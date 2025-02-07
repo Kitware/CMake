@@ -24,7 +24,6 @@
  *
  ***************************************************************************/
 
-
 /*
  * Inclusion of common header files.
  */
@@ -40,14 +39,6 @@
 #include <sys/types.h>
 #endif
 
-#ifdef NEED_MALLOC_H
-#include <malloc.h>
-#endif
-
-#ifdef NEED_MEMORY_H
-#include <memory.h>
-#endif
-
 #ifdef HAVE_SYS_STAT_H
 #include <sys/stat.h>
 #endif
@@ -56,8 +47,11 @@
 #include <sys/time.h>
 #endif
 
-#ifdef _WIN32
+#ifdef HAVE_IO_H
 #include <io.h>
+#endif
+
+#ifdef HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
 
@@ -111,8 +105,8 @@
 
 #ifndef HAVE_STRUCT_TIMEVAL
 struct timeval {
- long tv_sec;
- long tv_usec;
+  long tv_sec;
+  long tv_usec;
 };
 #endif
 
@@ -195,7 +189,7 @@ struct timeval {
 #  define sclose(x)  closesocket((x))
 #elif defined(HAVE_CLOSESOCKET_CAMEL)
 #  define sclose(x)  CloseSocket((x))
-#elif defined(HAVE_CLOSE_S)
+#elif defined(MSDOS)  /* Watt-32 */
 #  define sclose(x)  close_s((x))
 #elif defined(USE_LWIPSOCK)
 #  define sclose(x)  lwip_close((x))
@@ -233,8 +227,8 @@ struct timeval {
 
 #ifndef HAVE_BOOL_T
   typedef enum {
-      bool_false = 0,
-      bool_true  = 1
+    bool_false = 0,
+    bool_true  = 1
   } bool;
 
 /*
@@ -397,7 +391,7 @@ typedef unsigned int bit;
 #ifdef __VMS
 #define argv_item_t  __char_ptr32
 #elif defined(_UNICODE)
-#define argv_item_t wchar_t *
+#define argv_item_t  wchar_t *
 #else
 #define argv_item_t  char *
 #endif

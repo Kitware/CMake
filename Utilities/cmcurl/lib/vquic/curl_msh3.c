@@ -132,15 +132,23 @@ struct cf_msh3_ctx {
 
 static void h3_stream_hash_free(void *stream);
 
-static void cf_msh3_ctx_init(struct cf_msh3_ctx *ctx,
-                             const struct Curl_addrinfo *ai)
+static CURLcode cf_msh3_ctx_init(struct cf_msh3_ctx *ctx,
+                                 const struct Curl_addrinfo *ai)
 {
+  CURLcode result;
+
   DEBUGASSERT(!ctx->initialized);
   Curl_hash_offt_init(&ctx->streams, 63, h3_stream_hash_free);
-  Curl_sock_assign_addr(&ctx->addr, ai, TRNSPRT_QUIC);
+
+  result = Curl_sock_assign_addr(&ctx->addr, ai, TRNSPRT_QUIC);
+  if(result)
+    return result;
+
   ctx->sock[SP_LOCAL] = CURL_SOCKET_BAD;
   ctx->sock[SP_REMOTE] = CURL_SOCKET_BAD;
   ctx->initialized = TRUE;
+
+  return result;
 }
 
 static void cf_msh3_ctx_free(struct cf_msh3_ctx *ctx)
@@ -910,7 +918,6 @@ static CURLcode cf_msh3_connect(struct Curl_cfilter *cf,
     if(ctx->handshake_succeeded) {
       CURL_TRC_CF(data, cf, "handshake succeeded");
       cf->conn->bits.multiplex = TRUE; /* at least potentially multiplexed */
-      cf->conn->httpversion = 30;
       cf->connected = TRUE;
       cf->conn->alpn = CURL_HTTP_VERSION_3;
       *done = TRUE;
@@ -1017,6 +1024,9 @@ static CURLcode cf_msh3_query(struct Curl_cfilter *cf,
       *when = ctx->handshake_at;
     return CURLE_OK;
   }
+  case CF_QUERY_HTTP_VERSION:
+    *pres1 = 30;
+    return CURLE_OK;
   default:
     break;
   }
@@ -1039,7 +1049,7 @@ static bool cf_msh3_conn_is_alive(struct Curl_cfilter *cf,
 
 struct Curl_cftype Curl_cft_http3 = {
   "HTTP/3",
-  CF_TYPE_IP_CONNECT | CF_TYPE_SSL | CF_TYPE_MULTIPLEX,
+  CF_TYPE_IP_CONNECT | CF_TYPE_SSL | CF_TYPE_MULTIPLEX | CF_TYPE_HTTP,
   0,
   cf_msh3_destroy,
   cf_msh3_connect,
@@ -1087,7 +1097,10 @@ CURLcode Curl_cf_msh3_create(struct Curl_cfilter **pcf,
     result = CURLE_OUT_OF_MEMORY;
     goto out;
   }
-  cf_msh3_ctx_init(ctx, ai);
+
+  result = cf_msh3_ctx_init(ctx, ai);
+  if(result)
+    goto out;
 
   result = Curl_cf_create(&cf, &Curl_cft_http3, ctx);
 

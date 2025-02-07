@@ -78,16 +78,10 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
-#if defined(_WIN32) || defined(MSDOS) || defined(__EMX__)
+#if defined(_WIN32) || defined(MSDOS)
 #define DOS_FILESYSTEM 1
 #elif defined(__amigaos4__)
 #define AMIGA_FILESYSTEM 1
-#endif
-
-#ifdef OPEN_NEEDS_ARG3
-#  define open_readonly(p,f) open((p),(f),(0))
-#else
-#  define open_readonly(p,f) open((p),(f))
 #endif
 
 /*
@@ -126,6 +120,7 @@ const struct Curl_handler Curl_handler_file = {
   ZERO_NULL,                            /* write_resp_hd */
   ZERO_NULL,                            /* connection_check */
   ZERO_NULL,                            /* attach connection */
+  ZERO_NULL,                            /* follow */
   0,                                    /* defport */
   CURLPROTO_FILE,                       /* protocol */
   CURLPROTO_FILE,                       /* family */
@@ -209,7 +204,7 @@ static CURLcode file_connect(struct Curl_easy *data, bool *done)
       return CURLE_URL_MALFORMAT;
     }
 
-  fd = open_readonly(actual_path, O_RDONLY|O_BINARY);
+  fd = open(actual_path, O_RDONLY|CURL_O_BINARY);
   file->path = actual_path;
 #else
   if(memchr(real_path, 0, real_path_len)) {
@@ -233,16 +228,16 @@ static CURLcode file_connect(struct Curl_easy *data, bool *done)
     extern int __unix_path_semantics;
     if(strchr(real_path + 1, ':')) {
       /* Amiga absolute path */
-      fd = open_readonly(real_path + 1, O_RDONLY);
+      fd = open(real_path + 1, O_RDONLY);
       file->path++;
     }
     else if(__unix_path_semantics) {
       /* -lunix fallback */
-      fd = open_readonly(real_path, O_RDONLY);
+      fd = open(real_path, O_RDONLY);
     }
   }
   #else
-  fd = open_readonly(real_path, O_RDONLY);
+  fd = open(real_path, O_RDONLY);
   file->path = real_path;
   #endif
 #endif
@@ -318,18 +313,18 @@ static CURLcode file_upload(struct Curl_easy *data)
   if(!dir[1])
     return CURLE_FILE_COULDNT_READ_FILE; /* fix: better error code */
 
-#ifdef O_BINARY
-#define MODE_DEFAULT O_WRONLY|O_CREAT|O_BINARY
-#else
-#define MODE_DEFAULT O_WRONLY|O_CREAT
-#endif
-
+  mode = O_WRONLY|O_CREAT|CURL_O_BINARY;
   if(data->state.resume_from)
-    mode = MODE_DEFAULT|O_APPEND;
+    mode |= O_APPEND;
   else
-    mode = MODE_DEFAULT|O_TRUNC;
+    mode |= O_TRUNC;
 
+#if (defined(ANDROID) || defined(__ANDROID__)) && \
+    (defined(__i386__) || defined(__arm__))
+  fd = open(file->path, mode, (mode_t)data->set.new_file_perms);
+#else
   fd = open(file->path, mode, data->set.new_file_perms);
+#endif
   if(fd < 0) {
     failf(data, "cannot open %s for writing", file->path);
     return CURLE_WRITE_ERROR;
@@ -553,8 +548,13 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
 
   if(data->state.resume_from) {
     if(!S_ISDIR(statbuf.st_mode)) {
+#ifdef __AMIGA__
+      if(data->state.resume_from !=
+          lseek(fd, (off_t)data->state.resume_from, SEEK_SET))
+#else
       if(data->state.resume_from !=
           lseek(fd, data->state.resume_from, SEEK_SET))
+#endif
         return CURLE_BAD_DOWNLOAD_RESUME;
     }
     else {

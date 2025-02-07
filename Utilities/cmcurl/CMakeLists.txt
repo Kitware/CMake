@@ -22,7 +22,7 @@ set(CURL_USE_SCHANNEL OFF)
 set(CURL_USE_SECTRANSP OFF)
 set(CURL_USE_WOLFSSH OFF)
 set(CURL_USE_WOLFSSL OFF)
-set(CURL_BROTLI OFF)
+set(CURL_BROTLI "OFF" CACHE INTERNAL "Build curl with BROTLI support (AUTO, ON or OFF)")
 set(CURL_DISABLE_ALTSVC ON)
 set(CURL_DISABLE_AWS OFF)
 set(CURL_DISABLE_BASIC_AUTH OFF)
@@ -76,7 +76,7 @@ set(CURL_LTO OFF CACHE INTERNAL "Turn on compiler Link Time Optimizations")
 set(CURL_STATIC_CRT OFF CACHE INTERNAL "Set to ON to build libcurl with static CRT on Windows (/MT).")
 set(CURL_WERROR OFF CACHE INTERNAL "Turn compiler warnings into errors")
 set(CURL_ZLIB "AUTO" CACHE INTERNAL "Build curl with ZLIB support (AUTO, ON or OFF)")
-set(CURL_ZSTD OFF)
+set(CURL_ZSTD "OFF" CACHE INTERNAL "Build curl with ZSTD support (AUTO, ON or OFF)")
 set(DISABLED_THREADSAFE OFF CACHE INTERNAL "Curl can use thread-safe functions")
 set(ENABLE_ARES OFF CACHE INTERNAL "No curl c-ares support")
 set(ENABLE_ALT_SVC OFF)
@@ -108,6 +108,7 @@ set(USE_NGHTTP2 ON)
 set(USE_NGTCP2 OFF)
 set(USE_OPENSSL_QUIC OFF)
 set(USE_QUICHE OFF)
+set(USE_SSLS_EXPORT OFF)
 set(USE_WIN32_IDN OFF)
 set(USE_WIN32_LDAP OFF CACHE INTERNAL "No curl Windows LDAP")
 if(CURL_USE_OPENSSL)
@@ -207,7 +208,7 @@ endif()
 #   HAVE_SSL_SET0_WBIO: `SSL_set0_wbio` present in OpenSSL/wolfSSL
 #   HAVE_OPENSSL_SRP: `SSL_CTX_set_srp_username` present in OpenSSL/wolfSSL
 #   HAVE_GNUTLS_SRP: `gnutls_srp_verifier` present in GnuTLS
-#   HAVE_SSL_CTX_SET_QUIC_METHOD: `SSL_CTX_set_quic_method` present in OpenSSL/wolfSSL
+#   HAVE_SSL_SET_QUIC_USE_LEGACY_CODEPOINT: `SSL_set_quic_use_legacy_codepoint` present in OpenSSL/wolfSSL
 #   HAVE_QUICHE_CONN_SET_QLOG_FD: `quiche_conn_set_qlog_fd` present in quiche
 #   HAVE_ECH: ECH API checks for OpenSSL, BoringSSL or wolfSSL
 #
@@ -215,7 +216,7 @@ endif()
 # to ON or OFF), the symbol detection is skipped.  If the variable is
 # NOT DEFINED, the symbol detection is performed.
 
-if(0) # This code not needed for building within CMake.
+if(0) # XXX(cmake): not needed for build within cmake
 cmake_minimum_required(VERSION 3.7...3.16 FATAL_ERROR)
 message(STATUS "Using CMake version ${CMAKE_VERSION}")
 
@@ -238,16 +239,7 @@ if(NOT "$ENV{CURL_BUILDINFO}$ENV{CURL_CI}$ENV{CI}" STREQUAL "")
     endif()
   endforeach()
 endif()
-
-function(curl_dumpvars)  # Dump all defined variables with their values
-  message("::group::CMake Variable Dump")
-  get_cmake_property(_vars VARIABLES)
-  foreach(_var ${_vars})
-    message("${_var} = ${${_var}}")
-  endforeach()
-  message("::endgroup::")
-endfunction()
-endif()
+endif() # XXX(cmake): end
 
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake;${CMAKE_MODULE_PATH}")
 include(Utilities)
@@ -262,10 +254,11 @@ string(REGEX MATCH "#define LIBCURL_VERSION_NUM 0x[0-9a-fA-F]+" _curl_version_nu
 string(REGEX REPLACE "[^0]+0x" "" _curl_version_num ${_curl_version_num})
 unset(_curl_version_h_contents)
 
-if(0) # This code not needed for building within CMake.
+if(0) # XXX(cmake): not needed for build within cmake
 message(STATUS "curl version=[${_curl_version}]")
-endif()
-# XXX(CMake): Set these as normal variables to suppress cache entries.
+endif() # XXX(cmake): end
+
+# XXX(cmake): Set these as normal variables to suppress cache entries.
 set(CMAKE_PROJECT_VERSION 0)
 set(CMAKE_PROJECT_VERSION_MAJOR 0)
 set(CMAKE_PROJECT_VERSION_MINOR 0)
@@ -277,7 +270,24 @@ project(CURL
   VERSION "${_curl_version_sem}"
   LANGUAGES C)
 
-unset(_target_flags)
+# CMake does not recognize some targets accurately. Touch up configuration manually as a workaround.
+if(WINDOWS_STORE AND MINGW)  # mingw UWP build
+  # CMake (as of v3.31.2) gets confused and applies the MSVC rc.exe command-line
+  # template to windres. Reset it to the windres template via 'Modules/Platform/Windows-windres.cmake':
+  set(CMAKE_RC_COMPILE_OBJECT "<CMAKE_RC_COMPILER> -O coff <DEFINES> <INCLUDES> <FLAGS> <SOURCE> <OBJECT>")
+elseif(DOS AND CMAKE_COMPILER_IS_GNUCC)  # DJGPP
+  set(CMAKE_STATIC_LIBRARY_PREFIX "lib")
+  set(CMAKE_STATIC_LIBRARY_SUFFIX ".a")
+  set(CMAKE_FIND_LIBRARY_PREFIXES "lib")
+  set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
+endif()
+
+# Fill platform level variable when using CMake's built-in Android configuration
+if(ANDROID AND NOT DEFINED ANDROID_PLATFORM_LEVEL AND NOT CMAKE_SYSTEM_VERSION EQUAL 1)
+  set(ANDROID_PLATFORM_LEVEL "${CMAKE_SYSTEM_VERSION}")
+endif()
+
+set(_target_flags "")
 if(APPLE)
   set(_target_flags "${_target_flags} APPLE")
 endif()
@@ -286,6 +296,9 @@ if(UNIX)
 endif()
 if(BSD)
   set(_target_flags "${_target_flags} BSD")
+endif()
+if(ANDROID)
+  set(_target_flags "${_target_flags} ANDROID-${ANDROID_PLATFORM_LEVEL}")
 endif()
 if(WIN32)
   set(_target_flags "${_target_flags} WIN32")
@@ -299,6 +312,12 @@ endif()
 if(MSYS)
   set(_target_flags "${_target_flags} MSYS")
 endif()
+if(DOS)
+  set(_target_flags "${_target_flags} DOS")
+endif()
+if(AMIGA)
+  set(_target_flags "${_target_flags} AMIGA")
+endif()
 if(CMAKE_COMPILER_IS_GNUCC)
   set(_target_flags "${_target_flags} GCC")
 endif()
@@ -306,7 +325,7 @@ if(MINGW)
   set(_target_flags "${_target_flags} MINGW")
 endif()
 if(MSVC)
-  set(_target_flags "${_target_flags} MSVC")
+  set(_target_flags "${_target_flags} MSVC-${MSVC_VERSION}")
 endif()
 if(VCPKG_TOOLCHAIN)
   set(_target_flags "${_target_flags} VCPKG")
@@ -314,9 +333,9 @@ endif()
 if(CMAKE_CROSSCOMPILING)
   set(_target_flags "${_target_flags} CROSS")
 endif()
-if(0) # This code not needed for building within CMake.
+if(0) # XXX(cmake): not needed for build within cmake
 message(STATUS "CMake platform flags:${_target_flags}")
-endif()
+endif() # XXX(cmake): end
 
 if(CMAKE_CROSSCOMPILING)
   message(STATUS "Cross-compiling: "
@@ -360,8 +379,8 @@ if(WIN32)
   option(CURL_STATIC_CRT "Build libcurl with static CRT with MSVC (/MT)" OFF)
   if(CURL_STATIC_CRT AND MSVC)
     set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
-    set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} /MT")
-    set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} /MTd")
+    set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -MT")
+    set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -MTd")
   endif()
 
   option(ENABLE_UNICODE "Use the Unicode version of the Windows API functions" OFF)
@@ -375,7 +394,7 @@ if(WIN32)
     endif()
   endif()
 
-  if(0) # This code not needed for building within CMake.
+  if(0) # XXX(cmake): not needed for build within cmake
   list(APPEND CMAKE_REQUIRED_DEFINITIONS "-DWIN32_LEAN_AND_MEAN")  # Apply to all feature checks
 
   set(CURL_TARGET_WINDOWS_VERSION "" CACHE STRING "Minimum target Windows version as hex string")
@@ -383,31 +402,50 @@ if(WIN32)
     add_definitions("-D_WIN32_WINNT=${CURL_TARGET_WINDOWS_VERSION}")
     list(APPEND CMAKE_REQUIRED_DEFINITIONS "-D_WIN32_WINNT=${CURL_TARGET_WINDOWS_VERSION}")  # Apply to all feature checks
   endif()
-  endif()
+  endif() # XXX(cmake): end
 
   # Detect actual value of _WIN32_WINNT and store as HAVE_WIN32_WINNT
   curl_internal_test(HAVE_WIN32_WINNT)
   if(HAVE_WIN32_WINNT)
-    string(REGEX MATCH ".*_WIN32_WINNT=0x[0-9a-fA-F]+" CURL_TEST_OUTPUT "${CURL_TEST_OUTPUT}")
-    string(REGEX REPLACE ".*_WIN32_WINNT=" "" CURL_TEST_OUTPUT "${CURL_TEST_OUTPUT}")
+    string(REGEX MATCH "_WIN32_WINNT=0x[0-9a-fA-F]+" CURL_TEST_OUTPUT "${CURL_TEST_OUTPUT}")
+    string(REGEX REPLACE "_WIN32_WINNT=" "" CURL_TEST_OUTPUT "${CURL_TEST_OUTPUT}")
     string(REGEX REPLACE "0x([0-9a-f][0-9a-f][0-9a-f])$" "0x0\\1" CURL_TEST_OUTPUT "${CURL_TEST_OUTPUT}")  # pad to 4 digits
     string(TOLOWER "${CURL_TEST_OUTPUT}" HAVE_WIN32_WINNT)
     message(STATUS "Found _WIN32_WINNT=${HAVE_WIN32_WINNT}")
   endif()
-  # Avoid storing HAVE_WIN32_WINNT in CMake cache
-  unset(HAVE_WIN32_WINNT CACHE)
+  unset(HAVE_WIN32_WINNT CACHE)  # Avoid storing in CMake cache
+
+  if(MINGW)
+    # Detect __MINGW64_VERSION_MAJOR, __MINGW64_VERSION_MINOR and store as MINGW64_VERSION
+    curl_internal_test(MINGW64_VERSION)
+    if(MINGW64_VERSION)
+      string(REGEX MATCH "MINGW64_VERSION=[0-9]+\.[0-9]+" CURL_TEST_OUTPUT "${CURL_TEST_OUTPUT}")
+      string(REGEX REPLACE "MINGW64_VERSION=" "" MINGW64_VERSION "${CURL_TEST_OUTPUT}")
+      message(STATUS "Found MINGW64_VERSION=${MINGW64_VERSION}")
+    endif()
+    unset(MINGW64_VERSION CACHE)  # Avoid storing in CMake cache
+  endif()
+elseif(DOS OR AMIGA)
+  set(BUILD_SHARED_LIBS OFF)
+  set(BUILD_STATIC_LIBS ON)
 endif()
 option(CURL_LTO "Enable compiler Link Time Optimizations" OFF)
 
-if(0) # This code not needed for building within CMake.
-cmake_dependent_option(ENABLE_THREADED_RESOLVER "Enable threaded DNS lookup"
-  ON "NOT ENABLE_ARES"
-  OFF)
-
-include(PickyWarnings)
+if(0) # XXX(cmake): not needed for build within cmake
+if(NOT DOS AND NOT AMIGA)
+  # if c-ares is used, default the threaded resolver to OFF
+  if(ENABLE_ARES)
+    set(_enable_threaded_resolver_default OFF)
+  else()
+    set(_enable_threaded_resolver_default ON)
+  endif()
+  option(ENABLE_THREADED_RESOLVER "Enable threaded DNS lookup" ${_enable_threaded_resolver_default})
 endif()
 
-if(CMAKE_SYSTEM_NAME MATCHES "Linux")
+include(PickyWarnings)
+endif() # XXX(cmake): end
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D_GNU_SOURCE")  # Required for sendmmsg()
 endif()
 
@@ -429,12 +467,31 @@ if(ENABLE_CURLDEBUG)
   set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS "CURLDEBUG")
 endif()
 
-if(0) # This code not needed for building within CMake.
+if(0) # XXX(cmake): not needed for build within cmake
+option(CURL_CLANG_TIDY "Run the build through clang-tidy" OFF)
+if(CURL_CLANG_TIDY)
+  set(CMAKE_UNITY_BUILD OFF)
+  set(_tidy_checks "")
+  list(APPEND _tidy_checks "-clang-analyzer-security.insecureAPI.strcpy")
+  list(APPEND _tidy_checks "-clang-analyzer-optin.performance.Padding")
+  list(APPEND _tidy_checks "-clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling")
+  string(REPLACE ";" "," _tidy_checks "${_tidy_checks}")
+  find_program(CLANG_TIDY NAMES "clang-tidy" REQUIRED)
+  set(CMAKE_C_CLANG_TIDY "${CLANG_TIDY}" "-checks=${_tidy_checks}" "-quiet")
+  unset(_tidy_checks)
+  if(CURL_WERROR)
+    list(APPEND CMAKE_C_CLANG_TIDY "--warnings-as-errors=*")
+  endif()
+  if(CURL_CLANG_TIDYFLAGS)
+    list(APPEND CMAKE_C_CLANG_TIDY ${CURL_CLANG_TIDYFLAGS})
+  endif()
+endif()
+
 # For debug libs and exes, add "-d" postfix
 if(NOT DEFINED CMAKE_DEBUG_POSTFIX)
   set(CMAKE_DEBUG_POSTFIX "-d")
 endif()
-endif()
+endif() # XXX(cmake): end
 
 set(LIB_STATIC "libcurl_static")
 set(LIB_SHARED "libcurl_shared")
@@ -463,7 +520,9 @@ else()
 endif()
 
 # Override to force-disable or force-enable the use of pkg-config.
-if(UNIX OR VCPKG_TOOLCHAIN OR (MINGW AND NOT CMAKE_CROSSCOMPILING))  # Keep in sync with CMake/curl-config.cmake.in
+if((UNIX AND NOT ANDROID AND (NOT APPLE OR CMAKE_SYSTEM_NAME MATCHES "Darwin")) OR
+   VCPKG_TOOLCHAIN OR
+   (MINGW AND NOT CMAKE_CROSSCOMPILING))
   set(_curl_use_pkgconfig_default ON)
 else()
   set(_curl_use_pkgconfig_default OFF)
@@ -479,13 +538,17 @@ if(ENABLE_ARES)
   set(USE_ARES 1)
   find_package(Cares REQUIRED)
   list(APPEND CURL_LIBS ${CARES_LIBRARIES})
-  list(APPEND LIBCURL_PC_REQUIRES_PRIVATE "libcares")
-  add_definitions("-DCARES_NO_DEPRECATED")  # Ignore c-ares deprecation warnings
+  list(APPEND CURL_LIBDIRS ${CARES_LIBRARY_DIRS})
+  list(APPEND LIBCURL_PC_REQUIRES_PRIVATE ${CARES_PC_REQUIRES})
+  link_directories(${CARES_LIBRARY_DIRS})
+  if(CARES_CFLAGS)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CARES_CFLAGS}")
+  endif()
 endif()
 
-if(0) # This code not needed for building within CMake.
+if(0) # XXX(cmake): not needed for build within cmake
 include(CurlSymbolHiding)
-endif()
+endif() # XXX(cmake): end
 
 option(CURL_ENABLE_EXPORT_TARGET "Enable CMake export target" ON)
 mark_as_advanced(CURL_ENABLE_EXPORT_TARGET)
@@ -538,12 +601,12 @@ option(CURL_DISABLE_LIBCURL_OPTION "Disable --libcurl option from the curl tool"
 mark_as_advanced(CURL_DISABLE_LIBCURL_OPTION)
 option(CURL_DISABLE_MIME "Disable MIME support" OFF)
 mark_as_advanced(CURL_DISABLE_MIME)
-if(0) # This code not needed for building within CMake.
+if(0) # XXX(cmake): not needed for build within cmake
 cmake_dependent_option(CURL_DISABLE_FORM_API "Disable form-api"
   OFF "NOT CURL_DISABLE_MIME"
   ON)
 mark_as_advanced(CURL_DISABLE_FORM_API)
-endif()
+endif() # XXX(cmake): end
 option(CURL_DISABLE_MQTT "Disable MQTT" OFF)
 mark_as_advanced(CURL_DISABLE_MQTT)
 option(CURL_DISABLE_BINDLOCAL "Disable local binding support" OFF)
@@ -623,7 +686,9 @@ if(ENABLE_IPV6 AND NOT WIN32)
   check_struct_has_member("struct sockaddr_in6" "sin6_addr" "netinet/in.h" HAVE_SOCKADDR_IN6_SIN6_ADDR)
   check_struct_has_member("struct sockaddr_in6" "sin6_scope_id" "netinet/in.h" HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID)
   if(NOT HAVE_SOCKADDR_IN6_SIN6_ADDR)
-    message(WARNING "struct sockaddr_in6 not available, disabling IPv6 support")
+    if(NOT DOS AND NOT AMIGA)
+      message(WARNING "struct sockaddr_in6 not available, disabling IPv6 support")
+    endif()
     # Force the feature off as this name is used as guard macro...
     set(ENABLE_IPV6 OFF CACHE BOOL "Enable IPv6 support" FORCE)
   endif()
@@ -631,12 +696,11 @@ if(ENABLE_IPV6 AND NOT WIN32)
   if(APPLE AND NOT ENABLE_ARES)
     set(_use_core_foundation_and_core_services ON)
 
-    find_library(SYSTEMCONFIGURATION_FRAMEWORK "SystemConfiguration")
+    find_library(SYSTEMCONFIGURATION_FRAMEWORK NAMES "SystemConfiguration")
     mark_as_advanced(SYSTEMCONFIGURATION_FRAMEWORK)
     if(NOT SYSTEMCONFIGURATION_FRAMEWORK)
       message(FATAL_ERROR "SystemConfiguration framework not found")
     endif()
-
     list(APPEND CURL_LIBS "-framework SystemConfiguration")
   endif()
 endif()
@@ -644,8 +708,21 @@ if(ENABLE_IPV6)
   set(USE_IPV6 ON)
 endif()
 
-if(0) # This code not needed for building within CMake.
+if(0) # XXX(cmake): not needed for build within cmake
 find_package(Perl)
+
+if(PERL_EXECUTABLE)
+  add_custom_target(curl-ca-bundle
+    COMMENT "Generating a fresh ca-bundle.crt" VERBATIM USES_TERMINAL
+    COMMAND "${PERL_EXECUTABLE}" "${PROJECT_SOURCE_DIR}/scripts/mk-ca-bundle.pl" -b -l -u "lib/ca-bundle.crt"
+    DEPENDS "${PROJECT_SOURCE_DIR}/scripts/mk-ca-bundle.pl"
+  )
+  add_custom_target(curl-ca-firefox
+    COMMENT "generating a fresh ca-bundle.crt" VERBATIM USES_TERMINAL
+    COMMAND "${PERL_EXECUTABLE}" "${PROJECT_SOURCE_DIR}/scripts/firefox-db2pem.sh" "lib/ca-bundle.crt"
+    DEPENDS "${PROJECT_SOURCE_DIR}/scripts/firefox-db2pem.sh"
+  )
+endif()
 
 option(BUILD_LIBCURL_DOCS "Build libcurl man pages" ON)
 option(BUILD_MISC_DOCS "Build misc man pages (e.g. curl-config and mk-ca-bundle)" ON)
@@ -659,7 +736,7 @@ if(ENABLE_CURL_MANUAL OR BUILD_LIBCURL_DOCS)
     message(WARNING "Perl not found. Will not build manuals.")
   endif()
 endif()
-endif()
+endif() # XXX(cmake): end
 
 # Disable warnings on Borland to avoid changing 3rd party code.
 if(BORLAND)
@@ -674,6 +751,9 @@ endif()
 # If we are on Haiku, make sure that the network library is brought in.
 if(CMAKE_SYSTEM_NAME STREQUAL "Haiku")
   list(APPEND CURL_LIBS "network")
+elseif(AMIGA)
+  list(APPEND CURL_LIBS "net" "m" "atomic")
+  list(APPEND CMAKE_REQUIRED_LIBRARIES "net" "m" "atomic")
 endif()
 
 # Include all the necessary files for macros
@@ -686,14 +766,19 @@ include(CheckSymbolExists)
 include(CheckTypeSize)
 include(CheckCSourceCompiles)
 
-# Preload settings on Windows
 if(WIN32)
-  include("${CMAKE_CURRENT_SOURCE_DIR}/CMake/Platforms/WindowsCache.cmake")
+  # Preload settings on Windows
+  include("${CMAKE_CURRENT_SOURCE_DIR}/CMake/win32-cache.cmake")
 elseif(APPLE)
   # Fast-track predictable feature detections
   set(HAVE_EVENTFD 0)
   set(HAVE_GETPASS_R 0)
   set(HAVE_SENDMMSG 0)
+elseif(AMIGA)
+  set(HAVE_GETADDRINFO 0)  # Breaks the build when detected and used.
+endif()
+if(DOS OR AMIGA)
+  set(HAVE_TIME_T_UNSIGNED 1)
 endif()
 
 if(ENABLE_THREADED_RESOLVER)
@@ -708,20 +793,39 @@ if(ENABLE_THREADED_RESOLVER)
 endif()
 
 # Check for all needed libraries
-if(NOT WIN32 AND NOT APPLE)
+if(DOS)
+  if(WATT_ROOT)
+    set(USE_WATT32 ON)
+    # FIXME upstream: must specify the full path to avoid CMake converting "watt" to "watt.lib"
+    list(APPEND CURL_LIBS "${WATT_ROOT}/lib/libwatt.a")
+    include_directories(SYSTEM "${WATT_ROOT}/inc")
+    list(APPEND CMAKE_REQUIRED_INCLUDES "${WATT_ROOT}/inc")
+  else()
+    message(FATAL_ERROR "Set WATT_ROOT variable to the root installation of Watt-32.")
+  endif()
+elseif(AMIGA)
+  if(AMISSL_INCLUDE_DIR AND AMISSL_STUBS_LIBRARY AND AMISSL_AUTO_LIBRARY)
+    set(USE_AMISSL ON)
+    list(APPEND CMAKE_REQUIRED_INCLUDES "${AMISSL_INCLUDE_DIR}")
+    list(APPEND CMAKE_REQUIRED_LIBRARIES "${AMISSL_STUBS_LIBRARY}" "${AMISSL_AUTO_LIBRARY}")
+    set(OPENSSL_INCLUDE_DIR "${AMISSL_INCLUDE_DIR}")
+    set(OPENSSL_SSL_LIBRARY "${AMISSL_STUBS_LIBRARY}")
+    set(OPENSSL_CRYPTO_LIBRARY "${AMISSL_AUTO_LIBRARY}")
+    set(CURL_USE_OPENSSL ON)
+    set(CURL_CA_FALLBACK ON CACHE BOOL "")
+  endif()
+elseif(NOT WIN32 AND NOT APPLE)
   check_library_exists("socket" "connect" "" HAVE_LIBSOCKET)
   if(HAVE_LIBSOCKET)
     set(CURL_LIBS "socket;${CURL_LIBS}")
   endif()
 endif()
 
-check_function_exists("gethostname" HAVE_GETHOSTNAME)
-
 if(WIN32)
   list(APPEND CURL_LIBS "ws2_32" "bcrypt")
 endif()
 
-if(0) # This code not needed for building within CMake.
+if(0) # XXX(cmake): not needed for build within cmake
 # Check SSL libraries
 option(CURL_ENABLE_SSL "Enable SSL support" ON)
 
@@ -761,9 +865,9 @@ if(USE_OPENSSL_QUIC AND NOT CURL_USE_OPENSSL)
   set(USE_OPENSSL_QUIC OFF)
 endif()
 option(CURL_DISABLE_OPENSSL_AUTO_LOAD_CONFIG "Disable automatic loading of OpenSSL configuration" OFF)
-endif()
+endif() # XXX(cmake): end
 
-count_true(_enabled_ssl_options_count
+curl_count_true(_enabled_ssl_options_count
   CURL_USE_SCHANNEL
   CURL_USE_SECTRANSP
   CURL_USE_OPENSSL
@@ -795,39 +899,39 @@ endif()
 if(CURL_USE_SECTRANSP)
   set(_use_core_foundation_and_core_services ON)
 
-  find_library(SECURITY_FRAMEWORK "Security")
+  find_library(SECURITY_FRAMEWORK NAMES "Security")
   mark_as_advanced(SECURITY_FRAMEWORK)
   if(NOT SECURITY_FRAMEWORK)
     message(FATAL_ERROR "Security framework not found")
   endif()
+  list(APPEND CURL_LIBS "-framework Security")
 
   set(_ssl_enabled ON)
   set(USE_SECTRANSP ON)
-  list(APPEND CURL_LIBS "-framework Security")
 
   if(CURL_DEFAULT_SSL_BACKEND AND CURL_DEFAULT_SSL_BACKEND STREQUAL "secure-transport")
     set(_valid_default_ssl_backend TRUE)
   endif()
 
-  if(0) # This code not needed for building within CMake.
+  if(0) # XXX(cmake): not needed for build within cmake
   message(WARNING "Secure Transport does not support TLS 1.3.")
-  endif()
+  endif() # XXX(cmake): end
 endif()
 
 if(_use_core_foundation_and_core_services)
-  find_library(COREFOUNDATION_FRAMEWORK "CoreFoundation")
+  find_library(COREFOUNDATION_FRAMEWORK NAMES "CoreFoundation")
   mark_as_advanced(COREFOUNDATION_FRAMEWORK)
-  find_library(CORESERVICES_FRAMEWORK "CoreServices")
-  mark_as_advanced(CORESERVICES_FRAMEWORK)
-
   if(NOT COREFOUNDATION_FRAMEWORK)
     message(FATAL_ERROR "CoreFoundation framework not found")
   endif()
+  list(APPEND CURL_LIBS "-framework CoreFoundation")
+
+  find_library(CORESERVICES_FRAMEWORK NAMES "CoreServices")
+  mark_as_advanced(CORESERVICES_FRAMEWORK)
   if(NOT CORESERVICES_FRAMEWORK)
     message(FATAL_ERROR "CoreServices framework not found")
   endif()
-
-  list(APPEND CURL_LIBS "-framework CoreFoundation" "-framework CoreServices")
+  list(APPEND CURL_LIBS "-framework CoreServices")
 endif()
 
 if(CURL_USE_OPENSSL)
@@ -850,12 +954,15 @@ if(CURL_USE_OPENSSL)
   set(_curl_ca_bundle_supported TRUE)
 
   cmake_push_check_state()
-  set(CMAKE_REQUIRED_INCLUDES ${OPENSSL_INCLUDE_DIR})
+  list(APPEND CMAKE_REQUIRED_INCLUDES ${OPENSSL_INCLUDE_DIR})
   if(NOT DEFINED HAVE_BORINGSSL)
     check_symbol_exists("OPENSSL_IS_BORINGSSL" "openssl/base.h" HAVE_BORINGSSL)
   endif()
   if(NOT DEFINED HAVE_AWSLC)
     check_symbol_exists("OPENSSL_IS_AWSLC" "openssl/base.h" HAVE_AWSLC)
+  endif()
+  if(NOT DEFINED HAVE_LIBRESSL)
+    check_symbol_exists("LIBRESSL_VERSION_NUMBER" "openssl/opensslv.h" HAVE_LIBRESSL)
   endif()
   cmake_pop_check_state()
 
@@ -866,6 +973,30 @@ if(CURL_USE_OPENSSL)
   # Optionally build with a specific CA cert dir.
   if(CURL_CA_PATH)
     add_definitions(-DCURL_CA_PATH="${CURL_CA_PATH}")
+  endif()
+
+  if(HAVE_BORINGSSL OR HAVE_AWSLC)
+    if(OPENSSL_USE_STATIC_LIBS AND CMAKE_C_COMPILER_ID MATCHES "Clang")
+      list(APPEND CURL_LIBS "stdc++")
+      list(APPEND CMAKE_REQUIRED_LIBRARIES "stdc++")
+    endif()
+  endif()
+
+  if(HAVE_BORINGSSL)
+    set(_openssl "BoringSSL")
+  elseif(HAVE_AWSLC)
+    set(_openssl "AWS-LC")
+  elseif(HAVE_LIBRESSL)
+    set(_openssl "LibreSSL")
+  elseif(USE_AMISSL)
+    set(_openssl "AmiSSL")
+  else()
+    set(_openssl "OpenSSL")
+    if(0) # XXX(cmake): not needed for build within cmake
+    if(OPENSSL_VERSION VERSION_LESS 1.1.1)
+      message(WARNING "OpenSSL ${OPENSSL_VERSION} does not support TLS 1.3.")
+    endif()
+    endif() # XXX(cmake): end
   endif()
 endif()
 
@@ -900,9 +1031,9 @@ if(CURL_USE_BEARSSL)
   endif()
   set(_curl_ca_bundle_supported TRUE)
 
-  if(0) # This code not needed for building within CMake.
+  if(0) # XXX(cmake): not needed for build within cmake
   message(WARNING "BearSSL does not support TLS 1.3.")
-  endif()
+  endif() # XXX(cmake): end
 endif()
 
 if(CURL_USE_WOLFSSL)
@@ -911,7 +1042,7 @@ if(CURL_USE_WOLFSSL)
   set(USE_WOLFSSL ON)
   list(APPEND CURL_LIBS ${WOLFSSL_LIBRARIES})
   list(APPEND CURL_LIBDIRS ${WOLFSSL_LIBRARY_DIRS})
-  list(APPEND LIBCURL_PC_REQUIRES_PRIVATE "wolfssl")
+  list(APPEND LIBCURL_PC_REQUIRES_PRIVATE ${WOLFSSL_PC_REQUIRES})
   include_directories(SYSTEM ${WOLFSSL_INCLUDE_DIRS})
   link_directories(${WOLFSSL_LIBRARY_DIRS})
   if(WOLFSSL_CFLAGS)
@@ -940,7 +1071,7 @@ if(CURL_USE_GNUTLS)
   set(USE_GNUTLS ON)
   list(APPEND CURL_LIBS ${GNUTLS_LIBRARIES} ${NETTLE_LIBRARIES})
   list(APPEND CURL_LIBDIRS ${NETTLE_LIBRARY_DIRS})
-  list(APPEND LIBCURL_PC_REQUIRES_PRIVATE "gnutls" "nettle")
+  list(APPEND LIBCURL_PC_REQUIRES_PRIVATE "gnutls" ${NETTLE_PC_REQUIRES})
   include_directories(SYSTEM ${GNUTLS_INCLUDE_DIRS} ${NETTLE_INCLUDE_DIRS})
   link_directories(${NETTLE_LIBRARY_DIRS})
   if(NETTLE_CFLAGS)
@@ -954,8 +1085,8 @@ if(CURL_USE_GNUTLS)
 
   if(NOT DEFINED HAVE_GNUTLS_SRP AND NOT CURL_DISABLE_SRP)
     cmake_push_check_state()
-    set(CMAKE_REQUIRED_INCLUDES ${GNUTLS_INCLUDE_DIRS})
-    set(CMAKE_REQUIRED_LIBRARIES ${GNUTLS_LIBRARIES})
+    list(APPEND CMAKE_REQUIRED_INCLUDES ${GNUTLS_INCLUDE_DIRS})
+    list(APPEND CMAKE_REQUIRED_LIBRARIES ${GNUTLS_LIBRARIES})
     check_symbol_exists("gnutls_srp_verifier" "gnutls/gnutls.h" HAVE_GNUTLS_SRP)
     cmake_pop_check_state()
   endif()
@@ -985,13 +1116,12 @@ if(CURL_DEFAULT_SSL_BACKEND AND NOT _valid_default_ssl_backend)
 endif()
 
 # Keep ZLIB detection after TLS detection,
-# and before calling openssl_check_symbol_exists().
+# and before calling curl_openssl_check_symbol_exists().
 
 set(HAVE_LIBZ OFF)
-curl_dependency_option(ZLIB)
+curl_dependency_option(CURL_ZLIB ZLIB "ZLIB")
 if(ZLIB_FOUND)
   set(HAVE_LIBZ ON)
-
   # Depend on ZLIB via imported targets. This allows our dependents to
   # get our dependencies transitively.
   if(CMAKE_USE_SYSTEM_ZLIB)
@@ -1002,38 +1132,44 @@ if(ZLIB_FOUND)
   list(APPEND LIBCURL_PC_REQUIRES_PRIVATE "zlib")
 endif()
 
-option(CURL_BROTLI "Use brotli" OFF)
 set(HAVE_BROTLI OFF)
-if(CURL_BROTLI)
-  find_package(Brotli REQUIRED)
-  if(BROTLI_FOUND)
-    set(HAVE_BROTLI ON)
-    list(APPEND CURL_LIBS ${BROTLI_LIBRARIES})
-    list(APPEND LIBCURL_PC_REQUIRES_PRIVATE "libbrotlidec")
-    include_directories(SYSTEM ${BROTLI_INCLUDE_DIRS})
+curl_dependency_option(CURL_BROTLI Brotli "brotli")
+if(BROTLI_FOUND)
+  set(HAVE_BROTLI ON)
+  list(APPEND CURL_LIBS ${BROTLI_LIBRARIES})
+  list(APPEND CURL_LIBDIRS ${BROTLI_LIBRARY_DIRS})
+  list(APPEND LIBCURL_PC_REQUIRES_PRIVATE ${BROTLI_PC_REQUIRES})
+  include_directories(SYSTEM ${BROTLI_INCLUDE_DIRS})
+  link_directories(${BROTLI_LIBRARY_DIRS})
+  if(BROTLI_CFLAGS)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${BROTLI_CFLAGS}")
   endif()
 endif()
 
-option(CURL_ZSTD "Use zstd" OFF)
 set(HAVE_ZSTD OFF)
-if(CURL_ZSTD)
-  find_package(Zstd REQUIRED)
-  if(ZSTD_FOUND AND NOT ZSTD_VERSION VERSION_LESS 1.0.0)
+curl_dependency_option(CURL_ZSTD Zstd "zstd")
+if(ZSTD_FOUND)
+  if(NOT ZSTD_VERSION VERSION_LESS 1.0.0)
     set(HAVE_ZSTD ON)
     list(APPEND CURL_LIBS ${ZSTD_LIBRARIES})
-    list(APPEND LIBCURL_PC_REQUIRES_PRIVATE "libzstd")
+    list(APPEND CURL_LIBDIRS ${ZSTD_LIBRARY_DIRS})
+    list(APPEND LIBCURL_PC_REQUIRES_PRIVATE ${ZSTD_PC_REQUIRES})
     include_directories(SYSTEM ${ZSTD_INCLUDE_DIRS})
+    link_directories(${ZSTD_LIBRARY_DIRS})
+    if(ZSTD_CFLAGS)
+      set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${ZSTD_CFLAGS}")
+    endif()
   else()
     message(WARNING "zstd v1.0.0 or newer is required, disabling zstd support.")
   endif()
 endif()
 
-# Check symbol in an OpenSSL-like TLS backend, or in _extra_libs depending on it.
-macro(openssl_check_symbol_exists _symbol _files _variable _extra_libs)
+# Check symbol in an OpenSSL-like TLS backend.
+macro(curl_openssl_check_symbol_exists _symbol _files _variable)
   cmake_push_check_state()
   if(USE_OPENSSL)
-    set(CMAKE_REQUIRED_INCLUDES   "${OPENSSL_INCLUDE_DIR}")
-    set(CMAKE_REQUIRED_LIBRARIES  "${OPENSSL_LIBRARIES}")
+    list(APPEND CMAKE_REQUIRED_INCLUDES   "${OPENSSL_INCLUDE_DIR}")
+    list(APPEND CMAKE_REQUIRED_LIBRARIES  "${OPENSSL_LIBRARIES}")
     if(HAVE_LIBZ)
       list(APPEND CMAKE_REQUIRED_LIBRARIES "${ZLIB_LIBRARIES}")
     endif()
@@ -1041,9 +1177,10 @@ macro(openssl_check_symbol_exists _symbol _files _variable _extra_libs)
       list(APPEND CMAKE_REQUIRED_LIBRARIES "ws2_32")
       list(APPEND CMAKE_REQUIRED_LIBRARIES "bcrypt")  # for OpenSSL/LibreSSL
     endif()
-  elseif(USE_WOLFSSL)
-    set(CMAKE_REQUIRED_INCLUDES   "${WOLFSSL_INCLUDE_DIRS}")
-    set(CMAKE_REQUIRED_LIBRARIES  "${WOLFSSL_LIBRARIES}")
+  endif()
+  if(USE_WOLFSSL)
+    list(APPEND CMAKE_REQUIRED_INCLUDES   "${WOLFSSL_INCLUDE_DIRS}")
+    list(APPEND CMAKE_REQUIRED_LIBRARIES  "${WOLFSSL_LIBRARIES}")
     curl_required_libpaths("${WOLFSSL_LIBRARY_DIRS}")
     if(HAVE_LIBZ)
       list(APPEND CMAKE_REQUIRED_INCLUDES  "${ZLIB_INCLUDE_DIRS}")  # Public wolfSSL headers require zlib headers
@@ -1054,38 +1191,38 @@ macro(openssl_check_symbol_exists _symbol _files _variable _extra_libs)
     endif()
     list(APPEND CMAKE_REQUIRED_DEFINITIONS "-DHAVE_UINTPTR_T")  # to pull in stdint.h (as of wolfSSL v5.5.4)
   endif()
-  list(APPEND CMAKE_REQUIRED_LIBRARIES "${_extra_libs}")
   check_symbol_exists("${_symbol}" "${_files}" "${_variable}")
   cmake_pop_check_state()
 endmacro()
 
 # Ensure that the OpenSSL fork actually supports QUIC.
-macro(openssl_check_quic)
-  if(NOT DEFINED HAVE_SSL_CTX_SET_QUIC_METHOD)
+macro(curl_openssl_check_quic)
+  if(NOT DEFINED HAVE_SSL_SET_QUIC_USE_LEGACY_CODEPOINT)
     if(USE_OPENSSL)
-      openssl_check_symbol_exists("SSL_CTX_set_quic_method" "openssl/ssl.h" HAVE_SSL_CTX_SET_QUIC_METHOD "")
-    elseif(USE_WOLFSSL)
-      openssl_check_symbol_exists("wolfSSL_set_quic_method" "wolfssl/options.h;wolfssl/openssl/ssl.h"
-        HAVE_SSL_CTX_SET_QUIC_METHOD "")
+      curl_openssl_check_symbol_exists("SSL_set_quic_use_legacy_codepoint" "openssl/ssl.h" HAVE_SSL_SET_QUIC_USE_LEGACY_CODEPOINT)
+    endif()
+    if(USE_WOLFSSL)
+      curl_openssl_check_symbol_exists("wolfSSL_set_quic_use_legacy_codepoint" "wolfssl/options.h;wolfssl/openssl/ssl.h"
+        HAVE_SSL_SET_QUIC_USE_LEGACY_CODEPOINT)
     endif()
   endif()
-  if(NOT HAVE_SSL_CTX_SET_QUIC_METHOD)
+  if(NOT HAVE_SSL_SET_QUIC_USE_LEGACY_CODEPOINT)
     message(FATAL_ERROR "QUIC support is missing in OpenSSL fork. Try setting -DOPENSSL_ROOT_DIR")
   endif()
 endmacro()
 
 if(USE_WOLFSSL)
-  openssl_check_symbol_exists("wolfSSL_DES_ecb_encrypt" "wolfssl/options.h;wolfssl/openssl/des.h" HAVE_WOLFSSL_DES_ECB_ENCRYPT "")
-  openssl_check_symbol_exists("wolfSSL_BIO_new" "wolfssl/options.h;wolfssl/ssl.h" HAVE_WOLFSSL_BIO "")
-  openssl_check_symbol_exists("wolfSSL_BIO_set_shutdown" "wolfssl/options.h;wolfssl/ssl.h" HAVE_WOLFSSL_FULL_BIO "")
+  curl_openssl_check_symbol_exists("wolfSSL_DES_ecb_encrypt" "wolfssl/options.h;wolfssl/openssl/des.h" HAVE_WOLFSSL_DES_ECB_ENCRYPT)
+  curl_openssl_check_symbol_exists("wolfSSL_BIO_new" "wolfssl/options.h;wolfssl/ssl.h" HAVE_WOLFSSL_BIO)
+  curl_openssl_check_symbol_exists("wolfSSL_BIO_set_shutdown" "wolfssl/options.h;wolfssl/ssl.h" HAVE_WOLFSSL_FULL_BIO)
 endif()
 
 if(USE_OPENSSL OR USE_WOLFSSL)
   if(NOT DEFINED HAVE_SSL_SET0_WBIO)
-    openssl_check_symbol_exists("SSL_set0_wbio" "openssl/ssl.h" HAVE_SSL_SET0_WBIO "")
+    curl_openssl_check_symbol_exists("SSL_set0_wbio" "openssl/ssl.h" HAVE_SSL_SET0_WBIO)
   endif()
   if(NOT DEFINED HAVE_OPENSSL_SRP AND NOT CURL_DISABLE_SRP)
-    openssl_check_symbol_exists("SSL_CTX_set_srp_username" "openssl/ssl.h" HAVE_OPENSSL_SRP "")
+    curl_openssl_check_symbol_exists("SSL_CTX_set_srp_username" "openssl/ssl.h" HAVE_OPENSSL_SRP)
   endif()
 endif()
 
@@ -1094,22 +1231,38 @@ option(USE_ECH "Enable ECH support" OFF)
 if(USE_ECH)
   if(USE_OPENSSL OR USE_WOLFSSL)
     # Be sure that the TLS library actually supports ECH.
-    if(NOT DEFINED HAVE_ECH)
-      if(USE_OPENSSL AND (HAVE_BORINGSSL OR HAVE_AWSLC))
-        openssl_check_symbol_exists("SSL_set1_ech_config_list" "openssl/ssl.h" HAVE_ECH "")
-      elseif(USE_OPENSSL)
-        openssl_check_symbol_exists("SSL_ech_set1_echconfig" "openssl/ech.h" HAVE_ECH "")
-      elseif(USE_WOLFSSL)
-        openssl_check_symbol_exists("wolfSSL_CTX_GenerateEchConfig" "wolfssl/options.h;wolfssl/ssl.h" HAVE_ECH "")
-      endif()
+    if(USE_WOLFSSL)
+      curl_openssl_check_symbol_exists("wolfSSL_CTX_GenerateEchConfig" "wolfssl/options.h;wolfssl/ssl.h"
+        HAVE_WOLFSSL_CTX_GENERATEECHCONFIG)
+    endif()
+    if(HAVE_BORINGSSL OR HAVE_AWSLC)
+      curl_openssl_check_symbol_exists("SSL_set1_ech_config_list" "openssl/ssl.h" HAVE_SSL_SET1_ECH_CONFIG_LIST)
+    elseif(HAVE_OPENSSL)
+      curl_openssl_check_symbol_exists("SSL_set1_ech_config_list" "openssl/ech.h" HAVE_SSL_SET1_ECH_CONFIG_LIST)
+    endif()
+    if(HAVE_WOLFSSL_CTX_GENERATEECHCONFIG OR
+       HAVE_SSL_SET1_ECH_CONFIG_LIST)
+      set(HAVE_ECH 1)
     endif()
     if(NOT HAVE_ECH)
       message(FATAL_ERROR "ECH support missing in OpenSSL/BoringSSL/AWS-LC/wolfSSL")
     else()
-      message(STATUS "ECH enabled.")
+      message(STATUS "ECH enabled")
+      # ECH wants HTTPSRR
+      set(USE_HTTPSRR ON)
+      message(STATUS "HTTPSRR enabled")
     endif()
   else()
     message(FATAL_ERROR "ECH requires ECH-enablded OpenSSL, BoringSSL, AWS-LC or wolfSSL")
+  endif()
+endif()
+
+option(USE_SSLS_EXPORT "Enable SSL session export support" OFF)
+if(USE_SSLS_EXPORT)
+  if(_ssl_enabled)
+    message(STATUS "SSL export enabled.")
+  else()
+    message(FATAL_ERROR "SSL session export requires SSL enabled")
   endif()
 endif()
 
@@ -1117,9 +1270,14 @@ option(USE_NGHTTP2 "Use nghttp2 library" ON)
 if(USE_NGHTTP2)
   find_package(NGHTTP2)
   if(NGHTTP2_FOUND)
-    include_directories(SYSTEM ${NGHTTP2_INCLUDE_DIRS})
     list(APPEND CURL_LIBS ${NGHTTP2_LIBRARIES})
-    list(APPEND LIBCURL_PC_REQUIRES_PRIVATE "libnghttp2")
+    list(APPEND CURL_LIBDIRS ${NGHTTP2_LIBRARY_DIRS})
+    list(APPEND LIBCURL_PC_REQUIRES_PRIVATE ${NGHTTP2_PC_REQUIRES})
+    include_directories(SYSTEM ${NGHTTP2_INCLUDE_DIRS})
+    link_directories(${NGHTTP2_LIBRARY_DIRS})
+    if(NGHTTP2_CFLAGS)
+      set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${NGHTTP2_CFLAGS}")
+    endif()
   else()
     set(USE_NGHTTP2 OFF)
   endif()
@@ -1130,30 +1288,39 @@ if(USE_NGTCP2)
   if(USE_OPENSSL OR USE_WOLFSSL)
     if(USE_WOLFSSL)
       find_package(NGTCP2 REQUIRED "wolfSSL")
-      list(APPEND LIBCURL_PC_REQUIRES_PRIVATE "libngtcp2_crypto_wolfssl")
     elseif(HAVE_BORINGSSL OR HAVE_AWSLC)
       find_package(NGTCP2 REQUIRED "BoringSSL")
-      list(APPEND LIBCURL_PC_REQUIRES_PRIVATE "libngtcp2_crypto_boringssl")
     else()
       find_package(NGTCP2 REQUIRED "quictls")
-      list(APPEND LIBCURL_PC_REQUIRES_PRIVATE "libngtcp2_crypto_quictls")
+      if(NOT HAVE_LIBRESSL)
+        set(_openssl "quictls")
+      endif()
     endif()
-    openssl_check_quic()
+    curl_openssl_check_quic()
   elseif(USE_GNUTLS)
     find_package(NGTCP2 REQUIRED "GnuTLS")
-    list(APPEND LIBCURL_PC_REQUIRES_PRIVATE "libngtcp2_crypto_gnutls")
   else()
     message(FATAL_ERROR "ngtcp2 requires OpenSSL, wolfSSL or GnuTLS")
   endif()
-  include_directories(SYSTEM ${NGTCP2_INCLUDE_DIRS})
   list(APPEND CURL_LIBS ${NGTCP2_LIBRARIES})
-  list(APPEND LIBCURL_PC_REQUIRES_PRIVATE "libngtcp2")
+  list(APPEND CURL_LIBDIRS ${NGTCP2_LIBRARY_DIRS})
+  list(APPEND LIBCURL_PC_REQUIRES_PRIVATE ${NGTCP2_PC_REQUIRES})
+  include_directories(SYSTEM ${NGTCP2_INCLUDE_DIRS})
+  link_directories(${NGTCP2_LIBRARY_DIRS})
+  if(NGTCP2_CFLAGS)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${NGTCP2_CFLAGS}")
+  endif()
 
   find_package(NGHTTP3 REQUIRED)
   set(USE_NGHTTP3 ON)
-  include_directories(SYSTEM ${NGHTTP3_INCLUDE_DIRS})
   list(APPEND CURL_LIBS ${NGHTTP3_LIBRARIES})
-  list(APPEND LIBCURL_PC_REQUIRES_PRIVATE "libnghttp3")
+  list(APPEND CURL_LIBDIRS ${NGHTTP3_LIBRARY_DIRS})
+  list(APPEND LIBCURL_PC_REQUIRES_PRIVATE ${NGHTTP3_PC_REQUIRES})
+  include_directories(SYSTEM ${NGHTTP3_INCLUDE_DIRS})
+  link_directories(${NGHTTP3_LIBRARY_DIRS})
+  if(NGHTTP3_CFLAGS)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${NGHTTP3_CFLAGS}")
+  endif()
 endif()
 
 option(USE_QUICHE "Use quiche library for HTTP/3 support" OFF)
@@ -1165,10 +1332,10 @@ if(USE_QUICHE)
   if(NOT HAVE_BORINGSSL)
     message(FATAL_ERROR "quiche requires BoringSSL")
   endif()
-  openssl_check_quic()
+  curl_openssl_check_quic()
   list(APPEND CURL_LIBS ${QUICHE_LIBRARIES})
   list(APPEND CURL_LIBDIRS ${QUICHE_LIBRARY_DIRS})
-  list(APPEND LIBCURL_PC_REQUIRES_PRIVATE "quiche")
+  list(APPEND LIBCURL_PC_REQUIRES_PRIVATE ${QUICHE_PC_REQUIRES})
   include_directories(SYSTEM ${QUICHE_INCLUDE_DIRS})
   link_directories(${QUICHE_LIBRARY_DIRS})
   if(QUICHE_CFLAGS)
@@ -1176,8 +1343,8 @@ if(USE_QUICHE)
   endif()
   if(NOT DEFINED HAVE_QUICHE_CONN_SET_QLOG_FD)
     cmake_push_check_state()
-    set(CMAKE_REQUIRED_INCLUDES   "${QUICHE_INCLUDE_DIRS}")
-    set(CMAKE_REQUIRED_LIBRARIES  "${QUICHE_LIBRARIES}")
+    list(APPEND CMAKE_REQUIRED_INCLUDES   "${QUICHE_INCLUDE_DIRS}")
+    list(APPEND CMAKE_REQUIRED_LIBRARIES  "${QUICHE_LIBRARIES}")
     check_symbol_exists("quiche_conn_set_qlog_fd" "quiche.h" HAVE_QUICHE_CONN_SET_QLOG_FD)
     cmake_pop_check_state()
   endif()
@@ -1192,7 +1359,7 @@ if(USE_MSH3)
     if(NOT USE_OPENSSL)
       message(FATAL_ERROR "msh3/msquic requires OpenSSL fork with QUIC API")
     endif()
-    openssl_check_quic()
+    curl_openssl_check_quic()
   endif()
   find_package(MSH3 REQUIRED)
   list(APPEND CURL_LIBS ${MSH3_LIBRARIES})
@@ -1215,7 +1382,7 @@ if(USE_OPENSSL_QUIC)
   set(USE_NGHTTP3 ON)
   include_directories(SYSTEM ${NGHTTP3_INCLUDE_DIRS})
   list(APPEND CURL_LIBS ${NGHTTP3_LIBRARIES})
-  list(APPEND LIBCURL_PC_REQUIRES_PRIVATE "libnghttp3")
+  list(APPEND LIBCURL_PC_REQUIRES_PRIVATE ${NGHTTP3_PC_REQUIRES})
 endif()
 
 if(CURL_WITH_MULTI_SSL AND (USE_NGTCP2 OR USE_QUICHE OR USE_MSH3 OR USE_OPENSSL_QUIC))
@@ -1239,59 +1406,30 @@ if(NOT CURL_DISABLE_LDAP)
 
   # Now that we know, we are not using Windows LDAP...
   if(NOT USE_WIN32_LDAP)
-    if(NOT DEFINED LDAP_LIBRARY)
-      set(LDAP_LIBRARY "ldap" CACHE STRING "Name or full path to ldap library")
-    endif()
-    if(NOT DEFINED LDAP_LBER_LIBRARY)
-      set(LDAP_LBER_LIBRARY "lber" CACHE STRING "Name or full path to lber library")
-    endif()
-    if(NOT DEFINED LDAP_INCLUDE_DIR)
-      set(LDAP_INCLUDE_DIR "" CACHE STRING "Path to LDAP include directory")
-    endif()
-
     # Check for LDAP
     cmake_push_check_state()
     if(USE_OPENSSL)
-      set(CMAKE_REQUIRED_LIBRARIES ${OPENSSL_LIBRARIES})
+      list(APPEND CMAKE_REQUIRED_LIBRARIES ${OPENSSL_LIBRARIES})
     endif()
-    check_library_exists("${LDAP_LIBRARY}" "ldap_init" "" HAVE_LIBLDAP)
-    if(HAVE_LIBLDAP)
-      check_library_exists("${LDAP_LIBRARY};${LDAP_LBER_LIBRARY}" "ber_init" "" HAVE_LIBLBER)
-    else()
-      check_library_exists("${LDAP_LBER_LIBRARY}" "ber_init" "" HAVE_LIBLBER)
-    endif()
-
-    if(LDAP_INCLUDE_DIR)
-      list(APPEND CMAKE_REQUIRED_INCLUDES ${LDAP_INCLUDE_DIR})
-    endif()
-
-    unset(_include_list)
-    check_include_file("lber.h" HAVE_LBER_H)
-    if(HAVE_LBER_H)
-      list(APPEND _include_list "lber.h")
-    endif()
-    check_include_files("${_include_list};ldap.h" HAVE_LDAP_H)
-    unset(_include_list)
-
-    if(NOT HAVE_LDAP_H)
-      message(STATUS "LDAP_H not found CURL_DISABLE_LDAP set ON")
-      set(CURL_DISABLE_LDAP ON CACHE BOOL "" FORCE)
-    elseif(NOT HAVE_LIBLDAP)
-      message(STATUS "LDAP library '${LDAP_LIBRARY}' not found CURL_DISABLE_LDAP set ON")
-      set(CURL_DISABLE_LDAP ON CACHE BOOL "" FORCE)
-    else()
-      if(LDAP_INCLUDE_DIR)
-        include_directories(SYSTEM ${LDAP_INCLUDE_DIR})
+    find_package(LDAP)
+    if(LDAP_FOUND)
+      set(HAVE_LBER_H 1)
+      set(CURL_LIBS "${LDAP_LIBRARIES};${CURL_LIBS}")
+      list(APPEND CURL_LIBDIRS ${LDAP_LIBRARY_DIRS})
+      if(LDAP_PC_REQUIRES)
+        set(LIBCURL_PC_REQUIRES_PRIVATE "${LDAP_PC_REQUIRES};${LIBCURL_PC_REQUIRES_PRIVATE}")
       endif()
+      include_directories(SYSTEM ${LDAP_INCLUDE_DIRS})
+      link_directories(${LDAP_LIBRARY_DIRS})
+      if(LDAP_CFLAGS)
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${LDAP_CFLAGS}")
+      endif()
+
+      # LDAP feature checks
+
       list(APPEND CMAKE_REQUIRED_DEFINITIONS "-DLDAP_DEPRECATED=1")
-      list(APPEND CMAKE_REQUIRED_LIBRARIES ${LDAP_LIBRARY})
-      set(CURL_LIBS "${LDAP_LIBRARY};${CURL_LIBS}")
-      # FIXME: uncomment once pkg-config-based detection landed: https://github.com/curl/curl/pull/15273
-      # set(LIBCURL_PC_REQUIRES_PRIVATE "${LDAP_PC_REQUIRES};${LIBCURL_PC_REQUIRES_PRIVATE}")
-      if(HAVE_LIBLBER)
-        list(APPEND CMAKE_REQUIRED_LIBRARIES ${LDAP_LBER_LIBRARY})
-        set(CURL_LIBS "${LDAP_LBER_LIBRARY};${CURL_LIBS}")
-      endif()
+      list(APPEND CMAKE_REQUIRED_LIBRARIES ${LDAP_LIBRARIES})
+      curl_required_libpaths("${LDAP_LIBRARY_DIRS}")
 
       check_function_exists("ldap_url_parse" HAVE_LDAP_URL_PARSE)
       check_function_exists("ldap_init_fd" HAVE_LDAP_INIT_FD)
@@ -1305,6 +1443,9 @@ if(NOT CURL_DISABLE_LDAP)
       if(NOT CURL_DISABLE_LDAPS)
         set(HAVE_LDAP_SSL ON)
       endif()
+    else()
+      message(STATUS "LDAP not found. CURL_DISABLE_LDAP set ON")
+      set(CURL_DISABLE_LDAP ON CACHE BOOL "" FORCE)
     endif()
     cmake_pop_check_state()
   endif()
@@ -1331,7 +1472,7 @@ if(APPLE)
   option(USE_APPLE_IDN "Use Apple built-in IDN support" OFF)
   if(USE_APPLE_IDN)
     cmake_push_check_state()
-    set(CMAKE_REQUIRED_LIBRARIES "icucore")
+    list(APPEND CMAKE_REQUIRED_LIBRARIES "icucore")
     check_symbol_exists("uidna_openUTS46" "unicode/uidna.h" HAVE_APPLE_IDN)
     cmake_pop_check_state()
     if(HAVE_APPLE_IDN)
@@ -1353,7 +1494,7 @@ if(USE_LIBIDN2 AND NOT USE_APPLE_IDN AND NOT USE_WIN32_IDN)
   if(LIBIDN2_FOUND)
     set(CURL_LIBS "${LIBIDN2_LIBRARIES};${CURL_LIBS}")
     list(APPEND CURL_LIBDIRS ${LIBIDN2_LIBRARY_DIRS})
-    set(LIBCURL_PC_REQUIRES_PRIVATE "libidn2;${LIBCURL_PC_REQUIRES_PRIVATE}")
+    set(LIBCURL_PC_REQUIRES_PRIVATE "${LIBIDN2_PC_REQUIRES};${LIBCURL_PC_REQUIRES_PRIVATE}")
     include_directories(SYSTEM ${LIBIDN2_INCLUDE_DIRS})
     link_directories(${LIBIDN2_LIBRARY_DIRS})
     if(LIBIDN2_CFLAGS)
@@ -1370,15 +1511,16 @@ mark_as_advanced(CURL_USE_LIBPSL)
 set(USE_LIBPSL OFF)
 
 if(CURL_USE_LIBPSL)
-  find_package(Libpsl)  # TODO: add REQUIRED to match autotools
-  if(LIBPSL_FOUND)
-    list(APPEND CURL_LIBS ${LIBPSL_LIBRARIES})
-    list(APPEND LIBCURL_PC_REQUIRES_PRIVATE "libpsl")
-    include_directories(SYSTEM ${LIBPSL_INCLUDE_DIRS})
-    set(USE_LIBPSL ON)
-  else()
-    message(WARNING "libpsl is enabled, but not found.")
+  find_package(Libpsl REQUIRED)
+  list(APPEND CURL_LIBS ${LIBPSL_LIBRARIES})
+  list(APPEND CURL_LIBDIRS ${LIBPSL_LIBRARY_DIRS})
+  list(APPEND LIBCURL_PC_REQUIRES_PRIVATE ${LIBPSL_PC_REQUIRES})
+  include_directories(SYSTEM ${LIBPSL_INCLUDE_DIRS})
+  link_directories(${LIBPSL_LIBRARY_DIRS})
+  if(LIBPSL_CFLAGS)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${LIBPSL_CFLAGS}")
   endif()
+  set(USE_LIBPSL ON)
 endif()
 
 # libssh2
@@ -1390,8 +1532,13 @@ if(CURL_USE_LIBSSH2)
   find_package(Libssh2)
   if(LIBSSH2_FOUND)
     list(APPEND CURL_LIBS ${LIBSSH2_LIBRARIES})
-    list(APPEND LIBCURL_PC_REQUIRES_PRIVATE "libssh2")
+    list(APPEND CURL_LIBDIRS ${LIBSSH2_LIBRARY_DIRS})
+    list(APPEND LIBCURL_PC_REQUIRES_PRIVATE ${LIBSSH2_PC_REQUIRES})
     include_directories(SYSTEM ${LIBSSH2_INCLUDE_DIRS})
+    link_directories(${LIBSSH2_LIBRARY_DIRS})
+    if(LIBSSH2_CFLAGS)
+      set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${LIBSSH2_CFLAGS}")
+    endif()
     set(USE_LIBSSH2 ON)
   endif()
 endif()
@@ -1401,17 +1548,15 @@ option(CURL_USE_LIBSSH "Use libssh" OFF)
 mark_as_advanced(CURL_USE_LIBSSH)
 if(NOT USE_LIBSSH2 AND CURL_USE_LIBSSH)
   find_package(Libssh REQUIRED)
-  if(LIBSSH_FOUND)
-    list(APPEND CURL_LIBS ${LIBSSH_LIBRARIES})
-    list(APPEND CURL_LIBDIRS ${LIBSSH_LIBRARY_DIRS})
-    list(APPEND LIBCURL_PC_REQUIRES_PRIVATE "libssh")
-    include_directories(SYSTEM ${LIBSSH_INCLUDE_DIRS})
-    link_directories(${LIBSSH_LIBRARY_DIRS})
-    if(LIBSSH_CFLAGS)
-      set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${LIBSSH_CFLAGS}")
-    endif()
-    set(USE_LIBSSH ON)
+  list(APPEND CURL_LIBS ${LIBSSH_LIBRARIES})
+  list(APPEND CURL_LIBDIRS ${LIBSSH_LIBRARY_DIRS})
+  list(APPEND LIBCURL_PC_REQUIRES_PRIVATE ${LIBSSH_PC_REQUIRES})
+  include_directories(SYSTEM ${LIBSSH_INCLUDE_DIRS})
+  link_directories(${LIBSSH_LIBRARY_DIRS})
+  if(LIBSSH_CFLAGS)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${LIBSSH_CFLAGS}")
   endif()
+  set(USE_LIBSSH ON)
 endif()
 
 # wolfSSH
@@ -1435,17 +1580,15 @@ option(CURL_USE_GSASL "Use libgsasl" OFF)
 mark_as_advanced(CURL_USE_GSASL)
 if(CURL_USE_GSASL)
   find_package(Libgsasl REQUIRED)
-  if(LIBGSASL_FOUND)
-    list(APPEND CURL_LIBS ${LIBGSASL_LIBRARIES})
-    list(APPEND CURL_LIBDIRS ${LIBGSASL_LIBRARY_DIRS})
-    list(APPEND LIBCURL_PC_REQUIRES_PRIVATE "libgsasl")
-    include_directories(SYSTEM ${LIBGSASL_INCLUDE_DIRS})
-    link_directories(${LIBGSASL_LIBRARY_DIRS})
-    if(LIBGSASL_CFLAGS)
-      set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${LIBGSASL_CFLAGS}")
-    endif()
-    set(USE_GSASL ON)
+  list(APPEND CURL_LIBS ${LIBGSASL_LIBRARIES})
+  list(APPEND CURL_LIBDIRS ${LIBGSASL_LIBRARY_DIRS})
+  list(APPEND LIBCURL_PC_REQUIRES_PRIVATE ${LIBGSASL_PC_REQUIRES})
+  include_directories(SYSTEM ${LIBGSASL_INCLUDE_DIRS})
+  link_directories(${LIBGSASL_LIBRARY_DIRS})
+  if(LIBGSASL_CFLAGS)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${LIBGSASL_CFLAGS}")
   endif()
+  set(USE_GSASL ON)
 endif()
 
 option(CURL_USE_GSSAPI "Use GSSAPI implementation" OFF)
@@ -1456,6 +1599,15 @@ if(CURL_USE_GSSAPI)
 
   set(HAVE_GSSAPI ${GSS_FOUND})
   if(GSS_FOUND)
+    list(APPEND CURL_LIBS ${GSS_LIBRARIES})
+    list(APPEND CURL_LIBDIRS ${GSS_LIBRARY_DIRS})
+    list(APPEND LIBCURL_PC_REQUIRES_PRIVATE ${GSS_PC_REQUIRES})
+    include_directories(SYSTEM ${GSS_INCLUDE_DIRS})
+    link_directories(${GSS_LIBRARY_DIRS})
+    if(GSS_CFLAGS)
+      set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${GSS_CFLAGS}")
+    endif()
+
     if(GSS_FLAVOUR STREQUAL "GNU")
       set(HAVE_GSSGNU 1)
     else()
@@ -1479,8 +1631,8 @@ if(CURL_USE_GSSAPI)
         endif()
 
         if(NOT DEFINED HAVE_GSS_C_NT_HOSTBASED_SERVICE)
-          set(CMAKE_REQUIRED_FLAGS ${GSS_CFLAGS})
-          set(CMAKE_REQUIRED_LIBRARIES ${GSS_LIBRARIES})
+          set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} ${GSS_CFLAGS}")
+          list(APPEND CMAKE_REQUIRED_LIBRARIES ${GSS_LIBRARIES})
           curl_required_libpaths("${GSS_LIBRARY_DIRS}")
           check_symbol_exists("GSS_C_NT_HOSTBASED_SERVICE" "${_include_list}" HAVE_GSS_C_NT_HOSTBASED_SERVICE)
         endif()
@@ -1490,15 +1642,6 @@ if(CURL_USE_GSSAPI)
       endif()
       unset(_include_list)
       cmake_pop_check_state()
-    endif()
-
-    list(APPEND CURL_LIBS ${GSS_LIBRARIES})
-    list(APPEND CURL_LIBDIRS ${GSS_LIBRARY_DIRS})
-    list(APPEND LIBCURL_PC_REQUIRES_PRIVATE ${GSS_PC_REQUIRES})
-    include_directories(SYSTEM ${GSS_INCLUDE_DIRS})
-    link_directories(${GSS_LIBRARY_DIRS})
-    if(GSS_CFLAGS)
-      set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${GSS_CFLAGS}")
     endif()
   else()
     message(WARNING "GSSAPI has been requested, but no supporting libraries found. Skipping.")
@@ -1512,42 +1655,34 @@ if(CURL_USE_LIBUV)
     message(FATAL_ERROR "Using libuv without debug support enabled is useless")
   endif()
   find_package(Libuv REQUIRED)
-  if(LIBUV_FOUND)
-    list(APPEND CURL_LIBS ${LIBUV_LIBRARIES})
-    list(APPEND CURL_LIBDIRS ${LIBUV_LIBRARY_DIRS})
-    list(APPEND LIBCURL_PC_REQUIRES_PRIVATE "libuv")
-    include_directories(SYSTEM ${LIBUV_INCLUDE_DIRS})
-    link_directories(${LIBUV_LIBRARY_DIRS})
-    if(LIBUV_CFLAGS)
-      set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${LIBUV_CFLAGS}")
-    endif()
-    set(USE_LIBUV ON)
-    set(HAVE_UV_H ON)
+  list(APPEND CURL_LIBS ${LIBUV_LIBRARIES})
+  list(APPEND CURL_LIBDIRS ${LIBUV_LIBRARY_DIRS})
+  list(APPEND LIBCURL_PC_REQUIRES_PRIVATE ${LIBUV_PC_REQUIRES})
+  include_directories(SYSTEM ${LIBUV_INCLUDE_DIRS})
+  link_directories(${LIBUV_LIBRARY_DIRS})
+  if(LIBUV_CFLAGS)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${LIBUV_CFLAGS}")
   endif()
+  set(USE_LIBUV ON)
+  set(HAVE_UV_H ON)
 endif()
 
 option(USE_LIBRTMP "Enable librtmp from rtmpdump" OFF)
 if(USE_LIBRTMP)
-  set(_extra_libs "rtmp")
-  if(WIN32)
-    list(APPEND _extra_libs "winmm")
-  endif()
-  openssl_check_symbol_exists("RTMP_Init" "librtmp/rtmp.h" HAVE_LIBRTMP "${_extra_libs}")
-  if(HAVE_LIBRTMP)
-    list(APPEND CURL_LIBS "rtmp")
-    list(APPEND LIBCURL_PC_REQUIRES_PRIVATE "librtmp")
-    if(WIN32)
-      list(APPEND CURL_LIBS "winmm")
-    endif()
-  else()
-    message(WARNING "librtmp has been requested, but not found or missing OpenSSL. Skipping.")
-    set(USE_LIBRTMP OFF)
+  find_package(Librtmp REQUIRED)
+  list(APPEND CURL_LIBS ${LIBRTMP_LIBRARIES})
+  list(APPEND CURL_LIBDIRS ${LIBRTMP_LIBRARY_DIRS})
+  list(APPEND LIBCURL_PC_REQUIRES_PRIVATE ${LIBRTMP_PC_REQUIRES})
+  include_directories(SYSTEM ${LIBRTMP_INCLUDE_DIRS})
+  link_directories(${LIBRTMP_LIBRARY_DIRS})
+  if(LIBRTMP_CFLAGS)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${LIBRTMP_CFLAGS}")
   endif()
 endif()
 
 option(ENABLE_UNIX_SOCKETS "Enable Unix domain sockets support" ON)
 if(ENABLE_UNIX_SOCKETS)
-  if(WIN32)
+  if(WIN32 OR DOS)
     set(USE_UNIX_SOCKETS ON)
   else()
     include(CheckStructHasMember)
@@ -1557,15 +1692,15 @@ else()
   unset(USE_UNIX_SOCKETS CACHE)
 endif()
 
-if(0) # This code not needed for building within CMake.
+if(0) # XXX(cmake): not needed for build within cmake
 #
 # CA handling
 #
 if(_curl_ca_bundle_supported)
   set(CURL_CA_BUNDLE "auto" CACHE
     STRING "Path to the CA bundle. Set 'none' to disable or 'auto' for auto-detection. Defaults to 'auto'.")
-  set(CURL_CA_FALLBACK OFF CACHE BOOL
-    "Use built-in CA store of TLS backend. Defaults to OFF")
+  set(CURL_CA_FALLBACK OFF CACHE
+    BOOL "Use built-in CA store of TLS backend. Defaults to OFF")
   set(CURL_CA_PATH "auto" CACHE
     STRING "Location of default CA path. Set 'none' to disable or 'auto' for auto-detection. Defaults to 'auto'.")
   set(CURL_CA_EMBED "" CACHE
@@ -1646,7 +1781,7 @@ if(_curl_ca_bundle_supported)
     endif()
   endif()
 endif()
-endif()
+endif() # XXX(cmake): end
 
 if(WIN32)
   option(CURL_DISABLE_CA_SEARCH "Disable unsafe CA bundle search in PATH on Windows" OFF)
@@ -1681,40 +1816,38 @@ endif()
 
 # Detect headers
 
-# Use check_include_file_concat() for headers required by subsequent
-# check_include_file_concat() or check_symbol_exists() detections.
+# Use check_include_file_concat_curl() for headers required by subsequent
+# check_include_file_concat_curl() or check_symbol_exists() detections.
 # Order for these is significant.
 check_include_file("sys/eventfd.h"    HAVE_SYS_EVENTFD_H)
 check_include_file("sys/filio.h"      HAVE_SYS_FILIO_H)
-check_include_file("sys/wait.h"       HAVE_SYS_WAIT_H)
 check_include_file("sys/ioctl.h"      HAVE_SYS_IOCTL_H)
 check_include_file("sys/param.h"      HAVE_SYS_PARAM_H)
 check_include_file("sys/poll.h"       HAVE_SYS_POLL_H)
 check_include_file("sys/resource.h"   HAVE_SYS_RESOURCE_H)
-check_include_file_concat("sys/select.h"     HAVE_SYS_SELECT_H)
-check_include_file_concat("sys/socket.h"     HAVE_SYS_SOCKET_H)
+check_include_file_concat_curl("sys/select.h"     HAVE_SYS_SELECT_H)
+check_include_file_concat_curl("sys/socket.h"     HAVE_SYS_SOCKET_H)
 check_include_file("sys/sockio.h"     HAVE_SYS_SOCKIO_H)
 check_include_file("sys/stat.h"       HAVE_SYS_STAT_H)
-check_include_file_concat("sys/time.h"       HAVE_SYS_TIME_H)
-check_include_file_concat("sys/types.h"      HAVE_SYS_TYPES_H)
+check_include_file_concat_curl("sys/time.h"       HAVE_SYS_TIME_H)
+check_include_file_concat_curl("sys/types.h"      HAVE_SYS_TYPES_H)
 check_include_file("sys/un.h"         HAVE_SYS_UN_H)
-check_include_file("sys/utime.h"      HAVE_SYS_UTIME_H)
-check_include_file("sys/xattr.h"      HAVE_SYS_XATTR_H)
+check_include_file_concat_curl("sys/utime.h"      HAVE_SYS_UTIME_H)  # sys/types.h (AmigaOS)
 
-check_include_file_concat("arpa/inet.h"      HAVE_ARPA_INET_H)
+check_include_file_concat_curl("arpa/inet.h"      HAVE_ARPA_INET_H)
 check_include_file("dirent.h"         HAVE_DIRENT_H)
 check_include_file("fcntl.h"          HAVE_FCNTL_H)
-check_include_file_concat("ifaddrs.h"        HAVE_IFADDRS_H)
+check_include_file_concat_curl("ifaddrs.h"        HAVE_IFADDRS_H)
 check_include_file("io.h"             HAVE_IO_H)
-check_include_file_concat("libgen.h"         HAVE_LIBGEN_H)
+check_include_file_concat_curl("libgen.h"         HAVE_LIBGEN_H)
 check_include_file("linux/tcp.h"      HAVE_LINUX_TCP_H)
 check_include_file("locale.h"         HAVE_LOCALE_H)
-check_include_file("net/if.h"         HAVE_NET_IF_H)
-check_include_file_concat("netdb.h"          HAVE_NETDB_H)
-check_include_file_concat("netinet/in.h"     HAVE_NETINET_IN_H)
+check_include_file_concat_curl("net/if.h"         HAVE_NET_IF_H)  # sys/select.h (e.g. MS-DOS/Watt-32)
+check_include_file_concat_curl("netdb.h"          HAVE_NETDB_H)
+check_include_file_concat_curl("netinet/in.h"     HAVE_NETINET_IN_H)
 check_include_file("netinet/in6.h"    HAVE_NETINET_IN6_H)
-check_include_file_concat("netinet/tcp.h"    HAVE_NETINET_TCP_H)  # sys/types.h (e.g. Cygwin) netinet/in.h
-check_include_file_concat("netinet/udp.h"    HAVE_NETINET_UDP_H)  # sys/types.h (e.g. Cygwin)
+check_include_file_concat_curl("netinet/tcp.h"    HAVE_NETINET_TCP_H)  # sys/types.h (e.g. Cygwin) netinet/in.h
+check_include_file_concat_curl("netinet/udp.h"    HAVE_NETINET_UDP_H)  # sys/types.h (e.g. Cygwin)
 check_include_file("poll.h"           HAVE_POLL_H)
 check_include_file("pwd.h"            HAVE_PWD_H)
 check_include_file("stdatomic.h"      HAVE_STDATOMIC_H)
@@ -1723,11 +1856,11 @@ check_include_file("strings.h"        HAVE_STRINGS_H)
 check_include_file("stropts.h"        HAVE_STROPTS_H)
 check_include_file("termio.h"         HAVE_TERMIO_H)
 check_include_file("termios.h"        HAVE_TERMIOS_H)
-check_include_file_concat("unistd.h"         HAVE_UNISTD_H)
+check_include_file_concat_curl("unistd.h"         HAVE_UNISTD_H)
 check_include_file("utime.h"          HAVE_UTIME_H)
 
-if(CMAKE_SYSTEM_NAME MATCHES "AmigaOS")
-  check_include_file_concat("proto/bsdsocket.h" HAVE_PROTO_BSDSOCKET_H)
+if(AMIGA)
+  check_include_file_concat_curl("proto/bsdsocket.h" HAVE_PROTO_BSDSOCKET_H)
 endif()
 
 # Pass these detection results to curl_internal_test() for use in CurlTests.c
@@ -1756,12 +1889,16 @@ if(SIZEOF_SUSECONDS_T)
 endif()
 
 # Check for some functions that are used
+
+# Apply to all feature checks
 if(WIN32)
-  list(APPEND CMAKE_REQUIRED_LIBRARIES "ws2_32")  # Apply to all feature checks
+  list(APPEND CMAKE_REQUIRED_LIBRARIES "ws2_32")
 elseif(HAVE_LIBSOCKET)
-  list(APPEND CMAKE_REQUIRED_LIBRARIES "socket")  # Apply to all feature checks
+  list(APPEND CMAKE_REQUIRED_LIBRARIES "socket")
 elseif(HAVE_LIBNETWORK)
-  list(APPEND CMAKE_REQUIRED_LIBRARIES "network")  # Apply to all feature checks
+  list(APPEND CMAKE_REQUIRED_LIBRARIES "network")
+elseif(DOS)
+  list(APPEND CMAKE_REQUIRED_LIBRARIES "${WATT_ROOT}/lib/libwatt.a")
 endif()
 
 check_function_exists("fnmatch"       HAVE_FNMATCH)
@@ -1769,7 +1906,6 @@ check_symbol_exists("basename"        "${CURL_INCLUDES};string.h" HAVE_BASENAME)
 check_symbol_exists("opendir"         "dirent.h" HAVE_OPENDIR)
 check_function_exists("poll"          HAVE_POLL)  # poll.h
 check_symbol_exists("socket"          "${CURL_INCLUDES}" HAVE_SOCKET)  # winsock2.h sys/socket.h
-check_function_exists("sched_yield"   HAVE_SCHED_YIELD)
 check_symbol_exists("socketpair"      "${CURL_INCLUDES}" HAVE_SOCKETPAIR)  # sys/socket.h
 check_symbol_exists("recv"            "${CURL_INCLUDES}" HAVE_RECV)  # proto/bsdsocket.h sys/types.h sys/socket.h
 check_symbol_exists("send"            "${CURL_INCLUDES}" HAVE_SEND)  # proto/bsdsocket.h sys/types.h sys/socket.h
@@ -1778,9 +1914,6 @@ check_function_exists("sendmmsg"      HAVE_SENDMMSG)
 check_symbol_exists("select"          "${CURL_INCLUDES}" HAVE_SELECT)  # proto/bsdsocket.h sys/select.h sys/socket.h
 check_symbol_exists("strdup"          "string.h" HAVE_STRDUP)
 check_symbol_exists("strtok_r"        "string.h" HAVE_STRTOK_R)
-check_symbol_exists("strcasecmp"      "string.h" HAVE_STRCASECMP)
-check_symbol_exists("stricmp"         "string.h" HAVE_STRICMP)
-check_symbol_exists("strcmpi"         "string.h" HAVE_STRCMPI)
 check_symbol_exists("memrchr"         "string.h" HAVE_MEMRCHR)
 check_symbol_exists("alarm"           "unistd.h" HAVE_ALARM)
 check_symbol_exists("fcntl"           "fcntl.h" HAVE_FCNTL)
@@ -1798,6 +1931,7 @@ check_function_exists("utime"         HAVE_UTIME)
 check_symbol_exists("gmtime_r"        "stdlib.h;time.h" HAVE_GMTIME_R)
 
 check_symbol_exists("gethostbyname_r" "netdb.h" HAVE_GETHOSTBYNAME_R)
+check_symbol_exists("gethostname"     "${CURL_INCLUDES}" HAVE_GETHOSTNAME)  # winsock2.h unistd.h proto/bsdsocket.h
 
 check_symbol_exists("signal"          "signal.h" HAVE_SIGNAL)
 check_symbol_exists("strtoll"         "stdlib.h" HAVE_STRTOLL)
@@ -1818,11 +1952,18 @@ check_function_exists("setlocale"       HAVE_SETLOCALE)
 check_function_exists("setmode"         HAVE_SETMODE)
 check_function_exists("setrlimit"       HAVE_SETRLIMIT)
 
+if(NOT WIN32)
+  check_function_exists("sched_yield"   HAVE_SCHED_YIELD)
+  check_symbol_exists("strcasecmp"      "string.h" HAVE_STRCASECMP)
+  check_symbol_exists("stricmp"         "string.h" HAVE_STRICMP)
+  check_symbol_exists("strcmpi"         "string.h" HAVE_STRCMPI)
+endif()
+
 if(WIN32 OR CYGWIN)
   check_function_exists("_setmode" HAVE__SETMODE)
 endif()
 
-if(CMAKE_SYSTEM_NAME MATCHES "AmigaOS")
+if(AMIGA)
   check_symbol_exists("CloseSocket" "${CURL_INCLUDES}" HAVE_CLOSESOCKET_CAMEL)  # sys/socket.h proto/bsdsocket.h
 endif()
 
@@ -1838,9 +1979,6 @@ if(APPLE)
   check_function_exists("mach_absolute_time" HAVE_MACH_ABSOLUTE_TIME)
 endif()
 check_symbol_exists("inet_ntop" "${CURL_INCLUDES};stdlib.h;string.h" HAVE_INET_NTOP)  # arpa/inet.h
-if(MSVC AND (MSVC_VERSION LESS_EQUAL 1600))
-  set(HAVE_INET_NTOP OFF)
-endif()
 check_symbol_exists("inet_pton" "${CURL_INCLUDES};stdlib.h;string.h" HAVE_INET_PTON)  # arpa/inet.h
 
 check_symbol_exists("fsetxattr" "sys/xattr.h" HAVE_FSETXATTR)
@@ -1851,11 +1989,11 @@ endif()
 
 cmake_push_check_state()
 if(WIN32)
-  set(CMAKE_EXTRA_INCLUDE_FILES "winsock2.h")
+  list(APPEND CMAKE_EXTRA_INCLUDE_FILES "winsock2.h")
   check_type_size("ADDRESS_FAMILY" SIZEOF_ADDRESS_FAMILY)
   set(HAVE_ADDRESS_FAMILY ${HAVE_SIZEOF_ADDRESS_FAMILY})
 elseif(HAVE_SYS_SOCKET_H)
-  set(CMAKE_EXTRA_INCLUDE_FILES "sys/socket.h")
+  list(APPEND CMAKE_EXTRA_INCLUDE_FILES "sys/socket.h")
   check_type_size("sa_family_t" SIZEOF_SA_FAMILY_T)
   set(HAVE_SA_FAMILY_T ${HAVE_SIZEOF_SA_FAMILY_T})
 endif()
@@ -1871,7 +2009,6 @@ foreach(_curl_test IN ITEMS
     HAVE_IOCTL_FIONBIO
     HAVE_IOCTL_SIOCGIFADDR
     HAVE_SETSOCKOPT_SO_NONBLOCK
-    HAVE_O_NONBLOCK
     HAVE_GETHOSTBYNAME_R_3
     HAVE_GETHOSTBYNAME_R_5
     HAVE_GETHOSTBYNAME_R_6
@@ -1890,30 +2027,32 @@ endforeach()
 cmake_push_check_state()
 if(HAVE_FILE_OFFSET_BITS)
   set(_FILE_OFFSET_BITS 64)
-  set(CMAKE_REQUIRED_DEFINITIONS "-D_FILE_OFFSET_BITS=64")
+  list(APPEND CMAKE_REQUIRED_DEFINITIONS "-D_FILE_OFFSET_BITS=64")
 endif()
 check_type_size("off_t" SIZEOF_OFF_T)
 
-# fseeko may not exist with _FILE_OFFSET_BITS=64 but can exist with
-# _FILE_OFFSET_BITS unset or 32 (e.g. Android ARMv7 with NDK 26b and API level < 24)
-# so we need to test fseeko after testing for _FILE_OFFSET_BITS
-check_symbol_exists("fseeko" "${CURL_INCLUDES};stdio.h" HAVE_FSEEKO)
+if(NOT WIN32)
+  # fseeko may not exist with _FILE_OFFSET_BITS=64 but can exist with
+  # _FILE_OFFSET_BITS unset or 32 (e.g. Android ARMv7 with NDK 26b and API level < 24)
+  # so we need to test fseeko after testing for _FILE_OFFSET_BITS
+  check_symbol_exists("fseeko" "${CURL_INCLUDES};stdio.h" HAVE_FSEEKO)
 
-if(HAVE_FSEEKO)
-  set(HAVE_DECL_FSEEKO 1)
+  if(HAVE_FSEEKO)
+    set(HAVE_DECL_FSEEKO 1)
+  endif()
 endif()
 
 # Include this header to get the type
 cmake_push_check_state()
-set(CMAKE_REQUIRED_INCLUDES "${PROJECT_SOURCE_DIR}/include")
-set(CMAKE_EXTRA_INCLUDE_FILES "curl/system.h")
+list(APPEND CMAKE_REQUIRED_INCLUDES "${PROJECT_SOURCE_DIR}/include")
+list(APPEND CMAKE_EXTRA_INCLUDE_FILES "curl/system.h")
 check_type_size("curl_off_t" SIZEOF_CURL_OFF_T)
-set(CMAKE_EXTRA_INCLUDE_FILES "curl/curl.h")
+list(APPEND CMAKE_EXTRA_INCLUDE_FILES "curl/curl.h")
 check_type_size("curl_socket_t" SIZEOF_CURL_SOCKET_T)
 cmake_pop_check_state()  # pop curl system headers
 cmake_pop_check_state()  # pop -D_FILE_OFFSET_BITS=64
 
-if(0) # This code not needed for building within CMake.
+if(0) # XXX(cmake): not needed for build within cmake
 if(NOT WIN32 AND NOT CMAKE_CROSSCOMPILING)
   # On non-Windows and not cross-compiling, check for writable argv[]
   include(CheckCSourceRuns)
@@ -1925,6 +2064,16 @@ if(NOT WIN32 AND NOT CMAKE_CROSSCOMPILING)
       return (argv[0][0] == ' ')?0:1;
     }" HAVE_WRITABLE_ARGV)
 endif()
+endif() # XXX(cmake): end
+
+if(NOT CMAKE_CROSSCOMPILING)
+  include(CheckCSourceRuns)
+  check_c_source_runs("
+    #include <time.h>
+    int main(void) {
+      time_t t = -1;
+      return t < 0;
+    }" HAVE_TIME_T_UNSIGNED)
 endif()
 
 curl_internal_test(HAVE_GLIBC_STRERROR_R)
@@ -1968,15 +2117,6 @@ if(NOT HAVE_IN_ADDR_T)
   set(in_addr_t "unsigned long")
 endif()
 
-# Check for nonblocking
-set(HAVE_DISABLED_NONBLOCKING 1)
-if(HAVE_FIONBIO OR
-   HAVE_IOCTLSOCKET OR
-   HAVE_IOCTLSOCKET_CASE OR
-   HAVE_O_NONBLOCK)
-  unset(HAVE_DISABLED_NONBLOCKING)
-endif()
-
 if(CMAKE_COMPILER_IS_GNUCC AND APPLE)
   include(CheckCCompilerFlag)
   check_c_compiler_flag("-Wno-long-double" HAVE_C_FLAG_Wno_long_double)
@@ -2002,9 +2142,11 @@ include(CMake/OtherTests.cmake)
 
 add_definitions("-DHAVE_CONFIG_H")
 
-# For Windows, all compilers used by CMake should support large files
 if(WIN32)
-  set(USE_WIN32_LARGE_FILES ON)
+  # _fseeki64() requires VS2005
+  if(NOT MSVC OR (MSVC_VERSION GREATER_EQUAL 1400))
+    set(USE_WIN32_LARGE_FILES ON)
+  endif()
 
   # Use the manifest embedded in the Windows Resource
   set(CMAKE_RC_FLAGS "${CMAKE_RC_FLAGS} -DCURL_EMBED_MANIFEST")
@@ -2022,26 +2164,23 @@ endif()
 
 if(MSVC)
   # Disable default manifest added by CMake
-  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /MANIFEST:NO")
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -MANIFEST:NO")
 
-  add_definitions("-D_CRT_SECURE_NO_DEPRECATE" "-D_CRT_NONSTDC_NO_DEPRECATE")
-  if(CMAKE_C_FLAGS MATCHES "/W[0-4]")
-    string(REGEX REPLACE "/W[0-4]" "/W4" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
-  elseif(CMAKE_C_FLAGS MATCHES "-W[0-4]")
-    string(REGEX REPLACE "-W[0-4]" "-W4" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
+  if(CMAKE_C_FLAGS MATCHES "[/-]W[0-4]")
+    string(REGEX REPLACE "[/-]W[0-4]" "-W4" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
   else()
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /W4")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -W4")
   endif()
 
-  # Use multithreaded compilation on VS 2008+
+  # Use multithreaded compilation on VS2008+
   if(CMAKE_C_COMPILER_ID STREQUAL "MSVC" AND MSVC_VERSION GREATER_EQUAL 1500)
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /MP")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -MP")
   endif()
 endif()
 
 if(CURL_WERROR)
   if(MSVC)
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /WX")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -WX")
   else()
     # This assumes clang or gcc style options
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Werror")
@@ -2067,7 +2206,7 @@ endif()
 
 # Ugly (but functional) way to include "Makefile.inc" by transforming it
 # (= regenerate it).
-function(transform_makefile_inc _input_file _output_file)
+function(curl_transform_makefile_inc _input_file _output_file)
   file(READ ${_input_file} _makefile_inc_text)
   string(REPLACE "$(top_srcdir)"   "\${PROJECT_SOURCE_DIR}" _makefile_inc_text ${_makefile_inc_text})
   string(REPLACE "$(top_builddir)" "\${PROJECT_BINARY_DIR}" _makefile_inc_text ${_makefile_inc_text})
@@ -2086,7 +2225,7 @@ function(transform_makefile_inc _input_file _output_file)
 endfunction()
 
 #-----------------------------------------------------------------------------
-# CMake-specific curl code.
+# XXX(cmake): begin cmake-specific curl code
 add_subdirectory(lib)
 
 add_executable(curltest curltest.c)
@@ -2099,6 +2238,7 @@ endif()
 install(FILES COPYING DESTINATION ${CMAKE_DOC_DIR}/cmcurl)
 
 return() # The rest of this file is not needed for building within CMake.
+# XXX(cmake): end cmake-specific curl code
 #-----------------------------------------------------------------------------
 
 include(GNUInstallDirs)
@@ -2139,7 +2279,7 @@ endif()
 
 # Helper to populate a list (_items) with a label when conditions
 # (the remaining args) are satisfied
-macro(_add_if _label)
+macro(curl_add_if _label)
   # Needs to be a macro to allow this indirection
   if(${ARGN})
     set(_items ${_items} "${_label}")
@@ -2159,90 +2299,94 @@ if(NOT CURL_DISABLE_NTLM AND
 endif()
 
 # Clear list and try to detect available protocols
-unset(_items)
-_add_if("HTTP"          NOT CURL_DISABLE_HTTP)
-_add_if("HTTPS"         NOT CURL_DISABLE_HTTP AND _ssl_enabled)
-_add_if("FTP"           NOT CURL_DISABLE_FTP)
-_add_if("FTPS"          NOT CURL_DISABLE_FTP AND _ssl_enabled)
-_add_if("FILE"          NOT CURL_DISABLE_FILE)
-_add_if("TELNET"        NOT CURL_DISABLE_TELNET)
-_add_if("LDAP"          NOT CURL_DISABLE_LDAP)
+set(_items "")
+curl_add_if("HTTP"          NOT CURL_DISABLE_HTTP)
+curl_add_if("HTTPS"         NOT CURL_DISABLE_HTTP AND _ssl_enabled)
+curl_add_if("FTP"           NOT CURL_DISABLE_FTP)
+curl_add_if("FTPS"          NOT CURL_DISABLE_FTP AND _ssl_enabled)
+curl_add_if("FILE"          NOT CURL_DISABLE_FILE)
+curl_add_if("TELNET"        NOT CURL_DISABLE_TELNET)
+curl_add_if("LDAP"          NOT CURL_DISABLE_LDAP)
 # CURL_DISABLE_LDAP implies CURL_DISABLE_LDAPS
-_add_if("LDAPS"         NOT CURL_DISABLE_LDAPS AND
-                        ((USE_OPENLDAP AND _ssl_enabled) OR
-                        (NOT USE_OPENLDAP AND HAVE_LDAP_SSL)))
-_add_if("DICT"          NOT CURL_DISABLE_DICT)
-_add_if("TFTP"          NOT CURL_DISABLE_TFTP)
-_add_if("GOPHER"        NOT CURL_DISABLE_GOPHER)
-_add_if("GOPHERS"       NOT CURL_DISABLE_GOPHER AND _ssl_enabled)
-_add_if("POP3"          NOT CURL_DISABLE_POP3)
-_add_if("POP3S"         NOT CURL_DISABLE_POP3 AND _ssl_enabled)
-_add_if("IMAP"          NOT CURL_DISABLE_IMAP)
-_add_if("IMAPS"         NOT CURL_DISABLE_IMAP AND _ssl_enabled)
-_add_if("SMB"           NOT CURL_DISABLE_SMB AND
-                        _use_curl_ntlm_core AND (SIZEOF_CURL_OFF_T GREATER 4))
-_add_if("SMBS"          NOT CURL_DISABLE_SMB AND _ssl_enabled AND
-                        _use_curl_ntlm_core AND (SIZEOF_CURL_OFF_T GREATER 4))
-_add_if("SMTP"          NOT CURL_DISABLE_SMTP)
-_add_if("SMTPS"         NOT CURL_DISABLE_SMTP AND _ssl_enabled)
-_add_if("SCP"           USE_LIBSSH2 OR USE_LIBSSH OR USE_WOLFSSH)
-_add_if("SFTP"          USE_LIBSSH2 OR USE_LIBSSH OR USE_WOLFSSH)
-_add_if("IPFS"          NOT CURL_DISABLE_IPFS)
-_add_if("IPNS"          NOT CURL_DISABLE_IPFS)
-_add_if("RTSP"          NOT CURL_DISABLE_RTSP)
-_add_if("RTMP"          USE_LIBRTMP)
-_add_if("MQTT"          NOT CURL_DISABLE_MQTT)
-_add_if("WS"            NOT CURL_DISABLE_WEBSOCKETS)
-_add_if("WSS"           NOT CURL_DISABLE_WEBSOCKETS AND _ssl_enabled)
+curl_add_if("LDAPS"         NOT CURL_DISABLE_LDAPS AND
+                            ((USE_OPENLDAP AND _ssl_enabled) OR
+                            (NOT USE_OPENLDAP AND HAVE_LDAP_SSL)))
+curl_add_if("DICT"          NOT CURL_DISABLE_DICT)
+curl_add_if("TFTP"          NOT CURL_DISABLE_TFTP)
+curl_add_if("GOPHER"        NOT CURL_DISABLE_GOPHER)
+curl_add_if("GOPHERS"       NOT CURL_DISABLE_GOPHER AND _ssl_enabled)
+curl_add_if("POP3"          NOT CURL_DISABLE_POP3)
+curl_add_if("POP3S"         NOT CURL_DISABLE_POP3 AND _ssl_enabled)
+curl_add_if("IMAP"          NOT CURL_DISABLE_IMAP)
+curl_add_if("IMAPS"         NOT CURL_DISABLE_IMAP AND _ssl_enabled)
+curl_add_if("SMB"           NOT CURL_DISABLE_SMB AND
+                            _use_curl_ntlm_core AND (SIZEOF_CURL_OFF_T GREATER 4))
+curl_add_if("SMBS"          NOT CURL_DISABLE_SMB AND _ssl_enabled AND
+                            _use_curl_ntlm_core AND (SIZEOF_CURL_OFF_T GREATER 4))
+curl_add_if("SMTP"          NOT CURL_DISABLE_SMTP)
+curl_add_if("SMTPS"         NOT CURL_DISABLE_SMTP AND _ssl_enabled)
+curl_add_if("SCP"           USE_LIBSSH2 OR USE_LIBSSH OR USE_WOLFSSH)
+curl_add_if("SFTP"          USE_LIBSSH2 OR USE_LIBSSH OR USE_WOLFSSH)
+curl_add_if("IPFS"          NOT CURL_DISABLE_IPFS)
+curl_add_if("IPNS"          NOT CURL_DISABLE_IPFS)
+curl_add_if("RTSP"          NOT CURL_DISABLE_RTSP)
+curl_add_if("RTMP"          USE_LIBRTMP)
+curl_add_if("MQTT"          NOT CURL_DISABLE_MQTT)
+curl_add_if("WS"            NOT CURL_DISABLE_WEBSOCKETS)
+curl_add_if("WSS"           NOT CURL_DISABLE_WEBSOCKETS AND _ssl_enabled)
 if(_items)
   list(SORT _items)
 endif()
+set(CURL_SUPPORTED_PROTOCOLS_LIST "${_items}")
 string(REPLACE ";" " " SUPPORT_PROTOCOLS "${_items}")
 string(TOLOWER "${SUPPORT_PROTOCOLS}" _support_protocols_lower)
 message(STATUS "Protocols: ${_support_protocols_lower}")
 
 # Clear list and try to detect available features
-unset(_items)
-_add_if("SSL"           _ssl_enabled)
-_add_if("IPv6"          ENABLE_IPV6)
-_add_if("UnixSockets"   USE_UNIX_SOCKETS)
-_add_if("libz"          HAVE_LIBZ)
-_add_if("brotli"        HAVE_BROTLI)
-_add_if("gsasl"         USE_GSASL)
-_add_if("zstd"          HAVE_ZSTD)
-_add_if("AsynchDNS"     USE_ARES OR USE_THREADS_POSIX OR USE_THREADS_WIN32)
-_add_if("IDN"           (HAVE_LIBIDN2 AND HAVE_IDN2_H) OR
-                        USE_WIN32_IDN OR
-                        USE_APPLE_IDN)
-_add_if("Largefile"     (SIZEOF_CURL_OFF_T GREATER 4) AND
-                        ((SIZEOF_OFF_T GREATER 4) OR USE_WIN32_LARGE_FILES))
-_add_if("SSPI"          USE_WINDOWS_SSPI)
-_add_if("GSS-API"       HAVE_GSSAPI)
-_add_if("alt-svc"       NOT CURL_DISABLE_ALTSVC)
-_add_if("HSTS"          NOT CURL_DISABLE_HSTS)
-_add_if("SPNEGO"        NOT CURL_DISABLE_NEGOTIATE_AUTH AND
-                        (HAVE_GSSAPI OR USE_WINDOWS_SSPI))
-_add_if("Kerberos"      NOT CURL_DISABLE_KERBEROS_AUTH AND
-                        (HAVE_GSSAPI OR USE_WINDOWS_SSPI))
-_add_if("NTLM"          NOT (CURL_DISABLE_NTLM) AND
-                        (_use_curl_ntlm_core OR USE_WINDOWS_SSPI))
-_add_if("TLS-SRP"       USE_TLS_SRP)
-_add_if("HTTP2"         USE_NGHTTP2)
-_add_if("HTTP3"         USE_NGTCP2 OR USE_QUICHE OR USE_MSH3 OR USE_OPENSSL_QUIC)
-_add_if("MultiSSL"      CURL_WITH_MULTI_SSL)
-_add_if("HTTPS-proxy"   _ssl_enabled AND (USE_OPENSSL OR USE_GNUTLS
-                        OR USE_SCHANNEL OR USE_RUSTLS OR USE_BEARSSL OR
-                        USE_MBEDTLS OR USE_SECTRANSP OR
-                        (USE_WOLFSSL AND HAVE_WOLFSSL_BIO)))
-_add_if("Unicode"       ENABLE_UNICODE)
-_add_if("threadsafe"    HAVE_ATOMIC OR
-                        (USE_THREADS_POSIX AND HAVE_PTHREAD_H) OR
-                        (WIN32 AND HAVE_WIN32_WINNT GREATER_EQUAL 0x0600))
-_add_if("Debug"         ENABLE_DEBUG)
-_add_if("TrackMemory"   ENABLE_CURLDEBUG)
-_add_if("ECH"           _ssl_enabled AND HAVE_ECH)
-_add_if("PSL"           USE_LIBPSL)
-_add_if("CAcert"        CURL_CA_EMBED_SET)
+set(_items "")
+curl_add_if("SSL"           _ssl_enabled)
+curl_add_if("IPv6"          USE_IPV6)
+curl_add_if("UnixSockets"   USE_UNIX_SOCKETS)
+curl_add_if("libz"          HAVE_LIBZ)
+curl_add_if("brotli"        HAVE_BROTLI)
+curl_add_if("gsasl"         USE_GSASL)
+curl_add_if("zstd"          HAVE_ZSTD)
+curl_add_if("AsynchDNS"     USE_ARES OR USE_THREADS_POSIX OR USE_THREADS_WIN32)
+curl_add_if("asyn-rr"       USE_ARES AND ENABLE_THREADED_RESOLVER)
+curl_add_if("IDN"           (HAVE_LIBIDN2 AND HAVE_IDN2_H) OR
+                            USE_WIN32_IDN OR
+                            USE_APPLE_IDN)
+curl_add_if("Largefile"     (SIZEOF_CURL_OFF_T GREATER 4) AND
+                            ((SIZEOF_OFF_T GREATER 4) OR USE_WIN32_LARGE_FILES))
+curl_add_if("SSPI"          USE_WINDOWS_SSPI)
+curl_add_if("GSS-API"       HAVE_GSSAPI)
+curl_add_if("alt-svc"       NOT CURL_DISABLE_ALTSVC)
+curl_add_if("HSTS"          NOT CURL_DISABLE_HSTS)
+curl_add_if("SPNEGO"        NOT CURL_DISABLE_NEGOTIATE_AUTH AND
+                            (HAVE_GSSAPI OR USE_WINDOWS_SSPI))
+curl_add_if("Kerberos"      NOT CURL_DISABLE_KERBEROS_AUTH AND
+                            (HAVE_GSSAPI OR USE_WINDOWS_SSPI))
+curl_add_if("NTLM"          NOT (CURL_DISABLE_NTLM) AND
+                            (_use_curl_ntlm_core OR USE_WINDOWS_SSPI))
+curl_add_if("TLS-SRP"       USE_TLS_SRP)
+curl_add_if("HTTP2"         USE_NGHTTP2)
+curl_add_if("HTTP3"         USE_NGTCP2 OR USE_QUICHE OR USE_MSH3 OR USE_OPENSSL_QUIC)
+curl_add_if("MultiSSL"      CURL_WITH_MULTI_SSL)
+curl_add_if("HTTPS-proxy"   _ssl_enabled AND (USE_OPENSSL OR USE_GNUTLS
+                            OR USE_SCHANNEL OR USE_RUSTLS OR USE_BEARSSL OR
+                            USE_MBEDTLS OR USE_SECTRANSP OR
+                            (USE_WOLFSSL AND HAVE_WOLFSSL_BIO)))
+curl_add_if("Unicode"       ENABLE_UNICODE)
+curl_add_if("threadsafe"    HAVE_ATOMIC OR
+                            (USE_THREADS_POSIX AND HAVE_PTHREAD_H) OR
+                            (WIN32 AND HAVE_WIN32_WINNT GREATER_EQUAL 0x0600))
+curl_add_if("Debug"         ENABLE_DEBUG)
+curl_add_if("TrackMemory"   ENABLE_CURLDEBUG)
+curl_add_if("ECH"           _ssl_enabled AND HAVE_ECH)
+curl_add_if("HTTPSRR"       _ssl_enabled AND USE_HTTPSRR)
+curl_add_if("PSL"           USE_LIBPSL)
+curl_add_if("CAcert"        CURL_CA_EMBED_SET)
+curl_add_if("SSLS-EXPORT"   _ssl_enabled AND USE_SSLS_EXPORT)
 if(_items)
   if(NOT CMAKE_VERSION VERSION_LESS 3.13)
     list(SORT _items CASE INSENSITIVE)
@@ -2250,20 +2394,21 @@ if(_items)
     list(SORT _items)
   endif()
 endif()
+set(CURL_SUPPORTED_FEATURES_LIST "${_items}")
 string(REPLACE ";" " " SUPPORT_FEATURES "${_items}")
 message(STATUS "Features: ${SUPPORT_FEATURES}")
 
 # Clear list and collect SSL backends
-unset(_items)
-_add_if("Schannel"         _ssl_enabled AND USE_SCHANNEL)
-_add_if("OpenSSL"          _ssl_enabled AND USE_OPENSSL AND OPENSSL_VERSION VERSION_LESS 3.0.0)
-_add_if("OpenSSL v3+"      _ssl_enabled AND USE_OPENSSL AND NOT OPENSSL_VERSION VERSION_LESS 3.0.0)
-_add_if("Secure Transport" _ssl_enabled AND USE_SECTRANSP)
-_add_if("mbedTLS"          _ssl_enabled AND USE_MBEDTLS)
-_add_if("BearSSL"          _ssl_enabled AND USE_BEARSSL)
-_add_if("wolfSSL"          _ssl_enabled AND USE_WOLFSSL)
-_add_if("GnuTLS"           _ssl_enabled AND USE_GNUTLS)
-_add_if("rustls"           _ssl_enabled AND USE_RUSTLS)
+set(_items "")
+curl_add_if("Schannel"         _ssl_enabled AND USE_SCHANNEL)
+curl_add_if("${_openssl}"      _ssl_enabled AND USE_OPENSSL AND OPENSSL_VERSION VERSION_LESS 3.0.0)
+curl_add_if("${_openssl} v3+"  _ssl_enabled AND USE_OPENSSL AND NOT OPENSSL_VERSION VERSION_LESS 3.0.0)
+curl_add_if("Secure Transport" _ssl_enabled AND USE_SECTRANSP)
+curl_add_if("mbedTLS"          _ssl_enabled AND USE_MBEDTLS)
+curl_add_if("BearSSL"          _ssl_enabled AND USE_BEARSSL)
+curl_add_if("wolfSSL"          _ssl_enabled AND USE_WOLFSSL)
+curl_add_if("GnuTLS"           _ssl_enabled AND USE_GNUTLS)
+curl_add_if("rustls"           _ssl_enabled AND USE_RUSTLS)
 
 if(_items)
   if(NOT CMAKE_VERSION VERSION_LESS 3.13)
@@ -2326,7 +2471,7 @@ if(NOT CURL_DISABLE_INSTALL)
   endforeach()
 
   # Avoid getting unnecessary -L options for known system directories.
-  unset(_sys_libdirs)
+  set(_sys_libdirs "")
   foreach(_libdir IN LISTS CMAKE_SYSTEM_PREFIX_PATH)
     if(_libdir MATCHES "/$")
       set(_libdir "${_libdir}lib")
@@ -2351,7 +2496,7 @@ if(NOT CURL_DISABLE_INSTALL)
     endif()
   endforeach()
 
-  unset(_implicit_libs)
+  set(_implicit_libs "")
   if(NOT MINGW AND NOT UNIX)
     set(_implicit_libs ${CMAKE_C_IMPLICIT_LINK_LIBRARIES})
   endif()
@@ -2373,7 +2518,7 @@ if(NOT CURL_DISABLE_INSTALL)
     endif()
     if(_lib MATCHES "^-")  # '-framework <name>'
       list(APPEND _ldflags "${_lib}")
-    elseif(_lib MATCHES ".*/.*")
+    elseif(_lib MATCHES "/")
       # This gets a bit more complex, because we want to specify the
       # directory separately, and only once per directory
       get_filename_component(_libdir ${_lib} DIRECTORY)
@@ -2504,10 +2649,13 @@ if(NOT CURL_DISABLE_INSTALL)
     ${_generated_version_config}")
 
   # Consumed custom variables:
+  #   CURLVERSION
   #   LIB_SELECTED
   #   TARGETS_EXPORT_NAME
-  #   USE_OPENSSL
-  #   HAVE_LIBZ
+  #   USE_OPENSSL OPENSSL_VERSION_MAJOR
+  #   HAVE_LIBZ ZLIB_VERSION_MAJOR
+  #   CURL_SUPPORTED_FEATURES_LIST
+  #   CURL_SUPPORTED_PROTOCOLS_LIST
   configure_package_config_file("CMake/curl-config.cmake.in"
     "${_project_config}"
     INSTALL_DESTINATION ${_install_cmake_dir}
@@ -2521,15 +2669,6 @@ if(NOT CURL_DISABLE_INSTALL)
 
   install(FILES ${_version_config} ${_project_config}
     DESTINATION ${_install_cmake_dir})
-
-  # Workaround for MSVS10 to avoid the Dialog Hell
-  # FIXME: This could be removed with future version of CMake.
-  if(MSVC_VERSION EQUAL 1600)
-    set(_curl_sln_filename "${CMAKE_CURRENT_BINARY_DIR}/CURL.sln")
-    if(EXISTS "${_curl_sln_filename}")
-      file(APPEND "${_curl_sln_filename}" "\n# This should be regenerated!\n")
-    endif()
-  endif()
 
   if(NOT TARGET curl_uninstall)
     configure_file(
