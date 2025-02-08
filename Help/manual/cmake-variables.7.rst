@@ -323,6 +323,7 @@ Variables that Describe the System
 .. toctree::
    :maxdepth: 1
 
+   /variable/AIX
    /variable/ANDROID
    /variable/APPLE
    /variable/BORLAND
@@ -331,6 +332,7 @@ Variables that Describe the System
    /variable/CMAKE_CL_64
    /variable/CMAKE_COMPILER_2005
    /variable/CMAKE_HOST_APPLE
+   /variable/CMAKE_HOST_AIX
    /variable/CMAKE_HOST_BSD
    /variable/CMAKE_HOST_EXECUTABLE_SUFFIX
    /variable/CMAKE_HOST_LINUX
