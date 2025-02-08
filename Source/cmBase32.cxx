@@ -55,15 +55,15 @@ std::string cmBase32Encoder::encodeString(unsigned char const* input,
   size_t remain = static_cast<size_t>(end - input);
   if (remain != 0) {
     // Temporary source buffer filled up with 0s
-    unsigned char extended[blockSize];
+    unsigned char padded[blockSize];
     for (size_t ii = 0; ii != remain; ++ii) {
-      extended[ii] = input[ii];
+      padded[ii] = input[ii];
     }
     for (size_t ii = remain; ii != blockSize; ++ii) {
-      extended[ii] = 0;
+      padded[ii] = 0;
     }
 
-    Base32Encode5(extended, buffer);
+    Base32Encode5(padded, buffer);
     size_t numPad(0);
     switch (remain) {
       case 1:
