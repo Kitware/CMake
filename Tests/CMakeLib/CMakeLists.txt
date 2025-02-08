@@ -33,6 +33,7 @@ set(CMakeLib_TESTS
   testFindPackageCommand.cxx
   testUVHandlePtr.cxx
   testUVJobServerClient.cxx
+  testUVPatches.cxx
   testUVProcessChain.cxx
   testUVRAII.cxx
   testUVStreambuf.cxx
