@@ -17,6 +17,7 @@ unset(MSYS)
 unset(WIN32)
 unset(BSD)
 unset(LINUX)
+unset(AIX)
 
 # The CMAKE_EFFECTIVE_SYSTEM_NAME is used to load compiler and compiler
 # wrapper configuration files. By default it equals to CMAKE_SYSTEM_NAME
