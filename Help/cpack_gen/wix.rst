@@ -3,7 +3,7 @@ CPack WIX Generator
 
 Use the `WiX Toolset`_ to produce a Windows Installer ``.msi`` database.
 
-.. _`WiX Toolset`: https://wixtoolset.org/
+.. _`WiX Toolset`: https://www.firegiant.com/wixtoolset/
 
 .. versionadded:: 3.7
   The :variable:`CPACK_COMPONENT_<compName>_DISABLED` variable is now
@@ -222,7 +222,7 @@ Windows using WiX.
  simply provide the name of the culture.  If you specify more than one
  culture identifier in a comma or semicolon delimited list, the first one
  that is found will be used.  You can find a list of supported languages at:
- https://wixtoolset.org/docs/v3/wixui/wixui_localization/
+ https://docs.firegiant.com/wix3/wixui/wixui_localization/
 
 .. variable:: CPACK_WIX_TEMPLATE
 
@@ -427,7 +427,7 @@ Windows using WiX.
  for using WiX extensions. Each declaration should be in the form name=url, where
  name is the plain namespace without the usual xmlns: prefix and url is an unquoted
  namespace url. A list of commonly known WiX schemata can be found here:
- https://wixtoolset.org/docs/v3/xsd/
+ https://docs.firegiant.com/wix3/xsd/
 
 .. variable:: CPACK_WIX_SKIP_WIX_UI_EXTENSION
 
@@ -486,4 +486,4 @@ Windows using WiX.
      latter installer should be distributed with instructions to
      first manually uninstall any older version.
 
- See https://wixtoolset.org/docs/v3/xsd/wix/package/
+ See https://docs.firegiant.com/wix3/xsd/wix/package/
