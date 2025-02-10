@@ -161,6 +161,15 @@ std::string cmCurlSetCAInfo(::CURL* curl, std::string const& cafile)
     }
 #    undef CMAKE_CAPATH_AIX
 #  endif
+#  ifdef __sun
+#    define CMAKE_CAPATH_SUNOS_CSW "/etc/opt/csw/ssl/certs"
+    if (cmSystemTools::FileIsDirectory(CMAKE_CAPATH_SUNOS_CSW)) {
+      ::CURLcode res =
+        ::curl_easy_setopt(curl, CURLOPT_CAPATH, CMAKE_CAPATH_SUNOS_CSW);
+      check_curl_result(res, "Unable to set TLS/SSL Verify CAPATH: ");
+    }
+#    undef CMAKE_CAPATH_SUNOS_CSW
+#  endif
   }
 #endif
   return e;
