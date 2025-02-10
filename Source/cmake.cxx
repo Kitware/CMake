@@ -2690,13 +2690,13 @@ int cmake::ActualConfigure()
     this->State->SetGlobalProperty(
       "RULE_LAUNCH_COMPILE",
       cmStrCat(
-        launcher, "--command-type compile", common_args,
+        launcher, "--command-type compile", common_args, "--config <CONFIG> ",
         "--output <OBJECT> --source <SOURCE> --language <LANGUAGE> -- "));
     this->State->SetGlobalProperty(
       "RULE_LAUNCH_LINK",
       cmStrCat(
         launcher, "--command-type link", common_args,
-        "--output <TARGET> --target-type <TARGET_TYPE> ",
+        "--output <TARGET> --target-type <TARGET_TYPE> --config <CONFIG> ",
         "--language <LANGUAGE> --target-labels \"<TARGET_LABELS>\" -- "));
     this->State->SetGlobalProperty(
       "RULE_LAUNCH_CUSTOM",

@@ -110,7 +110,7 @@ std::unique_ptr<cmMakefileTargetGenerator> cmMakefileTargetGenerator::New(
   return result;
 }
 
-std::string cmMakefileTargetGenerator::GetConfigName() const
+std::string const& cmMakefileTargetGenerator::GetConfigName() const
 {
   auto const& configNames = this->LocalGenerator->GetConfigNames();
   assert(configNames.size() == 1);
@@ -952,6 +952,7 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
   vars.ObjectFileDir = objectFileDir.c_str();
   vars.Flags = flags.c_str();
   vars.ISPCHeader = ispcHeaderForShell.c_str();
+  vars.Config = this->GetConfigName().c_str();
 
   std::string definesString = cmStrCat("$(", lang, "_DEFINES)");
 
@@ -1700,6 +1701,7 @@ void cmMakefileTargetGenerator::WriteDeviceLinkRule(
   vars.Object = output.c_str();
   vars.Fatbinary = fatbinaryOutput.c_str();
   vars.RegisterFile = registerFile.c_str();
+  vars.Config = this->GetConfigName().c_str();
 
   std::string linkFlags;
   this->GetDeviceLinkFlags(linkFlags, "CUDA");

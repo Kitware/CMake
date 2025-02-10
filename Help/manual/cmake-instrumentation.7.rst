@@ -263,6 +263,10 @@ and contain the following data:
   ``testName``
     The name of the test being executed. Only included when ``role`` is ``test``.
 
+  ``config``
+    The type of build, such as ``Release`` or ``Debug``. Only included when
+    ``role`` is ``compile``, ``link`` or ``test``.
+
   ``dynamicSystemInformation``
     Specifies the dynamic information collected about the host machine
     CMake is being run from. Data is collected for every snippet file
@@ -294,7 +298,8 @@ Example:
     "language" : "C++",
     "outputs" : [ "CMakeFiles/main.dir/main.cxx.o" ],
     "outputSizes" : [ 0 ],
-    "source" : "<src>/main.cxx"
+    "source" : "<src>/main.cxx",
+    "config" : "Debug",
     "dynamicSystemInformation" :
     {
       "afterCPULoadAverage" : 2.3500000000000001,

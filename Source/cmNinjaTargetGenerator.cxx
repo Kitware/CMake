@@ -630,6 +630,7 @@ cmNinjaRule GetScanRule(
   scanVars.DynDepFile = "$DYNDEP_INTERMEDIATE_FILE";
   scanVars.DependencyFile = rule.DepFile.c_str();
   scanVars.DependencyTarget = "$out";
+  scanVars.Config = vars.Config;
 
   // Scanning needs the same preprocessor settings as direct compilation would.
   scanVars.Source = vars.Source;
@@ -695,6 +696,7 @@ void cmNinjaTargetGenerator::WriteCompileRule(std::string const& lang,
   vars.ObjectFileDir = "$OBJECT_FILE_DIR";
   vars.CudaCompileMode = "$CUDA_COMPILE_MODE";
   vars.ISPCHeader = "$ISPC_HEADER_FILE";
+  vars.Config = "$CONFIG";
 
   cmMakefile* mf = this->GetMakefile();
 
@@ -1440,6 +1442,7 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
     this->ComputeFlagsForObject(source, language, config, objectFileName);
   vars["DEFINES"] = this->ComputeDefines(source, language, config);
   vars["INCLUDES"] = this->ComputeIncludes(source, language, config);
+  vars["CONFIG"] = config;
 
   auto compilerLauncher = this->GetCompilerLauncher(language, config);
 
@@ -1793,6 +1796,7 @@ void cmNinjaTargetGenerator::WriteCxxModuleBmiBuildStatement(
     this->ComputeFlagsForObject(source, language, config, bmiFileName);
   vars["DEFINES"] = this->ComputeDefines(source, language, config);
   vars["INCLUDES"] = this->ComputeIncludes(source, language, config);
+  vars["CONFIG"] = config;
 
   if (this->GetMakefile()->GetSafeDefinition(
         cmStrCat("CMAKE_", language, "_DEPFILE_FORMAT")) != "msvc"_s) {
@@ -2035,6 +2039,7 @@ void cmNinjaTargetGenerator::WriteSwiftObjectBuildStatement(
                                     this->GetFlags(language, config));
   vars["DEFINES"] = this->GetDefines(language, config);
   vars["INCLUDES"] = this->GetIncludes(language, config);
+  vars["CONFIG"] = config;
 
   // target-level object filename
   std::string const targetObjectFilename = this->ConvertToNinjaPath(cmStrCat(

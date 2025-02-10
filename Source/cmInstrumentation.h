@@ -32,7 +32,8 @@ public:
   int InstrumentTest(std::string const& name, std::string const& command,
                      std::vector<std::string> const& args, int64_t result,
                      std::chrono::steady_clock::time_point steadyStart,
-                     std::chrono::system_clock::time_point systemStart);
+                     std::chrono::system_clock::time_point systemStart,
+                     std::string config);
   void GetPreTestStats();
   void LoadQueries();
   bool HasQuery() const;

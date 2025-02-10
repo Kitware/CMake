@@ -283,6 +283,12 @@ std::string cmRulePlaceholderExpander::ExpandVariable(
     }
     return "";
   }
+  if (variable == "CONFIG") {
+    if (this->ReplaceValues->Config) {
+      return this->ReplaceValues->Config;
+    }
+    return "";
+  }
 
   auto compIt = this->Compilers.find(variable);
 
