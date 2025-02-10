@@ -1030,6 +1030,10 @@ if(WIN32 AND NOT CYGWIN)
   list(APPEND _tools cmcldeps)
 endif()
 
+if(CMAKE_SYSTEM_NAME STREQUAL "SunOS" AND CMAKE_SYSTEM_VERSION STREQUAL "5.10" AND CMAKE_SYSTEM_PROCESSOR STREQUAL "i386")
+  set_property(SOURCE cmSystemTools.cxx APPEND PROPERTY COMPILE_DEFINITIONS CMAKE_NO_MKDTEMP)
+endif()
+
 # Some atomic instructions are implemented using libatomic on some platforms.
 if(CMake_HAVE_CXX_ATOMIC_LIB)
   target_link_libraries(CMakeLib PUBLIC atomic)

@@ -96,11 +96,34 @@ static bool testStrVersCmp()
   return true;
 }
 
+static bool testMakeTempDirectory()
+{
+  std::cout << "testMakeTempDirectory()\n";
+
+  static std::string const kTemplate = "testMakeTempDirectory-XXXXXX";
+  std::string tempDir = kTemplate;
+  cmsys::Status status = cmSystemTools::MakeTempDirectory(tempDir);
+  if (!status) {
+    std::cout << "cmSystemTools::MakeTempDirectory failed on \"" << tempDir
+              << "\": " << status.GetString() << '\n';
+    return false;
+  }
+  if (!cmSystemTools::FileIsDirectory(tempDir)) {
+    std::cout << "cmSystemTools::MakeTempDirectory did not create \""
+              << tempDir << '\n';
+    return false;
+  }
+  cmSystemTools::RemoveADirectory(tempDir);
+  ASSERT_TRUE(tempDir != kTemplate);
+  return true;
+}
+
 int testSystemTools(int /*unused*/, char* /*unused*/[])
 {
   return runTests({
     testUpperCase,
     testVersionCompare,
     testStrVersCmp,
+    testMakeTempDirectory,
   });
 }
