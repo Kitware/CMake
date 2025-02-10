@@ -141,6 +141,14 @@
 #  include <sys/utsname.h>
 #endif
 
+#if defined(CMAKE_BOOTSTRAP) && defined(__sun) && defined(__i386)
+#  define CMAKE_NO_MKDTEMP
+#endif
+
+#ifdef CMAKE_NO_MKDTEMP
+#  include <dlfcn.h>
+#endif
+
 #if defined(_MSC_VER) && _MSC_VER >= 1800
 #  define CM_WINDOWS_DEPRECATED_GetVersionEx
 #endif
@@ -1369,6 +1377,29 @@ inline int Mkdir(char const* dir, mode_t const* mode)
 #endif
 }
 
+#ifdef CMAKE_NO_MKDTEMP
+namespace {
+char* cm_mkdtemp_fallback(char* template_)
+{
+  if (mktemp(template_) == nullptr || mkdir(template_, 0700) != 0) {
+    return nullptr;
+  }
+  return template_;
+}
+using cm_mkdtemp_t = char* (*)(char*);
+cm_mkdtemp_t const cm_mkdtemp = []() -> cm_mkdtemp_t {
+  cm_mkdtemp_t f = (cm_mkdtemp_t)dlsym(RTLD_DEFAULT, "mkdtemp");
+  dlerror(); // Ignore/cleanup dlsym errors.
+  if (!f) {
+    f = cm_mkdtemp_fallback;
+  }
+  return f;
+}();
+}
+#else
+#  define cm_mkdtemp mkdtemp
+#endif
+
 cmsys::Status cmSystemTools::MakeTempDirectory(std::string& path,
                                                mode_t const* mode)
 {
@@ -1422,7 +1453,7 @@ cmsys::Status cmSystemTools::MakeTempDirectory(char* path, mode_t const* mode)
   }
   return cmsys::Status::POSIX(EAGAIN);
 #else
-  if (mkdtemp(path)) {
+  if (cm_mkdtemp(path)) {
     if (mode) {
       chmod(path, *mode);
     }
