@@ -243,7 +243,7 @@ and contain the following data:
     always ``1``.
 
   ``command``
-    The full command executed.
+    The full command executed. Excluded when ``role`` is ``build``.
 
   ``result``
     The exit-value of the command, an integer.
@@ -255,6 +255,7 @@ and contain the following data:
     * ``link``
     * ``custom``
     * ``cmakeBuild``
+    * ``build``
     * ``install``
     * ``ctest``
     * ``test``

@@ -365,7 +365,9 @@ int cmInstrumentation::InstrumentCommand(
   Json::Value commandInfo(Json::objectValue);
   std::string command_str = GetCommandStr(command);
 
-  root["command"] = command_str;
+  if (!command_str.empty()) {
+    root["command"] = command_str;
+  }
   root["version"] = 1;
 
   // Pre-Command
@@ -533,8 +535,15 @@ int cmInstrumentation::SpawnBuildDaemon()
  */
 int cmInstrumentation::CollectTimingAfterBuild(int ppid)
 {
-  while (0 == uv_kill(ppid, 0)) {
-    cmSystemTools::Delay(100);
+  std::function<int()> waitForBuild = [ppid]() -> int {
+    while (0 == uv_kill(ppid, 0)) {
+      cmSystemTools::Delay(100);
+    };
+    return 0;
   };
-  return this->CollectTimingData(cmInstrumentationQuery::Hook::PostBuild);
+  int ret = this->InstrumentCommand(
+    "build", {}, [waitForBuild]() { return waitForBuild(); }, cm::nullopt,
+    cm::nullopt, false);
+  this->CollectTimingData(cmInstrumentationQuery::Hook::PostBuild);
+  return ret;
 }
