@@ -143,7 +143,7 @@ cmLocalUnixMakefileGenerator3::cmLocalUnixMakefileGenerator3(
 
 cmLocalUnixMakefileGenerator3::~cmLocalUnixMakefileGenerator3() = default;
 
-std::string cmLocalUnixMakefileGenerator3::GetConfigName() const
+std::string const& cmLocalUnixMakefileGenerator3::GetConfigName() const
 {
   auto const& configNames = this->GetConfigNames();
   assert(configNames.size() == 1);

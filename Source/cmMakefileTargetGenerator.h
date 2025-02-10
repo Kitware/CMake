@@ -56,7 +56,7 @@ public:
 
   cmGeneratorTarget* GetGeneratorTarget() { return this->GeneratorTarget; }
 
-  std::string GetConfigName() const;
+  std::string const& GetConfigName() const;
 
 protected:
   void GetDeviceLinkFlags(std::string& linkFlags,

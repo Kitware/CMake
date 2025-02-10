@@ -52,7 +52,10 @@ function(instrument test)
     list(APPEND ARGS_CONFIGURE_ARG "-Wno-dev")
   endif()
   set(RunCMake_TEST_SOURCE_DIR ${RunCMake_SOURCE_DIR}/project)
-  run_cmake_with_options(${test} ${ARGS_CONFIGURE_ARG})
+  if(NOT RunCMake_GENERATOR_IS_MULTI_CONFIG)
+    set(maybe_CMAKE_BUILD_TYPE -DCMAKE_BUILD_TYPE=Debug)
+  endif()
+  run_cmake_with_options(${test} ${ARGS_CONFIGURE_ARG} ${maybe_CMAKE_BUILD_TYPE})
 
   # Follow-up Commands
   if (ARGS_BUILD)

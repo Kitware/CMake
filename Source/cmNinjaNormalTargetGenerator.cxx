@@ -342,6 +342,7 @@ void cmNinjaNormalTargetGenerator::WriteNvidiaDeviceLinkRule(
     vars.Flags = "$FLAGS";
     vars.LinkFlags = "$LINK_FLAGS";
     vars.Manifests = "$MANIFESTS";
+    vars.Config = "$CONFIG";
 
     vars.LanguageCompileFlags = "$LANGUAGE_COMPILE_FLAGS";
 
@@ -416,6 +417,7 @@ void cmNinjaNormalTargetGenerator::WriteDeviceLinkRules(
 
   std::string flags = this->GetFlags("CUDA", config);
   vars.Flags = flags.c_str();
+  vars.Config = "$CONFIG";
 
   std::string compileCmd = this->GetMakefile()->GetRequiredDefinition(
     "CMAKE_CUDA_DEVICE_LINK_COMPILE");
@@ -557,6 +559,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkRule(bool useResponseFile,
     vars.Flags = "$FLAGS";
     vars.LinkFlags = "$LINK_FLAGS";
     vars.Manifests = "$MANIFESTS";
+    vars.Config = "$CONFIG";
 
     std::string langFlags;
     if (targetType != cmStateEnums::EXECUTABLE) {
@@ -1313,6 +1316,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement(
   vars["AIX_EXPORTS"] = this->GetAIXExports(config);
 
   vars["LINK_PATH"] = frameworkPath + linkPath;
+  vars["CONFIG"] = config;
 
   // Compute architecture specific link flags.  Yes, these go into a different
   // variable for executables, probably due to a mistake made when duplicating

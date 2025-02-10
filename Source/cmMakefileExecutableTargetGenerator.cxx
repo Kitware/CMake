@@ -554,6 +554,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
       cmOutputConverter::SHELL, useWatcomQuote);
     vars.Target = target.c_str();
     vars.TargetPDB = targetOutPathPDB.c_str();
+    vars.Config = this->GetConfigName().c_str();
 
     // Setup the target version.
     std::string targetVersionMajor;
