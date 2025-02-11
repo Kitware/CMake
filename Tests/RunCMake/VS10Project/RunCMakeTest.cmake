@@ -52,9 +52,10 @@ run_cmake(VsToolOverride)
 
 run_cmake(VsWinRTByDefault)
 
-set(RunCMake_GENERATOR_TOOLSET "VCTargetsPath=$(VCTargetsPath)")
-run_cmake(VsVCTargetsPath)
-unset(RunCMake_GENERATOR_TOOLSET)
+block()
+  set(RunCMake_GENERATOR_TOOLSET "VCTargetsPath=$(VCTargetsPath)")
+  run_cmake(VsVCTargetsPath)
+endblock()
 
 if(CMAKE_C_COMPILER_ID STREQUAL "MSVC" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 19.05)
   run_cmake(VsJustMyCode)
@@ -65,9 +66,8 @@ if(CMAKE_C_COMPILER_ID STREQUAL "MSVC" AND CMAKE_C_COMPILER_VERSION VERSION_GREA
 endif()
 
 # Visual Studio 2017 has toolset version 141
-string(REPLACE "v" "" generator_toolset "${RunCMake_GENERATOR_TOOLSET}")
 if (RunCMake_GENERATOR MATCHES "Visual Studio 1[0-4] 201[0-5]" OR
-   (RunCMake_GENERATOR_TOOLSET AND generator_toolset VERSION_LESS "141"))
+   (RunCMake_GENERATOR_TOOLSET MATCHES "^v([0-9]+)" AND CMAKE_MATCH_1 LESS 141))
   run_cmake(UnityBuildPre2017)
 else()
   run_cmake(UnityBuildNative)
