@@ -223,19 +223,6 @@ for linking.  If policy :policy:`CMP0022` is not ``NEW``, then this mode
 also appends libraries to the :prop_tgt:`LINK_INTERFACE_LIBRARIES` and its
 per-configuration equivalent.
 
-Libraries specified as ``debug`` are wrapped in a generator expression to
-correspond to debug builds.  If policy :policy:`CMP0022` is
-not ``NEW``, the libraries are also appended to the
-:prop_tgt:`LINK_INTERFACE_LIBRARIES_DEBUG <LINK_INTERFACE_LIBRARIES_<CONFIG>>`
-property (or to the properties corresponding to configurations listed in
-the :prop_gbl:`DEBUG_CONFIGURATIONS` global property if it is set).
-Libraries specified as ``optimized`` are appended to the
-:prop_tgt:`INTERFACE_LINK_LIBRARIES` property.  If policy :policy:`CMP0022`
-is not ``NEW``, they are also appended to the
-:prop_tgt:`LINK_INTERFACE_LIBRARIES` property.  Libraries specified as
-``general`` (or without any keyword) are treated as if specified for both
-``debug`` and ``optimized``.
-
 .. _`Linking Object Libraries`:
 
 Linking Object Libraries
