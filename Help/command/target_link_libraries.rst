@@ -179,8 +179,10 @@ When this target is linked into another target then the libraries
 linked to this target will appear on the link line for the other
 target too.  This transitive "link interface" is stored in the
 :prop_tgt:`INTERFACE_LINK_LIBRARIES` target property and may be overridden
-by setting the property directly.  When :policy:`CMP0022` is not set to
-``NEW``, transitive linking is built in but may be overridden by the
+by setting the property directly.
+
+In CMake versions prior to 4.0, if :policy:`CMP0022` is not set to ``NEW``,
+transitive linking is built in but may be overridden by the
 :prop_tgt:`LINK_INTERFACE_LIBRARIES` property.  Calls to other signatures
 of this command may set the property making any libraries linked
 exclusively by this signature private.
@@ -201,11 +203,13 @@ The ``LINK_PUBLIC`` and ``LINK_PRIVATE`` modes can be used to specify both
 the link dependencies and the link interface in one command.
 
 Libraries and targets following ``LINK_PUBLIC`` are linked to, and are
-made part of the :prop_tgt:`INTERFACE_LINK_LIBRARIES`.  If policy
-:policy:`CMP0022` is not ``NEW``, they are also made part of the
-:prop_tgt:`LINK_INTERFACE_LIBRARIES`.  Libraries and targets following
-``LINK_PRIVATE`` are linked to, but are not made part of the
-:prop_tgt:`INTERFACE_LINK_LIBRARIES` (or :prop_tgt:`LINK_INTERFACE_LIBRARIES`).
+made part of the :prop_tgt:`INTERFACE_LINK_LIBRARIES`.
+
+In CMake versions prior to 4.0, if policy :policy:`CMP0022` is not ``NEW``,
+they are also made part of the :prop_tgt:`LINK_INTERFACE_LIBRARIES`.
+Libraries and targets following ``LINK_PRIVATE`` are linked to, but are
+not made part of the :prop_tgt:`INTERFACE_LINK_LIBRARIES`
+(or :prop_tgt:`LINK_INTERFACE_LIBRARIES`).
 
 Libraries for Dependents Only (Legacy)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -219,9 +223,11 @@ instead.
 
 The ``LINK_INTERFACE_LIBRARIES`` mode appends the libraries to the
 :prop_tgt:`INTERFACE_LINK_LIBRARIES` target property instead of using them
-for linking.  If policy :policy:`CMP0022` is not ``NEW``, then this mode
-also appends libraries to the :prop_tgt:`LINK_INTERFACE_LIBRARIES` and its
-per-configuration equivalent.
+for linking.
+
+In CMake versions prior to 4.0, if policy :policy:`CMP0022` is not ``NEW``,
+then this mode also appends libraries to the
+:prop_tgt:`LINK_INTERFACE_LIBRARIES` and its per-configuration equivalent.
 
 .. _`Linking Object Libraries`:
 
