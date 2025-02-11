@@ -356,14 +356,16 @@ struct entry_to_remove
   {
     if (this->valid()) {
       long to_skip = this->count;
-      long index_to_remove = 0;
+      size_t index_to_remove = 0;
       for (auto const& path : entries) {
         if (path == this->value && --to_skip == 0) {
           break;
         }
         ++index_to_remove;
       }
-      entries.erase(entries.begin() + index_to_remove);
+      if (index_to_remove < entries.size() && to_skip == 0) {
+        entries.erase(entries.begin() + index_to_remove);
+      }
     }
   }
 
