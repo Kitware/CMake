@@ -166,7 +166,7 @@ Options:
 
    Use the UTF-8 codepage.
 
-   This is the default.  See policy :policy:`CMP0176`.
+   This is the default since CMake 3.31.  See policy :policy:`CMP0176`.
 
  ``UTF8``
    Use the UTF-8 codepage.  Use of this name is discouraged in favor
