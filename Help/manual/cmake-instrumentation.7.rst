@@ -251,14 +251,17 @@ and contain the following data:
   ``role``
     The type of command executed, which will be one of the following values:
 
-    * ``compile``
-    * ``link``
-    * ``custom``
-    * ``cmakeBuild``
-    * ``build``
-    * ``install``
-    * ``ctest``
-    * ``test``
+    * ``configure``: the CMake configure step
+    * ``generate``: the CMake generate step
+    * ``compile``: an individual compile step invoked during the build
+    * ``link``: an individual link step invoked during the build
+    * ``custom``: an individual custom command invoked during the build
+    * ``build``: a complete ``make`` or ``ninja`` invocation. Only generated if ``preBuild`` or ``postBuild`` hooks are enabled.
+    * ``cmakeBuild``: a complete ``cmake --build`` invocation
+    * ``cmakeInstall``: a complete ``cmake --install`` invocation
+    * ``install``: an individual ``cmake -P cmake_install.cmake`` invocation
+    * ``ctest``: a complete ``ctest`` invocation
+    * ``test``: a single test executed by CTest
 
   ``target``
     The CMake target associated with the command. Only included when ``role`` is
