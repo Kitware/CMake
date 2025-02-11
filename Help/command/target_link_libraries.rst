@@ -191,6 +191,9 @@ exclusively by this signature private.
 Libraries for a Target and/or its Dependents (Legacy)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+This signature is for compatibility only.  Prefer the ``PUBLIC`` or
+``PRIVATE`` keywords instead.
+
 .. code-block:: cmake
 
   target_link_libraries(<target>
@@ -199,9 +202,6 @@ Libraries for a Target and/or its Dependents (Legacy)
 
 The ``LINK_PUBLIC`` and ``LINK_PRIVATE`` modes can be used to specify both
 the link dependencies and the link interface in one command.
-
-This signature is for compatibility only.  Prefer the ``PUBLIC`` or
-``PRIVATE`` keywords instead.
 
 Libraries and targets following ``LINK_PUBLIC`` are linked to, and are
 made part of the :prop_tgt:`INTERFACE_LINK_LIBRARIES`.  If policy
@@ -213,6 +213,9 @@ made part of the :prop_tgt:`INTERFACE_LINK_LIBRARIES`.  If policy
 Libraries for Dependents Only (Legacy)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+This signature is for compatibility only.  Prefer the ``INTERFACE`` mode
+instead.
+
 .. code-block:: cmake
 
   target_link_libraries(<target> LINK_INTERFACE_LIBRARIES <item>...)
@@ -222,9 +225,6 @@ The ``LINK_INTERFACE_LIBRARIES`` mode appends the libraries to the
 for linking.  If policy :policy:`CMP0022` is not ``NEW``, then this mode
 also appends libraries to the :prop_tgt:`LINK_INTERFACE_LIBRARIES` and its
 per-configuration equivalent.
-
-This signature is for compatibility only.  Prefer the ``INTERFACE`` mode
-instead.
 
 Libraries specified as ``debug`` are wrapped in a generator expression to
 correspond to debug builds.  If policy :policy:`CMP0022` is
