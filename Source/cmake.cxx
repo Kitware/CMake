@@ -2935,8 +2935,12 @@ int cmake::Run(std::vector<std::string> const& args, bool noconfigure)
     return -1;
   }
 #ifndef CMAKE_BOOTSTRAP
-  this->PrintPresetVariables();
-  this->PrintPresetEnvironment();
+  if (this->GetLogLevel() == Message::LogLevel::LOG_VERBOSE ||
+      this->GetLogLevel() == Message::LogLevel::LOG_DEBUG ||
+      this->GetLogLevel() == Message::LogLevel::LOG_TRACE) {
+    this->PrintPresetVariables();
+    this->PrintPresetEnvironment();
+  }
 #endif
 
   // In script mode we terminate after running the script.
