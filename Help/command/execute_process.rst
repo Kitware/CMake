@@ -54,8 +54,8 @@ Options:
 
  * .. versionchanged:: 4.0
      On Windows platforms, if the command runs a ``.bat`` or ``.cmd`` script,
-     it is automatically executed through the command interpreter, ``cmd /c``.
-     However, paths with spaces may fail if a "short path" is not available.
+     it is automatically executed through the command interpreter with
+     ``cmd /c call ...``.
 
  No intermediate shell is used, so shell operators such as ``>``
  are treated as normal arguments.
