@@ -12,6 +12,11 @@ cmake-instrumentation(7)
 Introduction
 ============
 
+.. note::
+
+   This feature is only available when experimental support for instrumentation
+   has been enabled by the ``CMAKE_EXPERIMENTAL_INSTRUMENTATION`` gate.
+
 The CMake Instrumentation API allows for the collection of timing data, target
 information and system diagnostic information during the configure, generate,
 build, test and install steps for a CMake project.
