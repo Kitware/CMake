@@ -76,6 +76,11 @@ function(run_cmake_presets name)
     set(_preset)
   endif()
 
+  set(_log_level)
+  if(CMakePresets_LOG_LEVEL)
+    set(_log_level "--log-level=${CMakePresets_LOG_LEVEL}")
+  endif()
+
   set(_make_program)
   if(RunCMake_MAKE_PROGRAM)
     set(_make_program -DCMAKE_MAKE_PROGRAM=${RunCMake_MAKE_PROGRAM})
@@ -88,6 +93,7 @@ function(run_cmake_presets name)
     ${_make_program}
     ${_unused_cli}
     ${_preset}
+    ${_log_level}
     ${ARGN}
     )
   run_cmake(${name})
@@ -192,6 +198,7 @@ unset(ENV{TEST_D_ENV_REF})
 set(ENV{TEST_ENV_OVERRIDE} "This environment variable will be overridden")
 set(ENV{TEST_PENV} "Process environment variable")
 set(ENV{TEST_ENV_REF_PENV} "suffix")
+set(CMakePresets_LOG_LEVEL "verbose")
 run_cmake_presets(Good "-DTEST_OVERRIDE_1=Overridden value" "-DTEST_OVERRIDE_2:STRING=Overridden value" -C "${RunCMake_SOURCE_DIR}/CacheOverride.cmake" "-UTEST_UNDEF")
 unset(ENV{TEST_ENV_OVERRIDE})
 unset(ENV{TEST_PENV})
@@ -209,6 +216,7 @@ if(WIN32)
 endif()
 set(CMakePresets_FILE "${RunCMake_SOURCE_DIR}/GoodBOM.json.in")
 run_cmake_presets(GoodBOM)
+unset(CMakePresets_LOG_LEVEL)
 set(CMakePresets_FILE "${RunCMake_SOURCE_DIR}/CMakePresets.json.in")
 file(REMOVE_RECURSE ${RunCMake_BINARY_DIR}/GoodBinaryCmdLine-build)
 run_cmake_presets(GoodBinaryCmdLine -B ${RunCMake_BINARY_DIR}/GoodBinaryCmdLine-build)
