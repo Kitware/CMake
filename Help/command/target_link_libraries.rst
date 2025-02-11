@@ -120,9 +120,6 @@ Each ``<item>`` may be:
   Additionally, a generator expression may be used as a fragment of
   any of the above items, e.g. ``foo$<1:_d>``.
 
-  Note that generator expressions will not be used in OLD handling of
-  policy :policy:`CMP0003` or policy :policy:`CMP0004`.
-
 * A ``debug``, ``optimized``, or ``general`` keyword immediately followed
   by another ``<item>``.  The item following such a keyword will be used
   only for the corresponding build configuration.  The ``debug`` keyword
