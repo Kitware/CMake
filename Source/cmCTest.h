@@ -21,6 +21,7 @@
 
 class cmake;
 class cmGeneratedFileStream;
+class cmInstrumentation;
 class cmMakefile;
 class cmValue;
 class cmXMLWriter;
@@ -391,6 +392,11 @@ public:
   bool StartLogFile(char const* name, int submitIndex,
                     cmGeneratedFileStream& xofs);
 
+  void ConvertInstrumentationSnippetsToXML(cmXMLWriter& xml,
+                                           std::string const& subdir);
+  bool ConvertInstrumentationJSONFileToXML(std::string const& fpath,
+                                           cmXMLWriter& xml);
+
   void AddSiteProperties(cmXMLWriter& xml, cmake* cm);
 
   bool GetInteractiveDebugMode() const;
@@ -432,6 +438,9 @@ public:
 
   cmCTestTestOptions const& GetTestOptions() const;
   std::vector<std::string> GetCommandLineHttpHeaders() const;
+
+  cmInstrumentation& GetInstrumentation();
+  bool GetUseVerboseInstrumentation() const;
 
 private:
   int GenerateNotesFile(cmake* cm, std::string const& files);

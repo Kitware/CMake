@@ -19,8 +19,9 @@ std::vector<std::string> const cmInstrumentationQuery::QueryString{
   "staticSystemInformation", "dynamicSystemInformation"
 };
 std::vector<std::string> const cmInstrumentationQuery::HookString{
-  "postGenerate",   "preBuild", "postBuild",   "preCMakeBuild",
-  "postCMakeBuild", "postTest", "postInstall", "manual"
+  "postGenerate",  "preBuild",        "postBuild",
+  "preCMakeBuild", "postCMakeBuild",  "postTest",
+  "postInstall",   "prepareForCDash", "manual"
 };
 
 namespace ErrorMessages {

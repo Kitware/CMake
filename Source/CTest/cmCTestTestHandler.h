@@ -192,6 +192,7 @@ public:
     std::string CustomCompletionStatus;
     std::string Output;
     std::string TestMeasurementsOutput;
+    std::string InstrumentationFile;
     int TestCount = 0;
     cmCTestTestProperties* Properties = nullptr;
   };
@@ -250,6 +251,7 @@ protected:
                              cmCTestTestResult const& result);
   void WriteTestResultFooter(cmXMLWriter& xml,
                              cmCTestTestResult const& result);
+
   // Write attached test files into the xml
   void AttachFiles(cmXMLWriter& xml, cmCTestTestResult& result);
   void AttachFile(cmXMLWriter& xml, std::string const& file,

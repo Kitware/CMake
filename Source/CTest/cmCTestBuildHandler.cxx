@@ -11,6 +11,7 @@
 #include <cm/string_view>
 #include <cmext/algorithm>
 
+#include <cm3p/json/value.h>
 #include <cm3p/uv.h>
 
 #include "cmsys/Directory.hxx"
@@ -21,6 +22,9 @@
 #include "cmDuration.h"
 #include "cmFileTimeCache.h"
 #include "cmGeneratedFileStream.h"
+#include "cmInstrumentation.h"
+#include "cmInstrumentationQuery.h"
+#include "cmJSONState.h"
 #include "cmList.h"
 #include "cmMakefile.h"
 #include "cmProcessOutput.h"
@@ -429,6 +433,11 @@ int cmCTestBuildHandler::ProcessHandler()
   } else {
     this->GenerateXMLLogScraped(xml);
   }
+
+  this->CTest->GetInstrumentation().CollectTimingData(
+    cmInstrumentationQuery::Hook::PrepareForCDash);
+  this->GenerateInstrumentationXML(xml);
+
   this->GenerateXMLFooter(xml, elapsed_build_time);
 
   if (!res || retVal || this->TotalErrors > 0) {
@@ -593,6 +602,88 @@ void cmCTestBuildHandler::GenerateXMLLogScraped(cmXMLWriter& xml)
       xml.EndElement(); // "Error" / "Warning"
     }
   }
+}
+
+void cmCTestBuildHandler::GenerateInstrumentationXML(cmXMLWriter& xml)
+{
+  // Record instrumentation data on a per-target basis.
+  cmsys::Directory targets_dir;
+  std::string targets_snippet_dir = cmStrCat(
+    this->CTest->GetInstrumentation().GetCDashDir(), "/build/targets");
+  if (targets_dir.Load(targets_snippet_dir) &&
+      targets_dir.GetNumberOfFiles() > 0) {
+    xml.StartElement("Targets");
+    for (unsigned int i = 0; i < targets_dir.GetNumberOfFiles(); i++) {
+      if (!targets_dir.FileIsDirectory(i)) {
+        continue;
+      }
+      std::string target_name = targets_dir.GetFile(i);
+      if (target_name == "." || target_name == "..") {
+        continue;
+      }
+      std::string target_type = "UNKNOWN";
+
+      xml.StartElement("Target");
+      xml.Attribute("name", target_name);
+
+      // Check if we have a link snippet for this target.
+      cmsys::Directory target_dir;
+      if (!target_dir.Load(targets_dir.GetFilePath(i))) {
+        cmSystemTools::Error(
+          cmStrCat("Error loading directory ", targets_dir.GetFilePath(i)));
+      }
+      Json::Value link_item;
+      for (unsigned int j = 0; j < target_dir.GetNumberOfFiles(); j++) {
+        std::string fname = target_dir.GetFile(j);
+        if (fname.rfind("link-", 0) == 0) {
+          std::string fpath = target_dir.GetFilePath(j);
+          cmJSONState parseState = cmJSONState(fpath, &link_item);
+          if (!parseState.errors.empty()) {
+            cmSystemTools::Error(parseState.GetErrorMessage(true));
+            break;
+          }
+
+          if (!link_item.isObject()) {
+            std::string error_msg =
+              cmStrCat("Expected snippet ", fpath, " to contain an object");
+            cmSystemTools::Error(error_msg);
+            break;
+          }
+          break;
+        }
+      }
+
+      // If so, parse targetType and targetLabels (optional) from it.
+      if (link_item.isMember("targetType")) {
+        target_type = link_item["targetType"].asString();
+      }
+
+      xml.Attribute("type", target_type);
+
+      if (link_item.isMember("targetLabels") &&
+          !link_item["targetLabels"].empty()) {
+        xml.StartElement("Labels");
+        for (auto const& json_label_item : link_item["targetLabels"]) {
+          xml.Element("Label", json_label_item.asString());
+        }
+        xml.EndElement(); // Labels
+      }
+
+      // Write instrumendation data for this target.
+      std::string target_subdir = cmStrCat("build/targets/", target_name);
+      this->CTest->ConvertInstrumentationSnippetsToXML(xml, target_subdir);
+      std::string target_dir_fullpath = cmStrCat(
+        this->CTest->GetInstrumentation().GetCDashDir(), '/', target_subdir);
+      if (cmSystemTools::FileIsDirectory(target_dir_fullpath)) {
+        cmSystemTools::RemoveADirectory(target_dir_fullpath);
+      }
+      xml.EndElement(); // Target
+    }
+    xml.EndElement(); // Targets
+  }
+
+  // Also record instrumentation data for custom commands (no target).
+  this->CTest->ConvertInstrumentationSnippetsToXML(xml, "build/commands");
 }
 
 void cmCTestBuildHandler::GenerateXMLFooter(cmXMLWriter& xml,

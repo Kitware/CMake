@@ -94,6 +94,37 @@ Instrumentation can be configured at the user-level by placing query files in
 the :envvar:`CMAKE_CONFIG_DIR` under
 ``<config_dir>/instrumentation/<version>/query/``.
 
+Enabling Instrumentation for CDash Submissions
+----------------------------------------------
+
+You can enable instrumentation when using CTest in :ref:`Dashboard Client`
+mode by setting the :envvar:`CTEST_USE_INSTRUMENTATION` environment variable
+to the current UUID for the ``CMAKE_EXPERIMENTAL_INSTRUMENTATION`` feature.
+Doing so automatically enables the ``dynamicSystemInformation`` query.
+
+The following table shows how each type of instrumented command gets mapped
+to a corresponding type of CTest XML file.
+
+=================================================== ==================
+:ref:`Snippet Role <cmake-instrumentation Data v1>` CTest XML File
+=================================================== ==================
+``configure``                                       ``Configure.xml``
+``generate``                                        ``Configure.xml``
+``compile``                                         ``Build.xml``
+``link``                                            ``Build.xml``
+``custom``                                          ``Build.xml``
+``build``                                           unused!
+``cmakeBuild``                                      ``Build.xml``
+``cmakeInstall``                                    ``Build.xml``
+``install``                                         ``Build.xml``
+``ctest``                                           ``Build.xml``
+``test``                                            ``Test.xml``
+=================================================== ==================
+
+By default the command line reported to CDash is truncated at the first space.
+You can instead choose to report the full command line (including arguments)
+by setting :envvar:`CTEST_USE_VERBOSE_INSTRUMENTATION` to 1.
+
 .. _`cmake-instrumentation API v1`:
 
 API v1
@@ -122,6 +153,10 @@ subdirectories:
   Holds instrumentation data collected on the project. CMake owns all data
   files, they should never be removed by other processes. Data collected here
   remains until after `Indexing`_ occurs and all `Callbacks`_ are executed.
+
+``cdash/``
+  Holds temporary files used internally to generate XML content to be submitted
+  to CDash.
 
 .. _`cmake-instrumentation v1 Query Files`:
 
