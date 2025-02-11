@@ -23,47 +23,73 @@ All interactions with the CMake instrumentation API must specify both an API
 version and a Data version. At this time, there is only one version for each of
 these: the `API v1`_ and `Data v1`_.
 
-When instrumentation is enabled, CMake sets the :prop_gbl:`RULE_LAUNCH_COMPILE`,
-:prop_gbl:`RULE_LAUNCH_LINK` and :prop_gbl:`RULE_LAUNCH_CUSTOM` global properties
-to use the ``ctest --instrument`` launcher. Whenever a command is executed with
+Data Collection
+---------------
+
+Whenever a command is executed with
 instrumentation enabled, a `v1 Snippet File`_ is created in the project build
-tree. If the project has been configured with :module:`CTestUseLaunchers`,
+tree with data specific to that command. These files remain until after
+`Indexing`_ occurs.
+
+CMake sets the :prop_gbl:`RULE_LAUNCH_COMPILE`, :prop_gbl:`RULE_LAUNCH_LINK` and
+:prop_gbl:`RULE_LAUNCH_CUSTOM` global properties to use the
+``ctest --instrument`` launcher in order to capture details of each compile, link
+and custom command respectively. If the project has been configured with :module:`CTestUseLaunchers`,
 ``ctest --instrument`` will also include the behavior usually performed by
 ``ctest --launch``.
 
-Hooks are specific intervals, configured as part of the `v1 Query Files`_,
-during which snippet data files are coallated. Whenever a hook executes, an
-index file is generated containing a list of snippet files newer than the
-previous indexing, and a sequence of custom callbacks are executed using
-the index file as an argument.
+Indexing
+--------
 
-Indexing and callbacks can also be performed by manually invoking
+Indexing is the process of collating generated instrumentation data. Indexing
+occurs at specific intervals called hooks, such as after every build. These
+hooks are configured as part of the `v1 Query Files`_. Whenever a hook is
+triggered, an index file is generated containing a list of snippet files newer
+than the previous indexing.
+
+Indexing and can also be performed by manually invoking
 ``ctest --collect-instrumentation``.
+
+Callbacks
+---------
+
+As part of the `v1 Query Files`_, users can provide a list of callbacks
+intended to handle data collected by this feature.
+
+Whenever `Indexing`_ occurs, each provided callback is executed, passing the
+path to the generated index file as an argument.
 
 These callbacks, defined either at the user-level or project-level should read
 the instrumentation data and perform any desired handling of it. The index file
 and its listed snippets are automatically deleted by CMake once all callbacks
-have completed.
+have completed. Note that a callback should never move or delete these data
+files manually as they may be needed by other callbacks.
 
-Configuring Instrumentation at the User-Level
+Enabling Instrumentation
+========================
+
+Instrumentation can be enabled either for an individual CMake project, or
+for all CMake projects configured and built by a user. For both cases,
+see the `v1 Query Files`_ for details on configuring this feature.
+
+Enabling Instrumentation at the Project-Level
 ---------------------------------------------
 
-Instrumentation can be configured at the user-level by placing query files in the
-:envvar:`CMAKE_CONFIG_DIR` under
-``<config_dir>/instrumentation/<version>/query/``. This version of CMake
-supports only one version schema, `API v1`_.
-
-Configuring Instrumentation at the Project-Level
-------------------------------------------------
-
-Configuring Instrumentation at the project level can be done by placing query
-files under ``<build>/.cmake/instrumentation/query/`` at the top of a build
-tree.
-
-Additionally, project code can contain instrumentation queries with the
+Project code can contain instrumentation queries with the
 :command:`cmake_instrumentation` command.
 
-.. _`cmake-instrumentation v1`:
+In addition, query files can be placed manually under
+``<build>/.cmake/instrumentation/<version>/query/`` at the top of a build tree.
+This version of CMake supports only one version schema, `API v1`_.
+
+Enabling Instrumentation at the User-Level
+------------------------------------------
+
+Instrumentation can be configured at the user-level by placing query files in
+the :envvar:`CMAKE_CONFIG_DIR` under
+``<config_dir>/instrumentation/<version>/query/``.
+
+.. _`cmake-instrumentation API v1`:
 
 API v1
 ======
@@ -89,7 +115,8 @@ subdirectories:
 
 ``data/``
   Holds instrumentation data collected on the project. CMake owns all data
-  files, they should never be removed by other processes.
+  files, they should never be removed by other processes. Data collected here
+  remains until after `Indexing`_ occurs and all `Callbacks`_ are executed.
 
 .. _`cmake-instrumentation v1 Query Files`:
 
@@ -99,21 +126,22 @@ v1 Query Files
 Any file with the ``.json`` extension under the ``instrumentation/v1/query/``
 directory is recognized as a query for instrumentation data.
 
-These files must contain a JSON object with the following keys which are all
-optional.
+These files must contain a JSON object with the following keys. The ``version``
+key is required, but all other fields are optional.
 
 ``version``
   The Data version of snippet file to generate, an integer. Currently the only
   supported version is ``1``.
 
 ``callbacks``
-  A list of command-line strings for callbacks to handle collected timing
-  data. Whenever these callbacks are executed, the full path to a
-  `v1 Index File`_ is appended to the arguments included in the string.
+  A list of command-line strings for `Callbacks`_ to handle collected
+  instrumentation data. Whenever these callbacks are executed, the full path to
+  a `v1 Index File`_ is appended to the arguments included in the string.
 
 ``hooks``
-  A list of strings specifying when instrumentation data should be collated
-  and user callbacks should be invoked on the data. Elements in this list
+  A list of strings specifying when `Indexing`_ should occur automatically.
+  These are the intervals when instrumentation data should be collated and user
+  `Callbacks`_ should be invoked to handle the data. Elements in this list
   should be one of the following:
 
   * ``postGenerate``
@@ -129,20 +157,20 @@ optional.
   instrumentation. Elements in this list should be one of the following:
 
     ``staticSystemInformation``
-      Enables collection of the static information about the host machine
-      CMake is being run from. This data is collected once at each hook and
-      included in the generated ``index-<has>.json`` file.
+      Enables collection of the static information about the host machine CMake
+      is being run from. This data is collected during `Indexing`_ and is
+      included in the generated `v1 Index File`_.
 
     ``dynamicSystemInformation``
       Enables collection of the dynamic information about the host machine
-      CMake is being run from. Data is collected for every snippet file
-      generated by CMake, with data immediately before and after the command is
-      executed.
+      CMake is being run from. Data is collected for every `v1 Snippet File`_
+      generated by CMake, and includes information from immediately before and
+      after the command is executed.
 
 The ``callbacks`` listed will be invoked during the specified hooks
-*at a minimum*. When there are multiple queries, the ``callbacks``, ``hooks``
-and ``queries`` between them will be merged. Therefore, if any query file
-includes any ``hooks``, every ``callback`` across all query files will be
+*at a minimum*. When there are multiple query files, the ``callbacks``,
+``hooks`` and ``queries`` between them will be merged. Therefore, if any query
+file includes any ``hooks``, every ``callback`` across all query files will be
 executed at every ``hook`` across all query files. Additionally, if any query
 file includes any optional ``queries``, the optional query data will be present
 in all data files.
@@ -179,14 +207,16 @@ each snippet file listed in the index will contain the
 file and all snippet files listed by it will be deleted from the project build
 tree.
 
+.. _`cmake-instrumentation Data v1`:
+
 Data v1
 =======
 
 Data version specifies the contents of the output files generated by the CMake
-instrumentation API. There are two types of data files generated. When using
-the `API v1`_, these files live in ``<build>/.cmake/instrumentation/v1/data/``
-under the project build tree. These are the `v1 Snippet File`_ and
-`v1 Index File`_.
+instrumentation API as part of the `Data Collection`_ and `Indexing`_. There are
+two types of data files generated: the `v1 Snippet File`_ and `v1 Index File`_.
+When using the `API v1`_, these files live in
+``<build>/.cmake/instrumentation/v1/data/`` under the project build tree.
 
 v1 Snippet File
 ---------------
@@ -201,6 +231,9 @@ the command executed. Additionally, snippet files are created for the following:
 * Entire install step (executed with ``cmake --install``)
 * Each ``ctest`` invocation
 * Each individual test executed by ``ctest``.
+
+These files remain in the build tree until after `Indexing`_ occurs and any
+user-specified `Callbacks`_ are executed.
 
 Snippet files have a filename with the syntax ``<role>-<timestamp>-<hash>.json``
 and contain the following data:
@@ -251,7 +284,8 @@ and contain the following data:
 
   ``outputSizes``
     The size(s) in bytes of the ``outputs``, an array. For files which do not
-    exist, the size is 0.
+    exist, the size is 0. Included under the same conditions as the ``outputs``
+    field.
 
   ``source``
     The source file being compiled. Only included when ``role`` is ``compile``.
@@ -271,7 +305,7 @@ and contain the following data:
     Specifies the dynamic information collected about the host machine
     CMake is being run from. Data is collected for every snippet file
     generated by CMake, with data immediately before and after the command is
-    executed.
+    executed. Only included when enabled by the `v1 Query Files`_.
 
     ``beforeHostMemoryUsed``
       The Host Memory Used in KiB at ``timeStart``.
@@ -315,7 +349,8 @@ v1 Index File
 -------------
 
 Index files contain a list of `v1 Snippet File`_. It serves as an entry point
-for navigating the instrumentation data.
+for navigating the instrumentation data. They are generated whenever `Indexing`_
+occurs and deleted after any user-specified `Callbacks`_ are executed.
 
 ``version``
   The Data version of the index file, an integer. Currently the version is
@@ -340,8 +375,7 @@ for navigating the instrumentation data.
 
 ``staticSystemInformation``
   Specifies the static information collected about the host machine
-  CMake is being run from. This data is collected once at each hook and
-  included in the generated ``index-<has>.json`` file.
+  CMake is being run from. Only included when enabled by the `v1 Query Files`_.
 
   * ``OSName``
   * ``OSPlatform``
