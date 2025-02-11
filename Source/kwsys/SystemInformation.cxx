@@ -5131,7 +5131,11 @@ bool SystemInformationImplementation::QueryBSDProcessor()
   defined(__DragonFly__)
   int k;
   size_t sz = sizeof(k);
+#  ifdef HW_NCPUONLINE
+  int ctrl[2] = { CTL_HW, HW_NCPUONLINE };
+#  else
   int ctrl[2] = { CTL_HW, HW_NCPU };
+#  endif
 
   if (sysctl(ctrl, 2, &k, &sz, nullptr, 0) != 0) {
     return false;
