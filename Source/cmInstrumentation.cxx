@@ -321,7 +321,6 @@ int cmInstrumentation::InstrumentTest(
   root["command"] = command_str;
   root["role"] = "test";
   root["testName"] = name;
-  root["binaryDir"] = this->binaryDir;
   root["result"] = static_cast<Json::Value::Int64>(result);
   root["config"] = config;
 
@@ -447,7 +446,6 @@ int cmInstrumentation::InstrumentCommand(
     }
   }
   root["role"] = command_type;
-  root["binaryDir"] = this->binaryDir;
 
   // Write Json
   std::string const& file_name =
