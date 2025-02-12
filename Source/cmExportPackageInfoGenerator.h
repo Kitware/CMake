@@ -110,5 +110,5 @@ private:
   std::vector<std::string> DefaultConfigurations;
 
   std::map<std::string, std::string> LinkTargets;
-  std::set<std::string> Requirements;
+  std::map<std::string, std::set<std::string>> Requirements;
 };

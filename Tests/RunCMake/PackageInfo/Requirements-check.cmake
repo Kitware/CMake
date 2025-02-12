@@ -8,8 +8,10 @@ expect_value("${content}" "interface" "components" "libb" "type")
 
 file(READ "${out_dir}/bar.cps" content)
 expect_value("${content}" "bar" "name")
-expect_null("${content}" "requires" "foo")
-expect_null("${content}" "requires" "test")
+expect_array("${content}"      1 "requires"  "foo" "components")
+expect_value("${content}" "libb" "requires"  "foo" "components" 0)
+expect_array("${content}"      1 "requires" "test" "components")
+expect_value("${content}" "liba" "requires" "test" "components" 0)
 expect_value("${content}" "interface" "components" "libc" "type")
 expect_value("${content}" "interface" "components" "libd" "type")
 
