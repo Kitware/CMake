@@ -3441,7 +3441,6 @@ bool SystemInformationImplementation::RetrieveInformationFromCpuInfoFile()
                                             this->CurrentPositionInFile + 1);
   }
   uint64_t NumberOfSockets = PhysicalIDs.size();
-  NumberOfSockets = std::max(NumberOfSockets, (uint64_t)1);
   // Physical ids returned by Linux don't distinguish cores.
   // We want to record the total number of cores in this->NumberOfPhysicalCPU
   // (checking only the first proc)
@@ -3451,9 +3450,11 @@ bool SystemInformationImplementation::RetrieveInformationFromCpuInfoFile()
     Cores = this->ExtractValueFromCpuInfoFile(buffer, "ncpus probed");
   }
   auto NumberOfCoresPerSocket = (unsigned int)atoi(Cores.c_str());
-  NumberOfCoresPerSocket = std::max(NumberOfCoresPerSocket, 1u);
-  this->NumberOfPhysicalCPU =
-    NumberOfCoresPerSocket * (unsigned int)NumberOfSockets;
+  // If either one is 0, will be assigned with NumberOfLogicalCPU or 1 below.
+  if (NumberOfSockets > 0 && NumberOfCoresPerSocket > 0) {
+    this->NumberOfPhysicalCPU =
+      NumberOfCoresPerSocket * (unsigned int)NumberOfSockets;
+  }
 
 #else
   // For systems which do not have "physical id" entries, neither "cpu cores"
@@ -3465,10 +3466,11 @@ bool SystemInformationImplementation::RetrieveInformationFromCpuInfoFile()
 #endif
   // gotta have one, and if this is 0 then we get a / by 0n
   // better to have a bad answer than a crash
-  if (this->NumberOfPhysicalCPU <= 0) {
-    this->NumberOfPhysicalCPU = 1;
-  }
-  if (this->NumberOfLogicalCPU == 0) {
+  if (this->NumberOfPhysicalCPU == 0 && this->NumberOfLogicalCPU == 0) {
+    this->NumberOfPhysicalCPU = this->NumberOfLogicalCPU = 1;
+  } else if (this->NumberOfPhysicalCPU == 0) {
+    this->NumberOfPhysicalCPU = this->NumberOfLogicalCPU;
+  } else if (this->NumberOfLogicalCPU == 0) {
     this->NumberOfLogicalCPU = this->NumberOfPhysicalCPU;
   }
   // LogicalProcessorsPerPhysical>1 => SMT.
