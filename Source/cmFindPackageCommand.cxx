@@ -2022,7 +2022,7 @@ bool cmFindPackageCommand::ImportPackageTargets(std::string const& fileName,
   cmsys::Glob glob;
   glob.RecurseOff();
   if (glob.FindFiles(
-        cmStrCat(cmSystemTools::GetFilenamePath(fileName), "/"_s,
+        cmStrCat(cmSystemTools::GetFilenamePath(fileName), '/',
                  cmSystemTools::GetFilenameWithoutExtension(fileName),
                  "@*.[Cc][Pp][Ss]"_s))) {
 

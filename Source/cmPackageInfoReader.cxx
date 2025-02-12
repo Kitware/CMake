@@ -376,7 +376,7 @@ std::unique_ptr<cmPackageInfoReader> cmPackageInfoReader::Read(
   //   - the input is a JSON object
   //   - the input has a "cps_version" that we (in theory) know how to parse
   Json::Value data = ReadJson(path);
-  if (!data.isObject() || !CheckSchemaVersion(data)) {
+  if (!data.isObject() || (!parent && !CheckSchemaVersion(data))) {
     return nullptr;
   }
 
