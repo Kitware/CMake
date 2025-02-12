@@ -28,6 +28,7 @@ static bool test_uv_fs_mkdtemp()
   ASSERT_EQUAL(r, 0);
   uv_run(loop, UV_RUN_DEFAULT);
   uv_fs_req_cleanup(&tempDirReq);
+  uv_loop_close(loop);
   if (!cmSystemTools::FileIsDirectory(tempDir)) {
     std::cout << "cmSystemTools::MakeTempDirectory did not create \""
               << tempDir << '\n';
