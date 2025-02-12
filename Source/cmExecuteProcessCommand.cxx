@@ -166,16 +166,7 @@ bool cmExecuteProcessCommand(std::vector<std::string> const& args,
       status.SetError(" given COMMAND argument with no value.");
       return false;
     }
-#ifdef _WIN32
-    cmsys::Status shortPathRes = cmSystemTools::MaybePrependCmdExe(cmd);
-    if (!shortPathRes) {
-      status.GetMakefile().IssueMessage(
-        MessageType::WARNING,
-        cmStrCat("Conversion of COMMAND:\n  ", cmd[2], '\n',
-                 "to a short path without spaces failed:\n  ",
-                 shortPathRes.GetString()));
-    }
-#endif
+    cmSystemTools::MaybePrependCmdExe(cmd);
   }
 
   // Parse the timeout string.

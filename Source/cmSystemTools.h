@@ -235,23 +235,18 @@ public:
                                            std::string const& destination);
 
   /**
-   *  According to the CreateProcessW documentation which is the underlying
-   *  function for all RunProcess calls:
+   * According to the CreateProcessW documentation:
    *
-   *  "To run a batch file, you must start the command interpreter; set"
-   *  "lpApplicationName to cmd.exe and set lpCommandLine to the following"
-   *  "arguments: /c plus the name of the batch file."
+   *   To run a batch file, you must start the command interpreter; set
+   *   lpApplicationName to cmd.exe and set lpCommandLine to the following
+   *   arguments: /c plus the name of the batch file.
    *
-   *  we should to take care of the correctness of the command line when
-   *  attempting to execute the batch files.
-   *
-   *  Also cmd.exe is unable to parse batch file names correctly if they
-   *  contain spaces. This function uses cmSystemTools::GetShortPath
-   *  conversion to suppress this behavior, and returns its status.
+   * Additionally, "cmd /c" does not always parse batch file names correctly
+   * if they contain spaces, but using "cmd /c call" seems to work.
    *
    *  The function is noop on platforms different from the pure WIN32 one.
    */
-  static cmsys::Status MaybePrependCmdExe(std::vector<std::string>& cmdLine);
+  static void MaybePrependCmdExe(std::vector<std::string>& cmdLine);
 
   /**
    * Run a single executable command

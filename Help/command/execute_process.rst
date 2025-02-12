@@ -44,23 +44,31 @@ Options:
 
  CMake executes the child process using operating system APIs directly:
 
- * On POSIX platforms, the command line is passed to the
-   child process in an ``argv[]`` style array.
+ * On POSIX platforms, the command line is passed to the child process
+   in an ``argv[]`` style array.  No intermediate shell is executed,
+   so shell operators such as ``>`` are treated as normal arguments.
 
  * On Windows platforms, the command line is encoded as a string such
    that child processes using `CommandLineToArgvW`_ will decode the
-   original arguments.  If the command runs a ``.bat`` or ``.cmd``
-   script, it may receive arguments with extra quoting.
+   original arguments.
 
- * .. versionchanged:: 4.0
-     On Windows platforms, if the command runs a ``.bat`` or ``.cmd`` script,
-     it is automatically executed through the command interpreter, ``cmd /c``.
-     However, paths with spaces may fail if a "short path" is not available.
+   If the command runs a ``.exe``, ``.com``, or other executable,
+   no intermediate command interpreter is executed, so shell operators
+   such as ``>`` are treated as normal arguments.
 
- No intermediate shell is used, so shell operators such as ``>``
- are treated as normal arguments.
- (Use the ``INPUT_*``, ``OUTPUT_*``, and ``ERROR_*`` options to
- redirect stdin, stdout, and stderr.)
+   If the command runs a ``.bat`` or ``.cmd`` script, it is executed
+   through the ``cmd`` command interpreter.  The command interpreter
+   does not use `CommandLineToArgvW`_, so some arguments may be received
+   by the script with extra quoting.
+
+   .. versionchanged:: 4.0
+     ``.bat`` and ``.cmd`` scripts are now explicitly executed through the
+     command interpreter by prepending ``cmd /c call`` to the command line.
+     Previously, they were implicitly executed through ``cmd /c``, without
+     ``call``, by undocumented behavior of `CreateProcessW`_.
+
+ Use the ``INPUT_*``, ``OUTPUT_*``, and ``ERROR_*`` options to
+ redirect stdin, stdout, and stderr.
 
  For **sequential execution** of multiple commands use multiple
  ``execute_process`` calls each with a single ``COMMAND`` argument.
@@ -205,3 +213,4 @@ Options:
     :variable:`CMAKE_EXECUTE_PROCESS_COMMAND_ERROR_IS_FATAL` is ignored.
 
 .. _`CommandLineToArgvW`: https://learn.microsoft.com/en-us/windows/win32/api/shellapi/nf-shellapi-commandlinetoargvw
+.. _`CreateProcessW`: https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-createprocessw
