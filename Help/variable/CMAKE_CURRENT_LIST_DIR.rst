@@ -14,4 +14,5 @@ function is the directory of the file invoking the bottom-most entry
 on the call stack, not the directory of the file containing the macro
 or function definition.
 
-See also :variable:`CMAKE_CURRENT_LIST_FILE`.
+See also :variable:`CMAKE_CURRENT_LIST_FILE` and
+:variable:`CMAKE_CURRENT_FUNCTION_LIST_DIR`.
