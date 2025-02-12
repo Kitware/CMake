@@ -561,21 +561,79 @@ inline void erase_if(enum_set<Enum, Size>& set, Predicate pred)
 } // namespace cm
 
 //
-// WARNING: the following two functions rely on an enum_set without
-// explicit size.
+// WARNING: the following two operators rely on the enum_set_traits<Enum>
+// struct definition.
+// The macro CM_ENUM_SET_TRAITS(EnumSet) can be used to define this structure.
 //
-// TODO: ensure compatibility with any enum_set definitions.
+// Notes:
+// When CM_ENUM_SET_TRAITS is used, the following restrictions applies:
+//   * Due to language constraints, the enum_set_traits specialization must
+//     occur outside of any namespace or function definition.
+//   * Only one enum_set instantiation is supported per enum class type.
 //
-template <typename Enum,
-          typename cm::enable_if_t<cm::is_scoped_enum<Enum>::value, int> = 0>
-inline cm::enum_set<Enum> operator+(Enum lhs, Enum rhs)
+
+template <typename Enum>
+struct cm_enum_set_traits
 {
-  return cm::enum_set<Enum>{ lhs, rhs };
+};
+
+namespace cm {
+template <typename Enum, typename = cm::void_t<>>
+struct is_enum_set : std::false_type
+{
+};
+template <typename Enum>
+struct is_enum_set<Enum, cm::void_t<typename cm_enum_set_traits<Enum>::type>>
+  : std::true_type
+{
+};
+}
+
+#if defined(__SUNPRO_CC) && defined(__sparc)
+// Oracle DeveloperStudio C++ compiler on Solaris/Sparc crash on the following
+// template declarations, so declare explicitly the operators.
+
+// Helper macro to define the enum_set_traits struct specialization.
+#  define CM_ENUM_SET_TRAITS(E)                                               \
+    template <>                                                               \
+    struct cm_enum_set_traits<E::value_type>                                  \
+    {                                                                         \
+      using type = E;                                                         \
+      using value_type = E::value_type;                                       \
+    };                                                                        \
+                                                                              \
+    inline E operator+(E::value_type lhs, E::value_type rhs)                  \
+    {                                                                         \
+      return { lhs, rhs };                                                    \
+    }                                                                         \
+                                                                              \
+    inline E operator|(E::value_type lhs, E::value_type rhs)                  \
+    {                                                                         \
+      return { lhs, rhs };                                                    \
+    }
+
+#else
+
+// Helper macro to define the enum_set_traits struct specialization.
+#  define CM_ENUM_SET_TRAITS(E)                                               \
+    template <>                                                               \
+    struct cm_enum_set_traits<E::value_type>                                  \
+    {                                                                         \
+      using type = E;                                                         \
+      using value_type = E::value_type;                                       \
+    };
+
+template <typename Enum,
+          typename cm::enable_if_t<cm::is_enum_set<Enum>::value, int> = 0>
+inline typename cm_enum_set_traits<Enum>::type operator+(Enum lhs, Enum rhs)
+{
+  return { lhs, rhs };
 }
 // Alternate syntax
 template <typename Enum,
-          typename cm::enable_if_t<cm::is_scoped_enum<Enum>::value, int> = 0>
-inline cm::enum_set<Enum> operator|(Enum lhs, Enum rhs)
+          typename cm::enable_if_t<cm::is_enum_set<Enum>::value, int> = 0>
+inline typename cm_enum_set_traits<Enum>::type operator|(Enum lhs, Enum rhs)
 {
-  return cm::enum_set<Enum>{ lhs, rhs };
+  return { lhs, rhs };
 }
+#endif
