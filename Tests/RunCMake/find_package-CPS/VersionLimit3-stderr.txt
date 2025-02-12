@@ -1,0 +1,13 @@
+CMake Error at VersionLimit3\.cmake:[0-9]+ \(find_package\):
+  Could not find a configuration file for package "Sample" that is compatible
+  with requested version range "1\.2\.0\.\.\.1\.2\.2"\.
+
+  The following configuration files were considered but not accepted:
+
+    .*/Tests/RunCMake/find_package-CPS/cps/sample/1\.5\.0/sample\.cps, version: 1\.5\.0\+niven
+    .*/Tests/RunCMake/find_package-CPS/cps/sample/1\.4\.2/sample\.cps, version: 1\.4\.2\+adams
+    .*/Tests/RunCMake/find_package-CPS/cps/sample/1\.2\.3/sample\.cps, version: 1\.2\.3\+clarke
+    .*/Tests/RunCMake/find_package-CPS/cps/sample/1\.1\.0/sample\.cps, version: 1\.1\.0\+asimov
+
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:3 \(include\)

@@ -59,6 +59,7 @@
 namespace {
 
 using pdt = cmFindPackageCommand::PackageDescriptionType;
+using ParsedVersion = cmPackageInfoReader::Pep440Version;
 
 template <template <typename> class Op>
 struct StrverscmpOp
@@ -2717,15 +2718,61 @@ bool cmFindPackageCommand::CheckVersion(std::string const& config_file)
     std::unique_ptr<cmPackageInfoReader> reader =
       cmPackageInfoReader::Read(config_file);
     if (reader && reader->GetName() == this->Name) {
+      // Read version information.
       cm::optional<std::string> cpsVersion = reader->GetVersion();
+      cm::optional<ParsedVersion> const& parsedVersion =
+        reader->ParseVersion(cpsVersion);
       bool const hasVersion = cpsVersion.has_value();
 
+      // Test for version compatibility.
+      result = this->Version.empty();
       if (hasVersion) {
         version = std::move(*cpsVersion);
-        // TODO: Implement version check for CPS
-        result = true;
-      } else {
-        result = this->Version.empty();
+
+        if (!this->Version.empty()) {
+          if (!parsedVersion) {
+            // If we don't understand the version, compare the exact versions
+            // using full string comparison. This is the correct behavior for
+            // the "custom" schema, and the best we can do otherwise.
+            result = (this->Version == version);
+          } else if (this->VersionExact) {
+            // If EXACT is specified, the version must be exactly the requested
+            // version.
+            result =
+              cmSystemTools::VersionCompareEqual(this->Version, version);
+          } else {
+            // Do we have a compat_version?
+            cm::optional<std::string> const& compatVersion =
+              reader->GetCompatVersion();
+            if (reader->ParseVersion(compatVersion)) {
+              // If yes, the initial result is whether the requested version is
+              // between the actual version and the compat version, inclusive.
+              result = cmSystemTools::VersionCompareGreaterEq(version,
+                                                              this->Version) &&
+                cmSystemTools::VersionCompareGreaterEq(this->Version,
+                                                       *compatVersion);
+
+              if (result && !this->VersionMax.empty()) {
+                // We must also check that the version is less than the version
+                // limit.
+                if (this->VersionRangeMax == VERSION_ENDPOINT_EXCLUDED) {
+                  result = cmSystemTools::VersionCompareGreater(
+                    this->VersionMax, version);
+                } else {
+                  result = cmSystemTools::VersionCompareGreaterEq(
+                    this->VersionMax, version);
+                }
+              }
+            } else {
+              // If no, compat_version is assumed to be exactly the actual
+              // version, so the result is whether the requested version is
+              // exactly the actual version, and we can ignore the version
+              // limit.
+              result =
+                cmSystemTools::VersionCompareEqual(this->Version, version);
+            }
+          }
+        }
       }
 
       if (result) {
@@ -2758,8 +2805,6 @@ bool cmFindPackageCommand::CheckVersion(std::string const& config_file)
         if (result && hasVersion) {
           this->VersionFound = version;
 
-          cm::optional<cmPackageInfoReader::Pep440Version> const&
-            parsedVersion = reader->ParseVersion();
           if (parsedVersion) {
             std::vector<unsigned> const& versionParts =
               parsedVersion->ReleaseComponents;

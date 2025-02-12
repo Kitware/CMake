@@ -484,11 +484,20 @@ cm::optional<std::string> cmPackageInfoReader::GetVersion() const
   return cm::nullopt;
 }
 
+cm::optional<std::string> cmPackageInfoReader::GetCompatVersion() const
+{
+  Json::Value const& version = this->Data["compat_version"];
+  if (version.isString()) {
+    return version.asString();
+  }
+  return cm::nullopt;
+}
+
 cm::optional<cmPackageInfoReader::Pep440Version>
-cmPackageInfoReader::ParseVersion() const
+cmPackageInfoReader::ParseVersion(
+  cm::optional<std::string> const& version) const
 {
   // Check that we have a version.
-  cm::optional<std::string> const& version = this->GetVersion();
   if (!version) {
     return cm::nullopt;
   }

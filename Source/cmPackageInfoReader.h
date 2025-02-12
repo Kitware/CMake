@@ -43,6 +43,7 @@ public:
 
   std::string GetName() const;
   cm::optional<std::string> GetVersion() const;
+  cm::optional<std::string> GetCompatVersion() const;
 
   // NOTE: The eventual intent is for CPS to support multiple version schemas,
   // and in particular, we expect to want to support "simple", "custom", "rpm",
@@ -65,10 +66,11 @@ public:
   // FIXME: Return a sum type (e.g. {cm,std}::variant) of possible versions
   // when we support more than just the "simple" (and possibly "pep440")
   // schema(s).
-  /// If the package uses the 'simple' version scheme, obtain the version as
-  /// a numeric tuple and optional trailing string.  Returns a disengaged
-  /// optional for other schemes or if no version is specified.
-  cm::optional<Pep440Version> ParseVersion() const;
+  /// If the package uses the 'simple' version scheme, parse the provided
+  /// version string as a numeric tuple and optional trailing string.  Returns
+  /// a disengaged optional for other schemes or if no version is specified.
+  cm::optional<Pep440Version> ParseVersion(
+    cm::optional<std::string> const& version) const;
 
   std::vector<cmPackageRequirement> GetRequirements() const;
   std::vector<std::string> GetComponentNames() const;
