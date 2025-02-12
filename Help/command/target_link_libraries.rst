@@ -120,9 +120,6 @@ Each ``<item>`` may be:
   Additionally, a generator expression may be used as a fragment of
   any of the above items, e.g. ``foo$<1:_d>``.
 
-  Note that generator expressions will not be used in OLD handling of
-  policy :policy:`CMP0003` or policy :policy:`CMP0004`.
-
 * A ``debug``, ``optimized``, or ``general`` keyword immediately followed
   by another ``<item>``.  The item following such a keyword will be used
   only for the corresponding build configuration.  The ``debug`` keyword
@@ -182,14 +179,19 @@ When this target is linked into another target then the libraries
 linked to this target will appear on the link line for the other
 target too.  This transitive "link interface" is stored in the
 :prop_tgt:`INTERFACE_LINK_LIBRARIES` target property and may be overridden
-by setting the property directly.  When :policy:`CMP0022` is not set to
-``NEW``, transitive linking is built in but may be overridden by the
+by setting the property directly.
+
+In CMake versions prior to 4.0, if :policy:`CMP0022` is not set to ``NEW``,
+transitive linking is built in but may be overridden by the
 :prop_tgt:`LINK_INTERFACE_LIBRARIES` property.  Calls to other signatures
 of this command may set the property making any libraries linked
 exclusively by this signature private.
 
 Libraries for a Target and/or its Dependents (Legacy)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+This signature is for compatibility only.  Prefer the ``PUBLIC`` or
+``PRIVATE`` keywords instead.
 
 .. code-block:: cmake
 
@@ -200,18 +202,20 @@ Libraries for a Target and/or its Dependents (Legacy)
 The ``LINK_PUBLIC`` and ``LINK_PRIVATE`` modes can be used to specify both
 the link dependencies and the link interface in one command.
 
-This signature is for compatibility only.  Prefer the ``PUBLIC`` or
-``PRIVATE`` keywords instead.
-
 Libraries and targets following ``LINK_PUBLIC`` are linked to, and are
-made part of the :prop_tgt:`INTERFACE_LINK_LIBRARIES`.  If policy
-:policy:`CMP0022` is not ``NEW``, they are also made part of the
-:prop_tgt:`LINK_INTERFACE_LIBRARIES`.  Libraries and targets following
-``LINK_PRIVATE`` are linked to, but are not made part of the
-:prop_tgt:`INTERFACE_LINK_LIBRARIES` (or :prop_tgt:`LINK_INTERFACE_LIBRARIES`).
+made part of the :prop_tgt:`INTERFACE_LINK_LIBRARIES`.
+
+In CMake versions prior to 4.0, if policy :policy:`CMP0022` is not ``NEW``,
+they are also made part of the :prop_tgt:`LINK_INTERFACE_LIBRARIES`.
+Libraries and targets following ``LINK_PRIVATE`` are linked to, but are
+not made part of the :prop_tgt:`INTERFACE_LINK_LIBRARIES`
+(or :prop_tgt:`LINK_INTERFACE_LIBRARIES`).
 
 Libraries for Dependents Only (Legacy)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+This signature is for compatibility only.  Prefer the ``INTERFACE`` mode
+instead.
 
 .. code-block:: cmake
 
@@ -219,25 +223,11 @@ Libraries for Dependents Only (Legacy)
 
 The ``LINK_INTERFACE_LIBRARIES`` mode appends the libraries to the
 :prop_tgt:`INTERFACE_LINK_LIBRARIES` target property instead of using them
-for linking.  If policy :policy:`CMP0022` is not ``NEW``, then this mode
-also appends libraries to the :prop_tgt:`LINK_INTERFACE_LIBRARIES` and its
-per-configuration equivalent.
+for linking.
 
-This signature is for compatibility only.  Prefer the ``INTERFACE`` mode
-instead.
-
-Libraries specified as ``debug`` are wrapped in a generator expression to
-correspond to debug builds.  If policy :policy:`CMP0022` is
-not ``NEW``, the libraries are also appended to the
-:prop_tgt:`LINK_INTERFACE_LIBRARIES_DEBUG <LINK_INTERFACE_LIBRARIES_<CONFIG>>`
-property (or to the properties corresponding to configurations listed in
-the :prop_gbl:`DEBUG_CONFIGURATIONS` global property if it is set).
-Libraries specified as ``optimized`` are appended to the
-:prop_tgt:`INTERFACE_LINK_LIBRARIES` property.  If policy :policy:`CMP0022`
-is not ``NEW``, they are also appended to the
-:prop_tgt:`LINK_INTERFACE_LIBRARIES` property.  Libraries specified as
-``general`` (or without any keyword) are treated as if specified for both
-``debug`` and ``optimized``.
+In CMake versions prior to 4.0, if policy :policy:`CMP0022` is not ``NEW``,
+then this mode also appends libraries to the
+:prop_tgt:`LINK_INTERFACE_LIBRARIES` and its per-configuration equivalent.
 
 .. _`Linking Object Libraries`:
 
