@@ -527,6 +527,13 @@ void cmPackageInfoReader::SetTargetProperties(
   cmMakefile* makefile, cmTarget* target, Json::Value const& data,
   std::string const& package, cm::string_view configuration) const
 {
+  // Add configuration (if applicable).
+  if (!configuration.empty()) {
+    target->AppendProperty("IMPORTED_CONFIGURATIONS",
+                           cmSystemTools::UpperCase(configuration),
+                           makefile->GetBacktrace());
+  }
+
   // Add compile and link features.
   for (std::string const& def : ReadList(data, "compile_features")) {
     AddCompileFeature(makefile, target, configuration, def);
