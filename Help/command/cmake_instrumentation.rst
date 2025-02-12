@@ -3,6 +3,11 @@ cmake_instrumentation
 
 .. versionadded:: 4.0
 
+.. note::
+
+   This command is only available when experimental support for instrumentation
+   has been enabled by the ``CMAKE_EXPERIMENTAL_INSTRUMENTATION`` gate.
+
 Enables interacting with the
 :manual:`CMake Instrumentation API <cmake-instrumentation(7)>`.
 

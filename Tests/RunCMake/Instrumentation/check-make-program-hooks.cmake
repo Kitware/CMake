@@ -33,3 +33,13 @@ endif()
 if (NOT dataDirClean)
   string(APPEND RunCMake_TEST_FAILED "Snippet files not fully removed post build\n")
 endif()
+
+file(READ ${v1}/postBuild.hook postBuildErrors)
+if (NOT postBuildErrors MATCHES "^$")
+  string(APPEND RunCMake_TEST_FAILED "Errors found in data during postBuild hook:\n${postBuildErrors}\n")
+endif()
+
+file(READ ${v1}/preBuild.hook preBuildErrors)
+if (NOT preBuildErrors MATCHES "^$")
+  string(APPEND RunCMake_TEST_FAILED "Errors found in data during preBuild hook:\n${preBuildErrors}\n")
+endif()

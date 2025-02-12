@@ -12,6 +12,11 @@ cmake-instrumentation(7)
 Introduction
 ============
 
+.. note::
+
+   This feature is only available when experimental support for instrumentation
+   has been enabled by the ``CMAKE_EXPERIMENTAL_INSTRUMENTATION`` gate.
+
 The CMake Instrumentation API allows for the collection of timing data, target
 information and system diagnostic information during the configure, generate,
 build, test and install steps for a CMake project.
@@ -243,7 +248,7 @@ and contain the following data:
     always ``1``.
 
   ``command``
-    The full command executed.
+    The full command executed. Excluded when ``role`` is ``build``.
 
   ``result``
     The exit-value of the command, an integer.
@@ -251,13 +256,17 @@ and contain the following data:
   ``role``
     The type of command executed, which will be one of the following values:
 
-    * ``compile``
-    * ``link``
-    * ``custom``
-    * ``cmakeBuild``
-    * ``install``
-    * ``ctest``
-    * ``test``
+    * ``configure``: the CMake configure step
+    * ``generate``: the CMake generate step
+    * ``compile``: an individual compile step invoked during the build
+    * ``link``: an individual link step invoked during the build
+    * ``custom``: an individual custom command invoked during the build
+    * ``build``: a complete ``make`` or ``ninja`` invocation. Only generated if ``preBuild`` or ``postBuild`` hooks are enabled.
+    * ``cmakeBuild``: a complete ``cmake --build`` invocation
+    * ``cmakeInstall``: a complete ``cmake --install`` invocation
+    * ``install``: an individual ``cmake -P cmake_install.cmake`` invocation
+    * ``ctest``: a complete ``ctest`` invocation
+    * ``test``: a single test executed by CTest
 
   ``target``
     The CMake target associated with the command. Only included when ``role`` is
