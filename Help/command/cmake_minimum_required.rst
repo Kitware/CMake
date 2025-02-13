@@ -53,9 +53,15 @@ with an error instead of just a warning.
 Policy Settings
 ^^^^^^^^^^^^^^^
 
-The ``cmake_minimum_required(VERSION)`` command implicitly invokes the
-:command:`cmake_policy(VERSION)` command to specify that the current
-project code is written for the given range of CMake versions.
+``cmake_minimum_required(VERSION <min>[...<max>])`` implicitly invokes
+
+.. code-block:: cmake
+
+  cmake_policy(VERSION <min>[...<max>])
+
+This specifies that the current CMake code is written for the given
+range of CMake versions.
+
 All policies known to the running version of CMake and introduced
 in the ``<min>`` (or ``<max>``, if specified) version or earlier will
 be set to use ``NEW`` behavior.  All policies introduced in later
@@ -63,23 +69,6 @@ versions will be unset (unless the
 :variable:`CMAKE_POLICY_DEFAULT_CMP<NNNN>` variable sets a default).
 This effectively requests behavior preferred as of a given CMake
 version and tells newer CMake versions to warn about their new policies.
-
-When a ``<min>`` version higher than 2.4 is specified the command
-implicitly invokes
-
-.. code-block:: cmake
-
-  cmake_policy(VERSION <min>[...<max>])
-
-which sets CMake policies based on the range of versions specified.
-When a ``<min>`` version 2.4 or lower is given the command implicitly
-invokes
-
-.. code-block:: cmake
-
-  cmake_policy(VERSION 2.4[...<max>])
-
-which enables compatibility features for CMake 2.4 and lower.
 
 .. include:: DEPRECATED_POLICY_VERSIONS.txt
 
