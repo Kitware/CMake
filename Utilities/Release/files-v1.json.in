@@ -60,6 +60,30 @@
       "macOSmin": "10.10"
     },
     {
+      "os": ["sunos", "SunOS"],
+      "architecture": ["i386"],
+      "class": "installer",
+      "name": "cmake-@version@-sunos-i386.sh"
+    },
+    {
+      "os": ["sunos", "SunOS"],
+      "architecture": ["i386"],
+      "class": "archive",
+      "name": "cmake-@version@-sunos-i386.tar.gz"
+    },
+    {
+      "os": ["sunos", "SunOS"],
+      "architecture": ["sparc"],
+      "class": "installer",
+      "name": "cmake-@version@-sunos-sparc.sh"
+    },
+    {
+      "os": ["sunos", "SunOS"],
+      "architecture": ["sparc"],
+      "class": "archive",
+      "name": "cmake-@version@-sunos-sparc.tar.gz"
+    },
+    {
       "os": ["windows", "Windows"],
       "architecture": ["i386"],
       "class": "installer",

@@ -13,6 +13,10 @@
 "cmake-@version@-macos-universal\.tar\.gz"
 "cmake-@version@-macos10\.10-universal\.dmg"
 "cmake-@version@-macos10\.10-universal\.tar\.gz"
+"cmake-@version@-sunos-i386\.sh"
+"cmake-@version@-sunos-i386\.tar\.gz"
+"cmake-@version@-sunos-sparc\.sh"
+"cmake-@version@-sunos-sparc\.tar\.gz"
 "cmake-@version@-windows-i386\.msi"
 "cmake-@version@-windows-i386\.zip"
 "cmake-@version@-windows-x86_64\.msi"
@@ -28,6 +32,8 @@
 "cmake-@version@-macos-universal\.dmg"
 -- query: \.files\[\] \| select\(\(\.os\[\] \| \. == "macos10\.10"\) and \(\.class == "archive"\)\) \| \.name
 "cmake-@version@-macos10\.10-universal\.tar\.gz"
+-- query: \.files\[\] \| select\(\(\.os\[\] \| \. == "sunos"\) and \(\.architecture\[\] \| \. == "sparc"\) and \(\.class == "archive"\)\) \| \.name
+"cmake-@version@-sunos-sparc\.tar\.gz"
 -- query: \.files\[\] \| select\(\(\.os\[\] \| \. == "windows"\) and \(\.architecture\[\] \| \. == "i386"\) and \(\.class == "installer"\)\) \| \.name
 "cmake-@version@-windows-i386\.msi"
 -- query: \.files\[\] \| select\(\.architecture\[\] \| \. == "x86_64"\) \| \.name
