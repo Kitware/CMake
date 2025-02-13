@@ -78,7 +78,7 @@ This module provides several function.
 
   ``INSTALL_DESTINATION``
     Install the results into the given directory (``share/locale/`` by
-    default). The language subdirectory will be taken into account .
+    default). The language subdirectory will be taken into account.
 
 .. versionadded:: 3.2
   If you wish to use the Gettext runtime library (libintl), use
