@@ -19,7 +19,7 @@ form ``major.minor[.patch[.tweak]]``, and the ``...`` is literal.
 If the running version of CMake is lower than the ``<min>`` required
 version it will stop processing the project and report an error.
 The optional ``<policy_max>`` version, if specified, must be at least the
-``<min>`` version and affects policy settings as described in `Policy Settings`_.
+``<min>`` version and sets the `Policy Version`_.
 If the running version of CMake is older than 3.12, the extra ``...``
 dots will be seen as version component separators, resulting in the
 ``...<max>`` part being ignored and preserving the pre-3.12 behavior
@@ -48,10 +48,10 @@ with an error instead of just a warning.
   calling scope, calling ``cmake_minimum_required()`` inside a function
   is generally discouraged.
 
-.. _`Policy Settings`:
+.. _`Policy Version`:
 
-Policy Settings
-^^^^^^^^^^^^^^^
+Policy Version
+^^^^^^^^^^^^^^
 
 ``cmake_minimum_required(VERSION <min>[...<max>])`` implicitly invokes
 
@@ -59,16 +59,7 @@ Policy Settings
 
   cmake_policy(VERSION <min>[...<max>])
 
-This specifies that the current CMake code is written for the given
-range of CMake versions.
-
-All policies known to the running version of CMake and introduced
-in the ``<min>`` (or ``<max>``, if specified) version or earlier will
-be set to use ``NEW`` behavior.  All policies introduced in later
-versions will be unset (unless the
-:variable:`CMAKE_POLICY_DEFAULT_CMP<NNNN>` variable sets a default).
-This effectively requests behavior preferred as of a given CMake
-version and tells newer CMake versions to warn about their new policies.
+.. include:: POLICY_VERSION.txt
 
 .. include:: DEPRECATED_POLICY_VERSIONS.txt
 
