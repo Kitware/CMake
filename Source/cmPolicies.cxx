@@ -15,6 +15,7 @@
 #include "cmStateSnapshot.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmValue.h"
 #include "cmVersion.h"
 
 static bool stringToId(char const* input, cmPolicies::PolicyID& pid)
@@ -294,6 +295,30 @@ bool cmPolicies::ApplyPolicyVersion(cmMakefile* mf, unsigned int majorVer,
                                     unsigned int patchVer,
                                     WarnCompat warnCompat)
 {
+  cmValue varVer = mf->GetDefinition("CMAKE_POLICY_VERSION_MINIMUM");
+  if (!varVer.IsEmpty()) {
+    unsigned int varMajor = 0;
+    unsigned int varMinor = 0;
+    unsigned int varPatch = 0;
+    unsigned int varTweak = 0;
+    if (sscanf(varVer.GetCStr(), "%u.%u.%u.%u", &varMajor, &varMinor,
+               &varPatch, &varTweak) < 2) {
+      mf->IssueMessage(
+        MessageType::FATAL_ERROR,
+        cmStrCat("Invalid CMAKE_POLICY_VERSION_MINIMUM value \"", varVer,
+                 "\".  "
+                 "A numeric major.minor[.patch[.tweak]] must be given."));
+      return false;
+    }
+    if (varMajor > majorVer || (varMajor == majorVer && varMinor > minorVer) ||
+        (varMajor == majorVer && varMinor == minorVer &&
+         varPatch > patchVer)) {
+      majorVer = varMajor;
+      minorVer = varMinor;
+      patchVer = varPatch;
+    }
+  }
+
   // Error on policy versions for which support has been removed.
   if (majorVer < 3 || (majorVer == 3 && minorVer < 5)) {
     if (IsFromLegacyInstallEXPORT(mf, majorVer, minorVer, patchVer)) {
@@ -305,7 +330,9 @@ bool cmPolicies::ApplyPolicyVersion(cmMakefile* mf, unsigned int majorVer,
     } else {
       mf->IssueMessage(MessageType::FATAL_ERROR,
                        "Compatibility with CMake < 3.5 has been removed "
-                       "from CMake.\n" ADVICE_UPDATE_VERSION_ARGUMENT);
+                       "from CMake.\n" ADVICE_UPDATE_VERSION_ARGUMENT "\n"
+                       "Or, add -DCMAKE_POLICY_VERSION_MINIMUM=3.5 to try "
+                       "configuring anyway.");
       cmSystemTools::SetFatalErrorOccurred();
       return false;
     }
