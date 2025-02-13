@@ -79,18 +79,14 @@ The command has a few modes by which it searches for packages:
   version files are used).
 
   .. note::
-
     If the experimental ``CMAKE_EXPERIMENTAL_FIND_CPS_PACKAGES`` is enabled,
     files named ``<PackageName>.cps`` and ``<lowercasePackageName>.cps`` are
     also considered.  These files provide package information according to the
     |CPS|_ (CPS), which is more portable than CMake script.  Aside from any
     explicitly noted exceptions, any references to "config files", "config
     mode", "package configuration files", and so forth refer equally to both
-    CPS and CMake-script files.  However, some features of ``find_package``
-    are not supported at this time when a CPS file is found.  In particular,
-    if a ``VERSION`` requirement is specified, only ``.cps`` files which do not
-    provide version information will be rejected.  (We expect to implement
-    proper version validation in the near future.)
+    CPS and CMake-script files.  This functionality is a work in progress, and
+    some features may be missing.
 
     Search is implemented in a manner that will tend to prefer |CPS| files
     over CMake-script config files in most cases.  Specifying ``CONFIGS``
@@ -211,15 +207,20 @@ specified:
 * A single version with the format ``major[.minor[.patch[.tweak]]]``, where
   each component is a numeric value.
 * A version range with the format ``versionMin...[<]versionMax`` where
-  ``versionMin`` and ``versionMax`` have the same format and constraints
-  on components being integers as the single version.  By default, both end
-  points are included.  By specifying ``<``, the upper end point will be
-  excluded. Version ranges are only supported with CMake 3.19 or later.
-  Note that it is not possible to extend the compatibility range specified
-  by the package's version file.  For example, if the package version file
-  specifies compatibility within a minor version, it is not possible to
-  extend the compatibility to several minor versions by specifying a
-  version range.
+  ``versionMin`` and ``versionMax`` have the same format and constraints on
+  components being integers as the single version.  By default, both end points
+  are included.  By specifying ``<``, the upper end point will be excluded.
+  Version ranges are only supported with CMake 3.19 or later.
+
+.. note::
+  With the exception of CPS packages, version support is currently provided
+  only on a package-by-package basis.  When a version range is specified but
+  the package is only designed to expect a single version, the package will
+  ignore the upper end point of the range and only take the single version at
+  the lower end of the range into account.  Non-CPS packages that do support
+  version ranges do so in a manner that is determined by the individual
+  package.  See the `Version Selection`_ section below for details and
+  important caveats.
 
 The ``EXACT`` option requests that the version be matched exactly. This option
 is incompatible with the specification of a version range.
@@ -227,11 +228,7 @@ is incompatible with the specification of a version range.
 If no ``[version]`` and/or component list is given to a recursive invocation
 inside a find-module, the corresponding arguments are forwarded
 automatically from the outer call (including the ``EXACT`` flag for
-``[version]``).  Version support is currently provided only on a
-package-by-package basis (see the `Version Selection`_ section below).
-When a version range is specified but the package is only designed to expect
-a single version, the package will ignore the upper end point of the range and
-only take the single version at the lower end of the range into account.
+``[version]``).
 
 See the :command:`cmake_policy` command documentation for discussion
 of the ``NO_POLICY_SCOPE`` option.
@@ -749,7 +746,7 @@ sets these variables:
 These variables are checked by the ``find_package`` command to determine
 whether the configuration file provides an acceptable version.  They
 are not available after the ``find_package`` call returns.  If the version
-is acceptable the following variables are set:
+is acceptable, the following variables are set:
 
 ``<PackageName>_VERSION``
   Full provided version string
@@ -766,12 +763,80 @@ is acceptable the following variables are set:
 
 and the corresponding package configuration file is loaded.
 
+.. note::
+  While the exact behavior of version matching is determined by the individual
+  package, many packages use :command:`write_basic_package_version_file` to
+  supply this logic.  The version check scripts this produces have some notable
+  caveats with respect to version ranges:
+
+  * The upper end of a version range acts as a hard limit on what versions will
+    be accepted.  Thus, while a request for version ``1.4.0`` might be
+    satisfied by a package whose version is ``1.6.0`` and which advertises
+    'same major version' compatibility, the same package will be rejected if
+    the requested version range is ``1.4.0...1.5.0``.
+
+  * Both ends of the version range must match the package's advertised
+    compatibility level. For example, if a package advertises 'same major and
+    minor version' compatibility, requesting the version range
+    ``1.4.0...<1.5.5`` or ``1.4.0...1.5.0`` will result in that package being
+    rejected, even if the package version is ``1.4.1``.
+
+  As a result, it is not possible to use a version range to extend the range
+  of compatible package versions that will be accepted.
+
 |CPS|
 """""
 
-For |CPS| package configuration files, no version checking is performed at
-this time.  However, packages using the ``simple`` version schema will set
-the following variables:
+For |CPS| package configuration files, package version numbers are checked by
+CMake according to the set of recognized version schemas. At present, the
+following schemas are recognized:
+
+  ``simple``
+    Version numbers are a tuple of integers followed by an optional trailing
+    segment which is ignored with respect to version comparisons.
+
+  ``custom``
+    The mechanism for interpreting version numbers is unspecified.  The version
+    strings must match exactly for the package to be accepted.
+
+Refer to |cps-version_schema|_ for a more detailed explanation of each schema
+and how comparisons for each are performed.  Note that the specification may
+include schemas that are not supported by CMake.
+
+In addition to the package's ``version``, CPS allows packages to optionally
+specify a |cps-compat_version|_, which is the oldest version for which the
+package provides compatibility.  That is, the package warrants that a consumer
+expecting the ``compat_version`` should be able to use the package, even if the
+package's actual version is newer.  If not specified, the ``compat_version``
+is implicitly equal to the package version, i.e. no backwards compatibility is
+provided.
+
+When a package uses a recognized schema, CMake will determine the package's
+acceptability according to the following rules:
+
+* If ``EXACT`` was specified, or if the package does not supply a
+  ``compat_version``, the package's ``version`` must equal the requested
+  version.
+
+* Otherwise:
+
+  * The package's ``version`` must be greater than or equal to the requested
+    (minimum) version, and
+
+  * the package's ``compat_version`` must be less than or equal to the
+    requested (minimum) version, and
+
+  * if a requested maximum version was given, it must be greater than (or equal
+    to, depending on whether the maximum version is specified as inclusive or
+    exclusive) the package's ``version``.
+
+.. note::
+  This implementation of range matching was chosen in order to most closely
+  match the behavior of :command:`write_basic_package_version_file`, albeit
+  without the case where an overly broad range matches nothing.
+
+For packages using the ``simple`` version schema, if the version is acceptable,
+the following variables are set:
 
 ``<PackageName>_VERSION``
   Full provided version string
@@ -878,3 +943,9 @@ requirements are not satisfied.
 
 .. _CPS: https://cps-org.github.io/cps/
 .. |CPS| replace:: Common Package Specification
+
+.. _cps-compat_version: https://cps-org.github.io/cps/schema.html#compat-version
+.. |cps-compat_version| replace:: ``compat_version``
+
+.. _cps-version_schema: https://cps-org.github.io/cps/schema.html#version-schema
+.. |cps-version_schema| replace:: ``version_schema``
