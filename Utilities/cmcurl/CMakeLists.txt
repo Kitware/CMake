@@ -1,4 +1,5 @@
 # Set curl options as needed for CMake build
+set(_CURL_QUICK_DETECT ON)
 set(BUILD_CURL_EXE OFF CACHE INTERNAL "No curl exe")
 set(BUILD_DASHBOARD_REPORTS OFF CACHE INTERNAL "No curl dashboard reports")
 set(BUILD_RELEASE_DEBUG_DIRS OFF CACHE INTERNAL "No curl release/debug dirs")
@@ -1178,7 +1179,11 @@ macro(curl_openssl_check_symbol_exists _symbol _files _variable)
     list(APPEND CMAKE_REQUIRED_LIBRARIES OpenSSL::SSL OpenSSL::Crypto)
     list(APPEND CMAKE_REQUIRED_DEFINITIONS "-DOPENSSL_SUPPRESS_DEPRECATED")  # for SSL_CTX_set_srp_username deprecated since 3.0.0
     if(HAVE_LIBZ)
-      list(APPEND CMAKE_REQUIRED_LIBRARIES ZLIB::ZLIB)
+      if(CMAKE_USE_SYSTEM_ZLIB)
+        list(APPEND CMAKE_REQUIRED_LIBRARIES ZLIB::ZLIB)
+      else()
+        list(APPEND CMAKE_REQUIRED_LIBRARIES cmzlib)
+      endif()
     endif()
     if(WIN32)
       list(APPEND CMAKE_REQUIRED_LIBRARIES "ws2_32")
