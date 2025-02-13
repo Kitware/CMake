@@ -55,6 +55,9 @@ if(CURL_BUILD_TESTING)
   )
   target_compile_definitions(curlu PUBLIC "UNITTESTS" "CURL_STATICLIB")
   target_link_libraries(curlu PRIVATE ${CURL_LIBS})
+  # There is plenty of parallelism when building the testdeps target.
+  # Override the curlu batch size with the maximum to optimize performance.
+  set_target_properties(curlu PROPERTIES UNITY_BUILD_BATCH_SIZE 0)
 endif()
 
 if(ENABLE_CURLDEBUG)
@@ -64,6 +67,13 @@ if(ENABLE_CURLDEBUG)
 endif()
 
 ## Library definition
+
+if(NOT DEFINED IMPORT_LIB_SUFFIX)
+  set(IMPORT_LIB_SUFFIX "")
+endif()
+if(NOT DEFINED STATIC_LIB_SUFFIX)
+  set(STATIC_LIB_SUFFIX "")
+endif()
 
 # Add "_imp" as a suffix before the extension to avoid conflicting with
 # the statically linked "libcurl.lib" (typically with MSVC)
