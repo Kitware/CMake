@@ -35,10 +35,11 @@ This module provides several function.
 
   .. code-block:: cmake
 
-    gettext_create_translations(<mofile> [ALL] <file>...)
+    gettext_create_translations(<potfile> [ALL] <file>...)
 
-  This will create a target "translations" which will convert the
-  given input .po files into the binary output .mo file. Options:
+  This function creates a custom target "translations" which processes the
+  given .pot file to .mo files. The generated binary files will be installed
+  into ``share/locale/`` directory. Options:
 
   ``ALL``
     The translations will be created when building the default target.
