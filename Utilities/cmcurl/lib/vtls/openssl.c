@@ -116,10 +116,6 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
-#ifndef ARRAYSIZE
-#define ARRAYSIZE(A) (sizeof(A)/sizeof((A)[0]))
-#endif
-
 /* Uncomment the ALLOW_RENEG line to a real #define if you want to allow TLS
    renegotiations when built with BoringSSL. Renegotiating is non-compliant
    with HTTP/2 and "an extremely dangerous protocol feature". Beware.
@@ -1313,7 +1309,9 @@ int cert_stuff(struct Curl_easy *data,
   if(cert_file || cert_blob || (file_type == SSL_FILETYPE_ENGINE) ||
      (file_type == SSL_FILETYPE_PROVIDER)) {
     SSL *ssl;
-    X509 *x509;
+    X509 *x509 = NULL;
+    EVP_PKEY *pri = NULL;
+    STACK_OF(X509) *ca = NULL;
     int cert_done = 0;
     int cert_use_result;
 
@@ -1502,8 +1500,6 @@ int cert_stuff(struct Curl_easy *data,
     {
       BIO *cert_bio = NULL;
       PKCS12 *p12 = NULL;
-      EVP_PKEY *pri;
-      STACK_OF(X509) *ca = NULL;
       if(cert_blob) {
         cert_bio = BIO_new_mem_buf(cert_blob->data, (int)(cert_blob->len));
         if(!cert_bio) {
@@ -1544,8 +1540,7 @@ int cert_stuff(struct Curl_easy *data,
 
       PKCS12_PBE_add();
 
-      if(!PKCS12_parse(p12, key_passwd, &pri, &x509,
-                       &ca)) {
+      if(!PKCS12_parse(p12, key_passwd, &pri, &x509, &ca)) {
         failf(data,
               "could not parse PKCS12 file, check password, " OSSL_PACKAGE
               " error %s",
@@ -2067,8 +2062,6 @@ static CURLcode ossl_set_provider(struct Curl_easy *data, const char *provider)
                         sizeof(error_buffer)));
     /* Do not attempt to load it again */
     data->state.provider_failed = TRUE;
-    /* FIXME not the right error but much less fuss than creating a new
-     * public one */
     return CURLE_SSL_ENGINE_NOTFOUND;
   }
   data->state.provider = TRUE;
@@ -2884,10 +2877,9 @@ static void ossl_trace(int direction, int ssl_ver, int content_type,
 /* ====================================================== */
 
 /* Check for OpenSSL 1.0.2 which has ALPN support. */
-#undef HAS_ALPN
 #if OPENSSL_VERSION_NUMBER >= 0x10002000L       \
   && !defined(OPENSSL_NO_TLSEXT)
-#  define HAS_ALPN 1
+#  define HAS_ALPN_OPENSSL
 #endif
 
 /* Check for OpenSSL 1.1.0 which has set_{min,max}_proto_version(). */
@@ -3381,7 +3373,7 @@ static CURLcode ossl_populate_x509_store(struct Curl_cfilter *cf,
         "CA"      /* Intermediate Certification Authorities */
       };
       size_t i;
-      for(i = 0; i < ARRAYSIZE(storeNames); ++i) {
+      for(i = 0; i < CURL_ARRAYSIZE(storeNames); ++i) {
         bool imported = FALSE;
         result = import_windows_cert_store(data, storeNames[i], store,
                                            &imported);
@@ -3692,7 +3684,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
   ctx_option_t ctx_options = 0;
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
-  const long int ssl_version_min = conn_config->version;
+  unsigned int ssl_version_min = conn_config->version;
   char * const ssl_cert = ssl_config->primary.clientcert;
   const struct curl_blob *ssl_cert_blob = ssl_config->primary.cert_blob;
   const char * const ssl_cert_type = ssl_config->cert_type;
@@ -3735,6 +3727,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
     }
     break;
   case TRNSPRT_QUIC:
+    ssl_version_min = CURL_SSLVERSION_TLSv1_3;
     if(conn_config->version_max &&
        (conn_config->version_max != CURL_SSLVERSION_MAX_TLSv1_3)) {
       failf(data, "QUIC needs at least TLS version 1.3");
@@ -3875,7 +3868,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
 #endif
 
   if(alpn && alpn_len) {
-#ifdef HAS_ALPN
+#ifdef HAS_ALPN_OPENSSL
     if(SSL_CTX_set_alpn_protos(octx->ssl_ctx, alpn, (int)alpn_len)) {
       failf(data, "Error setting ALPN");
       return CURLE_SSL_CONNECT_ERROR;
@@ -3898,7 +3891,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
   ciphers = conn_config->cipher_list;
   if(!ciphers && (peer->transport != TRNSPRT_QUIC))
     ciphers = DEFAULT_CIPHER_SELECTION;
-  if(ciphers) {
+  if(ciphers && (ssl_version_min < CURL_SSLVERSION_TLSv1_3)) {
     if(!SSL_CTX_set_cipher_list(octx->ssl_ctx, ciphers)) {
       failf(data, "failed setting cipher list: %s", ciphers);
       return CURLE_SSL_CIPHER;
@@ -3909,7 +3902,9 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
 #ifdef HAVE_SSL_CTX_SET_CIPHERSUITES
   {
     const char *ciphers13 = conn_config->cipher_list13;
-    if(ciphers13) {
+    if(ciphers13 &&
+       (!conn_config->version_max ||
+        (conn_config->version_max >= CURL_SSLVERSION_MAX_TLSv1_3))) {
       if(!SSL_CTX_set_ciphersuites(octx->ssl_ctx, ciphers13)) {
         failf(data, "failed setting TLS 1.3 cipher suite: %s", ciphers13);
         return CURLE_SSL_CIPHER;
@@ -4213,7 +4208,7 @@ static CURLcode ossl_connect_step1(struct Curl_cfilter *cf,
   DEBUGASSERT(ssl_connect_1 == connssl->connecting_state);
   DEBUGASSERT(octx);
   memset(&proto, 0, sizeof(proto));
-#ifdef HAS_ALPN
+#ifdef HAS_ALPN_OPENSSL
   if(connssl->alpn) {
     result = Curl_alpn_to_proto_buf(&proto, connssl->alpn);
     if(result) {
@@ -4250,7 +4245,7 @@ static CURLcode ossl_connect_step1(struct Curl_cfilter *cf,
   SSL_set_bio(octx->ssl, bio, bio);
 #endif
 
-#ifdef HAS_ALPN
+#ifdef HAS_ALPN_OPENSSL
   if(connssl->alpn) {
     Curl_alpn_to_proto_str(&proto, connssl->alpn);
     infof(data, VTLS_INFOF_ALPN_OFFER_1STR, proto.data);
@@ -4307,7 +4302,6 @@ static void ossl_trace_ech_retry_configs(struct Curl_easy *data, SSL* ssl,
       servername_type = SSL_get_servername_type(ssl);
       inner = SSL_get_servername(ssl, servername_type);
       SSL_get0_ech_name_override(ssl, &outer, &out_name_len);
-      /* TODO: get the inner from BoringSSL */
       infof(data, "ECH: retry_configs for %s from %s, %d %d",
             inner ? inner : "NULL", outer ? outer : "NULL", reason, rv);
 #endif
@@ -4562,7 +4556,7 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
 # endif  /* !OPENSSL_IS_BORINGSSL && !OPENSSL_IS_AWSLC */
 #endif  /* USE_ECH_OPENSSL */
 
-#ifdef HAS_ALPN
+#ifdef HAS_ALPN_OPENSSL
     /* Sets data and len to negotiated protocol, len is 0 if no protocol was
      * negotiated
      */
