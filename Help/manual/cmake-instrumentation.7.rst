@@ -53,7 +53,7 @@ triggered, an index file is generated containing a list of snippet files newer
 than the previous indexing.
 
 Indexing and can also be performed by manually invoking
-``ctest --collect-instrumentation``.
+``ctest --collect-instrumentation <build>``.
 
 Callbacks
 ---------
@@ -410,7 +410,7 @@ occurs and deleted after any user-specified `Callbacks`_ are executed.
   The name of the hook responsible for generating the index file. In addition
   to the hooks that can be specified by one of the `v1 Query Files`_, this value may
   be set to ``manual`` if indexing is performed by invoking
-  ``ctest --collect-instrumentation``.
+  ``ctest --collect-instrumentation <build>``.
 
 ``snippets``
   Contains a list of `v1 Snippet File`_. This includes all snippet files
