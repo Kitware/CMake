@@ -1,0 +1,7 @@
+set(CMAKE_POLICY_VERSION_MINIMUM 3.10)
+cmake_minimum_required(VERSION 3.1...3.4)
+message("CMAKE_MINIMUM_REQUIRED_VERSION='${CMAKE_MINIMUM_REQUIRED_VERSION}'")
+foreach(policy CMP0071 CMP0072)
+  cmake_policy(GET ${policy} status)
+  message("${policy}='${status}'")
+endforeach()

@@ -22,3 +22,6 @@ not itself been updated:
 * Projects may set this variable before a call to :command:`add_subdirectory`
   that adds a third-party project in order to set its policies without
   modifying third-party code.
+
+See :variable:`CMAKE_POLICY_VERSION_MINIMUM` set policies to ``NEW``
+based on the version of CMake that introduced them.

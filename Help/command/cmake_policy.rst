@@ -39,14 +39,7 @@ CMake is older than 3.12, the extra ``...`` dots will be seen as version
 component separators, resulting in the ``...<max>`` part being ignored and
 preserving the pre-3.12 behavior of basing policies on ``<min>``.
 
-This specifies that the current CMake code is written for the given
-range of CMake versions.  All policies known to the running version of CMake
-and introduced in the ``<min>`` (or ``<max>``, if specified) version
-or earlier will be set to use ``NEW`` behavior.  All policies
-introduced in later versions will be unset (unless the
-:variable:`CMAKE_POLICY_DEFAULT_CMP<NNNN>` variable sets a default).
-This effectively requests behavior preferred as of a given CMake
-version and tells newer CMake versions to warn about their new policies.
+.. include:: POLICY_VERSION.txt
 
 Note that the :command:`cmake_minimum_required(VERSION)`
 command implicitly calls ``cmake_policy(VERSION)`` too.
