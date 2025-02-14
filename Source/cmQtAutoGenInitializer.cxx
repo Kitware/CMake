@@ -1451,8 +1451,11 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
     if (this->AutogenTarget.DependOrigin) {
       // add_dependencies/addUtility do not support generator expressions.
       // We depend only on the libraries found in all configs therefore.
-      std::map<cmGeneratorTarget const*, std::size_t> commonTargets;
+      std::map<cmGeneratorTarget const*, std::size_t> targetsPartOfAllConfigs;
       for (std::string const& config : this->ConfigsList) {
+        // The same target might appear multiple times in a config, but we
+        // should only count it once.
+        std::set<cmGeneratorTarget const*> seenTargets;
         cmLinkImplementationLibraries const* libs =
           this->GenTarget->GetLinkImplementationLibraries(
             config, cmGeneratorTarget::UseTo::Link);
@@ -1460,14 +1463,15 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
           for (cmLinkItem const& item : libs->Libraries) {
             cmGeneratorTarget const* libTarget = item.Target;
             if (libTarget &&
-                !StaticLibraryCycle(this->GenTarget, libTarget, config)) {
+                !StaticLibraryCycle(this->GenTarget, libTarget, config) &&
+                seenTargets.insert(libTarget).second) {
               // Increment target config count
-              commonTargets[libTarget]++;
+              targetsPartOfAllConfigs[libTarget]++;
             }
           }
         }
       }
-      for (auto const& item : commonTargets) {
+      for (auto const& item : targetsPartOfAllConfigs) {
         if (item.second == this->ConfigsList.size()) {
           this->AutogenTarget.DependTargets.insert(item.first->Target);
         }
