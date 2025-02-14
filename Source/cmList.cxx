@@ -523,8 +523,8 @@ public:
                   std::string const& replace) override
   {
     TransformAction::Initialize(selector);
-    this->ReplaceHelper =
-      cm::make_unique<cmStringReplaceHelper>(regex, replace);
+    this->ReplaceHelper = cm::make_unique<cmStringReplaceHelper>(
+      regex, replace, selector->Makefile);
 
     if (!this->ReplaceHelper->IsRegularExpressionValid()) {
       throw transform_error(
@@ -641,6 +641,11 @@ ActionDescriptorSet::iterator TransformConfigure(
 
   return descriptor;
 }
+}
+
+std::unique_ptr<cmList::TransformSelector> cmList::TransformSelector::New()
+{
+  return cm::make_unique<TransformNoSelector>();
 }
 
 std::unique_ptr<cmList::TransformSelector> cmList::TransformSelector::NewAT(

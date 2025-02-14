@@ -128,3 +128,6 @@ check_list_execution (TRANSFORM-PREPEND)
 check_list_execution (TRANSFORM-REPLACE)
 check_list_execution (REVERSE)
 check_list_execution (SORT)
+
+run_cmake_with_options(CMP0186-OLD -DCMAKE_POLICY_DEFAULT_CMP0186=OLD)
+run_cmake_with_options(CMP0186-NEW -DCMAKE_POLICY_DEFAULT_CMP0186=NEW)

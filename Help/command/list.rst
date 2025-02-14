@@ -246,6 +246,11 @@ For more information on regular expressions look under
                                       <replace_expression> ...)
         :target: TRANSFORM_REPLACE
 
+      .. versionchanged:: 4.1
+        The ``^`` anchor now matches only at the beginning of the input
+        element instead of the beginning of each repeated search.
+        See policy :policy:`CMP0186`.
+
   ``<SELECTOR>`` determines which elements of the list will be transformed.
   Only one type of selector can be specified at a time.
   When given, ``<SELECTOR>`` must be one of the following:

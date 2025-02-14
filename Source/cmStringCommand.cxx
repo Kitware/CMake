@@ -29,6 +29,7 @@
 #include "cmGeneratorExpression.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
+#include "cmPolicies.h"
 #include "cmRange.h"
 #include "cmStringAlgorithms.h"
 #include "cmStringReplaceHelper.h"
@@ -288,10 +289,16 @@ bool RegexMatchAll(std::vector<std::string> const& args,
   // Concatenate all the last arguments together.
   std::string input = cmJoin(cmMakeRange(args).advance(4), std::string());
 
+  unsigned optAnchor = 0;
+  if (status.GetMakefile().GetPolicyStatus(cmPolicies::CMP0186) !=
+      cmPolicies::NEW) {
+    optAnchor = cmsys::RegularExpression::BOL_AT_OFFSET;
+  }
+
   // Scan through the input for all matches.
   std::string output;
-  char const* p = input.c_str();
-  while (re.find(p)) {
+  std::string::size_type base = 0;
+  while (re.find(input, base, optAnchor)) {
     status.GetMakefile().ClearMatches();
     status.GetMakefile().StoreMatches(re);
     std::string::size_type l = re.start();
@@ -305,8 +312,8 @@ bool RegexMatchAll(std::vector<std::string> const& args,
     if (!output.empty()) {
       output += ";";
     }
-    output += std::string(p + l, r - l);
-    p += r;
+    output += re.match();
+    base = r;
   }
 
   // Store the output in the provided variable.
