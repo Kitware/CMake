@@ -73,9 +73,6 @@ elseif(testname STREQUAL regex_match_multiple_inputs) # pass
 elseif(testname STREQUAL regex_match_bad_regex) # fail
   string(REGEX MATCH "(.*" v input)
 
-elseif(testname STREQUAL regex_match_empty_string) # fail
-  string(REGEX MATCH "x*" v "")
-
 elseif(testname STREQUAL regex_match_no_match) # pass
   string(REGEX MATCH "xyz" v "abc")
   message(STATUS "v='${v}'")
@@ -86,9 +83,6 @@ elseif(testname STREQUAL regex_matchall_multiple_inputs) # pass
 
 elseif(testname STREQUAL regex_matchall_bad_regex) # fail
   string(REGEX MATCHALL "(.*" v input)
-
-elseif(testname STREQUAL regex_matchall_empty_string) # fail
-  string(REGEX MATCHALL "x*" v "")
 
 elseif(testname STREQUAL regex_replace_ends_with_backslash) # fail
   string(REGEX REPLACE "input" "output\\" v input1 input2 input3 input4)
@@ -106,9 +100,6 @@ elseif(testname STREQUAL regex_replace_has_bogus_escape) # fail
 
 elseif(testname STREQUAL regex_replace_bad_regex) # fail
   string(REGEX REPLACE "this (.*" "with that" v input)
-
-elseif(testname STREQUAL regex_replace_empty_string) # fail
-  string(REGEX REPLACE "x*" "that" v "")
 
 elseif(testname STREQUAL regex_replace_index_too_small) # fail
   string(REGEX REPLACE "^this (.*)$" "with \\1 \\-1" v "this input")

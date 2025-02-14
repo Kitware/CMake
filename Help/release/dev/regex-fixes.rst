@@ -6,3 +6,5 @@ regex-fixes
 
 * References to unmatched groups are allowed, they are replaced with empty
   strings.
+
+* Zero-length matches are always allowed.

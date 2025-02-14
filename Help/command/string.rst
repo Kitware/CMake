@@ -122,6 +122,9 @@ Search and Replace With Regular Expressions
   string instead of the beginning of each repeated search.
   See policy :policy:`CMP0186`.
 
+  Zero-length matches are allowed in ``MATCHALL`` and ``REPLACE``.
+  Previously, they triggered an error.
+
   The replacement expression may contain references to subexpressions that
   didn't match anything. Previously, such references triggered an error.
 

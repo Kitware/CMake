@@ -251,15 +251,7 @@ bool RegexMatch(std::vector<std::string> const& args,
   std::string output;
   if (re.find(input)) {
     status.GetMakefile().StoreMatches(re);
-    std::string::size_type l = re.start();
-    std::string::size_type r = re.end();
-    if (r - l == 0) {
-      std::string e = "sub-command REGEX, mode MATCH regex \"" + regex +
-        "\" matched an empty string.";
-      status.SetError(e);
-      return false;
-    }
-    output = input.substr(l, r - l);
+    output = re.match();
   }
 
   // Store the output in the provided variable.
@@ -298,22 +290,24 @@ bool RegexMatchAll(std::vector<std::string> const& args,
   // Scan through the input for all matches.
   std::string output;
   std::string::size_type base = 0;
-  while (re.find(input, base, optAnchor)) {
+  unsigned optNonEmpty = 0;
+  while (re.find(input, base, optAnchor | optNonEmpty)) {
     status.GetMakefile().ClearMatches();
     status.GetMakefile().StoreMatches(re);
-    std::string::size_type l = re.start();
-    std::string::size_type r = re.end();
-    if (r - l == 0) {
-      std::string e = "sub-command REGEX, mode MATCHALL regex \"" + regex +
-        "\" matched an empty string.";
-      status.SetError(e);
-      return false;
-    }
-    if (!output.empty()) {
+    if (!output.empty() || optNonEmpty) {
       output += ";";
     }
     output += re.match();
-    base = r;
+    base = re.end();
+
+    if (re.start() == input.length()) {
+      break;
+    }
+    if (re.start() == re.end()) {
+      optNonEmpty = cmsys::RegularExpression::NONEMPTY_AT_OFFSET;
+    } else {
+      optNonEmpty = 0;
+    }
   }
 
   // Store the output in the provided variable.
