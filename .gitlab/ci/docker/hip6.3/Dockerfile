@@ -1,9 +1,9 @@
 # syntax=docker/dockerfile:1
 
-ARG BASE_IMAGE=rocm/dev-ubuntu-22.04:5.5
+ARG BASE_IMAGE=rocm/dev-ubuntu-24.04:6.3.2
 
 FROM ${BASE_IMAGE} AS cuda-keyring
-ADD https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/cuda-keyring_1.1-1_all.deb /root/
+ADD https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/cuda-keyring_1.1-1_all.deb /root/
 RUN --mount=type=tmpfs,target=/var/log \
     dpkg -i /root/cuda-keyring_1.1-1_all.deb \
  && rm /root/cuda-keyring_1.1-1_all.deb
@@ -22,7 +22,7 @@ FROM cuda-keyring
 MAINTAINER Brad King <brad.king@kitware.com>
 
 ENV NVIDIA_DRIVER_CAPABILITIES=compute,utility
-ENV NVIDIA_REQUIRE_CUDA=cuda>=11.8
+ENV NVIDIA_REQUIRE_CUDA=cuda>=12.6
 ENV NVIDIA_VISIBLE_DEVICES=all
 ENV PATH="/opt/rocm/bin:$PATH"
 
