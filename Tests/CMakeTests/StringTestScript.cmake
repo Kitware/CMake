@@ -116,6 +116,10 @@ elseif(testname STREQUAL regex_replace_index_too_small) # fail
 elseif(testname STREQUAL regex_replace_index_too_large) # fail
   string(REGEX REPLACE "^this (.*)$" "with \\1 \\2" v "this input")
 
+elseif(testname STREQUAL regex_replace_index_no_match) # pass
+  string(REGEX REPLACE "^(this (.*)|(that .*))$" "with \\1 \\2 \\3" v "this input")
+  message(STATUS "v='${v}'")
+
 elseif(testname STREQUAL compare_no_mode) # fail
   string(COMPARE)
 

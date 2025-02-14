@@ -61,10 +61,7 @@ bool cmStringReplaceHelper::Replace(std::string const& input,
       } else {
         // Replace with part of the match.
         auto n = replacement.Number;
-        auto start = this->RegularExpression.start(n);
-        if (start != std::string::npos) {
-          output += this->RegularExpression.match(n);
-        } else {
+        if (n > this->RegularExpression.num_groups()) {
           std::ostringstream error;
           error << "replace expression \"" << this->ReplaceExpression
                 << "\" contains an out-of-range escape for regex \""
@@ -72,6 +69,7 @@ bool cmStringReplaceHelper::Replace(std::string const& input,
           this->ErrorString = error.str();
           return false;
         }
+        output += this->RegularExpression.match(n);
       }
     }
 
