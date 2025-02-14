@@ -1,0 +1,3 @@
+libs=sci_cray_mpi_mp;sci_cray_mp;dl;mpi_cray;dsmml;stdc\+\+;pgas-shmem;quadmath;modules;fi;craymath;f;u;csup;pthread;atomic;m;stdc\+\+;m;craymp;unwind;pthread;c;unwind
+dirs=/opt/cray/pe/mpich/8.1.31/ofi/cray/17.0/lib;/opt/cray/pe/dsmml/0.3.0/dsmml/lib;/opt/cray/pe/libsci/24.11.0/CRAY/17.0/x86_64/lib;/opt/cray/pe/cce/18.0.1/cce/x86_64/lib;/usr/lib64/gcc/x86_64-suse-linux/14;/usr/lib64;/lib64;/usr/x86_64-suse-linux/lib;/lib;/usr/lib;/opt/cray/pe/cce/18.0.1/cce-clang/x86_64/lib
+linker_tool=/opt/cray/pe/cce/18.0.1/cce-clang/x86_64/bin/ld.lld

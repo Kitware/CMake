@@ -1,0 +1,66 @@
+CMAKE_LANG=Fortran
+CMAKE_LINKER=/opt/cray/pe/cce/18.0.1/binutils/x86_64/x86_64-pc-linux-gnu/bin/ld
+CMAKE_Fortran_COMPILER_ABI=ELF
+CMAKE_Fortran_COMPILER_AR=
+CMAKE_Fortran_COMPILER_ARCHITECTURE_ID=
+CMAKE_Fortran_COMPILER_EXTERNAL_TOOLCHAIN=
+CMAKE_Fortran_COMPILER_ID=Cray
+CMAKE_Fortran_COMPILER_LAUNCHER=
+CMAKE_Fortran_COMPILER_LOADED=1
+CMAKE_Fortran_COMPILER_RANLIB=
+CMAKE_Fortran_COMPILER_TARGET=
+CMAKE_Fortran_COMPILER_VERSION=18.0.0
+CMAKE_Fortran_COMPILER_VERSION_INTERAL=
+Change Dir: '/tmp/tmp.vY8KAMA9PX/CMakeFiles/CMakeTmp'
+
+Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_bc4c9/fast
+/usr/bin/gmake  -f CMakeFiles/cmTC_bc4c9.dir/build.make CMakeFiles/cmTC_bc4c9.dir/build
+gmake[1]: Entering directory '/tmp/tmp.vY8KAMA9PX/CMakeFiles/CMakeTmp'
+Building Fortran object CMakeFiles/cmTC_bc4c9.dir/CMakeFortranCompilerABI.F.o
+/opt/cray/pe/craype/2.7.33/bin/ftn   -homp  -em -J.   -v -c /home/generic.user/cmake/Modules/CMakeFortranCompilerABI.F -o CMakeFiles/cmTC_bc4c9.dir/CMakeFortranCompilerABI.F.o
+
+/opt/cray/pe/cce/18.0.1/cce/x86_64/bin/ftnfe -h cpu=x86-rome -h network=ofi -D__CRAY_X86_ROME -D__CRAYXT_COMPUTE_LINUX_TARGET -h omp -em -J. -I/opt/cray/pe/cce/18.0.1/cce-clang/x86_64/lib/clang/18/include -I/opt/cray/pe/cce/18.0.1/cce/x86_64/include/craylibs -I/usr/include -I/opt/cray/pe/mpich/8.1.31/ofi/cray/17.0/include -I/opt/cray/pe/dsmml/0.3.0/dsmml//include -I/opt/cray/pe/libsci/24.11.0/CRAY/17.0/x86_64/include -I/usr/include -hpl=/tmp/pe_201719//pldir -usystem_mod=/opt/cray/pe/cce/18.0.1/cce/x86_64/lib/libmodules.a -usystem_mod=/opt/cray/pe/cce/18.0.1/cce/x86_64/lib/libomp.a -usystem_mod=/opt/cray/pe/cce/18.0.1/cce/x86_64/lib/omp_lib.a -usystem_mod=/opt/cray/pe/cce/18.0.1/cce/x86_64/lib/libopenacc.a -usystem_mod=/opt/cray/pe/mpich/8.1.31/ofi/cray/17.0/include -usystem_mod=/opt/cray/pe/dsmml/0.3.0/dsmml//include -usystem_mod=/opt/cray/pe/libsci/24.11.0/CRAY/17.0/x86_64/include -usystem_mod=/opt/cray/pe/cce/18.0.1/cce/x86_64/lib/libcraymp.a -ffixed -CZ/tmp/pe_201719/CMakeFortranCompilerABI.T -Cx -CX/tmp/pe_201719/CMakeFortranCompilerABI.xml -hdecompile=/tmp/tmp.vY8KAMA9PX/CMakeFiles/CMakeTmp/CMakeFiles/cmTC_bc4c9.dir/CMakeFortranCompilerABI. -S /tmp/pe_201719/CMakeFortranCompilerABI_1.s -Oipa3 -ufile_id=1 /home/generic.user/cmake/Modules/CMakeFortranCompilerABI.F
+
+/opt/cray/pe/cce/18.0.1/cce/x86_64/bin/optcg /tmp/pe_201719//pldir 1
+
+/opt/cray/pe/cce/18.0.1/binutils/x86_64/x86_64-pc-linux-gnu/bin/as -o CMakeFiles/cmTC_bc4c9.dir/CMakeFortranCompilerABI.F.o --64 /tmp/pe_201719/CMakeFortranCompilerABI_1.s
+rm /tmp/pe_201719/CMakeFortranCompilerABI_1.s
+rm /tmp/pe_201719//pldir/PL_global_data
+rm /tmp/pe_201719//pldir/PL_module_list
+rm /tmp/pe_201719//pldir/PL_path
+rm /tmp/pe_201719//pldir/CMakeFortranCompilerABI_1.inl
+rm /tmp/pe_201719//pldir/gline_1
+rm /tmp/pe_201719//pldir/iline_1
+rmdir /tmp/pe_201719//pldir
+rm /tmp/pe_201719//CMakeFortranCompilerABI.xml
+rm /tmp/pe_201719//CMakeFortranCompilerABI.T
+rm /tmp/pe_201719//CMakeFortranCompilerABI.Tfe
+rm /tmp/pe_201719//CMakeFortranCompilerABI_1.cif.Ttmp
+rm /tmp/pe_201719//CMakeFortranCompilerABI_1.xml.Ttmp
+rmdir /tmp/pe_201719/
+Linking Fortran executable cmTC_bc4c9
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_bc4c9.dir/link.txt --verbose=1
+
+/opt/cray/pe/cce/18.0.1/cce/x86_64/bin/cce_omp_offload_linker -O2 --verbose -mcode-object-version=5 -- /opt/cray/pe/cce/18.0.1/binutils/x86_64/x86_64-pc-linux-gnu/bin/ld --eh-frame-hdr -m elf_x86_64 --enable-new-dtags --dynamic-linker /lib64/ld-linux-x86-64.so.2 /usr/lib64//crt1.o /usr/lib64//crti.o /usr/lib64/gcc/x86_64-suse-linux/14//crtbegin.o /usr/lib64/gcc/x86_64-suse-linux/14//crtfastmath.o /opt/cray/pe/cce/18.0.1/cce/x86_64/lib/no_mmap.o /opt/cray/pe/cce/18.0.1/cce/x86_64/lib/cce_floatingpt_au.o CMakeFiles/cmTC_bc4c9.dir/CMakeFortranCompilerABI.F.o -Bdynamic -rpath=/opt/cray/pe/cce/18.0.1/cce/x86_64/lib -L/opt/cray/pe/mpich/8.1.31/ofi/cray/17.0/lib -L/opt/cray/pe/dsmml/0.3.0/dsmml//lib -L/opt/cray/pe/libsci/24.11.0/CRAY/17.0/x86_64/lib -L/opt/cray/pe/cce/18.0.1/cce/x86_64/lib/pkgconfig/../ --as-needed -lsci_cray_mpi_mp --no-as-needed --as-needed -lsci_cray_mp --no-as-needed -ldl --as-needed -lmpifort_cray --no-as-needed --as-needed -lmpi_cray --no-as-needed --as-needed -ldsmml --no-as-needed -lstdc++ --as-needed -lpgas-shmem --no-as-needed -lquadmath -lcraymp -lmodules -lfi -lcraymath -lf -lu -lcsup --as-needed -latomic --no-as-needed --as-needed -lgfortran --no-as-needed -lpthread -L/opt/cray/pe/cce/18.0.1/cce-clang/x86_64/lib/clang/18/lib/linux -L/opt/cray/pe/cce/18.0.1/cce-clang/x86_64/lib/clang/18/lib/linux/../../../.. -lcsup -lm -lclang_rt.craypgo-x86_64 -lclang_rt.builtins-x86_64 --as-needed -lunwind --no-as-needed -lc -lclang_rt.builtins-x86_64 --as-needed -lunwind --no-as-needed --disable-new-dtags -L/usr/lib64/gcc/x86_64-suse-linux/14 -L/opt/cray/pe/cce/18.0.1/binutils/x86_64/x86_64-pc-linux-gnu/..//x86_64-unknown-linux-gnu/lib -EL -o cmTC_bc4c9 /usr/lib64/gcc/x86_64-suse-linux/14//crtend.o /usr/lib64//crtn.o
+Skipping unbundling of /opt/cray/pe/cce/18.0.1/cce/x86_64/lib/pkgconfig/..//libcsup.a (already processed)
+Skipping unbundling of /opt/cray/pe/cce/18.0.1/cce-clang/x86_64/lib/clang/18/lib/linux/libclang_rt.builtins-x86_64.a (already processed)
+Skipping unbundling of /opt/cray/pe/cce/18.0.1/cce-clang/x86_64/lib/clang/18/lib/linux/../../../../libunwind.a (already processed)
+as /tmp/cooltmpdir-B0IiNo/tmp_offload_linker-cce-openmpacc-targetbegin.s -o /tmp/cooltmpdir-B0IiNo/acc-targetbegin-cce-openmp.o
+as /tmp/cooltmpdir-B0IiNo/tmp_offload_linker-cce-openmpacc-targetend.s -o /tmp/cooltmpdir-B0IiNo/acc-targetend-tmp-cce-openmp.o
+/opt/cray/pe/cce/18.0.1/binutils/x86_64/bin/ld --relocatable /tmp/cooltmpdir-B0IiNo/acc-targetend-tmp-cce-openmp.o -o /tmp/cooltmpdir-B0IiNo/acc-targetend-cce-openmp.o
+/opt/cray/pe/cce/18.0.1/binutils/x86_64/x86_64-pc-linux-gnu/bin/ld /tmp/cooltmpdir-B0IiNo/acc-targetbegin-cce-openmp.o --eh-frame-hdr -m elf_x86_64 --enable-new-dtags --dynamic-linker /lib64/ld-linux-x86-64.so.2 /usr/lib64//crt1.o /usr/lib64//crti.o /usr/lib64/gcc/x86_64-suse-linux/14//crtbegin.o /usr/lib64/gcc/x86_64-suse-linux/14//crtfastmath.o /opt/cray/pe/cce/18.0.1/cce/x86_64/lib/no_mmap.o /opt/cray/pe/cce/18.0.1/cce/x86_64/lib/cce_floatingpt_au.o CMakeFiles/cmTC_bc4c9.dir/CMakeFortranCompilerABI.F.o -Bdynamic -rpath=/opt/cray/pe/cce/18.0.1/cce/x86_64/lib -L/opt/cray/pe/mpich/8.1.31/ofi/cray/17.0/lib -L/opt/cray/pe/dsmml/0.3.0/dsmml//lib -L/opt/cray/pe/libsci/24.11.0/CRAY/17.0/x86_64/lib -L/opt/cray/pe/cce/18.0.1/cce/x86_64/lib/pkgconfig/../ --as-needed -lsci_cray_mpi_mp --no-as-needed --as-needed -lsci_cray_mp --no-as-needed -ldl --as-needed -lmpifort_cray --no-as-needed --as-needed -lmpi_cray --no-as-needed --as-needed -ldsmml --no-as-needed -lstdc++ --as-needed -lpgas-shmem --no-as-needed -lquadmath -lcraymp -lmodules -lfi -lcraymath -lf -lu -lcsup --as-needed -latomic --no-as-needed --as-needed -lgfortran --no-as-needed -lpthread -L/opt/cray/pe/cce/18.0.1/cce-clang/x86_64/lib/clang/18/lib/linux -L/opt/cray/pe/cce/18.0.1/cce-clang/x86_64/lib/clang/18/lib/linux/../../../.. -lcsup -lm -lclang_rt.craypgo-x86_64 -lclang_rt.builtins-x86_64 --as-needed -lunwind --no-as-needed -lc -lclang_rt.builtins-x86_64 --as-needed -lunwind --no-as-needed --disable-new-dtags -L /usr/lib64/gcc/x86_64-suse-linux/14 -L /opt/cray/pe/cce/18.0.1/binutils/x86_64/x86_64-pc-linux-gnu/..//x86_64-unknown-linux-gnu/lib -EL -o cmTC_bc4c9 /usr/lib64/gcc/x86_64-suse-linux/14//crtend.o /usr/lib64//crtn.o /tmp/cooltmpdir-B0IiNo/acc-targetend-cce-openmp.o
+rm '/tmp/cooltmpdir-B0IiNo/tmp_offload_linker-cce-openmpacc-targetend.s'
+rm '/tmp/cooltmpdir-B0IiNo/tmp_offload_linker-cce-openmpacc-targetbegin.s'
+rm '/tmp/cooltmpdir-B0IiNo/acc-targetend-cce-openmp.o'
+rm '/tmp/cooltmpdir-B0IiNo/acc-targetend-tmp-cce-openmp.o'
+rm '/tmp/cooltmpdir-B0IiNo/acc-targetbegin-cce-openmp.o'
+rm '/tmp/cooltmpdir-B0IiNo/'
+
+/opt/cray/pe/cce/18.0.1/binutils/x86_64/bin/objcopy --remove-section=.note.ftn_module_data cmTC_bc4c9
+rm /tmp/pe_201731//pldir/PL_global_data
+rm /tmp/pe_201731//pldir/PL_module_list
+rm /tmp/pe_201731//pldir/PL_path
+rmdir /tmp/pe_201731//pldir
+rmdir /tmp/pe_201731/
+/opt/cray/pe/craype/2.7.33/bin/ftn  -v -homp  CMakeFiles/cmTC_bc4c9.dir/CMakeFortranCompilerABI.F.o -o cmTC_bc4c9
+gmake[1]: Leaving directory '/tmp/tmp.vY8KAMA9PX/CMakeFiles/CMakeTmp'
