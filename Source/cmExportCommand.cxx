@@ -63,12 +63,12 @@ bool cmExportCommand(std::vector<std::string> const& args,
 
   struct Arguments
   {
-    std::string ExportSetName;
     cm::optional<ArgumentParser::MaybeEmpty<std::vector<std::string>>> Targets;
-    std::string Namespace;
-    std::string Filename;
-    std::string AndroidMKFile;
-    std::string CxxModulesDirectory;
+    ArgumentParser::NonEmpty<std::string> ExportSetName;
+    ArgumentParser::NonEmpty<std::string> Namespace;
+    ArgumentParser::NonEmpty<std::string> Filename;
+    ArgumentParser::NonEmpty<std::string> AndroidMKFile;
+    ArgumentParser::NonEmpty<std::string> CxxModulesDirectory;
     bool Append = false;
     bool ExportOld = false;
 
