@@ -270,7 +270,7 @@ and contain the following data:
 
   ``target``
     The CMake target associated with the command. Only included when ``role`` is
-    one of ``compile``, ``link``, ``custom``.
+    ``compile`` or ``link``.
 
   ``targetType``
     The :prop_tgt:`TYPE` of the target. Only included when ``role`` is
