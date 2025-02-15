@@ -777,22 +777,15 @@ static void printsub(struct Curl_easy *data,
   }
 }
 
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable:4706) /* assignment within conditional expression */
-#endif
 static bool str_is_nonascii(const char *str)
 {
   char c;
-  while((c = *str++))
+  while((c = *str++) != 0)
     if(c & 0x80)
       return TRUE;
 
   return FALSE;
 }
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
 
 static CURLcode check_telnet_options(struct Curl_easy *data)
 {
@@ -1559,10 +1552,9 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
         /* returned not-zero, this an error */
         if(result) {
           keepon = FALSE;
-          /* TODO: in test 1452, macOS sees a ECONNRESET sometimes?
-           * Is this the telnet test server not shutting down the socket
-           * in a clean way? Seems to be timing related, happens more
-           * on slow debug build */
+          /* In test 1452, macOS sees a ECONNRESET sometimes? Is this the
+           * telnet test server not shutting down the socket in a clean way?
+           * Seems to be timing related, happens more on slow debug build */
           if(data->state.os_errno == ECONNRESET) {
             DEBUGF(infof(data, "telnet_do, unexpected ECONNRESET on recv"));
           }

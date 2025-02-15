@@ -8,7 +8,7 @@ CMAKE_EXE_LINKER_FLAGS:STRING=-static-libstdc++ -static-libgcc
 
 # Enable ssl support in curl
 CMAKE_USE_OPENSSL:BOOL=ON
-OPENSSL_CRYPTO_LIBRARY:STRING=/opt/openssl/lib/libcrypto.a;-pthread
+OPENSSL_CRYPTO_LIBRARY:STRING=/opt/openssl/lib/libcrypto.a
 OPENSSL_INCLUDE_DIR:PATH=/opt/openssl/include
 OPENSSL_SSL_LIBRARY:FILEPATH=/opt/openssl/lib/libssl.a
 

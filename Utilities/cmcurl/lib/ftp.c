@@ -4108,11 +4108,6 @@ static CURLcode ftp_disconnect(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable:4706) /* assignment within conditional expression */
-#endif
-
 /***********************************************************************
  *
  * ftp_parse_url_path()
@@ -4203,7 +4198,8 @@ CURLcode ftp_parse_url_path(struct Curl_easy *data)
         }
 
         /* parse the URL path into separate path components */
-        while((slashPos = strchr(curPos, '/'))) {
+        /* !checksrc! disable EQUALSNULL 1 */
+        while((slashPos = strchr(curPos, '/')) != NULL) {
           size_t compLen = slashPos - curPos;
 
           /* path starts with a slash: add that as a directory */
@@ -4266,10 +4262,6 @@ CURLcode ftp_parse_url_path(struct Curl_easy *data)
   free(rawPath);
   return CURLE_OK;
 }
-
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
 
 /* call this when the DO phase has completed */
 static CURLcode ftp_dophase_done(struct Curl_easy *data, bool connected)
