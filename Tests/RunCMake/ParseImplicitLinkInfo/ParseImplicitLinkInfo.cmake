@@ -11,6 +11,9 @@ set(targets
   aix-C-IBMClang-17.1.1.2 aix-CXX-IBMClang-17.1.1.2
   craype-C-Cray-8.7 craype-CXX-Cray-8.7 craype-Fortran-Cray-8.7
   craype-C-Cray-9.0-hlist-ad craype-CXX-Cray-9.0-hlist-ad craype-Fortran-Cray-9.0-hlist-ad
+  craype-C-CrayClang-18.0.1 craype-CXX-CrayClang-18.0.1 craype-Fortran-Cray-18.0.1
+  craype-C-CrayClang-18.0.1-fopenmp craype-CXX-CrayClang-18.0.1-fopenmp craype-Fortran-Cray-18.0.1-homp
+  craype-C-CrayClang-18.0.1-fopenmp-accel craype-CXX-CrayClang-18.0.1-fopenmp-accel craype-Fortran-Cray-18.0.1-homp-accel
   craype-C-GNU-7.3.0 craype-CXX-GNU-7.3.0 craype-Fortran-GNU-7.3.0
   craype-C-Intel-18.0.2.20180210 craype-CXX-Intel-18.0.2.20180210
     craype-Fortran-Intel-18.0.2.20180210

@@ -1,0 +1,67 @@
+CMAKE_LANG=C
+CMAKE_LINKER=/opt/cray/pe/cce/18.0.1/binutils/x86_64/x86_64-pc-linux-gnu/bin/ld
+CMAKE_C_COMPILER_ABI=ELF
+CMAKE_C_COMPILER_AR=
+CMAKE_C_COMPILER_ARCHITECTURE_ID=
+CMAKE_C_COMPILER_EXTERNAL_TOOLCHAIN=
+CMAKE_C_COMPILER_ID=CrayClang
+CMAKE_C_COMPILER_LAUNCHER=
+CMAKE_C_COMPILER_LOADED=1
+CMAKE_C_COMPILER_RANLIB=
+CMAKE_C_COMPILER_TARGET=
+CMAKE_C_COMPILER_VERSION=18.0.1
+CMAKE_C_COMPILER_VERSION_INTERAL=
+Change Dir: '/tmp/tmp.AZ7ST0Eub7/CMakeFiles/CMakeTmp'
+
+Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_4a483/fast
+/usr/bin/gmake  -f CMakeFiles/cmTC_4a483.dir/build.make CMakeFiles/cmTC_4a483.dir/build
+gmake[1]: Entering directory '/tmp/tmp.AZ7ST0Eub7/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_4a483.dir/CMakeCCompilerABI.c.o
+/opt/cray/pe/craype/2.7.33/bin/cc   -v -o CMakeFiles/cmTC_4a483.dir/CMakeCCompilerABI.c.o -c /home/generic.user/cmake/Modules/CMakeCCompilerABI.c
+Cray clang version 18.0.1  (ac9591613de6fa834bf54862b433bbc16834c13d)
+Target: x86_64-unknown-linux-gnu
+Thread model: posix
+InstalledDir: /opt/cray/pe/cce/18.0.1/cce-clang/x86_64/share/../bin
+Found candidate GCC installation: /usr/lib64/gcc/x86_64-suse-linux/11
+Found candidate GCC installation: /usr/lib64/gcc/x86_64-suse-linux/12
+Found candidate GCC installation: /usr/lib64/gcc/x86_64-suse-linux/13
+Found candidate GCC installation: /usr/lib64/gcc/x86_64-suse-linux/14
+Found candidate GCC installation: /usr/lib64/gcc/x86_64-suse-linux/7
+Selected GCC installation: /usr/lib64/gcc/x86_64-suse-linux/14
+Candidate multilib: .@m64
+Selected multilib: .@m64
+Found HIP installation: /opt/rocm, version 6.3.42131
+ (in-process)
+ "/opt/cray/pe/cce/18.0.1/cce-clang/x86_64/bin/clang-18" -cc1 -triple x86_64-unknown-linux-gnu -mllvm -cray-omp-opt-fork-call -mllvm -cray-omp-parallel-opt-call -mllvm -cray-openmp-rename-outlined -fcray-gpu -flocal-restrict -mllvm -cray-enhanced-asm=1 -fenhanced-asm=1 -mllvm -cray-enhanced-ir=1 -fenhanced-ir=1 -fomp-local-offload-table -ffortran -emit-obj -mrelax-all -disable-free -clear-ast-before-backend -main-file-name CMakeCCompilerABI.c -mrelocation-model static -mframe-pointer=all -fmath-errno -ffp-contract=on -fno-rounding-math -mconstructor-aliases -funwind-tables=2 -target-cpu znver2 -debugger-tuning=gdb -fdebug-compilation-dir=/tmp/tmp.AZ7ST0Eub7/CMakeFiles/CMakeTmp -v -fcoverage-compilation-dir=/tmp/tmp.AZ7ST0Eub7/CMakeFiles/CMakeTmp -resource-dir /opt/cray/pe/cce/18.0.1/cce-clang/x86_64/lib/clang/18 -isystem /opt/cray/pe/cce/18.0.1/cce-clang/x86_64/lib/clang/18/include -isystem /opt/cray/pe/cce/18.0.1/cce/x86_64/include/craylibs -D __CRAY_X86_ROME -D __CRAYXT_COMPUTE_LINUX_TARGET -I /opt/cray/pe/mpich/8.1.31/ofi/cray/17.0/include -I /opt/cray/pe/dsmml/0.3.0/dsmml//include -I /opt/cray/pe/libsci/24.11.0/CRAY/17.0/x86_64/include -internal-isystem /opt/cray/pe/cce/18.0.1/cce-clang/x86_64/lib/clang/18/include -internal-isystem /usr/local/include -internal-isystem /usr/lib64/gcc/x86_64-suse-linux/14/../../../../x86_64-suse-linux/include -internal-externc-isystem /include -internal-externc-isystem /usr/include -ferror-limit 19 -fgnuc-version=4.2.1 -fskip-odr-check-in-gmf -faddrsig -D__GCC_HAVE_DWARF2_CFI_ASM=1 -o CMakeFiles/cmTC_4a483.dir/CMakeCCompilerABI.c.o -x c /home/generic.user/cmake/Modules/CMakeCCompilerABI.c
+clang -cc1 version 18.1.8 based upon LLVM 18.1.8 default target x86_64-unknown-linux-gnu
+ignoring nonexistent directory "/include"
+ignoring duplicate directory "/opt/cray/pe/cce/18.0.1/cce-clang/x86_64/lib/clang/18/include"
+#include "..." search starts here:
+#include <...> search starts here:
+ /opt/cray/pe/mpich/8.1.31/ofi/cray/17.0/include
+ /opt/cray/pe/dsmml/0.3.0/dsmml//include
+ /opt/cray/pe/libsci/24.11.0/CRAY/17.0/x86_64/include
+ /opt/cray/pe/cce/18.0.1/cce-clang/x86_64/lib/clang/18/include
+ /opt/cray/pe/cce/18.0.1/cce/x86_64/include/craylibs
+ /usr/local/include
+ /usr/lib64/gcc/x86_64-suse-linux/14/../../../../x86_64-suse-linux/include
+ /usr/include
+End of search list.
+Linking C executable cmTC_4a483
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_4a483.dir/link.txt --verbose=1
+Cray clang version 18.0.0.x  (bbb3d6951c0329c4d902e7dcd9d677009b67b19a)
+Target: x86_64-unknown-linux-gnu
+Thread model: posix
+InstalledDir: /opt/cray/pe/cce/18.0.1/cce-clang/x86_64/share/../bin
+Found candidate GCC installation: /usr/lib64/gcc/x86_64-suse-linux/11
+Found candidate GCC installation: /usr/lib64/gcc/x86_64-suse-linux/12
+Found candidate GCC installation: /usr/lib64/gcc/x86_64-suse-linux/13
+Found candidate GCC installation: /usr/lib64/gcc/x86_64-suse-linux/14
+Found candidate GCC installation: /usr/lib64/gcc/x86_64-suse-linux/7
+Selected GCC installation: /usr/lib64/gcc/x86_64-suse-linux/14
+Candidate multilib: .@m64
+Selected multilib: .@m64
+Found HIP installation: /opt/rocm, version 6.3.42131
+ "/opt/cray/pe/cce/18.0.1/cce-clang/x86_64/bin/ld.lld" --hash-style=gnu --eh-frame-hdr -m elf_x86_64 -dynamic-linker /lib64/ld-linux-x86-64.so.2 -o cmTC_4a483 /usr/lib64/gcc/x86_64-suse-linux/14/../../../../lib64/crt1.o /usr/lib64/gcc/x86_64-suse-linux/14/../../../../lib64/crti.o /opt/cray/pe/cce/18.0.1/cce-clang/x86_64/lib/clang/18/lib/linux/clang_rt.crtbegin-x86_64.o -L/opt/cray/pe/mpich/8.1.31/ofi/cray/17.0/lib -L/opt/cray/pe/dsmml/0.3.0/dsmml//lib -L/opt/cray/pe/libsci/24.11.0/CRAY/17.0/x86_64/lib -L/opt/cray/pe/cce/18.0.1/cce/x86_64/lib/pkgconfig/../ -L/usr/lib64/gcc/x86_64-suse-linux/14 -L/usr/lib64/gcc/x86_64-suse-linux/14/../../../../lib64 -L/lib/../lib64 -L/usr/lib/../lib64 -L/usr/lib64/gcc/x86_64-suse-linux/14/../../../../x86_64-suse-linux/lib -L/lib -L/usr/lib -plugin-opt=mcpu=znver2 -plugin-opt=lto=0 -plugin-opt=defaults=cray -plugin-opt=mllvm=-cray-math-precision=none -rpath=/opt/cray/pe/cce/18.0.1/cce/x86_64/lib CMakeFiles/cmTC_4a483.dir/CMakeCCompilerABI.c.o --as-needed -lsci_cray_mpi --no-as-needed --as-needed -lsci_cray --no-as-needed -ldl --as-needed -lmpi_cray --no-as-needed --as-needed -ldsmml --no-as-needed -lstdc++ --as-needed -lpgas-shmem --no-as-needed -lquadmath -lmodules -lfi -lcraymath -lf -lu -lcsup --as-needed -lpthread -latomic --no-as-needed --as-needed -lm --no-as-needed --disable-new-dtags /opt/cray/pe/cce/18.0.1/cce/x86_64/lib/no_mmap.o /opt/cray/pe/cce/18.0.1/cce-clang/x86_64/lib/clang/18/lib/linux/libclang_rt.builtins-x86_64.a --as-needed -L/opt/cray/pe/cce/18.0.1/cce-clang/x86_64/lib -rpath=/opt/cray/pe/cce/18.0.1/cce-clang/x86_64/lib /opt/cray/pe/cce/18.0.1/cce-clang/x86_64/lib/libunwind.so -lunwind --no-as-needed -lc /opt/cray/pe/cce/18.0.1/cce-clang/x86_64/lib/clang/18/lib/linux/libclang_rt.builtins-x86_64.a --as-needed -L/opt/cray/pe/cce/18.0.1/cce-clang/x86_64/lib -rpath=/opt/cray/pe/cce/18.0.1/cce-clang/x86_64/lib /opt/cray/pe/cce/18.0.1/cce-clang/x86_64/lib/libunwind.so -lunwind --no-as-needed /opt/cray/pe/cce/18.0.1/cce-clang/x86_64/lib/clang/18/lib/linux/clang_rt.crtend-x86_64.o /usr/lib64/gcc/x86_64-suse-linux/14/../../../../lib64/crtn.o
+/opt/cray/pe/craype/2.7.33/bin/cc  -v CMakeFiles/cmTC_4a483.dir/CMakeCCompilerABI.c.o -o cmTC_4a483
+gmake[1]: Leaving directory '/tmp/tmp.AZ7ST0Eub7/CMakeFiles/CMakeTmp'
