@@ -439,9 +439,9 @@ t:cuda12.6-clang:
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
-t:hip5.5-nvidia:
+t:hip6.3-nvidia:
     extends:
-        - .hip5.5_nvidia
+        - .hip6.3_nvidia
         - .cmake_test_linux_release
         - .linux_x86_64_tags_cuda
         - .run_dependent
@@ -449,9 +449,9 @@ t:hip5.5-nvidia:
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
-t:hip5.5-radeon:
+t:hip6.3-radeon:
     extends:
-        - .hip5.5_radeon
+        - .hip6.3_radeon
         - .cmake_test_linux_release
         - .linux_x86_64_tags_radeon
         - .run_dependent
