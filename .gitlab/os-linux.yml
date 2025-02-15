@@ -434,19 +434,21 @@
 
 ### HIP builds
 
-.hip5.5:
-    image: "kitware/cmake:ci-hip5.5-x86_64-2023-09-18"
+.hip6.3:
+    image: "kitware/cmake:ci-hip6.3-x86_64-2025-02-14"
 
     variables:
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci"
         CMAKE_ARCH: x86_64
         CTEST_LABELS: "HIP"
 
-.hip5.5_radeon:
-    extends: .hip5.5
+.hip6.3_radeon:
+    extends: .hip6.3
 
     variables:
-        CMAKE_CONFIGURATION: hip5.5_radeon
+        # FIXME(rocclr): device modules fail loading from binaries in paths with spaces
+        GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake-ci"
+        CMAKE_CONFIGURATION: hip6.3_radeon
         CMAKE_GENERATOR: "Ninja Multi-Config"
 
 .debian12_hip_radeon:
@@ -463,11 +465,11 @@
         CMAKE_CONFIGURATION: fedora41_hip_radeon
         CTEST_LABELS: "HIP"
 
-.hip5.5_nvidia:
-    extends: .hip5.5
+.hip6.3_nvidia:
+    extends: .hip6.3
 
     variables:
-        CMAKE_CONFIGURATION: hip5.5_nvidia
+        CMAKE_CONFIGURATION: hip6.3_nvidia
         CTEST_LABELS: "HIP"
 
 ### C++ modules
