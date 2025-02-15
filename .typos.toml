@@ -11,6 +11,11 @@ extend-ignore-re = [
   , "(?Rm)^.*(#|/(/|\\*)|\\.\\.)\\s*(NOQA|noqa):? spellcheck(: *|=| +)disable-line$"
   ]
 locale = "en-us"
+# ATTENTION If, for any reason, you want to add the
+# `extend-ignore-identifiers-re` to this section,
+# please also modify the `.gitlab/ci/typos.bash`
+# script accordingly.
+#extend-ignore-identifiers-re=["\\b[0-9a-f]{10}\\b"]
 
 # Add repo-wide false positives here in the form of `word = "word"`.
 # Check the manual for details.
