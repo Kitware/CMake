@@ -79,11 +79,8 @@
 #include "memdebug.h"
 
 /* ALPN for http2 */
-#ifdef USE_HTTP2
-#  undef HAS_ALPN
-#  ifdef MBEDTLS_SSL_ALPN
-#    define HAS_ALPN
-#  endif
+#if defined(USE_HTTP2) && defined(MBEDTLS_SSL_ALPN)
+#  define HAS_ALPN_MBEDTLS
 #endif
 
 struct mbed_ssl_backend_data {
@@ -97,7 +94,7 @@ struct mbed_ssl_backend_data {
 #endif
   mbedtls_pk_context pk;
   mbedtls_ssl_config config;
-#ifdef HAS_ALPN
+#ifdef HAS_ALPN_MBEDTLS
   const char *protocols[3];
 #endif
   int *ciphersuites;
@@ -931,7 +928,7 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
     return CURLE_SSL_CONNECT_ERROR;
   }
 
-#ifdef HAS_ALPN
+#ifdef HAS_ALPN_MBEDTLS
   if(connssl->alpn) {
     struct alpn_proto_buf proto;
     size_t i;
@@ -1109,7 +1106,7 @@ pinnedpubkey_error:
     }
   }
 
-#ifdef HAS_ALPN
+#ifdef HAS_ALPN_MBEDTLS
   if(connssl->alpn) {
     const char *proto = mbedtls_ssl_get_alpn_protocol(&backend->ssl);
 
@@ -1636,7 +1633,6 @@ static CURLcode mbedtls_sha256sum(const unsigned char *input,
                                   unsigned char *sha256sum,
                                   size_t sha256len UNUSED_PARAM)
 {
-  /* TODO: explain this for different mbedtls 2.x vs 3 version */
   (void)sha256len;
 #if MBEDTLS_VERSION_NUMBER < 0x02070000
   mbedtls_sha256(input, inputlen, sha256sum, 0);
