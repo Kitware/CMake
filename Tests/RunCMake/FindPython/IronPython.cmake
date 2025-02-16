@@ -1,0 +1,36 @@
+
+set (${PYTHON}_FIND_IMPLEMENTATIONS IronPython)
+
+if(PYTHON STREQUAL "Python")
+  set(IronPython_VERSION "IronPython ${Python_REQUESTED_VERSION}")
+elseif(PYTHON STREQUAL "Python2")
+  set(IronPython_VERSION "IronPython2")
+else()
+  set(IronPython_VERSION "IronPython3")
+endif()
+
+find_package(${PYTHON} ${Python_REQUESTED_VERSION} COMPONENTS Interpreter Compiler)
+if (NOT ${PYTHON}_FOUND)
+  message (FATAL_ERROR "Failed to find Python ${Python_REQUESTED_VERSION}")
+endif()
+
+if (NOT ${PYTHON}_Interpreter_FOUND)
+  message (FATAL_ERROR "Failed to find Python Interpreter")
+endif()
+if (NOT ${PYTHON}_INTERPRETER_ID STREQUAL "IronPython")
+  message (FATAL_ERROR "Erroneous interpreter ID (${${PYTHON}_INTERPRETER_ID})")
+endif()
+
+if (NOT ${PYTHON}_Compiler_FOUND)
+  message (FATAL_ERROR "Failed to find Python Compiler")
+endif()
+if (NOT ${PYTHON}_COMPILER_ID STREQUAL "IronPython")
+  message (FATAL_ERROR "Erroneous compiler ID (${${PYTHON}_COMPILER_ID})")
+endif()
+
+if(NOT TARGET ${PYTHON}::Interpreter)
+  message(SEND_ERROR "${PYTHON}::Interpreter not found")
+endif()
+if(NOT TARGET ${PYTHON}::Compiler)
+  message(SEND_ERROR "${PYTHON}::Interpreter not found")
+endif()

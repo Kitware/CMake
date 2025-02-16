@@ -1085,7 +1085,7 @@ function (_PYTHON_VALIDATE_COMPILER)
   file (WRITE "${working_dir}/version.py" "import sys; sys.stdout.write('.'.join([str(x) for x in sys.version_info[:3]])); sys.stdout.flush()\n")
   execute_process (COMMAND ${launcher} "${_${_PYTHON_PREFIX}_COMPILER}"
                            ${_${_PYTHON_PREFIX}_IRON_PYTHON_COMPILER_ARCH_FLAGS}
-                           /target:exe /embed "${working_dir}/version.py"
+                           /target:exe /embed /standalone "${working_dir}/version.py"
                    WORKING_DIRECTORY "${working_dir}"
                    OUTPUT_QUIET
                    ERROR_QUIET
@@ -2664,7 +2664,7 @@ if ("Compiler" IN_LIST ${_PYTHON_BASE}_FIND_COMPONENTS)
     file (WRITE "${_${_PYTHON_PREFIX}_VERSION_DIR}/version.py" "import sys; sys.stdout.write('.'.join([str(x) for x in sys.version_info[:3]])); sys.stdout.flush()\n")
     execute_process (COMMAND ${_${_PYTHON_PREFIX}_COMPILER_LAUNCHER} "${_${_PYTHON_PREFIX}_COMPILER}"
                              ${_${_PYTHON_PREFIX}_IRON_PYTHON_COMPILER_ARCH_FLAGS}
-                             /target:exe /embed "${_${_PYTHON_PREFIX}_VERSION_DIR}/version.py"
+                             /target:exe /embed /standalone "${_${_PYTHON_PREFIX}_VERSION_DIR}/version.py"
                      WORKING_DIRECTORY "${_${_PYTHON_PREFIX}_VERSION_DIR}"
                      OUTPUT_QUIET
                      ERROR_QUIET)

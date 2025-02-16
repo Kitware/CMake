@@ -1,0 +1,4 @@
+  Could NOT find Python3 \(missing: .*NumPy.*\).*
+
+      Reason given by package: *
+          NumPy: Cannot find the directory "/not/found/numpy/include"

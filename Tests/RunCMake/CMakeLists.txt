@@ -421,6 +421,71 @@ if(CMAKE_GENERATOR MATCHES "Make|Ninja")
   add_RunCMake_test(Instrumentation)
 endif()
 add_RunCMake_test(ConfigDir)
+if(CMake_TEST_FindPython2)
+  add_RunCMake_test(FindPython2.CPython TEST_DIR FindPython
+                                -DCMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME}
+                                "-DRunCMake_BUILD_TYPE=${CMAKE_BUILD_TYPE}"
+                                -DCMake_TEST_FindPython2_CPython=TRUE
+                                -DCMake_TEST_FindPython2=TRUE)
+  set_property(TEST RunCMake.FindPython2.CPython PROPERTY LABELS Python2)
+endif()
+if(CMake_TEST_FindPython3)
+  add_RunCMake_test(FindPython3.CPython TEST_DIR FindPython
+                                        -DCMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME}
+                                        "-DRunCMake_BUILD_TYPE=${CMAKE_BUILD_TYPE}"
+                                        -DCMAKE_C_COMPILER_ID=${CMAKE_C_COMPILER_ID}
+                                        -DCMAKE_C_COMPILER_VERSION=${CMAKE_C_COMPILER_VERSION}
+                                        -DCMake_TEST_FindPython3_CPython=TRUE
+                                        -DCMake_TEST_FindPython3=TRUE)
+  set_property(TEST RunCMake.FindPython3.CPython PROPERTY LABELS Python3)
+endif()
+if(CMake_TEST_FindPython2_IronPython)
+  add_RunCMake_test(FindPython2.IronPython TEST_DIR FindPython
+                                           -DCMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME}
+                                           "-DRunCMake_BUILD_TYPE=${CMAKE_BUILD_TYPE}"
+                                           -DCMake_TEST_FindPython2=${CMake_TEST_FindPython2}
+                                           -DCMake_TEST_FindPython2_IronPython=${CMake_TEST_FindPython2_IronPython})
+  set_property(TEST RunCMake.FindPython2.IronPython PROPERTY LABELS Python2)
+endif()
+if(CMake_TEST_FindPython3_IronPython)
+  add_RunCMake_test(FindPython3.IronPython TEST_DIR FindPython
+                                           -DCMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME}
+                                           "-DRunCMake_BUILD_TYPE=${CMAKE_BUILD_TYPE}"
+                                           -DCMake_TEST_FindPython3=${CMake_TEST_FindPython3}
+                                           -DCMake_TEST_FindPython3_IronPython=${CMake_TEST_FindPython3_IronPython})
+  set_property(TEST RunCMake.FindPython3.IronPython PROPERTY LABELS Python3)
+endif()
+if(CMake_TEST_FindPython2_PyPy)
+  add_RunCMake_test(FindPython2.PyPy TEST_DIR FindPython
+                                     -DCMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME}
+                                     "-DRunCMake_BUILD_TYPE=${CMAKE_BUILD_TYPE}"
+                                     -DCMake_TEST_FindPython2_PyPy=${CMake_TEST_FindPython2_PyPy})
+  set_property(TEST RunCMake.FindPython2.PyPy PROPERTY LABELS Python2)
+endif()
+if(CMake_TEST_FindPython3_PyPy)
+  add_RunCMake_test(FindPython3.PyPy TEST_DIR FindPython
+                                     -DCMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME}
+                                     "-DRunCMake_BUILD_TYPE=${CMAKE_BUILD_TYPE}"
+                                     -DCMake_TEST_FindPython3_PyPy=${CMake_TEST_FindPython3_PyPy})
+  set_property(TEST RunCMake.FindPython3.PyPy PROPERTY LABELS Python3)
+endif()
+if(CMake_TEST_FindPython2 OR CMake_TEST_FindPython2_SABIModule OR CMake_TEST_FindPython2_NumPy
+    OR CMake_TEST_FindPython3 OR CMake_TEST_FindPython3_SABIModule OR CMake_TEST_FindPython3_NumPy
+    OR CMake_TEST_FindPython3_Conda)
+  add_RunCMake_test(FindPython.Various TEST_DIR FindPython
+                                       -DCMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME}
+                                       "-DRunCMake_BUILD_TYPE=${CMAKE_BUILD_TYPE}"
+                                       -DCMake_TEST_FindPython_Various=TRUE
+                                       -DCMake_TEST_FindPython2=${CMake_TEST_FindPython2}
+                                       -DCMake_TEST_FindPython2_SABIModule=${CMake_TEST_FindPython2_SABIModule}
+                                       -DCMake_TEST_FindPython2_NumPy=${CMake_TEST_FindPython2_NumPy}
+                                       -DCMake_TEST_FindPython3=${CMake_TEST_FindPython3}
+
+                                       -DCMake_TEST_FindPython3_SABIModule=${CMake_TEST_FindPython3_SABIModule}
+                                       -DCMake_TEST_FindPython3_NumPy=${CMake_TEST_FindPython3_NumPy}
+                                       -DCMake_TEST_FindPython3_Conda=${CMake_TEST_FindPython3_Conda})
+  set_property(TEST RunCMake.FindPython.Various PROPERTY LABELS Python2 Python3)
+endif()
 add_RunCMake_test(FindBoost)
 add_RunCMake_test(FindLua)
 add_RunCMake_test(FindOpenGL)
