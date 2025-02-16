@@ -9,11 +9,19 @@
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
+#include "cmPolicies.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmake.h"
 
-cmSourceFileLocation::cmSourceFileLocation() = default;
+// if CMP0187 and CMP0115 are NEW, then we assume that source files that do not
+// include a file extension are not ambiguous but intentionally do not have an
+// extension.
+bool NoAmbiguousExtensions(cmMakefile const& makefile)
+{
+  return makefile.GetPolicyStatus(cmPolicies::CMP0115) == cmPolicies::NEW &&
+    makefile.GetPolicyStatus(cmPolicies::CMP0187) == cmPolicies::NEW;
+}
 
 cmSourceFileLocation::cmSourceFileLocation(cmSourceFileLocation const& loc)
   : Makefile(loc.Makefile)
@@ -30,7 +38,12 @@ cmSourceFileLocation::cmSourceFileLocation(cmMakefile const* mf,
   : Makefile(mf)
 {
   this->AmbiguousDirectory = !cmSystemTools::FileIsFullPath(name);
-  this->AmbiguousExtension = true;
+  // If ambiguous extensions are allowed then the extension is assumed to be
+  // ambiguous unless the name has an extension, in which case
+  // `UpdateExtension` will update this. If ambiguous extensions are not
+  // allowed, then set this to false as the file extension must be provided or
+  // the file doesn't have an extension.
+  this->AmbiguousExtension = !NoAmbiguousExtensions(*mf);
   this->Directory = cmSystemTools::GetFilenamePath(name);
   if (cmSystemTools::FileIsFullPath(this->Directory)) {
     this->Directory = cmSystemTools::CollapseFullPath(this->Directory);
