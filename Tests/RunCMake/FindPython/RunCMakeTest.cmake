@@ -7,9 +7,10 @@ else()
 endif()
 
 function(run_python test)
+  set(options_args CHECK_RESULT)
   set(one_value_args TYPE ACTION VARIANT STRATEGY)
   set(multi_value_args OPTIONS)
-  cmake_parse_arguments(PARSE_ARGV 1 RP "" "${one_value_args}" "${multi_value_args}")
+  cmake_parse_arguments(PARSE_ARGV 1 RP "${options_args}" "${one_value_args}" "${multi_value_args}")
 
   if(RP_UNPARSED_ARGUMENTS)
     message(FATAL_ERROR "run_python: unparsed arguments: ${RP_UNPARSED_ARGUMENTS}")
@@ -35,6 +36,11 @@ function(run_python test)
   endif()
   if(NOT RunCMake_GENERATOR_IS_MULTI_CONFIG)
     list(APPEND options -DCMAKE_BUILD_TYPE=${Python_BUILD_TYPE})
+  endif()
+
+  if(RP_CHECK_RESULT)
+    set(RunCMake_TEST_EXPECT_RESULT 1)
+    file(READ "${RunCMake_SOURCE_DIR}/${test_name}-stderr.txt" RunCMake_TEST_EXPECT_stderr)
   endif()
 
   set(RunCMake_TEST_BINARY_DIR "${RunCMake_BINARY_DIR}/${test_name}-build")
@@ -121,11 +127,9 @@ function(required_artifacts)
   endif()
 endfunction()
 
-function(custom_failure_message_check name components)
-  set(RunCMake_TEST_EXPECT_RESULT 1)
-  file(READ "${RunCMake_SOURCE_DIR}/CustomFailureMessage.${name}-stderr.txt" RunCMake_TEST_EXPECT_stderr)
-  run_python(CustomFailureMessage VARIANT "${name}" OPTIONS "-DCHECK_COMPONENTS=${components}" ${ARGN})
-endfunction()
+macro(custom_failure_message_check name components)
+  run_python(CustomFailureMessage VARIANT "${name}" CHECK_RESULT OPTIONS "-DCHECK_COMPONENTS=${components}" ${ARGN})
+endmacro()
 
 
 if(CMake_TEST_FindPython2_CPython)
@@ -152,6 +156,23 @@ if(CMake_TEST_FindPython2_CPython)
                           OPTIONS -DPython_REQUESTED_VERSION=2)
   run_python(VersionRange TYPE Python STRATEGY VERSION VARIANT Python.V2
                           OPTIONS -DPython_REQUESTED_VERSION=2)
+  run_python(CrossCompiling-CMP0190-OLD TYPE Python2 VARIANT Python2)
+  run_python(CrossCompiling-CMP0190-NEW TYPE Python2 VARIANT Python2 CHECK_RESULT)
+  run_python(CrossCompiling-CMP0190-OLD TYPE Python VARIANT Python.V2
+                                        OPTIONS -DPython_REQUESTED_VERSION=2)
+  run_python(CrossCompiling-CMP0190-NEW TYPE Python VARIANT Python.V2 CHECK_RESULT
+                                        OPTIONS -DPython_REQUESTED_VERSION=2)
+  run_python(CrossCompiling-HOST TYPE Python2 VARIANT Python2)
+  run_python(CrossCompiling-HOST TYPE Python VARIANT Python.V2
+                                 OPTIONS -DPython_REQUESTED_VERSION=2)
+  if(CMAKE_SYSTEM_NAME MATCHES "Linux|Darwin" AND NOT RunCMake_GENERATOR_IS_MULTI_CONFIG)
+    run_python(CrossCompiling-TARGET TYPE Python2 VARIANT Python2)
+    run_python(CrossCompiling-TARGET TYPE Python VARIANT Python.V2
+                                     OPTIONS -DPython_REQUESTED_VERSION=2)
+    run_python(CrossCompiling-BOTH TYPE Python2 VARIANT Python2)
+    run_python(CrossCompiling-BOTH TYPE Python VARIANT Python.V2
+                                   OPTIONS -DPython_REQUESTED_VERSION=2)
+  endif()
 endif()
 
 if(CMake_TEST_FindPython3_CPython)
@@ -189,6 +210,23 @@ if(CMake_TEST_FindPython3_CPython)
   custom_failure_message_check("Include" "Development" -DPython3_INCLUDE_DIR=/not/found/include)
   custom_failure_message_check("Multiple" "Interpreter:Development" -DPython3_EXECUTABLE=/not/found/interpreter
                                                                     -DPython3_LIBRARY=/not/found/library)
+  run_python(CrossCompiling-CMP0190-OLD TYPE Python3 VARIANT Python3)
+  run_python(CrossCompiling-CMP0190-NEW TYPE Python3 VARIANT Python3 CHECK_RESULT)
+  run_python(CrossCompiling-CMP0190-OLD TYPE Python VARIANT Python.V3
+                                        OPTIONS -DPython_REQUESTED_VERSION=3)
+  run_python(CrossCompiling-CMP0190-NEW TYPE Python VARIANT Python.V3 CHECK_RESULT
+                                        OPTIONS -DPython_REQUESTED_VERSION=3)
+  run_python(CrossCompiling-HOST TYPE Python3 VARIANT Python3)
+  run_python(CrossCompiling-HOST TYPE Python VARIANT Python.V3
+                                 OPTIONS -DPython_REQUESTED_VERSION=3)
+  if(CMAKE_SYSTEM_NAME MATCHES "Linux|Darwin" AND NOT RunCMake_GENERATOR_IS_MULTI_CONFIG)
+    run_python(CrossCompiling-TARGET TYPE Python3 VARIANT Python3)
+    run_python(CrossCompiling-TARGET TYPE Python VARIANT Python.V3
+                                     OPTIONS -DPython_REQUESTED_VERSION=3)
+    run_python(CrossCompiling-BOTH TYPE Python3 VARIANT Python3)
+    run_python(CrossCompiling-BOTH TYPE Python VARIANT Python.V3
+                                        OPTIONS -DPython_REQUESTED_VERSION=3)
+  endif()
 endif()
 
 if(CMake_TEST_FindPython2_CPython OR CMake_TEST_FindPython3_CPython)

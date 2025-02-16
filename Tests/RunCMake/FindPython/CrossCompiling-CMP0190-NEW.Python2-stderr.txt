@@ -1,0 +1,4 @@
+CMake Error at .+/Support.cmake:[0-9]+ \(message\):
+  Python2: When cross-compiling, Interpreter and/or Compiler components
+  cannot be searched when CMAKE_CROSSCOMPILING_EMULATOR variable is not
+  specified \(see policy CMP0190\).
