@@ -1,0 +1,25 @@
+CMAKE_BUILD_TYPE:STRING=Release
+
+# Link C++ library statically.
+CMAKE_EXE_LINKER_FLAGS:STRING=-static-libstdc++ -static-libgcc -Wl,-z,noexecstack
+
+# Enable ssl support in curl
+CMAKE_USE_OPENSSL:BOOL=ON
+OPENSSL_USE_STATIC_LIBS:BOOL=ON
+OpenSSL_ROOT:PATH=/opt/cross/openssl/i386-pc-solaris2.10
+
+# Enable ccmake
+BUILD_CursesDialog:BOOL=ON
+
+# Disable cmake-gui
+BUILD_QtDialog:BOOL=OFF
+
+# Disable tests.
+BUILD_TESTING:BOOL=OFF
+CMake_TEST_INSTALL:BOOL=OFF
+
+# Disable unnecessary dependency.
+CMAKE_SKIP_INSTALL_ALL_DEPENDENCY:BOOL=ON
+
+# CPack package file name component for this platform.
+CPACK_SYSTEM_NAME:STRING=sunos-i386

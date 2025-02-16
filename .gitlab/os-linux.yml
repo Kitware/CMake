@@ -30,6 +30,24 @@
     variables:
         BOOTSTRAP_ARGS: '-- "-DCMake_DOC_ARTIFACT_PREFIX=$CI_PROJECT_DIR/build/install-doc"'
 
+.sunos_release_i386:
+    image: "kitware/cmake:build-sunos-i386-deps-2025-02-14"
+
+    variables:
+        GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci"
+        CMAKE_ARCH: i386
+
+.sunos_release_sparc:
+    image: "kitware/cmake:build-sunos-sparc-deps-2025-02-14"
+
+    variables:
+        GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci"
+        CMAKE_ARCH: sparc
+
+.sunos_package:
+    variables:
+        CMake_DOC_ARTIFACT_PREFIX: "$CI_PROJECT_DIR/build/install-doc"
+
 .needs_centos7_x86_64:
     needs:
         - b:centos7-x86_64
@@ -740,6 +758,33 @@
         - .needs_centos7_x86_64
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
+
+.cmake_build_sunos_release:
+    stage: build
+
+    script:
+        - *before_script_linux
+        # SunOS sysroot
+        - Utilities/Release/sunos/docker/sysroot.bash $CMAKE_ARCH
+        # Initial cache
+        - mkdir -p build/
+        - cp Utilities/Release/sunos/$CMAKE_ARCH/cache.txt build/CMakeCache.txt
+        # Make sccache available.
+        - source .gitlab/ci/sccache-env.sh
+        - echo "CMAKE_C_COMPILER_LAUNCHER:STRING=sccache" >> build/CMakeCache.txt
+        - echo "CMAKE_CXX_COMPILER_LAUNCHER:STRING=sccache" >> build/CMakeCache.txt
+        # Build
+        - cd build/
+        - cmake .. -GNinja
+          -DCMAKE_DOC_DIR=doc/cmake
+          -DCMake_DOC_ARTIFACT_PREFIX="$CMake_DOC_ARTIFACT_PREFIX"
+          -DCMAKE_TOOLCHAIN_FILE="$CI_PROJECT_DIR/Utilities/Release/sunos/$CMAKE_ARCH/toolchain.cmake"
+        - ninja
+        # Package
+        - cpack -G "TGZ;STGZ"
+        - sccache --show-stats
+
+    interruptible: true
 
 ### Documentation
 
