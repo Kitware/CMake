@@ -28,6 +28,7 @@ public:
     PostCMakeBuild,
     PostTest,
     PostInstall,
+    PrepareForCDash,
     Manual
   };
   static std::vector<std::string> const HookString;

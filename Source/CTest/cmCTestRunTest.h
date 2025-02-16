@@ -14,7 +14,6 @@
 #include "cmCTest.h"
 #include "cmCTestMultiProcessHandler.h"
 #include "cmCTestTestHandler.h"
-#include "cmInstrumentation.h"
 #include "cmProcess.h"
 
 /** \class cmRunTest
@@ -141,7 +140,6 @@ private:
   int NumberOfRunsTotal = 1; // default to 1 run of the test
   bool RunAgain = false;     // default to not having to run again
   size_t TotalNumberOfTests;
-  cmInstrumentation Instrumentation;
 };
 
 inline int getNumWidth(size_t n)

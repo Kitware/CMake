@@ -17,6 +17,8 @@
 #include "cmExecutionStatus.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGlobalGenerator.h"
+#include "cmInstrumentation.h"
+#include "cmInstrumentationQuery.h"
 #include "cmList.h"
 #include "cmMakefile.h"
 #include "cmStringAlgorithms.h"
@@ -203,6 +205,11 @@ bool cmCTestConfigureCommand::ExecuteConfigure(ConfigureArguments const& args,
   xml.Element("EndDateTime", endDateTime);
   xml.Element("EndConfigureTime", endTime);
   xml.Element("ElapsedMinutes", elapsedMinutes.count());
+
+  this->CTest->GetInstrumentation().CollectTimingData(
+    cmInstrumentationQuery::Hook::PrepareForCDash);
+  this->CTest->ConvertInstrumentationSnippetsToXML(xml, "configure");
+
   xml.EndElement(); // Configure
   this->CTest->EndXML(xml);
 
