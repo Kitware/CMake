@@ -33,25 +33,17 @@ bool cmStringReplaceHelper::Replace(std::string const& input,
   }
 
   // Scan through the input for all matches.
+  auto& re = this->RegularExpression;
   std::string::size_type base = 0;
-  while (this->RegularExpression.find(input, base, optAnchor)) {
+  unsigned optNonEmpty = 0;
+  while (re.find(input, base, optAnchor | optNonEmpty)) {
     if (this->Makefile) {
       this->Makefile->ClearMatches();
-      this->Makefile->StoreMatches(this->RegularExpression);
+      this->Makefile->StoreMatches(re);
     }
-    auto l2 = this->RegularExpression.start();
-    auto r = this->RegularExpression.end();
 
     // Concatenate the part of the input that was not matched.
-    output += input.substr(base, l2 - base);
-
-    // Make sure the match had some text.
-    if (r - l2 == 0) {
-      std::ostringstream error;
-      error << "regex \"" << this->RegExString << "\" matched an empty string";
-      this->ErrorString = error.str();
-      return false;
-    }
+    output += input.substr(base, re.start() - base);
 
     // Concatenate the replacement for the match.
     for (auto const& replacement : this->Replacements) {
@@ -61,10 +53,7 @@ bool cmStringReplaceHelper::Replace(std::string const& input,
       } else {
         // Replace with part of the match.
         auto n = replacement.Number;
-        auto start = this->RegularExpression.start(n);
-        if (start != std::string::npos) {
-          output += this->RegularExpression.match(n);
-        } else {
+        if (n > re.num_groups()) {
           std::ostringstream error;
           error << "replace expression \"" << this->ReplaceExpression
                 << "\" contains an out-of-range escape for regex \""
@@ -72,11 +61,21 @@ bool cmStringReplaceHelper::Replace(std::string const& input,
           this->ErrorString = error.str();
           return false;
         }
+        output += re.match(n);
       }
     }
 
     // Move past the match.
-    base = r;
+    base = re.end();
+
+    if (re.start() == input.length()) {
+      break;
+    }
+    if (re.start() == re.end()) {
+      optNonEmpty = cmsys::RegularExpression::NONEMPTY_AT_OFFSET;
+    } else {
+      optNonEmpty = 0;
+    }
   }
 
   // Concatenate the text after the last match.
