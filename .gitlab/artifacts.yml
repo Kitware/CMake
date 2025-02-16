@@ -78,6 +78,8 @@
             - ${CMAKE_CI_BUILD_DIR}/cmake-*-linux-x86_64.*
             - ${CMAKE_CI_BUILD_DIR}/cmake-*-linux-aarch64.*
             - ${CMAKE_CI_BUILD_DIR}/cmake-*-macos*-universal.*
+            - ${CMAKE_CI_BUILD_DIR}/cmake-*-sunos-i386.*
+            - ${CMAKE_CI_BUILD_DIR}/cmake-*-sunos-sparc.*
             - ${CMAKE_CI_BUILD_DIR}/cmake-*-windows-x86_64.*
             - ${CMAKE_CI_BUILD_DIR}/cmake-*-windows-i386.*
             - ${CMAKE_CI_BUILD_DIR}/cmake-*-windows-arm64.*

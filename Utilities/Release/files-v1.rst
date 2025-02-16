@@ -70,6 +70,9 @@ The members are:
     ``Windows``, ``windows``
       Windows packages.
 
+    ``SunOS``, ``sunos``
+      SunOS packages.
+
   ``architecture``
     A JSON array of strings naming the architecture(s) for which the
     package file is built, possibly using multiple alternative spellings.
@@ -79,6 +82,7 @@ The members are:
     On Windows, architecture names include ``x86_64``, ``i386``, and ``arm64``.
     On macOS, universal binary packages list all architectures,
     e.g. ``["arm64","x86_64"]``.
+    On SunOS, architecture names include ``i386`` and ``sparc``.
 
   ``class``
     A JSON string naming the class of package.  The value is one of:

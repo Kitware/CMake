@@ -236,3 +236,8 @@ Other Changes
   now only shown when the message log level is set to ``VERBOSE``, ``DEBUG``,
   or ``TRACE`` via the   :option:`cmake --log-level` option or the
   :variable:`CMAKE_MESSAGE_LOG_LEVEL` cache variable.
+
+* Precompiled SunOS ``sparc`` and ``i386`` binaries are now provided
+  on `cmake.org`_.
+
+.. _`cmake.org`: https://cmake.org/download/

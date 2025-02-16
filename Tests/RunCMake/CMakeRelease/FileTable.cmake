@@ -11,6 +11,7 @@ foreach(query
     ".files[] | select(.os[] | . == \"source\") | .name"
     ".files[] | select((.os[] | . == \"macOS\") and (.class == \"volume\")) | .name"
     ".files[] | select((.os[] | . == \"macos10.10\") and (.class == \"archive\")) | .name"
+    ".files[] | select((.os[] | . == \"sunos\") and (.architecture[] | . == \"sparc\") and (.class == \"archive\")) | .name"
     ".files[] | select((.os[] | . == \"windows\") and (.architecture[] | . == \"i386\") and (.class == \"installer\")) | .name"
     ".files[] | select(.architecture[] | . == \"x86_64\") | .name"
     ".files[] | select([.macOSmin] | inside([\"10.10\", \"10.11\", \"10.12\"])) | .name"
