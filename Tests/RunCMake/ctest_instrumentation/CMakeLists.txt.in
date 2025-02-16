@@ -1,0 +1,10 @@
+cmake_minimum_required(VERSION 3.10)
+@CASE_CMAKELISTS_PREFIX_CODE@
+project(CTestInstrumentation@CASE_NAME@)
+if(USE_INSTRUMENTATION)
+  set(CMAKE_EXPERIMENTAL_INSTRUMENTATION "a37d1069-1972-4901-b9c9-f194aaf2b6e0")
+endif()
+include(CTest)
+add_executable(main main.c)
+add_test(NAME main COMMAND main)
+@CASE_CMAKELISTS_SUFFIX_CODE@

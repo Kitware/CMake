@@ -20,10 +20,12 @@
 #include "cmCryptoHash.h"
 #include "cmExperimental.h"
 #include "cmInstrumentationQuery.h"
+#include "cmJSONState.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTimestamp.h"
 #include "cmUVProcessChain.h"
+#include "cmValue.h"
 
 cmInstrumentation::cmInstrumentation(std::string const& binary_dir)
 {
@@ -52,6 +54,75 @@ void cmInstrumentation::LoadQueries()
       cmSystemTools::FileExists(cmStrCat(this->userTimingDirv1, "/query"))) {
     this->hasQuery = this->hasQuery ||
       this->ReadJSONQueries(cmStrCat(this->userTimingDirv1, "/query"));
+  }
+
+  std::string envVal;
+  if (cmSystemTools::GetEnv("CTEST_USE_INSTRUMENTATION", envVal) &&
+      !cmIsOff(envVal)) {
+    if (cmSystemTools::GetEnv("CTEST_EXPERIMENTAL_INSTRUMENTATION", envVal)) {
+      std::string const uuid = cmExperimental::DataForFeature(
+                                 cmExperimental::Feature::Instrumentation)
+                                 .Uuid;
+      if (envVal == uuid) {
+        this->AddHook(cmInstrumentationQuery::Hook::PrepareForCDash);
+        this->AddQuery(
+          cmInstrumentationQuery::Query::DynamicSystemInformation);
+        this->cdashDir = cmStrCat(this->timingDirv1, "/cdash");
+        cmSystemTools::MakeDirectory(this->cdashDir);
+        cmSystemTools::MakeDirectory(cmStrCat(this->cdashDir, "/configure"));
+        cmSystemTools::MakeDirectory(cmStrCat(this->cdashDir, "/build"));
+        cmSystemTools::MakeDirectory(
+          cmStrCat(this->cdashDir, "/build/commands"));
+        cmSystemTools::MakeDirectory(
+          cmStrCat(this->cdashDir, "/build/targets"));
+        cmSystemTools::MakeDirectory(cmStrCat(this->cdashDir, "/test"));
+        this->cdashSnippetsMap = { {
+                                     "configure",
+                                     "configure",
+                                   },
+                                   {
+                                     "generate",
+                                     "configure",
+                                   },
+                                   {
+                                     "compile",
+                                     "build",
+                                   },
+                                   {
+                                     "link",
+                                     "build",
+                                   },
+                                   {
+                                     "custom",
+                                     "build",
+                                   },
+                                   {
+                                     "build",
+                                     "skip",
+                                   },
+                                   {
+                                     "cmakeBuild",
+                                     "build",
+                                   },
+                                   {
+                                     "cmakeInstall",
+                                     "build",
+                                   },
+                                   {
+                                     "install",
+                                     "build",
+                                   },
+                                   {
+                                     "ctest",
+                                     "build",
+                                   },
+                                   {
+                                     "test",
+                                     "test",
+                                   } };
+        this->hasQuery = true;
+      }
+    }
   }
 }
 
@@ -211,6 +282,11 @@ int cmInstrumentation::CollectTimingData(cmInstrumentationQuery::Hook hook)
                                     cmSystemTools::OUTPUT_PASSTHROUGH);
   }
 
+  // Special case for CDash collation
+  if (this->HasHook(cmInstrumentationQuery::Hook::PrepareForCDash)) {
+    this->PrepareDataForCDash(directory, index_path);
+  }
+
   // Delete files
   for (auto const& f : index["snippets"]) {
     cmSystemTools::RemoveFile(cmStrCat(directory, "/", f.asString()));
@@ -308,7 +384,7 @@ void cmInstrumentation::WriteInstrumentationJson(Json::Value& root,
   ftmp.close();
 }
 
-int cmInstrumentation::InstrumentTest(
+std::string cmInstrumentation::InstrumentTest(
   std::string const& name, std::string const& command,
   std::vector<std::string> const& args, int64_t result,
   std::chrono::steady_clock::time_point steadyStart,
@@ -331,11 +407,11 @@ int cmInstrumentation::InstrumentTest(
     this->InsertDynamicSystemInformation(root, "after");
   }
 
-  std::string const& file_name =
+  std::string file_name =
     cmStrCat("test-", this->ComputeSuffixHash(command_str),
              this->ComputeSuffixTime(), ".json");
   this->WriteInstrumentationJson(root, "data", file_name);
-  return 1;
+  return file_name;
 }
 
 void cmInstrumentation::GetPreTestStats()
@@ -546,4 +622,108 @@ int cmInstrumentation::CollectTimingAfterBuild(int ppid)
     cm::nullopt, false);
   this->CollectTimingData(cmInstrumentationQuery::Hook::PostBuild);
   return ret;
+}
+
+void cmInstrumentation::AddHook(cmInstrumentationQuery::Hook hook)
+{
+  this->hooks.insert(hook);
+}
+
+void cmInstrumentation::AddQuery(cmInstrumentationQuery::Query query)
+{
+  this->queries.insert(query);
+}
+
+std::string const& cmInstrumentation::GetCDashDir()
+{
+  return this->cdashDir;
+}
+
+/** Copy the snippets referred to by an index file to a separate
+ * directory where they will be parsed for submission to CDash.
+ **/
+void cmInstrumentation::PrepareDataForCDash(std::string const& data_dir,
+                                            std::string const& index_path)
+{
+  Json::Value root;
+  std::string error_msg;
+  cmJSONState parseState = cmJSONState(index_path, &root);
+  if (!parseState.errors.empty()) {
+    cmSystemTools::Error(parseState.GetErrorMessage(true));
+    return;
+  }
+
+  if (!root.isObject()) {
+    error_msg =
+      cmStrCat("Expected index file ", index_path, " to contain an object");
+    cmSystemTools::Error(error_msg);
+    return;
+  }
+
+  if (!root.isMember("snippets")) {
+    error_msg = cmStrCat("Expected index file ", index_path,
+                         " to have a key 'snippets'");
+    cmSystemTools::Error(error_msg);
+    return;
+  }
+
+  std::string dst_dir;
+  Json::Value snippets = root["snippets"];
+  for (auto const& snippet : snippets) {
+    // Parse the role of this snippet.
+    std::string snippet_str = snippet.asString();
+    std::string snippet_path = cmStrCat(data_dir, '/', snippet_str);
+    Json::Value snippet_root;
+    parseState = cmJSONState(snippet_path, &snippet_root);
+    if (!parseState.errors.empty()) {
+      cmSystemTools::Error(parseState.GetErrorMessage(true));
+      continue;
+    }
+    if (!snippet_root.isObject()) {
+      error_msg = cmStrCat("Expected snippet file ", snippet_path,
+                           " to contain an object");
+      cmSystemTools::Error(error_msg);
+      continue;
+    }
+    if (!snippet_root.isMember("role")) {
+      error_msg = cmStrCat("Expected snippet file ", snippet_path,
+                           " to have a key 'role'");
+      cmSystemTools::Error(error_msg);
+      continue;
+    }
+
+    std::string snippet_role = snippet_root["role"].asString();
+    auto map_element = this->cdashSnippetsMap.find(snippet_role);
+    if (map_element == this->cdashSnippetsMap.end()) {
+      std::string message =
+        "Unexpected snippet type encountered: " + snippet_role;
+      cmSystemTools::Message(message, "Warning");
+      continue;
+    }
+
+    if (map_element->second == "skip") {
+      continue;
+    }
+
+    if (map_element->second == "build") {
+      // We organize snippets on a per-target basis (when possible)
+      // for Build.xml.
+      if (snippet_root.isMember("target")) {
+        dst_dir = cmStrCat(this->cdashDir, "/build/targets/",
+                           snippet_root["target"].asString());
+        cmSystemTools::MakeDirectory(dst_dir);
+      } else {
+        dst_dir = cmStrCat(this->cdashDir, "/build/commands");
+      }
+    } else {
+      dst_dir = cmStrCat(this->cdashDir, '/', map_element->second);
+    }
+
+    std::string dst = cmStrCat(dst_dir, '/', snippet_str);
+    cmsys::Status copied = cmSystemTools::CopyFileAlways(snippet_path, dst);
+    if (!copied) {
+      error_msg = cmStrCat("Failed to copy ", snippet_path, " to ", dst);
+      cmSystemTools::Error(error_msg);
+    }
+  }
 }

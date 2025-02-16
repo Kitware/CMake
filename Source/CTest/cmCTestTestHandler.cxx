@@ -41,6 +41,8 @@
 #include "cmExecutionStatus.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGlobalGenerator.h"
+#include "cmInstrumentation.h"
+#include "cmInstrumentationQuery.h"
 #include "cmList.h"
 #include "cmMakefile.h"
 #include "cmState.h"
@@ -1381,6 +1383,9 @@ void cmCTestTestHandler::GenerateCTestXML(cmXMLWriter& xml)
     return;
   }
 
+  this->CTest->GetInstrumentation().CollectTimingData(
+    cmInstrumentationQuery::Hook::PrepareForCDash);
+
   this->CTest->StartXML(xml, this->CMake, this->AppendXML);
   this->CTest->GenerateSubprojectsOutput(xml);
   xml.StartElement("Testing");
@@ -1395,7 +1400,6 @@ void cmCTestTestHandler::GenerateCTestXML(cmXMLWriter& xml)
   for (cmCTestTestResult& result : this->TestResults) {
     this->WriteTestResultHeader(xml, result);
     xml.StartElement("Results");
-
     if (result.Status != cmCTestTestHandler::NOT_RUN) {
       if (result.Status != cmCTestTestHandler::COMPLETED ||
           result.ReturnValue) {
@@ -1473,6 +1477,15 @@ void cmCTestTestHandler::GenerateCTestXML(cmXMLWriter& xml)
     xml.Content(result.Output);
     xml.EndElement(); // Value
     xml.EndElement(); // Measurement
+
+    if (!result.InstrumentationFile.empty()) {
+      std::string instrument_file_path =
+        cmStrCat(this->CTest->GetInstrumentation().GetCDashDir(), "/test/",
+                 result.InstrumentationFile);
+      this->CTest->ConvertInstrumentationJSONFileToXML(instrument_file_path,
+                                                       xml);
+    }
+
     xml.EndElement(); // Results
 
     this->AttachFiles(xml, result);

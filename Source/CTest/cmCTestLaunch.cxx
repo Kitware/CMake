@@ -268,7 +268,9 @@ int cmCTestLaunch::Run()
 {
   auto instrumentation = cmInstrumentation(this->Reporter.OptionBuildDir);
   std::map<std::string, std::string> options;
-  options["target"] = this->Reporter.OptionTargetName;
+  if (this->Reporter.OptionTargetName != "TARGET_NAME") {
+    options["target"] = this->Reporter.OptionTargetName;
+  }
   options["source"] = this->Reporter.OptionSource;
   options["language"] = this->Reporter.OptionLanguage;
   options["targetType"] = this->Reporter.OptionTargetType;

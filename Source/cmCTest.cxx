@@ -27,6 +27,7 @@
 #include <cmext/string_view>
 
 #include <cm3p/curl/curl.h>
+#include <cm3p/json/value.h>
 #include <cm3p/uv.h>
 #include <cm3p/zlib.h>
 
@@ -115,6 +116,8 @@ struct cmCTest::Private
   bool UseHTTP10 = false;
   bool PrintLabels = false;
   bool Failover = false;
+  bool UseVerboseInstrumentation = false;
+  cmJSONState parseState;
 
   bool FlushTestProgressLine = false;
 
@@ -195,6 +198,8 @@ struct cmCTest::Private
 
   cmCTestTestOptions TestOptions;
   std::vector<std::string> CommandLineHttpHeaders;
+
+  std::unique_ptr<cmInstrumentation> Instrumentation;
 };
 
 struct tm* cmCTest::GetNightlyTime(std::string const& str, bool tomorrowtag)
@@ -320,6 +325,11 @@ cmCTest::cmCTest()
   if (cmSystemTools::GetEnv("CTEST_PROGRESS_OUTPUT", envValue)) {
     this->Impl->TestProgressOutput = !cmIsOff(envValue);
   }
+  envValue.clear();
+  if (cmSystemTools::GetEnv("CTEST_USE_VERBOSE_INSTRUMENTATION", envValue)) {
+    this->Impl->UseVerboseInstrumentation = !cmIsOff(envValue);
+  }
+  envValue.clear();
 
   this->Impl->Parts[PartStart].SetName("Start");
   this->Impl->Parts[PartUpdate].SetName("Update");
@@ -2628,8 +2638,6 @@ int cmCTest::Run(std::vector<std::string> const& args)
   }
 #endif
 
-  cmInstrumentation instrumentation(
-    cmSystemTools::GetCurrentWorkingDirectory());
   std::function<int()> doTest = [this, &cmakeAndTest, &runScripts,
                                  &processSteps]() -> int {
     // now what should cmake do? if --build-and-test was specified then
@@ -2650,6 +2658,8 @@ int cmCTest::Run(std::vector<std::string> const& args)
 
     return this->ExecuteTests();
   };
+  cmInstrumentation instrumentation(
+    cmSystemTools::GetCurrentWorkingDirectory());
   int ret = instrumentation.InstrumentCommand("ctest", args,
                                               [doTest]() { return doTest(); });
   instrumentation.CollectTimingData(cmInstrumentationQuery::Hook::PostTest);
@@ -3671,5 +3681,130 @@ bool cmCTest::StartLogFile(char const* name, int submitIndex,
                "Cannot create log file: " << ostr.str() << '\n');
     return false;
   }
+  return true;
+}
+
+cmInstrumentation& cmCTest::GetInstrumentation()
+{
+  if (!this->Impl->Instrumentation) {
+    this->Impl->Instrumentation =
+      cm::make_unique<cmInstrumentation>(this->GetBinaryDir());
+  }
+  return *this->Impl->Instrumentation;
+}
+
+bool cmCTest::GetUseVerboseInstrumentation() const
+{
+  return this->Impl->UseVerboseInstrumentation;
+}
+
+void cmCTest::ConvertInstrumentationSnippetsToXML(cmXMLWriter& xml,
+                                                  std::string const& subdir)
+{
+  std::string data_dir =
+    cmStrCat(this->GetInstrumentation().GetCDashDir(), '/', subdir);
+
+  cmsys::Directory d;
+  if (!d.Load(data_dir) || d.GetNumberOfFiles() == 0) {
+    return;
+  }
+
+  xml.StartElement("Commands");
+
+  for (unsigned int i = 0; i < d.GetNumberOfFiles(); i++) {
+    std::string fpath = d.GetFilePath(i);
+    std::string fname = d.GetFile(i);
+    if (fname.rfind('.', 0) == 0) {
+      continue;
+    }
+    this->ConvertInstrumentationJSONFileToXML(fpath, xml);
+  }
+
+  xml.EndElement(); // Commands
+}
+
+bool cmCTest::ConvertInstrumentationJSONFileToXML(std::string const& fpath,
+                                                  cmXMLWriter& xml)
+{
+  Json::Value root;
+  this->Impl->parseState = cmJSONState(fpath, &root);
+  if (!this->Impl->parseState.errors.empty()) {
+    cmCTestLog(this, ERROR_MESSAGE,
+               this->Impl->parseState.GetErrorMessage(true) << std::endl);
+    return false;
+  }
+
+  if (root.type() != Json::objectValue) {
+    cmCTestLog(this, ERROR_MESSAGE,
+               "Expected object, found " << root.type() << " for "
+                                         << root.asString() << std::endl);
+    return false;
+  }
+
+  std::vector<std::string> required_members = {
+    "command",
+    "role",
+    "dynamicSystemInformation",
+  };
+  for (std::string const& required_member : required_members) {
+    if (!root.isMember(required_member)) {
+      cmCTestLog(this, ERROR_MESSAGE,
+                 fpath << " is missing the '" << required_member << "' key"
+                       << std::endl);
+      return false;
+    }
+  }
+
+  // Do not record command-level data for Test.xml files because
+  // it is redundant with information actually captured by CTest.
+  bool generating_test_xml = root["role"] == "test";
+  if (!generating_test_xml) {
+    std::string element_name = root["role"].asString();
+    element_name[0] = static_cast<char>(std::toupper(element_name[0]));
+    xml.StartElement(element_name);
+    std::vector<std::string> keys = root.getMemberNames();
+    for (auto const& key : keys) {
+      auto key_type = root[key].type();
+      if (key_type == Json::objectValue || key_type == Json::arrayValue) {
+        continue;
+      }
+      if (key == "role" || key == "target" || key == "targetType" ||
+          key == "targetLabels") {
+        continue;
+      }
+      // Truncate the full command line if verbose instrumentation
+      // was not requested.
+      if (key == "command" && !this->GetUseVerboseInstrumentation()) {
+        std::string command_str = root[key].asString();
+        std::string truncated = command_str.substr(0, command_str.find(' '));
+        if (command_str != truncated) {
+          truncated = cmStrCat(truncated, " (truncated)");
+        }
+        xml.Attribute(key.c_str(), truncated);
+        continue;
+      }
+      xml.Attribute(key.c_str(), root[key].asString());
+    }
+  }
+
+  // Record dynamicSystemInformation section as XML.
+  auto dynamic_information = root["dynamicSystemInformation"];
+  std::vector<std::string> keys = dynamic_information.getMemberNames();
+  for (auto const& key : keys) {
+    std::string measurement_name = key;
+    measurement_name[0] = static_cast<char>(std::toupper(measurement_name[0]));
+
+    xml.StartElement("NamedMeasurement");
+    xml.Attribute("type", "numeric/double");
+    xml.Attribute("name", measurement_name);
+    xml.Element("Value", dynamic_information[key].asString());
+    xml.EndElement(); // NamedMeasurement
+  }
+
+  if (!generating_test_xml) {
+    xml.EndElement(); // role
+  }
+
+  cmSystemTools::RemoveFile(fpath);
   return true;
 }

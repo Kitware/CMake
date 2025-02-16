@@ -85,6 +85,7 @@ private:
   void GenerateXMLHeader(cmXMLWriter& xml);
   void GenerateXMLLaunched(cmXMLWriter& xml);
   void GenerateXMLLogScraped(cmXMLWriter& xml);
+  void GenerateInstrumentationXML(cmXMLWriter& xml);
   void GenerateXMLFooter(cmXMLWriter& xml, cmDuration elapsed_build_time);
   bool IsLaunchedErrorFile(char const* fname);
   bool IsLaunchedWarningFile(char const* fname);
