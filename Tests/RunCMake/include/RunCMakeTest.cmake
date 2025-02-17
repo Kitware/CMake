@@ -25,3 +25,8 @@ run_cmake(CMP0167-OLD)
 run_cmake(CMP0167-WARN)
 run_cmake(CMP0167-NEW-name)
 run_cmake(CMP0167-NEW-path)
+
+run_cmake(CMP0188-OLD)
+run_cmake(CMP0188-WARN)
+run_cmake(CMP0188-NEW-name)
+run_cmake(CMP0188-NEW-path)

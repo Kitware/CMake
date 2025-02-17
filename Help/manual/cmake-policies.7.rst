@@ -98,6 +98,7 @@ Policies Introduced by CMake 4.1
 .. toctree::
    :maxdepth: 1
 
+   CMP0188: The FindGCCXML module is removed. </policy/CMP0188>
    CMP0187: Include source file without an extension after the same name with an extension. </policy/CMP0187>
    CMP0186: Regular expressions match ^ at most once in repeated searches. </policy/CMP0186>
 

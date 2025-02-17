@@ -25,6 +25,7 @@ bool cmIncludeCommand(std::vector<std::string> const& args,
     DeprecatedModules["FindBoost"] = cmPolicies::CMP0167;
     DeprecatedModules["FindCUDA"] = cmPolicies::CMP0146;
     DeprecatedModules["FindDart"] = cmPolicies::CMP0145;
+    DeprecatedModules["FindGCCXML"] = cmPolicies::CMP0188;
     DeprecatedModules["FindPythonInterp"] = cmPolicies::CMP0148;
     DeprecatedModules["FindPythonLibs"] = cmPolicies::CMP0148;
     DeprecatedModules["WriteCompilerDetectionHeader"] = cmPolicies::CMP0120;
