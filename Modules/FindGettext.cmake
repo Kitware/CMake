@@ -52,7 +52,7 @@ This module provides several function.
                                [INSTALL_DESTINATION <destdir>]
                                LANGUAGES <lang>...)
 
-  This function creates a custom target "potfile" which processes the given
+  This function creates a custom target "potfiles" which processes the given
   .pot file to .mo files. Options:
 
   ``ALL``
