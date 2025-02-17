@@ -64,17 +64,6 @@ QCMake::QCMake(QObject* p)
   for (cmake::GeneratorInfo const& gen : generators) {
     this->AvailableGenerators.push_back(gen);
   }
-
-  connect(&this->LoadPresetsTimer, &QTimer::timeout, this, [this]() {
-    this->loadPresets();
-    if (!this->PresetName.isEmpty() &&
-        this->CMakePresetsGraph.ConfigurePresets.find(
-          std::string(this->PresetName.toStdString())) ==
-          this->CMakePresetsGraph.ConfigurePresets.end()) {
-      this->setPreset(QString{});
-    }
-  });
-  this->LoadPresetsTimer.start(1000);
 }
 
 QCMake::~QCMake() = default;
@@ -572,13 +561,12 @@ void QCMake::loadPresets()
 {
   auto result = this->CMakePresetsGraph.ReadProjectPresets(
     this->SourceDirectory.toStdString(), true);
-  if (result != this->LastLoadPresetsResult && !result) {
+  if (!result) {
     emit this->presetLoadError(
       this->SourceDirectory,
       QString::fromStdString(
         this->CMakePresetsGraph.parseState.GetErrorMessage(false)));
   }
-  this->LastLoadPresetsResult = result;
 
   QVector<QCMakePreset> presets;
   for (auto const& name : this->CMakePresetsGraph.ConfigurePresetOrder) {
