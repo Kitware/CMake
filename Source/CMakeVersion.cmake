@@ -24,14 +24,15 @@ if(NOT CMake_VERSION_NO_GIT)
   set(git_info [==[$Format:%h %s$]==])
 
   # Otherwise, try to identify the current development source version.
+  get_filename_component(git_toplevel "${CMAKE_CURRENT_LIST_DIR}" PATH)
   if(NOT git_info MATCHES "^([0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]?[0-9a-f]?)[0-9a-f]* "
-      AND EXISTS ${CMake_SOURCE_DIR}/.git)
+      AND EXISTS "${git_toplevel}/.git")
     find_package(Git QUIET)
     if(GIT_FOUND)
       macro(_git)
         execute_process(
           COMMAND ${GIT_EXECUTABLE} ${ARGN}
-          WORKING_DIRECTORY ${CMake_SOURCE_DIR}
+          WORKING_DIRECTORY "${git_toplevel}"
           RESULT_VARIABLE _git_res
           OUTPUT_VARIABLE _git_out OUTPUT_STRIP_TRAILING_WHITESPACE
           ERROR_VARIABLE _git_err ERROR_STRIP_TRAILING_WHITESPACE
