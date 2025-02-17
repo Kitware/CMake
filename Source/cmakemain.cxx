@@ -971,8 +971,7 @@ int do_install(int ac, char const* const* av)
     }
   }
 
-  std::function<int()> doInstall = [&handler, &verbose, &jobs,
-                                    &instrumentation]() -> int {
+  auto doInstall = [&handler, &verbose, &jobs, &instrumentation]() -> int {
     int ret_ = 0;
     if (handler.IsParallel()) {
       ret_ = handler.Install(jobs, instrumentation);

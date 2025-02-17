@@ -2624,7 +2624,7 @@ int cmake::ActualConfigure()
     cmSystemTools::Error(this->Instrumentation->errorMsg);
     return 1;
   }
-  std::function<int()> doConfigure = [this]() -> int {
+  auto doConfigure = [this]() -> int {
     this->GlobalGenerator->Configure();
     return 0;
   };
@@ -3023,7 +3023,7 @@ int cmake::Generate()
   auto startTime = std::chrono::steady_clock::now();
 #if !defined(CMAKE_BOOTSTRAP)
   auto profilingRAII = this->CreateProfilingEntry("project", "generate");
-  std::function<int()> doGenerate = [this]() -> int {
+  auto doGenerate = [this]() -> int {
     if (!this->GlobalGenerator->Compute()) {
       return -1;
     }
@@ -3975,9 +3975,8 @@ int cmake::Build(int jobs, std::string dir, std::vector<std::string> targets,
   // are being executed to the `output` parameter. If CMake is verbose, print
   // this out.
   std::ostream& verbose_ostr = verbose ? std::cout : ostr;
-  std::function<int()> doBuild = [this, jobs, dir, projName, targets,
-                                  &verbose_ostr, config, buildOptions, verbose,
-                                  nativeOptions]() {
+  auto doBuild = [this, jobs, dir, projName, targets, &verbose_ostr, config,
+                  buildOptions, verbose, nativeOptions]() -> int {
     return this->GlobalGenerator->Build(
       jobs, "", dir, projName, targets, verbose_ostr, "", config, buildOptions,
       verbose, cmDuration::zero(), cmSystemTools::OUTPUT_PASSTHROUGH,

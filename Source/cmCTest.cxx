@@ -10,7 +10,6 @@
 #include <cstdlib>
 #include <cstring>
 #include <ctime>
-#include <functional>
 #include <initializer_list>
 #include <iostream>
 #include <map>
@@ -2725,7 +2724,7 @@ int cmCTest::ExecuteTests(std::vector<std::string> const& args)
   handler.SetVerbose(this->Impl->Verbose);
 
   cmInstrumentation instrumentation(this->GetBinaryDir());
-  std::function<int()> processHandler = [&handler]() {
+  auto processHandler = [&handler]() -> int {
     return handler.ProcessHandler();
   };
   int ret = instrumentation.InstrumentCommand("ctest", args, processHandler);
