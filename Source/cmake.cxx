@@ -2624,7 +2624,7 @@ int cmake::ActualConfigure()
     cmSystemTools::Error(this->Instrumentation->errorMsg);
     return 1;
   }
-  std::function<int()> doConfigure = [this]() -> int {
+  auto doConfigure = [this]() -> int {
     this->GlobalGenerator->Configure();
     return 0;
   };
@@ -3023,7 +3023,7 @@ int cmake::Generate()
   auto startTime = std::chrono::steady_clock::now();
 #if !defined(CMAKE_BOOTSTRAP)
   auto profilingRAII = this->CreateProfilingEntry("project", "generate");
-  std::function<int()> doGenerate = [this]() -> int {
+  auto doGenerate = [this]() -> int {
     if (!this->GlobalGenerator->Compute()) {
       return -1;
     }
@@ -3720,7 +3720,8 @@ std::vector<std::string> cmake::GetDebugConfigs()
 int cmake::Build(int jobs, std::string dir, std::vector<std::string> targets,
                  std::string config, std::vector<std::string> nativeOptions,
                  cmBuildOptions& buildOptions, bool verbose,
-                 std::string const& presetName, bool listPresets)
+                 std::string const& presetName, bool listPresets,
+                 std::vector<std::string> const& args)
 {
   this->SetHomeDirectory("");
   this->SetHomeOutputDirectory("");
@@ -3959,16 +3960,38 @@ int cmake::Build(int jobs, std::string dir, std::vector<std::string> targets,
     return 1;
   }
 
+#if !defined(CMAKE_BOOTSTRAP)
+  cmInstrumentation instrumentation(dir);
+  if (!instrumentation.errorMsg.empty()) {
+    cmSystemTools::Error(instrumentation.errorMsg);
+    return 1;
+  }
+  instrumentation.CollectTimingData(
+    cmInstrumentationQuery::Hook::PreCMakeBuild);
+#endif
+
   this->GlobalGenerator->PrintBuildCommandAdvice(std::cerr, jobs);
   std::stringstream ostr;
   // `cmGlobalGenerator::Build` logs metadata about what directory and commands
   // are being executed to the `output` parameter. If CMake is verbose, print
   // this out.
   std::ostream& verbose_ostr = verbose ? std::cout : ostr;
-  int buildresult = this->GlobalGenerator->Build(
-    jobs, "", dir, projName, targets, verbose_ostr, "", config, buildOptions,
-    verbose, cmDuration::zero(), cmSystemTools::OUTPUT_PASSTHROUGH,
-    nativeOptions);
+  auto doBuild = [this, jobs, dir, projName, targets, &verbose_ostr, config,
+                  buildOptions, verbose, nativeOptions]() -> int {
+    return this->GlobalGenerator->Build(
+      jobs, "", dir, projName, targets, verbose_ostr, "", config, buildOptions,
+      verbose, cmDuration::zero(), cmSystemTools::OUTPUT_PASSTHROUGH,
+      nativeOptions);
+  };
+
+#if !defined(CMAKE_BOOTSTRAP)
+  int buildresult =
+    instrumentation.InstrumentCommand("cmakeBuild", args, doBuild);
+  instrumentation.CollectTimingData(
+    cmInstrumentationQuery::Hook::PostCMakeBuild);
+#else
+  int buildresult = doBuild();
+#endif
 
   return buildresult;
 }

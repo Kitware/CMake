@@ -10,7 +10,6 @@
 #include <cstdlib>
 #include <cstring>
 #include <ctime>
-#include <functional>
 #include <initializer_list>
 #include <iostream>
 #include <map>
@@ -2638,32 +2637,23 @@ int cmCTest::Run(std::vector<std::string> const& args)
   }
 #endif
 
-  std::function<int()> doTest = [this, &cmakeAndTest, &runScripts,
-                                 &processSteps]() -> int {
-    // now what should cmake do? if --build-and-test was specified then
-    // we run the build and test handler and return
-    if (cmakeAndTest) {
-      return this->RunCMakeAndTest();
-    }
+  // now what should cmake do? if --build-and-test was specified then
+  // we run the build and test handler and return
+  if (cmakeAndTest) {
+    return this->RunCMakeAndTest();
+  }
 
-    // -S, -SP, and/or -SP was specified
-    if (!runScripts.empty()) {
-      return this->RunScripts(runScripts);
-    }
+  // -S, -SP, and/or -SP was specified
+  if (!runScripts.empty()) {
+    return this->RunScripts(runScripts);
+  }
 
-    // -D, -T, and/or -M was specified
-    if (processSteps) {
-      return this->ProcessSteps();
-    }
+  // -D, -T, and/or -M was specified
+  if (processSteps) {
+    return this->ProcessSteps();
+  }
 
-    return this->ExecuteTests();
-  };
-  cmInstrumentation instrumentation(
-    cmSystemTools::GetCurrentWorkingDirectory());
-  int ret = instrumentation.InstrumentCommand("ctest", args,
-                                              [doTest]() { return doTest(); });
-  instrumentation.CollectTimingData(cmInstrumentationQuery::Hook::PostTest);
-  return ret;
+  return this->ExecuteTests(args);
 }
 
 int cmCTest::RunScripts(
@@ -2687,7 +2677,7 @@ int cmCTest::RunScripts(
   return res;
 }
 
-int cmCTest::ExecuteTests()
+int cmCTest::ExecuteTests(std::vector<std::string> const& args)
 {
   this->Impl->ExtraVerbose = this->Impl->Verbose;
   this->Impl->Verbose = true;
@@ -2732,7 +2722,14 @@ int cmCTest::ExecuteTests()
   }
 
   handler.SetVerbose(this->Impl->Verbose);
-  if (handler.ProcessHandler() < 0) {
+
+  cmInstrumentation instrumentation(this->GetBinaryDir());
+  auto processHandler = [&handler]() -> int {
+    return handler.ProcessHandler();
+  };
+  int ret = instrumentation.InstrumentCommand("ctest", args, processHandler);
+  instrumentation.CollectTimingData(cmInstrumentationQuery::Hook::PostTest);
+  if (ret < 0) {
     cmCTestLog(this, ERROR_MESSAGE, "Errors while running CTest\n");
     if (!this->Impl->OutputTestOutputOnTestFailure) {
       std::string const lastTestLog =

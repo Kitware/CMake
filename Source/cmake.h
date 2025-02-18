@@ -640,7 +640,8 @@ public:
   int Build(int jobs, std::string dir, std::vector<std::string> targets,
             std::string config, std::vector<std::string> nativeOptions,
             cmBuildOptions& buildOptions, bool verbose,
-            std::string const& presetName, bool listPresets);
+            std::string const& presetName, bool listPresets,
+            std::vector<std::string> const& args);
 
   //! run the --open option
   bool Open(std::string const& dir, bool dryRun);
