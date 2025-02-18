@@ -387,7 +387,6 @@ void cmGlobalNinjaGenerator::WriteCustomCommandBuild(
       std::string cmd = command; // NOLINT(*)
 #ifdef _WIN32
       if (cmd.empty())
-        // TODO Shouldn't an empty command be handled by ninja?
         cmd = "cmd.exe /c";
 #endif
       vars["COMMAND"] = std::move(cmd);
