@@ -1236,7 +1236,7 @@ void cmGlobalNinjaGenerator::AddCXXCompileCommand(
 void cmGlobalNinjaGenerator::CloseCompileCommandsStream()
 {
   if (this->CompileCommandsStream) {
-    *this->CompileCommandsStream << "\n]";
+    *this->CompileCommandsStream << "\n]\n";
     this->CompileCommandsStream.reset();
   }
 }

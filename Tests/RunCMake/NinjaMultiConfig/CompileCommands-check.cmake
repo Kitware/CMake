@@ -20,7 +20,8 @@ set(expected_compile_commands
 ]*(/Tests/RunCMake/NinjaMultiConfig/main\.c|\\\\Tests\\\\RunCMake\\\\NinjaMultiConfig\\\\main\.c)",
   "output": "(CMakeFiles/exe\.dir/Release/main\.c\.o|CMakeFiles\\\\exe\.dir\\\\Release\\\\main\.c\.(obj|o))"
 }
-]$]==])
+]
+$]==])
 
 file(READ "${RunCMake_TEST_BINARY_DIR}/compile_commands.json" actual_compile_commands)
 if(NOT actual_compile_commands MATCHES "${expected_compile_commands}")
