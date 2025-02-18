@@ -107,6 +107,15 @@ foreach(snippet IN LISTS snippets)
       snippet_error(${snippet} "Unexpected config: ${config}")
     endif()
   endif()
+
+  # Verify command args were passed
+  if (filename MATCHES "^cmakeBuild|^ctest")
+    string(JSON command GET "${contents}" command)
+    if (NOT command MATCHES "-.* Debug")
+      snippet_error(${snippet} "Command value missing passed arguments")
+    endif()
+  endif()
+
 endforeach()
 
 # Verify that listed snippets match expected roles

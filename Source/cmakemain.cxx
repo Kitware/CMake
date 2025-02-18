@@ -705,27 +705,12 @@ int do_build(int ac, char const* const* av)
     cmakemainProgressCallback(msg, prog, &cm);
   });
 
-  cmInstrumentation instrumentation(dir);
-  if (!instrumentation.errorMsg.empty()) {
-    cmSystemTools::Error(instrumentation.errorMsg);
-    return 1;
-  }
   cmBuildOptions buildOptions(cleanFirst, false, resolveMode);
-  std::function<int()> doBuild = [&cm, &jobs, &dir, &targets, &config,
-                                  &nativeOptions, &buildOptions, &verbose,
-                                  &presetName, &listPresets]() {
-    return cm.Build(jobs, dir, std::move(targets), std::move(config),
-                    std::move(nativeOptions), buildOptions, verbose,
-                    presetName, listPresets);
-  };
-  instrumentation.CollectTimingData(
-    cmInstrumentationQuery::Hook::PreCMakeBuild);
   std::vector<std::string> cmd;
   cm::append(cmd, av, av + ac);
-  int ret = instrumentation.InstrumentCommand("cmakeBuild", cmd, doBuild);
-  instrumentation.CollectTimingData(
-    cmInstrumentationQuery::Hook::PostCMakeBuild);
-  return ret;
+  return cm.Build(jobs, dir, std::move(targets), std::move(config),
+                  std::move(nativeOptions), buildOptions, verbose, presetName,
+                  listPresets, cmd);
 #endif
 }
 
@@ -986,8 +971,7 @@ int do_install(int ac, char const* const* av)
     }
   }
 
-  std::function<int()> doInstall = [&handler, &verbose, &jobs,
-                                    &instrumentation]() -> int {
+  auto doInstall = [&handler, &verbose, &jobs, &instrumentation]() -> int {
     int ret_ = 0;
     if (handler.IsParallel()) {
       ret_ = handler.Install(jobs, instrumentation);
