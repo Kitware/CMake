@@ -9,27 +9,29 @@ set(expected_compile_commands
 [==[^\[
 {
   "directory": "[^
-]*(/Tests/RunCMake/Swift/CompileCommands-build|\\\\Tests\\\\RunCMake\\\\Swift\\\\CompileCommands-build)",
+]*/Tests/RunCMake/Swift/CompileCommands-build",
   "command": "[^
 ]*swiftc[^
 ]* (\\")?[^
 ]*(/Tests/RunCMake/Swift/E.swift|\\\\Tests\\\\RunCMake\\\\Swift\\\\E.swift)(\\")? (\\")?[^
 ]*(/Tests/RunCMake/Swift/L.swift|\\\\Tests\\\\RunCMake\\\\Swift\\\\L.swift)(\\")?",
   "file": "[^
-]*(/Tests/RunCMake/Swift/E.swift|\\\\Tests\\\\RunCMake\\\\Swift\\\\E.swift)",
-  "output": "(CMakeFiles/CompileCommandLib.dir/(Debug/)?E.swift.o|CMakeFiles\\\\CompileCommandLib.dir\\\\(Debug\\\\)?E.swift.obj)"
+]*/Tests/RunCMake/Swift/E.swift",
+  "output": "[^
+]*/CMakeFiles/CompileCommandLib.dir/(Debug/)?E.swift.(o|obj)"
 },
 {
   "directory": "[^
-]*(/Tests/RunCMake/Swift/CompileCommands-build|\\\\Tests\\\\RunCMake\\\\Swift\\\\CompileCommands-build)",
+]*/Tests/RunCMake/Swift/CompileCommands-build",
   "command": "[^
 ]*swiftc[^
 ]* (\\")?[^
 ]*(/Tests/RunCMake/Swift/E.swift|\\\\Tests\\\\RunCMake\\\\Swift\\\\E.swift)(\\")? (\\")?[^
 ]*(/Tests/RunCMake/Swift/L.swift|\\\\Tests\\\\RunCMake\\\\Swift\\\\L.swift)(\\")?",
   "file": "[^
-]*(/Tests/RunCMake/Swift/L.swift|\\\\Tests\\\\RunCMake\\\\Swift\\\\L.swift)",
-  "output": "(CMakeFiles/CompileCommandLib.dir/(Debug/)?L.swift.o|CMakeFiles\\\\CompileCommandLib.dir\\\\(Debug\\\\)?L.swift.obj)"
+]*/Tests/RunCMake/Swift/L.swift",
+  "output": "[^
+]*/CMakeFiles/CompileCommandLib.dir/(Debug/)?L.swift.(o|obj)"
 }]==]
 )
 
