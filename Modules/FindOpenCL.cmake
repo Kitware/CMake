@@ -53,12 +53,12 @@ function(_FIND_OPENCL_VERSION)
     if(EXISTS ${OpenCL_INCLUDE_DIR}/Headers/cl.h)
       check_symbol_exists(
         CL_VERSION_${VERSION}
-        "${OpenCL_INCLUDE_DIR}/Headers/cl.h"
+        "Headers/cl.h"
         OPENCL_VERSION_${VERSION})
     else()
       check_symbol_exists(
         CL_VERSION_${VERSION}
-        "${OpenCL_INCLUDE_DIR}/CL/cl.h"
+        "CL/cl.h"
         OPENCL_VERSION_${VERSION})
     endif()
 
