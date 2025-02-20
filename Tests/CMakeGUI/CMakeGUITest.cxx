@@ -75,7 +75,8 @@ void CMakeGUITest::tryConfigure(int expectedResult, int timeout)
     Qt::QueuedConnection);
   QVERIFY(configureDoneSpy.wait(timeout));
 
-  QCOMPARE(configureDoneSpy, { { expectedResult } });
+  QList<QVariant> configureDoneSignalArguments = configureDoneSpy.takeFirst();
+  QCOMPARE(configureDoneSignalArguments.at(0).toInt(), expectedResult);
 }
 
 void CMakeGUITest::sourceBinaryArgs()

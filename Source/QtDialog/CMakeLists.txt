@@ -264,6 +264,7 @@ target_link_libraries(
   )
 
 add_executable(cmake-gui WIN32 MACOSX_BUNDLE CMakeGUIExec.cxx)
+set_property(TARGET cmake-gui PROPERTY CMake_QT_MAJOR_VERSION "${CMake_QT_MAJOR_VERSION}")
 target_link_libraries(cmake-gui
   PRIVATE
     CMakeGUIMainLib
