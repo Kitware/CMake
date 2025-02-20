@@ -9,7 +9,7 @@ CMAKE_C_COMPILER_LOADED=1
 CMAKE_C_COMPILER_RANLIB=C:/DoesNotExist/MinGW/bin/gcc-ranlib.exe
 CMAKE_C_COMPILER_TARGET=
 CMAKE_C_COMPILER_VERSION=4.9.3
-CMAKE_C_COMPILER_VERSION_INTERAL=
+CMAKE_C_COMPILER_VERSION_INTERNAL=
 Change Dir: C:/tmp/ii/CMakeFiles/CMakeTmp
 
 Run Build Command:"C:/DoesNotExist/MinGW/bin/mingw32-make.exe" "cmTC_ab097/fast"
