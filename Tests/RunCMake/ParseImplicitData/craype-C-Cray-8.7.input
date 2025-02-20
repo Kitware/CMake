@@ -10,6 +10,7 @@ CMAKE_C_COMPILER_RANLIB=
 CMAKE_C_COMPILER_TARGET=
 CMAKE_C_COMPILER_VERSION=8.7
 CMAKE_C_COMPILER_VERSION_INTERNAL=
+CMAKE_C_IMPLICIT_LINK_LIBRARY_stdc++=/usr/lib64/libstdc++.a
 Change Dir: /tmp/ii/CMakeFiles/CMakeTmp
 
 Run Build Command:"/usr/bin/gmake" "cmTC_cb7b8/fast"
