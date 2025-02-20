@@ -2,25 +2,28 @@ set(expected_compile_commands
 [==[^\[
 {
   "directory": "[^
-]*(/Tests/RunCMake/NinjaMultiConfig/CompileCommands-build|\\\\Tests\\\\RunCMake\\\\NinjaMultiConfig\\\\CompileCommands-build)",
+]*/Tests/RunCMake/NinjaMultiConfig/CompileCommands-build",
   "command": "[^
 ]*Debug[^
 ]*",
   "file": "[^
-]*(/Tests/RunCMake/NinjaMultiConfig/main\.c|\\\\Tests\\\\RunCMake\\\\NinjaMultiConfig\\\\main\.c)",
-  "output": "(CMakeFiles/exe\.dir/Debug/main\.c\.o|CMakeFiles\\\\exe\.dir\\\\Debug\\\\main\.c\.(obj|o))"
+]*/Tests/RunCMake/NinjaMultiConfig/main\.c",
+  "output": "[^
+]*/CMakeFiles/exe\.dir/Debug/main\.c\.(obj|o)"
 },
 {
   "directory": "[^
-]*(/Tests/RunCMake/NinjaMultiConfig/CompileCommands-build|\\\\Tests\\\\RunCMake\\\\NinjaMultiConfig\\\\CompileCommands-build)",
+]*/Tests/RunCMake/NinjaMultiConfig/CompileCommands-build",
   "command": "[^
 ]*Release[^
 ]*",
   "file": "[^
-]*(/Tests/RunCMake/NinjaMultiConfig/main\.c|\\\\Tests\\\\RunCMake\\\\NinjaMultiConfig\\\\main\.c)",
-  "output": "(CMakeFiles/exe\.dir/Release/main\.c\.o|CMakeFiles\\\\exe\.dir\\\\Release\\\\main\.c\.(obj|o))"
+]*/Tests/RunCMake/NinjaMultiConfig/main\.c",
+  "output": "[^
+]*/CMakeFiles/exe\.dir/Release/main\.c\.(obj|o)"
 }
-]$]==])
+]
+$]==])
 
 file(READ "${RunCMake_TEST_BINARY_DIR}/compile_commands.json" actual_compile_commands)
 if(NOT actual_compile_commands MATCHES "${expected_compile_commands}")

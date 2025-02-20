@@ -387,7 +387,6 @@ void cmGlobalNinjaGenerator::WriteCustomCommandBuild(
       std::string cmd = command; // NOLINT(*)
 #ifdef _WIN32
       if (cmd.empty())
-        // TODO Shouldn't an empty command be handled by ninja?
         cmd = "cmd.exe /c";
 #endif
       vars["COMMAND"] = std::move(cmd);
@@ -1214,11 +1213,8 @@ void cmGlobalNinjaGenerator::AddCXXCompileCommand(
     *this->CompileCommandsStream << ",\n";
   }
 
-  std::string sourceFileName = sourceFile;
-  if (!cmSystemTools::FileIsFullPath(sourceFileName)) {
-    sourceFileName = cmSystemTools::CollapseFullPath(
-      sourceFileName, this->GetCMakeInstance()->GetHomeOutputDirectory());
-  }
+  std::string sourceFileName =
+    cmSystemTools::CollapseFullPath(sourceFile, buildFileDir);
 
   /* clang-format off */
   *this->CompileCommandsStream << "{\n"
@@ -1229,7 +1225,9 @@ void cmGlobalNinjaGenerator::AddCXXCompileCommand(
      << R"(  "file": ")"
      << cmGlobalGenerator::EscapeJSON(sourceFileName) << "\",\n"
      << R"(  "output": ")"
-     << cmGlobalGenerator::EscapeJSON(objPath) << "\"\n"
+     << cmGlobalGenerator::EscapeJSON(
+           cmSystemTools::CollapseFullPath(objPath, buildFileDir))
+           << "\"\n"
      << "}";
   /* clang-format on */
 }
@@ -1237,7 +1235,7 @@ void cmGlobalNinjaGenerator::AddCXXCompileCommand(
 void cmGlobalNinjaGenerator::CloseCompileCommandsStream()
 {
   if (this->CompileCommandsStream) {
-    *this->CompileCommandsStream << "\n]";
+    *this->CompileCommandsStream << "\n]\n";
     this->CompileCommandsStream.reset();
   }
 }

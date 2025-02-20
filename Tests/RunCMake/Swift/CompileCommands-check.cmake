@@ -8,18 +8,31 @@ endif()
 set(expected_compile_commands
 [==[^\[
 {
-  "directory": ".*(/Tests/RunCMake/Swift/CompileCommands-build|\\\\Tests\\\\RunCMake\\\\Swift\\\\CompileCommands-build)",
-  "command": ".*swiftc .* (\\")?.*(/Tests/RunCMake/Swift/E.swift|\\\\Tests\\\\RunCMake\\\\Swift\\\\E.swift)(\\")? (\\")?.*(/Tests/RunCMake/Swift/L.swift|\\\\Tests\\\\RunCMake\\\\Swift\\\\L.swift)(\\")?",
-  "file": ".*(/Tests/RunCMake/Swift/E.swift|\\\\Tests\\\\RunCMake\\\\Swift\\\\E.swift)",
-  "output": "CMakeFiles/CompileCommandLib.dir/(Debug(/|\\))?E.swift.o|CMakeFiles\\\\CompileCommandLib.dir\\\\(Debug\\\\|Release\\\\)?E.swift.obj"
+  "directory": "[^
+]*/Tests/RunCMake/Swift/CompileCommands-build",
+  "command": "[^
+]*swiftc[^
+]* (\\")?[^
+]*(/Tests/RunCMake/Swift/E.swift|\\\\Tests\\\\RunCMake\\\\Swift\\\\E.swift)(\\")? (\\")?[^
+]*(/Tests/RunCMake/Swift/L.swift|\\\\Tests\\\\RunCMake\\\\Swift\\\\L.swift)(\\")?",
+  "file": "[^
+]*/Tests/RunCMake/Swift/E.swift",
+  "output": "[^
+]*/CMakeFiles/CompileCommandLib.dir/(Debug/)?E.swift.(o|obj)"
 },
 {
-  "directory": ".*(/Tests/RunCMake/Swift/CompileCommands-build|\\\\Tests\\\\RunCMake\\\\Swift\\\\CompileCommands-build)",
-  "command": ".*swiftc .* (\\")?.*(/Tests/RunCMake/Swift/E.swift|\\\\Tests\\\\RunCMake\\\\Swift\\\\E.swift)(\\")? (\\")?.*(/Tests/RunCMake/Swift/L.swift|\\\\Tests\\\\RunCMake\\\\Swift\\\\L.swift)(\\")?",
-  "file": ".*/Tests/RunCMake/Swift/L.swift",
-  "output": "CMakeFiles/CompileCommandLib.dir/(Debug(/|\\))?L.swift.o|CMakeFiles\\\\CompileCommandLib.dir\\\\(Debug\\\\|Release\\\\)?L.swift.obj"
-}
-]$]==]
+  "directory": "[^
+]*/Tests/RunCMake/Swift/CompileCommands-build",
+  "command": "[^
+]*swiftc[^
+]* (\\")?[^
+]*(/Tests/RunCMake/Swift/E.swift|\\\\Tests\\\\RunCMake\\\\Swift\\\\E.swift)(\\")? (\\")?[^
+]*(/Tests/RunCMake/Swift/L.swift|\\\\Tests\\\\RunCMake\\\\Swift\\\\L.swift)(\\")?",
+  "file": "[^
+]*/Tests/RunCMake/Swift/L.swift",
+  "output": "[^
+]*/CMakeFiles/CompileCommandLib.dir/(Debug/)?L.swift.(o|obj)"
+}]==]
 )
 
 file(READ "${RunCMake_TEST_BINARY_DIR}/compile_commands.json" compile_commands)
