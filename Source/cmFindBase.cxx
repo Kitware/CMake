@@ -94,6 +94,7 @@ bool cmFindBase::ParseArguments(std::vector<std::string> const& argsIn)
   this->SelectDefaultMacMode();
 
   bool newStyle = false;
+  bool haveRequiredOrOptional = false;
   enum Doing
   {
     DoingNone,
@@ -129,8 +130,21 @@ bool cmFindBase::ParseArguments(std::vector<std::string> const& argsIn)
       this->NoDefaultPath = true;
     } else if (args[j] == "REQUIRED") {
       doing = DoingNone;
+      if (haveRequiredOrOptional && !this->Required) {
+        this->SetError("cannot be both REQUIRED and OPTIONAL");
+        return false;
+      }
       this->Required = true;
       newStyle = true;
+      haveRequiredOrOptional = true;
+    } else if (args[j] == "OPTIONAL") {
+      doing = DoingNone;
+      if (haveRequiredOrOptional && this->Required) {
+        this->SetError("cannot be both REQUIRED and OPTIONAL");
+        return false;
+      }
+      newStyle = true;
+      haveRequiredOrOptional = true;
     } else if (args[j] == "REGISTRY_VIEW") {
       if (++j == args.size()) {
         this->SetError("missing required argument for REGISTRY_VIEW");
@@ -185,6 +199,10 @@ bool cmFindBase::ParseArguments(std::vector<std::string> const& argsIn)
         this->AddPathSuffix(args[j]);
       }
     }
+  }
+
+  if (!haveRequiredOrOptional) {
+    this->Required = this->Makefile->IsOn("CMAKE_FIND_REQUIRED");
   }
 
   if (this->VariableDocumentation.empty()) {

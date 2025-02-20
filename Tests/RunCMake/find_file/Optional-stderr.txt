@@ -1,0 +1,10 @@
+CMake Error at Optional.cmake:[0-9]+ \(find_file\):
+  find_file cannot be both REQUIRED and OPTIONAL
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)
+
+
+CMake Error at Optional\.cmake:[0-9]+ \(find_file\):
+  Could not find FILE_doNotExists using the following files: doNotExists.h
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)

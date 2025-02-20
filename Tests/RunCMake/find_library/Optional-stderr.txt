@@ -1,0 +1,10 @@
+CMake Error at Optional.cmake:[0-9]+ \(find_library\):
+  find_library cannot be both REQUIRED and OPTIONAL
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)
+
+
+CMake Error at Optional\.cmake:[0-9]+ \(find_library\):
+  Could not find LIB_doNotExists using the following names: doNotExists
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)

@@ -18,7 +18,7 @@ The general signature is:
              [VALIDATOR function]
              [DOC "cache documentation string"]
              [NO_CACHE]
-             [REQUIRED]
+             [REQUIRED|OPTIONAL]
              [NO_DEFAULT_PATH]
              [NO_PACKAGE_ROOT_PATH]
              [NO_CMAKE_PATH]
@@ -117,6 +117,18 @@ Options include:
   Stop processing with an error message if nothing is found, otherwise
   the search will be attempted again the next time |FIND_XXX| is invoked
   with the same variable.
+
+  .. versionadded:: 4.1
+
+    Every |FIND_XXX| command will be treated as ``REQUIRED`` when the
+    :variable:`CMAKE_FIND_REQUIRED` variable is enabled.
+
+``OPTIONAL``
+  .. versionadded:: 4.1
+
+  Ignore the value of :variable:`CMAKE_FIND_REQUIRED` and
+  continue without an error message if nothing is found.
+  Incompatible with ``REQUIRED``.
 
 If ``NO_DEFAULT_PATH`` is specified, then no additional paths are
 added to the search.

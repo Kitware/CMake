@@ -151,9 +151,17 @@ private:
   using AppendixMap = std::map<std::string, Appendix>;
   AppendixMap FindAppendices(std::string const& base,
                              cmPackageInfoReader const& baseReader) const;
+  enum RequiredStatus
+  {
+    Optional,
+    OptionalExplicit,
+    RequiredExplicit,
+    RequiredFromPackageVar,
+    RequiredFromFindVar
+  };
   bool FindPackageDependencies(std::string const& fileName,
                                cmPackageInfoReader const& reader,
-                               bool required);
+                               RequiredStatus required);
 
   bool ImportPackageTargets(std::string const& fileName,
                             cmPackageInfoReader& reader);
@@ -193,6 +201,8 @@ private:
   bool SearchFrameworkPrefix(std::string const& prefix);
   bool SearchAppBundlePrefix(std::string const& prefix);
   bool SearchEnvironmentPrefix(std::string const& prefix);
+
+  bool IsRequired() const;
 
   struct OriginalDef
   {
@@ -234,7 +244,7 @@ private:
   unsigned int VersionFoundCount = 0;
   KWIML_INT_uint64_t RequiredCMakeVersion = 0;
   bool Quiet = false;
-  bool Required = false;
+  RequiredStatus Required = RequiredStatus::Optional;
   bool UseCpsFiles = false;
   bool UseConfigFiles = true;
   bool UseFindModules = true;

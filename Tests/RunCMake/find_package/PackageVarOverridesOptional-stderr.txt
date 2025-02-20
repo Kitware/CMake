@@ -1,0 +1,20 @@
+CMake Error at PackageVarOverridesOptional.cmake:[0-9]+ \(find_package\):
+  By not providing "FindFoo.cmake" in CMAKE_MODULE_PATH this project has
+  asked CMake to find a package configuration file provided by "Foo", but
+  CMake did not find one.
+
+  Could not find a package configuration file provided by "Foo" with any of
+  the following names:
+
+    FooConfig.cmake
+    foo-config.cmake
+
+  Add the installation prefix of "Foo" to CMAKE_PREFIX_PATH or set "Foo_DIR"
+  to a directory containing one of the above files.  If "Foo" provides a
+  separate development package or SDK, be sure it has been installed.
+
+  This package is considered required because the
+  CMAKE_REQUIRE_FIND_PACKAGE_Foo variable has been enabled.
+
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)

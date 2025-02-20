@@ -1,0 +1,2 @@
+set(CMAKE_REQUIRE_FIND_PACKAGE_Foo ON)
+find_package(Foo OPTIONAL)
