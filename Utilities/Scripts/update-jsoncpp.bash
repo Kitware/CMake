@@ -8,7 +8,7 @@ readonly name="jsoncpp"
 readonly ownership="JsonCpp Upstream <kwrobot@kitware.com>"
 readonly subtree="Utilities/cmjsoncpp"
 readonly repo="https://github.com/open-source-parsers/jsoncpp.git"
-readonly tag="42e892d96e47b1f6e29844cc705e148ec4856448"
+readonly tag="1.9.6"
 readonly shortlog=false
 readonly paths="
   LICENSE
