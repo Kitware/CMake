@@ -547,6 +547,21 @@ void cmake::PrintPresetEnvironment()
 // Parse the args
 bool cmake::SetCacheArgs(std::vector<std::string> const& args)
 {
+  static std::string const kCMAKE_POLICY_VERSION_MINIMUM =
+    "CMAKE_POLICY_VERSION_MINIMUM";
+  if (!this->State->GetInitializedCacheValue(kCMAKE_POLICY_VERSION_MINIMUM)) {
+    cm::optional<std::string> policyVersion =
+      cmSystemTools::GetEnvVar(kCMAKE_POLICY_VERSION_MINIMUM);
+    if (policyVersion && !policyVersion->empty()) {
+      this->AddCacheEntry(
+        kCMAKE_POLICY_VERSION_MINIMUM, *policyVersion,
+        "Override policy version for cmake_minimum_required calls.",
+        cmStateEnums::STRING);
+      this->State->SetCacheEntryProperty(kCMAKE_POLICY_VERSION_MINIMUM,
+                                         "ADVANCED", "1");
+    }
+  }
+
   auto DefineLambda = [](std::string const& entry, cmake* state) -> bool {
     std::string var;
     std::string value;
