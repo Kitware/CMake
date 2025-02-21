@@ -1,0 +1,7 @@
+^CMake Error at [^
+]*/PolicyVersionVarBad\.cmake:1 \(cmake_minimum_required\):
+  Invalid CMAKE_POLICY_VERSION_MINIMUM value "\.\.\.3\.10"\.  A numeric
+  major\.minor\[\.patch\[\.tweak\]\] must be given\.
+Call Stack \(most recent call first\):
+  [^
+]*/PolicyVersionVarBadScript\.cmake:1 \(include\)$
