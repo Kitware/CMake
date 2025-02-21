@@ -70,6 +70,14 @@ test_unparsed_version(BadVersion4 "+42")
 test_unparsed_version(CustomVersion "VII")
 
 ###############################################################################
+# Test finding a package whose CPS file is in the package prefix root.
+set(RootTest_DIR "${CMAKE_CURRENT_SOURCE_DIR}/RootTest")
+find_package(RootTest)
+if(NOT RootTest_FOUND)
+  message(SEND_ERROR "RootTest not found !")
+endif()
+
+###############################################################################
 # Test glob sorting.
 
 set(SortLib_DIR "" CACHE FILEPATH "Wipe out find results for testing." FORCE)

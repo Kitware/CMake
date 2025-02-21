@@ -146,16 +146,24 @@ std::string DeterminePrefix(std::string const& filepath,
   }
 
   // Get and validate prefix-relative path.
+  std::string const& absPath = cmSystemTools::GetFilenamePath(filepath);
   std::string relPath = data["cps_path"].asString();
   cmSystemTools::ConvertToUnixSlashes(relPath);
-  if (relPath.empty() || !cmHasLiteralPrefix(relPath, "@prefix@/")) {
+  if (relPath.empty() || !cmHasLiteralPrefix(relPath, "@prefix@")) {
+    // The relative prefix is not valid.
+    return {};
+  }
+  if (relPath.size() == 8) {
+    // The relative path is exactly "@prefix@".
+    return absPath;
+  }
+  if (relPath[8] != '/') {
     // The relative prefix is not valid.
     return {};
   }
   relPath = relPath.substr(8);
 
   // Get directory portion of the absolute path.
-  std::string const& absPath = cmSystemTools::GetFilenamePath(filepath);
   if (ComparePathSuffix(absPath, relPath)) {
     return absPath.substr(0, absPath.size() - relPath.size());
   }
