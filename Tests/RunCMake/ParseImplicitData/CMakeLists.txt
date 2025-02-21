@@ -27,7 +27,7 @@ message("Generate input for system type: ${UNAME}")
 
 # CMAKE_<LANG>_COMPILER_* variables we save in the resultfile
 set(compvars ABI AR ARCHITECTURE_ID EXTERNAL_TOOLCHAIN ID LAUNCHER LOADED
-  RANLIB TARGET VERSION VERSION_INTERAL)
+  RANLIB TARGET VERSION VERSION_INTERNAL)
 
 foreach(lang IN ITEMS ${LANGUAGES})
 
