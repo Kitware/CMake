@@ -13,25 +13,26 @@ set(CMake_QT_MAJOR_VERSION "A" CACHE
   STRING "Expected Qt major version. Valid values are A (auto-select), 5, 6.")
 set(SUPPORTED_QT_VERSIONS "A" 5 6)
 set_property(CACHE CMake_QT_MAJOR_VERSION PROPERTY STRINGS ${SUPPORTED_QT_VERSIONS})
+# Select a Qt version and store it in a normal variable of the same name.
 if(NOT CMake_QT_MAJOR_VERSION STREQUAL "A")
   if(NOT CMake_QT_MAJOR_VERSION IN_LIST SUPPORTED_QT_VERSIONS)
     message(FATAL_ERROR "Supported Qt versions are \"${SUPPORTED_QT_VERSIONS}\"."
             " But CMake_QT_MAJOR_VERSION is set to ${CMake_QT_MAJOR_VERSION}.")
   endif()
-  set(INSTALLED_QT_VERSION ${CMake_QT_MAJOR_VERSION})
+  set(CMake_QT_MAJOR_VERSION "${CMake_QT_MAJOR_VERSION}")
 else()
   find_package(Qt6Widgets QUIET)
-  set(INSTALLED_QT_VERSION 6)
+  set(CMake_QT_MAJOR_VERSION 6)
   if(NOT Qt6Widgets_FOUND)
     find_package(Qt5Widgets QUIET)
     if(NOT Qt5Widgets_FOUND)
       message(FATAL_ERROR "Could not find a valid Qt installation.")
     endif()
-    set(INSTALLED_QT_VERSION 5)
+    set(CMake_QT_MAJOR_VERSION 5)
   endif()
 endif()
 
-find_package(Qt${INSTALLED_QT_VERSION}
+find_package(Qt${CMake_QT_MAJOR_VERSION}
     COMPONENTS ${QT_COMPONENTS}
     REQUIRED QUIET
 )
@@ -40,10 +41,10 @@ set(CMake_QT_EXTRA_LIBRARIES)
 
 # Try to find the package WinExtras for the task bar progress
 if(WIN32)
-  find_package(Qt${INSTALLED_QT_VERSION}WinExtras QUIET)
-  if(Qt${INSTALLED_QT_VERSION}WinExtras_FOUND)
+  find_package(Qt${CMake_QT_MAJOR_VERSION}WinExtras QUIET)
+  if(Qt${CMake_QT_MAJOR_VERSION}WinExtras_FOUND)
     add_compile_definitions(QT_WINEXTRAS)
-    list(APPEND CMake_QT_EXTRA_LIBRARIES Qt${INSTALLED_QT_VERSION}::WinExtras)
+    list(APPEND CMake_QT_EXTRA_LIBRARIES Qt${CMake_QT_MAJOR_VERSION}::WinExtras)
     list(APPEND QT_COMPONENTS WinExtras)
   endif()
 endif()
@@ -53,7 +54,7 @@ if(MSVC)
   add_compile_definitions(_SILENCE_STDEXT_ARR_ITERS_DEPRECATION_WARNING)
 endif()
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${Qt${INSTALLED_QT_VERSION}Widgets_EXECUTABLE_COMPILE_FLAGS}")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${Qt${CMake_QT_MAJOR_VERSION}Widgets_EXECUTABLE_COMPILE_FLAGS}")
 
 if(CMake_QT_STATIC_QXcbIntegrationPlugin_LIBRARIES)
   list(APPEND CMake_QT_EXTRA_LIBRARIES ${CMake_QT_STATIC_QXcbIntegrationPlugin_LIBRARIES})
@@ -70,7 +71,7 @@ endif()
 # We need to install platform plugin and add qt.conf for Qt5 on Mac and Windows.
 if(CMake_INSTALL_DEPENDENCIES AND (APPLE OR WIN32))
   function(_qt_get_plugin_name_with_version target out_var)
-      string(REGEX REPLACE "^Qt::(.+)" "Qt${INSTALLED_QT_VERSION}::\\1"
+      string(REGEX REPLACE "^Qt::(.+)" "Qt${CMake_QT_MAJOR_VERSION}::\\1"
              qt_plugin_with_version "${target}")
       if(TARGET "${qt_plugin_with_version}")
           set("${out_var}" "${qt_plugin_with_version}" PARENT_SCOPE)
@@ -106,23 +107,23 @@ if(CMake_INSTALL_DEPENDENCIES AND (APPLE OR WIN32))
   endmacro()
   macro(install_qt_plugins _comps _plugins_var)
     foreach(_qt_comp IN LISTS ${_comps})
-      if(INSTALLED_QT_VERSION VERSION_LESS 6)
-        set(_qt_module_plugins ${Qt${INSTALLED_QT_VERSION}${_qt_comp}_PLUGINS})
+      if(CMake_QT_MAJOR_VERSION VERSION_LESS 6)
+        set(_qt_module_plugins ${Qt${CMake_QT_MAJOR_VERSION}${_qt_comp}_PLUGINS})
       else()
-        get_target_property(_qt_module_plugins Qt${INSTALLED_QT_VERSION}::${_qt_comp} QT_PLUGINS)
+        get_target_property(_qt_module_plugins Qt${CMake_QT_MAJOR_VERSION}::${_qt_comp} QT_PLUGINS)
       endif()
       foreach(_qt_plugin IN LISTS _qt_module_plugins)
-        if(INSTALLED_QT_VERSION VERSION_GREATER_EQUAL 6)
+        if(CMake_QT_MAJOR_VERSION VERSION_GREATER_EQUAL 6)
           # Qt6 provides the plugins as individual packages that need to be found.
-          find_package(Qt${INSTALLED_QT_VERSION}${_qt_plugin} QUIET
-            PATHS ${Qt${INSTALLED_QT_VERSION}${_qt_comp}_DIR})
+          find_package(Qt${CMake_QT_MAJOR_VERSION}${_qt_plugin} QUIET
+            PATHS ${Qt${CMake_QT_MAJOR_VERSION}${_qt_comp}_DIR})
         endif()
         install_qt_plugin("${_qt_plugin}" "${_plugins_var}")
       endforeach()
     endforeach()
   endmacro()
   if(APPLE)
-    if(INSTALLED_QT_VERSION VERSION_EQUAL 5)
+    if(CMake_QT_MAJOR_VERSION VERSION_EQUAL 5)
       install_qt_plugin("Qt5::QCocoaIntegrationPlugin" QT_PLUGINS)
       if(TARGET Qt5::QMacStylePlugin)
         install_qt_plugin("Qt5::QMacStylePlugin" QT_PLUGINS)
@@ -137,7 +138,7 @@ if(CMake_INSTALL_DEPENDENCIES AND (APPLE OR WIN32))
       DESTINATION "${CMAKE_INSTALL_PREFIX}/Resources"
       ${COMPONENT})
   elseif(WIN32 AND NOT CMake_QT_STATIC_QWindowsIntegrationPlugin_LIBRARIES)
-    if(INSTALLED_QT_VERSION VERSION_EQUAL 5)
+    if(CMake_QT_MAJOR_VERSION VERSION_EQUAL 5)
       install_qt_plugin("Qt5::QWindowsIntegrationPlugin" QT_PLUGINS)
     else()
       # FIXME: Minimize plugins for Qt6.
@@ -151,7 +152,7 @@ if(CMake_INSTALL_DEPENDENCIES AND (APPLE OR WIN32))
   endif()
 endif()
 
-get_property(_Qt_Core_LOCATION TARGET Qt${INSTALLED_QT_VERSION}::Core PROPERTY LOCATION)
+get_property(_Qt_Core_LOCATION TARGET Qt${CMake_QT_MAJOR_VERSION}::Core PROPERTY LOCATION)
 get_filename_component(Qt_BIN_DIR "${_Qt_Core_LOCATION}" PATH)
 if(APPLE)
   get_filename_component(Qt_BIN_DIR "${Qt_BIN_DIR}" PATH)
@@ -194,8 +195,8 @@ target_link_libraries(
   PUBLIC
     CMakeLib
     ${CMake_QT_EXTRA_LIBRARIES}
-    Qt${INSTALLED_QT_VERSION}::Core
-    Qt${INSTALLED_QT_VERSION}::Widgets
+    Qt${CMake_QT_MAJOR_VERSION}::Core
+    Qt${CMake_QT_MAJOR_VERSION}::Widgets
   )
 
 set(UI_SRCS
@@ -223,7 +224,7 @@ set(MOC_SRCS
   )
 set(QRC_SRCS CMakeSetup.qrc)
 
-if(INSTALLED_QT_VERSION VERSION_LESS 6)
+if(CMake_QT_MAJOR_VERSION VERSION_LESS 6)
   qt5_wrap_ui(UI_BUILT_SRCS ${UI_SRCS})
   qt5_wrap_cpp(MOC_BUILT_SRCS ${MOC_SRCS})
   qt5_add_resources(QRC_BUILT_SRCS ${QRC_SRCS})
@@ -269,7 +270,7 @@ target_link_libraries(cmake-gui
     CMakeGUIQRCLib
     $<TARGET_NAME_IF_EXISTS:CMakeVersion>
     ManifestLib
-    Qt${INSTALLED_QT_VERSION}::Core
+    Qt${CMake_QT_MAJOR_VERSION}::Core
   )
 
 if(WIN32)
