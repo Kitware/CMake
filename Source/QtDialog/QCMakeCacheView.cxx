@@ -187,7 +187,7 @@ QCMakeCacheModel::QCMakeCacheModel(QObject* p)
 
 QCMakeCacheModel::~QCMakeCacheModel() = default;
 
-static uint qHash(QCMakeProperty const& p)
+static size_t qHash(QCMakeProperty const& p)
 {
   return qHash(p.Key);
 }
@@ -349,7 +349,7 @@ void QCMakeCacheModel::setViewType(QCMakeCacheModel::ViewType t)
 
   QCMakePropertyList props = this->properties();
   QCMakePropertyList oldProps;
-  int numNew = this->NewPropertyCount;
+  cm_qsizetype numNew = this->NewPropertyCount;
   cm_qsizetype numTotal = props.count();
   for (cm_qsizetype i = numNew; i < numTotal; i++) {
     oldProps.append(props[i]);
@@ -530,7 +530,7 @@ bool QCMakeCacheModel::editEnabled() const
   return this->EditEnabled;
 }
 
-int QCMakeCacheModel::newPropertyCount() const
+cm_qsizetype QCMakeCacheModel::newPropertyCount() const
 {
   return this->NewPropertyCount;
 }
