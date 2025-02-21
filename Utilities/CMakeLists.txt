@@ -17,5 +17,7 @@ if(CMake_BUILD_WIX_CUSTOM_ACTION)
   add_subdirectory(Release/WiX)
 endif()
 
-# Make sure generated files use the same clang-tidy checks (none).
-configure_file(.clang-tidy .clang-tidy COPYONLY)
+if(CMake_RUN_CLANG_TIDY)
+  # Make sure generated files use the same clang-tidy checks (none).
+  configure_file(.clang-tidy .clang-tidy COPYONLY)
+endif()
