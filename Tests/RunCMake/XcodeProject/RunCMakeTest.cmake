@@ -91,6 +91,13 @@ if(XCODE_VERSION VERSION_GREATER_EQUAL 12)
 
   XcodeObjectLibsInTwoProjectsMacOS()
 
+  block()
+    set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/BundlePostBuild-build)
+    run_cmake(BundlePostBuild)
+    set(RunCMake_TEST_NO_CLEAN 1)
+    run_cmake_command(BundlePostBuild-build ${CMAKE_COMMAND} --build . --config Debug)
+  endblock()
+
 endif()
 
 function(XcodeSchemaGeneration)
