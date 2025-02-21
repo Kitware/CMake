@@ -10,7 +10,7 @@ CMAKE_Fortran_COMPILER_LOADED=1
 CMAKE_Fortran_COMPILER_RANLIB=
 CMAKE_Fortran_COMPILER_TARGET=
 CMAKE_Fortran_COMPILER_VERSION=15.0.0
-CMAKE_Fortran_COMPILER_VERSION_INTERAL=
+CMAKE_Fortran_COMPILER_VERSION_INTERNAL=
 Change Dir: /tmp/ii/CMakeFiles/CMakeTmp
 
 Run Build Command(s):/usr/bin/gmake -f Makefile cmTC_2e9b9/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_2e9b9.dir/build.make CMakeFiles/cmTC_2e9b9.dir/build
