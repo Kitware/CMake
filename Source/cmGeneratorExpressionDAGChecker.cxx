@@ -19,20 +19,9 @@
 
 cmGeneratorExpressionDAGChecker::cmGeneratorExpressionDAGChecker(
   cmGeneratorTarget const* target, std::string property,
-  const GeneratorExpressionContent* content,
+  GeneratorExpressionContent const* content,
   cmGeneratorExpressionDAGChecker* parent, cmLocalGenerator const* contextLG,
-  std::string const& contextConfig)
-  : cmGeneratorExpressionDAGChecker(cmListFileBacktrace(), target,
-                                    std::move(property), content, parent,
-                                    contextLG, contextConfig)
-{
-}
-
-cmGeneratorExpressionDAGChecker::cmGeneratorExpressionDAGChecker(
-  cmListFileBacktrace backtrace, cmGeneratorTarget const* target,
-  std::string property, const GeneratorExpressionContent* content,
-  cmGeneratorExpressionDAGChecker* parent, cmLocalGenerator const* contextLG,
-  std::string const& contextConfig)
+  std::string const& contextConfig, cmListFileBacktrace backtrace)
   : Parent(parent)
   , Top(parent ? parent->Top : this)
   , Target(target)

@@ -48,8 +48,13 @@ std::string AddLangSpecificInterfaceIncludeDirectories(
   cmGeneratorExpressionDAGChecker* context)
 {
   cmGeneratorExpressionDAGChecker dagChecker{
-    target->GetBacktrace(),      target, propertyName, nullptr, context,
-    target->GetLocalGenerator(), config,
+    target,
+    propertyName,
+    nullptr,
+    context,
+    target->GetLocalGenerator(),
+    config,
+    target->GetBacktrace(),
   };
   switch (dagChecker.Check()) {
     case cmGeneratorExpressionDAGChecker::SELF_REFERENCE:
@@ -101,8 +106,13 @@ void AddLangSpecificImplicitIncludeDirectories(
   if (const auto* libraries =
         target->GetLinkImplementationLibraries(config, UseTo::Compile)) {
     cmGeneratorExpressionDAGChecker dagChecker{
-      target->GetBacktrace(),      target, propertyName, nullptr, nullptr,
-      target->GetLocalGenerator(), config,
+      target,
+      propertyName,
+      nullptr,
+      nullptr,
+      target->GetLocalGenerator(),
+      config,
+      target->GetBacktrace(),
     };
 
     for (const cmLinkImplItem& library : libraries->Libraries) {

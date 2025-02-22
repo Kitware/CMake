@@ -17,19 +17,12 @@ class cmLocalGenerator;
 
 struct cmGeneratorExpressionDAGChecker
 {
-  cmGeneratorExpressionDAGChecker(cmListFileBacktrace backtrace,
-                                  cmGeneratorTarget const* target,
-                                  std::string property,
-                                  const GeneratorExpressionContent* content,
-                                  cmGeneratorExpressionDAGChecker* parent,
-                                  cmLocalGenerator const* contextLG,
-                                  std::string const& contextConfig);
-  cmGeneratorExpressionDAGChecker(cmGeneratorTarget const* target,
-                                  std::string property,
-                                  const GeneratorExpressionContent* content,
-                                  cmGeneratorExpressionDAGChecker* parent,
-                                  cmLocalGenerator const* contextLG,
-                                  std::string const& contextConfig);
+  cmGeneratorExpressionDAGChecker(
+    cmGeneratorTarget const* target, std::string property,
+    GeneratorExpressionContent const* content,
+    cmGeneratorExpressionDAGChecker* parent, cmLocalGenerator const* contextLG,
+    std::string const& contextConfig,
+    cmListFileBacktrace backtrace = cmListFileBacktrace());
 
   enum Result
   {
