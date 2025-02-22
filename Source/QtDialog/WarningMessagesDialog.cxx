@@ -26,21 +26,23 @@ void WarningMessagesDialog::setInitialValues()
 
 void WarningMessagesDialog::setupSignals()
 {
+#if (QT_VERSION >= QT_VERSION_CHECK(6, 7, 0))
+  static auto const checkStateChanged = &QCheckBox::checkStateChanged;
+#else
+  static auto const checkStateChanged = &QCheckBox::stateChanged;
+#endif
   QObject::connect(this->buttonBox, &QDialogButtonBox::accepted, this,
                    &WarningMessagesDialog::doAccept);
-
-  QObject::connect(this->suppressDeveloperWarnings, &QCheckBox::stateChanged,
-                   this,
+  QObject::connect(this->suppressDeveloperWarnings, checkStateChanged, this,
                    &WarningMessagesDialog::doSuppressDeveloperWarningsChanged);
   QObject::connect(
-    this->suppressDeprecatedWarnings, &QCheckBox::stateChanged, this,
+    this->suppressDeprecatedWarnings, checkStateChanged, this,
     &WarningMessagesDialog::doSuppressDeprecatedWarningsChanged);
 
-  QObject::connect(this->developerWarningsAsErrors, &QCheckBox::stateChanged,
-                   this,
+  QObject::connect(this->developerWarningsAsErrors, checkStateChanged, this,
                    &WarningMessagesDialog::doDeveloperWarningsAsErrorsChanged);
   QObject::connect(
-    this->deprecatedWarningsAsErrors, &QCheckBox::stateChanged, this,
+    this->deprecatedWarningsAsErrors, checkStateChanged, this,
     &WarningMessagesDialog::doDeprecatedWarningsAsErrorsChanged);
 }
 

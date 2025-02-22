@@ -14,5 +14,7 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O3" CACHE STRING "")
 
 # Cover compilation with C++11 only and not higher standards.
 set(CMAKE_CXX_STANDARD "11" CACHE STRING "")
+# Qt 6 requires C++17, so use Qt 5.
+set(CMake_QT_MAJOR_VERSION "5" CACHE STRING "")
 
 include("${CMAKE_CURRENT_LIST_DIR}/configure_fedora41_common.cmake")

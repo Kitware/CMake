@@ -83,7 +83,8 @@ int QCMakePresetItemModel::rowCount(QModelIndex const& parent) const
   if (this->m_presets.empty()) {
     return 1;
   }
-  return this->m_presets.size() + 2;
+  // NOLINTNEXTLINE(readability-redundant-casting)
+  return static_cast<int>(this->m_presets.size() + 2);
 }
 
 int QCMakePresetItemModel::columnCount(QModelIndex const& parent) const
@@ -144,5 +145,6 @@ int QCMakePresetItemModel::presetNameToRow(QString const& name) const
     index++;
   }
 
-  return this->m_presets.size() + 1;
+  // NOLINTNEXTLINE(readability-redundant-casting)
+  return static_cast<int>(this->m_presets.size() + 1);
 }

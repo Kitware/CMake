@@ -17,7 +17,9 @@ using QItemDataHash = QHash<Qt::ItemDataRole, QVariant>;
 
 void QCMakePresetItemModelTest::initTestCase()
 {
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
   QMetaType::registerComparators<QCMakePreset>();
+#endif
 }
 
 void QCMakePresetItemModelTest::initTestCase_data()
