@@ -425,10 +425,14 @@ const std::string& cmGeneratorExpressionInterpreter::Evaluate(
     this->GeneratorExpression.Parse(std::move(expression));
 
   // Specify COMPILE_OPTIONS to DAGchecker, same semantic as COMPILE_FLAGS
-  cmGeneratorExpressionDAGChecker dagChecker(
+  cmGeneratorExpressionDAGChecker dagChecker{
     this->HeadTarget,
-    property == "COMPILE_FLAGS" ? "COMPILE_OPTIONS" : property, nullptr,
-    nullptr, this->LocalGenerator, this->Config);
+    property == "COMPILE_FLAGS" ? "COMPILE_OPTIONS" : property,
+    nullptr,
+    nullptr,
+    this->LocalGenerator,
+    this->Config,
+  };
 
   return this->CompiledGeneratorExpression->Evaluate(
     this->LocalGenerator, this->Config, this->HeadTarget, &dagChecker, nullptr,
