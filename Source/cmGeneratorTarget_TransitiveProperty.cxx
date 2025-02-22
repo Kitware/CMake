@@ -114,7 +114,7 @@ std::string cmGeneratorTarget::EvaluateInterfaceProperty(
     prop,
     nullptr,
     dagCheckerParent,
-    this->LocalGenerator,
+    context->LG,
     context->Config,
     context->Backtrace,
   };
