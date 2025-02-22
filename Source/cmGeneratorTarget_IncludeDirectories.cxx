@@ -47,13 +47,13 @@ std::string AddLangSpecificInterfaceIncludeDirectories(
   const std::string& propertyName, IncludeDirectoryFallBack mode,
   cmGeneratorExpressionDAGChecker* context)
 {
-  cmGeneratorExpressionDAGChecker dag{
+  cmGeneratorExpressionDAGChecker dagChecker{
     target->GetBacktrace(),      target, propertyName, nullptr, context,
-    target->GetLocalGenerator(), config
+    target->GetLocalGenerator(), config,
   };
-  switch (dag.Check()) {
+  switch (dagChecker.Check()) {
     case cmGeneratorExpressionDAGChecker::SELF_REFERENCE:
-      dag.ReportError(
+      dagChecker.ReportError(
         nullptr, "$<TARGET_PROPERTY:" + target->GetName() + ",propertyName");
       CM_FALLTHROUGH;
     case cmGeneratorExpressionDAGChecker::CYCLIC_REFERENCE:
@@ -100,9 +100,9 @@ void AddLangSpecificImplicitIncludeDirectories(
 {
   if (const auto* libraries =
         target->GetLinkImplementationLibraries(config, UseTo::Compile)) {
-    cmGeneratorExpressionDAGChecker dag{
+    cmGeneratorExpressionDAGChecker dagChecker{
       target->GetBacktrace(),      target, propertyName, nullptr, nullptr,
-      target->GetLocalGenerator(), config
+      target->GetLocalGenerator(), config,
     };
 
     for (const cmLinkImplItem& library : libraries->Libraries) {
@@ -128,10 +128,10 @@ void AddLangSpecificImplicitIncludeDirectories(
             }
           }
 
-          cmExpandList(
-            AddLangSpecificInterfaceIncludeDirectories(
-              target, dependency, lang, config, propertyName, mode, &dag),
-            entry.Values);
+          cmExpandList(AddLangSpecificInterfaceIncludeDirectories(
+                         target, dependency, lang, config, propertyName, mode,
+                         &dagChecker),
+                       entry.Values);
           entries.Entries.emplace_back(std::move(entry));
         }
       }
@@ -257,9 +257,10 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetIncludeDirectories(
   std::vector<BT<std::string>> includes;
   std::unordered_set<std::string> uniqueIncludes;
 
-  cmGeneratorExpressionDAGChecker dagChecker(this, "INCLUDE_DIRECTORIES",
-                                             nullptr, nullptr,
-                                             this->LocalGenerator, config);
+  cmGeneratorExpressionDAGChecker dagChecker{
+    this,    "INCLUDE_DIRECTORIES", nullptr,
+    nullptr, this->LocalGenerator,  config,
+  };
 
   cmList debugProperties{ this->Makefile->GetDefinition(
     "CMAKE_DEBUG_TARGET_PROPERTIES") };

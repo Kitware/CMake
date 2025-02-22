@@ -583,18 +583,18 @@ cmComputeLinkDepends::cmComputeLinkDepends(const cmGeneratorTarget* target,
         if (cmValue feature = this->Target->GetProperty(key)) {
           if (!feature->empty() && key.length() > lloPrefix.length()) {
             auto item = key.substr(lloPrefix.length());
-            cmGeneratorExpressionDAGChecker dag{
+            cmGeneratorExpressionDAGChecker dagChecker{
               this->Target->GetBacktrace(),
               this->Target,
               "LINK_LIBRARY_OVERRIDE",
               nullptr,
               nullptr,
               this->Target->GetLocalGenerator(),
-              config
+              config,
             };
             auto overrideFeature = cmGeneratorExpression::Evaluate(
               *feature, this->Target->GetLocalGenerator(), config,
-              this->Target, &dag, this->Target, linkLanguage);
+              this->Target, &dagChecker, this->Target, linkLanguage);
             this->LinkLibraryOverride.emplace(item, overrideFeature);
           }
         }
@@ -603,16 +603,18 @@ cmComputeLinkDepends::cmComputeLinkDepends(const cmGeneratorTarget* target,
   // global override property
   if (cmValue linkLibraryOverride =
         this->Target->GetProperty("LINK_LIBRARY_OVERRIDE")) {
-    cmGeneratorExpressionDAGChecker dag{ target->GetBacktrace(),
-                                         target,
-                                         "LINK_LIBRARY_OVERRIDE",
-                                         nullptr,
-                                         nullptr,
-                                         target->GetLocalGenerator(),
-                                         config };
+    cmGeneratorExpressionDAGChecker dagChecker{
+      target->GetBacktrace(),
+      target,
+      "LINK_LIBRARY_OVERRIDE",
+      nullptr,
+      nullptr,
+      target->GetLocalGenerator(),
+      config,
+    };
     auto overrideValue = cmGeneratorExpression::Evaluate(
-      *linkLibraryOverride, target->GetLocalGenerator(), config, target, &dag,
-      target, linkLanguage);
+      *linkLibraryOverride, target->GetLocalGenerator(), config, target,
+      &dagChecker, target, linkLanguage);
 
     auto overrideList = cmTokenize(overrideValue, ","_s);
     if (overrideList.size() >= 2) {

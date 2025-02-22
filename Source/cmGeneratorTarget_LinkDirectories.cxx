@@ -125,8 +125,9 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetLinkDirectories(
   std::vector<BT<std::string>> result;
   std::unordered_set<std::string> uniqueDirectories;
 
-  cmGeneratorExpressionDAGChecker dagChecker(
-    this, "LINK_DIRECTORIES", nullptr, nullptr, this->LocalGenerator, config);
+  cmGeneratorExpressionDAGChecker dagChecker{
+    this, "LINK_DIRECTORIES", nullptr, nullptr, this->LocalGenerator, config,
+  };
 
   cmList debugProperties{ this->Makefile->GetDefinition(
     "CMAKE_DEBUG_TARGET_PROPERTIES") };

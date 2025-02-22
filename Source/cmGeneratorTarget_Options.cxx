@@ -217,8 +217,9 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetCompileOptions(
   std::vector<BT<std::string>> result;
   std::unordered_set<std::string> uniqueOptions;
 
-  cmGeneratorExpressionDAGChecker dagChecker(
-    this, "COMPILE_OPTIONS", nullptr, nullptr, this->LocalGenerator, config);
+  cmGeneratorExpressionDAGChecker dagChecker{
+    this, "COMPILE_OPTIONS", nullptr, nullptr, this->LocalGenerator, config,
+  };
 
   cmList debugProperties{ this->Makefile->GetDefinition(
     "CMAKE_DEBUG_TARGET_PROPERTIES") };
@@ -258,8 +259,9 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetCompileFeatures(
   std::vector<BT<std::string>> result;
   std::unordered_set<std::string> uniqueFeatures;
 
-  cmGeneratorExpressionDAGChecker dagChecker(
-    this, "COMPILE_FEATURES", nullptr, nullptr, this->LocalGenerator, config);
+  cmGeneratorExpressionDAGChecker dagChecker{
+    this, "COMPILE_FEATURES", nullptr, nullptr, this->LocalGenerator, config,
+  };
 
   cmList debugProperties{ this->Makefile->GetDefinition(
     "CMAKE_DEBUG_TARGET_PROPERTIES") };
@@ -308,9 +310,10 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetCompileDefinitions(
   std::vector<BT<std::string>> list;
   std::unordered_set<std::string> uniqueOptions;
 
-  cmGeneratorExpressionDAGChecker dagChecker(this, "COMPILE_DEFINITIONS",
-                                             nullptr, nullptr,
-                                             this->LocalGenerator, config);
+  cmGeneratorExpressionDAGChecker dagChecker{
+    this,    "COMPILE_DEFINITIONS", nullptr,
+    nullptr, this->LocalGenerator,  config,
+  };
 
   cmList debugProperties{ this->Makefile->GetDefinition(
     "CMAKE_DEBUG_TARGET_PROPERTIES") };
@@ -373,9 +376,9 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetPrecompileHeaders(
   }
   std::unordered_set<std::string> uniqueOptions;
 
-  cmGeneratorExpressionDAGChecker dagChecker(this, "PRECOMPILE_HEADERS",
-                                             nullptr, nullptr,
-                                             this->LocalGenerator, config);
+  cmGeneratorExpressionDAGChecker dagChecker{
+    this, "PRECOMPILE_HEADERS", nullptr, nullptr, this->LocalGenerator, config,
+  };
 
   cmList debugProperties{ this->Makefile->GetDefinition(
     "CMAKE_DEBUG_TARGET_PROPERTIES") };
@@ -432,8 +435,9 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetLinkOptions(
   std::vector<BT<std::string>> result;
   std::unordered_set<std::string> uniqueOptions;
 
-  cmGeneratorExpressionDAGChecker dagChecker(
-    this, "LINK_OPTIONS", nullptr, nullptr, this->LocalGenerator, config);
+  cmGeneratorExpressionDAGChecker dagChecker{
+    this, "LINK_OPTIONS", nullptr, nullptr, this->LocalGenerator, config,
+  };
 
   cmList debugProperties{ this->Makefile->GetDefinition(
     "CMAKE_DEBUG_TARGET_PROPERTIES") };
@@ -601,9 +605,10 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetStaticLibraryLinkOptions(
   std::vector<BT<std::string>> result;
   std::unordered_set<std::string> uniqueOptions;
 
-  cmGeneratorExpressionDAGChecker dagChecker(this, "STATIC_LIBRARY_OPTIONS",
-                                             nullptr, nullptr,
-                                             this->LocalGenerator, config);
+  cmGeneratorExpressionDAGChecker dagChecker{
+    this,    "STATIC_LIBRARY_OPTIONS", nullptr,
+    nullptr, this->LocalGenerator,     config,
+  };
 
   EvaluatedTargetPropertyEntries entries;
   if (cmValue linkOptions = this->GetProperty("STATIC_LIBRARY_OPTIONS")) {
@@ -634,8 +639,9 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetLinkDepends(
 {
   std::vector<BT<std::string>> result;
   std::unordered_set<std::string> uniqueOptions;
-  cmGeneratorExpressionDAGChecker dagChecker(
-    this, "LINK_DEPENDS", nullptr, nullptr, this->LocalGenerator, config);
+  cmGeneratorExpressionDAGChecker dagChecker{
+    this, "LINK_DEPENDS", nullptr, nullptr, this->LocalGenerator, config,
+  };
 
   EvaluatedTargetPropertyEntries entries;
   if (cmValue linkDepends = this->GetProperty("LINK_DEPENDS")) {
