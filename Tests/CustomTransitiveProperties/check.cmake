@@ -47,9 +47,9 @@ iface11 LINK_LIBRARIES: ''
 iface11 INTERFACE_LINK_LIBRARIES: 'iface10'
 static10 LINK_LIBRARIES: 'iface11;iface10'
 static10 INTERFACE_LINK_LIBRARIES: 'iface11;iface10'
-static11 LINK_LIBRARIES: 'static10;iface11;iface11;iface10;iface10'
-static11 INTERFACE_LINK_LIBRARIES: 'static10;iface11;iface11;iface10;iface10'
-main10 LINK_LIBRARIES: 'static11;static10;static10;iface11;iface11;iface10;iface10;iface11;iface10'
+static11 LINK_LIBRARIES: 'static10;iface11;iface11;iface10'
+static11 INTERFACE_LINK_LIBRARIES: 'static10;iface11;iface11;iface10'
+main10 LINK_LIBRARIES: 'static11;static10;static10;iface11;iface11;iface10'
 main10 INTERFACE_LINK_LIBRARIES: ''
 ]])
 string(REGEX REPLACE "\r\n" "\n" expect "${expect}")

@@ -200,14 +200,12 @@ add_custom_target(check ALL VERBATIM
   #                                             /              \
   #                               "static10[iface11];iface11[iface10]"
   "$<TARGET_PROPERTY:static10,INTERFACE_LINK_LIBRARIES>" "iface11;iface10"
-  "$<TARGET_PROPERTY:static11,LINK_LIBRARIES>" "static10;iface11;iface11;iface10;iface10"
-  #                                                /        /       \       \       \___ extra!
+  "$<TARGET_PROPERTY:static11,LINK_LIBRARIES>" "static10;iface11;iface11;iface10"
   #                                             __/      __/         \__     \__________
   #                                            /        /               \               \
   #                              "static11[static10;iface11];static10[iface11;iface11[iface10]]"
-  "$<TARGET_PROPERTY:static11,INTERFACE_LINK_LIBRARIES>" "static10;iface11;iface11;iface10;iface10"
-  "$<TARGET_PROPERTY:main10,LINK_LIBRARIES>" "static11;static10;static10;iface11;iface11;iface10;iface10;iface11;iface10"
-  #                                              /        /        |        |       \       \       \_______\_______\____ extra!
+  "$<TARGET_PROPERTY:static11,INTERFACE_LINK_LIBRARIES>" "static10;iface11;iface11;iface10"
+  "$<TARGET_PROPERTY:main10,LINK_LIBRARIES>" "static11;static10;static10;iface11;iface11;iface10"
   #                                      _______/ _______/         |        |        \______ \______________
   #                                     /        /                 |        |               \               \
   #                         "main10[static11;static10];static11[static10;iface11;static10[iface11;iface11[iface10]]]"

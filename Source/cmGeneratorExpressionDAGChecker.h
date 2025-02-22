@@ -17,12 +17,19 @@ class cmLocalGenerator;
 
 struct cmGeneratorExpressionDAGChecker
 {
+  enum class ComputingLinkLibraries
+  {
+    No,
+    Yes,
+  };
   cmGeneratorExpressionDAGChecker(
     cmGeneratorTarget const* target, std::string property,
     GeneratorExpressionContent const* content,
     cmGeneratorExpressionDAGChecker* parent, cmLocalGenerator const* contextLG,
     std::string const& contextConfig,
-    cmListFileBacktrace backtrace = cmListFileBacktrace());
+    cmListFileBacktrace backtrace = cmListFileBacktrace(),
+    ComputingLinkLibraries computingLinkLibraries =
+      ComputingLinkLibraries::No);
 
   enum Result
   {
@@ -44,6 +51,11 @@ struct cmGeneratorExpressionDAGChecker
   bool EvaluatingLinkExpression() const;
   bool EvaluatingLinkOptionsExpression() const;
   bool EvaluatingLinkerLauncher() const;
+
+  /** Returns true only when computing the actual link dependency
+      graph for cmGeneratorTarget::GetLinkImplementationLibraries
+      or cmGeneratorTarget::GetLinkInterfaceLibraries.  */
+  bool IsComputingLinkLibraries() const;
 
   enum class ForGenex
   {
@@ -78,4 +90,6 @@ private:
   bool TransitivePropertiesOnly = false;
   bool CMP0131 = false;
   bool TopIsTransitiveProperty = false;
+  ComputingLinkLibraries const ComputingLinkLibraries_ =
+    ComputingLinkLibraries::No;
 };

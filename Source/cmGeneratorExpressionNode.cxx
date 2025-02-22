@@ -2957,8 +2957,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
 
     if (cm::optional<cmGeneratorTarget::TransitiveProperty> transitiveProp =
           target->IsTransitiveProperty(propertyName, context->LG,
-                                       context->Config,
-                                       evaluatingLinkLibraries)) {
+                                       context->Config, dagCheckerParent)) {
       interfacePropertyName = std::string(transitiveProp->InterfaceName);
       isInterfaceProperty = transitiveProp->InterfaceName == propertyName;
       usage = transitiveProp->Usage;
