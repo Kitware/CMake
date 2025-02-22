@@ -41,6 +41,16 @@ static1 LINK_LIBRARIES: 'iface2'
 static1 INTERFACE_LINK_LIBRARIES: '\$<LINK_ONLY:iface2>'
 main LINK_LIBRARIES: 'static1;object1'
 main INTERFACE_LINK_LIBRARIES: ''
+iface10 LINK_LIBRARIES: ''
+iface10 INTERFACE_LINK_LIBRARIES: ''
+iface11 LINK_LIBRARIES: ''
+iface11 INTERFACE_LINK_LIBRARIES: 'iface10'
+static10 LINK_LIBRARIES: 'iface11;iface10'
+static10 INTERFACE_LINK_LIBRARIES: 'iface11;iface10'
+static11 LINK_LIBRARIES: 'static10;iface11;iface11;iface10;iface10'
+static11 INTERFACE_LINK_LIBRARIES: 'static10;iface11;iface11;iface10;iface10'
+main10 LINK_LIBRARIES: 'static11;static10;static10;iface11;iface11;iface10;iface10;iface11;iface10'
+main10 INTERFACE_LINK_LIBRARIES: ''
 ]])
 string(REGEX REPLACE "\r\n" "\n" expect "${expect}")
 string(REGEX REPLACE "\n+$" "" expect "${expect}")

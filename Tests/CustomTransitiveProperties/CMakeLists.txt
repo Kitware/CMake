@@ -90,6 +90,18 @@ target_compile_definitions(CustomTransitiveProperties PRIVATE
   $<TARGET_PROPERTY:CUSTOM_W>
   )
 
+# Test TRANSITIVE_LINK_PROPERTIES containing LINK_LIBRARIES itself.
+add_library(iface10 INTERFACE)
+set_property(TARGET iface10 PROPERTY TRANSITIVE_LINK_PROPERTIES "LINK_LIBRARIES")
+add_library(iface11 INTERFACE)
+target_link_libraries(iface11 INTERFACE iface10)
+add_library(static10 STATIC static10.c)
+target_link_libraries(static10 PRIVATE iface11)
+add_library(static11 STATIC static11.c)
+target_link_libraries(static11 PRIVATE static10 iface11)
+add_executable(main10 main10.c)
+target_link_libraries(main10 PRIVATE static11 static10)
+
 # Test TRANSITIVE_*_PROPERTY evaluation outside of usage requirements.
 add_executable(check-args check-args.c)
 set(out "${CMAKE_CURRENT_BINARY_DIR}/out-$<CONFIG>.txt")
@@ -136,6 +148,16 @@ static1 LINK_LIBRARIES: '$<TARGET_PROPERTY:static1,LINK_LIBRARIES>'
 static1 INTERFACE_LINK_LIBRARIES: '$<TARGET_PROPERTY:static1,INTERFACE_LINK_LIBRARIES>'
 main LINK_LIBRARIES: '$<TARGET_PROPERTY:CustomTransitiveProperties,LINK_LIBRARIES>'
 main INTERFACE_LINK_LIBRARIES: '$<TARGET_PROPERTY:CustomTransitiveProperties,INTERFACE_LINK_LIBRARIES>'
+iface10 LINK_LIBRARIES: '$<TARGET_PROPERTY:iface10,LINK_LIBRARIES>'
+iface10 INTERFACE_LINK_LIBRARIES: '$<TARGET_PROPERTY:iface10,INTERFACE_LINK_LIBRARIES>'
+iface11 LINK_LIBRARIES: '$<TARGET_PROPERTY:iface11,LINK_LIBRARIES>'
+iface11 INTERFACE_LINK_LIBRARIES: '$<TARGET_PROPERTY:iface11,INTERFACE_LINK_LIBRARIES>'
+static10 LINK_LIBRARIES: '$<TARGET_PROPERTY:static10,LINK_LIBRARIES>'
+static10 INTERFACE_LINK_LIBRARIES: '$<TARGET_PROPERTY:static10,INTERFACE_LINK_LIBRARIES>'
+static11 LINK_LIBRARIES: '$<TARGET_PROPERTY:static11,LINK_LIBRARIES>'
+static11 INTERFACE_LINK_LIBRARIES: '$<TARGET_PROPERTY:static11,INTERFACE_LINK_LIBRARIES>'
+main10 LINK_LIBRARIES: '$<TARGET_PROPERTY:main10,LINK_LIBRARIES>'
+main10 INTERFACE_LINK_LIBRARIES: '$<TARGET_PROPERTY:main10,INTERFACE_LINK_LIBRARIES>'
 ]====])
 file(GENERATE OUTPUT "${out}" CONTENT "# file(GENERATE) produced:
 ${in_CUSTOM}
@@ -168,4 +190,26 @@ add_custom_target(check ALL VERBATIM
   "$<TARGET_PROPERTY:static1,INTERFACE_LINK_LIBRARIES>" "$<LINK_ONLY:iface2$<ANGLE-R>"
   "$<TARGET_PROPERTY:CustomTransitiveProperties,LINK_LIBRARIES>" "static1;object1"
   "$<TARGET_PROPERTY:CustomTransitiveProperties,INTERFACE_LINK_LIBRARIES>" ""
+  COMMAND check-args
+  "$<TARGET_PROPERTY:iface10,LINK_LIBRARIES>" ""
+  "$<TARGET_PROPERTY:iface10,INTERFACE_LINK_LIBRARIES>" ""
+  "$<TARGET_PROPERTY:iface11,LINK_LIBRARIES>" ""
+  "$<TARGET_PROPERTY:iface11,INTERFACE_LINK_LIBRARIES>" "iface10"
+  "$<TARGET_PROPERTY:static10,LINK_LIBRARIES>" "iface11;iface10"
+  #                                              _/         \__
+  #                                             /              \
+  #                               "static10[iface11];iface11[iface10]"
+  "$<TARGET_PROPERTY:static10,INTERFACE_LINK_LIBRARIES>" "iface11;iface10"
+  "$<TARGET_PROPERTY:static11,LINK_LIBRARIES>" "static10;iface11;iface11;iface10;iface10"
+  #                                                /        /       \       \       \___ extra!
+  #                                             __/      __/         \__     \__________
+  #                                            /        /               \               \
+  #                              "static11[static10;iface11];static10[iface11;iface11[iface10]]"
+  "$<TARGET_PROPERTY:static11,INTERFACE_LINK_LIBRARIES>" "static10;iface11;iface11;iface10;iface10"
+  "$<TARGET_PROPERTY:main10,LINK_LIBRARIES>" "static11;static10;static10;iface11;iface11;iface10;iface10;iface11;iface10"
+  #                                              /        /        |        |       \       \       \_______\_______\____ extra!
+  #                                      _______/ _______/         |        |        \______ \______________
+  #                                     /        /                 |        |               \               \
+  #                         "main10[static11;static10];static11[static10;iface11;static10[iface11;iface11[iface10]]]"
+  "$<TARGET_PROPERTY:main10,INTERFACE_LINK_LIBRARIES>" ""
   )
