@@ -110,13 +110,13 @@ std::string cmGeneratorTarget::EvaluateInterfaceProperty(
   // a subset of TargetPropertyNode::Evaluate without stringify/parse steps
   // but sufficient for transitive interface properties.
   cmGeneratorExpressionDAGChecker dagChecker{
-    context->Backtrace,
     this,
     prop,
     nullptr,
     dagCheckerParent,
-    this->LocalGenerator,
+    context->LG,
     context->Config,
+    context->Backtrace,
   };
   switch (dagChecker.Check()) {
     case cmGeneratorExpressionDAGChecker::SELF_REFERENCE:
@@ -183,10 +183,9 @@ std::string cmGeneratorTarget::EvaluateInterfaceProperty(
 }
 
 cm::optional<cmGeneratorTarget::TransitiveProperty>
-cmGeneratorTarget::IsTransitiveProperty(cm::string_view prop,
-                                        cmLocalGenerator const* lg,
-                                        std::string const& config,
-                                        bool evaluatingLinkLibraries) const
+cmGeneratorTarget::IsTransitiveProperty(
+  cm::string_view prop, cmLocalGenerator const* lg, std::string const& config,
+  cmGeneratorExpressionDAGChecker const* dagChecker) const
 {
   cm::optional<TransitiveProperty> result;
   static cm::string_view const kINTERFACE_ = "INTERFACE_"_s;
@@ -208,7 +207,7 @@ cmGeneratorTarget::IsTransitiveProperty(cm::string_view prop,
         result->Usage = cmGeneratorTarget::UseTo::Compile;
       }
     }
-  } else if (!evaluatingLinkLibraries) {
+  } else if (!dagChecker || !dagChecker->IsComputingLinkLibraries()) {
     // Honor TRANSITIVE_COMPILE_PROPERTIES and TRANSITIVE_LINK_PROPERTIES
     // from the link closure when we are not evaluating the closure itself.
     CustomTransitiveProperties const& ctp =

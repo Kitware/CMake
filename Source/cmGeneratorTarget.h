@@ -1006,7 +1006,8 @@ public:
 
   cm::optional<TransitiveProperty> IsTransitiveProperty(
     cm::string_view prop, cmLocalGenerator const* lg,
-    std::string const& config, bool evaluatingLinkLibraries) const;
+    std::string const& config,
+    cmGeneratorExpressionDAGChecker const* dagChecker) const;
 
   bool HaveInstallTreeRPATH(std::string const& config) const;
 
