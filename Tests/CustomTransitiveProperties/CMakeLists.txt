@@ -91,6 +91,7 @@ target_compile_definitions(CustomTransitiveProperties PRIVATE
   )
 
 # Test TRANSITIVE_*_PROPERTY evaluation outside of usage requirements.
+add_executable(check-args check-args.c)
 set(out "${CMAKE_CURRENT_BINARY_DIR}/out-$<CONFIG>.txt")
 file(GENERATE OUTPUT "${out}" CONTENT "# file(GENERATE) produced:
 iface1 CUSTOM_A: '$<TARGET_PROPERTY:iface1,CUSTOM_A>'
@@ -129,6 +130,7 @@ main INTERFACE_CUSTOM_W: '$<TARGET_PROPERTY:CustomTransitiveProperties,INTERFACE
 add_custom_target(check ALL VERBATIM
   COMMAND ${CMAKE_COMMAND} -Dconfig=$<CONFIG> -Dout=${out} -P${CMAKE_CURRENT_SOURCE_DIR}/check.cmake
   COMMAND CustomTransitiveProperties
+  COMMAND check-args
   "$<TARGET_PROPERTY:static1,CUSTOM_A>" "CUSTOM_A_STATIC1;CUSTOM_A_IFACE2;CUSTOM_A_TARGET_TYPE_STATIC_LIBRARY;CUSTOM_A_IFACE1;CUSTOM_A_TARGET_NAME_STATIC1"
   "$<TARGET_PROPERTY:static1,CUSTOM_B>" "CUSTOM_B_STATIC1;CUSTOM_B_IFACE1"
   "$<TARGET_PROPERTY:static1,CUSTOM_U>" "CUSTOM_U_STATIC1;CUSTOM_U_IFACE2;CUSTOM_U_TARGET_TYPE_STATIC_LIBRARY;CUSTOM_U_IFACE1;CUSTOM_U_TARGET_NAME_STATIC1"
