@@ -1,0 +1,1 @@
+^RESULT=2038-01-20 05:00:00.000000 Wednesday=Wed January=Jan 38 day=020 wd=3 week=03 w_iso=03 %I=05 epoch=2147576400 TZ=GMT tz=\+0000$
