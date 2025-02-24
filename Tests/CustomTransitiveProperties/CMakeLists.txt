@@ -102,6 +102,17 @@ target_link_libraries(static11 PRIVATE static10 iface11)
 add_executable(main10 main10.c)
 target_link_libraries(main10 PRIVATE static11 static10)
 
+# Test CMP0189 OLD and NEW behavior.
+add_library(iface20 INTERFACE)
+add_library(iface21 INTERFACE)
+target_link_libraries(iface21 INTERFACE iface20)
+add_library(static20 STATIC static20.c)
+target_link_libraries(static20 PRIVATE iface21)
+add_library(static21 STATIC static21.c)
+target_link_libraries(static21 PRIVATE static20 iface21)
+add_executable(main20 main20.c)
+target_link_libraries(main20 PRIVATE static21 static20)
+
 # Test TRANSITIVE_*_PROPERTY evaluation outside of usage requirements.
 add_executable(check-args check-args.c)
 set(out "${CMAKE_CURRENT_BINARY_DIR}/out-$<CONFIG>.txt")
@@ -158,6 +169,16 @@ static11 LINK_LIBRARIES: '$<TARGET_PROPERTY:static11,LINK_LIBRARIES>'
 static11 INTERFACE_LINK_LIBRARIES: '$<TARGET_PROPERTY:static11,INTERFACE_LINK_LIBRARIES>'
 main10 LINK_LIBRARIES: '$<TARGET_PROPERTY:main10,LINK_LIBRARIES>'
 main10 INTERFACE_LINK_LIBRARIES: '$<TARGET_PROPERTY:main10,INTERFACE_LINK_LIBRARIES>'
+iface20 LINK_LIBRARIES: '$<TARGET_PROPERTY:iface20,LINK_LIBRARIES>'
+iface20 INTERFACE_LINK_LIBRARIES: '$<TARGET_PROPERTY:iface20,INTERFACE_LINK_LIBRARIES>'
+iface21 LINK_LIBRARIES: '$<TARGET_PROPERTY:iface21,LINK_LIBRARIES>'
+iface21 INTERFACE_LINK_LIBRARIES: '$<TARGET_PROPERTY:iface21,INTERFACE_LINK_LIBRARIES>'
+static20 LINK_LIBRARIES: '$<TARGET_PROPERTY:static20,LINK_LIBRARIES>'
+static20 INTERFACE_LINK_LIBRARIES: '$<TARGET_PROPERTY:static20,INTERFACE_LINK_LIBRARIES>'
+static21 LINK_LIBRARIES: '$<TARGET_PROPERTY:static21,LINK_LIBRARIES>'
+static21 INTERFACE_LINK_LIBRARIES: '$<TARGET_PROPERTY:static21,INTERFACE_LINK_LIBRARIES>'
+main20 LINK_LIBRARIES: '$<TARGET_PROPERTY:main20,LINK_LIBRARIES>'
+main20 INTERFACE_LINK_LIBRARIES: '$<TARGET_PROPERTY:main20,INTERFACE_LINK_LIBRARIES>'
 ]====])
 file(GENERATE OUTPUT "${out}" CONTENT "# file(GENERATE) produced:
 ${in_CUSTOM}
@@ -210,4 +231,17 @@ add_custom_target(check ALL VERBATIM
   #                                     /        /                 |        |               \               \
   #                         "main10[static11;static10];static11[static10;iface11;static10[iface11;iface11[iface10]]]"
   "$<TARGET_PROPERTY:main10,INTERFACE_LINK_LIBRARIES>" ""
+  COMMAND check-args
+  "$<TARGET_PROPERTY:iface20,LINK_LIBRARIES>" ""
+  "$<TARGET_PROPERTY:iface20,INTERFACE_LINK_LIBRARIES>" ""
+  "$<TARGET_PROPERTY:iface21,LINK_LIBRARIES>" ""
+  "$<TARGET_PROPERTY:iface21,INTERFACE_LINK_LIBRARIES>" "iface20"
+  "$<TARGET_PROPERTY:static20,LINK_LIBRARIES>" "iface21"
+  "$<TARGET_PROPERTY:static20,INTERFACE_LINK_LIBRARIES>" "$<LINK_ONLY:iface21$<ANGLE-R>"
+  "$<TARGET_PROPERTY:static21,LINK_LIBRARIES>" "static20;iface21"
+  "$<TARGET_PROPERTY:static21,INTERFACE_LINK_LIBRARIES>" "$<LINK_ONLY:static20$<ANGLE-R>;$<LINK_ONLY:iface21$<ANGLE-R>"
+  "$<TARGET_PROPERTY:main20,LINK_LIBRARIES>" "static21;static20"
+  "$<TARGET_PROPERTY:main20,INTERFACE_LINK_LIBRARIES>" ""
   )
+
+add_subdirectory(CMP0189)

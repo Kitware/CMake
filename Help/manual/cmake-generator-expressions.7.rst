@@ -1919,7 +1919,10 @@ The expressions have special evaluation rules for some properties:
     :prop_tgt:`INTERFACE_LINK_LIBRARIES` *including* entries guarded by the
     :genex:`LINK_ONLY` generator expression.  See policy :policy:`CMP0166`.
 
-  Evaluation of :prop_tgt:`LINK_LIBRARIES` itself is not transitive.
+  .. versionchanged:: 4.1
+
+    Evaluation of :prop_tgt:`LINK_LIBRARIES` itself is now transitive.
+    See policy :policy:`CMP0189`.
 
 :ref:`Target Usage Requirement Properties <Target Usage Requirements>`
   These evaluate as a :ref:`semicolon-separated list <CMake Language Lists>`
@@ -1936,7 +1939,10 @@ The expressions have special evaluation rules for some properties:
     *including* entries guarded by the :genex:`LINK_ONLY` generator expression.
     See policy :policy:`CMP0166`.
 
-  Evaluation of :prop_tgt:`INTERFACE_LINK_LIBRARIES` itself is not transitive.
+  .. versionchanged:: 4.1
+
+    Evaluation of :prop_tgt:`INTERFACE_LINK_LIBRARIES` itself is now
+    transitive.  See policy :policy:`CMP0189`.
 
 :ref:`Custom Transitive Properties`
   .. versionadded:: 3.30
