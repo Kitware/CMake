@@ -79,9 +79,14 @@ std::string cmExportTryCompileFileGenerator::FindTargets(
       tgt, "LINK_OPTIONS", nullptr, nullptr, tgt->GetLocalGenerator(),
       this->Config);
   }
-  cmGeneratorExpressionDAGChecker dagChecker(
-    tgt, propName, nullptr, parentDagChecker.get(), tgt->GetLocalGenerator(),
-    this->Config);
+  cmGeneratorExpressionDAGChecker dagChecker{
+    tgt,
+    propName,
+    nullptr,
+    parentDagChecker.get(),
+    tgt->GetLocalGenerator(),
+    this->Config,
+  };
 
   std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(*prop);
 

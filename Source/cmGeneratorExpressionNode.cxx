@@ -485,10 +485,15 @@ protected:
     cmGeneratorExpressionDAGChecker* dagCheckerParent) const
   {
     if (context->HeadTarget) {
-      cmGeneratorExpressionDAGChecker dagChecker(
-        context->Backtrace, context->HeadTarget,
-        genexOperator + ":" + expression, content, dagCheckerParent,
-        context->LG, context->Config);
+      cmGeneratorExpressionDAGChecker dagChecker{
+        context->HeadTarget,
+        genexOperator + ":" + expression,
+        content,
+        dagCheckerParent,
+        context->LG,
+        context->Config,
+        context->Backtrace,
+      };
       switch (dagChecker.Check()) {
         case cmGeneratorExpressionDAGChecker::SELF_REFERENCE:
         case cmGeneratorExpressionDAGChecker::CYCLIC_REFERENCE: {
@@ -2952,8 +2957,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
 
     if (cm::optional<cmGeneratorTarget::TransitiveProperty> transitiveProp =
           target->IsTransitiveProperty(propertyName, context->LG,
-                                       context->Config,
-                                       evaluatingLinkLibraries)) {
+                                       context->Config, dagCheckerParent)) {
       interfacePropertyName = std::string(transitiveProp->InterfaceName);
       isInterfaceProperty = transitiveProp->InterfaceName == propertyName;
       usage = transitiveProp->Usage;
@@ -2987,9 +2991,15 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
                                           dagCheckerParent, usage));
     }
 
-    cmGeneratorExpressionDAGChecker dagChecker(
-      context->Backtrace, target, propertyName, content, dagCheckerParent,
-      context->LG, context->Config);
+    cmGeneratorExpressionDAGChecker dagChecker{
+      target,
+      propertyName,
+      content,
+      dagCheckerParent,
+      context->LG,
+      context->Config,
+      context->Backtrace,
+    };
 
     switch (dagChecker.Check()) {
       case cmGeneratorExpressionDAGChecker::SELF_REFERENCE:
