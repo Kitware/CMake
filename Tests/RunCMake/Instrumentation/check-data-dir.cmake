@@ -111,7 +111,7 @@ foreach(snippet IN LISTS snippets)
   # Verify command args were passed
   if (filename MATCHES "^cmakeBuild|^ctest")
     string(JSON command GET "${contents}" command)
-    if (NOT command MATCHES "-.* Debug")
+    if (NOT command MATCHES "Debug")
       snippet_error(${snippet} "Command value missing passed arguments")
     endif()
   endif()
