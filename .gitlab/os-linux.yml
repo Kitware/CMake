@@ -74,7 +74,7 @@
         CMAKE_CI_NO_INSTALL: 1
 
 .debian12_aarch64:
-    image: "kitware/cmake:ci-debian12-aarch64-2023-07-27"
+    image: "kitware/cmake:ci-debian12-aarch64-2025-02-24"
 
     variables:
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci"

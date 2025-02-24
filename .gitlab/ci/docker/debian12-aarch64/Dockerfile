@@ -2,7 +2,15 @@
 
 ARG BASE_IMAGE=arm64v8/debian:12
 
-FROM ${BASE_IMAGE} AS apt-cache
+FROM ${BASE_IMAGE} AS cuda-keyring
+ADD https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/sbsa/cuda-keyring_1.1-1_all.deb /root/
+RUN --mount=type=tmpfs,target=/var/log \
+    apt-get update \
+ && apt-get -y install ca-certificates \
+ && dpkg -i /root/cuda-keyring_1.1-1_all.deb \
+ && rm /root/cuda-keyring_1.1-1_all.deb
+
+FROM cuda-keyring AS apt-cache
 # Populate APT cache w/ the fresh metadata and prefetch packages.
 # Use an empty `docker-clean` file to "hide" the image-provided
 # file to disallow removing packages after `apt-get` operations.
@@ -12,7 +20,7 @@ RUN --mount=type=tmpfs,target=/var/log \
     apt-get update \
  && apt-get --download-only -y install $(grep -h '^[^#]\+$' /root/*.lst)
 
-FROM ${BASE_IMAGE}
+FROM cuda-keyring
 LABEL maintainer="Brad King <brad.king@kitware.com>"
 
 RUN --mount=type=bind,source=install_deps.sh,target=/root/install_deps.sh \
