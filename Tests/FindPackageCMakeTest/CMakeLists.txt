@@ -554,14 +554,15 @@ endif()
 ##Test FIND_PACKAGE using sorting
 set(CMAKE_PREFIX_PATH ${CMAKE_CURRENT_SOURCE_DIR})
 
-set(SortLib_DIR "" CACHE FILEPATH "Wipe out find results for testing." FORCE)
-SET(CMAKE_FIND_PACKAGE_SORT_ORDER NAME)
-SET(CMAKE_FIND_PACKAGE_SORT_DIRECTION ASC)
-FIND_PACKAGE(SortLib CONFIG)
-IF (NOT "${SortLib_VERSION}" STREQUAL "3.1.1")
-  message(SEND_ERROR "FIND_PACKAGE_SORT_ORDER Name Asc! ${SortLib_VERSION}")
-endif()
-unset(SortLib_VERSION)
+foreach(CMAKE_FIND_PACKAGE_SORT_DIRECTION IN ITEMS "" ASC Bogus)
+  set(SortLib_DIR "" CACHE FILEPATH "Wipe out find results for testing." FORCE)
+  SET(CMAKE_FIND_PACKAGE_SORT_ORDER NAME)
+  FIND_PACKAGE(SortLib CONFIG)
+  IF (NOT "${SortLib_VERSION}" STREQUAL "3.1.1")
+    message(SEND_ERROR "FIND_PACKAGE_SORT_ORDER Name Asc! ${SortLib_VERSION}")
+  endif()
+  unset(SortLib_VERSION)
+endforeach()
 
 
 set(SortLib_DIR "" CACHE FILEPATH "Wipe out find results for testing." FORCE)
