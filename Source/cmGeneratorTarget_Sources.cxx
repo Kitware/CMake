@@ -264,8 +264,9 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetSourceFilePaths(
     this->DebugSourcesDone = true;
   }
 
-  cmGeneratorExpressionDAGChecker dagChecker(this, "SOURCES", nullptr, nullptr,
-                                             this->LocalGenerator, config);
+  cmGeneratorExpressionDAGChecker dagChecker{
+    this, "SOURCES", nullptr, nullptr, this->LocalGenerator, config,
+  };
 
   EvaluatedTargetPropertyEntries entries = EvaluateTargetPropertyEntries(
     this, config, std::string(), &dagChecker, this->SourceEntries);
