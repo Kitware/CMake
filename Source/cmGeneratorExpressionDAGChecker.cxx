@@ -21,32 +21,22 @@ cmGeneratorExpressionDAGChecker::cmGeneratorExpressionDAGChecker(
   cmGeneratorTarget const* target, std::string property,
   GeneratorExpressionContent const* content,
   cmGeneratorExpressionDAGChecker* parent, cmLocalGenerator const* contextLG,
-  std::string const& contextConfig)
-  : cmGeneratorExpressionDAGChecker(cmListFileBacktrace(), target,
-                                    std::move(property), content, parent,
-                                    contextLG, contextConfig)
-{
-}
-
-cmGeneratorExpressionDAGChecker::cmGeneratorExpressionDAGChecker(
-  cmListFileBacktrace backtrace, cmGeneratorTarget const* target,
-  std::string property, GeneratorExpressionContent const* content,
-  cmGeneratorExpressionDAGChecker* parent, cmLocalGenerator const* contextLG,
-  std::string const& contextConfig)
+  std::string const& contextConfig, cmListFileBacktrace backtrace,
+  ComputingLinkLibraries computingLinkLibraries)
   : Parent(parent)
   , Top(parent ? parent->Top : this)
   , Target(target)
   , Property(std::move(property))
   , Content(content)
   , Backtrace(std::move(backtrace))
+  , ComputingLinkLibraries_(computingLinkLibraries)
 {
   if (parent) {
     this->TopIsTransitiveProperty = parent->TopIsTransitiveProperty;
   } else {
     this->TopIsTransitiveProperty =
       this->Target
-        ->IsTransitiveProperty(this->Property, contextLG, contextConfig,
-                               this->EvaluatingLinkLibraries())
+        ->IsTransitiveProperty(this->Property, contextLG, contextConfig, this)
         .has_value();
   }
 
@@ -202,6 +192,11 @@ bool cmGeneratorExpressionDAGChecker::EvaluatingLinkerLauncher() const
   return property.length() > cmStrLen("_LINKER_LAUNCHER") &&
     property.substr(property.length() - cmStrLen("_LINKER_LAUNCHER")) ==
     "_LINKER_LAUNCHER"_s;
+}
+
+bool cmGeneratorExpressionDAGChecker::IsComputingLinkLibraries() const
+{
+  return this->Top->ComputingLinkLibraries_ == ComputingLinkLibraries::Yes;
 }
 
 bool cmGeneratorExpressionDAGChecker::EvaluatingLinkLibraries(

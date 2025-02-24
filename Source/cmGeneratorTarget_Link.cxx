@@ -542,8 +542,16 @@ void cmGeneratorTarget::ExpandLinkItems(std::string const& prop,
     return;
   }
   // Keep this logic in sync with ComputeLinkImplementationLibraries.
-  cmGeneratorExpressionDAGChecker dagChecker(this, prop, nullptr, nullptr,
-                                             this->LocalGenerator, config);
+  cmGeneratorExpressionDAGChecker dagChecker{
+    this,
+    prop,
+    nullptr,
+    nullptr,
+    this->LocalGenerator,
+    config,
+    cmListFileBacktrace(),
+    cmGeneratorExpressionDAGChecker::ComputingLinkLibraries::Yes,
+  };
   // The $<LINK_ONLY> expression may be in a link interface to specify
   // private link dependencies that are otherwise excluded from usage
   // requirements.
@@ -1133,8 +1141,16 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
   // Collect libraries directly linked in this configuration.
   for (auto const& entry : entryRange) {
     // Keep this logic in sync with ExpandLinkItems.
-    cmGeneratorExpressionDAGChecker dagChecker(
-      this, "LINK_LIBRARIES", nullptr, nullptr, this->LocalGenerator, config);
+    cmGeneratorExpressionDAGChecker dagChecker{
+      this,
+      "LINK_LIBRARIES",
+      nullptr,
+      nullptr,
+      this->LocalGenerator,
+      config,
+      cmListFileBacktrace(),
+      cmGeneratorExpressionDAGChecker::ComputingLinkLibraries::Yes,
+    };
     // The $<LINK_ONLY> expression may be used to specify link dependencies
     // that are otherwise excluded from usage requirements.
     if (usage == UseTo::Compile) {
