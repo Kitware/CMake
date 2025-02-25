@@ -1,0 +1,4 @@
+CMake Error at NoArgs.cmake:[0-9]+ \(add_dependencies\):
+  add_dependencies called with incorrect number of arguments
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)

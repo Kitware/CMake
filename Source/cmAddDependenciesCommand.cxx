@@ -12,7 +12,7 @@
 bool cmAddDependenciesCommand(std::vector<std::string> const& args,
                               cmExecutionStatus& status)
 {
-  if (args.size() < 2) {
+  if (args.empty()) {
     status.SetError("called with incorrect number of arguments");
     return false;
   }
