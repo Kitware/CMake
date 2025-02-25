@@ -45,6 +45,7 @@ std::map<cm::string_view, TransitiveProperty> const
       { "INTERFACE_INCLUDE_DIRECTORIES"_s, UseTo::Compile } },
     { "LINK_DEPENDS"_s, { "INTERFACE_LINK_DEPENDS"_s, UseTo::Link } },
     { "LINK_DIRECTORIES"_s, { "INTERFACE_LINK_DIRECTORIES"_s, UseTo::Link } },
+    { "LINK_LIBRARIES"_s, { "INTERFACE_LINK_LIBRARIES"_s, UseTo::Link } },
     { "LINK_OPTIONS"_s, { "INTERFACE_LINK_OPTIONS"_s, UseTo::Link } },
     { "PRECOMPILE_HEADERS"_s,
       { "INTERFACE_PRECOMPILE_HEADERS"_s, UseTo::Compile } },
@@ -196,6 +197,13 @@ cmGeneratorTarget::IsTransitiveProperty(
     prop = prop.substr(kINTERFACE_.length());
   }
   auto i = BuiltinTransitiveProperties.find(prop);
+  if (i != BuiltinTransitiveProperties.end() &&
+      // Look up CMP0189 in the context where evaluation occurs,
+      // not where the target was created.
+      lg->GetPolicyStatus(cmPolicies::CMP0189) != cmPolicies::NEW &&
+      prop == "LINK_LIBRARIES"_s) {
+    i = BuiltinTransitiveProperties.end();
+  }
   if (i != BuiltinTransitiveProperties.end()) {
     result = i->second;
     if (result->Usage != cmGeneratorTarget::UseTo::Compile) {
