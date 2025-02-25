@@ -469,7 +469,7 @@ static bool DumpFile(std::string const& nmPath, char const* filename,
       // check for /bigobj and llvm LTO format
       cmANON_OBJECT_HEADER_BIGOBJ* h =
         (cmANON_OBJECT_HEADER_BIGOBJ*)lpFileBase;
-      if (h->Sig1 == 0x0 && h->Sig2 == 0xffff) {
+      if (h->Sig1 == 0x0 && h->Sig2 == 0xffff && h->Version >= 2) {
         // bigobj
         DumpSymbols<cmANON_OBJECT_HEADER_BIGOBJ, cmIMAGE_SYMBOL_EX>
           symbolDumper(
