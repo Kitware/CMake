@@ -219,7 +219,6 @@ endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL "FreeBSD")
   list(APPEND uv_libraries
-    kvm
     )
   list(APPEND uv_headers
     include/uv/bsd.h
@@ -236,7 +235,6 @@ endif()
 if(CMAKE_SYSTEM_NAME STREQUAL "kFreeBSD")
   list(APPEND uv_libraries
     freebsd-glue
-    kvm
     )
   list(APPEND uv_headers
     include/uv/bsd.h
@@ -268,7 +266,6 @@ endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL "OpenBSD")
   list(APPEND uv_libraries
-    kvm
     )
   list(APPEND uv_headers
     include/uv/bsd.h

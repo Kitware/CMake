@@ -1783,10 +1783,12 @@ else
       libs="${libs} -ldl -lrt"
       ;;
     *kFreeBSD*)
-      libs="${libs} -lkvm -lfreebsd-glue"
+      libs="${libs} -lfreebsd-glue"
+      ;;
+    *NetBSD*)
+      libs="${libs} -lkvm"
       ;;
     *BSD*)
-      libs="${libs} -lkvm"
       ;;
     *SunOS*)
       uv_c_flags="${uv_c_flags} -D__EXTENSIONS__ -D_XOPEN_SOURCE=600"
