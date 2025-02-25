@@ -277,7 +277,7 @@ bool cmExportPackageInfoGenerator::NoteLinkedTarget(
     return true;
   }
 
-  // Target belongs to multiple namespaces or multiple export sets.
+  // Target belongs to another export from this build.
   auto const& exportInfo = this->FindExportInfo(linkedTarget);
   if (exportInfo.Namespaces.size() == 1 && exportInfo.Sets.size() == 1) {
     auto const& linkNamespace = *exportInfo.Namespaces.begin();
@@ -302,6 +302,7 @@ bool cmExportPackageInfoGenerator::NoteLinkedTarget(
     return true;
   }
 
+  // Target belongs to multiple namespaces or multiple export sets.
   // cmExportFileGenerator::HandleMissingTarget should have complained about
   // this already.
   return false;
@@ -424,8 +425,7 @@ void cmExportPackageInfoGenerator::GenerateInterfaceListProperty(
   }
 }
 
-void cmExportPackageInfoGenerator::GenerateInterfaceConfigProperties(
-  Json::Value& components, cmGeneratorTarget const* target,
+Json::Value cmExportPackageInfoGenerator::GenerateInterfaceConfigProperties(
   std::string const& suffix, ImportPropertyMap const& properties) const
 {
   Json::Value component;
@@ -456,7 +456,5 @@ void cmExportPackageInfoGenerator::GenerateInterfaceConfigProperties(
     }
   }
 
-  if (!component.empty()) {
-    components[target->GetExportName()] = component;
-  }
+  return component;
 }

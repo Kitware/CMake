@@ -1,0 +1,7 @@
+add_library(foo INTERFACE)
+install(TARGETS foo EXPORT foo DESTINATION .)
+export(EXPORT foo LOWER_CASE_FILE)
+export(EXPORT foo APPENDIX test)
+export(EXPORT foo VERSION 1.0)
+export(EXPORT foo DEFAULT_TARGETS foo)
+export(EXPORT foo DEFAULT_CONFIGURATIONS Release)

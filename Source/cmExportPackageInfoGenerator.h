@@ -62,8 +62,7 @@ protected:
   bool GenerateInterfaceProperties(Json::Value& component,
                                    cmGeneratorTarget const* target,
                                    ImportPropertyMap const& properties) const;
-  void GenerateInterfaceConfigProperties(
-    Json::Value& components, cmGeneratorTarget const* target,
+  Json::Value GenerateInterfaceConfigProperties(
     std::string const& suffix, ImportPropertyMap const& properties) const;
 
   cm::string_view GetImportPrefixWithSlash() const override;

@@ -1,0 +1,10 @@
+CMake Error at BadArgs1\.cmake:3 \(export\):
+  export COMPAT_VERSION requires VERSION\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:3 \(include\)
+
+
+CMake Error at BadArgs1\.cmake:4 \(export\):
+  export VERSION_SCHEMA requires VERSION\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:3 \(include\)
