@@ -186,15 +186,20 @@ cmExportFileGenerator::ExportInfo cmExportBuildFileGenerator::FindExportInfo(
     target->GetLocalGenerator()->GetGlobalGenerator()->GetBuildExportSets();
 
   for (auto const& exp : allExportSets) {
-    auto const& exportSet = exp.second;
+    cmExportBuildFileGenerator const* const bfg = exp.second;
+    cmExportSet const* const exportSet = bfg->GetExportSet();
     std::vector<TargetExport> targets;
-    exportSet->GetTargets(targets);
+    bfg->GetTargets(targets);
     if (std::any_of(
           targets.begin(), targets.end(),
           [&name](TargetExport const& te) { return te.Name == name; })) {
-      exportSets.insert(exp.first);
+      if (exportSet) {
+        exportSets.insert(exportSet->GetName());
+      } else {
+        exportSets.insert(exp.first);
+      }
       exportFiles.push_back(exp.first);
-      namespaces.insert(exportSet->GetNamespace());
+      namespaces.insert(bfg->GetNamespace());
     }
   }
 
