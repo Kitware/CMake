@@ -3,5 +3,5 @@ cmake_instrumentation(
   API_VERSION 1
   DATA_VERSION 1
   HOOKS preBuild postBuild
-  CALLBACK "\"${CMAKE_COMMAND}\" -P \"${hook_path}\" 0"
+  CALLBACK ${CMAKE_COMMAND} -P ${hook_path} 0
 )

@@ -57,6 +57,7 @@ bool cmProcess::StartProcess(uv_loop_t& loop, std::vector<size_t>* affinity)
     return false;
   }
   this->StartTime = std::chrono::steady_clock::now();
+  this->SystemStartTime = std::chrono::system_clock::now();
   this->ProcessArgs.clear();
   // put the command as arg0
   this->ProcessArgs.push_back(this->Command.c_str());
