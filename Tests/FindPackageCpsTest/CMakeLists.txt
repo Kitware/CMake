@@ -80,14 +80,15 @@ endif()
 ###############################################################################
 # Test glob sorting.
 
-set(SortLib_DIR "" CACHE FILEPATH "Wipe out find results for testing." FORCE)
-set(CMAKE_FIND_PACKAGE_SORT_ORDER NAME)
-set(CMAKE_FIND_PACKAGE_SORT_DIRECTION ASC)
-find_package(SortLib CONFIG)
-if(NOT "${SortLib_VERSION}" STREQUAL "3.1.1")
-  message(SEND_ERROR "FIND_PACKAGE_SORT_ORDER Name Asc! ${SortLib_VERSION}")
-endif()
-unset(SortLib_VERSION)
+foreach(CMAKE_FIND_PACKAGE_SORT_DIRECTION IN ITEMS "" ASC Bogus)
+  set(SortLib_DIR "" CACHE FILEPATH "Wipe out find results for testing." FORCE)
+  set(CMAKE_FIND_PACKAGE_SORT_ORDER NAME)
+  find_package(SortLib CONFIG)
+  if(NOT "${SortLib_VERSION}" STREQUAL "3.1.1")
+    message(SEND_ERROR "FIND_PACKAGE_SORT_ORDER Name Asc! ${SortLib_VERSION}")
+  endif()
+  unset(SortLib_VERSION)
+endforeach()
 
 set(SortLib_DIR "" CACHE FILEPATH "Wipe out find results for testing." FORCE)
 set(CMAKE_FIND_PACKAGE_SORT_ORDER NATURAL)

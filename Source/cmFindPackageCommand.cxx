@@ -678,7 +678,7 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
   }
   if (cmValue const sd =
         this->Makefile->GetDefinition("CMAKE_FIND_PACKAGE_SORT_DIRECTION")) {
-    this->SortDirection = (*sd == "ASC") ? Asc : Dec;
+    this->SortDirection = (*sd == "DEC") ? Dec : Asc;
   }
 
   // Find what search path locations have been enabled/disable.
