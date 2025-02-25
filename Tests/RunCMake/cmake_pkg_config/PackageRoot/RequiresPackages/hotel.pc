@@ -1,0 +1,6 @@
+Name: Hotel
+Description: Hotel
+Version: 1.0.0
+
+Cflags: Hotel
+Requires: alpha >= 2.0.0

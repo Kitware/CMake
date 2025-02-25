@@ -1,0 +1,5 @@
+CMake Warning at ImportTransitiveVersionFail.cmake:[0-9]+ \(cmake_pkg_config\):
+  Package 'alpha' version '1.0.0' does not meet version requirement '>=2.0.0'
+  of 'hotel'
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)

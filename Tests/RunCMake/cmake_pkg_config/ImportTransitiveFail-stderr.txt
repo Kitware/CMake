@@ -1,0 +1,11 @@
+CMake Warning at ImportTransitiveFail.cmake:[0-9]+ \(cmake_pkg_config\):
+  Could not find pkg-config: 'foxtrot' required by: 'golf'
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)
+
+
+Import Golf Found: FALSE
+CMake Error at ImportTransitiveFail.cmake:[0-9]+ \(cmake_pkg_config\):
+  cmake_pkg_config Could not find pkg-config: 'foxtrot' required by: 'golf'
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)
