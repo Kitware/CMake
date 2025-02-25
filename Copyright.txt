@@ -68,7 +68,7 @@ The following individuals and institutions are among the Contributors:
 * Jordan Williams <jordan@jwillikers.com>
 * Julien Schueller
 * Kelly Thompson <kgt@lanl.gov>
-* Konstantin Podsvirov <konstantin@podsvirov.pro>
+* Konstantin Podsvirov <konstantin@podsvirov.su>
 * Laurent Montel <montel@kde.org>
 * Mario Bensi <mbensi@ipsquad.net>
 * Martin Gräßlin <mgraesslin@kde.org>
