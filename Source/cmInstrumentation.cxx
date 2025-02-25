@@ -538,7 +538,7 @@ std::string cmInstrumentation::GetCommandStr(
 {
   std::string command_str;
   for (size_t i = 0; i < args.size(); ++i) {
-    command_str = cmStrCat(command_str, args[i]);
+    command_str = cmStrCat(command_str, '"', args[i], '"');
     if (i < args.size() - 1) {
       command_str = cmStrCat(command_str, ' ');
     }

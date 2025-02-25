@@ -1,7 +1,7 @@
 {
   "callbacks" :
   [
-    "\"@CMAKE_COMMAND@\" -E echo callback1"
+    "\"@CMAKE_COMMAND@\" \"-E\" \"echo\" \"callback1\""
   ],
   "hooks" :
   [
