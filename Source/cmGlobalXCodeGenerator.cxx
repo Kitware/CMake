@@ -1814,9 +1814,37 @@ void cmGlobalXCodeGenerator::CreateCustomCommands(
     // create prelink phase
     preLinkPhase =
       this->CreateRunScriptBuildPhase("CMake PreLink Rules", gtgt, prelink);
+
+    std::vector<std::string> depends;
+    if (gtgt->IsBundleOnApple()) {
+      // In Xcode 16+ the POST_BUILD phase needs explicit dependencies to
+      // ensure it runs after certain bundle files are generated.
+      depends = {
+        "${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}/"
+        "Contents/Resources/DWARF/${PRODUCT_NAME}",
+        "${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}/"
+        "Contents/Info.plist",
+        "$(TARGET_BUILD_DIR)/$(EXECUTABLE_PATH)",
+        "$(TARGET_BUILD_DIR)/$(INFOPLIST_PATH)",
+      };
+      if (resourceBuildPhase) {
+        auto resourceFiles = resourceBuildPhase->GetAttribute("files");
+        for (auto xsf : resourceFiles->GetObjectList()) {
+          auto fileRef = xsf->GetAttribute("fileRef");
+          auto fileObj = fileRef->GetObject();
+          auto path = fileObj->GetAttribute("path");
+          auto fileName = cmSystemTools::GetFilenameName(path->GetString());
+          if (cmSystemTools::GetFilenameLastExtension(fileName) == ".plist") {
+            depends.push_back(
+              "$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/" +
+              fileName);
+          }
+        }
+      }
+    }
     // create postbuild phase
     postBuildPhase = this->CreateRunScriptBuildPhase("CMake PostBuild Rules",
-                                                     gtgt, postbuild);
+                                                     gtgt, postbuild, depends);
   } else {
     std::vector<cmSourceFile*> classes;
     if (!gtgt->GetConfigCommonSourceFilesForXcode(classes)) {
@@ -2030,7 +2058,8 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateRunScriptBuildPhase(
 
 cmXCodeObject* cmGlobalXCodeGenerator::CreateRunScriptBuildPhase(
   std::string const& name, cmGeneratorTarget const* gt,
-  std::vector<cmCustomCommand> const& commands)
+  std::vector<cmCustomCommand> const& commands,
+  std::vector<std::string> const& depends)
 {
   if (commands.empty()) {
     return nullptr;
@@ -2065,6 +2094,13 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateRunScriptBuildPhase(
   buildPhase->AddAttribute("shellPath", this->CreateString("/bin/sh"));
   buildPhase->AddAttribute("shellScript", this->CreateString(shellScript));
   buildPhase->AddAttribute("showEnvVarsInLog", this->CreateString("0"));
+  {
+    cmXCodeObject* inputPaths = this->CreateObject(cmXCodeObject::OBJECT_LIST);
+    for (std::string const& s : depends) {
+      inputPaths->AddUniqueObject(this->CreateString(s));
+    }
+    buildPhase->AddAttribute("inputPaths", inputPaths);
+  }
   {
     cmXCodeObject* outputPaths =
       this->CreateObject(cmXCodeObject::OBJECT_LIST);
