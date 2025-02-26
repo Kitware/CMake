@@ -4,6 +4,9 @@ include(CTest)
 
 find_package(BLAS REQUIRED)
 
+# Configure the test case to match BLAS's integer type ABI.
+# FindBLAS defaults to 32-bit integers if BLA_SIZEOF_INTEGER
+# is not already set in the cache.
 if(NOT BLA_SIZEOF_INTEGER)
   set(BLA_SIZEOF_INTEGER 4)
 endif()
