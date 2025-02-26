@@ -124,6 +124,8 @@ public slots:
   void setWarnUninitializedMode(bool value);
   /// check if project IDE open is possible and emit openPossible signal
   void checkOpenPossible();
+  /// Reload the preset files and tree
+  void loadPresets();
 
 public:
   /// get the list of cache properties
@@ -193,8 +195,6 @@ protected:
   void stderrCallback(std::string const& msg);
   void setUpEnvironment() const;
 
-  void loadPresets();
-
   bool WarnUninitializedMode;
   QString SourceDirectory;
   QString BinaryDirectory;
@@ -204,11 +204,9 @@ protected:
   QString Toolset;
   std::vector<cmake::GeneratorInfo> AvailableGenerators;
   cmCMakePresetsGraph CMakePresetsGraph;
-  bool LastLoadPresetsResult = true;
   QString PresetName;
   QString CMakeExecutable;
   QAtomicInt InterruptFlag;
   QProcessEnvironment StartEnvironment;
   QProcessEnvironment Environment;
-  QTimer LoadPresetsTimer;
 };

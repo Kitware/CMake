@@ -275,6 +275,8 @@ void CMakeSetupDialog::initialize()
   QObject::connect(this->BrowseSourceDirectoryButton,
                    &QAbstractButton::clicked, this,
                    &CMakeSetupDialog::doSourceBrowse);
+  QObject::connect(this->ReloadPresetsButton, &QAbstractButton::clicked,
+                   this->CMakeThread->cmakeInstance(), &QCMake::loadPresets);
   QObject::connect(this->BrowseBinaryDirectoryButton,
                    &QAbstractButton::clicked, this,
                    &CMakeSetupDialog::doBinaryBrowse);
