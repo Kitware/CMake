@@ -891,21 +891,22 @@ endif ()
 
 if(CMAKE_CROSSCOMPILING)
   set(CUDA_TOOLKIT_ROOT $ENV{CUDA_TOOLKIT_ROOT})
+  # Keep in sync with equivalent table in FindCUDAToolkit!
   if(CMAKE_SYSTEM_PROCESSOR STREQUAL "armv7-a")
     # Support for NVPACK
-    set (CUDA_TOOLKIT_TARGET_NAMES "armv7-linux-androideabi")
+    set(CUDA_TOOLKIT_TARGET_NAMES "armv7-linux-androideabi")
   elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "arm")
-    # Support for arm cross compilation
     set(CUDA_TOOLKIT_TARGET_NAMES "armv7-linux-gnueabihf")
   elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64")
-    # Support for aarch64 cross compilation
-    if (ANDROID_ARCH_NAME STREQUAL "arm64")
+    if(ANDROID_ARCH_NAME STREQUAL "arm64")
       set(CUDA_TOOLKIT_TARGET_NAMES "aarch64-linux-androideabi")
     elseif (CMAKE_SYSTEM_NAME STREQUAL "QNX")
       set(CUDA_TOOLKIT_TARGET_NAMES "aarch64-qnx")
     else()
       set(CUDA_TOOLKIT_TARGET_NAMES "aarch64-linux" "sbsa-linux")
     endif()
+  elseif(CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64")
+    set(CUDA_TOOLKIT_TARGET_NAMES "x86_64-linux")
   endif()
 
   foreach(CUDA_TOOLKIT_TARGET_NAME IN LISTS CUDA_TOOLKIT_TARGET_NAMES)
