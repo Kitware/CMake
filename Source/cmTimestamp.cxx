@@ -16,6 +16,7 @@
 
 #include <cstdlib>
 #include <cstring>
+#include <ctime>
 #include <sstream>
 #include <utility>
 
@@ -275,7 +276,8 @@ std::string cmTimestamp::AddTimestampComponent(
         return std::string();
       }
 
-      return std::to_string(static_cast<long int>(difftime(timeT, unixEpoch)));
+      return std::to_string(
+        static_cast<int64_t>(std::difftime(timeT, unixEpoch)));
     }
     case 'f': // microseconds
     {

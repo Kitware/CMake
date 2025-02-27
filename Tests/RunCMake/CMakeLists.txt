@@ -660,7 +660,10 @@ add_RunCMake_test(return)
 add_RunCMake_test(SarifOutput)
 add_RunCMake_test(separate_arguments)
 add_RunCMake_test(set_property)
-add_RunCMake_test(string)
+add_RunCMake_test(string
+  -DCMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME}
+  -DCMAKE_SYSTEM_PROCESSOR=${CMAKE_SYSTEM_PROCESSOR}
+  )
 add_RunCMake_test(test_include_dirs)
 add_RunCMake_test(BundleUtilities)
 if(APPLE)
