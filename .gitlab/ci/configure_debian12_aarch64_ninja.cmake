@@ -1,13 +1,22 @@
 set(CMake_TEST_C_STANDARDS "90;99;11;17;23" CACHE STRING "")
 set(CMake_TEST_CXX_STANDARDS "98;11;14;17;20;23" CACHE STRING "")
 
+set(blas_lapack_cases
+  All
+  static=1 Generic
+  model=lp64
+    static=0 thread=SEQ NVPL thread=OMP NVPL thread= NVPL
+  model=ilp64
+    static=0 thread=SEQ NVPL thread=OMP NVPL thread= NVPL
+  )
+
 set(CMake_TEST_CTestUpdate_BZR "ON" CACHE BOOL "")
 set(CMake_TEST_CTestUpdate_CVS "ON" CACHE BOOL "")
 set(CMake_TEST_CTestUpdate_GIT "ON" CACHE BOOL "")
 set(CMake_TEST_CTestUpdate_HG "ON" CACHE BOOL "")
 set(CMake_TEST_CTestUpdate_SVN "ON" CACHE BOOL "")
 set(CMake_TEST_FindALSA "ON" CACHE BOOL "")
-set(CMake_TEST_FindBLAS "All;static=1;Generic" CACHE STRING "")
+set(CMake_TEST_FindBLAS "${blas_lapack_cases}" CACHE STRING "")
 set(CMake_TEST_FindBoost "ON" CACHE BOOL "")
 set(CMake_TEST_FindBoost_Python "ON" CACHE BOOL "")
 set(CMake_TEST_FindBZip2 "ON" CACHE BOOL "")
@@ -51,7 +60,7 @@ set(CMake_TEST_FindIntl "ON" CACHE BOOL "")
 set(CMake_TEST_FindJNI "ON" CACHE BOOL "")
 set(CMake_TEST_FindJPEG "ON" CACHE BOOL "")
 set(CMake_TEST_FindJsonCpp "ON" CACHE BOOL "")
-set(CMake_TEST_FindLAPACK "All;static=1;Generic" CACHE STRING "")
+set(CMake_TEST_FindLAPACK "${blas_lapack_cases}" CACHE STRING "")
 set(CMake_TEST_FindLibArchive "ON" CACHE BOOL "")
 set(CMake_TEST_FindLibinput "ON" CACHE BOOL "")
 set(CMake_TEST_FindLibLZMA "ON" CACHE BOOL "")

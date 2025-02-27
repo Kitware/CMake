@@ -54,6 +54,21 @@ The following variables may be set to influence this module's behavior:
     Search for any BLAS/LAPACK.
     Most likely, a BLAS/LAPACK with 32-bit integer interfaces will be found.
 
+``BLA_THREAD``
+  .. versionadded:: 4.1
+
+  Specify the BLAS/LAPACK threading model:
+
+  ``SEQ``
+    Sequential model
+  ``OMP``
+    OpenMP model
+  ``ANY``
+    Search for any BLAS/LAPACK, if both are available most likely ``OMP`` will
+    be found.
+
+  This is currently only supported by NVIDIA NVPL.
+
 Imported Targets
 ^^^^^^^^^^^^^^^^
 
@@ -168,6 +183,11 @@ BLAS/LAPACK Vendors
   .. versionadded:: 3.30
 
   A BLAS/LAPACK demuxing library using PLT trampolines
+
+``NVPL``
+  .. versionadded:: 4.1
+
+  NVIDIA Performance Libraries
 
 ``NVHPC``
   .. versionadded:: 3.21
@@ -415,6 +435,16 @@ elseif((BLA_SIZEOF_INTEGER STREQUAL "ANY") OR
   set(_blas_sizeof_integer ${BLA_SIZEOF_INTEGER})
 else()
   message(FATAL_ERROR "BLA_SIZEOF_INTEGER can have only <no value>, ANY, 4, or 8 values")
+endif()
+
+if(NOT BLA_THREAD)
+  set(_blas_thread "ANY")
+elseif((BLA_THREAD STREQUAL "ANY") OR
+       (BLA_THREAD STREQUAL "SEQ") OR
+       (BLA_THREAD STREQUAL "OMP"))
+  set(_blas_thread ${BLA_THREAD})
+else()
+  message(FATAL_ERROR "BLA_THREAD can have only <no value>, ANY, SEQ, or OMP values")
 endif()
 
 # Implicitly linked BLAS libraries?
@@ -1313,6 +1343,52 @@ if(NOT BLAS_LIBRARIES
 
   unset(_blas_fjlapack_flags)
   unset(_blas_fjlapack_lib)
+endif()
+
+# nVidia NVPL? (https://developer.nvidia.com/nvpl)
+if(BLA_VENDOR STREQUAL "NVPL" OR BLA_VENDOR STREQUAL "All")
+  # Prefer lp64 unless ilp64 is requested.
+  if((_blas_sizeof_integer EQUAL 4) OR (_blas_sizeof_integer STREQUAL "ANY"))
+    list(APPEND _blas_nvpl_ints "_lp64")
+  endif()
+  if((_blas_sizeof_integer EQUAL 8) OR (_blas_sizeof_integer STREQUAL "ANY"))
+    list(APPEND _blas_nvpl_ints "_ilp64")
+  endif()
+
+  # Prefer OMP if available
+  if((_blas_thread STREQUAL "OMP") OR (_blas_thread STREQUAL "ANY"))
+    list(APPEND _blas_nvpl_threads "_omp")
+  endif()
+  if((_blas_thread STREQUAL "SEQ") OR (_blas_thread STREQUAL "ANY"))
+    list(APPEND _blas_nvpl_threads "_seq")
+  endif()
+
+  if(NOT BLAS_LIBRARIES)
+    find_package(nvpl)
+    if(nvpl_FOUND)
+      foreach(_nvpl_thread IN LISTS _blas_nvpl_threads)
+        foreach(_nvpl_int IN LISTS _blas_nvpl_ints)
+
+          set(_blas_lib "nvpl::blas${_nvpl_int}${_nvpl_thread}")
+
+          if(TARGET ${_blas_lib})
+            set(BLAS_LIBRARIES ${_blas_lib})
+            break()
+          endif()
+
+        endforeach()
+
+        if(BLAS_LIBRARIES)
+          break()
+        endif()
+
+      endforeach()
+    endif()
+  endif()
+
+  unset(_blas_lib)
+  unset(_blas_nvpl_ints)
+  unset(_blas_nvpl_threads)
 endif()
 
 # BLAS in nVidia HPC SDK? (https://developer.nvidia.com/hpc-sdk)

@@ -69,6 +69,9 @@ libjsoncpp-dev
 liblapack-dev
 liblzma-dev
 libmagick++-dev
+libnvpl-blas-dev
+libnvpl-common-dev
+libnvpl-lapack-dev
 libopenal-dev
 libopenmpi-dev openmpi-bin
 libosp-dev

@@ -55,6 +55,21 @@ The following variables may be set to influence this module's behavior:
     Search for any BLAS/LAPACK.
     Most likely, a BLAS/LAPACK with 32-bit integer interfaces will be found.
 
+``BLA_THREAD``
+  .. versionadded:: 4.1
+
+  Specify the BLAS/LAPACK threading model:
+
+  ``SEQ``
+    Sequential model
+  ``OMP``
+    OpenMP model
+  ``ANY``
+    Search for any BLAS/LAPACK, if both are available most likely ``OMP`` will
+    be found.
+
+  This is currently only supported by NVIDIA NVPL.
+
 Imported Targets
 ^^^^^^^^^^^^^^^^
 
@@ -276,6 +291,16 @@ elseif((BLA_SIZEOF_INTEGER STREQUAL "ANY") OR
   set(_lapack_sizeof_integer ${BLA_SIZEOF_INTEGER})
 else()
   message(FATAL_ERROR "BLA_SIZEOF_INTEGER can have only <no value>, ANY, 4, or 8 values")
+endif()
+
+if(NOT BLA_THREAD)
+  set(_lapack_thread "ANY")
+elseif((BLA_THREAD STREQUAL "ANY") OR
+       (BLA_THREAD STREQUAL "SEQ") OR
+       (BLA_THREAD STREQUAL "OMP"))
+  set(_lapack_thread ${BLA_THREAD})
+else()
+  message(FATAL_ERROR "BLA_THREAD can have only <no value>, ANY, SEQ, or OMP values")
 endif()
 
 # Load BLAS
@@ -691,6 +716,51 @@ if(NOT LAPACK_NOT_FOUND_MESSAGE)
     if(BLAS_LIBRARIES MATCHES "essl.+")
       set(LAPACK_LIBRARIES ${BLAS_LIBRARIES})
     endif()
+  endif()
+
+  # nVidia NVPL? (https://developer.nvidia.com/nvpl)
+  if(NOT LAPACK_LIBRARIES
+      AND (BLA_VENDOR MATCHES "NVPL" OR BLA_VENDOR STREQUAL "All"))
+    # Prefer lp64 unless ilp64 is requested.
+    if((_lapack_sizeof_integer EQUAL 4) OR (_lapack_sizeof_integer STREQUAL "ANY"))
+      list(APPEND _lapack_nvpl_ints "_lp64")
+    endif()
+    if((_lapack_sizeof_integer EQUAL 8) OR (_lapack_sizeof_integer STREQUAL "ANY"))
+      list(APPEND _lapack_nvpl_ints "_ilp64")
+    endif()
+
+    # Prefer OMP if available
+    if((_lapack_thread STREQUAL "OMP") OR (_lapack_thread STREQUAL "ANY"))
+      list(APPEND _lapack_nvpl_threads "_omp")
+    endif()
+    if((_lapack_thread STREQUAL "SEQ") OR (_lapack_thread STREQUAL "ANY"))
+      list(APPEND _lapack_nvpl_threads "_seq")
+    endif()
+
+    find_package(nvpl)
+    if(nvpl_FOUND)
+      foreach(_nvpl_thread IN LISTS _lapack_nvpl_threads)
+        foreach(_nvpl_int IN LISTS _lapack_nvpl_ints)
+
+          set(_lapack_lib "nvpl::lapack${_nvpl_int}${_nvpl_thread}")
+
+          if(TARGET ${_lapack_lib})
+            set(LAPACK_LIBRARIES ${_lapack_lib})
+            break()
+          endif()
+
+        endforeach()
+
+        if(LAPACK_LIBRARIES)
+          break()
+        endif()
+
+      endforeach()
+    endif()
+
+    unset(_lapack_lib)
+    unset(_lapack_nvpl_ints)
+    unset(_lapack_nvpl_threads)
   endif()
 
   # NVHPC Library?
