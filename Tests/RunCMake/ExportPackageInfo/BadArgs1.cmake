@@ -1,0 +1,4 @@
+add_library(foo INTERFACE)
+install(TARGETS foo EXPORT foo DESTINATION .)
+export(EXPORT foo PACKAGE_INFO foo COMPAT_VERSION 1.0)
+export(EXPORT foo PACKAGE_INFO foo VERSION_SCHEMA simple)

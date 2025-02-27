@@ -170,6 +170,8 @@ protected:
   bool AddTargetNamespace(std::string& input, cmGeneratorTarget const* target,
                           cmLocalGenerator const* lg);
 
+  static std::string PropertyConfigSuffix(std::string const& config);
+
   // The namespace in which the exports are placed in the generated file.
   std::string Namespace;
 

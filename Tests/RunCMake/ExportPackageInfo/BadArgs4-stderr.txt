@@ -1,0 +1,28 @@
+CMake Error at BadArgs4\.cmake:3 \(export\):
+  export LOWER_CASE_FILE requires PACKAGE_INFO\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:3 \(include\)
+
+
+CMake Error at BadArgs4\.cmake:4 \(export\):
+  export APPENDIX requires PACKAGE_INFO\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:3 \(include\)
+
+
+CMake Error at BadArgs4\.cmake:5 \(export\):
+  export VERSION requires PACKAGE_INFO\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:3 \(include\)
+
+
+CMake Error at BadArgs4\.cmake:6 \(export\):
+  export DEFAULT_TARGETS requires PACKAGE_INFO\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:3 \(include\)
+
+
+CMake Error at BadArgs4\.cmake:7 \(export\):
+  export DEFAULT_CONFIGURATIONS requires PACKAGE_INFO\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:3 \(include\)

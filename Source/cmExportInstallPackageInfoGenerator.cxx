@@ -71,8 +71,8 @@ bool cmExportInstallPackageInfoGenerator::GenerateMainFile(std::ostream& os)
   }
   root["cps_path"] = packagePath;
 
-  bool requiresConfigFiles = false;
   // Create all the imported targets.
+  bool requiresConfigFiles = false;
   for (cmTargetExport const* te : allTargets) {
     cmGeneratorTarget* gt = te->Target;
     cmStateEnums::TargetType targetType = this->GetExportTargetType(te);
@@ -139,8 +139,11 @@ void cmExportInstallPackageInfoGenerator::GenerateImportTargetsConfig(
     this->PopulateImportProperties(config, suffix, te.get(), properties,
                                    importedLocations);
 
-    this->GenerateInterfaceConfigProperties(components, te->Target, suffix,
-                                            properties);
+    Json::Value component =
+      this->GenerateInterfaceConfigProperties(suffix, properties);
+    if (!component.empty()) {
+      components[te->Target->GetExportName()] = std::move(component);
+    }
   }
 
   this->WritePackageInfo(root, os);

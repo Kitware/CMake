@@ -1,0 +1,16 @@
+CMake Error at BadArgs2\.cmake:3 \(export\):
+  export APPENDIX and VERSION are mutually exclusive\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:3 \(include\)
+
+
+CMake Error at BadArgs2\.cmake:4 \(export\):
+  export APPENDIX and DEFAULT_TARGETS are mutually exclusive\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:3 \(include\)
+
+
+CMake Error at BadArgs2\.cmake:5 \(export\):
+  export APPENDIX and DEFAULT_CONFIGURATIONS are mutually exclusive\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:3 \(include\)
