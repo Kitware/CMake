@@ -30,19 +30,19 @@
     variables:
         BOOTSTRAP_ARGS: '-- "-DCMake_DOC_ARTIFACT_PREFIX=$CI_PROJECT_DIR/build/install-doc"'
 
-.sunos_release_i386:
-    image: "kitware/cmake:build-sunos-i386-deps-2025-02-14"
+.sunos_release_x86_64:
+    image: "kitware/cmake:build-sunos-x86_64-deps-2025-02-27"
 
     variables:
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci"
-        CMAKE_ARCH: i386
+        CMAKE_ARCH: x86_64
 
-.sunos_release_sparc:
-    image: "kitware/cmake:build-sunos-sparc-deps-2025-02-14"
+.sunos_release_sparc64:
+    image: "kitware/cmake:build-sunos-sparc64-deps-2025-02-27"
 
     variables:
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci"
-        CMAKE_ARCH: sparc
+        CMAKE_ARCH: sparc64
 
 .sunos_package:
     variables:
