@@ -219,6 +219,7 @@ function(ProcessorCount var)
   if(NOT count)
     # Haiku
     find_program(ProcessorCount_cmd_sysinfo sysinfo)
+    mark_as_advanced(ProcessorCount_cmd_sysinfo)
     if(ProcessorCount_cmd_sysinfo)
       execute_process(COMMAND ${ProcessorCount_cmd_sysinfo}
         ERROR_QUIET
