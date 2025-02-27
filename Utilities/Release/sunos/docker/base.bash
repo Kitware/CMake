@@ -6,13 +6,13 @@ arch="$1"
 readonly arch
 
 case "$arch" in
-    i386)
-        tarball="gcc-9.5.0-linux-x86_64-cross-sunos-i386.tar.xz"
-        sha256sum="3cd3c989483051e741dd9f39170842d22e5c43cd25628d2b0c57890a3f235883"
+    x86_64)
+        tarball="gcc-9.5.0-linux-x86_64-cross-sunos-x86_64.tar.xz"
+        sha256sum="0632342dc20445a798148548376f986f3a09dc2e4f433fa9100e4a5371a14860"
         ;;
-    sparc)
-        tarball="gcc-9.5.0-linux-x86_64-cross-sunos-sparc.tar.xz"
-        sha256sum="853454ef4e787895786fdb21e56a3ba9c121ffe6116467a75f2c3eb09f3c88b4"
+    sparc64)
+        tarball="gcc-9.5.0-linux-x86_64-cross-sunos-sparc64.tar.xz"
+        sha256sum="ea3c3deecdd94823edd7241aa4b79a0dc4e7fb5a8dc9d101cc2d6a72beab7ced"
         ;;
     *)
         echo >&2 "Unknown architecture: $arch"
@@ -24,7 +24,7 @@ readonly sha256sum
 
 cd /tmp
 
-curl -OL "https://gitlab.kitware.com/api/v4/projects/6955/packages/generic/gcc-solaris/v9.5.0-20250212.0/$tarball"
+curl -OL "https://gitlab.kitware.com/api/v4/projects/6955/packages/generic/gcc-solaris/v9.5.0-20250227.0/$tarball"
 echo "$sha256sum  $tarball" > gcc.sha256sum
 sha256sum --check gcc.sha256sum
 

@@ -6,13 +6,13 @@ arch="$1"
 readonly arch
 
 case "$arch" in
-    i386)
-        tarball="sysroot-i386-pc-solaris2.10-sunos5.10-1.tar.xz"
-        sha256sum="1b9251699f4e412ba5b0fde9c0fb96ceef6b8a1f47f0c1f2146ba0ba9da458b8"
+    x86_64)
+        tarball="sysroot-x86_64-pc-solaris2.10-sunos5.10-1.tar.xz"
+        sha256sum="bea632b3ae755f89a1c0e64775437a9b29001a3fc3a3c2c6247b921776059231"
         ;;
-    sparc)
-        tarball="sysroot-sparc-sun-solaris2.10-sunos5.10-1.tar.xz"
-        sha256sum="e6c668a63dc00de443d07cbe2be779335642ffe1b818ba85d23ab543982aaf23"
+    sparc64)
+        tarball="sysroot-sparc64-sun-solaris2.10-sunos5.10-1.tar.xz"
+        sha256sum="fd60cc1be951ae314ff2b4246ac055c8e5b21c39b4cd41b23ebcec709451d90f"
         ;;
     *)
         echo >&2 "Unknown architecture: $arch"
@@ -23,8 +23,8 @@ esac
 #   --build-arg SYSROOT_URL=...
 #   --build-arg SYSROOT_SHA256SUM=...
 # The tarball must contain one of:
-#   sysroot/i386-pc-solaris2.10/{lib,usr/lib,usr/include}
-#   sysroot/sparc-sun-solaris2.10/{lib,usr/lib,usr/include}
+#   sysroot/x86_64-pc-solaris2.10/{lib,usr/lib,usr/include}
+#   sysroot/sparc64-sun-solaris2.10/{lib,usr/lib,usr/include}
 # The content may be retrieved from a real Solaris host.
 if test -n "$SYSROOT_URL"; then
     url="$SYSROOT_URL"

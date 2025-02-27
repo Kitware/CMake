@@ -6,8 +6,7 @@ CMAKE_EXE_LINKER_FLAGS:STRING=-static-libstdc++ -static-libgcc -Wl,-z,noexecstac
 # Enable ssl support in curl
 CMAKE_USE_OPENSSL:BOOL=ON
 OPENSSL_USE_STATIC_LIBS:BOOL=ON
-OpenSSL_ROOT:PATH=/opt/cross/openssl/sparc-sun-solaris2.10
-_OPENSSL_STATIC_LIBRARIES:STRING=/opt/cross/sparc-sun-solaris2.10/lib/libatomic.a
+OpenSSL_ROOT:PATH=/opt/cross/openssl/sparc64-sun-solaris2.10
 
 # Enable ccmake
 BUILD_CursesDialog:BOOL=ON
@@ -23,4 +22,4 @@ CMake_TEST_INSTALL:BOOL=OFF
 CMAKE_SKIP_INSTALL_ALL_DEPENDENCY:BOOL=ON
 
 # CPack package file name component for this platform.
-CPACK_SYSTEM_NAME:STRING=sunos-sparc
+CPACK_SYSTEM_NAME:STRING=sunos-sparc64
