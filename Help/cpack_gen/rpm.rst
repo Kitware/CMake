@@ -439,6 +439,51 @@ List of CPack RPM generator specific variables:
  variable. Note that you must enclose the entire value between quotes when
  setting this variable.
 
+.. variable:: CPACK_RPM_PACKAGE_RECOMMENDS
+              CPACK_RPM_<component>_PACKAGE_RECOMMENDS
+
+ .. versionadded:: 4.1
+
+ RPM spec recommends field.
+
+ :Mandatory: No
+ :Default:
+
+ May be used to set weak RPM dependencies (recommends). If ``rpmbuild`` doesn't
+ support the ``Recommends`` tag, CPack will emit a warning and ignore this
+ variable. Note that you must enclose the entire value between quotes when
+ setting this variable.
+
+.. variable:: CPACK_RPM_PACKAGE_SUPPLEMENTS
+              CPACK_RPM_<component>_PACKAGE_SUPPLEMENTS
+
+ .. versionadded:: 4.1
+
+ RPM spec supplements field.
+
+ :Mandatory: No
+ :Default:
+
+ May be used to set weak RPM dependencies (supplements). If ``rpmbuild`` doesn't
+ support the ``Supplements`` tag, CPack will emit a warning and ignore this
+ variable. Note that you must enclose the entire value between quotes when
+ setting this variable.
+
+.. variable:: CPACK_RPM_PACKAGE_ENHANCES
+              CPACK_RPM_<component>_PACKAGE_ENHANCES
+
+ .. versionadded:: 4.1
+
+ RPM spec enhances field.
+
+ :Mandatory: No
+ :Default:
+
+ May be used to set weak RPM dependencies (enhances). If ``rpmbuild`` doesn't
+ support the ``Enhances`` tag, CPack will emit a warning and ignore this
+ variable. Note that you must enclose the entire value between quotes when
+ setting this variable.
+
 .. variable:: CPACK_RPM_PACKAGE_PROVIDES
               CPACK_RPM_<component>_PACKAGE_PROVIDES
 
