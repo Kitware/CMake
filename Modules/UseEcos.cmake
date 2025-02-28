@@ -122,6 +122,7 @@ Examples
 
 # First check that ecosconfig is available.
 find_program(ECOSCONFIG_EXECUTABLE NAMES ecosconfig)
+mark_as_advanced(ECOSCONFIG_EXECUTABLE)
 if(NOT ECOSCONFIG_EXECUTABLE)
   message(SEND_ERROR "ecosconfig was not found. Either include it in the system path or set it manually using ccmake.")
 else()
