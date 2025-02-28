@@ -808,25 +808,22 @@ function(cpack_rpm_generate_package)
   # rpmbuild is the basic command for building RPM package
   # it may be a simple (symbolic) link to rpm command.
   find_program(RPMBUILD_EXECUTABLE rpmbuild)
+  if(NOT RPMBUILD_EXECUTABLE)
+    message(FATAL_ERROR "RPM package requires rpmbuild executable")
+  endif()
 
   # Check version of the rpmbuild tool this would be easier to
   # track bugs with users and CPackRPM debug mode.
   # We may use RPM version in order to check for available version dependent features
-  if(RPMBUILD_EXECUTABLE)
-    execute_process(COMMAND ${RPMBUILD_EXECUTABLE} --version
-                    OUTPUT_VARIABLE _TMP_VERSION
-                    ERROR_QUIET
-                    OUTPUT_STRIP_TRAILING_WHITESPACE)
-    string(REGEX REPLACE "^.* " ""
-           RPMBUILD_EXECUTABLE_VERSION
-           ${_TMP_VERSION})
-    if(CPACK_RPM_PACKAGE_DEBUG)
-      message("CPackRPM:Debug: rpmbuild version is <${RPMBUILD_EXECUTABLE_VERSION}>")
-    endif()
-  endif()
-
-  if(NOT RPMBUILD_EXECUTABLE)
-    message(FATAL_ERROR "RPM package requires rpmbuild executable")
+  execute_process(COMMAND ${RPMBUILD_EXECUTABLE} --version
+                  OUTPUT_VARIABLE _TMP_VERSION
+                  ERROR_QUIET
+                  OUTPUT_STRIP_TRAILING_WHITESPACE)
+  string(REGEX REPLACE "^.* " ""
+         RPMBUILD_EXECUTABLE_VERSION
+         ${_TMP_VERSION})
+  if(CPACK_RPM_PACKAGE_DEBUG)
+    message("CPackRPM:Debug: rpmbuild version is <${RPMBUILD_EXECUTABLE_VERSION}>")
   endif()
 
   # Display lsb_release output if DEBUG mode enable
@@ -854,16 +851,6 @@ function(cpack_rpm_generate_package)
   # not checked [yet].
   if(CPACK_TOPLEVEL_DIRECTORY MATCHES ".* .*")
     message(FATAL_ERROR "${RPMBUILD_EXECUTABLE} can't handle paths with spaces, use a build directory without spaces for building RPMs.")
-  endif()
-
-  # If rpmbuild is found
-  # we try to discover alien since we may be on non RPM distro like Debian.
-  # In this case we may try to use more advanced features
-  # like generating RPM directly from DEB using alien.
-  # FIXME feature not finished (yet)
-  find_program(ALIEN_EXECUTABLE alien)
-  if(ALIEN_EXECUTABLE)
-    message(STATUS "alien found, we may be on a Debian based distro.")
   endif()
 
   # Are we packaging components ?
@@ -1892,31 +1879,25 @@ mv %_topdir/tmpBBroot $RPM_BUILD_ROOT
   endif()
 
   if(NOT GENERATE_SPEC_PARTS) # generate package
-    if(RPMBUILD_EXECUTABLE)
-      # Now call rpmbuild using the SPECFILE
-      execute_process(
-        COMMAND "${RPMBUILD_EXECUTABLE}" ${RPMBUILD_FLAGS}
-                --define "_topdir ${CPACK_RPM_DIRECTORY}"
-                --buildroot "%_topdir/${CPACK_PACKAGE_FILE_NAME}${CPACK_RPM_PACKAGE_COMPONENT_PART_PATH}"
-                --target "${CPACK_RPM_PACKAGE_ARCHITECTURE}"
-                "${CPACK_RPM_BINARY_SPECFILE}"
-        WORKING_DIRECTORY "${CPACK_TOPLEVEL_DIRECTORY}/${CPACK_PACKAGE_FILE_NAME}${CPACK_RPM_PACKAGE_COMPONENT_PART_PATH}"
-        RESULT_VARIABLE CPACK_RPMBUILD_EXEC_RESULT
-        ERROR_FILE "${CPACK_TOPLEVEL_DIRECTORY}/rpmbuild${CPACK_RPM_PACKAGE_NAME}.err"
-        OUTPUT_FILE "${CPACK_TOPLEVEL_DIRECTORY}/rpmbuild${CPACK_RPM_PACKAGE_NAME}.out")
-      if(CPACK_RPM_PACKAGE_DEBUG OR CPACK_RPMBUILD_EXEC_RESULT)
-        file(READ ${CPACK_TOPLEVEL_DIRECTORY}/rpmbuild${CPACK_RPM_PACKAGE_NAME}.err RPMBUILDERR)
-        file(READ ${CPACK_TOPLEVEL_DIRECTORY}/rpmbuild${CPACK_RPM_PACKAGE_NAME}.out RPMBUILDOUT)
-        message("CPackRPM:Debug: You may consult rpmbuild logs in: ")
-        message("CPackRPM:Debug:    - ${CPACK_TOPLEVEL_DIRECTORY}/rpmbuild${CPACK_RPM_PACKAGE_NAME}.err")
-        message("CPackRPM:Debug: *** ${RPMBUILDERR} ***")
-        message("CPackRPM:Debug:    - ${CPACK_TOPLEVEL_DIRECTORY}/rpmbuild${CPACK_RPM_PACKAGE_NAME}.out")
-        message("CPackRPM:Debug: *** ${RPMBUILDOUT} ***")
-      endif()
-    else()
-      if(ALIEN_EXECUTABLE)
-        message(FATAL_ERROR "RPM packaging through alien not done (yet)")
-      endif()
+    # Now call rpmbuild using the SPECFILE
+    execute_process(
+      COMMAND "${RPMBUILD_EXECUTABLE}" ${RPMBUILD_FLAGS}
+              --define "_topdir ${CPACK_RPM_DIRECTORY}"
+              --buildroot "%_topdir/${CPACK_PACKAGE_FILE_NAME}${CPACK_RPM_PACKAGE_COMPONENT_PART_PATH}"
+              --target "${CPACK_RPM_PACKAGE_ARCHITECTURE}"
+              "${CPACK_RPM_BINARY_SPECFILE}"
+      WORKING_DIRECTORY "${CPACK_TOPLEVEL_DIRECTORY}/${CPACK_PACKAGE_FILE_NAME}${CPACK_RPM_PACKAGE_COMPONENT_PART_PATH}"
+      RESULT_VARIABLE CPACK_RPMBUILD_EXEC_RESULT
+      ERROR_FILE "${CPACK_TOPLEVEL_DIRECTORY}/rpmbuild${CPACK_RPM_PACKAGE_NAME}.err"
+      OUTPUT_FILE "${CPACK_TOPLEVEL_DIRECTORY}/rpmbuild${CPACK_RPM_PACKAGE_NAME}.out")
+    if(CPACK_RPM_PACKAGE_DEBUG OR CPACK_RPMBUILD_EXEC_RESULT)
+      file(READ ${CPACK_TOPLEVEL_DIRECTORY}/rpmbuild${CPACK_RPM_PACKAGE_NAME}.err RPMBUILDERR)
+      file(READ ${CPACK_TOPLEVEL_DIRECTORY}/rpmbuild${CPACK_RPM_PACKAGE_NAME}.out RPMBUILDOUT)
+      message("CPackRPM:Debug: You may consult rpmbuild logs in: ")
+      message("CPackRPM:Debug:    - ${CPACK_TOPLEVEL_DIRECTORY}/rpmbuild${CPACK_RPM_PACKAGE_NAME}.err")
+      message("CPackRPM:Debug: *** ${RPMBUILDERR} ***")
+      message("CPackRPM:Debug:    - ${CPACK_TOPLEVEL_DIRECTORY}/rpmbuild${CPACK_RPM_PACKAGE_NAME}.out")
+      message("CPackRPM:Debug: *** ${RPMBUILDOUT} ***")
     endif()
 
     # find generated rpm files and take their names
