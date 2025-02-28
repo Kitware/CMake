@@ -812,6 +812,10 @@ function(cpack_rpm_generate_package)
     message(FATAL_ERROR "RPM package requires rpmbuild executable")
   endif()
 
+  # rpm is used for fallback queries in some older versions,
+  # but is not required in general.
+  find_program(RPM_EXECUTABLE rpm)
+
   # Check version of the rpmbuild tool this would be easier to
   # track bugs with users and CPackRPM debug mode.
   # We may use RPM version in order to check for available version dependent features
@@ -1077,7 +1081,7 @@ function(cpack_rpm_generate_package)
     OUTPUT_STRIP_TRAILING_WHITESPACE)
   # In some versions of RPM, rpmbuild does not understand --querytags parameter,
   # but rpm does.
-  if(NOT RPMBUILD_QUERYTAGS_SUCCESS EQUAL 0)
+  if(NOT RPMBUILD_QUERYTAGS_SUCCESS EQUAL 0 AND RPM_EXECUTABLE)
     execute_process(
       COMMAND "${RPM_EXECUTABLE}" --querytags
       OUTPUT_VARIABLE RPMBUILD_TAG_LIST
@@ -1088,16 +1092,16 @@ function(cpack_rpm_generate_package)
   # In some versions of RPM, weak dependency tags are present in the --querytags
   # list, but unsupported by rpmbuild. A different method must be used to check
   # if they are supported.
-
-  execute_process(
-    COMMAND ${RPM_EXECUTABLE} --suggests
-    ERROR_QUIET
-    RESULT_VARIABLE RPMBUILD_SUGGESTS_RESULT)
-
-  if(NOT RPMBUILD_SUGGESTS_RESULT EQUAL 0)
-    foreach(_WEAK_DEP SUGGESTS RECOMMENDS SUPPLEMENTS ENHANCES)
-      list(REMOVE_ITEM RPMBUILD_TAG_LIST ${_WEAK_DEP})
-    endforeach()
+  if(RPM_EXECUTABLE)
+    execute_process(
+      COMMAND "${RPM_EXECUTABLE}" --suggests
+      ERROR_QUIET
+      RESULT_VARIABLE RPM_SUGGESTS_RESULT)
+    if(NOT RPM_SUGGESTS_RESULT EQUAL 0)
+      foreach(_WEAK_DEP SUGGESTS RECOMMENDS SUPPLEMENTS ENHANCES)
+        list(REMOVE_ITEM RPMBUILD_TAG_LIST ${_WEAK_DEP})
+      endforeach()
+    endif()
   endif()
 
   if(CPACK_RPM_PACKAGE_EPOCH)
