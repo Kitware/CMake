@@ -197,6 +197,7 @@ function(run_cmake test)
     "|icp?x: remark: Note that use of .-g. without any optimization-level option will turn off most compiler optimizations"
     "|ifx: remark #10440: Note that use of a debug option without any optimization-level option will turnoff most compiler optimizations"
     "|lld-link: warning: procedure symbol record for .* refers to PDB item index [0-9A-Fa-fx]+ which is not a valid function ID record"
+    "|ld: warning: .* has a LOAD segment with RWX permissions"
     "|Error kstat returned"
     "|Hit xcodebuild bug"
     "|Recompacting log\\.\\.\\."
