@@ -61,27 +61,27 @@
     },
     {
       "os": ["sunos", "SunOS"],
-      "architecture": ["i386"],
+      "architecture": ["x86_64"],
       "class": "installer",
-      "name": "cmake-@version@-sunos-i386.sh"
+      "name": "cmake-@version@-sunos-x86_64.sh"
     },
     {
       "os": ["sunos", "SunOS"],
-      "architecture": ["i386"],
+      "architecture": ["x86_64"],
       "class": "archive",
-      "name": "cmake-@version@-sunos-i386.tar.gz"
+      "name": "cmake-@version@-sunos-x86_64.tar.gz"
     },
     {
       "os": ["sunos", "SunOS"],
-      "architecture": ["sparc"],
+      "architecture": ["sparc64"],
       "class": "installer",
-      "name": "cmake-@version@-sunos-sparc.sh"
+      "name": "cmake-@version@-sunos-sparc64.sh"
     },
     {
       "os": ["sunos", "SunOS"],
-      "architecture": ["sparc"],
+      "architecture": ["sparc64"],
       "class": "archive",
-      "name": "cmake-@version@-sunos-sparc.tar.gz"
+      "name": "cmake-@version@-sunos-sparc64.tar.gz"
     },
     {
       "os": ["windows", "Windows"],

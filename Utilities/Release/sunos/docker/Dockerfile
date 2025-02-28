@@ -14,7 +14,7 @@ RUN --mount=type=tmpfs,target=/var/log \
  && apt-get --download-only -y install $(grep -h '^[^#]\+$' /root/*.lst)
 
 FROM ${BASE_IMAGE} AS base
-ARG ARCH=sparc
+ARG ARCH=sparc64
 RUN --mount=type=bind,source=base.lst,target=/root/base.lst \
     --mount=type=bind,source=docker-clean,target=/etc/apt/apt.conf.d/docker-clean \
     --mount=type=cache,from=apt-cache,source=/var/lib/apt/lists,target=/var/lib/apt/lists \
