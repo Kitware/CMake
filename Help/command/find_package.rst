@@ -132,7 +132,7 @@ Basic Signature
 .. code-block:: cmake
 
   find_package(<PackageName> [version] [EXACT] [QUIET] [MODULE]
-               [REQUIRED] [[COMPONENTS] [components...]]
+               [REQUIRED|OPTIONAL] [[COMPONENTS] [components...]]
                [OPTIONAL_COMPONENTS components...]
                [REGISTRY_VIEW  (64|32|64_32|32_64|HOST|TARGET|BOTH)]
                [GLOBAL]
@@ -158,6 +158,13 @@ satisfied, the package overall is considered to be not found.  If the
 otherwise execution still continues.  As a form of shorthand, if the
 ``REQUIRED`` option is present, the ``COMPONENTS`` keyword can be omitted
 and the required components can be listed directly after ``REQUIRED``.
+
+The :variable:`CMAKE_FIND_REQUIRED` variable can be enabled to make this call
+``REQUIRED`` by default. This behavior can be overridden by providing the
+``OPTIONAL`` keyword. As with the ``REQUIRED`` option, a list of components
+can be listed directly after ``OPTIONAL``, which is equivalent to listing
+them after the ``COMPONENTS`` keyword. When the ``OPTIONAL`` keyword is given,
+the warning output when a package is not found is suppressed.
 
 Additional optional components may be listed after
 ``OPTIONAL_COMPONENTS``.  If these cannot be satisfied, the package overall
@@ -249,7 +256,7 @@ Full Signature
 .. code-block:: cmake
 
   find_package(<PackageName> [version] [EXACT] [QUIET]
-               [REQUIRED] [[COMPONENTS] [components...]]
+               [REQUIRED|OPTIONAL] [[COMPONENTS] [components...]]
                [OPTIONAL_COMPONENTS components...]
                [CONFIG|NO_MODULE]
                [GLOBAL]
@@ -634,6 +641,9 @@ Every non-REQUIRED ``find_package`` call can be disabled or made REQUIRED:
   to ``TRUE`` makes the package REQUIRED.
 
 Setting both variables to ``TRUE`` simultaneously is an error.
+
+The :variable:`CMAKE_REQUIRE_FIND_PACKAGE_<PackageName>` variable takes priority
+over the ``OPTIONAL`` keyword in determining whether a package is required.
 
 .. _`version selection`:
 

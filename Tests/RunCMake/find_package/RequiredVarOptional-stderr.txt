@@ -1,0 +1,21 @@
+CMake Error at RequiredVarOptional.cmake:[0-9]+ \(find_package\):
+  By not providing "FindDoesNotExist.cmake" in CMAKE_MODULE_PATH this project
+  has asked CMake to find a package configuration file provided by
+  "DoesNotExist", but CMake did not find one.
+
+  Could not find a package configuration file provided by "DoesNotExist" with
+  any of the following names:
+
+    DoesNotExistConfig.cmake
+    doesnotexist-config.cmake
+
+  Add the installation prefix of "DoesNotExist" to CMAKE_PREFIX_PATH or set
+  "DoesNotExist_DIR" to a directory containing one of the above files.  If
+  "DoesNotExist" provides a separate development package or SDK, be sure it
+  has been installed.
+
+  This package is considered required because the CMAKE_FIND_REQUIRED
+  variable has been enabled.
+
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)

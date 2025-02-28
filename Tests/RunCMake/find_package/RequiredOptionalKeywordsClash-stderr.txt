@@ -1,0 +1,4 @@
+CMake Error at RequiredOptionalKeywordsClash.cmake:[0-9]+ \(find_package\):
+  find_package cannot be both REQUIRED and OPTIONAL
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)

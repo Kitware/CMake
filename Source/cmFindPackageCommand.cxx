@@ -747,7 +747,18 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
       configArgs.push_back(i);
       doing = DoingNone;
     } else if (args[i] == "REQUIRED") {
-      this->Required = true;
+      if (this->Required == RequiredStatus::OptionalExplicit) {
+        this->SetError("cannot be both REQUIRED and OPTIONAL");
+        return false;
+      }
+      this->Required = RequiredStatus::RequiredExplicit;
+      doing = DoingComponents;
+    } else if (args[i] == "OPTIONAL") {
+      if (this->Required == RequiredStatus::RequiredExplicit) {
+        this->SetError("cannot be both REQUIRED and OPTIONAL");
+        return false;
+      }
+      this->Required = RequiredStatus::OptionalExplicit;
       doing = DoingComponents;
     } else if (args[i] == "COMPONENTS") {
       doing = DoingComponents;
@@ -842,6 +853,11 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
         cmStrCat("called with invalid argument \"", args[i], "\""));
       return false;
     }
+  }
+
+  if (this->Required == RequiredStatus::Optional &&
+      this->Makefile->IsOn("CMAKE_FIND_REQUIRED")) {
+    this->Required = RequiredStatus::RequiredFromFindVar;
   }
 
   if (!this->GlobalScope) {
@@ -978,21 +994,21 @@ bool cmFindPackageCommand::FindPackage(
   bool const makePackageRequiredSet =
     this->Makefile->IsOn(makePackageRequiredVar);
   if (makePackageRequiredSet) {
-    if (this->Required) {
+    if (this->IsRequired()) {
       this->Makefile->IssueMessage(
         MessageType::WARNING,
         cmStrCat("for module ", this->Name,
                  " already called with REQUIRED, thus ",
                  makePackageRequiredVar, " has no effect."));
     } else {
-      this->Required = true;
+      this->Required = RequiredStatus::RequiredFromPackageVar;
     }
   }
 
   std::string const disableFindPackageVar =
     cmStrCat("CMAKE_DISABLE_FIND_PACKAGE_", this->Name);
   if (this->Makefile->IsOn(disableFindPackageVar)) {
-    if (this->Required) {
+    if (this->IsRequired()) {
       this->SetError(
         cmStrCat("for module ", this->Name,
                  (makePackageRequiredSet
@@ -1310,6 +1326,9 @@ void cmFindPackageCommand::SetModuleVariables()
 {
   this->AddFindDefinition("CMAKE_FIND_PACKAGE_NAME", this->Name);
 
+  // Nested find calls are not automatically required.
+  this->AddFindDefinition("CMAKE_FIND_REQUIRED", ""_s);
+
   // Store the list of components and associated variable definitions.
   std::string components_var = this->Name + "_FIND_COMPONENTS";
   this->AddFindDefinition(components_var, this->Components);
@@ -1329,7 +1348,7 @@ void cmFindPackageCommand::SetModuleVariables()
     this->AddFindDefinition(quietly, "1"_s);
   }
 
-  if (this->Required) {
+  if (this->IsRequired()) {
     // Tell the module that is about to be read that it should report
     // a fatal error if the package is not found.
     std::string req = cmStrCat(this->Name, "_FIND_REQUIRED");
@@ -1575,11 +1594,13 @@ bool cmFindPackageCommand::HandlePackageMode(
 
   // package not found
   if (result && !found) {
-    // warn if package required or neither quiet nor in config mode
-    if (this->Required ||
-        !(this->Quiet ||
-          (this->UseConfigFiles && !this->UseFindModules &&
-           this->ConsideredConfigs.empty()))) {
+    // warn if package required or
+    // (neither quiet nor in config mode and not explicitly optional)
+    if (this->IsRequired() ||
+        (!(this->Quiet ||
+           (this->UseConfigFiles && !this->UseFindModules &&
+            this->ConsideredConfigs.empty())) &&
+         this->Required != RequiredStatus::OptionalExplicit)) {
       // The variable is not set.
       std::ostringstream e;
       std::ostringstream aw;
@@ -1675,11 +1696,19 @@ bool cmFindPackageCommand::HandlePackageMode(
                "without ensuring that it is actually available.\n";
         }
       }
+      if (this->Required == RequiredStatus::RequiredFromFindVar) {
+        e << "\nThis package is considered required because the "
+             "CMAKE_FIND_REQUIRED variable has been enabled.\n";
+      } else if (this->Required == RequiredStatus::RequiredFromPackageVar) {
+        e << "\nThis package is considered required because the "
+          << cmStrCat("CMAKE_REQUIRE_FIND_PACKAGE_", this->Name)
+          << " variable has been enabled.\n";
+      }
 
-      this->Makefile->IssueMessage(this->Required ? MessageType::FATAL_ERROR
-                                                  : MessageType::WARNING,
-                                   e.str());
-      if (this->Required) {
+      this->Makefile->IssueMessage(
+        this->IsRequired() ? MessageType::FATAL_ERROR : MessageType::WARNING,
+        e.str());
+      if (this->IsRequired()) {
         cmSystemTools::SetFatalErrorOccurred();
       }
 
@@ -1912,7 +1941,7 @@ bool cmFindPackageCommand::ReadPackage()
   // Loop over appendices.
   auto iter = this->CpsAppendices.begin();
   while (iter != this->CpsAppendices.end()) {
-    bool required = false;
+    RequiredStatus required = RequiredStatus::Optional;
     bool important = false;
 
     // Check if this appendix provides any requested components.
@@ -1972,7 +2001,7 @@ bool cmFindPackageCommand::ReadPackage()
 
 bool cmFindPackageCommand::FindPackageDependencies(
   std::string const& fileName, cmPackageInfoReader const& reader,
-  bool required)
+  RequiredStatus required)
 {
   // Get package requirements.
   for (cmPackageRequirement const& dep : reader.GetRequirements()) {
@@ -2110,7 +2139,7 @@ void cmFindPackageCommand::AppendSuccessInformation()
   }
   this->Makefile->GetState()->SetGlobalProperty(versionInfoPropName,
                                                 versionInfo);
-  if (this->Required) {
+  if (this->IsRequired()) {
     std::string const requiredInfoPropName =
       cmStrCat("_CMAKE_", this->Name, "_TYPE");
     this->Makefile->GetState()->SetGlobalProperty(requiredInfoPropName,
@@ -3263,6 +3292,13 @@ bool cmFindPackageCommand::SearchEnvironmentPrefix(std::string const& prefix)
 
   // <environment-path>/(Foo|foo|FOO)/
   return TryGeneratedPaths(searchFn, pdt::Cps, prefix, pkgDirGen);
+}
+
+bool cmFindPackageCommand::IsRequired() const
+{
+  return this->Required == RequiredStatus::RequiredExplicit ||
+    this->Required == RequiredStatus::RequiredFromPackageVar ||
+    this->Required == RequiredStatus::RequiredFromFindVar;
 }
 
 // TODO: Debug cmsys::Glob double slash problem.

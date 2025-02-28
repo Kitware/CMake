@@ -61,6 +61,7 @@ Variables that Provide Information
    /variable/CMAKE_FIND_PACKAGE_REDIRECTS_DIR
    /variable/CMAKE_FIND_PACKAGE_SORT_DIRECTION
    /variable/CMAKE_FIND_PACKAGE_SORT_ORDER
+   /variable/CMAKE_FIND_REQUIRED
    /variable/CMAKE_GENERATOR
    /variable/CMAKE_GENERATOR_INSTANCE
    /variable/CMAKE_GENERATOR_PLATFORM
