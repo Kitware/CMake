@@ -82,7 +82,7 @@ The members are:
     On Windows, architecture names include ``x86_64``, ``i386``, and ``arm64``.
     On macOS, universal binary packages list all architectures,
     e.g. ``["arm64","x86_64"]``.
-    On SunOS, architecture names include ``i386`` and ``sparc``.
+    On SunOS, architecture names include ``x86_64`` and ``sparc64``.
 
   ``class``
     A JSON string naming the class of package.  The value is one of:

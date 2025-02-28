@@ -6,15 +6,15 @@ arch="$1"
 readonly arch
 
 case "$arch" in
-    i386)
-        target=i386-pc-solaris2.10
-        openssl_target=solaris-x86-gcc
+    x86_64)
+        target=x86_64-pc-solaris2.10
+        openssl_target=solaris64-x86_64-gcc
         ldlibs=
         ;;
-    sparc)
-        target=sparc-sun-solaris2.10
-        openssl_target=solaris-sparcv8-gcc
-        ldlibs=-latomic
+    sparc64)
+        target=sparc64-sun-solaris2.10
+        openssl_target=solaris64-sparcv9-gcc
+        ldlibs=
         ;;
     *)
         echo >&2 "Unknown architecture: $arch"
@@ -59,4 +59,4 @@ if ! make install_sw >>make.log 2>&1; then
     exit 1
 fi
 
-tar czf /root/openssl.tar.gz -C / "$prefix"
+tar czf /root/openssl.tar.gz -C / "${prefix#/}"

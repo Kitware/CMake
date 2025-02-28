@@ -1,0 +1,6 @@
+set(CMAKE_SYSTEM_NAME SunOS)
+set(CMAKE_SYSTEM_VERSION 5.10)
+set(CMAKE_SYSTEM_PROCESSOR sparc64)
+set(CMAKE_SYSROOT /opt/cross/sysroot/sparc64-sun-solaris2.10)
+set(CMAKE_C_COMPILER /opt/cross/bin/sparc64-sun-solaris2.10-gcc)
+set(CMAKE_CXX_COMPILER /opt/cross/bin/sparc64-sun-solaris2.10-g++)
