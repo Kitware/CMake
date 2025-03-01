@@ -68,7 +68,7 @@ _find_eclipse_version()
 set(_CMAKE_ECLIPSE_INITIAL_MAKE_ARGS "")
 
 include(ProcessorCount)
-processorcount(_CMAKE_ECLIPSE_PROCESSOR_COUNT)
+ProcessorCount(_CMAKE_ECLIPSE_PROCESSOR_COUNT)
 
 # Only set -j if we are under UNIX and if the make-tool used actually has "make" in the name
 # (we may also get here in the future e.g. for ninja)
