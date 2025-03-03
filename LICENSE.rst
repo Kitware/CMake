@@ -116,10 +116,15 @@ See version control history for details of individual contributions.
 Copyright
 =========
 
-The above copyright and license notice applies to distributions of
-CMake in source and binary form.  Third-party software packages supplied
-with CMake under compatible licenses provide their own copyright notices
-documented in corresponding subdirectories or source files.
+The above copyright notice applies to distributions of CMake
+in source and binary form.  We do not require any formal copyright
+assignment or contributor license agreement.  Any contributions
+intentionally sent upstream are presumed to be offered under terms
+of the OSI-approved BSD 3-clause License.
+
+Third-party software packages supplied with CMake under compatible
+licenses provide their own copyright notices documented in corresponding
+subdirectories or source files.
 
 Sponsorship
 ===========
