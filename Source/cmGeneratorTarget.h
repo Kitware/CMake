@@ -1372,6 +1372,9 @@ private:
   using OutputInfoMapType = std::map<std::string, OutputInfo>;
   mutable OutputInfoMapType OutputInfoMap;
 
+  using PdbOutputNameMapType = std::map<std::string, std::string>;
+  mutable PdbOutputNameMapType PdbOutputNameMap;
+
   using ModuleDefinitionInfoMapType =
     std::map<std::string, ModuleDefinitionInfo>;
   mutable ModuleDefinitionInfoMapType ModuleDefinitionInfoMap;

@@ -1,0 +1,9 @@
+CMake Error at PDB_NAME-recursion.cmake:[0-9]+ \(add_executable\):
+  Target 'empty1' PDB_NAME depends on itself.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:3 \(include\)
+.*
+CMake Error at PDB_NAME-recursion.cmake:[0-9]+ \(add_executable\):
+  Target 'empty2' PDB_NAME depends on itself.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:3 \(include\)
