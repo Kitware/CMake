@@ -25,7 +25,7 @@ for try in $(seq $n); do
   git reset -q --hard FETCH_HEAD
   Source/CMakeVersion.bash
   git update-index -q --ignore-missing --refresh
-  modified=$(git diff-index --name-only HEAD -- "Source/CMakeVersion.cmake" "Copyright.txt")
+  modified=$(git diff-index --name-only HEAD -- "Source/CMakeVersion.cmake" "LICENSE.rst")
   if test -n "$modified"; then
     echo "version changed"
     git add -u
