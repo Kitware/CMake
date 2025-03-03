@@ -4,6 +4,7 @@
 execute_process(
   COMMAND ${RPMBUILD_EXECUTABLE} --nobuild test_suggests.spec
   ERROR_QUIET
+  WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
   RESULT_VARIABLE RPMBUILD_SUGGESTS_RESULT)
 
 if(RPMBUILD_SUGGESTS_RESULT EQUAL 0)
@@ -15,15 +16,20 @@ endif()
 # that tag and that was already checked by expected files test.
 if(should_contain_suggests_tag_)
   execute_process(COMMAND ${RPM_EXECUTABLE} -q --suggests -p "${FOUND_FILE_1}"
-                  WORKING_DIRECTORY "${CPACK_TEMPORARY_DIRECTORY}"
                   RESULT_VARIABLE rpm_result_
-                  OUTPUT_VARIABLE rpm_output_
-                  ERROR_VARIABLE error_variable_
+                  OUTPUT_VARIABLE rpm_stdout_
+                  ERROR_VARIABLE  rpm_stderr_
                   OUTPUT_STRIP_TRAILING_WHITESPACE)
 
-  if(rpm_result_ OR NOT rpm_output_ STREQUAL "libsuggested")
-    message(FATAL_ERROR "RPM_SUGGESTED package error: no suggested packages"
-        " (result: '${rpm_result_}'; output: '${rpm_output_}';"
-        " error: '${error_variable_}')")
+  if(rpm_result_ OR NOT rpm_stdout_ STREQUAL "libsuggested")
+    string(REPLACE "\n" "\n  " rpm_stdout_ "${rpm_stdout_}")
+    string(REPLACE "\n" "\n  " rpm_stderr_  "${rpm_stderr_}")
+    message(FATAL_ERROR "RPM_SUGGESTED package error: no suggested packages\n"
+      "result: ${rpm_result_}\n"
+      "stdout:\n"
+      "  ${rpm_stdout_}\n"
+      "stderr:\n"
+      "  ${rpm_stderr_}\n"
+      )
   endif()
 endif()
