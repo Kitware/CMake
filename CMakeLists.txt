@@ -386,6 +386,7 @@ endif()
 # The main section of the CMakeLists file
 #
 #-----------------------------------------------------------------------
+include(Source/CMakeCopyright.cmake)
 include(Source/CMakeVersion.cmake)
 
 include(CTest)
