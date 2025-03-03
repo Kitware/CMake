@@ -2,10 +2,12 @@
    file Copyright.txt or https://cmake.org/licensing#kwsys for details.  */
 #include "kwsysPrivate.h"
 #include KWSYS_HEADER(Status.hxx)
+#include KWSYS_HEADER(Encoding.hxx)
 
 // Work-around CMake dependency scanning limitation.  This must
 // duplicate the above list of headers.
 #if 0
+#  include "Encoding.hxx.in"
 #  include "Status.hxx.in"
 #endif
 
@@ -43,13 +45,13 @@ std::string Status::GetString() const
       break;
 #ifdef _WIN32
     case Kind::Windows: {
-      LPSTR message = NULL;
-      DWORD size = FormatMessageA(
+      LPWSTR message = NULL;
+      DWORD size = FormatMessageW(
         FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM |
           FORMAT_MESSAGE_IGNORE_INSERTS,
         NULL, this->Windows_, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-        (LPSTR)&message, 0, NULL);
-      err = std::string(message, size);
+        (LPWSTR)&message, 0, NULL);
+      err = kwsys::Encoding::ToNarrow(message);
       LocalFree(message);
     } break;
 #endif
