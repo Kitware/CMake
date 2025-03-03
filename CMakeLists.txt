@@ -536,6 +536,7 @@ if(NOT CMake_TEST_EXTERNAL_CMAKE)
   # Install license file as it requires.
   install(FILES
     "${CMake_LICENSE_FILE}"
+    "${CMake_SOURCE_DIR}/CONTRIBUTORS.rst"
     DESTINATION ${CMAKE_DOC_DIR})
 
   # Install script directories.
