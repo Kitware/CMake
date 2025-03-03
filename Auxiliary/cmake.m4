@@ -1,5 +1,5 @@
 dnl Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-dnl file Copyright.txt or https://cmake.org/licensing for details.
+dnl file LICENSE.rst or https://cmake.org/licensing for details.
 
 AC_DEFUN([CMAKE_FIND_BINARY],
 [AC_ARG_VAR([CMAKE_BINARY], [path to the cmake binary])dnl

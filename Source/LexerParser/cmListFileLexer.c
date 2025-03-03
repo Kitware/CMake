@@ -748,7 +748,7 @@ static const flex_int32_t yy_rule_can_match_eol[25] =
 #define YY_MORE_ADJ 0
 #define YY_RESTORE_YY_MORE_OFFSET
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 /*
 
 This file must be translated to C and modified to build everywhere.

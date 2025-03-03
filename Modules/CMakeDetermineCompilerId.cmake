@@ -1,5 +1,5 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-# file Copyright.txt or https://cmake.org/licensing for details.
+# file LICENSE.rst or https://cmake.org/licensing for details.
 
 macro(__determine_compiler_id_test testflags_var userflags_var)
   set(_CMAKE_${lang}_COMPILER_ID_LOG "")
