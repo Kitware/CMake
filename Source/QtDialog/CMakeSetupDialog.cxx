@@ -1026,8 +1026,7 @@ void CMakeSetupDialog::doAbout()
     "CMake suite maintained and supported by Kitware (kitware.com/cmake).\n"
     "Distributed under terms of the BSD 3-Clause License.\n"
     "\n"
-    "CMake GUI maintained by csimsoft,\n"
-    "built using Qt %2 (qt-project.org).\n"
+    "CMake GUI built using Qt %2 (qt-project.org).\n"
 #ifdef USE_LGPL
     "\n"
     "The Qt Toolkit is Copyright (C) The Qt Company Ltd.\n"

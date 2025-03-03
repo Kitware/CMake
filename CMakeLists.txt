@@ -386,6 +386,7 @@ endif()
 # The main section of the CMakeLists file
 #
 #-----------------------------------------------------------------------
+include(Source/CMakeCopyright.cmake)
 include(Source/CMakeVersion.cmake)
 
 include(CTest)
@@ -533,7 +534,9 @@ endif()
 
 if(NOT CMake_TEST_EXTERNAL_CMAKE)
   # Install license file as it requires.
-  install(FILES Copyright.txt DESTINATION ${CMAKE_DOC_DIR})
+  install(FILES
+    "${CMake_LICENSE_FILE}"
+    DESTINATION ${CMAKE_DOC_DIR})
 
   # Install script directories.
   install(

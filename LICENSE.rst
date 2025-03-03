@@ -1,6 +1,4 @@
-CMake - Cross Platform Makefile Generator
 Copyright 2000-2025 Kitware, Inc. and Contributors
-All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -29,9 +27,10 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-------------------------------------------------------------------------------
+Contributors
+************
 
-The following individuals and institutions are among the Contributors:
+The following individuals and institutions are among the contributors:
 
 * Aaron C. Meadows <cmake@shadowguarddev.com>
 * Adriaan de Groot <groot@kde.org>
@@ -114,23 +113,27 @@ The following individuals and institutions are among the Contributors:
 
 See version control history for details of individual contributions.
 
+Copyright
+=========
+
 The above copyright and license notice applies to distributions of
 CMake in source and binary form.  Third-party software packages supplied
 with CMake under compatible licenses provide their own copyright notices
 documented in corresponding subdirectories or source files.
 
-------------------------------------------------------------------------------
+Sponsorship
+===========
 
 CMake was initially developed by Kitware with the following sponsorship:
 
- * National Library of Medicine at the National Institutes of Health
-   as part of the Insight Segmentation and Registration Toolkit (ITK).
+* National Library of Medicine at the National Institutes of Health
+  as part of the Insight Segmentation and Registration Toolkit (ITK).
 
- * US National Labs (Los Alamos, Livermore, Sandia) ASC Parallel
-   Visualization Initiative.
+* US National Labs (Los Alamos, Livermore, Sandia) ASC Parallel
+  Visualization Initiative.
 
- * National Alliance for Medical Image Computing (NAMIC) is funded by the
-   National Institutes of Health through the NIH Roadmap for Medical Research,
-   Grant U54 EB005149.
+* National Alliance for Medical Image Computing (NAMIC) is funded by the
+  National Institutes of Health through the NIH Roadmap for Medical Research,
+  Grant U54 EB005149.
 
- * Kitware, Inc.
+* Kitware, Inc.
