@@ -15,7 +15,9 @@ if(CMake_INSTALL_DEPENDENCIES)
 endif()
 
 set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/LICENSE.txt")
-configure_file("${CMake_LICENSE_FILE}" "${CPACK_RESOURCE_FILE_LICENSE}" COPYONLY)
+file(READ "${CMake_LICENSE_FILE}" license_text)
+string(REPLACE "`Contributors <CONTRIBUTORS.rst>`_" "Contributors" license_text "${license_text}")
+file(WRITE "${CPACK_RESOURCE_FILE_LICENSE}" "${license_text}")
 
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "CMake is a build tool")
 set(CPACK_PACKAGE_VENDOR "Kitware")

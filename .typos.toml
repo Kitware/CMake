@@ -57,7 +57,7 @@ SEH = "SEH"
 ignore-hidden = false
 ignore-dot = false
 extend-exclude = [
-    "LICENSE.rst"
+    "CONTRIBUTORS.rst"
     # Exclude third-party sources.
   , "Source/CursesDialog/form/"
   , "Source/kwsys/"
