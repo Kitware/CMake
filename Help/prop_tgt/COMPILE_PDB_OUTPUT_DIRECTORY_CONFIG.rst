@@ -14,5 +14,10 @@ property is initialized by the value of the
 :variable:`CMAKE_COMPILE_PDB_OUTPUT_DIRECTORY_<CONFIG>` variable
 if it is set when a target is created.
 
+.. versionadded:: 3.12
+
+  Contents of ``COMPILE_PDB_OUTPUT_DIRECTORY_<CONFIG>`` may use
+  :manual:`generator expressions <cmake-generator-expressions(7)>`.
+
 .. |PDB_XXX| replace:: :prop_tgt:`PDB_OUTPUT_DIRECTORY_<CONFIG>`
 .. include:: COMPILE_PDB_NOTE.txt
