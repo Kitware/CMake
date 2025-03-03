@@ -10,3 +10,5 @@ Defines how the link step is done. The possible values are:
 
 ``LINKER``
   The linker is used directly for the link step.
+
+This variable is read-only. Setting it is undefined behavior.
