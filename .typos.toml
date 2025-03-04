@@ -35,6 +35,7 @@ Spectre = "Spectre"
 [type.cmake.extend-identifiers]
 COMMANDs = "COMMANDs"
 xCOMMANDx = "xCOMMANDx"
+TYPEs = "TYPEs"
 
 [type.cmake.extend-words]
 # Some compiler's options trigger false-positives
@@ -52,6 +53,9 @@ Fo = "Fo"
 fo = "fo"
 Ot = "Ot"
 SEH = "SEH"
+
+[type.py.extend-identifiers]
+typ = "typ"
 
 [files]
 ignore-hidden = false
