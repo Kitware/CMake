@@ -10,7 +10,7 @@ macro(__compiler_adsp lang)
 
   set(CMAKE_${lang}_LINK_MODE DRIVER)
 
-  set(_CMAKE_${lang}_ADSP_FLAGS "-proc=${CMAKE_ADSP_PROCESSOR}")
+  set(_CMAKE_${lang}_ADSP_FLAGS "-proc ${CMAKE_ADSP_PROCESSOR}")
 
   set(CMAKE_DEPFILE_FLAGS_${lang} "-MD -Mo <DEP_FILE>")
 
