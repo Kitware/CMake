@@ -12,6 +12,6 @@ if version_patch_line=$(grep -E '^set\(CMake_VERSION_PATCH [0-9]{8}\)' "$version
   if [[ "$version_patch_year" =~ ^[0-9][0-9][0-9][0-9]$ ]] ; then
     sed -i -e '
       s/\(^Copyright 2000-\)[0-9][0-9][0-9][0-9]\( .*\)/\1'"$version_patch_year"'\2/
-    ' "${BASH_SOURCE%/*}/../Copyright.txt"
+    ' "${BASH_SOURCE%/*}/../LICENSE.rst"
   fi
 fi

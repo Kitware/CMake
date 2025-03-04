@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 /*-------------------------------------------------------------------------
   Portions of this source have been derived from the 'bindexplib' tool
   provided by the CERN ROOT Data Analysis Framework project (root.cern.ch).

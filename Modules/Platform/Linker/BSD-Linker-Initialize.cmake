@@ -1,5 +1,5 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-# file Copyright.txt or https://cmake.org/licensing for details.
+# file LICENSE.rst or https://cmake.org/licensing for details.
 
 if(NOT _CMAKE_SYSTEM_LINKER_TYPE)
   block(SCOPE_FOR VARIABLES)

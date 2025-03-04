@@ -1,5 +1,5 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-# file Copyright.txt or https://cmake.org/licensing for details.
+# file LICENSE.rst or https://cmake.org/licensing for details.
 
 project(QtDialog)
 CMake_OPTIONAL_COMPONENT(cmake-gui)
@@ -308,15 +308,12 @@ Checks: '-*,llvm-twine-local'
 ")
 
 if(APPLE)
-  file(STRINGS "${CMake_SOURCE_DIR}/Copyright.txt" copyright_line
-    LIMIT_COUNT 1 REGEX "^Copyright 2000-20[0-9][0-9] Kitware")
-
   set_target_properties(cmake-gui PROPERTIES
     OUTPUT_NAME CMake
     MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/Info.plist.in"
     MACOSX_BUNDLE_SHORT_VERSION_STRING "${CMAKE_BUNDLE_VERSION}"
     # TBD: MACOSX_BUNDLE_BUNDLE_VERSION "${CMAKE_BUNDLE_VERSION}"
-    MACOSX_BUNDLE_COPYRIGHT "${copyright_line}"
+    MACOSX_BUNDLE_COPYRIGHT "${CMake_COPYRIGHT_LINE}"
     MACOSX_BUNDLE_GUI_IDENTIFIER "org.cmake.cmake"
     )
 
