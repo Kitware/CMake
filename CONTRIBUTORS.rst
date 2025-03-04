@@ -32,8 +32,8 @@ The following individuals and institutions are among the contributors:
 * Gregor Jasny
 * `Helio Chissini de Castro <mailto:helio@kde.org>`_
 * `Ilya Lavrenov <mailto:ilya.lavrenov@itseez.com>`_
-* `Insight Software Consortium <mailto:insightsoftwareconsortium.org>`_
-* `Intel Corporation <mailto:www.intel.com>`_
+* `Insight Software Consortium <https://insightsoftwareconsortium.org/>`_
+* `Intel Corporation <https://www.intel.com/>`_
 * Jan Woetzel
 * `Jordan Williams <mailto:jordan@jwillikers.com>`_
 * Julien Schueller
@@ -46,7 +46,7 @@ The following individuals and institutions are among the contributors:
 * Matthaeus G. Chajdas
 * `Matthias Kretz <mailto:kretz@kde.org>`_
 * `Matthias Maennich <mailto:matthias@maennich.net>`_
-* `Michael Hirsch, Ph.D. <mailto:www.scivision.co>`_
+* `Michael Hirsch, Ph.D. <https://www.scivision.dev/>`_
 * Michael Stürmer
 * Miguel A. Figueroa-Villanueva
 * `Mike Durso <mailto:rbprogrammer@gmail.com>`_
@@ -55,8 +55,8 @@ The following individuals and institutions are among the contributors:
 * `Nicolas Bock <mailto:nicolasbock@gmail.com>`_
 * `Nicolas Despres <mailto:nicolas.despres@gmail.com>`_
 * `Nikita Krupen'ko <mailto:krnekit@gmail.com>`_
-* `NVIDIA Corporation <mailto:www.nvidia.com>`_
-* `OpenGamma Ltd. <mailto:opengamma.com>`_
+* `NVIDIA Corporation <https://www.nvidia.com/>`_
+* `OpenGamma Ltd. <https://opengamma.com/>`_
 * `Patrick Stotko <mailto:stotko@cs.uni-bonn.de>`_
 * `Per Øyvind Karlsen <mailto:peroyvind@mandriva.org>`_
 * `Peter Collingbourne <mailto:peter@pcc.me.uk>`_
@@ -64,7 +64,7 @@ The following individuals and institutions are among the contributors:
 * `Philip Lowman <mailto:philip@yhbt.com>`_
 * `Philippe Proulx <mailto:pproulx@efficios.com>`_
 * Raffi Enficiaud, Max Planck Society
-* `Raumfeld <mailto:raumfeld.com>`_
+* Raumfeld
 * `Roger Leigh <mailto:rleigh@codelibre.net>`_
 * `Rolf Eike Beer <mailto:eike@sf-mail.de>`_
 * `Roman Donchenko <mailto:roman.donchenko@itseez.com>`_
