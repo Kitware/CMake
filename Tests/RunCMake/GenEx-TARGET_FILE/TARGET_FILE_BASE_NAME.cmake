@@ -122,8 +122,8 @@ check_value ("TARGET_LINKER_FILE_BASE_NAME static linker all properties + postfi
 ]])
 if (CMAKE_C_LINKER_SUPPORTS_PDB)
   string (APPEND GENERATE_CONTENT [[
-check_value ("TARGET_PDB_FILE_BASE_NAME executable PDB all properties + postfix" "$<TARGET_PDB_FILE_BASE_NAME:exec4>" "exec4_pdb_postfix")
-check_value ("TARGET_PDB_FILE_BASE_NAME shared PDB all properties + postfix" "$<TARGET_PDB_FILE_BASE_NAME:shared4>" "shared4_pdb_postfix")
+check_value ("TARGET_PDB_FILE_BASE_NAME executable PDB all properties + postfix" "$<TARGET_PDB_FILE_BASE_NAME:exec4>" "exec4_pdb")
+check_value ("TARGET_PDB_FILE_BASE_NAME shared PDB all properties + postfix" "$<TARGET_PDB_FILE_BASE_NAME:shared4>" "shared4_pdb")
 ]])
 endif()
 
