@@ -1,5 +1,5 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-# file Copyright.txt or https://cmake.org/licensing for details.
+# file LICENSE.rst or https://cmake.org/licensing for details.
 
 option(CMAKE_INSTALL_DEBUG_LIBRARIES
   "Install Microsoft runtime debug libraries with CMake." FALSE)
@@ -14,10 +14,14 @@ if(CMake_INSTALL_DEPENDENCIES)
   include(${CMake_SOURCE_DIR}/Modules/InstallRequiredSystemLibraries.cmake)
 endif()
 
+set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/LICENSE.txt")
+file(READ "${CMake_LICENSE_FILE}" license_text)
+string(REPLACE "`Contributors <CONTRIBUTORS.rst>`_" "Contributors" license_text "${license_text}")
+file(WRITE "${CPACK_RESOURCE_FILE_LICENSE}" "${license_text}")
+
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "CMake is a build tool")
 set(CPACK_PACKAGE_VENDOR "Kitware")
-set(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/Copyright.txt")
-set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/Copyright.txt")
+set(CPACK_PACKAGE_DESCRIPTION_FILE "${CPACK_RESOURCE_FILE_LICENSE}")
 set(CPACK_PACKAGE_NAME "${CMAKE_PROJECT_NAME}")
 set(CPACK_PACKAGE_VERSION "${CMake_VERSION}")
 set(CPACK_PACKAGE_INSTALL_DIRECTORY "${CPACK_PACKAGE_NAME}")

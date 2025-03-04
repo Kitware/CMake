@@ -74,6 +74,6 @@ License
 We do not require any formal copyright assignment or contributor license
 agreement.  Any contributions intentionally sent upstream are presumed
 to be offered under terms of the OSI-approved BSD 3-clause License.
-See `Copyright.txt`_ for details.
+See `LICENSE.rst`_ for details.
 
-.. _`Copyright.txt`: Copyright.txt
+.. _`LICENSE.rst`: LICENSE.rst

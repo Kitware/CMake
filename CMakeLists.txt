@@ -1,5 +1,5 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-# file Copyright.txt or https://cmake.org/licensing for details.
+# file LICENSE.rst or https://cmake.org/licensing for details.
 
 cmake_minimum_required(VERSION 3.13...3.30 FATAL_ERROR)
 set(CMAKE_USER_MAKE_RULES_OVERRIDE_C ${CMAKE_CURRENT_SOURCE_DIR}/Source/Modules/OverrideC.cmake)
@@ -386,6 +386,7 @@ endif()
 # The main section of the CMakeLists file
 #
 #-----------------------------------------------------------------------
+include(Source/CMakeCopyright.cmake)
 include(Source/CMakeVersion.cmake)
 
 include(CTest)
@@ -533,7 +534,10 @@ endif()
 
 if(NOT CMake_TEST_EXTERNAL_CMAKE)
   # Install license file as it requires.
-  install(FILES Copyright.txt DESTINATION ${CMAKE_DOC_DIR})
+  install(FILES
+    "${CMake_LICENSE_FILE}"
+    "${CMake_SOURCE_DIR}/CONTRIBUTORS.rst"
+    DESTINATION ${CMAKE_DOC_DIR})
 
   # Install script directories.
   install(
