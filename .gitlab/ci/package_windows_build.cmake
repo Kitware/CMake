@@ -4,8 +4,9 @@ include(build/ci_package_info.cmake)
 set(build "${CMAKE_CURRENT_BINARY_DIR}/build")
 
 file(GLOB paths RELATIVE "${CMAKE_CURRENT_BINARY_DIR}"
-  # Allow CPack to find CMAKE_ROOT.
+  # Allow CPack to find CMAKE_ROOT and license text.
   "${build}/CMakeFiles/CMakeSourceDir.txt"
+  "${build}/CMakeFiles/LICENSE.txt"
 
   # We need the main binaries.
   "${build}/bin"
