@@ -70,7 +70,19 @@ function (check_build_database expect_basename fname component)
   file(READ "${RunCMake_TEST_BINARY_DIR}/${fname}" actual)
   file(READ "${expected_file}" expect)
 
+  set(RunCMake_TEST_FAILED_before "${RunCMake_TEST_FAILED}")
+  set(RunCMake_TEST_FAILED "")
+
   check_json("${actual}" "${expect}")
+
+  if (RunCMake_TEST_FAILED)
+    string(PREPEND RunCMake_TEST_FAILED
+      "${RunCMake_TEST_FAILED_before}\n"
+      "actual file: ${RunCMake_TEST_BINARY_DIR}/${fname}\n"
+      "expect file: ${expected_file}\n")
+  else ()
+    set(RunCMake_TEST_FAILED "${RunCMake_TEST_FAILED_before}")
+  endif ()
 
   set(RunCMake_TEST_FAILED "${RunCMake_TEST_FAILED}" PARENT_SCOPE)
 endfunction ()

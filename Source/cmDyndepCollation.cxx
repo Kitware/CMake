@@ -644,6 +644,9 @@ bool cmDyndepCollation::WriteDyndepMetadata(
             result = false;
           }
         }
+        for (auto const& req : object.Requires) {
+          bdb_entry->second->Requires.push_back(req.LogicalName);
+        }
       } else if (export_info.DatabaseInfo) {
         cmSystemTools::Error(cmStrCat(
           "Failed to find module database entry for ", file_set.SourcePath));
