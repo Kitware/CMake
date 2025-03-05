@@ -64,7 +64,8 @@ if test "$cmake_version_rc" != ""; then
   cmake_version="${cmake_version}-rc${cmake_version_rc}"
 fi
 
-cmake_copyright="`grep '^Copyright .* Kitware' "${cmake_source_dir}/LICENSE.rst"`"
+cmake_copyright="`grep '^Copyright .* Kitware' "${cmake_source_dir}/LICENSE.rst" |
+                  sed 's/\`Contributors.*\`_/Contributors/'`"
 
 cmake_bin_dir_keyword="OTHER"
 cmake_data_dir_keyword="OTHER"
