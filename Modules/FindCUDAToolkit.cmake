@@ -939,6 +939,7 @@ endif()
 
 # Find target directory when crosscompiling.
 if(CMAKE_CROSSCOMPILING)
+  # Keep in sync with equivalent table in CMakeDetermineCUDACompiler and FindCUDA!
   if(CMAKE_SYSTEM_PROCESSOR STREQUAL "armv7-a")
     # Support for NVPACK
     set(CUDAToolkit_TARGET_NAMES "armv7-linux-androideabi")
