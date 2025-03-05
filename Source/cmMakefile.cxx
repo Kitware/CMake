@@ -1728,6 +1728,15 @@ std::string const& cmMakefile::GetCurrentBinaryDirectory() const
   return this->StateSnapshot.GetDirectory().GetCurrentBinary();
 }
 
+cmTarget* cmMakefile::FindImportedTarget(std::string const& name) const
+{
+  auto const i = this->ImportedTargets.find(name);
+  if (i != this->ImportedTargets.end()) {
+    return i->second;
+  }
+  return nullptr;
+}
+
 std::vector<cmTarget*> cmMakefile::GetImportedTargets() const
 {
   std::vector<cmTarget*> tgts;
