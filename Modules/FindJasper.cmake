@@ -38,7 +38,7 @@ The following cache variables may also be set:
   where to find jasper/jasper.h, etc.
 ``JASPER_LIBRARY_RELEASE``
   where to find the Jasper library (optimized).
-``JASPER_LIBARRY_DEBUG``
+``JASPER_LIBRARY_DEBUG``
   where to find the Jasper library (debug).
 #]=======================================================================]
 
