@@ -2044,13 +2044,12 @@ In the following, the phrase "the ``tgt`` filename" means the name of the
 
   See also the :prop_tgt:`OUTPUT_NAME`, :prop_tgt:`ARCHIVE_OUTPUT_NAME`,
   :prop_tgt:`LIBRARY_OUTPUT_NAME` and :prop_tgt:`RUNTIME_OUTPUT_NAME`
-  target properties and their configuration specific variants
+  target properties, their configuration-specific variants
   :prop_tgt:`OUTPUT_NAME_<CONFIG>`, :prop_tgt:`ARCHIVE_OUTPUT_NAME_<CONFIG>`,
   :prop_tgt:`LIBRARY_OUTPUT_NAME_<CONFIG>` and
-  :prop_tgt:`RUNTIME_OUTPUT_NAME_<CONFIG>`.
-
-  The :prop_tgt:`<CONFIG>_POSTFIX` and :prop_tgt:`DEBUG_POSTFIX` target
-  properties can also be considered.
+  :prop_tgt:`RUNTIME_OUTPUT_NAME_<CONFIG>`, and
+  the :prop_tgt:`<CONFIG>_POSTFIX` and :prop_tgt:`DEBUG_POSTFIX` target
+  properties.
 
   Note that ``tgt`` is not added as a dependency of the target this
   expression is evaluated on.
@@ -2112,11 +2111,11 @@ In the following, the phrase "the ``tgt`` filename" means the name of the
   name is ``base``.
 
   See also the :prop_tgt:`OUTPUT_NAME` and :prop_tgt:`ARCHIVE_OUTPUT_NAME`
-  target properties and their configuration specific variants
-  :prop_tgt:`OUTPUT_NAME_<CONFIG>` and :prop_tgt:`ARCHIVE_OUTPUT_NAME_<CONFIG>`.
-
-  The :prop_tgt:`<CONFIG>_POSTFIX` and :prop_tgt:`DEBUG_POSTFIX` target
-  properties can also be considered.
+  target properties, their configuration-specific variants
+  :prop_tgt:`OUTPUT_NAME_<CONFIG>` and
+  :prop_tgt:`ARCHIVE_OUTPUT_NAME_<CONFIG>`, and
+  the :prop_tgt:`<CONFIG>_POSTFIX` and :prop_tgt:`DEBUG_POSTFIX` target
+  properties.
 
   Note that ``tgt`` is not added as a dependency of the target this
   expression is evaluated on.
@@ -2188,13 +2187,12 @@ In the following, the phrase "the ``tgt`` filename" means the name of the
   example, if target file name is ``libbase.a``, the base name is ``base``.
 
   See also the :prop_tgt:`OUTPUT_NAME`, :prop_tgt:`ARCHIVE_OUTPUT_NAME`,
-  and :prop_tgt:`LIBRARY_OUTPUT_NAME` target properties and their configuration
-  specific variants :prop_tgt:`OUTPUT_NAME_<CONFIG>`,
+  and :prop_tgt:`LIBRARY_OUTPUT_NAME` target properties, their
+  configuration-specific variants :prop_tgt:`OUTPUT_NAME_<CONFIG>`,
   :prop_tgt:`ARCHIVE_OUTPUT_NAME_<CONFIG>` and
-  :prop_tgt:`LIBRARY_OUTPUT_NAME_<CONFIG>`.
-
-  The :prop_tgt:`<CONFIG>_POSTFIX` and :prop_tgt:`DEBUG_POSTFIX` target
-  properties can also be considered.
+  :prop_tgt:`LIBRARY_OUTPUT_NAME_<CONFIG>`, and
+  the :prop_tgt:`<CONFIG>_POSTFIX` and :prop_tgt:`DEBUG_POSTFIX` target
+  properties.
 
   Note that ``tgt`` is not added as a dependency of the target this
   expression is evaluated on.
@@ -2257,13 +2255,12 @@ In the following, the phrase "the ``tgt`` filename" means the name of the
   For example, if target file name is ``libbase.a``, the base name is ``base``.
 
   See also the :prop_tgt:`OUTPUT_NAME`, :prop_tgt:`ARCHIVE_OUTPUT_NAME`,
-  and :prop_tgt:`LIBRARY_OUTPUT_NAME` target properties and their configuration
-  specific variants :prop_tgt:`OUTPUT_NAME_<CONFIG>`,
+  and :prop_tgt:`LIBRARY_OUTPUT_NAME` target properties, their
+  configuration-specific variants :prop_tgt:`OUTPUT_NAME_<CONFIG>`,
   :prop_tgt:`ARCHIVE_OUTPUT_NAME_<CONFIG>` and
-  :prop_tgt:`LIBRARY_OUTPUT_NAME_<CONFIG>`.
-
-  The :prop_tgt:`<CONFIG>_POSTFIX` and :prop_tgt:`DEBUG_POSTFIX` target
-  properties can also be considered.
+  :prop_tgt:`LIBRARY_OUTPUT_NAME_<CONFIG>`, and
+  the :prop_tgt:`<CONFIG>_POSTFIX` and :prop_tgt:`DEBUG_POSTFIX` target
+  properties.
 
   Note that ``tgt`` is not added as a dependency of the target this
   expression is evaluated on.
@@ -2328,12 +2325,11 @@ In the following, the phrase "the ``tgt`` filename" means the name of the
   For example, if target file name is ``libbase.tbd``, the base name is ``base``.
 
   See also the :prop_tgt:`OUTPUT_NAME` and :prop_tgt:`ARCHIVE_OUTPUT_NAME`,
-  target properties and their configuration
-  specific variants :prop_tgt:`OUTPUT_NAME_<CONFIG>` and
-  :prop_tgt:`ARCHIVE_OUTPUT_NAME_<CONFIG>`.
-
-  The :prop_tgt:`<CONFIG>_POSTFIX` and :prop_tgt:`DEBUG_POSTFIX` target
-  properties can also be considered.
+  target properties, their configuration-specific variants
+  :prop_tgt:`OUTPUT_NAME_<CONFIG>` and
+  :prop_tgt:`ARCHIVE_OUTPUT_NAME_<CONFIG>`, and
+  the :prop_tgt:`<CONFIG>_POSTFIX` and :prop_tgt:`DEBUG_POSTFIX` target
+  properties.
 
   Note that ``tgt`` is not added as a dependency of the target this
   expression is evaluated on.
@@ -2444,11 +2440,8 @@ In the following, the phrase "the ``tgt`` filename" means the name of the
   ``$<TARGET_PDB_FILE_NAME:tgt>``) without prefix and suffix. For example,
   if target file name is ``base.pdb``, the base name is ``base``.
 
-  See also the :prop_tgt:`PDB_NAME` target property and its configuration
-  specific variant :prop_tgt:`PDB_NAME_<CONFIG>`.
-
-  The :prop_tgt:`<CONFIG>_POSTFIX` and :prop_tgt:`DEBUG_POSTFIX` target
-  properties can also be considered.
+  See also the :prop_tgt:`PDB_NAME` target property, and its
+  configuration-specific variant :prop_tgt:`PDB_NAME_<CONFIG>`.
 
   Note that ``tgt`` is not added as a dependency of the target this
   expression is evaluated on.
