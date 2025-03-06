@@ -554,6 +554,10 @@ set(ENV{CMAKE_TLS_VERIFY} 0) # Test fallback to env variable.
 run_FailDrop(TLSVerify-OFF-env)
 unset(ENV{CMAKE_TLS_VERIFY})
 
+run_cmake_command(EmptyDirTest-ctest
+  ${CMAKE_CTEST_COMMAND} -C Debug -M Experimental -T Test
+  )
+
 run_cmake_command(EmptyDirCoverage-ctest
   ${CMAKE_CTEST_COMMAND} -C Debug -M Experimental -T Coverage
   )

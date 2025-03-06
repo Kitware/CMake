@@ -711,6 +711,9 @@ int cmCTest::ProcessSteps()
   this->Impl->Verbose = true;
   this->Impl->ProduceXML = true;
 
+  // Minimal dashboard client script configuration.
+  this->SetCTestConfiguration("BuildDirectory", this->Impl->BinaryDir);
+
   this->UpdateCTestConfiguration();
   this->BlockTestErrorDiagnostics();
 
