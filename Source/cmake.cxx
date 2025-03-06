@@ -4016,7 +4016,9 @@ bool cmake::Open(std::string const& dir, DryRun dryRun)
   this->SetHomeDirectory("");
   this->SetHomeOutputDirectory("");
   if (!cmSystemTools::FileIsDirectory(dir)) {
-    std::cerr << "Error: " << dir << " is not a directory\n";
+    if (dryRun == DryRun::No) {
+      std::cerr << "Error: " << dir << " is not a directory\n";
+    }
     return false;
   }
 
