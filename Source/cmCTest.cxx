@@ -173,8 +173,6 @@ struct cmCTest::Private
   bool CompressXMLFiles = false;
   bool CompressTestOutput = true;
 
-  bool SuppressUpdatingCTestConfiguration = false;
-
   bool Debug = false;
   bool Quiet = false;
 
@@ -529,9 +527,6 @@ bool cmCTest::ReadExistingTag(bool quiet)
 
 bool cmCTest::UpdateCTestConfiguration()
 {
-  if (this->Impl->SuppressUpdatingCTestConfiguration) {
-    return true;
-  }
   std::string fileName = this->Impl->BinaryDir + "/CTestConfiguration.ini";
   if (!cmSystemTools::FileExists(fileName)) {
     fileName = this->Impl->BinaryDir + "/DartConfiguration.tcl";
@@ -3169,11 +3164,6 @@ std::vector<std::string> const& cmCTest::GetSubmitFiles(Part part) const
 void cmCTest::ClearSubmitFiles(Part part)
 {
   this->Impl->Parts[part].SubmitFiles.clear();
-}
-
-void cmCTest::SetSuppressUpdatingCTestConfiguration(bool val)
-{
-  this->Impl->SuppressUpdatingCTestConfiguration = val;
 }
 
 void cmCTest::AddCTestConfigurationOverwrite(std::string const& overStr)
