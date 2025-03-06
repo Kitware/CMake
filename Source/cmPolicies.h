@@ -566,7 +566,10 @@ class cmMakefile;
   SELECT(POLICY, CMP0188, "The FindGCCXML module is removed.", 4, 1, 0, WARN) \
   SELECT(POLICY, CMP0189,                                                     \
          "TARGET_PROPERTY evaluates LINK_LIBRARIES properties transitively.", \
-         4, 1, 0, WARN)
+         4, 1, 0, WARN)                                                       \
+  SELECT(POLICY, CMP0190,                                                     \
+         "FindPython enforce consistency in cross-compiling mode.", 4, 1, 0,  \
+         WARN)
 
 #define CM_SELECT_ID(F, A1, A2, A3, A4, A5, A6) F(A1)
 #define CM_FOR_EACH_POLICY_ID(POLICY)                                         \

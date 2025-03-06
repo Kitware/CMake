@@ -39,13 +39,17 @@ include(FindPackageHandleStandardArgs)
 # helper commands
 #
 macro (_PYTHON_DISPLAY_FAILURE _PYTHON_MSG)
-  if (${_PYTHON_BASE}_FIND_REQUIRED)
+  if (${ARGC} GREATER 1 AND "${ARGV1}" STREQUAL "FATAL")
+    set (_${_PYTHON_PREFIX}_FATAL TRUE)
+  endif()
+  if (${_PYTHON_BASE}_FIND_REQUIRED OR _${_PYTHON_PREFIX}_FATAL)
     message (FATAL_ERROR "${_PYTHON_MSG}")
   else()
     if (NOT ${_PYTHON_BASE}_FIND_QUIETLY)
       message(STATUS "${_PYTHON_MSG}")
     endif ()
   endif()
+  unset(_${_PYTHON_PREFIX}_FATAL)
 
   set (${_PYTHON_BASE}_FOUND FALSE)
   set (${_PYTHON_PREFIX}_FOUND FALSE)
@@ -528,7 +532,7 @@ function (_PYTHON_GET_CONFIG_VAR _PYTHON_PGCV_VALUE NAME)
   endif()
 
   if ("Interpreter" IN_LIST ${_PYTHON_BASE}_FIND_COMPONENTS AND _${_PYTHON_PREFIX}_EXECUTABLE
-      AND NOT CMAKE_CROSSCOMPILING)
+      AND (_${_PYTHON_PREFIX}_CROSSCOMPILING OR NOT CMAKE_CROSSCOMPILING))
     if (NAME STREQUAL "PREFIX")
       execute_process (COMMAND ${_${_PYTHON_PREFIX}_INTERPRETER_LAUNCHER} "${_${_PYTHON_PREFIX}_EXECUTABLE}" -c "import sys\ntry:\n   import sysconfig\n   sys.stdout.write(';'.join([sysconfig.get_config_var('base') or '', sysconfig.get_config_var('installed_base') or '']))\nexcept Exception:\n   from distutils import sysconfig\n   sys.stdout.write(';'.join([sysconfig.PREFIX,sysconfig.EXEC_PREFIX,sysconfig.BASE_EXEC_PREFIX]))"
                        RESULT_VARIABLE _result
@@ -846,6 +850,11 @@ function (_PYTHON_GET_LAUNCHER _PYTHON_PGL_NAME)
     return()
   endif()
 
+  if (_${_PYTHON_PREFIX}_CROSSCOMPILING)
+    set (${_PYTHON_PGL_NAME} "${CMAKE_CROSSCOMPILING_EMULATOR}" PARENT_SCOPE)
+    return()
+  endif()
+
   if ("IronPython" IN_LIST _${_PYTHON_PREFIX}_FIND_IMPLEMENTATIONS
       AND NOT SYSTEM_NAME MATCHES "Windows|Linux")
     if (_PGL_INTERPRETER)
@@ -1001,7 +1010,7 @@ function (_PYTHON_VALIDATE_INTERPRETER)
   if (CMAKE_SIZEOF_VOID_P AND ("Development.Module" IN_LIST ${_PYTHON_BASE}_FIND_COMPONENTS
         OR "Development.SABIModule" IN_LIST ${_PYTHON_BASE}_FIND_COMPONENTS
         OR "Development.Embed" IN_LIST ${_PYTHON_BASE}_FIND_COMPONENTS)
-      AND NOT CMAKE_CROSSCOMPILING)
+      AND (_${_PYTHON_PREFIX}_CROSSCOMPILING OR NOT CMAKE_CROSSCOMPILING))
     # In this case, interpreter must have same architecture as environment
     execute_process (COMMAND ${_${_PYTHON_PREFIX}_INTERPRETER_LAUNCHER} "${_${_PYTHON_PREFIX}_EXECUTABLE}" -c
                              "import sys, struct; sys.stdout.write(str(struct.calcsize(\"P\")))"
@@ -1438,6 +1447,22 @@ endforeach()
 if (${_PYTHON_BASE}_FIND_REQUIRED_Development)
   set (${_PYTHON_BASE}_FIND_REQUIRED_Development.Module TRUE)
   set (${_PYTHON_BASE}_FIND_REQUIRED_Development.Embed TRUE)
+endif()
+
+## handle cross-compiling constraints for components:
+##  If Interpreter and/or Compiler are specified with Development components
+##  the CMAKE_CROSSCOMPILING_EMULATOR variable should be defined
+cmake_policy (GET CMP0190 _${_PYTHON_PREFIX}_CROSSCOMPILING_POLICY)
+unset (_${_PYTHON_PREFIX}_CROSSCOMPILING)
+if (CMAKE_CROSSCOMPILING AND _${_PYTHON_PREFIX}_CROSSCOMPILING_POLICY STREQUAL "NEW")
+  if (${_PYTHON_BASE}_FIND_COMPONENTS MATCHES "Interpreter|Compiler"
+      AND ${_PYTHON_BASE}_FIND_COMPONENTS MATCHES "Development")
+    if (CMAKE_CROSSCOMPILING_EMULATOR)
+      set (_${_PYTHON_PREFIX}_CROSSCOMPILING TRUE)
+    else()
+      _python_display_failure ("${_PYTHON_PREFIX}: When cross-compiling, Interpreter and/or Compiler components cannot be searched when CMAKE_CROSSCOMPILING_EMULATOR variable is not specified (see policy CMP0190)." FATAL)
+    endif()
+  endif()
 endif()
 
 unset (_${_PYTHON_PREFIX}_FIND_DEVELOPMENT_ARTIFACTS)
@@ -2827,7 +2852,8 @@ if (("Development.Module" IN_LIST ${_PYTHON_BASE}_FIND_COMPONENTS
     # if python interpreter is found, use it to look-up for artifacts
     # to ensure consistency between interpreter and development environments.
     # If not, try to locate a compatible config tool
-    if ((NOT ${_PYTHON_PREFIX}_Interpreter_FOUND OR CMAKE_CROSSCOMPILING)
+    if ((NOT ${_PYTHON_PREFIX}_Interpreter_FOUND
+          OR (NOT _${_PYTHON_PREFIX}_CROSSCOMPILING AND CMAKE_CROSSCOMPILING))
         AND "CPython" IN_LIST _${_PYTHON_PREFIX}_FIND_IMPLEMENTATIONS)
       set (_${_PYTHON_PREFIX}_HINTS "${${_PYTHON_PREFIX}_ROOT_DIR}" ENV ${_PYTHON_PREFIX}_ROOT_DIR)
       unset (_${_PYTHON_PREFIX}_VIRTUALENV_PATHS)
@@ -3093,7 +3119,9 @@ if (("Development.Module" IN_LIST ${_PYTHON_BASE}_FIND_COMPONENTS
 
   if ("LIBRARY" IN_LIST _${_PYTHON_PREFIX}_FIND_DEVELOPMENT_ARTIFACTS)
     if (NOT _${_PYTHON_PREFIX}_LIBRARY_RELEASE)
-      if ((${_PYTHON_PREFIX}_Interpreter_FOUND AND NOT CMAKE_CROSSCOMPILING) OR _${_PYTHON_PREFIX}_CONFIG)
+      if ((${_PYTHON_PREFIX}_Interpreter_FOUND
+            AND (_${_PYTHON_PREFIX}_CROSSCOMPILING OR NOT CMAKE_CROSSCOMPILING))
+          OR _${_PYTHON_PREFIX}_CONFIG)
         # retrieve root install directory
         _python_get_config_var (_${_PYTHON_PREFIX}_PREFIX PREFIX)
 
@@ -3361,7 +3389,9 @@ if (("Development.Module" IN_LIST ${_PYTHON_BASE}_FIND_COMPONENTS
           HINTS "${_${_PYTHON_PREFIX}_PATH}" ${_${_PYTHON_PREFIX}_HINTS}
           NO_DEFAULT_PATH)
       else()
-        if ((${_PYTHON_PREFIX}_Interpreter_FOUND AND NOT CMAKE_CROSSCOMPILING) OR _${_PYTHON_PREFIX}_CONFIG)
+        if ((${_PYTHON_PREFIX}_Interpreter_FOUND
+              AND (_${_PYTHON_PREFIX}_CROSSCOMPILING OR NOT CMAKE_CROSSCOMPILING))
+            OR _${_PYTHON_PREFIX}_CONFIG)
           # retrieve root install directory
           _python_get_config_var (_${_PYTHON_PREFIX}_PREFIX PREFIX)
 
@@ -3622,7 +3652,9 @@ if (("Development.Module" IN_LIST ${_PYTHON_BASE}_FIND_COMPONENTS
         break()
       endif()
 
-      if ((${_PYTHON_PREFIX}_Interpreter_FOUND AND NOT CMAKE_CROSSCOMPILING) OR _${_PYTHON_PREFIX}_CONFIG)
+      if ((${_PYTHON_PREFIX}_Interpreter_FOUND
+            AND (_${_PYTHON_PREFIX}_CROSSCOMPILING OR NOT CMAKE_CROSSCOMPILING))
+          OR _${_PYTHON_PREFIX}_CONFIG)
         _python_get_config_var (_${_PYTHON_PREFIX}_INCLUDE_DIRS INCLUDES)
 
         find_path (_${_PYTHON_PREFIX}_INCLUDE_DIR

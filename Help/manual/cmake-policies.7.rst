@@ -98,6 +98,7 @@ Policies Introduced by CMake 4.1
 .. toctree::
    :maxdepth: 1
 
+   CMP0190: FindPython enforce consistency in cross-compiling mode. </policy/CMP0190>
    CMP0189: TARGET_PROPERTY evaluates LINK_LIBRARIES properties transitively. </policy/CMP0189>
    CMP0188: The FindGCCXML module is removed. </policy/CMP0188>
    CMP0187: Include source file without an extension after the same name with an extension. </policy/CMP0187>

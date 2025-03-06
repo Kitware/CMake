@@ -423,10 +423,10 @@ endif()
 add_RunCMake_test(ConfigDir)
 if(CMake_TEST_FindPython2)
   add_RunCMake_test(FindPython2.CPython TEST_DIR FindPython
-                                -DCMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME}
-                                "-DRunCMake_BUILD_TYPE=${CMAKE_BUILD_TYPE}"
-                                -DCMake_TEST_FindPython2_CPython=TRUE
-                                -DCMake_TEST_FindPython2=TRUE)
+                                        -DCMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME}
+                                        "-DRunCMake_BUILD_TYPE=${CMAKE_BUILD_TYPE}"
+                                        -DCMake_TEST_FindPython2_CPython=TRUE
+                                        -DCMake_TEST_FindPython2=TRUE)
   set_property(TEST RunCMake.FindPython2.CPython PROPERTY LABELS Python2)
 endif()
 if(CMake_TEST_FindPython3)
