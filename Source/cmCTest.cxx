@@ -716,20 +716,6 @@ int cmCTest::ProcessSteps()
   this->Impl->Verbose = true;
   this->Impl->ProduceXML = true;
 
-  std::string const currDir = cmSystemTools::GetLogicalWorkingDirectory();
-  std::string workDir = currDir;
-  if (!this->Impl->TestDir.empty()) {
-    workDir = cmSystemTools::ToNormalizedPathOnDisk(this->Impl->TestDir);
-  }
-
-  cmWorkingDirectory changeDir(workDir);
-  if (changeDir.Failed()) {
-    cmCTestLog(this, ERROR_MESSAGE, changeDir.GetError() << std::endl);
-    return 1;
-  }
-
-  this->Impl->BinaryDir = workDir;
-  cmSystemTools::ConvertToUnixSlashes(this->Impl->BinaryDir);
   this->UpdateCTestConfiguration();
   this->BlockTestErrorDiagnostics();
 
@@ -2648,6 +2634,19 @@ int cmCTest::Run(std::vector<std::string> const& args)
     return this->RunScripts(runScripts);
   }
 
+  // Establish the working directory.
+  std::string const currDir = cmSystemTools::GetLogicalWorkingDirectory();
+  std::string workDir = currDir;
+  if (!this->Impl->TestDir.empty()) {
+    workDir = cmSystemTools::ToNormalizedPathOnDisk(this->Impl->TestDir);
+  }
+  cmWorkingDirectory changeDir(workDir);
+  if (changeDir.Failed()) {
+    cmCTestLog(this, ERROR_MESSAGE, changeDir.GetError() << std::endl);
+    return 1;
+  }
+  this->Impl->BinaryDir = workDir;
+
   // -D, -T, and/or -M was specified
   if (processSteps) {
     return this->ProcessSteps();
@@ -2682,27 +2681,12 @@ int cmCTest::ExecuteTests(std::vector<std::string> const& args)
   this->Impl->ExtraVerbose = this->Impl->Verbose;
   this->Impl->Verbose = true;
 
-  std::string const currDir = cmSystemTools::GetLogicalWorkingDirectory();
-  std::string workDir = currDir;
-  if (!this->Impl->TestDir.empty()) {
-    workDir = cmSystemTools::ToNormalizedPathOnDisk(this->Impl->TestDir);
-  }
-
-  cmWorkingDirectory changeDir(workDir);
-  if (changeDir.Failed()) {
-    cmCTestLog(this, ERROR_MESSAGE, changeDir.GetError() << std::endl);
-    return 1;
-  }
-
   cmCTestLog(this, DEBUG, "Here: " << __LINE__ << std::endl);
   if (!this->Impl->InteractiveDebugMode) {
     this->BlockTestErrorDiagnostics();
   } else {
     cmSystemTools::PutEnv("CTEST_INTERACTIVE_DEBUG_MODE=1");
   }
-
-  this->Impl->BinaryDir = workDir;
-  cmSystemTools::ConvertToUnixSlashes(this->Impl->BinaryDir);
 
   this->UpdateCTestConfiguration();
 
