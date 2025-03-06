@@ -143,7 +143,7 @@ macro(GETTEXT_CREATE_TRANSLATIONS _potFile _firstPoFileArg)
 
     add_custom_command(
       OUTPUT ${_gmoFile}
-      COMMAND ${GETTEXT_MSGMERGE_EXECUTABLE} --quiet --update --backup=none -s ${_absFile} ${_absPotFile}
+      COMMAND ${GETTEXT_MSGMERGE_EXECUTABLE} --quiet --update --backup=none ${_absFile} ${_absPotFile}
       COMMAND ${GETTEXT_MSGFMT_EXECUTABLE} -o ${_gmoFile} ${_absFile}
       DEPENDS ${_absPotFile} ${_absFile}
     )
@@ -184,7 +184,7 @@ function(GETTEXT_PROCESS_POT_FILE _potFile)
 
     add_custom_command(
       OUTPUT "${_poFile}"
-      COMMAND ${GETTEXT_MSGMERGE_EXECUTABLE} --quiet --update --backup=none -s ${_poFile} ${_absPotFile}
+      COMMAND ${GETTEXT_MSGMERGE_EXECUTABLE} --quiet --update --backup=none ${_poFile} ${_absPotFile}
       DEPENDS ${_absPotFile}
     )
 
