@@ -4,4 +4,4 @@ include(Setup.cmake)
 
 ###############################################################################
 # Test depending on components of another package which are unavailable.
-find_package(TransitiveMissing REQUIRED)
+find_package(TransitiveMissingCMake REQUIRED)

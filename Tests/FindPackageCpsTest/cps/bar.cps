@@ -3,8 +3,12 @@
   "name": "Bar",
   "cps_path": "@prefix@/cps",
   "requires": {
-    "Dep1": null,
-    "Dep2": null
+    "Dep1": {
+      "components": [ "Target" ]
+    },
+    "Dep2": {
+      "components": [ "Target" ]
+    }
   },
   "components": {
     "Target1": {
