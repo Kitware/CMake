@@ -1545,6 +1545,7 @@ bool cmFindPackageCommand::HandlePackageMode(
   bool result = true;
   bool found = false;
   bool configFileSetFOUNDFalse = false;
+  std::vector<std::string> missingTargets;
 
   if (fileFound) {
     if (this->Makefile->IsDefinitionSet(foundVar) &&
@@ -1578,6 +1579,17 @@ bool cmFindPackageCommand::HandlePackageMode(
         configFileSetFOUNDFalse = true;
         notFoundMessage =
           this->Makefile->GetSafeDefinition(notFoundMessageVar);
+      }
+
+      // Check whether the required targets are defined.
+      if (found && !this->RequiredTargets.empty()) {
+        for (std::string const& t : this->RequiredTargets) {
+          std::string qualifiedTarget = cmStrCat(this->Name, "::"_s, t);
+          if (!this->Makefile->FindImportedTarget(qualifiedTarget)) {
+            missingTargets.emplace_back(std::move(qualifiedTarget));
+            found = false;
+          }
+        }
       }
     } else {
       // The configuration file is invalid.
@@ -1615,10 +1627,18 @@ bool cmFindPackageCommand::HandlePackageMode(
         if (!notFoundMessage.empty()) {
           e << " Reason given by package: \n" << notFoundMessage << "\n";
         }
-      }
-      // If there are files in ConsideredConfigs, it means that FooConfig.cmake
-      // have been found, but they didn't have appropriate versions.
-      else if (!this->ConsideredConfigs.empty()) {
+      } else if (!missingTargets.empty()) {
+        e << "Found package configuration file:\n"
+             "  "
+          << this->FileFound
+          << "\n"
+             "but the following required targets were not found:\n"
+             "  "
+          << cmJoin(cmMakeRange(missingTargets), ", "_s);
+      } else if (!this->ConsideredConfigs.empty()) {
+        // If there are files in ConsideredConfigs, it means that
+        // FooConfig.cmake have been found, but they didn't have appropriate
+        // versions.
         auto duplicate_end = cmRemoveDuplicates(this->ConsideredConfigs);
         e << "Could not find a configuration file for package \"" << this->Name
           << "\" that "
@@ -1933,7 +1953,7 @@ bool cmFindPackageCommand::ReadPackage()
     return false;
   }
 
-  auto const hasComponentsRequested =
+  bool const hasComponentsRequested =
     !this->RequiredComponents.empty() || !this->OptionalComponents.empty();
 
   cmMakefile::CallRAII scope{ this->Makefile, this->FileFound, this->Status };
@@ -2024,8 +2044,9 @@ bool cmFindPackageCommand::FindPackageDependencies(
                    fp.VersionPatch, fp.VersionTweak);
 
     fp.Components = cmJoin(cmMakeRange(dep.Components), ";"_s);
-    fp.RequiredComponents =
+    fp.OptionalComponents =
       std::set<std::string>{ dep.Components.begin(), dep.Components.end() };
+    fp.RequiredTargets = fp.OptionalComponents;
 
     // TODO set hints
 
@@ -2823,10 +2844,14 @@ bool cmFindPackageCommand::CheckVersion(std::string const& config_file)
         }
 
         // Verify that all required components are available.
+        std::set<std::string> requiredComponents = this->RequiredComponents;
+        requiredComponents.insert(this->RequiredTargets.begin(),
+                                  this->RequiredTargets.end());
+
         std::vector<std::string> missingComponents;
-        std::set_difference(this->RequiredComponents.begin(),
-                            this->RequiredComponents.end(),
-                            allComponents.begin(), allComponents.end(),
+        std::set_difference(requiredComponents.begin(),
+                            requiredComponents.end(), allComponents.begin(),
+                            allComponents.end(),
                             std::back_inserter(missingComponents));
         if (!missingComponents.empty()) {
           result = false;
@@ -2863,6 +2888,7 @@ bool cmFindPackageCommand::CheckVersion(std::string const& config_file)
         }
         this->CpsReader = std::move(reader);
         this->CpsAppendices = std::move(appendices);
+        this->RequiredComponents = std::move(requiredComponents);
       }
     }
   } else {

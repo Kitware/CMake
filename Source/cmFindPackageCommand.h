@@ -264,6 +264,7 @@ private:
   std::string Components;
   std::set<std::string> RequiredComponents;
   std::set<std::string> OptionalComponents;
+  std::set<std::string> RequiredTargets;
   std::string DebugBuffer;
 
   struct ConfigName
