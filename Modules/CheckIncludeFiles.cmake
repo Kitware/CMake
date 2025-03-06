@@ -41,8 +41,41 @@ the way the check is run:
 
 .. include:: /module/CMAKE_REQUIRED_QUIET.txt
 
-See modules :module:`CheckIncludeFile` and :module:`CheckIncludeFileCXX`
-to check for a single header file in ``C`` or ``CXX`` languages.
+Examples
+^^^^^^^^
+
+Checking whether one or more ``C`` headers exist and storing the check result
+in cache variables:
+
+.. code-block:: cmake
+
+  include(CheckIncludeFiles)
+
+  check_include_files(sys/socket.h HAVE_SYS_SOCKET_H)
+
+  if(HAVE_SYS_SOCKET_H)
+    # The <net/if.h> header on Darwin and BSD-like systems is not self-contained
+    # and also requires <sys/socket.h>
+    check_include_files("sys/socket.h;net/if.h" HAVE_NET_IF_H)
+  else()
+    check_include_files(net/if.h HAVE_NET_IF_H)
+  endif()
+
+The ``LANGUAGE`` option can be used to specify which compiler to use.  For
+example, checking multiple ``C++`` headers, when both ``C`` and ``CXX``
+languages are enabled in the project:
+
+.. code-block:: cmake
+
+  include(CheckIncludeFiles)
+
+  check_include_files("header_1.hpp;header_2.hpp" HAVE_HEADERS LANGUAGE CXX)
+
+See Also
+^^^^^^^^
+
+* The :module:`CheckIncludeFile` module to check for single ``C`` header.
+* The :module:`CheckIncludeFileCXX` module to check for single ``C++`` header.
 #]=======================================================================]
 
 include_guard(GLOBAL)

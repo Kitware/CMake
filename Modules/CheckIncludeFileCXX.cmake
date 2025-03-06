@@ -35,8 +35,24 @@ the way the check is run:
 
 .. include:: /module/CMAKE_REQUIRED_QUIET.txt
 
-See modules :module:`CheckIncludeFile` and :module:`CheckIncludeFiles`
-to check for one or more ``C`` headers.
+Examples
+^^^^^^^^
+
+Checking whether the ``C++23`` header ``<stdfloat>`` exists and storing the
+check result in the ``HAVE_STDFLOAT_HEADER`` cache variable:
+
+.. code-block:: cmake
+
+  include(CheckIncludeFileCXX)
+
+  check_include_file_cxx(stdfloat HAVE_STDFLOAT_HEADER)
+
+See Also
+^^^^^^^^
+
+* The :module:`CheckIncludeFile` module to check for single ``C`` header.
+* The :module:`CheckIncludeFiles` module to check for one or more ``C`` or
+  ``C++`` headers at once.
 #]=======================================================================]
 
 include_guard(GLOBAL)
