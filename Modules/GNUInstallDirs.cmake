@@ -252,7 +252,7 @@ if(NOT DEFINED CMAKE_INSTALL_LIBDIR OR (_libdir_set
       "Please enable at least one language before including GNUInstallDirs.")
   endif()
 
-  if(CMAKE_SYSTEM_NAME MATCHES "^(Linux|kFreeBSD|GNU)$"
+  if(CMAKE_SYSTEM_NAME MATCHES "^(Linux|GNU)$"
       AND NOT CMAKE_CROSSCOMPILING)
     unset(__system_type_for_install)
     if(DEFINED ENV{CONDA_BUILD} AND DEFINED ENV{PREFIX})

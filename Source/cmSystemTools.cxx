@@ -4298,10 +4298,6 @@ cm::string_view cmSystemTools::GetSystemName()
       systemName = "BSDOS";
     }
 
-    // fix for GNU/kFreeBSD, remove the GNU/
-    if (systemName.find("kFreeBSD") != cm::string_view::npos) {
-      systemName = "kFreeBSD";
-    }
     return systemName;
   }
   return "";

@@ -1783,9 +1783,6 @@ else
       uv_c_flags="${uv_c_flags} -D_GNU_SOURCE"
       libs="${libs} -ldl -lrt"
       ;;
-    *kFreeBSD*)
-      libs="${libs} -lfreebsd-glue"
-      ;;
     *NetBSD*)
       libs="${libs} -lkvm"
       ;;
