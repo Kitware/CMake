@@ -651,6 +651,12 @@ public:
   static std::string GetComspec();
 #endif
 
+  /** Get the real path for a given path, removing all symlinks.
+      This variant of GetRealPath also works on Windows but will
+      resolve subst drives too.  */
+  static std::string GetRealPathResolvingWindowsSubst(
+    std::string const& path, std::string* errorMessage = nullptr);
+
   /** Get the real path for a given path, removing all symlinks.  */
   static std::string GetRealPath(std::string const& path,
                                  std::string* errorMessage = nullptr);

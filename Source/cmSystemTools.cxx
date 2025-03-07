@@ -1305,6 +1305,37 @@ bool FileModeGuard::HasErrors() const
   return filepath_.empty();
 }
 
+std::string cmSystemTools::GetRealPathResolvingWindowsSubst(
+  std::string const& path, std::string* errorMessage)
+{
+#ifdef _WIN32
+  // uv_fs_realpath uses Windows Vista API so fallback to kwsys if not found
+  std::string resolved_path;
+  uv_fs_t req;
+  int err = uv_fs_realpath(nullptr, &req, path.c_str(), nullptr);
+  if (!err) {
+    resolved_path = std::string((char*)req.ptr);
+    cmSystemTools::ConvertToUnixSlashes(resolved_path);
+  } else if (err == UV_ENOSYS) {
+    resolved_path = cmsys::SystemTools::GetRealPath(path, errorMessage);
+  } else if (errorMessage) {
+    cmsys::Status status =
+      cmsys::Status::Windows(uv_fs_get_system_error(&req));
+    *errorMessage = status.GetString();
+    resolved_path.clear();
+  } else {
+    resolved_path = path;
+  }
+  // Normalize to upper-case drive letter as cm::PathResolver does.
+  if (resolved_path.size() > 1 && resolved_path[1] == ':') {
+    resolved_path[0] = toupper(resolved_path[0]);
+  }
+  return resolved_path;
+#else
+  return cmsys::SystemTools::GetRealPath(path, errorMessage);
+#endif
+}
+
 std::string cmSystemTools::GetRealPath(std::string const& path,
                                        std::string* errorMessage)
 {
