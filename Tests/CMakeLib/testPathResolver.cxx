@@ -24,6 +24,7 @@
 
 // IWYU pragma: no_forward_declare cm::PathResolver::Policies::LogicalPath
 // IWYU pragma: no_forward_declare cm::PathResolver::Policies::NaivePath
+// IWYU pragma: no_forward_declare cm::PathResolver::Policies::CasePath
 // IWYU pragma: no_forward_declare cm::PathResolver::Policies::RealPath
 
 namespace {
@@ -213,6 +214,22 @@ bool posixSymlink()
   });
 
   {
+    Resolver<Policies::CasePath> const r(os);
+    EXPECT_RESOLVE("/link-a", "/link-a");
+    EXPECT_RESOLVE("/link-a-excess", "/link-a-excess");
+    EXPECT_RESOLVE("/link-a-excess/b", "/link-a-excess/b");
+    EXPECT_RESOLVE("/link-broken", "/link-broken");
+    EXPECT_RESOLVE("/link-a/../missing", "/missing");
+    EXPECT_RESOLVE("/a/b/link-c", "/a/b/link-c");
+    EXPECT_RESOLVE("/a/link-b/c", "/a/link-b/c");
+    EXPECT_RESOLVE("/a/link-b/link-c/..", "/a/link-b");
+    EXPECT_RESOLVE("/a/b/c/link-..|..", "/a/b/c/link-..|..");
+    EXPECT_RESOLVE("/a/b/c/link-..|../link-b", "/a/b/c/link-..|../link-b");
+    EXPECT_RESOLVE("/a/link-|1|2/3", "/a/link-|1|2/3");
+    EXPECT_RESOLVE("/a/link-|1|2/../2/3", "/a/2/3");
+  }
+
+  {
     Resolver<Policies::LogicalPath> const r(os);
     EXPECT_RESOLVE("/link-a", "/link-a");
     EXPECT_RESOLVE("/link-a-excess", "/link-a-excess");
@@ -264,6 +281,16 @@ bool macosActualCase()
   });
 
   {
+    Resolver<Policies::CasePath> const r(os);
+    EXPECT_RESOLVE("/mIxEd/MiSsInG", "/MiXeD/MiSsInG");
+    EXPECT_RESOLVE("/mIxEd/link-MiXeD", "/MiXeD/LiNk-MiXeD");
+    EXPECT_RESOLVE("/mIxEd/link-c-MiXeD", "/MiXeD/LiNk-C-MiXeD");
+    EXPECT_RESOLVE("/upper/mIsSiNg", "/UPPER/mIsSiNg");
+    EXPECT_RESOLVE("/upper/link-upper", "/UPPER/LINK-UPPER");
+    EXPECT_RESOLVE("/upper/link-c-upper", "/UPPER/LINK-C-UPPER");
+  }
+
+  {
     Resolver<Policies::LogicalPath> const r(os);
     EXPECT_RESOLVE("/mIxEd/MiSsInG", "/MiXeD/MiSsInG");
     EXPECT_RESOLVE("/mIxEd/link-MiXeD", "/MiXeD/LiNk-MiXeD");
@@ -301,6 +328,16 @@ bool windowsRoot()
     EXPECT_RESOLVE("c:/./", "c:/");
     EXPECT_RESOLVE("C:/..", "C:/");
     EXPECT_RESOLVE("c:/../", "c:/");
+  }
+  {
+    Resolver<Policies::CasePath> const r(os);
+    EXPECT_RESOLVE("c:/", "C:/");
+    EXPECT_RESOLVE("C:/", "C:/");
+    EXPECT_RESOLVE("c://", "C:/");
+    EXPECT_RESOLVE("C:/.", "C:/");
+    EXPECT_RESOLVE("c:/./", "C:/");
+    EXPECT_RESOLVE("C:/..", "C:/");
+    EXPECT_RESOLVE("c:/../", "C:/");
   }
   os.SetPaths({
     { "c:/", { {}, {} } },
@@ -359,6 +396,16 @@ bool windowsActualCase()
     { "c:/upper/upper", { "UPPER", {} } },
     { "c:/upper/link-c-upper", { "LINK-C-UPPER", "c:/upper" } },
   });
+
+  {
+    Resolver<Policies::CasePath> const r(os);
+    EXPECT_RESOLVE("c:/mIxEd/MiSsInG", "C:/MiXeD/MiSsInG");
+    EXPECT_RESOLVE("c:/mIxEd/link-MiXeD", "C:/MiXeD/LiNk-MiXeD");
+    EXPECT_RESOLVE("c:/mIxEd/link-c-MiXeD", "C:/MiXeD/LiNk-C-MiXeD");
+    EXPECT_RESOLVE("c:/upper/mIsSiNg", "C:/UPPER/mIsSiNg");
+    EXPECT_RESOLVE("c:/upper/link-upper", "C:/UPPER/LINK-UPPER");
+    EXPECT_RESOLVE("c:/upper/link-c-upper", "C:/UPPER/LINK-C-UPPER");
+  }
 
   {
     Resolver<Policies::LogicalPath> const r(os);
@@ -441,6 +488,27 @@ bool windowsWorkingDirectoryOnDrive()
     EXPECT_RESOLVE("E:.", "E:/");
     EXPECT_RESOLVE("E:..", "E:/");
   }
+  {
+    Resolver<Policies::CasePath> const r(os);
+    EXPECT_RESOLVE("c:", "C:/cwd");
+    EXPECT_RESOLVE("c:.", "C:/cwd");
+    EXPECT_RESOLVE("c:..", "C:/");
+    EXPECT_RESOLVE("C:", "C:/cwd");
+    EXPECT_RESOLVE("C:.", "C:/cwd");
+    EXPECT_RESOLVE("C:..", "C:/");
+    EXPECT_RESOLVE("d:", "D:/cwd-d");
+    EXPECT_RESOLVE("d:.", "D:/cwd-d");
+    EXPECT_RESOLVE("d:..", "D:/");
+    EXPECT_RESOLVE("D:", "D:/cwd-d");
+    EXPECT_RESOLVE("D:.", "D:/cwd-d");
+    EXPECT_RESOLVE("D:..", "D:/");
+    EXPECT_RESOLVE("e:", "E:/");
+    EXPECT_RESOLVE("e:.", "E:/");
+    EXPECT_RESOLVE("e:..", "E:/");
+    EXPECT_RESOLVE("E:", "E:/");
+    EXPECT_RESOLVE("E:.", "E:/");
+    EXPECT_RESOLVE("E:..", "E:/");
+  }
   os.SetPaths({
     { "c:/", { {}, {} } },
     { "c:/cwd", { {}, {} } },
@@ -495,6 +563,13 @@ bool windowsNetworkShare()
     EXPECT_RESOLVE("link-to-host-share", "C:/cwd/link-to-host-share");
     EXPECT_RESOLVE("link-to-host-share/..", "//host/");
     EXPECT_RESOLVE("link-to-host-share/../missing", "//host/missing");
+  }
+
+  {
+    Resolver<Policies::CasePath> const r(os);
+    EXPECT_RESOLVE("link-to-host-share", "C:/cwd/link-to-host-share");
+    EXPECT_RESOLVE("link-to-host-share/..", "C:/cwd");
+    EXPECT_RESOLVE("link-to-host-share/../missing", "C:/cwd/missing");
   }
   return true;
 }

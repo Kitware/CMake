@@ -85,6 +85,11 @@ struct LogicalPath;
     and reads their on-disk case (on Windows and macOS).  */
 struct RealPath;
 
+/** Normalizes paths while assuming components followed by '..'
+    components are not symlinks.  Does not require paths to exist, but
+    reads on-disk case of paths that do exist (on Windows and macOS).  */
+struct CasePath;
+
 /** Normalizes paths in memory without disk access.
     Assumes components followed by '..' components are not symlinks.  */
 struct NaivePath;
@@ -94,6 +99,7 @@ struct NaivePath;
 
 extern template class Resolver<Policies::LogicalPath>;
 extern template class Resolver<Policies::RealPath>;
+extern template class Resolver<Policies::CasePath>;
 extern template class Resolver<Policies::NaivePath>;
 
 }
