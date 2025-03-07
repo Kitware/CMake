@@ -173,8 +173,6 @@ struct cmCTest::Private
   bool CompressXMLFiles = false;
   bool CompressTestOutput = true;
 
-  bool SuppressUpdatingCTestConfiguration = false;
-
   bool Debug = false;
   bool Quiet = false;
 
@@ -529,9 +527,6 @@ bool cmCTest::ReadExistingTag(bool quiet)
 
 bool cmCTest::UpdateCTestConfiguration()
 {
-  if (this->Impl->SuppressUpdatingCTestConfiguration) {
-    return true;
-  }
   std::string fileName = this->Impl->BinaryDir + "/CTestConfiguration.ini";
   if (!cmSystemTools::FileExists(fileName)) {
     fileName = this->Impl->BinaryDir + "/DartConfiguration.tcl";
@@ -716,20 +711,9 @@ int cmCTest::ProcessSteps()
   this->Impl->Verbose = true;
   this->Impl->ProduceXML = true;
 
-  std::string const currDir = cmSystemTools::GetLogicalWorkingDirectory();
-  std::string workDir = currDir;
-  if (!this->Impl->TestDir.empty()) {
-    workDir = cmSystemTools::ToNormalizedPathOnDisk(this->Impl->TestDir);
-  }
+  // Minimal dashboard client script configuration.
+  this->SetCTestConfiguration("BuildDirectory", this->Impl->BinaryDir);
 
-  cmWorkingDirectory changeDir(workDir);
-  if (changeDir.Failed()) {
-    cmCTestLog(this, ERROR_MESSAGE, changeDir.GetError() << std::endl);
-    return 1;
-  }
-
-  this->Impl->BinaryDir = workDir;
-  cmSystemTools::ConvertToUnixSlashes(this->Impl->BinaryDir);
   this->UpdateCTestConfiguration();
   this->BlockTestErrorDiagnostics();
 
@@ -2648,6 +2632,19 @@ int cmCTest::Run(std::vector<std::string> const& args)
     return this->RunScripts(runScripts);
   }
 
+  // Establish the working directory.
+  std::string const currDir = cmSystemTools::GetLogicalWorkingDirectory();
+  std::string workDir = currDir;
+  if (!this->Impl->TestDir.empty()) {
+    workDir = cmSystemTools::ToNormalizedPathOnDisk(this->Impl->TestDir);
+  }
+  cmWorkingDirectory changeDir(workDir);
+  if (changeDir.Failed()) {
+    cmCTestLog(this, ERROR_MESSAGE, changeDir.GetError() << std::endl);
+    return 1;
+  }
+  this->Impl->BinaryDir = workDir;
+
   // -D, -T, and/or -M was specified
   if (processSteps) {
     return this->ProcessSteps();
@@ -2682,27 +2679,12 @@ int cmCTest::ExecuteTests(std::vector<std::string> const& args)
   this->Impl->ExtraVerbose = this->Impl->Verbose;
   this->Impl->Verbose = true;
 
-  std::string const currDir = cmSystemTools::GetLogicalWorkingDirectory();
-  std::string workDir = currDir;
-  if (!this->Impl->TestDir.empty()) {
-    workDir = cmSystemTools::ToNormalizedPathOnDisk(this->Impl->TestDir);
-  }
-
-  cmWorkingDirectory changeDir(workDir);
-  if (changeDir.Failed()) {
-    cmCTestLog(this, ERROR_MESSAGE, changeDir.GetError() << std::endl);
-    return 1;
-  }
-
   cmCTestLog(this, DEBUG, "Here: " << __LINE__ << std::endl);
   if (!this->Impl->InteractiveDebugMode) {
     this->BlockTestErrorDiagnostics();
   } else {
     cmSystemTools::PutEnv("CTEST_INTERACTIVE_DEBUG_MODE=1");
   }
-
-  this->Impl->BinaryDir = workDir;
-  cmSystemTools::ConvertToUnixSlashes(this->Impl->BinaryDir);
 
   this->UpdateCTestConfiguration();
 
@@ -3185,11 +3167,6 @@ std::vector<std::string> const& cmCTest::GetSubmitFiles(Part part) const
 void cmCTest::ClearSubmitFiles(Part part)
 {
   this->Impl->Parts[part].SubmitFiles.clear();
-}
-
-void cmCTest::SetSuppressUpdatingCTestConfiguration(bool val)
-{
-  this->Impl->SuppressUpdatingCTestConfiguration = val;
 }
 
 void cmCTest::AddCTestConfigurationOverwrite(std::string const& overStr)
