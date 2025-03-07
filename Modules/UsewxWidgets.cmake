@@ -5,38 +5,45 @@
 UsewxWidgets
 ------------
 
-Convenience include for using wxWidgets library.
+This module calls :command:`include_directories` and
+:command:`link_directories`, sets compile definitions for the current directory
+and appends some compile flags to use wxWidgets library after calling the
+:module:`find_package(wxWidgets) <FindwxWidgets>`.
 
-Determines if wxWidgets was FOUND and sets the appropriate libs,
-incdirs, flags, etc.  INCLUDE_DIRECTORIES and LINK_DIRECTORIES are
-called.
+Examples
+^^^^^^^^
 
-USAGE
+Include ``UsewxWidgets`` module in project's ``CMakeLists.txt``:
 
 .. code-block:: cmake
 
-  # Note that for MinGW users the order of libs is important!
+  # Note that for MinGW users the order of libraries is important.
   find_package(wxWidgets REQUIRED net gl core base)
+
+  # Above also sets the wxWidgets_USE_FILE variable that points to this module.
   include(${wxWidgets_USE_FILE})
-  # and for each of your dependent executable/library targets:
-  target_link_libraries(<YourTarget> ${wxWidgets_LIBRARIES})
 
+  # Link wxWidgets libraries for each dependent executable/library target.
+  target_link_libraries(<ProjectTarget> ${wxWidgets_LIBRARIES})
 
+As of CMake 3.27, a better approach is to link only the
+:module:`wxWidgets::wxWidgets <FindwxWidgets>` ``IMPORTED`` target to specific
+targets that require it, rather than including this module. Imported targets
+provide better control of the package usage properties, such as include
+directories and compile flags, by applying them only to the targets they are
+linked to, avoiding unnecessary propagation to all targets in the current
+directory.
 
-DEPRECATED
+.. code-block:: cmake
 
-::
+  # CMakeLists.txt
+  find_package(wxWidgets)
 
-  LINK_LIBRARIES is not called in favor of adding dependencies per target.
-
-
-
-AUTHOR
-
-::
-
-  Jan Woetzel <jw -at- mip.informatik.uni-kiel.de>
+  # Link the imported target for each dependent executable/library target.
+  target_link_libraries(<ProjectTarget> wxWidgets::wxWidgets)
 #]=======================================================================]
+
+# Author: Jan Woetzel <jw -at- mip.informatik.uni-kiel.de>
 
 if   (wxWidgets_FOUND)
   if   (wxWidgets_INCLUDE_DIRS)
