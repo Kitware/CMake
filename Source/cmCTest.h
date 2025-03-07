@@ -299,12 +299,6 @@ public:
   static std::string DecodeURL(std::string const&);
 
   /**
-   * Should ctect configuration be updated. When using new style ctest
-   * script, this should be true.
-   */
-  void SetSuppressUpdatingCTestConfiguration(bool val);
-
-  /**
    * Add overwrite to ctest configuration.
    *
    * The format is key=value
