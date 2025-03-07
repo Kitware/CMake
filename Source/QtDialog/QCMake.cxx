@@ -93,7 +93,8 @@ void QCMake::setSourceDirectory(QString const& _dir)
     emit this->sourceDirChanged(this->SourceDirectory);
     this->loadPresets();
     this->setPreset(QString{});
-    if (!cmSystemTools::FileIsFullPath(
+    if (!this->MaybeRelativeBinaryDirectory.isEmpty() &&
+        !cmSystemTools::FileIsFullPath(
           this->MaybeRelativeBinaryDirectory.toStdString())) {
       this->setBinaryDirectory(this->MaybeRelativeBinaryDirectory);
     }
