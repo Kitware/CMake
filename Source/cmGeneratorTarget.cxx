@@ -3772,7 +3772,8 @@ std::string cmGeneratorTarget::GetPDBOutputName(
   std::string const& config) const
 {
   std::string base =
-    this->GetOutputName(config, cmStateEnums::RuntimeBinaryArtifact);
+    this->GetOutputName(config, cmStateEnums::RuntimeBinaryArtifact) +
+    this->GetFilePostfix(config);
 
   std::vector<std::string> props;
   std::string configUpper = cmSystemTools::UpperCase(config);

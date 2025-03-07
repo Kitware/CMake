@@ -4182,8 +4182,7 @@ struct TargetOutputNameArtifactResultGetter<ArtifactPdbTag>
       return std::string();
     }
 
-    return target->GetPDBOutputName(context->Config) +
-      target->GetFilePostfix(context->Config);
+    return target->GetPDBOutputName(context->Config);
   }
 };
 
