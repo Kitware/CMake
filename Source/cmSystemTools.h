@@ -441,9 +441,11 @@ public:
   /** Convert an input path to an absolute path with no '/..' components.
       Backslashes in the input path are converted to forward slashes.
       Relative paths are interpreted w.r.t. GetLogicalWorkingDirectory.
-      On Windows, the on-disk capitalization is loaded for existing paths.
       This is similar to 'realpath', but preserves symlinks that are
-      not erased by '../' components.  */
+      not erased by '../' components.
+
+      On Windows and macOS, the on-disk capitalization is loaded for
+      existing paths.  */
   static std::string ToNormalizedPathOnDisk(std::string p);
 
 #ifndef CMAKE_BOOTSTRAP

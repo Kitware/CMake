@@ -78,11 +78,11 @@ namespace Policies {
 
 /** Normalizes paths while resolving symlinks only when followed
     by '..' components.  Does not require paths to exist, but
-    reads on-disk case of paths that do exist (on Windows).  */
+    reads on-disk case of paths that do exist (on Windows and macOS).  */
 struct LogicalPath;
 
-/** Normalizes paths while resolving all symlinks.
-    Requires paths to exist, and reads their on-disk case (on Windows).  */
+/** Normalizes paths while resolving all symlinks.  Requires paths to exist,
+    and reads their on-disk case (on Windows and macOS).  */
 struct RealPath;
 
 /** Normalizes paths in memory without disk access.
