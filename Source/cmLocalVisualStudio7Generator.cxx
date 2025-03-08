@@ -2043,7 +2043,7 @@ void cmLocalVisualStudio7Generator::WriteProjectStartFortran(
   }
   this->WriteProjectSCC(fout, target);
   /* clang-format off */
-  fout<< "\tKeyword=\"" << keyword << "\">\n"
+  fout<< "\tKeyword=\"" << keyword << "\"\n"
          "\tProjectGUID=\"{" << gg->GetGUID(libName) << "}\">\n"
          "\t<Platforms>\n"
          "\t\t<Platform\n\t\t\tName=\"" << gg->GetPlatformName() << "\"/>\n"
