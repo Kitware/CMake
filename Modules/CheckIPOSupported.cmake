@@ -7,9 +7,9 @@ CheckIPOSupported
 
 .. versionadded:: 3.9
 
-Check whether the compiler supports an interprocedural optimization (IPO/LTO).
-Use this before enabling the :prop_tgt:`INTERPROCEDURAL_OPTIMIZATION` target
-property.
+This module provides a function to check whether the compiler supports an
+interprocedural optimization (IPO/LTO).  Use this module before enabling the
+:prop_tgt:`INTERPROCEDURAL_OPTIMIZATION` target property.
 
 .. command:: check_ipo_supported
 
@@ -60,21 +60,33 @@ property.
 Examples
 ^^^^^^^^
 
+Checking whether the compiler supports IPO and emitting a fatal error if it is
+not supported:
+
 .. code-block:: cmake
 
+  include(CheckIPOSupported)
   check_ipo_supported() # fatal error if IPO is not supported
   set_property(TARGET foo PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
 
+The following example demonstrates how to use the ``CheckIPOSupported`` module
+to enable IPO for the target only when supported by the compiler and to issue a
+warning if it is not.  Additionally, projects may want to provide a
+configuration option to control when IPO is enabled.  For example:
+
 .. code-block:: cmake
 
-  # Optional IPO. Do not use IPO if it's not supported by compiler.
-  check_ipo_supported(RESULT result OUTPUT output)
-  if(result)
-    set_property(TARGET foo PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
-  else()
-    message(WARNING "IPO is not supported: ${output}")
-  endif()
+  option(FOO_ENABLE_IPO "Enable IPO/LTO")
 
+  if(FOO_ENABLE_IPO)
+    include(CheckIPOSupported)
+    check_ipo_supported(RESULT result OUTPUT output)
+    if(result)
+      set_property(TARGET foo PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
+    else()
+      message(WARNING "IPO is not supported: ${output}")
+    endif()
+  endif()
 #]=======================================================================]
 
 # X_RESULT - name of the final result variable
