@@ -492,6 +492,14 @@ struct NaivePath
   static constexpr Options::Symlinks Symlinks = Options::Symlinks::None;
   static constexpr Options::Existence Existence = Options::Existence::Agnostic;
 };
+struct CasePath
+{
+#if defined(_WIN32) || defined(__APPLE__)
+  static constexpr Options::ActualCase ActualCase = Options::ActualCase::Yes;
+#endif
+  static constexpr Options::Symlinks Symlinks = Options::Symlinks::None;
+  static constexpr Options::Existence Existence = Options::Existence::Agnostic;
+};
 struct RealPath
 {
 #if defined(_WIN32) || defined(__APPLE__)
@@ -512,6 +520,8 @@ struct LogicalPath
 #if defined(__SUNPRO_CC)
 constexpr Options::Symlinks NaivePath::Symlinks;
 constexpr Options::Existence NaivePath::Existence;
+constexpr Options::Symlinks CasePath::Symlinks;
+constexpr Options::Existence CasePath::Existence;
 constexpr Options::Symlinks RealPath::Symlinks;
 constexpr Options::Existence RealPath::Existence;
 constexpr Options::Symlinks LogicalPath::Symlinks;
@@ -535,6 +545,7 @@ System::~System() = default;
 
 template class Resolver<Policies::LogicalPath>;
 template class Resolver<Policies::RealPath>;
+template class Resolver<Policies::CasePath>;
 template class Resolver<Policies::NaivePath>;
 
 }
