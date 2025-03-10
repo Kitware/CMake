@@ -57,6 +57,7 @@ public:
 
   void SetProjectName(std::string const& name);
   std::string GetProjectName() const;
+  bool CheckProjectName(std::string const& name) const;
 
   cmPackageState& GetPackageState(std::string const& packagePath);
 

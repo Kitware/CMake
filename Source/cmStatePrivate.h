@@ -5,6 +5,7 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <set>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -81,6 +82,8 @@ struct cmStateDetail::BuildsystemDirectoryStateType
 
   std::vector<std::string> NormalTargetNames;
   std::vector<std::string> ImportedTargetNames;
+
+  std::set<std::string> Projects;
 
   std::string ProjectName;
 
