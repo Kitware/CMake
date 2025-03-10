@@ -218,6 +218,13 @@ else()
   set(HDF5_Fortran_COMPILER_NAMES h5fc h5pfc)
 endif()
 
+# Prefer h5hl<LANG> compilers if HDF5_FIND_HL is enabled
+if(HDF5_FIND_HL)
+  list(PREPEND HDF5_C_COMPILER_NAMES h5hlcc)
+  list(PREPEND HDF5_CXX_COMPILER_NAMES h5hlc++)
+  list(PREPEND HDF5_Fortran_COMPILER_NAMES h5hlfc)
+endif()
+
 # Test first if the current compilers automatically wrap HDF5
 function(_HDF5_test_regular_compiler_C success version is_parallel)
   if(NOT ${success} OR
