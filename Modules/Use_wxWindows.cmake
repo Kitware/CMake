@@ -7,39 +7,41 @@ Use_wxWindows
 
 .. deprecated:: 2.8.10
 
-  Use ``find_package(wxWidgets)`` and ``include(${wxWidgets_USE_FILE})`` instead.
+  Use :module:`find_package(wxWidgets) <FindwxWidgets>` instead.
 
-This convenience include finds if wxWindows is installed and set the
-appropriate libs, incdirs, flags etc.  author Jan Woetzel <jw -at-
-mip.informatik.uni-kiel.de> (07/2003)
+This convenience include finds if wxWindows library is installed and sets the
+appropriate libraries, include directories, flags, etc.
 
-USAGE:
+Examples
+^^^^^^^^
 
-::
+Include ``Use_wxWindows`` module in project's ``CMakeLists.txt``:
 
-   just include Use_wxWindows.cmake
-   in your projects CMakeLists.txt
+.. code-block:: cmake
 
-include( ${CMAKE_MODULE_PATH}/Use_wxWindows.cmake)
+  # CMakeLists.txt
+  include(Use_wxWindows)
 
-::
+When the GL support is required, set ``WXWINDOWS_USE_GL`` *before* including
+this module:
 
-   if you are sure you need GL then
+.. code-block:: cmake
 
-set(WXWINDOWS_USE_GL 1)
-
-::
-
-   *before* you include this file.
+  set(WXWINDOWS_USE_GL ON)
+  include(Use_wxWindows)
 #]=======================================================================]
+
+# Author: Jan Woetzel <jw -at- mip.informatik.uni-kiel.de> (07/2003)
 
 # -----------------------------------------------------
 # 16.Feb.2004: changed INCLUDE to FIND_PACKAGE to read from users own non-system CMAKE_MODULE_PATH (Jan Woetzel JW)
 # 07/2006: rewrite as FindwxWidgets.cmake, kept for backward compatibility JW
 
-message(STATUS "Use_wxWindows.cmake is DEPRECATED. \n"
-"Please use find_package(wxWidgets) and include(${wxWidgets_USE_FILE}) instead. (JW)")
-
+message(
+  DEPRECATION
+  "Use_wxWindows module is DEPRECATED.\n"
+  "Please use find_package(wxWidgets) instead. (JW)"
+)
 
 # ------------------------
 
