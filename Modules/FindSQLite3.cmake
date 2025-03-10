@@ -66,7 +66,7 @@ endif()
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(SQLite3
-    REQUIRED_VARS SQLite3_INCLUDE_DIR SQLite3_LIBRARY
+    REQUIRED_VARS SQLite3_LIBRARY SQLite3_INCLUDE_DIR
     VERSION_VAR SQLite3_VERSION)
 
 # Create the imported target
