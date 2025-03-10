@@ -1340,19 +1340,42 @@ std::string cmSystemTools::GetRealPath(std::string const& path,
                                        std::string* errorMessage)
 {
 #ifdef _WIN32
-  std::string resolved_path;
-  using namespace cm::PathResolver;
-  // IWYU pragma: no_forward_declare cm::PathResolver::Policies::RealPath
-  static Resolver<Policies::RealPath> const resolver(RealOS);
-  cmsys::Status status = resolver.Resolve(path, resolved_path);
-  if (!status) {
-    if (errorMessage) {
-      *errorMessage = status.GetString();
-      resolved_path.clear();
-    } else {
-      resolved_path = path;
+  std::string resolved_path =
+    cmSystemTools::GetRealPathResolvingWindowsSubst(path, errorMessage);
+
+  // If the original path used a subst drive and the real path starts
+  // with the substitution, restore the subst drive prefix.  This may
+  // incorrectly restore a subst drive if the underlying drive was
+  // encountered via an absolute symlink, but this is an acceptable
+  // limitation to otherwise preserve susbt drives.
+  if (resolved_path.size() >= 2 && resolved_path[1] == ':' &&
+      path.size() >= 2 && path[1] == ':' &&
+      toupper(resolved_path[0]) != toupper(path[0])) {
+    // FIXME: Add thread_local or mutex if we use threads.
+    static std::map<char, std::string> substMap;
+    char const drive = static_cast<char>(toupper(path[0]));
+    std::string maybe_subst = cmStrCat(drive, ":/");
+    auto smi = substMap.find(drive);
+    if (smi == substMap.end()) {
+      smi = substMap
+              .emplace(
+                drive,
+                cmSystemTools::GetRealPathResolvingWindowsSubst(maybe_subst))
+              .first;
+    }
+    std::string const& resolved_subst = smi->second;
+    std::string::size_type const ns = resolved_subst.size();
+    if (ns > 0) {
+      std::string::size_type const np = resolved_path.size();
+      if (ns == np && resolved_path == resolved_subst) {
+        resolved_path = maybe_subst;
+      } else if (ns > 0 && ns < np && resolved_path[ns] == '/' &&
+                 resolved_path.compare(0, ns, resolved_subst) == 0) {
+        resolved_path.replace(0, ns + 1, maybe_subst);
+      }
     }
   }
+
   return resolved_path;
 #else
   return cmsys::SystemTools::GetRealPath(path, errorMessage);
