@@ -45,6 +45,7 @@
 #include "cmList.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
+#include "cmPackageInfoArguments.h"
 #include "cmPolicies.h"
 #include "cmRange.h"
 #include "cmRuntimeDependencyArchive.h"
@@ -2174,26 +2175,12 @@ bool HandlePackageInfoMode(std::vector<std::string> const& args,
   // This is the PACKAGE_INFO mode.
   cmInstallCommandArguments ica(helper.DefaultComponentName, *helper.Makefile);
 
-  ArgumentParser::NonEmpty<std::string> pkg;
-  ArgumentParser::NonEmpty<std::string> appendix;
+  cmPackageInfoArguments arguments;
   ArgumentParser::NonEmpty<std::string> exportName;
-  bool lowerCase = false;
-  ArgumentParser::NonEmpty<std::string> version;
-  ArgumentParser::NonEmpty<std::string> versionCompat;
-  ArgumentParser::NonEmpty<std::string> versionSchema;
-  ArgumentParser::NonEmpty<std::vector<std::string>> defaultTargets;
-  ArgumentParser::NonEmpty<std::vector<std::string>> defaultConfigs;
   ArgumentParser::NonEmpty<std::string> cxxModulesDirectory;
 
-  ica.Bind("PACKAGE_INFO"_s, pkg);
+  arguments.Bind(ica);
   ica.Bind("EXPORT"_s, exportName);
-  ica.Bind("APPENDIX"_s, appendix);
-  ica.Bind("LOWER_CASE_FILE"_s, lowerCase);
-  ica.Bind("VERSION"_s, version);
-  ica.Bind("COMPAT_VERSION"_s, versionCompat);
-  ica.Bind("VERSION_SCHEMA"_s, versionSchema);
-  ica.Bind("DEFAULT_TARGETS"_s, defaultTargets);
-  ica.Bind("DEFAULT_CONFIGURATIONS"_s, defaultConfigs);
   // ica.Bind("CXX_MODULES_DIRECTORY"_s, cxxModulesDirectory); TODO?
 
   std::vector<std::string> unknownArgs;
@@ -2215,50 +2202,9 @@ bool HandlePackageInfoMode(std::vector<std::string> const& args,
     return false;
   }
 
-  if (version.empty()) {
-    if (!versionCompat.empty()) {
-      status.SetError("COMPAT_VERSION requires VERSION.");
-      return false;
-    }
-    if (!versionSchema.empty()) {
-      status.SetError("VERSION_SCHEMA requires VERSION.");
-      return false;
-    }
-  } else {
-    if (!appendix.empty()) {
-      status.SetError("APPENDIX and VERSION are mutually exclusive.");
-      return false;
-    }
-  }
-  if (!appendix.empty()) {
-    if (!defaultTargets.empty()) {
-      status.SetError("APPENDIX and DEFAULT_TARGETS are mutually exclusive.");
-      return false;
-    }
-    if (!defaultConfigs.empty()) {
-      status.SetError("APPENDIX and DEFAULT_CONFIGURATIONS "
-                      "are mutually exclusive.");
-      return false;
-    }
-  }
-
-  // Validate the package name.
-  if (!cmGeneratorExpression::IsValidTargetName(pkg) ||
-      pkg.find(':') != std::string::npos) {
-    status.SetError(
-      cmStrCat(args[0], " given invalid package name \"", pkg, "\"."));
+  if (!arguments.Check(status)) {
     return false;
   }
-
-  // Construct the case-normalized package name and the file name.
-  std::string const pkgNameOnDisk =
-    (lowerCase ? cmSystemTools::LowerCase(pkg) : pkg);
-  std::string pkgFileName = [&]() -> std::string {
-    if (appendix.empty()) {
-      return cmStrCat(pkgNameOnDisk, ".cps");
-    }
-    return cmStrCat(pkgNameOnDisk, '-', appendix, ".cps");
-  }();
 
   // Get or construct the destination path.
   std::string dest = ica.GetDestination();
@@ -2267,7 +2213,7 @@ bool HandlePackageInfoMode(std::vector<std::string> const& args,
       dest = std::string{ "cps"_s };
     } else {
       dest = cmStrCat(helper.GetLibraryDestination(nullptr), "/cps/",
-                      pkgNameOnDisk);
+                      arguments.GetPackageDirName());
     }
   }
 
@@ -2282,10 +2228,8 @@ bool HandlePackageInfoMode(std::vector<std::string> const& args,
     cm::make_unique<cmInstallPackageInfoExportGenerator>(
       &exportSet, dest, ica.GetPermissions(), ica.GetConfigurations(),
       ica.GetComponent(), message, ica.GetExcludeFromAll(),
-      std::move(pkgFileName), std::move(pkg), std::move(version),
-      std::move(versionCompat), std::move(versionSchema),
-      std::move(defaultTargets), std::move(defaultConfigs),
-      std::move(cxxModulesDirectory), helper.Makefile->GetBacktrace()));
+      std::move(arguments), std::move(cxxModulesDirectory),
+      helper.Makefile->GetBacktrace()));
 
   return true;
 #else

@@ -409,6 +409,8 @@ add_library(
   cmNewLineStyle.cxx
   cmOrderDirectories.cxx
   cmOrderDirectories.h
+  cmPackageInfoArguments.cxx
+  cmPackageInfoArguments.h
   cmPackageInfoReader.cxx
   cmPackageInfoReader.h
   cmPackageState.h

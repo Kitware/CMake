@@ -15,6 +15,7 @@
 #include <cm3p/json/value.h>
 #include <cm3p/json/writer.h>
 
+#include "cmArgumentParserTypes.h"
 #include "cmExportSet.h"
 #include "cmFindPackageStack.h"
 #include "cmGeneratorExpression.h"
@@ -22,6 +23,7 @@
 #include "cmList.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
+#include "cmPackageInfoArguments.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
@@ -30,15 +32,13 @@
 static std::string const kCPS_VERSION_STR = "0.13.0";
 
 cmExportPackageInfoGenerator::cmExportPackageInfoGenerator(
-  std::string packageName, std::string version, std::string versionCompat,
-  std::string versionSchema, std::vector<std::string> defaultTargets,
-  std::vector<std::string> defaultConfigurations)
-  : PackageName(std::move(packageName))
-  , PackageVersion(std::move(version))
-  , PackageVersionCompat(std::move(versionCompat))
-  , PackageVersionSchema(std::move(versionSchema))
-  , DefaultTargets(std::move(defaultTargets))
-  , DefaultConfigurations(std::move(defaultConfigurations))
+  cmPackageInfoArguments arguments)
+  : PackageName(std::move(arguments.PackageName))
+  , PackageVersion(std::move(arguments.Version))
+  , PackageVersionCompat(std::move(arguments.VersionCompat))
+  , PackageVersionSchema(std::move(arguments.VersionSchema))
+  , DefaultTargets(std::move(arguments.DefaultTargets))
+  , DefaultConfigurations(std::move(arguments.DefaultConfigs))
 {
 }
 

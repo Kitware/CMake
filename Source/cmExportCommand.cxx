@@ -24,10 +24,10 @@
 #include "cmExportBuildPackageInfoGenerator.h"
 #include "cmExportSet.h"
 #include "cmGeneratedFileStream.h"
-#include "cmGeneratorExpression.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
+#include "cmPackageInfoArguments.h"
 #include "cmPolicies.h"
 #include "cmRange.h"
 #include "cmStateTypes.h"
@@ -63,24 +63,16 @@ bool cmExportCommand(std::vector<std::string> const& args,
     return HandlePackage(args, status);
   }
 
-  struct Arguments
+  struct Arguments : cmPackageInfoArguments
   {
     cm::optional<ArgumentParser::MaybeEmpty<std::vector<std::string>>> Targets;
     ArgumentParser::NonEmpty<std::string> ExportSetName;
     ArgumentParser::NonEmpty<std::string> Namespace;
     ArgumentParser::NonEmpty<std::string> Filename;
     ArgumentParser::NonEmpty<std::string> AndroidMKFile;
-    ArgumentParser::NonEmpty<std::string> PackageName;
-    ArgumentParser::NonEmpty<std::string> Appendix;
-    ArgumentParser::NonEmpty<std::string> Version;
-    ArgumentParser::NonEmpty<std::string> VersionCompat;
-    ArgumentParser::NonEmpty<std::string> VersionSchema;
     ArgumentParser::NonEmpty<std::string> CxxModulesDirectory;
-    ArgumentParser::NonEmpty<std::vector<std::string>> DefaultTargets;
-    ArgumentParser::NonEmpty<std::vector<std::string>> DefaultConfigs;
     bool Append = false;
     bool ExportOld = false;
-    bool LowerCase = false;
 
     std::vector<std::vector<std::string>> PackageDependencyArgs;
     bool ExportPackageDependencies = false;
@@ -104,14 +96,7 @@ bool cmExportCommand(std::vector<std::string> const& args,
     }
     if (cmExperimental::HasSupportEnabled(
           status.GetMakefile(), cmExperimental::Feature::ExportPackageInfo)) {
-      parser.Bind("PACKAGE_INFO"_s, &Arguments::PackageName);
-      parser.Bind("LOWER_CASE_FILE"_s, &Arguments::LowerCase);
-      parser.Bind("APPENDIX"_s, &Arguments::Appendix);
-      parser.Bind("VERSION"_s, &Arguments::Version);
-      parser.Bind("COMPAT_VERSION"_s, &Arguments::VersionCompat);
-      parser.Bind("VERSION_SCHEMA"_s, &Arguments::VersionSchema);
-      parser.Bind("DEFAULT_TARGETS"_s, &Arguments::DefaultTargets);
-      parser.Bind("DEFAULT_CONFIGURATIONS"_s, &Arguments::DefaultConfigs);
+      cmPackageInfoArguments::Bind(parser);
     }
   } else if (args[0] == "SETUP") {
     parser.Bind("SETUP"_s, &Arguments::ExportSetName);
@@ -222,24 +207,7 @@ bool cmExportCommand(std::vector<std::string> const& args,
   }
 
   if (arguments.PackageName.empty()) {
-    if (arguments.LowerCase) {
-      status.SetError("LOWER_CASE_FILE requires PACKAGE_INFO.");
-      return false;
-    }
-    if (!arguments.Appendix.empty()) {
-      status.SetError("APPENDIX requires PACKAGE_INFO.");
-      return false;
-    }
-    if (!arguments.Version.empty()) {
-      status.SetError("VERSION requires PACKAGE_INFO.");
-      return false;
-    }
-    if (!arguments.DefaultTargets.empty()) {
-      status.SetError("DEFAULT_TARGETS requires PACKAGE_INFO.");
-      return false;
-    }
-    if (!arguments.DefaultConfigs.empty()) {
-      status.SetError("DEFAULT_CONFIGURATIONS requires PACKAGE_INFO.");
+    if (!arguments.Check(status, false)) {
       return false;
     }
   } else {
@@ -251,30 +219,7 @@ bool cmExportCommand(std::vector<std::string> const& args,
       status.SetError("PACKAGE_INFO and NAMESPACE are mutually exclusive.");
       return false;
     }
-    if (!arguments.Appendix.empty()) {
-      if (!arguments.Version.empty()) {
-        status.SetError("APPENDIX and VERSION are mutually exclusive.");
-        return false;
-      }
-      if (!arguments.DefaultTargets.empty()) {
-        status.SetError("APPENDIX and DEFAULT_TARGETS "
-                        "are mutually exclusive.");
-        return false;
-      }
-      if (!arguments.DefaultConfigs.empty()) {
-        status.SetError("APPENDIX and DEFAULT_CONFIGURATIONS "
-                        "are mutually exclusive.");
-        return false;
-      }
-    }
-  }
-  if (arguments.Version.empty()) {
-    if (!arguments.VersionCompat.empty()) {
-      status.SetError("COMPAT_VERSION requires VERSION.");
-      return false;
-    }
-    if (!arguments.VersionSchema.empty()) {
-      status.SetError("VERSION_SCHEMA requires VERSION.");
+    if (!arguments.Check(status)) {
       return false;
     }
   }
@@ -293,23 +238,7 @@ bool cmExportCommand(std::vector<std::string> const& args,
     if (arguments.PackageName.empty()) {
       fname = arguments.ExportSetName + ".cmake";
     } else {
-      // Validate the package name.
-      if (!cmGeneratorExpression::IsValidTargetName(arguments.PackageName) ||
-          arguments.PackageName.find(':') != std::string::npos) {
-        status.SetError(
-          cmStrCat(R"(PACKAGE_INFO given invalid package name ")"_s,
-                   arguments.PackageName, R"(".)"_s));
-        return false;
-      }
-
-      std::string const pkgNameOnDisk =
-        (arguments.LowerCase ? cmSystemTools::LowerCase(arguments.PackageName)
-                             : std::string{ arguments.PackageName });
-      if (arguments.Appendix.empty()) {
-        fname = cmStrCat(pkgNameOnDisk, ".cps"_s);
-      } else {
-        fname = cmStrCat(pkgNameOnDisk, '-', arguments.Appendix, ".cps"_s);
-      }
+      fname = arguments.GetPackageFileName();
       cps = true;
     }
   } else {
@@ -430,10 +359,7 @@ bool cmExportCommand(std::vector<std::string> const& args,
     ebag->SetAppendMode(arguments.Append);
     ebfg = std::move(ebag);
   } else if (cps) {
-    auto ebpg = cm::make_unique<cmExportBuildPackageInfoGenerator>(
-      arguments.PackageName, arguments.Version, arguments.VersionCompat,
-      arguments.VersionSchema, arguments.DefaultTargets,
-      arguments.DefaultConfigs);
+    auto ebpg = cm::make_unique<cmExportBuildPackageInfoGenerator>(arguments);
     ebfg = std::move(ebpg);
   } else {
     auto ebcg = cm::make_unique<cmExportBuildCMakeConfigGenerator>();

@@ -1,0 +1,104 @@
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
+#include "cmPackageInfoArguments.h"
+
+#include "cmExecutionStatus.h"
+#include "cmGeneratorExpression.h"
+#include "cmStringAlgorithms.h"
+#include "cmSystemTools.h"
+
+template void cmPackageInfoArguments::Bind<void>(cmArgumentParser<void>&,
+                                                 cmPackageInfoArguments*);
+
+bool cmPackageInfoArguments::Check(cmExecutionStatus& status,
+                                   bool enable) const
+{
+  if (!enable) {
+    // Check if any options were given.
+    if (this->LowerCase) {
+      status.SetError("LOWER_CASE_FILE requires PACKAGE_INFO.");
+      return false;
+    }
+    if (!this->Appendix.empty()) {
+      status.SetError("APPENDIX requires PACKAGE_INFO.");
+      return false;
+    }
+    if (!this->Version.empty()) {
+      status.SetError("VERSION requires PACKAGE_INFO.");
+      return false;
+    }
+    if (!this->DefaultTargets.empty()) {
+      status.SetError("DEFAULT_TARGETS requires PACKAGE_INFO.");
+      return false;
+    }
+    if (!this->DefaultConfigs.empty()) {
+      status.SetError("DEFAULT_CONFIGURATIONS requires PACKAGE_INFO.");
+      return false;
+    }
+  }
+
+  // Check for incompatible options.
+  if (!this->Appendix.empty()) {
+    if (!this->Version.empty()) {
+      status.SetError("APPENDIX and VERSION are mutually exclusive.");
+      return false;
+    }
+    if (!this->DefaultTargets.empty()) {
+      status.SetError("APPENDIX and DEFAULT_TARGETS "
+                      "are mutually exclusive.");
+      return false;
+    }
+    if (!this->DefaultConfigs.empty()) {
+      status.SetError("APPENDIX and DEFAULT_CONFIGURATIONS "
+                      "are mutually exclusive.");
+      return false;
+    }
+  }
+
+  // Check for options that require other options.
+  if (this->Version.empty()) {
+    if (!this->VersionCompat.empty()) {
+      status.SetError("COMPAT_VERSION requires VERSION.");
+      return false;
+    }
+    if (!this->VersionSchema.empty()) {
+      status.SetError("VERSION_SCHEMA requires VERSION.");
+      return false;
+    }
+  }
+
+  // Validate the package name.
+  if (!this->PackageName.empty()) {
+    if (!cmGeneratorExpression::IsValidTargetName(this->PackageName) ||
+        this->PackageName.find(':') != std::string::npos) {
+      status.SetError(
+        cmStrCat(R"(PACKAGE_INFO given invalid package name ")"_s,
+                 this->PackageName, R"(".)"_s));
+      return false;
+    }
+  }
+
+  return true;
+}
+
+std::string cmPackageInfoArguments::GetNamespace() const
+{
+  return cmStrCat(this->PackageName, "::"_s);
+}
+
+std::string cmPackageInfoArguments::GetPackageDirName() const
+{
+  if (this->LowerCase) {
+    return cmSystemTools::LowerCase(this->PackageName);
+  }
+  return this->PackageName;
+}
+
+std::string cmPackageInfoArguments::GetPackageFileName() const
+{
+  std::string const pkgNameOnDisk = this->GetPackageDirName();
+  if (!this->Appendix.empty()) {
+    return cmStrCat(pkgNameOnDisk, '-', this->Appendix, ".cps"_s);
+  }
+  return cmStrCat(pkgNameOnDisk, ".cps"_s);
+}
