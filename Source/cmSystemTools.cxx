@@ -1991,8 +1991,13 @@ std::vector<std::string> cmSystemTools::SplitEnvPathNormalized(
 std::string cmSystemTools::ToNormalizedPathOnDisk(std::string p)
 {
   using namespace cm::PathResolver;
+#ifdef _WIN32
+  // IWYU pragma: no_forward_declare cm::PathResolver::Policies::CasePath
+  static Resolver<Policies::CasePath> const resolver(RealOS);
+#else
   // IWYU pragma: no_forward_declare cm::PathResolver::Policies::LogicalPath
   static Resolver<Policies::LogicalPath> const resolver(RealOS);
+#endif
   resolver.Resolve(std::move(p), p);
   return p;
 }
