@@ -946,3 +946,37 @@ requirements are not satisfied.
 
 .. _cps-version_schema: https://cps-org.github.io/cps/schema.html#version-schema
 .. |cps-version_schema| replace:: ``version_schema``
+
+CPS Transitive Requirements
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+A |CPS| package description consists of one or more components which may in
+turn depend on other components either internal or external to the package.
+When external components are required, the providing package is noted as
+a package-level requirement of the package.  Additionally, the set of required
+components is typically noted in said external package requirement.
+
+Where a CMake-script package description would use the
+:command:`find_dependency` command to handle transitive dependencies, CMake
+handles transitive dependencies for CPS itself using an internally nested
+``find_package`` call.  This call can resolve CPS package dependencies via
+*either* another CPS package, or via a CMake-script package.  The manner in
+which the CPS component dependencies are handled is subject to some caveats.
+
+When the candidate for resolving a transitive dependency is another CPS
+package, things are simple; ``COMPONENTS`` and CPS "components" are directly
+comparable (and are effectively synonymous with CMake "imported targets").
+CMake-script packages, however, are encouraged to (and often do) check that
+required components were found, whether or not the package describes separate
+components.  Additionally, even those that do describe components typically do
+not have the same correlation to imported targets that is normal for CPS.  As
+a result, passing the set of required components declared by a CPS package to
+``COMPONENTS`` would result in spurious failures to resolve dependencies.
+
+To address this, if a candidate for resolving a CPS transitive dependency is a
+CMake-script package, CMake passes the required components as declared by the
+consuming CPS package as ``OPTIONAL_COMPONENTS`` and performs a separate,
+internal check that the candidate package supplied the required imported
+targets.  Those targets must be named ``<PackageName>::<ComponentName>``, in
+conformance with CPS convention, or the check will consider the package not
+found.
