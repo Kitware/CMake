@@ -5,13 +5,52 @@
 TestForSSTREAM
 --------------
 
-Test for compiler support of ANSI sstream header
+This module checks whether the C++ standard header ``<sstream>`` exists and
+functions correctly.  In early versions of C++ (pre-C++98), this header was not
+formally standardized and may not have been available.
 
-check if the compiler supports the standard ANSI sstream header
+This module defines the following cache variables:
 
-::
+``CMAKE_NO_ANSI_STRING_STREAM``
+  A cache variable indicating whether the ``<sstream>`` header is available. It
+  will be set to value ``0`` if ``<sstream>`` is available (``C++ 98`` and
+  newer), and to value ``1`` if ``<sstream>`` is missing (``ANSI C++``).
 
-  CMAKE_NO_ANSI_STRING_STREAM - defined by the results
+``CMAKE_HAS_ANSI_STRING_STREAM``
+  A cache variable that is the opposite of ``CMAKE_NO_ANSI_STRING_STREAM``
+  (true if ``<sstream>`` is available and false if ``<sstream>`` is missing).
+
+.. note::
+
+  The ``<sstream>`` header was formally introduced in the ``C++ 98`` standard,
+  making this check obsolete for modern compilers.
+
+Examples
+^^^^^^^^
+
+Including this module will check for ``<sstream>`` support and define the
+``CMAKE_NO_ANSI_STRING_STREAM`` cache variable:
+
+.. code-block:: cmake
+
+  include(TestForSSTREAM)
+  file(
+    CONFIGURE
+    OUTPUT config.h
+    CONTENT "#cmakedefine CMAKE_NO_ANSI_STRING_STREAM"
+  )
+
+Then it can be used in a C++ program:
+
+.. code-block:: c++
+
+  #include "config.h"
+
+  #ifndef CMAKE_NO_ANSI_STRING_STREAM
+  #  include <sstream>
+  #endif
+
+  int main() { ... }
 #]=======================================================================]
 
 if(NOT DEFINED CMAKE_HAS_ANSI_STRING_STREAM)
