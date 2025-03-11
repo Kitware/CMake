@@ -643,8 +643,14 @@ public:
             std::string const& presetName, bool listPresets,
             std::vector<std::string> const& args);
 
+  enum class DryRun
+  {
+    No,
+    Yes,
+  };
+
   //! run the --open option
-  bool Open(std::string const& dir, bool dryRun);
+  bool Open(std::string const& dir, DryRun dryRun);
 
   //! run the --workflow option
   enum class WorkflowListPresets

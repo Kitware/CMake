@@ -1132,7 +1132,7 @@ int do_open(int ac, char const* const* av)
   cm.SetProgressCallback([&cm](std::string const& msg, float prog) {
     cmakemainProgressCallback(msg, prog, &cm);
   });
-  return cm.Open(dir, false) ? 0 : 1;
+  return cm.Open(dir, cmake::DryRun::No) ? 0 : 1;
 #endif
 }
 } // namespace

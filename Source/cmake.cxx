@@ -4011,12 +4011,14 @@ int cmake::Build(int jobs, std::string dir, std::vector<std::string> targets,
   return buildresult;
 }
 
-bool cmake::Open(std::string const& dir, bool dryRun)
+bool cmake::Open(std::string const& dir, DryRun dryRun)
 {
   this->SetHomeDirectory("");
   this->SetHomeOutputDirectory("");
   if (!cmSystemTools::FileIsDirectory(dir)) {
-    std::cerr << "Error: " << dir << " is not a directory\n";
+    if (dryRun == DryRun::No) {
+      std::cerr << "Error: " << dir << " is not a directory\n";
+    }
     return false;
   }
 
@@ -4052,7 +4054,7 @@ bool cmake::Open(std::string const& dir, bool dryRun)
     return false;
   }
 
-  return gen->Open(dir, *cachedProjectName, dryRun);
+  return gen->Open(dir, *cachedProjectName, dryRun == DryRun::Yes);
 }
 
 #if !defined(CMAKE_BOOTSTRAP)
