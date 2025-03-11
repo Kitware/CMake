@@ -5,10 +5,26 @@
 CMakePrintSystemInformation
 ---------------------------
 
-Print system information.
+This module can be used for diagnostics to print system information.
 
-This module serves diagnostic purposes. Just include it in a
-project to see various internal CMake variables.
+Examples
+^^^^^^^^
+
+Including this module in a project:
+
+.. code-block:: cmake
+
+  include(CMakePrintSystemInformation)
+
+prints various internal CMake variables.  For example::
+
+  CMAKE_SYSTEM is Linux-6.11.0-17-generic Linux 6.11.0-17-generic x86_64
+  CMAKE_SYSTEM file is Platform/Linux
+  CMAKE_C_COMPILER is /usr/bin/cc
+  CMAKE_CXX_COMPILER is /usr/bin/c++
+  CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS is -shared
+  CMAKE_SHARED_LIBRARY_CREATE_CXX_FLAGS is -shared
+  ...
 #]=======================================================================]
 
 message("CMAKE_SYSTEM is ${CMAKE_SYSTEM} ${CMAKE_SYSTEM_NAME} ${CMAKE_SYSTEM_VERSION} ${CMAKE_SYSTEM_PROCESSOR}")
