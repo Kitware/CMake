@@ -63,6 +63,8 @@ public:
     MAX_WIDTH = 512
   };
 
+  void SetSearchMode(bool enable);
+
   /**
    * This method should normally be called only by the form.  The only
    * exception is during a resize. The optional argument specifies the

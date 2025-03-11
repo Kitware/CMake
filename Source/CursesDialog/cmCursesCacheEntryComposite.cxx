@@ -29,7 +29,7 @@ cmCursesCacheEntryComposite::cmCursesCacheEntryComposite(
 {
   this->Label =
     cm::make_unique<cmCursesLabelWidget>(this->LabelWidth, 1, 1, 1, key);
-  this->IsNewLabel = cm::make_unique<cmCursesLabelWidget>(1, 1, 1, 1, " ");
+  this->IsNewLabel = cm::make_unique<cmCursesLabelWidget>(3, 1, 1, 1, "   ");
   this->Entry =
     cm::make_unique<cmCursesStringWidget>(this->EntryWidth, 1, 1, 1);
 }
@@ -44,9 +44,9 @@ cmCursesCacheEntryComposite::cmCursesCacheEntryComposite(
   this->Label =
     cm::make_unique<cmCursesLabelWidget>(this->LabelWidth, 1, 1, 1, key);
   if (isNew) {
-    this->IsNewLabel = cm::make_unique<cmCursesLabelWidget>(1, 1, 1, 1, "*");
+    this->IsNewLabel = cm::make_unique<cmCursesLabelWidget>(3, 1, 1, 1, " * ");
   } else {
-    this->IsNewLabel = cm::make_unique<cmCursesLabelWidget>(1, 1, 1, 1, " ");
+    this->IsNewLabel = cm::make_unique<cmCursesLabelWidget>(3, 1, 1, 1, "   ");
   }
 
   cmValue value = state->GetCacheEntryValue(key);
