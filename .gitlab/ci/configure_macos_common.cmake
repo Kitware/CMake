@@ -16,3 +16,9 @@ set(BUILD_QtDialog ON CACHE BOOL "")
 # when CMake itself is configured.  Use a version that is not
 # newer than the macOS version running on any CI host.
 set(CMake_TEST_XCTest_DEPLOYMENT_TARGET "10.15" CACHE STRING "")
+
+if("$ENV{CMAKE_CONFIGURATION}" MATCHES "macos_arm64")
+  set(CMake_TEST_APPLE_SILICON ON CACHE BOOL "")
+else()
+  set(CMake_TEST_APPLE_SILICON OFF CACHE BOOL "")
+endif()
