@@ -1274,16 +1274,20 @@ std::string cmGeneratorTarget::GetCompilePDBName(
   std::string configProp = cmStrCat("COMPILE_PDB_NAME_", configUpper);
   cmValue config_name = this->GetProperty(configProp);
   if (cmNonempty(config_name)) {
+    std::string pdbName = cmGeneratorExpression::Evaluate(
+      *config_name, this->LocalGenerator, config, this);
     NameComponents const& components = GetFullNameInternalComponents(
       config, cmStateEnums::RuntimeBinaryArtifact);
-    return components.prefix + *config_name + ".pdb";
+    return components.prefix + pdbName + ".pdb";
   }
 
   cmValue name = this->GetProperty("COMPILE_PDB_NAME");
   if (cmNonempty(name)) {
+    std::string pdbName = cmGeneratorExpression::Evaluate(
+      *name, this->LocalGenerator, config, this);
     NameComponents const& components = GetFullNameInternalComponents(
       config, cmStateEnums::RuntimeBinaryArtifact);
-    return components.prefix + *name + ".pdb";
+    return components.prefix + pdbName + ".pdb";
   }
 
   return "";
@@ -3771,27 +3775,50 @@ bool cmGeneratorTarget::LinkerEnforcesNoAllowShLibUndefined(
 std::string cmGeneratorTarget::GetPDBOutputName(
   std::string const& config) const
 {
-  std::string base =
-    this->GetOutputName(config, cmStateEnums::RuntimeBinaryArtifact) +
-    this->GetFilePostfix(config);
+  // Lookup/compute/cache the pdb output name for this configuration.
+  auto i = this->PdbOutputNameMap.find(config);
+  if (i == this->PdbOutputNameMap.end()) {
+    // Add empty name in map to detect potential recursion.
+    PdbOutputNameMapType::value_type entry(config, "");
+    i = this->PdbOutputNameMap.insert(entry).first;
 
-  std::vector<std::string> props;
-  std::string configUpper = cmSystemTools::UpperCase(config);
-  if (!configUpper.empty()) {
-    // PDB_NAME_<CONFIG>
-    props.push_back("PDB_NAME_" + configUpper);
-  }
-
-  // PDB_NAME
-  props.emplace_back("PDB_NAME");
-
-  for (std::string const& p : props) {
-    if (cmValue outName = this->GetProperty(p)) {
-      base = *outName;
-      break;
+    // Compute output name.
+    std::vector<std::string> props;
+    std::string configUpper = cmSystemTools::UpperCase(config);
+    if (!configUpper.empty()) {
+      // PDB_NAME_<CONFIG>
+      props.push_back("PDB_NAME_" + configUpper);
     }
+
+    // PDB_NAME
+    props.emplace_back("PDB_NAME");
+
+    std::string outName;
+    for (std::string const& p : props) {
+      if (cmValue outNameProp = this->GetProperty(p)) {
+        outName = *outNameProp;
+        break;
+      }
+    }
+
+    // Now evaluate genex and update the previously-prepared map entry.
+    if (outName.empty()) {
+      i->second =
+        this->GetOutputName(config, cmStateEnums::RuntimeBinaryArtifact) +
+        this->GetFilePostfix(config);
+    } else {
+      i->second =
+        cmGeneratorExpression::Evaluate(outName, this->LocalGenerator, config);
+    }
+  } else if (i->second.empty()) {
+    // An empty map entry indicates we have been called recursively
+    // from the above block.
+    this->LocalGenerator->GetCMakeInstance()->IssueMessage(
+      MessageType::FATAL_ERROR,
+      "Target '" + this->GetName() + "' PDB_NAME depends on itself.",
+      this->GetBacktrace());
   }
-  return base;
+  return i->second;
 }
 
 std::string cmGeneratorTarget::GetPDBName(std::string const& config) const
@@ -3799,22 +3826,9 @@ std::string cmGeneratorTarget::GetPDBName(std::string const& config) const
   NameComponents const& parts = this->GetFullNameInternalComponents(
     config, cmStateEnums::RuntimeBinaryArtifact);
 
-  std::vector<std::string> props;
-  std::string configUpper = cmSystemTools::UpperCase(config);
-  if (!configUpper.empty()) {
-    // PDB_NAME_<CONFIG>
-    props.push_back("PDB_NAME_" + configUpper);
-  }
+  std::string base = this->GetPDBOutputName(config);
 
-  // PDB_NAME
-  props.emplace_back("PDB_NAME");
-
-  for (std::string const& p : props) {
-    if (cmValue outName = this->GetProperty(p)) {
-      return parts.prefix + *outName + ".pdb";
-    }
-  }
-  return parts.prefix + parts.base + ".pdb";
+  return parts.prefix + base + ".pdb";
 }
 
 std::string cmGeneratorTarget::GetObjectDirectory(
