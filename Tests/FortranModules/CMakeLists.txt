@@ -10,9 +10,7 @@ if(NOT DEFINED CMake_TEST_NESTED_MAKE_PROGRAM AND NOT CMAKE_GENERATOR MATCHES "V
   set(CMake_TEST_NESTED_MAKE_PROGRAM "${CMAKE_MAKE_PROGRAM}")
 endif()
 
-if("x${CMake_TEST_Fortran_SUBMODULES}" STREQUAL "x"
-    AND NOT CMAKE_VERSION VERSION_LESS 3.6.20160923 # for CheckFortranSourceCompiles SRC_EXT
-    )
+if(NOT DEFINED CMake_TEST_Fortran_SUBMODULES)
   include(CheckFortranSourceCompiles)
   CHECK_Fortran_SOURCE_COMPILES([[
 module parent
