@@ -5,14 +5,42 @@
 FindWget
 --------
 
-Find wget
+This module finds the ``wget`` command-line tool for retrieving content from web
+servers.
 
-This module looks for wget.  This module defines the following values:
+Result Variables
+^^^^^^^^^^^^^^^^
 
-::
+This module defines the following local variables:
 
-  WGET_EXECUTABLE: the full path to the wget tool.
-  WGET_FOUND: True if wget has been found.
+``Wget_FOUND``
+  True if ``wget`` has been found.
+
+Cache Variables
+^^^^^^^^^^^^^^^
+
+The following cache variables may also be set:
+
+``WGET_EXECUTABLE``
+  The full path to the ``wget`` tool.
+
+Examples
+^^^^^^^^
+
+Finding ``wget`` and executing it in a process:
+
+.. code-block:: cmake
+
+  find_package(Wget)
+  if(Wget_FOUND)
+    execute_process(COMMAND ${WGET_EXECUTABLE} -h)
+  endif()
+
+See Also
+^^^^^^^^
+
+* The :command:`file(DOWNLOAD)` command to download the given URL to a local
+  file.
 #]=======================================================================]
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindCygwin.cmake)
