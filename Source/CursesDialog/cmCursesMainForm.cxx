@@ -72,6 +72,9 @@ bool cmCursesMainForm::LookForCacheEntry(std::string const& key)
 // Create new cmCursesCacheEntryComposite entries from the cache
 void cmCursesMainForm::InitializeUI()
 {
+  // Hide the cursor by default
+  curs_set(0);
+
   // Create a vector of cmCursesCacheEntryComposite's
   // which contain labels, entries and new entry markers
   std::vector<cmCursesCacheEntryComposite> newEntries;
@@ -271,7 +274,7 @@ void cmCursesMainForm::Render(int left, int top, int width, int height)
         this->NumberOfPages++;
       }
       entry.Label->Move(left, top + row - 1, isNewPage);
-      entry.IsNewLabel->Move(left + 32, top + row - 1, false);
+      entry.IsNewLabel->Move(left + 30, top + row - 1, false);
       entry.Entry->Move(left + 33, top + row - 1, false);
       entry.Entry->SetPage(this->NumberOfPages);
       i++;
@@ -424,8 +427,11 @@ void cmCursesMainForm::UpdateStatusBar(cm::optional<std::string> message)
   // Fields are grouped by 3, the first one being the label
   // so start at 0 and move up by 3 avoiding the last null entry
   for (size_type index = 0; index < this->Fields.size() - 1; index += 3) {
-    bool currentLabel = index == currentLabelIndex;
-    set_field_fore(this->Fields[index], currentLabel ? A_STANDOUT : A_NORMAL);
+    int attr = (index == currentLabelIndex) ? A_STANDOUT : A_NORMAL;
+    set_field_fore(this->Fields[index], attr);
+    set_field_back(this->Fields[index], attr);
+    set_field_fore(this->Fields[index + 1], attr);
+    set_field_back(this->Fields[index + 1], attr);
   }
 
   // Display CMake version under the status bar
@@ -658,6 +664,12 @@ void cmCursesMainForm::FixValue(cmStateEnums::CacheEntryType type,
   }
 }
 
+void cmCursesMainForm::SetSearchMode(bool enable)
+{
+  this->SearchMode = enable;
+  curs_set(enable);
+}
+
 void cmCursesMainForm::HandleInput()
 {
   int x = 0;
@@ -710,7 +722,7 @@ void cmCursesMainForm::HandleInput()
 
     if (this->SearchMode) {
       if (key == 10 || key == KEY_ENTER) {
-        this->SearchMode = false;
+        this->SetSearchMode(false);
         if (!this->SearchString.empty()) {
           this->JumpToCacheEntry(this->SearchString.c_str());
           this->OldSearchString = this->SearchString;
@@ -865,7 +877,7 @@ void cmCursesMainForm::HandleInput()
         CurrentForm = this;
         this->Render(1, 1, x, y);
       } else if (key == '/') {
-        this->SearchMode = true;
+        this->SetSearchMode(true);
         this->UpdateStatusBar("Search");
         this->PrintKeys(1);
         touchwin(stdscr);

@@ -32,6 +32,12 @@ cmCursesStringWidget::cmCursesStringWidget(int width, int height, int left,
   field_opts_off(this->Field, O_STATIC);
 }
 
+void cmCursesStringWidget::SetInEdit(bool inedit)
+{
+  this->InEdit = inedit;
+  curs_set(inedit);
+}
+
 void cmCursesStringWidget::OnTab(cmCursesMainForm* /*unused*/,
                                  WINDOW* /*unused*/)
 {
@@ -42,7 +48,7 @@ void cmCursesStringWidget::OnReturn(cmCursesMainForm* fm, WINDOW* /*unused*/)
 {
   if (this->InEdit) {
     cmCursesForm::LogMessage("String widget leaving edit.");
-    this->InEdit = false;
+    this->SetInEdit(false);
     fm->PrintKeys();
     this->OriginalString.clear();
     // trick to force forms to update the field buffer
@@ -52,7 +58,7 @@ void cmCursesStringWidget::OnReturn(cmCursesMainForm* fm, WINDOW* /*unused*/)
     this->Done = true;
   } else {
     cmCursesForm::LogMessage("String widget entering edit.");
-    this->InEdit = true;
+    this->SetInEdit(true);
     fm->PrintKeys();
     this->OriginalString = field_buffer(this->Field, 0);
   }
@@ -114,7 +120,7 @@ bool cmCursesStringWidget::HandleInput(int& key, cmCursesMainForm* fm,
     } else if (key == KEY_DOWN || key == ctrl('n') || key == KEY_UP ||
                key == ctrl('p') || key == KEY_NPAGE || key == ctrl('d') ||
                key == KEY_PPAGE || key == ctrl('u')) {
-      this->InEdit = false;
+      this->SetInEdit(false);
       this->OriginalString.clear();
       // trick to force forms to update the field buffer
       form_driver(form, REQ_NEXT_FIELD);
@@ -124,7 +130,7 @@ bool cmCursesStringWidget::HandleInput(int& key, cmCursesMainForm* fm,
     // esc
     else if (key == 27) {
       if (this->InEdit) {
-        this->InEdit = false;
+        this->SetInEdit(false);
         fm->PrintKeys();
         this->SetString(this->OriginalString);
         this->OriginalString.clear();

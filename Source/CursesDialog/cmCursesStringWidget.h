@@ -40,7 +40,7 @@ public:
    * Set/Get InEdit flag. Can be used to tell the widget to leave
    * edit mode (in case of a resize for example).
    */
-  void SetInEdit(bool inedit) { this->InEdit = inedit; }
+  void SetInEdit(bool inedit);
   bool GetInEdit() { return this->InEdit; }
 
   /**
