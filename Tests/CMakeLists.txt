@@ -610,11 +610,11 @@ if(BUILD_TESTING)
   endif()
 
   # run test for BundleUtilities on supported platforms/compilers
-  if(MSVC OR
-     MINGW OR
-     CMAKE_SYSTEM_NAME MATCHES "Linux" OR
-     CMAKE_SYSTEM_NAME MATCHES "Darwin")
-  if(NOT "${CMAKE_GENERATOR}" STREQUAL "Watcom WMake")
+  if((MSVC OR
+      MINGW OR
+      CMAKE_SYSTEM_NAME MATCHES "Linux" OR
+      CMAKE_SYSTEM_NAME MATCHES "Darwin")
+    AND NOT CMAKE_GENERATOR STREQUAL "Watcom WMake")
 
     add_test(BundleUtilities ${CMAKE_CTEST_COMMAND}
       --build-and-test
@@ -641,7 +641,6 @@ if(BUILD_TESTING)
       list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Qt4Deploy")
     endif()
 
-  endif()
   endif()
 
   set(CMAKE_BUILD_TEST_SOURCE_DIR "${CMake_SOURCE_DIR}/Tests/COnly")
