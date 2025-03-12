@@ -18,6 +18,7 @@ set(FortranCInterface_MODULE_PREFIX  "@FortranCInterface_MODULE_PREFIX@")
 set(FortranCInterface_MODULE_MIDDLE  "@FortranCInterface_MODULE_MIDDLE@")
 set(FortranCInterface_MODULE_SUFFIX  "@FortranCInterface_MODULE_SUFFIX@")
 set(FortranCInterface_MODULE_CASE    "@FortranCInterface_MODULE_CASE@")
+set(FortranCInterface_MODULE_ORDER   "@FortranCInterface_MODULE_ORDER@")
 set(FortranCInterface_MODULE_MACRO   "@FortranCInterface_MODULE_MACRO@")
 
 # Module symbol with underscore.
@@ -26,6 +27,7 @@ set(FortranCInterface_MODULE__PREFIX "@FortranCInterface_MODULE__PREFIX@")
 set(FortranCInterface_MODULE__MIDDLE "@FortranCInterface_MODULE__MIDDLE@")
 set(FortranCInterface_MODULE__SUFFIX "@FortranCInterface_MODULE__SUFFIX@")
 set(FortranCInterface_MODULE__CASE   "@FortranCInterface_MODULE__CASE@")
+set(FortranCInterface_MODULE__ORDER  "@FortranCInterface_MODULE__ORDER@")
 set(FortranCInterface_MODULE__MACRO  "@FortranCInterface_MODULE__MACRO@")
 
 # Summarize what was found.

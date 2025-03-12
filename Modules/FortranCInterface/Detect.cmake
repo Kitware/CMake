@@ -92,6 +92,8 @@ set(_global_regex  "^(_*)(mysub|MYSUB)([_$]*)$")
 set(_global__regex "^(_*)(my_sub|MY_SUB)([_$]*)$")
 set(_module_regex "^([A-Za-z_$]*)(mymodule|MYMODULE)([A-Za-z_$]*)(mysub|MYSUB)([_$]*)$")
 set(_module__regex "^([A-Za-z_$]*)(my_module|MY_MODULE)([A-Za-z_$]*)(my_sub|MY_SUB)([_$]*)$")
+set(_module_reverse_regex "^([A-Za-z_$]*)(mysub|MYSUB)([A-Za-z_$]*)(mymodule|MYMODULE)([_$]*)$")
+set(_module_reverse__regex "^([A-Za-z_$]*)(my_sub|MY_SUB)([A-Za-z_$]*)(my_module|MY_MODULE)([_$]*)$")
 
 # Parse the symbol names.
 foreach(symbol ${FortranCInterface_SYMBOLS})
@@ -120,7 +122,24 @@ foreach(symbol ${FortranCInterface_SYMBOLS})
       list(GET pieces 3 name)
       list(GET pieces 4 FortranCInterface_MODULE_${form}SUFFIX)
       set(FortranCInterface_MODULE_${form}CASE "${_case_${name}}")
+      set(FortranCInterface_MODULE_${form}ORDER "MODULE_THEN_SYMBOL")
     endif()
+
+    # Look for module symbols with subroutine name first.
+    string(REGEX REPLACE "${_module_reverse_${form}regex}"
+                         "\\1;\\2;\\3;\\4;\\5" pieces "${symbol}")
+    list(LENGTH pieces len)
+    if(len EQUAL 5)
+      set(FortranCInterface_MODULE_${form}SYMBOL "${symbol}")
+      list(GET pieces 0 FortranCInterface_MODULE_${form}PREFIX)
+      list(GET pieces 1 name)
+      list(GET pieces 2 FortranCInterface_MODULE_${form}MIDDLE)
+      list(GET pieces 3 module)
+      list(GET pieces 4 FortranCInterface_MODULE_${form}SUFFIX)
+      set(FortranCInterface_MODULE_${form}CASE "${_case_${name}}")
+      set(FortranCInterface_MODULE_${form}ORDER "SYMBOL_THEN_MODULE")
+    endif()
+
   endforeach()
 endforeach()
 
@@ -156,8 +175,13 @@ foreach(form "" "_")
     endif()
     set(_name "${_name_${FortranCInterface_MODULE_${form}CASE}}")
     set(_middle "##${FortranCInterface_MODULE_${form}MIDDLE}##")
-    set(FortranCInterface_MODULE${form}_MACRO
-      "(mod_name,name, mod_NAME,NAME) ${_prefix}mod_${_name}${_middle}${_name}${_suffix}")
+    if(FortranCInterface_MODULE_${form}ORDER STREQUAL "SYMBOL_THEN_MODULE")
+      set(FortranCInterface_MODULE${form}_MACRO
+        "(mod_name,name, mod_NAME,NAME) ${_prefix}${_name}${_middle}mod_${_name}${_suffix}")
+    else()
+      set(FortranCInterface_MODULE${form}_MACRO
+        "(mod_name,name, mod_NAME,NAME) ${_prefix}mod_${_name}${_middle}${_name}${_suffix}")
+    endif()
   endif()
 endforeach()
 

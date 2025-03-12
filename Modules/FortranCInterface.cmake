@@ -59,6 +59,19 @@ to reference them and can use the `Module Functions`_ below.
   The case for a module symbol without an underscore,
   either ``UPPER`` or ``LOWER``.
 
+``FortranCInterface_MODULE_ORDER``
+  .. versionadded:: 4.1
+
+  Order of components for module symbols without an underscore:
+
+  ``MODULE_THEN_SYMBOL``
+    The module name appears *before* the symbol name, i.e.,
+    ``<PREFIX><module><MIDDLE><symbol><SUFFIX>``.
+
+  ``SYMBOL_THEN_MODULE``
+    The module name appears *after* the symbol name, i.e.,
+    ``<PREFIX><symbol><MIDDLE><module><SUFFIX>``.
+
 ``FortranCInterface_MODULE__PREFIX``
   Prefix for a module symbol with an underscore.
 
@@ -72,6 +85,19 @@ to reference them and can use the `Module Functions`_ below.
 ``FortranCInterface_MODULE__CASE``
   The case for a module symbol with an underscore,
   either ``UPPER`` or ``LOWER``.
+
+``FortranCInterface_MODULE__ORDER``
+  .. versionadded:: 4.1
+
+  Order of components for module symbols with an underscore:
+
+  ``MODULE_THEN_SYMBOL``
+    The module name appears *before* the symbol name, i.e.,
+    ``<PREFIX><module><MIDDLE><symbol><SUFFIX>``.
+
+  ``SYMBOL_THEN_MODULE``
+    The module name appears *after* the symbol name, i.e.,
+    ``<PREFIX><symbol><MIDDLE><module><SUFFIX>``.
 
 Module Functions
 ^^^^^^^^^^^^^^^^

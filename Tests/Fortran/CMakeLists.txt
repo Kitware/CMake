@@ -127,7 +127,7 @@ endfunction()
 # if the id's match or the compilers are compatible, then
 # call the test_fortran_c_interface_module function
 if("${CMAKE_Fortran_COMPILER_ID}:${CMAKE_C_COMPILER_ID}" MATCHES
-    "(Intel(LLVM)?:MSVC|Absoft:GNU|(LLVMFlang|LFortran):(GNU|Clang))"
+    "(Intel(LLVM)?:MSVC|Absoft:GNU|(LLVMFlang|LFortran):(GNU|Clang)|Cray:CrayClang)"
     OR ("${CMAKE_Fortran_COMPILER_ID}" STREQUAL "${CMAKE_C_COMPILER_ID}" ))
   test_fortran_c_interface_module()
 else()
