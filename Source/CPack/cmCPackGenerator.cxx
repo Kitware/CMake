@@ -1239,7 +1239,11 @@ int cmCPackGenerator::Initialize(std::string const& name, cmMakefile* mf)
   // Load the project specific config file
   cmValue config = this->GetOption("CPACK_PROJECT_CONFIG_FILE");
   if (config) {
-    mf->ReadListFile(*config);
+    if (!mf->ReadListFile(*config)) {
+      cmCPackLogger(cmCPackLog::LOG_WARNING,
+                    "CPACK_PROJECT_CONFIG_FILE not found: " << *config
+                                                            << std::endl);
+    }
   }
   int result = this->InitializeInternal();
   if (cmSystemTools::GetErrorOccurredFlag()) {

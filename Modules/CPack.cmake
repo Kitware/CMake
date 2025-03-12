@@ -572,6 +572,11 @@ function(_cpack_escape_for_cmake var value)
   set("${var}" "${escaped}" PARENT_SCOPE)
 endfunction()
 
+# Resolve CPACK_PROJECT_CONFIG_FILE relative to the source directory
+if(DEFINED CPACK_PROJECT_CONFIG_FILE)
+  cmake_path(ABSOLUTE_PATH CPACK_PROJECT_CONFIG_FILE)
+endif()
+
 # Set the package name
 _cpack_set_default(CPACK_PACKAGE_NAME "${CMAKE_PROJECT_NAME}")
 
