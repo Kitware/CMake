@@ -505,7 +505,7 @@ bool testFilteredObject()
   ASSERT_TRUE(m == expected);
 
   auto error = state.GetErrorMessage();
-  ASSERT_TRUE(error == "\nFaulty Object Property");
+  ASSERT_TRUE(error == "Faulty Object Property");
 
   return true;
 }

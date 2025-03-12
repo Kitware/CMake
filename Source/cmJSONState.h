@@ -9,8 +9,6 @@
 #include <utility>
 #include <vector>
 
-#include "cmStringAlgorithms.h"
-
 namespace Json {
 class Value;
 }
@@ -26,7 +24,7 @@ class cmJSONState
 public:
   using JsonPair = std::pair<std::string const, Json::Value const*>;
   cmJSONState() = default;
-  cmJSONState(std::string const& filename, Json::Value* root);
+  cmJSONState(std::string jsonFile, Json::Value* root);
   void AddError(std::string const& errMsg);
   void AddErrorAtValue(std::string const& errMsg, Json::Value const* value);
   void AddErrorAtOffset(std::string const& errMsg, std::ptrdiff_t offset);
@@ -46,15 +44,7 @@ public:
     Error(std::string errMsg)
       : location({ -1, -1 })
       , message(std::move(errMsg)) {};
-    std::string GetErrorMessage() const
-    {
-      std::string output = message;
-      if (location.line > 0) {
-        output = cmStrCat("Error: @", location.line, ",", location.column,
-                          ": ", output);
-      }
-      return output;
-    }
+    std::string GetErrorMessage() const { return message; }
     Location GetLocation() const { return location; }
 
   private:
@@ -70,4 +60,5 @@ public:
 private:
   std::string GetJsonContext(Location loc);
   Location LocateInDocument(ptrdiff_t offset);
+  std::string Filename;
 };

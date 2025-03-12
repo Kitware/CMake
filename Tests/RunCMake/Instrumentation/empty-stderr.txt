@@ -1,4 +1,5 @@
-^CMake Error: +
-Error: @1,1: Missing required field "version" in root object
+^CMake Error: Could not load instrumentation queries from [^
+]+:
+empty.json:[0-9]+: Missing required field "version" in root object
 {
 \^$

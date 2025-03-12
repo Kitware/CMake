@@ -1,5 +1,5 @@
 ^CMake Error: Could not read presets from [^
 ]*/Tests/RunCMake/CMakePresets/InvalidPresetGenerator:
-Error: @6,20: "generator" expected a string
+CMakePresets.json:6: "generator" expected a string
       "generator": \[\],
                    \^$

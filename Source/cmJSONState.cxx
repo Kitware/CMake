@@ -12,12 +12,14 @@
 #include "cmsys/FStream.hxx"
 
 #include "cmStringAlgorithms.h"
+#include "cmSystemTools.h"
 
-cmJSONState::cmJSONState(std::string const& filename, Json::Value* root)
+cmJSONState::cmJSONState(std::string jsonFile, Json::Value* root)
+  : Filename(std::move(jsonFile))
 {
-  cmsys::ifstream fin(filename.c_str(), std::ios::in | std::ios::binary);
+  cmsys::ifstream fin(this->Filename.c_str(), std::ios::in | std::ios::binary);
   if (!fin) {
-    this->AddError(cmStrCat("File not found: ", filename));
+    this->AddError(cmStrCat("File not found: ", this->Filename));
     return;
   }
   // If there's a BOM, toss it.
@@ -38,7 +40,7 @@ cmJSONState::cmJSONState(std::string const& filename, Json::Value* root)
   Json::CharReaderBuilder::strictMode(&builder.settings_);
   std::string errMsg;
   if (!Json::parseFromStream(builder, fin, root, &errMsg)) {
-    errMsg = cmStrCat("JSON Parse Error: ", filename, ":\n", errMsg);
+    errMsg = cmStrCat("JSON Parse Error: ", this->Filename, ":\n", errMsg);
     this->AddError(errMsg);
   }
 }
@@ -72,16 +74,17 @@ void cmJSONState::AddErrorAtOffset(std::string const& errMsg,
 std::string cmJSONState::GetErrorMessage(bool showContext)
 {
   std::string message;
+  std::string filenameName = cmSystemTools::GetFilenameName(this->Filename);
   for (auto const& error : this->errors) {
+    Location loc = error.GetLocation();
+    if (!filenameName.empty() && loc.line > 0) {
+      message = cmStrCat(message, filenameName, ':', loc.line, ": ");
+    }
     message = cmStrCat(message, error.GetErrorMessage(), "\n");
-    if (showContext) {
-      Location loc = error.GetLocation();
-      if (loc.column > 0) {
-        message = cmStrCat(message, GetJsonContext(loc), "\n");
-      }
+    if (showContext && loc.line > 0) {
+      message = cmStrCat(message, GetJsonContext(loc), "\n");
     }
   }
-  message = cmStrCat("\n", message);
   message.pop_back();
   return message;
 }

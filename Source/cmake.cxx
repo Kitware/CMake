@@ -1525,8 +1525,8 @@ void cmake::SetArgs(std::vector<std::string> const& args)
     auto result = presetsGraph.ReadProjectPresets(this->GetHomeDirectory());
     if (result != true) {
       std::string errorMsg =
-        cmStrCat("Could not read presets from ", this->GetHomeDirectory(), ":",
-                 presetsGraph.parseState.GetErrorMessage());
+        cmStrCat("Could not read presets from ", this->GetHomeDirectory(),
+                 ":\n", presetsGraph.parseState.GetErrorMessage());
       cmSystemTools::Error(errorMsg);
       return;
     }
@@ -2620,8 +2620,7 @@ int cmake::ActualConfigure()
   // actually do the configure
   auto startTime = std::chrono::steady_clock::now();
 #if !defined(CMAKE_BOOTSTRAP)
-  if (!this->Instrumentation->errorMsg.empty()) {
-    cmSystemTools::Error(this->Instrumentation->errorMsg);
+  if (this->Instrumentation->HasErrors()) {
     return 1;
   }
   auto doConfigure = [this]() -> int {
@@ -3735,8 +3734,8 @@ int cmake::Build(int jobs, std::string dir, std::vector<std::string> targets,
     auto result = settingsFile.ReadProjectPresets(this->GetHomeDirectory());
     if (result != true) {
       cmSystemTools::Error(
-        cmStrCat("Could not read presets from ", this->GetHomeDirectory(), ":",
-                 settingsFile.parseState.GetErrorMessage()));
+        cmStrCat("Could not read presets from ", this->GetHomeDirectory(),
+                 ":\n", settingsFile.parseState.GetErrorMessage()));
       return 1;
     }
 
@@ -3962,8 +3961,7 @@ int cmake::Build(int jobs, std::string dir, std::vector<std::string> targets,
 
 #if !defined(CMAKE_BOOTSTRAP)
   cmInstrumentation instrumentation(dir);
-  if (!instrumentation.errorMsg.empty()) {
-    cmSystemTools::Error(instrumentation.errorMsg);
+  if (instrumentation.HasErrors()) {
     return 1;
   }
   instrumentation.CollectTimingData(
@@ -4105,7 +4103,7 @@ int cmake::Workflow(std::string const& presetName,
   auto result = settingsFile.ReadProjectPresets(this->GetHomeDirectory());
   if (result != true) {
     cmSystemTools::Error(cmStrCat("Could not read presets from ",
-                                  this->GetHomeDirectory(), ":",
+                                  this->GetHomeDirectory(), ":\n",
                                   settingsFile.parseState.GetErrorMessage()));
     return 1;
   }
