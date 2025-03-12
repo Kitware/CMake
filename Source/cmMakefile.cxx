@@ -3805,14 +3805,14 @@ cmTarget* cmMakefile::AddImportedTarget(std::string const& name,
 cmTarget* cmMakefile::AddForeignTarget(std::string const& origin,
                                        std::string const& name)
 {
+  auto foreign_name = cmStrCat("@foreign_", origin, "::", name);
   std::unique_ptr<cmTarget> target(new cmTarget(
-    cmStrCat("@foreign_", origin, "::", name),
-    cmStateEnums::TargetType::INTERFACE_LIBRARY, cmTarget::Visibility::Foreign,
-    this, cmTarget::PerConfig::Yes));
+    foreign_name, cmStateEnums::TargetType::INTERFACE_LIBRARY,
+    cmTarget::Visibility::Foreign, this, cmTarget::PerConfig::Yes));
 
-  this->ImportedTargets[name] = target.get();
+  this->ImportedTargets[foreign_name] = target.get();
   this->GetGlobalGenerator()->IndexTarget(target.get());
-  this->GetStateSnapshot().GetDirectory().AddImportedTargetName(name);
+  this->GetStateSnapshot().GetDirectory().AddImportedTargetName(foreign_name);
 
   this->ImportedTargetsOwned.push_back(std::move(target));
   return this->ImportedTargetsOwned.back().get();

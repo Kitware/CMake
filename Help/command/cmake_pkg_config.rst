@@ -12,9 +12,11 @@ Process pkg-config format package files.
 Synopsis
 ^^^^^^^^
 
-.. code-block:: cmake
+.. parsed-literal::
 
-  cmake_pkg_config(EXTRACT <package> [<version>] [...])
+  cmake_pkg_config(`EXTRACT`_ <package> [<version>] [...])
+  cmake_pkg_config(`POPULATE`_ <package> [<version>] [...])
+  cmake_pkg_config(`IMPORT`_ <package> [<version>] [...])
 
 Introduction
 ^^^^^^^^^^^^
@@ -27,7 +29,31 @@ search patterns. The optional ``<version>`` string has the same format and
 semantics as a pkg-config style version specifier, with the exception that if
 no comparison operator is specified ``=`` is assumed.
 
-.. _`common options`:
+PkgConfig Targets
+^^^^^^^^^^^^^^^^^
+
+``cmake_pkg_config`` may recursively generate target-like names in the global
+scope in order to resolve a package ``IMPORT`` or ``POPULATE`` command. These
+names take the form of ``@foreign_pkgcfg::<package>`` and are exposed via the
+:prop_tgt:`INTERFACE_LINK_LIBRARIES` target property of an ``IMPORT``-generated
+target.
+
+It is not possible to modify or address these pkg-config native targets via
+normal target-based commands. Limited control over their generation is possible
+via the ``POPULATE`` command, but modification should generally be performed
+inside the corresponding package file, not downstream in CMake.
+
+Pkg-config targets are reused across commands. Once a given package name has
+been resolved via ``POPULATE`` or ``IMPORT`` (but not ``EXTRACT``), all future
+requests for the corresponding package name by those commands will resolve to
+the previously generated pkg-config target.
+
+``EXTRACT`` always performs the complete package name lookup in order to allow
+searches for multiple installations of the same package in custom dependency
+management schemes.
+
+Common Options
+^^^^^^^^^^^^^^
 
 There are multiple signatures for this command, and some of the options are
 common between them. They are:
@@ -143,7 +169,7 @@ common between them. They are:
      library directory paths and ``pc_sysrootdir`` will be set to ``/``
 
 ``TOP_BUILD_DIR <path>``
-  Overrides the top build directory path used to derived the ``pc_top_builddir``
+  Overrides the top build directory path used to derive the ``pc_top_builddir``
   package variable.
 
   When this option is not provided, the default top build directory path is
@@ -154,11 +180,23 @@ common between them. They are:
   #. If no top build directory path is available, the ``pc_top_builddir``
      package variable is not set
 
+``BIND_PC_REQUIRES``
+  A list of ``<Name>=<Target>`` pairs, the ``Name`` is a package name as it
+  appears in the ``Requires`` list of a pkg-config file and the ``Target`` is a
+  CMake-native target name (not a pkg-config target).
+
+  When a given package name appears in the ``Requires`` list of a package, it
+  will be fulfilled with the associated CMake target. This behavior applies to
+  all dependencies in the pkg-config graph that have not been previously
+  populated.
+
 Signatures
 ^^^^^^^^^^
 
 .. signature::
   cmake_pkg_config(EXTRACT <package> [<version>] [...])
+
+  .. versionadded:: 3.31
 
   Extract the contents of the package into variables.
 
@@ -166,17 +204,17 @@ Signatures
 
     cmake_pkg_config(EXTRACT <package> [<version>]
                     [REQUIRED] [EXACT] [QUIET]
+                    [SYSTEM_INCLUDE_DIRS <path>...]
+                    [SYSTEM_LIBRARY_DIRS <path>...]
+                    [ALLOW_SYSTEM_INCLUDES <bool>]
+                    [ALLOW_SYSTEM_LIBS <bool>]
                     [STRICTNESS <mode>]
                     [ENV_MODE <mode>]
                     [PC_LIBDIR <path>...]
                     [PC_PATH <path>...]
                     [DISABLE_UNINSTALLED <bool>]
                     [PC_SYSROOT_DIR <path>]
-                    [TOP_BUILD_DIR <path>]
-                    [SYSTEM_INCLUDE_DIRS <path>...]
-                    [SYSTEM_LIBRARY_DIRS <path>...]
-                    [ALLOW_SYSTEM_INCLUDES <bool>]
-                    [ALLOW_SYSTEM_LIBS <bool>])
+                    [TOP_BUILD_DIR <path>])
 
 The following variables will be populated from the contents of package file:
 
@@ -261,3 +299,58 @@ The following variables will be populated from the contents of package file:
   #. ``CMAKE_PKG_CONFIG_ALLOW_SYS_LIBS``
   #. If the ``PKG_CONFIG_ALLOW_SYSTEM_LIBS`` environment variable is defined
      the flags are preserved, otherwise they are filtered during flag mangling.
+
+.. signature::
+  cmake_pkg_config(POPULATE <package> [<version>] [...])
+
+  .. versionadded:: 4.1
+
+  Populate a package in the pkg-config target namespace
+
+  .. code-block:: cmake
+
+    cmake_pkg_config(POPULATE <package> [<version>]
+                    [REQUIRED] [EXACT] [QUIET]
+                    [BIND_PC_REQUIRES <<name>=<target>>...]
+                    [STRICTNESS <mode>]
+                    [ENV_MODE <mode>]
+                    [PC_LIBDIR <path>...]
+                    [PC_PATH <path>...]
+                    [DISABLE_UNINSTALLED <bool>]
+                    [PC_SYSROOT_DIR <path>]
+                    [TOP_BUILD_DIR <path>])
+
+``POPULATE`` enables manual control of resolution of a given package's
+``Requires`` list without importing onto a native CMake target. Once populated,
+a package and its dependencies will be used for resolution of all future
+``POPULATE`` and ``IMPORT`` commands.
+
+A ``PKGCONFIG_<package>_FOUND`` variable will be set to indicate whether the
+package was found.
+
+.. signature::
+  cmake_pkg_config(IMPORT <package> [<version>] [...])
+
+  .. versionadded:: 4.1
+
+  Import a pkg-config target as a CMake :prop_tgt:`IMPORTED` target
+
+  .. code-block:: cmake
+
+    cmake_pkg_config(IMPORT <package> [<version>]
+                    [REQUIRED] [EXACT] [QUIET]
+                    [BIND_PC_REQUIRES <<name>=<target>>...]
+                    [STRICTNESS <mode>]
+                    [ENV_MODE <mode>]
+                    [PC_LIBDIR <path>...]
+                    [PC_PATH <path>...]
+                    [DISABLE_UNINSTALLED <bool>]
+                    [PC_SYSROOT_DIR <path>]
+                    [TOP_BUILD_DIR <path>])
+
+Creates a native CMake ``IMPORTED`` target that can be linked to via
+:command:`target_link_libraries`. This new target is named
+``PkgConfig::<package>``.
+
+A ``PKGCONFIG_<package>_FOUND`` variable will be set to indicate whether the
+package was found.

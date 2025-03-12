@@ -46,7 +46,8 @@ are executed in order during installation.
   and the order that install rules added in different subdirectories will run is
   not guaranteed.
 
-.. _`common options`:
+Common Options
+""""""""""""""
 
 There are multiple signatures for this command.  Some of them define
 installation options for files and targets.  Options common to

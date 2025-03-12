@@ -1,0 +1,6 @@
+Name: Bravo
+Description: Bravo
+Version: 1.0.0
+
+Cflags: Bravo
+Requires: alpha

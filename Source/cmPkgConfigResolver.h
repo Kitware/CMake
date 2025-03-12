@@ -43,6 +43,8 @@ struct cmPkgConfigVersionReq
     GT,
   } Operation = ANY;
   std::string Version;
+
+  std::string string() const;
 };
 
 struct cmPkgConfigDependency
@@ -60,6 +62,7 @@ struct cmPkgConfigEnv
 
   cm::optional<std::string> SysrootDir;
   cm::optional<std::string> TopBuildDir;
+  std::vector<std::string> search;
 
   cm::optional<bool> DisableUninstalled;
 
@@ -84,7 +87,7 @@ public:
   cmPkgConfigCflagsResult Cflags(bool priv = false);
   cmPkgConfigLibsResult Libs(bool priv = false);
 
-  cmPkgConfigEnv env;
+  cmPkgConfigEnv* env;
 
 private:
   std::string StrOrDefault(std::string const& key, cm::string_view def = "");

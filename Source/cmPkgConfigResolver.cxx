@@ -16,6 +16,7 @@
 #include <cm/string_view>
 
 #include "cmPkgConfigParser.h"
+#include "cmStringAlgorithms.h"
 
 namespace {
 
@@ -56,6 +57,27 @@ std::string AppendAndTrim(std::string& str, cm::string_view sv)
 }
 
 } // namespace
+
+std::string cmPkgConfigVersionReq::string() const
+{
+  switch (Operation) {
+    case ANY:
+      return "";
+    case LT:
+      return cmStrCat("<", Version);
+    case LT_EQ:
+      return cmStrCat("<=", Version);
+    case EQ:
+      return cmStrCat("=", Version);
+    case NEQ:
+      return cmStrCat("!=", Version);
+    case GT_EQ:
+      return cmStrCat(">=", Version);
+    case GT:
+      return cmStrCat(">", Version);
+  }
+  return "";
+}
 
 std::string cmPkgConfigResult::StrOrDefault(std::string const& key,
                                             cm::string_view def)
@@ -127,24 +149,24 @@ cmPkgConfigCflagsResult cmPkgConfigResult::Cflags(bool priv)
 
   auto tokens = cmPkgConfigResolver::TokenizeFlags(cflags);
 
-  if (env.AllowSysCflags) {
-    if (env.SysrootDir) {
-      return cmPkgConfigResolver::MangleCflags(tokens, *env.SysrootDir);
+  if (env->AllowSysCflags) {
+    if (env->SysrootDir) {
+      return cmPkgConfigResolver::MangleCflags(tokens, *env->SysrootDir);
     }
     return cmPkgConfigResolver::MangleCflags(tokens);
   }
 
-  if (env.SysCflags) {
-    if (env.SysrootDir) {
-      return cmPkgConfigResolver::MangleCflags(tokens, *env.SysrootDir,
-                                               *env.SysCflags);
+  if (env->SysCflags) {
+    if (env->SysrootDir) {
+      return cmPkgConfigResolver::MangleCflags(tokens, *env->SysrootDir,
+                                               *env->SysCflags);
     }
-    return cmPkgConfigResolver::MangleCflags(tokens, *env.SysCflags);
+    return cmPkgConfigResolver::MangleCflags(tokens, *env->SysCflags);
   }
 
-  if (env.SysrootDir) {
+  if (env->SysrootDir) {
     return cmPkgConfigResolver::MangleCflags(
-      tokens, *env.SysrootDir, std::vector<std::string>{ "/usr/include" });
+      tokens, *env->SysrootDir, std::vector<std::string>{ "/usr/include" });
   }
 
   return cmPkgConfigResolver::MangleCflags(
@@ -160,24 +182,24 @@ cmPkgConfigLibsResult cmPkgConfigResult::Libs(bool priv)
 
   auto tokens = cmPkgConfigResolver::TokenizeFlags(it->second);
 
-  if (env.AllowSysLibs) {
-    if (env.SysrootDir) {
-      return cmPkgConfigResolver::MangleLibs(tokens, *env.SysrootDir);
+  if (env->AllowSysLibs) {
+    if (env->SysrootDir) {
+      return cmPkgConfigResolver::MangleLibs(tokens, *env->SysrootDir);
     }
     return cmPkgConfigResolver::MangleLibs(tokens);
   }
 
-  if (env.SysLibs) {
-    if (env.SysrootDir) {
-      return cmPkgConfigResolver::MangleLibs(tokens, *env.SysrootDir,
-                                             *env.SysLibs);
+  if (env->SysLibs) {
+    if (env->SysrootDir) {
+      return cmPkgConfigResolver::MangleLibs(tokens, *env->SysrootDir,
+                                             *env->SysLibs);
     }
-    return cmPkgConfigResolver::MangleLibs(tokens, *env.SysLibs);
+    return cmPkgConfigResolver::MangleLibs(tokens, *env->SysLibs);
   }
 
-  if (env.SysrootDir) {
+  if (env->SysrootDir) {
     return cmPkgConfigResolver::MangleLibs(
-      tokens, *env.SysrootDir, std::vector<std::string>{ "/usr/lib" });
+      tokens, *env->SysrootDir, std::vector<std::string>{ "/usr/lib" });
   }
 
   return cmPkgConfigResolver::MangleLibs(
@@ -210,7 +232,7 @@ cm::optional<cmPkgConfigResult> cmPkgConfigResolver::ResolveStrict(
     config.Variables["pc_top_builddir"] = *env.TopBuildDir;
   }
 
-  config.env = std::move(env);
+  config.env = &env;
 
   for (auto const& entry : entries) {
     std::string key(entry.Key);
@@ -288,7 +310,7 @@ cmPkgConfigResult cmPkgConfigResolver::ResolveBestEffort(
     result.Variables["pc_top_builddir"] = *env.TopBuildDir;
   }
 
-  result.env = std::move(env);
+  result.env = &env;
 
   for (auto const& entry : entries) {
     std::string key(entry.Key);
