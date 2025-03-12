@@ -10,6 +10,13 @@ if(NOT DEFINED CMake_TEST_NESTED_MAKE_PROGRAM AND NOT CMAKE_GENERATOR MATCHES "V
   set(CMake_TEST_NESTED_MAKE_PROGRAM "${CMAKE_MAKE_PROGRAM}")
 endif()
 
+if(NOT DEFINED CMake_TEST_Fortran_SUBMODULES AND (
+    # FIXME(#18925): We do not support Cray's module file names.
+    CMAKE_Fortran_COMPILER_ID STREQUAL "Cray"
+    ))
+  set(CMake_TEST_Fortran_SUBMODULES 0)
+endif()
+
 if(NOT DEFINED CMake_TEST_Fortran_SUBMODULES)
   include(CheckFortranSourceCompiles)
   CHECK_Fortran_SOURCE_COMPILES([[
