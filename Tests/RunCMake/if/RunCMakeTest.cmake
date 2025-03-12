@@ -7,7 +7,7 @@ if(NOT MSYS)
   # if real user is root, tests are irrelevant
   get_unix_uid(uid)
   if(NOT uid STREQUAL "0")
-    run_cmake(FilePermissions)
+    run_cmake_with_options(FilePermissions -DNO_WRITABLE_DIR=${CMake_TEST_NO_WRITE_ONLY_DIR})
   endif()
 endif()
 run_cmake(IsDirectory)
