@@ -875,9 +875,7 @@ bool HandleMakeDirectoryCommand(std::vector<std::string> const& args,
   }
 
   std::string expr;
-  for (std::string const& arg :
-       cmMakeRange(args).advance(1)) // Get rid of subcommand
-  {
+  for (std::string const& arg : argsRange) {
     std::string const* cdir = &arg;
     if (!cmsys::SystemTools::FileIsFullPath(arg)) {
       expr =
