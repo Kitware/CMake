@@ -610,11 +610,11 @@ if(BUILD_TESTING)
   endif()
 
   # run test for BundleUtilities on supported platforms/compilers
-  if(MSVC OR
-     MINGW OR
-     CMAKE_SYSTEM_NAME MATCHES "Linux" OR
-     CMAKE_SYSTEM_NAME MATCHES "Darwin")
-  if(NOT "${CMAKE_GENERATOR}" STREQUAL "Watcom WMake")
+  if((MSVC OR
+      MINGW OR
+      CMAKE_SYSTEM_NAME MATCHES "Linux" OR
+      CMAKE_SYSTEM_NAME MATCHES "Darwin")
+    AND NOT CMAKE_GENERATOR STREQUAL "Watcom WMake")
 
     add_test(BundleUtilities ${CMAKE_CTEST_COMMAND}
       --build-and-test
@@ -641,7 +641,6 @@ if(BUILD_TESTING)
       list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Qt4Deploy")
     endif()
 
-  endif()
   endif()
 
   set(CMAKE_BUILD_TEST_SOURCE_DIR "${CMake_SOURCE_DIR}/Tests/COnly")
@@ -3261,6 +3260,9 @@ if(BUILD_TESTING)
         # FIXME(lfortran): The compiler fails on the test's modules.
         AND NOT CMAKE_Fortran_COMPILER_ID STREQUAL "LFortran"
         )
+      if(DEFINED CMake_TEST_Fortran_SUBMODULES)
+        list(PREPEND CMake_TEST_FortranModules_BUILD_OPTIONS -DCMake_TEST_Fortran_SUBMODULES:BOOL=${CMake_TEST_Fortran_SUBMODULES})
+      endif()
       add_test(FortranModules ${CMAKE_CTEST_COMMAND}
         --build-and-test
         "${CMake_SOURCE_DIR}/Tests/FortranModules"
@@ -3269,7 +3271,6 @@ if(BUILD_TESTING)
         --build-project FortranModules
         --build-options
           -DCMake_TEST_NESTED_MAKE_PROGRAM:FILEPATH=${CMake_TEST_EXPLICIT_MAKE_PROGRAM}
-          -DCMake_TEST_Fortran_SUBMODULES:BOOL=${CMake_TEST_Fortran_SUBMODULES}
           ${CMake_TEST_FortranModules_BUILD_OPTIONS}
         )
       list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/FortranModules")

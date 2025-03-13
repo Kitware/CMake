@@ -81,11 +81,13 @@ else()
     message(FATAL_ERROR "checks on \"${CMAKE_CURRENT_BINARY_DIR}/readable-dir\" failed")
   endif()
 
-  if(NOT IS_WRITABLE "${CMAKE_CURRENT_BINARY_DIR}/writable-dir"
-      OR IS_READABLE "${CMAKE_CURRENT_BINARY_DIR}/writable-dir"
-      OR IS_EXECUTABLE "${CMAKE_CURRENT_BINARY_DIR}/writable-dir")
-    cleanup()
-    message(FATAL_ERROR "checks on \"${CMAKE_CURRENT_BINARY_DIR}/writable-dir\" failed")
+  if(NOT NO_WRITABLE_DIR)
+    if(NOT IS_WRITABLE "${CMAKE_CURRENT_BINARY_DIR}/writable-dir"
+        OR IS_READABLE "${CMAKE_CURRENT_BINARY_DIR}/writable-dir"
+        OR IS_EXECUTABLE "${CMAKE_CURRENT_BINARY_DIR}/writable-dir")
+      cleanup()
+      message(FATAL_ERROR "checks on \"${CMAKE_CURRENT_BINARY_DIR}/writable-dir\" failed")
+    endif()
   endif()
 
   if(NOT IS_EXECUTABLE "${CMAKE_CURRENT_BINARY_DIR}/executable-dir"
@@ -161,11 +163,13 @@ if(UNIX)
     message(FATAL_ERROR "checks on \"${CMAKE_CURRENT_BINARY_DIR}/link-to-readable-dir\" failed")
   endif()
 
-  if(NOT IS_WRITABLE "${CMAKE_CURRENT_BINARY_DIR}/link-to-writable-dir"
-     OR IS_READABLE "${CMAKE_CURRENT_BINARY_DIR}/link-to-writable-dir"
-     OR IS_EXECUTABLE "${CMAKE_CURRENT_BINARY_DIR}/link-to-writable-dir")
-    cleanup()
-    message(FATAL_ERROR "checks on \"${CMAKE_CURRENT_BINARY_DIR}/link-to-writable-dir\" failed")
+  if(NOT NO_WRITABLE_DIR)
+    if(NOT IS_WRITABLE "${CMAKE_CURRENT_BINARY_DIR}/link-to-writable-dir"
+       OR IS_READABLE "${CMAKE_CURRENT_BINARY_DIR}/link-to-writable-dir"
+       OR IS_EXECUTABLE "${CMAKE_CURRENT_BINARY_DIR}/link-to-writable-dir")
+      cleanup()
+      message(FATAL_ERROR "checks on \"${CMAKE_CURRENT_BINARY_DIR}/link-to-writable-dir\" failed")
+    endif()
   endif()
 
   if(NOT IS_EXECUTABLE "${CMAKE_CURRENT_BINARY_DIR}/link-to-executable-dir"
