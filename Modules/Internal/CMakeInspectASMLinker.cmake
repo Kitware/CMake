@@ -13,6 +13,7 @@ block()
       COMPILER_AR
       COMPILER_RANLIB
       COMPILER_VERSION
+      COMPILER_ARCHITECTURE_ID
       # Linker information.
       COMPILER_LINKER
       COMPILER_LINKER_ID
