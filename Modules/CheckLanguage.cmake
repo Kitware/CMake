@@ -5,8 +5,9 @@
 CheckLanguage
 -------------
 
-Check whether a language can be enabled by the :command:`enable_language`
-or :command:`project` commands:
+This module provides the ``check_language()`` macro to check whether a language
+can be enabled using the :command:`enable_language` or :command:`project`
+commands.
 
 .. command:: check_language
 
@@ -14,8 +15,8 @@ or :command:`project` commands:
 
     check_language(<lang>)
 
-  Try enabling language ``<lang>`` in a test project and record results
-  in the cache:
+  This macro attempts to enable the language ``<lang>`` in a test project and
+  records the results in the following cache variables:
 
   :variable:`CMAKE_<LANG>_COMPILER`
     If the language can be enabled, this variable is set to the compiler
@@ -44,13 +45,19 @@ or :command:`project` commands:
   :variable:`CMAKE_<LANG>_PLATFORM <CMAKE_HIP_PLATFORM>`
     This variable is set to the detected GPU platform when ``<lang>`` is ``HIP``.
 
-    If the variable is already set its value is always preserved. Only compatible values
-    will be considered for :variable:`CMAKE_<LANG>_COMPILER`.
+    If this variable is already set, its value is always preserved.  Only
+    compatible values will be considered for :variable:`CMAKE_<LANG>_COMPILER`.
 
-For example:
+Examples
+^^^^^^^^
+
+This module is useful when a project does not always require a specific language
+but may need to enable it for certain parts.  The following example checks for
+the availability of the ``Fortran`` language and enables it if possible:
 
 .. code-block:: cmake
 
+  include(CheckLanguage)
   check_language(Fortran)
   if(CMAKE_Fortran_COMPILER)
     enable_language(Fortran)
