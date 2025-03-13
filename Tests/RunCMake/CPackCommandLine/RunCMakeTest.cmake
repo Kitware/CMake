@@ -31,3 +31,13 @@ endfunction()
 if(RunCMake_GENERATOR MATCHES "Visual Studio|Xcode")
   run_MultiConfig()
 endif()
+
+function(run_cpack_test name)
+  set(RunCMake_TEST_BINARY_DIR "${RunCMake_BINARY_DIR}/${name}-build")
+  run_cmake(${name})
+  set(RunCMake_TEST_NO_CLEAN 1)
+  run_cmake_command(${name}-package ${CMAKE_CPACK_COMMAND} -G ZIP)
+endfunction()
+
+run_cpack_test(ProjectConfigMissing)
+run_cpack_test(ProjectConfigRelative)
