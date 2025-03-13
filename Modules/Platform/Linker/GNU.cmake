@@ -21,10 +21,11 @@ function(__cmake_set_whole_archive_feature __linker)
   endif()
 
   if(NOT DEFINED CMAKE_${__lang}LINKER_PUSHPOP_STATE_SUPPORTED)
-    execute_process(COMMAND "${__linker}" --help
-                    OUTPUT_VARIABLE __linker_help
-                    ERROR_VARIABLE __linker_help)
-    if(__linker_help MATCHES "--push-state" AND __linker_help MATCHES "--pop-state")
+    # launch linker to check if push_state/pop_state options are supported
+    execute_process(COMMAND "${__linker}" --push-state --pop-state
+                    OUTPUT_VARIABLE __linker_log
+                    ERROR_VARIABLE __linker_log)
+    if(__linker_log MATCHES "--push-state" OR __linker_log MATCHES "--pop-state")
       set(CMAKE_${__lang}LINKER_PUSHPOP_STATE_SUPPORTED FALSE)
     else()
       set(CMAKE_${__lang}LINKER_PUSHPOP_STATE_SUPPORTED TRUE)
