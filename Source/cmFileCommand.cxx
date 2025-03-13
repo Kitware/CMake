@@ -864,7 +864,7 @@ bool HandleMakeDirectoryCommand(std::vector<std::string> const& args,
         cmMakeRange(cm::begin(unparsedArguments), cm::end(unparsedArguments)),
         "\n");
       status.SetError("MAKE_DIRECTORY called with unexpected\n"
-                      "arguments:\n" +
+                      "arguments:\n  " +
                       unexpectedArgsStr);
       return false;
     }
