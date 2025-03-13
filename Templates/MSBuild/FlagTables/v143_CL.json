@@ -498,6 +498,13 @@
   },
   {
     "name": "LanguageStandard",
+    "switch": "std:c++23preview",
+    "comment": "Preview - ISO C++23 Standard",
+    "value": "stdcpp23",
+    "flags": []
+  },
+  {
+    "name": "LanguageStandard",
     "switch": "std:c++latest",
     "comment": "Preview - Features from the Latest C++ Working Draft",
     "value": "stdcpplatest",
