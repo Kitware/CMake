@@ -472,7 +472,11 @@ std::unique_ptr<cmPackageInfoReader> cmPackageInfoReader::Read(
     reader->ComponentTargets = parent->ComponentTargets;
     reader->DefaultConfigurations = parent->DefaultConfigurations;
   } else {
-    reader->DefaultConfigurations = ReadList(reader->Data, "configurations");
+    for (std::string const& config :
+         ReadList(reader->Data, "configurations")) {
+      reader->DefaultConfigurations.emplace_back(
+        cmSystemTools::UpperCase(config));
+    }
   }
 
   return reader;
@@ -664,17 +668,17 @@ cmTarget* cmPackageInfoReader::AddLibraryComponent(
   // Create the imported target.
   cmTarget* const target = makefile->AddImportedTarget(name, type, false);
 
+  // Set default configurations.
+  if (!this->DefaultConfigurations.empty()) {
+    target->SetProperty("IMPORTED_CONFIGURATIONS",
+                        cmJoin(this->DefaultConfigurations, ";"_s));
+  }
+
   // Set target properties.
   this->SetTargetProperties(makefile, target, data, package, {});
   auto const& cfgData = data["configurations"];
   for (auto ci = cfgData.begin(), ce = cfgData.end(); ci != ce; ++ci) {
     this->SetTargetProperties(makefile, target, *ci, package, IterKey(ci));
-  }
-
-  // Set default configurations.
-  if (!this->DefaultConfigurations.empty()) {
-    target->SetProperty("IMPORTED_CONFIGURATIONS",
-                        cmJoin(this->DefaultConfigurations, ";"_s));
   }
 
   return target;
