@@ -1,5 +1,5 @@
 ^CMake Error: Could not read presets from [^
 ]*/Tests/RunCMake/CMakePresets/NoVariableValue:
-Error: @9,16: Missing required field "value" in variable "VAR" for preset "NoVariableValue"
+CMakePresets.json:9: Missing required field "value" in variable "VAR" for preset "NoVariableValue"
         "VAR": {}
                \^$

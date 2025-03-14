@@ -1,4 +1,5 @@
-^CMake Error: +
-Error: @3,42: Not a valid query: "bad query"
+^CMake Error: Could not load instrumentation queries from [^
+]+:
+bad-query.json:[0-9]+: Not a valid query: "bad query"
   "queries": \["staticSystemInformation", "bad query"\]
                                          \^$

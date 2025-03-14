@@ -1556,7 +1556,7 @@ bool cmCTest::SetArgsFromPreset(std::string const& presetName,
   auto result = settingsFile.ReadProjectPresets(workingDirectory);
   if (result != true) {
     cmSystemTools::Error(cmStrCat("Could not read presets from ",
-                                  workingDirectory, ":",
+                                  workingDirectory, ":\n",
                                   settingsFile.parseState.GetErrorMessage()));
     return false;
   }

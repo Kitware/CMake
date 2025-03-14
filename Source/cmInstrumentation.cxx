@@ -148,6 +148,16 @@ void cmInstrumentation::ReadJSONQuery(std::string const& file)
   auto query = cmInstrumentationQuery();
   query.ReadJSON(file, this->errorMsg, this->queries, this->hooks,
                  this->callbacks);
+  if (!this->errorMsg.empty()) {
+    cmSystemTools::Error(cmStrCat(
+      "Could not load instrumentation queries from ",
+      cmSystemTools::GetParentDirectory(file), ":\n", this->errorMsg));
+  }
+}
+
+bool cmInstrumentation::HasErrors() const
+{
+  return !this->errorMsg.empty();
 }
 
 void cmInstrumentation::WriteJSONQuery(

@@ -53,7 +53,7 @@ public:
   int CollectTimingAfterBuild(int ppid);
   void AddHook(cmInstrumentationQuery::Hook hook);
   void AddQuery(cmInstrumentationQuery::Query query);
-  std::string errorMsg;
+  bool HasErrors() const;
   std::string const& GetCDashDir();
 
 private:
@@ -83,5 +83,6 @@ private:
   std::vector<std::string> queryFiles;
   std::map<std::string, std::string> cdashSnippetsMap;
   Json::Value preTestStats;
+  std::string errorMsg;
   bool hasQuery = false;
 };

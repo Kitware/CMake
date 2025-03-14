@@ -1,5 +1,5 @@
 ^CMake Error: Could not read presets from [^
 ]*/Tests/RunCMake/CMakePresets/InvalidVariableValue:
-Error: @10,20: "value" expected a string
+CMakePresets.json:10: "value" expected a string
           "value": \[\]
                    \^$

@@ -1,5 +1,5 @@
 ^CMake Error: Could not read presets from [^
 ]*/Tests/RunCMake/CMakePresets/InvalidPresetName:
-Error: @5,15: Invalid Preset Name
+CMakePresets.json:5: Invalid Preset Name
       "name": \[\],
               \^$

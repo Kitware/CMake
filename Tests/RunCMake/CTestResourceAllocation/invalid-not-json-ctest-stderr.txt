@@ -1,5 +1,5 @@
 ^Could not read/parse resource spec file [^
-]*/Tests/RunCMake/CTestResourceAllocation/invalid\.json:[ ]
+]*/Tests/RunCMake/CTestResourceAllocation/invalid\.json:
 JSON Parse Error: [^
 ]*/Tests/RunCMake/CTestResourceAllocation/invalid\.json:
 \* Line 1, Column 1

@@ -1,4 +1,5 @@
-^CMake Error: +
-Error: @3,13: Not a valid hook: "bad hook"
+^CMake Error: Could not load instrumentation queries from [^
+]+:
+bad-hook.json:3: Not a valid hook: "bad hook"
   "hooks": \["bad hook", "postGenerate", "preCMakeBuild", "postCMakeBuild", "postInstall"\]
             \^$

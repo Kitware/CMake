@@ -1,5 +1,5 @@
 ^CMake Error: Could not read presets from [^
 ]*/Tests/RunCMake/CMakePresets/InvalidPresetVendor:
-Error: @8,17: Invalid preset
+CMakePresets.json:8: Invalid preset
       "vendor": true
                 \^$
