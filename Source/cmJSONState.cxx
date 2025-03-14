@@ -4,10 +4,12 @@
 #include "cmJSONState.h"
 
 #include <iterator>
+#include <memory>
 #include <sstream>
 
 #include <cm3p/json/reader.h>
 #include <cm3p/json/value.h>
+#include <cm3p/json/version.h>
 
 #include "cmsys/FStream.hxx"
 
@@ -35,14 +37,27 @@ cmJSONState::cmJSONState(std::string jsonFile, Json::Value* root)
   }
   fin.seekg(finBegin);
 
-  // Parse the document.
   Json::CharReaderBuilder builder;
   Json::CharReaderBuilder::strictMode(&builder.settings_);
   std::string errMsg;
+
+#if JSONCPP_VERSION_HEXA >= 0x01090600
+  // Has StructuredError
+  std::unique_ptr<Json::CharReader> const reader(builder.newCharReader());
+  reader->parse(doc.data(), doc.data() + doc.size(), root, &errMsg);
+  std::vector<Json::CharReader::StructuredError> structuredErrors =
+    reader->getStructuredErrors();
+  for (auto const& structuredError : structuredErrors) {
+    this->AddErrorAtOffset(structuredError.message,
+                           structuredError.offset_start);
+  }
+#else
+  // No StructuredError Available, Use error string from jsonCpp
   if (!Json::parseFromStream(builder, fin, root, &errMsg)) {
     errMsg = cmStrCat("JSON Parse Error: ", this->Filename, ":\n", errMsg);
     this->AddError(errMsg);
   }
+#endif
 }
 
 void cmJSONState::AddError(std::string const& errMsg)
