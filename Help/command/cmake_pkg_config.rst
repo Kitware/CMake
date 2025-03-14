@@ -34,9 +34,9 @@ PkgConfig Targets
 
 ``cmake_pkg_config`` may recursively generate target-like names in the global
 scope in order to resolve a package ``IMPORT`` or ``POPULATE`` command. These
-names take the form of ``@foreign_pkgcfg::<package>`` and are exposed via the
-:prop_tgt:`INTERFACE_LINK_LIBRARIES` target property of an ``IMPORT``-generated
-target.
+names take the form of ``@foreign_pkgcfg::[<prefix>_]<package>`` and are exposed
+via the :prop_tgt:`INTERFACE_LINK_LIBRARIES` target property of an
+``IMPORT``-generated target.
 
 It is not possible to modify or address these pkg-config native targets via
 normal target-based commands. Limited control over their generation is possible
@@ -180,9 +180,16 @@ common between them. They are:
   #. If no top build directory path is available, the ``pc_top_builddir``
      package variable is not set
 
-``BIND_PC_REQUIRES``
-  A list of ``<Name>=<Target>`` pairs, the ``Name`` is a package name as it
-  appears in the ``Requires`` list of a pkg-config file and the ``Target`` is a
+``PREFIX <name>``
+  Specifying a prefix creates an independent collection of pkg-config targets
+  separate from previously populated targets. This enables multiple version of
+  a given package to co-exist, for example packages from different sysroots.
+
+  The default prefix is an empty string.
+
+``BIND_PC_REQUIRES <<name>=<target>>...``
+  A list of ``<name>=<target>`` pairs, the ``name`` is a package name as it
+  appears in the ``Requires`` list of a pkg-config file and the ``target`` is a
   CMake-native target name (not a pkg-config target).
 
   When a given package name appears in the ``Requires`` list of a package, it
@@ -311,6 +318,7 @@ The following variables will be populated from the contents of package file:
 
     cmake_pkg_config(POPULATE <package> [<version>]
                     [REQUIRED] [EXACT] [QUIET]
+                    [PREFIX <prefix>]
                     [BIND_PC_REQUIRES <<name>=<target>>...]
                     [STRICTNESS <mode>]
                     [ENV_MODE <mode>]
@@ -339,6 +347,8 @@ package was found.
 
     cmake_pkg_config(IMPORT <package> [<version>]
                     [REQUIRED] [EXACT] [QUIET]
+                    [NAME <name>]
+                    [PREFIX <prefix>]
                     [BIND_PC_REQUIRES <<name>=<target>>...]
                     [STRICTNESS <mode>]
                     [ENV_MODE <mode>]
@@ -350,7 +360,11 @@ package was found.
 
 Creates a native CMake ``IMPORTED`` target that can be linked to via
 :command:`target_link_libraries`. This new target is named
-``PkgConfig::<package>``.
+``PkgConfig::<package>`` by default.
 
 A ``PKGCONFIG_<package>_FOUND`` variable will be set to indicate whether the
 package was found.
+
+``NAME``
+  Overrides the name of the created CMake target to ``PkgConfig::<name>``. This
+  *does not* affect the ``PKGCONFIG_<package>_FOUND`` variable.
