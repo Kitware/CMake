@@ -458,23 +458,35 @@ if(MoltenVK IN_LIST Vulkan_FIND_COMPONENTS)
 endif()
 if(volk IN_LIST Vulkan_FIND_COMPONENTS)
   find_library(Vulkan_volk_LIBRARY
-          NAMES volk
-          HINTS
-            ${_Vulkan_hint_library_search_paths})
-  mark_as_advanced(Vulkan_Volk_LIBRARY)
+    NAMES volk
+    HINTS
+      ${_Vulkan_hint_library_search_paths})
+  mark_as_advanced(Vulkan_volk_LIBRARY)
+
+  find_library(Vulkan_volk_DEBUG_LIBRARY
+    NAMES volkd
+    HINTS
+      ${_Vulkan_hint_library_search_paths})
+  mark_as_advanced(Vulkan_volk_DEBUG_LIBRARY)
 endif()
 
 if (dxc IN_LIST Vulkan_FIND_COMPONENTS)
   find_library(Vulkan_dxc_LIBRARY
-          NAMES dxcompiler
-          HINTS
-            ${_Vulkan_hint_library_search_paths})
+    NAMES dxcompiler
+    HINTS
+      ${_Vulkan_hint_library_search_paths})
   mark_as_advanced(Vulkan_dxc_LIBRARY)
 
+  find_library(Vulkan_dxc_DEBUG_LIBRARY
+    NAMES dxcompilerd
+    HINTS
+      ${_Vulkan_hint_library_search_paths})
+  mark_as_advanced(Vulkan_dxc_DEBUG_LIBRARY)
+
   find_program(Vulkan_dxc_EXECUTABLE
-          NAMES dxc
-          HINTS
-            ${_Vulkan_hint_executable_search_paths})
+    NAMES dxc
+    HINTS
+      ${_Vulkan_hint_executable_search_paths})
   mark_as_advanced(Vulkan_dxc_EXECUTABLE)
 endif()
 
@@ -828,36 +840,57 @@ if(Vulkan_FOUND)
     endif()
   endif()
 
-  if(Vulkan_volk_LIBRARY AND NOT TARGET Vulkan::volk)
+  if((Vulkan_volk_LIBRARY OR Vulkan_volk_DEBUG_LIBRARY) AND NOT TARGET Vulkan::volk)
     add_library(Vulkan::volk STATIC IMPORTED)
     set_property(TARGET Vulkan::volk
             PROPERTY
               INTERFACE_INCLUDE_DIRECTORIES "${Vulkan_INCLUDE_DIRS}")
-    set_property(TARGET Vulkan::volk APPEND
-            PROPERTY
-              IMPORTED_CONFIGURATIONS Release)
-    set_property(TARGET Vulkan::volk APPEND
-            PROPERTY
-              IMPORTED_LOCATION_RELEASE "${Vulkan_volk_LIBRARY}")
+    if(Vulkan_volk_LIBRARY)
+      set_property(TARGET Vulkan::volk APPEND
+        PROPERTY
+          IMPORTED_CONFIGURATIONS Release)
+      set_property(TARGET Vulkan::volk
+        PROPERTY
+          IMPORTED_LOCATION_RELEASE "${Vulkan_volk_LIBRARY}")
+    endif()
+    if(Vulkan_volk_DEBUG_LIBRARY)
+      set_property(TARGET Vulkan::volk APPEND
+        PROPERTY
+          IMPORTED_CONFIGURATIONS Debug)
+      set_property(TARGET Vulkan::volk
+        PROPERTY
+          IMPORTED_LOCATION_DEBUG "${Vulkan_volk_DEBUG_LIBRARY}")
+    endif()
 
     if (NOT WIN32)
       set_property(TARGET Vulkan::volk APPEND
-              PROPERTY
-                IMPORTED_LINK_INTERFACE_LIBRARIES dl)
+        PROPERTY
+          IMPORTED_LINK_INTERFACE_LIBRARIES dl)
     endif()
   endif()
 
-  if (Vulkan_dxc_LIBRARY AND NOT TARGET Vulkan::dxc_lib)
+  if ((Vulkan_dxc_LIBRARY OR Vulkan_dxc_DEBUG_LIBRARY) AND NOT TARGET Vulkan::dxc_lib)
     add_library(Vulkan::dxc_lib STATIC IMPORTED)
     set_property(TARGET Vulkan::dxc_lib
       PROPERTY
         INTERFACE_INCLUDE_DIRECTORIES "${Vulkan_INCLUDE_DIRS}")
-    set_property(TARGET Vulkan::dxc_lib APPEND
-      PROPERTY
-        IMPORTED_CONFIGURATIONS Release)
-    set_property(TARGET Vulkan::dxc_lib APPEND
-      PROPERTY
-        IMPORTED_LOCATION_RELEASE "${Vulkan_dxc_LIBRARY}")
+    if(Vulkan_dxc_LIBRARY)
+      set_property(TARGET Vulkan::dxc_lib APPEND
+        PROPERTY
+          IMPORTED_CONFIGURATIONS Release)
+      set_property(TARGET Vulkan::dxc_lib
+        PROPERTY
+          IMPORTED_LOCATION_RELEASE "${Vulkan_dxc_LIBRARY}")
+    endif()
+    if(Vulkan_dxc_DEBUG_LIBRARY)
+      set_property(TARGET Vulkan::dxc_lib APPEND
+        PROPERTY
+          IMPORTED_CONFIGURATIONS Debug)
+      set_property(TARGET Vulkan::dxc_lib
+        PROPERTY
+          IMPORTED_LOCATION_DEBUG "${Vulkan_dxc_DEBUG_LIBRARY}")
+    endif()
+
   endif()
 
   if(Vulkan_dxc_EXECUTABLE AND NOT TARGET Vulkan::dxc_exe)
