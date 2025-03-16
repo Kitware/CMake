@@ -333,9 +333,11 @@ endif()
 
 
 include(${CMAKE_CURRENT_LIST_DIR}/CheckCXXSymbolExists.cmake)
-include(${CMAKE_CURRENT_LIST_DIR}/MacroAddFileDependencies.cmake)
 include(FindPackageHandleStandardArgs)
 include(${CMAKE_CURRENT_LIST_DIR}/CMakePushCheckState.cmake)
+
+# Included for backward compatibility, otherwise unused.
+include(${CMAKE_CURRENT_LIST_DIR}/MacroAddFileDependencies.cmake)
 
 set(QT_USE_FILE ${CMAKE_ROOT}/Modules/UseQt4.cmake)
 
