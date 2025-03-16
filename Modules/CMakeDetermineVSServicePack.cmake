@@ -7,15 +7,35 @@ CMakeDetermineVSServicePack
 
 .. deprecated:: 3.0
 
-  Do not use.
+  This module should no longer be used.  The functionality of this module has
+  been superseded by the :variable:`CMAKE_<LANG>_COMPILER_VERSION` variable that
+  contains the compiler version number.
 
-The functionality of this module has been superseded by the
-:variable:`CMAKE_<LANG>_COMPILER_VERSION` variable that contains
-the compiler version number.
+This module provides a function to determine the installed Visual Studio service
+pack version for Visual Studio 2012 and earlier.
 
-Determine the Visual Studio service pack of the 'cl' in use.
+.. command:: DetermineVSServicePack
 
-Usage:
+  .. code-block:: cmake
+
+    DetermineVSServicePack(<result>)
+
+  Determines the Visual Studio service pack version of the ``cl`` compiler in
+  use and stores the result in the specified internal cache variable
+  ``<result>``.
+
+  The ``<result>`` variable will be set to one of the following values or an
+  empty string if the service pack cannot be determined:
+
+  * ``vc80``, ``vc80sp1``
+  * ``vc90``, ``vc90sp1``
+  * ``vc100``, ``vc100sp1``
+  * ``vc110``, ``vc110sp1``, ``vc110sp2``, ``vc110sp3``, ``vc110sp4``
+
+Examples
+^^^^^^^^
+
+Determining the Visual Studio service pack version in a project:
 
 .. code-block:: cmake
 
@@ -26,14 +46,6 @@ Usage:
       message(STATUS "Detected: ${my_service_pack}")
     endif()
   endif()
-
-Function DetermineVSServicePack sets the given variable to one of the
-following values or an empty string if unknown::
-
-  vc80, vc80sp1
-  vc90, vc90sp1
-  vc100, vc100sp1
-  vc110, vc110sp1, vc110sp2, vc110sp3, vc110sp4
 #]=======================================================================]
 
 if(NOT CMAKE_MINIMUM_REQUIRED_VERSION VERSION_LESS 2.8.8)
