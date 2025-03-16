@@ -21,6 +21,7 @@
 
 #neundorf@kde.org
 
+# Included for backward compatibility, otherwise unused.
 include(AddFileDependencies)
 
 #create the kidl and skeletion file for dcop stuff
@@ -234,7 +235,7 @@ macro(KDE3_AUTOMOC)
           DEPENDS ${_header}
         )
 
-        ADD_FILE_DEPENDENCIES(${_abs_FILE} ${_moc})
+        set_property(SOURCE "${_abs_FILE}" APPEND PROPERTY OBJECT_DEPENDS "${_moc}")
 
       endforeach ()
       unset(_match)
