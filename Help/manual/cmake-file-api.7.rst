@@ -1058,6 +1058,13 @@ with members:
       * ``libraryPath``: library search path flags.
       * ``frameworkPath``: macOS framework search path flags.
 
+    ``backtrace``
+      Optional member that is present when a CMake language backtrace to
+      the :command:`target_link_libraries`, :command:`target_link_options`,
+      or other command invocation that added this link fragment is available.
+      The value is an unsigned integer 0-based index into the ``backtraceGraph``
+      member's ``nodes`` array.
+
   ``lto``
     Optional member that is present with boolean value ``true``
     when link-time optimization (a.k.a. interprocedural optimization
