@@ -37,6 +37,7 @@
 namespace {
 struct ExtractArguments;
 struct PopulateArguments;
+struct ImportArguments;
 }
 
 namespace {
@@ -797,10 +798,11 @@ bool HandleExtractCommand(std::vector<std::string> const& args,
 using pkgStack = std::unordered_map<std::string, std::vector<pkgStackEntry>>;
 using pkgProviders = std::unordered_map<std::string, std::string>;
 
-cmTarget* CreateCMakeTarget(std::string const& name, cmPkgConfigResult& pkg,
-                            pkgProviders& providers, cmMakefile& mf)
+cmTarget* CreateCMakeTarget(std::string const& name, std::string const& prefix,
+                            cmPkgConfigResult& pkg, pkgProviders& providers,
+                            cmMakefile& mf)
 {
-  auto* tgt = mf.AddForeignTarget("pkgcfg", name);
+  auto* tgt = mf.AddForeignTarget("pkgcfg", cmStrCat(prefix, name));
 
   tgt->AppendProperty("VERSION", pkg.Version());
 
@@ -829,13 +831,14 @@ cmTarget* CreateCMakeTarget(std::string const& name, cmPkgConfigResult& pkg,
     }
 
     tgt->AppendProperty("INTERFACE_LINK_LIBRARIES",
-                        cmStrCat("@foreign_pkgcfg::", dep.Name));
+                        cmStrCat("@foreign_pkgcfg::", prefix, dep.Name));
   }
   return tgt;
 }
 
 bool CheckPackageDependencies(
-  std::string const& name, cmPkgConfigResult& pkg, pkgStack& inStack,
+  std::string const& name, std::string const& prefix, cmPkgConfigResult& pkg,
+  pkgStack& inStack,
   std::unordered_map<std::string, cmPkgConfigResult>& outStack,
   pkgProviders& providers, ImportEnv& imEnv)
 {
@@ -846,7 +849,7 @@ bool CheckPackageDependencies(
     }
 
     auto* tgt = imEnv.status.GetMakefile().FindTargetToUse(
-      cmStrCat("@foreign_pkgcfg::", dep.Name),
+      cmStrCat("@foreign_pkgcfg::", prefix, dep.Name),
       cmStateEnums::TargetDomain::FOREIGN);
     if (tgt) {
       auto ver = tgt->GetProperty("VERSION");
@@ -882,16 +885,22 @@ bool CheckPackageDependencies(
 
 struct PopulateArguments : CommonArguments
 {
-  cm::optional<ArgumentParser::MaybeEmpty<std::vector<std::string>>> providers;
+  cm::optional<std::string> Prefix;
+  cm::optional<ArgumentParser::MaybeEmpty<std::vector<std::string>>> Providers;
 };
 
-auto const PopulateParser =
-  BIND_COMMON(PopulateArguments)
-    .Bind("BIND_PC_REQUIRES"_s, &PopulateArguments::providers);
+#define BIND_POPULATE(argtype)                                                \
+  BIND_COMMON(argtype)                                                        \
+    .Bind("PREFIX"_s, &argtype::Prefix)                                       \
+    .Bind("BIND_PC_REQUIRES"_s, &argtype::Providers)
+
+auto const PopulateParser = BIND_POPULATE(PopulateArguments);
 
 std::pair<bool, bool> PopulatePCTarget(PopulateArguments& args,
                                        cmExecutionStatus& status)
 {
+
+  std::string prefix = args.Prefix ? cmStrCat(*args.Prefix, "_"_s) : "";
 
   auto& mf = status.GetMakefile();
   auto maybeEnv = HandleCommon(args, status);
@@ -903,8 +912,8 @@ std::pair<bool, bool> PopulatePCTarget(PopulateArguments& args,
   auto& imEnv = maybeEnv->second;
 
   pkgProviders providers;
-  if (args.providers) {
-    for (auto const& provider_str : *args.providers) {
+  if (args.Providers) {
+    for (auto const& provider_str : *args.Providers) {
       auto assignment = provider_str.find('=');
       if (assignment != std::string::npos) {
         providers.emplace(provider_str.substr(0, assignment),
@@ -927,7 +936,7 @@ std::pair<bool, bool> PopulatePCTarget(PopulateArguments& args,
   }
   imEnv.exact = false;
 
-  if (!CheckPackageDependencies(*args.Package, *maybePackage, inStack,
+  if (!CheckPackageDependencies(*args.Package, prefix, *maybePackage, inStack,
                                 outStack, providers, imEnv)) {
     return { !args.Required, false };
   }
@@ -940,8 +949,8 @@ std::pair<bool, bool> PopulatePCTarget(PopulateArguments& args,
     if (!maybePackage) {
       return { !args.Required, false };
     }
-    if (!CheckPackageDependencies(name, *maybePackage, inStack, outStack,
-                                  providers, imEnv)) {
+    if (!CheckPackageDependencies(name, prefix, *maybePackage, inStack,
+                                  outStack, providers, imEnv)) {
       return { !args.Required, false };
     }
     inStack.erase(name);
@@ -949,7 +958,7 @@ std::pair<bool, bool> PopulatePCTarget(PopulateArguments& args,
   }
 
   for (auto& entry : outStack) {
-    CreateCMakeTarget(entry.first, entry.second, providers, mf);
+    CreateCMakeTarget(entry.first, prefix, entry.second, providers, mf);
   }
 
   return { true, true };
@@ -961,7 +970,11 @@ bool HandlePopulateCommand(std::vector<std::string> const& args,
   std::vector<std::string> unparsed;
   auto parsedArgs = PopulateParser.Parse(args, &unparsed);
 
-  auto foreign_name = cmStrCat("@foreign_pkgcfg::", *parsedArgs.Package);
+  std::string prefix =
+    parsedArgs.Prefix ? cmStrCat(*parsedArgs.Prefix, "_"_s) : "";
+
+  auto foreign_name =
+    cmStrCat("@foreign_pkgcfg::", prefix, *parsedArgs.Package);
   auto found_var = cmStrCat("PKGCONFIG_", *parsedArgs.Package, "_FOUND");
 
   auto& mf = status.GetMakefile();
@@ -976,13 +989,27 @@ bool HandlePopulateCommand(std::vector<std::string> const& args,
   return result.first;
 }
 
+struct ImportArguments : PopulateArguments
+{
+  cm::optional<std::string> Name;
+};
+
+auto const ImportParser =
+  BIND_POPULATE(ImportArguments).Bind("NAME"_s, &ImportArguments::Name);
+
 bool HandleImportCommand(std::vector<std::string> const& args,
                          cmExecutionStatus& status)
 {
   std::vector<std::string> unparsed;
-  auto parsedArgs = PopulateParser.Parse(args, &unparsed);
-  auto foreign_name = cmStrCat("@foreign_pkgcfg::", *parsedArgs.Package);
-  auto local_name = cmStrCat("PkgConfig::", *parsedArgs.Package);
+  auto parsedArgs = ImportParser.Parse(args, &unparsed);
+
+  std::string prefix =
+    parsedArgs.Prefix ? cmStrCat(*parsedArgs.Prefix, "_"_s) : "";
+
+  auto foreign_name =
+    cmStrCat("@foreign_pkgcfg::", prefix, *parsedArgs.Package);
+  auto local_name =
+    cmStrCat("PkgConfig::", parsedArgs.Name.value_or(*parsedArgs.Package));
   auto found_var = cmStrCat("PKGCONFIG_", *parsedArgs.Package, "_FOUND");
 
   auto& mf = status.GetMakefile();
