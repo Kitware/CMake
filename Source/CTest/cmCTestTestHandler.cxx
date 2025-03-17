@@ -1324,7 +1324,12 @@ bool cmCTestTestHandler::ProcessDirectory(std::vector<std::string>& passed,
 
   bool randomSchedule = this->CTest->GetScheduleType() == "Random";
   if (randomSchedule) {
-    srand(static_cast<unsigned>(time(nullptr)));
+    unsigned int seed = static_cast<unsigned>(time(nullptr));
+    srand(seed);
+    *this->LogFile
+      << "Test order random seed: " << seed << std::endl
+      << "----------------------------------------------------------"
+      << std::endl;
   }
 
   for (cmCTestTestProperties& p : this->TestList) {
