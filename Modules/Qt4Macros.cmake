@@ -280,7 +280,7 @@ macro(QT4_ADD_DBUS_INTERFACE _sources _interface _basename)
   QT4_GENERATE_MOC("${_header}" "${_moc}")
 
   list(APPEND ${_sources} "${_impl}" "${_header}" "${_moc}")
-  MACRO_ADD_FILE_DEPENDENCIES("${_impl}" "${_moc}")
+  set_property(SOURCE "${_impl}" APPEND PROPERTY OBJECT_DEPENDS "${_moc}")
 
 endmacro()
 
@@ -361,7 +361,7 @@ macro(QT4_ADD_DBUS_ADAPTOR _sources _xml_file _include _parentClass) # _optional
   QT4_GENERATE_MOC("${_header}" "${_moc}")
   set_property(SOURCE ${_impl} PROPERTY SKIP_AUTOMOC TRUE)  # don't run automoc on this file
   set_property(SOURCE ${_impl} PROPERTY SKIP_AUTOUIC TRUE)  # don't run autouic on this file
-  MACRO_ADD_FILE_DEPENDENCIES("${_impl}" "${_moc}")
+  set_property(SOURCE "${_impl}" APPEND PROPERTY OBJECT_DEPENDS "${_moc}")
 
   list(APPEND ${_sources} "${_impl}" "${_header}" "${_moc}")
 endmacro()
@@ -405,7 +405,7 @@ macro(QT4_AUTOMOC)
           endif()
           set(_moc    ${CMAKE_CURRENT_BINARY_DIR}/${_current_MOC})
           QT4_CREATE_MOC_COMMAND(${_header} ${_moc} "${_moc_INCS}" "" "")
-          MACRO_ADD_FILE_DEPENDENCIES(${_abs_FILE} ${_moc})
+          set_property(SOURCE "${_abs_FILE}" APPEND PROPERTY OBJECT_DEPENDS "${_moc}")
         endforeach ()
       endif()
     endif ()

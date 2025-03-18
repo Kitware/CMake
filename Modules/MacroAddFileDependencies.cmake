@@ -9,7 +9,7 @@ MacroAddFileDependencies
 
 .. code-block:: cmake
 
-  MACRO_ADD_FILE_DEPENDENCIES(<source> <files>...)
+  macro_add_file_dependencies(<source> <files>...)
 
 Do not use this command in new code.  It is just a wrapper around:
 
