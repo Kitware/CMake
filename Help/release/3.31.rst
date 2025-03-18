@@ -96,6 +96,10 @@ Variables
   property were added to optionally specify the strategy
   CMake uses to generate link lines.
 
+* The :envvar:`CMAKE_CONFIG_DIR` environment variable was added to specify a
+  CMake user-wide configuration directory for :manual:`cmake-file-api(7)`
+  queries.
+
 Properties
 ----------
 
