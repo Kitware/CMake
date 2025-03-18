@@ -306,6 +306,95 @@ Overall, the designs fall somewhere along two axes:
   schedule any discovered work during the build.
 * **Fixed** builds are generated with all module dependencies already known.
 
+Design Goals
+------------
+
+CMake's implementation of building C++ modules focuses on the following design
+goals:
+
+1. `Correct Builds <design-goal-correct-builds_>`__
+2. `Deterministic Builds <design-goal-deterministic-builds_>`__
+3. `Support Generated Sources <design-goal-generated-sources_>`__
+4. `Static Communication <design-goal-static-communication_>`__
+5. `Minimize Regeneration <design-goal-minimize-regeneration_>`__
+
+.. _design-goal-correct-builds:
+
+Correct Builds
+^^^^^^^^^^^^^^
+
+Above all else, an incorrect build is a frustrating experience for all
+involved.  A build which does not detect errors and instead lets a build with
+detectable problems run to completion is a good way to start wild goose chase
+debugging sessions.  CMake errs on the side of avoiding such situations.
+
+.. _design-goal-deterministic-builds:
+
+Deterministic Builds
+^^^^^^^^^^^^^^^^^^^^
+
+Given an on-disk state of a build, it should be possible to determine what
+steps will happen next.  This does not mean that the exact order of rules
+within the build that can be run concurrently is deterministic, but instead
+that the set of work to be done and its results are deterministic.  For
+example, if there is no dependency between tasks ``A`` and ``B``, ``A`` should
+have no effects on the execution of ``B`` and vice versa.
+
+.. _design-goal-generated-sources:
+
+Support Generated Sources
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Code generation is prevalent in the C++ ecosystem, so only supporting modules
+in files whose content is known at configure time is not suitable.  Without
+supporting generated sources which use or provide modules, code generation
+tools are effectively cut off from the use of modules, and any dependencies of
+generated sources must also provide non-modular ways of using their interfaces
+(i.e., provide headers).  Given that all C++ implementations use :term:`strong
+module ownership` for symbol mangling, this is problematic when such
+interfaces end up referring to compiled symbols in other libraries.
+
+.. _design-goal-static-communication:
+
+Static Communication
+^^^^^^^^^^^^^^^^^^^^
+
+All communication between different steps of the build should be handled
+statically.  Given the :term:`build tools <build tool>` that CMake supports,
+it is challenging to establish a controlled lifetime for a companion tool that
+needs to interact during compilation.  Neither ``make`` nor ``ninja`` offer a
+way to start a tool at the beginning of a build and ensure it is stopped at
+the end.  Instead, communication with compilers is managed through input and
+output files, using dependencies in the :term:`build tool` to keep everything
+up-to-date.  This approach enables standard debugging strategies for builds
+and allows developers to run build commands directly when investigating
+issues, without needing to account for other tools running in the background.
+
+.. _design-goal-minimize-regeneration:
+
+Minimize Regeneration
+^^^^^^^^^^^^^^^^^^^^^
+
+Active development of a build with modules should not require the build graph
+to be regenerated on every change.  This means that the module dependencies
+must be constructed after the build graph is available.  Without this, a
+`correct build <design-goal-correct-builds_>`__ would need to regenerate the
+build graph any time a module-aware source file is edited, as any changes may
+alter module dependencies.
+
+It also means that all module-aware sources must be known at configure time
+(even if they do not yet exist) so that the build graph can include the
+commands to :term:`scan` for their dependencies.
+
+.. note::
+
+  There is a known issue with ``ninja`` which can result in an erroneous
+  detection of a dependency cycle when the dependency order between two
+  sources reverses (i.e., `a` importing `b` becomes `b` importing `a`) between
+  two builds.  See `ninja issue 2666`_ for details.
+
+.. _`ninja issue 2666`: https://github.com/ninja-build/ninja/issues/2666
+
 Possible Future Enhancements
 ============================
 
@@ -446,6 +535,11 @@ Module Compilation Glossary
    primary module interface unit
      A :term:`module interface unit` which exports a named module that is not
      a :term:`partition unit`.
+
+   strong module ownership
+     C++ implementations have settled on a model where the module "owns" the
+     symbols declared within it.  In practice, this means that the module name
+     is included into the symbol mangling of entities declared within it.
 
    translation unit
      The smallest component of a compilation for a C++ program.  Generally,
