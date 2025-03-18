@@ -139,6 +139,141 @@ For the :ref:`Visual Studio Generators`:
 - Use of modules provided by ``PRIVATE`` sources from ``PUBLIC`` module
   sources is not diagnosed.
 
+Usage
+=====
+
+Troubleshooting CMake
+---------------------
+
+This section aims to answer common questions about CMake's implementation and
+to help diagnose or explain errors in CMake's C++ modules support.
+
+File Extension Support
+^^^^^^^^^^^^^^^^^^^^^^
+
+CMake imposes no requirements upon file extensions for modules of any unit
+type.  While there are preferences that differ between toolchains (e.g.,
+``.ixx`` on MSVC and ``.cppm`` on Clang), there is no universally agreed-upon
+extension.  As such, CMake only requires that the file be recognized as a
+``CXX``-language source file.  By default, any recognized extension will
+suffice, but the :prop_sf:`LANGUAGE` property may be used with any other
+extension as well.
+
+File Name Requirements
+^^^^^^^^^^^^^^^^^^^^^^
+
+The name of a module has no relation to the name or path of the file in which
+its declaration resides.  The C++ standard has no requirements here and
+neither does CMake.  However, it may be useful to have some pattern in use
+within a project for easier navigation within environments that lack IDE-like
+"find symbol" functionality (e.g., on code review platforms).
+
+Scanning Without Modules
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+A common problem for projects that have not yet adopted modules is unnecessary
+scanning of sources.  This typically happens when a C++20 project becomes
+aware of CMake 3.28, or a 3.28-aware project starts using C++20.  Either case
+ends up setting :policy:`CMP0155` to ``NEW``, which enables scanning of C++
+sources with C++20 or newer by default.  The easiest way for projects to turn
+this off is to add:
+
+.. code-block:: cmake
+
+   set(CMAKE_CXX_SCAN_FOR_MODULES 0)
+
+near the top of their top-level ``CMakeLists.txt`` file.  Note that it should
+**not** be in the cache, as it may otherwise affect projects using it via
+``FetchContent``.  Attention should also be paid to vendored projects which
+may want to enable scanning for their own sources, as this would change the
+default for them as well.
+
+Debugging Module Builds
+-----------------------
+
+This section aims to help diagnose or explain common errors that may arise on
+the build side of CMake's C++ modules support.
+
+Import Cycles
+^^^^^^^^^^^^^
+
+The C++ standard does not allow for cycles in the ``import`` graph of a
+:term:`translation unit`; therefore, CMake does not either.  Currently, CMake
+will leave it to the :term:`build tool` to detect this based on the
+:term:`dynamic dependencies` used to order module compilations.
+`CMake Issue 26119`_ tracks the desire to improve the user experience in this
+case.
+
+.. _`CMake Issue 26119`: https://gitlab.kitware.com/cmake/cmake/-/issues/26119
+
+Internal Module Partition Extension
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+When the implementation of building C++ modules was first investigated, it
+appeared as though there existed a type of :term:`translation unit` that
+represented the intersection of a :term:`partition unit` and an
+:term:`implementation unit`.  Initial CMake designs included specific support
+for these translation units; however, after a closer reading of the standard,
+these did not actually exist.  These units would have had ``module M:part;``
+as their module declaration statement.  The problem is that this is also the
+exact syntax also used for declaring module partitions that do not contribute
+to the external interface of the primary module.  Only MSVC supports this
+distinction.  Other compilers do not and will treat such files as an
+:term:`internal partition unit` and CMake will raise an error that a
+module-providing C++ source must be in a ``FILE_SET`` of type ``CXX_MODULES``.
+
+The fix is to not use the extension, as it provides no further expressivity
+over not using the extension.  All :term:`implementation unit` source files
+should instead only use ``module M;`` as their module declaration statement
+regardless of what partition the defined entities are declared within.  As an
+example:
+
+.. code-block:: cpp
+
+   // module-interface.cpp
+   export module M;
+   export int foo();
+
+   // module-impl.cpp
+   module M:part; // module M:part; looks like an internal partition
+   int foo() { return 42; }
+
+Instead use explicit interface/implementation separation:
+
+.. code-block:: cpp
+
+   // module-interface.cpp
+   export module M;
+   export int foo();
+
+   // module-impl.cpp
+   module M;
+   int foo() { return 42; }
+
+Module Visibility
+^^^^^^^^^^^^^^^^^
+
+CMake enforces :term:`module visibility` between and within targets.  This
+essentially means that a module (say, ``I``) provided from a ``PRIVATE``
+``FILE_SET`` on a target ``T`` may not be imported by:
+
+- other targets depending on ``T``; or
+- modules provided from a ``PUBLIC`` ``FILE_SET`` on target ``T`` itself.
+
+This is because, in general, all imported entities from a module must also be
+importable by all potential importers of that module.  Even if module ``I`` is
+only used within parts of a module without the ``export`` keyword, it may
+affect things within it in such a way that consumers of the module need to be
+able to transitively ``import`` it to work correctly.  As CMake uses the
+module visibility to determine whether to install :term:`module interface
+units <module interface unit>`, a ``PRIVATE`` module interface unit will not
+be installed, meaning that usage of any installed module which imports ``I``
+would not work.
+
+Instead, import ``PRIVATE`` C++ modules only from within an
+:term:`implementation unit`, as these are not exposed to consumers of any
+module.
+
 Possible Future Enhancements
 ============================
 
@@ -230,6 +365,10 @@ Module Compilation Glossary
      A C++20 language feature for describing the API of a piece of software.
      Intended as a replacement for headers for this purpose.
 
+   dynamic dependencies
+     Dependencies which require a separate command to detect so that a further
+     command may have its dependencies satisfied.
+
    embarrassingly parallel
      A set of tasks which, due to having minimal dependencies between them,
      can be easily divided into many independent tasks that can be executed
@@ -239,3 +378,36 @@ Module Compilation Glossary
      A header file which is used via an ``import`` statement rather than an
      ``#include`` preprocessor directive.  Implementations may provide support
      for treating ``#include`` as ``import`` as well.
+
+   implementation unit
+     A C++ :term:`translation unit` that implements module entities declared
+     in a module interface unit.
+
+   internal partition unit
+     A :term:`translation unit` which contains a partition name and is not
+     exported from the :term:`primary module interface unit`.
+
+   module interface unit
+     A :term:`translation unit` that declares a module's public interface
+     using ``export module``.  Such a unit may or may not be also be a
+     :term:`partition unit`.
+
+   module visibility
+     CMake's enforcement of access rules for modules based on their
+     declaration scope (PUBLIC/PRIVATE).
+
+   partition unit
+     A :term:`translation unit` which describes a module with a partition name
+     (i.e., `module MODNAME:PARTITION;`).  The partition may or may not use
+     the ``export`` keyword.  If it does, it is also a
+     :term:`module interface unit`; otherwise, it is a
+     :term:`internal partition unit`.
+
+   primary module interface unit
+     A :term:`module interface unit` which exports a named module that is not
+     a :term:`partition unit`.
+
+   translation unit
+     The smallest component of a compilation for a C++ program.  Generally,
+     there is one translation unit per source file.  C++ source files which do
+     not use C++ modules may be combined into a single translation unit.
