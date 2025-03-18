@@ -395,6 +395,14 @@ commands to :term:`scan` for their dependencies.
 
 .. _`ninja issue 2666`: https://github.com/ninja-build/ninja/issues/2666
 
+Use Case Considerations
+-----------------------
+
+The design goals described above constrain the implementation.  Additionally,
+mixed configurations are supported by CMake via multi-config generators such
+as :generator:`Ninja Multi-Config` and :ref:`Visual Studio Generators`.  This
+section describes how CMake addresses these constraints.
+
 Possible Future Enhancements
 ============================
 
