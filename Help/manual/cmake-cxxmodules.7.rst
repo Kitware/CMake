@@ -16,17 +16,19 @@ build graph.
 Compilation Strategy
 ====================
 
-With C++ modules, compiling a set of C++ sources is no longer embarrassingly
-parallel.  That is, any given source may require the compilation of another
-source file first in order to provide a "BMI" (or "CMI") that C++ compilers
-use to satisfy ``import`` statements in other sources.  With included headers,
-sources could share their declarations so that any consumers could compile
-independently. With modules, declarations are now generated into these BMI
-files by the compiler during compilation based on the contents of the source
-file and its ``export`` statements.  That means that, in order to get a
-correct build without regenerating the build graph via a configure and
-generate phase for every source change, the ordering needs to be extracted
-from the source during the build phase.
+With C++ modules, compiling a set of C++ sources is no longer
+:term:`embarrassingly parallel`.  That is, any given source may require the
+compilation of another source file first in order to provide a
+":abbr:`BMI (built module interface)`" (or
+":abbr:`CMI (compiled module interface)`") that C++ compilers use to satisfy
+``import`` statements in other sources.  With included headers, sources could
+share their declarations so that any consumers could compile independently.
+With modules, the compiler now generates :term:`BMI` files during compilation
+based on the contents of the source file and its ``export`` statements.  This
+means that, to ensure a correct build without having to regenerate the build
+graph (by running configure and generate steps) for every source change, the
+correct ordering must be determined from the source files during the build
+phase.
 
 :term:`Build systems <build system>` must be able to order these compilations
 within the build graph.  There are multiple strategies that are suitable for
@@ -123,7 +125,7 @@ can change over time.
 
 For all generators:
 
-- Header units are not supported.
+- :term:`Header units <header unit>` are not supported.
 - There is no builtin support for ``import std`` or other compiler-provided
   modules.
 
@@ -131,9 +133,9 @@ For the :ref:`Visual Studio Generators`:
 
 - Only Visual Studio 2022 and MSVC toolsets 14.34 (Visual Studio
   17.4) and newer are supported.
-- Exporting or installing BMI or module information is not supported.
-- Compiling BMIs from ``IMPORTED`` targets with C++ modules (including
-  ``import std``) is not supported.
+- Exporting or installing :term:`BMI` or module information is not supported.
+- Compiling :term:`BMIs <BMI>` from ``IMPORTED`` targets with C++ modules
+  (including ``import std``) is not supported.
 - Use of modules provided by ``PRIVATE`` sources from ``PUBLIC`` module
   sources is not diagnosed.
 
@@ -157,14 +159,14 @@ unchanged results do not trigger recompilations.
 BMI Modification Optimization
 -----------------------------
 
-Currently, as with object files, compilers always update a BMI file even if
-the contents have not changed.  Because modules increase the potential scope
-of "non-changes" to cause (conceptually) unnecessary recompilation, it might
-be useful to avoid recompilation of module consumers if the BMI file has not
-changed.  This might be achieved by wrapping the compilation to juggle the BMI
-through a ``cmake -E copy_if_different`` pass with ``ninja``'s ``restat = 1``
-feature to avoid recompiling importers if the BMI file doesn't actually
-change.
+Currently, as with object files, compilers always update a :term:`BMI` file
+even if the contents have not changed.  Because modules increase the potential
+scope of "non-changes" to cause (conceptually) unnecessary recompilation, it
+might be useful to avoid recompilation of module consumers if the :term:`BMI`
+file has not changed.  This might be achieved by wrapping the compilation to
+juggle the :term:`BMI` through a ``cmake -E copy_if_different`` pass with
+``ninja``'s ``restat = 1`` feature to avoid recompiling importers if the
+:term:`BMI` file doesn't actually change.
 
 .. _`easier-source-specification`:
 
@@ -177,34 +179,43 @@ related to other metadata requirements.  These were discovered while
 implementing CMake support beyond just building the modules-using code.
 
 Conflicts with `Separate BMI Generation <separate-bmi-generation_>`__ on a
-single target, as that requires knowledge of all BMI-generating rules at
-generate time.
+single target, as that requires knowledge of all :term:`BMI`-generating rules
+at generate time.
 
 .. _`separate-bmi-generation`:
 
 Separate BMI Generation
 -----------------------
 
-CMake currently uses a single rule to generate both the BMI and the object
-file for a compilation.  At least Clang supports compiling an object directly
-from the BMI.  This would be beneficial because BMI generation is typically
-faster than compilation and generating the BMI as a separate step allows
-importers to start compiling without waiting for the object to also be
-generated.
+CMake currently uses a single rule to generate both the :term:`BMI` and the
+object file for a compilation.  At least Clang supports compiling an object
+directly from the :term:`BMI`.  This would be beneficial because :term:`BMI`
+generation is typically faster than compilation and generating the :term:`BMI`
+as a separate step allows importers to start compiling without waiting for the
+object to also be generated.
 
 This is not supported in the current implementation as only Clang supports
-generating an object directly from the BMI.  Other compilers either do not
-support such a two-phase generation (GCC) or need to start object compilation
-from the source again.
+generating an object directly from the :term:`BMI`.  Other compilers either do
+not support such a two-phase generation (GCC) or need to start object
+compilation from the source again.
 
 Conflicts with `Easier Source Specification <easier-source-specification_>`__
-on a single target because CMake must know all BMI-generating sources at
-generate time rather than build time to create the two-phase rules.
+on a single target because CMake must know all :term:`BMI`-generating sources
+at generate time rather than build time to create the two-phase rules.
 
 Module Compilation Glossary
 ===========================
 
 .. glossary::
+
+   BMI
+     Built Module Interface.  A compiler-generated binary representation of a
+     C++ module's interface that is required by consumers of the module.  File
+     extensions vary by compiler.
+
+   CMI
+     Compiled Module Interface.  Alternative name for :term:`BMI` used by some
+     compilers.
 
    build system
      A tool that facilitates the building of software which includes a model
@@ -218,3 +229,13 @@ Module Compilation Glossary
    C++ module
      A C++20 language feature for describing the API of a piece of software.
      Intended as a replacement for headers for this purpose.
+
+   embarrassingly parallel
+     A set of tasks which, due to having minimal dependencies between them,
+     can be easily divided into many independent tasks that can be executed
+     concurrently.
+
+   header unit
+     A header file which is used via an ``import`` statement rather than an
+     ``#include`` preprocessor directive.  Implementations may provide support
+     for treating ``#include`` as ``import`` as well.
