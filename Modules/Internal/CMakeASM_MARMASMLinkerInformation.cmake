@@ -2,9 +2,9 @@
 # file LICENSE.rst or https://cmake.org/licensing for details.
 
 
-# support for the MS assembler, masm and masm64
+# support for the MS assembler, marmasm and marmasm64
 
 # Load the generic ASMInformation file:
-set(ASM_DIALECT "_MASM")
+set(ASM_DIALECT "_MARMASM")
 include(Internal/CMakeASMLinkerInformation)
 set(ASM_DIALECT)
