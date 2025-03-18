@@ -280,12 +280,14 @@ cmExportFileGenerator::ExportInfo cmExportInstallFileGenerator::FindExportInfo(
                     [&name](std::unique_ptr<cmTargetExport> const& te) {
                       return te->TargetName == name;
                     })) {
-      exportSets.insert(exp.first);
       std::vector<cmInstallExportGenerator const*> const* installs =
         exportSet.GetInstallations();
-      for (cmInstallExportGenerator const* install : *installs) {
-        exportFiles.push_back(install->GetDestinationFile());
-        namespaces.insert(install->GetNamespace());
+      if (!installs->empty()) {
+        exportSets.insert(exp.first);
+        for (cmInstallExportGenerator const* install : *installs) {
+          exportFiles.push_back(install->GetDestinationFile());
+          namespaces.insert(install->GetNamespace());
+        }
       }
     }
   }
