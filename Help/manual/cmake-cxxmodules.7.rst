@@ -274,6 +274,38 @@ Instead, import ``PRIVATE`` C++ modules only from within an
 :term:`implementation unit`, as these are not exposed to consumers of any
 module.
 
+Design
+======
+
+The design of CMake's C++ module support makes a number of trade-offs compared
+to other designs.  First, CMake's chosen design will be covered.  Later
+sections cover alternative designs that were not chosen for CMake's
+implementation.
+
+Overall, the designs fall somewhere along two axes:
+
+.. list-table::
+
+   * - Explicit Dynamic
+     - Explicit Static
+     - Explicit Fixed
+   * - Implicit Dynamic
+     - Implicit Static
+     - Implicit Fixed
+
+* **Explicit** builds control which modules are visible to each translation
+  unit directly.  For example, when compiling a source requiring a module
+  ``M``, the compiler will be given information which states the exact BMI
+  file to use when importing the ``M`` module.
+* **Implicit** builds can control module visibility as well, but do so by
+  instead grouping :term:`BMIs <BMI>` into directories which are then searched
+  for files to satisfy ``import`` statements in the source file.
+* **Static** builds use a static set of build commands in order to complete
+  the build.  There must be support to add edges between nodes at build time.
+* **Dynamic** builds may create new build commands during the build and
+  schedule any discovered work during the build.
+* **Fixed** builds are generated with all module dependencies already known.
+
 Possible Future Enhancements
 ============================
 
@@ -374,6 +406,10 @@ Module Compilation Glossary
      can be easily divided into many independent tasks that can be executed
      concurrently.
 
+   explicit build
+     A build strategy where module dependencies are explicitly specified
+     rather than discovered.
+
    header unit
      A header file which is used via an ``import`` statement rather than an
      ``#include`` preprocessor directive.  Implementations may provide support
@@ -382,6 +418,10 @@ Module Compilation Glossary
    implementation unit
      A C++ :term:`translation unit` that implements module entities declared
      in a module interface unit.
+
+   implicit build
+     A build strategy where module dependencies are discovered by searching
+     for :term:`BMI` files during compilation.
 
    internal partition unit
      A :term:`translation unit` which contains a partition name and is not
