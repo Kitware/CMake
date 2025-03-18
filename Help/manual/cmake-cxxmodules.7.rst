@@ -5,11 +5,12 @@ cmake-cxxmodules(7)
 
 .. versionadded:: 3.28
 
-C++ 20 introduced the concept of "modules" to the language.  The design
-requires build systems to order compilations to satisfy ``import`` statements
-reliably.  CMake's implementation asks the compiler to scan source files for
-module dependencies during the build, collates scanning results to infer
-ordering constraints, and tells the build tool how to dynamically update the
+C++ 20 introduced the concept of ":term:`modules <C++ module>`" to the
+language.  The design requires :term:`build systems <build system>` to order
+compilations to satisfy ``import`` statements reliably.  CMake's
+implementation asks the compiler to scan source files for module dependencies
+during the build, collates scanning results to infer ordering constraints, and
+tells the :term:`build tool` how to dynamically update the
 build graph.
 
 Compilation Strategy
@@ -27,12 +28,12 @@ correct build without regenerating the build graph via a configure and
 generate phase for every source change, the ordering needs to be extracted
 from the source during the build phase.
 
-Build systems must be able to order these compilations within the build graph.
-There are multiple strategies that are suitable for this, but each has
-advantages and disadvantages.  CMake uses a "scanning" step strategy, which is
-the most visible modules-related change for CMake users in the context of the
-build.  CMake provides multiple ways to control the scanning behavior of
-source files.
+:term:`Build systems <build system>` must be able to order these compilations
+within the build graph.  There are multiple strategies that are suitable for
+this, but each has advantages and disadvantages.  CMake uses a "scanning" step
+strategy, which is the most visible modules-related change for CMake users in
+the context of the build.  CMake provides multiple ways to control the
+scanning behavior of source files.
 
 .. _`P1689R5`: https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/p1689r5.html
 
@@ -199,3 +200,21 @@ from the source again.
 Conflicts with `Easier Source Specification <easier-source-specification_>`__
 on a single target because CMake must know all BMI-generating sources at
 generate time rather than build time to create the two-phase rules.
+
+Module Compilation Glossary
+===========================
+
+.. glossary::
+
+   build system
+     A tool that facilitates the building of software which includes a model
+     of how components of the build relate to each other.  For example, CMake,
+     Meson, build2, and more.
+
+   build tool
+     A build graph execution tool.  For example, `ninja` and `make`.  Some
+     build tools are also their own :term:`build system`.
+
+   C++ module
+     A C++20 language feature for describing the API of a piece of software.
+     Intended as a replacement for headers for this purpose.
