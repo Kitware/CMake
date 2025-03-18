@@ -236,11 +236,11 @@ Example:
   }
 
 In this example, after every ``cmake --build`` or ``cmake --install``
-invocation, an index file ``index-<hash>.json`` will be generated in
+invocation, an index file ``index-<timestamp>.json`` will be generated in
 ``<build>/.cmake/instrumentation/v1/data`` containing a list of data snippet
 files created since the previous indexing. The commands
-``/usr/bin/python callback.py index-<hash>.json`` and
-``/usr/bin/cmake -P callback.cmake arg index-<hash>.json`` will be executed in
+``/usr/bin/python callback.py index-<timestamp>.json`` and
+``/usr/bin/cmake -P callback.cmake arg index-<timestamp>.json`` will be executed in
 that order. The index file will contain the ``staticSystemInformation`` data and
 each snippet file listed in the index will contain the
 ``dynamicSystemInformation`` data. Once both callbacks have completed, the index
@@ -275,7 +275,7 @@ the command executed. Additionally, snippet files are created for the following:
 These files remain in the build tree until after `Indexing`_ occurs and any
 user-specified `Callbacks`_ are executed.
 
-Snippet files have a filename with the syntax ``<role>-<timestamp>-<hash>.json``
+Snippet files have a filename with the syntax ``<role>-<hash>-<timestamp>.json``
 and contain the following data:
 
   ``version``
@@ -284,6 +284,9 @@ and contain the following data:
 
   ``command``
     The full command executed. Excluded when ``role`` is ``build``.
+
+  ``workingDir``
+    The working directory in which the ``command`` was executed.
 
   ``result``
     The exit-value of the command, an integer.
@@ -450,14 +453,14 @@ Example:
     "buildDir": "<build>",
     "dataDir": "<build>/.cmake/instrumentation/v1/data",
     "snippets": [
-      "configure-<timestamp>-<hash>.json",
-      "generate-<timestamp>-<hash>.json",
-      "compile-<timestamp>-<hash>.json",
-      "compile-<timestamp>-<hash>.json",
-      "link-<timestamp>-<hash>.json",
-      "install-<timestamp>-<hash>.json",
-      "ctest-<timestamp>-<hash>.json",
-      "test-<timestamp>-<hash>.json",
-      "test-<timestamp>-<hash>.json",
+      "configure-<hash>-<timestamp>.json",
+      "generate-<hash>-<timestamp>.json",
+      "compile-<hash>-<timestamp>.json",
+      "compile-<hash>-<timestamp>.json",
+      "link-<hash>-<timestamp>.json",
+      "install-<hash>-<timestamp>.json",
+      "ctest-<hash>-<timestamp>.json",
+      "test-<hash>-<timestamp>.json",
+      "test-<hash>-<timestamp>.json",
     ]
   }

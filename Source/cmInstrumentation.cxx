@@ -399,6 +399,7 @@ std::string cmInstrumentation::InstrumentTest(
   root["testName"] = name;
   root["result"] = static_cast<Json::Value::Int64>(result);
   root["config"] = config;
+  root["workingDir"] = cmSystemTools::GetLogicalWorkingDirectory();
 
   // Post-Command
   this->InsertTimingData(root, steadyStart, systemStart);
@@ -407,9 +408,11 @@ std::string cmInstrumentation::InstrumentTest(
     this->InsertDynamicSystemInformation(root, "after");
   }
 
-  std::string file_name =
-    cmStrCat("test-", this->ComputeSuffixHash(command_str),
-             this->ComputeSuffixTime(), ".json");
+  cmsys::SystemInformation info;
+  std::string file_name = cmStrCat(
+    "test-",
+    this->ComputeSuffixHash(cmStrCat(command_str, info.GetProcessId())),
+    this->ComputeSuffixTime(), ".json");
   this->WriteInstrumentationJson(root, "data", file_name);
   return file_name;
 }
@@ -524,11 +527,14 @@ int cmInstrumentation::InstrumentCommand(
     }
   }
   root["role"] = command_type;
+  root["workingDir"] = cmSystemTools::GetLogicalWorkingDirectory();
 
   // Write Json
-  std::string const& file_name =
-    cmStrCat(command_type, "-", this->ComputeSuffixHash(command_str),
-             this->ComputeSuffixTime(), ".json");
+  cmsys::SystemInformation info;
+  std::string const& file_name = cmStrCat(
+    command_type, "-",
+    this->ComputeSuffixHash(cmStrCat(command_str, info.GetProcessId())),
+    this->ComputeSuffixTime(), ".json");
   this->WriteInstrumentationJson(root, "data", file_name);
   return ret;
 }
