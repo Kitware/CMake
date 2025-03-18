@@ -410,6 +410,113 @@ within the target.
 
 .. _`P1689R5`: https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/p1689r5.html
 
+Alternative Designs
+-------------------
+
+There are alternative designs that CMake does not implement.  This section
+aims to give a brief overview and to explain why they were not chosen for
+CMake's implementation.
+
+Implicit Builds
+^^^^^^^^^^^^^^^
+
+An implicit build performs module builds using compile-time search paths to
+make the implementation of the build simpler.  This is certainly something
+that can be made to work.  However, CMake's goals exclude it as a solution.
+
+When a build uses search directory management, the compiler is directed to
+place module output files into a specified directory.  These directories are
+then provided as search paths to any compilation allowed to use the modules
+within them.
+
+This strategy risks running into problems with the
+`Correct Builds <design-goal-correct-builds_>`__ goal.  This stems from the
+hazard of stale files being present in the search directories.  Since the
+build system is unaware of the actual files being written, it is difficult to
+know which files are allowed to be deleted (e.g., using ``ninja -t cleandead``
+to remove outputs ``ninja`` has encountered but are no longer generated).
+Removal of intermediate files may also cause the build to become stuck if the
+outputs are not known to the build system beyond consumers reporting "usage of
+file X".
+
+There is also a need to at least do some level of ordering of :term:`BMI`
+generation commands which share an output directory.  Separate directories may
+be used to order groups of modules (e.g., one directory per target);
+otherwise, modules within the same directory may not assume that other modules
+writing to the shared directory will complete first.  If module paths are
+grouped accurately according to the module dependency graph, it is a small
+step to being an explicit build where the files are directly specified.
+
+Static Scanning
+^^^^^^^^^^^^^^^
+
+A :term:`fixed build` performs a scan while generating the build graph and
+includes the necessary dependencies up-front.  In CMake's case, it would look
+at the source files during the generate phase and add the dependencies
+directly to the build graph.  This is more likely to be suitable for a
+:term:`build system` that is also its own :term:`build tool` where build graph
+manipulation can be done cooperatively.
+
+No matter whether it is integrated or not, this strategy necessitates either a
+suitable C++ parser to extract the information in the first place, or toolchain
+cooperation to obtain it.  While module dependency information is available to
+a simpler C++ parser, dependencies may be hidden behind preprocessor
+conditionals that need to be understood in order to be accurate.  Of course,
+choosing to not support preprocessor conditionals around ``import`` statements
+is also an option, but this may severely limit external library support.
+
+For CMake, this strategy would mean that any change to a module-aware source
+file may need to trigger regeneration of the build graph.  A benign edit would
+at least need to trigger the *check* for changed imports, but may skip
+actually regenerating if it is unchanged.  This may be less critical for a
+:term:`build system` which is also its own :term:`build tool`, but it is a
+direct violation of the
+`Minimize Regeneration <design-goal-minimize-regeneration_>`__ goal.
+
+Additionally, CMake's
+`Support Generated Sources <design-goal-generated-sources_>`__ goal would be
+unsupportable with this strategy.  CMake could defer scanning until the
+generated files are available, but those sources cannot be compiled until such
+a scan has been performed.  This would mean that there would be some unbounded
+(but finite) number of regenerations of the build graph as sources become
+available.
+
+Module Mapping Service
+^^^^^^^^^^^^^^^^^^^^^^
+
+Another strategy is to run a service alongside the build that can act as an
+oracle for where to place and discover modules.  The compiler is instructed to
+query the service with questions such as "this source is exporting module X"
+and "this source is importing module Y" and receive the path to either create
+or find the :term:`BMI`, respectively.  In this case, the service dynamically
+implements the collation logic.
+
+Of particular note, this conflicts with the
+`Deterministic Builds <design-goal-deterministic-builds_>`__ and
+`Static Communication <design-goal-static-communication_>`__ goals because the
+on-disk state may not match the actual state, and coordinating the lifetime of
+the :term:`build tool` itself with the service is difficult.  The primary
+missing feature is some signal when a build session starts and ends so that
+such a service can know in what context it is answering requests.  There also
+needs to be a way to resume a session and detect when a session is
+invalidated.  No :term:`build tool` that CMake supports today has such
+features.
+
+There are also hazards which conflict with the
+`Correct Builds <design-goal-correct-builds_>`__ goal.  When a module is
+imported, the compiler waits for a response before continuing.  However, there
+is no guarantee that a (visible) module of that name even exists, so it may
+wait indefinitely.  While waiting for a compilation to report that it creates
+that module, it may run into a dependency cycle which leaves the compilations
+hanging until some resource limit is reached (probably time, or that all
+possible providers of the module have not reported a module of that name).
+While these compilations are waiting on answers, there is the question of how
+they affect the parallelism limits of the :term:`build tool` in use.  Do
+compilations waiting on an answer count towards the limit and block other
+compilations from launching to potentially discover the module?  If they do
+not, what about other resources that may be held in use by those compilations
+(e.g., memory or available file descriptors)?
+
 Possible Future Enhancements
 ============================
 
@@ -518,6 +625,10 @@ Module Compilation Glossary
    explicit build
      A build strategy where module dependencies are explicitly specified
      rather than discovered.
+
+   fixed build
+     A build strategy where all module dependencies are computed and inserted
+     directly into the build graph.
 
    header unit
      A header file which is used via an ``import`` statement rather than an
