@@ -5,33 +5,78 @@
 FindQt3
 -------
 
-Locate Qt include paths and libraries
+This module finds Qt3, a cross-platform application development framework for
+creating graphical user interfaces and applications.
 
-This module defines:
+.. note::
 
-::
+  This module is for Qt version 3.  As of Qt version 5, the Qt upstream also
+  provides an exported configuration to find Qt.  New code should follow the
+  :manual:`cmake-qt(7)` instead of using this module.
 
-  QT_INCLUDE_DIR    - where to find qt.h, etc.
-  QT_LIBRARIES      - the libraries to link against to use Qt.
-  QT_DEFINITIONS    - definitions to use when
-                      compiling code that uses Qt.
-  QT_FOUND          - If false, don't try to use Qt.
-  QT_VERSION_STRING - the version of Qt found
+Result Variables
+^^^^^^^^^^^^^^^^
 
+This module sets the following variables:
 
+``Qt3_FOUND``
+  True if Qt3 has been found.
+``QT_FOUND``
+  True if Qt3 has been found.  This variable is for compatibility with other Qt
+  find modules.
+``QT_VERSION_STRING``
+  The version of Qt3 that was found.
+``QT_LIBRARIES``
+  Libraries needed to link against for using Qt3.
+``QT_DEFINITIONS``
+  A list of compile definitions to use when compiling code that uses Qt3.
 
-If you need the multithreaded version of Qt, set QT_MT_REQUIRED to
-TRUE
+Cache Variables
+^^^^^^^^^^^^^^^
 
-Also defined, but not for general use are:
+The following cache variables may also be set:
 
-::
+``QT_INCLUDE_DIR``
+  The directory containing ``qt.h`` and other Qt3 header files.
 
-  QT_MOC_EXECUTABLE, where to find the moc tool.
-  QT_UIC_EXECUTABLE, where to find the uic tool.
-  QT_QT_LIBRARY, where to find the Qt library.
-  QT_QTMAIN_LIBRARY, where to find the qtmain
-   library. This is only required by Qt3 on Windows.
+The following cache variables may also be set but are not meant for general use:
+
+``QT_MOC_EXECUTABLE``
+  Path to the ``moc`` tool.
+``QT_UIC_EXECUTABLE``
+  Path to the ``uic`` tool.
+``QT_QT_LIBRARY``
+  Path to the Qt3 library.
+``QT_QTMAIN_LIBRARY``
+  Path to the ``qtmain`` library.  This is only required by Qt3 on Windows.
+
+Hints
+^^^^^
+
+``QT_MT_REQUIRED``
+  To search for the multithreaded version of Qt3, set this variable to ``TRUE``
+  before looking for Qt3.
+
+Examples
+^^^^^^^^
+
+Finding Qt3 on the system:
+
+.. code-block:: cmake
+
+  find_package(Qt3)
+  if(Qt3_FOUND)
+    target_link_libraries(foo PRIVATE ${QT_LIBRARIES})
+    target_include_directories(foo PRIVATE ${QT_INCLUDE_DIR})
+    target_compile_definitions(foo PRIVATE ${QT_DEFINITIONS})
+  endif()
+
+Looking for the multithreaded version of Qt3:
+
+.. code-block:: cmake
+
+  set(QT_MT_REQUIRED TRUE)
+  find_package(Qt3)
 #]=======================================================================]
 
 cmake_policy(PUSH)
