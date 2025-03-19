@@ -15,7 +15,7 @@ int main()
   try {
 
     // initialize dynamic dispatcher
-    vk::DynamicLoader dl;
+    vk::detail::DynamicLoader dl;
     PFN_vkGetInstanceProcAddr vkGetInstanceProcAddr =
       dl.getProcAddress<PFN_vkGetInstanceProcAddr>("vkGetInstanceProcAddr");
     VULKAN_HPP_DEFAULT_DISPATCHER.init(vkGetInstanceProcAddr);
