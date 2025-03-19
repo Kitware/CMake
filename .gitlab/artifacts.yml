@@ -67,6 +67,36 @@
             annotations:
                 - ${CMAKE_CI_BUILD_DIR}/annotations.json
 
+.cmake_build_package_artifacts:
+    artifacts:
+        expire_in: 1d
+        name: "$CMAKE_CI_ARTIFACTS_NAME"
+        paths:
+            # Allow CPack to find CMAKE_ROOT and license text.
+            - build/CMakeFiles/CMakeSourceDir.txt
+            - build/CMakeFiles/LICENSE.txt
+
+            # Install rules.
+            - build/**/cmake_install.cmake
+
+            # We need the main binaries.
+            - build/bin/
+
+            # Pass through the documentation.
+            - build/install-doc/
+
+            # CPack configuration.
+            - build/CPackConfig.cmake
+            - build/CMakeCPackOptions.cmake
+            - build/Source/QtDialog/QtDialogCPack.cmake
+
+            # CPack/IFW packaging files.
+            - build/CMake*.qs
+
+            # CPack/WIX packaging files.
+            - build/Utilities/Release/WiX/custom_action_dll*.wxs
+            - build/Utilities/Release/WiX/CustomAction/CMakeWiXCustomActions.*
+
 .cmake_release_artifacts:
     artifacts:
         expire_in: 5d
