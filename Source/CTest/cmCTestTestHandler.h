@@ -34,6 +34,7 @@ struct cmCTestTestOptions
   bool ScheduleRandom = false;
   bool StopOnFailure = false;
   bool UseUnion = false;
+  cm::optional<unsigned int> ScheduleRandomSeed;
 
   int OutputSizePassed = 1 * 1024;
   int OutputSizeFailed = 300 * 1024;

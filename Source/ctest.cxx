@@ -149,6 +149,7 @@ cmDocumentationEntry const cmDocumentationOptions[] = {
   { "--extra-submit <file>[;<file>]", "Submit extra files to the dashboard." },
   { "--http-header <header>", "Append HTTP header when submitting" },
   { "--schedule-random", "Use a random order for scheduling tests" },
+  { "--schedule-random-seed", "Override seed for random order of tests" },
   { "--submit-index",
     "Submit individual dashboard tests with specific index" },
   { "--timeout <seconds>", "Set the default test timeout." },

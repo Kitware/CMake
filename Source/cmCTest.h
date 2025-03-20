@@ -198,6 +198,8 @@ public:
   std::string GetScheduleType() const;
   void SetScheduleType(std::string const& type);
 
+  cm::optional<unsigned int> GetRandomSeed() const;
+
   /** The max output width */
   int GetMaxTestNameWidth() const;
   void SetMaxTestNameWidth(int w);

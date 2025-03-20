@@ -2527,6 +2527,20 @@ int cmCTest::Run(std::vector<std::string> const& args)
                        this->Impl->TestOptions.ScheduleRandom = true;
                        return true;
                      } },
+    CommandArgument{
+      "--schedule-random-seed", CommandArgument::Values::One,
+      [this](std::string const& sz) -> bool {
+        unsigned long seed_value;
+        if (cmStrToULong(sz, &seed_value)) {
+          this->Impl->TestOptions.ScheduleRandomSeed =
+            static_cast<unsigned int>(seed_value);
+        } else {
+          cmCTestLog(this, WARNING,
+                     "Invalid value for '--schedule-random-seed': " << sz
+                                                                    << "\n");
+        }
+        return true;
+      } },
     CommandArgument{ "--rerun-failed", CommandArgument::Values::Zero,
                      [this](std::string const&) -> bool {
                        this->Impl->TestOptions.RerunFailed = true;
@@ -2793,6 +2807,11 @@ void cmCTest::SetStopTime(std::string const& time_str)
   if (stop_time < current_time) {
     this->Impl->StopTime += std::chrono::hours(24);
   }
+}
+
+cm::optional<unsigned int> cmCTest::GetRandomSeed() const
+{
+  return this->Impl->TestOptions.ScheduleRandomSeed;
 }
 
 std::string cmCTest::GetScheduleType() const
