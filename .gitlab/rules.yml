@@ -70,7 +70,9 @@
 
 .run_only_for_package:
     rules:
-        - if: '$CMAKE_CI_PACKAGE == "dev"'
+        - if: '$CMAKE_CI_PACKAGE == "dev" && $CI_JOB_STAGE != "upload"'
+          when: on_success
+        - if: '$CMAKE_CI_PACKAGE == "dev" && $CI_JOB_STAGE == "upload"'
           variables:
               RSYNC_DESTINATION: "kitware@cmake.org:dev/"
           when: on_success

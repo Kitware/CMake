@@ -16,6 +16,7 @@ stages:
     - build
     - test
     - test-ext
+    - package
     - upload
 
 variables:
@@ -40,6 +41,7 @@ variables:
 
 # Job prefixes:
 #   - `b:` build
+#   - `k:` package
 #   - `l:` lint
 #   - `p:` prep
 #   - `t:` test
@@ -1436,11 +1438,23 @@ b:windows-x86_64-package:
     extends:
         - .windows_x86_64_package
         - .cmake_build_windows
-        - .cmake_release_artifacts
+        - .cmake_build_package_artifacts
         - .windows_x86_64_tags_nonconcurrent_vs2022
         - .run_only_for_package
     needs:
         - p:doc-package
+    variables:
+        CMAKE_CI_ARTIFACTS_NAME: "artifacts-windows-x86_64-build"
+
+k:windows-x86_64-package:
+    extends:
+        - .windows_x86_64_package
+        - .cmake_package_windows
+        - .cmake_release_artifacts
+        - .windows_x86_64_tags_nonconcurrent_sign
+        - .run_only_for_package
+    needs:
+        - b:windows-x86_64-package
     variables:
         CMAKE_CI_ARTIFACTS_NAME: "artifacts-windows-x86_64"
 
@@ -1449,17 +1463,29 @@ u:windows-x86_64-package:
         - .rsync_upload_package
         - .run_only_for_package
     needs:
-        - b:windows-x86_64-package
+        - k:windows-x86_64-package
 
 b:windows-i386-package:
     extends:
         - .windows_i386_package
         - .cmake_build_windows
-        - .cmake_release_artifacts
+        - .cmake_build_package_artifacts
         - .windows_x86_64_tags_nonconcurrent_vs2022
         - .run_only_for_package
     needs:
         - p:doc-package
+    variables:
+        CMAKE_CI_ARTIFACTS_NAME: "artifacts-windows-i386-build"
+
+k:windows-i386-package:
+    extends:
+        - .windows_i386_package
+        - .cmake_package_windows
+        - .cmake_release_artifacts
+        - .windows_x86_64_tags_nonconcurrent_sign
+        - .run_only_for_package
+    needs:
+        - b:windows-i386-package
     variables:
         CMAKE_CI_ARTIFACTS_NAME: "artifacts-windows-i386"
 
@@ -1468,17 +1494,29 @@ u:windows-i386-package:
         - .rsync_upload_package
         - .run_only_for_package
     needs:
-        - b:windows-i386-package
+        - k:windows-i386-package
 
 b:windows-arm64-package:
     extends:
         - .windows_arm64_package
         - .cmake_build_windows
-        - .cmake_release_artifacts
+        - .cmake_build_package_artifacts
         - .windows_x86_64_tags_nonconcurrent_vs2022_arm64
         - .run_only_for_package
     needs:
         - p:doc-package
+    variables:
+        CMAKE_CI_ARTIFACTS_NAME: "artifacts-windows-arm64-build"
+
+k:windows-arm64-package:
+    extends:
+        - .windows_arm64_package
+        - .cmake_package_windows
+        - .cmake_release_artifacts
+        - .windows_x86_64_tags_nonconcurrent_sign
+        - .run_only_for_package
+    needs:
+        - b:windows-arm64-package
     variables:
         CMAKE_CI_ARTIFACTS_NAME: "artifacts-windows-arm64"
 
@@ -1487,4 +1525,4 @@ u:windows-arm64-package:
         - .rsync_upload_package
         - .run_only_for_package
     needs:
-        - b:windows-arm64-package
+        - k:windows-arm64-package
