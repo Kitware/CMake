@@ -141,7 +141,7 @@ endfunction ()
 
 macro (QT4_GENERATE_MOC infile outfile )
   # get include dirs and flags
-  QT4_GET_MOC_FLAGS(moc_flags)
+  qt4_get_moc_flags(moc_flags)
   get_filename_component(abs_infile ${infile} ABSOLUTE)
   set(_outfile "${outfile}")
   if(NOT IS_ABSOLUTE "${outfile}")
@@ -151,23 +151,22 @@ macro (QT4_GENERATE_MOC infile outfile )
   if (${ARGC} GREATER 3 AND "x${ARGV2}" STREQUAL "xTARGET")
     set(moc_target ${ARGV3})
   endif()
-  QT4_CREATE_MOC_COMMAND(${abs_infile} ${_outfile} "${moc_flags}" "" "${moc_target}")
+  qt4_create_moc_command(${abs_infile} ${_outfile} "${moc_flags}" "" "${moc_target}")
   set_property(SOURCE ${outfile} PROPERTY SKIP_AUTOMOC TRUE)  # don't run automoc on this file
   set_property(SOURCE ${outfile} PROPERTY SKIP_AUTOUIC TRUE)  # don't run autouic on this file
 endmacro ()
 
 
-# QT4_WRAP_CPP(outfiles inputfile ... )
-
+# qt4_wrap_cpp(outfiles inputfile ... )
 macro (QT4_WRAP_CPP outfiles )
   # get include dirs
-  QT4_GET_MOC_FLAGS(moc_flags)
-  QT4_EXTRACT_OPTIONS(moc_files moc_options moc_target ${ARGN})
+  qt4_get_moc_flags(moc_flags)
+  qt4_extract_options(moc_files moc_options moc_target ${ARGN})
 
   foreach (it ${moc_files})
     get_filename_component(it ${it} ABSOLUTE)
-    QT4_MAKE_OUTPUT_FILE(${it} moc_ cxx outfile)
-    QT4_CREATE_MOC_COMMAND(${it} ${outfile} "${moc_flags}" "${moc_options}" "${moc_target}")
+    qt4_make_output_file(${it} moc_ cxx outfile)
+    qt4_create_moc_command(${it} ${outfile} "${moc_flags}" "${moc_options}" "${moc_target}")
     set_property(SOURCE ${outfile} PROPERTY SKIP_AUTOMOC TRUE)  # don't run automoc on this file
     set_property(SOURCE ${outfile} PROPERTY SKIP_AUTOUIC TRUE)  # don't run autouic on this file
     set(${outfiles} ${${outfiles}} ${outfile})
@@ -176,10 +175,9 @@ macro (QT4_WRAP_CPP outfiles )
 endmacro ()
 
 
-# QT4_WRAP_UI(outfiles inputfile ... )
-
+# qt4_wrap_ui(outfiles inputfile ... )
 macro (QT4_WRAP_UI outfiles )
-  QT4_EXTRACT_OPTIONS(ui_files ui_options ui_target ${ARGN})
+  qt4_extract_options(ui_files ui_options ui_target ${ARGN})
 
   foreach (it ${ui_files})
     get_filename_component(outfile ${it} NAME_WE)
@@ -197,10 +195,9 @@ macro (QT4_WRAP_UI outfiles )
 endmacro ()
 
 
-# QT4_ADD_RESOURCES(outfiles inputfile ... )
-
+# qt4_add_resources(outfiles inputfile ... )
 macro (QT4_ADD_RESOURCES outfiles )
-  QT4_EXTRACT_OPTIONS(rcc_files rcc_options rcc_target ${ARGN})
+  qt4_extract_options(rcc_files rcc_options rcc_target ${ARGN})
 
   foreach (it ${rcc_files})
     get_filename_component(outfilename ${it} NAME_WE)
@@ -226,7 +223,7 @@ macro (QT4_ADD_RESOURCES outfiles )
       # Since this cmake macro is doing the dependency scanning for these files,
       # let's make a configured file and add it as a dependency so cmake is run
       # again when dependencies need to be recomputed.
-      QT4_MAKE_OUTPUT_FILE("${infile}" "" "qrc.depends" out_depends)
+      qt4_make_output_file("${infile}" "" "qrc.depends" out_depends)
       configure_file("${infile}" "${out_depends}" COPYONLY)
     else()
       # The .qrc file does not exist (yet). Let's add a dependency and hope
@@ -277,7 +274,7 @@ macro(QT4_ADD_DBUS_INTERFACE _sources _interface _basename)
   set_property(SOURCE ${_impl} PROPERTY SKIP_AUTOMOC TRUE)  # don't run automoc on this file
   set_property(SOURCE ${_impl} PROPERTY SKIP_AUTOUIC TRUE)  # don't run autouic on this file
 
-  QT4_GENERATE_MOC("${_header}" "${_moc}")
+  qt4_generate_moc("${_header}" "${_moc}")
 
   list(APPEND ${_sources} "${_impl}" "${_header}" "${_moc}")
   set_property(SOURCE "${_impl}" APPEND PROPERTY OBJECT_DEPENDS "${_moc}")
@@ -292,13 +289,13 @@ macro(QT4_ADD_DBUS_INTERFACES _sources)
     # get the part before the ".xml" suffix
     string(TOLOWER ${_basename} _basename)
     string(REGEX REPLACE "(.*\\.)?([^\\.]+)\\.xml" "\\2" _basename ${_basename})
-    QT4_ADD_DBUS_INTERFACE(${_sources} ${_infile} ${_basename}interface)
+    qt4_add_dbus_interface(${_sources} ${_infile} ${_basename}interface)
   endforeach ()
 endmacro()
 
 
 macro(QT4_GENERATE_DBUS_INTERFACE _header) # _customName OPTIONS -some -options )
-  QT4_EXTRACT_OPTIONS(_customName _qt4_dbus_options _qt4_dbus_target ${ARGN})
+  qt4_extract_options(_customName _qt4_dbus_options _qt4_dbus_target ${ARGN})
 
   get_filename_component(_in_file ${_header} ABSOLUTE)
   get_filename_component(_basename ${_header} NAME_WE)
@@ -358,7 +355,7 @@ macro(QT4_ADD_DBUS_ADAPTOR _sources _xml_file _include _parentClass) # _optional
      )
   endif()
 
-  QT4_GENERATE_MOC("${_header}" "${_moc}")
+  qt4_generate_moc("${_header}" "${_moc}")
   set_property(SOURCE ${_impl} PROPERTY SKIP_AUTOMOC TRUE)  # don't run automoc on this file
   set_property(SOURCE ${_impl} PROPERTY SKIP_AUTOUIC TRUE)  # don't run autouic on this file
   set_property(SOURCE "${_impl}" APPEND PROPERTY OBJECT_DEPENDS "${_moc}")
@@ -371,7 +368,7 @@ macro(QT4_AUTOMOC)
   if(NOT CMAKE_MINIMUM_REQUIRED_VERSION VERSION_LESS 2.8.11)
     message(DEPRECATION "The qt4_automoc macro is obsolete. Use the CMAKE_AUTOMOC feature instead.")
   endif()
-  QT4_GET_MOC_FLAGS(_moc_INCS)
+  qt4_get_moc_flags(_moc_INCS)
 
   set(_matching_FILES )
   foreach (_current_FILE ${ARGN})
@@ -404,7 +401,7 @@ macro(QT4_AUTOMOC)
             set(_header ${_abs_PATH}/${_basename}.h)
           endif()
           set(_moc    ${CMAKE_CURRENT_BINARY_DIR}/${_current_MOC})
-          QT4_CREATE_MOC_COMMAND(${_header} ${_moc} "${_moc_INCS}" "" "")
+          qt4_create_moc_command(${_header} ${_moc} "${_moc_INCS}" "" "")
           set_property(SOURCE "${_abs_FILE}" APPEND PROPERTY OBJECT_DEPENDS "${_moc}")
         endforeach ()
       endif()
@@ -414,7 +411,7 @@ endmacro()
 
 
 macro(QT4_CREATE_TRANSLATION _qm_files)
-  QT4_EXTRACT_OPTIONS(_lupdate_files _lupdate_options _lupdate_target ${ARGN})
+  qt4_extract_options(_lupdate_files _lupdate_options _lupdate_target ${ARGN})
   set(_my_sources)
   set(_my_dirs)
   set(_my_tsfiles)
@@ -456,7 +453,7 @@ macro(QT4_CREATE_TRANSLATION _qm_files)
         ARGS ${_lupdate_options} ${_ts_pro} ${_my_dirs} -ts ${_ts_file}
         DEPENDS ${_my_sources} ${_ts_pro} VERBATIM)
   endforeach()
-  QT4_ADD_TRANSLATION(${_qm_files} ${_my_tsfiles})
+  qt4_add_translation(${_qm_files} ${_my_tsfiles})
 endmacro()
 
 

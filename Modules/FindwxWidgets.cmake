@@ -1061,8 +1061,8 @@ find_program(wxWidgets_wxrc_EXECUTABLE
 #
 # NOTE: This is a generic piece of code that should be renamed to
 # SPLIT_ARGUMENTS_ON and put in a file serving the same purpose as
-# FindPackageStandardArgs.cmake. At the time of this writing
-# FindQt4.cmake has a QT4_EXTRACT_OPTIONS, which I basically copied
+# FindPackageHandleStandardArgs.cmake. At the time of this writing
+# FindQt4.cmake has a qt4_extract_options(), which I basically copied
 # here a bit more generalized. So, there are already two find modules
 # using this approach.
 #

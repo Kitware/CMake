@@ -5,7 +5,7 @@ Should the target be processed with auto-moc (for Qt projects).
 
 ``AUTOMOC`` is a boolean specifying whether CMake will handle the Qt ``moc``
 preprocessor automatically, i.e.  without having to use commands like
-:module:`QT4_WRAP_CPP() <FindQt4>`, `qt5_wrap_cpp()`_, etc.
+:module:`qt4_wrap_cpp() <FindQt4>`, `qt5_wrap_cpp()`_, etc.
 Currently, Qt versions 4 to 6 are supported.
 
 .. _qt5_wrap_cpp(): https://doc.qt.io/qt-5/qtcore-cmake-qt5-wrap-cpp.html
