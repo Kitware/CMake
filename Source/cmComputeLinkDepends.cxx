@@ -193,8 +193,8 @@ bool IsFeatureSupported(cmMakefile* makefile, std::string const& linkLanguage,
 {
   auto featureSupported = cmStrCat(
     "CMAKE_", linkLanguage, "_LINK_LIBRARY_USING_", feature, "_SUPPORTED");
-  if (makefile->GetDefinition(featureSupported).IsOn()) {
-    return true;
+  if (cmValue perLangVar = makefile->GetDefinition(featureSupported)) {
+    return perLangVar.IsOn();
   }
 
   featureSupported =
