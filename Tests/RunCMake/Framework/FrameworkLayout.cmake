@@ -9,6 +9,7 @@ add_library(Framework ${FRAMEWORK_TYPE}
             res.txt
             flatresource.txt
             deepresource.txt
+            assets
             some.txt)
 if("${CMAKE_FRAMEWORK}" STREQUAL "")
   set_target_properties(Framework PROPERTIES
@@ -23,6 +24,7 @@ set_target_properties(Framework PROPERTIES
                       RESOURCE "res.txt")
 set_source_files_properties(flatresource.txt PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
 set_source_files_properties(deepresource.txt PROPERTIES MACOSX_PACKAGE_LOCATION Resources/deep)
+set_source_files_properties(assets PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
 set_source_files_properties(some.txt PROPERTIES MACOSX_PACKAGE_LOCATION somedir)
 
 add_custom_command(TARGET Framework POST_BUILD
