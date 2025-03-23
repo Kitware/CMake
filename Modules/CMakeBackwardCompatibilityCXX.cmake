@@ -48,7 +48,7 @@ if(NOT CMAKE_SKIP_COMPATIBILITY_TESTS)
     # if CMAKE_TRY_ANSI_CXX_FLAGS has something in it, see
     # if the compiler accepts it
     if(NOT CMAKE_TRY_ANSI_CXX_FLAGS STREQUAL "")
-      CHECK_CXX_ACCEPTS_FLAG(${CMAKE_TRY_ANSI_CXX_FLAGS} CMAKE_CXX_ACCEPTS_FLAGS)
+      check_cxx_accepts_flag(${CMAKE_TRY_ANSI_CXX_FLAGS} CMAKE_CXX_ACCEPTS_FLAGS)
       # if the compiler liked the flag then set CMAKE_ANSI_CXXFLAGS
       # to the flag
       if(CMAKE_CXX_ACCEPTS_FLAGS)
