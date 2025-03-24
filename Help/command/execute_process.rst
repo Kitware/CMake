@@ -121,6 +121,10 @@ Options:
  and standard error pipes, respectively.  If the same variable is named
  for both pipes their output will be merged in the order produced.
 
+``OUTPUT_STRIP_TRAILING_WHITESPACE``, ``ERROR_STRIP_TRAILING_WHITESPACE``
+  Removes whitespace characters from the end of the values stored in the
+  corresponding ``OUTPUT_VARIABLE`` and ``ERROR_VARIABLE`` variables.
+
 ``ECHO_OUTPUT_VARIABLE``, ``ECHO_ERROR_VARIABLE``
   .. versionadded:: 3.18
 
