@@ -80,8 +80,8 @@ equivalent:
 However, for the sake of readability, it is recommended that you order your
 parameters in the order listed at the top of this page.
 
-If the :variable:`CTEST_CHECKOUT_COMMAND` variable (or the
-:variable:`CTEST_CVS_CHECKOUT` variable) is set, its content is treated as
+If the :variable:`CTEST_CHECKOUT_COMMAND` variable is set, its content is
+treated as
 command-line.  The command is invoked with the current working directory set
 to the parent of the source directory, even if the source directory already
 exists.  This can be used to create the source tree from a version control
