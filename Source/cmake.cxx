@@ -659,7 +659,8 @@ bool cmake::SetCacheArgs(std::vector<std::string> const& args)
     GetProjectCommandsInScriptMode(state->GetState());
     // Documented behavior of CMAKE{,_CURRENT}_{SOURCE,BINARY}_DIR is to be
     // set to $PWD for -P mode.
-    state->SetWorkingMode(SCRIPT_MODE);
+    state->SetWorkingMode(SCRIPT_MODE,
+                          cmake::CommandFailureAction::FATAL_ERROR);
     state->SetHomeDirectory(cmSystemTools::GetLogicalWorkingDirectory());
     state->SetHomeOutputDirectory(cmSystemTools::GetLogicalWorkingDirectory());
     state->ReadListFile(args, path);
@@ -1561,7 +1562,8 @@ void cmake::SetArgs(std::vector<std::string> const& args)
         presetsGraph.PrintAllPresets();
       }
 
-      this->SetWorkingMode(WorkingMode::HELP_MODE);
+      this->SetWorkingMode(WorkingMode::HELP_MODE,
+                           cmake::CommandFailureAction::FATAL_ERROR);
       return;
     }
 

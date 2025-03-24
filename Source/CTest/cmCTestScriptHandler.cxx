@@ -63,10 +63,7 @@ int cmCTestScriptHandler::ProcessHandler()
     res |= this->RunConfigurationScript(this->ConfigurationScripts[i],
                                         this->ScriptProcessScope[i]);
   }
-  if (res) {
-    return -1;
-  }
-  return 0;
+  return res;
 }
 
 void cmCTestScriptHandler::UpdateElapsedTime()
@@ -180,6 +177,8 @@ void cmCTestScriptHandler::CreateCMake()
   this->CMake->SetHomeOutputDirectory("");
   this->CMake->GetCurrentSnapshot().SetDefaultDefinitions();
   this->CMake->AddCMakePaths();
+  this->CMake->SetWorkingMode(cmake::SCRIPT_MODE,
+                              cmake::CommandFailureAction::EXIT_CODE);
   this->GlobalGenerator =
     cm::make_unique<cmGlobalGenerator>(this->CMake.get());
 
@@ -289,7 +288,7 @@ int cmCTestScriptHandler::ReadInScript(std::string const& total_script_arg)
       cmSystemTools::GetErrorOccurredFlag()) {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
                "Error in read:" << systemFile << "\n");
-    return 2;
+    return -1;
   }
 
   // Add definitions of variables passed in on the command line:
@@ -299,16 +298,20 @@ int cmCTestScriptHandler::ReadInScript(std::string const& total_script_arg)
     this->Makefile->AddDefinition(d.first, d.second);
   }
 
+  int res = 0;
+
   // finally read in the script
   if (!this->Makefile->ReadListFile(script) ||
       cmSystemTools::GetErrorOccurredFlag()) {
     // Reset the error flag so that it can run more than
     // one script with an error when you use ctest_run_script.
     cmSystemTools::ResetErrorOccurredFlag();
-    return 2;
+    res = -1;
   }
 
-  return 0;
+  return this->CMake->HasScriptModeExitCode()
+    ? this->CMake->GetScriptModeExitCode()
+    : res;
 }
 
 // run a specific script

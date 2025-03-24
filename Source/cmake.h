@@ -129,6 +129,16 @@ public:
     FIND_PACKAGE_MODE
   };
 
+  enum class CommandFailureAction
+  {
+    // When a command fails to execute, treat it as a fatal error.
+    FATAL_ERROR,
+
+    // When a command fails to execute, continue execution, but set the exit
+    // code accordingly.
+    EXIT_CODE,
+  };
+
   using TraceFormat = cmTraceEnums::TraceOutputFormat;
 
   struct GeneratorInfo
@@ -441,8 +451,18 @@ public:
   //! Do all the checks before running configure
   int DoPreConfigureChecks();
 
-  void SetWorkingMode(WorkingMode mode) { this->CurrentWorkingMode = mode; }
-  WorkingMode GetWorkingMode() { return this->CurrentWorkingMode; }
+  void SetWorkingMode(WorkingMode mode, CommandFailureAction policy)
+  {
+    this->CurrentWorkingMode = mode;
+    this->CurrentCommandFailureAction = policy;
+  }
+
+  WorkingMode GetWorkingMode() const { return this->CurrentWorkingMode; }
+
+  CommandFailureAction GetCommandFailureAction() const
+  {
+    return this->CurrentCommandFailureAction;
+  }
 
   //! Debug the try compile stuff by not deleting the files
   bool GetDebugTryCompile() const { return this->DebugTryCompile; }
@@ -780,6 +800,8 @@ private:
   std::string CMakeWorkingDirectory;
   ProgressCallbackType ProgressCallback;
   WorkingMode CurrentWorkingMode = NORMAL_MODE;
+  CommandFailureAction CurrentCommandFailureAction =
+    CommandFailureAction::FATAL_ERROR;
   bool DebugOutput = false;
   bool DebugFindOutput = false;
   bool Trace = false;

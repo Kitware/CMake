@@ -7,6 +7,7 @@
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
+#include "cmMessenger.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
@@ -94,10 +95,12 @@ bool cmCTestEmptyBinaryDirectoryCommand(std::vector<std::string> const& args,
 
   std::string err;
   if (!EmptyBinaryDirectory(args[0], err)) {
-    status.GetMakefile().IssueMessage(
+    cmMakefile& mf = status.GetMakefile();
+    mf.GetMessenger()->DisplayMessage(
       MessageType::FATAL_ERROR,
       cmStrCat("Did not remove the binary directory:\n ", args[0],
-               "\nbecause:\n ", err));
+               "\nbecause:\n ", err),
+      mf.GetBacktrace());
     return true;
   }
 
