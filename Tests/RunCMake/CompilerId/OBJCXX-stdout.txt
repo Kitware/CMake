@@ -1,3 +1,4 @@
 -- CMAKE_OBJCXX_COMPILER='[^']+'
 -- CMAKE_OBJCXX_COMPILER_ID='[A-Za-z]+'
 -- CMAKE_OBJCXX_COMPILER_VERSION='([0-9]+)(\.([0-9]+))?(\.([0-9]+))?(\.([0-9]+))?'
+-- CMAKE_OBJCXX_COMPILER_ARCHITECTURE_ID='[A-Za-z0-9_;]+'

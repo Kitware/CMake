@@ -14,6 +14,9 @@ int main(int argc, char* argv[])
 #if defined(ABI_ID)
   require += info_abi[argc];
 #endif
+#if defined(ARCHITECTURE_ID)
+  require += info_arch[argc];
+#endif
   static_cast<void>(argv);
 
   if (!cmakeCompilerCUDAArch()) {
