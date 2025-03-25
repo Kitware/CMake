@@ -44,6 +44,9 @@ block()
       ${CMAKE_ROOT}/Modules/DartConfiguration.tcl.in
       ${PROJECT_BINARY_DIR}/DartConfiguration.tcl )
   endif()
+  configure_file(
+    ${CMAKE_ROOT}/Templates/CTestScript.cmake.in
+    ${PROJECT_BINARY_DIR}/CMakeFiles/CTestScript.cmake @ONLY)
 endblock()
 
 #
@@ -73,7 +76,9 @@ if(NOT _CTEST_TARGETS_ADDED)
   # For all generators add basic testing targets.
   foreach(mode Experimental Nightly Continuous NightlyMemoryCheck)
     add_custom_target(${mode}
-      ${CMAKE_CTEST_COMMAND} ${__conf_types} -D ${mode}
+      COMMAND
+        ${CMAKE_CTEST_COMMAND} ${__conf_types}
+        -DMODEL=${mode} -S CMakeFiles/CTestScript.cmake -V
       USES_TERMINAL
       )
     set_property(TARGET ${mode} PROPERTY RULE_LAUNCH_CUSTOM "")
@@ -89,7 +94,10 @@ if(NOT _CTEST_TARGETS_ADDED)
           # missing purify
           )
         add_custom_target(${mode}${testtype}
-          ${CMAKE_CTEST_COMMAND} ${__conf_types} -D ${mode}${testtype}
+          COMMAND
+            ${CMAKE_CTEST_COMMAND} ${__conf_types}
+            -DMODEL=${mode} -DACTIONS=${testtype}
+            -S CMakeFiles/CTestScript.cmake -V
           USES_TERMINAL
           )
         set_property(TARGET ${mode}${testtype} PROPERTY RULE_LAUNCH_CUSTOM "")
