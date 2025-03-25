@@ -70,7 +70,7 @@ if(NOT CMAKE_CUDA_COMPILER_ID_RUN)
     # We determine the vendor to help with find the toolkit and use the right flags for detection right away.
     # The main compiler identification is still needed below to extract other information.
     list(APPEND CMAKE_CUDA_COMPILER_ID_VENDORS NVIDIA Clang)
-    set(CMAKE_CUDA_COMPILER_ID_VENDOR_REGEX_NVIDIA "nvcc: NVIDIA \\(R\\) Cuda compiler driver")
+    set(CMAKE_CUDA_COMPILER_ID_VENDOR_REGEX_NVIDIA "nvcc: [^\n]+ Cuda compiler driver")
     set(CMAKE_CUDA_COMPILER_ID_VENDOR_REGEX_Clang "(clang version)")
     CMAKE_DETERMINE_COMPILER_ID_VENDOR(CUDA "--version")
 
