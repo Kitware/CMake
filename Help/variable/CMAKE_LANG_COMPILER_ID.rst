@@ -41,6 +41,8 @@ Value                           Name
 ``OpenWatcom``                  `Open Watcom`_
 ``PGI``                         The Portland Group
 ``PathScale``                   PathScale
+``QCC``                         QNX C/C++ compiler
+``SCO``                         SCO OpenServer/UnixWare C/C++ Compiler
 ``SDCC``                        `Small Device C Compiler`_
 ``SunPro``                      Oracle Developer Studio
 ``Tasking``                     `Tasking Compiler Toolsets`_
