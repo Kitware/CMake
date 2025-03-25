@@ -392,8 +392,8 @@ include(Source/CMakeVersion.cmake)
 include(CTest)
 
 # Set up test-time configuration.
-set_directory_properties(PROPERTIES
-  TEST_INCLUDE_FILE "${CMake_BINARY_DIR}/Tests/EnforceConfig.cmake")
+set_property(DIRECTORY APPEND PROPERTY
+  TEST_INCLUDE_FILES "${CMake_BINARY_DIR}/Tests/EnforceConfig.cmake")
 
 if(NOT CMake_TEST_EXTERNAL_CMAKE)
   # where to write the resulting executables and libraries
