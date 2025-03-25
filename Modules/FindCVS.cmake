@@ -5,23 +5,35 @@
 FindCVS
 -------
 
-Find the Concurrent Versions System (CVS).
+Finds the Concurrent Versions System (CVS).
 
-The module defines the following variables:
+Result Variables
+^^^^^^^^^^^^^^^^
 
-::
+This module defines the following variables:
 
-   CVS_EXECUTABLE - path to cvs command line client
-   CVS_FOUND - true if the command line client was found
+``CVS_FOUND``
+  True if the command-line client was found.
 
-Example usage:
+Cache Variables
+^^^^^^^^^^^^^^^
+
+The following cache variables may also be set:
+
+``CVS_EXECUTABLE``
+  Path to ``cvs`` command-line client.
+
+Examples
+^^^^^^^^
+
+Finding CVS and executing it in a process:
 
 .. code-block:: cmake
 
-   find_package(CVS)
-   if(CVS_FOUND)
-     message("CVS found: ${CVS_EXECUTABLE}")
-   endif()
+  find_package(CVS)
+  if(CVS_FOUND)
+    execute_process(COMMAND ${CVS_EXECUTABLE} --help)
+  endif()
 #]=======================================================================]
 
 # CVSNT
