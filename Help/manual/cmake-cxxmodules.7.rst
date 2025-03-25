@@ -26,7 +26,7 @@ compiler during compilation based on the contents of the source file and its
 ``export`` statements.
 
 The order necessary for compilation requires build-time resolution of the
-ordering because the order is controlled by the contents of the sources. This
+ordering because the order is controlled by the contents of the sources.  This
 means that the ordering needs extracted from the source during the build to
 avoid regenerating the build graph via a configure and generate phase for
 every source change to get a correct build.
@@ -59,7 +59,7 @@ Scanning Control
 ================
 
 Whether or not sources get scanned for C++ module usage is dependent on the
-following queries. The first query that provides a yes/no answer is used.
+following queries.  The first query that provides a yes/no answer is used.
 
 - If the source file belongs to a file set of type ``CXX_MODULES``, it will
   be scanned.
