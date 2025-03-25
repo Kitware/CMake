@@ -31,7 +31,6 @@ Variables that Provide Information
    /variable/CMAKE_CACHE_MINOR_VERSION
    /variable/CMAKE_CACHE_PATCH_VERSION
    /variable/CMAKE_CACHEFILE_DIR
-   /variable/CMAKE_CFG_INTDIR
    /variable/CMAKE_COMMAND
    /variable/CMAKE_CPACK_COMMAND
    /variable/CMAKE_CROSSCOMPILING
@@ -829,6 +828,7 @@ Deprecated Variables that Provide Information
 .. toctree::
    :maxdepth: 1
 
+   /variable/CMAKE_CFG_INTDIR
    /variable/CMAKE_EXTRA_GENERATOR
 
 Deprecated Variables that Change Behavior
