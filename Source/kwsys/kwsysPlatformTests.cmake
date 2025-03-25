@@ -171,51 +171,46 @@ endmacro()
 #
 # Compile test named by ${var} and store INFO strings extracted from binary.
 macro(KWSYS_PLATFORM_INFO_TEST lang var description)
-  # We can implement this macro on CMake 2.6 and above.
-  if("${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}" LESS 2.6)
-    set(${var} "")
-  else()
-    # Choose a location for the result binary.
-    set(KWSYS_PLATFORM_INFO_FILE
-      ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_FILES_DIRECTORY}/${var}.bin)
+  # Choose a location for the result binary.
+  set(KWSYS_PLATFORM_INFO_FILE
+    ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_FILES_DIRECTORY}/${var}.bin)
 
-    # Compile the test binary.
-    if(NOT EXISTS ${KWSYS_PLATFORM_INFO_FILE})
-      message(STATUS "${description}")
-      try_compile(${var}_COMPILED
-        ${CMAKE_CURRENT_BINARY_DIR}
-        ${CMAKE_CURRENT_SOURCE_DIR}/${KWSYS_PLATFORM_TEST_FILE_${lang}}
-        COMPILE_DEFINITIONS -DTEST_${var}
-          ${KWSYS_PLATFORM_${lang}_TEST_DEFINES}
-          ${KWSYS_PLATFORM_${lang}_TEST_EXTRA_FLAGS}
-        OUTPUT_VARIABLE OUTPUT
-        COPY_FILE ${KWSYS_PLATFORM_INFO_FILE}
-        )
-      if(CMAKE_VERSION VERSION_LESS 3.26)
-        if(${var}_COMPILED)
-          file(APPEND
-            ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
-            "${description} compiled with the following output:\n${OUTPUT}\n\n")
-        else()
-          file(APPEND
-            ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
-            "${description} failed to compile with the following output:\n${OUTPUT}\n\n")
-        endif()
-      endif()
+  # Compile the test binary.
+  if(NOT EXISTS ${KWSYS_PLATFORM_INFO_FILE})
+    message(STATUS "${description}")
+    try_compile(${var}_COMPILED
+      ${CMAKE_CURRENT_BINARY_DIR}
+      ${CMAKE_CURRENT_SOURCE_DIR}/${KWSYS_PLATFORM_TEST_FILE_${lang}}
+      COMPILE_DEFINITIONS -DTEST_${var}
+        ${KWSYS_PLATFORM_${lang}_TEST_DEFINES}
+        ${KWSYS_PLATFORM_${lang}_TEST_EXTRA_FLAGS}
+      OUTPUT_VARIABLE OUTPUT
+      COPY_FILE ${KWSYS_PLATFORM_INFO_FILE}
+      )
+    if(CMAKE_VERSION VERSION_LESS 3.26)
       if(${var}_COMPILED)
-        message(STATUS "${description} - compiled")
+        file(APPEND
+          ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
+          "${description} compiled with the following output:\n${OUTPUT}\n\n")
       else()
-        message(STATUS "${description} - failed")
+        file(APPEND
+          ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
+          "${description} failed to compile with the following output:\n${OUTPUT}\n\n")
       endif()
     endif()
-
-    # Parse info strings out of the compiled binary.
     if(${var}_COMPILED)
-      file(STRINGS ${KWSYS_PLATFORM_INFO_FILE} ${var} REGEX "INFO:[A-Za-z0-9]+\\[[^]]*\\]")
+      message(STATUS "${description} - compiled")
     else()
-      set(${var} "")
+      message(STATUS "${description} - failed")
     endif()
-
-    set(KWSYS_PLATFORM_INFO_FILE)
   endif()
+
+  # Parse info strings out of the compiled binary.
+  if(${var}_COMPILED)
+    file(STRINGS ${KWSYS_PLATFORM_INFO_FILE} ${var} REGEX "INFO:[A-Za-z0-9]+\\[[^]]*\\]")
+  else()
+    set(${var} "")
+  endif()
+
+  set(KWSYS_PLATFORM_INFO_FILE)
 endmacro()

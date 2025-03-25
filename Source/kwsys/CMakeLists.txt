@@ -88,7 +88,7 @@
 # any outside mailing list and no documentation of the change will be
 # written.
 
-cmake_minimum_required(VERSION 3.9...3.22 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.13...3.31 FATAL_ERROR)
 
 # Some configure checks depend upon the deployment target. Clear checks when
 # the deployment target changes.
@@ -317,7 +317,7 @@ endif()
 
 #-----------------------------------------------------------------------------
 # Adjust compiler flags for some platforms.
-if(NOT CMAKE_COMPILER_IS_GNUCXX)
+if(NOT CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   if(CMAKE_SYSTEM MATCHES "OSF1-V.*")
     string(REGEX MATCH "-timplicit_local"
       KWSYS_CXX_FLAGS_HAVE_IMPLICIT_LOCAL "${CMAKE_CXX_FLAGS}")
@@ -1038,7 +1038,7 @@ if(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
     if(CTEST_TEST_KWSYS)
       configure_file("${CMAKE_CURRENT_SOURCE_DIR}/ExtraTest.cmake.in"
         "${CMAKE_CURRENT_BINARY_DIR}/ExtraTest.cmake")
-      set_directory_properties(PROPERTIES TEST_INCLUDE_FILE "${CMAKE_CURRENT_BINARY_DIR}/ExtraTest.cmake")
+      set_property(DIRECTORY APPEND PROPERTY TEST_INCLUDE_FILES "${CMAKE_CURRENT_BINARY_DIR}/ExtraTest.cmake")
     endif()
 
     set(KWSYS_TEST_ARGS_testCommandLineArguments
