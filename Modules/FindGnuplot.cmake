@@ -5,21 +5,42 @@
 FindGnuplot
 -----------
 
-This module looks for gnuplot.
+Finds the Gnuplot command-line graphing utility for generating two- and
+three-dimensional plots (``gnuplot``).
 
 Result Variables
 ^^^^^^^^^^^^^^^^
 
-``GNUPLOT_FOUND``
-  System has Gnuplot.
+This module sets the following variables:
 
-``GNUPLOT_EXECUTABLE``
-  The Gnuplot executable.
+``Gnuplot_FOUND``
+  Boolean indicating whether Gnuplot has been found.  For backward
+  compatibility, the ``GNUPLOT_FOUND`` variable is also set to the same value.
 
 ``GNUPLOT_VERSION_STRING``
   The version of Gnuplot found.
 
-  .. note:: Version string detection will not work for old versions like 3.7.1.
+  .. note::
+
+    Version detection is available only for Gnuplot 4 and later.  Earlier
+    versions did not provide version output.
+
+Cache Variables
+^^^^^^^^^^^^^^^
+
+The following cache variables may also be set:
+
+``GNUPLOT_EXECUTABLE``
+  Absolute path to the ``gnuplot`` executable.
+
+Examples
+^^^^^^^^
+
+Finding Gnuplot:
+
+.. code-block:: cmake
+
+  find_package(Gnuplot)
 #]=======================================================================]
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindCygwin.cmake)
