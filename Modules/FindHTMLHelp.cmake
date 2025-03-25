@@ -5,15 +5,39 @@
 FindHTMLHelp
 ------------
 
-This module looks for Microsoft HTML Help Compiler
+This module finds the Microsoft HTML Help Compiler and its API.  It is part of
+the HTML Help Workshop.
 
-It defines:
+.. note::
 
-::
+  HTML Help Workshop is in maintenance mode only and is considered deprecated.
+  For modern documentation, consider alternatives such as Microsoft Help Viewer
+  for producing ``.mshc`` files or web-based documentation tools.
 
-   HTML_HELP_COMPILER     : full path to the Compiler (hhc.exe)
-   HTML_HELP_INCLUDE_PATH : include path to the API (htmlhelp.h)
-   HTML_HELP_LIBRARY      : full path to the library (htmlhelp.lib)
+Cache Variables
+^^^^^^^^^^^^^^^
+
+This module may set the following cache variables:
+
+``HTML_HELP_COMPILER``
+  Full path to the HTML Help Compiler (``hhc.exe``), used to compile ``.chm``
+  files.
+``HTML_HELP_INCLUDE_PATH``
+  Directory containing ``htmlhelp.h``, required for applications integrating the
+  HTML Help API.
+``HTML_HELP_LIBRARY``
+  Full path to ``htmlhelp.lib`` library, required for linking applications that
+  use the HTML Help API.
+
+Examples
+^^^^^^^^
+
+Finding HTML Help Compiler:
+
+.. code-block:: cmake
+
+  find_package(HTMLHelp)
+  message(STATUS "HTML Help Compiler found at: ${HTML_HELP_COMPILER}")
 #]=======================================================================]
 
 if(WIN32)
