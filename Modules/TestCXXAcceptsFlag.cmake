@@ -7,18 +7,49 @@ TestCXXAcceptsFlag
 
 .. deprecated:: 3.0
 
-  See :module:`CheckCXXCompilerFlag`.
+  This module should no longer be used.  It has been superseded by the
+  :module:`CheckCXXCompilerFlag` module.  As of CMake 3.19, the
+  :module:`CheckCompilerFlag` module is also available for checking flags across
+  multiple languages.
 
-Check if the CXX compiler accepts a flag.
+This module provides a macro to test whether the C++ (CXX) compiler supports
+specific flags.
+
+Macros
+^^^^^^
+
+.. command:: check_cxx_accepts_flag
+
+  Checks whether the CXX compiler accepts the specified flags:
+
+  .. code-block:: cmake
+
+    check_cxx_accepts_flag(<flags> <result-variable>)
+
+  ``<flags>``
+    One or more compiler flags to test.  For multiple flags, provide them as a
+    space-separated string.
+
+  ``<result-variable>``
+    Name of an internal cache variable that stores the result.  It is set to
+    boolean true if the compiler accepts the flags and false otherwise.
+
+Examples
+^^^^^^^^
+
+Checking if the C++ compiler supports specific flags:
 
 .. code-block:: cmake
 
- CHECK_CXX_ACCEPTS_FLAG(<flags> <variable>)
+  include(TestCXXAcceptsFlag)
+  check_cxx_accepts_flag("-fno-common -fstack-clash-protection" HAVE_FLAGS)
 
-``<flags>``
- the flags to try
-``<variable>``
- variable to store the result
+Migrating to the :module:`CheckCompilerFlag` module:
+
+.. code-block:: cmake
+
+  include(CheckCompilerFlag)
+  check_compiler_flag(CXX "-fno-common;-fstack-clash-protection" HAVE_FLAGS)
 #]=======================================================================]
 
 macro(CHECK_CXX_ACCEPTS_FLAG FLAGS  VARIABLE)
