@@ -37,6 +37,8 @@ strategy, which is the most visible modules-related change for CMake users in
 the context of the build.  CMake provides multiple ways to control the
 scanning behavior of source files.
 
+.. _cxxmodules-scanning-control:
+
 Scanning Control
 ================
 
@@ -410,6 +412,257 @@ within the target.
 
 .. _`P1689R5`: https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/p1689r5.html
 
+Implementation Details
+----------------------
+
+This section describes how CMake actually structures the build graph, the data
+passed between various parts, and the files which contain that data.  It is
+intended to be used both as functional documentation and as a guide to help
+those debugging a module build to understand where to locate various bits of
+data.
+
+.. note::
+
+   This section documents internal implementation details that may be useful
+   for :manual:`toolchain file <cmake-toolchains(7)>` authors or during
+   debugging of a module-related issue.  Projects should not need to inspect
+   or modify any of the variables, properties, files, or targets mentioned
+   here.
+
+Toolchain (scanning)
+^^^^^^^^^^^^^^^^^^^^
+
+Compilers which support modules must also provide a scanning tool.  This will
+usually be either the compiler itself with some extra flags or a tool shipped
+with the compiler.  The command template for scanning is stored in the
+``CMAKE_CXX_SCANDEP_SOURCE`` variable.  The command is expected to write
+`P1689R5`_ results to the ``<DYNDEP_FILE>`` placeholder.  Additionally, the
+command should provide any :term:`discovered dependencies` to the
+``<DEP_FILE>`` placeholder.  This allows :term:`build tools <build tool>` to
+rerun the scan if any of the dependencies of the scanning command change.
+
+Additionally, toolchains should set the following variables:
+
+* ``CMAKE_CXX_MODULE_MAP_FORMAT``: The format of the :term:`module map`
+  describing where dependent :term:`BMI` files for imported modules exist
+  during compilation.  Must be one of ``gcc``, ``clang``, or ``msvc``.
+* ``CMAKE_CXX_MODULE_MAP_FLAG``: The arguments used to inform the compiler of
+  the :term:`module map` file.  It should use the ``<MODULE_MAP_FILE>``
+  placeholder.
+* ``CMAKE_CXX_MODULE_BMI_ONLY_FLAG``: The arguments used to compile only a
+  :term:`BMI` file from a :term:`module interface unit`.  This is used when
+  consuming modules from external projects to compile :term:`BMI` files for
+  use within the current build.
+
+If a toolchain does not provide the ``CMAKE_CXX_MODULE_BMI_ONLY_FLAG``, it
+will not be able to consume modules provided by ``IMPORTED`` targets.
+
+Toolchain (``import std``)
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+If the toolchain supports ``import std``, it must also provide a toolchain
+identification module named ``${CMAKE_CXX_COMPILER_ID}-CXX-CXXImportStd``.
+
+.. note::
+
+   Currently only CMake may provide these files due to the way they are
+   included.  Once ``import std`` is no longer experimental, external
+   toolchains may provide support independently as well.
+
+This module must provide the ``_cmake_cxx_import_std`` command.  It will be
+passed two arguments: the version of the C++ standard (e.g., ``23``) and the
+name of a variable in which to place the result of its ``import std`` support.
+The variable should be filled in with CMake source code which declares the
+``__CMAKE::CXX${std}`` target, where ``${std}`` is the version passed in.  If
+the target cannot be made, the source code should instead set the
+``CMAKE_CXX${std}_COMPILER_IMPORT_STD_NOT_FOUND_MESSAGE`` variable to the
+reason that ``import std`` is not supported in the current configuration.
+Note that CMake will guard the returned code with conditional checks to ensure
+that the target is only defined once.
+
+Ideally, the ``__CMAKE::CXX${std}`` target will be an ``IMPORTED``
+``INTERFACE`` target with the ``std`` module sources attached to it.  However,
+it may be necessary to compile objects for some implementations.  Object files
+are required when there are symbols expected to be provided by the consumer of
+the module by compiling it.  There is a concern that, if this happens, more
+than once within a program, this will result in duplication of these symbols
+which may violate the :term:`ODR` for them.
+
+As an example, if consumers of a module are expected to provide symbols for
+that module, the use of the module is then a global property of the program
+and cannot be abstracted away.  Imagine that a library exposes a C API but
+uses a C++ module internally.  If it is supposed to provide the module
+symbols, anything using the C API needs to cooperate with its internal module
+usage if it wants to use the same module for its own purposes.  If both end up
+providing symbols for the imported module, there may be conflicts.
+
+Configure
+^^^^^^^^^
+
+During the configure step, CMake needs to track which sources care about
+modules at all.  See :ref:`Scanning Control <cxxmodules-scanning-control>` for
+how each source determines whether it cares about modules or not.  CMake
+tracks these in its internal target representation structure (``cmTarget``).
+The set of sources which need to be scanned may be modified using the
+:command:`target_sources`, :command:`target_compile_features`, and
+:command:`set_property` commands.
+
+Additionally, targets may use the :prop_tgt:`CXX_MODULE_STD` target property
+to indicate that ``import std`` is desired within the target's sources.
+
+Generate
+^^^^^^^^
+
+During generation, CMake needs to add additional rules to ensure that the
+sources providing modules can be built before sources that import those
+modules.  Since CMake uses a :term:`static build`, the build graph must
+contain all possible commands for scanning and module generation.  The
+dependency edges between commands to ensure that modules are provided will
+then ensure that the build graph executes correctly.  This means that, while
+all sources may get scanned, only modules that are actually used will be
+generated.
+
+The first step CMake performs is to generate a :term:`synthetic target` for
+each unique usage of a module-providing target.  These targets are based on
+other targets, but provide only :term:`BMI` files for other targets rather
+than object files.  This is because the compatibility of :term:`BMI` files is
+extremely narrow and cannot be shared between arbitrary ``import`` instances.
+Due to the internal workings of toolchains, there can generally only be a
+single set of settings for a variety of flags for any one compilation,
+including :term:`BMI` files for imported modules.  As an example, the C++
+standard in use needs to be consistent across all modules, but there are many
+settings which may cause incompatibilities.
+
+.. note::
+
+   CMake currently assumes that all usages are compatible and will only create
+   one set of :term:`BMIs <BMI>` for each target.  This may cause build
+   failures where multiple :term:`BMI` files are required, but CMake only
+   provides one set.  See `CMake Issue 25916`_ for progress on removing this
+   assumption.
+
+.. _`CMake Issue 25916`: https://gitlab.kitware.com/cmake/cmake/-/issues/25916
+
+Once all of the :term:`synthetic targets <synthetic target>` are created,
+CMake looks at each target that has any source that might use C++ modules and
+creates a command to :term:`scan` each of them.  This command will output a
+`P1689R5`_-formatted file describing the C++ modules it uses and provides (if
+any).  It will also create a command to :term:`collate` module dependencies
+for the eligible compilations.  This command depends on the :term:`scan`
+results of all eligible sources, information about the target itself, as well
+as the :term:`collate` results of any dependent targets which provide C++
+modules.  The :term:`collate` step uses a target-specific
+``CXXDependInfo.json`` file which contains the following information:
+
+- ``compiler-*``: basic compiler information (``id``, ``frontend-variant``,
+  and ``simulate-id``) which is used to generate correctly formatted paths
+  when generating paths for the compiler
+- ``cxx-modules``: a map of object files to the ``FILE_SET`` information,
+  which is used to enforce :term:`module visibility` and generate install
+  rules for :term:`module interface unit` sources
+- ``module-dir``: where to place :term:`BMI` files for this target
+- ``dir-{cur,top}-{src,bld}``: the source (``src``) and build (``bld``)
+  directories for the current directory (``cur``) and the top (``top``) of the
+  project, used to compute accurate relative paths for the :term:`build tool`
+  dynamic dependencies
+- ``exports``: The list of exports which both contain the target and are
+  providing C++ module information, used to provide accurate module properties
+  on ``IMPORTED`` targets from the exported targets.
+- ``bmi-installation``: installation information, used to generate install
+  scripts for :term:`BMI` files
+- ``database-info``: information required to generate :term:`build database`
+  information if requested by :prop_tgt:`EXPORT_BUILD_DATABASE`
+- ``sources``: list of other source files in the target, used to add to the
+  :term:`build database` if requested
+- ``config``: the configuration for the target, used to set the appropriate
+  properties in generated export files
+- ``language``: the language (e.g., C++ or Fortran) the
+  :term:`collation <collate>` metadata file is describing
+- ``include-dirs`` and ``forward-modules-from-target-dirs``: unused for C++
+
+For each compilation, CMake will also provide a :term:`module map` which will
+be created during the build by the :term:`collate` command.  How this is
+provided to the compiler is specified by the ``CMAKE_CXX_MODULE_MAP_FORMAT``
+and ``CMAKE_CXX_MODULE_MAP_FLAG`` toolchain variables.
+
+Scan
+^^^^
+
+The compiler is expected to implement the :term:`scan` command.  This is
+because only the compiler itself can reliably answer preprocessor predicates
+like ``__has_builtin`` in order to provide accurate module usage information
+in the face of arbitrary flags that may be used when compiling sources.
+
+CMake names these files with the ``.ddi`` extension, which stands for "dynamic
+dependency information".  These files are in `P1689R5`_ format and are used by
+the :term:`collate` command to perform its tasks.
+
+Collate
+^^^^^^^
+
+The :term:`collate` command performs the bulk of the work to make C++ modules
+work within the build graph.  It consumes the following files as input:
+
+- ``CXXDependInfo.json`` from the generate step
+- ``.ddi`` files from the :term:`scanning <scan>` results of the target's
+  sources
+- ``CXXModules.json`` files output from eligible dependent targets'
+  :term:`collate` commands
+
+It uses the information from these files to generate:
+
+- ``CXX.dd`` files to inform the :term:`build tool` of dependencies that exist
+  between the compilation of a source and the :term:`BMI` files of the modules
+  that it imports
+- ``CXXModules.json`` files for use in :term:`collate` commands of depending
+  targets
+- ``*.modmap`` files for each compilation to find :term:`BMI` files for
+  imported modules
+- ``install-cxx-module-bmi-$<CONFIG>.cmake`` scripts for the installation of
+  any :term:`BMI` files (included by the ``install`` scripts)
+- ``target-*-$<CONFIG>.cmake`` export files for any exports of the target to
+  provide the :prop_tgt:`IMPORTED_CXX_MODULES_<CONFIG>` properties
+- ``CXX_build_database.json`` :term:`build database` files for the target when
+  the its :prop_tgt:`EXPORT_BUILD_DATABASE` property is set
+
+During its processing, it enforces the following guarantees:
+
+- :term:`BMI` usage is consistent
+- :term:`module visibility` is respected
+
+C++ modules have the rule that only a single module of a given name may
+exist within a program.  This is not exactly enforceable with the existence of
+private modules, but it is enforceable for public modules.  The enforcement is
+done by the :term:`collate` command.  Part of the ``CXXModules.json`` files is
+the set of modules that are transitively imported by each module it provides.
+When a module is then imported, the :term:`collate` command ensures that all
+modules with a given name agree upon a given :term:`BMI` file to provide that
+module.
+
+Compile
+^^^^^^^
+
+Compilation uses the :term:`module map` file generated by the :term:`collate`
+command to find imported modules during compilation.  Because CMake only
+provides the locations of modules that are discovered by the :term:`scan`
+command, any modules missed by it will not be provided to the compilation.
+
+It is possible for toolchains to reject the :term:`BMI` file that CMake
+provides to a compilation as incompatible.  This is because CMake assumes that
+all usages are compatible at the moment.  See `CMake Issue 25916`_ for
+progress on removing this assumption.
+
+Install
+^^^^^^^
+
+During installation, install scripts which have been written by the
+:term:`collate` command during the build are included so that any :term:`BMI`
+files are installed as needed.  These need to be generated, as it is not
+known what the :term:`BMI` file names will be during CMake's generation
+(because CMake names the :term:`BMI` files after the module name itself).
+These install scripts are included with the ``OPTIONAL`` keyword, so an
+incomplete build may result in an incomplete installation as well.
+
 Alternative Designs
 -------------------
 
@@ -595,6 +848,10 @@ Module Compilation Glossary
      Compiled Module Interface.  Alternative name for :term:`BMI` used by some
      compilers.
 
+   build database
+     A JSON file containing compilation commands, module dependencies, and
+     grouping information.  Used for IDE integration and build analysis.
+
    build system
      A tool that facilitates the building of software which includes a model
      of how components of the build relate to each other.  For example, CMake,
@@ -612,6 +869,10 @@ Module Compilation Glossary
      The process of aggregating module information from scanned sources to
      ensure correct compilation order and to provide metadata for other parts
      of the build (e.g., installation or a :term:`build database`).
+
+   discovered dependencies
+     Dependencies found during the processing of a command that do not need to
+     be explicitly declared.
 
    dynamic dependencies
      Dependencies which require a separate command to detect so that a further
@@ -652,9 +913,16 @@ Module Compilation Glossary
      using ``export module``.  Such a unit may or may not be also be a
      :term:`partition unit`.
 
+   module map
+     A compiler-specific file mapping module names to BMI locations.
+
    module visibility
      CMake's enforcement of access rules for modules based on their
      declaration scope (PUBLIC/PRIVATE).
+
+   ODR
+     One Definition Rule.  The C++ requirement that any entity be defined
+     exactly once per program.
 
    partition unit
      A :term:`translation unit` which describes a module with a partition name
@@ -671,10 +939,18 @@ Module Compilation Glossary
      The process of analyzing a :term:`translation unit` to discover module
      imports and exports.
 
+   static build
+     A build configuration where all compilation rules are determined at
+     generate time.
+
    strong module ownership
      C++ implementations have settled on a model where the module "owns" the
      symbols declared within it.  In practice, this means that the module name
      is included into the symbol mangling of entities declared within it.
+
+   synthetic target
+     A CMake-generated build target used to supply :term:`BMIs <BMI>` to a
+     specific user of a module-providing target.
 
    translation unit
      The smallest component of a compilation for a C++ program.  Generally,
