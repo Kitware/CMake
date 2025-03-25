@@ -5,7 +5,7 @@ Should the target be processed with auto-uic (for Qt projects).
 
 ``AUTOUIC`` is a boolean specifying whether CMake will handle
 the Qt ``uic`` code generator automatically, i.e. without having to use
-commands like :module:`QT4_WRAP_UI() <FindQt4>`, `qt5_wrap_ui()`_, etc.
+commands like :module:`qt4_wrap_ui() <FindQt4>`, `qt5_wrap_ui()`_, etc.
 Currently, Qt versions 4 to 6 are supported.
 
 .. _`qt5_wrap_ui()`: https://doc.qt.io/qt-5/qtwidgets-cmake-qt5-wrap-ui.html
