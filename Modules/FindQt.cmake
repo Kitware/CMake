@@ -26,7 +26,7 @@ Behavior:
 * If only one Qt version is found, then the ``DESIRED_QT_VERSION`` is set
   automatically.
 * Once the ``DESIRED_QT_VERSION`` variable is set, the corresponding
-  :module:`FindQt3` or :module`FindQt4` module is included.
+  :module:`FindQt3` or :module:`FindQt4` module is included.
 
 Result Variables
 ^^^^^^^^^^^^^^^^
