@@ -112,7 +112,6 @@ They are normally called through the :command:`find_package` command.
    /module/FindBLAS
    /module/FindBullet
    /module/FindBZip2
-   /module/FindCABLE
    /module/FindCoin3D
    /module/FindCUDAToolkit
    /module/FindCups
@@ -289,6 +288,7 @@ Deprecated Find Modules
    :maxdepth: 1
 
    /module/FindBoost
+   /module/FindCABLE
    /module/FindCUDA
    /module/FindDart
    /module/FindGCCXML

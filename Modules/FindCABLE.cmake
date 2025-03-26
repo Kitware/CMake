@@ -5,6 +5,9 @@
 FindCABLE
 ---------
 
+.. versionchanged:: 4.1
+  This module is available only if policy :policy:`CMP0191` is not set to ``NEW``.
+
 Finds the CABLE installation and determines its include paths and libraries.
 
 Package called CABLE (CABLE Automates Bindings for Language Extension) was
@@ -43,6 +46,16 @@ directories:
   target_link_libraries(tcl_wrapper_target PRIVATE ${CABLE_TCL_LIBRARY})
   target_include_directories(tcl_wrapper_target PRIVATE ${CABLE_INCLUDE_DIR})
 #]=======================================================================]
+
+cmake_policy(GET CMP0191 _FindCABLE_CMP0191)
+if(_FindCABLE_CMP0191 STREQUAL "NEW")
+  message(FATAL_ERROR "The FindCABLE module has been removed by policy CMP0191.")
+endif()
+
+if(_FindCABLE_testing)
+  set(_FindCABLE_included TRUE)
+  return()
+endif()
 
 if(NOT CABLE)
   find_path(CABLE_BUILD_DIR cableVersion.h)
