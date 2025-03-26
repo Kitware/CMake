@@ -5,19 +5,32 @@
 FindWish
 --------
 
-Find wish installation
+Finds ``wish``, a simple windowing shell command-line executable.
 
-This module finds if TCL is installed and determines where the include
-files and libraries are.  It also determines what the name of the
-library is.  This code sets the following variables:
+This module is commonly used in conjunction with finding a TCL installation (see
+the :module:`FindTCL` module).  It helps determine where the TCL include paths
+and libraries are, as well as identifying the name of the TCL library.
 
-::
+If the :variable:`UNIX` variable is defined, the module will prioritize looking
+for the Cygwin version of ``wish`` executable.
 
-  TK_WISH = the path to the wish executable
+Cache Variables
+^^^^^^^^^^^^^^^
 
+The following cache variables may be set:
 
+``TK_WISH``
+  The path to the ``wish`` executable.
 
-if UNIX is defined, then it will look for the cygwin version first
+Examples
+^^^^^^^^
+
+Finding ``wish``:
+
+.. code-block:: cmake
+
+  find_package(Wish)
+  message(STATUS "Found wish at: ${TK_WISH}")
 #]=======================================================================]
 
 if(UNIX)
