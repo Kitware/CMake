@@ -5,4 +5,4 @@ CMAKE_PKG_CONFIG_PC_PATH
 
 :ref:`Semicolon-separated list <CMake Language Lists>` of supplementary paths
 which the :command:`cmake_pkg_config` command will search for package files by
-efault. Also used to derive the ``pc_path`` package variable.
+default. Also used to derive the ``pc_path`` package variable.
