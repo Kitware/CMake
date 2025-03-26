@@ -6,35 +6,56 @@ FindQt
 ------
 
 .. deprecated:: 3.14
-  This module is available only if policy :policy:`CMP0084` is not set to ``NEW``.
 
-Searches for all installed versions of Qt3 or Qt4.
+  This module is available only if policy :policy:`CMP0084` is not set to
+  ``NEW``.  It supports only Qt3 and Qt4.  For Qt5 or later versions see
+  :manual:`cmake-qt(7)`.
 
-This module cannot handle Qt5 or any later versions.
-For those, see :manual:`cmake-qt(7)`.
+This module finds an installed version of Qt3 or Qt4.  Qt is a cross-platform
+application development framework for creating graphical user interfaces and
+applications.
 
-This module should only be used if your project can work with multiple
-versions of Qt.  If not, you should just directly use FindQt4 or
-FindQt3.  If multiple versions of Qt are found on the machine, then
-The user must set the option DESIRED_QT_VERSION to the version they
-want to use.  If only one version of qt is found on the machine, then
-the DESIRED_QT_VERSION is set to that version and the matching FindQt3
-or FindQt4 module is included.  Once the user sets DESIRED_QT_VERSION,
-then the FindQt3 or FindQt4 module is included.
+Use this module only if the project can work with both Qt3 and Qt4
+versions.  If a specific version is required, use :module:`FindQt4` or
+:module:`FindQt3` module directly.
 
-::
+Behavior:
 
-  QT_REQUIRED if this is set to TRUE then if CMake can
-              not find Qt4 or Qt3 an error is raised
-              and a message is sent to the user.
+* If multiple Qt versions are found, the user must set the preferred major
+  Qt version with the ``DESIRED_QT_VERSION`` variable.
+* If only one Qt version is found, then the ``DESIRED_QT_VERSION`` is set
+  automatically.
+* Once the ``DESIRED_QT_VERSION`` variable is set, the corresponding
+  :module:`FindQt3` or :module`FindQt4` module is included.
 
+Result Variables
+^^^^^^^^^^^^^^^^
 
+This module sets the following variables:
 
-::
+``QT4_INSTALLED``
+  ``TRUE`` if Qt4 is found.
+``QT3_INSTALLED``
+  ``TRUE`` if Qt3 is found.
 
-  DESIRED_QT_VERSION OPTION is created
-  QT4_INSTALLED is set to TRUE if qt4 is found.
-  QT3_INSTALLED is set to TRUE if qt3 is found.
+Hints
+^^^^^
+
+``QT_REQUIRED``
+  If this variable is set to ``TRUE`` before calling ``find_package(Qt)``,
+  CMake will raise an error if neither Qt3 nor Qt4 is found.
+``DESIRED_QT_VERSION``
+  Specifies the Qt major version to use.  Can be either ``3``, ``4``, or empty,
+  to search for version automatically.
+
+Examples
+^^^^^^^^
+
+Finding Qt3 or Qt4 version:
+
+.. code-block:: cmake
+
+  find_package(Qt)
 #]=======================================================================]
 
 if(_findqt_testing)
