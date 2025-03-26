@@ -131,7 +131,6 @@ They are normally called through the :command:`find_package` command.
    /module/FindFLTK2
    /module/FindFontconfig
    /module/FindFreetype
-   /module/FindGCCXML
    /module/FindGettext
    /module/FindGIF
    /module/FindGit
@@ -292,6 +291,7 @@ Deprecated Find Modules
    /module/FindBoost
    /module/FindCUDA
    /module/FindDart
+   /module/FindGCCXML
    /module/FindGDAL
    /module/FindITK
    /module/FindPythonInterp
