@@ -7,7 +7,7 @@ FindOpenCL
 
 .. versionadded:: 3.1
 
-Finds Open Computing Language (OpenCL)
+Finds Open Computing Language (OpenCL).
 
 .. versionadded:: 3.10
   Detection of OpenCL 2.1 and 2.2.
@@ -17,26 +17,49 @@ Imported Targets
 
 .. versionadded:: 3.7
 
-This module defines :prop_tgt:`IMPORTED` target ``OpenCL::OpenCL``, if
-OpenCL has been found.
+This module provides the following :ref:`Imported Targets`, if OpenCL has been
+found:
+
+``OpenCL::OpenCL``
+  Target providing OpenCL usage requirements.
 
 Result Variables
 ^^^^^^^^^^^^^^^^
 
-This module defines the following variables::
+This module defines the following variables:
 
-  OpenCL_FOUND          - True if OpenCL was found
-  OpenCL_INCLUDE_DIRS   - include directories for OpenCL
-  OpenCL_LIBRARIES      - link against this library to use OpenCL
-  OpenCL_VERSION_STRING - Highest supported OpenCL version (eg. 1.2)
-  OpenCL_VERSION_MAJOR  - The major version of the OpenCL implementation
-  OpenCL_VERSION_MINOR  - The minor version of the OpenCL implementation
+``OpenCL_FOUND``
+  True if OpenCL was found.
+``OpenCL_INCLUDE_DIRS``
+  Include directories needed to use OpenCL.
+``OpenCL_LIBRARIES``
+  Libraries needed to link to OpenCL.
+``OpenCL_VERSION_STRING``
+  Highest supported OpenCL version (e.g., ``1.2``).
+``OpenCL_VERSION_MAJOR``
+  The major version of the OpenCL implementation.
+``OpenCL_VERSION_MINOR``
+  The minor version of the OpenCL implementation.
 
-The module will also define two cache variables::
+Cache Variables
+^^^^^^^^^^^^^^^
 
-  OpenCL_INCLUDE_DIR    - the OpenCL include directory
-  OpenCL_LIBRARY        - the path to the OpenCL library
+The following cache variables may also be set:
 
+``OpenCL_INCLUDE_DIR``
+  The OpenCL include directory.
+``OpenCL_LIBRARY``
+  The path to the OpenCL library.
+
+Examples
+^^^^^^^^
+
+Finding OpenCL and linking it to a project target:
+
+.. code-block:: cmake
+
+  find_package(OpenCL)
+  target_link_libraries(project_target PRIVATE OpenCL::OpenCL)
 #]=======================================================================]
 
 set(_OPENCL_x86 "(x86)")
