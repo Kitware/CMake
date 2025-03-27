@@ -5,30 +5,50 @@
 FindLibArchive
 --------------
 
-Find libarchive library and headers.
-Libarchive is multi-format archive and compression library.
+Finds the libarchive library and include directories.  Libarchive is a
+multi-format archive and compression library.
 
-The module defines the following variables:
+Import Targets
+^^^^^^^^^^^^^^
 
-::
+This module defines the following :ref:`Imported Targets`:
 
-  LibArchive_FOUND        - true if libarchive was found
-  LibArchive_INCLUDE_DIRS - include search path
-  LibArchive_LIBRARIES    - libraries to link
-  LibArchive_VERSION      - libarchive 3-component version number
+``LibArchive::LibArchive``
+  .. versionadded:: 3.17
 
-The module defines the following ``IMPORTED`` targets:
+  A target for linking against libarchive.
 
-::
+Result Variables
+^^^^^^^^^^^^^^^^
 
-  LibArchive::LibArchive  - target for linking against libarchive
+This module defines the following variables:
 
-.. versionadded:: 3.6
-  Support for new libarchive 3.2 version string format.
+``LibArchive_FOUND``
+  Boolean indicating whether libarchive was found.
+``LibArchive_INCLUDE_DIRS``
+  Include search path for using libarchive.
+``LibArchive_LIBRARIES``
+  Libraries to link against libarchive.
+``LibArchive_VERSION``
+  A 3-component version string (``major.minor.patch``) of libarchive found.
 
-.. versionadded:: 3.17
-  Provides an imported target.
+  .. versionadded:: 3.6
 
+    Support for a new libarchive version string format.  Starting from
+    libarchive version 3.2, a different preprocessor macro is used in the header
+    to define the version.  In CMake 3.5 and earlier, this variable will be set
+    only for libarchive versions 3.1 and earlier.  In CMake 3.6 and newer, this
+    variable will be set for all libarchive versions.
+
+Examples
+^^^^^^^^
+
+Finding LibArchive and linking it to a project target:
+
+.. code-block:: cmake
+
+  find_package(LibArchive)
+  target_link_libraries(project_target PRIVATE LibArchive::LibArchive)
 #]=======================================================================]
 
 cmake_policy(PUSH)
