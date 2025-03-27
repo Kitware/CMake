@@ -1321,7 +1321,9 @@ if(CUDAToolkit_FOUND)
     set(_cmake_cupti_extra_paths extras/CUPTI/lib64/
                                  extras/CUPTI/lib/
                                  ../extras/CUPTI/lib64/
-                                 ../extras/CUPTI/lib/)
+                                 ../extras/CUPTI/lib/
+                                 ../../../extras/CUPTI/lib64/
+                                 ../../../extras/CUPTI/lib/)
     _CUDAToolkit_find_and_add_import_lib(cupti
                                         EXTRA_PATH_SUFFIXES ${_cmake_cupti_extra_paths}
                                         EXTRA_INCLUDE_DIRS "${CUDAToolkit_CUPTI_INCLUDE_DIR}")
