@@ -10,10 +10,10 @@ values:
   Running in project mode (processing a ``CMakeLists.txt`` file).
 
 ``SCRIPT``
-  Running in ``-P`` script mode.
+  Running in :ref:`cmake -P <Script Processing Mode>` script mode.
 
 ``FIND_PACKAGE``
-  Running in ``--find-package`` mode.
+  Running in :ref:`cmake --find-package <Find-Package Tool Mode>` mode.
 
 ``CTEST``
   Running in CTest script mode.
