@@ -39,3 +39,4 @@ curl -OL "https://github.com/ispc/ispc/releases/download/v$version/$tarball"
 $shatool --check ispc.sha256sum
 tar xf "$tarball"
 mv "$filename" ispc
+rm "$tarball" ispc.sha256sum

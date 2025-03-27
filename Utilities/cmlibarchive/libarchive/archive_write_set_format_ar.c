@@ -26,7 +26,6 @@
  */
 
 #include "archive_platform.h"
-__FBSDID("$FreeBSD: head/lib/libarchive/archive_write_set_format_ar.c 201108 2009-12-28 03:28:21Z kientzle $");
 
 #ifdef HAVE_ERRNO_H
 #include <errno.h>
@@ -127,7 +126,7 @@ archive_write_set_format_ar(struct archive_write *a)
 	if (a->format_free != NULL)
 		(a->format_free)(a);
 
-	ar = (struct ar_w *)calloc(1, sizeof(*ar));
+	ar = calloc(1, sizeof(*ar));
 	if (ar == NULL) {
 		archive_set_error(&a->archive, ENOMEM, "Can't allocate ar data");
 		return (ARCHIVE_FATAL);
@@ -247,7 +246,7 @@ archive_write_ar_header(struct archive_write *a, struct archive_entry *entry)
 				return (ARCHIVE_WARN);
 			}
 
-			se = (char *)malloc(strlen(filename) + 3);
+			se = malloc(strlen(filename) + 3);
 			if (se == NULL) {
 				archive_set_error(&a->archive, ENOMEM,
 				    "Can't allocate filename buffer");
@@ -380,7 +379,7 @@ archive_write_ar_data(struct archive_write *a, const void *buff, size_t s)
 			return (ARCHIVE_WARN);
 		}
 
-		ar->strtab = (char *)malloc(s + 1);
+		ar->strtab = malloc(s + 1);
 		if (ar->strtab == NULL) {
 			archive_set_error(&a->archive, ENOMEM,
 			    "Can't allocate strtab buffer");

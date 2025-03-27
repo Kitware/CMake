@@ -1,0 +1,41 @@
+{
+  "version": 6,
+  "configurePresets": [
+    {
+      "name": "SinglePresetArg",
+      "generator": "@RunCMake_GENERATOR@",
+      "cacheVariables":
+        {
+          "WORKFLOW_PRESET": "SinglePresetArg"
+        }
+    },
+    {
+      "name": "RepeatedPresetArg",
+      "generator": "@RunCMake_GENERATOR@",
+      "cacheVariables":
+        {
+          "WORKFLOW_PRESET": "RepeatedPresetArg"
+        }
+    }
+  ],
+  "workflowPresets": [
+    {
+      "name": "SinglePresetArg",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "SinglePresetArg"
+        }
+      ]
+    },
+    {
+      "name": "RepeatedPresetArg",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "RepeatedPresetArg"
+        }
+      ]
+    }
+  ]
+}

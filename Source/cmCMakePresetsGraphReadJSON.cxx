@@ -40,7 +40,7 @@ using cmCMakePresetsGraphInternal::BaseMacroExpander;
 using cmCMakePresetsGraphInternal::ExpandMacros;
 
 constexpr int MIN_VERSION = 1;
-constexpr int MAX_VERSION = 9;
+constexpr int MAX_VERSION = 10;
 
 struct CMakeVersion
 {
@@ -256,9 +256,14 @@ auto const VersionIntHelper =
 auto const VersionHelper = JSONHelperBuilder::Required<int>(
   cmCMakePresetsErrors::NO_VERSION, VersionIntHelper);
 
+auto const VersionRangeHelper = JSONHelperBuilder::Checked<int>(
+  cmCMakePresetsErrors::UNRECOGNIZED_VERSION_RANGE(MIN_VERSION, MAX_VERSION),
+  VersionHelper,
+  [](const int v) -> bool { return v >= MIN_VERSION && v <= MAX_VERSION; });
+
 auto const RootVersionHelper =
   JSONHelperBuilder::Object<int>(cmCMakePresetsErrors::INVALID_ROOT_OBJECT)
-    .Bind("version"_s, VersionHelper, false);
+    .Bind("version"_s, VersionRangeHelper, false);
 
 auto const CMakeVersionUIntHelper =
   JSONHelperBuilder::UInt(cmCMakePresetsErrors::INVALID_VERSION);
@@ -481,11 +486,6 @@ bool cmCMakePresetsGraph::ReadJSONFile(const std::string& filename,
   if ((result = RootVersionHelper(v, &root, &parseState)) != true) {
     return result;
   }
-  if (v < MIN_VERSION || v > MAX_VERSION) {
-    cmCMakePresetsErrors::UNRECOGNIZED_VERSION(&root["version"],
-                                               &this->parseState);
-    return false;
-  }
 
   // Support for build and test presets added in version 2.
   if (v < 2) {
@@ -527,6 +527,9 @@ bool cmCMakePresetsGraph::ReadJSONFile(const std::string& filename,
     cmCMakePresetsErrors::SCHEMA_UNSUPPORTED(&this->parseState);
     return false;
   }
+
+  // Support for $comment added in version 10.
+  this->parseState.allowComments = (v >= 10);
 
   RootPresets presets;
   if ((result = RootPresetsHelper(presets, &root, &parseState)) != true) {
@@ -605,6 +608,12 @@ bool cmCMakePresetsGraph::ReadJSONFile(const std::string& filename,
         (preset.TraceMode.has_value() || preset.TraceFormat.has_value() ||
          !preset.TraceRedirect.empty() || !preset.TraceSource.empty())) {
       cmCMakePresetsErrors::TRACE_UNSUPPORTED(&this->parseState);
+      return false;
+    }
+
+    // Support for graphviz argument added in version 10.
+    if (v < 10 && !preset.GraphVizFile.empty()) {
+      cmCMakePresetsErrors::GRAPHVIZ_FILE_UNSUPPORTED(&this->parseState);
       return false;
     }
 

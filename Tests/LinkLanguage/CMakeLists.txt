@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.7.20090708)
+cmake_minimum_required(VERSION 3.10)
 project(LinkLanguage C CXX)
 
 add_library(foo STATIC foo.cxx)

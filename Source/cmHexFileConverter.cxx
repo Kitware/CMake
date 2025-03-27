@@ -15,7 +15,7 @@
 
 static unsigned int ChompStrlen(const char* line)
 {
-  if (line == nullptr) {
+  if (!line) {
     return 0;
   }
   unsigned int length = static_cast<unsigned int>(strlen(line));
@@ -132,7 +132,7 @@ cmHexFileConverter::FileType cmHexFileConverter::DetermineFileType(
 {
   char buf[1024];
   FILE* inFile = cmsys::SystemTools::Fopen(inFileName, "rb");
-  if (inFile == nullptr) {
+  if (!inFile) {
     return Binary;
   }
 
@@ -181,11 +181,11 @@ bool cmHexFileConverter::TryConvert(const std::string& inFileName,
   // try to open the file
   FILE* inFile = cmsys::SystemTools::Fopen(inFileName, "rb");
   FILE* outFile = cmsys::SystemTools::Fopen(outFileName, "wb");
-  if ((inFile == nullptr) || (outFile == nullptr)) {
-    if (inFile != nullptr) {
+  if (!inFile || !outFile) {
+    if (inFile) {
       fclose(inFile);
     }
-    if (outFile != nullptr) {
+    if (outFile) {
       fclose(outFile);
     }
     return false;
@@ -194,7 +194,7 @@ bool cmHexFileConverter::TryConvert(const std::string& inFileName,
   // convert them line by line
   bool success = false;
   char buf[1024];
-  while (fgets(buf, 1024, inFile) != nullptr) {
+  while (fgets(buf, 1024, inFile)) {
     if (type == MotorolaSrec) {
       success = ConvertMotorolaSrecLine(buf, outFile);
     } else if (type == IntelHex) {

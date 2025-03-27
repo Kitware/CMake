@@ -23,7 +23,6 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 #include "archive_platform.h"
-__FBSDID("$FreeBSD: head/lib/libarchive/archive_read_support_format_raw.c 201107 2009-12-28 03:25:33Z kientzle $");
 
 #ifdef HAVE_ERRNO_H
 #include <errno.h>
@@ -62,7 +61,7 @@ archive_read_support_format_raw(struct archive *_a)
 	archive_check_magic(_a, ARCHIVE_READ_MAGIC,
 	    ARCHIVE_STATE_NEW, "archive_read_support_format_raw");
 
-	info = (struct raw_info *)calloc(1, sizeof(*info));
+	info = calloc(1, sizeof(*info));
 	if (info == NULL) {
 		archive_set_error(&a->archive, ENOMEM,
 		    "Can't allocate raw_info data");

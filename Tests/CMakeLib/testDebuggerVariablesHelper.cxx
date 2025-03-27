@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
 
-#include <functional>
 #include <memory>
 #include <set>
 #include <string>
@@ -571,18 +570,10 @@ static bool testCreateFromFileSets()
 
 int testDebuggerVariablesHelper(int, char*[])
 {
-  return runTests(std::vector<std::function<bool()>>{
-    testCreateFromPolicyMap,
-    testCreateFromPairVector,
-    testCreateFromSet,
-    testCreateFromStringVector,
-    testCreateFromTarget,
-    testCreateFromGlobalGenerator,
-    testCreateFromMakefile,
-    testCreateFromStackFrame,
-    testCreateFromTests,
-    testCreateFromBTStringVector,
-    testCreateFromFileSet,
-    testCreateFromFileSets,
-  });
+  return runTests({ testCreateFromPolicyMap, testCreateFromPairVector,
+                    testCreateFromSet, testCreateFromStringVector,
+                    testCreateFromTarget, testCreateFromGlobalGenerator,
+                    testCreateFromMakefile, testCreateFromStackFrame,
+                    testCreateFromTests, testCreateFromBTStringVector,
+                    testCreateFromFileSet, testCreateFromFileSets });
 }

@@ -63,7 +63,7 @@ bool cmDependsCompiler::CheckDependencies(
           continue;
         }
         // This is a dependee line
-        if (currentDependencies != nullptr) {
+        if (currentDependencies) {
           currentDependencies->emplace_back(line.substr(1));
         }
       }

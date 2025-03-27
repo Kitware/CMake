@@ -45,7 +45,7 @@ struct cmDebuggerVariableEntry
   }
   cmDebuggerVariableEntry(std::string name, const char* value)
     : Name(std::move(name))
-    , Value(value == nullptr ? "" : value)
+    , Value(value ? value : "")
     , Type("string")
   {
   }

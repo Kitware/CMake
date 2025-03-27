@@ -1,8 +1,9 @@
-#include <iostream>
 #include <vector>
 
 #include <cm/optional>
 #include <cm/utility>
+
+#include "testCommon.h"
 
 class EventLogger;
 
@@ -92,14 +93,6 @@ public:
   NoMoveAssignEventLogger& operator=(const NoMoveAssignEventLogger&) = default;
   NoMoveAssignEventLogger& operator=(NoMoveAssignEventLogger&&) = delete;
 };
-
-#define ASSERT_TRUE(x)                                                        \
-  do {                                                                        \
-    if (!(x)) {                                                               \
-      std::cout << "ASSERT_TRUE(" #x ") failed on line " << __LINE__ << "\n"; \
-      return false;                                                           \
-    }                                                                         \
-  } while (false)
 
 // Certain builds of GCC generate false -Wmaybe-uninitialized warnings when
 // doing a release build with the system version of std::optional. These

@@ -444,11 +444,14 @@ nvidia-ML
 """""""""
 
 The `NVIDIA Management Library <https://developer.nvidia.com/management-library-nvml>`_.
-This is a shared library only.
 
 Targets Created:
 
 - ``CUDA::nvml``
+- ``CUDA::nvml_static`` starting in CUDA 12.4
+
+.. versionadded:: 3.31
+  Added ``CUDA::nvml_static``.
 
 .. _`cuda_toolkit_nvToolsExt`:
 
@@ -782,7 +785,6 @@ else()
         set(CUDAToolkit_VERSION_MINOR "${CMAKE_MATCH_2}" PARENT_SCOPE)
         set(CUDAToolkit_VERSION_PATCH "${CMAKE_MATCH_3}" PARENT_SCOPE)
         set(CUDAToolkit_VERSION "${CMAKE_MATCH_1}.${CMAKE_MATCH_2}.${CMAKE_MATCH_3}" PARENT_SCOPE)
-        message(STATUS "_CUDAToolkit_parse_version_file")
       endif()
     endif()
   endfunction()
@@ -970,6 +972,14 @@ if(CMAKE_CROSSCOMPILING)
   endforeach()
 endif()
 
+# Determine windows search path suffix for libraries
+if(CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")
+  if(CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "AMD64")
+    set(_CUDAToolkit_win_search_dirs lib/x64)
+    set(_CUDAToolkit_win_stub_search_dirs lib/x64/stubs)
+  endif()
+endif()
+
 # If not already set we can simply use the toolkit root or it's a scattered installation.
 if(NOT CUDAToolkit_TARGET_DIR)
   # Not cross compiling
@@ -1025,12 +1035,12 @@ unset(CUDAToolkit_CUBLAS_INCLUDE_DIR)
 find_library(CUDA_CUDART
   NAMES cudart
   PATHS ${CUDAToolkit_IMPLICIT_LIBRARY_DIRECTORIES}
-  PATH_SUFFIXES lib64 lib/x64
+  PATH_SUFFIXES lib64 ${_CUDAToolkit_win_search_dirs}
 )
 find_library(CUDA_CUDART
   NAMES cudart
   PATHS ${CUDAToolkit_IMPLICIT_LIBRARY_DIRECTORIES}
-  PATH_SUFFIXES lib64/stubs lib/x64/stubs lib/stubs stubs
+  PATH_SUFFIXES lib64/stubs ${_CUDAToolkit_win_stub_search_dirs} lib/stubs stubs
 )
 
 if(NOT CUDA_CUDART AND NOT CUDAToolkit_FIND_QUIETLY)
@@ -1101,6 +1111,14 @@ if(CUDAToolkit_FOUND)
     unset(CUDAToolkit_search_loc)
     unset(CUDAToolkit_possible_lib_root)
   endif()
+else()
+  # clear cache results when we fail
+  unset(_cmake_CUDAToolkit_implicit_link_directories CACHE)
+  unset(_cmake_CUDAToolkit_include_directories CACHE)
+  unset(CUDA_CUDART CACHE)
+  unset(CUDAToolkit_BIN_DIR CACHE)
+  unset(CUDAToolkit_NVCC_EXECUTABLE CACHE)
+  unset(CUDAToolkit_SENTINEL_FILE CACHE)
 endif()
 unset(CUDAToolkit_IMPLICIT_LIBRARY_DIRECTORIES)
 unset(CUDAToolkit_INCLUDE_DIRECTORIES)
@@ -1110,15 +1128,19 @@ unset(CUDAToolkit_INCLUDE_DIRECTORIES)
 if(CUDAToolkit_FOUND)
 
   function(_CUDAToolkit_find_and_add_import_lib lib_name)
-    cmake_parse_arguments(arg "" "" "ALT;DEPS;EXTRA_PATH_SUFFIXES;EXTRA_INCLUDE_DIRS" ${ARGN})
+    cmake_parse_arguments(arg "" "" "ALT;DEPS;EXTRA_PATH_SUFFIXES;EXTRA_INCLUDE_DIRS;ONLY_SEARCH_FOR" ${ARGN})
 
-    set(search_names ${lib_name} ${arg_ALT})
+    if(arg_ONLY_SEARCH_FOR)
+      set(search_names ${arg_ONLY_SEARCH_FOR})
+    else()
+      set(search_names ${lib_name} ${arg_ALT})
+    endif()
 
     find_library(CUDA_${lib_name}_LIBRARY
       NAMES ${search_names}
       HINTS ${CUDAToolkit_LIBRARY_SEARCH_DIRS}
             ENV CUDA_PATH
-      PATH_SUFFIXES nvidia/current lib64 lib/x64 lib
+      PATH_SUFFIXES nvidia/current lib64 ${_CUDAToolkit_win_search_dirs} lib
                     # Support NVHPC splayed math library layout
                     math_libs/${CUDAToolkit_VERSION_MAJOR}.${CUDAToolkit_VERSION_MINOR}/lib64
                     math_libs/lib64
@@ -1133,10 +1155,10 @@ if(CUDAToolkit_FOUND)
         NAMES ${search_names}
         HINTS ${CUDAToolkit_LIBRARY_SEARCH_DIRS}
               ENV CUDA_PATH
-        PATH_SUFFIXES lib64/stubs lib/x64/stubs lib/stubs stubs
+        PATH_SUFFIXES lib64/stubs ${_CUDAToolkit_win_stub_search_dirs} lib/stubs stubs
       )
     endif()
-    if(CUDA_${lib_name}_LIBRARY MATCHES "/stubs/" AND NOT WIN32)
+    if(CUDA_${lib_name}_LIBRARY MATCHES "/stubs/" AND NOT CUDA_${lib_name}_LIBRARY MATCHES "\\.a$" AND NOT WIN32)
       # Use a SHARED library with IMPORTED_IMPLIB, but not IMPORTED_LOCATION,
       # to indicate that the stub is for linkers but not dynamic loaders.
       # It will not contribute any RPATH entry.  When encountered as
@@ -1333,11 +1355,11 @@ if(CUDAToolkit_FOUND)
   endif()
 
   _CUDAToolkit_find_and_add_import_lib(nvrtc_builtins ALT nvrtc-builtins)
-  _CUDAToolkit_find_and_add_import_lib(nvrtc DEPS nvrtc_builtins nvJitLink)
+  _CUDAToolkit_find_and_add_import_lib(nvrtc)
   if(CUDAToolkit_VERSION VERSION_GREATER_EQUAL 11.5.0)
     _CUDAToolkit_find_and_add_import_lib(nvrtc_builtins_static ALT nvrtc-builtins_static)
     if(NOT TARGET CUDA::nvrtc_static)
-      _CUDAToolkit_find_and_add_import_lib(nvrtc_static DEPS nvrtc_builtins_static nvptxcompiler_static nvJitLink_static)
+      _CUDAToolkit_find_and_add_import_lib(nvrtc_static DEPS nvrtc_builtins_static nvptxcompiler_static)
       if(TARGET CUDA::nvrtc_static AND WIN32 AND NOT (BORLAND OR MINGW OR CYGWIN))
         target_link_libraries(CUDA::nvrtc_static INTERFACE Ws2_32.lib)
       endif()
@@ -1345,6 +1367,7 @@ if(CUDAToolkit_FOUND)
   endif()
 
   _CUDAToolkit_find_and_add_import_lib(nvml ALT nvidia-ml nvml)
+  _CUDAToolkit_find_and_add_import_lib(nvml_static ONLY_SEARCH_FOR libnvidia-ml.a libnvml.a)
 
   if(WIN32)
     # nvtools can be installed outside the CUDA toolkit directory
@@ -1381,3 +1404,6 @@ if(_CUDAToolkit_Pop_ROOT_PATH)
   list(REMOVE_AT CMAKE_FIND_ROOT_PATH 0)
   unset(_CUDAToolkit_Pop_ROOT_PATH)
 endif()
+
+unset(_CUDAToolkit_win_search_dirs)
+unset(_CUDAToolkit_win_stub_search_dirs)

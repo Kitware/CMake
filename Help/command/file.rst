@@ -400,9 +400,18 @@ Filesystem
   ============== ======================================================
 
 .. signature::
-  file(MAKE_DIRECTORY <directories>...)
+  file(MAKE_DIRECTORY <directories>... [RESULT <result>])
 
   Create the given directories and their parents as needed.
+
+  The options are:
+
+    ``RESULT <result>``
+      .. versionadded:: 3.31
+
+      Set ``<result>`` variable to ``0`` on success or an error message
+      otherwise. If ``RESULT`` is not specified and the operation fails,
+      an error is emitted.
 
   .. versionchanged:: 3.30
     ``<directories>`` can be an empty list. CMake 3.29 and earlier required
@@ -802,10 +811,21 @@ Transfer
       environment variable will be used instead.
       See :variable:`CMAKE_TLS_VERSION` for allowed values.
 
+      .. versionchanged:: 3.31
+        The default is TLS 1.2.
+        Previously, no minimum version was enforced by default.
+
     ``TLS_VERIFY <ON|OFF>``
       Specify whether to verify the server certificate for ``https://`` URLs.
-      The default is to *not* verify. If this option is not specified, the
-      value of the :variable:`CMAKE_TLS_VERIFY` variable will be used instead.
+      If this option is not specified, the value of the
+      :variable:`CMAKE_TLS_VERIFY` variable or :envvar:`CMAKE_TLS_VERIFY`
+      environment variable will be used instead.
+      If neither is set, the default is *on*.
+
+      .. versionchanged:: 3.31
+        The default is on.  Previously, the default was off.
+        Users may set the :envvar:`CMAKE_TLS_VERIFY` environment
+        variable to ``0`` to restore the old default.
 
       .. versionadded:: 3.18
         Added support to ``file(UPLOAD)``.
@@ -818,9 +838,7 @@ Transfer
       .. versionadded:: 3.18
         Added support to ``file(UPLOAD)``.
 
-  For ``https://`` URLs CMake must be built with OpenSSL support.  ``TLS/SSL``
-  certificates are not checked by default.  Set ``TLS_VERIFY`` to ``ON`` to
-  check certificates.
+  For ``https://`` URLs CMake must be built with SSL/TLS support.
 
   Additional options to ``DOWNLOAD`` are:
 
@@ -892,8 +910,9 @@ Archiving
     PATHS <paths>...
     [FORMAT <format>]
     [COMPRESSION <compression>
-     [COMPRESSION_LEVEL <compression-level>]]
+    [COMPRESSION_LEVEL <compression-level>]]
     [MTIME <mtime>]
+    [WORKING_DIRECTORY <dir>]
     [VERBOSE])
   :target: ARCHIVE_CREATE
   :break: verbatim
@@ -904,40 +923,55 @@ Archiving
   listed in ``<paths>``.  Note that ``<paths>`` must list actual files or
   directories; wildcards are not supported.
 
-  Use the ``FORMAT`` option to specify the archive format.  Supported values
-  for ``<format>`` are ``7zip``, ``gnutar``, ``pax``, ``paxr``, ``raw`` and
-  ``zip``.  If ``FORMAT`` is not given, the default format is ``paxr``.
+  The options are:
 
-  Some archive formats allow the type of compression to be specified.
-  The ``7zip`` and ``zip`` archive formats already imply a specific type of
-  compression.  The other formats use no compression by default, but can be
-  directed to do so with the ``COMPRESSION`` option.  Valid values for
-  ``<compression>`` are ``None``, ``BZip2``, ``GZip``, ``XZ``, and ``Zstd``.
+  ``FORMAT <format>``
+    Specify the archive format.  Supported values for ``<format>`` are
+    ``7zip``, ``gnutar``, ``pax``, ``paxr``, ``raw`` and ``zip``.
+    If ``FORMAT`` is not given, the default format is ``paxr``.
 
-  .. versionadded:: 3.19
+  ``COMPRESSION <compression>``
+    Some archive formats allow the type of compression to be specified.
+    The ``7zip`` and ``zip`` archive formats already imply a specific type of
+    compression.  The other formats use no compression by default, but can be
+    directed to do so with the ``COMPRESSION`` option.  Valid values for
+    ``<compression>`` are ``None``, ``BZip2``, ``GZip``, ``XZ``, and ``Zstd``.
+
+    .. note::
+      With ``FORMAT`` set to ``raw``, only one file will be compressed
+      with the compression type specified by ``COMPRESSION``.
+
+  ``COMPRESSION_LEVEL <compression-level>``
+    .. versionadded:: 3.19
+
     The compression level can be specified with the ``COMPRESSION_LEVEL``
     option.  The ``<compression-level>`` should be between 0-9, with the
     default being 0.  The ``COMPRESSION`` option must be present when
     ``COMPRESSION_LEVEL`` is given.
 
-  .. versionadded:: 3.26
-    The ``<compression-level>`` of the ``Zstd`` algorithm can be set
-    between 0-19.
+    .. versionadded:: 3.26
+      The ``<compression-level>`` of the ``Zstd`` algorithm can be set
+      between 0-19.
 
-  .. note::
-    With ``FORMAT`` set to ``raw``, only one file will be compressed with the
-    compression type specified by ``COMPRESSION``.
+  ``MTIME <mtime>``
+    Specify the modification time recorded in tarball entries.
 
-  The ``VERBOSE`` option enables verbose output for the archive operation.
+  ``WORKING_DIRECTORY <dir>``
+    .. versionadded:: 3.31
 
-  To specify the modification time recorded in tarball entries, use
-  the ``MTIME`` option.
+    Specify the directory in which the archive creation operation will
+    be executed.  Paths in the ``<paths>`` argument can be relative to
+    this directory.  If this option is not provided, the current working
+    directory will be used by default.
+
+  ``VERBOSE``
+    Enable verbose output from the archive operation.
 
 .. signature::
   file(ARCHIVE_EXTRACT
     INPUT <archive>
     [DESTINATION <dir>]
-    [PATTERNS <patterns>...]
+    [PATTERNS <pattern>...]
     [LIST_ONLY]
     [VERBOSE]
     [TOUCH])
@@ -947,17 +981,30 @@ Archiving
 
   Extracts or lists the content of the specified ``<archive>``.
 
-  The directory where the content of the archive will be extracted to can
-  be specified using the ``DESTINATION`` option.  If the directory does not
-  exist, it will be created.  If ``DESTINATION`` is not given, the current
-  binary directory will be used.
+  The options are:
 
-  If required, you may select which files and directories to list or extract
-  from the archive using the specified ``<patterns>``.  Wildcards are
-  supported.  If the ``PATTERNS`` option is not given, the entire archive will
-  be listed or extracted.
+  ``DESTINATION <dir>``
+    Specify the directory under which the content of the archive will be
+    extracted.  If the directory does not exist, it will be created.
+    If ``DESTINATION`` is not given, the current binary directory will
+    be used.
 
-  ``LIST_ONLY`` will list the files in the archive rather than extract them.
+  ``PATTERNS <pattern>...``
+    Extract/list only files and directories that match one of the given
+    patterns.  Wildcards are supported.  If the ``PATTERNS`` option is
+    not given, the entire archive will be listed or extracted.
+
+  ``LIST_ONLY``
+    List the files in the archive rather than extract them.
+
+  ``TOUCH``
+    .. versionadded:: 3.24
+
+    Give extracted files a current local timestamp instead of extracting
+    file timestamps from the archive.
+
+  ``VERBOSE``
+    Enable verbose output from the extraction operation.
 
   .. note::
     The working directory for this subcommand is the ``DESTINATION`` directory
@@ -965,12 +1012,6 @@ Archiving
     outside of script mode, it may be best to provide absolute paths to
     ``INPUT`` archives as they are unlikely to be extracted where a relative
     path works.
-
-  .. versionadded:: 3.24
-    The ``TOUCH`` option gives extracted files a current local
-    timestamp instead of extracting file timestamps from the archive.
-
-  With ``VERBOSE``, the command will produce verbose output.
 
 Handling Runtime Binaries
 ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1161,6 +1202,14 @@ Handling Runtime Binaries
      from which it pulls dependencies).
 
   5. Otherwise, the dependency is unresolved.
+
+  .. versionchanged:: 3.31
+
+    Resolution of each encountered library file name occurs at most once
+    while processing a given root ELF file (executable or shared object).
+    If a library file name is encountered again in the dependency tree,
+    the original resolution is assumed.  This behavior more closely matches
+    the dynamic loader's behavior on Linux.
 
   On Windows platforms, library resolution works as follows:
 

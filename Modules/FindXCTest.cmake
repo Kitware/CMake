@@ -210,6 +210,8 @@ function(xctest_add_test name bundle)
 
   # register test
 
+  # There's no target used for this command, so we don't need to do anything
+  # here for CMP0178.
   add_test(
     NAME ${name}
     COMMAND ${XCTest_EXECUTABLE} $<TARGET_BUNDLE_DIR:${bundle}>)

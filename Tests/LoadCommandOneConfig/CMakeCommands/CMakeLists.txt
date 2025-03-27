@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.5)
+cmake_minimum_required(VERSION 3.10)
 project(CMAKE_LOADED_COMMANDS)
 
 if (MUDSLIDE_TYPE MATCHES MUCHO)

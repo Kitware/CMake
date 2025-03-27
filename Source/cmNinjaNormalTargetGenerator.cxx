@@ -1016,7 +1016,8 @@ void cmNinjaNormalTargetGenerator::WriteNvidiaDeviceLinkStatement(
   vars["LANGUAGE_COMPILE_FLAGS"] = langFlags;
 
   auto const tgtNames = this->TargetNames(config);
-  if (genTarget->HasSOName(config)) {
+  if (genTarget->HasSOName(config) ||
+      genTarget->IsArchivedAIXSharedLibrary()) {
     vars["SONAME_FLAG"] =
       this->GetMakefile()->GetSONameFlag(this->TargetLinkLanguage(config));
     vars["SONAME"] = localGen.ConvertToOutputFormat(tgtNames.SharedObject,
@@ -1163,11 +1164,10 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement(
   cmNinjaVars& vars = linkBuild.Variables;
 
   if (this->GeneratorTarget->HasLinkDependencyFile(config)) {
-    vars["DEP_FILE"] = this->GetLocalGenerator()->ConvertToOutputFormat(
-      this->ConvertToNinjaPath(
-        this->GetLocalGenerator()->GetLinkDependencyFile(this->GeneratorTarget,
-                                                         config)),
-      cmOutputConverter::SHELL);
+    this->AddDepfileBinding(vars,
+                            this->ConvertToNinjaPath(
+                              this->GetLocalGenerator()->GetLinkDependencyFile(
+                                this->GeneratorTarget, config)));
   }
 
   // Compute the comment.
@@ -1277,6 +1277,9 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement(
                           vars["LINK_LIBRARIES"], vars["FLAGS"],
                           vars["LINK_FLAGS"], frameworkPath, linkPath, gt);
 
+  localGen.AppendDependencyInfoLinkerFlags(vars["LINK_FLAGS"], gt, config,
+                                           this->TargetLinkLanguage(config));
+
   // Add OS X version flags, if any.
   if (this->GeneratorTarget->GetType() == cmStateEnums::SHARED_LIBRARY ||
       this->GeneratorTarget->GetType() == cmStateEnums::MODULE_LIBRARY) {
@@ -1316,7 +1319,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement(
       t, gt, this->TargetLinkLanguage(config), config);
     vars["LANGUAGE_COMPILE_FLAGS"] = t;
   }
-  if (gt->HasSOName(config)) {
+  if (gt->HasSOName(config) || gt->IsArchivedAIXSharedLibrary()) {
     vars["SONAME_FLAG"] = mf->GetSONameFlag(this->TargetLinkLanguage(config));
     vars["SONAME"] = localGen.ConvertToOutputFormat(tgtNames.SharedObject,
                                                     cmOutputConverter::SHELL);
@@ -1459,7 +1462,8 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement(
 
   cmNinjaVars symlinkVars;
   bool const symlinkNeeded =
-    (targetOutput != targetOutputReal && !gt->IsFrameworkOnApple());
+    (targetOutput != targetOutputReal && !gt->IsFrameworkOnApple() &&
+     !gt->IsArchivedAIXSharedLibrary());
   if (!symlinkNeeded) {
     vars["POST_BUILD"] = postBuildCmdLine;
   } else {

@@ -1,5 +1,0 @@
-CMake Error at FileSetModulesInterface.cmake:[0-9]+ \(target_sources\):
-  target_sources File set TYPE "CXX_MODULES" may not have "INTERFACE"
-  visibility
-Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)

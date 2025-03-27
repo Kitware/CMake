@@ -21,8 +21,6 @@
  * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- * $FreeBSD$
  */
 
 #ifndef ARCHIVE_ACL_PRIVATE_H_INCLUDED
@@ -79,5 +77,7 @@ int archive_acl_from_text_w(struct archive_acl *, const wchar_t * /* wtext */,
     int /* type */);
 int archive_acl_from_text_l(struct archive_acl *, const char * /* text */,
     int /* type */, struct archive_string_conv *);
+int archive_acl_from_text_nl(struct archive_acl *, const char * /* text */,
+    size_t /* size of text */, int /* type */, struct archive_string_conv *);
 
 #endif /* ARCHIVE_ENTRY_PRIVATE_H_INCLUDED */

@@ -123,7 +123,7 @@ CURLcode Curl_input_ntlm(struct Curl_easy *data,
 }
 
 /*
- * This is for creating ntlm header output
+ * This is for creating NTLM header output
  */
 CURLcode Curl_output_ntlm(struct Curl_easy *data, bool proxy)
 {
@@ -187,10 +187,10 @@ CURLcode Curl_output_ntlm(struct Curl_easy *data, bool proxy)
     passwdp = "";
 
 #ifdef USE_WINDOWS_SSPI
-  if(!s_hSecDll) {
+  if(!Curl_hSecDll) {
     /* not thread safe and leaks - use curl_global_init() to avoid */
     CURLcode err = Curl_sspi_global_init();
-    if(!s_hSecDll)
+    if(!Curl_hSecDll)
       return err;
   }
 #ifdef SECPKG_ATTR_ENDPOINT_BINDINGS
@@ -200,7 +200,7 @@ CURLcode Curl_output_ntlm(struct Curl_easy *data, bool proxy)
 
   Curl_bufref_init(&ntlmmsg);
 
-  /* connection is already authenticated, don't send a header in future
+  /* connection is already authenticated, do not send a header in future
    * requests so go directly to NTLMSTATE_LAST */
   if(*state == NTLMSTATE_TYPE3)
     *state = NTLMSTATE_LAST;

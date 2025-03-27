@@ -25,7 +25,6 @@
  */
 
 #include "archive_platform.h"
-__FBSDID("$FreeBSD: head/lib/libarchive/archive_write_set_format_cpio.c 201170 2009-12-29 06:34:23Z kientzle $");
 
 #ifdef HAVE_ERRNO_H
 #include <errno.h>
@@ -111,7 +110,7 @@ archive_write_set_format_cpio_odc(struct archive *_a)
 	if (a->format_free != NULL)
 		(a->format_free)(a);
 
-	cpio = (struct cpio *)calloc(1, sizeof(*cpio));
+	cpio = calloc(1, sizeof(*cpio));
 	if (cpio == NULL) {
 		archive_set_error(&a->archive, ENOMEM, "Can't allocate cpio data");
 		return (ARCHIVE_FATAL);
@@ -471,6 +470,9 @@ archive_write_odc_close(struct archive_write *a)
 		return ARCHIVE_FATAL;
 	}
 	trailer = archive_entry_new2(NULL);
+	if (trailer == NULL) {
+		return ARCHIVE_FATAL;
+	}
 	/* nlink = 1 here for GNU cpio compat. */
 	archive_entry_set_nlink(trailer, 1);
 	archive_entry_set_size(trailer, 0);

@@ -19,6 +19,7 @@
 #include "cmExecutionStatus.h"
 #include "cmExperimental.h"
 #include "cmExportBuildAndroidMKGenerator.h"
+#include "cmExportBuildCMakeConfigGenerator.h"
 #include "cmExportBuildFileGenerator.h"
 #include "cmExportSet.h"
 #include "cmGeneratedFileStream.h"
@@ -296,7 +297,7 @@ bool cmExportCommand(std::vector<std::string> const& args,
   // if cmExportBuildFileGenerator is already defined for the file
   // and APPEND is not specified, if CMP0103 is OLD ignore previous definition
   // else raise an error
-  if (gg->GetExportedTargetsFile(fname) != nullptr) {
+  if (gg->GetExportedTargetsFile(fname)) {
     switch (mf.GetPolicyStatus(cmPolicies::CMP0103)) {
       case cmPolicies::WARN:
         mf.IssueMessage(
@@ -318,21 +319,24 @@ bool cmExportCommand(std::vector<std::string> const& args,
   // Setup export file generation.
   std::unique_ptr<cmExportBuildFileGenerator> ebfg = nullptr;
   if (android) {
-    ebfg = cm::make_unique<cmExportBuildAndroidMKGenerator>();
+    auto ebag = cm::make_unique<cmExportBuildAndroidMKGenerator>();
+    ebag->SetAppendMode(arguments.Append);
+    ebfg = std::move(ebag);
   } else {
-    ebfg = cm::make_unique<cmExportBuildFileGenerator>();
+    auto ebcg = cm::make_unique<cmExportBuildCMakeConfigGenerator>();
+    ebcg->SetAppendMode(arguments.Append);
+    ebcg->SetExportOld(arguments.ExportOld);
+    ebcg->SetExportPackageDependencies(arguments.ExportPackageDependencies);
+    ebfg = std::move(ebcg);
   }
   ebfg->SetExportFile(fname.c_str());
   ebfg->SetNamespace(arguments.Namespace);
   ebfg->SetCxxModuleDirectory(arguments.CxxModulesDirectory);
-  ebfg->SetAppendMode(arguments.Append);
-  if (exportSet != nullptr) {
+  if (exportSet) {
     ebfg->SetExportSet(exportSet);
   } else {
     ebfg->SetTargets(targets);
   }
-  ebfg->SetExportOld(arguments.ExportOld);
-  ebfg->SetExportPackageDependencies(arguments.ExportPackageDependencies);
 
   // Compute the set of configurations exported.
   std::vector<std::string> configurationTypes =
@@ -341,7 +345,7 @@ bool cmExportCommand(std::vector<std::string> const& args,
   for (std::string const& ct : configurationTypes) {
     ebfg->AddConfiguration(ct);
   }
-  if (exportSet != nullptr) {
+  if (exportSet) {
     gg->AddBuildExportExportSet(ebfg.get());
   } else {
     gg->AddBuildExportSet(ebfg.get());

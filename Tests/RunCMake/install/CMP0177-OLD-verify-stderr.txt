@@ -1,0 +1,13 @@
+CMake Error at [^
+]*CMP0177-OLD-build/root-all/lib/cmake/pkg/pkg-config\.cmake:[0-9]+ \(message\):
+  The imported target "foo1" references the file
++     ".*/shouldNotRemain1/\.\./lib/(libfoo1\.a|foo1\.l(ib)?)"
++  but this file does not exist\.  Possible reasons include:
++  \* The file was deleted, renamed, or moved to another location\.
++  \* An install or uninstall procedure did not complete successfully\.
++  \* The installation package was faulty and contained
++     ".*/Tests/RunCMake/install/CMP0177-OLD-build/root-all/lib/cmake/pkg/pkg-config\.cmake"
++  but not all the files it references\.
++Call Stack \(most recent call first\):
+  CMP0177-OLD-verify\.cmake:2 \(find_package\)
+  CMakeLists\.txt:3 \(include\)

@@ -408,7 +408,9 @@ starting point.
 .. code-block:: cmake
 
   find_package(PkgConfig)
-  pkg_check_modules(PC_Foo QUIET Foo)
+  if(PKG_CONFIG_FOUND)
+    pkg_check_modules(PC_Foo QUIET Foo)
+  endif()
 
 This should define some variables starting ``PC_Foo_`` that contain the
 information from the ``Foo.pc`` file.

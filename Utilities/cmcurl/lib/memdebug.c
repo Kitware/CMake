@@ -30,7 +30,7 @@
 
 #include "urldata.h"
 
-#define MEMDEBUG_NODEFINES /* don't redefine the standard functions */
+#define MEMDEBUG_NODEFINES /* do not redefine the standard functions */
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -44,8 +44,8 @@ struct memdebug {
     double d;
     void *p;
   } mem[1];
-  /* I'm hoping this is the thing with the strictest alignment
-   * requirements.  That also means we waste some space :-( */
+  /* I am hoping this is the thing with the strictest alignment
+   * requirements. That also means we waste some space :-( */
 };
 
 /*
@@ -53,7 +53,7 @@ struct memdebug {
  * remain so. For advanced analysis, record a log file and write perl scripts
  * to analyze them!
  *
- * Don't use these with multithreaded test programs!
+ * Do not use these with multithreaded test programs!
  */
 
 FILE *curl_dbg_logfile = NULL;
@@ -75,7 +75,7 @@ static void curl_dbg_cleanup(void)
   curl_dbg_logfile = NULL;
 }
 
-/* this sets the log file name */
+/* this sets the log filename */
 void curl_dbg_memdebug(const char *logname)
 {
   if(!curl_dbg_logfile) {
@@ -84,7 +84,7 @@ void curl_dbg_memdebug(const char *logname)
     else
       curl_dbg_logfile = stderr;
 #ifdef MEMDEBUG_LOG_SYNC
-    /* Flush the log file after every line so the log isn't lost in a crash */
+    /* Flush the log file after every line so the log is not lost in a crash */
     if(curl_dbg_logfile)
       setbuf(curl_dbg_logfile, (char *)NULL);
 #endif
@@ -103,7 +103,7 @@ void curl_dbg_memlimit(long limit)
   }
 }
 
-/* returns TRUE if this isn't allowed! */
+/* returns TRUE if this is not allowed! */
 static bool countcheck(const char *func, int line, const char *source)
 {
   /* if source is NULL, then the call is made internally and this check
@@ -312,7 +312,7 @@ curl_socket_t curl_dbg_socket(int domain, int type, int protocol,
   sockfd = socket(domain, type, protocol);
 
   if(source && (sockfd != CURL_SOCKET_BAD))
-    curl_dbg_log("FD %s:%d socket() = %" CURL_FORMAT_SOCKET_T "\n",
+    curl_dbg_log("FD %s:%d socket() = %" FMT_SOCKET_T "\n",
                  source, line, sockfd);
 
   return sockfd;
@@ -356,8 +356,8 @@ int curl_dbg_socketpair(int domain, int type, int protocol,
 
   if(source && (0 == res))
     curl_dbg_log("FD %s:%d socketpair() = "
-      "%" CURL_FORMAT_SOCKET_T " %" CURL_FORMAT_SOCKET_T "\n",
-      source, line, socket_vector[0], socket_vector[1]);
+                 "%" FMT_SOCKET_T " %" FMT_SOCKET_T "\n",
+                 source, line, socket_vector[0], socket_vector[1]);
 
   return res;
 }
@@ -372,7 +372,7 @@ curl_socket_t curl_dbg_accept(curl_socket_t s, void *saddr, void *saddrlen,
   curl_socket_t sockfd = accept(s, addr, addrlen);
 
   if(source && (sockfd != CURL_SOCKET_BAD))
-    curl_dbg_log("FD %s:%d accept() = %" CURL_FORMAT_SOCKET_T "\n",
+    curl_dbg_log("FD %s:%d accept() = %" FMT_SOCKET_T "\n",
                  source, line, sockfd);
 
   return sockfd;
@@ -382,7 +382,7 @@ curl_socket_t curl_dbg_accept(curl_socket_t s, void *saddr, void *saddrlen,
 void curl_dbg_mark_sclose(curl_socket_t sockfd, int line, const char *source)
 {
   if(source)
-    curl_dbg_log("FD %s:%d sclose(%" CURL_FORMAT_SOCKET_T ")\n",
+    curl_dbg_log("FD %s:%d sclose(%" FMT_SOCKET_T ")\n",
                  source, line, sockfd);
 }
 

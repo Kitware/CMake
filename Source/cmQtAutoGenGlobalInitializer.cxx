@@ -166,7 +166,7 @@ void cmQtAutoGenGlobalInitializer::GetOrCreateGlobalTarget(
   std::string const& comment)
 {
   // Test if the target already exists
-  if (localGen->FindGeneratorTargetToUse(name) == nullptr) {
+  if (!localGen->FindGeneratorTargetToUse(name)) {
     cmMakefile const* makefile = localGen->GetMakefile();
 
     // Create utility target
@@ -196,7 +196,7 @@ void cmQtAutoGenGlobalInitializer::AddToGlobalAutoGen(
   if (it != this->GlobalAutoGenTargets_.end()) {
     cmGeneratorTarget const* target =
       localGen->FindGeneratorTargetToUse(it->second);
-    if (target != nullptr) {
+    if (target) {
       target->Target->AddUtility(targetName, false, localGen->GetMakefile());
     }
   }
@@ -209,7 +209,7 @@ void cmQtAutoGenGlobalInitializer::AddToGlobalAutoRcc(
   if (it != this->GlobalAutoRccTargets_.end()) {
     cmGeneratorTarget const* target =
       localGen->FindGeneratorTargetToUse(it->second);
-    if (target != nullptr) {
+    if (target) {
       target->Target->AddUtility(targetName, false, localGen->GetMakefile());
     }
   }

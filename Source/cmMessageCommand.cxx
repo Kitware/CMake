@@ -208,7 +208,7 @@ bool cmMessageCommand(std::vector<std::string> const& args,
     case Message::LogLevel::LOG_NOTICE:
       cmSystemTools::Message(IndentText(message, mf));
 #ifdef CMake_ENABLE_DEBUGGER
-      if (mf.GetCMakeInstance()->GetDebugAdapter() != nullptr) {
+      if (mf.GetCMakeInstance()->GetDebugAdapter()) {
         mf.GetCMakeInstance()->GetDebugAdapter()->OnMessageOutput(type,
                                                                   message);
       }

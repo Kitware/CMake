@@ -12,12 +12,20 @@ file name which may be a full path.
 The following target properties may be set to specify content to be
 configured into the file:
 
+``MACOSX_FRAMEWORK_BUNDLE_NAME``
+  .. versionadded:: 3.31
+
+  Sets ``CFBundleName``.
+
 ``MACOSX_FRAMEWORK_BUNDLE_VERSION``
   Sets ``CFBundleVersion``.
+
 ``MACOSX_FRAMEWORK_ICON_FILE``
   Sets ``CFBundleIconFile``.
+
 ``MACOSX_FRAMEWORK_IDENTIFIER``
   Sets ``CFBundleIdentifier``.
+
 ``MACOSX_FRAMEWORK_SHORT_VERSION_STRING``
   Sets ``CFBundleShortVersionString``.
 

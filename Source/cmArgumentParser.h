@@ -17,6 +17,7 @@
 #include <cm/string_view>
 #include <cm/type_traits>
 #include <cmext/string_view>
+#include <cmext/type_traits>
 
 #include "cmArgumentParserTypes.h" // IWYU pragma: keep
 
@@ -244,8 +245,11 @@ class cmArgumentParser : private ArgumentParser::Base
 public:
   // I *think* this function could be made `constexpr` when the code is
   // compiled as C++20.  This would allow building a parser at compile time.
-  template <typename T>
-  cmArgumentParser& Bind(cm::static_string_view name, T Result::*member)
+  template <typename T, typename cT = cm::member_pointer_class_t<T>,
+            typename mT = cm::remove_member_pointer_t<T>,
+            typename = cm::enable_if_t<std::is_base_of<cT, Result>::value>,
+            typename = cm::enable_if_t<!std::is_function<mT>::value>>
+  cmArgumentParser& Bind(cm::static_string_view name, T member)
   {
     this->Base::Bind(name, [member](Instance& instance) {
       instance.Bind(static_cast<Result*>(instance.Result)->*member);

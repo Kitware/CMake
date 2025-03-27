@@ -1,0 +1,2 @@
+set(CMAKE_LINK_LIBRARIES_STRATEGY REORDER_MINIMALLY)
+include(Duplicate-common.cmake)

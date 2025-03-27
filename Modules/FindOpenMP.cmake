@@ -37,6 +37,10 @@ Result Variables
   The module exposes the components ``C``, ``CXX``, and ``Fortran``.
   Each of these controls the various languages to search OpenMP support for.
 
+.. versionadded:: 3.31
+  The ``CUDA`` language component is supported when using a CUDA compiler
+  that supports OpenMP on the host.
+
 Depending on the enabled components the following variables will be set:
 
 ``OpenMP_FOUND``
@@ -48,7 +52,7 @@ Depending on the enabled components the following variables will be set:
   or all enabled languages if no components were specified.
 
 This module will set the following variables per language in your
-project, where ``<lang>`` is one of C, CXX, or Fortran:
+project, where ``<lang>`` is one of C, CXX, CUDA, or Fortran:
 
 ``OpenMP_<lang>_FOUND``
   Variable indicating if OpenMP support for ``<lang>`` was detected.
@@ -153,11 +157,17 @@ function(_OPENMP_FLAG_CANDIDATES LANG)
     set(OMP_FLAG_Fujitsu "-Kopenmp" "-KOMP")
     set(OMP_FLAG_FujitsuClang "-fopenmp" "-Kopenmp")
 
-    # If we know the correct flags, use those
-    if(DEFINED OMP_FLAG_${CMAKE_${LANG}_COMPILER_ID})
-      set(OpenMP_FLAG_CANDIDATES "${OMP_FLAG_${CMAKE_${LANG}_COMPILER_ID}}")
-    # Fall back to reasonable default tries otherwise
+    if(CMAKE_${LANG}_COMPILER_ID STREQUAL "NVIDIA" AND CMAKE_${LANG}_HOST_COMPILER_ID)
+      set(compiler_id "${CMAKE_${LANG}_HOST_COMPILER_ID}")
     else()
+      set(compiler_id "${CMAKE_${LANG}_COMPILER_ID}")
+    endif()
+
+    # If we know the correct flags, use those
+    if(DEFINED OMP_FLAG_${compiler_id})
+      set(OpenMP_FLAG_CANDIDATES "${OMP_FLAG_${compiler_id}}")
+    else()
+      # Fall back to reasonable default tries otherwise
       set(OpenMP_FLAG_CANDIDATES "-openmp" "-fopenmp" "-mp" " ")
     endif()
     set(OpenMP_${LANG}_FLAG_CANDIDATES "${OpenMP_FLAG_CANDIDATES}" PARENT_SCOPE)
@@ -173,12 +183,10 @@ set(OpenMP_C_CXX_TEST_SOURCE
 int main(void) {
 #ifdef _OPENMP
   omp_get_max_threads();
-  return 0;
-#elif defined(__HIP_DEVICE_COMPILE__)
-  return 0;
-#else
-  breaks_on_purpose
+#elif !defined(__CUDA_ARCH__) && !defined(__HIP_DEVICE_COMPILE__)
+#  error \"_OPENMP not defined!\"
 #endif
+  return 0;
 }
 ")
 
@@ -204,6 +212,9 @@ macro(_OPENMP_PREPARE_SOURCE LANG CONTENT_ID NAME_PREFIX FULLNAME_VAR CONTENT_VA
   elseif("${LANG}" STREQUAL "CXX")
     set(${FULLNAME_VAR} "${NAME_PREFIX}.cpp")
     set(${CONTENT_VAR} "${OpenMP_C_CXX_${CONTENT_ID}}")
+  elseif("${LANG}" STREQUAL "CUDA")
+    set(${FULLNAME_VAR} "${NAME_PREFIX}.cu")
+    set(${CONTENT_VAR} "${OpenMP_C_CXX_${CONTENT_ID}}")
   elseif("${LANG}" STREQUAL "Fortran")
     set(${FULLNAME_VAR} "${NAME_PREFIX}.F90")
     string(CONFIGURE "${OpenMP_Fortran_${CONTENT_ID}}" ${CONTENT_VAR} @ONLY)
@@ -217,29 +228,32 @@ function(_OPENMP_GET_FLAGS LANG FLAG_MODE OPENMP_FLAG_VAR OPENMP_LIB_NAMES_VAR)
   _OPENMP_PREPARE_SOURCE("${LANG}" TEST_SOURCE OpenMPTryFlag
     _OPENMP_TEST_SRC_NAME _OPENMP_TEST_SRC_CONTENT)
 
-  unset(OpenMP_VERBOSE_COMPILE_OPTIONS)
   separate_arguments(OpenMP_VERBOSE_OPTIONS NATIVE_COMMAND "${CMAKE_${LANG}_VERBOSE_FLAG}")
-  foreach(_VERBOSE_OPTION IN LISTS OpenMP_VERBOSE_OPTIONS)
-    if(NOT _VERBOSE_OPTION MATCHES "^-Wl,")
-      list(APPEND OpenMP_VERBOSE_COMPILE_OPTIONS ${_VERBOSE_OPTION})
-    endif()
-  endforeach()
 
   foreach(OPENMP_FLAG IN LISTS OpenMP_${LANG}_FLAG_CANDIDATES)
-    set(OPENMP_FLAGS_TEST "${OPENMP_FLAG}")
-    if(OpenMP_VERBOSE_COMPILE_OPTIONS)
-      string(APPEND OPENMP_FLAGS_TEST " ${OpenMP_VERBOSE_COMPILE_OPTIONS}")
-    endif()
     string(REGEX REPLACE "[-/=+]" "" OPENMP_PLAIN_FLAG "${OPENMP_FLAG}")
     unset(_includeDirFlags)
     if(OpenMP_${LANG}_INCLUDE_DIR)
       set(_includeDirFlags "-DINCLUDE_DIRECTORIES:STRING=${OpenMP_${LANG}_INCLUDE_DIR}")
     endif()
+    if(CMAKE_${LANG}_COMPILER_ID STREQUAL "NVIDIA")
+      # With NVCC we drive linking directly through the host compiler, but
+      # without language-wide flags since they may be specific to nvcc.
+      # Pass the candidate OpenMP flag to the host compiler when linking.
+      set(_OpenMP_LINK_OPTIONS "${OPENMP_FLAG}")
+      # Exclude CUDA runtime libraries that we may add ourselves.
+      # See the Compiler/NVIDIA module.  Do not exclude pthread,
+      # as that is typically a dependency of OpenMP too.
+      set(_OpenMP_EXCLUDE_IMPLICIT_LIBS cudart cudart_static cudadevrt rt dl)
+    else()
+      set(_OpenMP_LINK_OPTIONS "")
+      set(_OpenMP_EXCLUDE_IMPLICIT_LIBS "")
+    endif()
     try_compile( OpenMP_COMPILE_RESULT_${FLAG_MODE}_${OPENMP_PLAIN_FLAG}
       SOURCE_FROM_VAR "${_OPENMP_TEST_SRC_NAME}" _OPENMP_TEST_SRC_CONTENT
       LOG_DESCRIPTION "Detecting ${LANG} OpenMP compiler info"
-      CMAKE_FLAGS "-DCOMPILE_DEFINITIONS:STRING=${OPENMP_FLAGS_TEST}" ${_includeDirFlags}
-      LINK_LIBRARIES ${CMAKE_${LANG}_VERBOSE_FLAG}
+      CMAKE_FLAGS "-DCOMPILE_DEFINITIONS:STRING=${OPENMP_FLAG}" ${_includeDirFlags}
+      LINK_OPTIONS ${OpenMP_VERBOSE_OPTIONS} ${_OpenMP_LINK_OPTIONS}
       OUTPUT_VARIABLE OpenMP_TRY_COMPILE_OUTPUT
     )
 
@@ -290,6 +304,7 @@ function(_OPENMP_GET_FLAGS LANG FLAG_MODE OPENMP_FLAG_VAR OPENMP_LIB_NAMES_VAR)
           string(REGEX REPLACE "([][+.*?()^$])" "\\\\\\1" _OPENMP_IMPLICIT_LIB_PLAIN_ESC "${_OPENMP_IMPLICIT_LIB_PLAIN}")
           string(REGEX REPLACE "([][+.*?()^$])" "\\\\\\1" _OPENMP_IMPLICIT_LIB_PATH_ESC "${_OPENMP_IMPLICIT_LIB}")
           if(NOT ( "${_OPENMP_IMPLICIT_LIB}" IN_LIST CMAKE_${LANG}_IMPLICIT_LINK_LIBRARIES
+            OR "${_OPENMP_IMPLICIT_LIB}" IN_LIST _OpenMP_EXCLUDE_IMPLICIT_LIBS
             OR "${CMAKE_${LANG}_STANDARD_LIBRARIES}" MATCHES "(^| )(-Wl,)?(-l)?(${_OPENMP_IMPLICIT_LIB_PLAIN_ESC}|${_OPENMP_IMPLICIT_LIB_PATH_ESC})( |$)"
             OR "${CMAKE_${LANG}_LINK_EXECUTABLE}" MATCHES "(^| )(-Wl,)?(-l)?(${_OPENMP_IMPLICIT_LIB_PLAIN_ESC}|${_OPENMP_IMPLICIT_LIB_PATH_ESC})( |$)" ) )
             if(_OPENMP_IMPLICIT_LIB_DIR)
@@ -310,6 +325,9 @@ function(_OPENMP_GET_FLAGS LANG FLAG_MODE OPENMP_FLAG_VAR OPENMP_LIB_NAMES_VAR)
             list(APPEND _OPENMP_LIB_NAMES ${_OPENMP_IMPLICIT_LIB_PLAIN})
           endif()
         endforeach()
+        list(REVERSE _OPENMP_LIB_NAMES)
+        list(REMOVE_DUPLICATES _OPENMP_LIB_NAMES)
+        list(REVERSE _OPENMP_LIB_NAMES)
         set("${OPENMP_LIB_NAMES_VAR}" "${_OPENMP_LIB_NAMES}" PARENT_SCOPE)
       else()
         # We do not know how to extract implicit OpenMP libraries for this compiler.
@@ -336,8 +354,8 @@ function(_OPENMP_GET_FLAGS LANG FLAG_MODE OPENMP_FLAG_VAR OPENMP_LIB_NAMES_VAR)
         try_compile( OpenMP_COMPILE_RESULT_${FLAG_MODE}_${OPENMP_PLAIN_FLAG}
           SOURCE_FROM_VAR "${_OPENMP_TEST_SRC_NAME}" _OPENMP_TEST_SRC_CONTENT
           LOG_DESCRIPTION "Trying ${LANG} OpenMP compiler with '${OpenMP_libomp_LIBRARY}'"
-          CMAKE_FLAGS "-DCOMPILE_DEFINITIONS:STRING=${OPENMP_FLAGS_TEST}"
-          LINK_LIBRARIES ${CMAKE_${LANG}_VERBOSE_FLAG} ${OpenMP_libomp_LIBRARY}
+          COMPILE_DEFINITIONS ${OPENMP_FLAG}
+          LINK_LIBRARIES ${OpenMP_libomp_LIBRARY}
         )
         if(NOT OpenMP_COMPILE_RESULT_${FLAG_MODE}_${OPENMP_PLAIN_FLAG})
           find_path(OpenMP_${LANG}_INCLUDE_DIR omp.h)
@@ -347,9 +365,9 @@ function(_OPENMP_GET_FLAGS LANG FLAG_MODE OPENMP_FLAG_VAR OPENMP_LIB_NAMES_VAR)
             try_compile( OpenMP_COMPILE_RESULT_${FLAG_MODE}_${OPENMP_PLAIN_FLAG}
               SOURCE_FROM_VAR "${_OPENMP_TEST_SRC_NAME}" _OPENMP_TEST_SRC_CONTENT
               LOG_DESCRIPTION "Trying ${LANG} OpenMP compiler with '${OpenMP_libomp_LIBRARY}' and '${OpenMP_${LANG}_INCLUDE_DIR}'"
-              CMAKE_FLAGS "-DCOMPILE_DEFINITIONS:STRING=${OPENMP_FLAGS_TEST}"
-                          "-DINCLUDE_DIRECTORIES:STRING=${OpenMP_${LANG}_INCLUDE_DIR}"
-              LINK_LIBRARIES ${CMAKE_${LANG}_VERBOSE_FLAG} ${OpenMP_libomp_LIBRARY}
+              CMAKE_FLAGS "-DINCLUDE_DIRECTORIES:STRING=${OpenMP_${LANG}_INCLUDE_DIR}"
+              COMPILE_DEFINITIONS ${OPENMP_FLAG}
+              LINK_LIBRARIES ${OpenMP_libomp_LIBRARY}
             )
           endif()
         endif()
@@ -370,8 +388,8 @@ function(_OPENMP_GET_FLAGS LANG FLAG_MODE OPENMP_FLAG_VAR OPENMP_LIB_NAMES_VAR)
         try_compile( OpenMP_COMPILE_RESULT_${FLAG_MODE}_${OPENMP_PLAIN_FLAG}
           SOURCE_FROM_VAR "${_OPENMP_TEST_SRC_NAME}" _OPENMP_TEST_SRC_CONTENT
           LOG_DESCRIPTION "Trying ${LANG} OpenMP compiler with '${OpenMP_libomp_LIBRARY}'"
-          CMAKE_FLAGS "-DCOMPILE_DEFINITIONS:STRING=${OPENMP_FLAGS_TEST}"
-          LINK_LIBRARIES ${CMAKE_${LANG}_VERBOSE_FLAG} ${OpenMP_libomp_LIBRARY}
+          COMPILE_DEFINITIONS ${OPENMP_FLAG}
+          LINK_LIBRARIES ${OpenMP_libomp_LIBRARY}
         )
         if(OpenMP_COMPILE_RESULT_${FLAG_MODE}_${OPENMP_PLAIN_FLAG})
           set("${OPENMP_FLAG_VAR}" "${OPENMP_FLAG}" PARENT_SCOPE)
@@ -383,8 +401,6 @@ function(_OPENMP_GET_FLAGS LANG FLAG_MODE OPENMP_FLAG_VAR OPENMP_LIB_NAMES_VAR)
     set("${OPENMP_LIB_NAMES_VAR}" "NOTFOUND" PARENT_SCOPE)
     set("${OPENMP_FLAG_VAR}" "NOTFOUND" PARENT_SCOPE)
   endforeach()
-
-  unset(OpenMP_VERBOSE_COMPILE_OPTIONS)
 endfunction()
 
 set(OpenMP_C_CXX_CHECK_VERSION_SOURCE
@@ -499,7 +515,7 @@ macro(_OPENMP_SET_VERSION_BY_SPEC_DATE LANG)
   unset(OpenMP_SPEC_DATE_MAP)
 endmacro()
 
-foreach(LANG IN ITEMS C CXX)
+foreach(LANG IN ITEMS C CXX CUDA)
   if(CMAKE_${LANG}_COMPILER_LOADED)
     if(NOT DEFINED OpenMP_${LANG}_FLAGS OR "${OpenMP_${LANG}_FLAGS}" STREQUAL "NOTFOUND"
       OR NOT DEFINED OpenMP_${LANG}_LIB_NAMES OR "${OpenMP_${LANG}_LIB_NAMES}" STREQUAL "NOTFOUND")
@@ -565,7 +581,7 @@ if(CMAKE_Fortran_COMPILER_LOADED)
 endif()
 
 if(NOT OpenMP_FIND_COMPONENTS)
-  set(OpenMP_FINDLIST C CXX Fortran)
+  set(OpenMP_FINDLIST C CXX CUDA Fortran)
 else()
   set(OpenMP_FINDLIST ${OpenMP_FIND_COMPONENTS})
 endif()
@@ -644,7 +660,7 @@ foreach(LANG IN LISTS OpenMP_FINDLIST)
 endforeach()
 
 unset(_OpenMP_REQ_VARS)
-foreach(LANG IN ITEMS C CXX Fortran)
+foreach(LANG IN ITEMS C CXX CUDA Fortran)
   if((NOT OpenMP_FIND_COMPONENTS AND CMAKE_${LANG}_COMPILER_LOADED) OR LANG IN_LIST OpenMP_FIND_COMPONENTS)
     list(APPEND _OpenMP_REQ_VARS "OpenMP_${LANG}_FOUND")
   endif()
@@ -666,8 +682,8 @@ if(CMAKE_Fortran_COMPILER_LOADED AND OpenMP_Fortran_FOUND)
   endif()
 endif()
 
-if(NOT ( CMAKE_C_COMPILER_LOADED OR CMAKE_CXX_COMPILER_LOADED OR CMAKE_Fortran_COMPILER_LOADED ))
-  message(SEND_ERROR "FindOpenMP requires the C, CXX or Fortran languages to be enabled")
+if(NOT ( CMAKE_C_COMPILER_LOADED OR CMAKE_CXX_COMPILER_LOADED OR CMAKE_CUDA_COMPILER_LOADED OR CMAKE_Fortran_COMPILER_LOADED ))
+  message(SEND_ERROR "FindOpenMP requires the C, CXX, CUDA, or Fortran languages to be enabled")
 endif()
 
 unset(OpenMP_C_CXX_TEST_SOURCE)

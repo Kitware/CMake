@@ -61,10 +61,20 @@ public:
   bool GetOldStyle() const { return this->OldStyle; }
   void SetOldStyle(bool b) { this->OldStyle = b; }
 
-  /** Get/Set if CMP0158 policy is NEW */
+  /** Get if CMP0158 policy is NEW */
   bool GetCMP0158IsNew() const
   {
     return this->PolicyStatusCMP0158 == cmPolicies::NEW;
+  }
+
+  /** Get/Set the CMP0178 policy setting */
+  cmPolicies::PolicyStatus GetCMP0178() const
+  {
+    return this->PolicyStatusCMP0178;
+  }
+  void SetCMP0178(cmPolicies::PolicyStatus p)
+  {
+    this->PolicyStatusCMP0178 = p;
   }
 
   /** Set/Get whether lists in command lines should be expanded. */
@@ -82,4 +92,5 @@ private:
   cmMakefile* Makefile;
   cmListFileBacktrace Backtrace;
   cmPolicies::PolicyStatus PolicyStatusCMP0158;
+  cmPolicies::PolicyStatus PolicyStatusCMP0178;
 };

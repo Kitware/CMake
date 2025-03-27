@@ -1,0 +1,52 @@
+^CMake Debug Log at DebugRoot\.cmake:[0-9]+ \(find_package\):
+  The internally managed CMAKE_FIND_PACKAGE_REDIRECTS_DIR\.
+
+    [^
+]*/Tests/RunCMake/find_package/DebugRoot-build/CMakeFiles/pkgRedirects
+
+  Paths specified by the find_package HINTS option\.
+
+    none
+
+  Paths specified by the find_package PATHS option\.
+
+    /DebugRoot
+
+  Prepending the following roots to each prefix:
+
+  CMAKE_FIND_ROOT_PATH
+
+    [^
+]*/Tests/RunCMake/find_package/DebugRoot/NoExist
+    [^
+]*/Tests/RunCMake/find_package/DebugRoot/Exist
+
+  CMAKE_SYSROOT_COMPILE
+
+    none
+
+  CMAKE_SYSROOT_LINK
+
+    none
+
+  CMAKE_SYSROOT
+
+    none
+
+  find_package considered the following locations for DebugRoot's Config
+  module:
+
+    [^
+]*/Tests/RunCMake/find_package/DebugRoot/NoExist/DebugRoot/DebugRootConfig\.cmake
+    [^
+]*/Tests/RunCMake/find_package/DebugRoot/NoExist/DebugRoot/debugroot-config\.cmake
+    [^
+]*/Tests/RunCMake/find_package/DebugRoot/Exist/DebugRoot/DebugRootConfig\.cmake
+
+  The file was found at
+
+    [^
+]*/Tests/RunCMake/find_package/DebugRoot/Exist/DebugRoot/DebugRootConfig.cmake
+
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)$

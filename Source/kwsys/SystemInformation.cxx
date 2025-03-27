@@ -59,7 +59,7 @@
 #    include <psapi.h>
 #  endif
 #  if !defined(siginfo_t)
-typedef int siginfo_t;
+using siginfo_t = int;
 #  endif
 #else
 #  include <sys/types.h>
@@ -135,7 +135,7 @@ typedef int siginfo_t;
 using ResourceLimitType = struct rlimit64;
 #    define GetResourceLimit getrlimit64
 #  else
-typedef struct rlimit ResourceLimitType;
+using ResourceLimitType = struct rlimit;
 #    define GetResourceLimit getrlimit
 #  endif
 #elif defined(__hpux)
@@ -333,101 +333,58 @@ public:
   void RunMemoryCheck();
 
 public:
-  using ID = struct tagID
-
+  struct ID
   {
-
     int Type;
-
     int Family;
-
     int Model;
-
     int Revision;
-
     int ExtendedFamily;
-
     int ExtendedModel;
-
     std::string ProcessorName;
-
     std::string Vendor;
-
     std::string SerialNumber;
-
     std::string ModelName;
   };
 
-  using CPUPowerManagement = struct tagCPUPowerManagement
-
+  struct CPUPowerManagement
   {
-
     bool HasVoltageID;
-
     bool HasFrequencyID;
-
     bool HasTempSenseDiode;
   };
 
-  using CPUExtendedFeatures = struct tagCPUExtendedFeatures
-
+  struct CPUExtendedFeatures
   {
-
     bool Has3DNow;
-
     bool Has3DNowPlus;
-
     bool SupportsMP;
-
     bool HasMMXPlus;
-
     bool HasSSEMMX;
-
     unsigned int LogicalProcessorsPerPhysical;
-
     int APIC_ID;
-
     CPUPowerManagement PowerManagement;
   };
 
-  using CPUFeatures = struct CPUtagFeatures
-
+  struct CPUFeatures
   {
-
     bool HasFPU;
-
     bool HasTSC;
-
     bool HasMMX;
-
     bool HasSSE;
-
     bool HasSSEFP;
-
     bool HasSSE2;
-
     bool HasIA64;
-
     bool HasAPIC;
-
     bool HasCMOV;
-
     bool HasMTRR;
-
     bool HasACPI;
-
     bool HasSerial;
-
     bool HasThermal;
-
     int CPUSpeed;
-
     int L1CacheSize;
-
     int L2CacheSize;
-
     int L3CacheSize;
-
     CPUExtendedFeatures ExtendedFeatures;
   };
 
@@ -874,7 +831,7 @@ int LoadLines(FILE* file, std::vector<std::string>& lines)
   char buf[bufSize] = { '\0' };
   while (!feof(file) && !ferror(file)) {
     errno = 0;
-    if (fgets(buf, bufSize, file) == nullptr) {
+    if (!fgets(buf, bufSize, file)) {
       if (ferror(file) && (errno == EINTR)) {
         clearerr(file);
       }
@@ -900,7 +857,7 @@ int LoadLines(FILE* file, std::vector<std::string>& lines)
 int LoadLines(const char* fileName, std::vector<std::string>& lines)
 {
   FILE* file = fopen(fileName, "r");
-  if (file == nullptr) {
+  if (!file) {
     return 0;
   }
   int nRead = LoadLines(file, lines);
@@ -938,7 +895,7 @@ int GetFieldsFromFile(const char* fileName, const char** fieldNames, T* values)
     return -1;
   }
   int i = 0;
-  while (fieldNames[i] != nullptr) {
+  while (fieldNames[i]) {
     int ierr = NameValue(fields, fieldNames[i], values[i]);
     if (ierr) {
       return -(i + 2);
@@ -970,7 +927,7 @@ int GetFieldsFromCommand(const char* command, const char** fieldNames,
                          T* values)
 {
   FILE* file = popen(command, "r");
-  if (file == nullptr) {
+  if (!file) {
     return -1;
   }
   std::vector<std::string> fields;
@@ -980,7 +937,7 @@ int GetFieldsFromCommand(const char* command, const char** fieldNames,
     return -1;
   }
   int i = 0;
-  while (fieldNames[i] != nullptr) {
+  while (fieldNames[i]) {
     int ierr = NameValue(fields, fieldNames[i], values[i]);
     if (ierr) {
       return -(i + 2);
@@ -1016,7 +973,7 @@ void StacktraceSignalHandler(int sigNo, siginfo_t* sigInfo,
       break;
 
     case SIGFPE:
-      oss << "Caught SIGFPE at " << (sigInfo->si_addr == nullptr ? "0x" : "")
+      oss << "Caught SIGFPE at " << (sigInfo->si_addr ? "" : "0x")
           << sigInfo->si_addr << " ";
       switch (sigInfo->si_code) {
 #    if defined(FPE_INTDIV)
@@ -1064,7 +1021,7 @@ void StacktraceSignalHandler(int sigNo, siginfo_t* sigInfo,
       break;
 
     case SIGSEGV:
-      oss << "Caught SIGSEGV at " << (sigInfo->si_addr == nullptr ? "0x" : "")
+      oss << "Caught SIGSEGV at " << (sigInfo->si_addr ? "" : "0x")
           << sigInfo->si_addr << " ";
       switch (sigInfo->si_code) {
         case SEGV_MAPERR:
@@ -1082,7 +1039,7 @@ void StacktraceSignalHandler(int sigNo, siginfo_t* sigInfo,
       break;
 
     case SIGBUS:
-      oss << "Caught SIGBUS at " << (sigInfo->si_addr == nullptr ? "0x" : "")
+      oss << "Caught SIGBUS at " << (sigInfo->si_addr ? "" : "0x")
           << sigInfo->si_addr << " ";
       switch (sigInfo->si_code) {
         case BUS_ADRALN:
@@ -1122,7 +1079,7 @@ void StacktraceSignalHandler(int sigNo, siginfo_t* sigInfo,
       break;
 
     case SIGILL:
-      oss << "Caught SIGILL at " << (sigInfo->si_addr == nullptr ? "0x" : "")
+      oss << "Caught SIGILL at " << (sigInfo->si_addr ? "" : "0x")
           << sigInfo->si_addr << " ";
       switch (sigInfo->si_code) {
         case ILL_ILLOPC:
@@ -1659,7 +1616,7 @@ int SystemInformationImplementation::GetFullyQualifiedDomainName(
     return -2;
   }
 
-  for (ifa = ifas; ifa != nullptr; ifa = ifa->ifa_next) {
+  for (ifa = ifas; ifa; ifa = ifa->ifa_next) {
     int fam = ifa->ifa_addr ? ifa->ifa_addr->sa_family : -1;
     // Skip Loopback interfaces
     if (((fam == AF_INET) || (fam == AF_INET6)) &&
@@ -3448,8 +3405,9 @@ bool SystemInformationImplementation::RetrieveInformationFromCpuInfoFile()
   }
 
   size_t fileSize = 0;
-  while (!feof(fd)) {
-    buffer += static_cast<char>(fgetc(fd));
+  int fc;
+  while ((fc = fgetc(fd)) != EOF) {
+    buffer += static_cast<char>(fc);
     fileSize++;
   }
   fclose(fd);
@@ -3886,7 +3844,7 @@ long long SystemInformationImplementation::GetProcMemoryUsed()
   std::ostringstream oss;
   oss << "ps -o rss= -p " << pid;
   FILE* file = popen(oss.str().c_str(), "r");
-  if (file == nullptr) {
+  if (!file) {
     return -1;
   }
   oss.str("");
@@ -3923,8 +3881,7 @@ double SystemInformationImplementation::GetLoadAverage()
   return -0.0;
 #elif defined(KWSYS_SYSTEMINFORMATION_USE_GetSystemTimes)
   // Old windows.h headers do not provide GetSystemTimes.
-  typedef BOOL(WINAPI * GetSystemTimesType)(LPFILETIME, LPFILETIME,
-                                            LPFILETIME);
+  using GetSystemTimesType = BOOL(WINAPI*)(LPFILETIME, LPFILETIME, LPFILETIME);
   static GetSystemTimesType pGetSystemTimes =
     (GetSystemTimesType)GetProcAddress(GetModuleHandleW(L"kernel32"),
                                        "GetSystemTimes");
@@ -4469,8 +4426,8 @@ void SystemInformationImplementation::CPUCountWindows()
   this->NumberOfPhysicalCPU = 0;
   this->NumberOfLogicalCPU = 0;
 
-  typedef BOOL(WINAPI * GetLogicalProcessorInformationType)(
-    PSYSTEM_LOGICAL_PROCESSOR_INFORMATION, PDWORD);
+  using GetLogicalProcessorInformationType =
+    BOOL(WINAPI*)(PSYSTEM_LOGICAL_PROCESSOR_INFORMATION, PDWORD);
   static GetLogicalProcessorInformationType pGetLogicalProcessorInformation =
     reinterpret_cast<GetLogicalProcessorInformationType>(GetProcAddress(
       GetModuleHandleW(L"kernel32"), "GetLogicalProcessorInformation"));
@@ -4499,10 +4456,7 @@ void SystemInformationImplementation::CPUCountWindows()
     (void)rc; // Silence unused variable warning
   }
 
-  typedef std::vector<SYSTEM_LOGICAL_PROCESSOR_INFORMATION>::iterator
-    pinfoIt_t;
-  for (pinfoIt_t it = ProcInfo.begin(); it != ProcInfo.end(); ++it) {
-    SYSTEM_LOGICAL_PROCESSOR_INFORMATION PInfo = *it;
+  for (SYSTEM_LOGICAL_PROCESSOR_INFORMATION const& PInfo : ProcInfo) {
     if (PInfo.Relationship != RelationProcessorCore) {
       continue;
     }
@@ -5464,7 +5418,7 @@ bool SystemInformationImplementation::QueryOSInformation()
         this->OSVersion = operatingSystem;
       } else if (osvi.dwMajorVersion == 5 && osvi.dwMinorVersion == 1) {
         // Windows XP and .NET server.
-        typedef BOOL(CALLBACK * LPFNPROC)(HANDLE, BOOL*);
+        using LPFNPROC = BOOL(CALLBACK*)(HANDLE, BOOL*);
         HINSTANCE hKernelDLL;
         LPFNPROC DLLProc;
 

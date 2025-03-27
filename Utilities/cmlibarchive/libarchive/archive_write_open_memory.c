@@ -24,7 +24,6 @@
  */
 
 #include "archive_platform.h"
-__FBSDID("$FreeBSD: src/lib/libarchive/archive_write_open_memory.c,v 1.3 2007/01/09 08:05:56 kientzle Exp $");
 
 #include <errno.h>
 #include <stdlib.h>
@@ -53,7 +52,7 @@ archive_write_open_memory(struct archive *a, void *buff, size_t buffSize, size_t
 {
 	struct write_memory_data *mine;
 
-	mine = (struct write_memory_data *)calloc(1, sizeof(*mine));
+	mine = calloc(1, sizeof(*mine));
 	if (mine == NULL) {
 		archive_set_error(a, ENOMEM, "No memory");
 		return (ARCHIVE_FATAL);

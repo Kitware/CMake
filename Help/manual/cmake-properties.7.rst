@@ -109,6 +109,7 @@ Properties on Targets
 
    /prop_tgt/ADDITIONAL_CLEAN_FILES
    /prop_tgt/AIX_EXPORT_ALL_SYMBOLS
+   /prop_tgt/AIX_SHARED_LIBRARY_ARCHIVE
    /prop_tgt/ALIAS_GLOBAL
    /prop_tgt/ALIASED_TARGET
    /prop_tgt/ANDROID_ANT_ADDITIONAL_OPTIONS
@@ -217,6 +218,7 @@ Properties on Targets
    /prop_tgt/EXCLUDE_FROM_ALL
    /prop_tgt/EXCLUDE_FROM_DEFAULT_BUILD
    /prop_tgt/EXCLUDE_FROM_DEFAULT_BUILD_CONFIG
+   /prop_tgt/EXPORT_BUILD_DATABASE
    /prop_tgt/EXPORT_COMPILE_COMMANDS
    /prop_tgt/EXPORT_FIND_PACKAGE_NAME
    /prop_tgt/EXPORT_NAME
@@ -335,6 +337,7 @@ Properties on Targets
    /prop_tgt/LINK_INTERFACE_MULTIPLICITY_CONFIG
    /prop_tgt/LINK_LIBRARIES
    /prop_tgt/LINK_LIBRARIES_ONLY_TARGETS
+   /prop_tgt/LINK_LIBRARIES_STRATEGY
    /prop_tgt/LINK_LIBRARY_OVERRIDE
    /prop_tgt/LINK_LIBRARY_OVERRIDE_LIBRARY
    /prop_tgt/LINK_OPTIONS
@@ -431,6 +434,7 @@ Properties on Targets
    /prop_tgt/VS_DOTNET_STARTUP_OBJECT
    /prop_tgt/VS_DOTNET_TARGET_FRAMEWORK_VERSION
    /prop_tgt/VS_DPI_AWARE
+   /prop_tgt/VS_FRAMEWORK_REFERENCES
    /prop_tgt/VS_GLOBAL_KEYWORD
    /prop_tgt/VS_GLOBAL_PROJECT_TYPES
    /prop_tgt/VS_GLOBAL_ROOTNAMESPACE

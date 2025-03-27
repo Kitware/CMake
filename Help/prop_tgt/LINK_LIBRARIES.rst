@@ -28,3 +28,8 @@ In advanced use cases, the list of direct link dependencies specified
 by this property may be updated by usage requirements from dependencies.
 See the :prop_tgt:`INTERFACE_LINK_LIBRARIES_DIRECT` and
 :prop_tgt:`INTERFACE_LINK_LIBRARIES_DIRECT_EXCLUDE` target properties.
+
+See the :variable:`CMAKE_LINK_LIBRARIES_STRATEGY` variable and
+corresponding :prop_tgt:`LINK_LIBRARIES_STRATEGY` target property
+for details on how CMake orders direct link dependencies on linker
+command lines.

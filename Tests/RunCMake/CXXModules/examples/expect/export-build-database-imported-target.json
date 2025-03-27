@@ -1,0 +1,59 @@
+{
+  "version": 1,
+  "revision": 0,
+  "sets": [
+    {
+      "family-name": "use_import_interfaces",
+      "name": "use_import_interfaces@<CONFIG>",
+      "translation-units": [
+        {
+          "arguments": [
+            "<IGNORE>",
+            "-Dtarget_interface_define",
+            "-Dtarget_public_define",
+            "PATH:-I<SOURCE_DIR>/examples/export-build-database/target_interface_include",
+            "PATH:-I<SOURCE_DIR>/examples/export-build-database/target_public_include",
+            "-Dfrom_cmake_cxx_flags",
+            "-Dfrom_cmake_cxx_<CONFIG_LOWER>_flags",
+            "<CXX20_OPTION>",
+            "-Dtarget_interface_option",
+            "-Dtarget_public_option",
+            "PATH:-Ddepflag=\"CMakeFiles/use_import_interfaces.dir<CONFIG_DIR>/use.cxx<OBJEXT>.d\"",
+            "PATH:<OUTPUT_FLAG>CMakeFiles/use_import_interfaces.dir<CONFIG_DIR>/use.cxx<OBJEXT>",
+            "-c",
+            "PATH:<SOURCE_DIR>/examples/import-modules/use.cxx"
+          ],
+          "baseline-arguments": [
+            "-Dtarget_interface_define",
+            "-Dtarget_public_define",
+            "PATH:-I<SOURCE_DIR>/examples/export-build-database/target_interface_include",
+            "PATH:-I<SOURCE_DIR>/examples/export-build-database/target_public_include",
+            "-Dfrom_cmake_cxx_flags",
+            "-Dfrom_cmake_cxx_<CONFIG_LOWER>_flags",
+            "<CXX20_OPTION>",
+            "-Dtarget_interface_option",
+            "-Dtarget_public_option"
+          ],
+          "local-arguments": [
+            "-Dtarget_interface_define",
+            "-Dtarget_public_define",
+            "PATH:-I<SOURCE_DIR>/examples/export-build-database/target_interface_include",
+            "PATH:-I<SOURCE_DIR>/examples/export-build-database/target_public_include",
+            "-Dfrom_cmake_cxx_flags",
+            "-Dfrom_cmake_cxx_<CONFIG_LOWER>_flags",
+            "<CXX20_OPTION>",
+            "-Dtarget_interface_option",
+            "-Dtarget_public_option"
+          ],
+          "object": "PATH:CMakeFiles/use_import_interfaces.dir<CONFIG_DIR>/use.cxx<OBJEXT>",
+          "private": true,
+          "provides": {},
+          "requires": ["importable"],
+          "source": "PATH:<SOURCE_DIR>/examples/import-modules/use.cxx",
+          "work-directory": "<BINARY_DIR>"
+        }
+      ],
+      "visible-sets": ["REGEX:CXXModules__export_build_database@synth_<HEX>@<CONFIG>"]
+    }
+  ]
+}

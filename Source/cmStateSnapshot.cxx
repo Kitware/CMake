@@ -298,9 +298,11 @@ void cmStateSnapshot::SetDefaultDefinitions()
   if (hostSystemName == "Windows") {
     this->SetDefinition("WIN32", "1");
     this->SetDefinition("CMAKE_HOST_WIN32", "1");
+    this->SetDefinition("CMAKE_HOST_EXECUTABLE_SUFFIX", ".exe");
   } else {
     this->SetDefinition("UNIX", "1");
     this->SetDefinition("CMAKE_HOST_UNIX", "1");
+    this->SetDefinition("CMAKE_HOST_EXECUTABLE_SUFFIX", "");
   }
 #if defined(__APPLE__)
   this->SetDefinition("APPLE", "1");

@@ -1,0 +1,3 @@
+Name: Baz
+Description: Baz Description
+Version: 1.0.0

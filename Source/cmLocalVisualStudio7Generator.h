@@ -125,6 +125,7 @@ private:
                                     std::string const& config,
                                     cmGeneratorTarget* target);
   void OutputLibraryDirectories(std::ostream& fout,
+                                std::vector<std::string> const& stdlink,
                                 std::vector<std::string> const& dirs);
   void WriteProjectSCC(std::ostream& fout, cmGeneratorTarget* target);
   void WriteProjectStart(std::ostream& fout, const std::string& libName,

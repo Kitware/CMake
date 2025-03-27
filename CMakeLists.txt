@@ -1,7 +1,7 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
 # file Copyright.txt or https://cmake.org/licensing for details.
 
-cmake_minimum_required(VERSION 3.13...3.28 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.13...3.29 FATAL_ERROR)
 set(CMAKE_USER_MAKE_RULES_OVERRIDE_C ${CMAKE_CURRENT_SOURCE_DIR}/Source/Modules/OverrideC.cmake)
 set(CMAKE_USER_MAKE_RULES_OVERRIDE_CXX ${CMAKE_CURRENT_SOURCE_DIR}/Source/Modules/OverrideCXX.cmake)
 
@@ -267,9 +267,7 @@ macro(CMAKE_SETUP_TESTING)
   endif()
 
   # configure some files for testing
-  configure_file(Templates/CTestScript.cmake.in CTestScript.cmake @ONLY)
   configure_file(Tests/.NoDartCoverage Tests/.NoDartCoverage)
-  configure_file(Tests/.NoDartCoverage Modules/.NoDartCoverage)
   configure_file(CTestCustom.cmake.in CTestCustom.cmake @ONLY)
 endmacro()
 

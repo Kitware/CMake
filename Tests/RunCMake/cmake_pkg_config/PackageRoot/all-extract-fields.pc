@@ -1,0 +1,15 @@
+Name: Extract All
+Description: All flags example
+Version: 1.0.0
+
+Conflicts: Alpha Beta
+Provides: Gamma Delta
+
+Requires: Epsilon Zea
+Requires.private: Eta Theta
+
+Cflags: Iota -IKappa Lambda -IMu
+Cflags.private: Nu -IXi Omnicron -IPi
+
+Libs: Rho -LSigma -lTau Upsilon -LPhi -lChi
+Libs.private: Psi -LOmega -lMoe Larry -LCurly -lShemp

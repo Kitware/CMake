@@ -7,10 +7,10 @@ function(download case)
   endif()
 endfunction()
 
-# The default is OFF.
+# The default is ON.
 unset(ENV{CMAKE_TLS_VERIFY})
 unset(CMAKE_TLS_VERIFY)
-download(def-0)
+download(def-1)
 
 # The environment variable overrides the default.
 set(ENV{CMAKE_TLS_VERIFY} 0)

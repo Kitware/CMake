@@ -139,10 +139,10 @@ int cmCTestScriptHandler::ExecuteScript(const std::string& total_script_arg)
 {
   // execute the script passing in the arguments to the script as well as the
   // arguments from this invocation of cmake
-  std::vector<const char*> argv;
-  argv.push_back(cmSystemTools::GetCTestCommand().c_str());
+  std::vector<std::string> argv;
+  argv.push_back(cmSystemTools::GetCTestCommand());
   argv.push_back("-SR");
-  argv.push_back(total_script_arg.c_str());
+  argv.push_back(total_script_arg);
 
   cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
              "Executable for CTest is: " << cmSystemTools::GetCTestCommand()
@@ -151,10 +151,14 @@ int cmCTestScriptHandler::ExecuteScript(const std::string& total_script_arg)
   // now pass through all the other arguments
   std::vector<std::string>& initArgs =
     this->CTest->GetInitialCommandLineArguments();
+  //*** need to make sure this does not have the current script ***
+  for (size_t i = 1; i < initArgs.size(); ++i) {
+    argv.push_back(initArgs[i]);
+  }
 
   // Now create process object
   cmUVProcessChainBuilder builder;
-  builder.AddCommand(initArgs)
+  builder.AddCommand(argv)
     .SetBuiltinStream(cmUVProcessChainBuilder::Stream_OUTPUT)
     .SetBuiltinStream(cmUVProcessChainBuilder::Stream_ERROR);
   auto process = builder.Start();
@@ -210,13 +214,10 @@ int cmCTestScriptHandler::ExecuteScript(const std::string& total_script_arg)
     std::ostringstream message;
     message << "Error running command: [";
     message << static_cast<int>(result.first) << "] ";
-    for (const char* arg : argv) {
-      if (arg) {
-        message << arg << " ";
-      }
+    for (std::string const& arg : argv) {
+      message << arg << " ";
     }
-    cmCTestLog(this->CTest, ERROR_MESSAGE,
-               message.str() << argv[0] << std::endl);
+    cmCTestLog(this->CTest, ERROR_MESSAGE, message.str() << std::endl);
     return -1;
   }
   return retVal;

@@ -38,7 +38,9 @@ This will define the following variables in your project:
 # Use pkg-config to get the directories and then use these values
 # in the FIND_PATH() and FIND_LIBRARY() calls
 find_package(PkgConfig QUIET)
-pkg_check_modules(PKG_Libinput QUIET libinput)
+if(PKG_CONFIG_FOUND)
+  pkg_check_modules(PKG_Libinput QUIET libinput)
+endif()
 
 set(Libinput_COMPILE_OPTIONS ${PKG_Libinput_CFLAGS_OTHER})
 set(Libinput_VERSION ${PKG_Libinput_VERSION})

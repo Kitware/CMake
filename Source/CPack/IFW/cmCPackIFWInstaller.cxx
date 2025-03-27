@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCPackIFWInstaller.h"
 
+#include <algorithm>
 #include <cstddef>
 #include <sstream>
 #include <utility>
@@ -306,12 +307,37 @@ void cmCPackIFWInstaller::ConfigureFromOptions()
         this->GetOption("CPACK_IFW_PACKAGE_PRODUCT_IMAGES")) {
     this->ProductImages.clear();
     cmExpandList(productImages, this->ProductImages);
-    for (const auto& file : this->ProductImages) {
+
+    auto erase_missing_file_pred = [this](const std::string& file) -> bool {
       if (!cmSystemTools::FileExists(file)) {
-        // The warning will say skipped, but there will later be a hard error
-        // when the binarycreator tool tries to read the missing file.
         this->printSkippedOptionWarning("CPACK_IFW_PACKAGE_PRODUCT_IMAGES",
                                         file);
+        return true;
+      }
+      return false;
+    };
+
+    this->ProductImages.erase(std::remove_if(this->ProductImages.begin(),
+                                             this->ProductImages.end(),
+                                             erase_missing_file_pred),
+                              this->ProductImages.end());
+  }
+
+  if (!this->ProductImages.empty()) {
+    if (cmValue productUrls =
+          this->GetOption("CPACK_IFW_PACKAGE_PRODUCT_IMAGE_URLS")) {
+      this->ProductImageUrls.clear();
+      cmExpandList(productUrls, this->ProductImageUrls);
+      if (this->ProductImageUrls.size() != this->ProductImages.size()) {
+        cmCPackIFWLogger(
+          WARNING,
+          "Option \"CPACK_IFW_PACKAGE_PRODUCT_IMAGE_URLS\" will be skipped "
+          "because it contains "
+            << this->ProductImageUrls.size()
+            << " elements while \"CPACK_IFW_PACKAGE_PRODUCT_IMAGES\" "
+               "contains "
+            << this->ProductImages.size() << " elements." << std::endl);
+        this->ProductImageUrls.clear();
       }
     }
   }
@@ -614,13 +640,20 @@ void cmCPackIFWInstaller::GenerateInstallerFile()
   // Product images (copy to config dir)
   if (!this->IsVersionLess("4.0") && !this->ProductImages.empty()) {
     xout.StartElement("ProductImages");
-    for (auto const& srcImg : this->ProductImages) {
+    const bool hasProductImageUrl = !this->ProductImageUrls.empty();
+    for (size_t i = 0; i < this->ProductImages.size(); ++i) {
+      xout.StartElement("ProductImage");
+      auto const& srcImg = this->ProductImages[i];
       std::string name = cmSystemTools::GetFilenameName(srcImg);
       std::string dstImg = this->Directory + "/config/" + name;
       cmsys::SystemTools::CopyFileIfDifferent(srcImg, dstImg);
       xout.Element("Image", name);
+      if (hasProductImageUrl) {
+        xout.Element("Url", this->ProductImageUrls.at(i));
+      }
+      xout.EndElement(); // </ProductImage>
     }
-    xout.EndElement();
+    xout.EndElement(); // </ProductImages>
   }
 
   // Resources (copy to resources dir)

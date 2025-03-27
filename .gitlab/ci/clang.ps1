@@ -1,10 +1,10 @@
 $erroractionpreference = "stop"
 
-if ("$env:CMAKE_CI_BUILD_NAME".Contains("clang17.0")) {
-    # LLVM/Clang 17.0.1
-    # https://github.com/llvm/llvm-project/releases/tag/llvmorg-17.0.1
-    $filename = "llvm-17.0.1-win-x86_64-1"
-    $sha256sum = "803F5D7291219BE60D2EE69CE8882341F94A8707A214DED190614895B6996F55"
+if ("$env:CMAKE_CI_BUILD_NAME".Contains("clang19.1")) {
+    # LLVM/Clang 19.1.0
+    # https://github.com/llvm/llvm-project/releases/tag/llvmorg-19.1.0
+    $filename = "llvm-19.1.0-win-x86_64-1"
+    $sha256sum = "C1F974511A6FA2DC5B4892996C064A55BF81D7F244514F8AB5A453110ADEC0EC"
 } else {
     throw ('unknown CMAKE_CI_BUILD_NAME: ' + "$env:CMAKE_CI_BUILD_NAME")
 }
@@ -23,6 +23,7 @@ if ($hash.Hash -ne $sha256sum) {
 Add-Type -AssemblyName System.IO.Compression.FileSystem
 [System.IO.Compression.ZipFile]::ExtractToDirectory("$outdir\$tarball", "$outdir")
 Move-Item -Path "$outdir\$filename" -Destination "$outdir\llvm"
+Remove-Item "$outdir\$tarball"
 
 $bin = "$outdir\llvm\bin"
 $lib = "$outdir\llvm\lib"

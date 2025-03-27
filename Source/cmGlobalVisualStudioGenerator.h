@@ -34,8 +34,6 @@ public:
   /** Known versions of Visual Studio.  */
   enum class VSVersion : uint16_t
   {
-    VS12 = 120,
-    /* VS13 = 130 was skipped */
     VS14 = 140,
     VS15 = 150,
     VS16 = 160,
@@ -192,9 +190,6 @@ protected:
   VSDependMap VSTargetDepends;
   void ComputeVSTargetDepends(cmGeneratorTarget*);
 
-  bool CheckTargetLinks(cmGeneratorTarget& target, const std::string& name);
-  std::string GetUtilityForTarget(cmGeneratorTarget& target,
-                                  const std::string&);
   virtual std::string WriteUtilityDepend(cmGeneratorTarget const*) = 0;
   std::string GetUtilityDepend(const cmGeneratorTarget* target);
   using UtilityDependsMap = std::map<cmGeneratorTarget const*, std::string>;

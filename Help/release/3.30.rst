@@ -212,6 +212,9 @@ Deprecated and Removed Features
 Other Changes
 =============
 
+* :manual:`ctest(1)` now rejects unknown command-line arguments with an error.
+  Previously they were silently ignored.
+
 * The precompiled Windows ``.msi`` installers provided on
   `cmake.org <https://cmake.org/download/>`_, when performing a fresh
   installation, now modify the system-wide ``PATH`` by default.
@@ -298,3 +301,10 @@ Changes made since CMake 3.30.0 include the following.
   This refines 3.30.3's behavior change to restore behavior of nested
   directories that call :command:`project` with the same project name,
   and it addresses the bug in the implementation introduced in 3.30.4.
+
+3.30.6, 3.30.7, 3.30.8
+----------------------
+
+* These versions made no changes to documented features or interfaces.
+  Some implementation updates were made to support ecosystem changes
+  and/or fix regressions.

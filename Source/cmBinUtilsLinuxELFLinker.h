@@ -34,8 +34,7 @@ private:
   std::vector<std::string> LDConfigPaths;
   std::uint16_t Machine = 0;
 
-  bool ScanDependencies(std::string const& file,
-                        std::vector<std::string> const& parentRpaths);
+  bool ScanDependencies(std::string const& mainFile);
 
   bool ResolveDependency(std::string const& name,
                          std::vector<std::string> const& searchPaths,

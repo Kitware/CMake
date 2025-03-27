@@ -1,0 +1,14 @@
+{
+  "$comment": [
+    "invalid comment",
+    "version less than 10"
+  ],
+  "version": 9,
+  "configurePresets": [
+    {
+      "name": "CommentValidOldSchema",
+      "generator": "@RunCMake_GENERATOR@",
+      "binaryDir": "${sourceDir}/build"
+    }
+  ]
+}

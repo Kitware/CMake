@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.9)
+cmake_minimum_required(VERSION 3.10)
 project(PrecompiledHeader C)
 
 # Make sure the proper compiler is in use.

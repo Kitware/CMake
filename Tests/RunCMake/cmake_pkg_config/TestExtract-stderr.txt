@@ -1,0 +1,21 @@
+Name: Extract All
+Description: All flags example
+Version: 1.0.0
+Conflicts: Alpha;Beta
+Provides: Gamma;Delta
+Requires: Epsilon;Zea
+Requires.private: Eta;Theta
+Cflags: Iota -IKappa Lambda -IMu
+Includes: -IKappa;-IMu
+CompileOptions: Iota;Lambda
+Cflags.private: Nu -IXi Omnicron -IPi
+Includes.private: -IXi;-IPi
+CompileOptions.private: Nu;Omnicron
+Libs: Rho -LSigma -lTau Upsilon -LPhi -lChi
+LibDirs: -LSigma;-LPhi
+LibNames: -lTau;-lChi
+LinkOptions: Rho;Upsilon
+Libs.private: Psi -LOmega -lMoe Larry -LCurly -lShemp
+LibDirs.private: -LOmega;-LCurly
+LibNames.private: -lMoe;-lShemp
+LinkOptions.private: Psi;Larry

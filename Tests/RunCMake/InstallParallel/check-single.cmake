@@ -1,5 +1,0 @@
-include(read-ninja-install.cmake)
-list(LENGTH lines len)
-if (NOT ${len} STREQUAL "1")
-  message(FATAL_ERROR "Expected single installation call")
-endif()

@@ -9,6 +9,8 @@ set(_check_files
   [[include/main\.c]]
   [[lib]]
   [[lib/main\.c]]
+  [[libexec]]
+  [[libexec/main\.c]]
   [[sbin]]
   [[sbin/main\.c]]
   [[share]]

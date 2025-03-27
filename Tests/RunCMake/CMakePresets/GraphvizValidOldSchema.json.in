@@ -1,0 +1,11 @@
+{
+  "version": 9,
+  "configurePresets": [
+    {
+      "name": "GraphvizValid",
+      "generator": "@RunCMake_GENERATOR@",
+      "graphviz": "${sourceDir}/my_graphviz.dot",
+      "binaryDir": "${sourceDir}/build"
+    }
+  ]
+}

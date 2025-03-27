@@ -34,16 +34,16 @@ public:
   const std::string* Get() const noexcept { return this->Value; }
   const char* GetCStr() const noexcept
   {
-    return this->Value == nullptr ? nullptr : this->Value->c_str();
+    return this->Value ? this->Value->c_str() : nullptr;
   }
 
   const std::string* operator->() const noexcept
   {
-    return this->Value == nullptr ? &cmValue::Empty : this->Value;
+    return this->Value ? this->Value : &cmValue::Empty;
   }
   const std::string& operator*() const noexcept
   {
-    return this->Value == nullptr ? cmValue::Empty : *this->Value;
+    return this->Value ? *this->Value : cmValue::Empty;
   }
 
   explicit operator bool() const noexcept { return this->Value != nullptr; }
@@ -58,8 +58,7 @@ public:
    */
   bool IsOn() const noexcept
   {
-    return this->Value != nullptr &&
-      cmValue::IsOn(cm::string_view(*this->Value));
+    return this->Value && cmValue::IsOn(cm::string_view(*this->Value));
   }
   /**
    * Does the value indicate a false or off value ? Note that this is
@@ -70,18 +69,16 @@ public:
    */
   bool IsOff() const noexcept
   {
-    return this->Value == nullptr ||
-      cmValue::IsOff(cm::string_view(*this->Value));
+    return !this->Value || cmValue::IsOff(cm::string_view(*this->Value));
   }
   /** Return true if value is NOTFOUND or ends in -NOTFOUND.  */
   bool IsNOTFOUND() const noexcept
   {
-    return this->Value != nullptr &&
-      cmValue::IsNOTFOUND(cm::string_view(*this->Value));
+    return this->Value && cmValue::IsNOTFOUND(cm::string_view(*this->Value));
   }
   bool IsEmpty() const noexcept
   {
-    return this->Value == nullptr || this->Value->empty();
+    return !this->Value || this->Value->empty();
   }
 
   /**
@@ -91,7 +88,7 @@ public:
    */
   bool IsInternallyOn() const noexcept
   {
-    return this->Value != nullptr &&
+    return this->Value &&
       cmValue::IsInternallyOn(cm::string_view(*this->Value));
   }
 
@@ -105,7 +102,7 @@ public:
    */
   static bool IsOn(const char* value) noexcept
   {
-    return value != nullptr && IsOn(cm::string_view(value));
+    return value && IsOn(cm::string_view(value));
   }
   static bool IsOn(cm::string_view) noexcept;
 
@@ -124,20 +121,20 @@ public:
    */
   static bool IsOff(const char* value) noexcept
   {
-    return value == nullptr || IsOff(cm::string_view(value));
+    return !value || IsOff(cm::string_view(value));
   }
   static bool IsOff(cm::string_view) noexcept;
 
   /** Return true if value is NOTFOUND or ends in -NOTFOUND.  */
   static bool IsNOTFOUND(const char* value) noexcept
   {
-    return value == nullptr || IsNOTFOUND(cm::string_view(value));
+    return !value || IsNOTFOUND(cm::string_view(value));
   }
   static bool IsNOTFOUND(cm::string_view) noexcept;
 
   static bool IsEmpty(const char* value) noexcept
   {
-    return value == nullptr || *value == '\0';
+    return !value || *value == '\0';
   }
   static bool IsEmpty(cm::string_view value) noexcept { return value.empty(); }
 
@@ -148,7 +145,7 @@ public:
    */
   static bool IsInternallyOn(const char* value) noexcept
   {
-    return value != nullptr && IsInternallyOn(cm::string_view(value));
+    return value && IsInternallyOn(cm::string_view(value));
   }
   static bool IsInternallyOn(cm::string_view) noexcept;
 

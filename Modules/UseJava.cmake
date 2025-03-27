@@ -873,6 +873,7 @@ function(add_jar _TARGET_NAME)
             endforeach()
         endif()
 
+        cmake_language(GET_MESSAGE_LOG_LEVEL _LOG_LEVEL)
         # Compile the java files and create a list of class files
         add_custom_command(
             # NOTE: this command generates an artificial dependency file
@@ -881,6 +882,7 @@ function(add_jar _TARGET_NAME)
                 -DCMAKE_JAVA_CLASS_OUTPUT_PATH=${CMAKE_JAVA_CLASS_OUTPUT_PATH}
                 -DCMAKE_JAR_CLASSES_PREFIX=${CMAKE_JAR_CLASSES_PREFIX}
                 -P ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/UseJava/ClearClassFiles.cmake
+                --log-level ${_LOG_LEVEL}
             COMMAND ${Java_JAVAC_EXECUTABLE}
                 ${CMAKE_JAVA_COMPILE_FLAGS}
                 -classpath "${CMAKE_JAVA_INCLUDE_PATH_FINAL}"

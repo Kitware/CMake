@@ -1,0 +1,10 @@
+{
+  "version": 10,
+  "configurePresets": [
+    {
+      "name": "NoCommentValid",
+      "generator": "@RunCMake_GENERATOR@",
+      "binaryDir": "${sourceDir}/build"
+    }
+  ]
+}

@@ -45,8 +45,9 @@ struct ossl_ctx {
   BIO_METHOD *bio_method;
   CURLcode io_result;       /* result of last BIO cfilter operation */
 #ifndef HAVE_KEYLOG_CALLBACK
-  /* Set to true once a valid keylog entry has been created to avoid dupes. */
-  BIT(keylog_done);
+  /* Set to true once a valid keylog entry has been created to avoid dupes.
+     This is a bool and not a bitfield because it is passed by address. */
+  bool keylog_done;
 #endif
   BIT(x509_store_setup);            /* x509 store has been set up */
   BIT(reused_session);              /* session-ID was reused for this */
@@ -73,18 +74,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
 #define SSL_get1_peer_certificate SSL_get_peer_certificate
 #endif
 
-CURLcode Curl_ossl_verifyhost(struct Curl_easy *data, struct connectdata *conn,
-                              struct ssl_peer *peer, X509 *server_cert);
 extern const struct Curl_ssl Curl_ssl_openssl;
-
-CURLcode Curl_ossl_set_client_cert(struct Curl_easy *data,
-                                   SSL_CTX *ctx, char *cert_file,
-                                   const struct curl_blob *cert_blob,
-                                   const char *cert_type, char *key_file,
-                                   const struct curl_blob *key_blob,
-                                   const char *key_type, char *key_passwd);
-
-CURLcode Curl_ossl_certchain(struct Curl_easy *data, SSL *ssl);
 
 /**
  * Setup the OpenSSL X509_STORE in `ssl_ctx` for the cfilter `cf` and

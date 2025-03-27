@@ -5,7 +5,7 @@ CMake Error at BadOR.cmake:1 \(add_custom_target\):
 
   \$<OR> expression requires at least one parameter.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists.txt:[0-9]+ \(include\)
 +
 CMake Error at BadOR.cmake:1 \(add_custom_target\):
   Error evaluating generator expression:
@@ -14,7 +14,7 @@ CMake Error at BadOR.cmake:1 \(add_custom_target\):
 
   Parameters to \$<OR> must resolve to either '0' or '1'.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists.txt:[0-9]+ \(include\)
 +
 CMake Error at BadOR.cmake:1 \(add_custom_target\):
   Error evaluating generator expression:
@@ -23,7 +23,7 @@ CMake Error at BadOR.cmake:1 \(add_custom_target\):
 
   Parameters to \$<OR> must resolve to either '0' or '1'.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists.txt:[0-9]+ \(include\)
 +
 CMake Error at BadOR.cmake:1 \(add_custom_target\):
   Error evaluating generator expression:
@@ -32,7 +32,7 @@ CMake Error at BadOR.cmake:1 \(add_custom_target\):
 
   Parameters to \$<OR> must resolve to either '0' or '1'.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists.txt:[0-9]+ \(include\)
 +
 CMake Error at BadOR.cmake:1 \(add_custom_target\):
   Error evaluating generator expression:
@@ -41,7 +41,7 @@ CMake Error at BadOR.cmake:1 \(add_custom_target\):
 
   Parameters to \$<OR> must resolve to either '0' or '1'.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists.txt:[0-9]+ \(include\)
 +
 CMake Error at BadOR.cmake:1 \(add_custom_target\):
   Error evaluating generator expression:
@@ -50,6 +50,6 @@ CMake Error at BadOR.cmake:1 \(add_custom_target\):
 
   Parameters to \$<OR> must resolve to either '0' or '1'.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists.txt:[0-9]+ \(include\)
 +
 CMake Generate step failed\.  Build files cannot be regenerated correctly\.$

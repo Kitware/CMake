@@ -30,7 +30,7 @@ if (NOT DEFINED _${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR)
   message (FATAL_ERROR "FindPython: INTERNAL ERROR")
 endif()
 if (_${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR EQUAL "3")
-  set(_${_PYTHON_PREFIX}_VERSIONS 3.13 3.12 3.11 3.10 3.9 3.8 3.7 3.6 3.5 3.4 3.3 3.2 3.1 3.0)
+  set(_${_PYTHON_PREFIX}_VERSIONS 3.14 3.13 3.12 3.11 3.10 3.9 3.8 3.7 3.6 3.5 3.4 3.3 3.2 3.1 3.0)
 elseif (_${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR EQUAL "2")
   set(_${_PYTHON_PREFIX}_VERSIONS 2.7 2.6 2.5 2.4 2.3 2.2 2.1 2.0)
 else()
@@ -3464,14 +3464,15 @@ if (("Development.Module" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
     endif()
 
     # finalize library version information
-    _python_get_version (SABI_LIBRARY PREFIX _${_PYTHON_PREFIX}_)
     # ABI library does not have the full version information
-    if (${_PYTHON_PREFIX}_Interpreter_FOUND OR _${_PYTHON_PREFIX}_LIBRARY_RELEASE)
-      # update from interpreter or library
+    if (${_PYTHON_PREFIX}_Interpreter_FOUND AND NOT _${_PYTHON_PREFIX}_LIBRARY_RELEASE)
+      # update from interpreter
       set (_${_PYTHON_PREFIX}_VERSION ${${_PYTHON_PREFIX}_VERSION})
       set (_${_PYTHON_PREFIX}_VERSION_MAJOR ${${_PYTHON_PREFIX}_VERSION_MAJOR})
       set (_${_PYTHON_PREFIX}_VERSION_MINOR ${${_PYTHON_PREFIX}_VERSION_MINOR})
       set (_${_PYTHON_PREFIX}_VERSION_PATCH ${${_PYTHON_PREFIX}_VERSION_PATCH})
+    elseif(NOT _${_PYTHON_PREFIX}_LIBRARY_RELEASE)
+      _python_get_version (SABI_LIBRARY PREFIX _${_PYTHON_PREFIX}_)
     endif()
 
     set (${_PYTHON_PREFIX}_SABI_LIBRARY_RELEASE "${_${_PYTHON_PREFIX}_SABI_LIBRARY_RELEASE}")

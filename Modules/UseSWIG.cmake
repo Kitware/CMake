@@ -188,9 +188,8 @@ ensure generated files will receive the required settings.
   itself. This property is only meaningful for
   :ref:`Makefile <Makefile Generators>`,
   :ref:`Ninja <Ninja Generators>`, :generator:`Xcode`, and
-  :ref:`Visual Studio <Visual Studio Generators>`
-  (:generator:`Visual Studio 12 2013` and above) generators. Default value is
-  ``FALSE``.
+  :ref:`Visual Studio <Visual Studio Generators>` generators.
+  Default value is ``FALSE``.
 
   .. versionadded:: 3.21
     Added the support of :generator:`Xcode` generator.
@@ -352,9 +351,8 @@ as well as ``SWIG``:
   itself. This variable is only meaningful for
   :ref:`Makefile <Makefile Generators>`,
   :ref:`Ninja <Ninja Generators>`, :generator:`Xcode`, and
-  :ref:`Visual Studio <Visual Studio Generators>`
-  (:generator:`Visual Studio 12 2013` and above) generators. Default value is
-  ``FALSE``.
+  :ref:`Visual Studio <Visual Studio Generators>` generators.
+  Default value is ``FALSE``.
 
   Source file property ``USE_SWIG_DEPENDENCIES``, if not defined, will be
   initialized with the value of this variable.
@@ -565,7 +563,7 @@ function(SWIG_ADD_SOURCE_TO_MODULE name outfiles infile)
   endif()
 
   set (use_swig_dependencies ${SWIG_USE_SWIG_DEPENDENCIES})
-  if (CMAKE_GENERATOR MATCHES "Make|Ninja|Xcode|Visual Studio (1[1-9]|[2-9][0-9])")
+  if (CMAKE_GENERATOR MATCHES "Make|Ninja|Xcode|Visual Studio")
     get_property(use_swig_dependencies_set SOURCE "${infile}" PROPERTY USE_SWIG_DEPENDENCIES SET)
     if (use_swig_dependencies_set)
       get_property(use_swig_dependencies SOURCE "${infile}" PROPERTY USE_SWIG_DEPENDENCIES)
@@ -890,7 +888,7 @@ function(SWIG_ADD_LIBRARY name)
     set(SWIG_SOURCE_FILE_EXTENSIONS ".i")
   endif()
 
-  if (CMAKE_GENERATOR MATCHES "Make|Ninja|Xcode|Visual Studio (1[1-9]|[2-9][0-9])")
+  if (CMAKE_GENERATOR MATCHES "Make|Ninja|Xcode|Visual Studio")
     # For Makefiles, Ninja, Xcode and Visual Studio generators,
     # use SWIG generated dependencies if requested
     if (NOT DEFINED SWIG_USE_SWIG_DEPENDENCIES)

@@ -10,8 +10,8 @@
 include(Compiler/IAR)
 include(Compiler/CMakeCommonCompilerMacros)
 
-if(NOT DEFINED CMAKE_C_COMPILER_VERSION)
-  message(FATAL_ERROR "CMAKE_C_COMPILER_VERSION not detected.  This should be automatic.")
+if(NOT CMAKE_C_COMPILER_VERSION)
+  message(FATAL_ERROR "Could not detect CMAKE_C_COMPILER_VERSION. This should be automatic. Check your product license.\n")
 endif()
 
 # Unused after CMP0128

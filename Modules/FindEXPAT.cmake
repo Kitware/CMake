@@ -39,14 +39,19 @@ Hints
 
   Set to ``TRUE`` to use static libraries.
 
+  .. versionadded:: 3.31
+
+    Implemented on non-Windows platforms.
+
 #]=======================================================================]
 
 cmake_policy(PUSH)
 cmake_policy(SET CMP0159 NEW) # file(STRINGS) with REGEX updates CMAKE_MATCH_<n>
 
 find_package(PkgConfig QUIET)
-
-pkg_check_modules(PC_EXPAT QUIET expat)
+if(PKG_CONFIG_FOUND)
+  pkg_check_modules(PC_EXPAT QUIET expat)
+endif()
 
 # Look for the header file.
 find_path(EXPAT_INCLUDE_DIR NAMES expat.h HINTS ${PC_EXPAT_INCLUDE_DIRS})
@@ -72,8 +77,22 @@ if(NOT EXPAT_LIBRARY)
     set(_expat_ORIG_CMAKE_FIND_LIBRARY_PREFIXES)
   endif()
 
+  if(DEFINED CMAKE_FIND_LIBRARY_SUFFIXES)
+    set(_expat_ORIG_CMAKE_FIND_LIBRARY_SUFFIXES "${CMAKE_FIND_LIBRARY_SUFFIXES}")
+  else()
+    set(_expat_ORIG_CMAKE_FIND_LIBRARY_SUFFIXES)
+  endif()
+
   if(WIN32)
     list(APPEND CMAKE_FIND_LIBRARY_PREFIXES "" "lib")
+  endif()
+
+  if (EXPAT_USE_STATIC_LIBS)
+    if(WIN32)
+      set(CMAKE_FIND_LIBRARY_SUFFIXES .lib .a ${CMAKE_FIND_LIBRARY_SUFFIXES})
+    else()
+      set(CMAKE_FIND_LIBRARY_SUFFIXES .a)
+    endif()
   endif()
 
   # Look for the library.
@@ -85,6 +104,12 @@ if(NOT EXPAT_LIBRARY)
     set(CMAKE_FIND_LIBRARY_PREFIXES "${_expat_ORIG_CMAKE_FIND_LIBRARY_PREFIXES}")
   else()
     set(CMAKE_FIND_LIBRARY_PREFIXES)
+  endif()
+
+  if(DEFINED _expat_ORIG_CMAKE_FIND_LIBRARY_SUFFIXES)
+    set(CMAKE_FIND_LIBRARY_SUFFIXES "${_expat_ORIG_CMAKE_FIND_LIBRARY_SUFFIXES}")
+  else()
+    set(CMAKE_FIND_LIBRARY_SUFFIXES)
   endif()
 
   include(${CMAKE_CURRENT_LIST_DIR}/SelectLibraryConfigurations.cmake)

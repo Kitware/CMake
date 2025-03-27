@@ -10,10 +10,13 @@
 #include "cmArgumentParser.h"
 #include "cmArgumentParserTypes.h"
 
+class cmMakefile;
+
 class cmInstallCommandArguments : public cmArgumentParser<void>
 {
 public:
-  cmInstallCommandArguments(std::string defaultComponent);
+  cmInstallCommandArguments(std::string defaultComponent,
+                            cmMakefile& makefile);
   void SetGenericArguments(cmInstallCommandArguments* args)
   {
     this->GenericArguments = args;
@@ -78,7 +81,8 @@ private:
 class cmInstallCommandFileSetArguments : public cmInstallCommandArguments
 {
 public:
-  cmInstallCommandFileSetArguments(std::string defaultComponent);
+  cmInstallCommandFileSetArguments(std::string defaultComponent,
+                                   cmMakefile& makefile);
 
   void Parse(std::vector<std::string> args,
              std::vector<std::string>* unconsumedArgs);

@@ -1,16 +1,22 @@
 {
-  "version": 6,
+  "version": 10,
   "cmakeMinimumRequired": {
     "major": 3,
     "minor": 23,
     "patch": 0
   },
+  "$comment": "An example CMakePresets.json file",
   "include": [
     "otherThings.json",
     "moreThings.json"
   ],
   "configurePresets": [
     {
+      "$comment": [
+        "This is a comment row.",
+        "This is another comment,",
+        "just because we can do it"
+      ],
       "name": "default",
       "displayName": "Default Config",
       "description": "Default build using Ninja generator",

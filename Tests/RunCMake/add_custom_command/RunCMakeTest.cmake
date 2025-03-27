@@ -1,5 +1,8 @@
 include(RunCMake)
 
+run_cmake(CMP0175-OLD)
+run_cmake(CMP0175-WARN)
+run_cmake(CMP0175-NEW)
 run_cmake(AppendLiteralQuotes)
 run_cmake(AppendNoOutput)
 run_cmake(AppendNotOutput)

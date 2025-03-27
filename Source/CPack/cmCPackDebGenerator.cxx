@@ -598,7 +598,7 @@ int cmCPackDebGenerator::PackageComponents(bool ignoreGroup)
   // Handle Orphan components (components not belonging to any groups)
   for (auto const& comp : this->Components) {
     // Does the component belong to a group?
-    if (comp.second.Group == nullptr) {
+    if (!comp.second.Group) {
       cmCPackLogger(
         cmCPackLog::LOG_VERBOSE,
         "Component <"
@@ -789,6 +789,21 @@ bool cmCPackDebGenerator::createDeb()
   if (cmNonempty(debian_pkg_replaces)) {
     controlValues["Replaces"] = *debian_pkg_replaces;
   }
+  cmValue debian_pkg_multiarch =
+    this->GetOption("GEN_CPACK_DEBIAN_PACKAGE_MULTIARCH");
+  if (cmNonempty(debian_pkg_multiarch)) {
+    // check for valid values: same, foreign, allowed
+    if (*debian_pkg_multiarch != "same" &&
+        *debian_pkg_multiarch != "foreign" &&
+        *debian_pkg_multiarch != "allowed") {
+      cmCPackLogger(cmCPackLog::LOG_ERROR,
+                    "Error: invalid value for Multi-Arch: "
+                      << *debian_pkg_multiarch
+                      << ". Valid values are: same, foreign, allowed\n");
+      return false;
+    }
+    controlValues["Multi-Arch"] = *debian_pkg_multiarch;
+  }
 
   const std::string strGenWDIR(this->GetOption("GEN_WDIR"));
   const std::string shlibsfilename = strGenWDIR + "/shlibs";
@@ -913,7 +928,7 @@ std::string cmCPackDebGenerator::GetComponentInstallSuffix(
   // the current COMPONENT belongs to.
   std::string groupVar =
     "CPACK_COMPONENT_" + cmSystemTools::UpperCase(componentName) + "_GROUP";
-  if (nullptr != this->GetOption(groupVar)) {
+  if (this->GetOption(groupVar)) {
     return *this->GetOption(groupVar);
   }
   return componentName;

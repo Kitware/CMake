@@ -1,4 +1,3 @@
-#include <functional>
 #include <memory>
 #include <string>
 #include <vector>
@@ -57,10 +56,5 @@ bool testStackFrameFormatLine()
 
 int testDebuggerThread(int, char*[])
 {
-  return runTests(std::vector<std::function<bool()>>{
-    testStackFrameNoFormatting,
-    testStackFrameFormatParameters,
-    testStackFrameFormatParameterValues,
-    testStackFrameFormatLine
-  });
+  return runTests({ testStackFrameFunctionName });
 }

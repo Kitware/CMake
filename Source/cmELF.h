@@ -88,6 +88,9 @@ public:
   std::vector<char> EncodeDynamicEntries(
     const DynamicEntryList& entries) const;
 
+  /** Returns true if the ELF file has a dynamic section **/
+  bool HasDynamicSection() const;
+
   /** Get the SONAME field if any.  */
   bool GetSOName(std::string& soname);
   StringEntry const* GetSOName();

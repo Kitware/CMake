@@ -6,9 +6,11 @@ precisely checking their return code and stdout/stderr content.
 The RunCMake infrastructure is useful for testing error cases and
 diagnostic output.
 
-See also `../README.rst`_ and the `CMake Source Code Guide`_.
+See also `../README.rst`_, the `CMake Testing Guide`_,
+and the `CMake Source Code Guide`_.
 
 .. _`../README.rst`: ../README.rst
+.. _`CMake Testing Guide`: ../../Help/dev/testing.rst
 .. _`CMake Source Code Guide`: ../../Help/dev/source.rst
 .. _`CMakeLists.txt`: CMakeLists.txt
 

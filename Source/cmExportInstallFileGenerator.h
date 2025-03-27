@@ -4,39 +4,31 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include <iosfwd>
+#include <functional>
 #include <map>
 #include <set>
 #include <string>
-#include <utility>
 #include <vector>
 
+#include <cm/string_view>
+
 #include "cmExportFileGenerator.h"
+#include "cmGeneratorExpression.h"
 #include "cmInstallExportGenerator.h"
 #include "cmStateTypes.h"
 
 class cmExportSet;
-class cmFileSet;
 class cmGeneratorTarget;
-class cmGlobalGenerator;
 class cmInstallTargetGenerator;
 class cmTargetExport;
 
 /** \class cmExportInstallFileGenerator
  * \brief Generate a file exporting targets from an install tree.
  *
- * cmExportInstallFileGenerator generates files exporting targets from
- * install an installation tree.  The files are placed in a temporary
- * location for installation by cmInstallExportGenerator.  One main
- * file is generated that creates the imported targets and loads
- * per-configuration files.  Target locations and settings for each
- * configuration are written to these per-configuration files.  After
- * installation the main file loads the configurations that have been
- * installed.
- *
- * This is used to implement the INSTALL(EXPORT) command.
+ * cmExportInstallFileGenerator is the generic interface class for generating
+ * export files for an install tree.
  */
-class cmExportInstallFileGenerator : public cmExportFileGenerator
+class cmExportInstallFileGenerator : virtual public cmExportFileGenerator
 {
 public:
   /** Construct with the export installer that will install the
@@ -50,6 +42,9 @@ public:
   {
     return this->ConfigImportFiles;
   }
+
+  /** Get the temporary location of the config-agnostic C++ module file.  */
+  std::string GetCxxModuleFile() const;
 
   /** Get the per-config C++ module file generated for each configuration.
       This maps from the configuration name to the file temporary location
@@ -70,64 +65,75 @@ public:
 
   /** Compute the globbing expression used to load per-config import
       files from the main file.  */
-  std::string GetConfigImportFileGlob();
+  virtual std::string GetConfigImportFileGlob() const = 0;
 
 protected:
-  // Implement virtual methods from the superclass.
-  bool GenerateMainFile(std::ostream& os) override;
-  void GenerateImportTargetsConfig(std::ostream& os, const std::string& config,
-                                   std::string const& suffix) override;
   cmStateEnums::TargetType GetExportTargetType(
     cmTargetExport const* targetExport) const;
+
+  virtual std::string const& GetExportName() const;
+
+  std::string GetInstallPrefix() const
+  {
+    cm::string_view const& prefixWithSlash = this->GetImportPrefixWithSlash();
+    return std::string(prefixWithSlash.data(), prefixWithSlash.length() - 1);
+  }
+  virtual char GetConfigFileNameSeparator() const = 0;
+
   void HandleMissingTarget(std::string& link_libs,
                            cmGeneratorTarget const* depender,
                            cmGeneratorTarget* dependee) override;
 
-  void ReplaceInstallPrefix(std::string& input) override;
+  void ReplaceInstallPrefix(std::string& input) const override;
 
-  void ComplainAboutMissingTarget(cmGeneratorTarget const* depender,
-                                  cmGeneratorTarget const* dependee,
-                                  std::vector<std::string> const& exportFiles);
+  void ComplainAboutMissingTarget(
+    cmGeneratorTarget const* depender, cmGeneratorTarget const* dependee,
+    std::vector<std::string> const& exportFiles) const;
 
-  std::pair<std::vector<std::string>, std::string> FindNamespaces(
-    cmGlobalGenerator* gg, const std::string& name);
+  void ComplainAboutDuplicateTarget(
+    std::string const& targetName) const override;
 
-  /** Generate the relative import prefix.  */
-  virtual void GenerateImportPrefix(std::ostream&);
+  ExportInfo FindExportInfo(cmGeneratorTarget const* target) const override;
 
-  /** Generate the relative import prefix.  */
-  virtual void LoadConfigFiles(std::ostream&);
-
-  virtual void CleanupTemporaryVariables(std::ostream&);
+  void ReportError(std::string const& errorMessage) const override;
 
   /** Generate a per-configuration file for the targets.  */
-  virtual bool GenerateImportFileConfig(const std::string& config);
+  virtual bool GenerateImportFileConfig(std::string const& config);
 
   /** Fill in properties indicating installed file locations.  */
-  void SetImportLocationProperty(const std::string& config,
+  void SetImportLocationProperty(std::string const& config,
                                  std::string const& suffix,
                                  cmInstallTargetGenerator* itgen,
                                  ImportPropertyMap& properties,
                                  std::set<std::string>& importedLocations);
 
   std::string InstallNameDir(cmGeneratorTarget const* target,
-                             const std::string& config) override;
+                             std::string const& config) override;
 
-  std::string GetFileSetDirectories(cmGeneratorTarget* gte, cmFileSet* fileSet,
-                                    cmTargetExport* te) override;
-  std::string GetFileSetFiles(cmGeneratorTarget* gte, cmFileSet* fileSet,
-                              cmTargetExport* te) override;
+  using cmExportFileGenerator::GetCxxModuleFile;
 
-  std::string GetCxxModulesDirectory() const override;
-  void GenerateCxxModuleConfigInformation(std::string const&,
-                                          std::ostream&) const override;
-  bool GenerateImportCxxModuleConfigTargetInclusion(std::string const&,
-                                                    std::string const&);
+  /** Walk the list of targets to be exported.  Returns true iff no duplicates
+      are found.  */
+  bool CollectExports(
+    std::function<void(cmTargetExport const*)> const& visitor);
 
   cmExportSet* GetExportSet() const override
   {
     return this->IEGen->GetExportSet();
   }
+
+  std::string GetImportXcFrameworkLocation(
+    std::string const& config, cmTargetExport const* targetExport) const;
+
+  using cmExportFileGenerator::PopulateInterfaceProperties;
+  bool PopulateInterfaceProperties(cmTargetExport const* targetExport,
+                                   ImportPropertyMap& properties);
+
+  void PopulateImportProperties(std::string const& config,
+                                std::string const& suffix,
+                                cmTargetExport const* targetExport,
+                                ImportPropertyMap& properties,
+                                std::set<std::string>& importedLocations);
 
   cmInstallExportGenerator* IEGen;
 
@@ -137,4 +143,32 @@ protected:
   std::map<std::string, std::string> ConfigCxxModuleFiles;
   // The C++ module property target files generated for each configuration.
   std::map<std::string, std::vector<std::string>> ConfigCxxModuleTargetFiles;
+
+private:
+  bool CheckInterfaceDirs(std::string const& prepro,
+                          cmGeneratorTarget const* target,
+                          std::string const& prop) const;
+  void PopulateCompatibleInterfaceProperties(cmGeneratorTarget const* target,
+                                             ImportPropertyMap& properties);
+  void PopulateCustomTransitiveInterfaceProperties(
+    cmGeneratorTarget const* target,
+    cmGeneratorExpression::PreprocessContext preprocessRule,
+    ImportPropertyMap& properties);
+  void PopulateIncludeDirectoriesInterface(
+    cmGeneratorTarget const* target,
+    cmGeneratorExpression::PreprocessContext preprocessRule,
+    ImportPropertyMap& properties, cmTargetExport const& te,
+    std::string& includesDestinationDirs);
+  void PopulateSourcesInterface(
+    cmGeneratorTarget const* target,
+    cmGeneratorExpression::PreprocessContext preprocessRule,
+    ImportPropertyMap& properties);
+  void PopulateLinkDirectoriesInterface(
+    cmGeneratorTarget const* target,
+    cmGeneratorExpression::PreprocessContext preprocessRule,
+    ImportPropertyMap& properties);
+  void PopulateLinkDependsInterface(
+    cmGeneratorTarget const* target,
+    cmGeneratorExpression::PreprocessContext preprocessRule,
+    ImportPropertyMap& properties);
 };

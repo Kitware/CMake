@@ -13,8 +13,9 @@ target property is true.
 
 .. note::
 
-  CMake version |release| defaults this variable to ``FALSE`` because
-  GNU binutils linkers (``ld``, ``ld.bfd``, ``ld.gold``) generate spurious
+  CMake version |release| defaults this variable to ``FALSE`` if the linker is
+  one from the GNU binutils linkers (``ld`` and ``ld.bfd`` for version less
+  than 2.41 or ``ld.gold`` for any version) because it generate spurious
   dependencies on temporary files when LTO is enabled.  See `GNU bug 30568`_.
 
 .. _`GNU bug 30568`: https://sourceware.org/bugzilla/show_bug.cgi?id=30568

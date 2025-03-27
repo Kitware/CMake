@@ -1,0 +1,4 @@
+CMake Error at CMP0171-OLD\.cmake:[0-9]+ \(add_custom_command\):
+  add_custom_command CODEGEN option requires policy CMP0171 be set to NEW\!
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)

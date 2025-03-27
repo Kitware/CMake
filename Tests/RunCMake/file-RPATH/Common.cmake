@@ -1,12 +1,16 @@
 # Prepare binaries on which to operate.
 set(in "${CMAKE_CURRENT_LIST_DIR}/${format}")
 set(out "${CMAKE_CURRENT_BINARY_DIR}")
-foreach(f ${names})
+foreach(f ${dynamic})
   file(COPY ${in}/${f} DESTINATION ${out} NO_SOURCE_PERMISSIONS)
-  list(APPEND files "${out}/${f}")
+  list(APPEND dynamic_files "${out}/${f}")
+endforeach()
+foreach(f ${static})
+  file(COPY ${in}/${f} DESTINATION ${out} NO_SOURCE_PERMISSIONS)
+  list(APPEND static_files "${out}/${f}")
 endforeach()
 
-foreach(f ${files})
+foreach(f ${dynamic_files})
   # Check for the initial RPATH.
   file(RPATH_CHECK FILE "${f}" RPATH "/sample/rpath")
   if(NOT EXISTS "${f}")
@@ -65,11 +69,11 @@ endforeach()
 
 # TODO Implement RPATH_SET in XCOFF.
 if(format STREQUAL "ELF")
-  foreach(f ${names})
+  foreach(f ${dynamic})
     file(COPY ${in}/${f} DESTINATION ${out} NO_SOURCE_PERMISSIONS)
   endforeach()
 
-  foreach(f ${files})
+  foreach(f ${dynamic_files})
     # Set the RPATH.
     file(RPATH_SET FILE "${f}"
       NEW_RPATH "/new/rpath")
@@ -99,3 +103,8 @@ if(format STREQUAL "ELF")
     endif()
   endforeach()
 endif()
+
+# Verify that modifying rpaths on a static library is a no-op
+foreach(f ${static_files})
+  file(RPATH_CHANGE FILE "${f}" OLD_RPATH "/rpath/foo" NEW_RPATH "/rpath/bar")
+endforeach()

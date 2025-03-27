@@ -108,6 +108,7 @@ public:
 
   cmStateEnums::TargetType GetType() const;
   const std::string& GetName() const;
+  std::string GetFamilyName() const;
   std::string GetExportName() const;
   std::string GetFilesystemExportName() const;
 
@@ -516,6 +517,64 @@ public:
   std::vector<std::string> GetAppleArchs(std::string const& config,
                                          cm::optional<std::string> lang) const;
 
+  // The classification of the flag.
+  enum class FlagClassification
+  {
+    // The flag is for the execution of the tool (e.g., the compiler itself,
+    // any launchers, etc.).
+    ExecutionFlag,
+    // The flag is "baseline" and should be apply to TUs which may interact
+    // with this compilation (e.g., imported modules).
+    BaselineFlag,
+    // The flag is "private" and doesn't need to apply to interacting TUs.
+    PrivateFlag,
+    // Flags for the TU itself (e.g., output paths, dependency scanning, etc.).
+    LocationFlag,
+  };
+  enum class FlagKind
+  {
+    // Not a flag (executable or other entries).
+    NotAFlag,
+    // Flags for support of the build system.
+    BuildSystem,
+    // A compilation flag.
+    Compile,
+    // An include flag.
+    Include,
+    // A compile definition.
+    Definition,
+  };
+  struct ClassifiedFlag
+  {
+    ClassifiedFlag(FlagClassification cls, FlagKind kind, std::string flag)
+      : Classification(cls)
+      , Kind(kind)
+      , Flag(std::move(flag))
+    {
+    }
+
+    FlagClassification Classification;
+    FlagKind Kind;
+    std::string Flag;
+  };
+  using ClassifiedFlags = std::vector<ClassifiedFlag>;
+  ClassifiedFlags GetClassifiedFlagsForSource(cmSourceFile const* sf,
+                                              std::string const& config);
+  struct SourceVariables
+  {
+    std::string TargetPDB;
+    std::string TargetCompilePDB;
+    std::string ObjectDir;
+    std::string ObjectFileDir;
+    std::string DependencyFile;
+    std::string DependencyTarget;
+
+    // Dependency flags (if used)
+    std::string DependencyFlags;
+  };
+  SourceVariables GetSourceVariables(cmSourceFile const* sf,
+                                     std::string const& config);
+
   void AddExplicitLanguageFlags(std::string& flags,
                                 cmSourceFile const& sf) const;
 
@@ -653,6 +712,10 @@ public:
   bool IsSourceFilePartOfUnityBatch(const std::string& sourceFilename) const;
 
   bool IsSystemIncludeDirectory(const std::string& dir,
+                                const std::string& config,
+                                const std::string& language) const;
+
+  void AddSystemIncludeCacheKey(const std::string& key,
                                 const std::string& config,
                                 const std::string& language) const;
 
@@ -891,6 +954,9 @@ public:
   /** Return whether this target is a CFBundle (plugin) on Apple.  */
   bool IsCFBundleOnApple() const;
 
+  /** Return whether this target is a shared library on AIX.  */
+  bool IsArchivedAIXSharedLibrary() const;
+
   /** Assembly types. The order of the values of this enum is relevant
       because of smaller/larger comparison operations! */
   enum ManagedType
@@ -935,7 +1001,8 @@ public:
 
   cm::optional<TransitiveProperty> IsTransitiveProperty(
     cm::string_view prop, cmLocalGenerator const* lg,
-    std::string const& config, bool evaluatingLinkLibraries) const;
+    std::string const& config,
+    cmGeneratorExpressionDAGChecker const* dagChecker) const;
 
   bool HaveInstallTreeRPATH(const std::string& config) const;
 
@@ -1104,9 +1171,11 @@ private:
   // Returns ARCHIVE, LIBRARY, or RUNTIME based on platform and type.
   const char* GetOutputTargetType(cmStateEnums::ArtifactType artifact) const;
 
-  void ComputeVersionedName(std::string& vName, std::string const& prefix,
-                            std::string const& base, std::string const& suffix,
-                            std::string const& name, cmValue version) const;
+  std::string ComputeVersionedName(std::string const& prefix,
+                                   std::string const& base,
+                                   std::string const& suffix,
+                                   std::string const& name,
+                                   cmValue version) const;
 
   mutable std::map<std::string, CustomTransitiveProperties>
     CustomTransitiveBuildPropertiesMap;
@@ -1436,6 +1505,9 @@ public:
   };
   CxxModuleSupport NeedCxxDyndep(std::string const& config) const;
 
+  std::string BuildDatabasePath(std::string const& lang,
+                                std::string const& config) const;
+
 private:
   void BuildFileSetInfoCache(std::string const& config) const;
   struct InfoByConfig
@@ -1444,6 +1516,7 @@ private:
     std::map<std::string, cmFileSet const*> FileSetCache;
     std::map<cmGeneratorTarget const*, std::vector<cmGeneratorTarget const*>>
       SyntheticDeps;
+    std::map<cmSourceFile const*, ClassifiedFlags> SourceFlags;
   };
   mutable std::map<std::string, InfoByConfig> Configs;
 };

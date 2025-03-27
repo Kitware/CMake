@@ -1,0 +1,4 @@
+CMake Warning \(dev\) in CMakeLists.txt:
+  CMake's support for exporting build databases is experimental.  It is meant
+  only for experimentation and feedback to CMake developers.
+This warning is for project developers.  Use -Wno-dev to suppress it.

@@ -39,6 +39,23 @@ When activated, this experimental feature provides the following:
   using the ``CMAKE_EXPORT_FIND_PACKAGE_NAME`` variable and/or
 ``EXPORT_FIND_PACKAGE_NAME`` target property.
 
+Export |CPS| Package Information
+================================
+
+In order to activate support for this experimental feature, set
+
+* variable ``CMAKE_EXPERIMENTAL_EXPORT_PACKAGE_INFO`` to
+* value ``b80be207-778e-46ba-8080-b23bba22639e``.
+
+This UUID may change in future versions of CMake.  Be sure to use the value
+documented here by the source tree of the version of CMake with which you are
+experimenting.
+
+When activated, this experimental feature provides the following:
+
+* The experimental ``install(PACKAGE_INFO)`` command is available to export
+  package information in the |CPS|_ format.
+
 C++ ``import std`` support
 ==========================
 
@@ -60,3 +77,27 @@ When activated, this experimental feature provides the following:
 
 * Targets with the property set to a true value and at least ``cxx_std_23``
   may use ``import std;`` in any scanned C++ source file.
+
+.. _CPS: https://cps-org.github.io/cps/
+.. |CPS| replace:: Common Package Specification
+
+Build database support
+======================
+
+In order to activate support for exporting build databases, set
+
+* variable ``CMAKE_EXPERIMENTAL_EXPORT_BUILD_DATABASE`` to
+* value ``4bd552e2-b7fb-429a-ab23-c83ef53f3f13``.
+
+This UUID may change in future versions of CMake.  Be sure to use the value
+documented here by the source tree of the version of CMake with which you are
+experimenting.
+
+When activated, this experimental feature provides the following:
+
+* The :prop_tgt:`EXPORT_BUILD_DATABASE` target property and its initializing
+  variable :variable:`CMAKE_EXPORT_BUILD_DATABASE` and environment variable
+  :envvar:`CMAKE_EXPORT_BUILD_DATABASE`.
+
+* Targets with the property set to a true value will have their C++ build
+  information exported to the build database.

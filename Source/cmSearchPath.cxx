@@ -46,7 +46,7 @@ void cmSearchPath::AddPath(const std::string& path)
 
 void cmSearchPath::AddUserPath(const std::string& path)
 {
-  assert(this->FC != nullptr);
+  assert(this->FC);
 
   std::vector<std::string> outPaths;
 
@@ -68,7 +68,7 @@ void cmSearchPath::AddUserPath(const std::string& path)
 
 void cmSearchPath::AddCMakePath(const std::string& variable)
 {
-  assert(this->FC != nullptr);
+  assert(this->FC);
 
   // Get a path from a CMake variable.
   if (cmValue value = this->FC->Makefile->GetDefinition(variable)) {
@@ -92,7 +92,7 @@ void cmSearchPath::AddEnvPath(const std::string& variable)
 
 void cmSearchPath::AddCMakePrefixPath(const std::string& variable)
 {
-  assert(this->FC != nullptr);
+  assert(this->FC);
 
   // Get a path from a CMake variable.
   if (cmValue value = this->FC->Makefile->GetDefinition(variable)) {
@@ -154,7 +154,7 @@ void cmSearchPath::AddSuffixes(const std::vector<std::string>& suffixes)
 void cmSearchPath::AddPrefixPaths(const std::vector<std::string>& paths,
                                   const char* base)
 {
-  assert(this->FC != nullptr);
+  assert(this->FC);
 
   // default for programs
   std::string subdir = "bin";
@@ -222,7 +222,7 @@ void cmSearchPath::AddPrefixPaths(const std::vector<std::string>& paths,
 void cmSearchPath::AddPathInternal(const std::string& path,
                                    const std::string& prefix, const char* base)
 {
-  assert(this->FC != nullptr);
+  assert(this->FC);
 
   std::string collapsedPath = cmSystemTools::CollapseFullPath(path, base);
 

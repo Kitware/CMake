@@ -76,10 +76,6 @@ public:
   void AddImportedTargetName(std::string const& name);
 
 private:
-  template <typename ValueType>
-  void StoreProperty(const std::string& prop, ValueType value,
-                     cmListFileBacktrace const& lfbt);
-
   cmLinkedTree<cmStateDetail::BuildsystemDirectoryStateType>::iterator
     DirectoryState;
   cmStateSnapshot Snapshot_;

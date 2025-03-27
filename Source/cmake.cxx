@@ -97,7 +97,6 @@
 #    include "cmGlobalBorlandMakefileGenerator.h"
 #    include "cmGlobalJOMMakefileGenerator.h"
 #    include "cmGlobalNMakeMakefileGenerator.h"
-#    include "cmGlobalVisualStudio12Generator.h"
 #    include "cmGlobalVisualStudio14Generator.h"
 #    include "cmGlobalVisualStudioVersionedGenerator.h"
 #    include "cmVSSetupHelper.h"
@@ -1079,10 +1078,7 @@ void cmake::SetArgs(const std::vector<std::string>& args)
     CommandArgument{ "--graphviz", "No file specified for --graphviz",
                      CommandArgument::Values::One,
                      [](std::string const& value, cmake* state) -> bool {
-                       std::string path =
-                         cmSystemTools::CollapseFullPath(value);
-                       cmSystemTools::ConvertToUnixSlashes(path);
-                       state->GraphVizFile = path;
+                       state->SetGraphVizFile(value);
                        return true;
                      } },
 
@@ -1591,6 +1587,12 @@ void cmake::SetArgs(const std::vector<std::string>& args)
           cmCMakePresetsGraph::ArchToolsetStrategy::Set) {
       if (!this->GeneratorToolsetSet && !expandedPreset->Toolset.empty()) {
         this->SetGeneratorToolset(expandedPreset->Toolset);
+      }
+    }
+
+    if (!expandedPreset->GraphVizFile.empty()) {
+      if (this->GraphVizFile.empty()) {
+        this->SetGraphVizFile(expandedPreset->GraphVizFile);
       }
     }
 
@@ -2655,7 +2657,6 @@ std::unique_ptr<cmGlobalGenerator> cmake::EvaluateDefaultGlobalGenerator()
   };
   static VSVersionedGenerator const vsGenerators[] = {
     { "14.0", "Visual Studio 14 2015" }, //
-    { "12.0", "Visual Studio 12 2013" }, //
   };
   static const char* const vsEntries[] = {
     "\\Setup\\VC;ProductDir", //
@@ -2736,7 +2737,7 @@ bool cmake::StartDebuggerIfEnabled()
     return true;
   }
 
-  if (DebugAdapter == nullptr) {
+  if (!DebugAdapter) {
     if (this->GetDebuggerPipe().empty()) {
       std::cerr
         << "Error: --debugger-pipe must be set when debugging is enabled.\n";
@@ -2766,7 +2767,7 @@ void cmake::StopDebuggerIfNeeded(int exitCode)
   }
 
   // The debug adapter may have failed to start (e.g. invalid pipe path).
-  if (DebugAdapter != nullptr) {
+  if (DebugAdapter) {
     DebugAdapter->ReportExitCode(exitCode);
     DebugAdapter.reset();
   }
@@ -2940,6 +2941,7 @@ int cmake::Generate()
   this->SaveCache(this->GetHomeOutputDirectory());
 
 #if !defined(CMAKE_BOOTSTRAP)
+  this->GetGlobalGenerator()->WriteInstallJson();
   this->FileAPI->WriteReplies();
 #endif
 
@@ -3049,7 +3051,6 @@ void cmake::AddDefaultGenerators()
   this->Generators.push_back(
     cmGlobalVisualStudioVersionedGenerator::NewFactory15());
   this->Generators.push_back(cmGlobalVisualStudio14Generator::NewFactory());
-  this->Generators.push_back(cmGlobalVisualStudio12Generator::NewFactory());
   this->Generators.push_back(cmGlobalBorlandMakefileGenerator::NewFactory());
   this->Generators.push_back(cmGlobalNMakeMakefileGenerator::NewFactory());
   this->Generators.push_back(cmGlobalJOMMakefileGenerator::NewFactory());
@@ -3809,7 +3810,7 @@ int cmake::Build(int jobs, std::string dir, std::vector<std::string> targets,
   // itself, there is the risk of building an out-of-date solution file due
   // to limitations of the underlying build system.
   std::string const stampList = cachePath + "/" + "CMakeFiles/" +
-    cmGlobalVisualStudio12Generator::GetGenerateStampList();
+    cmGlobalVisualStudio14Generator::GetGenerateStampList();
 
   // Note that the stampList file only exists for VS generators.
   if (cmSystemTools::FileExists(stampList)) {

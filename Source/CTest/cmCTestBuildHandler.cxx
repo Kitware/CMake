@@ -8,6 +8,7 @@
 #include <set>
 #include <utility>
 
+#include <cm/string_view>
 #include <cmext/algorithm>
 
 #include <cm3p/uv.h>
@@ -1121,10 +1122,10 @@ void cmCTestBuildHandler::ProcessBuffer(const char* data, size_t length,
 
   // And if this is verbose output, display the content of the chunk
   cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-             cmCTestLogWrite(data, length));
+             cm::string_view(data, length));
 
   // Always store the chunk to the file
-  ofs << cmCTestLogWrite(data, length);
+  ofs << cm::string_view(data, length);
 }
 
 int cmCTestBuildHandler::ProcessSingleLine(const char* data)

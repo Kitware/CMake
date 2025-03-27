@@ -50,6 +50,10 @@ It has the following subdirectories:
   Clients may optionally create the ``reply/`` directory at any time
   and monitor it for the appearance of a new reply index file.
 
+.. versionadded:: 3.31
+  Users can add query files to ``api/v1/query`` inside the
+  :envvar:`CMAKE_CONFIG_DIR` to create user-wide queries for all CMake projects.
+
 v1 Shared Stateless Query Files
 -------------------------------
 

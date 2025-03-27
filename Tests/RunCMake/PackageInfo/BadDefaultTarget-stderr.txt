@@ -1,0 +1,2 @@
+CMake Error: Package "test" specifies DEFAULT_TARGETS "dog", which is not a target in the export set "foo".
+CMake Error: Package "test" specifies DEFAULT_TARGETS "cat", which is not a target in the export set "foo".

@@ -1,0 +1,4 @@
+CMake Error at implicit-depends\.cmake:[0-9]+ \(add_custom_command\):
+  add_custom_command CODEGEN is not compatible with IMPLICIT_DEPENDS\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)

@@ -18,7 +18,7 @@ Example values:
 
 ::
 
-  $(Configuration)     = Visual Studio 12 and above
+  $(Configuration)     = Visual Studio
   $(CONFIGURATION)     = Xcode
   .                    = Make-based tools
   .                    = Ninja

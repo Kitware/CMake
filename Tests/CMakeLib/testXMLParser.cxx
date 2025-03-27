@@ -1,8 +1,8 @@
-#include "testXMLParser.h"
-
 #include <iostream>
 
 #include "cmXMLParser.h"
+
+#include "testConfig.h"
 
 int testXMLParser(int /*unused*/, char* /*unused*/[])
 {

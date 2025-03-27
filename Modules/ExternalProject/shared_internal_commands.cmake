@@ -898,41 +898,33 @@ function(_ep_add_download_command name)
       message(FATAL_ERROR "error: could not find svn for checkout of ${name}")
     endif()
 
-    set(svn_revision   "${_EP_SVN_REVISION}")
-    set(svn_username   "${_EP_SVN_USERNAME}")
-    set(svn_password   "${_EP_SVN_PASSWORD}")
     set(svn_trust_cert "${_EP_SVN_TRUST_CERT}")
     set(uses_terminal  "${_EP_USES_TERMINAL_DOWNLOAD}")
-    # The --trust-server-cert option requires --non-interactive
-    if(uses_terminal AND NOT svn_trust_cert)
-      set(svn_interactive_args "")
-    else()
-      set(svn_interactive_args "--non-interactive")
-    endif()
 
     get_filename_component(src_name "${source_dir}" NAME)
     get_filename_component(work_dir "${source_dir}" PATH)
     set(comment "Performing download step (SVN checkout) for '${name}'")
-    set(svn_user_pw_args "")
-    if(DEFINED _EP_SVN_USERNAME)
-      set(svn_user_pw_args ${svn_user_pw_args} "--username=${svn_username}")
-    endif()
-    if(DEFINED _EP_SVN_PASSWORD)
-      set(svn_user_pw_args ${svn_user_pw_args} "--password=${svn_password}")
-    endif()
-    if(svn_trust_cert)
-      set(svn_trust_cert_args --trust-server-cert)
-    endif()
     set(cmd
       ${Subversion_SVN_EXECUTABLE}
       co
       ${svn_repository}
-      ${svn_revision}
-      ${svn_interactive_args}
-      ${svn_trust_cert_args}
-      ${svn_user_pw_args}
-      ${src_name}
+      ${_EP_SVN_REVISION}
     )
+    # The --trust-server-cert option requires --non-interactive
+    if(svn_trust_cert OR NOT uses_terminal)
+      list(APPEND cmd "--non-interactive")
+    endif()
+    if(svn_trust_cert)
+      list(APPEND cmd "--trust-server-cert")
+    endif()
+    if(DEFINED _EP_SVN_USERNAME)
+      list(APPEND cmd "--username=${_EP_SVN_USERNAME}")
+    endif()
+    if(DEFINED _EP_SVN_PASSWORD)
+      list(APPEND cmd "--password=${_EP_SVN_PASSWORD}")
+    endif()
+    list(APPEND cmd ${src_name})
+
     if(arg_SCRIPT_FILE)
       _ep_add_script_commands(
         step_script_contents
@@ -1446,7 +1438,9 @@ function(_ep_add_update_command name)
   _ep_get_update_disconnected(update_disconnected ${name})
 
   set(work_dir)
+  set(cmd_disconnected)
   set(comment)
+  set(comment_disconnected)
   set(always)
   set(file_deps)
 
@@ -1485,35 +1479,26 @@ function(_ep_add_update_command name)
     endif()
     set(work_dir ${source_dir})
     set(comment "Performing update step (SVN update) for '${name}'")
-    set(svn_revision   "${_EP_SVN_REVISION}")
-    set(svn_username   "${_EP_SVN_USERNAME}")
-    set(svn_password   "${_EP_SVN_PASSWORD}")
     set(svn_trust_cert "${_EP_SVN_TRUST_CERT}")
     set(uses_terminal  "${_EP_USES_TERMINAL_UPDATE}")
-    # The --trust-server-cert option requires --non-interactive
-    if(uses_terminal AND NOT svn_trust_cert)
-      set(svn_interactive_args "")
-    else()
-      set(svn_interactive_args "--non-interactive")
-    endif()
-    set(svn_user_pw_args "")
-    if(DEFINED _EP_SVN_USERNAME)
-      set(svn_user_pw_args ${svn_user_pw_args} "--username=${svn_username}")
-    endif()
-    if(DEFINED _EP_SVN_PASSWORD)
-      set(svn_user_pw_args ${svn_user_pw_args} "--password=${svn_password}")
-    endif()
-    if(svn_trust_cert)
-      set(svn_trust_cert_args --trust-server-cert)
-    endif()
     set(cmd
       ${Subversion_SVN_EXECUTABLE}
       up
-      ${svn_revision}
-      ${svn_interactive_args}
-      ${svn_trust_cert_args}
-      ${svn_user_pw_args}
+      ${_EP_SVN_REVISION}
     )
+    # The --trust-server-cert option requires --non-interactive
+    if(svn_trust_cert OR NOT uses_terminal)
+      list(APPEND cmd "--non-interactive")
+    endif()
+    if(svn_trust_cert)
+      list(APPEND cmd --trust-server-cert)
+    endif()
+    if(DEFINED _EP_SVN_USERNAME)
+      list(APPEND cmd "--username=${_EP_SVN_USERNAME}")
+    endif()
+    if(DEFINED _EP_SVN_PASSWORD)
+      list(APPEND cmd "--password=${_EP_SVN_PASSWORD}")
+    endif()
     set(always 1)
 
     if(arg_SCRIPT_FILE)

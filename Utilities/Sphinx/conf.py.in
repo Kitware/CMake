@@ -103,3 +103,5 @@ linkcheck_allowed_redirects = {
     r'https://openjdk\.java\.net/jeps/313': r'https://openjdk\.org:443/jeps/313',
     r'https://www\.sphinx-doc\.org': r'https://www\.sphinx-doc\.org/en/master/',
 }
+
+linkcheck_report_timeouts_as_broken = False

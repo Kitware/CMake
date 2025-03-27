@@ -41,6 +41,8 @@ the way the check is run:
 
 .. include:: /module/CMAKE_REQUIRED_LIBRARIES.txt
 
+.. include:: /module/CMAKE_REQUIRED_LINK_DIRECTORIES.txt
+
 .. include:: /module/CMAKE_REQUIRED_QUIET.txt
 
 For example:
@@ -121,6 +123,13 @@ macro(__CHECK_SYMBOL_EXISTS_IMPL SOURCEFILE SYMBOL FILES VARIABLE)
     else()
       set(CMAKE_SYMBOL_EXISTS_INCLUDES)
     endif()
+
+    if(CMAKE_REQUIRED_LINK_DIRECTORIES)
+      set(_CSE_LINK_DIRECTORIES
+        "-DLINK_DIRECTORIES:STRING=${CMAKE_REQUIRED_LINK_DIRECTORIES}")
+    else()
+      set(_CSE_LINK_DIRECTORIES)
+    endif()
     foreach(FILE ${FILES})
       string(APPEND _CSE_SOURCE
         "#include <${FILE}>\n")
@@ -159,7 +168,9 @@ int main(int argc, char** argv)
       CMAKE_FLAGS
       -DCOMPILE_DEFINITIONS:STRING=${MACRO_CHECK_SYMBOL_EXISTS_FLAGS}
       "${CMAKE_SYMBOL_EXISTS_INCLUDES}"
+      "${_CSE_LINK_DIRECTORIES}"
       )
+    unset(_CSE_LINK_DIRECTORIES)
     if(${VARIABLE})
       if(NOT CMAKE_REQUIRED_QUIET)
         message(CHECK_PASS "found")

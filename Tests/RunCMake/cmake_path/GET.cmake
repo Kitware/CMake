@@ -245,4 +245,71 @@ if (NOT output STREQUAL ".file")
   list (APPEND errors "STEM returns bad data: ${output}")
 endif()
 
+##################################################
+## tests for subcommands' handling of "." and ".."
+##################################################
+if (WIN32)
+  set (dot "C:/aa/bb/.")
+  set (dotdot "C:/ee/ff/..")
+else()
+  set (dot "/aa/bb/.")
+  set (dotdot "/ee/ff/..")
+endif()
+
+cmake_path(GET dot FILENAME dot_out)
+cmake_path(GET dotdot FILENAME dotdot_out)
+
+if (NOT dot_out STREQUAL ".")
+  list(APPEND errors "FILENAME returns bad data for '<path>/.': ${dot_out}")
+endif()
+if (NOT dotdot_out STREQUAL "..")
+  list(APPEND errors "FILENAME returns bad data for '<path>/..': ${dotdot_out}")
+endif()
+
+cmake_path(GET dot STEM dot_out)
+cmake_path(GET dotdot STEM dotdot_out)
+
+if (NOT dot_out STREQUAL ".")
+  list(APPEND errors "STEM returns bad data for '<path>/.': ${dot_out}")
+endif()
+if (NOT dotdot_out STREQUAL "..")
+  list(APPEND errors "STEM returns bad data for '<path>/..': ${dotdot_out}")
+endif()
+
+cmake_path(GET dot STEM LAST_ONLY dot_out)
+cmake_path(GET dotdot STEM LAST_ONLY dotdot_out)
+
+if (NOT dot_out STREQUAL ".")
+  list(APPEND errors
+    "STEM LAST_ONLY returns bad data for '<path>/.': ${dot_out}")
+endif()
+if (NOT dotdot_out STREQUAL "..")
+  list(APPEND errors
+    "STEM LAST_ONLY returns bad data for '<path>/..': ${dotdot_out}")
+endif()
+
+cmake_path(GET dot EXTENSION dot_out)
+cmake_path(GET dotdot EXTENSION dotdot_out)
+
+if (NOT dot_out STREQUAL "")
+  list(APPEND errors
+    "EXTENSION returns bad data for '<path>/.': ${dot_out}")
+endif()
+if (NOT dotdot_out STREQUAL "")
+  list(APPEND errors
+    "EXTENSION returns bad data for '<path>/..': ${dotdot_out}")
+endif()
+
+cmake_path(GET dot EXTENSION LAST_ONLY dot_out)
+cmake_path(GET dotdot EXTENSION LAST_ONLY dotdot_out)
+
+if (NOT dot_out STREQUAL "")
+  list(APPEND errors
+    "EXTENSION LAST_ONLY returns bad data for '<path>/.': ${dot_out}")
+endif()
+if (NOT dotdot_out STREQUAL "")
+  list(APPEND errors
+    "EXTENSION LAST_ONLY returns bad data for '<path>/..': ${dotdot_out}")
+endif()
+
 check_errors (GET ${errors})

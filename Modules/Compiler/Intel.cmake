@@ -30,6 +30,9 @@ else()
     string(APPEND CMAKE_${lang}_FLAGS_RELEASE_INIT " -O3")
     string(APPEND CMAKE_${lang}_FLAGS_RELWITHDEBINFO_INIT " -O2 -g")
 
+    # Compiler + IPO does not recognize --dependency-file link option
+    set(CMAKE_${lang}_LINKER_DEPFILE_SUPPORTED FALSE)
+
     if("${lang}" STREQUAL "CXX")
       set(CMAKE_${lang}_COMPILER_PREDEFINES_COMMAND "${CMAKE_${lang}_COMPILER}")
       if(CMAKE_${lang}_COMPILER_ARG1)

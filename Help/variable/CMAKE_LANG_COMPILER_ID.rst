@@ -32,6 +32,7 @@ Value                           Name
 ``Intel``                       Intel Classic Compiler
 ``IntelLLVM``                   `Intel LLVM-Based Compiler`_
 ``LCC``                         MCST Elbrus C/C++/Fortran Compiler
+``LFortran``                    LFortran Fortran Compiler
 ``MSVC``                        `Microsoft Visual Studio`_
 ``NVHPC``                       `NVIDIA HPC Compiler`_
 ``NVIDIA``                      `NVIDIA CUDA Compiler`_
@@ -40,7 +41,7 @@ Value                           Name
 ``PGI``                         The Portland Group
 ``PathScale``                   PathScale
 ``SDCC``                        `Small Device C Compiler`_
-``SunPro``                      Oracle Solaris Studio
+``SunPro``                      Oracle Developer Studio
 ``Tasking``                     `Tasking Compiler Toolsets`_
 ``TI``                          Texas Instruments
 ``TIClang``                     `Texas Instruments Clang-based Compilers`_

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.10)
 project(VSWinStorePhone)
 if(MSVC_VERSION GREATER 1899)
   set(COMPILER_VERSION "14")

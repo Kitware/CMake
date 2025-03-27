@@ -749,8 +749,7 @@ inline cmCMakePath::iterator cmCMakePath::end() const
 inline bool operator==(const cmCMakePath::iterator& lhs,
                        const cmCMakePath::iterator& rhs)
 {
-  return lhs.Path == rhs.Path && lhs.Path != nullptr &&
-    lhs.Iterator == rhs.Iterator;
+  return lhs.Path == rhs.Path && lhs.Path && lhs.Iterator == rhs.Iterator;
 }
 
 inline bool operator!=(const cmCMakePath::iterator& lhs,

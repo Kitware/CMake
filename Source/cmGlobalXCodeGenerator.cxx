@@ -3994,7 +3994,6 @@ void cmGlobalXCodeGenerator::AddDependAndLinkInformation(cmXCodeObject* target)
     {
       BuildObjectListOrString libSearchPaths(this, true);
 
-      std::string linkDirs;
       for (auto const& libDir : cli->GetDirectories()) {
         if (!libDir.empty() && libDir != "/usr/lib"_s) {
           cmPolicies::PolicyStatus cmp0142 =
@@ -4012,6 +4011,16 @@ void cmGlobalXCodeGenerator::AddDependAndLinkInformation(cmXCodeObject* target)
       for (auto& libDir : linkSearchPaths) {
         libSearchPaths.Add(this->XCodeEscapePath(libDir));
       }
+
+      // Add toolchain specified language link directories
+      std::string const& linkDirsString =
+        this->Makefiles.front()->GetSafeDefinition(cmStrCat(
+          "CMAKE_", cli->GetLinkLanguage(), "_STANDARD_LINK_DIRECTORIES"));
+
+      for (const auto& libDir : cmList(linkDirsString)) {
+        libSearchPaths.Add(this->XCodeEscapePath(libDir));
+      }
+
       if (!libSearchPaths.IsEmpty()) {
         this->AppendBuildSettingAttribute(target, "LIBRARY_SEARCH_PATHS",
                                           libSearchPaths.CreateList(),

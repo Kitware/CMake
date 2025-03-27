@@ -525,7 +525,34 @@ class cmMakefile;
          3, 30, 0, cmPolicies::WARN)                                          \
   SELECT(POLICY, CMP0170,                                                     \
          "FETCHCONTENT_FULLY_DISCONNECTED requirements are enforced.", 3, 30, \
-         0, cmPolicies::WARN)
+         0, cmPolicies::WARN)                                                 \
+  SELECT(POLICY, CMP0171, "'codegen' is a reserved target name.", 3, 31, 0,   \
+         cmPolicies::WARN)                                                    \
+  SELECT(POLICY, CMP0172,                                                     \
+         "The CPack module enables per-machine installation by default in "   \
+         "the CPack WIX Generator.",                                          \
+         3, 31, 0, cmPolicies::WARN)                                          \
+  SELECT(POLICY, CMP0173, "The CMakeFindFrameworks module is removed.", 3,    \
+         31, 0, cmPolicies::WARN)                                             \
+  SELECT(POLICY, CMP0174,                                                     \
+         "cmake_parse_arguments(PARSE_ARGV) defines a variable for an empty " \
+         "string after a single-value keyword.",                              \
+         3, 31, 0, cmPolicies::WARN)                                          \
+  SELECT(POLICY, CMP0175, "add_custom_command() rejects invalid arguments.",  \
+         3, 31, 0, cmPolicies::WARN)                                          \
+  SELECT(POLICY, CMP0176, "execute_process() ENCODING is UTF-8 by default.",  \
+         3, 31, 0, cmPolicies::WARN)                                          \
+  SELECT(POLICY, CMP0177, "install() DESTINATION paths are normalized.", 3,   \
+         31, 0, cmPolicies::WARN)                                             \
+  SELECT(POLICY, CMP0178, "Test command lines preserve empty arguments.", 3,  \
+         31, 0, cmPolicies::WARN)                                             \
+  SELECT(POLICY, CMP0179,                                                     \
+         "De-duplication of static libraries on link lines keeps first "      \
+         "occurrence.",                                                       \
+         3, 31, 0, cmPolicies::WARN)                                          \
+  SELECT(POLICY, CMP0180,                                                     \
+         "project() always sets <PROJECT-NAME>_* as normal variables.", 3,    \
+         31, 0, cmPolicies::WARN)
 
 #define CM_SELECT_ID(F, A1, A2, A3, A4, A5, A6) F(A1)
 #define CM_FOR_EACH_POLICY_ID(POLICY)                                         \
@@ -569,7 +596,8 @@ class cmMakefile;
   F(CMP0156)                                                                  \
   F(CMP0157)                                                                  \
   F(CMP0160)                                                                  \
-  F(CMP0162)
+  F(CMP0162)                                                                  \
+  F(CMP0179)
 
 #define CM_FOR_EACH_CUSTOM_COMMAND_POLICY(F)                                  \
   F(CMP0116)                                                                  \

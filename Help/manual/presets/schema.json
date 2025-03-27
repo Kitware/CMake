@@ -9,7 +9,7 @@
           "const": 1,
           "description": "A required integer representing the version of the JSON schema."
         },
-        "cmakeMinimumRequired": { "$ref": "#/definitions/cmakeMinimumRequired" },
+        "cmakeMinimumRequired": { "$ref": "#/definitions/cmakeMinimumRequiredV1" },
         "vendor": { "$ref": "#/definitions/vendor" },
         "configurePresets": { "$ref": "#/definitions/configurePresetsV1" }
       },
@@ -21,7 +21,7 @@
           "const": 2,
           "description": "A required integer representing the version of the JSON schema."
         },
-        "cmakeMinimumRequired": { "$ref": "#/definitions/cmakeMinimumRequired" },
+        "cmakeMinimumRequired": { "$ref": "#/definitions/cmakeMinimumRequiredV1" },
         "vendor": { "$ref": "#/definitions/vendor" },
         "configurePresets": { "$ref": "#/definitions/configurePresetsV1" },
         "buildPresets": { "$ref": "#/definitions/buildPresetsV2" },
@@ -35,7 +35,7 @@
           "const": 3,
           "description": "A required integer representing the version of the JSON schema."
         },
-        "cmakeMinimumRequired": { "$ref": "#/definitions/cmakeMinimumRequired" },
+        "cmakeMinimumRequired": { "$ref": "#/definitions/cmakeMinimumRequiredV1" },
         "vendor": { "$ref": "#/definitions/vendor" },
         "configurePresets": { "$ref": "#/definitions/configurePresetsV3" },
         "buildPresets": { "$ref": "#/definitions/buildPresetsV3" },
@@ -49,7 +49,7 @@
           "const": 4,
           "description": "A required integer representing the version of the JSON schema."
         },
-        "cmakeMinimumRequired": { "$ref": "#/definitions/cmakeMinimumRequired" },
+        "cmakeMinimumRequired": { "$ref": "#/definitions/cmakeMinimumRequiredV1" },
         "vendor": { "$ref": "#/definitions/vendor" },
         "configurePresets": { "$ref": "#/definitions/configurePresetsV3" },
         "buildPresets": { "$ref": "#/definitions/buildPresetsV4" },
@@ -64,7 +64,7 @@
           "const": 5,
           "description": "A required integer representing the version of the JSON schema."
         },
-        "cmakeMinimumRequired": { "$ref": "#/definitions/cmakeMinimumRequired" },
+        "cmakeMinimumRequired": { "$ref": "#/definitions/cmakeMinimumRequiredV1" },
         "vendor": { "$ref": "#/definitions/vendor" },
         "configurePresets": { "$ref": "#/definitions/configurePresetsV3" },
         "buildPresets": { "$ref": "#/definitions/buildPresetsV4" },
@@ -79,7 +79,7 @@
           "const": 6,
           "description": "A required integer representing the version of the JSON schema."
         },
-        "cmakeMinimumRequired": { "$ref": "#/definitions/cmakeMinimumRequired" },
+        "cmakeMinimumRequired": { "$ref": "#/definitions/cmakeMinimumRequiredV1" },
         "vendor": { "$ref": "#/definitions/vendor" },
         "configurePresets": { "$ref": "#/definitions/configurePresetsV3" },
         "buildPresets": { "$ref": "#/definitions/buildPresetsV4" },
@@ -96,7 +96,7 @@
           "const": 7,
           "description": "A required integer representing the version of the JSON schema."
         },
-        "cmakeMinimumRequired": { "$ref": "#/definitions/cmakeMinimumRequired" },
+        "cmakeMinimumRequired": { "$ref": "#/definitions/cmakeMinimumRequiredV1" },
         "vendor": { "$ref": "#/definitions/vendor" },
         "configurePresets": { "$ref": "#/definitions/configurePresetsV7" },
         "buildPresets": { "$ref": "#/definitions/buildPresetsV4" },
@@ -114,7 +114,7 @@
           "const": 8,
           "description": "A required integer representing the version of the JSON schema."
         },
-        "cmakeMinimumRequired": { "$ref": "#/definitions/cmakeMinimumRequired" },
+        "cmakeMinimumRequired": { "$ref": "#/definitions/cmakeMinimumRequiredV1" },
         "vendor": { "$ref": "#/definitions/vendor" },
         "configurePresets": { "$ref": "#/definitions/configurePresetsV7" },
         "buildPresets": { "$ref": "#/definitions/buildPresetsV4" },
@@ -132,13 +132,32 @@
           "const": 9,
           "description": "A required integer representing the version of the JSON schema."
         },
-        "cmakeMinimumRequired": { "$ref": "#/definitions/cmakeMinimumRequired" },
+        "cmakeMinimumRequired": { "$ref": "#/definitions/cmakeMinimumRequiredV1" },
         "vendor": { "$ref": "#/definitions/vendor" },
         "configurePresets": { "$ref": "#/definitions/configurePresetsV7" },
         "buildPresets": { "$ref": "#/definitions/buildPresetsV4" },
         "testPresets": { "$ref": "#/definitions/testPresetsV6" },
         "packagePresets": { "$ref": "#/definitions/packagePresetsV6" },
         "workflowPresets": { "$ref": "#/definitions/workflowPresetsV6" },
+        "include": { "$ref": "#/definitions/include" }
+      },
+      "additionalProperties": false
+    },
+    {
+      "properties": {
+        "$schema": { "$ref": "#/definitions/$schema" },
+        "$comment": { "$ref": "#/definitions/$comment" },
+        "version": {
+          "const": 10,
+          "description": "A required integer representing the version of the JSON schema."
+        },
+        "cmakeMinimumRequired": { "$ref": "#/definitions/cmakeMinimumRequiredV10" },
+        "vendor": { "$ref": "#/definitions/vendor" },
+        "configurePresets": { "$ref": "#/definitions/configurePresetsV10" },
+        "buildPresets": { "$ref": "#/definitions/buildPresetsV10" },
+        "testPresets": { "$ref": "#/definitions/testPresetsV10" },
+        "packagePresets": { "$ref": "#/definitions/packagePresetsV10" },
+        "workflowPresets": { "$ref": "#/definitions/workflowPresetsV10" },
         "include": { "$ref": "#/definitions/include" }
       },
       "additionalProperties": false
@@ -153,9 +172,33 @@
       "description": "The schema against which to verify this document.",
       "format": "uri-reference"
     },
-    "cmakeMinimumRequired": {
+    "$comment": {
+      "anyOf": [
+        {
+          "type": "string",
+          "description": "The single-line comment"
+        },
+        {
+          "type": "array",
+          "description": "The multi-line comment",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "description": "One line of the multi-line comment"
+          }
+        }
+      ]
+    },
+    "cmakeMinimumRequiredPropertiesV10": {
       "type": "object",
-      "description": "An optional object representing the minimum version of CMake needed to build this project.",
+      "description": "An optional object representing the minimum version of CMake needed to build this project. Available in version 10 and higher.",
+      "properties": {
+        "$comment": { "$ref": "#/definitions/$comment" }
+      }
+    },
+    "cmakeMinimumRequiredPropertiesV1": {
+      "type": "object",
+      "description": "An optional object representing the minimum version of CMake needed to build this project. Available in version 1 and higher.",
       "properties": {
         "major": {
           "type": "integer",
@@ -169,6 +212,33 @@
           "type": "integer",
           "description": "An optional integer representing the patch version."
         }
+      }
+    },
+    "cmakeMinimumRequiredV10": {
+      "type": "object",
+      "description": "An optional object representing the minimum version of CMake needed to build this project. Available in version 10 and higher.",
+      "allOf": [
+        { "$ref": "#/definitions/cmakeMinimumRequiredPropertiesV10" },
+        { "$ref": "#/definitions/cmakeMinimumRequiredPropertiesV1" }
+      ],
+      "properties": {
+        "$comment": {},
+        "major": {},
+        "minor": {},
+        "patch": {}
+      },
+      "additionalProperties": false
+    },
+    "cmakeMinimumRequiredV1": {
+      "type": "object",
+      "description": "An optional object representing the minimum version of CMake needed to build this project. Available in version 1 and higher.",
+      "allOf": [
+        { "$ref": "#/definitions/cmakeMinimumRequiredPropertiesV1" }
+      ],
+      "properties": {
+        "major": {},
+        "minor": {},
+        "patch": {}
       },
       "additionalProperties": false
     },
@@ -177,12 +247,264 @@
       "description": "An optional map containing vendor-specific information. CMake does not interpret the contents of this field except to verify that it is a map if it does exist. However, the keys should be a vendor-specific domain name followed by a /-separated path. For example, the Example IDE 1.0 could use example.com/ExampleIDE/1.0. The value of each field can be anything desired by the vendor, though will typically be a map.",
       "properties": {}
     },
-    "configurePresetsItemsV7": {
+    "configurePresetsArchitectureAsStringV1": {
+      "type": "string",
+      "description": "An optional string representing the platform for generators that support it."
+    },
+    "configurePresetsArchitectureAsObjectV10": {
+      "type": "object",
+      "description": "An optional object representing the platform for generators that support it. Available in version 10 and higher.",
+      "properties": {
+        "$comment": { "$ref": "#/definitions/$comment" }
+      }
+    },
+    "configurePresetsArchitectureAsObjectV1": {
+      "type": "object",
+      "description": "An optional object representing the platform for generators that support it. Available in version 1 and higher.",
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "An optional string representing the value."
+        },
+        "strategy": {
+          "type": "string",
+          "description": "An optional string telling CMake how to handle the field. Valid values are: \"set\" Set the respective value. This will result in an error for generators that do not support the respective field. \"external\" Do not set the value, even if the generator supports it. This is useful if, for example, a preset uses the Ninja generator, and an IDE knows how to set up the Visual C++ environment from the architecture and toolset fields. In that case, CMake will ignore the field, but the IDE can use them to set up the environment before invoking CMake.",
+          "enum": [
+            "set",
+            "external"
+          ]
+        }
+      }
+    },
+    "configurePresetsArchitectureV10": {
+      "anyOf": [
+        { "$ref": "#/definitions/configurePresetsArchitectureAsStringV1" },
+        {
+          "type": "object",
+          "description": "An optional object representing the platform for generators that support it. Available in version 10 and higher.",
+          "allOf": [
+            { "$ref": "#/definitions/configurePresetsArchitectureAsObjectV10" },
+            { "$ref": "#/definitions/configurePresetsArchitectureAsObjectV1" }
+          ],
+          "properties": {
+            "$comment": {},
+            "value": {},
+            "strategy": {}
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "configurePresetsArchitectureV1": {
+      "anyOf": [
+        { "$ref": "#/definitions/configurePresetsArchitectureAsStringV1" },
+        {
+          "type": "object",
+          "description": "An optional object representing the platform for generators that support it. Available in version 1 and higher.",
+          "allOf": [
+            { "$ref": "#/definitions/configurePresetsArchitectureAsObjectV1" }
+          ],
+          "properties": {
+            "value": {},
+            "strategy": {}
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "configurePresetsToolsetAsStringV1": {
+      "type": "string",
+      "description": "An optional string representing the toolset for generators that support it."
+    },
+    "configurePresetsToolsetAsObjectV10": {
+      "type": "object",
+      "description": "An optional object representing the toolset for generators that support it. Available in version 10 and higher.",
+      "properties": {
+        "$comment": { "$ref": "#/definitions/$comment" }
+      }
+    },
+    "configurePresetsToolsetAsObjectV1": {
+      "type": "object",
+      "description": "An optional object representing the toolset for generators that support it. Available in version 1 and higher.",
+      "properties": {
+        "value": {
+          "type": "string",
+          "description": "An optional string representing the value."
+        },
+        "strategy": {
+          "type": "string",
+          "description": "An optional string telling CMake how to handle the field. Valid values are: \"set\" Set the respective value. This will result in an error for generators that do not support the respective field. \"external\" Do not set the value, even if the generator supports it. This is useful if, for example, a preset uses the Ninja generator, and an IDE knows how to set up the Visual C++ environment from the architecture and toolset fields. In that case, CMake will ignore the field, but the IDE can use them to set up the environment before invoking CMake.",
+          "enum": [
+            "set",
+            "external"
+          ]
+        }
+      }
+    },
+    "configurePresetsToolsetV10": {
+      "anyOf": [
+        { "$ref": "#/definitions/configurePresetsToolsetAsStringV1" },
+        {
+          "type": "object",
+          "description": "An optional object representing the toolset for generators that support it. Available in version 10 and higher.",
+          "allOf": [
+            { "$ref": "#/definitions/configurePresetsToolsetAsObjectV10" },
+            { "$ref": "#/definitions/configurePresetsToolsetAsObjectV1" }
+          ],
+          "properties": {
+            "$comment": {},
+            "value": {},
+            "strategy": {}
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "configurePresetsToolsetV1": {
+      "anyOf": [
+        { "$ref": "#/definitions/configurePresetsToolsetAsStringV1" },
+        {
+          "type": "object",
+          "description": "An optional object representing the toolset for generators that support it. Available in version 1 and higher.",
+          "allOf": [
+            { "$ref": "#/definitions/configurePresetsToolsetAsObjectV1" }
+          ],
+          "properties": {
+            "value": {},
+            "strategy": {}
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "configurePresetsCacheVariablesAdditionalPropertiesAsNullV1": {
+      "type": "null",
+      "description": "Setting a variable to null causes it to not be set, even if a value was inherited from another preset."
+    },
+    "configurePresetsCacheVariablesAdditionalPropertiesAsBooleanV1": {
+      "type": "boolean",
+      "description": "A boolean representing the value of the variable. Equivalent to \"TRUE\" or \"FALSE\"."
+    },
+    "configurePresetsCacheVariablesAdditionalPropertiesAsStringV1": {
+      "type": "string",
+      "description": "A string representing the value of the variable (which supports macro expansion)."
+    },
+    "configurePresetsCacheVariablesAdditionalPropertiesAsObjectV10": {
+      "type": "object",
+      "description": "An optional object representing the cache variables for generators that support it. Available in version 10 and higher.",
+      "properties": {
+        "$comment": { "$ref": "#/definitions/$comment" }
+      }
+    },
+    "configurePresetsCacheVariablesAdditionalPropertiesAsObjectV1": {
+      "type": "object",
+      "description": "An optional object representing the cache variables for generators that support it. Available in version 1 and higher.",
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "An optional string representing the type of the variable. It should be BOOL, FILEPATH, PATH, STRING, or INTERNAL."
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "boolean",
+              "description": "A required boolean representing the value of the variable. Equivalent to \"TRUE\" or \"FALSE\"."
+            },
+            {
+              "type": "string",
+              "description": "A required string representing the value of the variable. This field supports macro expansion."
+            }
+          ]
+        }
+      }
+    },
+    "configurePresetsCacheVariablesAdditionalPropertiesV10": {
+      "anyOf": [
+        { "$ref": "#/definitions/configurePresetsCacheVariablesAdditionalPropertiesAsNullV1" },
+        { "$ref": "#/definitions/configurePresetsCacheVariablesAdditionalPropertiesAsBooleanV1" },
+        { "$ref": "#/definitions/configurePresetsCacheVariablesAdditionalPropertiesAsStringV1" },
+        {
+          "type": "object",
+          "description": "An object representing the type and value of the variable. Available in version 10 and higher.",
+          "allOf": [
+            { "$ref": "#/definitions/configurePresetsCacheVariablesAdditionalPropertiesAsObjectV10" },
+            { "$ref": "#/definitions/configurePresetsCacheVariablesAdditionalPropertiesAsObjectV1" }
+          ],
+          "properties": {
+            "$comment": {},
+            "type": {},
+            "value": {}
+          },
+          "required": [
+            "value"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "configurePresetsCacheVariablesAdditionalPropertiesV1": {
+      "anyOf": [
+        { "$ref": "#/definitions/configurePresetsCacheVariablesAdditionalPropertiesAsNullV1" },
+        { "$ref": "#/definitions/configurePresetsCacheVariablesAdditionalPropertiesAsBooleanV1" },
+        { "$ref": "#/definitions/configurePresetsCacheVariablesAdditionalPropertiesAsStringV1" },
+        {
+          "type": "object",
+          "description": "An object representing the type and value of the variable. Available in version 1 and higher.",
+          "allOf": [
+            { "$ref": "#/definitions/configurePresetsCacheVariablesAdditionalPropertiesAsObjectV1" }
+          ],
+          "properties": {
+            "type": {},
+            "value": {}
+          },
+          "required": [
+            "value"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "configurePresetsItemsV10": {
       "type": "array",
-      "description": "A configure preset object.",
+      "description": "An optional array of configure preset objects. Available in version 10 and higher.",
       "items": {
         "type": "object",
-        "description": "A configure preset object.",
+        "description": "A configure preset object. Available in version 10 and higher.",
+        "properties": {
+          "$comment": { "$ref": "#/definitions/$comment" },
+          "warnings": {
+            "properties": {
+              "$comment": { "$ref": "#/definitions/$comment" }
+            }
+          },
+          "errors": {
+            "properties": {
+              "$comment": { "$ref": "#/definitions/$comment" }
+            }
+          },
+          "debug": {
+            "properties": {
+              "$comment": { "$ref": "#/definitions/$comment" }
+            }
+          },
+          "trace": {
+            "properties": {
+              "$comment": { "$ref": "#/definitions/$comment" }
+            }
+          },
+          "graphviz": {
+            "type": "string",
+            "description": "An optional string specifying the path to graphviz dot file. Available in version 10 and higher."
+          }
+        }
+      }
+    },
+    "configurePresetsItemsV7": {
+      "type": "array",
+      "description": "An optional array of configure preset objects. Available in version 7 and higher.",
+      "items": {
+        "type": "object",
+        "description": "A configure preset object. Available in version 7 and higher.",
         "properties": {
           "trace": {
             "type": "object",
@@ -224,18 +546,17 @@
                 "type": "string",
                 "description": "An optional string specifying a path to a trace output file."
               }
-            },
-            "additionalProperties": false
+            }
           }
         }
       }
     },
     "configurePresetsItemsV3": {
       "type": "array",
-      "description": "A configure preset object.",
+      "description": "An optional array of configure preset objects. Available in version 3 and higher.",
       "items": {
         "type": "object",
-        "description": "A configure preset object.",
+        "description": "A configure preset object. Available in version 3 and higher.",
         "properties": {
           "binaryDir": {
             "type": "string",
@@ -252,17 +573,16 @@
           "installDir": {
             "type": "string",
             "description": "An optional string representing the path to the installation directory. This field supports macro expansion. If a relative path is specified, it is calculated relative to the source directory."
-          },
-          "condition": { "$ref": "#/definitions/topCondition" }
+          }
         }
       }
     },
     "configurePresetsItemsV1": {
       "type": "array",
-      "description": "An optional array of configure preset objects.",
+      "description": "An optional array of configure preset objects. Available in version 1 and higher.",
       "items": {
         "type": "object",
-        "description": "A configure preset object.",
+        "description": "A configure preset object. Available in version 1 and higher.",
         "properties": {
           "name": {
             "type": "string",
@@ -308,60 +628,6 @@
             "type": "string",
             "description": "An optional string representing the generator to use for the preset. If generator is not specified, it must be inherited from the inherits preset (unless this preset is hidden). Note that for Visual Studio generators, unlike in the command line -G argument, you cannot include the platform name in the generator name. Use the architecture field instead."
           },
-          "architecture": {
-            "anyOf": [
-              {
-                "type": "string",
-                "description": "An optional string representing the platform for generators that support it."
-              },
-              {
-                "type": "object",
-                "description": "An optional object representing the platform for generators that support it.",
-                "properties": {
-                  "value": {
-                    "type": "string",
-                    "description": "An optional string representing the value."
-                  },
-                  "strategy": {
-                    "type": "string",
-                    "description": "An optional string telling CMake how to handle the field. Valid values are: \"set\" Set the respective value. This will result in an error for generators that do not support the respective field. \"external\" Do not set the value, even if the generator supports it. This is useful if, for example, a preset uses the Ninja generator, and an IDE knows how to set up the Visual C++ environment from the architecture and toolset fields. In that case, CMake will ignore the field, but the IDE can use them to set up the environment before invoking CMake.",
-                    "enum": [
-                      "set",
-                      "external"
-                    ]
-                  }
-                },
-                "additionalProperties": false
-              }
-            ]
-          },
-          "toolset": {
-            "anyOf": [
-              {
-                "type": "string",
-                "description": "An optional string representing the toolset for generators that support it."
-              },
-              {
-                "type": "object",
-                "description": "An optional object representing the toolset for generators that support it.",
-                "properties": {
-                  "value": {
-                    "type": "string",
-                    "description": "An optional string representing the value."
-                  },
-                  "strategy": {
-                    "type": "string",
-                    "description": "An optional string telling CMake how to handle the field. Valid values are: \"set\" Set the respective value. This will result in an error for generators that do not support the respective field. \"external\" Do not set the value, even if the generator supports it. This is useful if, for example, a preset uses the Ninja generator, and an IDE knows how to set up the Visual C++ environment from the architecture and toolset fields. In that case, CMake will ignore the field, but the IDE can use them to set up the environment before invoking CMake.",
-                    "enum": [
-                      "set",
-                      "external"
-                    ]
-                  }
-                },
-                "additionalProperties": false
-              }
-            ]
-          },
           "binaryDir": {
             "type": "string",
             "description": "An optional string representing the path to the output binary directory. This field supports macro expansion. If a relative path is specified, it is calculated relative to the source directory. If binaryDir is not specified, it must be inherited from the inherits preset (unless this preset is hidden)."
@@ -374,48 +640,6 @@
             "type": "object",
             "description": "An optional map of cache variables. The key is the variable name (which must not be an empty string). Cache variables are inherited through the inherits field, and the preset's variables will be the union of its own cacheVariables and the cacheVariables from all its parents. If multiple presets in this union define the same variable, the standard rules of inherits are applied.",
             "properties": {},
-            "additionalProperties": {
-              "anyOf": [
-                {
-                  "type": "null",
-                  "description": "Setting a variable to null causes it to not be set, even if a value was inherited from another preset."
-                },
-                {
-                  "type": "boolean",
-                  "description": "A boolean representing the value of the variable. Equivalent to \"TRUE\" or \"FALSE\"."
-                },
-                {
-                  "type": "string",
-                  "description": "A string representing the value of the variable (which supports macro expansion)."
-                },
-                {
-                  "type": "object",
-                  "description": "An object representing the type and value of the variable.",
-                  "properties": {
-                    "type": {
-                      "type": "string",
-                      "description": "An optional string representing the type of the variable. It should be BOOL, FILEPATH, PATH, STRING, or INTERNAL."
-                    },
-                    "value": {
-                      "anyOf": [
-                        {
-                          "type": "boolean",
-                          "description": "A required boolean representing the value of the variable. Equivalent to \"TRUE\" or \"FALSE\"."
-                        },
-                        {
-                          "type": "string",
-                          "description": "A required string representing the value of the variable. This field supports macro expansion."
-                        }
-                      ]
-                    }
-                  },
-                  "required": [
-                    "value"
-                  ],
-                  "additionalProperties": false
-                }
-              ]
-            },
             "propertyNames": {
               "pattern": "^.+$"
             }
@@ -464,8 +688,7 @@
                 "type": "boolean",
                 "description": "An optional boolean. Setting this to true is equivalent to passing --check-system-vars on the command line."
               }
-            },
-            "additionalProperties": false
+            }
           },
           "errors": {
             "type": "object",
@@ -479,8 +702,7 @@
                 "type": "boolean",
                 "description": "An optional boolean. Equivalent to passing -Werror=deprecated or -Wno-error=deprecated on the command line. This may not be set to true if warnings.deprecated is set to false."
               }
-            },
-            "additionalProperties": false
+            }
           },
           "debug": {
             "type": "object",
@@ -498,19 +720,94 @@
                 "type": "boolean",
                 "description": "An optional boolean. Setting this to true is equivalent to passing --debug-find on the command line."
               }
-            },
-            "additionalProperties": false
+            }
           }
         }
       }
     },
+    "configurePresetsV10": {
+      "type": "array",
+      "description": "An optional array of configure preset objects. Available in version 10 and higher.",
+      "allOf": [
+        { "$ref": "#/definitions/configurePresetsItemsV10" },
+        { "$ref": "#/definitions/configurePresetsItemsV7" },
+        { "$ref": "#/definitions/configurePresetsItemsV3" },
+        { "$ref": "#/definitions/configurePresetsItemsV1" }
+      ],
+      "items": {
+        "properties": {
+          "$comment": {},
+          "name": {},
+          "hidden": {},
+          "inherits": {},
+          "vendor": {},
+          "displayName": {},
+          "description": {},
+          "generator": {},
+          "architecture": { "$ref": "#/definitions/configurePresetsArchitectureV10" },
+          "toolset": { "$ref": "#/definitions/configurePresetsToolsetV10" },
+          "toolchainFile": {},
+          "graphviz": {},
+          "binaryDir": {},
+          "installDir": {},
+          "cmakeExecutable": {},
+          "cacheVariables": {
+            "additionalProperties": { "$ref": "#/definitions/configurePresetsCacheVariablesAdditionalPropertiesV10" }
+          },
+          "environment": {},
+          "warnings": {
+            "properties": {
+              "$comment": {},
+              "dev": {},
+              "deprecated": {},
+              "uninitialized": {},
+              "unusedCli": {},
+              "systemVars": {}
+            },
+            "additionalProperties": false
+          },
+          "errors": {
+            "properties": {
+              "$comment": {},
+              "dev": {},
+              "deprecated": {}
+            },
+            "additionalProperties": false
+          },
+          "debug": {
+            "properties": {
+              "$comment": {},
+              "output": {},
+              "tryCompile": {},
+              "find": {}
+            },
+            "additionalProperties": false
+          },
+          "condition": { "$ref": "#/definitions/topConditionV10" },
+          "trace": {
+            "properties": {
+              "$comment": {},
+              "mode": {},
+              "format": {},
+              "source": {},
+              "redirect": {}
+            },
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "additionalProperties": false
+      }
+    },
     "configurePresetsV7": {
       "type": "array",
-      "description": "An optional array of configure preset objects.",
+      "description": "An optional array of configure preset objects. Available in version 7 and higher.",
       "allOf": [
-        { "$ref": "#/definitions/configurePresetsItemsV1" },
+        { "$ref": "#/definitions/configurePresetsItemsV7" },
         { "$ref": "#/definitions/configurePresetsItemsV3" },
-        { "$ref": "#/definitions/configurePresetsItemsV7" }
+        { "$ref": "#/definitions/configurePresetsItemsV1" }
       ],
       "items": {
         "properties": {
@@ -521,19 +818,51 @@
           "displayName": {},
           "description": {},
           "generator": {},
-          "architecture": {},
-          "toolset": {},
+          "architecture": { "$ref": "#/definitions/configurePresetsArchitectureV1" },
+          "toolset": { "$ref": "#/definitions/configurePresetsToolsetV1" },
           "toolchainFile": {},
           "binaryDir": {},
           "installDir": {},
           "cmakeExecutable": {},
-          "cacheVariables": {},
+          "cacheVariables": {
+            "additionalProperties": { "$ref": "#/definitions/configurePresetsCacheVariablesAdditionalPropertiesV1" }
+          },
           "environment": {},
-          "warnings": {},
-          "errors": {},
-          "debug": {},
-          "condition": {},
-          "trace": {}
+          "warnings": {
+            "properties": {
+              "dev": {},
+              "deprecated": {},
+              "uninitialized": {},
+              "unusedCli": {},
+              "systemVars": {}
+            },
+            "additionalProperties": false
+          },
+          "errors": {
+            "properties": {
+              "dev": {},
+              "deprecated": {}
+            },
+            "additionalProperties": false
+          },
+          "debug": {
+            "properties": {
+              "output": {},
+              "tryCompile": {},
+              "find": {}
+            },
+            "additionalProperties": false
+          },
+          "condition": { "$ref": "#/definitions/topConditionV3" },
+          "trace": {
+            "properties": {
+              "mode": {},
+              "format": {},
+              "source": {},
+              "redirect": {}
+            },
+            "additionalProperties": false
+          }
         },
         "required": [
           "name"
@@ -543,10 +872,10 @@
     },
     "configurePresetsV3": {
       "type": "array",
-      "description": "An optional array of configure preset objects.",
+      "description": "An optional array of configure preset objects. Available in version 3 and higher.",
       "allOf": [
-        { "$ref": "#/definitions/configurePresetsItemsV1" },
-        { "$ref": "#/definitions/configurePresetsItemsV3" }
+        { "$ref": "#/definitions/configurePresetsItemsV3" },
+        { "$ref": "#/definitions/configurePresetsItemsV1" }
       ],
       "items": {
         "properties": {
@@ -557,18 +886,42 @@
           "displayName": {},
           "description": {},
           "generator": {},
-          "architecture": {},
-          "toolset": {},
+          "architecture": { "$ref": "#/definitions/configurePresetsArchitectureV1" },
+          "toolset": { "$ref": "#/definitions/configurePresetsToolsetV1" },
           "toolchainFile": {},
           "binaryDir": {},
           "installDir": {},
           "cmakeExecutable": {},
-          "cacheVariables": {},
+          "cacheVariables": {
+            "additionalProperties": { "$ref": "#/definitions/configurePresetsCacheVariablesAdditionalPropertiesV1" }
+          },
           "environment": {},
-          "warnings": {},
-          "errors": {},
-          "debug": {},
-          "condition": {}
+          "warnings": {
+            "properties": {
+              "dev": {},
+              "deprecated": {},
+              "uninitialized": {},
+              "unusedCli": {},
+              "systemVars": {}
+            },
+            "additionalProperties": false
+          },
+          "errors": {
+            "properties": {
+              "dev": {},
+              "deprecated": {}
+            },
+            "additionalProperties": false
+          },
+          "debug": {
+            "properties": {
+              "output": {},
+              "tryCompile": {},
+              "find": {}
+            },
+            "additionalProperties": false
+          },
+          "condition": { "$ref": "#/definitions/topConditionV3" }
         },
         "required": [
           "name"
@@ -578,7 +931,7 @@
     },
     "configurePresetsV1": {
       "type": "array",
-      "description": "An optional array of configure preset objects.",
+      "description": "An optional array of configure preset objects. Available in version 1 and higher.",
       "allOf": [
         { "$ref": "#/definitions/configurePresetsItemsV1" }
       ],
@@ -591,20 +944,54 @@
           "displayName": {},
           "description": {},
           "generator": {},
-          "architecture": {},
-          "toolset": {},
+          "architecture": { "$ref": "#/definitions/configurePresetsArchitectureV1" },
+          "toolset": { "$ref": "#/definitions/configurePresetsToolsetV1" },
           "binaryDir": {},
           "cmakeExecutable": {},
-          "cacheVariables": {},
+          "cacheVariables": {
+            "additionalProperties": { "$ref": "#/definitions/configurePresetsCacheVariablesAdditionalPropertiesV1" }
+          },
           "environment": {},
-          "warnings": {},
-          "errors": {},
-          "debug": {}
+          "warnings": {
+            "properties": {
+              "dev": {},
+              "deprecated": {},
+              "uninitialized": {},
+              "unusedCli": {},
+              "systemVars": {}
+            },
+            "additionalProperties": false
+          },
+          "errors": {
+            "properties": {
+              "dev": {},
+              "deprecated": {}
+            },
+            "additionalProperties": false
+          },
+          "debug": {
+            "properties": {
+              "output": {},
+              "tryCompile": {},
+              "find": {}
+            },
+            "additionalProperties": false
+          }
         },
         "required": [
           "name"
         ],
         "additionalProperties": false
+      }
+    },
+    "buildPresetsItemsV10": {
+      "type": "array",
+      "description": "An optional array of build preset objects. Used to specify arguments to cmake --build. Available in version 10 and higher.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "$comment": { "$ref": "#/definitions/$comment" }
+        }
       }
     },
     "buildPresetsItemsV4": {
@@ -625,13 +1012,7 @@
     },
     "buildPresetsItemsV3": {
       "type": "array",
-      "description": "An optional array of build preset objects. Used to specify arguments to cmake --build. Available in version 3 and higher.",
-      "items": {
-        "type": "object",
-        "properties": {
-          "condition": { "$ref": "#/definitions/topCondition" }
-        }
-      }
+      "description": "An optional array of build preset objects. Used to specify arguments to cmake --build. Available in version 3 and higher."
     },
     "buildPresetsItemsV2": {
       "type": "array",
@@ -748,10 +1129,44 @@
               "description": "An optional string representing an option to pass after -- on the command line."
             }
           }
+        }
+      }
+    },
+    "buildPresetsV10": {
+      "type": "array",
+      "description": "An optional array of build preset objects. Used to specify arguments to cmake --build. Available in version 10 and higher.",
+      "allOf": [
+        { "$ref": "#/definitions/buildPresetsItemsV10" },
+        { "$ref": "#/definitions/buildPresetsItemsV4" },
+        { "$ref": "#/definitions/buildPresetsItemsV3" },
+        { "$ref": "#/definitions/buildPresetsItemsV2" }
+      ],
+      "items": {
+        "type": "object",
+        "properties": {
+          "$comment": {},
+          "name": {},
+          "hidden": {},
+          "inherits": {},
+          "configurePreset": {},
+          "vendor": {},
+          "displayName": {},
+          "description": {},
+          "inheritConfigureEnvironment": {},
+          "environment": {},
+          "jobs": {},
+          "targets": {},
+          "configuration": {},
+          "cleanFirst": {},
+          "resolvePackageReferences": {},
+          "verbose": {},
+          "nativeToolOptions": {},
+          "condition": { "$ref": "#/definitions/topConditionV10" }
         },
         "required": [
           "name"
-        ]
+        ],
+        "additionalProperties": false
       }
     },
     "buildPresetsV4": {
@@ -781,7 +1196,7 @@
           "resolvePackageReferences": {},
           "verbose": {},
           "nativeToolOptions": {},
-          "condition": {}
+          "condition": { "$ref": "#/definitions/topConditionV3" }
         },
         "required": [
           "name"
@@ -814,7 +1229,7 @@
           "cleanFirst": {},
           "verbose": {},
           "nativeToolOptions": {},
-          "condition": {}
+          "condition": { "$ref": "#/definitions/topConditionV3" }
         },
         "required": [
           "name"
@@ -851,6 +1266,129 @@
           "name"
         ],
         "additionalProperties": false
+      }
+    },
+    "testPresetsFilterIncludeIndexAsStringV2": {
+      "type": "string",
+      "description": "An optional string specifying a file with the command line syntax for --tests-information. Available in version 2 and higher."
+    },
+    "testPresetsFilterIncludeIndexAsObjectV10": {
+      "type": "object",
+      "description": "An optional object specifying tests to include by test index. Available in version 10 and higher.",
+      "properties": {
+        "$comment": { "$ref": "#/definitions/$comment" }
+      }
+    },
+    "testPresetsFilterIncludeIndexAsObjectV2": {
+      "type": "object",
+      "description": "An optional object specifying tests to include by test index. Available in version 2 and higher.",
+      "properties": {
+        "start": {
+          "type": "integer",
+          "description": "An optional integer specifying a test index to start testing at."
+        },
+        "end": {
+          "type": "integer",
+          "description": "An optional integer specifying a test index to stop testing at."
+        },
+        "stride": {
+          "type": "integer",
+          "description": "An optional integer specifying the increment."
+        },
+        "specificTests": {
+          "type": "array",
+          "description": "An optional array of integers specifying specific test indices to run.",
+          "items": {
+            "type": "integer",
+            "description": "An integer specifying the test to run by index."
+          }
+        }
+      }
+    },
+    "testPresetsFilterIncludeIndexV10": {
+      "anyOf": [
+        { "$ref": "#/definitions/testPresetsFilterIncludeIndexAsStringV2" },
+        {
+          "type": "object",
+          "description": "An optional object specifying test preset filters. Available in version 10 and higher.",
+          "allOf": [
+            { "$ref": "#/definitions/testPresetsFilterIncludeIndexAsObjectV10" },
+            { "$ref": "#/definitions/testPresetsFilterIncludeIndexAsObjectV2" }
+          ],
+          "properties": {
+            "$comment": {},
+            "start": {},
+            "end": {},
+            "stride": {},
+            "specificTests": {}
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "testPresetsFilterIncludeIndexV2": {
+      "anyOf": [
+        { "$ref": "#/definitions/testPresetsFilterIncludeIndexAsStringV2" },
+        {
+          "type": "object",
+          "description": "An optional object specifying test preset filters. Available in version 2 and higher.",
+          "allOf": [
+            { "$ref": "#/definitions/testPresetsFilterIncludeIndexAsObjectV2" }
+          ],
+          "properties": {
+            "start": {},
+            "end": {},
+            "stride": {},
+            "specificTests": {}
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "testPresetsItemsV10": {
+      "type": "array",
+      "description": "An optional array of test preset objects. Used to specify arguments to ctest. Available in version 10 and higher.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "$comment": { "$ref": "#/definitions/$comment" },
+          "filter": {
+            "type": "object",
+            "properties": {
+              "$comment": { "$ref": "#/definitions/$comment" },
+              "include": {
+                "type": "object",
+                "properties": {
+                  "$comment": { "$ref": "#/definitions/$comment" }
+                }
+              },
+              "exclude": {
+                "type": "object",
+                "properties": {
+                  "$comment": { "$ref": "#/definitions/$comment" },
+                  "fixtures": {
+                    "type": "object",
+                    "properties": {
+                      "$comment": { "$ref": "#/definitions/$comment" }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "execution": {
+            "type": "object",
+            "properties": {
+              "$comment": { "$ref": "#/definitions/$comment" },
+              "repeat": {
+                "type": "object",
+                "properties": {
+                  "$comment": { "$ref": "#/definitions/$comment" }
+                }
+              }
+            }
+          }
+        }
       }
     },
     "testPresetsItemsV6": {
@@ -896,13 +1434,7 @@
     },
     "testPresetsItemsV3": {
       "type": "array",
-      "description": "An optional array of test preset objects. Used to specify arguments to ctest. Available in version 3 and higher.",
-      "items": {
-        "type": "object",
-        "properties": {
-          "condition": { "$ref": "#/definitions/topCondition" }
-        }
-      }
+      "description": "An optional array of test preset objects. Used to specify arguments to ctest. Available in version 3 and higher."
     },
     "testPresetsItemsV2": {
       "type": "array",
@@ -1060,47 +1592,11 @@
                     "type": "string",
                     "description": "An optional string specifying a regex for test labels. Equivalent to passing --label-regex on the command line."
                   },
-                  "index": {
-                    "anyOf": [
-                      {
-                        "type": "object",
-                        "description": "An optional object specifying tests to include by test index.",
-                        "properties": {
-                          "start": {
-                            "type": "integer",
-                            "description": "An optional integer specifying a test index to start testing at."
-                          },
-                          "end": {
-                            "type": "integer",
-                            "description": "An optional integer specifying a test index to stop testing at."
-                          },
-                          "stride": {
-                            "type": "integer",
-                            "description": "An optional integer specifying the increment."
-                          },
-                          "specificTests": {
-                            "type": "array",
-                            "description": "An optional array of integers specifying specific test indices to run.",
-                            "items": {
-                              "type": "integer",
-                              "description": "An integer specifying the test to run by index."
-                            }
-                          }
-                        },
-                        "additionalProperties": false
-                      },
-                      {
-                        "type": "string",
-                        "description": "An optional string specifying a file with the command line syntax for --tests-information."
-                      }
-                    ]
-                  },
                   "useUnion": {
                     "type": "boolean",
                     "description": "An optional boolean. Equivalent to passing --union on the command line."
                   }
-                },
-                "additionalProperties": false
+                }
               },
               "exclude": {
                 "type": "object",
@@ -1130,13 +1626,11 @@
                         "type": "string",
                         "description": "An optional string specifying a regex for text fixtures to exclude from adding cleanup tests. Equivalent to --fixture-exclude-cleanup on the command line."
                       }
-                    },
-                    "additionalProperties": false
+                    }
                   }
                 }
               }
-            },
-            "additionalProperties": false
+            }
           },
           "execution": {
             "type": "object",
@@ -1184,11 +1678,7 @@
                     "type": "integer",
                     "description": "A required integer."
                   }
-                },
-                "required": [
-                  "mode", "count"
-                ],
-                "additionalProperties": false
+                }
               },
               "interactiveDebugging": {
                 "type": "boolean",
@@ -1209,23 +1699,137 @@
                   "default", "error", "ignore"
                 ]
               }
+            }
+          }
+        }
+      }
+    },
+    "testPresetsV10": {
+      "type": "array",
+      "description": "An optional array of test preset objects. Used to specify arguments to ctest. Available in version 10 and higher.",
+      "allOf": [
+        { "$ref": "#/definitions/testPresetsItemsV10" },
+        { "$ref": "#/definitions/testPresetsItemsV6" },
+        { "$ref": "#/definitions/testPresetsItemsV5" },
+        { "$ref": "#/definitions/testPresetsItemsV3" },
+        { "$ref": "#/definitions/testPresetsItemsV2" }
+      ],
+      "items": {
+        "type": "object",
+        "properties": {
+          "$comment": {},
+          "name": {},
+          "hidden": {},
+          "inherits": {},
+          "configurePreset": {},
+          "vendor": {},
+          "displayName": {},
+          "description": {},
+          "inheritConfigureEnvironment": {},
+          "environment": {},
+          "configuration": {},
+          "overwriteConfigurationFile": {},
+          "output": {
+            "type": "object",
+            "properties": {
+              "shortProgress": {},
+              "verbosity": {},
+              "debug": {},
+              "outputOnFailure": {},
+              "quiet": {},
+              "outputLogFile": {},
+              "outputJUnitFile": {},
+              "labelSummary": {},
+              "subprojectSummary": {},
+              "maxPassedTestOutputSize": {},
+              "maxFailedTestOutputSize": {},
+              "maxTestNameWidth": {},
+              "testOutputTruncation": {}
             },
             "additionalProperties": false
-          }
+          },
+          "filter": {
+            "type": "object",
+            "properties": {
+              "$comment": {},
+              "include": {
+                "type": "object",
+                "properties": {
+                  "$comment": {},
+                  "name": {},
+                  "label": {},
+                  "useUnion": {},
+                  "index": { "$ref": "#/definitions/testPresetsFilterIncludeIndexV10" }
+                },
+                "additionalProperties": false
+              },
+              "exclude": {
+                "type": "object",
+                "properties": {
+                  "$comment": {},
+                  "name": {},
+                  "label": {},
+                  "fixtures": {
+                    "type": "object",
+                    "properties": {
+                      "$comment": {},
+                      "any": {},
+                      "setup": {},
+                      "cleanup": {}
+                    },
+                    "additionalProperties": false
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            "additionalProperties": false
+          },
+          "execution": {
+            "type": "object",
+            "properties": {
+              "$comment": {},
+              "stopOnFailure": {},
+              "enableFailover": {},
+              "jobs": {},
+              "resourceSpecFile": {},
+              "testLoad": {},
+              "showOnly": {},
+              "repeat": {
+                "type": "object",
+                "properties": {
+                  "$comment": {},
+                  "mode": {},
+                  "count": {}
+                },
+                "required": [
+                  "mode", "count"
+                ],
+                "additionalProperties": false
+              },
+              "interactiveDebugging": {},
+              "scheduleRandom": {},
+              "timeout": {},
+              "noTestsAction": {}
+            },
+            "additionalProperties": false
+          },
+          "condition": { "$ref": "#/definitions/topConditionV10" }
         },
         "required": [
           "name"
-        ]
+        ],
+        "additionalProperties": false
       }
     },
     "testPresetsV6": {
       "type": "array",
       "description": "An optional array of test preset objects. Used to specify arguments to ctest. Available in version 6 and higher.",
       "allOf": [
-        { "$ref": "#/definitions/testPresetsItemsV2" },
-        { "$ref": "#/definitions/testPresetsItemsV3" },
+        { "$ref": "#/definitions/testPresetsItemsV6" },
         { "$ref": "#/definitions/testPresetsItemsV5" },
-        { "$ref": "#/definitions/testPresetsItemsV6" }
+        { "$ref": "#/definitions/testPresetsItemsV3" },
+        { "$ref": "#/definitions/testPresetsItemsV2" }
       ],
       "items": {
         "type": "object",
@@ -1260,9 +1864,67 @@
             },
             "additionalProperties": false
           },
-          "filter": {},
-          "execution": {},
-          "condition": {}
+          "filter": {
+            "type": "object",
+            "properties": {
+              "include": {
+                "type": "object",
+                "properties": {
+                  "name": {},
+                  "label": {},
+                  "useUnion": {},
+                  "index": { "$ref": "#/definitions/testPresetsFilterIncludeIndexV2" }
+                },
+                "additionalProperties": false
+              },
+              "exclude": {
+                "type": "object",
+                "properties": {
+                  "name": {},
+                  "label": {},
+                  "fixtures": {
+                    "type": "object",
+                    "properties": {
+                      "any": {},
+                      "setup": {},
+                      "cleanup": {}
+                    },
+                    "additionalProperties": false
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            "additionalProperties": false
+          },
+          "execution": {
+            "type": "object",
+            "properties": {
+              "stopOnFailure": {},
+              "enableFailover": {},
+              "jobs": {},
+              "resourceSpecFile": {},
+              "testLoad": {},
+              "showOnly": {},
+              "repeat": {
+                "type": "object",
+                "properties": {
+                  "mode": {},
+                  "count": {}
+                },
+                "required": [
+                  "mode", "count"
+                ],
+                "additionalProperties": false
+              },
+              "interactiveDebugging": {},
+              "scheduleRandom": {},
+              "timeout": {},
+              "noTestsAction": {}
+            },
+            "additionalProperties": false
+          },
+          "condition": { "$ref": "#/definitions/topConditionV3" }
         },
         "required": [
           "name"
@@ -1274,9 +1936,9 @@
       "type": "array",
       "description": "An optional array of test preset objects. Used to specify arguments to ctest. Available in version 5 and higher.",
       "allOf": [
-        { "$ref": "#/definitions/testPresetsItemsV2" },
+        { "$ref": "#/definitions/testPresetsItemsV5" },
         { "$ref": "#/definitions/testPresetsItemsV3" },
-        { "$ref": "#/definitions/testPresetsItemsV5" }
+        { "$ref": "#/definitions/testPresetsItemsV2" }
       ],
       "items": {
         "type": "object",
@@ -1310,9 +1972,67 @@
             },
             "additionalProperties": false
           },
-          "filter": {},
-          "execution": {},
-          "condition": {}
+          "filter": {
+            "type": "object",
+            "properties": {
+              "include": {
+                "type": "object",
+                "properties": {
+                  "name": {},
+                  "label": {},
+                  "useUnion": {},
+                  "index": { "$ref": "#/definitions/testPresetsFilterIncludeIndexV2" }
+                },
+                "additionalProperties": false
+              },
+              "exclude": {
+                "type": "object",
+                "properties": {
+                  "name": {},
+                  "label": {},
+                  "fixtures": {
+                    "type": "object",
+                    "properties": {
+                      "any": {},
+                      "setup": {},
+                      "cleanup": {}
+                    },
+                    "additionalProperties": false
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            "additionalProperties": false
+          },
+          "execution": {
+            "type": "object",
+            "properties": {
+              "stopOnFailure": {},
+              "enableFailover": {},
+              "jobs": {},
+              "resourceSpecFile": {},
+              "testLoad": {},
+              "showOnly": {},
+              "repeat": {
+                "type": "object",
+                "properties": {
+                  "mode": {},
+                  "count": {}
+                },
+                "required": [
+                  "mode", "count"
+                ],
+                "additionalProperties": false
+              },
+              "interactiveDebugging": {},
+              "scheduleRandom": {},
+              "timeout": {},
+              "noTestsAction": {}
+            },
+            "additionalProperties": false
+          },
+          "condition": { "$ref": "#/definitions/topConditionV3" }
         },
         "required": [
           "name"
@@ -1324,8 +2044,8 @@
       "type": "array",
       "description": "An optional array of test preset objects. Used to specify arguments to ctest. Available in version 3 and higher.",
       "allOf": [
-        { "$ref": "#/definitions/testPresetsItemsV2" },
-        { "$ref": "#/definitions/testPresetsItemsV3" }
+        { "$ref": "#/definitions/testPresetsItemsV3" },
+        { "$ref": "#/definitions/testPresetsItemsV2" }
       ],
       "items": {
         "type": "object",
@@ -1358,9 +2078,67 @@
             },
             "additionalProperties": false
           },
-          "filter": {},
-          "execution": {},
-          "condition": {}
+          "filter": {
+            "type": "object",
+            "properties": {
+              "include": {
+                "type": "object",
+                "properties": {
+                  "name": {},
+                  "label": {},
+                  "useUnion": {},
+                  "index": { "$ref": "#/definitions/testPresetsFilterIncludeIndexV2" }
+                },
+                "additionalProperties": false
+              },
+              "exclude": {
+                "type": "object",
+                "properties": {
+                  "name": {},
+                  "label": {},
+                  "fixtures": {
+                    "type": "object",
+                    "properties": {
+                      "any": {},
+                      "setup": {},
+                      "cleanup": {}
+                    },
+                    "additionalProperties": false
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            "additionalProperties": false
+          },
+          "execution": {
+            "type": "object",
+            "properties": {
+              "stopOnFailure": {},
+              "enableFailover": {},
+              "jobs": {},
+              "resourceSpecFile": {},
+              "testLoad": {},
+              "showOnly": {},
+              "repeat": {
+                "type": "object",
+                "properties": {
+                  "mode": {},
+                  "count": {}
+                },
+                "required": [
+                  "mode", "count"
+                ],
+                "additionalProperties": false
+              },
+              "interactiveDebugging": {},
+              "scheduleRandom": {},
+              "timeout": {},
+              "noTestsAction": {}
+            },
+            "additionalProperties": false
+          },
+          "condition": { "$ref": "#/definitions/topConditionV3" }
         },
         "required": [
           "name"
@@ -1405,13 +2183,87 @@
             },
             "additionalProperties": false
           },
-          "filter": {},
-          "execution": {}
+          "filter": {
+            "type": "object",
+            "properties": {
+              "include": {
+                "type": "object",
+                "properties": {
+                  "name": {},
+                  "label": {},
+                  "useUnion": {},
+                  "index": { "$ref": "#/definitions/testPresetsFilterIncludeIndexV2" }
+                },
+                "additionalProperties": false
+              },
+              "exclude": {
+                "type": "object",
+                "properties": {
+                  "name": {},
+                  "label": {},
+                  "fixtures": {
+                    "type": "object",
+                    "properties": {
+                      "any": {},
+                      "setup": {},
+                      "cleanup": {}
+                    },
+                    "additionalProperties": false
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            "additionalProperties": false
+          },
+          "execution": {
+            "type": "object",
+            "properties": {
+              "stopOnFailure": {},
+              "enableFailover": {},
+              "jobs": {},
+              "resourceSpecFile": {},
+              "testLoad": {},
+              "showOnly": {},
+              "repeat": {
+                "type": "object",
+                "properties": {
+                  "mode": {},
+                  "count": {}
+                },
+                "required": [
+                  "mode", "count"
+                ],
+                "additionalProperties": false
+              },
+              "interactiveDebugging": {},
+              "scheduleRandom": {},
+              "timeout": {},
+              "noTestsAction": {}
+            },
+            "additionalProperties": false
+          }
         },
         "required": [
           "name"
         ],
         "additionalProperties": false
+      }
+    },
+    "packagePresetsItemsV10": {
+      "type": "array",
+      "description": "An optional array of package preset objects. Used to specify arguments to cpack. Available in version 10 and higher.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "$comment": { "$ref": "#/definitions/$comment" },
+          "output": {
+            "type": "object",
+            "properties": {
+              "$comment": { "$ref": "#/definitions/$comment" }
+            }
+          }
+        }
       }
     },
     "packagePresetsItemsV6": {
@@ -1489,7 +2341,6 @@
               "pattern": "^.+$"
             }
           },
-          "condition": { "$ref": "#/definitions/topCondition" },
           "generators": {
             "type": "array",
             "description": "An optional list of strings representing generators for CPack to use.",
@@ -1530,8 +2381,7 @@
                 "type": "boolean",
                 "description": "An optional boolean specifying whether or not to print verbosely. A value of true is equivalent to passing --verbose on the command line."
               }
-            },
-            "additionalProperties": false
+            }
           },
           "packageName": {
             "type": "string",
@@ -1549,10 +2399,52 @@
             "type": "string",
             "description": "An optional string representing the vendor name."
           }
+        }
+      }
+    },
+    "packagePresetsV10": {
+      "type": "array",
+      "description": "An optional array of package preset objects. Used to specify arguments to cpack. Available in version 10 and higher.",
+      "allOf": [
+        { "$ref": "#/definitions/packagePresetsItemsV10" },
+        { "$ref": "#/definitions/packagePresetsItemsV6" }
+      ],
+      "items": {
+        "type": "object",
+        "properties": {
+          "$comment": {},
+          "name": {},
+          "hidden": {},
+          "inherits": {},
+          "configurePreset": {},
+          "vendor": {},
+          "displayName": {},
+          "description": {},
+          "inheritConfigureEnvironment": {},
+          "environment": {},
+          "condition": { "$ref": "#/definitions/topConditionV10" },
+          "generators": {},
+          "configurations": {},
+          "variables": {},
+          "configFile": {},
+          "output": {
+            "type": "object",
+            "properties": {
+              "$comment": {},
+              "debug": {},
+              "verbose": {}
+            },
+            "additionalProperties": false
+          },
+          "packageName": {},
+          "packageVersion": {},
+          "packageDirectory": {},
+          "vendorName": {}
         },
         "required": [
           "name"
-        ]
+        ],
+        "additionalProperties": false
       }
     },
     "packagePresetsV6": {
@@ -1573,12 +2465,19 @@
           "description": {},
           "inheritConfigureEnvironment": {},
           "environment": {},
-          "condition": {},
+          "condition": { "$ref": "#/definitions/topConditionV3" },
           "generators": {},
           "configurations": {},
           "variables": {},
           "configFile": {},
-          "output": {},
+          "output": {
+            "type": "object",
+            "properties": {
+              "debug": {},
+              "verbose": {}
+            },
+            "additionalProperties": false
+          },
           "packageName": {},
           "packageVersion": {},
           "packageDirectory": {},
@@ -1588,6 +2487,25 @@
           "name"
         ],
         "additionalProperties": false
+      }
+    },
+    "workflowPresetsItemsV10": {
+      "type": "array",
+      "description": "An optional array of workflow preset objects. Used to execute configure, build, test, and package presets in order. Available in version 10 and higher.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "$comment": { "$ref": "#/definitions/$comment" },
+          "steps": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "$comment": { "$ref": "#/definitions/$comment" }
+              }
+            }
+          }
+        }
       }
     },
     "workflowPresetsItemsV6": {
@@ -1630,6 +2548,35 @@
                   "description": "A required string representing the name of the configure, build, test, or package preset to run as this workflow step.",
                   "minLength": 1
                 }
+              }
+            }
+          }
+        }
+      }
+    },
+    "workflowPresetsV10": {
+      "type": "array",
+      "description": "An optional array of workflow preset objects. Used to execute configure, build, test, and package presets in order. Available in version 10 and higher.",
+      "allOf": [
+        { "$ref": "#/definitions/workflowPresetsItemsV10" },
+        { "$ref": "#/definitions/workflowPresetsItemsV6" }
+      ],
+      "items": {
+        "type": "object",
+        "properties": {
+          "$comment": {},
+          "name": {},
+          "vendor": {},
+          "displayName": {},
+          "description": {},
+          "steps": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "$comment": {},
+                "type": {},
+                "name": {}
               },
               "required": [
                 "type",
@@ -1659,7 +2606,21 @@
           "vendor": {},
           "displayName": {},
           "description": {},
-          "steps": {}
+          "steps": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {},
+                "name": {}
+              },
+              "required": [
+                "type",
+                "name"
+              ],
+              "additionalProperties": false
+            }
+          }
         },
         "required": [
           "name",
@@ -1668,24 +2629,154 @@
         "additionalProperties": false
       }
     },
-    "condition": {
-      "anyOf": [
-        {
-          "type": "boolean",
-          "description": "A boolean which provides a constant value for the condition's evaluation."
+    "conditionAsBooleanV3": {
+      "type": "boolean",
+      "description": "A boolean which provides a constant value for the condition's evaluation."
+    },
+    "conditionAsObjectConstV10": {
+      "type": "object",
+      "properties": {
+        "$comment": { "$ref": "#/definitions/$comment" }
+      }
+    },
+    "conditionAsObjectConstV3": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "A required string specifying the type of the condition.",
+          "const": "const"
         },
+        "value": {
+          "type": "boolean",
+          "description": "A required boolean which provides a constant value for the condition's evaluation."
+        }
+      }
+    },
+    "conditionAsObjectEqualsV10": {
+      "type": "object",
+      "properties": {
+        "$comment": { "$ref": "#/definitions/$comment" }
+      }
+    },
+    "conditionAsObjectEqualsV3": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "A required string specifying the type of the condition.",
+          "enum": [ "equals", "notEquals" ]
+        },
+        "lhs": {
+          "type": "string",
+          "description": "First string to compare. This field supports macro expansion."
+        },
+        "rhs": {
+          "type": "string",
+          "description": "Second string to compare. This field supports macro expansion."
+        }
+      }
+    },
+    "conditionAsObjectInListV10": {
+      "type": "object",
+      "properties": {
+        "$comment": { "$ref": "#/definitions/$comment" }
+      }
+    },
+    "conditionAsObjectInListV3": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "A required string specifying the type of the condition.",
+          "enum": [ "inList", "notInList" ]
+        },
+        "string": {
+          "type": "string",
+          "description": "A required string to search for. This field supports macro expansion."
+        },
+        "list": {
+          "type": "array",
+          "description": "A required list of strings to search. This field supports macro expansion, and uses short-circuit evaluation.",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "conditionAsObjectMatchesV10": {
+      "type": "object",
+      "properties": {
+        "$comment": { "$ref": "#/definitions/$comment" }
+      }
+    },
+    "conditionAsObjectMatchesV3": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "A required string specifying the type of the condition.",
+          "enum": [ "matches", "notMatches" ]
+        },
+        "string": {
+          "type": "string",
+          "description": "A required string to search. This field supports macro expansion."
+        },
+        "regex": {
+          "type": "string",
+          "description": "A required regular expression to search for. This field supports macro expansion."
+        }
+      }
+    },
+    "conditionAsObjectAggregationV10": {
+      "type": "object",
+      "properties": {
+        "$comment": { "$ref": "#/definitions/$comment" }
+      }
+    },
+    "conditionAsObjectAggregationV3": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "A required string specifying the type of the condition.",
+          "enum": [ "anyOf", "allOf" ]
+        },
+        "conditions": {
+          "type": "array",
+          "description": "A required array of condition objects. These conditions use short-circuit evaluation."
+        }
+      }
+    },
+    "conditionAsObjectNotV10": {
+      "type": "object",
+      "properties": {
+        "$comment": { "$ref": "#/definitions/$comment" }
+      }
+    },
+    "conditionAsObjectNotV3": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "A required string specifying the type of the condition.",
+          "const": "not"
+        }
+      }
+    },
+    "conditionV10": {
+      "anyOf": [
+        { "$ref": "#/definitions/conditionAsBooleanV3" },
         {
           "type": "object",
+          "allOf": [
+            { "$ref": "#/definitions/conditionAsObjectConstV10" },
+            { "$ref": "#/definitions/conditionAsObjectConstV3" }
+          ],
           "properties": {
-            "type": {
-              "type": "string",
-              "description": "A required string specifying the type of the condition.",
-              "const": "const"
-            },
-            "value": {
-              "type": "boolean",
-              "description": "A required boolean which provides a constant value for the condition's evaluation."
-            }
+            "$comment": {},
+            "type": {},
+            "value": {}
           },
           "required": [
             "type",
@@ -1695,20 +2786,15 @@
         },
         {
           "type": "object",
+          "allOf": [
+            { "$ref": "#/definitions/conditionAsObjectEqualsV10" },
+            { "$ref": "#/definitions/conditionAsObjectEqualsV3" }
+          ],
           "properties": {
-            "type": {
-              "type": "string",
-              "description": "A required string specifying the type of the condition.",
-              "const": "equals"
-            },
-            "lhs": {
-              "type": "string",
-              "description": "First string to compare. This field supports macro expansion."
-            },
-            "rhs": {
-              "type": "string",
-              "description": "Second string to compare. This field supports macro expansion."
-            }
+            "$comment": {},
+            "type": {},
+            "lhs": {},
+            "rhs": {}
           },
           "required": [
             "type",
@@ -1719,47 +2805,15 @@
         },
         {
           "type": "object",
-          "properties": {
-            "type": {
-              "type": "string",
-              "description": "A required string specifying the type of the condition.",
-              "const": "notEquals"
-            },
-            "lhs": {
-              "type": "string",
-              "description": "First string to compare. This field supports macro expansion."
-            },
-            "rhs": {
-              "type": "string",
-              "description": "Second string to compare. This field supports macro expansion."
-            }
-          },
-          "required": [
-            "type",
-            "lhs",
-            "rhs"
+          "allOf": [
+            { "$ref": "#/definitions/conditionAsObjectInListV10" },
+            { "$ref": "#/definitions/conditionAsObjectInListV3" }
           ],
-          "additionalProperties": false
-        },
-        {
-          "type": "object",
           "properties": {
-            "type": {
-              "type": "string",
-              "description": "A required string specifying the type of the condition.",
-              "const": "inList"
-            },
-            "string": {
-              "type": "string",
-              "description": "A required string to search for. This field supports macro expansion."
-            },
-            "list": {
-              "type": "array",
-              "description": "A required list of strings to search. This field supports macro expansion, and uses short-circuit evaluation.",
-              "items": {
-                "type": "string"
-              }
-            }
+            "$comment": {},
+            "type": {},
+            "string": {},
+            "list": {}
           },
           "required": [
             "type",
@@ -1770,47 +2824,15 @@
         },
         {
           "type": "object",
-          "properties": {
-            "type": {
-              "type": "string",
-              "description": "A required string specifying the type of the condition.",
-              "const": "notInList"
-            },
-            "string": {
-              "type": "string",
-              "description": "A required string to search for. This field supports macro expansion."
-            },
-            "list": {
-              "type": "array",
-              "description": "A required list of strings to search. This field supports macro expansion, and uses short-circuit evaluation.",
-              "items": {
-                "type": "string"
-              }
-            }
-          },
-          "required": [
-            "type",
-            "string",
-            "list"
+          "allOf": [
+            { "$ref": "#/definitions/conditionAsObjectMatchesV10" },
+            { "$ref": "#/definitions/conditionAsObjectMatchesV3" }
           ],
-          "additionalProperties": false
-        },
-        {
-          "type": "object",
           "properties": {
-            "type": {
-              "type": "string",
-              "description": "A required string specifying the type of the condition.",
-              "const": "matches"
-            },
-            "string": {
-              "type": "string",
-              "description": "A required string to search. This field supports macro expansion."
-            },
-            "regex": {
-              "type": "string",
-              "description": "A required regular expression to search for. This field supports macro expansion."
-            }
+            "$comment": {},
+            "type": {},
+            "string": {},
+            "regex": {}
           },
           "required": [
             "type",
@@ -1821,40 +2843,16 @@
         },
         {
           "type": "object",
-          "properties": {
-            "type": {
-              "type": "string",
-              "description": "A required string specifying the type of the condition.",
-              "const": "notMatches"
-            },
-            "string": {
-              "type": "string",
-              "description": "A required string to search. This field supports macro expansion."
-            },
-            "regex": {
-              "type": "string",
-              "description": "A required regular expression to search for. This field supports macro expansion."
-            }
-          },
-          "required": [
-            "type",
-            "string",
-            "regex"
+          "allOf": [
+            { "$ref": "#/definitions/conditionAsObjectAggregationV10" },
+            { "$ref": "#/definitions/conditionAsObjectAggregationV3" }
           ],
-          "additionalProperties": false
-        },
-        {
-          "type": "object",
           "properties": {
-            "type": {
-              "type": "string",
-              "description": "A required string specifying the type of the condition.",
-              "const": "anyOf"
-            },
+            "$comment": {},
+            "type": {},
             "conditions": {
               "type": "array",
-              "description": "A required array of condition objects. These conditions use short-circuit evaluation.",
-              "items": { "$ref": "#/definitions/condition" }
+              "items": { "$ref": "#/definitions/conditionV10" }
             }
           },
           "required": [
@@ -1865,33 +2863,14 @@
         },
         {
           "type": "object",
-          "properties": {
-            "type": {
-              "type": "string",
-              "description": "A required string specifying the type of the condition.",
-              "const": "allOf"
-            },
-            "conditions": {
-              "type": "array",
-              "description": "A required array of condition objects. These conditions use short-circuit evaluation.",
-              "items": { "$ref": "#/definitions/condition" }
-            }
-          },
-          "required": [
-            "type",
-            "conditions"
+          "allOf": [
+            { "$ref": "#/definitions/conditionAsObjectNotV10" },
+            { "$ref": "#/definitions/conditionAsObjectNotV3" }
           ],
-          "additionalProperties": false
-        },
-        {
-          "type": "object",
           "properties": {
-            "type": {
-              "type": "string",
-              "description": "A required string specifying the type of the condition.",
-              "const": "not"
-            },
-            "condition": { "$ref": "#/definitions/condition" }
+            "$comment": {},
+            "type": {},
+            "condition": { "$ref": "#/definitions/conditionV10" }
           },
           "required": [
             "type",
@@ -1901,13 +2880,124 @@
         }
       ]
     },
-    "topCondition": {
+    "conditionV3": {
       "anyOf": [
-        { "$ref": "#/definitions/condition" },
+        { "$ref": "#/definitions/conditionAsBooleanV3" },
         {
-          "type": "null",
-          "description": "Null indicates that the condition always evaluates to true and is not inherited."
+          "type": "object",
+          "allOf": [
+            { "$ref": "#/definitions/conditionAsObjectConstV3" }
+          ],
+          "properties": {
+            "type": {},
+            "value": {}
+          },
+          "required": [
+            "type",
+            "value"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "allOf": [
+            { "$ref": "#/definitions/conditionAsObjectEqualsV3" }
+          ],
+          "properties": {
+            "type": {},
+            "lhs": {},
+            "rhs": {}
+          },
+          "required": [
+            "type",
+            "lhs",
+            "rhs"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "allOf": [
+            { "$ref": "#/definitions/conditionAsObjectInListV3" }
+          ],
+          "properties": {
+            "type": {},
+            "string": {},
+            "list": {}
+          },
+          "required": [
+            "type",
+            "string",
+            "list"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "allOf": [
+            { "$ref": "#/definitions/conditionAsObjectMatchesV3" }
+          ],
+          "properties": {
+            "type": {},
+            "string": {},
+            "regex": {}
+          },
+          "required": [
+            "type",
+            "string",
+            "regex"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "allOf": [
+            { "$ref": "#/definitions/conditionAsObjectAggregationV3" }
+          ],
+          "properties": {
+            "type": {},
+            "conditions": {
+              "type": "array",
+              "items": { "$ref": "#/definitions/conditionV3" }
+            }
+          },
+          "required": [
+            "type",
+            "conditions"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "allOf": [
+            { "$ref": "#/definitions/conditionAsObjectNotV3" }
+          ],
+          "properties": {
+            "type": {},
+            "condition": { "$ref": "#/definitions/conditionV3" }
+          },
+          "required": [
+            "type",
+            "condition"
+          ],
+          "additionalProperties": false
         }
+      ]
+    },
+    "topConditionAsNullV3": {
+      "type": "null",
+      "description": "Null indicates that the condition always evaluates to true and is not inherited."
+    },
+    "topConditionV10": {
+      "anyOf": [
+        { "$ref": "#/definitions/conditionV10" },
+        { "$ref": "#/definitions/topConditionAsNullV3" }
+      ]
+    },
+    "topConditionV3": {
+      "anyOf": [
+        { "$ref": "#/definitions/conditionV3" },
+        { "$ref": "#/definitions/topConditionAsNullV3" }
       ]
     },
     "include": {

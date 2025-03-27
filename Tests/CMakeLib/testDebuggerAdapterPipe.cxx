@@ -3,13 +3,10 @@
 
 #include <chrono>
 #include <cstdio>
-#include <functional>
 #include <future>
-#include <iostream>
 #include <memory>
 #include <stdexcept>
 #include <string>
-#include <vector>
 
 #include <cm3p/cppdap/future.h>
 #include <cm3p/cppdap/io.h>
@@ -180,7 +177,5 @@ bool testProtocolWithPipes()
 
 int testDebuggerAdapterPipe(int, char*[])
 {
-  return runTests(std::vector<std::function<bool()>>{
-    testProtocolWithPipes,
-  });
+  return runTests({ testProtocolWithPipes });
 }

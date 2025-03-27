@@ -307,7 +307,7 @@ void cmCursesMainForm::PrintKeys(int process /* = 0 */)
   }
 
   char fmt_s[] = "%s";
-  if (cw == nullptr || !cw->PrintKeys()) {
+  if (!cw || !cw->PrintKeys()) {
     char firstLine[512] = "";
     char secondLine[512] = "";
     char thirdLine[512] = "";
@@ -605,7 +605,7 @@ void cmCursesMainForm::RemoveEntry(const char* value)
     std::find_if(this->Entries.begin(), this->Entries.end(),
                  [value](cmCursesCacheEntryComposite& entry) -> bool {
                    const char* val = entry.GetValue();
-                   return val != nullptr && !strcmp(value, val);
+                   return val && !strcmp(value, val);
                  });
 
   if (removeIt != this->Entries.end()) {

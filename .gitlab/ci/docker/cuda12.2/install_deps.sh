@@ -14,6 +14,7 @@ env DEBIAN_FRONTEND=noninteractive \
 apt-get install -y \
     g++ \
     clang-18 \
+    libomp-18-dev \
     curl \
     git
 

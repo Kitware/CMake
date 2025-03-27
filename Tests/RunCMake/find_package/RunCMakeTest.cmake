@@ -74,6 +74,7 @@ run_cmake(IgnorePrefixPath)
 run_cmake(REGISTRY_VIEW-no-view)
 run_cmake(REGISTRY_VIEW-wrong-view)
 run_cmake(REGISTRY_VIEW-propagated)
+run_cmake(DebugRoot)
 
 if(CMAKE_HOST_WIN32 AND MINGW)
   run_cmake(MSYSTEM_PREFIX)

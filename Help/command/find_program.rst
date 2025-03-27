@@ -41,3 +41,23 @@ When more than one value is given to the ``NAMES`` option this command by
 default will consider one name at a time and search every directory
 for it.  The ``NAMES_PER_DIR`` option tells this command to consider one
 directory at a time and search for all names in it.
+
+The set of files considered to be programs is platform-specific:
+
+* On Windows, filename suffixes are considered in order ``.com``, ``.exe``,
+  and no suffix.
+
+* On non-Windows systems, no filename suffix is considered, but files
+  must have execute permission (see policy :policy:`CMP0109`).
+
+To search for scripts, specify an extension explicitly:
+
+.. code-block:: cmake
+
+  if(WIN32)
+    set(_script_suffix .bat)
+  else()
+    set(_script_suffix .sh)
+  endif()
+
+  find_program(MY_SCRIPT NAMES my_script${_script_suffix})

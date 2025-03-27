@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.10)
 project(LinkFlags C)
 
 string(TOUPPER "${TEST_CONFIG}" TEST_CONFIG_UPPER)

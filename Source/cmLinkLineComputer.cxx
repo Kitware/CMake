@@ -9,6 +9,7 @@
 
 #include "cmComputeLinkInformation.h"
 #include "cmGeneratorTarget.h"
+#include "cmList.h"
 #include "cmListFileCache.h"
 #include "cmOutputConverter.h"
 #include "cmStateTypes.h"
@@ -112,18 +113,20 @@ std::string cmLinkLineComputer::ConvertToOutputForExisting(
 
 std::string cmLinkLineComputer::ComputeLinkPath(
   cmComputeLinkInformation& cli, std::string const& libPathFlag,
-  std::string const& libPathTerminator)
+  std::string const& libPathTerminator, std::string const& stdLinkDirString)
 {
   std::string linkPath;
   std::vector<BT<std::string>> linkPathList;
-  this->ComputeLinkPath(cli, libPathFlag, libPathTerminator, linkPathList);
+  this->ComputeLinkPath(cli, libPathFlag, libPathTerminator, stdLinkDirString,
+                        linkPathList);
   cli.AppendValues(linkPath, linkPathList);
   return linkPath;
 }
 
 void cmLinkLineComputer::ComputeLinkPath(
   cmComputeLinkInformation& cli, std::string const& libPathFlag,
-  std::string const& libPathTerminator, std::vector<BT<std::string>>& linkPath)
+  std::string const& libPathTerminator, std::string const& stdLinkDirString,
+  std::vector<BT<std::string>>& linkPath)
 {
   if (cli.GetLinkLanguage() == "Swift") {
     std::string linkPathNoBT;
@@ -159,6 +162,12 @@ void cmLinkLineComputer::ComputeLinkPath(
                             this->ConvertToOutputForExisting(libDir.Value),
                             libPathTerminator, " ");
     linkPath.emplace_back(libDir);
+  }
+
+  for (auto& linkDir : cmList(stdLinkDirString)) {
+    linkPath.emplace_back(cmStrCat(' ', libPathFlag,
+                                   this->ConvertToOutputForExisting(linkDir),
+                                   libPathTerminator, ' '));
   }
 }
 

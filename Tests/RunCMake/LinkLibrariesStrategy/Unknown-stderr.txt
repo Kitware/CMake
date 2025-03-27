@@ -1,0 +1,4 @@
+^CMake Error at Unknown.cmake:5 \(add_executable\):
+  LINK_LIBRARIES_STRATEGY value 'unknown' is not recognized\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9] \(include\)

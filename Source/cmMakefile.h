@@ -143,6 +143,14 @@ public:
   bool EnforceUniqueName(std::string const& name, std::string& msg,
                          bool isCustom = false) const;
 
+  enum class GeneratorActionWhen
+  {
+    // Run after all CMake code has been parsed.
+    AfterConfigure,
+    // Run after generator targets have been constructed.
+    AfterGeneratorTargets,
+  };
+
   class GeneratorAction
   {
     using ActionT =
@@ -152,20 +160,29 @@ public:
                          std::unique_ptr<cmCustomCommand> cc)>;
 
   public:
-    GeneratorAction(ActionT&& action)
-      : Action(std::move(action))
+    GeneratorAction(
+      ActionT&& action,
+      GeneratorActionWhen when = GeneratorActionWhen::AfterConfigure)
+      : When(when)
+      , Action(std::move(action))
     {
     }
 
-    GeneratorAction(std::unique_ptr<cmCustomCommand> tcc, CCActionT&& action)
-      : CCAction(std::move(action))
+    GeneratorAction(
+      std::unique_ptr<cmCustomCommand> tcc, CCActionT&& action,
+      GeneratorActionWhen when = GeneratorActionWhen::AfterConfigure)
+      : When(when)
+      , CCAction(std::move(action))
       , cc(std::move(tcc))
     {
     }
 
-    void operator()(cmLocalGenerator& lg, const cmListFileBacktrace& lfbt);
+    void operator()(cmLocalGenerator& lg, const cmListFileBacktrace& lfbt,
+                    GeneratorActionWhen when);
 
   private:
+    GeneratorActionWhen When;
+
     ActionT Action;
 
     // FIXME: Use std::variant
@@ -190,6 +207,7 @@ public:
    * the makefile.
    */
   void Generate(cmLocalGenerator& lg);
+  void GenerateAfterGeneratorTargets(cmLocalGenerator& lg);
 
   /**
    * Get the target for PRE_BUILD, PRE_LINK, or POST_BUILD commands.
@@ -576,6 +594,9 @@ public:
 
   /** Return whether the target platform is an Apple simulator.  */
   bool PlatformIsAppleSimulator() const;
+
+  /** Return whether the target platform is an Apple catalyst.  */
+  bool PlatformIsAppleCatalyst() const;
 
   /** Return whether the target platform supports generation of text base stubs
      (.tbd file) describing exports (Apple specific). */

@@ -69,3 +69,7 @@ else()
 endif()
 
 __compiler_check_default_language_standard(CXX 1 98)
+
+if (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 5.15)
+  set(CMAKE_CXX_COMPILE_OPTIONS_VISIBILITY "-fvisibility=")
+endif()

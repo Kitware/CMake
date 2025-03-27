@@ -1,0 +1,1 @@
+.*Library/Application\\ Support/CMake$

@@ -10,8 +10,8 @@ CPack test root directory: 'Tests/RunCMake/CPack/tests'.
 All phases are executed separately for each generator that is bound to a test.
 Tests for each generator are subtests of test 'RunCMake.CPack_<generator_name>'.
 
-Each test must also be added to 'RunCMakeTest.cmake' script located in CPack
-test root directory.
+Each test must be added to list "cpack_tests" in 'Tests/RunCMake/CMakeLists.txt'
+and also to 'RunCMakeTest.cmake' script located in 'Tests/RunCMake/CPack/'.
 
 Line that adds a test is:
 run_cpack_test(<test_name> "<generator_name_list>" <compile_stage>
@@ -53,7 +53,7 @@ Test consists of
 - verification of generated files
 
 The phases are executed once per specified generator, packaging type and subtest
-combinatiion.
+combination.
 
 test prerequirements phase (optional):
 --------------------------------------
@@ -136,7 +136,7 @@ this step and must contain
 - EXPECTED_FILES_COUNT variable that contains the number of expected files that
   will be generated (0 or more)
 
-- EXPECTED_FILE_<file_number_starting_with_1> that contains globing expression
+- EXPECTED_FILE_<file_number_starting_with_1> that contains globbing expression
   that uniquely defines expected file name (will be used to find expected file)
   and should be present once for each expected file.
   NOTE: This variable should be used only as last resort as it sets generator
@@ -173,7 +173,7 @@ This phase is executed if '<test_name>/VerifyResult.cmake' script exists.
 VerifyResult.cmake script also automatically prints out standard output and
 standard error from CPack execution phase that is compared with
 '<test_name>/<generator_name>-stdout.txt' regular expression and
-'<test_name>/<generator_name>-stderr.txt' regular expresson respectively.
+'<test_name>/<generator_name>-stderr.txt' regular expression respectively.
 NOTE: For subtests generator name can also be suffixed with subtest name and/or
       packaging type (MONOLITHIC, COMPONENT, GROUP) and in such cases the
       preferences of which file will be used are as follows:

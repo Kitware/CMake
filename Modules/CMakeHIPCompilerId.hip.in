@@ -16,6 +16,28 @@ char const* info_simulate = "INFO" ":" "simulate[" SIMULATE_ID "]";
 @CMAKE_HIP_COMPILER_ID_PLATFORM_CONTENT@
 @CMAKE_HIP_COMPILER_ID_ERROR_FOR_TEST@
 
+#ifdef HOST_COMPILER_ID
+char const* info_host_compiler = "INFO" ":" "host_compiler[" HOST_COMPILER_ID "]";
+#endif
+#ifdef HOST_COMPILER_VERSION
+char const* info_host_compiler_version = "INFO" ":" "host_compiler_version[" HOST_COMPILER_VERSION "]";
+#elif defined(HOST_COMPILER_VERSION_MAJOR)
+char const info_host_compiler_version[] = {
+  'I', 'N', 'F', 'O', ':','h','o','s','t','_',
+  'c','o','m','p','i','l','e','r','_','v','e','r','s','i','o','n','[',
+  HOST_COMPILER_VERSION_MAJOR,
+# ifdef HOST_COMPILER_VERSION_MINOR
+  '.', HOST_COMPILER_VERSION_MINOR,
+#  ifdef HOST_COMPILER_VERSION_PATCH
+   '.', HOST_COMPILER_VERSION_PATCH,
+#   ifdef HOST_COMPILER_VERSION_TWEAK
+    '.', HOST_COMPILER_VERSION_TWEAK,
+#   endif
+#  endif
+# endif
+  ']','\0'};
+#endif
+#
 #define CXX_STD_98 199711L
 #define CXX_STD_11 201103L
 #define CXX_STD_14 201402L
@@ -66,6 +88,12 @@ int main(int argc, char* argv[])
 #endif
 #ifdef SIMULATE_VERSION_MAJOR
   require += info_simulate_version[argc];
+#endif
+#ifdef HOST_COMPILER_ID
+  require += info_host_compiler[argc];
+#endif
+#ifdef HOST_COMPILER_VERSION_MAJOR
+  require += info_host_compiler_version[argc];
 #endif
   require += info_language_standard_default[argc];
   require += info_language_extensions_default[argc];

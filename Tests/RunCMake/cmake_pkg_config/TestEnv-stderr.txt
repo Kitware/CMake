@@ -1,0 +1,15 @@
+Includes: -I/Alpha;-I/Gamma
+LibDirs: -L/Delta;-L/Zeta
+Cflags: QuxInstalled
+PC_LIB_DIRS: Alpha;Beta
+PC_PATH: [^
+]*/PackageRoot
+DISABLE_UNINSTALLED: ON
+SYSROOT_DIR: Delta
+TOP_BUILD_DIR: Epsilon
+SYSTEM_INCLUDE_DIRS: Zeta;Eta
+SYSTEM_LIB_DIRS: Theta;Iota
+ALLOW_SYSTEM_INCLUDES: ON
+ALLOW_SYSTEM_LIBRARIES: ON
+PKGCONF_INCLUDES: Mu;Nu;Xi;Omnicron;Pi;Rho;Sigma;Tau
+PKGCONF_LIB_DIRS: Upsilon;Phi

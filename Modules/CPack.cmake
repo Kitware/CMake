@@ -885,6 +885,20 @@ endif()
 
 # WiX specific variables
 _cpack_set_default(CPACK_WIX_SIZEOF_VOID_P "${CMAKE_SIZEOF_VOID_P}")
+if(NOT DEFINED CPACK_WIX_INSTALL_SCOPE)
+  cmake_policy(GET CMP0172 _CPack_CMP0172)
+  if("x${_CPack_CMP0172}x" STREQUAL "xNEWx")
+    _cpack_set_default(CPACK_WIX_INSTALL_SCOPE perMachine)
+  elseif(NOT "x${_CPack_CMP0172}x" STREQUAL "xOLDx" AND CMAKE_POLICY_WARNING_CMP0172)
+    cmake_policy(GET_WARNING CMP0172 _CMP0172_warning)
+    message(AUTHOR_WARNING
+      "${_CMP0172_warning}\n"
+      "For compatibility, CMake will not enable per-machine installation by default in the CPack WIX Generator."
+      )
+    unset(_CMP0172_warning)
+  endif()
+  unset(_CPack_CMP0172)
+endif()
 
 # productbuild specific variables
 cmake_policy(GET CMP0161 _CPack_CMP0161)

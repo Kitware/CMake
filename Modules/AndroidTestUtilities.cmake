@@ -139,7 +139,6 @@ function(android_add_test_data test_name)
         get_filename_component(extern_data_basename ${output} NAME)
         add_custom_command(
           TARGET ${DATA_TARGET_NAME} POST_BUILD
-          DEPENDS ${extern_data_source}
           COMMAND ${CMAKE_COMMAND} -E copy_if_different ${extern_data_source} ${DEST}/${extern_data_basename}
         )
       endif()
@@ -148,6 +147,8 @@ function(android_add_test_data test_name)
 
   if(ANDROID)
     string(REGEX REPLACE "DATA{([^ ;]+)}" "\\1"  processed_FILES "${AST_FILES}")
+    # There's no target used for this command, so we don't need to do anything
+    # here for CMP0178.
     add_test(
       NAME ${test_name}
       COMMAND ${CMAKE_COMMAND}

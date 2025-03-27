@@ -1,0 +1,31 @@
+CMake Warning at TestStrictness.cmake:[0-9]+ \(cmake_pkg_config\):
+  Resolution failed for file[^
+]*(.)*/PackageRoot/no-name.pc'
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)
+
+
+CMake Warning at TestStrictness.cmake:[0-9]+ \(cmake_pkg_config\):
+  Resolution failed for file[^
+]*(.)*/PackageRoot/no-description.pc'
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)
+
+
+CMake Warning at TestStrictness.cmake:[0-9]+ \(cmake_pkg_config\):
+  Resolution failed for file[^
+]*(.)*/PackageRoot/no-version.pc'
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)
+
+
+CMake Warning at TestStrictness.cmake:[0-9]+ \(cmake_pkg_config\):
+  Parsing failed for file[^
+]*(.)*/PackageRoot/invalid.pc'
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)
+
+
+Cflags: lowercase
+CFlags: uppercase
+Cflags: lowercase uppercase

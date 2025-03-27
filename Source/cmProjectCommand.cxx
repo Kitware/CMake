@@ -58,11 +58,13 @@ bool cmProjectCommand(std::vector<std::string> const& args,
 
   mf.SetProjectName(projectName);
 
+  cmPolicies::PolicyStatus cmp0180 = mf.GetPolicyStatus(cmPolicies::CMP0180);
+
   std::string varName = cmStrCat(projectName, "_BINARY_DIR"_s);
   bool nonCacheVarAlreadySet = mf.IsNormalDefinitionSet(varName);
   mf.AddCacheDefinition(varName, mf.GetCurrentBinaryDirectory(),
                         "Value Computed by CMake", cmStateEnums::STATIC);
-  if (nonCacheVarAlreadySet) {
+  if (cmp0180 == cmPolicies::NEW || nonCacheVarAlreadySet) {
     mf.AddDefinition(varName, mf.GetCurrentBinaryDirectory());
   }
 
@@ -70,7 +72,7 @@ bool cmProjectCommand(std::vector<std::string> const& args,
   nonCacheVarAlreadySet = mf.IsNormalDefinitionSet(varName);
   mf.AddCacheDefinition(varName, mf.GetCurrentSourceDirectory(),
                         "Value Computed by CMake", cmStateEnums::STATIC);
-  if (nonCacheVarAlreadySet) {
+  if (cmp0180 == cmPolicies::NEW || nonCacheVarAlreadySet) {
     mf.AddDefinition(varName, mf.GetCurrentSourceDirectory());
   }
 
@@ -85,7 +87,7 @@ bool cmProjectCommand(std::vector<std::string> const& args,
   nonCacheVarAlreadySet = mf.IsNormalDefinitionSet(varName);
   mf.AddCacheDefinition(varName, mf.IsRootMakefile() ? "ON" : "OFF",
                         "Value Computed by CMake", cmStateEnums::STATIC);
-  if (nonCacheVarAlreadySet) {
+  if (cmp0180 == cmPolicies::NEW || nonCacheVarAlreadySet) {
     mf.AddDefinition(varName, mf.IsRootMakefile() ? "ON" : "OFF");
   }
 

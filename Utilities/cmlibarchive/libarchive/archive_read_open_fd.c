@@ -24,7 +24,6 @@
  */
 
 #include "archive_platform.h"
-__FBSDID("$FreeBSD: head/lib/libarchive/archive_read_open_fd.c 201103 2009-12-28 03:13:49Z kientzle $");
 
 #ifdef HAVE_SYS_STAT_H
 #include <sys/stat.h>
@@ -75,7 +74,7 @@ archive_read_open_fd(struct archive *a, int fd, size_t block_size)
 		return (ARCHIVE_FATAL);
 	}
 
-	mine = (struct read_fd_data *)calloc(1, sizeof(*mine));
+	mine = calloc(1, sizeof(*mine));
 	b = malloc(block_size);
 	if (mine == NULL || b == NULL) {
 		archive_set_error(a, ENOMEM, "No memory");

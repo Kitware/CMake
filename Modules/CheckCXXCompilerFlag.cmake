@@ -5,7 +5,7 @@
 CheckCXXCompilerFlag
 ------------------------
 
-Check whether the CXX compiler supports a given flag.
+Check once whether the CXX compiler supports a given flag.
 
 .. command:: check_cxx_compiler_flag
 
@@ -13,18 +13,39 @@ Check whether the CXX compiler supports a given flag.
 
     check_cxx_compiler_flag(<flag> <var>)
 
-  Check that the ``<flag>`` is accepted by the compiler without
-  a diagnostic.  Stores the result in an internal cache entry
-  named ``<var>``.
+Check once that the ``<flag>`` is accepted by the compiler without a diagnostic.
+The result is stored in the internal cache variable specified by
+``<resultVar>``, with boolean ``true`` for success and boolean ``false`` for
+failure.
 
-A positive result from this check indicates only that the compiler did not
-issue a diagnostic message when given the flag.  Whether the flag has any
-effect or even a specific one is beyond the scope of this module.
+``true`` indicates only that the compiler did not issue a diagnostic message
+when given the flag. Whether the flag has any effect is beyond the scope of
+this module.
 
-.. note::
-  Since the :command:`try_compile` command forwards flags from variables
-  like :variable:`CMAKE_CXX_FLAGS <CMAKE_<LANG>_FLAGS>`, unknown flags
-  in such variables may cause a false negative for this check.
+Internally, :command:`try_compile` is used to perform the check. If
+:variable:`CMAKE_TRY_COMPILE_TARGET_TYPE` is set to ``EXECUTABLE`` (default),
+the check compiles and links an executable program. If set to
+``STATIC_LIBRARY``, the check is compiled but not linked.
+
+See also :command:`check_compiler_flag` for a more general command syntax.
+
+The compile and link commands can be influenced by setting any of the
+following variables prior to calling ``check_cxx_compiler_flag()``. Unknown flags
+in these variables can case a false negative result.
+
+.. include:: /module/CMAKE_REQUIRED_FLAGS.txt
+
+.. include:: /module/CMAKE_REQUIRED_DEFINITIONS.txt
+
+.. include:: /module/CMAKE_REQUIRED_INCLUDES.txt
+
+.. include:: /module/CMAKE_REQUIRED_LINK_OPTIONS.txt
+
+.. include:: /module/CMAKE_REQUIRED_LIBRARIES.txt
+
+.. include:: /module/CMAKE_REQUIRED_LINK_DIRECTORIES.txt
+
+.. include:: /module/CMAKE_REQUIRED_QUIET.txt
 #]=======================================================================]
 
 include_guard(GLOBAL)

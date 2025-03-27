@@ -3,7 +3,6 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include <iostream>
 #include <string>
 #include <utility>
 
@@ -11,6 +10,8 @@
 #include <cmext/string_view>
 
 #include "cmCMakePath.h"
+
+#include "testCommon.h"
 
 namespace {
 
@@ -422,20 +423,6 @@ bool testAppend()
 
 int testCMakePath(int /*unused*/, char* /*unused*/[])
 {
-  int result = 0;
-
-  if (!testConstructors()) {
-    result = 1;
-  }
-  if (!testAssign()) {
-    result = 1;
-  }
-  if (!testConcat()) {
-    result = 1;
-  }
-  if (!testAppend()) {
-    result = 1;
-  }
-
-  return result;
+  return runTests({ testConstructors, testAssign, testConcat, testAppend },
+                  false);
 }

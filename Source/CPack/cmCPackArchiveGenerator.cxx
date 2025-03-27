@@ -259,11 +259,11 @@ int cmCPackArchiveGenerator::addOneComponentToArchive(
     std::string rp = filePrefix + file;
 
     DeduplicateStatus status = DeduplicateStatus::Add;
-    if (deduplicator != nullptr) {
+    if (deduplicator) {
       status = deduplicator->IsDeduplicate(rp, localToplevel);
     }
 
-    if (deduplicator == nullptr || status == DeduplicateStatus::Add) {
+    if (!deduplicator || status == DeduplicateStatus::Add) {
       cmCPackLogger(cmCPackLog::LOG_DEBUG, "Adding file: " << rp << std::endl);
       archive.Add(rp, 0, nullptr, false);
     } else if (status == DeduplicateStatus::Error) {
@@ -350,7 +350,7 @@ int cmCPackArchiveGenerator::PackageComponents(bool ignoreGroup)
     // Handle Orphan components (components not belonging to any groups)
     for (auto& comp : this->Components) {
       // Does the component belong to a group?
-      if (comp.second.Group == nullptr) {
+      if (!comp.second.Group) {
         cmCPackLogger(
           cmCPackLog::LOG_VERBOSE,
           "Component <"

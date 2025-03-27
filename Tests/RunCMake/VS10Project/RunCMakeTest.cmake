@@ -50,6 +50,7 @@ run_cmake(VsSettings)
 run_cmake(VsSourceSettingsTool)
 run_cmake(VsPlatformToolset)
 run_cmake(VsControlFlowGuardLinkSetting)
+run_cmake(VsToolOverride)
 
 run_cmake(VsWinRTByDefault)
 
@@ -98,6 +99,7 @@ run_cmake(DebugInformationFormat)
 run_cmake(VsCLREmpty)
 run_cmake(VsCLRPure)
 run_cmake(VsCLRSafe)
+run_cmake(VsFrameworkReference)
 
 if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 19.20)
   run_cmake(VsCLRNetcore)

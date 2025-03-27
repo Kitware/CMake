@@ -14,7 +14,7 @@ else()
 endif()
 
 # Verify Third Manifest Content is inside Executable.
-file(STRINGS "${exe}" manifest_content3 REGEX "<dpiAware>true</dpiAware>")
+file(STRINGS "${exe}" manifest_content3 REGEX "<dpiAwareness.*>PerMonitorV2</dpiAwareness>")
 if(manifest_content3)
   message(STATUS "Expected manifest content found:\n ${manifest_content3}")
 else()

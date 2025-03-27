@@ -146,7 +146,7 @@ public:
   {
     std::string result = argument;
     for (auto const& filter : this->Filters) {
-      if (filter != nullptr) {
+      if (filter) {
         result = filter(result);
       }
     }

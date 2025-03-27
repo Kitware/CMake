@@ -1,0 +1,4 @@
+libs=lfortran_runtime;m;gcc;gcc_s;c;gcc;gcc_s
+dirs=/usr/lib64;/usr/lib/clang/19/lib/x86_64-redhat-linux-gnu;/usr/lib/gcc/x86_64-redhat-linux/14;/lib64;/lib;/usr/lib
+library_arch=x86_64-redhat-linux-gnu
+linker_tool=/usr/bin/ld

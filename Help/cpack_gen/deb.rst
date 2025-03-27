@@ -182,11 +182,22 @@ List of CPack DEB generator specific variables:
    only the automatically discovered dependencies will be set for this
    component.
 
+ .. versionchanged:: 3.31
+
+   The variable is always expanded as a list. Before it was expanded only
+   if used in cooperation with :variable:`CPACK_DEB_COMPONENT_INSTALL`,
+   :variable:`CPACK_DEBIAN_PACKAGE_SHLIBDEPS` or
+   :variable:`CPACK_DEBIAN_<COMPONENT>_PACKAGE_SHLIBDEPS`.
+   This meant that if a component had no shared libraries discovered
+   (e.g. a package composed only of scripts) you had to join the list
+   by yourself to obtain a valid Depends field.
+
  Example:
 
  .. code-block:: cmake
 
    set(CPACK_DEBIAN_PACKAGE_DEPENDS "libc6 (>= 2.3.1-6), libc6 (< 2.4)")
+   list(APPEND CPACK_DEBIAN_PACKAGE_DEPENDS cmake)
 
 .. variable:: CPACK_DEBIAN_ENABLE_COMPONENT_DEPENDS
 
@@ -653,6 +664,31 @@ List of CPack DEB generator specific variables:
 
    This value is not interpreted. It is possible to pass an optional
    revision number of the referenced source package as well.
+
+.. variable:: CPACK_DEBIAN_PACKAGE_MULTIARCH
+              CPACK_DEBIAN_<COMPONENT>_PACKAGE_MULTIARCH
+
+ Sets the `Multi-Arch` field of the Debian package.
+ Packages can declare in their control file how they should handle
+ situations, where packages for different architectures are being installed
+ on the same machine.
+
+ :Mandatory: No
+ :Default:
+
+   - An empty string for non-component based installations
+   - :variable:`CPACK_DEBIAN_PACKAGE_MULTIARCH` for component-based
+     installations.
+
+ .. versionadded:: 3.31
+  Per-component :variable:`!CPACK_DEBIAN_<COMPONENT>_PACKAGE_MULTIARCH` variables.
+
+ See https://wiki.debian.org/MultiArch/Hints
+
+ .. note::
+
+   This value is validated. It must be one of the following values:
+   ``same``, ``foreign``, ``allowed``.
 
 Packaging of debug information
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

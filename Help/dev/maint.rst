@@ -306,11 +306,22 @@ Commit with a message such as::
 
   Begin post-$ver development
 
-Push the update to the ``master`` and ``release`` branches:
+Create a topic branch for the update to ``master``:
 
 .. code-block:: shell
 
-  git push --atomic origin master release-$ver:release
+  git branch branch-$ver master
+
+Open a merge request with the ``branch-$ver`` branch for review and CI.
+Add the following trailing lines in the merge request description::
+
+  Fast-forward: true
+  Backport-ff: release:HEAD~1^2
+
+This configures the ``Do: merge`` action to fast-foward the ``master``
+and ``release`` branches to the respective commits created above.
+
+Further steps may proceed after this has been merged.
 
 Announce 'release' Branch
 -------------------------

@@ -6,4 +6,4 @@ CMake Error at NonValidTarget-CXX_COMPILER_FRONTEND_VARIANT.cmake:1 \(add_custom
   \$<CXX_COMPILER_FRONTEND_VARIANT> may only be used with binary targets.  It
   may not be used with add_custom_command or add_custom_target.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists.txt:[0-9]+ \(include\)
