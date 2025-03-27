@@ -8,7 +8,7 @@ Projects may provide further modules; their location(s)
 can be specified in the :variable:`CMAKE_MODULE_PATH` variable.
 
 Utility Modules
-^^^^^^^^^^^^^^^
+===============
 
 These modules are loaded using the :command:`include` command.
 
@@ -95,7 +95,7 @@ These modules are loaded using the :command:`include` command.
    /module/UsewxWidgets
 
 Find Modules
-^^^^^^^^^^^^
+============
 
 These modules search for third-party software.
 They are normally called through the :command:`find_package` command.
@@ -255,10 +255,10 @@ They are normally called through the :command:`find_package` command.
    /module/FindZLIB
 
 Deprecated Modules
-^^^^^^^^^^^^^^^^^^^
+==================
 
 Deprecated Utility Modules
-==========================
+--------------------------
 
 .. toctree::
    :maxdepth: 1
@@ -284,7 +284,7 @@ Deprecated Utility Modules
    /module/WriteCompilerDetectionHeader
 
 Deprecated Find Modules
-=======================
+-----------------------
 
 .. toctree::
    :maxdepth: 1
@@ -302,7 +302,7 @@ Deprecated Find Modules
    /module/FindwxWindows
 
 Legacy CPack Modules
-====================
+--------------------
 
 These modules used to be mistakenly exposed to the user, and have been moved
 out of user visibility. They are for CPack internal use, and should never be
