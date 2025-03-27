@@ -23,6 +23,13 @@ run_cmake(no-file)
 run_cmake(range)
 run_cmake(SHOW_PROGRESS)
 
+foreach(file IN ITEMS /dev/full /dev/urandom)
+  if(IS_WRITABLE "${file}")
+    run_cmake_with_options(file-write-error -Dfile=${file})
+    break()
+  endif()
+endforeach()
+
 if(NOT CMake_TEST_NO_NETWORK)
   run_cmake(bad-hostname)
 endif()
