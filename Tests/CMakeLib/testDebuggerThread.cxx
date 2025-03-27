@@ -56,5 +56,7 @@ bool testStackFrameFormatLine()
 
 int testDebuggerThread(int, char*[])
 {
-  return runTests({ testStackFrameFunctionName });
+  return runTests({ testStackFrameNoFormatting, testStackFrameFormatParameters,
+                    testStackFrameFormatParameterValues,
+                    testStackFrameFormatLine });
 }
