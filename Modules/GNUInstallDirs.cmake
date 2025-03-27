@@ -263,6 +263,20 @@ function(_GNUInstallDirs_get_system_type_for_install out_var)
   return(PROPAGATE ${out_var})
 endfunction()
 
+# Special handler for `/`, `/usr`, `/opt/...` install prefixes
+# Used for SYSCONFDIR, LOCALSTATEDIR and RUNSTATEDIR paths
+function(_GNUInstallDirs_special_absolute out_var original_path install_prefix)
+  set(${out_var} "${original_path}")
+
+  if(install_prefix MATCHES "^/usr/?$")
+    set(${out_var} "/${original_path}")
+  elseif(install_prefix MATCHES "^/opt/" AND NOT install_prefix MATCHES "^/opt/homebrew/")
+    set(${out_var} "/${original_path}/${install_prefix}")
+  endif()
+
+  return(PROPAGATE ${out_var})
+endfunction()
+
 # Installation directories
 #
 
@@ -449,27 +463,23 @@ macro(GNUInstallDirs_get_absolute_install_dir absvar var)
     # - CMAKE_INSTALL_PREFIX == /
     # - CMAKE_INSTALL_PREFIX == /usr
     # - CMAKE_INSTALL_PREFIX == /opt/...
-    if("${CMAKE_INSTALL_PREFIX}" STREQUAL "/")
-      if("${GGAID_dir}" STREQUAL "SYSCONFDIR" OR "${GGAID_dir}" STREQUAL "LOCALSTATEDIR" OR "${GGAID_dir}" STREQUAL "RUNSTATEDIR")
-        set(${absvar} "/${${var}}")
-      else()
-        if (NOT "${${var}}" MATCHES "^usr/")
-          set(${var} "usr/${${var}}")
+    if("${GGAID_dir}" STREQUAL "SYSCONFDIR" OR "${GGAID_dir}" STREQUAL "LOCALSTATEDIR" OR "${GGAID_dir}" STREQUAL "RUNSTATEDIR")
+      _GNUInstallDirs_special_absolute(${absvar} "${${var}}" "${CMAKE_INSTALL_PREFIX}")
+      # If the CMAKE_INSTALL_PREFIX was not special, the output
+      # is still not absolute, so use the default logic.
+      if(NOT IS_ABSOLUTE "${${absvar}}")
+        # Make sure we account for any trailing `/`
+        if(CMAKE_INSTALL_PREFIX MATCHES "/$")
+          set(${absvar} "${CMAKE_INSTALL_PREFIX}${${var}}")
+        else()
+          set(${absvar} "${CMAKE_INSTALL_PREFIX}/${${var}}")
         endif()
-        set(${absvar} "/${${var}}")
       endif()
-    elseif("${CMAKE_INSTALL_PREFIX}" MATCHES "^/usr/?$")
-      if("${GGAID_dir}" STREQUAL "SYSCONFDIR" OR "${GGAID_dir}" STREQUAL "LOCALSTATEDIR" OR "${GGAID_dir}" STREQUAL "RUNSTATEDIR")
-        set(${absvar} "/${${var}}")
-      else()
-        set(${absvar} "${CMAKE_INSTALL_PREFIX}/${${var}}")
+    elseif("${CMAKE_INSTALL_PREFIX}" STREQUAL "/")
+      if (NOT "${${var}}" MATCHES "^usr/")
+        set(${var} "usr/${${var}}")
       endif()
-    elseif("${CMAKE_INSTALL_PREFIX}" MATCHES "^/opt/" AND NOT "${CMAKE_INSTALL_PREFIX}" MATCHES "^/opt/homebrew/")
-      if("${GGAID_dir}" STREQUAL "SYSCONFDIR" OR "${GGAID_dir}" STREQUAL "LOCALSTATEDIR" OR "${GGAID_dir}" STREQUAL "RUNSTATEDIR")
-        set(${absvar} "/${${var}}${CMAKE_INSTALL_PREFIX}")
-      else()
-        set(${absvar} "${CMAKE_INSTALL_PREFIX}/${${var}}")
-      endif()
+      set(${absvar} "/${${var}}")
     else()
       set(${absvar} "${CMAKE_INSTALL_PREFIX}/${${var}}")
     endif()
