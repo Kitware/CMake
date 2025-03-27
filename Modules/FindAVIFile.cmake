@@ -5,20 +5,41 @@
 FindAVIFile
 -----------
 
-Locate `AVIFILE <https://avifile.sourceforge.net/>`_
-library and include paths.
+Finds `AVIFile <https://avifile.sourceforge.net/>`_ library and include paths.
 
-AVIFILE is a set of libraries for
-i386 machines to use various AVI codecs.  Support is limited beyond
-Linux.  Windows provides native AVI support, and so doesn't need this
-library.  This module defines
+AVIFile is a set of libraries for i386 machines to use various AVI codecs.
+Support is limited beyond Linux.  Windows provides native AVI support, and so
+doesn't need this library.
 
-::
+Result Variables
+^^^^^^^^^^^^^^^^
 
-  AVIFILE_INCLUDE_DIR, where to find avifile.h , etc.
-  AVIFILE_LIBRARIES, the libraries to link against
-  AVIFILE_DEFINITIONS, definitions to use when compiling
-  AVIFILE_FOUND, If false, don't try to use AVIFILE
+This module defines the following variables:
+
+``AVIFile_FOUND``
+  True if AVIFile is found.  For backward compatibility, the ``AVIFILE_FOUND``
+  variable is also set to the same value.
+``AVIFILE_LIBRARIES``
+  The libraries to link against.
+``AVIFILE_DEFINITIONS``
+  Definitions to use when compiling.
+
+Cache Variables
+^^^^^^^^^^^^^^^
+
+The following cache variables may be also set:
+
+``AVIFILE_INCLUDE_DIR``
+  Directory containing ``avifile.h`` and other AVIFile headers.
+
+Examples
+^^^^^^^^
+
+Finding AVIFile:
+
+.. code-block:: cmake
+
+  find_package(AVIFile)
 #]=======================================================================]
 
 if (UNIX)
@@ -31,7 +52,7 @@ endif ()
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(AVIFile DEFAULT_MSG AVIFILE_INCLUDE_DIR AVIFILE_AVIPLAY_LIBRARY)
 
-if (AVIFILE_FOUND)
+if (AVIFile_FOUND)
     set(AVIFILE_LIBRARIES ${AVIFILE_AVIPLAY_LIBRARY})
     set(AVIFILE_DEFINITIONS "")
 endif()
