@@ -4,6 +4,8 @@
 # Re-configure to save learned information.
 block()
   foreach(_var IN ITEMS
+      # Compiler information.
+      # Keep in sync with CMakeDetermineASMCompiler.
       COMPILER
       COMPILER_ID
       COMPILER_ARG1
@@ -11,6 +13,8 @@ block()
       COMPILER_AR
       COMPILER_RANLIB
       COMPILER_VERSION
+      COMPILER_ARCHITECTURE_ID
+      # Linker information.
       COMPILER_LINKER
       COMPILER_LINKER_ID
       COMPILER_LINKER_VERSION

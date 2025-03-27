@@ -150,6 +150,7 @@ function(CMAKE_DETERMINE_COMPILER_ABI lang src)
       set(ABI_SIZEOF_DPTR "NOTFOUND")
       set(ABI_BYTE_ORDER "NOTFOUND")
       set(ABI_NAME "NOTFOUND")
+      set(ARCHITECTURE_ID "")
       foreach(info ${ABI_STRINGS})
         if("${info}" MATCHES "INFO:sizeof_dptr\\[0*([^]]*)\\]" AND NOT ABI_SIZEOF_DPTR)
           set(ABI_SIZEOF_DPTR "${CMAKE_MATCH_1}")
@@ -167,6 +168,9 @@ function(CMAKE_DETERMINE_COMPILER_ABI lang src)
         if("${info}" MATCHES "INFO:abi\\[([^]]*)\\]" AND NOT ABI_NAME)
           set(ABI_NAME "${CMAKE_MATCH_1}")
         endif()
+        if("${info}" MATCHES "INFO:arch\\[([^]\"]*)\\]")
+          list(APPEND ARCHITECTURE_ID "${CMAKE_MATCH_1}")
+        endif()
       endforeach()
 
       if(ABI_SIZEOF_DPTR)
@@ -181,6 +185,28 @@ function(CMAKE_DETERMINE_COMPILER_ABI lang src)
 
       if(ABI_NAME)
         set(CMAKE_${lang}_COMPILER_ABI "${ABI_NAME}" PARENT_SCOPE)
+      endif()
+
+      # The GNU Fortran compiler does not predefine architecture macros.
+      if(NOT CMAKE_${lang}_COMPILER_ARCHITECTURE_ID AND NOT ARCHITECTURE_ID
+         AND lang STREQUAL "Fortran" AND CMAKE_${lang}_COMPILER_ID STREQUAL "GNU")
+        execute_process(COMMAND "${CMAKE_${lang}_COMPILER}" -dumpmachine
+          OUTPUT_VARIABLE _dumpmachine_triple OUTPUT_STRIP_TRAILING_WHITESPACE
+          ERROR_VARIABLE  _dumpmachine_stderr
+          RESULT_VARIABLE _dumpmachine_result
+          )
+        if(_dumpmachine_result EQUAL 0)
+          include(Internal/CMakeParseCompilerArchitectureId)
+          cmake_parse_compiler_architecture_id("${_dumpmachine_triple}" ARCHITECTURE_ID)
+        endif()
+      endif()
+
+      # For some compilers we detect the architecture id during compiler identification.
+      # If this was not one of those, use what was detected during compiler ABI detection,
+      # which might be a list, e.g., when CMAKE_OSX_ARCHITECTURES has multiple values.
+      if(NOT CMAKE_${lang}_COMPILER_ARCHITECTURE_ID AND ARCHITECTURE_ID)
+        list(SORT ARCHITECTURE_ID)
+        set(CMAKE_${lang}_COMPILER_ARCHITECTURE_ID "${ARCHITECTURE_ID}" PARENT_SCOPE)
       endif()
 
       # Parse implicit include directory for this language, if available.

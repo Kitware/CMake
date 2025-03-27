@@ -238,18 +238,6 @@ else()
   message(STATUS "Didn't find assembler")
 endif()
 
-foreach(_var
-    COMPILER
-    COMPILER_ID
-    COMPILER_ARG1
-    COMPILER_ENV_VAR
-    COMPILER_AR
-    COMPILER_RANLIB
-    COMPILER_VERSION
-    )
-  set(_CMAKE_ASM_${_var} "${CMAKE_ASM${ASM_DIALECT}_${_var}}")
-endforeach()
-
 if(CMAKE_ASM${ASM_DIALECT}_COMPILER_SYSROOT)
   string(CONCAT _SET_CMAKE_ASM_COMPILER_SYSROOT
     "set(CMAKE_ASM${ASM_DIALECT}_COMPILER_SYSROOT \"${CMAKE_ASM${ASM_DIALECT}_COMPILER_SYSROOT}\")\n"
@@ -265,25 +253,21 @@ else()
   set(_SET_CMAKE_ASM_COMPILER_ID_VENDOR_MATCH "")
 endif()
 
-if(CMAKE_ASM${ASM_DIALECT}_COMPILER_ARCHITECTURE_ID)
-  set(_SET_CMAKE_ASM_COMPILER_ARCHITECTURE_ID
-    "set(CMAKE_ASM${ASM_DIALECT}_COMPILER_ARCHITECTURE_ID ${CMAKE_ASM${ASM_DIALECT}_COMPILER_ARCHITECTURE_ID})")
-else()
-  set(_SET_CMAKE_ASM_COMPILER_ARCHITECTURE_ID "")
-endif()
-
 # configure variables set in this file for fast reload later on
-configure_file(${CMAKE_ROOT}/Modules/CMakeASMCompiler.cmake.in
-  ${CMAKE_PLATFORM_INFO_DIR}/CMakeASM${ASM_DIALECT}Compiler.cmake @ONLY)
-
-foreach(_var
-    COMPILER
-    COMPILER_ID
-    COMPILER_ARG1
-    COMPILER_ENV_VAR
-    COMPILER_AR
-    COMPILER_RANLIB
-    COMPILER_VERSION
-    )
-  unset(_CMAKE_ASM_${_var})
-endforeach()
+block()
+  foreach(_var IN ITEMS
+      # Keep in sync with Internal/CMakeTestASMLinker.
+      COMPILER
+      COMPILER_ID
+      COMPILER_ARG1
+      COMPILER_ENV_VAR
+      COMPILER_AR
+      COMPILER_RANLIB
+      COMPILER_VERSION
+      COMPILER_ARCHITECTURE_ID
+      )
+    set(_CMAKE_ASM_${_var} "${CMAKE_ASM${ASM_DIALECT}_${_var}}")
+  endforeach()
+  configure_file(${CMAKE_ROOT}/Modules/CMakeASMCompiler.cmake.in
+    ${CMAKE_PLATFORM_INFO_DIR}/CMakeASM${ASM_DIALECT}Compiler.cmake @ONLY)
+endblock()

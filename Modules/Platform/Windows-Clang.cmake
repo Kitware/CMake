@@ -228,7 +228,7 @@ if("x${CMAKE_C_SIMULATE_ID}" STREQUAL "xMSVC"
       set(CMAKE_INCLUDE_SYSTEM_FLAG_${lang} "-imsvc")
 
       set(CMAKE_${lang}_LINK_MODE LINKER)
-endmacro()
+    endmacro()
   else()
     cmake_policy(GET CMP0091 __WINDOWS_CLANG_CMP0091)
     if(__WINDOWS_CLANG_CMP0091 STREQUAL "NEW")
