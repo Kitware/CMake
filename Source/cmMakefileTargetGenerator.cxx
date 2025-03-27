@@ -617,7 +617,9 @@ void cmMakefileTargetGenerator::MacOSXContentGeneratorType::operator()(
   this->Generator->LocalGenerator->AppendEcho(
     commands, copyEcho, cmLocalUnixMakefileGenerator3::EchoBuild);
   std::string copyCommand =
-    cmStrCat("$(CMAKE_COMMAND) -E copy ",
+    cmStrCat(cmSystemTools::FileIsDirectory(input)
+               ? "$(CMAKE_COMMAND) -E copy_directory "
+               : "$(CMAKE_COMMAND) -E copy ",
              this->Generator->LocalGenerator->ConvertToOutputFormat(
                input, cmOutputConverter::SHELL),
              ' ',

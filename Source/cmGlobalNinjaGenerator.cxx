@@ -419,20 +419,30 @@ void cmGlobalNinjaGenerator::WriteCustomCommandBuild(
 
 void cmGlobalNinjaGenerator::AddMacOSXContentRule()
 {
-  cmNinjaRule rule("COPY_OSX_CONTENT");
-  rule.Command = cmStrCat(this->CMakeCmd(), " -E copy $in $out");
-  rule.Description = "Copying OS X Content $out";
-  rule.Comment = "Rule for copying OS X bundle content file.";
-  this->AddRule(rule);
+  {
+    cmNinjaRule rule("COPY_OSX_CONTENT_FILE");
+    rule.Command = cmStrCat(this->CMakeCmd(), " -E copy $in $out");
+    rule.Description = "Copying OS X Content $out";
+    rule.Comment = "Rule for copying OS X bundle content file, with style.";
+    this->AddRule(rule);
+  }
+  {
+    cmNinjaRule rule("COPY_OSX_CONTENT_DIR");
+    rule.Command = cmStrCat(this->CMakeCmd(), " -E copy_directory $in $out");
+    rule.Description = "Copying OS X Content $out";
+    rule.Comment = "Rule for copying OS X bundle content dir, with style.";
+    this->AddRule(rule);
+  }
 }
-
 void cmGlobalNinjaGenerator::WriteMacOSXContentBuild(std::string input,
                                                      std::string output,
                                                      std::string const& config)
 {
   this->AddMacOSXContentRule();
   {
-    cmNinjaBuild build("COPY_OSX_CONTENT");
+    cmNinjaBuild build(cmSystemTools::FileIsDirectory(input)
+                         ? "COPY_OSX_CONTENT_DIR"
+                         : "COPY_OSX_CONTENT_FILE");
     build.Outputs.push_back(std::move(output));
     build.ExplicitDeps.push_back(std::move(input));
     this->WriteBuild(*this->GetImplFileStream(config), build);
