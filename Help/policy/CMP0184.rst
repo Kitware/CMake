@@ -24,9 +24,9 @@ offer a first-class abstraction.  The
 :variable:`CMAKE_MSVC_RUNTIME_CHECKS` variable and
 :prop_tgt:`MSVC_RUNTIME_CHECKS` target property may be set to
 select the MSVC runtime checks.  If they are not set, CMake
-enables runtime checks in ``Debug`` configuration using the default value
-``$<$<CONFIG:Debug>:StackFrameErrorCheck;UninitializedVariable>``, if
-supported by the compiler, or empty value otherwise.
+enables runtime checks for the ``Debug`` configuration only using the default
+value ``$<$<CONFIG:Debug>:StackFrameErrorCheck;UninitializedVariable>``, if
+supported by the compiler, or an empty value otherwise.
 
 This policy provides compatibility with projects that have not been updated
 to be aware of the abstraction.  The policy setting takes effect as of the
