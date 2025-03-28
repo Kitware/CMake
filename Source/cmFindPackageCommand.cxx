@@ -530,6 +530,7 @@ cmFindPackageCommand::cmFindPackageCommand(cmExecutionStatus& status)
   this->AppendSearchPathGroups();
 
   this->DeprecatedFindModules["Boost"] = cmPolicies::CMP0167;
+  this->DeprecatedFindModules["CABLE"] = cmPolicies::CMP0191;
   this->DeprecatedFindModules["CUDA"] = cmPolicies::CMP0146;
   this->DeprecatedFindModules["Dart"] = cmPolicies::CMP0145;
   this->DeprecatedFindModules["GCCXML"] = cmPolicies::CMP0188;

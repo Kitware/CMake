@@ -112,7 +112,6 @@ They are normally called through the :command:`find_package` command.
    /module/FindBLAS
    /module/FindBullet
    /module/FindBZip2
-   /module/FindCABLE
    /module/FindCoin3D
    /module/FindCUDAToolkit
    /module/FindCups
@@ -131,7 +130,6 @@ They are normally called through the :command:`find_package` command.
    /module/FindFLTK2
    /module/FindFontconfig
    /module/FindFreetype
-   /module/FindGCCXML
    /module/FindGettext
    /module/FindGIF
    /module/FindGit
@@ -290,8 +288,10 @@ Deprecated Find Modules
    :maxdepth: 1
 
    /module/FindBoost
+   /module/FindCABLE
    /module/FindCUDA
    /module/FindDart
+   /module/FindGCCXML
    /module/FindGDAL
    /module/FindITK
    /module/FindPythonInterp
