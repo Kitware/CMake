@@ -224,34 +224,34 @@ These identifiers are used when :variable:`CMAKE_<LANG>_COMPILER_ID` is
 ``IAR``.
 
 ``8051``
-  ..
+  Intel 8051-compatible 8-bit
 
 ``ARM``
-  ..
+  ARM 32-/64-bit
 
 ``AVR``
-  ..
+  Microchip AVR 8-bit
 
 ``MSP430``
-  ..
+  Texas Instruments MSP430 16-bit
 
 ``RH850``
-  ..
+  Renesas Electronics RH850 32-bit
 
 ``RISCV``
-  ..
+  RISC-V 32-/64-bit
 
 ``RL78``
-  ..
+  Renesas Electronics RL78 16-bit
 
 ``RX``
-  ..
+  Renesas Electronics RX 32-bit
 
 ``STM8``
-  ..
+  STMicroelectronics STM8 8-bit
 
 ``V850``
-  ..
+  Renesas Electronics V850 32-bit
 
 TASKING Platforms
 ^^^^^^^^^^^^^^^^^
