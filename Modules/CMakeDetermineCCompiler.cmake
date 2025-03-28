@@ -16,7 +16,6 @@
 #   CMAKE_C_COMPILER
 #   CMAKE_AR
 #   CMAKE_RANLIB
-#   CMAKE_COMPILER_IS_GNUCC
 #
 # If not already set before, it also sets
 #   _CMAKE_TOOLCHAIN_PREFIX

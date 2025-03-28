@@ -19,7 +19,7 @@ macro(TEST_PASS value msg)
   endif ()
 endmacro()
 
-if(CMAKE_COMPILER_IS_GNUCXX)
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   execute_process(COMMAND ${CMAKE_C_COMPILER} --version OUTPUT_VARIABLE     _gcc_version_info)
   string (REGEX MATCH "[345]\\.[0-9]\\.[0-9]" _gcc_version "${_gcc_version_info}")
   # gcc on mac just reports: "gcc (GCC) 3.3 20030304 ..." without the
@@ -52,7 +52,7 @@ check_cxx_compiler_flag(-fvisibility=hidden HAS_HIDDEN_VISIBILITY)
 
 message("HAS_HIDDEN_VISIBILITY: ${HAS_HIDDEN_VISIBILITY}\n\nCOMPILE OUTPUT:\n${OUTPUT}")
 
-if(CMAKE_COMPILER_IS_GNUCXX)
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   if(NOT WIN32)
 #     test_pass(HAS_HIDDEN_VISIBILITY "GCC should support hidden visibility, but does not.")
   endif()

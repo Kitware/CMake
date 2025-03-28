@@ -27,7 +27,7 @@ endif()
 
 set(CMAKE_BASE_NAME)
 get_filename_component(CMAKE_BASE_NAME "${CMAKE_C_COMPILER}" NAME_WE)
-if(CMAKE_COMPILER_IS_GNUCC)
+if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
   set(CMAKE_BASE_NAME gcc)
 endif()
 

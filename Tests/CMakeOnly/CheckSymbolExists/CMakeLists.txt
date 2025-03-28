@@ -37,7 +37,7 @@ else ()
   message(STATUS "errno found as expected")
 endif ()
 
-if (CMAKE_COMPILER_IS_GNUCC)
+if (CMAKE_C_COMPILER_ID MATCHES "^(GNU|LCC)$")
   string(APPEND CMAKE_C_FLAGS " -O3")
   unset(CSE_RESULT_O3 CACHE)
   message(STATUS "Testing with optimization -O3")

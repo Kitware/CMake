@@ -82,7 +82,7 @@ if(NOT 2.4 GREATER_EQUAL 2.4)
 endif()
 
 if(CMAKE_SYSTEM MATCHES "OSF1-V")
-  if(NOT CMAKE_COMPILER_IS_GNUCXX)
+  if(NOT CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
      string(APPEND CMAKE_CXX_FLAGS " -timplicit_local -no_implicit_include ")
   endif()
 endif()

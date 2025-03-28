@@ -21,7 +21,7 @@ set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
 
 include(Platform/UnixPaths)
 
-if(CMAKE_COMPILER_IS_GNUCC)
+if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
   set(CMAKE_C_LINK_EXECUTABLE
     "<CMAKE_C_COMPILER> -Wl,-relax <FLAGS> <CMAKE_C_LINK_FLAGS> <LINK_FLAGS> <OBJECTS> -o <TARGET> <LINK_LIBRARIES> -Wl,-lgcc,-lc -lnss_files -lnss_dns -lresolv")
 else()
@@ -30,7 +30,7 @@ else()
     "<CMAKE_C_COMPILER> -Wl,-relax <FLAGS> <CMAKE_C_LINK_FLAGS> <LINK_FLAGS> <OBJECTS> -o <TARGET> <LINK_LIBRARIES> -Wl,-lc -lnss_files -lnss_dns -lresolv")
 endif()
 
-if(CMAKE_COMPILER_IS_GNUCXX)
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   set(CMAKE_CXX_LINK_EXECUTABLE
     "<CMAKE_CXX_COMPILER> -Wl,-relax <FLAGS> <CMAKE_CXX_LINK_FLAGS> <LINK_FLAGS> <OBJECTS> -o <TARGET> <LINK_LIBRARIES> -Wl,-lstdc++,-lgcc,-lc -lnss_files -lnss_dns -lresolv")
 else()

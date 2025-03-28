@@ -14,12 +14,12 @@ endif()
 
 if(CMAKE_SYSTEM MATCHES "OSF1-V")
   set(CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS "-shared -Wl,-expect_unresolved,\\*")       # -shared
-  if(CMAKE_COMPILER_IS_GNUCXX)
+  if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     set(CMAKE_SHARED_LIBRARY_RUNTIME_CXX_FLAG "-Wl,-rpath,")
   else()
     set(CMAKE_SHARED_LIBRARY_RUNTIME_CXX_FLAG "-rpath ")
   endif()
-  if(CMAKE_COMPILER_IS_GNUCC)
+  if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
     set(CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG "-Wl,-rpath,")
   else()
     set(CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG "-rpath ")
@@ -29,7 +29,7 @@ endif()
 
 set(CMAKE_MAKE_INCLUDE_FROM_ROOT 1) # include $(CMAKE_BINARY_DIR)/...
 
-if(CMAKE_COMPILER_IS_GNUCXX)
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   # include the gcc flags
 else ()
   # use default OSF compiler flags
