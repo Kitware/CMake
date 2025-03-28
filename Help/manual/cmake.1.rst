@@ -1389,14 +1389,51 @@ CMake provides a pkg-config like helper for Makefile-based projects:
 
   cmake --find-package [<options>]
 
-It searches a package using :command:`find_package()` and prints the
-resulting flags to stdout.  This can be used instead of pkg-config
-to find installed libraries in plain Makefile-based projects or in
-autoconf-based projects (via ``share/aclocal/cmake.m4``).
-
 .. note::
   This mode is not well-supported due to some technical limitations.
   It is kept for compatibility but should not be used in new projects.
+
+.. option:: --find-package
+
+  It searches a package using the :command:`find_package` command and prints the
+  resulting flags to stdout.  This can be used instead of pkg-config to find
+  installed libraries in plain Makefile-based projects or in Autoconf-based
+  projects, using auxiliary macros installed in ``share/aclocal/cmake.m4`` on
+  the system.
+
+  When using this option, the following variables are expected:
+
+  ``NAME``
+    Name of the package as called in ``find_package(<PackageName>)``.
+
+  ``COMPILER_ID``
+    :variable:`Compiler ID <CMAKE_<LANG>_COMPILER_ID>` used for searching the
+    package, i.e. GNU/Intel/Clang/MSVC, etc.
+
+  ``LANGUAGE``
+    Language used for searching the package, i.e. C/CXX/Fortran/ASM, etc.
+
+  ``MODE``
+    The package search mode.  Value can be one of:
+
+    ``EXIST``
+      Only checks for existence of the given package.
+
+    ``COMPILE``
+      Prints the flags needed for compiling an object file which uses the given
+      package.
+
+    ``LINK``
+      Prints the flags needed for linking when using the given package.
+
+  ``SILENT``
+    (Optional) If TRUE, find result message is not printed.
+
+  For example:
+
+  .. code-block:: shell
+
+    cmake --find-package -DNAME=CURL -DCOMPILER_ID=GNU -DLANGUAGE=C -DMODE=LINK
 
 .. _`Workflow Mode`:
 
