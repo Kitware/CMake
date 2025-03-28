@@ -5,18 +5,36 @@
 FindMotif
 ---------
 
-Try to find Motif (or lesstif)
+Finds Motif (or LessTif) graphical user interface toolkit.
 
-Once done this will define:
+Result Variables
+^^^^^^^^^^^^^^^^
 
-::
+This module defines the following variables:
 
-  MOTIF_FOUND        - system has MOTIF
-  MOTIF_INCLUDE_DIR  - include paths to use Motif
-  MOTIF_LIBRARIES    - Link these to use Motif
+``Motif_FOUND``
+  Boolean indicating whether the Motif was found.  For backward compatibility,
+  the ``MOTIF_FOUND`` variable is also set to the same value.
+
+Cache Variables
+^^^^^^^^^^^^^^^
+
+The following cache variables may also be set:
+
+``MOTIF_LIBRARIES``
+  Libraries needed to link to Motif.
+``MOTIF_INCLUDE_DIR``
+  Include directories needed to use Motif.
+
+Examples
+^^^^^^^^
+
+Finding Motif:
+
+.. code-block:: cmake
+
+  find_package(Motif)
 #]=======================================================================]
-
-set(MOTIF_FOUND 0)
 
 if(UNIX)
   find_path(MOTIF_INCLUDE_DIR
