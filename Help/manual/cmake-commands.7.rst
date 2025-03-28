@@ -22,6 +22,7 @@ These commands are always available.
    /command/cmake_minimum_required
    /command/cmake_parse_arguments
    /command/cmake_path
+   /command/cmake_pkg_config
    /command/cmake_policy
    /command/configure_file
    /command/continue

@@ -1,0 +1,6 @@
+^Test project [^
+]*/Tests/RunCMake/CTestCommandLine/PrintLabels
+All Labels:
+  Label1
+  Label2
+  Label3$

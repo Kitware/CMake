@@ -55,8 +55,6 @@ macro(__windows_compiler_clang_gnu lang)
   set(CMAKE_SHARED_LIBRARY_${lang}_FLAGS "")
   set(CMAKE_SHARED_LIBRARY_CREATE_${lang}_FLAGS "-shared")
 
-  set(CMAKE_${lang}_LINK_LIBRARIES_PROCESSING ORDER=FORWARD DEDUPLICATION=ALL)
-
   # linker selection
   set(CMAKE_${lang}_USING_LINKER_DEFAULT "-fuse-ld=lld-link")
   set(CMAKE_${lang}_USING_LINKER_SYSTEM "-fuse-ld=link")
@@ -134,14 +132,6 @@ macro(__windows_compiler_clang_gnu lang)
   unset(_RTL_FLAGS_DEBUG)
   string(TOLOWER "${CMAKE_BUILD_TYPE}" BUILD_TYPE_LOWER)
   set(CMAKE_${lang}_STANDARD_LIBRARIES_INIT "-lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32 -loldnames")
-
-  # Features for LINK_LIBRARY generator expression
-  if(MSVC_VERSION GREATER "1900")
-    ## WHOLE_ARCHIVE: Force loading all members of an archive
-    set(CMAKE_${lang}_LINK_LIBRARY_USING_WHOLE_ARCHIVE "LINKER:/WHOLEARCHIVE:<LIBRARY>")
-    set(CMAKE_${lang}_LINK_LIBRARY_USING_WHOLE_ARCHIVE_SUPPORTED TRUE)
-    set(CMAKE_${lang}_LINK_LIBRARY_WHOLE_ARCHIVE_ATTRIBUTES LIBRARY_TYPE=STATIC DEDUPLICATION=YES OVERRIDE=DEFAULT)
-  endif()
 
   enable_language(RC)
 endmacro()

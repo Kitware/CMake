@@ -268,7 +268,7 @@ static inline char* realpath(const char* path, char* resolved_path)
   snprintf(resolved_path, maxlen, "%s", path);
   BPath normalized(resolved_path, nullptr, true);
   const char* resolved = normalized.Path();
-  if (resolved != nullptr) // nullptr == No such file.
+  if (resolved) // nullptr == No such file.
   {
     if (snprintf(resolved_path, maxlen, "%s", resolved) < maxlen) {
       return resolved_path;
@@ -798,7 +798,7 @@ bool SystemTools::HasEnv(const char* key)
 #else
   const char* v = getenv(key);
 #endif
-  return v != nullptr;
+  return v;
 }
 
 bool SystemTools::HasEnv(const std::string& key)
@@ -1167,7 +1167,7 @@ static DWORD SystemToolsMakeRegistryMode(DWORD mode,
   // only add the modes when on a system that supports Wow64.
   static FARPROC wow64p =
     GetProcAddress(GetModuleHandleW(L"kernel32"), "IsWow64Process");
-  if (wow64p == nullptr) {
+  if (!wow64p) {
     return mode;
   }
 
@@ -2597,8 +2597,12 @@ SystemTools::CopyStatus SystemTools::CloneFileContent(
 
   // NOTE: we cannot use `clonefile` as the {a,c,m}time for the file needs to
   // be updated by `copy_file_if_different` and `copy_file`.
+  // These flags are meant to be COPYFILE_METADATA | COPYFILE_CLONE, but CLONE
+  // forces COPYFILE_NOFOLLOW_SRC and that violates the invariant that this
+  // should result in a file.
   if (copyfile(source.c_str(), destination.c_str(), nullptr,
-               COPYFILE_METADATA | COPYFILE_CLONE) < 0) {
+               COPYFILE_METADATA | COPYFILE_EXCL | COPYFILE_STAT |
+                 COPYFILE_XATTR | COPYFILE_DATA) < 0) {
     return CopyStatus{ Status::POSIX_errno(), CopyStatus::NoPath };
   }
 #  if KWSYS_CXX_HAS_UTIMENSAT
@@ -3394,7 +3398,7 @@ Status SystemTools::ReadSymlink(std::string const& newName,
     // terminated by an empty string (0-0).  We need the third string.
     size_t destLen;
     substituteNameData = GetAppExecLink(data, destLen);
-    if (substituteNameData == nullptr || destLen == 0) {
+    if (!substituteNameData || destLen == 0) {
       return Status::Windows(ERROR_SYMLINK_NOT_SUPPORTED);
     }
     substituteNameLength = static_cast<USHORT>(destLen);

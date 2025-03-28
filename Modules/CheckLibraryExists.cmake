@@ -5,7 +5,7 @@
 CheckLibraryExists
 ------------------
 
-Check if the function exists.
+Check once if the function exists in system or specified library.
 
 .. command:: CHECK_LIBRARY_EXISTS
 
@@ -18,10 +18,11 @@ Check if the function exists.
     LIBRARY  - the name of the library you are looking for
     FUNCTION - the name of the function
     LOCATION - location where the library should be found
-    VARIABLE - variable to store the result
-               Will be created as an internal cache variable.
+    VARIABLE - internal cache variable to store the result
 
-
+Prefer using :module:`CheckSymbolExists` or :module:`CheckSourceCompiles`
+instead of this module for more robust detection if a function is available in
+a library.
 
 The following variables may be set before calling this macro to modify
 the way the check is run:
@@ -33,6 +34,8 @@ the way the check is run:
 .. include:: /module/CMAKE_REQUIRED_LINK_OPTIONS.txt
 
 .. include:: /module/CMAKE_REQUIRED_LIBRARIES.txt
+
+.. include:: /module/CMAKE_REQUIRED_LINK_DIRECTORIES.txt
 
 .. include:: /module/CMAKE_REQUIRED_QUIET.txt
 
@@ -57,6 +60,12 @@ macro(CHECK_LIBRARY_EXISTS LIBRARY FUNCTION LOCATION VARIABLE)
       set(CHECK_LIBRARY_EXISTS_LIBRARIES
         ${CHECK_LIBRARY_EXISTS_LIBRARIES} ${CMAKE_REQUIRED_LIBRARIES})
     endif()
+    if(CMAKE_REQUIRED_LINK_DIRECTORIES)
+      set(_CLE_LINK_DIRECTORIES
+        "-DLINK_DIRECTORIES:STRING=${LOCATION};${CMAKE_REQUIRED_LINK_DIRECTORIES}")
+    else()
+      set(_CLE_LINK_DIRECTORIES "-DLINK_DIRECTORIES:STRING=${LOCATION}")
+    endif()
 
     if(CMAKE_C_COMPILER_LOADED)
       set(_cle_source CheckFunctionExists.c)
@@ -73,9 +82,10 @@ macro(CHECK_LIBRARY_EXISTS LIBRARY FUNCTION LOCATION VARIABLE)
       LINK_LIBRARIES ${CHECK_LIBRARY_EXISTS_LIBRARIES}
       CMAKE_FLAGS
       -DCOMPILE_DEFINITIONS:STRING=${MACRO_CHECK_LIBRARY_EXISTS_DEFINITION}
-      -DLINK_DIRECTORIES:STRING=${LOCATION}
+      "${_CLE_LINK_DIRECTORIES}"
       )
     unset(_cle_source)
+    unset(_CLE_LINK_DIRECTORIES)
 
     if(${VARIABLE})
       if(NOT CMAKE_REQUIRED_QUIET)

@@ -1560,6 +1560,10 @@ Configuration settings include:
   * `CTest Script`_ variable: :variable:`CTEST_TLS_VERSION`
   * :module:`CTest` module variable: ``CTEST_TLS_VERSION``
 
+  .. versionchanged:: 3.31
+    The default is TLS 1.2.
+    Previously, no minimum version was enforced by default.
+
 ``TLSVerify``
   .. versionadded:: 3.30
 
@@ -1568,6 +1572,11 @@ Configuration settings include:
 
   * `CTest Script`_ variable: :variable:`CTEST_TLS_VERIFY`
   * :module:`CTest` module variable: ``CTEST_TLS_VERIFY``
+
+  .. versionchanged:: 3.31
+    The default is on.  Previously, the default was off.
+    Users may set the :envvar:`CMAKE_TLS_VERIFY` environment
+    variable to ``0`` to restore the old default.
 
 ``TriggerSite``
   Legacy option.  Not used.

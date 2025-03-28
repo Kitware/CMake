@@ -494,7 +494,7 @@ void cmExtraCodeBlocksGenerator::AppendTarget(
   xml.StartElement("Target");
   xml.Attribute("title", targetName);
 
-  if (target != nullptr) {
+  if (target) {
     int cbTargetType = this->GetCBTargetType(target);
     std::string workingDir = lg->GetCurrentBinaryDirectory();
     if (target->GetType() == cmStateEnums::EXECUTABLE) {

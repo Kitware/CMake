@@ -41,3 +41,4 @@ echo "$sha256sum  $tarball" > ninja.sha256sum
 curl -OL "$baseurl/$tarball"
 $shatool --check ninja.sha256sum
 ./cmake/bin/cmake -E tar xf "$tarball"
+rm "$tarball" ninja.sha256sum

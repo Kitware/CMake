@@ -1,11 +1,5 @@
-cmake_minimum_required (VERSION 3.5)
+cmake_minimum_required(VERSION 3.10)
 project(VSExternalInclude)
-
-if(${CMAKE_GENERATOR} MATCHES "Visual Studio 1[0124567]")
-  set(PROJECT_EXT vcxproj)
-else()
-  set(PROJECT_EXT vcproj)
-endif()
 
 # make sure directories exists
 set(LIB1_BINARY_DIR ${VSExternalInclude_BINARY_DIR}/Lib1)
@@ -37,9 +31,9 @@ execute_process(
 message("CMAKE Ran with the following output:\n\"${OUT}\"")
 
 
-include_external_msproject(lib1 ${VSExternalInclude_BINARY_DIR}/Lib1/LIB1.${PROJECT_EXT})
+include_external_msproject(lib1 ${VSExternalInclude_BINARY_DIR}/Lib1/LIB1.vcxproj)
 # lib2 depends on lib1
-include_external_msproject(lib2 ${VSExternalInclude_BINARY_DIR}/Lib2/LIB2.${PROJECT_EXT} lib1)
+include_external_msproject(lib2 ${VSExternalInclude_BINARY_DIR}/Lib2/LIB2.vcxproj lib1)
 
 include_directories(${VSExternalInclude_SOURCE_DIR}/Lib2 ${VSExternalInclude_SOURCE_DIR}/Lib1)
 
@@ -55,9 +49,7 @@ add_dependencies(VSExternalInclude lib2)
 # and the sln file can no longer be the only source
 # of that depend.  So, for VS 10 make the executable
 # depend on lib1 and lib2
-if(${CMAKE_GENERATOR} MATCHES "Visual Studio 1[0124567]")
-  add_dependencies(VSExternalInclude lib1)
-endif()
+add_dependencies(VSExternalInclude lib1)
 
 # Interaction testing between the FOLDER target property and
 # INCLUDE_EXTERNAL_MSPROJECT targets:

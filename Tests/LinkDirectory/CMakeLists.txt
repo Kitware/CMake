@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.10)
 project(LinkDirectory C)
 
 # Put the subproject source tree in our build tree so it can refer to

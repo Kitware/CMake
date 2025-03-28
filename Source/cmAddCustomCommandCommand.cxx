@@ -2,11 +2,15 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmAddCustomCommandCommand.h"
 
+#include <algorithm>
+#include <iterator>
+#include <set>
 #include <sstream>
 #include <unordered_set>
 #include <utility>
 
 #include <cm/memory>
+#include <cmext/string_view>
 
 #include "cmCustomCommand.h"
 #include "cmCustomCommandLines.h"
@@ -53,6 +57,7 @@ bool cmAddCustomCommandCommand(std::vector<std::string> const& args,
   bool command_expand_lists = false;
   bool depends_explicit_only =
     mf.IsOn("CMAKE_ADD_CUSTOM_COMMAND_DEPENDS_EXPLICIT_ONLY");
+  bool codegen = false;
   std::string implicit_depends_lang;
   cmImplicitDependsList implicit_depends;
 
@@ -111,6 +116,7 @@ bool cmAddCustomCommandCommand(std::vector<std::string> const& args,
   MAKE_STATIC_KEYWORD(VERBATIM);
   MAKE_STATIC_KEYWORD(WORKING_DIRECTORY);
   MAKE_STATIC_KEYWORD(DEPENDS_EXPLICIT_ONLY);
+  MAKE_STATIC_KEYWORD(CODEGEN);
 #undef MAKE_STATIC_KEYWORD
   static std::unordered_set<std::string> const keywords{
     keyAPPEND,
@@ -135,13 +141,86 @@ bool cmAddCustomCommandCommand(std::vector<std::string> const& args,
     keyUSES_TERMINAL,
     keyVERBATIM,
     keyWORKING_DIRECTORY,
-    keyDEPENDS_EXPLICIT_ONLY
+    keyDEPENDS_EXPLICIT_ONLY,
+    keyCODEGEN
   };
+  /* clang-format off */
+  static std::set<std::string> const supportedTargetKeywords{
+    keyARGS,
+    keyBYPRODUCTS,
+    keyCOMMAND,
+    keyCOMMAND_EXPAND_LISTS,
+    keyCOMMENT,
+    keyPOST_BUILD,
+    keyPRE_BUILD,
+    keyPRE_LINK,
+    keyTARGET,
+    keyUSES_TERMINAL,
+    keyVERBATIM,
+    keyWORKING_DIRECTORY
+  };
+  /* clang-format on */
+  static std::set<std::string> const supportedOutputKeywords{
+    keyAPPEND,
+    keyARGS,
+    keyBYPRODUCTS,
+    keyCODEGEN,
+    keyCOMMAND,
+    keyCOMMAND_EXPAND_LISTS,
+    keyCOMMENT,
+    keyDEPENDS,
+    keyDEPENDS_EXPLICIT_ONLY,
+    keyDEPFILE,
+    keyIMPLICIT_DEPENDS,
+    keyJOB_POOL,
+    keyJOB_SERVER_AWARE,
+    keyMAIN_DEPENDENCY,
+    keyOUTPUT,
+    keyUSES_TERMINAL,
+    keyVERBATIM,
+    keyWORKING_DIRECTORY
+  };
+  /* clang-format off */
+  static std::set<std::string> const supportedAppendKeywords{
+    keyAPPEND,
+    keyARGS,
+    keyCOMMAND,
+    keyCOMMENT,           // Allowed but ignored
+    keyDEPENDS,
+    keyIMPLICIT_DEPENDS,
+    keyMAIN_DEPENDENCY,   // Allowed but ignored
+    keyOUTPUT,
+    keyWORKING_DIRECTORY  // Allowed but ignored
+  };
+  /* clang-format on */
+  std::set<std::string> keywordsSeen;
+  std::string const* keywordExpectingValue = nullptr;
+  auto const cmp0175 = mf.GetPolicyStatus(cmPolicies::CMP0175);
 
   for (std::string const& copy : args) {
     if (keywords.count(copy)) {
+      // Check if a preceding keyword expected a value but there wasn't one
+      if (keywordExpectingValue) {
+        std::string const msg =
+          cmStrCat("Keyword ", *keywordExpectingValue,
+                   " requires a value, but none was given.");
+        if (cmp0175 == cmPolicies::NEW) {
+          mf.IssueMessage(MessageType::FATAL_ERROR, msg);
+          return false;
+        }
+        if (cmp0175 == cmPolicies::WARN) {
+          mf.IssueMessage(
+            MessageType::AUTHOR_WARNING,
+            cmStrCat(msg, '\n',
+                     cmPolicies::GetPolicyWarning(cmPolicies::CMP0175)));
+        }
+      }
+      keywordExpectingValue = nullptr;
+      keywordsSeen.insert(copy);
+
       if (copy == keySOURCE) {
         doing = doing_source;
+        keywordExpectingValue = &keySOURCE;
       } else if (copy == keyCOMMAND) {
         doing = doing_command;
 
@@ -166,8 +245,11 @@ bool cmAddCustomCommandCommand(std::vector<std::string> const& args,
         command_expand_lists = true;
       } else if (copy == keyDEPENDS_EXPLICIT_ONLY) {
         depends_explicit_only = true;
+      } else if (copy == keyCODEGEN) {
+        codegen = true;
       } else if (copy == keyTARGET) {
         doing = doing_target;
+        keywordExpectingValue = &keyTARGET;
       } else if (copy == keyARGS) {
         // Ignore this old keyword.
       } else if (copy == keyDEPENDS) {
@@ -176,16 +258,20 @@ bool cmAddCustomCommandCommand(std::vector<std::string> const& args,
         doing = doing_outputs;
       } else if (copy == keyOUTPUT) {
         doing = doing_output;
+        keywordExpectingValue = &keyOUTPUT;
       } else if (copy == keyBYPRODUCTS) {
         doing = doing_byproducts;
       } else if (copy == keyWORKING_DIRECTORY) {
         doing = doing_working_directory;
+        keywordExpectingValue = &keyWORKING_DIRECTORY;
       } else if (copy == keyMAIN_DEPENDENCY) {
         doing = doing_main_dependency;
+        keywordExpectingValue = &keyMAIN_DEPENDENCY;
       } else if (copy == keyIMPLICIT_DEPENDS) {
         doing = doing_implicit_depends_lang;
       } else if (copy == keyCOMMENT) {
         doing = doing_comment;
+        keywordExpectingValue = &keyCOMMENT;
       } else if (copy == keyDEPFILE) {
         doing = doing_depfile;
         if (!mf.GetGlobalGenerator()->SupportsCustomCommandDepfile()) {
@@ -193,12 +279,16 @@ bool cmAddCustomCommandCommand(std::vector<std::string> const& args,
                                    mf.GetGlobalGenerator()->GetName()));
           return false;
         }
+        keywordExpectingValue = &keyDEPFILE;
       } else if (copy == keyJOB_POOL) {
         doing = doing_job_pool;
+        keywordExpectingValue = &keyJOB_POOL;
       } else if (copy == keyJOB_SERVER_AWARE) {
         doing = doing_job_server_aware;
+        keywordExpectingValue = &keyJOB_SERVER_AWARE;
       }
     } else {
+      keywordExpectingValue = nullptr; // Value is being processed now
       std::string filename;
       switch (doing) {
         case doing_output:
@@ -283,6 +373,21 @@ bool cmAddCustomCommandCommand(std::vector<std::string> const& args,
           byproducts.push_back(filename);
           break;
         case doing_comment:
+          if (!comment_buffer.empty()) {
+            std::string const msg =
+              "COMMENT requires exactly one argument, but multiple values "
+              "or COMMENT keywords have been given.";
+            if (cmp0175 == cmPolicies::NEW) {
+              mf.IssueMessage(MessageType::FATAL_ERROR, msg);
+              return false;
+            }
+            if (cmp0175 == cmPolicies::WARN) {
+              mf.IssueMessage(
+                MessageType::AUTHOR_WARNING,
+                cmStrCat(msg, '\n',
+                         cmPolicies::GetPolicyWarning(cmPolicies::CMP0175)));
+            }
+          }
           comment_buffer = copy;
           comment = comment_buffer.c_str();
           break;
@@ -322,8 +427,51 @@ bool cmAddCustomCommandCommand(std::vector<std::string> const& args,
     return false;
   }
 
+  if (codegen) {
+    if (output.empty()) {
+      status.SetError("CODEGEN requires at least 1 OUTPUT.");
+      return false;
+    }
+
+    if (append) {
+      status.SetError("CODEGEN may not be used with APPEND.");
+      return false;
+    }
+
+    if (!implicit_depends.empty()) {
+      status.SetError("CODEGEN is not compatible with IMPLICIT_DEPENDS.");
+      return false;
+    }
+
+    if (mf.GetPolicyStatus(cmPolicies::CMP0171) != cmPolicies::NEW) {
+      status.SetError("CODEGEN option requires policy CMP0171 be set to NEW!");
+      return false;
+    }
+  }
+
   // Check for an append request.
   if (append) {
+    std::vector<std::string> unsupportedKeywordsUsed;
+    std::set_difference(keywordsSeen.begin(), keywordsSeen.end(),
+                        supportedAppendKeywords.begin(),
+                        supportedAppendKeywords.end(),
+                        std::back_inserter(unsupportedKeywordsUsed));
+    if (!unsupportedKeywordsUsed.empty()) {
+      std::string const msg =
+        cmJoin(unsupportedKeywordsUsed, ", "_s,
+               "The following keywords are not supported when using "
+               "APPEND with add_custom_command(OUTPUT): "_s);
+      if (cmp0175 == cmPolicies::NEW) {
+        mf.IssueMessage(MessageType::FATAL_ERROR, msg);
+        return false;
+      }
+      if (cmp0175 == cmPolicies::WARN) {
+        mf.IssueMessage(
+          MessageType::AUTHOR_WARNING,
+          cmStrCat(msg, ".\n",
+                   cmPolicies::GetPolicyWarning(cmPolicies::CMP0175)));
+      }
+    }
     mf.AppendCustomCommandToOutput(output[0], depends, implicit_depends,
                                    commandLines);
     return true;
@@ -349,12 +497,96 @@ bool cmAddCustomCommandCommand(std::vector<std::string> const& args,
   cc->SetDependsExplicitOnly(depends_explicit_only);
   if (source.empty() && output.empty()) {
     // Source is empty, use the target.
+    if (commandLines.empty()) {
+      std::string const msg = "At least one COMMAND must be given.";
+      if (cmp0175 == cmPolicies::NEW) {
+        mf.IssueMessage(MessageType::FATAL_ERROR, msg);
+        return false;
+      }
+      if (cmp0175 == cmPolicies::WARN) {
+        mf.IssueMessage(
+          MessageType::AUTHOR_WARNING,
+          cmStrCat(msg, '\n',
+                   cmPolicies::GetPolicyWarning(cmPolicies::CMP0175)));
+      }
+    }
+
+    std::vector<std::string> unsupportedKeywordsUsed;
+    std::set_difference(keywordsSeen.begin(), keywordsSeen.end(),
+                        supportedTargetKeywords.begin(),
+                        supportedTargetKeywords.end(),
+                        std::back_inserter(unsupportedKeywordsUsed));
+    if (!unsupportedKeywordsUsed.empty()) {
+      std::string const msg =
+        cmJoin(unsupportedKeywordsUsed, ", "_s,
+               "The following keywords are not supported when using "
+               "add_custom_command(TARGET): "_s);
+      if (cmp0175 == cmPolicies::NEW) {
+        mf.IssueMessage(MessageType::FATAL_ERROR, msg);
+        return false;
+      }
+      if (cmp0175 == cmPolicies::WARN) {
+        mf.IssueMessage(
+          MessageType::AUTHOR_WARNING,
+          cmStrCat(msg, ".\n",
+                   cmPolicies::GetPolicyWarning(cmPolicies::CMP0175)));
+      }
+    }
+    auto const prePostCount = keywordsSeen.count(keyPRE_BUILD) +
+      keywordsSeen.count(keyPRE_LINK) + keywordsSeen.count(keyPOST_BUILD);
+    if (prePostCount != 1) {
+      std::string msg =
+        "Exactly one of PRE_BUILD, PRE_LINK, or POST_BUILD must be given.";
+      if (cmp0175 == cmPolicies::NEW) {
+        mf.IssueMessage(MessageType::FATAL_ERROR, msg);
+        return false;
+      }
+      if (cmp0175 == cmPolicies::WARN) {
+        msg += " Assuming ";
+        switch (cctype) {
+          case cmCustomCommandType::PRE_BUILD:
+            msg += "PRE_BUILD";
+            break;
+          case cmCustomCommandType::PRE_LINK:
+            msg += "PRE_LINK";
+            break;
+          case cmCustomCommandType::POST_BUILD:
+            msg += "POST_BUILD";
+        }
+        mf.IssueMessage(
+          MessageType::AUTHOR_WARNING,
+          cmStrCat(msg, " to preserve backward compatibility.\n",
+                   cmPolicies::GetPolicyWarning(cmPolicies::CMP0175)));
+      }
+    }
     mf.AddCustomCommandToTarget(target, cctype, std::move(cc));
   } else if (target.empty()) {
     // Target is empty, use the output.
+    std::vector<std::string> unsupportedKeywordsUsed;
+    std::set_difference(keywordsSeen.begin(), keywordsSeen.end(),
+                        supportedOutputKeywords.begin(),
+                        supportedOutputKeywords.end(),
+                        std::back_inserter(unsupportedKeywordsUsed));
+    if (!unsupportedKeywordsUsed.empty()) {
+      std::string const msg =
+        cmJoin(unsupportedKeywordsUsed, ", "_s,
+               "The following keywords are not supported when using "
+               "add_custom_command(OUTPUT): "_s);
+      if (cmp0175 == cmPolicies::NEW) {
+        mf.IssueMessage(MessageType::FATAL_ERROR, msg);
+        return false;
+      }
+      if (cmp0175 == cmPolicies::WARN) {
+        mf.IssueMessage(
+          MessageType::AUTHOR_WARNING,
+          cmStrCat(msg, ".\n",
+                   cmPolicies::GetPolicyWarning(cmPolicies::CMP0175)));
+      }
+    }
     cc->SetOutputs(output);
     cc->SetMainDependency(main_dependency);
     cc->SetDepends(depends);
+    cc->SetCodegen(codegen);
     cc->SetImplicitDepends(implicit_depends);
     mf.AddCustomCommandToOutput(std::move(cc));
   } else {

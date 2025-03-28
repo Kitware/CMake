@@ -33,6 +33,7 @@ function(run_BuildDepends CASE)
   if(NOT RunCMake_GENERATOR_IS_MULTI_CONFIG)
     set(RunCMake_TEST_OPTIONS -DCMAKE_BUILD_TYPE=Debug)
   endif()
+  list(APPEND RunCMake_TEST_OPTIONS ${ARGN})
   file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
   file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
   include(${RunCMake_SOURCE_DIR}/${CASE}.step1.cmake OPTIONAL)
@@ -68,7 +69,10 @@ if(NOT RunCMake_GENERATOR STREQUAL "Xcode")
   unset(run_BuildDepends_skip_step_2)
 endif()
 
-if(CMake_TEST_Fortran)
+if(CMake_TEST_Fortran
+    # FIXME(lfortran): The compiler fails on the test's includes.
+    AND NOT CMAKE_Fortran_COMPILER_ID STREQUAL "LFortran"
+    )
   run_BuildDepends(FortranInclude)
 endif()
 
@@ -126,7 +130,7 @@ function(run_ReGeneration)
   file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
   file(REMOVE_RECURSE "${RunCMake_TEST_SOURCE_DIR}")
   set(ProjectHeader [=[
-    cmake_minimum_required(VERSION 3.5)
+    cmake_minimum_required(VERSION 3.10)
     project(Regenerate-Project NONE)
   ]=])
 
@@ -167,16 +171,18 @@ if ((RunCMake_GENERATOR STREQUAL "Unix Makefiles"
         OR CMAKE_C_COMPILER_ID STREQUAL "AppleClang"))
     OR (RunCMake_GENERATOR STREQUAL "NMake Makefiles"
       AND MSVC_VERSION GREATER 1300
-      AND CMAKE_C_COMPILER_ID STREQUAL "MSVC"))
-  run_BuildDepends(CompilerDependencies)
-  run_BuildDepends(CustomCommandDependencies)
+      AND CMAKE_C_COMPILER_ID STREQUAL "MSVC")
+    OR RunCMake_GENERATOR MATCHES "Ninja"
+    )
+  run_BuildDepends(CompileDepends -DMAKE_SUPPORTS_SPACES=${MAKE_SUPPORTS_SPACES})
+  run_BuildDepends(CustomCommandDepends -DMAKE_SUPPORTS_SPACES=${MAKE_SUPPORTS_SPACES})
 endif()
 
 if (RunCMake_GENERATOR MATCHES "Makefiles")
-  run_cmake(CustomCommandDependencies-BadArgs)
-  run_cmake_with_options(CustomCommandDependencies-compiler-deps-legacy -DCMAKE_DEPENDS_USE_COMPILER=FALSE)
+  run_cmake(CustomCommandDepends-BadArgs)
+  run_cmake_with_options(CustomCommandDepends-compiler-deps-legacy -DCMAKE_DEPENDS_USE_COMPILER=FALSE)
   set(RunCMake_TEST_NO_CLEAN 1)
-  run_cmake_command(CustomCommandDependencies-compiler-deps-legacy ${CMAKE_COMMAND} --build . --config Debug)
+  run_cmake_command(CustomCommandDepends-compiler-deps-legacy ${CMAKE_COMMAND} --build . --config Debug)
   unset(RunCMake_TEST_NO_CLEAN)
 endif()
 
@@ -202,9 +208,12 @@ if (RunCMake_GENERATOR MATCHES "Make|Ninja")
   run_BuildDepends(LinkDependsCheck)
   include("${RunCMake_BINARY_DIR}/LinkDependsCheck-build/LinkDependsUseLinker.cmake")
   if ((NOT DEFINED CMAKE_LINK_DEPENDS_USE_LINKER OR CMAKE_LINK_DEPENDS_USE_LINKER)
-      AND CMAKE_C_LINK_DEPENDS_USE_LINKER)
+    AND CMAKE_C_LINK_DEPENDS_USE_LINKER
+    # FIXME(#26401): GNU binutils 2.43 broke dependency-file generation.
+    AND NOT (CMAKE_C_COMPILER_LINKER_ID STREQUAL "GNU" AND CMAKE_C_COMPILER_LINKER_VERSION VERSION_GREATER_EQUAL "2.43")
+    )
     run_BuildDepends(LinkDependsExternalLibrary)
     unset(run_BuildDepends_skip_step_2)
-    run_BuildDepends(LinkDepends)
+    run_BuildDepends(LinkDepends -DMAKE_SUPPORTS_SPACES=${MAKE_SUPPORTS_SPACES})
   endif()
 endif()

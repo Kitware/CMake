@@ -305,6 +305,8 @@ cmVS7FlagTable cmLocalVisualStudio7GeneratorFortranFlagTable[] = {
   { "Optimization", "O1", "min space", "optimizeMinSpace", 0 },
   { "Optimization", "O3", "full optimize", "optimizeFull", 0 },
   { "GlobalOptimizations", "Og", "global optimize", "true", 0 },
+  { "InterproceduralOptimizations", "Qipo",
+    "Interprocedural optimization across multiple files", "ipoMultiFile", 0 },
   { "InlineFunctionExpansion", "Ob0", "", "expandDisable", 0 },
   { "InlineFunctionExpansion", "Ob1", "", "expandOnlyInline", 0 },
   { "FavorSizeOrSpeed", "Os", "", "favorSize", 0 },
@@ -690,7 +692,13 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(
     this->AddCompileOptions(flags, target, langForClCompile, configName);
 
     // Check IPO related warning/error.
-    target->IsIPOEnabled(linkLanguage, configName);
+    if (target->IsIPOEnabled(linkLanguage, configName)) {
+      if (this->FortranProject) {
+        this->AppendCompileOptions(flags,
+                                   this->Makefile->GetSafeDefinition(
+                                     "CMAKE_Fortran_COMPILE_OPTIONS_IPO"));
+      }
+    }
   }
 
   if (this->FortranProject) {
@@ -1123,7 +1131,10 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(
       this->WriteTargetVersionAttribute(fout, target);
       linkOptions.OutputFlagMap(fout, 4);
       fout << "\t\t\t\tAdditionalLibraryDirectories=\"";
-      this->OutputLibraryDirectories(fout, cli.GetDirectories());
+      std::string const& linkDirsString = this->Makefile->GetSafeDefinition(
+        cmStrCat("CMAKE_", linkLanguage, "_STANDARD_LINK_DIRECTORIES"));
+      this->OutputLibraryDirectories(fout, cmList(linkDirsString),
+                                     cli.GetDirectories());
       fout << "\"\n";
       temp =
         cmStrCat(target->GetPDBDirectory(configName), '/', targetNames.PDB);
@@ -1206,7 +1217,10 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(
       this->WriteTargetVersionAttribute(fout, target);
       linkOptions.OutputFlagMap(fout, 4);
       fout << "\t\t\t\tAdditionalLibraryDirectories=\"";
-      this->OutputLibraryDirectories(fout, cli.GetDirectories());
+      std::string const& linkDirsString = this->Makefile->GetSafeDefinition(
+        cmStrCat("CMAKE_", linkLanguage, "_STANDARD_LINK_DIRECTORIES"));
+      this->OutputLibraryDirectories(fout, cmList(linkDirsString),
+                                     cli.GetDirectories());
       fout << "\"\n";
       std::string path = this->ConvertToXMLOutputPathSingle(
         target->GetPDBDirectory(configName));
@@ -1265,9 +1279,9 @@ static std::string cmLocalVisualStudio7GeneratorEscapeForXML(
 
 static std::string GetEscapedPropertyIfValueNotNULL(const char* propertyValue)
 {
-  return propertyValue == nullptr
-    ? std::string()
-    : cmLocalVisualStudio7GeneratorEscapeForXML(propertyValue);
+  return propertyValue
+    ? cmLocalVisualStudio7GeneratorEscapeForXML(propertyValue)
+    : std::string();
 }
 
 void cmLocalVisualStudio7Generator::OutputDeploymentDebuggerTool(
@@ -1356,9 +1370,11 @@ void cmLocalVisualStudio7GeneratorInternals::OutputObjects(
 }
 
 void cmLocalVisualStudio7Generator::OutputLibraryDirectories(
-  std::ostream& fout, std::vector<std::string> const& dirs)
+  std::ostream& fout, std::vector<std::string> const& stdlink,
+  std::vector<std::string> const& dirs)
 {
   const char* comma = "";
+
   for (std::string dir : dirs) {
     // Remove any trailing slash and skip empty paths.
     if (dir.back() == '/') {
@@ -1382,6 +1398,12 @@ void cmLocalVisualStudio7Generator::OutputLibraryDirectories(
          << this->ConvertToXMLOutputPath(
               cmStrCat(dir, "/$(ConfigurationName)"))
          << ',' << this->ConvertToXMLOutputPath(dir);
+    comma = ",";
+  }
+
+  // No special processing on toolchain-defined standard link directory paths
+  for (const auto& dir : stdlink) {
+    fout << comma << this->ConvertToXMLOutputPath(dir);
     comma = ",";
   }
 }

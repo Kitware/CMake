@@ -503,6 +503,42 @@ The :variable:`CMAKE_IGNORE_PATH`, :variable:`CMAKE_IGNORE_PREFIX_PATH`,
 :variable:`CMAKE_SYSTEM_IGNORE_PREFIX_PATH` variables can also cause some
 of the above locations to be ignored.
 
+Paths are searched in the order described above.  The first viable package
+configuration file found is used, even if a newer version of the package
+resides later in the list of search paths.
+
+For search paths which contain ``<name>*``, the order among matching paths
+is unspecified unless the :variable:`CMAKE_FIND_PACKAGE_SORT_ORDER` variable
+is set.  This variable, along with the
+:variable:`CMAKE_FIND_PACKAGE_SORT_DIRECTION` variable, determines the order
+in which CMake considers paths that match a single search path containing
+``<name>*``.  For example, if the file system contains the package
+configuration files
+
+::
+
+  <prefix>/example-1.2/example-config.cmake
+  <prefix>/example-1.10/example-config.cmake
+  <prefix>/share/example-2.0/example-config.cmake
+
+it is unspecified (when the aforementioned variables are unset) whether
+``find_package(example)`` will find ``example-1.2`` or ``example-1.10``
+(assuming that both are viable), but ``find_package`` will *not* find
+``example-2.0``, because one of the other two will be found first.
+
+To control the order in which ``find_package`` searches directories that match
+a glob expression, use :variable:`CMAKE_FIND_PACKAGE_SORT_ORDER` and
+:variable:`CMAKE_FIND_PACKAGE_SORT_DIRECTION`.
+For instance, to cause the above example to select ``example-1.10``,
+one can set
+
+.. code-block:: cmake
+
+  SET(CMAKE_FIND_PACKAGE_SORT_ORDER NATURAL)
+  SET(CMAKE_FIND_PACKAGE_SORT_DIRECTION DEC)
+
+before calling ``find_package``.
+
 .. versionadded:: 3.16
    Added the ``CMAKE_FIND_USE_<CATEGORY>`` variables to globally disable
    various search locations.
@@ -648,22 +684,6 @@ is acceptable the following variables are set:
   Number of version components, 0 to 4
 
 and the corresponding package configuration file is loaded.
-When multiple package configuration files are available whose version files
-claim compatibility with the version requested it is unspecified which
-one is chosen: unless the variable :variable:`CMAKE_FIND_PACKAGE_SORT_ORDER`
-is set no attempt is made to choose a highest or closest version number.
-
-To control the order in which ``find_package`` checks for compatibility use
-the two variables :variable:`CMAKE_FIND_PACKAGE_SORT_ORDER` and
-:variable:`CMAKE_FIND_PACKAGE_SORT_DIRECTION`.
-For instance in order to select the highest version one can set
-
-.. code-block:: cmake
-
-  SET(CMAKE_FIND_PACKAGE_SORT_ORDER NATURAL)
-  SET(CMAKE_FIND_PACKAGE_SORT_DIRECTION DEC)
-
-before calling ``find_package``.
 
 Package File Interface Variables
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

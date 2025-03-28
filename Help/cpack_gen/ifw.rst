@@ -275,6 +275,16 @@ Package
 
  This feature is available for QtIFW 4.0.0 and later.
 
+.. variable:: CPACK_IFW_PACKAGE_PRODUCT_IMAGE_URLS
+
+ .. versionadded:: 3.31
+
+ A list of URLs associated with the ProductImages.
+ Only used if  ``CPACK_IFW_PACKAGE_PRODUCT_IMAGES`` is defined
+ and it has the same size.
+
+ This feature is available for QtIFW 4.0.0 and later.
+
 .. variable:: CPACK_IFW_PACKAGE_RUN_PROGRAM
 
  .. versionadded:: 3.23

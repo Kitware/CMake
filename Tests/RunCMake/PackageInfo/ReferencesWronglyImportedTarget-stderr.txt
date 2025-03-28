@@ -1,0 +1,3 @@
+CMake Error in CMakeLists.txt:
+  Target "foo" references imported target "bar" which does not come from any
+  known package.

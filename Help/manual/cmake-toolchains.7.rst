@@ -591,14 +591,14 @@ a different SDK (e.g. a simulator) can be selected by setting the
 necessary (see :ref:`Switching Between Device and Simulator` below).
 A list of available SDKs can be obtained by running ``xcodebuild -showsdks``.
 
-========  ================= ==================== ================
-OS        CMAKE_SYSTEM_NAME Device SDK (default) Simulator SDK
-========  ================= ==================== ================
-iOS       iOS               iphoneos             iphonesimulator
-tvOS      tvOS              appletvos            appletvsimulator
-visionOS  visionOS          xros                 xrsimulator
-watchOS   watchOS           watchos              watchsimulator
-========  ================= ==================== ================
+========  ================= ==================== ================ ============
+OS        CMAKE_SYSTEM_NAME Device SDK (default) Simulator SDK    Catalyst SDK
+========  ================= ==================== ================ ============
+iOS       iOS               iphoneos             iphonesimulator  macosx
+tvOS      tvOS              appletvos            appletvsimulator N/A
+visionOS  visionOS          xros                 xrsimulator      N/A
+watchOS   watchOS           watchos              watchsimulator   N/A
+========  ================= ==================== ================ ============
 
 For example, to create a CMake configuration for iOS, the following
 command is sufficient:

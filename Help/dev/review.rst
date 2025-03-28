@@ -348,7 +348,7 @@ Integration Testing
 
 The above `topic testing`_ tests the MR topic independent of other
 merge requests and on only a few key platforms and configurations.
-The `CMake Testing Process`_ also has a large number of machines
+`CMake Integration Testing`_ also uses a large number of machines
 provided by Kitware and generous volunteers that cover nearly all
 supported platforms, generators, and configurations.  In order to
 avoid overwhelming these resources, they do not test every MR
@@ -403,7 +403,7 @@ until one of the following occurs:
 Once a MR has been removed from the topic stage a new ``Do: stage``
 command is needed to stage it again.
 
-.. _`CMake Testing Process`: testing.rst
+.. _`CMake Integration Testing`: integration-testing.rst
 
 Resolve
 =======

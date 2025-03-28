@@ -31,7 +31,7 @@ Synopsis
   cmake --find-package [<options>]
 
  `Run a Workflow Preset`_
-  cmake --workflow [<options>]
+  cmake --workflow <options>
 
  `View Help`_
   cmake --help[-<topic>]
@@ -232,6 +232,17 @@ Options
  will display also advanced variables.  If ``H`` is specified, it will also
  display help for each variable.
 
+.. option:: -LR[A][H] <regex>
+
+ .. versionadded:: 3.31
+
+ Show specific non-advanced cached variables
+
+ Show non-``INTERNAL`` nor :prop_cache:`ADVANCED` variables from the CMake
+ ``CACHE`` that match the given regex. If ``A`` is specified, then it
+ will also show advanced variables.  If ``H`` is specified, it will also
+ display help for each variable.
+
 .. option:: -N
 
  View mode only.
@@ -255,7 +266,17 @@ Options
  from the top of a binary tree for a CMake project it will dump
  additional information such as the cache, log files etc.
 
+.. option:: --print-config-dir
+
+ .. versionadded:: 3.31
+
+ Print CMake config directory for user-wide FileAPI queries.
+
+ See :envvar:`CMAKE_CONFIG_DIR` for more details.
+
 .. option:: --log-level=<level>
+
+ .. versionadded:: 3.16
 
  Set the log ``<level>``.
 
@@ -744,6 +765,15 @@ The options are:
   Enable verbose output.
 
   This option can be omitted if :envvar:`VERBOSE` environment variable is set.
+
+.. option:: -j <jobs>, --parallel <jobs>
+
+  .. versionadded:: 3.31
+
+  Install in parallel using the given number of jobs. Only available if
+  :prop_gbl:`INSTALL_PARALLEL` is enabled. The
+  :envvar:`CMAKE_INSTALL_PARALLEL_LEVEL` environment variable specifies a
+  default parallel level when this option is not provided.
 
 Run :option:`cmake --install` with no options for quick help.
 
@@ -1364,7 +1394,7 @@ build steps in order:
 
 .. code-block:: shell
 
-  cmake --workflow [<options>]
+  cmake --workflow <options>
 
 The options are:
 
@@ -1380,6 +1410,15 @@ The options are:
   is inferred from the initial configure preset. The current working directory
   must contain CMake preset files.
   See :manual:`preset <cmake-presets(7)>` for more details.
+
+  .. versionchanged:: 3.31
+    When following immediately after the ``--workflow`` option,
+    the ``--preset`` argument can be omitted and just the ``<preset>``
+    name can be given.  This means the following syntax is valid:
+
+    .. code-block:: console
+
+      $ cmake --workflow my-preset
 
 .. option:: --list-presets
 

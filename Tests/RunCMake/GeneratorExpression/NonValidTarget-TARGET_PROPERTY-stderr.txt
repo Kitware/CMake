@@ -8,4 +8,4 @@ CMake Error at NonValidTarget-TARGET_PROPERTY.cmake:1 \(add_custom_command\):
   to read a property from using the \$<TARGET_PROPERTY:tgt,prop> signature
   instead.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists.txt:[0-9]+ \(include\)

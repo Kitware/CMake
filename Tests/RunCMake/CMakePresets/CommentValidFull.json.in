@@ -1,0 +1,179 @@
+{
+  "$comment": [
+    "example comment",
+    "with an array of strings"
+  ],
+  "version": 10,
+  "cmakeMinimumRequired": {
+    "$comment": "We can add comments in version"
+  },
+  "configurePresets": [
+    {
+      "name": "CommentValidFull",
+      "$comment": "example comment",
+      "generator": "@RunCMake_GENERATOR@",
+      "binaryDir": "${sourceDir}/build",
+      "architecture": {
+        "$comment": "We can add comments in architecture",
+        "value": "v143",
+        "strategy": "external"
+      },
+      "toolset": {
+        "$comment": "We can add comments in toolset",
+        "value": "x64",
+        "strategy": "external"
+      },
+      "cacheVariables": {
+        "SOME_VARIABLE": {
+          "$comment": "We can add comments in every cacheVariable, that we created",
+          "value": "SOME_VALUE"
+        }
+      },
+      "warnings": {
+        "$comment": "We can add comments in warnings",
+        "dev": false
+      },
+      "errors": {
+        "$comment": "We can add comments in errors",
+        "dev": false
+      },
+      "debug": {
+        "$comment": "We can add comments in debug",
+        "find": false
+      },
+      "trace": {
+        "$comment": "We can add comments in trace",
+        "mode": "off"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "$comment": "example comment",
+      "name": "default",
+      "condition": {
+        "$comment": "We can add comments in condition",
+        "type": "const",
+        "value": false
+      },
+      "configurePreset": "CommentValidFull"
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "default",
+      "configurePreset": "CommentValidFull",
+      "filter": {
+        "$comment": "We can add comments in filter",
+        "include": {
+          "$comment": ["example comment", "with an array of strings", "inside include"],
+          "index": {
+            "$comment": ["example comment", "with an array of strings"],
+            "start": 0
+          }
+        },
+        "exclude": {
+          "$comment": ["example comment", "with an array of strings", "inside exclude"],
+          "fixtures": {
+            "$comment": ["example comment", "with an array of strings"],
+            "any": ".*full.*"
+          }
+        }
+      },
+      "execution": {
+        "$comment": ["example comment", "with an array of strings"],
+        "repeat": {
+          "$comment": "Some comments here",
+          "mode": "until-fail",
+          "count": 1
+        }
+      },
+      "condition": {
+        "$comment": "We can add comments in equal & non-equal conditions",
+        "type": "equals",
+        "lhs": "test1",
+        "rhs": "test2"
+      },
+      "$comment": ["example comment", "with an array of strings"]
+    }
+  ],
+  "packagePresets": [
+    {
+      "name": "CommentValidFull",
+      "$comment": ["example comment", "with an array of strings"],
+      "configurePreset": "CommentValidFull",
+      "condition": {
+        "$comment": "We can add comments in list check conditions",
+        "type": "notInList",
+        "list": [
+          "test1",
+          "test2"
+        ],
+        "string": "test1"
+      },
+      "output": {
+        "$comment": "Hello, World!",
+        "debug": false
+      }
+    },
+    {
+      "name": "CommentValidFull1",
+      "configurePreset": "CommentValidFull",
+      "condition": {
+        "$comment": "We can add comments in aggregation conditions",
+        "type": "allOf",
+        "conditions": [
+          {
+            "$comment": "We can add comments in regex match conditions",
+            "type": "matches",
+            "regex": ".*tests.*",
+            "string": "test1"
+          },
+          {
+            "type": "matches",
+            "regex": ".*tests.*",
+            "string": "test2"
+          },
+          {
+            "type": "not",
+            "$comment": "We can add comments in not conditions",
+            "condition": {
+              "type": "matches",
+              "regex": ".*tests.*",
+              "string": "test3"
+            }
+          }
+        ]
+      },
+      "output": {
+        "$comment": "Hello, World 123!",
+        "verbose": false
+      }
+    }
+  ],
+  "workflowPresets": [
+    {
+      "name": "CommentValidFull",
+      "$comment": ["example comment", "with an array of strings"],
+      "steps": [
+        {
+          "type": "configure",
+          "name": "CommentValidFull"
+        },
+        {
+          "type": "build",
+          "name": "default"
+        },
+        {
+          "$comment": "We must test it before we can package it",
+          "type": "test",
+          "name": "default"
+        },
+        {
+          "type": "package",
+          "name": "CommentValidFull"
+        }
+      ]
+    }
+  ]
+}

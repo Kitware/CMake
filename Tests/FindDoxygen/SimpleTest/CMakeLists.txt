@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.10)
 project(TestFindDoxygen VERSION 1.0 LANGUAGES NONE)
 
 # Testing backward compatible signature

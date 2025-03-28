@@ -1,6 +1,6 @@
 # test if CSharp application correctly links
 # to managed C++ binary
-cmake_minimum_required(VERSION 3.9)
+cmake_minimum_required(VERSION 3.10)
 project (CSharpLinkToCxx CXX CSharp)
 
 # we have to change the default flags for the

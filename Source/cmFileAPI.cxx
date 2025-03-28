@@ -7,8 +7,12 @@
 #include <chrono>
 #include <ctime>
 #include <iomanip>
+#include <iterator>
 #include <sstream>
 #include <utility>
+
+#include <cm/optional>
+#include <cmext/string_view>
 
 #include "cmsys/Directory.hxx"
 #include "cmsys/FStream.hxx"
@@ -29,7 +33,12 @@ cmFileAPI::cmFileAPI(cmake* cm)
   : CMakeInstance(cm)
 {
   this->APIv1 =
-    this->CMakeInstance->GetHomeOutputDirectory() + "/.cmake/api/v1";
+    cmStrCat(this->CMakeInstance->GetHomeOutputDirectory(), "/.cmake/api/v1");
+
+  if (cm::optional<std::string> cmakeConfigDir =
+        cmSystemTools::GetCMakeConfigDirectory()) {
+    this->UserAPIv1 = cmStrCat(std::move(*cmakeConfigDir), "/api/v1"_s);
+  }
 
   Json::CharReaderBuilder rbuilder;
   rbuilder["collectComments"] = false;
@@ -47,14 +56,24 @@ cmFileAPI::cmFileAPI(cmake* cm)
 
 void cmFileAPI::ReadQueries()
 {
-  std::string const query_dir = this->APIv1 + "/query";
+  std::string const query_dir = cmStrCat(this->APIv1, "/query");
+  std::string const user_query_dir = cmStrCat(this->UserAPIv1, "/query");
   this->QueryExists = cmSystemTools::FileIsDirectory(query_dir);
+  if (!this->UserAPIv1.empty()) {
+    this->QueryExists =
+      this->QueryExists || cmSystemTools::FileIsDirectory(user_query_dir);
+  }
   if (!this->QueryExists) {
     return;
   }
 
   // Load queries at the top level.
   std::vector<std::string> queries = cmFileAPI::LoadDir(query_dir);
+  if (!this->UserAPIv1.empty()) {
+    std::vector<std::string> user_queries = cmFileAPI::LoadDir(user_query_dir);
+    std::move(user_queries.begin(), user_queries.end(),
+              std::back_inserter(queries));
+  }
 
   // Read the queries and save for later.
   for (std::string& query : queries) {

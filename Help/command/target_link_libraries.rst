@@ -140,6 +140,11 @@ Items containing ``::``, such as ``Foo::Bar``, are assumed to be
 target names and will cause an error if no such target exists.
 See policy :policy:`CMP0028`.
 
+See the :variable:`CMAKE_LINK_LIBRARIES_STRATEGY` variable and
+corresponding :prop_tgt:`LINK_LIBRARIES_STRATEGY` target property
+for details on how CMake orders direct link dependencies on linker
+command lines.
+
 See the :manual:`cmake-buildsystem(7)` manual for more on defining
 buildsystem properties.
 

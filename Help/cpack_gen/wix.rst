@@ -458,8 +458,7 @@ Windows using WiX.
    administrative privileges.  Start menu entries created by the
    installer are visible to all users.
 
-   This is the default if :variable:`CPACK_WIX_VERSION` is set to any
-   value other than ``3``.
+   This is the default.  See policy :policy:`CMP0172`.
 
  ``perUser``
    Not yet supported. This is reserved for future use.
@@ -467,9 +466,8 @@ Windows using WiX.
  ``NONE``
    Create an installer without any ``InstallScope`` attribute.
 
-   If :variable:`CPACK_WIX_VERSION` is not set, or is set to ``3``, this
-   value is the default to preserve compatibility with 3.28 and lower.
-   Otherwise, this value is not supported.
+   This is supported only if :variable:`CPACK_WIX_VERSION` is not set,
+   or is set to ``3``.
 
    .. deprecated:: 3.29
 

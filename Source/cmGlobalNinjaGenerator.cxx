@@ -25,6 +25,7 @@
 
 #include "cmsys/FStream.hxx"
 
+#include "cmCustomCommand.h"
 #include "cmCxxModuleMapper.h"
 #include "cmDyndepCollation.h"
 #include "cmFortranParser.h"
@@ -43,6 +44,7 @@
 #include "cmOutputConverter.h"
 #include "cmRange.h"
 #include "cmScanDepFormat.h"
+#include "cmSourceFile.h"
 #include "cmState.h"
 #include "cmStateDirectory.h"
 #include "cmStateSnapshot.h"
@@ -571,13 +573,7 @@ cmGlobalNinjaGenerator::cmGlobalNinjaGenerator(cmake* cm)
   cm->GetState()->SetWindowsShell(true);
 
   // Attempt to use full path to COMSPEC, default "cmd.exe"
-  std::string comspec;
-  if (cmSystemTools::GetEnv("COMSPEC", comspec) &&
-      cmSystemTools::FileIsFullPath(comspec)) {
-    this->Comspec = comspec;
-  } else {
-    this->Comspec = "cmd.exe";
-  }
+  this->Comspec = cmSystemTools::GetComspec();
 #endif
   cm->GetState()->SetNinja(true);
   this->FindMakeProgramFile = "CMakeNinjaFindMake.cmake";
@@ -1627,6 +1623,94 @@ void cmGlobalNinjaGenerator::WriteFolderTargets(std::ostream& os)
   std::map<std::string, DirectoryTarget> dirTargets =
     this->ComputeDirectoryTargets();
 
+  // Codegen target
+  if (this->CheckCMP0171()) {
+    for (auto const& it : dirTargets) {
+      cmNinjaBuild build("phony");
+      cmGlobalNinjaGenerator::WriteDivider(os);
+      std::string const& currentBinaryDir = it.first;
+      DirectoryTarget const& dt = it.second;
+      std::vector<std::string> configs =
+        static_cast<cmLocalNinjaGenerator const*>(dt.LG)->GetConfigNames();
+
+      // Setup target
+      build.Comment = cmStrCat("Folder: ", currentBinaryDir);
+      build.Outputs.emplace_back();
+      std::string const buildDirCodegenTarget =
+        this->ConvertToNinjaPath(cmStrCat(currentBinaryDir, "/codegen"));
+      for (auto const& config : configs) {
+        build.ExplicitDeps.clear();
+        build.Outputs.front() =
+          this->BuildAlias(buildDirCodegenTarget, config);
+
+        for (DirectoryTarget::Target const& t : dt.Targets) {
+          if (this->IsExcludedFromAllInConfig(t, config)) {
+            continue;
+          }
+          std::vector<cmSourceFile const*> customCommandSources;
+          t.GT->GetCustomCommands(customCommandSources, config);
+          for (cmSourceFile const* sf : customCommandSources) {
+            cmCustomCommand const* cc = sf->GetCustomCommand();
+            if (cc->GetCodegen()) {
+              auto const& outputs = cc->GetOutputs();
+
+              std::transform(outputs.begin(), outputs.end(),
+                             std::back_inserter(build.ExplicitDeps),
+                             this->MapToNinjaPath());
+            }
+          }
+        }
+
+        for (DirectoryTarget::Dir const& d : dt.Children) {
+          if (!d.ExcludeFromAll) {
+            build.ExplicitDeps.emplace_back(this->BuildAlias(
+              this->ConvertToNinjaPath(cmStrCat(d.Path, "/codegen")), config));
+          }
+        }
+
+        // Write target
+        this->WriteBuild(this->EnableCrossConfigBuild() &&
+                             this->CrossConfigs.count(config)
+                           ? os
+                           : *this->GetImplFileStream(config),
+                         build);
+      }
+
+      // Add shortcut target
+      if (this->IsMultiConfig()) {
+        for (auto const& config : configs) {
+          build.ExplicitDeps = { this->BuildAlias(buildDirCodegenTarget,
+                                                  config) };
+          build.Outputs.front() = buildDirCodegenTarget;
+          this->WriteBuild(*this->GetConfigFileStream(config), build);
+        }
+
+        if (!this->DefaultFileConfig.empty()) {
+          build.ExplicitDeps.clear();
+          for (auto const& config : this->DefaultConfigs) {
+            build.ExplicitDeps.push_back(
+              this->BuildAlias(buildDirCodegenTarget, config));
+          }
+          build.Outputs.front() = buildDirCodegenTarget;
+          this->WriteBuild(*this->GetDefaultFileStream(), build);
+        }
+      }
+
+      // Add target for all configs
+      if (this->EnableCrossConfigBuild()) {
+        build.ExplicitDeps.clear();
+        for (auto const& config : this->CrossConfigs) {
+          build.ExplicitDeps.push_back(
+            this->BuildAlias(buildDirCodegenTarget, config));
+        }
+        build.Outputs.front() =
+          this->BuildAlias(buildDirCodegenTarget, "codegen");
+        this->WriteBuild(os, build);
+      }
+    }
+  }
+
+  // All target
   for (auto const& it : dirTargets) {
     cmNinjaBuild build("phony");
     cmGlobalNinjaGenerator::WriteDivider(os);
@@ -1636,7 +1720,6 @@ void cmGlobalNinjaGenerator::WriteFolderTargets(std::ostream& os)
       static_cast<cmLocalNinjaGenerator const*>(dt.LG)->GetConfigNames();
 
     // Setup target
-    cmNinjaDeps configDeps;
     build.Comment = cmStrCat("Folder: ", currentBinaryDir);
     build.Outputs.emplace_back();
     std::string const buildDirAllTarget =
@@ -1644,7 +1727,6 @@ void cmGlobalNinjaGenerator::WriteFolderTargets(std::ostream& os)
     for (auto const& config : configs) {
       build.ExplicitDeps.clear();
       build.Outputs.front() = this->BuildAlias(buildDirAllTarget, config);
-      configDeps.emplace_back(build.Outputs.front());
       for (DirectoryTarget::Target const& t : dt.Targets) {
         if (!this->IsExcludedFromAllInConfig(t, config)) {
           this->AppendTargetOutputs(t.GT, build.ExplicitDeps, config,
@@ -1988,7 +2070,7 @@ std::string cmGlobalNinjaGenerator::CMakeCmd() const
 std::string cmGlobalNinjaGenerator::NinjaCmd() const
 {
   const auto& lgen = this->LocalGenerators[0];
-  if (lgen != nullptr) {
+  if (lgen) {
     return lgen->ConvertToOutputFormat(this->NinjaCommand,
                                        cmOutputConverter::SHELL);
   }
@@ -3067,6 +3149,11 @@ bool cmGlobalNinjaGenerator::IsSingleConfigUtility(
 {
   return target->GetType() == cmStateEnums::UTILITY &&
     !this->PerConfigUtilityTargets.count(target->GetName());
+}
+
+std::string cmGlobalNinjaGenerator::ConvertToOutputPath(std::string path) const
+{
+  return this->ConvertToNinjaPath(path);
 }
 
 const char* cmGlobalNinjaMultiGenerator::NINJA_COMMON_FILE =

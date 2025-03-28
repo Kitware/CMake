@@ -1,43 +1,111 @@
-CMake Testing Process
-*********************
+CMake Testing Guide
+*******************
 
-The following documents the process for running integration testing builds.
+The following is a guide to the CMake test suite for developers.
 See documentation on `CMake Development`_ for more information.
 
+See `CMake Integration Testing`_ for running integration testing builds.
+
+See `Tests/README.rst`_ for the test suite layout in the source tree.
+
 .. _`CMake Development`: README.rst
+.. _`CMake Integration Testing`: integration-testing.rst
+.. _`Tests/README.rst`: ../../Tests/README.rst
 
-CMake Dashboard Scripts
-=======================
+Running Tests in the Build Tree
+===============================
 
-The *integration testing* step of the `CMake Review Process`_ uses a set of
-testing machines that follow an integration branch on their own schedule to
-drive testing and submit results to the `CMake CDash Page`_.  Anyone is
-welcome to provide testing machines in order to help keep support for their
-platforms working.
+After `Building CMake`_, one may run the test suite in the build tree
+using `ctest(1)`_:
 
-The `CMake Dashboard Scripts Repository`_ provides CTest scripts to drive
-nightly, continuous, and experimental testing of CMake.  Use the following
-commands to set up a new integration testing client:
+* With a single-configuration CMake generator, such as ``Ninja``
+  or ``Unix Makefiles``, one may simply run ``ctest``:
+
+  .. code-block:: console
+
+    $ ctest
+
+* With a multi-configuration CMake generator, such as
+  ``Ninja Multi-Config``, ``Visual Studio``, or ``Xcode``,
+  one must tell ``ctest`` which configuration to test
+  by passing the ``-C <config>`` option:
+
+  .. code-block:: console
+
+    $ ctest -C Debug
+
+Some useful `ctest(1)`_ options include:
+
+``-N``
+  List test names without running them.
+
+``-V``
+  Show verbose output from each test.
+
+``-j <N>``
+  Run to run up to ``N`` tests concurrently.
+
+``-R <regex>``
+  Select tests for which the regular expression matches a substring
+  of their name.
+
+Cleaning Test Build Trees
+-------------------------
+
+Many CMake tests create their own test project build trees underneath
+the ``Tests/`` directory at the top of the CMake build tree.  These
+build trees are left behind after testing completes in order to
+facilitate manual investigation of results.  Many of the tests do *not*
+clean their build trees if they are run again, with the exception of
+tests using the `RunCMake`_ infrastructure.
+
+In order to clear test build trees, drive the ``test_clean`` custom target
+in the CMake build tree:
 
 .. code-block:: console
 
-  $ mkdir -p ~/Dashboards
-  $ cd ~/Dashboards
-  $ git clone https://gitlab.kitware.com/cmake/dashboard-scripts.git CMakeScripts
-  $ cd CMakeScripts
+  $ cmake --build . --target test_clean
 
-The `cmake_common.cmake`_ script contains comments at the top with
-instructions to set up a testing client.  As it instructs, create a
-CTest script with local settings and include ``cmake_common.cmake``.
+This removes the ``Tests/`` subdirectories created by individual tests
+so they will use a fresh directory next time they run.
 
-.. _`CMake Review Process`: review.rst
-.. _`CMake CDash Page`: https://open.cdash.org/index.php?project=CMake
-.. _`CMake Dashboard Scripts Repository`: https://gitlab.kitware.com/cmake/dashboard-scripts
-.. _`cmake_common.cmake`: https://gitlab.kitware.com/cmake/dashboard-scripts/-/blob/master/cmake_common.cmake
+.. _`Building CMake`: ../../README.rst#building-cmake
+.. _`ctest(1)`: https://cmake.org/cmake/help/latest/manual/ctest.1.html
+.. _`RunCMake`: ../../Tests/RunCMake/README.rst
 
-Nightly Start Time
-------------------
+Running Tests with a Different Generator
+========================================
 
-The ``cmake_common.cmake`` script expects its includer to be run from a
-nightly scheduled task (cron job).  Schedule such tasks for sometime after
-``1:00am UTC``, the time at which our nightly testing branches fast-forward.
+After `Building CMake`_ with one CMake generator, one may configure the
+test suite using a different generator in a separate build tree, without
+building CMake itself again, by defining ``CMake_TEST_EXTERNAL_CMAKE``
+to be the absolute path to the ``bin`` directory containing the ``cmake``,
+``ctest``, and ``cpack`` executables.
+
+For example, after building CMake with the ``Ninja`` generator:
+
+.. code-block:: console
+
+  $ cmake -B build-ninja -G Ninja -DCMAKE_BUILD_TYPE=Debug
+  $ cmake --build build-ninja
+
+one may configure a second build tree to drive tests with the
+``Ninja Multi-Config`` generator:
+
+.. code-block:: console
+
+  $ cmake -B build-nmc-tests -G "Ninja Multi-Config" \
+    -DCMake_TEST_EXTERNAL_CMAKE="$PWD/build-ninja/bin"
+  $ cmake --build build-nmc-tests --config Release
+
+The second build tree does not build CMake itself, but does configure
+the test suite and build test binaries.  One may then run tests normally:
+
+.. code-block:: console
+
+  $ cd build-nmc-tests
+  $ ctest -C Release
+
+Note that the configuration with which one drives tests in the second
+build tree is independent of the configuration with which CMake was
+built in the first.

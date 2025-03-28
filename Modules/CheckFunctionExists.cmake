@@ -5,7 +5,7 @@
 CheckFunctionExists
 -------------------
 
-Check if a C function can be linked
+Check once if a C function can be linked from system libraries.
 
 .. command:: check_function_exists
 
@@ -14,8 +14,7 @@ Check if a C function can be linked
     check_function_exists(<function> <variable>)
 
   Checks that the ``<function>`` is provided by libraries on the system and store
-  the result in a ``<variable>``, which will be created as an internal
-  cache variable.
+  the result in internal cache variable ``<variable>``.
 
 The following variables may be set before calling this macro to modify the
 way the check is run:
@@ -30,12 +29,14 @@ way the check is run:
 
 .. include:: /module/CMAKE_REQUIRED_LIBRARIES.txt
 
+.. include:: /module/CMAKE_REQUIRED_LINK_DIRECTORIES.txt
+
 .. include:: /module/CMAKE_REQUIRED_QUIET.txt
 
 .. note::
 
-  Prefer using :Module:`CheckSymbolExists` instead of this module,
-  for the following reasons:
+  Prefer using :module:`CheckSymbolExists` or :module:`CheckSourceCompiles`
+  instead of this module, for the following reasons:
 
   * ``check_function_exists()`` can't detect functions that are inlined
     in headers or specified as a macro.
@@ -68,6 +69,12 @@ macro(CHECK_FUNCTION_EXISTS FUNCTION VARIABLE)
     else()
       set(CHECK_FUNCTION_EXISTS_ADD_LIBRARIES)
     endif()
+    if(CMAKE_REQUIRED_LINK_DIRECTORIES)
+      set(_CFE_LINK_DIRECTORIES
+        "-DLINK_DIRECTORIES:STRING=${CMAKE_REQUIRED_LINK_DIRECTORIES}")
+    else()
+      set(_CFE_LINK_DIRECTORIES)
+    endif()
     if(CMAKE_REQUIRED_INCLUDES)
       set(CHECK_FUNCTION_EXISTS_ADD_INCLUDES
         "-DINCLUDE_DIRECTORIES:STRING=${CMAKE_REQUIRED_INCLUDES}")
@@ -90,8 +97,10 @@ macro(CHECK_FUNCTION_EXISTS FUNCTION VARIABLE)
       ${CHECK_FUNCTION_EXISTS_ADD_LIBRARIES}
       CMAKE_FLAGS -DCOMPILE_DEFINITIONS:STRING=${MACRO_CHECK_FUNCTION_DEFINITIONS}
       "${CHECK_FUNCTION_EXISTS_ADD_INCLUDES}"
+      "${_CFE_LINK_DIRECTORIES}"
       )
     unset(_cfe_source)
+    unset(_CFE_LINK_DIRECTORIES)
 
     if(${VARIABLE})
       set(${VARIABLE} 1 CACHE INTERNAL "Have function ${FUNCTION}")

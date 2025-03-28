@@ -232,7 +232,7 @@ This module will set the following variables in your project
   The Python 3 preprocessor definitions.
 
 ``Python3_DEBUG_POSTFIX``
-  .. versionadded.. 3.30
+  .. versionadded:: 3.30
 
   Postfix of debug python module. This variable can be used to define the
   :prop_tgt:`DEBUG_POSTFIX` target property.
@@ -449,7 +449,7 @@ Hints
     See `IronPython <https://ironpython.net>`_.
   * ``PyPy``: This implementation use ``RPython`` language and
     ``RPython translation toolchain`` to produce the python interpreter.
-    See `PyPy <https://www.pypy.org>`_.
+    See `PyPy <https://pypy.org>`_.
 
   The default value is:
 

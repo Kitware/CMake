@@ -24,8 +24,8 @@ foreach(_iar_toolchain IN LISTS _iar_toolchains)
   # Sets the minimal requirements for linking each target architecture
   if(ARCH STREQUAL "avr")
     string(CONCAT LINK_OPTS
-      "-I${TOOLKIT_DIR}/lib "
-      "-f ${TOOLKIT_DIR}/src/template/lnk3s.xcl "
+      "-I\"${TOOLKIT_DIR}/lib\" "
+      "-f \"${TOOLKIT_DIR}/src/template/lnk3s.xcl\" "
     )
   elseif(ARCH STREQUAL "rl78")
     string(CONCAT LINK_OPTS
@@ -36,7 +36,14 @@ foreach(_iar_toolchain IN LISTS _iar_toolchains)
       "--config_def _NEAR_CONST_LOCATION_START=0x2000 "
       "--config_def _NEAR_CONST_LOCATION_SIZE=0x6F00 "
       "--define_symbol _NEAR_CONST_LOCATION=0 "
-      "--config ${TOOLKIT_DIR}/config/lnkrl78_s3.icf "
+      "--config \"${TOOLKIT_DIR}/config/lnkrl78_s3.icf\" "
+    )
+  elseif(ARCH STREQUAL "rh850")
+    string(CONCAT LINK_OPTS
+      "--config_def CSTACK_SIZE=0x1000 "
+      "--config_def HEAP_SIZE=0x1000 "
+      "--config_def _SELF_SIZE=0x20000 "
+      "--config \"${TOOLKIT_DIR}/config/lnkr7f701401.icf\" "
     )
   else()
     set(LINK_OPTS "")

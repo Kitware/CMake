@@ -91,6 +91,7 @@ private:
   void WriteDotNetReference(Elem& e1, std::string const& ref,
                             std::string const& hint,
                             std::string const& config);
+  void WriteFrameworkReferences(Elem& e0);
   void WriteDotNetDocumentationFile(Elem& e0);
   void WriteImports(Elem& e0);
   void WriteDotNetReferenceCustomTags(Elem& e2, std::string const& ref);
@@ -121,6 +122,7 @@ private:
   std::vector<std::string> GetIncludes(std::string const& config,
                                        std::string const& lang) const;
   std::string GetTargetOutputName() const;
+  std::string GetAssemblyName(std::string const& config) const;
 
   bool ComputeClOptions();
   bool ComputeClOptions(std::string const& configName);
@@ -194,6 +196,11 @@ private:
   void WriteEvent(Elem& e1, std::string const& name,
                   std::vector<cmCustomCommand> const& commands,
                   std::string const& configName);
+  void WriteSdkStyleEvents(Elem& e0, std::string const& configName);
+  void WriteSdkStyleEvent(Elem& e0, const std::string& name,
+                          const std::string& when, const std::string& target,
+                          std::vector<cmCustomCommand> const& commands,
+                          std::string const& configName);
   void WriteGroupSources(Elem& e0, std::string const& name,
                          ToolSources const& sources,
                          std::vector<cmSourceGroup>&);
@@ -283,8 +290,6 @@ private:
 
   void WriteCommonPropertyGroupGlobals(
     cmVisualStudio10TargetGenerator::Elem& e1);
-
-  bool HasCustomCommands() const;
 
   std::unordered_map<std::string, ConfigToSettings> ParsedToolTargetSettings;
   bool PropertyIsSameInAllConfigs(const ConfigToSettings& toolSettings,

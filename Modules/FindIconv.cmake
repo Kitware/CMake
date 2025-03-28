@@ -134,6 +134,8 @@ else()
 
   find_path(Iconv_INCLUDE_DIR
     NAMES "iconv.h"
+    PATH_SUFFIXES
+      gnu-libiconv # GNU libiconv on Alpine Linux has header in a subdirectory.
     DOC "iconv include directory")
   set(Iconv_LIBRARY_NAMES "iconv" "libiconv")
   mark_as_advanced(Iconv_INCLUDE_DIR)

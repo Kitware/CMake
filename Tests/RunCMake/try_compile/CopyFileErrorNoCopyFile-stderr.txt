@@ -1,4 +1,4 @@
 CMake Error at CopyFileErrorNoCopyFile.cmake:[0-9]+ \(try_compile\):
   COPY_FILE_ERROR may be used only with COPY_FILE
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists.txt:[0-9]+ \(include\)

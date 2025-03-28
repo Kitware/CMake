@@ -8,7 +8,7 @@ readonly name="curl"
 readonly ownership="Curl Upstream <curl-library@lists.haxx.se>"
 readonly subtree="Utilities/cmcurl"
 readonly repo="https://github.com/curl/curl.git"
-readonly tag="curl-8_8_0"
+readonly tag="curl-8_10_1"
 readonly shortlog=false
 readonly paths="
   CMake/*

@@ -500,6 +500,7 @@ void cmLocalGenerator::GenerateInstallRules()
     toplevel_install = 1;
   }
   file += "/cmake_install.cmake";
+  this->GetGlobalGenerator()->AddInstallScript(file);
   cmGeneratedFileStream fout(file);
   fout.SetCopyIfDifferent(true);
 
@@ -712,32 +713,40 @@ void cmLocalGenerator::GenerateInstallRules()
       break;
   }
 
-  // Record the install manifest.
-  if (toplevel_install) {
-    /* clang-format off */
+  /* clang-format off */
+
     fout <<
-      "if(CMAKE_INSTALL_COMPONENT)\n"
-      "  if(CMAKE_INSTALL_COMPONENT MATCHES \"^[a-zA-Z0-9_.+-]+$\")\n"
-      "    set(CMAKE_INSTALL_MANIFEST \"install_manifest_"
-      "${CMAKE_INSTALL_COMPONENT}.txt\")\n"
-      "  else()\n"
-      "    string(MD5 CMAKE_INST_COMP_HASH \"${CMAKE_INSTALL_COMPONENT}\")\n"
-      "    set(CMAKE_INSTALL_MANIFEST \"install_manifest_"
-      "${CMAKE_INST_COMP_HASH}.txt\")\n"
-      "    unset(CMAKE_INST_COMP_HASH)\n"
-      "  endif()\n"
-      "else()\n"
-      "  set(CMAKE_INSTALL_MANIFEST \"install_manifest.txt\")\n"
-      "endif()\n"
-      "\n"
-      "if(NOT CMAKE_INSTALL_LOCAL_ONLY)\n"
-      "  string(REPLACE \";\" \"\\n\" CMAKE_INSTALL_MANIFEST_CONTENT\n"
+      "string(REPLACE \";\" \"\\n\" CMAKE_INSTALL_MANIFEST_CONTENT\n"
       "       \"${CMAKE_INSTALL_MANIFEST_FILES}\")\n"
-      "  file(WRITE \"" << homedir << "/${CMAKE_INSTALL_MANIFEST}\"\n"
+      "if(CMAKE_INSTALL_LOCAL_ONLY)\n"
+      "  file(WRITE \"" <<
+      this->StateSnapshot.GetDirectory().GetCurrentBinary() <<
+      "/install_local_manifest.txt\"\n"
       "     \"${CMAKE_INSTALL_MANIFEST_CONTENT}\")\n"
       "endif()\n";
-    /* clang-format on */
-  }
+
+    if (toplevel_install) {
+      fout <<
+        "if(CMAKE_INSTALL_COMPONENT)\n"
+        "  if(CMAKE_INSTALL_COMPONENT MATCHES \"^[a-zA-Z0-9_.+-]+$\")\n"
+        "    set(CMAKE_INSTALL_MANIFEST \"install_manifest_"
+        "${CMAKE_INSTALL_COMPONENT}.txt\")\n"
+        "  else()\n"
+        "    string(MD5 CMAKE_INST_COMP_HASH \"${CMAKE_INSTALL_COMPONENT}\")\n"
+        "    set(CMAKE_INSTALL_MANIFEST \"install_manifest_"
+        "${CMAKE_INST_COMP_HASH}.txt\")\n"
+        "    unset(CMAKE_INST_COMP_HASH)\n"
+        "  endif()\n"
+        "else()\n"
+        "  set(CMAKE_INSTALL_MANIFEST \"install_manifest.txt\")\n"
+        "endif()\n"
+        "\n"
+        "if(NOT CMAKE_INSTALL_LOCAL_ONLY)\n"
+        "  file(WRITE \"" << homedir << "/${CMAKE_INSTALL_MANIFEST}\"\n"
+        "     \"${CMAKE_INSTALL_MANIFEST_CONTENT}\")\n"
+        "endif()\n";
+    }
+  /* clang-format on */
 }
 
 void cmLocalGenerator::AddGeneratorTarget(
@@ -902,7 +911,7 @@ std::string cmLocalGenerator::GetIncludeFlags(
     sysIncludeFlag = this->Makefile->GetDefinition(
       cmStrCat("CMAKE_INCLUDE_SYSTEM_FLAG_", lang));
     sysIncludeFlagWarning = this->Makefile->GetDefinition(
-      cmStrCat("_CMAKE_INCLUDE_SYSTEM_FLAG_", lang, "_WARNING"));
+      cmStrCat("CMAKE_INCLUDE_SYSTEM_FLAG_", lang, "_WARNING"));
   }
 
   cmValue fwSearchFlag = this->Makefile->GetDefinition(
@@ -1617,8 +1626,6 @@ void cmLocalGenerator::GetTargetFlags(
   this->AppendPositionIndependentLinkerFlags(extraLinkFlags, target, config,
                                              linkLanguage);
   this->AppendIPOLinkerFlags(extraLinkFlags, target, config, linkLanguage);
-  this->AppendDependencyInfoLinkerFlags(extraLinkFlags, target, config,
-                                        linkLanguage);
   this->AppendModuleDefinitionFlag(extraLinkFlags, target, linkLineComputer,
                                    config);
 
@@ -1888,6 +1895,10 @@ void cmLocalGenerator::OutputLinkLibraries(
       this->Makefile->GetRequiredDefinition("CMAKE_LIBRARY_PATH_TERMINATOR");
   }
 
+  // Add standard link directories for this language
+  std::string stdLinkDirString = this->Makefile->GetSafeDefinition(
+    cmStrCat("CMAKE_", cli.GetLinkLanguage(), "_STANDARD_LINK_DIRECTORIES"));
+
   // Add standard libraries for this language.
   std::string stdLibString = this->Makefile->GetSafeDefinition(
     cmStrCat("CMAKE_", cli.GetLinkLanguage(), "_STANDARD_LIBRARIES"));
@@ -1898,7 +1909,7 @@ void cmLocalGenerator::OutputLinkLibraries(
 
   frameworkPath = linkLineComputer->ComputeFrameworkPath(cli, fwSearchFlag);
   linkLineComputer->ComputeLinkPath(cli, libPathFlag, libPathTerminator,
-                                    linkPath);
+                                    stdLinkDirString, linkPath);
   linkLineComputer->ComputeLinkLibraries(cli, stdLibString, linkLibraries);
 }
 
@@ -3154,6 +3165,25 @@ void cmLocalGenerator::WriteUnitySourceInclude(
   unity_file << "\n";
 }
 
+namespace {
+std::string unity_file_extension(std::string const& lang)
+{
+  std::string extension;
+  if (lang == "C") {
+    extension = "_c.c";
+  } else if (lang == "CXX") {
+    extension = "_cxx.cxx";
+  } else if (lang == "CUDA") {
+    extension = "_cu.cu";
+  } else if (lang == "OBJC") {
+    extension = "_m.m";
+  } else if (lang == "OBJCXX") {
+    extension = "_mm.mm";
+  }
+  return extension;
+}
+}
+
 std::vector<cmLocalGenerator::UnitySource>
 cmLocalGenerator::AddUnityFilesModeAuto(
   cmGeneratorTarget* target, std::string const& lang,
@@ -3172,17 +3202,8 @@ cmLocalGenerator::AddUnityFilesModeAuto(
 
     chunk = std::min(itemsLeft, batchSize);
 
-    std::string extension;
-    if (lang == "C") {
-      extension = "_c.c";
-    } else if (lang == "CXX") {
-      extension = "_cxx.cxx";
-    } else if (lang == "OBJC") {
-      extension = "_m.m";
-    } else if (lang == "OBJCXX") {
-      extension = "_mm.mm";
-    }
-    std::string filename = cmStrCat(filename_base, "unity_", batch, extension);
+    std::string filename =
+      cmStrCat(filename_base, "unity_", batch, unity_file_extension(lang));
     auto const begin = filtered_sources.begin() + batch * batchSize;
     auto const end = begin + chunk;
     unity_files.emplace_back(this->WriteUnitySource(
@@ -3220,8 +3241,8 @@ cmLocalGenerator::AddUnityFilesModeGroup(
 
   for (auto const& item : explicit_mapping) {
     auto const& name = item.first;
-    std::string filename = cmStrCat(filename_base, "unity_", name,
-                                    (lang == "C") ? "_c.c" : "_cxx.cxx");
+    std::string filename =
+      cmStrCat(filename_base, "unity_", name, unity_file_extension(lang));
     unity_files.emplace_back(this->WriteUnitySource(
       target, configs, cmMakeRange(item.second), beforeInclude, afterInclude,
       std::move(filename)));
@@ -3283,7 +3304,7 @@ void cmLocalGenerator::AddUnityBuild(cmGeneratorTarget* target)
   cmValue afterInclude = target->GetProperty("UNITY_BUILD_CODE_AFTER_INCLUDE");
   cmValue unityMode = target->GetProperty("UNITY_BUILD_MODE");
 
-  for (std::string lang : { "C", "CXX", "OBJC", "OBJCXX" }) {
+  for (std::string lang : { "C", "CXX", "OBJC", "OBJCXX", "CUDA" }) {
     std::vector<UnityBatchedSource> filtered_sources;
     std::copy_if(unitySources.begin(), unitySources.end(),
                  std::back_inserter(filtered_sources),
@@ -3424,7 +3445,7 @@ void cmLocalGenerator::AppendPositionIndependentLinkerFlags(
   }
 
   const char* PICValue = target->GetLinkPIEProperty(config);
-  if (PICValue == nullptr) {
+  if (!PICValue) {
     // POSITION_INDEPENDENT_CODE is not set
     return;
   }
@@ -3552,7 +3573,7 @@ void cmLocalGenerator::AppendCompileOptions(
   std::string& options, const std::vector<std::string>& options_vec,
   const char* regex) const
 {
-  if (regex != nullptr) {
+  if (regex) {
     // Filter flags upon specified reges.
     cmsys::RegularExpression r(regex);
 
@@ -3572,7 +3593,7 @@ void cmLocalGenerator::AppendCompileOptions(
   std::vector<BT<std::string>>& options,
   const std::vector<BT<std::string>>& options_vec, const char* regex) const
 {
-  if (regex != nullptr) {
+  if (regex) {
     // Filter flags upon specified regular expressions.
     cmsys::RegularExpression r(regex);
 
@@ -4369,6 +4390,7 @@ void cmLocalGenerator::GenerateFrameworkInfoPList(
   cmLGInfoProp(mf, target, "MACOSX_FRAMEWORK_ICON_FILE");
   cmLGInfoProp(mf, target, "MACOSX_FRAMEWORK_IDENTIFIER");
   cmLGInfoProp(mf, target, "MACOSX_FRAMEWORK_SHORT_VERSION_STRING");
+  cmLGInfoProp(mf, target, "MACOSX_FRAMEWORK_BUNDLE_NAME");
   cmLGInfoProp(mf, target, "MACOSX_FRAMEWORK_BUNDLE_VERSION");
   mf->ConfigureFile(inFile, fname, false, false, false);
 }
@@ -4625,6 +4647,12 @@ void AppendCustomCommandToOutput(cmLocalGenerator& lg,
     if (cmCustomCommand* cc = sf->GetCustomCommand()) {
       cc->AppendCommands(commandLines);
       cc->AppendDepends(depends);
+      if (cc->GetCodegen() && !implicit_depends.empty()) {
+        lg.GetCMakeInstance()->IssueMessage(
+          MessageType::FATAL_ERROR,
+          "Cannot append IMPLICIT_DEPENDS to existing CODEGEN custom "
+          "command.");
+      }
       cc->AppendImplicitDepends(implicit_depends);
       return;
     }

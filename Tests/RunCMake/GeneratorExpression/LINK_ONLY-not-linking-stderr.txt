@@ -5,4 +5,4 @@ CMake Error at LINK_ONLY-not-linking.cmake:1 \(add_custom_target\):
 
   \$<LINK_ONLY:...> may only be used for linking
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists.txt:[0-9]+ \(include\)

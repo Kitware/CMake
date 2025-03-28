@@ -17,7 +17,6 @@ macro(__aix_compiler_xl lang)
   set(CMAKE_SHARED_MODULE_${lang}_FLAGS  " ")
 
   set(CMAKE_${lang}_LINK_FLAGS "-Wl,-bnoipath")
-  set(CMAKE_${lang}_LINK_LIBRARIES_PROCESSING ORDER=REVERSE DEDUPLICATION=ALL)
 
   set(_OBJECTS " <OBJECTS>")
   if(DEFINED CMAKE_XL_CreateExportList AND CMAKE_XL_CreateExportList STREQUAL "")
@@ -33,6 +32,14 @@ macro(__aix_compiler_xl lang)
     "\"${CMAKE_ROOT}/Modules/Platform/AIX/ExportImportList\" -o <OBJECT_DIR>/exports.exp -c <CMAKE_${lang}_COMPILER> <AIX_EXPORTS>${_OBJECTS}"
     "<CMAKE_${lang}_COMPILER> <CMAKE_SHARED_LIBRARY_${lang}_FLAGS> -Wl,-bE:<OBJECT_DIR>/exports.exp <LANGUAGE_COMPILE_FLAGS> <LINK_FLAGS> <CMAKE_SHARED_LIBRARY_CREATE_${lang}_FLAGS> <SONAME_FLAG><TARGET_SONAME> -o <TARGET> <OBJECTS> <LINK_LIBRARIES>"
     )
+
+  # Create an archive for shared library if CMAKE_AIX_SHARED_LIBRARY_ARCHIVE is used.
+  string(REPLACE " <SONAME_FLAG><TARGET_SONAME> -o <TARGET>" " -o <TARGET_SONAME>"
+    CMAKE_${lang}_CREATE_SHARED_LIBRARY_ARCHIVE "${CMAKE_${lang}_CREATE_SHARED_LIBRARY}")
+  list(APPEND CMAKE_${lang}_CREATE_SHARED_LIBRARY_ARCHIVE
+    "<CMAKE_AR> -X32_64 rc <TARGET> <TARGET_SONAME>"
+    "rm -f <TARGET_SONAME>"
+  )
 
   set(CMAKE_${lang}_LINK_EXECUTABLE_WITH_EXPORTS
     "\"${CMAKE_ROOT}/Modules/Platform/AIX/ExportImportList\" -o <TARGET_IMPLIB> -c <CMAKE_${lang}_COMPILER> -l . <AIX_EXPORTS> <OBJECTS>"

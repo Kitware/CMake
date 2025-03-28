@@ -1,13 +1,14 @@
-[![Run Linux Travis CI tasks](https://github.com/libexpat/libexpat/actions/workflows/linux.yml/badge.svg)](https://github.com/libexpat/libexpat/actions/workflows/linux.yml)
+[![Run Linux CI tasks](https://github.com/libexpat/libexpat/actions/workflows/linux.yml/badge.svg)](https://github.com/libexpat/libexpat/actions/workflows/linux.yml)
 [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/libexpat/libexpat?svg=true)](https://ci.appveyor.com/project/libexpat/libexpat)
 [![Packaging status](https://repology.org/badge/tiny-repos/expat.svg)](https://repology.org/metapackage/expat/versions)
 [![Downloads SourceForge](https://img.shields.io/sourceforge/dt/expat?label=Downloads%20SourceForge)](https://sourceforge.net/projects/expat/files/)
 [![Downloads GitHub](https://img.shields.io/github/downloads/libexpat/libexpat/total?label=Downloads%20GitHub)](https://github.com/libexpat/libexpat/releases)
 
 
-# Expat, Release 2.4.6
+# Expat, Release 2.6.2
 
-This is Expat, a C library for parsing XML, started by
+This is Expat, a C99 library for parsing
+[XML 1.0 Fourth Edition](https://www.w3.org/TR/2006/REC-xml-20060816/), started by
 [James Clark](https://en.wikipedia.org/wiki/James_Clark_%28programmer%29) in 1997.
 Expat is a stream-oriented XML parser.  This means that you register
 handlers with the parser before starting the parse.  These handlers
@@ -222,37 +223,37 @@ CMAKE_INSTALL_PREFIX:PATH=/usr/local
 // Path to a program.
 DOCBOOK_TO_MAN:FILEPATH=/usr/bin/docbook2x-man
 
-// build man page for xmlwf
+// Build man page for xmlwf
 EXPAT_BUILD_DOCS:BOOL=ON
 
-// build the examples for expat library
+// Build the examples for expat library
 EXPAT_BUILD_EXAMPLES:BOOL=ON
 
-// build fuzzers for the expat library
+// Build fuzzers for the expat library
 EXPAT_BUILD_FUZZERS:BOOL=OFF
 
-// build pkg-config file
+// Build pkg-config file
 EXPAT_BUILD_PKGCONFIG:BOOL=ON
 
-// build the tests for expat library
+// Build the tests for expat library
 EXPAT_BUILD_TESTS:BOOL=ON
 
-// build the xmlwf tool for expat library
+// Build the xmlwf tool for expat library
 EXPAT_BUILD_TOOLS:BOOL=ON
 
 // Character type to use (char|ushort|wchar_t) [default=char]
 EXPAT_CHAR_TYPE:STRING=char
 
-// install expat files in cmake install target
+// Install expat files in cmake install target
 EXPAT_ENABLE_INSTALL:BOOL=ON
 
 // Use /MT flag (static CRT) when compiling in MSVC
 EXPAT_MSVC_STATIC_CRT:BOOL=OFF
 
-// build fuzzers via ossfuzz for the expat library
+// Build fuzzers via ossfuzz for the expat library
 EXPAT_OSSFUZZ_BUILD:BOOL=OFF
 
-// build a shared expat library
+// Build a shared expat library
 EXPAT_SHARED_LIBS:BOOL=ON
 
 // Treat all compiler warnings as errors
@@ -261,7 +262,7 @@ EXPAT_WARNINGS_AS_ERRORS:BOOL=OFF
 // Make use of getrandom function (ON|OFF|AUTO) [default=AUTO]
 EXPAT_WITH_GETRANDOM:STRING=AUTO
 
-// utilize libbsd (for arc4random_buf)
+// Utilize libbsd (for arc4random_buf)
 EXPAT_WITH_LIBBSD:BOOL=OFF
 
 // Make use of syscall SYS_getrandom (ON|OFF|AUTO) [default=AUTO]

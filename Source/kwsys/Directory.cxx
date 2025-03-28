@@ -292,7 +292,7 @@ Status Directory::Load(std::string const& name, std::string* errorMessage)
   DIR* dir = opendir(name.c_str());
 
   if (!dir) {
-    if (errorMessage != nullptr) {
+    if (errorMessage) {
       *errorMessage = std::string(strerror(errno));
     }
     return Status::POSIX_errno();
@@ -303,7 +303,7 @@ Status Directory::Load(std::string const& name, std::string* errorMessage)
     this->Internal->Files.emplace_back(d->d_name);
   }
   if (errno != 0) {
-    if (errorMessage != nullptr) {
+    if (errorMessage) {
       *errorMessage = std::string(strerror(errno));
     }
     return Status::POSIX_errno();
@@ -321,7 +321,7 @@ unsigned long Directory::GetNumberOfFilesInDirectory(const std::string& name,
   DIR* dir = opendir(name.c_str());
 
   if (!dir) {
-    if (errorMessage != nullptr) {
+    if (errorMessage) {
       *errorMessage = std::string(strerror(errno));
     }
     return 0;
@@ -332,7 +332,7 @@ unsigned long Directory::GetNumberOfFilesInDirectory(const std::string& name,
     count++;
   }
   if (errno != 0) {
-    if (errorMessage != nullptr) {
+    if (errorMessage) {
       *errorMessage = std::string(strerror(errno));
     }
     return false;

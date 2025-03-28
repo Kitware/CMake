@@ -35,7 +35,7 @@ variables:
 # Additionally, jobs may also contain:
 #
 #   - artifacts
-#   - dependency/needs jobs for required jobs
+#   - needs jobs for required jobs
 ################################################################################
 
 # Job prefixes:
@@ -59,7 +59,7 @@ p:source-package:
 
 p:doc-package:
     extends:
-        - .fedora40_sphinx_package
+        - .fedora41_sphinx_package
         - .cmake_prep_doc_linux
         - .linux_x86_64_tags
         - .cmake_doc_artifacts
@@ -69,8 +69,6 @@ u:source-package:
     extends:
         - .rsync_upload_package
         - .run_only_for_package
-    dependencies:
-        - p:source-package
     needs:
         - p:source-package
 
@@ -80,15 +78,12 @@ b:cmake.org-help:
     extends:
         - .cmake_org_help
         - .run_cmake_org_help
-    dependencies: []
     needs: []
 
 u:cmake.org-help:
     extends:
         - .rsync_upload_help
         - .run_cmake_org_help
-    dependencies:
-        - b:cmake.org-help
     needs:
         - b:cmake.org-help
 
@@ -108,18 +103,18 @@ l:iwyu-debian12:
         - .cmake_cdash_artifacts
         - .run_automatically
 
-l:tidy-fedora40:
+l:tidy-fedora41:
     extends:
-        - .fedora40_tidy
+        - .fedora41_tidy
         - .cmake_build_linux
         - .cmake_tidy_artifacts
         - .linux_x86_64_tags
         - .cmake_cdash_artifacts
         - .run_automatically
 
-l:sphinx-fedora40:
+l:sphinx-fedora41:
     extends:
-        - .fedora40_sphinx
+        - .fedora41_sphinx
         - .cmake_build_linux
         - .cmake_sphinx_artifacts
         - .linux_x86_64_tags
@@ -128,9 +123,9 @@ l:sphinx-fedora40:
         CMAKE_CI_JOB_CONTINUOUS: "true"
         CMAKE_CI_JOB_HELP: "true"
 
-l:clang-analyzer-fedora40:
+l:clang-analyzer-fedora41:
     extends:
-        - .fedora40_clang_analyzer
+        - .fedora41_clang_analyzer
         - .cmake_build_linux
         - .linux_x86_64_tags
         - .run_automatically
@@ -224,9 +219,9 @@ t:debian12-hip-radeon:
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
-t:fedora39-hip-radeon:
+t:fedora41-hip-radeon:
     extends:
-        - .fedora39_hip_radeon
+        - .fedora41_hip_radeon
         - .cmake_test_linux_release
         - .linux_x86_64_tags_radeon
         - .run_dependent
@@ -234,9 +229,9 @@ t:fedora39-hip-radeon:
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
-t:fedora40-ninja-clang:
+t:fedora41-makefiles-lfortran:
     extends:
-        - .fedora40_ninja_clang
+        - .fedora41_makefiles_lfortran
         - .cmake_test_linux_release
         - .linux_x86_64_tags
         - .run_dependent
@@ -244,9 +239,9 @@ t:fedora40-ninja-clang:
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
-t:fedora40-ninja-multi-clang:
+t:fedora41-ninja-lfortran:
     extends:
-        - .fedora40_ninja_multi_clang
+        - .fedora41_ninja_lfortran
         - .cmake_test_linux_release
         - .linux_x86_64_tags
         - .run_dependent
@@ -254,9 +249,9 @@ t:fedora40-ninja-multi-clang:
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
-t:fedora40-makefiles-clang:
+t:fedora41-ninja-clang:
     extends:
-        - .fedora40_makefiles_clang
+        - .fedora41_ninja_clang
         - .cmake_test_linux_release
         - .linux_x86_64_tags
         - .run_dependent
@@ -264,25 +259,45 @@ t:fedora40-makefiles-clang:
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
-t:fedora40-makefiles:
+t:fedora41-ninja-multi-clang:
     extends:
-        - .fedora40_makefiles
+        - .fedora41_ninja_multi_clang
         - .cmake_test_linux_release
         - .linux_x86_64_tags
         - .run_dependent
         - .needs_centos7_x86_64
+    variables:
+        CMAKE_CI_JOB_NIGHTLY: "true"
 
-t:fedora40-makefiles-nospace:
+t:fedora41-makefiles-clang:
     extends:
-        - .fedora40_makefiles
+        - .fedora41_makefiles_clang
         - .cmake_test_linux_release
         - .linux_x86_64_tags
+        - .run_dependent
+        - .needs_centos7_x86_64
+    variables:
+        CMAKE_CI_JOB_NIGHTLY: "true"
+
+t:fedora41-makefiles:
+    extends:
+        - .fedora41_makefiles
+        - .cmake_test_linux_release
+        - .linux_x86_64_v3_tags
+        - .run_dependent
+        - .needs_centos7_x86_64
+
+t:fedora41-makefiles-nospace:
+    extends:
+        - .fedora41_makefiles
+        - .cmake_test_linux_release
+        - .linux_x86_64_v3_tags
         - .cmake_junit_artifacts
         - .run_dependent
         - .needs_centos7_x86_64
     variables:
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake-ci"
-        CMAKE_CI_BUILD_NAME: fedora40_makefiles_nospace
+        CMAKE_CI_BUILD_NAME: fedora41_makefiles_nospace
         CMAKE_CI_JOB_NIGHTLY: "true"
 
 t:nvhpc22.11-ninja:
@@ -376,6 +391,17 @@ t:cuda12.2-nvidia:
         - .run_dependent
         - .needs_centos7_x86_64
 
+t:cuda12.2-nvidia-clang:
+    extends:
+        - .cuda12.2_nvidia_clang
+        - .cmake_test_linux_release
+        - .linux_x86_64_tags_cuda
+        - .cmake_junit_artifacts
+        - .run_dependent
+        - .needs_centos7_x86_64
+    variables:
+        CMAKE_CI_JOB_NIGHTLY: "true"
+
 t:cuda12.2-clang:
     extends:
         - .cuda12.2_clang
@@ -417,9 +443,9 @@ t:debian10-legacy:
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
-b:fedora40-ninja:
+b:fedora41-ninja:
     extends:
-        - .fedora40_ninja
+        - .fedora41_ninja
         - .cmake_build_linux
         - .cmake_build_artifacts
         - .linux_x86_64_tags
@@ -427,9 +453,9 @@ b:fedora40-ninja:
     variables:
         CMAKE_CI_JOB_CONTINUOUS: "true"
 
-b:fedora40-makefiles-symlinked:
+b:fedora41-makefiles-symlinked:
     extends:
-        - .fedora40_makefiles_symlinked
+        - .fedora41_makefiles_symlinked
         - .cmake_build_linux
         - .cmake_build_artifacts
         - .linux_x86_64_tags
@@ -464,54 +490,48 @@ b:debian12-aarch64-extdeps:
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
-b:fedora40-extdeps:
+b:fedora41-extdeps:
     extends:
-        - .fedora40_extdeps
+        - .fedora41_extdeps
         - .cmake_build_linux_standalone
         - .linux_x86_64_tags
         - .run_manually
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
-t:fedora40-ninja:
+t:fedora41-ninja:
     extends:
-        - .fedora40_ninja
+        - .fedora41_ninja
         - .cmake_test_linux
         - .linux_x86_64_tags_x11
         - .cmake_test_artifacts
         - .run_dependent
-    dependencies:
-        - b:fedora40-ninja
     needs:
-        - b:fedora40-ninja
+        - b:fedora41-ninja
     variables:
         CMAKE_CI_JOB_CONTINUOUS: "true"
 
-t:fedora40-makefiles-symlinked:
+t:fedora41-makefiles-symlinked:
     extends:
-        - .fedora40_makefiles_symlinked
+        - .fedora41_makefiles_symlinked
         - .cmake_test_linux
         - .linux_x86_64_tags_x11
         - .cmake_test_artifacts
         - .run_dependent
-    dependencies:
-        - b:fedora40-makefiles-symlinked
     needs:
-        - b:fedora40-makefiles-symlinked
+        - b:fedora41-makefiles-symlinked
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
-t:fedora40-ninja-multi:
+t:fedora41-ninja-multi:
     extends:
-        - .fedora40_ninja_multi
+        - .fedora41_ninja_multi
         - .cmake_test_linux_external
         - .linux_x86_64_tags
         - .cmake_junit_artifacts
         - .run_dependent
-    dependencies:
-        - t:fedora40-ninja
     needs:
-        - t:fedora40-ninja
+        - t:fedora41-ninja
 
 t:intel2016u2-makefiles:
     extends:
@@ -724,8 +744,6 @@ b:linux-x86_64-package:
         - .cmake_release_artifacts
         - .linux_x86_64_tags
         - .run_only_for_package
-    dependencies:
-        - p:doc-package
     needs:
         - p:doc-package
     variables:
@@ -735,8 +753,6 @@ u:linux-x86_64-package:
     extends:
         - .rsync_upload_package
         - .run_only_for_package
-    dependencies:
-        - b:linux-x86_64-package
     needs:
         - b:linux-x86_64-package
 
@@ -748,8 +764,6 @@ b:linux-aarch64-package:
         - .cmake_release_artifacts
         - .linux_aarch64_tags
         - .run_only_for_package
-    dependencies:
-        - p:doc-package
     needs:
         - p:doc-package
     variables:
@@ -759,16 +773,14 @@ u:linux-aarch64-package:
     extends:
         - .rsync_upload_package
         - .run_only_for_package
-    dependencies:
-        - b:linux-aarch64-package
     needs:
         - b:linux-aarch64-package
 
 ## Sanitizer builds
 
-b:fedora40-asan:
+b:fedora41-asan:
     extends:
-        - .fedora40_asan
+        - .fedora41_asan
         - .cmake_build_linux
         - .cmake_build_artifacts
         - .linux_x86_64_tags
@@ -776,16 +788,14 @@ b:fedora40-asan:
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
-t:fedora40-asan:
+t:fedora41-asan:
     extends:
-        - .fedora40_asan
+        - .fedora41_asan
         - .cmake_memcheck_linux
         - .linux_x86_64_tags
         - .run_dependent
-    dependencies:
-        - b:fedora40-asan
     needs:
-        - b:fedora40-asan
+        - b:fedora41-asan
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
@@ -847,8 +857,6 @@ t:macos-x86_64-ninja:
         - .cmake_test_artifacts
         - .macos_x86_64_tags
         - .run_dependent
-    dependencies:
-        - b:macos-x86_64-ninja
     needs:
         - b:macos-x86_64-ninja
     variables:
@@ -861,8 +869,6 @@ t:macos-arm64-ninja:
         - .cmake_test_artifacts
         - .macos_arm64_tags
         - .run_dependent
-    dependencies:
-        - b:macos-arm64-ninja
     needs:
         - b:macos-arm64-ninja
     variables:
@@ -876,8 +882,6 @@ t:macos-arm64-ninja-symlinked:
         - .cmake_test_artifacts
         - .macos_arm64_tags
         - .run_dependent
-    dependencies:
-        - b:macos-arm64-ninja-symlinked
     needs:
         - b:macos-arm64-ninja-symlinked
     variables:
@@ -890,8 +894,6 @@ t:macos-arm64-curl:
         - .cmake_test_macos
         - .macos_arm64_tags
         - .run_dependent
-    dependencies:
-        - b:macos-arm64-curl
     needs:
         - b:macos-arm64-curl
     variables:
@@ -911,8 +913,6 @@ t:macos-x86_64-makefiles:
         - .cmake_test_macos
         - .macos_x86_64_tags
         - .run_dependent
-    dependencies:
-        - b:macos-x86_64-makefiles
     needs:
         - b:macos-x86_64-makefiles
 
@@ -923,8 +923,6 @@ t:macos-arm64-ninja-multi:
         - .macos_arm64_tags_ext
         - .cmake_junit_artifacts
         - .run_dependent
-    dependencies:
-        - t:macos-arm64-ninja
     needs:
         - t:macos-arm64-ninja
     variables:
@@ -937,8 +935,6 @@ t:macos-x86_64-xcode:
         - .macos_x86_64_tags_ext
         - .cmake_junit_artifacts
         - .run_dependent
-    dependencies:
-        - t:macos-x86_64-ninja
     needs:
         - t:macos-x86_64-ninja
     variables:
@@ -951,8 +947,6 @@ t:macos-arm64-xcode:
         - .macos_arm64_tags_ext
         - .cmake_junit_artifacts
         - .run_dependent
-    dependencies:
-        - t:macos-arm64-ninja
     needs:
         - t:macos-arm64-ninja
 
@@ -963,8 +957,6 @@ t:macos-arm64-xcode-symlinked:
         - .macos_arm64_tags_ext
         - .cmake_junit_artifacts
         - .run_dependent
-    dependencies:
-        - t:macos-arm64-ninja
     needs:
         - t:macos-arm64-ninja
     variables:
@@ -977,8 +969,6 @@ t:macos-x86_64-ninja-ub:
         - .macos_x86_64_tags_ext
         - .cmake_junit_artifacts
         - .run_dependent
-    dependencies:
-        - t:macos-x86_64-ninja
     needs:
         - t:macos-x86_64-ninja
     variables:
@@ -991,8 +981,6 @@ t:macos-arm64-xcode-ub:
         - .macos_arm64_tags_ext
         - .cmake_junit_artifacts
         - .run_dependent
-    dependencies:
-        - t:macos-arm64-ninja
     needs:
         - t:macos-arm64-ninja
     variables:
@@ -1005,8 +993,6 @@ b:macos-package:
         - .cmake_release_artifacts
         - .macos_arm64_tags_package
         - .run_only_for_package
-    dependencies:
-        - p:doc-package
     needs:
         - p:doc-package
     variables:
@@ -1016,8 +1002,6 @@ u:macos-package:
     extends:
         - .rsync_upload_package
         - .run_only_for_package
-    dependencies:
-        - b:macos-package
     needs:
         - b:macos-package
 
@@ -1028,8 +1012,6 @@ b:macos10.10-package:
         - .cmake_release_artifacts
         - .macos_arm64_tags_package
         - .run_only_for_package
-    dependencies:
-        - p:doc-package
     needs:
         - p:doc-package
     variables:
@@ -1039,8 +1021,6 @@ u:macos10.10-package:
     extends:
         - .rsync_upload_package
         - .run_only_for_package
-    dependencies:
-        - b:macos10.10-package
     needs:
         - b:macos10.10-package
 
@@ -1072,8 +1052,6 @@ t:windows-vs2022-x64-ninja:
         - .windows_x86_64_tags_nonconcurrent_vs2022
         - .cmake_test_artifacts
         - .run_dependent
-    dependencies:
-        - b:windows-vs2022-x64-ninja
     needs:
         - b:windows-vs2022-x64-ninja
     variables:
@@ -1087,8 +1065,6 @@ t:windows-vs2022-x64-ninja-multi:
         - .windows_x86_64_tags_concurrent_vs2022
         - .cmake_junit_artifacts
         - .run_dependent
-    dependencies:
-        - t:windows-vs2022-x64-ninja
     needs:
         - t:windows-vs2022-x64-ninja
     variables:
@@ -1100,8 +1076,6 @@ t:windows-vs2022-x64-ninja-multi:
         - .cmake_test_windows_external
         - .cmake_junit_artifacts
         - .run_dependent
-    dependencies:
-        - t:windows-vs2022-x64-ninja
     needs:
         - t:windows-vs2022-x64-ninja
 
@@ -1126,8 +1100,6 @@ t:windows-vs2019-x64:
         - .windows_x86_64_tags_concurrent_vs2019_android
         - .cmake_junit_artifacts
         - .run_dependent
-    dependencies:
-        - t:windows-vs2022-x64-ninja
     needs:
         - t:windows-vs2022-x64-ninja
     variables:
@@ -1140,8 +1112,6 @@ t:windows-vs2022-x64-nmake:
         - .windows_x86_64_tags_concurrent_vs2022
         - .cmake_junit_artifacts
         - .run_dependent
-    dependencies:
-        - t:windows-vs2022-x64-ninja
     needs:
         - t:windows-vs2022-x64-ninja
     variables:
@@ -1154,8 +1124,6 @@ t:windows-vs2022-x64-jom:
         - .windows_x86_64_tags_concurrent_vs2022
         - .cmake_junit_artifacts
         - .run_dependent
-    dependencies:
-        - t:windows-vs2022-x64-ninja
     needs:
         - t:windows-vs2022-x64-ninja
     variables:
@@ -1168,8 +1136,6 @@ t:windows-borland5.5:
         - .windows_x86_64_tags_concurrent
         - .cmake_junit_artifacts
         - .run_dependent
-    dependencies:
-        - t:windows-vs2022-x64-ninja
     needs:
         - t:windows-vs2022-x64-ninja
     variables:
@@ -1182,71 +1148,61 @@ t:windows-borland5.8:
         - .windows_x86_64_tags_concurrent
         - .cmake_junit_artifacts
         - .run_dependent
-    dependencies:
-        - t:windows-vs2022-x64-ninja
     needs:
         - t:windows-vs2022-x64-ninja
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
-t:windows-clang17.0-cl-ninja:
+t:windows-clang19.1-cl-ninja:
     extends:
         - .windows_clang_ninja
         - .cmake_test_windows_external
         - .windows_x86_64_tags_concurrent
         - .cmake_junit_artifacts
         - .run_dependent
-    dependencies:
-        - t:windows-vs2022-x64-ninja
     needs:
         - t:windows-vs2022-x64-ninja
     variables:
-        CMAKE_CI_BUILD_NAME: windows_clang17.0_cl_ninja
+        CMAKE_CI_BUILD_NAME: windows_clang19.1_cl_ninja
         CMAKE_CI_JOB_NIGHTLY: "true"
 
-t:windows-clang17.0-cl-nmake:
+t:windows-clang19.1-cl-nmake:
     extends:
         - .windows_clang_nmake
         - .cmake_test_windows_external
         - .windows_x86_64_tags_concurrent
         - .cmake_junit_artifacts
         - .run_dependent
-    dependencies:
-        - t:windows-vs2022-x64-ninja
     needs:
         - t:windows-vs2022-x64-ninja
     variables:
-        CMAKE_CI_BUILD_NAME: windows_clang17.0_cl_nmake
+        CMAKE_CI_BUILD_NAME: windows_clang19.1_cl_nmake
         CMAKE_CI_JOB_NIGHTLY: "true"
 
-t:windows-clang17.0-gnu-ninja:
+t:windows-clang19.1-gnu-ninja:
     extends:
         - .windows_clang_ninja
         - .cmake_test_windows_external
         - .windows_x86_64_tags_concurrent
         - .cmake_junit_artifacts
         - .run_dependent
-    dependencies:
-        - t:windows-vs2022-x64-ninja
     needs:
         - t:windows-vs2022-x64-ninja
     variables:
-        CMAKE_CI_BUILD_NAME: windows_clang17.0_gnu_ninja
+        CMAKE_CI_BUILD_NAME: windows_clang19.1_gnu_ninja
         CMAKE_CI_JOB_NIGHTLY: "true"
 
-t:windows-clang17.0-gnu-nmake:
+t:windows-clang19.1-gnu-nmake:
     extends:
         - .windows_clang_nmake
         - .cmake_test_windows_external
         - .windows_x86_64_tags_concurrent
         - .cmake_junit_artifacts
         - .run_dependent
-    dependencies:
-        - t:windows-vs2022-x64-ninja
     needs:
         - t:windows-vs2022-x64-ninja
     variables:
-        CMAKE_CI_BUILD_NAME: windows_clang17.0_gnu_nmake
+        CMAKE_CI_BUILD_NAME: windows_clang19.1_gnu_nmake
         CMAKE_CI_JOB_NIGHTLY: "true"
 
 t:windows-intel2021.9.0-ninja:
@@ -1256,8 +1212,6 @@ t:windows-intel2021.9.0-ninja:
         - .windows_x86_64_tags_concurrent_vs2022
         - .cmake_junit_artifacts
         - .run_dependent
-    dependencies:
-        - t:windows-vs2022-x64-ninja
     needs:
         - t:windows-vs2022-x64-ninja
     variables:
@@ -1271,8 +1225,6 @@ t:windows-oneapi2024.1.0-ninja:
         - .windows_x86_64_tags_concurrent_vs2022
         - .cmake_junit_artifacts
         - .run_dependent
-    dependencies:
-        - t:windows-vs2022-x64-ninja
     needs:
         - t:windows-vs2022-x64-ninja
     variables:
@@ -1286,8 +1238,6 @@ t:mingw_osdn_io-mingw_makefiles:
         - .windows_x86_64_tags_concurrent
         - .cmake_junit_artifacts
         - .run_dependent
-    dependencies:
-        - t:windows-vs2022-x64-ninja
     needs:
         - t:windows-vs2022-x64-ninja
     variables:
@@ -1300,8 +1250,6 @@ t:mingw_osdn_io-msys_makefiles:
         - .windows_x86_64_tags_concurrent
         - .cmake_junit_artifacts
         - .run_dependent
-    dependencies:
-        - t:windows-vs2022-x64-ninja
     needs:
         - t:windows-vs2022-x64-ninja
     variables:
@@ -1314,8 +1262,6 @@ t:windows-msvc-v71-nmake:
         - .windows_x86_64_tags_concurrent
         - .cmake_junit_artifacts
         - .run_dependent
-    dependencies:
-        - t:windows-vs2022-x64-ninja
     needs:
         - t:windows-vs2022-x64-ninja
     variables:
@@ -1328,8 +1274,6 @@ t:windows-openwatcom1.9:
         - .windows_x86_64_tags_concurrent
         - .cmake_junit_artifacts
         - .run_dependent
-    dependencies:
-        - t:windows-vs2022-x64-ninja
     needs:
         - t:windows-vs2022-x64-ninja
     variables:
@@ -1342,8 +1286,6 @@ t:windows-orangec6.73.1:
         - .windows_x86_64_tags_concurrent
         - .cmake_junit_artifacts
         - .run_dependent
-    dependencies:
-        - t:windows-vs2022-x64-ninja
     needs:
         - t:windows-vs2022-x64-ninja
     variables:
@@ -1368,8 +1310,6 @@ t:windows-arm64-vs2022-ninja:
         - .windows_arm64_tags_nonconcurrent_vs2022
         - .cmake_test_artifacts
         - .run_dependent
-    dependencies:
-        - b:windows-arm64-vs2022-ninja
     needs:
         - b:windows-arm64-vs2022-ninja
     variables:
@@ -1382,8 +1322,6 @@ t:windows-arm64-vs2022:
         - .windows_arm64_tags_concurrent_vs2022
         - .cmake_junit_artifacts
         - .run_dependent
-    dependencies:
-        - t:windows-arm64-vs2022-ninja
     needs:
         - t:windows-arm64-vs2022-ninja
     variables:
@@ -1398,8 +1336,6 @@ b:windows-x86_64-package:
         - .cmake_release_artifacts
         - .windows_x86_64_tags_nonconcurrent_vs2022
         - .run_only_for_package
-    dependencies:
-        - p:doc-package
     needs:
         - p:doc-package
     variables:
@@ -1409,8 +1345,6 @@ u:windows-x86_64-package:
     extends:
         - .rsync_upload_package
         - .run_only_for_package
-    dependencies:
-        - b:windows-x86_64-package
     needs:
         - b:windows-x86_64-package
 
@@ -1421,8 +1355,6 @@ b:windows-i386-package:
         - .cmake_release_artifacts
         - .windows_x86_64_tags_nonconcurrent_vs2022
         - .run_only_for_package
-    dependencies:
-        - p:doc-package
     needs:
         - p:doc-package
     variables:
@@ -1432,8 +1364,6 @@ u:windows-i386-package:
     extends:
         - .rsync_upload_package
         - .run_only_for_package
-    dependencies:
-        - b:windows-i386-package
     needs:
         - b:windows-i386-package
 
@@ -1444,8 +1374,6 @@ b:windows-arm64-package:
         - .cmake_release_artifacts
         - .windows_x86_64_tags_nonconcurrent_vs2022_arm64
         - .run_only_for_package
-    dependencies:
-        - p:doc-package
     needs:
         - p:doc-package
     variables:
@@ -1455,7 +1383,5 @@ u:windows-arm64-package:
     extends:
         - .rsync_upload_package
         - .run_only_for_package
-    dependencies:
-        - b:windows-arm64-package
     needs:
         - b:windows-arm64-package

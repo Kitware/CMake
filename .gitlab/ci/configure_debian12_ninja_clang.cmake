@@ -1,4 +1,5 @@
 if (NOT "$ENV{CMAKE_CI_NIGHTLY}" STREQUAL "")
+  set(CMake_TEST_IAR_TOOLCHAINS "/opt/iarsystems" CACHE PATH "")
   set(CMake_TEST_TICLANG_TOOLCHAINS "$ENV{CI_PROJECT_DIR}/.gitlab/ticlang" CACHE PATH "")
 endif()
 

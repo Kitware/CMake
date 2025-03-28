@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.10)
 project(FortranHello Fortran C)
 
 # add a function to test for -lsunquad on sunpro sun systems.
@@ -24,6 +24,10 @@ target_link_libraries(sunq sunquad)
     "looking for sunquad:\nRESULT=[${RESULT}]\nOUTPUT=[\n${OUT}\n]")
   set(${result} "${RESULT}" PARENT_SCOPE)
 endfunction()
+
+if(CMAKE_Fortran_COMPILER_ID STREQUAL "LFortran")
+  add_compile_options(--implicit-interface --generate-object-code)
+endif()
 
 # check for the fortran c interface mangling
 include(FortranCInterface)

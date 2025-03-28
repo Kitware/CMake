@@ -34,6 +34,7 @@ function(CMAKE_PARSE_IMPLICIT_LINK_INFO text lib_var dir_var fwk_var log_var obj
   endif()
 endfunction()
 
+# FIXME(#26157) linker for Intel legacy compilers is not identified
 function(cmake_parse_implicit_link_info2 text log_var obj_regex)
   set(implicit_libs_tmp "")
   set(implicit_objs_tmp "")
@@ -48,14 +49,23 @@ function(cmake_parse_implicit_link_info2 text log_var obj_regex)
   set(multiValueArgs )
   cmake_parse_arguments(EXTRA_PARSE "${keywordArgs}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
+  set(is_lfortran_less_0_40 0)
   set(is_msvc 0)
-  if(EXTRA_PARSE_LANGUAGE AND
-    ("x${CMAKE_${EXTRA_PARSE_LANGUAGE}_COMPILER_ID}" STREQUAL "xMSVC" OR
-     "x${CMAKE_${EXTRA_PARSE_LANGUAGE}_SIMULATE_ID}" STREQUAL "xMSVC"))
-    set(is_msvc 1)
+  if(EXTRA_PARSE_LANGUAGE)
+    if("x${CMAKE_${EXTRA_PARSE_LANGUAGE}_COMPILER_ID}" STREQUAL "xMSVC" OR
+        "x${CMAKE_${EXTRA_PARSE_LANGUAGE}_SIMULATE_ID}" STREQUAL "xMSVC")
+      set(is_msvc 1)
+    elseif("x${CMAKE_${EXTRA_PARSE_LANGUAGE}_COMPILER_ID}" STREQUAL "xLFortran"
+        AND CMAKE_${EXTRA_PARSE_LANGUAGE}_COMPILER_VERSION VERSION_LESS "0.40")
+      set(is_lfortran_less_0_40 1)
+    endif()
   endif()
   # Parse implicit linker arguments.
   set(linker "ld[0-9]*(\\.[a-z]+)?")
+  if(is_lfortran_less_0_40)
+    # lfortran < 0.40 has no way to pass -v to clang/gcc driver.
+    string(APPEND linker "|clang|gcc")
+  endif()
   if(is_msvc)
     string(APPEND linker "|link\\.exe|lld-link(\\.exe)?")
   endif()
@@ -76,6 +86,10 @@ function(cmake_parse_implicit_link_info2 text log_var obj_regex)
   set(linker_exclude_regex "collect2 version |^[A-Za-z0-9_]+=|/ldfe ")
   set(linker_tool_regex "^[ \t]*(->|\")?[ \t]*(([^\"]*[/\\])?(${linker}))(\"|,| |$)")
   set(linker_tool_exclude_regex "cuda-fake-ld|-fuse-ld=|^ExecuteExternalTool ")
+  if(is_lfortran_less_0_40)
+    # lfortran < 0.40 has no way to pass -v to clang/gcc driver.
+    string(APPEND linker_tool_exclude_regex "|^clang |^gcc ")
+  endif()
   set(linker_tool "NOTFOUND")
   set(linker_tool_fallback "")
   set(link_line_parsed 0)
@@ -187,7 +201,7 @@ function(cmake_parse_implicit_link_info2 text log_var obj_regex)
           if(EXTRA_PARSE_COMPUTE_IMPLICIT_LIBS)
             # Unix library.
             set(lib "${CMAKE_MATCH_1}")
-            if(search_static AND lib MATCHES "^(gfortran|stdc\\+\\+)$")
+            if(search_static AND lib MATCHES "^(gfortran|quadmath|stdc\\+\\+)$")
               # Search for the static library later, once all link dirs are known.
               set(lib "SEARCH_STATIC:${lib}")
             endif()

@@ -72,6 +72,12 @@ Module Functions
   It passes its arguments through ``ExternalData_Expand_Arguments`` and then
   invokes the :command:`add_test` command using the results.
 
+  .. versionchanged:: 3.31
+    If the arguments after ``<target>`` define a test with an executable
+    that is a CMake target, empty values in the :prop_tgt:`TEST_LAUNCHER`
+    and :prop_tgt:`CROSSCOMPILING_EMULATOR` properties of that target are
+    preserved.  See policy :policy:`CMP0178`.
+
 .. command:: ExternalData_Add_Target
 
   The ``ExternalData_Add_Target`` function creates a custom target to
@@ -353,7 +359,17 @@ file or set a variable:
 function(ExternalData_add_test target)
   # Expand all arguments as a single string to preserve escaped semicolons.
   ExternalData_expand_arguments("${target}" testArgs "${ARGN}")
-  add_test(${testArgs})
+
+  # We need the caller's CMP0178 policy setting to apply here
+  cmake_policy(GET CMP0178 cmp0178
+    PARENT_SCOPE  # undocumented, do not use outside of CMake
+  )
+
+  # ExternalData_expand_arguments() escapes semicolons, so we should still be
+  # preserving empty elements from ARGN here. But CMP0178 is still important
+  # for correctly handling TEST_LAUNCHER and CROSSCOMPILING_EMULATOR target
+  # properties that contain empty elements.
+  add_test(${testArgs} __CMP0178 "${cmp0178}")
 endfunction()
 
 function(ExternalData_add_target target)

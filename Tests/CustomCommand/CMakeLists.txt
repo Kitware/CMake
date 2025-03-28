@@ -1,7 +1,7 @@
 #
 # Wrapping
 #
-cmake_minimum_required (VERSION 3.5)
+cmake_minimum_required(VERSION 3.10)
 project (CustomCommand)
 
 add_subdirectory(GeneratedHeader)
@@ -412,6 +412,10 @@ add_custom_target(do_check_command_line ALL
   COMMENT "Checking custom target command line escapes ($dollar-signs$)"
   )
 add_dependencies(do_check_command_line check_command_line)
+add_custom_command(TARGET do_check_command_line POST_BUILD VERBATIM
+  COMMAND ${CMAKE_COMMAND} -E echo "POST_BUILD command with $dollar-signs$"
+  COMMENT "Checking custom target POST_BUILD command line escapes ($dollar-signs$)"
+)
 
 add_custom_target(pre_check_command_line
   COMMAND ${CMAKE_COMMAND} -E rm -f ${CMAKE_CURRENT_BINARY_DIR}/check_mark.txt

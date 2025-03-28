@@ -93,6 +93,8 @@ Result Variables
   Compile options of <component>.
 
 ``ImageMagick_<component>_LIBRARIES``
+  .. versionadded:: 3.31
+
   Full path to <component> libraries.
 
 
@@ -113,7 +115,9 @@ find_package(PkgConfig QUIET)
 function(FIND_IMAGEMAGICK_API component header)
   set(ImageMagick_${component}_FOUND FALSE PARENT_SCOPE)
 
-  pkg_check_modules(PC_${component} QUIET ${component})
+  if(PKG_CONFIG_FOUND)
+    pkg_check_modules(PC_${component} QUIET ${component})
+  endif()
 
   find_path(ImageMagick_${component}_INCLUDE_DIR
     NAMES ${header}
@@ -129,7 +133,9 @@ function(FIND_IMAGEMAGICK_API component header)
     NO_DEFAULT_PATH
     )
   find_path(ImageMagick_${component}_ARCH_INCLUDE_DIR
-    NAMES magick/magick-baseconfig.h
+    NAMES
+      magick/magick-baseconfig.h
+      MagickCore/magick-baseconfig.h
     HINTS
       ${PC_${component}_INCLUDEDIR}
       ${PC_${component}_INCLUDE_DIRS}
@@ -168,6 +174,12 @@ function(FIND_IMAGEMAGICK_API component header)
     set(ImageMagick_${component}_INCLUDE_DIRS
       ${ImageMagick_${component}_INCLUDE_DIRS} PARENT_SCOPE)
 
+    set(ImageMagick_${component}_LIBRARIES
+      ${ImageMagick_${component}_LIBRARY}
+      )
+    set(ImageMagick_${component}_LIBRARIES
+      ${ImageMagick_${component}_LIBRARIES} PARENT_SCOPE)
+
     set(ImageMagick_${component}_COMPILE_OPTIONS ${PC_${component}_CFLAGS_OTHER})
 
     # Add the per-component include directories to the full include dirs.
@@ -185,11 +197,13 @@ function(FIND_IMAGEMAGICK_API component header)
       )
     set(ImageMagick_COMPILE_OPTIONS ${ImageMagick_COMPILE_OPTIONS} PARENT_SCOPE)
 
-    add_library(ImageMagick::${component} UNKNOWN IMPORTED)
-    set_target_properties(ImageMagick::${component} PROPERTIES
-      INTERFACE_INCLUDE_DIRECTORIES "${ImageMagick_${component}_INCLUDE_DIRS}"
-      INTERFACE_COMPILE_OPTIONS "${ImageMagick_${component}_COMPILE_OPTIONS}"
-      IMPORTED_LOCATION "${ImageMagick_${component}_LIBRARY}")
+    if(NOT TARGET ImageMagick::${component})
+      add_library(ImageMagick::${component} UNKNOWN IMPORTED)
+      set_target_properties(ImageMagick::${component} PROPERTIES
+        INTERFACE_INCLUDE_DIRECTORIES "${ImageMagick_${component}_INCLUDE_DIRS}"
+        INTERFACE_COMPILE_OPTIONS "${ImageMagick_${component}_COMPILE_OPTIONS}"
+        IMPORTED_LOCATION "${ImageMagick_${component}_LIBRARY}")
+    endif()
   endif()
 endfunction()
 

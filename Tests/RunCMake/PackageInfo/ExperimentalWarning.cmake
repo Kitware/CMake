@@ -1,0 +1,8 @@
+set(
+  CMAKE_EXPERIMENTAL_EXPORT_PACKAGE_INFO
+  "b80be207-778e-46ba-8080-b23bba22639e"
+  )
+
+add_library(foo INTERFACE)
+install(TARGETS foo EXPORT foo DESTINATION .)
+install(PACKAGE_INFO foo DESTINATION cps EXPORT foo)

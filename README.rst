@@ -51,18 +51,19 @@ Building CMake with CMake
 -------------------------
 
 You can build CMake as any other project with a CMake-based build system:
-run the installed CMake on the sources of this CMake with your preferred
-options and generators. Then build it and install it.
-For instructions how to do this, see documentation on `Running CMake`_.
-
-.. _`Running CMake`: https://cmake.org/runningcmake
+run an already-installed CMake on this source tree with your preferred
+generator and options.  Then build it and install it.
 
 To build the documentation, install `Sphinx`_ and configure CMake with
 ``-DSPHINX_HTML=ON`` and/or ``-DSPHINX_MAN=ON`` to enable the "html" or
 "man" builder.  Add ``-DSPHINX_EXECUTABLE=/path/to/sphinx-build`` if the
 tool is not found automatically.
 
+To run the test suite, run ``ctest`` in the CMake build directory after
+building.  See the `CMake Testing Guide`_ for details.
+
 .. _`Sphinx`: https://sphinx-doc.org
+.. _`CMake Testing Guide`: Help/dev/testing.rst
 
 Building CMake from Scratch
 ---------------------------

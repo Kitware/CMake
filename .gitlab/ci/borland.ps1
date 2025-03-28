@@ -28,6 +28,7 @@ if ($hash.Hash -ne $sha256sum) {
 Add-Type -AssemblyName System.IO.Compression.FileSystem
 [System.IO.Compression.ZipFile]::ExtractToDirectory("$outdir\$tarball", "$outdir")
 Move-Item -Path "$outdir\$filename" -Destination "$outdir\bcc"
+Remove-Item "$outdir\$tarball"
 
 $tools = "bcc32", "ilink32"
 foreach ($tool in $tools) {

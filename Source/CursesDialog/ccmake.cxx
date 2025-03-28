@@ -115,7 +115,7 @@ int main(int argc, char const* const* argv)
     cmCursesForm::DebugStart();
   }
 
-  if (initscr() == nullptr) {
+  if (!initscr()) {
     fprintf(stderr, "Error: ncurses initialization failed\n");
     exit(1);
   }

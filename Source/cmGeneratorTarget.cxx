@@ -37,6 +37,7 @@
 #include "cmMessageType.h"
 #include "cmOutputConverter.h"
 #include "cmPropertyMap.h"
+#include "cmRulePlaceholderExpander.h"
 #include "cmSourceFile.h"
 #include "cmSourceFileLocation.h"
 #include "cmSourceFileLocationKind.h"
@@ -138,6 +139,20 @@ cmGeneratorTarget::cmGeneratorTarget(cmTarget* t, cmLocalGenerator* lg)
   } else {
     this->LinkerLanguage = this->Target->GetSafeProperty("LINKER_LANGUAGE");
   }
+
+  auto configs =
+    this->Makefile->GetGeneratorConfigs(cmMakefile::ExcludeEmptyConfig);
+  std::string build_db_languages[] = { "CXX" };
+  for (auto const& language : build_db_languages) {
+    for (auto const& config : configs) {
+      auto bdb_path = this->BuildDatabasePath(language, config);
+      if (!bdb_path.empty()) {
+        this->Makefile->GetOrCreateGeneratedSource(bdb_path);
+        this->GetGlobalGenerator()->AddBuildDatabaseFile(language, config,
+                                                         bdb_path);
+      }
+    }
+  }
 }
 
 cmGeneratorTarget::~cmGeneratorTarget() = default;
@@ -171,6 +186,20 @@ cmStateEnums::TargetType cmGeneratorTarget::GetType() const
 const std::string& cmGeneratorTarget::GetName() const
 {
   return this->Target->GetName();
+}
+
+std::string cmGeneratorTarget::GetFamilyName() const
+{
+  if (!this->IsImported() && !this->IsSynthetic()) {
+    return this->Target->GetTemplateName();
+  }
+  cmCryptoHash hasher(cmCryptoHash::AlgoSHA3_512);
+  constexpr size_t HASH_TRUNCATION = 12;
+  auto dirhash =
+    hasher.HashString(this->GetLocalGenerator()->GetCurrentBinaryDirectory());
+  auto targetIdent = hasher.HashString(cmStrCat("@d_", dirhash));
+  return cmStrCat(this->Target->GetTemplateName(), '@',
+                  targetIdent.substr(0, HASH_TRUNCATION));
 }
 
 std::string cmGeneratorTarget::GetExportName() const
@@ -585,6 +614,10 @@ void cmGeneratorTarget::AddSystemIncludeDirectory(std::string const& inc,
     }
     auto const& key = cmStrCat(config_upper, "/", lang);
     this->Target->AddSystemIncludeDirectories({ inc_with_config });
+    if (this->SystemIncludesCache.find(key) ==
+        this->SystemIncludesCache.end()) {
+      this->AddSystemIncludeCacheKey(key, config, lang);
+    }
     this->SystemIncludesCache[key].emplace_back(inc_with_config);
 
     // SystemIncludesCache should be sorted so that binary search can be used
@@ -711,8 +744,9 @@ std::string cmGeneratorTarget::GetLinkerTypeProperty(
   std::string propName{ "LINKER_TYPE" };
   auto linkerType = this->GetProperty(propName);
   if (!linkerType.IsEmpty()) {
-    cmGeneratorExpressionDAGChecker dagChecker(
-      this, propName, nullptr, nullptr, this->LocalGenerator, config);
+    cmGeneratorExpressionDAGChecker dagChecker{
+      this, propName, nullptr, nullptr, this->LocalGenerator, config,
+    };
     auto ltype =
       cmGeneratorExpression::Evaluate(*linkerType, this->GetLocalGenerator(),
                                       config, this, &dagChecker, this, lang);
@@ -1039,7 +1073,7 @@ void cmGeneratorTarget::AppendCustomCommandSideEffects(
     sideEffects.insert(this);
   } else {
     for (auto const& source : this->GetAllConfigSources()) {
-      if (source.Source->GetCustomCommand() != nullptr) {
+      if (source.Source->GetCustomCommand()) {
         sideEffects.insert(this);
         break;
       }
@@ -1163,6 +1197,52 @@ const std::string& cmGeneratorTarget::GetLocationForBuild() const
   return location;
 }
 
+void cmGeneratorTarget::AddSystemIncludeCacheKey(
+  const std::string& key, const std::string& config,
+  const std::string& language) const
+{
+  cmGeneratorExpressionDAGChecker dagChecker{
+    this,    "SYSTEM_INCLUDE_DIRECTORIES", nullptr,
+    nullptr, this->LocalGenerator,         config,
+  };
+
+  bool excludeImported = this->GetPropertyAsBool("NO_SYSTEM_FROM_IMPORTED");
+
+  cmList result;
+  for (std::string const& it : this->Target->GetSystemIncludeDirectories()) {
+    result.append(cmGeneratorExpression::Evaluate(
+      it, this->LocalGenerator, config, this, &dagChecker, nullptr, language));
+  }
+
+  std::vector<cmGeneratorTarget const*> const& deps =
+    this->GetLinkImplementationClosure(config, UseTo::Compile);
+  for (cmGeneratorTarget const* dep : deps) {
+    handleSystemIncludesDep(this->LocalGenerator, dep, config, this,
+                            &dagChecker, result, excludeImported, language);
+  }
+
+  cmLinkImplementation const* impl =
+    this->GetLinkImplementation(config, UseTo::Compile);
+  if (impl) {
+    auto runtimeEntries = impl->LanguageRuntimeLibraries.find(language);
+    if (runtimeEntries != impl->LanguageRuntimeLibraries.end()) {
+      for (auto const& lib : runtimeEntries->second) {
+        if (lib.Target) {
+          handleSystemIncludesDep(this->LocalGenerator, lib.Target, config,
+                                  this, &dagChecker, result, excludeImported,
+                                  language);
+        }
+      }
+    }
+  }
+
+  std::for_each(result.begin(), result.end(),
+                cmSystemTools::ConvertToUnixSlashes);
+  std::sort(result.begin(), result.end());
+  result.erase(std::unique(result.begin(), result.end()), result.end());
+  SystemIncludesCache.emplace(key, result);
+}
+
 bool cmGeneratorTarget::IsSystemIncludeDirectory(
   const std::string& dir, const std::string& config,
   const std::string& language) const
@@ -1176,47 +1256,8 @@ bool cmGeneratorTarget::IsSystemIncludeDirectory(
   auto iter = this->SystemIncludesCache.find(key);
 
   if (iter == this->SystemIncludesCache.end()) {
-    cmGeneratorExpressionDAGChecker dagChecker(
-      this, "SYSTEM_INCLUDE_DIRECTORIES", nullptr, nullptr,
-      this->LocalGenerator, config);
-
-    bool excludeImported = this->GetPropertyAsBool("NO_SYSTEM_FROM_IMPORTED");
-
-    cmList result;
-    for (std::string const& it : this->Target->GetSystemIncludeDirectories()) {
-      result.append(cmGeneratorExpression::Evaluate(it, this->LocalGenerator,
-                                                    config, this, &dagChecker,
-                                                    nullptr, language));
-    }
-
-    std::vector<cmGeneratorTarget const*> const& deps =
-      this->GetLinkImplementationClosure(config, UseTo::Compile);
-    for (cmGeneratorTarget const* dep : deps) {
-      handleSystemIncludesDep(this->LocalGenerator, dep, config, this,
-                              &dagChecker, result, excludeImported, language);
-    }
-
-    cmLinkImplementation const* impl =
-      this->GetLinkImplementation(config, UseTo::Compile);
-    if (impl != nullptr) {
-      auto runtimeEntries = impl->LanguageRuntimeLibraries.find(language);
-      if (runtimeEntries != impl->LanguageRuntimeLibraries.end()) {
-        for (auto const& lib : runtimeEntries->second) {
-          if (lib.Target) {
-            handleSystemIncludesDep(this->LocalGenerator, lib.Target, config,
-                                    this, &dagChecker, result, excludeImported,
-                                    language);
-          }
-        }
-      }
-    }
-
-    std::for_each(result.begin(), result.end(),
-                  cmSystemTools::ConvertToUnixSlashes);
-    std::sort(result.begin(), result.end());
-    result.erase(std::unique(result.begin(), result.end()), result.end());
-
-    iter = this->SystemIncludesCache.emplace(key, result).first;
+    this->AddSystemIncludeCacheKey(key, config, language);
+    iter = this->SystemIncludesCache.find(key);
   }
 
   return std::binary_search(iter->second.begin(), iter->second.end(), dir);
@@ -1270,7 +1311,8 @@ bool cmGeneratorTarget::HasSOName(const std::string& config) const
   // and then only when the platform supports an soname flag.
   return ((this->GetType() == cmStateEnums::SHARED_LIBRARY) &&
           !this->GetPropertyAsBool("NO_SONAME") &&
-          this->Makefile->GetSONameFlag(this->GetLinkerLanguage(config)));
+          (this->Makefile->GetSONameFlag(this->GetLinkerLanguage(config)) ||
+           this->IsArchivedAIXSharedLibrary()));
 }
 
 bool cmGeneratorTarget::NeedRelinkBeforeInstall(
@@ -1938,8 +1980,9 @@ void cmGeneratorTarget::GetAutoUicOptions(std::vector<std::string>& result,
     return;
   }
 
-  cmGeneratorExpressionDAGChecker dagChecker(
-    this, "AUTOUIC_OPTIONS", nullptr, nullptr, this->LocalGenerator, config);
+  cmGeneratorExpressionDAGChecker dagChecker{
+    this, "AUTOUIC_OPTIONS", nullptr, nullptr, this->LocalGenerator, config,
+  };
   cmExpandList(cmGeneratorExpression::Evaluate(prop, this->LocalGenerator,
                                                config, this, &dagChecker),
                result);
@@ -1998,6 +2041,425 @@ std::vector<std::string> cmGeneratorTarget::GetAppleArchs(
       this->Makefile->GetDefinition("_CMAKE_APPLE_ARCHS_DEFAULT"));
   }
   return std::move(archList.data());
+}
+
+namespace {
+
+bool IsSupportedClassifiedFlagsLanguage(std::string const& lang)
+{
+  return lang == "CXX"_s;
+}
+
+bool CanUseCompilerLauncher(std::string const& lang)
+{
+  // Also found in `cmCommonTargetGenerator::GetCompilerLauncher`.
+  return lang == "C"_s || lang == "CXX"_s || lang == "Fortran"_s ||
+    lang == "CUDA"_s || lang == "HIP"_s || lang == "ISPC"_s ||
+    lang == "OBJC"_s || lang == "OBJCXX"_s;
+}
+
+// FIXME: return a vector of `cm::string_view` instead to avoid lots of tiny
+// allocations.
+std::vector<std::string> SplitFlags(std::string const& flags)
+{
+  std::vector<std::string> options;
+
+#ifdef _WIN32
+  cmSystemTools::ParseWindowsCommandLine(flags.c_str(), options);
+#else
+  cmSystemTools::ParseUnixCommandLine(flags.c_str(), options);
+#endif
+
+  return options;
+}
+
+}
+
+cmGeneratorTarget::ClassifiedFlags
+cmGeneratorTarget::GetClassifiedFlagsForSource(cmSourceFile const* sf,
+                                               std::string const& config)
+{
+  auto& sourceFlagsCache = this->Configs[config].SourceFlags;
+  auto cacheEntry = sourceFlagsCache.lower_bound(sf);
+  if (cacheEntry != sourceFlagsCache.end() && cacheEntry->first == sf) {
+    return cacheEntry->second;
+  }
+
+  ClassifiedFlags flags;
+  std::string const& lang = sf->GetLanguage();
+
+  if (!IsSupportedClassifiedFlagsLanguage(lang)) {
+    return flags;
+  }
+
+  auto* const lg = this->GetLocalGenerator();
+  auto const* const mf = this->Makefile;
+
+  // Compute the compiler launcher flags.
+  if (CanUseCompilerLauncher(lang)) {
+    // Compiler launchers are all execution flags and should not be relevant to
+    // the actual compilation.
+    FlagClassification cls = FlagClassification::ExecutionFlag;
+    FlagKind kind = FlagKind::NotAFlag;
+
+    std::string const clauncher_prop = cmStrCat(lang, "_COMPILER_LAUNCHER");
+    cmValue clauncher = this->GetProperty(clauncher_prop);
+    std::string const evaluatedClauncher = cmGeneratorExpression::Evaluate(
+      *clauncher, lg, config, this, nullptr, this, lang);
+
+    for (auto const& flag : SplitFlags(evaluatedClauncher)) {
+      flags.emplace_back(cls, kind, flag);
+    }
+  }
+
+  ClassifiedFlags define_flags;
+  ClassifiedFlags include_flags;
+  ClassifiedFlags compile_flags;
+
+  SourceVariables sfVars = this->GetSourceVariables(sf, config);
+
+  // Compute language flags.
+  {
+    FlagClassification cls = FlagClassification::BaselineFlag;
+    FlagKind kind = FlagKind::Compile;
+
+    std::string mfFlags;
+    // Explicitly add the explicit language flag before any other flag
+    // so user flags can override it.
+    this->AddExplicitLanguageFlags(mfFlags, *sf);
+
+    for (auto const& flag : SplitFlags(mfFlags)) {
+      flags.emplace_back(cls, kind, flag);
+    }
+  }
+
+  std::unordered_map<std::string, std::string> pchSources;
+  std::string filterArch;
+
+  {
+    std::vector<std::string> pchArchs = this->GetPchArchs(config, lang);
+
+    for (const std::string& arch : pchArchs) {
+      const std::string pchSource = this->GetPchSource(config, lang, arch);
+      if (pchSource == sf->GetFullPath()) {
+        filterArch = arch;
+      }
+      if (!pchSource.empty()) {
+        pchSources.insert(std::make_pair(pchSource, arch));
+      }
+    }
+  }
+
+  // Compute target-wide flags.
+  {
+    FlagClassification cls = FlagClassification::BaselineFlag;
+
+    // Compile flags
+    {
+      FlagKind kind = FlagKind::Compile;
+      std::string targetFlags;
+
+      lg->GetTargetCompileFlags(this, config, lang, targetFlags, filterArch);
+
+      for (auto&& flag : SplitFlags(targetFlags)) {
+        compile_flags.emplace_back(cls, kind, std::move(flag));
+      }
+    }
+
+    // Define flags
+    {
+      FlagKind kind = FlagKind::Definition;
+      std::set<std::string> defines;
+
+      lg->GetTargetDefines(this, config, lang, defines);
+
+      std::string defineFlags;
+      lg->JoinDefines(defines, defineFlags, lang);
+
+      for (auto&& flag : SplitFlags(defineFlags)) {
+        define_flags.emplace_back(cls, kind, std::move(flag));
+      }
+    }
+
+    // Include flags
+    {
+      FlagKind kind = FlagKind::Include;
+      std::vector<std::string> includes;
+
+      lg->GetIncludeDirectories(includes, this, lang, config);
+      auto includeFlags =
+        lg->GetIncludeFlags(includes, this, lang, config, false);
+
+      for (auto&& flag : SplitFlags(includeFlags)) {
+        include_flags.emplace_back(cls, kind, std::move(flag));
+      }
+    }
+  }
+
+  const std::string COMPILE_FLAGS("COMPILE_FLAGS");
+  const std::string COMPILE_OPTIONS("COMPILE_OPTIONS");
+
+  cmGeneratorExpressionInterpreter genexInterpreter(lg, config, this, lang);
+
+  // Source-specific flags.
+  {
+    FlagClassification cls = FlagClassification::PrivateFlag;
+    FlagKind kind = FlagKind::Compile;
+
+    std::string sourceFlags;
+
+    if (cmValue cflags = sf->GetProperty(COMPILE_FLAGS)) {
+      lg->AppendFlags(sourceFlags,
+                      genexInterpreter.Evaluate(*cflags, COMPILE_FLAGS));
+    }
+
+    if (cmValue coptions = sf->GetProperty(COMPILE_OPTIONS)) {
+      lg->AppendCompileOptions(
+        sourceFlags, genexInterpreter.Evaluate(*coptions, COMPILE_OPTIONS));
+    }
+
+    for (auto&& flag : SplitFlags(sourceFlags)) {
+      compile_flags.emplace_back(cls, kind, std::move(flag));
+    }
+
+    // Dependency tracking flags.
+    {
+      if (!sfVars.DependencyFlags.empty()) {
+        cmRulePlaceholderExpander::RuleVariables vars;
+        auto rulePlaceholderExpander = lg->CreateRulePlaceholderExpander();
+
+        vars.DependencyFile = sfVars.DependencyFile.c_str();
+        vars.DependencyTarget = sfVars.DependencyTarget.c_str();
+
+        std::string depfileFlags = sfVars.DependencyFlags;
+        rulePlaceholderExpander->ExpandRuleVariables(lg, depfileFlags, vars);
+        for (auto&& flag : SplitFlags(depfileFlags)) {
+          compile_flags.emplace_back(FlagClassification::LocationFlag,
+                                     FlagKind::BuildSystem, std::move(flag));
+        }
+      }
+    }
+  }
+
+  // Precompiled headers.
+  {
+    FlagClassification cls = FlagClassification::PrivateFlag;
+    FlagKind kind = FlagKind::Compile;
+
+    std::string pchFlags;
+
+    // Add precompile headers compile options.
+    if (!sf->GetProperty("SKIP_PRECOMPILE_HEADERS")) {
+      if (!pchSources.empty()) {
+        std::string pchOptions;
+        auto pchIt = pchSources.find(sf->GetFullPath());
+        if (pchIt != pchSources.end()) {
+          pchOptions =
+            this->GetPchCreateCompileOptions(config, lang, pchIt->second);
+        } else {
+          pchOptions = this->GetPchUseCompileOptions(config, lang);
+        }
+
+        this->LocalGenerator->AppendCompileOptions(
+          pchFlags, genexInterpreter.Evaluate(pchOptions, COMPILE_OPTIONS));
+      }
+    }
+
+    for (auto&& flag : SplitFlags(pchFlags)) {
+      compile_flags.emplace_back(cls, kind, std::move(flag));
+    }
+  }
+
+  // C++ module flags.
+  if (lang == "CXX"_s) {
+    FlagClassification cls = FlagClassification::LocationFlag;
+    FlagKind kind = FlagKind::BuildSystem;
+
+    std::string bmiFlags;
+
+    auto const* fs = this->GetFileSetForSource(config, sf);
+    if (fs && fs->GetType() == "CXX_MODULES"_s) {
+      if (lang != "CXX"_s) {
+        mf->IssueMessage(
+          MessageType::FATAL_ERROR,
+          cmStrCat(
+            "Target \"", this->Target->GetName(), "\" contains the source\n  ",
+            sf->GetFullPath(), "\nin a file set of type \"", fs->GetType(),
+            R"(" but the source is not classified as a "CXX" source.)"));
+      }
+
+      if (!this->Target->IsNormal()) {
+        auto flag = mf->GetSafeDefinition("CMAKE_CXX_MODULE_BMI_ONLY_FLAG");
+        cmRulePlaceholderExpander::RuleVariables compileObjectVars;
+        compileObjectVars.Object = sfVars.ObjectFileDir.c_str();
+        auto rulePlaceholderExpander = lg->CreateRulePlaceholderExpander();
+        rulePlaceholderExpander->ExpandRuleVariables(lg, flag,
+                                                     compileObjectVars);
+        lg->AppendCompileOptions(bmiFlags, flag);
+      }
+    }
+
+    for (auto&& flag : SplitFlags(bmiFlags)) {
+      compile_flags.emplace_back(cls, kind, std::move(flag));
+    }
+  }
+
+  cmRulePlaceholderExpander::RuleVariables vars;
+  vars.CMTargetName = this->GetName().c_str();
+  vars.CMTargetType = cmState::GetTargetTypeName(this->GetType()).c_str();
+  vars.Language = lang.c_str();
+  auto const sfPath = this->LocalGenerator->ConvertToOutputFormat(
+    sf->GetFullPath(), cmOutputConverter::SHELL);
+
+  // Compute the base compiler command line. We'll find placeholders and
+  // replace them with arguments later in this function.
+  {
+    FlagClassification cls = FlagClassification::ExecutionFlag;
+    FlagKind kind = FlagKind::NotAFlag;
+
+    std::string const cmdVar = cmStrCat("CMAKE_", lang, "_COMPILE_OBJECT");
+    std::string const& compileCmd = mf->GetRequiredDefinition(cmdVar);
+    cmList compileCmds(compileCmd); // FIXME: which command to use?
+    std::string& cmd = compileCmds[0];
+    auto rulePlaceholderExpander = lg->CreateRulePlaceholderExpander();
+
+    static std::string const PlaceholderDefines = "__CMAKE_DEFINES";
+    static std::string const PlaceholderIncludes = "__CMAKE_INCLUDES";
+    static std::string const PlaceholderFlags = "__CMAKE_FLAGS";
+    static std::string const PlaceholderSource = "__CMAKE_SOURCE";
+
+    vars.Defines = PlaceholderDefines.c_str();
+    vars.Includes = PlaceholderIncludes.c_str();
+    vars.TargetPDB = sfVars.TargetPDB.c_str();
+    vars.TargetCompilePDB = sfVars.TargetCompilePDB.c_str();
+    vars.Object = sfVars.ObjectFileDir.c_str();
+    vars.ObjectDir = sfVars.ObjectDir.c_str();
+    vars.ObjectFileDir = sfVars.ObjectFileDir.c_str();
+    vars.Flags = PlaceholderFlags.c_str();
+    vars.DependencyFile = sfVars.DependencyFile.c_str();
+    vars.DependencyTarget = sfVars.DependencyTarget.c_str();
+    vars.Source = PlaceholderSource.c_str();
+
+    rulePlaceholderExpander->ExpandRuleVariables(lg, cmd, vars);
+    for (auto&& flag : SplitFlags(cmd)) {
+      if (flag == PlaceholderDefines) {
+        flags.insert(flags.end(), define_flags.begin(), define_flags.end());
+      } else if (flag == PlaceholderIncludes) {
+        flags.insert(flags.end(), include_flags.begin(), include_flags.end());
+      } else if (flag == PlaceholderFlags) {
+        flags.insert(flags.end(), compile_flags.begin(), compile_flags.end());
+      } else if (flag == PlaceholderSource) {
+        flags.emplace_back(FlagClassification::LocationFlag,
+                           FlagKind::BuildSystem, sfPath);
+      } else {
+        flags.emplace_back(cls, kind, std::move(flag));
+        // All remaining flags here are build system flags.
+        kind = FlagKind::BuildSystem;
+      }
+    }
+  }
+
+  cacheEntry = sourceFlagsCache.emplace_hint(cacheEntry, sf, std::move(flags));
+  return cacheEntry->second;
+}
+
+cmGeneratorTarget::SourceVariables cmGeneratorTarget::GetSourceVariables(
+  cmSourceFile const* sf, std::string const& config)
+{
+  SourceVariables vars;
+  auto const language = sf->GetLanguage();
+  auto const targetType = this->GetType();
+  auto const* const lg = this->GetLocalGenerator();
+  auto const* const gg = this->GetGlobalGenerator();
+  auto const* const mf = this->Makefile;
+
+  // PDB settings.
+  {
+    if (mf->GetDefinition("MSVC_C_ARCHITECTURE_ID") ||
+        mf->GetDefinition("MSVC_CXX_ARCHITECTURE_ID") ||
+        mf->GetDefinition("MSVC_CUDA_ARCHITECTURE_ID")) {
+      std::string pdbPath;
+      std::string compilePdbPath;
+      if (targetType <= cmStateEnums::OBJECT_LIBRARY) {
+        compilePdbPath = this->GetCompilePDBPath(config);
+        if (compilePdbPath.empty()) {
+          // Match VS default: `$(IntDir)vc$(PlatformToolsetVersion).pdb`.
+          // A trailing slash tells the toolchain to add its default file name.
+          compilePdbPath = this->GetSupportDirectory();
+          if (gg->IsMultiConfig()) {
+            compilePdbPath = cmStrCat(compilePdbPath, '/', config);
+          }
+          compilePdbPath += '/';
+          if (targetType == cmStateEnums::STATIC_LIBRARY) {
+            // Match VS default for static libs: `$(IntDir)$(ProjectName).pdb`.
+            compilePdbPath = cmStrCat(compilePdbPath, this->GetName(), ".pdb");
+          }
+        }
+      }
+
+      if (targetType == cmStateEnums::EXECUTABLE ||
+          targetType == cmStateEnums::STATIC_LIBRARY ||
+          targetType == cmStateEnums::SHARED_LIBRARY ||
+          targetType == cmStateEnums::MODULE_LIBRARY) {
+        pdbPath = cmStrCat(this->GetPDBDirectory(config), '/',
+                           this->GetPDBName(config));
+      }
+
+      vars.TargetPDB = lg->ConvertToOutputFormat(
+        gg->ConvertToOutputPath(std::move(pdbPath)), cmOutputConverter::SHELL);
+      vars.TargetCompilePDB = lg->ConvertToOutputFormat(
+        gg->ConvertToOutputPath(std::move(compilePdbPath)),
+        cmOutputConverter::SHELL);
+    }
+  }
+
+  // Object settings.
+  {
+    std::string const objectDir = gg->ConvertToOutputPath(
+      cmStrCat(this->GetSupportDirectory(), gg->GetConfigDirectory(config)));
+    std::string const objectFileName = this->GetObjectName(sf);
+    std::string const objectFilePath =
+      cmStrCat(objectDir, '/', objectFileName);
+
+    vars.ObjectDir =
+      lg->ConvertToOutputFormat(objectDir, cmOutputConverter::SHELL);
+    vars.ObjectFileDir =
+      lg->ConvertToOutputFormat(objectFilePath, cmOutputConverter::SHELL);
+
+    // Dependency settings.
+    {
+      std::string const depfileFormatName =
+        cmStrCat("CMAKE_", language, "_DEPFILE_FORMAT");
+      std::string const depfileFormat =
+        mf->GetSafeDefinition(depfileFormatName);
+      if (depfileFormat != "msvc"_s) {
+        std::string const flagsName =
+          cmStrCat("CMAKE_DEPFILE_FLAGS_", language);
+        std::string const depfileFlags = mf->GetSafeDefinition(flagsName);
+        if (!depfileFlags.empty()) {
+          bool replaceExt = false;
+          if (!language.empty()) {
+            std::string const repVar =
+              cmStrCat("CMAKE_", language, "_DEPFILE_EXTENSION_REPLACE");
+            replaceExt = mf->IsOn(repVar);
+          }
+          std::string const depfilePath = cmStrCat(
+            objectDir, '/',
+            replaceExt
+              ? cmSystemTools::GetFilenameWithoutLastExtension(objectFileName)
+              : objectFileName,
+            ".d");
+
+          vars.DependencyFlags = depfileFlags;
+          vars.DependencyTarget = vars.ObjectFileDir;
+          vars.DependencyFile =
+            lg->ConvertToOutputFormat(depfilePath, cmOutputConverter::SHELL);
+        }
+      }
+    }
+  }
+
+  return vars;
 }
 
 void cmGeneratorTarget::AddExplicitLanguageFlags(std::string& flags,
@@ -2294,6 +2756,9 @@ std::string cmGeneratorTarget::GetCreateRuleVariable(
       return this->GetFeatureSpecificLinkRuleVariable(var, lang, config);
     }
     case cmStateEnums::SHARED_LIBRARY:
+      if (this->IsArchivedAIXSharedLibrary()) {
+        return "CMAKE_" + lang + "_CREATE_SHARED_LIBRARY_ARCHIVE";
+      }
       return "CMAKE_" + lang + "_CREATE_SHARED_LIBRARY";
     case cmStateEnums::MODULE_LIBRARY:
       return "CMAKE_" + lang + "_CREATE_SHARED_MODULE";
@@ -2833,8 +3298,7 @@ bool cmGeneratorTarget::ComputeCompileFeatures(
       }
 
       // Custom updates for the CUDA standard.
-      if (generatorTargetLanguageStandard != nullptr &&
-          (language.first == "CUDA")) {
+      if (generatorTargetLanguageStandard && (language.first == "CUDA")) {
         if (generatorTargetLanguageStandard->Value == "98") {
           this->LanguageStandardMap[key].Value = "03";
         }
@@ -2971,16 +3435,24 @@ cmGeneratorTarget::Names cmGeneratorTarget::GetLibraryNames(
     }
     targetNames.Real += cmStrCat(targetNames.Base, components.suffix);
     targetNames.SharedObject = targetNames.Real;
+  } else if (this->IsArchivedAIXSharedLibrary()) {
+    targetNames.SharedObject =
+      cmStrCat(components.prefix, targetNames.Base, ".so");
+    if (soversion) {
+      targetNames.SharedObject += ".";
+      targetNames.SharedObject += *soversion;
+    }
+    targetNames.Real = targetNames.Output;
   } else {
     // The library's soname.
-    this->ComputeVersionedName(targetNames.SharedObject, components.prefix,
-                               targetNames.Base, components.suffix,
-                               targetNames.Output, soversion);
+    targetNames.SharedObject = this->ComputeVersionedName(
+      components.prefix, targetNames.Base, components.suffix,
+      targetNames.Output, soversion);
 
     // The library's real name on disk.
-    this->ComputeVersionedName(targetNames.Real, components.prefix,
-                               targetNames.Base, components.suffix,
-                               targetNames.Output, version);
+    targetNames.Real = this->ComputeVersionedName(
+      components.prefix, targetNames.Base, components.suffix,
+      targetNames.Output, version);
   }
 
   // The import library names.
@@ -3003,14 +3475,13 @@ cmGeneratorTarget::Names cmGeneratorTarget::GetLibraryNames(
       targetNames.ImportLibrary = targetNames.ImportOutput;
     } else {
       // The import library's soname.
-      this->ComputeVersionedName(
-        targetNames.ImportLibrary, importComponents.prefix,
-        importComponents.base, importComponents.suffix,
-        targetNames.ImportOutput, soversion);
+      targetNames.ImportLibrary = this->ComputeVersionedName(
+        importComponents.prefix, importComponents.base,
+        importComponents.suffix, targetNames.ImportOutput, soversion);
 
       // The import library's real name on disk.
-      this->ComputeVersionedName(
-        targetNames.ImportReal, importComponents.prefix, importComponents.base,
+      targetNames.ImportReal = this->ComputeVersionedName(
+        importComponents.prefix, importComponents.base,
         importComponents.suffix, targetNames.ImportOutput, version);
     }
   }
@@ -3054,8 +3525,13 @@ cmGeneratorTarget::Names cmGeneratorTarget::GetExecutableNames(
 
   // The executable name.
   targetNames.Base = components.base;
-  targetNames.Output =
-    components.prefix + targetNames.Base + components.suffix;
+
+  if (this->IsArchivedAIXSharedLibrary()) {
+    targetNames.Output = components.prefix + targetNames.Base;
+  } else {
+    targetNames.Output =
+      components.prefix + targetNames.Base + components.suffix;
+  }
 
 // The executable's real name on disk.
 #if defined(__CYGWIN__)
@@ -3685,16 +4161,19 @@ std::string cmGeneratorTarget::GetFrameworkVersion() const
   return "A";
 }
 
-void cmGeneratorTarget::ComputeVersionedName(
-  std::string& vName, std::string const& prefix, std::string const& base,
-  std::string const& suffix, std::string const& name, cmValue version) const
+std::string cmGeneratorTarget::ComputeVersionedName(std::string const& prefix,
+                                                    std::string const& base,
+                                                    std::string const& suffix,
+                                                    std::string const& name,
+                                                    cmValue version) const
 {
-  vName = this->IsApple() ? (prefix + base) : name;
+  std::string vName = this->IsApple() ? (prefix + base) : name;
   if (version) {
     vName += ".";
     vName += *version;
   }
   vName += this->IsApple() ? suffix : std::string();
+  return vName;
 }
 
 std::vector<std::string> cmGeneratorTarget::GetPropertyKeys() const
@@ -4801,6 +5280,11 @@ bool cmGeneratorTarget::IsFrameworkOnApple() const
   return this->Target->IsFrameworkOnApple();
 }
 
+bool cmGeneratorTarget::IsArchivedAIXSharedLibrary() const
+{
+  return this->Target->IsArchivedAIXSharedLibrary();
+}
+
 bool cmGeneratorTarget::IsImportedFrameworkFolderOnApple(
   const std::string& config) const
 {
@@ -5457,6 +5941,31 @@ cmGeneratorTarget::CxxModuleSupport cmGeneratorTarget::NeedCxxDyndep(
       break;
   }
   return policyAnswer;
+}
+
+std::string cmGeneratorTarget::BuildDatabasePath(
+  std::string const& lang, std::string const& config) const
+{
+  // Check to see if the target wants it.
+  if (!this->GetPropertyAsBool("EXPORT_BUILD_DATABASE")) {
+    return {};
+  }
+  if (!cmExperimental::HasSupportEnabled(
+        *this->Makefile, cmExperimental::Feature::ExportBuildDatabase)) {
+    return {};
+  }
+  // Check to see if the generator supports it.
+  if (!this->GetGlobalGenerator()->SupportsBuildDatabase()) {
+    return {};
+  }
+
+  if (this->GetGlobalGenerator()->IsMultiConfig()) {
+    return cmStrCat(this->GetSupportDirectory(), '/', config, '/', lang,
+                    "_build_database.json");
+  }
+
+  return cmStrCat(this->GetSupportDirectory(), '/', lang,
+                  "_build_database.json");
 }
 
 void cmGeneratorTarget::BuildFileSetInfoCache(std::string const& config) const

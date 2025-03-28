@@ -61,6 +61,9 @@ private:
   /** The api/v1 directory location.  */
   std::string APIv1;
 
+  /** api/v1 directory in the user's shared CMake config directory.  */
+  std::string UserAPIv1;
+
   /** The set of files we have just written to the reply directory.  */
   std::unordered_set<std::string> ReplyFiles;
 

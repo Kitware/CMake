@@ -1093,7 +1093,7 @@ endif()
 
 # Set the CUDA_LIBRARIES variable.  This is the set of stuff to link against if you are
 # using the CUDA runtime.  For the dynamic version of the runtime, most of the
-# dependencies are brough in, but for the static version there are additional libraries
+# dependencies are brought in, but for the static version there are additional libraries
 # and linker commands needed.
 # Initialize to empty
 set(CUDA_LIBRARIES)
@@ -1449,7 +1449,7 @@ function(CUDA_COMPUTE_BUILD_PATH path build_path)
   # Avoid spaces
   string(REPLACE " " "_" bpath "${bpath}")
 
-  # Strip off the filename.  I wait until here to do it, since removin the
+  # Strip off the filename.  I wait until here to do it, since removing the
   # basename can make a path that looked like path/../basename turn into
   # path/.. (notice the trailing slash).
   get_filename_component(bpath "${bpath}" PATH)

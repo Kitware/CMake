@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.9)
+cmake_minimum_required(VERSION 3.10)
 project(VSExcludeFromDefaultBuild)
 
 # CMAKE_VS_INCLUDE_INSTALL_TO_DEFAULT_BUILD will enable the INSTALL target to be part of the default build

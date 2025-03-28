@@ -1819,7 +1819,7 @@ int cmCTestCoverageHandler::RunBullseyeCoverageBranch(
         covLogXML.StartElement("Report");
         // write the bullseye header
         line = 0;
-        for (int k = 0; bullseyeHelp[k] != nullptr; ++k) {
+        for (int k = 0; bullseyeHelp[k]; ++k) {
           covLogXML.StartElement("Line");
           covLogXML.Attribute("Number", line);
           covLogXML.Attribute("Count", -1);

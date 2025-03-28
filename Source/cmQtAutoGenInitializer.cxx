@@ -357,7 +357,7 @@ void cmQtAutoGenInitializer::AddAutogenExecutableToDependencies(
   cmQtAutoGenInitializer::GenVarsT const& genVars,
   std::vector<std::string>& dependencies) const
 {
-  if (genVars.ExecutableTarget != nullptr) {
+  if (genVars.ExecutableTarget) {
     dependencies.push_back(genVars.ExecutableTarget->Target->GetName());
   } else if (this->MultiConfig && this->UseBetterGraph) {
     cm::string_view const& configGenexWithCommandConfig =
@@ -1340,7 +1340,7 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
   }
 
   if (this->Uic.Enabled) {
-    for (const auto& file : this->Uic.UiHeaders) {
+    for (auto const& file : this->Uic.UiHeaders) {
       this->AddGeneratedSource(file.first, this->Uic);
       autogenByproducts.push_back(file.second);
     }
@@ -1634,13 +1634,17 @@ void cmQtAutoGenInitializer::AddCMakeProcessToCommandLines(
   std::string const& infoFile, std::string const& processName,
   cmCustomCommandLines& commandLines)
 {
+  std::vector<std::string> autogenConfigs;
+  this->GlobalGen->GetQtAutoGenConfigs(autogenConfigs);
   if (this->CrossConfig && this->UseBetterGraph) {
     commandLines.push_back(cmMakeCommandLine(
       { cmSystemTools::GetCMakeCommand(), "-E", processName, infoFile,
         "$<CONFIG>", "$<COMMAND_CONFIG:$<CONFIG>>" }));
   } else if ((this->MultiConfig && this->GlobalGen->IsXcode()) ||
              this->CrossConfig) {
-    for (std::string const& config : this->ConfigsList) {
+    const auto& configs =
+      processName == "cmake_autorcc" ? this->ConfigsList : autogenConfigs;
+    for (std::string const& config : configs) {
       commandLines.push_back(
         cmMakeCommandLine({ cmSystemTools::GetCMakeCommand(), "-E",
                             processName, infoFile, config }));
@@ -1650,9 +1654,7 @@ void cmQtAutoGenInitializer::AddCMakeProcessToCommandLines(
     if (this->MultiConfig) {
       autoInfoFileConfig = "$<CONFIG>";
     } else {
-      std::vector<std::string> configs;
-      this->GlobalGen->GetQtAutoGenConfigs(configs);
-      autoInfoFileConfig = configs[0];
+      autoInfoFileConfig = autogenConfigs[0];
     }
     commandLines.push_back(
       cmMakeCommandLine({ cmSystemTools::GetCMakeCommand(), "-E", processName,
@@ -1671,13 +1673,10 @@ bool cmQtAutoGenInitializer::InitRccTargets()
       sf->SetProperty("SKIP_UNITY_BUILD_INCLUSION", "On");
     }
 
-    std::vector<std::string> ccOutput;
-    ccOutput.push_back(qrc.OutputFile);
+    std::vector<std::string> ccOutput{ qrc.OutputFile };
 
-    std::vector<std::string> ccDepends;
     // Add the .qrc and info file to the custom command dependencies
-    ccDepends.push_back(qrc.QrcFile);
-    ccDepends.push_back(qrc.InfoFile);
+    std::vector<std::string> ccDepends{ qrc.QrcFile, qrc.InfoFile };
 
     cmCustomCommandLines commandLines;
     AddCMakeProcessToCommandLines(qrc.InfoFile, "cmake_autorcc", commandLines);
@@ -1923,9 +1922,10 @@ bool cmQtAutoGenInitializer::SetupWriteAutogenInfo()
     if (this->MultiConfig) {
       for (auto const& cfg : this->ConfigsList) {
         if (!cfg.empty()) {
-          cmGeneratorExpressionDAGChecker dagChecker(
-            this->GenTarget, "AUTOMOC_MACRO_NAMES", nullptr, nullptr,
-            this->LocalGen, cfg);
+          cmGeneratorExpressionDAGChecker dagChecker{
+            this->GenTarget, "AUTOMOC_MACRO_NAMES", nullptr,
+            nullptr,         this->LocalGen,        cfg,
+          };
           AddInterfaceEntries(this->GenTarget, cfg,
                               "INTERFACE_AUTOMOC_MACRO_NAMES", "CXX",
                               &dagChecker, InterfaceAutoMocMacroNamesEntries,
@@ -1933,9 +1933,10 @@ bool cmQtAutoGenInitializer::SetupWriteAutogenInfo()
         }
       }
     } else {
-      cmGeneratorExpressionDAGChecker dagChecker(
-        this->GenTarget, "AUTOMOC_MACRO_NAMES", nullptr, nullptr,
-        this->LocalGen, this->ConfigDefault);
+      cmGeneratorExpressionDAGChecker dagChecker{
+        this->GenTarget, "AUTOMOC_MACRO_NAMES", nullptr,
+        nullptr,         this->LocalGen,        this->ConfigDefault,
+      };
       AddInterfaceEntries(this->GenTarget, this->ConfigDefault,
                           "INTERFACE_AUTOMOC_MACRO_NAMES", "CXX", &dagChecker,
                           InterfaceAutoMocMacroNamesEntries,

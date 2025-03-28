@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.10)
 
 include(RunCMake)
 include("${RunCMake_SOURCE_DIR}/CPackTestHelpers.cmake")
@@ -73,3 +73,4 @@ run_cpack_test_package_target(PRE_POST_SCRIPTS "ZIP" false "MONOLITHIC;COMPONENT
 run_cpack_test_subtests(DUPLICATE_FILE "success;conflict_file;conflict_symlink" "TGZ" false "COMPONENT;GROUP")
 run_cpack_test(COMPONENT_WITH_SPECIAL_CHARS "RPM.COMPONENT_WITH_SPECIAL_CHARS;DEB.COMPONENT_WITH_SPECIAL_CHARS;7Z;TBZ2;TGZ;TXZ;TZ;ZIP;STGZ" false "MONOLITHIC;COMPONENT;GROUP")
 run_cpack_test_package_target(COMPONENT_WITH_SPECIAL_CHARS "RPM.COMPONENT_WITH_SPECIAL_CHARS;DEB.COMPONENT_WITH_SPECIAL_CHARS;7Z;TBZ2;TGZ;TXZ;TZ;ZIP;STGZ" false "MONOLITHIC;COMPONENT;GROUP")
+run_cpack_test_subtests(MULTIARCH "same;foreign;allowed;fail" "DEB.MULTIARCH" false "MONOLITHIC;COMPONENT")

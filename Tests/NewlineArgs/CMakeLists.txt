@@ -1,5 +1,5 @@
 # a simple CXX only test case
-cmake_minimum_required (VERSION 3.5)
+cmake_minimum_required(VERSION 3.10)
 project (NewlineArgs CXX)
 
 add_definitions("-DTEST_FLAG_1

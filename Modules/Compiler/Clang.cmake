@@ -245,15 +245,28 @@ macro(__compiler_clang_cxx_standards lang)
     set(CMAKE_${lang}_STANDARD_LATEST 17)
 
     if(CMAKE_${lang}_COMPILER_VERSION VERSION_GREATER_EQUAL 13.0)
-      set(CMAKE_${lang}23_STANDARD_COMPILE_OPTION "-std:c++latest")
-      set(CMAKE_${lang}23_EXTENSION_COMPILE_OPTION "-std:c++latest")
       set(CMAKE_${lang}20_STANDARD_COMPILE_OPTION "-std:c++20")
       set(CMAKE_${lang}20_EXTENSION_COMPILE_OPTION "-std:c++20")
-      set(CMAKE_${lang}_STANDARD_LATEST 23)
+      set(CMAKE_${lang}_STANDARD_LATEST 20)
     elseif(CMAKE_${lang}_COMPILER_VERSION VERSION_GREATER_EQUAL 6.0)
       set(CMAKE_${lang}20_STANDARD_COMPILE_OPTION "-std:c++latest")
       set(CMAKE_${lang}20_EXTENSION_COMPILE_OPTION "-std:c++latest")
       set(CMAKE_${lang}_STANDARD_LATEST 20)
+    endif()
+
+    if(CMAKE_${lang}_COMPILER_VERSION VERSION_GREATER_EQUAL "17.0")
+      # This version of clang-cl does not have a -std:c++23 flag.
+      # Pass the standard through to the underlying clang directly.
+      # Note that cmVisualStudio10TargetGenerator::ComputeClOptions
+      # has a special case to map this back to -std:c++latest in .vcxproj
+      # files that also have C sources.
+      set(CMAKE_${lang}23_STANDARD_COMPILE_OPTION "-clang:-std=c++23")
+      set(CMAKE_${lang}23_EXTENSION_COMPILE_OPTION "-clang:-std=c++23")
+      set(CMAKE_${lang}_STANDARD_LATEST 23)
+    elseif(CMAKE_${lang}_COMPILER_VERSION VERSION_GREATER_EQUAL 13.0)
+      set(CMAKE_${lang}23_STANDARD_COMPILE_OPTION "-std:c++latest")
+      set(CMAKE_${lang}23_EXTENSION_COMPILE_OPTION "-std:c++latest")
+      set(CMAKE_${lang}_STANDARD_LATEST 23)
     endif()
 
     __compiler_check_default_language_standard(${lang} 3.9 14)

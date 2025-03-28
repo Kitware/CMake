@@ -5,7 +5,7 @@ CMake Error at BadZero.cmake:2 \(add_custom_target\):
 
   \$<0> expression requires a parameter.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists.txt:[0-9]+ \(include\)
 +
 CMake Error at BadZero.cmake:2 \(add_custom_target\):
   Error evaluating generator expression:
@@ -14,4 +14,4 @@ CMake Error at BadZero.cmake:2 \(add_custom_target\):
 
   Expression did not evaluate to a known generator expression
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists.txt:[0-9]+ \(include\)

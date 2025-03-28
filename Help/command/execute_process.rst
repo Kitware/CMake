@@ -140,20 +140,33 @@ Options:
  ``NONE``
    Perform no decoding.  This assumes that the process output is encoded
    in the same way as CMake's internal encoding (UTF-8).
-   This is the default.
+
+   This was the default in CMake 3.14 and older.
+
  ``AUTO``
    Use the current active console's codepage or if that isn't
    available then use ANSI.
+
+   This was the default in CMake 3.15 through 3.30.
+
  ``ANSI``
    Use the ANSI codepage.
+
  ``OEM``
    Use the original equipment manufacturer (OEM) code page.
- ``UTF8`` or ``UTF-8``
+
+ ``UTF-8``
+   .. versionadded:: 3.11
+
    Use the UTF-8 codepage.
 
-   .. versionadded:: 3.11
-     Accept ``UTF-8`` spelling for consistency with the
-     `UTF-8 RFC <https://www.ietf.org/rfc/rfc3629>`_ naming convention.
+   This is the default since CMake 3.31.  See policy :policy:`CMP0176`.
+
+ ``UTF8``
+   Use the UTF-8 codepage.  Use of this name is discouraged in favor
+   of ``UTF-8`` to match the
+   `UTF-8 RFC <https://datatracker.ietf.org/doc/html/rfc3629>`_
+   naming convention.
 
 ``COMMAND_ERROR_IS_FATAL <ANY|LAST>``
   .. versionadded:: 3.19

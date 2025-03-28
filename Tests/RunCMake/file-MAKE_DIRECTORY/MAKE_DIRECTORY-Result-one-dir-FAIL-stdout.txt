@@ -1,0 +1,3 @@
+^-- Result=Failed to create directory: [^
+]*/Tests/RunCMake/file-MAKE_DIRECTORY/MAKE_DIRECTORY-Result-one-dir-FAIL-build/file/directory Error: [^
+]*$

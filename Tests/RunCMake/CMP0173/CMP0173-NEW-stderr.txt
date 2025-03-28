@@ -1,0 +1,9 @@
+CMake Error at .*/Modules/CMakeFindFrameworks\.cmake:[0-9]+ \(message\):
+  CMakeFindFrameworks\.cmake is not maintained and lacks support for more
+  recent framework handling\.  It will be removed in a future version of
+  CMake\.  Update the code to use find_library\(\) instead\.  Use of this module
+  is now an error according to policy CMP0173\.
+Call Stack \(most recent call first\):
+  CMP0173-common\.cmake:12 \(include\)
+  CMP0173-NEW\.cmake:4 \(include\)
+  CMakeLists\.txt:3 \(include\)

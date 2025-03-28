@@ -1,5 +1,5 @@
 ^CMake Error: Could not read presets from [^
 ]*/Tests/RunCMake/CMakePresets/HighVersion:
-Error: @2,14: Unrecognized "version" field
+Error: @2,14: Unrecognized "version" 1000: must be >=1 and <=10
   "version": 1000,
              \^$

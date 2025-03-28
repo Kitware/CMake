@@ -272,6 +272,8 @@ auto const ConfigurePresetHelper =
     .Bind("toolset"_s, ToolsetHelper, false)
     .Bind("toolchainFile"_s, &ConfigurePreset::ToolchainFile,
           cmCMakePresetsGraphInternal::PresetStringHelper, false)
+    .Bind("graphviz"_s, &ConfigurePreset::GraphVizFile,
+          cmCMakePresetsGraphInternal::PresetStringHelper, false)
     .Bind("binaryDir"_s, &ConfigurePreset::BinaryDir,
           cmCMakePresetsGraphInternal::PresetStringHelper, false)
     .Bind("installDir"_s, &ConfigurePreset::InstallDir,

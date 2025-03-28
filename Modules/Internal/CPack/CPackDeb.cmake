@@ -238,7 +238,7 @@ function(cpack_deb_prepare_package_vars)
     endforeach()
 
     # Only dynamically linked ELF files are included
-    # Extract only file name infront of ":"
+    # Extract only file name in front of ":"
     foreach(_FILE IN LISTS CPACK_DEB_INSTALL_FILES)
       if(_FILE MATCHES "ELF.*dynamically linked")
         string(REGEX MATCH "(^.*):" _FILE_NAME "${_FILE}")
@@ -567,7 +567,7 @@ function(cpack_deb_prepare_package_vars)
   # if per-component variable, overrides the global CPACK_DEBIAN_PACKAGE_${variable_type_}
   # automatic dependency discovery will be performed afterwards.
   if(CPACK_DEB_PACKAGE_COMPONENT)
-    foreach(value_type_ IN ITEMS DEPENDS RECOMMENDS SUGGESTS PREDEPENDS ENHANCES BREAKS CONFLICTS PROVIDES REPLACES SOURCE SECTION PRIORITY NAME)
+    foreach(value_type_ IN ITEMS DEPENDS RECOMMENDS SUGGESTS PREDEPENDS ENHANCES BREAKS CONFLICTS PROVIDES REPLACES MULTIARCH SOURCE SECTION PRIORITY NAME)
       set(_component_var "CPACK_DEBIAN_${_local_component_name}_PACKAGE_${value_type_}")
 
       # if set, overrides the global variable
@@ -589,7 +589,6 @@ function(cpack_deb_prepare_package_vars)
       list(JOIN COMPONENT_DEPENDS ", " COMPONENT_DEPENDS)
       if(COMPONENT_DEPENDS)
         list(PREPEND CPACK_DEBIAN_PACKAGE_DEPENDS ${COMPONENT_DEPENDS})
-        list(JOIN CPACK_DEBIAN_PACKAGE_DEPENDS ", " CPACK_DEBIAN_PACKAGE_DEPENDS)
       endif()
     endif()
   endif()
@@ -599,9 +598,9 @@ function(cpack_deb_prepare_package_vars)
   # Append automatically discovered dependencies .
   if(CPACK_DEBIAN_PACKAGE_AUTO_DEPENDS)
     list(APPEND CPACK_DEBIAN_PACKAGE_DEPENDS ${CPACK_DEBIAN_PACKAGE_AUTO_DEPENDS})
-    list(JOIN CPACK_DEBIAN_PACKAGE_DEPENDS ", " CPACK_DEBIAN_PACKAGE_DEPENDS)
   endif()
 
+  list(JOIN CPACK_DEBIAN_PACKAGE_DEPENDS ", " CPACK_DEBIAN_PACKAGE_DEPENDS)
   if(NOT CPACK_DEBIAN_PACKAGE_DEPENDS)
     message(STATUS "CPACK_DEBIAN_PACKAGE_DEPENDS not set, the package will have no dependencies.")
   endif()
@@ -862,6 +861,7 @@ function(cpack_deb_prepare_package_vars)
   set(GEN_CPACK_DEBIAN_PACKAGE_CONFLICTS "${CPACK_DEBIAN_PACKAGE_CONFLICTS}" PARENT_SCOPE)
   set(GEN_CPACK_DEBIAN_PACKAGE_PROVIDES "${CPACK_DEBIAN_PACKAGE_PROVIDES}" PARENT_SCOPE)
   set(GEN_CPACK_DEBIAN_PACKAGE_REPLACES "${CPACK_DEBIAN_PACKAGE_REPLACES}" PARENT_SCOPE)
+  set(GEN_CPACK_DEBIAN_PACKAGE_MULTIARCH "${CPACK_DEBIAN_PACKAGE_MULTIARCH}" PARENT_SCOPE)
   set(GEN_CPACK_DEBIAN_PACKAGE_SHLIBS "${CPACK_DEBIAN_PACKAGE_SHLIBS_LIST}" PARENT_SCOPE)
   set(GEN_CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA "${CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA}" PARENT_SCOPE)
   set(GEN_CPACK_DEBIAN_PACKAGE_CONTROL_STRICT_PERMISSION

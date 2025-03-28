@@ -25,7 +25,6 @@
  */
 
 #include "archive_platform.h"
-__FBSDID("$FreeBSD$");
 
 #include "archive.h"
 #include "archive_entry.h"
@@ -77,7 +76,7 @@ archive_entry_sparse_add_entry(struct archive_entry *entry,
 		}
 	}
 
-	if ((sp = (struct ae_sparse *)malloc(sizeof(*sp))) == NULL)
+	if ((sp = malloc(sizeof(*sp))) == NULL)
 		/* XXX Error XXX */
 		return;
 

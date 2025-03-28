@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.6.3)
+cmake_minimum_required(VERSION 3.10)
 
 # Make sure a policy set differently by our includer is now correct.
 cmake_policy(GET CMP0003 cmp)

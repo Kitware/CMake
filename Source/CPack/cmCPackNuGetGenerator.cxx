@@ -92,7 +92,7 @@ void cmCPackNuGetGenerator::SetupGroupComponentVariables(bool ignoreGroup)
     std::vector<std::string> components;
     for (auto const& comp : this->Components) {
       // Does the component belong to a group?
-      if (comp.second.Group == nullptr) {
+      if (!comp.second.Group) {
         cmCPackLogger(
           cmCPackLog::LOG_VERBOSE,
           "Component <"

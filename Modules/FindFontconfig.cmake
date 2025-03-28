@@ -40,7 +40,9 @@ cmake_policy(SET CMP0159 NEW) # file(STRINGS) with REGEX updates CMAKE_MATCH_<n>
 # use pkg-config to get the directories and then use these values
 # in the FIND_PATH() and FIND_LIBRARY() calls
 find_package(PkgConfig QUIET)
-pkg_check_modules(PKG_FONTCONFIG QUIET fontconfig)
+if(PKG_CONFIG_FOUND)
+  pkg_check_modules(PKG_FONTCONFIG QUIET fontconfig)
+endif()
 set(Fontconfig_COMPILE_OPTIONS ${PKG_FONTCONFIG_CFLAGS_OTHER})
 set(Fontconfig_VERSION ${PKG_FONTCONFIG_VERSION})
 

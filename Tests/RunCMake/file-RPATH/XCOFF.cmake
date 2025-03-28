@@ -1,4 +1,4 @@
-set(names
+set(dynamic
   xcoff32.bin
   xcoff64.bin
   )

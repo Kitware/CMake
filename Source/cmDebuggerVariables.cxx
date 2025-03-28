@@ -62,7 +62,7 @@ cmDebuggerVariables::cmDebuggerVariables(
 void cmDebuggerVariables::AddSubVariables(
   std::shared_ptr<cmDebuggerVariables> const& variables)
 {
-  if (variables != nullptr) {
+  if (variables) {
     SubVariables.emplace_back(variables);
   }
 }
@@ -71,7 +71,7 @@ dap::array<dap::Variable> cmDebuggerVariables::HandleVariablesRequest()
 {
   dap::array<dap::Variable> variables;
 
-  if (GetKeyValuesFunction != nullptr) {
+  if (GetKeyValuesFunction) {
     auto values = GetKeyValuesFunction();
     for (auto const& entry : values) {
       if (IgnoreEmptyStringEntries && entry.Type == "string" &&

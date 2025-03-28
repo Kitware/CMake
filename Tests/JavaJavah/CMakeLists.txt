@@ -1,6 +1,6 @@
 project(helloJavah Java CXX)
 
-cmake_minimum_required (VERSION 3.5)
+cmake_minimum_required(VERSION 3.10)
 set(CMAKE_VERBOSE_MAKEFILE 1)
 
 include(CTest)

@@ -178,7 +178,7 @@ bool cmVSSetupAPIHelper::CheckInstalledComponent(
 bool cmVSSetupAPIHelper::GetVSInstanceInfo(
   SmartCOMPtr<ISetupInstance2> pInstance, VSInstanceInfo& vsInstanceInfo)
 {
-  if (pInstance == nullptr) {
+  if (!pInstance) {
     return false;
   }
 
@@ -219,8 +219,7 @@ bool cmVSSetupAPIHelper::GetVSInstanceInfo(
     }
 
     LPSAFEARRAY lpsaPackages;
-    if (FAILED(pInstance->GetPackages(&lpsaPackages)) ||
-        lpsaPackages == nullptr) {
+    if (FAILED(pInstance->GetPackages(&lpsaPackages)) || !lpsaPackages) {
       return false;
     }
 
@@ -232,7 +231,7 @@ bool cmVSSetupAPIHelper::GetVSInstanceInfo(
       SmartCOMPtr<ISetupPackageReference> package = nullptr;
       if (FAILED(ppData[i]->QueryInterface(IID_ISetupPackageReference,
                                            (void**)&package)) ||
-          package == nullptr) {
+          !package) {
         continue;
       }
 
@@ -372,8 +371,7 @@ bool cmVSSetupAPIHelper::EnumerateVSInstancesWithVswhere(
 bool cmVSSetupAPIHelper::EnumerateVSInstancesWithCOM(
   std::vector<VSInstanceInfo>& VSInstances)
 {
-  if (initializationFailure || setupConfig == nullptr ||
-      setupConfig2 == nullptr || setupHelper == nullptr) {
+  if (initializationFailure || !setupConfig || !setupConfig2 || !setupHelper) {
     return false;
   }
 
@@ -452,7 +450,8 @@ bool cmVSSetupAPIHelper::EnumerateAndChooseVSInstance()
 
   // Enumerate VS instances with either COM interface or Vswhere
   if (!EnumerateVSInstancesWithCOM(vecVSInstancesAll) &&
-      !EnumerateVSInstancesWithVswhere(vecVSInstancesAll)) {
+      !EnumerateVSInstancesWithVswhere(vecVSInstancesAll) &&
+      this->SpecifiedVSInstallLocation.empty()) {
     return false;
   }
 
@@ -610,21 +609,21 @@ bool cmVSSetupAPIHelper::Initialize()
   if (FAILED(setupConfig.CoCreateInstance(CLSID_SetupConfiguration, nullptr,
                                           IID_ISetupConfiguration,
                                           CLSCTX_INPROC_SERVER)) ||
-      setupConfig == nullptr) {
+      !setupConfig) {
     initializationFailure = true;
     return false;
   }
 
   if (FAILED(setupConfig.QueryInterface(IID_ISetupConfiguration2,
                                         (void**)&setupConfig2)) ||
-      setupConfig2 == nullptr) {
+      !setupConfig2) {
     initializationFailure = true;
     return false;
   }
 
   if (FAILED(
         setupConfig.QueryInterface(IID_ISetupHelper, (void**)&setupHelper)) ||
-      setupHelper == nullptr) {
+      !setupHelper) {
     initializationFailure = true;
     return false;
   }

@@ -106,7 +106,7 @@ public:
 
 bool isDirentryToIgnore(const char* const fname)
 {
-  assert(fname != nullptr);
+  assert(fname);
   assert(fname[0] != 0);
   return fname[0] == '.' &&
     (fname[1] == 0 || (fname[1] == '.' && fname[2] == 0));
@@ -2013,7 +2013,7 @@ void cmFindPackageCommand::ComputePrefixes()
   }
   this->FillPrefixesUserGuess();
 
-  this->ComputeFinalPaths(IgnorePaths::No);
+  this->ComputeFinalPaths(IgnorePaths::No, &this->DebugBuffer);
 }
 
 void cmFindPackageCommand::FillPrefixesPackageRedirect()

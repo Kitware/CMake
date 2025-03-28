@@ -549,29 +549,6 @@ private:
   std::unique_ptr<Private> Impl;
 };
 
-class cmCTestLogWrite
-{
-public:
-  cmCTestLogWrite(const char* data, size_t length)
-    : Data(data)
-    , Length(length)
-  {
-  }
-
-  const char* Data;
-  size_t Length;
-};
-
-inline std::ostream& operator<<(std::ostream& os, const cmCTestLogWrite& c)
-{
-  if (!c.Length) {
-    return os;
-  }
-  os.write(c.Data, c.Length);
-  os.flush();
-  return os;
-}
-
 #define cmCTestLog(ctSelf, logType, msg)                                      \
   do {                                                                        \
     std::ostringstream cmCTestLog_msg;                                        \

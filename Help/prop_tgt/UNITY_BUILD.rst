@@ -38,6 +38,9 @@ Unity builds are supported for the following languages:
 ``CXX``
   .. versionadded:: 3.16
 
+``CUDA``
+  .. versionadded:: 3.31
+
 ``OBJC``
   .. versionadded:: 3.29
 

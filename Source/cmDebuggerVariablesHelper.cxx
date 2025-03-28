@@ -193,7 +193,7 @@ std::shared_ptr<cmDebuggerVariables> cmDebuggerVariablesHelper::CreateIfAny(
   std::shared_ptr<cmDebuggerVariablesManager> const& variablesManager,
   std::string const& name, bool supportsVariableType, cmFileSet* fileSet)
 {
-  if (fileSet == nullptr) {
+  if (!fileSet) {
     return {};
   }
 
@@ -471,7 +471,7 @@ std::shared_ptr<cmDebuggerVariables> cmDebuggerVariablesHelper::CreateIfAny(
   std::shared_ptr<cmDebuggerVariablesManager> const& variablesManager,
   std::string const& name, bool supportsVariableType, cmTest* test)
 {
-  if (test == nullptr) {
+  if (!test) {
     return {};
   }
 
@@ -519,7 +519,7 @@ std::shared_ptr<cmDebuggerVariables> cmDebuggerVariablesHelper::CreateIfAny(
   std::shared_ptr<cmDebuggerVariablesManager> const& variablesManager,
   std::string const& name, bool supportsVariableType, cmMakefile* mf)
 {
-  if (mf == nullptr) {
+  if (!mf) {
     return {};
   }
 
@@ -575,7 +575,7 @@ std::shared_ptr<cmDebuggerVariables> cmDebuggerVariablesHelper::CreateIfAny(
   std::shared_ptr<cmDebuggerVariablesManager> const& variablesManager,
   std::string const& name, bool supportsVariableType, cmGlobalGenerator* gen)
 {
-  if (gen == nullptr) {
+  if (!gen) {
     return {};
   }
 
@@ -624,10 +624,9 @@ std::shared_ptr<cmDebuggerVariables> cmDebuggerVariablesHelper::CreateIfAny(
       return ret;
     });
 
-  if (gen->GetInstallComponents() != nullptr) {
-    variables->AddSubVariables(
-      CreateIfAny(variablesManager, "InstallComponents", supportsVariableType,
-                  *gen->GetInstallComponents()));
+  if (const auto* ic = gen->GetInstallComponents()) {
+    variables->AddSubVariables(CreateIfAny(
+      variablesManager, "InstallComponents", supportsVariableType, *ic));
   }
 
   variables->SetIgnoreEmptyStringEntries(true);

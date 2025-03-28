@@ -20,6 +20,8 @@ public:
     ExportPackageDependencies,
     WindowsKernelModeDriver,
     CxxImportStd,
+    ExportPackageInfo,
+    ExportBuildDatabase,
 
     Sentinel,
   };

@@ -28,6 +28,9 @@
 #define CURL_NO_OLDIES
 #endif
 
+/* Tell "curl/curl.h" not to include "curl/mprintf.h" */
+#define CURL_SKIP_INCLUDE_MPRINTF
+
 /* FIXME: Delete this once the warnings have been fixed. */
 #if !defined(CURL_WARN_SIGN_CONVERSION)
 #ifdef __GNUC__
@@ -40,6 +43,45 @@
 #include <_mingw.h>
 #endif
 
+/* Workaround for Homebrew gcc 12.4.0, 13.3.0, 14.1.0 and newer (as of 14.1.0)
+   that started advertising the `availability` attribute, which then gets used
+   by Apple SDK, but, in a way incompatible with gcc, resulting in a misc
+   errors inside SDK headers, e.g.:
+     error: attributes should be specified before the declarator in a function
+            definition
+     error: expected ',' or '}' before
+   Followed by missing declarations.
+   Fix it by overriding the built-in feature-check macro used by the headers
+   to enable the problematic attributes. This makes the feature check fail. */
+#if defined(__APPLE__) &&                \
+  !defined(__clang__) &&                 \
+  defined(__GNUC__) && __GNUC__ >= 12 && \
+  defined(__has_attribute)
+#define availability curl_pp_attribute_disabled
+#endif
+
+#if defined(__APPLE__)
+#include <sys/types.h>
+#include <TargetConditionals.h>
+/* Fixup faulty target macro initialization in macOS SDK since v14.4 (as of
+   15.0 beta). The SDK target detection in `TargetConditionals.h` correctly
+   detects macOS, but fails to set the macro's old name `TARGET_OS_OSX`, then
+   continues to set it to a default value of 0. Other parts of the SDK still
+   rely on the old name, and with this inconsistency our builds fail due to
+   missing declarations. It happens when using mainline llvm older than v18.
+   Later versions fixed it by predefining these target macros, avoiding the
+   faulty dynamic detection. gcc is not affected (for now) because it lacks
+   the necessary dynamic detection features, so the SDK falls back to
+   a codepath that sets both the old and new macro to 1. */
+#if defined(TARGET_OS_MAC) && TARGET_OS_MAC && \
+  defined(TARGET_OS_OSX) && !TARGET_OS_OSX && \
+  (!defined(TARGET_OS_IPHONE) || !TARGET_OS_IPHONE) && \
+  (!defined(TARGET_OS_SIMULATOR) || !TARGET_OS_SIMULATOR)
+#undef TARGET_OS_OSX
+#define TARGET_OS_OSX TARGET_OS_MAC
+#endif
+#endif
+
 /*
  * Disable Visual Studio warnings:
  * 4127 "conditional expression is constant"
@@ -50,7 +92,7 @@
 
 #ifdef _WIN32
 /*
- * Don't include unneeded stuff in Windows headers to avoid compiler
+ * Do not include unneeded stuff in Windows headers to avoid compiler
  * warnings and macro clashes.
  * Make sure to define this macro before including any Windows headers.
  */
@@ -284,7 +326,7 @@
 
 /* curl uses its own printf() function internally. It understands the GNU
  * format. Use this format, so that is matches the GNU format attribute we
- * use with the mingw compiler, allowing it to verify them at compile-time.
+ * use with the MinGW compiler, allowing it to verify them at compile-time.
  */
 #ifdef  __MINGW32__
 #  undef CURL_FORMAT_CURL_OFF_T
@@ -310,13 +352,28 @@
 #define CURL_PRINTF(fmt, arg)
 #endif
 
+/* Override default printf mask check rules in "curl/mprintf.h" */
+#define CURL_TEMP_PRINTF CURL_PRINTF
+
+/* Workaround for mainline llvm v16 and earlier missing a built-in macro
+   expected by macOS SDK v14 / Xcode v15 (2023) and newer.
+   gcc (as of v14) is also missing it. */
+#if defined(__APPLE__) &&                                   \
+  ((!defined(__apple_build_version__) &&                    \
+    defined(__clang__) && __clang_major__ < 17) ||          \
+   (defined(__GNUC__) && __GNUC__ <= 14)) &&                \
+  defined(__ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__) && \
+  !defined(__ENVIRONMENT_OS_VERSION_MIN_REQUIRED__)
+#define __ENVIRONMENT_OS_VERSION_MIN_REQUIRED__             \
+  __ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__
+#endif
+
 /*
  * Use getaddrinfo to resolve the IPv4 address literal. If the current network
- * interface doesn't support IPv4, but supports IPv6, NAT64, and DNS64,
+ * interface does not support IPv4, but supports IPv6, NAT64, and DNS64,
  * performing this task will result in a synthesized IPv6 address.
  */
 #if defined(__APPLE__) && !defined(USE_ARES)
-#include <TargetConditionals.h>
 #define USE_RESOLVE_ON_IPS 1
 #  if TARGET_OS_MAC && !(defined(TARGET_OS_IPHONE) && TARGET_OS_IPHONE) && \
      defined(USE_IPV6)
@@ -408,7 +465,7 @@
 #endif
 
 /*
- * Large file (>2Gb) support using WIN32 functions.
+ * Large file (>2Gb) support using Win32 functions.
  */
 
 #ifdef USE_WIN32_LARGE_FILES
@@ -431,7 +488,7 @@
 #endif
 
 /*
- * Small file (<2Gb) support using WIN32 functions.
+ * Small file (<2Gb) support using Win32 functions.
  */
 
 #ifdef USE_WIN32_SMALL_FILES
@@ -462,7 +519,7 @@
 #endif
 
 #ifndef SIZEOF_TIME_T
-/* assume default size of time_t to be 32 bit */
+/* assume default size of time_t to be 32 bits */
 #define SIZEOF_TIME_T 4
 #endif
 
@@ -477,15 +534,15 @@
 #endif
 
 #if SIZEOF_CURL_SOCKET_T < 8
-#  define CURL_FORMAT_SOCKET_T "d"
+#  define FMT_SOCKET_T "d"
 #elif defined(__MINGW32__)
-#  define CURL_FORMAT_SOCKET_T "zd"
+#  define FMT_SOCKET_T "zd"
 #else
-#  define CURL_FORMAT_SOCKET_T "qd"
+#  define FMT_SOCKET_T "qd"
 #endif
 
 /*
- * Default sizeof(off_t) in case it hasn't been defined in config file.
+ * Default sizeof(off_t) in case it has not been defined in config file.
  */
 
 #ifndef SIZEOF_OFF_T
@@ -529,9 +586,12 @@
 #  endif
 #  define CURL_UINT64_SUFFIX  CURL_SUFFIX_CURL_OFF_TU
 #  define CURL_UINT64_C(val)  CURL_CONC_MACROS(val,CURL_UINT64_SUFFIX)
-# define CURL_PRId64  CURL_FORMAT_CURL_OFF_T
-# define CURL_PRIu64  CURL_FORMAT_CURL_OFF_TU
+# define FMT_PRId64  CURL_FORMAT_CURL_OFF_T
+# define FMT_PRIu64  CURL_FORMAT_CURL_OFF_TU
 #endif
+
+#define FMT_OFF_T CURL_FORMAT_CURL_OFF_T
+#define FMT_OFF_TU CURL_FORMAT_CURL_OFF_TU
 
 #if (SIZEOF_TIME_T == 4)
 #  ifdef HAVE_TIME_T_UNSIGNED
@@ -552,7 +612,7 @@
 #endif
 
 #ifndef SIZE_T_MAX
-/* some limits.h headers have this defined, some don't */
+/* some limits.h headers have this defined, some do not */
 #if defined(SIZEOF_SIZE_T) && (SIZEOF_SIZE_T > 4)
 #define SIZE_T_MAX 18446744073709551615U
 #else
@@ -561,7 +621,7 @@
 #endif
 
 #ifndef SSIZE_T_MAX
-/* some limits.h headers have this defined, some don't */
+/* some limits.h headers have this defined, some do not */
 #if defined(SIZEOF_SIZE_T) && (SIZEOF_SIZE_T > 4)
 #define SSIZE_T_MAX 9223372036854775807
 #else
@@ -570,7 +630,7 @@
 #endif
 
 /*
- * Arg 2 type for gethostname in case it hasn't been defined in config file.
+ * Arg 2 type for gethostname in case it has not been defined in config file.
  */
 
 #ifndef GETHOSTNAME_TYPE_ARG2
@@ -679,6 +739,11 @@
 #define USE_SSL    /* SSL support has been enabled */
 #endif
 
+#if defined(USE_WOLFSSL) && defined(USE_GNUTLS)
+/* Avoid defining unprefixed wolfSSL SHA macros colliding with nettle ones */
+#define NO_OLD_WC_NAMES
+#endif
+
 /* Single point where USE_SPNEGO definition might be defined */
 #if !defined(CURL_DISABLE_NEGOTIATE_AUTH) && \
     (defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI))
@@ -780,12 +845,12 @@
 
 #if defined(__LWIP_OPT_H__) || defined(LWIP_HDR_OPT_H)
 #  if defined(SOCKET) || defined(USE_WINSOCK)
-#    error "WinSock and lwIP TCP/IP stack definitions shall not coexist!"
+#    error "Winsock and lwIP TCP/IP stack definitions shall not coexist!"
 #  endif
 #endif
 
 /*
- * shutdown() flags for systems that don't define them
+ * shutdown() flags for systems that do not define them
  */
 
 #ifndef SHUT_RD
@@ -818,7 +883,7 @@ Therefore we specify it explicitly. https://github.com/curl/curl/pull/258
 #define FOPEN_WRITETEXT "wt"
 #define FOPEN_APPENDTEXT "at"
 #elif defined(__CYGWIN__)
-/* Cygwin has specific behavior we need to address when WIN32 is not defined.
+/* Cygwin has specific behavior we need to address when _WIN32 is not defined.
 https://cygwin.com/cygwin-ug-net/using-textbinary.html
 For write we want our output to have line endings of LF and be compatible with
 other Cygwin utilities. For read we want to handle input that may have line
@@ -833,7 +898,7 @@ endings either CRLF or LF so 't' is appropriate.
 #define FOPEN_APPENDTEXT "a"
 #endif
 
-/* for systems that don't detect this in configure */
+/* for systems that do not detect this in configure */
 #ifndef CURL_SA_FAMILY_T
 #  if defined(HAVE_SA_FAMILY_T)
 #    define CURL_SA_FAMILY_T sa_family_t
@@ -862,7 +927,7 @@ int getpwuid_r(uid_t uid, struct passwd *pwd, char *buf,
                size_t buflen, struct passwd **result);
 #endif
 
-#ifdef DEBUGBUILD
+#ifdef UNITTESTS
 #define UNITTEST
 #else
 #define UNITTEST static

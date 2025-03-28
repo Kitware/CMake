@@ -1,0 +1,35 @@
+CMake Warning \(dev\) at CMP0177\.cmake:[0-9]+ \(install\):
+  Policy CMP0177 is not set: install\(\) DESTINATION paths are normalized\.  Run
+  "cmake --help-policy CMP0177" for policy details\.  Use the cmake_policy
+  command to set the policy and suppress this warning\.
+Call Stack \(most recent call first\):
+  CMP0177-WARN\.cmake:1 \(include\)
+  CMakeLists\.txt:3 \(include\)
+This warning is for project developers\.  Use -Wno-dev to suppress it\.
+
+CMake Warning \(dev\) at CMP0177\.cmake:[0-9]+ \(install\):
+  Policy CMP0177 is not set: install\(\) DESTINATION paths are normalized\.  Run
+  "cmake --help-policy CMP0177" for policy details\.  Use the cmake_policy
+  command to set the policy and suppress this warning\.
+Call Stack \(most recent call first\):
+  CMP0177-WARN\.cmake:1 \(include\)
+  CMakeLists\.txt:3 \(include\)
+This warning is for project developers\.  Use -Wno-dev to suppress it\.
+
+CMake Warning \(dev\) at CMP0177\.cmake:[0-9]+ \(install\):
+  Policy CMP0177 is not set: install\(\) DESTINATION paths are normalized\.  Run
+  "cmake --help-policy CMP0177" for policy details\.  Use the cmake_policy
+  command to set the policy and suppress this warning\.
+Call Stack \(most recent call first\):
+  CMP0177-WARN\.cmake:1 \(include\)
+  CMakeLists\.txt:3 \(include\)
+This warning is for project developers\.  Use -Wno-dev to suppress it\.
+
+CMake Warning \(dev\) at CMP0177\.cmake:[0-9]+ \(install\):
+  Policy CMP0177 is not set: install\(\) DESTINATION paths are normalized\.  Run
+  "cmake --help-policy CMP0177" for policy details\.  Use the cmake_policy
+  command to set the policy and suppress this warning\.
+Call Stack \(most recent call first\):
+  CMP0177-WARN\.cmake:1 \(include\)
+  CMakeLists\.txt:3 \(include\)
+This warning is for project developers\.  Use -Wno-dev to suppress it\.

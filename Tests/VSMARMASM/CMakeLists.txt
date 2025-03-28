@@ -4,3 +4,4 @@ add_executable(VSMARMASM main.c foo.asm)
 target_compile_options(VSMARMASM PRIVATE
   "$<$<COMPILE_LANGUAGE:ASM_MARMASM>:SHELL:-predefine \"zero SETA 0\">"
   )
+add_library(empty STATIC empty.asm)

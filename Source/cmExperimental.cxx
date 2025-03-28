@@ -30,7 +30,7 @@ cmExperimental::FeatureData LookupTable[] = {
     false },
   // WindowsKernelModeDriver
   { "WindowsKernelModeDriver",
-    "5c2d848d-4efa-4529-a768-efd57171bf68",
+    "fac18f65-504e-4dbb-b068-f356bb1f2ddb",
     "CMAKE_EXPERIMENTAL_WINDOWS_KERNEL_MODE_DRIVER",
     "CMake's Windows kernel-mode driver support is experimental. It is meant "
     "only for experimentation and feedback to CMake developers.",
@@ -45,6 +45,25 @@ cmExperimental::FeatureData LookupTable[] = {
     "is meant only for experimentation and feedback to CMake developers.",
     {},
     cmExperimental::TryCompileCondition::Always,
+    false },
+  // ExportPackageInfo
+  { "ExportPackageInfo",
+    "b80be207-778e-46ba-8080-b23bba22639e",
+    "CMAKE_EXPERIMENTAL_EXPORT_PACKAGE_INFO",
+    "CMake's support for exporting package information in the Common Package "
+    "Specification format is experimental. It is meant only for "
+    "experimentation and feedback to CMake developers.",
+    {},
+    cmExperimental::TryCompileCondition::Always,
+    false },
+  // ExportBuildDatabase
+  { "ExportBuildDatabase",
+    "4bd552e2-b7fb-429a-ab23-c83ef53f3f13",
+    "CMAKE_EXPERIMENTAL_EXPORT_BUILD_DATABASE",
+    "CMake's support for exporting build databases is experimental. It is "
+    "meant only for experimentation and feedback to CMake developers.",
+    {},
+    cmExperimental::TryCompileCondition::Never,
     false },
 };
 static_assert(sizeof(LookupTable) / sizeof(LookupTable[0]) ==

@@ -345,6 +345,8 @@ public:
     void MaybeWriteResponseFile(std::string const& outputFile,
                                 std::vector<std::string>& cmd) const;
 
+    static void MaybePrependCmdExe(std::vector<std::string>& cmd);
+
     /** @brief Run an external process. Use only during Process() call!  */
     bool RunProcess(GenT genType, cmWorkerPool::ProcessResultT& result,
                     std::vector<std::string> const& command,
@@ -848,6 +850,54 @@ void cmQtAutoMocUicT::JobT::MaybeWriteResponseFile(
 #endif
 }
 
+/*
+ *  According to the CreateProcessW documentation which is the underlying
+ *  function for all RunProcess calls:
+ *
+ *  "To run a batch file, you must start the command interpreter; set"
+ *  "lpApplicationName to cmd.exe and set lpCommandLine to the following"
+ *  "arguments: /c plus the name of the batch file."
+ *
+ *  we should to take care of the correctness of the command line when
+ *  attempting to execute the batch files.
+ *
+ *  Also cmd.exe is unable to parse batch file names correctly if they
+ *  contain spaces. This function uses cmSystemTools::GetShortPath conversion
+ *  to suppress this behavior.
+ *
+ *  The function is noop on platforms different from the pure WIN32 one.
+ */
+void cmQtAutoMocUicT::JobT::MaybePrependCmdExe(
+  std::vector<std::string>& cmdLine)
+{
+#if defined(_WIN32) && !defined(__CYGWIN__)
+  if (!cmdLine.empty()) {
+    const auto& applicationName = cmdLine.at(0);
+    if (cmSystemTools::StringEndsWith(applicationName, ".bat") ||
+        cmSystemTools::StringEndsWith(applicationName, ".cmd")) {
+      std::vector<std::string> output;
+      output.reserve(cmdLine.size() + 2);
+      output.emplace_back(cmSystemTools::GetComspec());
+      output.emplace_back("/c");
+      std::string tmpShortPath;
+      if (applicationName.find(' ') != std::string::npos &&
+          cmSystemTools::GetShortPath(applicationName, tmpShortPath)) {
+        // If the batch file name contains spaces convert it to the windows
+        // short path. Otherwise it might cause issue when running cmd.exe.
+        output.emplace_back(tmpShortPath);
+      } else {
+        output.push_back(applicationName);
+      }
+      std::move(cmdLine.begin() + 1, cmdLine.end(),
+                std::back_inserter(output));
+      cmdLine = std::move(output);
+    }
+  }
+#else
+  static_cast<void>(cmdLine);
+#endif
+}
+
 bool cmQtAutoMocUicT::JobT::RunProcess(GenT genType,
                                        cmWorkerPool::ProcessResultT& result,
                                        std::vector<std::string> const& command,
@@ -856,7 +906,7 @@ bool cmQtAutoMocUicT::JobT::RunProcess(GenT genType,
   // Log command
   if (this->Log().Verbose()) {
     cm::string_view info;
-    if (infoMessage != nullptr) {
+    if (infoMessage) {
       info = *infoMessage;
     }
     this->Log().Info(
@@ -891,6 +941,9 @@ void cmQtAutoMocUicT::JobMocPredefsT::Process()
       cm::append(cmd, this->MocConst().OptionsIncludes);
       // Check if response file is necessary
       MaybeWriteResponseFile(this->MocConst().PredefsFileAbs, cmd);
+
+      MaybePrependCmdExe(cmd);
+
       // Execute command
       if (!this->RunProcess(GenT::MOC, result, cmd, reason.get())) {
         this->LogCommandError(GenT::MOC,
@@ -938,7 +991,7 @@ bool cmQtAutoMocUicT::JobMocPredefsT::Update(std::string* reason) const
 {
   // Test if the file exists
   if (!this->MocEval().PredefsTime.Load(this->MocConst().PredefsFileAbs)) {
-    if (reason != nullptr) {
+    if (reason) {
       *reason = cmStrCat("Generating ",
                          this->MessagePath(this->MocConst().PredefsFileAbs),
                          ", because it doesn't exist.");
@@ -948,7 +1001,7 @@ bool cmQtAutoMocUicT::JobMocPredefsT::Update(std::string* reason) const
 
   // Test if the settings changed
   if (this->MocConst().SettingsChanged) {
-    if (reason != nullptr) {
+    if (reason) {
       *reason = cmStrCat("Generating ",
                          this->MessagePath(this->MocConst().PredefsFileAbs),
                          ", because the moc settings changed.");
@@ -962,7 +1015,7 @@ bool cmQtAutoMocUicT::JobMocPredefsT::Update(std::string* reason) const
     cmFileTime execTime;
     if (execTime.Load(exec)) {
       if (this->MocEval().PredefsTime.Older(execTime)) {
-        if (reason != nullptr) {
+        if (reason) {
           *reason = cmStrCat(
             "Generating ", this->MessagePath(this->MocConst().PredefsFileAbs),
             " because it is older than ", this->MessagePath(exec), '.');
@@ -1800,7 +1853,7 @@ bool cmQtAutoMocUicT::JobProbeDepsMocT::Probe(MappingT const& mapping,
   // Test if the output file exists
   cmFileTime outputFileTime;
   if (!outputFileTime.Load(outputFile)) {
-    if (reason != nullptr) {
+    if (reason) {
       *reason = cmStrCat("Generating ", this->MessagePath(outputFile),
                          ", because it doesn't exist, from ",
                          this->MessagePath(sourceFile));
@@ -1810,7 +1863,7 @@ bool cmQtAutoMocUicT::JobProbeDepsMocT::Probe(MappingT const& mapping,
 
   // Test if any setting changed
   if (this->MocConst().SettingsChanged) {
-    if (reason != nullptr) {
+    if (reason) {
       *reason = cmStrCat("Generating ", this->MessagePath(outputFile),
                          ", because the moc settings changed, from ",
                          this->MessagePath(sourceFile));
@@ -1820,7 +1873,7 @@ bool cmQtAutoMocUicT::JobProbeDepsMocT::Probe(MappingT const& mapping,
 
   // Test if the source file is newer
   if (outputFileTime.Older(mapping.SourceFile->FileTime)) {
-    if (reason != nullptr) {
+    if (reason) {
       *reason = cmStrCat("Generating ", this->MessagePath(outputFile),
                          ", because it's older than its source file, from ",
                          this->MessagePath(sourceFile));
@@ -1831,7 +1884,7 @@ bool cmQtAutoMocUicT::JobProbeDepsMocT::Probe(MappingT const& mapping,
   // Test if the moc_predefs file is newer
   if (!this->MocConst().PredefsFileAbs.empty()) {
     if (outputFileTime.Older(this->MocEval().PredefsTime)) {
-      if (reason != nullptr) {
+      if (reason) {
         *reason = cmStrCat("Generating ", this->MessagePath(outputFile),
                            ", because it's older than ",
                            this->MessagePath(this->MocConst().PredefsFileAbs),
@@ -1843,7 +1896,7 @@ bool cmQtAutoMocUicT::JobProbeDepsMocT::Probe(MappingT const& mapping,
 
   // Test if the moc executable is newer
   if (outputFileTime.Older(this->MocConst().ExecutableTime)) {
-    if (reason != nullptr) {
+    if (reason) {
       *reason = cmStrCat("Generating ", this->MessagePath(outputFile),
                          ", because it's older than the moc executable, from ",
                          this->MessagePath(sourceFile));
@@ -1862,7 +1915,7 @@ bool cmQtAutoMocUicT::JobProbeDepsMocT::Probe(MappingT const& mapping,
       // Find dependency file
       auto const depMatch = this->FindDependency(sourceDir, dep);
       if (depMatch.first.empty()) {
-        if (reason != nullptr) {
+        if (reason) {
           *reason = cmStrCat("Generating ", this->MessagePath(outputFile),
                              " from ", this->MessagePath(sourceFile),
                              ", because its dependency ",
@@ -1875,7 +1928,7 @@ bool cmQtAutoMocUicT::JobProbeDepsMocT::Probe(MappingT const& mapping,
 
       // Test if dependency file is older
       if (outputFileTime.Older(depMatch.second)) {
-        if (reason != nullptr) {
+        if (reason) {
           *reason = cmStrCat("Generating ", this->MessagePath(outputFile),
                              ", because it's older than its dependency file ",
                              this->MessagePath(depMatch.first), ", from ",
@@ -1950,7 +2003,7 @@ bool cmQtAutoMocUicT::JobProbeDepsUicT::Probe(MappingT const& mapping,
   // Test if the build file exists
   cmFileTime outputFileTime;
   if (!outputFileTime.Load(outputFile)) {
-    if (reason != nullptr) {
+    if (reason) {
       *reason = cmStrCat("Generating ", this->MessagePath(outputFile),
                          ", because it doesn't exist, from ",
                          this->MessagePath(sourceFile));
@@ -1960,7 +2013,7 @@ bool cmQtAutoMocUicT::JobProbeDepsUicT::Probe(MappingT const& mapping,
 
   // Test if the uic settings changed
   if (this->UicConst().SettingsChanged) {
-    if (reason != nullptr) {
+    if (reason) {
       *reason = cmStrCat("Generating ", this->MessagePath(outputFile),
                          ", because the uic settings changed, from ",
                          this->MessagePath(sourceFile));
@@ -1970,7 +2023,7 @@ bool cmQtAutoMocUicT::JobProbeDepsUicT::Probe(MappingT const& mapping,
 
   // Test if the source file is newer
   if (outputFileTime.Older(mapping.SourceFile->FileTime)) {
-    if (reason != nullptr) {
+    if (reason) {
       *reason = cmStrCat("Generating ", this->MessagePath(outputFile),
                          " because it's older than the source file ",
                          this->MessagePath(sourceFile));
@@ -1980,7 +2033,7 @@ bool cmQtAutoMocUicT::JobProbeDepsUicT::Probe(MappingT const& mapping,
 
   // Test if the uic executable is newer
   if (outputFileTime.Older(this->UicConst().ExecutableTime)) {
-    if (reason != nullptr) {
+    if (reason) {
       *reason = cmStrCat("Generating ", this->MessagePath(outputFile),
                          ", because it's older than the uic executable, from ",
                          this->MessagePath(sourceFile));
@@ -2090,6 +2143,7 @@ void cmQtAutoMocUicT::JobCompileMocT::Process()
     cmd.push_back(sourceFile);
 
     MaybeWriteResponseFile(outputFile, cmd);
+    MaybePrependCmdExe(cmd);
   }
 
   // Execute moc command
@@ -2155,6 +2209,8 @@ void cmQtAutoMocUicT::JobCompileUicT::Process()
   cmd.emplace_back("-o");
   cmd.emplace_back(outputFile);
   cmd.emplace_back(sourceFile);
+
+  MaybePrependCmdExe(cmd);
 
   cmWorkerPool::ProcessResultT result;
   if (this->RunProcess(GenT::UIC, result, cmd, this->Reason.get())) {

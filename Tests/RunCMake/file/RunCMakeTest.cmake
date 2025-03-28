@@ -62,8 +62,6 @@ run_cmake_script(COPY_FILE-arg-unknown)
 run_cmake_script(COPY_FILE-input-missing)
 run_cmake_script(COPY_FILE-output-missing)
 
-run_cmake_script(MAKE_DIRECTORY-fail)
-
 run_cmake_script(RENAME-file-replace)
 run_cmake_script(RENAME-file-to-file)
 run_cmake_script(RENAME-file-to-dir-capture)
@@ -101,6 +99,8 @@ if(NOT WIN32
   endif()
 endif()
 
+run_cmake(REAL_PATH-non-existing)
+run_cmake(REAL_PATH-existing)
 run_cmake(REAL_PATH-unexpected-arg)
 run_cmake(REAL_PATH-no-base-dir)
 run_cmake(REAL_PATH)

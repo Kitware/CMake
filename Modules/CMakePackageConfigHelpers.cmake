@@ -219,6 +219,7 @@ Generating an Apple Platform Selection File
       [MACOS_INCLUDE_FILE <file>]
       [IOS_INCLUDE_FILE <file>]
       [IOS_SIMULATOR_INCLUDE_FILE <file>]
+      [IOS_CATALYST_INCLUDE_FILE <file>]
       [TVOS_INCLUDE_FILE <file>]
       [TVOS_SIMULATOR_INCLUDE_FILE <file>]
       [WATCHOS_INCLUDE_FILE <file>]
@@ -253,6 +254,11 @@ Generating an Apple Platform Selection File
 
   ``IOS_SIMULATOR_INCLUDE_FILE <file>``
     File to include if the platform is iOS Simulator.
+
+  ``IOS_CATALYST_INCLUDE_FILE <file>``
+    .. versionadded:: 3.31
+
+    File to include if the platform is iOS Catalyst.
 
   ``TVOS_INCLUDE_FILE <file>``
     File to include if the platform is tvOS.
@@ -507,6 +513,7 @@ function(generate_apple_platform_selection_file _output_file)
     MACOS_INCLUDE_FILE
     IOS_INCLUDE_FILE
     IOS_SIMULATOR_INCLUDE_FILE
+    IOS_CATALYST_INCLUDE_FILE
     TVOS_INCLUDE_FILE
     TVOS_SIMULATOR_INCLUDE_FILE
     WATCHOS_INCLUDE_FILE

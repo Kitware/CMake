@@ -86,7 +86,7 @@ list(APPEND CTEST_CUSTOM_WARNING_EXCEPTION
   "[0-9]+ Warning\\(s\\) detected" # SunPro
 
   # Ignore false positive on `cm::optional` usage from GCC
-  "cmFileCommand.cxx:[0-9]*:[0-9]*: warning: '\\*\\(\\(void\\*\\)& tls_verify \\+2\\)' may be used uninitialized in this function \\[-Wmaybe-uninitialized\\]"
+  "cmFileCommand.cxx:[0-9]*:[0-9]*: warning: '\\*\\(\\(void\\*\\)& tlsVerifyOpt \\+2\\)' may be used uninitialized in this function \\[-Wmaybe-uninitialized\\]"
   "cmGlobalNinjaGenerator.cxx:[0-9]*:[0-9]*: warning: '.*cm::optional<CxxModuleMapFormat>::_mem\\)\\)' may be used uninitialized \\[-Wmaybe-uninitialized\\]"
   "cmGlobalNinjaGenerator.cxx:[0-9]*:[0-9]*: note: '.*cm::optional<CxxModuleMapFormat>::_mem\\)\\)' was declared here"
   "cmGlobalNinjaGenerator.cxx:[0-9]*:[0-9]*: warning: '\\*\\(\\(void\\*\\)& modmap_fmt \\+4\\)' may be used uninitialized in this function \\[-Wmaybe-uninitialized\\]"
@@ -101,6 +101,7 @@ list(APPEND CTEST_CUSTOM_WARNING_EXCEPTION
   "libuv/src/.*:[0-9]+:[0-9]+: warning: 1st function call argument is an uninitialized value"
   "libuv/src/.*:[0-9]+:[0-9]+: warning: Dereference of null pointer"
   "libuv/src/.*:[0-9]+:[0-9]+: warning: The left operand of '[^']+' is a garbage value"
+  "libuv/src/.*:[0-9]+:[0-9]+: warning: Value of '[^']+' was not checked and may be overwritten by function '[^']+'"
   "nghttp2/lib/.*:[0-9]+:[0-9]+: warning: Access to field '[^']+' results in a dereference of a null pointer"
   "nghttp2/lib/.*:[0-9]+:[0-9]+: warning: Dereference of null pointer"
   "nghttp2/lib/.*:[0-9]+:[0-9]+: warning: Value stored to '[^']+' is never read"

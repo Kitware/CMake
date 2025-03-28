@@ -36,11 +36,13 @@ public:
 
   std::string ComputeLinkPath(cmComputeLinkInformation& cli,
                               std::string const& libPathFlag,
-                              std::string const& libPathTerminator);
+                              std::string const& libPathTerminator,
+                              std::string const& stdLinkDirString);
 
   void ComputeLinkPath(cmComputeLinkInformation& cli,
                        std::string const& libPathFlag,
                        std::string const& libPathTerminator,
+                       std::string const& stdLinkDirString,
                        std::vector<BT<std::string>>& linkPath);
 
   std::string ComputeFrameworkPath(cmComputeLinkInformation& cli,

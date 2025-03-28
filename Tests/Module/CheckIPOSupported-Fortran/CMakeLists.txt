@@ -1,7 +1,11 @@
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.10)
 project(CheckIPOSupported-Fortran LANGUAGES Fortran)
 
 cmake_policy(SET CMP0069 NEW)
+
+if(CMAKE_Fortran_COMPILER_ID STREQUAL "LFortran")
+  add_compile_options(--implicit-interface --generate-object-code)
+endif()
 
 include(CheckIPOSupported)
 check_ipo_supported(RESULT ipo_supported OUTPUT ipo_output)

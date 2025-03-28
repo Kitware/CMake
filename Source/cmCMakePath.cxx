@@ -57,11 +57,13 @@ cmCMakePath cmCMakePath::GetWideExtension() const
 cmCMakePath cmCMakePath::GetNarrowStem() const
 {
   auto stem = this->Path.stem().string();
-  if (!stem.empty()) {
-    auto pos = stem.find('.', stem[0] == '.' ? 1 : 0);
-    if (pos != std::string::npos) {
-      return stem.substr(0, pos);
-    }
+  if (stem.empty() || stem == "." || stem == "..") {
+    return stem;
+  }
+
+  auto pos = stem.find('.', stem[0] == '.' ? 1 : 0);
+  if (pos != std::string::npos) {
+    return stem.substr(0, pos);
   }
   return stem;
 }

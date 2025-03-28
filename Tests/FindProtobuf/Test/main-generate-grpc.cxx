@@ -1,4 +1,4 @@
-#include <msgs/example_service.grpc.pb.h>
+#include <example_service.grpc.pb.h>
 
 int main()
 {

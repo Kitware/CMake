@@ -1,0 +1,25 @@
+CMAKE_LANG=Fortran
+CMAKE_LINKER=/usr/bin/ld
+CMAKE_Fortran_COMPILER_ABI=ELF
+CMAKE_Fortran_COMPILER_AR=
+CMAKE_Fortran_COMPILER_ARCHITECTURE_ID=
+CMAKE_Fortran_COMPILER_EXTERNAL_TOOLCHAIN=
+CMAKE_Fortran_COMPILER_ID=LFortran
+CMAKE_Fortran_COMPILER_LAUNCHER=
+CMAKE_Fortran_COMPILER_LOADED=1
+CMAKE_Fortran_COMPILER_RANLIB=
+CMAKE_Fortran_COMPILER_TARGET=
+CMAKE_Fortran_COMPILER_VERSION=0.35.0
+CMAKE_Fortran_COMPILER_VERSION_INTERAL=
+Change Dir: '/tmp/ii/CMakeFiles/CMakeTmp'
+
+Run Build Command(s): /tmp/CMake/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_48bf9/fast
+/usr/bin/gmake  -f CMakeFiles/cmTC_48bf9.dir/build.make CMakeFiles/cmTC_48bf9.dir/build
+gmake[1]: Entering directory '/tmp/ii/CMakeFiles/CMakeTmp'
+Building Fortran object CMakeFiles/cmTC_48bf9.dir/CMakeFortranCompilerABI.F.o
+/usr/bin/lfortran --cpp-infer   --link-with-gcc    -v --generate-object-code -c /tmp/CMake/Modules/CMakeFortranCompilerABI.F -o CMakeFiles/cmTC_48bf9.dir/CMakeFortranCompilerABI.F.o
+Linking Fortran executable cmTC_48bf9
+/tmp/CMake/bin/cmake -E cmake_link_script CMakeFiles/cmTC_48bf9.dir/link.txt --verbose=1
+/usr/bin/lfortran  -v -Wl,-export-dynamic --link-with-gcc  CMakeFiles/cmTC_48bf9.dir/CMakeFortranCompilerABI.F.o -o cmTC_48bf9
+gcc -o cmTC_48bf9 CMakeFiles/cmTC_48bf9.dir/CMakeFortranCompilerABI.F.o  -L"/usr/bin/../lib64" -Wl,-rpath,"/usr/bin/../lib64" -Wl,-export-dynamic -llfortran_runtime -lm
+gmake[1]: Leaving directory '/tmp/ii/CMakeFiles/CMakeTmp'

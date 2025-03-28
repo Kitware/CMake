@@ -223,6 +223,9 @@ protected:
   void AppendGlobalTargetDepends(std::vector<std::string>& depends,
                                  cmGeneratorTarget* target);
 
+  void AppendCodegenTargetDepends(std::vector<std::string>& depends,
+                                  cmGeneratorTarget* target);
+
   // Target name hooks for superclass.
   const char* GetAllTargetName() const override { return "all"; }
   const char* GetInstallTargetName() const override { return "install"; }

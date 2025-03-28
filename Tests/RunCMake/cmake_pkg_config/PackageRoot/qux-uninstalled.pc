@@ -1,0 +1,5 @@
+Name: Qux
+Description: Qux Description
+Version: 1.0.0
+
+Cflags: QuxUninstalled

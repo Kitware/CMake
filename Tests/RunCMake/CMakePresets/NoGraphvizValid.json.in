@@ -1,0 +1,10 @@
+{
+  "version": 10,
+  "configurePresets": [
+    {
+      "name": "NoGraphvizValid",
+      "generator": "@RunCMake_GENERATOR@",
+      "binaryDir": "${sourceDir}/build"
+    }
+  ]
+}

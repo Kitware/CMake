@@ -1757,7 +1757,7 @@ endif()
     set(stderr_log "${logbase}-err.log")
   endif()
   set(code "
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION \${CMAKE_VERSION}) # this file comes with cmake
 ${code_cygpath_make}
 set(command \"${command}\")
 set(log_merged \"${log_merged}\")
@@ -2157,6 +2157,12 @@ function(ExternalProject_Add_Step name step)
     byproducts
   )
 
+  if(NOT "x${work_dir}" STREQUAL "x")
+    set(maybe_WORKING_DIRECTORY "WORKING_DIRECTORY [==[${work_dir}]==]")
+  else()
+    set(maybe_WORKING_DIRECTORY "")
+  endif()
+
   # Custom comment?
   get_property(comment_set
     TARGET ${name}
@@ -2176,9 +2182,9 @@ function(ExternalProject_Add_Step name step)
     PROPERTY _EP_${step}_USES_TERMINAL
   )
   if(uses_terminal)
-    set(uses_terminal USES_TERMINAL)
+    set(maybe_USES_TERMINAL USES_TERMINAL)
   else()
-    set(uses_terminal "")
+    set(maybe_USES_TERMINAL "")
   endif()
 
   # Run every time?
@@ -2245,14 +2251,14 @@ function(ExternalProject_Add_Step name step)
     add_custom_command(
       OUTPUT \${stamp_file}
       BYPRODUCTS \${byproducts}
-      COMMENT \${comment}
+      COMMENT [===[${comment}]===]
       COMMAND ${__cmdQuoted}
+      DEPENDS \${depends}
+      VERBATIM
       ${maybe_COMMAND_touch}
       ${maybe_JOB_SERVER_AWARE}
-      DEPENDS \${depends}
-      WORKING_DIRECTORY \${work_dir}
-      VERBATIM
-      ${uses_terminal}
+      ${maybe_WORKING_DIRECTORY}
+      ${maybe_USES_TERMINAL}
     )"
   )
   set_property(TARGET ${name} APPEND PROPERTY _EP_STEPS ${step})

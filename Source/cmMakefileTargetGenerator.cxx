@@ -251,6 +251,8 @@ void cmMakefileTargetGenerator::WriteTargetBuildRules()
   std::vector<cmSourceFile const*> customCommands;
   this->GeneratorTarget->GetCustomCommands(customCommands,
                                            this->GetConfigName());
+  std::vector<std::string> codegen_depends;
+  codegen_depends.reserve(customCommands.size());
   for (cmSourceFile const* sf : customCommands) {
     if (this->CMP0113New &&
         !this->LocalGenerator->GetCommandsVisited(this->GeneratorTarget)
@@ -273,6 +275,33 @@ void cmMakefileTargetGenerator::WriteTargetBuildRules()
           this->LocalGenerator->MaybeRelativeToCurBinDir(byproduct));
       }
     }
+
+    if (ccg.GetCC().GetCodegen()) {
+      std::string const& output = ccg.GetOutputs().front();
+
+      // We always attach the actual commands to the first output.
+      codegen_depends.emplace_back(output);
+    }
+  }
+
+  // Some make tools need a special dependency for an empty rule.
+  if (codegen_depends.empty()) {
+    std::string hack = this->GlobalGenerator->GetEmptyRuleHackDepends();
+    if (!hack.empty()) {
+      codegen_depends.emplace_back(std::move(hack));
+    }
+  }
+
+  // Construct the codegen target.
+  {
+    std::string const codegenTarget = cmStrCat(
+      this->LocalGenerator->GetRelativeTargetDirectory(this->GeneratorTarget),
+      "/codegen");
+
+    // Write the rule.
+    this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, nullptr,
+                                        codegenTarget, codegen_depends, {},
+                                        true);
   }
 
   // Add byproducts from build events to the clean rules
@@ -2177,13 +2206,14 @@ void cmMakefileTargetGenerator::CreateLinkLibs(
   bool useResponseFile, std::vector<std::string>& makefile_depends,
   std::string const& linkLanguage, ResponseFlagFor responseMode)
 {
-  std::string frameworkPath;
-  std::string linkPath;
-  cmComputeLinkInformation* pcli =
-    this->GeneratorTarget->GetLinkInformation(this->GetConfigName());
-  this->LocalGenerator->OutputLinkLibraries(pcli, linkLineComputer, linkLibs,
-                                            frameworkPath, linkPath);
-  linkLibs = frameworkPath + linkPath + linkLibs;
+  if (cmComputeLinkInformation* pcli =
+        this->GeneratorTarget->GetLinkInformation(this->GetConfigName())) {
+    std::string frameworkPath;
+    std::string linkPath;
+    this->LocalGenerator->OutputLinkLibraries(pcli, linkLineComputer, linkLibs,
+                                              frameworkPath, linkPath);
+    linkLibs = frameworkPath + linkPath + linkLibs;
+  }
 
   if (useResponseFile &&
       linkLibs.find_first_not_of(' ') != std::string::npos) {

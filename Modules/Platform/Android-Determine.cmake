@@ -533,7 +533,7 @@ elseif(CMAKE_ANDROID_NDK)
     set(_ANDROID_APIS ${_ANDROID_APIS_1} ${_ANDROID_APIS_2})
     unset(_ANDROID_APIS_1)
     unset(_ANDROID_APIS_2)
-    if(_ANDROID_APIS STREQUAL "")
+    if(NOT DEFINED _ANDROID_APIS OR _ANDROID_APIS STREQUAL "")
       message(FATAL_ERROR
         "Android: No APIs found in the NDK.  No\n"
         "  ${CMAKE_ANDROID_NDK}/platforms/android-*\n"

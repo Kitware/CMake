@@ -1,4 +1,4 @@
--- def-0: 0;"No error"
+-- def-1: (60;"SSL peer certificate or SSH remote key was not OK|35;"SSL connect error)\.  If this is due to https certificate verification failure, one may set environment variable CMAKE_TLS_VERIFY=0 to suppress it\."
 -- env-0: 0;"No error"
 -- env-1: (60;"SSL peer certificate or SSH remote key was not OK"|35;"SSL connect error")
 -- var-0: 0;"No error"

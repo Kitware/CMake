@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.6)
+cmake_minimum_required(VERSION 3.10)
 project(FindPackageTest)
 
 # Protect tests from running inside the default install prefix.
@@ -569,6 +569,14 @@ IF (NOT "${SortLib_VERSION}" STREQUAL "3.10.1")
   message(SEND_ERROR "FIND_PACKAGE_SORT_ORDER Natural! Dec ${SortLib_VERSION}")
 endif()
 set(SortLib_DIR "" CACHE FILEPATH "Wipe out find results for testing." FORCE)
+unset(SortLib_VERSION)
+
+
+set(SortLib_DIR "" CACHE FILEPATH "Wipe out find results for testing." FORCE)
+FIND_PACKAGE(SortLib 4.0 CONFIG)
+IF (NOT "${SortLib_VERSION}" STREQUAL "4.0.0")
+  message(SEND_ERROR "FIND_PACKAGE_SORT_ORDER gave up too soon! ${SortLib_VERSION}")
+endif()
 unset(SortLib_VERSION)
 
 unset(CMAKE_FIND_PACKAGE_SORT_ORDER)

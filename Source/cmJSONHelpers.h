@@ -7,8 +7,10 @@
 #include <algorithm>
 #include <functional>
 #include <iostream>
+#include <iterator>
 #include <map>
 #include <string>
+#include <type_traits>
 #include <utility>
 #include <vector>
 
@@ -34,9 +36,11 @@ enum ObjectError
   ExtraField,
   MissingRequired
 };
+
 using ErrorGenerator = std::function<void(const Json::Value*, cmJSONState*)>;
 using ObjectErrorGenerator =
   std::function<ErrorGenerator(ObjectError, const Json::Value::Members&)>;
+
 ErrorGenerator EXPECTED_TYPE(const std::string& type);
 
 void INVALID_STRING(const Json::Value* value, cmJSONState* state);
@@ -58,9 +62,28 @@ ErrorGenerator INVALID_NAMED_OBJECT_KEY(
   ObjectError errorType, const Json::Value::Members& extraFields);
 }
 
+#if __cplusplus >= 201703L
+namespace details {
+// A meta-function to check if a given callable type
+// can be called with the only string ref arg.
+template <typename F, typename Enable = void>
+struct is_bool_filter
+{
+  static constexpr bool value = false;
+};
+
+template <typename F>
+struct is_bool_filter<F,
+                      std::enable_if_t<std::is_same_v<
+                        std::invoke_result_t<F, const std::string&>, bool>>>
+{
+  static constexpr bool value = true;
+};
+}
+#endif
+
 struct cmJSONHelperBuilder
 {
-
   template <typename T>
   class Object
   {
@@ -104,7 +127,6 @@ struct cmJSONHelperBuilder
     bool operator()(T& out, const Json::Value* value, cmJSONState* state) const
     {
       Json::Value::Members extraFields;
-      bool success = true;
       if (!value && this->AnyRequired) {
         Error(JsonErrors::ObjectError::RequiredMissing, extraFields)(value,
                                                                      state);
@@ -119,6 +141,13 @@ struct cmJSONHelperBuilder
         extraFields = value->getMemberNames();
       }
 
+      if (state->allowComments) {
+        extraFields.erase(
+          std::remove(extraFields.begin(), extraFields.end(), "$comment"),
+          extraFields.end());
+      }
+
+      bool success = true;
       for (auto const& m : this->Members) {
         std::string name(m.Name.data(), m.Name.size());
         state->push_stack(name, value);
@@ -153,6 +182,12 @@ struct cmJSONHelperBuilder
                                               cmJSONState* state)>;
     struct Member
     {
+      Member(cm::string_view name, MemberFunction func, bool required)
+        : Name{ name }
+        , Function{ std::move(func) }
+        , Required{ required }
+      {
+      }
       cm::string_view Name;
       MemberFunction Function;
       bool Required;
@@ -165,14 +200,8 @@ struct cmJSONHelperBuilder
     Object& BindPrivate(const cm::string_view& name, MemberFunction&& func,
                         bool required)
     {
-      Member m;
-      m.Name = name;
-      m.Function = std::move(func);
-      m.Required = required;
-      this->Members.push_back(std::move(m));
-      if (required) {
-        this->AnyRequired = true;
-      }
+      this->Members.emplace_back(name, std::move(func), required);
+      this->AnyRequired = this->AnyRequired || required;
       return *this;
     }
   };
@@ -189,7 +218,6 @@ struct cmJSONHelperBuilder
       }
       if (!value->isString()) {
         error(value, state);
-        ;
         return false;
       }
       out = value->asString();
@@ -214,7 +242,6 @@ struct cmJSONHelperBuilder
       }
       if (!value->isInt()) {
         error(value, state);
-        ;
         return false;
       }
       out = value->asInt();
@@ -239,7 +266,6 @@ struct cmJSONHelperBuilder
       }
       if (!value->isUInt()) {
         error(value, state);
-        ;
         return false;
       }
       out = value->asUInt();
@@ -264,7 +290,6 @@ struct cmJSONHelperBuilder
       }
       if (!value->isBool()) {
         error(value, state);
-        ;
         return false;
       }
       out = value->asBool();
@@ -319,47 +344,125 @@ struct cmJSONHelperBuilder
                               [](const T&) { return true; });
   }
 
-  template <typename T, typename F, typename Filter>
-  static cmJSONHelper<std::map<std::string, T>> MapFilter(
+  enum class FilterResult
+  {
+    Continue, ///< A filter has accepted a given key (and value)
+    Skip,     ///< A filter has rejected a given key (or value)
+    Error     ///< A filter has found and reported an error
+  };
+
+  /// Iterate over the object's members and call a filter callable to
+  /// decide what to do with the current key/value.
+  /// A filter returns one of the `FilterResult` values.
+  /// A container type is an associative or a sequence
+  /// container of pairs (key, value).
+  template <typename Container, typename F, typename Filter>
+  static cmJSONHelper<Container> FilteredObject(
     const JsonErrors::ErrorGenerator& error, F func, Filter filter)
   {
-    return [error, func, filter](std::map<std::string, T>& out,
-                                 const Json::Value* value,
+    return [error, func, filter](Container& out, const Json::Value* value,
                                  cmJSONState* state) -> bool {
-      bool success = true;
+      // NOTE Some compile-time code path don't use `filter` at all.
+      // So, suppress "unused lambda capture" warning is needed.
+      static_cast<void>(filter);
+
       if (!value) {
         out.clear();
         return true;
       }
       if (!value->isObject()) {
         error(value, state);
-        ;
         return false;
       }
       out.clear();
+      auto outIt = std::inserter(out, out.end());
+      bool success = true;
       for (auto const& key : value->getMemberNames()) {
-        state->push_stack(cmStrCat(key, ""), &(*value)[key]);
-        if (!filter(key)) {
-          state->pop_stack();
-          continue;
+        state->push_stack(key, &(*value)[key]);
+#if __cplusplus >= 201703L
+        if constexpr (std::is_same_v<Filter, std::true_type>) {
+          // Filtering functionality isn't needed at all...
+        } else if constexpr (details::is_bool_filter<Filter>::value) {
+          // A given `Filter` is `bool(const std::string&)` callable.
+          if (!filter(key)) {
+            state->pop_stack();
+            continue;
+          }
+        } else {
+#endif
+          // A full-featured `Filter` has been given
+          auto res = filter(key, &(*value)[key], state);
+          if (res == FilterResult::Skip) {
+            state->pop_stack();
+            continue;
+          }
+          if (res == FilterResult::Error) {
+            state->pop_stack();
+            success = false;
+            break;
+          }
+#if __cplusplus >= 201703L
         }
-        T t;
-        if (!func(t, &(*value)[key], state)) {
-          success = false;
-        }
-        out[key] = std::move(t);
+#endif
+        typename Container::value_type::second_type t;
+        // ATTENTION Call the function first (for it's side-effects),
+        // then accumulate the result!
+        success = func(t, &(*value)[key], state) && success;
+        outIt = typename Container::value_type{ key, std::move(t) };
         state->pop_stack();
       }
       return success;
     };
   }
 
+  template <typename T, typename F, typename Filter>
+  static cmJSONHelper<std::map<std::string, T>> MapFilter(
+    const JsonErrors::ErrorGenerator& error, F func, Filter filter)
+  {
+    // clang-format off
+    return FilteredObject<std::map<std::string, T>>(
+      error, func,
+#if __cplusplus >= 201703L
+      // In C++ 17 a filter callable can be passed as is.
+      // Depending on its type `FilteredObject()` will call
+      // it with a key only (backward compatible behavior)
+      // or with 3 args supported by the full-featured
+      // filtering feature.
+      filter
+#else
+      // For C++14 and below, to keep backward compatibility
+      // with CMake Presets code, `MapFilter()` can accept only
+      // `bool(const std::string&)` callables.
+      [filter](const std::string &key, const Json::Value * /*value*/,
+              cmJSONState * /*state*/) -> FilterResult {
+        // Simple adaptor to translate `bool` to `FilterResult`
+        return filter(key) ? FilterResult::Continue : FilterResult::Skip;
+      }
+#endif
+    );
+    // clang-format on
+  }
+
   template <typename T, typename F>
   static cmJSONHelper<std::map<std::string, T>> Map(
     const JsonErrors::ErrorGenerator& error, F func)
   {
-    return MapFilter<T, F>(error, func,
-                           [](const std::string&) { return true; });
+    // clang-format off
+    return FilteredObject<std::map<std::string, T>>(
+      error, func,
+#if __cplusplus >= 201703L
+      // With C++ 17 and above, pass a marker type, that no
+      // filtering is needed at all.
+      std::true_type()
+#else
+      // In C++ 14 and below, pass an always-true dummy functor.
+      [](const std::string& /*key*/, const Json::Value* /*value*/,
+         cmJSONState* /*state*/) -> FilterResult {
+        return FilterResult::Continue;
+      }
+#endif
+    );
+    // clang-format on
   }
 
   template <typename T, typename F>
@@ -384,10 +487,24 @@ struct cmJSONHelperBuilder
                          cmJSONState* state) -> bool {
       if (!value) {
         error(value, state);
-        ;
         return false;
       }
       return func(out, value, state);
+    };
+  }
+
+  template <typename T, typename F, typename P>
+  static cmJSONHelper<T> Checked(const JsonErrors::ErrorGenerator& error,
+                                 F func, P predicate)
+  {
+    return [error, func, predicate](T& out, const Json::Value* value,
+                                    cmJSONState* state) -> bool {
+      bool result = func(out, value, state);
+      if (result && !predicate(out)) {
+        error(value, state);
+        result = false;
+      }
+      return result;
     };
   }
 };

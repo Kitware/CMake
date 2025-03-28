@@ -1,0 +1,29 @@
+CMake Warning \(dev\) at CMP0173-common\.cmake:1 \(include\):
+  Policy CMP0173 is not set: The CMakeFindFrameworks module is removed\.  Run
+  "cmake --help-policy CMP0173" for policy details\.  Use the cmake_policy
+  command to set the policy and suppress this warning\.
+
+Call Stack \(most recent call first\):
+  CMP0173-WARN\.cmake:2 \(include\)
+  CMakeLists\.txt:3 \(include\)
+This warning is for project developers\.  Use -Wno-dev to suppress it\.
+
+CMake Warning \(dev\) at .*/Modules/CMakeFindFrameworks\.cmake:[0-9]+ \(message\):
+  CMakeFindFrameworks\.cmake is not maintained and lacks support for more
+  recent framework handling\.  It will be removed in a future version of
+  CMake\.  Update the code to use find_library\(\) instead\.
+Call Stack \(most recent call first\):
+  CMP0173-common\.cmake:1 \(include\)
+  CMP0173-WARN\.cmake:2 \(include\)
+  CMakeLists\.txt:3 \(include\)
+This warning is for project developers\.  Use -Wno-dev to suppress it\.
+
+CMake Warning \(dev\) at .*/Modules/CMakeFindFrameworks\.cmake:[0-9]+ \(message\):
+  CMakeFindFrameworks\.cmake is not maintained and lacks support for more
+  recent framework handling\.  It will be removed in a future version of
+  CMake\.  Update the code to use find_library\(\) instead\.
+Call Stack \(most recent call first\):
+  CMP0173-common\.cmake:12 \(include\)
+  CMP0173-WARN\.cmake:2 \(include\)
+  CMakeLists\.txt:3 \(include\)
+This warning is for project developers\.  Use -Wno-dev to suppress it\.

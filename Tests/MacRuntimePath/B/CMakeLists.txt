@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.10)
 project(MacRuntimePath_B)
 
 include(${MacRuntimePath_B_BINARY_DIR}/../Root/lib/exp.cmake)

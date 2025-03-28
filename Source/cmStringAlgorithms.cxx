@@ -7,7 +7,6 @@
 #include <cstddef> // IWYU pragma: keep
 #include <cstdio>
 #include <cstdlib>
-#include <iterator>
 
 std::string cmTrimWhitespace(cm::string_view str)
 {
@@ -239,51 +238,14 @@ bool cmStrToULongLong(std::string const& str, unsigned long long* value)
   return cmStrToULongLong(str.c_str(), value);
 }
 
-template <typename Range>
-std::size_t getJoinedLength(Range const& rng, cm::string_view separator)
-{
-  std::size_t rangeLength{};
-  for (auto const& item : rng) {
-    rangeLength += item.size();
-  }
-
-  auto const separatorsLength = (rng.size() - 1) * separator.size();
-
-  return rangeLength + separatorsLength;
-}
-
-template <typename Range>
-std::string cmJoinImpl(Range const& rng, cm::string_view separator,
-                       cm::string_view initial)
-{
-  if (rng.empty()) {
-    return { std::begin(initial), std::end(initial) };
-  }
-
-  std::string result;
-  result.reserve(initial.size() + getJoinedLength(rng, separator));
-  result.append(std::begin(initial), std::end(initial));
-
-  auto begin = std::begin(rng);
-  auto end = std::end(rng);
-  result += *begin;
-
-  for (++begin; begin != end; ++begin) {
-    result.append(std::begin(separator), std::end(separator));
-    result += *begin;
-  }
-
-  return result;
-}
-
 std::string cmJoin(std::vector<std::string> const& rng,
                    cm::string_view separator, cm::string_view initial)
 {
-  return cmJoinImpl(rng, separator, initial);
+  return cmJoinStrings(rng, separator, initial);
 }
 
 std::string cmJoin(cmStringRange const& rng, cm::string_view separator,
                    cm::string_view initial)
 {
-  return cmJoinImpl(rng, separator, initial);
+  return cmJoinStrings(rng, separator, initial);
 }

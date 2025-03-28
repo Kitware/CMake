@@ -3,11 +3,19 @@
 #include "cmInstallCommandArguments.h"
 
 #include <algorithm>
+#include <functional>
 #include <utility>
 
+#include <cm/string_view>
 #include <cmext/string_view>
 
+#include "cmCMakePath.h"
+#include "cmGeneratorExpression.h"
+#include "cmMakefile.h"
+#include "cmMessageType.h"
+#include "cmPolicies.h"
 #include "cmRange.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 // Table of valid permissions.
@@ -20,10 +28,53 @@ const char* cmInstallCommandArguments::PermissionsTable[] = {
 const std::string cmInstallCommandArguments::EmptyString;
 
 cmInstallCommandArguments::cmInstallCommandArguments(
-  std::string defaultComponent)
+  std::string defaultComponent, cmMakefile& makefile)
   : DefaultComponentName(std::move(defaultComponent))
 {
-  this->Bind("DESTINATION"_s, this->Destination);
+  std::function<ArgumentParser::Continue(cm::string_view)> normalizeDest;
+
+  switch (makefile.GetPolicyStatus(cmPolicies::CMP0177)) {
+    case cmPolicies::OLD:
+      normalizeDest = [this](cm::string_view arg) -> ArgumentParser::Continue {
+        this->Destination = std::string(arg.begin(), arg.end());
+        return ArgumentParser::Continue::No;
+      };
+      break;
+    case cmPolicies::WARN:
+      normalizeDest =
+        [this, &makefile](cm::string_view arg) -> ArgumentParser::Continue {
+        this->Destination = std::string(arg.begin(), arg.end());
+        // We can't be certain if a warning is appropriate if there are any
+        // generator expressions
+        if (cmGeneratorExpression::Find(arg) == cm::string_view::npos &&
+            arg != cmCMakePath(arg).Normal().String()) {
+          makefile.IssueMessage(
+            MessageType::AUTHOR_WARNING,
+            cmPolicies::GetPolicyWarning(cmPolicies::CMP0177));
+        }
+        return ArgumentParser::Continue::No;
+      };
+      break;
+    case cmPolicies::NEW:
+      normalizeDest = [this](cm::string_view arg) -> ArgumentParser::Continue {
+        if (cmGeneratorExpression::Find(arg) == cm::string_view::npos) {
+          this->Destination = cmCMakePath(arg).Normal().String();
+        } else {
+          this->Destination =
+            cmStrCat("$<PATH:CMAKE_PATH,NORMALIZE,", arg, '>');
+        }
+        return ArgumentParser::Continue::No;
+      };
+      break;
+    case cmPolicies::REQUIRED_ALWAYS:
+    case cmPolicies::REQUIRED_IF_USED:
+      // We should never get here, only OLD, WARN, and NEW are used
+      makefile.IssueMessage(
+        MessageType::FATAL_ERROR,
+        cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0177));
+  }
+
+  this->Bind("DESTINATION"_s, normalizeDest);
   this->Bind("COMPONENT"_s, this->Component);
   this->Bind("NAMELINK_COMPONENT"_s, this->NamelinkComponent);
   this->Bind("EXCLUDE_FROM_ALL"_s, this->ExcludeFromAll);
@@ -41,7 +92,7 @@ const std::string& cmInstallCommandArguments::GetDestination() const
   if (!this->DestinationString.empty()) {
     return this->DestinationString;
   }
-  if (this->GenericArguments != nullptr) {
+  if (this->GenericArguments) {
     return this->GenericArguments->GetDestination();
   }
   return EmptyString;
@@ -52,7 +103,7 @@ const std::string& cmInstallCommandArguments::GetComponent() const
   if (!this->Component.empty()) {
     return this->Component;
   }
-  if (this->GenericArguments != nullptr) {
+  if (this->GenericArguments) {
     return this->GenericArguments->GetComponent();
   }
   if (!this->DefaultComponentName.empty()) {
@@ -75,7 +126,7 @@ const std::string& cmInstallCommandArguments::GetRename() const
   if (!this->Rename.empty()) {
     return this->Rename;
   }
-  if (this->GenericArguments != nullptr) {
+  if (this->GenericArguments) {
     return this->GenericArguments->GetRename();
   }
   return EmptyString;
@@ -86,7 +137,7 @@ const std::string& cmInstallCommandArguments::GetPermissions() const
   if (!this->PermissionsString.empty()) {
     return this->PermissionsString;
   }
-  if (this->GenericArguments != nullptr) {
+  if (this->GenericArguments) {
     return this->GenericArguments->GetPermissions();
   }
   return EmptyString;
@@ -97,7 +148,7 @@ bool cmInstallCommandArguments::GetOptional() const
   if (this->Optional) {
     return true;
   }
-  if (this->GenericArguments != nullptr) {
+  if (this->GenericArguments) {
     return this->GenericArguments->GetOptional();
   }
   return false;
@@ -108,7 +159,7 @@ bool cmInstallCommandArguments::GetExcludeFromAll() const
   if (this->ExcludeFromAll) {
     return true;
   }
-  if (this->GenericArguments != nullptr) {
+  if (this->GenericArguments) {
     return this->GenericArguments->GetExcludeFromAll();
   }
   return false;
@@ -119,7 +170,7 @@ bool cmInstallCommandArguments::GetNamelinkOnly() const
   if (this->NamelinkOnly) {
     return true;
   }
-  if (this->GenericArguments != nullptr) {
+  if (this->GenericArguments) {
     return this->GenericArguments->GetNamelinkOnly();
   }
   return false;
@@ -130,7 +181,7 @@ bool cmInstallCommandArguments::GetNamelinkSkip() const
   if (this->NamelinkSkip) {
     return true;
   }
-  if (this->GenericArguments != nullptr) {
+  if (this->GenericArguments) {
     return this->GenericArguments->GetNamelinkSkip();
   }
   return false;
@@ -141,7 +192,7 @@ bool cmInstallCommandArguments::HasNamelinkComponent() const
   if (!this->NamelinkComponent.empty()) {
     return true;
   }
-  if (this->GenericArguments != nullptr) {
+  if (this->GenericArguments) {
     return this->GenericArguments->HasNamelinkComponent();
   }
   return false;
@@ -163,7 +214,7 @@ const std::vector<std::string>& cmInstallCommandArguments::GetConfigurations()
   if (!this->Configurations.empty()) {
     return this->Configurations;
   }
-  if (this->GenericArguments != nullptr) {
+  if (this->GenericArguments) {
     return this->GenericArguments->GetConfigurations();
   }
   return this->Configurations;
@@ -227,8 +278,8 @@ void cmInstallCommandIncludesArgument::Parse(
 }
 
 cmInstallCommandFileSetArguments::cmInstallCommandFileSetArguments(
-  std::string defaultComponent)
-  : cmInstallCommandArguments(std::move(defaultComponent))
+  std::string defaultComponent, cmMakefile& makefile)
+  : cmInstallCommandArguments(std::move(defaultComponent), makefile)
 {
   this->Bind("FILE_SET"_s, this->FileSet);
 }

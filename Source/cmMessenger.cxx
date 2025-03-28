@@ -21,6 +21,129 @@
 #  include "cmDebuggerAdapter.h"
 #endif
 
+namespace {
+const char* getMessageTypeStr(MessageType t)
+{
+  switch (t) {
+    case MessageType::FATAL_ERROR:
+      return "Error";
+    case MessageType::INTERNAL_ERROR:
+      return "Internal Error (please report a bug)";
+    case MessageType::LOG:
+      return "Debug Log";
+    case MessageType::DEPRECATION_ERROR:
+      return "Deprecation Error";
+    case MessageType::DEPRECATION_WARNING:
+      return "Deprecation Warning";
+    case MessageType::AUTHOR_WARNING:
+      return "Warning (dev)";
+    case MessageType::AUTHOR_ERROR:
+      return "Error (dev)";
+    default:
+      break;
+  }
+  return "Warning";
+}
+
+int getMessageColor(MessageType t)
+{
+  switch (t) {
+    case MessageType::INTERNAL_ERROR:
+    case MessageType::FATAL_ERROR:
+    case MessageType::AUTHOR_ERROR:
+      return cmsysTerminal_Color_ForegroundRed;
+    case MessageType::AUTHOR_WARNING:
+    case MessageType::WARNING:
+      return cmsysTerminal_Color_ForegroundYellow;
+    default:
+      return cmsysTerminal_Color_Normal;
+  }
+}
+
+void printMessageText(std::ostream& msg, std::string const& text)
+{
+  msg << ":\n";
+  cmDocumentationFormatter formatter;
+  formatter.SetIndent(2u);
+  formatter.PrintFormatted(msg, text);
+}
+
+void displayMessage(MessageType t, std::ostringstream& msg)
+{
+  // Add a note about warning suppression.
+  if (t == MessageType::AUTHOR_WARNING) {
+    msg << "This warning is for project developers.  Use -Wno-dev to suppress "
+           "it.";
+  } else if (t == MessageType::AUTHOR_ERROR) {
+    msg << "This error is for project developers. Use -Wno-error=dev to "
+           "suppress it.";
+  }
+
+  // Add a terminating blank line.
+  msg << '\n';
+
+#if !defined(CMAKE_BOOTSTRAP)
+  // Add a C++ stack trace to internal errors.
+  if (t == MessageType::INTERNAL_ERROR) {
+    std::string stack = cmsys::SystemInformation::GetProgramStack(0, 0);
+    if (!stack.empty()) {
+      if (cmHasLiteralPrefix(stack, "WARNING:")) {
+        stack = "Note:" + stack.substr(8);
+      }
+      msg << stack << '\n';
+    }
+  }
+#endif
+
+  // Output the message.
+  cmMessageMetadata md;
+  md.desiredColor = getMessageColor(t);
+  if (t == MessageType::FATAL_ERROR || t == MessageType::INTERNAL_ERROR ||
+      t == MessageType::DEPRECATION_ERROR || t == MessageType::AUTHOR_ERROR) {
+    cmSystemTools::SetErrorOccurred();
+    md.title = "Error";
+    cmSystemTools::Message(msg.str(), md);
+  } else {
+    md.title = "Warning";
+    cmSystemTools::Message(msg.str(), md);
+  }
+}
+
+void PrintCallStack(std::ostream& out, cmListFileBacktrace bt,
+                    cm::optional<std::string> const& topSource)
+{
+  // The call stack exists only if we have at least two calls on top
+  // of the bottom.
+  if (bt.Empty()) {
+    return;
+  }
+  bt = bt.Pop();
+  if (bt.Empty()) {
+    return;
+  }
+
+  bool first = true;
+  for (; !bt.Empty(); bt = bt.Pop()) {
+    cmListFileContext lfc = bt.Top();
+    if (lfc.Name.empty() &&
+        lfc.Line != cmListFileContext::DeferPlaceholderLine) {
+      // Skip this whole-file scope.  When we get here we already will
+      // have printed a more-specific context within the file.
+      continue;
+    }
+    if (first) {
+      first = false;
+      out << "Call Stack (most recent call first):\n";
+    }
+    if (topSource) {
+      lfc.FilePath = cmSystemTools::RelativeIfUnder(*topSource, lfc.FilePath);
+    }
+    out << "  " << lfc << '\n';
+  }
+}
+
+} // anonymous namespace
+
 MessageType cmMessenger::ConvertMessageType(MessageType t) const
 {
   if (t == MessageType::AUTHOR_WARNING || t == MessageType::AUTHOR_ERROR) {
@@ -57,128 +180,6 @@ bool cmMessenger::IsMessageTypeVisible(MessageType t) const
   return true;
 }
 
-static bool printMessagePreamble(MessageType t, std::ostream& msg)
-{
-  // Construct the message header.
-  if (t == MessageType::FATAL_ERROR) {
-    msg << "CMake Error";
-  } else if (t == MessageType::INTERNAL_ERROR) {
-    msg << "CMake Internal Error (please report a bug)";
-  } else if (t == MessageType::LOG) {
-    msg << "CMake Debug Log";
-  } else if (t == MessageType::DEPRECATION_ERROR) {
-    msg << "CMake Deprecation Error";
-  } else if (t == MessageType::DEPRECATION_WARNING) {
-    msg << "CMake Deprecation Warning";
-  } else if (t == MessageType::AUTHOR_WARNING) {
-    msg << "CMake Warning (dev)";
-  } else if (t == MessageType::AUTHOR_ERROR) {
-    msg << "CMake Error (dev)";
-  } else {
-    msg << "CMake Warning";
-  }
-  return true;
-}
-
-static int getMessageColor(MessageType t)
-{
-  switch (t) {
-    case MessageType::INTERNAL_ERROR:
-    case MessageType::FATAL_ERROR:
-    case MessageType::AUTHOR_ERROR:
-      return cmsysTerminal_Color_ForegroundRed;
-    case MessageType::AUTHOR_WARNING:
-    case MessageType::WARNING:
-      return cmsysTerminal_Color_ForegroundYellow;
-    default:
-      return cmsysTerminal_Color_Normal;
-  }
-}
-
-static void printMessageText(std::ostream& msg, std::string const& text)
-{
-  msg << ":\n";
-  cmDocumentationFormatter formatter;
-  formatter.SetIndent(2u);
-  formatter.PrintFormatted(msg, text);
-}
-
-static void displayMessage(MessageType t, std::ostringstream& msg)
-{
-  // Add a note about warning suppression.
-  if (t == MessageType::AUTHOR_WARNING) {
-    msg << "This warning is for project developers.  Use -Wno-dev to suppress "
-           "it.";
-  } else if (t == MessageType::AUTHOR_ERROR) {
-    msg << "This error is for project developers. Use -Wno-error=dev to "
-           "suppress it.";
-  }
-
-  // Add a terminating blank line.
-  msg << "\n";
-
-#if !defined(CMAKE_BOOTSTRAP)
-  // Add a C++ stack trace to internal errors.
-  if (t == MessageType::INTERNAL_ERROR) {
-    std::string stack = cmsys::SystemInformation::GetProgramStack(0, 0);
-    if (!stack.empty()) {
-      if (cmHasLiteralPrefix(stack, "WARNING:")) {
-        stack = "Note:" + stack.substr(8);
-      }
-      msg << stack << "\n";
-    }
-  }
-#endif
-
-  // Output the message.
-  cmMessageMetadata md;
-  md.desiredColor = getMessageColor(t);
-  if (t == MessageType::FATAL_ERROR || t == MessageType::INTERNAL_ERROR ||
-      t == MessageType::DEPRECATION_ERROR || t == MessageType::AUTHOR_ERROR) {
-    cmSystemTools::SetErrorOccurred();
-    md.title = "Error";
-    cmSystemTools::Message(msg.str(), md);
-  } else {
-    md.title = "Warning";
-    cmSystemTools::Message(msg.str(), md);
-  }
-}
-
-namespace {
-void PrintCallStack(std::ostream& out, cmListFileBacktrace bt,
-                    cm::optional<std::string> const& topSource)
-{
-  // The call stack exists only if we have at least two calls on top
-  // of the bottom.
-  if (bt.Empty()) {
-    return;
-  }
-  bt = bt.Pop();
-  if (bt.Empty()) {
-    return;
-  }
-
-  bool first = true;
-  for (; !bt.Empty(); bt = bt.Pop()) {
-    cmListFileContext lfc = bt.Top();
-    if (lfc.Name.empty() &&
-        lfc.Line != cmListFileContext::DeferPlaceholderLine) {
-      // Skip this whole-file scope.  When we get here we already will
-      // have printed a more-specific context within the file.
-      continue;
-    }
-    if (first) {
-      first = false;
-      out << "Call Stack (most recent call first):\n";
-    }
-    if (topSource) {
-      lfc.FilePath = cmSystemTools::RelativeIfUnder(*topSource, lfc.FilePath);
-    }
-    out << "  " << lfc << "\n";
-  }
-}
-}
-
 void cmMessenger::IssueMessage(MessageType t, const std::string& text,
                                const cmListFileBacktrace& backtrace) const
 {
@@ -199,9 +200,9 @@ void cmMessenger::DisplayMessage(MessageType t, const std::string& text,
                                  const cmListFileBacktrace& backtrace) const
 {
   std::ostringstream msg;
-  if (!printMessagePreamble(t, msg)) {
-    return;
-  }
+
+  // Print the message preamble.
+  msg << "CMake " << getMessageTypeStr(t);
 
   // Add the immediate context.
   this->PrintBacktraceTitle(msg, backtrace);
@@ -214,7 +215,7 @@ void cmMessenger::DisplayMessage(MessageType t, const std::string& text,
   displayMessage(t, msg);
 
 #ifdef CMake_ENABLE_DEBUGGER
-  if (DebuggerAdapter != nullptr) {
+  if (DebuggerAdapter) {
     DebuggerAdapter->OnMessageOutput(t, msg.str());
   }
 #endif

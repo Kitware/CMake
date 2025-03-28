@@ -3,5 +3,5 @@ CMake Warning \(dev\) at CMP0044-WARN.cmake:13 \(target_compile_definitions\):
   expressions.  Run "cmake --help-policy CMP0044" for policy details.  Use
   the cmake_policy command to set the policy and suppress this warning.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists.txt:[0-9]+ \(include\)
 This warning is for project developers.  Use -Wno-dev to suppress it.

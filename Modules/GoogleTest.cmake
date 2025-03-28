@@ -42,7 +42,7 @@ same as the Google Test name (i.e. ``suite.testcase``); see also
 
     gtest_add_tests(TARGET target
                     [SOURCES src1...]
-                    [EXTRA_ARGS arg1...]
+                    [EXTRA_ARGS args...]
                     [WORKING_DIRECTORY dir]
                     [TEST_PREFIX prefix]
                     [TEST_SUFFIX suffix]
@@ -72,8 +72,11 @@ same as the Google Test name (i.e. ``suite.testcase``); see also
     this option is not given, the :prop_tgt:`SOURCES` property of the
     specified ``target`` will be used to obtain the list of sources.
 
-  ``EXTRA_ARGS arg1...``
+  ``EXTRA_ARGS args...``
     Any extra arguments to pass on the command line to each test case.
+
+    .. versionchanged:: 3.31
+      Empty values in ``args...`` are preserved, see :policy:`CMP0178`.
 
   ``WORKING_DIRECTORY dir``
     Specifies the directory in which to run the discovered test cases.  If this
@@ -100,6 +103,11 @@ same as the Google Test name (i.e. ``suite.testcase``); see also
     The variable named by ``outVar`` will be populated in the calling scope
     with the list of discovered test cases.  This allows the caller to do
     things like manipulate test properties of the discovered tests.
+
+  .. versionchanged:: 3.31
+    Empty values in the :prop_tgt:`TEST_LAUNCHER` and
+    :prop_tgt:`CROSSCOMPILING_EMULATOR` target properties are preserved,
+    see policy :policy:`CMP0178`.
 
   Usage example:
 
@@ -147,7 +155,7 @@ same as the Google Test name (i.e. ``suite.testcase``); see also
   for available tests::
 
     gtest_discover_tests(target
-                         [EXTRA_ARGS arg1...]
+                         [EXTRA_ARGS args...]
                          [WORKING_DIRECTORY dir]
                          [TEST_PREFIX prefix]
                          [TEST_SUFFIX suffix]
@@ -158,19 +166,20 @@ same as the Google Test name (i.e. ``suite.testcase``); see also
                          [DISCOVERY_TIMEOUT seconds]
                          [XML_OUTPUT_DIR dir]
                          [DISCOVERY_MODE <POST_BUILD|PRE_TEST>]
+                         [DISCOVERY_EXTRA_ARGS args...]
     )
 
   .. versionadded:: 3.10
 
-  ``gtest_discover_tests()`` sets up a post-build command on the test executable
-  that generates the list of tests by parsing the output from running the test
-  with the ``--gtest_list_tests`` argument.  Compared to the source parsing
-  approach of :command:`gtest_add_tests`, this ensures that the full list of
-  tests, including instantiations of parameterized tests, is obtained.  Since
-  test discovery occurs at build time, it is not necessary to re-run CMake when
-  the list of tests changes.
-  However, it requires that :prop_tgt:`CROSSCOMPILING_EMULATOR` is properly set
-  in order to function in a cross-compiling environment.
+  ``gtest_discover_tests()`` sets up a post-build or pre-test command on the
+  test executable that generates the list of tests by parsing the output from
+  running the test executable with the ``--gtest_list_tests`` argument.
+  Compared to the source parsing approach of :command:`gtest_add_tests`,
+  this ensures that the full list of tests, including instantiations of
+  parameterized tests, is obtained.  Since test discovery occurs at build
+  or test time, it is not necessary to re-run CMake when the list of tests
+  changes.  However, it requires that :prop_tgt:`CROSSCOMPILING_EMULATOR`
+  is properly set in order to function in a cross-compiling environment.
 
   Additionally, setting properties on tests is somewhat less convenient, since
   the tests are not available at CMake time.  Additional test properties may be
@@ -178,7 +187,8 @@ same as the Google Test name (i.e. ``suite.testcase``); see also
   more fine-grained test control is needed, custom content may be provided
   through an external CTest script using the :prop_dir:`TEST_INCLUDE_FILES`
   directory property.  The set of discovered tests is made accessible to such a
-  script via the ``<target>_TESTS`` variable.
+  script via the ``<target>_TESTS`` variable (see the ``TEST_LIST`` option
+  below for further discussion and limitations).
 
   The options are:
 
@@ -187,8 +197,11 @@ same as the Google Test name (i.e. ``suite.testcase``); see also
     executable target.  CMake will substitute the location of the built
     executable when running the test.
 
-  ``EXTRA_ARGS arg1...``
+  ``EXTRA_ARGS args...``
     Any extra arguments to pass on the command line to each test case.
+
+    .. versionchanged:: 3.31
+      Empty values in ``args...`` are preserved, see :policy:`CMP0178`.
 
   ``WORKING_DIRECTORY dir``
     Specifies the directory in which to run the discovered test cases.  If this
@@ -235,6 +248,11 @@ same as the Google Test name (i.e. ``suite.testcase``); see also
     default ``<target>_TESTS``.  This can be useful when the same test
     executable is being used in multiple calls to ``gtest_discover_tests()``.
     Note that this variable is only available in CTest.
+
+    Due to a limitation of CMake's parsing rules, any test with a square
+    bracket in its name will be omitted from the list of tests stored in
+    this variable.  Such tests will still be defined and executed by
+    ``ctest`` as normal though.
 
   ``DISCOVERY_TIMEOUT num``
     .. versionadded:: 3.10.3
@@ -283,11 +301,25 @@ same as the Google Test name (i.e. ``suite.testcase``); see also
     for globally selecting a preferred test discovery behavior without having
     to modify each call site.
 
+  ``DISCOVERY_EXTRA_ARGS args...``
+    .. versionadded:: 3.31
+
+    Any extra arguments to pass on the command line for the discovery command.
+
+  .. versionadded:: 3.29
+    The :prop_tgt:`TEST_LAUNCHER` target property is honored during test
+    discovery and test execution.
+
+  .. versionchanged:: 3.31
+    Empty values in the :prop_tgt:`TEST_LAUNCHER` and
+    :prop_tgt:`CROSSCOMPILING_EMULATOR` target properties are preserved,
+    see policy :policy:`CMP0178`.
+
 #]=======================================================================]
 
 # Save project's policies
-cmake_policy(PUSH)
-cmake_policy(SET CMP0057 NEW) # if IN_LIST
+block(SCOPE_FOR POLICIES)
+cmake_policy(VERSION 3.30)
 
 #------------------------------------------------------------------------------
 function(gtest_add_tests)
@@ -312,37 +344,69 @@ function(gtest_add_tests)
   )
   set(allKeywords ${options} ${oneValueArgs} ${multiValueArgs})
 
+  cmake_policy(GET CMP0178 cmp0178
+    PARENT_SCOPE # undocumented, do not use outside of CMake
+  )
+
   unset(sources)
   if("${ARGV0}" IN_LIST allKeywords)
-    cmake_parse_arguments(ARGS "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+    if(cmp0178 STREQUAL "NEW")
+      cmake_parse_arguments(PARSE_ARGV 0 arg
+        "${options}" "${oneValueArgs}" "${multiValueArgs}"
+      )
+    else()
+      cmake_parse_arguments(arg "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+      if(NOT cmp0178 STREQUAL "OLD")
+        block(SCOPE_FOR VARIABLES)
+          cmake_parse_arguments(PARSE_ARGV 0 arg_new
+            "${options}" "${oneValueArgs}" "${multiValueArgs}"
+          )
+          # Due to a quirk of cmake_parse_arguments(PARSE_ARGV),
+          # arg_new_EXTRA_ARGS will have semicolons already escaped, but
+          # arg_EXTRA_ARGS won't. We need to pass the former through one round
+          # of command argument parsing to de-escape them for comparison with
+          # the latter.
+          set(__newArgs ${arg_new_EXTRA_ARGS})
+          if(NOT "${arg_EXTRA_ARGS}" STREQUAL "${__newArgs}")
+            cmake_policy(GET_WARNING CMP0178 cmp0178_warning)
+            message(AUTHOR_WARNING
+              "The EXTRA_ARGS contain one or more empty values. Those empty "
+              "values are being silently discarded to preserve backward "
+              "compatibility.\n"
+              "${cmp0178_warning}"
+            )
+          endif()
+        endblock()
+      endif()
+    endif()
     set(autoAddSources YES)
   else()
     # Non-keyword syntax, convert to keyword form
     if (ARGC LESS 3)
       message(FATAL_ERROR "gtest_add_tests() without keyword options requires at least 3 arguments")
     endif()
-    set(ARGS_TARGET     "${ARGV0}")
-    set(ARGS_EXTRA_ARGS "${ARGV1}")
+    set(arg_TARGET     "${ARGV0}")
+    set(arg_EXTRA_ARGS "${ARGV1}")
     if(NOT "${ARGV2}" STREQUAL "AUTO")
-      set(ARGS_SOURCES "${ARGV}")
-      list(REMOVE_AT ARGS_SOURCES 0 1)
+      set(arg_SOURCES "${ARGV}")
+      list(REMOVE_AT arg_SOURCES 0 1)
     endif()
   endif()
 
   # The non-keyword syntax allows the first argument to be an arbitrary
   # executable rather than a target if source files are also provided. In all
   # other cases, both forms require a target.
-  if(NOT TARGET "${ARGS_TARGET}" AND NOT ARGS_SOURCES)
-    message(FATAL_ERROR "${ARGS_TARGET} does not define an existing CMake target")
+  if(NOT TARGET "${arg_TARGET}" AND NOT arg_SOURCES)
+    message(FATAL_ERROR "${arg_TARGET} does not define an existing CMake target")
   endif()
-  if(NOT ARGS_WORKING_DIRECTORY)
-    unset(workDir)
+  if(NOT arg_WORKING_DIRECTORY)
+    unset(maybe_WORKING_DIRECTORY)
   else()
-    set(workDir WORKING_DIRECTORY "${ARGS_WORKING_DIRECTORY}")
+    set(maybe_WORKING_DIRECTORY "WORKING_DIRECTORY \${arg_WORKING_DIRECTORY}")
   endif()
 
-  if(NOT ARGS_SOURCES)
-    get_property(ARGS_SOURCES TARGET ${ARGS_TARGET} PROPERTY SOURCES)
+  if(NOT arg_SOURCES)
+    get_property(arg_SOURCES TARGET ${arg_TARGET} PROPERTY SOURCES)
   endif()
 
   unset(testList)
@@ -351,8 +415,8 @@ function(gtest_add_tests)
   set(gtest_test_type_regex "(TYPED_TEST|TEST)_?[FP]?")
   set(each_line_regex "([^\r\n]*[\r\n])")
 
-  foreach(source IN LISTS ARGS_SOURCES)
-    if(NOT ARGS_SKIP_DEPENDENCY)
+  foreach(source IN LISTS arg_SOURCES)
+    if(NOT arg_SKIP_DEPENDENCY)
       set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${source})
     endif()
     file(READ "${source}" contents)
@@ -408,6 +472,11 @@ function(gtest_add_tests)
         continue()
       endif()
 
+      set(extra_args "")
+      foreach(arg IN LISTS arg_EXTRA_ARGS)
+        string(APPEND extra_args " [==[${arg}]==]")
+      endforeach()
+
       # Make sure tests disabled in GTest get disabled in CTest
       if(gtest_test_name MATCHES "(^|\\.)DISABLED_")
         # Add the disabled test if CMake is new enough
@@ -420,26 +489,32 @@ function(gtest_add_tests)
                  orig_test_name "${gtest_test_name}"
           )
           set(ctest_test_name
-              ${ARGS_TEST_PREFIX}${orig_test_name}${ARGS_TEST_SUFFIX}
+              ${arg_TEST_PREFIX}${orig_test_name}${arg_TEST_SUFFIX}
           )
-          add_test(NAME ${ctest_test_name}
-                   ${workDir}
-                   COMMAND ${ARGS_TARGET}
-                     --gtest_also_run_disabled_tests
-                     --gtest_filter=${gtest_test_name}
-                     ${ARGS_EXTRA_ARGS}
+          cmake_language(EVAL CODE "
+            add_test(NAME \${ctest_test_name}
+                     ${maybe_WORKING_DIRECTORY}
+                     COMMAND \${arg_TARGET}
+                       --gtest_also_run_disabled_tests
+                       --gtest_filter=\${gtest_test_name}
+                       ${extra_args}
+                     __CMP0178 [==[${cmp0178}]==]
+            )"
           )
           set_tests_properties(${ctest_test_name} PROPERTIES DISABLED TRUE
             DEF_SOURCE_LINE "${source}:${accumulate_line}")
           list(APPEND testList ${ctest_test_name})
         endif()
       else()
-        set(ctest_test_name ${ARGS_TEST_PREFIX}${gtest_test_name}${ARGS_TEST_SUFFIX})
-        add_test(NAME ${ctest_test_name}
-                 ${workDir}
-                 COMMAND ${ARGS_TARGET}
-                   --gtest_filter=${gtest_test_name}
-                   ${ARGS_EXTRA_ARGS}
+        set(ctest_test_name ${arg_TEST_PREFIX}${gtest_test_name}${arg_TEST_SUFFIX})
+        cmake_language(EVAL CODE "
+          add_test(NAME \${ctest_test_name}
+                   ${maybe_WORKING_DIRECTORY}
+                   COMMAND \${arg_TARGET}
+                     --gtest_filter=\${gtest_test_name}
+                     ${extra_args}
+                   __CMP0178 [==[${cmp0178}]==]
+          )"
         )
         # Makes sure a skipped GTest is reported as so by CTest
         set_tests_properties(
@@ -453,49 +528,64 @@ function(gtest_add_tests)
     endforeach()
   endforeach()
 
-  if(ARGS_TEST_LIST)
-    set(${ARGS_TEST_LIST} ${testList} PARENT_SCOPE)
+  if(arg_TEST_LIST)
+    set(${arg_TEST_LIST} ${testList} PARENT_SCOPE)
   endif()
 
 endfunction()
 
 #------------------------------------------------------------------------------
 
-function(gtest_discover_tests TARGET)
-  cmake_parse_arguments(
-    ""
-    "NO_PRETTY_TYPES;NO_PRETTY_VALUES"
-    "TEST_PREFIX;TEST_SUFFIX;WORKING_DIRECTORY;TEST_LIST;DISCOVERY_TIMEOUT;XML_OUTPUT_DIR;DISCOVERY_MODE"
-    "EXTRA_ARGS;PROPERTIES;TEST_FILTER"
-    ${ARGN}
+function(gtest_discover_tests target)
+  set(options
+    NO_PRETTY_TYPES
+    NO_PRETTY_VALUES
+  )
+  set(oneValueArgs
+    TEST_PREFIX
+    TEST_SUFFIX
+    WORKING_DIRECTORY
+    TEST_LIST
+    DISCOVERY_TIMEOUT
+    XML_OUTPUT_DIR
+    DISCOVERY_MODE
+  )
+  set(multiValueArgs
+    EXTRA_ARGS
+    DISCOVERY_EXTRA_ARGS
+    PROPERTIES
+    TEST_FILTER
+  )
+  cmake_parse_arguments(PARSE_ARGV 1 arg
+    "${options}" "${oneValueArgs}" "${multiValueArgs}"
   )
 
-  if(NOT _WORKING_DIRECTORY)
-    set(_WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
+  if(NOT arg_WORKING_DIRECTORY)
+    set(arg_WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
   endif()
-  if(NOT _TEST_LIST)
-    set(_TEST_LIST ${TARGET}_TESTS)
+  if(NOT arg_TEST_LIST)
+    set(arg_TEST_LIST ${target}_TESTS)
   endif()
-  if(NOT _DISCOVERY_TIMEOUT)
-    set(_DISCOVERY_TIMEOUT 5)
+  if(NOT arg_DISCOVERY_TIMEOUT)
+    set(arg_DISCOVERY_TIMEOUT 5)
   endif()
-  if(NOT _DISCOVERY_MODE)
+  if(NOT arg_DISCOVERY_MODE)
     if(NOT CMAKE_GTEST_DISCOVER_TESTS_DISCOVERY_MODE)
       set(CMAKE_GTEST_DISCOVER_TESTS_DISCOVERY_MODE "POST_BUILD")
     endif()
-    set(_DISCOVERY_MODE ${CMAKE_GTEST_DISCOVER_TESTS_DISCOVERY_MODE})
+    set(arg_DISCOVERY_MODE ${CMAKE_GTEST_DISCOVER_TESTS_DISCOVERY_MODE})
   endif()
 
   get_property(
     has_counter
-    TARGET ${TARGET}
+    TARGET ${target}
     PROPERTY CTEST_DISCOVERED_TEST_COUNTER
     SET
   )
   if(has_counter)
     get_property(
       counter
-      TARGET ${TARGET}
+      TARGET ${target}
       PROPERTY CTEST_DISCOVERED_TEST_COUNTER
     )
     math(EXPR counter "${counter} + 1")
@@ -503,17 +593,17 @@ function(gtest_discover_tests TARGET)
     set(counter 1)
   endif()
   set_property(
-    TARGET ${TARGET}
+    TARGET ${target}
     PROPERTY CTEST_DISCOVERED_TEST_COUNTER
     ${counter}
   )
 
   # Define rule to generate test list for aforementioned test executable
-  set(ctest_file_base "${CMAKE_CURRENT_BINARY_DIR}/${TARGET}[${counter}]")
+  set(ctest_file_base "${CMAKE_CURRENT_BINARY_DIR}/${target}[${counter}]")
   set(ctest_include_file "${ctest_file_base}_include.cmake")
   set(ctest_tests_file "${ctest_file_base}_tests.cmake")
   get_property(test_launcher
-    TARGET ${TARGET}
+    TARGET ${target}
     PROPERTY TEST_LAUNCHER
   )
   cmake_policy(GET CMP0158 _CMP0158
@@ -521,7 +611,7 @@ function(gtest_discover_tests TARGET)
   )
   if(NOT _CMP0158 OR _CMP0158 STREQUAL "OLD" OR _CMP0158 STREQUAL "NEW" AND CMAKE_CROSSCOMPILING)
     get_property(crosscompiling_emulator
-      TARGET ${TARGET}
+      TARGET ${target}
       PROPERTY CROSSCOMPILING_EMULATOR
     )
   endif()
@@ -536,26 +626,59 @@ function(gtest_discover_tests TARGET)
     set(test_executor "")
   endif()
 
-  if(_DISCOVERY_MODE STREQUAL "POST_BUILD")
+  cmake_policy(GET CMP0178 cmp0178
+    PARENT_SCOPE # undocumented, do not use outside of CMake
+  )
+  if(NOT cmp0178 STREQUAL "NEW")
+    # Preserve old behavior where empty list items are silently discarded
+    set(test_executor_orig "${test_executor}")
+    set(test_executor ${test_executor})
+    set(arg_EXTRA_ARGS_orig "${arg_EXTRA_ARGS}")
+    set(arg_EXTRA_ARGS ${arg_EXTRA_ARGS})
+    if(NOT cmp0178 STREQUAL "OLD")
+      if(NOT "${test_executor}" STREQUAL "${test_executor_orig}")
+        cmake_policy(GET_WARNING CMP0178 cmp0178_warning)
+        message(AUTHOR_WARNING
+          "The '${target}' target's TEST_LAUNCHER or CROSSCOMPILING_EMULATOR "
+          "test properties contain one or more empty values. Those empty "
+          "values are being silently discarded to preserve backward "
+          "compatibility.\n"
+          "${cmp0178_warning}"
+        )
+      endif()
+      if(NOT "${arg_EXTRA_ARGS}" STREQUAL "${arg_EXTRA_ARGS_orig}")
+        cmake_policy(GET_WARNING CMP0178 cmp0178_warning)
+        message(AUTHOR_WARNING
+          "The EXTRA_ARGS value contains one or more empty values. "
+          "Those empty values are being silently discarded to preserve "
+          "backward compatibility.\n"
+          "${cmp0178_warning}"
+        )
+      endif()
+    endif()
+  endif()
+
+  if(arg_DISCOVERY_MODE STREQUAL "POST_BUILD")
     add_custom_command(
-      TARGET ${TARGET} POST_BUILD
+      TARGET ${target} POST_BUILD
       BYPRODUCTS "${ctest_tests_file}"
       COMMAND "${CMAKE_COMMAND}"
-              -D "TEST_TARGET=${TARGET}"
-              -D "TEST_EXECUTABLE=$<TARGET_FILE:${TARGET}>"
+              -D "TEST_TARGET=${target}"
+              -D "TEST_EXECUTABLE=$<TARGET_FILE:${target}>"
               -D "TEST_EXECUTOR=${test_executor}"
-              -D "TEST_WORKING_DIR=${_WORKING_DIRECTORY}"
-              -D "TEST_EXTRA_ARGS=${_EXTRA_ARGS}"
-              -D "TEST_PROPERTIES=${_PROPERTIES}"
-              -D "TEST_PREFIX=${_TEST_PREFIX}"
-              -D "TEST_SUFFIX=${_TEST_SUFFIX}"
-              -D "TEST_FILTER=${_TEST_FILTER}"
-              -D "NO_PRETTY_TYPES=${_NO_PRETTY_TYPES}"
-              -D "NO_PRETTY_VALUES=${_NO_PRETTY_VALUES}"
-              -D "TEST_LIST=${_TEST_LIST}"
+              -D "TEST_WORKING_DIR=${arg_WORKING_DIRECTORY}"
+              -D "TEST_EXTRA_ARGS=${arg_EXTRA_ARGS}"
+              -D "TEST_PROPERTIES=${arg_PROPERTIES}"
+              -D "TEST_PREFIX=${arg_TEST_PREFIX}"
+              -D "TEST_SUFFIX=${arg_TEST_SUFFIX}"
+              -D "TEST_FILTER=${arg_TEST_FILTER}"
+              -D "NO_PRETTY_TYPES=${arg_NO_PRETTY_TYPES}"
+              -D "NO_PRETTY_VALUES=${arg_NO_PRETTY_VALUES}"
+              -D "TEST_LIST=${arg_TEST_LIST}"
               -D "CTEST_FILE=${ctest_tests_file}"
-              -D "TEST_DISCOVERY_TIMEOUT=${_DISCOVERY_TIMEOUT}"
-              -D "TEST_XML_OUTPUT_DIR=${_XML_OUTPUT_DIR}"
+              -D "TEST_DISCOVERY_TIMEOUT=${arg_DISCOVERY_TIMEOUT}"
+              -D "TEST_DISCOVERY_EXTRA_ARGS=${arg_DISCOVERY_EXTRA_ARGS}"
+              -D "TEST_XML_OUTPUT_DIR=${arg_XML_OUTPUT_DIR}"
               -P "${CMAKE_ROOT}/Modules/GoogleTestAddTests.cmake"
       VERBATIM
     )
@@ -564,10 +687,10 @@ function(gtest_discover_tests TARGET)
       "if(EXISTS \"${ctest_tests_file}\")\n"
       "  include(\"${ctest_tests_file}\")\n"
       "else()\n"
-      "  add_test(${TARGET}_NOT_BUILT ${TARGET}_NOT_BUILT)\n"
+      "  add_test(${target}_NOT_BUILT ${target}_NOT_BUILT)\n"
       "endif()\n"
     )
-  elseif(_DISCOVERY_MODE STREQUAL "PRE_TEST")
+  elseif(arg_DISCOVERY_MODE STREQUAL "PRE_TEST")
 
     get_property(GENERATOR_IS_MULTI_CONFIG GLOBAL
         PROPERTY GENERATOR_IS_MULTI_CONFIG
@@ -578,46 +701,58 @@ function(gtest_discover_tests TARGET)
     endif()
 
     string(CONCAT ctest_include_content
-      "if(EXISTS \"$<TARGET_FILE:${TARGET}>\")"                                    "\n"
+      "if(EXISTS \"$<TARGET_FILE:${target}>\")"                                    "\n"
       "  if(NOT EXISTS \"${ctest_tests_file}\" OR"                                 "\n"
-      "     NOT \"${ctest_tests_file}\" IS_NEWER_THAN \"$<TARGET_FILE:${TARGET}>\" OR\n"
+      "     NOT \"${ctest_tests_file}\" IS_NEWER_THAN \"$<TARGET_FILE:${target}>\" OR\n"
       "     NOT \"${ctest_tests_file}\" IS_NEWER_THAN \"\${CMAKE_CURRENT_LIST_FILE}\")\n"
       "    include(\"${CMAKE_ROOT}/Modules/GoogleTestAddTests.cmake\")"            "\n"
       "    gtest_discover_tests_impl("                                             "\n"
-      "      TEST_EXECUTABLE"        " [==[" "$<TARGET_FILE:${TARGET}>"   "]==]"   "\n"
-      "      TEST_EXECUTOR"          " [==[" "${test_executor}"           "]==]"   "\n"
-      "      TEST_WORKING_DIR"       " [==[" "${_WORKING_DIRECTORY}"      "]==]"   "\n"
-      "      TEST_EXTRA_ARGS"        " [==[" "${_EXTRA_ARGS}"             "]==]"   "\n"
-      "      TEST_PROPERTIES"        " [==[" "${_PROPERTIES}"             "]==]"   "\n"
-      "      TEST_PREFIX"            " [==[" "${_TEST_PREFIX}"            "]==]"   "\n"
-      "      TEST_SUFFIX"            " [==[" "${_TEST_SUFFIX}"            "]==]"   "\n"
-      "      TEST_FILTER"            " [==[" "${_TEST_FILTER}"            "]==]"   "\n"
-      "      NO_PRETTY_TYPES"        " [==[" "${_NO_PRETTY_TYPES}"        "]==]"   "\n"
-      "      NO_PRETTY_VALUES"       " [==[" "${_NO_PRETTY_VALUES}"       "]==]"   "\n"
-      "      TEST_LIST"              " [==[" "${_TEST_LIST}"              "]==]"   "\n"
-      "      CTEST_FILE"             " [==[" "${ctest_tests_file}"        "]==]"   "\n"
-      "      TEST_DISCOVERY_TIMEOUT" " [==[" "${_DISCOVERY_TIMEOUT}"      "]==]"   "\n"
-      "      TEST_XML_OUTPUT_DIR"    " [==[" "${_XML_OUTPUT_DIR}"         "]==]"   "\n"
+      "      TEST_EXECUTABLE"        " [==[$<TARGET_FILE:${target}>]==]"           "\n"
+      "      TEST_EXECUTOR"          " [==[${test_executor}]==]"                   "\n"
+      "      TEST_WORKING_DIR"       " [==[${arg_WORKING_DIRECTORY}]==]"           "\n"
+      "      TEST_EXTRA_ARGS"        " [==[${arg_EXTRA_ARGS}]==]"                  "\n"
+      "      TEST_PROPERTIES"        " [==[${arg_PROPERTIES}]==]"                  "\n"
+      "      TEST_PREFIX"            " [==[${arg_TEST_PREFIX}]==]"                 "\n"
+      "      TEST_SUFFIX"            " [==[${arg_TEST_SUFFIX}]==]"                 "\n"
+      "      TEST_FILTER"            " [==[${arg_TEST_FILTER}]==]"                 "\n"
+      "      NO_PRETTY_TYPES"        " [==[${arg_NO_PRETTY_TYPES}]==]"             "\n"
+      "      NO_PRETTY_VALUES"       " [==[${arg_NO_PRETTY_VALUES}]==]"            "\n"
+      "      TEST_LIST"              " [==[${arg_TEST_LIST}]==]"                   "\n"
+      "      CTEST_FILE"             " [==[${ctest_tests_file}]==]"                "\n"
+      "      TEST_DISCOVERY_TIMEOUT" " [==[${arg_DISCOVERY_TIMEOUT}]==]"           "\n"
+      "      TEST_DISCOVERY_EXTRA_ARGS [==[${arg_DISCOVERY_EXTRA_ARGS}]==]"        "\n"
+      "      TEST_XML_OUTPUT_DIR"    " [==[${arg_XML_OUTPUT_DIR}]==]"              "\n"
       "    )"                                                                      "\n"
       "  endif()"                                                                  "\n"
       "  include(\"${ctest_tests_file}\")"                                         "\n"
       "else()"                                                                     "\n"
-      "  add_test(${TARGET}_NOT_BUILT ${TARGET}_NOT_BUILT)"                        "\n"
+      "  add_test(${target}_NOT_BUILT ${target}_NOT_BUILT)"                        "\n"
       "endif()"                                                                    "\n"
     )
 
     if(GENERATOR_IS_MULTI_CONFIG)
       foreach(_config ${CMAKE_CONFIGURATION_TYPES})
-        file(GENERATE OUTPUT "${ctest_file_base}_include-${_config}.cmake" CONTENT "${ctest_include_content}" CONDITION $<CONFIG:${_config}>)
+        file(GENERATE
+          OUTPUT "${ctest_file_base}_include-${_config}.cmake"
+          CONTENT "${ctest_include_content}"
+          CONDITION $<CONFIG:${_config}>
+        )
       endforeach()
-      file(WRITE "${ctest_include_file}" "include(\"${ctest_file_base}_include-\${CTEST_CONFIGURATION_TYPE}.cmake\")")
+      file(WRITE "${ctest_include_file}"
+        "include(\"${ctest_file_base}_include-\${CTEST_CONFIGURATION_TYPE}.cmake\")"
+      )
     else()
-      file(GENERATE OUTPUT "${ctest_file_base}_include.cmake" CONTENT "${ctest_include_content}")
-      file(WRITE "${ctest_include_file}" "include(\"${ctest_file_base}_include.cmake\")")
+      file(GENERATE
+        OUTPUT "${ctest_file_base}_include.cmake"
+        CONTENT "${ctest_include_content}"
+      )
+      file(WRITE "${ctest_include_file}"
+        "include(\"${ctest_file_base}_include.cmake\")"
+      )
     endif()
 
   else()
-    message(FATAL_ERROR "Unknown DISCOVERY_MODE: ${_DISCOVERY_MODE}")
+    message(FATAL_ERROR "Unknown DISCOVERY_MODE: ${arg_DISCOVERY_MODE}")
   endif()
 
   # Add discovered tests to directory TEST_INCLUDE_FILES
@@ -630,4 +765,4 @@ endfunction()
 ###############################################################################
 
 # Restore project's policies
-cmake_policy(POP)
+endblock()

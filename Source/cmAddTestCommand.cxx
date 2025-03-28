@@ -2,13 +2,18 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmAddTestCommand.h"
 
+#include <algorithm>
+
 #include <cm/memory>
 
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
+#include "cmPolicies.h"
 #include "cmStringAlgorithms.h"
 #include "cmTest.h"
 #include "cmTestGenerator.h"
+
+static std::string const keywordCMP0178 = "__CMP0178";
 
 static bool cmAddTestCommandHandleNameMode(
   std::vector<std::string> const& args, cmExecutionStatus& status);
@@ -29,8 +34,30 @@ bool cmAddTestCommand(std::vector<std::string> const& args,
   }
 
   cmMakefile& mf = status.GetMakefile();
+  cmPolicies::PolicyStatus cmp0178;
+
+  // If the __CMP0178 keyword is present, it is always at the end
+  auto endOfCommandIter =
+    std::find(args.begin() + 2, args.end(), keywordCMP0178);
+  if (endOfCommandIter != args.end()) {
+    auto cmp0178Iter = endOfCommandIter + 1;
+    if (cmp0178Iter == args.end()) {
+      status.SetError(cmStrCat(keywordCMP0178, " keyword missing value"));
+      return false;
+    }
+    if (*cmp0178Iter == "NEW") {
+      cmp0178 = cmPolicies::PolicyStatus::NEW;
+    } else if (*cmp0178Iter == "OLD") {
+      cmp0178 = cmPolicies::PolicyStatus::OLD;
+    } else {
+      cmp0178 = cmPolicies::PolicyStatus::WARN;
+    }
+  } else {
+    cmp0178 = mf.GetPolicyStatus(cmPolicies::CMP0178);
+  }
+
   // Collect the command with arguments.
-  std::vector<std::string> command(args.begin() + 1, args.end());
+  std::vector<std::string> command(args.begin() + 1, endOfCommandIter);
 
   // Create the test but add a generator only the first time it is
   // seen.  This preserves behavior from before test generators.
@@ -46,6 +73,7 @@ bool cmAddTestCommand(std::vector<std::string> const& args,
   } else {
     test = mf.CreateTest(args[0]);
     test->SetOldStyle(true);
+    test->SetCMP0178(cmp0178);
     mf.AddTestGenerator(cm::make_unique<cmTestGenerator>(test));
   }
   test->SetCommand(command);
@@ -56,11 +84,14 @@ bool cmAddTestCommand(std::vector<std::string> const& args,
 bool cmAddTestCommandHandleNameMode(std::vector<std::string> const& args,
                                     cmExecutionStatus& status)
 {
+  cmMakefile& mf = status.GetMakefile();
+
   std::string name;
   std::vector<std::string> configurations;
   std::string working_directory;
   std::vector<std::string> command;
   bool command_expand_lists = false;
+  cmPolicies::PolicyStatus cmp0178 = mf.GetPolicyStatus(cmPolicies::CMP0178);
 
   // Read the arguments.
   enum Doing
@@ -69,6 +100,7 @@ bool cmAddTestCommandHandleNameMode(std::vector<std::string> const& args,
     DoingCommand,
     DoingConfigs,
     DoingWorkingDirectory,
+    DoingCmp0178,
     DoingNone
   };
   Doing doing = DoingName;
@@ -91,6 +123,8 @@ bool cmAddTestCommandHandleNameMode(std::vector<std::string> const& args,
         return false;
       }
       doing = DoingWorkingDirectory;
+    } else if (args[i] == keywordCMP0178) {
+      doing = DoingCmp0178;
     } else if (args[i] == "COMMAND_EXPAND_LISTS") {
       if (command_expand_lists) {
         status.SetError(" may be given at most one COMMAND_EXPAND_LISTS.");
@@ -107,6 +141,15 @@ bool cmAddTestCommandHandleNameMode(std::vector<std::string> const& args,
       configurations.push_back(args[i]);
     } else if (doing == DoingWorkingDirectory) {
       working_directory = args[i];
+      doing = DoingNone;
+    } else if (doing == DoingCmp0178) {
+      if (args[i] == "NEW") {
+        cmp0178 = cmPolicies::PolicyStatus::NEW;
+      } else if (args[i] == "OLD") {
+        cmp0178 = cmPolicies::PolicyStatus::OLD;
+      } else {
+        cmp0178 = cmPolicies::PolicyStatus::WARN;
+      }
       doing = DoingNone;
     } else {
       status.SetError(cmStrCat(" given unknown argument:\n  ", args[i], "\n"));
@@ -126,8 +169,6 @@ bool cmAddTestCommandHandleNameMode(std::vector<std::string> const& args,
     return false;
   }
 
-  cmMakefile& mf = status.GetMakefile();
-
   // Require a unique test name within the directory.
   if (mf.GetTest(name)) {
     status.SetError(cmStrCat(" given test NAME \"", name,
@@ -138,6 +179,7 @@ bool cmAddTestCommandHandleNameMode(std::vector<std::string> const& args,
   // Add the test.
   cmTest* test = mf.CreateTest(name);
   test->SetOldStyle(false);
+  test->SetCMP0178(cmp0178);
   test->SetCommand(command);
   if (!working_directory.empty()) {
     test->SetProperty("WORKING_DIRECTORY", working_directory);

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.10)
 project(FindLibraryTest NONE)
 
 set(CMAKE_FIND_DEBUG_MODE 1)

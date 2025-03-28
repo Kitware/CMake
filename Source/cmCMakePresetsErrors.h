@@ -70,6 +70,8 @@ void CONDITION_UNSUPPORTED(cmJSONState* state);
 
 void TOOLCHAIN_FILE_UNSUPPORTED(cmJSONState* state);
 
+void GRAPHVIZ_FILE_UNSUPPORTED(cmJSONState* state);
+
 void CYCLIC_INCLUDE(const std::string& file, cmJSONState* state);
 
 void TEST_OUTPUT_TRUNCATION_UNSUPPORTED(cmJSONState* state);
@@ -91,6 +93,8 @@ void WORKFLOW_STEP_UNREACHABLE_FROM_FILE(const std::string& workflowStep,
 void CTEST_JUNIT_UNSUPPORTED(cmJSONState* state);
 
 void TRACE_UNSUPPORTED(cmJSONState* state);
+
+JsonErrors::ErrorGenerator UNRECOGNIZED_VERSION_RANGE(int min, int max);
 
 JsonErrors::ErrorGenerator UNRECOGNIZED_CMAKE_VERSION(
   const std::string& version, int current, int required);

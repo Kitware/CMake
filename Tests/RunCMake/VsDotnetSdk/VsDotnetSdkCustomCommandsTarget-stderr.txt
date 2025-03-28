@@ -1,7 +1,0 @@
-CMake Error in CMakeLists.txt:
-  The target "foo" does not currently support add_custom_command as the
-  Visual Studio generators have not yet learned how to generate custom
-  commands in .Net SDK-style projects.
-
-
-CMake Generate step failed.  Build files cannot be regenerated correctly.

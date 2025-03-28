@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.10)
 project(CPackTestAllGenerators)
 add_subdirectory(../CTestTest/SmallAndFast SmallAndFast)
 install(FILES RunCPack.cmake DESTINATION .)

@@ -1,0 +1,10 @@
+target \[main\] link dependency ordering:
+  target \[A\]
+  target \[B\]
+  target \[C\]
+  target \[A\]
+
+target \[main\] link line:
+  target \[A\]
+  target \[B\]
+  target \[C\]$

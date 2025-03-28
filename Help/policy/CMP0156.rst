@@ -34,6 +34,11 @@ are de-duplicated by keeping their first occurrence, thus respecting the
 project-specified order.  This policy provides compatibility with projects
 that have not been updated to expect the latter behavior.
 
+.. note::
+
+  When this policy is set to ``NEW``, the policy :policy:`CMP0179` controls
+  which occurrence of the static libraries is kept when they are de-duplicated.
+
 The ``OLD`` behavior for this policy is to always repeat static libraries
 as if using a traditional linker, and always de-duplicate shared libraries
 by keeping the last occurrence of each.  The ``NEW`` behavior for this policy

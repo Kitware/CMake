@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.29)
 
 # Input variables.
 set(qt_version_major "5")
@@ -122,6 +122,7 @@ foreach (qt_file IN LISTS qt_files)
     message(FATAL_ERROR
       "Failed to extract ${qt_file}: ${err}")
   endif ()
+  file(REMOVE "${qt_file}")
 endforeach ()
 
 # The Windows tarballs have some unfortunate permissions in them that prevent

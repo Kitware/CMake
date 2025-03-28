@@ -223,7 +223,7 @@ if(CMAKE_HIP_PLATFORM STREQUAL "amd")
     endif()
     unset(_CMAKE_HIP_COMPILER_ROCM_LIB_DIRS)
   endif()
-  if(CMAKE_HIP_COMPILER_ROCM_LIB MATCHES "/lib64$" AND NOT DEFINED CMAKE_SIZEOF_VOID_P)
+  if(NOT DEFINED CMAKE_SIZEOF_VOID_P)
     # We have not yet determined the target ABI but we need 'find_package' to
     # search lib64 directories to find hip-lang CMake package dependencies.
     # This will be replaced by ABI detection later.

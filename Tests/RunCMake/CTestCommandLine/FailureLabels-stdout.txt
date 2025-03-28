@@ -1,0 +1,4 @@
+The following tests FAILED:
+[	 ]+1 - ShortName \(Failed\)                                Label1 Label2
+[	 ]+2 - LongerName \(Failed\)                               Label3
+[	 ]+3 - Long_Test_Name_That_Is_Over_Fifty_Characters_In_Length \(Failed\) Label4

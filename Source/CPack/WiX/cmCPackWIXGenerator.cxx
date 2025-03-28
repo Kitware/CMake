@@ -754,7 +754,7 @@ bool cmCPackWIXGenerator::CreateFeatureHierarchy(
 {
   for (auto const& i : ComponentGroups) {
     cmCPackComponentGroup const& group = i.second;
-    if (group.ParentGroup == nullptr) {
+    if (!group.ParentGroup) {
       featureDefinitions.EmitFeatureForComponentGroup(group, *this->Patch);
     }
   }

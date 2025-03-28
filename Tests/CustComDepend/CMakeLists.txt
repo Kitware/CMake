@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.6)
+cmake_minimum_required(VERSION 3.10)
 project(CustComDepend)
 include_directories("${CustComDepend_SOURCE_DIR}")
 add_definitions(-D_CRT_SECURE_NO_DEPRECATE=1)

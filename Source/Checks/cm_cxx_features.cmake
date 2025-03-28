@@ -36,6 +36,8 @@ function(cm_check_cxx_feature name)
         )
     endif()
     set(check_output "${OUTPUT}")
+    # Filter out ninja warnings.
+    string(REGEX REPLACE "[^\n]*ninja: warning: [^\n]*" "" check_output "${check_output}")
     # Filter out MSBuild output that looks like a warning.
     string(REGEX REPLACE " +0 Warning\\(s\\)" "" check_output "${check_output}")
     # Filter out MSBuild output that looks like a warning.

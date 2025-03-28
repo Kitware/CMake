@@ -23,12 +23,13 @@ branches and tags.  Upstream development processes are covered by the
 following documents:
 
 * The `CMake Review Process`_ manages integration of changes.
-* The `CMake Testing Process`_ drives integration testing.
+* The `CMake Integration Testing`_ infrastructure tests changes
+  before and after merging.
 
 .. _`Kitware's GitLab Instance`: https://gitlab.kitware.com
 .. _`CMake Repository`: https://gitlab.kitware.com/cmake/cmake
 .. _`CMake Review Process`: review.rst
-.. _`CMake Testing Process`: testing.rst
+.. _`CMake Integration Testing`: integration-testing.rst
 
 Developer Documentation
 =======================
@@ -37,10 +38,12 @@ CMake developer documentation is provided by the following documents:
 
 * The `CMake Source Code Guide`_.
 * The `CMake Documentation Guide`_.
+* The `CMake Testing Guide`_.
 * The `CMake Experimental Features Guide`_.
 
 .. _`CMake Source Code Guide`: source.rst
 .. _`CMake Documentation Guide`: documentation.rst
+.. _`CMake Testing Guide`: testing.rst
 .. _`CMake Experimental Features Guide`: experimental.rst
 
 Maintainer Documentation

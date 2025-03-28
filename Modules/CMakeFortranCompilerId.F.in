@@ -179,6 +179,11 @@
 # elif defined(__FRT_version__)
         PRINT *, 'INFO:compiler_version['//__FRT_version__//']'
 # endif
+#elif defined(__LFORTRAN__)
+        PRINT *, 'INFO:compiler[LFortran]'
+#define COMPILER_VERSION_MAJOR DEC(__LFORTRAN_MAJOR__)
+#define COMPILER_VERSION_MINOR DEC(__LFORTRAN_MINOR__)
+#define COMPILER_VERSION_PATCH DEC(__LFORTRAN_PATCHLEVEL__)
 #else
         PRINT *, 'INFO:compiler[]'
 #endif

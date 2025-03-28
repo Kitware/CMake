@@ -154,7 +154,7 @@ bool cmDepends::CheckDependencies(std::istream& internalDepends,
     dependee = line.substr(1);
 
     // Add dependee to depender's list
-    if (currentDependencies != nullptr) {
+    if (currentDependencies) {
       currentDependencies->push_back(dependee);
     }
 
@@ -210,7 +210,7 @@ bool cmDepends::CheckDependencies(std::istream& internalDepends,
 
       // Remove the information of this depender from the map, it needs
       // to be rescanned
-      if (currentDependencies != nullptr) {
+      if (currentDependencies) {
         validDeps.erase(depender);
         currentDependencies = nullptr;
       }

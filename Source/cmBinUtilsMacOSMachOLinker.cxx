@@ -87,7 +87,7 @@ bool cmBinUtilsMacOSMachOLinker::ScanDependencies(
     executablePath = cmSystemTools::GetFilenamePath(executableFile);
   }
   const FileInfo* file_info = this->GetFileInfo(file);
-  if (file_info == nullptr) {
+  if (!file_info) {
     return false;
   }
   return this->ScanDependencies(file, file_info->libs, file_info->rpaths,
@@ -120,7 +120,7 @@ bool cmBinUtilsMacOSMachOLinker::GetFileDependencies(
           auto filename = cmSystemTools::GetFilenameName(path);
           bool unique;
           const FileInfo* dep_file_info = this->GetFileInfo(path);
-          if (dep_file_info == nullptr) {
+          if (!dep_file_info) {
             return false;
           }
 

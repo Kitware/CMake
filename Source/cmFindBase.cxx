@@ -5,7 +5,6 @@
 #include <algorithm>
 #include <cstddef>
 #include <deque>
-#include <functional>
 #include <iterator>
 #include <map>
 #include <utility>
@@ -149,7 +148,7 @@ bool cmFindBase::ParseArguments(std::vector<std::string> const& argsIn)
         return false;
       }
       auto command = this->Makefile->GetState()->GetCommand(args[j]);
-      if (command == nullptr) {
+      if (!command) {
         this->SetError(cmStrCat(
           "command specified for \"VALIDATOR\" is undefined: ", args[j], '.'));
         return false;

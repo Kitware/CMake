@@ -1,7 +1,8 @@
-#include <functional>
-#include <iostream>
+#include <list>
 #include <map>
 #include <string>
+#include <unordered_map>
+#include <utility>
 #include <vector>
 
 #include <cm/optional>
@@ -12,13 +13,7 @@
 #include "cmJSONHelpers.h"
 #include "cmJSONState.h"
 
-#define ASSERT_TRUE(x)                                                        \
-  do {                                                                        \
-    if (!(x)) {                                                               \
-      std::cout << "ASSERT_TRUE(" #x ") failed on line " << __LINE__ << "\n"; \
-      return false;                                                           \
-    }                                                                         \
-  } while (false)
+#include "testCommon.h"
 
 namespace {
 struct ObjectStruct
@@ -44,6 +39,8 @@ ErrorGenerator ErrorGeneratorBuilder(std::string errorMessage)
 ErrorGenerator InvalidArray = ErrorGeneratorBuilder("Invalid Array");
 ErrorGenerator MissingRequired = ErrorGeneratorBuilder("Missing Required");
 ErrorGenerator InvalidMap = ErrorGeneratorBuilder("Invalid Map");
+ErrorGenerator FaultyObjectProperty =
+  ErrorGeneratorBuilder("Faulty Object Property");
 ErrorGenerator InvalidObject(JsonErrors::ObjectError /*errorType*/,
                              const Json::Value::Members& extraFields)
 {
@@ -468,51 +465,72 @@ bool testRequired()
 
   return true;
 }
+
+JSONHelperBuilder::FilterResult ObjectPropsFilter(const std::string& key,
+                                                  const Json::Value* value,
+                                                  cmJSONState* state)
+{
+  if (key == "ignore") {
+    return JSONHelperBuilder::FilterResult::Skip;
+  }
+  if (value->isString() && value->asString() == "ignore") {
+    return JSONHelperBuilder::FilterResult::Skip;
+  }
+  if (key == "zerror") {
+    ErrorMessages::FaultyObjectProperty(value, state);
+    return JSONHelperBuilder::FilterResult::Error;
+  }
+  return JSONHelperBuilder::FilterResult::Continue;
+}
+
+template <typename Container>
+bool testFilteredObject()
+{
+  auto const FilteredObjectHelper =
+    JSONHelperBuilder::FilteredObject<Container>(
+      ErrorMessages::InvalidMap, StringHelper, ObjectPropsFilter);
+
+  Json::Value v(Json::objectValue);
+  cmJSONState state;
+  v["field1"] = "Hello";
+  v["field2"] = "world!";
+  v["ignore"] = "any";
+  v["any"] = "ignore";
+  v["zerror"] = "error";
+
+  Container m{ { "key", "default" } };
+  Container expected{ { "field1", "Hello" }, { "field2", "world!" } };
+
+  ASSERT_TRUE(!FilteredObjectHelper(m, &v, &state));
+  ASSERT_TRUE(m == expected);
+
+  auto error = state.GetErrorMessage();
+  ASSERT_TRUE(error == "\nFaulty Object Property");
+
+  return true;
+}
 }
 
 int testJSONHelpers(int /*unused*/, char* /*unused*/[])
 {
-  if (!testInt()) {
-    return 1;
-  }
-  if (!testUInt()) {
-    return 1;
-  }
-  if (!testBool()) {
-    return 1;
-  }
-  if (!testString()) {
-    return 1;
-  }
-  if (!testObject()) {
-    return 1;
-  }
-  if (!testObjectInherited()) {
-    return 1;
-  }
-  if (!testObjectNoExtra()) {
-    return 1;
-  }
-  if (!testObjectOptional()) {
-    return 1;
-  }
-  if (!testVector()) {
-    return 1;
-  }
-  if (!testVectorFilter()) {
-    return 1;
-  }
-  if (!testMap()) {
-    return 1;
-  }
-  if (!testMapFilter()) {
-    return 1;
-  }
-  if (!testOptional()) {
-    return 1;
-  }
-  if (!testRequired()) {
-    return 1;
-  }
-  return 0;
+  return runTests({
+    testInt,
+    testUInt,
+    testBool,
+    testString,
+    testObject,
+    testObjectInherited,
+    testObjectNoExtra,
+    testObjectOptional,
+    testVector,
+    testVectorFilter,
+    testMap,
+    testMapFilter,
+    testOptional,
+    testRequired,
+    testFilteredObject<std::map<std::string, std::string>>,
+    testFilteredObject<std::unordered_map<std::string, std::string>>,
+    testFilteredObject<std::vector<std::pair<std::string, std::string>>>,
+    testFilteredObject<std::list<std::pair<std::string, std::string>>>,
+  });
 }

@@ -309,26 +309,6 @@ void cmGlobalVisualStudio7Generator::Generate()
     this->CallVisualStudioMacro(MacroReload,
                                 GetSLNFile(this->LocalGenerators[0].get()));
   }
-
-  if (this->Version == VSVersion::VS12 &&
-      !this->CMakeInstance->GetIsInTryCompile()) {
-    std::string cmakeWarnVS12;
-    if (cmValue cached = this->CMakeInstance->GetState()->GetCacheEntryValue(
-          "CMAKE_WARN_VS12")) {
-      this->CMakeInstance->MarkCliAsUsed("CMAKE_WARN_VS12");
-      cmakeWarnVS12 = *cached;
-    } else {
-      cmSystemTools::GetEnv("CMAKE_WARN_VS12", cmakeWarnVS12);
-    }
-    if (cmakeWarnVS12.empty() || !cmIsOff(cmakeWarnVS12)) {
-      this->CMakeInstance->IssueMessage(
-        MessageType::WARNING,
-        "The \"Visual Studio 12 2013\" generator is deprecated "
-        "and will be removed in a future version of CMake."
-        "\n"
-        "Add CMAKE_WARN_VS12=OFF to the cache to disable this warning.");
-    }
-  }
 }
 
 void cmGlobalVisualStudio7Generator::OutputSLNFile(

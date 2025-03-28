@@ -1,4 +1,4 @@
 CMake Error at SourceFromOneArg.cmake:[0-9]+ \(try_compile\):
   SOURCE_FROM_CONTENT requires exactly two arguments
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists.txt:[0-9]+ \(include\)

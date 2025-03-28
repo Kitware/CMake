@@ -54,10 +54,10 @@ void cmCPackPKGGenerator::CreateBackground(const char* themeName,
                                            cmXMLWriter& xout)
 {
   std::string paramSuffix =
-    (themeName == nullptr) ? "" : cmSystemTools::UpperCase(themeName);
-  std::string opt = (themeName == nullptr)
-    ? cmStrCat("CPACK_", genName, "_BACKGROUND")
-    : cmStrCat("CPACK_", genName, "_BACKGROUND_", paramSuffix);
+    themeName ? cmSystemTools::UpperCase(themeName) : "";
+  std::string opt = themeName
+    ? cmStrCat("CPACK_", genName, "_BACKGROUND_", paramSuffix)
+    : cmStrCat("CPACK_", genName, "_BACKGROUND");
   cmValue bgFileName = this->GetOption(opt);
   if (!bgFileName) {
     return;
@@ -73,21 +73,21 @@ void cmCPackPKGGenerator::CreateBackground(const char* themeName,
     return;
   }
 
-  if (themeName == nullptr) {
-    xout.StartElement("background");
-  } else {
+  if (themeName) {
     xout.StartElement(cmStrCat("background-", themeName));
+  } else {
+    xout.StartElement("background");
   }
 
   xout.Attribute("file", *bgFileName);
 
   cmValue param = this->GetOption(cmStrCat(opt, "_ALIGNMENT"));
-  if (param != nullptr) {
+  if (param) {
     xout.Attribute("alignment", *param);
   }
 
   param = this->GetOption(cmStrCat(opt, "_SCALING"));
-  if (param != nullptr) {
+  if (param) {
     xout.Attribute("scaling", *param);
   }
 
@@ -95,12 +95,12 @@ void cmCPackPKGGenerator::CreateBackground(const char* themeName,
   // attribute for the background, but I've seen examples that
   // doesn't have them, so don't make them mandatory.
   param = this->GetOption(cmStrCat(opt, "_MIME_TYPE"));
-  if (param != nullptr) {
+  if (param) {
     xout.Attribute("mime-type", *param);
   }
 
   param = this->GetOption(cmStrCat(opt, "_UTI"));
-  if (param != nullptr) {
+  if (param) {
     xout.Attribute("uti", *param);
   }
 
@@ -152,7 +152,7 @@ void cmCPackPKGGenerator::WriteDistributionFile(const char* metapackageFile,
 
   // Emit the outline for the groups
   for (auto const& group : this->ComponentGroups) {
-    if (group.second.ParentGroup == nullptr) {
+    if (!group.second.ParentGroup) {
       CreateChoiceOutline(group.second, xChoiceOut);
     }
   }
@@ -434,7 +434,7 @@ bool cmCPackPKGGenerator::CopyResourcePlistFile(const std::string& name,
   }
 
   std::string inFName = cmStrCat("CPack.", name, ".in");
-  std::string inFileName = this->FindTemplate(inFName.c_str());
+  std::string inFileName = this->FindTemplate(inFName);
   if (inFileName.empty()) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
                   "Cannot find input file: " << inFName << std::endl);

@@ -27,7 +27,7 @@ bool cmStringReplaceHelper::Replace(const std::string& input,
   // Scan through the input for all matches.
   std::string::size_type base = 0;
   while (this->RegularExpression.find(input.c_str() + base)) {
-    if (this->Makefile != nullptr) {
+    if (this->Makefile) {
       this->Makefile->ClearMatches();
       this->Makefile->StoreMatches(this->RegularExpression);
     }

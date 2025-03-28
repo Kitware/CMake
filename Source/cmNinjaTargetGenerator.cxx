@@ -22,6 +22,7 @@
 #include <cm3p/json/value.h>
 #include <cm3p/json/writer.h>
 
+#include "cmBuildDatabase.h"
 #include "cmComputeLinkInformation.h"
 #include "cmCustomCommandGenerator.h"
 #include "cmDyndepCollation.h"
@@ -1232,6 +1233,21 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements(
                language, "Modules.json"));
     build.ImplicitDeps.emplace_back(
       this->GetTargetDependInfoPath(language, config));
+    {
+      auto bdb_path =
+        this->GeneratorTarget->BuildDatabasePath(language, config);
+      if (!bdb_path.empty()) {
+        build.ImplicitOuts.emplace_back(this->ConvertToNinjaPath(bdb_path));
+      }
+    }
+    auto bdb_path = this->GeneratorTarget->BuildDatabasePath(language, config);
+    if (!bdb_path.empty()) {
+      auto db = cmBuildDatabase::ForTarget(this->GeneratorTarget, config);
+      auto mcdb_template_path = cmStrCat(bdb_path, ".in");
+      db.Write(mcdb_template_path);
+      build.ImplicitDeps.emplace_back(std::move(mcdb_template_path));
+      build.ImplicitOuts.emplace_back(std::move(bdb_path));
+    }
     for (auto const& scanFiles : scanningFiles) {
       if (!scanFiles.ScanningOutput.empty()) {
         build.ExplicitDeps.push_back(scanFiles.ScanningOutput);
@@ -1308,7 +1324,7 @@ cmNinjaBuild GetScanBuildStatement(const std::string& ruleName,
                                    bool compilationPreprocesses,
                                    cmNinjaBuild& objBuild, cmNinjaVars& vars,
                                    const std::string& objectFileName,
-                                   cmLocalGenerator* lg)
+                                   cmNinjaTargetGenerator* tg)
 {
   cmNinjaBuild scanBuild(ruleName);
 
@@ -1372,13 +1388,12 @@ cmNinjaBuild GetScanBuildStatement(const std::string& ruleName,
 
   // Scanning always provides a depfile for preprocessor dependencies. This
   // variable is unused in `msvc`-deptype scanners.
-  std::string const& depFileName = cmStrCat(scanBuild.Outputs.front(), ".d");
-  scanBuild.Variables["DEP_FILE"] =
-    lg->ConvertToOutputFormat(depFileName, cmOutputConverter::SHELL);
+  tg->AddDepfileBinding(scanBuild.Variables,
+                        cmStrCat(scanBuild.Outputs.front(), ".d"));
   if (compilePP) {
     // The actual compilation does not need a depfile because it
     // depends on the already-preprocessed source.
-    vars.erase("DEP_FILE");
+    tg->RemoveDepfileBinding(vars);
   }
 
   return scanBuild;
@@ -1455,25 +1470,19 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
 
   if (this->GetMakefile()->GetSafeDefinition(
         cmStrCat("CMAKE_", language, "_DEPFILE_FORMAT")) != "msvc"_s) {
-    bool replaceExt(false);
+    bool replaceExt = false;
     if (!language.empty()) {
       std::string repVar =
         cmStrCat("CMAKE_", language, "_DEPFILE_EXTENSION_REPLACE");
       replaceExt = this->Makefile->IsOn(repVar);
     }
-    if (!replaceExt) {
-      // use original code
-      vars["DEP_FILE"] = this->GetLocalGenerator()->ConvertToOutputFormat(
-        cmStrCat(objectFileName, ".d"), cmOutputConverter::SHELL);
-    } else {
-      // Replace the original source file extension with the
-      // depend file extension.
-      std::string dependFileName = cmStrCat(
-        cmSystemTools::GetFilenameWithoutLastExtension(objectFileName), ".d");
-      vars["DEP_FILE"] = this->GetLocalGenerator()->ConvertToOutputFormat(
-        cmStrCat(objectFileDir, '/', dependFileName),
-        cmOutputConverter::SHELL);
-    }
+    this->AddDepfileBinding(
+      vars,
+      replaceExt ? cmStrCat(objectFileDir, '/',
+                            cmSystemTools::GetFilenameWithoutLastExtension(
+                              objectFileName),
+                            ".d")
+                 : cmStrCat(objectFileName, ".d"));
   }
 
   this->SetMsvcTargetPdbVariable(vars, config);
@@ -1598,8 +1607,7 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
 
     cmNinjaBuild ppBuild = GetScanBuildStatement(
       scanRuleName, ppFileName, compilePP, compilePPWithDefines,
-      compilationPreprocesses, objBuild, vars, objectFileName,
-      this->LocalGenerator);
+      compilationPreprocesses, objBuild, vars, objectFileName, this);
 
     if (compilePP) {
       // In case compilation requires flags that are incompatible with
@@ -1788,24 +1796,19 @@ void cmNinjaTargetGenerator::WriteCxxModuleBmiBuildStatement(
 
   if (this->GetMakefile()->GetSafeDefinition(
         cmStrCat("CMAKE_", language, "_DEPFILE_FORMAT")) != "msvc"_s) {
-    bool replaceExt(false);
+    bool replaceExt = false;
     if (!language.empty()) {
       std::string repVar =
         cmStrCat("CMAKE_", language, "_DEPFILE_EXTENSION_REPLACE");
       replaceExt = this->Makefile->IsOn(repVar);
     }
-    if (!replaceExt) {
-      // use original code
-      vars["DEP_FILE"] = this->GetLocalGenerator()->ConvertToOutputFormat(
-        cmStrCat(bmiFileName, ".d"), cmOutputConverter::SHELL);
-    } else {
-      // Replace the original source file extension with the
-      // depend file extension.
-      std::string dependFileName = cmStrCat(
-        cmSystemTools::GetFilenameWithoutLastExtension(bmiFileName), ".d");
-      vars["DEP_FILE"] = this->GetLocalGenerator()->ConvertToOutputFormat(
-        cmStrCat(bmiFileDir, '/', dependFileName), cmOutputConverter::SHELL);
-    }
+    this->AddDepfileBinding(
+      vars,
+      replaceExt
+        ? cmStrCat(bmiFileDir, '/',
+                   cmSystemTools::GetFilenameWithoutLastExtension(bmiFileName),
+                   ".d")
+        : cmStrCat(bmiFileName, ".d"));
   }
 
   std::string d =
@@ -1852,7 +1855,7 @@ void cmNinjaTargetGenerator::WriteCxxModuleBmiBuildStatement(
 
     cmNinjaBuild ppBuild = GetScanBuildStatement(
       scanRuleName, ppFileName, false, compilePPWithDefines, true, bmiBuild,
-      vars, bmiFileName, this->LocalGenerator);
+      vars, bmiFileName, this);
 
     ScanningFiles scanningFiles;
 
@@ -2490,6 +2493,24 @@ void cmNinjaTargetGenerator::MacOSXContentGeneratorType::operator()(
 
   // Add as a dependency to the target so that it gets called.
   this->Generator->Configs[config].ExtraFiles.push_back(std::move(output));
+}
+
+void cmNinjaTargetGenerator::AddDepfileBinding(cmNinjaVars& vars,
+                                               std::string depfile) const
+{
+  std::string depfileForShell =
+    this->GetLocalGenerator()->ConvertToOutputFormat(depfile,
+                                                     cmOutputConverter::SHELL);
+  if (depfile != depfileForShell) {
+    vars["depfile"] = std::move(depfile);
+  }
+  vars["DEP_FILE"] = std::move(depfileForShell);
+}
+
+void cmNinjaTargetGenerator::RemoveDepfileBinding(cmNinjaVars& vars) const
+{
+  vars.erase("DEP_FILE");
+  vars.erase("depfile");
 }
 
 void cmNinjaTargetGenerator::addPoolNinjaVariable(

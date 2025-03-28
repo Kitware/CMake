@@ -115,7 +115,7 @@ std::string cmTimestamp::CreateTimestampFromTimeT(time_t timeT,
     ptr = localtime(&timeT);
   }
 
-  if (ptr == nullptr) {
+  if (!ptr) {
     return std::string();
   }
 

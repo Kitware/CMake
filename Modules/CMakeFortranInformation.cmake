@@ -129,5 +129,7 @@ if(CMAKE_Fortran_STANDARD_LIBRARIES_INIT)
   mark_as_advanced(CMAKE_Fortran_STANDARD_LIBRARIES)
 endif()
 
+set(CMAKE_Fortran_USE_LINKER_INFORMATION TRUE)
+
 # set this variable so we can avoid loading this more than once.
 set(CMAKE_Fortran_INFORMATION_LOADED 1)

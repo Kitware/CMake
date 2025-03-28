@@ -2,7 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 
 #include <cstring>
-#include <iostream>
 #include <iterator>
 #include <sstream>
 #include <stdexcept>
@@ -14,13 +13,7 @@
 
 #include "cmString.hxx"
 
-#define ASSERT_TRUE(x)                                                        \
-  do {                                                                        \
-    if (!(x)) {                                                               \
-      std::cout << "ASSERT_TRUE(" #x ") failed on line " << __LINE__ << "\n"; \
-      return false;                                                           \
-    }                                                                         \
-  } while (false)
+#include "testCommon.h"
 
 static bool testConstructDefault()
 {
@@ -1163,188 +1156,65 @@ static bool testStability()
 
 int testString(int /*unused*/, char* /*unused*/[])
 {
-  if (!testConstructDefault()) {
-    return 1;
-  }
-  if (!testConstructFromNullPtr()) {
-    return 1;
-  }
-  if (!testConstructFromCStrNull()) {
-    return 1;
-  }
-  if (!testConstructFromCharArray()) {
-    return 1;
-  }
-  if (!testConstructFromCStr()) {
-    return 1;
-  }
-  if (!testConstructFromStdString()) {
-    return 1;
-  }
-  if (!testConstructFromView()) {
-    return 1;
-  }
-  if (!testConstructFromChar()) {
-    return 1;
-  }
-  if (!testConstructFromInitList()) {
-    return 1;
-  }
-  if (!testConstructFromBuffer()) {
-    return 1;
-  }
-  if (!testConstructFromInputIterator()) {
-    return 1;
-  }
-  if (!testConstructFromN()) {
-    return 1;
-  }
-  if (!testConstructFromStaticStringView()) {
-    return 1;
-  }
-  if (!testConstructCopy()) {
-    return 1;
-  }
-  if (!testConstructMove()) {
-    return 1;
-  }
-  if (!testAssignCopy()) {
-    return 1;
-  }
-  if (!testAssignMove()) {
-    return 1;
-  }
-  if (!testAssignFromChar()) {
-    return 1;
-  }
-  if (!testAssignFromView()) {
-    return 1;
-  }
-  if (!testAssignFromStdString()) {
-    return 1;
-  }
-  if (!testAssignFromCStr()) {
-    return 1;
-  }
-  if (!testAssignFromCharArray()) {
-    return 1;
-  }
-  if (!testAssignFromCStrNull()) {
-    return 1;
-  }
-  if (!testAssignFromNullPtr()) {
-    return 1;
-  }
-  if (!testAssignFromInitList()) {
-    return 1;
-  }
-  if (!testAssignFromStaticStringView()) {
-    return 1;
-  }
-  if (!testOperatorBool()) {
-    return 1;
-  }
-  if (!testOperatorIndex()) {
-    return 1;
-  }
-  if (!testOperatorPlusEqual()) {
-    return 1;
-  }
-  if (!testOperatorCompare()) {
-    return 1;
-  }
-  if (!testOperatorStream()) {
-    return 1;
-  }
-  if (!testOperatorStdStringPlusEqual()) {
-    return 1;
-  }
-  if (!testMethod_borrow()) {
-    return 1;
-  }
-  if (!testMethod_view()) {
-    return 1;
-  }
-  if (!testMethod_empty()) {
-    return 1;
-  }
-  if (!testMethod_length()) {
-    return 1;
-  }
-  if (!testMethod_at()) {
-    return 1;
-  }
-  if (!testMethod_front_back()) {
-    return 1;
-  }
-  if (!testMethod_clear()) {
-    return 1;
-  }
-  if (!testMethod_insert()) {
-    return 1;
-  }
-  if (!testMethod_erase()) {
-    return 1;
-  }
-  if (!testMethod_push_back()) {
-    return 1;
-  }
-  if (!testMethod_pop_back()) {
-    return 1;
-  }
-  if (!testMethod_replace()) {
-    return 1;
-  }
-  if (!testMethod_copy()) {
-    return 1;
-  }
-  if (!testMethod_resize()) {
-    return 1;
-  }
-  if (!testMethod_swap()) {
-    return 1;
-  }
-  if (!testMethodIterators()) {
-    return 1;
-  }
-  if (!testMethod_substr_AtEndBorrowed()) {
-    return 1;
-  }
-  if (!testMethod_substr_AtEndOwned()) {
-    return 1;
-  }
-  if (!testMethod_substr_AtStartBorrowed()) {
-    return 1;
-  }
-  if (!testMethod_substr_AtStartOwned()) {
-    return 1;
-  }
-  if (!testMethod_compare()) {
-    return 1;
-  }
-  if (!testMethod_find()) {
-    return 1;
-  }
-  if (!testMethod_rfind()) {
-    return 1;
-  }
-  if (!testMethod_find_first_of()) {
-    return 1;
-  }
-  if (!testMethod_find_first_not_of()) {
-    return 1;
-  }
-  if (!testMethod_find_last_of()) {
-    return 1;
-  }
-  if (!testMethod_find_last_not_of()) {
-    return 1;
-  }
-  if (!testAddition()) {
-    return 1;
-  }
-  if (!testStability()) {
-    return 1;
-  }
-  return 0;
+  return runTests({ testConstructDefault,
+                    testConstructFromNullPtr,
+                    testConstructFromCStrNull,
+                    testConstructFromCharArray,
+                    testConstructFromCStr,
+                    testConstructFromStdString,
+                    testConstructFromView,
+                    testConstructFromChar,
+                    testConstructFromInitList,
+                    testConstructFromBuffer,
+                    testConstructFromInputIterator,
+                    testConstructFromN,
+                    testConstructFromStaticStringView,
+                    testConstructCopy,
+                    testConstructMove,
+                    testAssignCopy,
+                    testAssignMove,
+                    testAssignFromChar,
+                    testAssignFromView,
+                    testAssignFromStdString,
+                    testAssignFromCStr,
+                    testAssignFromCharArray,
+                    testAssignFromCStrNull,
+                    testAssignFromNullPtr,
+                    testAssignFromInitList,
+                    testAssignFromStaticStringView,
+                    testOperatorBool,
+                    testOperatorIndex,
+                    testOperatorPlusEqual,
+                    testOperatorCompare,
+                    testOperatorStream,
+                    testOperatorStdStringPlusEqual,
+                    testMethod_borrow,
+                    testMethod_view,
+                    testMethod_empty,
+                    testMethod_length,
+                    testMethod_at,
+                    testMethod_front_back,
+                    testMethod_clear,
+                    testMethod_insert,
+                    testMethod_erase,
+                    testMethod_push_back,
+                    testMethod_pop_back,
+                    testMethod_replace,
+                    testMethod_copy,
+                    testMethod_resize,
+                    testMethod_swap,
+                    testMethodIterators,
+                    testMethod_substr_AtEndBorrowed,
+                    testMethod_substr_AtEndOwned,
+                    testMethod_substr_AtStartBorrowed,
+                    testMethod_substr_AtStartOwned,
+                    testMethod_compare,
+                    testMethod_find,
+                    testMethod_rfind,
+                    testMethod_find_first_of,
+                    testMethod_find_first_not_of,
+                    testMethod_find_last_of,
+                    testMethod_find_last_not_of,
+                    testAddition,
+                    testStability });
 }

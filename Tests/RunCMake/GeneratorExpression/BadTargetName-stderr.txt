@@ -5,6 +5,6 @@ CMake Error at BadTargetName.cmake:1 \(add_custom_target\):
 
   \$<TARGET_NAME> expression requires literal input.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists.txt:[0-9]+ \(include\)
 +
 CMake Generate step failed\.  Build files cannot be regenerated correctly\.$

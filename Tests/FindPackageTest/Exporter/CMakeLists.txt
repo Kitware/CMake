@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.7.20090831)
+cmake_minimum_required(VERSION 3.10)
 project(CMakeTestExportPackage C)
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/CMakeTestExportPackageConfig.cmake.in

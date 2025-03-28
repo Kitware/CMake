@@ -31,7 +31,7 @@ const Json::Value* getPreset(cmJSONState* state)
 std::string getPresetName(cmJSONState* state)
 {
   const Json::Value* preset = getPreset(state);
-  if (preset != nullptr && preset->isMember("name")) {
+  if (preset && preset->isMember("name")) {
     return preset->operator[]("name").asString();
   }
   return "";
@@ -177,6 +177,12 @@ void TOOLCHAIN_FILE_UNSUPPORTED(cmJSONState* state)
                   "support");
 }
 
+void GRAPHVIZ_FILE_UNSUPPORTED(cmJSONState* state)
+{
+  state->AddError(
+    "File version must be 10 or higher for graphviz preset support");
+}
+
 void CYCLIC_INCLUDE(const std::string& file, cmJSONState* state)
 {
   state->AddError(cmStrCat("Cyclic include among preset files: ", file));
@@ -230,6 +236,16 @@ void CTEST_JUNIT_UNSUPPORTED(cmJSONState* state)
 void TRACE_UNSUPPORTED(cmJSONState* state)
 {
   state->AddError("File version must be 7 or higher for trace preset support");
+}
+
+JsonErrors::ErrorGenerator UNRECOGNIZED_VERSION_RANGE(int min, int max)
+{
+  return [min, max](const Json::Value* value, cmJSONState* state) -> void {
+    state->AddErrorAtValue(cmStrCat("Unrecognized \"version\" ",
+                                    value->asString(), ": must be >=", min,
+                                    " and <=", max),
+                           value);
+  };
 }
 
 JsonErrors::ErrorGenerator UNRECOGNIZED_CMAKE_VERSION(

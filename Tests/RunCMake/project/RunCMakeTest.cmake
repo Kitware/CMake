@@ -63,9 +63,13 @@ run_cmake(CMP0096-OLD)
 run_cmake(CMP0096-NEW)
 
 # We deliberately run these twice to verify behavior of the second CMake run
-run_cmake(SameProjectVarsSubdir)
+run_cmake(CMP0180-OLD)
 set(RunCMake_TEST_NO_CLEAN 1)
-run_cmake(SameProjectVarsSubdir)
+run_cmake(CMP0180-OLD)
+set(RunCMake_TEST_NO_CLEAN 0)
+run_cmake(CMP0180-NEW)
+set(RunCMake_TEST_NO_CLEAN 1)
+run_cmake(CMP0180-NEW)
 set(RunCMake_TEST_NO_CLEAN 0)
 
 run_cmake(NoMinimumRequired)

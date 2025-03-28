@@ -152,6 +152,15 @@ std::string cmCurlSetCAInfo(::CURL* curl, const std::string& cafile)
       check_curl_result(res, "Unable to set TLS/SSL Verify CAPATH: ");
     }
 #  undef CMAKE_CAPATH_COMMON
+#  ifdef _AIX
+#    define CMAKE_CAPATH_AIX "/var/ssl/certs"
+    if (cmSystemTools::FileIsDirectory(CMAKE_CAPATH_AIX)) {
+      ::CURLcode res =
+        ::curl_easy_setopt(curl, CURLOPT_CAPATH, CMAKE_CAPATH_AIX);
+      check_curl_result(res, "Unable to set TLS/SSL Verify CAPATH: ");
+    }
+#    undef CMAKE_CAPATH_AIX
+#  endif
   }
 #endif
   return e;

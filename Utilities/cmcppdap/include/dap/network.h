@@ -45,10 +45,18 @@ class Server {
   // create() constructs and returns a new Server.
   static std::unique_ptr<Server> create();
 
-  // start() begins listening for connections on the given port.
+  // start() begins listening for connections on localhost and the given port.
   // callback will be called for each connection.
   // onError will be called for any connection errors.
   virtual bool start(int port,
+                     const OnConnect& callback,
+                     const OnError& onError = ignoreErrors) = 0;
+
+  // start() begins listening for connections on the given specific address and port.
+  // callback will be called for each connection.
+  // onError will be called for any connection errors.
+  virtual bool start(const char* address,
+                     int port,
                      const OnConnect& callback,
                      const OnError& onError = ignoreErrors) = 0;
 
