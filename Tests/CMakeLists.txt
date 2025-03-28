@@ -1468,6 +1468,7 @@ if(BUILD_TESTING)
   _mod
   IN ITEMS
       ALSA
+      ASPELL
       Backtrace
       BLAS
       Boost

@@ -11,6 +11,7 @@ endif()
 
 set(CMake_TEST_ASM_NASM "ON" CACHE BOOL "")
 set(CMake_TEST_FindALSA "ON" CACHE BOOL "")
+set(CMake_TEST_FindASPELL "ON" CACHE BOOL "")
 set(CMake_TEST_FindBacktrace "ON" CACHE BOOL "")
 set(CMake_TEST_FindBLAS "All;static=1;Generic" CACHE STRING "")
 set(CMake_TEST_FindBoost "ON" CACHE BOOL "")
