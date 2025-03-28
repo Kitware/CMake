@@ -169,6 +169,39 @@ endfunction()
 function(_GNUInstallDirs_cache_path var description)
   set(cmake_install_var "CMAKE_INSTALL_${var}")
   set(default "${_GNUInstallDirs_${var}_DEFAULT}")
+  # Check if we have a special way to calculate the defaults
+  if(COMMAND _GNUInstallDirs_${var}_get_default)
+    # Check if the current CMAKE_INSTALL_PREFIX is the same as before
+    set(install_prefix_is_same TRUE)
+    set(last_default "${default}")
+    if(NOT DEFINED _GNUInstallDirs_LAST_CMAKE_INSTALL_PREFIX
+        OR NOT _GNUInstallDirs_LAST_CMAKE_INSTALL_PREFIX STREQUAL CMAKE_INSTALL_PREFIX)
+      set(install_prefix_is_same FALSE)
+      # Recalculate what the last default would have been
+      cmake_language(CALL _GNUInstallDirs_${var}_get_default
+        last_default
+        "${_GNUInstallDirs_LAST_CMAKE_INSTALL_PREFIX}")
+    endif()
+    if(DEFINED CACHE{${cmake_install_var}} AND install_prefix_is_same)
+      # If the cache variable was already set from a previous run and the
+      # install prefix has not changed, we don't need to do anything
+      return()
+    else()
+      # Otherwise get the new default
+      cmake_language(CALL _GNUInstallDirs_${var}_get_default
+        default
+        "${CMAKE_INSTALL_PREFIX}")
+      # if the current value is the same as the cache value and the same as
+      # the old default, reset the value to the new default
+      if(${cmake_install_var} STREQUAL "$CACHE{${cmake_install_var}}"
+          AND ${cmake_install_var} STREQUAL last_default)
+        set(${cmake_install_var} "${default}" CACHE PATH "${full_description}" FORCE)
+      endif()
+      # Continue to normal flow
+    endif()
+  endif()
+
+  # Normal flow
   set(full_description "${description} (${default})")
   if(NOT DEFINED ${cmake_install_var})
     set(${cmake_install_var} "${default}" CACHE PATH "${full_description}")
@@ -182,6 +215,12 @@ endfunction()
 function(_GNUInstallDirs_cache_path_fallback var description)
   set(cmake_install_var "CMAKE_INSTALL_${var}")
   set(default "${_GNUInstallDirs_${var}_DEFAULT}")
+  # Check if there is a more special way to handle the default
+  if(COMMAND _GNUInstallDirs_${var}_get_default)
+    cmake_language(CALL _GNUInstallDirs_${var}_get_default
+      default
+      "${CMAKE_INSTALL_PREFIX}")
+  endif()
   if(NOT ${cmake_install_var})
     set(${cmake_install_var} "" CACHE PATH "${description}")
     set(${cmake_install_var} "${default}")
@@ -238,6 +277,16 @@ set(_GNUInstallDirs_LIBDIR_DEFAULT "lib")
 set(_GNUInstallDirs_INCLUDEDIR_DEFAULT "include")
 set(_GNUInstallDirs_OLDINCLUDEDIR_DEFAULT "/usr/include")
 set(_GNUInstallDirs_DATAROOTDIR_DEFAULT "share")
+
+# Define the special defaults handling
+# Signature
+#   _GNUInstallDirs_<Dir>_get_default(out_var install_prefix)
+#
+# ``out_var``
+#   Output variable with the calculated default
+#
+# ``install_prefix``
+#   The CMAKE_INSTALL_PREFIX used to calculate the default
 
 # We check if the variable was manually set and not cached, in order to
 # allow projects to set the values as normal variables before including
@@ -325,8 +374,6 @@ if(NOT DEFINED CMAKE_INSTALL_LIBDIR OR (_libdir_set
 endif()
 _GNUInstallDirs_cache_convert_to_path(CMAKE_INSTALL_LIBDIR "Object code libraries (lib)")
 
-# Save for next run
-set(_GNUInstallDirs_LAST_CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}" CACHE INTERNAL "CMAKE_INSTALL_PREFIX during last run")
 unset(_libdir_set)
 unset(__LAST_LIBDIR_DEFAULT)
 
@@ -410,6 +457,9 @@ foreach(dir IN ITEMS
 )
   unset(_GNUInstallDirs_${dir}_DEFAULT)
 endforeach()
+
+# Save for next run
+set(_GNUInstallDirs_LAST_CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}" CACHE INTERNAL "CMAKE_INSTALL_PREFIX during last run")
 
 #-----------------------------------------------------------------------------
 
