@@ -5,43 +5,59 @@
 FindPerlLibs
 ------------
 
-Find Perl libraries
+Finds Perl libraries.  Perl is a general-purpose, interpreted, dynamic
+programming language.  This module detects whether Perl is installed and
+determines the locations of include paths, libraries, and the library name.
 
-This module finds if PERL is installed and determines where the
-include files and libraries are.  It also determines what the name of
-the library is.  This code sets the following variables:
+Result Variables
+^^^^^^^^^^^^^^^^
 
-::
+This module sets the following variables:
 
-  PERLLIBS_FOUND    = True if perl.h & libperl were found
-  PERL_INCLUDE_PATH = path to where perl.h is found
-  PERL_LIBRARY      = path to libperl
-  PERL_EXECUTABLE   = full path to the perl binary
+``PerlLibs_FOUND``
+  True if ``perl.h`` and ``libperl`` were found.  For backward compatibility,
+  the ``PERLLIBS_FOUND`` variable is also set to the same value.
+``PERL_SITESEARCH``
+  Path to the sitesearch install directory (``-V:installsitesearch``).
+``PERL_SITEARCH``
+  Path to the sitelib install directory (``-V:installsitearch``).
+``PERL_SITELIB``
+  Path to the sitelib install directory (``-V:installsitelib``).
+``PERL_VENDORARCH``
+  Path to the vendor arch install directory (``-V:installvendorarch``).
+``PERL_VENDORLIB``
+  Path to the vendor lib install directory (``-V:installvendorlib``).
+``PERL_ARCHLIB``
+  Path to the core arch lib install directory (``-V:archlib``).
+``PERL_PRIVLIB``
+  Path to the core priv lib install directory (``-V:privlib``).
+``PERL_UPDATE_ARCHLIB``
+  Path to the update arch lib install directory (``-V:installarchlib``).
+``PERL_UPDATE_PRIVLIB``
+  Path to the update priv lib install directory (``-V:installprivlib``).
+``PERL_EXTRA_C_FLAGS``
+  Compilation flags used to build Perl.
 
+Cache Variables
+^^^^^^^^^^^^^^^
 
+The following cache variables may also be set:
 
-The minimum required version of Perl can be specified using the
-standard syntax, e.g.  find_package(PerlLibs 6.0)
+``PERL_INCLUDE_PATH``
+  Directory containing ``perl.h`` and other Perl header files.
+``PERL_LIBRARY``
+  Path to the ``libperl``.
+``PERL_EXECUTABLE``
+  Full path to the ``perl`` executable.
 
-::
+Examples
+^^^^^^^^
 
-  The following variables are also available if needed
-  (introduced after CMake 2.6.4)
+Finding Perl libraries and specifying the minimum required version:
 
+.. code-block:: cmake
 
-
-::
-
-  PERL_SITESEARCH     = path to the sitesearch install dir (-V:installsitesearch)
-  PERL_SITEARCH       = path to the sitelib install directory (-V:installsitearch)
-  PERL_SITELIB        = path to the sitelib install directory (-V:installsitelib)
-  PERL_VENDORARCH     = path to the vendor arch install directory (-V:installvendorarch)
-  PERL_VENDORLIB      = path to the vendor lib install directory (-V:installvendorlib)
-  PERL_ARCHLIB        = path to the core arch lib install directory (-V:archlib)
-  PERL_PRIVLIB        = path to the core priv lib install directory (-V:privlib)
-  PERL_UPDATE_ARCHLIB = path to the update arch lib install directory (-V:installarchlib)
-  PERL_UPDATE_PRIVLIB = path to the update priv lib install directory (-V:installprivlib)
-  PERL_EXTRA_C_FLAGS = Compilation flags used to build perl
+  find_package(PerlLibs 6.0)
 #]=======================================================================]
 
 # find the perl executable
@@ -112,8 +128,9 @@ if (PERL_EXECUTABLE)
     list (APPEND PERL_POSSIBLE_LIBRARY_NAMES perl${PERL_VERSION_STRING})
   endif()
   if (CMAKE_SYSTEM_NAME MATCHES "MSYS|CYGWIN")
-    # on MSYS and CYGWIN environments, current perl -V:libperl gives shared library name
-    # rather than the import library. So, extends possible library names
+    # On MSYS and CYGWIN environments, current perl -V:libperl gives shared
+    # library name rather than the import library. So, extend possible library
+    # names.
     list (APPEND PERL_POSSIBLE_LIBRARY_NAMES perl)
   endif()
 
