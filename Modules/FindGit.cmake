@@ -5,30 +5,61 @@
 FindGit
 -------
 
-The module defines the following variables:
+Finds the Git distributed version control system.
 
-``GIT_EXECUTABLE``
-  Path to Git command-line client.
-``Git_FOUND``, ``GIT_FOUND``
-  True if the Git command-line client was found.
+Imported Targets
+^^^^^^^^^^^^^^^^
+
+This module provides the following :ref:`Imported Targets` when the
+:prop_gbl:`CMAKE_ROLE` is ``PROJECT``:
+
+``Git::Git``
+  .. versionadded:: 3.14
+
+  Target that encapsulates Git command-line client executable.  It can be used
+  in :manual:`generator expressions <cmake-generator-expressions(7)>`, and
+  commands like :command:`add_custom_target` and :command:`add_custom_command`.
+  This target is available only if Git is found.
+
+Result Variables
+^^^^^^^^^^^^^^^^
+
+This module defines the following variables:
+
+``Git_FOUND``
+  Boolean indicating whether the Git was found.  For backward compatibility, the
+  ``GIT_FOUND`` variable is also set to the same value.
 ``GIT_VERSION_STRING``
   The version of Git found.
 
-.. versionadded:: 3.14
-  The module defines the following ``IMPORTED`` targets (when
-  :prop_gbl:`CMAKE_ROLE` is ``PROJECT``):
+Cache Variables
+^^^^^^^^^^^^^^^
 
-``Git::Git``
-  Executable of the Git command-line client.
+The following cache variables may also be set:
 
-Example usage:
+``GIT_EXECUTABLE``
+  Path to the ``git`` command-line client executable.
+
+Examples
+^^^^^^^^
+
+Finding Git and retrieving the latest commit from the project repository:
 
 .. code-block:: cmake
 
-   find_package(Git)
-   if(Git_FOUND)
-     message("Git found: ${GIT_EXECUTABLE}")
-   endif()
+  find_package(Git)
+  if(Git_FOUND)
+    execute_process(
+      COMMAND ${GIT_EXECUTABLE} --no-pager log -n 1 HEAD "--pretty=format:%h %s"
+      OUTPUT_VARIABLE output
+      RESULT_VARIABLE result
+      ERROR_QUIET
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+    if(result EQUAL 0)
+      message(STATUS "Last Git commit: ${output}")
+    endif()
+  endif()
 #]=======================================================================]
 
 # Look for 'git'
