@@ -5,20 +5,39 @@
 FindPerl
 --------
 
-Find a Perl interpreter.
+Finds a Perl interpreter.  Perl is a general-purpose, interpreted, dynamic
+programming language.
+
+Result Variables
+^^^^^^^^^^^^^^^^
 
 This module defines the following variables:
 
-``PERL_EXECUTABLE``
-  The full path to Perl.
-
-``PERL_FOUND``
-  True if the Perl executable was found.
+``Perl_FOUND``
+  True if the Perl executable was found.  For backward compatibility, the
+  ``PERL_FOUND`` variable is also set to the same value.
 
 ``PERL_VERSION_STRING``
   .. versionadded:: 2.8.8
 
   The version of Perl found.
+
+Cache Variables
+^^^^^^^^^^^^^^^
+
+The following cache variables may also be set:
+
+``PERL_EXECUTABLE``
+  Full path to the ``perl`` executable.
+
+Examples
+^^^^^^^^
+
+Finding the Perl interpreter:
+
+.. code-block:: cmake
+
+  find_package(Perl)
 #]=======================================================================]
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindCygwin.cmake)
