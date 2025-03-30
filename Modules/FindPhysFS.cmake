@@ -5,20 +5,47 @@
 FindPhysFS
 ----------
 
-Locate PhysFS library This module defines:
+Finds the PhysicsFS library (PhysFS) for file I/O abstraction.
+
+Result Variables
+^^^^^^^^^^^^^^^^
+
+This module defines the following variables:
+
+``PhysFS_FOUND``
+  Boolean indicating whether PhysicsFS library is found.  For backward
+  compatibility, the ``PHYSFS_FOUND`` variable is also set to the same value.
+
+Cache Variables
+^^^^^^^^^^^^^^^
+
+The following cache variables may also be set:
 
 ``PHYSFS_LIBRARY``
-  the name of the library to link against
-``PHYSFS_FOUND``
-  if false, do not try to link to PHYSFS
+  Path to the PhysicsFS library needed to link against.
 ``PHYSFS_INCLUDE_DIR``
-  where to find physfs.h
+  Directory containing the ``physfs.h`` and related headers needed for using
+  the library.
 
-``$PHYSFSDIR`` is an environment variable that would correspond to::
+Hints
+^^^^^
 
-  ./configure --prefix=$PHYSFSDIR
+This module accepts the following variables:
 
-used in building PHYSFS.
+``PHYSFSDIR``
+  Environment variable that can be set to help locate a PhysicsFS library
+  installed in a custom location.  It should point to the installation
+  destination that was used when configuring, building, and installing PhysicsFS
+  library: ``./configure --prefix=$PHYSFSDIR``.
+
+Examples
+^^^^^^^^
+
+Finding the PhysicsFS library:
+
+.. code-block:: cmake
+
+  find_package(PhysFS)
 #]=======================================================================]
 
 find_path(PHYSFS_INCLUDE_DIR physfs.h
