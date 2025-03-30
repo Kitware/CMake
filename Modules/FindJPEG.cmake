@@ -5,53 +5,80 @@
 FindJPEG
 --------
 
-Find the Joint Photographic Experts Group (JPEG) library (``libjpeg``)
+Finds the Joint Photographic Experts Group (JPEG) library (``libjpeg``).
+
+.. versionchanged:: 3.12
+  Debug and Release JPEG library variants are now found separately.
 
 Imported Targets
 ^^^^^^^^^^^^^^^^
 
-.. versionadded:: 3.12
-
-This module defines the following :prop_tgt:`IMPORTED` targets:
+This module provides the following :ref:`Imported Targets`:
 
 ``JPEG::JPEG``
-  The JPEG library, if found.
+  .. versionadded:: 3.12
 
-Result variables
+  Target encapsulating the JPEG library usage requirements.  It is available
+  only when JPEG is found.
+
+Result Variables
 ^^^^^^^^^^^^^^^^
 
-This module will set the following variables in your project:
+This module sets the following variables:
 
 ``JPEG_FOUND``
-  If false, do not try to use JPEG.
+  Boolean indicating whether the JPEG is found.
+
 ``JPEG_INCLUDE_DIRS``
-  where to find jpeglib.h, etc.
+  Include directories containing headers needed to use JPEG.
+
 ``JPEG_LIBRARIES``
-  the libraries needed to use JPEG.
+  Libraries needed to link to JPEG.
+
 ``JPEG_VERSION``
   .. versionadded:: 3.12
-    the version of the JPEG library found
 
-Cache variables
+  The version of the JPEG library found.
+
+Cache Variables
 ^^^^^^^^^^^^^^^
 
 The following cache variables may also be set:
 
 ``JPEG_INCLUDE_DIR``
-  where to find jpeglib.h, etc.
+  Directory containing the ``jpeglib.h`` and related header files.
+
 ``JPEG_LIBRARY_RELEASE``
-  where to find the JPEG library (optimized).
+  .. versionadded:: 3.12
+
+  Path to the release (optimized) variant of the JPEG library.
+
 ``JPEG_LIBRARY_DEBUG``
-  where to find the JPEG library (debug).
+  .. versionadded:: 3.12
 
-.. versionadded:: 3.12
-  Debug and Release variand are found separately.
+  Path to the debug variant of the JPEG library.
 
-Obsolete variables
+Obsolete Variables
 ^^^^^^^^^^^^^^^^^^
 
+The following legacy variables are provided for backward compatibility:
+
 ``JPEG_LIBRARY``
-  where to find the JPEG library.
+  .. versionchanged:: 3.12
+    This variable has been superseded by the ``JPEG_LIBRARY_RELEASE`` and
+    ``JPEG_LIBRARY_DEBUG`` variables.
+
+  Path to the JPEG library.
+
+Examples
+^^^^^^^^
+
+Finding JPEG library and linking it to a project target:
+
+.. code-block:: cmake
+
+  find_package(JPEG)
+  target_link_libraries(project_target PRIVATE JPEG::JPEG)
 #]=======================================================================]
 
 cmake_policy(PUSH)
