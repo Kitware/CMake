@@ -18,14 +18,14 @@ support per-configuration specification.  For example, the code:
   set_property(TARGET foo PROPERTY
     MSVC_RUNTIME_CHECKS "$<$<CONFIG:Debug,RelWithDebInfo>:PossibleDataLoss;UninitializedVariable>")
 
-enables for the target ``foo`` the possible data loss and uninitialized variables checks
-for the ``Debug`` and ``RelWithDebInfo`` configurations.
+enables for the target ``foo`` the possible data loss and uninitialized
+variables checks for the ``Debug`` and ``RelWithDebInfo`` configurations.
 
 This property is initialized from the value of the
 :variable:`CMAKE_MSVC_RUNTIME_CHECKS` variable, if it is set.
-If this property is not set, CMake selects a runtime checks using
-the default value ``$<$<CONFIG:Debug>:StackFrameErrorCheck;UninitializedVariable>``, if
-supported by the compiler, or empty value otherwise.
+If this property is not set, CMake selects runtime checks using the default
+value ``$<$<CONFIG:Debug>:StackFrameErrorCheck;UninitializedVariable>``,
+if supported by the compiler, or an empty value otherwise.
 
 .. note::
 

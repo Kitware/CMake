@@ -166,7 +166,7 @@ CTest
 CPack
 -----
 
-* The :cpack_gen:`CPack Archive Generator` learned to generated ``.tar``
+* The :cpack_gen:`CPack Archive Generator` learned to generate ``.tar``
   packages without compression.
 
 * The :cpack_gen:`CPack Archive Generator` now honors the
