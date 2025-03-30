@@ -3,7 +3,7 @@ CMAKE_XCODE_SCHEME_LAUNCH_MODE
 
 .. versionadded:: 3.25
 
-Property value for ``Launch`` in the Info section of the generated Xcode
+Populate ``Launch`` in the Info section of the generated Xcode
 scheme.
 
 This variable initializes the :prop_tgt:`XCODE_SCHEME_LAUNCH_MODE` property on
