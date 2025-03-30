@@ -48,7 +48,7 @@ cmDocumentationEntry const cmDocumentationUsage = { {}, "  cpack [options]" };
 
 cmDocumentationEntry const cmDocumentationOptions[14] = {
   { "-G <generators>", "Override/define CPACK_GENERATOR" },
-  { "-C <Configuration>", "Specify the project configuration" },
+  { "-C <Configurations>", "Specify the project configuration(s)" },
   { "-D <var>=<value>", "Set a CPack variable." },
   { "--config <configFile>", "Specify the config file." },
   { "-V,--verbose", "Enable verbose output" },

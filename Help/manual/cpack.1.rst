@@ -51,10 +51,10 @@ Options
   the :variable:`CPACK_GENERATOR` variable determines the default set of
   generators that will be used.
 
-.. option:: -C <configs>
+.. option:: -C <configurations>
 
   Specify the project configuration(s) to be packaged (e.g. ``Debug``,
-  ``Release``, etc.), where ``<configs>`` is a
+  ``Release``, etc.), where ``<configurations>`` is a
   :ref:`semicolon-separated list <CMake Language Lists>`.
   When the CMake project uses a multi-configuration
   generator such as Xcode or Visual Studio, this option is needed to tell
