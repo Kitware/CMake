@@ -5,33 +5,58 @@
 FindArmadillo
 -------------
 
-Find the Armadillo C++ library.
-Armadillo is a library for linear algebra & scientific computing.
+Finds the Armadillo C++ library.  Armadillo is a library for linear algebra and
+scientific computing.
 
 .. versionadded:: 3.18
-  Support for linking wrapped libraries directly (``ARMA_DONT_USE_WRAPPER``).
+  Support for linking wrapped libraries directly (see the
+  ``ARMA_DONT_USE_WRAPPER`` preprocessor macro that needs to be defined before
+  including the ``<armadillo>`` header).
+
+Result Variables
+^^^^^^^^^^^^^^^^
+
+This module sets the following variables:
+
+``Armadillo_FOUND``
+  Set to true if the library is found.  For backward compatibility, the
+  ``ARMADILLO_FOUND`` variable is also set to the same value.
+``ARMADILLO_INCLUDE_DIRS``
+  List of required include directories.
+``ARMADILLO_LIBRARIES``
+  List of libraries to be linked.
+``ARMADILLO_VERSION_STRING``
+  Version as a string (ex: ``1.0.4``).
+``ARMADILLO_VERSION_MAJOR``
+  Major version number.
+``ARMADILLO_VERSION_MINOR``
+  Minor version number.
+``ARMADILLO_VERSION_PATCH``
+  Patch version number.
+``ARMADILLO_VERSION_NAME``
+  Name of the version (ex: ``Antipodean Antileech``).
+
+Examples
+^^^^^^^^
 
 Using Armadillo:
 
 .. code-block:: cmake
 
   find_package(Armadillo REQUIRED)
-  include_directories(${ARMADILLO_INCLUDE_DIRS})
+
+  if(Armadillo_FOUND AND NOT TARGET Armadillo::Armadillo)
+    add_library(Armadillo::Armadillo INTERFACE IMPORTED)
+    set_target_properties(
+      Armadillo::Armadillo
+      PROPERTIES
+        INTERFACE_LINK_LIBRARIES "${ARMADILLO_LIBRARIES}"
+        INTERFACE_INCLUDE_DIRECTORIES "${ARMADILLO_INCLUDE_DIRS}"
+    )
+  endif()
+
   add_executable(foo foo.cc)
-  target_link_libraries(foo ${ARMADILLO_LIBRARIES})
-
-This module sets the following variables:
-
-::
-
-  ARMADILLO_FOUND - set to true if the library is found
-  ARMADILLO_INCLUDE_DIRS - list of required include directories
-  ARMADILLO_LIBRARIES - list of libraries to be linked
-  ARMADILLO_VERSION_MAJOR - major version number
-  ARMADILLO_VERSION_MINOR - minor version number
-  ARMADILLO_VERSION_PATCH - patch version number
-  ARMADILLO_VERSION_STRING - version number as a string (ex: "1.0.4")
-  ARMADILLO_VERSION_NAME - name of the version (ex: "Antipodean Antileech")
+  target_link_libraries(foo PRIVATE Armadillo::Armadillo)
 #]=======================================================================]
 
 cmake_policy(PUSH)
@@ -83,7 +108,8 @@ endif()
 
 include(FindPackageHandleStandardArgs)
 
-# If _ARMA_USE_WRAPPER is set, then we just link to armadillo, but if it's not then we need support libraries instead
+# If _ARMA_USE_WRAPPER is set, then we just link to armadillo, but if it's not
+# then we need support libraries instead.
 set(_ARMA_SUPPORT_LIBRARIES)
 
 if(_ARMA_USE_WRAPPER)
@@ -126,7 +152,7 @@ find_package_handle_standard_args(Armadillo
   REQUIRED_VARS ARMADILLO_INCLUDE_DIR ${_ARMA_REQUIRED_VARS}
   VERSION_VAR ARMADILLO_VERSION_STRING)
 
-if (ARMADILLO_FOUND)
+if (Armadillo_FOUND)
   set(ARMADILLO_INCLUDE_DIRS ${ARMADILLO_INCLUDE_DIR})
   set(ARMADILLO_LIBRARIES ${ARMADILLO_LIBRARY} ${_ARMA_SUPPORT_LIBRARIES})
 endif ()
