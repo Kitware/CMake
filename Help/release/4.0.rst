@@ -78,6 +78,11 @@ Variables
   The :envvar:`CMAKE_POLICY_VERSION_MINIMUM` environment variable was
   added to initialize it.
 
+* The :variable:`CMAKE_UNITY_BUILD_RELOCATABLE` variable and corresponding
+  :prop_tgt:`UNITY_BUILD_RELOCATABLE` target property were added to make
+  sources generated for :variable:`CMAKE_UNITY_BUILD` to ``#include`` the
+  original source files using relative paths where possible.
+
 * The :variable:`CMAKE_XCODE_SCHEME_LLDB_INIT_FILE` variable and corresponding
   :prop_tgt:`XCODE_SCHEME_LLDB_INIT_FILE` target property were added to tell
   the :generator:`Xcode` generator what to put in the scheme's "LLDB Init File"
