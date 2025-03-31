@@ -59,6 +59,9 @@ rpm-build
 
 # Packages needed to test find modules.
 alsa-lib-devel
+aspell
+aspell-devel
+aspell-en
 blas-devel
 boost-devel
 boost-python3-devel
