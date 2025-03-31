@@ -1,0 +1,5 @@
+    Start 1: WorkDirWithSpaces\.test1_discovered
+.*    Start 2: WorkDirWithSpaces\.test2_discovered
+.*    Start 3: WorkDirWithSpaces\.test1
+.*    Start 4: WorkDirWithSpaces\.test2
+.*0 tests failed out of 4
