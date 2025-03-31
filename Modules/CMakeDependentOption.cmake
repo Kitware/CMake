@@ -5,61 +5,199 @@
 CMakeDependentOption
 --------------------
 
-Macro to provide an option dependent on other options.
+This module provides a command to define boolean options whose availability and
+default values depend on specified conditions or other options.  This helps
+maintain a clean configuration interface by only displaying options that are
+relevant to the current settings.
 
-This macro presents an option to the user only if a set of other
-conditions are true.
+Commands
+^^^^^^^^
 
 .. command:: cmake_dependent_option
 
+  Provides a boolean option that depends on a set of conditions:
+
   .. code-block:: cmake
 
-    cmake_dependent_option(<option> "<help_text>" <value> <depends> <force>)
+    cmake_dependent_option(<variable> <help> <value> <condition> <else-value>)
 
-  Makes ``<option>`` available to the user if the
-  :ref:`semicolon-separated list <CMake Language Lists>` of conditions in
-  ``<depends>`` are all true.  Otherwise, a local variable named ``<option>``
-  is set to ``<force>``.
+  This macro creates a boolean ``<variable>`` and makes it available to the user
+  in the GUI (such as :manual:`cmake-gui(1)` or :manual:`ccmake(1)`), if a set
+  of conditions evaluates to boolean true.
 
-  When ``<option>`` is available, the given ``<help_text>`` and initial
-  ``<value>`` are used. Otherwise, any value set by the user is preserved for
-  when ``<depends>`` is satisfied in the future.
+  The arguments are:
 
-  Note that the ``<option>`` variable only has a value which satisfies the
-  ``<depends>`` condition within the scope of the caller because it is a local
-  variable.
+  ``<variable>``
+    The name of a variable that stores the option value.
 
-.. versionadded:: 3.22
+  ``<help>``
+    A brief description of the option.  This string is typically a short line of
+    text and is displayed in the GUI.
 
-  Full :ref:`Condition Syntax` is now supported.  See policy :policy:`CMP0127`.
+  ``<value>``
+    Boolean value for the ``<variable>``, when ``<condition>`` evaluates to
+    boolean true.
+
+  ``<condition>``
+    Specifies the conditions that determine whether ``<variable>`` is set and
+    visible in the GUI.
+
+    * On the first configuration run, ``<variable>`` is not initialized unless
+      the ``<condition>`` evaluates to boolean true.  In that case, a boolean
+      cache variable named ``<variable>`` is created and set to ``<value>``.
+
+    * If ``<condition>`` is true, option is shown in the GUI, allowing the user
+      to enable or disable it.
+
+    * If ``<condition>`` later evaluates to boolean false (on consecutive
+      configuration run),  option is hidden from the user in the GUI and the
+      ``<variable>`` type is changed to an internal cache variable.  In that
+      case a local variable of the same name is set to ``<else-value>``.
+
+    * If ``<condition>`` becomes true again in consecutive configuration runs,
+      the user's previously set value is preserved.
+
+    The ``<condition>`` argument can be:
+
+    * A single condition (such as a variable name).
+
+    * A :ref:`semicolon-separated list <CMake Language Lists>` of multiple
+      conditions.
+
+    * Starting from CMake 3.22, a full condition expression as used in an
+      ``if(<condition>)`` clause.
+
+    .. versionadded:: 3.22
+
+      This argument now supports full :ref:`Condition Syntax`.  See policy
+      :policy:`CMP0127`.  This enables using entire condition syntax
+      (such as grouping conditions with parens and similar).
+
+  ``<else-value>``
+    The value assigned to a local variable named ``<variable>``, when
+    ``<condition>`` evaluates to boolean false.
 
 Examples
 ^^^^^^^^
 
-Semicolon-separated list of conditions:
+Example: Basic Usage
+""""""""""""""""""""
+
+Using this module in a project to conditionally set an option:
 
 .. code-block:: cmake
+  :caption: CMakeLists.txt
+
+  include(CMakeDependentOption)
+
+  cmake_dependent_option(USE_SSL_GNUTLS "Use GnuTLS for SSL" ON USE_SSL OFF)
+
+Example: Enabling/Disabling Dependent Option
+""""""""""""""""""""""""""""""""""""""""""""
+
+Extending the previous example, this demonstrates how the module allows
+user-configurable options based on a condition during the configuration phase:
+
+.. code-block:: cmake
+  :caption: CMakeLists.txt
+
+  include(CMakeDependentOption)
+
+  option(USE_SSL "Enable SSL in the project" OFF)
+
+  cmake_dependent_option(USE_SSL_GNUTLS "Use GnuTLS for SSL" ON USE_SSL OFF)
+
+  message(STATUS "USE_SSL: ${USE_SSL}")
+  message(STATUS "USE_SSL_GNUTLS: ${USE_SSL_GNUTLS}")
+
+On the first configuration run, a boolean cache variable ``USE_SSL`` is set to
+OFF, and ``USE_SSL_GNUTLS`` variable remains uninitialized:
+
+.. code-block:: console
+
+  $ cmake -B build-dir
+  # Outputs:
+  -- USE_SSL: OFF
+  -- USE_SSL_GNUTLS:
+
+Running CMake with ``USE_SSL=ON`` sets both ``USE_SSL`` and ``USE_SSL_GNUTLS``
+boolean cache variables to ON:
+
+.. code-block:: console
+
+  $ cmake -B build-dir -D USE_SSL=ON
+  # Outputs:
+  -- USE_SSL: ON
+  -- USE_SSL_GNUTLS: ON
+
+On a subsequent configuration run with ``USE_SSL=OFF``, ``USE_SSL_GNUTLS``
+follows suit.  However, its value is preserved in the internal cache while being
+overridden locally:
+
+.. code-block:: console
+
+  $ cmake -B build-dir -D USE_SSL=OFF
+  # Outputs:
+  -- USE_SSL: OFF
+  -- USE_SSL_GNUTLS: OFF
+
+Example: Semicolon-separated List of Conditions
+"""""""""""""""""""""""""""""""""""""""""""""""
+
+The ``<condition>`` argument can also be a semicolon-separated list of
+conditions.  In the following example, if the variable ``USE_BAR`` is ON and
+variable ``USE_ZOT`` is OFF, the option ``USE_FOO`` is available and defaults to
+ON.  Otherwise, ``USE_FOO`` is set to OFF and hidden from the user.
+
+If the values of ``USE_BAR`` or ``USE_ZOT`` change in the future configuration
+runs, the previous value of ``USE_FOO`` is preserved so that when it becomes
+available again, it retains its last set value.
+
+.. code-block:: cmake
+  :caption: CMakeLists.txt
+
+  include(CMakeDependentOption)
 
   cmake_dependent_option(USE_FOO "Use Foo" ON "USE_BAR;NOT USE_ZOT" OFF)
 
-If ``USE_BAR`` is true and ``USE_ZOT`` is false, this provides an option called
-``USE_FOO`` that defaults to ON. Otherwise, it sets ``USE_FOO`` to OFF and
-hides the option from the user. If the status of ``USE_BAR`` or ``USE_ZOT``
-ever changes, any value for the ``USE_FOO`` option is saved so that when the
-option is re-enabled it retains its old value.
+Example: Full Condition Syntax
+""""""""""""""""""""""""""""""
 
-Full condition syntax:
+As of CMake 3.22, ``cmake_dependent_option()`` supports full condition syntax.
+
+In fhe following example, if the condition evaluates to true, the option
+``USE_FOO`` is available and set to ON.  Otherwise, it is set to OFF and hidden
+in the GUI.  The value of ``USE_FOO`` is preserved across configuration runs,
+similar to the previous example.
 
 .. code-block:: cmake
+  :caption: CMakeLists.txt
+
+  include(CMakeDependentOption)
 
   cmake_dependent_option(USE_FOO "Use Foo" ON "USE_A AND (USE_B OR USE_C)" OFF)
 
-Similar to the previous example, if the argument with full condition syntax
-evaluates to true, this provides an option called ``USE_FOO`` that defaults to
-ON. Otherwise, it sets ``USE_FOO`` to OFF and hides the option from the user in
-the GUI. When condition changes, option is saved in similar way as described
-above. This enables using entire condition syntax as being the ``if`` clause
-argument, such as grouping conditions with parens and similar.
+Another example demonstrates how an option can be conditionally available based
+on the target system:
+
+.. code-block:: cmake
+  :caption: CMakeLists.txt
+
+  include(CMakeDependentOption)
+
+  cmake_dependent_option(
+    ENABLE_FOO
+    "Enable feature Foo (this option is available when building for Windows)"
+    ON
+    [[CMAKE_SYSTEM_NAME STREQUAL "Windows"]]
+    OFF
+  )
+
+See Also
+^^^^^^^^
+
+* The :command:`option` command to provide a boolean option that the user can
+  optionally select.
 #]=======================================================================]
 
 macro(CMAKE_DEPENDENT_OPTION option doc default depends force)

@@ -16,3 +16,9 @@ the module help for :module:`CMakeDependentOption`.
 
 In CMake project mode, a boolean cache variable is created with the option
 value. In CMake script mode, a boolean variable is set with the option value.
+
+See Also
+^^^^^^^^
+
+* The :module:`CMakeDependentOption` module to specify dependent boolean options
+  based on a set of conditions.
