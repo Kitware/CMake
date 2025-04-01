@@ -270,8 +270,9 @@ for any macros, functions and imported targets defined by the Find module.
   UNIX.  This should not be a cache entry.
 
 ``Xxx_VERSION``
-  The full version string of the package found, if any.  Note that many
-  existing modules provide ``Xxx_VERSION_STRING`` instead.
+  The full version string of the package found, if any.  Note that some existing
+  modules may also provide ``Xxx_VERSION_STRING``, as it was traditionally used
+  before the current naming convention.
 
 ``Xxx_VERSION_MAJOR``
   The major version of the package found, if any.
@@ -323,10 +324,10 @@ and release binaries, it is common to create cache variables with a
 ``Foo_LIBRARY_DEBUG``.  The :module:`SelectLibraryConfigurations` module
 can be helpful for such cases.
 
-While these are the standard variable names, you should provide
-backwards compatibility for any old names that were actually in use.
-Make sure you comment them as deprecated, so that no-one starts using
-them.
+While these are the standard variable names, backward compatibility should be
+provided for any previously used names in the find module that is replacing an
+older version.  Old variable names should be documented as deprecated to
+discourage further use.
 
 A Sample Find Module
 --------------------
@@ -437,9 +438,9 @@ look before checking other default paths.
     HINTS ${PC_Foo_LIBRARY_DIRS}
   )
 
-Alternatively, if the library is available with multiple configurations, you can
-use :module:`SelectLibraryConfigurations` to automatically set the
-``Foo_LIBRARY`` variable instead:
+Alternatively, if the library is available with multiple configurations, the
+:module:`SelectLibraryConfigurations` module can be used to automatically set
+the ``Foo_LIBRARY`` variable instead:
 
 .. code-block:: cmake
 
@@ -455,18 +456,16 @@ use :module:`SelectLibraryConfigurations` to automatically set the
   include(SelectLibraryConfigurations)
   select_library_configurations(Foo)
 
-If you have a good way of getting the version (from a header file, for
-example), you can use that information to set ``Foo_VERSION`` (although
-note that find modules have traditionally used ``Foo_VERSION_STRING``,
-so you may want to set both).  Otherwise, attempt to use the information
-from ``pkg-config``
+If there is a good way of getting the version (from a header file, for
+example), that information can be used to set ``Foo_VERSION``.  Otherwise,
+attempt to use the information from the ``pkg-config``:
 
 .. code-block:: cmake
 
   set(Foo_VERSION ${PC_Foo_VERSION})
 
-Now we can use :module:`FindPackageHandleStandardArgs` to do most of the
-rest of the work for us
+Now we can use the :module:`FindPackageHandleStandardArgs` module to handle most
+of the remaining steps for us:
 
 .. code-block:: cmake
 
@@ -568,8 +567,9 @@ The ``RELEASE`` variant should be listed first in the property
 so that the variant is chosen if the user uses a configuration which is
 not an exact match for any listed ``IMPORTED_CONFIGURATIONS``.
 
-Most of the cache variables should be hidden in the :program:`ccmake` interface unless
-the user explicitly asks to edit them.
+Most of the cache variables should be marked as advanced to remain hidden in GUI
+interfaces such as :manual:`cmake-gui(1)` or :manual:`ccmake(1)`, unless the
+user explicitly chooses to display and modify them:
 
 .. code-block:: cmake
 
@@ -578,10 +578,12 @@ the user explicitly asks to edit them.
     Foo_LIBRARY
   )
 
-If this module replaces an older version, you should set compatibility variables
-to cause the least disruption possible.
+If this find module replaces an older module version that provided variables
+before the current standard variables naming conventions, also backward
+compatibility variables should be provided to cause the least disruption
+possible.  For example:
 
 .. code-block:: cmake
 
-  # compatibility variables
+  # Backward compatibility variables
   set(Foo_VERSION_STRING ${Foo_VERSION})
