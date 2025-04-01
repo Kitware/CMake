@@ -5,15 +5,18 @@
 FindZLIB
 --------
 
-Find the native ZLIB includes and library.
+Finds the native zlib data compression library.
 
 Imported Targets
 ^^^^^^^^^^^^^^^^
 
-.. versionadded:: 3.1
+This module provides the following :ref:`Imported Targets`:
 
-This module defines :prop_tgt:`IMPORTED` target ``ZLIB::ZLIB``, if
-ZLIB has been found.
+``ZLIB::ZLIB``
+  .. versionadded:: 3.1
+
+  Target that encapsulates the zlib usage requirements.  It is available only
+  when zlib is found.
 
 Result Variables
 ^^^^^^^^^^^^^^^^
@@ -21,19 +24,22 @@ Result Variables
 This module defines the following variables:
 
 ``ZLIB_INCLUDE_DIRS``
-  where to find zlib.h, etc.
+  Include directories containing ``zlib.h`` and other headers needed to use
+  zlib.
+
 ``ZLIB_LIBRARIES``
-  List of libraries when using zlib.
+  List of libraries needed to link to zlib.
+
+  .. versionchanged:: 3.4
+    Debug and Release library variants can be now found separately.
+
 ``ZLIB_FOUND``
-  True if zlib found.
+  True if zlib is found.
+
 ``ZLIB_VERSION``
   .. versionadded:: 3.26
-    the version of Zlib found.
 
-  See also legacy variable ``ZLIB_VERSION_STRING``.
-
-.. versionadded:: 3.4
-  Debug and Release variants are found separately.
+  The version of zlib found.
 
 Legacy Variables
 ^^^^^^^^^^^^^^^^
@@ -45,43 +51,64 @@ The following variables are provided for backward compatibility:
 
   .. versionchanged:: 3.26
     Superseded by ``ZLIB_VERSION``.
+
 ``ZLIB_VERSION_MINOR``
   The minor version of zlib.
 
   .. versionchanged:: 3.26
     Superseded by ``ZLIB_VERSION``.
+
 ``ZLIB_VERSION_PATCH``
   The patch version of zlib.
 
   .. versionchanged:: 3.26
     Superseded by ``ZLIB_VERSION``.
+
 ``ZLIB_VERSION_TWEAK``
   The tweak version of zlib.
 
   .. versionchanged:: 3.26
     Superseded by ``ZLIB_VERSION``.
+
 ``ZLIB_VERSION_STRING``
-  The version of zlib found (x.y.z)
+  The version of zlib found (x.y.z).
 
   .. versionchanged:: 3.26
     Superseded by ``ZLIB_VERSION``.
+
 ``ZLIB_MAJOR_VERSION``
   The major version of zlib.  Superseded by ``ZLIB_VERSION_MAJOR``.
+
 ``ZLIB_MINOR_VERSION``
   The minor version of zlib.  Superseded by ``ZLIB_VERSION_MINOR``.
+
 ``ZLIB_PATCH_VERSION``
   The patch version of zlib.  Superseded by ``ZLIB_VERSION_PATCH``.
 
 Hints
 ^^^^^
 
-A user may set ``ZLIB_ROOT`` to a zlib installation root to tell this
-module where to look.
+This module accepts the following variables:
 
-.. versionadded:: 3.24
-  Set ``ZLIB_USE_STATIC_LIBS`` to ``ON`` to look for static libraries.
-  Default is ``OFF``.
+``ZLIB_ROOT``
+  A user may set this variable to a zlib installation root to help locate zlib
+  in custom installation paths.
 
+``ZLIB_USE_STATIC_LIBS``
+  .. versionadded:: 3.24
+
+  Set this variable to ``ON`` before calling ``find_package(ZLIB)`` to look for
+  static libraries.  Default is ``OFF``.
+
+Examples
+^^^^^^^^
+
+Finding zlib and linking it to a project target:
+
+.. code-block:: cmake
+
+  find_package(ZLIB)
+  target_link_libraries(project_target PRIVATE ZLIB::ZLIB)
 #]=======================================================================]
 
 cmake_policy(PUSH)
