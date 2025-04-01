@@ -5,45 +5,63 @@
 FindGIF
 -------
 
-This finds the Graphics Interchange Format (GIF) library (``giflib``)
+Finds the Graphics Interchange Format (GIF) library (``giflib``).
 
 Imported Targets
 ^^^^^^^^^^^^^^^^
 
-This module defines the following :prop_tgt:`IMPORTED` target:
+This module provides the following :ref:`Imported Targets`:
 
 ``GIF::GIF``
-  The ``giflib`` library, if found.
+  Target that encapsulates the usage requirements of the GIF library, available
+  when the library is found.
 
-Result variables
+Result Variables
 ^^^^^^^^^^^^^^^^
 
-This module will set the following variables in your project:
+This module sets the following variables:
 
 ``GIF_FOUND``
-  If false, do not try to use GIF.
+  Boolean indicating whether the GIF library was found.
 ``GIF_INCLUDE_DIRS``
-  where to find gif_lib.h, etc.
+  Include directories needed to use the GIF library.
 ``GIF_LIBRARIES``
-  the libraries needed to use GIF.
+  Libraries needed to link to the GIF library.
 ``GIF_VERSION``
-  3, 4 or a full version string (eg 5.1.4) for versions >= 4.1.6.
+  Version string of the GIF library found (for example, ``5.1.4``).  For GIF
+  library versions prior to 4.1.6, version string will be set only to ``3`` or
+  ``4`` as these versions did not provide version information in their headers.
 
-Cache variables
+Cache Variables
 ^^^^^^^^^^^^^^^
 
 The following cache variables may also be set:
 
 ``GIF_INCLUDE_DIR``
-  where to find the GIF headers.
+  Directory containing the ``gif_lib.h`` and other GIF library headers.
 ``GIF_LIBRARY``
-  where to find the GIF library.
+  Path to the GIF library.
 
 Hints
 ^^^^^
 
-``GIF_DIR`` is an environment variable that would correspond to the
-``./configure --prefix=$GIF_DIR``.
+This module accepts the following variables:
+
+``GIF_DIR``
+  Environment variable that can be set to help locate a GIF library installed in
+  a custom location.  It should point to the installation destination that was
+  used when configuring, building, and installing GIF library:
+  ``./configure --prefix=$GIF_DIR``.
+
+Examples
+^^^^^^^^
+
+Finding GIF library and linking it to a project target:
+
+.. code-block:: cmake
+
+  find_package(GIF)
+  target_link_libraries(project_target PRIVATE GIF::GIF)
 #]=======================================================================]
 
 cmake_policy(PUSH)
