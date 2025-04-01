@@ -7,29 +7,43 @@ FindSQLite3
 
 .. versionadded:: 3.14
 
-Find the SQLite libraries, v3
+Finds the SQLite 3 library.  SQLite is a small, fast, self-contained,
+high-reliability, and full-featured SQL database engine written in C, intended
+for embedding in applications.
 
 Imported Targets
 ^^^^^^^^^^^^^^^^
 
-This module defines the following :prop_tgt:`IMPORTED` target:
+This module provides the following :ref:`Imported Targets`:
 
 ``SQLite::SQLite3``
+  Target encapsulating SQLite library usage requirements.  It is available only
+  when SQLite is found.
 
-Result variables
+Result Variables
 ^^^^^^^^^^^^^^^^
 
-This module will set the following variables if found:
+This module sets the following variables:
 
 ``SQLite3_INCLUDE_DIRS``
-  where to find sqlite3.h, etc.
+  Include directories containing the ``sqlite3.h`` and related headers needed
+  to use SQLite.
 ``SQLite3_LIBRARIES``
-  the libraries to link against to use SQLite3.
+  Libraries needed to link against to use SQLite.
 ``SQLite3_VERSION``
-  version of the SQLite3 library found
+  Version of the SQLite library found.
 ``SQLite3_FOUND``
-  TRUE if found
+  Boolean indicating whether the SQLite library is found.
 
+Examples
+^^^^^^^^
+
+Finding the SQLite library and linking it to a project target:
+
+.. code-block:: cmake
+
+  find_package(SQLite3)
+  target_link_libraries(project_target PRIVATE SQLite::SQLite3)
 #]=======================================================================]
 
 cmake_policy(PUSH)
