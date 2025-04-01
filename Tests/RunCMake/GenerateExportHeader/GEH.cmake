@@ -82,7 +82,7 @@ if(NOT BORLAND)
   add_subdirectory(c_identifier)
 endif()
 
-if (CMAKE_COMPILER_IS_GNUCXX OR (${CMAKE_CXX_COMPILER_ID} MATCHES Clang))
+if (CMAKE_CXX_COMPILER_ID MATCHES "^(GNU|LCC)$" OR (${CMAKE_CXX_COMPILER_ID} MATCHES Clang))
   # No need to clutter the test output with warnings.
   string(APPEND CMAKE_CXX_FLAGS " -Wno-deprecated-declarations")
 endif()

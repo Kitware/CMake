@@ -13,7 +13,6 @@
 #
 # Sets the following variables:
 #   CMAKE_CXX_COMPILER
-#   CMAKE_COMPILER_IS_GNUCXX
 #   CMAKE_AR
 #   CMAKE_RANLIB
 #

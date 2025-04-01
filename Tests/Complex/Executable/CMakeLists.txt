@@ -133,7 +133,7 @@ endif()
 add_custom_target(notInAllCustom)
 add_dependencies(notInAllCustom notInAllExe)
 
-if(CMAKE_COMPILER_IS_GNUCXX AND CMAKE_INCLUDE_SYSTEM_FLAG_CXX
+if(CMAKE_CXX_COMPILER_ID MATCHES "^(GNU|LCC)$" AND CMAKE_INCLUDE_SYSTEM_FLAG_CXX
    AND NOT XCODE) # XCODE is excluded due to #15687
   add_executable(testSystemDir testSystemDir.cxx)
   set_target_properties(testSystemDir PROPERTIES COMPILE_FLAGS "-Werror")

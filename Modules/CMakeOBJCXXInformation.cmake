@@ -24,7 +24,7 @@ endif()
 set(CMAKE_BASE_NAME)
 get_filename_component(CMAKE_BASE_NAME "${CMAKE_OBJCXX_COMPILER}" NAME_WE)
 # since the gnu compiler has several names force g++
-if(CMAKE_COMPILER_IS_GNUOBJCXX)
+if(CMAKE_OBJCXX_COMPILER_ID STREQUAL "GNU")
   set(CMAKE_BASE_NAME g++)
 endif()
 

@@ -39,7 +39,7 @@ Including this module provides backward compatibility cache variables:
 
 if(NOT CMAKE_SKIP_COMPATIBILITY_TESTS)
   # check for some ANSI flags in the CXX compiler if it is not gnu
-  if(NOT CMAKE_COMPILER_IS_GNUCXX)
+  if(NOT CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     include(TestCXXAcceptsFlag)
     set(CMAKE_TRY_ANSI_CXX_FLAGS "")
     if(CMAKE_SYSTEM_NAME MATCHES "OSF")

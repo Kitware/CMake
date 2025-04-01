@@ -270,7 +270,7 @@ set(KDE3_DEFINITIONS -DQT_CLEAN_NAMESPACE -D_GNU_SOURCE)
 # set compiler flags only if KDE3 has actually been found
 if(KDE3_FOUND)
   set(_KDE3_USE_FLAGS FALSE)
-  if(CMAKE_COMPILER_IS_GNUCXX)
+  if(CMAKE_CXX_COMPILER_ID MATCHES "^(GNU|LCC)$")
     set(_KDE3_USE_FLAGS TRUE) # use flags for gnu compiler
     execute_process(COMMAND ${CMAKE_CXX_COMPILER} --version
                     OUTPUT_VARIABLE out)

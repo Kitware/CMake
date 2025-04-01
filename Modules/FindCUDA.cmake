@@ -1625,7 +1625,7 @@ macro(CUDA_WRAP_SRCS cuda_target format generated_files)
       # nvcc chokes on -g3 in versions previous to 3.0, so replace it with -g
       set(_cuda_fix_g3 FALSE)
 
-      if(CMAKE_COMPILER_IS_GNUCC)
+      if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
         if (CUDA_VERSION VERSION_LESS  "3.0" OR
             CUDA_VERSION VERSION_EQUAL "4.1" OR
             CUDA_VERSION VERSION_EQUAL "4.2"

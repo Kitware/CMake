@@ -45,23 +45,23 @@ endif()
 
 # Silence duplicate symbol warnings on AIX
 if(CMAKE_SYSTEM_NAME MATCHES "AIX")
-  if(NOT CMAKE_COMPILER_IS_GNUCXX)
+  if(NOT CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -bhalt:5 ")
   endif()
 endif()
 
 if(CMAKE_SYSTEM MATCHES "OSF1-V")
-  if(NOT CMAKE_COMPILER_IS_GNUCXX)
+  if(NOT CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -timplicit_local -no_implicit_include ")
   endif()
 endif()
 
 # Workaround for short jump tables on PA-RISC
 if(CMAKE_SYSTEM_PROCESSOR MATCHES "^parisc")
-  if(CMAKE_COMPILER_IS_GNUCC)
+  if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mlong-calls")
   endif()
-  if(CMAKE_COMPILER_IS_GNUCXX)
+  if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mlong-calls")
   endif()
 endif()

@@ -18,7 +18,7 @@ endif()
 set(CMAKE_BASE_NAME)
 get_filename_component(CMAKE_BASE_NAME "${CMAKE_Fortran_COMPILER}" NAME_WE)
 # since the gnu compiler has several names force g++
-if(CMAKE_COMPILER_IS_GNUG77)
+if(CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
   set(CMAKE_BASE_NAME g77)
 endif()
 if(CMAKE_Fortran_COMPILER_ID)
