@@ -151,38 +151,42 @@ Macros
     this value through the variable ``${dir}``.
 #]=======================================================================]
 
+cmake_policy(SET CMP0140 NEW)
+
 # Convert a cache variable to PATH type
 
-macro(_GNUInstallDirs_cache_convert_to_path var description)
-  get_property(_GNUInstallDirs_cache_type CACHE ${var} PROPERTY TYPE)
-  if(_GNUInstallDirs_cache_type STREQUAL "UNINITIALIZED")
-    file(TO_CMAKE_PATH "${${var}}" _GNUInstallDirs_cmakepath)
+function(_GNUInstallDirs_cache_convert_to_path var description)
+  get_property(cache_type CACHE ${var} PROPERTY TYPE)
+  if(cache_type STREQUAL "UNINITIALIZED")
+    file(TO_CMAKE_PATH "${${var}}" cmakepath)
     set_property(CACHE ${var} PROPERTY TYPE PATH)
-    set_property(CACHE ${var} PROPERTY VALUE "${_GNUInstallDirs_cmakepath}")
+    set_property(CACHE ${var} PROPERTY VALUE "${cmakepath}")
     set_property(CACHE ${var} PROPERTY HELPSTRING "${description}")
-    unset(_GNUInstallDirs_cmakepath)
   endif()
-  unset(_GNUInstallDirs_cache_type)
-endmacro()
+endfunction()
 
 # Create a cache variable with default for a path.
-macro(_GNUInstallDirs_cache_path var default description)
-  if(NOT DEFINED ${var})
-    set(${var} "${default}" CACHE PATH "${description}")
+function(_GNUInstallDirs_cache_path var default description)
+  set(cmake_install_var "${var}")
+  set(full_description "${description}")
+  if(NOT DEFINED ${cmake_install_var})
+    set(${cmake_install_var} "${default}" CACHE PATH "${full_description}")
   endif()
-  _GNUInstallDirs_cache_convert_to_path("${var}" "${description}")
-endmacro()
+  _GNUInstallDirs_cache_convert_to_path("${cmake_install_var}" "${full_description}")
+endfunction()
 
 # Create a cache variable with not default for a path, with a fallback
 # when unset; used for entries slaved to other entries such as
 # DATAROOTDIR.
-macro(_GNUInstallDirs_cache_path_fallback var default description)
-  if(NOT ${var})
-    set(${var} "" CACHE PATH "${description}")
-    set(${var} "${default}")
+function(_GNUInstallDirs_cache_path_fallback var default description)
+  set(cmake_install_var "${var}")
+  if(NOT ${cmake_install_var})
+    set(${cmake_install_var} "" CACHE PATH "${description}")
+    set(${cmake_install_var} "${default}")
   endif()
-  _GNUInstallDirs_cache_convert_to_path("${var}" "${description}")
-endmacro()
+  _GNUInstallDirs_cache_convert_to_path("${cmake_install_var}" "${description}")
+  return(PROPAGATE ${cmake_install_var})
+endfunction()
 
 # Installation directories
 #
