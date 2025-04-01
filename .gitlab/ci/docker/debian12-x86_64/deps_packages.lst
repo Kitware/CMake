@@ -48,10 +48,13 @@ sudo
 
 # Packages needed to test find modules.
 alsa-utils
+aspell
+aspell-en
 doxygen graphviz
 freeglut3-dev
 gnutls-dev
 libarchive-dev
+libaspell-dev
 libblas-dev
 libboost-dev
 libboost-filesystem-dev
