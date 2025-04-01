@@ -5,47 +5,57 @@
 FindBZip2
 ---------
 
-Try to find BZip2
+Finds the BZip2 data compression library (libbz2).
 
 Imported Targets
 ^^^^^^^^^^^^^^^^
 
-.. versionadded:: 3.12
+This module provides the following :ref:`Imported Targets`:
 
-This module defines :prop_tgt:`IMPORTED` target ``BZip2::BZip2``, if
-BZip2 has been found.
+``BZip2::BZip2``
+  .. versionadded:: 3.12
+
+  Target encapsulating the usage requirements of BZip2 library.  This target is
+  available only when BZip2 is found.
 
 Result Variables
 ^^^^^^^^^^^^^^^^
 
 This module defines the following variables:
 
-``BZIP2_FOUND``
-  system has BZip2
+``BZip2_FOUND``
+  Boolean indicating whether the BZip2 library is found.  For backward
+  compatibility, the ``BZIP2_FOUND`` variable is also set to the same value.
+
 ``BZIP2_INCLUDE_DIRS``
   .. versionadded:: 3.12
-    the BZip2 include directories
+
+  Include directories needed to use BZip2 library.
+
 ``BZIP2_LIBRARIES``
-  Link these to use BZip2
-``BZIP2_NEED_PREFIX``
-  this is set if the functions are prefixed with ``BZ2_``
+  Libraries needed for linking to use BZip2.
+
 ``BZIP2_VERSION``
   .. versionadded:: 3.26
-    the version of BZip2 found.
 
-  See also legacy variable ``BZIP2_VERSION_STRING``.
+  The version of BZip2 found.
 
-Cache variables
+Cache Variables
 ^^^^^^^^^^^^^^^
 
 The following cache variables may also be set:
 
 ``BZIP2_INCLUDE_DIR``
-  the directory containing the BZip2 headers
+  The directory containing the BZip2 headers.
+
 ``BZIP2_LIBRARY_RELEASE``
-  the path to the BZip2 library for release configurations
+  The path to the BZip2 library for release configurations.
+
 ``BZIP2_LIBRARY_DEBUG``
-  the path to the BZip2 library for debug configurations
+  The path to the BZip2 library for debug configurations.
+
+``BZIP2_NEED_PREFIX``
+  Boolean indicating if the BZip2 functions are prefixed with ``BZ2_``.
 
 Legacy Variables
 ^^^^^^^^^^^^^^^^
@@ -53,10 +63,20 @@ Legacy Variables
 The following variables are provided for backward compatibility:
 
 ``BZIP2_VERSION_STRING``
-  the version of BZip2 found.
-
   .. versionchanged:: 3.26
     Superseded by ``BZIP2_VERSION``.
+
+  The version of BZip2 found.
+
+Examples
+^^^^^^^^
+
+Finding BZip2 library and linking it to a project target:
+
+.. code-block:: cmake
+
+  find_package(BZip2)
+  target_link_libraries(project_target PRIVATE BZip2::BZip2)
 #]=======================================================================]
 
 cmake_policy(PUSH)
@@ -89,7 +109,7 @@ find_package_handle_standard_args(BZip2
                                   REQUIRED_VARS BZIP2_LIBRARIES BZIP2_INCLUDE_DIR
                                   VERSION_VAR BZIP2_VERSION)
 
-if (BZIP2_FOUND)
+if (BZip2_FOUND)
   set(BZIP2_INCLUDE_DIRS ${BZIP2_INCLUDE_DIR})
   include(${CMAKE_CURRENT_LIST_DIR}/CheckSymbolExists.cmake)
   include(${CMAKE_CURRENT_LIST_DIR}/CMakePushCheckState.cmake)
