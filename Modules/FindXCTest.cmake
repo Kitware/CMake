@@ -171,8 +171,8 @@ function(xctest_add_bundle target testee)
           LIBRARY_OUTPUT_DIRECTORY "${_output_directory}")
       endif()
     else()
-      target_link_libraries(${target}
-        PRIVATE -bundle_loader $<TARGET_FILE:${testee}>)
+      target_link_options(${target}
+        PRIVATE "SHELL:-bundle_loader \"$<TARGET_FILE:${testee}>\"")
     endif()
 
   else()
