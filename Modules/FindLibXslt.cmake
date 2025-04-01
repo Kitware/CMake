@@ -5,44 +5,104 @@
 FindLibXslt
 -----------
 
-Find the XSL Transformations, Extensible Stylesheet Language
-Transformations (XSLT) library (LibXslt)
+Finds the XSL Transformations, Extensible Stylesheet Language Transformations
+(XSLT) library (libxslt).
 
 Imported Targets
 ^^^^^^^^^^^^^^^^
 
 .. versionadded:: 3.18
 
-The following :prop_tgt:`IMPORTED` targets may be defined:
+This module provides the following :ref:`Imported Targets`:
 
 ``LibXslt::LibXslt``
-  If the libxslt library has been found
-``LibXslt::LibExslt``
-  If the libexslt library has been found
-``LibXslt::xsltproc``
-  If the xsltproc command-line executable has been found
+  Target encapsulating the usage requirements of the libxslt library.  This
+  target is available only if libxslt is found.
 
-Result variables
+``LibXslt::LibExslt``
+  Target encapsulating the usage requirements for the libexslt library. Part of
+  the libxslt package, libexslt provides optional extensions to XSLT on top of
+  libxslt.  This target is available only if the main libxslt library is found.
+
+``LibXslt::xsltproc``
+  Target encapsulating the command-line XSLT processor (``xsltproc``).  This
+  tool, part of the libxslt package, applies XSLT stylesheets to XML documents
+  as a command-line alternative to the libxslt library.  This target is
+  available only if the ``xsltproc`` executable is found.
+
+Result Variables
 ^^^^^^^^^^^^^^^^
 
-This module will set the following variables in your project:
+This module sets the following variables:
 
-  LIBXSLT_FOUND - system has LibXslt
-  LIBXSLT_INCLUDE_DIR - the LibXslt include directory
-  LIBXSLT_LIBRARIES - Link these to LibXslt
-  LIBXSLT_DEFINITIONS - Compiler switches required for using LibXslt
-  LIBXSLT_VERSION_STRING - version of LibXslt found (since CMake 2.8.8)
+``LibXslt_FOUND``
+  Boolean indicating whether the libxslt is found.  For backward compatibility,
+  the ``LIBXSLT_FOUND`` variable is also set to the same value.
 
-Additionally, the following two variables are set (but not required
-for using xslt):
+``LIBXSLT_LIBRARIES``
+  Libraries needed to link to libxslt.
+
+``LIBXSLT_DEFINITIONS``
+  Compiler switches required for using libxslt.
+
+``LIBXSLT_VERSION_STRING``
+  .. versionadded:: 2.8.8
+
+  Version of libxslt found.
+
+``LIBXSLT_EXSLT_LIBRARIES``
+  Libraries needed when linking against the exslt library.  These are available
+  and needed only when using exslt library.
+
+Cache Variables
+^^^^^^^^^^^^^^^
+
+The following cache variables may also be set:
+
+``LIBXSLT_INCLUDE_DIR``
+  Directory containing ``libxslt/xslt.h`` and other libxslt header files.
 
 ``LIBXSLT_EXSLT_INCLUDE_DIR``
   .. versionadded:: 3.18
-    The include directory for exslt.
-``LIBXSLT_EXSLT_LIBRARIES``
-  Link to these if you need to link against the exslt library.
+
+  Directory containing ``libexslt/exslt.h`` and other exslt-related headers.
+  These are needed only when using exslt (extensions to XSLT).
+
 ``LIBXSLT_XSLTPROC_EXECUTABLE``
-  Contains the full path to the xsltproc executable if found.
+  Full path to the XSLT processor executable ``xsltproc`` if found.  This path
+  is optional.
+
+Examples
+^^^^^^^^
+
+Finding libxslt library and linking it to a project target:
+
+.. code-block:: cmake
+
+  find_package(LibXslt)
+  target_link_libraries(foo PRIVATE LibXslt::LibXslt)
+
+When project also needs the extensions to XSLT (exslt) library, both targets
+should be linked:
+
+.. code-block:: cmake
+
+  find_package(LibXslt)
+  target_link_libraries(foo PRIVATE LibXslt::LibXslt LibXslt::LibExslt)
+
+Example, how to use XSLT processor in a custom command build rule:
+
+.. code-block:: cmake
+
+  find_package(LibXslt)
+
+  if(TARGET LibXslt::xsltproc)
+    # Executed when some build rule depends on example.html.
+    add_custom_command(
+      OUTPUT example.html
+      COMMAND LibXslt::xsltproc -o example.html transform.xslt example.xml
+    )
+  endif()
 #]=======================================================================]
 
 cmake_policy(PUSH)
@@ -122,14 +182,14 @@ mark_as_advanced(LIBXSLT_INCLUDE_DIR
                  LIBXSLT_EXSLT_LIBRARY
                  LIBXSLT_XSLTPROC_EXECUTABLE)
 
-if(LIBXSLT_FOUND AND NOT TARGET LibXslt::LibXslt)
+if(LibXslt_FOUND AND NOT TARGET LibXslt::LibXslt)
   add_library(LibXslt::LibXslt UNKNOWN IMPORTED)
   set_target_properties(LibXslt::LibXslt PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${LIBXSLT_INCLUDE_DIR}")
   set_target_properties(LibXslt::LibXslt PROPERTIES INTERFACE_COMPILE_OPTIONS "${LIBXSLT_DEFINITIONS}")
   set_property(TARGET LibXslt::LibXslt APPEND PROPERTY IMPORTED_LOCATION "${LIBXSLT_LIBRARY}")
 endif()
 
-if(LIBXSLT_FOUND AND NOT TARGET LibXslt::LibExslt)
+if(LibXslt_FOUND AND NOT TARGET LibXslt::LibExslt)
   add_library(LibXslt::LibExslt UNKNOWN IMPORTED)
   set_target_properties(LibXslt::LibExslt PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${LIBXSLT_EXSLT_INCLUDE_DIR}")
   set_target_properties(LibXslt::LibExslt PROPERTIES INTERFACE_COMPILE_OPTIONS "${LIBXSLT_EXSLT_DEFINITIONS}")
