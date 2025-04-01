@@ -12,16 +12,15 @@ When this property is set to true, the ``#include`` lines inside the generated
 unity source files will attempt to use relative paths to the original source
 files if possible in order to standardize the output of the unity file.
 
-The unity file's path to the original source file will use the following
-priority:
+The unity file's path to an original source file uses the following priority:
 
-* relative path to the generated unity file if the source file exists
-  directly or in subfolder under the :variable:`CMAKE_BINARY_DIR`
+* a path relative to the generated unity file if the source file exists
+  directly in :variable:`CMAKE_BINARY_DIR`, or in a subfolder under it.
 
-* relative path to :variable:`CMAKE_SOURCE_DIR` if the source file exists
-  directly or in subfolder under the :variable:`CMAKE_SOURCE_DIR`
+* a path relative to :variable:`CMAKE_SOURCE_DIR` if the source file exists
+  directly in :variable:`CMAKE_SOURCE_DIR`, or in a subfolder under it.
 
-* absolute path to the source file.
+* an absolute path to the source file.
 
 This target property *does not* guarantee a consistent unity file across
 different environments as the final priority is an absolute path.
