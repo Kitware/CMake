@@ -58,9 +58,8 @@ bool cmCacheManager::LoadCache(std::string const& path, bool internal,
     cmSystemTools::GetLineFromStream(fin, buffer);
     lineno++;
     realbuffer = buffer.c_str();
-    while (*realbuffer != '0' &&
-           (*realbuffer == ' ' || *realbuffer == '\t' || *realbuffer == '\r' ||
-            *realbuffer == '\n')) {
+    while (*realbuffer == ' ' || *realbuffer == '\t' || *realbuffer == '\r' ||
+           *realbuffer == '\n') {
       if (*realbuffer == '\n') {
         lineno++;
       }
