@@ -13,6 +13,22 @@ if(NOT nonexistent2 STREQUAL "${bindir}/THIS_IS_A_NONEXISTENT_FILE")
 endif()
 
 #
+# Test treatment of .. after file name
+#
+foreach(c REALPATH ABSOLUTE)
+  get_filename_component(dir "${CMAKE_CURRENT_LIST_DIR}" ${c})
+  get_filename_component(fileDotDot "${CMAKE_CURRENT_LIST_FILE}/.." ${c})
+  if(NOT "${fileDotDot}" STREQUAL "${dir}")
+    message(FATAL_ERROR
+      "${c} did not resolve\n"
+      "  ${CMAKE_CURRENT_LIST_FILE}/..\n"
+      "lexically:\n"
+      "  ${fileDotDot}"
+    )
+  endif()
+endforeach()
+
+#
 # Test treatment of relative paths
 #
 foreach(c REALPATH ABSOLUTE)
