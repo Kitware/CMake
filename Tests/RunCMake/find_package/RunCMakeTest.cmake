@@ -2,6 +2,7 @@ include(RunCMake)
 
 run_cmake(CMP0074-WARN)
 run_cmake(CMP0074-OLD)
+run_cmake(ComponentRecursion)
 run_cmake(ComponentRequiredAndOptional)
 run_cmake(EmptyRoots)
 run_cmake(FromPATHEnv)
