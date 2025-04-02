@@ -329,6 +329,9 @@ inline char const* Getcwd(char* buf, unsigned int len)
 }
 inline int Chdir(std::string const& dir)
 {
+  // We cannot use ToWindowsExtendedPath here because that causes a
+  // UNC path to be recorded as the process working directory, and
+  // can break child processes.
   return _wchdir(KWSYS_NAMESPACE::Encoding::ToWide(dir).c_str());
 }
 inline void Realpath(std::string const& path, std::string& resolved_path,
