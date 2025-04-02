@@ -307,6 +307,7 @@ if (XCODE_VERSION VERSION_GREATER_EQUAL 7.3)
     if(BuildSystemVersion)
       set(RunCMake_GENERATOR_TOOLSET "buildsystem=${BuildSystemVersion}")
     endif()
+    set(RunCMake_TEST_VARIANT_DESCRIPTION "-${SystemName}-${SDK}")
     run_cmake(XCTestAddBundle)
   endfunction()
 
