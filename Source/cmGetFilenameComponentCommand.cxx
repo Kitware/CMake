@@ -107,15 +107,9 @@ bool cmGetFilenameComponentCommand(std::vector<std::string> const& args,
         }
       }
     }
-    if (args[2] == "ABSOLUTE") {
-      // Collapse the path to its simplest form.
-      result = cmSystemTools::CollapseFullPath(filename, baseDir);
-    } else {
-      // Convert relative paths to absolute paths
-      result = filename;
-      if (!cmSystemTools::FileIsFullPath(result)) {
-        result = cmStrCat(baseDir, '/', result);
-      }
+    // Collapse the path to its simplest form.
+    result = cmSystemTools::CollapseFullPath(filename, baseDir);
+    if (args[2] == "REALPATH") {
       // Resolve symlinks if possible
       result = cmSystemTools::GetRealPath(result);
     }
