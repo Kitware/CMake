@@ -911,10 +911,16 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
         this->VersionExact = this->Makefile->IsOn(exact);
       }
       if (this->Components.empty()) {
-        std::string const components_var = this->Name + "_FIND_COMPONENTS";
-        this->Components = this->Makefile->GetSafeDefinition(components_var);
+        std::string const componentsVar = this->Name + "_FIND_COMPONENTS";
+        this->Components = this->Makefile->GetSafeDefinition(componentsVar);
         for (auto const& component : cmList{ this->Components }) {
-          this->RequiredComponents.insert(component);
+          std::string const crVar =
+            cmStrCat(this->Name, "_FIND_REQUIRED_"_s, component);
+          if (this->Makefile->GetDefinition(crVar).IsOn()) {
+            this->RequiredComponents.insert(component);
+          } else {
+            this->OptionalComponents.insert(component);
+          }
         }
       }
     }
