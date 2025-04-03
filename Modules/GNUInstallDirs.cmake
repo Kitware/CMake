@@ -319,6 +319,17 @@ function(_GNUInstallDirs_special_absolute out_var original_path install_prefix)
   return(PROPAGATE ${out_var})
 endfunction()
 
+# Common handler for defaults that should be in /<dir>
+# i.e. SYSCONFDIR and LOCALSTATEDIR
+function(__GNUInstallDirs_default_in_root out_var original_path install_prefix)
+  if(_GNUInstallDirs_CMP0192 STREQUAL "NEW")
+    _GNUInstallDirs_special_absolute(${out_var}
+      "${original_path}" "${install_prefix}")
+  endif()
+  cmake_path(NORMAL_PATH ${out_var})
+  return(PROPAGATE ${out_var})
+endfunction()
+
 # Installation directories
 #
 
@@ -381,22 +392,21 @@ function(_GNUInstallDirs_LIBDIR_get_default out_var install_prefix)
   return(PROPAGATE ${out_var})
 endfunction()
 
-function(_GNUInstallDirs_SYSCONFDIR_get_default out_var install_prefix)
-  if(_GNUInstallDirs_CMP0192 STREQUAL "NEW")
-    _GNUInstallDirs_special_absolute(${out_var}
-      "${_GNUInstallDirs_SYSCONFDIR_DEFAULT}" "${install_prefix}")
-  endif()
-  cmake_path(NORMAL_PATH ${out_var})
-  return(PROPAGATE ${out_var})
-endfunction()
-function(_GNUInstallDirs_LOCALSTATEDIR_get_default out_var install_prefix)
-  if(_GNUInstallDirs_CMP0192 STREQUAL "NEW")
-    _GNUInstallDirs_special_absolute(${out_var}
-      "${_GNUInstallDirs_LOCALSTATEDIR_DEFAULT}" "${install_prefix}")
-  endif()
-  cmake_path(NORMAL_PATH ${out_var})
-  return(PROPAGATE ${out_var})
-endfunction()
+foreach(dir IN ITEMS
+    SYSCONFDIR
+    LOCALSTATEDIR
+)
+  # Cannot call function() directly because `dir` would not be accessible inside the function
+  # Using cmake_language(EVAL) to call a short wrapper function instead
+  cmake_language(EVAL CODE "
+    function(_GNUInstallDirs_${dir}_get_default out_var install_prefix)
+      set(\${out_var} \"\${_GNUInstallDirs_${dir}_DEFAULT}\")
+      __GNUInstallDirs_default_in_root(\${out_var} \"\${\${out_var}}\" \"\${install_prefix}\")
+      return(PROPAGATE \${out_var})
+    endfunction()
+  "
+  )
+endforeach()
 
 # Depends on current CMAKE_INSTALL_LOCALSTATEDIR value
 function(_GNUInstallDirs_RUNSTATEDIR_get_default out_var install_prefix)
