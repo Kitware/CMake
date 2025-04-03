@@ -42,12 +42,13 @@ Commands
     Specifies the conditions that determine whether ``<variable>`` is set and
     visible in the GUI.
 
-    * On the first configuration run, ``<variable>`` is not initialized unless
-      the ``<condition>`` evaluates to boolean true.  In that case, a boolean
-      cache variable named ``<variable>`` is created and set to ``<value>``.
+    * If ``<condition>`` evaluates to boolean false, option is hidden from the
+      user in the GUI, and a local variable ``<variable>`` is set to
+      ``<else-value>``.
 
-    * If ``<condition>`` is true, option is shown in the GUI, allowing the user
-      to enable or disable it.
+    * If ``<condition>`` evaluates to boolean true, a boolean cache variable
+      named ``<variable>`` is created with default ``<value>``, and option is
+      shown in the GUI, allowing the user to enable or disable it.
 
     * If ``<condition>`` later evaluates to boolean false (on consecutive
       configuration run),  option is hidden from the user in the GUI and the
@@ -64,14 +65,10 @@ Commands
     * A :ref:`semicolon-separated list <CMake Language Lists>` of multiple
       conditions.
 
-    * Starting from CMake 3.22, a full condition expression as used in an
-      ``if(<condition>)`` clause.
-
-    .. versionadded:: 3.22
-
-      This argument now supports full :ref:`Condition Syntax`.  See policy
-      :policy:`CMP0127`.  This enables using entire condition syntax
-      (such as grouping conditions with parens and similar).
+    * .. versionadded:: 3.22
+        A full :ref:`Condition Syntax` as used in an ``if(<condition>)`` clause.
+        See policy :policy:`CMP0127`.  This enables using entire condition
+        syntax (such as grouping conditions with parens and similar).
 
   ``<else-value>``
     The value assigned to a local variable named ``<variable>``, when
@@ -111,14 +108,14 @@ user-configurable options based on a condition during the configuration phase:
   message(STATUS "USE_SSL_GNUTLS: ${USE_SSL_GNUTLS}")
 
 On the first configuration run, a boolean cache variable ``USE_SSL`` is set to
-OFF, and ``USE_SSL_GNUTLS`` variable remains uninitialized:
+OFF, and a local variable ``USE_SSL_GNUTLS`` is set to OFF:
 
 .. code-block:: console
 
   $ cmake -B build-dir
-  # Outputs:
+
   -- USE_SSL: OFF
-  -- USE_SSL_GNUTLS:
+  -- USE_SSL_GNUTLS: OFF
 
 Running CMake with ``USE_SSL=ON`` sets both ``USE_SSL`` and ``USE_SSL_GNUTLS``
 boolean cache variables to ON:
@@ -126,7 +123,7 @@ boolean cache variables to ON:
 .. code-block:: console
 
   $ cmake -B build-dir -D USE_SSL=ON
-  # Outputs:
+
   -- USE_SSL: ON
   -- USE_SSL_GNUTLS: ON
 
@@ -137,7 +134,7 @@ overridden locally:
 .. code-block:: console
 
   $ cmake -B build-dir -D USE_SSL=OFF
-  # Outputs:
+
   -- USE_SSL: OFF
   -- USE_SSL_GNUTLS: OFF
 
