@@ -21,5 +21,21 @@ foreach(case
   unset(RunCMake-stderr-file)
 endforeach()
 
+block()
+  set(RunCMake_TEST_BINARY_DIR "${RunCMake_BINARY_DIR}/Reconfigure-build")
+  set(RunCMake-stderr-file UsrLocal${variant}-stderr.txt)
+  run_cmake_with_options(Reconfigure)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  foreach(case
+      Opt
+      Root
+      Usr
+      UsrLocal
+  )
+    set(RunCMake-stderr-file ${case}${variant}-stderr.txt)
+    run_cmake_with_options(Reconfigure -Dcase=${case})
+  endforeach()
+endblock()
+
 run_cmake(GetAbs)
 run_cmake(NoSystem)
