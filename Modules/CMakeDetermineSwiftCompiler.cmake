@@ -126,6 +126,19 @@ elseif(NOT DEFINED CMAKE_Swift_COMPILER_USE_OLD_DRIVER)
   unset(_CMAKE_Swift_COMPILER_CHECK_OUTPUT)
 endif()
 
+if(CMAKE_Swift_COMPILER_VERSION VERSION_GREATER_EQUAL 5.2)
+  set(target_info_command "${CMAKE_Swift_COMPILER}" -print-target-info)
+  if(CMAKE_Swift_COMPILER_TARGET)
+    list(APPEND target_info_command -target ${CMAKE_Swift_COMPILER_TARGET})
+  endif()
+  execute_process(
+    COMMAND ${target_info_command}
+    OUTPUT_VARIABLE swift_target_info)
+  message(CONFIGURE_LOG "Swift target info:\n" "${swift_target_info}")
+  string(JSON module_triple GET "${swift_target_info}" "target" "moduleTriple")
+  set(CMAKE_Swift_MODULE_TRIPLE ${module_triple})
+endif()
+
 if (NOT _CMAKE_TOOLCHAIN_LOCATION)
   get_filename_component(_CMAKE_TOOLCHAIN_LOCATION "${CMAKE_Swift_COMPILER}" PATH)
 endif ()
