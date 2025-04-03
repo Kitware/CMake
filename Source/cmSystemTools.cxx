@@ -149,6 +149,15 @@
 #  include <dlfcn.h>
 #endif
 
+#ifndef CMAKE_NO_GETPWNAM
+#  if defined(_WIN32)
+#    define CMAKE_NO_GETPWNAM
+#  endif
+#endif
+#ifndef CMAKE_NO_GETPWNAM
+#  include <pwd.h>
+#endif
+
 #if defined(_MSC_VER) && _MSC_VER >= 1800
 #  define CM_WINDOWS_DEPRECATED_GetVersionEx
 #endif
@@ -159,6 +168,35 @@ cmSystemTools::InterruptCallback s_InterruptCallback;
 cmSystemTools::MessageCallback s_MessageCallback;
 cmSystemTools::OutputCallback s_StderrCallback;
 cmSystemTools::OutputCallback s_StdoutCallback;
+
+std::string ResolveTildePath(std::string p)
+{
+  if (!p.empty() && p[0] == '~') {
+    cm::optional<std::string> home;
+    std::string::size_type last = p.find_first_of("/\\");
+    if (last == std::string::npos) {
+      last = p.size();
+    }
+    if (last == 1) {
+#if defined(_WIN32) && !defined(__CYGWIN__)
+      home = cmSystemTools::GetEnvVar("USERPROFILE");
+      if (!home)
+#endif
+        home = cmSystemTools::GetEnvVar("HOME");
+#ifndef CMAKE_NO_GETPWNAM
+    } else if (last > 1) {
+      std::string user = p.substr(1, last - 1);
+      if (passwd* pw = getpwnam(user.c_str())) {
+        home = std::string(pw->pw_dir);
+      }
+#endif
+    }
+    if (home) {
+      p.replace(0, last, *home);
+    }
+  }
+  return p;
+}
 
 #ifdef _WIN32
 std::string GetDosDriveWorkingDirectory(char letter)
@@ -2044,6 +2082,7 @@ std::vector<std::string> cmSystemTools::SplitEnvPathNormalized(
 
 std::string cmSystemTools::ToNormalizedPathOnDisk(std::string p)
 {
+  p = ResolveTildePath(p);
   using namespace cm::PathResolver;
 #ifdef _WIN32
   // IWYU pragma: no_forward_declare cm::PathResolver::Policies::CasePath

@@ -1035,6 +1035,11 @@ endif()
 if(CMAKE_SYSTEM_NAME STREQUAL "SunOS" AND CMAKE_SYSTEM_VERSION STREQUAL "5.10" AND CMAKE_SYSTEM_PROCESSOR MATCHES "^(i386|x86_64)$")
   set_property(SOURCE cmSystemTools.cxx APPEND PROPERTY COMPILE_DEFINITIONS CMAKE_NO_MKDTEMP)
 endif()
+get_property(targetSupportsSharedLibs GLOBAL PROPERTY TARGET_SUPPORTS_SHARED_LIBS)
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND NOT targetSupportsSharedLibs)
+  # Disable getpwnam for static linux builds since it depends on shared glibc.
+  set_property(SOURCE cmSystemTools.cxx APPEND PROPERTY COMPILE_DEFINITIONS CMAKE_NO_GETPWNAM)
+endif()
 
 # Some atomic instructions are implemented using libatomic on some platforms.
 if(CMake_HAVE_CXX_ATOMIC_LIB)
