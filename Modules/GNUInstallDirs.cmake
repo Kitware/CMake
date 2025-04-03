@@ -163,8 +163,8 @@ The following values of :variable:`CMAKE_INSTALL_PREFIX` are special:
 
 .. _`Filesystem Hierarchy Standard`: https://refspecs.linuxfoundation.org/FHS_3.0/fhs/index.html
 
-Macros
-^^^^^^
+Functions
+^^^^^^^^^
 
 .. command:: GNUInstallDirs_get_absolute_install_dir
 
@@ -177,7 +177,7 @@ Macros
   Set the given variable ``absvar`` to the absolute path contained
   within the variable ``var``.  This is to allow the computation of an
   absolute path, accounting for all the special cases documented
-  above.  While this macro is used to compute the various
+  above.  While this function is used to compute the various
   ``CMAKE_INSTALL_FULL_<dir>`` variables, it is exposed publicly to
   allow users who create additional path variables to also compute
   absolute paths where necessary, using the same logic.  ``dirname`` is
@@ -529,7 +529,7 @@ mark_as_advanced(
   CMAKE_INSTALL_DOCDIR
   )
 
-macro(GNUInstallDirs_get_absolute_install_dir absvar var)
+function(GNUInstallDirs_get_absolute_install_dir absvar var)
   set(GGAID_extra_args ${ARGN})
   list(LENGTH GGAID_extra_args GGAID_extra_arg_count)
   if(GGAID_extra_arg_count GREATER "0")
@@ -571,10 +571,8 @@ macro(GNUInstallDirs_get_absolute_install_dir absvar var)
     set(${absvar} "${${var}}")
   endif()
 
-  unset(GGAID_dir)
-  unset(GGAID_extra_arg_count)
-  unset(GGAID_extra_args)
-endmacro()
+  return(PROPAGATE ${var} ${absvar})
+endfunction()
 
 # Result directories
 #
