@@ -282,16 +282,12 @@ cmStateSnapshot cmState::Reset()
   {
     cmLinkedTree<cmStateDetail::BuildsystemDirectoryStateType>::iterator it =
       this->BuildsystemDirectory.Truncate();
-    it->IncludeDirectories.clear();
-    it->CompileDefinitions.clear();
-    it->CompileOptions.clear();
-    it->LinkOptions.clear();
-    it->LinkDirectories.clear();
-    it->CurrentScope = pos;
-    it->NormalTargetNames.clear();
-    it->ImportedTargetNames.clear();
-    it->Properties.Clear();
-    it->Children.clear();
+
+    cmStateDetail::BuildsystemDirectoryStateType newState;
+    newState.Location = std::move(it->Location);
+    newState.OutputLocation = std::move(it->OutputLocation);
+    newState.CurrentScope = pos;
+    *it = std::move(newState);
   }
 
   this->PolicyStack.Clear();
