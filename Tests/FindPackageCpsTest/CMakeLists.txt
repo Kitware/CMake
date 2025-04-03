@@ -55,12 +55,6 @@ find_package(Sample CONFIG)
 test_version(Sample "2.10.11" 3 2 10 11 0)
 
 ###############################################################################
-# Test finding a package more than once.
-
-find_package(Repeat REQUIRED)
-find_package(Repeat REQUIRED)
-
-###############################################################################
 # Test some more complicated version parsing.
 
 find_package(LongVersion CONFIG)
@@ -273,6 +267,21 @@ elseif(TARGET TransitiveDep::Target4)
   message(SEND_ERROR "TransitiveDep::Target4 exists ?!")
 elseif(TARGET TransitiveDep::Target5)
   message(SEND_ERROR "TransitiveDep::Target5 exists ?!")
+endif()
+
+###############################################################################
+# Test finding a package more than once.
+
+find_package(Repeat REQUIRED OPTIONAL_COMPONENTS DoesNotExist)
+if(NOT TARGET Repeat::Base)
+  message(SEND_ERROR "Repeat::Base missing !")
+elseif(TARGET Repeat::Extra)
+  message(SEND_ERROR "Repeat::Extra exists ?!")
+endif()
+
+find_package(Repeat REQUIRED COMPONENTS Extra)
+if(NOT TARGET Repeat::Extra)
+  message(SEND_ERROR "Repeat::Extra missing !")
 endif()
 
 ###############################################################################

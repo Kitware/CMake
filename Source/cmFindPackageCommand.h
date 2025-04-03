@@ -33,6 +33,7 @@ namespace std {
 #endif
 
 class cmExecutionStatus;
+class cmPackageState;
 class cmSearchPath;
 
 /** \class cmFindPackageCommand
@@ -159,11 +160,12 @@ private:
     RequiredFromPackageVar,
     RequiredFromFindVar
   };
-  bool FindPackageDependencies(std::string const& fileName,
+  bool FindPackageDependencies(std::string const& filePath,
                                cmPackageInfoReader const& reader,
                                RequiredStatus required);
 
-  bool ImportPackageTargets(std::string const& fileName,
+  bool ImportPackageTargets(cmPackageState& packageState,
+                            std::string const& filePath,
                             cmPackageInfoReader& reader);
   void StoreVersionFound();
   void SetConfigDirCacheVariable(std::string const& value);

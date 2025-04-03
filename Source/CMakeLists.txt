@@ -415,6 +415,7 @@ add_library(
   cmOrderDirectories.h
   cmPackageInfoReader.cxx
   cmPackageInfoReader.h
+  cmPackageState.h
   cmPathResolver.cxx
   cmPathResolver.h
   cmPlistParser.cxx

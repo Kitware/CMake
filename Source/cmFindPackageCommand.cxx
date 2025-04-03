@@ -9,6 +9,7 @@
 #include <functional>
 #include <iterator>
 #include <sstream>
+#include <unordered_set>
 #include <utility>
 
 #include <cm/optional>
@@ -29,10 +30,12 @@
 #include "cmListFileCache.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
+#include "cmPackageState.h"
 #include "cmPolicies.h"
 #include "cmRange.h"
 #include "cmSearchPath.h"
 #include "cmState.h"
+#include "cmStateSnapshot.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
@@ -1543,7 +1546,6 @@ bool cmFindPackageCommand::HandlePackageMode(
     }
   }
 
-  std::string const fileVar = cmStrCat(this->Name, "_CONFIG");
   std::string const foundVar = cmStrCat(this->Name, "_FOUND");
   std::string const notFoundMessageVar =
     cmStrCat(this->Name, "_NOT_FOUND_MESSAGE");
@@ -1574,15 +1576,7 @@ bool cmFindPackageCommand::HandlePackageMode(
     if (this->CpsReader) {
       // The package has been found.
       found = true;
-
-      // Don't read a CPS file if we've already read it.
-      cmValue const& previousFileFound =
-        this->Makefile->GetDefinition(fileVar);
-      if (previousFileFound.Compare(this->FileFound) == 0) {
-        result = true;
-      } else {
-        result = this->ReadPackage();
-      }
+      result = this->ReadPackage();
     } else if (this->ReadListFile(this->FileFound, DoPolicyScope)) {
       // The package has been found.
       found = true;
@@ -1765,6 +1759,7 @@ bool cmFindPackageCommand::HandlePackageMode(
   this->Makefile->AddDefinition(foundVar, found ? "1" : "0");
 
   // Set a variable naming the configuration file that was found.
+  std::string const fileVar = cmStrCat(this->Name, "_CONFIG");
   if (found) {
     this->Makefile->AddDefinition(fileVar, this->FileFound);
   } else {
@@ -2016,8 +2011,15 @@ bool cmFindPackageCommand::ReadPackage()
     }
   }
 
+  // If we made it here, we want to actually import something, but we also
+  // need to ensure we don't try to import the same file more than once (which
+  // will fail due to the targets already existing). Retrieve the package state
+  // so we can record what we're doing.
+  cmPackageState& state =
+    this->Makefile->GetStateSnapshot().GetPackageState(this->FileFound);
+
   // Import targets from root file.
-  if (!this->ImportPackageTargets(this->FileFound, *this->CpsReader)) {
+  if (!this->ImportPackageTargets(state, this->FileFound, *this->CpsReader)) {
     return false;
   }
 
@@ -2026,7 +2028,7 @@ bool cmFindPackageCommand::ReadPackage()
   for (auto const& appendix : this->CpsAppendices) {
     cmMakefile::CallRAII appendixScope{ this->Makefile, appendix.first,
                                         this->Status };
-    if (!this->ImportPackageTargets(appendix.first, appendix.second)) {
+    if (!this->ImportPackageTargets(state, appendix.first, appendix.second)) {
       return false;
     }
   }
@@ -2035,13 +2037,13 @@ bool cmFindPackageCommand::ReadPackage()
 }
 
 bool cmFindPackageCommand::FindPackageDependencies(
-  std::string const& fileName, cmPackageInfoReader const& reader,
+  std::string const& filePath, cmPackageInfoReader const& reader,
   RequiredStatus required)
 {
   // Get package requirements.
   for (cmPackageRequirement const& dep : reader.GetRequirements()) {
     cmExecutionStatus status{ *this->Makefile };
-    cmMakefile::CallRAII scope{ this->Makefile, fileName, status };
+    cmMakefile::CallRAII scope{ this->Makefile, filePath, status };
 
     // For each requirement, set up a nested instance to find it.
     cmFindPackageCommand fp{ status };
@@ -2077,9 +2079,16 @@ bool cmFindPackageCommand::FindPackageDependencies(
   return true;
 }
 
-bool cmFindPackageCommand::ImportPackageTargets(std::string const& fileName,
+bool cmFindPackageCommand::ImportPackageTargets(cmPackageState& packageState,
+                                                std::string const& filePath,
                                                 cmPackageInfoReader& reader)
 {
+  // Check if we've already imported this file.
+  std::string fileName = cmSystemTools::GetFilenameName(filePath);
+  if (cm::contains(packageState.ImportedFiles, fileName)) {
+    return true;
+  }
+
   // Import base file.
   if (!reader.ImportTargets(this->Makefile, this->Status)) {
     return false;
@@ -2089,8 +2098,8 @@ bool cmFindPackageCommand::ImportPackageTargets(std::string const& fileName,
   cmsys::Glob glob;
   glob.RecurseOff();
   if (glob.FindFiles(
-        cmStrCat(cmSystemTools::GetFilenamePath(fileName), '/',
-                 cmSystemTools::GetFilenameWithoutExtension(fileName),
+        cmStrCat(cmSystemTools::GetFilenamePath(filePath), '/',
+                 cmSystemTools::GetFilenameWithoutExtension(filePath),
                  "@*.[Cc][Pp][Ss]"_s))) {
 
     // Try to read supplemental data from each file found.
@@ -2106,6 +2115,7 @@ bool cmFindPackageCommand::ImportPackageTargets(std::string const& fileName,
     }
   }
 
+  packageState.ImportedFiles.emplace(std::move(fileName));
   return true;
 }
 
