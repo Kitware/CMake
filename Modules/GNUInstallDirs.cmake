@@ -129,6 +129,10 @@ The following values of :variable:`CMAKE_INSTALL_PREFIX` are special:
     When building the complete GNU system, the prefix will be empty
     and ``/usr`` will be a symbolic link to ``/``.
 
+  .. versionchanged:: 4.1
+    The ``CMAKE_INSTALL_<dir>`` variables are cached with the ``usr/`` prefix.
+    See policy :policy:`CMP0193`.
+
 ``/usr``
 
   For ``<dir>`` equal to ``SYSCONFDIR``, ``LOCALSTATEDIR`` or
@@ -186,6 +190,9 @@ Functions
   .. versionchanged:: 3.20
     Added the ``<dirname>`` parameter.  Previous versions of CMake passed
     this value through the variable ``${dir}``.
+
+  .. versionchanged:: 4.1
+    The ``var`` variable is no longer altered. See policy :policy:`CMP0193`.
 #]=======================================================================]
 
 cmake_policy(SET CMP0140 NEW)
@@ -330,6 +337,20 @@ function(__GNUInstallDirs_default_in_root out_var original_path install_prefix)
   return(PROPAGATE ${out_var})
 endfunction()
 
+# Common handler for defaults that should be in usr/<dir>
+function(__GNUInstallDirs_default_in_usr out_var initial_value install_prefix)
+  set(${out_var} "${initial_value}")
+  if(install_prefix STREQUAL "/")
+    cmake_policy(GET CMP0193 cmp0193
+        PARENT_SCOPE # undocumented, do not use outside of CMake
+    )
+    if(cmp0193 STREQUAL "NEW")
+      set(${out_var} "usr/${${out_var}}")
+    endif()
+  endif()
+  return(PROPAGATE ${out_var})
+endfunction()
+
 # Installation directories
 #
 
@@ -388,6 +409,7 @@ function(_GNUInstallDirs_LIBDIR_get_default out_var install_prefix)
       endif()
     endif()
   endif()
+  __GNUInstallDirs_default_in_usr(${out_var} "${${out_var}}" "${install_prefix}")
 
   return(PROPAGATE ${out_var})
 endfunction()
@@ -422,6 +444,31 @@ function(_GNUInstallDirs_RUNSTATEDIR_get_default out_var install_prefix)
   endif()
   return(PROPAGATE ${out_var})
 endfunction()
+
+# All of the other (primitive) dirs are typically in usr/<dir>.
+# A special handling is needed for the `/` install_prefix
+foreach(dir IN ITEMS
+    BINDIR
+    SBINDIR
+    LIBEXECDIR
+    SHAREDSTATEDIR
+    INCLUDEDIR
+    OLDINCLUDEDIR
+    DATAROOTDIR
+    # Except all the previous ones that had a special handling:
+    # LIBDIR, SYSCONFDIR, LOCALSTATEDIR, OLDINCLUDEDIR
+)
+  # Cannot call function() directly because `dir` would not be accessible inside the function
+  # Using cmake_language(EVAL) to call a short wrapper function instead
+  cmake_language(EVAL CODE "
+    function(_GNUInstallDirs_${dir}_get_default out_var install_prefix)
+      set(\${out_var} \"\${_GNUInstallDirs_${dir}_DEFAULT}\")
+      __GNUInstallDirs_default_in_usr(\${out_var} \"\${\${out_var}}\" \"\${install_prefix}\")
+      return(PROPAGATE \${out_var})
+    endfunction()
+  "
+  )
+endforeach()
 
 _GNUInstallDirs_cache_path(BINDIR
   "User executables")
@@ -571,7 +618,14 @@ function(GNUInstallDirs_get_absolute_install_dir absvar var)
     set(${absvar} "${${var}}")
   endif()
 
-  return(PROPAGATE ${var} ${absvar})
+  set(return_vars ${absvar})
+  cmake_policy(GET CMP0193 cmp0193
+    PARENT_SCOPE # undocumented, do not use outside of CMake
+  )
+  if(NOT cmp0193 STREQUAL "NEW")
+    list(APPEND return_vars ${var})
+  endif()
+  return(PROPAGATE ${return_vars})
 endfunction()
 
 # Result directories

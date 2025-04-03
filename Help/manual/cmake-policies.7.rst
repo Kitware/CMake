@@ -98,6 +98,7 @@ Policies Introduced by CMake 4.1
 .. toctree::
    :maxdepth: 1
 
+   CMP0193: GNUInstallDirs caches CMAKE_INSTALL_* with leading 'usr/' for install prefix '/'. </policy/CMP0193>
    CMP0192: GNUInstallDirs uses absolute SYSCONFDIR, LOCALSTATEDIR, and RUNSTATEDIR in special prefixes. </policy/CMP0192>
    CMP0191: The FindCABLE module is removed. </policy/CMP0191>
    CMP0190: FindPython enforce consistency in cross-compiling mode. </policy/CMP0190>
