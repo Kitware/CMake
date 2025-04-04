@@ -7,5 +7,21 @@ events:(
       - "[^"]+")+
     message: \|(
 +      [^
-]*)*)+
+]*)*|
+  -
+    kind: "find-v1"
+    backtrace:(
+      - "[^"]+")+
+    mode: "[^"]*"
+    variable: "[^"]*"
+    description: "[^"]*"
+    settings:(
+      [A-Za-z_]+: (true|false|"(NEVER|ONLY|FIRST|LAST)"))+
+    names:(
+      - "[^"]+")+
+    candidate_directories:(
+      - "[^"]+")*
+    searched_directories:(
+      - "[^"]+")*
+    found: (false|"[^"]*"))+
 \.\.\.$

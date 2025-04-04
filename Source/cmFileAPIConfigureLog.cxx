@@ -55,6 +55,7 @@ Json::Value ConfigureLog::DumpEventKindNames()
     eventKindNames.append("message-v1");     // WriteMessageEvent
     eventKindNames.append("try_compile-v1"); // WriteTryCompileEvent
     eventKindNames.append("try_run-v1");     // WriteTryRunEvent
+    eventKindNames.append("find-v1");        // WriteFindBaseEvent
   }
   return eventKindNames;
 }

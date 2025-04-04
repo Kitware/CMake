@@ -11,7 +11,9 @@
 #include "cmFindCommon.h"
 #include "cmStateTypes.h"
 
+class cmConfigureLog;
 class cmExecutionStatus;
+class cmMakefile;
 
 /** \class cmFindBase
  * \brief Base class for most FIND_XXX commands.
@@ -113,8 +115,13 @@ private:
     std::string path;
   };
 
+#ifndef CMAKE_BOOTSTRAP
+  void WriteFindEvent(cmConfigureLog& log, cmMakefile const& mf) const;
+#endif
+
   cmFindBase const* FindCommand;
   std::string CommandName;
+  bool TrackSearchProgress() const;
   std::vector<DebugLibState> FailedSearchLocations;
   DebugLibState FoundSearchLocation;
 };
