@@ -169,7 +169,7 @@ endfunction()
 function(_GNUInstallDirs_cache_path var description)
   set(cmake_install_var "CMAKE_INSTALL_${var}")
   set(default "${_GNUInstallDirs_${var}_DEFAULT}")
-  set(full_description "${description}")
+  set(full_description "${description} (${default})")
   if(NOT DEFINED ${cmake_install_var})
     set(${cmake_install_var} "${default}" CACHE PATH "${full_description}")
   endif()
@@ -322,24 +322,24 @@ unset(_libdir_set)
 unset(__LAST_LIBDIR_DEFAULT)
 
 _GNUInstallDirs_cache_path(BINDIR
-  "User executables (bin)")
+  "User executables")
 _GNUInstallDirs_cache_path(SBINDIR
-  "System admin executables (sbin)")
+  "System admin executables")
 _GNUInstallDirs_cache_path(LIBEXECDIR
-  "Program executables (libexec)")
+  "Program executables")
 _GNUInstallDirs_cache_path(SYSCONFDIR
-  "Read-only single-machine data (etc)")
+  "Read-only single-machine data")
 _GNUInstallDirs_cache_path(SHAREDSTATEDIR
-  "Modifiable architecture-independent data (com)")
+  "Modifiable architecture-independent data")
 _GNUInstallDirs_cache_path(LOCALSTATEDIR
-  "Modifiable single-machine data (var)")
+  "Modifiable single-machine data")
 
 _GNUInstallDirs_cache_path(INCLUDEDIR
-  "C header files (include)")
+  "C header files")
 _GNUInstallDirs_cache_path(OLDINCLUDEDIR
-  "C header files for non-gcc (/usr/include)")
+  "C header files for non-gcc")
 _GNUInstallDirs_cache_path(DATAROOTDIR
-  "Read-only architecture-independent data root (share)")
+  "Read-only architecture-independent data root")
 
 #-----------------------------------------------------------------------------
 # Values whose defaults are relative to DATAROOTDIR.  Store empty values in
@@ -349,7 +349,7 @@ _GNUInstallDirs_cache_path(DATAROOTDIR
 if(CMAKE_SYSTEM_NAME MATCHES "^(([^kF].*)?BSD|DragonFly)$")
   set(_GNUInstallDirs_INFODIR_DEFAULT "info")
   _GNUInstallDirs_cache_path(INFODIR
-    "Info documentation (info)")
+    "Info documentation")
 else()
   set(_GNUInstallDirs_INFODIR_DEFAULT "${CMAKE_INSTALL_DATAROOTDIR}/info")
   _GNUInstallDirs_cache_path_fallback(INFODIR
@@ -359,7 +359,7 @@ endif()
 if(CMAKE_SYSTEM_NAME MATCHES "^(([^k].*)?BSD|DragonFly)$" AND NOT CMAKE_SYSTEM_NAME MATCHES "^(FreeBSD)$")
   set(_GNUInstallDirs_MANDIR_DEFAULT "man")
   _GNUInstallDirs_cache_path(MANDIR
-    "Man documentation (man)")
+    "Man documentation")
 else()
   set(_GNUInstallDirs_MANDIR_DEFAULT "${CMAKE_INSTALL_DATAROOTDIR}/man")
   _GNUInstallDirs_cache_path_fallback(MANDIR
