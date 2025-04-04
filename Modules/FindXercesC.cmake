@@ -7,44 +7,63 @@ FindXercesC
 
 .. versionadded:: 3.1
 
-Find the Apache Xerces-C++ validating XML parser headers and libraries.
+Finds the Apache Xerces-C++ validating XML parser headers and libraries.
 
 Imported Targets
 ^^^^^^^^^^^^^^^^
 
-.. versionadded:: 3.5
-
-This module defines the following :prop_tgt:`IMPORTED` targets:
+This module defines the following :ref:`Imported Targets`:
 
 ``XercesC::XercesC``
-  The Xerces-C++ ``xerces-c`` library, if found.
+  .. versionadded:: 3.5
 
-Result variables
+  Target encapsulating the Xerces-C++ library (``xerces-c``) usage requirements,
+  available only if Xerces-C++ is found.
+
+Result Variables
 ^^^^^^^^^^^^^^^^
 
-This module will set the following variables in your project:
+This module defines the following variables:
 
 ``XercesC_FOUND``
-  true if the Xerces headers and libraries were found
+  Boolean indicating whether the Xerces-C++ is found.
 ``XercesC_VERSION``
-  Xerces release version
+  The version of the found Xerces-C++ library.
 ``XercesC_INCLUDE_DIRS``
-  the directory containing the Xerces headers
+  Include directories needed to use Xerces-C++.
 ``XercesC_LIBRARIES``
-  Xerces libraries to be linked
+  Libraries needed to link for using Xerces-C++.
+``XercesC_LIBRARY``
+  The path to the Xerces-C++ library (``xerces-c``), either release or debug
+  variant.
 
-Cache variables
+Cache Variables
 ^^^^^^^^^^^^^^^
 
 The following cache variables may also be set:
 
 ``XercesC_INCLUDE_DIR``
-  the directory containing the Xerces headers
-``XercesC_LIBRARY``
-  the Xerces library
+  The directory containing the Xerces-C++ headers.
 
-.. versionadded:: 3.4
-  Debug and Release variants are found separately.
+``XercesC_LIBRARY_RELEASE``
+  .. versionadded:: 3.4
+
+  The path to a release (optimized) variant of the Xerces-C++ library.
+
+``XercesC_LIBRARY_DEBUG``
+  .. versionadded:: 3.4
+
+  The path to a debug variant of the Xerces-C++ library.
+
+Examples
+^^^^^^^^
+
+Finding the Xerces-C++ library and linking it to a project target:
+
+.. code-block:: cmake
+
+  find_package(XercesC)
+  target_link_libraries(project_target PRIVATE XercesC::XercesC)
 #]=======================================================================]
 
 cmake_policy(PUSH)
