@@ -1,5 +1,15 @@
 include(RunCMake)
 
+# Isolate test cases from the caller's environment.
+if(DEFINED ENV{CFLAGS})
+  string(REGEX REPLACE "-Werror[^ ]*" "" cflags "$ENV{CFLAGS}")
+  set(ENV{CFLAGS} "${cflags}")
+endif()
+if(DEFINED ENV{LDFLAGS})
+  string(REGEX REPLACE "-Wl,--fatal-warnings[^ ]*" "" ldflags "$ENV{LDFLAGS}")
+  set(ENV{LDFLAGS} "${ldflags}")
+endif()
+
 run_cmake(BadValue)
 
 function(run_link_warn test)
