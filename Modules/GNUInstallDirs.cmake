@@ -167,7 +167,7 @@ endfunction()
 
 # Create a cache variable with default for a path.
 function(_GNUInstallDirs_cache_path var default description)
-  set(cmake_install_var "${var}")
+  set(cmake_install_var "CMAKE_INSTALL_${var}")
   set(full_description "${description}")
   if(NOT DEFINED ${cmake_install_var})
     set(${cmake_install_var} "${default}" CACHE PATH "${full_description}")
@@ -179,7 +179,7 @@ endfunction()
 # when unset; used for entries slaved to other entries such as
 # DATAROOTDIR.
 function(_GNUInstallDirs_cache_path_fallback var default description)
-  set(cmake_install_var "${var}")
+  set(cmake_install_var "CMAKE_INSTALL_${var}")
   if(NOT ${cmake_install_var})
     set(${cmake_install_var} "" CACHE PATH "${description}")
     set(${cmake_install_var} "${default}")
@@ -307,24 +307,24 @@ set(_GNUInstallDirs_LAST_CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}" CACHE IN
 unset(_libdir_set)
 unset(__LAST_LIBDIR_DEFAULT)
 
-_GNUInstallDirs_cache_path(CMAKE_INSTALL_BINDIR "bin"
+_GNUInstallDirs_cache_path(BINDIR "bin"
   "User executables (bin)")
-_GNUInstallDirs_cache_path(CMAKE_INSTALL_SBINDIR "sbin"
+_GNUInstallDirs_cache_path(SBINDIR "sbin"
   "System admin executables (sbin)")
-_GNUInstallDirs_cache_path(CMAKE_INSTALL_LIBEXECDIR "libexec"
+_GNUInstallDirs_cache_path(LIBEXECDIR "libexec"
   "Program executables (libexec)")
-_GNUInstallDirs_cache_path(CMAKE_INSTALL_SYSCONFDIR "etc"
+_GNUInstallDirs_cache_path(SYSCONFDIR "etc"
   "Read-only single-machine data (etc)")
-_GNUInstallDirs_cache_path(CMAKE_INSTALL_SHAREDSTATEDIR "com"
+_GNUInstallDirs_cache_path(SHAREDSTATEDIR "com"
   "Modifiable architecture-independent data (com)")
-_GNUInstallDirs_cache_path(CMAKE_INSTALL_LOCALSTATEDIR "var"
+_GNUInstallDirs_cache_path(LOCALSTATEDIR "var"
   "Modifiable single-machine data (var)")
 
-_GNUInstallDirs_cache_path(CMAKE_INSTALL_INCLUDEDIR "include"
+_GNUInstallDirs_cache_path(INCLUDEDIR "include"
   "C header files (include)")
-_GNUInstallDirs_cache_path(CMAKE_INSTALL_OLDINCLUDEDIR "/usr/include"
+_GNUInstallDirs_cache_path(OLDINCLUDEDIR "/usr/include"
   "C header files for non-gcc (/usr/include)")
-_GNUInstallDirs_cache_path(CMAKE_INSTALL_DATAROOTDIR "share"
+_GNUInstallDirs_cache_path(DATAROOTDIR "share"
   "Read-only architecture-independent data root (share)")
 
 #-----------------------------------------------------------------------------
@@ -333,28 +333,28 @@ _GNUInstallDirs_cache_path(CMAKE_INSTALL_DATAROOTDIR "share"
 # not set explicitly.  This auto-updates the defaults as DATAROOTDIR changes.
 
 if(CMAKE_SYSTEM_NAME MATCHES "^(([^kF].*)?BSD|DragonFly)$")
-  _GNUInstallDirs_cache_path(CMAKE_INSTALL_INFODIR "info"
+  _GNUInstallDirs_cache_path(INFODIR "info"
     "Info documentation (info)")
 else()
-  _GNUInstallDirs_cache_path_fallback(CMAKE_INSTALL_INFODIR "${CMAKE_INSTALL_DATAROOTDIR}/info"
+  _GNUInstallDirs_cache_path_fallback(INFODIR "${CMAKE_INSTALL_DATAROOTDIR}/info"
     "Info documentation (DATAROOTDIR/info)")
 endif()
 
 if(CMAKE_SYSTEM_NAME MATCHES "^(([^k].*)?BSD|DragonFly)$" AND NOT CMAKE_SYSTEM_NAME MATCHES "^(FreeBSD)$")
-  _GNUInstallDirs_cache_path(CMAKE_INSTALL_MANDIR "man"
+  _GNUInstallDirs_cache_path(MANDIR "man"
     "Man documentation (man)")
 else()
-  _GNUInstallDirs_cache_path_fallback(CMAKE_INSTALL_MANDIR "${CMAKE_INSTALL_DATAROOTDIR}/man"
+  _GNUInstallDirs_cache_path_fallback(MANDIR "${CMAKE_INSTALL_DATAROOTDIR}/man"
     "Man documentation (DATAROOTDIR/man)")
 endif()
 
-_GNUInstallDirs_cache_path_fallback(CMAKE_INSTALL_DATADIR "${CMAKE_INSTALL_DATAROOTDIR}"
+_GNUInstallDirs_cache_path_fallback(DATADIR "${CMAKE_INSTALL_DATAROOTDIR}"
   "Read-only architecture-independent data (DATAROOTDIR)")
-_GNUInstallDirs_cache_path_fallback(CMAKE_INSTALL_LOCALEDIR "${CMAKE_INSTALL_DATAROOTDIR}/locale"
+_GNUInstallDirs_cache_path_fallback(LOCALEDIR "${CMAKE_INSTALL_DATAROOTDIR}/locale"
   "Locale-dependent data (DATAROOTDIR/locale)")
-_GNUInstallDirs_cache_path_fallback(CMAKE_INSTALL_DOCDIR "${CMAKE_INSTALL_DATAROOTDIR}/doc/${PROJECT_NAME}"
+_GNUInstallDirs_cache_path_fallback(DOCDIR "${CMAKE_INSTALL_DATAROOTDIR}/doc/${PROJECT_NAME}"
   "Documentation root (DATAROOTDIR/doc/PROJECT_NAME)")
-_GNUInstallDirs_cache_path_fallback(CMAKE_INSTALL_RUNSTATEDIR "${CMAKE_INSTALL_LOCALSTATEDIR}/run"
+_GNUInstallDirs_cache_path_fallback(RUNSTATEDIR "${CMAKE_INSTALL_LOCALSTATEDIR}/run"
   "Run-time variable data (LOCALSTATEDIR/run)")
 
 #-----------------------------------------------------------------------------
