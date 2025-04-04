@@ -190,6 +190,40 @@ function(_GNUInstallDirs_cache_path_fallback var description)
   return(PROPAGATE ${cmake_install_var})
 endfunction()
 
+# Other helpers
+# Check what system we are on for LIBDIR formatting
+function(_GNUInstallDirs_get_system_type_for_install out_var)
+  unset(${out_var})
+  # Check if we are building for conda
+  if(DEFINED ENV{CONDA_BUILD} AND DEFINED ENV{PREFIX})
+    set(conda_prefix "$ENV{PREFIX}")
+    cmake_path(ABSOLUTE_PATH conda_prefix NORMALIZE)
+    if("${CMAKE_INSTALL_PREFIX}" STREQUAL conda_prefix)
+      set(${out_var} "conda")
+    endif()
+  elseif(DEFINED ENV{CONDA_PREFIX})
+    set(conda_prefix "$ENV{CONDA_PREFIX}")
+    cmake_path(ABSOLUTE_PATH conda_prefix NORMALIZE)
+    if("${CMAKE_INSTALL_PREFIX}" STREQUAL conda_prefix AND
+        NOT ("${CMAKE_INSTALL_PREFIX}" MATCHES "^/usr/?$" OR
+             "${CMAKE_INSTALL_PREFIX}" MATCHES "^/usr/local/?$"))
+      set(${out_var} "conda")
+    endif()
+  endif()
+  # If we didn't detect conda from the previous step, check
+  # for the linux variant
+  if(NOT ${out_var})
+    if (EXISTS "/etc/alpine-release")
+      set(${out_var} "alpine")
+    elseif (EXISTS "/etc/arch-release")
+      set(${out_var} "arch linux")
+    elseif (EXISTS "/etc/debian_version")
+      set(${out_var} "debian")
+    endif()
+  endif()
+  return(PROPAGATE ${out_var})
+endfunction()
+
 # Installation directories
 #
 
@@ -259,32 +293,7 @@ if(NOT DEFINED CMAKE_INSTALL_LIBDIR OR (_libdir_set
 
   if(CMAKE_SYSTEM_NAME MATCHES "^(Linux|GNU)$"
       AND NOT CMAKE_CROSSCOMPILING)
-    unset(__system_type_for_install)
-    if(DEFINED ENV{CONDA_BUILD} AND DEFINED ENV{PREFIX})
-      set(conda_prefix "$ENV{PREFIX}")
-      cmake_path(ABSOLUTE_PATH conda_prefix NORMALIZE)
-      if("${CMAKE_INSTALL_PREFIX}" STREQUAL conda_prefix)
-        set(__system_type_for_install "conda")
-      endif()
-    elseif(DEFINED ENV{CONDA_PREFIX})
-      set(conda_prefix "$ENV{CONDA_PREFIX}")
-      cmake_path(ABSOLUTE_PATH conda_prefix NORMALIZE)
-      if("${CMAKE_INSTALL_PREFIX}" STREQUAL conda_prefix AND
-         NOT ("${CMAKE_INSTALL_PREFIX}" MATCHES "^/usr/?$" OR
-              "${CMAKE_INSTALL_PREFIX}" MATCHES "^/usr/local/?$"))
-        set(__system_type_for_install "conda")
-      endif()
-    endif()
-    if(NOT __system_type_for_install)
-      if (EXISTS "/etc/alpine-release")
-        set(__system_type_for_install "alpine")
-      elseif (EXISTS "/etc/arch-release")
-        set(__system_type_for_install "arch linux")
-      elseif (EXISTS "/etc/debian_version")
-        set(__system_type_for_install "debian")
-      endif()
-    endif()
-
+    _GNUInstallDirs_get_system_type_for_install(__system_type_for_install)
     if(__system_type_for_install STREQUAL "debian")
       if(CMAKE_LIBRARY_ARCHITECTURE)
         if("${CMAKE_INSTALL_PREFIX}" MATCHES "^/usr/?$")
