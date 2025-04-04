@@ -40,10 +40,8 @@ protected:
   friend class cmFindBaseDebugState;
   void ExpandPaths();
 
-  // see if the VariableName is already set,
-  // also copy the documentation from the cache to VariableDocumentation
-  // if it has documentation in the cache
-  bool CheckForVariableDefined();
+  bool IsFound() const;
+  bool IsDefined() const;
 
   void NormalizeFindResult();
   void StoreFindResult(std::string const& value);
@@ -62,7 +60,6 @@ protected:
   // CMAKE_*_PATH CMAKE_SYSTEM_*_PATH FRAMEWORK|LIBRARY|INCLUDE|PROGRAM
   std::string EnvironmentPath; // LIB,INCLUDE
 
-  bool AlreadyDefined = false;
   bool AlreadyInCacheWithoutMetaInfo = false;
   bool StoreResultInCache = true;
 
@@ -71,6 +68,18 @@ protected:
   std::string ValidatorName;
 
 private:
+  enum class FindState
+  {
+    Undefined,
+    Found,
+    NotFound,
+  };
+  // see if the VariableName is already set,
+  // also copy the documentation from the cache to VariableDocumentation
+  // if it has documentation in the cache
+  FindState GetInitialState();
+  FindState InitialState = FindState::Undefined;
+
   // Add pieces of the search.
   void FillPackageRootPath();
   void FillCMakeVariablePath();

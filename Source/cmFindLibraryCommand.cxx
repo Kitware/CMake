@@ -44,7 +44,7 @@ bool cmFindLibraryCommand::InitialPass(std::vector<std::string> const& argsIn)
 
   this->DebugMode = this->ComputeIfDebugModeWanted(this->VariableName);
 
-  if (this->AlreadyDefined) {
+  if (this->IsFound()) {
     this->NormalizeFindResult();
     return true;
   }

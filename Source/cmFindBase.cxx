@@ -79,8 +79,8 @@ bool cmFindBase::ParseArguments(std::vector<std::string> const& argsIn)
     return false;
   }
   this->VariableName = args[0];
-  if (this->CheckForVariableDefined()) {
-    this->AlreadyDefined = true;
+  this->InitialState = this->GetInitialState();
+  if (this->IsFound()) {
     return true;
   }
 
@@ -470,7 +470,7 @@ void cmFindBase::FillUserGuessPath()
   paths.AddSuffixes(this->SearchPathSuffixes);
 }
 
-bool cmFindBase::CheckForVariableDefined()
+cmFindBase::FindState cmFindBase::GetInitialState()
 {
   if (cmValue value = this->Makefile->GetDefinition(this->VariableName)) {
     cmState* state = this->Makefile->GetState();
@@ -496,10 +496,21 @@ bool cmFindBase::CheckForVariableDefined()
       if (cached && cacheType == cmStateEnums::UNINITIALIZED) {
         this->AlreadyInCacheWithoutMetaInfo = true;
       }
-      return true;
+      return FindState::Found;
     }
+    return FindState::NotFound;
   }
-  return false;
+  return FindState::Undefined;
+}
+
+bool cmFindBase::IsFound() const
+{
+  return this->InitialState == FindState::Found;
+}
+
+bool cmFindBase::IsDefined() const
+{
+  return this->InitialState != FindState::Undefined;
 }
 
 void cmFindBase::NormalizeFindResult()
