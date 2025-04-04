@@ -5,40 +5,62 @@
 FindCups
 --------
 
-Find the Common UNIX Printing System (CUPS).
-
-Set ``CUPS_REQUIRE_IPP_DELETE_ATTRIBUTE`` to ``TRUE`` if you need a version which
-features this function (i.e. at least ``1.1.19``)
+Finds the Common UNIX Printing System (CUPS).
 
 Imported Targets
 ^^^^^^^^^^^^^^^^
 
-.. versionadded:: 3.15
+This module provides the following :ref:`Imported Targets`:
 
-This module defines :prop_tgt:`IMPORTED` target ``Cups::Cups``, if Cups has
-been found.
+``Cups::Cups``
+  .. versionadded:: 3.15
 
-Result variables
+  Target encapsulating the CUPS usage requirements, available only if CUPS is
+  found.
+
+Result Variables
 ^^^^^^^^^^^^^^^^
 
-This module will set the following variables in your project:
+This module defines the following variables:
 
-``CUPS_FOUND``
-  true if CUPS headers and libraries were found
+``Cups_FOUND``
+  Boolean indicating whether the CUPS is found.  For backward compatibility, the
+  ``CUPS_FOUND`` variable is also set to the same value.
 ``CUPS_INCLUDE_DIRS``
-  the directory containing the Cups headers
-``CUPS_LIBRARIES``
-  the libraries to link against to use CUPS.
+  Include directories needed for using CUPS.
 ``CUPS_VERSION_STRING``
-  the version of CUPS found (since CMake 2.8.8)
+  .. versionadded:: 2.8.8
 
-Cache variables
+  The version of CUPS found.
+
+Cache Variables
 ^^^^^^^^^^^^^^^
 
 The following cache variables may also be set:
 
 ``CUPS_INCLUDE_DIR``
-  the directory containing the Cups headers
+  The directory containing the CUPS headers.
+``CUPS_LIBRARIES``
+  Libraries needed to link against to use CUPS.
+
+Hints
+^^^^^
+
+This module accepts the following variables:
+
+``CUPS_REQUIRE_IPP_DELETE_ATTRIBUTE``
+  Set this variable to ``TRUE`` to require CUPS version which features the
+  ``ippDeleteAttribute()`` function (i.e. at least of CUPS ``1.1.19``).
+
+Examples
+^^^^^^^^
+
+Finding CUPS and linking it to a project target:
+
+.. code-block:: cmake
+
+  find_package(Cups)
+  target_link_libraries(project_target PRIVATE Cups::Cups)
 #]=======================================================================]
 
 cmake_policy(PUSH)
@@ -92,7 +114,7 @@ endif ()
 
 mark_as_advanced(CUPS_INCLUDE_DIR CUPS_LIBRARIES)
 
-if (CUPS_FOUND)
+if (Cups_FOUND)
     set(CUPS_INCLUDE_DIRS "${CUPS_INCLUDE_DIR}")
     if (NOT TARGET Cups::Cups)
         add_library(Cups::Cups INTERFACE IMPORTED)
