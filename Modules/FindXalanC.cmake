@@ -7,41 +7,62 @@ FindXalanC
 
 .. versionadded:: 3.5
 
-Find the Apache Xalan-C++ XSL transform processor headers and libraries.
+Finds the Apache Xalan-C++ XSL transform processor headers and libraries.
+
+.. note::
+
+  The Xalan-C++ library depends on the :module:`Xerces-C++ <FindXercesC>`
+  library, which must be found for this module to succeed.
 
 Imported Targets
 ^^^^^^^^^^^^^^^^
 
-This module defines the following :prop_tgt:`IMPORTED` targets:
+This module provides the following :ref:`Imported Targets`:
 
 ``XalanC::XalanC``
-  The Xalan-C++ ``xalan-c`` library, if found.
+  Target encapsulating the Xalan-C++ library usage requirements, available only
+  if Xalan-C++ is found.
 
-Result variables
+Result Variables
 ^^^^^^^^^^^^^^^^
 
-This module will set the following variables in your project:
+This module defines the following variables:
 
 ``XalanC_FOUND``
-  true if the Xalan headers and libraries were found
+  Boolean indicating whether the Xalan-C++ is found.
 ``XalanC_VERSION``
-  Xalan release version
+  The version of the found Xalan-C++ library.
 ``XalanC_INCLUDE_DIRS``
-  the directory containing the Xalan headers; note
-  ``XercesC_INCLUDE_DIRS`` is also required
+  Include directories needed for using Xalan-C++ library.  These contain the
+  Xalan-C++ and Xerces-C++ headers.
 ``XalanC_LIBRARIES``
-  Xalan libraries to be linked; note ``XercesC_LIBRARIES`` is also
-  required
+  Libraries needed to link against Xalan-C++.  These contain the Xalan-C++ and
+  Xerces-C++ libraries.
+``XalanC_LIBRARY``
+  The path to the Xalan-C++ library (``xalan-c``), either release or debug
+  variant.
 
-Cache variables
+Cache Variables
 ^^^^^^^^^^^^^^^
 
 The following cache variables may also be set:
 
 ``XalanC_INCLUDE_DIR``
-  the directory containing the Xalan headers
-``XalanC_LIBRARY``
-  the Xalan library
+  The directory containing the Xalan-C++ headers.
+``XalanC_LIBRARY_RELEASE``
+  The path to a release (optimized) variant of the Xalan-C++ library.
+``XalanC_LIBRARY_DEBUG``
+  The path to a debug variant of the Xalan-C++ library.
+
+Examples
+^^^^^^^^
+
+Finding Xalan-C++ library and linking it to a project target:
+
+.. code-block:: cmake
+
+  find_package(XalanC)
+  target_link_libraries(project_target PRIVATE XalanC::XalanC)
 #]=======================================================================]
 
 cmake_policy(PUSH)
