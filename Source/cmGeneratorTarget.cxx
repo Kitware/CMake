@@ -6001,8 +6001,15 @@ std::string cmGeneratorTarget::GetSwiftModuleName() const
 
 std::string cmGeneratorTarget::GetSwiftModuleFileName() const
 {
-  return this->GetPropertyOrDefault(
+  std::string moduleFilename = this->GetPropertyOrDefault(
     "Swift_MODULE", this->GetSwiftModuleName() + ".swiftmodule");
+  if (this->GetPolicyStatusCMP0195() == cmPolicies::NEW) {
+    if (cmValue moduleTriple =
+          this->Makefile->GetDefinition("CMAKE_Swift_MODULE_TRIPLE")) {
+      moduleFilename += "/" + *moduleTriple + ".swiftmodule";
+    }
+  }
+  return moduleFilename;
 }
 
 std::string cmGeneratorTarget::GetSwiftModuleDirectory(

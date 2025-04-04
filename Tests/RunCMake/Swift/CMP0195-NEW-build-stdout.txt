@@ -1,0 +1,1 @@
+swiftc(.exe)? .* -emit-module -emit-module-path El(/|\\)((Debug|Release)(/|\\))?El\.swiftmodule(/|\\)[-_a-z0-9]+\.swiftmodule -module-name El
