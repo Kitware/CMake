@@ -6,11 +6,13 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include "cmDefinitions.h"
 #include "cmLinkedTree.h"
 #include "cmListFileCache.h"
+#include "cmPackageState.h"
 #include "cmPolicies.h"
 #include "cmPropertyMap.h"
 #include "cmStateSnapshot.h"
@@ -83,6 +85,8 @@ struct cmStateDetail::BuildsystemDirectoryStateType
   std::string ProjectName;
 
   cmPropertyMap Properties;
+
+  std::unordered_map<std::string, cmPackageState> Packages;
 
   std::vector<cmStateSnapshot> Children;
 };

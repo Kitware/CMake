@@ -6,12 +6,14 @@
 #include <algorithm>
 #include <cassert>
 #include <string>
+#include <unordered_map>
 
 #include <cm/iterator>
 
 #include "cmDefinitions.h"
 #include "cmLinkedTree.h"
 #include "cmListFileCache.h"
+#include "cmPackageState.h"
 #include "cmPropertyMap.h"
 #include "cmState.h"
 #include "cmStateDirectory.h"
@@ -416,6 +418,12 @@ void cmStateSnapshot::SetProjectName(std::string const& name)
 std::string cmStateSnapshot::GetProjectName() const
 {
   return this->Position->BuildSystemDirectory->ProjectName;
+}
+
+cmPackageState& cmStateSnapshot::GetPackageState(
+  std::string const& packagePath)
+{
+  return this->Position->BuildSystemDirectory->Packages[packagePath];
 }
 
 void cmStateSnapshot::InitializeFromParent_ForSubdirsCommand()
