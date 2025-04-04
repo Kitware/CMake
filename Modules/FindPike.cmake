@@ -5,16 +5,27 @@
 FindPike
 --------
 
-Find Pike
+Finds the Pike compiler and interpreter.  Pike is interpreted, general purpose,
+high-level, dynamic programming language.
 
-This module finds if PIKE is installed and determines where the
-include files and libraries are.  It also determines what the name of
-the library is.  This code sets the following variables:
+Cache Variables
+^^^^^^^^^^^^^^^
 
-::
+The following cache variables may also be set:
 
-  PIKE_INCLUDE_PATH       = path to where program.h is found
-  PIKE_EXECUTABLE         = full path to the pike binary
+``PIKE_INCLUDE_PATH``
+  The directory containing ``program.h``.
+``PIKE_EXECUTABLE``
+  Full path to the pike binary.
+
+Examples
+^^^^^^^^
+
+Finding Pike:
+
+.. code-block:: cmake
+
+  find_package(Pike)
 #]=======================================================================]
 
 find_path(PIKE_INCLUDE_PATH program.h
