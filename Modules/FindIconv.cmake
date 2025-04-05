@@ -7,72 +7,82 @@ FindIconv
 
 .. versionadded:: 3.11
 
-This module finds the ``iconv()`` POSIX.1 functions on the system.
-These functions might be provided in the regular C library or externally
-in the form of an additional library.
+This module finds the ``iconv()`` POSIX.1 functions on the system.  These
+functions might be provided in the standard C library or externally in the form
+of an additional library.
 
-The following variables are provided to indicate iconv support:
+Imported Targets
+^^^^^^^^^^^^^^^^
 
-.. variable:: Iconv_FOUND
+This module provides the following :ref:`Imported Targets`:
 
-  Variable indicating if the iconv support was found.
+``Iconv::Iconv``
+  Target encapsulating the iconv usage requirements, available only if iconv is
+  found.
 
-.. variable:: Iconv_INCLUDE_DIRS
+Result Variables
+^^^^^^^^^^^^^^^^
 
-  The directories containing the iconv headers.
+This module defines the following variables:
 
-.. variable:: Iconv_LIBRARIES
+``Iconv_FOUND``
+  Boolean indicating if the iconv support was found.
 
+``Iconv_INCLUDE_DIRS``
+  The include directories containing the iconv headers.
+
+``Iconv_LIBRARIES``
   The iconv libraries to be linked.
 
-.. variable:: Iconv_VERSION
-
+``Iconv_VERSION``
   .. versionadded:: 3.21
 
-  The version of iconv found (x.y)
+  The version of iconv found (x.y).
 
-.. variable:: Iconv_VERSION_MAJOR
+  .. note::
+    Some libiconv implementations don't embed the version in their header files.
+    In this case the variables ``Iconv_VERSION*`` will be empty.
 
+``Iconv_VERSION_MAJOR``
   .. versionadded:: 3.21
 
-  The major version of iconv
+  The major version of iconv.
 
-.. variable:: Iconv_VERSION_MINOR
-
+``Iconv_VERSION_MINOR``
   .. versionadded:: 3.21
 
-  The minor version of iconv
+  The minor version of iconv.
 
-.. variable:: Iconv_IS_BUILT_IN
+``Iconv_IS_BUILT_IN``
+  A boolean variable indicating whether iconv support is stemming from the C
+  standard library or not.  Even if the C library provides ``iconv()``, the
+  presence of an external ``libiconv`` implementation might lead to this being
+  false.
 
-  A variable indicating whether iconv support is stemming from the
-  C library or not. Even if the C library provides `iconv()`, the presence of
-  an external `libiconv` implementation might lead to this being false.
-
-Additionally, the following :prop_tgt:`IMPORTED` target is being provided:
-
-.. variable:: Iconv::Iconv
-
-  Imported target for using iconv.
+Cache Variables
+^^^^^^^^^^^^^^^
 
 The following cache variables may also be set:
 
-.. variable:: Iconv_INCLUDE_DIR
-
+``Iconv_INCLUDE_DIR``
   The directory containing the iconv headers.
 
-.. variable:: Iconv_LIBRARY
-
+``Iconv_LIBRARY``
   The iconv library (if not implicitly given in the C library).
 
 .. note::
   On POSIX platforms, iconv might be part of the C library and the cache
   variables ``Iconv_INCLUDE_DIR`` and ``Iconv_LIBRARY`` might be empty.
 
-.. note::
-  Some libiconv implementations don't embed the version number in their header files.
-  In this case the variables ``Iconv_VERSION*`` will be empty.
+Examples
+^^^^^^^^
 
+Finding iconv and linking it to a project target:
+
+.. code-block:: cmake
+
+  find_package(Iconv)
+  target_link_libraries(project_target PRIVATE Iconv::Iconv)
 #]=======================================================================]
 
 cmake_policy(PUSH)
