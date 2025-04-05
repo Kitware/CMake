@@ -5,48 +5,107 @@
 FindCurses
 ----------
 
-Find the curses or ncurses include file and library.
+Finds the curses or ncurses library.
+
+Curses is a terminal control library for Unix-like systems, used to build text
+user interface (TUI) applications.  Originally developed in 1978, it has since
+evolved into multiple implementations, most notably ncurses (new curses), BSD
+curses, and PDCurses (a public domain curses library for non-Unix platforms).
 
 Result Variables
 ^^^^^^^^^^^^^^^^
 
 This module defines the following variables:
 
-``CURSES_FOUND``
-  True if Curses is found.
+``Curses_FOUND``
+  Boolean indicating whether the Curses is found.  For backward compatibility,
+  the ``CURSES_FOUND`` variable is also set to the same value.
+
 ``CURSES_INCLUDE_DIRS``
+  .. versionadded:: 3.1
+
   The include directories needed to use Curses.
+
 ``CURSES_LIBRARIES``
   The libraries needed to use Curses.
+
 ``CURSES_CFLAGS``
   .. versionadded:: 3.16
 
-  Parameters which ought be given to C/C++ compilers when using Curses.
+  Compiler flags which ought be given to C/C++ compilers when using Curses.
+
 ``CURSES_HAVE_CURSES_H``
-  True if curses.h is available.
+  Boolean indicating whether ``curses.h`` is available.
+
 ``CURSES_HAVE_NCURSES_H``
-  True if ncurses.h is available.
+  Boolean indicating whether ``ncurses.h`` is available.
+
 ``CURSES_HAVE_NCURSES_NCURSES_H``
-  True if ``ncurses/ncurses.h`` is available.
+  Boolean indicating whether ``ncurses/ncurses.h`` is available.
+
 ``CURSES_HAVE_NCURSES_CURSES_H``
-  True if ``ncurses/curses.h`` is available.
+  Boolean indicating whether ``ncurses/curses.h`` is available.
 
-Set ``CURSES_NEED_NCURSES`` to ``TRUE`` before the
-``find_package(Curses)`` call if NCurses functionality is required.
+Hints
+^^^^^
 
-.. versionadded:: 3.10
-  Set ``CURSES_NEED_WIDE`` to ``TRUE`` before the
-  ``find_package(Curses)`` call if unicode functionality is required.
+This module accepts the following variables:
 
-Backward Compatibility
-^^^^^^^^^^^^^^^^^^^^^^
+``CURSES_NEED_NCURSES``
+  Set this variable to ``TRUE`` before calling ``find_package(Curses)`` if the
+  the ncurses implementation functionality is specifically required.
 
-The following variable are provided for backward compatibility:
+``CURSES_NEED_WIDE``
+  .. versionadded:: 3.10
+
+  Set this variable to ``TRUE`` before calling ``find_package(Curses)`` if
+  Unicode (wide character) support is required.
+
+Deprecated Variables
+^^^^^^^^^^^^^^^^^^^^
+
+The following legacy variables are provided for backward compatibility:
 
 ``CURSES_INCLUDE_DIR``
-  Path to Curses include.  Use ``CURSES_INCLUDE_DIRS`` instead.
+  .. deprecated:: 3.1
+    Use the ``CURSES_INCLUDE_DIRS`` variable instead.
+
+  Path to a Curses include directory.
+
 ``CURSES_LIBRARY``
-  Path to Curses library.  Use ``CURSES_LIBRARIES`` instead.
+  .. deprecated:: 2.4
+    Use the ``CURSES_LIBRARIES`` variable instead.
+
+  Path to Curses library.
+
+Examples
+^^^^^^^^
+
+Finding Curses and creating an imported interface target for linking it to a
+project target:
+
+.. code-block:: cmake
+
+  find_package(Curses)
+  if(Curses_FOUND AND NOT TARGET Curses::Curses)
+    add_library(Curses::Curses INTERFACE IMPORTED)
+    set_target_properties(
+      Curses::Curses
+      PROPERTIES
+        INTERFACE_LINK_LIBRARIES "${CURSES_LIBRARIES}"
+        INTERFACE_INCLUDE_DIRECTORIES "${CURSES_INCLUDE_DIRS}"
+    )
+  endif()
+
+  add_executable(app app.c)
+  target_link_libraries(app PRIVATE Curses::Curses)
+
+When ncurses is specifically required:
+
+.. code-block:: cmake
+
+  set(CURSES_NEED_NCURSES TRUE)
+  find_package(Curses)
 #]=======================================================================]
 
 include(${CMAKE_CURRENT_LIST_DIR}/CheckLibraryExists.cmake)
@@ -174,8 +233,8 @@ else()
   get_filename_component(_cursesLibDir "${CURSES_CURSES_LIBRARY}" PATH)
   get_filename_component(_cursesParentDir "${_cursesLibDir}" PATH)
 
-  #We can't find anything with CURSES_NEED_WIDE because we know
-  #only about ncursesw unicode curses version
+  # We can't find anything with CURSES_NEED_WIDE because we know
+  # only about ncursesw unicode curses version
   if(NOT CURSES_NEED_WIDE)
     find_path(CURSES_INCLUDE_PATH
       NAMES curses.h
@@ -218,7 +277,7 @@ if(NOT DEFINED CURSES_HAVE_NCURSES_CURSES_H)
   endif()
 endif()
 if(NOT CURSES_NEED_WIDE)
-  #ncursesw can't be found for this paths
+  # ncursesw can't be found for this paths
   if(NOT DEFINED CURSES_HAVE_NCURSES_H)
     if(EXISTS "${CURSES_INCLUDE_PATH}/ncurses.h")
       set(CURSES_HAVE_NCURSES_H "${CURSES_INCLUDE_PATH}/ncurses.h")
