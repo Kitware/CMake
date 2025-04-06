@@ -5,53 +5,79 @@
 FindOpenAL
 ----------
 
-Finds Open Audio Library (OpenAL).
+Finds the Open Audio Library (OpenAL).
 
-Projects using this module should use ``#include "al.h"`` to include the OpenAL
-header file, **not** ``#include <AL/al.h>``.  The reason for this is that the
-latter is not entirely portable.  Windows/Creative Labs does not by default put
-their headers in ``AL/`` and macOS uses the convention ``<OpenAL/al.h>``.
+OpenAL is a cross-platform 3D audio API designed for efficient rendering of
+multichannel three-dimensional positional audio.  It is commonly used in games
+and multimedia applications to provide immersive and spatialized sound.
 
-Hints
-^^^^^
-
-Environment variable ``$OPENALDIR`` can be used to set the prefix of OpenAL
-installation to be found.
-
-By default on macOS, system framework is search first.  In other words,
-OpenAL is searched in the following order:
-
-1. System framework: ``/System/Library/Frameworks``, whose priority can be
-   changed via setting the :variable:`CMAKE_FIND_FRAMEWORK` variable.
-2. Environment variable ``$OPENALDIR``.
-3. System paths.
-4. User-compiled framework: ``~/Library/Frameworks``.
-5. Manually compiled framework: ``/Library/Frameworks``.
-6. Add-on package: ``/opt``.
+Projects using this module should include the OpenAL header file using
+``#include <al.h>``, and **not** ``#include <AL/al.h>``.  The reason for this is
+that the latter is not portable.  For example, Windows/Creative Labs does not by
+default put OpenAL headers in ``AL/`` and macOS uses the convention of
+``<OpenAL/al.h>``.
 
 Imported Targets
 ^^^^^^^^^^^^^^^^
 
-.. versionadded:: 3.25
-
-This module defines the :prop_tgt:`IMPORTED` target:
+This module provides the following :ref:`Imported Targets`:
 
 ``OpenAL::OpenAL``
-  The OpenAL library, if found.
+  .. versionadded:: 3.25
+
+  Target encapsulating the OpenAL library usage requirements, available only if
+  the OpenAL library is found.
 
 Result Variables
 ^^^^^^^^^^^^^^^^
 
 This module defines the following variables:
 
-``OPENAL_FOUND``
-  If false, do not try to link to OpenAL
-``OPENAL_INCLUDE_DIR``
-  OpenAL include directory
-``OPENAL_LIBRARY``
-  Path to the OpenAL library
+``OpenAL_FOUND``
+  Boolean indicating whether the OpenAL is found.  For backward compatibility,
+  the ``OPENAL_FOUND`` variable is also set to the same value.
 ``OPENAL_VERSION_STRING``
-  Human-readable string containing the version of OpenAL
+  Human-readable string containing the version of OpenAL found.
+
+Cache Variables
+^^^^^^^^^^^^^^^
+
+The following cache variables may also be set:
+
+``OPENAL_INCLUDE_DIR``
+  The include directory containing headers needed to use the OpenAL library.
+``OPENAL_LIBRARY``
+  The path to the OpenAL library.
+
+Hints
+^^^^^
+
+This module accepts the following variables:
+
+``OPENALDIR``
+  Environment variable which can be used to set the installation prefix of
+  OpenAL to be found in non-standard locations.
+
+  OpenAL is searched in the following order:
+
+  1. By default on macOS, system framework is searched first:
+     ``/System/Library/Frameworks``, whose priority can be changed by setting
+     the :variable:`CMAKE_FIND_FRAMEWORK` variable.
+  2. Environment variable ``ENV{OPENALDIR}``.
+  3. System paths.
+  4. User-compiled framework: ``~/Library/Frameworks``.
+  5. Manually compiled framework: ``/Library/Frameworks``.
+  6. Add-on package: ``/opt``.
+
+Examples
+^^^^^^^^
+
+Finding the OpenAL library and linking it to a project target:
+
+.. code-block:: cmake
+
+  find_package(OpenAL)
+  target_link_libraries(project_target PRIVATE OpenAL::OpenAL)
 #]=======================================================================]
 
 # For Windows, Creative Labs seems to have added a registry key for their
@@ -105,7 +131,7 @@ find_package_handle_standard_args(
 
 mark_as_advanced(OPENAL_LIBRARY OPENAL_INCLUDE_DIR)
 
-if(OPENAL_FOUND AND NOT TARGET OpenAL::OpenAL)
+if(OpenAL_FOUND AND NOT TARGET OpenAL::OpenAL)
   add_library(OpenAL::OpenAL UNKNOWN IMPORTED)
   set_target_properties(OpenAL::OpenAL PROPERTIES
     IMPORTED_LOCATION "${OPENAL_LIBRARY}")
