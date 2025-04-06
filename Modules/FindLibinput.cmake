@@ -7,31 +7,46 @@ FindLibinput
 
 .. versionadded:: 3.14
 
-Find libinput headers and library.
+Finds the libinput library which handles input devices in Wayland compositors
+and provides a generic X.Org input driver.
 
 Imported Targets
 ^^^^^^^^^^^^^^^^
 
+This module provides the following :ref:`Imported Targets`:
+
 ``Libinput::Libinput``
-  The libinput library, if found.
+  Target encapsulating the libinput library usage requirements, available only
+  if library is found.
 
 Result Variables
 ^^^^^^^^^^^^^^^^
 
-This will define the following variables in your project:
+This module defines the following variables:
 
 ``Libinput_FOUND``
-  true if (the requested version of) libinput is available.
+  Boolean indicating whether the (requested version of) libinput library is
+  found.
 ``Libinput_VERSION``
-  the version of libinput.
+  The version of the libinput found.
 ``Libinput_LIBRARIES``
-  the libraries to link against to use libinput.
+  The libraries to link against to use the libinput library.
 ``Libinput_INCLUDE_DIRS``
-  where to find the libinput headers.
+  The include directories containing headers needed to use the libinput library.
 ``Libinput_COMPILE_OPTIONS``
-  this should be passed to target_compile_options(), if the
-  target is not used for linking
+  Compile options needed to use the libinput library.  These can be passed to
+  the :command:`target_compile_options` command, when not using the
+  ``Libinput::Libinput`` imported target.
 
+Examples
+^^^^^^^^
+
+Finding the libinput library and linking it to a project target:
+
+.. code-block:: cmake
+
+  find_package(Libinput)
+  target_link_libraries(project_target PRIVATE Libinput::Libinput)
 #]=======================================================================]
 
 
