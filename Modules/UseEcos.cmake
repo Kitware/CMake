@@ -139,10 +139,8 @@ endif ()
 # Check that tclsh (coming with TCL) is available, otherwise ecosconfig doesn't
 # work.
 find_package(Tclsh)
-if (NOT TCL_TCLSH)
+if (NOT Tclsh_FOUND)
   message(SEND_ERROR "The TCL tclsh was not found. Please install TCL, it is required for building eCos applications.")
-else ()
-  message(STATUS "tlcsh found: ${TCL_TCLSH}")
 endif ()
 
 macro(ECOS_ADD_INCLUDE_DIRECTORIES)
