@@ -100,10 +100,45 @@ class FileScopeBase
 protected:
   cmMakefile* Makefile;
 
+private:
+  std::string OldCurrent;
+  cm::optional<std::string> OldParent;
+
 public:
   FileScopeBase(cmMakefile* mf)
     : Makefile(mf)
   {
+  }
+  void PushListFileVars(std::string const& newCurrent)
+  {
+    if (cmValue p = this->Makefile->GetDefinition(kCMAKE_PARENT_LIST_FILE)) {
+      this->OldParent = *p;
+    }
+    if (cmValue c = this->Makefile->GetDefinition(kCMAKE_CURRENT_LIST_FILE)) {
+      this->OldCurrent = *c;
+      this->Makefile->AddDefinition(kCMAKE_PARENT_LIST_FILE, this->OldCurrent);
+      this->Makefile->MarkVariableAsUsed(kCMAKE_PARENT_LIST_FILE);
+    }
+    this->Makefile->AddDefinition(kCMAKE_CURRENT_LIST_FILE, newCurrent);
+    this->Makefile->AddDefinition(kCMAKE_CURRENT_LIST_DIR,
+                                  cmSystemTools::GetFilenamePath(newCurrent));
+    this->Makefile->MarkVariableAsUsed(kCMAKE_CURRENT_LIST_FILE);
+    this->Makefile->MarkVariableAsUsed(kCMAKE_CURRENT_LIST_DIR);
+  }
+  void PopListFileVars()
+  {
+    if (this->OldParent) {
+      this->Makefile->AddDefinition(kCMAKE_PARENT_LIST_FILE, *this->OldParent);
+      this->Makefile->MarkVariableAsUsed(kCMAKE_PARENT_LIST_FILE);
+    } else {
+      this->Makefile->RemoveDefinition(kCMAKE_PARENT_LIST_FILE);
+    }
+    this->Makefile->AddDefinition(kCMAKE_CURRENT_LIST_FILE, this->OldCurrent);
+    this->Makefile->AddDefinition(
+      kCMAKE_CURRENT_LIST_DIR,
+      cmSystemTools::GetFilenamePath(this->OldCurrent));
+    this->Makefile->MarkVariableAsUsed(kCMAKE_CURRENT_LIST_FILE);
+    this->Makefile->MarkVariableAsUsed(kCMAKE_CURRENT_LIST_DIR);
   }
 };
 }
@@ -610,10 +645,12 @@ cmMakefile::IncludeScope::IncludeScope(cmMakefile* mf,
   if (!this->NoPolicyScope) {
     this->Makefile->PushPolicy();
   }
+  this->PushListFileVars(filenametoread);
 }
 
 cmMakefile::IncludeScope::~IncludeScope()
 {
+  this->PopListFileVars();
   if (!this->NoPolicyScope) {
     // Pop the scope we pushed for the script.
     this->Makefile->PopPolicy();
@@ -628,9 +665,6 @@ cmMakefile::IncludeScope::~IncludeScope()
 bool cmMakefile::ReadDependentFile(std::string const& filename,
                                    bool noPolicyScope)
 {
-  if (cmValue def = this->GetDefinition(kCMAKE_CURRENT_LIST_FILE)) {
-    this->AddDefinition(kCMAKE_PARENT_LIST_FILE, *def);
-  }
   std::string filenametoread = cmSystemTools::CollapseFullPath(
     filename, this->GetCurrentSourceDirectory());
 
@@ -685,10 +719,12 @@ public:
     assert(this->Makefile->StateSnapshot.IsValid());
 
     this->Makefile->PushFunctionBlockerBarrier();
+    this->PushListFileVars(filenametoread);
   }
 
   ~ListFileScope()
   {
+    this->PopListFileVars();
     this->Makefile->PopSnapshot(this->ReportError);
     this->Makefile->PopFunctionBlockerBarrier(this->ReportError);
     this->Makefile->Backtrace = this->Makefile->Backtrace.Pop();
@@ -826,18 +862,6 @@ void cmMakefile::RunListFile(cmListFile const& listFile,
   // add this list file to the list of dependencies
   this->ListFiles.push_back(filenametoread);
 
-  std::string currentParentFile =
-    this->GetSafeDefinition(kCMAKE_PARENT_LIST_FILE);
-  std::string currentFile = this->GetSafeDefinition(kCMAKE_CURRENT_LIST_FILE);
-
-  this->AddDefinition(kCMAKE_CURRENT_LIST_FILE, filenametoread);
-  this->AddDefinition(kCMAKE_CURRENT_LIST_DIR,
-                      cmSystemTools::GetFilenamePath(filenametoread));
-
-  this->MarkVariableAsUsed(kCMAKE_PARENT_LIST_FILE);
-  this->MarkVariableAsUsed(kCMAKE_CURRENT_LIST_FILE);
-  this->MarkVariableAsUsed(kCMAKE_CURRENT_LIST_DIR);
-
   // Run the parsed commands.
   size_t const numberFunctions = listFile.Functions.size();
   for (size_t i = 0; i < numberFunctions; ++i) {
@@ -884,14 +908,6 @@ void cmMakefile::RunListFile(cmListFile const& listFile,
       }
     }
   }
-
-  this->AddDefinition(kCMAKE_PARENT_LIST_FILE, currentParentFile);
-  this->AddDefinition(kCMAKE_CURRENT_LIST_FILE, currentFile);
-  this->AddDefinition(kCMAKE_CURRENT_LIST_DIR,
-                      cmSystemTools::GetFilenamePath(currentFile));
-  this->MarkVariableAsUsed(kCMAKE_PARENT_LIST_FILE);
-  this->MarkVariableAsUsed(kCMAKE_CURRENT_LIST_FILE);
-  this->MarkVariableAsUsed(kCMAKE_CURRENT_LIST_DIR);
 }
 
 void cmMakefile::EnforceDirectoryLevelRules() const
@@ -1482,6 +1498,7 @@ public:
       this->Makefile->StateSnapshot.GetState()->CreatePolicyScopeSnapshot(
         this->Makefile->StateSnapshot);
     this->Makefile->PushFunctionBlockerBarrier();
+    this->PushListFileVars(currentStart);
 
     this->GG = mf->GetGlobalGenerator();
     this->CurrentMakefile = this->GG->GetCurrentMakefile();
@@ -1495,6 +1512,7 @@ public:
 
   ~BuildsystemFileScope()
   {
+    this->PopListFileVars();
     this->Makefile->PopFunctionBlockerBarrier(this->ReportError);
     this->Makefile->PopSnapshot(this->ReportError);
 #if !defined(CMAKE_BOOTSTRAP)

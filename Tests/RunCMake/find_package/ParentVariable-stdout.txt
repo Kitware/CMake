@@ -1,5 +1,5 @@
 -- ParentVariable\.cmake: '[^']*/Tests/RunCMake/find_package/CMakeLists\.txt'
 -- ParentVariable/PrimaryConfig\.cmake: '[^']*/Tests/RunCMake/find_package/ParentVariable\.cmake'
 -- ParentVariable/SecondaryConfig\.cmake: '[^']*/Tests/RunCMake/find_package/ParentVariable/PrimaryConfig\.cmake'
--- ParentVariable/PrimaryConfig\.cmake: '[^']*/Tests/RunCMake/find_package/ParentVariable/PrimaryConfig\.cmake'
--- ParentVariable\.cmake: '[^']*/Tests/RunCMake/find_package/ParentVariable\.cmake'
+-- ParentVariable/PrimaryConfig\.cmake: '[^']*/Tests/RunCMake/find_package/ParentVariable\.cmake'
+-- ParentVariable\.cmake: '[^']*/Tests/RunCMake/find_package/CMakeLists\.txt'
