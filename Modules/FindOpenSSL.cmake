@@ -5,110 +5,162 @@
 FindOpenSSL
 -----------
 
-Find the OpenSSL encryption library.
-
-This module finds an installed OpenSSL library and determines its version.
+Finds the installed OpenSSL encryption library and determines its version.
 
 .. versionadded:: 3.19
-  When a version is requested, it can be specified as a simple value or as a
-  range. For a detailed description of version range usage and capabilities,
-  refer to the :command:`find_package` command.
+  Support for specifying version range when calling the :command:`find_package`
+  command.  When a version is requested, it can be specified as a single value
+  as before, and now also a version range can be used.  For a detailed
+  description of version range usage and capabilities, refer to the
+  :command:`find_package` command.
 
 .. versionadded:: 3.18
   Support for OpenSSL 3.0.
 
-Optional COMPONENTS
-^^^^^^^^^^^^^^^^^^^
+Components
+^^^^^^^^^^
 
-.. versionadded:: 3.12
+This module supports the following optional components:
 
-This module supports two optional COMPONENTS: ``Crypto`` and ``SSL``.  Both
-components have associated imported targets, as described below.
+``Crypto``
+  .. versionadded:: 3.12
+
+  Ensures that the OpenSSL ``crypto`` library is found.
+
+``SSL``
+  .. versionadded:: 3.12
+
+  Ensures that the OpenSSL ``ssl`` library is found.
+
+Components can be optionally specified using a standard syntax:
+
+.. code-block:: cmake
+
+  find_package(OpenSSL [COMPONENTS <components>...])
+
+If no components are requested, module by default searches for the ``Crypto``
+as required and ``SSL`` as optional component.
 
 Imported Targets
 ^^^^^^^^^^^^^^^^
 
-.. versionadded:: 3.4
+This module provides the following :ref:`Imported Targets`:
 
-This module defines the following :prop_tgt:`IMPORTED` targets:
+``OpenSSL::Crypto``
+  .. versionadded:: 3.4
+
+  Target encapsulating the OpenSSL ``crypto`` library usage requirements,
+  available only if the ``crypto`` library is found.
 
 ``OpenSSL::SSL``
-  The OpenSSL ``ssl`` library, if found.
-``OpenSSL::Crypto``
-  The OpenSSL ``crypto`` library, if found.
+  .. versionadded:: 3.4
+
+  Target encapsulating the OpenSSL ``ssl`` library usage requirements, available
+  only if the ``ssl`` library is found.  For convenience, this target also links
+  ``OpenSSL::Crypto``, since the ``ssl`` library depends on the ``crypto``
+  library.
+
 ``OpenSSL::applink``
   .. versionadded:: 3.18
 
-  The OpenSSL ``applink`` components that might be need to be compiled into
-  projects under MSVC. This target is available only if found OpenSSL version
-  is not less than 0.9.8. By linking this target the above OpenSSL targets can
-  be linked even if the project has different MSVC runtime configurations with
-  the above OpenSSL targets. This target has no effect on platforms other than
-  MSVC.
+  Target encapsulating the OpenSSL application-side interface
+  (``openssl/applink.c``) usage requirements, available only if OpenSSL is found
+  and its version is at least 0.9.8.
 
-NOTE: Due to how ``INTERFACE_SOURCES`` are consumed by the consuming target,
-unless you certainly know what you are doing, it is always preferred to link
-``OpenSSL::applink`` target as ``PRIVATE`` and to make sure that this target is
-linked at most once for the whole dependency graph of any library or
-executable:
+  This interface provides a glue between OpenSSL BIO layer and the Windows
+  compiler runtime environment and may need to be compiled into projects when
+  using MSVC.  By linking this target, the other OpenSSL imported targets can be
+  linked even if the project uses different MSVC runtime configuration.  Linking
+  this target on platforms other than MSVC has no effect.
 
-.. code-block:: cmake
+  .. note::
 
-   target_link_libraries(myTarget PRIVATE OpenSSL::applink)
+    The interface file is added using the :prop_tgt:`INTERFACE_SOURCES` target
+    property.  Due to how interface sources are propagated in CMake, it is
+    recommended to link the ``OpenSSL::applink`` target as
+    :ref:`PRIVATE <Target Command Scope>` to ensure that it is linked only once
+    in the entire dependency graph of any library or executable:
 
-Otherwise you would probably encounter unexpected random problems when building
-and linking, as both the ISO C and the ISO C++ standard claims almost nothing
-about what a link process should be.
+    .. code-block:: cmake
+
+      target_link_libraries(project_target PRIVATE OpenSSL::applink)
+
+    Using other scopes for this target specifically can lead to unexpected
+    issues during the build or link process, as both the ISO C and ISO C++
+    standards place very few requirements on how linking should behave.
 
 Result Variables
 ^^^^^^^^^^^^^^^^
 
-This module will set the following variables in your project:
+This module defines the following variables:
 
-``OPENSSL_FOUND``
-  System has the OpenSSL library. If no components are requested it only
-  requires the crypto library.
+``OpenSSL_FOUND``
+  Boolean indicating whether the OpenSSL library has been found.  For backward
+  compatibility, the ``OPENSSL_FOUND`` variable is also set to the same value.
 ``OPENSSL_INCLUDE_DIR``
   The OpenSSL include directory.
 ``OPENSSL_CRYPTO_LIBRARY``
-  The OpenSSL crypto library.
+  The OpenSSL ``crypto`` library.
 ``OPENSSL_CRYPTO_LIBRARIES``
-  The OpenSSL crypto library and its dependencies.
+  The OpenSSL ``crypto`` library and its dependencies.
 ``OPENSSL_SSL_LIBRARY``
-  The OpenSSL SSL library.
+  The OpenSSL ``ssl`` library.
 ``OPENSSL_SSL_LIBRARIES``
-  The OpenSSL SSL library and its dependencies.
+  The OpenSSL ``ssl`` library and its dependencies.
 ``OPENSSL_LIBRARIES``
   All OpenSSL libraries and their dependencies.
 ``OPENSSL_VERSION``
-  This is set to ``$major.$minor.$revision$patch`` (e.g. ``0.9.8s``).
+  The OpenSSL version found.  This is set to
+  ``<major>.<minor>.<revision><patch>`` (e.g. ``0.9.8s``).
 ``OPENSSL_APPLINK_SOURCE``
-  The sources in the target ``OpenSSL::applink`` that is mentioned above. This
-  variable shall always be undefined if found openssl version is less than
-  0.9.8 or if platform is not MSVC.
+  The sources in the target ``OpenSSL::applink`` mentioned above.  This variable
+  is only defined if found OpenSSL version is at least 0.9.8 and the platform is
+  MSVC.
 
 Hints
 ^^^^^
 
-The following variables may be set to control search behavior:
+This module accepts the following variables to control the search behavior:
 
 ``OPENSSL_ROOT_DIR``
-  Set to the root directory of an OpenSSL installation.
+  Set to the root directory of an OpenSSL installation to search for the OpenSSL
+  libraries in custom locations.
 
 ``OPENSSL_USE_STATIC_LIBS``
   .. versionadded:: 3.4
 
-  Set to ``TRUE`` to look for static libraries.
+  Set to ``TRUE`` to prefer static OpenSSL libraries over shared ones.
 
 ``OPENSSL_MSVC_STATIC_RT``
   .. versionadded:: 3.5
 
-  Set to ``TRUE`` to choose the MT version of the lib.
+  Set to ``TRUE`` to search for the OpenSSL libraries built with the MSVC static
+  runtime (MT).
 
 ``ENV{PKG_CONFIG_PATH}``
-  On UNIX-like systems, ``pkg-config`` is used to locate the system OpenSSL.
-  Set the ``PKG_CONFIG_PATH`` environment variable to look in alternate
-  locations.  Useful on multi-lib systems.
+  On UNIX-like systems, ``pkg-config`` is used to locate OpenSSL.  Set the
+  ``PKG_CONFIG_PATH`` environment variable to specify alternate locations, which
+  is useful on systems with multiple library installations.
+
+Examples
+^^^^^^^^
+
+Finding the OpenSSL ``crypto`` library and linking it to a project target:
+
+.. code-block:: cmake
+
+  find_package(OpenSSL)
+  target_link_libraries(project_target PRIVATE OpenSSL::Crypto)
+
+The following example shows how to find the OpenSSL ``crypto`` and ``ssl``
+libraries and link them to a project target.  The ``SSL`` component is
+explicitly specified to ensure that the find module reports an error if the
+``ssl`` library is not found:
+
+.. code-block:: cmake
+
+  find_package(OpenSSL COMPONENTS SSL)
+  target_link_libraries(project_target PRIVATE OpenSSL::SSL)
 #]=======================================================================]
 
 cmake_policy(PUSH)
@@ -669,7 +721,7 @@ find_package_handle_standard_args(OpenSSL
 
 mark_as_advanced(OPENSSL_INCLUDE_DIR)
 
-if(OPENSSL_FOUND)
+if(OpenSSL_FOUND)
   if(NOT TARGET OpenSSL::Crypto AND
       (EXISTS "${OPENSSL_CRYPTO_LIBRARY}" OR
         EXISTS "${LIB_EAY_LIBRARY_DEBUG}" OR

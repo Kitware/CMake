@@ -8,10 +8,10 @@ unset (OPENSSL_CRYPTO_LIBRARY)
 unset (OPENSSL_CRYPTO_LIBRARIES)
 unset (OPENSSL_LIBRARIES)
 unset (OPENSSL_VERSION)
-unset (OPENSSL_FOUND)
+unset (OpenSSL_FOUND)
 
 
 find_package (OpenSSL ${version} EXACT COMPONENTS Crypto)
-if (NOT OPENSSL_FOUND)
+if (NOT OpenSSL_FOUND)
   message (FATAL_ERROR "Failed to find OpenSSL with version ${version} EXACT")
 endif()
