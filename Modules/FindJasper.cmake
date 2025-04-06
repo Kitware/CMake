@@ -5,41 +5,64 @@
 FindJasper
 ----------
 
-Find the Jasper JPEG2000 library.
+Finds the JasPer Image Coding Toolkit for handling image data in a variety of
+formats, such as the JPEG-2000.
 
 Imported Targets
 ^^^^^^^^^^^^^^^^
 
+This module provides the following :ref:`Imported Targets`:
+
 ``Jasper::Jasper``
-  The jasper library, if found.
+  .. versionadded:: 3.22
+
+  Target encapsulating the JasPer library usage requirements, available only if
+  the library is found.
 
 Result Variables
 ^^^^^^^^^^^^^^^^
 
 This module defines the following variables:
 
-``JASPER_FOUND``
-  system has Jasper
+``Jasper_FOUND``
+  Boolean indicating whether the JasPer is found.  For backward compatibility,
+  the ``JASPER_FOUND`` variable is also set to the same value.
+
 ``JASPER_INCLUDE_DIRS``
   .. versionadded:: 3.22
 
-  the Jasper include directory
-``JASPER_LIBRARIES``
-  the libraries needed to use Jasper
-``JASPER_VERSION_STRING``
-  the version of Jasper found
+  The include directories needed to use the JasPer library.
 
-Cache variables
+``JASPER_LIBRARIES``
+  The libraries needed to use JasPer.
+
+``JASPER_VERSION_STRING``
+  The version of JasPer found.
+
+Cache Variables
 ^^^^^^^^^^^^^^^
 
 The following cache variables may also be set:
 
 ``JASPER_INCLUDE_DIR``
-  where to find jasper/jasper.h, etc.
+  The directory containing the ``jasper/jasper.h`` and other headers needed to
+  use the JasPer library.
+
 ``JASPER_LIBRARY_RELEASE``
-  where to find the Jasper library (optimized).
+  The path to the release (optimized) variant of the JasPer library.
+
 ``JASPER_LIBRARY_DEBUG``
-  where to find the Jasper library (debug).
+  The path to the debug variant of the JasPer library.
+
+Examples
+^^^^^^^^
+
+Finding the JasPer library and linking it to a project target:
+
+.. code-block:: cmake
+
+  find_package(Jasper)
+  target_link_libraries(project_target PRIVATE Jasper::Jasper)
 #]=======================================================================]
 
 cmake_policy(PUSH)
@@ -66,7 +89,7 @@ find_package_handle_standard_args(Jasper
                                   REQUIRED_VARS JASPER_LIBRARIES JASPER_INCLUDE_DIR JPEG_LIBRARIES
                                   VERSION_VAR JASPER_VERSION_STRING)
 
-if(JASPER_FOUND)
+if(Jasper_FOUND)
   set(JASPER_LIBRARIES ${JASPER_LIBRARIES} ${JPEG_LIBRARIES})
   set(JASPER_INCLUDE_DIRS ${JASPER_INCLUDE_DIR})
   if(NOT TARGET Jasper::Jasper)
