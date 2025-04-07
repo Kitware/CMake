@@ -13,6 +13,8 @@ Imported Targets
 This module provides the following :ref:`Imported Targets`:
 
 ``GIF::GIF``
+  .. versionadded:: 3.14
+
   Target that encapsulates the usage requirements of the GIF library, available
   when the library is found.
 
