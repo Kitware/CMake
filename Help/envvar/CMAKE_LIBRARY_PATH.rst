@@ -1,7 +1,7 @@
 CMAKE_LIBRARY_PATH
 ------------------
 
-.. include:: ENV_VAR.txt
+.. include:: include/ENV_VAR.rst
 
 The ``CMAKE_LIBRARY_PATH`` environment variable may be set to a list of
 directories to be searched by the :command:`find_library` command.

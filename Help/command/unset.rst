@@ -18,7 +18,7 @@ If ``PARENT_SCOPE`` is present then the variable is removed from the scope
 above the current scope.  See the same option in the :command:`set` command
 for further details.
 
-.. include:: UNSET_NOTE.txt
+.. include:: include/UNSET_NOTE.rst
 
 Unset Environment Variable
 ^^^^^^^^^^^^^^^^^^^^^^^^^^

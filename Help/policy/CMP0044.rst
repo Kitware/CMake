@@ -2,7 +2,7 @@ CMP0044
 -------
 
 .. |REMOVED_IN_CMAKE_VERSION| replace:: 4.0
-.. include:: REMOVED_PROLOGUE.txt
+.. include:: include/REMOVED_PROLOGUE.rst
 
 Case sensitive ``<LANG>_COMPILER_ID`` generator expressions
 
@@ -19,4 +19,4 @@ the ``<LANG>_COMPILER_ID`` expression.
 
 .. |INTRODUCED_IN_CMAKE_VERSION| replace:: 3.0
 .. |WARNED_OR_DID_NOT_WARN| replace:: warned
-.. include:: REMOVED_EPILOGUE.txt
+.. include:: include/REMOVED_EPILOGUE.rst

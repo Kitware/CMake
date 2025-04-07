@@ -4,5 +4,5 @@ The ``NEW`` behavior for this policy is to issue a ``FATAL_ERROR`` when the
 command is called.
 
 .. |INTRODUCED_IN_CMAKE_VERSION| replace:: |disallowed_version|
-.. |WARNED_OR_DID_NOT_WARN| replace:: warned
-.. include:: REMOVED_EPILOGUE.txt
+.. |WARNS_OR_DOES_NOT_WARN| replace:: warns
+.. include:: include/STANDARD_ADVICE.rst

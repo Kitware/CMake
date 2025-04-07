@@ -2,7 +2,7 @@ CMP0020
 -------
 
 .. |REMOVED_IN_CMAKE_VERSION| replace:: 4.0
-.. include:: REMOVED_PROLOGUE.txt
+.. include:: include/REMOVED_PROLOGUE.rst
 
 Automatically link Qt executables to ``qtmain`` target on Windows.
 
@@ -25,4 +25,4 @@ automatically when they link to QtCore ``IMPORTED`` target.
 
 .. |INTRODUCED_IN_CMAKE_VERSION| replace:: 2.8.11
 .. |WARNED_OR_DID_NOT_WARN| replace:: warned
-.. include:: REMOVED_EPILOGUE.txt
+.. include:: include/REMOVED_EPILOGUE.rst

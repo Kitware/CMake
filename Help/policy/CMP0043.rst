@@ -2,7 +2,7 @@ CMP0043
 -------
 
 .. |REMOVED_IN_CMAKE_VERSION| replace:: 4.0
-.. include:: REMOVED_PROLOGUE.txt
+.. include:: include/REMOVED_PROLOGUE.rst
 
 Ignore COMPILE_DEFINITIONS_<Config> properties
 
@@ -45,4 +45,4 @@ of the :prop_tgt:`COMPILE_DEFINITIONS_<CONFIG>` target property .
 
 .. |INTRODUCED_IN_CMAKE_VERSION| replace:: 3.0
 .. |WARNED_OR_DID_NOT_WARN| replace:: warned
-.. include:: REMOVED_EPILOGUE.txt
+.. include:: include/REMOVED_EPILOGUE.rst

@@ -3,7 +3,7 @@ CMAKE_CROSSCOMPILING_EMULATOR
 
 .. versionadded:: 3.28
 
-.. include:: ENV_VAR.txt
+.. include:: include/ENV_VAR.rst
 
 The default value for :variable:`CMAKE_CROSSCOMPILING_EMULATOR` when there
 is no explicit configuration given on the first run while creating a new

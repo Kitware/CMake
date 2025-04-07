@@ -28,7 +28,7 @@ may still be linked as an indirect link dependency via the
 :prop_tgt:`INTERFACE_LINK_LIBRARIES` property on other dependencies.
 
 .. |INTERFACE_PROPERTY_LINK_DIRECT| replace:: ``INTERFACE_LINK_LIBRARIES_DIRECT_EXCLUDE``
-.. include:: INTERFACE_LINK_LIBRARIES_DIRECT.txt
+.. include:: include/INTERFACE_LINK_LIBRARIES_DIRECT.rst
 
 See the :prop_tgt:`INTERFACE_LINK_LIBRARIES_DIRECT` target property
 documentation for more details and examples.

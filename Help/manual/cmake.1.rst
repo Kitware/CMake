@@ -203,7 +203,7 @@ Options
 
 .. program:: cmake
 
-.. include:: OPTIONS_BUILD.txt
+.. include:: include/OPTIONS_BUILD.rst
 
 .. option:: --fresh
 
@@ -1498,7 +1498,7 @@ To print selected pages from the CMake documentation, use
 
 with one of the following options:
 
-.. include:: OPTIONS_HELP.txt
+.. include:: include/OPTIONS_HELP.rst
 
 To view the presets available for a project, use
 
@@ -1521,4 +1521,4 @@ or another error condition, then a non-zero exit code is returned.
 See Also
 ========
 
-.. include:: LINKS.txt
+.. include:: include/LINKS.rst

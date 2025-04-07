@@ -2,7 +2,7 @@ CMP0033
 -------
 
 .. |REMOVED_IN_CMAKE_VERSION| replace:: 4.0
-.. include:: REMOVED_PROLOGUE.txt
+.. include:: include/REMOVED_PROLOGUE.rst
 
 The :command:`export_library_dependencies` command should not be called.
 
@@ -14,4 +14,4 @@ The functionality has been superseded by the :command:`export` and
 :command:`install(EXPORT)` commands.
 
 .. |disallowed_version| replace:: 3.0
-.. include:: REMOVED_COMMAND.txt
+.. include:: include/REMOVED_COMMAND.rst

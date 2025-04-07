@@ -78,7 +78,7 @@ included by absolute path.  For example:
    brackets must be specified by absolute path.  Also, when specifying angle
    brackets inside a generator expression, be sure to encode the closing
    ``>`` as :genex:`$<ANGLE-R>`.  For example:
-.. include:: GENEX_NOTE.txt
+.. include:: include/GENEX_NOTE.rst
    :start-line: 1
 
 .. code-block:: cmake

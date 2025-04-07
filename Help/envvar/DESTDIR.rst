@@ -1,7 +1,7 @@
 DESTDIR
 -------
 
-.. include:: ENV_VAR.txt
+.. include:: include/ENV_VAR.rst
 
 On UNIX one can use the ``DESTDIR`` mechanism in order to relocate the
 whole installation.  ``DESTDIR`` means DESTination DIRectory.  It is

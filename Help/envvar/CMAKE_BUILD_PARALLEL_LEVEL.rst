@@ -3,7 +3,7 @@ CMAKE_BUILD_PARALLEL_LEVEL
 
 .. versionadded:: 3.12
 
-.. include:: ENV_VAR.txt
+.. include:: include/ENV_VAR.rst
 
 Specifies the maximum number of concurrent processes to use when building
 using the ``cmake --build`` command line

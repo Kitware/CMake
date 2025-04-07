@@ -14,4 +14,4 @@ This is the configuration-specific version of :prop_tgt:`COMPILE_PDB_NAME`.
   :manual:`generator expressions <cmake-generator-expressions(7)>`.
 
 .. |PDB_XXX| replace:: :prop_tgt:`PDB_NAME_<CONFIG>`
-.. include:: COMPILE_PDB_NOTE.txt
+.. include:: include/COMPILE_PDB_NOTE.rst

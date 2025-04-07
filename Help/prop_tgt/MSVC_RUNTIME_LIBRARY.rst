@@ -7,7 +7,7 @@ Select the MSVC runtime library for use by compilers targeting the MSVC ABI.
 
 The allowed values are:
 
-.. include:: MSVC_RUNTIME_LIBRARY-VALUES.txt
+.. include:: include/MSVC_RUNTIME_LIBRARY-VALUES.rst
 
 Use :manual:`generator expressions <cmake-generator-expressions(7)>` to
 support per-configuration specification.  For example, the code:

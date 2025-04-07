@@ -2,7 +2,7 @@ CMP0012
 -------
 
 .. |REMOVED_IN_CMAKE_VERSION| replace:: 4.0
-.. include:: REMOVED_PROLOGUE.txt
+.. include:: include/REMOVED_PROLOGUE.rst
 
 :command:`if` recognizes numbers and boolean constants.
 
@@ -26,4 +26,4 @@ dereferencing variables with such names.
 
 .. |INTRODUCED_IN_CMAKE_VERSION| replace:: 2.8.0
 .. |WARNED_OR_DID_NOT_WARN| replace:: warned
-.. include:: REMOVED_EPILOGUE.txt
+.. include:: include/REMOVED_EPILOGUE.rst

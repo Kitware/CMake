@@ -9,4 +9,4 @@ via the :variable:`CTEST_CUSTOM_MAXIMUM_PASSED_TEST_OUTPUT_SIZE` or
 By default the ``tail`` of the output will be truncated. Other possible
 values are ``middle`` and ``head``.
 
-.. include:: CTEST_CUSTOM_XXX.txt
+.. include:: include/CTEST_CUSTOM_XXX.rst

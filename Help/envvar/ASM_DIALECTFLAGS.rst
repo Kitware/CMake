@@ -1,7 +1,7 @@
 ASM<DIALECT>FLAGS
 -----------------
 
-.. include:: ENV_VAR.txt
+.. include:: include/ENV_VAR.rst
 
 Add default compilation flags to be used when compiling a specific dialect
 of an assembly language.  ``ASM<DIALECT>FLAGS`` can be one of:
@@ -14,6 +14,6 @@ of an assembly language.  ``ASM<DIALECT>FLAGS`` can be one of:
 
 .. |CMAKE_LANG_FLAGS| replace:: :variable:`CMAKE_ASM<DIALECT>_FLAGS <CMAKE_<LANG>_FLAGS>`
 .. |LANG| replace:: ``ASM<DIALECT>``
-.. include:: LANG_FLAGS.txt
+.. include:: include/LANG_FLAGS.rst
 
 See also :variable:`CMAKE_ASM<DIALECT>_FLAGS_INIT <CMAKE_<LANG>_FLAGS_INIT>`.

@@ -38,7 +38,7 @@ Set Normal Variable
   can be used as an alternate method to the :command:`set(PARENT_SCOPE)`
   and :command:`unset(PARENT_SCOPE)` commands to update the parent scope.
 
-.. include:: UNSET_NOTE.txt
+.. include:: include/UNSET_NOTE.rst
 
 Set Cache Entry
 ^^^^^^^^^^^^^^^

@@ -30,11 +30,11 @@ Options
 
 .. program:: ccmake
 
-.. include:: OPTIONS_BUILD.txt
+.. include:: include/OPTIONS_BUILD.rst
 
-.. include:: OPTIONS_HELP.txt
+.. include:: include/OPTIONS_HELP.rst
 
 See Also
 ========
 
-.. include:: LINKS.txt
+.. include:: include/LINKS.rst

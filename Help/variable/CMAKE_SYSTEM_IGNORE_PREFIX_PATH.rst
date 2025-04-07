@@ -7,9 +7,9 @@ CMAKE_SYSTEM_IGNORE_PREFIX_PATH
 .. |CMAKE_IGNORE_NONPREFIX_VAR| replace:: :variable:`CMAKE_SYSTEM_IGNORE_PATH`
 .. |CMAKE_IGNORE_NONSYSTEM_VAR| replace:: :variable:`CMAKE_IGNORE_PREFIX_PATH`
 
-.. include:: IGNORE_SEARCH_PREFIX.txt
-.. include:: IGNORE_SEARCH_LOCATIONS.txt
-.. include:: IGNORE_SEARCH_SYSTEM.txt
+.. include:: include/IGNORE_SEARCH_PREFIX.rst
+.. include:: include/IGNORE_SEARCH_LOCATIONS.rst
+.. include:: include/IGNORE_SEARCH_SYSTEM.rst
 
 See also the following variables:
 

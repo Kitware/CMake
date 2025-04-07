@@ -2,7 +2,7 @@ CMP0048
 -------
 
 .. |REMOVED_IN_CMAKE_VERSION| replace:: 4.0
-.. include:: REMOVED_PROLOGUE.txt
+.. include:: include/REMOVED_PROLOGUE.rst
 
 The :command:`project` command manages ``VERSION`` variables.
 
@@ -21,4 +21,4 @@ The ``NEW`` behavior for this policy is to set ``VERSION`` as documented by the
 
 .. |INTRODUCED_IN_CMAKE_VERSION| replace:: 3.0
 .. |WARNED_OR_DID_NOT_WARN| replace:: warned
-.. include:: REMOVED_EPILOGUE.txt
+.. include:: include/REMOVED_EPILOGUE.rst

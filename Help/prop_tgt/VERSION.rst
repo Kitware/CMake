@@ -12,7 +12,7 @@ executables ``VERSION`` can be used to specify the build version.  When
 building or installing appropriate symlinks are created if the
 platform supports symlinks.
 
-.. include:: VERSION_SOVERSION_EXAMPLE.txt
+.. include:: include/VERSION_SOVERSION_EXAMPLE.rst
 
 Windows Versions
 ^^^^^^^^^^^^^^^^

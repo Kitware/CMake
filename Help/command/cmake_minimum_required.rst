@@ -59,9 +59,9 @@ Policy Version
 
   cmake_policy(VERSION <min>[...<max>])
 
-.. include:: POLICY_VERSION.txt
+.. include:: include/POLICY_VERSION.rst
 
-.. include:: DEPRECATED_POLICY_VERSIONS.txt
+.. include:: include/DEPRECATED_POLICY_VERSIONS.rst
 
 See Also
 ^^^^^^^^

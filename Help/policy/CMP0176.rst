@@ -22,6 +22,6 @@ behavior for this policy is to use ``UTF-8`` as the default ``ENCODING``.
 
 .. |INTRODUCED_IN_CMAKE_VERSION| replace:: 3.31
 .. |WARNS_OR_DOES_NOT_WARN| replace:: does *not* warn
-.. include:: STANDARD_ADVICE.txt
+.. include:: include/STANDARD_ADVICE.rst
 
-.. include:: DEPRECATED.txt
+.. include:: include/DEPRECATED.rst

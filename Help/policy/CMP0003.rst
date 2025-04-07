@@ -2,7 +2,7 @@ CMP0003
 -------
 
 .. |REMOVED_IN_CMAKE_VERSION| replace:: 4.0
-.. include:: REMOVED_PROLOGUE.txt
+.. include:: include/REMOVED_PROLOGUE.rst
 
 Libraries linked via full path no longer produce linker search paths.
 
@@ -102,4 +102,4 @@ when setting the policy once will probably fix all targets.
 
 .. |INTRODUCED_IN_CMAKE_VERSION| replace:: 2.6.0
 .. |WARNED_OR_DID_NOT_WARN| replace:: warned
-.. include:: REMOVED_EPILOGUE.txt
+.. include:: include/REMOVED_EPILOGUE.rst

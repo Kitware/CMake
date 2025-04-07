@@ -39,12 +39,12 @@ CMake is older than 3.12, the extra ``...`` dots will be seen as version
 component separators, resulting in the ``...<max>`` part being ignored and
 preserving the pre-3.12 behavior of basing policies on ``<min>``.
 
-.. include:: POLICY_VERSION.txt
+.. include:: include/POLICY_VERSION.rst
 
 Note that the :command:`cmake_minimum_required(VERSION)`
 command implicitly calls ``cmake_policy(VERSION)`` too.
 
-.. include:: DEPRECATED_POLICY_VERSIONS.txt
+.. include:: include/DEPRECATED_POLICY_VERSIONS.rst
 
 Setting Policies Explicitly
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -58,7 +58,7 @@ policy warning by setting the policy state to ``OLD``.  Alternatively
 one may fix the project to work with the new behavior and set the
 policy state to ``NEW``.
 
-.. include:: ../policy/DEPRECATED.txt
+.. include:: ../policy/include/DEPRECATED.rst
 
 Checking Policy Settings
 ^^^^^^^^^^^^^^^^^^^^^^^^

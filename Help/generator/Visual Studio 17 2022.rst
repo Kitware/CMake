@@ -44,4 +44,4 @@ via the :option:`cmake -T` option, to specify another toolset.
    By default this generator uses the 64-bit variant on x64 hosts and
    the 32-bit variant otherwise.
 
-.. include:: VS_TOOLSET_HOST_ARCH.txt
+.. include:: include/VS_TOOLSET_HOST_ARCH.rst

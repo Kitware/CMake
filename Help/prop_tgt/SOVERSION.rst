@@ -10,7 +10,7 @@ symlinks and the linker supports so-names.  If only one of both is
 specified the missing is assumed to have the same version number.
 ``SOVERSION`` is ignored if :prop_tgt:`NO_SONAME` property is set.
 
-.. include:: VERSION_SOVERSION_EXAMPLE.txt
+.. include:: include/VERSION_SOVERSION_EXAMPLE.rst
 
 Windows Versions
 ^^^^^^^^^^^^^^^^

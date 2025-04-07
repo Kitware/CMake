@@ -2,7 +2,7 @@ CMP0031
 -------
 
 .. |REMOVED_IN_CMAKE_VERSION| replace:: 4.0
-.. include:: REMOVED_PROLOGUE.txt
+.. include:: include/REMOVED_PROLOGUE.rst
 
 The :command:`load_command` command should not be called.
 
@@ -13,4 +13,4 @@ the CMake process.  It has been mostly superseded by the
 :command:`macro` and :command:`function` commands.
 
 .. |disallowed_version| replace:: 3.0
-.. include:: REMOVED_COMMAND.txt
+.. include:: include/REMOVED_COMMAND.rst

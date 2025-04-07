@@ -11,7 +11,7 @@ into the test project.
 
 The allowed values are:
 
-.. include:: ../prop_tgt/MSVC_RUNTIME_CHECKS-VALUES.txt
+.. include:: ../prop_tgt/include/MSVC_RUNTIME_CHECKS-VALUES.rst
 
 Use :manual:`generator expressions <cmake-generator-expressions(7)>` to
 support per-configuration specification. For example, the code:

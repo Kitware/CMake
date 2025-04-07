@@ -3,7 +3,7 @@ CTEST_PROGRESS_OUTPUT
 
 .. versionadded:: 3.13
 
-.. include:: ENV_VAR.txt
+.. include:: include/ENV_VAR.rst
 
 Boolean environment variable that affects how :manual:`ctest <ctest(1)>`
 command output reports overall progress.  When set to ``1``, ``TRUE``, ``ON`` or anything

@@ -11,9 +11,8 @@ work together in an example project can be very helpful.
 Steps
 =====
 
-.. include:: source.txt
-
-|tutorial_source|
+The tutorial documentation and source code examples can be found in
+the ``Help/guide/tutorial`` directory of the CMake source code tree.
 Each step has its own subdirectory containing code that may be used as a
 starting point. The tutorial examples are progressive so that each step
 provides the complete solution for the previous step.

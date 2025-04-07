@@ -3,7 +3,7 @@ CMAKE_<LANG>_COMPILER_LAUNCHER
 
 .. versionadded:: 3.17
 
-.. include:: ENV_VAR.txt
+.. include:: include/ENV_VAR.rst
 
 Default compiler launcher to use for the specified language. Will only be used
 by CMake to initialize the variable on the first configuration. Afterwards, it

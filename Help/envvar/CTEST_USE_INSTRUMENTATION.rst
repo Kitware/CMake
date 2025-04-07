@@ -3,7 +3,7 @@ CTEST_USE_INSTRUMENTATION
 
 .. versionadded:: 4.0
 
-.. include:: ENV_VAR.txt
+.. include:: include/ENV_VAR.rst
 
 .. note::
 

@@ -61,7 +61,7 @@ Options include:
 ``REGISTRY_VIEW``
   .. versionadded:: 3.24
 
-  .. include:: FIND_XXX_REGISTRY_VIEW.txt
+  .. include:: include/FIND_XXX_REGISTRY_VIEW.rst
 
 ``PATH_SUFFIXES``
   Specify additional subdirectories to check below each directory
@@ -261,5 +261,5 @@ On macOS the :variable:`CMAKE_FIND_FRAMEWORK` and
 :variable:`CMAKE_FIND_APPBUNDLE` variables determine the order of
 preference between Apple-style and unix-style package components.
 
-.. include:: FIND_XXX_ROOT.txt
-.. include:: FIND_XXX_ORDER.txt
+.. include:: include/FIND_XXX_ROOT.rst
+.. include:: include/FIND_XXX_ORDER.rst

@@ -22,7 +22,11 @@ primary_domain = 'cmake'
 highlight_language = 'none'
 
 exclude_patterns = [
-    'dev', # ignore developer-only documentation
+    # Ignore developer-only documentation
+    'dev',
+    # NOTE Ignore shared RST files used in `.. include::` directives
+    'include/*.rst',
+    '**/include/*.rst'
     ]
 
 extensions = ['cmake']

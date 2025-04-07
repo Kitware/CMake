@@ -22,7 +22,7 @@ syntax ``$<...>``.  Policy :policy:`CMP0131` affects the behavior of the
 See the :manual:`cmake-buildsystem(7)` manual for more on defining
 buildsystem properties.
 
-.. include:: LINK_LIBRARIES_INDIRECTION.txt
+.. include:: include/LINK_LIBRARIES_INDIRECTION.rst
 
 In advanced use cases, the list of direct link dependencies specified
 by this property may be updated by usage requirements from dependencies.
@@ -34,4 +34,4 @@ corresponding :prop_tgt:`LINK_LIBRARIES_STRATEGY` target property
 for details on how CMake orders direct link dependencies on linker
 command lines.
 
-.. include:: ../command/LINK_LIBRARIES_LINKER.txt
+.. include:: ../command/include/LINK_LIBRARIES_LINKER.rst

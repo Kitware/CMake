@@ -5,7 +5,7 @@ INTERFACE_INCLUDE_DIRECTORIES
 .. |command_name| replace:: :command:`target_include_directories`
 .. |PROPERTY_INTERFACE_NAME| replace:: ``INTERFACE_INCLUDE_DIRECTORIES``
 .. |PROPERTY_LINK| replace:: :prop_tgt:`INCLUDE_DIRECTORIES`
-.. include:: INTERFACE_BUILD_PROPERTY.txt
+.. include:: include/INTERFACE_BUILD_PROPERTY.rst
 
 Include directories usage requirements commonly differ between the build-tree
 and the install-tree.  The ``BUILD_INTERFACE`` and ``INSTALL_INTERFACE``
@@ -25,4 +25,4 @@ Creating Relocatable Packages
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. |INTERFACE_PROPERTY_LINK| replace:: ``INTERFACE_INCLUDE_DIRECTORIES``
-.. include:: /include/INTERFACE_INCLUDE_DIRECTORIES_WARNING.txt
+.. include:: /include/INTERFACE_INCLUDE_DIRECTORIES_WARNING.rst

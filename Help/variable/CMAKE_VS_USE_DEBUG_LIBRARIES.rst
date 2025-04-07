@@ -6,7 +6,7 @@ CMAKE_VS_USE_DEBUG_LIBRARIES
 .. |VS_USE_DEBUG_LIBRARIES| replace:: ``CMAKE_VS_USE_DEBUG_LIBRARIES``
 .. |MSVC_RUNTIME_LIBRARY| replace:: :variable:`CMAKE_MSVC_RUNTIME_LIBRARY`
 
-.. include:: ../prop_tgt/VS_USE_DEBUG_LIBRARIES-PURPOSE.txt
+.. include:: ../prop_tgt/include/VS_USE_DEBUG_LIBRARIES-PURPOSE.rst
 
 Use :manual:`generator expressions <cmake-generator-expressions(7)>`
 for per-configuration specification.  For example, the code:

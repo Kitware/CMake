@@ -1573,7 +1573,7 @@ Link Features
   underscores.  Feature names defined in all uppercase are reserved for CMake's
   own built-in features.  The pre-defined built-in library features are:
 
-  .. include:: ../variable/LINK_LIBRARY_PREDEFINED_FEATURES.txt
+  .. include:: ../variable/include/LINK_LIBRARY_PREDEFINED_FEATURES.rst
 
   Built-in and custom library features are defined in terms of the following
   variables:
@@ -1665,7 +1665,7 @@ Link Features
   own built-in features.  Currently, there is only one pre-defined built-in
   group feature:
 
-  .. include:: ../variable/LINK_GROUP_PREDEFINED_FEATURES.txt
+  .. include:: ../variable/include/LINK_GROUP_PREDEFINED_FEATURES.rst
 
   Built-in and custom group features are defined in terms of the following
   variables:

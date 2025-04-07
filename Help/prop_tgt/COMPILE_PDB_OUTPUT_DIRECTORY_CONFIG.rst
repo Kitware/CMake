@@ -20,4 +20,4 @@ if it is set when a target is created.
   :manual:`generator expressions <cmake-generator-expressions(7)>`.
 
 .. |PDB_XXX| replace:: :prop_tgt:`PDB_OUTPUT_DIRECTORY_<CONFIG>`
-.. include:: COMPILE_PDB_NOTE.txt
+.. include:: include/COMPILE_PDB_NOTE.rst

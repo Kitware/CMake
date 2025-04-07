@@ -127,9 +127,9 @@ Options
 
   List presets from :manual:`cmake-presets(7)`.
 
-.. include:: OPTIONS_HELP.txt
+.. include:: include/OPTIONS_HELP.rst
 
 See Also
 ========
 
-.. include:: LINKS.txt
+.. include:: include/LINKS.rst

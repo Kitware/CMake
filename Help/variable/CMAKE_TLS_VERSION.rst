@@ -15,7 +15,7 @@ If neither is set, the default is TLS 1.2.
 
 The value may be one of:
 
-.. include:: CMAKE_TLS_VERSION-VALUES.txt
+.. include:: include/CMAKE_TLS_VERSION-VALUES.rst
 
 This variable is also used by the :module:`ExternalProject` and
 :module:`FetchContent` modules for internal calls to

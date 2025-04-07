@@ -2,7 +2,7 @@ CMP0030
 -------
 
 .. |REMOVED_IN_CMAKE_VERSION| replace:: 4.0
-.. include:: REMOVED_PROLOGUE.txt
+.. include:: include/REMOVED_PROLOGUE.rst
 
 The :command:`use_mangled_mesa` command should not be called.
 
@@ -11,4 +11,4 @@ modern CMake language and custom command capabilities.  VTK has
 not used it in years.
 
 .. |disallowed_version| replace:: 3.0
-.. include:: REMOVED_COMMAND.txt
+.. include:: include/REMOVED_COMMAND.rst

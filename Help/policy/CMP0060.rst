@@ -2,7 +2,7 @@ CMP0060
 -------
 
 .. |REMOVED_IN_CMAKE_VERSION| replace:: 4.0
-.. include:: REMOVED_PROLOGUE.txt
+.. include:: include/REMOVED_PROLOGUE.rst
 
 .. versionadded:: 3.3
 
@@ -63,7 +63,7 @@ if they are in implicit link directories.
 
 .. |INTRODUCED_IN_CMAKE_VERSION| replace:: 3.3
 .. |WARNED_OR_DID_NOT_WARN| replace:: did *not* warn by default
-.. include:: REMOVED_EPILOGUE.txt
+.. include:: include/REMOVED_EPILOGUE.rst
 
 See documentation of the
 :variable:`CMAKE_POLICY_WARNING_CMP0060 <CMAKE_POLICY_WARNING_CMP<NNNN>>`

@@ -1,7 +1,7 @@
 CMAKE_FRAMEWORK_PATH
 --------------------
 
-.. include:: ENV_VAR.txt
+.. include:: include/ENV_VAR.rst
 
 The ``CMAKE_FRAMEWORK_PATH`` environment variable may be set to a list of
 directories to be searched for macOS frameworks by the :command:`find_library`,

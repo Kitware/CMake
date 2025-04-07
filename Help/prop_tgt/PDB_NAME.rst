@@ -14,4 +14,4 @@ logical target name is used by default.
   :manual:`generator expressions <cmake-generator-expressions(7)>`.
 
 .. |COMPILE_PDB_XXX| replace:: :prop_tgt:`COMPILE_PDB_NAME`
-.. include:: PDB_NOTE.txt
+.. include:: include/PDB_NOTE.rst

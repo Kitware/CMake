@@ -7,7 +7,7 @@ Select the CUDA runtime library for use by compilers targeting the CUDA language
 
 The allowed case insensitive values are:
 
-.. include:: CUDA_RUNTIME_LIBRARY-VALUES.txt
+.. include:: include/CUDA_RUNTIME_LIBRARY-VALUES.rst
 
 Contents of ``CUDA_RUNTIME_LIBRARY`` may use
 :manual:`generator expressions <cmake-generator-expressions(7)>`.

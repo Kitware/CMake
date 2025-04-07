@@ -6,7 +6,7 @@ VS_USE_DEBUG_LIBRARIES
 .. |VS_USE_DEBUG_LIBRARIES| replace:: ``VS_USE_DEBUG_LIBRARIES``
 .. |MSVC_RUNTIME_LIBRARY| replace:: :prop_tgt:`MSVC_RUNTIME_LIBRARY`
 
-.. include:: VS_USE_DEBUG_LIBRARIES-PURPOSE.txt
+.. include:: include/VS_USE_DEBUG_LIBRARIES-PURPOSE.rst
 
 Use :manual:`generator expressions <cmake-generator-expressions(7)>`
 for per-configuration specification.  For example, the code:

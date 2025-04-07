@@ -33,6 +33,6 @@ for those directories.
 .. |INTRODUCED_IN_CMAKE_VERSION| replace:: 3.20
 .. |WARNS_OR_DOES_NOT_WARN| replace::
    warns about setting the ``GENERATED`` property to a non-boolean value
-.. include:: STANDARD_ADVICE.txt
+.. include:: include/STANDARD_ADVICE.rst
 
-.. include:: DEPRECATED.txt
+.. include:: include/DEPRECATED.rst

@@ -3,7 +3,7 @@ CMAKE_TLS_VERIFY
 
 .. versionadded:: 3.30
 
-.. include:: ENV_VAR.txt
+.. include:: include/ENV_VAR.rst
 
 Specify the default value for the :command:`file(DOWNLOAD)` and
 :command:`file(UPLOAD)` commands' ``TLS_VERIFY`` option.
