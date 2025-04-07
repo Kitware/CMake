@@ -127,9 +127,7 @@ int cmCPackProductBuildGenerator::InitializeInternal()
 {
   this->SetOptionIfNotSet("CPACK_PACKAGING_INSTALL_PREFIX", "/Applications");
 
-  std::vector<std::string> no_paths;
-  std::string program =
-    cmSystemTools::FindProgram("pkgbuild", no_paths, false);
+  std::string program = cmSystemTools::FindProgram("pkgbuild");
   if (program.empty()) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
                   "Cannot find pkgbuild executable" << std::endl);
@@ -137,7 +135,7 @@ int cmCPackProductBuildGenerator::InitializeInternal()
   }
   this->SetOptionIfNotSet("CPACK_COMMAND_PKGBUILD", program);
 
-  program = cmSystemTools::FindProgram("productbuild", no_paths, false);
+  program = cmSystemTools::FindProgram("productbuild");
   if (program.empty()) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
                   "Cannot find productbuild executable" << std::endl);

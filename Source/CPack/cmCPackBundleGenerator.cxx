@@ -27,8 +27,7 @@ int cmCPackBundleGenerator::InitializeInternal()
   }
 
   if (this->GetOption("CPACK_BUNDLE_APPLE_CERT_APP")) {
-    std::string const codesign_path = cmSystemTools::FindProgram(
-      "codesign", std::vector<std::string>(), false);
+    std::string const codesign_path = cmSystemTools::FindProgram("codesign");
 
     if (codesign_path.empty()) {
       cmCPackLogger(cmCPackLog::LOG_ERROR,
