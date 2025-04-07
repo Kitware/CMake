@@ -3075,11 +3075,7 @@ std::string FindOwnExecutable(char const* argv0)
     }
   }
 #else
-  std::string errorMsg;
-  std::string exe;
-  if (!cmSystemTools::FindProgramPath(argv0, exe, errorMsg)) {
-    // ???
-  }
+  std::string exe = cmsys::SystemTools::FindProgram(argv0);
 #endif
   exe = cmSystemTools::ToNormalizedPathOnDisk(std::move(exe));
   return exe;
