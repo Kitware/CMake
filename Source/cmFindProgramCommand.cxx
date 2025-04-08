@@ -18,7 +18,9 @@
 class cmExecutionStatus;
 
 #if defined(__APPLE__)
-#  include <CoreFoundation/CoreFoundation.h>
+#  include <CoreFoundation/CFBundle.h>
+#  include <CoreFoundation/CFString.h>
+#  include <CoreFoundation/CFURL.h>
 #endif
 
 struct cmFindProgramHelper
