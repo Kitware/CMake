@@ -3,7 +3,7 @@ project(CheckCurses C)
 
 set(CURSES_NEED_NCURSES TRUE)
 find_package(Curses)
-if(NOT CURSES_FOUND)
+if(NOT Curses_FOUND)
   return()
 endif()
 include_directories(${CURSES_INCLUDE_DIRS})

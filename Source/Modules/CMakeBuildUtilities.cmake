@@ -358,7 +358,7 @@ if(BUILD_CursesDialog)
   if(UNIX)
     set(CURSES_NEED_NCURSES TRUE)
     find_package(Curses)
-    if(NOT CURSES_FOUND)
+    if(NOT Curses_FOUND)
       message(WARNING
         "'ccmake' will not be built because Curses was not found.\n"
         "Turn off BUILD_CursesDialog to suppress this message."
