@@ -63,6 +63,10 @@ public:
                                 PreprocessContext context,
                                 cm::string_view importPrefix = {});
 
+  static std::string Collect(
+    std::string const& input,
+    std::map<std::string, std::vector<std::string>>& collected);
+
   static void Split(std::string const& input,
                     std::vector<std::string>& output);
 

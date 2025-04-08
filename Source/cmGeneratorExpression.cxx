@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <cassert>
 #include <memory>
+#include <stack>
 #include <utility>
 
 #include <cm/string_view>
@@ -156,27 +157,40 @@ std::string cmGeneratorExpression::StripEmptyListElements(
   return result;
 }
 
-static std::string stripAllGeneratorExpressions(std::string const& input)
+static std::string extractAllGeneratorExpressions(
+  std::string const& input,
+  std::map<std::string, std::vector<std::string>>* collected)
 {
   std::string result;
   std::string::size_type pos = 0;
   std::string::size_type lastPos = pos;
-  int nestingLevel = 0;
+  // stack of { Generator Expression Name, Start Position of Value }
+  std::stack<std::pair<std::string, std::string::size_type>> genexps;
   while ((pos = input.find("$<", lastPos)) != std::string::npos) {
     result += input.substr(lastPos, pos - lastPos);
     pos += 2;
-    nestingLevel = 1;
     char const* c = input.c_str() + pos;
+    char const* cName = c;
     char const* const cStart = c;
     for (; *c; ++c) {
       if (cmGeneratorExpression::StartsWithGeneratorExpression(c)) {
-        ++nestingLevel;
         ++c;
+        cName = c + 1;
         continue;
       }
-      if (c[0] == '>') {
-        --nestingLevel;
-        if (nestingLevel == 0) {
+      if (c[0] == ':' && cName) {
+        genexps.push({ input.substr(pos + (cName - cStart), c - cName),
+                       pos + (c + 1 - cStart) });
+        cName = nullptr;
+      } else if (c[0] == '>') {
+        if (!cName && !genexps.empty()) {
+          if (collected) {
+            (*collected)[genexps.top().first].push_back(input.substr(
+              genexps.top().second, pos + c - cStart - genexps.top().second));
+          }
+          genexps.pop();
+        }
+        if (genexps.empty()) {
           break;
         }
       }
@@ -188,10 +202,15 @@ static std::string stripAllGeneratorExpressions(std::string const& input)
     pos += traversed;
     lastPos = pos;
   }
-  if (nestingLevel == 0) {
+  if (genexps.empty()) {
     result += input.substr(lastPos);
   }
   return cmGeneratorExpression::StripEmptyListElements(result);
+}
+
+static std::string stripAllGeneratorExpressions(std::string const& input)
+{
+  return extractAllGeneratorExpressions(input, nullptr);
 }
 
 static void prefixItems(std::string const& content, std::string& result,
@@ -373,6 +392,13 @@ std::string cmGeneratorExpression::Preprocess(std::string const& input,
   assert(false &&
          "cmGeneratorExpression::Preprocess called with invalid args");
   return std::string();
+}
+
+std::string cmGeneratorExpression::Collect(
+  std::string const& input,
+  std::map<std::string, std::vector<std::string>>& collected)
+{
+  return extractAllGeneratorExpressions(input, &collected);
 }
 
 cm::string_view::size_type cmGeneratorExpression::Find(
