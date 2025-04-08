@@ -2992,6 +2992,16 @@ unsigned int cmSystemTools::RandomNumber()
   return static_cast<unsigned int>(gen());
 }
 
+std::string cmSystemTools::FindProgram(std::string const& name,
+                                       std::vector<std::string> const& path)
+{
+  std::string exe = cmsys::SystemTools::FindProgram(name, path);
+  if (!exe.empty()) {
+    exe = cmSystemTools::ToNormalizedPathOnDisk(std::move(exe));
+  }
+  return exe;
+}
+
 namespace {
 std::string InitLogicalWorkingDirectory()
 {
@@ -3065,11 +3075,7 @@ std::string FindOwnExecutable(char const* argv0)
     }
   }
 #else
-  std::string errorMsg;
-  std::string exe;
-  if (!cmSystemTools::FindProgramPath(argv0, exe, errorMsg)) {
-    // ???
-  }
+  std::string exe = cmsys::SystemTools::FindProgram(argv0);
 #endif
   exe = cmSystemTools::ToNormalizedPathOnDisk(std::move(exe));
   return exe;
