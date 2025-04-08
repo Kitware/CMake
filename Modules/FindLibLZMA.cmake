@@ -5,39 +5,51 @@
 FindLibLZMA
 -----------
 
-Find LZMA compression algorithm headers and library.
-
+Finds the data compression library that implements the LZMA (Lempel–Ziv–Markov
+chain algorithm) - liblzma.
 
 Imported Targets
 ^^^^^^^^^^^^^^^^
 
-.. versionadded:: 3.14
+This module provides the following :ref:`Imported Targets`:
 
-This module defines :prop_tgt:`IMPORTED` target ``LibLZMA::LibLZMA``, if
-liblzma has been found.
+``LibLZMA::LibLZMA``
+  .. versionadded:: 3.14
 
-Result variables
+  Target encapsulating the liblzma library usage requirements, available only if
+  liblzma is found.
+
+Result Variables
 ^^^^^^^^^^^^^^^^
 
-This module will set the following variables in your project:
+This module defines the following variables:
 
-``LIBLZMA_FOUND``
-  True if liblzma headers and library were found.
+``LibLZMA_FOUND``
+  Boolean indicating whether the liblzma is found.  For backward compatibility,
+  the ``LIBLZMA_FOUND`` variable is also set to the same value.
 ``LIBLZMA_INCLUDE_DIRS``
-  Directory where liblzma headers are located.
+  Include directories containing headers needed to use liblzma.
 ``LIBLZMA_LIBRARIES``
-  Lzma libraries to link against.
-``LIBLZMA_HAS_AUTO_DECODER``
-  True if lzma_auto_decoder() is found (required).
-``LIBLZMA_HAS_EASY_ENCODER``
-  True if lzma_easy_encoder() is found (required).
-``LIBLZMA_HAS_LZMA_PRESET``
-  True if lzma_lzma_preset() is found (required).
+  Libraries needed to link against to use liblzma.
 ``LIBLZMA_VERSION``
   .. versionadded:: 3.26
-    the version of LZMA found.
 
-  See also legacy variable ``LIBLZMA_VERSION_STRING``.
+  The version of liblzma found (available as a string, for example, ``5.0.3``).
+
+Cache Variables
+^^^^^^^^^^^^^^^
+
+The following cache variables may also be set:
+
+``LIBLZMA_HAS_AUTO_DECODER``
+  Boolean sanity check result indicating whether the ``lzma_auto_decoder()``
+  function (automatic decoder functionality) is found in liblzma (required).
+``LIBLZMA_HAS_EASY_ENCODER``
+  Boolean sanity check result indicating whether the ``lzma_easy_encoder()``
+  function (basic encoder API) is found in liblzma (required).
+``LIBLZMA_HAS_LZMA_PRESET``
+  Boolean sanity check result indicating whether the ``lzma_lzma_preset()``
+  function (preset compression configuration) is found in liblzma (required).
 
 Legacy Variables
 ^^^^^^^^^^^^^^^^
@@ -45,17 +57,26 @@ Legacy Variables
 The following variables are provided for backward compatibility:
 
 ``LIBLZMA_VERSION_MAJOR``
-  The major version of lzma
+  The major version of liblzma found.
 ``LIBLZMA_VERSION_MINOR``
-  The minor version of lzma
+  The minor version of liblzma found.
 ``LIBLZMA_VERSION_PATCH``
-  The patch version of lzma
+  The patch version of liblzma found.
 ``LIBLZMA_VERSION_STRING``
-  version number as a string (ex: "5.0.3")
+  The version of liblzma found.
 
   .. versionchanged:: 3.26
     Superseded by ``LIBLZMA_VERSION``.
 
+Examples
+^^^^^^^^
+
+Finding the liblzma library and linking it to a project target:
+
+.. code-block:: cmake
+
+  find_package(LibLZMA)
+  target_link_libraries(project_target PRIVATE LibLZMA::LibLZMA)
 #]=======================================================================]
 
 cmake_policy(PUSH)
@@ -114,7 +135,7 @@ find_package_handle_standard_args(LibLZMA  REQUIRED_VARS  LIBLZMA_LIBRARY
                                  )
 mark_as_advanced( LIBLZMA_INCLUDE_DIR LIBLZMA_LIBRARY )
 
-if (LIBLZMA_FOUND)
+if (LibLZMA_FOUND)
     set(LIBLZMA_LIBRARIES ${LIBLZMA_LIBRARY})
     set(LIBLZMA_INCLUDE_DIRS ${LIBLZMA_INCLUDE_DIR})
     if(NOT TARGET LibLZMA::LibLZMA)
