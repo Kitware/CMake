@@ -22,12 +22,12 @@ if(NOT CMAKE_ASM${ASM_DIALECT}_COMPILER)
   if("ASM${ASM_DIALECT}" STREQUAL "ASM") # the generic assembler support
     if(NOT CMAKE_ASM_COMPILER_INIT)
       if(CMAKE_C_COMPILER)
-        set(CMAKE_ASM${ASM_DIALECT}_COMPILER_LIST ${CMAKE_C_COMPILER})
+        set(CMAKE_ASM_COMPILER_LIST ${CMAKE_C_COMPILER})
       elseif(CMAKE_CXX_COMPILER)
-        set(CMAKE_ASM${ASM_DIALECT}_COMPILER_LIST ${CMAKE_CXX_COMPILER})
+        set(CMAKE_ASM_COMPILER_LIST ${CMAKE_CXX_COMPILER})
       else()
         # List all default C and CXX compilers
-        set(CMAKE_ASM${ASM_DIALECT}_COMPILER_LIST
+        set(CMAKE_ASM_COMPILER_LIST
              ${_CMAKE_TOOLCHAIN_PREFIX}cc  ${_CMAKE_TOOLCHAIN_PREFIX}gcc cl bcc xlc
           CC ${_CMAKE_TOOLCHAIN_PREFIX}c++ ${_CMAKE_TOOLCHAIN_PREFIX}g++ aCC cl bcc xlC)
       endif()
