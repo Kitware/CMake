@@ -21,15 +21,15 @@ if(NOT CMAKE_ASM${ASM_DIALECT}_COMPILER)
   # finally list compilers to try
   if("ASM${ASM_DIALECT}" STREQUAL "ASM") # the generic assembler support
     if(NOT CMAKE_ASM_COMPILER_INIT)
-      if(CMAKE_C_COMPILER_LOADED)
+      if(CMAKE_C_COMPILER_LOADED AND NOT CMAKE_C_COMPILER_ID MATCHES "^(MSVC)$")
         set(CMAKE_ASM_COMPILER_LIST ${CMAKE_C_COMPILER})
-      elseif(CMAKE_CXX_COMPILER_LOADED)
+      elseif(CMAKE_CXX_COMPILER_LOADED AND NOT CMAKE_CXX_COMPILER_ID MATCHES "^(MSVC)$")
         set(CMAKE_ASM_COMPILER_LIST ${CMAKE_CXX_COMPILER})
       else()
         # List all default C and CXX compilers
         set(CMAKE_ASM_COMPILER_LIST
-             ${_CMAKE_TOOLCHAIN_PREFIX}cc  ${_CMAKE_TOOLCHAIN_PREFIX}gcc cl xlc
-          CC ${_CMAKE_TOOLCHAIN_PREFIX}c++ ${_CMAKE_TOOLCHAIN_PREFIX}g++ cl xlC)
+             ${_CMAKE_TOOLCHAIN_PREFIX}cc  ${_CMAKE_TOOLCHAIN_PREFIX}gcc xlc
+          CC ${_CMAKE_TOOLCHAIN_PREFIX}c++ ${_CMAKE_TOOLCHAIN_PREFIX}g++ xlC)
       endif()
     endif()
   else() # some specific assembler "dialect"
