@@ -7,29 +7,67 @@ FindPatch
 
 .. versionadded:: 3.10
 
-The module defines the following variables:
+Finds the ``patch`` command-line executable for applying diff patches to
+original files.
 
-``Patch_EXECUTABLE``
-  Path to patch command-line executable.
-``Patch_FOUND``
-  True if the patch command-line executable was found.
+Imported Targets
+^^^^^^^^^^^^^^^^
 
-The following :prop_tgt:`IMPORTED` targets are also defined:
+This module provides the following :ref:`Imported Targets`:
 
 ``Patch::patch``
-  The command-line executable.
+  Target encapsulating the ``patch`` command-line executable, available only if
+  ``patch`` is found.
 
   .. versionchanged:: 4.0
-    Imported target is defined only when :prop_gbl:`CMAKE_ROLE` is ``PROJECT``.
+    This imported target is defined only when :prop_gbl:`CMAKE_ROLE` is
+    ``PROJECT``.
 
-Example usage:
+Result Variables
+^^^^^^^^^^^^^^^^
+
+This module defines the following variables:
+
+``Patch_FOUND``
+  Boolean indicating whether the ``patch`` command-line executable is found.
+
+Cache Variables
+^^^^^^^^^^^^^^^
+
+The following cache variables may also be set:
+
+``Patch_EXECUTABLE``
+  The path to the ``patch`` command-line executable.
+
+Examples
+^^^^^^^^
+
+Finding ``patch`` command and executing it in a process:
 
 .. code-block:: cmake
 
-   find_package(Patch)
-   if(Patch_FOUND)
-     message("Patch found: ${Patch_EXECUTABLE}")
-   endif()
+  find_package(Patch)
+  if(Patch_FOUND)
+    execute_process(
+      COMMAND ${Patch_EXECUTABLE} -p1 -i ${CMAKE_CURRENT_SOURCE_DIR}/src.patch
+    )
+  endif()
+
+The imported target can be used, for example, inside the
+:command:`add_custom_command` command, which patches the given file when some
+build rule depends on its output:
+
+.. code-block:: cmake
+
+  find_package(Patch)
+  if(TARGET Patch::patch)
+    # Executed when some build rule depends on the src.c file.
+    add_custom_command(
+      OUTPUT src.c
+      COMMAND Patch::patch -p1 -i ${CMAKE_CURRENT_SOURCE_DIR}/src.patch
+      # ...
+    )
+  endif()
 #]=======================================================================]
 
 set(_doc "Patch command line executable")
