@@ -5,16 +5,34 @@
 FindPHP4
 --------
 
-Find PHP4
+Finds PHP version 4, a general-purpose scripting language.
 
-This module finds if PHP4 is installed and determines where the
-include files and libraries are.  It also determines what the name of
-the library is.  This code sets the following variables:
+.. note::
 
-::
+  This module is specifically for PHP version 4, which is obsolete and no longer
+  supported.  For modern development, use a newer PHP version.
 
-  PHP4_INCLUDE_PATH       = path to where php.h can be found
-  PHP4_EXECUTABLE         = full path to the php4 binary
+This module checks if PHP 4 is installed and determines the locations of the
+include directories and the PHP command-line interpreter.
+
+Cache Variables
+^^^^^^^^^^^^^^^
+
+The following cache variables may also be set:
+
+``PHP4_INCLUDE_PATH``
+  The directory containing ``php.h`` and other headers needed to use PHP.
+``PHP4_EXECUTABLE``
+  The full path to the ``php`` command-line interpreter executable.
+
+Examples
+^^^^^^^^
+
+Finding PHP:
+
+.. code-block:: cmake
+
+  find_package(PHP4)
 #]=======================================================================]
 
 set(PHP4_POSSIBLE_INCLUDE_PATHS
@@ -48,7 +66,7 @@ mark_as_advanced(
   )
 
 if(APPLE)
-# this is a hack for now
+  # this is a hack for now
   string(APPEND CMAKE_SHARED_MODULE_CREATE_C_FLAGS
    " -Wl,-flat_namespace")
   foreach(symbol
