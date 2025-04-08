@@ -46,8 +46,8 @@ int cmCPackInnoSetupGenerator::InitializeInternal()
 #endif
 
   SetOptionIfNotSet("CPACK_INNOSETUP_EXECUTABLE", "ISCC");
-  std::string const& isccPath = cmSystemTools::FindProgram(
-    GetOption("CPACK_INNOSETUP_EXECUTABLE"), path, false);
+  std::string const& isccPath =
+    cmSystemTools::FindProgram(GetOption("CPACK_INNOSETUP_EXECUTABLE"), path);
 
   if (isccPath.empty()) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,

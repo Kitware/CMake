@@ -560,6 +560,14 @@ public:
   static unsigned int RandomSeed();
   static unsigned int RandomNumber();
 
+  /**
+   * Find an executable in the system PATH, with optional extra paths.
+   * This wraps KWSys's FindProgram to add ToNormalizedPathOnDisk.
+   */
+  static std::string FindProgram(
+    std::string const& name,
+    std::vector<std::string> const& path = std::vector<std::string>());
+
   /** Find the directory containing CMake executables.  */
   static void FindCMakeResources(char const* argv0);
 

@@ -75,8 +75,7 @@ int cmCPackDragNDropGenerator::InitializeInternal()
   paths.emplace_back("/Applications/Xcode.app/Contents/Developer/Tools");
   paths.emplace_back("/Developer/Tools");
 
-  std::string const hdiutil_path =
-    cmSystemTools::FindProgram("hdiutil", std::vector<std::string>(), false);
+  std::string const hdiutil_path = cmSystemTools::FindProgram("hdiutil");
   if (hdiutil_path.empty()) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
                   "Cannot locate hdiutil command" << std::endl);
@@ -85,7 +84,7 @@ int cmCPackDragNDropGenerator::InitializeInternal()
   this->SetOptionIfNotSet("CPACK_COMMAND_HDIUTIL", hdiutil_path);
 
   std::string const setfile_path =
-    cmSystemTools::FindProgram("SetFile", paths, false);
+    cmSystemTools::FindProgram("SetFile", paths);
   if (setfile_path.empty()) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
                   "Cannot locate SetFile command" << std::endl);
@@ -93,7 +92,7 @@ int cmCPackDragNDropGenerator::InitializeInternal()
   }
   this->SetOptionIfNotSet("CPACK_COMMAND_SETFILE", setfile_path);
 
-  std::string const rez_path = cmSystemTools::FindProgram("Rez", paths, false);
+  std::string const rez_path = cmSystemTools::FindProgram("Rez", paths);
   if (rez_path.empty()) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
                   "Cannot locate Rez command" << std::endl);
