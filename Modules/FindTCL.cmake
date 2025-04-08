@@ -5,44 +5,95 @@
 FindTCL
 -------
 
-TK_INTERNAL_PATH was removed.
+Finds the Tcl (Tool Command Language), dynamic programming language.
 
-This module finds if Tcl is installed and determines where the include
-files and libraries are.  It also determines what the name of the
-library is.  This code sets the following variables:
+This module locates a Tcl installation, including its include directories and
+libraries, and determines the appropriate Tcl library name for linking.  As part
+of the Tcl ecosystem, it also finds Tk, a GUI toolkit that provides a library of
+basic widgets for building graphical user interfaces.
 
-::
+Result Variables
+^^^^^^^^^^^^^^^^
 
-  TCL_FOUND              = Tcl was found
-  TK_FOUND               = Tk was found
-  TCLTK_FOUND            = Tcl and Tk were found
-  TCL_LIBRARY            = path to Tcl library (tcl tcl80)
-  TCL_INCLUDE_PATH       = path to where tcl.h can be found
-  TCL_TCLSH              = path to tclsh binary (tcl tcl80)
-  TK_LIBRARY             = path to Tk library (tk tk80 etc)
-  TK_INCLUDE_PATH        = path to where tk.h can be found
-  TK_WISH                = full path to the wish executable
+This module defines the following variables:
 
+``TCL_FOUND``
+  Boolean indicating whether the Tcl is found.
+``TK_FOUND``
+  Boolean indicating whether the Tk is found.
+``TCLTK_FOUND``
+  Boolean indicating whether both Tcl and Tk are found.
 
+Cache Variables
+^^^^^^^^^^^^^^^
 
-In an effort to remove some clutter and clear up some issues for
-people who are not necessarily Tcl/Tk gurus/developers, some
-variables were moved or removed.  Changes compared to CMake 2.4 are:
+The following cache variables may also be set:
 
-::
+``TCL_LIBRARY``
+  The path to the Tcl library (e.g., ``tcl``, etc.).
+``TCL_INCLUDE_PATH``
+  The directory containing ``tcl.h`` and other Tcl-related headers needed to use
+  Tcl.
+``TCL_TCLSH``
+  The path to the ``tclsh`` command-line executable.
+``TK_LIBRARY``
+  The path to the Tk library (e.g., ``tk``, etc.).
+``TK_INCLUDE_PATH``
+  The directory containing ``tk.h`` and other Tk-related headers needed to use
+  Tk.
+``TK_WISH``
+  The path to the ``wish`` windowing shell command-line executable.
 
-   => they were only useful for people writing Tcl/Tk extensions.
-   => these libs are not packaged by default with Tcl/Tk distributions.
-      Even when Tcl/Tk is built from source, several flavors of debug libs
-      are created and there is no real reason to pick a single one
-      specifically (say, amongst tcl84g, tcl84gs, or tcl84sgx).
-      Let's leave that choice to the user by allowing him to assign
-      TCL_LIBRARY to any Tcl library, debug or not.
-   => this ended up being only a Win32 variable, and there is a lot of
-      confusion regarding the location of this file in an installed Tcl/Tk
-      tree anyway (see 8.5 for example). If you need the internal path at
-      this point it is safer you ask directly where the *source* tree is
-      and dig from there.
+Changelog
+^^^^^^^^^
+
+.. versionchanged:: 2.6
+
+  To reduce clutter and clarify usage for users who are not Tcl/Tk experts, some
+  variables have been removed or relocated.  Many of the previous variables were
+  primarily useful only when writing Tcl/Tk extensions.
+
+  * The Tcl Stub Library can now be found using the separate
+    :module:`FindTclStub` module.
+
+  * The ``TCL_STUB_LIBRARY_DEBUG`` and ``TK_STUB_LIBRARY_DEBUG`` cache variables
+    have been removed.  They provided a path to the debug variant of the Tcl
+    Stub Library.
+
+    The extension-related libraries are not typically packaged with standard
+    Tcl/Tk distributions.  Even when building Tcl/Tk from source, several debug
+    variants (e.g., ``tcl84g``, ``tcl84gs``, ``tcl84sgx``, ``tclstub84g``,
+    ``tclstub84gs``, or ``tclstub84sgx``) may be produced.
+
+    Rather than enforcing one specific variant, users are now free to set
+    ``TCL_LIBRARY`` to any desired variant (debug or release) when using this
+    module, and ``TCL_STUB_LIBRARY`` to any desired variant via the
+    :module:`FindTclStub` module.
+
+  * The ``TK_INTERNAL_PATH`` cache variable has been removed.  It specified the
+    directory containing the ``tkWinInt.h`` header file.
+
+    This variable was Windows-specific and often caused confusion regarding file
+    locations within Tcl/Tk installation trees (as seen with version 8.5).  When
+    internal paths are needed, it's now safer to locate the Tcl/Tk source tree
+    directly, or use the ``TK_INCLUDE_PATH`` variable instead.
+
+Examples
+^^^^^^^^
+
+Finding Tcl:
+
+.. code-block:: cmake
+
+  find_package(TCL)
+
+See Also
+^^^^^^^^
+
+* The :module:`FindTclsh` module to find the Tcl shell command-line executable.
+* The :module:`FindTclStub` module to find the Tcl Stubs Library.
+* The :module:`FindWish` module to find the ``wish`` windowing shell
+  command-line executable .
 #]=======================================================================]
 
 block(SCOPE_FOR POLICIES)
