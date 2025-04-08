@@ -5,15 +5,37 @@
 FindSelfPackers
 ---------------
 
-Find upx
+Finds `UPX <https://upx.github.io/>`_, the Ultimate Packer for eXecutables.
 
-This module looks for some executable packers (i.e.  software that
-compress executables or shared libs into on-the-fly self-extracting
-executables or shared libs.  Examples:
+This module searches for executable packers-tools that compress executables or
+shared libraries into on-the-fly, self-extracting versions.  It currently
+supports ``UPX``.
 
-::
+Cache Variables
+^^^^^^^^^^^^^^^
 
-  UPX: http://wildsau.idv.uni-linz.ac.at/mfx/upx.html
+The following cache variables may be set:
+
+``SELF_PACKER_FOR_EXECUTABLE``
+  Path to the executable packer for compressing executables.
+
+``SELF_PACKER_FOR_SHARED_LIB``
+  Path to the executable packer for compressing shared libraries.
+
+``SELF_PACKER_FOR_EXECUTABLE_FLAGS``
+  Command-line options to use when compressing executables.
+
+``SELF_PACKER_FOR_SHARED_LIB_FLAGS``
+  Command-line options to use when compressing shared libraries.
+
+Examples
+^^^^^^^^
+
+Finding UPX:
+
+.. code-block:: cmake
+
+  find_package(SelfPackers)
 #]=======================================================================]
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindCygwin.cmake)
