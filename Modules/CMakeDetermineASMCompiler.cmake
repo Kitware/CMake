@@ -28,8 +28,8 @@ if(NOT CMAKE_ASM${ASM_DIALECT}_COMPILER)
       else()
         # List all default C and CXX compilers
         set(CMAKE_ASM_COMPILER_LIST
-             ${_CMAKE_TOOLCHAIN_PREFIX}cc  ${_CMAKE_TOOLCHAIN_PREFIX}gcc cl bcc xlc
-          CC ${_CMAKE_TOOLCHAIN_PREFIX}c++ ${_CMAKE_TOOLCHAIN_PREFIX}g++ aCC cl bcc xlC)
+             ${_CMAKE_TOOLCHAIN_PREFIX}cc  ${_CMAKE_TOOLCHAIN_PREFIX}gcc cl xlc
+          CC ${_CMAKE_TOOLCHAIN_PREFIX}c++ ${_CMAKE_TOOLCHAIN_PREFIX}g++ cl xlC)
       endif()
     endif()
   else() # some specific assembler "dialect"
