@@ -360,6 +360,7 @@ std::string cmCommonTargetGenerator::GenerateCodeCheckRules(
   std::string iwyu;
   std::string cpplint;
   std::string cppcheck;
+  std::string icstat;
 
   auto evaluateProp = [&](std::string const& prop) -> std::string {
     auto const value = this->GeneratorTarget->GetProperty(prop);
@@ -383,9 +384,12 @@ std::string cmCommonTargetGenerator::GenerateCodeCheckRules(
 
     std::string const cppcheck_prop = cmStrCat(lang, "_CPPCHECK");
     cppcheck = evaluateProp(cppcheck_prop);
+
+    std::string const icstat_prop = cmStrCat(lang, "_ICSTAT");
+    icstat = evaluateProp(icstat_prop);
   }
   if (cmNonempty(iwyu) || cmNonempty(tidy) || cmNonempty(cpplint) ||
-      cmNonempty(cppcheck)) {
+      cmNonempty(cppcheck) || cmNonempty(icstat)) {
     std::string code_check = cmakeCmd + " -E __run_co_compile";
     if (!compilerLauncher.empty()) {
       // In __run_co_compile case the launcher command is supplied
@@ -480,6 +484,24 @@ std::string cmCommonTargetGenerator::GenerateCodeCheckRules(
       code_check += " --cppcheck=";
       code_check +=
         this->GeneratorTarget->GetLocalGenerator()->EscapeForShell(cppcheck);
+    }
+    if (cmNonempty(icstat)) {
+      code_check += " --icstat=";
+      std::string checksParam{};
+      std::string dbParam{};
+      // Set default values for mandatory parameters
+      std::string checksFile{ "cstat_sel_checks.txt" };
+      std::string dbFile{ "cstat.db" };
+      // Populate the command line with C-STAT
+      // mandatory parameters unless specified
+      if (icstat.find("--checks=") == std::string::npos) {
+        checksParam = cmStrCat(";--checks=", checksFile);
+      }
+      if (icstat.find("--db=") == std::string::npos) {
+        dbParam = cmStrCat(";--db=", dbFile);
+      }
+      code_check += this->GeneratorTarget->GetLocalGenerator()->EscapeForShell(
+        cmStrCat(icstat, checksParam, dbParam));
     }
     if (cmNonempty(tidy) || (cmNonempty(cpplint)) || (cmNonempty(cppcheck))) {
       code_check += " --source=";

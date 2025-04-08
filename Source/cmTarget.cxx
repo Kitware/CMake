@@ -463,12 +463,14 @@ TargetProperty const StaticTargetProperties[] = {
   { "C_CLANG_TIDY_EXPORT_FIXES_DIR"_s, IC::CanCompileSources },
   { "C_CPPLINT"_s, IC::CanCompileSources },
   { "C_CPPCHECK"_s, IC::CanCompileSources },
+  { "C_ICSTAT"_s, IC::CanCompileSources },
   { "C_INCLUDE_WHAT_YOU_USE"_s, IC::CanCompileSources },
   // -- C++
   { "CXX_CLANG_TIDY"_s, IC::CanCompileSources },
   { "CXX_CLANG_TIDY_EXPORT_FIXES_DIR"_s, IC::CanCompileSources },
   { "CXX_CPPLINT"_s, IC::CanCompileSources },
   { "CXX_CPPCHECK"_s, IC::CanCompileSources },
+  { "CXX_ICSTAT"_s, IC::CanCompileSources },
   { "CXX_INCLUDE_WHAT_YOU_USE"_s, IC::CanCompileSources },
   // -- Objective C
   { "OBJC_CLANG_TIDY"_s, IC::CanCompileSources },
@@ -1783,6 +1785,7 @@ void cmTarget::CopyImportedCxxModulesProperties(cmTarget const* tgt)
     "CXX_CLANG_TIDY_EXPORT_FIXES_DIR",
     "CXX_CPPLINT",
     "CXX_CPPCHECK",
+    "CXX_ICSTAT",
     "CXX_INCLUDE_WHAT_YOU_USE",
 
     // Build graph properties

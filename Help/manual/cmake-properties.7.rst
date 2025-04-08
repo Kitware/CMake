@@ -318,6 +318,7 @@ Properties on Targets
    /prop_tgt/LANG_CPPCHECK
    /prop_tgt/LANG_CPPLINT
    /prop_tgt/LANG_EXTENSIONS
+   /prop_tgt/LANG_ICSTAT
    /prop_tgt/LANG_INCLUDE_WHAT_YOU_USE
    /prop_tgt/LANG_LINKER_LAUNCHER
    /prop_tgt/LANG_STANDARD

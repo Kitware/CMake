@@ -513,6 +513,55 @@ int HandleCppCheck(std::string const& runCmd, std::string const& sourceFile,
   return ret;
 }
 
+int HandleIcstat(std::string const& runCmd, std::string const& sourceFile,
+                 std::vector<std::string> const& orig_cmd)
+{
+  // Construct the IAR C-STAT command line.
+  cmList icstat_cmd{ runCmd, cmList::EmptyElements::Yes };
+  std::string icstat_analyze{ "analyze" };
+  std::string icstat_dashdash{ "--" };
+  std::string stdOut;
+  std::string stdErr;
+  int ret;
+
+  icstat_cmd.push_back(icstat_analyze);
+  icstat_cmd.push_back(sourceFile);
+  icstat_cmd.push_back(icstat_dashdash);
+
+  for (auto const& cmd : orig_cmd) {
+    icstat_cmd.push_back(cmd);
+  }
+
+  // Create the default manifest ruleset file when not found
+  if (!cmSystemTools::FileExists("cstat_sel_checks.txt")) {
+    std::string ichecks_cmd = cmSystemTools::GetFilenamePath(orig_cmd[0]);
+    ichecks_cmd = cmStrCat(ichecks_cmd, "/ichecks --default stdchecks");
+    if (!cmSystemTools::RunSingleCommand(ichecks_cmd, &stdOut, &stdErr, &ret,
+                                         nullptr,
+                                         cmSystemTools::OUTPUT_NONE)) {
+      std::cerr << "Error generating default manifest file '" << ichecks_cmd
+                << "'. " << stdOut << '\n';
+      return 1;
+    }
+  }
+
+  // Run the IAR C-STAT command line. Capture its output.
+  if (!cmSystemTools::RunSingleCommand(icstat_cmd, &stdOut, &stdErr, &ret,
+                                       nullptr, cmSystemTools::OUTPUT_NONE)) {
+    std::cerr << "Error running '" << icstat_cmd[0] << "': " << stdOut << '\n';
+    return 1;
+  }
+  if (ret == 0) {
+    std::cerr << "Warning: C-STAT static analysis reported diagnostics:\n";
+  } else {
+    std::cerr << "Error: C-STAT static analysis reported failure:\n";
+  }
+  std::cerr << stdOut;
+  std::cerr << stdErr;
+
+  return ret;
+}
+
 using CoCompileHandler = int (*)(std::string const&, std::string const&,
                                  std::vector<std::string> const&);
 
@@ -523,10 +572,11 @@ struct CoCompiler
   bool NoOriginalCommand;
 };
 
-std::array<CoCompiler, 5> const CoCompilers = {
+std::array<CoCompiler, 6> const CoCompilers = {
   { // Table of options and handlers.
     { "--cppcheck=", HandleCppCheck, false },
     { "--cpplint=", HandleCppLint, false },
+    { "--icstat=", HandleIcstat, false },
     { "--iwyu=", HandleIWYU, false },
     { "--lwyu=", HandleLWYU, true },
     { "--tidy=", HandleTidy, false } }

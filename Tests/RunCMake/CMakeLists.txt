@@ -1361,7 +1361,11 @@ if(WIN32)
 endif()
 
 if(CMake_TEST_IAR_TOOLCHAINS)
-  add_RunCMake_test(IAR -DCMake_TEST_IAR_TOOLCHAINS=${CMake_TEST_IAR_TOOLCHAINS})
+  add_executable(pseudo_icstat pseudo_icstat.c)
+  add_RunCMake_test(IAR
+    -DCMake_TEST_IAR_TOOLCHAINS=${CMake_TEST_IAR_TOOLCHAINS}
+    -DPSEUDO_ICSTAT=$<TARGET_FILE:pseudo_icstat>
+  )
   set_property(TEST RunCMake.IAR APPEND PROPERTY LABELS "IAR")
 endif()
 if(CMake_TEST_TICLANG_TOOLCHAINS)
