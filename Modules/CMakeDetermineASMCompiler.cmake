@@ -21,9 +21,9 @@ if(NOT CMAKE_ASM${ASM_DIALECT}_COMPILER)
   # finally list compilers to try
   if("ASM${ASM_DIALECT}" STREQUAL "ASM") # the generic assembler support
     if(NOT CMAKE_ASM_COMPILER_INIT)
-      if(CMAKE_C_COMPILER)
+      if(CMAKE_C_COMPILER_LOADED)
         set(CMAKE_ASM_COMPILER_LIST ${CMAKE_C_COMPILER})
-      elseif(CMAKE_CXX_COMPILER)
+      elseif(CMAKE_CXX_COMPILER_LOADED)
         set(CMAKE_ASM_COMPILER_LIST ${CMAKE_CXX_COMPILER})
       else()
         # List all default C and CXX compilers
