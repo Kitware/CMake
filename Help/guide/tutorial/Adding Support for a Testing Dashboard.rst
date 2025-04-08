@@ -39,8 +39,6 @@ We will also need to acquire a ``CTestConfig.cmake`` file to be placed in the
 top-level directory. When run, the :manual:`ctest <ctest(1)>` executable will
 read this file to gather information about the testing dashboard. It contains:
 
-* The project name
-
 * The project "Nightly" start time
 
   *  The time when a 24 hour "day" starts for this project.
