@@ -2893,17 +2893,6 @@ std::string SystemTools::FindDirectory(
  * the system search path.  Returns the full path to the executable if it is
  * found.  Otherwise, the empty string is returned.
  */
-std::string SystemTools::FindProgram(char const* nameIn,
-                                     std::vector<std::string> const& userPaths,
-                                     bool no_system_path)
-{
-  if (!nameIn || !*nameIn) {
-    return "";
-  }
-  return SystemTools::FindProgram(std::string(nameIn), userPaths,
-                                  no_system_path);
-}
-
 std::string SystemTools::FindProgram(std::string const& name,
                                      std::vector<std::string> const& userPaths,
                                      bool no_system_path)
@@ -2972,105 +2961,6 @@ std::string SystemTools::FindProgram(std::string const& name,
     }
   }
   // Couldn't find the program.
-  return "";
-}
-
-std::string SystemTools::FindProgram(std::vector<std::string> const& names,
-                                     std::vector<std::string> const& path,
-                                     bool noSystemPath)
-{
-  for (std::string const& name : names) {
-    // Try to find the program.
-    std::string result = SystemTools::FindProgram(name, path, noSystemPath);
-    if (!result.empty()) {
-      return result;
-    }
-  }
-  return "";
-}
-
-/**
- * Find the library with the given name.  Searches the given path and then
- * the system search path.  Returns the full path to the library if it is
- * found.  Otherwise, the empty string is returned.
- */
-std::string SystemTools::FindLibrary(std::string const& name,
-                                     std::vector<std::string> const& userPaths)
-{
-  // See if the executable exists as written.
-  if (SystemTools::FileExists(name, true)) {
-    return SystemTools::CollapseFullPath(name);
-  }
-
-  // Add the system search path to our path.
-  std::vector<std::string> path;
-  SystemTools::GetPath(path);
-  // now add the additional paths
-  path.reserve(path.size() + userPaths.size());
-  path.insert(path.end(), userPaths.begin(), userPaths.end());
-  // Add a trailing slash to all paths to aid the search process.
-  for (std::string& p : path) {
-    if (p.empty() || p.back() != '/') {
-      p += '/';
-    }
-  }
-  std::string tryPath;
-  for (std::string const& p : path) {
-#if defined(__APPLE__)
-    tryPath = p;
-    tryPath += name;
-    tryPath += ".framework";
-    if (SystemTools::FileIsDirectory(tryPath)) {
-      return SystemTools::CollapseFullPath(tryPath);
-    }
-#endif
-#if defined(_WIN32) && !defined(__CYGWIN__) && !defined(__MINGW32__)
-    tryPath = p;
-    tryPath += name;
-    tryPath += ".lib";
-    if (SystemTools::FileExists(tryPath, true)) {
-      return SystemTools::CollapseFullPath(tryPath);
-    }
-#else
-    tryPath = p;
-    tryPath += "lib";
-    tryPath += name;
-    tryPath += ".so";
-    if (SystemTools::FileExists(tryPath, true)) {
-      return SystemTools::CollapseFullPath(tryPath);
-    }
-    tryPath = p;
-    tryPath += "lib";
-    tryPath += name;
-    tryPath += ".a";
-    if (SystemTools::FileExists(tryPath, true)) {
-      return SystemTools::CollapseFullPath(tryPath);
-    }
-    tryPath = p;
-    tryPath += "lib";
-    tryPath += name;
-    tryPath += ".sl";
-    if (SystemTools::FileExists(tryPath, true)) {
-      return SystemTools::CollapseFullPath(tryPath);
-    }
-    tryPath = p;
-    tryPath += "lib";
-    tryPath += name;
-    tryPath += ".dylib";
-    if (SystemTools::FileExists(tryPath, true)) {
-      return SystemTools::CollapseFullPath(tryPath);
-    }
-    tryPath = p;
-    tryPath += "lib";
-    tryPath += name;
-    tryPath += ".dll";
-    if (SystemTools::FileExists(tryPath, true)) {
-      return SystemTools::CollapseFullPath(tryPath);
-    }
-#endif
-  }
-
-  // Couldn't find the library.
   return "";
 }
 
@@ -3377,33 +3267,6 @@ bool SystemTools::SplitProgramPath(std::string const& in_name,
     dir = in_name;
     return false;
   }
-  return true;
-}
-
-bool SystemTools::FindProgramPath(char const* argv0, std::string& pathOut,
-                                  std::string& errorMsg)
-{
-  std::vector<std::string> failures;
-  std::string self = argv0 ? argv0 : "";
-  failures.push_back(self);
-  SystemTools::ConvertToUnixSlashes(self);
-  self = SystemTools::FindProgram(self);
-  if (!SystemTools::FileIsExecutable(self)) {
-    failures.push_back(self);
-    std::ostringstream msg;
-    msg << "Can not find the command line program ";
-    msg << "\n";
-    if (argv0) {
-      msg << "  argv[0] = \"" << argv0 << "\"\n";
-    }
-    msg << "  Attempted paths:\n";
-    for (std::string const& ff : failures) {
-      msg << "    \"" << ff << "\"\n";
-    }
-    errorMsg = msg.str();
-    return false;
-  }
-  pathOut = self;
   return true;
 }
 
