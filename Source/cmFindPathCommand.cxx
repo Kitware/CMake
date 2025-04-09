@@ -49,7 +49,7 @@ bool cmFindPathCommand::InitialPass(std::vector<std::string> const& argsIn)
 
 std::string cmFindPathCommand::FindHeader()
 {
-  cmFindBaseDebugState debug(this->FindCommandName, this);
+  cmFindBaseDebugState debug(this);
   std::string header;
   if (this->SearchFrameworkFirst || this->SearchFrameworkOnly) {
     header = this->FindFrameworkHeader(debug);

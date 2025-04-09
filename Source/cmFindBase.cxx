@@ -634,10 +634,9 @@ void cmFindBase::StoreFindResult(std::string const& value)
   }
 }
 
-cmFindBaseDebugState::cmFindBaseDebugState(std::string commandName,
-                                           cmFindBase const* findBase)
+cmFindBaseDebugState::cmFindBaseDebugState(cmFindBase const* findBase)
   : FindCommand(findBase)
-  , CommandName(std::move(commandName))
+  , CommandName(findBase->FindCommandName)
 {
 }
 

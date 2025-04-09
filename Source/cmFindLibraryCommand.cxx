@@ -191,8 +191,7 @@ std::string cmFindLibraryCommand::FindLibrary()
 
 struct cmFindLibraryHelper
 {
-  cmFindLibraryHelper(std::string debugName, cmMakefile* mf,
-                      cmFindBase const* findBase);
+  cmFindLibraryHelper(cmMakefile* mf, cmFindBase const* findBase);
 
   // Context information.
   cmMakefile* Makefile;
@@ -306,12 +305,12 @@ std::string const& get_suffixes(cmMakefile* mf)
   return (suffixProp) ? *suffixProp : defaultSuffix;
 }
 }
-cmFindLibraryHelper::cmFindLibraryHelper(std::string debugName, cmMakefile* mf,
+cmFindLibraryHelper::cmFindLibraryHelper(cmMakefile* mf,
                                          cmFindBase const* base)
   : Makefile(mf)
   , FindBase(base)
   , DebugMode(base->DebugModeEnabled())
-  , DebugSearches(std::move(debugName), base)
+  , DebugSearches(base)
 {
   this->GG = this->Makefile->GetGlobalGenerator();
 
@@ -540,7 +539,7 @@ std::string cmFindLibraryCommand::FindNormalLibrary()
 std::string cmFindLibraryCommand::FindNormalLibraryNamesPerDir()
 {
   // Search for all names in each directory.
-  cmFindLibraryHelper helper(this->FindCommandName, this->Makefile, this);
+  cmFindLibraryHelper helper(this->Makefile, this);
   for (std::string const& n : this->Names) {
     helper.AddName(n);
   }
@@ -557,7 +556,7 @@ std::string cmFindLibraryCommand::FindNormalLibraryNamesPerDir()
 std::string cmFindLibraryCommand::FindNormalLibraryDirsPerName()
 {
   // Search the entire path for each name.
-  cmFindLibraryHelper helper(this->FindCommandName, this->Makefile, this);
+  cmFindLibraryHelper helper(this->Makefile, this);
   for (std::string const& n : this->Names) {
     // Switch to searching for this name.
     helper.SetName(n);

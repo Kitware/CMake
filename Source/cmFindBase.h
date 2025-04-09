@@ -95,7 +95,7 @@ private:
 class cmFindBaseDebugState
 {
 public:
-  explicit cmFindBaseDebugState(std::string name, cmFindBase const* findBase);
+  explicit cmFindBaseDebugState(cmFindBase const* findBase);
   ~cmFindBaseDebugState();
 
   void FoundAt(std::string const& path, std::string regexName = std::string());

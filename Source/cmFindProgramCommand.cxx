@@ -4,7 +4,6 @@
 
 #include <algorithm>
 #include <string>
-#include <utility>
 
 #include "cmMakefile.h"
 #include "cmMessageType.h"
@@ -25,9 +24,8 @@ class cmExecutionStatus;
 
 struct cmFindProgramHelper
 {
-  cmFindProgramHelper(std::string debugName, cmMakefile* makefile,
-                      cmFindBase const* base)
-    : DebugSearches(std::move(debugName), base)
+  cmFindProgramHelper(cmMakefile* makefile, cmFindBase const* base)
+    : DebugSearches(base)
     , Makefile(makefile)
     , FindBase(base)
     , PolicyCMP0109(makefile->GetPolicyStatus(cmPolicies::CMP0109))
@@ -233,7 +231,7 @@ std::string cmFindProgramCommand::FindNormalProgram()
 std::string cmFindProgramCommand::FindNormalProgramNamesPerDir()
 {
   // Search for all names in each directory.
-  cmFindProgramHelper helper(this->FindCommandName, this->Makefile, this);
+  cmFindProgramHelper helper(this->Makefile, this);
   for (std::string const& n : this->Names) {
     helper.AddName(n);
   }
@@ -256,7 +254,7 @@ std::string cmFindProgramCommand::FindNormalProgramNamesPerDir()
 std::string cmFindProgramCommand::FindNormalProgramDirsPerName()
 {
   // Search the entire path for each name.
-  cmFindProgramHelper helper(this->FindCommandName, this->Makefile, this);
+  cmFindProgramHelper helper(this->Makefile, this);
   for (std::string const& n : this->Names) {
     // Switch to searching for this name.
     helper.SetName(n);
