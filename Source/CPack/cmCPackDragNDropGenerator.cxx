@@ -10,7 +10,8 @@
 #include <cm/string_view>
 #include <cmext/string_view>
 
-#include <CoreFoundation/CoreFoundation.h>
+#include <CoreFoundation/CFLocale.h>
+#include <CoreFoundation/CFString.h>
 #include <cm3p/kwiml/abi.h>
 
 #include "cmsys/Base64.h"

@@ -58,7 +58,10 @@
 #include "cmake.h"
 
 #if !defined(CMAKE_BOOTSTRAP) && defined(__APPLE__)
-#  include <CoreFoundation/CoreFoundation.h>
+#  include <CoreFoundation/CFBundle.h>
+#  include <CoreFoundation/CFString.h>
+#  include <CoreFoundation/CFURL.h>
+#  include <CoreFoundation/CFUUID.h>
 #  if !TARGET_OS_IPHONE
 #    define HAVE_APPLICATION_SERVICES
 #    include <ApplicationServices/ApplicationServices.h>
