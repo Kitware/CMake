@@ -1,0 +1,7 @@
+if(VARNAME)
+  message(STATUS "Variable - ${VARNAME}: $ENV{${VARNAME}}")
+else()
+  message(STATUS "Stage: $ENV{Stage}")
+  message(STATUS "Separator: $ENV{ListSeparator}")
+  message(STATUS "List: $ENV{ListVar}")
+endif()
