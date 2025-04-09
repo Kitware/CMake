@@ -1,7 +1,6 @@
 macro (add_hip_test_macro name)
   add_test_macro("${name}" ${ARGN})
-  set_property(TEST "${name}" APPEND
-    PROPERTY LABELS "HIP")
+  set_property(TEST "${name}" APPEND PROPERTY LABELS "HIP")
 endmacro ()
 
 add_hip_test_macro(HIP.ArchitectureOff HIPOnlyArchitectureOff)
