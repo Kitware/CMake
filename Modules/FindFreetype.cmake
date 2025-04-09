@@ -5,46 +5,72 @@
 FindFreetype
 ------------
 
-Find the FreeType font renderer includes and library.
+Finds the FreeType font renderer library.
 
 Imported Targets
 ^^^^^^^^^^^^^^^^
 
-.. versionadded:: 3.10
-
-This module defines the following :prop_tgt:`IMPORTED` target:
+This module provides the following :ref:`Imported Targets`:
 
 ``Freetype::Freetype``
-  The Freetype ``freetype`` library, if found
+  .. versionadded:: 3.10
+
+  Target encapsulating the Freetype library usage requirements, available if
+  Freetype is found.
 
 Result Variables
 ^^^^^^^^^^^^^^^^
 
-This module will set the following variables in your project:
+This module defines the following variables:
 
-``FREETYPE_FOUND``
-  true if the Freetype headers and libraries were found
+``Freetype_FOUND``
+  Boolean indicating whether the (requested version of) Freetype is found.  For
+  backward compatibility, the ``FREETYPE_FOUND`` variable is also set to the
+  same value.
+
 ``FREETYPE_INCLUDE_DIRS``
-  directories containing the Freetype headers. This is the
-  concatenation of the variables:
+  Include directories containing headers needed to use Freetype.  This is the
+  concatenation of ``FREETYPE_INCLUDE_DIR_ft2build`` and
+  ``FREETYPE_INCLUDE_DIR_freetype2`` variables.
 
-  ``FREETYPE_INCLUDE_DIR_ft2build``
-    directory holding the main Freetype API configuration header
-  ``FREETYPE_INCLUDE_DIR_freetype2``
-    directory holding Freetype public headers
 ``FREETYPE_LIBRARIES``
-  the library to link against
+  Libraries needed to link against for using Freetype.
+
 ``FREETYPE_VERSION_STRING``
-  the version of freetype found
+  The version of Freetype found.
 
 .. versionadded:: 3.7
-  Debug and Release variants are found separately.
+  Debug and Release library variants are found separately.
+
+Cache Variables
+^^^^^^^^^^^^^^^
+
+The following cache variables may also be set:
+
+``FREETYPE_INCLUDE_DIR_ft2build``
+  The directory containing the main Freetype API configuration header.
+
+``FREETYPE_INCLUDE_DIR_freetype2``
+  The directory containing Freetype public headers.
 
 Hints
 ^^^^^
 
-The user may set the environment variable ``FREETYPE_DIR`` to the root
-directory of a Freetype installation.
+This module accepts the following variables:
+
+``FREETYPE_DIR``
+  The user may set this environment variable to the root directory of a Freetype
+  installation to find Freetype in non-standard locations.
+
+Examples
+^^^^^^^^
+
+Finding Freetype and linking it to a project target:
+
+.. code-block:: cmake
+
+  find_package(Freetype)
+  target_link_libraries(project_target PRIVATE Freetype::Freetype)
 #]=======================================================================]
 
 cmake_policy(PUSH)
