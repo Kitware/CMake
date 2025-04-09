@@ -649,21 +649,15 @@ cmFindBaseDebugState::~cmFindBaseDebugState()
   if (cmConfigureLog* log =
         this->FindCommand->Makefile->GetCMakeInstance()->GetConfigureLog()) {
     // Write event if any of:
-    //   - debug mode is enabled
     //   - the variable was not defined (first run)
     //   - the variable found state does not match the new found state (state
     //     transition)
-    if (this->FindCommand->DebugModeEnabled() ||
-        !this->FindBaseCommand->IsDefined() ||
+    if (!this->FindBaseCommand->IsDefined() ||
         this->FindBaseCommand->IsFound() != found) {
       this->WriteFindEvent(*log, *this->FindCommand->Makefile);
     }
   }
 #endif
-
-  if (!this->FindCommand->DebugModeEnabled()) {
-    return;
-  }
 
   // clang-format off
   auto buffer =

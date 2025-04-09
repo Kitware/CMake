@@ -342,3 +342,16 @@ struct hash<cmFindPackageCommand::ConfigFileInfo>
 
 bool cmFindPackage(std::vector<std::string> const& args,
                    cmExecutionStatus& status);
+
+class cmFindPackageDebugState : public cmFindCommonDebugState
+{
+public:
+  explicit cmFindPackageDebugState(cmFindPackageCommand const* findPackage);
+  ~cmFindPackageDebugState() override;
+
+private:
+  void FoundAtImpl(std::string const& path, std::string regexName) override;
+  void FailedAtImpl(std::string const& path, std::string regexName) override;
+
+  cmFindPackageCommand const* const FindPackageCommand;
+};

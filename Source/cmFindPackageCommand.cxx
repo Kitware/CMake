@@ -12,6 +12,7 @@
 #include <unordered_set>
 #include <utility>
 
+#include <cm/memory>
 #include <cm/optional>
 #include <cmext/algorithm>
 #include <cmext/string_view>
@@ -529,7 +530,6 @@ cmFindPackageCommand::cmFindPackageCommand(cmExecutionStatus& status)
   , VersionRangeMax(VERSION_ENDPOINT_INCLUDED)
 {
   this->CMakePathName = "PACKAGE";
-  this->DebugMode = false;
   this->AppendSearchPathGroups();
 
   this->DeprecatedFindModules["Boost"] = cmPolicies::CMP0167;
@@ -704,7 +704,9 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
 
   // Process debug mode
   cmMakefile::DebugFindPkgRAII debugFindPkgRAII(this->Makefile, this->Name);
-  this->DebugMode = this->ComputeIfDebugModeWanted();
+  if (this->ComputeIfDebugModeWanted()) {
+    this->DebugState = cm::make_unique<cmFindPackageDebugState>(this);
+  }
 
   // Parse the arguments.
   enum Doing
@@ -3358,4 +3360,27 @@ bool cmFindPackage(std::vector<std::string> const& args,
                    cmExecutionStatus& status)
 {
   return cmFindPackageCommand(status).InitialPass(args);
+}
+
+cmFindPackageDebugState::cmFindPackageDebugState(
+  cmFindPackageCommand const* findPackage)
+  : cmFindCommonDebugState("find_package", findPackage)
+  , FindPackageCommand(findPackage)
+{
+}
+
+cmFindPackageDebugState::~cmFindPackageDebugState() = default;
+
+void cmFindPackageDebugState::FoundAtImpl(std::string const& path,
+                                          std::string regexName)
+{
+  (void)path;
+  (void)regexName;
+}
+
+void cmFindPackageDebugState::FailedAtImpl(std::string const& path,
+                                           std::string regexName)
+{
+  (void)path;
+  (void)regexName;
 }

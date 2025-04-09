@@ -59,8 +59,6 @@ cmFindCommon::cmFindCommon(cmExecutionStatus& status)
 
   this->InitializeSearchPathGroups();
 
-  this->DebugMode = false;
-
   // Windows Registry views
   // When policy CMP0134 is not NEW, rely on previous behavior:
   if (this->Makefile->GetPolicyStatus(cmPolicies::CMP0134) !=
@@ -76,6 +74,11 @@ cmFindCommon::cmFindCommon(cmExecutionStatus& status)
 void cmFindCommon::SetError(std::string const& e)
 {
   this->Status.SetError(e);
+}
+
+bool cmFindCommon::DebugModeEnabled() const
+{
+  return static_cast<bool>(this->DebugState);
 }
 
 void cmFindCommon::DebugMessage(std::string const& msg) const

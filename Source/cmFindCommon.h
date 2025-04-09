@@ -5,6 +5,7 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <map>
+#include <memory>
 #include <set>
 #include <string>
 #include <vector>
@@ -13,6 +14,7 @@
 #include "cmSearchPath.h"
 #include "cmWindowsRegistry.h"
 
+class cmFindCommonDebugState;
 class cmExecutionStatus;
 class cmMakefile;
 
@@ -30,7 +32,7 @@ public:
 
   void SetError(std::string const& e);
 
-  bool DebugModeEnabled() const { return this->DebugMode; }
+  bool DebugModeEnabled() const;
 
 protected:
   friend class cmSearchPath;
@@ -127,7 +129,7 @@ protected:
   void AddPathSuffix(std::string const& arg);
 
   void DebugMessage(std::string const& msg) const;
-  bool DebugMode;
+  std::unique_ptr<cmFindCommonDebugState> DebugState;
   bool NoDefaultPath;
   bool NoPackageRootPath;
   bool NoCMakePath;
