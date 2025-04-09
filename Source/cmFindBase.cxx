@@ -660,7 +660,7 @@ cmFindBaseDebugState::~cmFindBaseDebugState()
   }
 #endif
 
-  if (!this->FindCommand->DebugMode) {
+  if (!this->FindCommand->DebugModeEnabled()) {
     return;
   }
 

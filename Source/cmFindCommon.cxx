@@ -226,14 +226,14 @@ void cmFindCommon::RerootPaths(std::vector<std::string>& paths,
     return;
   }
 
-  if (this->DebugMode && debugBuffer) {
+  if (this->DebugModeEnabled() && debugBuffer) {
     *debugBuffer = cmStrCat(
       *debugBuffer, "Prepending the following roots to each prefix:\n");
   }
 
   auto debugRoot = [this, debugBuffer](std::string const& name,
                                        cmValue value) {
-    if (this->DebugMode && debugBuffer) {
+    if (this->DebugModeEnabled() && debugBuffer) {
       *debugBuffer = cmStrCat(*debugBuffer, name, '\n');
       cmList roots{ value };
       if (roots.empty()) {
