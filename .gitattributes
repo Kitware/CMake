@@ -60,6 +60,7 @@ coverage.xml.in  tab-indent
 *.H              our-c-style
 *.h              our-c-style
 *.hh             our-c-style
+*.hip            our-c-style
 *.hpp            our-c-style
 *.hxx            our-c-style
 *.notcu          our-c-style

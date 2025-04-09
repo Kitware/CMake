@@ -1,17 +1,14 @@
-
-#include <type_traits>
 #include <system_error>
-#include <hip/hip_runtime_api.h>
+#include <type_traits>
 
+#include <hip/hip_runtime_api.h>
 
 static __global__ void fake_hip_kernel()
 {
 }
 
-
 int __host__ static_hip_func(int x)
 {
-
   fake_hip_kernel<<<1, 1>>>();
   bool valid = (hipSuccess == hipGetLastError());
   if (!valid) {
