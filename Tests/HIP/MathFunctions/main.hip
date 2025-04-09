@@ -1,4 +1,5 @@
 #include <cmath>
+#include <iostream>
 #include <memory>
 #include <stdexcept>
 
@@ -18,14 +19,23 @@ bool verify(F f, T expected)
 {
   std::unique_ptr<T> cpu_T(new T);
   T* gpu_T = nullptr;
-  if (hipMalloc((void**)&gpu_T, sizeof(T)) != hipSuccess) {
-    return false;
-  }
   bool result = true;
+  {
+    hipError_t err = hipMalloc((void**)&gpu_T, sizeof(T));
+    if (err != hipSuccess) {
+      std::cerr << "hipMalloc failed: " << hipGetErrorString(err) << std::endl;
+      result = false;
+    }
+  }
   hipLaunchKernelGGL(global_entry_point, 1, 1, 0, 0, f, gpu_T);
-  result = hipMemcpy(cpu_T.get(), gpu_T, sizeof(T), hipMemcpyDeviceToHost) ==
-      hipSuccess &&
-    result;
+  {
+    hipError_t err =
+      hipMemcpy(cpu_T.get(), gpu_T, sizeof(T), hipMemcpyDeviceToHost);
+    if (err != hipSuccess) {
+      std::cerr << "hipMemcpy failed: " << hipGetErrorString(err) << std::endl;
+      result = false;
+    }
+  }
   result = hipFree(gpu_T) == hipSuccess && result;
   result = *cpu_T == expected && result;
   return result;
