@@ -35,6 +35,7 @@ public:
 protected:
   friend class cmSearchPath;
   friend class cmFindBaseDebugState;
+  friend class cmFindCommonDebugState;
 
   /** Used to define groups of path labels */
   class PathGroup : public cmPathLabel
@@ -156,4 +157,30 @@ protected:
 
   cmMakefile* Makefile;
   cmExecutionStatus& Status;
+};
+
+class cmFindCommonDebugState
+{
+public:
+  cmFindCommonDebugState(std::string name, cmFindCommon const* findCommand);
+  virtual ~cmFindCommonDebugState() = default;
+
+  void FoundAt(std::string const& path, std::string regexName = std::string());
+  void FailedAt(std::string const& path,
+                std::string regexName = std::string());
+
+protected:
+  virtual void FoundAtImpl(std::string const& path, std::string regexName) = 0;
+  virtual void FailedAtImpl(std::string const& path,
+                            std::string regexName) = 0;
+
+  cmFindCommon const* const FindCommand;
+  std::string const CommandName;
+  std::string const Mode;
+  bool HasBeenFound() const { return this->IsFound; }
+
+private:
+  bool TrackSearchProgress() const;
+
+  bool IsFound{ false };
 };

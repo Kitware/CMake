@@ -457,3 +457,44 @@ void cmFindCommon::ComputeFinalPaths(IgnorePaths ignorePaths,
                   }
                 });
 }
+
+cmFindCommonDebugState::cmFindCommonDebugState(std::string name,
+                                               cmFindCommon const* findCommand)
+  : FindCommand(findCommand)
+  , CommandName(std::move(name))
+  // Strip the `find_` prefix.
+  , Mode(this->CommandName.substr(5))
+{
+}
+
+void cmFindCommonDebugState::FoundAt(std::string const& path,
+                                     std::string regexName)
+{
+  this->IsFound = true;
+
+  if (!this->TrackSearchProgress()) {
+    return;
+  }
+
+  this->FoundAtImpl(path, regexName);
+}
+
+void cmFindCommonDebugState::FailedAt(std::string const& path,
+                                      std::string regexName)
+{
+  if (!this->TrackSearchProgress()) {
+    return;
+  }
+
+  this->FailedAtImpl(path, regexName);
+}
+
+bool cmFindCommonDebugState::TrackSearchProgress() const
+{
+  // Track search progress if debugging or logging the configure.
+  return this->FindCommand->DebugModeEnabled()
+#ifndef CMAKE_BOOTSTRAP
+    || this->FindCommand->Makefile->GetCMakeInstance()->GetConfigureLog()
+#endif
+    ;
+}

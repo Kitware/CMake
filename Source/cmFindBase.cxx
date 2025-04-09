@@ -635,8 +635,8 @@ void cmFindBase::StoreFindResult(std::string const& value)
 }
 
 cmFindBaseDebugState::cmFindBaseDebugState(cmFindBase const* findBase)
-  : FindCommand(findBase)
-  , CommandName(findBase->FindCommandName)
+  : cmFindCommonDebugState(findBase->FindCommandName, findBase)
+  , FindBaseCommand(findBase)
 {
 }
 
@@ -653,8 +653,9 @@ cmFindBaseDebugState::~cmFindBaseDebugState()
     //   - the variable was not defined (first run)
     //   - the variable found state does not match the new found state (state
     //     transition)
-    if (this->FindCommand->DebugMode || !this->FindCommand->IsDefined() ||
-        this->FindCommand->IsFound() != found) {
+    if (this->FindCommand->DebugModeEnabled() ||
+        !this->FindBaseCommand->IsDefined() ||
+        this->FindBaseCommand->IsFound() != found) {
       this->WriteFindEvent(*log, *this->FindCommand->Makefile);
     }
   }
@@ -668,17 +669,17 @@ cmFindBaseDebugState::~cmFindBaseDebugState()
   auto buffer =
     cmStrCat(
       this->CommandName, " called with the following settings:"
-      "\n  VAR: ", this->FindCommand->VariableName,
-      "\n  NAMES: ", cmWrap('"', this->FindCommand->Names, '"', "\n         "),
-      "\n  Documentation: ", this->FindCommand->VariableDocumentation,
+      "\n  VAR: ", this->FindBaseCommand->VariableName,
+      "\n  NAMES: ", cmWrap('"', this->FindBaseCommand->Names, '"', "\n         "),
+      "\n  Documentation: ", this->FindBaseCommand->VariableDocumentation,
       "\n  Framework"
-      "\n    Only Search Frameworks: ", this->FindCommand->SearchFrameworkOnly,
-      "\n    Search Frameworks Last: ", this->FindCommand->SearchFrameworkLast,
-      "\n    Search Frameworks First: ", this->FindCommand->SearchFrameworkFirst,
+      "\n    Only Search Frameworks: ", this->FindBaseCommand->SearchFrameworkOnly,
+      "\n    Search Frameworks Last: ", this->FindBaseCommand->SearchFrameworkLast,
+      "\n    Search Frameworks First: ", this->FindBaseCommand->SearchFrameworkFirst,
       "\n  AppBundle"
-      "\n    Only Search AppBundle: ", this->FindCommand->SearchAppBundleOnly,
-      "\n    Search AppBundle Last: ", this->FindCommand->SearchAppBundleLast,
-      "\n    Search AppBundle First: ", this->FindCommand->SearchAppBundleFirst,
+      "\n    Only Search AppBundle: ", this->FindBaseCommand->SearchAppBundleOnly,
+      "\n    Search AppBundle Last: ", this->FindBaseCommand->SearchAppBundleLast,
+      "\n    Search AppBundle First: ", this->FindBaseCommand->SearchAppBundleFirst,
       "\n"
     );
   // clang-format on
@@ -708,7 +709,7 @@ cmFindBaseDebugState::~cmFindBaseDebugState()
     buffer += cmStrCat(path, '\n');
   }
 
-  if (found) {
+  if (this->HasBeenFound()) {
     buffer += cmStrCat("The item was found at\n  ",
                        this->FoundSearchLocation.path, '\n');
   } else {
@@ -718,20 +719,16 @@ cmFindBaseDebugState::~cmFindBaseDebugState()
   this->FindCommand->DebugMessage(buffer);
 }
 
-void cmFindBaseDebugState::FoundAt(std::string const& path,
-                                   std::string regexName)
+void cmFindBaseDebugState::FoundAtImpl(std::string const& path,
+                                       std::string regexName)
 {
-  if (this->TrackSearchProgress()) {
-    this->FoundSearchLocation = DebugLibState{ std::move(regexName), path };
-  }
+  this->FoundSearchLocation = DebugLibState{ std::move(regexName), path };
 }
 
-void cmFindBaseDebugState::FailedAt(std::string const& path,
-                                    std::string regexName)
+void cmFindBaseDebugState::FailedAtImpl(std::string const& path,
+                                        std::string regexName)
 {
-  if (this->TrackSearchProgress()) {
-    this->FailedSearchLocations.emplace_back(std::move(regexName), path);
-  }
+  this->FailedSearchLocations.emplace_back(std::move(regexName), path);
 }
 
 #ifndef CMAKE_BOOTSTRAP
@@ -742,8 +739,9 @@ void cmFindBaseDebugState::WriteFindEvent(cmConfigureLog& log,
 
   // Mode is the Command name without the "find_" prefix
   log.WriteValue("mode"_s, this->CommandName.substr(5));
-  log.WriteValue("variable"_s, this->FindCommand->VariableName);
-  log.WriteValue("description"_s, this->FindCommand->VariableDocumentation);
+  log.WriteValue("variable"_s, this->FindBaseCommand->VariableName);
+  log.WriteValue("description"_s,
+                 this->FindBaseCommand->VariableDocumentation);
 
   // Yes, this needs to return a `std::string`. If it returns a `const char*`,
   // the `WriteValue` method prefers the `bool` overload. There's no overload
@@ -774,7 +772,7 @@ void cmFindBaseDebugState::WriteFindEvent(cmConfigureLog& log,
                  !this->FindCommand->NoCMakeInstallPath);
   log.EndObject();
 
-  log.WriteValue("names"_s, this->FindCommand->Names);
+  log.WriteValue("names"_s, this->FindBaseCommand->Names);
   std::vector<std::string> directories;
   directories.reserve(this->FailedSearchLocations.size());
   for (auto const& location : this->FailedSearchLocations) {
@@ -790,13 +788,3 @@ void cmFindBaseDebugState::WriteFindEvent(cmConfigureLog& log,
   log.EndEvent();
 }
 #endif
-
-bool cmFindBaseDebugState::TrackSearchProgress() const
-{
-  // Track search progress if debugging or logging the configure.
-  return this->FindCommand->DebugMode
-#ifndef CMAKE_BOOTSTRAP
-    || this->FindCommand->Makefile->GetCMakeInstance()->GetConfigureLog()
-#endif
-    ;
-}

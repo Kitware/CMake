@@ -92,17 +92,16 @@ private:
   void FillUserGuessPath();
 };
 
-class cmFindBaseDebugState
+class cmFindBaseDebugState : public cmFindCommonDebugState
 {
 public:
   explicit cmFindBaseDebugState(cmFindBase const* findBase);
-  ~cmFindBaseDebugState();
-
-  void FoundAt(std::string const& path, std::string regexName = std::string());
-  void FailedAt(std::string const& path,
-                std::string regexName = std::string());
+  ~cmFindBaseDebugState() override;
 
 private:
+  void FoundAtImpl(std::string const& path, std::string regexName) override;
+  void FailedAtImpl(std::string const& path, std::string regexName) override;
+
   struct DebugLibState
   {
     DebugLibState() = default;
@@ -119,9 +118,7 @@ private:
   void WriteFindEvent(cmConfigureLog& log, cmMakefile const& mf) const;
 #endif
 
-  cmFindBase const* FindCommand;
-  std::string CommandName;
-  bool TrackSearchProgress() const;
+  cmFindBase const* const FindBaseCommand;
   std::vector<DebugLibState> FailedSearchLocations;
   DebugLibState FoundSearchLocation;
 };
