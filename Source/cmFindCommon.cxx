@@ -71,6 +71,8 @@ cmFindCommon::cmFindCommon(cmExecutionStatus& status)
   }
 }
 
+cmFindCommon::~cmFindCommon() = default;
+
 void cmFindCommon::SetError(std::string const& e)
 {
   this->Status.SetError(e);
@@ -490,6 +492,26 @@ void cmFindCommonDebugState::FailedAt(std::string const& path,
   }
 
   this->FailedAtImpl(path, regexName);
+}
+
+void cmFindCommonDebugState::Write()
+{
+#ifndef CMAKE_BOOTSTRAP
+  // Write find event to the configure log if the log exists
+  if (cmConfigureLog* log =
+        this->FindCommand->Makefile->GetCMakeInstance()->GetConfigureLog()) {
+    // Write event if any of:
+    //   - the variable was not defined (first run)
+    //   - the variable found state does not match the new found state (state
+    //     transition)
+    if (!this->FindCommand->IsDefined() ||
+        this->FindCommand->IsFound() != this->IsFound) {
+      this->WriteEvent(*log, *this->FindCommand->Makefile);
+    }
+  }
+#endif
+
+  this->WriteDebug();
 }
 
 bool cmFindCommonDebugState::TrackSearchProgress() const

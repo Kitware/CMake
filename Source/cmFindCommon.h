@@ -14,6 +14,7 @@
 #include "cmSearchPath.h"
 #include "cmWindowsRegistry.h"
 
+class cmConfigureLog;
 class cmFindCommonDebugState;
 class cmExecutionStatus;
 class cmMakefile;
@@ -29,6 +30,7 @@ class cmFindCommon
 {
 public:
   cmFindCommon(cmExecutionStatus& status);
+  virtual ~cmFindCommon();
 
   void SetError(std::string const& e);
 
@@ -79,6 +81,9 @@ protected:
     RootPathModeOnly,
     RootPathModeBoth
   };
+
+  virtual bool IsFound() const = 0;
+  virtual bool IsDefined() const = 0;
 
   /** Construct the various path groups and labels */
   void InitializeSearchPathGroups();
@@ -171,10 +176,17 @@ public:
   void FailedAt(std::string const& path,
                 std::string regexName = std::string());
 
+  void Write();
+
 protected:
   virtual void FoundAtImpl(std::string const& path, std::string regexName) = 0;
   virtual void FailedAtImpl(std::string const& path,
                             std::string regexName) = 0;
+
+  virtual void WriteDebug() const = 0;
+#ifndef CMAKE_BOOTSTRAP
+  virtual void WriteEvent(cmConfigureLog& log, cmMakefile const& mf) const = 0;
+#endif
 
   cmFindCommon const* const FindCommand;
   std::string const CommandName;

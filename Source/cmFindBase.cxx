@@ -7,6 +7,7 @@
 #include <deque>
 #include <iterator>
 #include <map>
+#include <memory>
 #include <utility>
 
 #include <cm/optional>
@@ -35,6 +36,13 @@ cmFindBase::cmFindBase(std::string findCommandName, cmExecutionStatus& status)
   : cmFindCommon(status)
   , FindCommandName(std::move(findCommandName))
 {
+}
+
+cmFindBase::~cmFindBase()
+{
+  if (this->DebugState) {
+    this->DebugState->Write();
+  }
 }
 
 bool cmFindBase::ParseArguments(std::vector<std::string> const& argsIn)
@@ -640,25 +648,22 @@ cmFindBaseDebugState::cmFindBaseDebugState(cmFindBase const* findBase)
 {
 }
 
-cmFindBaseDebugState::~cmFindBaseDebugState()
+cmFindBaseDebugState::~cmFindBaseDebugState() = default;
+
+void cmFindBaseDebugState::FoundAtImpl(std::string const& path,
+                                       std::string regexName)
 {
-  bool found = !this->FoundSearchLocation.path.empty();
+  this->FoundSearchLocation = DebugLibState{ std::move(regexName), path };
+}
 
-#ifndef CMAKE_BOOTSTRAP
-  // Write find event to the configure log if the log exists
-  if (cmConfigureLog* log =
-        this->FindCommand->Makefile->GetCMakeInstance()->GetConfigureLog()) {
-    // Write event if any of:
-    //   - the variable was not defined (first run)
-    //   - the variable found state does not match the new found state (state
-    //     transition)
-    if (!this->FindBaseCommand->IsDefined() ||
-        this->FindBaseCommand->IsFound() != found) {
-      this->WriteFindEvent(*log, *this->FindCommand->Makefile);
-    }
-  }
-#endif
+void cmFindBaseDebugState::FailedAtImpl(std::string const& path,
+                                        std::string regexName)
+{
+  this->FailedSearchLocations.emplace_back(std::move(regexName), path);
+}
 
+void cmFindBaseDebugState::WriteDebug() const
+{
   // clang-format off
   auto buffer =
     cmStrCat(
@@ -713,21 +718,9 @@ cmFindBaseDebugState::~cmFindBaseDebugState()
   this->FindCommand->DebugMessage(buffer);
 }
 
-void cmFindBaseDebugState::FoundAtImpl(std::string const& path,
-                                       std::string regexName)
-{
-  this->FoundSearchLocation = DebugLibState{ std::move(regexName), path };
-}
-
-void cmFindBaseDebugState::FailedAtImpl(std::string const& path,
-                                        std::string regexName)
-{
-  this->FailedSearchLocations.emplace_back(std::move(regexName), path);
-}
-
 #ifndef CMAKE_BOOTSTRAP
-void cmFindBaseDebugState::WriteFindEvent(cmConfigureLog& log,
-                                          cmMakefile const& mf) const
+void cmFindBaseDebugState::WriteEvent(cmConfigureLog& log,
+                                      cmMakefile const& mf) const
 {
   log.BeginEvent("find-v1", mf);
 
