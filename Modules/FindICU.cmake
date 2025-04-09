@@ -7,82 +7,169 @@ FindICU
 
 .. versionadded:: 3.7
 
-Find the International Components for Unicode (ICU) libraries and
-programs.
-
-This module supports multiple components.
-Components can include any of: ``data``, ``i18n``, ``io``, ``le``,
-``lx``, ``test``, ``tu`` and ``uc``.
-
-Note that on Windows ``data`` is named ``dt`` and ``i18n`` is named
-``in``; any of the names may be used, and the appropriate
-platform-specific library name will be automatically selected.
+Finds the International Components for Unicode (ICU) libraries and programs.
 
 .. versionadded:: 3.11
-  Added support for static libraries on Windows.
+  Support for static libraries on Windows.
 
-This module reports information about the ICU installation in
-several variables.  General variables::
+Components
+^^^^^^^^^^
 
-  ICU_FOUND - true if the main programs and libraries were found
-  ICU_INCLUDE_DIRS - the directories containing the ICU headers
-  ICU_LIBRARIES - component libraries to be linked
-  ICU_VERSION - ICU release version
+This module supports the following components:
 
-Imported targets::
+``data``
+  Finds the ICU Data library.  On Windows, this library component is named
+  ``dt``, otherwise any of these component names may be used, and the
+  appropriate platform-specific library name will be automatically selected.
 
-  ICU::<C>
+``i18n``
+  Finds the ICU Internationalization library.  On Windows, this library
+  component is named ``in``, otherwise any of these component names may be used,
+  and the appropriate platform-specific library name will be automatically
+  selected.
 
-Where ``<C>`` is the name of an ICU component, for example
-``ICU::i18n``; ``<C>`` is lower-case.
+``io``
+  Finds the ICU Stream and I/O (Unicode stdio) library.
 
-ICU programs are reported in::
+``le``
+  Finds the deprecated ICU Layout Engine library, which has been removed as of
+  ICU version 58.
 
-  ICU_GENCNVAL_EXECUTABLE - path to gencnval executable
-  ICU_ICUINFO_EXECUTABLE - path to icuinfo executable
-  ICU_GENBRK_EXECUTABLE - path to genbrk executable
-  ICU_ICU-CONFIG_EXECUTABLE - path to icu-config executable
-  ICU_GENRB_EXECUTABLE - path to genrb executable
-  ICU_GENDICT_EXECUTABLE - path to gendict executable
-  ICU_DERB_EXECUTABLE - path to derb executable
-  ICU_PKGDATA_EXECUTABLE - path to pkgdata executable
-  ICU_UCONV_EXECUTABLE - path to uconv executable
-  ICU_GENCFU_EXECUTABLE - path to gencfu executable
-  ICU_MAKECONV_EXECUTABLE - path to makeconv executable
-  ICU_GENNORM2_EXECUTABLE - path to gennorm2 executable
-  ICU_GENCCODE_EXECUTABLE - path to genccode executable
-  ICU_GENSPREP_EXECUTABLE - path to gensprep executable
-  ICU_ICUPKG_EXECUTABLE - path to icupkg executable
-  ICU_GENCMN_EXECUTABLE - path to gencmn executable
+``lx``
+  Finds the ICU Layout Extensions Engine library, used for paragraph layout.
 
-ICU component libraries are reported in::
+``test``
+  Finds the ICU test suits.
 
-  ICU_<C>_FOUND - ON if component was found; ``<C>`` is upper-case.
-  ICU_<C>_LIBRARIES - libraries for component; ``<C>`` is upper-case.
+``tu``
+  Finds the ICU Tool Utility library.
 
-ICU datafiles are reported in::
+``uc``
+  Finds the base ICU Common and Data libraries.  This library is required by
+  all other ICU libraries and is recommended to include when working with ICU
+  components.
 
-  ICU_MAKEFILE_INC - Makefile.inc
-  ICU_PKGDATA_INC - pkgdata.inc
+At least one component should be specified for this module to successfully find
+ICU:
 
-This module reads hints about search results from::
+.. code-block:: cmake
 
-  ICU_ROOT - the root of the ICU installation
+  find_package(ICU COMPONENTS <components>...)
 
-The environment variable ``ICU_ROOT`` may also be used; the
-ICU_ROOT variable takes precedence.
+Imported Targets
+^^^^^^^^^^^^^^^^
 
-The following cache variables may also be set::
+This module provides the following :ref:`Imported Targets`:
 
-  ICU_<P>_EXECUTABLE - the path to executable <P>; ``<P>`` is upper-case.
-  ICU_INCLUDE_DIR - the directory containing the ICU headers
-  ICU_<C>_LIBRARY - the library for component <C>; ``<C>`` is upper-case.
+``ICU::<component>``
+
+  Target encapsulating the usage requirements for the specified ICU component,
+  available only if that component is found.  The ``<component>`` should be
+  written in lowercase, as listed above.  For example, use ``ICU::i18n`` for the
+  Internationalization library.
+
+Result Variables
+^^^^^^^^^^^^^^^^
+
+This module defines the following variables:
+
+``ICU_FOUND``
+  Boolean indicating whether the main programs and libraries were found.
+``ICU_INCLUDE_DIRS``
+  The include directories containing the ICU headers.
+``ICU_LIBRARIES``
+  Component libraries to be linked.
+``ICU_VERSION``
+  The version of the ICU release found.
+
+ICU programs are defined in the following variables:
+
+``ICU_GENCNVAL_EXECUTABLE``
+  The path to the ``gencnval`` executable.
+``ICU_ICUINFO_EXECUTABLE``
+  The path to the ``icuinfo`` executable.
+``ICU_GENBRK_EXECUTABLE``
+  The path to the ``genbrk`` executable.
+``ICU_ICU-CONFIG_EXECUTABLE``
+  The path to the ``icu-config`` executable.
+``ICU_GENRB_EXECUTABLE``
+  The path to the ``genrb`` executable.
+``ICU_GENDICT_EXECUTABLE``
+  The path to the ``gendict`` executable.
+``ICU_DERB_EXECUTABLE``
+  The path to the ``derb`` executable.
+``ICU_PKGDATA_EXECUTABLE``
+  The path to the ``pkgdata`` executable.
+``ICU_UCONV_EXECUTABLE``
+  The path to the ``uconv`` executable.
+``ICU_GENCFU_EXECUTABLE``
+  The path to the ``gencfu`` executable.
+``ICU_MAKECONV_EXECUTABLE``
+  The path to the ``makeconv`` executable.
+``ICU_GENNORM2_EXECUTABLE``
+  The path to the ``gennorm2`` executable.
+``ICU_GENCCODE_EXECUTABLE``
+  The path to the ``genccode`` executable.
+``ICU_GENSPREP_EXECUTABLE``
+  The path to the ``gensprep`` executable.
+``ICU_ICUPKG_EXECUTABLE``
+  The path to the ``icupkg`` executable.
+``ICU_GENCMN_EXECUTABLE``
+  The path to the ``gencmn`` executable.
+
+ICU component libraries are defined in the following variables:
+
+``ICU_<COMPONENT>_FOUND``
+  Boolean indicating whether the ICU component was found; The ``<COMPONENT>``
+  should be written in uppercase.
+``ICU_<COMPONENT>_LIBRARIES``
+  Libraries for component; The ``<COMPONENT>`` should be written in uppercase.
+
+ICU datafiles are defined in the following variables:
+
+``ICU_MAKEFILE_INC``
+  The path to the ``Makefile.inc`` file.
+``ICU_PKGDATA_INC``
+  The path to the ``pkgdata.inc`` file.
+
+Cache Variables
+^^^^^^^^^^^^^^^
+
+The following cache variables may also be set:
+
+``ICU_<PROGRAM>_EXECUTABLE``
+  The path to executable ``<PROGRAM>``; The ``<PROGRAM>`` should be written in
+  uppercase. These variables correspond to the ICU program result variables
+  listed above.
+``ICU_INCLUDE_DIR``
+  The directory containing the ICU headers.
+``ICU_<COMPONENT>_LIBRARY``
+  The library for the ICU component.  The ``<COMPONENT>`` should be written in
+  uppercase.
+
+Hints
+^^^^^
+
+This module reads hints about search results from:
+
+``ICU_ROOT``
+  The root of the ICU installation.  The environment variable ``ICU_ROOT`` may
+  also be used; the ``ICU_ROOT`` variable takes precedence.
 
 .. note::
 
-  In most cases none of the above variables will require setting,
-  unless multiple ICU versions are available and a specific version
-  is required.
+  In most cases, none of the above variables will need to be set, unless
+  multiple versions of ICU are available and a specific version is required.
+
+Examples
+^^^^^^^^
+
+Finding ICU components and linking them to a project target:
+
+.. code-block:: cmake
+
+  find_package(ICU COMPONENTS i18n io uc)
+  target_link_libraries(project_target PRIVATE ICU::i18n ICU::io ICU::uc)
 #]=======================================================================]
 
 cmake_policy(PUSH)
