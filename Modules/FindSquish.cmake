@@ -5,110 +5,204 @@
 FindSquish
 ----------
 
--- Typical Use
+Finds Squish, a cross-platform automated GUI testing framework for applications
+built on various GUI technologies.  Squish supports testing of both native and
+cross-platform toolkits, such as Qt, Java, and Tk.
 
+Result Variables
+^^^^^^^^^^^^^^^^
 
+This module defines the following variables:
 
-This module can be used to find Squish.
+``Squish_FOUND``
+  Boolean indicating whether the (requested version of) Squish is found.  For
+  backward compatibility, the ``SQUISH_FOUND`` variable is also set to the same
+  value.
 
-::
+``SQUISH_VERSION``
+  The full version of the Squish found.
 
-  SQUISH_FOUND                    If false, don't try to use Squish
-  SQUISH_VERSION                  The full version of Squish found
-  SQUISH_VERSION_MAJOR            The major version of Squish found
-  SQUISH_VERSION_MINOR            The minor version of Squish found
-  SQUISH_VERSION_PATCH            The patch version of Squish found
+``SQUISH_VERSION_MAJOR``
+  The major version of the Squish found.
 
+``SQUISH_VERSION_MINOR``
+  The minor version of the Squish found.
 
+``SQUISH_VERSION_PATCH``
+  The patch version of the Squish found.
 
-::
+``SQUISH_INSTALL_DIR_FOUND``
+  Boolean indicating whether the Squish installation directory is found.
 
-  SQUISH_INSTALL_DIR              The Squish installation directory
-                                  (containing bin, lib, etc)
-  SQUISH_SERVER_EXECUTABLE        The squishserver executable
-  SQUISH_CLIENT_EXECUTABLE        The squishrunner executable
+``SQUISH_SERVER_EXECUTABLE_FOUND``
+  Boolean indicating whether the Squish server executable is found.
 
+``SQUISH_CLIENT_EXECUTABLE_FOUND``
+  Boolean indicating whether the Squish client executable is found.
 
+Cache Variables
+^^^^^^^^^^^^^^^
 
-::
+The following cache variables may also be set:
 
-  SQUISH_INSTALL_DIR_FOUND        Was the install directory found?
-  SQUISH_SERVER_EXECUTABLE_FOUND  Was the server executable found?
-  SQUISH_CLIENT_EXECUTABLE_FOUND  Was the client executable found?
+``SQUISH_INSTALL_DIR``
+  The Squish installation directory containing ``bin``, ``lib``, etc.
 
+``SQUISH_SERVER_EXECUTABLE``
+  The path to the ``squishserver`` executable.
 
+``SQUISH_CLIENT_EXECUTABLE``
+  The path to the ``squishrunner`` executable.
 
-It provides the function squish_add_test() for adding a squish test
-to cmake using Squish >= 4.x:
+Commands
+^^^^^^^^
+
+This module provides the following commands, if Squish is found:
+
+.. command:: squish_add_test
+
+  Adds a Squish test to the project:
+
+  .. code-block:: cmake
+
+    squish_add_test(
+      <name>
+      AUT <target>
+      SUITE <suite-name>
+      TEST <squish-test-case-name>
+      [PRE_COMMAND <command>]
+      [POST_COMMAND <command>]
+      [SETTINGSGROUP <group>]
+    )
+
+  This command is built on top of the :command:`add_test` command and adds a
+  Squish test called ``<name>`` to the CMake project.  It supports Squish
+  versions 4 and newer.
+
+  During the CMake testing phase, the Squish server is started, the test is
+  executed on the client, and the server is stopped once the test completes.  If
+  any of these steps fail (including if the test itself fails), a fatal error is
+  raised indicating the test did not pass.
+
+  The arguments are:
+
+  ``<name>``
+    The name of the test.  This is passed as the first argument to the
+    :command:`add_test` command.
+
+  ``AUT <target>``
+    The name of the CMake target to be used as the AUT (Application Under Test),
+    i.e., the executable that will be tested.
+
+  ``SUITE <suite-name>``
+    Either the full path to the Squish test suite or just the suite name (i.e.,
+    the last directory name of the suite).  In the latter case, the
+    ``CMakeLists.txt`` invoking ``squish_add_test()`` must reside in the parent
+    directory of the suite.
+
+  ``TEST <squish-test-case-name>``
+    The name of the Squish test, corresponding to the subdirectory of the test
+    within the suite directory.
+
+  ``PRE_COMMAND <command>``
+    An optional command to execute before starting the Squish test.  Pass it as
+    a string.  This may be a single command, or a :ref:`semicolon-separated list
+    <CMake Language Lists>` of command and arguments.
+
+  ``POST_COMMAND <command>``
+    An optional command to execute after the Squish test has completed.  Pass it
+    as a string.  This may be a single command, or a :ref:`semicolon-separated
+    list <CMake Language Lists>` of command and arguments.
+
+  ``SETTINGSGROUP <group>``
+    .. deprecated:: 3.18
+      This argument is now ignored.  It was previously used to specify a
+      settings group name for executing the test instead of the default value
+      ``CTest_<username>``.
+
+  .. versionchanged:: 3.18
+    In previous CMake versions, this command was named ``squish_v4_add_test()``.
+
+.. command:: squish_v3_add_test
+
+  Adds a Squish test to the project, when using Squish version 3.x:
+
+  .. code-block:: cmake
+
+    squish_v3_add_test(
+      <test-name>
+      <application-under-test>
+      <squish-test-case-name>
+      <environment-variables>
+      <test-wrapper>
+    )
+
+  .. note::
+    This command is for Squish version 3, which is not maintained anymore.  Use
+    a newer Squish version, and ``squish_add_test()`` command.
+
+  The arguments are:
+
+  ``<name>``
+    The name of the test.
+
+  ``<application-under-test>``
+    The path to the executable used as the AUT (Application Under Test), i.e.,
+    the executable that will be tested.
+
+  ``<squish-test-case-name>``
+    The name of the Squish test, corresponding to the subdirectory of the test
+    within the suite directory.
+
+  ``<environment-variables>``
+    A semicolon-separated list of environment variables and their values
+    (VAR=VALUE).
+
+  ``<test-wrapper>``
+    A string of one or more (semicolon-separated list) test wrappers needed by
+    the test case.
+
+Examples
+^^^^^^^^
+
+Finding Squish and specifying a minimum required version:
 
 .. code-block:: cmake
 
-   squish_add_test(cmakeTestName
-     AUT targetName SUITE suiteName TEST squishTestName
-     [SETTINGSGROUP group] [PRE_COMMAND command] [POST_COMMAND command] )
+  find_package(Squish 6.5)
 
-.. versionchanged:: 3.18
-  In previous CMake versions, this function was named ``squish_v4_add_test``.
-
-The arguments have the following meaning:
-
-``cmakeTestName``
-  this will be used as the first argument for add_test()
-``AUT targetName``
-  the name of the cmake target which will be used as AUT, i.e. the
-  executable which will be tested.
-``SUITE suiteName``
-  this is either the full path to the squish suite, or just the
-  last directory of the suite, i.e. the suite name. In this case
-  the CMakeLists.txt which calls squish_add_test() must be located
-  in the parent directory of the suite directory.
-``TEST squishTestName``
-  the name of the squish test, i.e. the name of the subdirectory
-  of the test inside the suite directory.
-``SETTINGSGROUP group``
-  deprecated, this argument will be ignored.
-``PRE_COMMAND command``
-  if specified, the given command will be executed before starting the squish test.
-``POST_COMMAND command``
-  same as PRE_COMMAND, but after the squish test has been executed.
-
-
-
-.. code-block:: cmake
-
-   enable_testing()
-   find_package(Squish 6.5)
-   if (SQUISH_FOUND)
-      squish_add_test(myTestName
-        AUT myApp
-        SUITE ${CMAKE_SOURCE_DIR}/tests/mySuite
-        TEST someSquishTest
-        )
-   endif ()
-
-
-
-
-
-For users of Squish version 3.x the macro squish_v3_add_test() is
-provided:
-
-.. code-block:: cmake
-
-   squish_v3_add_test(testName applicationUnderTest testCase envVars testWrapper)
-   Use this macro to add a test using Squish 3.x.
-
-
+Adding a Squish test:
 
 .. code-block:: cmake
 
   enable_testing()
+
+  find_package(Squish 6.5)
+  if(Squish_FOUND)
+    squish_add_test(
+      projectTestName
+      AUT projectApp
+      SUITE ${CMAKE_CURRENT_SOURCE_DIR}/tests/projectSuite
+      TEST someSquishTest
+    )
+  endif()
+
+Example, how to use the ``squish_v3_add_test()`` command:
+
+.. code-block:: cmake
+
+  enable_testing()
+
   find_package(Squish 3.0)
-  if (SQUISH_FOUND)
-    squish_v3_add_test(myTestName myApplication testCase envVars testWrapper)
-  endif ()
-
-
+  if(Squish_FOUND)
+    squish_v3_add_test(
+      projectTestName
+      $<TARGET_FILE:projectApp>
+      someSquishTest
+      "FOO=1;BAR=2"
+      testWrapper
+    )
+  endif()
 #]=======================================================================]
 
 set(SQUISH_INSTALL_DIR_STRING "Directory containing the bin, doc, and lib directories for Squish; this should be the root of the installation directory.")
