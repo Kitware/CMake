@@ -60,6 +60,21 @@ xctest_add_bundle(CocoaExampleTests CocoaExample
 
 xctest_add_test(XCTest.CocoaExample CocoaExampleTests)
 
+# Cocoa App Bundle with explicit artifact location.
+block()
+  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin")
+  set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/lib")
+  add_executable(CocoaExample2 MACOSX_BUNDLE
+    CocoaExample/main.m
+    CocoaExample/AppDelegate.m
+    CocoaExample/AppDelegate.h
+    CocoaExample/MainMenu.xib
+  )
+  target_link_libraries(CocoaExample2 PRIVATE "-framework Foundation" "-framework AppKit")
+  xctest_add_bundle(CocoaExample2Tests CocoaExample2 CocoaExampleTests/CocoaExampleTests.m)
+  xctest_add_test(XCTest.CocoaExample2 CocoaExample2Tests)
+endblock()
+
 # Static lib
 
 add_library(StaticLibExample STATIC

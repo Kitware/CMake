@@ -158,21 +158,16 @@ function(xctest_add_bundle target testee)
       set_target_properties(${target} PROPERTIES
         XCODE_ATTRIBUTE_BUNDLE_LOADER "$(TEST_HOST)"
         XCODE_ATTRIBUTE_TEST_HOST "$<TARGET_FILE:${testee}>")
-      if(XCODE_VERSION VERSION_GREATER_EQUAL 7.3)
-        # The Xcode "new build system" used a different path until Xcode 12.5.
-        if(CMAKE_XCODE_BUILD_SYSTEM EQUAL 12 AND
-           XCODE_VERSION VERSION_LESS 12.5 AND
-           NOT CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-          set(_output_directory "$<TARGET_BUNDLE_CONTENT_DIR:${testee}>")
-        else()
-          set(_output_directory "$<TARGET_BUNDLE_CONTENT_DIR:${testee}>/PlugIns")
-        endif()
-        set_target_properties(${target} PROPERTIES
-          LIBRARY_OUTPUT_DIRECTORY "${_output_directory}")
-      endif()
+      # TEST_HOST overrides ${target}'s artifact path, but the relative
+      # path from TEST_HOST to ${testee}'s PlugIns folder must not leave
+      # ${target}'s TARGET_BUILD_DIR.  If the project sets an explicit
+      # RUNTIME_OUTPUT_DIRECTORY for ${testee}, put ${target} there too.
+      # If not, just suppress the project's CMAKE_LIBRARY_OUTPUT_DIRECTORY.
+      get_property(testee_RUNTIME_OUTPUT_DIRECTORY TARGET ${testee} PROPERTY RUNTIME_OUTPUT_DIRECTORY)
+      set_property(TARGET ${target} PROPERTY LIBRARY_OUTPUT_DIRECTORY ${testee_RUNTIME_OUTPUT_DIRECTORY})
     else()
-      target_link_libraries(${target}
-        PRIVATE -bundle_loader $<TARGET_FILE:${testee}>)
+      target_link_options(${target}
+        PRIVATE "SHELL:-bundle_loader \"$<TARGET_FILE:${testee}>\"")
     endif()
 
   else()
@@ -210,6 +205,24 @@ function(xctest_add_test name bundle)
 
   get_property(_testee_type TARGET ${_testee} PROPERTY TYPE)
   get_property(_testee_framework TARGET ${_testee} PROPERTY FRAMEWORK)
+  get_property(_testee_macosx_bundle TARGET ${_testee} PROPERTY MACOSX_BUNDLE)
+
+  # Determine the path to the test module artifact on disk.
+  set(_test_bundle_dir "$<TARGET_BUNDLE_DIR:${bundle}>")
+  if(XCODE AND _testee_type STREQUAL "EXECUTABLE" AND _testee_macosx_bundle)
+    # Xcode's TEST_HOST setting places the test module inside the testee bundle.
+    if(XCODE_VERSION VERSION_GREATER_EQUAL 7.3)
+      # The Xcode "new build system" used a different path until Xcode 12.5.
+      if(CMAKE_XCODE_BUILD_SYSTEM EQUAL 12 AND
+          XCODE_VERSION VERSION_LESS 12.5 AND
+          NOT CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+        set(_test_bundle_dir "$<TARGET_BUNDLE_CONTENT_DIR:${_testee}>")
+      else()
+        set(_test_bundle_dir "$<TARGET_BUNDLE_CONTENT_DIR:${_testee}>/PlugIns")
+      endif()
+      string(APPEND _test_bundle_dir "/$<TARGET_BUNDLE_DIR_NAME:${bundle}>")
+    endif()
+  endif()
 
   # register test
 
@@ -217,7 +230,7 @@ function(xctest_add_test name bundle)
   # here for CMP0178.
   add_test(
     NAME ${name}
-    COMMAND ${XCTest_EXECUTABLE} $<TARGET_BUNDLE_DIR:${bundle}>)
+    COMMAND ${XCTest_EXECUTABLE} ${_test_bundle_dir})
 
   # point loader to testee in case rpath is disabled
 

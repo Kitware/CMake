@@ -10,13 +10,20 @@ add_executable(TestedApp MACOSX_BUNDLE dummy_main.swift)
 
 xctest_add_bundle(TestingAppBundle TestedApp dummy_main.swift)
 
-get_target_property(_lib_output_dir TestingAppBundle LIBRARY_OUTPUT_DIRECTORY)
+macro(add_test NAME name COMMAND xctest arg)
+  set(actual_arg "${arg}" PARENT_SCOPE)
+endmacro()
 
-if (NOT DEFINED TEST_EXPECTED_OUTPUT_DIR)
-    message(FATAL_ERROR "Testing variable TEST_EXPECTED_OUTPUT_DIR is not set")
+xctest_add_test(TestedApp.TestingAppBundle TestingAppBundle)
+
+if(NOT DEFINED TEST_EXPECTED_OUTPUT_DIR)
+  message(FATAL_ERROR "Testing variable TEST_EXPECTED_OUTPUT_DIR is not set")
 endif()
-
-if (NOT _lib_output_dir STREQUAL TEST_EXPECTED_OUTPUT_DIR)
-    message(SEND_ERROR "Property LIBRARY_OUTPUT_DIRECTORY is expected to be ${TEST_EXPECTED_OUTPUT_DIR} "
-        "but was ${_lib_output_dir}")
+set(expect_arg "${TEST_EXPECTED_OUTPUT_DIR}/$<TARGET_BUNDLE_DIR_NAME:TestingAppBundle>")
+if(NOT "${actual_arg}" STREQUAL "${expect_arg}")
+  message(FATAL_ERROR "xctest argument expected to be:\n"
+    "  ${expect_arg}\n"
+    "but was:\n"
+    "  ${actual_arg}\n"
+  )
 endif()
