@@ -15,4 +15,12 @@ sysroot is used.
   The default is now empty.  Previously a default was computed based on
   the :variable:`CMAKE_OSX_DEPLOYMENT_TARGET` or the host platform.
 
+.. note::
+
+  Xcode's compilers, when not invoked with ``-isysroot``, search for
+  headers in ``/usr/local/include`` before system SDK paths, matching the
+  convention on many platforms.  Users on macOS-x86_64 hosts with Homebrew
+  installed in ``/usr/local`` should pass ``-DCMAKE_OSX_SYSROOT=macosx``,
+  or ``export SDKROOT=macosx``, when not building with Homebrew tools.
+
 .. include:: CMAKE_OSX_VARIABLE.txt
