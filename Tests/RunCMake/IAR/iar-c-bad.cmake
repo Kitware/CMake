@@ -1,5 +1,5 @@
 enable_language(C)
-set(CMAKE_C_ICSTAT "${PSEUDO_ICSTAT}" -some -args)
+set(CMAKE_C_ICSTAT "${PSEUDO_ICSTAT}" -bad)
 add_executable(exec-c module.c)
 target_compile_options(exec-c PRIVATE -e)
 target_link_options(exec-c PRIVATE ${LINKER_OPTS})

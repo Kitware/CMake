@@ -6,11 +6,11 @@ SKIP_LINTING
 This property allows you to exclude a specific source file
 from the linting process. The linting process involves running
 tools such as :prop_tgt:`<LANG>_CPPLINT`, :prop_tgt:`<LANG>_CLANG_TIDY`,
-:prop_tgt:`<LANG>_CPPCHECK`, and :prop_tgt:`<LANG>_INCLUDE_WHAT_YOU_USE`
-on the source files, as well as compiling header files as part of
-:prop_tgt:`VERIFY_INTERFACE_HEADER_SETS`. By setting ``SKIP_LINTING`` on a
-source file, the mentioned linting tools will not be executed for that
-particular file.
+:prop_tgt:`<LANG>_CPPCHECK`, :prop_tgt:`<LANG>_ICSTAT` and
+:prop_tgt:`<LANG>_INCLUDE_WHAT_YOU_USE` on the source files, as well
+as compiling header files as part of :prop_tgt:`VERIFY_INTERFACE_HEADER_SETS`.
+By setting ``SKIP_LINTING`` on a source file, the mentioned linting tools
+will not be executed for that particular file.
 
 Example
 ^^^^^^^
@@ -33,8 +33,9 @@ command as shown below:
 In the provided code snippet, the ``SKIP_LINTING`` property is set to true
 for the ``generatedBindings.cpp`` source file. As a result, when the linting
 tools specified by :prop_tgt:`<LANG>_CPPLINT`, :prop_tgt:`<LANG>_CLANG_TIDY`,
-:prop_tgt:`<LANG>_CPPCHECK`, or :prop_tgt:`<LANG>_INCLUDE_WHAT_YOU_USE`
-are executed, they will skip analyzing the ``generatedBindings.cpp`` file.
+:prop_tgt:`<LANG>_CPPCHECK`, :prop_tgt:`<LANG>_ICSTAT` or
+:prop_tgt:`<LANG>_INCLUDE_WHAT_YOU_USE` are executed, they will skip analyzing
+the ``generatedBindings.cpp`` file.
 
 By using the ``SKIP_LINTING`` property, you can selectively exclude specific
 source files from the linting process. This allows you to focus the
