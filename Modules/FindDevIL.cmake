@@ -5,60 +5,108 @@
 FindDevIL
 ---------
 
-This module locates the Developer's Image Library,
-`DevIL <https://openil.sourceforge.net/>`_.
+Finds the Developer's Image Library, `DevIL <https://openil.sourceforge.net/>`_.
+
+The DevIL package internally consists of the following libraries, all
+distributed as part of the same release:
+
+* The core Image Library (IL)
+
+  This library is always required when working with DevIL, as it provides the
+  main image loading and manipulation functionality.
+
+* The Image Library Utilities (ILU)
+
+  This library depends on IL and provides image filters and effects. It is only
+  required if the application uses this extended functionality.
+
+* The Image Library Utility Toolkit (ILUT)
+
+  This library depends on both IL and ILU, and additionally provides an
+  interface to OpenGL.  It is only needed if the application uses DevIL together
+  with OpenGL.
 
 Imported Targets
 ^^^^^^^^^^^^^^^^
 
-.. versionadded:: 3.21
-
-This module defines the :prop_tgt:`IMPORTED` targets:
+This module provides the following :ref:`Imported Targets`:
 
 ``DevIL::IL``
- Defined if the system has DevIL.
+  .. versionadded:: 3.21
+
+  Target encapsulating the core Image Library (IL) usage requirements, available
+  if the DevIL package is found.
 
 ``DevIL::ILU``
- Defined if the system has DevIL Utilities.
+  .. versionadded:: 3.21
+
+  Target encapsulating the Image Library Utilities (ILU) usage requirements,
+  available if the DevIL package is found.  This target also links to
+  ``DevIL::IL`` for convenience, as ILU depends on the core IL library.
 
 ``DevIL::ILUT``
- Defined if the system has DevIL Utility Toolkit.
+  .. versionadded:: 3.21
+
+  Target encapsulating the Image Library Utility Toolkit (ILUT) usage
+  requirements, available if the DevIL package and its ILUT library are found.
+  This target also links to ``DevIL::ILU``, and transitively to ``DevIL::IL``,
+  since ILUT depends on both.
 
 Result Variables
 ^^^^^^^^^^^^^^^^
 
-This module sets:
-
-``IL_LIBRARIES``
-  The name of the IL library. These include the full path to
-  the core DevIL library. This one has to be linked into the
-  application.
-
-``ILU_LIBRARIES``
-  The name of the ILU library. Again, the full path. This
-  library is for filters and effects, not actual loading. It
-  doesn't have to be linked if the functionality it provides
-  is not used.
-
-``ILUT_LIBRARIES``
-  The name of the ILUT library. Full path. This part of the
-  library interfaces with OpenGL. It is not strictly needed
-  in applications.
-
-``IL_INCLUDE_DIR``
-  where to find the il.h, ilu.h and ilut.h files.
+This module defines the following variables:
 
 ``DevIL_FOUND``
-  This is set to TRUE if all the above variables were set.
-  This will be set to false if ILU or ILUT are not found,
-  even if they are not needed. In most systems, if one
-  library is found all the others are as well. That's the
-  way the DevIL developers release it.
+  Boolean indicating whether the DevIL package is found, including the IL and
+  ILU libraries.
 
 ``DevIL_ILUT_FOUND``
   .. versionadded:: 3.21
 
-  This is set to TRUE if the ILUT library is found.
+  Boolean indicating whether the ILUT library is found.  On most systems, ILUT
+  is found when both IL and ILU are available.
+
+Cache Variables
+^^^^^^^^^^^^^^^
+
+The following cache variables may also be set:
+
+``IL_INCLUDE_DIR``
+  The directory containing the ``il.h``, ``ilu.h`` and ``ilut.h`` header files.
+
+``IL_LIBRARIES``
+  The full path to the core Image Library (IL).
+
+``ILU_LIBRARIES``
+  The full path to the ILU library.
+
+``ILUT_LIBRARIES``
+  The full path to the ILUT library.
+
+Examples
+^^^^^^^^
+
+Finding the DevIL package and linking against the core Image Library (IL):
+
+.. code-block:: cmake
+
+  find_package(DevIL)
+  target_link_libraries(app PRIVATE DevIL::IL)
+
+Linking against the Image Library Utilities (ILU):
+
+.. code-block:: cmake
+
+  find_package(DevIL)
+  target_link_libraries(app PRIVATE DevIL::ILU)
+
+Linking against the Image Library Utility Toolkit (ILUT):
+
+.. code-block:: cmake
+
+  find_package(DevIL)
+  target_link_libraries(app PRIVATE DevIL::ILUT)
 #]=======================================================================]
 
 # TODO: Add version support.
