@@ -7,8 +7,43 @@ FindMsys
 
 .. versionadded:: 3.21
 
-Find MSYS, a POSIX-compatible environment that runs natively
-on Microsoft Windows
+Finds MSYS, a POSIX-compatible environment that runs natively on Microsoft
+Windows.
+
+.. note::
+
+  This module is primarily intended for use in other :ref:`Find Modules` to help
+  locate programs when using the ``find_*()`` commands, such as
+  :command:`find_program`.  In most cases, direct use of those commands is
+  sufficient.  Use this module only if a specific program is known to be
+  installed via MSYS and is usable from Windows.
+
+Result Variables
+^^^^^^^^^^^^^^^^
+
+This module defines the following variables:
+
+``MSYS_INSTALL_PATH``
+  The path to the MSYS root installation directory.
+
+Examples
+^^^^^^^^
+
+Finding the MSYS installation and using its path in a custom find module:
+
+.. code-block:: cmake
+  :caption: FindFoo.cmake
+
+  find_package(Msys)
+  find_program(Foo_EXECUTABLE NAMES foo PATHS ${MSYS_INSTALL_PATH}/usr/bin)
+
+  include(FindPackageHandleStandardArgs)
+  find_package_handle_standard_args(Foo REQUIRED_VARS Foo_EXECUTABLE)
+
+See Also
+^^^^^^^^
+
+* The :module:`FindCygwin` module to find Cygwin path in a similar way.
 #]=======================================================================]
 
 if (WIN32)
