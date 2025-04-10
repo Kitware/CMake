@@ -254,3 +254,15 @@ Other Changes
   on `cmake.org`_.
 
 .. _`cmake.org`: https://cmake.org/download/
+
+Updates
+=======
+
+Changes made since CMake 4.0.0 include the following.
+
+4.0.1
+-----
+
+* This version made no changes to documented features or interfaces.
+  Some implementation updates were made to support ecosystem changes
+  and/or fix regressions.
