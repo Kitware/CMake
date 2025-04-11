@@ -57,3 +57,17 @@ if (RunCMake_GENERATOR MATCHES "Makefiles|Ninja|Xcode|Visual Studio"
     endif()
   endforeach()
 endif()
+
+if(RunCMake_GENERATOR MATCHES "Makefiles|Ninja" AND
+    CMAKE_EXECUTABLE_FORMAT STREQUAL "ELF" AND CMAKE_SHARED_LIBRARY_RPATH_ORIGIN_TOKEN)
+  foreach(policy IN ITEMS OLD NEW)
+    set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/encode_literal-CMP0181-${policy}-build)
+    run_cmake_with_options(encode_literal -DCMP0181=${policy})
+
+    set(RunCMake_TEST_NO_CLEAN 1)
+    run_cmake_command(encode_literal-CMP0181-${policy} "${CMAKE_COMMAND}" --build . --target encode_literal)
+
+    unset(RunCMake_TEST_BINARY_DIR)
+    unset(RunCMake_TEST_NO_CLEAN)
+  endforeach()
+endif()

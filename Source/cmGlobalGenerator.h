@@ -666,6 +666,7 @@ public:
   };
   StripCommandStyle GetStripCommandStyle(std::string const& strip);
 
+  std::string GetEncodedLiteral(std::string const& lit);
   virtual std::string& EncodeLiteral(std::string& lit) { return lit; }
 
   bool CheckCMP0171() const;

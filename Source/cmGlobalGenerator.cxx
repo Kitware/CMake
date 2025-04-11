@@ -3891,6 +3891,12 @@ cmGlobalGenerator::StripCommandStyle cmGlobalGenerator::GetStripCommandStyle(
 #endif
 }
 
+std::string cmGlobalGenerator::GetEncodedLiteral(std::string const& lit)
+{
+  std::string result = lit;
+  return this->EncodeLiteral(result);
+}
+
 void cmGlobalGenerator::AddInstallScript(std::string const& file)
 {
   this->InstallScripts.push_back(file);
