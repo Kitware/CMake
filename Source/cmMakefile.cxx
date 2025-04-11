@@ -94,6 +94,18 @@ namespace {
 std::string const kCMAKE_CURRENT_LIST_DIR = "CMAKE_CURRENT_LIST_DIR";
 std::string const kCMAKE_CURRENT_LIST_FILE = "CMAKE_CURRENT_LIST_FILE";
 std::string const kCMAKE_PARENT_LIST_FILE = "CMAKE_PARENT_LIST_FILE";
+
+class FileScopeBase
+{
+protected:
+  cmMakefile* Makefile;
+
+public:
+  FileScopeBase(cmMakefile* mf)
+    : Makefile(mf)
+  {
+  }
+};
 }
 
 class cmMessenger;
@@ -565,7 +577,7 @@ bool cmMakefile::IsImportedTargetGlobalScope() const
   return this->CurrentImportedTargetScope == ImportedTargetScope::Global;
 }
 
-class cmMakefile::IncludeScope
+class cmMakefile::IncludeScope : public FileScopeBase
 {
 public:
   IncludeScope(cmMakefile* mf, std::string const& filenametoread,
@@ -577,7 +589,6 @@ public:
   IncludeScope& operator=(IncludeScope const&) = delete;
 
 private:
-  cmMakefile* Makefile;
   bool NoPolicyScope;
   bool ReportError = true;
 };
@@ -585,7 +596,7 @@ private:
 cmMakefile::IncludeScope::IncludeScope(cmMakefile* mf,
                                        std::string const& filenametoread,
                                        bool noPolicyScope)
-  : Makefile(mf)
+  : FileScopeBase(mf)
   , NoPolicyScope(noPolicyScope)
 {
   this->Makefile->Backtrace = this->Makefile->Backtrace.Push(
@@ -659,11 +670,11 @@ bool cmMakefile::ReadDependentFile(std::string const& filename,
   return true;
 }
 
-class cmMakefile::ListFileScope
+class cmMakefile::ListFileScope : public FileScopeBase
 {
 public:
   ListFileScope(cmMakefile* mf, std::string const& filenametoread)
-    : Makefile(mf)
+    : FileScopeBase(mf)
   {
     this->Makefile->Backtrace = this->Makefile->Backtrace.Push(
       cmListFileContext::FromListFilePath(filenametoread));
@@ -689,7 +700,6 @@ public:
   ListFileScope& operator=(ListFileScope const&) = delete;
 
 private:
-  cmMakefile* Makefile;
   bool ReportError = true;
 };
 
@@ -1458,11 +1468,11 @@ bool cmMakefile::IsRootMakefile() const
   return !this->StateSnapshot.GetBuildsystemDirectoryParent().IsValid();
 }
 
-class cmMakefile::BuildsystemFileScope
+class cmMakefile::BuildsystemFileScope : public FileScopeBase
 {
 public:
   BuildsystemFileScope(cmMakefile* mf)
-    : Makefile(mf)
+    : FileScopeBase(mf)
   {
     std::string currentStart =
       this->Makefile->GetCMakeInstance()->GetCMakeListFile(
@@ -1500,7 +1510,6 @@ public:
   BuildsystemFileScope& operator=(BuildsystemFileScope const&) = delete;
 
 private:
-  cmMakefile* Makefile;
   cmGlobalGenerator* GG;
   cmMakefile* CurrentMakefile;
   cmStateSnapshot Snapshot;
