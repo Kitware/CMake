@@ -10,42 +10,101 @@ FindPythonLibs
 
 .. deprecated:: 3.12
 
-  Use :module:`FindPython3`, :module:`FindPython2` or :module:`FindPython` instead.
+  Use :module:`FindPython3`, :module:`FindPython2`, or :module:`FindPython`
+  instead.
 
-Find python libraries
+This module finds the Python installation and determines the location of its
+include directories and libraries, as well as the name of the Python library to
+link against.
 
-This module finds if Python is installed and determines where the
-include files and libraries are.  It also determines what the name of
-the library is.  This code sets the following variables:
+.. note::
 
-::
+  When using both this and the :module:`FindPythonInterp` module, call
+  ``find_package(PythonInterp)`` before ``find_package(PythonLibs)``.  This
+  ensures that the detected interpreter version is used to guide the selection
+  of compatible libraries, resulting in a consistent ``PYTHON_LIBRARIES`` value.
 
-  PYTHONLIBS_FOUND           - have the Python libs been found
-  PYTHON_LIBRARIES           - path to the python library
-  PYTHON_INCLUDE_PATH        - path to where Python.h is found (deprecated)
-  PYTHON_INCLUDE_DIRS        - path to where Python.h is found
-  PYTHON_DEBUG_LIBRARIES     - path to the debug library (deprecated)
-  PYTHONLIBS_VERSION_STRING  - version of the Python libs found (since CMake 2.8.8)
+Result Variables
+^^^^^^^^^^^^^^^^
 
+This module defines the following variables:
 
+``PythonLibs_FOUND``
+  Boolean indicating whether the (requested version of) Python libraries have
+  been found.  For backward compatibility, the ``PYTHONLIBS_FOUND`` variable is
+  also set to the same value.
 
-The Python_ADDITIONAL_VERSIONS variable can be used to specify a list
-of version numbers that should be taken into account when searching
-for Python.  You need to set this variable before calling
-find_package(PythonLibs).
+``PYTHONLIBS_VERSION_STRING``
+  .. versionadded:: 2.8.8
 
-If you'd like to specify the installation of Python to use, you should
-modify the following cache variables:
+  The version of the Python libraries found.
 
-::
+``PYTHON_LIBRARIES``
+  Libraries needed to link against to use Python.
 
-  PYTHON_LIBRARY             - path to the python library
-  PYTHON_INCLUDE_DIR         - path to where Python.h is found
+``PYTHON_INCLUDE_DIRS``
+  Include directories needed to use Python.
 
-If calling both ``find_package(PythonInterp)`` and
-``find_package(PythonLibs)``, call ``find_package(PythonInterp)`` first to
-get the currently active Python version by default with a consistent version
-of PYTHON_LIBRARIES.
+Cache Variables
+^^^^^^^^^^^^^^^
+
+The following cache variables may also be set to specify the Python installation
+to use:
+
+``PYTHON_LIBRARY``
+  The path to the Python library.
+
+``PYTHON_INCLUDE_DIR``
+  The directory containing the ``Python.h`` header file.
+
+Hints
+^^^^^
+
+This module accepts the following variables before calling
+``find_package(PythonLibs)``:
+
+``Python_ADDITIONAL_VERSIONS``
+  This variable can be used to specify a list of version numbers that should be
+  taken into account when searching for Python.
+
+Deprecated Variables
+^^^^^^^^^^^^^^^^^^^^
+
+These variables are provided for backward compatibility:
+
+``PYTHON_DEBUG_LIBRARIES``
+  .. deprecated:: 2.8.8
+    Use ``PYTHON_LIBRARIES`` instead.
+
+  Result variable that holds the path to the debug library.
+
+``PYTHON_INCLUDE_PATH``
+  .. deprecated:: 2.8.0
+    Use ``PYTHON_INCLUDE_DIR`` or ``PYTHON_INCLUDE_DIRS`` instead.
+
+  Result variable that holds the path to the directory containing the
+  ``Python.h`` header file.
+
+Examples
+^^^^^^^^
+
+In earlier versions of CMake, Python libraries were found and used in a project
+like this:
+
+.. code-block:: cmake
+
+  find_package(PythonLibs)
+  target_link_libraries(app PRIVATE ${PYTHON_LIBRARIES})
+  target_include_directories(app PRIVATE ${PYTHON_INCLUDE_DIRS})
+
+Starting with CMake 3.12, Python libraries can be found using the
+:module:`FindPython` module.  The equivalent example using the modern approach
+with an imported target is:
+
+.. code-block:: cmake
+
+  find_package(Python COMPONENTS Development)
+  target_link_libraries(app PRIVATE Python::Python)
 #]=======================================================================]
 
 cmake_policy(PUSH)

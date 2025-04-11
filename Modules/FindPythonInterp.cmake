@@ -10,47 +10,80 @@ FindPythonInterp
 
 .. deprecated:: 3.12
 
-  Use :module:`FindPython3`, :module:`FindPython2` or :module:`FindPython` instead.
+  Use :module:`FindPython3`, :module:`FindPython2`, or :module:`FindPython`
+  instead.
 
-Find python interpreter
-
-This module finds if Python interpreter is installed and determines
-where the executables are.  This code sets the following variables:
-
-::
-
-  PYTHONINTERP_FOUND         - Was the Python executable found
-  PYTHON_EXECUTABLE          - path to the Python interpreter
-
-
-
-::
-
-  PYTHON_VERSION_STRING      - Python version found e.g. 2.5.2
-  PYTHON_VERSION_MAJOR       - Python major version found e.g. 2
-  PYTHON_VERSION_MINOR       - Python minor version found e.g. 5
-  PYTHON_VERSION_PATCH       - Python patch version found e.g. 2
-
-
-
-The Python_ADDITIONAL_VERSIONS variable can be used to specify a list
-of version numbers that should be taken into account when searching
-for Python.  You need to set this variable before calling
-find_package(PythonInterp).
-
-If calling both ``find_package(PythonInterp)`` and
-``find_package(PythonLibs)``, call ``find_package(PythonInterp)`` first to
-get the currently active Python version by default with a consistent version
-of PYTHON_LIBRARIES.
+This module finds the Python interpreter and determines the location of its
+executable.
 
 .. note::
 
-  A call to ``find_package(PythonInterp ${V})`` for python version ``V``
-  may find a ``python`` executable with no version suffix.  In this case
-  no attempt is made to avoid python executables from other versions.
-  Use :module:`FindPython3`, :module:`FindPython2` or :module:`FindPython`
-  instead.
+  When using both this and the :module:`FindPythonLibs` module, call
+  ``find_package(PythonInterp)`` before ``find_package(PythonLibs)``.  This
+  ensures that the detected interpreter version is used to guide the selection
+  of compatible libraries, resulting in a consistent ``PYTHON_LIBRARIES`` value.
 
+.. note::
+
+  A call to ``find_package(PythonInterp ${V})`` for Python version ``V`` may
+  find a ``python`` executable with no version suffix.  In this case no attempt
+  is made to avoid Python executables from other versions.  Use
+  :module:`FindPython3`, :module:`FindPython2`, or :module:`FindPython` instead.
+
+Result Variables
+^^^^^^^^^^^^^^^^
+
+This module defines the following variables:
+
+``PythonInterp_FOUND``
+  Boolean indicating whether the (requested version of) Python executable is
+  found.  For backward compatibility, the ``PYTHONINTERP_FOUND`` variable is
+  also set to the same value.
+``PYTHON_VERSION_STRING``
+  Python version found (e.g., ``2.5.2``).
+``PYTHON_VERSION_MAJOR``
+  Python major version found (e.g., ``2``).
+``PYTHON_VERSION_MINOR``
+  Python minor version found (e.g., ``5``).
+``PYTHON_VERSION_PATCH``
+  Python patch version found (e.g., ``2``).
+
+Cache Variables
+^^^^^^^^^^^^^^^
+
+The following cache variables may also be set:
+
+``PYTHON_EXECUTABLE``
+  The path to the Python interpreter.
+
+Hints
+^^^^^
+
+This module accepts the following variables before calling
+``find_package(PythonInterp)``:
+
+``Python_ADDITIONAL_VERSIONS``
+  This variable can be used to specify a list of version numbers that should be
+  taken into account when searching for Python.
+
+Examples
+^^^^^^^^
+
+Finding the Python interpreter in earlier versions of CMake:
+
+.. code-block:: cmake
+
+  find_package(PythonInterp)
+  execute_process(COMMAND ${PYTHON_EXECUTABLE} --help)
+
+Starting with CMake 3.12, the Python interpreter can be found using the
+:module:`FindPython` module.  The equivalent example using the modern approach
+is:
+
+.. code-block:: cmake
+
+  find_package(Python)
+  execute_process(COMMAND ${Python_EXECUTABLE} --help)
 #]=======================================================================]
 
 cmake_policy(GET CMP0148 _FindPythonInterp_CMP0148)
