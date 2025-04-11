@@ -90,6 +90,12 @@
 #  endif
 #endif
 
+namespace {
+std::string const kCMAKE_CURRENT_LIST_DIR = "CMAKE_CURRENT_LIST_DIR";
+std::string const kCMAKE_CURRENT_LIST_FILE = "CMAKE_CURRENT_LIST_FILE";
+std::string const kCMAKE_PARENT_LIST_FILE = "CMAKE_PARENT_LIST_FILE";
+}
+
 class cmMessenger;
 
 cmDirectoryId::cmDirectoryId(std::string s)
@@ -611,8 +617,8 @@ cmMakefile::IncludeScope::~IncludeScope()
 bool cmMakefile::ReadDependentFile(std::string const& filename,
                                    bool noPolicyScope)
 {
-  if (cmValue def = this->GetDefinition("CMAKE_CURRENT_LIST_FILE")) {
-    this->AddDefinition("CMAKE_PARENT_LIST_FILE", *def);
+  if (cmValue def = this->GetDefinition(kCMAKE_CURRENT_LIST_FILE)) {
+    this->AddDefinition(kCMAKE_PARENT_LIST_FILE, *def);
   }
   std::string filenametoread = cmSystemTools::CollapseFullPath(
     filename, this->GetCurrentSourceDirectory());
@@ -811,16 +817,16 @@ void cmMakefile::RunListFile(cmListFile const& listFile,
   this->ListFiles.push_back(filenametoread);
 
   std::string currentParentFile =
-    this->GetSafeDefinition("CMAKE_PARENT_LIST_FILE");
-  std::string currentFile = this->GetSafeDefinition("CMAKE_CURRENT_LIST_FILE");
+    this->GetSafeDefinition(kCMAKE_PARENT_LIST_FILE);
+  std::string currentFile = this->GetSafeDefinition(kCMAKE_CURRENT_LIST_FILE);
 
-  this->AddDefinition("CMAKE_CURRENT_LIST_FILE", filenametoread);
-  this->AddDefinition("CMAKE_CURRENT_LIST_DIR",
+  this->AddDefinition(kCMAKE_CURRENT_LIST_FILE, filenametoread);
+  this->AddDefinition(kCMAKE_CURRENT_LIST_DIR,
                       cmSystemTools::GetFilenamePath(filenametoread));
 
-  this->MarkVariableAsUsed("CMAKE_PARENT_LIST_FILE");
-  this->MarkVariableAsUsed("CMAKE_CURRENT_LIST_FILE");
-  this->MarkVariableAsUsed("CMAKE_CURRENT_LIST_DIR");
+  this->MarkVariableAsUsed(kCMAKE_PARENT_LIST_FILE);
+  this->MarkVariableAsUsed(kCMAKE_CURRENT_LIST_FILE);
+  this->MarkVariableAsUsed(kCMAKE_CURRENT_LIST_DIR);
 
   // Run the parsed commands.
   size_t const numberFunctions = listFile.Functions.size();
@@ -869,13 +875,13 @@ void cmMakefile::RunListFile(cmListFile const& listFile,
     }
   }
 
-  this->AddDefinition("CMAKE_PARENT_LIST_FILE", currentParentFile);
-  this->AddDefinition("CMAKE_CURRENT_LIST_FILE", currentFile);
-  this->AddDefinition("CMAKE_CURRENT_LIST_DIR",
+  this->AddDefinition(kCMAKE_PARENT_LIST_FILE, currentParentFile);
+  this->AddDefinition(kCMAKE_CURRENT_LIST_FILE, currentFile);
+  this->AddDefinition(kCMAKE_CURRENT_LIST_DIR,
                       cmSystemTools::GetFilenamePath(currentFile));
-  this->MarkVariableAsUsed("CMAKE_PARENT_LIST_FILE");
-  this->MarkVariableAsUsed("CMAKE_CURRENT_LIST_FILE");
-  this->MarkVariableAsUsed("CMAKE_CURRENT_LIST_DIR");
+  this->MarkVariableAsUsed(kCMAKE_PARENT_LIST_FILE);
+  this->MarkVariableAsUsed(kCMAKE_CURRENT_LIST_FILE);
+  this->MarkVariableAsUsed(kCMAKE_CURRENT_LIST_DIR);
 }
 
 void cmMakefile::EnforceDirectoryLevelRules() const
@@ -1520,7 +1526,7 @@ void cmMakefile::Configure()
   cmSystemTools::MakeDirectory(filesDir);
 
   assert(cmSystemTools::FileExists(currentStart, true));
-  this->AddDefinition("CMAKE_PARENT_LIST_FILE", currentStart);
+  this->AddDefinition(kCMAKE_PARENT_LIST_FILE, currentStart);
 
 #ifdef CMake_ENABLE_DEBUGGER
   if (this->GetCMakeInstance()->GetDebugAdapter()) {
@@ -3392,7 +3398,7 @@ std::string cmMakefile::GetModulesFile(cm::string_view filename, bool& system,
   // from which we are being called is located itself in CMAKE_ROOT, then
   // prefer results from CMAKE_ROOT depending on the policy setting.
   if (!moduleInCMakeModulePath.empty() && !moduleInCMakeRoot.empty()) {
-    cmValue currentFile = this->GetDefinition("CMAKE_CURRENT_LIST_FILE");
+    cmValue currentFile = this->GetDefinition(kCMAKE_CURRENT_LIST_FILE);
     std::string mods = cmStrCat(cmSystemTools::GetCMakeRoot(), "/Modules/");
     if (currentFile && cmSystemTools::IsSubDirectory(*currentFile, mods)) {
       system = true;
