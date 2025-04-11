@@ -241,6 +241,13 @@ Other Changes
   installed in ``/usr/local`` should pass ``-DCMAKE_OSX_SYSROOT=macosx``,
   or ``export SDKROOT=macosx``, when not building with Homebrew tools.
 
+* On Windows, file paths named in project code, e.g., in ``CMakeLists.txt``,
+  are no longer automatically converted to their on-disk upper/lower case.
+  Projects are expected to spell source file paths consistently using
+  their canonical case, e.g., in calls to :command:`add_library`,
+  :command:`set_property(SOURCE)`, or :command:`set_source_files_properties`.
+  This matches the behavior on platforms with case-sensitive filesystems.
+
 * On AIX, ``SHARED`` library targets now produce a shared library archive
   by default.  See policy :policy:`CMP0182`.
 
