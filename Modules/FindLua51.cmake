@@ -36,7 +36,7 @@ cmake_policy(SET CMP0159 NEW) # file(STRINGS) with REGEX updates CMAKE_MATCH_<n>
 find_path(LUA_INCLUDE_DIR lua.h
   HINTS
     ENV LUA_DIR
-  PATH_SUFFIXES include/lua51 include/lua5.1 include/lua-5.1 include/lua include
+  PATH_SUFFIXES lua51 lua5.1 lua-5.1 lua
   PATHS
   ~/Library/Frameworks
   /Library/Frameworks
