@@ -567,10 +567,27 @@
         - docker
         - linux-x86_64-v3
 
-.linux_x86_64_tags_radeon:
+.linux_x86_64_tags_rocm5.2:
     tags:
         - cmake
         - radeon
+        - rocm-5.2
+        - docker
+        - linux-x86_64
+
+.linux_x86_64_tags_rocm6.2:
+    tags:
+        - cmake
+        - radeon
+        - rocm-6.2
+        - docker
+        - linux-x86_64
+
+.linux_x86_64_tags_rocm6.3:
+    tags:
+        - cmake
+        - radeon
+        - rocm-6.3
         - docker
         - linux-x86_64
 

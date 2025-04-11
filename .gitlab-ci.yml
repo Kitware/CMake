@@ -221,7 +221,7 @@ t:debian12-hip-radeon:
     extends:
         - .debian12_hip_radeon
         - .cmake_test_linux_release
-        - .linux_x86_64_tags_radeon
+        - .linux_x86_64_tags_rocm5.2
         - .run_dependent
         - .needs_centos7_x86_64
     variables:
@@ -231,7 +231,7 @@ t:fedora41-hip-radeon:
     extends:
         - .fedora41_hip_radeon
         - .cmake_test_linux_release
-        - .linux_x86_64_tags_radeon
+        - .linux_x86_64_tags_rocm6.2
         - .run_dependent
         - .needs_centos7_x86_64
     variables:
@@ -455,7 +455,7 @@ t:hip6.3-radeon:
     extends:
         - .hip6.3_radeon
         - .cmake_test_linux_release
-        - .linux_x86_64_tags_radeon
+        - .linux_x86_64_tags_rocm6.3
         - .run_dependent
         - .needs_centos7_x86_64
     variables:
