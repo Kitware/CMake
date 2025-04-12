@@ -442,13 +442,18 @@ Json::Value cmFileAPI::BuildReply(Query const& q)
   Json::Value reply = Json::objectValue;
   for (Object const& o : q.Known) {
     std::string const& name = ObjectName(o);
-    reply[name] = this->AddReplyIndexObject(o);
+    reply[name] = this->BuildReplyEntry(o);
   }
 
   for (std::string const& name : q.Unknown) {
     reply[name] = cmFileAPI::BuildReplyError("unknown query file");
   }
   return reply;
+}
+
+Json::Value cmFileAPI::BuildReplyEntry(Object const& object)
+{
+  return this->AddReplyIndexObject(object);
 }
 
 Json::Value cmFileAPI::BuildReplyError(std::string const& error)
@@ -681,7 +686,7 @@ Json::Value cmFileAPI::BuildClientReplyResponse(ClientRequest const& request)
     response = this->BuildReplyError(request.Error);
     return response;
   }
-  response = this->AddReplyIndexObject(request);
+  response = this->BuildReplyEntry(request);
   return response;
 }
 

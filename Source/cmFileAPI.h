@@ -177,6 +177,7 @@ private:
   Json::Value BuildReplyIndex();
   Json::Value BuildCMake();
   Json::Value BuildReply(Query const& q);
+  Json::Value BuildReplyEntry(Object const& object);
   static Json::Value BuildReplyError(std::string const& error);
   Json::Value const& AddReplyIndexObject(Object const& o);
 
