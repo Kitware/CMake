@@ -16,6 +16,7 @@ run_cmake(duplicate-deep-else)
 run_cmake(duplicate-else)
 run_cmake(duplicate-else-after-elseif)
 run_cmake(elseif-message)
+run_cmake(empty-elseif-warning)
 run_cmake(misplaced-elseif)
 
 run_cmake(unbalanced-parenthesis)
