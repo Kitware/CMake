@@ -42,7 +42,7 @@ It has the following subdirectories:
 
 ``reply/``
   Holds reply files written by CMake whenever it runs to generate a build
-  system.  These are indexed by a `v1 Reply Index File`_ file that may
+  system.  These are indexed by a `v1 Reply Index File`_ that may
   reference additional `v1 Reply Files`_.  CMake owns all reply files.
   Clients must never remove them.
 
@@ -352,10 +352,10 @@ The members are:
         contains a JSON array with a response for each entry of the
         ``requests`` array, in the same order.  Each response is
 
-        * a JSON object with a single ``error`` member containing a string
-          with an error message, or
         * a `v1 Reply File Reference`_ to the corresponding reply file for
-          the requested object kind and selected version.
+          the requested object kind and selected version, or
+        * a JSON object with a single ``error`` member containing a string
+          with an error message.
 
 After reading the reply index file, clients may read the other
 `v1 Reply Files`_ it references.
