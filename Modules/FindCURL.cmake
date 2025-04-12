@@ -5,26 +5,59 @@
 FindCURL
 --------
 
-Find the native CURL headers and libraries.
+Finds the native curl installation (include directories and libraries) for
+transferring data with URLS.
+
+.. versionadded:: 3.17
+  If curl is built using its CMake-based build system, it will provide its own
+  CMake Package Configuration file (``CURLConfig.cmake``) for use with the
+  :command:`find_package` command in *config mode*.  By default, this module
+  searches for this file and, if found, returns the results without further
+  action.  If the upstream configuration file is not found, this module falls
+  back to *module mode* and searches standard locations.
+
+.. versionadded:: 3.13
+  Debug and Release library variants are found separately.
+
+Components
+^^^^^^^^^^
 
 .. versionadded:: 3.14
-  This module accept optional COMPONENTS to check supported features and
-  protocols:
 
-::
+This module supports optional components to detect the protocols and features
+available in the installed curl (these can vary based on the curl version)::
 
-  PROTOCOLS: ICT FILE FTP FTPS GOPHER HTTP HTTPS IMAP IMAPS LDAP LDAPS POP3
+  Protocols: ICT FILE FTP FTPS GOPHER HTTP HTTPS IMAP IMAPS LDAP LDAPS POP3
              POP3S RTMP RTSP SCP SFTP SMB SMBS SMTP SMTPS TELNET TFTP
-  FEATURES:  SSL IPv6 UnixSockets libz AsynchDNS IDN GSS-API PSL SPNEGO
+  Features:  SSL IPv6 UnixSockets libz AsynchDNS IDN GSS-API PSL SPNEGO
              Kerberos NTLM NTLM_WB TLS-SRP HTTP2 HTTPS-proxy
+
+Components can be specified with the :command:`find_package` command as required
+for curl to be considered found:
+
+.. code-block:: cmake
+
+  find_package(CURL [COMPONENTS <protocols>... <features>...])
+
+Or to check for them optionally, allowing conditional handling in the code:
+
+.. code-block:: cmake
+
+  find_package(CURL [OPTIONAL_COMPONENTS <protocols>... <features>...])
+
+Refer to the curl documentation for more information on supported protocols and
+features.  Component names are case-sensitive and follow the upstream curl
+naming conventions.
 
 Imported Targets
 ^^^^^^^^^^^^^^^^
 
-.. versionadded:: 3.12
+This module provides the following :ref:`Imported Targets`:
 
-This module defines :prop_tgt:`IMPORTED` target ``CURL::libcurl``, if
-curl has been found.
+``CURL::libcurl``
+  .. versionadded:: 3.12
+
+  Target encapsulating the curl usage requirements, available if curl is found.
 
 Result Variables
 ^^^^^^^^^^^^^^^^
@@ -32,51 +65,95 @@ Result Variables
 This module defines the following variables:
 
 ``CURL_FOUND``
-  "True" if ``curl`` found.
-
-``CURL_INCLUDE_DIRS``
-  where to find ``curl``/``curl.h``, etc.
-
-``CURL_LIBRARIES``
-  List of libraries when using ``curl``.
+  Boolean indicating whether the (requested version of) curl and all required
+  components are found.
 
 ``CURL_VERSION``
   .. versionadded:: 4.0
 
-  The version of ``curl`` found.
-  This supersedes ``CURL_VERSION_STRING``.
+  The version of curl found.  This supersedes ``CURL_VERSION_STRING``.
 
-``CURL_VERSION_STRING``
-  The version of ``curl`` found.
-  Superseded by ``CURL_VERSION``.
+``CURL_<component>_FOUND``
+  .. versionadded:: 3.14
 
-.. versionadded:: 3.13
-  Debug and Release variants are found separately.
+  Boolean indicating whether the specified component (curl protocol or feature)
+  is found.
 
-CURL CMake
-^^^^^^^^^^
+``CURL_INCLUDE_DIRS``
+  Include directories containing the ``curl/curl.h`` and other headers needed to
+  use curl.
 
-.. versionadded:: 3.17
+  .. note::
 
-If CURL was built using the CMake buildsystem then it provides its own
-``CURLConfig.cmake`` file for use with the :command:`find_package` command's
-config mode. This module looks for this file and, if found,
-returns its results with no further action.
+    When curl is found via *config mode*, this variable is available only with
+    curl version 8.9 or newer.
 
-Set ``CURL_NO_CURL_CMAKE`` to ``ON`` to disable this search.
+``CURL_LIBRARIES``
+  List of libraries needed to link against to use curl.
+
+  .. note::
+
+    When curl is found via *module mode*, this is a list of library file paths.
+    In *config mode*, this variable is available only with curl version 8.9 or
+    newer and contains a list of imported targets.
 
 Hints
 ^^^^^
 
-``CURL_USE_STATIC_LIBS``
+This module accepts the following variables:
 
+``CURL_NO_CURL_CMAKE``
+  .. versionadded:: 3.17
+
+  Set this variable to ``TRUE`` to disable searching for curl via *config mode*.
+
+``CURL_USE_STATIC_LIBS``
   .. versionadded:: 3.28
 
-  Set to ``TRUE`` to use static libraries.
+  Set this variable to ``TRUE`` to use static libraries.  This is meaningful
+  only when curl is not found via *config mode*.
 
-  This is meaningful only when CURL is not found via its
-  CMake Package Configuration file.
+Deprecated Variables
+^^^^^^^^^^^^^^^^^^^^
 
+The following variables are provided for backward compatibility:
+
+``CURL_VERSION_STRING``
+  .. deprecated:: 4.0
+    Superseded by ``CURL_VERSION``.
+
+  The version of curl found.
+
+Examples
+^^^^^^^^
+
+Finding the curl library and specifying the required minimum version:
+
+.. code-block:: cmake
+
+  find_package(CURL 7.61.0)
+
+Finding the curl library and linking it to a project target:
+
+.. code-block:: cmake
+
+  find_package(CURL)
+  target_link_libraries(project_target PRIVATE CURL::libcurl)
+
+Using components to check if the found curl supports specific protocols or
+features:
+
+.. code-block:: cmake
+
+  find_package(CURL OPTIONAL_COMPONENTS HTTPS SSL)
+
+  if(CURL_HTTPS_FOUND)
+    # curl supports the HTTPS protocol
+  endif()
+
+  if(CURL_SSL_FOUND)
+    # curl has SSL feature enabled
+  endif()
 #]=======================================================================]
 
 cmake_policy(PUSH)
