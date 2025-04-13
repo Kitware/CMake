@@ -9,79 +9,112 @@ FindwxWindows
 
   Replaced by :module:`FindwxWidgets`.
 
-Find wxWindows (wxWidgets) installation
+Finds the wxWidgets (formerly known as wxWindows) installation and determines
+the locations of its include directories and libraries, as well as the name of
+the library.
 
-This module finds if wxWindows/wxWidgets is installed and determines
-where the include files and libraries are.  It also determines what
-the name of the library is.  This code sets the following variables:
+wxWidgets 2.6.x is supported for monolithic builds, such as those compiled in
+the ``wx/build/msw`` directory using:
 
-::
-
-  WXWINDOWS_FOUND     = system has WxWindows
-  WXWINDOWS_LIBRARIES = path to the wxWindows libraries
-                        on Unix/Linux with additional
-                        linker flags from
-                        "wx-config --libs"
-  CMAKE_WXWINDOWS_CXX_FLAGS  = Compiler flags for wxWindows,
-                               essentially "`wx-config --cxxflags`"
-                               on Linux
-  WXWINDOWS_INCLUDE_DIR      = where to find "wx/wx.h" and "wx/setup.h"
-  WXWINDOWS_LINK_DIRECTORIES = link directories, useful for rpath on
-                                Unix
-  WXWINDOWS_DEFINITIONS      = extra defines
-
-
-
-OPTIONS If you need OpenGL support please
-
-.. code-block:: cmake
-
-  set(WXWINDOWS_USE_GL 1)
-
-in your CMakeLists.txt *before* you include this file.
-
-::
-
-  HAVE_ISYSTEM      - true required to replace -I by -isystem on g++
-
-
-
-For convenience include Use_wxWindows.cmake in your project's
-CMakeLists.txt using
-include(${CMAKE_CURRENT_LIST_DIR}/Use_wxWindows.cmake).
-
-USAGE
-
-.. code-block:: cmake
-
-  set(WXWINDOWS_USE_GL 1)
-  find_package(wxWindows)
-
-
-
-NOTES wxWidgets 2.6.x is supported for monolithic builds e.g.
-compiled in wx/build/msw dir as:
-
-::
+.. code-block:: shell
 
   nmake -f makefile.vc BUILD=debug SHARED=0 USE_OPENGL=1 MONOLITHIC=1
 
+Result Variables
+^^^^^^^^^^^^^^^^
 
+This module defines the following variables:
 
-DEPRECATED
+``WXWINDOWS_FOUND``
+  Boolean indicating whether the wxWidgets is found.
+``WXWINDOWS_LIBRARIES``
+  Libraries needed to link against to use wxWidgets.  This includes paths to
+  the wxWidgets libraries and any additional linker flags, typically derived
+  from the output of ``wx-config --libs`` on Unix/Linux systems.
+``CMAKE_WXWINDOWS_CXX_FLAGS``
+  Compiler options needed to use wxWidgets (if any).  On Linux, this corresponds
+  to the output of ``wx-config --cxxflags``.
+``WXWINDOWS_INCLUDE_DIR``
+  The directory containing the ``wx/wx.h`` and ``wx/setup.h`` header files.
+``WXWINDOWS_LINK_DIRECTORIES``
+  Link directories, useful for setting ``rpath`` on Unix-like platforms.
+``WXWINDOWS_DEFINITIONS``
+  Extra compile definitions needed to use wxWidgets (if any).
 
-::
+Hints
+^^^^^
 
-  CMAKE_WX_CAN_COMPILE
-  WXWINDOWS_LIBRARY
-  CMAKE_WX_CXX_FLAGS
-  WXWINDOWS_INCLUDE_PATH
+This module accepts the following variables before calling the
+``find_package(wxWindows)``:
 
+``WXWINDOWS_USE_GL``
+  Set this variable to boolean true to require OpenGL support.
 
+``HAVE_ISYSTEM``
+  Set this variable to boolean true to replace ``-I`` compiler options with
+  ``-isystem`` when the C++ compiler is GNU (``g++``).
 
-AUTHOR Jan Woetzel (07/2003-01/2006)
+Deprecated Variables
+^^^^^^^^^^^^^^^^^^^^
+
+These variables are provided for backward compatibility:
+
+``CMAKE_WX_CAN_COMPILE``
+  .. deprecated:: 1.8
+    Replaced by the ``WXWINDOWS_FOUND`` variable with the same value.
+
+``WXWINDOWS_LIBRARY``
+  .. deprecated:: 1.8
+    Replaced by the ``WXWINDOWS_LIBRARIES`` variable with the same value.
+
+``CMAKE_WX_CXX_FLAGS``
+  .. deprecated:: 1.8
+    Replaced by the ``CMAKE_WXWINDOWS_CXX_FLAGS`` variable with the same value.
+
+``WXWINDOWS_INCLUDE_PATH``
+  .. deprecated:: 1.8
+    Replaced by the ``WXWINDOWS_INCLUDE_DIR`` variable with the same value.
+
+Examples
+^^^^^^^^
+
+Example: Finding wxWidgets in earlier CMake versions
+""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+In earlier versions of CMake, wxWidgets (wxWindows) could be found using:
+
+.. code-block:: cmake
+
+  find_package(wxWindows)
+
+To request OpenGL support, the ``WXWINDOWS_USE_GL`` variable could be set before
+calling ``find_package()``:
+
+.. code-block:: cmake
+
+  set(WXWINDOWS_USE_GL ON)
+  find_package(wxWindows)
+
+Using wxWidgets (wxWindows) in CMake was commonly done by including the
+:module:`Use_wxWindows` module, which would find wxWidgets and set the
+appropriate libraries, include directories, and compiler flags:
+
+.. code-block:: cmake
+
+  include(Use_wxWindows)
+
+Example: Finding wxWidgets as of CMake 3.0
+""""""""""""""""""""""""""""""""""""""""""
+
+Starting with CMake 3.0, wxWidgets can be found using the
+:module:`FindwxWidgets` module:
+
+.. code-block:: cmake
+
+  find_package(wxWidgets)
 #]=======================================================================]
 
+# AUTHOR Jan Woetzel (07/2003-01/2006)
 # ------------------------------------------------------------------
 #
 # -removed OPTION for CMAKE_WXWINDOWS_USE_GL. Force the developer to SET it before calling this.
