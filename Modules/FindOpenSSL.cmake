@@ -7,7 +7,7 @@ FindOpenSSL
 
 Finds the installed OpenSSL encryption library and determines its version.
 
-.. versionadded:: 3.19
+.. versionadded:: 3.20
   Support for specifying version range when calling the :command:`find_package`
   command.  When a version is requested, it can be specified as a single value
   as before, and now also a version range can be used.  For a detailed
