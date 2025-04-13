@@ -10,4 +10,4 @@ set(expect
   )
 check_api("^${expect}$")
 
-check_python(codemodel-v2)
+check_python(codemodel-v2 index)

@@ -17,11 +17,11 @@ in directory:
   endif()
 endfunction()
 
-function(check_python case)
+function(check_python case prefix)
   if(RunCMake_TEST_FAILED OR NOT Python_EXECUTABLE)
     return()
   endif()
-  file(GLOB index ${RunCMake_TEST_BINARY_DIR}/.cmake/api/v1/reply/index-*.json)
+  file(GLOB index ${RunCMake_TEST_BINARY_DIR}/.cmake/api/v1/reply/${prefix}-*.json)
   execute_process(
     COMMAND ${Python_EXECUTABLE} "${RunCMake_SOURCE_DIR}/${case}-check.py" "${index}" "${CMAKE_CXX_COMPILER_ID}"
       "${RunCMake_TEST_BINARY_DIR}"
