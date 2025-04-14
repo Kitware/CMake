@@ -12,3 +12,7 @@ set_property(CACHE CM_SET_INTERNAL PROPERTY VALUE "int2")
 set(CM_SET_TYPE "1" CACHE INTERNAL "Testing set(CACHE INTERNAL) with set_property(TYPE)")
 set_property(CACHE CM_SET_TYPE PROPERTY TYPE "STRING")
 set_property(CACHE CM_SET_TYPE PROPERTY ADVANCED "0")
+
+if(FAIL)
+  message(FATAL_ERROR "Intentionally fail to configure")
+endif()

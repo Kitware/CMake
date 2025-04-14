@@ -1,0 +1,4 @@
+^CMake Error at toolchains-v1.cmake:[0-9]+ \(message\):
+  Intentionally fail to configure
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)$

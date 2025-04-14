@@ -16,3 +16,7 @@ file(GLOB_RECURSE var
   "${CMAKE_CURRENT_SOURCE_DIR}/dir/*.cmake")
 
 add_subdirectory(dir)
+
+if(FAIL)
+  message(FATAL_ERROR "Intentionally fail to configure")
+endif()

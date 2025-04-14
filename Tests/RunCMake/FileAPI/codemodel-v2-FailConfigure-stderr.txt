@@ -1,0 +1,4 @@
+^CMake Error at codemodel-v2.cmake:[0-9]+ \(message\):
+  Intentionally fail to configure
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)$
