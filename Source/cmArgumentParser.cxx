@@ -147,6 +147,24 @@ void Instance::Consume(std::size_t pos, cm::string_view arg)
     return;
   }
 
+  if (!this->DoneWithPositional) {
+    auto const pit = this->Bindings.Positions.Find(pos);
+    if (pit != this->Bindings.Positions.end()) {
+      pit->second(*this, pos, arg);
+      return;
+    }
+
+    if (this->Bindings.TrailingArgs) {
+      this->Keyword = ""_s;
+      this->KeywordValuesSeen = 0;
+      this->DoneWithPositional = true;
+      this->Bindings.TrailingArgs(*this);
+      if (!this->KeywordValueFunc) {
+        return;
+      }
+    }
+  }
+
   if (this->KeywordValueFunc) {
     switch (this->KeywordValueFunc(arg)) {
       case Continue::Yes:
@@ -159,14 +177,6 @@ void Instance::Consume(std::size_t pos, cm::string_view arg)
     return;
   }
 
-  if (!this->DoneWithPositional) {
-    auto const pit = this->Bindings.Positions.Find(pos);
-    if (pit != this->Bindings.Positions.end()) {
-      pit->second(*this, pos, arg);
-      return;
-    }
-  }
-
   if (this->UnparsedArguments) {
     this->UnparsedArguments->emplace_back(arg);
   }
@@ -174,7 +184,7 @@ void Instance::Consume(std::size_t pos, cm::string_view arg)
 
 void Instance::FinishKeyword()
 {
-  if (this->Keyword.empty()) {
+  if (!this->DoneWithPositional) {
     return;
   }
   if (this->KeywordValuesSeen < this->KeywordValuesExpected) {
