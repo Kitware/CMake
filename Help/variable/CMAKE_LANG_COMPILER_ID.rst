@@ -42,6 +42,7 @@ Value                           Name
 ``PGI``                         The Portland Group
 ``PathScale``                   PathScale
 ``QCC``                         QNX C/C++ compiler
+``Renesas``                     `Renesas Compiler`_
 ``SCO``                         SCO OpenServer/UnixWare C/C++ Compiler
 ``SDCC``                        `Small Device C Compiler`_
 ``SunPro``                      Oracle Developer Studio
@@ -70,6 +71,7 @@ languages.
 .. _NVIDIA CUDA Compiler: https://developer.nvidia.com/cuda-llvm-compiler
 .. _Open Watcom: https://open-watcom.github.io
 .. _OrangeC Compiler: https://github.com/LADSoft/OrangeC
+.. _Renesas Compiler: https://www.renesas.com
 .. _Small Device C Compiler: https://sdcc.sourceforge.net
 .. _Tiny C Compiler: https://bellard.org/tcc
 .. _Tasking Compiler Toolsets: https://www.tasking.com

@@ -274,6 +274,20 @@
 #  define ARCHITECTURE_ID ""
 # endif
 
+#elif defined(__RENESAS__)
+# if defined(__CCRX__)
+#  define ARCHITECTURE_ID "RX"
+
+# elif defined(__CCRL__)
+#  define ARCHITECTURE_ID "RL78"
+
+# elif defined(__CCRH__)
+#  define ARCHITECTURE_ID "RH850"
+
+# else
+#  define ARCHITECTURE_ID ""
+# endif
+
 #else
 #  define ARCHITECTURE_ID
 #endif
