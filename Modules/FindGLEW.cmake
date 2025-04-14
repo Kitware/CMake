@@ -5,61 +5,128 @@
 FindGLEW
 --------
 
-Find the OpenGL Extension Wrangler Library (GLEW)
+Finds the OpenGL Extension Wrangler Library (GLEW).
 
-Input Variables
-^^^^^^^^^^^^^^^
+GLEW is a cross-platform C/C++ library that helps manage OpenGL extensions by
+providing efficient run-time mechanisms to query and load OpenGL functionality
+beyond the core specification.
 
-The following variables may be set to influence this module's behavior:
+.. versionadded:: 3.7
+  Debug and Release library variants are found separately.
 
-``GLEW_USE_STATIC_LIBS``
-  to find and create :prop_tgt:`IMPORTED` target for static linkage.
-
-``GLEW_VERBOSE``
-  to output a detailed log of this module.
+.. versionadded:: 3.15
+  If GLEW is built using its CMake-based build system, it provides a CMake
+  package configuration file (``GLEWConfig.cmake``).  This module now takes that
+  into account and first attempts to find GLEW in *config mode*.  If the
+  configuration file is not available, it falls back to *module mode* and
+  searches standard locations.
 
 Imported Targets
 ^^^^^^^^^^^^^^^^
 
-.. versionadded:: 3.1
+This module provides the following :ref:`Imported Targets`:
 
-This module defines the following :ref:`Imported Targets <Imported Targets>`:
+``GLEW::GLEW``
+  .. versionadded:: 3.1
 
+  The main imported target encapsulating the GLEW usage requirements, available
+  if GLEW is found.  It maps usage requirements of either ``GLEW::glew`` or
+  ``GLEW::glew_s`` target depending on their availability.
 
 ``GLEW::glew``
-  The GLEW shared library.
+  .. versionadded:: 3.15
+
+  Target encapsulating the usage requirements for a shared GLEW library.  This
+  target is available if GLEW is found and static libraries aren't requested via
+  the ``GLEW_USE_STATIC_LIBS`` hint variable (see below).
+
 ``GLEW::glew_s``
-  The GLEW static library, if ``GLEW_USE_STATIC_LIBS`` is set to ``TRUE``.
-``GLEW::GLEW``
-  Duplicates either ``GLEW::glew`` or ``GLEW::glew_s`` based on availability.
+  .. versionadded:: 3.15
+
+  Target encapsulating the usage requirements for a static GLEW library.  This
+  target is available if GLEW is found and the ``GLEW_USE_STATIC_LIBS`` hint
+  variable is set to boolean true.
 
 Result Variables
 ^^^^^^^^^^^^^^^^
 
 This module defines the following variables:
 
-``GLEW_INCLUDE_DIRS``
-  include directories for GLEW
-``GLEW_LIBRARIES``
-  libraries to link against GLEW
-``GLEW_SHARED_LIBRARIES``
-  libraries to link against shared GLEW
-``GLEW_STATIC_LIBRARIES``
-  libraries to link against static GLEW
 ``GLEW_FOUND``
-  true if GLEW has been found and can be used
+  Boolean indicating whether GLEW is found.
+
 ``GLEW_VERSION``
-  GLEW version
+  .. versionadded:: 3.15
+
+  The version of GLEW found.
+
 ``GLEW_VERSION_MAJOR``
-  GLEW major version
+  .. versionadded:: 3.15
+
+  The major version of GLEW found.
+
 ``GLEW_VERSION_MINOR``
-  GLEW minor version
+  .. versionadded:: 3.15
+
+  The minor version of GLEW found.
+
 ``GLEW_VERSION_MICRO``
-  GLEW micro version
+  .. versionadded:: 3.15
 
-.. versionadded:: 3.7
-  Debug and Release variants are found separately.
+  The micro version of GLEW found.
 
+``GLEW_INCLUDE_DIRS``
+  Include directories needed to use GLEW library.
+
+``GLEW_LIBRARIES``
+  Libraries needed to link against to use GLEW library (shared or static
+  depending on configuration).
+
+``GLEW_SHARED_LIBRARIES``
+  .. versionadded:: 3.15
+
+  Libraries needed to link against to use shared GLEW library.
+
+``GLEW_STATIC_LIBRARIES``
+  .. versionadded:: 3.15
+
+  Libraries needed to link against to use static GLEW library.
+
+Hints
+^^^^^
+
+This module accepts the following variables before calling
+``find_package(GLEW)`` to influence this module's behavior:
+
+``GLEW_USE_STATIC_LIBS``
+  .. versionadded:: 3.15
+
+  Set to boolean true to find static GLEW library and create the
+  ``GLEW::glew_s`` imported target for static linkage.
+
+``GLEW_VERBOSE``
+  .. versionadded:: 3.15
+
+  Set to boolean true to output a detailed log of this module.  Can be used, for
+  example, for debugging.
+
+Examples
+^^^^^^^^
+
+Finding GLEW and linking it to a project target:
+
+.. code-block:: cmake
+
+  find_package(GLEW)
+  target_link_libraries(project_target PRIVATE GLEW::GLEW)
+
+Using the static GLEW library, if found:
+
+.. code-block:: cmake
+
+  set(GLEW_USE_STATIC_LIBS TRUE)
+  find_package(GLEW)
+  target_link_libraries(project_target PRIVATE GLEW::GLEW)
 #]=======================================================================]
 
 include(FindPackageHandleStandardArgs)
