@@ -24,6 +24,8 @@ run_cmake(ReferencesWronglyImportedTarget)
 run_cmake(ReferencesWronglyNamespacedTarget)
 run_cmake(DependsMultipleDifferentNamespace)
 run_cmake(DependsMultipleDifferentSets)
+run_cmake(LinkInterfaceGeneratorExpression)
+run_cmake(LinkOnlyRecursive)
 
 # Test functionality
 run_cmake(Appendix)
@@ -35,3 +37,4 @@ run_cmake(LowerCaseFile)
 run_cmake(Requirements)
 run_cmake(TargetTypes)
 run_cmake(DependsMultiple)
+run_cmake(LinkOnly)
