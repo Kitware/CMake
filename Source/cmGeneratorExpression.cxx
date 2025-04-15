@@ -43,7 +43,7 @@ std::unique_ptr<cmCompiledGeneratorExpression> cmGeneratorExpression::Parse(
 }
 
 std::string cmGeneratorExpression::Evaluate(
-  std::string input, cmLocalGenerator* lg, std::string const& config,
+  std::string input, cmLocalGenerator const* lg, std::string const& config,
   cmGeneratorTarget const* headTarget,
   cmGeneratorExpressionDAGChecker* dagChecker,
   cmGeneratorTarget const* currentTarget, std::string const& language)
@@ -63,7 +63,7 @@ std::string cmGeneratorExpression::Evaluate(
 }
 
 std::string const& cmCompiledGeneratorExpression::Evaluate(
-  cmLocalGenerator* lg, std::string const& config,
+  cmLocalGenerator const* lg, std::string const& config,
   cmGeneratorTarget const* headTarget,
   cmGeneratorExpressionDAGChecker* dagChecker,
   cmGeneratorTarget const* currentTarget, std::string const& language) const
