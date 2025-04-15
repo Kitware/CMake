@@ -513,6 +513,8 @@ void CommandLineArguments::GenerateHelp()
         case CommandLineArguments::EQUAL_ARGUMENT:
           clen += 4;
           break;
+        default:
+          break;
       }
       if (clen > maxlen) {
         maxlen = clen;
@@ -543,6 +545,8 @@ void CommandLineArguments::GenerateHelp()
           break;
         case CommandLineArguments::MULTI_ARGUMENT:
           argument += " opt opt ...";
+          break;
+        default:
           break;
       }
       str << "  " << argument.substr(0, maxstrlen) << "  ";
