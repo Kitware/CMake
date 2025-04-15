@@ -1,31 +1,12 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
 # file LICENSE.rst or https://cmake.org/licensing for details.
 
-#
-
-# See FindKDE3.cmake for documentation.
-#
-# this file contains the following macros:
-# KDE3_ADD_DCOP_SKELS
-# KDE3_ADD_DCOP_STUBS
-# KDE3_ADD_MOC_FILES
-# KDE3_ADD_UI_FILES
-# KDE3_ADD_KCFG_FILES
-# KDE3_AUTOMOC
-# KDE3_INSTALL_LIBTOOL_FILE
-# KDE3_CREATE_FINAL_FILE
-# KDE3_ADD_KPART
-# KDE3_ADD_KDEINIT_EXECUTABLE
-# KDE3_ADD_EXECUTABLE
-
-
-#neundorf@kde.org
+# This file contains KDE 3 macros. See FindKDE3.cmake for documentation.
+# Author: neundorf@kde.org
 
 # Included for backward compatibility, otherwise unused.
 include(AddFileDependencies)
 
-#create the kidl and skeletion file for dcop stuff
-#usage: KDE_ADD_COP_SKELS(foo_SRCS ${dcop_headers})
 macro(KDE3_ADD_DCOP_SKELS _sources)
   foreach (_current_FILE ${ARGN})
 
@@ -131,8 +112,6 @@ macro(KDE3_ADD_KCFG_FILES _sources)
 endmacro()
 
 
-#create the moc files and add them to the list of sources
-#usage: KDE_ADD_MOC_FILES(foo_SRCS ${moc_headers})
 macro(KDE3_ADD_MOC_FILES _sources)
   foreach (_current_FILE ${ARGN})
 
@@ -155,8 +134,6 @@ endmacro()
 
 get_filename_component( KDE3_MODULE_DIR  ${CMAKE_CURRENT_LIST_FILE} PATH)
 
-#create the implementation files from the ui files and add them to the list of sources
-#usage: KDE_ADD_UI_FILES(foo_SRCS ${ui_files})
 macro(KDE3_ADD_UI_FILES _sources )
   foreach (_current_FILE ${ARGN})
 
@@ -245,7 +222,7 @@ macro(KDE3_AUTOMOC)
   endforeach ()
 endmacro()
 
-# only used internally by KDE3_INSTALL_ICONS
+# Only used internally by kde3_install_icons().
 macro (_KDE3_ADD_ICON_INSTALL_RULE _install_SCRIPT _install_PATH _group _orig_NAME _install_NAME)
 
   # if the string doesn't match the pattern, the result is the full string, so all three have the same content
@@ -358,7 +335,7 @@ macro(KDE3_ADD_KPART _target_NAME _with_PREFIX)
   endif ()
 
 #    if (KDE3_ENABLE_FINAL)
-#       KDE3_CREATE_FINAL_FILE(${_target_NAME}_final.cpp ${_first_SRC} ${ARGN})
+#       kde3_create_final_file(${_target_NAME}_final.cpp ${_first_SRC} ${ARGN})
 #       add_library(${_target_NAME} MODULE  ${_target_NAME}_final.cpp)
 #    else ()
   add_library(${_target_NAME} MODULE ${_first_SRC} ${ARGN})
@@ -368,15 +345,14 @@ macro(KDE3_ADD_KPART _target_NAME _with_PREFIX)
     set_target_properties(${_target_NAME} PROPERTIES PREFIX "")
   endif()
 
-  KDE3_INSTALL_LIBTOOL_FILE(${_target_NAME})
-
+  kde3_install_libtool_file(${_target_NAME})
 endmacro()
 
 
 macro(KDE3_ADD_KDEINIT_EXECUTABLE _target_NAME )
 
 #    if (KDE3_ENABLE_FINAL)
-#       KDE3_CREATE_FINAL_FILE(${_target_NAME}_final.cpp ${ARGN})
+#       kde3_create_final_file(${_target_NAME}_final.cpp ${ARGN})
 #       add_library(kdeinit_${_target_NAME} SHARED  ${_target_NAME}_final.cpp)
 #    else ()
   add_library(kdeinit_${_target_NAME} SHARED ${ARGN} )
@@ -393,7 +369,7 @@ endmacro()
 macro(KDE3_ADD_EXECUTABLE _target_NAME )
 
 #    if (KDE3_ENABLE_FINAL)
-#       KDE3_CREATE_FINAL_FILE(${_target_NAME}_final.cpp ${ARGN})
+#       kde3_create_final_file(${_target_NAME}_final.cpp ${ARGN})
 #       add_executable(${_target_NAME} ${_target_NAME}_final.cpp)
 #    else ()
   add_executable(${_target_NAME} ${ARGN} )

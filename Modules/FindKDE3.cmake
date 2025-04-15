@@ -5,138 +5,214 @@
 FindKDE3
 --------
 
-Find the KDE3 include and library dirs, KDE preprocessors and define a some macros
+.. note::
 
+  This module is specifically intended for KDE version 3, which is obsolete and
+  no longer maintained.  For modern application development using KDE
+  technologies with CMake, use a newer version of KDE, and refer to the
+  `KDE documentation
+  <https://develop.kde.org/docs/getting-started/building/cmake-build/>`_.
 
+This module finds KDE 3 include directories, libraries, and KDE-specific
+preprocessor tools.  It provides usage requirements for building KDE 3 software
+and defines several helper commands to simplify working with KDE 3 in CMake.
+
+Result Variables
+^^^^^^^^^^^^^^^^
 
 This module defines the following variables:
 
-``KDE3_DEFINITIONS``
-  compiler definitions required for compiling KDE software
-``KDE3_INCLUDE_DIR``
-  the KDE include directory
-``KDE3_INCLUDE_DIRS``
-  the KDE and the Qt include directory, for use with include_directories()
-``KDE3_LIB_DIR``
-  the directory where the KDE libraries are installed, for use with link_directories()
-``QT_AND_KDECORE_LIBS``
-  this contains both the Qt and the kdecore library
-``KDE3_DCOPIDL_EXECUTABLE``
-  the dcopidl executable
-``KDE3_DCOPIDL2CPP_EXECUTABLE``
-  the dcopidl2cpp executable
-``KDE3_KCFGC_EXECUTABLE``
-  the kconfig_compiler executable
 ``KDE3_FOUND``
-  set to TRUE if all of the above has been found
+  Boolean indicating whether KDE 3 is found.
+``KDE3_DEFINITIONS``
+  Compiler definitions required for compiling KDE 3 software.
+``KDE3_INCLUDE_DIRS``
+  The KDE and the Qt include directories, for use with the
+  :command:`target_include_directories` command.
+``KDE3_LIB_DIR``
+  The directory containing the installed KDE 3 libraries, for use with the
+  :command:`target_link_directories` command.
+``QT_AND_KDECORE_LIBS``
+  A list containing both the Qt and the kdecore library, typically used together
+  when linking KDE 3.
 
-The following user adjustable options are provided:
+Cache Variables
+^^^^^^^^^^^^^^^
+
+The following cache variables may also be set:
+
+``KDE3_INCLUDE_DIR``
+  The directory containing KDE 3 header files.
+``KDE3_DCOPIDL_EXECUTABLE``
+  The path to the ``dcopidl`` executable.
+``KDE3_DCOPIDL2CPP_EXECUTABLE``
+  The path to the ``dcopidl2cpp`` executable.
+``KDE3_KCFGC_EXECUTABLE``
+  The path to the ``kconfig_compiler`` executable.
+
+Hints
+^^^^^
+
+This module accepts the following variables:
 
 ``KDE3_BUILD_TESTS``
-  enable this to build KDE testcases
+  Provided as a user adjustable option.  Set this variable to boolean true to
+  build KDE 3 testcases.
 
-It also adds the following macros (from ``KDE3Macros.cmake``) ``SRCS_VAR`` is
-always the variable which contains the list of source files for your
-application or library.
+Commands
+^^^^^^^^
 
-KDE3_AUTOMOC(file1 ...  fileN)
+This module provides the following commands to work with KDE 3 in CMake:
 
-::
+.. command:: kde3_automoc
 
-    Call this if you want to have automatic moc file handling.
-    This means if you include "foo.moc" in the source file foo.cpp
-    a moc file for the header foo.h will be created automatically.
-    You can set the property SKIP_AUTOMAKE using set_source_files_properties()
-    to exclude some files in the list from being processed.
+  Enables automatic processing with ``moc`` for the given source files:
 
+  .. code-block:: cmake
 
+    kde3_automoc(<sources>...)
 
-KDE3_ADD_MOC_FILES(SRCS_VAR file1 ...  fileN )
+  Call this command to enable automatic ``moc`` file handling.  For example,
+  if a source file (e.g., ``foo.cpp``) contains ``include "foo.moc"``, a
+  ``moc`` file for the corresponding header (``foo.h``) will be generated
+  automatically.  To skip processing for a specific source file, set the
+  :prop_sf:`SKIP_AUTOMOC` source file property.
 
-::
+.. command:: kde3_add_moc_files
 
-    If you don't use the KDE3_AUTOMOC() macro, for the files
-    listed here moc files will be created (named "foo.moc.cpp")
+  Processes header files with ``moc``:
 
+  .. code-block:: cmake
 
+    kde3_add_moc_files(<variable> <headers>...)
 
-KDE3_ADD_DCOP_SKELS(SRCS_VAR header1.h ...  headerN.h )
+  If not using ``kde3_automoc()``, this command can be used to generate ``moc``
+  files for one or more ``<headers>`` files.  The generated files are named
+  ``<filename>.moc.cpp`` and the resulting list of these generated source files
+  is stored in the variable named ``<variable>`` for use in project targets.
 
-::
+.. command:: kde3_add_dcop_skels
 
-    Use this to generate DCOP skeletions from the listed headers.
+  Generates KIDL and DCOP skeletons:
 
+  .. code-block:: cmake
 
+    kde3_add_dcop_skels(<variable> <dcop-headers>...)
 
-KDE3_ADD_DCOP_STUBS(SRCS_VAR header1.h ...  headerN.h )
+  This command generates ``.kidl`` and DCOP skeleton source files from the given
+  DCOP header files.  The resulting list of generated source files is stored in
+  the variable named ``<variable>`` for use in project targets.
 
-::
+.. command:: kde3_add_dcop_stubs
 
-     Use this to generate DCOP stubs from the listed headers.
+  Generates DCOP stubs:
 
+  .. code-block:: cmake
 
+    kde3_add_dcop_stubs(<variable> <headers>...)
 
-KDE3_ADD_UI_FILES(SRCS_VAR file1.ui ...  fileN.ui )
+  Use this command to generate DCOP stubs from one or more given header files.
+  The resulting list of generated source files is stored in the variable named
+  ``<variable>`` for use in project targets.
 
-::
+.. command:: kde3_add_ui_files
 
-    Use this to add the Qt designer ui files to your application/library.
+  Adds Qt designer UI files:
 
+  .. code-block:: cmake
 
+    kde3_add_ui_files(<variable> <ui-files>...)
 
-KDE3_ADD_KCFG_FILES(SRCS_VAR file1.kcfgc ...  fileN.kcfgc )
+  This command creates the implementation files from the given Qt designer
+  ``.ui`` files.  The resulting list of generated files is stored in the
+  variable named ``<variable>`` for use in project targets.
 
-::
+.. command:: kde3_add_kcfg_files
 
-    Use this to add KDE kconfig compiler files to your application/library.
+  Adds KDE kconfig compiler files:
 
+  .. code-block:: cmake
 
+    kde3_add_kcfg_files(<variable> <kcfgc-files>...)
 
-KDE3_INSTALL_LIBTOOL_FILE(target)
+  Use this command to add KDE kconfig compiler files (``.kcfgc``) to the
+  application/library.  The resulting list of generated source files is stored
+  in the variable named ``<variable>`` for use in project targets.
 
-::
+.. command:: kde3_install_libtool_file
 
-    This will create and install a simple libtool file for the given target.
+  Creates and installs a libtool file:
 
+  .. code-block:: cmake
 
+    kde3_install_libtool_file(<target>)
 
-KDE3_ADD_EXECUTABLE(name file1 ...  fileN )
+  This command creates and installs a basic libtool file for the given target
+  ``<target>``.
 
-::
+.. command:: kde3_add_executable
 
-    Currently identical to add_executable(), may provide some advanced
-    features in the future.
+  Adds KDE executable:
 
+  .. code-block:: cmake
 
+    kde3_add_executable(<name> <sources>...)
 
-KDE3_ADD_KPART(name [WITH_PREFIX] file1 ...  fileN )
+  This command is functionally identical to the built-in
+  :command:`add_executable` command.  It was originally intended to support
+  additional features in future versions of this module.
 
-::
+.. command:: kde3_add_kpart
 
-    Create a KDE plugin (KPart, kioslave, etc.) from the given source files.
-    If WITH_PREFIX is given, the resulting plugin will have the prefix "lib",
-    otherwise it won't.
-    It creates and installs an appropriate libtool la-file.
+  Creates a KDE plugin:
 
+  .. code-block:: cmake
 
+    kde3_add_kpart(<name> [WITH_PREFIX] <sources>...)
 
-KDE3_ADD_KDEINIT_EXECUTABLE(name file1 ...  fileN )
+  This command creates a KDE plugin (KPart, kioslave, etc.) from one or more
+  source files ``<sources>``.  It also creates and installs an appropriate
+  libtool ``.la`` file.
 
-::
+  If the ``WITH_PREFIX`` option is given, the resulting plugin name will be
+  prefixed with ``lib``.  Otherwise, no prefix is added.
 
-    Create a KDE application in the form of a module loadable via kdeinit.
-    A library named kdeinit_<name> will be created and a small executable
-    which links to it.
+.. command:: kde3_add_kdeinit_executable
 
+  Creates a KDE application as a module loadable via kdeinit:
 
+  .. code-block:: cmake
 
-The option KDE3_ENABLE_FINAL to enable all-in-one compilation is no
-longer supported.
+    kde3_add_kdeinit_executable(<name> <sources>...)
 
+  This command creates a library named ``kdeinit_<name>`` from one or more
+  source files ``<sources>``.  It also builds a small executable linked against
+  this library.
 
+Deprecated Variables
+^^^^^^^^^^^^^^^^^^^^
 
-Author: Alexander Neundorf <neundorf@kde.org>
+The following variables have been either removed or are provided for backward
+compatibility:
+
+``KDE3_ENABLE_FINAL``
+  .. versionchanged:: 2.4.8
+    This variable is now removed and no longer supported.
+
+  This hint variable was provided as an option in earlier CMake versions to
+  enable all-in-one compilation.
+
+Examples
+^^^^^^^^
+
+Finding KDE 3:
+
+.. code-block:: cmake
+
+  find_package(KDE3)
 #]=======================================================================]
+
+# Author: Alexander Neundorf <neundorf@kde.org>
 
 if(NOT UNIX AND KDE3_FIND_REQUIRED)
   message(FATAL_ERROR "Compiling KDE3 applications and libraries under Windows is not supported")
