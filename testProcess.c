@@ -478,6 +478,8 @@ static int runChild2(kwsysProcess* kp, char const* cmd[], int state,
       printf("Error in administrating child process: [%s]\n",
              kwsysProcess_GetErrorString(kp));
       break;
+    default:
+      break;
   }
 
   if (result) {
@@ -629,6 +631,8 @@ int main(int argc, char const* argv[])
         return test9_grandchild(argc, argv);
       case 110:
         return test10_grandchild(argc, argv);
+      default:
+        break;
     }
     fprintf(stderr, "Invalid test number %d.\n", n);
     return 1;

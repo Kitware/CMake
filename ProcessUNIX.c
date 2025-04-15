@@ -1179,6 +1179,8 @@ static int kwsysProcessWaitForPipe(kwsysProcess* cp, char** data, int* length,
             case KWSYSPE_PIPE_STDERR:
               wd->PipeId = kwsysProcess_Pipe_STDERR;
               break;
+            default:
+              break;
           }
           return 1;
         }
@@ -2851,6 +2853,8 @@ static void kwsysProcessesSignalHandler(int signum
 
   /* Signal all process objects that a child has terminated.  */
   switch (signum) {
+    default:
+      break;
     case SIGCHLD:
       for (i = 0; i < kwsysProcesses.Count; ++i) {
         /* Set the pipe in a signalled state.  */

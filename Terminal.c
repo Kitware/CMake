@@ -297,6 +297,8 @@ static void kwsysTerminalSetVT100Color(FILE* stream, int color)
     case kwsysTerminal_Color_ForegroundWhite:
       fprintf(stream, KWSYS_TERMINAL_VT100_FOREGROUND_WHITE);
       break;
+    default:
+      break;
   }
   switch (color & kwsysTerminal_Color_BackgroundMask) {
     case kwsysTerminal_Color_BackgroundBlack:
@@ -322,6 +324,8 @@ static void kwsysTerminalSetVT100Color(FILE* stream, int color)
       break;
     case kwsysTerminal_Color_BackgroundWhite:
       fprintf(stream, KWSYS_TERMINAL_VT100_BACKGROUND_WHITE);
+      break;
+    default:
       break;
   }
   if (color & kwsysTerminal_Color_ForegroundBold) {

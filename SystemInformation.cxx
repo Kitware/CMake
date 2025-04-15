@@ -1804,6 +1804,8 @@ int SystemInformationImplementation::GetProcessorCacheXSize(
       return this->Features.L2CacheSize;
     case SystemInformation::CPU_FEATURE_L3CACHE:
       return this->Features.L3CacheSize;
+    default:
+      break;
   }
   return -1;
 }
@@ -4814,6 +4816,8 @@ std::string SystemInformationImplementation::RunProcess(
       std::cerr << "Unexpected ending state after running " << args[0]
                 << std::endl;
     } break;
+    default:
+      break;
   }
   kwsysProcess_Delete(gp);
   if (result) {
