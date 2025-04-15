@@ -2639,7 +2639,8 @@ void cmLocalGenerator::AppendFlags(std::string& flags,
       }
       CM_FALLTHROUGH;
     case cmPolicies::OLD:
-      this->AppendFlags(flags, newFlags);
+      this->AppendFlags(
+        flags, this->GetGlobalGenerator()->GetEncodedLiteral(newFlags));
       break;
     case cmPolicies::NEW:
       if (compileOrLink == cmBuildStep::Link) {
