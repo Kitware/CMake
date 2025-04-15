@@ -5,109 +5,171 @@
 FindSDL
 -------
 
-Locate the SDL library
+Finds the SDL (Simple DirectMedia Layer) library.  SDL is a cross-platform
+library for developing multimedia software, such as games and emulators.
 
+.. note::
+
+  This module is specifically intended for SDL version 1.  Starting with version
+  2, SDL provides a CMake package configuration file when built with CMake and
+  should be found using ``find_package(SDL2)``.  Similarly, SDL version 3 can be
+  found using ``find_package(SDL3)``.  These newer versions provide separate
+  :ref:`Imported Targets` that encapsulate usage requirements.  Refer to the
+  official SDL documentation for more information.
+
+Note that the include path for the SDL header has changed in recent SDL 1
+versions from ``SDL/SDL.h`` to simply ``SDL.h``.  This change aligns with SDL's
+convention of using ``#include "SDL.h"`` for portability, as not all systems
+install the headers in a ``SDL/`` subdirectory (e.g., FreeBSD).
+
+When targeting macOS and using the SDL framework, be sure to include both
+``SDLmain.h`` and ``SDLmain.m`` in the project.  For other platforms, the
+``SDLmain`` library is typically linked using ``-lSDLmain``, which this module
+will attempt to locate automatically.  Additionally, for macOS, this module will
+add the ``-framework Cocoa`` flag as needed.
 
 Imported Targets
 ^^^^^^^^^^^^^^^^
 
-.. versionadded:: 3.19
-
-This module defines the following :prop_tgt:`IMPORTED` target:
+This module provides the following :ref:`Imported Targets`:
 
 ``SDL::SDL``
-  The SDL library, if found
+  .. versionadded:: 3.19
 
-Result variables
+  Target encapsulating the SDL library usage requirements, available if SDL is
+  found.
+
+Result Variables
 ^^^^^^^^^^^^^^^^
 
-This module will set the following variables in your project:
+This module defines the following variables:
+
+``SDL_FOUND``
+  Boolean indicating whether the (requested version of) SDL is found.
+
+``SDL_VERSION``
+  .. versionadded:: 3.19
+
+  The human-readable string containing the version of SDL found.
+
+``SDL_VERSION_MAJOR``
+  .. versionadded:: 3.19
+
+  The major version of SDL found.
+
+``SDL_VERSION_MINOR``
+  .. versionadded:: 3.19
+
+  The minor version of SDL found.
+
+``SDL_VERSION_PATCH``
+  .. versionadded:: 3.19
+
+  The patch version of SDL found.
 
 ``SDL_INCLUDE_DIRS``
-  where to find SDL.h
+  .. versionadded:: 3.19
+
+  Include directories needed to use SDL.
+
 ``SDL_LIBRARIES``
-  the name of the library to link against
-``SDL_FOUND``
-  if false, do not try to link to SDL
-``SDL_VERSION``
-  the human-readable string containing the version of SDL if found
-``SDL_VERSION_MAJOR``
-  SDL major version
-``SDL_VERSION_MINOR``
-  SDL minor version
-``SDL_VERSION_PATCH``
-  SDL patch version
+  .. versionadded:: 3.19
 
-.. versionadded:: 3.19
-  Added the ``SDL_INCLUDE_DIRS``, ``SDL_LIBRARIES`` and ``SDL_VERSION[_<PART>]``
-  variables.
+  Libraries needed to link against to use SDL.
 
-Cache variables
+Cache Variables
 ^^^^^^^^^^^^^^^
 
-These variables may optionally be set to help this module find the correct files:
+These variables may optionally be set to help this module find the correct
+files:
 
 ``SDL_INCLUDE_DIR``
-  where to find SDL.h
+  The directory containing the ``SDL.h`` header file.
 ``SDL_LIBRARY``
-  the name of the library to link against
+  A list of libraries containing the path to the SDL library and libraries
+  needed to link against to use SDL.
 
+Hints
+^^^^^
 
-Variables for locating SDL
-^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-This module responds to the flag:
+This module accepts the following variables:
 
 ``SDL_BUILDING_LIBRARY``
-    If this is defined, then no SDL_main will be linked in because
-    only applications need main().
-    Otherwise, it is assumed you are building an application and this
-    module will attempt to locate and set the proper link flags
-    as part of the returned SDL_LIBRARY variable.
+  When set to boolean true, the ``SDL_main`` library will be excluded from
+  linking, as it is not required when building the SDL library itself (only
+  applications need ``main()`` function).  If not set, this module assumes an
+  application is being built and attempts to locate and include the appropriate
+  ``SDL_main`` link flags in the returned ``SDL_LIBRARY`` variable.
 
+``SDLDIR``
+  Environment variable that can be set to help locate an SDL library installed
+  in a custom location.  It should point to the installation destination that
+  was used when configuring, building, and installing SDL library:
+  ``./configure --prefix=$SDLDIR``.
 
-Obsolete variables
-^^^^^^^^^^^^^^^^^^
+  On macOS, setting this variable will prefer the Framework version (if found)
+  over others.  In this case, the cache value of ``SDL_LIBRARY`` would need to
+  be manually changed to override this selection or set the
+  :variable:`CMAKE_INCLUDE_PATH` variable to modify the search paths.
 
-.. deprecated:: 3.19
+Troubleshooting
+^^^^^^^^^^^^^^^
+
+In case the SDL library is not found automatically, the ``SDL_LIBRARY_TEMP``
+variable may be empty, and ``SDL_LIBRARY`` will not be set.  This typically
+means that CMake could not locate the SDL library (e.g., ``SDL.dll``,
+``libSDL.so``, ``SDL.framework``, etc.).  To resolve this, manually set
+``SDL_LIBRARY_TEMP`` to the correct path and reconfigure the project.
+Similarly, if ``SDLMAIN_LIBRARY`` is unset, it may also need to be specified
+manually.  These variables are used to construct the final ``SDL_LIBRARY``
+value.  If they are not set, ``SDL_LIBRARY`` will remain undefined.
+
+Deprecated Variables
+^^^^^^^^^^^^^^^^^^^^
 
 These variables are obsolete and provided for backwards compatibility:
 
 ``SDL_VERSION_STRING``
-  the human-readable string containing the version of SDL if found.
-  Identical to SDL_VERSION
+  .. deprecated:: 3.19
+    Superseded by the ``SDL_VERSION`` with the same value.
 
+  The human-readable string containing the version of SDL if found.
 
-Don't forget to include SDLmain.h and SDLmain.m your project for the
-OS X framework based version.  (Other versions link to -lSDLmain which
-this module will try to find on your behalf.) Also for OS X, this
-module will automatically add the -framework Cocoa on your behalf.
+Examples
+^^^^^^^^
 
+Finding SDL library and linking it to a project target:
 
+.. code-block:: cmake
 
-Additional Note: If you see an empty SDL_LIBRARY_TEMP in your
-configuration and no SDL_LIBRARY, it means CMake did not find your SDL
-library (SDL.dll, libsdl.so, SDL.framework, etc).  Set
-SDL_LIBRARY_TEMP to point to your SDL library, and configure again.
-Similarly, if you see an empty SDLMAIN_LIBRARY, you should set this
-value as appropriate.  These values are used to generate the final
-SDL_LIBRARY variable, but when these values are unset, SDL_LIBRARY
-does not get created.
+  find_package(SDL)
+  target_link_libraries(project_target PRIVATE SDL::SDL)
 
+When working with SDL version 2, the upstream package provides the
+``SDL2::SDL2`` imported target directly.  It can be used in a project without
+using this module:
 
+.. code-block:: cmake
 
-$SDLDIR is an environment variable that would correspond to the
-./configure --prefix=$SDLDIR used in building SDL.  l.e.galup 9-20-02
+  find_package(SDL2)
+  target_link_libraries(project_target PRIVATE SDL2::SDL2)
 
-On OSX, this will prefer the Framework version (if found) over others.
-People will have to manually change the cache values of SDL_LIBRARY to
-override this selection or set the CMake environment
-CMAKE_INCLUDE_PATH to modify the search paths.
+Similarly, for SDL version 3:
 
-Note that the header path has changed from SDL/SDL.h to just SDL.h
-This needed to change because "proper" SDL convention is #include
-"SDL.h", not <SDL/SDL.h>.  This is done for portability reasons
-because not all systems place things in SDL/ (see FreeBSD).
+.. code-block:: cmake
+
+  find_package(SDL3)
+  target_link_libraries(project_target PRIVATE SDL3::SDL3)
+
+See Also
+^^^^^^^^
+
+* The :module:`FindSDL_gfx` module to find the SDL_gfx library.
+* The :module:`FindSDL_image` module to find the SDL_image library.
+* The :module:`FindSDL_mixer` module to find the SDL_mixer library.
+* The :module:`FindSDL_net` module to find the SDL_net library.
+* The :module:`FindSDL_sound` module to find the SDL_sound library.
+* The :module:`FindSDL_ttf` module to find the SDL_ttf library.
 #]=======================================================================]
 
 cmake_policy(PUSH)

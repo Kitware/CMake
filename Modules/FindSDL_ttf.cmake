@@ -5,31 +5,107 @@
 FindSDL_ttf
 -----------
 
-Locate SDL_ttf library
+Finds the SDL_ttf library that provides support for rendering text with TrueType
+fonts in SDL (Simple DirectMedia Layer) applications.
 
-This module defines:
+.. note::
 
-::
+  This module is specifically intended for SDL_ttf version 1.  Starting with
+  version 2.0.15, SDL_ttf provides a CMake package configuration file when built
+  with CMake and should be found using ``find_package(SDL2_ttf)``.  Similarly,
+  SDL_ttf version 3 can be found using ``find_package(SDL3_ttf)``.  These newer
+  versions provide :ref:`Imported Targets` that encapsulate usage requirements.
+  Refer to the official SDL documentation for more information.
 
-  SDL_TTF_LIBRARIES, the name of the library to link against
-  SDL_TTF_INCLUDE_DIRS, where to find the headers
-  SDL_TTF_FOUND, if false, do not try to link against
-  SDL_TTF_VERSION_STRING - human-readable string containing the version of SDL_ttf
+Result Variables
+^^^^^^^^^^^^^^^^
 
+This module defines the following variables:
 
+``SDL_ttf_FOUND``
+  Boolean indicating whether the (requested version of) SDL_ttf library is
+  found.  For backward compatibility, the ``SDL_TTF_FOUND`` variable is also set
+  to the same value.
+
+``SDL_TTF_VERSION_STRING``
+  The human-readable string containing the version of SDL_ttf found.
+
+``SDL_TTF_INCLUDE_DIRS``
+  Include directories containing headers needed to use SDL_ttf library.
+
+``SDL_TTF_LIBRARIES``
+  Libraries needed to link against to use SDL_ttf.
+
+Deprecated Variables
+^^^^^^^^^^^^^^^^^^^^
 
 For backward compatibility the following variables are also set:
 
-::
+``SDLTTF_FOUND``
+  .. deprecated:: 2.8.10
+    Replaced with ``SDL_ttf_FOUND``, which has the same value.
 
-  SDLTTF_LIBRARY (same value as SDL_TTF_LIBRARIES)
-  SDLTTF_INCLUDE_DIR (same value as SDL_TTF_INCLUDE_DIRS)
-  SDLTTF_FOUND (same value as SDL_TTF_FOUND)
+``SDLTTF_INCLUDE_DIR``
+  .. deprecated:: 2.8.10
+    Replaced with ``SDL_TTF_INCLUDE_DIRS``, which has the same value.
 
+``SDLTTF_LIBRARY``
+  .. deprecated:: 2.8.10
+    Replaced with ``SDL_TTF_LIBRARIES``, which has the same value.
 
+Hints
+^^^^^
 
-$SDLDIR is an environment variable that would correspond to the
-./configure --prefix=$SDLDIR used in building SDL.
+This module accepts the following variables:
+
+``SDLDIR``
+  Environment variable that can be set to help locate an SDL library installed
+  in a custom location.  It should point to the installation destination that
+  was used when configuring, building, and installing SDL library:
+  ``./configure --prefix=$SDLDIR``.
+
+Examples
+^^^^^^^^
+
+Finding SDL_ttf library and creating an imported interface target for linking
+it to a project target:
+
+.. code-block:: cmake
+
+  find_package(SDL_ttf)
+
+  if(SDL_ttf_FOUND AND NOT TARGET SDL::SDL_ttf)
+    add_library(SDL::SDL_ttf INTERFACE IMPORTED)
+    set_target_properties(
+      SDL::SDL_ttf
+      PROPERTIES
+        INTERFACE_INCLUDE_DIRECTORIES "${SDL_TTF_INCLUDE_DIRS}"
+        INTERFACE_LINK_LIBRARIES "${SDL_TTF_LIBRARIES}"
+    )
+  endif()
+
+  target_link_libraries(project_target PRIVATE SDL::SDL_ttf)
+
+When working with SDL_ttf version 2, the upstream package provides the
+``SDL2_ttf::SDL2_ttf`` imported target directly.  It can be used in a project
+without using this module:
+
+.. code-block:: cmake
+
+  find_package(SDL2_ttf)
+  target_link_libraries(project_target PRIVATE SDL2_ttf::SDL2_ttf)
+
+Similarly, for SDL_ttf version 3:
+
+.. code-block:: cmake
+
+  find_package(SDL3_ttf)
+  target_link_libraries(project_target PRIVATE SDL3_ttf::SDL3_ttf)
+
+See Also
+^^^^^^^^
+
+* The :module:`FindSDL` module to find the main SDL library.
 #]=======================================================================]
 
 cmake_policy(PUSH)
