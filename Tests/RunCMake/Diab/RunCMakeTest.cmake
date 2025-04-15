@@ -36,7 +36,6 @@ foreach(_diab_toolchain IN LISTS _diab_toolchains)
 
   # Create an executable from mixed, c, cxx and assembly.
   run_toolchain(diab-asm
-    -DCMAKE_C_COMPILER=${c_comp}
-    -DCMAKE_CXX_COMPILER=${cxx_comp}
+    -DCMAKE_ASM_COMPILER=${c_comp}
   )
 endforeach()
