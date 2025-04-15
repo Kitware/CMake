@@ -184,12 +184,6 @@ std::string cmGlobalNinjaGenerator::EncodeRuleName(std::string const& name)
   return encoded;
 }
 
-std::string cmGlobalNinjaGenerator::GetEncodedLiteral(std::string const& lit)
-{
-  std::string result = lit;
-  return this->EncodeLiteral(result);
-}
-
 std::string& cmGlobalNinjaGenerator::EncodeLiteral(std::string& lit)
 {
   cmSystemTools::ReplaceString(lit, "$", "$$");
