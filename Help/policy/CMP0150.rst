@@ -34,6 +34,6 @@ will be raised.
 .. |INTRODUCED_IN_CMAKE_VERSION| replace:: 3.27
 .. |WARNS_OR_DOES_NOT_WARN| replace::
    warns when a relative path is encountered
-.. include:: STANDARD_ADVICE.txt
+.. include:: include/STANDARD_ADVICE.rst
 
-.. include:: DEPRECATED.txt
+.. include:: include/DEPRECATED.rst

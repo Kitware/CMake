@@ -8,7 +8,7 @@ Specify how Swift compiles a target. This variable is used to initialize the
 
 The allowed values are:
 
-.. include:: ../prop_tgt/Swift_COMPILATION_MODE-VALUES.txt
+.. include:: ../prop_tgt/include/Swift_COMPILATION_MODE-VALUES.rst
 
 Use :manual:`generator expressions <cmake-generator-expressions(7)>` to support
 per-configuration specification. For example, the code:

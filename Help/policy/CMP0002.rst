@@ -2,7 +2,7 @@ CMP0002
 -------
 
 .. |REMOVED_IN_CMAKE_VERSION| replace:: 4.0
-.. include:: REMOVED_PROLOGUE.txt
+.. include:: include/REMOVED_PROLOGUE.rst
 
 Logical target names must be globally unique.
 
@@ -24,4 +24,4 @@ property :prop_gbl:`ALLOW_DUPLICATE_CUSTOM_TARGETS` with a Makefiles generator).
 
 .. |INTRODUCED_IN_CMAKE_VERSION| replace:: 2.6.0
 .. |WARNED_OR_DID_NOT_WARN| replace:: warned
-.. include:: REMOVED_EPILOGUE.txt
+.. include:: include/REMOVED_EPILOGUE.rst

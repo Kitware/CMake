@@ -2,7 +2,7 @@ CMP0038
 -------
 
 .. |REMOVED_IN_CMAKE_VERSION| replace:: 4.0
-.. include:: REMOVED_PROLOGUE.txt
+.. include:: include/REMOVED_PROLOGUE.rst
 
 Targets may not link directly to themselves.
 
@@ -16,4 +16,4 @@ report an error if a target attempts to link to itself.
 
 .. |INTRODUCED_IN_CMAKE_VERSION| replace:: 3.0
 .. |WARNED_OR_DID_NOT_WARN| replace:: warned
-.. include:: REMOVED_EPILOGUE.txt
+.. include:: include/REMOVED_EPILOGUE.rst

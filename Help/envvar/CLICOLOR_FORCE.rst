@@ -3,7 +3,7 @@ CLICOLOR_FORCE
 
 .. versionadded:: 3.5
 
-.. include:: ENV_VAR.txt
+.. include:: include/ENV_VAR.rst
 
 Set to a non-empty value, other than ``0``, to tell command-line
 tools to print color messages even if not connected to a terminal.

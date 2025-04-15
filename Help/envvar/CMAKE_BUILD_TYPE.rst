@@ -3,7 +3,7 @@ CMAKE_BUILD_TYPE
 
 .. versionadded:: 3.22
 
-.. include:: ENV_VAR.txt
+.. include:: include/ENV_VAR.rst
 
 The ``CMAKE_BUILD_TYPE`` environment variable specifies a default value
 for the :variable:`CMAKE_BUILD_TYPE` variable when there is no explicit

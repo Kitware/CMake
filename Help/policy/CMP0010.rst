@@ -2,7 +2,7 @@ CMP0010
 -------
 
 .. |REMOVED_IN_CMAKE_VERSION| replace:: 4.0
-.. include:: REMOVED_PROLOGUE.txt
+.. include:: include/REMOVED_PROLOGUE.rst
 
 Bad variable reference syntax is an error.
 
@@ -18,4 +18,4 @@ and is treated as always being ``NEW``.
 
 .. |INTRODUCED_IN_CMAKE_VERSION| replace:: 2.6.3
 .. |WARNED_OR_DID_NOT_WARN| replace:: warned
-.. include:: REMOVED_EPILOGUE.txt
+.. include:: include/REMOVED_EPILOGUE.rst

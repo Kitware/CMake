@@ -21,7 +21,7 @@ an empty string to initialize and update no git submodules.
 
 .. |INTRODUCED_IN_CMAKE_VERSION| replace:: 3.16
 .. |WARNS_OR_DOES_NOT_WARN| replace:: does *not* warn
-.. include:: STANDARD_ADVICE.txt
+.. include:: include/STANDARD_ADVICE.rst
 
 .. note::
 
@@ -34,4 +34,4 @@ an empty string to initialize and update no git submodules.
   :command:`FetchContent_Declare` will continue to apply in future CMake
   releases.
 
-.. include:: DEPRECATED.txt
+.. include:: include/DEPRECATED.rst

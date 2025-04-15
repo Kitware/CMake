@@ -15,6 +15,6 @@ The ``NEW`` behavior of this policy is to prevent target overwriting.
 
 .. |INTRODUCED_IN_CMAKE_VERSION| replace:: 3.17
 .. |WARNS_OR_DOES_NOT_WARN| replace:: does *not* warn
-.. include:: STANDARD_ADVICE.txt
+.. include:: include/STANDARD_ADVICE.rst
 
-.. include:: DEPRECATED.txt
+.. include:: include/DEPRECATED.rst

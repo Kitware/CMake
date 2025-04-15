@@ -2,7 +2,7 @@ CMP0032
 -------
 
 .. |REMOVED_IN_CMAKE_VERSION| replace:: 4.0
-.. include:: REMOVED_PROLOGUE.txt
+.. include:: include/REMOVED_PROLOGUE.rst
 
 The :command:`output_required_files` command should not be called.
 
@@ -13,4 +13,4 @@ scanning capabilities of this command are very limited and this
 functionality is better achieved through dedicated outside tools.
 
 .. |disallowed_version| replace:: 3.0
-.. include:: REMOVED_COMMAND.txt
+.. include:: include/REMOVED_COMMAND.rst

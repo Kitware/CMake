@@ -6,4 +6,4 @@ IMPORTED_CXX_MODULES_COMPILE_OPTIONS
 List of options to pass to the compiler for this ``IMPORTED`` target's C++
 modules.
 
-.. include:: ../command/OPTIONS_SHELL.txt
+.. include:: ../command/include/OPTIONS_SHELL.rst

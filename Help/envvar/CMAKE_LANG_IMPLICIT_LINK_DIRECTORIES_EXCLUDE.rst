@@ -3,7 +3,7 @@ CMAKE_<LANG>_IMPLICIT_LINK_DIRECTORIES_EXCLUDE
 
 .. versionadded:: 3.27
 
-.. include:: ENV_VAR.txt
+.. include:: include/ENV_VAR.rst
 
 A :ref:`semicolon-separated list <CMake Language Lists>` of directories
 to exclude from the :variable:`CMAKE_<LANG>_IMPLICIT_LINK_DIRECTORIES`

@@ -2,7 +2,7 @@ CMP0018
 -------
 
 .. |REMOVED_IN_CMAKE_VERSION| replace:: 4.0
-.. include:: REMOVED_PROLOGUE.txt
+.. include:: include/REMOVED_PROLOGUE.rst
 
 Ignore ``CMAKE_SHARED_LIBRARY_<Lang>_FLAGS`` variable.
 
@@ -32,4 +32,4 @@ honor the :prop_tgt:`POSITION_INDEPENDENT_CODE` target property.
 
 .. |INTRODUCED_IN_CMAKE_VERSION| replace:: 2.8.9
 .. |WARNED_OR_DID_NOT_WARN| replace:: warned
-.. include:: REMOVED_EPILOGUE.txt
+.. include:: include/REMOVED_EPILOGUE.rst

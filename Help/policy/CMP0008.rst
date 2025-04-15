@@ -2,7 +2,7 @@ CMP0008
 -------
 
 .. |REMOVED_IN_CMAKE_VERSION| replace:: 4.0
-.. include:: REMOVED_PROLOGUE.txt
+.. include:: include/REMOVED_PROLOGUE.rst
 
 Libraries linked by full-path must have a valid library file name.
 
@@ -33,4 +33,4 @@ pass it directly to the native build tool unchanged.
 
 .. |INTRODUCED_IN_CMAKE_VERSION| replace:: 2.6.1
 .. |WARNED_OR_DID_NOT_WARN| replace:: warned
-.. include:: REMOVED_EPILOGUE.txt
+.. include:: include/REMOVED_EPILOGUE.rst

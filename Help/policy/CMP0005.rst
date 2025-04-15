@@ -2,7 +2,7 @@ CMP0005
 -------
 
 .. |REMOVED_IN_CMAKE_VERSION| replace:: 4.0
-.. include:: REMOVED_PROLOGUE.txt
+.. include:: include/REMOVED_PROLOGUE.rst
 
 Preprocessor definition values are now escaped automatically.
 
@@ -24,4 +24,4 @@ limitations of the escaping implementation.
 
 .. |INTRODUCED_IN_CMAKE_VERSION| replace:: 2.6.0
 .. |WARNED_OR_DID_NOT_WARN| replace:: warned
-.. include:: REMOVED_EPILOGUE.txt
+.. include:: include/REMOVED_EPILOGUE.rst

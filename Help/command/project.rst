@@ -123,7 +123,7 @@ The options are:
 
   Selects which programming languages are needed to build the project.
 
-.. include:: SUPPORTED_LANGUAGES.txt
+.. include:: include/SUPPORTED_LANGUAGES.rst
 
 By default ``C`` and ``CXX`` are enabled if no language options are given.
 Specify language ``NONE``, or use the ``LANGUAGES`` keyword and list no languages,

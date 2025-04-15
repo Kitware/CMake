@@ -41,7 +41,7 @@ If ``SYSTEM`` is used together with ``PUBLIC`` or ``INTERFACE``, the
 populated with the specified directories.
 
 .. |command_name| replace:: ``target_include_directories``
-.. include:: GENEX_NOTE.txt
+.. include:: include/GENEX_NOTE.rst
 
 Specified include directories may be absolute paths or relative paths.
 A relative path will be interpreted as relative to the current source
@@ -71,7 +71,7 @@ Creating Relocatable Packages
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. |INTERFACE_PROPERTY_LINK| replace:: :prop_tgt:`INTERFACE_INCLUDE_DIRECTORIES`
-.. include:: /include/INTERFACE_INCLUDE_DIRECTORIES_WARNING.txt
+.. include:: /include/INTERFACE_INCLUDE_DIRECTORIES_WARNING.rst
 
 See Also
 ^^^^^^^^

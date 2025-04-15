@@ -3,7 +3,7 @@ CLICOLOR
 
 .. versionadded:: 3.21
 
-.. include:: ENV_VAR.txt
+.. include:: include/ENV_VAR.rst
 
 Set to ``0`` to tell command-line tools not to print color
 messages even if connected to a terminal.

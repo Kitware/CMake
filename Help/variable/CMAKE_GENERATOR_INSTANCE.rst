@@ -44,7 +44,7 @@ Supported pairs are:
 
   Specify the 4-component VS Build Version, a.k.a. Build Number.
 
-  .. include:: CMAKE_VS_VERSION_BUILD_NUMBER_COMPONENTS.txt
+  .. include:: include/CMAKE_VS_VERSION_BUILD_NUMBER_COMPONENTS.rst
 
 .. versionadded:: 3.23
 

@@ -2,7 +2,7 @@ CMP0011
 -------
 
 .. |REMOVED_IN_CMAKE_VERSION| replace:: 4.0
-.. include:: REMOVED_PROLOGUE.txt
+.. include:: include/REMOVED_PROLOGUE.rst
 
 Included scripts do automatic :command:`cmake_policy` PUSH and POP.
 
@@ -23,4 +23,4 @@ their default cmake_policy ``PUSH`` and ``POP``.
 
 .. |INTRODUCED_IN_CMAKE_VERSION| replace:: 2.6.3
 .. |WARNED_OR_DID_NOT_WARN| replace:: warned
-.. include:: REMOVED_EPILOGUE.txt
+.. include:: include/REMOVED_EPILOGUE.rst

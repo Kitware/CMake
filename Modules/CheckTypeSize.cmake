@@ -68,19 +68,19 @@ member you can do something like this:
 The following variables may be set before calling this macro to modify
 the way the check is run:
 
-.. include:: /module/CMAKE_REQUIRED_FLAGS.txt
+.. include:: /module/include/CMAKE_REQUIRED_FLAGS.rst
 
-.. include:: /module/CMAKE_REQUIRED_DEFINITIONS.txt
+.. include:: /module/include/CMAKE_REQUIRED_DEFINITIONS.rst
 
-.. include:: /module/CMAKE_REQUIRED_INCLUDES.txt
+.. include:: /module/include/CMAKE_REQUIRED_INCLUDES.rst
 
-.. include:: /module/CMAKE_REQUIRED_LINK_OPTIONS.txt
+.. include:: /module/include/CMAKE_REQUIRED_LINK_OPTIONS.rst
 
-.. include:: /module/CMAKE_REQUIRED_LIBRARIES.txt
+.. include:: /module/include/CMAKE_REQUIRED_LIBRARIES.rst
 
-.. include:: /module/CMAKE_REQUIRED_LINK_DIRECTORIES.txt
+.. include:: /module/include/CMAKE_REQUIRED_LINK_DIRECTORIES.rst
 
-.. include:: /module/CMAKE_REQUIRED_QUIET.txt
+.. include:: /module/include/CMAKE_REQUIRED_QUIET.rst
 
 ``CMAKE_EXTRA_INCLUDE_FILES``
   list of extra headers to include.

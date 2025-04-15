@@ -52,9 +52,9 @@ Options
  ``<filename>`` is specified, open that file within the reference manual
  instead of ``index.html``.
 
-.. include:: OPTIONS_HELP.txt
+.. include:: include/OPTIONS_HELP.rst
 
 See Also
 ========
 
-.. include:: LINKS.txt
+.. include:: include/LINKS.rst

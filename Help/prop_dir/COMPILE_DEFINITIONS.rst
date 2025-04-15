@@ -22,7 +22,7 @@ by the native build tool.
 .. versionadded:: 3.26
   Any leading ``-D`` on an item will be removed.
 
-.. include:: /include/COMPILE_DEFINITIONS_DISCLAIMER.txt
+.. include:: /include/COMPILE_DEFINITIONS_DISCLAIMER.rst
 
 Contents of ``COMPILE_DEFINITIONS`` may use "generator expressions" with
 the syntax ``$<...>``.  See the :manual:`cmake-generator-expressions(7)`

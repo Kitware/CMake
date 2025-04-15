@@ -44,7 +44,7 @@ find_path
 .. |CMAKE_FIND_ROOT_PATH_MODE_XXX| replace::
    :variable:`CMAKE_FIND_ROOT_PATH_MODE_INCLUDE`
 
-.. include:: FIND_XXX.txt
+.. include:: include/FIND_XXX.rst
 
 When searching for frameworks, if the file is specified as ``A/b.h``, then
 the framework search will look for ``A.framework/Headers/b.h``.  If that

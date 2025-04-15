@@ -3,7 +3,7 @@ CUDAARCHS
 
 .. versionadded:: 3.20
 
-.. include:: ENV_VAR.txt
+.. include:: include/ENV_VAR.rst
 
 Value used to initialize :variable:`CMAKE_CUDA_ARCHITECTURES` on the first
 configuration. Subsequent runs will use the value stored in the cache.

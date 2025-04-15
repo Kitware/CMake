@@ -2,7 +2,7 @@ CMP0058
 -------
 
 .. |REMOVED_IN_CMAKE_VERSION| replace:: 4.0
-.. include:: REMOVED_PROLOGUE.txt
+.. include:: include/REMOVED_PROLOGUE.rst
 
 .. versionadded:: 3.3
 
@@ -113,4 +113,4 @@ The policy setting must be in scope at the end of the top-level
 .. |INTRODUCED_IN_CMAKE_VERSION| replace:: 3.3
 .. |WARNED_OR_DID_NOT_WARN| replace::
    warned when it saw unknown dependencies in out-of-source build trees
-.. include:: REMOVED_EPILOGUE.txt
+.. include:: include/REMOVED_EPILOGUE.rst

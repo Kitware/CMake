@@ -9,6 +9,6 @@ Visual Studio version.
 variable to the Visual Studio version build number in the format
 ``<major>.<minor>.<date>.<build>``.
 
-.. include:: CMAKE_VS_VERSION_BUILD_NUMBER_COMPONENTS.txt
+.. include:: include/CMAKE_VS_VERSION_BUILD_NUMBER_COMPONENTS.rst
 
 See also the :variable:`CMAKE_GENERATOR_INSTANCE` variable.

@@ -2,7 +2,7 @@ CMP0015
 -------
 
 .. |REMOVED_IN_CMAKE_VERSION| replace:: 4.0
-.. include:: REMOVED_PROLOGUE.txt
+.. include:: include/REMOVED_PROLOGUE.rst
 
 :command:`link_directories` treats paths relative to the source dir.
 
@@ -17,4 +17,4 @@ paths by appending the relative path to ``CMAKE_CURRENT_SOURCE_DIR``.
 
 .. |INTRODUCED_IN_CMAKE_VERSION| replace:: 2.8.1
 .. |WARNED_OR_DID_NOT_WARN| replace:: warned
-.. include:: REMOVED_EPILOGUE.txt
+.. include:: include/REMOVED_EPILOGUE.rst

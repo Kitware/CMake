@@ -23,10 +23,10 @@ The ``OLD`` behavior for this policy is to use compiler id ``XL``.  The
 
 .. |INTRODUCED_IN_CMAKE_VERSION| replace:: 3.15
 .. |WARNS_OR_DOES_NOT_WARN| replace:: does *not* warn by default
-.. include:: STANDARD_ADVICE.txt
+.. include:: include/STANDARD_ADVICE.rst
 
 See documentation of the
 :variable:`CMAKE_POLICY_WARNING_CMP0089 <CMAKE_POLICY_WARNING_CMP<NNNN>>`
 variable to control the warning.
 
-.. include:: DEPRECATED.txt
+.. include:: include/DEPRECATED.rst

@@ -3,7 +3,7 @@ CMAKE_APPLE_SILICON_PROCESSOR
 
 .. versionadded:: 3.19.2
 
-.. include:: ENV_VAR.txt
+.. include:: include/ENV_VAR.rst
 
 On Apple Silicon hosts running macOS, set this environment variable to tell
 CMake what architecture to use for :variable:`CMAKE_HOST_SYSTEM_PROCESSOR`.

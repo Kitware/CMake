@@ -3,7 +3,7 @@ CTEST_NO_TESTS_ACTION
 
 .. versionadded:: 3.26
 
-.. include:: ENV_VAR.txt
+.. include:: include/ENV_VAR.rst
 
 Environment variable that controls how :manual:`ctest <ctest(1)>` handles
 cases when there are no tests to run. Possible values are: ``error``,

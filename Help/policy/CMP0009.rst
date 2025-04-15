@@ -2,7 +2,7 @@ CMP0009
 -------
 
 .. |REMOVED_IN_CMAKE_VERSION| replace:: 4.0
-.. include:: REMOVED_PROLOGUE.txt
+.. include:: include/REMOVED_PROLOGUE.rst
 
 FILE GLOB_RECURSE calls should not follow symlinks by default.
 
@@ -19,4 +19,4 @@ as an additional argument to the ``FILE`` command.
 
 .. |INTRODUCED_IN_CMAKE_VERSION| replace:: 2.6.2
 .. |WARNED_OR_DID_NOT_WARN| replace:: warned
-.. include:: REMOVED_EPILOGUE.txt
+.. include:: include/REMOVED_EPILOGUE.rst

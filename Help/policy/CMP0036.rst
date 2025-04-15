@@ -2,7 +2,7 @@ CMP0036
 -------
 
 .. |REMOVED_IN_CMAKE_VERSION| replace:: 4.0
-.. include:: REMOVED_PROLOGUE.txt
+.. include:: include/REMOVED_PROLOGUE.rst
 
 The :command:`build_name` command should not be called.
 
@@ -12,4 +12,4 @@ documented as discouraged and replaced by the :variable:`CMAKE_SYSTEM`
 and :variable:`CMAKE_<LANG>_COMPILER` variables.
 
 .. |disallowed_version| replace:: 3.0
-.. include:: REMOVED_COMMAND.txt
+.. include:: include/REMOVED_COMMAND.rst

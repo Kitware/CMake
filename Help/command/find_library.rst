@@ -44,7 +44,7 @@ find_library
 .. |CMAKE_FIND_ROOT_PATH_MODE_XXX| replace::
    :variable:`CMAKE_FIND_ROOT_PATH_MODE_LIBRARY`
 
-.. include:: FIND_XXX.txt
+.. include:: include/FIND_XXX.rst
 
 When more than one value is given to the ``NAMES`` option this command by
 default will consider one name at a time and search every directory

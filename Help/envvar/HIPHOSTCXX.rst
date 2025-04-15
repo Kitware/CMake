@@ -3,7 +3,7 @@ HIPHOSTCXX
 
 .. versionadded:: 3.28
 
-.. include:: ENV_VAR.txt
+.. include:: include/ENV_VAR.rst
 
 Preferred executable for compiling host code when compiling ``HIP``
 language files with the NVIDIA CUDA Compiler. Will only be used by CMake

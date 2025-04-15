@@ -35,4 +35,4 @@ If it is not set, CMake will warn if it detects a path that would be different
 if normalized, and uses ``OLD`` behavior.  If a destination path contains a
 generator expression, no such warning will be issued regardless of the value.
 
-.. include:: DEPRECATED.txt
+.. include:: include/DEPRECATED.rst

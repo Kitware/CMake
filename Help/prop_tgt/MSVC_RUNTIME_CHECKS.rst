@@ -7,7 +7,7 @@ Select the list of enabled runtime checks when targeting the MSVC ABI.
 
 The allowed values are:
 
-.. include:: MSVC_RUNTIME_CHECKS-VALUES.txt
+.. include:: include/MSVC_RUNTIME_CHECKS-VALUES.rst
 
 Use :manual:`generator expressions <cmake-generator-expressions(7)>` to
 support per-configuration specification.  For example, the code:

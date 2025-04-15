@@ -22,7 +22,7 @@ by any dependency's :prop_tgt:`INTERFACE_LINK_LIBRARIES_DIRECT_EXCLUDE`
 target property.
 
 .. |INTERFACE_PROPERTY_LINK_DIRECT| replace:: ``INTERFACE_LINK_LIBRARIES_DIRECT``
-.. include:: INTERFACE_LINK_LIBRARIES_DIRECT.txt
+.. include:: include/INTERFACE_LINK_LIBRARIES_DIRECT.rst
 
 Direct Link Dependencies as Usage Requirements
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

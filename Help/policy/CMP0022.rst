@@ -2,7 +2,7 @@ CMP0022
 -------
 
 .. |REMOVED_IN_CMAKE_VERSION| replace:: 4.0
-.. include:: REMOVED_PROLOGUE.txt
+.. include:: include/REMOVED_PROLOGUE.rst
 
 :prop_tgt:`INTERFACE_LINK_LIBRARIES` defines the link interface.
 
@@ -37,4 +37,4 @@ property for in-build targets, and ignore the old properties matching
 
 .. |INTRODUCED_IN_CMAKE_VERSION| replace:: 2.8.12
 .. |WARNED_OR_DID_NOT_WARN| replace:: warned
-.. include:: REMOVED_EPILOGUE.txt
+.. include:: include/REMOVED_EPILOGUE.rst

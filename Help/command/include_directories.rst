@@ -30,7 +30,7 @@ skipping warnings, or these fixed-install system files not being
 considered in dependency calculations - see compiler docs.
 
 .. |command_name| replace:: ``include_directories``
-.. include:: GENEX_NOTE.txt
+.. include:: include/GENEX_NOTE.rst
 
 .. note::
 

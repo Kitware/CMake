@@ -2,7 +2,7 @@ CMP0052
 -------
 
 .. |REMOVED_IN_CMAKE_VERSION| replace:: 4.0
-.. include:: REMOVED_PROLOGUE.txt
+.. include:: include/REMOVED_PROLOGUE.rst
 
 .. versionadded:: 3.1
 
@@ -26,4 +26,4 @@ policy is to issue an error if such a directory is used.
 
 .. |INTRODUCED_IN_CMAKE_VERSION| replace:: 3.1
 .. |WARNED_OR_DID_NOT_WARN| replace:: warned
-.. include:: REMOVED_EPILOGUE.txt
+.. include:: include/REMOVED_EPILOGUE.rst

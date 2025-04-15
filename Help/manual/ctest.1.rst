@@ -503,7 +503,7 @@ View Help
 To print version details or selected pages from the CMake documentation,
 use one of the following options:
 
-.. include:: OPTIONS_HELP.txt
+.. include:: include/OPTIONS_HELP.rst
 
 .. _`Label Matching`:
 
@@ -1978,4 +1978,4 @@ On Windows systems, job server integration is not yet implemented.
 See Also
 ========
 
-.. include:: LINKS.txt
+.. include:: include/LINKS.rst

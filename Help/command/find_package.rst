@@ -436,7 +436,7 @@ target architecture, in the following order:
   ``REGISTRY_VIEW`` can be specified to manage ``Windows`` registry queries
   specified as part of ``PATHS`` and ``HINTS``.
 
-  .. include:: FIND_XXX_REGISTRY_VIEW.txt
+  .. include:: include/FIND_XXX_REGISTRY_VIEW.rst
 
 If ``PATH_SUFFIXES`` is specified, the suffixes are appended to each
 (``W``) or (``U``) directory entry one-by-one.
@@ -620,8 +620,8 @@ before calling ``find_package``.
    and ``<prefix>/<name>.framework/Versions/*/Resources/CMake``.  In previous
    versions of CMake, this order was unspecified.
 
-.. include:: FIND_XXX_ROOT.txt
-.. include:: FIND_XXX_ORDER.txt
+.. include:: include/FIND_XXX_ROOT.rst
+.. include:: include/FIND_XXX_ORDER.rst
 
 By default the value stored in the result variable will be the path at
 which the file is found.  The :variable:`CMAKE_FIND_PACKAGE_RESOLVE_SYMLINKS`

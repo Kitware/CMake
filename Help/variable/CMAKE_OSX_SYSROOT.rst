@@ -23,4 +23,4 @@ sysroot is used.
   installed in ``/usr/local`` should pass ``-DCMAKE_OSX_SYSROOT=macosx``,
   or ``export SDKROOT=macosx``, when not building with Homebrew tools.
 
-.. include:: CMAKE_OSX_VARIABLE.txt
+.. include:: include/CMAKE_OSX_VARIABLE.rst

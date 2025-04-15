@@ -3,7 +3,7 @@ CMAKE_POLICY_VERSION_MINIMUM
 
 .. versionadded:: 4.0
 
-.. include:: ENV_VAR.txt
+.. include:: include/ENV_VAR.rst
 
 The default value for :variable:`CMAKE_POLICY_VERSION_MINIMUM` when there
 is no explicit configuration given on the first run while creating a new

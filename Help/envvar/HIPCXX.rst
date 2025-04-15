@@ -3,7 +3,7 @@ HIPCXX
 
 .. versionadded:: 3.21
 
-.. include:: ENV_VAR.txt
+.. include:: include/ENV_VAR.rst
 
 Preferred executable for compiling ``HIP`` language files. Will only be used by
 CMake on the first configuration to determine ``HIP`` compiler, after which the

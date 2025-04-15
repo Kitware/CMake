@@ -5,4 +5,4 @@ Flags to be used when linking a module.
 
 Same as ``CMAKE_C_FLAGS_*`` but used by the linker when creating modules.
 
-.. include:: ../variable/LINKER_FLAGS.txt
+.. include:: ../variable/include/LINKER_FLAGS.rst

@@ -1,7 +1,7 @@
 ASM<DIALECT>
 ------------
 
-.. include:: ENV_VAR.txt
+.. include:: include/ENV_VAR.rst
 
 Preferred executable for compiling a specific dialect of assembly language
 files. ``ASM<DIALECT>`` can be one of:

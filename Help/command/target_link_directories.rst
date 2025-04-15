@@ -35,7 +35,7 @@ If ``BEFORE`` is specified, the content will be prepended to the relevant
 property instead of being appended.
 
 .. |command_name| replace:: ``target_link_directories``
-.. include:: GENEX_NOTE.txt
+.. include:: include/GENEX_NOTE.rst
 
 .. note::
 

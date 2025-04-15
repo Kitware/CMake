@@ -1,7 +1,7 @@
 CMAKE_PREFIX_PATH
 -----------------
 
-.. include:: ENV_VAR.txt
+.. include:: include/ENV_VAR.rst
 
 The ``CMAKE_PREFIX_PATH`` environment variable may be set to a list of
 directories specifying installation *prefixes* to be searched by the

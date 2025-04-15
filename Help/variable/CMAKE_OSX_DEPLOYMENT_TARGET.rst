@@ -12,4 +12,4 @@ If not set explicitly the value is initialized by the
 ``MACOSX_DEPLOYMENT_TARGET`` environment variable, if set,
 and otherwise computed based on the host platform.
 
-.. include:: CMAKE_OSX_VARIABLE.txt
+.. include:: include/CMAKE_OSX_VARIABLE.rst

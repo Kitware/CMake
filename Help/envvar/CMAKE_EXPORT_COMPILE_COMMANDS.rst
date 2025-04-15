@@ -3,7 +3,7 @@ CMAKE_EXPORT_COMPILE_COMMANDS
 
 .. versionadded:: 3.17
 
-.. include:: ENV_VAR.txt
+.. include:: include/ENV_VAR.rst
 
 The default value for :variable:`CMAKE_EXPORT_COMPILE_COMMANDS` when there
 is no explicit configuration given on the first run while creating a new

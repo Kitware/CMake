@@ -1,6 +1,6 @@
 CTEST_USE_LAUNCHERS_DEFAULT
 ---------------------------
 
-.. include:: ENV_VAR.txt
+.. include:: include/ENV_VAR.rst
 
 Initializes the :variable:`CTEST_USE_LAUNCHERS` variable if not already defined.

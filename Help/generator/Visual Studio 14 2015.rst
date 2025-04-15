@@ -48,7 +48,7 @@ via the :option:`cmake -T` option, to specify another toolset.
 .. |VS_TOOLSET_HOST_ARCH_DEFAULT| replace::
    By default this generator uses the 32-bit variant even on a 64-bit host.
 
-.. include:: VS_TOOLSET_HOST_ARCH_LEGACY.txt
+.. include:: include/VS_TOOLSET_HOST_ARCH_LEGACY.rst
 
 .. _`Windows 10 SDK Maximum Version for VS 2015`:
 

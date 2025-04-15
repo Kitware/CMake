@@ -22,4 +22,4 @@ This property is initialized by the value of the
 set when a target is created.
 
 .. |PDB_XXX| replace:: :prop_tgt:`PDB_OUTPUT_DIRECTORY`
-.. include:: COMPILE_PDB_NOTE.txt
+.. include:: include/COMPILE_PDB_NOTE.rst

@@ -17,7 +17,7 @@ in the group and ``<SUFFIX>`` will follow after.
 
 For the elements of this variable, the ``LINKER:`` prefix can be used.
 
-.. include:: ../command/LINK_OPTIONS_LINKER.txt
+.. include:: ../command/include/LINK_OPTIONS_LINKER.rst
   :start-line: 3
 
 Examples
@@ -75,4 +75,4 @@ Predefined Features
 
 The following built-in group features are pre-defined by CMake:
 
-.. include:: LINK_GROUP_PREDEFINED_FEATURES.txt
+.. include:: include/LINK_GROUP_PREDEFINED_FEATURES.rst

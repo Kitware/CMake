@@ -1,7 +1,7 @@
 MACOSX_DEPLOYMENT_TARGET
 ------------------------
 
-.. include:: ENV_VAR.txt
+.. include:: include/ENV_VAR.rst
 
 Specify the minimum version of macOS on which the target binaries are
 to be deployed.

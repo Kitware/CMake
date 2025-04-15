@@ -150,7 +150,7 @@ command lines.
 See the :manual:`cmake-buildsystem(7)` manual for more on defining
 buildsystem properties.
 
-.. include:: ../command/LINK_LIBRARIES_LINKER.txt
+.. include:: ../command/include/LINK_LIBRARIES_LINKER.rst
 
 Libraries for a Target and/or its Dependents
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -416,7 +416,7 @@ Creating Relocatable Packages
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. |INTERFACE_PROPERTY_LINK| replace:: :prop_tgt:`INTERFACE_LINK_LIBRARIES`
-.. include:: /include/INTERFACE_LINK_LIBRARIES_WARNING.txt
+.. include:: /include/INTERFACE_LINK_LIBRARIES_WARNING.rst
 
 See Also
 ^^^^^^^^
