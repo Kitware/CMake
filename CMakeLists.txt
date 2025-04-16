@@ -100,6 +100,9 @@ configure_file(Utilities/std/cmSTL.hxx.in Utilities/cmSTL.hxx @ONLY)
 # set the internal encoding of CMake to UTF-8
 set(KWSYS_ENCODING_DEFAULT_CODEPAGE CP_UTF8)
 
+# enable parallel install
+set_property(GLOBAL PROPERTY INSTALL_PARALLEL ON)
+
 # option to use COMPONENT with install command
 option(CMake_INSTALL_COMPONENTS "Using components when installing" OFF)
 mark_as_advanced(CMake_INSTALL_COMPONENTS)
