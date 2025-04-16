@@ -292,4 +292,11 @@ if(NOT CMAKE_OSX_SYSROOT)
     RESULT_VARIABLE _result
   )
   unset(_sdk_macosx)
+
+  list(APPEND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES_EXCLUDE
+    # Without -isysroot, some compiler drivers implicitly pass -L/usr/local/lib
+    # to the linker.  Since the macOS dynamic loader does not search it by
+    # default, it is not a fully-implemented implicit link directory.
+    /usr/local/lib
+  )
 endif()
