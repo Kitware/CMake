@@ -5,25 +5,66 @@
 FindFLTK2
 ---------
 
-Find the native FLTK 2.0 includes and library
+.. note::
 
-The following settings are defined
+  This module is specifically for FLTK version 2.x.  The 2.0 series was
+  originally a development branch intended as the next major version of FLTK.
+  However, it never reached stable release status, and active development has
+  shifted back to the FLTK 1.x branch.  For finding FLTK, including stable and
+  modern versions, use the :module:`FindFLTK` module instead.
 
-::
+Finds the Fast Light Toolkit (FLTK) version 2.x, a cross-platform toolkit for
+GUI development.
 
-  FLTK2_FLUID_EXECUTABLE, where to find the Fluid tool
-  FLTK2_WRAP_UI, This enables the FLTK2_WRAP_UI command
-  FLTK2_INCLUDE_DIR, where to find include files
-  FLTK2_LIBRARIES, list of fltk2 libraries
-  FLTK2_FOUND, Don't use FLTK2 if false.
+Result Variables
+^^^^^^^^^^^^^^^^
 
-The following settings should not be used in general.
+This module defines the following variables:
 
-::
+``FLTK2_FOUND``
+  Boolean indicating whether FLTK 2.x is found.
 
-  FLTK2_BASE_LIBRARY   = the full path to fltk2.lib
-  FLTK2_GL_LIBRARY     = the full path to fltk2_gl.lib
-  FLTK2_IMAGES_LIBRARY = the full path to fltk2_images.lib
+``FLTK2_LIBRARIES``
+  Libraries needed to link against to use FLTK 2.x.
+
+``FLTK2_WRAP_UI``
+  Boolean indicating whether the ``fluid2`` executable is found.  This variable
+  can be used, for example, to conditionally invoke the :command:`fltk_wrap_ui`
+  command if it is needed and available.
+
+Cache Variables
+^^^^^^^^^^^^^^^
+
+The following cache variables may also be set:
+
+``FLTK2_FLUID_EXECUTABLE``
+  The path to the ``fluid2`` binary tool.
+
+``FLTK2_INCLUDE_DIR``
+  The directory containing header files needed to use FLTK 2.x.
+
+``FLTK2_BASE_LIBRARY``
+  The path to the FLTK 2.x library (``fltk2``).
+
+``FLTK2_GL_LIBRARY``
+  The path to the FLTK 2.x OpenGL compatibility library (``fltk2_gl``).
+
+``FLTK2_IMAGES_LIBRARY``
+  The path to the FLTK 2.x Images library (``fltk2_images``).
+
+Examples
+^^^^^^^^
+
+Finding FLTK version 2:
+
+.. code-block:: cmake
+
+  find_package(FLTK2)
+
+See Also
+^^^^^^^^
+
+* The :module:`FindFLTK` module to find FLTK in a version-agnostic way.
 #]=======================================================================]
 
 set (FLTK2_DIR $ENV{FLTK2_DIR} )

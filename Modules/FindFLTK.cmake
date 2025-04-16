@@ -5,82 +5,135 @@
 FindFLTK
 --------
 
-Find the Fast Light Toolkit (FLTK) library
+Finds the Fast Light Toolkit (FLTK), a cross-platform toolkit for GUI
+development.
 
-Input Variables
-^^^^^^^^^^^^^^^
+FLTK uses CMake-based build system and provides a package configuration file for
+projects to find it.  As of its 1.4.0 version it also provides
+:ref:`Imported Targets` that encapsulate usage requirements.  For example,
+``fltk::fltk``, which can be linked to project targets where FLTK is needed.
+This module takes that into account and first attempts to find FLTK in
+*config mode*.  If the configuration file is not available, it falls back to
+*module mode* and searches standard locations. See also to the official FLTK
+documentation for more information, how to use FLTK with CMake.
 
-By default this module will search for all of the FLTK components and
-add them to the ``FLTK_LIBRARIES`` variable.  You can limit the components
-which get placed in ``FLTK_LIBRARIES`` by defining one or more of the
-following three options:
-
-``FLTK_SKIP_OPENGL``
-  Set to true to disable searching for the FLTK GL library
-
-``FLTK_SKIP_FORMS``
-  Set to true to disable searching for the FLTK Forms library
-
-``FLTK_SKIP_IMAGES``
-  Set to true to disable searching for the FLTK Images library
-
-FLTK is composed also by a binary tool. You can set the following option:
-
-``FLTK_SKIP_FLUID``
-  Set to true to not look for the FLUID binary
+.. versionadded:: 3.11
+  Debug and Release library variants are found separately and use
+  per-configuration variables.
 
 Result Variables
 ^^^^^^^^^^^^^^^^
 
-The following variables will be defined:
+This module defines the following variables:
 
 ``FLTK_FOUND``
-  True if all components not skipped were found
-
-``FLTK_INCLUDE_DIR``
-  Path to the include directory for FLTK header files
+  Boolean indicating whether FLTK is found.
 
 ``FLTK_LIBRARIES``
-  List of the FLTK libraries found
-
-``FLTK_FLUID_EXECUTABLE``
-  Path to the FLUID binary tool
+  Libraries needed to link against to use FLTK.
 
 ``FLTK_WRAP_UI``
-  True if FLUID is found, used to enable the FLTK_WRAP_UI command
+  Boolean indicating whether the ``fluid`` executable is found.  This variable
+  is available only if FLTK is found in *module mode* and can be used, for
+  example, to conditionally invoke the :command:`fltk_wrap_ui` command if it is
+  needed and available.
 
 Cache Variables
 ^^^^^^^^^^^^^^^
 
 The following cache variables are also available to set or use:
 
+``FLTK_FLUID_EXECUTABLE``
+  The path to the ``fluid`` binary tool.
+
+``FLTK_INCLUDE_DIR``
+  The include directory containing header files needed to use FLTK.
+
 ``FLTK_BASE_LIBRARY_RELEASE``
-  The FLTK base library (optimized)
+  .. versionadded:: 3.11
+
+  The path to the release (optimized) FLTK base library.
 
 ``FLTK_BASE_LIBRARY_DEBUG``
-  The FLTK base library (debug)
+  .. versionadded:: 3.11
+
+  The path to the debug FLTK base library.
 
 ``FLTK_GL_LIBRARY_RELEASE``
-  The FLTK GL library (optimized)
+  .. versionadded:: 3.11
+
+  The path to the release (optimized) FLTK GL library.
 
 ``FLTK_GL_LIBRARY_DEBUG``
-  The FLTK GL library (debug)
+  .. versionadded:: 3.11
+
+  The path to the debug FLTK GL library.
 
 ``FLTK_FORMS_LIBRARY_RELEASE``
-  The FLTK Forms library (optimized)
+  .. versionadded:: 3.11
+
+  The path to the release (optimized) FLTK Forms library.
 
 ``FLTK_FORMS_LIBRARY_DEBUG``
-  The FLTK Forms library (debug)
+  .. versionadded:: 3.11
+
+  The path to the debug FLTK Forms library.
 
 ``FLTK_IMAGES_LIBRARY_RELEASE``
-  The FLTK Images protobuf library (optimized)
+  .. versionadded:: 3.11
+
+  The path to the release (optimized) FLTK Images protobuf library.
 
 ``FLTK_IMAGES_LIBRARY_DEBUG``
-  The FLTK Images library (debug)
+  .. versionadded:: 3.11
 
-.. versionadded:: 3.11
-  Debug and Release variants are found separately and use per-configuration
-  variables.
+  The path to the debug FLTK Images library.
+
+Input Variables
+^^^^^^^^^^^^^^^
+
+By default, this module searches for all FLTK libraries and its ``fluid``
+executable.  The following variables can be set before calling
+``find_package(FLTK)`` to indicate which elements are optional for a successful
+configuration:
+
+``FLTK_SKIP_FLUID``
+  Set to boolean true to mark the ``fluid`` executable as optional.
+
+``FLTK_SKIP_FORMS``
+  Set to boolean true to mark the FLTK Forms library as optional; it will
+  therefore not be included in the ``FLTK_LIBRARIES`` result variable.
+
+``FLTK_SKIP_IMAGES``
+  Set to boolean true to mark the FLTK Image library as optional; it will
+  therefore not be included in the ``FLTK_LIBRARIES`` result variable.
+
+``FLTK_SKIP_OPENGL``
+  Set to boolean true to mark the FLTK OpenGL library as optional; it will
+  therefore not be included in the ``FLTK_LIBRARIES`` result variable.
+
+Examples
+^^^^^^^^
+
+Finding FLTK and conditionally creating a ``fltk::fltk`` imported interface
+target, if it is not provided by the upstream FLTK package.  Imported target can
+then be linked to a project target:
+
+.. code-block:: cmake
+
+  find_package(FLTK)
+
+  if(FLTK_FOUND AND NOT TARGET fltk::fltk)
+    add_library(fltk::fltk INTERFACE IMPORTED)
+    set_target_properties(
+      fltk::fltk
+      PROPERTIES
+        INTERFACE_INCLUDE_DIRECTORIES "${FLTK_INCLUDE_DIR}"
+        INTERFACE_LINK_LIBRARIES "${FLTK_LIBRARIES}"
+    )
+  endif()
+
+  target_link_libraries(project_target PRIVATE fltk::fltk)
 #]=======================================================================]
 
 if(NOT FLTK_SKIP_OPENGL)
