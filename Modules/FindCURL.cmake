@@ -27,10 +27,13 @@ Components
 This module supports optional components to detect the protocols and features
 available in the installed curl (these can vary based on the curl version)::
 
-  Protocols: ICT FILE FTP FTPS GOPHER HTTP HTTPS IMAP IMAPS LDAP LDAPS POP3
-             POP3S RTMP RTSP SCP SFTP SMB SMBS SMTP SMTPS TELNET TFTP
-  Features:  SSL IPv6 UnixSockets libz AsynchDNS IDN GSS-API PSL SPNEGO
-             Kerberos NTLM NTLM_WB TLS-SRP HTTP2 HTTPS-proxy
+  Protocols: DICT FILE FTP FTPS GOPHER GOPHERS HTTP HTTPS IMAP IMAPS IPFS IPNS
+             LDAP LDAPS MQTT POP3 POP3S RTMP RTMPS RTSP SCP SFTP SMB SMBS SMTP
+             SMTPS TELNET TFTP WS WSS
+  Features:  alt-svc asyn-rr AsynchDNS brotli CAcert Debug ECH gsasl GSS-API
+             HSTS HTTP2 HTTP3 HTTPS-proxy HTTPSRR IDN IPv6 Kerberos Largefile
+             libz MultiSSL NTLM NTLM_WB PSL SPNEGO SSL SSLS-EXPORT SSPI
+             threadsafe TLS-SRP TrackMemory Unicode UnixSockets zstd
 
 Components can be specified with the :command:`find_package` command as required
 for curl to be considered found:
@@ -240,11 +243,10 @@ if(CURL_INCLUDE_DIR)
 endif()
 
 if(CURL_FIND_COMPONENTS)
-  set(CURL_KNOWN_PROTOCOLS ICT FILE FTP FTPS GOPHER HTTP HTTPS IMAP IMAPS LDAP LDAPS POP3 POP3S RTMP RTSP SCP SFTP SMB SMBS SMTP SMTPS TELNET TFTP)
-  set(CURL_KNOWN_FEATURES  SSL IPv6 UnixSockets libz AsynchDNS IDN GSS-API PSL SPNEGO Kerberos NTLM NTLM_WB TLS-SRP HTTP2 HTTPS-proxy)
-  foreach(component IN LISTS CURL_KNOWN_PROTOCOLS CURL_KNOWN_FEATURES)
+  foreach(component IN LISTS CURL_FIND_COMPONENTS)
     set(CURL_${component}_FOUND FALSE)
   endforeach()
+
   if(NOT PC_CURL_FOUND)
     find_program(CURL_CONFIG_EXECUTABLE NAMES curl-config)
     if(CURL_CONFIG_EXECUTABLE)
@@ -263,23 +265,17 @@ if(CURL_FIND_COMPONENTS)
                       OUTPUT_STRIP_TRAILING_WHITESPACE)
       string(REPLACE "\n" ";" CURL_SUPPORTED_PROTOCOLS "${CURL_CONFIG_PROTOCOLS_STRING}")
     endif()
-
   endif()
+
   foreach(component IN LISTS CURL_FIND_COMPONENTS)
-    list(FIND CURL_KNOWN_PROTOCOLS ${component} _found)
+    list(FIND CURL_SUPPORTED_PROTOCOLS ${component} _found)
+
     if(NOT _found EQUAL -1)
-      list(FIND CURL_SUPPORTED_PROTOCOLS ${component} _found)
-      if(NOT _found EQUAL -1)
-        set(CURL_${component}_FOUND TRUE)
-      elseif(CURL_FIND_REQUIRED)
-        message(FATAL_ERROR "CURL: Required protocol ${component} is not found")
-      endif()
+      set(CURL_${component}_FOUND TRUE)
     else()
       list(FIND CURL_SUPPORTED_FEATURES ${component} _found)
       if(NOT _found EQUAL -1)
         set(CURL_${component}_FOUND TRUE)
-      elseif(CURL_FIND_REQUIRED)
-        message(FATAL_ERROR "CURL: Required feature ${component} is not found")
       endif()
     endif()
   endforeach()
