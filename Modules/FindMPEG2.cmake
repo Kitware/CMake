@@ -5,22 +5,58 @@
 FindMPEG2
 ---------
 
-Find the native MPEG2 includes and library
+Finds the native MPEG2 library (libmpeg2).
 
-This module defines
+.. note::
 
-::
+  Depending on how the native libmpeg2 library is built and installed, it may
+  depend on the SDL (Simple DirectMedia Layer) library.  If SDL is found, this
+  module includes it in its usage requirements when used.
 
-  MPEG2_INCLUDE_DIR, path to mpeg2dec/mpeg2.h, etc.
-  MPEG2_LIBRARIES, the libraries required to use MPEG2.
-  MPEG2_FOUND, If false, do not try to use MPEG2.
+Result Variables
+^^^^^^^^^^^^^^^^
 
-also defined, but not for general use are
+This module defines the following variables:
 
-::
+``MPEG2_FOUND``
+  Boolean indicating whether the libmpeg2 library is found.
+``MPEG2_LIBRARIES``
+  Libraries needed to link against to use libmpeg2.
 
-  MPEG2_mpeg2_LIBRARY, where to find the MPEG2 library.
-  MPEG2_vo_LIBRARY, where to find the vo library.
+Cache Variables
+^^^^^^^^^^^^^^^
+
+The following cache variables may be also set:
+
+``MPEG2_INCLUDE_DIR``
+  The directory containing the ``mpeg2.h`` and related headers needed to use
+  libmpeg2 library.
+``MPEG2_mpeg2_LIBRARY``
+  The path to the libmpeg2 library.
+``MPEG2_vo_LIBRARY``
+  The path to the vo (Video Out) library.
+
+Examples
+^^^^^^^^
+
+Finding libmpeg2 library and creating an imported interface target for linking
+it to a project target:
+
+.. code-block:: cmake
+
+  find_package(MPEG2)
+
+  if(MPEG2_FOUND AND NOT TARGET MPEG2::MPEG2)
+    add_library(MPEG2::MPEG2 INTERFACE IMPORTED)
+    set_target_properties(
+      MPEG2::MPEG2
+      PROPERTIES
+        INTERFACE_LINK_LIBRARIES "${MPEG2_LIBRARIES}"
+        INTERFACE_INCLUDE_DIRECTORIES "${MPEG2_INCLUDE_DIR}"
+    )
+  endif()
+
+  target_link_libraries(project_target PRIVATE MPEG2::MPEG2)
 #]=======================================================================]
 
 find_path(MPEG2_INCLUDE_DIR
@@ -39,8 +75,7 @@ if(MPEG2_FOUND)
     list(APPEND MPEG2_LIBRARIES ${MPEG2_vo_LIBRARY})
   endif()
 
-  #some native mpeg2 installations will depend
-  #on libSDL, if found, add it in.
+  # Some native mpeg2 installations will depend on libSDL. If found, add it in.
   find_package(SDL)
   if(SDL_FOUND)
     set( MPEG2_LIBRARIES ${MPEG2_LIBRARIES} ${SDL_LIBRARY})
