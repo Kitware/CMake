@@ -5,31 +5,99 @@
 FindSDL_net
 -----------
 
-Locate SDL_net library
+Finds the SDL_net library, a cross-platform network library for use with the
+SDL (Simple DirectMedia Layer) applications.
 
-This module defines:
+.. note::
 
-::
+  This module is specifically intended for SDL_net version 1.  Starting with
+  version 2.1, SDL_net provides a CMake package configuration file when built
+  with CMake and should be found using ``find_package(SDL2_net)``.  These
+  newer versions provide :ref:`Imported Targets` that encapsulate usage
+  requirements.  Refer to the official SDL documentation for more information.
 
-  SDL_NET_LIBRARIES, the name of the library to link against
-  SDL_NET_INCLUDE_DIRS, where to find the headers
-  SDL_NET_FOUND, if false, do not try to link against
-  SDL_NET_VERSION_STRING - human-readable string containing the version of SDL_net
+Result Variables
+^^^^^^^^^^^^^^^^
 
+This module defines the following variables:
 
+``SDL_net_FOUND``
+  Boolean indicating whether the (requested version of) SDL_net library is
+  found.  For backward compatibility, the ``SDL_NET_FOUND`` variable is also set
+  to the same value.
+
+``SDL_NET_VERSION_STRING``
+  The human-readable string containing the version of SDL_net found.
+
+``SDL_NET_INCLUDE_DIRS``
+  Include directories containing headers needed to use the SDL_net library.
+
+``SDL_NET_LIBRARIES``
+  Libraries needed to link against to use the SDL_net library.
+
+Deprecated Variables
+^^^^^^^^^^^^^^^^^^^^
 
 For backward compatibility the following variables are also set:
 
-::
+``SDLNET_FOUND``
+  .. deprecated:: 2.8.10
+    Use the ``SDL_net_FOUND``, which has the same value.
 
-  SDLNET_LIBRARY (same value as SDL_NET_LIBRARIES)
-  SDLNET_INCLUDE_DIR (same value as SDL_NET_INCLUDE_DIRS)
-  SDLNET_FOUND (same value as SDL_NET_FOUND)
+``SDLNET_INCLUDE_DIR``
+  .. deprecated:: 2.8.10
+    Use the ``SDL_NET_INCLUDE_DIRS``, which has the same value.
 
+``SDLNET_LIBRARY``
+  .. deprecated:: 2.8.10
+    Use the ``SDL_NET_LIBRARIES``, which has the same value.
 
+Hints
+^^^^^
 
-$SDLDIR is an environment variable that would correspond to the
-./configure --prefix=$SDLDIR used in building SDL.
+This module accepts the following variables:
+
+``SDLDIR``
+  Environment variable that can be set to help locate an SDL library installed
+  in a custom location.  It should point to the installation destination that
+  was used when configuring, building, and installing SDL library:
+  ``./configure --prefix=$SDLDIR``.
+
+Examples
+^^^^^^^^
+
+Finding SDL_net library and creating an imported interface target for linking it
+to a project target:
+
+.. code-block:: cmake
+
+  find_package(SDL_net)
+
+  if(SDL_net_FOUND AND NOT TARGET SDL::SDL_net)
+    add_library(SDL::SDL_net INTERFACE IMPORTED)
+    set_target_properties(
+      SDL::SDL_net
+      PROPERTIES
+        INTERFACE_INCLUDE_DIRECTORIES "${SDL_NET_INCLUDE_DIRS}"
+        INTERFACE_LINK_LIBRARIES "${SDL_NET_LIBRARIES}"
+    )
+  endif()
+
+  target_link_libraries(project_target PRIVATE SDL::SDL_net)
+
+When working with SDL_net version 2, the upstream package provides the
+``SDL2_net::SDL2_net`` imported target directly.  It can be used in a project
+without using this module:
+
+.. code-block:: cmake
+
+  find_package(SDL2_net)
+  target_link_libraries(project_target PRIVATE SDL2_net::SDL2_net)
+
+See Also
+^^^^^^^^
+
+* The :module:`FindSDL` module to find the main SDL library.
 #]=======================================================================]
 
 cmake_policy(PUSH)
@@ -94,7 +162,7 @@ find_package_handle_standard_args(SDL_net
 # for backward compatibility
 set(SDLNET_LIBRARY ${SDL_NET_LIBRARIES})
 set(SDLNET_INCLUDE_DIR ${SDL_NET_INCLUDE_DIRS})
-set(SDLNET_FOUND ${SDL_NET_FOUND})
+set(SDLNET_FOUND ${SDL_net_FOUND})
 
 mark_as_advanced(SDL_NET_LIBRARY SDL_NET_INCLUDE_DIR)
 

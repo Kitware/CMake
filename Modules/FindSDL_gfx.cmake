@@ -7,21 +7,70 @@ FindSDL_gfx
 
 .. versionadded:: 3.25
 
-Locate SDL_gfx library
+Finds the SDL_gfx library that provides graphics support in SDL (Simple
+DirectMedia Layer) applications.
 
-This module defines:
+.. note::
 
-::
+  This module is for SDL_gfx version 1.  For version 2 or newer usage refer to
+  the upstream documentation.
 
-  SDL::SDL_gfx, the name of the target to use with target_*() commands
-  SDL_GFX_LIBRARIES, the name of the library to link against
-  SDL_GFX_INCLUDE_DIRS, where to find the headers
-  SDL_GFX_FOUND, if false, do not try to link against
-  SDL_GFX_VERSION_STRING - human-readable string containing the
-                             version of SDL_gfx
+Imported Targets
+^^^^^^^^^^^^^^^^
 
-``$SDLDIR`` is an environment variable that would correspond to the
-``./configure --prefix=$SDLDIR`` used in building SDL.
+This module provides the following :ref:`Imported Targets`:
+
+``SDL::SDL_gfx``
+  Target encapsulating the SDL_gfx library usage requirements, available if
+  SDL_gfx is found.
+
+Result Variables
+^^^^^^^^^^^^^^^^
+
+This module defines the following variables:
+
+``SDL_gfx_FOUND``
+  Boolean indicating whether the (requested version of) SDL_gfx library is
+  found.  For backward compatibility, the ``SDL_GFX_FOUND`` variable is also set
+  to the same value.
+``SDL_GFX_VERSION_STRING``
+  The human-readable string containing the version of SDL_gfx found.
+
+Cache Variables
+^^^^^^^^^^^^^^^
+
+The following cache variables may also be set:
+
+``SDL_GFX_INCLUDE_DIRS``
+  The directory containing the headers needed to use SDL_gfx.
+``SDL_GFX_LIBRARIES``
+  The path to the SDL_gfx library needed to link against to use SDL_gfx.
+
+Hints
+^^^^^
+
+This module accepts the following variables:
+
+``SDLDIR``
+  Environment variable that can be set to help locate an SDL library installed
+  in a custom location.  It should point to the installation destination that
+  was used when configuring, building, and installing SDL library:
+  ``./configure --prefix=$SDLDIR``.
+
+Examples
+^^^^^^^^
+
+Finding SDL_gfx library and linking it to a project target:
+
+.. code-block:: cmake
+
+  find_package(SDL_gfx)
+  target_link_libraries(project_target PRIVATE SDL::SDL_gfx)
+
+See Also
+^^^^^^^^
+
+* The :module:`FindSDL` module to find the main SDL library.
 #]=======================================================================]
 
 cmake_policy(PUSH)

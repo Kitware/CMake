@@ -5,32 +5,99 @@
 FindSDL_mixer
 -------------
 
-Locate SDL_mixer library
+Finds the SDL_mixer library that provides an audio mixer with support for
+various file formats in SDL (Simple DirectMedia Layer) applications.
 
-This module defines:
+.. note::
 
-::
+  This module is specifically intended for SDL_mixer version 1.  Starting with
+  version 2.5, SDL_mixer provides a CMake package configuration file when built
+  with CMake and should be found using ``find_package(SDL2_mixer)``.  These
+  newer versions provide :ref:`Imported Targets` that encapsulate usage
+  requirements.  Refer to the official SDL documentation for more information.
 
-  SDL_MIXER_LIBRARIES, the name of the library to link against
-  SDL_MIXER_INCLUDE_DIRS, where to find the headers
-  SDL_MIXER_FOUND, if false, do not try to link against
-  SDL_MIXER_VERSION_STRING - human-readable string containing the
-                             version of SDL_mixer
+Result Variables
+^^^^^^^^^^^^^^^^
 
+This module defines the following variables:
 
+``SDL_mixer_FOUND``
+  Boolean indicating whether the (requested version of) SDL_mixer library is
+  found.  For backward compatibility, the ``SDL_MIXER_FOUND`` variable is also
+  set to the same value.
+
+``SDL_MIXER_VERSION_STRING``
+  The human-readable string containing the version of SDL_mixer found.
+
+``SDL_MIXER_INCLUDE_DIRS``
+  Include directories containing headers needed to use the SDL_mixer library.
+
+``SDL_MIXER_LIBRARIES``
+  Libraries needed to link against to use SDL_mixer.
+
+Hints
+^^^^^
+
+This module accepts the following variables:
+
+``SDLDIR``
+  Environment variable that can be set to help locate an SDL library installed
+  in a custom location.  It should point to the installation destination that
+  was used when configuring, building, and installing SDL library:
+  ``./configure --prefix=$SDLDIR``.
+
+Deprecated Variables
+^^^^^^^^^^^^^^^^^^^^
 
 For backward compatibility the following variables are also set:
 
-::
+``SDLMIXER_FOUND``
+  .. deprecated:: 2.8.10
+    Use ``SDL_mixer_FOUND``, which has the same value.
 
-  SDLMIXER_LIBRARY (same value as SDL_MIXER_LIBRARIES)
-  SDLMIXER_INCLUDE_DIR (same value as SDL_MIXER_INCLUDE_DIRS)
-  SDLMIXER_FOUND (same value as SDL_MIXER_FOUND)
+``SDLMIXER_INCLUDE_DIR``
+  .. deprecated:: 2.8.10
+    Use ``SDL_MIXER_INCLUDE_DIRS``, which has the same value.
 
+``SDLMIXER_LIBRARY``
+  .. deprecated:: 2.8.10
+    Use ``SDL_MIXER_LIBRARIES``, which has the same value.
 
+Examples
+^^^^^^^^
 
-$SDLDIR is an environment variable that would correspond to the
-./configure --prefix=$SDLDIR used in building SDL.
+Finding SDL_mixer library and creating an imported interface target for linking
+it to a project target:
+
+.. code-block:: cmake
+
+  find_package(SDL_mixer)
+
+  if(SDL_mixer_FOUND AND NOT TARGET SDL::SDL_mixer)
+    add_library(SDL::SDL_mixer INTERFACE IMPORTED)
+    set_target_properties(
+      SDL::SDL_mixer
+      PROPERTIES
+        INTERFACE_INCLUDE_DIRECTORIES "${SDL_MIXER_INCLUDE_DIRS}"
+        INTERFACE_LINK_LIBRARIES "${SDL_MIXER_LIBRARIES}"
+    )
+  endif()
+
+  target_link_libraries(project_target PRIVATE SDL::SDL_mixer)
+
+When working with SDL_mixer version 2, the upstream package provides the
+``SDL2_mixer::SDL2_mixer`` imported target directly.  It can be used in a
+project without using this module:
+
+.. code-block:: cmake
+
+  find_package(SDL2_mixer)
+  target_link_libraries(project_target PRIVATE SDL2_mixer::SDL2_mixer)
+
+See Also
+^^^^^^^^
+
+* The :module:`FindSDL` module to find the main SDL library.
 #]=======================================================================]
 
 cmake_policy(PUSH)
@@ -95,7 +162,7 @@ find_package_handle_standard_args(SDL_mixer
 # for backward compatibility
 set(SDLMIXER_LIBRARY ${SDL_MIXER_LIBRARIES})
 set(SDLMIXER_INCLUDE_DIR ${SDL_MIXER_INCLUDE_DIRS})
-set(SDLMIXER_FOUND ${SDL_MIXER_FOUND})
+set(SDLMIXER_FOUND ${SDL_mixer_FOUND})
 
 mark_as_advanced(SDL_MIXER_LIBRARY SDL_MIXER_INCLUDE_DIR)
 

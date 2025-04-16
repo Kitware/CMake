@@ -5,63 +5,144 @@
 FindSDL_sound
 -------------
 
-Locates the SDL_sound library
+Finds the SDL_sound library, an abstract soundfile decoder for use in SDL
+(Simple DirectMedia Layer) applications.
 
+.. note::
 
+  This module is specifically intended for SDL_sound version 1.  Starting with
+  version 2.0.2, SDL_sound provides a CMake package configuration file when
+  built with CMake and should be found using ``find_package(SDL2_sound)``.
+  These newer versions provide :ref:`Imported Targets` that encapsulate usage
+  requirements.  Refer to the upstream SDL_sound documentation for more
+  information.
 
-This module depends on SDL being found and must be called AFTER
-FindSDL.cmake is called.
+.. note::
+  This module depends on SDL being found and must be called after the
+  :module:`find_package(SDL) <FindSDL>`.
 
-This module defines
+  Depending on how the SDL_sound library is built, it may require additional
+  dependent libraries to be found for this module to succeed.  These
+  dependencies may include MikMod, ModPlug, Ogg, Vorbis, SMPEG, FLAC, and Speex.
 
-::
+Result Variables
+^^^^^^^^^^^^^^^^
 
-  SDL_SOUND_INCLUDE_DIR, where to find SDL_sound.h
-  SDL_SOUND_FOUND, if false, do not try to link to SDL_sound
-  SDL_SOUND_LIBRARIES, this contains the list of libraries that you need
-    to link against.
-  SDL_SOUND_EXTRAS, this is an optional variable for you to add your own
-    flags to SDL_SOUND_LIBRARIES. This is prepended to SDL_SOUND_LIBRARIES.
-    This is available mostly for cases this module failed to anticipate for
-    and you must add additional flags. This is marked as ADVANCED.
-  SDL_SOUND_VERSION_STRING, human-readable string containing the
-    version of SDL_sound
+This module defines the following variables:
 
+``SDL_sound_FOUND``
+  Boolean indicating whether the (requested version of) SDL_sound library is
+  found.  For backward compatibility, the ``SDL_SOUND_FOUND`` variable is also
+  set to the same value.
 
+``SDL_SOUND_VERSION_STRING``
+  The human-readable string containing the version of SDL_sound found.
 
-This module also defines (but you shouldn't need to use directly)
+``SDL_SOUND_LIBRARIES``
+  Libraries needed to link against to use the SDL_sound library.
 
-::
+Cache Variables
+^^^^^^^^^^^^^^^
 
-   SDL_SOUND_LIBRARY, the name of just the SDL_sound library you would link
-   against. Use SDL_SOUND_LIBRARIES for you link instructions and not this one.
+The following cache variables may also be set:
 
-And might define the following as needed
+``SDL_SOUND_INCLUDE_DIR``
+  The directory containing the ``SDL_sound.h`` and other headers needed to use
+  the SDL_sound library.
 
-::
+``SDL_SOUND_LIBRARY``
+  The name of just the SDL_sound library you would link against.  Use
+  ``SDL_SOUND_LIBRARIES`` for the link instructions and not this one.
 
-   MIKMOD_LIBRARY
-   MODPLUG_LIBRARY
-   OGG_LIBRARY
-   VORBIS_LIBRARY
-   SMPEG_LIBRARY
-   FLAC_LIBRARY
-   SPEEX_LIBRARY
+``MIKMOD_LIBRARY``
+  The path to the dependent MikMod library.
 
+``MODPLUG_LIBRARY``
+  The path to the dependent ModPlug library (libmodplug).
 
+``OGG_LIBRARY``
+  The path to the dependent Ogg library.
 
-Typically, you should not use these variables directly, and you should
-use SDL_SOUND_LIBRARIES which contains SDL_SOUND_LIBRARY and the other
-audio libraries (if needed) to successfully compile on your system.
+``VORBIS_LIBRARY``
+  The path to the dependent Vorbis library.
 
-Responds to the $SDLDIR and $SDLSOUNDDIR environmental variable that
-would correspond to the ./configure --prefix=$SDLDIR used in building
-SDL.
+``SMPEG_LIBRARY``
+  The path to the dependent SMPEG library.
 
-On OSX, this will prefer the Framework version (if found) over others.
-People will have to manually change the cache values of SDL_LIBRARY to
-override this selectionor set the CMake environment CMAKE_INCLUDE_PATH
-to modify the search paths.
+``FLAC_LIBRARY``
+  The path to the dependent FLAC library.
+
+``SPEEX_LIBRARY``
+  The path to the dependent Speex library.
+
+Hints
+^^^^^
+
+This module accepts the following variables:
+
+``SDLDIR``
+  Environment variable that can be set to help locate an SDL library installed
+  in a custom location.  It should point to the installation destination that
+  was used when configuring, building, and installing SDL library:
+  ``./configure --prefix=$SDLDIR``.
+
+  On macOS, setting this variable will prefer the Framework version (if found)
+  over others.  In this case, the cache value of ``SDL_LIBRARY`` would need to
+  be manually changed to override this selection or set the
+  :variable:`CMAKE_INCLUDE_PATH` variable to modify the search paths.
+
+``SDLSOUNDDIR``
+  Environment variable that works the same as ``SDLDIR``.
+
+``SDL_SOUND_EXTRAS``
+  This is an optional cache variable that can be used to add additional flags
+  that are prepended to the ``SDL_SOUND_LIBRARIES`` result variable.  This is
+  available mostly for cases this module failed to anticipate for and additional
+  flags must be added.
+
+Examples
+^^^^^^^^
+
+Finding SDL_sound library and creating an imported interface target for linking
+it to a project target:
+
+.. code-block:: cmake
+
+  find_package(SDL)
+  find_package(SDL_sound)
+
+  if(SDL_sound_FOUND AND NOT TARGET SDL::SDL_sound)
+    add_library(SDL::SDL_sound INTERFACE IMPORTED)
+    set_target_properties(
+      SDL::SDL_sound
+      PROPERTIES
+        INTERFACE_INCLUDE_DIRECTORIES "${SDL_SOUND_INCLUDE_DIR}"
+        INTERFACE_LINK_LIBRARIES "${SDL_SOUND_LIBRARIES}"
+    )
+
+    # Append the SDL dependency as imported target to be transitively linked:
+    set_property(
+      TARGET SDL::SDL_sound
+      APPEND
+      PROPERTY INTERFACE_LINK_LIBRARIES SDL::SDL
+    )
+  endif()
+
+  target_link_libraries(project_target PRIVATE SDL::SDL_sound)
+
+When working with SDL_sound version 2, the upstream package provides the
+``SDL2_sound::SDL2_sound`` imported target directly.  It can be used in a
+project without using this module:
+
+.. code-block:: cmake
+
+  find_package(SDL2_sound)
+  target_link_libraries(project_target PRIVATE SDL2_sound::SDL2_sound)
+
+See Also
+^^^^^^^^
+
+* The :module:`FindSDL` module to find the main SDL library.
 #]=======================================================================]
 
 

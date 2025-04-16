@@ -225,8 +225,8 @@ They are normally called through the :command:`find_package` command.
    /module/FindRTI
    /module/FindRuby
    /module/FindSDL
-   /module/FindSDL_image
    /module/FindSDL_gfx
+   /module/FindSDL_image
    /module/FindSDL_mixer
    /module/FindSDL_net
    /module/FindSDL_sound
