@@ -107,6 +107,12 @@ bool cmIfFunctionBlocker::Replay(std::vector<cmListFileFunction> functions,
         return true;
       }
 
+      if (func.Arguments().empty()) {
+        mf.GetCMakeInstance()->IssueMessage(
+          MessageType::AUTHOR_WARNING,
+          "ELSEIF called with no arguments, it will be skipped. ", elseifBT);
+      }
+
       if (this->HasRun) {
         this->IsBlocking = true;
       } else {
