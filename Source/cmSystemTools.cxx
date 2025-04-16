@@ -3007,10 +3007,11 @@ std::string InitLogicalWorkingDirectory()
 {
   std::string cwd = cmsys::SystemTools::GetCurrentWorkingDirectory();
   std::string pwd;
-  if (cmSystemTools::GetEnv("PWD", pwd)) {
+  if (cmSystemTools::GetEnv("PWD", pwd) &&
+      cmSystemTools::FileIsFullPath(pwd)) {
     std::string const pwd_real = cmSystemTools::GetRealPath(pwd);
     if (pwd_real == cwd) {
-      cwd = std::move(pwd);
+      cwd = cmSystemTools::ToNormalizedPathOnDisk(std::move(pwd));
     }
   }
   return cwd;
