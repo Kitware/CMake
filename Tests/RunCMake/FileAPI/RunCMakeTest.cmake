@@ -17,11 +17,11 @@ in directory:
   endif()
 endfunction()
 
-function(check_python case)
+function(check_python case prefix)
   if(RunCMake_TEST_FAILED OR NOT Python_EXECUTABLE)
     return()
   endif()
-  file(GLOB index ${RunCMake_TEST_BINARY_DIR}/.cmake/api/v1/reply/index-*.json)
+  file(GLOB index ${RunCMake_TEST_BINARY_DIR}/.cmake/api/v1/reply/${prefix}-*.json)
   execute_process(
     COMMAND ${Python_EXECUTABLE} "${RunCMake_SOURCE_DIR}/${case}-check.py" "${index}" "${CMAKE_CXX_COMPILER_ID}"
       "${RunCMake_TEST_BINARY_DIR}"
@@ -54,6 +54,7 @@ run_cmake(DuplicateStateless)
 run_cmake(ClientStateful)
 run_cmake(ProjectQueryGood)
 run_cmake(ProjectQueryBad)
+run_cmake(FailConfigure)
 
 function(run_object object)
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/${object}-build)
@@ -64,6 +65,7 @@ function(run_object object)
   run_cmake_command(${object}-SharedStateless ${CMAKE_COMMAND} .)
   run_cmake_command(${object}-ClientStateless ${CMAKE_COMMAND} .)
   run_cmake_command(${object}-ClientStateful ${CMAKE_COMMAND} .)
+  run_cmake_command(${object}-FailConfigure ${CMAKE_COMMAND} . -DFAIL=1)
 endfunction()
 
 run_object(codemodel-v2)

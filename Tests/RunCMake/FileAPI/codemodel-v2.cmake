@@ -60,3 +60,7 @@ install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/dir
 install(EXPORT FooTargets DESTINATION lib/cmake/foo)
 install(SCRIPT InstallScript.cmake)
 install(CODE "message(foo)" ALL_COMPONENTS)
+
+if(FAIL)
+  message(FATAL_ERROR "Intentionally fail to configure")
+endif()

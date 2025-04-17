@@ -17,4 +17,4 @@ set(expect
   )
 check_api("^${expect}$")
 
-check_python(DuplicateStateless)
+check_python(DuplicateStateless index)

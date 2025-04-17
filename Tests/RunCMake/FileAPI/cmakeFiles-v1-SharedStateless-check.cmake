@@ -7,4 +7,4 @@ set(expect
   )
 check_api("^${expect}$")
 
-check_python(cmakeFiles-v1)
+check_python(cmakeFiles-v1 index)

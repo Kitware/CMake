@@ -7,4 +7,4 @@ set(expect
   )
 check_api("^${expect}$")
 
-check_python(cache-v2)
+check_python(cache-v2 index)

@@ -105,14 +105,20 @@ std::vector<unsigned long> cmFileAPI::GetConfigureLogVersions()
   return versions;
 }
 
-void cmFileAPI::WriteReplies()
+void cmFileAPI::WriteReplies(IndexFor indexFor)
 {
+  bool const success = indexFor == IndexFor::Success;
+  this->ReplyIndexFor = indexFor;
+
   if (this->QueryExists) {
     cmSystemTools::MakeDirectory(this->APIv1 + "/reply");
-    this->WriteJsonFile(this->BuildReplyIndex(), "index", ComputeSuffixTime);
+    this->WriteJsonFile(this->BuildReplyIndex(), success ? "index" : "error",
+                        ComputeSuffixTime);
   }
 
-  this->RemoveOldReplyFiles();
+  if (success) {
+    this->RemoveOldReplyFiles();
+  }
 }
 
 std::vector<std::string> cmFileAPI::LoadDir(std::string const& dir)
@@ -442,13 +448,30 @@ Json::Value cmFileAPI::BuildReply(Query const& q)
   Json::Value reply = Json::objectValue;
   for (Object const& o : q.Known) {
     std::string const& name = ObjectName(o);
-    reply[name] = this->AddReplyIndexObject(o);
+    reply[name] = this->BuildReplyEntry(o);
   }
 
   for (std::string const& name : q.Unknown) {
     reply[name] = cmFileAPI::BuildReplyError("unknown query file");
   }
   return reply;
+}
+
+Json::Value cmFileAPI::BuildReplyEntry(Object const& object)
+{
+  if (this->ReplyIndexFor != IndexFor::Success) {
+    switch (object.Kind) {
+      case ObjectKind::ConfigureLog:
+        break;
+      case ObjectKind::CodeModel:
+      case ObjectKind::Cache:
+      case ObjectKind::CMakeFiles:
+      case ObjectKind::Toolchains:
+      case ObjectKind::InternalTest:
+        return this->BuildReplyError("no buildsystem generated");
+    }
+  }
+  return this->AddReplyIndexObject(object);
 }
 
 Json::Value cmFileAPI::BuildReplyError(std::string const& error)
@@ -681,7 +704,7 @@ Json::Value cmFileAPI::BuildClientReplyResponse(ClientRequest const& request)
     response = this->BuildReplyError(request.Error);
     return response;
   }
-  response = this->AddReplyIndexObject(request);
+  response = this->BuildReplyEntry(request);
   return response;
 }
 

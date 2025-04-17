@@ -12,4 +12,4 @@ set(expect
   )
 check_api("^${expect}$")
 
-check_python(SharedStateless)
+check_python(SharedStateless index)
