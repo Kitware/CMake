@@ -44,6 +44,7 @@ struct Result : public ArgumentParser::ParseResult
   cm::optional<std::string> Pos0;
   cm::optional<std::string> Pos1;
   cm::optional<std::string> Pos2;
+  ArgumentParser::MaybeEmpty<std::vector<std::string>> TrailingPos;
 
   bool Func0_ = false;
   ArgumentParser::Continue Func0(cm::string_view)
@@ -133,6 +134,31 @@ std::initializer_list<cm::string_view> const args = {
   /* clang-format on */
 };
 
+struct ResultTrailingPos : public ArgumentParser::ParseResult
+{
+  bool Option1 = false;
+  ArgumentParser::NonEmpty<std::vector<std::string>> List1;
+
+  cm::optional<std::string> Pos0;
+  cm::optional<std::string> Pos1;
+  ArgumentParser::NonEmpty<std::vector<std::string>> TrailingPos;
+};
+
+struct DerivedTrailingPos : ResultTrailingPos
+{
+};
+
+std::initializer_list<cm::string_view> const args_trailingpos = {
+  /* clang-format off */
+  "pos0",                    // position index 0
+  "pos1",                    // position index 1
+  "pos_trailing0",           // trailing positional 0
+  "pos_trailing1",           // trailing positional 1
+  "OPTION_1",                // option
+  "LIST_1", "foo", "bar",    // list arg with 2 elems
+  /* clang-format on */
+};
+
 bool verifyResult(Result const& result,
                   std::vector<std::string> const& unparsedArguments)
 {
@@ -216,6 +242,7 @@ bool verifyResult(Result const& result,
   ASSERT_TRUE(result.Pos0 == "pos0");
   ASSERT_TRUE(!result.Pos1);
   ASSERT_TRUE(!result.Pos2);
+  ASSERT_TRUE(result.TrailingPos.empty());
 
   ASSERT_TRUE(result.Func0_ == false);
   ASSERT_TRUE(result.Func1_ == "foo");
@@ -242,6 +269,26 @@ bool verifyResult(Result const& result,
   return true;
 }
 
+bool verifyResult(ResultTrailingPos const& result,
+                  std::vector<std::string> const& unparsedArguments)
+{
+  static std::vector<std::string> const foobar = { "foo", "bar" };
+  static std::vector<std::string> const trailing = { "pos_trailing0",
+                                                     "pos_trailing1" };
+
+  ASSERT_TRUE(result);
+  ASSERT_TRUE(unparsedArguments.empty());
+
+  ASSERT_TRUE(result.Option1);
+  ASSERT_TRUE(result.List1 == foobar);
+
+  ASSERT_TRUE(result.Pos0 == "pos0");
+  ASSERT_TRUE(result.Pos1 == "pos1");
+  ASSERT_TRUE(result.TrailingPos == trailing);
+
+  return true;
+}
+
 bool testArgumentParserDynamic()
 {
   Result result;
@@ -258,6 +305,7 @@ bool testArgumentParserDynamic()
       .Bind(0, result.Pos0)
       .Bind(1, result.Pos1)
       .Bind(2, result.Pos2)
+      .BindTrailingArgs(result.TrailingPos)
       .Bind("OPTION_1"_s, result.Option1)
       .Bind("OPTION_2"_s, result.Option2)
       .Bind("STRING_1"_s, result.String1)
@@ -299,7 +347,23 @@ bool testArgumentParserDynamic()
       .BindParsedKeywords(result.ParsedKeywords)
       .Parse(args, &unparsedArguments);
 
-  return verifyResult(result, unparsedArguments);
+  if (!verifyResult(result, unparsedArguments)) {
+    return false;
+  }
+
+  unparsedArguments.clear();
+
+  ResultTrailingPos result_trailing;
+  static_cast<ArgumentParser::ParseResult&>(result_trailing) =
+    cmArgumentParser<void>{}
+      .Bind(0, result_trailing.Pos0)
+      .Bind(1, result_trailing.Pos1)
+      .BindTrailingArgs(result_trailing.TrailingPos)
+      .Bind("OPTION_1"_s, result_trailing.Option1)
+      .Bind("LIST_1"_s, result_trailing.List1)
+      .Parse(args_trailingpos, &unparsedArguments);
+
+  return verifyResult(result_trailing, unparsedArguments);
 }
 
 static auto const parserStaticFunc4 =
@@ -314,6 +378,7 @@ static auto const parserStaticFunc4 =
       .Bind(0, &resultType::Pos0)                                             \
       .Bind(1, &resultType::Pos1)                                             \
       .Bind(2, &resultType::Pos2)                                             \
+      .BindTrailingArgs(&resultType::TrailingPos)                             \
       .Bind("OPTION_1"_s, &resultType::Option1)                               \
       .Bind("OPTION_2"_s, &resultType::Option2)                               \
       .Bind("STRING_1"_s, &resultType::String1)                               \
@@ -346,18 +411,43 @@ static auto const parserStaticFunc4 =
 BIND_ALL(parserStatic, Result);
 BIND_ALL(parserDerivedStatic, Derived);
 
+#define BIND_TRAILING(name, resultType)                                       \
+  static auto const name = cmArgumentParser<resultType>{}                     \
+                             .Bind(0, &resultType::Pos0)                      \
+                             .Bind(1, &resultType::Pos1)                      \
+                             .BindTrailingArgs(&resultType::TrailingPos)      \
+                             .Bind("OPTION_1"_s, &resultType::Option1)        \
+                             .Bind("LIST_1"_s, &resultType::List1)
+
+BIND_TRAILING(parserTrailingStatic, ResultTrailingPos);
+BIND_TRAILING(parserTrailingDerivedStatic, DerivedTrailingPos);
+
 bool testArgumentParserStatic()
 {
   std::vector<std::string> unparsedArguments;
   Result const result = parserStatic.Parse(args, &unparsedArguments);
-  return verifyResult(result, unparsedArguments);
+  if (!verifyResult(result, unparsedArguments)) {
+    return false;
+  }
+
+  unparsedArguments.clear();
+  ResultTrailingPos const result_trailing =
+    parserTrailingStatic.Parse(args_trailingpos, &unparsedArguments);
+  return verifyResult(result_trailing, unparsedArguments);
 }
 
 bool testArgumentParserDerivedStatic()
 {
   std::vector<std::string> unparsedArguments;
   Derived const result = parserDerivedStatic.Parse(args, &unparsedArguments);
-  return verifyResult(result, unparsedArguments);
+  if (!verifyResult(result, unparsedArguments)) {
+    return false;
+  }
+
+  unparsedArguments.clear();
+  ResultTrailingPos const result_trailing =
+    parserTrailingDerivedStatic.Parse(args_trailingpos, &unparsedArguments);
+  return verifyResult(result_trailing, unparsedArguments);
 }
 
 bool testArgumentParserStaticBool()

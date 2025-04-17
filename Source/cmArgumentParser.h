@@ -113,6 +113,7 @@ public:
   KeywordNameAction KeywordMissingValue;
   KeywordNameAction ParsedKeyword;
   PositionActionMap Positions;
+  KeywordAction TrailingArgs;
 };
 
 class Base
@@ -147,6 +148,12 @@ public:
   {
     assert(!this->Bindings.KeywordMissingValue);
     this->Bindings.KeywordMissingValue = std::move(action);
+  }
+
+  void BindTrailingArgs(KeywordAction action)
+  {
+    assert(!this->Bindings.TrailingArgs);
+    this->Bindings.TrailingArgs = std::move(action);
   }
 
   void Bind(std::size_t pos, PositionAction action)
@@ -354,6 +361,18 @@ public:
     return *this;
   }
 
+  template <typename T, typename cT = cm::member_pointer_class_t<T>,
+            typename mT = cm::remove_member_pointer_t<T>,
+            typename = cm::enable_if_t<std::is_base_of<cT, Result>::value>,
+            typename = cm::enable_if_t<!std::is_function<mT>::value>>
+  cmArgumentParser& BindTrailingArgs(T member)
+  {
+    this->Base::BindTrailingArgs([member](Instance& instance) {
+      instance.Bind(static_cast<Result*>(instance.Result)->*member);
+    });
+    return *this;
+  }
+
   template <typename Range>
   bool Parse(Result& result, Range const& args,
              std::vector<std::string>* unparsedArguments,
@@ -428,6 +447,14 @@ public:
   {
     this->Base::BindParsedKeyword(
       [&ref](Instance&, cm::string_view arg) { ref.emplace_back(arg); });
+    return *this;
+  }
+
+  template <typename T>
+  cmArgumentParser& BindTrailingArgs(T& ref)
+  {
+    this->Base::BindTrailingArgs(
+      [&ref](Instance& instance) { instance.Bind(ref); });
     return *this;
   }
 
