@@ -13,7 +13,7 @@ class cmLocalGenerator;
 
 struct cmGeneratorExpressionContext
 {
-  cmGeneratorExpressionContext(cmLocalGenerator* lg, std::string config,
+  cmGeneratorExpressionContext(cmLocalGenerator const* lg, std::string config,
                                bool quiet, cmGeneratorTarget const* headTarget,
                                cmGeneratorTarget const* currentTarget,
                                bool evaluateForBuildsystem,
@@ -27,7 +27,7 @@ struct cmGeneratorExpressionContext
   std::set<cmGeneratorTarget const*> SourceSensitiveTargets;
   std::map<cmGeneratorTarget const*, std::map<std::string, std::string>>
     MaxLanguageStandard;
-  cmLocalGenerator* LG;
+  cmLocalGenerator const* LG;
   std::string Config;
   std::string Language;
   // The target whose property is being evaluated.

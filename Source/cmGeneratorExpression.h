@@ -46,7 +46,7 @@ public:
     std::string input) const;
 
   static std::string Evaluate(
-    std::string input, cmLocalGenerator* lg, std::string const& config,
+    std::string input, cmLocalGenerator const* lg, std::string const& config,
     cmGeneratorTarget const* headTarget = nullptr,
     cmGeneratorExpressionDAGChecker* dagChecker = nullptr,
     cmGeneratorTarget const* currentTarget = nullptr,
@@ -103,7 +103,7 @@ public:
     cmCompiledGeneratorExpression const&) = delete;
 
   std::string const& Evaluate(
-    cmLocalGenerator* lg, std::string const& config,
+    cmLocalGenerator const* lg, std::string const& config,
     cmGeneratorTarget const* headTarget = nullptr,
     cmGeneratorExpressionDAGChecker* dagChecker = nullptr,
     cmGeneratorTarget const* currentTarget = nullptr,
@@ -185,7 +185,7 @@ private:
 class cmGeneratorExpressionInterpreter
 {
 public:
-  cmGeneratorExpressionInterpreter(cmLocalGenerator* localGenerator,
+  cmGeneratorExpressionInterpreter(cmLocalGenerator const* localGenerator,
                                    std::string config,
                                    cmGeneratorTarget const* headTarget,
                                    std::string language = std::string())
@@ -208,7 +208,7 @@ public:
 protected:
   cmGeneratorExpression GeneratorExpression;
   std::unique_ptr<cmCompiledGeneratorExpression> CompiledGeneratorExpression;
-  cmLocalGenerator* LocalGenerator = nullptr;
+  cmLocalGenerator const* LocalGenerator = nullptr;
   std::string Config;
   cmGeneratorTarget const* HeadTarget = nullptr;
   std::string Language;

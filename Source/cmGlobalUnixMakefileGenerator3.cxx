@@ -801,19 +801,15 @@ void cmGlobalUnixMakefileGenerator3::InitializeProgressMarks()
   // Loop over all targets in all local generators.
   for (auto const& lg : this->LocalGenerators) {
     for (auto const& gt : lg->GetGeneratorTargets()) {
-      cmLocalGenerator* tlg = gt->GetLocalGenerator();
-
       if (!gt->IsInBuildSystem() || this->IsExcluded(lg.get(), gt.get())) {
         continue;
       }
 
       cmStateSnapshot csnp = lg->GetStateSnapshot();
-      cmStateSnapshot tsnp = tlg->GetStateSnapshot();
 
-      // Consider the directory containing the target and all its
-      // parents until something excludes the target.
-      for (; csnp.IsValid() && !this->IsExcluded(csnp, tsnp);
-           csnp = csnp.GetBuildsystemDirectoryParent()) {
+      // Consider the directory containing the target and all its parents.
+      // An excluded directory may contains non-excluded targets.
+      for (; csnp.IsValid(); csnp = csnp.GetBuildsystemDirectoryParent()) {
         // This local generator includes the target.
         std::set<cmGeneratorTarget const*>& targetSet =
           this->DirectoryTargetsMap[csnp];
@@ -854,7 +850,9 @@ size_t cmGlobalUnixMakefileGenerator3::CountProgressMarksInAll(
   std::set<cmGeneratorTarget const*> emitted;
   for (cmGeneratorTarget const* target :
        this->DirectoryTargetsMap[lg.GetStateSnapshot()]) {
-    count += this->CountProgressMarksInTarget(target, emitted);
+    if (!this->IsExcluded(&lg, target)) {
+      count += this->CountProgressMarksInTarget(target, emitted);
+    }
   }
   return count;
 }
