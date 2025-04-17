@@ -19,6 +19,7 @@
 #include "cmList.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
+#include "cmProcessOutput.h"
 #include "cmQtAutoMocUic.h"
 #include "cmQtAutoRcc.h"
 #include "cmRange.h"
@@ -1463,11 +1464,11 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
     }
 
     if (args[1] == "vs_link_exe") {
-      return cmcmd::VisualStudioLink(args, 1);
+      return cmcmd::VisualStudioLink(args, 1, std::move(consoleBuf));
     }
 
     if (args[1] == "vs_link_dll") {
-      return cmcmd::VisualStudioLink(args, 2);
+      return cmcmd::VisualStudioLink(args, 2, std::move(consoleBuf));
     }
 
     if (args[1] == "cmake_llvm_rc") {
@@ -2219,19 +2220,16 @@ private:
 // For visual studio 2005 and newer manifest files need to be embedded into
 // exe and dll's.  This code does that in such a way that incremental linking
 // still works.
-int cmcmd::VisualStudioLink(std::vector<std::string> const& args, int type)
+int cmcmd::VisualStudioLink(std::vector<std::string> const& args, int type,
+                            std::unique_ptr<cmConsoleBuf> consoleBuf)
 {
   // MSVC tools print output in the language specified by the VSLANG
   // environment variable, and encoded in the console output code page.
-  // RunCommand captures and converts it to our internal UTF-8 encoding.
-  // Then we print it as output through cmConsoleBuf:
-  // - NMake: Our output goes to a real console.  cmConsoleBuf writes
-  //   with WriteConsoleW, so no narrow encoding code page is needed.
-  // - Ninja: Our output goes to a pipe that ninja buffers and prints again.
-  //   It does not convert encoding, so we must print in the console output
-  //   code page even though it goes to a pipe.
-  // Both cases can be handled using a cmConsoleBuf without SetUTF8Pipes.
-  cmConsoleBuf consoleBuf;
+  // Since vs_link_{exe,dll} just wraps these, pass through that encoding.
+  // RunCommand tells RunSingleCommand to *not* convert encoding, so
+  // we buffer the output in its original encoding instead of UTF-8.
+  // Drop our output encoding conversion so we print with original encoding.
+  consoleBuf.reset();
 
   if (args.size() < 2) {
     return -1;
@@ -2291,6 +2289,9 @@ static bool RunCommand(char const* comment,
                        NumberFormat exitFormat, int* retCodeOut = nullptr,
                        bool (*retCodeOkay)(int) = nullptr)
 {
+  // See comment in VisualStudioLink for why we suppress encoding conversion.
+  cmProcessOutput::Encoding const encoding = cmProcessOutput::None;
+
   if (verbose) {
     std::cout << comment << ":\n";
     std::cout << cmJoin(command, " ") << '\n';
@@ -2298,7 +2299,8 @@ static bool RunCommand(char const* comment,
   std::string output;
   int retCode = 0;
   bool commandResult = cmSystemTools::RunSingleCommand(
-    command, &output, &output, &retCode, nullptr, cmSystemTools::OUTPUT_NONE);
+    command, &output, &output, &retCode, nullptr, cmSystemTools::OUTPUT_NONE,
+    cmDuration::zero(), encoding);
   bool const retCodeSuccess =
     retCode == 0 || (retCodeOkay && retCodeOkay(retCode));
   bool const success = commandResult && retCodeSuccess;
