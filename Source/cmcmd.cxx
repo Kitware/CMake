@@ -2221,10 +2221,16 @@ private:
 // still works.
 int cmcmd::VisualStudioLink(std::vector<std::string> const& args, int type)
 {
-  // Replace streambuf so we output in the system codepage. CMake is set up
-  // to output in Unicode (see SetUTF8Pipes) but the Visual Studio linker
-  // outputs using the system codepage so we need to change behavior when
-  // we run the link command.
+  // MSVC tools print output in the language specified by the VSLANG
+  // environment variable, and encoded in the console output code page.
+  // RunCommand captures and converts it to our internal UTF-8 encoding.
+  // Then we print it as output through cmConsoleBuf:
+  // - NMake: Our output goes to a real console.  cmConsoleBuf writes
+  //   with WriteConsoleW, so no narrow encoding code page is needed.
+  // - Ninja: Our output goes to a pipe that ninja buffers and prints again.
+  //   It does not convert encoding, so we must print in the console output
+  //   code page even though it goes to a pipe.
+  // Both cases can be handled using a cmConsoleBuf without SetUTF8Pipes.
   cmConsoleBuf consoleBuf;
 
   if (args.size() < 2) {
