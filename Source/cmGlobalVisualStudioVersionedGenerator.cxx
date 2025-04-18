@@ -505,7 +505,10 @@ bool cmGlobalVisualStudioVersionedGenerator::SetGeneratorInstance(
   }
 
   if (!this->GeneratorInstanceVersion.empty()) {
-    std::string const majorStr = VSVersionToMajorString(this->Version);
+    std::string majorStr = VSVersionToMajorString(this->Version);
+    if (majorStr == "17" && this->GeneratorInstanceVersion._Starts_with("18")) {
+      majorStr = "18";
+    }
     cmsys::RegularExpression versionRegex(
       cmStrCat('^', majorStr, R"(\.[0-9]+\.[0-9]+\.[0-9]+$)"));
     if (!versionRegex.find(this->GeneratorInstanceVersion)) {

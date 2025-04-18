@@ -459,7 +459,8 @@ bool cmVSSetupAPIHelper::EnumerateAndChooseVSInstance()
   for (const auto& instanceInfo : vecVSInstancesAll) {
     // We are looking for a specific major version.
     if (instanceInfo.Version.size() < wantVersion.size() ||
-        instanceInfo.Version.substr(0, wantVersion.size()) != wantVersion) {
+        (instanceInfo.Version.substr(0, wantVersion.size()) != wantVersion &&
+        !(instanceInfo.Version.substr(0, wantVersion.size()) == "18." && wantVersion == "17."))) {
       continue;
     }
 
