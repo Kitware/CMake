@@ -39,5 +39,6 @@ protected:
   static int RunPreprocessor(std::vector<std::string> const& command,
                              std::string const& intermediate_file);
   static int RunLLVMRC(std::vector<std::string> const& args);
-  static int VisualStudioLink(std::vector<std::string> const& args, int type);
+  static int VisualStudioLink(std::vector<std::string> const& args, int type,
+                              std::unique_ptr<cmConsoleBuf> consoleBuf);
 };
