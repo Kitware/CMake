@@ -16,6 +16,14 @@ processed by `Sphinx`_ to generate the CMake help manuals.
 .. _`reStructuredText`: https://docutils.sourceforge.net/docs/ref/rst/introduction.html
 .. _`Sphinx`: https://sphinx-doc.org
 
+To generate the HTML and/or man documentation locally from within the CMake
+repository to ``build/html`` and ``build/man`` directories:
+
+.. code-block:: console
+
+  $ cmake -S Utilities/Sphinx -B build -DSPHINX_HTML=ON -DSPHINX_MAN=ON
+  $ cmake --build build
+
 Markup Constructs
 -----------------
 
