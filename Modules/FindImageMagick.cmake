@@ -5,17 +5,19 @@
 FindImageMagick
 ---------------
 
-Find ImageMagick, software suite for displaying, converting and
-manipulating raster images.
-
+Finds ImageMagick, a software suite for displaying, converting, and manipulating
+raster images.
 
 .. versionadded:: 3.9
-  Added support for ImageMagick 7.
+  Support for ImageMagick 7.
 
-This module will search for a set of ImageMagick tools specified as
-components in the :command:`find_package` call.  Typical components include,
-but are not limited to (future versions of ImageMagick might have
-additional components not listed here):
+Components
+^^^^^^^^^^
+
+This module supports components and searches for a set of ImageMagick tools.
+Typical components include the names of ImageMagick executables, but are not
+limited to the following (future versions of ImageMagick may provide additional
+components not listed here):
 
 * ``animate``
 * ``compare``
@@ -29,77 +31,107 @@ additional components not listed here):
 * ``montage``
 * ``stream``
 
-If no component is specified in the :command:`find_package` call, then it only
-searches for the ImageMagick executable directory.
-
 There are also components for the following ImageMagick APIs:
 
-* ``Magick++``: ImageMagick C++ API, if found.
-* ``MagickWand``: ImageMagick MagickWand C API, if found.
-* ``MagickCore``: ImageMagick MagickCore low-level C API, if found.
+``Magick++``
+  Finds the ImageMagick C++ API.
+``MagickWand``
+  Finds the ImageMagick MagickWand C API.
+``MagickCore``
+  Finds the ImageMagick MagickCore low-level C API.
 
+Components can be specified using the :command:`find_package` command:
+
+.. code-block:: cmake
+
+  find_package(ImageMagick [COMPONENTS <components>...])
+
+If no components are specified, the module only searches for the ImageMagick
+executable directory.
 
 Imported Targets
 ^^^^^^^^^^^^^^^^
 
-.. versionadded:: 3.26
-
-This module defines the following :prop_tgt:`IMPORTED` targets:
+This module provides the following :ref:`Imported Targets`:
 
 ``ImageMagick::Magick++``
-  ImageMagick C++ API, if found.
+  .. versionadded:: 3.26
+
+  Target encapsulating the ImageMagick C++ API usage requirements, available if
+  ImageMagick C++ is found.
 
 ``ImageMagick::MagickWand``
-  ImageMagick MagickWand C API, if found.
+  .. versionadded:: 3.26
+
+  Target encapsulating the ImageMagick MagickWand C API usage requirements,
+  available if MagickWand is found.
 
 ``ImageMagick::MagickCore``
-  ImageMagick MagickCore low-level C API, if found.
+  .. versionadded:: 3.26
 
+  Target encapsulating the ImageMagick MagickCore low-level C API usage
+  requirements, available if MagickCore is found.
 
 Result Variables
 ^^^^^^^^^^^^^^^^
 
+This module defines the following variables:
+
 ``ImageMagick_FOUND``
-  TRUE if all components are found.
-
-``ImageMagick_EXECUTABLE_DIR``
-  Full path to executables directory.
-
-``ImageMagick_INCLUDE_DIRS``
-  Full paths to all include dirs.
-
-``ImageMagick_LIBRARIES``
-  Full paths to all libraries.
-
-``ImageMagick_COMPILE_OPTIONS``
-  Compile options of all libraries.
+  Boolean indicating whether ImageMagick and all its requested components are
+  found.
 
 ``ImageMagick_VERSION_STRING``
-  The version of ImageMagick found (since CMake 2.8.8).
-  Will not work for old versions like 5.2.3.
+  The version of ImageMagick found.
+
+  .. note::
+
+    Version detection is available only for ImageMagick 6 and later.
+
+``ImageMagick_INCLUDE_DIRS``
+  All include directories needed to use ImageMagick.
+
+``ImageMagick_LIBRARIES``
+  Libraries needed to link against to use ImageMagick.
+
+``ImageMagick_COMPILE_OPTIONS``
+  .. versionadded:: 3.26
+
+  Compile options of all libraries.
 
 ``ImageMagick_<component>_FOUND``
-  TRUE if <component> is found.
+  Boolean indicating whether the ImageMagick ``<component>`` is found.
 
 ``ImageMagick_<component>_EXECUTABLE``
-  Full path to <component> executable.
+  The full path to ``<component>`` executable.
 
 ``ImageMagick_<component>_INCLUDE_DIRS``
-  Full path to <component> include dirs.
+  Include directories containing headers needed to use the ImageMagick
+  ``<component>``.
 
 ``ImageMagick_<component>_COMPILE_OPTIONS``
   .. versionadded:: 3.26
 
-  Compile options of <component>.
+  Compile options of the ImageMagick ``<component>``.
 
 ``ImageMagick_<component>_LIBRARIES``
   .. versionadded:: 3.31
 
-  Full path to <component> libraries.
+  Libraries needed to link against to use the ImageMagick ``<component>``.
 
+Cache Variables
+^^^^^^^^^^^^^^^
 
-Example Usage
-^^^^^^^^^^^^^
+The following cache variables may also be set:
+
+``ImageMagick_EXECUTABLE_DIR``
+  The full path to directory containing ImageMagick executables.
+
+Examples
+^^^^^^^^
+
+Finding ImageMagick with its component ``Magick++``  and linking it to a project
+target:
 
 .. code-block:: cmake
 
