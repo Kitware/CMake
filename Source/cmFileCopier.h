@@ -5,6 +5,7 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include "cmsys/RegularExpression.hxx"
@@ -30,6 +31,7 @@ protected:
   char const* Name;
   bool Always = false;
   cmFileTimeCache FileTimes;
+  std::unordered_map<std::string, bool> DirEmptyCache;
 
   // Whether to install a file not matching any expression.
   bool MatchlessFiles = true;
@@ -89,6 +91,7 @@ protected:
   bool UseGivenPermissionsFile = false;
   bool UseGivenPermissionsDir = false;
   bool UseSourcePermissions = true;
+  bool ExcludeEmptyDirectories = false;
   bool FollowSymlinkChain = false;
   std::string Destination;
   std::string FilesFromDir;
