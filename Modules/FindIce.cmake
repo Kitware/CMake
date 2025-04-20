@@ -7,156 +7,424 @@ FindIce
 
 .. versionadded:: 3.1
 
-Find the ZeroC Internet Communication Engine (ICE) programs,
-libraries and datafiles.
-
-This module supports multiple components.
-Components can include any of: ``Freeze``, ``Glacier2``, ``Ice``,
-``IceBox``, ``IceDB``, ``IceDiscovery``, ``IceGrid``,
-``IceLocatorDiscovery``, ``IcePatch``, ``IceSSL``, ``IceStorm``,
-``IceUtil``, ``IceXML``, or ``Slice``.
-
-Ice 3.7 and later also include C++11-specific components:
-``Glacier2++11``, ``Ice++11``, ``IceBox++11``, ``IceDiscovery++11``
-``IceGrid``, ``IceLocatorDiscovery++11``, ``IceSSL++11``,
-``IceStorm++11``
-
-Note that the set of supported components is Ice version-specific.
+Finds the Internet Communication Engine (Ice) programs, libraries and datafiles.
+Ice is an open-source remote procedure call (RPC) framework developed by ZeroC
+and provides SDKs for various languages to develop network applications.
 
 .. versionadded:: 3.4
-  Imported targets for components and most ``EXECUTABLE`` variables.
+  Imported targets for components and many new ``*_EXECUTABLE`` variables.
 
 .. versionadded:: 3.7
-  Debug and Release variants are found separately.
+  Debug and Release library variants are found separately.
 
 .. versionadded:: 3.10
   Ice 3.7 support, including new components, programs and the Nuget package.
 
-This module reports information about the Ice installation in
-several variables.  General variables::
+Components
+^^^^^^^^^^
 
-  Ice_VERSION - Ice release version
-  Ice_FOUND - true if the main programs and libraries were found
-  Ice_LIBRARIES - component libraries to be linked
-  Ice_INCLUDE_DIRS - the directories containing the Ice headers
-  Ice_SLICE_DIRS - the directories containing the Ice slice interface
-                   definitions
+Ice consists of several libraries and programs (executables).  This find module
+supports components, which can be specified using the :command:`find_package`
+command, to select specific Ice libraries for use in a CMake project.
+Executables provided by Ice installation are always searched automatically,
+regardless of the specified components.
 
-Imported targets::
+The list of available components depends on the Ice version in use.  To
+successfully find Ice, at least one component must be specified:
 
-  Ice::<C>
+.. code-block:: cmake
 
-Where ``<C>`` is the name of an Ice component, for example
-``Ice::Glacier2`` or ``Ice++11``.
+  find_package(Ice COMPONENTS <components>...)
 
-Ice slice programs are reported in::
+Supported components include:
 
-  Ice_SLICE2CONFLUENCE_EXECUTABLE - path to slice2confluence executable
-  Ice_SLICE2CPP_EXECUTABLE - path to slice2cpp executable
-  Ice_SLICE2CS_EXECUTABLE - path to slice2cs executable
-  Ice_SLICE2FREEZEJ_EXECUTABLE - path to slice2freezej executable
-  Ice_SLICE2FREEZE_EXECUTABLE - path to slice2freeze executable
-  Ice_SLICE2HTML_EXECUTABLE - path to slice2html executable
-  Ice_SLICE2JAVA_EXECUTABLE - path to slice2java executable
-  Ice_SLICE2JS_EXECUTABLE - path to slice2js executable
-  Ice_SLICE2MATLAB_EXECUTABLE - path to slice2matlab executable
-  Ice_SLICE2OBJC_EXECUTABLE - path to slice2objc executable
-  Ice_SLICE2PHP_EXECUTABLE - path to slice2php executable
-  Ice_SLICE2PY_EXECUTABLE - path to slice2py executable
-  Ice_SLICE2RB_EXECUTABLE - path to slice2rb executable
+.. hlist::
 
-.. versionadded:: 3.14
-  Variables for ``slice2confluence`` and ``slice2matlab``.
+  - ``Freeze``
+  - ``Glacier2``
+  - ``Ice``
+  - ``IceBox``
+  - ``IceDB``
+  - ``IceDiscovery``
+  - ``IceGrid``
+  - ``IceLocatorDiscovery``
+  - ``IcePatch``
+  - ``IceSSL``
+  - ``IceStorm``
+  - ``IceUtil``
+  - ``IceXML``
+  - ``Slice``
 
-Ice programs are reported in::
+Ice 3.7 and later also include C++11-specific components:
 
-  Ice_GLACIER2ROUTER_EXECUTABLE - path to glacier2router executable
-  Ice_ICEBOX_EXECUTABLE - path to icebox executable
-  Ice_ICEBOXXX11_EXECUTABLE - path to icebox++11 executable
-  Ice_ICEBOXADMIN_EXECUTABLE - path to iceboxadmin executable
-  Ice_ICEBOXD_EXECUTABLE - path to iceboxd executable
-  Ice_ICEBOXNET_EXECUTABLE - path to iceboxnet executable
-  Ice_ICEBRIDGE_EXECUTABLE - path to icebridge executable
-  Ice_ICEGRIDADMIN_EXECUTABLE - path to icegridadmin executable
-  Ice_ICEGRIDDB_EXECUTABLE - path to icegriddb executable
-  Ice_ICEGRIDNODE_EXECUTABLE - path to icegridnode executable
-  Ice_ICEGRIDNODED_EXECUTABLE - path to icegridnoded executable
-  Ice_ICEGRIDREGISTRY_EXECUTABLE - path to icegridregistry executable
-  Ice_ICEGRIDREGISTRYD_EXECUTABLE - path to icegridregistryd executable
-  Ice_ICEPATCH2CALC_EXECUTABLE - path to icepatch2calc executable
-  Ice_ICEPATCH2CLIENT_EXECUTABLE - path to icepatch2client executable
-  Ice_ICEPATCH2SERVER_EXECUTABLE - path to icepatch2server executable
-  Ice_ICESERVICEINSTALL_EXECUTABLE - path to iceserviceinstall executable
-  Ice_ICESTORMADMIN_EXECUTABLE - path to icestormadmin executable
-  Ice_ICESTORMDB_EXECUTABLE - path to icestormdb executable
-  Ice_ICESTORMMIGRATE_EXECUTABLE - path to icestormmigrate executable
+.. hlist::
 
-Ice db programs (Windows only; standard system versions on all other
-platforms) are reported in::
+  - ``Glacier2++11``
+  - ``Ice++11``
+  - ``IceBox++11``
+  - ``IceDiscovery++11``
+  - ``IceGrid++11``
+  - ``IceLocatorDiscovery++11``
+  - ``IceSSL++11``
+  - ``IceStorm++11``
 
-  Ice_DB_ARCHIVE_EXECUTABLE - path to db_archive executable
-  Ice_DB_CHECKPOINT_EXECUTABLE - path to db_checkpoint executable
-  Ice_DB_DEADLOCK_EXECUTABLE - path to db_deadlock executable
-  Ice_DB_DUMP_EXECUTABLE - path to db_dump executable
-  Ice_DB_HOTBACKUP_EXECUTABLE - path to db_hotbackup executable
-  Ice_DB_LOAD_EXECUTABLE - path to db_load executable
-  Ice_DB_LOG_VERIFY_EXECUTABLE - path to db_log_verify executable
-  Ice_DB_PRINTLOG_EXECUTABLE - path to db_printlog executable
-  Ice_DB_RECOVER_EXECUTABLE - path to db_recover executable
-  Ice_DB_STAT_EXECUTABLE - path to db_stat executable
-  Ice_DB_TUNER_EXECUTABLE - path to db_tuner executable
-  Ice_DB_UPGRADE_EXECUTABLE - path to db_upgrade executable
-  Ice_DB_VERIFY_EXECUTABLE - path to db_verify executable
-  Ice_DUMPDB_EXECUTABLE - path to dumpdb executable
-  Ice_TRANSFORMDB_EXECUTABLE - path to transformdb executable
+Imported Targets
+^^^^^^^^^^^^^^^^
 
-Ice component libraries are reported in::
+This module provides the following :ref:`Imported Targets`:
 
-  Ice_<C>_FOUND - ON if component was found
-  Ice_<C>_LIBRARIES - libraries for component
+``Ice::<component>``
+  .. versionadded:: 3.4
 
-Note that ``<C>`` is the uppercased name of the component.
+  Target encapsulating the usage requirements for the specified Ice component
+  (library), available if that component is found.  The ``<component>`` should
+  be written in the same case, as listed above.  For example, use
+  ``Ice::Glacier2`` for the Ice Glacier2 library, or ``Ice::Ice++11`` for the
+  Ice++11 library, etc.
 
-This module reads hints about search results from::
+Result Variables
+^^^^^^^^^^^^^^^^
 
-  Ice_HOME - the root of the Ice installation
+This module defines the following variables:
 
-The environment variable ``ICE_HOME`` may also be used; the
-Ice_HOME variable takes precedence.
+``Ice_FOUND``
+  Boolean indicating whether the main programs, libraries and all requested
+  components for using Ice were found.
+
+``Ice_VERSION``
+  The version of Ice release found.
+
+``Ice_INCLUDE_DIRS``
+  The include directories containing headers needed to use Ice.
+
+``Ice_LIBRARIES``
+  Component libraries needed to link against to use Ice.
+
+``Ice_SLICE_DIRS``
+  The data directories containing interface definitions (``*.ice`` files) for
+  Slice (Specification Language for Ice).
+
+Ice component libraries are stored in:
+
+``Ice_<COMPONENT>_FOUND``
+  Boolean indicating whether the specified Ice component is found.  The
+  ``<COMPONENT>`` should be written in uppercase.
+
+``Ice_<COMPONENT>_LIBRARIES``
+  Libraries provided by the specified Ice component.  The ``<COMPONENT>`` should
+  be written in uppercase.
+
+Slice programs are stored in:
+
+``Ice_SLICE2CONFLUENCE_EXECUTABLE``
+  .. versionadded:: 3.14
+
+  The path to the ``slice2confluence`` executable.
+
+``Ice_SLICE2CPP_EXECUTABLE``
+  The path to the ``slice2cpp`` executable.
+
+``Ice_SLICE2CS_EXECUTABLE``
+  The path to the ``slice2cs`` executable.
+
+``Ice_SLICE2FREEZEJ_EXECUTABLE``
+  The path to the ``slice2freezej`` executable.
+
+``Ice_SLICE2FREEZE_EXECUTABLE``
+  The path to the ``slice2freeze`` executable.
+
+``Ice_SLICE2HTML_EXECUTABLE``
+  The path to the ``slice2html`` executable.
+
+``Ice_SLICE2JAVA_EXECUTABLE``
+  The path to the ``slice2java`` executable.
+
+``Ice_SLICE2JS_EXECUTABLE``
+  .. versionadded:: 3.4
+
+  The path to the ``slice2js`` executable.
+
+``Ice_SLICE2MATLAB_EXECUTABLE``
+  .. versionadded:: 3.14
+
+  The path to the ``slice2matlab`` executable.
+
+``Ice_SLICE2OBJC_EXECUTABLE``
+  .. versionadded:: 3.10
+
+  The path to the ``slice2objc`` executable.
+
+``Ice_SLICE2PHP_EXECUTABLE``
+  The path to the ``slice2php`` executable.
+
+``Ice_SLICE2PY_EXECUTABLE``
+  The path to the ``slice2py`` executable.
+
+``Ice_SLICE2RB_EXECUTABLE``
+  The path to the ``slice2rb`` executable.
+
+Ice programs are stored in:
+
+``Ice_GLACIER2ROUTER_EXECUTABLE``
+  .. versionadded:: 3.4
+
+  The path to the ``glacier2router`` executable.
+
+``Ice_ICEBOX_EXECUTABLE``
+  .. versionadded:: 3.4
+
+  The path to the ``icebox`` executable.
+
+``Ice_ICEBOX++11_EXECUTABLE``
+  .. versionadded:: 3.10
+
+  The path to the ``icebox++11`` executable.
+
+``Ice_ICEBOXADMIN_EXECUTABLE``
+  .. versionadded:: 3.4
+
+  The path to the ``iceboxadmin`` executable.
+
+``Ice_ICEBOXD_EXECUTABLE``
+  .. versionadded:: 3.4
+
+  The path to the ``iceboxd`` executable.
+
+``Ice_ICEBOXNET_EXECUTABLE``
+  .. versionadded:: 3.4
+
+  The path to the ``iceboxnet`` executable.
+
+``Ice_ICEBRIDGE_EXECUTABLE``
+  .. versionadded:: 3.10
+
+  The path to the ``icebridge`` executable.
+
+``Ice_ICEGRIDADMIN_EXECUTABLE``
+  .. versionadded:: 3.4
+
+  The path to the ``icegridadmin`` executable.
+
+``Ice_ICEGRIDDB_EXECUTABLE``
+  .. versionadded:: 3.10
+
+  The path to the ``icegriddb`` executable.
+
+``Ice_ICEGRIDNODE_EXECUTABLE``
+  .. versionadded:: 3.4
+
+  The path to the ``icegridnode`` executable.
+
+``Ice_ICEGRIDNODED_EXECUTABLE``
+  .. versionadded:: 3.4
+
+  The path to the ``icegridnoded`` executable.
+
+``Ice_ICEGRIDREGISTRY_EXECUTABLE``
+  .. versionadded:: 3.4
+
+  The path to the ``icegridregistry`` executable.
+
+``Ice_ICEGRIDREGISTRYD_EXECUTABLE``
+  .. versionadded:: 3.4
+
+  The path to the ``icegridregistryd`` executable.
+
+``Ice_ICEPATCH2CALC_EXECUTABLE``
+  The path to the ``icepatch2calc`` executable.
+
+``Ice_ICEPATCH2CLIENT_EXECUTABLE``
+  .. versionadded:: 3.4
+
+  The path to the ``icepatch2client`` executable.
+
+``Ice_ICEPATCH2SERVER_EXECUTABLE``
+  .. versionadded:: 3.4
+
+  The path to the ``icepatch2server`` executable.
+
+``Ice_ICESERVICEINSTALL_EXECUTABLE``
+  .. versionadded:: 3.4
+
+  The path to the ``iceserviceinstall`` executable.
+
+``Ice_ICESTORMADMIN_EXECUTABLE``
+  .. versionadded:: 3.4
+
+  The path to the ``icestormadmin`` executable.
+
+``Ice_ICESTORMDB_EXECUTABLE``
+  .. versionadded:: 3.10
+
+  The path to the ``icestormdb`` executable.
+
+``Ice_ICESTORMMIGRATE_EXECUTABLE``
+  .. versionadded:: 3.4
+
+  The path to the ``icestormmigrate`` executable.
+
+Ice database programs are stored in the following variables (on Windows, they
+are included with the Ice installation; on other platforms, they are usually
+available through standard Berkeley DB packages):
+
+``Ice_DB_ARCHIVE_EXECUTABLE``
+  .. versionadded:: 3.4
+
+  The path to the ``db_archive`` executable.
+
+``Ice_DB_CHECKPOINT_EXECUTABLE``
+  .. versionadded:: 3.4
+
+  The path to the ``db_checkpoint`` executable.
+
+``Ice_DB_DEADLOCK_EXECUTABLE``
+  .. versionadded:: 3.4
+
+  The path to the ``db_deadlock`` executable.
+
+``Ice_DB_DUMP_EXECUTABLE``
+  .. versionadded:: 3.4
+
+  The path to the ``db_dump`` executable.
+
+``Ice_DB_HOTBACKUP_EXECUTABLE``
+  .. versionadded:: 3.4
+
+  The path to the ``db_hotbackup`` executable.
+
+``Ice_DB_LOAD_EXECUTABLE``
+  .. versionadded:: 3.4
+
+  The path to the ``db_load`` executable.
+
+``Ice_DB_LOG_VERIFY_EXECUTABLE``
+  .. versionadded:: 3.4
+
+  The path to the ``db_log_verify`` executable.
+
+``Ice_DB_PRINTLOG_EXECUTABLE``
+  .. versionadded:: 3.4
+
+  The path to the ``db_printlog`` executable.
+
+``Ice_DB_RECOVER_EXECUTABLE``
+  .. versionadded:: 3.4
+
+  The path to the ``db_recover`` executable.
+
+``Ice_DB_STAT_EXECUTABLE``
+  .. versionadded:: 3.4
+
+  The path to the ``db_stat`` executable.
+
+``Ice_DB_TUNER_EXECUTABLE``
+  .. versionadded:: 3.4
+
+  The path to the ``db_tuner`` executable.
+
+``Ice_DB_UPGRADE_EXECUTABLE``
+  .. versionadded:: 3.4
+
+  The path to the ``db_upgrade`` executable.
+
+``Ice_DB_VERIFY_EXECUTABLE``
+  .. versionadded:: 3.4
+
+  The path to the ``db_verify`` executable.
+
+``Ice_DUMPDB_EXECUTABLE``
+  .. versionadded:: 3.4
+
+  The path to the ``dumpdb`` executable.
+
+``Ice_TRANSFORMDB_EXECUTABLE``
+  .. versionadded:: 3.4
+
+  The path to the ``transformdb`` executable.
+
+Cache Variables
+^^^^^^^^^^^^^^^
+
+The following cache variables may also be set:
+
+``Ice_<PROGRAM>_EXECUTABLE``
+  The path to the specified ``<PROGRAM>`` executable;  The ``<PROGRAM>`` is the
+  uppercase name of the Ice program as listed in above result variables of
+  executables.
+
+``Ice_INCLUDE_DIR``
+  The directory containing Ice headers.
+
+``Ice_SLICE_DIR``
+  The data directory containing interface definitions for Slice.
+
+``Ice_<COMPONENT>_LIBRARY``
+  The path to the library for the specified component.  The ``<COMPONENT>``
+  should be written in uppercase.
+
+Hints
+^^^^^
+
+This module accepts the following variables:
+
+``Ice_HOME``
+  Set this CMake variable to the root of the Ice installation in order to
+  search for Ice in a custom location.
+
+  .. note::
+
+    On Windows, Ice 3.7.0 and later provide libraries via the NuGet
+    package manager.  Appropriate NuGet packages will be searched for
+    using :variable:`CMAKE_PREFIX_PATH`, or alternatively ``Ice_HOME`` may be
+    set to the location of a specific NuGet package to restrict the search.
+
+``ICE_HOME``
+  Environment variable (uppercased) may also be set to the root of the Ice
+  installation;  The ``Ice_HOME`` CMake variable takes precedence.
+
+``Ice_DEBUG``
+  Set this variable to boolean true to enable debug output from this module.
 
 .. note::
-  On Windows, Ice 3.7.0 and later provide libraries via the NuGet
-  package manager.  Appropriate NuGet packages will be searched for
-  using ``CMAKE_PREFIX_PATH``, or alternatively ``Ice_HOME`` may be
-  set to the location of a specific NuGet package to restrict the
-  search.
 
-The following cache variables may also be set::
+  In most cases, none of the above variables need to be set unless multiple Ice
+  versions are installed and a specific one is required.  On Windows, the most
+  recent version is typically found using the registry.  On Unix-like systems,
+  programs, headers, and libraries are usually found in standard locations,
+  although ``Ice_SLICE_DIRS`` might not be detected automatically (commonly
+  known locations are searched).  All other variables default based on the value
+  of ``Ice_HOME``, if set.
 
-  Ice_<P>_EXECUTABLE - the path to executable <P>
-  Ice_INCLUDE_DIR - the directory containing the Ice headers
-  Ice_SLICE_DIR - the directory containing the Ice slice interface
-                  definitions
-  Ice_<C>_LIBRARY - the library for component <C>
+  It's also possible to set ``Ice_HOME`` while selectively overriding specific
+  locations for individual components;  This might be required, for example, in
+  newer versions of Visual Studio if the heuristics are not sufficient to
+  identify the correct programs and libraries for the specific Visual Studio
+  version.
 
-.. note::
+Examples
+^^^^^^^^
 
-  In most cases none of the above variables will require setting,
-  unless multiple Ice versions are available and a specific version
-  is required.  On Windows, the most recent version of Ice will be
-  found through the registry.  On Unix, the programs, headers and
-  libraries will usually be in standard locations, but Ice_SLICE_DIRS
-  might not be automatically detected (commonly known locations are
-  searched).  All the other variables are defaulted using Ice_HOME,
-  if set.  It's possible to set Ice_HOME and selectively specify
-  alternative locations for the other components; this might be
-  required for e.g. newer versions of Visual Studio if the
-  heuristics are not sufficient to identify the correct programs and
-  libraries for the specific Visual Studio version.
+Finding the Ice core library and linking it to a project target:
 
-Other variables one may set to control this module are::
+.. code-block:: cmake
 
-  Ice_DEBUG - Set to ON to enable debug output from FindIce.
+  find_package(Ice COMPONENTS Ice)
+  target_link_libraries(project_target PRIVATE Ice::Ice)
+
+Finding Ice core library and IceSSL library, and linking them to a project
+target:
+
+.. code-block:: cmake
+
+  find_package(Ice COMPONENTS Ice IceSSL)
+  target_link_libraries(project_target PRIVATE Ice::Ice Ice::IceSSL)
+
+Finding Ice core library as required component and Ice Freeze library as
+optional:
+
+.. code-block:: cmake
+
+  find_package(Ice COMPONENTS Ice OPTIONAL_COMPONENTS Freeze)
 #]=======================================================================]
 
 # Written by Roger Leigh <rleigh@codelibre.net>
