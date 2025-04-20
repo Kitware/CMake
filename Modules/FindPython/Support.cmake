@@ -3138,7 +3138,7 @@ if (("Development.Module" IN_LIST ${_PYTHON_BASE}_FIND_COMPONENTS
         if (_${_PYTHON_PREFIX}_FIND_STRATEGY STREQUAL "LOCATION")
           # library names
           _python_get_names (_${_PYTHON_PREFIX}_LIB_NAMES VERSION ${_${_PYTHON_PREFIX}_FIND_VERSIONS} WIN32 POSIX LIBRARY)
-          _python_get_names (_${_PYTHON_PREFIX}_LIB_NAMES_DEBUG VERSION ${_${_PYTHON_PREFIX}_FIND_VERSIONS} WIN32 DEBUG)
+          _python_get_names (_${_PYTHON_PREFIX}_LIB_NAMES_DEBUG VERSION ${_${_PYTHON_PREFIX}_FIND_VERSIONS} WIN32 DEBUG LIBRARY)
           # Paths suffixes
           _python_get_path_suffixes (_${_PYTHON_PREFIX}_PATH_SUFFIXES VERSION ${_${_PYTHON_PREFIX}_FIND_VERSIONS} LIBRARY)
 
@@ -3205,7 +3205,7 @@ if (("Development.Module" IN_LIST ${_PYTHON_BASE}_FIND_COMPONENTS
         else()
           foreach (_${_PYTHON_PREFIX}_LIB_VERSION IN LISTS _${_PYTHON_PREFIX}_FIND_VERSIONS)
             _python_get_names (_${_PYTHON_PREFIX}_LIB_NAMES VERSION ${_${_PYTHON_PREFIX}_LIB_VERSION} WIN32 POSIX LIBRARY)
-            _python_get_names (_${_PYTHON_PREFIX}_LIB_NAMES_DEBUG VERSION ${_${_PYTHON_PREFIX}_LIB_VERSION} WIN32 DEBUG)
+            _python_get_names (_${_PYTHON_PREFIX}_LIB_NAMES_DEBUG VERSION ${_${_PYTHON_PREFIX}_LIB_VERSION} WIN32 DEBUG LIBRARY)
 
             _python_get_frameworks (_${_PYTHON_PREFIX}_FRAMEWORK_PATHS VERSION ${_${_PYTHON_PREFIX}_LIB_VERSION})
             _python_get_registries (_${_PYTHON_PREFIX}_REGISTRY_PATHS VERSION ${_${_PYTHON_PREFIX}_LIB_VERSION})
@@ -3303,7 +3303,7 @@ if (("Development.Module" IN_LIST ${_PYTHON_BASE}_FIND_COMPONENTS
     if (WIN32 AND _${_PYTHON_PREFIX}_LIBRARY_RELEASE)
       # search for debug library
       # use release library location as a hint
-      _python_get_names (_${_PYTHON_PREFIX}_LIB_NAMES_DEBUG VERSION ${_${_PYTHON_PREFIX}_VERSION} WIN32 DEBUG)
+      _python_get_names (_${_PYTHON_PREFIX}_LIB_NAMES_DEBUG VERSION ${_${_PYTHON_PREFIX}_VERSION} WIN32 DEBUG LIBRARY)
       get_filename_component (_${_PYTHON_PREFIX}_PATH "${_${_PYTHON_PREFIX}_LIBRARY_RELEASE}" DIRECTORY)
       find_library (_${_PYTHON_PREFIX}_LIBRARY_DEBUG
                     NAMES ${_${_PYTHON_PREFIX}_LIB_NAMES_DEBUG}
@@ -3331,7 +3331,7 @@ if (("Development.Module" IN_LIST ${_PYTHON_BASE}_FIND_COMPONENTS
                                     PATH_SUFFIXES bin)
     endif()
     if (_${_PYTHON_PREFIX}_LIBRARY_DEBUG)
-      _python_get_names (_${_PYTHON_PREFIX}_LIB_NAMES_DEBUG VERSION ${_${_PYTHON_PREFIX}_VERSION} WIN32 DEBUG)
+      _python_get_names (_${_PYTHON_PREFIX}_LIB_NAMES_DEBUG VERSION ${_${_PYTHON_PREFIX}_VERSION} WIN32 DEBUG LIBRARY)
       get_filename_component (_${_PYTHON_PREFIX}_PATH "${_${_PYTHON_PREFIX}_LIBRARY_DEBUG}" DIRECTORY)
       get_filename_component (_${_PYTHON_PREFIX}_PATH2 "${_${_PYTHON_PREFIX}_PATH}" DIRECTORY)
       _python_find_runtime_library (_${_PYTHON_PREFIX}_RUNTIME_LIBRARY_DEBUG
@@ -3347,7 +3347,7 @@ if (("Development.Module" IN_LIST ${_PYTHON_BASE}_FIND_COMPONENTS
     if (NOT _${_PYTHON_PREFIX}_SABI_LIBRARY_RELEASE)
       ## compute artifact names
       _python_get_names (_${_PYTHON_PREFIX}_LIB_NAMES VERSION ${_${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR} WIN32 POSIX LIBRARY)
-      _python_get_names (_${_PYTHON_PREFIX}_LIB_NAMES_DEBUG VERSION ${_${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR} WIN32 DEBUG)
+      _python_get_names (_${_PYTHON_PREFIX}_LIB_NAMES_DEBUG VERSION ${_${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR} WIN32 DEBUG LIBRARY)
 
       if ("LIBRARY" IN_LIST _${_PYTHON_PREFIX}_FIND_DEVELOPMENT_ARTIFACTS
           AND _${_PYTHON_PREFIX}_LIBRARY_RELEASE)
@@ -3561,6 +3561,8 @@ if (("Development.Module" IN_LIST ${_PYTHON_BASE}_FIND_COMPONENTS
 
     if (WIN32 AND _${_PYTHON_PREFIX}_SABI_LIBRARY_RELEASE)
       # search for debug library
+      # use release library location as a hint
+      _python_get_names (_${_PYTHON_PREFIX}_LIB_NAMES_DEBUG VERSION ${_${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR} WIN32 DEBUG LIBRARY)
       get_filename_component (_${_PYTHON_PREFIX}_PATH "${_${_PYTHON_PREFIX}_SABI_LIBRARY_RELEASE}" DIRECTORY)
       find_library (_${_PYTHON_PREFIX}_SABI_LIBRARY_DEBUG
                     NAMES ${_${_PYTHON_PREFIX}_LIB_NAMES_DEBUG}
@@ -3577,6 +3579,7 @@ if (("Development.Module" IN_LIST ${_PYTHON_BASE}_FIND_COMPONENTS
 
     # retrieve runtime libraries
     if (_${_PYTHON_PREFIX}_SABI_LIBRARY_RELEASE)
+      _python_get_names (_${_PYTHON_PREFIX}_LIB_NAMES VERSION ${_${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR} WIN32 POSIX LIBRARY)
       get_filename_component (_${_PYTHON_PREFIX}_PATH "${_${_PYTHON_PREFIX}_SABI_LIBRARY_RELEASE}" DIRECTORY)
       get_filename_component (_${_PYTHON_PREFIX}_PATH2 "${_${_PYTHON_PREFIX}_PATH}" DIRECTORY)
       _python_find_runtime_library (_${_PYTHON_PREFIX}_RUNTIME_SABI_LIBRARY_RELEASE

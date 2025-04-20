@@ -107,6 +107,10 @@ add_test(NAME FindPython.RequiredArtifacts.Library.VALID COMMAND
   --build-project TestRequiredArtifacts.Check
   --build-options -DPYTHON_IS_FOUND=TRUE -DCHECK_LIBRARY=ON
                   "-DPython3_LIBRARY=${Python3_LIBRARY_RELEASE}"
+                  "-DPYTHON_LIBRARY_RELEASE=${Python3_LIBRARY_RELEASE}"
+                  "-DPYTHON_RUNTIME_LIBRARY_RELEASE=${Python3_RUNTIME_LIBRARY_RELEASE}"
+                  "-DPYTHON_LIBRARY_DEBUG=${Python3_LIBRARY_DEBUG}"
+                  "-DPYTHON_RUNTIME_LIBRARY_DEBUG=${Python3_RUNTIME_LIBRARY_DEBUG}"
   --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
   )
 add_test(NAME FindPython.RequiredArtifacts.Library.INVALID COMMAND
@@ -179,7 +183,11 @@ if (CMake_TEST_FindPython3_SABIModule AND WIN32)
     ${build_generator_args}
     --build-project TestRequiredArtifacts.Check
     --build-options -DPYTHON_IS_FOUND=TRUE -DCHECK_SABI_LIBRARY=ON
-    "-DPython3_SABI_LIBRARY=${Python3_SABI_LIBRARY_RELEASE}"
+                    "-DPython3_SABI_LIBRARY=${Python3_SABI_LIBRARY_RELEASE}"
+                    "-DPYTHON_SABI_LIBRARY_RELEASE=${Python3_SABI_LIBRARY_RELEASE}"
+                    "-DPYTHON_RUNTIME_SABI_LIBRARY_RELEASE=${Python3_RUNTIME_SABI_LIBRARY_RELEASE}"
+                    "-DPYTHON_SABI_LIBRARY_DEBUG=${Python3_SABI_LIBRARY_DEBUG}"
+                    "-DPYTHON_RUNTIME_SABI_LIBRARY_DEBUG=${Python3_RUNTIME_SABI_LIBRARY_DEBUG}"
     --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
   )
   add_test(NAME FindPython.RequiredArtifacts.SABILibrary.INVALID COMMAND
@@ -190,7 +198,7 @@ if (CMake_TEST_FindPython3_SABIModule AND WIN32)
     ${build_generator_args}
     --build-project TestRequiredArtifacts.Check
     --build-options -DPYTHON_IS_FOUND=FALSE -DCHECK_SABI_LIBRARY=ON
-    "-DPython3_SABI_LIBRARY=${USER_LIBRARY}"
+                    "-DPython3_SABI_LIBRARY=${USER_LIBRARY}"
     --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
   )
 endif()
