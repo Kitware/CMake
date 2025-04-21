@@ -36,7 +36,14 @@ int main()
   cuDeviceGet(&device, 0);
 
   CUcontext context;
+#if defined(__CUDACC_VER_MAJOR__) && __CUDACC_VER_MAJOR__ >= 13
+  CUctxCreateParams params;
+  params.execAffinityParams = nullptr;
+  params.numExecAffinityParams = 0;
+  cuCtxCreate(&context, &params, 0, device);
+#else
   cuCtxCreate(&context, 0, device);
+#endif
 
   CUmodule module;
   for (auto p : actual_paths) {
