@@ -43,7 +43,6 @@
 
 #ifndef CMAKE_BOOTSTRAP
 #  include "cmDocumentation.h"
-#  include "cmDynamicLoader.h"
 #endif
 
 #include "cmsys/Encoding.hxx"
@@ -1181,9 +1180,6 @@ int main(int ac, char const* const* av)
     }
   }
   int ret = do_cmake(ac, av);
-#ifndef CMAKE_BOOTSTRAP
-  cmDynamicLoader::FlushCache();
-#endif
   if (uv_loop_t* loop = uv_default_loop()) {
     uv_loop_close(loop);
   }
