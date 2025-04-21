@@ -304,7 +304,7 @@ t:nvhpc22.11-ninja:
     extends:
         - .nvhpc_ninja
         - .cmake_test_linux_release
-        - .linux_x86_64_v3_tags_cuda
+        - .linux_x86_64_v3_tags_cuda_arch_52
         - .run_dependent
         - .needs_centos7_x86_64
     variables:
@@ -314,7 +314,7 @@ t:cuda9.2-nvidia:
     extends:
         - .cuda9.2_nvidia
         - .cmake_test_linux_release
-        - .linux_x86_64_tags_cuda
+        - .linux_x86_64_tags_cuda_arch_30
         - .run_dependent
         - .needs_centos7_x86_64
     variables:
@@ -324,7 +324,7 @@ t:cuda10.2-nvidia:
     extends:
         - .cuda10.2_nvidia
         - .cmake_test_linux_release
-        - .linux_x86_64_tags_cuda
+        - .linux_x86_64_tags_cuda_arch_52
         - .cmake_junit_artifacts
         - .run_dependent
         - .needs_centos7_x86_64
@@ -335,7 +335,7 @@ t:cuda10.2-clang:
     extends:
         - .cuda10.2_clang
         - .cmake_test_linux_release
-        - .linux_x86_64_tags_cuda
+        - .linux_x86_64_tags_cuda_arch_52
         - .run_dependent
         - .needs_centos7_x86_64
     variables:
@@ -345,7 +345,7 @@ t:cuda11.6-nvidia:
     extends:
         - .cuda11.6_nvidia
         - .cmake_test_linux_release
-        - .linux_x86_64_tags_cuda
+        - .linux_x86_64_tags_cuda_arch_52
         - .cmake_junit_artifacts
         - .run_dependent
         - .needs_centos7_x86_64
@@ -356,7 +356,7 @@ t:cuda11.6-clang:
     extends:
         - .cuda11.6_clang
         - .cmake_test_linux_release
-        - .linux_x86_64_tags_cuda
+        - .linux_x86_64_tags_cuda_arch_52
         - .run_dependent
         - .needs_centos7_x86_64
     variables:
@@ -366,7 +366,7 @@ t:cuda11.8-minimal-ninja:
     extends:
         - .cuda11.8_minimal_nvidia
         - .cmake_test_linux_release
-        - .linux_x86_64_tags_cuda
+        - .linux_x86_64_tags_cuda_arch_52
         - .run_dependent
         - .needs_centos7_x86_64
     variables:
@@ -376,7 +376,7 @@ t:cuda11.8-minimal-splayed-ninja:
     extends:
         - .cuda11.8_splayed_nvidia
         - .cmake_test_linux_release
-        - .linux_x86_64_tags_cuda
+        - .linux_x86_64_tags_cuda_arch_52
         - .run_dependent
         - .needs_centos7_x86_64
     variables:
@@ -386,7 +386,7 @@ t:cuda12.2-nvidia:
     extends:
         - .cuda12.2_nvidia
         - .cmake_test_linux_release
-        - .linux_x86_64_tags_cuda
+        - .linux_x86_64_tags_cuda_arch_52
         - .cmake_junit_artifacts
         - .run_dependent
         - .needs_centos7_x86_64
@@ -395,7 +395,7 @@ t:cuda12.2-nvidia-clang:
     extends:
         - .cuda12.2_nvidia_clang
         - .cmake_test_linux_release
-        - .linux_x86_64_tags_cuda
+        - .linux_x86_64_tags_cuda_arch_52
         - .cmake_junit_artifacts
         - .run_dependent
         - .needs_centos7_x86_64
@@ -406,7 +406,7 @@ t:cuda12.2-clang:
     extends:
         - .cuda12.2_clang
         - .cmake_test_linux_release
-        - .linux_x86_64_tags_cuda
+        - .linux_x86_64_tags_cuda_arch_52
         - .run_dependent
         - .needs_centos7_x86_64
     variables:
@@ -416,7 +416,7 @@ t:hip5.5-nvidia:
     extends:
         - .hip5.5_nvidia
         - .cmake_test_linux_release
-        - .linux_x86_64_tags_cuda
+        - .linux_x86_64_tags_cuda_arch_52
         - .run_dependent
         - .needs_centos7_x86_64
     variables:

@@ -491,17 +491,24 @@
         - linux-x86_64
         - x11
 
-.linux_x86_64_tags_cuda:
+.linux_x86_64_tags_cuda_arch_30:
     tags:
         - cmake
-        - cuda-rt
+        - cuda-arch-30
         - docker
         - linux-x86_64
 
-.linux_x86_64_v3_tags_cuda:
+.linux_x86_64_tags_cuda_arch_52:
     tags:
         - cmake
-        - cuda-rt
+        - cuda-arch-52
+        - docker
+        - linux-x86_64
+
+.linux_x86_64_v3_tags_cuda_arch_52:
+    tags:
+        - cmake
+        - cuda-arch-52
         - docker
         - linux-x86_64-v3
 
