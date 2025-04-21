@@ -26,4 +26,9 @@ macro(get_warning_options warning_options lang)
   elseif (CMAKE_${lang}_COMPILER_ID STREQUAL "Fujitsu")
     set(${warning_options} "SHELL:-w 8")
   endif()
+
+  if(${lang} STREQUAL Swift)
+    # No extra flags required for Swift
+    set(${warning_options} "")
+  endif()
 endmacro()
