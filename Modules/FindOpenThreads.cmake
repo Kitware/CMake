@@ -5,54 +5,87 @@
 FindOpenThreads
 ---------------
 
-OpenThreads is a C++ based threading library.  Its largest userbase
-seems to OpenSceneGraph so you might notice I accept OSGDIR as an
-environment path.  I consider this part of the ``Findosg*`` suite used to
-find OpenSceneGraph components.  Each component is separate and you
-must opt in to each module.
+Finds the OpenThreads C++ based threading library.
 
-This module defines:
+OpenThreads header files are intended to be included as
+``#include <OpenThreads/Thread>``.
+
+Result Variables
+^^^^^^^^^^^^^^^^
+
+This module defines the following variables:
+
+``OpenThreads_FOUND``
+  Boolean indicating whether OpenThreads library is found.  For backward
+  compatibility, the ``OPENTHREADS_FOUND`` variable is also set to the same
+  value.
 
 ``OPENTHREADS_LIBRARY``
+  Libraries needed to link against to use OpenThreads.  This provides either
+  release (optimized) or debug library variant, which are found separately
+  depending on the project's :ref:`Build Configurations`.
 
-``OPENTHREADS_FOUND``
-  if false, do not try to link to OpenThreads
+Cache Variables
+^^^^^^^^^^^^^^^
+
+The following cache variables may also be set:
+
 ``OPENTHREADS_INCLUDE_DIR``
-  where to find the headers
+  The directory containing the header files needed to use OpenThreads.
 
-``$OPENTHREADS_DIR`` is an environment variable that would correspond to the::
+Hints
+^^^^^
 
-  ./configure --prefix=$OPENTHREADS_DIR
+This module accepts the following variables:
 
-used in building osg.
+``OPENTHREADS_DIR``
+  An environment or CMake variable that can be set to help find an OpenThreads
+  library installed in a custom location.  It should point to the installation
+  destination that was used when configuring, building, and installing
+  OpenThreads library: ``./configure --prefix=$OPENTHREADS_DIR``.
 
-.. versionadded:: 2.8.10
+This module was originally introduced to support the
+:module:`FindOpenSceneGraph` module and its components.  To simplify one-step
+automated configuration and builds when the OpenSceneGraph package is developed
+and distributed upstream, this module supports additional environment variables
+to find dependencies in specific locations.  This approach is used by upstream
+package over specifying ``-DVAR=value`` on the command line because it offers
+better isolation from internal changes to the module and allows more flexibility
+when specifying individual OSG components independently of the ``CMAKE_*_PATH``
+variables.  Explicit ``-DVAR=value`` arguments can still override these settings
+if needed.  Since OpenThreads is an optional standalone dependency of
+OpenSceneGraph, this module also honors the following variables for convenience:
 
-  The CMake variables ``OPENTHREADS_DIR`` or ``OSG_DIR`` can now
-  be used as well to influence detection, instead of needing to specify
-  an environment variable.
+``OSG_DIR``
+  May be set as an environment or CMake variable. Treated the same as
+  ``OPENTHREADS_DIR``.
+
+``OSGDIR``
+  Environment variable treated the same as ``OPENTHREADS_DIR``.
+
+Examples
+^^^^^^^^
+
+Finding the OpenThreads library and creating an interface :ref:`imported target
+<Imported Targets>` that encapsulates its usage requirements for linking to a
+project target:
+
+.. code-block:: cmake
+
+  find_package(OpenThreads)
+
+  if(OpenThreads_FOUND AND NOT TARGET OpenThreads::OpenThreads)
+    add_library(OpenThreads::OpenThreads INTERFACE IMPORTED)
+    set_target_properties(
+      OpenThreads::OpenThreads
+      PROPERTIES
+        INTERFACE_INCLUDE_DIRECTORIES "${OPENTHREADS_INCLUDE_DIR}"
+        INTERFACE_LINK_LIBRARIES "${OPENTHREADS_LIBRARY}"
+    )
+  endif()
+
+  target_link_libraries(project_target PRIVATE OpenThreads::OpenThreads)
 #]=======================================================================]
-
-# Header files are presumed to be included like
-# #include <OpenThreads/Thread>
-
-# To make it easier for one-step automated configuration/builds,
-# we leverage environmental paths. This is preferable
-# to the -DVAR=value switches because it insulates the
-# users from changes we may make in this script.
-# It also offers a little more flexibility than setting
-# the CMAKE_*_PATH since we can target specific components.
-# However, the default CMake behavior will search system paths
-# before anything else. This is problematic in the cases
-# where you have an older (stable) version installed, but
-# are trying to build a newer version.
-# CMake doesn't offer a nice way to globally control this behavior
-# so we have to do a nasty "double FIND_" in this module.
-# The first FIND disables the CMAKE_ search paths and only checks
-# the environmental paths.
-# If nothing is found, then the second find will search the
-# standard install paths.
-# Explicit -DVAR=value arguments should still be able to override everything.
 
 include(${CMAKE_CURRENT_LIST_DIR}/SelectLibraryConfigurations.cmake)
 
@@ -69,7 +102,6 @@ find_path(OPENTHREADS_INCLUDE_DIR OpenThreads/Thread
         ${OSG_DIR}
     PATH_SUFFIXES include
 )
-
 
 find_library(OPENTHREADS_LIBRARY_RELEASE
     NAMES OpenThreads OpenThreadsWin32
