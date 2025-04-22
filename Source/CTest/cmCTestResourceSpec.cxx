@@ -47,10 +47,19 @@ auto const RootVersionHelper = JSONHelperBuilder::Object<TopVersion>().Bind(
 bool ResourceIdHelper(std::string& out, Json::Value const* value,
                       cmJSONState* state)
 {
+#if defined(__GNUC__) && __GNUC__ >= 15
+#  define CM_GCC_diagnostic_push_Wmaybe_uninitialized
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+#endif
   if (!JSONHelperBuilder::String(cmCTestResourceSpecErrors::INVALID_RESOURCE)(
         out, value, state)) {
     return false;
   }
+#ifdef CM_GCC_diagnostic_push_Wmaybe_uninitialized
+#  pragma GCC diagnostic pop
+#  undef CM_GCC_diagnostic_push_Wmaybe_uninitialized
+#endif
   cmsys::RegularExpressionMatch match;
   if (!IdRegex.find(out.c_str(), match)) {
     cmCTestResourceSpecErrors::INVALID_RESOURCE(value, state);
