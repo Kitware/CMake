@@ -15,6 +15,8 @@ run_cmake(TLS_VERSION-invalid)
 run_cmake(TLS_VERSION-missing)
 run_cmake(pass-not-set)
 run_cmake(no-save-hash)
+run_cmake(failed-download)
+run_cmake(bad-file)
 
 run_cmake(basic)
 run_cmake(EXPECTED_HASH)

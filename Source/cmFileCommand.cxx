@@ -2131,7 +2131,8 @@ bool HandleDownloadCommand(std::vector<std::string> const& args,
   if (!file.empty()) {
     fout.open(file.c_str(), std::ios::binary);
     if (!fout) {
-      status.SetError("DOWNLOAD cannot open file for write.");
+      status.SetError(cmStrCat("DOWNLOAD cannot open file for write\n",
+                               "  file: \"", file, '"'));
       return false;
     }
   }
@@ -2320,16 +2321,18 @@ bool HandleDownloadCommand(std::vector<std::string> const& args,
   //
   if (hash) {
     if (res != CURLE_OK) {
-      status.SetError(cmStrCat(
-        "DOWNLOAD cannot compute hash on failed download\n"
-        "  status: [",
-        static_cast<int>(res), ";\"", ::curl_easy_strerror(res), "\"]"));
+      status.SetError(
+        cmStrCat("DOWNLOAD cannot compute hash on failed download\n"
+                 "  from url: \"",
+                 url, "\"\n  status: [", static_cast<int>(res), ";\"",
+                 ::curl_easy_strerror(res), "\"]"));
       return false;
     }
 
     std::string actualHash = hash->HashFile(file);
     if (actualHash.empty()) {
-      status.SetError("DOWNLOAD cannot compute hash on downloaded file");
+      status.SetError(cmStrCat("DOWNLOAD cannot compute hash on download\n",
+                               "  for file: \"", file, '"'));
       return false;
     }
 
@@ -2343,14 +2346,14 @@ bool HandleDownloadCommand(std::vector<std::string> const& args,
       }
 
       status.SetError(cmStrCat("DOWNLOAD HASH mismatch\n"
-                               "  for file: [",
+                               "  for file: \"",
                                file,
-                               "]\n"
-                               "    expected hash: [",
+                               "\"\n"
+                               "    expected hash: \"",
                                expectedHash,
-                               "]\n"
-                               "      actual hash: [",
-                               actualHash, "]\n"));
+                               "\"\n"
+                               "      actual hash: \"",
+                               actualHash, "\"\n"));
       return false;
     }
   }

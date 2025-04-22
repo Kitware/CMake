@@ -1,0 +1,6 @@
+CMake Error at bad-file.cmake:[0-9]+ \(file\):
+  file DOWNLOAD cannot open file for write
+
+    file: "."
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)
