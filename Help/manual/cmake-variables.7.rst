@@ -105,6 +105,7 @@ Variables that Provide Information
    /variable/CMAKE_PROJECT_VERSION_MINOR
    /variable/CMAKE_PROJECT_VERSION_PATCH
    /variable/CMAKE_PROJECT_VERSION_TWEAK
+   /variable/CMAKE_PROJECT_COMPAT_VERSION
    /variable/CMAKE_RANLIB
    /variable/CMAKE_ROOT
    /variable/CMAKE_RULE_MESSAGES
@@ -161,6 +162,7 @@ Variables that Provide Information
    /variable/PROJECT-NAME_VERSION_MINOR
    /variable/PROJECT-NAME_VERSION_PATCH
    /variable/PROJECT-NAME_VERSION_TWEAK
+   /variable/PROJECT-NAME_COMPAT_VERSION
    /variable/PROJECT_BINARY_DIR
    /variable/PROJECT_DESCRIPTION
    /variable/PROJECT_HOMEPAGE_URL
@@ -172,6 +174,7 @@ Variables that Provide Information
    /variable/PROJECT_VERSION_MINOR
    /variable/PROJECT_VERSION_PATCH
    /variable/PROJECT_VERSION_TWEAK
+   /variable/PROJECT_COMPAT_VERSION
 
 Variables that Change Behavior
 ==============================

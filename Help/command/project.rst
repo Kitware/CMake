@@ -11,6 +11,7 @@ Synopsis
  project(<PROJECT-NAME> [<language-name>...])
  project(<PROJECT-NAME>
          [VERSION <major>[.<minor>[.<patch>[.<tweak>]]]]
+         [COMPAT_VERSION <major>[.<minor>[.<patch>[.<tweak>]]]]
          [DESCRIPTION <project-description-string>]
          [HOMEPAGE_URL <url-string>]
          [LANGUAGES <language-name>...])
@@ -85,6 +86,24 @@ The options are:
     When the ``project()`` command is called from the top-level
     ``CMakeLists.txt``, then the version is also stored in the variable
     :variable:`CMAKE_PROJECT_VERSION`.
+
+``COMPAT_VERSION <version>``
+  .. note::
+
+    Experimental. Gated by ``CMAKE_EXPERIMENTAL_EXPORT_PACKAGE_INFO``.
+
+  Optional; requires ``VERSION`` also be set.
+
+  Takes a ``<version>`` argument composed of non-negative integer components,
+  i.e. ``<major>[.<minor>[.<patch>[.<tweak>]]]``,
+  and sets the variables
+
+  * :variable:`PROJECT_COMPAT_VERSION`,
+    :variable:`<PROJECT-NAME>_COMPAT_VERSION`
+
+    When the ``project()`` command is called from the top-level
+    ``CMakeLists.txt``, then the compatibility version is also stored in the
+    variable :variable:`CMAKE_PROJECT_COMPAT_VERSION`.
 
 ``DESCRIPTION <project-description-string>``
   .. versionadded:: 3.9

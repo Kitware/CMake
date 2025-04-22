@@ -1,0 +1,1 @@
+  COMPAT_VERSION may be specified at most once.
