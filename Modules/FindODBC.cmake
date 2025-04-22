@@ -7,83 +7,123 @@ FindODBC
 
 .. versionadded:: 3.12
 
-Find an Open Database Connectivity (ODBC) include directory and library.
+Finds the Open Database Connectivity (ODBC) library, which implements a standard
+API for accessing database systems.  ODBC enables applications to communicate
+with different database management systems (DBMS) using a common set of
+functions.  Communication with a specific database is handled through ODBC
+drivers, which the library loads at runtime.
 
 On Windows, when building with Visual Studio, this module assumes the ODBC
 library is provided by the available Windows SDK.
 
-On Unix, this module allows to search for ODBC library provided by
-unixODBC or iODBC implementations of ODBC API.
-This module reads hint about location of the config program:
-
-.. variable:: ODBC_CONFIG
-
-  Location of odbc_config or iodbc-config program
-
-Otherwise, this module tries to find the config program,
-first from unixODBC, then from iODBC.
-If no config program found, this module searches for ODBC header
-and library in list of known locations.
+On Unix-like systems, this module searches for ODBC library provided by unixODBC
+or iODBC implementations of ODBC API.  By default, this module looks for the
+ODBC config program to determine the ODBC library and include directory, first
+from unixODBC, then from iODBC.  If no config program is found, it searches for
+ODBC header and library in standard locations.
 
 Imported Targets
 ^^^^^^^^^^^^^^^^
 
-This module defines the following :prop_tgt:`IMPORTED` targets:
+This module provides the following :ref:`Imported Targets`:
 
-.. variable:: ODBC::ODBC
+``ODBC::ODBC``
+  Target encapsulating the ODBC usage requirements, available if ODBC is found.
 
-  Imported target for using the ODBC library, if found.
-
-Result variables
+Result Variables
 ^^^^^^^^^^^^^^^^
 
-.. variable:: ODBC_FOUND
+This module defines the following variables:
 
-  Set to true if ODBC library found, otherwise false or undefined.
+``ODBC_FOUND``
+  Boolean indicating whether ODBC is found.
 
-.. variable:: ODBC_INCLUDE_DIRS
+``ODBC_INCLUDE_DIRS``
+  Include directories containing headers needed to use ODBC.
 
-  Paths to include directories listed in one variable for use by ODBC client.
-  May be empty on Windows, where the include directory corresponding to the
-  expected Windows SDK is already available in the compilation environment.
+``ODBC_LIBRARIES``
+  Libraries needed to link against to use ODBC.
 
-.. variable:: ODBC_LIBRARIES
-
-  Paths to libraries to linked against to use ODBC.
-  May just a library name on Windows, where the library directory corresponding
-  to the expected Windows SDK is already available in the compilation environment.
-
-.. variable:: ODBC_CONFIG
-
-  Path to unixODBC or iODBC config program, if found or specified.
-
-Cache variables
+Cache Variables
 ^^^^^^^^^^^^^^^
 
-For users who wish to edit and control the module behavior, this module
-reads hints about search locations from the following variables:
+The following cache variables may also be set:
 
-.. variable:: ODBC_INCLUDE_DIR
+``ODBC_INCLUDE_DIR``
+  The path to the directory containing ``sql.h`` and other ODBC headers.  May be
+  empty on Windows, where the include directory corresponding to the expected
+  Windows SDK is already available in the compilation environment.
 
-  Path to ODBC include directory with ``sql.h`` header.
+``ODBC_LIBRARY``
+  The path to the ODBC library or a library name.  On Windows, this may be only
+  a library name, because the library directory corresponding to the expected
+  Windows SDK is already available in the compilation environment.
 
-.. variable:: ODBC_LIBRARY
-
-  Path to ODBC library to be linked.
-
-These variables should not be used directly by project code.
+``ODBC_CONFIG``
+  The path to the ODBC config program if found or specified.  For example,
+  ``odbc_config`` for unixODBC, or ``iodbc-config`` for iODBC.
 
 Limitations
 ^^^^^^^^^^^
 
-On Windows, this module does not search for iODBC.
-On Unix, there is no way to prefer unixODBC over iODBC, or vice versa,
-other than providing the config program location using the ``ODBC_CONFIG``.
-This module does not allow to search for a specific ODBC driver.
+* On Windows, this module does not search for iODBC.
+* On Unix-like systems, there is no built-in mechanism to prefer unixODBC over
+  iODBC, or vice versa.  To bypass this limitation, explicitly set the
+  ``ODBC_CONFIG`` variable to the path of the desired ODBC config program.
+* This module does not support searching for or selecting a specific ODBC
+  driver.
 
+Examples
+^^^^^^^^
+
+Finding and using ODBC
+""""""""""""""""""""""
+
+Finding ODBC and linking it to a project target:
+
+.. code-block:: cmake
+  :caption: CMakeLists.txt
+
+  find_package(ODBC)
+  target_link_libraries(project_target PRIVATE ODBC::ODBC)
+
+Finding a custom ODBC installation on Unix-like systems
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+The following examples are for Unix-like systems and demonstrate how to set hint
+and cache variables during the CMake configuration phase to help this module
+find a custom ODBC implementation (e.g. one not supported by default).
+
+To specify the installation prefix using :variable:`CMAKE_PREFIX_PATH`:
+
+.. code-block:: console
+
+  $ cmake -D CMAKE_PREFIX_PATH=/path/to/odbc-installation -B build
+
+Or using the dedicated :variable:`ODBC_ROOT <<PackageName>_ROOT>` variable:
+
+.. code-block:: console
+
+  $ cmake -D ODBC_ROOT=/path/to/odbc-installation -B build
+
+To manually specify the ODBC config program, if available, so that the ODBC
+installation can be automatically determined based on the config tool:
+
+.. code-block:: console
+
+  $ cmake -D ODBC_CONFIG=/path/to/odbc/bin/odbc-config -B build
+
+To manually specify the ODBC library and include directory:
+
+.. code-block:: console
+
+  $ cmake \
+      -D ODBC_LIBRARY=/path/to/odbc/lib/libodbc.so \
+      -D ODBC_INCLUDE_DIR=/path/to/odbc/include \
+      -B build
 #]=======================================================================]
 
-# Define lists used internally
+# Define internal variables
 set(_odbc_include_paths)
 set(_odbc_lib_paths)
 set(_odbc_lib_names)
@@ -175,7 +215,7 @@ if(NOT ODBC_LIBRARY)
   foreach(_lib IN LISTS _odbc_required_libs_names)
     find_library(_lib_path
       NAMES ${_lib}
-      PATHS ${_odbc_lib_paths} # system parths or collected from ODBC_CONFIG
+      PATHS ${_odbc_lib_paths} # system paths or collected from ODBC_CONFIG
       PATH_SUFFIXES odbc)
     if(_lib_path)
       list(APPEND _odbc_required_libs_paths ${_lib_path})
@@ -184,7 +224,7 @@ if(NOT ODBC_LIBRARY)
   endforeach()
 endif()
 
-# Unset internal lists as no longer used
+# Unset internal variables as no longer used
 unset(_odbc_include_paths)
 unset(_odbc_lib_paths)
 unset(_odbc_lib_names)
