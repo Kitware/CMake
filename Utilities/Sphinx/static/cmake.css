@@ -73,16 +73,19 @@ div.body nav.contents p {
   white-space: nowrap;
 }
 
-/* Add hanging indent to deprecated and version-{added,changed} content. */
+/* Add hanging indent to deprecated and version-{added,changed} content. Don't
+   de-indent footnotes, because the brackets are rendered as floating elements
+   that ignore the padding, while the de-indenting will cause the following
+   text to overlap the footnote brackets. */
 div.deprecated > *,
 div.versionadded > *,
 div.versionchanged > * {
   padding-left: 2em;
 }
 
-div.deprecated > :first-child,
-div.versionadded > :first-child,
-div.versionchanged > :first-child {
+:not(.footnote) > div.deprecated > :first-child,
+:not(.footnote) > div.versionadded > :first-child,
+:not(.footnote) > div.versionchanged > :first-child {
   text-indent: -2em;
 }
 
