@@ -4,6 +4,7 @@ macro (add_cuda_test_macro name)
     PROPERTY LABELS "CUDA")
 endmacro ()
 
+set(CudaOnly.Architecture_BUILD_OPTIONS -DCMake_TEST_CUDA_ARCH=${CMake_TEST_CUDA_ARCH})
 add_cuda_test_macro(CudaOnly.Architecture Architecture)
 add_cuda_test_macro(CudaOnly.ArchSpecial CudaOnlyArchSpecial)
 add_cuda_test_macro(CudaOnly.CompileFlags CudaOnlyCompileFlags)
