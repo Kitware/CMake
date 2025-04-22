@@ -33,7 +33,7 @@ if(NOT TARGET Python3::SABIModule)
   message(SEND_ERROR "Python3::SABIModule not found")
 endif()
 
-if (Python3_VERSION VERSION_GREATER_EQUAL "3.2" AND NOT Python3_SOSABI)
+if (Python3_VERSION VERSION_GREATER_EQUAL "3.2" AND NOT DEFINED Python3_SOSABI)
   message(FATAL_ERROR "Python3_SOSABI unexpectedly not defined")
 endif()
 
