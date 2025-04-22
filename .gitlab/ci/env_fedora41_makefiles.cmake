@@ -1,1 +1,1 @@
-set(ENV{MY_RUBY_HOME} "/usr/local/rvm/rubies/ruby-3.0.4")
+set(ENV{MY_RUBY_HOME} "/usr/local/rvm/rubies/ruby-3.3.8")

@@ -13,3 +13,4 @@ llvm
 rocm-comgr-devel
 rocm-hip-devel
 rocm-runtime-devel
+rocminfo

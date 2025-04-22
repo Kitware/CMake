@@ -3,6 +3,7 @@ automake
 bison
 bzip2
 findutils
+gawk
 gcc-c++
 glibc-devel
 gnupg2
