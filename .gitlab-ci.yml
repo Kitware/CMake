@@ -61,7 +61,7 @@ p:source-package:
 
 p:doc-package:
     extends:
-        - .fedora41_sphinx_package
+        - .fedora42_sphinx_package
         - .cmake_prep_doc_linux
         - .linux_x86_64_tags
         - .cmake_doc_artifacts
@@ -111,18 +111,18 @@ l:iwyu-debian12:
         - .cmake_cdash_artifacts
         - .run_automatically
 
-l:tidy-fedora41:
+l:tidy-fedora42:
     extends:
-        - .fedora41_tidy
+        - .fedora42_tidy
         - .cmake_build_linux
         - .cmake_tidy_artifacts
         - .linux_x86_64_tags
         - .cmake_cdash_artifacts
         - .run_automatically
 
-l:sphinx-fedora41:
+l:sphinx-fedora42:
     extends:
-        - .fedora41_sphinx
+        - .fedora42_sphinx
         - .cmake_build_linux
         - .cmake_sphinx_artifacts
         - .linux_x86_64_tags
@@ -131,9 +131,9 @@ l:sphinx-fedora41:
         CMAKE_CI_JOB_CONTINUOUS: "true"
         CMAKE_CI_JOB_HELP: "true"
 
-l:clang-analyzer-fedora41:
+l:clang-analyzer-fedora42:
     extends:
-        - .fedora41_clang_analyzer
+        - .fedora42_clang_analyzer
         - .cmake_build_linux
         - .linux_x86_64_tags
         - .run_automatically
@@ -227,9 +227,9 @@ t:debian12-hip-radeon:
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
-t:fedora41-hip-radeon:
+t:fedora42-hip-radeon:
     extends:
-        - .fedora41_hip_radeon
+        - .fedora42_hip_radeon
         - .cmake_test_linux_release
         - .linux_x86_64_tags_rocm6.2
         - .run_dependent
@@ -237,9 +237,9 @@ t:fedora41-hip-radeon:
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
-t:fedora41-makefiles-lfortran:
+t:fedora42-makefiles-lfortran:
     extends:
-        - .fedora41_makefiles_lfortran
+        - .fedora42_makefiles_lfortran
         - .cmake_test_linux_release
         - .linux_x86_64_tags
         - .run_dependent
@@ -247,9 +247,9 @@ t:fedora41-makefiles-lfortran:
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
-t:fedora41-ninja-lfortran:
+t:fedora42-ninja-lfortran:
     extends:
-        - .fedora41_ninja_lfortran
+        - .fedora42_ninja_lfortran
         - .cmake_test_linux_release
         - .linux_x86_64_tags
         - .run_dependent
@@ -257,9 +257,9 @@ t:fedora41-ninja-lfortran:
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
-t:fedora41-ninja-clang:
+t:fedora42-ninja-clang:
     extends:
-        - .fedora41_ninja_clang
+        - .fedora42_ninja_clang
         - .cmake_test_linux_release
         - .linux_x86_64_tags
         - .run_dependent
@@ -267,9 +267,9 @@ t:fedora41-ninja-clang:
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
-t:fedora41-ninja-multi-clang:
+t:fedora42-ninja-multi-clang:
     extends:
-        - .fedora41_ninja_multi_clang
+        - .fedora42_ninja_multi_clang
         - .cmake_test_linux_release
         - .linux_x86_64_tags
         - .run_dependent
@@ -277,9 +277,9 @@ t:fedora41-ninja-multi-clang:
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
-t:fedora41-makefiles-clang:
+t:fedora42-makefiles-clang:
     extends:
-        - .fedora41_makefiles_clang
+        - .fedora42_makefiles_clang
         - .cmake_test_linux_release
         - .linux_x86_64_tags
         - .run_dependent
@@ -287,17 +287,17 @@ t:fedora41-makefiles-clang:
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
-t:fedora41-makefiles:
+t:fedora42-makefiles:
     extends:
-        - .fedora41_makefiles
+        - .fedora42_makefiles
         - .cmake_test_linux_release
         - .linux_x86_64_v3_tags
         - .run_dependent
         - .needs_centos7_x86_64
 
-t:fedora41-makefiles-nospace:
+t:fedora42-makefiles-nospace:
     extends:
-        - .fedora41_makefiles
+        - .fedora42_makefiles
         - .cmake_test_linux_release
         - .linux_x86_64_v3_tags
         - .cmake_junit_artifacts
@@ -305,7 +305,7 @@ t:fedora41-makefiles-nospace:
         - .needs_centos7_x86_64
     variables:
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake-ci"
-        CMAKE_CI_BUILD_NAME: fedora41_makefiles_nospace
+        CMAKE_CI_BUILD_NAME: fedora42_makefiles_nospace
         CMAKE_CI_JOB_NIGHTLY: "true"
 
 t:nvhpc24.9-ninja:
@@ -492,9 +492,9 @@ t:debian10-legacy:
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
-b:fedora41-ninja:
+b:fedora42-ninja:
     extends:
-        - .fedora41_ninja
+        - .fedora42_ninja
         - .cmake_build_linux
         - .cmake_build_artifacts
         - .linux_x86_64_tags
@@ -502,9 +502,9 @@ b:fedora41-ninja:
     variables:
         CMAKE_CI_JOB_CONTINUOUS: "true"
 
-b:fedora41-makefiles-symlinked:
+b:fedora42-makefiles-symlinked:
     extends:
-        - .fedora41_makefiles_symlinked
+        - .fedora42_makefiles_symlinked
         - .cmake_build_linux
         - .cmake_build_artifacts
         - .linux_x86_64_tags
@@ -539,48 +539,48 @@ b:debian12-aarch64-extdeps:
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
-b:fedora41-extdeps:
+b:fedora42-extdeps:
     extends:
-        - .fedora41_extdeps
+        - .fedora42_extdeps
         - .cmake_build_linux_standalone
         - .linux_x86_64_tags
         - .run_manually
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
-t:fedora41-ninja:
+t:fedora42-ninja:
     extends:
-        - .fedora41_ninja
+        - .fedora42_ninja
         - .cmake_test_linux
         - .linux_x86_64_tags_x11
         - .cmake_test_artifacts
         - .run_dependent
     needs:
-        - b:fedora41-ninja
+        - b:fedora42-ninja
     variables:
         CMAKE_CI_JOB_CONTINUOUS: "true"
 
-t:fedora41-makefiles-symlinked:
+t:fedora42-makefiles-symlinked:
     extends:
-        - .fedora41_makefiles_symlinked
+        - .fedora42_makefiles_symlinked
         - .cmake_test_linux
         - .linux_x86_64_tags_x11
         - .cmake_test_artifacts
         - .run_dependent
     needs:
-        - b:fedora41-makefiles-symlinked
+        - b:fedora42-makefiles-symlinked
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
-t:fedora41-ninja-multi:
+t:fedora42-ninja-multi:
     extends:
-        - .fedora41_ninja_multi
+        - .fedora42_ninja_multi
         - .cmake_test_linux_external
         - .linux_x86_64_tags
         - .cmake_junit_artifacts
         - .run_dependent
     needs:
-        - t:fedora41-ninja
+        - t:fedora42-ninja
 
 t:intel2016u2-makefiles:
     extends:
@@ -874,9 +874,9 @@ u:sunos-sparc64-package:
 
 ## Sanitizer builds
 
-b:fedora41-asan:
+b:fedora42-asan:
     extends:
-        - .fedora41_asan
+        - .fedora42_asan
         - .cmake_build_linux
         - .cmake_build_artifacts
         - .linux_x86_64_tags
@@ -884,14 +884,14 @@ b:fedora41-asan:
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
-t:fedora41-asan:
+t:fedora42-asan:
     extends:
-        - .fedora41_asan
+        - .fedora42_asan
         - .cmake_memcheck_linux
         - .linux_x86_64_tags
         - .run_dependent
     needs:
-        - b:fedora41-asan
+        - b:fedora42-asan
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
