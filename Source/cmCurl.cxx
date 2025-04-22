@@ -48,6 +48,7 @@
 // Do this only for our vendored curl to avoid breaking builds
 // against external future versions of curl.
 #if !defined(CMAKE_USE_SYSTEM_CURL)
+// NOLINTNEXTLINE(misc-redundant-expression)
 static_assert(CURL_SSLVERSION_LAST == 8,
               "A new CURL_SSLVERSION_ may be available!");
 #endif
