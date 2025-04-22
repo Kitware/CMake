@@ -40,11 +40,13 @@ cmSourceGroup::cmSourceGroup(cmSourceGroup const& r)
 
 cmSourceGroup& cmSourceGroup::operator=(cmSourceGroup const& r)
 {
-  this->Name = r.Name;
-  this->GroupRegex = r.GroupRegex;
-  this->GroupFiles = r.GroupFiles;
-  this->SourceFiles = r.SourceFiles;
-  *(this->Internal) = *(r.Internal);
+  if (this != &r) {
+    this->Name = r.Name;
+    this->GroupRegex = r.GroupRegex;
+    this->GroupFiles = r.GroupFiles;
+    this->SourceFiles = r.SourceFiles;
+    *(this->Internal) = *(r.Internal);
+  }
   return *this;
 }
 
