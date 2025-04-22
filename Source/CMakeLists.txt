@@ -186,8 +186,6 @@ add_library(
   cmDependsCompiler.h
   cmDocumentation.cxx
   cmDocumentationFormatter.cxx
-  cmDynamicLoader.cxx
-  cmDynamicLoader.h
   cmDyndepCollation.cxx
   cmDyndepCollation.h
   cmELF.h

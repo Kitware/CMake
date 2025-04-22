@@ -47,7 +47,6 @@
 #include "cmCTestTestHandler.h"
 #include "cmCTestTypes.h"
 #include "cmCommandLineArgument.h"
-#include "cmDynamicLoader.h"
 #include "cmExecutionStatus.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGlobalGenerator.h"
@@ -2744,11 +2743,7 @@ int cmCTest::ExecuteTests(std::vector<std::string> const& args)
 
 int cmCTest::RunCMakeAndTest()
 {
-  int retv = this->Impl->BuildAndTest.Run();
-#ifndef CMAKE_BOOTSTRAP
-  cmDynamicLoader::FlushCache();
-#endif
-  return retv;
+  return this->Impl->BuildAndTest.Run();
 }
 
 void cmCTest::SetNotesFiles(std::string const& notes)
