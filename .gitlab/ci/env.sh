@@ -22,3 +22,10 @@ fi
 if test -r ".gitlab/ci/env_${CMAKE_CONFIGURATION}.sh"; then
   source ".gitlab/ci/env_${CMAKE_CONFIGURATION}.sh"
 fi
+
+case "$(uname -s)-$(uname -m)" in
+    Linux-*)
+        # Remove superuser tools from PATH.
+        export PATH=$(echo "$PATH" | sed 's|:[^:]*/sbin:|:|g')
+        ;;
+esac
