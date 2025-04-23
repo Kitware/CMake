@@ -78,6 +78,19 @@ macro(check_language lang)
     file(REMOVE_RECURSE ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/Check${lang})
 
     set(_input_variables "set(CMAKE_MODULE_PATH \"${CMAKE_MODULE_PATH}\")\n")
+    get_property(_languages GLOBAL PROPERTY ENABLED_LANGUAGES)
+    list(REMOVE_ITEM _languages "NONE")
+    if(NOT _languages STREQUAL "")
+      string(APPEND _input_variables "set(_CMAKE_CHECK_ENABLED_LANGUAGES \"${_languages}\")\n")
+      foreach(l IN LISTS _languages)
+        string(APPEND _input_variables
+          "set(CMAKE_${l}_COMPILER \"${CMAKE_${l}_COMPILER}\")\n"
+          "set(CMAKE_${l}_COMPILER_ID \"${CMAKE_${l}_COMPILER_ID}\")\n"
+          "set(CMAKE_${l}_COMPILER_LOADED ${CMAKE_${l}_COMPILER_LOADED})\n"
+          "set(CMAKE_${l}_COMPILER_VERSION \"${CMAKE_${l}_COMPILER_VERSION}\")\n"
+        )
+      endforeach()
+    endif()
 
     set(_output_variables "set(CMAKE_${lang}_COMPILER \\\"\${CMAKE_${lang}_COMPILER}\\\")\n")
     if("${lang}" MATCHES "^(CUDA|HIP)$" AND NOT CMAKE_GENERATOR MATCHES "Visual Studio")
