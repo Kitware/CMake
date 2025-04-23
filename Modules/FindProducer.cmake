@@ -5,39 +5,91 @@
 FindProducer
 ------------
 
-Though Producer isn't directly part of OpenSceneGraph, its primary
-user is OSG so I consider this part of the Findosg* suite used to find
-OpenSceneGraph components.  You'll notice that I accept OSGDIR as an
-environment path.
+.. note::
 
-Each component is separate and you must opt in to each module.  You
-must also opt into OpenGL (and OpenThreads?) as these modules won't do
-it for you.  This is to allow you control over your own system piece
-by piece in case you need to opt out of certain components or change
-the Find behavior for a particular module (perhaps because the default
-:module:`FindOpenGL` module doesn't work with your system as an example).
-If you want to use a more convenient module that includes everything,
-use the :module:`FindOpenSceneGraph` instead of the Findosg*.cmake
-modules.
+  Producer (also known as *Open Producer*) library originated from the
+  osgProducer utility library in early versions of the OpenSceneGraph toolkit
+  and was later developed into a standalone library.  The osgProducer was
+  eventually replaced by the osgViewer library, and the standalone Producer
+  library became obsolete and is no longer maintained.  For details about
+  OpenSceneGraph usage, refer to the :module:`FindOpenSceneGraph` module.
 
-Locate Producer This module defines:
+This module finds the Producer library, a windowing and event handling library
+designed primarily for real-time graphics applications.
+
+Producer library headers are intended to be included in C++ project source code
+as:
+
+.. code-block:: c++
+
+  #include <Producer/CameraGroup>
+
+Result Variables
+^^^^^^^^^^^^^^^^
+
+This module defines the following variables:
+
+``Producer_FOUND``
+  Boolean indicating whether Producer is found.  For backward compatibility, the
+  ``PRODUCER_FOUND`` variable is also set to the same value.
+
+Cache Variables
+^^^^^^^^^^^^^^^
+
+The following cache variables may also be set:
+
+``PRODUCER_INCLUDE_DIR``
+  The include directory containing headers needed to use Producer.
 
 ``PRODUCER_LIBRARY``
+  The path to the Producer library needed to link against for usage.
 
-``PRODUCER_FOUND``
-  if false, do not try to link to Producer
-``PRODUCER_INCLUDE_DIR``
-  where to find the headers
+Hints
+^^^^^
 
-``$PRODUCER_DIR`` is an environment variable that would correspond to::
+This module accepts the following variables:
 
-  ./configure --prefix=$PRODUCER_DIR
+``PRODUCER_DIR``
+  Environment variable that can be set to help locate a custom installation of
+  the Producer library.  It should point to the root directory where the
+  Producer library was installed.  This should match the installation prefix
+  used when configuring and building Producer, such as with
+  ``./configure --prefix=$PRODUCER_DIR``.
 
-used in building osg.
+Because Producer was historically tightly integrated with OpenSceneGraph, this
+module also accepts the following environment variables as equivalents to
+``PRODUCER_DIR`` for convenience to specify common installation root for
+multiple OpenSceneGraph-related libraries at once:
+
+``OSGDIR``
+  Environment variable treated the same as ``PRODUCER_DIR``.
+
+``OSG_DIR``
+  Environment variable treated the same as ``PRODUCER_DIR``.
+
+Examples
+^^^^^^^^
+
+Finding the Producer library and creating an :ref:`imported target
+<Imported Targets>` that encapsulates its usage requirements for linking to a
+project target:
+
+.. code-block:: cmake
+
+  find_package(Producer)
+
+  if(Producer_FOUND AND NOT TARGET Producer::Producer)
+    add_library(Producer::Producer INTERFACE IMPORTED)
+    set_target_properties(
+      Producer::Producer
+      PROPERTIES
+        INTERFACE_INCLUDE_DIRECTORIES "${PRODUCER_INCLUDE_DIR}"
+        INTERFACE_LINK_LIBRARIES "${PRODUCER_LIBRARY}"
+    )
+  endif()
+
+  target_link_libraries(project_target PRIVATE Producer::Producer)
 #]=======================================================================]
-
-# Header files are presumed to be included like
-# #include <Producer/CameraGroup>
 
 # Try the user's environment request before anything else.
 find_path(PRODUCER_INCLUDE_DIR Producer/CameraGroup
