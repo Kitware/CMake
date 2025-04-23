@@ -7,107 +7,146 @@ FindVulkan
 
 .. versionadded:: 3.7
 
-Find Vulkan, which is a low-overhead, cross-platform 3D graphics
-and computing API.
+Finds Vulkan, a low-overhead, cross-platform 3D graphics and computing API,
+along with related development tools typically provided by the Vulkan SDK.  This
+includes commonly used utilities such as shader compilers and SPIR-V tools
+(e.g., DXC, ``glslc``, ``glslang``, etc.) that support Vulkan-based development
+workflows.
 
-Optional COMPONENTS
-^^^^^^^^^^^^^^^^^^^
+Components
+^^^^^^^^^^
 
 .. versionadded:: 3.24
 
-This module respects several optional COMPONENTS.
-There are corresponding imported targets for each of these.
+This module supports several optional components that can be specified with the
+:command:`find_package` command:
+
+.. code-block:: cmake
+
+  find_package(Vulkan [COMPONENTS <components>...])
+
+Each component provides a corresponding imported target.  Supported components
+include:
 
 ``glslc``
-  The SPIR-V compiler.
+  .. versionadded:: 3.24
+
+  Finds the SPIR-V compiler.  This optional component is always implied
+  automatically for backward compatibility, even if not requested.
 
 ``glslangValidator``
-  The ``glslangValidator`` tool.
+  .. versionadded:: 3.24
+
+  Finds the ``glslangValidator`` tool that is used to compile GLSL and HLSL
+  shaders into SPIR-V.  This optional component is always implied automatically
+  for backward compatibility, even if not requested.
 
 ``glslang``
-  The SPIR-V generator library.
+  .. versionadded:: 3.24
+
+  Finds the Khronos-reference front-end shader parser and SPIR-V code
+  generation library (``glslang``).
 
 ``shaderc_combined``
-  The static library for Vulkan shader compilation.
+  .. versionadded:: 3.24
+
+  Finds the Google static library used for Vulkan shader compilation.
 
 ``SPIRV-Tools``
-  Tools to process SPIR-V modules.
+  .. versionadded:: 3.24
+
+  Finds Khronos library for analyzing and transforming SPIR-V modules.
 
 ``MoltenVK``
-  On macOS, an additional component ``MoltenVK`` is available.
+  .. versionadded:: 3.24
+
+  Finds the Khronos MoltenVK library, which is available on macOS, and
+  implements a subset of Vulkan API over Apple Metal graphics framework.
 
 ``dxc``
   .. versionadded:: 3.25
 
-  The DirectX Shader Compiler.
+  Finds the DirectX Shader Compiler (DXC), including the library and
+  command-line tool.  Note that Visual Studio also provides a DXC tool, but the
+  version included with the Vulkan SDK is typically required for Vulkan
+  development, as it has Vulkan capability enabled.
 
-The ``glslc`` and ``glslangValidator`` components are provided even
-if not explicitly requested (for backward compatibility).
+``volk``
+  .. versionadded:: 3.25
+
+  Finds the Vulkan meta-loader ``volk`` library, a vector-optimized library of
+  kernels.
 
 Imported Targets
 ^^^^^^^^^^^^^^^^
 
-This module defines :prop_tgt:`IMPORTED` targets if Vulkan has been found:
+This module provides the following :ref:`Imported Targets`:
 
 ``Vulkan::Vulkan``
-  The main Vulkan library.
+  Target encapsulating the main Vulkan library usage requirements, available
+  if Vulkan is found.
 
 ``Vulkan::glslc``
   .. versionadded:: 3.19
 
-  The GLSLC SPIR-V compiler, if it has been found.
+  Imported executable target encapsulating the GLSLC SPIR-V compiler usage
+  requirements, available if ``glslc`` is found.
 
 ``Vulkan::Headers``
   .. versionadded:: 3.21
 
-  Provides just Vulkan headers include paths, if found.  No library is
-  included in this target.  This can be useful for applications that
-  load Vulkan library dynamically.
+  Target encapsulating the usage requirements needed to include Vulkan headers.
+  It provides only the include directories and does not link to any library.
+  This is useful for applications that load the Vulkan library dynamically at
+  runtime.  This target is available if Vulkan is found.
 
 ``Vulkan::glslangValidator``
   .. versionadded:: 3.21
 
-  The glslangValidator tool, if found.  It is used to compile GLSL and
-  HLSL shaders into SPIR-V.
+  Imported executable target encapsulating the ``glslangValidator`` usage
+  requirements, available if this tool is found.
 
 ``Vulkan::glslang``
   .. versionadded:: 3.24
 
-  Defined if SDK has the Khronos-reference front-end shader parser and SPIR-V
-  generator library (glslang).
+  Target encapsulating the ``glslang`` library usage requirements, available if
+  ``glslang`` is found in the SDK.
 
 ``Vulkan::shaderc_combined``
   .. versionadded:: 3.24
 
-  Defined if SDK has the Google static library for Vulkan shader compilation
-  (shaderc_combined).
+  Target encapsulating the ``shaderc_combined`` library usage requirements,
+  available if this library is found in the SDK.
 
 ``Vulkan::SPIRV-Tools``
   .. versionadded:: 3.24
 
-  Defined if SDK has the Khronos library to process SPIR-V modules
-  (SPIRV-Tools).
+  Target encapsulating the SPIRV-Tools library usage requirements, available if
+  this library is found in the SDK.
 
 ``Vulkan::MoltenVK``
   .. versionadded:: 3.24
 
-  Defined if SDK has the Khronos library which implement a subset of Vulkan API
-  over Apple Metal graphics framework. (MoltenVK).
+  Target encapsulating the MoltenVK library usage requirements, available if
+  this library is found in the SDK.
 
 ``Vulkan::volk``
   .. versionadded:: 3.25
 
-  Defined if SDK has the Vulkan meta-loader (volk).
+  Target encapsulating the ``volk`` library usage requirements, available if
+  ``volk`` is found in the SDK.
 
 ``Vulkan::dxc_lib``
   .. versionadded:: 3.25
 
-  Defined if SDK has the DirectX shader compiler library.
+  Target encapsulating the usage requirements for the DirectX shader compiler
+  library, available if DXC library is found in the SDK.
 
 ``Vulkan::dxc_exe``
   .. versionadded:: 3.25
 
-  Defined if SDK has the DirectX shader compiler CLI tool.
+  Imported executable target providing usage requirements for the DirectX shader
+  compiler CLI tool, available if SDK has this tool.
 
 Result Variables
 ^^^^^^^^^^^^^^^^
@@ -115,108 +154,152 @@ Result Variables
 This module defines the following variables:
 
 ``Vulkan_FOUND``
-  set to true if Vulkan was found
-``Vulkan_INCLUDE_DIRS``
-  include directories for Vulkan
-``Vulkan_LIBRARIES``
-  link against this library to use Vulkan
+  Boolean indicating whether (the requested version of) Vulkan and all required
+  components are found.
+
 ``Vulkan_VERSION``
   .. versionadded:: 3.23
 
-  value from ``vulkan/vulkan_core.h``
+  The version of Vulkan found.  Value is retrieved from
+  ``vulkan/vulkan_core.h``.
+
+``Vulkan_INCLUDE_DIRS``
+  Include directories needed to use the main Vulkan library.
+
+``Vulkan_LIBRARIES``
+  Libraries needed to link against to use the main Vulkan library.
+
 ``Vulkan_glslc_FOUND``
   .. versionadded:: 3.24
 
-  True, if the SDK has the glslc executable.
+  Boolean indicating whether the SDK provides the ``glslc`` executable.
+
 ``Vulkan_glslangValidator_FOUND``
   .. versionadded:: 3.24
 
-  True, if the SDK has the glslangValidator executable.
+  Boolean indicating whether the SDK provides the ``glslangValidator``
+  executable.
+
 ``Vulkan_glslang_FOUND``
   .. versionadded:: 3.24
 
-  True, if the SDK has the glslang library.
+  Boolean indicating whether the SDK provides the ``glslang`` library.
+
 ``Vulkan_shaderc_combined_FOUND``
   .. versionadded:: 3.24
 
-  True, if the SDK has the shaderc_combined library.
+  Boolean indicating whether the SDK provides the ``shaderc_combined`` library.
+
 ``Vulkan_SPIRV-Tools_FOUND``
   .. versionadded:: 3.24
 
-  True, if the SDK has the SPIRV-Tools library.
+  Boolean indicating whether the SDK provides the SPIRV-Tools library.
+
 ``Vulkan_MoltenVK_FOUND``
   .. versionadded:: 3.24
 
-  True, if the SDK has the MoltenVK library.
+  Boolean indicating whether the SDK provides the MoltenVK library.
+
 ``Vulkan_volk_FOUND``
   .. versionadded:: 3.25
 
-  True, if the SDK has the volk library.
+  Boolean indicating whether the SDK provides the volk library.
 
 ``Vulkan_dxc_lib_FOUND``
   .. versionadded:: 3.25
 
-  True, if the SDK has the DirectX shader compiler library.
+  Boolean indicating whether the SDK provides the DirectX shader compiler
+  library.
 
 ``Vulkan_dxc_exe_FOUND``
   .. versionadded:: 3.25
 
-  True, if the SDK has the DirectX shader compiler CLI tool.
+  Boolean indicating whether the SDK provides the DirectX shader compiler CLI
+  tool.
 
+Cache Variables
+^^^^^^^^^^^^^^^
 
-The module will also defines these cache variables:
+The following cache variables may also be set:
 
 ``Vulkan_INCLUDE_DIR``
-  the Vulkan include directory
+  The directory containing Vulkan headers.
+
 ``Vulkan_LIBRARY``
-  the path to the Vulkan library
+  The path to the Vulkan library.
+
 ``Vulkan_GLSLC_EXECUTABLE``
-  the path to the GLSL SPIR-V compiler
+  .. versionadded:: 3.19
+
+  The path to the GLSL SPIR-V compiler.
+
 ``Vulkan_GLSLANG_VALIDATOR_EXECUTABLE``
-  the path to the glslangValidator tool
+  .. versionadded:: 3.21
+
+  The path to the ``glslangValidator`` tool.
+
 ``Vulkan_glslang_LIBRARY``
   .. versionadded:: 3.24
 
-  Path to the glslang library.
+  The path to the ``glslang`` library.
+
 ``Vulkan_shaderc_combined_LIBRARY``
   .. versionadded:: 3.24
 
-  Path to the shaderc_combined library.
+  The path to the ``shaderc_combined`` library.
+
 ``Vulkan_SPIRV-Tools_LIBRARY``
   .. versionadded:: 3.24
 
-  Path to the SPIRV-Tools library.
+  The path to the SPIRV-Tools library.
+
 ``Vulkan_MoltenVK_LIBRARY``
   .. versionadded:: 3.24
 
-  Path to the MoltenVK library.
+  The path to the MoltenVK library.
 
 ``Vulkan_volk_LIBRARY``
   .. versionadded:: 3.25
 
-  Path to the volk library.
+  The path to the ``volk`` library.
 
 ``Vulkan_dxc_LIBRARY``
   .. versionadded:: 3.25
 
-  Path to the DirectX shader compiler library.
+  The path to the DirectX shader compiler library.
 
 ``Vulkan_dxc_EXECUTABLE``
   .. versionadded:: 3.25
 
-  Path to the DirectX shader compiler CLI tool.
+  The path to the DirectX shader compiler CLI tool.
 
 Hints
 ^^^^^
 
-.. versionadded:: 3.18
+This module accepts the following variables:
 
-The ``VULKAN_SDK`` environment variable optionally specifies the
-location of the Vulkan SDK root directory for the given
-architecture. It is typically set by sourcing the toplevel
-``setup-env.sh`` script of the Vulkan SDK directory into the shell
-environment.
+``VULKAN_SDK``
+  This environment variable can be optionally set to specify the location of the
+  Vulkan SDK root directory for the given architecture.  It is typically set by
+  sourcing the toplevel ``setup-env.sh`` script of the Vulkan SDK directory into
+  the shell environment.
 
+Examples
+^^^^^^^^
+
+Finding the Vulkan library and linking it to a project target:
+
+.. code-block:: cmake
+
+  find_package(Vulkan)
+  target_link_libraries(project_target PRIVATE Vulkan::Vulkan)
+
+Finding the Vulkan library along with additional components:
+
+.. code-block:: cmake
+
+  find_package(Vulkan COMPONENTS volk)
+  target_link_libraries(project_target PRIVATE Vulkan::Vulkan Vulkan::volk)
 #]=======================================================================]
 
 cmake_policy(PUSH)
