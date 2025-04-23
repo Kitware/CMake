@@ -71,7 +71,7 @@ rm -rf jsoncpp-1.6.0*
 
 git clone https://github.com/google/cppdap.git
 cd cppdap
-git checkout 03cc18678ed2ed8b2424ec99dee7e4655d876db5 # 2023-05-25
+git checkout c69444ed76f7468b232ac4f989cb8f2bdc100185 # 2024-08-02
 cd ..
 cmake -S cppdap -B cppdap-build \
   -DCPPDAP_USE_EXTERNAL_JSONCPP_PACKAGE=ON \
