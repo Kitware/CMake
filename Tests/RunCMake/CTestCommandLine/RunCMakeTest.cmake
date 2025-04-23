@@ -559,7 +559,9 @@ run_cmake_command(EmptyDirTest-ctest
   )
 
 run_cmake_command(EmptyDirCoverage-ctest
-  ${CMAKE_CTEST_COMMAND} -C Debug -M Experimental -T Coverage
+  # Isolate this test from any surrounding coverage tool.
+  ${CMAKE_COMMAND} -E env --unset=COVFILE
+    ${CMAKE_CTEST_COMMAND} -C Debug -M Experimental -T Coverage
   )
 
 function(run_MemCheckSan case opts)
