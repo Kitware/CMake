@@ -38,8 +38,6 @@ This module sets the following variables:
 ``PNG_FOUND``
   True if PNG library is found.
 ``PNG_VERSION_STRING``
-  .. versionadded:: 2.8.8
-
   The version of the PNG library found.
 
 Obsolete Variables

@@ -29,8 +29,6 @@ This module defines the following variables:
 ``CUPS_INCLUDE_DIRS``
   Include directories needed for using CUPS.
 ``CUPS_VERSION_STRING``
-  .. versionadded:: 2.8.8
-
   The version of CUPS found.
 
 Cache Variables

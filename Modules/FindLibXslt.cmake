@@ -46,8 +46,6 @@ This module sets the following variables:
   Compiler switches required for using libxslt.
 
 ``LIBXSLT_VERSION_STRING``
-  .. versionadded:: 2.8.8
-
   Version of libxslt found.
 
 ``LIBXSLT_EXSLT_LIBRARIES``
