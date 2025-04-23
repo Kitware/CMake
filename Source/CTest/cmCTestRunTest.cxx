@@ -319,7 +319,7 @@ cmCTestRunTest::EndTestResult cmCTestRunTest::EndTest(size_t completed,
     ttime -= minutes;
     auto seconds = std::chrono::duration_cast<std::chrono::seconds>(ttime);
     char buffer[100];
-    snprintf(buffer, sizeof(buffer), "%02d:%02d:%02d",
+    snprintf(buffer, sizeof(buffer), "%02u:%02u:%02u",
              static_cast<unsigned>(hours.count()),
              static_cast<unsigned>(minutes.count()),
              static_cast<unsigned>(seconds.count()));

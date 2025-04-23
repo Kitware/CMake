@@ -2427,7 +2427,7 @@ void list_item_verbose(FILE* out, struct archive_entry* entry)
   if (!now) {
     time(&now);
   }
-  fprintf(out, "%s %d ", archive_entry_strmode(entry),
+  fprintf(out, "%s %u ", archive_entry_strmode(entry),
           archive_entry_nlink(entry));
 
   /* Use uname if it's present, else uid. */
