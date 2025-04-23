@@ -1,6 +1,9 @@
+#ifndef EXPECT_CUDA_ARCH
+#  error "EXPECT_CUDA_ARCH not defined!"
+#endif
 #ifdef __CUDA_ARCH__
-#  if __CUDA_ARCH__ != 500
-#    error "Passed architecture 50, but got something else."
+#  if __CUDA_ARCH__ != (EXPECT_CUDA_ARCH * 10)
+#    error "__CUDA_ARCH__ does not match CUDA_ARCHITECTURES"
 #  endif
 #endif
 
