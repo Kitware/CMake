@@ -123,6 +123,26 @@ void cmConfigureLog::EndLine()
   this->Stream << std::endl;
 }
 
+void cmConfigureLog::BeginArray()
+{
+  ++this->Indent;
+}
+
+void cmConfigureLog::NextArrayElement()
+{
+  assert(this->Indent);
+  --this->Indent;
+  this->BeginLine() << '-';
+  this->EndLine();
+  ++this->Indent;
+}
+
+void cmConfigureLog::EndArray()
+{
+  assert(this->Indent);
+  --this->Indent;
+}
+
 void cmConfigureLog::BeginObject(cm::string_view key)
 {
   this->BeginLine() << key << ':';
