@@ -42,7 +42,7 @@ else()
         list(APPEND CMAKE_${lang}_COMPILER_PREDEFINES_COMMAND ${_COMPILER_ARGS})
         unset(_COMPILER_ARGS)
       endif()
-      list(APPEND CMAKE_${lang}_COMPILER_PREDEFINES_COMMAND "-QdM" "-P" "-Za" "${CMAKE_ROOT}/Modules/CMakeCXXCompilerABI.cpp")
+      list(APPEND CMAKE_${lang}_COMPILER_PREDEFINES_COMMAND "-w" "-QdM" "-P" "-Za" "${CMAKE_ROOT}/Modules/CMakeCXXCompilerABI.cpp")
     endif()
 
     if("x${lang}" STREQUAL "xFortran")
