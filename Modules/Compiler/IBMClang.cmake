@@ -27,6 +27,6 @@ macro(__compiler_ibmclang lang)
   endif()
 
   if("${lang}" STREQUAL "CXX")
-    list(APPEND CMAKE_${lang}_COMPILER_PREDEFINES_COMMAND "-dM" "-E" "-c" "${CMAKE_ROOT}/Modules/CMakeCXXCompilerABI.cpp")
+    list(APPEND CMAKE_${lang}_COMPILER_PREDEFINES_COMMAND "-w" "-dM" "-E" "${CMAKE_ROOT}/Modules/CMakeCXXCompilerABI.cpp")
   endif()
 endmacro()
