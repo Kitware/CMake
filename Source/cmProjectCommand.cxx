@@ -130,17 +130,7 @@ bool cmProjectCommand(std::vector<std::string> const& args,
     mf.AddDefinition(varName, mf.IsRootMakefile() ? "ON" : "OFF");
   }
 
-  // Set the CMAKE_PROJECT_NAME variable to be the highest-level
-  // project name in the tree. If there are two project commands
-  // in the same CMakeLists.txt file, and it is the top level
-  // CMakeLists.txt file, then go with the last one, so that
-  // CMAKE_PROJECT_NAME will match PROJECT_NAME, and cmake --build
-  // will work.
-  if (!mf.GetDefinition("CMAKE_PROJECT_NAME") || mf.IsRootMakefile()) {
-    mf.RemoveDefinition("CMAKE_PROJECT_NAME");
-    mf.AddCacheDefinition("CMAKE_PROJECT_NAME", *prArgs.ProjectName,
-                          "Value Computed by CMake", cmStateEnums::STATIC);
-  }
+  TopLevelCMakeVarCondSet(mf, "CMAKE_PROJECT_NAME", *prArgs.ProjectName);
 
   std::set<cm::string_view> seenKeywords;
   for (cm::string_view keyword : parsedKeywords) {
@@ -178,6 +168,10 @@ bool cmProjectCommand(std::vector<std::string> const& args,
     prArgs.Languages->emplace_back("NONE");
   }
 
+  constexpr std::size_t MAX_VERSION_COMPONENTS = 4u;
+  std::string version_string;
+  std::array<std::string, MAX_VERSION_COMPONENTS> version_components;
+
   if (prArgs.Version) {
     cmsys::RegularExpression vx(
       R"(^([0-9]+(\.[0-9]+(\.[0-9]+(\.[0-9]+)?)?)?)?$)");
@@ -191,10 +185,6 @@ bool cmProjectCommand(std::vector<std::string> const& args,
 
     cmPolicies::PolicyStatus const cmp0096 =
       mf.GetPolicyStatus(cmPolicies::CMP0096);
-
-    constexpr std::size_t MAX_VERSION_COMPONENTS = 4u;
-    std::string version_string;
-    std::array<std::string, MAX_VERSION_COMPONENTS> version_components;
 
     if (cmp0096 == cmPolicies::OLD || cmp0096 == cmPolicies::WARN) {
       constexpr size_t maxIntLength =
@@ -223,69 +213,21 @@ bool cmProjectCommand(std::vector<std::string> const& args,
         version_components[i] = std::move(components[i]);
       }
     }
-
-    std::string vv;
-    vv = *prArgs.ProjectName + "_VERSION";
-    mf.AddDefinition("PROJECT_VERSION", version_string);
-    mf.AddDefinition(vv, version_string);
-    vv = *prArgs.ProjectName + "_VERSION_MAJOR";
-    mf.AddDefinition("PROJECT_VERSION_MAJOR", version_components[0]);
-    mf.AddDefinition(vv, version_components[0]);
-    vv = *prArgs.ProjectName + "_VERSION_MINOR";
-    mf.AddDefinition("PROJECT_VERSION_MINOR", version_components[1]);
-    mf.AddDefinition(vv, version_components[1]);
-    vv = *prArgs.ProjectName + "_VERSION_PATCH";
-    mf.AddDefinition("PROJECT_VERSION_PATCH", version_components[2]);
-    mf.AddDefinition(vv, version_components[2]);
-    vv = *prArgs.ProjectName + "_VERSION_TWEAK";
-    mf.AddDefinition("PROJECT_VERSION_TWEAK", version_components[3]);
-    mf.AddDefinition(vv, version_components[3]);
-    // Also, try set top level variables
-    TopLevelCMakeVarCondSet(mf, "CMAKE_PROJECT_VERSION", version_string);
-    TopLevelCMakeVarCondSet(mf, "CMAKE_PROJECT_VERSION_MAJOR",
-                            version_components[0]);
-    TopLevelCMakeVarCondSet(mf, "CMAKE_PROJECT_VERSION_MINOR",
-                            version_components[1]);
-    TopLevelCMakeVarCondSet(mf, "CMAKE_PROJECT_VERSION_PATCH",
-                            version_components[2]);
-    TopLevelCMakeVarCondSet(mf, "CMAKE_PROJECT_VERSION_TWEAK",
-                            version_components[3]);
-  } else {
-    // Set project VERSION variables to empty
-    std::vector<std::string> vv = { "PROJECT_VERSION",
-                                    "PROJECT_VERSION_MAJOR",
-                                    "PROJECT_VERSION_MINOR",
-                                    "PROJECT_VERSION_PATCH",
-                                    "PROJECT_VERSION_TWEAK",
-                                    *prArgs.ProjectName + "_VERSION",
-                                    *prArgs.ProjectName + "_VERSION_MAJOR",
-                                    *prArgs.ProjectName + "_VERSION_MINOR",
-                                    *prArgs.ProjectName + "_VERSION_PATCH",
-                                    *prArgs.ProjectName + "_VERSION_TWEAK" };
-    if (mf.IsRootMakefile()) {
-      vv.emplace_back("CMAKE_PROJECT_VERSION");
-      vv.emplace_back("CMAKE_PROJECT_VERSION_MAJOR");
-      vv.emplace_back("CMAKE_PROJECT_VERSION_MINOR");
-      vv.emplace_back("CMAKE_PROJECT_VERSION_PATCH");
-      vv.emplace_back("CMAKE_PROJECT_VERSION_TWEAK");
-    }
-    for (std::string const& i : vv) {
-      cmValue v = mf.GetDefinition(i);
-      if (cmNonempty(v)) {
-        mf.AddDefinition(i, "");
-      }
-    }
   }
 
-  std::string const& desc = prArgs.Description.value_or("");
-  mf.AddDefinition("PROJECT_DESCRIPTION", desc);
-  mf.AddDefinition(*prArgs.ProjectName + "_DESCRIPTION", desc);
-  TopLevelCMakeVarCondSet(mf, "CMAKE_PROJECT_DESCRIPTION", desc);
+  auto create_variables = [&](cm::string_view var, std::string const& val) {
+    mf.AddDefinition(cmStrCat("PROJECT_"_s, var), val);
+    mf.AddDefinition(cmStrCat(*prArgs.ProjectName, "_"_s, var), val);
+    TopLevelCMakeVarCondSet(mf, cmStrCat("CMAKE_PROJECT_"_s, var), val);
+  };
 
-  std::string const& url = prArgs.HomepageURL.value_or("");
-  mf.AddDefinition("PROJECT_HOMEPAGE_URL", url);
-  mf.AddDefinition(*prArgs.ProjectName + "_HOMEPAGE_URL", url);
-  TopLevelCMakeVarCondSet(mf, "CMAKE_PROJECT_HOMEPAGE_URL", url);
+  create_variables("VERSION"_s, version_string);
+  create_variables("VERSION_MAJOR"_s, version_components[0]);
+  create_variables("VERSION_MINOR"_s, version_components[1]);
+  create_variables("VERSION_PATCH"_s, version_components[2]);
+  create_variables("VERSION_TWEAK"_s, version_components[3]);
+  create_variables("DESCRIPTION"_s, prArgs.Description.value_or(""));
+  create_variables("HOMEPAGE_URL"_s, prArgs.HomepageURL.value_or(""));
 
   if (unparsedArgs.empty() && !prArgs.Languages) {
     // if no language is specified do c and c++
