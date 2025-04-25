@@ -3789,6 +3789,22 @@ bool cmCTest::ConvertInstrumentationJSONFileToXML(std::string const& fpath,
     xml.EndElement(); // NamedMeasurement
   }
 
+  // Record information about outputs and their sizes if found.
+  if (root.isMember("outputs") && root.isMember("outputSizes")) {
+    Json::ArrayIndex num_outputs =
+      std::min(root["outputs"].size(), root["outputSizes"].size());
+    if (num_outputs > 0) {
+      xml.StartElement("Outputs");
+      for (Json::ArrayIndex i = 0; i < num_outputs; ++i) {
+        xml.StartElement("Output");
+        xml.Attribute("name", root["outputs"][i].asString());
+        xml.Attribute("size", root["outputSizes"][i].asString());
+        xml.EndElement(); // Output
+      }
+      xml.EndElement(); // Outputs
+    }
+  }
+
   if (!generating_test_xml) {
     xml.EndElement(); // role
   }
