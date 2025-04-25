@@ -4,7 +4,11 @@
 
 macro(_cmake_find_compiler lang)
   # Use already-enabled languages for reference.
-  get_property(_languages GLOBAL PROPERTY ENABLED_LANGUAGES)
+  if(DEFINED _CMAKE_CHECK_ENABLED_LANGUAGES)
+    set(_languages "${_CMAKE_CHECK_ENABLED_LANGUAGES}")
+  else()
+    get_property(_languages GLOBAL PROPERTY ENABLED_LANGUAGES)
+  endif()
   list(REMOVE_ITEM _languages "${lang}")
 
   if(CMAKE_${lang}_COMPILER_INIT)

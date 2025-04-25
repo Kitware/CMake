@@ -77,31 +77,34 @@ macro(check_language lang)
     message(CHECK_START "${_desc}")
     file(REMOVE_RECURSE ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/Check${lang})
 
-    set(extra_compiler_variables)
+    set(_input_variables "set(CMAKE_MODULE_PATH \"${CMAKE_MODULE_PATH}\")\n")
+    get_property(_languages GLOBAL PROPERTY ENABLED_LANGUAGES)
+    list(REMOVE_ITEM _languages "NONE")
+    if(NOT _languages STREQUAL "")
+      string(APPEND _input_variables "set(_CMAKE_CHECK_ENABLED_LANGUAGES \"${_languages}\")\n")
+      foreach(l IN LISTS _languages)
+        string(APPEND _input_variables
+          "set(CMAKE_${l}_COMPILER \"${CMAKE_${l}_COMPILER}\")\n"
+          "set(CMAKE_${l}_COMPILER_ID \"${CMAKE_${l}_COMPILER_ID}\")\n"
+          "set(CMAKE_${l}_COMPILER_LOADED ${CMAKE_${l}_COMPILER_LOADED})\n"
+          "set(CMAKE_${l}_COMPILER_VERSION \"${CMAKE_${l}_COMPILER_VERSION}\")\n"
+        )
+      endforeach()
+    endif()
+
+    set(_output_variables "set(CMAKE_${lang}_COMPILER \\\"\${CMAKE_${lang}_COMPILER}\\\")\n")
     if("${lang}" MATCHES "^(CUDA|HIP)$" AND NOT CMAKE_GENERATOR MATCHES "Visual Studio")
-      set(extra_compiler_variables "set(CMAKE_${lang}_HOST_COMPILER \\\"\${CMAKE_${lang}_HOST_COMPILER}\\\")")
+      string(APPEND _output_variables "set(CMAKE_${lang}_HOST_COMPILER \\\"\${CMAKE_${lang}_HOST_COMPILER}\\\")\n")
     endif()
-
     if("${lang}" STREQUAL "HIP")
-      list(APPEND extra_compiler_variables "set(CMAKE_${lang}_PLATFORM \\\"\${CMAKE_${lang}_PLATFORM}\\\")")
+      string(APPEND _output_variables "set(CMAKE_${lang}_PLATFORM \\\"\${CMAKE_${lang}_PLATFORM}\\\")\n")
     endif()
-
-    list(TRANSFORM extra_compiler_variables PREPEND "\"")
-    list(TRANSFORM extra_compiler_variables APPEND "\\n\"")
-    list(JOIN extra_compiler_variables "\n  " extra_compiler_variables)
-
-    set(_cl_content
-      "cmake_minimum_required(VERSION ${CMAKE_VERSION})
-set(CMAKE_MODULE_PATH \"${CMAKE_MODULE_PATH}\")
-project(Check${lang} ${lang})
-file(WRITE \"\${CMAKE_CURRENT_BINARY_DIR}/result.cmake\"
-  \"set(CMAKE_${lang}_COMPILER \\\"\${CMAKE_${lang}_COMPILER}\\\")\\n\"
-  ${extra_compiler_variables}
-  )"
-    )
 
     file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/Check${lang}/CMakeLists.txt"
-      "${_cl_content}")
+      "cmake_minimum_required(VERSION ${CMAKE_VERSION})
+${_input_variables}
+project(Check${lang} LANGUAGES ${lang})
+file(WRITE \"\${CMAKE_CURRENT_BINARY_DIR}/result.cmake\" \"${_output_variables}\")")
     if(CMAKE_GENERATOR_INSTANCE)
       set(_D_CMAKE_GENERATOR_INSTANCE "-DCMAKE_GENERATOR_INSTANCE:INTERNAL=${CMAKE_GENERATOR_INSTANCE}")
     else()
