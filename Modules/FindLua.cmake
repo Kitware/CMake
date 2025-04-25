@@ -5,42 +5,79 @@
 FindLua
 -------
 
-Locate Lua library.
+Finds the Lua library.  Lua is a embeddable scripting language.
 
 .. versionadded:: 3.18
   Support for Lua 5.4.
 
-This module defines:
-
-``LUA_FOUND``
-  if false, do not try to link to Lua
-``LUA_LIBRARIES``
-  both lua and lualib
-``LUA_INCLUDE_DIR``
-  where to find lua.h
-``LUA_VERSION_STRING``
-  the version of Lua found
-``LUA_VERSION_MAJOR``
-  the major version of Lua
-``LUA_VERSION_MINOR``
-  the minor version of Lua
-``LUA_VERSION_PATCH``
-  the patch version of Lua
-
-Note that the expected include convention is
+When working with Lua, its library headers are intended to be included in
+project source code as:
 
 .. code-block:: c
 
-  #include "lua.h"
+  #include <lua.h>
 
-and not
+and not:
 
 .. code-block:: c
 
   #include <lua/lua.h>
 
-This is because, the lua location is not standardized and may exist in
-locations other than lua/
+This is because, the location of Lua headers may differ across platforms and may
+exist in locations other than ``lua/``.
+
+Result Variables
+^^^^^^^^^^^^^^^^
+
+This module defines the following variables:
+
+``Lua_FOUND``
+  Boolean indicating whether (the requested version of) Lua is found.  For
+  backward compatibility, the ``LUA_FOUND`` variable is also set to the same
+  value.
+``LUA_VERSION_STRING``
+  The version of Lua found.
+``LUA_VERSION_MAJOR``
+  The major version of Lua found.
+``LUA_VERSION_MINOR``
+  The minor version of Lua found.
+``LUA_VERSION_PATCH``
+  The patch version of Lua found.
+``LUA_LIBRARIES``
+  Libraries needed to link against to use Lua.  This list includes both ``lua``
+  and ``lualib`` libraries.
+
+Cache Variables
+^^^^^^^^^^^^^^^
+
+The following cache variables may also be set:
+
+``LUA_INCLUDE_DIR``
+  The directory containing the Lua header files, such as ``lua.h``,
+  ``lualib.h``, and ``lauxlib.h``, needed to use Lua.
+
+Examples
+^^^^^^^^
+
+Finding the Lua library and creating an interface :ref:`imported target
+<Imported Targets>` that encapsulates its usage requirements for linking to a
+project target:
+
+.. code-block:: cmake
+
+  find_package(Lua)
+
+  if(Lua_FOUND AND NOT TARGET Lua::Lua)
+    add_library(Lua::Lua INTERFACE IMPORTED)
+    set_target_properties(
+      Lua::Lua
+      PROPERTIES
+        INTERFACE_INCLUDE_DIRECTORIES "${LUA_INCLUDE_DIR}"
+        INTERFACE_LINK_LIBRARIES "${LUA_LIBRARIES}"
+    )
+  endif()
+
+  target_link_libraries(project_target PRIVATE Lua::Lua)
 #]=======================================================================]
 
 cmake_policy(PUSH)  # Policies apply to functions at definition-time
@@ -231,8 +268,6 @@ if (LUA_LIBRARY)
 endif ()
 
 include(FindPackageHandleStandardArgs)
-# handle the QUIETLY and REQUIRED arguments and set LUA_FOUND to TRUE if
-# all listed variables are TRUE
 find_package_handle_standard_args(Lua
                                   REQUIRED_VARS LUA_LIBRARIES LUA_INCLUDE_DIR
                                   VERSION_VAR LUA_VERSION_STRING)
