@@ -5,7 +5,7 @@
 FindJNI
 -------
 
-Find Java Native Interface (JNI) headers and libraries.
+Finds the Java Native Interface (JNI) include directories and libraries.
 
 JNI enables Java code running in a Java Virtual Machine (JVM) or Dalvik Virtual
 Machine (DVM) on Android to call and be called by native applications and
@@ -13,14 +13,11 @@ libraries written in other languages such as C and C++.
 
 This module finds if Java is installed and determines where the
 include files and libraries are.  It also determines what the name of
-the library is.  The caller may set variable ``JAVA_HOME`` to specify a
-Java installation prefix explicitly.
+the library is.
 
 .. versionadded:: 3.24
 
-  Added imported targets, components ``AWT``, ``JVM``, and Android NDK support.
-  If no components are specified, the module defaults to an empty components
-  list while targeting Android, and all available components otherwise.
+  Imported targets, components, and Android NDK support.
 
   When using Android NDK, the corresponding package version is reported and a
   specific release can be requested. At Android API level 31 and above, the
@@ -28,74 +25,172 @@ Java installation prefix explicitly.
   also exposed as an implicit dependency of the ``JVM`` component (only if this
   does not cause a conflict) which provides a uniform access to JVM functions.
 
+Components
+^^^^^^^^^^
+
+This module supports optional components, which can be specified with the
+:command:`find_package` command:
+
+.. code-block:: cmake
+
+  find_package(JNI [COMPONENTS <components>...])
+
+Supported components include:
+
+``AWT``
+  .. versionadded:: 3.24
+
+  Finds the Java Abstract Window Toolkit (AWT).
+
+``JVM``
+  .. versionadded:: 3.24
+
+  Finds the Java Virtual Machine (JVM).
+
+``NativeHelper``
+  .. versionadded:: 3.24
+
+  Finds the NativeHelper library on Android (``libnativehelper.so``), which
+  exposes JVM functions such as ``JNI_CreateJavaVM()``.
+
+If no components are specified, the module defaults are:
+
+* When targeting Android with API level 31 and above: module looks for the
+  ``NativeHelper`` component.  For other Android API levels, components are by
+  default not set.
+* When targeting other systems: module looks for ``AWT`` and ``JVM`` components.
+
 Imported Targets
 ^^^^^^^^^^^^^^^^
 
-.. versionadded:: 3.24
+This module provides the following :ref:`Imported Targets`:
 
 ``JNI::JNI``
-  Main JNI target, defined only if ``jni.h`` was found.
+  .. versionadded:: 3.24
+
+  Main target encapsulating all JNI usage requirements, available if ``jni.h``
+  is found.
 
 ``JNI::AWT``
-  Java AWT Native Interface (JAWT) library, defined only if component ``AWT`` was
-  found.
+  .. versionadded:: 3.24
+
+  Target encapsulating the Java AWT Native Interface (JAWT) library usage
+  requirements, available if the ``AWT`` component is found.
 
 ``JNI::JVM``
-  Java Virtual Machine (JVM) library, defined only if component ``JVM`` was found.
+  .. versionadded:: 3.24
+
+  Target encapsulating the Java Virtual Machine (JVM) library usage
+  requirements, available if component ``JVM`` is found.
 
 ``JNI::NativeHelper``
-  When targeting Android API level 31 and above, the import target will provide
-  access to ``libnativehelper.so`` that exposes JVM functions such as
-  ``JNI_CreateJavaVM``.
+  .. versionadded:: 3.24
+
+  Target encapsulating the NativeHelper library usage requirements, available
+  when targeting Android API level 31 and above, and the library is found.
 
 Result Variables
 ^^^^^^^^^^^^^^^^
 
-This module sets the following result variables:
+This module defines the following variables:
 
-``JNI_INCLUDE_DIRS``
-  The include directories to use.
-``JNI_LIBRARIES``
-  The libraries to use (JAWT and JVM).
 ``JNI_FOUND``
-  ``TRUE`` if JNI headers and libraries were found.
+  Boolean indicating whether the JNI is found.
+
 ``JNI_<component>_FOUND``
   .. versionadded:: 3.24
 
-  ``TRUE`` if ``<component>`` was found.
+  Boolean indicating whether the ``<component>`` is found.
+
 ``JNI_VERSION``
   Full Android NDK package version (including suffixes such as ``-beta3`` and
   ``-rc1``) or undefined otherwise.
+
 ``JNI_VERSION_MAJOR``
   .. versionadded:: 3.24
 
   Android NDK major version or undefined otherwise.
+
 ``JNI_VERSION_MINOR``
   .. versionadded:: 3.24
 
   Android NDK minor version or undefined otherwise.
+
 ``JNI_VERSION_PATCH``
   .. versionadded:: 3.24
 
   Android NDK patch version or undefined otherwise.
+
+``JNI_INCLUDE_DIRS``
+  The include directories needed to use the JNI.
+
+``JNI_LIBRARIES``
+  The libraries (JAWT and JVM) needed to link against to use JNI.
 
 Cache Variables
 ^^^^^^^^^^^^^^^
 
 The following cache variables are also available to set or use:
 
+``JAVA_INCLUDE_PATH``
+  The directory containing the ``jni.h`` header.
+
+``JAVA_INCLUDE_PATH2``
+  The directory containing machine-dependent headers ``jni_md.h`` and
+  ``jniport.h``.  This variable is defined only if ``jni.h`` depends on one of
+  these headers.  In contrast, Android NDK ``jni.h`` can be typically used
+  standalone.
+
+``JAVA_AWT_INCLUDE_PATH``
+  The directory containing the ``jawt.h`` header.
+
 ``JAVA_AWT_LIBRARY``
   The path to the Java AWT Native Interface (JAWT) library.
+
 ``JAVA_JVM_LIBRARY``
   The path to the Java Virtual Machine (JVM) library.
-``JAVA_INCLUDE_PATH``
-  The include path to ``jni.h``.
-``JAVA_INCLUDE_PATH2``
-  The include path to machine-dependent headers ``jni_md.h`` and ``jniport.h``.
-  The variable is defined only if ``jni.h`` depends on one of these headers. In
-  contrast, Android NDK ``jni.h`` can be typically used standalone.
-``JAVA_AWT_INCLUDE_PATH``
-  The include path to ``jawt.h``.
+
+Hints
+^^^^^
+
+This module accepts the following variables:
+
+``JAVA_HOME``
+  The caller can set this variable to specify the installation directory of Java
+  explicitly.
+
+Examples
+^^^^^^^^
+
+Finding JNI and linking it to a project target:
+
+.. code-block:: cmake
+
+  find_package(JNI)
+  target_link_libraries(project_target PRIVATE JNI::JNI)
+
+Finding JNI with AWT component specified and linking them to a project target:
+
+.. code-block:: cmake
+
+  find_package(JNI COMPONENTS AWT)
+  target_link_libraries(project_target PRIVATE JNI::JNI JNI::AWT)
+
+A more common way to use Java and JNI in CMake is to use a dedicated
+:module:`UseJava` module:
+
+.. code-block:: cmake
+
+  find_package(Java)
+  find_package(JNI)
+  include(UseJava)
+
+See Also
+^^^^^^^^
+
+* The :module:`FindJava` module to find Java runtime tools and development
+  components.
+* The :module:`UseJava` module to use Java in CMake.
 #]=======================================================================]
 
 include(CheckSourceCompiles)
