@@ -35,8 +35,6 @@ This module defines the following variables:
   also set to the same value.
 
 ``PYTHONLIBS_VERSION_STRING``
-  .. versionadded:: 2.8.8
-
   The version of the Python libraries found.
 
 ``PYTHON_LIBRARIES``

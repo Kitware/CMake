@@ -15,8 +15,6 @@ following variables will also be set:
   True if a pkg-config executable was found.
 
 ``PKG_CONFIG_VERSION_STRING``
-  .. versionadded:: 2.8.8
-
   The version of pkg-config that was found.
 
 ``PKG_CONFIG_EXECUTABLE``

@@ -38,8 +38,6 @@ This module defines the following variables:
 ``LIBXML2_DEFINITIONS``
   The compiler switches required for using libxml2.
 ``LIBXML2_VERSION_STRING``
-  .. versionadded:: 2.8.8
-
   The version of the libxml2 found.
 
 Cache Variables

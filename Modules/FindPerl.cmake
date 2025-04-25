@@ -18,8 +18,6 @@ This module defines the following variables:
   ``PERL_FOUND`` variable is also set to the same value.
 
 ``PERL_VERSION_STRING``
-  .. versionadded:: 2.8.8
-
   The version of Perl found.
 
 Cache Variables
