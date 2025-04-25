@@ -145,7 +145,22 @@ elseif("x${CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_ID}" MATCHES "^xIAR$")
   set(_CMAKE_IAR_SYMEXPORT_NAMES
     "isymexport" "isymexport.exe"
   )
-  list(APPEND _CMAKE_TOOL_VARS AR LINKER IAR_ELFDUMP IAR_ELFTOOL IAR_EXE2OBJ IAR_OBJMANIP IAR_SYMEXPORT)
+  # IAR C-STAT Command Line Interface
+  set(_CMAKE_IAR_CSTAT_NAMES
+    "icstat" "icstat.exe"
+  )
+  # IAR C-STAT Checks Manifest Handler
+  set(_CMAKE_IAR_CHECKS_NAMES
+    "ichecks" "ichecks.exe"
+  )
+  # IAR C-STAT Report Generator
+  set(_CMAKE_IAR_REPORT_NAMES
+    "ireport" "ireport.exe"
+  )
+  list(APPEND _CMAKE_TOOL_VARS
+    AR LINKER IAR_ELFDUMP IAR_ELFTOOL IAR_EXE2OBJ IAR_OBJMANIP IAR_SYMEXPORT
+    IAR_CSTAT IAR_CHECKS IAR_REPORT
+  )
   unset(__iar_selected_compiler)
   unset(__iar_arch_id)
 
