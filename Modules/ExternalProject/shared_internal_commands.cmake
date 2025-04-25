@@ -701,23 +701,8 @@ function(_ep_write_extractfile_script
   directory
   options
 )
-  set(args "")
-
-  if(filename MATCHES
-    "(\\.|=)(7z|tar\\.bz2|tar\\.gz|tar\\.xz|tbz2|tgz|txz|zip)$")
-    set(args xfz)
-  endif()
-
-  if(filename MATCHES "(\\.|=)tar$")
-    set(args xf)
-  endif()
-
-  if(args STREQUAL "")
-    message(FATAL_ERROR
-      "Do not know how to extract '${filename}' -- known types are: "
-      ".7z, .tar, .tar.bz2, .tar.gz, .tar.xz, .tbz2, .tgz, .txz and .zip"
-    )
-  endif()
+  # cmake -E tar auto detects the type of archive being extracted
+  set(args "xf")
 
   configure_file(
     "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/extractfile.cmake.in"

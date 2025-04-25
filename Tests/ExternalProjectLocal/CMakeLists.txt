@@ -142,7 +142,7 @@ set_property(TARGET ${proj} PROPERTY FOLDER "Local/TGZ")
 #  this more complete, we should add a diff between this and the TGZ tree since
 #  that one does build.
 #
-set(extra_cmp_exts tar.bz2 tar.xz zip)
+set(extra_cmp_exts tar.bz2 tar.xz tar.zst zip)
 foreach(ext IN LISTS extra_cmp_exts)
   string(TOUPPER "${ext}" name)
 

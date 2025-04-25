@@ -301,6 +301,10 @@ URL
 .. versionadded:: 3.1
   Added support for `tbz2`, `.tar.xz`, `.txz`, and `.7z` extensions.
 
+.. versionadded:: 4.1
+  All archive types that :option:`cmake -E tar <cmake-E tar>` can extract
+  are supported regardless of file extension.
+
 Git
 ~~~
 
