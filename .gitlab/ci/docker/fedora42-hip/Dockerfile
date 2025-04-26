@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-ARG BASE_IMAGE=fedora:41
+ARG BASE_IMAGE=fedora:42
 
 FROM ${BASE_IMAGE} AS dnf-cache
 LABEL maintainer="Brad King <brad.king@kitware.com>"

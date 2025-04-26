@@ -89,7 +89,7 @@ hdf5-mpich-devel
 hdf5-openmpi-devel
 ImageMagick-c++-devel
 jasper-devel
-java-11-openjdk-devel
+java-21-openjdk-devel
 jsoncpp-devel
 lapack-devel
 libarchive-devel

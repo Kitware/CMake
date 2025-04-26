@@ -4,4 +4,4 @@ set(CMake_CLANG_TIDY_MODULE "$ENV{CI_PROJECT_DIR}/Utilities/ClangTidyModule/buil
 set(CMake_CLANG_TIDY_EXPORT_FIXES_DIR "$ENV{CI_PROJECT_DIR}/.gitlab/clang-tidy-fixes" CACHE PATH "")
 set(CMake_QT_MAJOR_VERSION "5" CACHE STRING "")
 
-include("${CMAKE_CURRENT_LIST_DIR}/configure_fedora41_common.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/configure_fedora42_common.cmake")

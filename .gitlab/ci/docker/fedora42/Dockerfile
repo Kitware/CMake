@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-ARG BASE_IMAGE=fedora:41
+ARG BASE_IMAGE=fedora:42
 
 FROM ${BASE_IMAGE} AS dnf-cache
 # Populate DNF cache w/ the fresh metadata and prefetch packages.
@@ -132,4 +132,4 @@ RUN --mount=type=bind,from=rvm-build,source=/root,target=/root \
     tar -C /usr/local -xf /root/rvm.tar
 
 RUN --mount=type=bind,from=rbenv-build,source=/root,target=/root \
-    tar -C / -xf /root/rbenv.tar && rbenv global 3.1.2
+    tar -C / -xf /root/rbenv.tar && rbenv global 3.4.3

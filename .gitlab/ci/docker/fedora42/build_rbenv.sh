@@ -7,7 +7,7 @@ echo "gem: --no-document" > ~/.gemrc
 # Ruby rbenv
 export RUBY_CONFIGURE_OPTS=--disable-install-doc
 export RUBY_BUILD_CURL_OPTS=-C-
-rbenv install 3.1.2 -k -s -v
+rbenv install 3.4.3 -k -s -v
 
 cat <<EOF >/tmp/exclude.lst
 *LICENSE*
