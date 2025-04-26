@@ -5,14 +5,64 @@
 FindGTK
 -------
 
-Find GTK, glib and GTKGLArea
+Finds GTK, glib and GTKGLArea.
 
-::
+GTK is a multi-platform toolkit for creating graphical user interfaces.
 
-  GTK_INCLUDE_DIR   - Directories to include to use GTK
-  GTK_LIBRARIES     - Files to link against to use GTK
-  GTK_FOUND         - GTK was found
-  GTK_GL_FOUND      - GTK's GL features were found
+.. note::
+
+  This module works only on Unix-like systems and was intended for early GTK
+  branch of 1.x, which is no longer maintained.  Use the latest supported GTK
+  version and :module:`FindPkgConfig` module to find GTK in CMake instead of
+  this module.  For example:
+
+  .. code-block:: cmake
+
+    find_package(PkgConfig REQUIRED)
+    pkg_check_modules(GTK REQUIRED IMPORTED_TARGET gtk4>=4.14)
+    target_link_libraries(example PRIVATE PkgConfig::GTK)
+
+Result Variables
+^^^^^^^^^^^^^^^^
+
+This module defines the following variables:
+
+``GTK_FOUND``
+  Boolean indicating whether GTK is found.
+``GTK_GL_FOUND``
+  Boolean indicating whether GTK's GL features are found.
+``GTK_INCLUDE_DIR``
+  Include directories containing headers needed to use GTK.
+``GTK_LIBRARIES``
+  Libraries needed to link against for using GTK.
+
+Examples
+^^^^^^^^
+
+Finding GTK 1.x and creating an interface :ref:`imported target
+<Imported Targets>` that encapsulates its usage requirements for linking to a
+project target:
+
+.. code-block:: cmake
+
+  find_package(GTK)
+
+  if(GTK_FOUND)
+    add_library(GTK::GTK INTERFACE IMPORTED)
+    set_target_properties(
+      GTK::GTK
+      PROPERTIES
+        INTERFACE_INCLUDE_DIRECTORIES "${GTK_INCLUDE_DIR}"
+        INTERFACE_LINK_LIBRARIES "${GTK_LIBRARIES}"
+    )
+  endif()
+
+  target_link_libraries(example PRIVATE GTK::GTK)
+
+See Also
+^^^^^^^^
+
+* The :module:`FindGTK2` module to find GTK version 2.
 #]=======================================================================]
 
 # don't even bother under WIN32
