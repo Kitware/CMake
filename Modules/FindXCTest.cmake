@@ -7,64 +7,111 @@ FindXCTest
 
 .. versionadded:: 3.3
 
-Functions to help creating and executing XCTest bundles.
+Finds the XCTest framework for writing unit tests in Xcode projects.
 
-An XCTest bundle is a CFBundle with a special product-type
-and bundle extension. The Mac Developer Library provides more
-information in the `Testing with Xcode`_ document.
+.. note::
+
+  Xcode 16 and later includes the Swift Testing framework for writing unit tests
+  in the Swift programming language, which supersedes XCTest.
+
+An XCTest bundle is a CFBundle (Core Foundation Bundle) with a special
+product type and bundle extension.  See the Apple Developer Library for more
+information in the `Testing with Xcode`_ documentation.
 
 .. _Testing with Xcode: https://developer.apple.com/library/archive/documentation/DeveloperTools/Conceptual/testing_with_xcode/
 
-Module Functions
+Result Variables
 ^^^^^^^^^^^^^^^^
+
+This module defines the following variables:
+
+``XCTest_FOUND``
+  Boolean indicating whether the XCTest framework and executable are found.
+
+``XCTest_INCLUDE_DIRS``
+  Include directories containing the XCTest framework headers needed to use
+  XCTest.
+
+``XCTest_LIBRARIES``
+  Libraries needed to link against to use XCTest framework.
+
+Cache Variables
+^^^^^^^^^^^^^^^
+
+The following cache variables may also be set:
+
+``XCTest_EXECUTABLE``
+  The path to the ``xctest`` command-line tool used to execute XCTest bundles.
+
+Commands
+^^^^^^^^
+
+When XCTest is found, this module provides the following commands to help
+create and run XCTest bundles:
 
 .. command:: xctest_add_bundle
 
-  The ``xctest_add_bundle`` function creates a XCTest bundle named
-  <target> which will test the target <testee>. Supported target types
-  for testee are Frameworks and App Bundles:
+  Creates an XCTest bundle to test a given target:
 
   .. code-block:: cmake
 
-    xctest_add_bundle(
-      <target>  # Name of the XCTest bundle
-      <testee>  # Target name of the testee
-      )
+    xctest_add_bundle(<bundle> <testee> [<sources>...])
+
+  This command creates an XCTest bundle named ``<bundle>`` that will test the
+  specified ``<testee>`` target.
+
+  The arguments are:
+
+  ``<bundle>``
+    Name of the XCTest bundle to create.  The :prop_tgt:`XCTEST` target
+    property will be set on this bundle.
+
+  ``<testee>``
+    Name of the target to test.  Supported types for the testee are Frameworks
+    and App Bundles.
+
+  ``<sources>...``
+    One or more source files to add to the bundle.  If not provided, they must
+    be added later using commands like :command:`target_sources`.
+
+  .. note::
+    The :variable:`CMAKE_OSX_SYSROOT` variable must be set before using this
+    command.
 
 .. command:: xctest_add_test
 
-  The ``xctest_add_test`` function adds an XCTest bundle to the
-  project to be run by :manual:`ctest(1)`. The test will be named
-  <name> and tests <bundle>:
+  Adds an XCTest bundle to the project to be run during the CTest phase:
 
   .. code-block:: cmake
 
-    xctest_add_test(
-      <name>    # Test name
-      <bundle>  # Target name of XCTest bundle
-      )
+    xctest_add_test(<name> <bundle>)
 
-Module Variables
-^^^^^^^^^^^^^^^^
+  This command registers an XCTest bundle to be executed by :manual:`ctest(1)`.
+  The test will be named ``<name>`` and will run the specified ``<bundle>``.
 
-The following variables are set by including this module:
+  The arguments are:
 
-.. variable:: XCTest_FOUND
+  ``<name>``
+    Name of the test as it will appear in CTest.
 
-  True if the XCTest Framework and executable were found.
+  ``<bundle>``
+    Target name of the XCTest bundle.
 
-.. variable:: XCTest_EXECUTABLE
+Examples
+^^^^^^^^
 
-  The path to the xctest command line tool used to execute XCTest bundles.
+Finding XCTest and adding tests:
 
-.. variable:: XCTest_INCLUDE_DIRS
+.. code-block:: cmake
 
-  The directory containing the XCTest Framework headers.
+  find_package(XCTest)
 
-.. variable:: XCTest_LIBRARIES
+  add_library(foo SHARED foo.c)
 
-  The location of the XCTest Framework.
-
+  if(XCTest_FOUND)
+    xctest_add_bundle(TestAppBundle foo source.swift)
+    xctest_add_test(app.TestAppBundle TestAppBundle)
+  endif()
 #]=======================================================================]
 
 set(_PRESERVED_CMAKE_FIND_ROOT_PATH "${CMAKE_FIND_ROOT_PATH}")
@@ -181,7 +228,7 @@ function(xctest_add_test name bundle)
     message(FATAL_ERROR "XCTest executable is required to register a test.")
   endif()
 
-  # check that bundle is a XCTest Bundle
+  # check that bundle is an XCTest Bundle
 
   if(NOT TARGET ${bundle})
     message(FATAL_ERROR "${bundle} is not a target.")

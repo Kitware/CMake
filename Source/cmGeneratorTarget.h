@@ -953,7 +953,7 @@ public:
   /** Return whether this target is an executable Bundle on Apple.  */
   bool IsAppBundleOnApple() const;
 
-  /** Return whether this target is a XCTest on Apple.  */
+  /** Return whether this target is an XCTest on Apple.  */
   bool IsXCTestOnApple() const;
 
   /** Return whether this target is a CFBundle (plugin) on Apple.  */
