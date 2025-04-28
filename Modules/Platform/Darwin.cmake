@@ -47,7 +47,7 @@ set(CMAKE_APPLE_IMPORT_FILE_PREFIX "lib")
 set(CMAKE_APPLE_IMPORT_FILE_SUFFIX ".tbd")
 set(CMAKE_MODULE_EXISTS 1)
 set(CMAKE_DL_LIBS "")
-if(NOT "${_CURRENT_OSX_VERSION}" VERSION_LESS "10.5")
+if(NOT (DEFINED _CMAKE_HOST_OSX_VERSION AND _CMAKE_HOST_OSX_VERSION VERSION_LESS "10.5"))
   set(CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG "-Wl,-rpath,")
 endif()
 
@@ -80,7 +80,7 @@ endif()
 # Enable shared library versioning.
 set(CMAKE_SHARED_LIBRARY_SONAME_C_FLAG "-install_name")
 
-if("${_CURRENT_OSX_VERSION}" VERSION_LESS "10.5")
+if(DEFINED _CMAKE_HOST_OSX_VERSION AND _CMAKE_HOST_OSX_VERSION VERSION_LESS "10.5")
   # Need to list dependent shared libraries on link line.  When building
   # with -isysroot (for universal binaries), the linker always looks for
   # dependent libraries under the sysroot.  Listing them on the link
@@ -157,7 +157,8 @@ if(_CMAKE_OSX_SYSROOT_PATH)
   list(APPEND CMAKE_PLATFORM_IMPLICIT_LINK_FRAMEWORK_DIRECTORIES
     /System/Library/Frameworks)
 endif()
-if("${_CURRENT_OSX_VERSION}" VERSION_LESS "10.5")
+
+if(DEFINED _CMAKE_HOST_OSX_VERSION AND _CMAKE_HOST_OSX_VERSION VERSION_LESS "10.5")
   # Older OS X tools had more implicit paths.
   list(APPEND CMAKE_PLATFORM_IMPLICIT_LINK_FRAMEWORK_DIRECTORIES
     ${_CMAKE_OSX_SYSROOT_PATH}/Network/Library/Frameworks)
