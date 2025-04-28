@@ -5,16 +5,45 @@
 FindMFC
 -------
 
-Find Microsoft Foundation Class Library (MFC) on Windows
+Finds the native Microsoft Foundation Class Library (MFC) for developing MFC
+applications on Windows.
 
-Find the native MFC - i.e.  decide if an application can link to the
-MFC libraries.
+.. note::
 
-::
+  MFC is an optional component in Visual Studio and must be installed
+  separately for this module to succeed.
 
-  MFC_FOUND - Was MFC support found
+Once the MFC libraries and headers are found, no additional manual linking is
+needed, as they are part of the development environment.
 
-You don't need to include anything or link anything to use it.
+Result Variables
+^^^^^^^^^^^^^^^^
+
+This module defines the following variables:
+
+``MFC_FOUND``
+  Boolean indicating whether MFC support is found.
+
+Examples
+^^^^^^^^
+
+Using this module to check if the application can link to the MFC libraries:
+
+.. code-block:: cmake
+
+  find_package(MFC)
+
+  if(MFC_FOUND)
+    # Example logic when MFC is available...
+    set(CMAKE_MFC_FLAG 2)
+    add_executable(app WIN32 main.cpp)
+    target_compile_definitions(app PRIVATE _AFXDLL)
+  endif()
+
+See Also
+^^^^^^^^
+
+* The :variable:`CMAKE_MFC_FLAG` variable.
 #]=======================================================================]
 
 # Assume no MFC support
