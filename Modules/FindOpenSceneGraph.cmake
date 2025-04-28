@@ -5,111 +5,255 @@
 FindOpenSceneGraph
 ------------------
 
-Find OpenSceneGraph (3D graphics application programming interface)
+Finds `OpenSceneGraph`_ (OSG), a 3D graphics application programming interface.
 
-This module searches for the OpenSceneGraph core "osg" library as well
-as :module:`FindOpenThreads`, and whatever additional ``COMPONENTS``
-(nodekits) that you specify.
+.. note::
 
-::
+  OpenSceneGraph development has largely transitioned to its successor project,
+  VulkanSceneGraph, which should be preferred for new code.  Refer to the
+  upstream documentation for guidance on using VulkanSceneGraph with CMake.
 
-    See http://www.openscenegraph.org
+This module searches for the OpenSceneGraph core osg library, its dependency
+OpenThreads, and additional OpenSceneGraph libraries, some of which are also
+known as *NodeKits*, if specified.
 
+When working with OpenSceneGraph, its core library headers are intended to be
+included in C++ project source code as:
 
+.. code-block:: c++
 
-NOTE: To use this module effectively you must either require ``CMake >=
-2.6.3`` with  :command:`cmake_minimum_required(VERSION 2.6.3)` or download
-and place :module:`FindOpenThreads`, :module:`Findosg` functions,
-:module:`Findosg` and ``Find<etc>.cmake`` files into your
-:variable:`CMAKE_MODULE_PATH`.
+  #include <osg/PositionAttitudeTransform>
 
-==================================
+Headers for the OpenSceneGraph libraries and NodeKits follow a similar inclusion
+structure, for example:
 
-This module accepts the following variables (note mixed case)
+.. code-block:: c++
 
-::
+  #include <osgAnimation/Animation>
+  #include <osgDB/DatabasePager>
+  #include <osgFX/BumpMapping>
+  // ...
 
-    OpenSceneGraph_DEBUG - Enable debugging output
+.. _`OpenSceneGraph`: https://openscenegraph.github.io/openscenegraph.io/
 
+Components
+^^^^^^^^^^
 
+OpenSceneGraph toolkit consists of the core library osg, and additional
+libraries, which can be optionally specified as components with the
+:command:`find_package` command:
 
-::
+.. code-block:: cmake
 
-    OpenSceneGraph_MARK_AS_ADVANCED - Mark cache variables as advanced
-                                      automatically
+  find_package(OpenSceneGraph [COMPONENTS <components>...])
 
+Supported components include:
 
+``osg``
+  Finds the core osg library (``libosg``), required to use OpenSceneGraph.
+  This component is always automatically implied.
 
-The following environment variables are also respected for finding the
-OSG and it's various components.  :variable:`CMAKE_PREFIX_PATH` can also be
-used for this (see :command:`find_library` CMake documentation).
+``OpenThreads``
+  Finds the dependent OpenThreads library (``libOpenThreads``) via the
+  :module:`FindOpenThreads` module.  This component is always automatically
+  implied as it is required to use OpenSceneGraph.
 
-``<MODULE>_DIR``
-  (where ``MODULE`` is of the form "OSGVOLUME" and there is
-  a :module:`FindosgVolume`.cmake` file)
+``osgAnimation``
+  Finds the osgAnimation library, which provides general purpose utility classes
+  for animation.
+
+``osgDB``
+  Finds the osgDB library for reading and writing scene graphs support.
+
+``osgFX``
+  Finds the osgFX NodeKit, which provides a framework for implementing special
+  effects.
+
+``osgGA``
+  Finds the osgGA (GUI Abstraction) library, which provides facilities to work
+  with varying window systems.
+
+``osgIntrospection``
+  Finds the osgIntrospection library, which provides a reflection framework for
+  accessing and invoking class properties and methods at runtime without
+  modifying the classes.
+
+  .. note::
+    The osgIntrospection library has been removed from the OpenSceneGraph
+    toolkit as of OpenSceneGraph version 3.0.
+
+``osgManipulator``
+  Finds the osgManipulator NodeKit, which provides support for 3D interactive
+  manipulators.
+
+``osgParticle``
+  Finds the osgParticle NodeKit, which provides support for particle effects.
+
+``osgPresentation``
+  Finds the osgPresentation NodeKit, which provides support for 3D scene graph
+  based presentations.
+
+  .. note::
+    This NodeKit has been added in OpenSceneGraph 3.0.0.
+
+``osgProducer``
+  Finds the osgProducer utility library, which provides functionality for window
+  management and event handling.
+
+  .. note::
+    The osgProducer has been removed from early versions of OpenSceneGraph
+    toolkit 1.x, and has been superseded by the osgViewer library.
+
+``osgQt``
+  Finds the osgQt NodeKit, which provides various classes to aid the integration
+  of Qt.
+
+  .. note::
+    As of OpenSceneGraph version 3.6, this NodeKit has been moved to its own
+    repository.
+
+``osgShadow``
+  Finds the osgShadow NodeKit, which provides support for a range of shadow
+  techniques.
+
+``osgSim``
+  Finds the osgSim NodeKit, which adds support for simulation features like
+  navigation lights and OpenFlight-style movement controls.
+
+``osgTerrain``
+  Finds the osgTerrain NodeKit, which provides geospecifc terrain rendering
+  support.
+
+``osgText``
+  Finds the osgText NodeKit, which provides high quality text support.
+
+``osgUtil``
+  Finds the osgUtil library, which provides general-purpose utilities like
+  update, cull, and draw traversals, as well as scene graph tools such as
+  optimization, triangle stripping, and tessellation.
+
+``osgViewer``
+  Finds the osgViewer library, which provides high level viewer functionality.
+
+``osgVolume``
+  Finds the osgVolume NodeKit, which provides volume rendering support.
+
+``osgWidget``
+  Finds the osgWidget NodeKit, which provides support for 2D and 3D GUI widget
+  sets.
+
+If no components are specified, this module searches for the ``osg`` and
+``OpenThreads`` components by default.
+
+Result Variables
+^^^^^^^^^^^^^^^^
+
+This module defines the following variables:
+
+``OpenSceneGraph_FOUND``
+  Boolean indicating whether the (requested version of) OpenSceneGraph with all
+  specified components is found.  For backward compatibility, the
+  ``OPENSCENEGRAPH_FOUND`` variable is also set to the same value.
+
+``OPENSCENEGRAPH_VERSION``
+  The version of the OSG which was found.
+
+``OPENSCENEGRAPH_INCLUDE_DIRS``
+  Include directories containing headers needed to use OpenSceneGraph.
+
+``OPENSCENEGRAPH_LIBRARIES``
+  Libraries needed to link against to use OpenSceneGraph.
+
+Hints
+^^^^^
+
+This module accepts the following variables:
+
+``OpenSceneGraph_DEBUG``
+  Set this variable to boolean true to enable debugging output by this module.
+
+``OpenSceneGraph_MARK_AS_ADVANCED``
+  Set this variable to boolean true to mark cache variables of this module as
+  advanced automatically.
+
+To help this module find OpenSceneGraph and its various components installed in
+custom location, :variable:`CMAKE_PREFIX_PATH` variable can be used.
+Additionally, the following variables are also respected:
+
+``<COMPONENT>_DIR``
+  Environment or CMake variable that can be set to the root of the OSG common
+  installation, where ``<COMPONENT>`` is the uppercase form of component listed
+  above.  For example, ``OSGVOLUME_DIR`` to find the ``osgVolume`` component.
+
 ``OSG_DIR``
-  ..
+  Environment or CMake variable that can be set to influence detection of
+  OpenSceneGraph installation root location as a whole.
+
 ``OSGDIR``
-  ..
+  Environment variable treated the same as ``OSG_DIR``.
+
 ``OSG_ROOT``
-  ..
+  Environment variable treated the same as ``OSG_DIR``.
 
+Examples
+^^^^^^^^
 
-[CMake 2.8.10]: The CMake variable ``OSG_DIR`` can now be used as well to
-influence detection, instead of needing to specify an environment
-variable.
-
-This module defines the following output variables:
-
-::
-
-    OPENSCENEGRAPH_FOUND - Was the OSG and all of the specified components found?
-
-
-
-::
-
-    OPENSCENEGRAPH_VERSION - The version of the OSG which was found
-
-
-
-::
-
-    OPENSCENEGRAPH_INCLUDE_DIRS - Where to find the headers
-
-
-
-::
-
-    OPENSCENEGRAPH_LIBRARIES - The OSG libraries
-
-
-
-================================== Example Usage:
+Finding the OpenSceneGraph with ``osgDB`` and ``osgUtil`` libraries specified as
+components and creating an interface :ref:`imported target <Imported Targets>`
+that encapsulates its usage requirements for linking to a project target:
 
 .. code-block:: cmake
 
-  find_package(OpenSceneGraph 2.0.0 REQUIRED osgDB osgUtil)
-      # libOpenThreads & libosg automatically searched
-  include_directories(${OPENSCENEGRAPH_INCLUDE_DIRS})
+  find_package(OpenSceneGraph 2.0.0 REQUIRED COMPONENTS osgDB osgUtil)
 
-
-
-.. code-block:: cmake
+  if(OpenSceneGraph_FOUND AND NOT TARGET OpenSceneGraph::OpenSceneGraph)
+    add_library(OpenSceneGraph::OpenSceneGraph INTERFACE IMPORTED)
+    set_target_properties(
+      OpenSceneGraph::OpenSceneGraph
+      PROPERTIES
+        INTERFACE_INCLUDE_DIRECTORIES "${OPENSCENEGRAPH_INCLUDE_DIRS}"
+        INTERFACE_LINK_LIBRARIES "${OPENSCENEGRAPH_LIBRARIES}"
+    )
+  endif()
 
   add_executable(foo foo.cc)
-  target_link_libraries(foo ${OPENSCENEGRAPH_LIBRARIES})
+
+  target_link_libraries(foo PRIVATE OpenSceneGraph::OpenSceneGraph)
+
+See Also
+^^^^^^^^
+
+The following OpenSceneGraph-related helper find modules are used internally by
+this module when finding specific OpenSceneGraph components.  These modules are
+not intended to be included or invoked directly by project code during typical
+use of ``find_package(OpenSceneGraph)``.  However, they can be useful for
+advanced scenarios where finer control over component detection is needed.  For
+example, to find them explicitly and override or bypass detection of specific
+OpenSceneGraph components:
+
+* The :module:`Findosg` module to find the core osg library.
+* The :module:`FindosgAnimation` module to find osgAnimation.
+* The :module:`FindosgDB` module to find osgDB.
+* The :module:`FindosgFX` module to find osgDB.
+* The :module:`FindosgGA` module to find osgGA.
+* The :module:`FindosgIntrospection` module to find osgIntrospection.
+* The :module:`FindosgManipulator` module to find osgManipulator.
+* The :module:`FindosgParticle` module to find osgParticle.
+* The :module:`FindosgPresentation` module to find osgPresentation.
+* The :module:`FindosgProducer` module to find osgProducer.
+* The :module:`FindosgQt` module to find osgQt.
+* The :module:`FindosgShadow` module to find osgShadow.
+* The :module:`FindosgSim` module to find osgSim.
+* The :module:`FindosgTerrain` module to find osgTerrain.
+* The :module:`FindosgText` module to find osgText.
+* The :module:`FindosgUtil` module to find osgUtil.
+* The :module:`FindosgViewer` module to find osgViewer.
+* The :module:`FindosgVolume` module to find osgVolume.
+* The :module:`FindosgWidget` module to find osgWidget.
 #]=======================================================================]
 
 cmake_policy(PUSH)
 cmake_policy(SET CMP0159 NEW) # file(STRINGS) with REGEX updates CMAKE_MATCH_<n>
-
-#
-# Naming convention:
-#  Local variables of the form _osg_foo
-#  Input variables of the form OpenSceneGraph_FOO
-#  Output variables of the form OPENSCENEGRAPH_FOO
-#
 
 include(${CMAKE_CURRENT_LIST_DIR}/Findosg_functions.cmake)
 
