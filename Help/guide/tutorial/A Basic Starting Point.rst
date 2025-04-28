@@ -17,7 +17,7 @@ the ``Build and Run`` section will walk step-by-step through how to build and
 test the exercise. Finally, at the end of each exercise the intended solution
 is discussed.
 
-Also note that each step in the tutorial builds on the next. So, for example,
+Also note that each step in the tutorial builds on the previous. For example,
 the starting code for ``Step2`` is the complete solution to ``Step1``.
 
 Exercise 1 - Building a Basic Project
