@@ -57,7 +57,7 @@ string(REGEX REPLACE "^([0-9]+\\.[0-9]+).*$" "\\1"
 # CMAKE_OSX_DEPLOYMENT_TARGET
 
 # Set cache variable - end user may change this during ccmake or cmake-gui configure.
-if(CMAKE_SYSTEM_NAME STREQUAL "Darwin" AND _CURRENT_OSX_VERSION VERSION_GREATER 10.3)
+if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
   set(CMAKE_OSX_DEPLOYMENT_TARGET "$ENV{MACOSX_DEPLOYMENT_TARGET}" CACHE STRING
     "Minimum OS X version to target for deployment (at runtime); newer APIs weak linked. Set to empty string for default value.")
 endif()
