@@ -334,3 +334,110 @@ documented by the `try_compile-v1 event`_, plus:
     An optional key that is present when the test project built successfully.
     Its value is an integer specifying the exit code, or a string containing
     an error message, from trying to run the test executable.
+
+.. _`find configure-log event`:
+
+Event Kind ``find``
+-------------------
+
+The :command:`find_file`, :command:`find_path`, :command:`find_library`, and
+:command:`find_program` commands log ``find`` events.
+
+There is only one ``find`` event major version, version 1.
+
+.. _`find-v1 event`:
+
+``find-v1`` Event
+^^^^^^^^^^^^^^^^^
+
+.. versionadded:: 4.1
+
+A ``find-v1`` event is a YAML mapping:
+
+.. code-block:: yaml
+
+  kind: "find-v1"
+  backtrace:
+    - "CMakeLists.txt:456 (find_program)"
+  mode: "program"
+  variable: "PROGRAM_PATH"
+  description: "Docstring for variable"
+  settings:
+    SearchFramework: "NEVER"
+    SearchAppBundle: "NEVER"
+    CMAKE_FIND_USE_CMAKE_PATH: true
+    CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: true
+    CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+    CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+    CMAKE_FIND_USE_INSTALL_PREFIX: true
+  names:
+    - "name1"
+    - "name2"
+  candidate_directories:
+    - "/path/to/search"
+    - "/other/path/to/search"
+    - "/path/to/found"
+    - "/further/path/to/search"
+  searched_directories:
+    - "/path/to/search"
+    - "/other/path/to/search"
+  found: "/path/to/found/program"
+
+The keys specific to ``find-v1`` mappings are:
+
+``mode``
+  A string describing the command using the search performed. One of ``file``,
+  ``path``, ``program``, or ``library``.
+
+``variable``
+  The variable to which the search stored its result.
+
+``description``
+  The documentation string of the variable.
+
+``settings``
+  Search settings active for the search.
+
+  ``SearchFramework``
+    A string describing how framework search is performed. One of ``FIRST``,
+    ``LAST``, ``ONLY``, or ``NEVER``. See :variable:`CMAKE_FIND_FRAMEWORK`.
+
+  ``SearchAppBundle``
+    A string describing how application bundle search is performed. One of
+    ``FIRST``, ``LAST``, ``ONLY``, or ``NEVER``. See
+    :variable:`CMAKE_FIND_APPBUNDLE`.
+
+  ``CMAKE_FIND_USE_CMAKE_PATH``
+    A boolean indicating whether or not CMake-specific cache variables are
+    used when searching. See :variable:`CMAKE_FIND_USE_CMAKE_PATH`.
+
+  ``CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH``
+    A boolean indicating whether or not CMake-specific environment variables
+    are used when searching. See
+    :variable:`CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH`.
+
+  ``CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH``
+    A boolean indicating whether or not platform-specific environment
+    variables are used when searching. See
+    :variable:`CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH`.
+
+  ``CMAKE_FIND_USE_CMAKE_SYSTEM_PATH``
+    A boolean indicating whether or not platform-specific CMake variables are
+    used when searching. See :variable:`CMAKE_FIND_USE_CMAKE_SYSTEM_PATH`.
+
+  ``CMAKE_FIND_USE_INSTALL_PREFIX``
+    A boolean indicating whether or not the install prefix is used when
+    searching. See :variable:`CMAKE_FIND_USE_INSTALL_PREFIX`.
+
+``names``
+  The names to look for the queries.
+
+``candidate_directories``
+  Candidate directories, in order, to look in during the search.
+
+``searched_directories``
+  Directories, in order, looked at during the search process.
+
+``found``
+  Either a string representing the found value or ``false`` if it was not
+  found.
