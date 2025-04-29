@@ -168,7 +168,7 @@ Modules
 * The :module:`ExternalProject` module gained a ``HTTP_HEADER``
   option to add http download headers.
 
-* The :module:`FindBISON` module ``BISON_TARGET`` macro learned a new
+* The :module:`FindBISON` module ``bison_target()`` command learned a new
   ``REPORT_FILE`` option to specify the bison ``--report-file=`` option.
 
 * The :module:`FindBZip2` module now provides imported targets.

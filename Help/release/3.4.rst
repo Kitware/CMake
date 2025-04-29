@@ -117,7 +117,7 @@ Modules
   useful with the :generator:`Ninja` generator to monitor CMake
   superbuild progress and prevent CPU oversubscription.
 
-* The :module:`FindBISON` module ``BISON_TARGET`` macro learned a
+* The :module:`FindBISON` module ``bison_target()`` command learned a
   new ``DEFINES_FILE`` option to specify a custom output header
   to be generated.
 
