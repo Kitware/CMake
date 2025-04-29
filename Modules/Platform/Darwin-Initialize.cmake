@@ -15,9 +15,11 @@ else()
   set(OSX_DEVELOPER_ROOT "")
 endif()
 
-execute_process(COMMAND sw_vers -productVersion
-  OUTPUT_VARIABLE CURRENT_OSX_VERSION
-  OUTPUT_STRIP_TRAILING_WHITESPACE)
+if(NOT CMAKE_CROSSCOMPILING)
+  execute_process(COMMAND sw_vers -productVersion
+    OUTPUT_VARIABLE _CMAKE_HOST_OSX_VERSION
+    OUTPUT_STRIP_TRAILING_WHITESPACE)
+endif()
 
 # Save CMAKE_OSX_ARCHITECTURES from the environment.
 set(CMAKE_OSX_ARCHITECTURES "$ENV{CMAKE_OSX_ARCHITECTURES}" CACHE STRING
@@ -48,16 +50,10 @@ endif()
 set(CMAKE_EFFECTIVE_SYSTEM_NAME "Apple")
 
 #----------------------------------------------------------------------------
-# _CURRENT_OSX_VERSION - as a two-component string: 10.5, 10.6, ...
-#
-string(REGEX REPLACE "^([0-9]+\\.[0-9]+).*$" "\\1"
-  _CURRENT_OSX_VERSION "${CURRENT_OSX_VERSION}")
-
-#----------------------------------------------------------------------------
 # CMAKE_OSX_DEPLOYMENT_TARGET
 
 # Set cache variable - end user may change this during ccmake or cmake-gui configure.
-if(CMAKE_SYSTEM_NAME STREQUAL "Darwin" AND _CURRENT_OSX_VERSION VERSION_GREATER 10.3)
+if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
   set(CMAKE_OSX_DEPLOYMENT_TARGET "$ENV{MACOSX_DEPLOYMENT_TARGET}" CACHE STRING
     "Minimum OS X version to target for deployment (at runtime); newer APIs weak linked. Set to empty string for default value.")
 endif()
