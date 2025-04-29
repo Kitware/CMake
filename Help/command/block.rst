@@ -43,13 +43,15 @@ scopes created by the ``block()`` command are removed.
 
     set(var1 "INIT1")
     set(var2 "INIT2")
+    set(var3 "INIT3")
 
     block(PROPAGATE var1 var2)
       set(var1 "VALUE1")
       unset(var2)
+      set(var3 "VALUE3")
     endblock()
 
-    # Now var1 holds VALUE1, and var2 is unset
+    # Now var1 holds VALUE1, var2 is unset, and var3 holds the initial value INIT3
 
   This option is only allowed when a variable scope is created. An error will
   be raised in the other cases.
