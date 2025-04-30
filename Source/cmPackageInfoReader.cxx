@@ -212,7 +212,7 @@ std::string NormalizeTargetName(std::string const& name,
                                 std::string const& context)
 {
   if (cmHasLiteralPrefix(name, ":")) {
-    return cmStrCat(context, name);
+    return cmStrCat(context, ':', name);
   }
 
   std::string::size_type const n = name.find_first_of(':');
