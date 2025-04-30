@@ -52,17 +52,11 @@ static_assert(CURL_SSLVERSION_LAST == 8,
               "A new CURL_SSLVERSION_ may be available!");
 #endif
 
-void cmCurlInitOnce()
+::CURLcode cm_curl_global_init(long flags)
 {
   // curl 7.56.0 introduced curl_global_sslset.
 #if defined(__APPLE__) && defined(CMAKE_USE_SYSTEM_CURL) &&                   \
   defined(LIBCURL_VERSION_NUM) && LIBCURL_VERSION_NUM >= 0x073800
-  static bool initialized = false;
-  if (initialized) {
-    return;
-  }
-  initialized = true;
-
   cm::optional<std::string> curl_ssl_backend =
     cmSystemTools::GetEnvVar("CURL_SSL_BACKEND");
   if (!curl_ssl_backend || curl_ssl_backend->empty()) {
@@ -74,6 +68,7 @@ void cmCurlInitOnce()
     }
   }
 #endif
+  return ::curl_global_init(flags);
 }
 
 cm::optional<int> cmCurlParseTLSVersion(cm::string_view tls_version)
