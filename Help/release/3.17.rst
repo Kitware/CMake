@@ -170,7 +170,7 @@ Modules
   CURL's cmake buildsystem.  It also gained a new ``CURL_NO_CURL_CMAKE``
   option to disable this behavior.
 
-* The :module:`FindFLEX` module's ``FLEX_TARGET`` command now runs ``flex``
+* The :module:`FindFLEX` module's ``flex_target()`` command now runs ``flex``
   with :variable:`CMAKE_CURRENT_BINARY_DIR` as the working directory.
   See policy :policy:`CMP0098`.
 

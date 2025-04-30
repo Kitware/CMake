@@ -73,7 +73,7 @@ Modules
 * The :module:`FindBoost` module now provides imported targets
   such as ``Boost::boost`` and ``Boost::filesystem``.
 
-* The :module:`FindFLEX` module ``FLEX_TARGET`` macro learned a
+* The :module:`FindFLEX` module ``flex_target()`` command learned a
   new ``DEFINES_FILE`` option to specify a custom output header
   to be generated.
 
