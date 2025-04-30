@@ -10,6 +10,19 @@ set(RunCMake_TEST_OPTIONS
   "-DCMAKE_EXPERIMENTAL_EXPORT_PACKAGE_INFO:STRING=b80be207-778e-46ba-8080-b23bba22639e"
   )
 
+function(run_cmake_install test)
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/${test}-build)
+  if (NOT RunCMake_GENERATOR_IS_MULTI_CONFIG)
+    list(APPEND RunCMake_TEST_OPTIONS -DCMAKE_BUILD_TYPE=Release)
+  endif()
+
+  run_cmake(${test})
+
+  set(RunCMake_TEST_NO_CLEAN TRUE)
+  run_cmake_command(${test}-build ${CMAKE_COMMAND} --build . --config Release)
+  run_cmake_command(${test}-install ${CMAKE_COMMAND} --install . --config Release)
+endfunction()
+
 # Test incorrect usage
 run_cmake(BadArgs1)
 run_cmake(BadArgs2)
@@ -36,3 +49,4 @@ run_cmake(Requirements)
 run_cmake(TargetTypes)
 run_cmake(DependsMultiple)
 run_cmake(DependsMultipleNotInstalled)
+run_cmake_install(Destination)
