@@ -134,56 +134,36 @@ ExternalProject_Add(${proj}
 set_property(TARGET ${proj} PROPERTY FOLDER "Local/TGZ")
 
 
-# Local BZ2:
+# Local archives with other compression methods:
 #
-# (The bz2 tests are here just to verify that the bz2 decompression is executed
-#  during a test suite run... The configure and build commands are set to
-#  nothing to make the test quicker. To make this more complete, I should add
-#  a diff between this and the TGZ source tree since that one does build...)
+# These tests are here just to verify that decompression of other archive types
+#  supported by "cmake -E tar" is also supported by ExternalProject. The steps
+#  for configure and build are set to nothing to make the test quicker. To make
+#  this more complete, we should add a diff between this and the TGZ tree since
+#  that one does build.
 #
-set(proj TutorialStep1-LocalBZ2)
-ExternalProject_Add(${proj}
-  URL "${CMAKE_CURRENT_SOURCE_DIR}/Step1.tar.bz2"
-  CONFIGURE_COMMAND ""
-  BUILD_COMMAND ""
-  INSTALL_COMMAND ""
-)
-set_property(TARGET ${proj} PROPERTY FOLDER "Local/BZ2")
+set(extra_cmp_exts tar.bz2 tar.xz tar.zst zip)
+foreach(ext IN LISTS extra_cmp_exts)
+  string(TOUPPER "${ext}" name)
 
-set(proj TutorialStep1-LocalNoDirBZ2)
-ExternalProject_Add(${proj}
-  URL "${CMAKE_CURRENT_SOURCE_DIR}/Step1NoDir.tar.bz2"
-  CONFIGURE_COMMAND ""
-  BUILD_COMMAND ""
-  INSTALL_COMMAND ""
-)
-set_property(TARGET ${proj} PROPERTY FOLDER "Local/BZ2")
+  set(proj "TutorialStep1-Local${name}")
+  ExternalProject_Add(${proj}
+    URL "${CMAKE_CURRENT_SOURCE_DIR}/Step1.${ext}"
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND ""
+    INSTALL_COMMAND ""
+  )
+  set_property(TARGET ${proj} PROPERTY FOLDER "Local/${name}")
 
-
-# Local ZIP:
-#
-# (The zip tests are here just to verify that the zip decompression is executed
-#  during a test suite run... The configure and build commands are set to
-#  nothing to make the test quicker. To make this more complete, I should add
-#  a diff between this and the TGZ source tree since that one does build...)
-#
-set(proj TutorialStep1-LocalZIP)
-ExternalProject_Add(${proj}
-  URL "${CMAKE_CURRENT_SOURCE_DIR}/Step1.zip"
-  CONFIGURE_COMMAND ""
-  BUILD_COMMAND ""
-  INSTALL_COMMAND ""
-)
-set_property(TARGET ${proj} PROPERTY FOLDER "Local/ZIP")
-
-set(proj TutorialStep1-LocalNoDirZIP)
-ExternalProject_Add(${proj}
-  URL "${CMAKE_CURRENT_SOURCE_DIR}/Step1NoDir.zip"
-  CONFIGURE_COMMAND ""
-  BUILD_COMMAND ""
-  INSTALL_COMMAND ""
-)
-set_property(TARGET ${proj} PROPERTY FOLDER "Local/ZIP")
+  set(proj "TutorialStep1-LocalNoDir${name}")
+  ExternalProject_Add(${proj}
+    URL "${CMAKE_CURRENT_SOURCE_DIR}/Step1NoDir.${ext}"
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND ""
+    INSTALL_COMMAND ""
+  )
+  set_property(TARGET ${proj} PROPERTY FOLDER "Local/${name}")
+endforeach()
 
 
 # Test the testable built/installed products:
