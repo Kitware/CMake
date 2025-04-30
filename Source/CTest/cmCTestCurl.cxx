@@ -24,9 +24,8 @@ cmCTestCurl::cmCTestCurl(cmCTest* ctest)
   , CurlOpts(ctest)
 {
   this->SetProxyType();
-  cmCurlInitOnce();
   // In windows, this will init the winsock stuff
-  ::curl_global_init(CURL_GLOBAL_ALL);
+  cm_curl_global_init(CURL_GLOBAL_ALL);
   this->Curl = cm_curl_easy_init();
 }
 
