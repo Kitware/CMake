@@ -63,7 +63,7 @@ In order to activate support for ``import std`` in C++23 and newer targets,
 set
 
 * variable ``CMAKE_EXPERIMENTAL_CXX_IMPORT_STD`` to
-* value ``a9e1cf81-9932-4810-974b-6eccaf14e457``.
+* value ``d0edc3af-4c50-42ea-a356-e2862fe7a444``.
 
 This UUID may change in future versions of CMake.  Be sure to use the value
 documented here by the source tree of the version of CMake with which you are
