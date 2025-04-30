@@ -5,43 +5,111 @@
 FindosgAnimation
 ----------------
 
+Finds the osgAnimation library from the OpenSceneGraph toolkit.
 
+.. note::
 
-This is part of the ``Findosg*`` suite used to find OpenSceneGraph
-components.  Each component is separate and you must opt in to each
-module.  You must also opt into OpenGL and OpenThreads (and Producer
-if needed) as these modules won't do it for you.  This is to allow you
-control over your own system piece by piece in case you need to opt
-out of certain components or change the Find behavior for a particular
-module (perhaps because the default :module:`FindOpenGL` module doesn't
-work with your system as an example).  If you want to use a more
-convenient module that includes everything, use the
-:module:`FindOpenSceneGraph` instead of the ``Findosg*.cmake`` modules.
+  In most cases, it's recommended to use the :module:`FindOpenSceneGraph` module
+  instead and list osgAnimation as a component.  This will automatically handle
+  dependencies such as the OpenThreads and core osg libraries:
 
-Locate osgAnimation This module defines:
+  .. code-block:: cmake
 
-``OSGANIMATION_FOUND``
-  Was osgAnimation found?
-``OSGANIMATION_INCLUDE_DIR``
-  Where to find the headers
+    find_package(OpenSceneGraph COMPONENTS osgAnimation)
+
+This module is used internally by :module:`FindOpenSceneGraph` to find the
+osgAnimation library.  It is not intended to be included directly during typical
+use of the :command:`find_package` command.  However, it is available as a
+standalone module for advanced use cases where finer control over detection is
+needed.  For example, to find the osgAnimation explicitly or bypass automatic
+component detection:
+
+.. code-block:: cmake
+
+  find_package(osgAnimation)
+
+OpenSceneGraph and osgAnimation headers are intended to be included in C++
+project source code as:
+
+.. code-block:: c++
+  :caption: ``example.cxx``
+
+  #include <osg/PositionAttitudeTransform>
+  #include <osgAnimation/Animation>
+  // ...
+
+When working with the OpenSceneGraph toolkit, other libraries such as OpenGL may
+also be required.
+
+Result Variables
+^^^^^^^^^^^^^^^^
+
+This module defines the following variables:
+
+``osgAnimation_FOUND``
+  Boolean indicating whether the osgAnimation library of the OpenSceneGraph
+  toolkit is found.  For backward compatibility, the ``OSGANIMATION_FOUND``
+  variable is also set to the same value.
+
 ``OSGANIMATION_LIBRARIES``
-  The libraries to link against for the OSG (use this)
+  The libraries needed to link against to use osgAnimation.
+
 ``OSGANIMATION_LIBRARY``
-  The OSG library
+  A result variable that is set to the same value as the
+  ``OSGANIMATION_LIBRARIES`` variable.
+
+Cache Variables
+^^^^^^^^^^^^^^^
+
+The following cache variables may also be set:
+
+``OSGANIMATION_INCLUDE_DIR``
+  The include directory containing headers needed to use osgAnimation.
+
 ``OSGANIMATION_LIBRARY_DEBUG``
-  The OSG debug library
+  The path to the osgAnimation debug library.
 
-``$OSGDIR`` is an environment variable that would correspond to::
+Hints
+^^^^^
 
-  ./configure --prefix=$OSGDIR
+This module accepts the following variables:
 
-used in building osg.
-Created by Eric Wing.
+``OSGDIR``
+  Environment variable that can be set to help locate the OpenSceneGraph
+  toolkit, including its osgAnimation library, when installed in a custom
+  location.  It should point to the OpenSceneGraph installation prefix used when
+  it was configured, built, and installed: ``./configure --prefix=$OSGDIR``.
+
+Examples
+^^^^^^^^
+
+Finding the osgAnimation library explicitly with this module and creating an
+interface :ref:`imported target <Imported Targets>` that encapsulates its usage
+requirements for linking it to a project target:
+
+.. code-block:: cmake
+
+  find_package(osgAnimation)
+
+  if(osgAnimation_FOUND AND NOT TARGET osgAnimation::osgAnimation)
+    add_library(osgAnimation::osgAnimation INTERFACE IMPORTED)
+    set_target_properties(
+      osgAnimation::osgAnimation
+      PROPERTIES
+        INTERFACE_INCLUDE_DIRECTORIES "${OSGANIMATION_INCLUDE_DIR}"
+        INTERFACE_LINK_LIBRARIES "${OSGANIMATION_LIBRARIES}"
+    )
+  endif()
+
+  target_link_libraries(example PRIVATE osgAnimation::osgAnimation)
+
+See Also
+^^^^^^^^
+
+* The :module:`FindOpenSceneGraph` module to find OpenSceneGraph toolkit.
 #]=======================================================================]
 
-# Header files are presumed to be included like
-# #include <osg/PositionAttitudeTransform>
-# #include <osgAnimation/Animation>
+# Created by Eric Wing.
 
 include(${CMAKE_CURRENT_LIST_DIR}/Findosg_functions.cmake)
 OSG_FIND_PATH   (OSGANIMATION osgAnimation/Animation)

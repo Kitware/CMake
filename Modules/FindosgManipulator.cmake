@@ -5,44 +5,111 @@
 FindosgManipulator
 ------------------
 
+Finds the osgManipulator NodeKit from the OpenSceneGraph toolkit.
 
+.. note::
 
-This is part of the ``Findosg*`` suite used to find OpenSceneGraph
-components.  Each component is separate and you must opt in to each
-module.  You must also opt into OpenGL and OpenThreads (and Producer
-if needed) as these modules won't do it for you.  This is to allow you
-control over your own system piece by piece in case you need to opt
-out of certain components or change the Find behavior for a particular
-module (perhaps because the default :module:`FindOpenGL` module doesn't
-work with your system as an example).  If you want to use a more
-convenient module that includes everything, use the
-:module:`FindOpenSceneGraph` instead of the ``Findosg*.cmake`` modules.
+  In most cases, it's recommended to use the :module:`FindOpenSceneGraph` module
+  instead and list osgManipulator as a component.  This will automatically
+  handle dependencies such as the OpenThreads and core osg libraries:
 
-Locate osgManipulator This module defines:
+  .. code-block:: cmake
 
-``OSGMANIPULATOR_FOUND``
-  Was osgManipulator found?
-``OSGMANIPULATOR_INCLUDE_DIR``
-  Where to find the headers
+    find_package(OpenSceneGraph COMPONENTS osgManipulator)
+
+This module is used internally by :module:`FindOpenSceneGraph` to find the
+osgManipulator NodeKit.  It is not intended to be included directly during
+typical use of the :command:`find_package` command.  However, it is available as
+a standalone module for advanced use cases where finer control over detection is
+needed.  For example, to find the osgManipulator explicitly or bypass
+automatic component detection:
+
+.. code-block:: cmake
+
+  find_package(osgManipulator)
+
+OpenSceneGraph and osgManipulator headers are intended to be included in C++
+project source code as:
+
+.. code-block:: c++
+  :caption: ``example.cxx``
+
+  #include <osg/PositionAttitudeTransform>
+  #include <osgManipulator/TrackballDragger>
+  // ...
+
+When working with the OpenSceneGraph toolkit, other libraries such as OpenGL may
+also be required.
+
+Result Variables
+^^^^^^^^^^^^^^^^
+
+This module defines the following variables:
+
+``osgManipulator_FOUND``
+  Boolean indicating whether the osgManipulator NodeKit of the
+  OpenSceneGraph toolkit is found.  For backward compatibility, the
+  ``OSGMANIPULATOR_FOUND`` variable is also set to the same value.
+
 ``OSGMANIPULATOR_LIBRARIES``
-  The libraries to link for osgManipulator (use this)
+  The libraries needed to link against to use osgManipulator.
+
 ``OSGMANIPULATOR_LIBRARY``
-  The osgManipulator library
+  A result variable that is set to the same value as the
+  ``OSGMANIPULATOR_LIBRARIES`` variable.
+
+Cache Variables
+^^^^^^^^^^^^^^^
+
+The following cache variables may also be set:
+
+``OSGMANIPULATOR_INCLUDE_DIR``
+  The include directory containing headers needed to use osgManipulator.
+
 ``OSGMANIPULATOR_LIBRARY_DEBUG``
-  The osgManipulator debug library
+  The path to the osgManipulator debug library.
 
-``$OSGDIR`` is an environment variable that would correspond to::
+Hints
+^^^^^
 
-  ./configure --prefix=$OSGDIR
+This module accepts the following variables:
 
-used in building osg.
+``OSGDIR``
+  Environment variable that can be set to help locate the OpenSceneGraph
+  toolkit, including its osgManipulator NodeKit, when installed in a custom
+  location.  It should point to the OpenSceneGraph installation prefix used when
+  it was configured, built, and installed: ``./configure --prefix=$OSGDIR``.
 
-Created by Eric Wing.
+Examples
+^^^^^^^^
+
+Finding osgManipulator explicitly with this module and creating an interface
+:ref:`imported target <Imported Targets>` that encapsulates its usage
+requirements for linking it to a project target:
+
+.. code-block:: cmake
+
+  find_package(osgManipulator)
+
+  if(osgManipulator_FOUND AND NOT TARGET osgManipulator::osgManipulator)
+    add_library(osgManipulator::osgManipulator INTERFACE IMPORTED)
+    set_target_properties(
+      osgManipulator::osgManipulator
+      PROPERTIES
+        INTERFACE_INCLUDE_DIRECTORIES "${OSGMANIPULATOR_INCLUDE_DIR}"
+        INTERFACE_LINK_LIBRARIES "${OSGMANIPULATOR_LIBRARIES}"
+    )
+  endif()
+
+  target_link_libraries(example PRIVATE osgManipulator::osgManipulator)
+
+See Also
+^^^^^^^^
+
+* The :module:`FindOpenSceneGraph` module to find OpenSceneGraph toolkit.
 #]=======================================================================]
 
-# Header files are presumed to be included like
-# #include <osg/PositionAttitudeTransform>
-# #include <osgManipulator/TrackballDragger>
+# Created by Eric Wing.
 
 include(${CMAKE_CURRENT_LIST_DIR}/Findosg_functions.cmake)
 OSG_FIND_PATH   (OSGMANIPULATOR osgManipulator/TrackballDragger)

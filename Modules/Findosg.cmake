@@ -5,49 +5,107 @@
 Findosg
 -------
 
-
+Finds the core OpenSceneGraph osg library (``libosg``).
 
 .. note::
-  It is highly recommended that you use the new
-  :module:`FindOpenSceneGraph` introduced in CMake 2.6.3 and not use this
-  Find module directly.
 
-This is part of the ``Findosg*`` suite used to find OpenSceneGraph
-components.  Each component is separate and you must opt in to each
-module.  You must also opt into OpenGL and OpenThreads (and Producer
-if needed) as these modules won't do it for you.  This is to allow you
-control over your own system piece by piece in case you need to opt
-out of certain components or change the Find behavior for a particular
-module (perhaps because the default :module:`FindOpenGL` module doesn't
-work with your system as an example).  If you want to use a more
-convenient module that includes everything, use the
-:module:`FindOpenSceneGraph` instead of the ``Findosg*.cmake`` modules.
+  In most cases, it's recommended to use the :module:`FindOpenSceneGraph` module
+  instead, which automatically finds the osg core library along with its
+  required dependencies like OpenThreads:
 
-Locate osg This module defines:
+  .. code-block:: cmake
 
-``OSG_FOUND``
-  Was the Osg found?
-``OSG_INCLUDE_DIR``
-  Where to find theheaders
+    find_package(OpenSceneGraph)
+
+This module is used internally by :module:`FindOpenSceneGraph` to find the osg
+library.  It is not intended to be included directly during typical use of the
+:command:`find_package` command.  However, it is available as a standalone
+module for advanced use cases where finer control over detection is needed, such
+as explicitly finding osg library or bypassing automatic component detection:
+
+.. code-block:: cmake
+
+  find_package(osg)
+
+OpenSceneGraph core library headers are intended to be included in C++ project
+source code as:
+
+.. code-block:: c++
+  :caption: ``example.cxx``
+
+  #include <osg/PositionAttitudeTransform>
+
+When working with the OpenSceneGraph toolkit, other libraries such as OpenGL may
+also be required.
+
+Result Variables
+^^^^^^^^^^^^^^^^
+
+This module defines the following variables:
+
+``osg_FOUND``
+  Boolean indicating whether osg library is found.  For backward
+  compatibility, the ``OSG_FOUND`` variable is also set to the same value.
+
 ``OSG_LIBRARIES``
-  The libraries to link against for the OSG (use this)
+  The libraries needed to link against to use osg library.
+
 ``OSG_LIBRARY``
-  The OSG library
+  A result variable that is set to the same value as the ``OSG_LIBRARIES``
+  variable.
+
+Cache Variables
+^^^^^^^^^^^^^^^
+
+The following cache variables may also be set:
+
+``OSG_INCLUDE_DIR``
+  The include directory containing headers needed to use osg library.
+
 ``OSG_LIBRARY_DEBUG``
-  The OSG debug library
+  The path to the osg debug library.
 
-``$OSGDIR`` is an environment variable that would correspond to::
+Hints
+^^^^^
 
-  ./configure --prefix=$OSGDIR
+This module accepts the following variables:
 
-used in building osg.
+``OSGDIR``
+  Environment variable that can be set to help locate the OpenSceneGraph
+  toolkit, including its osg library, when installed in a custom
+  location.  It should point to the OpenSceneGraph installation prefix used when
+  it was configured, built, and installed: ``./configure --prefix=$OSGDIR``.
 
-Created by Eric Wing.
+Examples
+^^^^^^^^
+
+Finding the osg library explicitly with this module and creating an interface
+:ref:`imported target <Imported Targets>` that encapsulates its usage
+requirements for linking it to a project target:
+
+.. code-block:: cmake
+
+  find_package(osg)
+
+  if(osg_FOUND AND NOT TARGET osg::osg)
+    add_library(osg::osg INTERFACE IMPORTED)
+    set_target_properties(
+      osg::osg
+      PROPERTIES
+        INTERFACE_INCLUDE_DIRECTORIES "${OSG_INCLUDE_DIR}"
+        INTERFACE_LINK_LIBRARIES "${OSG_LIBRARIES}"
+    )
+  endif()
+
+  target_link_libraries(example PRIVATE osg::osg)
+
+See Also
+^^^^^^^^
+
+* The :module:`FindOpenSceneGraph` module to find OpenSceneGraph toolkit.
 #]=======================================================================]
 
-# Header files are presumed to be included like
-# #include <osg/PositionAttitudeTransform>
-# #include <osgUtil/SceneView>
+# Created by Eric Wing.
 
 include(${CMAKE_CURRENT_LIST_DIR}/Findosg_functions.cmake)
 OSG_FIND_PATH   (OSG osg/PositionAttitudeTransform)

@@ -21,6 +21,7 @@ When working with OpenSceneGraph, its core library headers are intended to be
 included in C++ project source code as:
 
 .. code-block:: c++
+  :caption: ``example.cxx``
 
   #include <osg/PositionAttitudeTransform>
 
@@ -28,6 +29,7 @@ Headers for the OpenSceneGraph libraries and NodeKits follow a similar inclusion
 structure, for example:
 
 .. code-block:: c++
+  :caption: ``example.cxx``
 
   #include <osgAnimation/Animation>
   #include <osgDB/DatabasePager>
@@ -105,11 +107,11 @@ Supported components include:
     toolkit 1.x, and has been superseded by the osgViewer library.
 
 ``osgQt``
-  Finds the osgQt NodeKit, which provides various classes to aid the integration
-  of Qt.
+  Finds the osgQt utility library, which provides various classes to aid the
+  integration of Qt.
 
   .. note::
-    As of OpenSceneGraph version 3.6, this NodeKit has been moved to its own
+    As of OpenSceneGraph version 3.6, this library has been moved to its own
     repository.
 
 ``osgShadow``
@@ -216,9 +218,9 @@ that encapsulates its usage requirements for linking to a project target:
     )
   endif()
 
-  add_executable(foo foo.cc)
+  add_executable(example example.cxx)
 
-  target_link_libraries(foo PRIVATE OpenSceneGraph::OpenSceneGraph)
+  target_link_libraries(example PRIVATE OpenSceneGraph::OpenSceneGraph)
 
 See Also
 ^^^^^^^^

@@ -21,6 +21,7 @@ Producer library headers are intended to be included in C++ project source code
 as:
 
 .. code-block:: c++
+  :caption: ``example.cxx``
 
   #include <Producer/CameraGroup>
 
@@ -88,7 +89,7 @@ project target:
     )
   endif()
 
-  target_link_libraries(project_target PRIVATE Producer::Producer)
+  target_link_libraries(example PRIVATE Producer::Producer)
 #]=======================================================================]
 
 # Try the user's environment request before anything else.

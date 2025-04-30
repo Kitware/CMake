@@ -7,8 +7,12 @@ FindOpenThreads
 
 Finds the OpenThreads C++ based threading library.
 
-OpenThreads header files are intended to be included as
-``#include <OpenThreads/Thread>``.
+OpenThreads header files are intended to be included as:
+
+.. code-block:: c++
+  :caption: ``example.cxx``
+
+  #include <OpenThreads/Thread>
 
 Result Variables
 ^^^^^^^^^^^^^^^^
@@ -84,7 +88,7 @@ project target:
     )
   endif()
 
-  target_link_libraries(project_target PRIVATE OpenThreads::OpenThreads)
+  target_link_libraries(example PRIVATE OpenThreads::OpenThreads)
 #]=======================================================================]
 
 include(${CMAKE_CURRENT_LIST_DIR}/SelectLibraryConfigurations.cmake)
