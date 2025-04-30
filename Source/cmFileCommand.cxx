@@ -2137,8 +2137,7 @@ bool HandleDownloadCommand(std::vector<std::string> const& args,
   url = cmCurlFixFileURL(url);
 
   ::CURL* curl;
-  cmCurlInitOnce();
-  ::curl_global_init(CURL_GLOBAL_DEFAULT);
+  cm_curl_global_init(CURL_GLOBAL_DEFAULT);
   curl = cm_curl_easy_init();
   if (!curl) {
     status.SetError("DOWNLOAD error initializing curl.");
@@ -2535,8 +2534,7 @@ bool HandleUploadCommand(std::vector<std::string> const& args,
   url = cmCurlFixFileURL(url);
 
   ::CURL* curl;
-  cmCurlInitOnce();
-  ::curl_global_init(CURL_GLOBAL_DEFAULT);
+  cm_curl_global_init(CURL_GLOBAL_DEFAULT);
   curl = cm_curl_easy_init();
   if (!curl) {
     status.SetError("UPLOAD error initializing curl.");
