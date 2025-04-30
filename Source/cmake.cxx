@@ -2244,10 +2244,9 @@ int cmake::DoPreConfigureChecks()
   }
 
   // do a sanity check on some values
-  if (this->State->GetInitializedCacheValue("CMAKE_HOME_DIRECTORY")) {
-    std::string cacheStart =
-      cmStrCat(*this->State->GetInitializedCacheValue("CMAKE_HOME_DIRECTORY"),
-               "/", this->CMakeListName);
+  if (cmValue dir =
+        this->State->GetInitializedCacheValue("CMAKE_HOME_DIRECTORY")) {
+    std::string cacheStart = cmStrCat(*dir, '/', this->CMakeListName);
     if (!cmSystemTools::SameFile(cacheStart, srcList)) {
       std::string message =
         cmStrCat("The source \"", srcList, "\" does not match the source \"",

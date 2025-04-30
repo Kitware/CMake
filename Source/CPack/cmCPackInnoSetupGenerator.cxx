@@ -662,12 +662,11 @@ bool cmCPackInnoSetupGenerator::ProcessComponents()
     if (cmNonempty(userUploadDirectory)) {
       uploadDirectory = *userUploadDirectory;
     } else {
-      if (!RequireOption("CPACK_PACKAGE_DIRECTORY")) {
+      cmValue pkgDirectory = RequireOption("CPACK_PACKAGE_DIRECTORY");
+      if (!pkgDirectory) {
         return false;
       }
-
-      uploadDirectory =
-        cmStrCat(GetOption("CPACK_PACKAGE_DIRECTORY"), "/CPackUploads");
+      uploadDirectory = cmStrCat(*pkgDirectory, "/CPackUploads");
     }
 
     if (!cmSystemTools::FileExists(uploadDirectory)) {

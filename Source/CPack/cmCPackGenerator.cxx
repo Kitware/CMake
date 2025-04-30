@@ -196,8 +196,8 @@ int cmCPackGenerator::InstallProject()
   std::string bareTempInstallDirectory =
     this->GetOption("CPACK_TEMPORARY_DIRECTORY");
   std::string tempInstallDirectory = bareTempInstallDirectory;
-  bool setDestDir = this->GetOption("CPACK_SET_DESTDIR").IsOn() ||
-    cmIsInternallyOn(this->GetOption("CPACK_SET_DESTDIR"));
+  cmValue v = this->GetOption("CPACK_SET_DESTDIR");
+  bool setDestDir = v.IsOn() || cmIsInternallyOn(v);
   if (!setDestDir) {
     tempInstallDirectory += this->GetPackagingInstallPrefix();
   }
@@ -962,9 +962,8 @@ int cmCPackGenerator::InstallCMakeProject(
       std::string absoluteDestFileComponent =
         std::string("CPACK_ABSOLUTE_DESTINATION_FILES") + "_" +
         this->GetComponentInstallSuffix(component);
-      if (this->GetOption(absoluteDestFileComponent)) {
-        std::string absoluteDestFilesListComponent =
-          cmStrCat(this->GetOption(absoluteDestFileComponent), ';', *d);
+      if (cmValue v = this->GetOption(absoluteDestFileComponent)) {
+        std::string absoluteDestFilesListComponent = cmStrCat(*v, ';', *d);
         this->SetOption(absoluteDestFileComponent,
                         absoluteDestFilesListComponent);
       } else {
