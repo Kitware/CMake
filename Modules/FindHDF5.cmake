@@ -5,153 +5,313 @@
 FindHDF5
 --------
 
-Find Hierarchical Data Format (HDF5), a library for reading and writing
-self describing array data.
+Finds Hierarchical Data Format (HDF5), a library for reading and writing
+self-describing array data:
 
+.. code-block:: cmake
 
-This module invokes the ``HDF5`` wrapper compiler that should be installed
-alongside ``HDF5``.  Depending upon the ``HDF5`` Configuration, the wrapper
-compiler is called either ``h5cc`` or ``h5pcc``.  If this succeeds, the module
-will then call the compiler with the show argument to see what flags
-are used when compiling an ``HDF5`` client application.
+  find_package(HDF5 [<version>] ... [COMPONENTS <components>...] ...)
 
-The module will optionally accept the ``COMPONENTS`` argument.  If no
-``COMPONENTS`` are specified, then the find module will default to finding
-only the ``HDF5`` C library.  If one or more ``COMPONENTS`` are specified, the
-module will attempt to find the language bindings for the specified
-components.  The valid components are ``C``, ``CXX``, ``Fortran``, ``HL``.
-``HL`` refers to the "high-level" HDF5 functions for C and Fortran.
-If the ``COMPONENTS`` argument is not given, the module will
-attempt to find only the C bindings.
-For example, to use Fortran HDF5 and HDF5-HL functions, do:
-``find_package(HDF5 COMPONENTS Fortran HL)``.
+If the HDF5 library is built using its CMake-based build system, it will as
+of HDF5 version 1.8.15 provide its own CMake Package Configuration file
+(``hdf5-config.cmake``) for use with the :command:`find_package` command in
+*config mode*.  By default, this module searches for this file and, if found,
+returns the results based on the found configuration.
 
-This module will read the variable
-``HDF5_USE_STATIC_LIBRARIES`` to determine whether or not to prefer a
-static link to a dynamic link for ``HDF5`` and all of it's dependencies.
-To use this feature, make sure that the ``HDF5_USE_STATIC_LIBRARIES``
-variable is set before the call to find_package.
+If the upstream configuration file is not found, this module falls back to
+*module mode* and invokes the HDF5 wrapper compiler typically installed
+with the HDF5 library.  Depending on the configuration, this wrapper
+compiler is named either ``h5cc`` (serial) or ``h5pcc`` (parallel).  If
+found, the wrapper is queried with the ``-show`` argument to determine the
+compiler and linker flags required for building an HDF5 client application.
+Both serial and parallel versions of the HDF5 wrapper are considered.  The
+first directory containing either is used.  If both versions are found in the
+same directory, the serial version is preferred by default.  To change this
+behavior, set the variable ``HDF5_PREFER_PARALLEL`` to ``TRUE``.
 
-.. versionadded:: 3.10
-  Support for ``HDF5_USE_STATIC_LIBRARIES`` on Windows.
+In addition to finding the include directories and libraries needed to compile
+an HDF5 application, this module also attempts to find additional tools
+provided by the HDF5 distribution, which can be useful for regression testing
+or development workflows.
 
-Both the serial and parallel ``HDF5`` wrappers are considered and the first
-directory to contain either one will be used.  In the event that both appear
-in the same directory the serial version is preferentially selected. This
-behavior can be reversed by setting the variable ``HDF5_PREFER_PARALLEL`` to
-``TRUE``.
+Components
+^^^^^^^^^^
 
-In addition to finding the includes and libraries required to compile
-an ``HDF5`` client application, this module also makes an effort to find
-tools that come with the ``HDF5`` distribution that may be useful for
-regression testing.
+This module supports optional components, which can be specified with the
+:command:`find_package` command:
+
+.. code-block:: cmake
+
+  find_package(HDF5 [COMPONENTS <components>...])
+
+Supported components include:
+
+``C``
+  Finds the ``HDF5`` C library (C bindings).
+
+``CXX``
+  Finds the ``HDF5`` C++ library (C++ bindings).
+
+``Fortran``
+  Finds the ``HDF5`` Fortran library (Fortran bindings).
+
+``HL``
+  This component can be used in combination with other components to find the
+  high-level (HL) HDF5 library variants for C, CXX, and/or Fortran, which
+  provide high-level functions.
+
+If no components are specified, then this module will by default search for the
+``C`` component.
+
+Imported Targets
+^^^^^^^^^^^^^^^^
+
+This module provides the following :ref:`Imported Targets`:
+
+``HDF5::HDF5``
+  .. versionadded:: 3.19
+
+  Target encapsulating the usage requirements for all found HDF5 libraries
+  (``HDF5_LIBRARIES``), available if HDF5 and all required components are found.
+
+``hdf5::hdf5``
+  .. versionadded:: 3.19
+
+  Target encapsulating the usage requirements for the HDF5 C library, available
+  if HDF5 library and its ``C`` component are found.
+
+``hdf5::hdf5_cpp``
+  .. versionadded:: 3.19
+
+  Target encapsulating the usage requirements for the HDF5 C and C++ libraries,
+  available if HDF5 library, and its ``C`` and ``CXX`` components are found.
+
+``hdf5::hdf5_fortran``
+  .. versionadded:: 3.19
+
+  Target encapsulating the usage requirements for the HDF5 Fortran library,
+  available if HDF5 library and its ``Fortran`` component are found.
+
+``hdf5::hdf5_hl``
+  .. versionadded:: 3.19
+
+  Target encapsulating the usage requirements for the HDF5 high-level C library,
+  available if HDF5 library and its ``C``, and ``HL`` components are found.
+
+``hdf5::hdf5_hl_cpp``
+  .. versionadded:: 3.19
+
+  High-level C++ library.
+
+  Target encapsulating the usage requirements for the HDF5 high-level C and
+  high-level C++ libraries, available if HDF5 library and its ``C``, ``CXX``,
+  and ``HL`` components are found.
+
+``hdf5::hdf5_hl_fortran``
+  .. versionadded:: 3.19
+
+  Target encapsulating the usage requirements for the HDF5 high-level Fortran
+  library, available if HDF5 library and its ``Fortran``, and ``HL`` components
+  are found.
+
+``hdf5::h5diff``
+  .. versionadded:: 3.19
+
+  Imported executable target encapsulating the usage requirements for the
+  ``h5diff`` executable, available if ``h5diff`` is found.
 
 Result Variables
 ^^^^^^^^^^^^^^^^
 
-This module will set the following variables in your project:
+This module defines the following variables:
 
 ``HDF5_FOUND``
-  HDF5 was found on the system
+  Boolean indicating whether (the requested version of) HDF5 is found.
+
 ``HDF5_VERSION``
   .. versionadded:: 3.3
-    HDF5 library version
+
+  The version of HDF5 library found.
+
 ``HDF5_INCLUDE_DIRS``
-  Location of the HDF5 header files
+  Include directories containing header files needed to use HDF5.
+
 ``HDF5_DEFINITIONS``
-  Required compiler definitions for HDF5
+  Required compiler definitions for using HDF5.
+
 ``HDF5_LIBRARIES``
-  Required libraries for all requested bindings
+  Libraries of all requested bindings needed to link against to use HDF5.
+
 ``HDF5_HL_LIBRARIES``
-  Required libraries for the HDF5 high level API for all bindings,
-  if the ``HL`` component is enabled
-
-Available components are: ``C`` ``CXX`` ``Fortran`` and ``HL``.
-For each enabled language binding, a corresponding ``HDF5_${LANG}_LIBRARIES``
-variable, and potentially ``HDF5_${LANG}_DEFINITIONS``, will be defined.
-If the ``HL`` component is enabled, then an ``HDF5_${LANG}_HL_LIBRARIES`` will
-also be defined.  With all components enabled, the following variables will be defined:
-
-``HDF5_C_DEFINITIONS``
-  Required compiler definitions for HDF5 C bindings
-``HDF5_CXX_DEFINITIONS``
-  Required compiler definitions for HDF5 C++ bindings
-``HDF5_Fortran_DEFINITIONS``
-  Required compiler definitions for HDF5 Fortran bindings
-``HDF5_C_INCLUDE_DIRS``
-  Required include directories for HDF5 C bindings
-``HDF5_CXX_INCLUDE_DIRS``
-  Required include directories for HDF5 C++ bindings
-``HDF5_Fortran_INCLUDE_DIRS``
-  Required include directories for HDF5 Fortran bindings
-``HDF5_C_LIBRARIES``
-  Required libraries for the HDF5 C bindings
-``HDF5_CXX_LIBRARIES``
-  Required libraries for the HDF5 C++ bindings
-``HDF5_Fortran_LIBRARIES``
-  Required libraries for the HDF5 Fortran bindings
-``HDF5_C_HL_LIBRARIES``
-  Required libraries for the high level C bindings
-``HDF5_CXX_HL_LIBRARIES``
-  Required libraries for the high level C++ bindings
-``HDF5_Fortran_HL_LIBRARIES``
-  Required libraries for the high level Fortran bindings.
+  Required libraries for the HDF5 high-level API for all bindings,
+  if the ``HL`` component is enabled.
 
 ``HDF5_IS_PARALLEL``
-  HDF5 library has parallel IO support
+  Boolean indicating whether the HDF5 library has parallel IO support.
+
+For each enabled language binding component, a corresponding
+``HDF5_<LANG>_LIBRARIES`` variable, and potentially
+``HDF5_<LANG>_DEFINITIONS``, will be defined.  If the ``HL`` component is
+enabled, then ``HDF5_<LANG>_HL_LIBRARIES`` variables will also be defined:
+
+``HDF5_C_DEFINITIONS``
+  Required compiler definitions for HDF5 C bindings.
+
+``HDF5_CXX_DEFINITIONS``
+  Required compiler definitions for HDF5 C++ bindings.
+
+``HDF5_Fortran_DEFINITIONS``
+  Required compiler definitions for HDF5 Fortran bindings.
+
+``HDF5_C_INCLUDE_DIRS``
+  Required include directories for HDF5 C bindings.
+
+``HDF5_CXX_INCLUDE_DIRS``
+  Required include directories for HDF5 C++ bindings.
+
+``HDF5_Fortran_INCLUDE_DIRS``
+  Required include directories for HDF5 Fortran bindings.
+
+``HDF5_C_LIBRARIES``
+  Required libraries for the HDF5 C bindings.
+
+``HDF5_CXX_LIBRARIES``
+  Required libraries for the HDF5 C++ bindings.
+
+``HDF5_Fortran_LIBRARIES``
+  Required libraries for the HDF5 Fortran bindings.
+
+``HDF5_C_HL_LIBRARIES``
+  Required libraries for the high-level C bindings, if the ``HL`` component
+  is enabled.
+
+``HDF5_CXX_HL_LIBRARIES``
+  Required libraries for the high-level C++ bindings, if the ``HL``
+  component is enabled.
+
+``HDF5_Fortran_HL_LIBRARIES``
+  Required libraries for the high-level Fortran bindings, if the ``HL``
+  component is enabled.
+
+Cache Variables
+^^^^^^^^^^^^^^^
+
+The following cache variables may also be set:
+
 ``HDF5_C_COMPILER_EXECUTABLE``
-  path to the HDF5 C wrapper compiler
+  The path to the HDF5 C wrapper compiler.
+
 ``HDF5_CXX_COMPILER_EXECUTABLE``
-  path to the HDF5 C++ wrapper compiler
+  The path to the HDF5 C++ wrapper compiler.
+
 ``HDF5_Fortran_COMPILER_EXECUTABLE``
-  path to the HDF5 Fortran wrapper compiler
+  The path to the HDF5 Fortran wrapper compiler.
+
 ``HDF5_C_COMPILER_EXECUTABLE_NO_INTERROGATE``
-  path to the primary C compiler which is also the HDF5 wrapper
+  .. versionadded:: 3.6
+
+  The path to the primary C compiler which is also the HDF5 wrapper.
+  This variable is used only in *module mode*.
+
 ``HDF5_CXX_COMPILER_EXECUTABLE_NO_INTERROGATE``
-  path to the primary C++ compiler which is also the HDF5 wrapper
+  .. versionadded:: 3.6
+
+  The path to the primary C++ compiler which is also the HDF5 wrapper.
+  This variable is used only in *module mode*.
+
 ``HDF5_Fortran_COMPILER_EXECUTABLE_NO_INTERROGATE``
-  path to the primary Fortran compiler which is also the HDF5 wrapper
+  .. versionadded:: 3.6
+
+  The path to the primary Fortran compiler which is also the HDF5 wrapper.
+  This variable is used only in *module mode*.
+
 ``HDF5_DIFF_EXECUTABLE``
-  path to the HDF5 dataset comparison tool
-
-With all components enabled, the following targets will be defined:
-
-``HDF5::HDF5``
-  All detected ``HDF5_LIBRARIES``.
-``hdf5::hdf5``
-  C library.
-``hdf5::hdf5_cpp``
-  C++ library.
-``hdf5::hdf5_fortran``
-  Fortran library.
-``hdf5::hdf5_hl``
-  High-level C library.
-``hdf5::hdf5_hl_cpp``
-  High-level C++ library.
-``hdf5::hdf5_hl_fortran``
-  High-level Fortran library.
-``hdf5::h5diff``
-  ``h5diff`` executable.
+  The path to the HDF5 dataset comparison tool (``h5diff``).
 
 Hints
 ^^^^^
 
-The following variables can be set to guide the search for HDF5 libraries and includes:
+The following variables can be set before calling the ``find_package(HDF5)``
+to guide the search for HDF5 library:
 
 ``HDF5_PREFER_PARALLEL``
   .. versionadded:: 3.4
 
-  set ``true`` to prefer parallel HDF5 (by default, serial is preferred)
+  Set this to boolean true to prefer parallel HDF5 (by default, serial is
+  preferred).  This variable is used only in *module mode*.
 
 ``HDF5_FIND_DEBUG``
   .. versionadded:: 3.9
 
-  Set ``true`` to get extra debugging output.
+  Set this to boolean true to get extra debugging output by this module.
 
 ``HDF5_NO_FIND_PACKAGE_CONFIG_FILE``
   .. versionadded:: 3.8
 
-  Set ``true`` to skip trying to find ``hdf5-config.cmake``.
+  Set this to boolean true to skip finding and using CMake package configuration
+  file (``hdf5-config.cmake``).
+
+``HDF5_USE_STATIC_LIBRARIES``
+  Set this to boolean value to determine whether or not to prefer a
+  static link to a dynamic link for ``HDF5`` and all of its dependencies.
+
+  .. versionadded:: 3.10
+    Support for ``HDF5_USE_STATIC_LIBRARIES`` on Windows.
+
+Examples
+^^^^^^^^
+
+Examples: Finding HDF5
+""""""""""""""""""""""
+
+Finding HDF5:
+
+.. code-block:: cmake
+
+  find_package(HDF5)
+
+Specifying a minimum required version of HDF5 to find:
+
+.. code-block:: cmake
+
+  find_package(HDF5 1.8.15)
+
+Finding HDF5 and making it required (if HDF5 is not found, processing stops with
+an error message):
+
+.. code-block:: cmake
+
+  find_package(HDF5 1.8.15 REQUIRED)
+
+Searching for static HDF5 libraries:
+
+.. code-block:: cmake
+
+  set(HDF5_USE_STATIC_LIBRARIES TRUE)
+  find_package(HDF5)
+
+Specifying components to find high-level C and C++ functions:
+
+.. code-block:: cmake
+
+  find_package(HDF5 COMPONENTS C CXX HL)
+
+Examples: Using HDF5
+""""""""""""""""""""
+
+Finding HDF5 and linking it to a project target:
+
+.. code-block:: cmake
+
+  find_package(HDF5)
+  target_link_libraries(project_target PRIVATE HDF5::HDF5)
+
+Using Fortran HDF5 and HDF5-HL functions:
+
+.. code-block:: cmake
+
+  find_package(HDF5 COMPONENTS Fortran HL)
+  target_link_libraries(project_target PRIVATE HDF5::HDF5)
 #]=======================================================================]
 
 include(${CMAKE_CURRENT_LIST_DIR}/SelectLibraryConfigurations.cmake)
