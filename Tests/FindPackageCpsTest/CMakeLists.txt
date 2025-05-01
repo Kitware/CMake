@@ -176,6 +176,14 @@ else()
 endif()
 
 ###############################################################################
+# Test importing and mangling of requirements (i.e. link libraries).
+
+find_package(RequiresTest CONFIG REQUIRED)
+
+add_library(requires-test STATIC requires-test.cxx)
+target_link_libraries(requires-test RequiresTest::Indirect)
+
+###############################################################################
 # Test importing of (language-specific) include paths.
 
 include(CheckIncludeFile)
