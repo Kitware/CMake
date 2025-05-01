@@ -240,12 +240,14 @@ public:
       for (auto i = 0ul; i < directoryLister.GetNumberOfFiles(); ++i) {
         char const* const fname = directoryLister.GetFile(i);
         // Skip entries to ignore or that aren't directories.
-        if (isDirentryToIgnore(fname) || !directoryLister.FileIsDirectory(i)) {
+        if (isDirentryToIgnore(fname)) {
           continue;
         }
 
         if (!this->Names) {
-          this->Matches.emplace_back(fname);
+          if (directoryLister.FileIsDirectory(i)) {
+            this->Matches.emplace_back(fname);
+          }
         } else {
           for (auto const& n : *this->Names) {
             // NOTE Customization point for
@@ -258,7 +260,9 @@ public:
                   : cmsysString_strncasecmp(fname, name.c_str(),
                                             name.length())) == 0);
             if (equal) {
-              this->Matches.emplace_back(fname);
+              if (directoryLister.FileIsDirectory(i)) {
+                this->Matches.emplace_back(fname);
+              }
               break;
             }
           }
