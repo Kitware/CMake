@@ -1,0 +1,4 @@
+-- CMAKE_C_COMPILER_APPLE_SYSROOT='/([^']*/SDKs/MacOSX[0-9.]*\.sdk)?'
+-- CMAKE_CXX_COMPILER_APPLE_SYSROOT='/([^']*/SDKs/MacOSX[0-9.]*\.sdk)?'
+-- CMAKE_OBJC_COMPILER_APPLE_SYSROOT='/([^']*/SDKs/MacOSX[0-9.]*\.sdk)?'
+-- CMAKE_OBJCXX_COMPILER_APPLE_SYSROOT='/([^']*/SDKs/MacOSX[0-9.]*\.sdk)?'

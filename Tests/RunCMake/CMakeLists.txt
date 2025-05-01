@@ -665,6 +665,7 @@ add_RunCMake_test(BundleUtilities)
 if(APPLE)
   add_RunCMake_test(INSTALL_NAME_DIR)
   add_RunCMake_test(MacOSVersions)
+  add_RunCMake_test(AppleSDK)
   add_RunCMake_test(AppleTextStubs)
 endif()
 

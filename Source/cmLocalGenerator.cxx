@@ -2014,6 +2014,11 @@ void cmLocalGenerator::AddArchitectureFlags(std::string& flags,
     }
 
     cmValue sysroot = this->Makefile->GetDefinition("CMAKE_OSX_SYSROOT");
+    if (sysroot.IsEmpty() &&
+        this->Makefile->IsOn(
+          cmStrCat("CMAKE_", lang, "_COMPILER_APPLE_SYSROOT_REQUIRED"))) {
+      sysroot = this->Makefile->GetDefinition("_CMAKE_OSX_SYSROOT_PATH");
+    }
     if (sysroot && *sysroot == "/") {
       sysroot = nullptr;
     }
