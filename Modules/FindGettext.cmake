@@ -5,84 +5,385 @@
 FindGettext
 -----------
 
-Find GNU gettext tools.
+Finds the GNU gettext tools and provides commands for producing multi-lingual
+messages:
 
-This module looks for the GNU gettext tools.
+.. code-block:: cmake
+
+  find_package(Gettext [<version>] ...)
+
+GNU gettext is a system for internationalization (i18n) and localization
+(l10n), consisting of command-line tools and a runtime library (``libintl``).
+This module finds the gettext tools (such as ``msgmerge`` and ``msgfmt``),
+while the runtime library can be found using the separate :module:`FindIntl`
+module, which abstracts ``libintl`` handling across various implementations.
+
+Common file types used with gettext:
+
+POT files
+  Portable Object Template (``.pot``) files used as the source template for
+  translations.
+
+PO files
+  Portable Object (``.po``) files containing human-readable translations.
+
+MO files
+  Machine Object (``.mo``) files compiled from ``.po`` files for runtime use.
 
 Result Variables
 ^^^^^^^^^^^^^^^^
 
 This module defines the following variables:
 
-``GETTEXT_FOUND``
-  True if gettext has been found.
+``Gettext_FOUND``
+  Boolean indicating whether (the requested version of) gettext is found.  For
+  backward compatibility, the ``GETTEXT_FOUND`` variable is also set to the same
+  value.
 
 ``GETTEXT_VERSION_STRING``
   The version of gettext found.
 
+Cache Variables
+^^^^^^^^^^^^^^^
+
+The following cache variables may also be set:
+
 ``GETTEXT_MSGMERGE_EXECUTABLE``
-  The full path to the msgmerge tool.
+  The full path to the ``msgmerge`` tool for merging message catalog and
+  template.
 
 ``GETTEXT_MSGFMT_EXECUTABLE``
-  The full path to the msgfmt tool.
+  The full path to the ``msgfmt`` tool for compiling message catalog to a binary
+  format.
 
-Functions
-^^^^^^^^^
+Commands
+^^^^^^^^
 
-This module provides several function.
-
-.. command:: gettext_create_translations
-
-  .. code-block:: cmake
-
-    gettext_create_translations(<potfile> [ALL] <file>...)
-
-  This function creates a custom target "translations" which processes the
-  given .pot file to .mo files. The generated binary files will be installed
-  into ``share/locale/`` directory. Options:
-
-  ``ALL``
-    The translations will be created when building the default target.
-
-.. command:: gettext_process_pot_file
-
-  .. code-block:: cmake
-
-      gettext_process_pot_file(<potfile> [ALL]
-                               [INSTALL_DESTINATION <destdir>]
-                               LANGUAGES <lang>...)
-
-  This function creates a custom target "potfiles" which processes the given
-  .pot file to .mo files. Options:
-
-  ``ALL``
-    The .pot file will be processed when building the default target.
-
-  ``INSTALL_DESTINATION``
-    Install the results into the given directory (``share/locale/`` by
-    default). The language subdirectory will be taken into account.
+This module provides the following commands to work with gettext in CMake, if
+gettext is found:
 
 .. command:: gettext_process_po_files
 
+  Creates a build rule that processes one or more ``.po`` translation files
+  into binary ``.mo`` files for a specified translatable language locale:
+
   .. code-block:: cmake
 
-    gettext_process_po_files(<lang> [ALL]
-                             [INSTALL_DESTINATION <dir>]
-                             PO_FILES <pofile>...)
+    gettext_process_po_files(
+      <language>
+      [ALL]
+      [INSTALL_DESTINATION <destdir>]
+      PO_FILES <po-files>...
+    )
 
-  This function creates a custom target "pofiles", which processes the given
-  .po files to .mo files for the given language. Options:
+  This command defines a custom target that compiles the given ``<po-files>``
+  into ``.mo`` files for the specified ``<language>``.  On first invocation,
+  it also creates a global custom target named ``pofiles``, to which all
+  subsequent invocations contribute.  This target can be used to build all
+  translation files collectively or referenced in other CMake commands.
+
+  This command should be invoked separately for each language locale to
+  generate the appropriate ``.mo`` files per locale.
+
+  The arguments are:
+
+  ``<language>``
+    The target translatable language locale of the PO files.
+
+    This string is typically formatted as a locale identifier (e.g., ``de_DE``
+    for German as used in Germany, or ``de_AT`` for German as used in Austria,
+    etc.).  The part before the underscore specifies the language, and the
+    part after specifies the country or regional variant.  In some cases, a
+    shorter form using only the language code (e.g., ``de``) may also be used.
 
   ``ALL``
-    The .po files will be processed when building the default target.
+    This option adds the generated target to the default CMake build target so
+    that translations are built by default.
 
-  ``INSTALL_DESTINATION``
-    Install the results into the given directory (``share/locale/`` by
-    default). The language subdirectory will be taken into account.
+  ``INSTALL_DESTINATION <destdir>``
+    Specifies the installation directory for the generated ``.mo`` files at
+    the install phase.  If specified, files are installed to:
+    ``<destdir>/<language>/LC_MESSAGES/*.mo``.  If not specified, files are
+    not installed.
 
-.. versionadded:: 3.2
-  If you wish to use the Gettext runtime library (libintl), use
-  :module:`FindIntl`.
+  ``PO_FILES <po-files>...``
+    A list of one or more ``.po`` translation files to be compiled into
+    ``.mo`` files at build phase for the specified ``<language>``.  Relative
+    paths will be interpreted relative to the current source directory
+    (:variable:`CMAKE_CURRENT_SOURCE_DIR`).
+
+.. command:: gettext_process_pot_file
+
+  Creates a build rule that processes a gettext Portable Object Template
+  (``.pot``) file and associated ``.po`` files into compiled gettext Machine
+  Object (``.mo``) files:
+
+  .. code-block:: cmake
+
+    gettext_process_pot_file(
+      <pot-file>
+      [ALL]
+      [INSTALL_DESTINATION <destdir>]
+      LANGUAGES <languages>...
+    )
+
+  This command defines a custom target named ``potfiles`` that compiles the
+  given ``<pot-file>`` and language-specific ``.po`` files into binary ``.mo``
+  files for each specified language.  The corresponding ``<language>.po``
+  files must exist in the current binary directory
+  (:variable:`CMAKE_CURRENT_BINARY_DIR`) before this command is invoked.
+
+  The arguments are:
+
+  ``<pot-file>``
+    The path to the gettext Portable Object Template file (``.pot``) serving
+    as the source for translations.  If given as a relative path, it will be
+    interpreted relative to the current source directory
+    (:variable:`CMAKE_CURRENT_SOURCE_DIR`).
+
+  ``ALL``
+    Adds the generated target to the default CMake build target so that the
+    files are built by default.
+
+  ``INSTALL_DESTINATION <destdir>``
+    Specifies the installation directory for the generated ``.mo`` files at
+    the install phase.  If specified, files are installed to:
+    ``<destdir>/<language>/LC_MESSAGES/<pot-base-filename>.mo``.  If not
+    specified, files are not installed.
+
+  ``LANGUAGES <languages>...``
+    A list of one or more translatable language locales (e.g., ``en_US``,
+    ``fr``, ``de_DE``, ``zh_CN``, etc.).
+
+.. command:: gettext_create_translations
+
+  Creates a build rule that processes a given ``.pot`` template file and
+  associated ``.po`` translation files into compiled Machine Object (``.mo``)
+  files:
+
+  .. code-block:: cmake
+
+    gettext_create_translations(<pot-file> [ALL] <po-files>...)
+
+  This command defines a custom target named ``translations`` that compiles
+  the specified ``<pot-file>`` and ``<po-files>`` into binary ``.mo`` files.
+  It also automatically adds an install rule for the generated ``.mo`` files,
+  installing them into the default
+  ``share/locale/<language>/LC_MESSAGES/<pot-base-filename>.mo`` path during
+  the install phase.
+
+  The arguments are:
+
+  ``<pot-file>``
+    The path to the gettext Portable Object Template file (``.pot``) serving
+    as the source for translations.  If given as a relative path, it will be
+    interpreted relative to the current source directory
+    (:variable:`CMAKE_CURRENT_SOURCE_DIR`).
+
+  ``ALL``
+    Adds the generated target to the default CMake build target so that
+    translations are created by default during the build.
+
+  ``<po-files>...``
+    A list of one or more translation source files in ``.po`` format, whose
+    filenames must follow the format ``<language>.po``.  Relative paths will
+    be interpreted relative to the current source directory
+    (:variable:`CMAKE_CURRENT_SOURCE_DIR`).
+
+  .. note::
+    For better control over build and installation behavior, use
+    :command:`gettext_process_po_files` instead.
+
+Examples
+^^^^^^^^
+
+Examples: Finding gettext
+"""""""""""""""""""""""""
+
+Finding the GNU gettext tools:
+
+.. code-block:: cmake
+
+  find_package(Gettext)
+
+Or, finding gettext and specifying a minimum required version:
+
+.. code-block:: cmake
+
+  find_package(Gettext 0.21)
+
+Or, finding gettext and making it required (if not found, processing stops
+with an error message):
+
+.. code-block:: cmake
+
+  find_package(Gettext REQUIRED)
+
+Example: Working With gettext in CMake
+""""""""""""""""""""""""""""""""""""""
+
+When starting with gettext, ``.pot`` file is considered to be created manually.
+For example, using a ``xgettext`` tool on the provided ``main.cxx`` source
+code file:
+
+.. code-block:: c++
+  :caption: ``main.cxx``
+  :emphasize-lines: 18
+
+  #include <iostream>
+  #include <libintl.h>
+  #include <locale.h>
+
+  int main()
+  {
+    // Set locale from environment
+    setlocale(LC_ALL, "");
+
+    // Bind the text domain
+    const char* dir = std::getenv("TEXTDOMAINDIR");
+    if (!dir) {
+      dir = "/usr/local/share/locale";
+    }
+    bindtextdomain("MyApp", dir);
+    textdomain("MyApp");
+
+    std::cout << gettext("Hello, World") << std::endl;
+
+    return 0;
+  }
+
+The ``xgettext`` tool extracts all strings from ``gettext()`` calls in provided
+source code and creates translatable strings:
+
+.. code-block:: console
+
+  $ xgettext -o MyApp.pot main.cxx
+
+Translatable files can be initialized by the project manually using
+``msginit`` tool:
+
+.. code-block:: console
+
+  $ mkdir -p locale/de_DE
+  $ msginit -l de_DE.UTF8 -o locale/de_DE/MyApp.po -i MyApp.pot --no-translator
+
+which creates a human-readable file that can be translated into a desired
+language (adjust as needed):
+
+.. code-block:: po
+  :caption: ``locale/de_DE/MyApp.po``
+  :emphasize-lines: 9
+
+  msgid ""
+  msgstr ""
+  "Language: de\n"
+  "Content-Type: text/plain; charset=UTF-8\n"
+  "Content-Transfer-Encoding: 8bit\n"
+  "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+  msgid "Hello, World"
+  msgstr "Hallo, Welt"
+
+In CMake, the :command:`gettext_process_po_files` command provided by this
+module automatically creates the needed ``.mo`` files that application loads
+at runtime depending on the system environment variables such as ``LANG``.
+In the following example, also the :module:`GNUInstallDirs` module is used
+to provide the ``CMAKE_INSTALL_LOCALEDIR`` variable:
+
+.. code-block:: cmake
+  :caption: ``CMakeLists.txt``
+  :emphasize-lines: 9-14
+
+  cmake_minimum_required(VERSION 3.24)
+  project(GettextExample)
+  include(GNUInstallDirs)
+
+  find_package(Gettext)
+
+  if(Gettext_FOUND)
+    foreach(language IN ITEMS de_DE)
+      gettext_process_po_files(
+        ${language}
+        ALL
+        PO_FILES locale/${language}/MyApp.po
+        INSTALL_DESTINATION ${CMAKE_INSTALL_LOCALEDIR}
+      )
+    endforeach()
+  endif()
+
+  add_executable(example main.cxx)
+
+  # Find and link Intl library to use gettext() from libintl.h
+  find_package(Intl)
+  target_link_libraries(example PRIVATE Intl::Intl)
+
+  install(TARGETS example)
+
+.. code-block:: console
+
+  $ cmake -B build
+  $ cmake --build build
+  $ DESTDIR=$(pwd)/stage cmake --install build
+
+To utilize the translations, the ``de_DE`` locale needs to be enabled on the
+system (see ``locale -a``).  And then the localized output can be run:
+
+.. code-block:: console
+
+  $ LANG=de_DE.UTF-8 TEXTDOMAINDIR=./stage/usr/local/share/locale \
+    ./stage/usr/local/bin/example
+
+Example: Processing POT File
+""""""""""""""""""""""""""""
+
+The :command:`gettext_process_pot_file` command processes ``.po`` translation
+files located in the current binary directory into ``.mo`` files:
+
+.. code-block:: cmake
+  :caption: ``CMakeLists.txt``
+
+  find_package(Gettext)
+
+  if(Gettext_FOUND)
+    set(languages de_DE fr zh_CN)
+
+    foreach(language IN LISTS languages)
+      configure_file(locale/${language}.po ${language}.po COPYONLY)
+    endforeach()
+
+    gettext_process_pot_file(
+      MyApp.pot
+      ALL
+      INSTALL_DESTINATION ${CMAKE_INSTALL_LOCALEDIR}
+      LANGUAGES ${languages}
+    )
+  endif()
+
+Example: Creating Translations
+""""""""""""""""""""""""""""""
+
+Using a simplified :command:`gettext_create_translations` command to create
+``.mo`` files:
+
+.. code-block:: cmake
+  :caption: ``CMakeLists.txt``
+
+  find_package(Gettext)
+
+  if(Gettext_FOUND)
+    gettext_create_translations(
+      MyApp.pot
+      ALL
+      locale/de_DE.po
+      locale/fr.po
+      locale/zh_CN.po
+    )
+  endif()
+
+See Also
+^^^^^^^^
+
+* The :module:`FindIntl` module to find the Gettext runtime library (libintl).
 #]=======================================================================]
 
 find_program(GETTEXT_MSGMERGE_EXECUTABLE msgmerge)
