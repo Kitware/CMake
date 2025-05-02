@@ -13,3 +13,6 @@ created.
 If the :prop_tgt:`VS_DEBUGGER_WORKING_DIRECTORY` property is also set, it will
 take precedence over ``DEBUGGER_WORKING_DIRECTORY`` when using one of the
 Visual Studio generators.
+
+Similarly, if :prop_tgt:`XCODE_SCHEME_WORKING_DIRECTORY` is set, it will
+override ``DEBUGGER_WORKING_DIRECTORY`` when using the Xcode generator.
