@@ -32,7 +32,9 @@ namespace std {
 /* clang-format on */
 #endif
 
+class cmConfigureLog;
 class cmExecutionStatus;
+class cmMakefile;
 class cmPackageState;
 class cmSearchPath;
 
@@ -94,6 +96,9 @@ private:
   };
 
   void InheritOptions(cmFindPackageCommand* other);
+
+  bool IsFound() const override;
+  bool IsDefined() const override;
 
   // Try to find a package, assuming most state has already been set up. This
   // is used for recursive dependency solving, particularly when importing
@@ -342,3 +347,21 @@ struct hash<cmFindPackageCommand::ConfigFileInfo>
 
 bool cmFindPackage(std::vector<std::string> const& args,
                    cmExecutionStatus& status);
+
+class cmFindPackageDebugState : public cmFindCommonDebugState
+{
+public:
+  explicit cmFindPackageDebugState(cmFindPackageCommand const* findPackage);
+  ~cmFindPackageDebugState() override;
+
+private:
+  void FoundAtImpl(std::string const& path, std::string regexName) override;
+  void FailedAtImpl(std::string const& path, std::string regexName) override;
+
+  void WriteDebug() const override;
+#ifndef CMAKE_BOOTSTRAP
+  void WriteEvent(cmConfigureLog& log, cmMakefile const& mf) const override;
+#endif
+
+  // cmFindPackageCommand const* const FindPackageCommand;
+};

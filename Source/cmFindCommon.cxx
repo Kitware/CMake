@@ -59,8 +59,6 @@ cmFindCommon::cmFindCommon(cmExecutionStatus& status)
 
   this->InitializeSearchPathGroups();
 
-  this->DebugMode = false;
-
   // Windows Registry views
   // When policy CMP0134 is not NEW, rely on previous behavior:
   if (this->Makefile->GetPolicyStatus(cmPolicies::CMP0134) !=
@@ -73,9 +71,16 @@ cmFindCommon::cmFindCommon(cmExecutionStatus& status)
   }
 }
 
+cmFindCommon::~cmFindCommon() = default;
+
 void cmFindCommon::SetError(std::string const& e)
 {
   this->Status.SetError(e);
+}
+
+bool cmFindCommon::DebugModeEnabled() const
+{
+  return static_cast<bool>(this->DebugState);
 }
 
 void cmFindCommon::DebugMessage(std::string const& msg) const
@@ -226,14 +231,14 @@ void cmFindCommon::RerootPaths(std::vector<std::string>& paths,
     return;
   }
 
-  if (this->DebugMode && debugBuffer) {
+  if (this->DebugModeEnabled() && debugBuffer) {
     *debugBuffer = cmStrCat(
       *debugBuffer, "Prepending the following roots to each prefix:\n");
   }
 
   auto debugRoot = [this, debugBuffer](std::string const& name,
                                        cmValue value) {
-    if (this->DebugMode && debugBuffer) {
+    if (this->DebugModeEnabled() && debugBuffer) {
       *debugBuffer = cmStrCat(*debugBuffer, name, '\n');
       cmList roots{ value };
       if (roots.empty()) {
@@ -456,4 +461,65 @@ void cmFindCommon::ComputeFinalPaths(IgnorePaths ignorePaths,
                     s += '/';
                   }
                 });
+}
+
+cmFindCommonDebugState::cmFindCommonDebugState(std::string name,
+                                               cmFindCommon const* findCommand)
+  : FindCommand(findCommand)
+  , CommandName(std::move(name))
+  // Strip the `find_` prefix.
+  , Mode(this->CommandName.substr(5))
+{
+}
+
+void cmFindCommonDebugState::FoundAt(std::string const& path,
+                                     std::string regexName)
+{
+  this->IsFound = true;
+
+  if (!this->TrackSearchProgress()) {
+    return;
+  }
+
+  this->FoundAtImpl(path, regexName);
+}
+
+void cmFindCommonDebugState::FailedAt(std::string const& path,
+                                      std::string regexName)
+{
+  if (!this->TrackSearchProgress()) {
+    return;
+  }
+
+  this->FailedAtImpl(path, regexName);
+}
+
+void cmFindCommonDebugState::Write()
+{
+#ifndef CMAKE_BOOTSTRAP
+  // Write find event to the configure log if the log exists
+  if (cmConfigureLog* log =
+        this->FindCommand->Makefile->GetCMakeInstance()->GetConfigureLog()) {
+    // Write event if any of:
+    //   - the variable was not defined (first run)
+    //   - the variable found state does not match the new found state (state
+    //     transition)
+    if (!this->FindCommand->IsDefined() ||
+        this->FindCommand->IsFound() != this->IsFound) {
+      this->WriteEvent(*log, *this->FindCommand->Makefile);
+    }
+  }
+#endif
+
+  this->WriteDebug();
+}
+
+bool cmFindCommonDebugState::TrackSearchProgress() const
+{
+  // Track search progress if debugging or logging the configure.
+  return this->FindCommand->DebugModeEnabled()
+#ifndef CMAKE_BOOTSTRAP
+    || this->FindCommand->Makefile->GetCMakeInstance()->GetConfigureLog()
+#endif
+    ;
 }

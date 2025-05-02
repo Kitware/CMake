@@ -25,7 +25,7 @@ class cmFindBase : public cmFindCommon
 {
 public:
   cmFindBase(std::string findCommandName, cmExecutionStatus& status);
-  virtual ~cmFindBase() = default;
+  ~cmFindBase() override;
 
   /**
    * This is called when the command is first encountered in
@@ -42,8 +42,8 @@ protected:
   friend class cmFindBaseDebugState;
   void ExpandPaths();
 
-  bool IsFound() const;
-  bool IsDefined() const;
+  bool IsFound() const override;
+  bool IsDefined() const override;
 
   void NormalizeFindResult();
   void StoreFindResult(std::string const& value);
@@ -92,17 +92,16 @@ private:
   void FillUserGuessPath();
 };
 
-class cmFindBaseDebugState
+class cmFindBaseDebugState : public cmFindCommonDebugState
 {
 public:
-  explicit cmFindBaseDebugState(std::string name, cmFindBase const* findBase);
-  ~cmFindBaseDebugState();
-
-  void FoundAt(std::string const& path, std::string regexName = std::string());
-  void FailedAt(std::string const& path,
-                std::string regexName = std::string());
+  explicit cmFindBaseDebugState(cmFindBase const* findBase);
+  ~cmFindBaseDebugState() override;
 
 private:
+  void FoundAtImpl(std::string const& path, std::string regexName) override;
+  void FailedAtImpl(std::string const& path, std::string regexName) override;
+
   struct DebugLibState
   {
     DebugLibState() = default;
@@ -115,13 +114,12 @@ private:
     std::string path;
   };
 
+  void WriteDebug() const override;
 #ifndef CMAKE_BOOTSTRAP
-  void WriteFindEvent(cmConfigureLog& log, cmMakefile const& mf) const;
+  void WriteEvent(cmConfigureLog& log, cmMakefile const& mf) const override;
 #endif
 
-  cmFindBase const* FindCommand;
-  std::string CommandName;
-  bool TrackSearchProgress() const;
+  cmFindBase const* const FindBaseCommand;
   std::vector<DebugLibState> FailedSearchLocations;
   DebugLibState FoundSearchLocation;
 };

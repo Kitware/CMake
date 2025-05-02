@@ -5,6 +5,7 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <map>
+#include <memory>
 #include <set>
 #include <string>
 #include <vector>
@@ -13,6 +14,8 @@
 #include "cmSearchPath.h"
 #include "cmWindowsRegistry.h"
 
+class cmConfigureLog;
+class cmFindCommonDebugState;
 class cmExecutionStatus;
 class cmMakefile;
 
@@ -27,14 +30,16 @@ class cmFindCommon
 {
 public:
   cmFindCommon(cmExecutionStatus& status);
+  virtual ~cmFindCommon();
 
   void SetError(std::string const& e);
 
-  bool DebugModeEnabled() const { return this->DebugMode; }
+  bool DebugModeEnabled() const;
 
 protected:
   friend class cmSearchPath;
   friend class cmFindBaseDebugState;
+  friend class cmFindCommonDebugState;
 
   /** Used to define groups of path labels */
   class PathGroup : public cmPathLabel
@@ -76,6 +81,9 @@ protected:
     RootPathModeOnly,
     RootPathModeBoth
   };
+
+  virtual bool IsFound() const = 0;
+  virtual bool IsDefined() const = 0;
 
   /** Construct the various path groups and labels */
   void InitializeSearchPathGroups();
@@ -126,7 +134,7 @@ protected:
   void AddPathSuffix(std::string const& arg);
 
   void DebugMessage(std::string const& msg) const;
-  bool DebugMode;
+  std::unique_ptr<cmFindCommonDebugState> DebugState;
   bool NoDefaultPath;
   bool NoPackageRootPath;
   bool NoCMakePath;
@@ -156,4 +164,37 @@ protected:
 
   cmMakefile* Makefile;
   cmExecutionStatus& Status;
+};
+
+class cmFindCommonDebugState
+{
+public:
+  cmFindCommonDebugState(std::string name, cmFindCommon const* findCommand);
+  virtual ~cmFindCommonDebugState() = default;
+
+  void FoundAt(std::string const& path, std::string regexName = std::string());
+  void FailedAt(std::string const& path,
+                std::string regexName = std::string());
+
+  void Write();
+
+protected:
+  virtual void FoundAtImpl(std::string const& path, std::string regexName) = 0;
+  virtual void FailedAtImpl(std::string const& path,
+                            std::string regexName) = 0;
+
+  virtual void WriteDebug() const = 0;
+#ifndef CMAKE_BOOTSTRAP
+  virtual void WriteEvent(cmConfigureLog& log, cmMakefile const& mf) const = 0;
+#endif
+
+  cmFindCommon const* const FindCommand;
+  std::string const CommandName;
+  std::string const Mode;
+  bool HasBeenFound() const { return this->IsFound; }
+
+private:
+  bool TrackSearchProgress() const;
+
+  bool IsFound{ false };
 };

@@ -9,10 +9,12 @@
 #include <set>
 #include <utility>
 
+#include <cm/memory>
 #include <cm/optional>
 
 #include "cmsys/RegularExpression.hxx"
 
+#include "cmFindCommon.h"
 #include "cmGlobalGenerator.h"
 #include "cmList.h"
 #include "cmMakefile.h"
@@ -42,7 +44,9 @@ bool cmFindLibraryCommand::InitialPass(std::vector<std::string> const& argsIn)
     return false;
   }
 
-  this->DebugMode = this->ComputeIfDebugModeWanted(this->VariableName);
+  if (this->ComputeIfDebugModeWanted(this->VariableName)) {
+    this->DebugState = cm::make_unique<cmFindBaseDebugState>(this);
+  }
 
   if (this->IsFound()) {
     this->NormalizeFindResult();
@@ -85,7 +89,7 @@ void cmFindLibraryCommand::AddArchitecturePaths(char const* suffix)
   original.swap(this->SearchPaths);
   for (std::string const& o : original) {
     this->AddArchitecturePath(o, 0, suffix);
-    if (this->DebugMode) {
+    if (this->DebugModeEnabled()) {
       std::string msg = cmStrCat(
         "find_library(", this->VariableName, ") removed original suffix ", o,
         " from PATH_SUFFIXES while adding architecture paths for suffix '",
@@ -153,7 +157,7 @@ void cmFindLibraryCommand::AddArchitecturePath(
 
     if (use_dirX) {
       dirX += "/";
-      if (this->DebugMode) {
+      if (this->DebugModeEnabled()) {
         std::string msg = cmStrCat(
           "find_library(", this->VariableName, ") added replacement path ",
           dirX, " to PATH_SUFFIXES for architecture suffix '", suffix, "'");
@@ -164,7 +168,7 @@ void cmFindLibraryCommand::AddArchitecturePath(
 
     if (use_dir) {
       this->SearchPaths.push_back(dir);
-      if (this->DebugMode) {
+      if (this->DebugModeEnabled()) {
         std::string msg = cmStrCat(
           "find_library(", this->VariableName, ") added replacement path ",
           dir, " to PATH_SUFFIXES for architecture suffix '", suffix, "'");
@@ -191,8 +195,8 @@ std::string cmFindLibraryCommand::FindLibrary()
 
 struct cmFindLibraryHelper
 {
-  cmFindLibraryHelper(std::string debugName, cmMakefile* mf,
-                      cmFindBase const* findBase);
+  cmFindLibraryHelper(cmMakefile* mf, cmFindBase const* findBase,
+                      cmFindCommonDebugState* debugState);
 
   // Context information.
   cmMakefile* Makefile;
@@ -213,8 +217,6 @@ struct cmFindLibraryHelper
 
   // Support for OpenBSD shared library naming: lib<name>.so.<major>.<minor>
   bool IsOpenBSD;
-
-  bool DebugMode;
 
   // Current names under consideration.
   struct Name
@@ -251,11 +253,11 @@ struct cmFindLibraryHelper
     return this->FindBase->Validate(path);
   }
 
-  cmFindBaseDebugState DebugSearches;
+  cmFindCommonDebugState* DebugState;
 
   void DebugLibraryFailed(std::string const& name, std::string const& path)
   {
-    if (this->DebugMode) {
+    if (this->DebugState) {
       // To improve readability of the debug output, if there is only one
       // prefix/suffix, use the plain prefix/suffix instead of the regex.
       auto const& prefix = (this->Prefixes.size() == 1) ? this->Prefixes[0]
@@ -264,16 +266,16 @@ struct cmFindLibraryHelper
                                                         : this->SuffixRegexStr;
 
       auto regexName = cmStrCat(prefix, name, suffix);
-      this->DebugSearches.FailedAt(path, regexName);
+      this->DebugState->FailedAt(path, regexName);
     }
   }
 
   void DebugLibraryFound(std::string const& name, std::string const& path)
   {
-    if (this->DebugMode) {
+    if (this->DebugState) {
       auto regexName =
         cmStrCat(this->PrefixRegexStr, name, this->SuffixRegexStr);
-      this->DebugSearches.FoundAt(path, regexName);
+      this->DebugState->FoundAt(path, regexName);
     }
   }
 };
@@ -306,12 +308,12 @@ std::string const& get_suffixes(cmMakefile* mf)
   return (suffixProp) ? *suffixProp : defaultSuffix;
 }
 }
-cmFindLibraryHelper::cmFindLibraryHelper(std::string debugName, cmMakefile* mf,
-                                         cmFindBase const* base)
+cmFindLibraryHelper::cmFindLibraryHelper(cmMakefile* mf,
+                                         cmFindBase const* base,
+                                         cmFindCommonDebugState* debugState)
   : Makefile(mf)
   , FindBase(base)
-  , DebugMode(base->DebugModeEnabled())
-  , DebugSearches(std::move(debugName), base)
+  , DebugState(debugState)
 {
   this->GG = this->Makefile->GetGlobalGenerator();
 
@@ -540,7 +542,7 @@ std::string cmFindLibraryCommand::FindNormalLibrary()
 std::string cmFindLibraryCommand::FindNormalLibraryNamesPerDir()
 {
   // Search for all names in each directory.
-  cmFindLibraryHelper helper(this->FindCommandName, this->Makefile, this);
+  cmFindLibraryHelper helper(this->Makefile, this, this->DebugState.get());
   for (std::string const& n : this->Names) {
     helper.AddName(n);
   }
@@ -557,7 +559,7 @@ std::string cmFindLibraryCommand::FindNormalLibraryNamesPerDir()
 std::string cmFindLibraryCommand::FindNormalLibraryDirsPerName()
 {
   // Search the entire path for each name.
-  cmFindLibraryHelper helper(this->FindCommandName, this->Makefile, this);
+  cmFindLibraryHelper helper(this->Makefile, this, this->DebugState.get());
   for (std::string const& n : this->Names) {
     // Switch to searching for this name.
     helper.SetName(n);
