@@ -131,10 +131,16 @@ macro(write_test_to_file)
   endif()
   string(APPEND script ")\n")
 
+  set(maybe_LOCATION "")
+  if(NOT current_test_file STREQUAL "" AND NOT current_test_line STREQUAL "")
+    set(maybe_LOCATION DEF_SOURCE_LINE "${current_test_file}:${current_test_line}")
+  endif()
+
   add_command(set_tests_properties
     "${guarded_testname}"
     PROPERTIES
       ${maybe_DISABLED}
+      ${maybe_LOCATION}
       WORKING_DIRECTORY "${arg_TEST_WORKING_DIR}"
       SKIP_REGULAR_EXPRESSION "\\[  SKIPPED \\]"
       ${arg_TEST_PROPERTIES}
@@ -174,6 +180,10 @@ macro(parse_tests_from_output)
   # Preserve semicolon in test-parameters
   string(REPLACE [[;]] [[\;]] output "${output}")
   string(REPLACE "\n" ";" output "${output}")
+
+  # Command line output doesn't contain information about the file and line number of the tests
+  set(current_test_file "")
+  set(current_test_line "")
 
   # Parse output
   foreach(line ${output})
@@ -265,6 +275,8 @@ macro(parse_tests_from_json json_file)
       endif()
 
       get_json_member_with_default(test_json "name" current_test_name)
+      get_json_member_with_default(test_json "file" current_test_file)
+      get_json_member_with_default(test_json "line" current_test_line)
       get_json_member_with_default(test_json "value_param" current_test_value_param)
       get_json_member_with_default(test_json "type_param" current_test_type_param)
 
