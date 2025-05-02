@@ -165,7 +165,7 @@ Example:
         [PROTOC_OUT_DIR <dir>]
         [PLUGIN <plugin>]
         [PLUGIN_OPTIONS <plugin-options>]
-        [DEPENDENCIES <dependencies>]
+        [DEPENDENCIES <dependencies>...]
         [PROTOS <proto-file>...]
         [IMPORT_DIRS <dir>...]
         [GENERATE_EXTENSIONS <extension>...]
@@ -204,11 +204,17 @@ Example:
     Additional options provided to the plugin, such as ``generate_mock_code=true``
     for the gRPC cpp plugin.
 
-  ``DEPENDENCIES <dependencies>``
+  ``DEPENDENCIES <dependencies>...``
     .. versionadded:: 3.28
 
-    Arguments forwarded to the ``DEPENDS`` of the underlying ``add_custom_command``
+    Dependencies on which the generation of files depends on.  These are
+    forwarded to the underlying :command:`add_custom_command(DEPENDS)`
     invocation.
+
+    .. versionchanged:: 4.1
+      This argument now accepts multiple values (``DEPENDENCIES a b c...``).
+      Previously only a single value could be specified
+      (``DEPENDENCIES "a;b;c;..."``).
 
   ``TARGET <target>``
     CMake target that will have the generated files added as sources.
@@ -258,11 +264,11 @@ cmake_policy(SET CMP0159 NEW) # file(STRINGS) with REGEX updates CMAKE_MATCH_<n>
 
 function(protobuf_generate)
   set(_options APPEND_PATH DESCRIPTORS)
-  set(_singleargs LANGUAGE OUT_VAR EXPORT_MACRO PROTOC_OUT_DIR PLUGIN PLUGIN_OPTIONS DEPENDENCIES PROTOC_EXE)
+  set(_singleargs LANGUAGE OUT_VAR EXPORT_MACRO PROTOC_OUT_DIR PLUGIN PLUGIN_OPTIONS PROTOC_EXE)
   if(COMMAND target_sources)
     list(APPEND _singleargs TARGET)
   endif()
-  set(_multiargs PROTOS IMPORT_DIRS GENERATE_EXTENSIONS PROTOC_OPTIONS)
+  set(_multiargs PROTOS IMPORT_DIRS GENERATE_EXTENSIONS PROTOC_OPTIONS DEPENDENCIES)
 
   cmake_parse_arguments(protobuf_generate "${_options}" "${_singleargs}" "${_multiargs}" "${ARGN}")
 
