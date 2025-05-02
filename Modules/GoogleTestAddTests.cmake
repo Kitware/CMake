@@ -43,6 +43,240 @@ function(escape_square_brackets output bracket placeholder placeholder_var outpu
   endif()
 endfunction()
 
+macro(write_test_to_file)
+  # Store the gtest test name before messing with these strings
+  set(gtest_name ${current_test_suite}.${current_test_name})
+
+  set(pretty_test_suite ${current_test_suite})
+  set(pretty_test_name ${current_test_name})
+
+  # Handle disabled tests
+  set(maybe_DISABLED "")
+  if(pretty_test_suite MATCHES "^DISABLED_" OR pretty_test_name MATCHES "^DISABLED_")
+    set(maybe_DISABLED DISABLED YES)
+    string(REGEX REPLACE "^DISABLED_" "" pretty_test_suite "${pretty_test_suite}")
+    string(REGEX REPLACE "^DISABLED_" "" pretty_test_name "${pretty_test_name}")
+  endif()
+
+  set(pretty_type_param "")
+  if(NOT current_test_type_param STREQUAL "")
+    # Parse test suite index from name
+    set(current_test_suite_index "")
+    if(pretty_test_suite MATCHES "^(.+)/([0-9]+)$")
+      set(pretty_test_suite ${CMAKE_MATCH_1})
+      set(current_test_suite_index ${CMAKE_MATCH_2})
+    endif()
+    if(NOT current_test_suite_index STREQUAL "")
+      if(arg_NO_PRETTY_TYPES)
+        set(pretty_type_param "<${current_test_suite_index}>")
+      else()
+        set(pretty_type_param "<${current_test_type_param}>")
+      endif()
+    else()
+      # bug compatibility with https://gitlab.kitware.com/cmake/cmake/-/issues/26939
+      set(pretty_test_suite "${pretty_test_suite}.  # TypeParam = ${current_test_type_param}")
+      set(pretty_type_param "<${pretty_test_suite}>")
+    endif()
+  endif()
+  if (NOT current_test_value_param STREQUAL "")
+    # Parse test index from name
+    if(NOT arg_NO_PRETTY_VALUES)
+      if(pretty_test_name MATCHES "^(.+)/[0-9]+$")
+        set(pretty_test_name "${CMAKE_MATCH_1}/${current_test_value_param}")
+      else()
+        # bug compatibility with https://gitlab.kitware.com/cmake/cmake/-/issues/26939
+        set(pretty_test_name "${pretty_test_name}  # GetParam() = ${current_test_value_param}")
+      endif()
+    endif()
+  endif()
+
+  set(test_name_template "@prefix@@pretty_test_suite@.@pretty_test_name@@pretty_type_param@@suffix@")
+  string(CONFIGURE "${test_name_template}" testname)
+
+  if(NOT "${arg_TEST_XML_OUTPUT_DIR}" STREQUAL "")
+    set(TEST_XML_OUTPUT_PARAM "--gtest_output=xml:${arg_TEST_XML_OUTPUT_DIR}/${prefix}${gtest_name}${suffix}.xml")
+  else()
+    set(TEST_XML_OUTPUT_PARAM "")
+  endif()
+
+  # unescape []
+  if(open_sb)
+    string(REPLACE "${open_sb}" "[" testname "${testname}")
+  endif()
+  if(close_sb)
+    string(REPLACE "${close_sb}" "]" testname "${testname}")
+  endif()
+  set(guarded_testname "${open_guard}${testname}${close_guard}")
+  # Add to script. Do not use add_command() here because it messes up the
+  # handling of empty values when forwarding arguments, and we need to
+  # preserve those carefully for arg_TEST_EXECUTOR and arg_EXTRA_ARGS.
+  string(APPEND script "add_test(${guarded_testname} ${launcherArgs}")
+  foreach(arg IN ITEMS
+    "${arg_TEST_EXECUTABLE}"
+    "--gtest_filter=${gtest_name}"
+    "--gtest_also_run_disabled_tests"
+    ${TEST_XML_OUTPUT_PARAM}
+  )
+
+    if(arg MATCHES "[^-./:a-zA-Z0-9_]")
+      string(APPEND script " [==[${arg}]==]")
+    else()
+      string(APPEND script " ${arg}")
+    endif()
+  endforeach()
+
+  if(arg_TEST_EXTRA_ARGS)
+    list(JOIN arg_TEST_EXTRA_ARGS "]==] [==[" extra_args)
+    string(APPEND script " [==[${extra_args}]==]")
+  endif()
+  string(APPEND script ")\n")
+
+  add_command(set_tests_properties
+    "${guarded_testname}"
+    PROPERTIES
+      ${maybe_DISABLED}
+      WORKING_DIRECTORY "${arg_TEST_WORKING_DIR}"
+      SKIP_REGULAR_EXPRESSION "\\[  SKIPPED \\]"
+      ${arg_TEST_PROPERTIES}
+  )
+
+  # possibly unbalanced square brackets render lists invalid so skip such
+  # tests in ${arg_TEST_LIST}
+  if(NOT "${testname}" MATCHES [=[(\[|\])]=])
+    # escape ;
+    string(REPLACE [[;]] [[\\;]] testname "${testname}")
+    list(APPEND tests_buffer "${testname}")
+    list(LENGTH tests_buffer tests_buffer_length)
+    if(tests_buffer_length GREATER "250")
+      # Chunk updates to the final "tests" variable, keeping the
+      # "tests_buffer" variable that we append each test to relatively
+      # small. This mitigates worsening performance impacts for the
+      # corner case of having many thousands of tests.
+      list(APPEND tests "${tests_buffer}")
+      set(tests_buffer "")
+    endif()
+  endif()
+
+  # If we've built up a sizable script so far, write it out as a chunk now
+  # so we don't accumulate a massive string to write at the end
+  string(LENGTH "${script}" script_len)
+  if(${script_len} GREATER "50000")
+    file(APPEND "${arg_CTEST_FILE}" "${script}")
+    set(script "")
+  endif()
+endmacro()
+
+macro(parse_tests_from_output)
+  generate_testname_guards("${output}" open_guard close_guard)
+  escape_square_brackets("${output}" "[" "__osb" open_sb output)
+  escape_square_brackets("${output}" "]" "__csb" close_sb output)
+
+  # Preserve semicolon in test-parameters
+  string(REPLACE [[;]] [[\;]] output "${output}")
+  string(REPLACE "\n" ";" output "${output}")
+
+  # Parse output
+  foreach(line ${output})
+    # Skip header
+    if(line MATCHES "gtest_main\\.cc")
+      continue()
+    endif()
+
+    if(line STREQUAL "")
+      continue()
+    endif()
+
+    # Do we have a module name or a test name?
+    if(NOT line MATCHES "^  ")
+      set(current_test_type_param "")
+
+      # Module; remove trailing '.' to get just the name...
+      string(REGEX REPLACE "\\.( *#.*)?$" "" current_test_suite "${line}")
+      if(line MATCHES "# *TypeParam = (.*)$")
+        set(current_test_type_param "${CMAKE_MATCH_1}")
+      endif()
+    else()
+      string(STRIP "${line}" test)
+      string(REGEX REPLACE " ( *#.*)?$" "" current_test_name "${test}")
+
+      set(current_test_value_param "")
+      if(line MATCHES "# *GetParam\\(\\) = (.*)$")
+        set(current_test_value_param "${CMAKE_MATCH_1}")
+      endif()
+
+      write_test_to_file()
+    endif()
+  endforeach()
+endmacro()
+
+macro(get_json_member_with_default json_variable member_name out_variable)
+  string(JSON ${out_variable}
+    ERROR_VARIABLE error_param
+    GET "${${json_variable}}" "${member_name}"
+  )
+  if(error_param)
+    # Member not present
+    set(${out_variable} "")
+  endif()
+endmacro()
+
+macro(parse_tests_from_json json_file)
+  if(NOT EXISTS "${json_file}")
+    message(FATAL_ERROR "Missing expected JSON file with test list: ${json_file}")
+  endif()
+
+  file(READ "${json_file}" test_json)
+  string(JSON test_suites_json GET "${test_json}" "testsuites")
+
+  # Return if there are no testsuites
+  string(JSON len_test_suites LENGTH "${test_suites_json}")
+  if(len_test_suites LESS_EQUAL 0)
+    return()
+  endif()
+
+  set(open_sb)
+  set(close_sb)
+
+  math(EXPR upper_limit_test_suite_range "${len_test_suites} - 1")
+
+  foreach(index_test_suite RANGE ${upper_limit_test_suite_range})
+    string(JSON test_suite_json GET "${test_suites_json}" ${index_test_suite})
+
+    # "suite" is expected to be set in write_test_to_file(). When parsing the
+    # plain text output, "suite" is expected to be the original suite name
+    # before accounting for pretty names. This may be used to construct the
+    # name of XML output results files.
+    string(JSON current_test_suite GET "${test_suite_json}" "name")
+    string(JSON tests_json GET "${test_suite_json}" "testsuite")
+
+    # Skip test suites without tests
+    string(JSON len_tests LENGTH "${tests_json}")
+    if(len_tests LESS_EQUAL 0)
+      continue()
+    endif()
+
+    math(EXPR upper_limit_test_range "${len_tests} - 1")
+    foreach(index_test RANGE ${upper_limit_test_range})
+      string(JSON test_json GET "${tests_json}" ${index_test})
+
+      string(JSON len_test_parameters LENGTH "${test_json}")
+      if(len_test_parameters LESS_EQUAL 0)
+        continue()
+      endif()
+
+      get_json_member_with_default(test_json "name" current_test_name)
+      get_json_member_with_default(test_json "value_param" current_test_value_param)
+      get_json_member_with_default(test_json "type_param" current_test_type_param)
+
+      generate_testname_guards(
+        "${current_test_suite}${current_test_name}${current_test_value_param}${current_test_type_param}"
+        open_guard close_guard
+      )
+      write_test_to_file()
+    endforeach()
+  endforeach()
+endmacro()
+
 function(gtest_discover_tests_impl)
 
   set(options "")
@@ -74,19 +308,15 @@ function(gtest_discover_tests_impl)
   set(prefix "${arg_TEST_PREFIX}")
   set(suffix "${arg_TEST_SUFFIX}")
   set(script)
-  set(suite)
   set(tests)
   set(tests_buffer "")
 
   # If a file at ${arg_CTEST_FILE} already exists, we overwrite it.
-  # For performance reasons, we write to this file in chunks, and this variable
-  # is updated to APPEND after the first write.
-  set(file_write_mode WRITE)
+  file(REMOVE "${arg_CTEST_FILE}")
 
+  set(filter)
   if(arg_TEST_FILTER)
     set(filter "--gtest_filter=${arg_TEST_FILTER}")
-  else()
-    set(filter)
   endif()
 
   # CMP0178 has already been handled in gtest_discover_tests(), so we only need
@@ -113,15 +343,25 @@ function(gtest_discover_tests_impl)
     set(discovery_extra_args "[==[${discovery_extra_args}]==]")
   endif()
 
+  set(json_file "${arg_TEST_WORKING_DIR}/cmake_test_discovery.json")
+
+  # Remove json file to make sure we don't pick up an outdated one
+  file(REMOVE "${json_file}")
+
   cmake_language(EVAL CODE
     "execute_process(
-      COMMAND ${launcherArgs} [==[${arg_TEST_EXECUTABLE}]==] --gtest_list_tests ${filter} ${discovery_extra_args}
+      COMMAND ${launcherArgs} [==[${arg_TEST_EXECUTABLE}]==]
+        --gtest_list_tests
+        [==[--gtest_output=json:${json_file}]==]
+        ${filter}
+        ${discovery_extra_args}
       WORKING_DIRECTORY [==[${arg_TEST_WORKING_DIR}]==]
       TIMEOUT ${arg_TEST_DISCOVERY_TIMEOUT}
       OUTPUT_VARIABLE output
       RESULT_VARIABLE result
     )"
   )
+
   if(NOT ${result} EQUAL 0)
     string(REPLACE "\n" "\n    " output "${output}")
     if(arg_TEST_EXECUTOR)
@@ -139,124 +379,21 @@ function(gtest_discover_tests_impl)
     )
   endif()
 
-  generate_testname_guards("${output}" open_guard close_guard)
-  escape_square_brackets("${output}" "[" "__osb" open_sb output)
-  escape_square_brackets("${output}" "]" "__csb" close_sb output)
-  # Preserve semicolon in test-parameters
-  string(REPLACE [[;]] [[\;]] output "${output}")
-  string(REPLACE "\n" ";" output "${output}")
+  if(EXISTS "${json_file}")
+    parse_tests_from_json("${json_file}")
+  else()
+    # gtest < 1.8.1, and all gtest compiled with GTEST_HAS_FILE_SYSTEM=0, don't
+    # recognize the --gtest_output=json option, and issue a warning or error on
+    # stdout about it being unrecognized, but still return an exit code 0 for
+    # success. All versions report the test list on stdout whether
+    # --gtest_output=json is recognized or not.
 
-  # Parse output
-  foreach(line ${output})
-    # Skip header
-    if(NOT line MATCHES "gtest_main\\.cc")
-      # Do we have a module name or a test name?
-      if(NOT line MATCHES "^  ")
-        # Module; remove trailing '.' to get just the name...
-        string(REGEX REPLACE "\\.( *#.*)?$" "" suite "${line}")
-        if(line MATCHES "#")
-          string(REGEX REPLACE "/[0-9].*" "" pretty_suite "${line}")
-          if(NOT arg_NO_PRETTY_TYPES)
-            string(REGEX REPLACE ".*/[0-9]+[ .#]+TypeParam = (.*)" "\\1" type_parameter "${line}")
-          else()
-            string(REGEX REPLACE ".*/([0-9]+)[ .#]+TypeParam = .*" "\\1" type_parameter "${line}")
-          endif()
-          set(test_name_template "@prefix@@pretty_suite@.@pretty_test@<@type_parameter@>@suffix@")
-        else()
-          set(pretty_suite "${suite}")
-          set(test_name_template "@prefix@@pretty_suite@.@pretty_test@@suffix@")
-        endif()
-        string(REGEX REPLACE "^DISABLED_" "" pretty_suite "${pretty_suite}")
-      else()
-        string(STRIP "${line}" test)
-        if(test MATCHES "#" AND NOT arg_NO_PRETTY_VALUES)
-          string(REGEX REPLACE "/[0-9]+[ #]+GetParam\\(\\) = " "/" pretty_test "${test}")
-        else()
-          string(REGEX REPLACE " +#.*" "" pretty_test "${test}")
-        endif()
-        string(REGEX REPLACE "^DISABLED_" "" pretty_test "${pretty_test}")
-        string(REGEX REPLACE " +#.*" "" test "${test}")
-        if(NOT "${arg_TEST_XML_OUTPUT_DIR}" STREQUAL "")
-          set(TEST_XML_OUTPUT_PARAM "--gtest_output=xml:${arg_TEST_XML_OUTPUT_DIR}/${prefix}${suite}.${test}${suffix}.xml")
-        else()
-          unset(TEST_XML_OUTPUT_PARAM)
-        endif()
-
-        string(CONFIGURE "${test_name_template}" testname)
-        # unescape []
-        if(open_sb)
-          string(REPLACE "${open_sb}" "[" testname "${testname}")
-        endif()
-        if(close_sb)
-          string(REPLACE "${close_sb}" "]" testname "${testname}")
-        endif()
-        set(guarded_testname "${open_guard}${testname}${close_guard}")
-
-        # Add to script. Do not use add_command() here because it messes up the
-        # handling of empty values when forwarding arguments, and we need to
-        # preserve those carefully for arg_TEST_EXECUTOR and arg_EXTRA_ARGS.
-        string(APPEND script "add_test(${guarded_testname} ${launcherArgs}")
-        foreach(arg IN ITEMS
-          "${arg_TEST_EXECUTABLE}"
-          "--gtest_filter=${suite}.${test}"
-          "--gtest_also_run_disabled_tests"
-          ${TEST_XML_OUTPUT_PARAM}
-          )
-          if(arg MATCHES "[^-./:a-zA-Z0-9_]")
-            string(APPEND script " [==[${arg}]==]")
-          else()
-            string(APPEND script " ${arg}")
-          endif()
-        endforeach()
-        if(arg_TEST_EXTRA_ARGS)
-          list(JOIN arg_TEST_EXTRA_ARGS "]==] [==[" extra_args)
-          string(APPEND script " [==[${extra_args}]==]")
-        endif()
-        string(APPEND script ")\n")
-
-        set(maybe_disabled "")
-        if(suite MATCHES "^DISABLED_" OR test MATCHES "^DISABLED_")
-          set(maybe_disabled DISABLED TRUE)
-        endif()
-
-        add_command(set_tests_properties
-          "${guarded_testname}"
-          PROPERTIES
-          ${maybe_disabled}
-          WORKING_DIRECTORY "${arg_TEST_WORKING_DIR}"
-          SKIP_REGULAR_EXPRESSION "\\[  SKIPPED \\]"
-          ${arg_TEST_PROPERTIES}
-        )
-
-        # possibly unbalanced square brackets render lists invalid so skip such
-        # tests in ${arg_TEST_LIST}
-        if(NOT "${testname}" MATCHES [=[(\[|\])]=])
-          # escape ;
-          string(REPLACE [[;]] [[\\;]] testname "${testname}")
-          list(APPEND tests_buffer "${testname}")
-          list(LENGTH tests_buffer tests_buffer_length)
-          if(tests_buffer_length GREATER "250")
-            # Chunk updates to the final "tests" variable, keeping the
-            # "tests_buffer" variable that we append each test to relatively
-            # small. This mitigates worsening performance impacts for the
-            # corner case of having many thousands of tests.
-            list(APPEND tests "${tests_buffer}")
-            set(tests_buffer "")
-          endif()
-        endif()
-      endif()
-
-      # If we've built up a sizable script so far, write it out as a chunk now
-      # so we don't accumulate a massive string to write at the end
-      string(LENGTH "${script}" script_len)
-      if(${script_len} GREATER "50000")
-        file(${file_write_mode} "${arg_CTEST_FILE}" "${script}")
-        set(file_write_mode APPEND)
-        set(script "")
-      endif()
-
-    endif()
-  endforeach()
+    # NOTE: Because we are calling a macro, we don't want to pass "output" as
+    # an argument because it messes up the contents passed through due to the
+    # different escaping, etc. that gets applied. We rely on it picking up the
+    # "output" variable we have already set here.
+    parse_tests_from_output()
+  endif()
 
   if(NOT tests_buffer STREQUAL "")
     list(APPEND tests "${tests_buffer}")
@@ -267,8 +404,7 @@ function(gtest_discover_tests_impl)
   add_command(set "" ${arg_TEST_LIST} "${tests}")
 
   # Write remaining content to the CTest script
-  file(${file_write_mode} "${arg_CTEST_FILE}" "${script}")
-
+  file(APPEND "${arg_CTEST_FILE}" "${script}")
 endfunction()
 
 if(CMAKE_SCRIPT_MODE_FILE)

@@ -402,6 +402,37 @@ function(run_GoogleTest_discovery_test_list_extra_args DISCOVERY_MODE)
   )
 endfunction()
 
+function(run_GoogleTest_LegacyParser)
+  # Use a single build tree for a few tests without cleaning.
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/GoogleTestLegacyParser-build)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  if(NOT RunCMake_GENERATOR_IS_MULTI_CONFIG)
+    set(RunCMake_TEST_OPTIONS -DCMAKE_BUILD_TYPE=Debug)
+  endif()
+  file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
+  file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
+
+  set(ENV{NO_GTEST_JSON_OUTPUT} 1)
+
+  run_cmake(GoogleTestLegacyParser)
+
+  run_cmake_command(GoogleTestLegacyParser-build
+    ${CMAKE_COMMAND}
+    --build .
+    --config Debug
+    --target fake_gtest
+  )
+
+  set(RunCMake-stdout-file GoogleTest-test1-stdout.txt)
+  run_cmake_command(GoogleTestLegacyParser-test
+    ${CMAKE_CTEST_COMMAND}
+    -C Debug
+    --no-label-summary
+  )
+
+  unset(ENV{NO_GTEST_JSON_OUTPUT})
+endfunction()
+
 foreach(DISCOVERY_MODE POST_BUILD PRE_TEST)
   message(STATUS "Testing ${DISCOVERY_MODE} discovery mode via CMAKE_GTEST_DISCOVER_TESTS_DISCOVERY_MODE global override...")
   run_GoogleTest(${DISCOVERY_MODE})
@@ -449,3 +480,5 @@ block(SCOPE_FOR VARIABLES)
     --output-on-failure
   )
 endblock()
+
+run_GoogleTest_LegacyParser()
