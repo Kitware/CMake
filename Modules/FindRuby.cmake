@@ -354,10 +354,10 @@ endif ()
 
 if (Ruby_VERSION_MAJOR)
   set(Ruby_VERSION "${Ruby_VERSION_MAJOR}.${Ruby_VERSION_MINOR}.${Ruby_VERSION_PATCH}")
+  set(_Ruby_VERSION_NODOT "${Ruby_VERSION_MAJOR}${Ruby_VERSION_MINOR}${Ruby_VERSION_PATCH}")
+  set(_Ruby_VERSION_NODOT_ZERO_PATCH "${Ruby_VERSION_MAJOR}${Ruby_VERSION_MINOR}0")
   set(_Ruby_VERSION_SHORT "${Ruby_VERSION_MAJOR}.${Ruby_VERSION_MINOR}")
   set(_Ruby_VERSION_SHORT_NODOT "${Ruby_VERSION_MAJOR}${Ruby_VERSION_MINOR}")
-  set(_Ruby_NODOT_VERSION "${Ruby_VERSION_MAJOR}${Ruby_VERSION_MINOR}${Ruby_VERSION_PATCH}")
-  set(_Ruby_NODOT_VERSION_ZERO_PATCH "${Ruby_VERSION_MAJOR}${Ruby_VERSION_MINOR}0")
 endif ()
 
 # FIXME: Currently we require both the interpreter and development components to be found
@@ -386,7 +386,7 @@ if (Ruby_FIND_VERSION VERSION_GREATER_EQUAL "1.9" OR Ruby_VERSION VERSION_GREATE
 endif ()
 
 # Determine the list of possible names for the Ruby shared library
-set(_Ruby_POSSIBLE_LIB_NAMES ruby ruby-static ruby${_Ruby_VERSION_SHORT} ruby${_Ruby_VERSION_SHORT_NODOT} ruby${_Ruby_NODOT_VERSION} ruby-${_Ruby_VERSION_SHORT} ruby-${Ruby_VERSION})
+set(_Ruby_POSSIBLE_LIB_NAMES ruby ruby-static ruby${_Ruby_VERSION_SHORT} ruby${_Ruby_VERSION_SHORT_NODOT} ruby${_Ruby_VERSION_NODOT} ruby-${_Ruby_VERSION_SHORT} ruby-${Ruby_VERSION})
 
 if (WIN32)
   set(_Ruby_POSSIBLE_MSVC_RUNTIMES "ucrt;msvcrt;vcruntime140;vcruntime140_1")
@@ -396,7 +396,7 @@ if (WIN32)
     list(APPEND _Ruby_POSSIBLE_MSVC_RUNTIMES "msvcr")
   endif ()
 
-  set(_Ruby_POSSIBLE_VERSION_SUFFICES "${_Ruby_NODOT_VERSION};${_Ruby_NODOT_VERSION_ZERO_PATCH}")
+  set(_Ruby_POSSIBLE_VERSION_SUFFICES "${_Ruby_VERSION_NODOT};${_Ruby_VERSION_NODOT_ZERO_PATCH}")
 
   if (CMAKE_SIZEOF_VOID_P EQUAL 8)
     set(_Ruby_POSSIBLE_ARCH_PREFIXS "libx64-;x64-")
