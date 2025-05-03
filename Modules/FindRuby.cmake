@@ -396,17 +396,17 @@ if (WIN32)
     list(APPEND _Ruby_POSSIBLE_RUNTIMES "msvcr")
   endif ()
 
-  set(_Ruby_POSSIBLE_VERSION_SUFFICES "${_Ruby_VERSION_NODOT};${_Ruby_VERSION_NODOT_ZERO_PATCH}")
+  set(_Ruby_POSSIBLE_VERSION_SUFFIXES "${_Ruby_VERSION_NODOT};${_Ruby_VERSION_NODOT_ZERO_PATCH}")
 
   if (CMAKE_SIZEOF_VOID_P EQUAL 8)
-    set(_Ruby_POSSIBLE_ARCH_PREFIXS "libx64-;x64-")
+    set(_Ruby_POSSIBLE_ARCH_PREFIXES "libx64-;x64-")
   else ()
-    set(_Ruby_POSSIBLE_ARCH_PREFIXS "lib")
+    set(_Ruby_POSSIBLE_ARCH_PREFIXES "lib")
   endif ()
 
   foreach (_Ruby_RUNTIME ${_Ruby_POSSIBLE_RUNTIMES})
-    foreach (_Ruby_VERSION_SUFFIX ${_Ruby_POSSIBLE_VERSION_SUFFICES})
-      foreach (_Ruby_ARCH_PREFIX ${_Ruby_POSSIBLE_ARCH_PREFIXS})
+    foreach (_Ruby_VERSION_SUFFIX ${_Ruby_POSSIBLE_VERSION_SUFFIXES})
+      foreach (_Ruby_ARCH_PREFIX ${_Ruby_POSSIBLE_ARCH_PREFIXES})
         list(APPEND _Ruby_POSSIBLE_LIB_NAMES
              "${_Ruby_ARCH_PREFIX}${_Ruby_RUNTIME}-ruby${_Ruby_VERSION_SUFFIX}"
              "${_Ruby_ARCH_PREFIX}${_Ruby_RUNTIME}-ruby${_Ruby_VERSION_SUFFIX}-static")
