@@ -26,6 +26,10 @@ macro(__apple_compiler_clang lang)
   set(CMAKE_${lang}_USING_LINKER_MOLD "-fuse-ld=mold")
   set(CMAKE_${lang}_USING_LINKER_SOLD "-fuse-ld=sold")
 
+  if(NOT CMAKE_${lang}_COMPILER_APPLE_SYSROOT)
+    set(CMAKE_${lang}_COMPILER_APPLE_SYSROOT_REQUIRED 1)
+  endif()
+
   if(_CMAKE_OSX_SYSROOT_PATH MATCHES "/iPhoneOS")
     set(CMAKE_${lang}_OSX_DEPLOYMENT_TARGET_FLAG "-miphoneos-version-min=")
   elseif(_CMAKE_OSX_SYSROOT_PATH MATCHES "/iPhoneSimulator")

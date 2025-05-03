@@ -256,6 +256,46 @@ function(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
     set(CMAKE_${lang}_CL_SHOWINCLUDES_PREFIX "")
   endif()
 
+  if(CMAKE_EFFECTIVE_SYSTEM_NAME STREQUAL "Apple" AND CMAKE_${lang}_COMPILER_ID MATCHES "Clang$")
+    cmake_path(GET src EXTENSION LAST_ONLY ext)
+    set(apple_sdk_dir "${CMAKE_${lang}_COMPILER_ID_DIR}")
+    set(apple_sdk_src "apple-sdk${ext}")
+    file(WRITE "${apple_sdk_dir}/${apple_sdk_src}" "#include <AvailabilityMacros.h>\n")
+    set(apple_sdk_cmd
+      "${CMAKE_${lang}_COMPILER}"
+        ${CMAKE_${lang}_COMPILER_ID_ARG1}
+        ${CMAKE_${lang}_COMPILER_ID_FLAGS_LIST}
+        -E ${apple_sdk_src}
+    )
+    execute_process(
+      COMMAND ${apple_sdk_cmd}
+      WORKING_DIRECTORY ${apple_sdk_dir}
+      OUTPUT_VARIABLE apple_sdk_out
+      ERROR_VARIABLE apple_sdk_out
+      RESULT_VARIABLE apple_sdk_res
+    )
+    string(JOIN "\" \"" apple_sdk_cmd ${apple_sdk_cmd})
+    if(apple_sdk_res EQUAL 0 AND apple_sdk_out MATCHES [["([^"]*)/usr/include/AvailabilityMacros\.h"]])
+      if(CMAKE_MATCH_1)
+        set(CMAKE_${lang}_COMPILER_APPLE_SYSROOT "${CMAKE_MATCH_1}")
+      else()
+        set(CMAKE_${lang}_COMPILER_APPLE_SYSROOT "/")
+      endif()
+      set(apple_sdk_msg "Found apple sysroot: ${CMAKE_${lang}_COMPILER_APPLE_SYSROOT}")
+    else()
+      set(CMAKE_${lang}_COMPILER_APPLE_SYSROOT "")
+      set(apple_sdk_msg "No apple sysroot found.")
+    endif()
+    string(REPLACE "\n" "\n  " apple_sdk_out "  ${apple_sdk_out}")
+    message(CONFIGURE_LOG
+      "Detecting ${lang} compiler apple sysroot: \"${apple_sdk_cmd}\"\n"
+      "${apple_sdk_out}\n"
+      "${apple_sdk_msg}"
+    )
+  else()
+    set(CMAKE_${lang}_COMPILER_APPLE_SYSROOT "")
+  endif()
+
   set(_variant "")
   if("x${CMAKE_${lang}_COMPILER_ID}" STREQUAL "xClang"
     OR "x${CMAKE_${lang}_COMPILER_ID}" STREQUAL "xIntelLLVM")
@@ -392,6 +432,7 @@ function(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
   set(CMAKE_${lang}_COMPILER_PRODUCED_FILES "${COMPILER_${lang}_PRODUCED_FILES}" PARENT_SCOPE)
   set(CMAKE_${lang}_COMPILER_CLANG_RESOURCE_DIR "${CMAKE_${lang}_COMPILER_CLANG_RESOURCE_DIR}" PARENT_SCOPE)
   set(CMAKE_${lang}_STANDARD_LIBRARY "${CMAKE_${lang}_STANDARD_LIBRARY}" PARENT_SCOPE)
+  set(CMAKE_${lang}_COMPILER_APPLE_SYSROOT "${CMAKE_${lang}_COMPILER_APPLE_SYSROOT}" PARENT_SCOPE)
 endfunction()
 
 include(CMakeCompilerIdDetection)
