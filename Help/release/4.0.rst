@@ -229,17 +229,24 @@ Other Changes
   behavior can override user-specified compiler paths.  Therefore, this
   behavior has been reverted.
 
-* Builds targeting macOS no longer choose any SDK or pass an ``-isysroot``
-  flag to the compiler by default.  Instead, compilers are expected to
-  choose a default macOS SDK on their own.  In order to use a compiler that
-  does not do this, users must now specify :variable:`CMAKE_OSX_SYSROOT`
-  when configuring their build, e.g., ``-DCMAKE_OSX_SYSROOT=macosx``.
+* In builds targeting macOS, :variable:`CMAKE_OSX_SYSROOT` now defaults to
+  empty, deferring to the compiler's default macOS SDK selection.  In order
+  to pass an explicit macOS SDK via the compiler's ``-isysroot`` flag, users
+  may configure their build tree with ``-DCMAKE_OSX_SYSROOT=macosx``, or
+  ``export SDKROOT="$(xcrun --sdk macosx --show-sdk-path)"`` in their
+  environment.
 
-  Note that Xcode's compilers, when not invoked with ``-isysroot``, search
-  for headers in ``/usr/local/include`` before system SDK paths, matching the
-  convention on many platforms.  Users on macOS-x86_64 hosts with Homebrew
-  installed in ``/usr/local`` should pass ``-DCMAKE_OSX_SYSROOT=macosx``,
-  or ``export SDKROOT=macosx``, when not building with Homebrew tools.
+  Notes:
+
+  * macOS compilers in ``/usr/bin``, when not invoked with ``-isysroot``,
+    search for headers in ``/usr/local/include`` before system SDK paths,
+    matching the convention on many platforms.  Users on macOS-x86_64 hosts
+    with Homebrew installed in ``/usr/local`` should pass an explicit SDK,
+    as described above, when not building with Homebrew tools.
+
+  * Some Clang compilers have no default macOS SDK selection.  For these,
+    if :variable:`CMAKE_OSX_SYSROOT` is empty, CMake will automatically pass
+    ``-isysroot`` with the macOS SDK printed by ``xcrun --show-sdk-path``.
 
 * On Windows, file paths named in project code, e.g., in ``CMakeLists.txt``,
   are no longer automatically converted to their on-disk upper/lower case.
@@ -273,3 +280,12 @@ Changes made since CMake 4.0.0 include the following.
 * This version made no changes to documented features or interfaces.
   Some implementation updates were made to support ecosystem changes
   and/or fix regressions.
+
+.. 4.0.2 (unreleased)
+
+  * When building for macOS with a Clang that has no default macOS SDK,
+    if :variable:`CMAKE_OSX_SYSROOT` is empty, CMake now automatically passes
+    ``-isysroot`` with the macOS SDK printed by ``xcrun --show-sdk-path``.
+    This restores support for using LLVM/Clang on macOS without manually
+    setting ``CMAKE_OSX_SYSROOT``, which was broken by CMake 4.0.0's
+    removal of a default value.
