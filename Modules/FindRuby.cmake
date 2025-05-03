@@ -389,11 +389,11 @@ endif ()
 set(_Ruby_POSSIBLE_LIB_NAMES ruby ruby-static ruby${_Ruby_VERSION_SHORT} ruby${_Ruby_VERSION_SHORT_NODOT} ruby${_Ruby_VERSION_NODOT} ruby-${_Ruby_VERSION_SHORT} ruby-${Ruby_VERSION})
 
 if (WIN32)
-  set(_Ruby_POSSIBLE_MSVC_RUNTIMES "ucrt;msvcrt;vcruntime140;vcruntime140_1")
+  set(_Ruby_POSSIBLE_RUNTIMES "ucrt;msvcrt;vcruntime140;vcruntime140_1")
   if (MSVC_TOOLSET_VERSION)
-    list(APPEND _Ruby_POSSIBLE_MSVC_RUNTIMES "msvcr${MSVC_TOOLSET_VERSION}")
+    list(APPEND _Ruby_POSSIBLE_RUNTIMES "msvcr${MSVC_TOOLSET_VERSION}")
   else ()
-    list(APPEND _Ruby_POSSIBLE_MSVC_RUNTIMES "msvcr")
+    list(APPEND _Ruby_POSSIBLE_RUNTIMES "msvcr")
   endif ()
 
   set(_Ruby_POSSIBLE_VERSION_SUFFICES "${_Ruby_VERSION_NODOT};${_Ruby_VERSION_NODOT_ZERO_PATCH}")
@@ -404,12 +404,12 @@ if (WIN32)
     set(_Ruby_POSSIBLE_ARCH_PREFIXS "lib")
   endif ()
 
-  foreach (_Ruby_MSVC_RUNTIME ${_Ruby_POSSIBLE_MSVC_RUNTIMES})
+  foreach (_Ruby_RUNTIME ${_Ruby_POSSIBLE_RUNTIMES})
     foreach (_Ruby_VERSION_SUFFIX ${_Ruby_POSSIBLE_VERSION_SUFFICES})
       foreach (_Ruby_ARCH_PREFIX ${_Ruby_POSSIBLE_ARCH_PREFIXS})
         list(APPEND _Ruby_POSSIBLE_LIB_NAMES
-             "${_Ruby_ARCH_PREFIX}${_Ruby_MSVC_RUNTIME}-ruby${_Ruby_VERSION_SUFFIX}"
-             "${_Ruby_ARCH_PREFIX}${_Ruby_MSVC_RUNTIME}-ruby${_Ruby_VERSION_SUFFIX}-static")
+             "${_Ruby_ARCH_PREFIX}${_Ruby_RUNTIME}-ruby${_Ruby_VERSION_SUFFIX}"
+             "${_Ruby_ARCH_PREFIX}${_Ruby_RUNTIME}-ruby${_Ruby_VERSION_SUFFIX}-static")
       endforeach ()
     endforeach ()
   endforeach ()
