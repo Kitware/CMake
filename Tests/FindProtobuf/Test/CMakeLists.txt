@@ -35,8 +35,8 @@ add_test(NAME test_var_protoc COMMAND test_var_protoc)
 add_test(NAME test_tgt_protoc_version COMMAND protobuf::protoc --version)
 
 set(Protobuf_IMPORT_DIRS ${Protobuf_INCLUDE_DIRS})
-PROTOBUF_GENERATE_CPP(PROTO_SRC PROTO_HEADER msgs/example.proto)
-PROTOBUF_GENERATE_CPP(DESC_PROTO_SRC DESC_PROTO_HEADER DESCRIPTORS DESC_PROTO_DESC msgs/example_desc.proto)
+protobuf_generate_cpp(PROTO_SRC PROTO_HEADER msgs/example.proto)
+protobuf_generate_cpp(DESC_PROTO_SRC DESC_PROTO_HEADER DESCRIPTORS DESC_PROTO_DESC msgs/example_desc.proto)
 add_library(msgs ${PROTO_SRC} ${PROTO_HEADER})
 target_compile_features(msgs PRIVATE cxx_std_11)
 

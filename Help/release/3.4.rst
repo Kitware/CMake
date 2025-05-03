@@ -140,7 +140,7 @@ Modules
   (such as for related tools or data and plugin install paths).
 
 * The :module:`FindProtobuf` module gained a new
-  :command:`protobuf_generate_python` function to generate python
+  :command:`protobuf_generate_python` command to generate Python
   sources from ``.proto`` files.
 
 * The :module:`FindTIFF` module learned to search separately for
