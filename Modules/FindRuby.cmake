@@ -386,7 +386,15 @@ if (Ruby_FIND_VERSION VERSION_GREATER_EQUAL "1.9" OR Ruby_VERSION VERSION_GREATE
 endif ()
 
 # Determine the list of possible names for the Ruby shared library
-set(_Ruby_POSSIBLE_LIB_NAMES ruby ruby-static ruby${_Ruby_VERSION_SHORT} ruby${_Ruby_VERSION_SHORT_NODOT} ruby${_Ruby_VERSION_NODOT} ruby-${_Ruby_VERSION_SHORT} ruby-${Ruby_VERSION})
+set(_Ruby_POSSIBLE_LIB_NAMES
+  ruby
+  ruby-static
+  ruby${_Ruby_VERSION_SHORT}
+  ruby${_Ruby_VERSION_SHORT_NODOT}
+  ruby${_Ruby_VERSION_NODOT}
+  ruby-${_Ruby_VERSION_SHORT}
+  ruby-${Ruby_VERSION}
+)
 
 if (WIN32)
   set(_Ruby_POSSIBLE_RUNTIMES "ucrt;msvcrt;vcruntime140;vcruntime140_1")
