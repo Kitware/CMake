@@ -44,39 +44,13 @@ The following cache variables may also be set:
 ``TK_WISH``
   The path to the ``wish`` windowing shell command-line executable.
 
-Changelog
-^^^^^^^^^
 
-.. versionchanged:: 2.6
+Other Libraries
+^^^^^^^^^^^^^^^
 
-  To reduce clutter and clarify usage for users who are not Tcl/Tk experts, some
-  variables have been removed or relocated.  Many of the previous variables were
-  primarily useful only when writing Tcl/Tk extensions.
+The Tcl Stub Library can be found using the separate :module:`FindTclStub`
+module.
 
-  * The Tcl Stub Library can now be found using the separate
-    :module:`FindTclStub` module.
-
-  * The ``TCL_STUB_LIBRARY_DEBUG`` and ``TK_STUB_LIBRARY_DEBUG`` cache variables
-    have been removed.  They provided a path to the debug variant of the Tcl
-    Stub Library.
-
-    The extension-related libraries are not typically packaged with standard
-    Tcl/Tk distributions.  Even when building Tcl/Tk from source, several debug
-    variants (e.g., ``tcl84g``, ``tcl84gs``, ``tcl84sgx``, ``tclstub84g``,
-    ``tclstub84gs``, or ``tclstub84sgx``) may be produced.
-
-    Rather than enforcing one specific variant, users are now free to set
-    ``TCL_LIBRARY`` to any desired variant (debug or release) when using this
-    module, and ``TCL_STUB_LIBRARY`` to any desired variant via the
-    :module:`FindTclStub` module.
-
-  * The ``TK_INTERNAL_PATH`` cache variable has been removed.  It specified the
-    directory containing the ``tkWinInt.h`` header file.
-
-    This variable was Windows-specific and often caused confusion regarding file
-    locations within Tcl/Tk installation trees (as seen with version 8.5).  When
-    internal paths are needed, it's now safer to locate the Tcl/Tk source tree
-    directly, or use the ``TK_INCLUDE_PATH`` variable instead.
 
 Examples
 ^^^^^^^^
