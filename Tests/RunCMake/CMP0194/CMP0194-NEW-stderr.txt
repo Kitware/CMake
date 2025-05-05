@@ -1,0 +1,9 @@
+^CMake Error at CMP0194-common\.cmake:[0-9]+ \(enable_language\):
+  No CMAKE_ASM_COMPILER could be found\.
+(
+  Tell CMake where to find the compiler by setting either the environment
+  variable "ASM" or the CMake cache entry CMAKE_ASM_COMPILER to the full path
+  to the compiler, or to the compiler name if it is in the PATH\.)?
+Call Stack \(most recent call first\):
+  CMP0194-NEW\.cmake:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)$
