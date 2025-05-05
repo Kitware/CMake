@@ -289,3 +289,7 @@ Changes made since CMake 4.0.0 include the following.
     This restores support for using LLVM/Clang on macOS without manually
     setting ``CMAKE_OSX_SYSROOT``, which was broken by CMake 4.0.0's
     removal of a default value.
+
+  * The :prop_tgt:`DEBUGGER_WORKING_DIRECTORY` target property is now
+    used by the :generator:`Xcode` generator as a fallback for the
+    :prop_tgt:`XCODE_SCHEME_WORKING_DIRECTORY` target property.

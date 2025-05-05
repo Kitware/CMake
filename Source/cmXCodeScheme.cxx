@@ -14,6 +14,7 @@
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
+#include "cmGlobalGenerator.h"
 #include "cmList.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
@@ -474,16 +475,17 @@ void cmXCodeScheme::WriteBuildableReference(cmXMLWriter& xout,
 void cmXCodeScheme::WriteCustomWorkingDirectory(
   cmXMLWriter& xout, std::string const& configuration)
 {
-  std::string const& propertyValue =
-    this->Target->GetTarget()->GetSafeProperty(
-      "XCODE_SCHEME_WORKING_DIRECTORY");
-  if (propertyValue.empty()) {
+  cmGlobalGenerator* gg = this->LocalGenerator->GetGlobalGenerator();
+
+  cmValue propertyValue =
+    gg->GetDebuggerWorkingDirectory(this->Target->GetTarget());
+  if (!propertyValue) {
     xout.Attribute("useCustomWorkingDirectory", "NO");
   } else {
     xout.Attribute("useCustomWorkingDirectory", "YES");
 
     auto customWorkingDirectory = cmGeneratorExpression::Evaluate(
-      propertyValue, this->LocalGenerator, configuration);
+      *propertyValue, this->LocalGenerator, configuration);
     xout.Attribute("customWorkingDirectory", customWorkingDirectory);
   }
 }
