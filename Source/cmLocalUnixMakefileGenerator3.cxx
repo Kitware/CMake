@@ -1376,6 +1376,12 @@ bool cmLocalUnixMakefileGenerator3::UpdateDependencies(
   // Check if any multiple output pairs have a missing file.
   this->CheckMultipleOutputs(verbose);
 
+  auto echoColor = [color](std::string const& m) {
+    cmSystemTools::MakefileColorEcho(cmsysTerminal_Color_ForegroundMagenta |
+                                       cmsysTerminal_Color_ForegroundBold,
+                                     m.c_str(), true, color);
+  };
+
   std::string const targetDir = cmSystemTools::GetFilenamePath(tgtInfo);
   if (!this->Makefile->GetSafeDefinition("CMAKE_DEPENDS_LANGUAGES").empty()) {
     // dependencies are managed by CMake itself
@@ -1452,10 +1458,7 @@ bool cmLocalUnixMakefileGenerator3::UpdateDependencies(
         targetName = targetName.substr(0, targetName.length() - 4);
         std::string message =
           cmStrCat("Scanning dependencies of target ", targetName);
-        cmSystemTools::MakefileColorEcho(
-          cmsysTerminal_Color_ForegroundMagenta |
-            cmsysTerminal_Color_ForegroundBold,
-          message.c_str(), true, color);
+        echoColor(message);
       }
 
       status = this->ScanDependencies(targetDir, dependFile,
@@ -1493,10 +1496,7 @@ bool cmLocalUnixMakefileGenerator3::UpdateDependencies(
         auto message =
           cmStrCat("Consolidate compiler generated dependencies of target ",
                    targetName);
-        cmSystemTools::MakefileColorEcho(
-          cmsysTerminal_Color_ForegroundMagenta |
-            cmsysTerminal_Color_ForegroundBold,
-          message.c_str(), true, color);
+        echoColor(message);
       }
 
       // Open the make depends file.  This should be copy-if-different
