@@ -132,6 +132,8 @@ public:
                            cmMakefile* mf) override;
   void AppendFlag(std::string& flags, std::string const& flag) const;
 
+  cmValue GetDebuggerWorkingDirectory(cmGeneratorTarget* gt) const override;
+
   enum class BuildSystem
   {
     One = 1,

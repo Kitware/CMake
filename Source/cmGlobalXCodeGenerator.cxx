@@ -5423,3 +5423,12 @@ std::string cmGlobalXCodeGenerator::GetDeploymentPlatform(cmMakefile const* mf)
       return "MACOSX_DEPLOYMENT_TARGET";
   }
 }
+
+cmValue cmGlobalXCodeGenerator::GetDebuggerWorkingDirectory(
+  cmGeneratorTarget* gt) const
+{
+  if (cmValue ret = gt->GetProperty("XCODE_SCHEME_WORKING_DIRECTORY")) {
+    return ret;
+  }
+  return cmGlobalGenerator::GetDebuggerWorkingDirectory(gt);
+}
