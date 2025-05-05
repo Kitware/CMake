@@ -5,10 +5,14 @@ Implicit link libraries and flags detected for language ``<LANG>``.
 
 Compilers typically pass language runtime library names and other
 flags when they invoke a linker.  These flags are implicit link
-options for the compiler's language.  For each language enabled
-by the :command:`project` or :command:`enable_language` command,
-CMake automatically detects these libraries and flags and reports
-the results in this variable.
+options for the compiler's language.
+
+For each language enabled by the :command:`project` or
+:command:`enable_language` command, CMake automatically detects these
+libraries and flags and reports the results in this variable.
+The :envvar:`CMAKE_<LANG>_IMPLICIT_LINK_LIBRARIES_EXCLUDE` environment
+variable may be set to exclude specific libraries from the automatically
+detected results.
 
 When linking to a static library, CMake adds the implicit link libraries and
 flags from this variable for each language used in the static library (except

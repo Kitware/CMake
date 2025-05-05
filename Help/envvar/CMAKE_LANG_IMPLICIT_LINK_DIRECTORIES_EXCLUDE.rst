@@ -11,3 +11,6 @@ variable when it is automatically detected from the ``<LANG>`` compiler.
 
 This may be used to work around misconfigured compiler drivers that pass
 extraneous implicit link directories to their linker.
+
+See also the :envvar:`CMAKE_<LANG>_IMPLICIT_LINK_LIBRARIES_EXCLUDE`
+environment variable.

@@ -10,6 +10,7 @@ run_cmake(ParseImplicitLinkInfo)
 # - CMAKE_C_COMPILER_LINKER
 # - CMAKE_C_COMPILER_LINKER_ID
 # - CMAKE_C_COMPILER_LINKER_VERSION
+# - CMAKE_C_IMPLICIT_LINK_LIBRARIES
 # - CMAKE_C_IMPLICIT_LINK_DIRECTORIES
 run_cmake(Inspect)
 set(info "${RunCMake_BINARY_DIR}/Inspect-build/info.cmake")
@@ -19,6 +20,9 @@ if(CMAKE_HOST_UNIX)
   run_cmake_script(DetermineLinkerId)
 endif()
 
+if(CMAKE_C_IMPLICIT_LINK_LIBRARIES MATCHES ";")
+  run_cmake_with_options(ExcludeLibs "-Dinfo=${RunCMake_BINARY_DIR}/Inspect-build/info.cmake")
+endif()
 if(CMAKE_C_IMPLICIT_LINK_DIRECTORIES MATCHES ";")
   run_cmake_with_options(ExcludeDirs "-Dinfo=${RunCMake_BINARY_DIR}/Inspect-build/info.cmake")
 endif()
