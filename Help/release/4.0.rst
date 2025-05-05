@@ -281,15 +281,16 @@ Changes made since CMake 4.0.0 include the following.
   Some implementation updates were made to support ecosystem changes
   and/or fix regressions.
 
-.. 4.0.2 (unreleased)
+4.0.2
+-----
 
-  * When building for macOS with a Clang that has no default macOS SDK,
-    if :variable:`CMAKE_OSX_SYSROOT` is empty, CMake now automatically passes
-    ``-isysroot`` with the macOS SDK printed by ``xcrun --show-sdk-path``.
-    This restores support for using LLVM/Clang on macOS without manually
-    setting ``CMAKE_OSX_SYSROOT``, which was broken by CMake 4.0.0's
-    removal of a default value.
+* When building for macOS with a Clang that has no default macOS SDK,
+  if :variable:`CMAKE_OSX_SYSROOT` is empty, CMake now automatically passes
+  ``-isysroot`` with the macOS SDK printed by ``xcrun --show-sdk-path``.
+  This restores support for using LLVM/Clang on macOS without manually
+  setting ``CMAKE_OSX_SYSROOT``, which was broken by CMake 4.0.0's
+  removal of a default value.
 
-  * The :prop_tgt:`DEBUGGER_WORKING_DIRECTORY` target property is now
-    used by the :generator:`Xcode` generator as a fallback for the
-    :prop_tgt:`XCODE_SCHEME_WORKING_DIRECTORY` target property.
+* The :prop_tgt:`DEBUGGER_WORKING_DIRECTORY` target property is now
+  used by the :generator:`Xcode` generator as a fallback for the
+  :prop_tgt:`XCODE_SCHEME_WORKING_DIRECTORY` target property.
