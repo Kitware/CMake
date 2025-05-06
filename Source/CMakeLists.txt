@@ -468,6 +468,8 @@ add_library(
   cmStateSnapshot.cxx
   cmStateSnapshot.h
   cmStateTypes.h
+  cmStdIoConsole.h
+  cmStdIoConsole.cxx
   cmStdIoInit.h
   cmStdIoInit.cxx
   cmStdIoStream.h

@@ -489,6 +489,7 @@ CMAKE_CXX_SOURCES="\
   cmState \
   cmStateDirectory \
   cmStateSnapshot \
+  cmStdIoConsole \
   cmStdIoInit \
   cmStdIoStream \
   cmString \
@@ -543,6 +544,10 @@ if ${cmake_system_mingw}; then
     cmVSSetupHelper \
   "
 fi
+
+CMAKE_C_SOURCES="\
+  cm_utf8 \
+"
 
 CMAKE_STD_CXX_HEADERS="\
   filesystem \
