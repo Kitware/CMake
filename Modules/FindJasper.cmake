@@ -72,7 +72,7 @@ find_path(JASPER_INCLUDE_DIR jasper/jasper.h)
 mark_as_advanced(JASPER_INCLUDE_DIR)
 
 if(NOT JASPER_LIBRARIES)
-  find_package(JPEG)
+  find_package(JPEG QUIET)
   find_library(JASPER_LIBRARY_RELEASE NAMES jasper libjasper)
   find_library(JASPER_LIBRARY_DEBUG NAMES jasperd)
   include(${CMAKE_CURRENT_LIST_DIR}/SelectLibraryConfigurations.cmake)
@@ -86,11 +86,14 @@ endif()
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(Jasper
-                                  REQUIRED_VARS JASPER_LIBRARIES JASPER_INCLUDE_DIR JPEG_LIBRARIES
+                                  REQUIRED_VARS JASPER_LIBRARIES JASPER_INCLUDE_DIR
                                   VERSION_VAR JASPER_VERSION_STRING)
 
 if(Jasper_FOUND)
-  set(JASPER_LIBRARIES ${JASPER_LIBRARIES} ${JPEG_LIBRARIES})
+  set(JASPER_LIBRARIES ${JASPER_LIBRARIES})
+  if(JPEG_FOUND)
+    list(APPEND JASPER_LIBRARIES ${JPEG_LIBRARIES})
+  endif()
   set(JASPER_INCLUDE_DIRS ${JASPER_INCLUDE_DIR})
   if(NOT TARGET Jasper::Jasper)
     add_library(Jasper::Jasper UNKNOWN IMPORTED)
