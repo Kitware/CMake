@@ -490,6 +490,7 @@ CMAKE_CXX_SOURCES="\
   cmStateDirectory \
   cmStateSnapshot \
   cmStdIoInit \
+  cmStdIoStream \
   cmString \
   cmStringAlgorithms \
   cmStringReplaceHelper \

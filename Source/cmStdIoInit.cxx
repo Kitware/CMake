@@ -5,6 +5,7 @@
 #include <cerrno>
 #include <cstdio>
 #include <cstdlib>
+#include <iostream>
 
 #include <fcntl.h>
 
@@ -17,6 +18,8 @@
 #else
 #  include <unistd.h>
 #endif
+
+#include "cmStdIoStream.h"
 
 namespace cm {
 namespace StdIo {
@@ -82,7 +85,11 @@ struct InitStdPipes
 class Globals
 {
 public:
+  std::ios::Init InitIos;
   InitStdPipes InitPipes;
+  IStream StdIn{ std::cin, stdin };
+  OStream StdOut{ std::cout, stdout };
+  OStream StdErr{ std::cerr, stderr };
 
   static Globals& Get();
 };
@@ -96,6 +103,21 @@ Globals& Globals::Get()
 Init::Init()
 {
   Globals::Get();
+}
+
+IStream& In()
+{
+  return Globals::Get().StdIn;
+}
+
+OStream& Out()
+{
+  return Globals::Get().StdOut;
+}
+
+OStream& Err()
+{
+  return Globals::Get().StdErr;
 }
 
 }

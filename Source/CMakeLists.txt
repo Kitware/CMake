@@ -470,6 +470,8 @@ add_library(
   cmStateTypes.h
   cmStdIoInit.h
   cmStdIoInit.cxx
+  cmStdIoStream.h
+  cmStdIoStream.cxx
   cmStringAlgorithms.cxx
   cmStringAlgorithms.h
   cmSyntheticTargetCache.h
