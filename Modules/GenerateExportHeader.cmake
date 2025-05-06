@@ -5,190 +5,195 @@
 GenerateExportHeader
 --------------------
 
-This module provides the ``generate_export_header()`` function to generate
-export macros for libraries.
+This module provides commands for generating a header file containing
+preprocessor macro definitions to control C/C++ symbol visibility.
+
+Load this module in CMake project with:
+
+.. code-block:: cmake
+
+  include(GenerateExportHeader)
 
 .. versionadded:: 3.12
-  Added support for C projects.  Previous versions supported C++ project only.
+  Support for C projects.  Previous versions supported C++ projects only.
+
+When developing C or C++ projects, especially for cross-platform use, symbol
+visibility determines which functions, classes, global variables, templates,
+and other symbols are made visible to users of the library.
+
+For example, on Windows, symbols must be explicitly marked with
+``__declspec(dllexport)`` when building a shared library, and
+``__declspec(dllimport)`` when using it.  Other platforms may use attributes
+like ``__attribute__((visibility("default")))``.
+
+This module simplifies the creation and usage of preprocessor macros to
+manage these requirements, avoiding repetitive and error-prone ``#ifdef``
+blocks in source code.
+
+Some symbol visibility can also be controlled with compiler options. In
+CMake, target properties such as :prop_tgt:`<LANG>_VISIBILITY_PRESET` and
+:prop_tgt:`VISIBILITY_INLINES_HIDDEN` enable compiler visibility flags,
+where appropriate.  See also related convenience variables
+:variable:`CMAKE_<LANG>_VISIBILITY_PRESET` and
+:variable:`CMAKE_VISIBILITY_INLINES_HIDDEN` to enable it for all targets in
+current scope.  These are commonly used in combination with this module to
+further simplify C/C++ code, removing the need for some of the preprocessor
+macros in the source code.
+
+Commands
+^^^^^^^^
+
+This module provides the following commands:
+
+Generating Export Header
+""""""""""""""""""""""""
 
 .. command:: generate_export_header
 
-  The ``generate_export_header()`` function can be used to generate a file
-  suitable for preprocessor inclusion which contains EXPORT macros to be
-  used in library classes:
+  Generates a header file suitable for inclusion in source code, containing
+  preprocessor *export* macros for controlling the visibility of symbols:
 
   .. code-block:: cmake
 
-    generate_export_header(LIBRARY_TARGET
-             [BASE_NAME <base_name>]
-             [EXPORT_MACRO_NAME <export_macro_name>]
-             [EXPORT_FILE_NAME <export_file_name>]
-             [DEPRECATED_MACRO_NAME <deprecated_macro_name>]
-             [NO_EXPORT_MACRO_NAME <no_export_macro_name>]
-             [INCLUDE_GUARD_NAME <include_guard_name>]
-             [STATIC_DEFINE <static_define>]
-             [NO_DEPRECATED_MACRO_NAME <no_deprecated_macro_name>]
-             [DEFINE_NO_DEPRECATED]
-             [PREFIX_NAME <prefix_name>]
-             [CUSTOM_CONTENT_FROM_VARIABLE <variable>]
+    generate_export_header(
+      <target>
+      [BASE_NAME <base-name>]
+      [EXPORT_FILE_NAME <export-file-name>]
+      [EXPORT_MACRO_NAME <export-macro-name>]
+      [NO_EXPORT_MACRO_NAME <no-export-macro-name>]
+      [DEPRECATED_MACRO_NAME <deprecated-macro-name>]
+      [DEFINE_NO_DEPRECATED]
+      [NO_DEPRECATED_MACRO_NAME <no-deprecated-macro-name>]
+      [STATIC_DEFINE <static-define>]
+      [PREFIX_NAME <prefix>]
+      [CUSTOM_CONTENT_FROM_VARIABLE <variable>]
+      [INCLUDE_GUARD_NAME <include-guard-name>]
     )
 
-The target properties :prop_tgt:`CXX_VISIBILITY_PRESET <<LANG>_VISIBILITY_PRESET>`
-and :prop_tgt:`VISIBILITY_INLINES_HIDDEN` can be used to add the appropriate
-compile flags for targets.  See the documentation of those target properties,
-and the convenience variables
-:variable:`CMAKE_CXX_VISIBILITY_PRESET <CMAKE_<LANG>_VISIBILITY_PRESET>` and
-:variable:`CMAKE_VISIBILITY_INLINES_HIDDEN`.
+  By default, this command generates a header file named
+  ``<target-name-lowercase>_export.h`` in the current binary directory
+  (:variable:`CMAKE_CURRENT_BINARY_DIR`).  This header defines a set of
+  preprocessor macros used to mark API symbols as exported, hidden, or
+  deprecated across different platforms and build types (e.g., static or
+  shared builds), and is intended to be installed along with the library's
+  public headers, because it affects public API declarations:
 
-By default ``generate_export_header()`` generates macro names in a file
-name determined by the name of the library.  This means that in the
-simplest case, users of ``GenerateExportHeader`` will be equivalent to:
+  * ``<MACRO>_EXPORT``: Marks symbols for export or import, making them
+    visible as part of the public API when building or consuming a shared
+    library.
 
-.. code-block:: cmake
+  * ``<MACRO>_NO_EXPORT``: Marks symbols that should not be exported.
+    If the :prop_tgt:`<LANG>_VISIBILITY_PRESET` target property is set to
+    ``hidden``, using this macro in source code is typically redundant.
 
-   set(CMAKE_CXX_VISIBILITY_PRESET hidden)
-   set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
-   add_library(somelib someclass.cpp)
-   generate_export_header(somelib)
-   install(TARGETS somelib DESTINATION ${LIBRARY_INSTALL_DIR})
-   install(FILES
-    someclass.h
-    ${PROJECT_BINARY_DIR}/somelib_export.h DESTINATION ${INCLUDE_INSTALL_DIR}
-   )
+  * ``<MACRO>_DEPRECATED``: Marks symbols as deprecated.  When such symbols
+    are used, the compiler emits a warning at compile-time.
 
+  * ``<MACRO>_DEPRECATED_EXPORT``: Combines export/import and deprecation
+    markers for a symbol that is both part of the public API and deprecated.
 
-And in the ABI header files:
+  * ``<MACRO>_DEPRECATED_NO_EXPORT``: Marks a deprecated symbol that should
+    not be exported (internal and deprecated).
 
-.. code-block:: c++
+  * ``<MACRO>_NO_DEPRECATED``: A macro that can be used in source code to
+    conditionally exclude deprecated code parts from the build via
+    preprocessor logic.
 
-   #include "somelib_export.h"
-   class SOMELIB_EXPORT SomeClass {
-     ...
-   };
+  The ``<MACRO>`` part is derived by default from the uppercase name of the
+  target or the explicitly provided ``<base-name>``.  All macro names can be
+  customized using the optional arguments.
 
+  .. rubric:: The arguments are:
 
-The CMake fragment will generate a file in the
-``${CMAKE_CURRENT_BINARY_DIR}`` called ``somelib_export.h`` containing the
-macros ``SOMELIB_EXPORT``, ``SOMELIB_NO_EXPORT``, ``SOMELIB_DEPRECATED``,
-``SOMELIB_DEPRECATED_EXPORT`` and ``SOMELIB_DEPRECATED_NO_EXPORT``.
-They will be followed by content taken from the variable specified by
-the ``CUSTOM_CONTENT_FROM_VARIABLE`` option, if any.
-The resulting file should be installed with other headers in the library.
+  ``<target>``
+    Name of a target for which the export header will be generated.
+    Supported target types:
 
-The ``BASE_NAME`` argument can be used to override the file name and the
-names used for the macros:
+    * ``STATIC`` library (in this case, export-related macros are defined
+      without values)
+    * ``SHARED`` library
+    * ``MODULE`` library
+    * .. versionadded:: 3.1
+        ``OBJECT`` library
 
-.. code-block:: cmake
+  ``BASE_NAME <base-name>``
+    If specified, it overrides the default file name and macro names.
 
-   add_library(somelib someclass.cpp)
-   generate_export_header(somelib
-     BASE_NAME other_name
-   )
+  ``EXPORT_FILE_NAME <export-file-name>``
+    If specified, it overrides the full path and the name of the generated
+    export header file (``<base-name-lowercase>_export.h``) to
+    ``<export-file-name>``.  If given as a relative path, it will be
+    interpreted relative to the current binary directory
+    (:variable:`CMAKE_CURRENT_BINARY_DIR`).
 
+  ``EXPORT_MACRO_NAME <export-macro-name>``
+    If specified, it overrides the default macro name for the export
+    directive.
 
-Generates a file called ``other_name_export.h`` containing the macros
-``OTHER_NAME_EXPORT``, ``OTHER_NAME_NO_EXPORT`` and ``OTHER_NAME_DEPRECATED``
-etc.
+  ``NO_EXPORT_MACRO_NAME <no-export-macro-name>``
+    If specified, the ``<no-export-macro-name>`` will be used for the macro
+    name that designates the attribute for items that shouldn't be exported.
 
-The ``BASE_NAME`` may be overridden by specifying other options in the
-function.  For example:
+  ``DEPRECATED_MACRO_NAME <deprecated-macro-name>``
+    If specified, the following names will be used:
 
-.. code-block:: cmake
+    * ``<deprecated-macro-name>`` (macro for marking deprecated symbols)
+    * ``<deprecated-macro-name>_EXPORT`` (macro for deprecated symbols with
+      export markers)
+    * ``<deprecated-macro-name>_NO_EXPORT`` (macro for deprecated symbols
+      with no-export markers)
 
-   add_library(somelib someclass.cpp)
-   generate_export_header(somelib
-     EXPORT_MACRO_NAME OTHER_NAME_EXPORT
-   )
+    instead of the default names in format of
+    ``<MACRO>_DEPRECATED{,_EXPORT,_NO_EXPORT}``.
 
+  ``DEFINE_NO_DEPRECATED``
+    If specified, this will define a macro named ``<MACRO>_NO_DEPRECATED``.
 
-creates the macro ``OTHER_NAME_EXPORT`` instead of ``SOMELIB_EXPORT``, but
-other macros and the generated file name is as default:
+  ``NO_DEPRECATED_MACRO_NAME <no-deprecated-macro-name>``
+    Used in combination with ``DEFINE_NO_DEPRECATED`` option.  If specified,
+    then a macro named ``<no-deprecated-macro-name>`` is used instead of the
+    default ``<MACRO>_NO_DEPRECATED``.
 
-.. code-block:: cmake
+  ``STATIC_DEFINE <static-define>``
+    If specified, the ``<static-define>`` macro name will be used instead
+    of the default ``<MACRO>_STATIC_DEFINE``.  This macro controls the
+    symbol export behavior in the generated header for static libraries.
+    It is typically used when building both shared and static variants of a
+    library from the same sources using a single generated export header.
+    When this macro is defined for static library, the export-related macros
+    will expand to nothing.  This is important also on Windows, where symbol
+    decoration is required only for shared libraries, not for static ones.
 
-   add_library(somelib someclass.cpp)
-   generate_export_header(somelib
-     DEPRECATED_MACRO_NAME KDE_DEPRECATED
-   )
+  ``PREFIX_NAME <prefix>``
+    If specified, the additional ``<prefix>`` is prepended to all generated
+    macro names.
 
+  ``CUSTOM_CONTENT_FROM_VARIABLE <variable>``
+    .. versionadded:: 3.7
 
-creates the macro ``KDE_DEPRECATED`` instead of ``SOMELIB_DEPRECATED``.
+    If specified, the content from the ``<variable>`` value is appended to
+    the generated header file content after the preprocessor macros
+    definitions.
 
-If ``LIBRARY_TARGET`` is a static library, macros are defined without
-values.
+  ``INCLUDE_GUARD_NAME <include-guard-name>``
+    .. versionadded:: 3.11
 
-If the same sources are used to create both a shared and a static
-library, the uppercased symbol ``${BASE_NAME}_STATIC_DEFINE`` should be
-used when building the static library:
+    If specified, the ``<include-guard-name>`` is used as the preprocessor
+    macro name to guard multiple inclusions of the generated header instead
+    of the default name ``<export-macro-name>_H``.
 
-.. code-block:: cmake
+    .. code-block:: c++
+      :caption: ``<base-name-lowercase>_export.h``
 
-   add_library(shared_variant SHARED ${lib_SRCS})
-   add_library(static_variant ${lib_SRCS})
-   generate_export_header(shared_variant BASE_NAME libshared_and_static)
-   set_target_properties(static_variant PROPERTIES
-     COMPILE_FLAGS -DLIBSHARED_AND_STATIC_STATIC_DEFINE)
+      #ifndef <include-guard-name>
+      #define <include-guard-name>
+      // ...
+      #endif /* <include-guard-name> */
 
-This will cause the export macros to expand to nothing when building
-the static library.
-
-If ``DEFINE_NO_DEPRECATED`` is specified, then a macro
-``${BASE_NAME}_NO_DEPRECATED`` will be defined This macro can be used to
-remove deprecated code from preprocessor output:
-
-.. code-block:: cmake
-
-   option(EXCLUDE_DEPRECATED "Exclude deprecated parts of the library" FALSE)
-   if (EXCLUDE_DEPRECATED)
-     set(NO_BUILD_DEPRECATED DEFINE_NO_DEPRECATED)
-   endif()
-   generate_export_header(somelib ${NO_BUILD_DEPRECATED})
-
-
-And then in somelib:
-
-.. code-block:: c++
-
-   class SOMELIB_EXPORT SomeClass
-   {
-   public:
-   #ifndef SOMELIB_NO_DEPRECATED
-     SOMELIB_DEPRECATED void oldMethod();
-   #endif
-   };
-
-.. code-block:: c++
-
-   #ifndef SOMELIB_NO_DEPRECATED
-   void SomeClass::oldMethod() {  }
-   #endif
-
-
-If ``PREFIX_NAME`` is specified, the argument will be used as a prefix to
-all generated macros.
-
-For example:
-
-.. code-block:: cmake
-
-   generate_export_header(somelib PREFIX_NAME VTK_)
-
-Generates the macros ``VTK_SOMELIB_EXPORT`` etc.
-
-.. versionadded:: 3.1
-  Library target can be an ``OBJECT`` library.
-
-.. versionadded:: 3.7
-  Added the ``CUSTOM_CONTENT_FROM_VARIABLE`` option.
-
-.. versionadded:: 3.11
-  Added the ``INCLUDE_GUARD_NAME`` option.
+Deprecated Command
+""""""""""""""""""
 
 .. command:: add_compiler_export_flags
-
-  .. code-block:: cmake
-
-    add_compiler_export_flags([<output_variable>])
 
   .. deprecated:: 3.0
 
@@ -196,12 +201,276 @@ Generates the macros ``VTK_SOMELIB_EXPORT`` etc.
     :prop_tgt:`CXX_VISIBILITY_PRESET <<LANG>_VISIBILITY_PRESET>` and
     :prop_tgt:`VISIBILITY_INLINES_HIDDEN` instead.
 
-The ``add_compiler_export_flags()`` function adds ``-fvisibility=hidden`` to
-:variable:`CMAKE_CXX_FLAGS <CMAKE_<LANG>_FLAGS>` if supported, and is a no-op
-on Windows which does not need extra compiler flags for exporting support.
-You may optionally pass a single argument to ``add_compiler_export_flags()``
-that will be populated with the ``CXX_FLAGS`` required to enable visibility
-support for the compiler/architecture in use.
+  Adds C++ compiler options ``-fvisibility=hidden`` (and
+  ``-fvisibility-inlines-hidden``, if supported) to hide all symbols by
+  default to either :variable:`CMAKE_CXX_FLAGS <CMAKE_<LANG>_FLAGS>`
+  variable or to a specified variable:
+
+  .. code-block:: cmake
+
+    add_compiler_export_flags([<output_variable>])
+
+  This command is a no-op on Windows which does not need extra compiler flags
+  for exporting support.
+
+  ``<output-variable>``
+    Optional variable name that will be populated with a string of
+    space-separated C++ compile options required to enable visibility
+    support for the compiler/architecture in use.  If this argument is
+    specified, the :variable:`CMAKE_CXX_FLAGS <CMAKE_<LANG>_FLAGS>` variable
+    will not be modified.
+
+Examples
+^^^^^^^^
+
+Example: Generating Export Header
+"""""""""""""""""""""""""""""""""
+
+The following example demonstrates how to use this module to generate an
+export header in the current binary directory (``example_export.h``) and use
+it in a C++ library named ``example`` to control symbols visibility.  The
+generated header defines the preprocessor macros ``EXAMPLE_EXPORT``,
+``EXAMPLE_NO_EXPORT``, ``EXAMPLE_DEPRECATED``, ``EXAMPLE_DEPRECATED_EXPORT``,
+and ``EXAMPLE_DEPRECATED_NO_EXPORT``, and is installed along with the
+library's other public headers:
+
+.. code-block:: cmake
+  :caption: ``CMakeLists.txt``
+  :emphasize-lines: 10,11
+
+  cmake_minimum_required(VERSION 3.24)
+  project(GenerateExportHeaderExample)
+
+  # Set default visibility of all symbols to hidden
+  set(CMAKE_CXX_VISIBILITY_PRESET "hidden")
+  set(CMAKE_VISIBILITY_INLINES_HIDDEN TRUE)
+
+  add_library(example)
+
+  include(GenerateExportHeader)
+  generate_export_header(example)
+
+  target_sources(
+    example
+    PRIVATE example.cxx
+    PUBLIC
+      FILE_SET HEADERS
+        FILES example.h
+      FILE_SET generated_headers
+        TYPE HEADERS
+        BASE_DIRS $<TARGET_PROPERTY:example,BINARY_DIR>
+        FILES ${CMAKE_CURRENT_BINARY_DIR}/example_export.h
+  )
+
+  target_include_directories(example PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+
+  install(
+    TARGETS example
+    FILE_SET HEADERS
+    FILE_SET generated_headers
+  )
+
+And in the ABI header files:
+
+.. code-block:: c++
+  :caption: ``example.h``
+
+  #include "example_export.h"
+
+  // This class is part of the public API and is exported
+  class EXAMPLE_EXPORT SomeClass
+  {
+  public:
+    SomeClass();
+    void doSomething();
+
+    // This method is deprecated
+    EXAMPLE_DEPRECATED void legacyMethod();
+  };
+
+  // This function is exported and deprecated
+  EXAMPLE_DEPRECATED_EXPORT void legacyPublicFunction();
+
+  // This function is deprecated but not exported
+  EXAMPLE_DEPRECATED void legacyInternalFunction();
+
+.. code-block:: c++
+  :caption: ``example.cxx``
+
+  #include <iostream>
+  #include "example.h"
+
+  SomeClass::SomeClass() = default;
+
+  void SomeClass::doSomething()
+  {
+    std::cout << "SomeClass::doSomething() called" << std::endl;
+  }
+
+  void SomeClass::legacyMethod()
+  {
+    std::cout << "SomeClass::legacyMethod() is deprecated" << std::endl;
+  }
+
+  void legacyPublicFunction()
+  {
+    std::cout << "legacyPublicFunction() is deprecated" << std::endl;
+  }
+
+  void internalLegacyFunction()
+  {
+    std::cout << "legacyInternalFunction() is deprecated" << std::endl;
+  }
+
+Examples: Customizing Generated Header
+""""""""""""""""""""""""""""""""""""""
+
+The ``BASE_NAME`` argument can be used to override the generated file name
+and the names used for the macros.  The following will generate a file
+named ``other_name_export.h`` containing export-related macros such as
+``OTHER_NAME_EXPORT``, ``OTHER_NAME_NO_EXPORT``, ``OTHER_NAME_DEPRECATED``,
+etc.
+
+.. code-block:: cmake
+
+  add_library(example example.cxx)
+  include(GenerateExportHeader)
+  generate_export_header(example BASE_NAME "other_name")
+
+The ``BASE_NAME`` may be overridden by specifying other command options.
+For example, the following creates a macro ``OTHER_NAME_EXPORT`` instead of
+``EXAMPLE_EXPORT``, but other macros and the generated header file name are
+set to their default values:
+
+.. code-block:: cmake
+
+  add_library(example example.cxx)
+  include(GenerateExportHeader)
+  generate_export_header(example EXPORT_MACRO_NAME "OTHER_NAME_EXPORT")
+
+The following example creates ``KDE_DEPRECATED`` macro instead of
+default ``EXAMPLE_DEPRECATED``:
+
+.. code-block:: cmake
+
+  add_library(example example.cxx)
+  include(GenerateExportHeader)
+  generate_export_header(example DEPRECATED_MACRO_NAME "KDE_DEPRECATED")
+
+The ``DEFINE_NO_DEPRECATED`` option can be used to define a macro which can
+be used to remove deprecated code from preprocessor output:
+
+.. code-block:: cmake
+
+  option(EXCLUDE_DEPRECATED "Exclude deprecated parts of the library")
+  if(EXCLUDE_DEPRECATED)
+    set(NO_BUILD_DEPRECATED DEFINE_NO_DEPRECATED)
+  endif()
+
+  include(GenerateExportHeader)
+  generate_export_header(example ${NO_BUILD_DEPRECATED})
+
+.. code-block:: c++
+  :caption: ``example.h``
+
+  class EXAMPLE_EXPORT SomeClass
+  {
+  public:
+  #ifndef EXAMPLE_NO_DEPRECATED
+    EXAMPLE_DEPRECATED void legacyMethod();
+  #endif
+  };
+
+.. code-block:: c++
+  :caption: ``example.cxx``
+
+  #ifndef EXAMPLE_NO_DEPRECATED
+  void SomeClass::legacyMethod() {  }
+  #endif
+
+The ``PREFIX_NAME`` argument can be used to prepend all generated macro names
+with some prefix.  For example, the following will generate macros such as
+``VTK_SOMELIB_EXPORT``, etc.
+
+.. code-block:: cmake
+
+  include(GenerateExportHeader)
+  generate_export_header(somelib PREFIX_NAME "VTK_")
+
+Appending additional content to generated header can be done with the
+``CUSTOM_CONTENT_FROM_VARIABLE`` argument:
+
+.. code-block:: cmake
+
+  include(GenerateExportHeader)
+  set(content [[#include "project_api.h"]])
+  generate_export_header(example CUSTOM_CONTENT_FROM_VARIABLE content)
+
+Example: Building Shared and Static Library
+"""""""""""""""""""""""""""""""""""""""""""
+
+In the following example both a shared and a static library are built from
+the same sources, and the ``<MACRO>_STATIC_DEFINE`` macro compile definition
+is defined to ensure the same generated export header works for both:
+
+.. code-block:: cmake
+
+  add_library(example_shared SHARED example.cxx)
+  add_library(example_static STATIC example.cxx)
+
+  include(GenerateExportHeader)
+  generate_export_header(example_shared BASE_NAME "example")
+
+  # Define macro to disable export attributes for static build
+  target_compile_definitions(example_static PRIVATE EXAMPLE_STATIC_DEFINE)
+
+Example: Upgrading Deprecated Command
+"""""""""""""""""""""""""""""""""""""
+
+In earlier versions of CMake, ``add_compiler_export_flags()`` command was
+used to add symbol visibility compile options:
+
+.. code-block:: cmake
+  :caption: ``CMakeLists.txt``
+
+  add_library(example example.cxx)
+
+  include(GenerateExportHeader)
+
+  add_compiler_export_flags(flags)
+  string(REPLACE " " ";" flags "${flags}")
+  set_property(TARGET example APPEND PROPERTY COMPILE_OPTIONS "${flags}")
+
+  generate_export_header(example)
+
+In new code, the following target properties are used to achieve the same
+functionality:
+
+.. code-block:: cmake
+  :caption: ``CMakeLists.txt``
+
+  add_library(example example.cxx)
+
+  include(GenerateExportHeader)
+
+  set_target_properties(
+    example
+    PROPERTIES
+      CXX_VISIBILITY_PRESET hidden
+      VISIBILITY_INLINES_HIDDEN TRUE
+  )
+
+  generate_export_header(example)
+
+See Also
+^^^^^^^^
+
+* The :prop_tgt:`DEFINE_SYMBOL` target property to customize the preprocessor
+  macro name used by the generated header.  This macro determines whether
+  the library header is being included during the library's own compilation
+  or when it is used by another project (e.g., after installation).
+* The :prop_tgt:`ENABLE_EXPORTS` target property.
+* The :prop_tgt:`WINDOWS_EXPORT_ALL_SYMBOLS` target property.
 #]=======================================================================]
 
 include(CheckCompilerFlag)
