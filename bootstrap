@@ -491,6 +491,7 @@ CMAKE_CXX_SOURCES="\
   cmStdIoConsole \
   cmStdIoInit \
   cmStdIoStream \
+  cmStdIoTerminal \
   cmString \
   cmStringAlgorithms \
   cmStringReplaceHelper \

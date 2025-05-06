@@ -9,6 +9,7 @@
 #include "cmStdIoConsole.h"
 #include "cmStdIoInit.h"
 #include "cmStdIoStream.h"
+#include "cmStdIoTerminal.h"
 
 #include "testCommon.h"
 
@@ -70,6 +71,54 @@ bool testConsole()
   return true;
 }
 
+void testTerminalPrint(cm::StdIo::TermAttrSet const& attrs,
+                       cm::string_view text)
+{
+  using namespace cm::StdIo;
+  std::cout << "  ";
+  Print(Out(), attrs, text);
+#ifdef _WIN32
+  if (Out().Kind() == TermKind::Console) {
+    std::cout << " : ";
+    Print(Out(), attrs | TermAttr::BackgroundBold, text);
+  }
+#endif
+  std::cout << std::endl;
+}
+
+bool testTerminal()
+{
+  std::cout << "testTerminal()\n";
+  using cm::StdIo::TermAttr;
+  testTerminalPrint(TermAttr::Normal, "Normal"_s);
+  testTerminalPrint(TermAttr::ForegroundBold, "Bold"_s);
+  testTerminalPrint(TermAttr::ForegroundBlack, "Black"_s);
+  testTerminalPrint(TermAttr::ForegroundBlue, "Blue"_s);
+  testTerminalPrint(TermAttr::ForegroundCyan, "Cyan"_s);
+  testTerminalPrint(TermAttr::ForegroundGreen, "Green"_s);
+  testTerminalPrint(TermAttr::ForegroundMagenta, "Magenta"_s);
+  testTerminalPrint(TermAttr::ForegroundRed, "Red"_s);
+  testTerminalPrint(TermAttr::ForegroundWhite, "White"_s);
+  testTerminalPrint(TermAttr::ForegroundYellow, "Yellow"_s);
+  testTerminalPrint({ TermAttr::ForegroundBold, TermAttr::BackgroundBlack },
+                    "Bold on Black"_s);
+  testTerminalPrint({ TermAttr::ForegroundBlack, TermAttr::BackgroundBlue },
+                    "Black on Blue"_s);
+  testTerminalPrint({ TermAttr::ForegroundBlack, TermAttr::BackgroundCyan },
+                    "Black on Cyan"_s);
+  testTerminalPrint({ TermAttr::ForegroundBlack, TermAttr::BackgroundGreen },
+                    "Black on Green"_s);
+  testTerminalPrint({ TermAttr::ForegroundBlack, TermAttr::BackgroundMagenta },
+                    "Black on Magenta"_s);
+  testTerminalPrint({ TermAttr::ForegroundBlack, TermAttr::BackgroundRed },
+                    "Black on Red"_s);
+  testTerminalPrint({ TermAttr::ForegroundBlack, TermAttr::BackgroundWhite },
+                    "Black on White"_s);
+  testTerminalPrint({ TermAttr::ForegroundBlack, TermAttr::BackgroundYellow },
+                    "Black on Yellow"_s);
+  return true;
+}
+
 cm::string_view const kUsage = "usage: CMakeLibTests testStdIo [--stdin]"_s;
 
 }
@@ -91,5 +140,6 @@ int testStdIo(int argc, char* argv[])
   return runTests({
     testStream,
     testConsole,
+    testTerminal,
   });
 }
