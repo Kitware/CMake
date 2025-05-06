@@ -14,7 +14,6 @@
 #include "cmInstrumentation.h"
 #include "cmInstrumentationQuery.h"
 #include "cmStdIoConsole.h"
-#include "cmStdIoInit.h"
 #include "cmSystemTools.h"
 
 #include "CTest/cmCTestLaunch.h"
@@ -167,8 +166,6 @@ cmDocumentationEntry const cmDocumentationOptions[] = {
 // this is a test driver program for cmCTest.
 int main(int argc, char const* const* argv)
 {
-  cm::StdIo::Init();
-
   cm::StdIo::Console console;
 
   cmsys::Encoding::CommandLineArguments encoding_args =

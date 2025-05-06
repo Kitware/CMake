@@ -34,7 +34,6 @@
 #include "cmState.h"
 #include "cmStateTypes.h"
 #include "cmStdIoConsole.h"
-#include "cmStdIoInit.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmValue.h"
@@ -1142,8 +1141,6 @@ int do_open(int ac, char const* const* av)
 
 int main(int ac, char const* const* av)
 {
-  cm::StdIo::Init();
-
   cm::optional<cm::StdIo::Console> console = cm::StdIo::Console();
 
   cmsys::Encoding::CommandLineArguments args =

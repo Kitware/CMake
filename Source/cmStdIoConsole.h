@@ -4,6 +4,8 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include "cmStdIoInit.h"
+
 #ifdef _WIN32
 #  include <memory>
 #endif
@@ -28,7 +30,7 @@ namespace StdIo {
  *
  * Destroy the instance of this to restore the original `streambuf`s.
  */
-class Console
+class Console : private Init
 {
 #ifdef _WIN32
   class Impl;

@@ -33,7 +33,6 @@
 #include "cmState.h"
 #include "cmStateSnapshot.h"
 #include "cmStdIoConsole.h"
-#include "cmStdIoInit.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmValue.h"
@@ -90,8 +89,6 @@ std::vector<cmDocumentationEntry> makeGeneratorDocs(
 // this is CPack.
 int main(int argc, char const* const* argv)
 {
-  cm::StdIo::Init();
-
   cm::StdIo::Console console;
 
   cmsys::Encoding::CommandLineArguments args =
