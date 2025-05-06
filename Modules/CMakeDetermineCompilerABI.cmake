@@ -287,7 +287,10 @@ function(CMAKE_DETERMINE_COMPILER_ABI lang src)
         list(REMOVE_ITEM implicit_dirs ${CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES_EXCLUDE})
       endif()
 
-      # Filter out implicit link directories excluded by the environment.
+      # Filter out implicit link information excluded by the environment.
+      if(DEFINED ENV{CMAKE_${lang}_IMPLICIT_LINK_LIBRARIES_EXCLUDE})
+        list(REMOVE_ITEM implicit_libs $ENV{CMAKE_${lang}_IMPLICIT_LINK_LIBRARIES_EXCLUDE})
+      endif()
       if(DEFINED ENV{CMAKE_${lang}_IMPLICIT_LINK_DIRECTORIES_EXCLUDE})
         list(REMOVE_ITEM implicit_dirs $ENV{CMAKE_${lang}_IMPLICIT_LINK_DIRECTORIES_EXCLUDE})
       endif()
