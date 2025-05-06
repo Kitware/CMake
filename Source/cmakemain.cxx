@@ -35,6 +35,7 @@
 #include "cmMessageMetadata.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
+#include "cmStdIoInit.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmValue.h"
@@ -1142,7 +1143,7 @@ int do_open(int ac, char const* const* av)
 
 int main(int ac, char const* const* av)
 {
-  cmSystemTools::EnsureStdPipes();
+  cm::StdIo::Init();
 
   // Replace streambuf so we can output Unicode to console
   auto consoleBuf = cm::make_unique<cmConsoleBuf>();

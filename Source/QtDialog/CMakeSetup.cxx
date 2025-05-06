@@ -18,6 +18,7 @@
 #include "cmAlgorithms.h"
 #include "cmDocumentation.h"
 #include "cmDocumentationEntry.h"
+#include "cmStdIoInit.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h" // IWYU pragma: keep
 #include "cmake.h"
@@ -66,7 +67,8 @@ void OpenReferenceManual(QString const& filename);
 
 int main(int argc, char** argv)
 {
-  cmSystemTools::EnsureStdPipes();
+  cm::StdIo::Init();
+
   cmsys::Encoding::CommandLineArguments encoding_args =
     cmsys::Encoding::CommandLineArguments::Main(argc, argv);
   int argc2 = encoding_args.argc();

@@ -554,8 +554,6 @@ public:
                          cmTarExtractTimestamps extractTimestamps,
                          bool verbose);
 
-  static void EnsureStdPipes();
-
   /** Random number generation.  */
   static unsigned int RandomSeed();
   static unsigned int RandomNumber();
