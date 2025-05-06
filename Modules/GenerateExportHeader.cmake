@@ -292,9 +292,6 @@ macro(_test_compiler_has_deprecated)
   endif()
 endmacro()
 
-get_filename_component(_GENERATE_EXPORT_HEADER_MODULE_DIR
-  "${CMAKE_CURRENT_LIST_FILE}" PATH)
-
 macro(_DO_SET_MACRO_VALUES TARGET_LIBRARY)
   set(DEFINE_DEPRECATED)
   set(DEFINE_EXPORT)
@@ -321,7 +318,7 @@ macro(_DO_SET_MACRO_VALUES TARGET_LIBRARY)
   endif()
 endmacro()
 
-macro(_DO_GENERATE_EXPORT_HEADER TARGET_LIBRARY)
+function(_DO_GENERATE_EXPORT_HEADER TARGET_LIBRARY)
   # Option overrides
   set(options DEFINE_NO_DEPRECATED)
   set(oneValueArgs PREFIX_NAME BASE_NAME EXPORT_MACRO_NAME EXPORT_FILE_NAME
@@ -411,9 +408,9 @@ macro(_DO_GENERATE_EXPORT_HEADER TARGET_LIBRARY)
     endif()
   endif()
 
-  configure_file("${_GENERATE_EXPORT_HEADER_MODULE_DIR}/exportheader.cmake.in"
+  configure_file("${CMAKE_CURRENT_FUNCTION_LIST_DIR}/exportheader.cmake.in"
     "${EXPORT_FILE_NAME}" @ONLY)
-endmacro()
+endfunction()
 
 function(GENERATE_EXPORT_HEADER TARGET_LIBRARY)
   get_property(type TARGET ${TARGET_LIBRARY} PROPERTY TYPE)
