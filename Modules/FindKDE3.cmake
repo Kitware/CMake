@@ -189,19 +189,6 @@ This module provides the following commands to work with KDE 3 in CMake:
   source files ``<sources>``.  It also builds a small executable linked against
   this library.
 
-Deprecated Variables
-^^^^^^^^^^^^^^^^^^^^
-
-The following variables have been either removed or are provided for backward
-compatibility:
-
-``KDE3_ENABLE_FINAL``
-  .. versionchanged:: 2.4.8
-    This variable is now removed and no longer supported.
-
-  This hint variable was provided as an option in earlier CMake versions to
-  enable all-in-one compilation.
-
 Examples
 ^^^^^^^^
 
