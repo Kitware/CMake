@@ -16,3 +16,6 @@ unset(ENV{CMAKE_APPBUNDLE_PATH})
 
 # Find a config package
 find_package(ViaConfig)
+
+# Find a module
+find_package(ViaModule)

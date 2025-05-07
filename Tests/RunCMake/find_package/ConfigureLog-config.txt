@@ -59,8 +59,45 @@ events:
         path: ".*/Tests/RunCMake/find_package/ConfigureLog/viaconfig-config.cmake"
         mode: "config"
         reason: "no_exist"
+      -
+        path: ".*/Tests/RunCMake/find_package/ConfigureLog/cmake/ViaConfigConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: ".*/Tests/RunCMake/find_package/ConfigureLog/cmake/viaconfig-config.cmake"
+        mode: "config"
+        reason: "no_exist"
     found:
       path: ".*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/ViaConfig/ViaConfigConfig.cmake"
       mode: "config"
       version: "1\.0"
+  -
+    kind: "find_package-v1"
+    backtrace:(
+      - "[^"]+")+
+    name: "ViaModule"
+    version_request:
+      exact: false
+    settings:
+      required: "optional"
+      quiet: false
+      global: false
+      policy_scope: true
+      bypass_provider: false
+      path_suffixes:
+        - ""
+      paths:
+        CMAKE_FIND_USE_CMAKE_PATH: true
+        CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: true
+        CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+        CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+        CMAKE_FIND_USE_INSTALL_PREFIX: true
+        CMAKE_FIND_USE_PACKAGE_ROOT_PATH: true
+        CMAKE_FIND_USE_CMAKE_PACKAGE_REGISTRY: true
+        CMAKE_FIND_USE_SYSTEM_PACKAGE_REGISTRY: true
+        CMAKE_FIND_ROOT_PATH_MODE: "BOTH"
+    found:
+      path: ".*/Tests/RunCMake/find_package/ConfigureLog/cmake/FindViaModule.cmake"
+      mode: "module"
+      version: "1.0"
 \.\.\.$

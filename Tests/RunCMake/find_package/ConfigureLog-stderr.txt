@@ -71,11 +71,27 @@
     .*/Tests/RunCMake/find_package/ConfigureLog-build/CMakeFiles/pkgRedirects/viaconfig-config.cmake
     .*/Tests/RunCMake/find_package/ConfigureLog/ViaConfigConfig.cmake
     .*/Tests/RunCMake/find_package/ConfigureLog/viaconfig-config.cmake
+    .*/Tests/RunCMake/find_package/ConfigureLog/cmake/ViaConfigConfig.cmake
+    .*/Tests/RunCMake/find_package/ConfigureLog/cmake/viaconfig-config.cmake
     .*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/ViaConfig/ViaConfigConfig.cmake
 
   The file was found at
 
     .*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/ViaConfig/ViaConfigConfig.cmake
+
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)
+
+
+CMake Debug Log at ConfigureLog.cmake:[0-9]+ \(find_package\):
+  find_package considered the following paths for FindViaModule.cmake:
+
+(    [^
+]*
+)*
+  The file was found at
+
+    .*/Tests/RunCMake/find_package/ConfigureLog/cmake/FindViaModule.cmake
 
 Call Stack \(most recent call first\):
   CMakeLists.txt:[0-9]+ \(include\)$
