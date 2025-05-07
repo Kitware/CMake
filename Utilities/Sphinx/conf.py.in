@@ -96,6 +96,7 @@ linkcheck_ignore = [
     r'about:',
     r'https://gitlab\.kitware\.com/cmake/community/-/wikis/doc/cpack',
     r'https://web\.archive\.org/',
+    r'https://www\.gnu\.org/',
     r'https://www\.intel\.com/',
     r'https://www\.tasking\.com($|/)',
 ]
