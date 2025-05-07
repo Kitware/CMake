@@ -648,6 +648,7 @@ Signatures
             [USE_SOURCE_PERMISSIONS] [OPTIONAL] [MESSAGE_NEVER]
             [CONFIGURATIONS <config>...]
             [COMPONENT <component>] [EXCLUDE_FROM_ALL]
+            [EXCLUDE_EMPTY_DIRECTORIES]
             [FILES_MATCHING]
             [<match-rule> <match-option>...]...
             )
@@ -749,6 +750,13 @@ Signatures
     .. versionadded:: 3.1
 
     Disable file installation status output.
+
+  ``EXCLUDE_EMPTY_DIRECTORIES``
+    .. versionadded:: 4.1
+
+    Exclude empty directories from installation.  A directory is
+    considered empty if it contains no files, no symbolic links,
+    and no non-empty subdirectories.
 
   ``FILES_MATCHING``
     This option may be given before the first ``<match-rule>`` to

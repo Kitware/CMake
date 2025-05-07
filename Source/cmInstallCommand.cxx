@@ -1805,6 +1805,14 @@ bool HandleDirectoryMode(std::vector<std::string> const& args,
       }
       exclude_from_all = true;
       doing = DoingNone;
+    } else if (args[i] == "EXCLUDE_EMPTY_DIRECTORIES") {
+      if (in_match_mode) {
+        status.SetError(cmStrCat(args[0], " does not allow \"", args[i],
+                                 "\" after PATTERN or REGEX."));
+        return false;
+      }
+      literal_args += " EXCLUDE_EMPTY_DIRECTORIES";
+      doing = DoingNone;
     } else if (doing == DoingDirs) {
       // Convert this directory to a full path.
       std::string dir = args[i];

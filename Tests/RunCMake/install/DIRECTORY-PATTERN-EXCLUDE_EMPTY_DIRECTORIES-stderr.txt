@@ -1,0 +1,5 @@
+CMake Error at DIRECTORY-PATTERN-EXCLUDE_EMPTY_DIRECTORIES.cmake:[0-9]+ \(install\):
+  install DIRECTORY does not allow "EXCLUDE_EMPTY_DIRECTORIES" after PATTERN
+  or REGEX\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
