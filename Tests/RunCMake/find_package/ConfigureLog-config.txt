@@ -1,0 +1,66 @@
+^
+---
+events:
+  -
+    kind: "message-v1"
+    backtrace:(
+      - "[^"]+")+
+    message: \|(
++      [^
+]*)*
+  -
+    kind: "find_package-v1"
+    backtrace:(
+      - "[^"]+")+
+    name: "ViaConfig"
+    configs:
+      -
+        filename: "ViaConfigConfig.cmake"
+        kind: "cmake"
+      -
+        filename: "viaconfig-config.cmake"
+        kind: "cmake"
+    version_request:
+      exact: false
+    settings:
+      required: "optional"
+      quiet: false
+      global: false
+      policy_scope: true
+      bypass_provider: false
+      names:
+        - "ViaConfig"
+      path_suffixes:
+        - ""
+      paths:
+        CMAKE_FIND_USE_CMAKE_PATH: true
+        CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: true
+        CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+        CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+        CMAKE_FIND_USE_INSTALL_PREFIX: true
+        CMAKE_FIND_USE_PACKAGE_ROOT_PATH: true
+        CMAKE_FIND_USE_CMAKE_PACKAGE_REGISTRY: true
+        CMAKE_FIND_USE_SYSTEM_PACKAGE_REGISTRY: true
+        CMAKE_FIND_ROOT_PATH_MODE: "BOTH"
+    candidates:
+      -
+        path: ".*/Tests/RunCMake/find_package/ConfigureLog-build/CMakeFiles/pkgRedirects/ViaConfigConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: ".*/Tests/RunCMake/find_package/ConfigureLog-build/CMakeFiles/pkgRedirects/viaconfig-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: ".*/Tests/RunCMake/find_package/ConfigureLog/ViaConfigConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: ".*/Tests/RunCMake/find_package/ConfigureLog/viaconfig-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+    found:
+      path: ".*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/ViaConfig/ViaConfigConfig.cmake"
+      mode: "config"
+      version: "1\.0"
+\.\.\.$
