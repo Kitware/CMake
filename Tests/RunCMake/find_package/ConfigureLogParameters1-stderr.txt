@@ -1,4 +1,4 @@
-^CMake Debug Log at ConfigureLogParameters.cmake:[0-9]+ \(find_package\):
+^CMake Debug Log at ConfigureLogParameters1.cmake:[0-9]+ \(find_package\):
   find_package considered the following paths for FindParameterCheck.cmake:
 
     .*/Modules/FindParameterCheck.cmake
@@ -12,7 +12,7 @@ Call Stack \(most recent call first\):
   CMakeLists.txt:[0-9]+ \(include\)(
 
 
-CMake Debug Log at ConfigureLogParameters.cmake:[0-9]+ \(find_package\):
+CMake Debug Log at ConfigureLogParameters1.cmake:[0-9]+ \(find_package\):
   find_package considered the following paths for FindParameterCheck.cmake:
 
     .*/Modules/FindParameterCheck.cmake
