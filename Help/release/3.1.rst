@@ -250,7 +250,7 @@ Modules
 * The :module:`FindZLIB` module now provides imported targets.
 
 * The :module:`GenerateExportHeader` module ``generate_export_header``
-  function learned to allow use with :ref:`Object Libraries`.
+  command learned to allow use with :ref:`Object Libraries`.
 
 * The :module:`InstallRequiredSystemLibraries` module gained a new
   ``CMAKE_INSTALL_OPENMP_LIBRARIES`` option to install MSVC OpenMP

@@ -391,7 +391,7 @@ Deprecated and Removed Features
   :command:`target_compile_options` command instead.
 
 * The :module:`GenerateExportHeader` module ``add_compiler_export_flags``
-  function is now deprecated.  It has been superseded by the
+  command is now deprecated.  It has been superseded by the
   :prop_tgt:`<LANG>_VISIBILITY_PRESET` and
   :prop_tgt:`VISIBILITY_INLINES_HIDDEN` target properties.
 
