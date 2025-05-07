@@ -723,33 +723,71 @@ bool cmQtAutoGenInitializer::InitMoc()
 
   // Moc includes
   {
-    SearchPathSanitizer const sanitizer(this->Makefile);
-    auto getDirs =
-      [this, &sanitizer](std::string const& cfg) -> std::vector<std::string> {
-      // Get the include dirs for this target, without stripping the implicit
-      // include dirs off, see issue #13667.
-      std::vector<std::string> dirs;
-      bool const appendImplicit = (this->QtVersion.Major >= 5);
-      this->LocalGen->GetIncludeDirectoriesImplicit(
-        dirs, this->GenTarget, "CXX", cfg, false, appendImplicit);
-      return sanitizer(dirs);
-    };
+    // If the property AUTOMOC_INCLUDE_DIRECTORIES is set on the target,
+    // use its value for moc include paths instead of gathering all
+    // include directories from the target.
+    cmValue autoIncDirs =
+      this->GenTarget->GetProperty("AUTOMOC_INCLUDE_DIRECTORIES");
+    if (autoIncDirs) {
+      cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
+      cmGeneratorExpression ge(*this->Makefile->GetCMakeInstance(), lfbt);
+      auto cge = ge.Parse(*autoIncDirs);
 
-    // Other configuration settings
-    if (this->MultiConfig) {
-      for (std::string const& cfg : this->ConfigsList) {
-        std::vector<std::string> dirs = getDirs(cfg);
-        if (dirs == this->Moc.Includes.Default) {
-          continue;
+      // Build a single list of configs to iterate, whether single or multi
+      std::vector<std::string> configs = this->MultiConfig
+        ? this->ConfigsList
+        : std::vector<std::string>{ this->ConfigDefault };
+
+      for (auto const& cfg : configs) {
+        std::string eval = cge->Evaluate(this->LocalGen, cfg);
+        std::vector<std::string> incList = cmList(eval);
+
+        // Validate absolute paths
+        for (auto const& path : incList) {
+          if (!cmGeneratorExpression::StartsWithGeneratorExpression(path) &&
+              !cmSystemTools::FileIsFullPath(path)) {
+            this->Makefile->IssueMessage(
+              MessageType::FATAL_ERROR,
+              cmStrCat("AUTOMOC_INCLUDE_DIRECTORIES: path '", path,
+                       "' is not absolute."));
+            return false;
+          }
         }
-        this->Moc.Includes.Config[cfg] = std::move(dirs);
+        if (this->MultiConfig) {
+          this->Moc.Includes.Config[cfg] = std::move(incList);
+        } else {
+          this->Moc.Includes.Default = std::move(incList);
+        }
       }
     } else {
-      // Default configuration include directories
-      this->Moc.Includes.Default = getDirs(this->ConfigDefault);
+      // Otherwise, discover include directories from the target for moc.
+      SearchPathSanitizer const sanitizer(this->Makefile);
+      auto getDirs = [this, &sanitizer](
+                       std::string const& cfg) -> std::vector<std::string> {
+        // Get the include dirs for this target, without stripping the implicit
+        // include dirs off, see issue #13667.
+        std::vector<std::string> dirs;
+        bool const appendImplicit = (this->QtVersion.Major >= 5);
+        this->LocalGen->GetIncludeDirectoriesImplicit(
+          dirs, this->GenTarget, "CXX", cfg, false, appendImplicit);
+        return sanitizer(dirs);
+      };
+
+      // Other configuration settings
+      if (this->MultiConfig) {
+        for (std::string const& cfg : this->ConfigsList) {
+          std::vector<std::string> dirs = getDirs(cfg);
+          if (dirs == this->Moc.Includes.Default) {
+            continue;
+          }
+          this->Moc.Includes.Config[cfg] = std::move(dirs);
+        }
+      } else {
+        // Default configuration include directories
+        this->Moc.Includes.Default = getDirs(this->ConfigDefault);
+      }
     }
   }
-
   // Moc compile definitions
   {
     auto getDefs = [this](std::string const& cfg) -> std::set<std::string> {

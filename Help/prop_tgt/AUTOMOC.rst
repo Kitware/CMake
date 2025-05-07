@@ -34,6 +34,11 @@ At configuration time, a list of header files that should be scanned by
 
   and adds these to the scan list.
 
+- The :prop_tgt:`AUTOMOC_INCLUDE_DIRECTORIES` target property may be set
+  to explicitly tell ``moc`` what include directories to search.  If not
+  set, the default is to use the include directories from the target and
+  its transitive closure of dependencies.
+
 At build time, CMake scans each unknown or modified header file from the
 list and searches for
 
@@ -221,6 +226,10 @@ defining file name filters in this target property.
 :prop_tgt:`AUTOMOC_COMPILER_PREDEFINES`:
 Compiler pre definitions for ``moc`` are written to the ``moc_predefs.h`` file.
 The generation of this file can be enabled or disabled in this target property.
+
+:prop_tgt:`AUTOMOC_INCLUDE_DIRECTORIES`:
+Specifies one or more include directories for ``AUTOMOC`` to pass explicitly to ``moc``
+instead of automatically discovering a target’s include directories.
 
 :prop_sf:`SKIP_AUTOMOC`:
 Sources and headers can be excluded from ``AUTOMOC`` processing by
