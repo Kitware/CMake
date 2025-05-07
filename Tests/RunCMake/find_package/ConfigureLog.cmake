@@ -19,3 +19,6 @@ find_package(ViaConfig)
 
 # Find a module
 find_package(ViaModule)
+
+# Find a module that chains to a config package
+find_package(WithInner)
