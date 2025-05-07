@@ -22,3 +22,6 @@ find_package(ViaModule)
 
 # Find a module that chains to a config package
 find_package(WithInner)
+
+# Version insufficiency testing
+find_package(VersionCheck 2.0)
