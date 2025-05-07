@@ -1,0 +1,109 @@
+^
+---
+events:
+  -
+    kind: "message-v1"
+    backtrace:(
+      - "[^"]+")+
+    message: \|(
++      [^
+]*)*
+  -
+    kind: "find_package-v1"
+    backtrace:(
+      - "[^"]+")+
+    name: "ParameterCheck"
+    version_request:
+      version: "1.0"
+      version_complete: "1.0"
+      exact: true
+    settings:
+      required: "optional"
+      quiet: false
+      global: false
+      policy_scope: true
+      bypass_provider: false
+      path_suffixes:
+        - ""
+      paths:
+        CMAKE_FIND_USE_CMAKE_PATH: true
+        CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: true
+        CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+        CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+        CMAKE_FIND_USE_INSTALL_PREFIX: true
+        CMAKE_FIND_USE_PACKAGE_ROOT_PATH: true
+        CMAKE_FIND_USE_CMAKE_PACKAGE_REGISTRY: true
+        CMAKE_FIND_USE_SYSTEM_PACKAGE_REGISTRY: true
+        CMAKE_FIND_ROOT_PATH_MODE: "BOTH"
+    candidates:
+      -
+        path: ".*/Tests/RunCMake/find_package/ConfigureLog/cmake/FindParameterCheck.cmake"
+        mode: "module"
+        reason: "not_found"
+        message: "Not an EXACT version match"
+    found: null
+  -
+    kind: "find_package-v1"
+    backtrace:(
+      - "[^"]+")+
+    name: "ParameterCheck"
+    version_request:
+      version: "1.0"
+      version_complete: "1.0...1.5"
+      min: "INCLUDE"
+      max: "INCLUDE"
+      exact: false
+    settings:
+      required: "optional"
+      quiet: false
+      global: false
+      policy_scope: true
+      bypass_provider: false
+      path_suffixes:
+        - ""
+      paths:
+        CMAKE_FIND_USE_CMAKE_PATH: true
+        CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: true
+        CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+        CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+        CMAKE_FIND_USE_INSTALL_PREFIX: true
+        CMAKE_FIND_USE_PACKAGE_ROOT_PATH: true
+        CMAKE_FIND_USE_CMAKE_PACKAGE_REGISTRY: true
+        CMAKE_FIND_USE_SYSTEM_PACKAGE_REGISTRY: true
+        CMAKE_FIND_ROOT_PATH_MODE: "BOTH"
+    found:
+      path: ".*/Tests/RunCMake/find_package/ConfigureLog/cmake/FindParameterCheck.cmake"
+      mode: "module"
+      version: "1.2"
+  -
+    kind: "find_package-v1"
+    backtrace:(
+      - "[^"]+")+
+    name: "ParameterCheck"
+    version_request:
+      version: "1.2"
+      version_complete: "1.2"
+      exact: false
+    settings:
+      required: "optional"
+      quiet: false
+      global: false
+      policy_scope: true
+      bypass_provider: false
+      path_suffixes:
+        - ""
+      paths:
+        CMAKE_FIND_USE_CMAKE_PATH: true
+        CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: true
+        CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+        CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+        CMAKE_FIND_USE_INSTALL_PREFIX: true
+        CMAKE_FIND_USE_PACKAGE_ROOT_PATH: true
+        CMAKE_FIND_USE_CMAKE_PACKAGE_REGISTRY: true
+        CMAKE_FIND_USE_SYSTEM_PACKAGE_REGISTRY: true
+        CMAKE_FIND_ROOT_PATH_MODE: "BOTH"
+    found:
+      path: ".*/Tests/RunCMake/find_package/ConfigureLog/cmake/FindParameterCheck.cmake"
+      mode: "module"
+      version: "1.2"
+\.\.\.$
