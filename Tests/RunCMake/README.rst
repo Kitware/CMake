@@ -274,3 +274,11 @@ script that will automatically perform steps 1 through 4 for you::
   cmake -DRunCMake_TEST_SUITE=<test suite name> -P Tests/RunCMake/AddRunCMakeTestSuite.cmake
 
 Be sure to run this from the top-level CMake source directory.
+
+Crafting Expected Output
+========================
+
+There is a `regex debugging`_ tool available to help craft regular expressions
+to verify output from tests. See its documentation for more.
+
+.. _`regex debugging`: ../../Utilities/cmredbg/README.rst
