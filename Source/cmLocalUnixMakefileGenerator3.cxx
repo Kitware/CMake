@@ -6,6 +6,7 @@
 #include <cassert>
 #include <cstdio>
 #include <functional>
+#include <iostream>
 #include <utility>
 
 #include <cm/memory>
@@ -16,7 +17,6 @@
 #include <cmext/string_view>
 
 #include "cmsys/FStream.hxx"
-#include "cmsys/Terminal.h"
 
 #include "cmCMakePath.h"
 #include "cmCustomCommand.h" // IWYU pragma: keep
@@ -41,6 +41,8 @@
 #include "cmState.h"
 #include "cmStateSnapshot.h"
 #include "cmStateTypes.h"
+#include "cmStdIoStream.h"
+#include "cmStdIoTerminal.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTargetDepend.h"
@@ -1377,9 +1379,15 @@ bool cmLocalUnixMakefileGenerator3::UpdateDependencies(
   this->CheckMultipleOutputs(verbose);
 
   auto echoColor = [color](std::string const& m) {
-    cmSystemTools::MakefileColorEcho(cmsysTerminal_Color_ForegroundMagenta |
-                                       cmsysTerminal_Color_ForegroundBold,
-                                     m.c_str(), true, color);
+    cm::StdIo::TermAttrSet attrs;
+    if (color) {
+      attrs = {
+        cm::StdIo::TermAttr::ForegroundMagenta,
+        cm::StdIo::TermAttr::ForegroundBold,
+      };
+    }
+    Print(cm::StdIo::Out(), attrs, m);
+    std::cout << std::endl;
   };
 
   std::string const targetDir = cmSystemTools::GetFilenamePath(tgtInfo);

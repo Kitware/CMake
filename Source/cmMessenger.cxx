@@ -5,6 +5,7 @@
 #include "cmDocumentationFormatter.h"
 #include "cmMessageMetadata.h"
 #include "cmMessageType.h"
+#include "cmStdIoTerminal.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
@@ -16,8 +17,6 @@
 
 #include <sstream>
 #include <utility>
-
-#include "cmsys/Terminal.h"
 
 #ifdef CMake_ENABLE_DEBUGGER
 #  include "cmDebuggerAdapter.h"
@@ -47,18 +46,18 @@ char const* getMessageTypeStr(MessageType t)
   return "Warning";
 }
 
-int getMessageColor(MessageType t)
+cm::StdIo::TermAttr getMessageColor(MessageType t)
 {
   switch (t) {
     case MessageType::INTERNAL_ERROR:
     case MessageType::FATAL_ERROR:
     case MessageType::AUTHOR_ERROR:
-      return cmsysTerminal_Color_ForegroundRed;
+      return cm::StdIo::TermAttr::ForegroundRed;
     case MessageType::AUTHOR_WARNING:
     case MessageType::WARNING:
-      return cmsysTerminal_Color_ForegroundYellow;
+      return cm::StdIo::TermAttr::ForegroundYellow;
     default:
-      return cmsysTerminal_Color_Normal;
+      return cm::StdIo::TermAttr::Normal;
   }
 }
 
@@ -99,7 +98,7 @@ void displayMessage(MessageType t, std::ostringstream& msg)
 
   // Output the message.
   cmMessageMetadata md;
-  md.desiredColor = getMessageColor(t);
+  md.attrs = getMessageColor(t);
   if (t == MessageType::FATAL_ERROR || t == MessageType::INTERNAL_ERROR ||
       t == MessageType::DEPRECATION_ERROR || t == MessageType::AUTHOR_ERROR) {
     cmSystemTools::SetErrorOccurred();
