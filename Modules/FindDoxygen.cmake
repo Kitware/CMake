@@ -874,7 +874,7 @@ function(doxygen_add_docs targetName)
                           ${ARGN})
 
     if(NOT _args_COMMENT)
-        set(_args_COMMENT "Generate API documentation for ${targetName}")
+        set(_args_COMMENT "Generating API documentation for ${targetName}")
     endif()
 
     if(NOT _args_WORKING_DIRECTORY)
