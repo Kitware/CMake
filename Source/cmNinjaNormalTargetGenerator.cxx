@@ -1427,6 +1427,10 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement(
   cmGeneratorTarget::ModuleDefinitionInfo const* mdi =
     gt->GetModuleDefinitionInfo(config);
   if (mdi && mdi->DefFileGenerated) {
+    std::string homeOutDir = "cd " + localGen.ConvertToOutputFormat(
+                                       localGen.GetBinaryDirectory(), cmOutputConverter::SHELL);
+    preLinkCmdLines.push_back(std::move(homeOutDir));
+
     std::string cmakeCommand =
       this->GetLocalGenerator()->ConvertToOutputFormat(
         cmSystemTools::GetCMakeCommand(), cmOutputConverter::SHELL);
