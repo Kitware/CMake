@@ -9,11 +9,11 @@
 #include "cmsys/Encoding.hxx"
 
 #include "cmCTest.h"
-#include "cmConsoleBuf.h"
 #include "cmDocumentation.h"
 #include "cmDocumentationEntry.h"
 #include "cmInstrumentation.h"
 #include "cmInstrumentationQuery.h"
+#include "cmStdIoConsole.h"
 #include "cmStdIoInit.h"
 #include "cmSystemTools.h"
 
@@ -169,9 +169,7 @@ int main(int argc, char const* const* argv)
 {
   cm::StdIo::Init();
 
-  // Replace streambuf so we can output Unicode to console
-  cmConsoleBuf consoleBuf;
-  consoleBuf.SetUTF8Pipes();
+  cm::StdIo::Console console;
 
   cmsys::Encoding::CommandLineArguments encoding_args =
     cmsys::Encoding::CommandLineArguments::Main(argc, argv);

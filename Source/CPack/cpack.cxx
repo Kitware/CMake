@@ -24,7 +24,6 @@
 #include "cmCPackGeneratorFactory.h"
 #include "cmCPackLog.h"
 #include "cmCommandLineArgument.h"
-#include "cmConsoleBuf.h"
 #include "cmDocumentation.h"
 #include "cmDocumentationEntry.h"
 #include "cmGlobalGenerator.h"
@@ -33,6 +32,7 @@
 #include "cmMakefile.h"
 #include "cmState.h"
 #include "cmStateSnapshot.h"
+#include "cmStdIoConsole.h"
 #include "cmStdIoInit.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
@@ -92,9 +92,7 @@ int main(int argc, char const* const* argv)
 {
   cm::StdIo::Init();
 
-  // Replace streambuf so we can output Unicode to console
-  cmConsoleBuf consoleBuf;
-  consoleBuf.SetUTF8Pipes();
+  cm::StdIo::Console console;
 
   cmsys::Encoding::CommandLineArguments args =
     cmsys::Encoding::CommandLineArguments::Main(argc, argv);
