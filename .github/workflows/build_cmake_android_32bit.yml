@@ -285,9 +285,7 @@ jobs:
               -DBUILD_TESTING=OFF \
               -Wno-dev \
               -DCMAKE_C_USE_PRECOMPILED_HEADERS=FALSE \
-              -DCMAKE_CXX_USE_PRECOMPILED_HEADERS=FALSE \
-              -DCMAKE_C_FLAGS="${CMAKE_C_FLAGS} -fno-pch" \
-              -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} -fno-pch"
+              -DCMAKE_CXX_USE_PRECOMPILED_HEADERS=FALSE
 
         if [ $? -ne 0 ]; then
           echo "CMake configuration failed!"
