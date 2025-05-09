@@ -2806,14 +2806,13 @@ bool SystemInformationImplementation::RetrieveCPUPowerManagement()
 
 #if USE_CPUID
 // Used only in USE_CPUID implementation below.
-static void SystemInformationStripLeadingSpace(std::string& str)
+static void SystemInformationTrimSpace(std::string& s)
 {
-  // Because some manufacturers have leading white space - we have to
-  // post-process the name.
-  std::string::size_type pos = str.find_first_not_of(" ");
-  if (pos != std::string::npos) {
-    str.erase(0, pos);
-  }
+  // Because some manufacturers have leading and/or trailing white space,
+  // we have to post-process the name.
+  auto const not_space = [](char c) { return c != ' '; };
+  s.erase(s.begin(), std::find_if(s.begin(), s.end(), not_space));
+  s.erase(std::find_if(s.rbegin(), s.rend(), not_space).base(), s.end());
 }
 #endif
 
@@ -2859,9 +2858,10 @@ bool SystemInformationImplementation::RetrieveExtendedCPUIdentity()
   this->ChipID.ProcessorName = nbuf;
   this->ChipID.ModelName = nbuf;
 
-  // Because some manufacturers have leading white space - we have to
-  // post-process the name.
-  SystemInformationStripLeadingSpace(this->ChipID.ProcessorName);
+  // Because some manufacturers have leading and/or trailing white space,
+  // we have to post-process the names.
+  SystemInformationTrimSpace(this->ChipID.ProcessorName);
+  SystemInformationTrimSpace(this->ChipID.ModelName);
   return true;
 #else
   return false;
