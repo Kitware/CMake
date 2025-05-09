@@ -147,21 +147,20 @@ jobs:
     # Langkah debugging "Check for android_lf.h existence" dihapus agar workflow tidak berhenti.
 
     # --- START: Langkah patching baru untuk menonaktifkan include android_lf.h ---
-    - name: Patch cmlibarchive archive.h to disable android_lf.h include
+    - name: Patch cmlibarchive archive.h to disable android_lf.h include (single sed)
       env:
         CMAKE_SOURCE_DIR: ${{ runner.temp }}/cmake_src
       run: |
         ARCHIVE_H_PATH="$CMAKE_SOURCE_DIR/Utilities/cmlibarchive/libarchive/archive.h"
-        echo "Patching $ARCHIVE_H_PATH to disable android_lf.h include."
+        echo "Patching $ARCHIVE_H_PATH to disable android_lf.h include using single sed command."
 
         # Cari baris `#include "android_lf.h"` dan bungkus dengan #if 0 ... #endif
-        # Ini menonaktifkan baris include tersebut.
-        sed -i '/#include "android_lf.h"/i#if 0' "$ARCHIVE_H_PATH"
-        sed -i '/#include "android_lf.h"/a#endif' "$ARCHIVE_H_PATH"
+        # Menggunakan satu perintah sed tunggal untuk robustness
+        sed -i '/#include "android_lf.h"/ { i#if 0; a#endif }' "$ARCHIVE_H_PATH"
 
         echo "Patch applied. Showing relevant section of archive.h:"
         # Tampilkan bagian yang di-patch untuk verifikasi
-        grep -A 2 -B 1 "android_lf.h" "$CMAKE_SOURCE_DIR/Utilities/cmlibarchive/libarchive/archive.h" || echo "Could not find patched section."
+        grep -A 2 -B 1 "android_lf.h" "$CMAKE_SOURCE_DIR/Utilities/cmlibarchive/libarchive/archive.h" || echo "Could not find patched section using grep."
     # --- END: Langkah patching android_lf.h ---
 
     # --- START: Langkah Verifikasi Patch archive.h ---
@@ -172,19 +171,21 @@ jobs:
         ARCHIVE_H_PATH="$CMAKE_SOURCE_DIR/Utilities/cmlibarchive/libarchive/archive.h"
         echo "Verifying patch in $ARCHIVE_H_PATH..."
         # Periksa apakah #if 0 ada tepat sebelum baris include
-        if grep -A 1 '#if 0' "$ARCHIVE_H_PATH" | tail -n 1 | grep -q '#include "android_lf.h"'; then
-          echo "Patch start (#if 0) found correctly."
+        # Menggunakan pcregrep untuk pola yang lebih canggih yang mencari #if 0 diikuti *langsung* oleh include di baris berikutnya
+        if pcregrep -q '#if 0\n#include "android_lf.h"' "$ARCHIVE_H_PATH"; then
+           echo "Patch start (#if 0) found correctly before include."
         else
-          echo "Error: Patch start (#if 0) NOT found correctly."
-          echo "Content of $ARCHIVE_H_PATH:"
-          cat "$ARCHIVE_H_PATH" # Dump the file content for inspection
-          exit 1
+           echo "Error: Patch start (#if 0) NOT found correctly before include."
+           echo "Content of $ARCHIVE_H_PATH:"
+           cat "$ARCHIVE_H_PATH" # Dump the file content for inspection
+           exit 1
         fi
         # Periksa apakah #endif ada tepat setelah baris include
-        if grep -B 1 '#endif' "$ARCHIVE_H_PATH" | head -n 1 | grep -q '#include "android_lf.h"'; then
-           echo "Patch end (#endif) found correctly."
+        # Menggunakan pcregrep untuk pola yang lebih canggih yang mencari include diikuti *langsung* oleh #endif di baris berikutnya
+        if pcregrep -q '#include "android_lf.h"\n#endif' "$ARCHIVE_H_PATH"; then
+           echo "Patch end (#endif) found correctly after include."
         else
-           echo "Error: Patch end (#endif) NOT found correctly."
+           echo "Error: Patch end (#endif) NOT found correctly after include."
            echo "Content of $ARCHIVE_H_PATH:"
            cat "$ARCHIVE_H_PATH" # Dump the file content for inspection
            exit 1
