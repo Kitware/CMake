@@ -1,4 +1,4 @@
-name: Build CMake for Android (armeabi-v7a) - Manual NDK Download & Extract
+name: Build CMake for Android (armeabi-v7a) - Manual NDK Setup (via Updated SDK Manager)
 
 on:
   workflow_dispatch # Memungkinkan workflow dijalankan secara manual dari Actions tab
@@ -18,19 +18,15 @@ jobs:
         java-version: '17' # Menggunakan Java 17
 
     # --- MANUAL SDK TOOLS SETUP DIMULAI ---
-    # Langkah pertama: Download dan ekstrak SDK Command-line Tools secara manual
-    # Ini diperlukan untuk mendapatkan 'sdkmanager' untuk LISENSI, tetapi TIDAK untuk menginstal NDK di metode ini.
-    - name: Install Android SDK Command-line Tools (for Licenses)
+    # Langkah pertama: Download dan ekstrak SDK Command-line Tools secara manual, lalu update via sdkmanager
+    - name: Install and Update Android SDK Command-line Tools
       run: |
-        echo "--- Installing SDK Command-line Tools ---"
-        # Tentukan lokasi SDK root di direktori temporer runner
+        echo "--- Installing and Updating SDK Command-line Tools ---"
         export ANDROID_SDK_ROOT=${{ runner.temp }}/android-sdk
         mkdir -p $ANDROID_SDK_ROOT
         echo "ANDROID_SDK_ROOT set to $ANDROID_SDK_ROOT"
 
-        # Menggunakan URL spesifik yang mengandung build number (Build 11076708 / Tools 9.0)
-        # Ini adalah URL yang berhasil diunduh dan mengandung sdkmanager yang kita butuhkan untuk lisensi.
-        # URL 'commandlinetools-linux-latest.zip' sebelumnya menghasilkan 404.
+        # Download SDK Command-line Tools versi awal (Tools 9.0 / Build 11076708)
         SDK_TOOLS_URL="https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip"
         CMD_TOOLS_ZIP="cmdline-tools.zip"
         echo "Downloading Command-line Tools from $SDK_TOOLS_URL"
@@ -39,151 +35,129 @@ jobs:
 
         echo "Extracting Command-line Tools..."
         unzip $CMD_TOOLS_ZIP -d $ANDROID_SDK_ROOT/cmdline-tools-temp-extraction || { echo "Error: Extraction failed!"; exit 1; }
-        echo "Command-line Tools extracted to $ANDROID_SDK_ROOT/cmdline-tools-temp-extraction."
 
         CMD_TOOLS_DIR="$ANDROID_SDK_ROOT/cmdline-tools-temp-extraction"
-        # Direktori standar untuk command-line tools versi 'latest'
         CMD_TOOLS_LATEST_DIR="$ANDROID_SDK_ROOT/cmdline-tools/latest"
         mkdir -p $CMD_TOOLS_LATEST_DIR
 
-        # Pindahkan konten yang diekstrak ke direktori 'latest',
-        # menangani struktur zip yang mungkin bersarang (ada folder 'cmdline-tools' di dalamnya)
         if [ -d "$CMD_TOOLS_DIR/cmdline-tools" ]; then
-            echo "Detected nested structure."
             mv $CMD_TOOLS_DIR/cmdline-tools/* $CMD_TOOLS_LATEST_DIR/ || { echo "Nested move command failed!"; exit 1; }
         else
-            echo "Detected flat structure."
             mv $CMD_TOOLS_DIR/* $CMD_TOOLS_LATEST_DIR/ || { echo "Flat move command failed!"; exit 1; }
         fi
         echo "Moved contents to $CMD_TOOLS_LATEST_DIR."
-
-        # Hapus direktori ekstraksi temporer
         rm -rf $ANDROID_SDK_ROOT/cmdline-tools-temp-extraction
 
-        # Tambahkan direktori bin tools ke PATH untuk langkah ini dan langkah berikutnya
-        # Di metode ini, sdkmanager HANYA dipakai untuk lisensi dan list paket (debug)
+        # Tambahkan bin tools awal ke PATH untuk langkah ini
         export PATH=$CMD_TOOLS_LATEST_DIR/bin:$PATH
-        echo "PATH for this step updated: $PATH"
+        echo "Initial PATH for this step updated: $PATH"
 
-        echo "--- Checking if sdkmanager is found in PATH ---"
-        command -v sdkmanager || { echo "sdkmanager NOT found in PATH after this step. PATH is: $PATH"; exit 1; }
-        echo "sdkmanager found."
+        echo "--- Checking if initial sdkmanager is found in PATH ---"
+        command -v sdkmanager || { echo "Initial sdkmanager NOT found in PATH. PATH is: $PATH"; exit 1; }
+        echo "Initial sdkmanager found."
 
-        # Set variabel lingkungan global untuk langkah berikutnya
-        echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
-        echo "PATH=$PATH" >> $GITHUB_ENV # Simpan PATH yang diperbarui
+        # **PERBAIKAN/PENINGKATAN:** Gunakan sdkmanager awal untuk menginstal paket command-line tools TERBARU
+        # dari repository Google. Ini akan menggantikan atau memperbarui tools 9.0.
+        echo "--- Installing latest command-line tools package via sdkmanager ---"
+        # Gunakan --verbose untuk melihat output sdkmanager secara detail jika ada masalah
+        yes | sdkmanager --verbose "cmdline-tools;latest" --sdk_root=$ANDROID_SDK_ROOT &> sdkmanager_tools_install_latest.log || \
+          { echo "Error: Failed to install latest command-line tools package!"; cat sdkmanager_tools_install_latest.log; exit 1; }
+        echo "Latest command-line tools package installation finished."
+        cat sdkmanager_tools_install_latest.log # Tampilkan log instalasi tools
+
+        # Setelah update, direktori 'latest' SEHARUSNYA sudah berisi tools terbaru.
+        # PATH sudah seharusnya mengarah ke sana.
 
         echo "Accepting SDK licenses..."
-        # Setuju dengan lisensi Android SDK menggunakan sdkmanager yang baru diinstal
+        # Gunakan sdkmanager yang seharusnya sudah diupdate
         yes | sdkmanager --licenses --sdk_root=$ANDROID_SDK_ROOT || true
         echo "SDK licenses accepted."
 
-        echo "--- SDK Command-line Tools Installation Complete ---"
+        # Set variabel lingkungan global untuk langkah berikutnya
+        echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
+        # PATH sudah diperbarui oleh instalasi sdkmanager, simpan PATH saat ini
+        echo "PATH=$PATH" >> $GITHUB_ENV
+
+        echo "--- SDK Command-line Tools Setup Complete ---"
       shell: bash
       timeout-minutes: 5
 
     # --- MANUAL SDK TOOLS SETUP SELESAI ---
 
-    # Langkah kedua: List paket SDK yang tersedia (untuk debugging - opsional di metode ini)
-    # Tetap berguna untuk melihat paket NDK apa saja yang dikenali repository Google.
-    - name: List Available SDK Packages (Optional Debug)
+    # Langkah kedua: List paket SDK yang tersedia (untuk melihat nama paket NDK terbaru)
+    - name: List Available SDK Packages
       run: |
-        echo "--- Listing Available SDK Packages (Optional Debug) ---"
-        echo "PATH at the start of List step: $PATH"
+        echo "--- Listing Available SDK Packages ---"
+        echo "PATH at the start of List step: $PATH" # Cek PATH
         echo "ANDROID_SDK_ROOT at the start of List step: $ANDROID_SDK_ROOT"
-        command -v sdkmanager || { echo "sdkmanager NOT found in PATH. PATH is: $PATH"; echo "Skipping package list."; exit 0; } # Exit 0 jika sdkmanager tidak ada
+
+        command -v sdkmanager || { echo "sdkmanager NOT found in PATH. PATH is: $PATH"; exit 1; }
 
         echo "Running sdkmanager --list..."
         sdkmanager --list --sdk_root=$ANDROID_SDK_ROOT &> sdk_packages_list.txt || \
-          { echo "Warning: sdkmanager --list failed!"; cat sdk_packages_list.txt; } # Warning, jangan gagal jika list gagal
+          { echo "Error: sdkmanager --list failed!"; cat sdk_packages_list.txt; exit 1; }
 
         echo "--- Full Package List Output ---"
         cat sdk_packages_list.txt
         echo "--- Listing Complete ---"
+        echo "--- IMPORTANT: Check the output above for the exact package name of a recent STABLE NDK (e.g., ndk;r27, ndk;r26b). ---"
       shell: bash
       timeout-minutes: 3
 
-    # --- MANUAL NDK DOWNLOAD & EXTRACT DIMULAI ---
-    # Langkah ketiga: Download dan ekstrak NDK secara manual
-    - name: Download and Extract Android NDK (Manual)
+    # Langkah ketiga: Instal Android NDK STABIL menggunakan sdkmanager
+    - name: Install Android NDK (via sdkmanager)
       run: |
-        echo "--- Downloading and Extracting Android NDK ---"
-        # Menggunakan versi NDK stabil r25c.
-        # Jika ini juga gagal 404, Anda mungkin perlu mencoba r26b, r27, atau memeriksa arsip download Google secara manual.
-        NDK_VERSION="r25c" # <-- MENGGANTI r28b ke r25c
+        echo "--- Installing Android NDK (via sdkmanager) ---"
+        echo "PATH at the start of Install Android NDK step: $PATH" # Cek PATH
+        echo "ANDROID_SDK_ROOT at the start of Install Android NDK step: $ANDROID_SDK_ROOT"
+        command -v sdkmanager || { echo "sdkmanager NOT found in PATH. PATH is: $PATH"; exit 1; }
 
-        # URL download langsung untuk NDK Linux x86_64 ZIP
-        # Format umumnya: https://dl.google.com/android/repository/android-ndk-[version]-linux-x86_64.zip
-        NDK_ZIP_URL="https://dl.google.com/android/repository/android-ndk-${NDK_VERSION}-linux-x86_64.zip"
-        NDK_ZIP_FILE="android-ndk-${NDK_VERSION}-linux-x86_64.zip"
-        NDK_INSTALL_DIR="$ANDROID_SDK_ROOT/ndk/$NDK_VERSION" # Lokasi target instalasi
+        # *** PENTING: Versi NDK STABIL yang akan diinstal ***
+        # Gunakan versi NDK stabil terbaru yang Anda lihat di output 'sdkmanager --list'.
+        # r27 adalah pilihan yang baik jika tersedia. r26b atau r25c juga bisa.
+        NDK_VERSION_NAME="r27" # <-- GANTI INI jika NDK r27 tidak tersedia di sdkmanager --list
 
-        echo "Downloading NDK from $NDK_ZIP_URL"
-        # Gunakan flag '-L' dengan wget untuk mengikuti redirect, jika ada.
-        # Gunakan flag '-o logfile' untuk menangkap output wget secara detail jika gagal.
-        wget -L $NDK_ZIP_URL -O $NDK_ZIP_FILE || { echo "Error: Failed to download NDK from $NDK_ZIP_URL!"; exit 1; }
-        echo "NDK downloaded: $NDK_ZIP_FILE"
+        NDK_PACKAGE="ndk;$NDK_VERSION_NAME" # Format paket untuk sdkmanager --install
 
-        echo "Creating installation directory: $NDK_INSTALL_DIR"
-        mkdir -p $NDK_INSTALL_DIR || { echo "Error: Failed to create NDK installation directory!"; exit 1; }
+        echo "Running sdkmanager to install NDK $NDK_PACKAGE..."
+        # Gunakan --verbose untuk melihat detail proses instalasi jika gagal
+        yes | sdkmanager --verbose --install "$NDK_PACKAGE" --sdk_root=$ANDROID_SDK_ROOT &> sdkmanager_ndk_install.log || \
+          { echo "Error: sdkmanager NDK installation failed for $NDK_PACKAGE!"; cat sdkmanager_ndk_install.log; exit 1; }
+        echo "sdkmanager NDK installation command finished successfully."
+        cat sdkmanager_ndk_install.log # Tampilkan log instalasi NDK
 
-        echo "Extracting NDK to $NDK_INSTALL_DIR..."
-        # Ekstrak konten ZIP (misalnya folder 'android-ndk-r25c')
-        # Gunakan '-q' untuk quiet (tidak menampilkan daftar file saat ekstrak)
-        # Ekstrak ke direktori temporer lalu pindahkan isinya
-        NDK_TEMP_DIR=${{ runner.temp }}/ndk-extract-temp
-        mkdir -p $NDK_TEMP_DIR
-        unzip -q $NDK_ZIP_FILE -d $NDK_TEMP_DIR || { echo "Error: Failed to unzip NDK file!"; exit 1; }
-
-        # Nama folder utama di dalam ZIP biasanya sama dengan nama file ZIP tanpa ekstensi
-        # atau 'android-ndk-' + versi. Kita cari folder yang diekstrak.
-        EXTRACTED_FOLDER_PATH=$(find $NDK_TEMP_DIR -maxdepth 1 -mindepth 1 -type d -print -quit)
-        if [ -z "$EXTRACTED_FOLDER_PATH" ]; then
-          echo "Error: Could not find extracted NDK folder inside $NDK_TEMP_DIR!"
-          ls -la $NDK_TEMP_DIR || echo "Failed to list temp extraction directory contents."
+        # Temukan path lengkap NDK yang baru diinstal.
+        # Cari folder di dalam $ANDROID_SDK_ROOT/ndk/ dengan nama sesuai NDK_VERSION_NAME.
+        echo "Finding installed NDK path..."
+        NDK_FULL_PATH=$(find $ANDROID_SDK_ROOT/ndk/ -maxdepth 1 -type d -name "$NDK_VERSION_NAME" -print -quit)
+        if [ -z "$NDK_FULL_PATH" ]; then
+          echo "Error: NDK version $NDK_VERSION_NAME not found after installation attempt in $ANDROID_SDK_ROOT/ndk/!"
+          ls -la $ANDROID_SDK_ROOT/ndk/ || echo "Failed to list NDK directory contents."
           exit 1
         fi
-        echo "Found extracted folder: $EXTRACTED_FOLDER_PATH"
+        echo "Installed NDK path found at: $NDK_FULL_PATH"
 
-        # Pindahkan isi folder yang diekstrak ke lokasi instalasi akhir
-        # Gunakan /.* untuk memindahkan semua file dan sub-folder, termasuk yang tersembunyi
-        mv "$EXTRACTED_FOLDER_PATH"/* "$NDK_INSTALL_DIR"/ || { echo "Error: Failed to move extracted NDK contents!"; exit 1; }
-        # Alternatif: Jika mv /* gagal, coba mv folder/*
-        # mv "$EXTRACTED_FOLDER_PATH" "$NDK_INSTALL_DIR"/ || { echo "Error: Failed to move extracted NDK folder!"; exit 1; }
+        # Set variabel lingkungan ANDROID_NDK_HOME ke path NDK yang ditemukan
+        echo "ANDROID_NDK_HOME=$NDK_FULL_PATH" >> $GITHUB_ENV
 
-
-        echo "Moved contents to $NDK_INSTALL_DIR."
-
-        # Bersihkan file ZIP dan direktori temporer
-        rm $NDK_ZIP_FILE
-        rm -rf $NDK_TEMP_DIR
-
-        # Set variabel lingkungan ANDROID_NDK_HOME ke path NDK yang diekstrak
-        echo "ANDROID_NDK_HOME=$NDK_INSTALL_DIR" >> $GITHUB_ENV
-        echo "--- Android NDK Download and Extraction Complete ---"
+        echo "--- Android NDK Installation Complete ---"
       shell: bash
-      timeout-minutes: 10 # Beri waktu yang cukup untuk download dan ekstrak
-
-    # --- MANUAL NDK DOWNLOAD & EXTRACT SELESAI ---
+      timeout-minutes: 10
 
 
-    # Langkah keempat: Debugging dan verifikasi path NDK setelah instalasi (Manual)
-    - name: Debug NDK Setup Paths (Manual Install)
+    # Langkah keempat: Debugging dan verifikasi path NDK setelah instalasi
+    - name: Debug NDK Setup Paths
       run: |
-        echo "--- Debugging NDK Variables After Manual Extraction ---"
-        # Tampilkan variabel lingkungan yang relevan
+        echo "--- Debugging NDK Variables After Installation ---"
         echo "ANDROID_NDK_HOME = ${{ env.ANDROID_NDK_HOME }}" # HARUS terisi sekarang
         echo "ANDROID_SDK_ROOT = ${{ env.ANDROID_SDK_ROOT }}" # Path SDK root yang disetel manual
         echo "NDK_ROOT = ${{ env.NDK_ROOT }}" # Mungkin kosong, ANDROID_NDK_HOME lebih umum digunakan CMake
 
         echo "--- Checking NDK Build Dir ---"
-        # Periksa apakah direktori build NDK ada
         ls -l ${{ env.ANDROID_NDK_HOME }}/build/ || echo "Directory ${{ env.ANDROID_NDK_HOME }}/build/ not found or listing failed"
         echo "--- Checking NDK CMake Dir ---"
-        # Periksa apakah direktori CMake di dalam NDK build ada
         ls -l ${{ env.ANDROID_NDK_HOME }}/build/cmake/ || echo "Directory ${{ env.ANDROID_NDK_HOME }}/build/cmake/ not found or listing failed"
         echo "--- Checking for toolchain file existence ---"
-        # Periksa apakah file toolchain CMake untuk Android ada di lokasi yang diharapkan
         TOOLCHAIN_FILE_PATH="${{ env.ANDROID_NDK_HOME }}/build/cmake/android.toolchain.cmake"
         test -f "$TOOLCHAIN_FILE_PATH" && echo "Toolchain file EXISTS at expected path: $TOOLCHAIN_FILE_PATH" || echo "Toolchain file NOT found at expected path!"
         echo "Expected Toolchain Path used in Configure Step: $TOOLCHAIN_FILE_PATH"
@@ -195,7 +169,6 @@ jobs:
     - name: Install Host Build Tools
       run: |
         echo "--- Installing additional build tools ---"
-        # Update daftar paket dan instal cmake, make, ninja, git
         sudo apt-get update -qq
         sudo apt-get install -y cmake make ninja-build git
         echo "Additional build tools installed."
@@ -204,11 +177,9 @@ jobs:
     # Langkah keenam: Ambil kode sumber CMake
     - name: Get CMake Source Code
       env:
-        # Versi CMake yang akan dibangun
         CMAKE_VERSION_TAG: "v3.29.3"
       run: |
         echo "--- Getting CMake source code ---"
-        # Clone kode sumber CMake dengan kedalaman 1 untuk menghemat waktu/ruang
         git clone --depth 1 --branch ${{ env.CMAKE_VERSION_TAG }} https://github.com/Kitware/CMake.git ${{ runner.temp }}/cmake_src || exit 1
         echo "CMake source downloaded to ${{ runner.temp }}/cmake_src."
       shell: bash
@@ -216,25 +187,17 @@ jobs:
     # Langkah ketujuh: Konfigurasi build CMake untuk target Android armeabi-v7a
     - name: Configure CMake Build for Android armeabi-v7a
       env:
-        # Tentukan direktori instalasi untuk biner CMake yang dibangun
         INSTALL_DIR: ${{ runner.temp }}/cmake_android_install
-        # Tentukan direktori di mana CMake akan dibangun (terpisah dari sumber)
         CMAKE_BUILD_DIR: ${{ runner.temp }}/cmake_build_android
-        # Tentukan direktori sumber CMake
         CMAKE_SOURCE_DIR: ${{ runner.temp }}/cmake_src
       run: |
         echo "--- Configuring CMake build ---"
-        # Variabel lingkungan (ANDROID_NDK_HOME, dll.) dan variabel langkah tersedia
-
-        # Buat dan navigasi ke direktori build
         mkdir -p ${{ env.CMAKE_BUILD_DIR }}
         cd ${{ env.CMAKE_BUILD_DIR }} || exit 1
         echo "Current directory: $(pwd)"
         echo "CMake source directory: ${{ env.CMAKE_SOURCE_DIR }}"
 
         echo "Running cmake configuration..."
-        # Jalankan perintah konfigurasi CMake dengan toolchain file NDK
-        # Menggunakan variabel ANDROID_NDK_HOME yang disetel di langkah instalasi NDK
         cmake ${{ env.CMAKE_SOURCE_DIR }} \
           -DCMAKE_TOOLCHAIN_FILE=${{ env.ANDROID_NDK_HOME }}/build/cmake/android.toolchain.cmake \
           -DANDROID_ABI=armeabi-v7a \
@@ -243,7 +206,7 @@ jobs:
           -DCMAKE_INSTALL_PREFIX=${{ env.INSTALL_DIR }} \
           -DCMAKE_MAKE_PROGRAM=$(which make) \
           -DBUILD_TESTING=OFF \
-          -Wdev -Wdeprecated # Tambahkan warning untuk debugging konfigurasi
+          -Wdev -Wdeprecated
         if [ $? -ne 0 ]; then echo "Error: CMake configuration failed!"; exit 1; endif
         echo "CMake configuration complete."
         echo "CMake build directory: ${{ env.CMAKE_BUILD_DIR }}"
@@ -253,39 +216,30 @@ jobs:
     # Langkah kedelapan: Bangun CMake (kompilasi silang untuk Android)
     - name: Build CMake (Cross-compilation)
       env:
-        # Pastikan variabel direktori build tersedia
         CMAKE_BUILD_DIR: ${{ runner.temp }}/cmake_build_android
       run: |
         echo "--- Building CMake ---"
-        # Navigasi ke direktori tempat CMake dikonfigurasi dan dibangun
         cd ${{ env.CMAKE_BUILD_DIR }} || exit 1
         echo "Current directory: $(pwd)"
-
-        # Jalankan perintah build menggunakan make dengan paralelisme sesuai jumlah CPU
         make -j$(nproc) || { echo "Error: CMake build failed!"; exit 1; }
         echo "CMake build complete."
       shell: bash
-      timeout-minutes: 20 # Mungkin perlu waktu agak lama
+      timeout-minutes: 20
 
     # Langkah kesembilan: Instal biner CMake yang dibangun ke direktori staging
     - name: Install CMake to Staging Directory
       env:
-        # Pastikan variabel direktori build dan instalasi tersedia
         CMAKE_BUILD_DIR: ${{ runner.temp }}/cmake_build_android
         INSTALL_DIR: ${{ runner.temp }}/cmake_android_install
       run: |
         echo "--- Installing CMake ---"
-        # Navigasi ke direktori tempat CMake dibangun
         cd ${{ env.CMAKE_BUILD_DIR }} || exit 1
         echo "Current directory: $(pwd)"
         echo "Installation directory: ${{ env.INSTALL_DIR }}"
-
-        # Jalankan perintah instalasi
         make install || { echo "Error: CMake installation failed!"; exit 1; }
         echo "CMake installed to ${{ env.INSTALL_DIR }}"
 
         echo "--- Verifying Installation Directory Contents ---"
-        # Verifikasi isi direktori instalasi
         ls -l ${{ env.INSTALL_DIR }} || echo "Failed to list installation directory contents."
         ls -l ${{ env.INSTALL_DIR }}/bin/ || echo "Failed to list installation bin directory contents."
         test -f ${{ env.INSTALL_DIR }}/bin/cmake && echo "cmake executable found in installation bin directory!" || echo "cmake executable NOT found in installation bin directory!"
@@ -298,11 +252,8 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: cmake-android-armeabi-v7a
-        path: ${{ runner.temp }}/cmake_android_install # Mengunggah direktori instalasi
-        if-no-files-found: error # Gagal jika tidak ada file ditemukan
-        # Opsional: Tambahkan tag versi ke nama artefak jika diperlukan
-        # name: cmake-android-armeabi-v7a-ndk${{ env.NDK_VERSION_FOR_ARTIFACT }}-cmake${{ env.CMAKE_VERSION_TAG_FOR_ARTIFACT }}
+        path: ${{ runner.temp }}/cmake_android_install
+        if-no-files-found: error
       # env:
-      #   # Contoh cara menggunakan variabel di nama artefak (jika didefinisikan di tempat lain atau di sini)
-      #   NDK_VERSION_FOR_ARTIFACT: "r25c" # Sesuaikan dengan NDK_VERSION
+      #   NDK_VERSION_FOR_ARTIFACT: "r27" # Sesuaikan
       #   CMAKE_VERSION_TAG_FOR_ARTIFACT: "v3.29.3"
