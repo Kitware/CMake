@@ -87,7 +87,7 @@ jobs:
             ls -lA "$DETECTED_NDK_HOME/build" 2>/dev/null || echo "$DETECTED_NDK_HOME/build does not exist."
             exit 1
         fi
-        
+
         echo "Successfully located NDK and toolchain file."
         echo "ANDROID_NDK_HOME=$DETECTED_NDK_HOME" >> $GITHUB_ENV
 
@@ -110,19 +110,19 @@ jobs:
         echo "ANDROID_SDK_ROOT is: $ANDROID_SDK_ROOT"
         echo "ANDROID_NDK_HOME is: $ANDROID_NDK_HOME"
         echo "NDK_VERSION_NUMBER_FOR_ARTIFACT is: ${{ env.NDK_VERSION_NUMBER_FOR_ARTIFACT }}"
-        
+
         echo "Contents of SDK root ($ANDROID_SDK_ROOT):"
         ls -lA "$ANDROID_SDK_ROOT"
         echo "Contents of SDK CMake directory ($ANDROID_SDK_ROOT/cmake):"
         ls -lA "$ANDROID_SDK_ROOT/cmake" || echo "SDK CMake directory not found or empty."
-        
+
         echo "Contents of NDK root ($ANDROID_NDK_HOME):"
         if [ ! -d "$ANDROID_NDK_HOME" ]; then
           echo "Error: ANDROID_NDK_HOME directory '$ANDROID_NDK_HOME' does not exist."
           exit 1
         fi
         ls -lA "$ANDROID_NDK_HOME"
-        
+
         echo "Checking for NDK toolchain file at $ANDROID_NDK_HOME/build/cmake/android.toolchain.cmake"
         if [ ! -f "$ANDROID_NDK_HOME/build/cmake/android.toolchain.cmake" ]; then
             echo "Error: NDK toolchain file NOT FOUND. Path: $ANDROID_NDK_HOME/build/cmake/android.toolchain.cmake"
@@ -143,10 +143,27 @@ jobs:
         echo "Cloning CMake version ${{ env.CMAKE_VERSION_TAG }}"
         git clone --depth 1 --branch ${{ env.CMAKE_VERSION_TAG }} https://github.com/Kitware/CMake.git ${{ runner.temp }}/cmake_src
 
+    # --- START: Langkah patching untuk memperbaiki error sched.h ---
+    - name: Patch cmlibuv core.c for sched.h includes
+      env:
+        CMAKE_SOURCE_DIR: ${{ runner.temp }}/cmake_src
+      run: |
+        echo "Patching Utilities/cmlibuv/src/unix/core.c to include sched.h"
+        # Menggunakan sed untuk menyisipkan baris di awal file
+        sed -i '1i\
+#define _GNU_SOURCE\
+#include <sched.h>
+' "$CMAKE_SOURCE_DIR/Utilities/cmlibuv/src/unix/core.c"
+        echo "Patch applied. Showing first few lines of core.c:"
+        # Menampilkan beberapa baris pertama untuk verifikasi
+        head "$CMAKE_SOURCE_DIR/Utilities/cmlibuv/src/unix/core.c"
+    # --- END: Langkah patching ---
+
+
     - name: Konfigurasi build CMake untuk Android armeabi-v7a
       env:
         CMAKE_BUILD_DIR: ${{ runner.temp }}/cmake_build_android
-        CMAKE_SOURCE_DIR: ${{ runner.temp }}/cmake_src
+        CMAKE_SOURCE_DIR: ${{ runner.temp }}/cmake_src # Pastikan CMAKE_SOURCE_DIR masih didefinisikan
         INSTALL_DIR: ${{ runner.temp }}/cmake_android_install
       run: |
         echo "Configuring CMake build for Android (armeabi-v7a)..."
@@ -207,14 +224,14 @@ jobs:
         fi
         echo "CMake installation successful. Contents of $INSTALL_DIR:"
         ls -lA "$INSTALL_DIR"
-        
+
         echo "Verifying key directories in installation:"
         ls -lA "$INSTALL_DIR/bin" || echo "Warning: $INSTALL_DIR/bin not found or empty."
-        
-        CMAKE_VERSION_NUMERIC_PART="${CMAKE_VERSION_TAG#v}" 
+
+        CMAKE_VERSION_NUMERIC_PART="${CMAKE_VERSION_TAG#v}"
         CMAKE_SHARE_DIR_VERSION=$(echo "$CMAKE_VERSION_NUMERIC_PART" | cut -d. -f1,2)
         CMAKE_SHARE_DIR_TO_CHECK="cmake-$CMAKE_SHARE_DIR_VERSION"
-        
+
         echo "Verifying share directory: $INSTALL_DIR/share/$CMAKE_SHARE_DIR_TO_CHECK"
         ls -lA "$INSTALL_DIR/share/$CMAKE_SHARE_DIR_TO_CHECK" || echo "Warning: $INSTALL_DIR/share/$CMAKE_SHARE_DIR_TO_CHECK not found or empty."
 
