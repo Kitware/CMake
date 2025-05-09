@@ -1,4 +1,4 @@
-name: Build CMake for Android (armeabi-v7a) - using nttld/setup-ndk
+name: Build CMake for Android (armeabi-v7a) - using nttld/setup-ndk + Debugging
 
 on:
   # Ini memungkinkan Anda menjalankan workflow secara manual dari tab "Actions" di GitHub
@@ -11,7 +11,7 @@ jobs:
     steps:
     - name: Checkout code
       # Mengunduh kode repositori (shantoze/CMake-arm) tempat workflow ini berada
-      uses: actions/checkout@v4 # Menggunakan v4, lebih update dari v3
+      uses: actions/checkout@v4 # Menggunakan v4
 
     - name: Set up Java
       # NDK membutuhkan Java
@@ -27,9 +27,30 @@ jobs:
         # Gunakan parameter ndk-version sesuai action ini
         ndk-version: r26d # *** PENTING: Tentukan versi NDK yang konsisten di sini ***
 
-    # Langkah ini biasanya tidak perlu karena cmake/make sudah ada di runner Ubuntu,
-    # tapi bisa ditambahkan jika runner standar berubah.
+    # --- LANGKAH DEBUGGING DIMULAI ---
+    - name: Debug NDK Setup Paths
+      run: |
+        echo "--- NDK Environment Variables ---"
+        echo "ANDROID_NDK_HOME = ${{ env.ANDROID_NDK_HOME }}"
+        echo "ANDROID_HOME = ${{ env.ANDROID_HOME }}"
+        echo "NDK_ROOT = ${{ env.NDK_ROOT }}"
+        echo "--- Checking NDK Build Dir ---"
+        # List isi direktori build di dalam NDK root yang disetel oleh Action
+        ls -l ${{ env.ANDROID_NDK_HOME }}/build/ || echo "Directory ${{ env.ANDROID_NDK_HOME }}/build/ not found or listing failed"
+        echo "--- Checking NDK CMake Dir ---"
+        # List isi direktori cmake di dalam NDK build
+        ls -l ${{ env.ANDROID_NDK_HOME }}/build/cmake/ || echo "Directory ${{ env.ANDROID_NDK_HOME }}/build/cmake/ not found or listing failed"
+        echo "--- Checking for toolchain file existence ---"
+        # Cek apakah file toolchain ada di lokasi yang diharapkan
+        test -f ${{ env.ANDROID_NDK_HOME }}/build/cmake/android.toolchain.cmake && echo "Toolchain file EXISTS at expected path!" || echo "Toolchain file NOT found at expected path!"
+        echo "Expected Toolchain Path: ${{ env.ANDROID_NDK_HOME }}/build/cmake/android.toolchain.cmake"
+        echo "--- Debugging Complete ---"
+    # --- LANGKAH DEBUGGING SELESAI ---
+
+
     - name: Install Additional Build Tools (Optional, tapi disarankan)
+      # Langkah ini biasanya tidak perlu karena cmake/make sudah ada di runner Ubuntu,
+      # tapi bisa ditambahkan jika runner standar berubah.
       run: |
         sudo apt-get update
         sudo apt-get install -y cmake make ninja-build git
@@ -54,6 +75,8 @@ jobs:
         INSTALL_DIR: ${{ runner.temp }}/cmake_install # Lokasi instalasi sementara di runner
       run: |
         cd ${{ runner.temp }}/cmake_src/build # Pastikan berada di direktori build
+        # *** PENTING: Gunakan path toolchain file yang dikonfirmasi oleh langkah debugging ***
+        # Berdasarkan dugaan, ini seharusnya ${{ env.ANDROID_NDK_HOME }}/build/cmake/android.toolchain.cmake
         cmake ${{ runner.temp }}/cmake_src \
           -DCMAKE_TOOLCHAIN_FILE=${{ env.ANDROID_NDK_HOME }}/build/cmake/android.toolchain.cmake \
           -DANDROID_ABI=armeabi-v7a \
