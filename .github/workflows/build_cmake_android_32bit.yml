@@ -1,4 +1,4 @@
-name: Build CMake for Android (armeabi-v7a) - Validated
+name: Build CMake for Android (armeabi-v7a) - CMake SDK Pkg Fix
 
 on:
   workflow_dispatch: # Allows manual triggering of the workflow
@@ -8,22 +8,21 @@ jobs:
     runs-on: ubuntu-latest # Specifies the runner environment
 
     env:
-      # Define NDK version as an environment variable for easy updates
-      # Using NDK r26d (LTS version) as it's stable and widely compatible.
-      ANDROID_NDK_VERSION_PACKAGE: "ndk;26.3.11579264" # Corresponds to NDK r26d
-      CMAKE_VERSION_TAG: "v3.29.3" # Version of CMake to build
+      ANDROID_SDK_CMAKE_VERSION: "cmake;3.22.1" # Changed to a more common SDK CMake version
+      ANDROID_NDK_VERSION_PACKAGE: "ndk;26.3.11579264" # NDK r26d
+      CMAKE_VERSION_TAG: "v3.29.3" # Version of CMake to build (this is for the source we are compiling)
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4 # Checks out your repository code
+      uses: actions/checkout@v4
 
     - name: Set up Java
-      uses: actions/setup-java@v4 # Sets up Java, required for Android SDK tools
+      uses: actions/setup-java@v4
       with:
-        distribution: 'temurin' # Adoptium Temurin is a good choice
-        java-version: '17'    # Android SDK tools often require Java 11 or 17
+        distribution: 'temurin'
+        java-version: '17'
 
-    - name: Setup Android SDK, NDK, CMake
+    - name: Setup Android SDK, NDK, and SDK's CMake
       run: |
         set -e # Exit immediately if a command exits with a non-zero status.
         echo "Setting ANDROID_SDK_ROOT"
@@ -42,34 +41,39 @@ jobs:
 
         echo "Adding SDK tools to PATH"
         echo "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin" >> $GITHUB_PATH
-        export PATH="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH"
+        export PATH="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH" # Also for current script
 
         echo "Verifying sdkmanager..."
         which sdkmanager || { echo "sdkmanager not found on PATH after setup."; exit 1; }
 
-        echo "Updating SDK..."
-        yes | sdkmanager --sdk_root="$ANDROID_SDK_ROOT" --update > /dev/null
+        echo "Updating SDK (verbose)..."
+        # Removed > /dev/null to see output from sdkmanager --update
+        yes | sdkmanager --sdk_root="$ANDROID_SDK_ROOT" --update
 
-        echo "Installing NDK (${{ env.ANDROID_NDK_VERSION_PACKAGE }}), platforms, build-tools, SDK's CMake..."
+        echo "Installing NDK ('${{ env.ANDROID_NDK_VERSION_PACKAGE }}'), platforms, build-tools, SDK's CMake ('${{ env.ANDROID_SDK_CMAKE_VERSION }}')..."
         yes | sdkmanager --sdk_root="$ANDROID_SDK_ROOT" \
           "platforms;android-21" \
           "build-tools;33.0.0" \
           "${{ env.ANDROID_NDK_VERSION_PACKAGE }}" \
-          "cmake;3.26.4"
+          "${{ env.ANDROID_SDK_CMAKE_VERSION }}"
 
         echo "Attempting to locate installed NDK..."
         NDK_BASE_PATH="$ANDROID_SDK_ROOT/ndk"
-
         if [ ! -d "$NDK_BASE_PATH" ] || [ -z "$(ls -A $NDK_BASE_PATH)" ]; then
-          echo "Error: NDK base directory '$NDK_BASE_PATH' not found or is empty."
-          # ... (error logging from previous version) ...
+          echo "Error: NDK base directory '$NDK_BASE_PATH' not found or is empty after NDK installation attempt."
+          echo "This could mean '${{ env.ANDROID_NDK_VERSION_PACKAGE }}' is not a valid NDK package string, or the installation failed."
+          echo "Listing contents of $ANDROID_SDK_ROOT (if it exists):"
+          ls -lA "$ANDROID_SDK_ROOT"
+          echo "Listing available SDK packages (might take a moment) to help find a valid NDK package:"
+          sdkmanager --list --sdk_root="$ANDROID_SDK_ROOT" | grep "ndk;" || echo "No NDK packages found in list."
           exit 1
         fi
 
         INSTALLED_NDK_SUBDIR=$(ls "$NDK_BASE_PATH" | head -n 1)
         if [ -z "$INSTALLED_NDK_SUBDIR" ]; then
-          echo "Error: No subdirectory found in NDK base path '$NDK_BASE_PATH'."
-          # ... (error logging from previous version) ...
+          echo "Error: No subdirectory found in NDK base path '$NDK_BASE_PATH'. NDK might not be installed correctly."
+          echo "Contents of '$NDK_BASE_PATH':"
+          ls -lA "$NDK_BASE_PATH"
           exit 1
         fi
 
@@ -78,15 +82,15 @@ jobs:
 
         if [ ! -f "$DETECTED_NDK_HOME/build/cmake/android.toolchain.cmake" ]; then
             echo "Error: android.toolchain.cmake not found in $DETECTED_NDK_HOME/build/cmake/"
-            # ... (error logging from previous version) ...
+            echo "This indicates an incomplete or improperly structured NDK installation."
+            ls -lA "$DETECTED_NDK_HOME"
+            ls -lA "$DETECTED_NDK_HOME/build" 2>/dev/null || echo "$DETECTED_NDK_HOME/build does not exist."
             exit 1
         fi
         
         echo "Successfully located NDK and toolchain file."
         echo "ANDROID_NDK_HOME=$DETECTED_NDK_HOME" >> $GITHUB_ENV
 
-        # Extract NDK version number for artifact naming using shell parameter expansion
-        # This removes the "ndk;" prefix from ANDROID_NDK_VERSION_PACKAGE
         NDK_VERSION_NUMBER_FOR_ARTIFACT="${ANDROID_NDK_VERSION_PACKAGE#ndk;}"
         echo "NDK_VERSION_NUMBER_FOR_ARTIFACT=$NDK_VERSION_NUMBER_FOR_ARTIFACT" >> $GITHUB_ENV
         echo "Extracted NDK version for artifact: $NDK_VERSION_NUMBER_FOR_ARTIFACT"
@@ -97,6 +101,7 @@ jobs:
         echo "Android SDK setup summary:"
         echo "SDK root: $ANDROID_SDK_ROOT"
         echo "NDK path (detected for next steps): $DETECTED_NDK_HOME"
+        echo "SDK's CMake version requested: ${{ env.ANDROID_SDK_CMAKE_VERSION }}"
 
     - name: Verifikasi SDK & NDK setup
       run: |
@@ -104,10 +109,12 @@ jobs:
         which sdkmanager || { echo "sdkmanager is not on PATH in this step."; exit 1; }
         echo "ANDROID_SDK_ROOT is: $ANDROID_SDK_ROOT"
         echo "ANDROID_NDK_HOME is: $ANDROID_NDK_HOME"
-        echo "NDK_VERSION_NUMBER_FOR_ARTIFACT is: ${{ env.NDK_VERSION_NUMBER_FOR_ARTIFACT }}" # Verify it's available
+        echo "NDK_VERSION_NUMBER_FOR_ARTIFACT is: ${{ env.NDK_VERSION_NUMBER_FOR_ARTIFACT }}"
         
         echo "Contents of SDK root ($ANDROID_SDK_ROOT):"
         ls -lA "$ANDROID_SDK_ROOT"
+        echo "Contents of SDK CMake directory ($ANDROID_SDK_ROOT/cmake):"
+        ls -lA "$ANDROID_SDK_ROOT/cmake" || echo "SDK CMake directory not found or empty."
         
         echo "Contents of NDK root ($ANDROID_NDK_HOME):"
         if [ ! -d "$ANDROID_NDK_HOME" ]; then
@@ -127,9 +134,11 @@ jobs:
     - name: Install build tools (cmake, make, ninja for host)
       run: |
         sudo apt-get update -qq
+        # This installs cmake, make, ninja-build on the runner for building the CMake source.
+        # This is separate from the Android SDK's CMake.
         sudo apt-get install -y cmake make ninja-build git
 
-    - name: Clone CMake source code
+    - name: Clone CMake source code (version ${{ env.CMAKE_VERSION_TAG }})
       run: |
         echo "Cloning CMake version ${{ env.CMAKE_VERSION_TAG }}"
         git clone --depth 1 --branch ${{ env.CMAKE_VERSION_TAG }} https://github.com/Kitware/CMake.git ${{ runner.temp }}/cmake_src
@@ -150,6 +159,8 @@ jobs:
         echo "Using NDK from: $ANDROID_NDK_HOME"
         echo "Toolchain file will be: $ANDROID_NDK_HOME/build/cmake/android.toolchain.cmake"
 
+        # This cmake command uses the host's cmake (installed in previous step)
+        # to configure the build of CMake sources for Android.
         cmake "$CMAKE_SOURCE_DIR" \
           -DCMAKE_TOOLCHAIN_FILE="$ANDROID_NDK_HOME/build/cmake/android.toolchain.cmake" \
           -DANDROID_ABI=armeabi-v7a \
@@ -200,9 +211,6 @@ jobs:
         echo "Verifying key directories in installation:"
         ls -lA "$INSTALL_DIR/bin" || echo "Warning: $INSTALL_DIR/bin not found or empty."
         
-        # Derive CMAKE_SHARE_DIR_NAME from CMAKE_VERSION_TAG for verification
-        # Example: CMAKE_VERSION_TAG="v3.29.3" -> CMAKE_VERSION_NUMERIC_PART="3.29.3" -> CMAKE_SHARE_DIR_VERSION="3.29"
-        # The directory created by CMake install is typically "cmake-X.Y"
         CMAKE_VERSION_NUMERIC_PART="${CMAKE_VERSION_TAG#v}" 
         CMAKE_SHARE_DIR_VERSION=$(echo "$CMAKE_VERSION_NUMERIC_PART" | cut -d. -f1,2)
         CMAKE_SHARE_DIR_TO_CHECK="cmake-$CMAKE_SHARE_DIR_VERSION"
@@ -213,7 +221,6 @@ jobs:
     - name: Upload artefak hasil build
       uses: actions/upload-artifact@v4
       with:
-        # Use the new NDK_VERSION_NUMBER_FOR_ARTIFACT environment variable
         name: cmake-${{ env.CMAKE_VERSION_TAG }}-android-armeabi-v7a-ndk${{ env.NDK_VERSION_NUMBER_FOR_ARTIFACT }}
         path: ${{ runner.temp }}/cmake_android_install
         if-no-files-found: error
