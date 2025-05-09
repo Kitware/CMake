@@ -144,6 +144,24 @@ jobs:
         echo "Cloning CMake version ${{ env.CMAKE_VERSION_TAG }}"
         git clone --depth 1 --branch ${{ env.CMAKE_VERSION_TAG }} https://github.com/Kitware/CMake.git ${{ runner.temp }}/cmake_src
 
+    # --- START: Debugging step: Check for android_lf.h existence ---
+    - name: Check for android_lf.h existence
+      env:
+        CMAKE_SOURCE_DIR: ${{ runner.temp }}/cmake_src
+      run: |
+        FILE_PATH="$CMAKE_SOURCE_DIR/Utilities/cmlibarchive/libarchive/android_lf.h"
+        echo "Checking if $FILE_PATH exists..."
+        if [ -f "$FILE_PATH" ]; then
+          echo "$FILE_PATH exists."
+          head "$FILE_PATH" # Tampilkan beberapa baris pertama jika ada
+        else
+          echo "Error: $FILE_PATH DOES NOT EXIST."
+          # Tampilkan isi direktori untuk melihat file apa saja yang ada
+          ls -lA "$CMAKE_SOURCE_DIR/Utilities/cmlibarchive/libarchive/"
+          exit 1 # Gagalkan langkah jika file hilang
+        fi
+    # --- END: Debugging step ---
+
     # --- START: Langkah patching untuk memperbaiki error sched.h (core.c) ---
     - name: Patch cmlibuv core.c for sched.h includes
       env:
@@ -176,7 +194,7 @@ jobs:
         head "$CMAKE_SOURCE_DIR/Utilities/cmlibuv/src/unix/pipe.c"
     # --- END: Langkah patching pipe.c ---
 
-    # --- START: Langkah patching untuk memperbaiki error CPU affinity (process.c) - Menggunakan sintaks sed yang diperbaiki ---
+    # --- START: Langkah patching untuk memperbaiki error CPU affinity (process.c) ---
     - name: Patch cmlibuv process.c for sched.h, pthread.h, defines, and stub for pthread_setaffinity_np (revised sed)
       env:
         CMAKE_SOURCE_DIR: ${{ runner.temp }}/cmake_src
