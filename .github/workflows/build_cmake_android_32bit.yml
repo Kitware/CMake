@@ -176,26 +176,23 @@ jobs:
         head "$CMAKE_SOURCE_DIR/Utilities/cmlibuv/src/unix/pipe.c"
     # --- END: Langkah patching pipe.c ---
 
-    # --- START: Langkah patching untuk memperbaiki error CPU affinity (process.c) - Ditambahkan kembali ---
-    - name: Patch cmlibuv process.c for sched.h, pthread.h, defines, and stub for pthread_setaffinity_np
+    # --- START: Langkah patching untuk memperbaiki error CPU affinity (process.c) - Menggunakan sintaks sed yang diperbaiki ---
+    - name: Patch cmlibuv process.c for sched.h, pthread.h, defines, and stub for pthread_setaffinity_np (revised sed)
       env:
         CMAKE_SOURCE_DIR: ${{ runner.temp }}/cmake_src
       run: |
         echo "Patching Utilities/cmlibuv/src/unix/process.c"
-        # Add defines and includes at the very top
+        # Tambahkan define dan include di bagian paling atas
         sed -i '1i#define _GNU_SOURCE' "$CMAKE_SOURCE_DIR/Utilities/cmlibuv/src/unix/process.c"
         sed -i '2i#include <sched.h>' "$CMAKE_SOURCE_DIR/Utilities/cmlibuv/src/unix/process.c"
         sed -i '3i#include <pthread.h>' "$CMAKE_SOURCE_DIR/Utilities/cmlibuv/src/unix/process.c"
 
-        # Add a conditional declaration for pthread_setaffinity_np if it's not declared
-        # This is a hack to allow compilation if the function is missing or conditionally declared
-        # Note: this will be inserted at line 4 after the previous includes/defines
-        sed -i '4i\
-#ifndef pthread_setaffinity_np\
-#warning "Using stub pthread_setaffinity_np - actual function may be missing or require different defines"\
-int pthread_setaffinity_np(pthread_t, size_t, const cpu_set_t *);\
-#endif\
-' "$CMAKE_SOURCE_DIR/Utilities/cmlibuv/src/unix/process.c"
+        # Tambahkan deklarasi kondisional untuk pthread_setaffinity_np jika belum dideklarasikan
+        # Sisipkan baris demi baris menggunakan perintah sed terpisah
+        sed -i '4i#ifndef pthread_setaffinity_np' "$CMAKE_SOURCE_DIR/Utilities/cmlibuv/src/unix/process.c"
+        sed -i '5i#warning "Using stub pthread_setaffinity_np - actual function may be missing or require different defines"' "$CMAKE_SOURCE_DIR/Utilities/cmlibuv/src/unix/process.c"
+        sed -i '6iint pthread_setaffinity_np(pthread_t, size_t, const cpu_set_t *);' "$CMAKE_SOURCE_DIR/Utilities/cmlibuv/src/unix/process.c"
+        sed -i '7i#endif' "$CMAKE_SOURCE_DIR/Utilities/cmlibuv/src/unix/process.c"
 
         echo "Patch applied. Showing first few lines of process.c:"
         head "$CMAKE_SOURCE_DIR/Utilities/cmlibuv/src/unix/process.c"
