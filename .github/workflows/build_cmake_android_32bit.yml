@@ -23,12 +23,13 @@ jobs:
         distribution: 'temurin'
         java-version: '17'
 
-    - name: Setup Android SDK, NDK, and SDK's CMake
+    - name: Setup Android SDK, NDK, and SDK's CMake # <-- Sekitar sini, di dalam 'run' block
+      env:
+        ANDROID_SDK_ROOT: ${{ runner.temp }}/android-sdk
       run: |
         set -e # Exit immediately if a command exits with a non-zero status.
         echo "Setting ANDROID_SDK_ROOT"
-        export ANDROID_SDK_ROOT="${{ runner.temp }}/android-sdk"
-        mkdir -p "$ANDROID_SDK_ROOT"
+        export ANDROID_SDK_ROOT="$ANDROID_SDK_ROOT"
         echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
 
         echo "Downloading Android command line tools..."
@@ -55,7 +56,7 @@ echo "Installing NDK \('</span>{{ env.ANDROID_NDK_VERSION_PACKAGE }}'), platform
 "platforms;</span>{{ env.ANDROID_PLATFORM }}" \
           "build-tools;33.0.0" \
           "<span class="math-inline">\{\{ env\.ANDROID\_NDK\_VERSION\_PACKAGE \}\}" \\
-"</span>{{ env.ANDROID_SDK_CMAKE_VERSION }}"
+"</span>{{ env.ANDROID_SDK_CMAKE_VERSION }}" # <-- Baris ini atau baris setelahnya mungkin baris 53 Anda
 
         echo "Attempting to locate installed NDK..."
         NDK_BASE_PATH="$ANDROID_SDK_ROOT/ndk"
@@ -102,6 +103,10 @@ NDK\_VERSION\_NUMBER\_FOR\_ARTIFACT\="</span>{ANDROID_NDK_VERSION_PACKAGE#ndk;}"
         echo "SDK's CMake version requested: ${{ env.ANDROID_SDK_CMAKE_VERSION }}"
 
     - name: Verifikasi SDK & NDK setup
+      env:
+        ANDROID_SDK_ROOT: ${{ runner.temp }}/android-sdk
+        ANDROID_NDK_HOME: ${{ env.ANDROID_NDK_HOME }}
+        NDK_VERSION_NUMBER_FOR_ARTIFACT: ${{ env.NDK_VERSION_NUMBER_FOR_ARTIFACT }}
       run: |
         echo "Verifying sdkmanager availability..."
         which sdkmanager || { echo "sdkmanager is not on PATH in this step."; exit 1; }
@@ -129,6 +134,7 @@ NDK\_VERSION\_NUMBER\_FOR\_ARTIFACT\="</span>{ANDROID_NDK_VERSION_PACKAGE#ndk;}"
             echo "NDK toolchain file found successfully."
         fi
 
+
     - name: Install build tools (cmake, make, ninja for host)
       run: |
         sudo apt-get update -qq
@@ -141,7 +147,6 @@ NDK\_VERSION\_NUMBER\_FOR\_ARTIFACT\="</span>{ANDROID_NDK_VERSION_PACKAGE#ndk;}"
         echo "Cloning CMake version ${{ env.CMAKE_VERSION_TAG }}"
         git clone --depth 1 --branch ${{ env.CMAKE_VERSION_TAG }} https://github.com/Kitware/CMake.git ${{ runner.temp }}/cmake_src
 
-    # Langkah debugging "Check for android_lf.h existence" dihapus agar workflow tidak berhenti.
 
     # --- START: Langkah patching baru untuk menonaktifkan include android_lf.h (Menggunakan 2 sed) ---
     - name: Patch cmlibarchive archive.h to disable android_lf.h include (two sed commands)
