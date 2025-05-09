@@ -295,14 +295,14 @@ jobs:
         fi
         echo "CMake configuration successful."
 
-    - name: Build CMake with make
+    - name: Build CMake with make (Verbose) # Nama langkah diubah
       env:
         CMAKE_BUILD_DIR: ${{ runner.temp }}/cmake_build_android
         INSTALL_DIR: ${{ runner.temp }}/cmake_android_install
       run: |
-        echo "Building CMake using make..."
+        echo "Building CMake using make with VERBOSE=1..."
         cd "$CMAKE_BUILD_DIR"
-        make -j$(nproc)
+        make VERBOSE=1 -j$(nproc) # <--- VERBOSE=1 ditambahkan
         if [ $? -ne 0 ]; then
           echo "Make build failed!"
           exit 1
