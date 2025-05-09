@@ -1,4 +1,4 @@
-name: Build CMake for Android (armeabi-v7a) - Manual NDK Setup 29.0.13113456
+name: Build CMake for Android (armeabi-v7a) - Manual NDK Setup (Stable NDK)
 
 on:
   workflow_dispatch # Memungkinkan workflow dijalankan secara manual dari Actions tab
@@ -17,7 +17,7 @@ jobs:
         distribution: 'temurin' # Menggunakan distribusi Temurin (OpenJDK)
         java-version: '17' # Menggunakan Java 17
 
-    # --- MANUAL NDK SETUP DIMULAI ---
+    # --- MANUAL SDK TOOLS SETUP DIMULAI ---
     # Langkah pertama: Download dan ekstrak SDK Command-line Tools secara manual
     # Ini diperlukan untuk mendapatkan 'sdkmanager' yang akan digunakan untuk menginstal NDK
     - name: Install Android SDK Command-line Tools
@@ -30,7 +30,8 @@ jobs:
 
         # Menggunakan URL spesifik yang mengandung build number (Build 11076708 / Tools 9.0)
         # Ini adalah URL yang berhasil diunduh dan mengandung sdkmanager yang kita butuhkan.
-        # Kita menghilangkan langkah update via sdkmanager di sini untuk menghindari konflik.
+        # URL 'commandlinetools-linux-latest.zip' sebelumnya menghasilkan 404.
+        # Kita menghilangkan langkah update tools via sdkmanager di sini untuk menghindari konflik instalasi.
         SDK_TOOLS_URL="https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip"
         CMD_TOOLS_ZIP="cmdline-tools.zip"
         echo "Downloading Command-line Tools from $SDK_TOOLS_URL"
@@ -82,15 +83,14 @@ jobs:
         yes | sdkmanager --licenses --sdk_root=$ANDROID_SDK_ROOT || true
         echo "SDK licenses accepted."
 
-        # **DIHAPUS:** Langkah 'sdkmanager "cmdline-tools;latest"' dihapus
-        # untuk menghindari warning 'inconsistent location' dan potensi konflik.
-        # Kita hanya akan mengandalkan tools dari download manual awal.
-
         echo "--- SDK Command-line Tools Installation Complete ---"
       shell: bash
       timeout-minutes: 5
 
+    # --- MANUAL SDK TOOLS SETUP SELESAI ---
+
     # Langkah kedua: List paket SDK yang tersedia (untuk debugging)
+    # Ini PENTING untuk memeriksa nama paket NDK STABIL yang tersedia
     - name: List Available SDK Packages
       run: |
         echo "--- Listing Available SDK Packages ---"
@@ -110,37 +110,37 @@ jobs:
         # Tampilkan isi file output
         cat sdk_packages_list.txt
         echo "--- Listing Complete ---"
-        echo "--- IMPORTANT: Check the output above for the correct NDK package name (e.g., ndk;29.0.13113118 or ndk;r21e) ---"
-        # CATATAN: Perhatikan output ini, jika 29.0.13113456 tidak ada, pilih versi terdekat atau yang tersedia.
+        echo "--- IMPORTANT: Check the output above for available STABLE NDK package names (e.g., ndk;r21e, ndk;r25c, ndk;r26b, ndk;r27). ---"
       shell: bash
       timeout-minutes: 3
 
-    # Langkah ketiga: Instal Android NDK versi spesifik
-    - name: Install Android NDK
+    # Langkah ketiga: Instal Android NDK versi STABIL
+    - name: Install Android NDK (Stable Version)
       run: |
-        echo "--- Installing Android NDK ---"
+        echo "--- Installing Android NDK (Stable Version) ---"
         # Variabel lingkungan dari GITHUB_ENV tersedia secara otomatis
         echo "PATH at the start of Install Android NDK step: $PATH"
         echo "ANDROID_SDK_ROOT at the start of Install Android NDK step: $ANDROID_SDK_ROOT"
         command -v sdkmanager || { echo "sdkmanager NOT found in PATH. PATH is: $PATH"; exit 1; }
 
-        # *** PENTING: Versi NDK yang diminta: 29.0.13113456 ***
-        # Ini harus sama persis dengan nama paket di output 'sdkmanager --list'
-        NDK_VERSION_NUMBER="29.0.13113456"
+        # *** PENTING: Versi NDK STABIL yang akan diinstal ***
+        # Mengganti 29.0.13113456 (beta) dengan versi stabil seperti r21e
+        # Jika 'r21e' tidak muncul di output 'sdkmanager --list', GANTI dengan versi stabil lain
+        # (misalnya "r25c", "r26b", "r27") yang ada di daftar.
+        NDK_VERSION_NUMBER="r21e" # <-- VERSI NDK STABIL
+
         NDK_PACKAGE="ndk;$NDK_VERSION_NUMBER" # Format paket untuk sdkmanager --install
 
         echo "Running sdkmanager to install NDK $NDK_PACKAGE..."
-        # Jalankan perintah instalasi NDK. Output log menunjukkan NDK sebenarnya didownload dan diekstrak.
-        # Kegagalan mungkin terjadi setelah unzipping karena state sdkmanager.
-        # Dengan menghapus langkah update tools sebelumnya, semoga state sdkmanager stabil.
+        # Jalankan perintah instalasi NDK
         yes | sdkmanager --install "$NDK_PACKAGE" --sdk_root=$ANDROID_SDK_ROOT &> sdkmanager_ndk_install.log || \
           { echo "Error: sdkmanager NDK installation failed for $NDK_PACKAGE!"; cat sdkmanager_ndk_install.log; exit 1; }
         echo "sdkmanager NDK installation command finished successfully."
 
         # Temukan path lengkap NDK yang baru diinstal.
-        # Cari folder dengan nama nomor versi NDK di dalam $ANDROID_SDK_ROOT/ndk/
+        # Cari folder di dalam $ANDROID_SDK_ROOT/ndk/ dengan nama sesuai NDK_VERSION_NUMBER.
+        # Contoh: paket 'ndk;r21e' terinstal di folder 'r21e', paket 'ndk;r25c' di folder 'r25c'.
         echo "Finding installed NDK path..."
-        # Gunakan find dengan maxdepth 1 dan -quit untuk efisiensi
         NDK_FULL_PATH=$(find $ANDROID_SDK_ROOT/ndk/ -maxdepth 1 -type d -name "$NDK_VERSION_NUMBER" -print -quit)
         if [ -z "$NDK_FULL_PATH" ]; then
           echo "Error: NDK version $NDK_VERSION_NUMBER not found after installation attempt in $ANDROID_SDK_ROOT/ndk/!"
@@ -164,7 +164,7 @@ jobs:
         # Tampilkan variabel lingkungan yang relevan
         echo "ANDROID_NDK_HOME = ${{ env.ANDROID_NDK_HOME }}" # HARUS terisi sekarang
         echo "ANDROID_SDK_ROOT = ${{ env.ANDROID_SDK_ROOT }}" # Path SDK root yang disetel manual
-        echo "NDK_ROOT = ${{ env.NDK_ROOT }}" # Mungkin kosong, ANDROID_NDK_HOME lebih umum
+        echo "NDK_ROOT = ${{ env.NDK_ROOT }}" # Mungkin kosong, ANDROID_NDK_HOME lebih umum digunakan CMake
 
         echo "--- Checking NDK Build Dir ---"
         # Periksa apakah direktori build NDK ada
@@ -205,9 +205,6 @@ jobs:
         echo "CMake source downloaded to ${{ runner.temp }}/cmake_src."
       shell: bash
 
-    # **PERBAIKAN DIREKTORI BUILD:** Langkah pembuatan direktori build terpisah ada di langkah configure.
-    # Langkah pembuatan direktori build yang sebelumnya di sini Dihapus karena membingungkan dan tidak diperlukan.
-
     # Langkah ketujuh: Konfigurasi build CMake untuk target Android armeabi-v7a
     - name: Configure CMake Build for Android armeabi-v7a
       env:
@@ -229,6 +226,7 @@ jobs:
 
         echo "Running cmake configuration..."
         # Jalankan perintah konfigurasi CMake dengan toolchain file NDK
+        # Menggunakan variabel ANDROID_NDK_HOME yang disetel di langkah instalasi NDK
         cmake ${{ env.CMAKE_SOURCE_DIR }} \
           -DCMAKE_TOOLCHAIN_FILE=${{ env.ANDROID_NDK_HOME }}/build/cmake/android.toolchain.cmake \
           -DANDROID_ABI=armeabi-v7a \
@@ -251,7 +249,7 @@ jobs:
         CMAKE_BUILD_DIR: ${{ runner.temp }}/cmake_build_android
       run: |
         echo "--- Building CMake ---"
-        # **PERBAIKAN DIREKTORI BUILD:** Navigasi ke direktori tempat CMake dikonfigurasi
+        # Navigasi ke direktori tempat CMake dikonfigurasi dan dibangun
         cd ${{ env.CMAKE_BUILD_DIR }} || exit 1
         echo "Current directory: $(pwd)"
 
@@ -269,7 +267,7 @@ jobs:
         INSTALL_DIR: ${{ runner.temp }}/cmake_android_install
       run: |
         echo "--- Installing CMake ---"
-        # **PERBAIKAN DIREKTORI BUILD:** Navigasi ke direktori tempat CMake dibangun
+        # Navigasi ke direktori tempat CMake dibangun
         cd ${{ env.CMAKE_BUILD_DIR }} || exit 1
         echo "Current directory: $(pwd)"
         echo "Installation directory: ${{ env.INSTALL_DIR }}"
@@ -298,5 +296,5 @@ jobs:
         # name: cmake-android-armeabi-v7a-ndk${{ env.NDK_VERSION_NUMBER_FOR_ARTIFACT }}-cmake${{ env.CMAKE_VERSION_TAG_FOR_ARTIFACT }}
       # env:
       #   # Contoh cara menggunakan variabel di nama artefak (jika didefinisikan di tempat lain atau di sini)
-      #   NDK_VERSION_NUMBER_FOR_ARTIFACT: "29.0.13113456"
+      #   NDK_VERSION_NUMBER_FOR_ARTIFACT: "r21e" # Sesuaikan dengan NDK_VERSION_NUMBER
       #   CMAKE_VERSION_TAG_FOR_ARTIFACT: "v3.29.3"
