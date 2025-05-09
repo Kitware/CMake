@@ -64,7 +64,7 @@ jobs:
         # Removed > /dev/null to see output from sdkmanager --update
         yes | sdkmanager --sdk_root="$ANDROID_SDK_ROOT" --update
 
-        echo "Installing NDK ('${{ env.ANDROID_NDK_VERSION_PACKAGE }}'), platforms, build-tools, SDK's CMake ('${{ env.SDK_CMAKE_VERSION }}')..." # Fix typo: ANDROID_SDK_CMAKE_VERSION -> SDK_CMAKE_VERSION
+        echo "Installing NDK ('${{ env.ANDROID_NDK_VERSION_PACKAGE }}'), platforms, build-tools, SDK's CMake ('${{ env.ANDROID_SDK_CMAKE_VERSION }}')..."
         yes | sdkmanager --sdk_root="$ANDROID_SDK_ROOT" \
           "platforms;${{ env.ANDROID_PLATFORM }}" \
           "build-tools;33.0.0" \
@@ -296,6 +296,22 @@ jobs:
           exit 1
         fi
         echo "CMake configuration successful."
+
+    # --- START: Tambahkan langkah make clean ---
+    - name: Clean previous build artifacts
+      env:
+        CMAKE_BUILD_DIR: ${{ runner.temp }}/cmake_build_android
+      run: |
+        echo "Cleaning build directory: $CMAKE_BUILD_DIR"
+        if [ -d "$CMAKE_BUILD_DIR" ]; then # Cek apakah direktori build ada sebelum clean
+          cd "$CMAKE_BUILD_DIR"
+          make clean
+          # Tidak menggunakan set -e ketat di sini karena make clean mungkin gagal jika direktori kosong/baru
+        else
+          echo "Build directory $CMAKE_BUILD_DIR does not exist, no cleaning needed."
+        fi
+        echo "Clean complete."
+    # --- END: Tambahkan langkah make clean ---
 
     - name: Build CMake with make (Verbose) # Nama langkah diubah
       env:
