@@ -1,4 +1,4 @@
-name: Build CMake for Android (armeabi-v7a) - using nttld/setup-ndk + Final Config
+name: Build CMake for Android (armeabi-v7a) - using android-actions/setup-ndk + Debugging
 
 on:
   # Ini memungkinkan Anda menjalankan workflow secara manual dari tab "Actions" di GitHub
@@ -20,12 +20,12 @@ jobs:
         distribution: 'temurin'
         java-version: '17' # Versi Java yang kompatibel dengan NDK
 
-    - name: Set up Android NDK (using nttld/setup-ndk)
-      # Menggunakan action komunitas nttld/setup-ndk@v1 untuk menginstal Android NDK
-      uses: nttld/setup-ndk@v1
+    - name: Set up Android NDK (using android-actions/setup-ndk)
+      # Menggunakan action komunitas android-actions/setup-ndk@v1 untuk menginstal Android NDK
+      uses: android-actions/setup-ndk@v1
       with:
-        # Gunakan parameter ndk-version sesuai action ini
-        ndk-version: r26d # *** PENTING: Tentukan versi NDK yang konsisten di sini ***
+        # Action ini menggunakan parameter 'ndk'
+        ndk: '25.2.8702022' # *** PENTING: Tentukan versi NDK yang konsisten di sini ***
 
     # --- LANGKAH DEBUGGING DIMULAI ---
     - name: Debug NDK Setup Paths
@@ -43,7 +43,7 @@ jobs:
         echo "--- Checking for toolchain file existence ---"
         # Cek apakah file toolchain ada di lokasi yang diharapkan
         test -f ${{ env.ANDROID_NDK_HOME }}/build/cmake/android.toolchain.cmake && echo "Toolchain file EXISTS at expected path!" || echo "Toolchain file NOT found at expected path!"
-        echo "Expected Toolchain Path: ${{ env.ANDROID_NDK_HOME }}/build/cmake/android.toolchain.cmake"
+        echo "Expected Toolchain Path used in Configure Step: ${{ env.ANDROID_NDK_HOME }}/build/cmake/android.toolchain.cmake"
         echo "--- Debugging Complete ---"
     # --- LANGKAH DEBUGGING SELESAI ---
 
@@ -69,13 +69,13 @@ jobs:
 
     - name: Configure CMake Build for Android armeabi-v7a
       # Menjalankan konfigurasi CMake menggunakan NDK toolchain file
-      # Path NDK diambil dari variabel lingkungan ANDROID_NDK_HOME yang disetel oleh nttld/setup-ndk@v1
+      # Path NDK diambil dari variabel lingkungan ANDROID_NDK_HOME yang disetel oleh action setup NDK
       env:
-        # nttld/setup-ndk@v1 seharusnya menyetel ANDROID_NDK_HOME
+        # Action setup NDK seharusnya menyetel ANDROID_NDK_HOME
         INSTALL_DIR: ${{ runner.temp }}/cmake_install # Lokasi instalasi sementara di runner
       run: | # <-- Pastikan ada | di sini untuk multi-line command
         cd ${{ runner.temp }}/cmake_src/build # Pastikan berada di direktori build
-        # BARIS DI BAWAH INI SUDAH DIPERBAIKI. PASTIKAN DIKUTIP PERSIS.
+        # BARIS DI BAWAH INI MENGGUNAKAN VARIABEL LINGKUNGAN NDK YANG DIHARAPKAN DISETELLAH
         cmake ${{ runner.temp }}/cmake_src \
           -DCMAKE_TOOLCHAIN_FILE=${{ env.ANDROID_NDK_HOME }}/build/cmake/android.toolchain.cmake \
           -DANDROID_ABI=armeabi-v7a \
