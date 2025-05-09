@@ -28,11 +28,9 @@ jobs:
         mkdir -p $ANDROID_SDK_ROOT
         echo "ANDROID_SDK_ROOT set to $ANDROID_SDK_ROOT"
 
-        # **PERBAIKAN 404:** Gunakan URL spesifik yang mengandung build number
-        # URL 'commandlinetools-linux-latest.zip' sebelumnya menghasilkan 404.
-        # Build 11076708 sesuai dengan SDK Command-line Tools 9.0,
-        # yang seharusnya cukup baru untuk mengelola NDK 29.
-        # Perlu dicatat bahwa URL spesifik ini bisa saja tidak aktif di masa depan.
+        # Menggunakan URL spesifik yang mengandung build number (Build 11076708 / Tools 9.0)
+        # Ini adalah URL yang berhasil diunduh dan mengandung sdkmanager yang kita butuhkan.
+        # Kita menghilangkan langkah update via sdkmanager di sini untuk menghindari konflik.
         SDK_TOOLS_URL="https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip"
         CMD_TOOLS_ZIP="cmdline-tools.zip"
         echo "Downloading Command-line Tools from $SDK_TOOLS_URL"
@@ -84,14 +82,9 @@ jobs:
         yes | sdkmanager --licenses --sdk_root=$ANDROID_SDK_ROOT || true
         echo "SDK licenses accepted."
 
-        # **PENINGKATAN KEANDALAN:** Gunakan sdkmanager yang baru diinstal
-        # untuk menginstal versi 'latest' dari command-line tools dari repository.
-        # Ini memastikan tools yang digunakan adalah yang paling mutakhir, terlepas dari build
-        # spesifik yang diunduh secara manual di awal.
-        echo "--- Updating Command-line Tools to latest version via sdkmanager ---"
-        yes | sdkmanager "cmdline-tools;latest" --sdk_root=$ANDROID_SDK_ROOT &> sdkmanager_tools_update.log || \
-          { echo "Warning: sdkmanager command-line tools update failed. Proceeding with manually downloaded version."; cat sdkmanager_tools_update.log; }
-        echo "Command-line Tools update attempt finished."
+        # **DIHAPUS:** Langkah 'sdkmanager "cmdline-tools;latest"' dihapus
+        # untuk menghindari warning 'inconsistent location' dan potensi konflik.
+        # Kita hanya akan mengandalkan tools dari download manual awal.
 
         echo "--- SDK Command-line Tools Installation Complete ---"
       shell: bash
@@ -117,7 +110,8 @@ jobs:
         # Tampilkan isi file output
         cat sdk_packages_list.txt
         echo "--- Listing Complete ---"
-        echo "--- IMPORTANT: Check the output above for the correct NDK package name (e.g., ndk;29.0.13113456 or ndk;r21e) ---"
+        echo "--- IMPORTANT: Check the output above for the correct NDK package name (e.g., ndk;29.0.13113118 or ndk;r21e) ---"
+        # CATATAN: Perhatikan output ini, jika 29.0.13113456 tidak ada, pilih versi terdekat atau yang tersedia.
       shell: bash
       timeout-minutes: 3
 
@@ -136,7 +130,9 @@ jobs:
         NDK_PACKAGE="ndk;$NDK_VERSION_NUMBER" # Format paket untuk sdkmanager --install
 
         echo "Running sdkmanager to install NDK $NDK_PACKAGE..."
-        # Jalankan perintah instalasi NDK
+        # Jalankan perintah instalasi NDK. Output log menunjukkan NDK sebenarnya didownload dan diekstrak.
+        # Kegagalan mungkin terjadi setelah unzipping karena state sdkmanager.
+        # Dengan menghapus langkah update tools sebelumnya, semoga state sdkmanager stabil.
         yes | sdkmanager --install "$NDK_PACKAGE" --sdk_root=$ANDROID_SDK_ROOT &> sdkmanager_ndk_install.log || \
           { echo "Error: sdkmanager NDK installation failed for $NDK_PACKAGE!"; cat sdkmanager_ndk_install.log; exit 1; }
         echo "sdkmanager NDK installation command finished successfully."
