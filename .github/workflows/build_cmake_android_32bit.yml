@@ -41,16 +41,11 @@ jobs:
         rm -rf "$ANDROID_SDK_ROOT/cmdline-tools-temp"
         rm -f cmdline-tools.zip
 
-        # Tambahkan path ke environment PATH
+        # Tambahkan path ke environment PATH dan ke $GITHUB_PATH
         echo "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin" >> $GITHUB_PATH
 
-        # Pastikan sdkmanager bisa dipanggil
-        # Karena PATH baru akan berlaku di langkah berikut, kita cek langsung dengan env
-        # Setelah langkah ini selesai, environment PATH akan diupdate otomatis
-        # tapi untuk langsung menguji, kita bisa memanggil dengan path lengkap nanti
-
-        # Debug: tampilkan PATH
-        echo "PATH=$PATH"
+        # Update PATH di sesi ini juga agar sdkmanager bisa langsung dipanggil
+        export PATH=$PATH:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin
 
         # Verifikasi keberadaan sdkmanager
         which sdkmanager || { echo "sdkmanager tidak ditemukan"; exit 1; }
@@ -77,8 +72,8 @@ jobs:
 
     - name: Verifikasi SDK & NDK setup
       run: |
-        echo "Verifikasi sdkmanager"
-        which sdkmanager || echo "sdkmanager tidak ditemukan setelah setup"
+        echo "Verifikasi keberadaan sdkmanager"
+        which sdkmanager || echo "sdkmanager tidak ditemukan"
         echo "Isi folder SDK:"
         ls -l "$ANDROID_SDK_ROOT"
         echo "Isi folder NDK:"
@@ -104,7 +99,7 @@ jobs:
         mkdir -p "$CMAKE_BUILD_DIR"
         cd "$CMAKE_BUILD_DIR"
 
-        # Tambahkan path ke sdkmanager pada PATH lokal agar bisa dipanggil
+        # Tambahkan path ke sdkmanager ke environment PATH agar tersedia
         export PATH=$PATH:${{ env.ANDROID_SDK_ROOT }}/cmdline-tools/latest/bin
 
         # Verifikasi sdkmanager bisa dipanggil
