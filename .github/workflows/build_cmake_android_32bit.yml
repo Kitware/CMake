@@ -162,32 +162,41 @@ jobs:
         echo "Cloning CMake version ${{ env.CMAKE_VERSION_TAG }}"
         git clone --depth 1 --branch ${{ env.CMAKE_VERSION_TAG }} https://github.com/Kitware/CMake.git ${{ runner.temp }}/cmake_src
 
+    # --- START: Tambahkan langkah membuat dummy android_lf.h ---
+    - name: Create dummy android_lf.h
+      env:
+        CMAKE_SOURCE_DIR: ${{ runner.temp }}/cmake_src
+      run: |
+        DUMMY_HEADER_DIR="$CMAKE_SOURCE_DIR/Utilities/cmlibarchive/contrib/android/include"
+        DUMMY_HEADER_PATH="$DUMMY_HEADER_DIR/android_lf.h"
+        echo "Creating dummy file: $DUMMY_HEADER_PATH"
+        mkdir -p "$DUMMY_HEADER_DIR" # Pastikan direktori ada
+        touch "$DUMMY_HEADER_PATH" # Membuat file kosong
+        echo "Dummy file created."
+        ls -l "$DUMMY_HEADER_PATH" # Tampilkan informasi file dummy
+    # --- END: Tambahkan langkah membuat dummy android_lf.h ---
 
     # --- START: Langkah patching baru untuk mengomentari include android_lf.h ---
+    # Kita pertahankan langkah patching ini, just in case
     - name: Patch cmlibarchive archive.h to comment out android_lf.h include
       env:
         CMAKE_SOURCE_DIR: ${{ runner.temp }}/cmake_src
       run: |
         ARCHIVE_H_PATH="$CMAKE_SOURCE_DIR/Utilities/cmlibarchive/libarchive/archive.h"
         echo "Patching $ARCHIVE_H_PATH to comment out android_lf.h include."
-
-        # Cari baris `#include "android_lf.h"` dan ganti dengan "// #include "android_lf.h"" (mengomentari)
         sed -i 's/#include "android_lf.h"/ \/\/ #include "android_lf.h"/' "$ARCHIVE_H_PATH"
-
         echo "Patch applied. Showing relevant section of archive.h:"
-        # Tampilkan bagian yang di-patch untuk verifikasi
         grep -C 1 "android_lf.h" "$CMAKE_SOURCE_DIR/Utilities/cmlibarchive/libarchive/archive.h" || echo "Could not find patched section using grep."
     # --- END: Langkah patching archive.h (komentar) ---
 
     # --- START: Langkah Verifikasi Patch archive.h (Cek Komentar) ---
+    # Kita pertahankan langkah verifikasi ini
     - name: Verify cmlibarchive archive.h patch (commented out)
       env:
         CMAKE_SOURCE_DIR: ${{ runner.temp }}/cmake_src
       run: |
         ARCHIVE_H_PATH="$CMAKE_SOURCE_DIR/Utilities/cmlibarchive/libarchive/archive.h"
         echo "Verifying patch in $ARCHIVE_H_PATH (commented out check)..."
-
-        # Periksa apakah baris include telah dikomentari
         if grep -q '\/\/ #include "android_lf.h"' "$ARCHIVE_H_PATH"; then
            echo "Include line successfully commented out."
         else
@@ -349,7 +358,7 @@ jobs:
         CMAKE_SHARE_DIR_VERSION=$(echo "$CMAKE_VERSION_NUMERIC_PART" | cut -d. -f1,2)
         CMAKE_SHARE_DIR_TO_CHECK="cmake-$CMAKE_SHARE_DIR_VERSION"
 
-        echo "Verifying share directory: $INSTALL_DIR/share/$CMAKE_SHARE_DIR_TOCHECK"
+        echo "Verifying share directory: $INSTALL_DIR/share/$CMAKE_SHARE_DIR_TO_CHECK"
         ls -lA "$INSTALL_DIR/share/$CMAKE_SHARE_DIR_TO_CHECK" || echo "Warning: $INSTALL_DIR/share/$CMAKE_SHARE_DIR_TO_CHECK not found or empty."
 
     - name: Upload artefak hasil build
