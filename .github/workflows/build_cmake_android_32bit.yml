@@ -1,4 +1,4 @@
-name: Build CMake for Android (armeabi-v7a) - CMake SDK Pkg Fix
+name: Build CMake for Android (armeabi-v7a) - API 34
 
 on:
   workflow_dispatch: # Allows manual triggering of the workflow
@@ -11,6 +11,7 @@ jobs:
       ANDROID_SDK_CMAKE_VERSION: "cmake;3.22.1" # Changed to a more common SDK CMake version
       ANDROID_NDK_VERSION_PACKAGE: "ndk;26.3.11579264" # NDK r26d
       CMAKE_VERSION_TAG: "v3.29.3" # Version of CMake to build (this is for the source we are compiling)
+      ANDROID_PLATFORM: android-34 # <-- TARGET API LEVEL DIUBAH KE 34
 
     steps:
     - name: Checkout code
@@ -52,7 +53,7 @@ jobs:
 
         echo "Installing NDK ('${{ env.ANDROID_NDK_VERSION_PACKAGE }}'), platforms, build-tools, SDK's CMake ('${{ env.ANDROID_SDK_CMAKE_VERSION }}')..."
         yes | sdkmanager --sdk_root="$ANDROID_SDK_ROOT" \
-          "platforms;android-21" \
+          "platforms;${{ env.ANDROID_PLATFORM }}" \
           "build-tools;33.0.0" \
           "${{ env.ANDROID_NDK_VERSION_PACKAGE }}" \
           "${{ env.ANDROID_SDK_CMAKE_VERSION }}"
@@ -78,7 +79,7 @@ jobs:
         fi
 
         DETECTED_NDK_HOME="$NDK_BASE_PATH/$INSTALLED_NDK_SUBDIR"
-        echo "NDK appears to be installed in: $DETECTED_NDK_HOME"
+        echo "NDK appears to be installed in:: $DETECTED_NDK_HOME"
 
         if [ ! -f "$DETECTED_NDK_HOME/build/cmake/android.toolchain.cmake" ]; then
             echo "Error: android.toolchain.cmake not found in $DETECTED_NDK_HOME/build/cmake/"
@@ -143,77 +144,12 @@ jobs:
         echo "Cloning CMake version ${{ env.CMAKE_VERSION_TAG }}"
         git clone --depth 1 --branch ${{ env.CMAKE_VERSION_TAG }} https://github.com/Kitware/CMake.git ${{ runner.temp }}/cmake_src
 
-    # --- START: Langkah patching untuk memperbaiki error sched.h (core.c) ---
-    - name: Patch cmlibuv core.c for sched.h includes
-      env:
-        CMAKE_SOURCE_DIR: ${{ runner.temp }}/cmake_src
-      run: |
-        echo "Patching Utilities/cmlibuv/src/unix/core.c to include sched.h"
-        # Menggunakan sed untuk menyisipkan baris di awal file
-        # Sisipkan #define _GNU_SOURCE di baris 1
-        sed -i '1i#define _GNU_SOURCE' "$CMAKE_SOURCE_DIR/Utilities/cmlibuv/src/unix/core.c"
-        # Sisipkan #include <sched.h> di baris 2 (yang kini berada setelah define)
-        sed -i '2i#include <sched.h>' "$CMAKE_SOURCE_DIR/Utilities/cmlibuv/src/unix/core.c"
-
-        echo "Patch applied. Showing first few lines of core.c:"
-        head "$CMAKE_SOURCE_DIR/Utilities/cmlibuv/src/unix/core.c"
-    # --- END: Langkah patching sched.h ---
-
-    # --- START: Langkah patching untuk memperbaiki error pipe2 (pipe.c) ---
-    - name: Patch cmlibuv pipe.c for unistd.h and pipe2 define
-      env:
-        CMAKE_SOURCE_DIR: ${{ runner.temp }}/cmake_src
-      run: |
-        echo "Patching Utilities/cmlibuv/src/unix/pipe.c to include unistd.h and define _GNU_SOURCE"
-        # Menggunakan sed untuk menyisipkan baris di awal file
-        # Sisipkan #define _GNU_SOURCE di baris 1
-        sed -i '1i#define _GNU_SOURCE' "$CMAKE_SOURCE_DIR/Utilities/cmlibuv/src/unix/pipe.c"
-        # Sisipkan #include <unistd.h> di baris 2
-        sed -i '2i#include <unistd.h>' "$CMAKE_SOURCE_DIR/Utilities/cmlibuv/src/unix/pipe.c"
-
-        echo "Patch applied. Showing first few lines of pipe.c:"
-        head "$CMAKE_SOURCE_DIR/Utilities/cmlibuv/src/unix/pipe.c"
-    # --- END: Langkah patching pipe.c ---
-
-    # --- START: Langkah patching untuk memperbaiki error CPU affinity (process.c) ---
-    - name: Patch cmlibuv process.c for sched.h, pthread.h, and defines
-      env:
-        CMAKE_SOURCE_DIR: ${{ runner.temp }}/cmake_src
-      run: |
-        echo "Patching Utilities/cmlibuv/src/unix/process.c to include sched.h, pthread.h and define _GNU_SOURCE"
-        # Menggunakan sed untuk menyisipkan baris di awal file
-        # Sisipkan #define _GNU_SOURCE di baris 1
-        sed -i '1i#define _GNU_SOURCE' "$CMAKE_SOURCE_DIR/Utilities/cmlibuv/src/unix/process.c"
-        # Sisipkan #include <sched.h> di baris 2
-        sed -i '2i#include <sched.h>' "$CMAKE_SOURCE_DIR/Utilities/cmlibuv/src/unix/process.c"
-        # Sisipkan #include <pthread.h> di baris 3
-        sed -i '3i#include <pthread.h>' "$CMAKE_SOURCE_DIR/Utilities/cmlibuv/src/unix/process.c"
-
-        echo "Patch applied. Showing first few lines of process.c:"
-        head "$CMAKE_SOURCE_DIR/Utilities/cmlibuv/src/unix/process.c"
-    # --- END: Langkah patching process.c ---
-
-    # --- START: Langkah patching baru untuk memperbaiki error tipe dasar libcurl (formdata.c) - Menggunakan header publik ---
-    - name: Patch cmcurl formdata.c for public curl headers include
-      env:
-        CMAKE_SOURCE_DIR: ${{ runner.temp }}/cmake_src
-      run: |
-        echo "Patching Utilities/cmcurl/lib/formdata.c to include public curl headers"
-        # Menggunakan sed untuk menyisipkan baris di awal file
-        # Sisipkan #include <curl/curl.h> di baris 1
-        sed -i '1i#include <curl/curl.h>' "$CMAKE_SOURCE_DIR/Utilities/cmcurl/lib/formdata.c"
-        # Sisipkan #include <curl/system.h> di baris 2
-        sed -i '2i#include <curl/system.h>' "$CMAKE_SOURCE_DIR/Utilities/cmcurl/lib/formdata.c"
-
-        echo "Patch applied. Showing first few lines of formdata.c:"
-        head "$CMAKE_SOURCE_DIR/Utilities/cmcurl/lib/formdata.c"
-    # --- END: Langkah patching formdata.c ---
-
+    # Langkah-langkah patching sebelumnya (untuk core.c, pipe.c, process.c, formdata.c) dihapus di sini.
 
     - name: Konfigurasi build CMake untuk Android armeabi-v7a
       env:
         CMAKE_BUILD_DIR: ${{ runner.temp }}/cmake_build_android
-        CMAKE_SOURCE_DIR: ${{ runner.temp }}/cmake_src # Pastikan CMAKE_SOURCE_DIR masih didefinisikan
+        CMAKE_SOURCE_DIR: ${{ runner.temp }}/cmake_src
         INSTALL_DIR: ${{ runner.temp }}/cmake_android_install
       run: |
         echo "Configuring CMake build for Android (armeabi-v7a)..."
@@ -225,13 +161,16 @@ jobs:
 
         echo "Using NDK from: $ANDROID_NDK_HOME"
         echo "Toolchain file will be: $ANDROID_NDK_HOME/build/cmake/android.toolchain.cmake"
+        echo "Targeting Android API level: ${{ env.ANDROID_PLATFORM }}"
+        echo "Targeting Android ABI: armeabi-v7a"
+
 
         # This cmake command uses the host's cmake (installed in previous step)
         # to configure the build of CMake sources for Android.
         cmake "$CMAKE_SOURCE_DIR" \
           -DCMAKE_TOOLCHAIN_FILE="$ANDROID_NDK_HOME/build/cmake/android.toolchain.cmake" \
           -DANDROID_ABI=armeabi-v7a \
-          -DANDROID_PLATFORM=android-21 \
+          -DANDROID_PLATFORM=${{ env.ANDROID_PLATFORM }} \ # Menggunakan variabel env yang diperbarui
           -DCMAKE_BUILD_TYPE=Release \
           -DCMAKE_INSTALL_PREFIX="$INSTALL_DIR" \
           -DBUILD_TESTING=OFF \
@@ -288,6 +227,6 @@ jobs:
     - name: Upload artefak hasil build
       uses: actions/upload-artifact@v4
       with:
-        name: cmake-${{ env.CMAKE_VERSION_TAG }}-android-armeabi-v7a-ndk${{ env.NDK_VERSION_NUMBER_FOR_ARTIFACT }}
+        name: cmake-${{ env.CMAKE_VERSION_TAG }}-android-armeabi-v7a-ndk${{ env.NDK_VERSION_NUMBER_FOR_ARTIFACT }}-api${{ env.ANDROID_PLATFORM }}
         path: ${{ runner.temp }}/cmake_android_install
         if-no-files-found: error
