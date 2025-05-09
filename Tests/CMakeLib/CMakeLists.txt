@@ -24,6 +24,7 @@ set(CMakeLib_TESTS
   testRange.cxx
   testOptional.cxx
   testPathResolver.cxx
+  testStdIo.cxx
   testString.cxx
   testStringAlgorithms.cxx
   testSystemTools.cxx

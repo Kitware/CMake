@@ -2867,58 +2867,6 @@ cmSystemTools::WaitForLineResult cmSystemTools::WaitForLine(
 }
 
 #ifdef _WIN32
-static void EnsureStdPipe(int stdFd, DWORD nStdHandle, FILE* stream,
-                          wchar_t const* mode)
-{
-  if (fileno(stream) >= 0) {
-    return;
-  }
-  _close(stdFd);
-  _wfreopen(L"NUL", mode, stream);
-  int fd = fileno(stream);
-  if (fd < 0) {
-    perror("failed to open NUL for missing stdio pipe");
-    abort();
-  }
-  if (fd != stdFd) {
-    _dup2(fd, stdFd);
-  }
-  SetStdHandle(nStdHandle, reinterpret_cast<HANDLE>(_get_osfhandle(fd)));
-}
-
-void cmSystemTools::EnsureStdPipes()
-{
-  EnsureStdPipe(0, STD_INPUT_HANDLE, stdin, L"rb");
-  EnsureStdPipe(1, STD_OUTPUT_HANDLE, stdout, L"wb");
-  EnsureStdPipe(2, STD_ERROR_HANDLE, stderr, L"wb");
-}
-#else
-static void EnsureStdPipe(int fd)
-{
-  if (fcntl(fd, F_GETFD) != -1 || errno != EBADF) {
-    return;
-  }
-
-  int f = open("/dev/null", fd == STDIN_FILENO ? O_RDONLY : O_WRONLY);
-  if (f == -1) {
-    perror("failed to open /dev/null for missing stdio pipe");
-    abort();
-  }
-  if (f != fd) {
-    dup2(f, fd);
-    close(f);
-  }
-}
-
-void cmSystemTools::EnsureStdPipes()
-{
-  EnsureStdPipe(STDIN_FILENO);
-  EnsureStdPipe(STDOUT_FILENO);
-  EnsureStdPipe(STDERR_FILENO);
-}
-#endif
-
-#ifdef _WIN32
 #  ifndef CRYPT_SILENT
 #    define CRYPT_SILENT 0x40 /* Not defined by VS 6 version of header.  */
 #  endif

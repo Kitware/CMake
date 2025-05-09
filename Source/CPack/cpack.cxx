@@ -33,6 +33,7 @@
 #include "cmMakefile.h"
 #include "cmState.h"
 #include "cmStateSnapshot.h"
+#include "cmStdIoInit.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmValue.h"
@@ -89,7 +90,7 @@ std::vector<cmDocumentationEntry> makeGeneratorDocs(
 // this is CPack.
 int main(int argc, char const* const* argv)
 {
-  cmSystemTools::EnsureStdPipes();
+  cm::StdIo::Init();
 
   // Replace streambuf so we can output Unicode to console
   cmConsoleBuf consoleBuf;
