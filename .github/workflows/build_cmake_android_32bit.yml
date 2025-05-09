@@ -23,11 +23,11 @@ jobs:
         distribution: 'temurin'
         java-version: '17'
 
-    - name: Setup Android SDK, NDK, and SDK's CMake # <-- Sekitar sini, di dalam 'run' block
+    - name: Setup Android SDK, NDK, and SDK's CMake
       env:
         ANDROID_SDK_ROOT: ${{ runner.temp }}/android-sdk
-      run: |
-        set -e # Exit immediately if a command exits with a non-zero status.
+      run: | # <-- Perhatikan indentasi di sini (6 spasi)
+        set -e # <-- Perhatikan indentasi di sini (8 spasi)
         echo "Setting ANDROID_SDK_ROOT"
         export ANDROID_SDK_ROOT="$ANDROID_SDK_ROOT"
         echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
@@ -50,151 +50,69 @@ jobs:
 
         echo "Updating SDK (verbose)..."
         # Removed > /dev/null to see output from sdkmanager --update
-        yes | sdkmanager --sdk_root="<span class="math-inline">ANDROID\_SDK\_ROOT" \-\-update
-echo "Installing NDK \('</span>{{ env.ANDROID_NDK_VERSION_PACKAGE }}'), platforms, build-tools, SDK's CMake ('${{ env.ANDROID_SDK_CMAKE_VERSION }}')..."
-        yes | sdkmanager --sdk_root="<span class="math-inline">ANDROID\_SDK\_ROOT" \\
-"platforms;</span>{{ env.ANDROID_PLATFORM }}" \
+        yes | sdkmanager --sdk_root="$ANDROID_SDK_ROOT" --update
+
+        echo "Installing NDK ('${{ env.ANDROID_NDK_VERSION_PACKAGE }}'), platforms, build-tools, SDK's CMake ('${{ env.ANDROID_SDK_CMAKE_VERSION }}')..."
+        yes | sdkmanager --sdk_root="$ANDROID_SDK_ROOT" \
+          "platforms;${{ env.ANDROID_PLATFORM }}" \
           "build-tools;33.0.0" \
-          "<span class="math-inline">\{\{ env\.ANDROID\_NDK\_VERSION\_PACKAGE \}\}" \\
-"</span>{{ env.ANDROID_SDK_CMAKE_VERSION }}" # <-- Baris ini atau baris setelahnya mungkin baris 53 Anda
+          "${{ env.ANDROID_NDK_VERSION_PACKAGE }}" \
+          "${{ env.ANDROID_SDK_CMAKE_VERSION }}" # <-- Mungkin ini baris 54 Anda di file Anda. Pastikan indentasinya 8 spasi dan tidak ada spasi setelah '\' di baris atasnya.
 
-        echo "Attempting to locate installed NDK..."
+        echo "Attempting to locate installed NDK..." # <-- Baris setelah perintah sdkmanager
         NDK_BASE_PATH="$ANDROID_SDK_ROOT/ndk"
-        if [ ! -d "<span class="math-inline">NDK\_BASE\_PATH" \] \|\| \[ \-z "</span>(ls -A $NDK_BASE_PATH)" ]; then
-          echo "Error: NDK base directory '<span class="math-inline">NDK\_BASE\_PATH' not found or is empty after NDK installation attempt\."
-echo "This could mean '</span>{{ env.ANDROID_NDK_VERSION_PACKAGE }}' is not a valid NDK package string, or the installation failed."
-          echo "Listing contents of $ANDROID_SDK_ROOT (if it exists):"
-          ls -lA "$ANDROID_SDK_ROOT"
-          echo "Listing available SDK packages (might take a moment) to help find a valid NDK package:"
-          sdkmanager --list --sdk_root="<span class="math-inline">ANDROID\_SDK\_ROOT" \| grep "ndk;" \|\| echo "No NDK packages found in list\."
-exit 1
-fi
-INSTALLED\_NDK\_SUBDIR\=</span>(ls "$NDK_BASE_PATH" | head -n 1)
-        if [ -z "$INSTALLED_NDK_SUBDIR" ]; then
-          echo "Error: No subdirectory found in NDK base path '$NDK_BASE_PATH'. NDK might not be installed correctly."
-          echo "Contents of '$NDK_BASE_PATH':"
-          ls -lA "$NDK_BASE_PATH"
-          exit 1
-        fi
+        if [ ! -d "$NDK_BASE_PATH" ] || [ -z "$(ls -A $NDK_BASE_PATH)" ]; then
+        # ... dan seterusnya ...
 
-        DETECTED_NDK_HOME="$NDK_BASE_PATH/$INSTALLED_NDK_SUBDIR"
-        echo "NDK appears to be installed in:: $DETECTED_NDK_HOME"
-
-        if [ ! -f "$DETECTED_NDK_HOME/build/cmake/android.toolchain.cmake" ]; then
-            echo "Error: android.toolchain.cmake not found in $DETECTED_NDK_HOME/build/cmake/"
-            echo "This indicates an incomplete or improperly structured NDK installation."
-            ls -lA "$DETECTED_NDK_HOME"
-            ls -lA "$DETECTED_NDK_HOME/build" 2>/dev/null || echo "$DETECTED_NDK_HOME/build does not exist."
-            exit 1
-        fi
-
-        echo "Successfully located NDK and toolchain file."
-        echo "ANDROID_NDK_HOME=$DETECTED_NDK_HOME" >> <span class="math-inline">GITHUB\_ENV
-NDK\_VERSION\_NUMBER\_FOR\_ARTIFACT\="</span>{ANDROID_NDK_VERSION_PACKAGE#ndk;}"
-        echo "NDK_VERSION_NUMBER_FOR_ARTIFACT=$NDK_VERSION_NUMBER_FOR_ARTIFACT" >> $GITHUB_ENV
-        echo "Extracted NDK version for artifact: $NDK_VERSION_NUMBER_FOR_ARTIFACT"
-
-        echo "Accepting SDK licenses..."
-        yes | sdkmanager --licenses --sdk_root="$ANDROID_SDK_ROOT" > /dev/null
-
-        echo "Android SDK setup summary:"
-        echo "SDK root: $ANDROID_SDK_ROOT"
-        echo "NDK path (detected for next steps): $DETECTED_NDK_HOME"
-        echo "SDK's CMake version requested: ${{ env.ANDROID_SDK_CMAKE_VERSION }}"
-
-    - name: Verifikasi SDK & NDK setup
-      env:
-        ANDROID_SDK_ROOT: ${{ runner.temp }}/android-sdk
-        ANDROID_NDK_HOME: ${{ env.ANDROID_NDK_HOME }}
-        NDK_VERSION_NUMBER_FOR_ARTIFACT: ${{ env.NDK_VERSION_NUMBER_FOR_ARTIFACT }}
-      run: |
-        echo "Verifying sdkmanager availability..."
-        which sdkmanager || { echo "sdkmanager is not on PATH in this step."; exit 1; }
-        echo "ANDROID_SDK_ROOT is: $ANDROID_SDK_ROOT"
-        echo "ANDROID_NDK_HOME is: $ANDROID_NDK_HOME"
-        echo "NDK_VERSION_NUMBER_FOR_ARTIFACT is: ${{ env.NDK_VERSION_NUMBER_FOR_ARTIFACT }}"
-
-        echo "Contents of SDK root ($ANDROID_SDK_ROOT):"
-        ls -lA "$ANDROID_SDK_ROOT"
-        echo "Contents of SDK CMake directory ($ANDROID_SDK_ROOT/cmake):"
-        ls -lA "$ANDROID_SDK_ROOT/cmake" || echo "SDK CMake directory not found or empty."
-
-        echo "Contents of NDK root ($ANDROID_NDK_HOME):"
-        if [ ! -d "$ANDROID_NDK_HOME" ]; then
-          echo "Error: ANDROID_NDK_HOME directory '$ANDROID_NDK_HOME' does not exist."
-          exit 1
-        fi
-        ls -lA "$ANDROID_NDK_HOME"
-
-        echo "Checking for NDK toolchain file at $ANDROID_NDK_HOME/build/cmake/android.toolchain.cmake"
-        if [ ! -f "$ANDROID_NDK_HOME/build/cmake/android.toolchain.cmake" ]; then
-            echo "Error: NDK toolchain file NOT FOUND. Path: $ANDROID_NDK_HOME/build/cmake/android.toolchain.cmake"
-            exit 1
-        else
-            echo "NDK toolchain file found successfully."
-        fi
-
-
-    - name: Install build tools (cmake, make, ninja for host)
-      run: |
-        sudo apt-get update -qq
-        # This installs cmake, make, ninja-build on the runner for building the CMake source.
-        # This is separate from the Android SDK's CMake.
-        sudo apt-get install -y cmake make ninja-build git
-
-    - name: Clone CMake source code (version ${{ env.CMAKE_VERSION_TAG }})
-      run: |
-        echo "Cloning CMake version ${{ env.CMAKE_VERSION_TAG }}"
-        git clone --depth 1 --branch ${{ env.CMAKE_VERSION_TAG }} https://github.com/Kitware/CMake.git ${{ runner.temp }}/cmake_src
-
+    # ... langkah-langkah lainnya seperti Verify SDK & NDK setup, Install build tools, Clone CMake ...
 
     # --- START: Langkah patching baru untuk menonaktifkan include android_lf.h (Menggunakan 2 sed) ---
     - name: Patch cmlibarchive archive.h to disable android_lf.h include (two sed commands)
       env:
         CMAKE_SOURCE_DIR: ${{ runner.temp }}/cmake_src
-      run: |
-        ARCHIVE_H_PATH="$CMAKE_SOURCE_DIR/Utilities/cmlibarchive/libarchive/archive.h"
+      run: | # <-- Perhatikan indentasi di sini (6 spasi)
+        ARCHIVE_H_PATH="$CMAKE_SOURCE_DIR/Utilities/cmlibarchive/libarchive/archive.h" # <-- Perhatikan indentasi di sini (8 spasi)
         echo "Patching $ARCHIVE_H_PATH to disable android_lf.h include using two separate sed commands."
 
         # Cari baris `#include "android_lf.h"` dan sisipkan #if 0 sebelum itu
-        sed -i '/#include "android_lf.h"/i#if 0' "$ARCHIVE_H_PATH"
+        sed -i '/#include "android_lf.h"/i#if 0' "$ARCHIVE_H_PATH" # <-- Perhatikan indentasi di sini (8 spasi)
 
         # Cari baris `#include "android_lf.h"` (yang sekarang ada setelah #if 0) dan tambahkan #endif setelah itu
-        sed -i '/#include "android_lf.h"/a#endif' "$ARCHIVE_H_PATH"
+        sed -i '/#include "android_lf.h"/a#endif' "$ARCHIVE_H_PATH" # <-- Perhatikan indentasi di sini (8 spasi)
 
-        echo "Patch applied. Showing relevant section of archive.h:"
+        echo "Patch applied. Showing relevant section of archive.h:" # <-- Perhatikan indentasi di sini (8 spasi)
         # Tampilkan bagian yang di-patch untuk verifikasi
-        grep -A 2 -B 1 "android_lf.h" "$CMAKE_SOURCE_DIR/Utilities/cmlibarchive/libarchive/archive.h" || echo "Could not find patched section using grep."
+        grep -A 2 -B 1 "android_lf.h" "$CMAKE_SOURCE_DIR/Utilities/cmlibarchive/libarchive/archive.h" || echo "Could not find patched section using grep." # <-- Perhatikan indentasi di sini (8 spasi)
     # --- END: Langkah patching android_lf.h ---
 
     # --- START: Langkah Verifikasi Patch archive.h ---
     - name: Verify cmlibarchive archive.h patch
       env:
         CMAKE_SOURCE_DIR: ${{ runner.temp }}/cmake_src
-      run: |
-        ARCHIVE_H_PATH="$CMAKE_SOURCE_DIR/Utilities/cmlibarchive/libarchive/archive.h"
-        echo "Verifying patch in $ARCHIVE_H_PATH..."
+      run: | # <-- Perhatikan indentasi di sini (6 spasi)
+        ARCHIVE_H_PATH="$CMAKE_SOURCE_DIR/Utilities/cmlibarchive/libarchive/archive.h" # <-- Perhatikan indentasi di sini (8 spasi)
+        echo "Verifying patch in $ARCHIVE_H_PATH..." # <-- Perhatikan indentasi di sini (8 spasi)
         # Periksa apakah #if 0 ada tepat sebelum baris include
         # Menggunakan pcregrep untuk pola yang lebih canggih yang mencari #if 0 diikuti *langsung* oleh include di baris berikutnya
-        if pcregrep -q '#if 0\n#include "android_lf.h"' "$ARCHIVE_H_PATH"; then
-           echo "Patch start (#if 0) found correctly before include."
-        else
-           echo "Error: Patch start (#if 0) NOT found correctly before include."
-           echo "Content of $ARCHIVE_H_PATH:"
-           cat "$ARCHIVE_H_PATH" # Dump the file content for inspection
-           exit 1
-        fi
+        if pcregrep -q '#if 0\n#include "android_lf.h"' "$ARCHIVE_H_PATH"; then # <-- Perhatikan indentasi di sini (8 spasi)
+           echo "Patch start (#if 0) found correctly before include." # <-- Perhatikan indentasi di sini (11 spasi)
+        else # <-- Perhatikan indentasi di sini (8 spasi)
+           echo "Error: Patch start (#if 0) NOT found correctly before include." # <-- Perhatikan indentasi di sini (11 spasi)
+           echo "Content of $ARCHIVE_H_PATH:" # <-- Perhatikan indentasi di sini (11 spasi)
+           cat "$ARCHIVE_H_PATH" # Dump the file content for inspection # <-- Perhatikan indentasi di sini (11 spasi)
+           exit 1 # <-- Perhatikan indentasi di sini (11 spasi)
+        fi # <-- Perhatikan indentasi di sini (8 spasi)
         # Periksa apakah #endif ada tepat setelah baris include
         # Menggunakan pcregrep untuk pola yang lebih canggih yang mencari include diikuti *langsung* oleh #endif di baris berikutnya
-        if pcregrep -q '#include "android_lf.h"\n#endif' "$ARCHIVE_H_PATH"; then
-           echo "Patch end (#endif) found correctly after include."
-        else
-           echo "Error: Patch end (#endif) NOT found correctly after include."
-           echo "Content of $ARCHIVE_H_PATH:"
-           cat "$ARCHIVE_H_PATH" # Dump the file content for inspection
-           exit 1
-        fi
-        echo "Patch verification complete."
+        if pcregrep -q '#include "android_lf.h"\n#endif' "$ARCHIVE_H_PATH"; then # <-- Perhatikan indentasi di sini (8 spasi)
+           echo "Patch end (#endif) found correctly after include." # <-- Perhatikan indentasi di sini (11 spasi)
+        else # <-- Perhatikan indentasi di sini (8 spasi)
+           echo "Error: Patch end (#endif) NOT found correctly after include." # <-- Perhatikan indentasi di sini (11 spasi)
+           echo "Content of $ARCHIVE_H_PATH:" # <-- Perhatikan indentasi di sini (11 spasi)
+           cat "$ARCHIVE_H_PATH" # Dump the file content for inspection # <-- Perhatikan indentasi di sini (11 spasi)
+           exit 1 # <-- Perhatikan indentasi di sini (11 spasi)
+        fi # <-- Perhatikan indentasi di sini (8 spasi)
+        echo "Patch verification complete." # <-- Perhatikan indentasi di sini (8 spasi)
     # --- END: Langkah Verifikasi Patch archive.h ---
 
 
@@ -202,54 +120,54 @@ NDK\_VERSION\_NUMBER\_FOR\_ARTIFACT\="</span>{ANDROID_NDK_VERSION_PACKAGE#ndk;}"
     - name: Patch cmlibuv core.c for sched.h includes
       env:
         CMAKE_SOURCE_DIR: ${{ runner.temp }}/cmake_src
-      run: |
-        echo "Patching Utilities/cmlibuv/src/unix/core.c to include sched.h"
+      run: | # <-- Perhatikan indentasi di sini (6 spasi)
+        echo "Patching Utilities/cmlibuv/src/unix/core.c to include sched.h" # <-- Perhatikan indentasi di sini (8 spasi)
         # Menggunakan sed untuk menyisipkan baris di awal file
         # Sisipkan #define _GNU_SOURCE di baris 1
-        sed -i '1i#define _GNU_SOURCE' "$CMAKE_SOURCE_DIR/Utilities/cmlibuv/src/unix/core.c"
+        sed -i '1i#define _GNU_SOURCE' "$CMAKE_SOURCE_DIR/Utilities/cmlibuv/src/unix/core.c" # <-- Perhatikan indentasi di sini (8 spasi)
         # Sisipkan #include <sched.h> di baris 2 (yang kini berada setelah define)
-        sed -i '2i#include <sched.h>' "$CMAKE_SOURCE_DIR/Utilities/cmlibuv/src/unix/core.c"
+        sed -i '2i#include <sched.h>' "$CMAKE_SOURCE_DIR/Utilities/cmlibuv/src/unix/core.c" # <-- Perhatikan indentasi di sini (8 spasi)
 
-        echo "Patch applied. Showing first few lines of core.c:"
-        head "$CMAKE_SOURCE_DIR/Utilities/cmlibuv/src/unix/core.c"
+        echo "Patch applied. Showing first few lines of core.c:" # <-- Perhatikan indentasi di sini (8 spasi)
+        head "$CMAKE_SOURCE_DIR/Utilities/cmlibuv/src/unix/core.c" # <-- Perhatikan indentasi di sini (8 spasi)
     # --- END: Langkah patching sched.h ---
 
     # --- START: Langkah patching untuk memperbaiki error pipe2 (pipe.c) ---
     - name: Patch cmlibuv pipe.c for unistd.h and pipe2 define
       env:
         CMAKE_SOURCE_DIR: ${{ runner.temp }}/cmake_src
-      run: |
-        echo "Patching Utilities/cmlibuv/src/unix/pipe.c to include unistd.h and define _GNU_SOURCE"
+      run: | # <-- Perhatikan indentasi di sini (6 spasi)
+        echo "Patching Utilities/cmlibuv/src/unix/pipe.c to include unistd.h and define _GNU_SOURCE" # <-- Perhatikan indentasi di sini (8 spasi)
         # Menggunakan sed untuk menyisipkan baris di awal file
         # Sisipkan #define _GNU_SOURCE di baris 1
-        sed -i '1i#define _GNU_SOURCE' "$CMAKE_SOURCE_DIR/Utilities/cmlibuv/src/unix/pipe.c"
+        sed -i '1i#define _GNU_SOURCE' "$CMAKE_SOURCE_DIR/Utilities/cmlibuv/src/unix/pipe.c" # <-- Perhatikan indentasi di sini (8 spasi)
         # Sisipkan #include <unistd.h> di baris 2
-        sed -i '2i#include <unistd.h>' "$CMAKE_SOURCE_DIR/Utilities/cmlibuv/src/unix/pipe.c"
+        sed -i '2i#include <unistd.h>' "$CMAKE_SOURCE_DIR/Utilities/cmlibuv/src/unix/pipe.c" # <-- Perhatikan indentasi di sini (8 spasi)
 
-        echo "Patch applied. Showing first few lines of pipe.c:"
-        head "$CMAKE_SOURCE_DIR/Utilities/cmlibuv/src/unix/pipe.c"
+        echo "Patch applied. Showing first few lines of pipe.c:" # <-- Perhatikan indentasi di sini (8 spasi)
+        head "$CMAKE_SOURCE_DIR/Utilities/cmlibuv/src/unix/pipe.c" # <-- Perhatikan indentasi di sini (8 spasi)
     # --- END: Langkah patching pipe2 ---
 
     # --- START: Langkah patching untuk memperbaiki error CPU affinity (process.c) ---
     - name: Patch cmlibuv process.c for sched.h, pthread.h, defines, and stub for pthread_setaffinity_np (revised sed)
       env:
         CMAKE_SOURCE_DIR: ${{ runner.temp }}/cmake_src
-      run: |
-        echo "Patching Utilities/cmlibuv/src/unix/process.c"
+      run: | # <-- Perhatikan indentasi di sini (6 spasi)
+        echo "Patching Utilities/cmlibuv/src/unix/process.c" # <-- Perhatikan indentasi di sini (8 spasi)
         # Tambahkan define dan include di bagian paling atas
-        sed -i '1i#define _GNU_SOURCE' "$CMAKE_SOURCE_DIR/Utilities/cmlibuv/src/unix/process.c"
-        sed -i '2i#include <sched.h>' "$CMAKE_SOURCE_DIR/Utilities/cmlibuv/src/unix/process.c"
-        sed -i '3i#include <pthread.h>' "$CMAKE_SOURCE_DIR/Utilities/cmlibuv/src/unix/process.c"
+        sed -i '1i#define _GNU_SOURCE' "$CMAKE_SOURCE_DIR/Utilities/cmlibuv/src/unix/process.c" # <-- Perhatikan indentasi di sini (8 spasi)
+        sed -i '2i#include <sched.h>' "$CMAKE_SOURCE_DIR/Utilities/cmlibuv/src/unix/process.c" # <-- Perhatikan indentasi di sini (8 spasi)
+        sed -i '3i#include <pthread.h>' "$CMAKE_SOURCE_DIR/Utilities/cmlibuv/src/unix/process.c" # <-- Perhatikan indentasi di sini (8 spasi)
 
         # Tambahkan deklarasi kondisional untuk pthread_setaffinity_np jika belum dideklarasikan
         # Sisipkan baris demi baris menggunakan perintah sed terpisah
-        sed -i '4i#ifndef pthread_setaffinity_np' "$CMAKE_SOURCE_DIR/Utilities/cmlibuv/src/unix/process.c"
-        sed -i '5i#warning "Using stub pthread_setaffinity_np - actual function may be missing or require different defines"' "$CMAKE_SOURCE_DIR/Utilities/cmlibuv/src/unix/process.c"
-        sed -i '6iint pthread_setaffinity_np(pthread_t, size_t, const cpu_set_t *);' "$CMAKE_SOURCE_DIR/Utilities/cmlibuv/src/unix/process.c"
-        sed -i '7i#endif' "$CMAKE_SOURCE_DIR/Utilities/cmlibuv/src/unix/process.c"
+        sed -i '4i#ifndef pthread_setaffinity_np' "$CMAKE_SOURCE_DIR/Utilities/cmlibuv/src/unix/process.c" # <-- Perhatikan indentasi di sini (8 spasi)
+        sed -i '5i#warning "Using stub pthread_setaffinity_np - actual function may be missing or require different defines"' "$CMAKE_SOURCE_DIR/Utilities/cmlibuv/src/unix/process.c" # <-- Perhatikan indentasi di sini (8 spasi)
+        sed -i '6iint pthread_setaffinity_np(pthread_t, size_t, const cpu_set_t *);' "$CMAKE_SOURCE_DIR/Utilities/cmlibuv/src/unix/process.c" # <-- Perhatikan indentasi di sini (8 spasi)
+        sed -i '7i#endif' "$CMAKE_SOURCE_DIR/Utilities/cmlibuv/src/unix/process.c" # <-- Perhatikan indentasi di sini (8 spasi)
 
-        echo "Patch applied. Showing first few lines of process.c:"
-        head "$CMAKE_SOURCE_DIR/Utilities/cmlibuv/src/unix/process.c"
+        echo "Patch applied. Showing first few lines of process.c:" # <-- Perhatikan indentasi di sini (8 spasi)
+        head "$CMAKE_SOURCE_DIR/Utilities/cmlibuv/src/unix/process.c" # <-- Perhatikan indentasi di sini (8 spasi)
     # --- END: Langkah patching process.c ---
 
 
@@ -258,81 +176,83 @@ NDK\_VERSION\_NUMBER\_FOR\_ARTIFACT\="</span>{ANDROID_NDK_VERSION_PACKAGE#ndk;}"
         CMAKE_BUILD_DIR: ${{ runner.temp }}/cmake_build_android
         CMAKE_SOURCE_DIR: ${{ runner.temp }}/cmake_src
         INSTALL_DIR: ${{ runner.temp }}/cmake_android_install
-      run: |
-        echo "Configuring CMake build for Android (armeabi-v7a)..."
-        mkdir -p "$CMAKE_BUILD_DIR"
-        cd "$CMAKE_BUILD_DIR"
+      run: | # <-- Perhatikan indentasi di sini (6 spasi)
+        echo "Configuring CMake build for Android (armeabi-v7a)..." # <-- Perhatikan indentasi di sini (8 spasi)
+        mkdir -p "$CMAKE_BUILD_DIR" # <-- Perhatikan indentasi di sini (8 spasi)
+        cd "$CMAKE_BUILD_DIR" # <-- Perhatikan indentasi di sini (8 spasi)
 
-        export PATH="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH"
-        which sdkmanager > /dev/null || echo "Warning: sdkmanager not found during CMake configuration."
+        export PATH="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH" # <-- Perhatikan indentasi di sini (8 spasi)
+        which sdkmanager > /dev/null || echo "Warning: sdkmanager not found during CMake configuration." # <-- Perhatikan indentasi di sini (8 spasi)
 
-        echo "Using NDK from: $ANDROID_NDK_HOME"
-        echo "Toolchain file will be: $ANDROID_NDK_HOME/build/cmake/android.toolchain.cmake"
-        echo "Targeting Android API level: ${{ env.ANDROID_PLATFORM }}"
-        echo "Targeting Android ABI: armeabi-v7a"
+        echo "Using NDK from: $ANDROID_NDK_HOME" # <-- Perhatikan indentasi di sini (8 spasi)
+        echo "Toolchain file will be: $ANDROID_NDK_HOME/build/cmake/android.toolchain.cmake" # <-- Perhatikan indentasi di sini (8 spasi)
+        echo "Targeting Android API level: ${{ env.ANDROID_PLATFORM }}" # <-- Perhatikan indentasi di sini (8 spasi)
+        echo "Targeting Android ABI: armeabi-v7a" # <-- Perhatikan indentasi di sini (8 spasi)
 
         # This cmake command uses the host's cmake (installed in previous step)
         # to configure the build of CMake sources for Android.
         # PASTIKAN TIDAK ADA SPASI SETELAH BACKSLASH DI SETIAP AKHIR BARIS DI BAWAH INI
-        cmake "$CMAKE_SOURCE_DIR" \
-              -DCMAKE_TOOLCHAIN_FILE="<span class="math-inline">ANDROID\_NDK\_HOME/build/cmake/android\.toolchain\.cmake" \\
-\-DANDROID\_ABI\=armeabi\-v7a \\
-\-DANDROID\_PLATFORM\=</span>{{ env.ANDROID_PLATFORM }} \
-              -DCMAKE_BUILD_TYPE=Release \
-              -DCMAKE_INSTALL_PREFIX="$INSTALL_DIR" \
-              -DBUILD_TESTING=OFF \
-              -Wno-dev
+        cmake "$CMAKE_SOURCE_DIR" \ # <-- Perhatikan indentasi di sini (8 spasi)
+              -DCMAKE_TOOLCHAIN_FILE="$ANDROID_NDK_HOME/build/cmake/android.toolchain.cmake" \ # <-- Perhatikan indentasi di sini (14 spasi)
+              -DANDROID_ABI=armeabi-v7a \ # <-- Perhatikan indentasi di sini (14 spasi)
+              -DANDROID_PLATFORM=${{ env.ANDROID_PLATFORM }} \ # <-- Perhatikan indentasi di sini (14 spasi)
+              -DCMAKE_BUILD_TYPE=Release \ # <-- Perhatikan indentasi di sini (14 spasi)
+              -DCMAKE_INSTALL_PREFIX="$INSTALL_DIR" \ # <-- Perhatikan indentasi di sini (14 spasi)
+              -DBUILD_TESTING=OFF \ # <-- Perhatikan indentasi di sini (14 spasi)
+              -Wno-dev # <-- Perhatikan indentasi di sini (14 spasi)
 
-        if [ $? -ne 0 ]; then
-          echo "CMake configuration failed!"
-          echo "CMakeOutput.log content:"
-          cat "$CMAKE_BUILD_DIR/CMakeFiles/CMakeOutput.log" || echo "CMakeOutput.log not found."
-          echo "CMakeError.log content:"
-          cat "$CMAKE_BUILD_DIR/CMakeFiles/CMakeError.log" || echo "CMakeError.log not found."
-          exit 1
-        fi
-        echo "CMake configuration successful."
+        if [ $? -ne 0 ]; then # <-- Perhatikan indentasi di sini (8 spasi)
+          echo "CMake configuration failed!" # <-- Perhatikan indentasi di sini (11 spasi)
+          echo "CMakeOutput.log content:" # <-- Perhatikan indentasi di sini (11 spasi)
+          cat "$CMAKE_BUILD_DIR/CMakeFiles/CMakeOutput.log" || echo "CMakeOutput.log not found." # <-- Perhatikan indentasi di sini (11 spasi)
+          echo "CMakeError.log content:" # <-- Perhatikan indentasi di sini (11 spasi)
+          cat "$CMAKE_BUILD_DIR/CMakeFiles/CMakeError.log" || echo "CMakeError.log not found." # <-- Perhatikan indentasi di sini (11 spasi)
+          exit 1 # <-- Perhatikan indentasi di sini (11 spasi)
+        fi # <-- Perhatikan indentasi di sini (8 spasi)
+        echo "CMake configuration successful." # <-- Perhatikan indentasi di sini (8 spasi)
 
     - name: Build CMake with make
       env:
         CMAKE_BUILD_DIR: ${{ runner.temp }}/cmake_build_android
         INSTALL_DIR: ${{ runner.temp }}/cmake_android_install
-      run: |
-        echo "Building CMake using make..."
-        cd "<span class="math-inline">CMAKE\_BUILD\_DIR"
-make \-j</span>(nproc)
-        if [ $? -ne 0 ]; then
-          echo "Make build failed!"
-          exit 1
-        fi
-        echo "Make build successful."
+      run: | # <-- Perhatikan indentasi di sini (6 spasi)
+        echo "Building CMake using make..." # <-- Perhatikan indentasi di sini (8 spasi)
+        cd "$CMAKE_BUILD_DIR" # <-- Perhatikan indentasi di sini (8 spasi)
+        make -j$(nproc) # <-- Perhatikan indentasi di sini (8 spasi)
+        if [ $? -ne 0 ]; then # <-- Perhatikan indentasi di sini (8 spasi)
+          echo "Make build failed!" # <-- Perhatikan indentasi di sini (11 spasi)
+          exit 1 # <-- Perhatikan indentasi di sini (11 spasi)
+        fi # <-- Perhatikan indentasi di sini (8 spasi)
+        echo "Make build successful." # <-- Perhatikan indentasi di sini (8 spasi)
 
     - name: Install hasil build CMake
       env:
         CMAKE_BUILD_DIR: ${{ runner.temp }}/cmake_build_android
         INSTALL_DIR: ${{ runner.temp }}/cmake_android_install
-      run: |
-        echo "Installing CMake to $INSTALL_DIR..."
-        cd "$CMAKE_BUILD_DIR"
-        make install
-        if [ $? -ne 0 ]; then
-          echo "Make install failed!"
-          exit 1
-        fi
-        echo "CMake installation successful. Contents of $INSTALL_DIR:"
-        ls -lA "$INSTALL_DIR"
+      run: | # <-- Perhatikan indentasi di sini (6 spasi)
+        echo "Installing CMake to $INSTALL_DIR..." # <-- Perhatikan indentasi di sini (8 spasi)
+        cd "$CMAKE_BUILD_DIR" # <-- Perhatikan indentasi di sini (8 spasi)
+        make install # <-- Perhatikan indentasi di sini (8 spasi)
+        if [ $? -ne 0 ]; then # <-- Perhatikan indentasi di sini (8 spasi)
+          echo "Make install failed!" # <-- Perhatikan indentasi di sini (11 spasi)
+          exit 1 # <-- Perhatikan indentasi di sini (11 spasi)
+        fi # <-- Perhatikan indentasi di sini (8 spasi)
+        echo "CMake installation successful. Contents of $INSTALL_DIR:" # <-- Perhatikan indentasi di sini (8 spasi)
+        ls -lA "$INSTALL_DIR" # <-- Perhatikan indentasi di sini (8 spasi)
 
-        echo "Verifying key directories in installation:"
-        ls -lA "$INSTALL_DIR/bin" || echo "Warning: <span class="math-inline">INSTALL\_DIR/bin not found or empty\."
-CMAKE\_VERSION\_NUMERIC\_PART\="</span>{CMAKE_VERSION_TAG#v}"
-        CMAKE_SHARE_DIR_VERSION=$(echo "$CMAKE_VERSION_NUMERIC_PART" | cut -d. -f1,2)
-        CMAKE_SHARE_DIR_TO_CHECK="cmake-$CMAKE_SHARE_DIR_VERSION"
+        echo "Verifying key directories in installation:" # <-- Perhatikan indentasi di sini (8 spasi)
+        ls -lA "$INSTALL_DIR/bin" || echo "Warning: $INSTALL_DIR/bin not found or empty." # <-- Perhatikan indentasi di sini (8 spasi)
 
-        echo "Verifying share directory: $INSTALL_DIR/share/$CMAKE_SHARE_DIR_TOCHECK"
-        ls -lA "$INSTALL_DIR/share/$CMAKE_SHARE_DIR_TO_CHECK" || echo "Warning: $INSTALL_DIR/share/<span class="math-inline">CMAKE\_SHARE\_DIR\_TO\_CHECK not found or empty\."
-\- name\: Upload artefak hasil build
-uses\: actions/upload\-artifact@v4
-with\:
-name\: cmake\-</span>{{ env.CMAKE_VERSION_TAG }}-android-armeabi-v7a-ndk${{ env.NDK_VERSION_NUMBER_FOR_ARTIFACT }}-api${{ env.ANDROID_PLATFORM }}
+        CMAKE_VERSION_NUMERIC_PART="${CMAKE_VERSION_TAG#v}" # <-- Perhatikan indentasi di sini (8 spasi)
+        CMAKE_SHARE_DIR_VERSION=$(echo "$CMAKE_VERSION_NUMERIC_PART" | cut -d. -f1,2) # <-- Perhatikan indentasi di sini (8 spasi)
+        CMAKE_SHARE_DIR_TO_CHECK="cmake-$CMAKE_SHARE_DIR_VERSION" # <-- Perhatikan indentasi di sini (8 spasi)
+
+        echo "Verifying share directory: $INSTALL_DIR/share/$CMAKE_SHARE_DIR_TOCHECK" # <-- Perhatikan indentasi di sini (8 spasi)
+        ls -lA "$INSTALL_DIR/share/$CMAKE_SHARE_DIR_TO_CHECK" || echo "Warning: $INSTALL_DIR/share/$CMAKE_SHARE_DIR_TO_CHECK not found or empty." # <-- Perhatikan indentasi di sini (8 spasi)
+
+    - name: Upload artefak hasil build
+      uses: actions/upload-artifact@v4
+      with:
+        name: cmake-${{ env.CMAKE_VERSION_TAG }}-android-armeabi-v7a-ndk${{ env.NDK_VERSION_NUMBER_FOR_ARTIFACT }}-api${{ env.ANDROID_PLATFORM }}
         path: ${{ runner.temp }}/cmake_android_install
         if-no-files-found: error
