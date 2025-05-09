@@ -162,6 +162,25 @@ jobs:
         fi
     # --- END: Debugging step ---
 
+    # --- START: Langkah patching baru untuk menonaktifkan include android_lf.h ---
+    - name: Patch cmlibarchive archive.h to disable android_lf.h include
+      env:
+        CMAKE_SOURCE_DIR: ${{ runner.temp }}/cmake_src
+      run: |
+        ARCHIVE_H_PATH="$CMAKE_SOURCE_DIR/Utilities/cmlibarchive/libarchive/archive.h"
+        echo "Patching $ARCHIVE_H_PATH to disable android_lf.h include."
+
+        # Cari baris `#include "android_lf.h"` dan bungkus dengan #if 0 ... #endif
+        # Ini menonaktifkan baris include tersebut.
+        sed -i '/#include "android_lf.h"/i#if 0' "$ARCHIVE_H_PATH"
+        sed -i '/#include "android_lf.h"/a#endif' "$ARCHIVE_H_PATH"
+
+        echo "Patch applied. Showing relevant section of archive.h:"
+        # Tampilkan bagian yang di-patch untuk verifikasi
+        grep -A 2 -B 1 "android_lf.h" "$ARCHIVE_SOURCE_DIR/Utilities/cmlibarchive/libarchive/archive.h" || echo "Could not find patched section." # Fix: use CMAKE_SOURCE_DIR
+    # --- END: Langkah patching android_lf.h ---
+
+
     # --- START: Langkah patching untuk memperbaiki error sched.h (core.c) ---
     - name: Patch cmlibuv core.c for sched.h includes
       env:
@@ -261,6 +280,7 @@ jobs:
     - name: Build CMake with make
       env:
         CMAKE_BUILD_DIR: ${{ runner.temp }}/cmake_build_android
+        INSTALL_DIR: ${{ runner.temp }}/cmake_android_install # Fix: Add INSTALL_DIR env var for this step
       run: |
         echo "Building CMake using make..."
         cd "$CMAKE_BUILD_DIR"
