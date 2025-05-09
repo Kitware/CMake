@@ -64,7 +64,7 @@ jobs:
         # Removed > /dev/null to see output from sdkmanager --update
         yes | sdkmanager --sdk_root="$ANDROID_SDK_ROOT" --update
 
-        echo "Installing NDK ('${{ env.ANDROID_NDK_VERSION_PACKAGE }}'), platforms, build-tools, SDK's CMake ('${{ env.ANDROID_SDK_CMAKE_VERSION }}')..."
+        echo "Installing NDK ('${{ env.ANDROID_NDK_VERSION_PACKAGE }}'), platforms, build-tools, SDK's CMake ('${{ env.SDK_CMAKE_VERSION }}')..." # Fix typo: ANDROID_SDK_CMAKE_VERSION -> SDK_CMAKE_VERSION
         yes | sdkmanager --sdk_root="$ANDROID_SDK_ROOT" \
           "platforms;${{ env.ANDROID_PLATFORM }}" \
           "build-tools;33.0.0" \
@@ -283,7 +283,9 @@ jobs:
               -DCMAKE_BUILD_TYPE=Release \
               -DCMAKE_INSTALL_PREFIX="$INSTALL_DIR" \
               -DBUILD_TESTING=OFF \
-              -Wno-dev
+              -Wno-dev \
+              -DCMAKE_C_USE_PRECOMPILED_HEADERS=FALSE \ # <-- Tambahkan ini
+              -DCMAKE_CXX_USE_PRECOMPILED_HEADERS=FALSE # <-- Tambahkan ini
 
         if [ $? -ne 0 ]; then
           echo "CMake configuration failed!"
