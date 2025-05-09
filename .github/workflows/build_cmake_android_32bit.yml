@@ -108,9 +108,9 @@ jobs:
     - name: Download and Extract Android NDK (Manual)
       run: |
         echo "--- Downloading and Extracting Android NDK ---"
-        # Gunakan versi NDK stabil (misalnya r21e, r25c, r26b, r28b)
-        # GANTI ini jika Anda butuh versi stabil lain yang spesifik
-        NDK_VERSION="r28b" # <-- PILIH VERSI NDK STABIL DI SINI
+        # Menggunakan versi NDK stabil r25c.
+        # Jika ini juga gagal 404, Anda mungkin perlu mencoba r26b, r27, atau memeriksa arsip download Google secara manual.
+        NDK_VERSION="r25c" # <-- MENGGANTI r28b ke r25c
 
         # URL download langsung untuk NDK Linux x86_64 ZIP
         # Format umumnya: https://dl.google.com/android/repository/android-ndk-[version]-linux-x86_64.zip
@@ -119,14 +119,16 @@ jobs:
         NDK_INSTALL_DIR="$ANDROID_SDK_ROOT/ndk/$NDK_VERSION" # Lokasi target instalasi
 
         echo "Downloading NDK from $NDK_ZIP_URL"
-        wget $NDK_ZIP_URL -O $NDK_ZIP_FILE || { echo "Error: Failed to download NDK from $NDK_ZIP_URL!"; exit 1; }
+        # Gunakan flag '-L' dengan wget untuk mengikuti redirect, jika ada.
+        # Gunakan flag '-o logfile' untuk menangkap output wget secara detail jika gagal.
+        wget -L $NDK_ZIP_URL -O $NDK_ZIP_FILE || { echo "Error: Failed to download NDK from $NDK_ZIP_URL!"; exit 1; }
         echo "NDK downloaded: $NDK_ZIP_FILE"
 
         echo "Creating installation directory: $NDK_INSTALL_DIR"
         mkdir -p $NDK_INSTALL_DIR || { echo "Error: Failed to create NDK installation directory!"; exit 1; }
 
         echo "Extracting NDK to $NDK_INSTALL_DIR..."
-        # Ekstrak konten ZIP (misalnya folder 'android-ndk-r28b')
+        # Ekstrak konten ZIP (misalnya folder 'android-ndk-r25c')
         # Gunakan '-q' untuk quiet (tidak menampilkan daftar file saat ekstrak)
         # Ekstrak ke direktori temporer lalu pindahkan isinya
         NDK_TEMP_DIR=${{ runner.temp }}/ndk-extract-temp
@@ -134,19 +136,22 @@ jobs:
         unzip -q $NDK_ZIP_FILE -d $NDK_TEMP_DIR || { echo "Error: Failed to unzip NDK file!"; exit 1; }
 
         # Nama folder utama di dalam ZIP biasanya sama dengan nama file ZIP tanpa ekstensi
-        # atau 'android-ndk-' + versi. Kita coba tebak namanya.
-        # Atau yang lebih aman, cari foldernya setelah ekstrak.
-        # Contoh nama folder di dalam ZIP: 'android-ndk-r28b'
-        EXTRACTED_FOLDER_NAME=$(find $NDK_TEMP_DIR -maxdepth 1 -mindepth 1 -type d -print -quit)
-        if [ -z "$EXTRACTED_FOLDER_NAME" ]; then
+        # atau 'android-ndk-' + versi. Kita cari folder yang diekstrak.
+        EXTRACTED_FOLDER_PATH=$(find $NDK_TEMP_DIR -maxdepth 1 -mindepth 1 -type d -print -quit)
+        if [ -z "$EXTRACTED_FOLDER_PATH" ]; then
           echo "Error: Could not find extracted NDK folder inside $NDK_TEMP_DIR!"
           ls -la $NDK_TEMP_DIR || echo "Failed to list temp extraction directory contents."
           exit 1
         fi
-        echo "Found extracted folder: $EXTRACTED_FOLDER_NAME"
+        echo "Found extracted folder: $EXTRACTED_FOLDER_PATH"
 
         # Pindahkan isi folder yang diekstrak ke lokasi instalasi akhir
-        mv "$EXTRACTED_FOLDER_NAME"/* "$NDK_INSTALL_DIR"/ || { echo "Error: Failed to move extracted NDK contents!"; exit 1; }
+        # Gunakan /.* untuk memindahkan semua file dan sub-folder, termasuk yang tersembunyi
+        mv "$EXTRACTED_FOLDER_PATH"/* "$NDK_INSTALL_DIR"/ || { echo "Error: Failed to move extracted NDK contents!"; exit 1; }
+        # Alternatif: Jika mv /* gagal, coba mv folder/*
+        # mv "$EXTRACTED_FOLDER_PATH" "$NDK_INSTALL_DIR"/ || { echo "Error: Failed to move extracted NDK folder!"; exit 1; }
+
+
         echo "Moved contents to $NDK_INSTALL_DIR."
 
         # Bersihkan file ZIP dan direktori temporer
@@ -230,7 +235,7 @@ jobs:
         echo "Running cmake configuration..."
         # Jalankan perintah konfigurasi CMake dengan toolchain file NDK
         # Menggunakan variabel ANDROID_NDK_HOME yang disetel di langkah instalasi NDK
-        cmake ${{ env.CMAKE_SOURCE_HOME }} \
+        cmake ${{ env.CMAKE_SOURCE_DIR }} \
           -DCMAKE_TOOLCHAIN_FILE=${{ env.ANDROID_NDK_HOME }}/build/cmake/android.toolchain.cmake \
           -DANDROID_ABI=armeabi-v7a \
           -DANDROID_PLATFORM=android-21 \
@@ -299,5 +304,5 @@ jobs:
         # name: cmake-android-armeabi-v7a-ndk${{ env.NDK_VERSION_FOR_ARTIFACT }}-cmake${{ env.CMAKE_VERSION_TAG_FOR_ARTIFACT }}
       # env:
       #   # Contoh cara menggunakan variabel di nama artefak (jika didefinisikan di tempat lain atau di sini)
-      #   NDK_VERSION_FOR_ARTIFACT: "r28b" # Sesuaikan dengan NDK_VERSION
+      #   NDK_VERSION_FOR_ARTIFACT: "r25c" # Sesuaikan dengan NDK_VERSION
       #   CMAKE_VERSION_TAG_FOR_ARTIFACT: "v3.29.3"
