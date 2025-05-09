@@ -20,13 +20,13 @@ jobs:
         distribution: 'temurin'
         java-version: '17' # Versi Java yang kompatibel dengan NDK
 
-    - name: Set up Android SDK and NDK
-      # Menggunakan action komunitas untuk menginstal Android SDK dan NDK di runner
-      # Ini akan menempatkan SDK di lokasi standar yang diketahui
-      uses: android-sdk/setup-android@v0
+    - name: Set up Android NDK
+      # Menggunakan action komunitas yang BENAR untuk menginstal Android NDK di runner
+      # Action ini adalah android-actions/setup-ndk@v1
+      uses: android-actions/setup-ndk@v1
       with:
-        android-version: '35' # Menginstal SDK tools terbaru
-        ndk: '29.0.13113456' # *** PENTING: Tentukan versi NDK yang konsisten di sini ***
+        # action ini hanya perlu parameter ndk
+        ndk: '25.2.8702022' # *** PENTING: Tentukan versi NDK yang konsisten di sini ***
 
     # Langkah ini biasanya tidak perlu karena cmake/make sudah ada di runner Ubuntu,
     # tapi bisa ditambahkan jika runner standar berubah.
@@ -49,15 +49,14 @@ jobs:
 
     - name: Configure CMake Build for Android armeabi-v7a
       # Menjalankan konfigurasi CMake menggunakan NDK toolchain file dari instalasi NDK di runner
+      # Path NDK diambil dari variabel lingkungan ANDROID_NDK_HOME yang disetel oleh action setup-ndk
       env:
-        # ANDROID_SDK_ROOT disetel oleh setup-android action
-        # Menentukan path NDK berdasarkan lokasi instalasi action
-        NDK_PATH: ${{ env.ANDROID_SDK_ROOT }}/ndk/29.0.13113456 # *** PENTING: Pastikan versi NDK cocok di sini ***
+        # ANDROID_NDK_HOME disetel oleh android-actions/setup-ndk@v1
         INSTALL_DIR: ${{ runner.temp }}/cmake_install # Lokasi instalasi sementara di runner
       run: |
         cd ${{ runner.temp }}/cmake_src/build # Pastikan berada di direktori build
         cmake ${{ runner.temp }}/cmake_src \
-          -DCMAKE_TOOLCHAIN_FILE=$NDK_PATH/build/cmake/android.toolchain.cmake \
+          -DCMAKE_TOOLCHAIN_FILE=${{ env.ANDROID_NDK_HOME }}/build/cmake/android.toolchain.cmake \
           -DANDROID_ABI=armeabi-v7a \
           -DANDROID_PLATFORM=android-21 \
           -DCMAKE_BUILD_TYPE=Release \
