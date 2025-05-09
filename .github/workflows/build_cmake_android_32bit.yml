@@ -100,7 +100,7 @@ jobs:
         echo "ANDROID_SDK_ROOT at the start of Install Android NDK step: $ANDROID_SDK_ROOT"
         command -v sdkmanager || { echo "sdkmanager NOT found in PATH at start of Install Android NDK step. PATH is: $PATH"; exit 1; }
 
-        NDK_VERSION_NUMBER="25.2.8702022"
+        NDK_VERSION_NUMBER="29.0.13113456"
         NDK_PACKAGE="ndk;$NDK_VERSION_NUMBER"
 
         echo "Running sdkmanager to install NDK $NDK_PACKAGE..."
@@ -151,7 +151,7 @@ jobs:
 
     - name: Get CMake Source Code
       env:
-        CMAKE_VERSION_TAG: "v3.29.3"
+        CMAKE_VERSION_TAG: "v3.31.6"
       run: |
         echo "--- Getting CMake source code ---"
         git clone --depth 1 --branch ${{ env.CMAKE_VERSION_TAG }} https://github.com/Kitware/CMake.git ${{ runner.temp }}/cmake_src || exit 1
