@@ -143,7 +143,7 @@ jobs:
         echo "Cloning CMake version ${{ env.CMAKE_VERSION_TAG }}"
         git clone --depth 1 --branch ${{ env.CMAKE_VERSION_TAG }} https://github.com/Kitware/CMake.git ${{ runner.temp }}/cmake_src
 
-    # --- START: Langkah patching untuk memperbaiki error sched.h (menggunakan dua perintah sed) ---
+    # --- START: Langkah patching untuk memperbaiki error sched.h ---
     - name: Patch cmlibuv core.c for sched.h includes
       env:
         CMAKE_SOURCE_DIR: ${{ runner.temp }}/cmake_src
@@ -156,9 +156,21 @@ jobs:
         sed -i '2i#include <sched.h>' "$CMAKE_SOURCE_DIR/Utilities/cmlibuv/src/unix/core.c"
 
         echo "Patch applied. Showing first few lines of core.c:"
-        # Menampilkan beberapa baris pertama untuk verifikasi
         head "$CMAKE_SOURCE_DIR/Utilities/cmlibuv/src/unix/core.c"
-    # --- END: Langkah patching ---
+    # --- END: Langkah patching sched.h ---
+
+    # --- START: Langkah patching baru untuk memperbaiki error formdata.c ---
+    - name: Patch cmcurl formdata.c for sendf.h include
+      env:
+        CMAKE_SOURCE_DIR: ${{ runner.temp }}/cmake_src
+      run: |
+        echo "Patching Utilities/cmcurl/lib/formdata.c to include sendf.h"
+        # Menggunakan sed untuk menyisipkan #include "sendf.h" di baris 1
+        sed -i '1i#include "sendf.h"' "$CMAKE_SOURCE_DIR/Utilities/cmcurl/lib/formdata.c"
+
+        echo "Patch applied. Showing first few lines of formdata.c:"
+        head "$CMAKE_SOURCE_DIR/Utilities/cmcurl/lib/formdata.c"
+    # --- END: Langkah patching formdata.c ---
 
 
     - name: Konfigurasi build CMake untuk Android armeabi-v7a
