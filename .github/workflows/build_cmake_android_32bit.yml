@@ -1,4 +1,4 @@
-name: Build CMake for Android (armeabi-v7a) - using nttld/setup-ndk + Debugging
+name: Build CMake for Android (armeabi-v7a) - using nttld/setup-ndk + Final Config
 
 on:
   # Ini memungkinkan Anda menjalankan workflow secara manual dari tab "Actions" di GitHub
@@ -73,10 +73,9 @@ jobs:
       env:
         # nttld/setup-ndk@v1 seharusnya menyetel ANDROID_NDK_HOME
         INSTALL_DIR: ${{ runner.temp }}/cmake_install # Lokasi instalasi sementara di runner
-      run: |
+      run: | # <-- Pastikan ada | di sini untuk multi-line command
         cd ${{ runner.temp }}/cmake_src/build # Pastikan berada di direktori build
-        # *** PENTING: Gunakan path toolchain file yang dikonfirmasi oleh langkah debugging ***
-        # Berdasarkan dugaan, ini seharusnya ${{ env.ANDROID_NDK_HOME }}/build/cmake/android.toolchain.cmake
+        # BARIS DI BAWAH INI SUDAH DIPERBAIKI. PASTIKAN DIKUTIP PERSIS.
         cmake ${{ runner.temp }}/cmake_src \
           -DCMAKE_TOOLCHAIN_FILE=${{ env.ANDROID_NDK_HOME }}/build/cmake/android.toolchain.cmake \
           -DANDROID_ABI=armeabi-v7a \
