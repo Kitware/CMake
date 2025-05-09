@@ -159,19 +159,6 @@ jobs:
         head "$CMAKE_SOURCE_DIR/Utilities/cmlibuv/src/unix/core.c"
     # --- END: Langkah patching sched.h ---
 
-    # --- START: Langkah patching untuk memperbaiki error tipe dasar libcurl (formdata.c) ---
-    - name: Patch cmcurl formdata.c for curl_private.h include
-      env:
-        CMAKE_SOURCE_DIR: ${{ runner.temp }}/cmake_src
-      run: |
-        echo "Patching Utilities/cmcurl/lib/formdata.c to include curl_private.h"
-        # Menggunakan sed untuk menyisipkan #include "curl_private.h" di baris 1
-        sed -i '1i#include "curl_private.h"' "$CMAKE_SOURCE_DIR/Utilities/cmcurl/lib/formdata.c"
-
-        echo "Patch applied. Showing first few lines of formdata.c:"
-        head "$CMAKE_SOURCE_DIR/Utilities/cmcurl/lib/formdata.c"
-    # --- END: Langkah patching curl_private.h ---
-
     # --- START: Langkah patching untuk memperbaiki error pipe2 (pipe.c) ---
     - name: Patch cmlibuv pipe.c for unistd.h and pipe2 define
       env:
@@ -188,7 +175,7 @@ jobs:
         head "$CMAKE_SOURCE_DIR/Utilities/cmlibuv/src/unix/pipe.c"
     # --- END: Langkah patching pipe.c ---
 
-    # --- START: Langkah patching baru untuk memperbaiki error CPU affinity (process.c) ---
+    # --- START: Langkah patching untuk memperbaiki error CPU affinity (process.c) ---
     - name: Patch cmlibuv process.c for sched.h, pthread.h, and defines
       env:
         CMAKE_SOURCE_DIR: ${{ runner.temp }}/cmake_src
@@ -205,6 +192,22 @@ jobs:
         echo "Patch applied. Showing first few lines of process.c:"
         head "$CMAKE_SOURCE_DIR/Utilities/cmlibuv/src/unix/process.c"
     # --- END: Langkah patching process.c ---
+
+    # --- START: Langkah patching baru untuk memperbaiki error tipe dasar libcurl (formdata.c) - Menggunakan header publik ---
+    - name: Patch cmcurl formdata.c for public curl headers include
+      env:
+        CMAKE_SOURCE_DIR: ${{ runner.temp }}/cmake_src
+      run: |
+        echo "Patching Utilities/cmcurl/lib/formdata.c to include public curl headers"
+        # Menggunakan sed untuk menyisipkan baris di awal file
+        # Sisipkan #include <curl/curl.h> di baris 1
+        sed -i '1i#include <curl/curl.h>' "$CMAKE_SOURCE_DIR/Utilities/cmcurl/lib/formdata.c"
+        # Sisipkan #include <curl/system.h> di baris 2
+        sed -i '2i#include <curl/system.h>' "$CMAKE_SOURCE_DIR/Utilities/cmcurl/lib/formdata.c"
+
+        echo "Patch applied. Showing first few lines of formdata.c:"
+        head "$CMAKE_SOURCE_DIR/Utilities/cmcurl/lib/formdata.c"
+    # --- END: Langkah patching formdata.c ---
 
 
     - name: Konfigurasi build CMake untuk Android armeabi-v7a
