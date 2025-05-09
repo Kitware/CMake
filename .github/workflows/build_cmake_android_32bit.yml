@@ -1,4 +1,4 @@
-name: Build CMake for Android (armeabi-v7a)
+name: Build CMake for Android (armeabi-v7a) - using nttld/setup-ndk
 
 on:
   # Ini memungkinkan Anda menjalankan workflow secara manual dari tab "Actions" di GitHub
@@ -11,7 +11,7 @@ jobs:
     steps:
     - name: Checkout code
       # Mengunduh kode repositori (shantoze/CMake-arm) tempat workflow ini berada
-      uses: actions/checkout@v4
+      uses: actions/checkout@v4 # Menggunakan v4, lebih update dari v3
 
     - name: Set up Java
       # NDK membutuhkan Java
@@ -20,13 +20,12 @@ jobs:
         distribution: 'temurin'
         java-version: '17' # Versi Java yang kompatibel dengan NDK
 
-    - name: Set up Android NDK
-      # Menggunakan action komunitas yang BENAR untuk menginstal Android NDK di runner
-      # Action ini adalah android-actions/setup-ndk@v1
-      uses: android-actions/setup-ndk@v1
+    - name: Set up Android NDK (using nttld/setup-ndk)
+      # Menggunakan action komunitas nttld/setup-ndk@v1 untuk menginstal Android NDK
+      uses: nttld/setup-ndk@v1
       with:
-        # action ini hanya perlu parameter ndk
-        ndk: '25.2.8702022' # *** PENTING: Tentukan versi NDK yang konsisten di sini ***
+        # Gunakan parameter ndk-version sesuai action ini
+        ndk-version: r26d # *** PENTING: Tentukan versi NDK yang konsisten di sini ***
 
     # Langkah ini biasanya tidak perlu karena cmake/make sudah ada di runner Ubuntu,
     # tapi bisa ditambahkan jika runner standar berubah.
@@ -48,10 +47,10 @@ jobs:
         cd ${{ runner.temp }}/cmake_src/build
 
     - name: Configure CMake Build for Android armeabi-v7a
-      # Menjalankan konfigurasi CMake menggunakan NDK toolchain file dari instalasi NDK di runner
-      # Path NDK diambil dari variabel lingkungan ANDROID_NDK_HOME yang disetel oleh action setup-ndk
+      # Menjalankan konfigurasi CMake menggunakan NDK toolchain file
+      # Path NDK diambil dari variabel lingkungan ANDROID_NDK_HOME yang disetel oleh nttld/setup-ndk@v1
       env:
-        # ANDROID_NDK_HOME disetel oleh android-actions/setup-ndk@v1
+        # nttld/setup-ndk@v1 seharusnya menyetel ANDROID_NDK_HOME
         INSTALL_DIR: ${{ runner.temp }}/cmake_install # Lokasi instalasi sementara di runner
       run: |
         cd ${{ runner.temp }}/cmake_src/build # Pastikan berada di direktori build
