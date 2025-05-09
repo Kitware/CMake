@@ -159,18 +159,18 @@ jobs:
         head "$CMAKE_SOURCE_DIR/Utilities/cmlibuv/src/unix/core.c"
     # --- END: Langkah patching sched.h ---
 
-    # --- START: Langkah patching baru untuk memperbaiki error formdata.c ---
-    - name: Patch cmcurl formdata.c for sendf.h include
+    # --- START: Langkah patching baru untuk memperbaiki error tipe dasar libcurl ---
+    - name: Patch cmcurl formdata.c for curl_private.h include
       env:
         CMAKE_SOURCE_DIR: ${{ runner.temp }}/cmake_src
       run: |
-        echo "Patching Utilities/cmcurl/lib/formdata.c to include sendf.h"
-        # Menggunakan sed untuk menyisipkan #include "sendf.h" di baris 1
-        sed -i '1i#include "sendf.h"' "$CMAKE_SOURCE_DIR/Utilities/cmcurl/lib/formdata.c"
+        echo "Patching Utilities/cmcurl/lib/formdata.c to include curl_private.h"
+        # Menggunakan sed untuk menyisipkan #include "curl_private.h" di baris 1
+        sed -i '1i#include "curl_private.h"' "$CMAKE_SOURCE_DIR/Utilities/cmcurl/lib/formdata.c"
 
         echo "Patch applied. Showing first few lines of formdata.c:"
         head "$CMAKE_SOURCE_DIR/Utilities/cmcurl/lib/formdata.c"
-    # --- END: Langkah patching formdata.c ---
+    # --- END: Langkah patching curl_private.h ---
 
 
     - name: Konfigurasi build CMake untuk Android armeabi-v7a
