@@ -172,7 +172,7 @@ jobs:
         head "$CMAKE_SOURCE_DIR/Utilities/cmcurl/lib/formdata.c"
     # --- END: Langkah patching curl_private.h ---
 
-    # --- START: Langkah patching baru untuk memperbaiki error pipe2 (pipe.c) ---
+    # --- START: Langkah patching untuk memperbaiki error pipe2 (pipe.c) ---
     - name: Patch cmlibuv pipe.c for unistd.h and pipe2 define
       env:
         CMAKE_SOURCE_DIR: ${{ runner.temp }}/cmake_src
@@ -187,6 +187,24 @@ jobs:
         echo "Patch applied. Showing first few lines of pipe.c:"
         head "$CMAKE_SOURCE_DIR/Utilities/cmlibuv/src/unix/pipe.c"
     # --- END: Langkah patching pipe.c ---
+
+    # --- START: Langkah patching baru untuk memperbaiki error CPU affinity (process.c) ---
+    - name: Patch cmlibuv process.c for sched.h, pthread.h, and defines
+      env:
+        CMAKE_SOURCE_DIR: ${{ runner.temp }}/cmake_src
+      run: |
+        echo "Patching Utilities/cmlibuv/src/unix/process.c to include sched.h, pthread.h and define _GNU_SOURCE"
+        # Menggunakan sed untuk menyisipkan baris di awal file
+        # Sisipkan #define _GNU_SOURCE di baris 1
+        sed -i '1i#define _GNU_SOURCE' "$CMAKE_SOURCE_DIR/Utilities/cmlibuv/src/unix/process.c"
+        # Sisipkan #include <sched.h> di baris 2
+        sed -i '2i#include <sched.h>' "$CMAKE_SOURCE_DIR/Utilities/cmlibuv/src/unix/process.c"
+        # Sisipkan #include <pthread.h> di baris 3
+        sed -i '3i#include <pthread.h>' "$CMAKE_SOURCE_DIR/Utilities/cmlibuv/src/unix/process.c"
+
+        echo "Patch applied. Showing first few lines of process.c:"
+        head "$CMAKE_SOURCE_DIR/Utilities/cmlibuv/src/unix/process.c"
+    # --- END: Langkah patching process.c ---
 
 
     - name: Konfigurasi build CMake untuk Android armeabi-v7a
