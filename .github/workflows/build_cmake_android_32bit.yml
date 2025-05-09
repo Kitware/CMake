@@ -284,8 +284,8 @@ jobs:
               -DCMAKE_INSTALL_PREFIX="$INSTALL_DIR" \
               -DBUILD_TESTING=OFF \
               -Wno-dev \
-              -DCMAKE_C_USE_PRECOMPILED_HEADERS=FALSE \ # <-- Tambahkan ini
-              -DCMAKE_CXX_USE_PRECOMPILED_HEADERS=FALSE # <-- Tambahkan ini
+              -DCMAKE_C_USE_PRECOMPILED_HEADERS=FALSE \
+              -DCMAKE_CXX_USE_PRECOMPILED_HEADERS=FALSE
 
         if [ $? -ne 0 ]; then
           echo "CMake configuration failed!"
