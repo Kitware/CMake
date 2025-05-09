@@ -143,17 +143,18 @@ jobs:
         echo "Cloning CMake version ${{ env.CMAKE_VERSION_TAG }}"
         git clone --depth 1 --branch ${{ env.CMAKE_VERSION_TAG }} https://github.com/Kitware/CMake.git ${{ runner.temp }}/cmake_src
 
-    # --- START: Langkah patching untuk memperbaiki error sched.h ---
+    # --- START: Langkah patching untuk memperbaiki error sched.h (menggunakan dua perintah sed) ---
     - name: Patch cmlibuv core.c for sched.h includes
       env:
         CMAKE_SOURCE_DIR: ${{ runner.temp }}/cmake_src
       run: |
         echo "Patching Utilities/cmlibuv/src/unix/core.c to include sched.h"
         # Menggunakan sed untuk menyisipkan baris di awal file
-        sed -i '1i\
-#define _GNU_SOURCE\
-#include <sched.h>
-' "$CMAKE_SOURCE_DIR/Utilities/cmlibuv/src/unix/core.c"
+        # Sisipkan #define _GNU_SOURCE di baris 1
+        sed -i '1i#define _GNU_SOURCE' "$CMAKE_SOURCE_DIR/Utilities/cmlibuv/src/unix/core.c"
+        # Sisipkan #include <sched.h> di baris 2 (yang kini berada setelah define)
+        sed -i '2i#include <sched.h>' "$CMAKE_SOURCE_DIR/Utilities/cmlibuv/src/unix/core.c"
+
         echo "Patch applied. Showing first few lines of core.c:"
         # Menampilkan beberapa baris pertama untuk verifikasi
         head "$CMAKE_SOURCE_DIR/Utilities/cmlibuv/src/unix/core.c"
