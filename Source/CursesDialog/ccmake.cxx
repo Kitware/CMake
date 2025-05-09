@@ -19,6 +19,7 @@
 #include "cmDocumentationEntry.h"
 #include "cmMessageMetadata.h"
 #include "cmState.h"
+#include "cmStdIoInit.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmake.h"
@@ -62,7 +63,8 @@ cmCursesForm* cmCursesForm::CurrentForm = nullptr;
 
 int main(int argc, char const* const* argv)
 {
-  cmSystemTools::EnsureStdPipes();
+  cm::StdIo::Init();
+
   cmsys::Encoding::CommandLineArguments encoding_args =
     cmsys::Encoding::CommandLineArguments::Main(argc, argv);
   argc = encoding_args.argc();
