@@ -1,4 +1,4 @@
-name: Build CMake for Android (armeabi-v7a) - using android-actions/setup-ndk + Debugging
+name: Build CMake for Android (armeabi-v7a) - Manual NDK Setup + Debugging
 
 on:
   # Ini memungkinkan Anda menjalankan workflow secara manual dari tab "Actions" di GitHub
@@ -14,37 +14,77 @@ jobs:
       uses: actions/checkout@v4 # Menggunakan v4
 
     - name: Set up Java
-      # NDK membutuhkan Java
+      # SDK Manager membutuhkan Java
       uses: actions/setup-java@v4
       with:
         distribution: 'temurin'
-        java-version: '17' # Versi Java yang kompatibel dengan NDK
+        java-version: '17' # Versi Java yang kompatibel
 
-    - name: Set up Android NDK (using android-actions/setup-ndk)
-      # Menggunakan action komunitas android-actions/setup-ndk@v1 untuk menginstal Android NDK
-      uses: android-actions/setup-ndk@v1
-      with:
-        # Action ini menggunakan parameter 'ndk'
-        ndk: '25.2.8702022' # *** PENTING: Tentukan versi NDK yang konsisten di sini ***
+    # --- LANGKAH MANUAL INSTALASI NDK DIMULAI ---
+    - name: Install Android SDK Command-line Tools
+      run: |
+        echo "Installing SDK Command-line Tools..."
+        # Buat direktori untuk SDK
+        mkdir -p ${{ runner.temp }}/android-sdk
+        # Tetapkan variabel ANDROID_SDK_ROOT untuk langkah ini dan selanjutnya
+        export ANDROID_SDK_ROOT=${{ runner.temp }}/android-sdk
+        # Unduh Command-line Tools terbaru
+        wget https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -O cmdline-tools.zip
+        # Ekstrak
+        unzip cmdline-tools.zip -d $ANDROID_SDK_ROOT/cmdline-tools
+        # Pindahkan isi ke direktori 'latest' sesuai struktur yg diharapkan sdkmanager
+        mv $ANDROID_SDK_ROOT/cmdline-tools/cmdline-tools/* $ANDROID_SDK_ROOT/cmdline-tools/latest/ || echo "Move command failed, structure might be different. Proceeding..."
+        # Set PATH agar sdkmanager bisa dijalankan
+        echo "PATH=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH" >> $GITHUB_ENV # Set PATH untuk langkah selanjutnya
+        echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT" >> $GITHUB_ENV # Set ANDROID_SDK_ROOT untuk langkah selanjutnya
+        # Terima lisensi SDK (otomatis)
+        yes | sdkmanager --licenses > /dev/null || true
+        echo "SDK Command-line Tools installed."
+      shell: bash # Pastikan menggunakan bash
+
+    - name: Install Android NDK
+      run: |
+        echo "Installing Android NDK..."
+        # Ambil variabel dari env sebelumnya
+        export ANDROID_SDK_ROOT=${{ env.ANDROID_SDK_ROOT }}
+        export PATH=${{ env.PATH }} # Ambil PATH yang sudah diperbarui
+        # Instal NDK versi spesifik menggunakan sdkmanager
+        # Format versinya 'ndk;nomor.versi'
+        NDK_VERSION="ndk;25.2.8702022" # *** PENTING: Tentukan versi NDK yang konsisten di sini ***
+        yes | sdkmanager --install $NDK_VERSION --sdk_root=$ANDROID_SDK_ROOT > /dev/null || true
+        # Temukan path lengkap NDK yang baru diinstal
+        # Cari folder dengan nama nomor versi NDK di dalam $ANDROID_SDK_ROOT/ndk/
+        NDK_FULL_PATH=$(find $ANDROID_SDK_ROOT/ndk/ -maxdepth 1 -type d -name "25.2.8702022" -print -quit) # *** Sesuaikan nama folder NDK jika perlu ***
+        if [ -z "$NDK_FULL_PATH" ]; then
+          echo "Error: NDK version 25.2.8702022 not found after installation attempt!"
+          exit 1
+        fi
+        echo "Installed NDK path found at: $NDK_FULL_PATH"
+        # Set variabel lingkungan ANDROID_NDK_HOME ke path NDK yang ditemukan
+        echo "ANDROID_NDK_HOME=$NDK_FULL_PATH" >> $GITHUB_ENV # Set ANDROID_NDK_HOME untuk langkah selanjutnya
+        echo "PATH=$NDK_FULL_PATH:$PATH" >> $GITHUB_ENV # Tambahkan NDK ke PATH jika perlu (opsional, tapi bagus)
+        echo "NDK installed."
+      shell: bash # Pastikan menggunakan bash
+    # --- LANGKAH MANUAL INSTALASI NDK SELESAI ---
+
 
     # --- LANGKAH DEBUGGING DIMULAI ---
     - name: Debug NDK Setup Paths
       run: |
         echo "--- NDK Environment Variables ---"
-        echo "ANDROID_NDK_HOME = ${{ env.ANDROID_NDK_HOME }}"
-        echo "ANDROID_HOME = ${{ env.ANDROID_HOME }}"
-        echo "NDK_ROOT = ${{ env.NDK_ROOT }}"
+        echo "ANDROID_NDK_HOME = ${{ env.ANDROID_NDK_HOME }}" # Ini HARUS terisi sekarang
+        echo "ANDROID_HOME = ${{ env.ANDROID_HOME }}" # Mungkin terisi atau kosong
+        echo "NDK_ROOT = ${{ env.NDK_ROOT }}" # Mungkin kosong
         echo "--- Checking NDK Build Dir ---"
-        # List isi direktori build di dalam NDK root yang disetel oleh Action
+        # Gunakan path dari ANDROID_NDK_HOME
         ls -l ${{ env.ANDROID_NDK_HOME }}/build/ || echo "Directory ${{ env.ANDROID_NDK_HOME }}/build/ not found or listing failed"
         echo "--- Checking NDK CMake Dir ---"
-        # List isi direktori cmake di dalam NDK build
         ls -l ${{ env.ANDROID_NDK_HOME }}/build/cmake/ || echo "Directory ${{ env.ANDROID_NDK_HOME }}/build/cmake/ not found or listing failed"
         echo "--- Checking for toolchain file existence ---"
-        # Cek apakah file toolchain ada di lokasi yang diharapkan
         test -f ${{ env.ANDROID_NDK_HOME }}/build/cmake/android.toolchain.cmake && echo "Toolchain file EXISTS at expected path!" || echo "Toolchain file NOT found at expected path!"
         echo "Expected Toolchain Path used in Configure Step: ${{ env.ANDROID_NDK_HOME }}/build/cmake/android.toolchain.cmake"
         echo "--- Debugging Complete ---"
+      shell: bash # Pastikan menggunakan bash
     # --- LANGKAH DEBUGGING SELESAI ---
 
 
@@ -52,48 +92,67 @@ jobs:
       # Langkah ini biasanya tidak perlu karena cmake/make sudah ada di runner Ubuntu,
       # tapi bisa ditambahkan jika runner standar berubah.
       run: |
+        echo "Installing additional build tools..."
         sudo apt-get update
         sudo apt-get install -y cmake make ninja-build git
+        echo "Additional build tools installed."
+      shell: bash # Pastikan menggunakan bash
 
     - name: Get CMake Source
       # Mengunduh kode sumber CMake LANGSUNG dari repositori asli Kitware
       # Disimpan di lokasi temporary runner ($RUNNER_TEMP/cmake_src)
       # Ini terpisah dari repositori shantoze/CMake-arm Anda
-      run: git clone --depth 1 https://github.com/Kitware/CMake.git ${{ runner.temp }}/cmake_src
+      run: |
+        echo "Getting CMake source code..."
+        git clone --depth 1 https://github.com/Kitware/CMake.git ${{ runner.temp }}/cmake_src
+        echo "CMake source downloaded."
+      shell: bash
 
     - name: Create and Navigate to Build Directory
       # Membuat dan masuk ke direktori build di lokasi temporary
       run: |
+        echo "Creating build directory..."
         mkdir ${{ runner.temp }}/cmake_src/build
         cd ${{ runner.temp }}/cmake_src/build
+        echo "Build directory created."
+      shell: bash
 
     - name: Configure CMake Build for Android armeabi-v7a
       # Menjalankan konfigurasi CMake menggunakan NDK toolchain file
-      # Path NDK diambil dari variabel lingkungan ANDROID_NDK_HOME yang disetel oleh action setup NDK
+      # Path NDK diambil dari variabel lingkungan ANDROID_NDK_HOME yang disetel manual
       env:
-        # Action setup NDK seharusnya menyetel ANDROID_NDK_HOME
+        # ANDROID_NDK_HOME disetel di langkah Install Android NDK
         INSTALL_DIR: ${{ runner.temp }}/cmake_install # Lokasi instalasi sementara di runner
-      run: | # <-- Pastikan ada | di sini untuk multi-line command
+      run: |
+        echo "Configuring CMake build..."
         cd ${{ runner.temp }}/cmake_src/build # Pastikan berada di direktori build
-        # BARIS DI BAWAH INI MENGGUNAKAN VARIABEL LINGKUNGAN NDK YANG DIHARAPKAN DISETELLAH
+        # Menggunakan variabel ANDROID_NDK_HOME yang sudah disetel manual
         cmake ${{ runner.temp }}/cmake_src \
-          -DCMAKE_TOOLCHAIN_FILE=${{ env.ANDROID_NDK_HOME }}/build/cmake/android.toolchain.cmake \
+          -DCMAKE_TOOLCHAIN_FILE=${{ env.ANDROID_NDK_HOME }}/build/cmake/android.toolchain.cmake \ # <--- Menggunakan variabel yang seharusnya sudah terisi
           -DANDROID_ABI=armeabi-v7a \
           -DANDROID_PLATFORM=android-21 \
           -DCMAKE_BUILD_TYPE=Release \
           -DCMAKE_MAKE_PROGRAM=$(which make)
+        echo "CMake configuration complete."
+      shell: bash
 
     - name: Build CMake
       # Menjalankan proses kompilasi menggunakan make
       run: |
+        echo "Building CMake..."
         cd ${{ runner.temp }}/cmake_src/build # Pastikan berada di direktori build
         make -j$(nproc) # Menggunakan semua core runner
+        echo "CMake build complete."
+      shell: bash
 
     - name: Install CMake
       # Menyalin hasil build ke direktori instalasi sementara ($INSTALL_DIR)
       run: |
+        echo "Installing CMake..."
         cd ${{ runner.temp }}/cmake_src/build # Pastikan berada di direktori build
         make install
+        echo "CMake installed to ${{ runner.temp }}/cmake_install"
+      shell: bash
 
     - name: Archive built CMake
       # Mengunggah isi direktori instalasi sebagai artefak build yang bisa diunduh
