@@ -144,7 +144,7 @@ jobs:
         echo "Cloning CMake version ${{ env.CMAKE_VERSION_TAG }}"
         git clone --depth 1 --branch ${{ env.CMAKE_VERSION_TAG }} https://github.com/Kitware/CMake.git ${{ runner.temp }}/cmake_src
 
-    # Langkah-langkah patching sebelumnya (untuk core.c, pipe.c, process.c, formdata.c) dihapus di sini.
+    # Langkah-langkah patching sebelumnya telah dihapus.
 
     - name: Konfigurasi build CMake untuk Android armeabi-v7a
       env:
@@ -164,17 +164,17 @@ jobs:
         echo "Targeting Android API level: ${{ env.ANDROID_PLATFORM }}"
         echo "Targeting Android ABI: armeabi-v7a"
 
-
         # This cmake command uses the host's cmake (installed in previous step)
         # to configure the build of CMake sources for Android.
+        # PASTIKAN TIDAK ADA SPASI SETELAH BACKSLASH DI SETIAP AKHIR BARIS DI BAWAH INI
         cmake "$CMAKE_SOURCE_DIR" \
-          -DCMAKE_TOOLCHAIN_FILE="$ANDROID_NDK_HOME/build/cmake/android.toolchain.cmake" \
-          -DANDROID_ABI=armeabi-v7a \
-          -DANDROID_PLATFORM=${{ env.ANDROID_PLATFORM }} \ # Menggunakan variabel env yang diperbarui
-          -DCMAKE_BUILD_TYPE=Release \
-          -DCMAKE_INSTALL_PREFIX="$INSTALL_DIR" \
-          -DBUILD_TESTING=OFF \
-          -Wno-dev
+              -DCMAKE_TOOLCHAIN_FILE="$ANDROID_NDK_HOME/build/cmake/android.toolchain.cmake" \
+              -DANDROID_ABI=armeabi-v7a \
+              -DANDROID_PLATFORM=${{ env.ANDROID_PLATFORM }} \
+              -DCMAKE_BUILD_TYPE=Release \
+              -DCMAKE_INSTALL_PREFIX="$INSTALL_DIR" \
+              -DBUILD_TESTING=OFF \
+              -Wno-dev
 
         if [ $? -ne 0 ]; then
           echo "CMake configuration failed!"
