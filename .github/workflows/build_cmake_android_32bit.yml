@@ -127,7 +127,7 @@ jobs:
         # Mengganti 29.0.13113456 (beta) dengan versi stabil seperti r21e
         # Jika 'r21e' tidak muncul di output 'sdkmanager --list', GANTI dengan versi stabil lain
         # (misalnya "r25c", "r26b", "r27") yang ada di daftar.
-        NDK_VERSION_NUMBER="r28b" # <-- VERSI NDK STABIL
+        NDK_VERSION_NUMBER="28.1.13356709" # <-- VERSI NDK STABIL
 
         NDK_PACKAGE="ndk;$NDK_VERSION_NUMBER" # Format paket untuk sdkmanager --install
 
