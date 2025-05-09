@@ -144,7 +144,7 @@ jobs:
         echo "Cloning CMake version ${{ env.CMAKE_VERSION_TAG }}"
         git clone --depth 1 --branch ${{ env.CMAKE_VERSION_TAG }} https://github.com/Kitware/CMake.git ${{ runner.temp }}/cmake_src
 
-    # --- START: Langkah patching untuk memperbaiki error sched.h (core.c) - Ditambahkan kembali ---
+    # --- START: Langkah patching untuk memperbaiki error sched.h (core.c) ---
     - name: Patch cmlibuv core.c for sched.h includes
       env:
         CMAKE_SOURCE_DIR: ${{ runner.temp }}/cmake_src
@@ -160,7 +160,23 @@ jobs:
         head "$CMAKE_SOURCE_DIR/Utilities/cmlibuv/src/unix/core.c"
     # --- END: Langkah patching sched.h ---
 
-    # Langkah-langkah patching lainnya (pipe.c, process.c, formdata.c) TIDAK ditambahkan kembali di sini.
+    # --- START: Langkah patching untuk memperbaiki error pipe2 (pipe.c) - Ditambahkan kembali ---
+    - name: Patch cmlibuv pipe.c for unistd.h and pipe2 define
+      env:
+        CMAKE_SOURCE_DIR: ${{ runner.temp }}/cmake_src
+      run: |
+        echo "Patching Utilities/cmlibuv/src/unix/pipe.c to include unistd.h and define _GNU_SOURCE"
+        # Menggunakan sed untuk menyisipkan baris di awal file
+        # Sisipkan #define _GNU_SOURCE di baris 1
+        sed -i '1i#define _GNU_SOURCE' "$CMAKE_SOURCE_DIR/Utilities/cmlibuv/src/unix/pipe.c"
+        # Sisipkan #include <unistd.h> di baris 2
+        sed -i '2i#include <unistd.h>' "$CMAKE_SOURCE_DIR/Utilities/cmlibuv/src/unix/pipe.c"
+
+        echo "Patch applied. Showing first few lines of pipe.c:"
+        head "$CMAKE_SOURCE_DIR/Utilities/cmlibuv/src/unix/pipe.c"
+    # --- END: Langkah patching pipe.c ---
+
+    # Langkah-langkah patching lainnya (process.c, formdata.c) TIDAK ditambahkan kembali di sini.
 
     - name: Konfigurasi build CMake untuk Android armeabi-v7a
       env:
