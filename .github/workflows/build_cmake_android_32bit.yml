@@ -20,53 +20,28 @@ jobs:
     - name: Setup Android SDK, NDK, CMake
       run: |
         set -e
-
-        # Definisikan variabel
         export ANDROID_SDK_ROOT="${{ runner.temp }}/android-sdk"
         mkdir -p "$ANDROID_SDK_ROOT"
         echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
 
-        # Download SDK command line tools
         SDK_TOOLS_URL="https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip"
         wget -O cmdline-tools.zip "$SDK_TOOLS_URL"
-
-        # Ekstrak dan atur folder
         unzip cmdline-tools.zip -d "$ANDROID_SDK_ROOT/cmdline-tools-temp"
-
-        # Buat folder 'latest' dan pindahkan isi
         mkdir -p "$ANDROID_SDK_ROOT/cmdline-tools/latest"
         mv "$ANDROID_SDK_ROOT/cmdline-tools-temp/cmdline-tools/"* "$ANDROID_SDK_ROOT/cmdline-tools/latest/"
-
-        # Bersihkan file zip dan folder sementara
         rm -rf "$ANDROID_SDK_ROOT/cmdline-tools-temp"
         rm -f cmdline-tools.zip
-
-        # Tambahkan path ke environment PATH dan ke $GITHUB_PATH
         echo "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin" >> $GITHUB_PATH
-
-        # Update PATH di sesi ini juga agar sdkmanager bisa langsung dipanggil
         export PATH=$PATH:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin
-
-        # Verifikasi keberadaan sdkmanager
         which sdkmanager || { echo "sdkmanager tidak ditemukan"; exit 1; }
-
-        # Update SDK tools dan install dependencies
         yes | sdkmanager --sdk_root="$ANDROID_SDK_ROOT" --update
-
-        # Install platform, build tools, NDK, dan CMake
         yes | sdkmanager --sdk_root="$ANDROID_SDK_ROOT" \
           "platforms;android-21" \
           "build-tools;33.0.0" \
           "ndk;r27" \
           "cmake;3.26.4"
-
-        # Set environment variable untuk NDK
         echo "ANDROID_NDK_HOME=$ANDROID_SDK_ROOT/ndk/r27" >> $GITHUB_ENV
-
-        # Accept licenses
         yes | sdkmanager --licenses --sdk_root="$ANDROID_SDK_ROOT"
-
-        # Debug info
         echo "SDK root: $ANDROID_SDK_ROOT"
         echo "NDK path: $ANDROID_NDK_HOME"
 
@@ -98,14 +73,9 @@ jobs:
       run: |
         mkdir -p "$CMAKE_BUILD_DIR"
         cd "$CMAKE_BUILD_DIR"
-
-        # Tambahkan path ke sdkmanager ke environment PATH agar tersedia
         export PATH=$PATH:${{ env.ANDROID_SDK_ROOT }}/cmdline-tools/latest/bin
-
-        # Verifikasi sdkmanager bisa dipanggil
         which sdkmanager || { echo "sdkmanager tidak ditemukan"; exit 1; }
 
-        # Konfigurasi CMake dengan toolchain Android
         cmake "$CMAKE_SOURCE_DIR" \
           -DCMAKE_TOOLCHAIN_FILE="$ANDROID_NDK_HOME/build/cmake/android.toolchain.cmake" \
           -DANDROID_ABI=armeabi-v7a \
@@ -115,7 +85,6 @@ jobs:
           -DWITH_TESTING=OFF \
           -Wdev -Wdeprecated
 
-        # Pastikan konfigurasi berhasil
         if [ $? -ne 0 ]; then
           echo "Konfigurasi CMake gagal!"
           exit 1
@@ -138,4 +107,4 @@ jobs:
       with:
         name: cmake-android-armeabi-v7a
         path: "$INSTALL_DIR"
-        if-no-files-found: error
+      if-no-files-found: error
