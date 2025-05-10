@@ -7,75 +7,116 @@ include_guard(GLOBAL)
 CMakePushCheckState
 -------------------
 
-This module provides macros for managing the state of variables that influence
-how various CMake check commands (e.g., ``check_symbol_exists()``, etc.) are
-performed.  These macros save, reset, and restore the following variables:
+This module provides commands for managing the state of variables that influence
+how various CMake check commands (e.g., :command:`check_symbol_exists`, etc.)
+are performed.
 
-* ``CMAKE_REQUIRED_FLAGS``
-* ``CMAKE_REQUIRED_DEFINITIONS``
-* ``CMAKE_REQUIRED_INCLUDES``
-* ``CMAKE_REQUIRED_LINK_OPTIONS``
-* ``CMAKE_REQUIRED_LIBRARIES``
-* ``CMAKE_REQUIRED_LINK_DIRECTORIES``
-* ``CMAKE_REQUIRED_QUIET``
-* ``CMAKE_EXTRA_INCLUDE_FILES``
+Load this module in CMake project with:
 
-Macros
-^^^^^^
+.. code-block:: cmake
+
+  include(CMakePushCheckState)
+
+This module provides the following commands, which are useful for scoped
+configuration, for example, in CMake modules or when performing checks in a
+controlled environment, ensuring that temporary modifications are isolated
+to the scope of the check and do not propagate into other parts of the build
+system:
+
+* :command:`cmake_push_check_state`
+* :command:`cmake_reset_check_state`
+* :command:`cmake_pop_check_state`
+
+Affected Variables
+^^^^^^^^^^^^^^^^^^
+
+The following CMake variables are saved, reset, and restored by this module's
+commands:
+
+.. include:: /module/include/CMAKE_REQUIRED_FLAGS.rst
+
+.. include:: /module/include/CMAKE_REQUIRED_DEFINITIONS.rst
+
+.. include:: /module/include/CMAKE_REQUIRED_INCLUDES.rst
+
+.. include:: /module/include/CMAKE_REQUIRED_LINK_OPTIONS.rst
+
+.. include:: /module/include/CMAKE_REQUIRED_LIBRARIES.rst
+
+.. include:: /module/include/CMAKE_REQUIRED_LINK_DIRECTORIES.rst
+
+.. include:: /module/include/CMAKE_REQUIRED_QUIET.rst
+
+``CMAKE_EXTRA_INCLUDE_FILES``
+  .. versionadded:: 3.6
+    Previously used already by the :command:`check_type_size` command;  now
+    also supported by this module.
+
+  A :ref:`semicolon-separated list <CMake Language Lists>` of extra header
+  files to include when performing the check.
+
+.. note::
+
+  Other CMake variables, such as :variable:`CMAKE_<LANG>_FLAGS`, propagate
+  to all checks regardless of commands provided by this module, as those
+  fundamental variables are designed to influence the global state of the
+  build system.
+
+Commands
+^^^^^^^^
 
 .. command:: cmake_push_check_state
 
-  Saves (pushes) the current states of the above variables onto a stack.  This
-  is typically used to preserve the current configuration before making
-  temporary modifications for specific checks.
+  Pushes (saves) the current states of the above variables onto a stack:
 
   .. code-block:: cmake
 
     cmake_push_check_state([RESET])
 
+  Use this command to preserve the current configuration before making
+  temporary modifications for specific checks.
+
   ``RESET``
-    When this option is specified, the macro not only saves the current states
+    When this option is specified, the command not only saves the current states
     of the listed variables but also resets them to empty, allowing them to be
     reconfigured from a clean state.
 
 .. command:: cmake_reset_check_state
 
-  Resets (clears) the contents of the variables listed above to empty states.
+  Resets (clears) the contents of the variables listed above to empty states:
 
   .. code-block:: cmake
 
     cmake_reset_check_state()
 
-  This macro can be used, for example, when performing multiple sequential
-  checks that require entirely new configurations, ensuring no previous
-  configuration unintentionally carries over.
+  Use this command when performing multiple sequential checks that require
+  entirely new configurations, ensuring no previous configuration
+  unintentionally carries over.
 
 .. command:: cmake_pop_check_state
 
   Restores the states of the variables listed above to their values at the time
-  of the most recent ``cmake_push_check_state()`` call.
+  of the most recent ``cmake_push_check_state()`` call:
 
   .. code-block:: cmake
 
     cmake_pop_check_state()
 
-  This macro is used to revert temporary changes made during a check.  To
+  Use this command to revert temporary changes made during a check.  To
   prevent unexpected behavior, pair each ``cmake_push_check_state()`` with a
   corresponding ``cmake_pop_check_state()``.
 
-These macros are useful for scoped configuration, for example, in
-:ref:`Find modules <Find Modules>` or when performing checks in a controlled
-environment, ensuring that temporary modifications are isolated to the scope of
-the check and do not propagate into other parts of the build system.
-
-.. note::
-
-  Other CMake variables, such as ``CMAKE_<LANG>_FLAGS``, propagate to all checks
-  regardless of these macros, as those fundamental variables are designed to
-  influence the global state of the build system.
-
 Examples
 ^^^^^^^^
+
+Example: Isolated Check With Compile Definitions
+""""""""""""""""""""""""""""""""""""""""""""""""
+
+In the following example, a check for the C symbol ``memfd_create()`` is
+performed with an additional ``_GNU_SOURCE`` compile definition,  without
+affecting global compile flags.  The ``RESET`` option is used to ensure
+that any prior values of the check-related variables are explicitly cleared
+before the check.
 
 .. code-block:: cmake
 
@@ -92,9 +133,12 @@ Examples
   # Restore the original state
   cmake_pop_check_state()
 
-Variable states can be pushed onto the stack multiple times, allowing for nested
-or sequential configurations.  Each ``cmake_pop_check_state()`` restores the
-most recent pushed states.
+Example: Nested Configuration Scopes
+""""""""""""""""""""""""""""""""""""
+
+In the following example, variable states are pushed onto the stack multiple
+times, allowing for sequential or nested checks.  Each
+``cmake_pop_check_state()`` restores the most recent pushed states.
 
 .. code-block:: cmake
 
