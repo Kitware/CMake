@@ -162,25 +162,20 @@ jobs:
         echo "Cloning CMake version ${{ env.CMAKE_VERSION_TAG }}"
         git clone --depth 1 --branch ${{ env.CMAKE_VERSION_TAG }} https://github.com/Kitware/CMake.git ${{ runner.temp }}/cmake_src
 
-    # --- START: Patch cmAffinity.cxx for pthread_getaffinity_np ---
-    - name: Patch cmAffinity.cxx for pthread_getaffinity_np
+    # --- START: Patch cmAffinity.cxx to exclude Android from CPU Affinity ---
+    - name: Patch cmAffinity.cxx to exclude Android from CPU Affinity
       env:
         CMAKE_SOURCE_DIR: ${{ runner.temp }}/cmake_src
       run: |
         CMAFFINITY_CXX_PATH="$CMAKE_SOURCE_DIR/Source/cmAffinity.cxx"
-        echo "Patching $CMAFFINITY_CXX_PATH for pthread_getaffinity_np."
+        echo "Patching $CMAFFINITY_CXX_PATH to exclude Android from CPU affinity features."
 
-        # Add conditional compilation around GetThreadAffinity implementation
-        # Insert #if !defined(ANDROID) after the function definition line
-        sed -i '/^std::vector<int> cmAffinity::GetThreadAffinity()/a#if !defined(ANDROID)' "$CMAFFINITY_CXX_PATH"
-
-        # Insert #else ... #endif before the closing brace of the function
-        sed -i '/^}/i#else \/\/ For Android, pthread_getaffinity_np might not be available or behave differently.\n  \/\/ Returning an empty vector as a fallback.\n#endif' "$CMAFFINITY_CXX_PATH"
+        # Modify the existing #if condition to include !defined(__ANDROID__)
+        sed -i 's/^#if defined(CMAKE_USE_CPU_AFFINITY) && defined(__linux__)/#if defined(CMAKE_USE_CPU_AFFINITY) && defined(__linux__) && !defined(__ANDROID__)/' "$CMAFFINITY_CXX_PATH"
 
         echo "Patch applied. Showing relevant section of cmAffinity.cxx:"
-        # Tampilkan bagian yang di-patch untuk verifikasi
-        grep -A 10 -B 2 'GetThreadAffinity' "$CMAFFINITY_CXX_PATH" || echo "Could not find patched section using grep."
-    # --- END: Patch cmAffinity.cxx for pthread_getaffinity_np ---
+        grep -A 5 'defined(CMAKE_USE_CPU_AFFINITY)' "$CMAFFINITY_CXX_PATH" || echo "Could not find patched section using grep."
+    # --- END: Patch cmAffinity.cxx to exclude Android from CPU Affinity ---
 
 
     # --- START: Tambahkan langkah membuat dummy android_lf.h ---
@@ -362,7 +357,7 @@ jobs:
         CMAKE_BUILD_DIR: ${{ runner.temp }}/cmake_build_android
         INSTALL_DIR: ${{ runner.temp }}/cmake_android_install
       run: |
-        echo "Installing CMake to $INSTALL_DIR..."
+        echo "Installing CMake to "$INSTALL_DIR"..."
         cd "$CMAKE_BUILD_DIR"
         make install
         if [ $? -ne 0 ]; then
@@ -379,7 +374,7 @@ jobs:
         CMAKE_SHARE_DIR_VERSION=$(echo "$CMAKE_VERSION_NUMERIC_PART" | cut -d. -f1,2)
         CMAKE_SHARE_DIR_TO_CHECK="cmake-$CMAKE_SHARE_DIR_VERSION"
 
-        echo "Verifying share directory: "$INSTALL_DIR"/share/"$CMAKE_SHARE_DIR_TOCHECK""
+        echo "Verifying share directory: "$INSTALL_DIR"/share/"$CMAKE_SHARE_DIR_TO_CHECK""
         ls -lA "$INSTALL_DIR/share/$CMAKE_SHARE_DIR_TO_CHECK" || echo "Warning: "$INSTALL_DIR"/share/"$CMAKE_SHARE_DIR_TO_CHECK" not found or empty."
 
     - name: Upload artefak hasil build
