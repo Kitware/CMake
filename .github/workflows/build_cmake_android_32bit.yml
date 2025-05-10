@@ -173,10 +173,42 @@ jobs:
         # Modify the existing #if condition to include !defined(ANDROID)
         sed -i 's/^#if defined(CMAKE_USE_CPU_AFFINITY) && defined(__linux__)/#if defined(CMAKE_USE_CPU_AFFINITY) && defined(__linux__) && !defined(ANDROID)/' "$CMAFFINITY_CXX_PATH"
 
-        echo "Patch applied. Showing relevant section of cmAffinity.cxx:"
+        echo "Patch applied. Showing relevant section of cmAffinity.cxx (from grep):"
         grep -A 5 'defined(CMAKE_USE_CPU_AFFINITY)' "$CMAFFINITY_CXX_PATH" || echo "Could not find patched section using grep."
     # --- END: Patch cmAffinity.cxx to exclude Android from CPU Affinity ---
 
+    # --- START: NEW DEBUG STEP: Verify cmAffinity.cxx content after patch ---
+    - name: Verify cmAffinity.cxx content after patch
+      env:
+        CMAKE_SOURCE_DIR: ${{ runner.temp }}/cmake_src
+      run: |
+        CMAFFINITY_CXX_PATH="$CMAKE_SOURCE_DIR/Source/cmAffinity.cxx"
+        echo "Displaying cmAffinity.cxx content around line 53 (the error line) and the main #if condition:"
+        
+        echo "--- Content around the main #if condition for CPU affinity (grep -C 5) ---"
+        grep -C 5 '^#if defined(CMAKE_USE_CPU_AFFINITY)' "$CMAFFINITY_CXX_PATH" || echo "Could not locate main CPU affinity #if condition."
+
+        echo "--- Content around GetThreadAffinity function (line 53 context) ---"
+        # Display 10 lines before and 10 lines after line 53.
+        # Adjust numbers if the compiler error line number changes due to other code or includes.
+        head -n 63 "$CMAFFINITY_CXX_PATH" | tail -n 20 || echo "Could not get content around line 53."
+
+        echo "--- Full GetThreadAffinity function content (awk) ---"
+        # Extract the entire function body to ensure the #if condition applies correctly
+        awk '/^std::vector<int> cmAffinity::GetThreadAffinity()/ {
+          print; # print the function signature
+          found=1;
+          nest_level=0;
+          next;
+        }
+        found {
+          print;
+          if ($0 ~ /{/) nest_level++;
+          if ($0 ~ /}/) nest_level--;
+          if (nest_level == 0 && $0 ~ /}/) { found=0; } # Stop after the outermost '}' of the function
+        }
+        ' "$CMAFFINITY_CXX_PATH" || echo "Could not extract GetThreadAffinity function content."
+    # --- END: NEW DEBUG STEP ---
 
     # --- START: Tambahkan langkah membuat dummy android_lf.h ---
     - name: Create dummy android_lf.h
