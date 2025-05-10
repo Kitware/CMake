@@ -170,8 +170,8 @@ jobs:
         CMAFFINITY_CXX_PATH="$CMAKE_SOURCE_DIR/Source/cmAffinity.cxx"
         echo "Patching $CMAFFINITY_CXX_PATH to exclude Android from CPU affinity features."
 
-        # Modify the existing #if condition to include !defined(__ANDROID__)
-        sed -i 's/^#if defined(CMAKE_USE_CPU_AFFINITY) && defined(__linux__)/#if defined(CMAKE_USE_CPU_AFFINITY) && defined(__linux__) && !defined(__ANDROID__)/' "$CMAFFINITY_CXX_PATH"
+        # Modify the existing #if condition to include !defined(ANDROID)
+        sed -i 's/^#if defined(CMAKE_USE_CPU_AFFINITY) && defined(__linux__)/#if defined(CMAKE_USE_CPU_AFFINITY) && defined(__linux__) && !defined(ANDROID)/' "$CMAFFINITY_CXX_PATH"
 
         echo "Patch applied. Showing relevant section of cmAffinity.cxx:"
         grep -A 5 'defined(CMAKE_USE_CPU_AFFINITY)' "$CMAFFINITY_CXX_PATH" || echo "Could not find patched section using grep."
@@ -293,8 +293,8 @@ jobs:
         export PATH="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH"
         which sdkmanager > /dev/null || echo "Warning: sdkmanager not found during CMake configuration."
 
-        echo "Using NDK from: $ANDROID_NDK_HOME"
-        echo "Toolchain file will be: $ANDROID_NDK_HOME/build/cmake/android.toolchain.cmake"
+        echo "Using NDK from: "$ANDROID_NDK_HOME""
+        echo "Toolchain file will be: "$ANDROID_NDK_HOME"/build/cmake/android.toolchain.cmake"
         echo "Targeting Android API level: ${{ env.ANDROID_PLATFORM }}"
         echo "Targeting Android ABI: armeabi-v7a"
 
@@ -327,13 +327,13 @@ jobs:
       env:
         CMAKE_BUILD_DIR: ${{ runner.temp }}/cmake_build_android
       run: |
-        echo "Cleaning build directory: $CMAKE_BUILD_DIR"
+        echo "Cleaning build directory: "$CMAKE_BUILD_DIR""
         if [ -d "$CMAKE_BUILD_DIR" ]; then # Cek apakah direktori build ada sebelum clean
           cd "$CMAKE_BUILD_DIR"
           make clean
           # Tidak menggunakan set -e ketat di sini karena make clean mungkin gagal jika direktori kosong/baru
         else
-          echo "Build directory $CMAKE_BUILD_DIR does not exist, no cleaning needed."
+          echo "Build directory "$CMAKE_BUILD_DIR" does not exist, no cleaning needed."
         fi
         echo "Clean complete."
     # --- END: Tambahkan langkah make clean ---
