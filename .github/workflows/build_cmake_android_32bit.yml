@@ -162,6 +162,27 @@ jobs:
         echo "Cloning CMake version ${{ env.CMAKE_VERSION_TAG }}"
         git clone --depth 1 --branch ${{ env.CMAKE_VERSION_TAG }} https://github.com/Kitware/CMake.git ${{ runner.temp }}/cmake_src
 
+    # --- START: Patch cmAffinity.cxx for pthread_getaffinity_np ---
+    - name: Patch cmAffinity.cxx for pthread_getaffinity_np
+      env:
+        CMAKE_SOURCE_DIR: ${{ runner.temp }}/cmake_src
+      run: |
+        CMAFFINITY_CXX_PATH="$CMAKE_SOURCE_DIR/Source/cmAffinity.cxx"
+        echo "Patching $CMAFFINITY_CXX_PATH for pthread_getaffinity_np."
+
+        # Add conditional compilation around GetThreadAffinity implementation
+        # Insert #if !defined(ANDROID) after the function definition line
+        sed -i '/^std::vector<int> cmAffinity::GetThreadAffinity()/a#if !defined(ANDROID)' "$CMAFFINITY_CXX_PATH"
+
+        # Insert #else ... #endif before the closing brace of the function
+        sed -i '/^}/i#else \/\/ For Android, pthread_getaffinity_np might not be available or behave differently.\n  \/\/ Returning an empty vector as a fallback.\n#endif' "$CMAFFINITY_CXX_PATH"
+
+        echo "Patch applied. Showing relevant section of cmAffinity.cxx:"
+        # Tampilkan bagian yang di-patch untuk verifikasi
+        grep -A 10 -B 2 'GetThreadAffinity' "$CMAFFINITY_CXX_PATH" || echo "Could not find patched section using grep."
+    # --- END: Patch cmAffinity.cxx for pthread_getaffinity_np ---
+
+
     # --- START: Tambahkan langkah membuat dummy android_lf.h ---
     - name: Create dummy android_lf.h
       env:
@@ -201,7 +222,7 @@ jobs:
            echo "Include line successfully commented out."
         else
            echo "Error: Include line NOT successfully commented out."
-           echo "Content of $ARCHIVE_H_PATH:"
+           echo "Content of "$ARCHIVE_H_PATH":"
            cat "$ARCHIVE_H_PATH" # Dump the file content for inspection
            exit 1
         fi
@@ -348,18 +369,18 @@ jobs:
           echo "Make install failed!"
           exit 1
         fi
-        echo "CMake installation successful. Contents of $INSTALL_DIR:"
+        echo "CMake installation successful. Contents of "$INSTALL_DIR":"
         ls -lA "$INSTALL_DIR"
 
         echo "Verifying key directories in installation:"
-        ls -lA "$INSTALL_DIR/bin" || echo "Warning: $INSTALL_DIR/bin not found or empty."
+        ls -lA "$INSTALL_DIR/bin" || echo "Warning: "$INSTALL_DIR"/bin not found or empty."
 
         CMAKE_VERSION_NUMERIC_PART="${CMAKE_VERSION_TAG#v}"
         CMAKE_SHARE_DIR_VERSION=$(echo "$CMAKE_VERSION_NUMERIC_PART" | cut -d. -f1,2)
         CMAKE_SHARE_DIR_TO_CHECK="cmake-$CMAKE_SHARE_DIR_VERSION"
 
-        echo "Verifying share directory: $INSTALL_DIR/share/$CMAKE_SHARE_DIR_TO_CHECK"
-        ls -lA "$INSTALL_DIR/share/$CMAKE_SHARE_DIR_TO_CHECK" || echo "Warning: $INSTALL_DIR/share/$CMAKE_SHARE_DIR_TO_CHECK not found or empty."
+        echo "Verifying share directory: "$INSTALL_DIR"/share/"$CMAKE_SHARE_DIR_TOCHECK""
+        ls -lA "$INSTALL_DIR/share/$CMAKE_SHARE_DIR_TO_CHECK" || echo "Warning: "$INSTALL_DIR"/share/"$CMAKE_SHARE_DIR_TO_CHECK" not found or empty."
 
     - name: Upload artefak hasil build
       uses: actions/upload-artifact@v4
