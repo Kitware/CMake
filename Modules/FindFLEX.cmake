@@ -103,7 +103,7 @@ Generating Scanners
     line. A :ref:`semicolon-separated list <CMake Language Lists>` will not
     work.
 
-  ---------------------------------------------------------------------
+  .. rubric:: Command variables
 
   This command also defines the following variables:
 

@@ -119,7 +119,7 @@ This module provides the following command if ``bison`` is found:
     line.  A :ref:`semicolon-separated list <CMake Language Lists>` will not
     work.
 
-  ---------------------------------------------------------------------
+  .. rubric:: Command variables
 
   This command also defines the following variables:
 
