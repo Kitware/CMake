@@ -50,6 +50,8 @@ Search Modes
 
 The command has a few modes by which it searches for packages:
 
+.. _`Module mode`:
+
 **Module mode**
   In this mode, CMake searches for a file called ``Find<PackageName>.cmake``,
   looking first in the locations listed in the :variable:`CMAKE_MODULE_PATH`,
@@ -69,6 +71,8 @@ The command has a few modes by which it searches for packages:
 
   Module mode is only supported by the
   :ref:`basic command signature <Basic Signature>`.
+
+.. _`Config mode`:
 
 **Config mode**
   In this mode, CMake searches for a file called
