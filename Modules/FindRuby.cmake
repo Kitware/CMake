@@ -398,13 +398,7 @@ set(_Ruby_POSSIBLE_LIB_NAMES
 )
 
 if (WIN32)
-  set(_Ruby_POSSIBLE_RUNTIMES "ucrt;msvcrt;vcruntime140;vcruntime140_1")
-  if (MSVC_TOOLSET_VERSION)
-    list(APPEND _Ruby_POSSIBLE_RUNTIMES "msvcr${MSVC_TOOLSET_VERSION}")
-  else ()
-    list(APPEND _Ruby_POSSIBLE_RUNTIMES "msvcr")
-  endif ()
-
+  set(_Ruby_POSSIBLE_RUNTIMES "ucrt;msvcrt;vcruntime140;vcruntime140_1;vcruntime${MSVC_TOOLSET_VERSION}")
   set(_Ruby_POSSIBLE_VERSION_SUFFIXES "${_Ruby_VERSION_NODOT};${_Ruby_VERSION_NODOT_ZERO_PATCH}")
 
   if (CMAKE_SIZEOF_VOID_P EQUAL 8)
