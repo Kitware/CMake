@@ -6,16 +6,21 @@ FindHg
 ------
 
 Finds the Mercurial command-line client executable (``hg``) and provides a
-command for extracting information from a Mercurial working copy.
+command for extracting information from a Mercurial working copy:
+
+.. code-block:: cmake
+
+  find_package(Hg [<version>] [...])
 
 Result Variables
 ^^^^^^^^^^^^^^^^
 
-This module sets the following variables:
+This module defines the following variables:
 
 ``Hg_FOUND``
-  Boolean indicating whether the Mercurial client was found.  For backward
-  compatibility, the ``HG_FOUND`` variable is also set to the same value.
+  Boolean indicating whether (the requested version of) Mercurial client is
+  found.  For backward compatibility, the ``HG_FOUND`` variable is also set
+  to the same value.
 
 ``HG_VERSION_STRING``
   The version of Mercurial found.
@@ -31,7 +36,7 @@ The following cache variables may also be set:
 Commands
 ^^^^^^^^
 
-This module defines the following command when Mercurial client (``hg``) is
+This module provides the following command when Mercurial client (``hg``) is
 found:
 
 .. command:: Hg_WC_INFO
@@ -44,7 +49,7 @@ found:
 
     Hg_WC_INFO(<dir> <var-prefix>)
 
-  This macro defines the following variables if running Mercurial client on
+  This command defines the following variables if running Mercurial client on
   working copy located at a given location ``<dir>`` succeeds; otherwise a
   ``SEND_ERROR`` message is generated:
 
