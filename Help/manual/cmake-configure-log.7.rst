@@ -441,3 +441,243 @@ The keys specific to ``find-v1`` mappings are:
 ``found``
   Either a string representing the found value or ``false`` if it was not
   found.
+
+.. _`find_package configure-log event`:
+
+Event Kind ``find_package``
+---------------------------
+
+.. versionadded:: 4.1
+
+The :command:`find_package` command logs ``find_package`` events.
+
+There is only one ``find_package`` event major version, version 1.
+
+.. _`find_package-v1 event`:
+
+``find_package-v1`` Event
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+A ``find_package-v1`` event is a YAML mapping:
+
+.. code-block:: yaml
+
+  kind: "find_package-v1"
+  backtrace:
+    - "CMakeLists.txt:456 (find_program)"
+  name: "PackageName"
+  components:
+    -
+      name: "Component"
+      required: true
+      found: true
+  configs:
+    -
+      filename: PackageNameConfig.cmake
+      kind: "cmake"
+    -
+      filename: packagename-config.cmake
+      kind: "cmake"
+  version_request:
+    version: "1.0"
+    version_complete: "1.0...1.5"
+    min: "INCLUDE"
+    max: "INCLUDE"
+    exact: false
+  settings:
+    required: "optional"
+    quiet: false
+    global: false
+    policy_scope: true
+    bypass_provider: false
+    hints:
+      - "/hint/path"
+    names:
+      - "name1"
+      - "name2"
+    search_paths:
+      - "/search/path"
+    path_suffixes:
+      - ""
+      - "suffix"
+    registry_view: "HOST"
+    paths:
+      CMAKE_FIND_USE_CMAKE_PATH: true
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+      CMAKE_FIND_USE_PACKAGE_ROOT_PATH: true
+      CMAKE_FIND_USE_CMAKE_PACKAGE_REGISTRY: true
+      CMAKE_FIND_USE_SYSTEM_PACKAGE_REGISTRY: true
+      CMAKE_FIND_ROOT_PATH_MODE: "BOTH"
+    candidates:
+      -
+        path: "/path/to/config/PackageName/PackageNameConfig.cmake"
+        mode: "config"
+        reason: "insufficient_version"
+      -
+        path: "/path/to/config/PackageName/packagename-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+    found:
+      path: "/path/to/config/PackageName-2.5/PackageNameConfig.cmake"
+      mode: "config"
+      version: "2.5"
+
+The keys specific to ``find_package-v1`` mappings are:
+
+``name``
+  The name of the requested package.
+
+``components``
+  If present, an array of objects containing the fields:
+
+  ``name``
+    The name of the component.
+
+  ``required``
+    A boolean indicating whether the component is required or optional.
+
+  ``found``
+    A boolean indicating whether the component was found or not.
+
+``configs``
+  If present, an array of objects indicating the configuration files to search
+  for.
+
+  ``filename``
+    The filename of the configuration file.
+
+  ``kind``
+    The kind of file. Either ``cmake`` or ``cps``.
+
+``version_request``
+  An object indicating the version constraints on the search.
+
+  ``version``
+    The minimum version required.
+
+  ``version_complete``
+    The user-provided version range.
+
+  ``min``
+    Whether to ``INCLUDE`` or ``EXCLUDE`` the lower bound on the version
+    range.
+
+  ``max``
+    Whether to ``INCLUDE`` or ``EXCLUDE`` the upper bound on the version
+    range.
+
+  ``exact``
+    A boolean indicating whether an ``EXACT`` version match was requested.
+
+``settings``
+  Search settings active for the search.
+
+  ``required``
+    The requirement request of the search. One of ``optional``,
+    ``optional_explicit``, ``required_explicit``,
+    ``required_from_package_variable``, or ``required_from_find_variable``.
+
+  ``quiet``
+    A boolean indicating whether the search is ``QUIET`` or not.
+
+  ``global``
+    A boolean indicating whether the ``GLOBAL`` keyword has been provided or
+    not.
+
+  ``policy_scope``
+    A boolean indicating whether the ``NO_POLICY_SCOPE`` keyword has been
+    provided or not.
+
+  ``bypass_provider``
+    A boolean indicating whether the ``BYPASS_PROVIDER`` keyword has been
+    provided or not.
+
+  ``hints``
+    An array of paths provided as ``HINTS``.
+
+  ``names``
+    An array of package names to use when searching, provided by ``NAMES``.
+
+  ``search_paths``
+    An array of paths to search, provided by ``PATHS``.
+
+  ``path_suffixes``
+    An array of suffixes to use when searching, provided by ``PATH_SUFFIXES``.
+
+  ``registry_view``
+    The ``REGISTRY_VIEW`` requested for the search.
+
+  ``paths``
+    Path settings active for the search.
+
+    ``CMAKE_FIND_USE_CMAKE_PATH``
+      A boolean indicating whether or not CMake-specific cache variables are
+      used when searching. See :variable:`CMAKE_FIND_USE_CMAKE_PATH`.
+
+    ``CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH``
+      A boolean indicating whether or not CMake-specific environment variables
+      are used when searching. See
+      :variable:`CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH`.
+
+    ``CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH``
+      A boolean indicating whether or not platform-specific environment
+      variables are used when searching. See
+      :variable:`CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH`.
+
+    ``CMAKE_FIND_USE_CMAKE_SYSTEM_PATH``
+      A boolean indicating whether or not platform-specific CMake variables are
+      used when searching. See :variable:`CMAKE_FIND_USE_CMAKE_SYSTEM_PATH`.
+
+    ``CMAKE_FIND_USE_INSTALL_PREFIX``
+      A boolean indicating whether or not the install prefix is used when
+      searching. See :variable:`CMAKE_FIND_USE_INSTALL_PREFIX`.
+
+    ``CMAKE_FIND_USE_CMAKE_PACKAGE_REGISTRY``
+      A boolean indicating whether or not to search the CMake package registry
+      for the package. See :variable:`CMAKE_FIND_USE_PACKAGE_REGISTRY`.
+
+    ``CMAKE_FIND_USE_SYSTEM_PACKAGE_REGISTRY``
+      A boolean indicating whether or not to search the system CMake package
+      registry for the package. See
+      :variable:`CMAKE_FIND_USE_SYSTEM_PACKAGE_REGISTRY`.
+
+    ``CMAKE_FIND_ROOT_PATH_MODE``
+      A string indicating the root path mode in effect as selected by the
+      ``CMAKE_FIND_ROOT_PATH_BOTH``, ``ONLY_CMAKE_FIND_ROOT_PATH``, and
+      ``NO_CMAKE_FIND_ROOT_PATH`` arguments.
+
+``candidates``
+  An array of rejected candidate paths. Each element contains the following
+  keys:
+
+  ``path``
+    The path to the considered file.
+
+  ``mode``
+    The mode which found the file. One of ``module``, ``cps``, ``cmake``, or
+    ``provider``.
+
+  ``reason``
+    The reason the path was rejected. One of ``insufficient_version``,
+    ``no_exist``, ``ignored``, ``no_config_file``, or ``not_found``.
+
+  ``message``
+    If present, a string describing why the package is considered as not
+    found.
+
+``found``
+  If the package has been found, information on the found file. If it is not
+  found, this is ``null``. Keys available:
+
+  ``path``
+    The path to the module or configuration that found the package.
+
+  ``mode``
+    The mode that considered the path. One of ``module``, ``cps``, ``cmake``,
+    or ``provider``.
+
+  ``version``
+    The reported version of the package.

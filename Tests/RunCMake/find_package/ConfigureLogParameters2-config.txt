@@ -1,0 +1,524 @@
+^
+---
+events:
+  -
+    kind: "message-v1"
+    backtrace:(
+      - "[^"]+")+
+    message: \|(
++      [^
+]*)*
+  -
+    kind: "find_package-v1"
+    backtrace:(
+      - "[^"]+")+
+    name: "ParameterCheckConfig"
+    configs:
+      -
+        filename: "ParameterCheckConfigConfig.cmake"
+        kind: "cmake"
+      -
+        filename: "parametercheckconfig-config.cmake"
+        kind: "cmake"
+    version_request:
+      exact: false
+    settings:
+      required: "optional"
+      quiet: false
+      global: false
+      policy_scope: true
+      bypass_provider: false
+      hints:
+        - ".*/Tests/RunCMake/find_package"
+      names:
+        - "ParameterCheckConfig"
+      path_suffixes:
+        - ""
+      paths:
+        CMAKE_FIND_USE_CMAKE_PATH: true
+        CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: true
+        CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+        CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+        CMAKE_FIND_USE_INSTALL_PREFIX: true
+        CMAKE_FIND_USE_PACKAGE_ROOT_PATH: true
+        CMAKE_FIND_USE_CMAKE_PACKAGE_REGISTRY: true
+        CMAKE_FIND_USE_SYSTEM_PACKAGE_REGISTRY: true
+        CMAKE_FIND_ROOT_PATH_MODE: "BOTH"
+    candidates:
+      -
+        path: ".*/CMakeFiles/pkgRedirects/ParameterCheckConfigConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: ".*/CMakeFiles/pkgRedirects/parametercheckconfig-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: ".*/Tests/RunCMake/find_package/ConfigureLog/ParameterCheckConfigConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: ".*/Tests/RunCMake/find_package/ConfigureLog/parametercheckconfig-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: ".*/Tests/RunCMake/find_package/ConfigureLog/cmake/ParameterCheckConfigConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: ".*/Tests/RunCMake/find_package/ConfigureLog/cmake/parametercheckconfig-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+    found:
+      path: ".*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/ParameterCheckConfig/ParameterCheckConfigConfig.cmake"
+      mode: "config"
+      version: "1.6"
+  -
+    kind: "find_package-v1"
+    backtrace:(
+      - "[^"]+")+
+    name: "ParameterCheckConfig"
+    configs:
+      -
+        filename: "ParameterCheckConfigConfig.cmake"
+        kind: "cmake"
+      -
+        filename: "parametercheckconfig-config.cmake"
+        kind: "cmake"
+    version_request:
+      exact: false
+    settings:
+      required: "optional"
+      quiet: false
+      global: false
+      policy_scope: true
+      bypass_provider: false
+      names:
+        - "ParameterCheckConfig"
+      path_suffixes:
+        - ""
+        - "suffix1"
+        - "suffix2"
+      paths:
+        CMAKE_FIND_USE_CMAKE_PATH: true
+        CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: true
+        CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+        CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+        CMAKE_FIND_USE_INSTALL_PREFIX: true
+        CMAKE_FIND_USE_PACKAGE_ROOT_PATH: true
+        CMAKE_FIND_USE_CMAKE_PACKAGE_REGISTRY: true
+        CMAKE_FIND_USE_SYSTEM_PACKAGE_REGISTRY: true
+        CMAKE_FIND_ROOT_PATH_MODE: "BOTH"
+    candidates:
+      -
+        path: ".*/CMakeFiles/pkgRedirects/ParameterCheckConfigConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: ".*/CMakeFiles/pkgRedirects/parametercheckconfig-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: ".*/CMakeFiles/pkgRedirects/suffix1/ParameterCheckConfigConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: ".*/CMakeFiles/pkgRedirects/suffix1/parametercheckconfig-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: ".*/CMakeFiles/pkgRedirects/suffix2/ParameterCheckConfigConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: ".*/CMakeFiles/pkgRedirects/suffix2/parametercheckconfig-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: ".*/Tests/RunCMake/find_package/ConfigureLog/ParameterCheckConfigConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: ".*/Tests/RunCMake/find_package/ConfigureLog/parametercheckconfig-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: ".*/Tests/RunCMake/find_package/ConfigureLog/suffix1/ParameterCheckConfigConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: ".*/Tests/RunCMake/find_package/ConfigureLog/suffix1/parametercheckconfig-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: ".*/Tests/RunCMake/find_package/ConfigureLog/suffix2/ParameterCheckConfigConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: ".*/Tests/RunCMake/find_package/ConfigureLog/suffix2/parametercheckconfig-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: ".*/Tests/RunCMake/find_package/ConfigureLog/cmake/ParameterCheckConfigConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: ".*/Tests/RunCMake/find_package/ConfigureLog/cmake/parametercheckconfig-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: ".*/Tests/RunCMake/find_package/ConfigureLog/cmake/suffix1/ParameterCheckConfigConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: ".*/Tests/RunCMake/find_package/ConfigureLog/cmake/suffix1/parametercheckconfig-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: ".*/Tests/RunCMake/find_package/ConfigureLog/cmake/suffix2/ParameterCheckConfigConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: ".*/Tests/RunCMake/find_package/ConfigureLog/cmake/suffix2/parametercheckconfig-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+    found:
+      path: ".*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/ParameterCheckConfig/ParameterCheckConfigConfig.cmake"
+      mode: "config"
+      version: "1.6"
+  -
+    kind: "find_package-v1"
+    backtrace:(
+      - "[^"]+")+
+    name: "ParameterCheckConfig"
+    configs:
+      -
+        filename: "ParameterCheckConfigConfig.cmake"
+        kind: "cmake"
+      -
+        filename: "parametercheckconfig-config.cmake"
+        kind: "cmake"
+    version_request:
+      exact: false
+    settings:
+      required: "optional"
+      quiet: false
+      global: false
+      policy_scope: true
+      bypass_provider: false
+      names:
+        - "ParameterCheckConfig"
+      path_suffixes:
+        - ""
+      paths:
+        CMAKE_FIND_USE_CMAKE_PATH: false
+        CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: false
+        CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: false
+        CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: false
+        CMAKE_FIND_USE_INSTALL_PREFIX: false
+        CMAKE_FIND_USE_PACKAGE_ROOT_PATH: false
+        CMAKE_FIND_USE_CMAKE_PACKAGE_REGISTRY: false
+        CMAKE_FIND_USE_SYSTEM_PACKAGE_REGISTRY: false
+        CMAKE_FIND_ROOT_PATH_MODE: "BOTH"
+    candidates:
+      -
+        path: ".*/CMakeFiles/pkgRedirects/ParameterCheckConfigConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: ".*/CMakeFiles/pkgRedirects/parametercheckconfig-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+    found: null
+  -
+    kind: "find_package-v1"
+    backtrace:(
+      - "[^"]+")+
+    name: "ParameterCheckConfig"
+    configs:
+      -
+        filename: "ParameterCheckConfigConfig.cmake"
+        kind: "cmake"
+      -
+        filename: "parametercheckconfig-config.cmake"
+        kind: "cmake"
+    version_request:
+      exact: false
+    settings:
+      required: "optional"
+      quiet: false
+      global: false
+      policy_scope: true
+      bypass_provider: false
+      names:
+        - "ParameterCheckConfig"
+      path_suffixes:
+        - ""
+      paths:
+        CMAKE_FIND_USE_CMAKE_PATH: true
+        CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: true
+        CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+        CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+        CMAKE_FIND_USE_INSTALL_PREFIX: true
+        CMAKE_FIND_USE_PACKAGE_ROOT_PATH: true
+        CMAKE_FIND_USE_CMAKE_PACKAGE_REGISTRY: true
+        CMAKE_FIND_USE_SYSTEM_PACKAGE_REGISTRY: true
+        CMAKE_FIND_ROOT_PATH_MODE: "BOTH"
+    candidates:
+      -
+        path: ".*/CMakeFiles/pkgRedirects/ParameterCheckConfigConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: ".*/CMakeFiles/pkgRedirects/parametercheckconfig-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: ".*/Tests/RunCMake/find_package/ConfigureLog/ParameterCheckConfigConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: ".*/Tests/RunCMake/find_package/ConfigureLog/parametercheckconfig-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: ".*/Tests/RunCMake/find_package/ConfigureLog/cmake/ParameterCheckConfigConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: ".*/Tests/RunCMake/find_package/ConfigureLog/cmake/parametercheckconfig-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+    found:
+      path: ".*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/ParameterCheckConfig/ParameterCheckConfigConfig.cmake"
+      mode: "config"
+      version: "1.6"
+  -
+    kind: "find_package-v1"
+    backtrace:(
+      - "[^"]+")+
+    name: "ParameterCheckConfig"
+    configs:
+      -
+        filename: "ParameterCheckConfigConfig.cmake"
+        kind: "cmake"
+      -
+        filename: "parametercheckconfig-config.cmake"
+        kind: "cmake"
+    version_request:
+      exact: false
+    settings:
+      required: "optional"
+      quiet: false
+      global: false
+      policy_scope: true
+      bypass_provider: false
+      names:
+        - "ParameterCheckConfig"
+      path_suffixes:
+        - ""
+      paths:
+        CMAKE_FIND_USE_CMAKE_PATH: true
+        CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: true
+        CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+        CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+        CMAKE_FIND_USE_INSTALL_PREFIX: true
+        CMAKE_FIND_USE_PACKAGE_ROOT_PATH: true
+        CMAKE_FIND_USE_CMAKE_PACKAGE_REGISTRY: true
+        CMAKE_FIND_USE_SYSTEM_PACKAGE_REGISTRY: true
+        CMAKE_FIND_ROOT_PATH_MODE: "ONLY"
+    candidates:
+      -
+        path: ".*/CMakeFiles/pkgRedirects/ParameterCheckConfigConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: ".*/CMakeFiles/pkgRedirects/parametercheckconfig-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: ".*/Tests/RunCMake/find_package/ConfigureLog/ParameterCheckConfigConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: ".*/Tests/RunCMake/find_package/ConfigureLog/parametercheckconfig-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: ".*/Tests/RunCMake/find_package/ConfigureLog/cmake/ParameterCheckConfigConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: ".*/Tests/RunCMake/find_package/ConfigureLog/cmake/parametercheckconfig-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+    found:
+      path: ".*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/ParameterCheckConfig/ParameterCheckConfigConfig.cmake"
+      mode: "config"
+      version: "1.6"
+  -
+    kind: "find_package-v1"
+    backtrace:(
+      - "[^"]+")+
+    name: "ParameterCheckConfig"
+    configs:
+      -
+        filename: "ParameterCheckConfigConfig.cmake"
+        kind: "cmake"
+      -
+        filename: "parametercheckconfig-config.cmake"
+        kind: "cmake"
+    version_request:
+      exact: false
+    settings:
+      required: "optional"
+      quiet: false
+      global: false
+      policy_scope: true
+      bypass_provider: false
+      names:
+        - "ParameterCheckConfig"
+      path_suffixes:
+        - ""
+      paths:
+        CMAKE_FIND_USE_CMAKE_PATH: true
+        CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: true
+        CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+        CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+        CMAKE_FIND_USE_INSTALL_PREFIX: true
+        CMAKE_FIND_USE_PACKAGE_ROOT_PATH: true
+        CMAKE_FIND_USE_CMAKE_PACKAGE_REGISTRY: true
+        CMAKE_FIND_USE_SYSTEM_PACKAGE_REGISTRY: true
+        CMAKE_FIND_ROOT_PATH_MODE: "NEVER"
+    candidates:
+      -
+        path: ".*/CMakeFiles/pkgRedirects/ParameterCheckConfigConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: ".*/CMakeFiles/pkgRedirects/parametercheckconfig-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: ".*/Tests/RunCMake/find_package/ConfigureLog/ParameterCheckConfigConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: ".*/Tests/RunCMake/find_package/ConfigureLog/parametercheckconfig-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: ".*/Tests/RunCMake/find_package/ConfigureLog/cmake/ParameterCheckConfigConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: ".*/Tests/RunCMake/find_package/ConfigureLog/cmake/parametercheckconfig-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+    found:
+      path: ".*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/ParameterCheckConfig/ParameterCheckConfigConfig.cmake"
+      mode: "config"
+      version: "1.6"
+  -
+    kind: "find_package-v1"
+    backtrace:(
+      - "[^"]+")+
+    name: "OtherParameterCheck"
+    configs:
+      -
+        filename: "BogusParameterCheckConfig.cmake"
+        kind: "cmake"
+      -
+        filename: "bogusparametercheck-config.cmake"
+        kind: "cmake"
+      -
+        filename: "ParameterCheckConfigConfig.cmake"
+        kind: "cmake"
+      -
+        filename: "parametercheckconfig-config.cmake"
+        kind: "cmake"
+    version_request:
+      exact: false
+    settings:
+      required: "optional"
+      quiet: false
+      global: false
+      policy_scope: true
+      bypass_provider: false
+      names:
+        - "BogusParameterCheck"
+        - "ParameterCheckConfig"
+      path_suffixes:
+        - ""
+      paths:
+        CMAKE_FIND_USE_CMAKE_PATH: true
+        CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: true
+        CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+        CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+        CMAKE_FIND_USE_INSTALL_PREFIX: true
+        CMAKE_FIND_USE_PACKAGE_ROOT_PATH: true
+        CMAKE_FIND_USE_CMAKE_PACKAGE_REGISTRY: true
+        CMAKE_FIND_USE_SYSTEM_PACKAGE_REGISTRY: true
+        CMAKE_FIND_ROOT_PATH_MODE: "BOTH"
+    candidates:
+      -
+        path: ".*/CMakeFiles/pkgRedirects/BogusParameterCheckConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: ".*/CMakeFiles/pkgRedirects/bogusparametercheck-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: ".*/CMakeFiles/pkgRedirects/ParameterCheckConfigConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: ".*/CMakeFiles/pkgRedirects/parametercheckconfig-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: ".*/Tests/RunCMake/find_package/ConfigureLog/BogusParameterCheckConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: ".*/Tests/RunCMake/find_package/ConfigureLog/bogusparametercheck-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: ".*/Tests/RunCMake/find_package/ConfigureLog/ParameterCheckConfigConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: ".*/Tests/RunCMake/find_package/ConfigureLog/parametercheckconfig-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: ".*/Tests/RunCMake/find_package/ConfigureLog/cmake/BogusParameterCheckConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: ".*/Tests/RunCMake/find_package/ConfigureLog/cmake/bogusparametercheck-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: ".*/Tests/RunCMake/find_package/ConfigureLog/cmake/ParameterCheckConfigConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: ".*/Tests/RunCMake/find_package/ConfigureLog/cmake/parametercheckconfig-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: ".*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/ParameterCheckConfig/BogusParameterCheckConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: ".*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/ParameterCheckConfig/bogusparametercheck-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+    found:
+      path: ".*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/ParameterCheckConfig/ParameterCheckConfigConfig.cmake"
+      mode: "config"
+      version: "1.6"
+\.\.\.$

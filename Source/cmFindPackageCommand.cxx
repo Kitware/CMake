@@ -24,6 +24,7 @@
 #include "cmsys/String.h"
 
 #include "cmAlgorithms.h"
+#include "cmConfigureLog.h"
 #include "cmDependencyProvider.h"
 #include "cmExecutionStatus.h"
 #include "cmExperimental.h"
@@ -59,8 +60,6 @@
 #    define KEY_WOW64_64KEY 0x0100
 #  endif
 #endif
-
-class cmConfigureLog;
 
 namespace {
 
@@ -548,6 +547,13 @@ cmFindPackageCommand::cmFindPackageCommand(cmExecutionStatus& status)
   this->DeprecatedFindModules["Qt"] = cmPolicies::CMP0084;
 }
 
+cmFindPackageCommand::~cmFindPackageCommand()
+{
+  if (this->DebugState) {
+    this->DebugState->Write();
+  }
+}
+
 void cmFindPackageCommand::AppendSearchPathGroups()
 {
   // Update the All group with new paths. Note that package redirection must
@@ -608,8 +614,7 @@ void cmFindPackageCommand::InheritOptions(cmFindPackageCommand* other)
 
 bool cmFindPackageCommand::IsFound() const
 {
-  // TODO: track the actual found state.
-  return false;
+  return !this->FileFound.empty();
 }
 
 bool cmFindPackageCommand::IsDefined() const
@@ -717,7 +722,6 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
   // Record options.
   this->Name = args[0];
   cm::string_view componentsSep = ""_s;
-  bool bypassProvider = false;
 
   // Always search directly in a generated path.
   this->SearchPathSuffixes.emplace_back();
@@ -751,7 +755,7 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
       this->Quiet = true;
       doing = DoingNone;
     } else if (args[i] == "BYPASS_PROVIDER") {
-      bypassProvider = true;
+      this->BypassProvider = true;
       doing = DoingNone;
     } else if (args[i] == "EXACT") {
       this->VersionExact = true;
@@ -1015,7 +1019,8 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
       this->VersionMaxPatch, this->VersionMaxTweak);
   }
 
-  return this->FindPackage(bypassProvider ? std::vector<std::string>{} : args);
+  return this->FindPackage(this->BypassProvider ? std::vector<std::string>{}
+                                                : args);
 }
 
 bool cmFindPackageCommand::FindPackage(
@@ -1517,6 +1522,23 @@ bool cmFindPackageCommand::FindModule(bool& found)
         this->DebugBuffer = cmStrCat(
           this->DebugBuffer, "The module is considered not found due to ",
           foundVar, " being FALSE.");
+
+        this->ConsideredPaths.emplace_back(mfile, FoundPackageMode::Module,
+                                           SearchResult::NotFound);
+        std::string const notFoundMessageVar =
+          cmStrCat(this->Name, "_NOT_FOUND_MESSAGE");
+        if (cmValue notFoundMessage =
+              this->Makefile->GetDefinition(notFoundMessageVar)) {
+
+          this->ConsideredPaths.back().Message = *notFoundMessage;
+        }
+      } else {
+        this->FileFound = mfile;
+        this->FileFoundMode = FoundPackageMode::Module;
+        std::string const versionVar = cmStrCat(this->Name, "_VERSION");
+        if (cmValue version = this->Makefile->GetDefinition(versionVar)) {
+          this->VersionFound = *version;
+        }
       }
     }
     return result;
@@ -1547,8 +1569,10 @@ bool cmFindPackageCommand::HandlePackageMode(
       }
       // The file location was cached.  Look for the correct file.
       std::string file;
-      if (this->FindConfigFile(dir, pdt::Any, file)) {
+      FoundPackageMode foundMode = FoundPackageMode::None;
+      if (this->FindConfigFile(dir, pdt::Any, file, foundMode)) {
         this->FileFound = std::move(file);
+        this->FileFoundMode = foundMode;
         fileFound = true;
       }
       def = this->Makefile->GetDefinition(this->Variable);
@@ -2765,13 +2789,17 @@ bool cmFindPackageCommand::CheckDirectory(std::string const& dir,
 
   std::string const d = dir.substr(0, dir.size() - 1);
   if (cm::contains(this->IgnoredPaths, d)) {
+    this->ConsideredPaths.emplace_back(
+      dir, cmFindPackageCommand::FoundMode(type), SearchResult::Ignored);
     return false;
   }
 
   // Look for the file in this directory.
   std::string file;
-  if (this->FindConfigFile(d, type, file)) {
+  FoundPackageMode foundMode = FoundPackageMode::None;
+  if (this->FindConfigFile(d, type, file, foundMode)) {
     this->FileFound = std::move(file);
+    this->FileFoundMode = foundMode;
     return true;
   }
   return false;
@@ -2779,7 +2807,8 @@ bool cmFindPackageCommand::CheckDirectory(std::string const& dir,
 
 bool cmFindPackageCommand::FindConfigFile(std::string const& dir,
                                           PackageDescriptionType type,
-                                          std::string& file)
+                                          std::string& file,
+                                          FoundPackageMode& foundMode)
 {
   for (auto const& config : this->Configs) {
     if (type != pdt::Any && config.Type != type) {
@@ -2789,14 +2818,24 @@ bool cmFindPackageCommand::FindConfigFile(std::string const& dir,
     if (this->DebugModeEnabled()) {
       this->DebugBuffer = cmStrCat(this->DebugBuffer, "  ", file, '\n');
     }
-    if (cmSystemTools::FileExists(file, true) && this->CheckVersion(file)) {
-      // Allow resolving symlinks when the config file is found through a link
-      if (this->UseRealPath) {
-        file = cmSystemTools::GetRealPath(file);
-      } else {
-        file = cmSystemTools::ToNormalizedPathOnDisk(file);
+    if (cmSystemTools::FileExists(file, true)) {
+      if (this->CheckVersion(file)) {
+        // Allow resolving symlinks when the config file is found through a
+        // link
+        if (this->UseRealPath) {
+          file = cmSystemTools::GetRealPath(file);
+        } else {
+          file = cmSystemTools::ToNormalizedPathOnDisk(file);
+        }
+        foundMode = cmFindPackageCommand::FoundMode(config.Type);
+        return true;
       }
-      return true;
+      this->ConsideredPaths.emplace_back(file,
+                                         cmFindPackageCommand::FoundMode(type),
+                                         SearchResult::InsufficientVersion);
+    } else {
+      this->ConsideredPaths.emplace_back(
+        file, cmFindPackageCommand::FoundMode(type), SearchResult::NoExist);
     }
   }
   return false;
@@ -3374,6 +3413,20 @@ bool cmFindPackageCommand::IsRequired() const
     this->Required == RequiredStatus::RequiredFromFindVar;
 }
 
+cmFindPackageCommand::FoundPackageMode cmFindPackageCommand::FoundMode(
+  PackageDescriptionType type)
+{
+  switch (type) {
+    case PackageDescriptionType::Any:
+      return FoundPackageMode::None;
+    case PackageDescriptionType::CMake:
+      return FoundPackageMode::Config;
+    case PackageDescriptionType::Cps:
+      return FoundPackageMode::Cps;
+  }
+  return FoundPackageMode::None;
+}
+
 // TODO: Debug cmsys::Glob double slash problem.
 
 bool cmFindPackage(std::vector<std::string> const& args,
@@ -3385,7 +3438,7 @@ bool cmFindPackage(std::vector<std::string> const& args,
 cmFindPackageDebugState::cmFindPackageDebugState(
   cmFindPackageCommand const* findPackage)
   : cmFindCommonDebugState("find_package", findPackage)
-// , FindPackageCommand(findPackage)
+  , FindPackageCommand(findPackage)
 {
 }
 
@@ -3416,6 +3469,205 @@ void cmFindPackageDebugState::WriteEvent(cmConfigureLog& log,
   (void)log;
   (void)mf;
 
-  // TODO
+  log.BeginEvent("find_package-v1", mf);
+
+  auto const* fpc = this->FindPackageCommand;
+
+  log.WriteValue("name"_s, fpc->Name);
+  if (!fpc->Components.empty()) {
+    log.BeginObject("components"_s);
+    log.BeginArray();
+    for (auto const& component : cmList{ fpc->Components }) {
+      log.NextArrayElement();
+      log.WriteValue("name"_s, component);
+      log.WriteValue("required"_s,
+                     fpc->RequiredComponents.find(component) !=
+                       fpc->RequiredComponents.end());
+      log.WriteValue("found"_s,
+                     mf.IsOn(cmStrCat(fpc->Name, '_', component, "_FOUND")));
+    }
+    log.EndArray();
+    log.EndObject();
+  }
+  if (!fpc->Configs.empty()) {
+    auto pdt_name =
+      [](cmFindPackageCommand::PackageDescriptionType type) -> std::string {
+      switch (type) {
+        case pdt::Any:
+          return "any";
+        case pdt::CMake:
+          return "cmake";
+        case pdt::Cps:
+          return "cps";
+      }
+      assert(false);
+      return "<UNKNOWN>";
+    };
+
+    log.BeginObject("configs"_s);
+    log.BeginArray();
+    for (auto const& config : fpc->Configs) {
+      log.NextArrayElement();
+      log.WriteValue("filename"_s, config.Name);
+      log.WriteValue("kind"_s, pdt_name(config.Type));
+    }
+    log.EndArray();
+    log.EndObject();
+  }
+  {
+    log.BeginObject("version_request"_s);
+    if (!fpc->Version.empty()) {
+      log.WriteValue("version"_s, fpc->Version);
+    }
+    if (!fpc->VersionComplete.empty()) {
+      log.WriteValue("version_complete"_s, fpc->VersionComplete);
+    }
+    if (!fpc->VersionRange.empty()) {
+      log.WriteValue("min"_s, std::string(fpc->VersionRangeMin));
+      log.WriteValue("max"_s, std::string(fpc->VersionRangeMax));
+    }
+    log.WriteValue("exact"_s, fpc->VersionExact);
+    log.EndObject();
+  }
+  {
+    auto required_str =
+      [](cmFindPackageCommand::RequiredStatus status) -> std::string {
+      switch (status) {
+        case cmFindPackageCommand::RequiredStatus::Optional:
+          return "optional";
+        case cmFindPackageCommand::RequiredStatus::OptionalExplicit:
+          return "optional_explicit";
+        case cmFindPackageCommand::RequiredStatus::RequiredExplicit:
+          return "required_explicit";
+        case cmFindPackageCommand::RequiredStatus::RequiredFromPackageVar:
+          return "required_from_package_variable";
+        case cmFindPackageCommand::RequiredStatus::RequiredFromFindVar:
+          return "required_from_find_variable";
+      }
+      assert(false);
+      return "<UNKNOWN>";
+    };
+    log.BeginObject("settings"_s);
+    log.WriteValue("required"_s, required_str(fpc->Required));
+    log.WriteValue("quiet"_s, fpc->Quiet);
+    log.WriteValue("global"_s, fpc->GlobalScope);
+    log.WriteValue("policy_scope"_s, fpc->PolicyScope);
+    log.WriteValue("bypass_provider"_s, fpc->BypassProvider);
+    if (!fpc->UserHintsArgs.empty()) {
+      log.WriteValue("hints"_s, fpc->UserHintsArgs);
+    }
+    if (!fpc->Names.empty()) {
+      log.WriteValue("names"_s, fpc->Names);
+    }
+    if (!fpc->UserGuessArgs.empty()) {
+      log.WriteValue("search_paths"_s, fpc->UserGuessArgs);
+    }
+    if (!fpc->SearchPathSuffixes.empty()) {
+      log.WriteValue("path_suffixes"_s, fpc->SearchPathSuffixes);
+    }
+    if (fpc->RegistryViewDefined) {
+      log.WriteValue(
+        "registry_view"_s,
+        std::string(cmWindowsRegistry::FromView(fpc->RegistryView)));
+    }
+    {
+      auto find_root_path_mode =
+        [](cmFindCommon::RootPathMode mode) -> std::string {
+        switch (mode) {
+          case cmFindCommon::RootPathModeNever:
+            return "NEVER";
+          case cmFindCommon::RootPathModeOnly:
+            return "ONLY";
+          case cmFindCommon::RootPathModeBoth:
+            return "BOTH";
+        }
+        assert(false);
+        return "<UNKNOWN>";
+      };
+      log.BeginObject("paths"_s);
+      log.WriteValue("CMAKE_FIND_USE_CMAKE_PATH"_s, !fpc->NoDefaultPath);
+      log.WriteValue("CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH"_s,
+                     !fpc->NoCMakeEnvironmentPath);
+      log.WriteValue("CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH"_s,
+                     !fpc->NoSystemEnvironmentPath);
+      log.WriteValue("CMAKE_FIND_USE_CMAKE_SYSTEM_PATH"_s,
+                     !fpc->NoCMakeSystemPath);
+      log.WriteValue("CMAKE_FIND_USE_INSTALL_PREFIX"_s,
+                     !fpc->NoCMakeInstallPath);
+      log.WriteValue("CMAKE_FIND_USE_PACKAGE_ROOT_PATH"_s,
+                     !fpc->NoPackageRootPath);
+      log.WriteValue("CMAKE_FIND_USE_CMAKE_PACKAGE_REGISTRY"_s,
+                     !fpc->NoUserRegistry);
+      log.WriteValue("CMAKE_FIND_USE_SYSTEM_PACKAGE_REGISTRY"_s,
+                     !fpc->NoSystemRegistry);
+      log.WriteValue("CMAKE_FIND_ROOT_PATH_MODE"_s,
+                     find_root_path_mode(fpc->FindRootPathMode));
+      log.EndObject();
+    }
+    log.EndObject();
+  }
+
+  auto found_mode =
+    [](cmFindPackageCommand::FoundPackageMode status) -> std::string {
+    switch (status) {
+      case cmFindPackageCommand::FoundPackageMode::None:
+        return "none?";
+      case cmFindPackageCommand::FoundPackageMode::Module:
+        return "module";
+      case cmFindPackageCommand::FoundPackageMode::Config:
+        return "config";
+      case cmFindPackageCommand::FoundPackageMode::Cps:
+        return "cps";
+      case cmFindPackageCommand::FoundPackageMode::Provider:
+        return "provider";
+    }
+    assert(false);
+    return "<UNKNOWN>";
+  };
+  if (!fpc->ConsideredPaths.empty()) {
+    auto search_result =
+      [](cmFindPackageCommand::SearchResult type) -> std::string {
+      switch (type) {
+        case cmFindPackageCommand::SearchResult::InsufficientVersion:
+          return "insufficient_version";
+        case cmFindPackageCommand::SearchResult::NoExist:
+          return "no_exist";
+        case cmFindPackageCommand::SearchResult::Ignored:
+          return "ignored";
+        case cmFindPackageCommand::SearchResult::NoConfigFile:
+          return "no_config_file";
+        case cmFindPackageCommand::SearchResult::NotFound:
+          return "not_found";
+      }
+      assert(false);
+      return "<UNKNOWN>";
+    };
+
+    log.BeginObject("candidates"_s);
+    log.BeginArray();
+    for (auto const& considered : fpc->ConsideredPaths) {
+      log.NextArrayElement();
+      log.WriteValue("path"_s, considered.Path);
+      log.WriteValue("mode"_s, found_mode(considered.Mode));
+      log.WriteValue("reason"_s, search_result(considered.Reason));
+      if (!considered.Message.empty()) {
+        log.WriteValue("message"_s, considered.Message);
+      }
+    }
+    log.EndArray();
+    log.EndObject();
+  }
+  // TODO: Add provider information (see #26925)
+  if (fpc->IsFound()) {
+    log.BeginObject("found"_s);
+    log.WriteValue("path"_s, fpc->FileFound);
+    log.WriteValue("mode"_s, found_mode(fpc->FileFoundMode));
+    log.WriteValue("version"_s, fpc->VersionFound);
+    log.EndObject();
+  } else {
+    log.WriteValue("found"_s, nullptr);
+  }
+
+  log.EndEvent();
 }
 #endif

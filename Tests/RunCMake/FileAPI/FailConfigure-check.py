@@ -65,7 +65,7 @@ def check_object_configureLog(o):
     assert os.path.exists(path)
     eventKindNames = o["eventKindNames"]
     assert is_list(eventKindNames)
-    assert sorted(eventKindNames) == ["find-v1", "message-v1", "try_compile-v1", "try_run-v1"]
+    assert sorted(eventKindNames) == ["find-v1", "find_package-v1", "message-v1", "try_compile-v1", "try_run-v1"]
 
 assert is_dict(index)
 assert sorted(index.keys()) == ["cmake", "objects", "reply"]

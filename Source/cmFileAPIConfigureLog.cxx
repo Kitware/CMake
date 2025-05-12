@@ -52,10 +52,11 @@ Json::Value ConfigureLog::DumpEventKindNames()
   // major version of the configureLog object kind is needed.
   Json::Value eventKindNames = Json::arrayValue;
   if (this->Version == 1) {
-    eventKindNames.append("message-v1");     // WriteMessageEvent
-    eventKindNames.append("try_compile-v1"); // WriteTryCompileEvent
-    eventKindNames.append("try_run-v1");     // WriteTryRunEvent
-    eventKindNames.append("find-v1");        // WriteFindBaseEvent
+    eventKindNames.append("message-v1");      // WriteMessageEvent
+    eventKindNames.append("try_compile-v1");  // WriteTryCompileEvent
+    eventKindNames.append("try_run-v1");      // WriteTryRunEvent
+    eventKindNames.append("find-v1");         // WriteFindBaseEvent
+    eventKindNames.append("find_package-v1"); // WriteFindPackageEvent
   }
   return eventKindNames;
 }

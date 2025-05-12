@@ -1,0 +1,595 @@
+^CMake Debug Log at ConfigureLogParameters2.cmake:[0-9]+ \(find_package\):
+  The internally managed CMAKE_FIND_PACKAGE_REDIRECTS_DIR.
+
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects
+
+  <PackageName>_ROOT CMake variable \[CMAKE_FIND_USE_PACKAGE_ROOT_PATH\].
+
+    none
+
+  CMAKE_PREFIX_PATH variable \[CMAKE_FIND_USE_CMAKE_PATH\].
+
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLog
+
+  CMAKE_FRAMEWORK_PATH and CMAKE_APPBUNDLE_PATH variables
+  \[CMAKE_FIND_USE_CMAKE_PATH\].
+
+  Env variable ParameterCheckConfig_DIR
+  \[CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH\].
+
+    none
+
+  CMAKE_PREFIX_PATH env variable \[CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH\].
+
+    none
+
+  CMAKE_FRAMEWORK_PATH and CMAKE_APPBUNDLE_PATH env variables
+  \[CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH\].
+
+    none
+
+  Paths specified by the find_package HINTS option.
+
+    [^
+]*/Tests/RunCMake/find_package
+
+  Standard system environment variables
+  \[CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH\].
+
+(    [^
+]*
+)*
+  CMake User Package Registry \[CMAKE_FIND_USE_PACKAGE_REGISTRY\].
+
+    none
+
+  CMake variables defined in the Platform file
+  \[CMAKE_FIND_USE_CMAKE_SYSTEM_PATH\].
+
+(    [^
+]*
+)*
+  CMake System Package Registry
+  \[CMAKE_FIND_PACKAGE_NO_SYSTEM_PACKAGE_REGISTRY\].
+
+    none
+
+  Paths specified by the find_package PATHS option.
+
+    none
+
+  find_package considered the following locations for ParameterCheckConfig's
+  Config module:
+
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/ParameterCheckConfigConfig.cmake
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/parametercheckconfig-config.cmake
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLog/ParameterCheckConfigConfig.cmake
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLog/parametercheckconfig-config.cmake
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLog/cmake/ParameterCheckConfigConfig.cmake
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLog/cmake/parametercheckconfig-config.cmake
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/ParameterCheckConfig/ParameterCheckConfigConfig.cmake
+
+  The file was found at
+
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/ParameterCheckConfig/ParameterCheckConfigConfig.cmake
+
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)
+
+
+CMake Debug Log at ConfigureLogParameters2.cmake:[0-9]+ \(find_package\):
+  The internally managed CMAKE_FIND_PACKAGE_REDIRECTS_DIR.
+
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects
+
+  <PackageName>_ROOT CMake variable \[CMAKE_FIND_USE_PACKAGE_ROOT_PATH\].
+
+    none
+
+  CMAKE_PREFIX_PATH variable \[CMAKE_FIND_USE_CMAKE_PATH\].
+
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLog
+
+  CMAKE_FRAMEWORK_PATH and CMAKE_APPBUNDLE_PATH variables
+  \[CMAKE_FIND_USE_CMAKE_PATH\].
+
+  Env variable ParameterCheckConfig_DIR
+  \[CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH\].
+
+    none
+
+  CMAKE_PREFIX_PATH env variable \[CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH\].
+
+    none
+
+  CMAKE_FRAMEWORK_PATH and CMAKE_APPBUNDLE_PATH env variables
+  \[CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH\].
+
+    none
+
+  Paths specified by the find_package HINTS option.
+
+    none
+
+  Standard system environment variables
+  \[CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH\].
+
+(    [^
+]*
+)*
+  CMake User Package Registry \[CMAKE_FIND_USE_PACKAGE_REGISTRY\].
+
+    none
+
+  CMake variables defined in the Platform file
+  \[CMAKE_FIND_USE_CMAKE_SYSTEM_PATH\].
+
+(    [^
+]*
+)*
+  CMake System Package Registry
+  \[CMAKE_FIND_PACKAGE_NO_SYSTEM_PACKAGE_REGISTRY\].
+
+    none
+
+  Paths specified by the find_package PATHS option.
+
+    none
+
+  find_package considered the following locations for ParameterCheckConfig's
+  Config module:
+
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/ParameterCheckConfigConfig.cmake
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/parametercheckconfig-config.cmake
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/suffix1/ParameterCheckConfigConfig.cmake
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/suffix1/parametercheckconfig-config.cmake
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/suffix2/ParameterCheckConfigConfig.cmake
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/suffix2/parametercheckconfig-config.cmake
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLog/ParameterCheckConfigConfig.cmake
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLog/parametercheckconfig-config.cmake
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLog/suffix1/ParameterCheckConfigConfig.cmake
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLog/suffix1/parametercheckconfig-config.cmake
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLog/suffix2/ParameterCheckConfigConfig.cmake
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLog/suffix2/parametercheckconfig-config.cmake
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLog/cmake/ParameterCheckConfigConfig.cmake
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLog/cmake/parametercheckconfig-config.cmake
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLog/cmake/suffix1/ParameterCheckConfigConfig.cmake
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLog/cmake/suffix1/parametercheckconfig-config.cmake
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLog/cmake/suffix2/ParameterCheckConfigConfig.cmake
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLog/cmake/suffix2/parametercheckconfig-config.cmake
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/ParameterCheckConfig/ParameterCheckConfigConfig.cmake
+
+  The file was found at
+
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/ParameterCheckConfig/ParameterCheckConfigConfig.cmake
+
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)
+
+
+CMake Debug Log at ConfigureLogParameters2.cmake:[0-9]+ \(find_package\):
+  The internally managed CMAKE_FIND_PACKAGE_REDIRECTS_DIR.
+
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects
+
+  Paths specified by the find_package HINTS option.
+
+    none
+
+  Paths specified by the find_package PATHS option.
+
+    none
+
+  find_package considered the following locations for ParameterCheckConfig's
+  Config module:
+
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/ParameterCheckConfigConfig.cmake
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/parametercheckconfig-config.cmake
+
+  The file was not found.
+
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)
+
+
+CMake Debug Log at ConfigureLogParameters2.cmake:[0-9]+ \(find_package\):
+  The internally managed CMAKE_FIND_PACKAGE_REDIRECTS_DIR.
+
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects
+
+  <PackageName>_ROOT CMake variable \[CMAKE_FIND_USE_PACKAGE_ROOT_PATH\].
+
+    none
+
+  CMAKE_PREFIX_PATH variable \[CMAKE_FIND_USE_CMAKE_PATH\].
+
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLog
+
+  CMAKE_FRAMEWORK_PATH and CMAKE_APPBUNDLE_PATH variables
+  \[CMAKE_FIND_USE_CMAKE_PATH\].
+
+  Env variable ParameterCheckConfig_DIR
+  \[CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH\].
+
+    none
+
+  CMAKE_PREFIX_PATH env variable \[CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH\].
+
+    none
+
+  CMAKE_FRAMEWORK_PATH and CMAKE_APPBUNDLE_PATH env variables
+  \[CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH\].
+
+    none
+
+  Paths specified by the find_package HINTS option.
+
+    none
+
+  Standard system environment variables
+  \[CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH\].
+
+(    [^
+]*
+)*
+  CMake User Package Registry \[CMAKE_FIND_USE_PACKAGE_REGISTRY\].
+
+    none
+
+  CMake variables defined in the Platform file
+  \[CMAKE_FIND_USE_CMAKE_SYSTEM_PATH\].
+
+(    [^
+]*
+)*
+  CMake System Package Registry
+  \[CMAKE_FIND_PACKAGE_NO_SYSTEM_PACKAGE_REGISTRY\].
+
+    none
+
+  Paths specified by the find_package PATHS option.
+
+    none
+
+  find_package considered the following locations for ParameterCheckConfig's
+  Config module:
+
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/ParameterCheckConfigConfig.cmake
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/parametercheckconfig-config.cmake
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLog/ParameterCheckConfigConfig.cmake
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLog/parametercheckconfig-config.cmake
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLog/cmake/ParameterCheckConfigConfig.cmake
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLog/cmake/parametercheckconfig-config.cmake
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/ParameterCheckConfig/ParameterCheckConfigConfig.cmake
+
+  The file was found at
+
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/ParameterCheckConfig/ParameterCheckConfigConfig.cmake
+
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)
+
+
+CMake Debug Log at ConfigureLogParameters2.cmake:[0-9]+ \(find_package\):
+  The internally managed CMAKE_FIND_PACKAGE_REDIRECTS_DIR.
+
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects
+
+  <PackageName>_ROOT CMake variable \[CMAKE_FIND_USE_PACKAGE_ROOT_PATH\].
+
+    none
+
+  CMAKE_PREFIX_PATH variable \[CMAKE_FIND_USE_CMAKE_PATH\].
+
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLog
+
+  CMAKE_FRAMEWORK_PATH and CMAKE_APPBUNDLE_PATH variables
+  \[CMAKE_FIND_USE_CMAKE_PATH\].
+
+  Env variable ParameterCheckConfig_DIR
+  \[CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH\].
+
+    none
+
+  CMAKE_PREFIX_PATH env variable \[CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH\].
+
+    none
+
+  CMAKE_FRAMEWORK_PATH and CMAKE_APPBUNDLE_PATH env variables
+  \[CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH\].
+
+    none
+
+  Paths specified by the find_package HINTS option.
+
+    none
+
+  Standard system environment variables
+  \[CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH\].
+
+(    [^
+]*
+)*
+  CMake User Package Registry \[CMAKE_FIND_USE_PACKAGE_REGISTRY\].
+
+    none
+
+  CMake variables defined in the Platform file
+  \[CMAKE_FIND_USE_CMAKE_SYSTEM_PATH\].
+
+(    [^
+]*
+)*
+  CMake System Package Registry
+  \[CMAKE_FIND_PACKAGE_NO_SYSTEM_PACKAGE_REGISTRY\].
+
+    none
+
+  Paths specified by the find_package PATHS option.
+
+    none
+
+  find_package considered the following locations for ParameterCheckConfig's
+  Config module:
+
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/ParameterCheckConfigConfig.cmake
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/parametercheckconfig-config.cmake
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLog/ParameterCheckConfigConfig.cmake
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLog/parametercheckconfig-config.cmake
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLog/cmake/ParameterCheckConfigConfig.cmake
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLog/cmake/parametercheckconfig-config.cmake
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/ParameterCheckConfig/ParameterCheckConfigConfig.cmake
+
+  The file was found at
+
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/ParameterCheckConfig/ParameterCheckConfigConfig.cmake
+
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)
+
+
+CMake Debug Log at ConfigureLogParameters2.cmake:[0-9]+ \(find_package\):
+  The internally managed CMAKE_FIND_PACKAGE_REDIRECTS_DIR.
+
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects
+
+  <PackageName>_ROOT CMake variable \[CMAKE_FIND_USE_PACKAGE_ROOT_PATH\].
+
+    none
+
+  CMAKE_PREFIX_PATH variable \[CMAKE_FIND_USE_CMAKE_PATH\].
+
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLog
+
+  CMAKE_FRAMEWORK_PATH and CMAKE_APPBUNDLE_PATH variables
+  \[CMAKE_FIND_USE_CMAKE_PATH\].
+
+  Env variable ParameterCheckConfig_DIR
+  \[CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH\].
+
+    none
+
+  CMAKE_PREFIX_PATH env variable \[CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH\].
+
+    none
+
+  CMAKE_FRAMEWORK_PATH and CMAKE_APPBUNDLE_PATH env variables
+  \[CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH\].
+
+    none
+
+  Paths specified by the find_package HINTS option.
+
+    none
+
+  Standard system environment variables
+  \[CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH\].
+
+(    [^
+]*
+)*
+  CMake User Package Registry \[CMAKE_FIND_USE_PACKAGE_REGISTRY\].
+
+    none
+
+  CMake variables defined in the Platform file
+  \[CMAKE_FIND_USE_CMAKE_SYSTEM_PATH\].
+
+(    [^
+]*
+)*
+  CMake System Package Registry
+  \[CMAKE_FIND_PACKAGE_NO_SYSTEM_PACKAGE_REGISTRY\].
+
+    none
+
+  Paths specified by the find_package PATHS option.
+
+    none
+
+  find_package considered the following locations for ParameterCheckConfig's
+  Config module:
+
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/ParameterCheckConfigConfig.cmake
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/parametercheckconfig-config.cmake
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLog/ParameterCheckConfigConfig.cmake
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLog/parametercheckconfig-config.cmake
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLog/cmake/ParameterCheckConfigConfig.cmake
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLog/cmake/parametercheckconfig-config.cmake
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/ParameterCheckConfig/ParameterCheckConfigConfig.cmake
+
+  The file was found at
+
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/ParameterCheckConfig/ParameterCheckConfigConfig.cmake
+
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)
+
+
+CMake Debug Log at ConfigureLogParameters2.cmake:[0-9]+ \(find_package\):
+  The internally managed CMAKE_FIND_PACKAGE_REDIRECTS_DIR.
+
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects
+
+  <PackageName>_ROOT CMake variable \[CMAKE_FIND_USE_PACKAGE_ROOT_PATH\].
+
+    none
+
+  CMAKE_PREFIX_PATH variable \[CMAKE_FIND_USE_CMAKE_PATH\].
+
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLog
+
+  CMAKE_FRAMEWORK_PATH and CMAKE_APPBUNDLE_PATH variables
+  \[CMAKE_FIND_USE_CMAKE_PATH\].
+
+  Env variable OtherParameterCheck_DIR
+  \[CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH\].
+
+    none
+
+  CMAKE_PREFIX_PATH env variable \[CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH\].
+
+    none
+
+  CMAKE_FRAMEWORK_PATH and CMAKE_APPBUNDLE_PATH env variables
+  \[CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH\].
+
+    none
+
+  Paths specified by the find_package HINTS option.
+
+    none
+
+  Standard system environment variables
+  \[CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH\].
+
+(    [^
+]*
+)*
+  CMake User Package Registry \[CMAKE_FIND_USE_PACKAGE_REGISTRY\].
+
+    none
+
+  CMake variables defined in the Platform file
+  \[CMAKE_FIND_USE_CMAKE_SYSTEM_PATH\].
+
+(    [^
+]*
+)*
+  CMake System Package Registry
+  \[CMAKE_FIND_PACKAGE_NO_SYSTEM_PACKAGE_REGISTRY\].
+
+    none
+
+  Paths specified by the find_package PATHS option.
+
+    none
+
+  find_package considered the following locations for OtherParameterCheck's
+  Config module:
+
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/BogusParameterCheckConfig.cmake
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/bogusparametercheck-config.cmake
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/ParameterCheckConfigConfig.cmake
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/parametercheckconfig-config.cmake
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLog/BogusParameterCheckConfig.cmake
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLog/bogusparametercheck-config.cmake
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLog/ParameterCheckConfigConfig.cmake
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLog/parametercheckconfig-config.cmake
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLog/cmake/BogusParameterCheckConfig.cmake
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLog/cmake/bogusparametercheck-config.cmake
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLog/cmake/ParameterCheckConfigConfig.cmake
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLog/cmake/parametercheckconfig-config.cmake
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/ParameterCheckConfig/BogusParameterCheckConfig.cmake
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/ParameterCheckConfig/bogusparametercheck-config.cmake
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/ParameterCheckConfig/ParameterCheckConfigConfig.cmake
+
+  The file was found at
+
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/ParameterCheckConfig/ParameterCheckConfigConfig.cmake
+
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)$

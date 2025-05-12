@@ -1,0 +1,268 @@
+^
+---
+events:
+  -
+    kind: "message-v1"
+    backtrace:(
+      - "[^"]+")+
+    message: \|(
++      [^
+]*)*
+  -
+    kind: "find_package-v1"
+    backtrace:(
+      - "[^"]+")+
+    name: "ViaConfig"
+    configs:
+      -
+        filename: "ViaConfigConfig.cmake"
+        kind: "cmake"
+      -
+        filename: "viaconfig-config.cmake"
+        kind: "cmake"
+    version_request:
+      exact: false
+    settings:
+      required: "optional"
+      quiet: false
+      global: false
+      policy_scope: true
+      bypass_provider: false
+      names:
+        - "ViaConfig"
+      path_suffixes:
+        - ""
+      paths:
+        CMAKE_FIND_USE_CMAKE_PATH: true
+        CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: true
+        CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+        CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+        CMAKE_FIND_USE_INSTALL_PREFIX: true
+        CMAKE_FIND_USE_PACKAGE_ROOT_PATH: true
+        CMAKE_FIND_USE_CMAKE_PACKAGE_REGISTRY: true
+        CMAKE_FIND_USE_SYSTEM_PACKAGE_REGISTRY: true
+        CMAKE_FIND_ROOT_PATH_MODE: "BOTH"
+    candidates:
+      -
+        path: ".*/Tests/RunCMake/find_package/ConfigureLog-build/CMakeFiles/pkgRedirects/ViaConfigConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: ".*/Tests/RunCMake/find_package/ConfigureLog-build/CMakeFiles/pkgRedirects/viaconfig-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: ".*/Tests/RunCMake/find_package/ConfigureLog/ViaConfigConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: ".*/Tests/RunCMake/find_package/ConfigureLog/viaconfig-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: ".*/Tests/RunCMake/find_package/ConfigureLog/cmake/ViaConfigConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: ".*/Tests/RunCMake/find_package/ConfigureLog/cmake/viaconfig-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+    found:
+      path: ".*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/ViaConfig/ViaConfigConfig.cmake"
+      mode: "config"
+      version: "1\.0"
+  -
+    kind: "find_package-v1"
+    backtrace:(
+      - "[^"]+")+
+    name: "ViaModule"
+    version_request:
+      exact: false
+    settings:
+      required: "optional"
+      quiet: false
+      global: false
+      policy_scope: true
+      bypass_provider: false
+      path_suffixes:
+        - ""
+      paths:
+        CMAKE_FIND_USE_CMAKE_PATH: true
+        CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: true
+        CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+        CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+        CMAKE_FIND_USE_INSTALL_PREFIX: true
+        CMAKE_FIND_USE_PACKAGE_ROOT_PATH: true
+        CMAKE_FIND_USE_CMAKE_PACKAGE_REGISTRY: true
+        CMAKE_FIND_USE_SYSTEM_PACKAGE_REGISTRY: true
+        CMAKE_FIND_ROOT_PATH_MODE: "BOTH"
+    found:
+      path: ".*/Tests/RunCMake/find_package/ConfigureLog/cmake/FindViaModule.cmake"
+      mode: "module"
+      version: "1.0"
+  -
+    kind: "find_package-v1"
+    backtrace:(
+      - "[^"]+")+
+    name: "Inner"
+    configs:
+      -
+        filename: "InnerConfig.cmake"
+        kind: "cmake"
+      -
+        filename: "inner-config.cmake"
+        kind: "cmake"
+    version_request:
+      exact: false
+    settings:
+      required: "optional"
+      quiet: false
+      global: false
+      policy_scope: true
+      bypass_provider: false
+      names:
+        - "Inner"
+      path_suffixes:
+        - ""
+      paths:
+        CMAKE_FIND_USE_CMAKE_PATH: true
+        CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: true
+        CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+        CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+        CMAKE_FIND_USE_INSTALL_PREFIX: true
+        CMAKE_FIND_USE_PACKAGE_ROOT_PATH: true
+        CMAKE_FIND_USE_CMAKE_PACKAGE_REGISTRY: true
+        CMAKE_FIND_USE_SYSTEM_PACKAGE_REGISTRY: true
+        CMAKE_FIND_ROOT_PATH_MODE: "BOTH"
+    candidates:
+      -
+        path: ".*/CMakeFiles/pkgRedirects/InnerConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: ".*/CMakeFiles/pkgRedirects/inner-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: ".*/Tests/RunCMake/find_package/ConfigureLog/InnerConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: ".*/Tests/RunCMake/find_package/ConfigureLog/inner-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: ".*/Tests/RunCMake/find_package/ConfigureLog/cmake/InnerConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: ".*/Tests/RunCMake/find_package/ConfigureLog/cmake/inner-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+    found:
+      path: ".*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/Inner/InnerConfig.cmake"
+      mode: "config"
+      version: "1.1"
+  -
+    kind: "find_package-v1"
+    backtrace:(
+      - "[^"]+")+
+    name: "WithInner"
+    version_request:
+      exact: false
+    settings:
+      required: "optional"
+      quiet: false
+      global: false
+      policy_scope: true
+      bypass_provider: false
+      path_suffixes:
+        - ""
+      paths:
+        CMAKE_FIND_USE_CMAKE_PATH: true
+        CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: true
+        CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+        CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+        CMAKE_FIND_USE_INSTALL_PREFIX: true
+        CMAKE_FIND_USE_PACKAGE_ROOT_PATH: true
+        CMAKE_FIND_USE_CMAKE_PACKAGE_REGISTRY: true
+        CMAKE_FIND_USE_SYSTEM_PACKAGE_REGISTRY: true
+        CMAKE_FIND_ROOT_PATH_MODE: "BOTH"
+    found:
+      path: ".*/Tests/RunCMake/find_package/ConfigureLog/cmake/FindWithInner.cmake"
+      mode: "module"
+      version: "1.1"
+  -
+    kind: "find_package-v1"
+    backtrace:(
+      - "[^"]+")+
+    name: "VersionCheck"
+    configs:
+      -
+        filename: "VersionCheckConfig.cmake"
+        kind: "cmake"
+      -
+        filename: "versioncheck-config.cmake"
+        kind: "cmake"
+    version_request:
+      version: "2.0"
+      version_complete: "2.0"
+      exact: false
+    settings:
+      required: "optional"
+      quiet: false
+      global: false
+      policy_scope: true
+      bypass_provider: false
+      names:
+        - "VersionCheck"
+      path_suffixes:
+        - ""
+      paths:
+        CMAKE_FIND_USE_CMAKE_PATH: true
+        CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: true
+        CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+        CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+        CMAKE_FIND_USE_INSTALL_PREFIX: true
+        CMAKE_FIND_USE_PACKAGE_ROOT_PATH: true
+        CMAKE_FIND_USE_CMAKE_PACKAGE_REGISTRY: true
+        CMAKE_FIND_USE_SYSTEM_PACKAGE_REGISTRY: true
+        CMAKE_FIND_ROOT_PATH_MODE: "BOTH"
+    candidates:
+      -
+        path: ".*/CMakeFiles/pkgRedirects/VersionCheckConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: ".*/CMakeFiles/pkgRedirects/versioncheck-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: ".*/Tests/RunCMake/find_package/ConfigureLog/VersionCheckConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: ".*/Tests/RunCMake/find_package/ConfigureLog/versioncheck-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: ".*/Tests/RunCMake/find_package/ConfigureLog/cmake/VersionCheckConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: ".*/Tests/RunCMake/find_package/ConfigureLog/cmake/versioncheck-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: ".*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/VersionCheck-1.5/VersionCheckConfig.cmake"
+        mode: "config"
+        reason: "insufficient_version"
+      -
+        path: ".*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/VersionCheck-1.5/versioncheck-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+    found:
+      path: ".*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/VersionCheck-2.5/VersionCheckConfig.cmake"
+      mode: "config"
+      version: "2.5"
+\.\.\.$

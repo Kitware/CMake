@@ -34,6 +34,10 @@ public:
   void BeginEvent(std::string const& kind, cmMakefile const& mf);
   void EndEvent();
 
+  void BeginArray();
+  void NextArrayElement();
+  void EndArray();
+
   void BeginObject(cm::string_view key);
   void EndObject();
 

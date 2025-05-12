@@ -40,6 +40,7 @@ protected:
   friend class cmSearchPath;
   friend class cmFindBaseDebugState;
   friend class cmFindCommonDebugState;
+  friend class cmFindPackageDebugState;
 
   /** Used to define groups of path labels */
   class PathGroup : public cmPathLabel
