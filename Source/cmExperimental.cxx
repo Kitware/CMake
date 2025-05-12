@@ -10,6 +10,7 @@
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
+#include "cmStringAlgorithms.h"
 #include "cmValue.h"
 
 namespace {
@@ -120,6 +121,16 @@ bool cmExperimental::HasSupportEnabled(cmMakefile const& mf, Feature f)
     if (mf.GetGlobalGenerator()->ShouldWarnExperimental(data.Name, *value)) {
       if (enabled) {
         mf.IssueMessage(MessageType::AUTHOR_WARNING, data.Description);
+      } else {
+        mf.IssueMessage(
+          MessageType::AUTHOR_WARNING,
+          cmStrCat(
+            data.Variable, " is set to incorrect value\n  ", value, '\n',
+            "See 'Help/dev/experimental.rst' in the source tree of this "
+            "version of CMake for documentation of the experimental feature "
+            "and the corresponding activation value.  This project's code "
+            "may require changes to work with this CMake's version of the "
+            "feature."));
       }
     }
   }
