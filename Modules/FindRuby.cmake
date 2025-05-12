@@ -389,12 +389,12 @@ endif ()
 set(_Ruby_POSSIBLE_LIB_NAMES
   ruby
   ruby-static
+  ruby-${Ruby_VERSION}
+  ruby${_Ruby_VERSION_NODOT}
   ruby${_Ruby_VERSION_NODOT_ZERO_PATCH}
+  ruby-${_Ruby_VERSION_SHORT}
   ruby${_Ruby_VERSION_SHORT}
   ruby${_Ruby_VERSION_SHORT_NODOT}
-  ruby${_Ruby_VERSION_NODOT}
-  ruby-${_Ruby_VERSION_SHORT}
-  ruby-${Ruby_VERSION}
 )
 
 if (WIN32)
