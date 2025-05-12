@@ -385,10 +385,11 @@ if (Ruby_FIND_VERSION VERSION_GREATER_EQUAL "1.9" OR Ruby_VERSION VERSION_GREATE
   set(Ruby_INCLUDE_DIRS ${Ruby_INCLUDE_DIRS} ${Ruby_CONFIG_INCLUDE_DIR})
 endif ()
 
-# Determine the list of possible names for the Ruby shared library
+# Determine the list of possible names for the ruby library
 set(_Ruby_POSSIBLE_LIB_NAMES
   ruby
   ruby-static
+  ruby${_Ruby_VERSION_NODOT_ZERO_PATCH}
   ruby${_Ruby_VERSION_SHORT}
   ruby${_Ruby_VERSION_SHORT_NODOT}
   ruby${_Ruby_VERSION_NODOT}
