@@ -10,6 +10,7 @@ target_include_directories(
 target_link_directories(foo INTERFACE /opt/foo/lib)
 target_link_options(foo INTERFACE --needed)
 target_link_libraries(foo INTERFACE /usr/lib/libm.so)
+set_property(TARGET foo PROPERTY SPDX_LICENSE "BSD-3-Clause")
 
 install(TARGETS foo EXPORT foo DESTINATION .)
 export(EXPORT foo PACKAGE_INFO foo)

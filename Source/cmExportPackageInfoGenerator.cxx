@@ -205,7 +205,10 @@ bool cmExportPackageInfoGenerator::GenerateInterfaceProperties(
   this->GenerateInterfaceListProperty(result, component, target, "includes",
                                       "INCLUDE_DIRECTORIES"_s, properties);
 
-  // TODO: description, license
+  this->GenerateProperty(result, component, target, "license", "SPDX_LICENSE",
+                         properties);
+
+  // TODO: description
 
   return result;
 }
@@ -462,6 +465,24 @@ void cmExportPackageInfoGenerator::GenerateInterfaceListProperty(
   for (auto const& value : cmList{ iter->second }) {
     array.append(value);
   }
+}
+
+void cmExportPackageInfoGenerator::GenerateProperty(
+  bool& result, Json::Value& component, cmGeneratorTarget const* target,
+  std::string const& outName, std::string const& inName,
+  ImportPropertyMap const& properties) const
+{
+  auto const& iter = properties.find(inName);
+  if (iter == properties.end()) {
+    return;
+  }
+
+  if (!ForbidGeneratorExpressions(target, inName, iter->second)) {
+    result = false;
+    return;
+  }
+
+  component[outName] = iter->second;
 }
 
 Json::Value cmExportPackageInfoGenerator::GenerateInterfaceConfigProperties(

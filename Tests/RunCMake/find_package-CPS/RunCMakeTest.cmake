@@ -17,6 +17,9 @@ run_cmake(VersionLimit2)
 run_cmake(TransitiveVersion)
 run_cmake(CustomVersion)
 
+# Metadata Tests
+run_cmake(SupplementalAttributes)
+
 # Version-matching failure tests
 run_cmake(MissingVersion1)
 run_cmake(MissingVersion2)

@@ -101,6 +101,11 @@ private:
     std::string const& outName, cm::string_view inName,
     ImportPropertyMap const& properties) const;
 
+  void GenerateProperty(bool& result, Json::Value& component,
+                        cmGeneratorTarget const* target,
+                        std::string const& outName, std::string const& inName,
+                        ImportPropertyMap const& properties) const;
+
   std::string const PackageName;
   std::string const PackageVersion;
   std::string const PackageVersionCompat;

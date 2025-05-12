@@ -117,6 +117,9 @@ bool cmExportFileGenerator::PopulateInterfaceProperties(
   this->PopulateInterfaceProperty("INTERFACE_POSITION_INDEPENDENT_CODE",
                                   target, properties);
 
+  this->PopulateInterfaceProperty("SPDX_LICENSE", target, preprocessRule,
+                                  properties);
+
   std::string errorMessage;
   if (!this->PopulateCxxModuleExportProperties(
         target, properties, preprocessRule, includesDestinationDirs,
