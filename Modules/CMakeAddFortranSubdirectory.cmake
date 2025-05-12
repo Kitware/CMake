@@ -5,12 +5,23 @@
 CMakeAddFortranSubdirectory
 ---------------------------
 
-This module provides a function to add a Fortran project located in a
-subdirectory:
+This module provides a command to add a Fortran project located in a
+subdirectory.
+
+Load it in a CMake project with:
+
+.. code-block:: cmake
+
+  include(CMakeAddFortranSubdirectory)
+
+Commands
+^^^^^^^^
+
+This module provides the following command:
 
 .. command:: cmake_add_fortran_subdirectory
 
-  Adds a Fortran-only subproject from ``<subdir>`` to the current project.
+  Adds a Fortran-only subproject from subdirectory to the current project:
 
   .. code-block:: cmake
 
@@ -26,9 +37,10 @@ subdirectory:
       NO_EXTERNAL_INSTALL
     )
 
-  This function checks whether the current compiler supports Fortran or attempts
+  This command checks whether the current compiler supports Fortran or attempts
   to locate a Fortran compiler.  If a compatible Fortran compiler is found, the
-  Fortran project is added as a subdirectory.
+  Fortran project located in ``<subdir>`` is added as a subdirectory to the
+  current project.
 
   If no Fortran compiler is found and the compiler is ``MSVC``, it searches for
   the MinGW ``gfortran`` compiler.  In this case, the Fortran project is built
@@ -80,7 +92,7 @@ Examples
 ^^^^^^^^
 
 Adding a Fortran subdirectory to a project can be done by including this module
-and calling the ``cmake_add_fortran_subdirectory()`` function.  In the following
+and calling the ``cmake_add_fortran_subdirectory()`` command.  In the following
 example, a Fortran project provides the ``hello`` library and its dependent
 ``world`` library:
 
