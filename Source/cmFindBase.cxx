@@ -778,6 +778,21 @@ void cmFindBaseDebugState::WriteEvent(cmConfigureLog& log,
   } else {
     log.WriteValue("found"_s, false);
   }
+
+  this->WriteSearchVariables(log, mf);
+
   log.EndEvent();
+}
+
+std::vector<std::pair<cmFindCommonDebugState::VariableSource, std::string>>
+cmFindBaseDebugState::ExtraSearchVariables() const
+{
+  std::vector<std::pair<cmFindCommonDebugState::VariableSource, std::string>>
+    extraSearches;
+  if (!this->FindBaseCommand->EnvironmentPath.empty()) {
+    extraSearches.emplace_back(VariableSource::EnvironmentList,
+                               this->FindBaseCommand->EnvironmentPath);
+  }
+  return extraSearches;
 }
 #endif

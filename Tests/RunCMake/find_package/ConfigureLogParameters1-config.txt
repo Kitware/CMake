@@ -42,6 +42,9 @@ events:
         reason: "not_found"
         message: "Not an EXACT version match"
     found: null
+    search_context:(
+      [^
+]*)+
   -
     kind: "find_package-v1"
     backtrace:(
@@ -75,6 +78,9 @@ events:
       path: ".*/Tests/RunCMake/find_package/ConfigureLog/cmake/FindParameterCheck.cmake"
       mode: "module"
       version: "1.2"
+    search_context:(
+      [^
+]*)+
   -
     kind: "find_package-v1"
     backtrace:(
@@ -106,6 +112,9 @@ events:
       path: ".*/Tests/RunCMake/find_package/ConfigureLog/cmake/FindParameterCheck.cmake"
       mode: "module"
       version: "1.2"
+    search_context:(
+      [^
+]*)+
   -
     kind: "find_package-v1"
     backtrace:(
@@ -135,6 +144,9 @@ events:
       path: ".*/Tests/RunCMake/find_package/ConfigureLog/cmake/FindParameterCheck.cmake"
       mode: "module"
       version: "1.2"
+    search_context:(
+      [^
+]*)+
   -
     kind: "find_package-v1"
     backtrace:(
@@ -164,6 +176,9 @@ events:
       path: ".*/Tests/RunCMake/find_package/ConfigureLog/cmake/FindParameterCheck.cmake"
       mode: "module"
       version: "1.2"
+    search_context:(
+      [^
+]*)+
   -
     kind: "find_package-v1"
     backtrace:(
@@ -202,6 +217,9 @@ events:
       path: ".*/Tests/RunCMake/find_package/ConfigureLog/cmake/FindParameterCheck.cmake"
       mode: "module"
       version: "1.2"
+    search_context:(
+      [^
+]*)+
   -
     kind: "find_package-v1"
     backtrace:(
@@ -232,6 +250,9 @@ events:
       path: ".*/Tests/RunCMake/find_package/ConfigureLog/cmake/FindParameterCheck.cmake"
       mode: "module"
       version: "1.2"
+    search_context:(
+      [^
+]*)+
   -
     kind: "find_package-v1"
     backtrace:(
@@ -261,6 +282,9 @@ events:
       path: ".*/Tests/RunCMake/find_package/ConfigureLog/cmake/FindParameterCheck.cmake"
       mode: "module"
       version: "1.2"
+    search_context:(
+      [^
+]*)+
   -
     kind: "find_package-v1"
     backtrace:(
@@ -290,6 +314,9 @@ events:
       path: ".*/Tests/RunCMake/find_package/ConfigureLog/cmake/FindParameterCheck.cmake"
       mode: "module"
       version: "1.2"
+    search_context:(
+      [^
+]*)+
   -
     kind: "find_package-v1"
     backtrace:(
@@ -319,4 +346,7 @@ events:
       path: ".*/Tests/RunCMake/find_package/ConfigureLog/cmake/FindParameterCheck.cmake"
       mode: "module"
       version: "1.2"
+    search_context:(
+      [^
+]*)+
 \.\.\.$

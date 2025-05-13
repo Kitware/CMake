@@ -442,6 +442,20 @@ The keys specific to ``find-v1`` mappings are:
   Either a string representing the found value or ``false`` if it was not
   found.
 
+``search_context``
+  A mapping of variable names to search paths specified by them (either a
+  string or an array of strings depending on the variable). Environment
+  variables are wrapped with ``ENV{`` and ``}``, otherwise CMake variables are
+  used. Only variables with any paths specified are used.
+
+  ``package_stack``
+    An array of objects with paths which come from the stack of paths made
+    available by :command:`find_package` calls.
+
+    ``package_paths``
+      The paths made available by :command:`find_package` commands in the call
+      stack.
+
 .. _`find_package configure-log event`:
 
 Event Kind ``find_package``
@@ -681,3 +695,17 @@ The keys specific to ``find_package-v1`` mappings are:
 
   ``version``
     The reported version of the package.
+
+``search_context``
+  A mapping of variable names to search paths specified by them (either a
+  string or an array of strings depending on the variable). Environment
+  variables are wrapped with ``ENV{`` and ``}``, otherwise CMake variables are
+  used. Only variables with any paths specified are used.
+
+  ``package_stack``
+    An array of objects with paths which come from the stack of paths made
+    available by :command:`find_package` calls.
+
+    ``package_paths``
+      The paths made available by :command:`find_package` commands in the call
+      stack.

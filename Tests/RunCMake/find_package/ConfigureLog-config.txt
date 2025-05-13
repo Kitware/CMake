@@ -71,6 +71,9 @@ events:
       path: ".*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/ViaConfig/ViaConfigConfig.cmake"
       mode: "config"
       version: "1\.0"
+    search_context:(
+      [^
+]*)+
   -
     kind: "find_package-v1"
     backtrace:(
@@ -100,6 +103,9 @@ events:
       path: ".*/Tests/RunCMake/find_package/ConfigureLog/cmake/FindViaModule.cmake"
       mode: "module"
       version: "1.0"
+    search_context:(
+      [^
+]*)+
   -
     kind: "find_package-v1"
     backtrace:(
@@ -163,6 +169,9 @@ events:
       path: ".*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/Inner/InnerConfig.cmake"
       mode: "config"
       version: "1.1"
+    search_context:(
+      [^
+]*)+
   -
     kind: "find_package-v1"
     backtrace:(
@@ -192,6 +201,9 @@ events:
       path: ".*/Tests/RunCMake/find_package/ConfigureLog/cmake/FindWithInner.cmake"
       mode: "module"
       version: "1.1"
+    search_context:(
+      [^
+]*)+
   -
     kind: "find_package-v1"
     backtrace:(
@@ -265,4 +277,7 @@ events:
       path: ".*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/VersionCheck-2.5/VersionCheckConfig.cmake"
       mode: "config"
       version: "2.5"
+    search_context:(
+      [^
+]*)+
 \.\.\.$
