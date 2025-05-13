@@ -39,7 +39,6 @@
             - ${CMAKE_CI_BUILD_DIR}/Tests/CMake*Lib/*LibTests
             - ${CMAKE_CI_BUILD_DIR}/Tests/CMake*Lib/*LibTests.exe
             - ${CMAKE_CI_BUILD_DIR}/Source/kwsys/cmsysTest*
-            - ${CMAKE_CI_BUILD_DIR}/Source/kwsys/testConsoleBufChild.exe
             - ${CMAKE_CI_BUILD_DIR}/Utilities/cmcurl/curltest
             - ${CMAKE_CI_BUILD_DIR}/Utilities/cmcurl/curltest.exe
             - ${CMAKE_CI_BUILD_DIR}/Utilities/KWIML/test/kwiml_test
