@@ -16,6 +16,7 @@
 #include <vector>
 
 #include <cm/optional>
+#include <cm/string_view>
 #include <cmext/algorithm>
 #include <cmext/string_view>
 
@@ -681,6 +682,9 @@ public:
     return configs;
   }
 
+  bool ShouldWarnExperimental(cm::string_view featureName,
+                              cm::string_view featureUuid);
+
 protected:
   // for a project collect all its targets by following depend
   // information, and also collect all the targets
@@ -907,6 +911,8 @@ private:
 
   // track targets to issue CMP0068 warning for.
   std::set<std::string> CMP0068WarnTargets;
+
+  std::unordered_set<std::string> WarnedExperimental;
 
   mutable std::map<cmSourceFile*, std::set<cmGeneratorTarget const*>>
     FilenameTargetDepends;

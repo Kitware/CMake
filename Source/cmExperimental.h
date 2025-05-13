@@ -37,13 +37,12 @@ public:
 
   struct FeatureData
   {
-    std::string const Name;
-    std::string const Uuid;
-    std::string const Variable;
-    std::string const Description;
-    std::vector<std::string> const TryCompileVariables;
-    TryCompileCondition const ForwardThroughTryCompile;
-    bool Warned;
+    std::string Name;
+    std::string Uuid;
+    std::string Variable;
+    std::string Description;
+    std::vector<std::string> TryCompileVariables;
+    TryCompileCondition ForwardThroughTryCompile;
   };
 
   static FeatureData const& DataForFeature(Feature f);
