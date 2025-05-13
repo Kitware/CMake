@@ -759,14 +759,20 @@ void cmFindBaseDebugState::WriteEvent(cmConfigureLog& log,
                  !this->FindCommand->NoCMakeInstallPath);
   log.EndObject();
 
-  log.WriteValue("names"_s, this->FindBaseCommand->Names);
+  if (!this->FindBaseCommand->Names.empty()) {
+    log.WriteValue("names"_s, this->FindBaseCommand->Names);
+  }
   std::vector<std::string> directories;
   directories.reserve(this->FailedSearchLocations.size());
   for (auto const& location : this->FailedSearchLocations) {
     directories.push_back(location.path);
   }
-  log.WriteValue("candidate_directories"_s, this->FindCommand->SearchPaths);
-  log.WriteValue("searched_directories"_s, directories);
+  if (!this->FindCommand->SearchPaths.empty()) {
+    log.WriteValue("candidate_directories"_s, this->FindCommand->SearchPaths);
+  }
+  if (!directories.empty()) {
+    log.WriteValue("searched_directories"_s, directories);
+  }
   if (!this->FoundSearchLocation.path.empty()) {
     log.WriteValue("found"_s, this->FoundSearchLocation.path);
   } else {
