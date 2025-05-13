@@ -5,18 +5,28 @@
 FindPackageMessage
 ------------------
 
-This module is intended to be used in
-:ref:`FindXXX.cmake modules <Find Modules>` and provides a function for printing
-find result messages.
+This module provides a command for printing find result messages and is
+intended for use in :ref:`Find Modules`.
+
+Load it in a CMake find module with:
+
+.. code-block:: cmake
+
+  include(FindPackageMessage)
+
+Commands
+^^^^^^^^
+
+This module provides the following command:
 
 .. command:: find_package_message
+
+  Prints a message once for each unique find result to inform the user which
+  package was found and where:
 
   .. code-block:: cmake
 
     find_package_message(<PackageName> <message> <details>)
-
-  Prints a ``<message>`` once for each unique find result to inform the user
-  which package was found and where.
 
   ``<PackageName>``
     The name of the package (for example, as used in the
@@ -37,34 +47,33 @@ find result messages.
 Examples
 ^^^^^^^^
 
-Printing result message in a find module:
+Printing a result message in a custom find module:
 
 .. code-block:: cmake
-  :caption: FindFoo.cmake
+  :caption: ``FindFoo.cmake``
 
   find_library(Foo_LIBRARY foo)
   find_path(Foo_INCLUDE_DIR foo.h)
 
-  # ...
-
   include(FindPackageMessage)
 
-  if(Foo_FOUND)
+  if(Foo_LIBRARY AND Foo_INCLUDE_DIR)
     find_package_message(
       Foo
       "Found Foo: ${Foo_LIBRARY}"
       "[${Foo_LIBRARY}][${Foo_INCLUDE_DIR}]"
     )
   else()
-    # ...
+    message(STATUS "Could NOT find Foo")
   endif()
 
-When writing standard :ref:`Find modules <Find Modules>`, use the
-:module:`find_package_handle_standard_args() <FindPackageHandleStandardArgs>`
-function, which automatically prints the find result message:
+When writing standard find modules, use the
+:module:`FindPackageHandleStandardArgs` module and its
+:command:`find_package_handle_standard_args` command which automatically
+prints the find result message based on whether the package was found:
 
 .. code-block:: cmake
-  :caption: FindFoo.cmake
+  :caption: ``FindFoo.cmake``
 
   # ...
 
