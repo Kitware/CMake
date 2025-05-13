@@ -153,7 +153,7 @@ Modules
 * The :module:`FindBLAS` and :module:`FindLAPACK` modules learned to support
   `FLAME`_ ``blis`` and ``libflame``.
 
-* The :module:`FindDoxygen` module :command:`doxygen_add_docs` function
+* The :module:`FindDoxygen` module :command:`doxygen_add_docs` command
   now supports a new ``DOXYGEN_VERBATIM_VARS`` list variable.  Any
   ``DOXYGEN_...`` variable contained in that list will bypass the automatic
   quoting logic, leaving its contents untouched when transferring them to the
