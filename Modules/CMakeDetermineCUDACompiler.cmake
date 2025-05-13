@@ -115,6 +115,9 @@ if(NOT CMAKE_CUDA_COMPILER_ID_RUN)
     # Clang does not automatically select an architecture supported by the SDK.
     # Prefer NVCC's default for each SDK version, and fall back to older archs.
     set(archs "")
+    if(NOT CMAKE_CUDA_COMPILER_TOOLKIT_VERSION VERSION_LESS 13.0)
+      list(APPEND archs 75)
+    endif()
     if(NOT CMAKE_CUDA_COMPILER_TOOLKIT_VERSION VERSION_LESS 11.0)
       list(APPEND archs 52)
     endif()
