@@ -7,126 +7,126 @@ FindEnvModules
 
 .. versionadded:: 3.15
 
-Locate an environment module implementation and make commands available to
-CMake scripts to use them.  This is compatible with both Lua-based Lmod
-and TCL-based EnvironmentModules.
-
-This module is intended for the use case of setting up the compiler and library
-environment within a :ref:`CTest Script <CTest Script>` (``ctest -S``).  It can
-also be used in a :ref:`CMake Script <Script Processing Mode>` (``cmake -P``).
-
-.. note::
-
-  The loaded environment will not survive past the end of the calling process.
-  Do not use this module in project code (``CMakeLists.txt`` files) to load
-  a compiler environment; it will not be available during the build.  Instead
-  load the environment manually before running CMake or using the generated
-  build system.
-
-Example Usage
-^^^^^^^^^^^^^
+Finds an Environment Modules implementation and provides commands for use in
+CMake scripts:
 
 .. code-block:: cmake
 
-  set(CTEST_BUILD_NAME "CrayLinux-CrayPE-Cray-dynamic")
-  set(CTEST_BUILD_CONFIGURATION Release)
-  set(CTEST_BUILD_FLAGS "-k -j8")
-  set(CTEST_CMAKE_GENERATOR "Unix Makefiles")
+  find_package(EnvModules [...])
 
-  ...
+The Environment Modules system is a command-line tool that manages Unix-like
+shell environments by dynamically modifying environment variables.
+It is commonly used in High-Performance Computing (HPC) environments to
+support multiple software versions or configurations.
 
-  find_package(EnvModules REQUIRED)
+This module is compatible with the two most common implementations:
 
-  env_module(purge)
-  env_module(load modules)
-  env_module(load craype)
-  env_module(load PrgEnv-cray)
-  env_module(load craype-knl)
-  env_module(load cray-mpich)
-  env_module(load cray-libsci)
+* Lua-based Lmod
+* TCL-based Environment Modules
 
-  set(ENV{CRAYPE_LINK_TYPE} dynamic)
+This module is primarily intended for setting up compiler and library
+environments within a :ref:`CTest Script <CTest Script>` (``ctest -S``).
+It may also be used in a :ref:`CMake Script <Script Processing Mode>`
+(``cmake -P``).
 
-  ...
+.. note::
+
+  The loaded environment will not persist beyond the end of the calling
+  process.  Do not use this module in CMake project code (such as
+  ``CMakeLists.txt``) to load compiler environments, as the environment
+  changes will not be available during the build phase.  In such a case, load
+  the desired environment before invoking CMake or the generated build system.
 
 Result Variables
 ^^^^^^^^^^^^^^^^
 
-This module will set the following variables in your project:
+This module defines the following variables:
 
 ``EnvModules_FOUND``
-  True if a compatible environment modules framework was found.
+  Boolean indicating whether a compatible Environment Modules framework is
+  found.
 
 Cache Variables
 ^^^^^^^^^^^^^^^
 
-The following cache variable will be set:
+The following cache variables may also be set:
 
 ``EnvModules_COMMAND``
-  The low level module command to use.  Currently supported
-  implementations are the Lua based Lmod and TCL based EnvironmentModules.
+  The path to a low level module command to use.
 
-Environment Variables
-^^^^^^^^^^^^^^^^^^^^^
+Hints
+^^^^^
+
+This module accepts the following variables before calling the
+``find_package(EnvModules)``:
 
 ``ENV{MODULESHOME}``
-  Usually set by the module environment implementation, used as a hint to
-  locate the module command to execute.
+  This environment variable is usually set by the Environment Modules
+  implementation, and can be used as a hint to locate the module command to
+  execute.
 
-Provided Functions
-^^^^^^^^^^^^^^^^^^
+Commands
+^^^^^^^^
 
-This defines the following CMake functions for interacting with environment
-modules:
+This module provides the following commands for interacting with the
+Environment Modules system, if found:
 
 .. command:: env_module
 
-  Execute an arbitrary module command:
+  Executes an arbitrary module command:
 
   .. code-block:: cmake
 
-    env_module(cmd arg1 ... argN)
+    env_module(<command> <args>...)
     env_module(
-      COMMAND cmd arg1 ... argN
+      COMMAND <command> <args>...
       [OUTPUT_VARIABLE <out-var>]
       [RESULT_VARIABLE <ret-var>]
     )
 
   The options are:
 
-  ``cmd arg1 ... argN``
-    The module sub-command and arguments to execute as if they were
-    passed directly to the module command in your shell environment.
+  ``COMMAND <command> <args>...``
+    The module sub-command and arguments to execute as if passed directly to
+    the module command in the shell environment.
 
   ``OUTPUT_VARIABLE <out-var>``
-    The standard output from executing the module command.
+    Stores the standard output of the executed module command in the specified
+    variable.
 
   ``RESULT_VARIABLE <ret-var>``
-    The return code from executing the module command.
+    Stores the return code of the executed module command in the specified
+    variable.
 
 .. command:: env_module_swap
 
-  Swap one module for another:
+  Swaps one module for another:
 
   .. code-block:: cmake
 
-    env_module_swap(out_mod in_mod
+    env_module_swap(
+      <out-mod>
+      <in-mod>
       [OUTPUT_VARIABLE <out-var>]
       [RESULT_VARIABLE <ret-var>]
     )
 
-  This is functionally equivalent to the ``module swap out_mod in_mod`` shell
-  command.  The options are:
+  This is functionally equivalent to the ``module swap <out-mod> <in-mod>``
+  shell command.
+
+  The options are:
 
   ``OUTPUT_VARIABLE <out-var>``
-    The standard output from executing the module command.
+    Stores the standard output of the executed module command in the specified
+    variable.
 
   ``RESULT_VARIABLE <ret-var>``
-    The return code from executing the module command.
+    Stores the return code of the executed module command in the specified
+    variable.
 
 .. command:: env_module_list
 
-  Retrieve the list of currently loaded modules:
+  Retrieves the list of currently loaded modules:
 
   .. code-block:: cmake
 
@@ -138,7 +138,7 @@ modules:
 
 .. command:: env_module_avail
 
-  Retrieve the list of available modules:
+  Retrieves the list of available modules:
 
   .. code-block:: cmake
 
@@ -148,6 +148,58 @@ modules:
   command.  The result is stored in ``<out-var>`` as a properly formatted
   CMake :ref:`semicolon-separated list <CMake Language Lists>` variable.
 
+Examples
+^^^^^^^^
+
+In the following example, this module is used in a CTest script to configure
+the compiler and libraries for a Cray Programming Environment.
+After the Environment Modules system is found, the ``env_module()`` command is
+used to load the necessary compiler, MPI, and scientific libraries to set up
+the build environment.  The ``CRAYPE_LINK_TYPE`` environment variable is set
+to ``dynamic`` to specify dynamic linking.  This instructs the Cray Linux
+Environment compiler driver to link against dynamic libraries at runtime,
+rather than linking static libraries at compile time.  As a result, the
+compiler produces dynamically linked executable files.
+
+.. code-block:: cmake
+  :caption: ``example-script.cmake``
+
+  set(CTEST_BUILD_NAME "CrayLinux-CrayPE-Cray-dynamic")
+  set(CTEST_BUILD_CONFIGURATION Release)
+  set(CTEST_BUILD_FLAGS "-k -j8")
+  set(CTEST_CMAKE_GENERATOR "Unix Makefiles")
+
+  # ...
+
+  find_package(EnvModules REQUIRED)
+
+  # Clear all currently loaded Environment Modules to start with a clean state
+  env_module(purge)
+
+  # Load the base module-handling system to use other modules
+  env_module(load modules)
+
+  # Load Cray Programming Environment (Cray PE) support, which manages
+  # platform-specific optimizations and architecture selection
+  env_module(load craype)
+
+  # Load the Cray programming environment
+  env_module(load PrgEnv-cray)
+
+  # Load settings targeting the Intel Knights Landing (KNL) CPU architecture
+  env_module(load craype-knl)
+
+  # Load the Cray MPI (Message Passing Interface) library, needed for
+  # distributed computing
+  env_module(load cray-mpich)
+
+  # Load Cray's scientific library package, which includes optimized math
+  # libraries (like BLAS, LAPACK)
+  env_module(load cray-libsci)
+
+  set(ENV{CRAYPE_LINK_TYPE} dynamic)
+
+  # ...
 #]=======================================================================]
 
 function(env_module)
