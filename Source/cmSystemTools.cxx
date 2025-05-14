@@ -103,7 +103,6 @@
 #include "cmsys/FStream.hxx"
 #include "cmsys/RegularExpression.hxx"
 #include "cmsys/System.h"
-#include "cmsys/Terminal.h"
 
 #if defined(_WIN32)
 #  include <windows.h>
@@ -3257,37 +3256,6 @@ cmsys::Status cmSystemTools::SetLogicalWorkingDirectory(std::string const& lwd)
     cmSystemToolsLogicalWorkingDirectory = lwd;
   }
   return status;
-}
-
-void cmSystemTools::MakefileColorEcho(int color, char const* message,
-                                      bool newline, bool enabled)
-{
-  // On some platforms (an MSYS prompt) cmsysTerminal may not be able
-  // to determine whether the stream is displayed on a tty.  In this
-  // case it assumes no unless we tell it otherwise.  Since we want
-  // color messages to be displayed for users we will assume yes.
-  // However, we can test for some situations when the answer is most
-  // likely no.
-  int assumeTTY = cmsysTerminal_Color_AssumeTTY;
-  if (cmSystemTools::HasEnv("DART_TEST_FROM_DART") ||
-      cmSystemTools::HasEnv("DASHBOARD_TEST_FROM_CTEST") ||
-      cmSystemTools::HasEnv("CTEST_INTERACTIVE_DEBUG_MODE")) {
-    // Avoid printing color escapes during dashboard builds.
-    assumeTTY = 0;
-  }
-
-  if (enabled && color != cmsysTerminal_Color_Normal) {
-    // Print with color.  Delay the newline until later so that
-    // all color restore sequences appear before it.
-    cmsysTerminal_cfprintf(color | assumeTTY, stdout, "%s", message);
-  } else {
-    // Color is disabled.  Print without color.
-    fprintf(stdout, "%s", message);
-  }
-
-  if (newline) {
-    fprintf(stdout, "\n");
-  }
 }
 
 bool cmSystemTools::GuessLibrarySOName(std::string const& fullPath,
