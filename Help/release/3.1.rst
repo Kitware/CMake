@@ -235,7 +235,7 @@ Modules
 
 * The :module:`FindGLUT` module now provides imported targets.
 
-* The :module:`FindHg` module gained a new ``Hg_WC_INFO`` macro to
+* The :module:`FindHg` module gained a new ``Hg_WC_INFO`` command to
   help run ``hg`` to extract information about a Mercurial work copy.
 
 * The :module:`FindOpenCL` module was introduced.
