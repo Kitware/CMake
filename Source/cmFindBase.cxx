@@ -90,6 +90,10 @@ bool cmFindBase::ParseArguments(std::vector<std::string> const& argsIn)
   this->VariableName = args[0];
   this->InitialState = this->GetInitialState();
   if (this->IsFound()) {
+    if (this->DebugState) {
+      this->DebugState->FoundAt(
+        *this->Makefile->GetDefinition(this->VariableName));
+    }
     return true;
   }
 
@@ -524,6 +528,7 @@ bool cmFindBase::IsDefined() const
 
 void cmFindBase::NormalizeFindResult()
 {
+  std::string foundValue;
   if (this->Makefile->GetPolicyStatus(cmPolicies::CMP0125) ==
       cmPolicies::NEW) {
     // ensure the path returned by find_* command is absolute
@@ -542,6 +547,7 @@ void cmFindBase::NormalizeFindResult()
       }
     }
 
+    foundValue = value;
     if (this->StoreResultInCache) {
       // If the user specifies the entry on the command line without a
       // type we should add the type and docstring but keep the original
@@ -571,6 +577,10 @@ void cmFindBase::NormalizeFindResult()
     // type we should add the type and docstring but keep the original
     // value.
     if (this->StoreResultInCache) {
+      auto const& existingValue =
+        this->Makefile->GetCMakeInstance()->GetCacheDefinition(
+          this->VariableName);
+      foundValue = *existingValue;
       if (this->AlreadyInCacheWithoutMetaInfo) {
         this->Makefile->AddCacheDefinition(this->VariableName, "",
                                            this->VariableDocumentation,
@@ -578,18 +588,19 @@ void cmFindBase::NormalizeFindResult()
         if (this->Makefile->GetPolicyStatus(cmPolicies::CMP0126) ==
               cmPolicies::NEW &&
             this->Makefile->IsNormalDefinitionSet(this->VariableName)) {
-          this->Makefile->AddDefinition(
-            this->VariableName,
-            *this->Makefile->GetCMakeInstance()->GetCacheDefinition(
-              this->VariableName));
+          this->Makefile->AddDefinition(this->VariableName, *existingValue);
         }
       }
     } else {
+      auto const& existingValue =
+        this->Makefile->GetSafeDefinition(this->VariableName);
+      foundValue = existingValue;
       // ensure a normal variable is defined.
-      this->Makefile->AddDefinition(
-        this->VariableName,
-        this->Makefile->GetSafeDefinition(this->VariableName));
+      this->Makefile->AddDefinition(this->VariableName, existingValue);
     }
+  }
+  if (this->DebugState) {
+    this->DebugState->FoundAt(foundValue);
   }
 }
 
@@ -611,6 +622,10 @@ void cmFindBase::StoreFindResult(std::string const& value)
       }
     } else {
       this->Makefile->AddDefinition(this->VariableName, value);
+    }
+
+    if (this->DebugState) {
+      this->DebugState->FoundAt(value);
     }
 
     return;
