@@ -1,0 +1,25 @@
+^CMake Warning \(dev\) at Experimental/WindowsKernelModeDriver-wrong\.cmake:4 \(cmake_language\):
+  CMAKE_EXPERIMENTAL_WINDOWS_KERNEL_MODE_DRIVER is set to incorrect value
+
+    01234567-0123-0123-0123-0123456789ab
+
+  See 'Help/dev/experimental\.rst' in the source tree of this version of CMake
+  for documentation of the experimental feature and the corresponding
+  activation value\.  This project's code may require changes to work with
+  this CMake's version of the feature\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
+This warning is for project developers\.  Use -Wno-dev to suppress it\.
++
+CMake Warning \(dev\) at Experimental/WindowsKernelModeDriver-wrong\.cmake:19 \(cmake_language\):
+  CMAKE_EXPERIMENTAL_WINDOWS_KERNEL_MODE_DRIVER is set to incorrect value
+
+    76543210-3210-3210-3210-ba9876543210
+
+  See 'Help/dev/experimental\.rst' in the source tree of this version of CMake
+  for documentation of the experimental feature and the corresponding
+  activation value\.  This project's code may require changes to work with
+  this CMake's version of the feature\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
+This warning is for project developers\.  Use -Wno-dev to suppress it\.$

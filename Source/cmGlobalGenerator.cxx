@@ -2003,6 +2003,7 @@ void cmGlobalGenerator::ClearGeneratorMembers()
   this->GeneratedFiles.clear();
   this->RuntimeDependencySets.clear();
   this->RuntimeDependencySetsByName.clear();
+  this->WarnedExperimental.clear();
 }
 
 void cmGlobalGenerator::ComputeTargetObjectDirectory(
@@ -3913,4 +3914,12 @@ void cmGlobalGenerator::AddCMakeFilesToRebuild(
   files.insert(files.end(), this->InstallScripts.begin(),
                this->InstallScripts.end());
   files.insert(files.end(), this->TestFiles.begin(), this->TestFiles.end());
+}
+
+bool cmGlobalGenerator::ShouldWarnExperimental(cm::string_view featureName,
+                                               cm::string_view featureUuid)
+{
+  return this->WarnedExperimental
+    .emplace(cmStrCat(featureName, '-', featureUuid))
+    .second;
 }
