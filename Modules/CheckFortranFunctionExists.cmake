@@ -29,11 +29,11 @@ Check if a Fortran function exists.
 The following variables may be set before calling this macro to modify
 the way the check is run:
 
-.. include:: /module/include/CMAKE_REQUIRED_LINK_OPTIONS.rst
+  .. include:: /module/include/CMAKE_REQUIRED_LINK_OPTIONS.rst
 
-.. include:: /module/include/CMAKE_REQUIRED_LIBRARIES.rst
+  .. include:: /module/include/CMAKE_REQUIRED_LIBRARIES.rst
 
-.. include:: /module/include/CMAKE_REQUIRED_LINK_DIRECTORIES.rst
+  .. include:: /module/include/CMAKE_REQUIRED_LINK_DIRECTORIES.rst
 #]=======================================================================]
 
 include_guard(GLOBAL)
