@@ -1121,13 +1121,24 @@ bool cmFindPackageCommand::FindPackage(
     if (!providerCommand(listFileArgs, this->Status)) {
       return false;
     }
+    std::string providerName;
+    if (auto depProvider = state->GetDependencyProvider()) {
+      providerName = depProvider->GetCommand();
+    } else {
+      providerName = "<no provider?>";
+    }
+    auto searchPath = cmStrCat("dependency_provider::", providerName);
     if (this->Makefile->IsOn(cmStrCat(this->Name, "_FOUND"))) {
       if (this->DebugModeEnabled()) {
         this->DebugMessage("Package was found by the dependency provider");
       }
+      this->FileFound = searchPath;
+      this->FileFoundMode = FoundPackageMode::Provider;
       this->AppendSuccessInformation();
       return true;
     }
+    this->ConsideredPaths.emplace_back(searchPath, FoundPackageMode::Provider,
+                                       SearchResult::NotFound);
   }
 
   // Limit package nesting depth well below the recursion depth limit because

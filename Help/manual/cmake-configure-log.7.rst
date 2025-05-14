@@ -654,7 +654,8 @@ The keys specific to ``find_package-v1`` mappings are:
   keys:
 
   ``path``
-    The path to the considered file.
+    The path to the considered file. In the case of a dependency provider, the
+    value is in the form of ``dependency_provider::<COMMAND_NAME>``.
 
   ``mode``
     The mode which found the file. One of ``module``, ``cps``, ``cmake``, or
@@ -673,7 +674,9 @@ The keys specific to ``find_package-v1`` mappings are:
   found, this is ``null``. Keys available:
 
   ``path``
-    The path to the module or configuration that found the package.
+    The path to the module or configuration that found the package. In the
+    case of a dependency provider, the value is in the form of
+    ``dependency_provider::<COMMAND_NAME>``.
 
   ``mode``
     The mode that considered the path. One of ``module``, ``cps``, ``cmake``,
