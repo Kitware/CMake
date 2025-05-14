@@ -8,22 +8,10 @@ events:(
     message: \|(
 +      [^
 ]*)*|
-  -
-    kind: "find-v1"
-    backtrace:(
-      - "[^"]+")+
-    mode: "[^"]*"
-    variable: "[^"]*"
-    description: "[^"]*"
-    settings:(
-      [A-Za-z_]+: (true|false|"(NEVER|ONLY|FIRST|LAST)"))+
-    names:(
-      - "[^"]+")+
-    candidate_directories:(
-      - "[^"]+")*
-    searched_directories:(
-      - "[^"]+")*
-    found: (false|"[^"]*"))+
++  -
+    kind: "find-v1"(
+    [^
+]*)+)*
   -
     kind: "try_compile-v1"
     backtrace:
@@ -44,29 +32,17 @@ events:(
       cached: true
       stdout: \|.*
       exitCode: 0(
-  -
++  -
     kind: "message-v1"
     backtrace:(
       - "[^"]+")+
     message: \|(
 +      [^
 ]*)*|
-  -
-    kind: "find-v1"
-    backtrace:(
-      - "[^"]+")+
-    mode: "[^"]*"
-    variable: "[^"]*"
-    description: "[^"]*"
-    settings:(
-      [A-Za-z_]+: (true|false|"(NEVER|ONLY|FIRST|LAST)"))+
-    names:(
-      - "[^"]+")+
-    candidate_directories:(
-      - "[^"]+")*
-    searched_directories:(
-      - "[^"]+")*
-    found: (false|"[^"]*"))+
++  -
+    kind: "find-v1"(
+    [^
+]*)+)*
   -
     kind: "try_compile-v1"
     backtrace:
@@ -87,7 +63,7 @@ events:(
       cached: true
       stdout: \|.*
       exitCode: 0(
-  -
++  -
     kind: "message-v1"
     backtrace:(
       - "[^"]+")+

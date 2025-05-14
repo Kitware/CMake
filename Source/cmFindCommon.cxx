@@ -47,6 +47,7 @@ cmFindCommon::cmFindCommon(cmExecutionStatus& status)
   , Status(status)
 {
   this->FindRootPathMode = RootPathModeBoth;
+  this->FullDebugMode = false;
   this->NoDefaultPath = false;
   this->NoPackageRootPath = false;
   this->NoCMakePath = false;
@@ -92,7 +93,7 @@ void cmFindCommon::SetError(std::string const& e)
 
 bool cmFindCommon::DebugModeEnabled() const
 {
-  return static_cast<bool>(this->DebugState);
+  return this->FullDebugMode;
 }
 
 void cmFindCommon::DebugMessage(std::string const& msg) const
@@ -508,22 +509,27 @@ void cmFindCommonDebugState::FailedAt(std::string const& path,
 
 void cmFindCommonDebugState::Write()
 {
+  auto const* const fc = this->FindCommand;
+
 #ifndef CMAKE_BOOTSTRAP
   // Write find event to the configure log if the log exists
   if (cmConfigureLog* log =
-        this->FindCommand->Makefile->GetCMakeInstance()->GetConfigureLog()) {
+        fc->Makefile->GetCMakeInstance()->GetConfigureLog()) {
     // Write event if any of:
+    //   - debug mode is enabled
     //   - the variable was not defined (first run)
     //   - the variable found state does not match the new found state (state
     //     transition)
-    if (!this->FindCommand->IsDefined() ||
-        this->FindCommand->IsFound() != this->IsFound) {
-      this->WriteEvent(*log, *this->FindCommand->Makefile);
+    if (fc->DebugModeEnabled() || !fc->IsDefined() ||
+        fc->IsFound() != this->IsFound) {
+      this->WriteEvent(*log, *fc->Makefile);
     }
   }
 #endif
 
-  this->WriteDebug();
+  if (fc->DebugModeEnabled()) {
+    this->WriteDebug();
+  }
 }
 
 #ifndef CMAKE_BOOTSTRAP

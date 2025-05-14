@@ -199,9 +199,8 @@ bool cmFindProgramCommand::InitialPass(std::vector<std::string> const& argsIn)
   if (!this->ParseArguments(argsIn)) {
     return false;
   }
-  if (this->ComputeIfDebugModeWanted(this->VariableName)) {
-    this->DebugState = cm::make_unique<cmFindBaseDebugState>(this);
-  }
+  this->DebugState = cm::make_unique<cmFindBaseDebugState>(this);
+  this->FullDebugMode = this->ComputeIfDebugModeWanted(this->VariableName);
 
   if (this->IsFound()) {
     this->NormalizeFindResult();

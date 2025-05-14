@@ -20,8 +20,11 @@ events:(
     names:(
       - "[^"]+")+
     candidate_directories:(
-      - "[^"]+")*
+      - "[^"]+")*(
     searched_directories:(
-      - "[^"]+")*
-    found: (false|"[^"]*"))+
-\.\.\.$
+      - "[^"]+")*)?
+    found: (false|"[^"]*")
+    search_context:(
+      [^
+]*)+)+
++\.\.\.$

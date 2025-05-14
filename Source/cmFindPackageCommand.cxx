@@ -728,9 +728,8 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
 
   // Process debug mode
   cmMakefile::DebugFindPkgRAII debugFindPkgRAII(this->Makefile, this->Name);
-  if (this->ComputeIfDebugModeWanted()) {
-    this->DebugState = cm::make_unique<cmFindPackageDebugState>(this);
-  }
+  this->DebugState = cm::make_unique<cmFindPackageDebugState>(this);
+  this->FullDebugMode = this->ComputeIfDebugModeWanted();
 
   // Parse the arguments.
   enum Doing
