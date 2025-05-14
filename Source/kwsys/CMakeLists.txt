@@ -152,7 +152,6 @@ if(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
   set(KWSYS_USE_FStream 1)
   set(KWSYS_USE_String 1)
   set(KWSYS_USE_SystemInformation 1)
-  set(KWSYS_USE_ConsoleBuf 1)
 endif()
 
 # Enforce component dependencies.
@@ -191,9 +190,6 @@ if(KWSYS_USE_DynamicLoader)
   set(KWSYS_USE_Encoding 1)
 endif()
 if(KWSYS_USE_FStream)
-  set(KWSYS_USE_Encoding 1)
-endif()
-if(KWSYS_USE_ConsoleBuf)
   set(KWSYS_USE_Encoding 1)
 endif()
 
@@ -619,7 +615,7 @@ set(KWSYS_HXX_FILES Configure)
 # Add selected C++ classes.
 set(cppclasses
   Directory DynamicLoader Encoding Glob RegularExpression SystemTools
-  CommandLineArguments FStream SystemInformation ConsoleBuf Status
+  CommandLineArguments FStream SystemInformation Status
   )
 foreach(cpp IN LISTS cppclasses)
   if(KWSYS_USE_${cpp})
@@ -969,24 +965,6 @@ if(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
       set(KWSYS_CXX_TESTS ${KWSYS_CXX_TESTS}
         testFStream.cxx
         )
-    endif()
-    if(KWSYS_USE_ConsoleBuf)
-      add_executable(testConsoleBufChild testConsoleBufChild.cxx)
-      set_property(TARGET testConsoleBufChild PROPERTY C_CLANG_TIDY "")
-      set_property(TARGET testConsoleBufChild PROPERTY CXX_CLANG_TIDY "")
-      set_property(TARGET testConsoleBufChild PROPERTY C_INCLUDE_WHAT_YOU_USE "")
-      set_property(TARGET testConsoleBufChild PROPERTY CXX_INCLUDE_WHAT_YOU_USE "")
-      set_property(TARGET testConsoleBufChild PROPERTY LABELS ${KWSYS_LABELS_EXE})
-      target_link_libraries(testConsoleBufChild ${KWSYS_TARGET_LINK})
-      set(KWSYS_CXX_TESTS ${KWSYS_CXX_TESTS}
-        testConsoleBuf.cxx
-        )
-      if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" AND
-         CMAKE_CXX_COMPILER_VERSION VERSION_GREATER "19.0.23506")
-        set_property(SOURCE testConsoleBuf.cxx testConsoleBufChild.cxx PROPERTY COMPILE_FLAGS /utf-8)
-      endif()
-      set_property(SOURCE testConsoleBuf.cxx APPEND PROPERTY COMPILE_DEFINITIONS
-        KWSYS_ENCODING_DEFAULT_CODEPAGE=${KWSYS_ENCODING_DEFAULT_CODEPAGE})
     endif()
     if(KWSYS_USE_SystemInformation)
       set(KWSYS_CXX_TESTS ${KWSYS_CXX_TESTS} testSystemInformation.cxx)

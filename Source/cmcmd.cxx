@@ -12,7 +12,6 @@
 #include <fcntl.h>
 
 #include "cmCommandLineArgument.h"
-#include "cmConsoleBuf.h"
 #include "cmCryptoHash.h"
 #include "cmDuration.h"
 #include "cmGlobalGenerator.h"
@@ -26,6 +25,7 @@
 #include "cmState.h"
 #include "cmStateDirectory.h"
 #include "cmStateSnapshot.h"
+#include "cmStdIoConsole.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTransformDepfile.h"
@@ -689,7 +689,7 @@ int cmcmd::HandleCoCompileCommands(std::vector<std::string> const& args)
 }
 
 int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
-                               std::unique_ptr<cmConsoleBuf> consoleBuf)
+                               cm::optional<cm::StdIo::Console> console)
 {
   // IF YOU ADD A NEW COMMAND, DOCUMENT IT ABOVE and in cmakemain.cxx
   if (args.size() > 1) {
@@ -1191,7 +1191,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
         if (arg == "-") {
           doing_options = false;
           // Destroy console buffers to drop cout/cerr encoding transform.
-          consoleBuf.reset();
+          console.reset();
           cmCatFile(arg);
         } else if (doing_options && cmHasLiteralPrefix(arg, "-")) {
           if (arg == "--") {
@@ -1215,7 +1215,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
           // Ignore empty files, this is not an error
         } else {
           // Destroy console buffers to drop cout/cerr encoding transform.
-          consoleBuf.reset();
+          console.reset();
           cmCatFile(arg);
         }
       }
@@ -1464,11 +1464,11 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
     }
 
     if (args[1] == "vs_link_exe") {
-      return cmcmd::VisualStudioLink(args, 1, std::move(consoleBuf));
+      return cmcmd::VisualStudioLink(args, 1, std::move(console));
     }
 
     if (args[1] == "vs_link_dll") {
-      return cmcmd::VisualStudioLink(args, 2, std::move(consoleBuf));
+      return cmcmd::VisualStudioLink(args, 2, std::move(console));
     }
 
     if (args[1] == "cmake_llvm_rc") {
@@ -2221,7 +2221,7 @@ private:
 // exe and dll's.  This code does that in such a way that incremental linking
 // still works.
 int cmcmd::VisualStudioLink(std::vector<std::string> const& args, int type,
-                            std::unique_ptr<cmConsoleBuf> consoleBuf)
+                            cm::optional<cm::StdIo::Console> console)
 {
   // MSVC tools print output in the language specified by the VSLANG
   // environment variable, and encoded in the console output code page.
@@ -2229,7 +2229,7 @@ int cmcmd::VisualStudioLink(std::vector<std::string> const& args, int type,
   // RunCommand tells RunSingleCommand to *not* convert encoding, so
   // we buffer the output in its original encoding instead of UTF-8.
   // Drop our output encoding conversion so we print with original encoding.
-  consoleBuf.reset();
+  console.reset();
 
   if (args.size() < 2) {
     return -1;

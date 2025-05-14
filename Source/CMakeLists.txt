@@ -148,8 +148,6 @@ add_library(
   cmComputeTargetDepends.cxx
   cmConfigureLog.h
   cmConfigureLog.cxx
-  cmConsoleBuf.h
-  cmConsoleBuf.cxx
   cmConstStack.h
   cmConstStack.tcc
   cmCPackPropertiesGenerator.h
@@ -468,6 +466,8 @@ add_library(
   cmStateSnapshot.cxx
   cmStateSnapshot.h
   cmStateTypes.h
+  cmStdIoConsole.h
+  cmStdIoConsole.cxx
   cmStdIoInit.h
   cmStdIoInit.cxx
   cmStdIoStream.h

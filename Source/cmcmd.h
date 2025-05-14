@@ -4,15 +4,20 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include <memory>
 #include <string>
 #include <vector>
+
+#include <cm/optional>
 
 #include "cmsys/Status.hxx"
 
 #include "cmCryptoHash.h"
 
-class cmConsoleBuf;
+namespace cm {
+namespace StdIo {
+class Console;
+}
+}
 
 class cmcmd
 {
@@ -22,7 +27,7 @@ public:
    * as echo, remove file etc.
    */
   static int ExecuteCMakeCommand(std::vector<std::string> const&,
-                                 std::unique_ptr<cmConsoleBuf> consoleBuf);
+                                 cm::optional<cm::StdIo::Console> console);
 
 protected:
   static int HandleCoCompileCommands(std::vector<std::string> const& args);
@@ -40,5 +45,5 @@ protected:
                              std::string const& intermediate_file);
   static int RunLLVMRC(std::vector<std::string> const& args);
   static int VisualStudioLink(std::vector<std::string> const& args, int type,
-                              std::unique_ptr<cmConsoleBuf> consoleBuf);
+                              cm::optional<cm::StdIo::Console> console);
 };

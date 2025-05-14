@@ -16,7 +16,6 @@
 #include <utility>
 #include <vector>
 
-#include <cm/memory>
 #include <cm/optional>
 #include <cmext/algorithm>
 
@@ -24,7 +23,6 @@
 
 #include "cmBuildOptions.h"
 #include "cmCommandLineArgument.h"
-#include "cmConsoleBuf.h"
 #include "cmDocumentationEntry.h"
 #include "cmGlobalGenerator.h"
 #include "cmInstallScriptHandler.h"
@@ -35,7 +33,7 @@
 #include "cmMessageMetadata.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
-#include "cmStdIoInit.h"
+#include "cmStdIoConsole.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmValue.h"
@@ -139,13 +137,13 @@ cmDocumentationEntry const cmDocumentationOptions[35] = {
 #endif
 
 int do_command(int ac, char const* const* av,
-               std::unique_ptr<cmConsoleBuf> consoleBuf)
+               cm::optional<cm::StdIo::Console> console)
 {
   std::vector<std::string> args;
   args.reserve(ac - 1);
   args.emplace_back(av[0]);
   cm::append(args, av + 2, av + ac);
-  return cmcmd::ExecuteCMakeCommand(args, std::move(consoleBuf));
+  return cmcmd::ExecuteCMakeCommand(args, std::move(console));
 }
 
 cmMakefile* cmakemainGetMakefile(cmake* cm)
@@ -1143,11 +1141,7 @@ int do_open(int ac, char const* const* av)
 
 int main(int ac, char const* const* av)
 {
-  cm::StdIo::Init();
-
-  // Replace streambuf so we can output Unicode to console
-  auto consoleBuf = cm::make_unique<cmConsoleBuf>();
-  consoleBuf->SetUTF8Pipes();
+  cm::optional<cm::StdIo::Console> console = cm::StdIo::Console();
 
   cmsys::Encoding::CommandLineArguments args =
     cmsys::Encoding::CommandLineArguments::Main(ac, av);
@@ -1170,7 +1164,7 @@ int main(int ac, char const* const* av)
       return do_workflow(ac, av);
     }
     if (strcmp(av[1], "-E") == 0) {
-      return do_command(ac, av, std::move(consoleBuf));
+      return do_command(ac, av, std::move(console));
     }
     if (strcmp(av[1], "--print-config-dir") == 0) {
       std::cout << cmSystemTools::ConvertToOutputPath(
