@@ -2,6 +2,9 @@ set(test_exclusions
   # This test hits global resources and can be handled by nightly testing.
   # https://gitlab.kitware.com/cmake/cmake/-/merge_requests/4769
   "^BundleGeneratorTest$"
+
+  # This test fails on Windows Terminal 1.22 and above.
+  "^kwsys.testConsoleBuf$"
 )
 
 if (CTEST_CMAKE_GENERATOR MATCHES "Visual Studio")
