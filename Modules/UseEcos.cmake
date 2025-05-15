@@ -5,46 +5,59 @@
 UseEcos
 -------
 
-This module defines variables and macros required to build eCos application.
+This module defines variables and provides commands required to build an eCos
+application.
 
-Macros
-^^^^^^
+Load this module in CMake project with:
 
-This module defines the following macros:
+.. code-block:: cmake
+
+  include(UseEcos)
+
+Commands
+^^^^^^^^
+
+This module provides the following commands:
+
+Building an eCos Application
+""""""""""""""""""""""""""""
 
 .. command:: ecos_add_include_directories
+
+  Adds the eCos include directories for the current ``CMakeLists.txt`` file:
 
   .. code-block:: cmake
 
     ecos_add_include_directories()
 
-  Adds the eCos include directories for the current `CMakeLists.txt` file.
-
 .. command:: ecos_adjust_directory
+
+  Adjusts the paths of given source files:
 
   .. code-block:: cmake
 
     ecos_adjust_directory(<var> <sources>...)
 
-  Adjusts the paths of given source files ``<sources>...`` and stores them into
-  a result variable named ``<var>``.
+  This command modifies the paths of the source files ``<sources>...`` to
+  make them suitable for use with ``ecos_add_executable()``, and stores them
+  in the variable ``<var>``.
 
   ``<var>``
     Result variable name holding a new list of source files with adjusted paths.
   ``<sources>...``
     A list of relative or absolute source files to adjust their paths.
 
-  Use this macro when the actual sources are located one level upwards. A
+  Use this command when the actual sources are located one level upwards. A
   ``../`` has to be prepended in front of every source file that is given as a
   relative path.
 
 .. command:: ecos_add_executable
 
+  Creates an eCos application executable:
+
   .. code-block:: cmake
 
     ecos_add_executable(<name> <sources>...)
-
-  Creates an eCos application executable.
 
   ``<name>``
     The name of the executable.
@@ -52,40 +65,42 @@ This module defines the following macros:
     A list of all source files, where the path has been adjusted beforehand by
     calling the ``ecos_adjust_directory()``.
 
-  This macro also sets the ``ECOS_DEFINITIONS`` local variable, holding some
+  This command also sets the ``ECOS_DEFINITIONS`` local variable, holding some
   common compile definitions.
 
-Macros for selecting the toolchain:
+Selecting the Toolchain
+"""""""""""""""""""""""
 
 .. command:: ecos_use_arm_elf_tools
+
+  Enables the ARM ELF toolchain for the directory where it is called:
 
   .. code-block:: cmake
 
     ecos_use_arm_elf_tools()
 
-  Enables the ARM ELF toolchain for the directory where it is called. Use this
-  macro, when compiling for the xscale processor.
+  Use this command, when compiling for the xscale processor.
 
 .. command:: ecos_use_i386_elf_tools
+
+  Enables the i386 ELF toolchain for the directory where it is called:
 
   .. code-block:: cmake
 
     ecos_use_i386_elf_tools()
 
-  Enables the i386 ELF toolchain for the directory where it is called.
-
 .. command:: ecos_use_ppc_eabi_tools
+
+  Enables the PowerPC toolchain for the directory where it is called:
 
   .. code-block:: cmake
 
     ecos_use_ppc_eabi_tools()
 
-  Enables the PowerPC toolchain for the directory where it is called.
-
 Variables
 ^^^^^^^^^
 
-Module also defines the following variables:
+This module also defines the following variables:
 
 ``ECOSCONFIG_EXECUTABLE``
   Cache variable that contains a path to the ``ecosconfig`` executable (the eCos
@@ -99,9 +114,13 @@ Module also defines the following variables:
 Examples
 ^^^^^^^^
 
-.. code-block:: cmake
+The following example demonstrates defining an eCos executable target in a
+project that follows the common eCos convention of listing source files in
+a ``ProjectSources.txt`` file, located one directory above the current
+``CMakeLists.txt``:
 
-  # CMakeLists.txt
+.. code-block:: cmake
+  :caption: ``CMakeLists.txt``
 
   include(UseEcos)
 
