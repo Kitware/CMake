@@ -835,7 +835,7 @@ int cmCTestSubmitHandler::ProcessHandler()
                        "   Send to group: " << specificGroup << std::endl,
                        this->Quiet);
   }
-  this->SetLogFile(&ofs);
+  this->LogFile = &ofs;
 
   std::string url = this->CTest->GetSubmitURL();
   cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,

@@ -46,8 +46,6 @@ public:
   }
 
 private:
-  void SetLogFile(std::ostream* ost) { this->LogFile = ost; }
-
   /**
    * Submit file using various ways
    */
