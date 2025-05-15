@@ -32,8 +32,6 @@
 
 #define SUBMIT_TIMEOUT_IN_SECONDS_DEFAULT 120
 
-using cmCTestSubmitHandlerVectorOfChar = std::vector<char>;
-
 class cmCTestSubmitHandler::ResponseParser : public cmXMLParser
 {
 public:
@@ -101,8 +99,7 @@ static size_t cmCTestSubmitHandlerWriteMemoryCallback(void* ptr, size_t size,
 {
   int realsize = static_cast<int>(size * nmemb);
   char const* chPtr = static_cast<char*>(ptr);
-  cm::append(*static_cast<cmCTestSubmitHandlerVectorOfChar*>(data), chPtr,
-             chPtr + realsize);
+  cm::append(*static_cast<std::vector<char>*>(data), chPtr, chPtr + realsize);
   return realsize;
 }
 
@@ -111,8 +108,7 @@ static size_t cmCTestSubmitHandlerCurlDebugCallback(CURL* /*unused*/,
                                                     char* chPtr, size_t size,
                                                     void* data)
 {
-  cm::append(*static_cast<cmCTestSubmitHandlerVectorOfChar*>(data), chPtr,
-             chPtr + size);
+  cm::append(*static_cast<std::vector<char>*>(data), chPtr, chPtr + size);
   return 0;
 }
 
@@ -321,8 +317,8 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(
                          cmCTestSubmitHandlerCurlDebugCallback);
 
       /* we pass our 'chunk' struct to the callback function */
-      cmCTestSubmitHandlerVectorOfChar chunk;
-      cmCTestSubmitHandlerVectorOfChar chunkDebug;
+      std::vector<char> chunk;
+      std::vector<char> chunkDebug;
       ::curl_easy_setopt(curl, CURLOPT_FILE, &chunk);
       ::curl_easy_setopt(curl, CURLOPT_DEBUGDATA, &chunkDebug);
 
@@ -447,8 +443,7 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(
   return true;
 }
 
-void cmCTestSubmitHandler::ParseResponse(
-  cmCTestSubmitHandlerVectorOfChar chunk)
+void cmCTestSubmitHandler::ParseResponse(std::vector<char> chunk)
 {
   std::string output;
   output.append(chunk.begin(), chunk.end());

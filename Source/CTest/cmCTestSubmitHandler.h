@@ -53,10 +53,7 @@ private:
                        std::vector<std::string> const& files,
                        std::string const& remoteprefix,
                        std::string const& url);
-
-  using cmCTestSubmitHandlerVectorOfChar = std::vector<char>;
-
-  void ParseResponse(cmCTestSubmitHandlerVectorOfChar chunk);
+  void ParseResponse(std::vector<char> chunk);
 
   std::string GetSubmitResultsPrefix();
   int GetSubmitInactivityTimeout();
