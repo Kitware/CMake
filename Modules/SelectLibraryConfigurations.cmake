@@ -5,11 +5,18 @@
 SelectLibraryConfigurations
 ---------------------------
 
-This module is intended to be used in :ref:`Find Modules` when finding packages
-that are available with multiple :ref:`Build Configurations`.  It provides a
-macro that automatically sets and adjusts library variables.  Supported library
-build configurations are ``Release`` and ``Debug`` as these are the most common
-ones in such packages.
+This module is intended for use in :ref:`Find Modules` and provides a
+command to automatically set library variables when package is available
+with multiple :ref:`Build Configurations`.
+
+Load it in a CMake find module with:
+
+.. code-block:: cmake
+
+  include(SelectLibraryConfigurations)
+
+Supported build configurations are ``Release`` and ``Debug`` as these are
+the most common ones in such packages.
 
 .. note::
 
@@ -20,13 +27,21 @@ ones in such packages.
   targets provide finer control over linking through the
   :prop_tgt:`IMPORTED_CONFIGURATIONS` property.
 
+Commands
+^^^^^^^^
+
+This module provides the following command:
+
 .. command:: select_library_configurations
+
+  Sets and adjusts library variables based on debug and release build
+  configurations:
 
   .. code-block:: cmake
 
     select_library_configurations(<basename>)
 
-  This macro is a helper for setting the ``<basename>_LIBRARY`` and
+  This command is a helper for setting the ``<basename>_LIBRARY`` and
   ``<basename>_LIBRARIES`` result variables when a library might be provided
   with multiple build configurations.
 
@@ -37,20 +52,20 @@ ones in such packages.
     the name of the package as used in the ``Find<PackageName>.cmake`` module
     filename, or the component name, when find module provides them.
 
-  Prior to calling this macro the following cache variables should be set in the
-  find module (for example, by the :command:`find_library` command):
+  Prior to calling this command the following cache variables should be set
+  in the find module (for example, by the :command:`find_library` command):
 
   ``<basename>_LIBRARY_RELEASE``
     A cache variable storing the full path to the ``Release`` build of the
-    library.  If not set or found, this macro will set its value to
+    library.  If not set or found, this command will set its value to
     ``<basename>_LIBRARY_RELEASE-NOTFOUND``.
 
   ``<basename>_LIBRARY_DEBUG``
     A cache variable storing the full path to the ``Debug`` build of the
-    library.  If not set or found, this macro will set its value to
+    library.  If not set or found, this command will set its value to
     ``<basename>_LIBRARY_DEBUG-NOTFOUND``.
 
-  This macro then sets the following local result variables:
+  This command then sets the following local result variables:
 
   ``<basename>_LIBRARY``
     A result variable that is set to the value of
@@ -74,12 +89,11 @@ ones in such packages.
 
   .. note::
 
-    The ``select_library_configurations()`` macro should be called before
+    The ``select_library_configurations()`` command should be called before
     handling standard find module arguments with
-    :module:`find_package_handle_standard_args()
-    <FindPackageHandleStandardArgs>` to ensure that the ``<PackageName>_FOUND``
-    result variable is correctly set based on ``<basename>_LIBRARY`` or other
-    related variables.
+    :command:`find_package_handle_standard_args` to ensure that the
+    ``<PackageName>_FOUND`` result variable is correctly set based on
+    ``<basename>_LIBRARY`` or other related variables.
 
 Examples
 ^^^^^^^^
@@ -88,7 +102,7 @@ Setting library variables based on the build configuration inside a find module
 file:
 
 .. code-block:: cmake
-  :caption: FindFoo.cmake
+  :caption: ``FindFoo.cmake``
 
   # Find release and debug build of the library
   find_library(Foo_LIBRARY_RELEASE ...)
@@ -108,7 +122,7 @@ file:
 When find module provides components with multiple build configurations:
 
 .. code-block:: cmake
-  :caption: FindFoo.cmake
+  :caption: ``FindFoo.cmake``
 
   include(SelectLibraryConfigurations)
   foreach(component IN LISTS Foo_FIND_COMPONENTS)
@@ -120,7 +134,7 @@ When find module provides components with multiple build configurations:
 A project can then use this find module as follows:
 
 .. code-block:: cmake
-  :caption: CMakeLists.txt
+  :caption: ``CMakeLists.txt``
 
   find_package(Foo)
   target_link_libraries(project_target PRIVATE ${Foo_LIBRARIES})
