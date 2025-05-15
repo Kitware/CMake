@@ -31,19 +31,19 @@ If the check needs to be done in C++, consider using
 The following variables may be set before calling this macro to modify
 the way the check is run:
 
-.. include:: /module/include/CMAKE_REQUIRED_FLAGS.rst
+  .. include:: /module/include/CMAKE_REQUIRED_FLAGS.rst
 
-.. include:: /module/include/CMAKE_REQUIRED_DEFINITIONS.rst
+  .. include:: /module/include/CMAKE_REQUIRED_DEFINITIONS.rst
 
-.. include:: /module/include/CMAKE_REQUIRED_INCLUDES.rst
+  .. include:: /module/include/CMAKE_REQUIRED_INCLUDES.rst
 
-.. include:: /module/include/CMAKE_REQUIRED_LINK_OPTIONS.rst
+  .. include:: /module/include/CMAKE_REQUIRED_LINK_OPTIONS.rst
 
-.. include:: /module/include/CMAKE_REQUIRED_LIBRARIES.rst
+  .. include:: /module/include/CMAKE_REQUIRED_LIBRARIES.rst
 
-.. include:: /module/include/CMAKE_REQUIRED_LINK_DIRECTORIES.rst
+  .. include:: /module/include/CMAKE_REQUIRED_LINK_DIRECTORIES.rst
 
-.. include:: /module/include/CMAKE_REQUIRED_QUIET.rst
+  .. include:: /module/include/CMAKE_REQUIRED_QUIET.rst
 
 For example:
 

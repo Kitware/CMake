@@ -30,19 +30,19 @@ and can subsequently be run.
   The compile and link commands can be influenced by setting any of the
   following variables prior to calling ``check_objcxx_source_runs()``
 
-.. include:: /module/include/CMAKE_REQUIRED_FLAGS.rst
+  .. include:: /module/include/CMAKE_REQUIRED_FLAGS.rst
 
-.. include:: /module/include/CMAKE_REQUIRED_DEFINITIONS.rst
+  .. include:: /module/include/CMAKE_REQUIRED_DEFINITIONS.rst
 
-.. include:: /module/include/CMAKE_REQUIRED_INCLUDES.rst
+  .. include:: /module/include/CMAKE_REQUIRED_INCLUDES.rst
 
-.. include:: /module/include/CMAKE_REQUIRED_LINK_OPTIONS.rst
+  .. include:: /module/include/CMAKE_REQUIRED_LINK_OPTIONS.rst
 
-.. include:: /module/include/CMAKE_REQUIRED_LIBRARIES.rst
+  .. include:: /module/include/CMAKE_REQUIRED_LIBRARIES.rst
 
-.. include:: /module/include/CMAKE_REQUIRED_LINK_DIRECTORIES.rst
+  .. include:: /module/include/CMAKE_REQUIRED_LINK_DIRECTORIES.rst
 
-.. include:: /module/include/CMAKE_REQUIRED_QUIET.rst
+  .. include:: /module/include/CMAKE_REQUIRED_QUIET.rst
 
 #]=======================================================================]
 

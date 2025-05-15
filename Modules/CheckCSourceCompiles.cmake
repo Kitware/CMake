@@ -35,19 +35,19 @@ Check once if C source code can be built.
   The compile and link commands can be influenced by setting any of the
   following variables prior to calling ``check_c_source_compiles()``:
 
-.. include:: /module/include/CMAKE_REQUIRED_FLAGS.rst
+  .. include:: /module/include/CMAKE_REQUIRED_FLAGS.rst
 
-.. include:: /module/include/CMAKE_REQUIRED_DEFINITIONS.rst
+  .. include:: /module/include/CMAKE_REQUIRED_DEFINITIONS.rst
 
-.. include:: /module/include/CMAKE_REQUIRED_INCLUDES.rst
+  .. include:: /module/include/CMAKE_REQUIRED_INCLUDES.rst
 
-.. include:: /module/include/CMAKE_REQUIRED_LINK_OPTIONS.rst
+  .. include:: /module/include/CMAKE_REQUIRED_LINK_OPTIONS.rst
 
-.. include:: /module/include/CMAKE_REQUIRED_LIBRARIES.rst
+  .. include:: /module/include/CMAKE_REQUIRED_LIBRARIES.rst
 
-.. include:: /module/include/CMAKE_REQUIRED_LINK_DIRECTORIES.rst
+  .. include:: /module/include/CMAKE_REQUIRED_LINK_DIRECTORIES.rst
 
-.. include:: /module/include/CMAKE_REQUIRED_QUIET.rst
+  .. include:: /module/include/CMAKE_REQUIRED_QUIET.rst
 
 #]=======================================================================]
 
