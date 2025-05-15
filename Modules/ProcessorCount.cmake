@@ -5,24 +5,36 @@
 ProcessorCount
 --------------
 
-This module provides the following function to determine the number of
-processors/cores:
+This module provides a command to determine the number of processors/cores.
+
+Load this module in CMake with:
+
+.. code-block:: cmake
+
+  include(ProcessorCount)
+
+Commands
+^^^^^^^^
+
+This module provides the following command:
 
 .. command:: ProcessorCount
+
+  Determines the number of logical CPU cores available on the machine:
 
   .. code-block:: cmake
 
     ProcessorCount(<variable>)
 
-  Sets a local variable named ``<variable>`` to the number of logical CPU cores
-  available on the machine, if the information can be determined.  If
-  successful, the variable is guaranteed to be set to a positive integer (>=1).
-  If the processor count cannot be determined, it is set to 0.
+  This command sets a variable named ``<variable>`` to the number of logical
+  CPU cores available on the machine, if the information can be determined.
+  If successful, the variable is guaranteed to be set to a positive integer
+  (>=1).  If the processor count cannot be determined, it is set to 0.
 
   Currently, this functionality is implemented for AIX, Cygwin, FreeBSD, Haiku,
   HPUX, Linux, macOS, QNX, Sun and Windows.
 
-  This function provides an approximation of the number of compute cores
+  This command provides an approximation of the number of compute cores
   available on the current machine, making it useful for parallel building and
   testing.  It is meant to help utilize as much of the machine as seems
   reasonable, though users should consider other workloads running on the
@@ -45,7 +57,9 @@ processors/cores:
 Examples
 ^^^^^^^^
 
-Using ``ProcessorCount`` module in a :option:`ctest -S` dashboard script:
+In the following example this module is used in a :option:`ctest -S`
+dashboard script to determine number of cores to use for a parallel
+:ref:`CTest Build Step`:
 
 .. code-block:: cmake
 
