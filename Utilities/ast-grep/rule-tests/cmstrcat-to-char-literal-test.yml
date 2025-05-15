@@ -1,0 +1,24 @@
+---
+id: cmstrcat-to-char-literal
+valid:
+  - 'cmStrCat(other, "li")'
+  - 'cmStrCat(other, variable)'
+  - "cmStrCat(other, 'c')"
+  - "cmStrCat(other, '\\n')"
+  - "cmStrCat(other, \"a\" \"b\")"
+invalid:
+  - 'cmStrCat(other, "\n")'
+  - 'cmStrCat(other, "n")'
+  - 'cmStrCat(other, "\"")'
+  - "cmStrCat(other, \"\\'\")"
+  - "cmStrCat(other, \"'\")"
+  - 'cmStrCat("\n", other)'
+  - 'cmStrCat("n", other)'
+  - 'cmStrCat("\"", other)'
+  - "cmStrCat(\"\\'\", other)"
+  - "cmStrCat(\"'\", other)"
+  - 'cmStrCat(other, "\n", other)'
+  - 'cmStrCat(other, "n", other)'
+  - 'cmStrCat(other, "\"", other)'
+  - "cmStrCat(other, \"\\'\", other)"
+  - "cmStrCat(other, \"'\", other)"
