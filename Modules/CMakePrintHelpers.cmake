@@ -5,35 +5,47 @@
 CMakePrintHelpers
 -----------------
 
-Convenience functions for printing properties and variables, useful
-e.g. for debugging.
+This module provides convenience commands, primarily intended for debugging,
+to print the values of properties and variables.
+
+Load this module in CMake with:
+
+.. code-block:: cmake
+
+  include(CMakePrintHelpers)
 
 Commands
 ^^^^^^^^
 
+This module provides the following commands:
+
 .. command:: cmake_print_properties
+
+  Prints the values of properties for the specified targets, source files,
+  directories, tests, or cache entries:
 
   .. code-block:: cmake
 
-    cmake_print_properties(<TARGETS       [<target1> ...] |
-                            SOURCES       [<source1> ...] |
-                            DIRECTORIES   [<dir1> ...]    |
-                            TESTS         [<test1> ...]   |
-                            CACHE_ENTRIES [<entry1> ...]  >
-                           PROPERTIES [<prop1> ...])
+    cmake_print_properties(
+      <TARGETS       [<targets>...] |
+       SOURCES       [<sources>...] |
+       DIRECTORIES   [<dirs>...]    |
+       TESTS         [<tests>...]   |
+       CACHE_ENTRIES [<entries>...] >
+      PROPERTIES [<properties>...]
+    )
 
-  This function prints the values of the properties of the given targets,
-  source files, directories, tests or cache entries.  Exactly one of the
-  scope keywords must be used.  The scope keyword and its arguments must
-  come before the ``PROPERTIES`` keyword in the arguments list.
+  Exactly one of the scope keywords must be specified.  The scope keyword
+  and its arguments must appear before the ``PROPERTIES`` keyword in the
+  argument list.
 
 .. command:: cmake_print_variables
 
+  Prints each variable name followed by its value:
+
   .. code-block:: cmake
 
-    cmake_print_variables([var1 [var2 ... [varN]]])
-
-  This function prints the name of each variable followed by its value.
+    cmake_print_variables([<vars>...])
 
 Examples
 ^^^^^^^^
