@@ -1,0 +1,19 @@
+---
+id: cmstrcat-adjacent-literals
+language: Cpp
+severity: warning
+message: Adjacent `cmStrCat` arguments which are string literals should be combined
+ignores:
+  - Utilities/ClangTidyModule/Tests/**
+rule:
+  matches: string-literal
+  inside:
+    matches: cmstrcat-call
+    stopBy:
+      kind: call_expression
+  precedes:
+    matches: string-literal
+    follows:
+      pattern: ','
+    stopBy:
+      matches: cmstrcat-arg

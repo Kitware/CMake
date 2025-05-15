@@ -1,0 +1,39 @@
+---
+id: cmstrcat-adjacent-literals
+valid:
+  - 'cmStrCat("literal", variable)'
+  - 'cmStrCat(variable, "literal")'
+  - 'cmStrCat(variable, "literal", variable)'
+  - 'cmStrCat(variable, variable, "literal")'
+  - 'cmStrCat("literal", variable, variable)'
+  - 'cmStrCat(variable, "literal", variable)'
+  - 'cmStrCat("literal", binary + expr, "literal")'
+  - 'cmStrCat("literal", cond ? t : f, "literal")'
+  - 'cmStrCat("literal", field.expr, "literal")'
+  - 'cmStrCat("literal", identifier, "literal")'
+  - 'cmStrCat("literal", [lambda](){}, "literal")'
+  - 'cmStrCat("literal", 4, "literal")'
+  - 'cmStrCat("literal", (parens), "literal")'
+  - 'cmStrCat("literal", *ptr_expr, "literal")'
+  - 'cmStrCat("literal", qualified::ident, "literal")'
+  - 'cmStrCat("literal", subscript[expr], "literal")'
+  - 'cmStrCat("literal", +unary_expr, "literal")'
+  - 'cmStrCat("literal", ++update, "literal")'
+  - 'cmStrCat("literal", "udl"_unit, "literal")'
+invalid:
+  - 'cmStrCat("literal", "literal")'
+  - 'cmStrCat("literal", "literal", "literal")'
+  - 'cmStrCat("literal", "literal", variable)'
+  - 'cmStrCat(variable, "literal", "literal")'
+  - 'cmStrCat(variable, "literal", "literal", "literal")'
+  - 'cmStrCat(variable, "literal", "literal", "literal", variable, "literal")'
+  - 'cmStrCat(variable, "literal", "literal", variable)'
+  - "cmStrCat(variable, \"literal\", 'l', variable)"
+  - "cmStrCat(variable, 'c', 'l', variable)"
+  - "cmStrCat(variable, 'c', \"literal\", variable)"
+  - "cmStrCat(variable, 'c', \"literal\" \"literal\")"
+  - 'cmStrCat(variable, "literal", "literal" "literal")'
+  - 'cmStrCat(variable, "literal", R"(raw_literal)", variable)'
+  - 'cmStrCat(variable, R"(raw_literal)", "literal", variable)'
+  - 'cmStrCat(variable, "literal", "string_view"_s, variable)'
+  - 'cmStrCat(variable, "string_view"_s, "literal", variable)'
