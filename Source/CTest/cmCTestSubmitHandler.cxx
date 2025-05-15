@@ -715,6 +715,9 @@ int cmCTestSubmitHandler::ProcessHandler()
     return -1;
   }
 
+  cmGeneratedFileStream ofs;
+  this->StartLogFile("Submit", ofs);
+
   if (char const* proxy = getenv("HTTP_PROXY")) {
     this->HTTPProxyType = 1;
     this->HTTPProxy = proxy;
@@ -747,8 +750,6 @@ int cmCTestSubmitHandler::ProcessHandler()
                        "   Use HTTP Proxy: " << this->HTTPProxy << std::endl,
                        this->Quiet);
   }
-  cmGeneratedFileStream ofs;
-  this->StartLogFile("Submit", ofs);
 
   std::vector<std::string> files;
   std::string prefix = this->GetSubmitResultsPrefix();
