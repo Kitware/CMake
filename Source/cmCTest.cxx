@@ -25,7 +25,6 @@
 #include <cmext/algorithm>
 #include <cmext/string_view>
 
-#include <cm3p/curl/curl.h>
 #include <cm3p/json/value.h>
 #include <cm3p/uv.h>
 #include <cm3p/zlib.h>
@@ -40,6 +39,8 @@
 #else
 #  include <unistd.h> // IWYU pragma: keep
 #endif
+
+#include "cm_get_date.h"
 
 #include "cmCMakePresetsGraph.h"
 #include "cmCTestBuildAndTest.h"
@@ -215,7 +216,7 @@ struct tm* cmCTest::GetNightlyTime(std::string const& str, bool tomorrowtag)
   char buf[1024];
   std::snprintf(buf, sizeof(buf), "%d%02d%02d %s", lctime->tm_year + 1900,
                 lctime->tm_mon + 1, lctime->tm_mday, str.c_str());
-  time_t ntime = curl_getdate(buf, &tctime);
+  time_t ntime = cm_get_date(tctime, buf);
   cmCTestLog(this, DEBUG,
              "   Get the nightly start time: " << ntime << std::endl);
   tctime = time(nullptr);
@@ -2790,7 +2791,7 @@ void cmCTest::SetStopTime(std::string const& time_str)
            lctime->tm_mon + 1, lctime->tm_mday, time_str.c_str(),
            tzone_offset);
 
-  time_t stop_time = curl_getdate(buf, &current_time);
+  time_t stop_time = cm_get_date(current_time, buf);
   if (stop_time == -1) {
     this->Impl->StopTime = std::chrono::system_clock::time_point();
     return;
