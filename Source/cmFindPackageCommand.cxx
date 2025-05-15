@@ -880,7 +880,7 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
       this->VersionComplete = args[i];
     } else {
       this->SetError(
-        cmStrCat("called with invalid argument \"", args[i], "\""));
+        cmStrCat("called with invalid argument \"", args[i], '"'));
       return false;
     }
   }

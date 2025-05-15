@@ -425,7 +425,7 @@ void cmInstallTargetGenerator::GetInstallObjectNames(
 {
   this->Target->GetTargetObjectNames(config, objects);
   for (std::string& o : objects) {
-    o = cmStrCat(computeInstallObjectDir(this->Target, config), "/", o);
+    o = cmStrCat(computeInstallObjectDir(this->Target, config), '/', o);
   }
 }
 

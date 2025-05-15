@@ -348,7 +348,7 @@ void cmRST::OutputMarkupLines(bool inlineMarkup)
 {
   for (auto line : this->MarkupLines) {
     if (!line.empty()) {
-      line = cmStrCat(" ", line);
+      line = cmStrCat(' ', line);
     }
     this->OutputLine(line, inlineMarkup);
   }

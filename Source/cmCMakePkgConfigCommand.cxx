@@ -508,7 +508,7 @@ cm::optional<cmPkgConfigResult> ReadPackage(std::string const& package,
   cmsys::ifstream ifs(path.string().c_str(), std::ios::binary);
 
   if (!ifs) {
-    warn_or_error(cmStrCat("Could not open file '", path.string(), "'"),
+    warn_or_error(cmStrCat("Could not open file '", path.string(), '\''),
                   imEnv);
     return result;
   }
@@ -518,7 +518,7 @@ cm::optional<cmPkgConfigResult> ReadPackage(std::string const& package,
 
   // Shouldn't have hit eof on previous read, should hit eof now
   if (ifs.fail() || ifs.eof() || ifs.get() != EOF) {
-    warn_or_error(cmStrCat("Error while reading file '", path.string(), "'"),
+    warn_or_error(cmStrCat("Error while reading file '", path.string(), '\''),
                   imEnv);
     return result;
   }
@@ -530,7 +530,7 @@ cm::optional<cmPkgConfigResult> ReadPackage(std::string const& package,
 
   if (imEnv.strictness != StrictnessType::STRICTNESS_BEST_EFFORT &&
       err != PCE_OK) {
-    warn_or_error(cmStrCat("Parsing failed for file '", path.string(), "'"),
+    warn_or_error(cmStrCat("Parsing failed for file '", path.string(), '\''),
                   imEnv);
     return result;
   }
@@ -544,8 +544,8 @@ cm::optional<cmPkgConfigResult> ReadPackage(std::string const& package,
   }
 
   if (!result) {
-    warn_or_error(cmStrCat("Resolution failed for file '", path.string(), "'"),
-                  imEnv);
+    warn_or_error(
+      cmStrCat("Resolution failed for file '", path.string(), '\''), imEnv);
   }
 
   return result;
@@ -559,7 +559,7 @@ cm::optional<cmPkgConfigResult> ImportPackage(
 
   if (!result) {
     if (!imEnv.err) {
-      warn_or_error(cmStrCat("Could not find pkg-config: '", package, "'"),
+      warn_or_error(cmStrCat("Could not find pkg-config: '", package, '\''),
                     imEnv);
     }
     return result;
@@ -575,7 +575,7 @@ cm::optional<cmPkgConfigResult> ImportPackage(
     if (ver != result->Version()) {
       warn_or_error(
         cmStrCat("Package '", package, "' version '", result->Version(),
-                 "' does not meet exact version requirement '", ver, "'"),
+                 "' does not meet exact version requirement '", ver, '\''),
         imEnv);
       return {};
     }
@@ -585,7 +585,7 @@ cm::optional<cmPkgConfigResult> ImportPackage(
     if (!cmPkgConfigResolver::CheckVersion(rv, result->Version())) {
       warn_or_error(
         cmStrCat("Package '", package, "' version '", result->Version(),
-                 "' does not meet version requirement '", *version, "'"),
+                 "' does not meet version requirement '", *version, '\''),
         imEnv);
       return {};
     }
@@ -609,9 +609,9 @@ cm::optional<cmPkgConfigResult> ImportPackage(
 
   if (!result) {
     if (!imEnv.err) {
-      std::string req_str = cmStrCat("'", reqs.begin()->parent, "'");
+      std::string req_str = cmStrCat('\'', reqs.begin()->parent, '\'');
       for (auto it = reqs.begin() + 1; it != reqs.end(); ++it) {
-        req_str = cmStrCat(req_str, ", '", it->parent, "'");
+        req_str = cmStrCat(req_str, ", '", it->parent, '\'');
       }
       warn_or_error(cmStrCat("Could not find pkg-config: '", package,
                              "' required by: ", req_str),
@@ -626,7 +626,7 @@ cm::optional<cmPkgConfigResult> ImportPackage(
     if (!cmPkgConfigResolver::CheckVersion(req.ver, ver)) {
       warn_or_error(cmStrCat("Package '", package, "' version '", ver,
                              "' does not meet version requirement '",
-                             req.ver.string(), "' of '", req.parent, "'"),
+                             req.ver.string(), "' of '", req.parent, '\''),
                     imEnv);
       return {};
     }
@@ -856,7 +856,7 @@ bool CheckPackageDependencies(
       if (!cmPkgConfigResolver::CheckVersion(dep.VerReq, *ver)) {
         warn_or_error(cmStrCat("Package '", dep.Name, "' version '", *ver,
                                "' does not meet version requirement '",
-                               dep.VerReq.string(), "' of '", name, "'"),
+                               dep.VerReq.string(), "' of '", name, '\''),
                       imEnv);
         return false;
       }
@@ -869,7 +869,7 @@ bool CheckPackageDependencies(
       if (!cmPkgConfigResolver::CheckVersion(dep.VerReq, ver)) {
         warn_or_error(cmStrCat("Package '", dep.Name, "' version '", ver,
                                "' does not meet version requirement '",
-                               dep.VerReq.string(), "' of '", name, "'"),
+                               dep.VerReq.string(), "' of '", name, '\''),
                       imEnv);
         return false;
       }
@@ -920,7 +920,7 @@ std::pair<bool, bool> PopulatePCTarget(PopulateArguments& args,
                           provider_str.substr(assignment + 1));
       } else {
         imEnv.status.SetError(cmStrCat(
-          "No '=' found in BIND_PC_REQUIRES argument '", provider_str, "'"));
+          "No '=' found in BIND_PC_REQUIRES argument '", provider_str, '\''));
         cmSystemTools::SetFatalErrorOccurred();
         return { false, false };
       }

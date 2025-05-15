@@ -1293,7 +1293,7 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
           "to destination specified by COPY_FILE:\n"
           "  '", copyFile, "'\n"
           "because:\n"
-          "  ", err, "\n",
+          "  ", err, '\n',
           this->FindErrorMessage);
         /* clang-format on */
         if (!arguments.CopyFileError) {
@@ -1412,7 +1412,7 @@ void cmCoreTryCompile::FindOutputFile(std::string const& targetName)
   if (!cmSystemTools::FileExists(command)) {
     std::ostringstream emsg;
     emsg << "Unable to find the recorded try_compile output location:\n";
-    emsg << cmStrCat("  ", command, "\n");
+    emsg << cmStrCat("  ", command, '\n');
     this->FindErrorMessage = emsg.str();
     return;
   }
@@ -1423,7 +1423,7 @@ void cmCoreTryCompile::FindOutputFile(std::string const& targetName)
   if (!cmSystemTools::FileExists(outputFileLocation)) {
     std::ostringstream emsg;
     emsg << "Recorded try_compile output location doesn't exist:\n";
-    emsg << cmStrCat("  ", outputFileLocation, "\n");
+    emsg << cmStrCat("  ", outputFileLocation, '\n');
     this->FindErrorMessage = emsg.str();
     return;
   }

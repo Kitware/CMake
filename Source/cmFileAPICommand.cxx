@@ -51,7 +51,7 @@ std::string processObjectKindVersions(cmFileAPI& fileApi,
     }
     if (majorVersion < 1 || minorVersion < 0) {
       return cmStrCat("Given a malformed version \"", ver, "\" for ", keyword,
-                      ".");
+                      '.');
     }
     if (fileApi.AddProjectQuery(objectKind,
                                 static_cast<unsigned>(majorVersion),

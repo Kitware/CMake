@@ -799,7 +799,7 @@ bool HandleCacheMode(cmExecutionStatus& status,
   } else if (propertyName == "TYPE") {
     if (!cmState::IsCacheEntryType(propertyValue)) {
       status.SetError(
-        cmStrCat("given invalid CACHE entry TYPE \"", propertyValue, "\""));
+        cmStrCat("given invalid CACHE entry TYPE \"", propertyValue, '"'));
       return false;
     }
   } else if (propertyName != "HELPSTRING" && propertyName != "STRINGS" &&

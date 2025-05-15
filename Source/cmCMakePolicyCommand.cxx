@@ -56,7 +56,7 @@ bool cmCMakePolicyCommand(std::vector<std::string> const& args,
     return HandleGetWarningMode(args, status);
   }
 
-  status.SetError(cmStrCat("given unknown first argument \"", args[0], "\""));
+  status.SetError(cmStrCat("given unknown first argument \"", args[0], '"'));
   return false;
 }
 
@@ -77,7 +77,7 @@ bool HandleSetMode(std::vector<std::string> const& args,
     policyStatus = cmPolicies::NEW;
   } else {
     status.SetError(
-      cmStrCat("SET given unrecognized policy status \"", args[2], "\""));
+      cmStrCat("SET given unrecognized policy status \"", args[2], '"'));
     return false;
   }
 

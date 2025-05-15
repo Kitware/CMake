@@ -270,7 +270,7 @@ void cmExtraSublimeTextGenerator::AppendTarget(
         R"((^|[ ])-[DIOUWfgs][^= ]+(=\"[^"]+\"|=[^"][^ ]+)?)";
       flagRegex.compile(regexString);
       std::string workString =
-        cmStrCat(flagsString, " ", definesString, " ", includesString);
+        cmStrCat(flagsString, ' ', definesString, ' ', includesString);
       while (flagRegex.find(workString)) {
         std::string::size_type start = flagRegex.start();
         if (workString[start] == ' ') {

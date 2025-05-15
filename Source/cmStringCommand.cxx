@@ -171,7 +171,7 @@ bool HandleConfigureCommand(std::vector<std::string> const& args,
     } else if (args[i] == "ESCAPE_QUOTES") {
       escapeQuotes = true;
     } else {
-      status.SetError(cmStrCat("Unrecognized argument \"", args[i], "\""));
+      status.SetError(cmStrCat("Unrecognized argument \"", args[i], '"'));
       return false;
     }
   }

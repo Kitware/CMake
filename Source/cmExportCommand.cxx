@@ -184,7 +184,7 @@ bool cmExportCommand(std::vector<std::string> const& args,
         } else {
           status.SetError(
             cmStrCat("Invalid enable setting for package dependency: \"",
-                     packageDependencyArguments.Enabled, "\""));
+                     packageDependencyArguments.Enabled, '"'));
           return false;
         }
       }

@@ -142,7 +142,7 @@ void cmFileAPI::RemoveOldReplyFiles()
   std::vector<std::string> files = this->LoadDir(reply_dir);
   for (std::string const& f : files) {
     if (this->ReplyFiles.find(f) == this->ReplyFiles.end()) {
-      std::string file = cmStrCat(reply_dir, "/", f);
+      std::string file = cmStrCat(reply_dir, '/', f);
       cmSystemTools::RemoveFile(file);
     }
   }
@@ -207,7 +207,7 @@ std::string cmFileAPI::WriteJsonFile(
 
   // Compute the final name for the file.
   std::string suffix = computeSuffix(tmpFile);
-  std::string suffixWithExtension = cmStrCat("-", suffix, ".json");
+  std::string suffixWithExtension = cmStrCat('-', suffix, ".json");
   fileName = cmStrCat(prefix, suffixWithExtension);
 
   // Truncate the file name length
@@ -225,7 +225,7 @@ std::string cmFileAPI::WriteJsonFile(
     suffix = cmCryptoHash(cmCryptoHash::AlgoSHA256)
                .HashString(toBeRemoved)
                .substr(0, newHashLength);
-    suffixWithExtension = cmStrCat("-", suffix, ".json");
+    suffixWithExtension = cmStrCat('-', suffix, ".json");
     fileName.replace(startPos, overLength, suffixWithExtension);
   }
 

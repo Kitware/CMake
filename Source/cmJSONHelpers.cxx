@@ -20,7 +20,7 @@ ErrorGenerator EXPECTED_TYPE(std::string const& type)
       state->AddErrorAtValue(cmStrCat("Expected ", type), value);
       return;
     }
-    std::string errMsg = cmStrCat("\"", state->key(), "\" expected ", type);
+    std::string errMsg = cmStrCat('"', state->key(), "\" expected ", type);
     if (value && value->isConvertibleTo(Json::ValueType::stringValue)) {
       errMsg = cmStrCat(errMsg, ", got: ", value->asString());
     }
@@ -114,7 +114,7 @@ ErrorGenerator INVALID_NAMED_OBJECT_KEY(
         if (it->first.rfind("$vector_item_", 0) == 0) {
           continue;
         }
-        return cmStrCat("\"", it->first, "\"");
+        return cmStrCat('"', it->first, '"');
       }
       return "root";
     })(errorType, extraFields);

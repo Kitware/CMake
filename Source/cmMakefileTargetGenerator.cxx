@@ -753,7 +753,7 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
 
   // Add language-specific flags.
   std::string const langFlags =
-    cmStrCat("$(", lang, "_FLAGS", filterArch, ")");
+    cmStrCat("$(", lang, "_FLAGS", filterArch, ')');
   this->LocalGenerator->AppendFlags(flags, langFlags);
 
   cmGeneratorExpressionInterpreter genexInterpreter(
@@ -1008,7 +1008,7 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
             "CUDA_SEPARABLE_COMPILATION")) {
         std::string const& rdcFlag =
           this->Makefile->GetRequiredDefinition("_CMAKE_CUDA_RDC_FLAG");
-        cudaCompileMode = cmStrCat(cudaCompileMode, rdcFlag, " ");
+        cudaCompileMode = cmStrCat(cudaCompileMode, rdcFlag, ' ');
       }
 
       static std::array<cm::string_view, 4> const compileModes{

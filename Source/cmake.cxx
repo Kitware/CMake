@@ -1468,7 +1468,7 @@ void cmake::SetArgs(std::vector<std::string> const& args)
   if (!extraProvidedPath.empty() && this->GetWorkingMode() == NORMAL_MODE) {
     this->IssueMessage(MessageType::WARNING,
                        cmStrCat("Ignoring extra path from command line:\n \"",
-                                extraProvidedPath, "\""));
+                                extraProvidedPath, '"'));
   }
   if (!possibleUnknownArg.empty() && this->GetWorkingMode() != SCRIPT_MODE) {
     cmSystemTools::Error(cmStrCat("Unknown argument ", possibleUnknownArg));
@@ -1591,7 +1591,7 @@ void cmake::SetArgs(std::vector<std::string> const& args)
     }
     if (!expandedPreset->ConditionResult) {
       cmSystemTools::Error(cmStrCat("Could not use disabled preset \"",
-                                    preset->second.Unexpanded.Name, "\""));
+                                    preset->second.Unexpanded.Name, '"'));
       return;
     }
 
@@ -2121,9 +2121,9 @@ void cmake::SetHomeDirectoryViaCommandLine(std::string const& path)
   auto prev_path = this->GetHomeDirectory();
   if (prev_path != path && !prev_path.empty() &&
       this->GetWorkingMode() == NORMAL_MODE) {
-    this->IssueMessage(MessageType::WARNING,
-                       cmStrCat("Ignoring extra path from command line:\n \"",
-                                prev_path, "\""));
+    this->IssueMessage(
+      MessageType::WARNING,
+      cmStrCat("Ignoring extra path from command line:\n \"", prev_path, '"'));
   }
   this->SetHomeDirectory(path);
 }
@@ -2224,7 +2224,7 @@ int cmake::DoPreConfigureChecks()
 {
   // Make sure the Source directory contains a CMakeLists.txt file.
   std::string srcList =
-    cmStrCat(this->GetHomeDirectory(), "/", this->CMakeListName);
+    cmStrCat(this->GetHomeDirectory(), '/', this->CMakeListName);
   if (!cmSystemTools::FileExists(srcList)) {
     std::ostringstream err;
     if (cmSystemTools::FileIsDirectory(this->GetHomeDirectory())) {
@@ -2704,12 +2704,12 @@ int cmake::ActualConfigure()
   if (this->Instrumentation->HasQuery()) {
     std::string launcher;
     if (mf->IsOn("CTEST_USE_LAUNCHERS")) {
-      launcher = cmStrCat("\"", cmSystemTools::GetCTestCommand(),
+      launcher = cmStrCat('"', cmSystemTools::GetCTestCommand(),
                           "\" --launch "
                           "--current-build-dir <CMAKE_CURRENT_BINARY_DIR> ");
     } else {
       launcher =
-        cmStrCat("\"", cmSystemTools::GetCTestCommand(), "\" --instrument ");
+        cmStrCat('"', cmSystemTools::GetCTestCommand(), "\" --instrument ");
     }
     std::string common_args =
       cmStrCat(" --target-name <TARGET_NAME> --build-dir \"",

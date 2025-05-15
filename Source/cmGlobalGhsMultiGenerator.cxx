@@ -380,7 +380,7 @@ void cmGlobalGhsMultiGenerator::WriteTargets(cmLocalGenerator* root)
 
     // create target build file
     std::string name = cmStrCat(target->GetName(), ".tgt", FILE_EXTENSION);
-    std::string fname = cmStrCat(rootBinaryDir, "/", name);
+    std::string fname = cmStrCat(rootBinaryDir, '/', name);
     cmGeneratedFileStream fbld(fname);
     fbld.SetCopyIfDifferent(true);
     this->WriteFileHeader(fbld);

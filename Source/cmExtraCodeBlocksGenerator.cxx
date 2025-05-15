@@ -183,19 +183,19 @@ void Tree::BuildUnitImpl(cmXMLWriter& xml,
 {
   for (std::string const& f : this->files) {
     xml.StartElement("Unit");
-    xml.Attribute("filename", cmStrCat(fsPath, this->path, "/", f));
+    xml.Attribute("filename", cmStrCat(fsPath, this->path, '/', f));
 
     xml.StartElement("Option");
     xml.Attribute(
       "virtualFolder",
-      cmStrCat("CMake Files\\", virtualFolderPath, this->path, "\\"));
+      cmStrCat("CMake Files\\", virtualFolderPath, this->path, '\\'));
     xml.EndElement();
 
     xml.EndElement();
   }
   for (Tree const& folder : this->folders) {
-    folder.BuildUnitImpl(xml, cmStrCat(virtualFolderPath, this->path, "\\"),
-                         cmStrCat(fsPath, this->path, "/"));
+    folder.BuildUnitImpl(xml, cmStrCat(virtualFolderPath, this->path, '\\'),
+                         cmStrCat(fsPath, this->path, '/'));
   }
 }
 

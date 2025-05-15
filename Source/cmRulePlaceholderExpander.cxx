@@ -36,7 +36,7 @@ std::string cmRulePlaceholderExpander::ExpandVariable(
         // Add launcher as part of expansion so that it always appears
         // immediately before the command itself, regardless of whether the
         // overall rule template contains other content at the front.
-        result = cmStrCat(this->ReplaceValues->Launcher, " ", result);
+        result = cmStrCat(this->ReplaceValues->Launcher, ' ', result);
       }
       return result;
     }
@@ -317,7 +317,7 @@ std::string cmRulePlaceholderExpander::ExpandVariable(
       // Add launcher as part of expansion so that it always appears
       // immediately before the command itself, regardless of whether the
       // overall rule template contains other content at the front.
-      ret = cmStrCat(this->ReplaceValues->Launcher, " ", ret);
+      ret = cmStrCat(this->ReplaceValues->Launcher, ' ', ret);
     }
 
     // if there are required arguments to the compiler add it

@@ -176,7 +176,7 @@ bool TryRunCommandImpl::TryRunCode(std::vector<std::string> const& argv)
     } else {
       std::string runArgs;
       if (arguments.RunArgs) {
-        runArgs = cmStrCat(" ", cmJoin(*arguments.RunArgs, " "));
+        runArgs = cmStrCat(' ', cmJoin(*arguments.RunArgs, " "));
       }
 
       // "run" it and capture the output

@@ -275,7 +275,7 @@ bool CxxModuleUsage::AddReference(std::string const& logical,
                                   ref.Path, "' via ", method_name(ref.Method),
                                   "; "
                                   "Location B: '",
-                                  loc, "' via ", method_name(method), "."));
+                                  loc, "' via ", method_name(method), '.'));
     return false;
   }
 

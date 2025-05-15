@@ -729,8 +729,7 @@ bool FileSetType::WriteProperties(cmTarget* tgt, cmTargetInternals* impl,
     } else {
       impl->AddDirectoryToFileSet(
         tgt, fileSetName, value, this->TypeName,
-        cmStrCat(this->ArbitraryDescription, " \"", fileSetName, "\""),
-        action);
+        cmStrCat(this->ArbitraryDescription, " \"", fileSetName, '"'), action);
     }
     return true;
   }
@@ -743,8 +742,7 @@ bool FileSetType::WriteProperties(cmTarget* tgt, cmTargetInternals* impl,
     } else {
       impl->AddPathToFileSet(
         tgt, fileSetName, value, this->TypeName,
-        cmStrCat(this->ArbitraryDescription, " \"", fileSetName, "\""),
-        action);
+        cmStrCat(this->ArbitraryDescription, " \"", fileSetName, '"'), action);
     }
     return true;
   }
@@ -2140,7 +2138,7 @@ void cmTarget::SetProperty(std::string const& prop, cmValue value)
       this->impl->Properties.SetProperty(prop, value);
     } else {
       auto e = cmStrCat(prop, " property is not supported by ", compiler,
-                        "  compiler version ", compilerVersion, ".");
+                        "  compiler version ", compilerVersion, '.');
       this->impl->Makefile->IssueMessage(MessageType::FATAL_ERROR, e);
       return;
     }
@@ -3094,11 +3092,11 @@ std::string cmTarget::ImportedGetFullPath(
         }
 
         if (!config.empty()) {
-          configuration = cmStrCat(" configuration \"", config, "\"");
+          configuration = cmStrCat(" configuration \"", config, '"');
         }
 
         return cmStrCat(unset, " not set for imported target \"",
-                        this->GetName(), "\"", configuration, ".");
+                        this->GetName(), '"', configuration, '.');
       };
 
       switch (this->GetPolicyStatus(cmPolicies::CMP0111)) {

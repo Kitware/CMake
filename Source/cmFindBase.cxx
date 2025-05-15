@@ -679,7 +679,7 @@ void cmFindBaseDebugState::WriteDebug() const
       "\n    Only Search AppBundle: ", this->FindBaseCommand->SearchAppBundleOnly,
       "\n    Search AppBundle Last: ", this->FindBaseCommand->SearchAppBundleLast,
       "\n    Search AppBundle First: ", this->FindBaseCommand->SearchAppBundleFirst,
-      "\n"
+      '\n'
     );
   // clang-format on
 
@@ -693,7 +693,7 @@ void cmFindBaseDebugState::WriteDebug() const
       "\n  CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: ", !this->FindCommand->NoSystemEnvironmentPath,
       "\n  CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: ", !this->FindCommand->NoCMakeSystemPath,
       "\n  CMAKE_FIND_USE_INSTALL_PREFIX: ", !this->FindCommand->NoCMakeInstallPath,
-      "\n"
+      '\n'
      );
     // clang-format on
   }

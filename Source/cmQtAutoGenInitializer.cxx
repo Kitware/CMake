@@ -1536,7 +1536,7 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
           cmStrCat(this->Dir.Build, "/deps_");
         std::string const timestampFileName =
           timestampFileWithoutConfig + configView;
-        outputFile = cmStrCat(this->Dir.Build, "/", timestampFileName);
+        outputFile = cmStrCat(this->Dir.Build, '/', timestampFileName);
         auto const depFileWithConfig =
           cmStrCat(depFileWithoutConfig, configView);
         depFile = depFileWithConfig;
@@ -1549,18 +1549,18 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
           auto tempDepFile = depFileWithoutConfig + config;
           outputFileWithConfig.Config[config] = tempTimestampFileName;
           this->AutogenTarget.DepFileRuleName.Config[config] =
-            cmStrCat(this->Dir.RelativeBuild, "/", tempTimestampFileName);
+            cmStrCat(this->Dir.RelativeBuild, '/', tempTimestampFileName);
           this->AutogenTarget.DepFile.Config[config] = tempDepFile;
         }
         this->AddGeneratedSource(outputFileWithConfig, this->Moc);
       } else {
         cm::string_view const timestampFileName = "timestamp";
-        outputFile = cmStrCat(this->Dir.Build, "/", timestampFileName);
+        outputFile = cmStrCat(this->Dir.Build, '/', timestampFileName);
         this->AutogenTarget.DepFile.Default =
           cmStrCat(this->Dir.Build, "/deps");
         depFile = this->AutogenTarget.DepFile.Default;
         this->AutogenTarget.DepFileRuleName.Default =
-          cmStrCat(this->Dir.RelativeBuild, "/", timestampFileName);
+          cmStrCat(this->Dir.RelativeBuild, '/', timestampFileName);
         commandLines.push_back(cmMakeCommandLine(
           { cmSystemTools::GetCMakeCommand(), "-E", "touch", outputFile }));
         this->AddGeneratedSource(outputFile, this->Moc);
@@ -1736,7 +1736,7 @@ bool cmQtAutoGenInitializer::InitRccTargets()
             auto resourceFilesWithConfig = cmStrCat(
               "$<$<CONFIG:", config,
               ">:", cmList{ qrc.Resources.Config.at(config) }.to_string(),
-              ">");
+              '>');
             ccDepends.emplace_back(std::move(resourceFilesWithConfig));
           }
         } else {

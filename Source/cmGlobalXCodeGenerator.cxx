@@ -2553,7 +2553,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
           this->CurrentLocalGenerator->IssueMessage(
             MessageType::AUTHOR_WARNING,
             cmStrCat("Unknown Swift_COMPILATION_MODE on target '",
-                     gtgt->GetName(), "'"));
+                     gtgt->GetName(), '\''));
           break;
       }
     }
@@ -3182,7 +3182,7 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateUtilityTarget(
 
   cmXCodeObject* target = this->CreateObject(
     cmXCodeObject::PBXAggregateTarget,
-    cmStrCat("PBXAggregateTarget:", gtgt->GetName(), ":", targetBinaryPath));
+    cmStrCat("PBXAggregateTarget:", gtgt->GetName(), ':', targetBinaryPath));
   target->SetComment(gtgt->GetName());
   cmXCodeObject* buildPhases = this->CreateObject(cmXCodeObject::OBJECT_LIST);
   std::vector<cmXCodeObject*> emptyContentVector;
@@ -3412,7 +3412,7 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateXCodeTarget(
 
   cmXCodeObject* target = this->CreateObject(
     cmXCodeObject::PBXNativeTarget,
-    cmStrCat("PBXNativeTarget:", gtgt->GetName(), ":", targetBinaryPath));
+    cmStrCat("PBXNativeTarget:", gtgt->GetName(), ':', targetBinaryPath));
 
   target->AddAttribute("buildPhases", buildPhases);
   cmXCodeObject* buildRules = this->CreateObject(cmXCodeObject::OBJECT_LIST);

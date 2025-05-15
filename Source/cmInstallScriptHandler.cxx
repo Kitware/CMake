@@ -165,7 +165,7 @@ int cmInstallScriptHandler::Install(unsigned int j,
         cmStrCat("install_manifest_", md5.HashString(this->component), ".txt");
     }
   }
-  cmGeneratedFileStream fout(cmStrCat(this->binaryDir, "/", install_manifest));
+  cmGeneratedFileStream fout(cmStrCat(this->binaryDir, '/', install_manifest));
   fout.SetCopyIfDifferent(true);
   for (auto const& dir : this->directories) {
     auto local_manifest = cmStrCat(dir, "/install_local_manifest.txt");

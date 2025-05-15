@@ -145,10 +145,10 @@ void cmLinkLineComputer::ComputeLinkPath(
         }
 
         linkPathNoBT +=
-          cmStrCat(" ", libPathFlag,
+          cmStrCat(' ', libPathFlag,
                    this->ConvertToOutputForExisting(
                      item.Target->GetDirectory(cli.GetConfig(), type)),
-                   libPathTerminator, " ");
+                   libPathTerminator, ' ');
       }
     }
 
@@ -158,9 +158,9 @@ void cmLinkLineComputer::ComputeLinkPath(
   }
 
   for (BT<std::string> libDir : cli.GetDirectoriesWithBacktraces()) {
-    libDir.Value = cmStrCat(" ", libPathFlag,
+    libDir.Value = cmStrCat(' ', libPathFlag,
                             this->ConvertToOutputForExisting(libDir.Value),
-                            libPathTerminator, " ");
+                            libPathTerminator, ' ');
     linkPath.emplace_back(libDir);
   }
 

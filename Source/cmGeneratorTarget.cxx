@@ -461,7 +461,7 @@ cmValue cmGeneratorTarget::GetFilePrefixInternal(
   if (!targetPrefix) {
     char const* prefixVar = this->Target->GetPrefixVariableInternal(artifact);
     if (!language.empty() && cmNonempty(prefixVar)) {
-      std::string langPrefix = cmStrCat(prefixVar, "_", language);
+      std::string langPrefix = cmStrCat(prefixVar, '_', language);
       targetPrefix = this->Makefile->GetDefinition(langPrefix);
     }
 
@@ -512,7 +512,7 @@ cmValue cmGeneratorTarget::GetFileSuffixInternal(
   if (!targetSuffix) {
     char const* suffixVar = this->Target->GetSuffixVariableInternal(artifact);
     if (!language.empty() && cmNonempty(suffixVar)) {
-      std::string langSuffix = cmStrCat(suffixVar, "_", language);
+      std::string langSuffix = cmStrCat(suffixVar, '_', language);
       targetSuffix = this->Makefile->GetDefinition(langSuffix);
     }
 
@@ -605,7 +605,7 @@ void cmGeneratorTarget::AddSystemIncludeDirectory(std::string const& inc,
       cmSystemTools::ReplaceString(inc_with_config, "$<CONFIG>", config);
       config_upper = cmSystemTools::UpperCase(config);
     }
-    auto const& key = cmStrCat(config_upper, "/", lang);
+    auto const& key = cmStrCat(config_upper, '/', lang);
     this->Target->AddSystemIncludeDirectories({ inc_with_config });
     if (this->SystemIncludesCache.find(key) ==
         this->SystemIncludesCache.end()) {
@@ -2854,11 +2854,11 @@ std::string cmGeneratorTarget::GetPchHeader(std::string const& config,
     filename = generatorTarget->GetSupportDirectory();
 
     if (this->GetGlobalGenerator()->IsMultiConfig()) {
-      filename = cmStrCat(filename, "/", config);
+      filename = cmStrCat(filename, '/', config);
     }
 
     filename =
-      cmStrCat(filename, "/cmake_pch", arch.empty() ? "" : cmStrCat("_", arch),
+      cmStrCat(filename, "/cmake_pch", arch.empty() ? "" : cmStrCat('_', arch),
                languageToExtension.at(language));
 
     std::string const filename_tmp = cmStrCat(filename, ".tmp");
@@ -2955,14 +2955,14 @@ std::string cmGeneratorTarget::GetPchSource(std::string const& config,
         { "OBJCXX", ".objcxx.hxx.mm" }
       };
 
-      filename = cmStrCat(filename, arch.empty() ? "" : cmStrCat("_", arch),
+      filename = cmStrCat(filename, arch.empty() ? "" : cmStrCat('_', arch),
                           languageToExtension.at(language));
     } else {
       std::map<std::string, std::string> const languageToExtension = {
         { "C", ".c" }, { "CXX", ".cxx" }, { "OBJC", ".m" }, { "OBJCXX", ".mm" }
       };
 
-      filename = cmStrCat(filename, arch.empty() ? "" : cmStrCat("_", arch),
+      filename = cmStrCat(filename, arch.empty() ? "" : cmStrCat('_', arch),
                           languageToExtension.at(language));
     }
 
@@ -3073,7 +3073,7 @@ std::string cmGeneratorTarget::GetPchCreateCompileOptions(
       std::string instantiateOption =
         this->Makefile->GetSafeDefinition(varName);
       if (!instantiateOption.empty()) {
-        createOptionList = cmStrCat(createOptionList, ";", instantiateOption);
+        createOptionList = cmStrCat(createOptionList, ';', instantiateOption);
       }
     }
 
@@ -3081,7 +3081,7 @@ std::string cmGeneratorTarget::GetPchCreateCompileOptions(
       cmStrCat("CMAKE_", language, "_COMPILE_OPTIONS_CREATE_PCH");
 
     createOptionList = cmStrCat(
-      createOptionList, ";", this->Makefile->GetSafeDefinition(createOptVar));
+      createOptionList, ';', this->Makefile->GetSafeDefinition(createOptVar));
 
     std::string const pchHeader = this->GetPchHeader(config, language, arch);
     std::string const pchFile = this->GetPchFile(config, language, arch);
@@ -3113,7 +3113,7 @@ std::string cmGeneratorTarget::GetPchUseCompileOptions(
       this->GetSafeProperty(useOptVar);
 
     useOptionList = cmStrCat(
-      useOptionList, ";",
+      useOptionList, ';',
       useOptionListProperty.empty()
         ? this->Makefile->GetSafeDefinition(cmStrCat("CMAKE_", useOptVar))
         : useOptionListProperty);
@@ -5489,7 +5489,7 @@ bool cmGeneratorTarget::AddHeaderSetVerification()
           }
 
           if (fileCgesContextSensitive) {
-            filename = cmStrCat("$<$<CONFIG:", config, ">:", filename, ">");
+            filename = cmStrCat("$<$<CONFIG:", config, ">:", filename, '>');
           }
           verifyTarget->AddSource(filename);
         }

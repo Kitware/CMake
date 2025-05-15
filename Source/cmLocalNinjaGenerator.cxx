@@ -920,7 +920,7 @@ std::string cmLocalNinjaGenerator::MakeCustomLauncher(
                           : outputs[i],
                         cmOutputConverter::SHELL));
     if (i != outputs.size() - 1) {
-      output = cmStrCat(output, ",");
+      output = cmStrCat(output, ',');
     }
   }
   vars.Output = output.c_str();

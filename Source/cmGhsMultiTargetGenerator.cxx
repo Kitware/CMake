@@ -756,7 +756,7 @@ std::string cmGhsMultiTargetGenerator::WriteObjectLangOverride(
   std::string ret;
   cmValue rawLangProp = sourceFile->GetProperty("LANGUAGE");
   if (rawLangProp) {
-    ret = cmStrCat(" [", *rawLangProp, "]");
+    ret = cmStrCat(" [", *rawLangProp, ']');
   }
 
   return ret;

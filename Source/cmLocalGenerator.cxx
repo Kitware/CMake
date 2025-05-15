@@ -1742,7 +1742,7 @@ std::vector<BT<std::string>> cmLocalGenerator::GetTargetCompileFlags(
           this->IssueMessage(
             MessageType::AUTHOR_WARNING,
             cmStrCat("Unknown Swift_COMPILATION_MODE on target '",
-                     target->GetName(), "'"));
+                     target->GetName(), '\''));
         }
       }
       this->AppendFlags(compileFlags, swiftCompileModeFlag);
@@ -2776,7 +2776,7 @@ void cmLocalGenerator::AddPchDependencies(cmGeneratorTarget* target)
 
           target->Target->AppendProperty(
             cmStrCat(lang, "_COMPILE_OPTIONS_USE_PCH"),
-            cmStrCat("$<$<CONFIG:", config, ">:", useMultiArchPch, ">"));
+            cmStrCat("$<$<CONFIG:", config, ">:", useMultiArchPch, '>'));
         }
       }
 
@@ -2825,7 +2825,7 @@ void cmLocalGenerator::AddPchDependencies(cmGeneratorTarget* target)
             if (!ReuseFrom) {
               pch_sf->AppendProperty(
                 "OBJECT_OUTPUTS",
-                cmStrCat("$<$<CONFIG:", config, ">:", pchFile, ">"));
+                cmStrCat("$<$<CONFIG:", config, ">:", pchFile, '>'));
             } else {
               auto* reuseTarget =
                 this->GlobalGenerator->FindGeneratorTarget(*ReuseFrom);
@@ -2894,7 +2894,7 @@ void cmLocalGenerator::AddPchDependencies(cmGeneratorTarget* target)
                 }
                 target->Target->AppendProperty(
                   cmStrCat(linkerProperty, configUpper),
-                  cmStrCat(" ",
+                  cmStrCat(' ',
                            this->ConvertToOutputFormat(pchSourceObj, SHELL)),
                   cm::nullopt, true);
               } else if (reuseTarget->GetType() ==
@@ -2935,10 +2935,10 @@ void cmLocalGenerator::CopyPchCompilePdb(
   cmGeneratorTarget* reuseTarget, std::vector<std::string> const& extensions)
 {
   std::string const pdb_prefix =
-    this->GetGlobalGenerator()->IsMultiConfig() ? cmStrCat(config, "/") : "";
+    this->GetGlobalGenerator()->IsMultiConfig() ? cmStrCat(config, '/') : "";
 
   std::string const target_compile_pdb_dir =
-    cmStrCat(target->GetLocalGenerator()->GetCurrentBinaryDirectory(), "/",
+    cmStrCat(target->GetLocalGenerator()->GetCurrentBinaryDirectory(), '/',
              target->GetName(), ".dir/");
 
   std::string const copy_script = cmStrCat(
@@ -2954,10 +2954,10 @@ void cmLocalGenerator::CopyPchCompilePdb(
   for (auto const& extension : extensions) {
     std::string const from_file =
       cmStrCat(reuseTarget->GetLocalGenerator()->GetCurrentBinaryDirectory(),
-               "/", ReuseFrom, ".dir/${PDB_PREFIX}", ReuseFrom, extension);
+               '/', ReuseFrom, ".dir/${PDB_PREFIX}", ReuseFrom, extension);
 
     std::string const to_dir =
-      cmStrCat(target->GetLocalGenerator()->GetCurrentBinaryDirectory(), "/",
+      cmStrCat(target->GetLocalGenerator()->GetCurrentBinaryDirectory(), '/',
                target->GetName(), ".dir/${PDB_PREFIX}");
 
     std::string const to_file = cmStrCat(to_dir, ReuseFrom, extension);
@@ -2996,7 +2996,7 @@ void cmLocalGenerator::CopyPchCompilePdb(
 
   auto configGenex = [&](cm::string_view expr) -> std::string {
     if (this->GetGlobalGenerator()->IsMultiConfig()) {
-      return cmStrCat("$<$<CONFIG:", config, ">:", expr, ">");
+      return cmStrCat("$<$<CONFIG:", config, ">:", expr, '>');
     }
     return std::string(expr);
   };
@@ -3122,7 +3122,7 @@ cmLocalGenerator::UnitySource cmLocalGenerator::WriteUnitySource(
       cm::string_view sep;
       for (size_t ci : ubs.Configs) {
         cond = cmStrCat(*cond, sep, "defined(CMAKE_UNITY_CONFIG_",
-                        cmSystemTools::UpperCase(configs[ci]), ")");
+                        cmSystemTools::UpperCase(configs[ci]), ')');
         sep = " || "_s;
       }
     }
@@ -4781,7 +4781,7 @@ std::vector<std::string> ComputeISPCExtraObjects(
 
   for (auto const& ispcTarget : ispcSuffixes) {
     computedObjects.emplace_back(
-      cmStrCat(normalizedDir, "/", objNameNoExt, "_", ispcTarget, extension));
+      cmStrCat(normalizedDir, '/', objNameNoExt, '_', ispcTarget, extension));
   }
 
   return computedObjects;

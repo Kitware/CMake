@@ -1799,7 +1799,7 @@ void cmGlobalNinjaGenerator::WriteBuiltinTargets(std::ostream& os)
     build.Outputs.emplace_back(this->GetInstallParallelTargetName());
     for (auto const& mf : this->Makefiles) {
       build.ExplicitDeps.emplace_back(
-        this->ConvertToNinjaPath(cmStrCat(mf->GetCurrentBinaryDirectory(), "/",
+        this->ConvertToNinjaPath(cmStrCat(mf->GetCurrentBinaryDirectory(), '/',
                                           this->GetInstallLocalTargetName())));
     }
     WriteBuild(os, build);
@@ -2098,7 +2098,7 @@ void cmGlobalNinjaGenerator::WriteTargetClean(std::ostream& os)
         build.Variables["TARGETS"] = cmStrCat(
           this->BuildAlias(
             this->NinjaOutputPath(GetByproductsForCleanTargetName()), config),
-          " ", this->NinjaOutputPath(GetByproductsForCleanTargetName()));
+          ' ', this->NinjaOutputPath(GetByproductsForCleanTargetName()));
       }
       build.ExplicitDeps.clear();
       if (additionalFiles) {
@@ -2217,8 +2217,8 @@ void cmGlobalNinjaGenerator::WriteTargetInstrument(std::ostream& os)
   {
     cmNinjaRule rule("START_INSTRUMENT");
     rule.Command = cmStrCat(
-      "\"", cmSystemTools::GetCTestCommand(), "\" --start-instrumentation \"",
-      this->GetCMakeInstance()->GetHomeOutputDirectory(), "\"");
+      '"', cmSystemTools::GetCTestCommand(), "\" --start-instrumentation \"",
+      this->GetCMakeInstance()->GetHomeOutputDirectory(), '"');
     /*
      * On Unix systems, Ninja will prefix the command with `/bin/sh -c`.
      * Use exec so that Ninja is the parent process of the command.

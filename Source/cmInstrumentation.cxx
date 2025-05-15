@@ -229,7 +229,7 @@ int cmInstrumentation::CollectTimingData(cmInstrumentationQuery::Hook hook)
   std::string const& directory = cmStrCat(this->timingDirv1, "/data");
   std::string const& file_name =
     cmStrCat("index-", ComputeSuffixTime(), ".json");
-  std::string index_path = cmStrCat(directory, "/", file_name);
+  std::string index_path = cmStrCat(directory, '/', file_name);
   cmSystemTools::Touch(index_path, true);
 
   // Gather Snippets
@@ -287,7 +287,7 @@ int cmInstrumentation::CollectTimingData(cmInstrumentationQuery::Hook hook)
 
   // Execute callbacks
   for (auto& cb : this->callbacks) {
-    cmSystemTools::RunSingleCommand(cmStrCat(cb, " \"", index_path, "\""),
+    cmSystemTools::RunSingleCommand(cmStrCat(cb, " \"", index_path, '"'),
                                     nullptr, nullptr, nullptr, nullptr,
                                     cmSystemTools::OUTPUT_PASSTHROUGH);
   }
@@ -299,7 +299,7 @@ int cmInstrumentation::CollectTimingData(cmInstrumentationQuery::Hook hook)
 
   // Delete files
   for (auto const& f : index["snippets"]) {
-    cmSystemTools::RemoveFile(cmStrCat(directory, "/", f.asString()));
+    cmSystemTools::RemoveFile(cmStrCat(directory, '/', f.asString()));
   }
   cmSystemTools::RemoveFile(index_path);
 
@@ -386,9 +386,9 @@ void cmInstrumentation::WriteInstrumentationJson(Json::Value& root,
   wbuilder["indentation"] = "\t";
   std::unique_ptr<Json::StreamWriter> JsonWriter =
     std::unique_ptr<Json::StreamWriter>(wbuilder.newStreamWriter());
-  std::string const& directory = cmStrCat(this->timingDirv1, "/", subdir);
+  std::string const& directory = cmStrCat(this->timingDirv1, '/', subdir);
   cmSystemTools::MakeDirectory(directory);
-  cmsys::ofstream ftmp(cmStrCat(directory, "/", file_name).c_str());
+  cmsys::ofstream ftmp(cmStrCat(directory, '/', file_name).c_str());
   JsonWriter->write(root, &ftmp);
   ftmp << "\n";
   ftmp.close();
@@ -531,7 +531,7 @@ int cmInstrumentation::InstrumentCommand(
         for (auto const& output : root["outputs"]) {
           root["outputSizes"].append(
             static_cast<Json::Value::UInt64>(cmSystemTools::FileLength(
-              cmStrCat(this->binaryDir, "/", output.asCString()))));
+              cmStrCat(this->binaryDir, '/', output.asCString()))));
         }
       }
     }
@@ -542,7 +542,7 @@ int cmInstrumentation::InstrumentCommand(
   // Write Json
   cmsys::SystemInformation info;
   std::string const& file_name = cmStrCat(
-    command_type, "-",
+    command_type, '-',
     this->ComputeSuffixHash(cmStrCat(command_str, info.GetProcessId())),
     this->ComputeSuffixTime(), ".json");
   this->WriteInstrumentationJson(root, "data", file_name);

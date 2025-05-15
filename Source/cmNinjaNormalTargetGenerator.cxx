@@ -204,24 +204,24 @@ std::string cmNinjaNormalTargetGenerator::LanguageLinkerRule(
   std::string const& config) const
 {
   return cmStrCat(
-    this->TargetLinkLanguage(config), "_",
+    this->TargetLinkLanguage(config), '_',
     cmState::GetTargetTypeName(this->GetGeneratorTarget()->GetType()),
     "_LINKER__",
     cmGlobalNinjaGenerator::EncodeRuleName(
       this->GetGeneratorTarget()->GetName()),
-    "_", config);
+    '_', config);
 }
 
 std::string cmNinjaNormalTargetGenerator::LanguageLinkerDeviceRule(
   std::string const& config) const
 {
   return cmStrCat(
-    this->TargetLinkLanguage(config), "_",
+    this->TargetLinkLanguage(config), '_',
     cmState::GetTargetTypeName(this->GetGeneratorTarget()->GetType()),
     "_DEVICE_LINKER__",
     cmGlobalNinjaGenerator::EncodeRuleName(
       this->GetGeneratorTarget()->GetName()),
-    "_", config);
+    '_', config);
 }
 
 std::string cmNinjaNormalTargetGenerator::LanguageLinkerCudaDeviceRule(
@@ -845,7 +845,7 @@ void cmNinjaNormalTargetGenerator::WriteDeviceLinkStatement(
 
   std::string targetOutputDir =
     cmStrCat(this->GetLocalGenerator()->GetTargetDirectory(genTarget),
-             globalGen->ConfigDirectory(config), "/");
+             globalGen->ConfigDirectory(config), '/');
   targetOutputDir = globalGen->ExpandCFGIntDir(targetOutputDir, config);
 
   std::string targetOutputReal =
@@ -981,7 +981,7 @@ void cmNinjaNormalTargetGenerator::WriteNvidiaDeviceLinkStatement(
   if (config != fileConfig) {
     std::string targetOutputFileConfigDir =
       cmStrCat(this->GetLocalGenerator()->GetTargetDirectory(genTarget),
-               globalGen->ConfigDirectory(fileConfig), "/");
+               globalGen->ConfigDirectory(fileConfig), '/');
     targetOutputFileConfigDir =
       globalGen->ExpandCFGIntDir(outputDir, fileConfig);
     if (outputDir == targetOutputFileConfigDir) {

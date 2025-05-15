@@ -250,10 +250,10 @@ bool cmCPackProductBuildGenerator::GenerateComponentPackage(
          << "\""
             " --install-location \"/\""
          << (identityName.empty() ? std::string{}
-                                  : cmStrCat(" --sign \"", identityName, "\""))
+                                  : cmStrCat(" --sign \"", identityName, '"'))
          << (keychainPath.empty()
                ? std::string{}
-               : cmStrCat(" --keychain \"", keychainPath, "\""))
+               : cmStrCat(" --keychain \"", keychainPath, '"'))
          << " \"" << packageFile << '"';
 
   if (component && !component->Plist.empty()) {

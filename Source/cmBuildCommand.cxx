@@ -60,7 +60,7 @@ bool MainSignature(std::vector<std::string> const& args,
       doing = DoingNone;
       parallel = args[i];
     } else {
-      status.SetError(cmStrCat("unknown argument \"", args[i], "\""));
+      status.SetError(cmStrCat("unknown argument \"", args[i], '"'));
       return false;
     }
   }

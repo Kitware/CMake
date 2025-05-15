@@ -231,7 +231,7 @@ int cmCPackBundleGenerator::SignBundle(std::string const& src_dir)
     // sign app bundle
     auto temp_codesign_cmd =
       cmStrCat(this->GetOption("CPACK_COMMAND_CODESIGN"), ' ', sign_parameter,
-               " -s \"", cpack_apple_cert_app, "\"");
+               " -s \"", cpack_apple_cert_app, '"');
     if (this->GetOption("CPACK_BUNDLE_APPLE_ENTITLEMENTS")) {
       temp_codesign_cmd +=
         cmStrCat(" --entitlements ",

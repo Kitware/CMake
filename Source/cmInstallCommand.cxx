@@ -999,7 +999,7 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
           if (!target.HasKnownObjectFileLocation(&reason)) {
             status.SetError(
               cmStrCat("TARGETS given OBJECT library \"", target.GetName(),
-                       "\" whose objects may not be installed", reason, "."));
+                       "\" whose objects may not be installed", reason, '.'));
             return false;
           }
 

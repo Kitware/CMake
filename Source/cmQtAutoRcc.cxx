@@ -144,7 +144,7 @@ bool cmQtAutoRccT::InitFromInfo(InfoT const& info)
   this->QrcFileDir_ = cmSystemTools::GetFilenamePath(this->QrcFile_);
   if (IsMultiConfig() && !this->IsXcode() && this->UseBetterGraph_) {
     this->RccFilePublic_ =
-      cmStrCat(this->AutogenBuildDir_, '/', this->RccPathChecksum_, "_",
+      cmStrCat(this->AutogenBuildDir_, '/', this->RccPathChecksum_, '_',
                this->InfoConfig(), '/', this->RccFileName_);
   } else {
     this->RccFilePublic_ =

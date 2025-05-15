@@ -447,7 +447,7 @@ bool HandleStringsCommand(std::vector<std::string> const& args,
       arg_mode = arg_none;
     } else {
       status.SetError(
-        cmStrCat("STRINGS given unknown argument \"", args[i], "\""));
+        cmStrCat("STRINGS given unknown argument \"", args[i], '"'));
       return false;
     }
   }

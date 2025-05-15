@@ -64,17 +64,17 @@ std::string cmPkgConfigVersionReq::string() const
     case ANY:
       return "";
     case LT:
-      return cmStrCat("<", Version);
+      return cmStrCat('<', Version);
     case LT_EQ:
       return cmStrCat("<=", Version);
     case EQ:
-      return cmStrCat("=", Version);
+      return cmStrCat('=', Version);
     case NEQ:
       return cmStrCat("!=", Version);
     case GT_EQ:
       return cmStrCat(">=", Version);
     case GT:
-      return cmStrCat(">", Version);
+      return cmStrCat('>', Version);
   }
   return "";
 }
