@@ -1179,8 +1179,8 @@ void cmComputeLinkDepends::AddLinkEntries(
               cmStrCat("Impossible to link target '", this->Target->GetName(),
                        "' because the link item '", entry.Item.Value,
                        "', specified with the group feature '", currentFeature,
-                       '\'', ", has already occurred with the feature '",
-                       groupFeature, '\'', ", which is not allowed."),
+                       "', has already occurred with the feature '",
+                       groupFeature, "', which is not allowed."),
               this->Target->GetBacktrace());
             continue;
           }
@@ -1203,7 +1203,8 @@ void cmComputeLinkDepends::AddLinkEntries(
             cmStrCat("Impossible to link target '", this->Target->GetName(),
                      "' because the link item '", entry.Item.Value,
                      "' is specified with the features '", itemFeature,
-                     "' and '", entry.Feature, "'",
+                     "' and '", entry.Feature,
+                     "'"
                      ", and both have an 'OVERRIDE' attribute that overrides "
                      "the other. Such cycles are not allowed."),
             this->Target->GetBacktrace());

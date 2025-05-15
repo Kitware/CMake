@@ -1302,7 +1302,7 @@ bool cmQtAutoMocUicT::JobEvalCacheMocT::EvalSource(
                  ".\nRunning moc on the source\n  ",
                  this->MessagePath(sourceFile.FileName), "!\nBetter include ",
                  this->MessagePath(sourceBase + ".moc"),
-                 " for compatibility with regular mode.\n",
+                 " for compatibility with regular mode.\n"
                  "This is a CMAKE_AUTOMOC_RELAXED_MODE warning.\n"));
 
       // Create mapping
@@ -1370,7 +1370,7 @@ bool cmQtAutoMocUicT::JobEvalCacheMocT::EvalSource(
             " macro.\nRunning moc on the header\n  ",
             this->MessagePath(headerHandle->FileName), "!\nBetter include ",
             this->MessagePath("moc_" + incKey.Base + ".cpp"),
-            " for a compatibility with regular mode.\n",
+            " for a compatibility with regular mode.\n"
             "This is a CMAKE_AUTOMOC_RELAXED_MODE warning.\n"));
       } else {
         this->Log().Warning(
@@ -1382,7 +1382,7 @@ bool cmQtAutoMocUicT::JobEvalCacheMocT::EvalSource(
             ".\nRunning moc on the header\n  ",
             this->MessagePath(headerHandle->FileName), "!\nBetter include ",
             this->MessagePath("moc_" + incKey.Base + ".cpp"),
-            " for compatibility with regular mode.\n",
+            " for compatibility with regular mode.\n"
             "This is a CMAKE_AUTOMOC_RELAXED_MODE warning.\n"));
       }
       // Create mapping

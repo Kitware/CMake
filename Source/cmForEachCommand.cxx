@@ -357,7 +357,7 @@ bool HandleInMode(std::vector<std::string> const& args,
 
     } else {
       makefile.IssueMessage(MessageType::FATAL_ERROR,
-                            cmStrCat("Unknown argument:\n", "  ", arg, '\n'));
+                            cmStrCat("Unknown argument:\n  ", arg, '\n'));
       return true;
     }
   }

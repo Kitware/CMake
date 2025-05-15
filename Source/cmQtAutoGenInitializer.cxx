@@ -1166,7 +1166,8 @@ bool cmQtAutoGenInitializer::InitScanFiles()
       this->Makefile->IssueMessage(
         MessageType::AUTHOR_WARNING,
         cmStrCat(
-          cmPolicies::GetPolicyWarning(cmPolicies::CMP0071), '\n',
+          cmPolicies::GetPolicyWarning(cmPolicies::CMP0071),
+          "\n"
           "For compatibility, CMake is excluding the GENERATED source "
           "file(s):\n",
           files, "from processing by ",
@@ -1197,9 +1198,10 @@ bool cmQtAutoGenInitializer::InitScanFiles()
     this->Makefile->IssueMessage(
       MessageType::AUTHOR_WARNING,
       cmStrCat(
-        cmPolicies::GetPolicyWarning(cmPolicies::CMP0100), '\n',
-        "For compatibility, CMake is excluding the header file(s):\n", files,
-        "from processing by ",
+        cmPolicies::GetPolicyWarning(cmPolicies::CMP0100),
+        "\n"
+        "For compatibility, CMake is excluding the header file(s):\n",
+        files, "from processing by ",
         cmQtAutoGen::Tools(this->Moc.Enabled, this->Uic.Enabled, false),
         ".  If any of the files should be processed, set CMP0100 to NEW.  "
         "If any of the files should not be processed, "
@@ -1233,7 +1235,7 @@ bool cmQtAutoGenInitializer::InitScanFiles()
       if (this->MultiConfig && !this->GlobalGen->IsXcode() &&
           this->UseBetterGraph) {
         qrc.OutputFile = cmStrCat(this->Dir.Build, '/', qrc.QrcPathChecksum,
-                                  "_$<CONFIG>", "/qrc_", qrc.QrcName, ".cpp");
+                                  "_$<CONFIG>/qrc_", qrc.QrcName, ".cpp");
       } else {
         qrc.OutputFile = cmStrCat(this->Dir.Build, '/', qrc.QrcPathChecksum,
                                   "/qrc_", qrc.QrcName, ".cpp");

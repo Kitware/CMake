@@ -297,8 +297,10 @@ bool cmGlobalVisualStudio10Generator::SetGeneratorToolset(
                    this->GetPlatformToolsetString(),
                    ",version=", this->GeneratorToolsetVersion,
                    "\n"
-                   "has multiple matches installed at\n",
-                   "  ", auxProps, "\n",
+                   "has multiple matches installed at\n"
+                   "  ",
+                   auxProps,
+                   "\n"
                    "The toolset and version specification must resolve \n"
                    "to a single installed toolset"));
 

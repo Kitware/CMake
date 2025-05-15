@@ -594,8 +594,10 @@ std::string GetScanCommand(
   cm::optional<cm::string_view> srcOrigFile = cm::nullopt)
 {
   return cmStrCat(cmakeCmd, " -E cmake_ninja_depends --tdi=", tdi,
-                  " --lang=", lang, " --src=", srcFile, " --out=$out",
-                  " --dep=$DEP_FILE --obj=$OBJ_FILE --ddi=", ddiFile,
+                  " --lang=", lang, " --src=", srcFile,
+                  " --out=$out"
+                  " --dep=$DEP_FILE --obj=$OBJ_FILE --ddi=",
+                  ddiFile,
                   srcOrigFile ? cmStrCat(" --src-orig=", *srcOrigFile) : "");
 }
 
@@ -1299,7 +1301,8 @@ void cmNinjaTargetGenerator::GenerateSwiftOutputFileMap(
   }();
 
   std::string mapFilePath =
-    cmStrCat(this->GeneratorTarget->GetSupportDirectory(), '/', config, '/',
+    cmStrCat(this->GeneratorTarget->GetSupportDirectory(), '/', config,
+             "/"
              "output-file-map.json");
 
   // build the global target dependencies

@@ -450,9 +450,8 @@ bool cmGeneratorTarget::VerifyLinkItemColons(LinkItemRole role,
     e = cmStrCat(e, "The link interface of target \"", this->GetName(),
                  "\" contains");
   }
-  e =
-    cmStrCat(e, ":\n  ", item.AsStr(), "\n", "but the target was not found.  ",
-             missingTargetPossibleReasons);
+  e = cmStrCat(e, ":\n  ", item.AsStr(), "\nbut the target was not found.  ",
+               missingTargetPossibleReasons);
   cmListFileBacktrace backtrace = item.Backtrace;
   if (backtrace.Empty()) {
     backtrace = this->GetBacktrace();

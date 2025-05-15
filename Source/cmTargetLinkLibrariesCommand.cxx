@@ -429,7 +429,7 @@ bool TLL::HandleLibrary(ProcessingState currentProcessingState,
           "Target \"", lib, "\" of type ",
           cmState::GetTargetTypeName(tgt->GetType()),
           " may not be linked into another target. One may link only to "
-          "INTERFACE, OBJECT, STATIC or SHARED libraries, or to ",
+          "INTERFACE, OBJECT, STATIC or SHARED libraries, or to "
           "executables with the ENABLE_EXPORTS property set."));
     }
 

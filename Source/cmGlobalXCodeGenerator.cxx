@@ -2264,7 +2264,7 @@ void cmGlobalXCodeGenerator::AddCommandsToBuildPhase(
   cdir = cmSystemTools::ConvertToOutputPath(cdir);
   std::string makecmd = cmStrCat(
     "make -C ", cdir, " -f ", cmSystemTools::ConvertToOutputPath(makefile),
-    "$CONFIGURATION", " OBJDIR=$(basename \"$OBJECT_FILE_DIR_normal\") all");
+    "$CONFIGURATION OBJDIR=$(basename \"$OBJECT_FILE_DIR_normal\") all");
   buildphase->AddAttribute("shellScript", this->CreateString(makecmd));
   buildphase->AddAttribute("showEnvVarsInLog", this->CreateString("0"));
 }

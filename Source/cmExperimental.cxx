@@ -125,7 +125,8 @@ bool cmExperimental::HasSupportEnabled(cmMakefile const& mf, Feature f)
         mf.IssueMessage(
           MessageType::AUTHOR_WARNING,
           cmStrCat(
-            data.Variable, " is set to incorrect value\n  ", value, '\n',
+            data.Variable, " is set to incorrect value\n  ", value,
+            "\n"
             "See 'Help/dev/experimental.rst' in the source tree of this "
             "version of CMake for documentation of the experimental feature "
             "and the corresponding activation value.  This project's code "

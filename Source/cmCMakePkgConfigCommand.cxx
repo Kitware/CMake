@@ -626,7 +626,7 @@ cm::optional<cmPkgConfigResult> ImportPackage(
     if (!cmPkgConfigResolver::CheckVersion(req.ver, ver)) {
       warn_or_error(cmStrCat("Package '", package, "' version '", ver,
                              "' does not meet version requirement '",
-                             req.ver.string(), "' ", "of '", req.parent, "'"),
+                             req.ver.string(), "' of '", req.parent, "'"),
                     imEnv);
       return {};
     }
@@ -856,7 +856,7 @@ bool CheckPackageDependencies(
       if (!cmPkgConfigResolver::CheckVersion(dep.VerReq, *ver)) {
         warn_or_error(cmStrCat("Package '", dep.Name, "' version '", *ver,
                                "' does not meet version requirement '",
-                               dep.VerReq.string(), "' ", "of '", name, "'"),
+                               dep.VerReq.string(), "' of '", name, "'"),
                       imEnv);
         return false;
       }
@@ -869,7 +869,7 @@ bool CheckPackageDependencies(
       if (!cmPkgConfigResolver::CheckVersion(dep.VerReq, ver)) {
         warn_or_error(cmStrCat("Package '", dep.Name, "' version '", ver,
                                "' does not meet version requirement '",
-                               dep.VerReq.string(), "' ", "of '", name, "'"),
+                               dep.VerReq.string(), "' of '", name, "'"),
                       imEnv);
         return false;
       }

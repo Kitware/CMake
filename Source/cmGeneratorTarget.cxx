@@ -5770,7 +5770,8 @@ void cmGeneratorTarget::CheckCxxModuleStatus(std::string const& config) const
       cmStrCat("The target named \"", this->GetName(),
                "\" has C++ sources that may use modules, but modules are not "
                "supported by this generator:\n  ",
-               this->GetGlobalGenerator()->GetName(), '\n',
+               this->GetGlobalGenerator()->GetName(),
+               "\n"
                "Modules are supported only by Ninja, Ninja Multi-Config, "
                "and Visual Studio generators for VS 17.4 and newer.  "
                "See the cmake-cxxmodules(7) manual for details.  "

@@ -467,7 +467,7 @@ bool cmCMakeLanguageCommand(std::vector<cmListFileArgument> const& args,
         if (!defer.Directory) {
           return FatalError(status,
                             cmStrCat("DEFER DIRECTORY:\n  "_s, dir,
-                                     "\nis not known.  "_s,
+                                     "\nis not known.  "
                                      "It may not have been processed yet."_s));
         }
       } else if (expArgs[expArg] == "ID"_s) {

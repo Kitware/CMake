@@ -407,7 +407,8 @@ bool cmExportCommand(std::vector<std::string> const& args,
       case cmPolicies::WARN:
         mf.IssueMessage(
           MessageType::AUTHOR_WARNING,
-          cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0103), '\n',
+          cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0103),
+                   "\n"
                    "export() command already specified for the file\n  ",
                    arguments.Filename, "\nDid you miss 'APPEND' keyword?"));
         CM_FALLTHROUGH;

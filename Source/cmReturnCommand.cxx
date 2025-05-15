@@ -22,7 +22,8 @@ bool cmReturnCommand(std::vector<std::string> const& args,
         status.GetMakefile().IssueMessage(
           MessageType::AUTHOR_WARNING,
           cmStrCat(
-            cmPolicies::GetPolicyWarning(cmPolicies::CMP0140), '\n',
+            cmPolicies::GetPolicyWarning(cmPolicies::CMP0140),
+            "\n"
             "return() checks its arguments when the policy is set to NEW. "
             "Since the policy is not set the OLD behavior will be used so "
             "the arguments will be ignored."));
