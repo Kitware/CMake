@@ -203,23 +203,21 @@ struct tm* cmCTest::GetNightlyTime(std::string const& str, bool tomorrowtag)
   struct tm* lctime;
   time_t tctime = time(nullptr);
   lctime = gmtime(&tctime);
-  char buf[1024];
-  // add todays year day and month to the time in str because
-  // curl_getdate no longer assumes the day is today
-  std::snprintf(buf, sizeof(buf), "%d%02d%02d %s", lctime->tm_year + 1900,
-                lctime->tm_mon + 1, lctime->tm_mday, str.c_str());
   cmCTestLog(this, OUTPUT,
              "Determine Nightly Start Time" << std::endl
                                             << "   Specified time: " << str
                                             << std::endl);
-  // Convert the nightly start time to seconds. Since we are
-  // providing only a time and a timezone, the current date of
+  // Convert the nightly start time to seconds. The current date of
   // the local machine is assumed. Consequently, nightlySeconds
   // is the time at which the nightly dashboard was opened or
   // will be opened on the date of the current client machine.
   // As such, this time may be in the past or in the future.
+  char buf[1024];
+  std::snprintf(buf, sizeof(buf), "%d%02d%02d %s", lctime->tm_year + 1900,
+                lctime->tm_mon + 1, lctime->tm_mday, str.c_str());
   time_t ntime = curl_getdate(buf, &tctime);
-  cmCTestLog(this, DEBUG, "   Get curl time: " << ntime << std::endl);
+  cmCTestLog(this, DEBUG,
+             "   Get the nightly start time: " << ntime << std::endl);
   tctime = time(nullptr);
   cmCTestLog(this, DEBUG, "   Get the current time: " << tctime << std::endl);
 
