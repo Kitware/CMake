@@ -5,17 +5,32 @@
 CheckLanguage
 -------------
 
-This module provides the ``check_language()`` macro to check whether a language
-can be enabled using the :command:`enable_language` or :command:`project`
-commands.
+This module provides a command to check whether a language can be enabled
+using the :command:`enable_language` or :command:`project` commands.
+
+Load this module in a CMake project with:
+
+.. code-block:: cmake
+
+  include(CheckLanguage)
+
+This module is useful when a project does not always require a specific
+language but may need to enable it for certain parts.
+
+Commands
+^^^^^^^^
+
+This module provides the following command:
 
 .. command:: check_language
+
+  Checks whether a language can be enabled in a CMake project:
 
   .. code-block:: cmake
 
     check_language(<lang>)
 
-  This macro attempts to enable the language ``<lang>`` in a test project and
+  This command attempts to enable the language ``<lang>`` in a test project and
   records the results in the following cache variables:
 
   :variable:`CMAKE_<LANG>_COMPILER`
@@ -51,9 +66,8 @@ commands.
 Examples
 ^^^^^^^^
 
-This module is useful when a project does not always require a specific language
-but may need to enable it for certain parts.  The following example checks for
-the availability of the ``Fortran`` language and enables it if possible:
+The following example checks for the availability of the ``Fortran`` language
+and enables it if possible:
 
 .. code-block:: cmake
 
