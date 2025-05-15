@@ -58,8 +58,6 @@ private:
   std::string GetSubmitResultsPrefix();
   int GetSubmitInactivityTimeout();
 
-  class ResponseParser;
-
   std::string HTTPProxy;
   int HTTPProxyType = 0;
   std::string HTTPProxyAuth;

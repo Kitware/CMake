@@ -32,7 +32,8 @@
 
 #define SUBMIT_TIMEOUT_IN_SECONDS_DEFAULT 120
 
-class cmCTestSubmitHandler::ResponseParser : public cmXMLParser
+namespace {
+class ResponseParser : public cmXMLParser
 {
 public:
   enum StatusType
@@ -94,8 +95,8 @@ private:
   }
 };
 
-static size_t cmCTestSubmitHandlerWriteMemoryCallback(void* ptr, size_t size,
-                                                      size_t nmemb, void* data)
+size_t cmCTestSubmitHandlerWriteMemoryCallback(void* ptr, size_t size,
+                                               size_t nmemb, void* data)
 {
   int realsize = static_cast<int>(size * nmemb);
   char const* chPtr = static_cast<char*>(ptr);
@@ -103,13 +104,15 @@ static size_t cmCTestSubmitHandlerWriteMemoryCallback(void* ptr, size_t size,
   return realsize;
 }
 
-static size_t cmCTestSubmitHandlerCurlDebugCallback(CURL* /*unused*/,
-                                                    curl_infotype /*unused*/,
-                                                    char* chPtr, size_t size,
-                                                    void* data)
+size_t cmCTestSubmitHandlerCurlDebugCallback(CURL* /*unused*/,
+                                             curl_infotype /*unused*/,
+                                             char* chPtr, size_t size,
+                                             void* data)
 {
   cm::append(*static_cast<std::vector<char>*>(data), chPtr, chPtr + size);
   return 0;
+}
+
 }
 
 cmCTestSubmitHandler::cmCTestSubmitHandler(cmCTest* ctest)
