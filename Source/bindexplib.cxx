@@ -254,7 +254,8 @@ public:
            */
           if (pSymbolTable->N.Name.Short != 0) {
             symbol.clear();
-            symbol.insert(0, (char const*)pSymbolTable->N.ShortName, 8);
+            symbol.insert(0, (char const*)pSymbolTable->N.ShortName,
+                          strnlen((char const*)pSymbolTable->N.ShortName, 8));
           } else {
             symbol = stringTable + pSymbolTable->N.Name.Long;
           }
