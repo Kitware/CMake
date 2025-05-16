@@ -4069,7 +4069,11 @@ if(_${_PYTHON_PREFIX}_CMAKE_ROLE STREQUAL "PROJECT")
         set_property (TARGET ${__name}
                       PROPERTY INTERFACE_COMPILE_DEFINITIONS "${${_PYTHON_PREFIX}_DEFINITIONS}")
       endif()
-
+      if(WIN32)
+        # avoid implicit library link (recognized by version 3.14 and upper)
+        set_property (TARGET ${__name}
+                      APPEND PROPERTY INTERFACE_COMPILE_DEFINITIONS "Py_NO_LINK_LIB")
+      endif()
 
       if (${_PYTHON_PREFIX}_${_PREFIX}LIBRARY_RELEASE AND ${_PYTHON_PREFIX}_RUNTIME_${_PREFIX}LIBRARY_RELEASE)
         # System manage shared libraries in two parts: import and runtime
@@ -4130,6 +4134,11 @@ if(_${_PYTHON_PREFIX}_CMAKE_ROLE STREQUAL "PROJECT")
       if (${_PYTHON_PREFIX}_DEFINITIONS)
         set_property (TARGET ${__name}
                       PROPERTY INTERFACE_COMPILE_DEFINITIONS "${${_PYTHON_PREFIX}_DEFINITIONS}")
+      endif()
+      if(WIN32)
+        # avoid implicit library link (recognized by version 3.14 and upper)
+        set_property (TARGET ${__name}
+                      APPEND PROPERTY INTERFACE_COMPILE_DEFINITIONS "Py_NO_LINK_LIB")
       endif()
 
       # When available, enforce shared library generation with undefined symbols
