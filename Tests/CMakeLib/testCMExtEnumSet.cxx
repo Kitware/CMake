@@ -46,6 +46,13 @@ void testDeclaration()
   std::cout << "testDeclaration()" << std::endl;
 
   {
+    static EnumSetTest const testSet1;
+    static EnumSetTest2 const testSet2;
+    static_cast<void>(testSet1);
+    static_cast<void>(testSet2);
+  }
+
+  {
     EnumSetTest testSet1;
     EnumSetTest testSet2 = Test::A;
     EnumSetTest testSet3 = Test::A | Test::C;
