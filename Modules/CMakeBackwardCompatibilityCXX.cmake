@@ -8,6 +8,12 @@ CMakeBackwardCompatibilityCXX
 This module defines several backward compatibility cache variables for the
 ``CXX`` language to support early C++ (pre-C++98, ANSI C++).
 
+Load this module in a CMake project with:
+
+.. code-block:: cmake
+
+  include(CMakeBackwardCompatibilityCXX)
+
 The following modules are included by this module:
 
 * :module:`TestForANSIForScope`
@@ -30,11 +36,23 @@ Additionally, the following cache variable may be defined:
 Examples
 ^^^^^^^^
 
-Including this module provides backward compatibility cache variables:
+Including this module provides backward compatibility cache variables, which
+can be used in C++.  For example:
 
 .. code-block:: cmake
+  :caption: ``CMakeLists.txt``
 
   include(CMakeBackwardCompatibilityCXX)
+  file(
+    CONFIGURE
+    OUTPUT config.h
+    CONTENT [[
+      #cmakedefine CMAKE_NO_ANSI_FOR_SCOPE
+      #cmakedefine CMAKE_NO_ANSI_STRING_STREAM
+      #cmakedefine CMAKE_NO_ANSI_STREAM_HEADERS
+      #cmakedefine CMAKE_NO_STD_NAMESPACE
+    ]]
+  )
 #]=======================================================================]
 
 if(NOT CMAKE_SKIP_COMPATIBILITY_TESTS)
