@@ -15,3 +15,9 @@ target is created.
 There is also the per-configuration :prop_tgt:`INTERPROCEDURAL_OPTIMIZATION_<CONFIG>`
 target property, which overrides :prop_tgt:`INTERPROCEDURAL_OPTIMIZATION`
 if it is set.
+
+See Also
+^^^^^^^^
+
+* The :module:`CheckIPOSupported` module to check whether the compiler
+  supports interprocedural optimization before enabling this target property.

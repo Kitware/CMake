@@ -7,25 +7,56 @@ CheckIPOSupported
 
 .. versionadded:: 3.9
 
-This module provides a function to check whether the compiler supports an
-interprocedural optimization (IPO/LTO).  Use this module before enabling the
-:prop_tgt:`INTERPROCEDURAL_OPTIMIZATION` target property.
+This module provides a command to check whether the compiler supports
+interprocedural optimization (IPO/LTO).
+
+Load this module in a CMake project with:
+
+.. code-block:: cmake
+
+  include(CheckIPOSupported)
+
+Interprocedural optimization is a compiler technique that performs
+optimizations across translation units (i.e., across source files), allowing
+the compiler to analyze and optimize the entire program as a whole rather
+than file-by-file.  This can improve performance by enabling more aggressive
+inlining and dead code elimination.  When these optimizations are applied at
+link time, the process is typically referred to as link-time optimization
+(LTO), which is a common form of IPO.
+
+In CMake, interprocedural optimization can be enabled on a per-target basis
+using the :prop_tgt:`INTERPROCEDURAL_OPTIMIZATION` target property, or
+for all targets in the current scope using the
+:variable:`CMAKE_INTERPROCEDURAL_OPTIMIZATION` variable.
+
+Use this module before enabling the interprocedural optimization on targets
+to ensure the compiler supports IPO/LTO.
+
+Commands
+^^^^^^^^
+
+This module provides the following command:
 
 .. command:: check_ipo_supported
 
+  Checks whether the compiler supports interprocedural optimization (IPO/LTO):
+
   .. code-block:: cmake
 
-    check_ipo_supported([RESULT <result>] [OUTPUT <output>]
-                        [LANGUAGES <lang>...])
+    check_ipo_supported(
+      [RESULT <result-var>]
+      [OUTPUT <output-var>]
+      [LANGUAGES <lang>...]
+    )
 
   Options are:
 
-  ``RESULT <result>``
-    Set ``<result>`` variable to ``YES`` if IPO is supported by the
+  ``RESULT <result-var>``
+    Set ``<result-var>`` variable to ``YES`` if IPO is supported by the
     compiler and ``NO`` otherwise.  If this option is not given then
     the command will issue a fatal error if IPO is not supported.
-  ``OUTPUT <output>``
-    Set ``<output>`` variable with details about any error.
+  ``OUTPUT <output-var>``
+    Set ``<output-var>`` variable with details about any error.
   ``LANGUAGES <lang>...``
     Specify languages whose compilers to check.
 
@@ -44,18 +75,18 @@ interprocedural optimization (IPO/LTO).  Use this module before enabling the
     If this option is not given, the default languages are picked from
     the current :prop_gbl:`ENABLED_LANGUAGES` global property.
 
-.. note::
+  .. note::
 
-  To use ``check_ipo_supported()``, policy :policy:`CMP0069` must be set to
-  ``NEW``; otherwise, a fatal error will occur.
+    To use ``check_ipo_supported()``, policy :policy:`CMP0069` must be set to
+    ``NEW``; otherwise, a fatal error will occur.
 
-.. versionadded:: 3.13
-  Support for Visual Studio generators.
+  .. versionadded:: 3.13
+    Support for Visual Studio generators.
 
-.. versionadded:: 3.24
-  The check uses the caller's :variable:`CMAKE_<LANG>_FLAGS`
-  and :variable:`CMAKE_<LANG>_FLAGS_<CONFIG>` values.
-  See policy :policy:`CMP0138`.
+  .. versionadded:: 3.24
+    The check uses the caller's :variable:`CMAKE_<LANG>_FLAGS`
+    and :variable:`CMAKE_<LANG>_FLAGS_<CONFIG>` values.
+    See policy :policy:`CMP0138`.
 
 Examples
 ^^^^^^^^
@@ -69,10 +100,10 @@ not supported:
   check_ipo_supported() # fatal error if IPO is not supported
   set_property(TARGET foo PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
 
-The following example demonstrates how to use the ``CheckIPOSupported`` module
-to enable IPO for the target only when supported by the compiler and to issue a
-warning if it is not.  Additionally, projects may want to provide a
-configuration option to control when IPO is enabled.  For example:
+The following example demonstrates how to use this module to enable IPO for
+the target only when supported by the compiler and to issue a warning if it
+is not.  Additionally, projects may want to provide a configuration option
+to control when IPO is enabled.  For example:
 
 .. code-block:: cmake
 
