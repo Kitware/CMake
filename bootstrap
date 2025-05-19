@@ -454,6 +454,7 @@ CMAKE_CXX_SOURCES="\
   cmOSXBundleGenerator \
   cmOptionCommand \
   cmOrderDirectories \
+  cmObjectLocation \
   cmOutputConverter \
   cmParseArgumentsCommand \
   cmPathLabel \

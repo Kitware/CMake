@@ -401,6 +401,8 @@ add_library(
   cmMSVC60LinkLineComputer.h
   cmOSXBundleGenerator.cxx
   cmOSXBundleGenerator.h
+  cmObjectLocation.cxx
+  cmObjectLocation.h
   cmOutputConverter.cxx
   cmOutputConverter.h
   cmNewLineStyle.h
