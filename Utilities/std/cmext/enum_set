@@ -149,7 +149,7 @@ public:
   using reverse_iterator = std::reverse_iterator<iterator>;
   using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
-  constexpr enum_set() noexcept = default;
+  constexpr enum_set() noexcept {}
   enum_set(key_type e) { this->insert(e); }
   enum_set(enum_set const& other) noexcept { this->insert(other); }
   template <typename E,
