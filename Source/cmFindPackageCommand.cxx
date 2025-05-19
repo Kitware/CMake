@@ -3668,6 +3668,19 @@ void cmFindPackageDebugState::WriteEvent(cmConfigureLog& log,
     log.WriteValue("found"_s, nullptr);
   }
 
+  this->WriteSearchVariables(log, mf);
+
   log.EndEvent();
+}
+
+std::vector<std::pair<cmFindCommonDebugState::VariableSource, std::string>>
+cmFindPackageDebugState::ExtraSearchVariables() const
+{
+  std::vector<std::pair<cmFindCommonDebugState::VariableSource, std::string>>
+    extraSearches;
+  if (this->FindPackageCommand->UseFindModules) {
+    extraSearches.emplace_back(VariableSource::PathList, "CMAKE_MODULE_PATH");
+  }
+  return extraSearches;
 }
 #endif

@@ -399,6 +399,8 @@ private:
   void WriteDebug() const override;
 #ifndef CMAKE_BOOTSTRAP
   void WriteEvent(cmConfigureLog& log, cmMakefile const& mf) const override;
+  std::vector<std::pair<VariableSource, std::string>> ExtraSearchVariables()
+    const override;
 #endif
 
   cmFindPackageCommand const* const FindPackageCommand;

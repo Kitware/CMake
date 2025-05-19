@@ -8,6 +8,7 @@
 #include <memory>
 #include <set>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "cmPathLabel.h"
@@ -187,6 +188,15 @@ protected:
   virtual void WriteDebug() const = 0;
 #ifndef CMAKE_BOOTSTRAP
   virtual void WriteEvent(cmConfigureLog& log, cmMakefile const& mf) const = 0;
+  void WriteSearchVariables(cmConfigureLog& log, cmMakefile const& mf) const;
+  enum class VariableSource
+  {
+    String,
+    PathList,
+    EnvironmentList,
+  };
+  virtual std::vector<std::pair<VariableSource, std::string>>
+  ExtraSearchVariables() const;
 #endif
 
   cmFindCommon const* const FindCommand;

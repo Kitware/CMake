@@ -73,6 +73,9 @@ events:
       path: ".*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/ParameterCheckConfig/ParameterCheckConfigConfig.cmake"
       mode: "config"
       version: "1.6"
+    search_context:(
+      [^
+]*)+
   -
     kind: "find_package-v1"
     backtrace:(
@@ -186,6 +189,9 @@ events:
       path: ".*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/ParameterCheckConfig/ParameterCheckConfigConfig.cmake"
       mode: "config"
       version: "1.6"
+    search_context:(
+      [^
+]*)+
   -
     kind: "find_package-v1"
     backtrace:(
@@ -230,6 +236,9 @@ events:
         mode: "config"
         reason: "no_exist"
     found: null
+    search_context:(
+      [^
+]*)+
   -
     kind: "find_package-v1"
     backtrace:(
@@ -293,6 +302,9 @@ events:
       path: ".*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/ParameterCheckConfig/ParameterCheckConfigConfig.cmake"
       mode: "config"
       version: "1.6"
+    search_context:(
+      [^
+]*)+
   -
     kind: "find_package-v1"
     backtrace:(
@@ -356,6 +368,9 @@ events:
       path: ".*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/ParameterCheckConfig/ParameterCheckConfigConfig.cmake"
       mode: "config"
       version: "1.6"
+    search_context:(
+      [^
+]*)+
   -
     kind: "find_package-v1"
     backtrace:(
@@ -419,6 +434,9 @@ events:
       path: ".*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/ParameterCheckConfig/ParameterCheckConfigConfig.cmake"
       mode: "config"
       version: "1.6"
+    search_context:(
+      [^
+]*)+
   -
     kind: "find_package-v1"
     backtrace:(
@@ -521,4 +539,7 @@ events:
       path: ".*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/ParameterCheckConfig/ParameterCheckConfigConfig.cmake"
       mode: "config"
       version: "1.6"
+    search_context:(
+      [^
+]*)+
 \.\.\.$
