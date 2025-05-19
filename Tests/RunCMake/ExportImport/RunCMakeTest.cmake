@@ -22,6 +22,7 @@ function(run_ExportImport_test case)
 endfunction()
 
 run_ExportImport_test(SharedDep)
+run_ExportImport_test(SpdxLicenseProperty)
 
 function(run_ExportImportBuildInstall_test case)
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/${case}-export-build)

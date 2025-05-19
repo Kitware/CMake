@@ -564,10 +564,10 @@ std::string cmPackageInfoReader::ResolvePath(std::string path) const
   return path;
 }
 
-void cmPackageInfoReader::SetOptionalProperty(cmTarget* target,
-                                              cm::string_view property,
-                                              cm::string_view configuration,
-                                              Json::Value const& value) const
+void cmPackageInfoReader::SetImportProperty(cmTarget* target,
+                                            cm::string_view property,
+                                            cm::string_view configuration,
+                                            Json::Value const& value) const
 {
   if (!value.isNull()) {
     std::string fullprop;
@@ -579,6 +579,15 @@ void cmPackageInfoReader::SetOptionalProperty(cmTarget* target,
     }
 
     target->SetProperty(fullprop, this->ResolvePath(value.asString()));
+  }
+}
+
+void cmPackageInfoReader::SetMetaProperty(cmTarget* target,
+                                          cm::string_view property,
+                                          Json::Value const& value) const
+{
+  if (!value.isNull()) {
+    target->SetProperty(property.data(), value.asString());
   }
 }
 
@@ -630,14 +639,14 @@ void cmPackageInfoReader::SetTargetProperties(
                            });
 
   // Add link name/location(s).
-  this->SetOptionalProperty(target, "LOCATION"_s, configuration,
-                            data["location"]);
+  this->SetImportProperty(target, "LOCATION"_s, configuration,
+                          data["location"]);
 
-  this->SetOptionalProperty(target, "IMPLIB"_s, configuration,
-                            data["link_location"]);
+  this->SetImportProperty(target, "IMPLIB"_s, configuration,
+                          data["link_location"]);
 
-  this->SetOptionalProperty(target, "SONAME"_s, configuration,
-                            data["link_name"]);
+  this->SetImportProperty(target, "SONAME"_s, configuration,
+                          data["link_name"]);
 
   // Add link languages.
   for (std::string const& originalLang : ReadList(data, "link_languages")) {
@@ -658,6 +667,11 @@ void cmPackageInfoReader::SetTargetProperties(
     std::string const& lib =
       cmStrCat("$<LINK_ONLY:"_s, NormalizeTargetName(dep, package), '>');
     AppendProperty(makefile, target, "LINK_LIBRARIES"_s, configuration, lib);
+  }
+
+  // Add other information.
+  if (configuration.empty()) {
+    this->SetMetaProperty(target, "SPDX_LICENSE"_s, data["license"]);
   }
 }
 
