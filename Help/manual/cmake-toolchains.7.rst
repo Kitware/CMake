@@ -83,7 +83,7 @@ with the :prop_tgt:`LINKER_LANGUAGE` target property.
 Toolchain Features
 ==================
 
-CMake provides the :command:`try_compile` command and wrapper macros such as
+CMake provides the :command:`try_compile` command and modules such as
 :module:`CheckSourceCompiles`, :module:`CheckCXXSymbolExists` and
 :module:`CheckIncludeFile` to test capability and availability of various
 toolchain features. These APIs test the toolchain in some way and cache the
