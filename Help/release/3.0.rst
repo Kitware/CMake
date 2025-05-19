@@ -207,7 +207,7 @@ Modules
 
 * The :module:`CheckTypeSize` module ``check_type_size`` macro and
   the :module:`CheckStructHasMember` module ``check_struct_has_member``
-  macro learned a new ``LANGUAGE`` option to optionally check C++ types.
+  command learned a new ``LANGUAGE`` option to optionally check C++ types.
 
 * The :module:`ExternalData` module learned to work with no
   URL templates if a local store is available.
