@@ -9,6 +9,7 @@
 #include <string>
 
 #include "cmLocalGenerator.h"
+#include "cmObjectLocation.h"
 
 class cmGeneratorTarget;
 class cmGlobalGenerator;
@@ -35,7 +36,7 @@ public:
   void Generate() override;
   void AddGeneratorSpecificInstallSetup(std::ostream& os) override;
   void ComputeObjectFilenames(
-    std::map<cmSourceFile const*, std::string>& mapping,
+    std::map<cmSourceFile const*, cmObjectLocations>& mapping,
     cmGeneratorTarget const* gt = nullptr) override;
 
   void AddXCConfigSources(cmGeneratorTarget* target) override;

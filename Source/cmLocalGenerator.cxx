@@ -4143,7 +4143,7 @@ std::string& cmLocalGenerator::CreateSafeUniqueObjectFileName(
 }
 
 void cmLocalGenerator::ComputeObjectFilenames(
-  std::map<cmSourceFile const*, std::string>& /*unused*/,
+  std::map<cmSourceFile const*, cmObjectLocations>& /*unused*/,
   cmGeneratorTarget const* /*unused*/)
 {
 }
@@ -4227,8 +4227,13 @@ std::string cmLocalGenerator::GetRelativeSourceFileName(
 
 std::string cmLocalGenerator::GetObjectFileNameWithoutTarget(
   cmSourceFile const& source, std::string const& dir_max,
-  bool* hasSourceExtension, char const* customOutputExtension)
+  bool* hasSourceExtension, char const* customOutputExtension,
+  bool const* forceShortObjectName)
 {
+  bool useShortObjectNames = this->UseShortObjectNames();
+  if (forceShortObjectName) {
+    useShortObjectNames = *forceShortObjectName;
+  }
 
   // This can return an absolute path in the case where source is
   // not relative to the current source or binary directoreis
@@ -4246,7 +4251,7 @@ std::string cmLocalGenerator::GetObjectFileNameWithoutTarget(
   // Short object path policy selected, use as little info as necessary to
   // select an object name
   bool keptSourceExtension = true;
-  if (this->UseShortObjectNames()) {
+  if (useShortObjectNames) {
     objectName = this->GetShortObjectFileName(source);
     keptSourceExtension = false;
   }

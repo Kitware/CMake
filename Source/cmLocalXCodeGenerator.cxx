@@ -119,7 +119,7 @@ void cmLocalXCodeGenerator::AddGeneratorSpecificInstallSetup(std::ostream& os)
 }
 
 void cmLocalXCodeGenerator::ComputeObjectFilenames(
-  std::map<cmSourceFile const*, std::string>& mapping,
+  std::map<cmSourceFile const*, cmObjectLocations>& mapping,
   cmGeneratorTarget const*)
 {
   // Count the number of object files with each name. Warn about duplicate
@@ -129,15 +129,17 @@ void cmLocalXCodeGenerator::ComputeObjectFilenames(
   std::map<std::string, int> counts;
   for (auto& si : mapping) {
     cmSourceFile const* sf = si.first;
-    std::string objectName = cmStrCat(
+    std::string shortObjectName = this->GetShortObjectFileName(*sf);
+    std::string longObjectName = cmStrCat(
       cmSystemTools::GetFilenameWithoutLastExtension(sf->GetFullPath()), ".o");
 
-    std::string objectNameLower = cmSystemTools::LowerCase(objectName);
-    counts[objectNameLower] += 1;
-    if (2 == counts[objectNameLower]) {
+    std::string longObjectNameLower = cmSystemTools::LowerCase(longObjectName);
+    counts[longObjectNameLower] += 1;
+    if (2 == counts[longObjectNameLower]) {
       // TODO: emit warning about duplicate name?
     }
-    si.second = objectName;
+    si.second.ShortLoc.emplace(shortObjectName);
+    si.second.LongLoc.Update(longObjectName);
   }
 }
 

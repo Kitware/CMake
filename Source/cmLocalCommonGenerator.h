@@ -13,6 +13,7 @@
 class cmGeneratorTarget;
 class cmGlobalGenerator;
 class cmMakefile;
+struct cmObjectLocations;
 class cmSourceFile;
 
 /** \class cmLocalCommonGenerator
@@ -39,7 +40,7 @@ public:
     cmGeneratorTarget const* target) const override;
 
   void ComputeObjectFilenames(
-    std::map<cmSourceFile const*, std::string>& mapping,
+    std::map<cmSourceFile const*, cmObjectLocations>& mapping,
     cmGeneratorTarget const* gt = nullptr) override;
 
 protected:

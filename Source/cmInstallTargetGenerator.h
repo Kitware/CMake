@@ -86,6 +86,7 @@ public:
     std::string ToDir;
 
     NamelinkModeType NamelinkMode = NamelinkModeNone;
+    bool Rename = false;
     bool NoTweak = false;
     bool UseSourcePermissions = false;
     cmInstallType Type = cmInstallType();
