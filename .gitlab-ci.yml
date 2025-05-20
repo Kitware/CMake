@@ -799,6 +799,13 @@ t:oneapi2025.0.0-makefiles:
         CMAKE_CI_BUILD_NAME: oneapi2025.0.0_makefiles
         CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2025.0.0-rocky9
 
+t:oneapi2025.1.0-makefiles:
+    extends:
+        - .cmake_test_linux_inteloneapi_makefiles
+    variables:
+        CMAKE_CI_BUILD_NAME: oneapi2025.1.0_makefiles
+        CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2025.1.0-rocky9
+
 b:linux-x86_64-package:
     extends:
         - .linux_package
