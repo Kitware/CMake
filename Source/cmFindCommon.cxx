@@ -507,6 +507,11 @@ void cmFindCommonDebugState::FailedAt(std::string const& path,
   this->FailedAtImpl(path, regexName);
 }
 
+bool cmFindCommonDebugState::ShouldImplicitlyLogEvents() const
+{
+  return true;
+}
+
 void cmFindCommonDebugState::Write()
 {
   auto const* const fc = this->FindCommand;
@@ -517,11 +522,13 @@ void cmFindCommonDebugState::Write()
         fc->Makefile->GetCMakeInstance()->GetConfigureLog()) {
     // Write event if any of:
     //   - debug mode is enabled
-    //   - the variable was not defined (first run)
-    //   - the variable found state does not match the new found state (state
-    //     transition)
-    if (fc->DebugModeEnabled() || !fc->IsDefined() ||
-        fc->IsFound() != this->IsFound) {
+    //   - implicit logging should happen and:
+    //     - the variable was not defined (first run)
+    //     - the variable found state does not match the new found state (state
+    //       transition)
+    if (fc->DebugModeEnabled() ||
+        (this->ShouldImplicitlyLogEvents() &&
+         (!fc->IsDefined() || fc->IsFound() != this->IsFound))) {
       this->WriteEvent(*log, *fc->Makefile);
     }
   }

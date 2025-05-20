@@ -185,6 +185,7 @@ protected:
   virtual void FoundAtImpl(std::string const& path, std::string regexName) = 0;
   virtual void FailedAtImpl(std::string const& path,
                             std::string regexName) = 0;
+  virtual bool ShouldImplicitlyLogEvents() const;
 
   virtual void WriteDebug() const = 0;
 #ifndef CMAKE_BOOTSTRAP
