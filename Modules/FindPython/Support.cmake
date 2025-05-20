@@ -625,18 +625,16 @@ function (_PYTHON_GET_CONFIG_VAR _PYTHON_PGCV_VALUE NAME)
         set (_values "_d")
       endif()
     elseif (NAME STREQUAL "ABIFLAGS" AND WIN32)
-      # config var ABIFLAGS does not exist, check GIL specific variable
+      # config var ABIFLAGS does not exist for version < 3.14, check GIL specific variable
       execute_process (COMMAND ${_${_PYTHON_PREFIX}_INTERPRETER_LAUNCHER} "${_${_PYTHON_PREFIX}_EXECUTABLE}" -c
-                               "import sys; import sysconfig; sys.stdout.write(str(sysconfig.get_config_var('Py_GIL_DISABLED')))"
+                               "import sys\nimport sysconfig\ntry:\n   sys.stdout.write(sysconfig.get_config_var('ABIFLAGS'))\nexcept Exception:\n   sys.stdout.write('t' if sysconfig.get_config_var('Py_GIL_DISABLED') == 1 else '<none>')"
                      RESULT_VARIABLE _result
                      OUTPUT_VARIABLE _values
                      ERROR_QUIET
                      OUTPUT_STRIP_TRAILING_WHITESPACE)
-      if (result OR NOT _values EQUAL "1")
+      if (_result OR NOT _values)
         # assume ABI is not supported or GIL is set
         set (_values "<none>")
-      else()
-        set (_values "t")
       endif()
     else()
       set (config_flag "${NAME}")
@@ -4071,7 +4069,11 @@ if(_${_PYTHON_PREFIX}_CMAKE_ROLE STREQUAL "PROJECT")
         set_property (TARGET ${__name}
                       PROPERTY INTERFACE_COMPILE_DEFINITIONS "${${_PYTHON_PREFIX}_DEFINITIONS}")
       endif()
-
+      if(WIN32)
+        # avoid implicit library link (recognized by version 3.14 and upper)
+        set_property (TARGET ${__name}
+                      APPEND PROPERTY INTERFACE_COMPILE_DEFINITIONS "Py_NO_LINK_LIB")
+      endif()
 
       if (${_PYTHON_PREFIX}_${_PREFIX}LIBRARY_RELEASE AND ${_PYTHON_PREFIX}_RUNTIME_${_PREFIX}LIBRARY_RELEASE)
         # System manage shared libraries in two parts: import and runtime
@@ -4132,6 +4134,11 @@ if(_${_PYTHON_PREFIX}_CMAKE_ROLE STREQUAL "PROJECT")
       if (${_PYTHON_PREFIX}_DEFINITIONS)
         set_property (TARGET ${__name}
                       PROPERTY INTERFACE_COMPILE_DEFINITIONS "${${_PYTHON_PREFIX}_DEFINITIONS}")
+      endif()
+      if(WIN32)
+        # avoid implicit library link (recognized by version 3.14 and upper)
+        set_property (TARGET ${__name}
+                      APPEND PROPERTY INTERFACE_COMPILE_DEFINITIONS "Py_NO_LINK_LIB")
       endif()
 
       # When available, enforce shared library generation with undefined symbols
