@@ -6,9 +6,16 @@ TestForANSIForScope
 -------------------
 
 This module checks whether the ``CXX`` compiler restricts the scope of variables
-declared in a for-init-statement to the loop body.  In early C++ (pre-C++98),
-variables declared in ``for(<init-statement> ...)`` could remain accessible
-outside the loop after its body (``for() { <body> }``).
+declared in a for-init-statement to the loop body.
+
+Load this module in a CMake project with:
+
+.. code-block:: cmake
+
+  include(TestForANSIForScope)
+
+In early C++ (pre-C++98), variables declared in ``for(<init-statement> ...)``
+could remain accessible outside the loop after its body (``for() { <body> }``).
 
 This module defines the following cache variable:
 
@@ -29,8 +36,30 @@ Including this module will check the ``for()`` loop scope behavior and define
 the ``CMAKE_NO_ANSI_FOR_SCOPE`` cache variable:
 
 .. code-block:: cmake
+  :caption: ``CMakeLists.txt``
 
   include(TestForANSIForScope)
+  file(
+    CONFIGURE
+    OUTPUT config.h
+    CONTENT "#cmakedefine CMAKE_NO_ANSI_FOR_SCOPE"
+  )
+
+which can be then used in a C++ program:
+
+.. code-block:: c++
+  :caption: ``example.cxx``
+
+  #include "config.h"
+
+  #ifdef CMAKE_NO_ANSI_FOR_SCOPE
+  #  define for if(false) {} else for
+  #endif
+
+See Also
+^^^^^^^^
+
+* The :module:`CMakeBackwardCompatibilityCXX` module.
 #]=======================================================================]
 
 if(NOT DEFINED CMAKE_ANSI_FOR_SCOPE)

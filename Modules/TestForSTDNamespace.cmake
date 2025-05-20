@@ -6,10 +6,18 @@ TestForSTDNamespace
 -------------------
 
 This module checks whether the ``CXX`` compiler supports the ``std`` namespace
-for the C++ Standard Library.  Early versions of C++ (pre-C++98) did not have a
-requirement for a dedicated namespace of C++ Standard Template Library (STL)
-components (e.g. ``list``, etc.) and other parts of the C++ Standard Library
-(such as I/O streams ``cout``, ``endl``, etc), so they were available globally.
+for the C++ Standard Library.
+
+Load this module in a CMake project with:
+
+.. code-block:: cmake
+
+  include(TestForSTDNamespace)
+
+Early versions of C++ (pre-C++98) did not have a requirement for a dedicated
+namespace of C++ Standard Template Library (STL) components (e.g. ``list``,
+etc.) and other parts of the C++ Standard Library (such as I/O streams
+``cout``, ``endl``, etc), so they were available globally.
 
 This module defines the following cache variable:
 
@@ -30,6 +38,7 @@ Including this module will check for the ``std`` namespace support and define
 the ``CMAKE_NO_STD_NAMESPACE`` cache variable:
 
 .. code-block:: cmake
+  :caption: ``CMakeLists.txt``
 
   include(TestForSTDNamespace)
   file(
@@ -41,12 +50,18 @@ the ``CMAKE_NO_STD_NAMESPACE`` cache variable:
 which can be then used in a C++ program to define the missing namespace:
 
 .. code-block:: c++
+  :caption: ``example.cxx``
 
   #include "config.h"
 
   #ifdef CMAKE_NO_STD_NAMESPACE
   #  define std
   #endif
+
+See Also
+^^^^^^^^
+
+* The :module:`CMakeBackwardCompatibilityCXX` module.
 #]=======================================================================]
 
 if(NOT DEFINED CMAKE_STD_NAMESPACE)

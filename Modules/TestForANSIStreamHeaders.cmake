@@ -6,9 +6,16 @@ TestForANSIStreamHeaders
 ------------------------
 
 This module checks whether the ``CXX`` compiler supports standard library
-headers without the ``.h`` extension (e.g. ``<iostream>``).  Early
-versions of C++ (pre-C++98) didn't support including standard headers without
-extensions.
+headers without the ``.h`` extension (e.g. ``<iostream>``).
+
+Load this module in a CMake project with:
+
+.. code-block:: cmake
+
+  include(TestForANSIStreamHeaders)
+
+Early versions of C++ (pre-C++98) didn't support including standard headers
+without extensions.
 
 This module defines the following cache variable:
 
@@ -30,6 +37,7 @@ Including this module will check how the C++ standard headers can be included
 and define the ``CMAKE_NO_ANSI_STREAM_HEADERS`` cache variable:
 
 .. code-block:: cmake
+  :caption: ``CMakeLists.txt``
 
   include(TestForANSIStreamHeaders)
   file(
@@ -41,6 +49,7 @@ and define the ``CMAKE_NO_ANSI_STREAM_HEADERS`` cache variable:
 C++ program can then include the available header conditionally:
 
 .. code-block:: c++
+  :caption: ``example.cxx``
 
   #include "config.h"
 
@@ -51,6 +60,11 @@ C++ program can then include the available header conditionally:
   #endif
 
   int main() { ... }
+
+See Also
+^^^^^^^^
+
+* The :module:`CMakeBackwardCompatibilityCXX` module.
 #]=======================================================================]
 
 include(${CMAKE_CURRENT_LIST_DIR}/CheckIncludeFileCXX.cmake)

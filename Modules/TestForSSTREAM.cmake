@@ -6,7 +6,15 @@ TestForSSTREAM
 --------------
 
 This module checks whether the C++ standard header ``<sstream>`` exists and
-functions correctly.  In early versions of C++ (pre-C++98), this header was not
+functions correctly.
+
+Load this module in a CMake project with:
+
+.. code-block:: cmake
+
+  include(TestForSSTREAM)
+
+In early versions of C++ (pre-C++98), the ``<sstream>`` header was not
 formally standardized and may not have been available.
 
 This module defines the following cache variables:
@@ -32,6 +40,7 @@ Including this module will check for ``<sstream>`` support and define the
 ``CMAKE_NO_ANSI_STRING_STREAM`` cache variable:
 
 .. code-block:: cmake
+  :caption: ``CMakeLists.txt``
 
   include(TestForSSTREAM)
   file(
@@ -43,6 +52,7 @@ Including this module will check for ``<sstream>`` support and define the
 Then it can be used in a C++ program:
 
 .. code-block:: c++
+  :caption: ``example.cxx``
 
   #include "config.h"
 
@@ -51,6 +61,11 @@ Then it can be used in a C++ program:
   #endif
 
   int main() { ... }
+
+See Also
+^^^^^^^^
+
+* The :module:`CMakeBackwardCompatibilityCXX` module.
 #]=======================================================================]
 
 if(NOT DEFINED CMAKE_HAS_ANSI_STRING_STREAM)
