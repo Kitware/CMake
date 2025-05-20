@@ -31,6 +31,12 @@
         CMAKE_CI_BUILD_TYPE: Release
         CTEST_NO_WARNINGS_ALLOWED: 1
 
+.windows_vcvarsall_vs2022_x64_msvc14.43:
+    variables:
+        VCVARSALL: "${VS170COMNTOOLS}\\..\\..\\VC\\Auxiliary\\Build\\vcvarsall.bat"
+        VCVARSPLATFORM: "x64"
+        VCVARSVERSION: "14.43.34808"
+
 .windows_vcvarsall_vs2022_x64:
     variables:
         VCVARSALL: "${VS170COMNTOOLS}\\..\\..\\VC\\Auxiliary\\Build\\vcvarsall.bat"
@@ -232,7 +238,7 @@
 .windows_intelclassic_ninja:
     extends:
         - .windows_ninja
-        - .windows_vcvarsall_vs2022_x64
+        - .windows_vcvarsall_vs2022_x64_msvc14.43
 
     variables:
         CMAKE_CONFIGURATION: windows_intelclassic_ninja
@@ -240,7 +246,7 @@
 .windows_inteloneapi_ninja:
     extends:
         - .windows_ninja
-        - .windows_vcvarsall_vs2022_x64
+        - .windows_vcvarsall_vs2022_x64_msvc14.43
 
     variables:
         CMAKE_CONFIGURATION: windows_inteloneapi_ninja
@@ -329,6 +335,15 @@
         - nonconcurrent
 
 .windows_x86_64_tags_concurrent_vs2022:
+    tags:
+        - cmake # Since this is a bare runner, pin to a project.
+        - windows-x86_64
+        - shell
+        - vs2022
+        - msvc-14.43
+        - concurrent
+
+.windows_x86_64_tags_concurrent_vs2022_msvc14.43:
     tags:
         - cmake # Since this is a bare runner, pin to a project.
         - windows-x86_64
