@@ -1,0 +1,161 @@
+^
+---
+events:(
+  -
+    kind: "find-v1"(
+    [^
+]*)+|
++  -
+    kind: "message-v1"
+    backtrace:(
+      - "[^"]+")+
+    message: \|(
++      [^
+]*)*)*
+  -
+    kind: "message-v1"
+    backtrace:
+      - "ConfigureLogTransitionsModule2.cmake:[0-9]+ \(message\)"
+      - "CMakeLists.txt:[0-9]+ \(include\)"
+    message: \|
+      NotDefined -> NotFound
+  -
+    kind: "find_package-v1"
+    backtrace:
+      - "ConfigureLogTransitionsModule2.cmake:[0-9]+ \(find_package\)"
+      - "CMakeLists.txt:[0-9]+ \(include\)"
+    name: "ViaModule"
+    configs:
+      -
+        filename: "ViaModuleConfig.cmake"
+        kind: "cmake"
+      -
+        filename: "viamodule-config.cmake"
+        kind: "cmake"
+    version_request:
+      exact: false
+    settings:
+      required: "optional"
+      quiet: false
+      global: false
+      policy_scope: true
+      bypass_provider: false
+      names:
+        - "ViaModule"
+      path_suffixes:
+        - ""
+      paths:
+        CMAKE_FIND_USE_CMAKE_PATH: true
+        CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: true
+        CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+        CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+        CMAKE_FIND_USE_INSTALL_PREFIX: true
+        CMAKE_FIND_USE_PACKAGE_ROOT_PATH: true
+        CMAKE_FIND_USE_CMAKE_PACKAGE_REGISTRY: true
+        CMAKE_FIND_USE_SYSTEM_PACKAGE_REGISTRY: true
+        CMAKE_FIND_ROOT_PATH_MODE: "BOTH"
+    candidates:
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLogTransitionsModule2-build/CMakeFiles/pkgRedirects/ViaModuleConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLogTransitionsModule2-build/CMakeFiles/pkgRedirects/viamodule-config.cmake"
+        mode: "config"
+        reason: "no_exist"(
+      -
+        path: "[^"]*/(viamodule-config|ViaModuleConfig).cmake"
+        mode: "config"
+        reason: "no_exist")*
+    found: null
+    search_context:(
+      [^
+]*)+
+  -
+    kind: "message-v1"
+    backtrace:
+      - "ConfigureLogTransitionsModule2.cmake:[0-9]+ \(message\)"
+      - "CMakeLists.txt:[0-9]+ \(include\)"
+    message: \|
+      NotFound -> NotFound
+  -
+    kind: "message-v1"
+    backtrace:
+      - "ConfigureLogTransitionsModule2.cmake:[0-9]+ \(message\)"
+      - "CMakeLists.txt:[0-9]+ \(include\)"
+    message: \|
+      NotFound -> Found
+  -
+    kind: "message-v1"
+    backtrace:
+      - "ConfigureLogTransitionsModule2.cmake:[0-9]+ \(message\)"
+      - "CMakeLists.txt:[0-9]+ \(include\)"
+    message: \|
+      Found -> Found
+  -
+    kind: "message-v1"
+    backtrace:
+      - "ConfigureLogTransitionsModule2.cmake:[0-9]+ \(message\)"
+      - "CMakeLists.txt:[0-9]+ \(include\)"
+    message: \|
+      Found -> NotFound
+  -
+    kind: "find_package-v1"
+    backtrace:
+      - "ConfigureLogTransitionsModule2.cmake:[0-9]+ \(find_package\)"
+      - "CMakeLists.txt:[0-9]+ \(include\)"
+    name: "ViaModule"
+    configs:
+      -
+        filename: "ViaModuleConfig.cmake"
+        kind: "cmake"
+      -
+        filename: "viamodule-config.cmake"
+        kind: "cmake"
+    version_request:
+      exact: false
+    settings:
+      required: "optional"
+      quiet: false
+      global: false
+      policy_scope: true
+      bypass_provider: false
+      names:
+        - "ViaModule"
+      path_suffixes:
+        - ""
+      paths:
+        CMAKE_FIND_USE_CMAKE_PATH: true
+        CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: true
+        CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+        CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+        CMAKE_FIND_USE_INSTALL_PREFIX: true
+        CMAKE_FIND_USE_PACKAGE_ROOT_PATH: true
+        CMAKE_FIND_USE_CMAKE_PACKAGE_REGISTRY: true
+        CMAKE_FIND_USE_SYSTEM_PACKAGE_REGISTRY: true
+        CMAKE_FIND_ROOT_PATH_MODE: "BOTH"
+    candidates:
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLogTransitionsModule2-build/CMakeFiles/pkgRedirects/ViaModuleConfig.cmake"
+        mode: "config"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLogTransitionsModule2-build/CMakeFiles/pkgRedirects/viamodule-config.cmake"
+        mode: "config"
+        reason: "no_exist"(
+      -
+        path: "[^"]*/(viamodule-config|ViaModuleConfig).cmake"
+        mode: "config"
+        reason: "no_exist")*
+    found: null
+    search_context:(
+      [^
+]+)+
+  -
+    kind: "message-v1"
+    backtrace:
+      - "ConfigureLogTransitionsModule2.cmake:[0-9]+ \(message\)"
+      - "CMakeLists.txt:[0-9]+ \(include\)"
+    message: \|
+      END
+\.\.\.$

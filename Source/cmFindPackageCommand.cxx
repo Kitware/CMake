@@ -614,15 +614,13 @@ void cmFindPackageCommand::InheritOptions(cmFindPackageCommand* other)
 
 bool cmFindPackageCommand::IsFound() const
 {
-  return !this->FileFound.empty();
+  return this->InitialState == FindState::Found;
 }
 
 bool cmFindPackageCommand::IsDefined() const
 {
-  // A `find_package` always needs to be rerun because it could create
-  // variables, provide commands, or targets. Therefore it is never
-  // "predefined" whether it is found or not.
-  return false;
+  return this->InitialState == FindState::Found ||
+    this->InitialState == FindState::NotFound;
 }
 
 bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
@@ -931,6 +929,41 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
     e << "The options are incompatible.";
     this->SetError(e.str());
     return false;
+  }
+
+  bool canBeIrrelevant = true;
+  if (this->UseConfigFiles || this->UseCpsFiles) {
+    canBeIrrelevant = false;
+    if (cmValue v = this->Makefile->GetState()->GetCacheEntryValue(
+          cmStrCat(this->Name, "_DIR"))) {
+      if (!v.IsNOTFOUND()) {
+        this->InitialState = FindState::Found;
+      } else {
+        this->InitialState = FindState::NotFound;
+      }
+    }
+  }
+
+  if (this->UseFindModules &&
+      (this->InitialState == FindState::Undefined ||
+       this->InitialState == FindState::NotFound)) {
+    // There are no definitive cache variables to know if a given `Find` module
+    // has been searched for or not. However, if we have a `_FOUND` variable,
+    // use that as an indication of a previous search.
+    if (cmValue v =
+          this->Makefile->GetDefinition(cmStrCat(this->Name, "_FOUND"))) {
+      if (v.IsOn()) {
+        this->InitialState = FindState::Found;
+      } else {
+        this->InitialState = FindState::NotFound;
+      }
+    }
+  }
+
+  // If there is no signaling variable and there's no reason to expect a cache
+  // variable, mark the initial state as "irrelevant".
+  if (this->InitialState == FindState::Undefined && canBeIrrelevant) {
+    this->InitialState = FindState::Irrelevant;
   }
 
   // Ignore EXACT with no version.
@@ -3477,6 +3510,19 @@ void cmFindPackageDebugState::FailedAtImpl(std::string const& path,
   (void)regexName;
 }
 
+bool cmFindPackageDebugState::ShouldImplicitlyLogEvents() const
+{
+  auto const* fpc = this->FindPackageCommand;
+  bool const canUsePackage = fpc->UseConfigFiles || fpc->UseCpsFiles;
+  return canUsePackage &&
+    fpc->FileFoundMode != cmFindPackageCommand::FoundPackageMode::Module &&
+    std::any_of(fpc->ConsideredPaths.begin(), fpc->ConsideredPaths.end(),
+                [](cmFindPackageCommand::ConsideredPath const& cp) {
+                  return cp.Mode >
+                    cmFindPackageCommand::FoundPackageMode::Module;
+                });
+}
+
 void cmFindPackageDebugState::WriteDebug() const
 {
 }
@@ -3677,7 +3723,7 @@ void cmFindPackageDebugState::WriteEvent(cmConfigureLog& log,
     log.EndObject();
   }
   // TODO: Add provider information (see #26925)
-  if (fpc->IsFound()) {
+  if (!fpc->FileFound.empty()) {
     log.BeginObject("found"_s);
     log.WriteValue("path"_s, fpc->FileFound);
     log.WriteValue("mode"_s, found_mode(fpc->FileFoundMode));
