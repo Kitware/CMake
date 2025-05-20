@@ -5,9 +5,23 @@
 CheckPrototypeDefinition
 ------------------------
 
-Check if a ``C`` function has the expected prototype.
+This module provides a command to check if a C function has the expected
+prototype.
+
+Load this module in a CMake project with:
+
+.. code-block:: cmake
+
+  include(CheckPrototypeDefinition)
+
+Commands
+^^^^^^^^
+
+This module provides the following command:
 
 .. command:: check_prototype_definition
+
+  Checks if a C function has the expected prototype:
 
   .. code-block:: cmake
 
@@ -41,8 +55,10 @@ Check if a ``C`` function has the expected prototype.
     <prototype> { return <return>; }
     int main(...) { ...<function>()... }
 
-The following variables may be set before calling this function to modify
-the way the check is run:
+  .. rubric:: Variables Affecting the Check
+
+  The following variables may be set before calling this command to modify
+  the way the check is run:
 
   .. include:: /module/include/CMAKE_REQUIRED_FLAGS.rst
 
