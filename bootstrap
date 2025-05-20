@@ -491,6 +491,7 @@ CMAKE_CXX_SOURCES="\
   cmStdIoConsole \
   cmStdIoInit \
   cmStdIoStream \
+  cmStdIoTerminal \
   cmString \
   cmStringAlgorithms \
   cmStringReplaceHelper \
@@ -577,14 +578,14 @@ if ${cmake_system_mingw}; then
     ProcessWin32 \
     String \
     System \
-    Terminal"
+  "
 else
   KWSYS_C_SOURCES="\
     EncodingC \
     ProcessUNIX \
     String \
     System \
-    Terminal"
+  "
 fi
 
 KWSYS_CXX_SOURCES="\
@@ -608,7 +609,7 @@ KWSYS_FILES="\
   String.h \
   System.h \
   SystemTools.hxx \
-  Terminal.h"
+  "
 
 LIBRHASH_C_SOURCES="\
   librhash/algorithms.c \

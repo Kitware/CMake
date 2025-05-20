@@ -7,7 +7,6 @@
 #include <cassert>
 #include <cctype>
 #include <climits>
-#include <cstdio>
 #include <cstring>
 #include <functional>
 #include <iostream>
@@ -34,6 +33,8 @@
 #include "cmState.h"
 #include "cmStateTypes.h"
 #include "cmStdIoConsole.h"
+#include "cmStdIoStream.h"
+#include "cmStdIoTerminal.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmValue.h"
@@ -46,7 +47,6 @@
 
 #include "cmsys/Encoding.hxx"
 #include "cmsys/RegularExpression.hxx"
-#include "cmsys/Terminal.h"
 
 namespace {
 #ifndef CMAKE_BOOTSTRAP
@@ -174,20 +174,8 @@ std::string cmakemainGetStack(cmake* cm)
 void cmakemainMessageCallback(std::string const& m,
                               cmMessageMetadata const& md, cmake* cm)
 {
-#if defined(_WIN32)
-  // FIXME: On Windows we replace cerr's streambuf with a custom
-  // implementation that converts our internal UTF-8 encoding to the
-  // console's encoding.  It also does *not* replace LF with CRLF.
-  // Since stderr does not convert encoding and does convert LF, we
-  // cannot use it to print messages.  Another implementation will
-  // be needed to print colored messages on Windows.
-  static_cast<void>(md);
-  std::cerr << m << cmakemainGetStack(cm) << std::endl;
-#else
-  cmsysTerminal_cfprintf(md.desiredColor, stderr, "%s", m.c_str());
-  fflush(stderr); // stderr is buffered in some cases.
+  Print(cm::StdIo::Err(), md.attrs, m);
   std::cerr << cmakemainGetStack(cm) << std::endl;
-#endif
 }
 
 void cmakemainProgressCallback(std::string const& m, float prog, cmake* cm)

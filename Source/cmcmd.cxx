@@ -3,6 +3,7 @@
 #include "cmcmd.h"
 
 #include <functional>
+#include <iomanip>
 #include <iterator>
 
 #include <cm/optional>
@@ -26,6 +27,8 @@
 #include "cmStateDirectory.h"
 #include "cmStateSnapshot.h"
 #include "cmStdIoConsole.h"
+#include "cmStdIoStream.h"
+#include "cmStdIoTerminal.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTransformDepfile.h"
@@ -73,7 +76,6 @@
 #include "cmsys/Directory.hxx"
 #include "cmsys/FStream.hxx"
 #include "cmsys/RegularExpression.hxx"
-#include "cmsys/Terminal.h"
 
 int cmcmd_cmake_ninja_depends(std::vector<std::string>::const_iterator argBeg,
                               std::vector<std::string>::const_iterator argEnd);
@@ -1859,8 +1861,8 @@ static void cmcmdProgressReport(std::string const& dir, std::string const& num)
   int fileNum =
     static_cast<int>(cmsys::Directory::GetNumberOfFilesInDirectory(dirName));
   if (count > 0) {
-    // print the progress
-    fprintf(stdout, "[%3i%%] ", ((fileNum - 3) * 100) / count);
+    int const percent = ((fileNum - 3) * 100) / count;
+    std::cout << '[' << std::setw(3) << percent << "%] ";
   }
 }
 
@@ -1871,7 +1873,8 @@ int cmcmd::ExecuteEchoColor(std::vector<std::string> const& args)
   //   args[1] == cmake_echo_color
 
   bool enabled = true;
-  int color = cmsysTerminal_Color_Normal;
+  static cm::StdIo::TermAttrSet const noAttrs;
+  cm::StdIo::TermAttrSet attrs = cm::StdIo::TermAttr::Normal;
   bool newline = true;
   std::string progressDir;
   for (auto const& arg : cmMakeRange(args).advance(2)) {
@@ -1889,32 +1892,34 @@ int cmcmd::ExecuteEchoColor(std::vector<std::string> const& args)
         cmcmdProgressReport(progressDir, progressNum);
       }
     } else if (arg == "--normal") {
-      color = cmsysTerminal_Color_Normal;
+      attrs = cm::StdIo::TermAttr::Normal;
     } else if (arg == "--black") {
-      color = cmsysTerminal_Color_ForegroundBlack;
+      attrs = cm::StdIo::TermAttr::ForegroundBlack;
     } else if (arg == "--red") {
-      color = cmsysTerminal_Color_ForegroundRed;
+      attrs = cm::StdIo::TermAttr::ForegroundRed;
     } else if (arg == "--green") {
-      color = cmsysTerminal_Color_ForegroundGreen;
+      attrs = cm::StdIo::TermAttr::ForegroundGreen;
     } else if (arg == "--yellow") {
-      color = cmsysTerminal_Color_ForegroundYellow;
+      attrs = cm::StdIo::TermAttr::ForegroundYellow;
     } else if (arg == "--blue") {
-      color = cmsysTerminal_Color_ForegroundBlue;
+      attrs = cm::StdIo::TermAttr::ForegroundBlue;
     } else if (arg == "--magenta") {
-      color = cmsysTerminal_Color_ForegroundMagenta;
+      attrs = cm::StdIo::TermAttr::ForegroundMagenta;
     } else if (arg == "--cyan") {
-      color = cmsysTerminal_Color_ForegroundCyan;
+      attrs = cm::StdIo::TermAttr::ForegroundCyan;
     } else if (arg == "--white") {
-      color = cmsysTerminal_Color_ForegroundWhite;
+      attrs = cm::StdIo::TermAttr::ForegroundWhite;
     } else if (arg == "--bold") {
-      color |= cmsysTerminal_Color_ForegroundBold;
+      attrs |= cm::StdIo::TermAttr::ForegroundBold;
     } else if (arg == "--no-newline") {
       newline = false;
     } else if (arg == "--newline") {
       newline = true;
     } else {
-      // Color is enabled.  Print with the current color.
-      cmSystemTools::MakefileColorEcho(color, arg.c_str(), newline, enabled);
+      Print(cm::StdIo::Out(), enabled ? attrs : noAttrs, arg);
+      if (newline) {
+        std::cout << std::endl;
+      }
     }
   }
 

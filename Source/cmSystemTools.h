@@ -589,10 +589,6 @@ public:
       contain any '../' path components.  */
   static cmsys::Status SetLogicalWorkingDirectory(std::string const& lwd);
 
-  /** Echo a message in color using KWSys's Terminal cprintf.  */
-  static void MakefileColorEcho(int color, char const* message, bool newLine,
-                                bool enabled);
-
   /** Try to guess the soname of a shared library.  */
   static bool GuessLibrarySOName(std::string const& fullPath,
                                  std::string& soname);

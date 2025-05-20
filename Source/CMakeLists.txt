@@ -472,6 +472,8 @@ add_library(
   cmStdIoInit.cxx
   cmStdIoStream.h
   cmStdIoStream.cxx
+  cmStdIoTerminal.h
+  cmStdIoTerminal.cxx
   cmStringAlgorithms.cxx
   cmStringAlgorithms.h
   cmSyntheticTargetCache.h

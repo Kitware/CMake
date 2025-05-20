@@ -6,6 +6,7 @@
 #include <cassert>
 #include <cstdio>
 #include <functional>
+#include <iostream>
 #include <utility>
 
 #include <cm/memory>
@@ -16,7 +17,6 @@
 #include <cmext/string_view>
 
 #include "cmsys/FStream.hxx"
-#include "cmsys/Terminal.h"
 
 #include "cmCMakePath.h"
 #include "cmCustomCommand.h" // IWYU pragma: keep
@@ -41,6 +41,8 @@
 #include "cmState.h"
 #include "cmStateSnapshot.h"
 #include "cmStateTypes.h"
+#include "cmStdIoStream.h"
+#include "cmStdIoTerminal.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTargetDepend.h"
@@ -1376,6 +1378,18 @@ bool cmLocalUnixMakefileGenerator3::UpdateDependencies(
   // Check if any multiple output pairs have a missing file.
   this->CheckMultipleOutputs(verbose);
 
+  auto echoColor = [color](std::string const& m) {
+    cm::StdIo::TermAttrSet attrs;
+    if (color) {
+      attrs = {
+        cm::StdIo::TermAttr::ForegroundMagenta,
+        cm::StdIo::TermAttr::ForegroundBold,
+      };
+    }
+    Print(cm::StdIo::Out(), attrs, m);
+    std::cout << std::endl;
+  };
+
   std::string const targetDir = cmSystemTools::GetFilenamePath(tgtInfo);
   if (!this->Makefile->GetSafeDefinition("CMAKE_DEPENDS_LANGUAGES").empty()) {
     // dependencies are managed by CMake itself
@@ -1452,10 +1466,7 @@ bool cmLocalUnixMakefileGenerator3::UpdateDependencies(
         targetName = targetName.substr(0, targetName.length() - 4);
         std::string message =
           cmStrCat("Scanning dependencies of target ", targetName);
-        cmSystemTools::MakefileColorEcho(
-          cmsysTerminal_Color_ForegroundMagenta |
-            cmsysTerminal_Color_ForegroundBold,
-          message.c_str(), true, color);
+        echoColor(message);
       }
 
       status = this->ScanDependencies(targetDir, dependFile,
@@ -1493,10 +1504,7 @@ bool cmLocalUnixMakefileGenerator3::UpdateDependencies(
         auto message =
           cmStrCat("Consolidate compiler generated dependencies of target ",
                    targetName);
-        cmSystemTools::MakefileColorEcho(
-          cmsysTerminal_Color_ForegroundMagenta |
-            cmsysTerminal_Color_ForegroundBold,
-          message.c_str(), true, color);
+        echoColor(message);
       }
 
       // Open the make depends file.  This should be copy-if-different
