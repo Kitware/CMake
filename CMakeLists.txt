@@ -148,7 +148,6 @@ if(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
   set(KWSYS_USE_System 1)
   set(KWSYS_USE_SystemTools 1)
   set(KWSYS_USE_CommandLineArguments 1)
-  set(KWSYS_USE_Terminal 1)
   set(KWSYS_USE_FStream 1)
   set(KWSYS_USE_String 1)
   set(KWSYS_USE_SystemInformation 1)
@@ -631,7 +630,7 @@ endforeach()
 
 # Add selected C components.
 foreach(c IN ITEMS
-    Process Base64 Encoding MD5 Terminal System String
+    Process Base64 Encoding MD5 System String
     )
   if(KWSYS_USE_${c})
     # Use the corresponding header file.
@@ -662,7 +661,7 @@ if(KWSYS_USE_Process)
 endif()
 
 # Add selected C sources.
-foreach(c IN ITEMS Base64 Encoding MD5 Terminal System String)
+foreach(c IN ITEMS Base64 Encoding MD5 System String)
   if(KWSYS_USE_${c})
     if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${c}C.c)
       list(APPEND KWSYS_C_SRCS ${c}C.c)
@@ -927,7 +926,6 @@ if(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
     # C tests
     set(KWSYS_C_TESTS
       testEncode.c
-      testTerminal.c
       )
     if(KWSYS_STANDALONE)
       set(KWSYS_C_TESTS ${KWSYS_C_TESTS} testFail.c)
