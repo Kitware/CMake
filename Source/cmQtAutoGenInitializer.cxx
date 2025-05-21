@@ -462,6 +462,9 @@ bool cmQtAutoGenInitializer::InitCustomTargets()
       std::string(), this->Makefile->GetCurrentBinaryDirectory());
 
     // Info directory
+    // TODO: Split this? `AutogenInfo.json` is expected to always be under the
+    // `CMakeFiles` directory, but not all generators places its `<tgt>.dir`
+    // directories there.
     this->Dir.Info = cmStrCat(cbd, "/CMakeFiles/", this->GenTarget->GetName(),
                               "_autogen.dir");
     cmSystemTools::ConvertToUnixSlashes(this->Dir.Info);

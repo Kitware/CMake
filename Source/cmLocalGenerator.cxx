@@ -4288,7 +4288,7 @@ std::string cmLocalGenerator::GetObjectFileNameWithoutTarget(
 
 std::string cmLocalGenerator::GetObjectOutputRoot() const
 {
-  return this->GetCurrentBinaryDirectory();
+  return cmStrCat(this->GetCurrentBinaryDirectory(), "/CMakeFiles");
 }
 
 std::string cmLocalGenerator::GetSourceFileLanguage(cmSourceFile const& source)

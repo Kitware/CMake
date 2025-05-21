@@ -92,7 +92,7 @@ std::string cmLocalCommonGenerator::GetTargetFortranFlags(
 std::string cmLocalCommonGenerator::GetTargetDirectory(
   cmGeneratorTarget const* target) const
 {
-  std::string dir = cmStrCat("CMakeFiles/", target->GetName());
+  std::string dir = target->GetName();
 #if defined(__VMS)
   dir += "_dir";
 #else

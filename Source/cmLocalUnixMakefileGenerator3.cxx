@@ -1150,11 +1150,13 @@ void cmLocalUnixMakefileGenerator3::AppendCleanCommand(
     std::set<std::string> languages;
     target->GetLanguages(
       languages, this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE"));
+    auto langFileDir = cmSystemTools::GetFilenamePath(
+      this->MaybeRelativeToCurBinDir(cleanfile));
     /* clang-format off */
     fout << "\n"
             "# Per-language clean rules from dependency scanning.\n"
             "foreach(lang " << cmJoin(languages, " ") << ")\n"
-            "  include(" << this->GetTargetDirectory(target)
+            "  include(" << langFileDir
          << "/cmake_clean_${lang}.cmake OPTIONAL)\n"
             "endforeach()\n";
     /* clang-format on */
