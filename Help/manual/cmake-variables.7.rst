@@ -261,6 +261,7 @@ Variables that Change Behavior
    /variable/CMAKE_MESSAGE_LOG_LEVEL
    /variable/CMAKE_MFC_FLAG
    /variable/CMAKE_MODULE_PATH
+   /variable/CMAKE_INTERMEDIATE_DIR_STRATEGY
    /variable/CMAKE_PKG_CONFIG_DISABLE_UNINSTALLED
    /variable/CMAKE_PKG_CONFIG_PC_LIB_DIRS
    /variable/CMAKE_PKG_CONFIG_PC_PATH

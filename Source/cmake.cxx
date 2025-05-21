@@ -933,6 +933,8 @@ void cmake::LoadEnvironmentPresets()
   readGeneratorVar("CMAKE_GENERATOR_INSTANCE", this->GeneratorInstance);
   readGeneratorVar("CMAKE_GENERATOR_PLATFORM", this->GeneratorPlatform);
   readGeneratorVar("CMAKE_GENERATOR_TOOLSET", this->GeneratorToolset);
+  this->IntermediateDirStrategy =
+    cmSystemTools::GetEnvVar("CMAKE_INTERMEDIATE_DIR_STRATEGY");
 }
 
 namespace {
@@ -2598,6 +2600,14 @@ int cmake::ActualConfigure()
   } else {
     this->AddCacheEntry("CMAKE_GENERATOR_TOOLSET", this->GeneratorToolset,
                         "Name of generator toolset.", cmStateEnums::INTERNAL);
+  }
+
+  if (!this->State->GetInitializedCacheValue(
+        "CMAKE_INTERMEDIATE_DIR_STRATEGY") &&
+      this->IntermediateDirStrategy) {
+    this->AddCacheEntry(
+      "CMAKE_INTERMEDIATE_DIR_STRATEGY", *this->IntermediateDirStrategy,
+      "Select the intermediate directory strategy", cmStateEnums::STRING);
   }
 
   if (!this->State->GetInitializedCacheValue("CMAKE_TEST_LAUNCHER")) {
