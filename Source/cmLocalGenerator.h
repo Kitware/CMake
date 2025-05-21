@@ -458,6 +458,8 @@ public:
   /** Construct a comment for a custom command.  */
   std::string ConstructComment(cmCustomCommandGenerator const& ccg,
                                char const* default_comment = "") const;
+  // Computes relative path to source respective to source or binary dir.
+  std::string GetRelativeSourceFileName(cmSourceFile const& source) const;
   // Compute object file names.
   std::string GetObjectFileNameWithoutTarget(
     cmSourceFile const& source, std::string const& dir_max,

@@ -4188,9 +4188,8 @@ std::string relativeIfUnder(std::string const& top, std::string const& cur,
 }
 }
 
-std::string cmLocalGenerator::GetObjectFileNameWithoutTarget(
-  cmSourceFile const& source, std::string const& dir_max,
-  bool* hasSourceExtension, char const* customOutputExtension)
+std::string cmLocalGenerator::GetRelativeSourceFileName(
+  cmSourceFile const& source) const
 {
   // Construct the object file name using the full path to the source
   // file which is its only unique identification.
@@ -4223,7 +4222,17 @@ std::string cmLocalGenerator::GetObjectFileNameWithoutTarget(
   } else {
     objectName = relFromSource;
   }
+  return objectName;
+}
 
+std::string cmLocalGenerator::GetObjectFileNameWithoutTarget(
+  cmSourceFile const& source, std::string const& dir_max,
+  bool* hasSourceExtension, char const* customOutputExtension)
+{
+
+  // This can return an absolute path in the case where source is
+  // not relative to the current source or binary directoreis
+  std::string objectName = this->GetRelativeSourceFileName(source);
   // if it is still a full path check for the try compile case
   // try compile never have in source sources, and should not
   // have conflicting source file names in the same target
