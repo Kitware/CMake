@@ -196,8 +196,7 @@ cmCommonTargetGenerator::GetLinkedTargetDirectories(
             ((lang == "CXX"_s && linkee->HaveCxx20ModuleSources()) ||
              (lang == "Fortran"_s && linkee->HaveFortranSources(config)))) {
           cmLocalGenerator* lg = linkee->GetLocalGenerator();
-          std::string di = cmStrCat(lg->GetCurrentBinaryDirectory(), '/',
-                                    lg->GetTargetDirectory(linkee));
+          std::string di = linkee->GetSupportDirectory();
           if (lg->GetGlobalGenerator()->IsMultiConfig()) {
             di = cmStrCat(di, '/', config);
           }

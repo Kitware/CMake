@@ -36,8 +36,7 @@ private:
 
   void CreateNewProjectFile(std::vector<cmLocalGenerator*> const& lgs,
                             std::string const& filename);
-  std::string CreateDummyTargetFile(cmLocalGenerator* lg,
-                                    cmGeneratorTarget* target) const;
+  std::string CreateDummyTargetFile(cmGeneratorTarget* target) const;
 
   std::string GetCBCompilerId(cmMakefile const* mf);
   int GetCBTargetType(cmGeneratorTarget* target);

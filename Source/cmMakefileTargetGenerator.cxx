@@ -165,10 +165,10 @@ void cmMakefileTargetGenerator::GetTargetLinkFlags(
 void cmMakefileTargetGenerator::CreateRuleFile()
 {
   // Create a directory for this target.
-  this->TargetBuildDirectory =
-    this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget);
   this->TargetBuildDirectoryFull =
-    this->LocalGenerator->ConvertToFullPath(this->TargetBuildDirectory);
+    this->GeneratorTarget->GetSupportDirectory();
+  this->TargetBuildDirectory = this->LocalGenerator->MaybeRelativeToCurBinDir(
+    this->TargetBuildDirectoryFull);
   cmSystemTools::MakeDirectory(this->TargetBuildDirectoryFull);
 
   // Construct the rule file name.

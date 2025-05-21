@@ -771,8 +771,8 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(
 
   // The intermediate directory name consists of a directory for the
   // target and a subdirectory for the configuration name.
-  std::string intermediateDir =
-    cmStrCat(this->GetTargetDirectory(target), '/', configName);
+  std::string intermediateDir = this->MaybeRelativeToCurBinDir(
+    cmStrCat(target->GetSupportDirectory(), '/', configName));
 
   if (target->GetType() < cmStateEnums::UTILITY) {
     std::string const& outDir =
@@ -1019,9 +1019,9 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(
     case cmStateEnums::UNKNOWN_LIBRARY:
       break;
     case cmStateEnums::OBJECT_LIBRARY: {
-      std::string libpath =
-        cmStrCat(this->GetTargetDirectory(target), '/', configName, '/',
-                 target->GetName(), ".lib");
+      std::string libpath = this->MaybeRelativeToCurBinDir(
+        cmStrCat(target->GetSupportDirectory(), '/', configName, '/',
+                 target->GetName(), ".lib"));
       char const* tool =
         this->FortranProject ? "VFLibrarianTool" : "VCLibrarianTool";
       fout << "\t\t\t<Tool\n"
@@ -1661,8 +1661,7 @@ std::string cmLocalVisualStudio7Generator::ComputeLongestObjectDirectory(
   // files directory for any configuration.  This is used to construct
   // object file names that do not produce paths that are too long.
   std::string dir_max =
-    cmStrCat(this->GetCurrentBinaryDirectory(), '/',
-             this->GetTargetDirectory(target), '/', config_max, '/');
+    cmStrCat(target->GetSupportDirectory(), '/', config_max, '/');
   return dir_max;
 }
 

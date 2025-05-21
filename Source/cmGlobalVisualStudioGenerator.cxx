@@ -225,9 +225,8 @@ void cmGlobalVisualStudioGenerator::AddExtraIDETargets()
 void cmGlobalVisualStudioGenerator::ComputeTargetObjectDirectory(
   cmGeneratorTarget* gt) const
 {
-  std::string dir = cmStrCat(gt->LocalGenerator->GetCurrentBinaryDirectory(),
-                             '/', gt->LocalGenerator->GetTargetDirectory(gt),
-                             '/', this->GetCMakeCFGIntDir(), '/');
+  std::string dir =
+    cmStrCat(gt->GetSupportDirectory(), '/', this->GetCMakeCFGIntDir(), '/');
   gt->ObjectDirectory = dir;
 }
 

@@ -69,9 +69,7 @@ void cmGlobalGhsMultiGenerator::ComputeTargetObjectDirectory(
   cmGeneratorTarget* gt) const
 {
   // Compute full path to object file directory for this target.
-  std::string dir =
-    cmStrCat(gt->LocalGenerator->GetCurrentBinaryDirectory(), '/',
-             gt->LocalGenerator->GetTargetDirectory(gt), '/');
+  std::string dir = cmStrCat(gt->GetSupportDirectory(), '/');
   gt->ObjectDirectory = dir;
 }
 

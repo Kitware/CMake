@@ -619,13 +619,18 @@ std::string cmGlobalVisualStudio7Generator::WriteUtilityDepend(
     "\t<Configurations>\n"
     ;
   /* clang-format on */
+  std::string intDirPrefix =
+    target->GetLocalGenerator()->MaybeRelativeToCurBinDir(
+      cmStrCat(target->GetSupportDirectory(), '\\'));
   for (std::string const& i : configs) {
+    std::string intDir = cmStrCat(intDir, i);
+
     /* clang-format off */
     fout <<
       "\t\t<Configuration\n"
       "\t\t\tName=\"" << i << "|Win32\"\n"
       "\t\t\tOutputDirectory=\"" << i << "\"\n"
-      "\t\t\tIntermediateDirectory=\"" << pname << ".dir\\" << i << "\"\n"
+      "\t\t\tIntermediateDirectory=\"" << intDir << "\"\n"
       "\t\t\tConfigurationType=\"10\"\n"
       "\t\t\tUseOfMFC=\"0\"\n"
       "\t\t\tATLMinimizesCRunTimeLibraryUsage=\"FALSE\"\n"

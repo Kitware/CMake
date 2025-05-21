@@ -81,8 +81,7 @@ std::string AddLangSpecificInterfaceIncludeDirectories(
             if (mode == IncludeDirectoryFallBack::BINARY) {
               value = lg->GetCurrentBinaryDirectory();
             } else if (mode == IncludeDirectoryFallBack::OBJECT) {
-              value = cmStrCat(lg->GetCurrentBinaryDirectory(), '/',
-                               lg->GetTargetDirectory(dependency));
+              value = dependency->GetSupportDirectory();
             }
           }
 

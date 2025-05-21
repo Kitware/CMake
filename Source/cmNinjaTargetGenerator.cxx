@@ -412,14 +412,9 @@ std::string cmNinjaTargetGenerator::GetCompiledSourceNinjaPath(
 std::string cmNinjaTargetGenerator::GetObjectFileDir(
   std::string const& config) const
 {
-  std::string path = this->LocalGenerator->GetHomeRelativeOutputPath();
-  if (!path.empty()) {
-    path += '/';
-  }
-  path +=
-    cmStrCat(this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget),
-             this->GetGlobalGenerator()->ConfigDirectory(config));
-  return path;
+  return this->LocalGenerator->MaybeRelativeToTopBinDir(
+    cmStrCat(this->GeneratorTarget->GetSupportDirectory(),
+             this->GetGlobalGenerator()->GetConfigDirectory(config)));
 }
 
 std::string cmNinjaTargetGenerator::GetObjectFilePath(

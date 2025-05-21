@@ -224,8 +224,7 @@ void cmLocalUnixMakefileGenerator3::GetLocalObjectFiles(
     std::vector<cmSourceFile const*> objectSources;
     gt->GetObjectSources(objectSources, this->GetConfigName());
     // Compute full path to object file directory for this target.
-    std::string dir = cmStrCat(gt->LocalGenerator->GetCurrentBinaryDirectory(),
-                               '/', this->GetTargetDirectory(gt.get()), '/');
+    std::string dir = cmStrCat(gt->GetSupportDirectory(), '/');
     // Compute the name of each object file.
     for (cmSourceFile const* sf : objectSources) {
       bool hasSourceExtension = true;
@@ -891,9 +890,7 @@ void cmLocalUnixMakefileGenerator3::WriteConvenienceRule(
 std::string cmLocalUnixMakefileGenerator3::GetRelativeTargetDirectory(
   cmGeneratorTarget const* target) const
 {
-  std::string dir =
-    cmStrCat(this->HomeRelativeOutputPath, this->GetTargetDirectory(target));
-  return dir;
+  return this->MaybeRelativeToTopBinDir(target->GetSupportDirectory());
 }
 
 void cmLocalUnixMakefileGenerator3::AppendFlags(
@@ -1120,9 +1117,8 @@ void cmLocalUnixMakefileGenerator3::AppendCleanCommand(
   std::vector<std::string>& commands, std::set<std::string> const& files,
   cmGeneratorTarget* target, char const* filename)
 {
-  std::string currentBinDir = this->GetCurrentBinaryDirectory();
-  std::string cleanfile = cmStrCat(
-    currentBinDir, '/', this->GetTargetDirectory(target), "/cmake_clean");
+  std::string cleanfile =
+    cmStrCat(target->GetSupportDirectory(), "/cmake_clean");
   if (filename) {
     cleanfile += "_";
     cleanfile += filename;
