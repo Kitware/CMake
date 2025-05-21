@@ -225,18 +225,9 @@ void cmGlobalVisualStudioGenerator::AddExtraIDETargets()
 void cmGlobalVisualStudioGenerator::ComputeTargetObjectDirectory(
   cmGeneratorTarget* gt) const
 {
-  std::string dir =
-    cmStrCat(gt->LocalGenerator->GetCurrentBinaryDirectory(), '/');
-  std::string tgtDir = gt->LocalGenerator->GetTargetDirectory(gt);
-  if (!tgtDir.empty()) {
-    dir += tgtDir;
-    dir += '/';
-  }
-  char const* cd = this->GetCMakeCFGIntDir();
-  if (cd && *cd) {
-    dir += cd;
-    dir += '/';
-  }
+  std::string dir = cmStrCat(gt->LocalGenerator->GetCurrentBinaryDirectory(),
+                             '/', gt->LocalGenerator->GetTargetDirectory(gt),
+                             '/', this->GetCMakeCFGIntDir(), '/');
   gt->ObjectDirectory = dir;
 }
 
