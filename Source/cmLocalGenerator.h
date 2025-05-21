@@ -441,6 +441,9 @@ public:
   bool UseShortObjectNames() const;
   virtual std::string GetObjectOutputRoot() const;
   virtual bool AlwaysUsesCMFPaths() const;
+  virtual std::string GetShortObjectFileName(cmSourceFile const& source) const;
+  virtual std::string ComputeShortTargetDirectory(
+    cmGeneratorTarget const* gt) const;
 
   /**
    * Generate a macOS application bundle Info.plist file.

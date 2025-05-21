@@ -4242,6 +4242,14 @@ std::string cmLocalGenerator::GetObjectFileNameWithoutTarget(
     }
   }
 
+  // Short object path policy selected, use as little info as necessary to
+  // select an object name
+  bool keptSourceExtension = true;
+  if (this->UseShortObjectNames()) {
+    objectName = this->GetShortObjectFileName(source);
+    keptSourceExtension = false;
+  }
+
   // Ensure that for the CMakeFiles/<target>.dir/generated_source_file
   // we don't end up having:
   // CMakeFiles/<target>.dir/CMakeFiles/<target>.dir/generated_source_file.obj
@@ -4261,7 +4269,6 @@ std::string cmLocalGenerator::GetObjectFileNameWithoutTarget(
 
   // Replace the original source file extension with the object file
   // extension.
-  bool keptSourceExtension = true;
   if (!source.GetPropertyAsBool("KEEP_EXTENSION")) {
     // Decide whether this language wants to replace the source
     // extension with the object extension.
@@ -4281,6 +4288,10 @@ std::string cmLocalGenerator::GetObjectFileNameWithoutTarget(
       }
     }
 
+    // Strip source file extension when shortening object file paths
+    if (this->UseShortObjectNames()) {
+      objectName = cmSystemTools::GetFilenameWithoutExtension(objectName);
+    }
     // Store the new extension.
     if (customOutputExtension) {
       objectName += customOutputExtension;
@@ -4309,6 +4320,26 @@ std::string cmLocalGenerator::GetObjectOutputRoot() const
 bool cmLocalGenerator::AlwaysUsesCMFPaths() const
 {
   return true;
+}
+
+std::string cmLocalGenerator::GetShortObjectFileName(
+  cmSourceFile const& source) const
+{
+  std::string objectName = this->GetRelativeSourceFileName(source);
+  std::string objectFileName =
+    cmSystemTools::GetFilenameName(source.GetFullPath());
+  cmCryptoHash objNameHasher(cmCryptoHash::AlgoSHA3_512);
+  std::string terseObjectName =
+    objNameHasher.HashString(objectName).substr(0, 8);
+  return terseObjectName;
+}
+
+std::string cmLocalGenerator::ComputeShortTargetDirectory(
+  cmGeneratorTarget const* target) const
+{
+  auto const& tgtName = target->GetName();
+  return this->GetGlobalGenerator()->ComputeTargetShortName(
+    this->GetCurrentBinaryDirectory(), tgtName);
 }
 
 std::string cmLocalGenerator::GetSourceFileLanguage(cmSourceFile const& source)

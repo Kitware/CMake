@@ -104,6 +104,9 @@ std::string cmLocalCommonGenerator::ComputeLongTargetDirectory(
 std::string cmLocalCommonGenerator::GetTargetDirectory(
   cmGeneratorTarget const* target) const
 {
+  if (target->GetUseShortObjectNames()) {
+    return this->ComputeShortTargetDirectory(target);
+  }
   return this->ComputeLongTargetDirectory(target);
 }
 
