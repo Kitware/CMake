@@ -1324,7 +1324,7 @@ t:windows-clang19.1-gnu-nmake:
         CMAKE_CI_BUILD_NAME: windows_clang19.1_gnu_nmake
         CMAKE_CI_JOB_NIGHTLY: "true"
 
-t:windows-intel2021.9.0-ninja:
+t:windows-intel2021.9-ninja:
     extends:
         - .windows_intelclassic_ninja
         - .cmake_test_windows_external
@@ -1334,7 +1334,7 @@ t:windows-intel2021.9.0-ninja:
     needs:
         - t:windows-vs2022-x64-ninja
     variables:
-        CMAKE_CI_BUILD_NAME: windows_intel2021.9.0_ninja
+        CMAKE_CI_BUILD_NAME: windows_intel2021.9_ninja
         CMAKE_CI_JOB_NIGHTLY: "true"
 
 t:windows-oneapi2025.1-ninja:

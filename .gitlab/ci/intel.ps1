@@ -8,7 +8,7 @@ if ("$env:CMAKE_CI_BUILD_NAME" -match "(^|_)(oneapi2025\.1)(_|$)") {
     $llvm_dir = "bin\compiler"
     $filename = "intel-oneapi-$version-windows-1"
     $sha256sum = "CA7D5B4E5C11AA9FAF6ED56045D2440F620A2DA3D8BF2B8B644280C9B10DE844"
-} elseif ("$env:CMAKE_CI_BUILD_NAME" -match "(^|_)(intel2021\.9\.0)(_|$)") {
+} elseif ("$env:CMAKE_CI_BUILD_NAME" -match "(^|_)(intel2021\.9)(_|$)") {
     # Intel oneAPI 2023.1.0
     $version = "2023.1.0"
     $version_dir = "2023.1.0"
