@@ -1312,7 +1312,7 @@ t:windows-intel2021.9.0-ninja:
     extends:
         - .windows_intelclassic_ninja
         - .cmake_test_windows_external
-        - .windows_x86_64_tags_concurrent_vs2022
+        - .windows_x86_64_tags_concurrent_vs2022_msvc14.43
         - .cmake_junit_artifacts
         - .run_dependent
     needs:
@@ -1325,7 +1325,7 @@ t:windows-oneapi2024.1.0-ninja:
     extends:
         - .windows_inteloneapi_ninja
         - .cmake_test_windows_external
-        - .windows_x86_64_tags_concurrent_vs2022
+        - .windows_x86_64_tags_concurrent_vs2022_msvc14.43
         - .cmake_junit_artifacts
         - .run_dependent
     needs:
