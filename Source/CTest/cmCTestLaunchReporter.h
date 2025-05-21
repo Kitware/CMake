@@ -43,6 +43,7 @@ public:
   std::string OptionCommandType;
   std::string OptionRole;
   std::string OptionConfig;
+  std::string OptionObjectDir;
 
   // The real command line appearing after launcher arguments.
   std::string CWD;

@@ -60,7 +60,7 @@ endif()
 
 if(CTEST_USE_LAUNCHERS)
   set(__launch_common_options
-    "--target-name <TARGET_NAME> --current-build-dir <CMAKE_CURRENT_BINARY_DIR>")
+    "--target-name <TARGET_NAME> --current-build-dir <CMAKE_CURRENT_BINARY_DIR> --build-dir <CMAKE_BINARY_DIR> --object-dir <TARGET_SUPPORT_DIR>")
 
   set(__launch_compile_options
     "${__launch_common_options} --output <OBJECT> --source <SOURCE> --language <LANGUAGE>")
