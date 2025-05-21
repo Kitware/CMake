@@ -195,6 +195,7 @@ public:
 
   bool IsIPOSupported() const override { return true; }
 
+  bool SupportsShortObjectNames() const override;
   void ComputeTargetObjectDirectory(cmGeneratorTarget* gt) const override;
 
   std::string IncludeDirective;

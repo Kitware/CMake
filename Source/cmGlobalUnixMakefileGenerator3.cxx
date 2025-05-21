@@ -77,6 +77,11 @@ cmDocumentationEntry cmGlobalUnixMakefileGenerator3::GetDocumentation()
            "Generates standard UNIX makefiles." };
 }
 
+bool cmGlobalUnixMakefileGenerator3::SupportsShortObjectNames() const
+{
+  return true;
+}
+
 void cmGlobalUnixMakefileGenerator3::ComputeTargetObjectDirectory(
   cmGeneratorTarget* gt) const
 {

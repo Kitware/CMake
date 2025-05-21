@@ -201,6 +201,15 @@ void cmLocalUnixMakefileGenerator3::Generate()
   this->WriteDirectoryInformationFile();
 }
 
+std::string cmLocalUnixMakefileGenerator3::GetObjectOutputRoot() const
+{
+  if (this->UseShortObjectNames()) {
+    return cmStrCat(this->GetCurrentBinaryDirectory(), '/',
+                    this->GetGlobalGenerator()->GetShortBinaryOutputDir());
+  }
+  return cmStrCat(this->GetCurrentBinaryDirectory(), "/CMakeFiles");
+}
+
 void cmLocalUnixMakefileGenerator3::ComputeHomeRelativeOutputPath()
 {
   // Compute the path to use when referencing the current output

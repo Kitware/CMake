@@ -8,3 +8,6 @@ short-object-names
   is supported for the following generators:
 
   - :ref:`Ninja Generators`
+  - :ref:`Makefile Generators`
+
+  Note that the strategy implementation may differ between generators.

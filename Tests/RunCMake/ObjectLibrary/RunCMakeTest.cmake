@@ -91,6 +91,6 @@ function(run_Dependencies suffix)
 endfunction()
 
 run_Dependencies("")
-if (CMAKE_GENERATOR MATCHES "Ninja")
+if (CMAKE_GENERATOR MATCHES "(Ninja|Makefiles)")
   run_Dependencies(Short)
 endif ()

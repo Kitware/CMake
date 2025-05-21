@@ -75,6 +75,11 @@ cmGlobalWatcomWMakeGenerator::GenerateBuildCommand(
     cmake::NO_BUILD_PARALLEL_LEVEL, verbose, buildOptions, makeOptions);
 }
 
+std::string cmGlobalWatcomWMakeGenerator::GetShortBinaryOutputDir() const
+{
+  return "_o";
+}
+
 void cmGlobalWatcomWMakeGenerator::PrintBuildCommandAdvice(std::ostream& os,
                                                            int jobs) const
 {

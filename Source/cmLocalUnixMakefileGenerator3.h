@@ -43,6 +43,8 @@ public:
    */
   void Generate() override;
 
+  std::string GetObjectOutputRoot() const override;
+
   // this returns the relative path between the HomeOutputDirectory and this
   // local generators StartOutputDirectory
   std::string const& GetHomeRelativeOutputPath();
