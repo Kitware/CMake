@@ -2246,18 +2246,6 @@ std::string cmLocalUnixMakefileGenerator3::ConvertToQuotedOutputPath(
   return result;
 }
 
-std::string cmLocalUnixMakefileGenerator3::GetTargetDirectory(
-  cmGeneratorTarget const* target) const
-{
-  std::string dir = cmStrCat("CMakeFiles/", target->GetName());
-#if defined(__VMS)
-  dir += "_dir";
-#else
-  dir += ".dir";
-#endif
-  return dir;
-}
-
 cmLocalUnixMakefileGenerator3::ImplicitDependLanguageMap const&
 cmLocalUnixMakefileGenerator3::GetImplicitDepends(
   cmGeneratorTarget const* tgt, cmDependencyScannerKind scanner)

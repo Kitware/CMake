@@ -89,6 +89,18 @@ std::string cmLocalCommonGenerator::GetTargetFortranFlags(
   return flags;
 }
 
+std::string cmLocalCommonGenerator::GetTargetDirectory(
+  cmGeneratorTarget const* target) const
+{
+  std::string dir = cmStrCat("CMakeFiles/", target->GetName());
+#if defined(__VMS)
+  dir += "_dir";
+#else
+  dir += ".dir";
+#endif
+  return dir;
+}
+
 void cmLocalCommonGenerator::ComputeObjectFilenames(
   std::map<cmSourceFile const*, std::string>& mapping,
   cmGeneratorTarget const* gt)

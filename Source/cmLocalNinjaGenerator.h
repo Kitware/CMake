@@ -49,9 +49,6 @@ public:
     cmBuildStep buildStep, cmGeneratorTarget const* target,
     std::string const& language) override;
 
-  std::string GetTargetDirectory(
-    cmGeneratorTarget const* target) const override;
-
   cmGlobalNinjaGenerator const* GetGlobalNinjaGenerator() const;
   cmGlobalNinjaGenerator* GetGlobalNinjaGenerator();
 
