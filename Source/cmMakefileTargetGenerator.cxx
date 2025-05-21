@@ -655,8 +655,7 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
   std::string const& objectName =
     this->GeneratorTarget->GetObjectName(&source);
   std::string const obj =
-    cmStrCat(this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget),
-             '/', objectName);
+    cmStrCat(this->TargetBuildDirectory, '/', objectName);
 
   // Avoid generating duplicate rules.
   if (this->ObjectFiles.find(obj) == this->ObjectFiles.end()) {
@@ -1419,26 +1418,28 @@ std::string cmMakefileTargetGenerator::GetClangTidyReplacementsFilePath(
 {
   (void)config;
   auto const& objectName = this->GeneratorTarget->GetObjectName(&source);
-  auto fixesFile = cmSystemTools::CollapseFullPath(cmStrCat(
-    directory, '/',
-    this->GeneratorTarget->GetLocalGenerator()->MaybeRelativeToTopBinDir(
-      cmStrCat(this->GeneratorTarget->GetLocalGenerator()
-                 ->GetCurrentBinaryDirectory(),
-               '/',
-               this->GeneratorTarget->GetLocalGenerator()->GetTargetDirectory(
-                 this->GeneratorTarget),
-               '/', objectName, ".yaml"))));
+  // NOTE: This may be better to use `this->TargetBuildDirectory` instead of
+  // `MaybeRelativeToTopBinDir(this->TargetBuildDirectoryFull)` here. The main
+  // difference is that the current behavior looks odd to relative
+  // `<LANG>_CLANG_TIDY_EXPORT_FIXES_DIR` settings. Each subdirectory has its
+  // own export fixes directory *and* adds its relative-from-root path
+  // underneath it. However, when using an absolute export fixes directory, the
+  // source directory structure is preserved. The main benefit of the former is
+  // shorter paths everywhere versus the status quo of the existing code.
+  cmLocalGenerator* lg = this->GeneratorTarget->GetLocalGenerator();
+  auto fixesFile = cmSystemTools::CollapseFullPath(
+    cmStrCat(directory, '/',
+             lg->CreateSafeObjectFileName(
+               lg->MaybeRelativeToTopBinDir(this->TargetBuildDirectoryFull)),
+             '/', objectName, ".yaml"));
   return fixesFile;
 }
 
 void cmMakefileTargetGenerator::WriteTargetDependRules()
 {
   // must write the targets depend info file
-  std::string dir =
-    this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget);
-  this->InfoFileNameFull = cmStrCat(dir, "/DependInfo.cmake");
   this->InfoFileNameFull =
-    this->LocalGenerator->ConvertToFullPath(this->InfoFileNameFull);
+    cmStrCat(this->TargetBuildDirectoryFull, "/DependInfo.cmake");
   this->InfoFileStream =
     cm::make_unique<cmGeneratedFileStream>(this->InfoFileNameFull);
   if (!this->InfoFileStream) {
