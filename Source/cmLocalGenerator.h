@@ -438,6 +438,8 @@ public:
   std::string const& GetCurrentBinaryDirectory() const;
   std::string const& GetCurrentSourceDirectory() const;
 
+  virtual std::string GetObjectOutputRoot() const;
+
   /**
    * Generate a macOS application bundle Info.plist file.
    */

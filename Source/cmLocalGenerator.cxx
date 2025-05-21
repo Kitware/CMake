@@ -4286,6 +4286,11 @@ std::string cmLocalGenerator::GetObjectFileNameWithoutTarget(
   return this->CreateSafeUniqueObjectFileName(objectName, dir_max);
 }
 
+std::string cmLocalGenerator::GetObjectOutputRoot() const
+{
+  return this->GetCurrentBinaryDirectory();
+}
+
 std::string cmLocalGenerator::GetSourceFileLanguage(cmSourceFile const& source)
 {
   return source.GetLanguage();
