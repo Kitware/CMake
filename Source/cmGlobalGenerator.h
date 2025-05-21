@@ -631,6 +631,9 @@ public:
 
   virtual bool SupportsShortObjectNames() const;
   bool UseShortObjectNames() const;
+  virtual std::string GetShortBinaryOutputDir() const;
+  std::string ComputeTargetShortName(std::string const& bindir,
+                                     std::string const& targetName) const;
 
   virtual void ComputeTargetObjectDirectory(cmGeneratorTarget* gt) const;
 

@@ -2006,6 +2006,23 @@ bool cmGlobalGenerator::UseShortObjectNames() const
     this->IntDirStrategy == IntermediateDirStrategy::Short;
 }
 
+std::string cmGlobalGenerator::GetShortBinaryOutputDir() const
+{
+  return ".o";
+}
+
+std::string cmGlobalGenerator::ComputeTargetShortName(
+  std::string const& bindir, std::string const& targetName) const
+{
+  auto const& rcwbd =
+    this->LocalGenerators[0]->MaybeRelativeToTopBinDir(bindir);
+  cmCryptoHash hasher(cmCryptoHash::AlgoSHA3_512);
+  constexpr size_t HASH_TRUNCATION = 4;
+  auto dirHash = hasher.HashString(rcwbd).substr(0, HASH_TRUNCATION);
+  auto tgtHash = hasher.HashString(targetName).substr(0, HASH_TRUNCATION);
+  return cmStrCat(tgtHash, dirHash);
+}
+
 void cmGlobalGenerator::ComputeTargetObjectDirectory(
   cmGeneratorTarget* /*unused*/) const
 {
