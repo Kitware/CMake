@@ -5218,7 +5218,7 @@ bool cmGeneratorTarget::NeedImportLibraryName(std::string const& config) const
 std::string cmGeneratorTarget::GetSupportDirectory() const
 {
   cmLocalGenerator* lg = this->GetLocalGenerator();
-  return cmStrCat(lg->GetCurrentBinaryDirectory(), '/',
+  return cmStrCat(lg->GetObjectOutputRoot(), '/',
                   lg->GetTargetDirectory(this));
 }
 
