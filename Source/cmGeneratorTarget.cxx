@@ -2994,6 +2994,7 @@ std::string cmGeneratorTarget::GetPchHeader(std::string const& config,
       filename = cmStrCat(filename, '/', config);
     }
 
+    // This is acceptable as its the source file, won't have a rename/hash
     filename =
       cmStrCat(filename, "/cmake_pch", arch.empty() ? "" : cmStrCat('_', arch),
                languageToExtension.at(language));
@@ -3135,12 +3136,9 @@ std::string cmGeneratorTarget::GetPchFileObject(std::string const& config,
 
     auto* pchSf = this->Makefile->GetOrCreateSource(
       pchSource, false, cmSourceFileLocationKind::Known);
-
-    filename = cmStrCat(this->ObjectDirectory, this->GetObjectName(pchSf));
-    if (this->GetGlobalGenerator()->IsMultiConfig()) {
-      cmSystemTools::ReplaceString(
-        filename, this->GetGlobalGenerator()->GetCMakeCFGIntDir(), config);
-    }
+    pchSf->ResolveFullPath();
+    filename = cmStrCat(this->GetObjectDirectory(config), '/',
+                        this->GetObjectName(pchSf));
   }
   return inserted.first->second;
 }
@@ -3181,8 +3179,18 @@ std::string cmGeneratorTarget::GetPchFile(std::string const& config,
         pchFile = replaceExtension(pchFileObject, pchExtension);
       }
     } else {
-      pchFile = this->GetPchHeader(config, language, arch);
-      pchFile += pchExtension;
+      if (this->GetUseShortObjectNames()) {
+        auto pchSource = this->GetPchSource(config, language, arch);
+        auto* pchSf = this->Makefile->GetOrCreateSource(
+          pchSource, false, cmSourceFileLocationKind::Known);
+        pchSf->ResolveFullPath();
+        pchFile = cmStrCat(
+          this->GetSupportDirectory(), '/',
+          this->LocalGenerator->GetShortObjectFileName(*pchSf), pchExtension);
+      } else {
+        pchFile =
+          cmStrCat(this->GetPchHeader(config, language, arch), pchExtension);
+      }
     }
   }
   return inserted.first->second;

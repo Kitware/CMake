@@ -4241,6 +4241,7 @@ std::string cmLocalGenerator::GetObjectFileNameWithoutTarget(
       objectName = cmSystemTools::GetFilenameName(source.GetFullPath());
     }
   }
+  bool const isPchObject = objectName.find("cmake_pch") != std::string::npos;
 
   // Short object path policy selected, use as little info as necessary to
   // select an object name
@@ -4255,7 +4256,6 @@ std::string cmLocalGenerator::GetObjectFileNameWithoutTarget(
   // CMakeFiles/<target>.dir/CMakeFiles/<target>.dir/generated_source_file.obj
   cmValue unitySourceFile = source.GetProperty("UNITY_SOURCE_FILE");
   cmValue pchExtension = source.GetProperty("PCH_EXTENSION");
-  bool const isPchObject = objectName.find("cmake_pch") != std::string::npos;
   if (unitySourceFile || pchExtension || isPchObject) {
     if (pchExtension) {
       customOutputExtension = pchExtension->c_str();
