@@ -5355,6 +5355,11 @@ bool cmGeneratorTarget::NeedImportLibraryName(std::string const& config) const
       this->GetType() == cmStateEnums::MODULE_LIBRARY));
 }
 
+bool cmGeneratorTarget::GetUseShortObjectNames() const
+{
+  return this->LocalGenerator->UseShortObjectNames();
+}
+
 std::string cmGeneratorTarget::GetSupportDirectory() const
 {
   cmLocalGenerator* lg = this->GetLocalGenerator();

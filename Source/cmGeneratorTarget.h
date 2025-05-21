@@ -937,6 +937,8 @@ public:
   /** Return whether or not the target has a DLL import library.  */
   bool HasImportLibrary(std::string const& config) const;
 
+  bool GetUseShortObjectNames() const;
+
   /** Get a build-tree directory in which to place target support files.  */
   std::string GetSupportDirectory() const;
   std::string GetCMFSupportDirectory() const;
