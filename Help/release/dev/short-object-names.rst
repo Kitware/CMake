@@ -9,5 +9,6 @@ short-object-names
 
   - :ref:`Ninja Generators`
   - :ref:`Makefile Generators`
+  - :ref:`Visual Studio Generators`
 
   Note that the strategy implementation may differ between generators.
