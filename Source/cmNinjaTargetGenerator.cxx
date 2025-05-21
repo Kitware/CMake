@@ -1414,6 +1414,12 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
   vars["DEFINES"] = this->ComputeDefines(source, language, config);
   vars["INCLUDES"] = this->ComputeIncludes(source, language, config);
   vars["CONFIG"] = config;
+  if (this->GetGeneratorTarget()->GetUseShortObjectNames()) {
+    vars.emplace(
+      "description",
+      cmStrCat("Compiling object ", objectFileName, " from source ",
+               this->GetLocalGenerator()->GetRelativeSourceFileName(*source)));
+  }
 
   auto compilerLauncher = this->GetCompilerLauncher(language, config);
 

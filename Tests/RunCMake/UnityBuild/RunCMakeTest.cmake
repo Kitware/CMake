@@ -72,6 +72,6 @@ endfunction()
 run_test(unitybuild_runtest)
 run_test(unitybuild_object_library)
 
-if (CMAKE_GENERATOR MATCHES "NONE")
+if (CMAKE_GENERATOR MATCHES "Ninja")
   run_build(unitybuild_cxx_short)
 endif ()

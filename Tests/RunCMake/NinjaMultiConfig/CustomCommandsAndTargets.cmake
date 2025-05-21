@@ -1,3 +1,5 @@
+set(CMAKE_INTERMEDIATE_DIR_STRATEGY FULL CACHE STRING "" FORCE)
+
 enable_language(C)
 
 file(REMOVE "${CMAKE_BINARY_DIR}/target_files_custom.cmake")

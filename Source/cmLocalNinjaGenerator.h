@@ -62,6 +62,7 @@ public:
   {
     return this->HomeRelativeOutputPath;
   }
+  std::string GetObjectOutputRoot() const override;
 
   std::string BuildCommandLine(
     std::vector<std::string> const& cmdLines, std::string const& outputConfig,
