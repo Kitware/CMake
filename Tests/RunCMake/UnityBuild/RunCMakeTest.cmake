@@ -71,3 +71,7 @@ endfunction()
 
 run_test(unitybuild_runtest)
 run_test(unitybuild_object_library)
+
+if (CMAKE_GENERATOR MATCHES "NONE")
+  run_build(unitybuild_cxx_short)
+endif ()
