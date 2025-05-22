@@ -5,68 +5,92 @@
 CheckTypeSize
 -------------
 
-Check sizeof a type
+This module provides a command to check the size of a C/C++ type or expression.
 
-.. command:: check_type_size
-
-  .. code-block:: cmake
-
-    check_type_size(<type> <variable> [BUILTIN_TYPES_ONLY]
-                                      [LANGUAGE <language>])
-
-  Check if the type exists and determine its size.  Results are reported
-  in the following variables:
-
-  ``HAVE_<variable>``
-    Holds a true or false value indicating whether the type exists.
-
-  ``<variable>``
-    Holds one of the following values:
-
-    ``<size>``
-       Type has non-zero size ``<size>``.
-
-    ``0``
-       Type has architecture-dependent size.  This may occur when
-       :variable:`CMAKE_OSX_ARCHITECTURES` has multiple architectures.
-       In this case ``<variable>_CODE`` contains C preprocessor tests
-       mapping from each architecture macro to the corresponding type size.
-       The list of architecture macros is stored in ``<variable>_KEYS``,
-       and the value for each key is stored in ``<variable>-<key>``.
-
-    "" (empty string)
-       Type does not exist.
-
-  ``<variable>_CODE``
-    Holds C preprocessor code to define the macro ``<variable>`` to the size
-    of the type, or to leave the macro undefined if the type does not exist.
-
-  The options are:
-
-  ``BUILTIN_TYPES_ONLY``
-
-    Support only compiler-builtin types.  If *not* given, the macro checks
-    for headers ``<sys/types.h>``, ``<stdint.h>``, and ``<stddef.h>``, and
-    saves results in ``HAVE_SYS_TYPES_H``, ``HAVE_STDINT_H``, and
-    ``HAVE_STDDEF_H``.  The type size check automatically includes the
-    available headers, thus supporting checks of types defined in the headers.
-
-  ``LANGUAGE <language>``
-    Use the ``<language>`` compiler to perform the check.
-    Acceptable values are ``C`` and ``CXX``.
-    If not specified, it defaults to ``C``.
-
-Despite the name of the macro you may use it to check the size of more
-complex expressions, too.  To check e.g.  for the size of a struct
-member you can do something like this:
+Load this module in a CMake project with:
 
 .. code-block:: cmake
 
-  check_type_size("((struct something*)0)->member" SIZEOF_MEMBER)
+  include(CheckTypeSize)
 
+Commands
+^^^^^^^^
 
-The following variables may be set before calling this macro to modify
-the way the check is run:
+This module provides the following command:
+
+.. command:: check_type_size
+
+  Checks once whether the C/C++ type or expression exists and determines its
+  size:
+
+  .. code-block:: cmake
+
+    check_type_size(<type> <variable> [BUILTIN_TYPES_ONLY] [LANGUAGE <language>])
+
+  The arguments are:
+
+  ``<type>``
+    The type or expression being checked.
+
+  ``<variable>``
+    The name of the variable and a prefix used for storing the check results.
+
+  ``BUILTIN_TYPES_ONLY``
+    If given, only compiler-builtin types will be supported in the check.
+    If *not* given, the command checks for common headers ``<sys/types.h>``,
+    ``<stdint.h>``, and ``<stddef.h>``, and saves results in
+    ``HAVE_SYS_TYPES_H``, ``HAVE_STDINT_H``, and ``HAVE_STDDEF_H`` internal
+    cache variables.  The type size check automatically includes the available
+    headers, thus supporting checks of types defined in the headers.
+
+  ``LANGUAGE <language>``
+    Uses the ``<language>`` compiler to perform the check.
+    Acceptable values are ``C`` and ``CXX``.
+    If not specified, it defaults to ``C``.
+
+  .. rubric:: Result Variables
+
+  Results are reported in the following variables:
+
+  ``HAVE_<variable>``
+    Internal cache variable that holds a boolean true or false value
+    indicating whether the type or expression ``<type>`` exists.
+
+  ``<variable>``
+    Internal cache variable that holds one of the following values:
+
+    ``<size>``
+      If the type or expression exists, it will have a non-zero size
+      ``<size>`` in bytes.
+
+    ``0``
+      When type has architecture-dependent size;  This may occur when
+      :variable:`CMAKE_OSX_ARCHITECTURES` has multiple architectures.
+      In this case ``<variable>_CODE`` contains preprocessor tests
+      mapping from each architecture macro to the corresponding type size.
+      The list of architecture macros is stored in ``<variable>_KEYS``,
+      and the value for each key is stored in ``<variable>-<key>``.
+
+    "" (empty string)
+      When type or expression does not exist.
+
+  ``<variable>_CODE``
+    CMake variable that holds preprocessor code to define the macro
+    ``<variable>`` to the size of the type, or to leave the macro undefined
+    if the type does not exist.
+
+  Despite the name of this command, it may also be used to determine the size
+  of more complex expressions.  For example, to check the size of a struct
+  member:
+
+  .. code-block:: cmake
+
+    check_type_size("((struct something*)0)->member" SIZEOF_MEMBER)
+
+  .. rubric:: Variables Affecting the Check
+
+  The following variables may be set before calling this command to modify
+  the way the check is run:
 
   .. include:: /module/include/CMAKE_REQUIRED_FLAGS.rst
 
@@ -83,7 +107,8 @@ the way the check is run:
   .. include:: /module/include/CMAKE_REQUIRED_QUIET.rst
 
   ``CMAKE_EXTRA_INCLUDE_FILES``
-    list of extra headers to include.
+    A :ref:`semicolon-separated list <CMake Language Lists>` of extra header
+    files to include when performing the check.
 
 Examples
 ^^^^^^^^

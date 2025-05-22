@@ -205,8 +205,8 @@ Properties
 Modules
 -------
 
-* The :module:`CheckTypeSize` module ``check_type_size`` macro and
-  the :module:`CheckStructHasMember` module ``check_struct_has_member``
+* The :module:`CheckTypeSize` module ``check_type_size()`` command and
+  the :module:`CheckStructHasMember` module ``check_struct_has_member()``
   command learned a new ``LANGUAGE`` option to optionally check C++ types.
 
 * The :module:`ExternalData` module learned to work with no
