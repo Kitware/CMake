@@ -1,0 +1,342 @@
+id: cmstrcat-to-char-literal
+snapshots:
+  cmStrCat("'"):
+    fixed: cmStrCat('\'')
+    labels:
+    - source: '"''"'
+      style: primary
+      start: 9
+      end: 12
+    - source: cmStrCat("'")
+      style: secondary
+      start: 0
+      end: 13
+  cmStrCat("'", other):
+    fixed: cmStrCat('\'', other)
+    labels:
+    - source: '"''"'
+      style: primary
+      start: 9
+      end: 12
+    - source: cmStrCat("'", other)
+      style: secondary
+      start: 0
+      end: 20
+    - source: ','
+      style: secondary
+      start: 12
+      end: 13
+    - source: (
+      style: secondary
+      start: 8
+      end: 9
+  cmStrCat("\""):
+    fixed: cmStrCat('"')
+    labels:
+    - source: '"\""'
+      style: primary
+      start: 9
+      end: 13
+    - source: cmStrCat("\"")
+      style: secondary
+      start: 0
+      end: 14
+  cmStrCat("\"", other):
+    fixed: cmStrCat('"', other)
+    labels:
+    - source: '"\""'
+      style: primary
+      start: 9
+      end: 13
+    - source: cmStrCat("\"", other)
+      style: secondary
+      start: 0
+      end: 21
+    - source: ','
+      style: secondary
+      start: 13
+      end: 14
+    - source: (
+      style: secondary
+      start: 8
+      end: 9
+  cmStrCat("\'"):
+    fixed: cmStrCat('\'')
+    labels:
+    - source: '"\''"'
+      style: primary
+      start: 9
+      end: 13
+    - source: cmStrCat("\'")
+      style: secondary
+      start: 0
+      end: 14
+  cmStrCat("\'", other):
+    fixed: cmStrCat('\'', other)
+    labels:
+    - source: '"\''"'
+      style: primary
+      start: 9
+      end: 13
+    - source: cmStrCat("\'", other)
+      style: secondary
+      start: 0
+      end: 21
+    - source: ','
+      style: secondary
+      start: 13
+      end: 14
+    - source: (
+      style: secondary
+      start: 8
+      end: 9
+  cmStrCat("\n"):
+    fixed: cmStrCat('\n')
+    labels:
+    - source: '"\n"'
+      style: primary
+      start: 9
+      end: 13
+    - source: cmStrCat("\n")
+      style: secondary
+      start: 0
+      end: 14
+  cmStrCat("\n", other):
+    fixed: cmStrCat('\n', other)
+    labels:
+    - source: '"\n"'
+      style: primary
+      start: 9
+      end: 13
+    - source: cmStrCat("\n", other)
+      style: secondary
+      start: 0
+      end: 21
+    - source: ','
+      style: secondary
+      start: 13
+      end: 14
+    - source: (
+      style: secondary
+      start: 8
+      end: 9
+  cmStrCat("n"):
+    fixed: cmStrCat('n')
+    labels:
+    - source: '"n"'
+      style: primary
+      start: 9
+      end: 12
+    - source: cmStrCat("n")
+      style: secondary
+      start: 0
+      end: 13
+  cmStrCat("n", other):
+    fixed: cmStrCat('n', other)
+    labels:
+    - source: '"n"'
+      style: primary
+      start: 9
+      end: 12
+    - source: cmStrCat("n", other)
+      style: secondary
+      start: 0
+      end: 20
+    - source: ','
+      style: secondary
+      start: 12
+      end: 13
+    - source: (
+      style: secondary
+      start: 8
+      end: 9
+  cmStrCat(other, "'"):
+    fixed: cmStrCat(other, '\'')
+    labels:
+    - source: '"''"'
+      style: primary
+      start: 16
+      end: 19
+    - source: cmStrCat(other, "'")
+      style: secondary
+      start: 0
+      end: 20
+    - source: )
+      style: secondary
+      start: 19
+      end: 20
+    - source: ','
+      style: secondary
+      start: 14
+      end: 15
+  cmStrCat(other, "'", other):
+    fixed: cmStrCat(other, '\'', other)
+    labels:
+    - source: '"''"'
+      style: primary
+      start: 16
+      end: 19
+    - source: cmStrCat(other, "'", other)
+      style: secondary
+      start: 0
+      end: 27
+    - source: ','
+      style: secondary
+      start: 19
+      end: 20
+    - source: ','
+      style: secondary
+      start: 14
+      end: 15
+  cmStrCat(other, "\""):
+    fixed: cmStrCat(other, '"')
+    labels:
+    - source: '"\""'
+      style: primary
+      start: 16
+      end: 20
+    - source: cmStrCat(other, "\"")
+      style: secondary
+      start: 0
+      end: 21
+    - source: )
+      style: secondary
+      start: 20
+      end: 21
+    - source: ','
+      style: secondary
+      start: 14
+      end: 15
+  cmStrCat(other, "\"", other):
+    fixed: cmStrCat(other, '"', other)
+    labels:
+    - source: '"\""'
+      style: primary
+      start: 16
+      end: 20
+    - source: cmStrCat(other, "\"", other)
+      style: secondary
+      start: 0
+      end: 28
+    - source: ','
+      style: secondary
+      start: 20
+      end: 21
+    - source: ','
+      style: secondary
+      start: 14
+      end: 15
+  cmStrCat(other, "\'"):
+    fixed: cmStrCat(other, '\'')
+    labels:
+    - source: '"\''"'
+      style: primary
+      start: 16
+      end: 20
+    - source: cmStrCat(other, "\'")
+      style: secondary
+      start: 0
+      end: 21
+    - source: )
+      style: secondary
+      start: 20
+      end: 21
+    - source: ','
+      style: secondary
+      start: 14
+      end: 15
+  cmStrCat(other, "\'", other):
+    fixed: cmStrCat(other, '\'', other)
+    labels:
+    - source: '"\''"'
+      style: primary
+      start: 16
+      end: 20
+    - source: cmStrCat(other, "\'", other)
+      style: secondary
+      start: 0
+      end: 28
+    - source: ','
+      style: secondary
+      start: 20
+      end: 21
+    - source: ','
+      style: secondary
+      start: 14
+      end: 15
+  cmStrCat(other, "\n"):
+    fixed: cmStrCat(other, '\n')
+    labels:
+    - source: '"\n"'
+      style: primary
+      start: 16
+      end: 20
+    - source: cmStrCat(other, "\n")
+      style: secondary
+      start: 0
+      end: 21
+    - source: )
+      style: secondary
+      start: 20
+      end: 21
+    - source: ','
+      style: secondary
+      start: 14
+      end: 15
+  cmStrCat(other, "\n", other):
+    fixed: cmStrCat(other, '\n', other)
+    labels:
+    - source: '"\n"'
+      style: primary
+      start: 16
+      end: 20
+    - source: cmStrCat(other, "\n", other)
+      style: secondary
+      start: 0
+      end: 28
+    - source: ','
+      style: secondary
+      start: 20
+      end: 21
+    - source: ','
+      style: secondary
+      start: 14
+      end: 15
+  cmStrCat(other, "n"):
+    fixed: cmStrCat(other, 'n')
+    labels:
+    - source: '"n"'
+      style: primary
+      start: 16
+      end: 19
+    - source: cmStrCat(other, "n")
+      style: secondary
+      start: 0
+      end: 20
+    - source: )
+      style: secondary
+      start: 19
+      end: 20
+    - source: ','
+      style: secondary
+      start: 14
+      end: 15
+  cmStrCat(other, "n", other):
+    fixed: cmStrCat(other, 'n', other)
+    labels:
+    - source: '"n"'
+      style: primary
+      start: 16
+      end: 19
+    - source: cmStrCat(other, "n", other)
+      style: secondary
+      start: 0
+      end: 27
+    - source: ','
+      style: secondary
+      start: 19
+      end: 20
+    - source: ','
+      style: secondary
+      start: 14
+      end: 15

@@ -78,9 +78,9 @@ bool cmFLTKWrapUICommand(std::vector<std::string> const& args,
     // to generate .cxx and .h files
     if (!curr || !curr->GetPropertyAsBool("WRAP_EXCLUDE")) {
       std::string outName = cmStrCat(
-        outputDirectory, "/", cmSystemTools::GetFilenameWithoutExtension(arg));
+        outputDirectory, '/', cmSystemTools::GetFilenameWithoutExtension(arg));
       std::string hname = cmStrCat(outName, ".h");
-      std::string origname = cmStrCat(cdir, "/", arg);
+      std::string origname = cmStrCat(cdir, '/', arg);
       // add starting depends
       std::vector<std::string> depends;
       depends.push_back(origname);

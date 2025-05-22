@@ -89,7 +89,7 @@ bool cmDefinePropertyCommand(std::vector<std::string> const& args,
     if (!cmHasSuffix(initializeFromVariable, PropertyName)) {
       status.SetError(cmStrCat("Variable name \"", initializeFromVariable,
                                "\" does not end with property name \"",
-                               PropertyName, "\""));
+                               PropertyName, '"'));
       return false;
     }
     if (PropertyName.find('_') == std::string::npos) {

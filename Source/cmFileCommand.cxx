@@ -417,7 +417,8 @@ bool HandleStringsCommand(std::vector<std::string> const& args,
                 "CMAKE_POLICY_WARNING_CMP0159")) {
             status.GetMakefile().IssueMessage(
               MessageType::AUTHOR_WARNING,
-              cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0159), '\n',
+              cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0159),
+                       "\n"
                        "For compatibility, CMake is leaving CMAKE_MATCH_<n> "
                        "unchanged."));
           }
@@ -446,7 +447,7 @@ bool HandleStringsCommand(std::vector<std::string> const& args,
       arg_mode = arg_none;
     } else {
       status.SetError(
-        cmStrCat("STRINGS given unknown argument \"", args[i], "\""));
+        cmStrCat("STRINGS given unknown argument \"", args[i], '"'));
       return false;
     }
   }
@@ -2131,8 +2132,9 @@ bool HandleDownloadCommand(std::vector<std::string> const& args,
   if (!file.empty()) {
     fout.open(file.c_str(), std::ios::binary);
     if (!fout) {
-      status.SetError(cmStrCat("DOWNLOAD cannot open file for write\n",
-                               "  file: \"", file, '"'));
+      status.SetError(cmStrCat("DOWNLOAD cannot open file for write\n"
+                               "  file: \"",
+                               file, '"'));
       return false;
     }
   }
@@ -2330,8 +2332,9 @@ bool HandleDownloadCommand(std::vector<std::string> const& args,
 
     std::string actualHash = hash->HashFile(file);
     if (actualHash.empty()) {
-      status.SetError(cmStrCat("DOWNLOAD cannot compute hash on download\n",
-                               "  for file: \"", file, '"'));
+      status.SetError(cmStrCat("DOWNLOAD cannot compute hash on download\n"
+                               "  for file: \"",
+                               file, '"'));
       return false;
     }
 
@@ -2990,8 +2993,9 @@ bool HandleLockCommand(std::vector<std::string> const& args,
     } else {
       status.GetMakefile().IssueMessage(
         MessageType::FATAL_ERROR,
-        cmStrCat("expected DIRECTORY, RELEASE, GUARD, RESULT_VARIABLE or ",
-                 "TIMEOUT\nbut got: \"", args[i], "\"."));
+        cmStrCat("expected DIRECTORY, RELEASE, GUARD, RESULT_VARIABLE or "
+                 "TIMEOUT\nbut got: \"",
+                 args[i], "\"."));
       return false;
     }
   }

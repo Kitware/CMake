@@ -77,8 +77,9 @@ bool cmAddSubDirectoryCommand(std::vector<std::string> const& args,
     if (!cmSystemTools::IsSubDirectory(srcPath,
                                        mf.GetCurrentSourceDirectory())) {
       status.SetError(
-        cmStrCat("not given a binary directory but the given source ",
-                 "directory \"", srcPath, "\" is not a subdirectory of \"",
+        cmStrCat("not given a binary directory but the given source "
+                 "directory \"",
+                 srcPath, "\" is not a subdirectory of \"",
                  mf.GetCurrentSourceDirectory(),
                  "\".  When specifying an "
                  "out-of-tree source a binary directory must be explicitly "

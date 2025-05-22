@@ -1468,7 +1468,7 @@ void cmake::SetArgs(std::vector<std::string> const& args)
   if (!extraProvidedPath.empty() && this->GetWorkingMode() == NORMAL_MODE) {
     this->IssueMessage(MessageType::WARNING,
                        cmStrCat("Ignoring extra path from command line:\n \"",
-                                extraProvidedPath, "\""));
+                                extraProvidedPath, '"'));
   }
   if (!possibleUnknownArg.empty() && this->GetWorkingMode() != SCRIPT_MODE) {
     cmSystemTools::Error(cmStrCat("Unknown argument ", possibleUnknownArg));
@@ -1591,7 +1591,7 @@ void cmake::SetArgs(std::vector<std::string> const& args)
     }
     if (!expandedPreset->ConditionResult) {
       cmSystemTools::Error(cmStrCat("Could not use disabled preset \"",
-                                    preset->second.Unexpanded.Name, "\""));
+                                    preset->second.Unexpanded.Name, '"'));
       return;
     }
 
@@ -2121,9 +2121,9 @@ void cmake::SetHomeDirectoryViaCommandLine(std::string const& path)
   auto prev_path = this->GetHomeDirectory();
   if (prev_path != path && !prev_path.empty() &&
       this->GetWorkingMode() == NORMAL_MODE) {
-    this->IssueMessage(MessageType::WARNING,
-                       cmStrCat("Ignoring extra path from command line:\n \"",
-                                prev_path, "\""));
+    this->IssueMessage(
+      MessageType::WARNING,
+      cmStrCat("Ignoring extra path from command line:\n \"", prev_path, '"'));
   }
   this->SetHomeDirectory(path);
 }
@@ -2224,7 +2224,7 @@ int cmake::DoPreConfigureChecks()
 {
   // Make sure the Source directory contains a CMakeLists.txt file.
   std::string srcList =
-    cmStrCat(this->GetHomeDirectory(), "/", this->CMakeListName);
+    cmStrCat(this->GetHomeDirectory(), '/', this->CMakeListName);
   if (!cmSystemTools::FileExists(srcList)) {
     std::ostringstream err;
     if (cmSystemTools::FileIsDirectory(this->GetHomeDirectory())) {
@@ -2511,11 +2511,14 @@ int cmake::ActualConfigure()
   cmValue genName = this->State->GetInitializedCacheValue("CMAKE_GENERATOR");
   if (genName) {
     if (!this->GlobalGenerator->MatchesGeneratorName(*genName)) {
-      std::string message = cmStrCat(
-        "Error: generator : ", this->GlobalGenerator->GetName(), '\n',
-        "Does not match the generator used previously: ", *genName, '\n',
-        "Either remove the CMakeCache.txt file and CMakeFiles "
-        "directory or choose a different binary directory.");
+      std::string message =
+        cmStrCat("Error: generator : ", this->GlobalGenerator->GetName(),
+                 "\n"
+                 "Does not match the generator used previously: ",
+                 *genName,
+                 "\n"
+                 "Either remove the CMakeCache.txt file and CMakeFiles "
+                 "directory or choose a different binary directory.");
       cmSystemTools::Error(message);
       return -2;
     }
@@ -2541,11 +2544,14 @@ int cmake::ActualConfigure()
   if (cmValue instance =
         this->State->GetInitializedCacheValue("CMAKE_GENERATOR_INSTANCE")) {
     if (this->GeneratorInstanceSet && this->GeneratorInstance != *instance) {
-      std::string message = cmStrCat(
-        "Error: generator instance: ", this->GeneratorInstance, '\n',
-        "Does not match the instance used previously: ", *instance, '\n',
-        "Either remove the CMakeCache.txt file and CMakeFiles "
-        "directory or choose a different binary directory.");
+      std::string message =
+        cmStrCat("Error: generator instance: ", this->GeneratorInstance,
+                 "\n"
+                 "Does not match the instance used previously: ",
+                 *instance,
+                 "\n"
+                 "Either remove the CMakeCache.txt file and CMakeFiles "
+                 "directory or choose a different binary directory.");
       cmSystemTools::Error(message);
       return -2;
     }
@@ -2559,11 +2565,14 @@ int cmake::ActualConfigure()
         this->State->GetInitializedCacheValue("CMAKE_GENERATOR_PLATFORM")) {
     if (this->GeneratorPlatformSet &&
         this->GeneratorPlatform != *platformName) {
-      std::string message = cmStrCat(
-        "Error: generator platform: ", this->GeneratorPlatform, '\n',
-        "Does not match the platform used previously: ", *platformName, '\n',
-        "Either remove the CMakeCache.txt file and CMakeFiles "
-        "directory or choose a different binary directory.");
+      std::string message =
+        cmStrCat("Error: generator platform: ", this->GeneratorPlatform,
+                 "\n"
+                 "Does not match the platform used previously: ",
+                 *platformName,
+                 "\n"
+                 "Either remove the CMakeCache.txt file and CMakeFiles "
+                 "directory or choose a different binary directory.");
       cmSystemTools::Error(message);
       return -2;
     }
@@ -2576,8 +2585,11 @@ int cmake::ActualConfigure()
         this->State->GetInitializedCacheValue("CMAKE_GENERATOR_TOOLSET")) {
     if (this->GeneratorToolsetSet && this->GeneratorToolset != *tsName) {
       std::string message =
-        cmStrCat("Error: generator toolset: ", this->GeneratorToolset, '\n',
-                 "Does not match the toolset used previously: ", *tsName, '\n',
+        cmStrCat("Error: generator toolset: ", this->GeneratorToolset,
+                 "\n"
+                 "Does not match the toolset used previously: ",
+                 *tsName,
+                 "\n"
                  "Either remove the CMakeCache.txt file and CMakeFiles "
                  "directory or choose a different binary directory.");
       cmSystemTools::Error(message);
@@ -2692,12 +2704,12 @@ int cmake::ActualConfigure()
   if (this->Instrumentation->HasQuery()) {
     std::string launcher;
     if (mf->IsOn("CTEST_USE_LAUNCHERS")) {
-      launcher =
-        cmStrCat("\"", cmSystemTools::GetCTestCommand(), "\" --launch ",
-                 "--current-build-dir <CMAKE_CURRENT_BINARY_DIR> ");
+      launcher = cmStrCat('"', cmSystemTools::GetCTestCommand(),
+                          "\" --launch "
+                          "--current-build-dir <CMAKE_CURRENT_BINARY_DIR> ");
     } else {
       launcher =
-        cmStrCat("\"", cmSystemTools::GetCTestCommand(), "\" --instrument ");
+        cmStrCat('"', cmSystemTools::GetCTestCommand(), "\" --instrument ");
     }
     std::string common_args =
       cmStrCat(" --target-name <TARGET_NAME> --build-dir \"",
@@ -2705,13 +2717,14 @@ int cmake::ActualConfigure()
     this->State->SetGlobalProperty(
       "RULE_LAUNCH_COMPILE",
       cmStrCat(
-        launcher, "--command-type compile", common_args, "--config <CONFIG> ",
+        launcher, "--command-type compile", common_args,
+        "--config <CONFIG> "
         "--output <OBJECT> --source <SOURCE> --language <LANGUAGE> -- "));
     this->State->SetGlobalProperty(
       "RULE_LAUNCH_LINK",
       cmStrCat(
         launcher, "--command-type link", common_args,
-        "--output <TARGET> --target-type <TARGET_TYPE> --config <CONFIG> ",
+        "--output <TARGET> --target-type <TARGET_TYPE> --config <CONFIG> "
         "--language <LANGUAGE> --target-labels \"<TARGET_LABELS>\" -- "));
     this->State->SetGlobalProperty(
       "RULE_LAUNCH_CUSTOM",

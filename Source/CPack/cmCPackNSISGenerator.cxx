@@ -132,11 +132,11 @@ int cmCPackNSISGenerator::PackageFiles()
     std::string installerIconCode;
     if (cmValue v = this->GetOptionIfSet("CPACK_NSIS_MUI_ICON")) {
       std::string iconFile = cmSystemTools::ConvertToWindowsOutputPath(*v);
-      installerIconCode += cmStrCat("!define MUI_ICON ", iconFile, "\n");
+      installerIconCode += cmStrCat("!define MUI_ICON ", iconFile, '\n');
     }
     if (cmValue v = this->GetOptionIfSet("CPACK_NSIS_MUI_UNIICON")) {
       std::string iconFile = cmSystemTools::ConvertToWindowsOutputPath(*v);
-      installerIconCode += cmStrCat("!define MUI_UNICON ", iconFile, "\n");
+      installerIconCode += cmStrCat("!define MUI_UNICON ", iconFile, '\n');
     }
     this->SetOptionIfNotSet("CPACK_NSIS_INSTALLER_MUI_ICON_CODE",
                             installerIconCode.c_str());
@@ -151,7 +151,7 @@ int cmCPackNSISGenerator::PackageFiles()
     installerHeaderImage =
       cmSystemTools::ConvertToWindowsOutputPath(installerHeaderImage);
     std::string installerIconCode =
-      cmStrCat("!define MUI_HEADERIMAGE_BITMAP ", installerHeaderImage, "\n");
+      cmStrCat("!define MUI_HEADERIMAGE_BITMAP ", installerHeaderImage, '\n');
     this->SetOptionIfNotSet("CPACK_NSIS_INSTALLER_ICON_CODE",
                             installerIconCode);
   }
@@ -160,7 +160,7 @@ int cmCPackNSISGenerator::PackageFiles()
         this->GetOptionIfSet("CPACK_NSIS_MUI_WELCOMEFINISHPAGE_BITMAP")) {
     std::string bitmapFile = cmSystemTools::ConvertToWindowsOutputPath(*v);
     std::string installerBitmapCode =
-      cmStrCat("!define MUI_WELCOMEFINISHPAGE_BITMAP ", bitmapFile, "\n");
+      cmStrCat("!define MUI_WELCOMEFINISHPAGE_BITMAP ", bitmapFile, '\n');
     this->SetOptionIfNotSet("CPACK_NSIS_INSTALLER_MUI_WELCOMEFINISH_CODE",
                             installerBitmapCode);
   }
@@ -169,7 +169,7 @@ int cmCPackNSISGenerator::PackageFiles()
         this->GetOptionIfSet("CPACK_NSIS_MUI_UNWELCOMEFINISHPAGE_BITMAP")) {
     std::string bitmapFile = cmSystemTools::ConvertToWindowsOutputPath(*v);
     std::string installerBitmapCode =
-      cmStrCat("!define MUI_UNWELCOMEFINISHPAGE_BITMAP ", bitmapFile, "\n");
+      cmStrCat("!define MUI_UNWELCOMEFINISHPAGE_BITMAP ", bitmapFile, '\n');
     this->SetOptionIfNotSet("CPACK_NSIS_INSTALLER_MUI_UNWELCOMEFINISH_CODE",
                             installerBitmapCode);
   }
@@ -184,7 +184,7 @@ int cmCPackNSISGenerator::PackageFiles()
 
   if (cmValue v = this->GetOptionIfSet("CPACK_NSIS_WELCOME_TITLE")) {
     std::string welcomeTitleCode =
-      cmStrCat("!define MUI_WELCOMEPAGE_TITLE \"", *v, "\"");
+      cmStrCat("!define MUI_WELCOMEPAGE_TITLE \"", *v, '"');
     this->SetOptionIfNotSet("CPACK_NSIS_INSTALLER_WELCOME_TITLE_CODE",
                             welcomeTitleCode);
   }
@@ -196,7 +196,7 @@ int cmCPackNSISGenerator::PackageFiles()
 
   if (cmValue v = this->GetOptionIfSet("CPACK_NSIS_FINISH_TITLE")) {
     std::string finishTitleCode =
-      cmStrCat("!define MUI_FINISHPAGE_TITLE \"", *v, "\"");
+      cmStrCat("!define MUI_FINISHPAGE_TITLE \"", *v, '"');
     this->SetOptionIfNotSet("CPACK_NSIS_INSTALLER_FINISH_TITLE_CODE",
                             finishTitleCode);
   }
@@ -240,7 +240,7 @@ int cmCPackNSISGenerator::PackageFiles()
     cmValue v = this->GetOption("CPACK_RESOURCE_FILE_LICENSE");
     std::string licenseFile = cmSystemTools::ConvertToWindowsOutputPath(*v);
     std::string licenseCode =
-      cmStrCat("!insertmacro MUI_PAGE_LICENSE ", licenseFile, "\n");
+      cmStrCat("!insertmacro MUI_PAGE_LICENSE ", licenseFile, '\n');
     this->SetOptionIfNotSet("CPACK_NSIS_LICENSE_PAGE", licenseCode);
   }
 
@@ -388,7 +388,7 @@ int cmCPackNSISGenerator::PackageFiles()
     cmStrCat('"', this->GetOption("CPACK_INSTALLER_PROGRAM"), "\" ",
              nsisPreArguments, " \"", nsisFileName, '"');
   if (!nsisPostArguments.empty()) {
-    nsisCmd = cmStrCat(nsisCmd, " ", nsisPostArguments);
+    nsisCmd = cmStrCat(nsisCmd, ' ', nsisPostArguments);
   }
   cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Execute: " << nsisCmd << std::endl);
   std::string output;

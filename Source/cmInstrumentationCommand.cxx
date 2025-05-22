@@ -30,7 +30,7 @@ bool validateVersion(std::string const& key, std::string const& versionString,
                      int& version, cmExecutionStatus& status)
 {
   if (!std::all_of(versionString.begin(), versionString.end(), isCharDigit)) {
-    status.SetError(cmStrCat("given a non-integer ", key, "."));
+    status.SetError(cmStrCat("given a non-integer ", key, '.'));
     return false;
   }
   version = std::atoi(versionString.c_str());
@@ -118,7 +118,7 @@ bool cmInstrumentationCommand(std::vector<std::string> const& args,
     cmInstrumentationQuery::Query query;
     if (!queryParser(arg, query)) {
       status.SetError(
-        cmStrCat("given invalid argument to QUERIES \"", arg, "\""));
+        cmStrCat("given invalid argument to QUERIES \"", arg, '"'));
       return false;
     }
     queries.insert(query);
@@ -131,7 +131,7 @@ bool cmInstrumentationCommand(std::vector<std::string> const& args,
     cmInstrumentationQuery::Hook hook;
     if (!hookParser(arg, hook)) {
       status.SetError(
-        cmStrCat("given invalid argument to HOOKS \"", arg, "\""));
+        cmStrCat("given invalid argument to HOOKS \"", arg, '"'));
       return false;
     }
     hooks.insert(hook);

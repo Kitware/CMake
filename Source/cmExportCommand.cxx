@@ -184,7 +184,7 @@ bool cmExportCommand(std::vector<std::string> const& args,
         } else {
           status.SetError(
             cmStrCat("Invalid enable setting for package dependency: \"",
-                     packageDependencyArguments.Enabled, "\""));
+                     packageDependencyArguments.Enabled, '"'));
           return false;
         }
       }
@@ -407,7 +407,8 @@ bool cmExportCommand(std::vector<std::string> const& args,
       case cmPolicies::WARN:
         mf.IssueMessage(
           MessageType::AUTHOR_WARNING,
-          cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0103), '\n',
+          cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0103),
+                   "\n"
                    "export() command already specified for the file\n  ",
                    arguments.Filename, "\nDid you miss 'APPEND' keyword?"));
         CM_FALLTHROUGH;

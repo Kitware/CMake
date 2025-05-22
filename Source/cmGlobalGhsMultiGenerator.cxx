@@ -101,11 +101,14 @@ bool cmGlobalGhsMultiGenerator::SetGeneratorToolset(std::string const& ts,
 
   /* check if the toolset changed from last generate */
   if (cmNonempty(prevTool) && !cmSystemTools::ComparePath(gbuild, *prevTool)) {
-    std::string const& e = cmStrCat(
-      "toolset build tool: ", gbuild, '\n',
-      "Does not match the previously used build tool: ", *prevTool, '\n',
-      "Either remove the CMakeCache.txt file and CMakeFiles "
-      "directory or choose a different binary directory.");
+    std::string const& e =
+      cmStrCat("toolset build tool: ", gbuild,
+               "\n"
+               "Does not match the previously used build tool: ",
+               *prevTool,
+               "\n"
+               "Either remove the CMakeCache.txt file and CMakeFiles "
+               "directory or choose a different binary directory.");
     mf->IssueMessage(MessageType::FATAL_ERROR, e);
     return false;
   }
@@ -377,7 +380,7 @@ void cmGlobalGhsMultiGenerator::WriteTargets(cmLocalGenerator* root)
 
     // create target build file
     std::string name = cmStrCat(target->GetName(), ".tgt", FILE_EXTENSION);
-    std::string fname = cmStrCat(rootBinaryDir, "/", name);
+    std::string fname = cmStrCat(rootBinaryDir, '/', name);
     cmGeneratedFileStream fbld(fname);
     fbld.SetCopyIfDifferent(true);
     this->WriteFileHeader(fbld);

@@ -1048,7 +1048,7 @@ void cmLocalUnixMakefileGenerator3::AppendCustomCommand(
                                 : outputs[i],
                               cmOutputConverter::SHELL));
           if (i != outputs.size() - 1) {
-            output = cmStrCat(output, ",");
+            output = cmStrCat(output, ',');
           }
         }
         vars.Output = output.c_str();
@@ -1109,7 +1109,7 @@ void cmLocalUnixMakefileGenerator3::AppendCustomCommand(
   // Prefix the commands with the jobserver prefix "+"
   if (ccg.GetCC().GetJobserverAware() && gg->IsGNUMakeJobServerAware()) {
     std::transform(commands1.begin(), commands1.end(), commands1.begin(),
-                   [](std::string const& cmd) { return cmStrCat("+", cmd); });
+                   [](std::string const& cmd) { return cmStrCat('+', cmd); });
   }
 
   // push back the custom commands

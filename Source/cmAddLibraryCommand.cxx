@@ -237,7 +237,7 @@ bool cmAddLibraryCommand(std::vector<std::string> const& args,
             "ADD_LIBRARY called with ",
             (type == cmStateEnums::SHARED_LIBRARY ? "SHARED" : "MODULE"),
             " option but the target platform does not support dynamic "
-            "linking. ",
+            "linking. "
             "Building a STATIC library instead. This may lead to problems."));
         CM_FALLTHROUGH;
       case cmPolicies::OLD:

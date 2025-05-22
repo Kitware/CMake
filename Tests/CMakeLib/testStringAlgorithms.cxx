@@ -142,7 +142,7 @@ int testStringAlgorithms(int /*unused*/, char* /*unused*/[])
     long long int nlli = -130000ll;
     unsigned long long int nulli = 130000ull;
     std::string val =
-      cmStrCat("<test>", ni, ',', nui, ',', nli, ",", nuli, ", ", nlli,
+      cmStrCat("<test>", ni, ',', nui, ',', nli, ',', nuli, ", ", nlli,
                std::string(", "), nulli, cm::string_view("</test>"));
     std::string expect =
       "<test>-1100,1100,-12000,12000, -130000, 130000</test>";

@@ -2258,7 +2258,7 @@ void cmComputeLinkInformation::GetRPath(std::vector<std::string>& runtimeDirs,
               cmSystemTools::IsSubDirectory(d, topBinaryDir)) {
             d = cmSystemTools::RelativePath(targetOutputDir, d);
             if (!d.empty()) {
-              d = cmStrCat(originToken, "/", d);
+              d = cmStrCat(originToken, '/', d);
             } else {
               d = originToken;
             }

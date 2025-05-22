@@ -848,9 +848,10 @@ void cmCursesMainForm::HandleInput()
             curField, "HELPSTRING");
         }
         if (helpString) {
-          this->HelpMessage[1] =
-            cmStrCat("Current option is: ", curField, '\n',
-                     "Help string for this option is: ", *helpString, '\n');
+          this->HelpMessage[1] = cmStrCat("Current option is: ", curField,
+                                          "\n"
+                                          "Help string for this option is: ",
+                                          *helpString, '\n');
         } else {
           this->HelpMessage[1] = "";
         }

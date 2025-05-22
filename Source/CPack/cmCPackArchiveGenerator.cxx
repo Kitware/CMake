@@ -55,7 +55,7 @@ private:
         : DeduplicateStatus::Skip;
     }
 
-    this->Files[path] = cmStrCat(localTopLevel, "/", path);
+    this->Files[path] = cmStrCat(localTopLevel, '/', path);
     return DeduplicateStatus::Add;
   }
 

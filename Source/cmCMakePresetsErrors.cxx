@@ -40,8 +40,8 @@ std::string getPresetName(cmJSONState* state)
 std::string getVariableName(cmJSONState* state)
 {
   std::string var = state->key_after("cacheVariables");
-  std::string errMsg = cmStrCat("variable \"", var, "\"");
-  errMsg = cmStrCat(errMsg, " for preset \"", getPresetName(state), "\"");
+  std::string errMsg = cmStrCat("variable \"", var, '"');
+  errMsg = cmStrCat(errMsg, " for preset \"", getPresetName(state), '"');
   return errMsg;
 }
 
@@ -82,7 +82,7 @@ void INVALID_PRESET(Json::Value const* value, cmJSONState* state)
 
 void INVALID_PRESET_NAMED(std::string const& presetName, cmJSONState* state)
 {
-  state->AddError(cmStrCat("Invalid preset: \"", presetName, "\""));
+  state->AddError(cmStrCat("Invalid preset: \"", presetName, '"'));
 }
 
 void INVALID_VARIABLE(Json::Value const* value, cmJSONState* state)
@@ -93,7 +93,7 @@ void INVALID_VARIABLE(Json::Value const* value, cmJSONState* state)
 
 void DUPLICATE_PRESETS(std::string const& presetName, cmJSONState* state)
 {
-  state->AddError(cmStrCat("Duplicate preset: \"", presetName, "\""));
+  state->AddError(cmStrCat("Duplicate preset: \"", presetName, '"'));
 }
 
 void CYCLIC_PRESET_INHERITANCE(std::string const& presetName,
@@ -101,7 +101,7 @@ void CYCLIC_PRESET_INHERITANCE(std::string const& presetName,
 
 {
   state->AddError(
-    cmStrCat("Cyclic preset inheritance for preset \"", presetName, "\""));
+    cmStrCat("Cyclic preset inheritance for preset \"", presetName, '"'));
 }
 
 void INHERITED_PRESET_UNREACHABLE_FROM_FILE(std::string const& presetName,
@@ -120,7 +120,7 @@ void CONFIGURE_PRESET_UNREACHABLE_FROM_FILE(std::string const& presetName,
 
 void INVALID_MACRO_EXPANSION(std::string const& presetName, cmJSONState* state)
 {
-  state->AddError(cmStrCat("Invalid macro expansion in \"", presetName, "\""));
+  state->AddError(cmStrCat("Invalid macro expansion in \"", presetName, '"'));
 }
 
 void BUILD_TEST_PRESETS_UNSUPPORTED(Json::Value const*, cmJSONState* state)
@@ -155,7 +155,7 @@ void INVALID_CONFIGURE_PRESET(std::string const& presetName,
                               cmJSONState* state)
 {
   state->AddError(
-    cmStrCat(R"(Invalid "configurePreset": ")", presetName, "\""));
+    cmStrCat(R"(Invalid "configurePreset": ")", presetName, '"'));
 }
 
 void INSTALL_PREFIX_UNSUPPORTED(Json::Value const* value, cmJSONState* state)
@@ -197,13 +197,13 @@ void TEST_OUTPUT_TRUNCATION_UNSUPPORTED(cmJSONState* state)
 void INVALID_WORKFLOW_STEPS(std::string const& workflowStep,
                             cmJSONState* state)
 {
-  state->AddError(cmStrCat("Invalid workflow step \"", workflowStep, "\""));
+  state->AddError(cmStrCat("Invalid workflow step \"", workflowStep, '"'));
 }
 
 void NO_WORKFLOW_STEPS(std::string const& presetName, cmJSONState* state)
 {
   state->AddError(
-    cmStrCat("No workflow steps specified for \"", presetName, "\""));
+    cmStrCat("No workflow steps specified for \"", presetName, '"'));
 }
 
 void FIRST_WORKFLOW_STEP_NOT_CONFIGURE(std::string const& stepName,
@@ -273,7 +273,7 @@ void INVALID_PRESET_NAME(Json::Value const* value, cmJSONState* state)
 void INVALID_CONDITION(Json::Value const* value, cmJSONState* state)
 {
   state->AddErrorAtValue(
-    cmStrCat("Invalid condition for preset \"", getPresetName(state), "\""),
+    cmStrCat("Invalid condition for preset \"", getPresetName(state), '"'),
     value);
 }
 
@@ -282,7 +282,7 @@ JsonErrors::ErrorGenerator INVALID_CONDITION_OBJECT(
 {
   return JsonErrors::INVALID_NAMED_OBJECT(
     [](Json::Value const*, cmJSONState* state) -> std::string {
-      return cmStrCat(" condition for preset \"", getPresetName(state), "\"");
+      return cmStrCat(" condition for preset \"", getPresetName(state), '"');
     })(errorType, extraFields);
 }
 
@@ -316,7 +316,7 @@ void PRESET_MISSING_FIELD(std::string const& presetName,
                           std::string const& missingField, cmJSONState* state)
 {
   state->AddError(cmStrCat("Preset \"", presetName, "\" missing field \"",
-                           missingField, "\""));
+                           missingField, '"'));
 }
 
 void SCHEMA_UNSUPPORTED(cmJSONState* state)

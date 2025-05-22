@@ -3450,7 +3450,7 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
       if (configName == this->Configurations[0]) {
         std::string message =
           cmStrCat("For the target \"", this->GeneratorTarget->GetName(),
-                   "\" the /clr compiler flag was added manually. ",
+                   "\" the /clr compiler flag was added manually. "
                    "Set usage of C++/CLI by setting COMMON_LANGUAGE_RUNTIME "
                    "target property.");
         this->Makefile->IssueMessage(MessageType::WARNING, message);

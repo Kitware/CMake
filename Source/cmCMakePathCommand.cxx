@@ -174,7 +174,7 @@ bool HandleGetCommand(std::vector<std::string> const& args,
 
   if (actions.find(action) == actions.end()) {
     status.SetError(
-      cmStrCat("GET called with an unknown action: ", action, "."));
+      cmStrCat("GET called with an unknown action: ", action, '.'));
     return false;
   }
 
@@ -609,7 +609,7 @@ bool HandleConvertCommand(std::vector<std::string> const& args,
 
   if (action != cmakePath && action != nativePath) {
     status.SetError(
-      cmStrCat("CONVERT called with an unknown action: ", action, "."));
+      cmStrCat("CONVERT called with an unknown action: ", action, '.'));
     return false;
   }
 
@@ -679,7 +679,7 @@ bool HandleCompareCommand(std::vector<std::string> const& args,
   auto const op = operators.find(args[2]);
   if (op == operators.end()) {
     status.SetError(cmStrCat(
-      "COMPARE called with an unknown comparison operator: ", args[2], "."));
+      "COMPARE called with an unknown comparison operator: ", args[2], '.'));
     return false;
   }
 

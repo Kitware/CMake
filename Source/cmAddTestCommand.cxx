@@ -152,7 +152,7 @@ bool cmAddTestCommandHandleNameMode(std::vector<std::string> const& args,
       }
       doing = DoingNone;
     } else {
-      status.SetError(cmStrCat(" given unknown argument:\n  ", args[i], "\n"));
+      status.SetError(cmStrCat(" given unknown argument:\n  ", args[i], '\n'));
       return false;
     }
   }

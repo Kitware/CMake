@@ -220,7 +220,7 @@ bool cmCMakeLanguageCommandEVAL(std::vector<cmListFileArgument> const& args,
   std::string const code =
     cmJoin(cmMakeRange(expandedArgs.begin() + 2, expandedArgs.end()), " ");
   return makefile.ReadListFileAsString(
-    code, cmStrCat(context.FilePath, ":", context.Line, ":EVAL"));
+    code, cmStrCat(context.FilePath, ':', context.Line, ":EVAL"));
 }
 
 bool cmCMakeLanguageCommandSET_DEPENDENCY_PROVIDER(
@@ -252,7 +252,7 @@ bool cmCMakeLanguageCommandSET_DEPENDENCY_PROVIDER(
 
   if (!unparsed.empty()) {
     return FatalError(
-      status, cmStrCat("Unrecognized keyword: \"", unparsed.front(), "\""));
+      status, cmStrCat("Unrecognized keyword: \"", unparsed.front(), '"'));
   }
 
   // We store the command that FetchContent_MakeAvailable() can call in a
@@ -296,7 +296,7 @@ bool cmCMakeLanguageCommandSET_DEPENDENCY_PROVIDER(
     } else {
       return FatalError(
         status,
-        cmStrCat("Unknown dependency provider method \"", method, "\""));
+        cmStrCat("Unknown dependency provider method \"", method, '"'));
     }
   }
 
@@ -467,7 +467,7 @@ bool cmCMakeLanguageCommand(std::vector<cmListFileArgument> const& args,
         if (!defer.Directory) {
           return FatalError(status,
                             cmStrCat("DEFER DIRECTORY:\n  "_s, dir,
-                                     "\nis not known.  "_s,
+                                     "\nis not known.  "
                                      "It may not have been processed yet."_s));
         }
       } else if (expArgs[expArg] == "ID"_s) {

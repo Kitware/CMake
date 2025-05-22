@@ -594,8 +594,10 @@ std::string GetScanCommand(
   cm::optional<cm::string_view> srcOrigFile = cm::nullopt)
 {
   return cmStrCat(cmakeCmd, " -E cmake_ninja_depends --tdi=", tdi,
-                  " --lang=", lang, " --src=", srcFile, " --out=$out",
-                  " --dep=$DEP_FILE --obj=$OBJ_FILE --ddi=", ddiFile,
+                  " --lang=", lang, " --src=", srcFile,
+                  " --out=$out"
+                  " --dep=$DEP_FILE --obj=$OBJ_FILE --ddi=",
+                  ddiFile,
                   srcOrigFile ? cmStrCat(" --src-orig=", *srcOrigFile) : "");
 }
 
@@ -928,7 +930,7 @@ void cmNinjaTargetGenerator::WriteCompileRule(std::string const& lang,
           "CUDA_SEPARABLE_COMPILATION")) {
       std::string const& rdcFlag =
         this->Makefile->GetRequiredDefinition("_CMAKE_CUDA_RDC_FLAG");
-      cudaCompileMode = cmStrCat(cudaCompileMode, rdcFlag, " ");
+      cudaCompileMode = cmStrCat(cudaCompileMode, rdcFlag, ' ');
     }
     static std::array<cm::string_view, 4> const compileModes{
       { "PTX"_s, "CUBIN"_s, "FATBIN"_s, "OPTIX"_s }
@@ -1299,7 +1301,8 @@ void cmNinjaTargetGenerator::GenerateSwiftOutputFileMap(
   }();
 
   std::string mapFilePath =
-    cmStrCat(this->GeneratorTarget->GetSupportDirectory(), '/', config, '/',
+    cmStrCat(this->GeneratorTarget->GetSupportDirectory(), '/', config,
+             "/"
              "output-file-map.json");
 
   // build the global target dependencies
@@ -2300,7 +2303,7 @@ void cmNinjaTargetGenerator::ExportObjectCompileCommand(
           "CUDA_SEPARABLE_COMPILATION")) {
       std::string const& rdcFlag =
         this->Makefile->GetRequiredDefinition("_CMAKE_CUDA_RDC_FLAG");
-      cudaCompileMode = cmStrCat(cudaCompileMode, rdcFlag, " ");
+      cudaCompileMode = cmStrCat(cudaCompileMode, rdcFlag, ' ');
     }
     static std::array<cm::string_view, 4> const compileModes{
       { "PTX"_s, "CUBIN"_s, "FATBIN"_s, "OPTIX"_s }

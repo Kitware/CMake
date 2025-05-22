@@ -213,7 +213,7 @@ bool TargetSourcesImpl::HandleOneFileSet(
 
   if (!unparsed.empty()) {
     this->SetError(
-      cmStrCat("Unrecognized keyword: \"", unparsed.front(), "\""));
+      cmStrCat("Unrecognized keyword: \"", unparsed.front(), '"'));
     return false;
   }
 
@@ -289,7 +289,7 @@ bool TargetSourcesImpl::HandleOneFileSet(
     if (!args.Type.empty() && args.Type != type) {
       this->SetError(cmStrCat(
         "Type \"", args.Type, "\" for file set \"", fileSet.first->GetName(),
-        "\" does not match original type \"", type, "\""));
+        "\" does not match original type \"", type, '"'));
       return false;
     }
 
@@ -317,7 +317,7 @@ bool TargetSourcesImpl::HandleOneFileSet(
     if (type == "HEADERS"_s) {
       for (auto const& dir : cmList{ baseDirectories }) {
         auto interfaceDirectoriesGenex =
-          cmStrCat("$<BUILD_INTERFACE:", dir, ">");
+          cmStrCat("$<BUILD_INTERFACE:", dir, '>');
         if (cmFileSetVisibilityIsForSelf(visibility)) {
           this->Target->AppendProperty("INCLUDE_DIRECTORIES",
                                        interfaceDirectoriesGenex,

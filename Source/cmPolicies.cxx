@@ -225,7 +225,7 @@ bool cmPolicies::ApplyPolicyVersion(cmMakefile* mf,
       MessageType::FATAL_ERROR,
       cmStrCat("An attempt was made to set the policy version of CMake to \"",
                version_min,
-               "\" which is greater than this version of CMake.  ",
+               "\" which is greater than this version of CMake.  "
                "This is not allowed because the greater version may have new "
                "policies not known to this CMake.  "
                "You may need a newer CMake version to build this project."));

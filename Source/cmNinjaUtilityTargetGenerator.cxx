@@ -68,7 +68,7 @@ void cmNinjaUtilityTargetGenerator::WriteUtilBuildStatements(
     configDir = gg->ConfigDirectory(fileConfig);
   }
   std::string utilCommandName =
-    cmStrCat(lg->GetCurrentBinaryDirectory(), "/CMakeFiles", configDir, "/",
+    cmStrCat(lg->GetCurrentBinaryDirectory(), "/CMakeFiles", configDir, '/',
              this->GetTargetName(), ".util");
   utilCommandName = this->ConvertToNinjaPath(utilCommandName);
 

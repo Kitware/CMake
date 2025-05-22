@@ -95,9 +95,9 @@ std::string cmJSONState::GetErrorMessage(bool showContext)
     if (!filenameName.empty() && loc.line > 0) {
       message = cmStrCat(message, filenameName, ':', loc.line, ": ");
     }
-    message = cmStrCat(message, error.GetErrorMessage(), "\n");
+    message = cmStrCat(message, error.GetErrorMessage(), '\n');
     if (showContext && loc.line > 0) {
-      message = cmStrCat(message, GetJsonContext(loc), "\n");
+      message = cmStrCat(message, GetJsonContext(loc), '\n');
     }
   }
   message.pop_back();

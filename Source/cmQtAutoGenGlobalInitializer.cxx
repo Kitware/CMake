@@ -143,8 +143,8 @@ cmQtAutoGenGlobalInitializer::cmQtAutoGenGlobalInitializer(
             "AUTOGEN: No valid Qt version found for target ",
             target->GetName(), ".  ",
             cmQtAutoGen::Tools(mocDisabled, uicDisabled, rccDisabled),
-            " disabled.  Consider adding:\n", "  find_package(Qt", version,
-            " COMPONENTS ", component, ")\n", "to your CMakeLists.txt file.");
+            " disabled.  Consider adding:\n  find_package(Qt", version,
+            " COMPONENTS ", component, ")\nto your CMakeLists.txt file.");
           target->Makefile->IssueMessage(MessageType::AUTHOR_WARNING, msg);
         }
         if (mocIsValid || uicIsValid || rccIsValid) {

@@ -1075,7 +1075,7 @@ std::string cmSystemTools::FileExistsInParentDirectories(
   cmSystemTools::ConvertToUnixSlashes(dir);
   std::string prevDir;
   while (dir != prevDir) {
-    std::string path = cmStrCat(dir, "/", file);
+    std::string path = cmStrCat(dir, '/', file);
     if (cmSystemTools::FileExists(path)) {
       return path;
     }

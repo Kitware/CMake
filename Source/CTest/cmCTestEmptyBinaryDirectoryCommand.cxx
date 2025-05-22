@@ -27,7 +27,7 @@ cmsys::Status TryToRemoveBinaryDirectoryOnce(std::string const& directoryPath)
       continue;
     }
 
-    std::string fullPath = cmStrCat(directoryPath, "/", path);
+    std::string fullPath = cmStrCat(directoryPath, '/', path);
 
     bool isDirectory = cmSystemTools::FileIsDirectory(fullPath) &&
       !cmSystemTools::FileIsSymlink(fullPath);
