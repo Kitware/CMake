@@ -536,6 +536,8 @@ public:
   // (If CMP0157 is NEW, we can do a split build)
   bool IsSplitSwiftBuild() const;
 
+  std::string CreateSafeObjectFileName(std::string const& sin) const;
+
 protected:
   // The default implementation converts to a Windows shortpath to
   // help older toolchains handle spaces and such.  A generator may

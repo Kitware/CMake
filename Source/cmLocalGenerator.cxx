@@ -4056,6 +4056,27 @@ bool cmLocalGeneratorCheckObjectName(std::string& objName,
 }
 }
 
+std::string cmLocalGenerator::CreateSafeObjectFileName(
+  std::string const& sin) const
+{
+  // Start with the original name.
+  std::string ssin = sin;
+
+  // Avoid full paths by removing leading slashes.
+  ssin.erase(0, ssin.find_first_not_of('/'));
+
+  // Avoid full paths by removing colons.
+  std::replace(ssin.begin(), ssin.end(), ':', '_');
+
+  // Avoid relative paths that go up the tree.
+  cmSystemTools::ReplaceString(ssin, "../", "__/");
+
+  // Avoid spaces.
+  std::replace(ssin.begin(), ssin.end(), ' ', '_');
+
+  return ssin;
+}
+
 std::string& cmLocalGenerator::CreateSafeUniqueObjectFileName(
   std::string const& sin, std::string const& dir_max)
 {
@@ -4064,20 +4085,7 @@ std::string& cmLocalGenerator::CreateSafeUniqueObjectFileName(
 
   // If no entry exists create one.
   if (it == this->UniqueObjectNamesMap.end()) {
-    // Start with the original name.
-    std::string ssin = sin;
-
-    // Avoid full paths by removing leading slashes.
-    ssin.erase(0, ssin.find_first_not_of('/'));
-
-    // Avoid full paths by removing colons.
-    std::replace(ssin.begin(), ssin.end(), ':', '_');
-
-    // Avoid relative paths that go up the tree.
-    cmSystemTools::ReplaceString(ssin, "../", "__/");
-
-    // Avoid spaces.
-    std::replace(ssin.begin(), ssin.end(), ' ', '_');
+    auto ssin = this->CreateSafeObjectFileName(sin);
 
     // Mangle the name if necessary.
     if (this->Makefile->IsOn("CMAKE_MANGLE_OBJECT_FILE_NAMES")) {
