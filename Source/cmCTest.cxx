@@ -34,9 +34,7 @@
 #include "cmsys/FStream.hxx"
 #include "cmsys/RegularExpression.hxx"
 #include "cmsys/SystemInformation.hxx"
-#if defined(_WIN32)
-#  include <windows.h> // IWYU pragma: keep
-#else
+#ifndef _WIN32
 #  include <unistd.h> // IWYU pragma: keep
 #endif
 
@@ -61,6 +59,7 @@
 #include "cmState.h"
 #include "cmStateSnapshot.h"
 #include "cmStateTypes.h"
+#include "cmStdIoStream.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmUVHandlePtr.h"
@@ -1487,28 +1486,9 @@ bool cmCTest::CheckArgument(std::string const& arg, cm::string_view varg1,
   return (arg == varg1) || (varg2 && arg == varg2);
 }
 
-#if !defined(_WIN32)
-bool cmCTest::ConsoleIsNotDumb()
-{
-  std::string term_env_variable;
-  if (cmSystemTools::GetEnv("TERM", term_env_variable)) {
-    return isatty(1) && term_env_variable != "dumb";
-  }
-  return false;
-}
-#endif
-
 bool cmCTest::ProgressOutputSupportedByConsole()
 {
-#if defined(_WIN32)
-  // On Windows we need a console buffer.
-  void* console = GetStdHandle(STD_OUTPUT_HANDLE);
-  CONSOLE_SCREEN_BUFFER_INFO csbi;
-  return GetConsoleScreenBufferInfo(console, &csbi);
-#else
-  // On UNIX we need a non-dumb tty.
-  return ConsoleIsNotDumb();
-#endif
+  return cm::StdIo::Out().Kind() == cm::StdIo::TermKind::VT100;
 }
 
 bool cmCTest::ColoredOutputSupportedByConsole()
@@ -1522,13 +1502,7 @@ bool cmCTest::ColoredOutputSupportedByConsole()
   if (cmSystemTools::GetEnv("CLICOLOR", clicolor) && clicolor == "0") {
     return false;
   }
-#if defined(_WIN32)
-  // Not supported on Windows
-  return false;
-#else
-  // On UNIX we need a non-dumb tty.
-  return ConsoleIsNotDumb();
-#endif
+  return cm::StdIo::Out().Kind() == cm::StdIo::TermKind::VT100;
 }
 
 bool cmCTest::AddVariableDefinition(std::string const& arg)
