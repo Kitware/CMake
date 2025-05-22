@@ -1269,11 +1269,11 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements(
       this->GetLinkedTargetDirectories(language, config);
     for (std::string const& l : linked_directories.Direct) {
       build.ImplicitDeps.emplace_back(
-        cmStrCat(l, '/', language, "Modules.json"));
+        this->ConvertToNinjaPath(cmStrCat(l, '/', language, "Modules.json")));
     }
     for (std::string const& l : linked_directories.Forward) {
       build.ImplicitDeps.emplace_back(
-        cmStrCat(l, '/', language, "Modules.json"));
+        this->ConvertToNinjaPath(cmStrCat(l, '/', language, "Modules.json")));
     }
 
     this->GetGlobalGenerator()->WriteBuild(this->GetImplFileStream(fileConfig),
