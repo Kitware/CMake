@@ -249,7 +249,7 @@ void cmLocalUnixMakefileGenerator3::GetIndividualFileTargets(
   for (auto const& localObjectFile : localObjectFiles) {
     targets.push_back(localObjectFile.first);
 
-    std::string::size_type dot_pos = localObjectFile.first.rfind(".");
+    std::string::size_type dot_pos = localObjectFile.first.rfind('.');
     std::string base = localObjectFile.first.substr(0, dot_pos);
     if (localObjectFile.second.HasPreprocessRule) {
       targets.push_back(base + ".i");
