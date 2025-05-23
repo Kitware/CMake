@@ -53,6 +53,7 @@ protected:
   };
 
   Stream(std::ios& s, FILE* file, Direction direction);
+  ~Stream(); // NOLINT(performance-trivially-destructible)
 
 private:
   std::ios& IOS_;
@@ -61,6 +62,7 @@ private:
 
 #ifdef _WIN32
   void* Console_ = nullptr;
+  unsigned long ConsoleOrigMode_ = 0;
 #endif
 };
 
