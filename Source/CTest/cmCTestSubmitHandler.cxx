@@ -32,9 +32,8 @@
 
 #define SUBMIT_TIMEOUT_IN_SECONDS_DEFAULT 120
 
-using cmCTestSubmitHandlerVectorOfChar = std::vector<char>;
-
-class cmCTestSubmitHandler::ResponseParser : public cmXMLParser
+namespace {
+class ResponseParser : public cmXMLParser
 {
 public:
   enum StatusType
@@ -96,24 +95,24 @@ private:
   }
 };
 
-static size_t cmCTestSubmitHandlerWriteMemoryCallback(void* ptr, size_t size,
-                                                      size_t nmemb, void* data)
+size_t cmCTestSubmitHandlerWriteMemoryCallback(void* ptr, size_t size,
+                                               size_t nmemb, void* data)
 {
   int realsize = static_cast<int>(size * nmemb);
   char const* chPtr = static_cast<char*>(ptr);
-  cm::append(*static_cast<cmCTestSubmitHandlerVectorOfChar*>(data), chPtr,
-             chPtr + realsize);
+  cm::append(*static_cast<std::vector<char>*>(data), chPtr, chPtr + realsize);
   return realsize;
 }
 
-static size_t cmCTestSubmitHandlerCurlDebugCallback(CURL* /*unused*/,
-                                                    curl_infotype /*unused*/,
-                                                    char* chPtr, size_t size,
-                                                    void* data)
+size_t cmCTestSubmitHandlerCurlDebugCallback(CURL* /*unused*/,
+                                             curl_infotype /*unused*/,
+                                             char* chPtr, size_t size,
+                                             void* data)
 {
-  cm::append(*static_cast<cmCTestSubmitHandlerVectorOfChar*>(data), chPtr,
-             chPtr + size);
+  cm::append(*static_cast<std::vector<char>*>(data), chPtr, chPtr + size);
   return 0;
+}
+
 }
 
 cmCTestSubmitHandler::cmCTestSubmitHandler(cmCTest* ctest)
@@ -321,8 +320,8 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(
                          cmCTestSubmitHandlerCurlDebugCallback);
 
       /* we pass our 'chunk' struct to the callback function */
-      cmCTestSubmitHandlerVectorOfChar chunk;
-      cmCTestSubmitHandlerVectorOfChar chunkDebug;
+      std::vector<char> chunk;
+      std::vector<char> chunkDebug;
       ::curl_easy_setopt(curl, CURLOPT_FILE, &chunk);
       ::curl_easy_setopt(curl, CURLOPT_DEBUGDATA, &chunkDebug);
 
@@ -447,8 +446,7 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(
   return true;
 }
 
-void cmCTestSubmitHandler::ParseResponse(
-  cmCTestSubmitHandlerVectorOfChar chunk)
+void cmCTestSubmitHandler::ParseResponse(std::vector<char> chunk)
 {
   std::string output;
   output.append(chunk.begin(), chunk.end());
@@ -715,6 +713,9 @@ int cmCTestSubmitHandler::ProcessHandler()
     return -1;
   }
 
+  cmGeneratedFileStream ofs;
+  this->StartLogFile("Submit", ofs);
+
   if (char const* proxy = getenv("HTTP_PROXY")) {
     this->HTTPProxyType = 1;
     this->HTTPProxy = proxy;
@@ -747,8 +748,6 @@ int cmCTestSubmitHandler::ProcessHandler()
                        "   Use HTTP Proxy: " << this->HTTPProxy << std::endl,
                        this->Quiet);
   }
-  cmGeneratedFileStream ofs;
-  this->StartLogFile("Submit", ofs);
 
   std::vector<std::string> files;
   std::string prefix = this->GetSubmitResultsPrefix();
@@ -835,7 +834,7 @@ int cmCTestSubmitHandler::ProcessHandler()
                        "   Send to group: " << specificGroup << std::endl,
                        this->Quiet);
   }
-  this->SetLogFile(&ofs);
+  this->LogFile = &ofs;
 
   std::string url = this->CTest->GetSubmitURL();
   cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,

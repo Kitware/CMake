@@ -37,17 +37,12 @@ public:
   /** Specify a set of files to submit.  */
   void SelectFiles(std::set<std::string> const& files);
 
-  // handle the cdash file upload protocol
-  int HandleCDashUploadFile(std::string const& file, std::string const& type);
-
   void SetHttpHeaders(std::vector<std::string> const& v)
   {
     this->HttpHeaders.insert(this->HttpHeaders.end(), v.begin(), v.end());
   }
 
 private:
-  void SetLogFile(std::ostream* ost) { this->LogFile = ost; }
-
   /**
    * Submit file using various ways
    */
@@ -55,15 +50,13 @@ private:
                        std::vector<std::string> const& files,
                        std::string const& remoteprefix,
                        std::string const& url);
+  void ParseResponse(std::vector<char> chunk);
 
-  using cmCTestSubmitHandlerVectorOfChar = std::vector<char>;
-
-  void ParseResponse(cmCTestSubmitHandlerVectorOfChar chunk);
+  // handle the cdash file upload protocol
+  int HandleCDashUploadFile(std::string const& file, std::string const& type);
 
   std::string GetSubmitResultsPrefix();
   int GetSubmitInactivityTimeout();
-
-  class ResponseParser;
 
   std::string HTTPProxy;
   int HTTPProxyType = 0;
