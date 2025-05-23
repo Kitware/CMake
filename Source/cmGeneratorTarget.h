@@ -935,6 +935,7 @@ public:
 
   /** Get a build-tree directory in which to place target support files.  */
   std::string GetSupportDirectory() const;
+  std::string GetCMFSupportDirectory() const;
 
   /** Return whether this target may be used to link another target.  */
   bool IsLinkable() const;

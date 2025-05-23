@@ -2851,7 +2851,7 @@ std::string cmGeneratorTarget::GetPchHeader(std::string const& config,
       { "OBJCXX", ".objcxx.hxx" }
     };
 
-    filename = generatorTarget->GetSupportDirectory();
+    filename = generatorTarget->GetCMFSupportDirectory();
 
     if (this->GetGlobalGenerator()->IsMultiConfig()) {
       filename = cmStrCat(filename, '/', config);
@@ -2944,7 +2944,8 @@ std::string cmGeneratorTarget::GetPchSource(std::string const& config,
         this->GetGlobalGenerator()->FindGeneratorTarget(*pchReuseFrom);
     }
 
-    filename = cmStrCat(generatorTarget->GetSupportDirectory(), "/cmake_pch");
+    filename =
+      cmStrCat(generatorTarget->GetCMFSupportDirectory(), "/cmake_pch");
 
     // For GCC the source extension will be transformed into .h[xx].gch
     if (!this->Makefile->IsOn("CMAKE_LINK_PCH")) {
@@ -5218,6 +5219,17 @@ bool cmGeneratorTarget::NeedImportLibraryName(std::string const& config) const
 std::string cmGeneratorTarget::GetSupportDirectory() const
 {
   cmLocalGenerator* lg = this->GetLocalGenerator();
+  return cmStrCat(lg->GetObjectOutputRoot(), '/',
+                  lg->GetTargetDirectory(this));
+}
+
+std::string cmGeneratorTarget::GetCMFSupportDirectory() const
+{
+  cmLocalGenerator* lg = this->GetLocalGenerator();
+  if (!lg->AlwaysUsesCMFPaths()) {
+    return cmStrCat(lg->GetCurrentBinaryDirectory(), "/CMakeFiles/",
+                    lg->GetTargetDirectory(this));
+  }
   return cmStrCat(lg->GetObjectOutputRoot(), '/',
                   lg->GetTargetDirectory(this));
 }

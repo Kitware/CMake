@@ -52,6 +52,7 @@ public:
     cmGeneratorTarget const* = nullptr) override;
 
   std::string GetObjectOutputRoot() const override;
+  bool AlwaysUsesCMFPaths() const override;
 
 protected:
   virtual char const* ReportErrorLabel() const;

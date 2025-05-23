@@ -51,7 +51,7 @@ std::string cmInstallCxxModuleBmiGenerator::GetScriptLocation(
   if (config.empty()) {
     config_name = "noconfig";
   }
-  return cmStrCat(this->Target->GetSupportDirectory(),
+  return cmStrCat(this->Target->GetCMFSupportDirectory(),
                   "/install-cxx-module-bmi-", config_name, ".cmake");
 }
 

@@ -3323,7 +3323,7 @@ void cmLocalGenerator::AddUnityBuild(cmGeneratorTarget* target)
   }
 
   std::string filename_base =
-    cmStrCat(target->GetSupportDirectory(), "/Unity/");
+    cmStrCat(target->GetCMFSupportDirectory(), "/Unity/");
 
   cmValue batchSizeString = target->GetProperty("UNITY_BUILD_BATCH_SIZE");
   size_t const unityBatchSize = batchSizeString
@@ -4289,6 +4289,11 @@ std::string cmLocalGenerator::GetObjectFileNameWithoutTarget(
 std::string cmLocalGenerator::GetObjectOutputRoot() const
 {
   return cmStrCat(this->GetCurrentBinaryDirectory(), "/CMakeFiles");
+}
+
+bool cmLocalGenerator::AlwaysUsesCMFPaths() const
+{
+  return true;
 }
 
 std::string cmLocalGenerator::GetSourceFileLanguage(cmSourceFile const& source)

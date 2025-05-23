@@ -89,6 +89,11 @@ std::string cmLocalVisualStudioGenerator::GetObjectOutputRoot() const
   return this->GetCurrentBinaryDirectory();
 }
 
+bool cmLocalVisualStudioGenerator::AlwaysUsesCMFPaths() const
+{
+  return false;
+}
+
 std::unique_ptr<cmCustomCommand>
 cmLocalVisualStudioGenerator::MaybeCreateImplibDir(cmGeneratorTarget* target,
                                                    std::string const& config,

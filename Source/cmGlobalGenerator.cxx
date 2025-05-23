@@ -3636,7 +3636,7 @@ void cmGlobalGenerator::WriteSummary()
         continue;
       }
       this->WriteSummary(tgt.get());
-      fout << tgt->GetSupportDirectory() << '\n';
+      fout << tgt->GetCMFSupportDirectory() << '\n';
     }
   }
 }
@@ -3644,7 +3644,7 @@ void cmGlobalGenerator::WriteSummary()
 void cmGlobalGenerator::WriteSummary(cmGeneratorTarget* target)
 {
   // Place the labels file in a per-target support directory.
-  std::string dir = target->GetSupportDirectory();
+  std::string dir = target->GetCMFSupportDirectory();
   std::string file = cmStrCat(dir, "/Labels.txt");
   std::string json_file = cmStrCat(dir, "/Labels.json");
 

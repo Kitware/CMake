@@ -439,6 +439,7 @@ public:
   std::string const& GetCurrentSourceDirectory() const;
 
   virtual std::string GetObjectOutputRoot() const;
+  virtual bool AlwaysUsesCMFPaths() const;
 
   /**
    * Generate a macOS application bundle Info.plist file.
