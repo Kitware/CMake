@@ -113,7 +113,7 @@ bool cmCPackWIXGenerator::RunCandleCommand(std::string const& sourceFile,
     command << " -ext " << QuotePath(ext);
   }
 
-  if (!cmHasSuffix(sourceFile, this->CPackTopLevel)) {
+  if (!cmHasPrefix(sourceFile, this->CPackTopLevel)) {
     command << ' ' << QuotePath(cmStrCat("-I", this->CPackTopLevel));
   }
 
