@@ -334,8 +334,13 @@ bool cmCPackWIXGenerator::PackageWithWix()
 
   AddCustomFlags("CPACK_WIX_BUILD_EXTRA_FLAGS", command);
 
+  bool includeCPackTopLevel = false;
   for (std::string const& sourceFilename : this->WixSources) {
     command << " -src " << QuotePath(CMakeToWixPath(sourceFilename));
+    includeCPackTopLevel |= !cmHasPrefix(sourceFilename, this->CPackTopLevel);
+  }
+  if (includeCPackTopLevel) {
+    command << " -i " << QuotePath(this->CPackTopLevel);
   }
 
   return RunWiXCommand(command.str());
