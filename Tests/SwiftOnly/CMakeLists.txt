@@ -5,6 +5,10 @@ endif()
 if(POLICY CMP0157)
   cmake_policy(SET CMP0157 NEW)
 endif()
+if(POLICY CMP0195)
+  cmake_policy(SET CMP0195 NEW)
+  set(Swift_NESTED_MODULE TRUE)
+endif()
 
 # NOTE: Force the Release mode configuration as there are some issues with the
 # debug information handling on macOS on certain Xcode builds.
@@ -52,11 +56,18 @@ target_link_libraries(N PUBLIC
 
 # FIXME(#25989): The Xcode generator doesn't respect CMAKE_Swift_MODULE_DIRECTORY.
 if(NOT CMAKE_GENERATOR STREQUAL "Xcode")
+  if(Swift_NESTED_MODULE)
+    # Swift module is a directory, grab the binary swiftmodule file
+    set(ModulePath "${CMAKE_Swift_MODULE_DIRECTORY}/M.swiftmodule/${CMAKE_Swift_MODULE_TRIPLE}.swiftmodule")
+  else()
+    # Swift modules are files
+    set(ModulePath "${CMAKE_Swift_MODULE_DIRECTORY}/M.swiftmodule")
+  endif()
   add_custom_command(TARGET M
     POST_BUILD
     COMMAND "${CMAKE_COMMAND}" -E compare_files
-    "${CMAKE_Swift_MODULE_DIRECTORY}/M.swiftmodule"
-    "${CMAKE_Swift_MODULE_DIRECTORY}/M.swiftmodule"
+    "${ModulePath}"
+    "${ModulePath}"
     COMMENT "check that .swiftmodule files are generated in CMAKE_Swift_MODULE_DIRECTORY"
     VERBATIM)
 endif()

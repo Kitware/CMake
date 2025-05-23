@@ -580,7 +580,11 @@ class cmMakefile;
          "install prefix '/'.",                                               \
          4, 1, 0, WARN)                                                       \
   SELECT(POLICY, CMP194, "MSVC is not an assembler for language ASM.", 4, 1,  \
-         0, WARN)
+         0, WARN)                                                             \
+  SELECT(                                                                     \
+    POLICY, CMP0195,                                                          \
+    "Swift modules in build trees use the Swift module directory structure.", \
+    4, 1, 0, WARN)
 
 #define CM_SELECT_ID(F, A1, A2, A3, A4, A5, A6) F(A1)
 #define CM_FOR_EACH_POLICY_ID(POLICY)                                         \
@@ -627,7 +631,8 @@ class cmMakefile;
   F(CMP0162)                                                                  \
   F(CMP0179)                                                                  \
   F(CMP0181)                                                                  \
-  F(CMP0182)
+  F(CMP0182)                                                                  \
+  F(CMP0195)
 
 #define CM_FOR_EACH_CUSTOM_COMMAND_POLICY(F)                                  \
   F(CMP0116)                                                                  \
