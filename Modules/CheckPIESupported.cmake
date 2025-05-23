@@ -148,6 +148,9 @@ function (check_pie_supported)
   set(CMAKE_REQUIRED_QUIET TRUE)
   set (outputs)
 
+  # Isolate the checks below from the project's PIC selection.
+  unset(CMAKE_POSITION_INDEPENDENT_CODE)
+
   foreach(lang IN LISTS CHECK_PIE_LANGUAGES)
     if(_CMAKE_${lang}_PIE_MAY_BE_SUPPORTED_BY_LINKER)
       if(NOT DEFINED CMAKE_${lang}_LINK_PIE_SUPPORTED)
