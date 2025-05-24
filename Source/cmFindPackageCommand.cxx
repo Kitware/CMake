@@ -1131,6 +1131,9 @@ bool cmFindPackageCommand::FindPackage(
       if (this->DebugModeEnabled()) {
         this->DebugMessage("Package was found by the dependency provider");
       }
+      if (this->DebugState) {
+        this->DebugState->FoundAt(searchPath);
+      }
       this->FileFound = searchPath;
       this->FileFoundMode = FoundPackageMode::Provider;
       this->AppendSuccessInformation();
@@ -1524,31 +1527,34 @@ bool cmFindPackageCommand::FindModule(bool& found)
     bool result = this->ReadListFile(mfile, DoPolicyScope);
     this->Makefile->RemoveDefinition(var);
 
-    if (this->DebugModeEnabled()) {
-      std::string const foundVar = cmStrCat(this->Name, "_FOUND");
-      if (this->Makefile->IsDefinitionSet(foundVar) &&
-          !this->Makefile->IsOn(foundVar)) {
+    std::string const foundVar = cmStrCat(this->Name, "_FOUND");
+    if (this->Makefile->IsDefinitionSet(foundVar) &&
+        !this->Makefile->IsOn(foundVar)) {
 
+      if (this->DebugModeEnabled()) {
         this->DebugBuffer = cmStrCat(
           this->DebugBuffer, "The module is considered not found due to ",
           foundVar, " being FALSE.");
+      }
 
-        this->ConsideredPaths.emplace_back(mfile, FoundPackageMode::Module,
-                                           SearchResult::NotFound);
-        std::string const notFoundMessageVar =
-          cmStrCat(this->Name, "_NOT_FOUND_MESSAGE");
-        if (cmValue notFoundMessage =
-              this->Makefile->GetDefinition(notFoundMessageVar)) {
+      this->ConsideredPaths.emplace_back(mfile, FoundPackageMode::Module,
+                                         SearchResult::NotFound);
+      std::string const notFoundMessageVar =
+        cmStrCat(this->Name, "_NOT_FOUND_MESSAGE");
+      if (cmValue notFoundMessage =
+            this->Makefile->GetDefinition(notFoundMessageVar)) {
 
-          this->ConsideredPaths.back().Message = *notFoundMessage;
-        }
-      } else {
-        this->FileFound = mfile;
-        this->FileFoundMode = FoundPackageMode::Module;
-        std::string const versionVar = cmStrCat(this->Name, "_VERSION");
-        if (cmValue version = this->Makefile->GetDefinition(versionVar)) {
-          this->VersionFound = *version;
-        }
+        this->ConsideredPaths.back().Message = *notFoundMessage;
+      }
+    } else {
+      if (this->DebugState) {
+        this->DebugState->FoundAt(mfile);
+      }
+      this->FileFound = mfile;
+      this->FileFoundMode = FoundPackageMode::Module;
+      std::string const versionVar = cmStrCat(this->Name, "_VERSION");
+      if (cmValue version = this->Makefile->GetDefinition(versionVar)) {
+        this->VersionFound = *version;
       }
     }
     return result;
@@ -1581,6 +1587,9 @@ bool cmFindPackageCommand::HandlePackageMode(
       std::string file;
       FoundPackageMode foundMode = FoundPackageMode::None;
       if (this->FindConfigFile(dir, pdt::Any, file, foundMode)) {
+        if (this->DebugState) {
+          this->DebugState->FoundAt(file);
+        }
         this->FileFound = std::move(file);
         this->FileFoundMode = foundMode;
         fileFound = true;
