@@ -5,28 +5,40 @@
 CheckCXXSourceRuns
 ------------------
 
-Check once if given C++ source compiles and links into an executable and can
-subsequently be run.
+This module provides a command to check whether a C++ source can be built
+and run.
+
+Load this module in a CMake project with:
+
+.. code-block:: cmake
+
+  include(CheckCXXSourceRuns)
+
+Commands
+^^^^^^^^
+
+This module provides the following command:
 
 .. command:: check_cxx_source_runs
 
+  Checks once whether the given C++ source code compiles and links into an
+  executable that can subsequently be run:
+
   .. code-block:: cmake
 
-    check_cxx_source_runs(<code> <resultVar>)
+    check_cxx_source_runs(<code> <variable>)
 
-  Check once that the source supplied in ``<code>`` can be built, linked as an
-  executable, and then run. The ``<code>`` must contain at least a ``main()``
-  function.
+  The C++ source supplied in ``<code>`` must contain at least a ``main()``
+  function.  The result of the check is stored in the internal cache variable
+  specified by ``<variable>``.  If the code builds and runs with exit code
+  ``0``, success is indicated by a boolean true value.  Failure to build or
+  run is indicated by a boolean false value, such as an empty string or an
+  error message.
 
-  The result is stored in the internal cache variable specified by
-  ``<resultVar>``. If the code builds and runs with exit code ``0``, success is
-  indicated by boolean ``true``. Failure to build or run is indicated by boolean
-  ``false``, such as an empty string or an error message.
+  .. rubric:: Variables Affecting the Check
 
-  See also :command:`check_source_runs` for a more general command syntax.
-
-  The compile and link commands can be influenced by setting any of the
-  following variables prior to calling ``check_cxx_source_runs()``:
+  The following variables may be set before calling this command to modify
+  the way the check is run:
 
   .. include:: /module/include/CMAKE_REQUIRED_FLAGS.rst
 
@@ -42,6 +54,39 @@ subsequently be run.
 
   .. include:: /module/include/CMAKE_REQUIRED_QUIET.rst
 
+Examples
+^^^^^^^^
+
+The following example demonstrates how to check whether the C++ standard
+library is functional and ``std::vector`` works at runtime.  If the source
+compiles, links, and runs successfully, internal cache variable
+``HAVE_WORKING_STD_VECTOR`` will be set to boolean true value.  Code is
+supplied using :ref:`Bracket Argument` for easier embedded quotes handling:
+
+.. code-block:: cmake
+  :force:
+
+  include(CheckCXXSourceRuns)
+
+  check_cxx_source_runs([[
+    #include <iostream>
+    #include <vector>
+
+    int main()
+    {
+      std::vector<int> v = {1, 2, 3};
+      if (v.size() != 3) return 1;
+      std::cout << "Vector works correctly." << std::endl;
+      return 0;
+    }
+  ]] HAVE_WORKING_STD_VECTOR)
+
+See Also
+^^^^^^^^
+
+* The :module:`CheckSourceRuns` module for a more general command syntax.
+* The :module:`CheckSourceCompiles` module to check whether a source code
+  can be built.
 #]=======================================================================]
 
 include_guard(GLOBAL)
