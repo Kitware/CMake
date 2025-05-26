@@ -282,15 +282,15 @@ Other Changes
   :command:`install` documentation so that external packaging software can take
   advantage of CPack-style component installs.
 
-* The :module:`CheckIncludeFile` module ``check_include_file`` macro
+* The :module:`CheckIncludeFile` module ``check_include_file()`` command
   learned to honor the ``CMAKE_REQUIRED_LIBRARIES`` variable.
   See policy :policy:`CMP0075`.
 
-* The :module:`CheckIncludeFileCXX` module ``check_include_file_cxx`` macro
+* The :module:`CheckIncludeFileCXX` module ``check_include_file_cxx()`` command
   learned to honor the ``CMAKE_REQUIRED_LIBRARIES`` variable.
   See policy :policy:`CMP0075`.
 
-* The :module:`CheckIncludeFiles` module ``check_include_files`` macro
+* The :module:`CheckIncludeFiles` module ``check_include_files()`` command
   learned to honor the ``CMAKE_REQUIRED_LIBRARIES`` variable.
   See policy :policy:`CMP0075`.
 

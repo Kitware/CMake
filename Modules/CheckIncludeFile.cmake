@@ -5,21 +5,37 @@
 CheckIncludeFile
 ----------------
 
-Provides a macro to check if a header file can be included in ``C``.
+This module provides a command to check C header file.
+
+Load this module in a CMake project with:
+
+.. code-block:: cmake
+
+  include(CheckIncludeFile)
+
+Commands
+^^^^^^^^
+
+This module provides the following command:
 
 .. command:: check_include_file
+
+  Checks once whether a header file can be included in C code:
 
   .. code-block:: cmake
 
     check_include_file(<include> <variable> [<flags>])
 
-  Check if the given ``<include>`` file may be included in a ``C``
-  source file and store the result in an internal cache entry named
-  ``<variable>``.  The optional third argument may be used to add
-  compilation flags to the check (or use ``CMAKE_REQUIRED_FLAGS`` below).
+  This command checks once whether the given ``<include>`` header file
+  exists and can be included in a C source file.  The result of the check
+  is stored in an internal cache variable named ``<variable>``.  The
+  optional third argument may be used to add additional compilation flags
+  to the check (or use the ``CMAKE_REQUIRED_FLAGS`` variable below).
 
-The following variables may be set before calling this macro to modify
-the way the check is run:
+  .. rubric:: Variables Affecting the Check
+
+  The following variables may be set before calling this command to modify
+  the way the check is run:
 
   .. include:: /module/include/CMAKE_REQUIRED_FLAGS.rst
 
@@ -35,10 +51,17 @@ the way the check is run:
 
   .. include:: /module/include/CMAKE_REQUIRED_QUIET.rst
 
+  .. versionadded:: 3.12
+    The ``CMAKE_REQUIRED_LIBRARIES`` variable, if policy :policy:`CMP0075` is
+    set to ``NEW``.
+
 Examples
 ^^^^^^^^
 
-Checking whether the ``C`` header ``<unistd.h>`` exists and storing the check
+Example: Checking C Header
+""""""""""""""""""""""""""
+
+Checking whether the C header ``<unistd.h>`` exists and storing the check
 result in the ``HAVE_UNISTD_H`` cache variable:
 
 .. code-block:: cmake
@@ -47,12 +70,40 @@ result in the ``HAVE_UNISTD_H`` cache variable:
 
   check_include_file(unistd.h HAVE_UNISTD_H)
 
+Example: Isolated Check
+"""""""""""""""""""""""
+
+In the following example, this module is used in combination with the
+:module:`CMakePushCheckState` module to temporarily modify the required
+compile definitions (via ``CMAKE_REQUIRED_DEFINITIONS``) and verify whether
+the C header ``ucontext.h`` is available.  The result is stored
+in the internal cache variable ``HAVE_UCONTEXT_H``.
+
+For example, on macOS, the ``ucontext`` API is deprecated, and headers may
+be hidden unless certain feature macros are defined.  In particular,
+defining ``_XOPEN_SOURCE`` (without a value) can expose the necessary
+symbols without enabling broader POSIX or SUS (Single Unix Specification)
+features (values 500 or greater).
+
+.. code-block:: cmake
+
+  include(CheckIncludeFile)
+  include(CMakePushCheckState)
+
+  cmake_push_check_state(RESET)
+    if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+      set(CMAKE_REQUIRED_DEFINITIONS -D_XOPEN_SOURCE)
+    endif()
+
+    check_include_files(ucontext.h HAVE_UCONTEXT_H)
+  cmake_pop_check_state()
+
 See Also
 ^^^^^^^^
 
-* The :module:`CheckIncludeFileCXX` module to check for single ``C++`` header.
-* The :module:`CheckIncludeFiles` module to check for one or more ``C`` or
-  ``C++`` headers at once.
+* The :module:`CheckIncludeFileCXX` module to check for single C++ header.
+* The :module:`CheckIncludeFiles` module to check for one or more C or
+  C++ headers at once.
 #]=======================================================================]
 
 include_guard(GLOBAL)
