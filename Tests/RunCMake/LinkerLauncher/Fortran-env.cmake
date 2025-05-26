@@ -1,0 +1,1 @@
+include(Fortran-common.cmake)

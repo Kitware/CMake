@@ -78,6 +78,11 @@ if(NOT CMAKE_Fortran_COMPILER_LAUNCHER AND DEFINED ENV{CMAKE_Fortran_COMPILER_LA
     CACHE STRING "Compiler launcher for Fortran.")
 endif()
 
+if(NOT CMAKE_Fortran_LINKER_LAUNCHER AND DEFINED ENV{CMAKE_Fortran_LINKER_LAUNCHER})
+  set(CMAKE_Fortran_LINKER_LAUNCHER "$ENV{CMAKE_Fortran_LINKER_LAUNCHER}"
+          CACHE STRING "Linker launcher for Fortran.")
+endif()
+
 include(CMakeCommonLanguageInclude)
 _cmake_common_language_platform_flags(Fortran)
 
