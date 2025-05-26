@@ -63,7 +63,7 @@ add_dependencies(checksayhello sayhello)
 
 include(CheckFortranSourceCompiles)
 unset(HAVE_PRINT CACHE)
-CHECK_Fortran_SOURCE_COMPILES([[
+check_fortran_source_compiles([[
       PROGRAM TEST_HAVE_PRINT
         PRINT *, 'Hello'
       END

@@ -35,7 +35,7 @@ exercise, complete ``TODO 1`` through ``TODO 5``.
 
 Start by editing ``MathFunctions/CMakeLists.txt``. Include the
 :module:`CheckCXXSourceCompiles` module. Then, use
-``check_cxx_source_compiles`` to determine whether ``log`` and ``exp`` are
+``check_cxx_source_compiles()`` to determine whether ``log`` and ``exp`` are
 available from ``cmath``. If they are available, use
 :command:`target_compile_definitions` to specify ``HAVE_LOG`` and ``HAVE_EXP``
 as compile definitions.

@@ -191,7 +191,7 @@ Modules
   meant for a prefix other than :variable:`CMAKE_INSTALL_PREFIX`.
 
 * The :module:`CheckFortranSourceCompiles` module was added to
-  provide a ``CHECK_Fortran_SOURCE_COMPILES`` macro.
+  provide a ``check_fortran_source_compiles()`` command.
 
 * The :module:`ExternalData` module learned to tolerate a ``DATA{}``
   reference to a missing source file with a warning instead of
