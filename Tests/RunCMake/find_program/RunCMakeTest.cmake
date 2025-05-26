@@ -1,5 +1,6 @@
 include(RunCMake)
 
+run_cmake(ConfigureLogTransitions)
 run_cmake(EnvAndHints)
 run_cmake(DirsPerName)
 run_cmake(NamesPerDir)

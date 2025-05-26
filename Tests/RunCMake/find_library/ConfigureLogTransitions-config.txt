@@ -1,0 +1,167 @@
+^
+---
+events:
+  -
+events:(
+  -
+    kind: "find-v1"(
+    [^
+]*)+|
++  -
+    kind: "message-v1"
+    backtrace:(
+      - "[^"]+")+
+    message: \|(
++      [^
+]*)*)*
+  -
+    kind: "message-v1"
+    backtrace:
+      - "ConfigureLogTransitions.cmake:[0-9]+ \(message\)"
+      - "CMakeLists.txt:[0-9]+ \(include\)"
+    message: |
+      NotDefined -> NotFound
+  -
+    kind: "find-v1"
+    backtrace:
+      - "ConfigureLogTransitions.cmake:[0-9]+ \(find_library\)"
+      - "CMakeLists.txt:[0-9]+ \(include\)"
+    mode: "library"
+    variable: "NOEXIST_FILE"
+    description: "Path to a library."
+    settings:
+      SearchFramework: "(NEVER|FIRST)"
+      SearchAppBundle: "(NEVER|FIRST)"
+      CMAKE_FIND_USE_CMAKE_PATH: true
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "NoExist"
+    candidate_directories:
+      - ".*/Tests/RunCMake/find_library/lib/"
+      - ".*/Tests/RunCMake/find_library/"(
+      - "[^"]+")+
+    searched_directories:
+      - ".*/Tests/RunCMake/find_library/lib/"
+      - ".*/Tests/RunCMake/find_library/"(
+      - "[^"]+")+
+    found: false
+    search_context:(
+      [^
+]*)+
+  -
+    kind: "message-v1"
+    backtrace:
+      - "ConfigureLogTransitions.cmake:[0-9]+ \(find_library\)"
+      - "CMakeLists.txt:[0-9]+ \(include\)"
+    message: |
+      NotFound -> NotFound
+  -
+    kind: "message-v1"
+    backtrace:
+      - "ConfigureLogTransitions.cmake:[0-9]+ \(find_library\)"
+      - "CMakeLists.txt:[0-9]+ \(include\)"
+    message: |
+      NotDefined -> Found
+  -
+    kind: "find-v1"
+    backtrace:
+      - "ConfigureLogTransitions.cmake:[0-9]+ \(find_library\)"
+      - "CMakeLists.txt:[0-9]+ \(include\)"
+    mode: "library"
+    variable: "PREFIX_IN_PATH"
+    description: "Path to a library."
+    settings:
+      SearchFramework: "(NEVER|FIRST)"
+      SearchAppBundle: "(NEVER|FIRST)"
+      CMAKE_FIND_USE_CMAKE_PATH: true
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "PrefixInPATH"
+    candidate_directories:
+      - ".*/Tests/RunCMake/find_library/lib/"
+      - ".*/Tests/RunCMake/find_library/"(
+      - "[^"]+")+
+    found: ".*/Tests/RunCMake/find_library/lib/libPrefixInPATH.a"
+    search_context:(
+      [^
+]*)+
+  -
+    kind: "message-v1"
+    backtrace:
+      - "ConfigureLogTransitions.cmake:[0-9]+ \(find_library\)"
+      - "CMakeLists.txt:[0-9]+ \(include\)"
+    message: |
+      Found -> Found
+  -
+    kind: "message-v1"
+    backtrace:
+      - "ConfigureLogTransitions.cmake:[0-9]+ \(find_library\)"
+      - "CMakeLists.txt:[0-9]+ \(include\)"
+    message: |
+      Found -> NotFound
+  -
+    kind: "find-v1"
+    backtrace:
+      - "ConfigureLogTransitions.cmake:[0-9]+ \(find_library\)"
+      - "CMakeLists.txt:[0-9]+ \(include\)"
+    mode: "library"
+    variable: "PREFIX_IN_PATH"
+    description: "Path to a library."
+    settings:
+      SearchFramework: "(NEVER|FIRST)"
+      SearchAppBundle: "(NEVER|FIRST)"
+      CMAKE_FIND_USE_CMAKE_PATH: true
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "PrefixInPATH"
+    candidate_directories:(
+      - "[^"]+")+
+    searched_directories:(
+      - "[^"]+")+
+    found: false
+    search_context:(
+      [^
+]*)+
+  -
+    kind: "message-v1"
+    backtrace:
+      - "ConfigureLogTransitions.cmake:[0-9]+ \(find_library\)"
+      - "CMakeLists.txt:[0-9]+ \(include\)"
+    message: |
+      NotFound -> Found
+  -
+    kind: "find-v1"
+    backtrace:
+      - "ConfigureLogTransitions.cmake:[0-9]+ \(find_library\)"
+      - "CMakeLists.txt:[0-9]+ \(include\)"
+    mode: "library"
+    variable: "PREFIX_IN_PATH"
+    description: "Path to a library."
+    settings:
+      SearchFramework: "(NEVER|FIRST)"
+      SearchAppBundle: "(NEVER|FIRST)"
+      CMAKE_FIND_USE_CMAKE_PATH: true
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "PrefixInPATH"
+    candidate_directories:
+      - ".*/Tests/RunCMake/find_library/lib/"
+      - ".*/Tests/RunCMake/find_library/"(
+      - "[^"]+")+
+    found: ".*/Tests/RunCMake/find_library/lib/libPrefixInPATH.a"
+    search_context:(
+      [^
+]*)+
+...
