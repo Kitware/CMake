@@ -132,9 +132,8 @@ void cmGhsMultiTargetGenerator::GenerateTarget()
 
   // Open the target file in copy-if-different mode.
   std::string fproj =
-    cmStrCat(this->LocalGenerator->GetCurrentBinaryDirectory(), '/',
-             this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget),
-             '/', this->Name, cmGlobalGhsMultiGenerator::FILE_EXTENSION);
+    cmStrCat(this->GeneratorTarget->GetSupportDirectory(), '/', this->Name,
+             cmGlobalGhsMultiGenerator::FILE_EXTENSION);
 
   // Tell the global generator the name of the project file
   this->GeneratorTarget->Target->SetProperty("GENERATOR_FILE_NAME", fproj);
@@ -179,9 +178,7 @@ void cmGhsMultiTargetGenerator::WriteTargetSpecifics(std::ostream& fout,
    */
   if (this->TagType != GhsMultiGpj::SUBPROJECT) {
     // set target binary file destination
-    std::string binpath = cmStrCat(
-      this->LocalGenerator->GetCurrentBinaryDirectory(), '/',
-      this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget));
+    std::string binpath = this->GeneratorTarget->GetSupportDirectory();
     outpath = cmSystemTools::RelativePath(
       binpath, this->GeneratorTarget->GetDirectory(config));
     /* clang-format off */
@@ -386,10 +383,8 @@ void cmGhsMultiTargetGenerator::WriteBuildEventsHelper(
   for (cmCustomCommand const& cc : ccv) {
     cmCustomCommandGenerator ccg(cc, this->ConfigName, this->LocalGenerator);
     // Open the filestream for this custom command
-    std::string fname =
-      cmStrCat(this->LocalGenerator->GetCurrentBinaryDirectory(), '/',
-               this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget),
-               '/', this->Name, '_', name, cmdcount++, fext);
+    std::string fname = cmStrCat(this->GeneratorTarget->GetSupportDirectory(),
+                                 '/', this->Name, '_', name, cmdcount++, fext);
 
     cmGeneratedFileStream f(fname);
     f.SetCopyIfDifferent(true);
@@ -604,10 +599,8 @@ void cmGhsMultiTargetGenerator::WriteSources(std::ostream& fout_proj)
       cmsys::SystemTools::ReplaceString(gname, "\\", "_");
       std::string lpath =
         cmStrCat(gname, cmGlobalGhsMultiGenerator::FILE_EXTENSION);
-      std::string fpath = cmStrCat(
-        this->LocalGenerator->GetCurrentBinaryDirectory(), '/',
-        this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget), '/',
-        lpath);
+      std::string fpath =
+        cmStrCat(this->GeneratorTarget->GetSupportDirectory(), '/', lpath);
       cmGeneratedFileStream* f = new cmGeneratedFileStream(fpath);
       f->SetCopyIfDifferent(true);
       gfiles.push_back(f);
@@ -700,10 +693,8 @@ void cmGhsMultiTargetGenerator::WriteSources(std::ostream& fout_proj)
 
           // Open the filestream for this custom command
           std::string fname = cmStrCat(
-            this->LocalGenerator->GetCurrentBinaryDirectory(), '/',
-            this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget),
-            '/', this->Name, "_cc", cmdcount++, '_',
-            (sf->GetLocation()).GetName(), fext);
+            this->GeneratorTarget->GetSupportDirectory(), '/', this->Name,
+            "_cc", cmdcount++, '_', (sf->GetLocation()).GetName(), fext);
 
           cmGeneratedFileStream f(fname);
           f.SetCopyIfDifferent(true);

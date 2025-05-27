@@ -1052,9 +1052,8 @@ void cmGlobalNinjaGenerator::ComputeTargetObjectDirectory(
   cmGeneratorTarget* gt) const
 {
   // Compute full path to object file directory for this target.
-  std::string dir = cmStrCat(gt->LocalGenerator->GetCurrentBinaryDirectory(),
-                             '/', gt->LocalGenerator->GetTargetDirectory(gt),
-                             '/', this->GetCMakeCFGIntDir(), '/');
+  std::string dir =
+    cmStrCat(gt->GetSupportDirectory(), '/', this->GetCMakeCFGIntDir(), '/');
   gt->ObjectDirectory = dir;
 }
 

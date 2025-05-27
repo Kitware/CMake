@@ -412,14 +412,9 @@ std::string cmNinjaTargetGenerator::GetCompiledSourceNinjaPath(
 std::string cmNinjaTargetGenerator::GetObjectFileDir(
   std::string const& config) const
 {
-  std::string path = this->LocalGenerator->GetHomeRelativeOutputPath();
-  if (!path.empty()) {
-    path += '/';
-  }
-  path +=
-    cmStrCat(this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget),
-             this->GetGlobalGenerator()->ConfigDirectory(config));
-  return path;
+  return this->LocalGenerator->MaybeRelativeToTopBinDir(
+    cmStrCat(this->GeneratorTarget->GetSupportDirectory(),
+             this->GetGlobalGenerator()->GetConfigDirectory(config)));
 }
 
 std::string cmNinjaTargetGenerator::GetObjectFilePath(
@@ -450,18 +445,11 @@ std::string cmNinjaTargetGenerator::GetClangTidyReplacementsFilePath(
   std::string const& directory, cmSourceFile const& source,
   std::string const& config) const
 {
-  auto path = this->LocalGenerator->GetHomeRelativeOutputPath();
-  if (!path.empty()) {
-    path += '/';
-  }
-  path = cmStrCat(directory, '/', path);
   auto const& objectName = this->GeneratorTarget->GetObjectName(&source);
-  path =
-    cmStrCat(std::move(path),
-             this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget),
-             this->GetGlobalGenerator()->ConfigDirectory(config), '/',
-             objectName, ".yaml");
-  return path;
+  return cmStrCat(directory, '/',
+                  this->LocalGenerator->CreateSafeObjectFileName(
+                    this->GetObjectFileDir(config)),
+                  '/', objectName, ".yaml");
 }
 
 std::string cmNinjaTargetGenerator::GetPreprocessedFilePath(
@@ -490,38 +478,20 @@ std::string cmNinjaTargetGenerator::GetPreprocessedFilePath(
   std::string const ppName =
     cmStrCat(objName.substr(0, objName.size() - objExt.size()), "-pp.", ppExt);
 
-  std::string path = this->LocalGenerator->GetHomeRelativeOutputPath();
-  if (!path.empty()) {
-    path += '/';
-  }
-  path +=
-    cmStrCat(this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget),
-             this->GetGlobalGenerator()->ConfigDirectory(config), '/', ppName);
-  return path;
+  return cmStrCat(this->GetObjectFileDir(config), '/', ppName);
 }
 
 std::string cmNinjaTargetGenerator::GetDyndepFilePath(
   std::string const& lang, std::string const& config) const
 {
-  std::string path = this->LocalGenerator->GetHomeRelativeOutputPath();
-  if (!path.empty()) {
-    path += '/';
-  }
-  path += cmStrCat(
-    this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget),
-    this->GetGlobalGenerator()->ConfigDirectory(config), '/', lang, ".dd");
-  return path;
+  return cmStrCat(this->GetObjectFileDir(config), '/', lang, ".dd");
 }
 
 std::string cmNinjaTargetGenerator::GetTargetDependInfoPath(
   std::string const& lang, std::string const& config) const
 {
-  std::string path =
-    cmStrCat(this->Makefile->GetCurrentBinaryDirectory(), '/',
-             this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget),
-             this->GetGlobalGenerator()->ConfigDirectory(config), '/', lang,
-             "DependInfo.json");
-  return path;
+  return cmStrCat(this->GetObjectFileDir(config), '/', lang,
+                  "DependInfo.json");
 }
 
 std::string cmNinjaTargetGenerator::GetTargetOutputDir(
@@ -1129,9 +1099,7 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements(
         tgtDir = ".";
       } else {
         // Any path that always exists will work here.
-        tgtDir = cmStrCat(
-          this->LocalGenerator->GetCurrentBinaryDirectory(), '/',
-          this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget));
+        tgtDir = this->GetObjectFileDir(config);
       }
       orderOnlyDeps.push_back(this->ConvertToNinjaPath(tgtDir));
     }
@@ -1233,10 +1201,7 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements(
     cmNinjaBuild build(this->LanguageDyndepRule(language, config));
     build.Outputs.push_back(this->GetDyndepFilePath(language, config));
     build.ImplicitOuts.emplace_back(
-      cmStrCat(this->Makefile->GetCurrentBinaryDirectory(), '/',
-               this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget),
-               this->GetGlobalGenerator()->ConfigDirectory(config), '/',
-               language, "Modules.json"));
+      cmStrCat(this->GetObjectFileDir(config), '/', language, "Modules.json"));
     build.ImplicitDeps.emplace_back(
       this->GetTargetDependInfoPath(language, config));
     {
@@ -1269,11 +1234,11 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements(
       this->GetLinkedTargetDirectories(language, config);
     for (std::string const& l : linked_directories.Direct) {
       build.ImplicitDeps.emplace_back(
-        cmStrCat(l, '/', language, "Modules.json"));
+        this->ConvertToNinjaPath(cmStrCat(l, '/', language, "Modules.json")));
     }
     for (std::string const& l : linked_directories.Forward) {
       build.ImplicitDeps.emplace_back(
-        cmStrCat(l, '/', language, "Modules.json"));
+        this->ConvertToNinjaPath(cmStrCat(l, '/', language, "Modules.json")));
     }
 
     this->GetGlobalGenerator()->WriteBuild(this->GetImplFileStream(fileConfig),
@@ -1411,9 +1376,8 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
 {
   std::string const language = source->GetLanguage();
   std::string const sourceFilePath = this->GetCompiledSourceNinjaPath(source);
-  std::string const objectDir = this->ConvertToNinjaPath(
-    cmStrCat(this->GeneratorTarget->GetSupportDirectory(),
-             this->GetGlobalGenerator()->ConfigDirectory(config)));
+  std::string const objectDir =
+    this->ConvertToNinjaPath(this->GetObjectFileDir(config));
   std::string const objectFileName =
     this->ConvertToNinjaPath(this->GetObjectFilePath(source, config));
   std::string const objectFileDir =

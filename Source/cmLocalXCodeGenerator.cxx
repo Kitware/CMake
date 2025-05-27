@@ -28,10 +28,9 @@ cmLocalXCodeGenerator::cmLocalXCodeGenerator(cmGlobalGenerator* gg,
 cmLocalXCodeGenerator::~cmLocalXCodeGenerator() = default;
 
 std::string cmLocalXCodeGenerator::GetTargetDirectory(
-  cmGeneratorTarget const*) const
+  cmGeneratorTarget const* target) const
 {
-  // No per-target directory for this generator (yet).
-  return std::string{};
+  return cmStrCat(target->GetName(), ".dir");
 }
 
 void cmLocalXCodeGenerator::AppendFlagEscape(std::string& flags,

@@ -226,17 +226,7 @@ void cmGlobalVisualStudioGenerator::ComputeTargetObjectDirectory(
   cmGeneratorTarget* gt) const
 {
   std::string dir =
-    cmStrCat(gt->LocalGenerator->GetCurrentBinaryDirectory(), '/');
-  std::string tgtDir = gt->LocalGenerator->GetTargetDirectory(gt);
-  if (!tgtDir.empty()) {
-    dir += tgtDir;
-    dir += '/';
-  }
-  char const* cd = this->GetCMakeCFGIntDir();
-  if (cd && *cd) {
-    dir += cd;
-    dir += '/';
-  }
+    cmStrCat(gt->GetSupportDirectory(), '/', this->GetCMakeCFGIntDir(), '/');
   gt->ObjectDirectory = dir;
 }
 

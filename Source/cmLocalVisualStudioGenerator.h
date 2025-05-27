@@ -51,6 +51,9 @@ public:
     std::map<cmSourceFile const*, std::string>& mapping,
     cmGeneratorTarget const* = nullptr) override;
 
+  std::string GetObjectOutputRoot() const override;
+  bool AlwaysUsesCMFPaths() const override;
+
 protected:
   virtual char const* ReportErrorLabel() const;
   virtual bool CustomCommandUseLocal() const { return false; }

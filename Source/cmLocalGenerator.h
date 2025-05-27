@@ -438,6 +438,9 @@ public:
   std::string const& GetCurrentBinaryDirectory() const;
   std::string const& GetCurrentSourceDirectory() const;
 
+  virtual std::string GetObjectOutputRoot() const;
+  virtual bool AlwaysUsesCMFPaths() const;
+
   /**
    * Generate a macOS application bundle Info.plist file.
    */
@@ -535,6 +538,8 @@ public:
   // Can we build Swift with a separate object build and link step
   // (If CMP0157 is NEW, we can do a split build)
   bool IsSplitSwiftBuild() const;
+
+  std::string CreateSafeObjectFileName(std::string const& sin) const;
 
 protected:
   // The default implementation converts to a Windows shortpath to

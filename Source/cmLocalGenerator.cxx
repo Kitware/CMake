@@ -2941,8 +2941,8 @@ void cmLocalGenerator::CopyPchCompilePdb(
     cmStrCat(target->GetLocalGenerator()->GetCurrentBinaryDirectory(), '/',
              target->GetName(), ".dir/");
 
-  std::string const copy_script = cmStrCat(
-    target_compile_pdb_dir, "copy_idb_pdb_", config.c_str(), ".cmake");
+  std::string const copy_script =
+    cmStrCat(target_compile_pdb_dir, "copy_idb_pdb_", config, ".cmake");
   cmGeneratedFileStream file(copy_script);
 
   file << "# CMake generated file\n";
@@ -3323,8 +3323,7 @@ void cmLocalGenerator::AddUnityBuild(cmGeneratorTarget* target)
   }
 
   std::string filename_base =
-    cmStrCat(this->GetCurrentBinaryDirectory(), "/CMakeFiles/",
-             target->GetName(), ".dir/Unity/");
+    cmStrCat(target->GetCMFSupportDirectory(), "/Unity/");
 
   cmValue batchSizeString = target->GetProperty("UNITY_BUILD_BATCH_SIZE");
   size_t const unityBatchSize = batchSizeString
@@ -4056,6 +4055,27 @@ bool cmLocalGeneratorCheckObjectName(std::string& objName,
 }
 }
 
+std::string cmLocalGenerator::CreateSafeObjectFileName(
+  std::string const& sin) const
+{
+  // Start with the original name.
+  std::string ssin = sin;
+
+  // Avoid full paths by removing leading slashes.
+  ssin.erase(0, ssin.find_first_not_of('/'));
+
+  // Avoid full paths by removing colons.
+  std::replace(ssin.begin(), ssin.end(), ':', '_');
+
+  // Avoid relative paths that go up the tree.
+  cmSystemTools::ReplaceString(ssin, "../", "__/");
+
+  // Avoid spaces.
+  std::replace(ssin.begin(), ssin.end(), ' ', '_');
+
+  return ssin;
+}
+
 std::string& cmLocalGenerator::CreateSafeUniqueObjectFileName(
   std::string const& sin, std::string const& dir_max)
 {
@@ -4064,20 +4084,7 @@ std::string& cmLocalGenerator::CreateSafeUniqueObjectFileName(
 
   // If no entry exists create one.
   if (it == this->UniqueObjectNamesMap.end()) {
-    // Start with the original name.
-    std::string ssin = sin;
-
-    // Avoid full paths by removing leading slashes.
-    ssin.erase(0, ssin.find_first_not_of('/'));
-
-    // Avoid full paths by removing colons.
-    std::replace(ssin.begin(), ssin.end(), ':', '_');
-
-    // Avoid relative paths that go up the tree.
-    cmSystemTools::ReplaceString(ssin, "../", "__/");
-
-    // Avoid spaces.
-    std::replace(ssin.begin(), ssin.end(), ' ', '_');
+    auto ssin = this->CreateSafeObjectFileName(sin);
 
     // Mangle the name if necessary.
     if (this->Makefile->IsOn("CMAKE_MANGLE_OBJECT_FILE_NAMES")) {
@@ -4277,6 +4284,16 @@ std::string cmLocalGenerator::GetObjectFileNameWithoutTarget(
 
   // Convert to a safe name.
   return this->CreateSafeUniqueObjectFileName(objectName, dir_max);
+}
+
+std::string cmLocalGenerator::GetObjectOutputRoot() const
+{
+  return cmStrCat(this->GetCurrentBinaryDirectory(), "/CMakeFiles");
+}
+
+bool cmLocalGenerator::AlwaysUsesCMFPaths() const
+{
+  return true;
 }
 
 std::string cmLocalGenerator::GetSourceFileLanguage(cmSourceFile const& source)

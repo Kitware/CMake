@@ -122,9 +122,6 @@ public:
   /** Get whether the makefile is to have color.  */
   bool GetColorMakefile() const { return this->ColorMakefile; }
 
-  std::string GetTargetDirectory(
-    cmGeneratorTarget const* target) const override;
-
   // create a command that cds to the start dir then runs the commands
   void CreateCDCommand(std::vector<std::string>& commands,
                        std::string const& targetDir,

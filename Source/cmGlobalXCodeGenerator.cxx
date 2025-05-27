@@ -5344,9 +5344,7 @@ void cmGlobalXCodeGenerator::AppendFlag(std::string& flags,
 std::string cmGlobalXCodeGenerator::ComputeInfoPListLocation(
   cmGeneratorTarget* target)
 {
-  std::string plist =
-    cmStrCat(target->GetLocalGenerator()->GetCurrentBinaryDirectory(),
-             "/CMakeFiles/", target->GetName(), ".dir/Info.plist");
+  std::string plist = cmStrCat(target->GetSupportDirectory(), "/Info.plist");
   return plist;
 }
 

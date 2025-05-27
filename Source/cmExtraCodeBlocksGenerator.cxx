@@ -461,14 +461,13 @@ void cmExtraCodeBlocksGenerator::CreateNewProjectFile(
 
 // Write a dummy file for OBJECT libraries, so C::B can reference some file
 std::string cmExtraCodeBlocksGenerator::CreateDummyTargetFile(
-  cmLocalGenerator* lg, cmGeneratorTarget* target) const
+  cmGeneratorTarget* target) const
 {
   // this file doesn't seem to be used by C::B in custom makefile mode,
   // but we generate a unique file for each OBJECT library so in case
   // C::B uses it in some way, the targets don't interfere with each other.
-  std::string filename = cmStrCat(lg->GetCurrentBinaryDirectory(), '/',
-                                  lg->GetTargetDirectory(target), '/',
-                                  target->GetName(), ".objlib");
+  std::string filename =
+    cmStrCat(target->GetSupportDirectory(), '/', target->GetName(), ".objlib");
   cmGeneratedFileStream fout(filename);
   if (fout) {
     /* clang-format off */
@@ -516,8 +515,7 @@ void cmExtraCodeBlocksGenerator::AppendTarget(
     std::string buildType = makefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
     std::string location;
     if (target->GetType() == cmStateEnums::OBJECT_LIBRARY) {
-      location =
-        this->CreateDummyTargetFile(const_cast<cmLocalGenerator*>(lg), target);
+      location = this->CreateDummyTargetFile(target);
     } else {
       location = target->GetLocation(buildType);
     }

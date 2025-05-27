@@ -300,9 +300,7 @@ cmVisualStudio10TargetGenerator::cmVisualStudio10TargetGenerator(
          &this->NsightTegraVersion[0], &this->NsightTegraVersion[1],
          &this->NsightTegraVersion[2], &this->NsightTegraVersion[3]);
   this->MSTools = !this->NsightTegra && !this->Android;
-  this->DefaultArtifactDir =
-    cmStrCat(this->LocalGenerator->GetCurrentBinaryDirectory(), '/',
-             this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget));
+  this->DefaultArtifactDir = this->GeneratorTarget->GetSupportDirectory();
   this->InSourceBuild = (this->Makefile->GetCurrentSourceDirectory() ==
                          this->Makefile->GetCurrentBinaryDirectory());
   this->ClassifyAllConfigSources();
@@ -3094,9 +3092,9 @@ void cmVisualStudio10TargetGenerator::WritePathAndIncrementalLinkOptions(
         }
       }
 
-      std::string intermediateDir = cmStrCat(
-        this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget), '/',
-        config, '/');
+      std::string intermediateDir =
+        this->LocalGenerator->MaybeRelativeToCurBinDir(cmStrCat(
+          this->GeneratorTarget->GetSupportDirectory(), '/', config, '/'));
       std::string outDir;
       std::string targetNameFull;
       if (ttype == cmStateEnums::OBJECT_LIBRARY) {
@@ -5255,8 +5253,8 @@ void cmVisualStudio10TargetGenerator::WriteWinRTPackageCertificateKeyFile(
         !(this->GlobalGenerator->TargetsWindowsPhone() &&
           this->GlobalGenerator->GetSystemVersion() == "8.0"_s)) {
       // Move the manifest to a project directory to avoid clashes
-      std::string artifactDir =
-        this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget);
+      std::string artifactDir = this->LocalGenerator->MaybeRelativeToCurBinDir(
+        this->GeneratorTarget->GetSupportDirectory());
       ConvertToWindowsSlash(artifactDir);
       Elem e1(e0, "PropertyGroup");
       e1.Element("AppxPackageArtifactsDir", cmStrCat(artifactDir, '\\'));
@@ -5507,8 +5505,8 @@ void cmVisualStudio10TargetGenerator::WriteMissingFilesWP80(Elem& e1)
   // folders
   std::string manifestFile = cmStrCat(
     this->LocalGenerator->GetCurrentBinaryDirectory(), "/WMAppManifest.xml");
-  std::string artifactDir =
-    this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget);
+  std::string artifactDir = this->LocalGenerator->MaybeRelativeToCurBinDir(
+    this->GeneratorTarget->GetSupportDirectory());
   ConvertToWindowsSlash(artifactDir);
   std::string artifactDirXML = cmVS10EscapeXML(artifactDir);
   std::string const& targetNameXML = cmVS10EscapeXML(GetTargetOutputName());
@@ -5589,8 +5587,8 @@ void cmVisualStudio10TargetGenerator::WriteMissingFilesWP81(Elem& e1)
 {
   std::string manifestFile =
     cmStrCat(this->DefaultArtifactDir, "/package.appxManifest");
-  std::string artifactDir =
-    this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget);
+  std::string artifactDir = this->LocalGenerator->MaybeRelativeToCurBinDir(
+    this->GeneratorTarget->GetSupportDirectory());
   ConvertToWindowsSlash(artifactDir);
   std::string artifactDirXML = cmVS10EscapeXML(artifactDir);
   std::string const& targetNameXML = cmVS10EscapeXML(GetTargetOutputName());
@@ -5651,8 +5649,8 @@ void cmVisualStudio10TargetGenerator::WriteMissingFilesWS80(Elem& e1)
 {
   std::string manifestFile =
     cmStrCat(this->DefaultArtifactDir, "/package.appxManifest");
-  std::string artifactDir =
-    this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget);
+  std::string artifactDir = this->LocalGenerator->MaybeRelativeToCurBinDir(
+    this->GeneratorTarget->GetSupportDirectory());
   ConvertToWindowsSlash(artifactDir);
   std::string artifactDirXML = cmVS10EscapeXML(artifactDir);
   std::string const& targetNameXML = cmVS10EscapeXML(GetTargetOutputName());
@@ -5705,8 +5703,8 @@ void cmVisualStudio10TargetGenerator::WriteMissingFilesWS81(Elem& e1)
 {
   std::string manifestFile =
     cmStrCat(this->DefaultArtifactDir, "/package.appxManifest");
-  std::string artifactDir =
-    this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget);
+  std::string artifactDir = this->LocalGenerator->MaybeRelativeToCurBinDir(
+    this->GeneratorTarget->GetSupportDirectory());
   ConvertToWindowsSlash(artifactDir);
   std::string artifactDirXML = cmVS10EscapeXML(artifactDir);
   std::string const& targetNameXML = cmVS10EscapeXML(GetTargetOutputName());
@@ -5764,8 +5762,8 @@ void cmVisualStudio10TargetGenerator::WriteMissingFilesWS10_0(Elem& e1)
 {
   std::string manifestFile =
     cmStrCat(this->DefaultArtifactDir, "/package.appxManifest");
-  std::string artifactDir =
-    this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget);
+  std::string artifactDir = this->LocalGenerator->MaybeRelativeToCurBinDir(
+    this->GeneratorTarget->GetSupportDirectory());
   ConvertToWindowsSlash(artifactDir);
   std::string artifactDirXML = cmVS10EscapeXML(artifactDir);
   std::string const& targetNameXML = cmVS10EscapeXML(GetTargetOutputName());
