@@ -37,39 +37,18 @@
 
 namespace {
 constexpr char const* unique_binary_directory = "CMAKE_BINARY_DIR_USE_MKDTEMP";
-constexpr size_t lang_property_start = 0;
-constexpr size_t lang_property_size = 4;
-constexpr size_t pie_property_start = 4;
-constexpr size_t pie_property_size = 2;
-/* clang-format off */
-#define SETUP_LANGUAGE(name, lang)                                            \
-  static const std::string name[lang_property_size + pie_property_size + 1] = \
-    { "CMAKE_" #lang "_COMPILER_EXTERNAL_TOOLCHAIN",                          \
-      "CMAKE_" #lang "_COMPILER_TARGET",                                      \
-      "CMAKE_" #lang "_LINK_NO_PIE_SUPPORTED",                                \
-      "CMAKE_" #lang "_PIE_SUPPORTED", "" }
-/* clang-format on */
 
-// NOLINTNEXTLINE(bugprone-suspicious-missing-comma)
-SETUP_LANGUAGE(c_properties, C);
-// NOLINTNEXTLINE(bugprone-suspicious-missing-comma)
-SETUP_LANGUAGE(cxx_properties, CXX);
-
-// NOLINTNEXTLINE(bugprone-suspicious-missing-comma)
-SETUP_LANGUAGE(cuda_properties, CUDA);
-// NOLINTNEXTLINE(bugprone-suspicious-missing-comma)
-SETUP_LANGUAGE(fortran_properties, Fortran);
-// NOLINTNEXTLINE(bugprone-suspicious-missing-comma)
-SETUP_LANGUAGE(hip_properties, HIP);
-// NOLINTNEXTLINE(bugprone-suspicious-missing-comma)
-SETUP_LANGUAGE(objc_properties, OBJC);
-// NOLINTNEXTLINE(bugprone-suspicious-missing-comma)
-SETUP_LANGUAGE(objcxx_properties, OBJCXX);
-// NOLINTNEXTLINE(bugprone-suspicious-missing-comma)
-SETUP_LANGUAGE(ispc_properties, ISPC);
-// NOLINTNEXTLINE(bugprone-suspicious-missing-comma)
-SETUP_LANGUAGE(swift_properties, Swift);
-#undef SETUP_LANGUAGE
+std::array<cm::string_view, 9> const kLanguageNames{ {
+  "C"_s,
+  "CUDA"_s,
+  "CXX"_s,
+  "Fortran"_s,
+  "HIP"_s,
+  "ISPC"_s,
+  "OBJC"_s,
+  "OBJCXX"_s,
+  "Swift"_s,
+} };
 
 std::string const kCMAKE_CUDA_ARCHITECTURES = "CMAKE_CUDA_ARCHITECTURES";
 std::string const kCMAKE_CUDA_RUNTIME_LIBRARY = "CMAKE_CUDA_RUNTIME_LIBRARY";
@@ -1077,24 +1056,10 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
          cmPolicies::NEW) &&
       !this->Makefile->IsOn("CMAKE_TRY_COMPILE_NO_PLATFORM_VARIABLES")) {
     std::set<std::string> vars;
-    vars.insert(&c_properties[lang_property_start],
-                &c_properties[lang_property_start + lang_property_size]);
-    vars.insert(&cxx_properties[lang_property_start],
-                &cxx_properties[lang_property_start + lang_property_size]);
-    vars.insert(&cuda_properties[lang_property_start],
-                &cuda_properties[lang_property_start + lang_property_size]);
-    vars.insert(&fortran_properties[lang_property_start],
-                &fortran_properties[lang_property_start + lang_property_size]);
-    vars.insert(&hip_properties[lang_property_start],
-                &hip_properties[lang_property_start + lang_property_size]);
-    vars.insert(&objc_properties[lang_property_start],
-                &objc_properties[lang_property_start + lang_property_size]);
-    vars.insert(&objcxx_properties[lang_property_start],
-                &objcxx_properties[lang_property_start + lang_property_size]);
-    vars.insert(&ispc_properties[lang_property_start],
-                &ispc_properties[lang_property_start + lang_property_size]);
-    vars.insert(&swift_properties[lang_property_start],
-                &swift_properties[lang_property_start + lang_property_size]);
+    for (cm::string_view l : kLanguageNames) {
+      vars.emplace(cmStrCat("CMAKE_", l, "_COMPILER_EXTERNAL_TOOLCHAIN"));
+      vars.emplace(cmStrCat("CMAKE_", l, "_COMPILER_TARGET"));
+    }
     vars.insert(kCMAKE_CUDA_ARCHITECTURES);
     vars.insert(kCMAKE_CUDA_RUNTIME_LIBRARY);
     vars.insert(kCMAKE_CXX_SCAN_FOR_MODULES);
@@ -1148,24 +1113,10 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
         cmPolicies::NEW) {
       // To ensure full support of PIE, propagate cache variables
       // driving the link options
-      vars.insert(&c_properties[pie_property_start],
-                  &c_properties[pie_property_start + pie_property_size]);
-      vars.insert(&cxx_properties[pie_property_start],
-                  &cxx_properties[pie_property_start + pie_property_size]);
-      vars.insert(&cuda_properties[pie_property_start],
-                  &cuda_properties[pie_property_start + pie_property_size]);
-      vars.insert(&fortran_properties[pie_property_start],
-                  &fortran_properties[pie_property_start + pie_property_size]);
-      vars.insert(&hip_properties[pie_property_start],
-                  &hip_properties[pie_property_start + pie_property_size]);
-      vars.insert(&objc_properties[pie_property_start],
-                  &objc_properties[pie_property_start + pie_property_size]);
-      vars.insert(&objcxx_properties[pie_property_start],
-                  &objcxx_properties[pie_property_start + pie_property_size]);
-      vars.insert(&ispc_properties[pie_property_start],
-                  &ispc_properties[pie_property_start + pie_property_size]);
-      vars.insert(&swift_properties[pie_property_start],
-                  &swift_properties[pie_property_start + pie_property_size]);
+      for (cm::string_view l : kLanguageNames) {
+        vars.emplace(cmStrCat("CMAKE_", l, "_LINK_NO_PIE_SUPPORTED"));
+        vars.emplace(cmStrCat("CMAKE_", l, "_LINK_PIE_SUPPORTED"));
+      }
     }
 
     /* for the TRY_COMPILEs we want to be able to specify the architecture.
