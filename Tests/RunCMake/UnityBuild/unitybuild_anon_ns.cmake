@@ -1,3 +1,5 @@
+set(CMAKE_INTERMEDIATE_DIR_STRATEGY FULL CACHE STRING "" FORCE)
+
 project(unitybuild_anon_ns CXX)
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/unitybuild_anon_ns_test_files.cmake)

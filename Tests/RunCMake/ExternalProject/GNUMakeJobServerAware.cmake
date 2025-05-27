@@ -1,3 +1,5 @@
+set(CMAKE_INTERMEDIATE_DIR_STRATEGY FULL CACHE STRING "" FORCE)
+
 include(ExternalProject)
 ExternalProject_Add(Foo
   SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Foo

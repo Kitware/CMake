@@ -4,6 +4,8 @@
 cmake_minimum_required(VERSION 3.10)
 project (Complex)
 
+set(CMAKE_INTERMEDIATE_DIR_STRATEGY FULL CACHE STRING "" FORCE)
+
 # Inform the test if the debug configuration is getting built.
 string(APPEND CMAKE_C_FLAGS_RELEASE " -DCOMPLEX_NDEBUG")
 string(APPEND CMAKE_CXX_FLAGS_RELEASE " -DCOMPLEX_NDEBUG")

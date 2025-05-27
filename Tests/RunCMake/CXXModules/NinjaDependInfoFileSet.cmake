@@ -1,3 +1,5 @@
+set(CMAKE_INTERMEDIATE_DIR_STRATEGY FULL CACHE STRING "" FORCE)
+
 # Fake out that we have dyndep; we only need to generate, not actually build
 # here.
 set(CMAKE_CXX_SCANDEP_SOURCE "")

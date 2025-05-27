@@ -1,3 +1,5 @@
+set(CMAKE_INTERMEDIATE_DIR_STRATEGY FULL CACHE STRING "" FORCE)
+
 enable_language(C)
 add_library(UnityBuildPCH STATIC UnityBuildPCH.c)
 target_precompile_headers(UnityBuildPCH PRIVATE UnityBuildPCH.h)
