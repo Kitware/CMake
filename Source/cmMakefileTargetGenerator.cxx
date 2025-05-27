@@ -1548,6 +1548,7 @@ void cmMakefileTargetGenerator::WriteTargetDependRules()
   //                          <home-src-dir> <start-src-dir>
   //                          <home-out-dir> <start-out-dir>
   //                          <dep-info> --color=$(COLOR)
+  //                          <target-name>
   //
   // This gives the dependency scanner enough information to recreate
   // the state of our local generator sufficiently for its needs.
@@ -1574,6 +1575,9 @@ void cmMakefileTargetGenerator::WriteTargetDependRules()
   if (this->LocalGenerator->GetColorMakefile()) {
     depCmd << " \"--color=$(COLOR)\"";
   }
+  depCmd << ' '
+         << this->LocalGenerator->ConvertToOutputFormat(
+              this->GeneratorTarget->GetName(), cmOutputConverter::SHELL);
   commands.push_back(depCmd.str());
 
   // Make sure all custom command outputs in this target are built.

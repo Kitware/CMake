@@ -135,7 +135,8 @@ public:
 
   /** Called from command-line hook to bring dependencies up to date
       for a target.  */
-  bool UpdateDependencies(std::string const& tgtInfo, bool verbose,
+  bool UpdateDependencies(std::string const& tgtInfo,
+                          std::string const& targetName, bool verbose,
                           bool color) override;
 
   /** Called from command-line hook to clear dependencies.  */

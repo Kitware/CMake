@@ -290,6 +290,7 @@ public:
 
   /** Called from command-line hook to update dependencies.  */
   virtual bool UpdateDependencies(std::string const& /* tgtInfo */,
+                                  std::string const& /* targetName */,
                                   bool /*verbose*/, bool /*color*/)
   {
     return true;

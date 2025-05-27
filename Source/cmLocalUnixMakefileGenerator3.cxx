@@ -1376,7 +1376,8 @@ std::string cmLocalUnixMakefileGenerator3::CreateMakeVariable(
 }
 
 bool cmLocalUnixMakefileGenerator3::UpdateDependencies(
-  std::string const& tgtInfo, bool verbose, bool color)
+  std::string const& tgtInfo, std::string const& targetName, bool verbose,
+  bool color)
 {
   // read in the target info file
   if (!this->Makefile->ReadListFile(tgtInfo) ||
@@ -1473,8 +1474,6 @@ bool cmLocalUnixMakefileGenerator3::UpdateDependencies(
     if (needRescanDependInfo || needRescanDirInfo || needRescanDependencies) {
       // The dependencies must be regenerated.
       if (verbose) {
-        std::string targetName = cmSystemTools::GetFilenameName(targetDir);
-        targetName = targetName.substr(0, targetName.length() - 4);
         std::string message =
           cmStrCat("Scanning dependencies of target ", targetName);
         echoColor(message);
@@ -1508,10 +1507,6 @@ bool cmLocalUnixMakefileGenerator3::UpdateDependencies(
                       : std::function<bool(std::string const&)>())) {
       // regenerate dependencies files
       if (verbose) {
-        std::string targetName = cmCMakePath(targetDir)
-                                   .GetFileName()
-                                   .RemoveExtension()
-                                   .GenericString();
         auto message =
           cmStrCat("Consolidate compiler generated dependencies of target ",
                    targetName);
