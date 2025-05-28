@@ -1,0 +1,10 @@
+---
+id: rm-cmdbg-macros
+valid:
+  - CM_DBG;
+  - macro(expr);
+invalid:
+  - CM_DBG(arg);
+  - f(CM_DBG(arg));
+  - b = a + CM_DBG(arg);
+  - a = CM_DBG(arg);

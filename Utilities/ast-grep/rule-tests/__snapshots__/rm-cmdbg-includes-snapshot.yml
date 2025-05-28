@@ -1,0 +1,16 @@
+id: rm-cmdbg-includes
+snapshots:
+  '#include "cmDebugTools.h"':
+    fixed: ''
+    labels:
+    - source: '#include "cmDebugTools.h"'
+      style: primary
+      start: 0
+      end: 25
+  '#include <cmDebugTools.h>':
+    fixed: ''
+    labels:
+    - source: '#include <cmDebugTools.h>'
+      style: primary
+      start: 0
+      end: 25
