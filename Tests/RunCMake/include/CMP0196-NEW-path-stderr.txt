@@ -1,0 +1,6 @@
+^CMake Error at [^
+]*/Modules/CMakeDetermineVSServicePack.cmake:[0-9]+ \(message\):
+  The CMakeDetermineVSServicePack module has been removed by policy CMP0196\.
+Call Stack \(most recent call first\):
+  CMP0196-NEW-path\.cmake:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)$
