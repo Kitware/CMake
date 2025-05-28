@@ -276,9 +276,9 @@ Changes made since CMake 3.11.0 include the following.
 3.11.1
 ------
 
-* The :module:`CheckIncludeFile` module ``check_include_file`` macro,
-  :module:`CheckIncludeFileCXX` module ``check_include_file_cxx`` macro,
-  and :module:`CheckIncludeFiles` module ``check_include_files`` macro
+* The :module:`CheckIncludeFile` module ``check_include_file()`` command,
+  :module:`CheckIncludeFileCXX` module ``check_include_file_cxx()`` command,
+  and :module:`CheckIncludeFiles` module ``check_include_files()`` command
   were taught to honor the ``CMAKE_REQUIRED_LIBRARIES`` variable in
   CMake 3.11.0.  This has been reverted due to changing behavior of
   checks for existing projects.  It may be restored in the future
