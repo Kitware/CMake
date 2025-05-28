@@ -2358,6 +2358,7 @@ cmGeneratorTarget::GetClassifiedFlagsForSource(cmSourceFile const* sf,
     vars.Object = sfVars.ObjectFileDir.c_str();
     vars.ObjectDir = sfVars.ObjectDir.c_str();
     vars.ObjectFileDir = sfVars.ObjectFileDir.c_str();
+    vars.TargetSupportDir = sfVars.TargetSupportDir.c_str();
     vars.Flags = PlaceholderFlags.c_str();
     vars.DependencyFile = sfVars.DependencyFile.c_str();
     vars.DependencyTarget = sfVars.DependencyTarget.c_str();
@@ -2438,12 +2439,16 @@ cmGeneratorTarget::SourceVariables cmGeneratorTarget::GetSourceVariables(
 
   // Object settings.
   {
+    std::string const targetSupportDir = lg->MaybeRelativeToTopBinDir(
+      gg->ConvertToOutputPath(this->GetCMFSupportDirectory()));
     std::string const objectDir = gg->ConvertToOutputPath(
       cmStrCat(this->GetSupportDirectory(), gg->GetConfigDirectory(config)));
     std::string const objectFileName = this->GetObjectName(sf);
     std::string const objectFilePath =
       cmStrCat(objectDir, '/', objectFileName);
 
+    vars.TargetSupportDir =
+      lg->ConvertToOutputFormat(targetSupportDir, cmOutputConverter::SHELL);
     vars.ObjectDir =
       lg->ConvertToOutputFormat(objectDir, cmOutputConverter::SHELL);
     vars.ObjectFileDir =

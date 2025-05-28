@@ -566,6 +566,7 @@ public:
     std::string TargetPDB;
     std::string TargetCompilePDB;
     std::string ObjectDir;
+    std::string TargetSupportDir;
     std::string ObjectFileDir;
     std::string DependencyFile;
     std::string DependencyTarget;
