@@ -5,255 +5,505 @@
 BundleUtilities
 ---------------
 
-Functions to help assemble a standalone bundle application.
+This module provides utility commands for assembling standalone,
+bundle-style applications with CMake, such as macOS ``.app`` bundles or
+similar directory-based application bundles on other operating systems.
 
-A collection of CMake utility functions useful for dealing with ``.app``
-bundles on the Mac and bundle-like directories on any OS.
+Load this module in CMake installation with:
+
+.. code-block:: cmake
+
+  include(BundleUtilities)
 
 .. note::
 
-  Do not use these functions at configure time (from ``CMakeLists.txt``).
-  Instead, invoke them from an :command:`install(CODE)` or
-  :command:`install(SCRIPT)`.
+  Do not use this module at configure time (from ``CMakeLists.txt``).
+  Instead, include it and invoke its commands from an :command:`install(CODE)`
+  or :command:`install(SCRIPT)`.
 
-Functions
-^^^^^^^^^
+Commands
+^^^^^^^^
 
-The following functions are provided by this module:
+This module provides the following commands:
+
+* :command:`fixup_bundle`
+* :command:`copy_and_fixup_bundle`
+* :command:`verify_app`
+* :command:`get_bundle_main_executable`
+* :command:`get_dotapp_dir`
+* :command:`get_bundle_and_executable`
+* :command:`get_bundle_all_executables`
+* :command:`get_item_key`
+* :command:`get_item_rpaths`
+* :command:`clear_bundle_keys`
+* :command:`set_bundle_key_values`
+* :command:`get_bundle_keys`
+* :command:`copy_resolved_item_into_bundle`
+* :command:`copy_resolved_framework_into_bundle`
+* :command:`fixup_bundle_item`
+* :command:`verify_bundle_prerequisites`
+* :command:`verify_bundle_symlinks`
 
 .. command:: fixup_bundle
 
+  Prepares a bundle for distribution by fixing up its internal dependencies:
+
   .. code-block:: cmake
 
-    fixup_bundle(<app> <libs> <dirs> [IGNORE_ITEM <file>...])
+    fixup_bundle(<app> <libs> <dirs> [IGNORE_ITEM <files>...])
 
-  Fix up ``<app>`` bundle in-place and make it standalone, such that it can be
-  drag-n-drop copied to another machine and run on that machine as long
-  as all of the system libraries are compatible.
+  This command modifies the ``<app>`` bundle in-place to make it
+  self-contained and portable, so that it can be drag-n-drop copied to
+  another machine and run there, assuming all of the system libraries are
+  compatible.
 
-  If you pass plugins to ``fixup_bundle`` as the libs parameter, you should
-  install them or copy them into the bundle before calling ``fixup_bundle``.
-  The ``<libs>`` parameter is a list of libraries that must be fixed up, but
-  that cannot be determined by ``otool`` output analysis  (i.e. ``plugins``).
+  This command collects all dependencies (keys) for the executables and
+  libraries in the bundle.  For each dependency, it copies the required
+  files into the bundle and adjusts them according to their own
+  prerequisites.  Once complete, it clears the collected keys and invokes
+  the :command:`verify_app` command to ensure the final bundle is truly
+  standalone.
 
-  Gather all the keys for all the executables and libraries in a bundle,
-  and then, for each key, copy each prerequisite into the bundle.  Then
-  fix each one up according to its own list of prerequisites.
+  The arguments are:
 
-  Then clear all the keys and call ``verify_app`` on the final bundle to
-  ensure that it is truly standalone.
+  ``<app>``
+    The path to the bundle to fix.  This can be an ``.app`` directory or
+    direct path to an executable.
 
-  .. versionadded:: 3.6
-    As an optional parameter (``IGNORE_ITEM``) a list of file names can be
-    passed, which are then ignored
+  ``<libs>``
+    A list of libraries that must be fixed up, but that cannot be
+    automatically determined by the ``otool`` output analysis  (i.e.
+    ``plugins``).  If plugins are passed to this command as this parameter,
+    they should be installed or copied into the bundle before calling this
+    command.
+
+  ``<dirs>``
+    A list of paths where libraries might be found.  These paths are searched
+    first when a target without any path info is given.  Then standard system
+    locations are also searched: ``PATH``, Framework locations, ``/usr/lib``,
+    etc.
+
+  ``IGNORE_ITEM <files>...``
+    .. versionadded:: 3.6
+
+    Optional list of file names to ignore
     (e.g. ``IGNORE_ITEM "vcredist_x86.exe;vcredist_x64.exe"``).
 
 .. command:: copy_and_fixup_bundle
+
+  Copies the bundle and fixes up the new copied bundle in-place:
 
   .. code-block:: cmake
 
     copy_and_fixup_bundle(<src> <dst> <libs> <dirs>)
 
-  Makes a copy of the bundle ``<src>`` at location ``<dst>`` and then fixes up
-  the new copied bundle in-place at ``<dst>``.
+  This command makes a copy of the bundle ``<src>`` at location ``<dst>``
+  and then fixes up the new copied bundle in-place at ``<dst>``.
+
+  The arguments are:
+
+  ``<src>``
+    The directory of the bundle being copied.
+
+  ``<dst>``
+    The destination directory of the bundle copy.
+
+  ``<libs>``
+    A list of libraries that must be fixed up, but that cannot be
+    automatically determined by the ``otool`` output analysis  (i.e.
+    ``plugins``).  If plugins are passed to this command as this parameter,
+    they should be installed or copied into the bundle before calling this
+    command.
+
+  ``<dirs>``
+    A list of paths where libraries might be found.  These paths are searched
+    first when a target without any path info is given.  Then standard system
+    locations are also searched: ``PATH``, Framework locations, ``/usr/lib``,
+    etc.
 
 .. command:: verify_app
 
+  Verifies that an application bundle appears valid based on running analysis
+  tools on it:
+
   .. code-block:: cmake
 
-    verify_app(<app> [IGNORE_ITEM <file>...])
+    verify_app(<app> [IGNORE_ITEM <files>...])
 
-  Verifies that an application ``<app>`` appears valid based on running
-  analysis tools on it.  Calls :command:`message(FATAL_ERROR)` if the
-  application is not verified.
+  If the application fails verification, a :command:`message(FATAL_ERROR)`
+  is issued, halting the installation process.
 
-  .. versionadded:: 3.6
-    As an optional parameter (``IGNORE_ITEM``) a list of file names can be
-    passed, which are then ignored
-    (e.g. ``IGNORE_ITEM "vcredist_x86.exe;vcredist_x64.exe"``)
+  The arguments are:
+
+  ``<app>``
+    The path to the application to verify.  This can be a ``.app`` directory
+    or a standalone executable.
+
+  ``IGNORE_ITEM <files>...``
+    .. versionadded:: 3.6
+
+    Optional list of file names to ignore
+    (e.g. ``IGNORE_ITEM "vcredist_x86.exe;vcredist_x64.exe"``).
 
 .. command:: get_bundle_main_executable
 
+  Retrieves the main executable within a given application bundle:
+
   .. code-block:: cmake
 
-    get_bundle_main_executable(<bundle> <result_var>)
+    get_bundle_main_executable(<bundle> <result-var>)
 
-  The result will be the full path name of the bundle's main executable
-  file or an ``error:`` prefixed string if it could not be determined.
+  The result is stored in a ``<result-var>`` variable and will contain a
+  full path name of the bundle's main executable file, or an ``error:``
+  prefixed string if it could not be determined.
 
 .. command:: get_dotapp_dir
 
+  Locates the enclosing ``.app`` directory for the given executable:
+
   .. code-block:: cmake
 
-    get_dotapp_dir(<exe> <dotapp_dir_var>)
+    get_dotapp_dir(<exe> <dotapp-dir-var>)
 
-  Returns the nearest parent dir whose name ends with ``.app`` given the
-  full path to an executable.  If there is no such parent dir, then
-  simply return the dir containing the executable.
+  This command retrieves the nearest parent dir whose name ends with ``.app``
+  given the full path to an executable and stores it to the
+  ``<dotapp-dir-var>`` variable.  If there is no such parent dir, then it
+  simply retrieves the directory containing the executable.
 
-  The returned directory may or may not exist.
+  The retrieved directory may or may not exist.
 
 .. command:: get_bundle_and_executable
 
+  Takes either a ``.app`` directory name or the name of an executable
+  nested inside a ``.app`` directory and retrieves the path to the ``.app``
+  directory and the path to its main executable:
+
   .. code-block:: cmake
 
-    get_bundle_and_executable(<app> <bundle_var> <executable_var> <valid_var>)
+    get_bundle_and_executable(<app> <bundle-var> <executable-var> <valid-var>)
 
-  Takes either a ``.app`` directory name or the name of an executable
-  nested inside a ``.app`` directory and returns the path to the ``.app``
-  directory in ``<bundle_var>`` and the path to its main executable in
-  ``<executable_var>``.
+  The arguments are:
+
+  ``<app>``
+    The name of the application being processed.
+
+  ``<bundle-var>``
+    Variable name in which to store the resulting path to the ``.app``
+    directory.  In case of any error, this variable will contain an error
+    message prefixed with string ``error:``.
+
+  ``<executable-var>``
+    Variable name in which to store the resulting main executable.  In case
+    of any error, this variable will contain an error message prefixed with
+    string ``error:``.
+
+  ``<valid-var>``
+    Variable name in which the boolean result is stored whether this command
+    was successful or not.
 
 .. command:: get_bundle_all_executables
 
+  Gets all executables of a given bundle:
+
   .. code-block:: cmake
 
-    get_bundle_all_executables(<bundle> <exes_var>)
+    get_bundle_all_executables(<bundle> <exes-var>)
 
-  Scans ``<bundle>`` bundle recursively for all ``<exes_var>`` executable
-  files and accumulates them into a variable.
+  This command scans ``<bundle>`` bundle recursively for all executable
+  files and stores them into a variable ``<exes-var>``.
 
 .. command:: get_item_key
 
+  Generates a unique key for the given item:
+
   .. code-block:: cmake
 
-    get_item_key(<item> <key_var>)
+    get_item_key(<item> <key-var>)
 
-  Given ``<item>`` file name, generate ``<key_var>`` key that should be unique
-  considering the set of libraries that need copying or fixing up to
-  make a bundle standalone.  This is essentially the file name including
-  extension with ``.`` replaced by ``_``
+  Given ``<item>`` file name, this command generates ``<key-var>`` key that
+  should be unique considering the set of libraries that need copying or
+  fixing up to make a bundle standalone.  This is essentially the file name
+  including extension with ``.`` replaced by ``_``.
 
-  This key is used as a prefix for CMake variables so that we can
-  associate a set of variables with a given item based on its key.
+  This key is used as a prefix for CMake variables so that a set of
+  variables can be associated with a given item based on its key.
 
 .. command:: get_item_rpaths
 
+  Gets RPATHS (run-time search paths) for the given item:
+
   .. code-block:: cmake
 
-    get_item_rpaths(<item> <rpaths_var>)
+    get_item_rpaths(<item> <rpaths-var>)
 
-  Get RPATHS of the ``<item>`` file name and store them to the variable with
-  provided name ``<rpaths_var>``.
+  This command gets RPATHS of the ``<item>`` file name and stores them to
+  the variable with provided name ``<rpaths-var>``.
 
 .. command:: clear_bundle_keys
 
+  Clears all variables associated with keys:
+
   .. code-block:: cmake
 
-    clear_bundle_keys(<keys_var>)
+    clear_bundle_keys(<keys-var>)
 
-  Loop over the ``<keys_var>`` list of keys, clearing all the variables
-  associated with each key.  After the loop, clear the list of keys itself.
-
-  Caller of ``get_bundle_keys`` should call ``clear_bundle_keys`` when done with
-  list of keys.
+  This command loops over the ``<keys-var>`` list of keys, clearing all the
+  variables associated with each key.  After the loop, it clears the list of
+  keys itself.  This command should be called after the
+  :command:`get_bundle_keys` command, when done working with a list of keys.
 
 .. command:: set_bundle_key_values
 
+  Adds a key to the list of keys:
+
   .. code-block:: cmake
 
-    set_bundle_key_values(<keys_var> <context> <item> <exepath> <dirs>
-                          <copyflag> [<rpaths>])
+    set_bundle_key_values(
+      <keys-var>
+      <context>
+      <item>
+      <exepath>
+      <dirs>
+      <copyflag>
+      [<rpaths>]
+    )
 
-  Add ``<keys_var>`` key to the list (if necessary) for the given item.
-  If added, also set all the variables associated with that key.
+  This command adds the ``<keys-var>`` key to the list (if necessary) for
+  the given item.  If added, also set all the variables associated with
+  that key.
+
+  The arguments are:
+
+  ``<keys-var>``
+    Variable name holding the name of the key to be added to the list for
+    the given item.
+
+  ``<context>``
+    The path to the top level loading path used for ``@loader_path``
+    replacement on Apple operating systems.  When resolving item,
+    ``@loader_path`` references will be resolved relative to the directory
+    of the given context value (presumably another library).
+
+  ``<item>``
+    The item for which to add the key.
+
+  ``<exepath>``
+    The path to the top level executable used for ``@executable_path``
+    replacement on Apple operating systems.
+
+  ``<dirs>``
+    A list of paths where libraries might be found.  These paths are searched
+    first when a target without any path info is given.  Then standard system
+    locations are also searched: ``PATH``, Framework locations, ``/usr/lib``,
+    etc.
+
+  ``<copyflag>``
+    If set to ``1`` library symlink structure will be preserved.
+
+  ``<rpaths>``
+    Optional run-time search paths for an executable file or library to help
+    find files.
 
 .. command:: get_bundle_keys
 
+  Gets bundle keys:
+
   .. code-block:: cmake
 
-    get_bundle_keys(<app> <libs> <dirs> <keys_var> [IGNORE_ITEM <file>...])
+    get_bundle_keys(<app> <libs> <dirs> <keys-var> [IGNORE_ITEM <files>...])
 
-  Loop over all the executable and library files within ``<app>`` bundle (and
-  given as extra ``<libs>``) and accumulate a list of keys representing
-  them.  Set values associated with each key such that we can loop over
-  all of them and copy prerequisite libs into the bundle and then do
-  appropriate ``install_name_tool`` fixups.
+  This command loops over all the executable and library files within
+  ``<app>`` bundle (and given as extra ``<libs>``) and accumulate a list of
+  keys representing them.  It sets values associated with each key such
+  that they can be looped over all of them and copies prerequisite libs into
+  the bundle and then does appropriate ``install_name_tool`` fixups.
 
-  .. versionadded:: 3.6
-    As an optional parameter (``IGNORE_ITEM``) a list of file names can be
-    passed, which are then ignored
-    (e.g. ``IGNORE_ITEM "vcredist_x86.exe;vcredist_x64.exe"``)
+  The arguments are:
+
+  ``<app>``
+    The path to the bundle to fix.  This can be an ``.app`` directory or
+    direct path to an executable.
+
+  ``<libs>``
+    A list of libraries that must be fixed up, but that cannot be
+    automatically determined by the ``otool`` output analysis  (i.e.
+    ``plugins``).  If plugins are passed to this command as this parameter,
+    they should be installed or copied into the bundle before calling this
+    command.
+
+  ``<dirs>``
+    A list of paths where libraries might be found.  These paths are searched
+    first when a target without any path info is given.  Then standard system
+    locations are also searched: ``PATH``, Framework locations, ``/usr/lib``,
+    etc.
+
+  ``<keys-var>``
+    Variable name holding a list of keys that represent all executable and
+    library files within the bundle.
+
+  ``IGNORE_ITEM <files>...``
+    .. versionadded:: 3.6
+
+    Optional list of file names to ignore
+    (e.g. ``IGNORE_ITEM "vcredist_x86.exe;vcredist_x64.exe"``).
 
 .. command:: copy_resolved_item_into_bundle
 
+  Copies a resolved item into the bundle if necessary:
+
   .. code-block:: cmake
 
-    copy_resolved_item_into_bundle(<resolved_item> <resolved_embedded_item>)
+    copy_resolved_item_into_bundle(<resolved-item> <resolved-embedded-item>)
 
-  Copy a resolved item into the bundle if necessary.
-  Copy is not necessary, if the ``<resolved_item>`` is "the same as" the
-  ``<resolved_embedded_item>``.
+  Copy is not necessary, if the ``<resolved-item>`` is "the same as" the
+  ``<resolved-embedded-item>``.
 
 .. command:: copy_resolved_framework_into_bundle
 
+  Copies a resolved framework into the bundle if necessary:
+
   .. code-block:: cmake
 
-    copy_resolved_framework_into_bundle(<resolved_item> <resolved_embedded_item>)
+    copy_resolved_framework_into_bundle(<resolved-item> <resolved-embedded-item>)
 
-  Copy a resolved framework into the bundle if necessary.
-  Copy is not necessary, if the ``<resolved_item>`` is "the same as" the
-  ``<resolved_embedded_item>``.
+  Copy is not necessary, if the ``<resolved-item>`` is "the same as" the
+  ``<resolved-embedded-item>``.
 
-  By default, ``BU_COPY_FULL_FRAMEWORK_CONTENTS`` is not set.  If you want
-  full frameworks embedded in your bundles, set
-  ``BU_COPY_FULL_FRAMEWORK_CONTENTS`` to ``ON`` before calling fixup_bundle.  By
-  default, ``COPY_RESOLVED_FRAMEWORK_INTO_BUNDLE`` copies the framework
-  dylib itself plus the framework ``Resources`` directory.
+  The following variables can be set before invoking this command:
+
+  ``BU_COPY_FULL_FRAMEWORK_CONTENTS``
+    By default, this variable is not set.  If full frameworks should be
+    embedded in the bundles, set this variable to boolean true before calling
+    the :command:`fixup_bundle` command.  By default, this command copies
+    the framework dylib itself plus the framework ``Resources`` directory.
 
 .. command:: fixup_bundle_item
 
+  Fixes up bundle item:
+
   .. code-block:: cmake
 
-    fixup_bundle_item(<resolved_embedded_item> <exepath> <dirs>)
+    fixup_bundle_item(<resolved-embedded-item> <exepath> <dirs>)
 
-  Get the direct/non-system prerequisites of the ``<resolved_embedded_item>``.
-  For each prerequisite, change the way it is referenced to the value of
-  the ``_EMBEDDED_ITEM`` keyed variable for that prerequisite.  (Most likely
-  changing to an ``@executable_path`` style reference.)
+  This command gets the direct/non-system prerequisites of the
+  ``<resolved-embedded-item>`` and for each prerequisite, it changes the
+  way it is referenced to the value of the ``_EMBEDDED_ITEM`` keyed variable
+  for that prerequisite.  Most likely changing to an ``@executable_path``
+  style reference.
 
-  This function requires that the ``<resolved_embedded_item>`` be ``inside``
-  the bundle already.  In other words, if you pass plugins to ``fixup_bundle``
-  as the libs parameter, you should install them or copy them into the
-  bundle before calling ``fixup_bundle``.  The ``libs`` parameter is a list of
-  libraries that must be fixed up, but that cannot be determined by
-  otool output analysis.  (i.e., ``plugins``)
+  This command requires that the ``<resolved-embedded-item>`` be ``inside``
+  the bundle already.  In other words, if plugins are passed to
+  :command:`fixup_bundle` command as its ``<libs>`` parameter, they should
+  be installed or copied into the bundle before calling the
+  :command:`fixup_bundle` command.
 
-  Also, change the id of the item being fixed up to its own
+  Also, it changes the id of the item being fixed up to its own
   ``_EMBEDDED_ITEM`` value.
 
-  Accumulate changes in a local variable and make *one* call to
-  ``install_name_tool`` at the end of the function with all the changes at
-  once.
+  Changes are accumulated in a local variable and *one* call is made to
+  ``install_name_tool`` command-line tool at the end of this command with
+  all the changes at once.
 
-  If the ``BU_CHMOD_BUNDLE_ITEMS`` variable is set then bundle items will be
-  marked writable before ``install_name_tool`` tries to change them.
+  The arguments are:
+
+  ``<resolved-embedded-item>``
+    The bundle item to be fixed up.
+
+  ``<exepath>``
+    The path to the top level executable used for ``@executable_path``
+    replacement on Apple operating systems.
+
+  ``<dirs>``
+    A list of paths where libraries might be found.  These paths are searched
+    first when a target without any path info is given.  Then standard system
+    locations are also searched: ``PATH``, Framework locations, ``/usr/lib``,
+    etc.
+
+  The following variables can be set before invoking this command:
+
+  ``BU_CHMOD_BUNDLE_ITEMS``
+    If this variable is set to boolean true value then bundle items will be
+    marked writable before ``install_name_tool`` tool tries to change them.
 
 .. command:: verify_bundle_prerequisites
 
-  .. code-block:: cmake
-
-    verify_bundle_prerequisites(<bundle> <result_var> <info_var>
-                                [IGNORE_ITEM <file>...])
-
   Verifies that the sum of all prerequisites of all files inside the
   bundle are contained within the bundle or are ``system`` libraries,
-  presumed to exist everywhere.
+  presumed to exist everywhere:
 
-  .. versionadded:: 3.6
-    As an optional parameter (``IGNORE_ITEM``) a list of file names can be
-    passed, which are then ignored
-    (e.g. ``IGNORE_ITEM "vcredist_x86.exe;vcredist_x64.exe"``)
+  .. code-block:: cmake
+
+    verify_bundle_prerequisites(
+      <bundle>
+      <result-var>
+      <info-var>
+      [IGNORE_ITEM <files>...]
+    )
+
+  The arguments are:
+
+  ``<bundle>``
+    Name of the bundle being verified.
+
+  ``<result-var>``
+    Name of the variable in which to store a boolean result of whether a
+    verification was successful.
+
+  ``<info-var>``
+    Name of the variable holding any informational messages produced by the
+    verification.
+
+  ``IGNORE_ITEM <files>...``
+    .. versionadded:: 3.6
+
+    Optional list of file names to ignore
+    (e.g. ``IGNORE_ITEM "vcredist_x86.exe;vcredist_x64.exe"``).
 
 .. command:: verify_bundle_symlinks
 
+  Verifies that any symlinks found in the specified bundle point to other
+  files that are already also in the bundle:
+
   .. code-block:: cmake
 
-    verify_bundle_symlinks(<bundle> <result_var> <info_var>)
+    verify_bundle_symlinks(<bundle> <result-var> <info-var>)
 
-  Verifies that any symlinks found in the ``<bundle>`` bundle point to other
-  files that are already also in the bundle...  Anything that points to an
-  external file causes this function to fail the verification.
+  Anything that points to an external file causes this command to fail the
+  verification.
+
+  The arguments are:
+
+  ``<bundle>``
+    Name of the bundle being verified.
+
+  ``<result-var>``
+    Name of the variable in which to store a boolean result of whether a
+    verification was successful.
+
+  ``<info-var>``
+    Name of the variable holding any informational messages produced by the
+    verification.
+
+Examples
+^^^^^^^^
+
+Using this module inside the installation code that is executed at the
+installation phase:
+
+.. code-block:: cmake
+  :caption: ``CMakeLists.txt``
+
+  # ...
+
+  install(CODE "
+    include(BundleUtilities)
+    set(BU_CHMOD_BUNDLE_ITEMS TRUE)
+    fixup_bundle(
+      \"${fixup_exe}\"
+      \"${plugins}\"
+      \"${bin_dir};${library_dir};${binary_dir}\"
+    )
+  ")
 #]=======================================================================]
 
 function(_warn_cmp0080)
