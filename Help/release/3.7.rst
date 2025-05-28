@@ -158,8 +158,8 @@ Modules
 * An :module:`AndroidTestUtilities` module was added to manage transfer
   of test data to an Android device.
 
-* The :module:`CheckFortranSourceCompiles` module macro
-  ``CHECK_Fortran_SOURCE_COMPILES`` gained a ``SRC_EXT`` option
+* The :module:`CheckFortranSourceCompiles` module command
+  ``check_fortran_source_compiles()`` gained a ``SRC_EXT`` option
   to specify a custom test Fortran source file extension.
 
 * The :module:`ExternalProject` module gained ``HTTP_USERNAME`` and

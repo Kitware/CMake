@@ -7,41 +7,65 @@ CheckFortranSourceCompiles
 
 .. versionadded:: 3.1
 
-Check once if Fortran source code can be built.
+This module provides a command to check whether a Fortran source can be
+built.
+
+Load this module in a CMake project with:
+
+.. code-block:: cmake
+
+  include(CheckFortranSourceCompiles)
+
+Commands
+^^^^^^^^
+
+This module provides the following command:
 
 .. command:: check_fortran_source_compiles
 
+  Checks once whether the given Fortran source code can be built:
+
   .. code-block:: cmake
 
-    check_fortran_source_compiles(<code> <resultVar>
-        [FAIL_REGEX <regex>...]
-        [SRC_EXT <extension>]
+    check_fortran_source_compiles(
+      <code>
+      <variable>
+      [FAIL_REGEX <regexes>...]
+      [SRC_EXT <extension>]
     )
 
-  Check once that the source supplied in ``<code>`` can be built. The result is
-  stored in the internal cache variable specified by ``<resultVar>``, with
-  boolean ``true`` for success and boolean ``false`` for failure.
+  This command checks once that the source supplied in ``<code>`` can be
+  compiled (and linked into an executable).  The result of the check is
+  stored in the internal cache variable specified by ``<variable>``.
 
-  If ``FAIL_REGEX`` is provided, then failure is determined by checking
-  if anything in the compiler output matches any of the specified regular
-  expressions.
+  The arguments are:
 
-  By default, the test source file will be given a ``.F`` file extension. The
-  ``SRC_EXT`` option can be used to override this with ``.<extension>`` instead--
-  ``.F90`` is a typical choice.
+  ``<code>``
+    Fortran source code to check.  This must be an entire program, as
+    written in a file containing the body block.  All symbols used in the
+    source code are expected to be declared as usual in their corresponding
+    headers.
 
-  See also :command:`check_source_compiles` for a more general command syntax.
+  ``<variable>``
+    Variable name of an internal cache variable to store the result of the
+    check, with boolean true for success and boolean false for failure.
 
-  See also :command:`check_source_runs` to run compiled source.
+  ``FAIL_REGEX <regexes>...``
+    If this option is provided with one or more regular expressions, then
+    failure is determined by checking if anything in the compiler output
+    matches any of the specified regular expressions.
 
-  Internally, :command:`try_compile` is used to compile the source. If
-  :variable:`CMAKE_TRY_COMPILE_TARGET_TYPE` is set to ``EXECUTABLE`` (default),
-  the source is compiled and linked as an executable program. If set to
-  ``STATIC_LIBRARY``, the source is compiled but not linked. In any case, all
-  functions must be declared as usual.
+  ``SRC_EXT <extension>``
+    .. versionadded:: 3.7
 
-  The compile and link commands can be influenced by setting any of the
-  following variables prior to calling ``check_fortran_source_compiles()``:
+    By default, the test source file used for the check will be given a
+    ``.F`` file extension.  This option can be used to override this with
+    ``.<extension>`` instead - ``.F90`` is a typical choice.
+
+  .. rubric:: Variables Affecting the Check
+
+  The following variables may be set before calling this command to modify
+  the way the check is run:
 
   .. include:: /module/include/CMAKE_REQUIRED_FLAGS.rst
 
@@ -57,6 +81,33 @@ Check once if Fortran source code can be built.
 
   .. include:: /module/include/CMAKE_REQUIRED_QUIET.rst
 
+  .. include:: /module/include/CMAKE_TRY_COMPILE_TARGET_TYPE.rst
+
+Examples
+^^^^^^^^
+
+Checking whether the Fortran compiler supports the ``pure`` procedure
+attribute:
+
+.. code-block:: cmake
+
+  include(CheckFortranSourceCompiles)
+
+  check_fortran_source_compiles("
+    pure subroutine foo()
+    end subroutine
+    program test
+      call foo()
+    end
+  " HAVE_PURE SRC_EXT "F90")
+
+See Also
+^^^^^^^^
+
+* The :module:`CheckSourceCompiles` module for a more general command to
+  check whether source can be built.
+* The :module:`CheckSourceRuns` module to check whether source can be built
+  and run.
 #]=======================================================================]
 
 include_guard(GLOBAL)

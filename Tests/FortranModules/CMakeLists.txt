@@ -19,7 +19,7 @@ endif()
 
 if(NOT DEFINED CMake_TEST_Fortran_SUBMODULES)
   include(CheckFortranSourceCompiles)
-  CHECK_Fortran_SOURCE_COMPILES([[
+  check_fortran_source_compiles([[
 module parent
   interface
     module function id(x)
