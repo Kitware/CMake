@@ -11,21 +11,32 @@ CMakeDetermineVSServicePack
   been superseded by the :variable:`CMAKE_<LANG>_COMPILER_VERSION` variable that
   contains the compiler version number.
 
-This module provides a function to determine the installed Visual Studio service
-pack version for Visual Studio 2012 and earlier.
+This module provides a command to determine the installed Visual Studio
+service pack version for Visual Studio 2012 and earlier.
+
+Load this module in a CMake project with:
+
+.. code-block:: cmake
+
+  include(CMakeDetermineVSServicePack)
+
+Commands
+^^^^^^^^
+
+This module provides the following command:
 
 .. command:: DetermineVSServicePack
 
+  Determines the Visual Studio service pack version of the ``cl`` compiler
+  in use:
+
   .. code-block:: cmake
 
-    DetermineVSServicePack(<result>)
+    DetermineVSServicePack(<variable>)
 
-  Determines the Visual Studio service pack version of the ``cl`` compiler in
-  use and stores the result in the specified internal cache variable
-  ``<result>``.
-
-  The ``<result>`` variable will be set to one of the following values or an
-  empty string if the service pack cannot be determined:
+  The result is stored in the specified internal cache variable ``<variable>``,
+  which is set to one of the following values, or to an empty string if the
+  service pack cannot be determined:
 
   * ``vc80``, ``vc80sp1``
   * ``vc90``, ``vc90sp1``
