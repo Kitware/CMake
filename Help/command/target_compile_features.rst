@@ -34,7 +34,7 @@ The named ``<target>`` must have been created by a command such as
 .. |more_see_also| replace:: See the :manual:`cmake-compile-features(7)`
    manual for information on compile features and a list of supported compilers.
 .. include:: include/GENEX_NOTE.rst
-   :start-line: 1
+   :start-line: 2
 
 See Also
 ^^^^^^^^

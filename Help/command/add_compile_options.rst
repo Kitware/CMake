@@ -41,7 +41,8 @@ this command is in a compiler-specific conditional clause:
   endif()
 
 To set per-language options, use the :genex:`$<COMPILE_LANGUAGE>`
-or :genex:`$<COMPILE_LANGUAGE:languages>` generator expressions.
+or :genex:`$<COMPILE_LANGUAGE:languages> <COMPILE_LANGUAGE:languages>`
+generator expressions.
 
 See Also
 ^^^^^^^^

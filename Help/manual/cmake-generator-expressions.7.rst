@@ -1288,14 +1288,12 @@ related to most of the expressions in this sub-section.
   .. versionadded:: 3.3
 
   The compile language of source files when evaluating compile options.
-  See :ref:`the related boolean expression
-  <Boolean COMPILE_LANGUAGE Generator Expression>`
-  ``$<COMPILE_LANGUAGE:language>``
+  See the related boolean expression
+  :genex:`$<COMPILE_LANGUAGE:languages> <COMPILE_LANGUAGE:languages>`
   for notes about the portability of this generator expression.
 
-.. _`Boolean COMPILE_LANGUAGE Generator Expression`:
-
 .. genex:: $<COMPILE_LANGUAGE:languages>
+  :target: COMPILE_LANGUAGE:languages
 
   .. versionadded:: 3.3
 
