@@ -8,7 +8,7 @@ preprocessor automatically, i.e.  without having to use commands like
 :module:`qt4_wrap_cpp() <FindQt4>`, `qt5_wrap_cpp()`_, etc.
 Currently, Qt versions 4 to 6 are supported.
 
-.. _qt5_wrap_cpp(): https://doc.qt.io/qt-5/qtcore-cmake-qt5-wrap-cpp.html
+.. _qt5_wrap_cpp(): https://doc.qt.io/archives/qt-5.15/qtcore-cmake-qt5-wrap-cpp.html
 
 This property is initialized by the value of the :variable:`CMAKE_AUTOMOC`
 variable if it is set when a target is created.

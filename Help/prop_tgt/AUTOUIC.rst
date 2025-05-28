@@ -8,7 +8,7 @@ the Qt ``uic`` code generator automatically, i.e. without having to use
 commands like :module:`qt4_wrap_ui() <FindQt4>`, `qt5_wrap_ui()`_, etc.
 Currently, Qt versions 4 to 6 are supported.
 
-.. _`qt5_wrap_ui()`: https://doc.qt.io/qt-5/qtwidgets-cmake-qt5-wrap-ui.html
+.. _`qt5_wrap_ui()`: https://doc.qt.io/archives/qt-5.15/qtwidgets-cmake-qt5-wrap-ui.html
 
 This property is initialized by the value of the :variable:`CMAKE_AUTOUIC`
 variable if it is set when a target is created.
