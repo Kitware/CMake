@@ -127,6 +127,8 @@ macro(__windows_compiler_gnu lang)
     set(CMAKE_${lang}_RESPONSE_FILE_LINK_FLAG "@")
   endif()
 
+  set(CMAKE_${lang}_LINK_DEF_FILE_FLAG "") # Empty string: passing the file is enough
+
   # Binary link rules.
   set(CMAKE_${lang}_CREATE_SHARED_MODULE
     "<CMAKE_${lang}_COMPILER> <CMAKE_SHARED_MODULE_${lang}_FLAGS> <LANGUAGE_COMPILE_FLAGS> <LINK_FLAGS> <CMAKE_SHARED_MODULE_CREATE_${lang}_FLAGS> -o <TARGET> ${CMAKE_GNULD_IMAGE_VERSION} <OBJECTS> <LINK_LIBRARIES>")

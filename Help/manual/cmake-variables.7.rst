@@ -493,6 +493,7 @@ Variables that Control the Build
    /variable/CMAKE_LANG_COMPILER_LAUNCHER
    /variable/CMAKE_LANG_CPPCHECK
    /variable/CMAKE_LANG_CPPLINT
+   /variable/CMAKE_LANG_LINK_DEF_FILE_FLAG
    /variable/CMAKE_LANG_ICSTAT
    /variable/CMAKE_LANG_INCLUDE_WHAT_YOU_USE
    /variable/CMAKE_LANG_LINK_GROUP_USING_FEATURE

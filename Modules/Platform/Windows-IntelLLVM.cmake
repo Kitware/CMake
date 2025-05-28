@@ -35,7 +35,8 @@ macro(__windows_compiler_intel lang)
 
   set(CMAKE_${lang}_CREATE_WIN32_EXE "${CMAKE_${lang}_LINKER_WRAPPER_FLAG}/subsystem:windows")
   set(CMAKE_${lang}_CREATE_CONSOLE_EXE "${CMAKE_${lang}_LINKER_WRAPPER_FLAG}/subsystem:console")
-  set(CMAKE_LINK_DEF_FILE_FLAG "${CMAKE_${lang}_LINKER_WRAPPER_FLAG}/DEF:")
+  set(CMAKE_${lang}_LINK_DEF_FILE_FLAG "${CMAKE_${lang}_LINKER_WRAPPER_FLAG}/DEF:")
+  set(CMAKE_LINK_DEF_FILE_FLAG "${CMAKE_${lang}_LINK_DEF_FILE_FLAG}")
   set(CMAKE_LIBRARY_PATH_FLAG "${CMAKE_${lang}_LINKER_WRAPPER_FLAG}/LIBPATH:")
 
   set(CMAKE_${lang}_LINK_EXECUTABLE
