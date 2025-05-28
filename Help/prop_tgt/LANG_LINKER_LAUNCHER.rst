@@ -3,8 +3,15 @@
 
 .. versionadded:: 3.21
 
-This property is implemented only when ``<LANG>`` is ``C``, ``CXX``,
-``OBJC``, or ``OBJCXX``
+This property is implemented only when ``<LANG>`` is one of:
+
+* ``C``
+* ``CXX``
+* ``OBJC``
+* ``OBJCXX``
+* ``Fortran``
+
+  .. versionadded:: 4.1
 
 Specify a :ref:`semicolon-separated list <CMake Language Lists>` containing a
 command line for a linker launching tool. The :ref:`Makefile Generators` and the

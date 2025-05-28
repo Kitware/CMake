@@ -457,6 +457,8 @@ TargetProperty const StaticTargetProperties[] = {
   { "OBJC_LINKER_LAUNCHER"_s, IC::CanCompileSources },
   // ---- Objective C++
   { "OBJCXX_LINKER_LAUNCHER"_s, IC::CanCompileSources },
+  // ---- Fortran
+  { "Fortran_LINKER_LAUNCHER"_s, IC::CanCompileSources },
 
   // Static analysis
   // -- C
