@@ -659,6 +659,8 @@ the ``EXACT`` option is given, only a version of the package claiming an exact
 match of the requested version may be found.  CMake does not establish any
 convention for the meaning of version numbers.
 
+.. _`cmake script version selection`:
+
 CMake-script
 """"""""""""
 
@@ -791,6 +793,8 @@ and the corresponding package configuration file is loaded.
   As a result, it is not possible to use a version range to extend the range
   of compatible package versions that will be accepted.
 
+.. _`cps version selection`:
+
 |CPS|
 """""
 
@@ -817,6 +821,9 @@ expecting the ``compat_version`` should be able to use the package, even if the
 package's actual version is newer.  If not specified, the ``compat_version``
 is implicitly equal to the package version, i.e. no backwards compatibility is
 provided.
+
+.. TODO Rework the preceding paragraph when COMPAT_VERSION has broader support
+        in CMake.
 
 When a package uses a recognized schema, CMake will determine the package's
 acceptability according to the following rules:
