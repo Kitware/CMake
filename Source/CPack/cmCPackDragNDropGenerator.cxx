@@ -601,6 +601,7 @@ int cmCPackDragNDropGenerator::CreateDMG(std::string const& src_dir,
           cmCPackLogger(cmCPackLog::LOG_ERROR,
                         language << " is not a recognized language"
                                  << std::endl);
+          return 0;
         }
         char iso_language_cstr[65];
         CFStringGetCString(iso_language, iso_language_cstr,
