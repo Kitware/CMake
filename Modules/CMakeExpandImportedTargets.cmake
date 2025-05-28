@@ -16,6 +16,12 @@ CMakeExpandImportedTargets
   :command:`try_compile` command and since CMake 3.2 for :command:`try_run`
   command).
 
+Load this module in a CMake project with:
+
+.. code-block:: cmake
+
+  include(CMakeExpandImportedTargets)
+
 .. note::
 
   This module does not support the policy :policy:`CMP0022` ``NEW`` behavior,
@@ -23,12 +29,16 @@ CMakeExpandImportedTargets
   :manual:`generator expressions <cmake-generator-expressions(7)>` cannot be
   evaluated at the configuration phase.
 
-Functions
+Commands
 ^^^^^^^^^
 
-This module defines the following function:
+This module provides the following command:
 
 .. command:: cmake_expand_imported_targets
+
+  Expands all imported targets in a given list of libraries to their
+  corresponding file paths on disk and stores the resulting list in a local
+  variable:
 
   .. code-block:: cmake
 
@@ -38,19 +48,18 @@ This module defines the following function:
       [CONFIGURATION <config>]
     )
 
-  Expands all imported targets in a list of libraries ``<libs>...`` to their
-  corresponding file paths on disk and stores the resulting list in a local
-  variable ``<result-var>``.
+  The arguments are:
 
-  The options are:
+  ``<result-var>``
+    Name of a CMake variable containing the resulting list of file paths.
 
-  ``LIBRARIES``
+  ``LIBRARIES <libs>...``
     A :ref:`semicolon-separated list <CMake Language Lists>` of system and
     imported targets.  Imported targets in this list are replaced with their
     corresponding library file paths, including libraries from their link
     interfaces.
 
-  ``CONFIGURATION``
+  ``CONFIGURATION <config>``
     If this option is given, it uses the respective build configuration
     ``<config>`` of the imported targets if it exists.  If omitted, it defaults
     to the first entry in the :variable:`CMAKE_CONFIGURATION_TYPES` variable, or
