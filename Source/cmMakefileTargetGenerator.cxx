@@ -946,6 +946,12 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
     this->LocalGenerator->MaybeRelativeToCurBinDir(objectDir),
     cmOutputConverter::SHELL);
   vars.ObjectDir = objectDir.c_str();
+  std::string targetSupportDir =
+    this->GeneratorTarget->GetCMFSupportDirectory();
+  targetSupportDir = this->LocalGenerator->ConvertToOutputFormat(
+    this->LocalGenerator->MaybeRelativeToTopBinDir(targetSupportDir),
+    cmOutputConverter::SHELL);
+  vars.TargetSupportDir = targetSupportDir.c_str();
   std::string objectFileDir = cmSystemTools::GetFilenamePath(obj);
   objectFileDir = this->LocalGenerator->ConvertToOutputFormat(
     this->LocalGenerator->MaybeRelativeToCurBinDir(objectFileDir),

@@ -1036,6 +1036,14 @@ void cmLocalUnixMakefileGenerator3::AppendCustomCommand(
       if (cmNonempty(val)) {
         // Expand rule variables referenced in the given launcher command.
         cmRulePlaceholderExpander::RuleVariables vars;
+        std::string targetSupportDir =
+          target->GetGlobalGenerator()->ConvertToOutputPath(
+            target->GetCMFSupportDirectory());
+        targetSupportDir = target->GetLocalGenerator()->ConvertToOutputFormat(
+          target->GetLocalGenerator()->MaybeRelativeToTopBinDir(
+            targetSupportDir),
+          cmOutputConverter::SHELL);
+        vars.TargetSupportDir = targetSupportDir.c_str();
         vars.CMTargetName = target->GetName().c_str();
         vars.CMTargetType =
           cmState::GetTargetTypeName(target->GetType()).c_str();

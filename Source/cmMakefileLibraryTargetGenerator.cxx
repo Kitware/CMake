@@ -364,6 +364,12 @@ void cmMakefileLibraryTargetGenerator::WriteNvidiaDeviceLibraryRules(
       this->LocalGenerator->MaybeRelativeToCurBinDir(objectDir),
       cmOutputConverter::SHELL);
 
+    std::string targetSupportDir =
+      this->GeneratorTarget->GetCMFSupportDirectory();
+    targetSupportDir = this->LocalGenerator->ConvertToOutputFormat(
+      this->LocalGenerator->MaybeRelativeToTopBinDir(targetSupportDir),
+      cmOutputConverter::SHELL);
+
     std::string target = this->LocalGenerator->ConvertToOutputFormat(
       this->LocalGenerator->MaybeRelativeToCurBinDir(targetOutput),
       cmOutputConverter::SHELL);
@@ -376,6 +382,7 @@ void cmMakefileLibraryTargetGenerator::WriteNvidiaDeviceLibraryRules(
 
     vars.Objects = buildObjs.c_str();
     vars.ObjectDir = objectDir.c_str();
+    vars.TargetSupportDir = targetSupportDir.c_str();
     vars.Target = target.c_str();
     vars.LinkLibraries = linkLibs.c_str();
     vars.ObjectsQuoted = buildObjs.c_str();
@@ -798,6 +805,14 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
       cmOutputConverter::SHELL);
 
     vars.ObjectDir = objectDir.c_str();
+    std::string targetSupportDir =
+      this->GeneratorTarget->GetCMFSupportDirectory();
+
+    targetSupportDir = this->LocalGenerator->ConvertToOutputFormat(
+      this->LocalGenerator->MaybeRelativeToTopBinDir(targetSupportDir),
+      cmOutputConverter::SHELL);
+
+    vars.TargetSupportDir = targetSupportDir.c_str();
     std::string target = this->LocalGenerator->ConvertToOutputFormat(
       this->LocalGenerator->MaybeRelativeToCurBinDir(targetFullPathReal),
       cmOutputConverter::SHELL, useWatcomQuote);
