@@ -243,7 +243,7 @@ bool cmProjectCommand(std::vector<std::string> const& args,
     }
 
     if (cmSystemTools::VersionCompareGreater(*prArgs.CompatVersion,
-                                             *prArgs.Version)) {
+                                             version_string)) {
       mf.IssueMessage(MessageType::FATAL_ERROR,
                       "COMPAT_VERSION must be less than or equal to VERSION");
       cmSystemTools::SetFatalErrorOccurred();
