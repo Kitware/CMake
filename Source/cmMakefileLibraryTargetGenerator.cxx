@@ -188,7 +188,7 @@ void cmMakefileLibraryTargetGenerator::WriteSharedLibraryRules(bool relink)
 
   this->LocalGenerator->AppendModuleDefinitionFlag(
     extraFlags, this->GeneratorTarget, linkLineComputer.get(),
-    this->GetConfigName());
+    this->GetConfigName(), linkLanguage);
 
   this->UseLWYU = this->LocalGenerator->AppendLWYUFlags(
     extraFlags, this->GeneratorTarget, linkLanguage);
@@ -224,7 +224,7 @@ void cmMakefileLibraryTargetGenerator::WriteModuleLibraryRules(bool relink)
 
   this->LocalGenerator->AppendModuleDefinitionFlag(
     extraFlags, this->GeneratorTarget, linkLineComputer.get(),
-    this->GetConfigName());
+    this->GetConfigName(), linkLanguage);
 
   this->UseLWYU = this->LocalGenerator->AppendLWYUFlags(
     extraFlags, this->GeneratorTarget, linkLanguage);

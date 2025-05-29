@@ -421,7 +421,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
 
     this->LocalGenerator->AppendModuleDefinitionFlag(
       linkFlags, this->GeneratorTarget, linkLineComputer.get(),
-      this->GetConfigName());
+      this->GetConfigName(), linkLanguage);
   }
 
   this->LocalGenerator->AppendIPOLinkerFlags(

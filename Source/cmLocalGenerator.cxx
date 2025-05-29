@@ -1673,7 +1673,7 @@ void cmLocalGenerator::GetTargetFlags(
   this->AppendWarningAsErrorLinkerFlags(extraLinkFlags, target, linkLanguage);
   this->AppendIPOLinkerFlags(extraLinkFlags, target, config, linkLanguage);
   this->AppendModuleDefinitionFlag(extraLinkFlags, target, linkLineComputer,
-                                   config);
+                                   config, linkLanguage);
 
   if (!extraLinkFlags.empty()) {
     this->GetGlobalGenerator()->EncodeLiteral(extraLinkFlags);
@@ -3615,7 +3615,8 @@ std::string cmLocalGenerator::GetLinkDependencyFile(
 
 void cmLocalGenerator::AppendModuleDefinitionFlag(
   std::string& flags, cmGeneratorTarget const* target,
-  cmLinkLineComputer* linkLineComputer, std::string const& config)
+  cmLinkLineComputer* linkLineComputer, std::string const& config,
+  std::string const& lang)
 {
   cmGeneratorTarget::ModuleDefinitionInfo const* mdi =
     target->GetModuleDefinitionInfo(config);
@@ -3623,8 +3624,11 @@ void cmLocalGenerator::AppendModuleDefinitionFlag(
     return;
   }
 
-  cmValue defFileFlag =
-    this->Makefile->GetDefinition("CMAKE_LINK_DEF_FILE_FLAG");
+  cmValue defFileFlag = this->Makefile->GetDefinition(
+    cmStrCat("CMAKE_", lang, "_LINK_DEF_FILE_FLAG"));
+  if (!defFileFlag) {
+    defFileFlag = this->Makefile->GetDefinition("CMAKE_LINK_DEF_FILE_FLAG");
+  }
   if (!defFileFlag) {
     return;
   }

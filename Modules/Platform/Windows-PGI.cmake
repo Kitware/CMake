@@ -37,6 +37,8 @@ else()
 endif()
 
 macro(__windows_compiler_pgi lang)
+  set(CMAKE_${lang}_LINK_DEF_FILE_FLAG "-def:")
+
   # Shared library compile and link rules.
   set(CMAKE_${lang}_CREATE_STATIC_LIBRARY "lib ${CMAKE_CL_NOLOGO} <LINK_FLAGS> /out:<TARGET> <OBJECTS> ")
   set(CMAKE_${lang}_CREATE_SHARED_LIBRARY "<CMAKE_${lang}_COMPILER> ${CMAKE_START_TEMP_FILE} -Mmakedll -implib:<TARGET_IMPLIB> -Xlinker -pdb:<TARGET_PDB> -Xlinker -version:<TARGET_VERSION_MAJOR>.<TARGET_VERSION_MINOR> <LINK_FLAGS> -o <TARGET> <OBJECTS> <LINK_LIBRARIES> ${CMAKE_END_TEMP_FILE}")
