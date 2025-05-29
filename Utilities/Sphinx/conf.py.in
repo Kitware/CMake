@@ -109,6 +109,7 @@ linkcheck_allowed_redirects = {
     r'https://learn\.microsoft\.com/en-us/cpp/build/reference/openmp-enable-openmp-2-0-support': r'https://learn\.microsoft\.com/en-us/cpp/build/reference/openmp-enable-openmp-2-0-support\?.*',
     r'https://learn\.microsoft\.com/en-us/cpp/c-language/parsing-c-command-line-arguments': r'https://learn\.microsoft\.com/en-us/cpp/c-language/parsing-c-command-line-arguments\?.*',
     r'https://openjdk\.java\.net/jeps/313': r'https://openjdk\.org:443/jeps/313',
+    r'https://www\.renesas\.com': r'https://www\.renesas\.com/en',
     r'https://www\.sphinx-doc\.org': r'https://www\.sphinx-doc\.org/en/master/',
 }
 

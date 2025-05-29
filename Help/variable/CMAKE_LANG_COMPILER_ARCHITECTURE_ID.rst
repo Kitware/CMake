@@ -253,6 +253,23 @@ These identifiers are used when :variable:`CMAKE_<LANG>_COMPILER_ID` is
 ``V850``
   Renesas Electronics V850 32-bit
 
+Renesas Compiler Platforms
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. versionadded:: 4.1
+
+These identifiers are used when :variable:`CMAKE_<LANG>_COMPILER_ID` is
+``Renesas``.
+
+``RH850``
+  Renesas Electronics RH850
+
+``RL78``
+  Renesas Electronics RL78
+
+``RX``
+  Renesas Electronics RX
+
 TASKING Platforms
 ^^^^^^^^^^^^^^^^^
 

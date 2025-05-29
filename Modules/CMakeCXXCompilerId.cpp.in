@@ -108,7 +108,7 @@ const char* info_language_standard_default = "INFO" ":" "standard_default["
 
 const char* info_language_extensions_default = "INFO" ":" "extensions_default["
 #if (defined(__clang__) || defined(__GNUC__) || defined(__xlC__) ||           \
-     defined(__TI_COMPILER_VERSION__)) &&                                     \
+     defined(__TI_COMPILER_VERSION__) || defined(__RENESAS__)) &&             \
   !defined(__STRICT_ANSI__)
   "ON"
 #else
