@@ -5,6 +5,10 @@
 CMakeDetermineVSServicePack
 ---------------------------
 
+.. versionchanged:: 4.1
+
+  This module is available only if policy :policy:`CMP0196` is not set to ``NEW``.
+
 .. deprecated:: 3.0
 
   This module should no longer be used.  The functionality of this module has
@@ -58,6 +62,16 @@ Determining the Visual Studio service pack version in a project:
     endif()
   endif()
 #]=======================================================================]
+
+cmake_policy(GET CMP0196 _CMakeDetermineVSServicePack_CMP0196)
+if(_CMakeDetermineVSServicePack_CMP0196 STREQUAL "NEW")
+  message(FATAL_ERROR "The CMakeDetermineVSServicePack module has been removed by policy CMP0196.")
+endif()
+
+if(_CMakeDetermineVSServicePack_testing)
+  set(_CMakeDetermineVSServicePack_included TRUE)
+  return()
+endif()
 
 if(NOT CMAKE_MINIMUM_REQUIRED_VERSION VERSION_LESS 2.8.8)
   message(DEPRECATION

@@ -1,0 +1,6 @@
+^CMake Error at CMP0196-NEW-name\.cmake:[0-9]+ \(include\):
+  include could not find requested file:
+
+    CMakeDetermineVSServicePack
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)$
