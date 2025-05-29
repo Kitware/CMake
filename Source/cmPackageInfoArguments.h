@@ -47,6 +47,10 @@ public:
   /// \c false, forbid specifying any options whatsoever.
   bool Check(cmExecutionStatus& status, bool enable = true) const;
 
+  /// Set metadata (not already specified) from either the specified project,
+  /// or from the project which matches the package name.
+  bool SetMetadataFromProject(cmExecutionStatus& status);
+
   ArgumentParser::NonEmpty<std::string> PackageName;
   ArgumentParser::NonEmpty<std::string> Appendix;
   ArgumentParser::NonEmpty<std::string> Version;
@@ -56,7 +60,12 @@ public:
   ArgumentParser::NonEmpty<std::vector<std::string>> DefaultConfigs;
   bool LowerCase = false;
 
+  ArgumentParser::NonEmpty<std::string> ProjectName;
+  bool NoProjectDefaults = false;
+
 private:
+  bool SetEffectiveProject(cmExecutionStatus& status);
+
   template <typename T>
   static void Bind(cmArgumentParser<T>& parser, cmPackageInfoArguments* self)
   {
@@ -73,6 +82,10 @@ private:
          &cmPackageInfoArguments::DefaultTargets);
     Bind(self, parser, "DEFAULT_CONFIGURATIONS"_s,
          &cmPackageInfoArguments::DefaultConfigs);
+
+    Bind(self, parser, "PROJECT"_s, &cmPackageInfoArguments::ProjectName);
+    Bind(self, parser, "NO_PROJECT_METADATA"_s,
+         &cmPackageInfoArguments::NoProjectDefaults);
   }
 
   template <typename T, typename U,

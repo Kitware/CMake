@@ -133,6 +133,7 @@ Exporting Targets to the |CPS|
 .. code-block:: cmake
 
   export(EXPORT <export-name> PACKAGE_INFO <package-name>
+         [PROJECT <project-name>|NO_PROJECT_METADATA]
          [APPENDIX <appendix-name>]
          [LOWER_CASE_FILE]
          [VERSION <version>

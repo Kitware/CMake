@@ -2202,7 +2202,7 @@ bool HandlePackageInfoMode(std::vector<std::string> const& args,
     return false;
   }
 
-  if (!arguments.Check(status)) {
+  if (!arguments.Check(status) || !arguments.SetMetadataFromProject(status)) {
     return false;
   }
 

@@ -14,3 +14,9 @@ CMake Error at BadArgs2.cmake:5 \(install\):
   install APPENDIX and DEFAULT_CONFIGURATIONS are mutually exclusive.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:3 \(include\)
+
+
+CMake Error at BadArgs2.cmake:6 \(install\):
+  install APPENDIX and PROJECT are mutually exclusive.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:3 \(include\)

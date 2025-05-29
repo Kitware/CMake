@@ -114,7 +114,7 @@ bool cmExportCommand(std::vector<std::string> const& args,
   }
 
   std::vector<std::string> unknownArgs;
-  Arguments const arguments = parser.Parse(args, &unknownArgs);
+  Arguments arguments = parser.Parse(args, &unknownArgs);
 
   if (!unknownArgs.empty()) {
     status.SetError("Unknown argument: \"" + unknownArgs.front() + "\".");
@@ -219,7 +219,8 @@ bool cmExportCommand(std::vector<std::string> const& args,
       status.SetError("PACKAGE_INFO and NAMESPACE are mutually exclusive.");
       return false;
     }
-    if (!arguments.Check(status)) {
+    if (!arguments.Check(status) ||
+        !arguments.SetMetadataFromProject(status)) {
       return false;
     }
   }

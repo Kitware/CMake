@@ -992,6 +992,7 @@ Signatures
   .. code-block:: cmake
 
     install(PACKAGE_INFO <package-name> EXPORT <export-name>
+            [PROJECT <project-name>|NO_PROJECT_METADATA]
             [APPENDIX <appendix-name>]
             [DESTINATION <dir>]
             [LOWER_CASE_FILE]
@@ -1056,6 +1057,14 @@ Signatures
     configurations exists.  If not specified, CMake will fall back to the
     package's available configurations in an unspecified order.
 
+  By default, if the specified ``<package-name>`` matches the current CMake
+  :variable:`PROJECT_NAME`, package metadata will be inherited from the
+  project.  The ``PROJECT <project-name>`` option may be used to specify a
+  different project from which to inherit metadata.  If ``NO_PROJECT_METADATA``
+  is specified, automatic inheritance of package metadata will be disabled.
+  In any case, any metadata values specified in the ``install`` command will
+  take precedence.
+
   If ``APPENDIX`` is specified, rather than generating a top level package
   specification, the specified targets will be exported as an appendix to the
   named package.  Appendices may be used to separate less commonly used targets
@@ -1065,7 +1074,7 @@ Signatures
   artifacts produced by multiple build trees.
 
   Appendices are not permitted to change basic package metadata; therefore,
-  none of ``VERSION``, ``COMPAT_VERSION``, ``VERSION_SCHEMA``,
+  none of ``PROJECT``, ``VERSION``, ``COMPAT_VERSION``, ``VERSION_SCHEMA``,
   ``DEFAULT_TARGETS`` or ``DEFAULT_CONFIGURATIONS`` may be specified in
   combination with ``APPENDIX``.  Additionally, it is strongly recommended that
   use of ``LOWER_CASE_FILE`` should be consistent between the main package and
