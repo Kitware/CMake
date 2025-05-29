@@ -43,6 +43,8 @@ int main(int argc, char** argv)
         std::cout << "  case" << std::endl;
         std::cout << typed_suite_names[i] << "/42.  # TypeParam = char\n";
         std::cout << "  case" << std::endl;
+        std::cout << typed_suite_names[i] << "/named.  # TypeParam = int\n";
+        std::cout << "  case" << std::endl;
       }
     }
     if (!is_basic_only && !is_typed_only) {
@@ -52,6 +54,7 @@ int main(int argc, char** argv)
         std::cout << value_suite_names[i] << "/test." << std::endl;
         std::cout << "  case/0  # GetParam() = 1" << std::endl;
         std::cout << "  case/1  # GetParam() = \"foo\"" << std::endl;
+        std::cout << "  case/named  # GetParam() = 'c'" << std::endl;
       }
       char const* param_suite_names[] = { "param", "ns.param",
                                           "prefix/param" };
@@ -65,6 +68,15 @@ int main(int argc, char** argv)
         std::cout << "  case/5  # GetParam() = \"__osbtext\"" << std::endl;
         std::cout << "  case/6  # GetParam() = \"__csb___text\"" << std::endl;
         std::cout << "  case/7  # GetParam() = \"S o m  e   \"" << std::endl;
+      }
+      char const* both_suite_names[] = { "both_suite", "both/suite",
+                                         "ns.both/suite",
+                                         "prefix/both/suite" };
+      for (size_t k = 0; k < ARRAY_SIZE(both_suite_names); k++) {
+        std::cout << both_suite_names[k] << ".  # TypeParam = TYPE"
+                  << std::endl;
+        std::cout << "  test  # GetParam() = VALUE" << std::endl;
+        std::cout << "  case/test  # GetParam() = VALUE" << std::endl;
       }
     }
     return 0;

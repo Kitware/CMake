@@ -1,12 +1,15 @@
 Test project .*/Tests/RunCMake/GoogleTest/GoogleTest-discovery-arg-change
-  Test #[0-9]+: typed\.case<short>
-  Test #[0-9]+: typed\.case<float>
-  Test #[0-9]+: typed\.case<char>
-  Test #[0-9]+: ns\.typed\.case<short>
-  Test #[0-9]+: ns\.typed\.case<float>
-  Test #[0-9]+: ns\.typed\.case<char>
-  Test #[0-9]+: prefix/typed\.case<short>
-  Test #[0-9]+: prefix/typed\.case<float>
-  Test #[0-9]+: prefix/typed\.case<char>
+  Test +#[0-9]+: typed\.case<short>
+  Test +#[0-9]+: typed\.case<float>
+  Test +#[0-9]+: typed\.case<char>
+  Test +#[0-9]+: typed/named\.  # TypeParam = int\.case<typed/named\.  # TypeParam = int>
+  Test +#[0-9]+: ns\.typed\.case<short>
+  Test +#[0-9]+: ns\.typed\.case<float>
+  Test +#[0-9]+: ns\.typed\.case<char>
+  Test +#[0-9]+: ns\.typed/named\.  # TypeParam = int\.case<ns\.typed/named\.  # TypeParam = int>
+  Test +#[0-9]+: prefix/typed\.case<short>
+  Test +#[0-9]+: prefix/typed\.case<float>
+  Test +#[0-9]+: prefix/typed\.case<char>
+  Test +#[0-9]+: prefix/typed/named\.  # TypeParam = int\.case<prefix/typed/named\.  # TypeParam = int>
 
 Total Tests: [0-9]+
