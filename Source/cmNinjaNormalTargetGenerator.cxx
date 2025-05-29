@@ -1450,6 +1450,14 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement(
     }
   }
 
+  // If we have any PRE_LINK commands, we need to go back to CMAKE_BINARY_DIR
+  // for the link commands.
+  if (!preLinkCmdLines.empty()) {
+    std::string const homeOutDir = localGen.ConvertToOutputFormat(
+      localGen.GetBinaryDirectory(), cmOutputConverter::SHELL);
+    preLinkCmdLines.push_back("cd " + homeOutDir);
+  }
+
   // maybe create .def file from list of objects
   cmGeneratorTarget::ModuleDefinitionInfo const* mdi =
     gt->GetModuleDefinitionInfo(config);
@@ -1489,13 +1497,6 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement(
     for (cmSourceFile const* src : mdi->Sources) {
       fout << src->GetFullPath() << "\n";
     }
-  }
-  // If we have any PRE_LINK commands, we need to go back to CMAKE_BINARY_DIR
-  // for the link commands.
-  if (!preLinkCmdLines.empty()) {
-    std::string const homeOutDir = localGen.ConvertToOutputFormat(
-      localGen.GetBinaryDirectory(), cmOutputConverter::SHELL);
-    preLinkCmdLines.push_back("cd " + homeOutDir);
   }
 
   vars["PRE_LINK"] = localGen.BuildCommandLine(
