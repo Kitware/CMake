@@ -1,0 +1,2 @@
+^Computing sqrt of 25 to be 5 using log and exp
+The square root of 25 is 5$

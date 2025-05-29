@@ -1747,50 +1747,6 @@ if(BUILD_TESTING)
     add_installmode_test(SYMLINK_OR_COPY)
   endif()
 
-
-  # do each of the tutorial steps
-  function(add_tutorial_test step_name use_mymath tutorial_arg pass_regex)
-    set(tutorial_test_name Tutorial${step_name})
-    set(tutorial_build_dir "${CMake_BINARY_DIR}/Tests/Tutorial/${step_name}")
-    if(use_mymath)
-      set(tutorial_build_options "")
-    else()
-      set(tutorial_test_name ${tutorial_test_name}_MYMATH)
-      set(tutorial_build_dir "${tutorial_build_dir}_MYMATH")
-      set(tutorial_build_options -DUSE_MYMATH:BOOL=OFF)
-    endif()
-    add_test(${tutorial_test_name} ${CMAKE_CTEST_COMMAND}
-      -C "Release"
-      --build-and-test
-      "${CMake_SOURCE_DIR}/Help/guide/tutorial/${step_name}"
-      ${tutorial_build_dir}_Build
-      ${build_generator_args}
-      --build-project Tutorial
-      --build-options ${tutorial_build_options}
-      --test-command Tutorial ${tutorial_arg})
-    set_tests_properties(${tutorial_test_name} PROPERTIES
-      PASS_REGULAR_EXPRESSION ${pass_regex})
-
-    list(APPEND TEST_BUILD_DIRS "${tutorial_build_dir}_Build")
-  endfunction()
-
-  if(NOT CMake_TEST_EXTERNAL_CMAKE)
-    foreach(STP RANGE 2 12)
-      if(STP EQUAL 8)
-        set(pass_regex ".*using log and exp")
-      else()
-        set(pass_regex "The square root of 25 is 5")
-      endif()
-      add_tutorial_test(Step${STP} TRUE 25 ${pass_regex})
-    endforeach()
-    set(pass_regex "The square root of 25 is 5")
-    add_tutorial_test(Complete TRUE 25 ${pass_regex})
-    foreach(STP RANGE 3 12)
-      add_tutorial_test(Step${STP} FALSE 25 ${pass_regex})
-    endforeach()
-    add_tutorial_test(Complete FALSE 25 ${pass_regex})
-  endif()
-
   function(add_importexport_test export_name import_name)
     set(install_dir
       "${CMake_BINARY_DIR}/Tests/ImportExport/Install${export_name}")
