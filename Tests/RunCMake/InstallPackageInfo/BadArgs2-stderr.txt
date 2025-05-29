@@ -1,2 +1,16 @@
 CMake Error at BadArgs2.cmake:3 \(install\):
-  install VERSION_SCHEMA requires VERSION.
+  install APPENDIX and VERSION are mutually exclusive.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:3 \(include\)
+
+
+CMake Error at BadArgs2.cmake:4 \(install\):
+  install APPENDIX and DEFAULT_TARGETS are mutually exclusive.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:3 \(include\)
+
+
+CMake Error at BadArgs2.cmake:5 \(install\):
+  install APPENDIX and DEFAULT_CONFIGURATIONS are mutually exclusive.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:3 \(include\)

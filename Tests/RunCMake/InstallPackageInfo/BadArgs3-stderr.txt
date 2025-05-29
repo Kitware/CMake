@@ -1,2 +1,0 @@
-CMake Error at BadArgs3.cmake:3 \(install\):
-  install APPENDIX and VERSION are mutually exclusive.
