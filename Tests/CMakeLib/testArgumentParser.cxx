@@ -458,6 +458,25 @@ bool testArgumentParserStaticBool()
   return verifyResult(result, unparsedArguments);
 }
 
+bool testArgumentParserTypes()
+{
+  ArgumentParser::Maybe<std::string> maybeString;
+  maybeString = std::string();
+  maybeString = "";
+
+  ArgumentParser::MaybeEmpty<std::vector<std::string>> maybeEmptyVecStr;
+  maybeEmptyVecStr = std::vector<std::string>{};
+
+  ArgumentParser::NonEmpty<std::string> nonEmptyString;
+  nonEmptyString = std::string("x");
+  nonEmptyString = "x";
+
+  ArgumentParser::NonEmpty<std::vector<std::string>> nonEmptyVecStr;
+  nonEmptyVecStr = std::vector<std::string>{ "" };
+
+  return true;
+}
+
 } // namespace
 
 int testArgumentParser(int /*unused*/, char* /*unused*/[])
@@ -479,6 +498,11 @@ int testArgumentParser(int /*unused*/, char* /*unused*/[])
 
   if (!testArgumentParserStaticBool()) {
     std::cout << "While executing testArgumentParserStaticBool().\n";
+    return -1;
+  }
+
+  if (!testArgumentParserTypes()) {
+    std::cout << "While executing testArgumentParserTypes().\n";
     return -1;
   }
 
