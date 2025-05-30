@@ -5,10 +5,15 @@
 GNUInstallDirs
 --------------
 
-Define GNU standard installation directories
+This module defines the installation directory variables according to the
+`GNU Coding Standards`_ and provides a command to compute
+installation-related absolute paths.
 
-Provides install directory variables as defined by the
-`GNU Coding Standards`_.
+Load this module in a CMake project with:
+
+.. code-block:: cmake
+
+  include(GNUInstallDirs)
 
 .. _`GNU Coding Standards`: https://www.gnu.org/prep/standards/html_node/Directory-Variables.html
 
@@ -18,7 +23,6 @@ Result Variables
 Inclusion of this module defines the following variables:
 
 ``CMAKE_INSTALL_<dir>``
-
   Destination for files of a given type.  This value may be passed to
   the ``DESTINATION`` options of  :command:`install` commands for the
   corresponding file type.  It should be a path relative to the installation
@@ -33,7 +37,6 @@ Inclusion of this module defines the following variables:
   this prefix is used by default if the DESTINATION is a relative path.
 
 ``CMAKE_INSTALL_FULL_<dir>``
-
   The absolute path generated from the corresponding ``CMAKE_INSTALL_<dir>``
   value.  If the value is not already an absolute path, an absolute path
   is constructed typically by prepending the value of the
@@ -167,32 +170,64 @@ The following values of :variable:`CMAKE_INSTALL_PREFIX` are special:
 
 .. _`Filesystem Hierarchy Standard`: https://refspecs.linuxfoundation.org/FHS_3.0/fhs/index.html
 
-Functions
-^^^^^^^^^
+Commands
+^^^^^^^^
+
+This module provides the following command:
 
 .. command:: GNUInstallDirs_get_absolute_install_dir
 
-  .. code-block:: cmake
-
-    GNUInstallDirs_get_absolute_install_dir(absvar var dirname)
-
   .. versionadded:: 3.7
 
-  Set the given variable ``absvar`` to the absolute path contained
-  within the variable ``var``.  This is to allow the computation of an
-  absolute path, accounting for all the special cases documented
-  above.  While this function is used to compute the various
-  ``CMAKE_INSTALL_FULL_<dir>`` variables, it is exposed publicly to
-  allow users who create additional path variables to also compute
-  absolute paths where necessary, using the same logic.  ``dirname`` is
-  the directory name to get, e.g. ``BINDIR``.
+  Computes an absolute installation path from a given relative path:
 
-  .. versionchanged:: 3.20
-    Added the ``<dirname>`` parameter.  Previous versions of CMake passed
-    this value through the variable ``${dir}``.
+  .. code-block:: cmake
 
-  .. versionchanged:: 4.1
-    The ``var`` variable is no longer altered. See policy :policy:`CMP0193`.
+    GNUInstallDirs_get_absolute_install_dir(<result-var> <input-var> <dir>)
+
+  This command takes the value from the variable ``<input-var>`` and
+  computes its absolute path according to GNU standard installation
+  directories.  If the input path is relative, it is prepended with
+  :variable:`CMAKE_INSTALL_PREFIX` and may be adjusted for the
+  `special cases`_ described above.
+
+  The arguments are:
+
+  ``<result-var>``
+    Name of the variable in which to store the computed absolute path.
+
+  ``<input-var>``
+    Name of the variable containing the path that will be used to compute
+    its associated absolute installation path.
+
+    .. versionchanged:: 4.1
+      This variable is no longer altered.  See policy :policy:`CMP0193`.
+      In previous CMake versions, this command modified the ``<input-var>``
+      variable value based on the `special cases`_.
+
+  ``<dir>``
+    .. versionadded:: 3.20
+
+    The directory type name, e.g., ``SYSCONFDIR``, ``LOCALSTATEDIR``,
+    ``RUNSTATEDIR``, etc.  This argument determines whether `special cases`_
+    apply when computing the absolute path.
+
+    .. versionchanged:: 3.20
+
+      Before the ``<dir>`` argument was introduced, the directory type
+      could be specified by setting the ``dir`` variable prior to calling
+      this command.  As of CMake 3.20, if the ``<dir>`` argument is provided
+      explicitly, the ``dir`` variable is ignored.
+
+  While this command is used internally by this module to compute the
+  ``CMAKE_INSTALL_FULL_<dir>`` variables, it is also exposed publicly for
+  users to create additional custom installation path variables and compute
+  absolute paths where necessary, using the same logic.
+
+See Also
+^^^^^^^^
+
+* The :command:`install` command.
 #]=======================================================================]
 
 cmake_policy(SET CMP0140 NEW)
