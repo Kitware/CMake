@@ -7,198 +7,216 @@ CSharpUtilities
 
 .. versionadded:: 3.8
 
-Functions to make configuration of CSharp/.NET targets easier.
+This utility module is intended to simplify the configuration of CSharp/.NET
+targets and provides a collection of commands for managing CSharp targets
+with Visual Studio generators, version 2010 and newer.
 
-A collection of CMake utility functions useful for dealing with CSharp
-targets for Visual Studio generators from version 2010 and later.
+Load this module in a CMake project with:
 
-The following functions are provided by this module:
+.. code-block:: cmake
 
-**Main functions**
+  include(CSharpUtilities)
+
+Commands
+^^^^^^^^
+
+This module provides the following commands:
+
+.. rubric:: Main Commands
 
 - :command:`csharp_set_windows_forms_properties`
 - :command:`csharp_set_designer_cs_properties`
 - :command:`csharp_set_xaml_cs_properties`
 
-**Helper functions**
+.. rubric:: Helper Commands
 
 - :command:`csharp_get_filename_keys`
 - :command:`csharp_get_filename_key_base`
 - :command:`csharp_get_dependentupon_name`
 
-Main functions provided by the module
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Main Commands
+"""""""""""""
 
 .. command:: csharp_set_windows_forms_properties
 
-  Sets source file properties for use of Windows Forms. Use this, if your CSharp
-  target uses Windows Forms:
+  Sets source file properties for use of Windows Forms:
 
   .. code-block:: cmake
 
-    csharp_set_windows_forms_properties([<file1> [<file2> [...]]])
+    csharp_set_windows_forms_properties([<files>...])
 
-  ``<fileN>``
-    List of all source files which are relevant for setting the
-    :prop_sf:`VS_CSHARP_<tagname>` properties (including ``.cs``, ``.resx`` and
-    ``.Designer.cs`` extensions).
+  ``<files>...``
+    A list of zero or more source files which are relevant for setting the
+    :prop_sf:`VS_CSHARP_<tagname>` source file properties. This typically
+    includes files with ``.cs``, ``.resx``, and ``.Designer.cs`` extensions.
 
-  In the list of all given files for all files ending with ``.Designer.cs`` and
-  ``.resx`` is searched.  For every *designer* or *resource* file a file with the
-  same base name but only ``.cs`` as extension is searched.  If this is found, the
-  :prop_sf:`VS_CSHARP_<tagname>` properties are set as follows:
+  Use this command when a CSharp target in the project uses Windows Forms.
 
-  for the **.cs** file:
-   - VS_CSHARP_SubType "Form"
+  This command searches in the provided list of files for pairs of related
+  files ending with ``.Designer.cs`` (*designer* files) or ``.resx``
+  (*resource* files).  For each such file, a corresponding base ``.cs``
+  file is searched (with the same base name).  When found, the
+  :prop_sf:`VS_CSHARP_<tagname>` source file properties are set as follows:
 
-  for the **.Designer.cs** file (if it exists):
-   - VS_CSHARP_DependentUpon <cs-filename>
-   - VS_CSHARP_DesignTime "" (delete tag if previously defined)
-   - VS_CSHARP_AutoGen ""(delete tag if previously defined)
+  For the **.cs** file:
+   - ``VS_CSHARP_SubType "Form"``
 
-  for the **.resx** file (if it exists):
-   - VS_RESOURCE_GENERATOR "" (delete tag if previously defined)
-   - VS_CSHARP_DependentUpon <cs-filename>
-   - VS_CSHARP_SubType "Designer"
+  For the **.Designer.cs** file (if it exists):
+   - ``VS_CSHARP_DependentUpon <cs-filename>``
+   - ``VS_CSHARP_DesignTime ""`` (tag is removed if previously defined)
+   - ``VS_CSHARP_AutoGen ""`` (tag is removed if previously defined)
+
+  For the **.resx** file (if it exists):
+   - ``VS_RESOURCE_GENERATOR ""`` (tag is removed if previously defined)
+   - ``VS_CSHARP_DependentUpon <cs-filename>``
+   - ``VS_CSHARP_SubType "Designer"``
 
 .. command:: csharp_set_designer_cs_properties
 
-  Sets source file properties of ``.Designer.cs`` files depending on
-  sibling filenames. Use this, if your CSharp target does **not**
-  use Windows Forms (for Windows Forms use
-  :command:`csharp_set_windows_forms_properties` instead):
+  Sets source file properties for ``.Designer.cs`` files depending on
+  sibling filenames:
 
   .. code-block:: cmake
 
-    csharp_set_designer_cs_properties([<file1> [<file2> [...]]])
+    csharp_set_designer_cs_properties([<files>...])
 
-  ``<fileN>``
-    List of all source files which are relevant for setting the
-    :prop_sf:`VS_CSHARP_<tagname>` properties (including ``.cs``,
-    ``.resx``, ``.settings`` and ``.Designer.cs`` extensions).
+  ``<files>...``
+    A list of zero or more source files which are relevant for setting the
+    :prop_sf:`VS_CSHARP_<tagname>` source file properties.  This typically
+    includes files with ``.resx``, ``.settings``, and ``.Designer.cs``
+    extensions.
 
-  In the list of all given files for all files ending with
-  ``.Designer.cs`` is searched. For every *designer* file all files
-  with the same base name but different extensions are searched. If
-  a match is found, the source file properties of the *designer* file
-  are set depending on the extension of the matched file:
+  Use this command, if the CSharp target does **not** use Windows Forms
+  (for Windows Forms use :command:`csharp_set_windows_forms_properties`
+  instead).
 
-  if match is **.resx** file:
+  This command searches through the provided list for files ending in
+  ``.Designer.cs`` (*designer* files).  For each such file, it looks for
+  sibling files with the same base name but different extensions.  If a
+  matching file is found, the appropriate source file properties are set on
+  the corresponding ``.Designer.cs`` file based on the matched extension:
 
-  - VS_CSHARP_AutoGen "True"
-  - VS_CSHARP_DesignTime "True"
-  - VS_CSHARP_DependentUpon <resx-filename>
+  If match is **.resx** file:
 
-  if match is **.cs** file:
+  - ``VS_CSHARP_AutoGen "True"``
+  - ``VS_CSHARP_DesignTime "True"``
+  - ``VS_CSHARP_DependentUpon <resx-filename>``
 
-  - VS_CSHARP_DependentUpon <cs-filename>
+  If match is **.cs** file:
 
-  if match is **.settings** file:
+  - ``VS_CSHARP_DependentUpon <cs-filename>``
 
-  - VS_CSHARP_AutoGen "True"
-  - VS_CSHARP_DesignTimeSharedInput "True"
-  - VS_CSHARP_DependentUpon <settings-filename>
+  If match is **.settings** file:
+
+  - ``VS_CSHARP_AutoGen "True"``
+  - ``VS_CSHARP_DesignTimeSharedInput "True"``
+  - ``VS_CSHARP_DependentUpon <settings-filename>``
 
 .. note::
 
-    Because the source file properties of the ``.Designer.cs`` file are set according
-    to the found matches and every match sets the **VS_CSHARP_DependentUpon**
-    property, there should only be one match for each ``Designer.cs`` file.
+    Because the source file properties of the ``.Designer.cs`` file are set
+    according to the found matches and every match sets the
+    :prop_sf:`VS_CSHARP_DependentUpon <VS_CSHARP_<tagname>>`
+    source file property, there should only be one match for
+    each ``Designer.cs`` file.
 
 .. command:: csharp_set_xaml_cs_properties
 
-  Sets source file properties for use of Windows Presentation Foundation (WPF) and
-  XAML. Use this, if your CSharp target uses WPF/XAML:
+  Sets source file properties for use of Windows Presentation Foundation (WPF)
+  and XAML:
 
   .. code-block:: cmake
 
-    csharp_set_xaml_cs_properties([<file1> [<file2> [...]]])
+    csharp_set_xaml_cs_properties([<files>...])
 
-  ``<fileN>``
-    List of all source files which are relevant for setting the
-    :prop_sf:`VS_CSHARP_<tagname>` properties (including ``.cs``,
-    ``.xaml``, and ``.xaml.cs`` extensions).
+  Use this command, if the CSharp target uses WPF/XAML.
 
-  In the list of all given files for all files ending with
-  ``.xaml.cs`` is searched. For every *xaml-cs* file, a file
-  with the same base name but extension ``.xaml`` is searched.
-  If a match is found, the source file properties of the ``.xaml.cs``
-  file are set:
+  ``<files>...``
+    A list of zero or more source files which are relevant for setting the
+    :prop_sf:`VS_CSHARP_<tagname>` source file properties.  This typically
+    includes files with ``.cs``, ``.xaml``, and ``.xaml.cs`` extensions.
 
-  - VS_CSHARP_DependentUpon <xaml-filename>
+  This command searches the provided file list for files ending with
+  ``.xaml.cs``.  For each such XAML code-behind file, a corresponding
+  ``.xaml`` file with the same base name is searched.  If found, the
+  following source file property is set on the ``.xaml.cs`` file:
 
-Helper functions which are used by the above ones
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  - ``VS_CSHARP_DependentUpon <xaml-filename>``
+
+Helper Commands
+"""""""""""""""
+
+These commands are used by the above main commands and typically aren't
+used directly:
 
 .. command:: csharp_get_filename_keys
 
-  Helper function which computes a list of key values to identify
-  source files independently of relative/absolute paths given in cmake
-  and eliminates case sensitivity:
+  Computes a normalized list of key values to identify source files
+  independently of relative or absolute paths given in CMake and eliminates
+  case sensitivity:
 
   .. code-block:: cmake
 
-    csharp_get_filename_keys(OUT [<file1> [<file2> [...]]])
+    csharp_get_filename_keys(<variable> [<files>...])
 
-  ``OUT``
-    Name of the variable in which the list of keys is stored
+  ``<variable>``
+    Name of the variable in which the list of computed keys is stored.
 
-  ``<fileN>``
-    filename(s) as given to CSharp target using :command:`add_library`
-    or :command:`add_executable`
+  ``<files>...``
+    Zero or more source file paths as given to CSharp target using commands
+    like :command:`add_library`, or :command:`add_executable`.
 
-  In some way the function applies a canonicalization to the source names.
-  This is necessary to find file matches if the files have been added to
-  the target with different directory prefixes:
+  This command canonicalizes file paths to ensure consistent identification
+  of source files.  This is useful when source files are added to a target
+  using different path forms.  Without normalization, CMake may treat paths
+  like ``myfile.Designer.cs`` and
+  ``${CMAKE_CURRENT_SOURCE_DIR}/myfile.Designer.cs`` as different files,
+  which can cause issues when setting source file properties.
+
+  For example, the following code will fail to set properties because the
+  file paths do not match exactly:
 
   .. code-block:: cmake
 
-    add_library(lib
-      myfile.cs
-      ${CMAKE_CURRENT_SOURCE_DIR}/myfile.Designer.cs)
+    add_library(lib myfile.cs ${CMAKE_CURRENT_SOURCE_DIR}/myfile.Designer.cs)
 
-    set_source_files_properties(myfile.Designer.cs PROPERTIES
-      VS_CSHARP_DependentUpon myfile.cs)
-
-    # this will fail, because in cmake
-    #  - ${CMAKE_CURRENT_SOURCE_DIR}/myfile.Designer.cs
-    #  - myfile.Designer.cs
-    # are not the same source file. The source file property is not set.
+    set_source_files_properties(
+      myfile.Designer.cs
+      PROPERTIES VS_CSHARP_DependentUpon myfile.cs
+    )
 
 .. command:: csharp_get_filename_key_base
 
-  Returns the full filepath and name **without** extension of a key.
-  KEY is expected to be a key from csharp_get_filename_keys. In BASE
-  the value of KEY without the file extension is returned:
+  Returns the full filepath and name **without** extension of a key:
 
   .. code-block:: cmake
 
-    csharp_get_filename_key_base(BASE KEY)
+    csharp_get_filename_key_base(<base> <key>)
 
-  ``BASE``
-    Name of the variable with the computed "base" of ``KEY``.
+  ``<base>``
+    Name of the variable with the computed base value of the ``<key>``
+    without the file extension.
 
-  ``KEY``
-    The key of which the base will be computed. Expected to be a
-    upper case full filename.
+  ``<key>``
+    The key of which the base will be computed.  Expected to be a
+    uppercase full filename from :command:`csharp_get_filename_keys`.
 
 .. command:: csharp_get_dependentupon_name
 
   Computes a string which can be used as value for the source file property
-  :prop_sf:`VS_CSHARP_<tagname>` with *target* being ``DependentUpon``:
+  :prop_sf:`VS_CSHARP_<tagname>` with ``<tagname>`` being ``DependentUpon``:
 
   .. code-block:: cmake
 
-    csharp_get_dependentupon_name(NAME FILE)
+    csharp_get_dependentupon_name(<variable> <file>)
 
-  ``NAME``
-    Name of the variable with the result value
+  ``<variable>``
+    Name of the variable with the result value.  Value contains the name
+    of the ``<file>`` without directory.
 
-  ``FILE``
-    Filename to convert to ``<DependentUpon>`` value
-
-  Actually this is only the filename without any path given at the moment.
-
+  ``<file>``
+    Filename to convert for using in the value of the
+    ``VS_CSHARP_DependentUpon`` source file property.
 #]=======================================================================]
 
 function(csharp_get_filename_keys OUT)
