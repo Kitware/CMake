@@ -10,8 +10,6 @@ endforeach()
 foreach(lib ${CMAKE_CUDA_HOST_IMPLICIT_LINK_LIBRARIES})
   string(APPEND __IMPLICIT_LINKS " \"${lib}\"")
 endforeach()
-set(CMAKE_CUDA_LINK_EXECUTABLE
-   "<CMAKE_CUDA_HOST_LINK_LAUNCHER> <LINK_FLAGS> <OBJECTS> /out:<TARGET> /implib:<TARGET_IMPLIB> /pdb:<TARGET_PDB> /version:<TARGET_VERSION_MAJOR>.<TARGET_VERSION_MINOR> <LINK_LIBRARIES>${__IMPLICIT_LINKS}")
 
 set(_CMAKE_VS_LINK_DLL "<CMAKE_COMMAND> -E vs_link_dll --intdir=<OBJECT_DIR> --rc=<CMAKE_RC_COMPILER> --mt=<CMAKE_MT> --manifests <MANIFESTS> -- ")
 set(_CMAKE_VS_LINK_EXE "<CMAKE_COMMAND> -E vs_link_exe --intdir=<OBJECT_DIR> --rc=<CMAKE_RC_COMPILER> --mt=<CMAKE_MT> --manifests <MANIFESTS> -- ")
