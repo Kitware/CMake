@@ -1,0 +1,13 @@
+---
+id: rm-cmdbg-includes
+language: Cpp
+severity: 'off'
+message: "Remove `cmDebugTools.h` includes before submission"
+ignores:
+  # Unit tests for the header.
+  - Tests/CMakeLib/testDebug.cxx
+rule:
+  any:
+    - pattern: '#include "cmDebugTools.h"'
+    - pattern: '#include <cmDebugTools.h>'
+fix: ''
