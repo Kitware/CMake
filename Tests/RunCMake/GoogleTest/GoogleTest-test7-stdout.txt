@@ -1,20 +1,20 @@
 Test project .*
- *Start +[0-9]+: TEST:both_suite\.  # TypeParam = TYPE\.test<both_suite\.  # TypeParam = TYPE>!7
- *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:both_suite\.  # TypeParam = TYPE\.test<both_suite\.  # TypeParam = TYPE>!7 \.+ +Passed +[0-9.]+ sec
- *Start +[0-9]+: TEST:both_suite\.  # TypeParam = TYPE\.case/test<both_suite\.  # TypeParam = TYPE>!7
- *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:both_suite\.  # TypeParam = TYPE\.case/test<both_suite\.  # TypeParam = TYPE>!7 \.+ +Passed +[0-9.]+ sec
- *Start +[0-9]+: TEST:both/suite\.  # TypeParam = TYPE\.test<both/suite\.  # TypeParam = TYPE>!7
- *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:both/suite\.  # TypeParam = TYPE\.test<both/suite\.  # TypeParam = TYPE>!7 \.+ +Passed +[0-9.]+ sec
- *Start +[0-9]+: TEST:both/suite\.  # TypeParam = TYPE\.case/test<both/suite\.  # TypeParam = TYPE>!7
- *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:both/suite\.  # TypeParam = TYPE\.case/test<both/suite\.  # TypeParam = TYPE>!7 \.+ +Passed +[0-9.]+ sec
- *Start +[0-9]+: TEST:ns\.both/suite\.  # TypeParam = TYPE\.test<ns\.both/suite\.  # TypeParam = TYPE>!7
- *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:ns\.both/suite\.  # TypeParam = TYPE\.test<ns\.both/suite\.  # TypeParam = TYPE>!7 \.+ +Passed +[0-9.]+ sec
- *Start +[0-9]+: TEST:ns\.both/suite\.  # TypeParam = TYPE\.case/test<ns\.both/suite\.  # TypeParam = TYPE>!7
- *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:ns\.both/suite\.  # TypeParam = TYPE\.case/test<ns\.both/suite\.  # TypeParam = TYPE>!7 \.+ +Passed +[0-9.]+ sec
- *Start +[0-9]+: TEST:prefix/both/suite\.  # TypeParam = TYPE\.test<prefix/both/suite\.  # TypeParam = TYPE>!7
- *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:prefix/both/suite\.  # TypeParam = TYPE\.test<prefix/both/suite\.  # TypeParam = TYPE>!7 \.+ +Passed +[0-9.]+ sec
- *Start +[0-9]+: TEST:prefix/both/suite\.  # TypeParam = TYPE\.case/test<prefix/both/suite\.  # TypeParam = TYPE>!7
- *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:prefix/both/suite\.  # TypeParam = TYPE\.case/test<prefix/both/suite\.  # TypeParam = TYPE>!7 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:both_suite\.test!7
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:both_suite\.test!7 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:both_suite\.case/test!7
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:both_suite\.case/test!7 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:both\.test<suite>!7
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:both\.test<suite>!7 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:both\.case/test<suite>!7
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:both\.case/test<suite>!7 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:ns\.both\.test<suite>!7
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:ns\.both\.test<suite>!7 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:ns\.both\.case/test<suite>!7
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:ns\.both\.case/test<suite>!7 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:prefix/both\.test<suite>!7
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:prefix/both\.test<suite>!7 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:prefix/both\.case/test<suite>!7
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:prefix/both\.case/test<suite>!7 \.+ +Passed +[0-9.]+ sec
 
 100% tests passed, 0 tests failed out of [0-9]+
 

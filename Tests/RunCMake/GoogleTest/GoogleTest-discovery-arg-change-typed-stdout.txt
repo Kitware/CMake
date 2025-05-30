@@ -2,22 +2,22 @@ Test project .*/Tests/RunCMake/GoogleTest/GoogleTest-discovery-arg-change
   Test +#[0-9]+: typed\.case<short>
   Test +#[0-9]+: typed\.case<float>
   Test +#[0-9]+: typed\.case<char>
-  Test +#[0-9]+: typed/named\.  # TypeParam = int\.case<typed/named\.  # TypeParam = int>
+  Test +#[0-9]+: typed\.case<int>
   Test +#[0-9]+: ns\.typed\.case<short>
   Test +#[0-9]+: ns\.typed\.case<float>
   Test +#[0-9]+: ns\.typed\.case<char>
-  Test +#[0-9]+: ns\.typed/named\.  # TypeParam = int\.case<ns\.typed/named\.  # TypeParam = int>
+  Test +#[0-9]+: ns\.typed\.case<int>
   Test +#[0-9]+: prefix/typed\.case<short>
   Test +#[0-9]+: prefix/typed\.case<float>
   Test +#[0-9]+: prefix/typed\.case<char>
-  Test +#[0-9]+: prefix/typed/named\.  # TypeParam = int\.case<prefix/typed/named\.  # TypeParam = int>
-  Test +#[0-9]+: both_suite\.  # TypeParam = TYPE\.test  # GetParam\(\) = VALUE<both_suite\.  # TypeParam = TYPE>
-  Test +#[0-9]+: both_suite\.  # TypeParam = TYPE\.case/test  # GetParam\(\) = VALUE<both_suite\.  # TypeParam = TYPE>
-  Test +#[0-9]+: both/suite\.  # TypeParam = TYPE\.test  # GetParam\(\) = VALUE<both/suite\.  # TypeParam = TYPE>
-  Test +#[0-9]+: both/suite\.  # TypeParam = TYPE\.case/test  # GetParam\(\) = VALUE<both/suite\.  # TypeParam = TYPE>
-  Test +#[0-9]+: ns\.both/suite\.  # TypeParam = TYPE\.test  # GetParam\(\) = VALUE<ns\.both/suite\.  # TypeParam = TYPE>
-  Test +#[0-9]+: ns\.both/suite\.  # TypeParam = TYPE\.case/test  # GetParam\(\) = VALUE<ns\.both/suite\.  # TypeParam = TYPE>
-  Test +#[0-9]+: prefix/both/suite\.  # TypeParam = TYPE\.test  # GetParam\(\) = VALUE<prefix/both/suite\.  # TypeParam = TYPE>
-  Test +#[0-9]+: prefix/both/suite\.  # TypeParam = TYPE\.case/test  # GetParam\(\) = VALUE<prefix/both/suite\.  # TypeParam = TYPE>
+  Test +#[0-9]+: prefix/typed\.case<int>
+  Test +#[0-9]+: both_suite\.test/VALUE<TYPE>
+  Test +#[0-9]+: both_suite\.case/VALUE<TYPE>
+  Test +#[0-9]+: both\.test/VALUE<TYPE>
+  Test +#[0-9]+: both\.case/VALUE<TYPE>
+  Test +#[0-9]+: ns\.both\.test/VALUE<TYPE>
+  Test +#[0-9]+: ns\.both\.case/VALUE<TYPE>
+  Test +#[0-9]+: prefix/both\.test/VALUE<TYPE>
+  Test +#[0-9]+: prefix/both\.case/VALUE<TYPE>
 
 Total Tests: [0-9]+
