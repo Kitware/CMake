@@ -23,5 +23,9 @@ This is done only when ``<LANG>`` is one of:
 
   .. versionadded:: 4.1
 
+* ``HIP``
+
+  .. versionadded:: 4.1
+
 This variable is initialized to the :envvar:`CMAKE_<LANG>_LINKER_LAUNCHER`
 environment variable if it is set.
