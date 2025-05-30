@@ -13,7 +13,7 @@ string(APPEND CMAKE_MODULE_LINKER_FLAGS_INIT " $ENV{LDFLAGS}")
 cmake_initialize_per_config_variable(CMAKE_EXE_LINKER_FLAGS    "Flags used by the linker")
 cmake_initialize_per_config_variable(CMAKE_SHARED_LINKER_FLAGS "Flags used by the linker during the creation of shared libraries")
 cmake_initialize_per_config_variable(CMAKE_MODULE_LINKER_FLAGS "Flags used by the linker during the creation of modules")
-cmake_initialize_per_config_variable(CMAKE_STATIC_LINKER_FLAGS "Flags used by the linker during the creation of static libraries")
+cmake_initialize_per_config_variable(CMAKE_STATIC_LINKER_FLAGS "Flags used by the archiver during the creation of static libraries")
 
 # Alias the build tool variable for backward compatibility.
 set(CMAKE_BUILD_TOOL ${CMAKE_MAKE_PROGRAM})
