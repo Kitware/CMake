@@ -449,6 +449,7 @@ TargetProperty const StaticTargetProperties[] = {
   // ---- C++
   { "CXX_LINKER_LAUNCHER"_s, IC::CanCompileSources },
   // ---- CUDA
+  { "CUDA_LINKER_LAUNCHER"_s, IC::CanCompileSources },
   { "CUDA_RESOLVE_DEVICE_SYMBOLS"_s, IC::CanCompileSources },
   { "CUDA_RUNTIME_LIBRARY"_s, IC::CanCompileSources },
   // ---- HIP

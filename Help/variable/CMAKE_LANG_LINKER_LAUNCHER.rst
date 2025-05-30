@@ -8,9 +8,17 @@ variable is used to initialize the property on each target as it is created.
 This is done only when ``<LANG>`` is one of:
 
 * ``C``
+
 * ``CXX``
+
+* ``CUDA``
+
+  .. versionadded:: 4.1
+
 * ``OBJC``
+
 * ``OBJCXX``
+
 * ``Fortran``
 
   .. versionadded:: 4.1
