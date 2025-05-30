@@ -7,33 +7,51 @@ CheckOBJCCompilerFlag
 
 .. versionadded:: 3.16
 
-Check once whether the Objective-C compiler supports a given flag.
+This module provides a command to check whether the Objective-C compiler
+supports a given flag.
+
+Load this module in a CMake project with:
+
+.. code-block:: cmake
+
+  include(CheckOBJCCompilerFlag)
+
+Commands
+^^^^^^^^
+
+This module provides the following command:
 
 .. command:: check_objc_compiler_flag
 
+  Checks once whether the Objective-C compiler supports a given flag:
+
   .. code-block:: cmake
 
-    check_objc_compiler_flag(<flag> <resultVar>)
+    check_objc_compiler_flag(<flag> <variable>)
 
-Check once that the ``<flag>`` is accepted by the compiler without a diagnostic.
-The result is stored in the internal cache variable specified by
-``<resultVar>``, with boolean ``true`` for success and boolean ``false`` for
-failure.
+  This command checks once that the ``<flag>`` is accepted by the ``OBJC``
+  compiler without producing a diagnostic message.  Multiple flags can be
+  specified in one argument as a string using a
+  :ref:`semicolon-separated list <CMake Language Lists>`.
 
-``true`` indicates only that the compiler did not issue a diagnostic message
-when given the flag. Whether the flag has any effect is beyond the scope of
-this module.
+  The result of the check is stored in the internal cache variable specified
+  by ``<variable>``, with boolean true for success and boolean false for
+  failure.
 
-Internally, :command:`try_compile` is used to perform the check. If
-:variable:`CMAKE_TRY_COMPILE_TARGET_TYPE` is set to ``EXECUTABLE`` (default),
-the check compiles and links an executable program. If set to
-``STATIC_LIBRARY``, the check is compiled but not linked.
+  A successful result only indicates that the compiler did not report an
+  error when given the flag.  Whether the flag has any effect, or the
+  intended one, is outside the scope of this module.
 
-See also :command:`check_compiler_flag` for a more general command syntax.
+  .. note::
 
-The compile and link commands can be influenced by setting any of the
-following variables prior to calling ``check_objc_compiler_flag()``. Unknown
-flags in these variables can case a false negative result.
+    Since the underlying :command:`try_compile` command also uses flags from
+    variables like :variable:`CMAKE_<LANG>_FLAGS`, unknown or unsupported
+    flags in those variables may result in a false negative for this check.
+
+  .. rubric:: Variables Affecting the Check
+
+  The following variables may be set before calling this command to modify
+  the way the check is run:
 
   .. include:: /module/include/CMAKE_REQUIRED_FLAGS.rst
 
@@ -49,6 +67,35 @@ flags in these variables can case a false negative result.
 
   .. include:: /module/include/CMAKE_REQUIRED_QUIET.rst
 
+  .. include:: /module/include/CMAKE_TRY_COMPILE_TARGET_TYPE.rst
+
+Examples
+^^^^^^^^
+
+The following example demonstrates how to use this module to check the
+Objective-C compiler flag ``-fobjc-arc``.  The result of the check is
+stored in the internal cache variable ``HAVE_OBJC_ARC``, and the flag is
+conditionally enabled using the :command:`target_compile_options` command.
+The :genex:`$<COMPILE_LANGUAGE:...> <COMPILE_LANGUAGE:languages>` generator
+expression ensures that the flag is added only to ``OBJC`` source files.
+
+.. code-block:: cmake
+
+  include(CheckOBJCCompilerFlag)
+  check_objc_compiler_flag(-fobjc-arc HAVE_OBJC_ARC)
+
+  if(HAVE_OBJC_ARC)
+    target_compile_options(
+      example
+      PRIVATE $<$<COMPILE_LANGUAGE:OBJC>:-fobjc-arc>
+    )
+  endif()
+
+See Also
+^^^^^^^^
+
+* The :module:`CheckCompilerFlag` module for a more general command to check
+  whether a compiler flag is supported.
 #]=======================================================================]
 
 include_guard(GLOBAL)

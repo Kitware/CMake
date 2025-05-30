@@ -71,7 +71,8 @@ included by absolute path.  For example:
   )
 
 .. |command_name| replace:: ``target_precompile_headers``
-.. |more_see_also| replace:: The :genex:`$<COMPILE_LANGUAGE:...>` generator
+.. |more_see_also| replace:: The :genex:`$<COMPILE_LANGUAGE:...>
+   <COMPILE_LANGUAGE:languages>` generator
    expression is particularly useful for specifying a language-specific header
    to precompile for only one language (e.g. ``CXX`` and not ``C``).  In this
    case, header file names that are not explicitly in double quotes or angle
@@ -79,7 +80,7 @@ included by absolute path.  For example:
    brackets inside a generator expression, be sure to encode the closing
    ``>`` as :genex:`$<ANGLE-R>`.  For example:
 .. include:: include/GENEX_NOTE.rst
-   :start-line: 1
+   :start-line: 2
 
 .. code-block:: cmake
 

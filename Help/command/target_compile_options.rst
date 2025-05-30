@@ -69,3 +69,6 @@ See Also
 * :variable:`CMAKE_<LANG>_FLAGS` and :variable:`CMAKE_<LANG>_FLAGS_<CONFIG>`
   add language-wide flags passed to all invocations of the compiler.
   This includes invocations that drive compiling and those that drive linking.
+
+* The :module:`CheckCompilerFlag` module to check whether the compiler
+  supports a given flag.

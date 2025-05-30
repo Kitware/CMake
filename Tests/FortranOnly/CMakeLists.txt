@@ -93,7 +93,7 @@ endif()
 
 unset(Fortran_BOGUS_FLAG CACHE)
 include(CheckFortranCompilerFlag)
-CHECK_Fortran_COMPILER_FLAG(-_this_is_not_a_flag_ Fortran_BOGUS_FLAG)
+check_fortran_compiler_flag(-_this_is_not_a_flag_ Fortran_BOGUS_FLAG)
 if (Fortran_BOGUS_FLAG)
   message(SEND_ERROR "CHECK_Fortran_COMPILER_FLAG() succeeded, but should have failed")
 endif()

@@ -142,6 +142,8 @@ See Also
 
 * The :variable:`CMAKE_LINKER_TYPE` variable to specify the linker, which
   will be used also by this module.
+* The :module:`CheckCompilerFlag` module to check whether a compiler flag
+  is supported.
 #]=======================================================================]
 
 include_guard(GLOBAL)
