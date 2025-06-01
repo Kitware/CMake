@@ -94,6 +94,9 @@ set(MACHO_CURRENT_VERSION "${MACHO_COMPATIBILITY_VERSION}.${_revision}")
 # saving and restoring the state of the variables.
 INCLUDE(CMakePushCheckState)
 
+# Enable the pkg-config helpers.
+INCLUDE(FindPkgConfig)
+
 # Initialize the state of the variables. This initialization is not
 # necessary but this shows you what value the variables initially have.
 SET(CMAKE_REQUIRED_DEFINITIONS)
@@ -225,6 +228,7 @@ OPTION(ENABLE_ZLIB "Enable the use of the system ZLIB library if found" ON)
 OPTION(ENABLE_BZip2 "Enable the use of the system BZip2 library if found" ON)
 OPTION(ENABLE_LIBXML2 "Enable the use of the system libxml2 library if found" ON)
 OPTION(ENABLE_EXPAT "Enable the use of the system EXPAT library if found" ON)
+OPTION(ENABLE_WIN32_XMLLITE "Enable the use of the Windows XmlLite library if found" ON)
 OPTION(ENABLE_PCREPOSIX "Enable the use of the system PCREPOSIX library if found" ON)
 OPTION(ENABLE_PCRE2POSIX "Enable the use of the system PCRE2POSIX library if found" ON)
 OPTION(ENABLE_LIBGCC "Enable the use of the system LibGCC library if found" ON)
@@ -353,10 +357,12 @@ ENDMACRO (GENERATE_LIST_H)
 # Generate installation rules for man pages.
 #
 MACRO (INSTALL_MAN __mans)
-  FOREACH (_man ${ARGV})
-    STRING(REGEX REPLACE "^.+[.]([1-9])" "\\1" _mansect ${_man})
-    INSTALL(FILES ${_man} DESTINATION "share/man/man${_mansect}")
-  ENDFOREACH (_man)
+  IF(ENABLE_INSTALL)
+    FOREACH (_man ${ARGV})
+      STRING(REGEX REPLACE "^.+[.]([1-9])" "\\1" _mansect ${_man})
+      INSTALL(FILES ${_man} DESTINATION "share/man/man${_mansect}")
+    ENDFOREACH (_man)
+  ENDIF(ENABLE_INSTALL)
 ENDMACRO (INSTALL_MAN __mans)
 #
 # Find out what macro is needed to use libraries on Windows.
@@ -581,6 +587,7 @@ IF(ENABLE_LIBB2)
   FIND_PACKAGE_HANDLE_STANDARD_ARGS(LIBB2 DEFAULT_MSG LIBB2_LIBRARY LIBB2_INCLUDE_DIR)
 ELSE(ENABLE_LIBB2)
   SET(LIBB2_FOUND FALSE) # Override cached value
+  UNSET(LIBB2_PKGCONFIG_VERSION CACHE)
 ENDIF(ENABLE_LIBB2)
 IF(LIBB2_FOUND)
   SET(HAVE_LIBB2 1)
@@ -593,8 +600,13 @@ IF(LIBB2_FOUND)
   SET(CMAKE_REQUIRED_INCLUDES ${LIBB2_INCLUDE_DIR})
   CHECK_FUNCTION_EXISTS(blake2sp_init HAVE_LIBB2)
   CMAKE_POP_CHECK_STATE()
+  pkg_check_modules(LIBB2 libb2)
+  IF(LIBB2_VERSION)
+    SET(LIBB2_PKGCONFIG_VERSION LIBB2_VERSION)
+  ENDIF(LIBB2_VERSION)
 ELSE(LIBB2_FOUND)
   SET(ARCHIVE_BLAKE2 TRUE)
+  UNSET(LIBB2_PKGCONFIG_VERSION CACHE)
 ENDIF(LIBB2_FOUND)
 #
 # Find LZ4
@@ -657,6 +669,7 @@ IF(ZSTD_FOUND)
   SET(CMAKE_REQUIRED_INCLUDES ${ZSTD_INCLUDE_DIR})
   CHECK_FUNCTION_EXISTS(ZSTD_decompressStream HAVE_LIBZSTD)
   CHECK_FUNCTION_EXISTS(ZSTD_compressStream HAVE_ZSTD_compressStream)
+  CHECK_FUNCTION_EXISTS(ZSTD_minCLevel HAVE_ZSTD_minCLevel)
   #
   # TODO: test for static library.
   #
@@ -664,7 +677,6 @@ IF(ZSTD_FOUND)
 ENDIF(ZSTD_FOUND)
 MARK_AS_ADVANCED(CLEAR ZSTD_INCLUDE_DIR)
 MARK_AS_ADVANCED(CLEAR ZSTD_LIBRARY)
-
 
 #
 # Check headers
@@ -796,7 +808,7 @@ IF(ENABLE_MBEDTLS)
     LA_CHECK_INCLUDE_FILE("mbedtls/aes.h" HAVE_MBEDTLS_AES_H)
     LA_CHECK_INCLUDE_FILE("mbedtls/md.h" HAVE_MBEDTLS_MD_H)
     LA_CHECK_INCLUDE_FILE("mbedtls/pkcs5.h" HAVE_MBEDTLS_PKCS5_H)
-
+    LA_CHECK_INCLUDE_FILE("mbedtls/version.h" HAVE_MBEDTLS_VERSION_H)
   ENDIF(MBEDTLS_FOUND)
   MARK_AS_ADVANCED(CLEAR MBEDTLS_INCLUDE_DIRS)
   MARK_AS_ADVANCED(CLEAR MBEDCRYPTO_LIBRARY)
@@ -819,7 +831,7 @@ IF(ENABLE_NETTLE)
     LA_CHECK_INCLUDE_FILE("nettle/pbkdf2.h" HAVE_NETTLE_PBKDF2_H)
     LA_CHECK_INCLUDE_FILE("nettle/ripemd160.h" HAVE_NETTLE_RIPEMD160_H)
     LA_CHECK_INCLUDE_FILE("nettle/sha.h" HAVE_NETTLE_SHA_H)
-
+    LA_CHECK_INCLUDE_FILE("nettle/version.h" HAVE_NETTLE_VERSION_H)
   ENDIF(NETTLE_FOUND)
   MARK_AS_ADVANCED(CLEAR NETTLE_INCLUDE_DIR)
   MARK_AS_ADVANCED(CLEAR NETTLE_LIBRARIES)
@@ -838,6 +850,7 @@ IF(ENABLE_OPENSSL AND NOT CMAKE_SYSTEM_NAME MATCHES "Darwin")
     SET(CMAKE_REQUIRED_LIBRARIES ${OPENSSL_CRYPTO_LIBRARY})
     SET(CMAKE_REQUIRED_INCLUDES ${OPENSSL_INCLUDE_DIR})
     LA_CHECK_INCLUDE_FILE("openssl/evp.h" HAVE_OPENSSL_EVP_H)
+    LA_CHECK_INCLUDE_FILE("openssl/opensslv.h" HAVE_OPENSSL_OPENSSLV_H)
     CHECK_FUNCTION_EXISTS(PKCS5_PBKDF2_HMAC_SHA1 HAVE_PKCS5_PBKDF2_HMAC_SHA1)
   ENDIF(OPENSSL_FOUND)
 ELSE()
@@ -1045,7 +1058,6 @@ main(int argc, char **argv)
         	"${OUTPUT}\n"
         	"Source file was:\n${SOURCE}\n")
 	ENDIF (ARCHIVE_CRYPTO_${CRYPTO}_WIN)
-
       ENDIF(NOT DEFINED ARCHIVE_CRYPTO_${CRYPTO}_WIN)
       ENDIF(NOT ARCHIVE_CRYPTO_${CRYPTO})
     ENDFOREACH(CRYPTO)
@@ -1138,6 +1150,7 @@ IF(ENABLE_ICONV)
       CHECK_ICONV("libiconv" "const")
       CHECK_ICONV("libiconv" "")
       IF (HAVE_ICONV)
+        SET(HAVE_LIBICONV 1)
         LIST(APPEND ADDITIONAL_LIBS ${LIBICONV_PATH})
       ENDIF(HAVE_ICONV)
     ENDIF(NOT HAVE_ICONV AND LIBICONV_PATH)
@@ -1181,6 +1194,7 @@ ELSE(ENABLE_ICONV)
   # (once enabled).
   UNSET(HAVE_LOCALE_CHARSET CACHE)
   UNSET(HAVE_ICONV CACHE)
+  UNSET(HAVE_LIBICONV CACHE)
   UNSET(HAVE_ICONV_libc_ CACHE)
   UNSET(HAVE_ICONV_libc_const CACHE)
   UNSET(HAVE_ICONV_libiconv_ CACHE)
@@ -1210,6 +1224,7 @@ IF(LIBXML2_FOUND)
   SET(CMAKE_REQUIRED_INCLUDES ${ICONV_INCLUDE_DIR} ${LIBXML2_INCLUDE_DIR})
   CHECK_INCLUDE_FILES("libxml/xmlreader.h" HAVE_LIBXML_XMLREADER_H)
   CHECK_INCLUDE_FILES("libxml/xmlwriter.h" HAVE_LIBXML_XMLWRITER_H)
+  CHECK_INCLUDE_FILES("libxml/xmlversion.h" HAVE_LIBXML_XMLVERSION_H)
   # Test if a macro is needed for the library.
   TRY_MACRO_FOR_LIBRARY(
     "${ICONV_INCLUDE_DIR};${LIBXML2_INCLUDE_DIR}"
@@ -1237,6 +1252,25 @@ ELSE(LIBXML2_FOUND)
     SET(HAVE_LIBEXPAT 1)
     LA_CHECK_INCLUDE_FILE("expat.h" HAVE_EXPAT_H)
     CMAKE_POP_CHECK_STATE()	# Restore the state of the variables
+  ELSE(EXPAT_FOUND)
+    IF(WIN32 AND ENABLE_WIN32_XMLLITE)
+      # Check linkage as well; versions of mingw-w64 before v11.0.0
+      # do not contain an import library for xmllite.
+      cmake_push_check_state()
+      SET(CMAKE_REQUIRED_LIBRARIES "xmllite" "uuid")
+      check_c_source_compiles("
+      #include <initguid.h>
+      #include <xmllite.h>
+      int main() {
+        return CreateXmlReader(&IID_IXmlReader, NULL, NULL);
+      }
+      " HAVE_XMLLITE_H)
+      cmake_pop_check_state()
+      IF(HAVE_XMLLITE_H)
+        SET(XMLLITE_FOUND TRUE)
+        LIST(APPEND ADDITIONAL_LIBS "xmllite" "uuid")
+      ENDIF()
+    ENDIF()
   ENDIF(EXPAT_FOUND)
 ENDIF(LIBXML2_FOUND)
 MARK_AS_ADVANCED(CLEAR LIBXML2_INCLUDE_DIR)
@@ -1790,11 +1824,16 @@ IF(ENABLE_XATTR)
   CHECK_LIBRARY_EXISTS(attr "setxattr" "" HAVE_LIBATTR)
   IF(HAVE_LIBATTR)
     SET(CMAKE_REQUIRED_LIBRARIES "attr")
-  ELSE()
+	  pkg_check_modules(LIBATTR libattr)
+	  IF(LIBATTR_VERSION)
+	    SET(LIBATTR_PKGCONFIG_VERSION ${LIBATTR_VERSION})
+	  ENDIF(LIBATTR_VERSION)
+  ELSE(HAVE_LIBATTR)
     CHECK_LIBRARY_EXISTS(gnu "setxattr" "" HAVE_LIBATTR_GNU)
     IF(HAVE_LIBATTR_GNU)
       SET(CMAKE_REQUIRED_LIBRARIES "gnu")
     ENDIF()
+    UNSET(LIBATTR_PKGCONFIG_VERSION CACHE)
   ENDIF(HAVE_LIBATTR)
   CHECK_SYMBOL_EXISTS(EXTATTR_NAMESPACE_USER "sys/types.h;sys/extattr.h" HAVE_DECL_EXTATTR_NAMESPACE_USER)
   CHECK_SYMBOL_EXISTS(XATTR_NOFOLLOW "sys/xattr.h" HAVE_DECL_XATTR_NOFOLLOW)
@@ -1912,6 +1951,12 @@ IF(ENABLE_ACL)
     SET(CMAKE_REQUIRED_LIBRARIES "acl")
     FIND_LIBRARY(ACL_LIBRARY NAMES acl)
     LIST(APPEND ADDITIONAL_LIBS ${ACL_LIBRARY})
+	  pkg_check_modules(LIBACL libacl)
+	  IF(LIBACL_VERSION)
+	    SET(LIBACL_PKGCONFIG_VERSION ${LIBACL_VERSION})
+	  ENDIF(LIBACL_VERSION)
+  ELSE(HAVE_LIBACL)
+    UNSET(LIBACL_PKGCONFIG_VERSION CACHE)
   ENDIF(HAVE_LIBACL)
 
   CHECK_TYPE_EXISTS(acl_t "sys/types.h;sys/acl.h" HAVE_ACL_T)
@@ -2051,6 +2096,12 @@ int main(void) { return ACL_SYNCHRONIZE; }" HAVE_DECL_ACL_SYNCHRONIZE)
     SET(CMAKE_REQUIRED_LIBRARIES "richacl")
     FIND_LIBRARY(RICHACL_LIBRARY NAMES richacl)
     LIST(APPEND ADDITIONAL_LIBS ${RICHACL_LIBRARY})
+	  pkg_check_modules(LIBRICHACL librichacl)
+	  IF(LIBRICHACL_VERSION)
+	    SET(LIBRICHACL_PKGCONFIG_VERSION ${LIBRICHACL_VERSION})
+	  ENDIF(LIBRICHACL_VERSION)
+  ELSE(HAVE_LIBRICHACL)
+    UNSET(LIBRICHACL_PKGCONFIG_VERSION CACHE)
   ENDIF(HAVE_LIBRICHACL)
 
   CHECK_STRUCT_HAS_MEMBER("struct richace" e_type "sys/richacl.h"
@@ -2150,7 +2201,7 @@ INCLUDE(CreatePkgConfigFile)
 #
 # Register installation of PDF documents.
 #
-IF(WIN32 AND NOT CYGWIN)
+IF(WIN32 AND NOT CYGWIN AND ENABLE_INSTALL)
   #
   # On Windows platform, It's better that we install PDF documents
   # on one's computer.
@@ -2162,7 +2213,7 @@ IF(WIN32 AND NOT CYGWIN)
             FILES_MATCHING PATTERN "*.pdf"
     )
   ENDIF(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/doc/pdf)
-ENDIF(WIN32 AND NOT CYGWIN)
+ENDIF(WIN32 AND NOT CYGWIN AND ENABLE_INSTALL)
 #
 #
 #
