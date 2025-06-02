@@ -84,7 +84,7 @@ void Instance::Bind(NonEmpty<std::string>& val)
         this->ParseResults->AddKeywordError(this->Keyword,
                                             "  empty string not allowed\n");
       }
-      val.assign(std::string(arg));
+      val = std::string(arg);
       return Continue::No;
     },
     ExpectAtLeast{ 1 });
@@ -94,7 +94,7 @@ void Instance::Bind(Maybe<std::string>& val)
 {
   this->Bind(
     [&val](cm::string_view arg) -> Continue {
-      static_cast<std::string&>(val) = std::string(arg);
+      val = std::string(arg);
       return Continue::No;
     },
     ExpectAtLeast{ 0 });

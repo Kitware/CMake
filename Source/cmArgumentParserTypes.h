@@ -17,6 +17,7 @@ template <>
 struct Maybe<std::string> : public std::string
 {
   using std::string::basic_string;
+  using std::string::operator=;
 };
 
 template <typename T>
@@ -26,12 +27,14 @@ template <>
 struct MaybeEmpty<std::vector<std::string>> : public std::vector<std::string>
 {
   using std::vector<std::string>::vector;
+  using std::vector<std::string>::operator=;
 };
 #  endif
 template <typename T>
 struct MaybeEmpty<std::vector<T>> : public std::vector<T>
 {
   using std::vector<T>::vector;
+  using std::vector<T>::operator=;
 };
 
 template <typename T>
@@ -40,11 +43,13 @@ template <typename T>
 struct NonEmpty<std::vector<T>> : public std::vector<T>
 {
   using std::vector<T>::vector;
+  using std::vector<T>::operator=;
 };
 template <>
 struct NonEmpty<std::string> : public std::string
 {
   using std::string::basic_string;
+  using std::string::operator=;
 };
 
 } // namespace ArgumentParser
@@ -57,18 +62,21 @@ template <typename T>
 struct Maybe : public T
 {
   using T::T;
+  using T::operator=;
 };
 
 template <typename T>
 struct MaybeEmpty : public T
 {
   using T::T;
+  using T::operator=;
 };
 
 template <typename T>
 struct NonEmpty : public T
 {
   using T::T;
+  using T::operator=;
 };
 
 } // namespace ArgumentParser
