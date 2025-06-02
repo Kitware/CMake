@@ -468,6 +468,12 @@ if(CPACK_NUGET_PACKAGE_DEBUG)
     list(APPEND CPACK_NUGET_PACK_ADDITIONAL_OPTIONS "-Verbosity" "detailed")
 endif()
 
+# Generate symbol package
+if(CPACK_NUGET_SYMBOL_PACKAGE)
+    list(APPEND CPACK_NUGET_PACK_ADDITIONAL_OPTIONS "-Symbols")
+    list(APPEND CPACK_NUGET_PACK_ADDITIONAL_OPTIONS "-SymbolPackageFormat" "snupkg")
+endif()
+
 # Case one: ordinal all-in-one package
 if(CPACK_NUGET_ORDINAL_MONOLITIC)
     # This variable `CPACK_NUGET_ALL_IN_ONE` set by C++ code:
@@ -552,9 +558,19 @@ else()
     endif()
 endif()
 
-file(GLOB_RECURSE GEN_CPACK_OUTPUT_FILES "${CPACK_TEMPORARY_DIRECTORY}/*.nupkg")
-if(NOT GEN_CPACK_OUTPUT_FILES)
+
+file(GLOB_RECURSE GEN_CPACK_NUGET_PACKAGE_FILES "${CPACK_TEMPORARY_DIRECTORY}/*.nupkg")
+if(NOT GEN_CPACK_NUGET_PACKAGE_FILES)
     message(FATAL_ERROR "NuGet package was not generated at `${CPACK_TEMPORARY_DIRECTORY}`!")
+endif()
+list(APPEND GEN_CPACK_OUTPUT_FILES "${GEN_CPACK_NUGET_PACKAGE_FILES}")
+
+if(CPACK_NUGET_SYMBOL_PACKAGE)
+  file(GLOB_RECURSE GEN_CPACK_NUGET_SYMBOL_PACKAGE_FILES "${CPACK_TEMPORARY_DIRECTORY}/*.snupkg")
+  if(NOT GEN_CPACK_NUGET_SYMBOL_PACKAGE_FILES)
+        message(FATAL_ERROR "NuGet symbol package was not generated at `${CPACK_TEMPORARY_DIRECTORY}`!")
+    endif()
+    list(APPEND GEN_CPACK_OUTPUT_FILES "${GEN_CPACK_NUGET_SYMBOL_PACKAGE_FILES}")
 endif()
 
 _cpack_nuget_debug("Generated files: ${GEN_CPACK_OUTPUT_FILES}")
