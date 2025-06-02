@@ -178,4 +178,13 @@ endfunction()
 
 BundleLinkBundle()
 
+if(XCODE_VERSION VERSION_GREATER_EQUAL 12)
+  block()
+    set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/XcodeWorkspace-build)
+    run_cmake(XcodeWorkspace)
+    set(RunCMake_TEST_NO_CLEAN 1)
+    run_cmake_command(XcodeWorkspace-build ${CMAKE_COMMAND} --build . --config Debug)
+  endblock()
+endif()
+
 # Please add device-specific tests to '../XcodeProject-Device/RunCMakeTest.cmake'.

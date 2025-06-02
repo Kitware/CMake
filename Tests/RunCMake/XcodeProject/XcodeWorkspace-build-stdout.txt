@@ -1,0 +1,1 @@
+xcodebuild -workspace XcodeWorkspace\.xcworkspace build -scheme ALL_BUILD -destination generic/platform=MacOS

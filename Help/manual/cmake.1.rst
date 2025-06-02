@@ -736,6 +736,19 @@ following options:
 
 Run :option:`cmake --build` with no options for quick help.
 
+Generator-Specific Build Tool Behavior
+--------------------------------------
+
+``cmake --build`` has special behavior with some generators:
+
+:generator:`Xcode`
+
+  .. versionadded:: 4.1
+
+    If a third-party tool has written a ``.xcworkspace`` next to
+    the CMake-generated ``.xcodeproj``, ``cmake --build`` drives
+    the build through the workspace instead.
+
 Install a Project
 =================
 
