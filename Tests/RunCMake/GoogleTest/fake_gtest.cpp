@@ -11,13 +11,17 @@ int main(int argc, char** argv)
   // to test the module without actually needing Google Test.
   bool is_filtered =
     argc > 2 && std::string(argv[2]).find("--gtest_filter=") == 0;
-  bool is_basic_only =
-    is_filtered && std::string(argv[2]).find("basic*") != std::string::npos;
-  bool is_typed_only =
-    is_filtered && std::string(argv[2]).find("typed*") != std::string::npos;
+  bool add_basic_tests =
+    !is_filtered || (std::string(argv[2]).find("basic*") != std::string::npos);
+  bool add_typed_tests =
+    !is_filtered || (std::string(argv[2]).find("typed*") != std::string::npos);
+  bool add_value_tests =
+    !is_filtered || (std::string(argv[2]).find("value*") != std::string::npos);
+  bool add_dynamic_tests = !is_filtered ||
+    (std::string(argv[2]).find("dynamic*") != std::string::npos);
 
   if (argc > 1 && std::string(argv[1]) == "--gtest_list_tests") {
-    if (!is_typed_only) {
+    if (add_basic_tests) {
       char const* basic_suite_names[] = { "basic.", "ns.basic." };
       for (size_t i = 0; i < ARRAY_SIZE(basic_suite_names); i++) {
         std::cout << basic_suite_names[i] << std::endl;
@@ -27,13 +31,13 @@ int main(int argc, char** argv)
         std::cout << "  DISABLEDnot_really_case" << std::endl;
       }
     }
-    if (!is_basic_only && !is_typed_only) {
+    if (!is_filtered) {
       std::cout << "DISABLED_disabled." << std::endl;
       std::cout << "  case" << std::endl;
       std::cout << "DISABLEDnotreally." << std::endl;
       std::cout << "  case" << std::endl;
     }
-    if (!is_basic_only) {
+    if (add_typed_tests) {
       char const* typed_suite_names[] = { "typed", "ns.typed",
                                           "prefix/typed" };
       for (size_t i = 0; i < ARRAY_SIZE(typed_suite_names); i++) {
@@ -47,7 +51,7 @@ int main(int argc, char** argv)
         std::cout << "  case" << std::endl;
       }
     }
-    if (!is_basic_only && !is_typed_only) {
+    if (add_value_tests) {
       char const* value_suite_names[] = { "value", "ns.value",
                                           "prefix/value" };
       for (size_t i = 0; i < ARRAY_SIZE(value_suite_names); i++) {
@@ -69,6 +73,8 @@ int main(int argc, char** argv)
         std::cout << "  case/6  # GetParam() = \"__csb___text\"" << std::endl;
         std::cout << "  case/7  # GetParam() = \"S o m  e   \"" << std::endl;
       }
+    }
+    if (add_value_tests || add_typed_tests || add_dynamic_tests) {
       char const* both_suite_names[] = { "both_suite", "both/suite",
                                          "ns.both/suite",
                                          "prefix/both/suite" };

@@ -23,6 +23,22 @@ Test project .*
  *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:prefix/typed\.case<char>!4 \.+ +Passed +[0-9.]+ sec
  *Start +[0-9]+: TEST:prefix/typed/named\.  # TypeParam = int\.case<prefix/typed/named\.  # TypeParam = int>!4
  *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:prefix/typed/named\.  # TypeParam = int\.case<prefix/typed/named\.  # TypeParam = int>!4 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:both_suite\.  # TypeParam = TYPE\.test  # GetParam\(\) = VALUE<both_suite\.  # TypeParam = TYPE>!4
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:both_suite\.  # TypeParam = TYPE\.test  # GetParam\(\) = VALUE<both_suite\.  # TypeParam = TYPE>!4 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:both_suite\.  # TypeParam = TYPE\.case/test  # GetParam\(\) = VALUE<both_suite\.  # TypeParam = TYPE>!4
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:both_suite\.  # TypeParam = TYPE\.case/test  # GetParam\(\) = VALUE<both_suite\.  # TypeParam = TYPE>!4 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:both/suite\.  # TypeParam = TYPE\.test  # GetParam\(\) = VALUE<both/suite\.  # TypeParam = TYPE>!4
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:both/suite\.  # TypeParam = TYPE\.test  # GetParam\(\) = VALUE<both/suite\.  # TypeParam = TYPE>!4 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:both/suite\.  # TypeParam = TYPE\.case/test  # GetParam\(\) = VALUE<both/suite\.  # TypeParam = TYPE>!4
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:both/suite\.  # TypeParam = TYPE\.case/test  # GetParam\(\) = VALUE<both/suite\.  # TypeParam = TYPE>!4 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:ns\.both/suite\.  # TypeParam = TYPE\.test  # GetParam\(\) = VALUE<ns\.both/suite\.  # TypeParam = TYPE>!4
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:ns\.both/suite\.  # TypeParam = TYPE\.test  # GetParam\(\) = VALUE<ns\.both/suite\.  # TypeParam = TYPE>!4 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:ns\.both/suite\.  # TypeParam = TYPE\.case/test  # GetParam\(\) = VALUE<ns\.both/suite\.  # TypeParam = TYPE>!4
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:ns\.both/suite\.  # TypeParam = TYPE\.case/test  # GetParam\(\) = VALUE<ns\.both/suite\.  # TypeParam = TYPE>!4 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:prefix/both/suite\.  # TypeParam = TYPE\.test  # GetParam\(\) = VALUE<prefix/both/suite\.  # TypeParam = TYPE>!4
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:prefix/both/suite\.  # TypeParam = TYPE\.test  # GetParam\(\) = VALUE<prefix/both/suite\.  # TypeParam = TYPE>!4 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:prefix/both/suite\.  # TypeParam = TYPE\.case/test  # GetParam\(\) = VALUE<prefix/both/suite\.  # TypeParam = TYPE>!4
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:prefix/both/suite\.  # TypeParam = TYPE\.case/test  # GetParam\(\) = VALUE<prefix/both/suite\.  # TypeParam = TYPE>!4 \.+ +Passed +[0-9.]+ sec
 
 100% tests passed, 0 tests failed out of [0-9]+
 
