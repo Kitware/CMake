@@ -86,7 +86,9 @@ function(cmake_cuda_architectures_all lang lang_var_)
   endif()
 
   if(${lang_var_}TOOLKIT_VERSION VERSION_GREATER_EQUAL 12.9)
-    if(CMAKE_${lang}_COMPILER_ID STREQUAL "NVIDIA")
+    if(CMAKE_${lang}_COMPILER_ID STREQUAL "NVIDIA"
+        OR (CMAKE_${lang}_COMPILER_ID STREQUAL "Clang" AND CMAKE_${lang}_COMPILER_VERSION VERSION_GREATER_EQUAL 21.1)
+        )
       list(APPEND CMAKE_CUDA_ARCHITECTURES_ALL 103 121)
     endif()
   endif()
