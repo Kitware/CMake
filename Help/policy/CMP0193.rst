@@ -16,9 +16,9 @@ without their leading ``usr/``, and it was prepended in normal variables that
 shadow their cache entries.
 CMake 4.1 and above prefer to cache ``CMAKE_INSTALL_<dir>`` with their leading
 ``usr/``.  Consequently, the :command:`GNUInstallDirs_get_absolute_install_dir`
-command no longer alters the relative ``var`` input variable.  This policy
-provides compatibility for projects that have not been updated to expect
-the new behavior.
+command no longer alters the relative input variable argument ``<input-var>``.
+This policy provides compatibility for projects that have not been updated to
+expect the new behavior.
 
 The ``OLD`` behavior for this policy is to cache ``CMAKE_INSTALL_<dir>``
 variables without the leading ``usr/``.  The ``NEW`` behavior for this
