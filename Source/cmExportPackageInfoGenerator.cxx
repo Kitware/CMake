@@ -64,7 +64,7 @@ void cmExportPackageInfoGenerator::WritePackageInfo(
 
 namespace {
 template <typename T>
-void buildArray(Json::Value& object, std::string const& property,
+void BuildArray(Json::Value& object, std::string const& property,
                 T const& values)
 {
   if (!values.empty()) {
@@ -115,8 +115,8 @@ Json::Value cmExportPackageInfoGenerator::GeneratePackageInfo() const
     }
   }
 
-  buildArray(package, "default_components", this->DefaultTargets);
-  buildArray(package, "configurations", this->DefaultConfigurations);
+  BuildArray(package, "default_components", this->DefaultTargets);
+  BuildArray(package, "configurations", this->DefaultConfigurations);
 
   // TODO: description, website, license
 
@@ -382,9 +382,9 @@ void cmExportPackageInfoGenerator::GenerateInterfaceLinkProperties(
   addLibraries(allowList["LINK_ONLY"], linkRequires);
   addLibraries(cmList{ interfaceLinkLibraries }, buildRequires);
 
-  buildArray(component, "requires", buildRequires);
-  buildArray(component, "link_requires", linkRequires);
-  buildArray(component, "link_libraries", linkLibraries);
+  BuildArray(component, "requires", buildRequires);
+  BuildArray(component, "link_requires", linkRequires);
+  BuildArray(component, "link_libraries", linkLibraries);
 }
 
 void cmExportPackageInfoGenerator::GenerateInterfaceCompileFeatures(
@@ -412,7 +412,7 @@ void cmExportPackageInfoGenerator::GenerateInterfaceCompileFeatures(
     }
   }
 
-  buildArray(component, "compile_features", features);
+  BuildArray(component, "compile_features", features);
 }
 
 void cmExportPackageInfoGenerator::GenerateInterfaceCompileDefines(
@@ -512,7 +512,7 @@ Json::Value cmExportPackageInfoGenerator::GenerateInterfaceConfigProperties(
           languages.emplace_back(std::move(ll));
         }
       }
-      buildArray(component, "link_languages", languages);
+      BuildArray(component, "link_languages", languages);
     }
   }
 
