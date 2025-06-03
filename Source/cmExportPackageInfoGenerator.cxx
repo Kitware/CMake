@@ -63,6 +63,16 @@ void cmExportPackageInfoGenerator::WritePackageInfo(
 }
 
 namespace {
+bool SetProperty(Json::Value& object, std::string const& property,
+                 std::string const& value)
+{
+  if (!value.empty()) {
+    object[property] = value;
+    return true;
+  }
+  return false;
+}
+
 template <typename T>
 void BuildArray(Json::Value& object, std::string const& property,
                 T const& values)
@@ -105,14 +115,9 @@ Json::Value cmExportPackageInfoGenerator::GeneratePackageInfo() const
   package["name"] = this->GetPackageName();
   package["cps_version"] = std::string(kCPS_VERSION_STR);
 
-  if (!this->PackageVersion.empty()) {
-    package["version"] = this->PackageVersion;
-    if (!this->PackageVersionCompat.empty()) {
-      package["compat_version"] = this->PackageVersionCompat;
-    }
-    if (!this->PackageVersionSchema.empty()) {
-      package["version_schema"] = this->PackageVersionSchema;
-    }
+  if (SetProperty(package, "version", this->PackageVersion)) {
+    SetProperty(package, "compat_version", this->PackageVersionCompat);
+    SetProperty(package, "version_schema", this->PackageVersionSchema);
   }
 
   BuildArray(package, "default_components", this->DefaultTargets);
