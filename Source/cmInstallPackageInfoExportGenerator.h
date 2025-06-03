@@ -9,6 +9,7 @@
 
 class cmExportSet;
 class cmListFileBacktrace;
+class cmPackageInfoArguments;
 
 /** \class cmInstallPackageInfoGenerator
  * \brief Generate rules for creating CPS package info files.
@@ -20,11 +21,9 @@ public:
     cmExportSet* exportSet, std::string destination,
     std::string filePermissions,
     std::vector<std::string> const& configurations, std::string component,
-    MessageLevel message, bool excludeFromAll, std::string filename,
-    std::string packageName, std::string version, std::string versionCompat,
-    std::string versionSchema, std::vector<std::string> defaultTargets,
-    std::vector<std::string> defaultConfigurations,
-    std::string cxxModulesDirectory, cmListFileBacktrace backtrace);
+    MessageLevel message, bool excludeFromAll,
+    cmPackageInfoArguments arguments, std::string cxxModulesDirectory,
+    cmListFileBacktrace backtrace);
   cmInstallPackageInfoExportGenerator(
     cmInstallPackageInfoExportGenerator const&) = delete;
   ~cmInstallPackageInfoExportGenerator() override;

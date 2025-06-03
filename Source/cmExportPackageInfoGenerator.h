@@ -15,10 +15,12 @@
 #include "cmExportFileGenerator.h"
 #include "cmStateTypes.h"
 
-class cmGeneratorTarget;
 namespace Json {
 class Value;
 }
+
+class cmGeneratorTarget;
+class cmPackageInfoArguments;
 
 /** \class cmExportPackageInfoGenerator
  * \brief Generate Common Package Specification package information files
@@ -32,11 +34,7 @@ class Value;
 class cmExportPackageInfoGenerator : virtual public cmExportFileGenerator
 {
 public:
-  cmExportPackageInfoGenerator(std::string packageName, std::string version,
-                               std::string versionCompat,
-                               std::string versionSchema,
-                               std::vector<std::string> defaultTargets,
-                               std::vector<std::string> defaultConfigurations);
+  cmExportPackageInfoGenerator(cmPackageInfoArguments arguments);
 
   using cmExportFileGenerator::GenerateImportFile;
 

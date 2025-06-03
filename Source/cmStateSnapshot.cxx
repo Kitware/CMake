@@ -5,10 +5,12 @@
 
 #include <algorithm>
 #include <cassert>
+#include <set>
 #include <string>
 #include <unordered_map>
 
 #include <cm/iterator>
+#include <cmext/algorithm>
 
 #include "cmDefinitions.h"
 #include "cmLinkedTree.h"
@@ -413,11 +415,17 @@ cmStateDirectory cmStateSnapshot::GetDirectory() const
 void cmStateSnapshot::SetProjectName(std::string const& name)
 {
   this->Position->BuildSystemDirectory->ProjectName = name;
+  this->Position->BuildSystemDirectory->Projects.insert(name);
 }
 
 std::string cmStateSnapshot::GetProjectName() const
 {
   return this->Position->BuildSystemDirectory->ProjectName;
+}
+
+bool cmStateSnapshot::CheckProjectName(std::string const& name) const
+{
+  return cm::contains(this->Position->BuildSystemDirectory->Projects, name);
 }
 
 cmPackageState& cmStateSnapshot::GetPackageState(

@@ -26,3 +26,15 @@ CMake Error at BadArgs4\.cmake:7 \(export\):
   export DEFAULT_CONFIGURATIONS requires PACKAGE_INFO\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:3 \(include\)
+
+
+CMake Error at BadArgs4\.cmake:8 \(export\):
+  export PROJECT requires PACKAGE_INFO\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:3 \(include\)
+
+
+CMake Error at BadArgs4\.cmake:9 \(export\):
+  export NO_PROJECT_METADATA requires PACKAGE_INFO\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:3 \(include\)

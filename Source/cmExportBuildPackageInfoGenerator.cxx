@@ -11,17 +11,13 @@
 #include <cm3p/json/value.h>
 
 #include "cmGeneratorExpression.h"
+#include "cmPackageInfoArguments.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 
 cmExportBuildPackageInfoGenerator::cmExportBuildPackageInfoGenerator(
-  std::string packageName, std::string version, std::string versionCompat,
-  std::string versionSchema, std::vector<std::string> defaultTargets,
-  std::vector<std::string> defaultConfigurations)
-  : cmExportPackageInfoGenerator(
-      std::move(packageName), std::move(version), std::move(versionCompat),
-      std::move(versionSchema), std::move(defaultTargets),
-      std::move(defaultConfigurations))
+  cmPackageInfoArguments arguments)
+  : cmExportPackageInfoGenerator(std::move(arguments))
 {
   this->SetNamespace(cmStrCat(this->GetPackageName(), "::"_s));
 }

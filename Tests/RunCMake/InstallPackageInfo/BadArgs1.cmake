@@ -1,3 +1,6 @@
 add_library(foo INTERFACE)
 install(TARGETS foo EXPORT foo DESTINATION .)
 install(PACKAGE_INFO test EXPORT foo COMPAT_VERSION 1.0)
+install(PACKAGE_INFO test EXPORT foo VERSION_SCHEMA simple)
+install(PACKAGE_INFO test EXPORT foo PROJECT foo NO_PROJECT_METADATA)
+install(PACKAGE_INFO test EXPORT foo PROJECT bar)

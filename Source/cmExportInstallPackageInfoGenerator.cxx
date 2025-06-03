@@ -15,6 +15,7 @@
 #include "cmInstallExportGenerator.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
+#include "cmPackageInfoArguments.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
@@ -22,14 +23,8 @@
 #include "cmTargetExport.h"
 
 cmExportInstallPackageInfoGenerator::cmExportInstallPackageInfoGenerator(
-  cmInstallExportGenerator* iegen, std::string packageName,
-  std::string version, std::string versionCompat, std::string versionSchema,
-  std::vector<std::string> defaultTargets,
-  std::vector<std::string> defaultConfigurations)
-  : cmExportPackageInfoGenerator(
-      std::move(packageName), std::move(version), std::move(versionCompat),
-      std::move(versionSchema), std::move(defaultTargets),
-      std::move(defaultConfigurations))
+  cmInstallExportGenerator* iegen, cmPackageInfoArguments arguments)
+  : cmExportPackageInfoGenerator(std::move(arguments))
   , cmExportInstallFileGenerator(iegen)
 {
 }

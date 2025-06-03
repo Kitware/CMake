@@ -6,7 +6,6 @@
 
 #include <iosfwd>
 #include <string>
-#include <vector>
 
 #include "cmExportBuildFileGenerator.h"
 #include "cmExportPackageInfoGenerator.h"
@@ -16,6 +15,7 @@ class Value;
 }
 
 class cmGeneratorTarget;
+class cmPackageInfoArguments;
 
 /** \class cmExportBuildPackageInfoGenerator
  * \brief Generate a file exporting targets from a build tree.
@@ -31,10 +31,7 @@ class cmExportBuildPackageInfoGenerator
   , public cmExportPackageInfoGenerator
 {
 public:
-  cmExportBuildPackageInfoGenerator(
-    std::string packageName, std::string version, std::string versionCompat,
-    std::string versionSchema, std::vector<std::string> defaultTargets,
-    std::vector<std::string> defaultConfigurations);
+  cmExportBuildPackageInfoGenerator(cmPackageInfoArguments arguments);
 
 protected:
   // Implement virtual methods from the superclass.
