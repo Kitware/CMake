@@ -176,7 +176,7 @@ void DebGenerator::generateControlFile() const
       totalSize += cmSystemTools::FileLength(file);
     }
   }
-  out << "Installed-Size: " << (totalSize + 1023) / 1024 << "\n\n";
+  out << "Installed-Size: " << (totalSize + 1023) / 1024 << "\n";
 }
 
 bool DebGenerator::generateDataTar() const
