@@ -136,6 +136,14 @@ bool cmPackageInfoArguments::SetMetadataFromProject(cmExecutionStatus& status)
     }
   }
 
+  if (this->Description.empty()) {
+    mapProjectValue(this->Description, "DESCRIPTION"_s);
+  }
+
+  if (this->Website.empty()) {
+    mapProjectValue(this->Website, "HOMEPAGE_URL"_s);
+  }
+
   return true;
 }
 

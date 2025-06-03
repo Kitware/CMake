@@ -9,4 +9,6 @@ install(
   COMPAT_VERSION 1.2.0
   DEFAULT_TARGETS foo
   DEFAULT_CONFIGURATIONS release debug
+  DESCRIPTION "Sample package"
+  HOMEPAGE_URL "https://www.example.com/package/foo"
   )

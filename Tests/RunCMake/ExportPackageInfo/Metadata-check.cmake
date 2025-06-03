@@ -14,3 +14,6 @@ expect_value("${content}" "foo" "default_components" 0)
 expect_array("${content}" 2 "configurations")
 expect_value("${content}" "release" "configurations" 0)
 expect_value("${content}" "debug" "configurations" 1)
+
+expect_value("${content}" "Sample package" "description")
+expect_value("${content}" "https://www.example.com/package/foo" "website")
