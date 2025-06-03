@@ -88,6 +88,7 @@ The options are:
     :variable:`CMAKE_PROJECT_VERSION`.
 
 ``COMPAT_VERSION <version>``
+  .. versionadded:: 4.1
   .. note::
 
     Experimental. Gated by ``CMAKE_EXPERIMENTAL_EXPORT_PACKAGE_INFO``.
