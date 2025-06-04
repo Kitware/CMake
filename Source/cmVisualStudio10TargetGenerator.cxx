@@ -3632,17 +3632,26 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
     if (!clOptions.HasFlag("BasicRuntimeChecks")) {
       clOptions.AddFlag("BasicRuntimeChecks", "Default");
     }
+    if (!clOptions.HasFlag("ForceConformanceInForLoopScope")) {
+      clOptions.AddFlag("ForceConformanceInForLoopScope", "");
+    }
     if (!clOptions.HasFlag("MinimalRebuild")) {
       clOptions.AddFlag("MinimalRebuild", "");
     }
     if (!clOptions.HasFlag("Optimization")) {
       clOptions.AddFlag("Optimization", "");
     }
+    if (!clOptions.HasFlag("RemoveUnreferencedCodeData")) {
+      clOptions.AddFlag("RemoveUnreferencedCodeData", "");
+    }
     if (!clOptions.HasFlag("RuntimeLibrary")) {
       clOptions.AddFlag("RuntimeLibrary", "");
     }
     if (!clOptions.HasFlag("SupportJustMyCode")) {
       clOptions.AddFlag("SupportJustMyCode", "");
+    }
+    if (!clOptions.HasFlag("TreatWChar_tAsBuiltInType")) {
+      clOptions.AddFlag("TreatWChar_tAsBuiltInType", "");
     }
   }
 
