@@ -41,7 +41,9 @@ if(ANDROID)
 else()
   set(HAVE_ARC4RANDOM 0)
 endif()
+if(0) # XXX(cmake): cache this result for nghttp2
 set(HAVE_ARPA_INET_H 1)
+endif() # XXX(cmake): end
 set(HAVE_ATOMIC 1)
 set(HAVE_BASENAME 1)
 set(HAVE_BOOL_T 1)
@@ -186,7 +188,9 @@ if(ANDROID)
 else()
   set(HAVE_NETINET_IN6_H 0)
 endif()
+if(0) # XXX(cmake): cache this result for nghttp2
 set(HAVE_NETINET_IN_H 1)
+endif() # XXX(cmake): end
 set(HAVE_NETINET_TCP_H 1)
 set(HAVE_NETINET_UDP_H 1)
 set(HAVE_NET_IF_H 1)

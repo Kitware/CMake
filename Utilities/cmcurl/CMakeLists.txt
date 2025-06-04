@@ -1,5 +1,9 @@
 # Set curl options as needed for CMake build
-set(_CURL_QUICK_DETECT ON)
+if(CMAKE_SYSTEM_NAME MATCHES "^(AIX|SunOS)$")
+  set(_CURL_PREFILL OFF)
+else()
+  set(_CURL_PREFILL ON)
+endif()
 set(BUILD_CURL_EXE OFF CACHE INTERNAL "No curl exe")
 set(BUILD_DASHBOARD_REPORTS OFF CACHE INTERNAL "No curl dashboard reports")
 set(BUILD_RELEASE_DEBUG_DIRS OFF CACHE INTERNAL "No curl release/debug dirs")
@@ -86,6 +90,7 @@ set(ENABLE_DEBUG OFF CACHE INTERNAL "No curl debug features")
 set(ENABLE_INET_PTON OFF CACHE INTERNAL "Set to OFF to prevent usage of inet_pton when building against modern SDKs while still requiring compatibility with older Windows versions, such as Windows XP, Windows Server 2003 etc.")
 set(ENABLE_IPV6 ON CACHE INTERNAL "Enable curl IPv6 support detection")
 set(ENABLE_MANUAL OFF CACHE INTERNAL "No curl built-in manual")
+set(ENABLE_SERVER_DEBUG OFF)
 set(ENABLE_THREADED_RESOLVER OFF CACHE INTERNAL "No curl POSIX threaded DNS lookup")
 set(ENABLE_UNICODE OFF)
 set(ENABLE_UNIX_SOCKETS OFF CACHE INTERNAL "No curl Unix domain sockets support")
@@ -767,10 +772,14 @@ if(_CURL_PREFILL)
     include("${CMAKE_CURRENT_SOURCE_DIR}/CMake/win32-cache.cmake")
   elseif(UNIX)
     include("${CMAKE_CURRENT_SOURCE_DIR}/CMake/unix-cache.cmake")
+    if(0) # XXX(cmake): not needed for build within cmake
     message(STATUS "Pre-filling feature detection results for UNIX")
+    endif() # XXX(cmake): end
   endif()
 elseif(WIN32)
+  if(0) # XXX(cmake): not needed for build within cmake
   message(STATUS "Pre-filling feature detection results disabled.")
+  endif() # XXX(cmake): end
 elseif(APPLE)
   set(HAVE_EVENTFD 0)
   set(HAVE_GETPASS_R 0)
