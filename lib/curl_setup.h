@@ -28,9 +28,6 @@
 #define CURL_NO_OLDIES
 #endif
 
-/* Tell "curl/curl.h" not to include "curl/mprintf.h" */
-#define CURL_SKIP_INCLUDE_MPRINTF
-
 /* Set default _WIN32_WINNT */
 #ifdef __MINGW32__
 #include <_mingw.h>
@@ -56,7 +53,7 @@
 #  endif
 #endif
 
-#if defined(__APPLE__)
+#ifdef __APPLE__
 #include <sys/types.h>
 #include <TargetConditionals.h>
 /* Fixup faulty target macro initialization in macOS SDK since v14.4 (as of
@@ -76,6 +73,12 @@
 #undef TARGET_OS_OSX
 #define TARGET_OS_OSX TARGET_OS_MAC
 #endif
+#endif
+
+/* Visual Studio 2008 is the minimum Visual Studio version we support.
+   Workarounds for older versions of Visual Studio have been removed. */
+#if defined(_MSC_VER) && (_MSC_VER < 1500)
+#error "Ancient versions of Visual Studio are no longer supported due to bugs."
 #endif
 
 #ifdef _MSC_VER
@@ -112,6 +115,14 @@
 #      define CURL_WINDOWS_UWP
 #    endif
 #  endif
+#endif
+
+/* Avoid bogus format check warnings with mingw32ce gcc 4.4.0 in
+   C99 (-std=gnu99) mode */
+#if defined(__MINGW32CE__) && !defined(CURL_NO_FMT_CHECKS) && \
+  (defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L) && \
+  (defined(__GNUC__) && (__GNUC__ == 4) && (__GNUC_MINOR__ == 4))
+#define CURL_NO_FMT_CHECKS
 #endif
 
 /* Compatibility */
@@ -160,6 +171,12 @@
 /* before this point. As a result of all this we frown inclusion of */
 /* system header files in our config files, avoid this at any cost. */
 /* ================================================================ */
+
+#ifdef HAVE_LIBZ
+#  ifndef ZLIB_CONST
+#  define ZLIB_CONST  /* Use z_const. Supported by v1.2.5.2 and upper. */
+#  endif
+#endif
 
 /*
  * AIX 4.3 and newer needs _THREAD_SAFE defined to build
@@ -262,7 +279,7 @@
  * When HTTP is disabled, disable HTTP-only features
  */
 
-#if defined(CURL_DISABLE_HTTP)
+#ifdef CURL_DISABLE_HTTP
 #  define CURL_DISABLE_ALTSVC 1
 #  define CURL_DISABLE_COOKIES 1
 #  define CURL_DISABLE_BASIC_AUTH 1
@@ -435,6 +452,11 @@
 #  define __NO_NET_API
 #endif
 
+/* Whether to use eventfd() */
+#if defined(HAVE_EVENTFD) && defined(HAVE_SYS_EVENTFD_H)
+#define USE_EVENTFD
+#endif
+
 #include <stdio.h>
 #include <assert.h>
 
@@ -448,18 +470,14 @@
 #include <curl/stdcheaders.h>
 #endif
 
-#ifdef _WIN32
-#define Curl_getpid() GetCurrentProcessId()
-#else
-#define Curl_getpid() getpid()
-#endif
-
 /*
  * Large file (>2Gb) support using Win32 functions.
  */
 
 #ifdef USE_WIN32_LARGE_FILES
+#  ifdef HAVE_IO_H
 #  include <io.h>
+#  endif
 #  include <sys/types.h>
 #  include <sys/stat.h>
 #  undef  lseek
@@ -490,10 +508,12 @@
  */
 
 #if defined(_WIN32) && !defined(USE_WIN32_LARGE_FILES)
+#  ifdef HAVE_IO_H
 #  include <io.h>
+#  endif
 #  include <sys/types.h>
 #  include <sys/stat.h>
-#  ifndef _WIN32_WCE
+#  ifndef UNDER_CE
 #    undef  lseek
 #    define lseek(fdes,offset,whence)  _lseek(fdes, (long)offset, whence)
 #    define fstat(fdes,stp)            _fstat(fdes, stp)
@@ -668,7 +688,6 @@
 
 #  ifdef __minix
      /* Minix 3 versions up to at least 3.1.3 are missing these prototypes */
-     extern char *strtok_r(char *s, const char *delim, char **last);
      extern struct tm *gmtime_r(const time_t * const timep, struct tm *tmp);
 #  endif
 
@@ -680,16 +699,6 @@
 /*             resolver specialty compile-time defines              */
 /*         CURLRES_* defines to use in the host*.c sources          */
 /* ---------------------------------------------------------------- */
-
-/*
- * MSVC threads support requires a multi-threaded runtime library.
- * _beginthreadex() is not available in single-threaded ones.
- * Single-threaded option was last available in VS2005: _MSC_VER <= 1400
- */
-#if defined(_MSC_VER) && !defined(_MT)  /* available in _MSC_VER <= 1400 */
-#  undef USE_THREADS_POSIX
-#  undef USE_THREADS_WIN32
-#endif
 
 /*
  * Mutually exclusive CURLRES_* definitions.
@@ -764,7 +773,7 @@
 #endif
 
 /* Single point where USE_NTLM definition might be defined */
-#if !defined(CURL_DISABLE_NTLM)
+#ifndef CURL_DISABLE_NTLM
 #  if defined(USE_OPENSSL) || defined(USE_MBEDTLS) ||                   \
   defined(USE_GNUTLS) || defined(USE_SECTRANSP) ||                      \
   defined(USE_OS400CRYPTO) || defined(USE_WIN32_CRYPTO) ||              \
@@ -804,7 +813,7 @@
 
 /* noreturn attribute */
 
-#if !defined(CURL_NORETURN)
+#ifndef CURL_NORETURN
 #if (defined(__GNUC__) && (__GNUC__ >= 3)) || defined(__clang__) || \
   defined(__IAR_SYSTEMS_ICC__)
 #  define CURL_NORETURN  __attribute__((__noreturn__))
@@ -817,7 +826,7 @@
 
 /* fallthrough attribute */
 
-#if !defined(FALLTHROUGH)
+#ifndef FALLTHROUGH
 #if (defined(__GNUC__) && __GNUC__ >= 7) || \
     (defined(__clang__) && __clang_major__ >= 10)
 #  define FALLTHROUGH()  __attribute__((fallthrough))
@@ -832,6 +841,27 @@
 
 #ifndef HEADER_CURL_SETUP_ONCE_H
 #include "curl_setup_once.h"
+#endif
+
+#ifdef UNDER_CE
+#define getenv curl_getenv  /* Windows CE does not support getenv() */
+#define raise(s) ((void)(s))
+/* Terrible workarounds to make Windows CE compile */
+#define errno 0
+#define CURL_SETERRNO(x) ((void)(x))
+#define EINTR  4
+#define EAGAIN 11
+#define ENOMEM 12
+#define EACCES 13
+#define EEXIST 17
+#define EISDIR 21
+#define EINVAL 22
+#define ENOSPC 28
+#define strerror(x) "?"
+#undef STDIN_FILENO
+#define STDIN_FILENO 0
+#else
+#define CURL_SETERRNO(x) (errno = (x))
 #endif
 
 /*
@@ -876,6 +906,17 @@
 /* Define S_ISDIR if not defined by system headers, e.g. MSVC */
 #if !defined(S_ISDIR) && defined(S_IFMT) && defined(S_IFDIR)
 #define S_ISDIR(m) (((m) & S_IFMT) == S_IFDIR)
+#endif
+
+/* For MSVC (all versions as of VS2022) */
+#ifndef STDIN_FILENO
+#define STDIN_FILENO  fileno(stdin)
+#endif
+#ifndef STDOUT_FILENO
+#define STDOUT_FILENO  fileno(stdout)
+#endif
+#ifndef STDERR_FILENO
+#define STDERR_FILENO  fileno(stderr)
 #endif
 
 /* Since O_BINARY is used in bitmasks, setting it to zero makes it usable in
@@ -934,6 +975,16 @@ endings either CRLF or LF so 't' is appropriate.
 #define STRCONST(x) x,sizeof(x)-1
 
 #define CURL_ARRAYSIZE(A) (sizeof(A)/sizeof((A)[0]))
+
+#ifdef CURLDEBUG
+#define CURL_GETADDRINFO(host,serv,hint,res) \
+  curl_dbg_getaddrinfo(host, serv, hint, res, __LINE__, __FILE__)
+#define CURL_FREEADDRINFO(data) \
+  curl_dbg_freeaddrinfo(data, __LINE__, __FILE__)
+#else
+#define CURL_GETADDRINFO getaddrinfo
+#define CURL_FREEADDRINFO freeaddrinfo
+#endif
 
 /* Some versions of the Android NDK is missing the declaration */
 #if defined(HAVE_GETPWUID_R) && \
@@ -997,7 +1048,7 @@ int getpwuid_r(uid_t uid, struct passwd *pwd, char *buf,
 #  endif
 #endif
 
-#if defined(CURL_INLINE)
+#ifdef CURL_INLINE
 /* 'CURL_INLINE' defined, use as-is */
 #elif defined(inline)
 #  define CURL_INLINE inline /* 'inline' defined, assumed correct */

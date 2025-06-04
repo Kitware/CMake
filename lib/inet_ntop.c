@@ -38,7 +38,7 @@
 #include "curl_printf.h"
 
 #define IN6ADDRSZ       16
-#define INADDRSZ         4
+/* #define INADDRSZ         4 */
 #define INT16SZ          2
 
 /*
@@ -56,7 +56,7 @@
  * Returns `dst' (as a const)
  * Note:
  *  - uses no statics
- *  - takes a unsigned char* not an in_addr as input
+ *  - takes an unsigned char* not an in_addr as input
  */
 static char *inet_ntop4(const unsigned char *src, char *dst, size_t size)
 {
@@ -74,7 +74,11 @@ static char *inet_ntop4(const unsigned char *src, char *dst, size_t size)
 
   len = strlen(tmp);
   if(len == 0 || len >= size) {
-    errno = ENOSPC;
+#ifdef USE_WINSOCK
+    CURL_SETERRNO(WSAEINVAL);
+#else
+    CURL_SETERRNO(ENOSPC);
+#endif
     return NULL;
   }
   strcpy(dst, tmp);
@@ -153,7 +157,6 @@ static char *inet_ntop6(const unsigned char *src, char *dst, size_t size)
     if(i == 6 && best.base == 0 &&
         (best.len == 6 || (best.len == 5 && words[5] == 0xffff))) {
       if(!inet_ntop4(src + 12, tp, sizeof(tmp) - (tp - tmp))) {
-        errno = ENOSPC;
         return NULL;
       }
       tp += strlen(tp);
@@ -171,7 +174,11 @@ static char *inet_ntop6(const unsigned char *src, char *dst, size_t size)
   /* Check for overflow, copy, and we are done.
    */
   if((size_t)(tp - tmp) > size) {
-    errno = ENOSPC;
+#ifdef USE_WINSOCK
+    CURL_SETERRNO(WSAEINVAL);
+#else
+    CURL_SETERRNO(ENOSPC);
+#endif
     return NULL;
   }
   strcpy(dst, tmp);
@@ -197,7 +204,7 @@ char *Curl_inet_ntop(int af, const void *src, char *buf, size_t size)
   case AF_INET6:
     return inet_ntop6((const unsigned char *)src, buf, size);
   default:
-    errno = EAFNOSUPPORT;
+    CURL_SETERRNO(SOCKEAFNOSUPPORT);
     return NULL;
   }
 }

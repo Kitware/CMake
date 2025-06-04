@@ -32,12 +32,11 @@
 /* this must be the last include file */
 #include "memdebug.h"
 
+#ifdef DEBUGBUILD
 #define LLISTINIT 0x100cc001 /* random pattern */
 #define NODEINIT  0x12344321 /* random pattern */
 #define NODEREM   0x54321012 /* random pattern */
 
-
-#ifdef DEBUGBUILD
 #define VERIFYNODE(x) verifynode(x)
 static struct Curl_llist_node *verifynode(struct Curl_llist_node *n)
 {
@@ -86,7 +85,7 @@ Curl_llist_insert_next(struct Curl_llist *list,
 #ifdef DEBUGBUILD
   ne->_init = NODEINIT;
 #endif
-  ne->_ptr = (void *) p;
+  ne->_ptr = CURL_UNCONST(p);
   ne->_list = list;
   if(list->_size == 0) {
     list->_head = ne;

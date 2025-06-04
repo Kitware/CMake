@@ -29,6 +29,7 @@
 #include "strcase.h"
 #include "sendf.h"
 #include "headers.h"
+#include "curlx/strparse.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -208,15 +209,15 @@ static CURLcode namevalue(char *header, size_t hlen, unsigned int type,
   else
     return CURLE_BAD_FUNCTION_ARGUMENT;
 
-  /* skip all leading space letters */
-  while(*header && ISBLANK(*header))
+  /* skip all leading blank letters */
+  while(ISBLANK(*header))
     header++;
 
   *value = header;
 
   /* skip all trailing space letters */
-  while((end > header) && ISSPACE(*end))
-    *end-- = 0; /* nul terminate */
+  while((end > header) && ISBLANK(*end))
+    *end-- = 0; /* null-terminate */
   return CURLE_OK;
 }
 
@@ -235,7 +236,7 @@ static CURLcode unfold_value(struct Curl_easy *data, const char *value,
   oalloc = olen + offset + 1;
 
   /* skip all trailing space letters */
-  while(vlen && ISSPACE(value[vlen - 1]))
+  while(vlen && ISBLANK(value[vlen - 1]))
     vlen--;
 
   /* save only one leading space */
@@ -312,12 +313,17 @@ CURLcode Curl_headers_push(struct Curl_easy *data, const char *header,
         return CURLE_WEIRD_SERVER_REPLY;
     }
   }
+  if(Curl_llist_count(&data->state.httphdrs) >= MAX_HTTP_RESP_HEADER_COUNT) {
+    failf(data, "Too many response headers, %d is max",
+          MAX_HTTP_RESP_HEADER_COUNT);
+    return CURLE_TOO_LARGE;
+  }
 
   hs = calloc(1, sizeof(*hs) + hlen);
   if(!hs)
     return CURLE_OUT_OF_MEMORY;
   memcpy(hs->buffer, header, hlen);
-  hs->buffer[hlen] = 0; /* nul terminate */
+  hs->buffer[hlen] = 0; /* null-terminate */
 
   result = namevalue(hs->buffer, hlen, type, &name, &value);
   if(!result) {
@@ -330,8 +336,10 @@ CURLcode Curl_headers_push(struct Curl_easy *data, const char *header,
     Curl_llist_append(&data->state.httphdrs, hs, &hs->node);
     data->state.prevhead = hs;
   }
-  else
+  else {
+    failf(data, "Invalid response header");
     free(hs);
+  }
   return result;
 }
 

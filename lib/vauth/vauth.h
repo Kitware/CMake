@@ -26,7 +26,7 @@
 
 #include <curl/curl.h>
 
-#include "bufref.h"
+#include "../bufref.h"
 
 struct Curl_easy;
 
@@ -60,7 +60,7 @@ struct gsasldata;
  */
 bool Curl_auth_allowed_to_host(struct Curl_easy *data);
 
-/* This is used to build a SPN string */
+/* This is used to build an SPN string */
 #if !defined(USE_WINDOWS_SSPI)
 char *Curl_auth_build_spn(const char *service, const char *host,
                           const char *realm);
@@ -167,6 +167,8 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
 
 /* This is used to clean up the NTLM specific data */
 void Curl_auth_cleanup_ntlm(struct ntlmdata *ntlm);
+#else
+#define Curl_auth_is_ntlm_supported()     FALSE
 #endif /* USE_NTLM */
 
 /* This is used to generate a base64 encoded OAuth 2.0 message */
@@ -207,6 +209,8 @@ CURLcode Curl_auth_create_gssapi_security_message(struct Curl_easy *data,
 
 /* This is used to clean up the GSSAPI specific data */
 void Curl_auth_cleanup_gssapi(struct kerberos5data *krb5);
+#else
+#define Curl_auth_is_gssapi_supported()       FALSE
 #endif /* USE_KERBEROS5 */
 
 #if defined(USE_SPNEGO)

@@ -23,7 +23,7 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "curl_setup.h"
+#include "../curl_setup.h"
 
 #ifdef USE_SSLS_EXPORT
 
@@ -35,7 +35,7 @@ CURLcode Curl_ssl_session_pack(struct Curl_easy *data,
                                struct dynbuf *buf);
 
 CURLcode Curl_ssl_session_unpack(struct Curl_easy *data,
-                                 const unsigned char *buf, size_t buflen,
+                                 const void *bufv, size_t buflen,
                                  struct Curl_ssl_session **ps);
 
 #endif /* USE_SSLS_EXPORT */

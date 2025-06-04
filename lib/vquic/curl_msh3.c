@@ -22,30 +22,32 @@
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "../curl_setup.h"
 
 #ifdef USE_MSH3
 
-#include "urldata.h"
-#include "hash.h"
-#include "timeval.h"
-#include "multiif.h"
-#include "sendf.h"
-#include "curl_trc.h"
-#include "cfilters.h"
-#include "cf-socket.h"
-#include "connect.h"
-#include "progress.h"
-#include "http1.h"
+#include "../urldata.h"
+#include "../hash.h"
+#include "../uint-hash.h"
+#include "../curlx/timeval.h"
+#include "../multiif.h"
+#include "../sendf.h"
+#include "../curl_trc.h"
+#include "../cfilters.h"
+#include "../cf-socket.h"
+#include "../connect.h"
+#include "../progress.h"
+#include "../http1.h"
 #include "curl_msh3.h"
-#include "socketpair.h"
-#include "vtls/vtls.h"
-#include "vquic/vquic.h"
+#include "../socketpair.h"
+#include "../vtls/vtls.h"
+#include "vquic.h"
+#include "vquic_int.h"
 
 /* The last 3 #include files should be in this order */
-#include "curl_printf.h"
-#include "curl_memory.h"
-#include "memdebug.h"
+#include "../curl_printf.h"
+#include "../curl_memory.h"
+#include "../memdebug.h"
 
 #ifdef CURL_DISABLE_SOCKETPAIR
 #error "MSH3 cannot be build with CURL_DISABLE_SOCKETPAIR set"
@@ -119,18 +121,18 @@ struct cf_msh3_ctx {
   struct cf_call_data call_data;
   struct curltime connect_started;   /* time the current attempt started */
   struct curltime handshake_at;      /* time connect handshake finished */
-  struct Curl_hash streams;          /* hash `data->mid` to `stream_ctx` */
+  struct uint_hash streams;          /* hash `data->mid` to `stream_ctx` */
   /* Flags written by msh3/msquic thread */
-  bool handshake_complete;
-  bool handshake_succeeded;
-  bool connected;
+  BIT(handshake_complete);
+  BIT(handshake_succeeded);
+  BIT(connected);
   BIT(initialized);
   /* Flags written by curl thread */
   BIT(verbose);
   BIT(active);
 };
 
-static void h3_stream_hash_free(void *stream);
+static void h3_stream_hash_free(unsigned int id, void *stream);
 
 static CURLcode cf_msh3_ctx_init(struct cf_msh3_ctx *ctx,
                                  const struct Curl_addrinfo *ai)
@@ -138,7 +140,7 @@ static CURLcode cf_msh3_ctx_init(struct cf_msh3_ctx *ctx,
   CURLcode result;
 
   DEBUGASSERT(!ctx->initialized);
-  Curl_hash_offt_init(&ctx->streams, 63, h3_stream_hash_free);
+  Curl_uint_hash_init(&ctx->streams, 63, h3_stream_hash_free);
 
   result = Curl_sock_assign_addr(&ctx->addr, ai, TRNSPRT_QUIC);
   if(result)
@@ -154,7 +156,7 @@ static CURLcode cf_msh3_ctx_init(struct cf_msh3_ctx *ctx,
 static void cf_msh3_ctx_free(struct cf_msh3_ctx *ctx)
 {
   if(ctx && ctx->initialized) {
-    Curl_hash_destroy(&ctx->streams);
+    Curl_uint_hash_destroy(&ctx->streams);
   }
   free(ctx);
 }
@@ -169,7 +171,7 @@ static struct cf_msh3_ctx *h3_get_msh3_ctx(struct Curl_easy *data);
 /**
  * All about the H3 internals of a stream
  */
-struct stream_ctx {
+struct h3_stream_ctx {
   struct MSH3_REQUEST *req;
   struct bufq recvbuf;   /* h3 response */
 #ifdef _WIN32
@@ -180,33 +182,31 @@ struct stream_ctx {
   uint64_t error3; /* HTTP/3 stream error code */
   int status_code; /* HTTP status code */
   CURLcode recv_error;
-  bool closed;
-  bool reset;
-  bool upload_done;
-  bool firstheader;  /* FALSE until headers arrive */
-  bool recv_header_complete;
+  BIT(closed);
+  BIT(reset);
+  BIT(upload_done);
+  BIT(firstheader);  /* FALSE until headers arrive */
+  BIT(recv_header_complete);
 };
 
-#define H3_STREAM_CTX(ctx,data)   ((struct stream_ctx *)((data && ctx)? \
-                Curl_hash_offt_get(&(ctx)->streams, (data)->mid) : NULL))
-
-static void h3_stream_ctx_free(struct stream_ctx *stream)
+static void h3_stream_ctx_free(struct h3_stream_ctx *stream)
 {
   Curl_bufq_free(&stream->recvbuf);
   free(stream);
 }
 
-static void h3_stream_hash_free(void *stream)
+static void h3_stream_hash_free(unsigned int id, void *stream)
 {
+  (void)id;
   DEBUGASSERT(stream);
-  h3_stream_ctx_free((struct stream_ctx *)stream);
+  h3_stream_ctx_free((struct h3_stream_ctx *)stream);
 }
 
 static CURLcode h3_data_setup(struct Curl_cfilter *cf,
                               struct Curl_easy *data)
 {
   struct cf_msh3_ctx *ctx = cf->ctx;
-  struct stream_ctx *stream = H3_STREAM_CTX(ctx, data);
+  struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
 
   if(stream)
     return CURLE_OK;
@@ -221,7 +221,7 @@ static CURLcode h3_data_setup(struct Curl_cfilter *cf,
                   H3_STREAM_RECV_CHUNKS, BUFQ_OPT_SOFT_LIMIT);
   CURL_TRC_CF(data, cf, "data setup");
 
-  if(!Curl_hash_offt_set(&ctx->streams, data->mid, stream)) {
+  if(!Curl_uint_hash_set(&ctx->streams, data->mid, stream)) {
     h3_stream_ctx_free(stream);
     return CURLE_OUT_OF_MEMORY;
   }
@@ -232,17 +232,17 @@ static CURLcode h3_data_setup(struct Curl_cfilter *cf,
 static void h3_data_done(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
   struct cf_msh3_ctx *ctx = cf->ctx;
-  struct stream_ctx *stream = H3_STREAM_CTX(ctx, data);
+  struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
 
   (void)cf;
   if(stream) {
     CURL_TRC_CF(data, cf, "easy handle is done");
-    Curl_hash_offt_remove(&ctx->streams, data->mid);
+    Curl_uint_hash_remove(&ctx->streams, data->mid);
   }
 }
 
 static void drain_stream_from_other_thread(struct Curl_easy *data,
-                                           struct stream_ctx *stream)
+                                           struct h3_stream_ctx *stream)
 {
   unsigned char bits;
 
@@ -260,7 +260,7 @@ static void h3_drain_stream(struct Curl_cfilter *cf,
                             struct Curl_easy *data)
 {
   struct cf_msh3_ctx *ctx = cf->ctx;
-  struct stream_ctx *stream = H3_STREAM_CTX(ctx, data);
+  struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
   unsigned char bits;
 
   (void)cf;
@@ -359,7 +359,7 @@ static CURLcode write_resp_raw(struct Curl_easy *data,
                                const void *mem, size_t memlen)
 {
   struct cf_msh3_ctx *ctx = h3_get_msh3_ctx(data);
-  struct stream_ctx *stream = H3_STREAM_CTX(ctx, data);
+  struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
   CURLcode result = CURLE_OK;
   ssize_t nwritten;
 
@@ -386,7 +386,7 @@ static void MSH3_CALL msh3_header_received(MSH3_REQUEST *Request,
 {
   struct Curl_easy *data = userp;
   struct cf_msh3_ctx *ctx = h3_get_msh3_ctx(data);
-  struct stream_ctx *stream = H3_STREAM_CTX(ctx, data);
+  struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
   CURLcode result;
   (void)Request;
 
@@ -398,7 +398,7 @@ static void MSH3_CALL msh3_header_received(MSH3_REQUEST *Request,
   msh3_lock_acquire(&stream->recv_lock);
 
   if((hd->NameLength == 7) &&
-     !strncmp(HTTP_PSEUDO_STATUS, (char *)hd->Name, 7)) {
+     !strncmp(HTTP_PSEUDO_STATUS, (const char *)hd->Name, 7)) {
     char line[14]; /* status line is always 13 characters long */
     size_t ncopy;
 
@@ -437,7 +437,7 @@ static bool MSH3_CALL msh3_data_received(MSH3_REQUEST *Request,
 {
   struct Curl_easy *data = IfContext;
   struct cf_msh3_ctx *ctx = h3_get_msh3_ctx(data);
-  struct stream_ctx *stream = H3_STREAM_CTX(ctx, data);
+  struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
   CURLcode result;
   bool rv = FALSE;
 
@@ -477,7 +477,7 @@ static void MSH3_CALL msh3_complete(MSH3_REQUEST *Request, void *IfContext,
 {
   struct Curl_easy *data = IfContext;
   struct cf_msh3_ctx *ctx = h3_get_msh3_ctx(data);
-  struct stream_ctx *stream = H3_STREAM_CTX(ctx, data);
+  struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
 
   (void)Request;
   if(!stream)
@@ -497,7 +497,7 @@ static void MSH3_CALL msh3_shutdown_complete(MSH3_REQUEST *Request,
 {
   struct Curl_easy *data = IfContext;
   struct cf_msh3_ctx *ctx = h3_get_msh3_ctx(data);
-  struct stream_ctx *stream = H3_STREAM_CTX(ctx, data);
+  struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
 
   if(!stream)
     return;
@@ -510,7 +510,7 @@ static void MSH3_CALL msh3_data_sent(MSH3_REQUEST *Request,
 {
   struct Curl_easy *data = IfContext;
   struct cf_msh3_ctx *ctx = h3_get_msh3_ctx(data);
-  struct stream_ctx *stream = H3_STREAM_CTX(ctx, data);
+  struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
   if(!stream)
     return;
   (void)Request;
@@ -523,7 +523,7 @@ static ssize_t recv_closed_stream(struct Curl_cfilter *cf,
                                   CURLcode *err)
 {
   struct cf_msh3_ctx *ctx = cf->ctx;
-  struct stream_ctx *stream = H3_STREAM_CTX(ctx, data);
+  struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
   ssize_t nread = -1;
 
   if(!stream) {
@@ -557,7 +557,7 @@ out:
 static void set_quic_expire(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
   struct cf_msh3_ctx *ctx = cf->ctx;
-  struct stream_ctx *stream = H3_STREAM_CTX(ctx, data);
+  struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
 
   /* we have no indication from msh3 when it would be a good time
    * to juggle the connection again. So, we compromise by calling
@@ -575,7 +575,7 @@ static ssize_t cf_msh3_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
                             char *buf, size_t len, CURLcode *err)
 {
   struct cf_msh3_ctx *ctx = cf->ctx;
-  struct stream_ctx *stream = H3_STREAM_CTX(ctx, data);
+  struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
   ssize_t nread = -1;
   struct cf_call_data save;
 
@@ -627,7 +627,7 @@ static ssize_t cf_msh3_send(struct Curl_cfilter *cf, struct Curl_easy *data,
                             CURLcode *err)
 {
   struct cf_msh3_ctx *ctx = cf->ctx;
-  struct stream_ctx *stream = H3_STREAM_CTX(ctx, data);
+  struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
   struct h1_req_parser h1;
   struct dynhds h2_headers;
   MSH3_HEADER *nva = NULL;
@@ -723,7 +723,7 @@ static void cf_msh3_adjust_pollset(struct Curl_cfilter *cf,
                                    struct easy_pollset *ps)
 {
   struct cf_msh3_ctx *ctx = cf->ctx;
-  struct stream_ctx *stream = H3_STREAM_CTX(ctx, data);
+  struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
   struct cf_call_data save;
 
   CF_DATA_SAVE(save, cf, data);
@@ -743,7 +743,7 @@ static bool cf_msh3_data_pending(struct Curl_cfilter *cf,
                                  const struct Curl_easy *data)
 {
   struct cf_msh3_ctx *ctx = cf->ctx;
-  struct stream_ctx *stream = H3_STREAM_CTX(ctx, data);
+  struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
   struct cf_call_data save;
   bool pending = FALSE;
 
@@ -752,12 +752,13 @@ static bool cf_msh3_data_pending(struct Curl_cfilter *cf,
   (void)cf;
   if(stream && stream->req) {
     msh3_lock_acquire(&stream->recv_lock);
-    CURL_TRC_CF((struct Curl_easy *)data, cf, "data pending = %zu",
+    CURL_TRC_CF((struct Curl_easy *)CURL_UNCONST(data), cf,
+                "data pending = %zu",
                 Curl_bufq_len(&stream->recvbuf));
     pending = !Curl_bufq_is_empty(&stream->recvbuf);
     msh3_lock_release(&stream->recv_lock);
     if(pending)
-      h3_drain_stream(cf, (struct Curl_easy *)data);
+      h3_drain_stream(cf, (struct Curl_easy *)CURL_UNCONST(data));
   }
 
   CF_DATA_RESTORE(cf, save);
@@ -780,7 +781,7 @@ static CURLcode cf_msh3_data_event(struct Curl_cfilter *cf,
                                    int event, int arg1, void *arg2)
 {
   struct cf_msh3_ctx *ctx = cf->ctx;
-  struct stream_ctx *stream = H3_STREAM_CTX(ctx, data);
+  struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
   struct cf_call_data save;
   CURLcode result = CURLE_OK;
 
@@ -838,16 +839,10 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
   MSH3_SET_PORT(&addr, (uint16_t)cf->conn->remote_port);
 
   if(verify && (conn_config->CAfile || conn_config->CApath)) {
-    /* Need a way to provide trust anchors to MSH3 */
-#ifdef DEBUGBUILD
-    /* we need this for our test cases to run */
-    CURL_TRC_CF(data, cf, "non-standard CA not supported, "
-                "switching off verifypeer in DEBUG mode");
-    verify = 0;
-#else
+    /* Note there's currently no way to provide trust anchors to MSH3 and
+       that causes tests to fail. */
     CURL_TRC_CF(data, cf, "non-standard CA not supported, "
                 "attempting with built-in verification");
-#endif
   }
 
   CURL_TRC_CF(data, cf, "connecting to %s:%d (verify=%d)",
@@ -883,13 +878,12 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
 
 static CURLcode cf_msh3_connect(struct Curl_cfilter *cf,
                                 struct Curl_easy *data,
-                                bool blocking, bool *done)
+                                bool *done)
 {
   struct cf_msh3_ctx *ctx = cf->ctx;
   struct cf_call_data save;
   CURLcode result = CURLE_OK;
 
-  (void)blocking;
   if(cf->connected) {
     *done = TRUE;
     return CURLE_OK;
@@ -907,14 +901,14 @@ static CURLcode cf_msh3_connect(struct Curl_cfilter *cf,
 
   *done = FALSE;
   if(!ctx->qconn) {
-    ctx->connect_started = Curl_now();
+    ctx->connect_started = curlx_now();
     result = cf_connect_start(cf, data);
     if(result)
       goto out;
   }
 
   if(ctx->handshake_complete) {
-    ctx->handshake_at = Curl_now();
+    ctx->handshake_at = curlx_now();
     if(ctx->handshake_succeeded) {
       CURL_TRC_CF(data, cf, "handshake succeeded");
       cf->conn->bits.multiplex = TRUE; /* at least potentially multiplexed */

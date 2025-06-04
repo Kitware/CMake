@@ -37,7 +37,7 @@
 #include "urldata.h"
 #include "vtls/vtls.h"
 #include "sendf.h"
-#include "timeval.h"
+#include "curlx/timeval.h"
 #include "rand.h"
 #include "escape.h"
 
@@ -130,7 +130,7 @@ static CURLcode weak_random(struct Curl_easy *data,
     static bool seeded = FALSE;
     unsigned int rnd;
     if(!seeded) {
-      struct curltime now = Curl_now();
+      struct curltime now = curlx_now();
       randseed += (unsigned int)now.tv_usec + (unsigned int)now.tv_sec;
       randseed = randseed * 1103515245 + 12345;
       randseed = randseed * 1103515245 + 12345;
@@ -191,12 +191,11 @@ static CURLcode randit(struct Curl_easy *data, unsigned int *rnd,
  * Curl_rand() stores 'num' number of random unsigned characters in the buffer
  * 'rnd' points to.
  *
- * If libcurl is built without TLS support or with a TLS backend that lacks a
- * proper random API (Rustls or mbedTLS), this function will use "weak"
- * random.
+ * If libcurl is built without TLS support or arc4random, this function will
+ * use "weak" random.
  *
- * When built *with* TLS support and a backend that offers strong random, it
- * will return error if it cannot provide strong random values.
+ * When built *with* TLS support, it will return error if it cannot provide
+ * strong random values.
  *
  * NOTE: 'data' may be passed in as NULL when coming from external API without
  * easy handle!

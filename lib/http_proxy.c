@@ -38,11 +38,12 @@
 #include "cf-h1-proxy.h"
 #include "cf-h2-proxy.h"
 #include "connect.h"
-#include "curlx.h"
+#include "strcase.h"
 #include "vtls/vtls.h"
 #include "transfer.h"
 #include "multiif.h"
 #include "vauth/vauth.h"
+#include "curlx/strparse.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -60,7 +61,7 @@ static CURLcode dynhds_add_custom(struct Curl_easy *data,
                                   struct dynhds *hds)
 {
   struct connectdata *conn = data->conn;
-  char *ptr;
+  const char *ptr;
   struct curl_slist *h[2];
   struct curl_slist *headers;
   int numlists = 1; /* by default */
@@ -108,8 +109,7 @@ static CURLcode dynhds_add_custom(struct Curl_easy *data,
         name = headers->data;
         namelen = ptr - headers->data;
         ptr++; /* pass the colon */
-        while(*ptr && ISSPACE(*ptr))
-          ptr++;
+        curlx_str_passblanks(&ptr);
         if(*ptr) {
           value = ptr;
           valuelen = strlen(value);
@@ -131,8 +131,7 @@ static CURLcode dynhds_add_custom(struct Curl_easy *data,
         name = headers->data;
         namelen = ptr - headers->data;
         ptr++; /* pass the semicolon */
-        while(*ptr && ISSPACE(*ptr))
-          ptr++;
+        curlx_str_passblanks(&ptr);
         if(!*ptr) {
           /* quirk #2, send an empty header */
           value = "";
@@ -307,7 +306,7 @@ out:
 
 static CURLcode http_proxy_cf_connect(struct Curl_cfilter *cf,
                                       struct Curl_easy *data,
-                                      bool blocking, bool *done)
+                                      bool *done)
 {
   struct cf_proxy_ctx *ctx = cf->ctx;
   CURLcode result;
@@ -319,7 +318,7 @@ static CURLcode http_proxy_cf_connect(struct Curl_cfilter *cf,
 
   CURL_TRC_CF(data, cf, "connect");
 connect_sub:
-  result = cf->next->cft->do_connect(cf->next, data, blocking, done);
+  result = cf->next->cft->do_connect(cf->next, data, done);
   if(result || !*done)
     return result;
 
