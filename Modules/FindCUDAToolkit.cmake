@@ -164,7 +164,7 @@ Targets Created:
 cuBLAS
 """"""
 
-The `cuBLAS <https://docs.nvidia.com/cuda/cublas>`_ library.
+The `CUDA Basic Linear Algebra Subroutine`_ library.
 
 Targets Created:
 
@@ -173,6 +173,8 @@ Targets Created:
 - ``CUDA::cublasLt`` starting in CUDA 10.1
 - ``CUDA::cublasLt_static`` starting in CUDA 10.1
 
+.. _`CUDA Basic Linear Algebra Subroutine`: https://docs.nvidia.com/cuda/cublas
+
 .. _`cuda_toolkit_cuDLA`:
 
 cuDLA
@@ -180,11 +182,13 @@ cuDLA
 
 .. versionadded:: 3.27
 
-The NVIDIA Tegra Deep Learning Accelerator `cuDLA <https://docs.nvidia.com/cuda/cublas>`_ library.
+The `NVIDIA Tegra Deep Learning Accelerator`_ library.
 
 Targets Created:
 
 - ``CUDA::cudla`` starting in CUDA 11.6
+
+.. _`NVIDIA Tegra Deep Learning Accelerator`: https://docs.nvidia.com/cuda/cuda-for-tegra-appnote#cudla
 
 .. _`cuda_toolkit_cuFile`:
 
@@ -193,7 +197,7 @@ cuFile
 
 .. versionadded:: 3.25
 
-The NVIDIA GPUDirect Storage `cuFile <https://docs.nvidia.com/gpudirect-storage/api-reference-guide>`_ library.
+The `NVIDIA GPUDirect Storage cuFile`_ library.
 
 Targets Created:
 
@@ -202,12 +206,14 @@ Targets Created:
 - ``CUDA::cuFile_rdma`` starting in CUDA 11.4
 - ``CUDA::cuFile_rdma_static`` starting in CUDA 11.4
 
+.. _`NVIDIA GPUDirect Storage cuFile`: https://docs.nvidia.com/gpudirect-storage/api-reference-guide
+
 .. _`cuda_toolkit_cuFFT`:
 
 cuFFT
 """""
 
-The `cuFFT <https://docs.nvidia.com/cuda/cufft>`_ library.
+The `CUDA Fast Fourier Transform`_ library.
 
 Targets Created:
 
@@ -217,48 +223,56 @@ Targets Created:
 - ``CUDA::cufft_static_nocallback`` starting in CUDA 9.2, requires CMake 3.23+
 - ``CUDA::cufftw_static``
 
+.. _`CUDA Fast Fourier Transform`: https://docs.nvidia.com/cuda/cufft
+
 .. _`cuda_toolkit_cuRAND`:
 
 cuRAND
 """"""
 
-The `cuRAND <https://docs.nvidia.com/cuda/curand>`_ library.
+The `CUDA random number generation`_ library.
 
 Targets Created:
 
 - ``CUDA::curand``
 - ``CUDA::curand_static``
 
+.. _`CUDA random number generation`: https://docs.nvidia.com/cuda/curand
+
 .. _`cuda_toolkit_cuSOLVER`:
 
 cuSOLVER
 """"""""
 
-The `cuSOLVER <https://docs.nvidia.com/cuda/cusolver>`_ library.
+A `GPU accelerated linear system solver`_ library.
 
 Targets Created:
 
 - ``CUDA::cusolver``
 - ``CUDA::cusolver_static``
 
+.. _`GPU accelerated linear system solver`: https://docs.nvidia.com/cuda/cusolver
+
 .. _`cuda_toolkit_cuSPARSE`:
 
 cuSPARSE
 """"""""
 
-The `cuSPARSE <https://docs.nvidia.com/cuda/cusparse>`_ library.
+The `CUDA sparse matrix`_ library.
 
 Targets Created:
 
 - ``CUDA::cusparse``
 - ``CUDA::cusparse_static``
 
+.. _`CUDA sparse matrix`: https://docs.nvidia.com/cuda/cusparse
+
 .. _`cuda_toolkit_cupti`:
 
 cupti
 """""
 
-The `NVIDIA CUDA Profiling Tools Interface <https://developer.nvidia.com/cupti>`_.
+The `NVIDIA CUDA Profiling Tools Interface`_.
 
 Targets Created:
 
@@ -272,12 +286,14 @@ Targets Created:
   - ``CUDA::nvperf_target``       starting in CUDA 10.2
   - ``CUDA::pcsamplingutil``      starting in CUDA 11.3
 
+.. _`NVIDIA CUDA Profiling Tools Interface`: https://developer.nvidia.com/cupti
+
 .. _`cuda_toolkit_NPP`:
 
 NPP
 """
 
-The `NPP <https://docs.nvidia.com/cuda/npp>`_ libraries.
+The `NVIDIA 2D Image and Signal Processing Performance Primitives`_ libraries.
 
 Targets Created:
 
@@ -342,24 +358,28 @@ Targets Created:
   - ``CUDA::npps``
   - ``CUDA::npps_static``
 
+.. _`NVIDIA 2D Image and Signal Processing Performance Primitives`: https://docs.nvidia.com/cuda/npp
+
 .. _`cuda_toolkit_nvBLAS`:
 
 nvBLAS
 """"""
 
-The `nvBLAS <https://docs.nvidia.com/cuda/nvblas>`_ libraries.
+The `GPU-accelerated drop-in BLAS`_ library.
 This is a shared library only.
 
 Targets Created:
 
 - ``CUDA::nvblas``
 
+.. _`GPU-accelerated drop-in BLAS`: https://docs.nvidia.com/cuda/nvblas
+
 .. _`cuda_toolkit_nvGRAPH`:
 
 nvGRAPH
 """""""
 
-The `nvGRAPH <https://web.archive.org/web/20201111171403/https://docs.nvidia.com/cuda/nvgraph/index.html>`_ library.
+A `GPU-accelerated graph analytics`_ library.
 Removed starting in CUDA 11.0
 
 Targets Created:
@@ -367,19 +387,22 @@ Targets Created:
 - ``CUDA::nvgraph``
 - ``CUDA::nvgraph_static``
 
+.. _`GPU-accelerated graph analytics`: https://docs.nvidia.com/cuda/archive/10.0/nvgraph
 
 .. _`cuda_toolkit_nvJPEG`:
 
 nvJPEG
 """"""
 
-The `nvJPEG <https://docs.nvidia.com/cuda/nvjpeg>`_ library.
+A `GPU-accelerated JPEG codec`_ library.
 Introduced in CUDA 10.
 
 Targets Created:
 
 - ``CUDA::nvjpeg``
 - ``CUDA::nvjpeg_static``
+
+.. _`GPU-accelerated JPEG codec`: https://docs.nvidia.com/cuda/nvjpeg
 
 .. _`cuda_toolkit_nvPTX`:
 
@@ -388,8 +411,8 @@ nvPTX Compiler
 
 .. versionadded:: 3.25
 
-The `nvPTX <https://docs.nvidia.com/cuda/ptx-compiler-api>`_ (PTX Compilation) library.
-The PTX Compiler APIs are a set of APIs which can be used to compile a PTX program into GPU assembly code.
+The `PTX Compiler APIs`_.
+These are a set of APIs which can be used to compile a PTX program into GPU assembly code.
 Introduced in CUDA 11.1
 This is a static library only.
 
@@ -397,12 +420,14 @@ Targets Created:
 
 - ``CUDA::nvptxcompiler_static`` starting in CUDA 11.1
 
+.. _`PTX Compiler APIs`: https://docs.nvidia.com/cuda/ptx-compiler-api
+
 .. _`cuda_toolkit_nvRTC`:
 
 nvRTC
 """""
 
-The `nvRTC <https://docs.nvidia.com/cuda/nvrtc>`_ (Runtime Compilation) library.
+A `runtime compilation library for CUDA`_.
 
 Targets Created:
 
@@ -414,17 +439,21 @@ Targets Created:
   - ``CUDA::nvrtc_static`` starting in CUDA 11.5
   - ``CUDA::nvrtc_builtins_static`` starting in CUDA 11.5
 
+.. _`runtime compilation library for CUDA`: https://docs.nvidia.com/cuda/nvrtc
+
 .. _`cuda_toolkit_nvjitlink`:
 
 nvJitLink
 """""""""
 
-The `nvJItLink <https://docs.nvidia.com/cuda/>`_ (Runtime LTO Linking) library.
+The `JIT Link APIs`_.
 
 Targets Created:
 
 - ``CUDA::nvJitLink`` starting in CUDA 12.0
 - ``CUDA::nvJitLink_static``  starting in CUDA 12.0
+
+.. _`JIT Link APIs`: https://docs.nvidia.com/cuda/nvjitlink
 
 .. _`cuda_toolkit_nvfatbin`:
 
@@ -433,19 +462,21 @@ nvFatBin
 
 .. versionadded:: 3.30
 
-The `nvFatBin <https://docs.nvidia.com/cuda/>`_ (Runtime fatbin creation) library.
+The `Fatbin Creator APIs`_.
 
 Targets Created:
 
 - ``CUDA::nvfatbin`` starting in CUDA 12.4
 - ``CUDA::nvfatbin_static``  starting in CUDA 12.4
 
+.. _`Fatbin Creator APIs`: https://docs.nvidia.com/cuda/nvfatbin
+
 .. _`cuda_toolkit_nvml`:
 
 nvidia-ML
 """""""""
 
-The `NVIDIA Management Library <https://developer.nvidia.com/management-library-nvml>`_.
+The `NVIDIA Management Library`_.
 
 Targets Created:
 
@@ -455,19 +486,25 @@ Targets Created:
 .. versionadded:: 3.31
   Added ``CUDA::nvml_static``.
 
+.. _`NVIDIA Management Library`: https://developer.nvidia.com/management-library-nvml
+
 .. _`cuda_toolkit_nvToolsExt`:
 
 nvToolsExt
 """"""""""
 
-.. deprecated:: 3.25 With CUDA 10.0+, use :ref:`nvtx3 <cuda_toolkit_nvtx3>`.
+.. deprecated:: 3.25
 
-The `NVIDIA Tools Extension <https://docs.nvidia.com/nvtx/>`_.
+  With CUDA 10.0+, use :ref:`nvtx3 <cuda_toolkit_nvtx3>`.
+
+The `legacy NVIDIA Tools Extension`_.
 This is a shared library only.
 
 Targets Created:
 
 - ``CUDA::nvToolsExt``
+
+.. _`legacy NVIDIA Tools Extension`: https://docs.nvidia.com/cuda/archive/9.0/profiler-users-guide#nvtx
 
 .. _`cuda_toolkit_nvtx3`:
 
@@ -476,24 +513,28 @@ nvtx3
 
 .. versionadded:: 3.25
 
-The header-only `NVIDIA Tools Extension Library <https://nvidia.github.io/NVTX/doxygen>`_.
+The header-only `NVIDIA Tools Extension`_ library.
 Introduced in CUDA 10.0.
 
 Targets created:
 
 - ``CUDA::nvtx3``
 
+.. _`NVIDIA Tools Extension`: https://nvidia.github.io/NVTX/doxygen
+
 .. _`cuda_toolkit_opencl`:
 
 OpenCL
 """"""
 
-The `NVIDIA OpenCL Library <https://developer.nvidia.com/opencl>`_.
+The `NVIDIA Open Computing Language`_ library.
 This is a shared library only.
 
 Targets Created:
 
 - ``CUDA::OpenCL``
+
+.. _`NVIDIA Open Computing Language`: https://developer.nvidia.com/opencl
 
 .. _`cuda_toolkit_cuLIBOS`:
 
