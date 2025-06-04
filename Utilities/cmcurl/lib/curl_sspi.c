@@ -28,10 +28,10 @@
 
 #include <curl/curl.h>
 #include "curl_sspi.h"
-#include "curl_multibyte.h"
+#include "curlx/multibyte.h"
 #include "system_win32.h"
-#include "version_win32.h"
-#include "warnless.h"
+#include "curlx/version_win32.h"
+#include "curlx/warnless.h"
 
 /* The last #include files should be: */
 #include "curl_memory.h"
@@ -42,7 +42,7 @@ typedef PSecurityFunctionTable (APIENTRY *INITSECURITYINTERFACE_FN)(VOID);
 
 /* See definition of SECURITY_ENTRYPOINT in sspi.h */
 #ifdef UNICODE
-#  ifdef _WIN32_WCE
+#  ifdef UNDER_CE
 #    define SECURITYENTRYPOINT L"InitSecurityInterfaceW"
 #  else
 #    define SECURITYENTRYPOINT "InitSecurityInterfaceW"
@@ -129,7 +129,7 @@ void Curl_sspi_global_cleanup(void)
 /*
  * Curl_create_sspi_identity()
  *
- * This is used to populate a SSPI identity structure based on the supplied
+ * This is used to populate an SSPI identity structure based on the supplied
  * username and password.
  *
  * Parameters:
@@ -154,7 +154,7 @@ CURLcode Curl_create_sspi_identity(const char *userp, const char *passwdp,
   /* Initialize the identity */
   memset(identity, 0, sizeof(*identity));
 
-  useranddomain.tchar_ptr = curlx_convert_UTF8_to_tchar((char *)userp);
+  useranddomain.tchar_ptr = curlx_convert_UTF8_to_tchar(userp);
   if(!useranddomain.tchar_ptr)
     return CURLE_OUT_OF_MEMORY;
 
@@ -198,7 +198,7 @@ CURLcode Curl_create_sspi_identity(const char *userp, const char *passwdp,
   curlx_unicodefree(useranddomain.tchar_ptr);
 
   /* Setup the identity's password and length */
-  passwd.tchar_ptr = curlx_convert_UTF8_to_tchar((char *)passwdp);
+  passwd.tchar_ptr = curlx_convert_UTF8_to_tchar(passwdp);
   if(!passwd.tchar_ptr)
     return CURLE_OUT_OF_MEMORY;
   dup_passwd.tchar_ptr = _tcsdup(passwd.tchar_ptr);
@@ -221,7 +221,7 @@ CURLcode Curl_create_sspi_identity(const char *userp, const char *passwdp,
 /*
  * Curl_sspi_free_identity()
  *
- * This is used to free the contents of a SSPI identifier structure.
+ * This is used to free the contents of an SSPI identifier structure.
  *
  * Parameters:
  *

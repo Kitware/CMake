@@ -22,24 +22,24 @@
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "../curl_setup.h"
 
 #include <curl/curl.h>
 
 #include "vauth.h"
-#include "urldata.h"
-#include "strcase.h"
-#include "curl_multibyte.h"
-#include "curl_printf.h"
+#include "../urldata.h"
+#include "../strcase.h"
+#include "../curlx/multibyte.h"
+#include "../curl_printf.h"
 
 /* The last #include files should be: */
-#include "curl_memory.h"
-#include "memdebug.h"
+#include "../curl_memory.h"
+#include "../memdebug.h"
 
 /*
  * Curl_auth_build_spn()
  *
- * This is used to build a SPN string in the following formats:
+ * This is used to build an SPN string in the following formats:
  *
  * service/host@realm (Not currently used)
  * service/host       (Not used by GSS-API)

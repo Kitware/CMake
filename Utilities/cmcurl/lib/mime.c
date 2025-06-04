@@ -29,10 +29,11 @@
 struct Curl_easy;
 
 #include "mime.h"
-#include "warnless.h"
+#include "curlx/warnless.h"
 #include "urldata.h"
 #include "sendf.h"
 #include "strdup.h"
+#include "curlx/base64.h"
 
 #if !defined(CURL_DISABLE_MIME) && (!defined(CURL_DISABLE_HTTP) ||      \
                                     !defined(CURL_DISABLE_SMTP) ||      \
@@ -45,7 +46,7 @@ struct Curl_easy;
 #include "rand.h"
 #include "slist.h"
 #include "strcase.h"
-#include "dynbuf.h"
+#include "curlx/dynbuf.h"
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
@@ -86,10 +87,6 @@ static const struct mime_encoder encoders[] = {
   {"quoted-printable", encoder_qp_read, encoder_qp_size},
   {ZERO_NULL, ZERO_NULL, ZERO_NULL}
 };
-
-/* Base64 encoding table */
-static const char base64enc[] =
-  "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
 /* Quoted-printable character class table.
  *
@@ -318,19 +315,19 @@ static char *escape_string(struct Curl_easy *data,
   if(strategy == MIMESTRATEGY_MAIL || (data && (data->set.mime_formescape)))
     table = mimetable;
 
-  Curl_dyn_init(&db, CURL_MAX_INPUT_LENGTH);
+  curlx_dyn_init(&db, CURL_MAX_INPUT_LENGTH);
 
-  for(result = Curl_dyn_addn(&db, STRCONST("")); !result && *src; src++) {
+  for(result = curlx_dyn_addn(&db, STRCONST("")); !result && *src; src++) {
     for(p = table; *p && **p != *src; p++)
       ;
 
     if(*p)
-      result = Curl_dyn_add(&db, *p + 1);
+      result = curlx_dyn_add(&db, *p + 1);
     else
-      result = Curl_dyn_addn(&db, src, 1);
+      result = curlx_dyn_addn(&db, src, 1);
   }
 
-  return Curl_dyn_ptr(&db);
+  return curlx_dyn_ptr(&db);
 }
 
 /* Check if header matches. */
@@ -472,10 +469,10 @@ static size_t encoder_base64_read(char *buffer, size_t size, bool ateof,
     i = st->buf[st->bufbeg++] & 0xFF;
     i = (i << 8) | (st->buf[st->bufbeg++] & 0xFF);
     i = (i << 8) | (st->buf[st->bufbeg++] & 0xFF);
-    *ptr++ = base64enc[(i >> 18) & 0x3F];
-    *ptr++ = base64enc[(i >> 12) & 0x3F];
-    *ptr++ = base64enc[(i >> 6) & 0x3F];
-    *ptr++ = base64enc[i & 0x3F];
+    *ptr++ = Curl_base64encdec[(i >> 18) & 0x3F];
+    *ptr++ = Curl_base64encdec[(i >> 12) & 0x3F];
+    *ptr++ = Curl_base64encdec[(i >> 6) & 0x3F];
+    *ptr++ = Curl_base64encdec[i & 0x3F];
     cursize += 4;
     st->pos += 4;
     size -= 4;
@@ -499,10 +496,10 @@ static size_t encoder_base64_read(char *buffer, size_t size, bool ateof,
           i = (st->buf[st->bufbeg + 1] & 0xFF) << 8;
 
         i |= (st->buf[st->bufbeg] & 0xFF) << 16;
-        ptr[0] = base64enc[(i >> 18) & 0x3F];
-        ptr[1] = base64enc[(i >> 12) & 0x3F];
+        ptr[0] = Curl_base64encdec[(i >> 18) & 0x3F];
+        ptr[1] = Curl_base64encdec[(i >> 12) & 0x3F];
         if(++st->bufbeg != st->bufend) {
-          ptr[2] = base64enc[(i >> 6) & 0x3F];
+          ptr[2] = Curl_base64encdec[(i >> 6) & 0x3F];
           st->bufbeg++;
         }
         cursize += 4;
@@ -1742,7 +1739,7 @@ const char *Curl_mime_contenttype(const char *filename)
     const char *nameend = filename + len1;
     unsigned int i;
 
-    for(i = 0; i < sizeof(ctts) / sizeof(ctts[0]); i++) {
+    for(i = 0; i < CURL_ARRAYSIZE(ctts); i++) {
       size_t len2 = strlen(ctts[i].extension);
 
       if(len1 >= len2 && strcasecompare(nameend - len2, ctts[i].extension))

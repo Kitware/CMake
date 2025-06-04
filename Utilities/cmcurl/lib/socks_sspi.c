@@ -32,11 +32,11 @@
 #include "cfilters.h"
 #include "connect.h"
 #include "strerror.h"
-#include "timeval.h"
+#include "curlx/timeval.h"
 #include "socks.h"
 #include "curl_sspi.h"
-#include "curl_multibyte.h"
-#include "warnless.h"
+#include "curlx/multibyte.h"
+#include "curlx/warnless.h"
 #include "strdup.h"
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -140,14 +140,14 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
   cred_handle.dwUpper = 0;
 
   status = Curl_pSecFn->AcquireCredentialsHandle(NULL,
-                                              (TCHAR *) TEXT("Kerberos"),
-                                              SECPKG_CRED_OUTBOUND,
-                                              NULL,
-                                              NULL,
-                                              NULL,
-                                              NULL,
-                                              &cred_handle,
-                                              &expiry);
+                                       (TCHAR *)CURL_UNCONST(TEXT("Kerberos")),
+                                       SECPKG_CRED_OUTBOUND,
+                                       NULL,
+                                       NULL,
+                                       NULL,
+                                       NULL,
+                                       &cred_handle,
+                                       &expiry);
 
   if(check_sspi_err(data, status, "AcquireCredentialsHandle")) {
     failf(data, "Failed to acquire credentials.");

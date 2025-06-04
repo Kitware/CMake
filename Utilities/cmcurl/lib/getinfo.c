@@ -28,10 +28,10 @@
 
 #include "urldata.h"
 #include "getinfo.h"
-
 #include "vtls/vtls.h"
 #include "connect.h" /* Curl_getconnectinfo() */
 #include "progress.h"
+#include "curlx/strparse.h"
 
 /* The last #include files should be: */
 #include "curl_memory.h"
@@ -98,7 +98,7 @@ static CURLcode getinfo_char(struct Curl_easy *data, CURLINFO info,
 {
   switch(info) {
   case CURLINFO_EFFECTIVE_URL:
-    *param_charp = data->state.url ? data->state.url : (char *)"";
+    *param_charp = data->state.url ? data->state.url : "";
     break;
   case CURLINFO_EFFECTIVE_METHOD: {
     const char *m = data->set.str[STRING_CUSTOMREQUEST];
@@ -204,9 +204,10 @@ static CURLcode getinfo_long(struct Curl_easy *data, CURLINFO info,
   } lptr;
 
 #ifdef DEBUGBUILD
-  char *timestr = getenv("CURL_TIME");
+  const char *timestr = getenv("CURL_TIME");
   if(timestr) {
-    unsigned long val = strtoul(timestr, NULL, 10);
+    curl_off_t val;
+    curlx_str_number(&timestr, &val, TIME_T_MAX);
     switch(info) {
     case CURLINFO_LOCAL_PORT:
       *param_longp = (long)val;
@@ -218,7 +219,8 @@ static CURLcode getinfo_long(struct Curl_easy *data, CURLINFO info,
   /* use another variable for this to allow different values */
   timestr = getenv("CURL_DEBUG_SIZE");
   if(timestr) {
-    unsigned long val = strtoul(timestr, NULL, 10);
+    curl_off_t val;
+    curlx_str_number(&timestr, &val, LONG_MAX);
     switch(info) {
     case CURLINFO_HEADER_SIZE:
     case CURLINFO_REQUEST_SIZE:
@@ -379,9 +381,11 @@ static CURLcode getinfo_offt(struct Curl_easy *data, CURLINFO info,
                              curl_off_t *param_offt)
 {
 #ifdef DEBUGBUILD
-  char *timestr = getenv("CURL_TIME");
+  const char *timestr = getenv("CURL_TIME");
   if(timestr) {
-    unsigned long val = strtoul(timestr, NULL, 10);
+    curl_off_t val;
+    curlx_str_number(&timestr, &val, CURL_OFF_T_MAX);
+
     switch(info) {
     case CURLINFO_TOTAL_TIME_T:
     case CURLINFO_NAMELOOKUP_TIME_T:
@@ -418,11 +422,11 @@ static CURLcode getinfo_offt(struct Curl_easy *data, CURLINFO info,
     *param_offt = data->progress.ul.speed;
     break;
   case CURLINFO_CONTENT_LENGTH_DOWNLOAD_T:
-    *param_offt = (data->progress.flags & PGRS_DL_SIZE_KNOWN) ?
+    *param_offt = data->progress.dl_size_known ?
       data->progress.dl.total_size : -1;
     break;
   case CURLINFO_CONTENT_LENGTH_UPLOAD_T:
-    *param_offt = (data->progress.flags & PGRS_UL_SIZE_KNOWN) ?
+    *param_offt = data->progress.ul_size_known ?
       data->progress.ul.total_size : -1;
     break;
    case CURLINFO_TOTAL_TIME_T:
@@ -476,9 +480,11 @@ static CURLcode getinfo_double(struct Curl_easy *data, CURLINFO info,
                                double *param_doublep)
 {
 #ifdef DEBUGBUILD
-  char *timestr = getenv("CURL_TIME");
+  const char *timestr = getenv("CURL_TIME");
   if(timestr) {
-    unsigned long val = strtoul(timestr, NULL, 10);
+    curl_off_t val;
+    curlx_str_number(&timestr, &val, CURL_OFF_T_MAX);
+
     switch(info) {
     case CURLINFO_TOTAL_TIME:
     case CURLINFO_NAMELOOKUP_TIME:
@@ -528,11 +534,11 @@ static CURLcode getinfo_double(struct Curl_easy *data, CURLINFO info,
     *param_doublep = (double)data->progress.ul.speed;
     break;
   case CURLINFO_CONTENT_LENGTH_DOWNLOAD:
-    *param_doublep = (data->progress.flags & PGRS_DL_SIZE_KNOWN) ?
+    *param_doublep = data->progress.dl_size_known ?
       (double)data->progress.dl.total_size : -1;
     break;
   case CURLINFO_CONTENT_LENGTH_UPLOAD:
-    *param_doublep = (data->progress.flags & PGRS_UL_SIZE_KNOWN) ?
+    *param_doublep = data->progress.ul_size_known ?
       (double)data->progress.ul.total_size : -1;
     break;
   case CURLINFO_REDIRECT_TIME:

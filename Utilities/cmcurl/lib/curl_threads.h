@@ -53,7 +53,7 @@
 #if defined(USE_THREADS_POSIX) || defined(USE_THREADS_WIN32)
 
 curl_thread_t Curl_thread_create(
-#if defined(_WIN32_WCE) || defined(CURL_WINDOWS_UWP)
+#if defined(CURL_WINDOWS_UWP) || defined(UNDER_CE)
                                  DWORD
 #else
                                  unsigned int
@@ -61,7 +61,7 @@ curl_thread_t Curl_thread_create(
                                  (CURL_STDCALL *func) (void *),
                                  void *arg);
 
-void Curl_thread_destroy(curl_thread_t hnd);
+void Curl_thread_destroy(curl_thread_t *hnd);
 
 int Curl_thread_join(curl_thread_t *hnd);
 

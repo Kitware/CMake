@@ -24,15 +24,13 @@
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
-#include "bufq.h"
+#include "../curl_setup.h"
+#include "../bufq.h"
 
 #ifdef USE_HTTP3
 
 #define MAX_PKT_BURST 10
 #define MAX_UDP_PAYLOAD_SIZE  1452
-/* Default QUIC connection timeout we announce from our side */
-#define CURL_QUIC_MAX_IDLE_MS   (120 * 1000)
 
 struct cf_quic_ctx {
   curl_socket_t sockfd; /* connected UDP socket */
@@ -52,6 +50,9 @@ struct cf_quic_ctx {
   BIT(got_first_byte); /* if first byte was received */
   BIT(no_gso); /* do not use gso on sending */
 };
+
+#define H3_STREAM_CTX(ctx,data)                                         \
+  (data ? Curl_uint_hash_get(&(ctx)->streams, (data)->mid) : NULL)
 
 CURLcode vquic_ctx_init(struct cf_quic_ctx *qctx);
 void vquic_ctx_free(struct cf_quic_ctx *qctx);

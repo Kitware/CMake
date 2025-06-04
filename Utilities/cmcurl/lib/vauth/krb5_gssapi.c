@@ -25,22 +25,22 @@
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "../curl_setup.h"
 
 #if defined(HAVE_GSSAPI) && defined(USE_KERBEROS5)
 
 #include <curl/curl.h>
 
-#include "vauth/vauth.h"
-#include "curl_sasl.h"
-#include "urldata.h"
-#include "curl_gssapi.h"
-#include "sendf.h"
-#include "curl_printf.h"
+#include "vauth.h"
+#include "../curl_sasl.h"
+#include "../urldata.h"
+#include "../curl_gssapi.h"
+#include "../sendf.h"
+#include "../curl_printf.h"
 
 /* The last #include files should be: */
-#include "curl_memory.h"
-#include "memdebug.h"
+#include "../curl_memory.h"
+#include "../memdebug.h"
 
 #if defined(__GNUC__) && defined(__APPLE__)
 #pragma GCC diagnostic push
@@ -133,7 +133,7 @@ CURLcode Curl_auth_create_gssapi_user_message(struct Curl_easy *data,
       infof(data, "GSSAPI handshake failure (empty challenge message)");
       return CURLE_BAD_CONTENT_ENCODING;
     }
-    input_token.value = (void *) Curl_bufref_ptr(chlg);
+    input_token.value = CURL_UNCONST(Curl_bufref_ptr(chlg));
     input_token.length = Curl_bufref_len(chlg);
   }
 
@@ -210,7 +210,7 @@ CURLcode Curl_auth_create_gssapi_security_message(struct Curl_easy *data,
   }
 
   /* Setup the challenge "input" security buffer */
-  input_token.value = (void *) Curl_bufref_ptr(chlg);
+  input_token.value = CURL_UNCONST(Curl_bufref_ptr(chlg));
   input_token.length = Curl_bufref_len(chlg);
 
   /* Decrypt the inbound challenge and obtain the qop */

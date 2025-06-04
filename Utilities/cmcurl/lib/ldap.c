@@ -89,10 +89,10 @@
 #include "progress.h"
 #include "transfer.h"
 #include "strcase.h"
-#include "strtok.h"
+#include "curlx/strparse.h"
 #include "curl_ldap.h"
-#include "curl_multibyte.h"
-#include "curl_base64.h"
+#include "curlx/multibyte.h"
+#include "curlx/base64.h"
 #include "connect.h"
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -285,8 +285,8 @@ static int ldap_win_bind(struct Curl_easy *data, LDAP *server,
   PTCHAR inpass = NULL;
 
   if(user && passwd && (data->set.httpauth & CURLAUTH_BASIC)) {
-    inuser = curlx_convert_UTF8_to_tchar((char *) user);
-    inpass = curlx_convert_UTF8_to_tchar((char *) passwd);
+    inuser = curlx_convert_UTF8_to_tchar(user);
+    inpass = curlx_convert_UTF8_to_tchar(passwd);
 
     rc = (int)ldap_simple_bind_s(server, inuser, inpass);
 
@@ -543,7 +543,7 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
 #endif
       name_len = strlen(name);
 
-      result = Curl_client_write(data, CLIENTWRITE_BODY, (char *)"DN: ", 4);
+      result = Curl_client_write(data, CLIENTWRITE_BODY, "DN: ", 4);
       if(result) {
         FREE_ON_WINLDAP(name);
         ldap_memfree(dn);
@@ -557,7 +557,7 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
         goto quit;
       }
 
-      result = Curl_client_write(data, CLIENTWRITE_BODY, (char *)"\n", 1);
+      result = Curl_client_write(data, CLIENTWRITE_BODY, "\n", 1);
       if(result) {
         FREE_ON_WINLDAP(name);
         ldap_memfree(dn);
@@ -593,7 +593,7 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
       vals = ldap_get_values_len(server, entryIterator, attribute);
       if(vals) {
         for(i = 0; (vals[i] != NULL); i++) {
-          result = Curl_client_write(data, CLIENTWRITE_BODY, (char *)"\t", 1);
+          result = Curl_client_write(data, CLIENTWRITE_BODY, "\t", 1);
           if(result) {
             ldap_value_free_len(vals);
             FREE_ON_WINLDAP(attr);
@@ -615,7 +615,7 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
             goto quit;
           }
 
-          result = Curl_client_write(data, CLIENTWRITE_BODY, (char *)": ", 2);
+          result = Curl_client_write(data, CLIENTWRITE_BODY, ": ", 2);
           if(result) {
             ldap_value_free_len(vals);
             FREE_ON_WINLDAP(attr);
@@ -629,8 +629,8 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
           if((attr_len > 7) &&
              (strcmp(";binary", attr + (attr_len - 7)) == 0)) {
             /* Binary attribute, encode to base64. */
-            result = Curl_base64_encode(vals[i]->bv_val, vals[i]->bv_len,
-                                        &val_b64, &val_b64_sz);
+            result = curlx_base64_encode(vals[i]->bv_val, vals[i]->bv_len,
+                                         &val_b64, &val_b64_sz);
             if(result) {
               ldap_value_free_len(vals);
               FREE_ON_WINLDAP(attr);
@@ -670,7 +670,7 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
             }
           }
 
-          result = Curl_client_write(data, CLIENTWRITE_BODY, (char *)"\n", 1);
+          result = Curl_client_write(data, CLIENTWRITE_BODY, "\n", 1);
           if(result) {
             ldap_value_free_len(vals);
             FREE_ON_WINLDAP(attr);
@@ -690,7 +690,7 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
       FREE_ON_WINLDAP(attr);
       ldap_memfree(attribute);
 
-      result = Curl_client_write(data, CLIENTWRITE_BODY, (char *)"\n", 1);
+      result = Curl_client_write(data, CLIENTWRITE_BODY, "\n", 1);
       if(result)
         goto quit;
     }
@@ -728,7 +728,9 @@ static void _ldap_trace(const char *fmt, ...)
 
   if(do_trace == -1) {
     const char *env = getenv("CURL_TRACE");
-    do_trace = (env && strtol(env, NULL, 10) > 0);
+    curl_off_t e = 0;
+    if(!curlx_str_number(&env, &e, INT_MAX))
+      do_trace = e > 0;
   }
   if(!do_trace)
     return;
@@ -759,36 +761,17 @@ static int str2scope(const char *p)
   return -1;
 }
 
-/*
- * Split 'str' into strings separated by commas.
- * Note: out[] points into 'str'.
- */
-static bool split_str(char *str, char ***out, size_t *count)
+/* number of entries in the attributes list */
+static size_t num_entries(const char *s)
 {
-  char **res;
-  char *lasts;
-  char *s;
-  size_t  i;
   size_t items = 1;
 
-  s = strchr(str, ',');
+  s = strchr(s, ',');
   while(s) {
     items++;
-    s = strchr(++s, ',');
+    s = strchr(s + 1, ',');
   }
-
-  res = calloc(items, sizeof(char *));
-  if(!res)
-    return FALSE;
-
-  for(i = 0, s = Curl_strtok_r(str, ",", &lasts); s && i < items;
-      s = Curl_strtok_r(NULL, ",", &lasts), i++)
-    res[i] = s;
-
-  *out = res;
-  *count = items;
-
-  return TRUE;
+  return items;
 }
 
 /*
@@ -882,15 +865,8 @@ static int _ldap_url_parse2(struct Curl_easy *data,
     *q++ = '\0';
 
   if(*p) {
-    char **attributes;
-    size_t count = 0;
-
-    /* Split the string into an array of attributes */
-    if(!split_str(p, &attributes, &count)) {
-      rc = LDAP_NO_MEMORY;
-
-      goto quit;
-    }
+    size_t count = num_entries(p); /* at least one */
+    const char *atp = p;
 
     /* Allocate our array (+1 for the NULL entry) */
 #if defined(USE_WIN32_LDAP)
@@ -899,27 +875,25 @@ static int _ldap_url_parse2(struct Curl_easy *data,
     ludp->lud_attrs = calloc(count + 1, sizeof(char *));
 #endif
     if(!ludp->lud_attrs) {
-      free(attributes);
-
       rc = LDAP_NO_MEMORY;
-
       goto quit;
     }
 
     for(i = 0; i < count; i++) {
       char *unescaped;
       CURLcode result;
+      struct Curl_str out;
 
-      LDAP_TRACE(("attr[%zu] '%s'\n", i, attributes[i]));
+      if(curlx_str_until(&atp, &out, 1024, ','))
+        break;
+
+      LDAP_TRACE(("attr[%zu] '%.*s'\n", i, (int)out.len, out.str));
 
       /* Unescape the attribute */
-      result = Curl_urldecode(attributes[i], 0, &unescaped, NULL,
+      result = Curl_urldecode(out.str, out.len, &unescaped, NULL,
                               REJECT_ZERO);
       if(result) {
-        free(attributes);
-
         rc = LDAP_NO_MEMORY;
-
         goto quit;
       }
 
@@ -931,10 +905,7 @@ static int _ldap_url_parse2(struct Curl_easy *data,
       free(unescaped);
 
       if(!ludp->lud_attrs[i]) {
-        free(attributes);
-
         rc = LDAP_NO_MEMORY;
-
         goto quit;
       }
 #else
@@ -942,9 +913,9 @@ static int _ldap_url_parse2(struct Curl_easy *data,
 #endif
 
       ludp->lud_attrs_dups++;
+      if(curlx_str_single(&atp, ','))
+        break;
     }
-
-    free(attributes);
   }
 
   p = q;

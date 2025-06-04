@@ -26,7 +26,7 @@
 
 #include "urldata.h"
 #include "cfilters.h"
-#include "dynbuf.h"
+#include "curlx/dynbuf.h"
 #include "doh.h"
 #include "multiif.h"
 #include "progress.h"
@@ -34,6 +34,7 @@
 #include "sendf.h"
 #include "transfer.h"
 #include "url.h"
+#include "curlx/strparse.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -68,6 +69,8 @@ CURLcode Curl_req_soft_reset(struct SingleRequest *req,
   req->deductheadercount = 0;
   req->httpversion_sent = 0;
   req->httpversion = 0;
+  req->sendbuf_hds_len = 0;
+
   result = Curl_client_start(data);
   if(result)
     return result;
@@ -92,7 +95,7 @@ CURLcode Curl_req_soft_reset(struct SingleRequest *req,
 CURLcode Curl_req_start(struct SingleRequest *req,
                         struct Curl_easy *data)
 {
-  req->start = Curl_now();
+  req->start = curlx_now();
   return Curl_req_soft_reset(req, data);
 }
 
@@ -115,9 +118,6 @@ void Curl_req_hard_reset(struct SingleRequest *req, struct Curl_easy *data)
 {
   struct curltime t0 = {0, 0};
 
-  /* This is a bit ugly. `req->p` is a union and we assume we can
-   * free this safely without leaks. */
-  Curl_safefree(req->p.ftp);
   Curl_safefree(req->newurl);
   Curl_client_reset(data);
   if(req->sendbuf_init)
@@ -140,6 +140,7 @@ void Curl_req_hard_reset(struct SingleRequest *req, struct Curl_easy *data)
   req->httpcode = 0;
   req->keepon = 0;
   req->upgr101 = UPGR101_INIT;
+  req->sendbuf_hds_len = 0;
   req->timeofdoc = 0;
   req->location = NULL;
   req->newurl = NULL;
@@ -167,17 +168,10 @@ void Curl_req_hard_reset(struct SingleRequest *req, struct Curl_easy *data)
 
 void Curl_req_free(struct SingleRequest *req, struct Curl_easy *data)
 {
-  /* This is a bit ugly. `req->p` is a union and we assume we can
-   * free this safely without leaks. */
-  Curl_safefree(req->p.ftp);
   Curl_safefree(req->newurl);
   if(req->sendbuf_init)
     Curl_bufq_free(&req->sendbuf);
   Curl_client_cleanup(data);
-
-#ifndef CURL_DISABLE_DOH
-  Curl_doh_cleanup(data);
-#endif
 }
 
 static CURLcode xfer_send(struct Curl_easy *data,
@@ -194,11 +188,13 @@ static CURLcode xfer_send(struct Curl_easy *data,
     /* Allow debug builds to override this logic to force short initial
        sends */
     size_t body_len = blen - hds_len;
-    char *p = getenv("CURL_SMALLREQSEND");
-    if(p) {
-      size_t body_small = (size_t)strtoul(p, NULL, 10);
-      if(body_small && body_small < body_len)
-        blen = hds_len + body_small;
+    if(body_len) {
+      const char *p = getenv("CURL_SMALLREQSEND");
+      if(p) {
+        curl_off_t body_small;
+        if(!curlx_str_number(&p, &body_small, body_len))
+          blen = hds_len + (size_t)body_small;
+      }
     }
   }
 #endif
@@ -222,11 +218,11 @@ static CURLcode xfer_send(struct Curl_easy *data,
       data->req.eos_sent = TRUE;
     if(*pnwritten) {
       if(hds_len)
-        Curl_debug(data, CURLINFO_HEADER_OUT, (char *)buf,
+        Curl_debug(data, CURLINFO_HEADER_OUT, buf,
                    CURLMIN(hds_len, *pnwritten));
       if(*pnwritten > hds_len) {
         size_t body_len = *pnwritten - hds_len;
-        Curl_debug(data, CURLINFO_DATA_OUT, (char *)buf + hds_len, body_len);
+        Curl_debug(data, CURLINFO_DATA_OUT, buf + hds_len, body_len);
         data->req.writebytecount += body_len;
         Curl_pgrsSetUploadCounter(data, data->req.writebytecount);
       }
@@ -385,8 +381,8 @@ CURLcode Curl_req_send(struct Curl_easy *data, struct dynbuf *req,
     return CURLE_FAILED_INIT;
 
   data->req.httpversion_sent = httpversion;
-  buf = Curl_dyn_ptr(req);
-  blen = Curl_dyn_len(req);
+  buf = curlx_dyn_ptr(req);
+  blen = curlx_dyn_len(req);
   if(!Curl_creader_total_length(data)) {
     /* Request without body. Try to send directly from the buf given. */
     data->req.eos_read = TRUE;
