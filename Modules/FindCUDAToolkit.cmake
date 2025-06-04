@@ -217,6 +217,8 @@ Targets Created:
 - ``CUDA::cufft_static_nocallback`` starting in CUDA 9.2, requires CMake 3.23+
 - ``CUDA::cufftw_static``
 
+.. _`cuda_toolkit_cuRAND`:
+
 cuRAND
 """"""
 
@@ -508,10 +510,6 @@ Target Created:
 - ``CUDA::culibos``
 
 **Note**: direct usage of this target by consumers should not be necessary.
-
-.. _`cuda_toolkit_cuRAND`:
-
-
 
 Result variables
 ^^^^^^^^^^^^^^^^
