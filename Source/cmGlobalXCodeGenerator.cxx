@@ -2723,7 +2723,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
                                   this->CreateString("BUNDLE"));
       // Add the flags to create a module library (bundle).
       std::string createFlags = this->LookupFlags(
-        "CMAKE_SHARED_MODULE_CREATE_", llang, "_FLAGS", gtgt, "");
+        "CMAKE_SHARED_MODULE_CREATE_", llang, "_FLAGS", gtgt);
       if (this->GetTargetProductType(gtgt) !=
           "com.apple.product-type.app-extension"_s) {
         // Xcode passes -bundle automatically.
@@ -2779,7 +2779,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
       } else {
         // Add the flags to create a shared library.
         std::string createFlags = this->LookupFlags(
-          "CMAKE_SHARED_LIBRARY_CREATE_", llang, "_FLAGS", gtgt, "");
+          "CMAKE_SHARED_LIBRARY_CREATE_", llang, "_FLAGS", gtgt);
         // Xcode passes -dynamiclib automatically.
         cmSystemTools::ReplaceString(createFlags, "-dynamiclib", "");
         createFlags = cmTrimWhitespace(createFlags);
@@ -2802,7 +2802,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
     case cmStateEnums::EXECUTABLE: {
       // Add the flags to create an executable.
       std::string createFlags =
-        this->LookupFlags("CMAKE_", llang, "_LINK_FLAGS", gtgt, "");
+        this->LookupFlags("CMAKE_", llang, "_LINK_FLAGS", gtgt);
       if (!createFlags.empty()) {
         extraLinkOptions += ' ';
         extraLinkOptions += createFlags;
@@ -5234,21 +5234,19 @@ void cmGlobalXCodeGenerator::AppendDirectoryForConfig(
 
 std::string cmGlobalXCodeGenerator::LookupFlags(
   std::string const& varNamePrefix, std::string const& varNameLang,
-  std::string const& varNameSuffix, cmGeneratorTarget const* gt,
-  std::string const& default_flags)
+  std::string const& varNameSuffix, cmGeneratorTarget const* gt)
 {
+  std::string flags;
   if (!varNameLang.empty()) {
     std::string varName = cmStrCat(varNamePrefix, varNameLang, varNameSuffix);
     if (cmValue varValue = this->CurrentMakefile->GetDefinition(varName)) {
       if (!varValue->empty()) {
-        std::string flags;
         this->CurrentLocalGenerator->AppendFlags(
           flags, *varValue, varName, gt, cmBuildStep::Link, varNameLang);
-        return flags;
       }
     }
   }
-  return default_flags;
+  return flags;
 }
 
 void cmGlobalXCodeGenerator::AppendDefines(BuildObjectListOrString& defs,
