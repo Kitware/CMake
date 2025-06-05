@@ -2721,16 +2721,20 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
     case cmStateEnums::MODULE_LIBRARY: {
       buildSettings->AddAttribute("LIBRARY_STYLE",
                                   this->CreateString("BUNDLE"));
+      // Add the flags to create a module library (bundle).
+      std::string createFlags = this->LookupFlags(
+        "CMAKE_SHARED_MODULE_CREATE_", llang, "_FLAGS", gtgt, "");
+      if (this->GetTargetProductType(gtgt) !=
+          "com.apple.product-type.app-extension"_s) {
+        // Xcode passes -bundle automatically.
+        cmSystemTools::ReplaceString(createFlags, "-bundle", "");
+      }
+      createFlags = cmTrimWhitespace(createFlags);
+      if (!createFlags.empty()) {
+        extraLinkOptions += ' ';
+        extraLinkOptions += createFlags;
+      }
       if (gtgt->IsCFBundleOnApple()) {
-        // It turns out that a BUNDLE is basically the same
-        // in many ways as an application bundle, as far as
-        // link flags go
-        std::string createFlags = this->LookupFlags(
-          "CMAKE_SHARED_MODULE_CREATE_", llang, "_FLAGS", gtgt, "-bundle");
-        if (!createFlags.empty()) {
-          extraLinkOptions += ' ';
-          extraLinkOptions += createFlags;
-        }
         cmValue ext = gtgt->GetProperty("BUNDLE_EXTENSION");
         if (ext) {
           buildSettings->AddAttribute("WRAPPER_EXTENSION",
@@ -2750,13 +2754,6 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
                                     this->CreateString("mh_bundle"));
         buildSettings->AddAttribute("GCC_DYNAMIC_NO_PIC",
                                     this->CreateString("NO"));
-        // Add the flags to create an executable.
-        std::string createFlags =
-          this->LookupFlags("CMAKE_", llang, "_LINK_FLAGS", gtgt, "");
-        if (!createFlags.empty()) {
-          extraLinkOptions += ' ';
-          extraLinkOptions += createFlags;
-        }
       }
       break;
     }
@@ -2781,9 +2778,11 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
                                     this->CreateString(plist));
       } else {
         // Add the flags to create a shared library.
-        std::string createFlags =
-          this->LookupFlags("CMAKE_SHARED_LIBRARY_CREATE_", llang, "_FLAGS",
-                            gtgt, "-dynamiclib");
+        std::string createFlags = this->LookupFlags(
+          "CMAKE_SHARED_LIBRARY_CREATE_", llang, "_FLAGS", gtgt, "");
+        // Xcode passes -dynamiclib automatically.
+        cmSystemTools::ReplaceString(createFlags, "-dynamiclib", "");
+        createFlags = cmTrimWhitespace(createFlags);
         if (!createFlags.empty()) {
           extraLinkOptions += ' ';
           extraLinkOptions += createFlags;
