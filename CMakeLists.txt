@@ -774,7 +774,7 @@ if(KWSYS_C_SRCS OR KWSYS_CXX_SRCS)
 
   if(KWSYS_USE_SystemInformation)
     if(WIN32)
-      target_link_libraries(${KWSYS_TARGET_INTERFACE} ${KWSYS_LINK_DEPENDENCY} ws2_32)
+      target_link_libraries(${KWSYS_TARGET_INTERFACE} ${KWSYS_LINK_DEPENDENCY} ws2_32 PowrProf)
       # link in dbghelp.dll for symbol lookup if MSVC 1800 or later
       # Note that the dbghelp runtime is part of MS Windows OS
       if(MSVC_VERSION AND NOT MSVC_VERSION VERSION_LESS 1800)

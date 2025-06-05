@@ -61,6 +61,7 @@
 #  if !defined(siginfo_t)
 using siginfo_t = int;
 #  endif
+#  include <powerbase.h>
 #else
 #  include <sys/types.h>
 
@@ -2489,38 +2490,61 @@ bool SystemInformationImplementation::RetrieveClassicalCPUCacheDetails()
 #endif
 }
 
+#if defined(_WIN32)
+typedef struct _PROCESSOR_POWER_INFORMATION
+{
+  ULONG Number;
+  ULONG MaxMhz;
+  ULONG CurrentMhz;
+  ULONG MhzLimit;
+  ULONG MaxIdleState;
+  ULONG CurrentIdleState;
+} PROCESSOR_POWER_INFORMATION, *PPROCESSOR_POWER_INFORMATION;
+#endif
+
 /** */
 bool SystemInformationImplementation::RetrieveCPUClockSpeed()
 {
   bool retrieved = false;
 
 #if defined(_WIN32)
-  unsigned int uiRepetitions = 1;
-  unsigned int uiMSecPerRepetition = 50;
-  __int64 i64Total = 0;
-  __int64 i64Overhead = 0;
+  PROCESSOR_POWER_INFORMATION powerInfo[64];
+  NTSTATUS status =
+    CallNtPowerInformation(ProcessorInformation, nullptr, 0, powerInfo,
+                           sizeof(PROCESSOR_POWER_INFORMATION) * 64);
 
-  // Check if the TSC implementation works at all
-  if (this->Features.HasTSC &&
-      GetCyclesDifference(SystemInformationImplementation::Delay,
-                          uiMSecPerRepetition) > 0) {
-    for (unsigned int nCounter = 0; nCounter < uiRepetitions; nCounter++) {
-      i64Total += GetCyclesDifference(SystemInformationImplementation::Delay,
-                                      uiMSecPerRepetition);
-      i64Overhead += GetCyclesDifference(
-        SystemInformationImplementation::DelayOverhead, uiMSecPerRepetition);
-    }
-
-    // Calculate the MHz speed.
-    i64Total -= i64Overhead;
-    i64Total /= uiRepetitions;
-    i64Total /= uiMSecPerRepetition;
-    i64Total /= 1000;
-
-    // Save the CPU speed.
-    this->CPUSpeedInMHz = (float)i64Total;
-
+  if (status == 0) {
+    this->CPUSpeedInMHz = (float)powerInfo[0].MaxMhz;
     retrieved = true;
+  }
+
+  if (!retrieved) {
+    unsigned int uiRepetitions = 1;
+    unsigned int uiMSecPerRepetition = 50;
+    __int64 i64Total = 0;
+    __int64 i64Overhead = 0;
+
+    // Check if the TSC implementation works at all
+    if (this->Features.HasTSC &&
+        GetCyclesDifference(SystemInformationImplementation::Delay,
+                            uiMSecPerRepetition) > 0) {
+      for (unsigned int nCounter = 0; nCounter < uiRepetitions; nCounter++) {
+        i64Total += GetCyclesDifference(SystemInformationImplementation::Delay,
+                                        uiMSecPerRepetition);
+        i64Overhead += GetCyclesDifference(
+          SystemInformationImplementation::DelayOverhead, uiMSecPerRepetition);
+      }
+
+      // Calculate the MHz speed.
+      i64Total -= i64Overhead;
+      i64Total /= uiRepetitions;
+      i64Total /= uiMSecPerRepetition;
+      i64Total /= 1000;
+
+      // Save the CPU speed.
+      this->CPUSpeedInMHz = (float)i64Total;
+      retrieved = true;
+    }
   }
 
   // If RDTSC is not supported, we fallback to trying to read this value
