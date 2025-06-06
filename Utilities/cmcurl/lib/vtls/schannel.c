@@ -29,7 +29,7 @@
  * but vtls.c should ever call or use these functions.
  */
 
-#include "curl_setup.h"
+#include "../curl_setup.h"
 
 #ifdef USE_SCHANNEL
 
@@ -42,23 +42,25 @@
 #include "vtls.h"
 #include "vtls_int.h"
 #include "vtls_scache.h"
-#include "strcase.h"
-#include "sendf.h"
-#include "connect.h" /* for the connect timeout */
-#include "strerror.h"
-#include "select.h" /* for the socket readiness */
-#include "inet_pton.h" /* for IP addr SNI check */
-#include "curl_multibyte.h"
-#include "warnless.h"
+#include "../strcase.h"
+#include "../sendf.h"
+#include "../connect.h" /* for the connect timeout */
+#include "../strerror.h"
+#include "../select.h" /* for the socket readiness */
+#include "../curlx/inet_pton.h" /* for IP addr SNI check */
+#include "../curlx/multibyte.h"
+#include "../curlx/warnless.h"
 #include "x509asn1.h"
-#include "curl_printf.h"
-#include "multiif.h"
-#include "version_win32.h"
-#include "rand.h"
+#include "../curl_printf.h"
+#include "../multiif.h"
+#include "../system_win32.h"
+#include "../curlx/version_win32.h"
+#include "../rand.h"
+#include "../curlx/strparse.h"
 
 /* The last #include file should be: */
-#include "curl_memory.h"
-#include "memdebug.h"
+#include "../curl_memory.h"
+#include "../memdebug.h"
 
 /* Some verbose debug messages are wrapped by SCH_DEV() instead of DEBUGF()
  * and only shown if CURL_SCHANNEL_DEV_DEBUG was defined at build time. These
@@ -69,19 +71,6 @@
 #define SCH_DEV(x) x
 #else
 #define SCH_DEV(x) do { } while(0)
-#endif
-
-/* ALPN requires version 8.1 of the Windows SDK, which was
-   shipped with Visual Studio 2013, aka _MSC_VER 1800:
-
-   https://technet.microsoft.com/en-us/library/hh831771%28v=ws.11%29.aspx
-*/
-#if defined(_MSC_VER) && (_MSC_VER >= 1800) && !defined(_USING_V110_SDK71_)
-#  define HAS_ALPN_SCHANNEL
-#endif
-
-#ifndef BCRYPT_CHACHA20_POLY1305_ALGORITHM
-#define BCRYPT_CHACHA20_POLY1305_ALGORITHM L"CHACHA20_POLY1305"
 #endif
 
 #ifndef BCRYPT_CHAIN_MODE_CCM
@@ -152,8 +141,29 @@
 #define CALG_SHA_256 0x0000800c
 #endif
 
+/* Work around typo in CeGCC (as of 0.59.1) w32api headers */
+#if defined(__MINGW32CE__) && \
+  !defined(ALG_CLASS_DHASH) && defined(ALG_CLASS_HASH)
+#define ALG_CLASS_DHASH ALG_CLASS_HASH
+#endif
+
 #ifndef PKCS12_NO_PERSIST_KEY
 #define PKCS12_NO_PERSIST_KEY 0x00008000
+#endif
+
+#ifndef CERT_FIND_HAS_PRIVATE_KEY
+#define CERT_FIND_HAS_PRIVATE_KEY (21 << CERT_COMPARE_SHIFT)
+#endif
+
+/* ALPN requires version 8.1 of the Windows SDK, which was
+   shipped with Visual Studio 2013, aka _MSC_VER 1800:
+     https://technet.microsoft.com/en-us/library/hh831771%28v=ws.11%29.aspx
+   Or mingw-w64 9.0 or upper.
+*/
+#if (defined(__MINGW64_VERSION_MAJOR) && __MINGW64_VERSION_MAJOR >= 9) || \
+  (defined(_MSC_VER) && (_MSC_VER >= 1800) && !defined(_USING_V110_SDK71_))
+#define HAS_ALPN_SCHANNEL
+static bool s_win_has_alpn;
 #endif
 
 static CURLcode schannel_pkp_pin_peer_pubkey(struct Curl_cfilter *cf,
@@ -232,8 +242,6 @@ schannel_set_ssl_version_min_max(DWORD *enabled_protocols,
   return CURLE_OK;
 }
 
-/* longest is 26, buffer is slightly bigger */
-#define LONGEST_ALG_ID 32
 #define CIPHEROPTION(x) {#x, x}
 
 struct algo {
@@ -350,9 +358,9 @@ static const struct algo algs[]= {
 };
 
 static int
-get_alg_id_by_name(char *name)
+get_alg_id_by_name(const char *name)
 {
-  char *nameEnd = strchr(name, ':');
+  const char *nameEnd = strchr(name, ':');
   size_t n = nameEnd ? (size_t)(nameEnd - name) : strlen(name);
   int i;
 
@@ -369,12 +377,13 @@ static CURLcode
 set_ssl_ciphers(SCHANNEL_CRED *schannel_cred, char *ciphers,
                 ALG_ID *algIds)
 {
-  char *startCur = ciphers;
+  const char *startCur = ciphers;
   int algCount = 0;
   while(startCur && (0 != *startCur) && (algCount < NUM_CIPHERS)) {
-    long alg = strtol(startCur, 0, 0);
-    if(!alg)
+    curl_off_t alg;
+    if(curlx_str_number(&startCur, &alg, INT_MAX) || !alg)
       alg = get_alg_id_by_name(startCur);
+
     if(alg)
       algIds[algCount++] = (ALG_ID)alg;
     else if(!strncmp(startCur, "USE_STRONG_CRYPTO",
@@ -606,6 +615,7 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
       WCHAR* pszPassword;
       size_t pwd_len = 0;
       int str_w_len = 0;
+      int cert_find_flags;
       const char *cert_showfilename_error = blob ?
         "(memory blob)" : data->set.ssl.primary.clientcert;
       curlx_unicodefree(cert_path);
@@ -654,8 +664,7 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
         else
           pszPassword[0] = 0;
 
-        if(curlx_verify_windows_version(6, 0, 0, PLATFORM_WINNT,
-                                        VERSION_GREATER_THAN_EQUAL))
+        if(Curl_isVistaOrGreater)
           cert_store = PFXImportCertStore(&datablob, pszPassword,
                                           PKCS12_NO_PERSIST_KEY);
         else
@@ -678,9 +687,17 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
         return CURLE_SSL_CERTPROBLEM;
       }
 
+      /* CERT_FIND_HAS_PRIVATE_KEY is only available in Windows 8 / Server
+         2012, (NT v6.2). For earlier versions we use CURL_FIND_ANY. */
+      if(curlx_verify_windows_version(6, 2, 0, PLATFORM_WINNT,
+                                      VERSION_GREATER_THAN_EQUAL))
+        cert_find_flags = CERT_FIND_HAS_PRIVATE_KEY;
+      else
+        cert_find_flags = CERT_FIND_ANY;
+
       client_certs[0] = CertFindCertificateInStore(
         cert_store, X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, 0,
-        CERT_FIND_ANY, NULL, NULL);
+        cert_find_flags, NULL, NULL);
 
       if(!client_certs[0]) {
         failf(data, "schannel: Failed to get certificate from file %s"
@@ -802,11 +819,12 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
 #endif
 
     sspi_status =
-      Curl_pSecFn->AcquireCredentialsHandle(NULL, (TCHAR*)UNISP_NAME,
-                                         SECPKG_CRED_OUTBOUND, NULL,
-                                         &credentials, NULL, NULL,
-                                         &backend->cred->cred_handle,
-                                         &backend->cred->time_stamp);
+      Curl_pSecFn->AcquireCredentialsHandle(NULL,
+                                            (TCHAR *)CURL_UNCONST(UNISP_NAME),
+                                            SECPKG_CRED_OUTBOUND, NULL,
+                                            &credentials, NULL, NULL,
+                                            &backend->cred->cred_handle,
+                                            &backend->cred->time_stamp);
   }
   else {
     /* Pre-Windows 10 1809 or the user set a legacy algorithm list.
@@ -842,11 +860,12 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
 #endif
 
     sspi_status =
-      Curl_pSecFn->AcquireCredentialsHandle(NULL, (TCHAR*)UNISP_NAME,
-                                         SECPKG_CRED_OUTBOUND, NULL,
-                                         &schannel_cred, NULL, NULL,
-                                         &backend->cred->cred_handle,
-                                         &backend->cred->time_stamp);
+      Curl_pSecFn->AcquireCredentialsHandle(NULL,
+                                            (TCHAR *)CURL_UNCONST(UNISP_NAME),
+                                            SECPKG_CRED_OUTBOUND, NULL,
+                                            &schannel_cred, NULL, NULL,
+                                            &backend->cred->cred_handle,
+                                            &backend->cred->time_stamp);
   }
 
 #ifdef HAS_CLIENT_CERT_PATH
@@ -882,7 +901,9 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   struct ssl_connect_data *connssl = cf->ctx;
   struct schannel_ssl_backend_data *backend =
     (struct schannel_ssl_backend_data *)connssl->backend;
+#ifndef UNDER_CE
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
+#endif
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
   SecBuffer outbuf;
   SecBufferDesc outbuf_desc;
@@ -892,7 +913,6 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   unsigned char alpn_buffer[128];
 #endif
   SECURITY_STATUS sspi_status = SEC_E_OK;
-  struct Curl_schannel_cred *old_cred = NULL;
   CURLcode result;
 
   DEBUGASSERT(backend);
@@ -909,20 +929,14 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   }
 
 #ifdef HAS_ALPN_SCHANNEL
-  /* ALPN is only supported on Windows 8.1 / Server 2012 R2 and above.
-     Also it does not seem to be supported for WINE, see curl bug #983. */
-  backend->use_alpn = connssl->alpn &&
-    !GetProcAddress(GetModuleHandle(TEXT("ntdll")),
-                    "wine_get_version") &&
-    curlx_verify_windows_version(6, 3, 0, PLATFORM_WINNT,
-                                 VERSION_GREATER_THAN_EQUAL);
+  backend->use_alpn = connssl->alpn && s_win_has_alpn;
 #else
   backend->use_alpn = FALSE;
 #endif
 
-#ifdef _WIN32_WCE
+#ifdef UNDER_CE
 #ifdef HAS_MANUAL_VERIFY_API
-  /* certificate validation on CE does not seem to work right; we will
+  /* certificate validation on Windows CE does not seem to work right; we will
    * do it following a more manual process. */
   backend->use_manual_cred_validation = TRUE;
 #else
@@ -955,9 +969,10 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
 
   /* check for an existing reusable credential handle */
   if(ssl_config->primary.cache_session) {
+    struct Curl_schannel_cred *old_cred;
     Curl_ssl_scache_lock(data);
-    if(Curl_ssl_scache_get_obj(cf, data, connssl->peer.scache_key,
-                               (void **)&old_cred)) {
+    old_cred = Curl_ssl_scache_get_obj(cf, data, connssl->peer.scache_key);
+    if(old_cred) {
       backend->cred = old_cred;
       DEBUGF(infof(data, "schannel: reusing existing credential handle"));
 
@@ -973,7 +988,7 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   if(!backend->cred) {
     char *snihost;
     result = schannel_acquire_credential_handle(cf, data);
-    if(result)
+    if(result || !backend->cred)
       return result;
     /* schannel_acquire_credential_handle() sets backend->cred accordingly or
        it returns error otherwise. */
@@ -1629,6 +1644,7 @@ schannel_connect_step3(struct Curl_cfilter *cf, struct Curl_easy *data)
       args.data = data;
       args.idx = 0;
       args.certs_count = certs_count;
+      args.result = CURLE_OK;
       traverse_cert_store(ccert_context, add_cert_to_certinfo, &args);
       result = args.result;
     }
@@ -1642,16 +1658,12 @@ schannel_connect_step3(struct Curl_cfilter *cf, struct Curl_easy *data)
   return CURLE_OK;
 }
 
-static CURLcode
-schannel_connect_common(struct Curl_cfilter *cf,
-                        struct Curl_easy *data,
-                        bool nonblocking, bool *done)
+static CURLcode schannel_connect(struct Curl_cfilter *cf,
+                                 struct Curl_easy *data,
+                                 bool *done)
 {
-  CURLcode result;
   struct ssl_connect_data *connssl = cf->ctx;
-  curl_socket_t sockfd = Curl_conn_cf_get_socket(cf, data);
-  timediff_t timeout_ms;
-  int what;
+  CURLcode result;
 
   /* check if the connection has already been established */
   if(ssl_connection_complete == connssl->state) {
@@ -1659,73 +1671,19 @@ schannel_connect_common(struct Curl_cfilter *cf,
     return CURLE_OK;
   }
 
+  *done = FALSE;
+
   if(ssl_connect_1 == connssl->connecting_state) {
-    /* check out how much more time we are allowed */
-    timeout_ms = Curl_timeleft(data, NULL, TRUE);
-
-    if(timeout_ms < 0) {
-      /* no need to continue if time already is up */
-      failf(data, "SSL/TLS connection timeout");
-      return CURLE_OPERATION_TIMEDOUT;
-    }
-
     result = schannel_connect_step1(cf, data);
     if(result)
       return result;
   }
 
-  while(ssl_connect_2 == connssl->connecting_state) {
-
-    /* check out how much more time we are allowed */
-    timeout_ms = Curl_timeleft(data, NULL, TRUE);
-
-    if(timeout_ms < 0) {
-      /* no need to continue if time already is up */
-      failf(data, "SSL/TLS connection timeout");
-      return CURLE_OPERATION_TIMEDOUT;
-    }
-
-    /* if ssl is expecting something, check if it is available. */
-    if(connssl->io_need) {
-
-      curl_socket_t writefd = (connssl->io_need & CURL_SSL_IO_NEED_SEND) ?
-        sockfd : CURL_SOCKET_BAD;
-      curl_socket_t readfd = (connssl->io_need & CURL_SSL_IO_NEED_RECV) ?
-        sockfd : CURL_SOCKET_BAD;
-
-      what = Curl_socket_check(readfd, CURL_SOCKET_BAD, writefd,
-                               nonblocking ? 0 : timeout_ms);
-      if(what < 0) {
-        /* fatal error */
-        failf(data, "select/poll on SSL/TLS socket, errno: %d", SOCKERRNO);
-        return CURLE_SSL_CONNECT_ERROR;
-      }
-      else if(0 == what) {
-        if(nonblocking) {
-          *done = FALSE;
-          return CURLE_OK;
-        }
-        else {
-          /* timeout */
-          failf(data, "SSL/TLS connection timeout");
-          return CURLE_OPERATION_TIMEDOUT;
-        }
-      }
-      /* socket is readable or writable */
-    }
-
-    /* Run transaction, and return to the caller if it failed or if
-     * this connection is part of a multi handle and this loop would
-     * execute again. This permits the owner of a multi handle to
-     * abort a connection attempt before step2 has completed while
-     * ensuring that a client using select() or epoll() will always
-     * have a valid fdset to wait on.
-     */
+  if(ssl_connect_2 == connssl->connecting_state) {
     result = schannel_connect_step2(cf, data);
-    if(result || (nonblocking && (ssl_connect_2 == connssl->connecting_state)))
+    if(result)
       return result;
-
-  } /* repeat step2 until all transactions are done. */
+  }
 
   if(ssl_connect_3 == connssl->connecting_state) {
     result = schannel_connect_step3(cf, data);
@@ -1752,11 +1710,6 @@ schannel_connect_common(struct Curl_cfilter *cf,
 
     *done = TRUE;
   }
-  else
-    *done = FALSE;
-
-  /* reset our connection state machine */
-  connssl->connecting_state = ssl_connect_1;
 
   return CURLE_OK;
 }
@@ -2002,7 +1955,6 @@ schannel_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
                                     backend->encdata_offset),
                               size, err);
     if(*err) {
-      nread = -1;
       if(*err == CURLE_AGAIN)
         SCH_DEV(infof(data, "schannel: recv returned CURLE_AGAIN"));
       else if(*err == CURLE_RECV_ERROR)
@@ -2129,7 +2081,7 @@ schannel_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
         connssl->connecting_state = ssl_connect_2;
         connssl->io_need = CURL_SSL_IO_NEED_SEND;
         backend->recv_renegotiating = TRUE;
-        *err = schannel_connect_common(cf, data, FALSE, &done);
+        *err = schannel_connect(cf, data, &done);
         backend->recv_renegotiating = FALSE;
         if(*err) {
           infof(data, "schannel: renegotiation failed");
@@ -2238,28 +2190,6 @@ cleanup:
     *err = CURLE_OK;
 
   return *err ? -1 : 0;
-}
-
-static CURLcode schannel_connect_nonblocking(struct Curl_cfilter *cf,
-                                             struct Curl_easy *data,
-                                             bool *done)
-{
-  return schannel_connect_common(cf, data, TRUE, done);
-}
-
-static CURLcode schannel_connect(struct Curl_cfilter *cf,
-                                 struct Curl_easy *data)
-{
-  CURLcode result;
-  bool done = FALSE;
-
-  result = schannel_connect_common(cf, data, FALSE, &done);
-  if(result)
-    return result;
-
-  DEBUGASSERT(done);
-
-  return CURLE_OK;
 }
 
 static bool schannel_data_pending(struct Curl_cfilter *cf,
@@ -2466,6 +2396,34 @@ static void schannel_close(struct Curl_cfilter *cf, struct Curl_easy *data)
 
 static int schannel_init(void)
 {
+#if defined(HAS_ALPN_SCHANNEL) && !defined(UNDER_CE)
+  bool wine = FALSE;
+  bool wine_has_alpn = FALSE;
+
+#ifndef CURL_WINDOWS_UWP
+  typedef const char *(APIENTRY *WINE_GET_VERSION_FN)(void);
+  /* GetModuleHandle() not available for UWP.
+     Assume no WINE because WINE has no UWP support. */
+  WINE_GET_VERSION_FN p_wine_get_version =
+    CURLX_FUNCTION_CAST(WINE_GET_VERSION_FN,
+                        (GetProcAddress(GetModuleHandleA("ntdll"),
+                                        "wine_get_version")));
+  wine = !!p_wine_get_version;
+  if(wine) {
+    const char *wine_version = p_wine_get_version();  /* e.g. "6.0.2" */
+    /* Assume ALPN support with WINE 6.0 or upper */
+    wine_has_alpn = wine_version && atoi(wine_version) >= 6;
+  }
+#endif
+  if(wine)
+    s_win_has_alpn = wine_has_alpn;
+  else {
+    /* ALPN is supported on Windows 8.1 / Server 2012 R2 and above. */
+    s_win_has_alpn = curlx_verify_windows_version(6, 3, 0, PLATFORM_WINNT,
+                                                  VERSION_GREATER_THAN_EQUAL);
+  }
+#endif /* HAS_ALPN_SCHANNEL && !UNDER_CE */
+
   return Curl_sspi_global_init() == CURLE_OK ? 1 : 0;
 }
 
@@ -2589,7 +2547,12 @@ static void schannel_checksum(const unsigned char *input,
     if(!CryptCreateHash(hProv, algId, 0, 0, &hHash))
       break; /* failed */
 
+#ifdef __MINGW32CE__
+    /* workaround for CeGCC, should be (const BYTE*) */
+    if(!CryptHashData(hHash, (BYTE*)CURL_UNCONST(input), (DWORD)inputlen, 0))
+#else
     if(!CryptHashData(hHash, input, (DWORD)inputlen, 0))
+#endif
       break; /* failed */
 
     /* get hash size */
@@ -2653,7 +2616,7 @@ HCERTSTORE Curl_schannel_get_cached_cert_store(struct Curl_cfilter *cf,
   }
 
   share = Curl_hash_pick(&multi->proto_hash,
-                         (void *)MPROTO_SCHANNEL_CERT_SHARE_KEY,
+                         CURL_UNCONST(MPROTO_SCHANNEL_CERT_SHARE_KEY),
                          sizeof(MPROTO_SCHANNEL_CERT_SHARE_KEY)-1);
   if(!share || !share->cert_store) {
     return NULL;
@@ -2669,8 +2632,8 @@ HCERTSTORE Curl_schannel_get_cached_cert_store(struct Curl_cfilter *cf,
      negative timeout means retain forever. */
   timeout_ms = cfg->ca_cache_timeout * (timediff_t)1000;
   if(timeout_ms >= 0) {
-    now = Curl_now();
-    elapsed_ms = Curl_timediff(now, share->time);
+    now = curlx_now();
+    elapsed_ms = curlx_timediff(now, share->time);
     if(elapsed_ms >= timeout_ms) {
       return NULL;
     }
@@ -2731,7 +2694,7 @@ bool Curl_schannel_set_cached_cert_store(struct Curl_cfilter *cf,
   }
 
   share = Curl_hash_pick(&multi->proto_hash,
-                         (void *)MPROTO_SCHANNEL_CERT_SHARE_KEY,
+                         CURL_UNCONST(MPROTO_SCHANNEL_CERT_SHARE_KEY),
                          sizeof(MPROTO_SCHANNEL_CERT_SHARE_KEY)-1);
   if(!share) {
     share = calloc(1, sizeof(*share));
@@ -2739,7 +2702,7 @@ bool Curl_schannel_set_cached_cert_store(struct Curl_cfilter *cf,
       return FALSE;
     }
     if(!Curl_hash_add2(&multi->proto_hash,
-                       (void *)MPROTO_SCHANNEL_CERT_SHARE_KEY,
+                       CURL_UNCONST(MPROTO_SCHANNEL_CERT_SHARE_KEY),
                        sizeof(MPROTO_SCHANNEL_CERT_SHARE_KEY)-1,
                        share, schannel_cert_share_free)) {
       free(share);
@@ -2769,7 +2732,7 @@ bool Curl_schannel_set_cached_cert_store(struct Curl_cfilter *cf,
   }
   free(share->CAfile);
 
-  share->time = Curl_now();
+  share->time = curlx_now();
   share->cert_store = cert_store;
   share->CAinfo_blob_size = CAinfo_blob_size;
   share->CAfile = CAfile;
@@ -2800,7 +2763,6 @@ const struct Curl_ssl Curl_ssl_schannel = {
   schannel_random,                   /* random */
   NULL,                              /* cert_status_request */
   schannel_connect,                  /* connect */
-  schannel_connect_nonblocking,      /* connect_nonblocking */
   Curl_ssl_adjust_pollset,           /* adjust_pollset */
   schannel_get_internals,            /* get_internals */
   schannel_close,                    /* close_one */

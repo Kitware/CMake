@@ -45,8 +45,8 @@
 #include "urldata.h"
 #include "connect.h"
 #include "select.h"
-#include "timediff.h"
-#include "warnless.h"
+#include "curlx/timediff.h"
+#include "curlx/warnless.h"
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
@@ -74,7 +74,7 @@ int Curl_wait_ms(timediff_t timeout_ms)
   if(!timeout_ms)
     return 0;
   if(timeout_ms < 0) {
-    SET_SOCKERRNO(EINVAL);
+    SET_SOCKERRNO(SOCKEINVAL);
     return -1;
   }
 #if defined(MSDOS)
@@ -86,7 +86,7 @@ int Curl_wait_ms(timediff_t timeout_ms)
     timeout_ms = ULONG_MAX-1;
     /* do not use ULONG_MAX, because that is equal to INFINITE */
 #endif
-  Sleep((ULONG)timeout_ms);
+  Sleep((DWORD)timeout_ms);
 #else
   /* avoid using poll() for this since it behaves incorrectly with no sockets
      on Apple operating systems */
@@ -96,7 +96,7 @@ int Curl_wait_ms(timediff_t timeout_ms)
   }
 #endif /* _WIN32 */
   if(r) {
-    if((r == -1) && (SOCKERRNO == EINTR))
+    if((r == -1) && (SOCKERRNO == SOCKEINTR))
       /* make EINTR from select or poll not a "lethal" error */
       r = 0;
     else
@@ -197,7 +197,7 @@ int Curl_socket_check(curl_socket_t readfd0, /* two sockets to read from */
     return Curl_wait_ms(timeout_ms);
   }
 
-  /* Avoid initial timestamp, avoid Curl_now() call, when elapsed
+  /* Avoid initial timestamp, avoid curlx_now() call, when elapsed
      time in this function does not need to be measured. This happens
      when function is called with a zero timeout or a negative timeout
      value indicating a blocking call should be performed. */
@@ -292,7 +292,7 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, timediff_t timeout_ms)
     return Curl_wait_ms(timeout_ms);
   }
 
-  /* Avoid initial timestamp, avoid Curl_now() call, when elapsed
+  /* Avoid initial timestamp, avoid curlx_now() call, when elapsed
      time in this function does not need to be measured. This happens
      when function is called with a zero timeout or a negative timeout
      value indicating a blocking call should be performed. */
@@ -312,7 +312,7 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, timediff_t timeout_ms)
     pending_ms = 0;
   r = poll(ufds, nfds, pending_ms);
   if(r <= 0) {
-    if((r == -1) && (SOCKERRNO == EINTR))
+    if((r == -1) && (SOCKERRNO == SOCKEINTR))
       /* make EINTR from select or poll not a "lethal" error */
       r = 0;
     return r;
@@ -360,7 +360,7 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, timediff_t timeout_ms)
   */
   r = our_select(maxfd, &fds_read, &fds_write, &fds_err, timeout_ms);
   if(r <= 0) {
-    if((r == -1) && (SOCKERRNO == EINTR))
+    if((r == -1) && (SOCKERRNO == SOCKEINTR))
       /* make EINTR from select or poll not a "lethal" error */
       r = 0;
     return r;
@@ -408,6 +408,11 @@ void Curl_pollfds_init(struct curl_pollfds *cpfds,
     cpfds->pfds = static_pfds;
     cpfds->count = static_count;
   }
+}
+
+void Curl_pollfds_reset(struct curl_pollfds *cpfds)
+{
+  cpfds->n = 0;
 }
 
 void Curl_pollfds_cleanup(struct curl_pollfds *cpfds)

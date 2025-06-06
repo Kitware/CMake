@@ -24,7 +24,7 @@
  *
  ***************************************************************************/
 
-#include "timediff.h"
+#include "curlx/timediff.h"
 
 struct Curl_cfilter;
 struct Curl_easy;
@@ -51,7 +51,7 @@ typedef CURLcode Curl_cft_shutdown(struct Curl_cfilter *cf,
 
 typedef CURLcode Curl_cft_connect(struct Curl_cfilter *cf,
                                   struct Curl_easy *data,
-                                  bool blocking, bool *done);
+                                  bool *done);
 
 /* Return the hostname and port the connection goes to.
  * This may change with the connection state of filters when tunneling
@@ -65,10 +65,10 @@ typedef CURLcode Curl_cft_connect(struct Curl_cfilter *cf,
  * @param pport  on return, contains the port number
  */
 typedef void     Curl_cft_get_host(struct Curl_cfilter *cf,
-                                  struct Curl_easy *data,
-                                  const char **phost,
-                                  const char **pdisplay_host,
-                                  int *pport);
+                                   struct Curl_easy *data,
+                                   const char **phost,
+                                   const char **pdisplay_host,
+                                   int *pport);
 
 struct easy_pollset;
 
@@ -96,8 +96,8 @@ struct easy_pollset;
  * @param ps     the pollset (inout) for the easy handle
  */
 typedef void     Curl_cft_adjust_pollset(struct Curl_cfilter *cf,
-                                          struct Curl_easy *data,
-                                          struct easy_pollset *ps);
+                                         struct Curl_easy *data,
+                                         struct easy_pollset *ps);
 
 typedef bool     Curl_cft_data_pending(struct Curl_cfilter *cf,
                                        const struct Curl_easy *data);
@@ -245,8 +245,8 @@ void     Curl_cf_def_get_host(struct Curl_cfilter *cf, struct Curl_easy *data,
                               const char **phost, const char **pdisplay_host,
                               int *pport);
 void     Curl_cf_def_adjust_pollset(struct Curl_cfilter *cf,
-                                     struct Curl_easy *data,
-                                     struct easy_pollset *ps);
+                                    struct Curl_easy *data,
+                                    struct easy_pollset *ps);
 bool     Curl_cf_def_data_pending(struct Curl_cfilter *cf,
                                   const struct Curl_easy *data);
 ssize_t  Curl_cf_def_send(struct Curl_cfilter *cf, struct Curl_easy *data,
@@ -255,8 +255,8 @@ ssize_t  Curl_cf_def_send(struct Curl_cfilter *cf, struct Curl_easy *data,
 ssize_t  Curl_cf_def_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
                           char *buf, size_t len, CURLcode *err);
 CURLcode Curl_cf_def_cntrl(struct Curl_cfilter *cf,
-                                struct Curl_easy *data,
-                                int event, int arg1, void *arg2);
+                           struct Curl_easy *data,
+                           int event, int arg1, void *arg2);
 bool     Curl_cf_def_conn_is_alive(struct Curl_cfilter *cf,
                                    struct Curl_easy *data,
                                    bool *input_pending);
@@ -324,7 +324,7 @@ void Curl_conn_cf_discard_all(struct Curl_easy *data,
 
 CURLcode Curl_conn_cf_connect(struct Curl_cfilter *cf,
                               struct Curl_easy *data,
-                              bool blocking, bool *done);
+                              bool *done);
 void Curl_conn_cf_close(struct Curl_cfilter *cf, struct Curl_easy *data);
 ssize_t Curl_conn_cf_send(struct Curl_cfilter *cf, struct Curl_easy *data,
                           const void *buf, size_t len, bool eos,
@@ -371,6 +371,11 @@ CURLcode Curl_conn_connect(struct Curl_easy *data, int sockindex,
                            bool blocking, bool *done);
 
 /**
+ * Check if a filter chain at `sockindex` for connection `conn` exists.
+ */
+bool Curl_conn_is_setup(struct connectdata *conn, int sockindex);
+
+/**
  * Check if the filter chain at `sockindex` for connection `conn` is
  * completely connected.
  */
@@ -399,7 +404,8 @@ bool Curl_conn_is_multiplex(struct connectdata *conn, int sockindex);
  * Return the HTTP version used on the FIRSTSOCKET connection filters
  * or 0 if unknown. Value otherwise is 09, 10, 11, etc.
  */
-unsigned char Curl_conn_http_version(struct Curl_easy *data);
+unsigned char Curl_conn_http_version(struct Curl_easy *data,
+                                     struct connectdata *conn);
 
 /**
  * Close the filter chain at `sockindex` for connection `data->conn`.
@@ -454,7 +460,8 @@ void Curl_conn_cf_adjust_pollset(struct Curl_cfilter *cf,
  * Adjust pollset from filters installed at transfer's connection.
  */
 void Curl_conn_adjust_pollset(struct Curl_easy *data,
-                               struct easy_pollset *ps);
+                              struct connectdata *conn,
+                              struct easy_pollset *ps);
 
 /**
  * Curl_poll() the filter chain at `cf` with timeout `timeout_ms`.
@@ -654,7 +661,7 @@ struct cf_call_data {
     (save) = CF_CTX_CALL_DATA(cf); \
     DEBUGASSERT((save).data == NULL || (save).depth > 0); \
     CF_CTX_CALL_DATA(cf).depth++;  \
-    CF_CTX_CALL_DATA(cf).data = (struct Curl_easy *)data; \
+    CF_CTX_CALL_DATA(cf).data = (struct Curl_easy *)CURL_UNCONST(data); \
   } while(0)
 
 #define CF_DATA_RESTORE(cf, save) \
@@ -669,7 +676,7 @@ struct cf_call_data {
 #define CF_DATA_SAVE(save, cf, data) \
   do { \
     (save) = CF_CTX_CALL_DATA(cf); \
-    CF_CTX_CALL_DATA(cf).data = (struct Curl_easy *)data; \
+    CF_CTX_CALL_DATA(cf).data = (struct Curl_easy *)CURL_UNCONST(data); \
   } while(0)
 
 #define CF_DATA_RESTORE(cf, save) \

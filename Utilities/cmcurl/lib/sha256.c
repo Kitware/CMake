@@ -28,45 +28,20 @@
 #if !defined(CURL_DISABLE_AWS) || !defined(CURL_DISABLE_DIGEST_AUTH) \
   || defined(USE_LIBSSH2) || defined(USE_SSL)
 
-#include "warnless.h"
+#include "curlx/warnless.h"
 #include "curl_sha256.h"
 #include "curl_hmac.h"
 
-#ifdef USE_WOLFSSL
-#include <wolfssl/options.h>
-#endif
-
-#if defined(USE_OPENSSL)
-
-#include <openssl/opensslv.h>
-
-#if (OPENSSL_VERSION_NUMBER >= 0x0090800fL)
-#define USE_OPENSSL_SHA256
-#endif
-
-#endif /* USE_OPENSSL */
-
-#ifdef USE_MBEDTLS
+#ifdef USE_OPENSSL
+#include <openssl/evp.h>
+#elif defined(USE_GNUTLS)
+#include <nettle/sha.h>
+#elif defined(USE_MBEDTLS)
 #include <mbedtls/version.h>
-
 #if(MBEDTLS_VERSION_NUMBER >= 0x02070000) && \
    (MBEDTLS_VERSION_NUMBER < 0x03000000)
   #define HAS_MBEDTLS_RESULT_CODE_BASED_FUNCTIONS
 #endif
-#endif /* USE_MBEDTLS */
-
-#if defined(USE_OPENSSL_SHA256)
-
-/* When OpenSSL or wolfSSL is available we use their SHA256-functions. */
-#if defined(USE_OPENSSL)
-#include <openssl/evp.h>
-#elif defined(USE_WOLFSSL)
-#include <wolfssl/openssl/evp.h>
-#endif
-
-#elif defined(USE_GNUTLS)
-#include <nettle/sha.h>
-#elif defined(USE_MBEDTLS)
 #include <mbedtls/sha256.h>
 #elif (defined(__MAC_OS_X_VERSION_MAX_ALLOWED) && \
               (__MAC_OS_X_VERSION_MAX_ALLOWED >= 1040)) || \
@@ -95,7 +70,7 @@
  * file even if multiple backends are enabled at the same time.
  */
 
-#if defined(USE_OPENSSL_SHA256)
+#ifdef USE_OPENSSL
 
 struct ossl_sha256_ctx {
   EVP_MD_CTX *openssl_ctx;
@@ -241,7 +216,11 @@ static void my_sha256_update(void *in,
                              unsigned int length)
 {
   my_sha256_ctx *ctx = (my_sha256_ctx *)in;
-  CryptHashData(ctx->hHash, (unsigned char *) data, length, 0);
+#ifdef __MINGW32CE__
+  CryptHashData(ctx->hHash, (BYTE *)CURL_UNCONST(data), length, 0);
+#else
+  CryptHashData(ctx->hHash, (const BYTE *)data, length, 0);
+#endif
 }
 
 static void my_sha256_final(unsigned char *digest, void *in)
@@ -348,7 +327,7 @@ static const unsigned long K[64] = {
 
 /* Compress 512-bits */
 static int sha256_compress(struct sha256_state *md,
-                           unsigned char *buf)
+                           const unsigned char *buf)
 {
   unsigned long S[8], W[64];
   int i;
@@ -426,7 +405,7 @@ static void my_sha256_update(void *ctx,
     return;
   while(inlen > 0) {
     if(md->curlen == 0 && inlen >= CURL_SHA256_BLOCK_SIZE) {
-      if(sha256_compress(md, (unsigned char *)in) < 0)
+      if(sha256_compress(md, in) < 0)
         return;
       md->length += CURL_SHA256_BLOCK_SIZE * 8;
       in += CURL_SHA256_BLOCK_SIZE;
@@ -532,6 +511,5 @@ const struct HMAC_params Curl_HMAC_SHA256 = {
   64,                    /* Maximum key length. */
   32                     /* Result size. */
 };
-
 
 #endif /* AWS, DIGEST, or libssh2 */

@@ -8,7 +8,7 @@ readonly name="curl"
 readonly ownership="Curl Upstream <curl-library@lists.haxx.se>"
 readonly subtree="Utilities/cmcurl"
 readonly repo="https://github.com/curl/curl.git"
-readonly tag="curl-8_12_1"
+readonly tag="curl-8_14_1"
 readonly shortlog=false
 readonly paths="
   CMake/*
@@ -21,6 +21,8 @@ readonly paths="
   lib/Makefile.inc
   lib/curl_config.h.cmake
   lib/libcurl.rc
+  lib/curlx/*.c
+  lib/curlx/*.h
   lib/vauth/*.c
   lib/vauth/*.h
   lib/vquic/*.c

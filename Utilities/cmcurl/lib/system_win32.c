@@ -24,20 +24,17 @@
 
 #include "curl_setup.h"
 
-#if defined(_WIN32)
+#ifdef _WIN32
 
 #include <curl/curl.h>
 #include "system_win32.h"
-#include "version_win32.h"
+#include "curlx/version_win32.h"
 #include "curl_sspi.h"
-#include "warnless.h"
+#include "curlx/warnless.h"
 
 /* The last #include files should be: */
 #include "curl_memory.h"
 #include "memdebug.h"
-
-LARGE_INTEGER Curl_freq;
-bool Curl_isVistaOrGreater;
 
 /* Handle of iphlpapp.dll */
 static HMODULE s_hIpHlpApiDll = NULL;
@@ -96,9 +93,15 @@ CURLcode Curl_win32_init(long flags)
   s_hIpHlpApiDll = Curl_load_library(TEXT("iphlpapi.dll"));
   if(s_hIpHlpApiDll) {
     /* Get the address of the if_nametoindex function */
+#ifdef UNDER_CE
+    #define CURL_TEXT(n) TEXT(n)
+#else
+    #define CURL_TEXT(n) (n)
+#endif
     IF_NAMETOINDEX_FN pIfNameToIndex =
       CURLX_FUNCTION_CAST(IF_NAMETOINDEX_FN,
-                          (GetProcAddress(s_hIpHlpApiDll, "if_nametoindex")));
+                          (GetProcAddress(s_hIpHlpApiDll,
+                                          CURL_TEXT("if_nametoindex"))));
 
     if(pIfNameToIndex)
       Curl_if_nametoindex = pIfNameToIndex;
@@ -150,7 +153,7 @@ typedef HMODULE (APIENTRY *LOADLIBRARYEX_FN)(LPCTSTR, HANDLE, DWORD);
 
 /* See function definitions in winbase.h */
 #ifdef UNICODE
-#  ifdef _WIN32_WCE
+#  ifdef UNDER_CE
 #    define LOADLIBARYEX  L"LoadLibraryExW"
 #  else
 #    define LOADLIBARYEX  "LoadLibraryExW"
@@ -175,7 +178,7 @@ typedef HMODULE (APIENTRY *LOADLIBRARYEX_FN)(LPCTSTR, HANDLE, DWORD);
  */
 HMODULE Curl_load_library(LPCTSTR filename)
 {
-#ifndef CURL_WINDOWS_UWP
+#if !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE)
   HMODULE hModule = NULL;
   LOADLIBRARYEX_FN pLoadLibraryEx = NULL;
 
@@ -211,7 +214,7 @@ HMODULE Curl_load_library(LPCTSTR filename)
     /* Attempt to get the Windows system path */
     UINT systemdirlen = GetSystemDirectory(NULL, 0);
     if(systemdirlen) {
-      /* Allocate space for the full DLL path (Room for the null terminator
+      /* Allocate space for the full DLL path (Room for the null-terminator
          is included in systemdirlen) */
       size_t filenamelen = _tcslen(filename);
       TCHAR *path = malloc(sizeof(TCHAR) * (systemdirlen + 1 + filenamelen));

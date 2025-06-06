@@ -24,7 +24,7 @@
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "../curl_setup.h"
 
 #if defined(USE_LIBSSH2)
 #include <libssh2.h>
@@ -40,6 +40,11 @@
 #endif
 
 #include "curl_path.h"
+
+/* meta key for storing protocol meta at easy handle */
+#define CURL_META_SSH_EASY   "meta:proto:ssh:easy"
+/* meta key for storing protocol meta at connection */
+#define CURL_META_SSH_CONN   "meta:proto:ssh:conn"
 
 /****************************************************************************
  * SSH unique setup
@@ -141,12 +146,8 @@ struct ssh_conn {
   const char *passphrase;     /* pass-phrase to use */
   char *rsa_pub;              /* strdup'ed public key file */
   char *rsa;                  /* strdup'ed private key file */
-  bool authed;                /* the connection has been authenticated fine */
-  bool acceptfail;            /* used by the SFTP_QUOTE (continue if
-                                 quote command fails) */
   sshstate state;             /* always use ssh.c:state() to change state! */
   sshstate nextstate;         /* the state to goto after stopping */
-  CURLcode actualcode;        /* the actual error code */
   struct curl_slist *quote_item; /* for the quote option */
   char *quote_path1;          /* two generic pointers for the QUOTE stuff */
   char *quote_path2;
@@ -162,6 +163,7 @@ struct ssh_conn {
   char *slash_pos;              /* used by the SFTP_CREATE_DIRS state */
 
 #if defined(USE_LIBSSH)
+  CURLcode actualcode;        /* the actual error code */
   char *readdir_linkPath;
   size_t readdir_len;
   struct dynbuf readdir_buf;
@@ -206,12 +208,17 @@ struct ssh_conn {
   struct libssh2_agent_publickey *sshagent_prev_identity;
   LIBSSH2_KNOWNHOSTS *kh;
 #elif defined(USE_WOLFSSH)
+  CURLcode actualcode;        /* the actual error code */
   WOLFSSH *ssh_session;
   WOLFSSH_CTX *ctx;
   word32 handleSz;
   byte handle[WOLFSSH_MAX_HANDLE];
   curl_off_t offset;
 #endif /* USE_LIBSSH */
+  BIT(initialised);
+  BIT(authed);                /* the connection has been authenticated fine */
+  BIT(acceptfail);            /* used by the SFTP_QUOTE (continue if
+                                 quote command fails) */
 };
 
 #ifdef USE_LIBSSH

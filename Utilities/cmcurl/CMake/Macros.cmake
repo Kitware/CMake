@@ -52,7 +52,7 @@ macro(curl_internal_test _curl_test)
       ${PROJECT_BINARY_DIR}
       "${CMAKE_CURRENT_SOURCE_DIR}/CMake/CurlTests.c"
       CMAKE_FLAGS
-        "-DCOMPILE_DEFINITIONS:STRING=-D${_curl_test} ${CURL_TEST_DEFINES} ${_cmake_required_definitions}"
+        "-DCOMPILE_DEFINITIONS:STRING=-D${_curl_test} ${CURL_TEST_DEFINES} ${CMAKE_REQUIRED_FLAGS} ${_cmake_required_definitions}"
         "${_curl_test_add_libraries}"
       OUTPUT_VARIABLE CURL_TEST_OUTPUT)
     if(${_curl_test})
@@ -86,4 +86,11 @@ macro(curl_required_libpaths _libpaths_arg)
   else()
     list(APPEND CMAKE_REQUIRED_LINK_DIRECTORIES "${_libpaths_arg}")
   endif()
+endmacro()
+
+# Pre-fill variables set by a check_type_size() call.
+macro(curl_prefill_type_size _type _size)
+  set(HAVE_SIZEOF_${_type} TRUE)
+  set(SIZEOF_${_type} ${_size})
+  set(SIZEOF_${_type}_CODE "#define SIZEOF_${_type} ${_size}")
 endmacro()

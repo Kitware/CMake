@@ -30,8 +30,8 @@
 #include "urldata.h"
 #include "idn.h"
 #include "sendf.h"
-#include "curl_multibyte.h"
-#include "warnless.h"
+#include "curlx/multibyte.h"
+#include "curlx/warnless.h"
 
 #ifdef USE_LIBIDN2
 #include <idn2.h>
@@ -64,13 +64,14 @@ static CURLcode iconv_to_utf8(const char *in, size_t inlen,
   iconv_t cd = iconv_open("UTF-8", nl_langinfo(CODESET));
   if(cd != (iconv_t)-1) {
     size_t iconv_outlen = *outlen;
-    char *iconv_in = (char *)in;
+    char *iconv_in = (char *)CURL_UNCONST(in);
     size_t iconv_inlen = inlen;
     size_t iconv_result = iconv(cd, &iconv_in, &iconv_inlen,
                                 out, &iconv_outlen);
     *outlen -= iconv_outlen;
     iconv_close(cd);
     if(iconv_result == (size_t)-1) {
+      /* !checksrc! disable ERRNOVAR 1 */
       if(errno == ENOMEM)
         return CURLE_OUT_OF_MEMORY;
       else
@@ -80,6 +81,7 @@ static CURLcode iconv_to_utf8(const char *in, size_t inlen,
     return CURLE_OK;
   }
   else {
+    /* !checksrc! disable ERRNOVAR 1 */
     if(errno == ENOMEM)
       return CURLE_OUT_OF_MEMORY;
     else
