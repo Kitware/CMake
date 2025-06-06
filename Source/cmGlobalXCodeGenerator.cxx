@@ -1700,12 +1700,10 @@ void cmGlobalXCodeGenerator::ForceLinkerLanguage(cmGeneratorTarget* gtgt)
   }
 
   // Allow empty source file list for iOS Sticker packs
-  if (char const* productType = GetTargetProductType(gtgt)) {
-    if (strcmp(productType,
-               "com.apple.product-type.app-extension.messages-sticker-pack") ==
-        0) {
-      return;
-    }
+  cm::string_view productType = this->GetTargetProductType(gtgt);
+  if (productType ==
+      "com.apple.product-type.app-extension.messages-sticker-pack"_s) {
+    return;
   }
 
   // Add an empty source file to the target that compiles with the
@@ -3364,40 +3362,40 @@ char const* cmGlobalXCodeGenerator::GetTargetFileType(
   return nullptr;
 }
 
-char const* cmGlobalXCodeGenerator::GetTargetProductType(
+cm::string_view cmGlobalXCodeGenerator::GetTargetProductType(
   cmGeneratorTarget* target)
 {
   if (cmValue e = target->GetProperty("XCODE_PRODUCT_TYPE")) {
-    return e->c_str();
+    return cm::string_view(*e);
   }
 
   switch (target->GetType()) {
     case cmStateEnums::OBJECT_LIBRARY:
-      return "com.apple.product-type.library.static";
+      return "com.apple.product-type.library.static"_s;
     case cmStateEnums::STATIC_LIBRARY:
-      return (target->GetPropertyAsBool("FRAMEWORK")
-                ? "com.apple.product-type.framework"
-                : "com.apple.product-type.library.static");
+      return target->GetPropertyAsBool("FRAMEWORK")
+        ? "com.apple.product-type.framework"_s
+        : "com.apple.product-type.library.static"_s;
     case cmStateEnums::MODULE_LIBRARY:
       if (target->IsXCTestOnApple()) {
-        return "com.apple.product-type.bundle.unit-test";
+        return "com.apple.product-type.bundle.unit-test"_s;
       } else if (target->IsCFBundleOnApple()) {
-        return "com.apple.product-type.bundle";
+        return "com.apple.product-type.bundle"_s;
       } else {
-        return "com.apple.product-type.tool";
+        return "com.apple.product-type.tool"_s;
       }
     case cmStateEnums::SHARED_LIBRARY:
-      return (target->GetPropertyAsBool("FRAMEWORK")
-                ? "com.apple.product-type.framework"
-                : "com.apple.product-type.library.dynamic");
+      return target->GetPropertyAsBool("FRAMEWORK")
+        ? "com.apple.product-type.framework"_s
+        : "com.apple.product-type.library.dynamic"_s;
     case cmStateEnums::EXECUTABLE:
-      return (target->GetPropertyAsBool("MACOSX_BUNDLE")
-                ? "com.apple.product-type.application"
-                : "com.apple.product-type.tool");
+      return target->GetPropertyAsBool("MACOSX_BUNDLE")
+        ? "com.apple.product-type.application"_s
+        : "com.apple.product-type.tool"_s;
     default:
       break;
   }
-  return nullptr;
+  return ""_s;
 }
 
 cmXCodeObject* cmGlobalXCodeGenerator::CreateXCodeTarget(
@@ -3440,7 +3438,8 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateXCodeTarget(
   fileRef->SetComment(gtgt->GetName());
   target->AddAttribute("productReference",
                        this->CreateObjectReference(fileRef));
-  if (char const* productType = this->GetTargetProductType(gtgt)) {
+  cm::string_view productType = this->GetTargetProductType(gtgt);
+  if (!productType.empty()) {
     target->AddAttribute("productType", this->CreateString(productType));
   }
   target->SetTarget(gtgt);
