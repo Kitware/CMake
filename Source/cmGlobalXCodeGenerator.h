@@ -192,7 +192,7 @@ private:
   cmXCodeObject* CreateObject(cmXCodeObject::PBXType ptype,
                               cm::string_view key = {});
   cmXCodeObject* CreateObject(cmXCodeObject::Type type);
-  cmXCodeObject* CreateString(std::string const& s);
+  cmXCodeObject* CreateString(cm::string_view s);
   cmXCodeObject* CreateObjectReference(cmXCodeObject*);
   cmXCodeObject* CreateFlatClone(cmXCodeObject*);
   cmXCodeObject* CreateXCodeTarget(cmGeneratorTarget* gtgt,

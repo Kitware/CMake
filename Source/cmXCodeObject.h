@@ -12,6 +12,7 @@
 #include <utility>
 #include <vector>
 
+#include <cm/string_view>
 #include <cmext/algorithm>
 
 class cmGeneratorTarget;
@@ -64,7 +65,7 @@ public:
 
   bool IsEmpty() const;
 
-  void SetString(std::string const& s);
+  void SetString(cm::string_view s);
   std::string const& GetString() const { return this->String; }
 
   void AddAttribute(std::string const& name, cmXCodeObject* value)

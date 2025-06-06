@@ -850,7 +850,7 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateObject(cmXCodeObject::Type type)
   return ptr;
 }
 
-cmXCodeObject* cmGlobalXCodeGenerator::CreateString(std::string const& s)
+cmXCodeObject* cmGlobalXCodeGenerator::CreateString(cm::string_view s)
 {
   cmXCodeObject* obj = this->CreateObject(cmXCodeObject::STRING);
   obj->SetString(s);
