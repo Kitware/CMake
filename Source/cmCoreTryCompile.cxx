@@ -91,6 +91,7 @@ std::string const kCMAKE_MSVC_DEBUG_INFORMATION_FORMAT_DEFAULT =
   "CMAKE_MSVC_DEBUG_INFORMATION_FORMAT_DEFAULT";
 std::string const kCMAKE_MSVC_RUNTIME_CHECKS_DEFAULT =
   "CMAKE_MSVC_RUNTIME_CHECKS_DEFAULT";
+std::string const kCMAKE_MSVC_CMP0197 = "CMAKE_MSVC_CMP0197";
 
 /* GHS Multi platform variables */
 std::set<std::string> const ghs_platform_vars{
@@ -682,6 +683,12 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
     if (this->Makefile->GetPolicyStatus(cmPolicies::CMP0128) !=
         cmPolicies::NEW) {
       fprintf(fout, "cmake_policy(SET CMP0128 OLD)\n");
+    }
+
+    /* Set MSVC link -machine: policy to match outer project.  */
+    if (cmValue cmp0197 = this->Makefile->GetDefinition(kCMAKE_MSVC_CMP0197)) {
+      fprintf(fout, "cmake_policy(SET CMP0197 %s)\n",
+              *cmp0197 == "NEW"_s ? "NEW" : "OLD");
     }
 
     std::string projectLangs;
