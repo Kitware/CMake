@@ -37,6 +37,8 @@ cmExportPackageInfoGenerator::cmExportPackageInfoGenerator(
   , PackageVersion(std::move(arguments.Version))
   , PackageVersionCompat(std::move(arguments.VersionCompat))
   , PackageVersionSchema(std::move(arguments.VersionSchema))
+  , PackageDescription(std::move(arguments.Description))
+  , PackageWebsite(std::move(arguments.Website))
   , DefaultTargets(std::move(arguments.DefaultTargets))
   , DefaultConfigurations(std::move(arguments.DefaultConfigs))
 {
@@ -63,8 +65,18 @@ void cmExportPackageInfoGenerator::WritePackageInfo(
 }
 
 namespace {
+bool SetProperty(Json::Value& object, std::string const& property,
+                 std::string const& value)
+{
+  if (!value.empty()) {
+    object[property] = value;
+    return true;
+  }
+  return false;
+}
+
 template <typename T>
-void buildArray(Json::Value& object, std::string const& property,
+void BuildArray(Json::Value& object, std::string const& property,
                 T const& values)
 {
   if (!values.empty()) {
@@ -105,20 +117,17 @@ Json::Value cmExportPackageInfoGenerator::GeneratePackageInfo() const
   package["name"] = this->GetPackageName();
   package["cps_version"] = std::string(kCPS_VERSION_STR);
 
-  if (!this->PackageVersion.empty()) {
-    package["version"] = this->PackageVersion;
-    if (!this->PackageVersionCompat.empty()) {
-      package["compat_version"] = this->PackageVersionCompat;
-    }
-    if (!this->PackageVersionSchema.empty()) {
-      package["version_schema"] = this->PackageVersionSchema;
-    }
+  if (SetProperty(package, "version", this->PackageVersion)) {
+    SetProperty(package, "compat_version", this->PackageVersionCompat);
+    SetProperty(package, "version_schema", this->PackageVersionSchema);
   }
 
-  buildArray(package, "default_components", this->DefaultTargets);
-  buildArray(package, "configurations", this->DefaultConfigurations);
+  BuildArray(package, "default_components", this->DefaultTargets);
+  BuildArray(package, "configurations", this->DefaultConfigurations);
 
-  // TODO: description, website, license
+  SetProperty(package, "description", this->PackageDescription);
+  SetProperty(package, "website", this->PackageWebsite);
+  // TODO: license
 
   return package;
 }
@@ -382,9 +391,9 @@ void cmExportPackageInfoGenerator::GenerateInterfaceLinkProperties(
   addLibraries(allowList["LINK_ONLY"], linkRequires);
   addLibraries(cmList{ interfaceLinkLibraries }, buildRequires);
 
-  buildArray(component, "requires", buildRequires);
-  buildArray(component, "link_requires", linkRequires);
-  buildArray(component, "link_libraries", linkLibraries);
+  BuildArray(component, "requires", buildRequires);
+  BuildArray(component, "link_requires", linkRequires);
+  BuildArray(component, "link_libraries", linkLibraries);
 }
 
 void cmExportPackageInfoGenerator::GenerateInterfaceCompileFeatures(
@@ -412,7 +421,7 @@ void cmExportPackageInfoGenerator::GenerateInterfaceCompileFeatures(
     }
   }
 
-  buildArray(component, "compile_features", features);
+  BuildArray(component, "compile_features", features);
 }
 
 void cmExportPackageInfoGenerator::GenerateInterfaceCompileDefines(
@@ -512,7 +521,7 @@ Json::Value cmExportPackageInfoGenerator::GenerateInterfaceConfigProperties(
           languages.emplace_back(std::move(ll));
         }
       }
-      buildArray(component, "link_languages", languages);
+      BuildArray(component, "link_languages", languages);
     }
   }
 

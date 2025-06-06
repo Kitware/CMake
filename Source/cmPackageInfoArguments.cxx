@@ -4,6 +4,8 @@
 
 #include <utility>
 
+#include <cm/string_view>
+
 #include "cmExecutionStatus.h"
 #include "cmGeneratorExpression.h"
 #include "cmMakefile.h"
@@ -118,17 +120,28 @@ bool cmPackageInfoArguments::SetMetadataFromProject(cmExecutionStatus& status)
   }
 
   cmMakefile& mf = status.GetMakefile();
-  if (this->Version.empty()) {
-    cmValue const& version =
-      mf.GetDefinition(cmStrCat(this->ProjectName, "_VERSION"_s));
-    if (version) {
-      this->Version = version;
-      cmValue const& compatVersion =
-        mf.GetDefinition(cmStrCat(this->ProjectName, "_COMPAT_VERSION"_s));
-      if (compatVersion) {
-        this->VersionCompat = compatVersion;
-      }
+  auto mapProjectValue = [&](std::string& arg, cm::string_view suffix) {
+    cmValue const& projectValue =
+      mf.GetDefinition(cmStrCat(this->ProjectName, '_', suffix));
+    if (projectValue) {
+      arg = *projectValue;
+      return true;
     }
+    return false;
+  };
+
+  if (this->Version.empty()) {
+    if (mapProjectValue(this->Version, "VERSION"_s)) {
+      mapProjectValue(this->VersionCompat, "COMPAT_VERSION"_s);
+    }
+  }
+
+  if (this->Description.empty()) {
+    mapProjectValue(this->Description, "DESCRIPTION"_s);
+  }
+
+  if (this->Website.empty()) {
+    mapProjectValue(this->Website, "HOMEPAGE_URL"_s);
   }
 
   return true;

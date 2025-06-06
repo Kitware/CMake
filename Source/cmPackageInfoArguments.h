@@ -56,6 +56,8 @@ public:
   ArgumentParser::NonEmpty<std::string> Version;
   ArgumentParser::NonEmpty<std::string> VersionCompat;
   ArgumentParser::NonEmpty<std::string> VersionSchema;
+  ArgumentParser::NonEmpty<std::string> Description;
+  ArgumentParser::NonEmpty<std::string> Website;
   ArgumentParser::NonEmpty<std::vector<std::string>> DefaultTargets;
   ArgumentParser::NonEmpty<std::vector<std::string>> DefaultConfigs;
   bool LowerCase = false;
@@ -82,6 +84,8 @@ private:
          &cmPackageInfoArguments::DefaultTargets);
     Bind(self, parser, "DEFAULT_CONFIGURATIONS"_s,
          &cmPackageInfoArguments::DefaultConfigs);
+    Bind(self, parser, "DESCRIPTION"_s, &cmPackageInfoArguments::Description);
+    Bind(self, parser, "HOMEPAGE_URL"_s, &cmPackageInfoArguments::Website);
 
     Bind(self, parser, "PROJECT"_s, &cmPackageInfoArguments::ProjectName);
     Bind(self, parser, "NO_PROJECT_METADATA"_s,

@@ -1001,6 +1001,8 @@ Signatures
              [VERSION_SCHEMA <string>]]
             [DEFAULT_TARGETS <target>...]
             [DEFAULT_CONFIGURATIONS <config>...]
+            [DESCRIPTION <project-description-string>]
+            [HOMEPAGE_URL <url-string>]
             [PERMISSIONS <permission>...]
             [CONFIGURATIONS <config>...]
             [COMPONENT <component>]
@@ -1056,6 +1058,17 @@ Signatures
     mapping of the consumer's configuration to the package's available
     configurations exists.  If not specified, CMake will fall back to the
     package's available configurations in an unspecified order.
+
+  ``DESCRIPTION <project-description-string>``
+    .. versionadded:: 4.1
+
+    An informational description of the project.  It is recommended that this
+    description is a relatively short string, usually no more than a few words.
+
+  ``HOMEPAGE_URL <url-string>``
+    .. versionadded:: 4.1
+
+    An informational canonical home URL for the project.
 
   By default, if the specified ``<package-name>`` matches the current CMake
   :variable:`PROJECT_NAME`, package metadata will be inherited from the

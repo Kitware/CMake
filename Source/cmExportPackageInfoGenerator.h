@@ -108,6 +108,8 @@ private:
   std::string const PackageVersion;
   std::string const PackageVersionCompat;
   std::string const PackageVersionSchema;
+  std::string const PackageDescription;
+  std::string const PackageWebsite;
   std::vector<std::string> DefaultTargets;
   std::vector<std::string> DefaultConfigurations;
 

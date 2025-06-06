@@ -140,7 +140,9 @@ Exporting Targets to the |CPS|
           [COMPAT_VERSION <version>]
           [VERSION_SCHEMA <string>]]
          [DEFAULT_TARGETS <target>...]
-         [DEFAULT_CONFIGURATIONS <config>...])
+         [DEFAULT_CONFIGURATIONS <config>...]
+         [DESCRIPTION <project-description-string>]
+         [HOMEPAGE_URL <url-string>])
 
 .. versionadded:: 4.1
 .. note::
