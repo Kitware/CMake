@@ -1622,9 +1622,11 @@ model is defined as follows:
   A JSON object specifying the version components.  Its members are:
 
   ``major``
-    A non-negative integer specifying the major version component.
+    A positive integer specifying the major version component
+    of the JSON object model.
   ``minor``
-    A non-negative integer specifying the minor version component.
+    A non-negative integer specifying the minor version component
+    of the JSON object model.
 
 ``backtraceGraph``
     JSON object representing backtrace information with the
@@ -1682,6 +1684,10 @@ model is defined as follows:
     ``value``
       The property value, which can be a string, a number, a boolean, or an
       array of strings.
+
+.. versionadded:: 4.1
+  The JSON output format is described in machine-readable form by
+  :download:`this JSON schema </manual/ctest/show-only-schema.json>`.
 
 .. _`ctest-resource-allocation`:
 

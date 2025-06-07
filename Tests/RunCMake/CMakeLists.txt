@@ -1084,7 +1084,10 @@ if(CMake_TEST_RunCMake_ExternalProject_RUN_SERIAL)
 endif()
 add_RunCMake_test(FetchContent)
 add_RunCMake_test(FetchContent_find_package)
-set(CTestCommandLine_ARGS -DPython_EXECUTABLE=${Python_EXECUTABLE})
+set(CTestCommandLine_ARGS
+  -DPython_EXECUTABLE=${Python_EXECUTABLE}
+  -DCMake_TEST_JSON_SCHEMA=${CMake_TEST_JSON_SCHEMA}
+)
 if(NOT CMake_TEST_EXTERNAL_CMAKE)
   list(APPEND CTestCommandLine_ARGS -DTEST_AFFINITY=$<TARGET_FILE:testAffinity>)
 endif()
