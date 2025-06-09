@@ -490,8 +490,9 @@ std::string cmNinjaTargetGenerator::GetDyndepFilePath(
 std::string cmNinjaTargetGenerator::GetTargetDependInfoPath(
   std::string const& lang, std::string const& config) const
 {
-  return cmStrCat(this->GetObjectFileDir(config), '/', lang,
-                  "DependInfo.json");
+  return cmStrCat(this->GeneratorTarget->GetSupportDirectory(),
+                  this->GetGlobalGenerator()->ConfigDirectory(config), '/',
+                  lang, "DependInfo.json");
 }
 
 std::string cmNinjaTargetGenerator::GetTargetOutputDir(
