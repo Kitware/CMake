@@ -238,18 +238,17 @@ cmLocalGenerator::CreateRulePlaceholderExpander(
     };
 
     switch (targetType) {
-      // FALLTHROUGH is used because, depending of the compiler and/or
-      // platform, the wrong variable is used. For example
-      // CMAKE_SHARED_LIBRARY_CREATE_<LANG>_FLAGS is used to generate a module,
-      // and the variable CMAKE_SHARED_MODULE_CREATE_<LANG>_FLAGS is ignored.
       case cmStateEnums::MODULE_LIBRARY:
         updateMapping(
           cmStrCat("CMAKE_SHARED_MODULE_CREATE_", language, "_FLAGS"));
+        // For some toolchains we set CMAKE_${lang}_CREATE_SHARED_MODULE
+        // to be the same as CMAKE_${lang}_CREATE_SHARED_LIBRARY.  Fall
+        // through to populate the latter's placeholder.
         CM_FALLTHROUGH;
       case cmStateEnums::SHARED_LIBRARY:
         updateMapping(
           cmStrCat("CMAKE_SHARED_LIBRARY_CREATE_", language, "_FLAGS"));
-        CM_FALLTHROUGH;
+        break;
       case cmStateEnums::EXECUTABLE:
         updateMapping(cmStrCat("CMAKE_", language, "_LINK_FLAGS"));
         break;
