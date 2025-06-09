@@ -36,7 +36,7 @@ macro(__compiler_ti lang)
   set(CMAKE_${lang}_ARCHIVE_APPEND "<CMAKE_AR> qa <TARGET> <OBJECTS>")
   set(CMAKE_${lang}_ARCHIVE_FINISH "")
 
-  set(CMAKE_${lang}_LINK_EXECUTABLE "<CMAKE_${lang}_COMPILER> <FLAGS> --run_linker --output_file=<TARGET> --map_file=<TARGET_NAME>.map <CMAKE_${lang}_LINK_FLAGS> <LINK_FLAGS> <OBJECTS> <LINK_LIBRARIES>")
+  set(CMAKE_${lang}_LINK_EXECUTABLE "<CMAKE_${lang}_COMPILER> <FLAGS> --run_linker --output_file=<TARGET> --map_file=<TARGET_NAME>.map <LINK_FLAGS> <OBJECTS> <LINK_LIBRARIES>")
 endmacro()
 
 set(CMAKE_LIBRARY_PATH_FLAG "--search_path=")
