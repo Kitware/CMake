@@ -39,21 +39,13 @@ static std::string cm_archive_error_string(struct archive* a)
 static void cm_archive_entry_copy_pathname(struct archive_entry* e,
                                            std::string const& dest)
 {
-#if cmsys_STL_HAS_WSTRING
   archive_entry_copy_pathname_w(e, cmsys::Encoding::ToWide(dest).c_str());
-#else
-  archive_entry_copy_pathname(e, dest.c_str());
-#endif
 }
 
 static void cm_archive_entry_copy_sourcepath(struct archive_entry* e,
                                              std::string const& file)
 {
-#if cmsys_STL_HAS_WSTRING
   archive_entry_copy_sourcepath_w(e, cmsys::Encoding::ToWide(file).c_str());
-#else
-  archive_entry_copy_sourcepath(e, file.c_str());
-#endif
 }
 
 class cmArchiveWrite::Entry
