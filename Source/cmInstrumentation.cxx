@@ -27,7 +27,10 @@
 #include "cmUVProcessChain.h"
 #include "cmValue.h"
 
-cmInstrumentation::cmInstrumentation(std::string const& binary_dir)
+using LoadQueriesAfter = cmInstrumentation::LoadQueriesAfter;
+
+cmInstrumentation::cmInstrumentation(std::string const& binary_dir,
+                                     LoadQueriesAfter loadQueries)
 {
   std::string const uuid =
     cmExperimental::DataForFeature(cmExperimental::Feature::Instrumentation)
@@ -40,7 +43,9 @@ cmInstrumentation::cmInstrumentation(std::string const& binary_dir)
     this->userTimingDirv1 =
       cmStrCat(configDir.value(), "/instrumentation-", uuid, "/v1");
   }
-  this->LoadQueries();
+  if (loadQueries == LoadQueriesAfter::Yes) {
+    this->LoadQueries();
+  }
 }
 
 void cmInstrumentation::LoadQueries()
@@ -439,12 +444,12 @@ int cmInstrumentation::InstrumentCommand(
   std::function<int()> const& callback,
   cm::optional<std::map<std::string, std::string>> options,
   cm::optional<std::map<std::string, std::string>> arrayOptions,
-  bool reloadQueriesAfterCommand)
+  LoadQueriesAfter reloadQueriesAfterCommand)
 {
 
   // Always begin gathering data for configure in case cmake_instrumentation
   // command creates a query
-  if (!this->hasQuery && !reloadQueriesAfterCommand) {
+  if (!this->hasQuery && reloadQueriesAfterCommand == LoadQueriesAfter::No) {
     return callback();
   }
 
@@ -466,7 +471,7 @@ int cmInstrumentation::InstrumentCommand(
   if (this->HasQuery(
         cmInstrumentationQuery::Query::DynamicSystemInformation)) {
     this->InsertDynamicSystemInformation(root, "before");
-  } else if (reloadQueriesAfterCommand) {
+  } else if (reloadQueriesAfterCommand == LoadQueriesAfter::Yes) {
     this->GetDynamicSystemInformation(preConfigureMemory, preConfigureLoad);
   }
 
@@ -475,7 +480,7 @@ int cmInstrumentation::InstrumentCommand(
   root["result"] = ret;
 
   // Exit early if configure didn't generate a query
-  if (reloadQueriesAfterCommand) {
+  if (reloadQueriesAfterCommand == LoadQueriesAfter::Yes) {
     this->LoadQueries();
     if (!this->HasQuery()) {
       return ret;
@@ -634,7 +639,7 @@ int cmInstrumentation::CollectTimingAfterBuild(int ppid)
   };
   int ret = this->InstrumentCommand(
     "build", {}, [waitForBuild]() { return waitForBuild(); }, cm::nullopt,
-    cm::nullopt, false);
+    cm::nullopt, LoadQueriesAfter::No);
   this->CollectTimingData(cmInstrumentationQuery::Hook::PostBuild);
   return ret;
 }

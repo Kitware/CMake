@@ -25,14 +25,21 @@
 class cmInstrumentation
 {
 public:
-  cmInstrumentation(std::string const& binary_dir);
+  enum class LoadQueriesAfter
+  {
+    Yes,
+    No
+  };
+  cmInstrumentation(std::string const& binary_dir,
+                    LoadQueriesAfter loadQueries = LoadQueriesAfter::Yes);
+  void LoadQueries();
   int InstrumentCommand(
     std::string command_type, std::vector<std::string> const& command,
     std::function<int()> const& callback,
     cm::optional<std::map<std::string, std::string>> options = cm::nullopt,
     cm::optional<std::map<std::string, std::string>> arrayOptions =
       cm::nullopt,
-    bool reloadQueriesAfterCommand = false);
+    LoadQueriesAfter reloadQueriesAfterCommand = LoadQueriesAfter::No);
   std::string InstrumentTest(std::string const& name,
                              std::string const& command,
                              std::vector<std::string> const& args,
@@ -41,7 +48,6 @@ public:
                              std::chrono::system_clock::time_point systemStart,
                              std::string config);
   void GetPreTestStats();
-  void LoadQueries();
   bool HasQuery() const;
   bool HasQuery(cmInstrumentationQuery::Query) const;
   bool HasHook(cmInstrumentationQuery::Hook) const;
