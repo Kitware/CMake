@@ -70,11 +70,11 @@ events:(
   -
     kind: "try_compile-v1"
     backtrace:
-      - ".*/Modules/Internal/FeatureTesting.cmake:[0-9]+ \(try_compile\)"
-      - ".*/Modules/Internal/FeatureTesting.cmake:[0-9]+ \(_record_compiler_features\)"
-      - ".*/Modules/Compiler/CMakeCommonCompilerMacros.cmake:[0-9]+ \(_record_compiler_features_c\)"
-      - ".*/Modules/CMakeDetermineCompilerSupport.cmake:[0-9]+ \(cmake_record_c_compile_features\)"
-      - ".*/Modules/CMakeTestCCompiler.cmake:[0-9]+ \(CMAKE_DETERMINE_COMPILER_SUPPORT\)"
+      - "[^"]*/Modules/Internal/FeatureTesting.cmake:[0-9]+ \(try_compile\)"
+      - "[^"]*/Modules/Internal/FeatureTesting.cmake:[0-9]+ \(_record_compiler_features\)"
+      - "[^"]*/Modules/Compiler/CMakeCommonCompilerMacros.cmake:[0-9]+ \(_record_compiler_features_c\)"
+      - "[^"]*/Modules/CMakeDetermineCompilerSupport.cmake:[0-9]+ \(cmake_record_c_compile_features\)"
+      - "[^"]*/Modules/CMakeTestCCompiler.cmake:[0-9]+ \(CMAKE_DETERMINE_COMPILER_SUPPORT\)"
       - "ConfigureLog.cmake:[0-9]+ \(enable_language\)"
       - "CMakeLists.txt:[0-9]+ \(include\)"
     checks:
@@ -89,7 +89,7 @@ events:(
       variable: "CMAKE_C_FEATURE_TEST"
       cached: true
       stdout: \|.*
-      exitCode: 0)?
+      exitCode: 0)*
   -
     kind: "try_compile-v1"
     backtrace:
