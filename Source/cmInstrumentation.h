@@ -11,9 +11,13 @@
 #include <string>
 #include <vector>
 
+#include <cm/memory>
 #include <cm/optional>
 
 #include <cm3p/json/value.h>
+#ifndef CMAKE_BOOTSTRAP
+#  include <cmsys/SystemInformation.hxx>
+#endif
 #include <stdint.h>
 
 #include "cmInstrumentationQuery.h"
@@ -60,13 +64,13 @@ private:
   void WriteInstrumentationJson(Json::Value& index,
                                 std::string const& directory,
                                 std::string const& file_name);
-  static void InsertStaticSystemInformation(Json::Value& index);
-  static void GetDynamicSystemInformation(double& memory, double& load);
-  static void InsertDynamicSystemInformation(Json::Value& index,
-                                             std::string const& instant);
-  static void InsertTimingData(
-    Json::Value& root, std::chrono::steady_clock::time_point steadyStart,
-    std::chrono::system_clock::time_point systemStart);
+  void InsertStaticSystemInformation(Json::Value& index);
+  void GetDynamicSystemInformation(double& memory, double& load);
+  void InsertDynamicSystemInformation(Json::Value& index,
+                                      std::string const& instant);
+  void InsertTimingData(Json::Value& root,
+                        std::chrono::steady_clock::time_point steadyStart,
+                        std::chrono::system_clock::time_point systemStart);
   bool HasQueryFile(std::string const& file);
   static std::string GetCommandStr(std::vector<std::string> const& args);
   static std::string ComputeSuffixHash(std::string const& command_str);
@@ -84,4 +88,10 @@ private:
   std::map<std::string, std::string> cdashSnippetsMap;
   Json::Value preTestStats;
   bool hasQuery = false;
+  bool ranSystemChecks = false;
+  bool ranOSCheck = false;
+#ifndef CMAKE_BOOTSTRAP
+  std::unique_ptr<cmsys::SystemInformation> systemInformation;
+  cmsys::SystemInformation& GetSystemInformation();
+#endif
 };
