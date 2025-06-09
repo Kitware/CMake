@@ -73,11 +73,8 @@ namespace {
 // languages.
 auto ruleReplaceVars = {
   "CMAKE_${LANG}_COMPILER",
-  "CMAKE_SHARED_LIBRARY_CREATE_${LANG}_FLAGS",
-  "CMAKE_SHARED_MODULE_CREATE_${LANG}_FLAGS",
   "CMAKE_SHARED_MODULE_${LANG}_FLAGS",
   "CMAKE_SHARED_LIBRARY_${LANG}_FLAGS",
-  "CMAKE_${LANG}_LINK_FLAGS",
   "CMAKE_SHARED_LIBRARY_SONAME_${LANG}_FLAG",
   "CMAKE_${LANG}_ARCHIVE",
   "CMAKE_AR",
@@ -91,6 +88,14 @@ auto ruleReplaceVars = {
   "CMAKE_HIP_HOST_COMPILER",
   "CMAKE_HIP_HOST_LINK_LAUNCHER",
   "CMAKE_CL_SHOWINCLUDES_PREFIX",
+};
+
+// Variables whose placeholders now map to an empty string.
+// Our platform modules no longer use these, but third-party code might.
+auto ruleReplaceEmptyVars = {
+  "CMAKE_SHARED_LIBRARY_CREATE_${LANG}_FLAGS",
+  "CMAKE_SHARED_MODULE_CREATE_${LANG}_FLAGS",
+  "CMAKE_${LANG}_LINK_FLAGS",
 };
 }
 
@@ -205,6 +210,14 @@ cmLocalGenerator::cmLocalGenerator(cmGlobalGenerator* gg, cmMakefile* makefile)
       this->VariableMappings[replaceVar] =
         this->Makefile->GetSafeDefinition(replaceVar);
     }
+
+    for (std::string replaceVar : ruleReplaceEmptyVars) {
+      if (replaceVar.find("${LANG}") != std::string::npos) {
+        cmSystemTools::ReplaceString(replaceVar, "${LANG}", lang);
+      }
+
+      this->VariableMappings[replaceVar] = std::string();
+    }
   }
 }
 
@@ -220,48 +233,8 @@ cmLocalGenerator::CreateRulePlaceholderExpander(
   cmBuildStep buildStep, cmGeneratorTarget const* target,
   std::string const& language)
 {
-  auto targetType = target->GetType();
-  if (buildStep == cmBuildStep::Link &&
-      (targetType == cmStateEnums::EXECUTABLE ||
-       targetType == cmStateEnums::SHARED_LIBRARY ||
-       targetType == cmStateEnums::MODULE_LIBRARY)) {
-    auto mappings = this->VariableMappings;
-    auto updateMapping = [buildStep, target, &language, &mappings,
-                          this](std::string const& variable) {
-      auto search = this->VariableMappings.find(variable);
-      if (search != this->VariableMappings.end()) {
-        std::string finalFlags;
-        this->AppendFlags(finalFlags, search->second, variable, target,
-                          buildStep, language);
-        mappings[variable] = std::move(finalFlags);
-      }
-    };
-
-    switch (targetType) {
-      case cmStateEnums::MODULE_LIBRARY:
-        updateMapping(
-          cmStrCat("CMAKE_SHARED_MODULE_CREATE_", language, "_FLAGS"));
-        // For some toolchains we set CMAKE_${lang}_CREATE_SHARED_MODULE
-        // to be the same as CMAKE_${lang}_CREATE_SHARED_LIBRARY.  Fall
-        // through to populate the latter's placeholder.
-        CM_FALLTHROUGH;
-      case cmStateEnums::SHARED_LIBRARY:
-        updateMapping(
-          cmStrCat("CMAKE_SHARED_LIBRARY_CREATE_", language, "_FLAGS"));
-        break;
-      case cmStateEnums::EXECUTABLE:
-        updateMapping(cmStrCat("CMAKE_", language, "_LINK_FLAGS"));
-        break;
-      default:
-        // no action needed
-        ;
-    }
-
-    return cm::make_unique<cmRulePlaceholderExpander>(
-      buildStep, this->Compilers, std::move(mappings), this->CompilerSysroot,
-      this->LinkerSysroot);
-  }
-
+  static_cast<void>(target);
+  static_cast<void>(language);
   return this->CreateRulePlaceholderExpander(buildStep);
 }
 
@@ -1533,6 +1506,14 @@ void cmLocalGenerator::GetTargetFlags(
 
   std::string const linkLanguage =
     linkLineComputer->GetLinkerLanguage(target, config);
+
+  {
+    std::string createFlags;
+    this->AppendTargetCreationLinkFlags(createFlags, target, linkLanguage);
+    if (!createFlags.empty()) {
+      linkFlags.emplace_back(std::move(createFlags));
+    }
+  }
 
   switch (target->GetType()) {
     case cmStateEnums::STATIC_LIBRARY:
@@ -3389,6 +3370,41 @@ void cmLocalGenerator::AddUnityBuild(cmGeneratorTarget* target)
                               this->GetSourceDirectory(), false);
       }
     }
+  }
+}
+
+void cmLocalGenerator::AppendTargetCreationLinkFlags(
+  std::string& flags, cmGeneratorTarget const* target,
+  std::string const& linkLanguage)
+{
+  std::string createFlagsVar;
+  cmValue createFlagsVal;
+  switch (target->GetType()) {
+    case cmStateEnums::STATIC_LIBRARY:
+      break;
+    case cmStateEnums::MODULE_LIBRARY:
+      createFlagsVar =
+        cmStrCat("CMAKE_SHARED_MODULE_CREATE_", linkLanguage, "_FLAGS");
+      createFlagsVal = this->Makefile->GetDefinition(createFlagsVar);
+      // On some platforms we use shared library creation flags for modules.
+      CM_FALLTHROUGH;
+    case cmStateEnums::SHARED_LIBRARY:
+      if (!createFlagsVal) {
+        createFlagsVar =
+          cmStrCat("CMAKE_SHARED_LIBRARY_CREATE_", linkLanguage, "_FLAGS");
+        createFlagsVal = this->Makefile->GetDefinition(createFlagsVar);
+      }
+      break;
+    case cmStateEnums::EXECUTABLE:
+      createFlagsVar = cmStrCat("CMAKE_", linkLanguage, "_LINK_FLAGS");
+      createFlagsVal = this->Makefile->GetDefinition(createFlagsVar);
+      break;
+    default:
+      break;
+  }
+  if (createFlagsVal) {
+    this->AppendFlags(flags, *createFlagsVal, createFlagsVar, target,
+                      cmBuildStep::Link, linkLanguage);
   }
 }
 

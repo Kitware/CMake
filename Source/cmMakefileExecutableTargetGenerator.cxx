@@ -371,6 +371,8 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   std::string linkFlags;
 
   // Add flags to create an executable.
+  this->LocalGenerator->AppendTargetCreationLinkFlags(
+    linkFlags, this->GeneratorTarget, linkLanguage);
   this->LocalGenerator->AddConfigVariableFlags(
     linkFlags, "CMAKE_EXE_LINKER_FLAGS", this->GeneratorTarget,
     cmBuildStep::Link, linkLanguage, this->GetConfigName());
