@@ -18,7 +18,7 @@ macro(__compiler_adsp lang)
     "<CMAKE_${lang}_COMPILER> ${_CMAKE_${lang}_ADSP_FLAGS} <DEFINES> <INCLUDES> <FLAGS> -o <OBJECT> -c <SOURCE>")
 
   set(CMAKE_${lang}_CREATE_STATIC_LIBRARY
-    "<CMAKE_${lang}_COMPILER> ${_CMAKE_${lang}_ADSP_FLAGS} -build-lib -o <TARGET> <CMAKE_${lang}_LINK_FLAGS> <OBJECTS>")
+    "<CMAKE_${lang}_COMPILER> ${_CMAKE_${lang}_ADSP_FLAGS} -build-lib -o <TARGET> <OBJECTS>")
 
   set(CMAKE_${lang}_LINK_EXECUTABLE
     "<CMAKE_${lang}_COMPILER> ${_CMAKE_${lang}_ADSP_FLAGS} <FLAGS> <CMAKE_${lang}_LINK_FLAGS> <LINK_FLAGS> <OBJECTS> -o <TARGET> <LINK_LIBRARIES>")
