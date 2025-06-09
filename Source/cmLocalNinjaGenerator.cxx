@@ -57,16 +57,6 @@ cmLocalNinjaGenerator::CreateRulePlaceholderExpander(
   ret->SetTargetImpLib("$TARGET_IMPLIB");
   return std::unique_ptr<cmRulePlaceholderExpander>(std::move(ret));
 }
-std::unique_ptr<cmRulePlaceholderExpander>
-cmLocalNinjaGenerator::CreateRulePlaceholderExpander(
-  cmBuildStep buildStep, cmGeneratorTarget const* target,
-  std::string const& language)
-{
-  auto ret = this->cmLocalGenerator::CreateRulePlaceholderExpander(
-    buildStep, target, language);
-  ret->SetTargetImpLib("$TARGET_IMPLIB");
-  return std::unique_ptr<cmRulePlaceholderExpander>(std::move(ret));
-}
 
 cmLocalNinjaGenerator::~cmLocalNinjaGenerator() = default;
 

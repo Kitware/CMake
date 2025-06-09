@@ -228,15 +228,6 @@ cmLocalGenerator::CreateRulePlaceholderExpander(cmBuildStep buildStep) const
     buildStep, this->Compilers, this->VariableMappings, this->CompilerSysroot,
     this->LinkerSysroot);
 }
-std::unique_ptr<cmRulePlaceholderExpander>
-cmLocalGenerator::CreateRulePlaceholderExpander(
-  cmBuildStep buildStep, cmGeneratorTarget const* target,
-  std::string const& language)
-{
-  static_cast<void>(target);
-  static_cast<void>(language);
-  return this->CreateRulePlaceholderExpander(buildStep);
-}
 
 cmLocalGenerator::~cmLocalGenerator() = default;
 

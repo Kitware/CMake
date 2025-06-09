@@ -115,10 +115,6 @@ public:
   virtual std::unique_ptr<cmRulePlaceholderExpander>
   CreateRulePlaceholderExpander(
     cmBuildStep buildStep = cmBuildStep::Compile) const;
-  virtual std::unique_ptr<cmRulePlaceholderExpander>
-  CreateRulePlaceholderExpander(cmBuildStep buildStep,
-                                cmGeneratorTarget const* target,
-                                std::string const& language);
 
   std::string GetExeExportFlags(std::string const& linkLanguage,
                                 cmGeneratorTarget& tgt) const;
