@@ -231,7 +231,7 @@ bool Curl_check_noproxy(const char *name, const char *no_proxy)
           slash = strchr(check, '/');
           /* if the slash is part of this token, use it */
           if(slash) {
-            /* if the bits variable gets a crazy value here, that is fine as
+            /* if the bits variable gets an unexpected value here, that is fine as
                the value will then be rejected in the cidr function */
             bits = (unsigned int)atoi(slash + 1);
             *slash = 0; /* null terminate there */
