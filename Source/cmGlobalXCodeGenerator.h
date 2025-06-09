@@ -192,7 +192,7 @@ private:
   cmXCodeObject* CreateObject(cmXCodeObject::PBXType ptype,
                               cm::string_view key = {});
   cmXCodeObject* CreateObject(cmXCodeObject::Type type);
-  cmXCodeObject* CreateString(std::string const& s);
+  cmXCodeObject* CreateString(cm::string_view s);
   cmXCodeObject* CreateObjectReference(cmXCodeObject*);
   cmXCodeObject* CreateFlatClone(cmXCodeObject*);
   cmXCodeObject* CreateXCodeTarget(cmGeneratorTarget* gtgt,
@@ -201,7 +201,7 @@ private:
   void ForceLinkerLanguage(cmGeneratorTarget* gtgt);
   char const* GetTargetLinkFlagsVar(cmGeneratorTarget const* target) const;
   char const* GetTargetFileType(cmGeneratorTarget* target);
-  char const* GetTargetProductType(cmGeneratorTarget* target);
+  cm::string_view GetTargetProductType(cmGeneratorTarget* target);
   std::string AddConfigurations(cmXCodeObject* target,
                                 cmGeneratorTarget* gtgt);
   void AppendOrAddBuildSetting(cmXCodeObject* settings, char const* attr,
@@ -307,8 +307,7 @@ private:
   std::string LookupFlags(std::string const& varNamePrefix,
                           std::string const& varNameLang,
                           std::string const& varNameSuffix,
-                          cmGeneratorTarget const* gt,
-                          std::string const& default_flags);
+                          cmGeneratorTarget const* gt);
 
   class Factory;
   class BuildObjectListOrString;

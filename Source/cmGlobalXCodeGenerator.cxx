@@ -850,7 +850,7 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateObject(cmXCodeObject::Type type)
   return ptr;
 }
 
-cmXCodeObject* cmGlobalXCodeGenerator::CreateString(std::string const& s)
+cmXCodeObject* cmGlobalXCodeGenerator::CreateString(cm::string_view s)
 {
   cmXCodeObject* obj = this->CreateObject(cmXCodeObject::STRING);
   obj->SetString(s);
@@ -1700,12 +1700,10 @@ void cmGlobalXCodeGenerator::ForceLinkerLanguage(cmGeneratorTarget* gtgt)
   }
 
   // Allow empty source file list for iOS Sticker packs
-  if (char const* productType = GetTargetProductType(gtgt)) {
-    if (strcmp(productType,
-               "com.apple.product-type.app-extension.messages-sticker-pack") ==
-        0) {
-      return;
-    }
+  cm::string_view productType = this->GetTargetProductType(gtgt);
+  if (productType ==
+      "com.apple.product-type.app-extension.messages-sticker-pack"_s) {
+    return;
   }
 
   // Add an empty source file to the target that compiles with the
@@ -2723,16 +2721,20 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
     case cmStateEnums::MODULE_LIBRARY: {
       buildSettings->AddAttribute("LIBRARY_STYLE",
                                   this->CreateString("BUNDLE"));
+      // Add the flags to create a module library (bundle).
+      std::string createFlags = this->LookupFlags(
+        "CMAKE_SHARED_MODULE_CREATE_", llang, "_FLAGS", gtgt);
+      if (this->GetTargetProductType(gtgt) !=
+          "com.apple.product-type.app-extension"_s) {
+        // Xcode passes -bundle automatically.
+        cmSystemTools::ReplaceString(createFlags, "-bundle", "");
+      }
+      createFlags = cmTrimWhitespace(createFlags);
+      if (!createFlags.empty()) {
+        extraLinkOptions += ' ';
+        extraLinkOptions += createFlags;
+      }
       if (gtgt->IsCFBundleOnApple()) {
-        // It turns out that a BUNDLE is basically the same
-        // in many ways as an application bundle, as far as
-        // link flags go
-        std::string createFlags = this->LookupFlags(
-          "CMAKE_SHARED_MODULE_CREATE_", llang, "_FLAGS", gtgt, "-bundle");
-        if (!createFlags.empty()) {
-          extraLinkOptions += ' ';
-          extraLinkOptions += createFlags;
-        }
         cmValue ext = gtgt->GetProperty("BUNDLE_EXTENSION");
         if (ext) {
           buildSettings->AddAttribute("WRAPPER_EXTENSION",
@@ -2752,13 +2754,6 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
                                     this->CreateString("mh_bundle"));
         buildSettings->AddAttribute("GCC_DYNAMIC_NO_PIC",
                                     this->CreateString("NO"));
-        // Add the flags to create an executable.
-        std::string createFlags =
-          this->LookupFlags("CMAKE_", llang, "_LINK_FLAGS", gtgt, "");
-        if (!createFlags.empty()) {
-          extraLinkOptions += ' ';
-          extraLinkOptions += createFlags;
-        }
       }
       break;
     }
@@ -2783,9 +2778,11 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
                                     this->CreateString(plist));
       } else {
         // Add the flags to create a shared library.
-        std::string createFlags =
-          this->LookupFlags("CMAKE_SHARED_LIBRARY_CREATE_", llang, "_FLAGS",
-                            gtgt, "-dynamiclib");
+        std::string createFlags = this->LookupFlags(
+          "CMAKE_SHARED_LIBRARY_CREATE_", llang, "_FLAGS", gtgt);
+        // Xcode passes -dynamiclib automatically.
+        cmSystemTools::ReplaceString(createFlags, "-dynamiclib", "");
+        createFlags = cmTrimWhitespace(createFlags);
         if (!createFlags.empty()) {
           extraLinkOptions += ' ';
           extraLinkOptions += createFlags;
@@ -2805,7 +2802,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
     case cmStateEnums::EXECUTABLE: {
       // Add the flags to create an executable.
       std::string createFlags =
-        this->LookupFlags("CMAKE_", llang, "_LINK_FLAGS", gtgt, "");
+        this->LookupFlags("CMAKE_", llang, "_LINK_FLAGS", gtgt);
       if (!createFlags.empty()) {
         extraLinkOptions += ' ';
         extraLinkOptions += createFlags;
@@ -3364,40 +3361,40 @@ char const* cmGlobalXCodeGenerator::GetTargetFileType(
   return nullptr;
 }
 
-char const* cmGlobalXCodeGenerator::GetTargetProductType(
+cm::string_view cmGlobalXCodeGenerator::GetTargetProductType(
   cmGeneratorTarget* target)
 {
   if (cmValue e = target->GetProperty("XCODE_PRODUCT_TYPE")) {
-    return e->c_str();
+    return cm::string_view(*e);
   }
 
   switch (target->GetType()) {
     case cmStateEnums::OBJECT_LIBRARY:
-      return "com.apple.product-type.library.static";
+      return "com.apple.product-type.library.static"_s;
     case cmStateEnums::STATIC_LIBRARY:
-      return (target->GetPropertyAsBool("FRAMEWORK")
-                ? "com.apple.product-type.framework"
-                : "com.apple.product-type.library.static");
+      return target->GetPropertyAsBool("FRAMEWORK")
+        ? "com.apple.product-type.framework"_s
+        : "com.apple.product-type.library.static"_s;
     case cmStateEnums::MODULE_LIBRARY:
       if (target->IsXCTestOnApple()) {
-        return "com.apple.product-type.bundle.unit-test";
+        return "com.apple.product-type.bundle.unit-test"_s;
       } else if (target->IsCFBundleOnApple()) {
-        return "com.apple.product-type.bundle";
+        return "com.apple.product-type.bundle"_s;
       } else {
-        return "com.apple.product-type.tool";
+        return "com.apple.product-type.tool"_s;
       }
     case cmStateEnums::SHARED_LIBRARY:
-      return (target->GetPropertyAsBool("FRAMEWORK")
-                ? "com.apple.product-type.framework"
-                : "com.apple.product-type.library.dynamic");
+      return target->GetPropertyAsBool("FRAMEWORK")
+        ? "com.apple.product-type.framework"_s
+        : "com.apple.product-type.library.dynamic"_s;
     case cmStateEnums::EXECUTABLE:
-      return (target->GetPropertyAsBool("MACOSX_BUNDLE")
-                ? "com.apple.product-type.application"
-                : "com.apple.product-type.tool");
+      return target->GetPropertyAsBool("MACOSX_BUNDLE")
+        ? "com.apple.product-type.application"_s
+        : "com.apple.product-type.tool"_s;
     default:
       break;
   }
-  return nullptr;
+  return ""_s;
 }
 
 cmXCodeObject* cmGlobalXCodeGenerator::CreateXCodeTarget(
@@ -3440,7 +3437,8 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateXCodeTarget(
   fileRef->SetComment(gtgt->GetName());
   target->AddAttribute("productReference",
                        this->CreateObjectReference(fileRef));
-  if (char const* productType = this->GetTargetProductType(gtgt)) {
+  cm::string_view productType = this->GetTargetProductType(gtgt);
+  if (!productType.empty()) {
     target->AddAttribute("productType", this->CreateString(productType));
   }
   target->SetTarget(gtgt);
@@ -5236,21 +5234,19 @@ void cmGlobalXCodeGenerator::AppendDirectoryForConfig(
 
 std::string cmGlobalXCodeGenerator::LookupFlags(
   std::string const& varNamePrefix, std::string const& varNameLang,
-  std::string const& varNameSuffix, cmGeneratorTarget const* gt,
-  std::string const& default_flags)
+  std::string const& varNameSuffix, cmGeneratorTarget const* gt)
 {
+  std::string flags;
   if (!varNameLang.empty()) {
     std::string varName = cmStrCat(varNamePrefix, varNameLang, varNameSuffix);
     if (cmValue varValue = this->CurrentMakefile->GetDefinition(varName)) {
       if (!varValue->empty()) {
-        std::string flags;
         this->CurrentLocalGenerator->AppendFlags(
           flags, *varValue, varName, gt, cmBuildStep::Link, varNameLang);
-        return flags;
       }
     }
   }
-  return default_flags;
+  return flags;
 }
 
 void cmGlobalXCodeGenerator::AppendDefines(BuildObjectListOrString& defs,

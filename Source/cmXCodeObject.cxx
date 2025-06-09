@@ -4,6 +4,7 @@
 
 #include <ostream>
 
+#include <cm/string_view>
 #include <cmext/string_view>
 
 char const* cmXCodeObject::PBXTypeNames[] = {
@@ -225,7 +226,7 @@ void cmXCodeObject::PrintString(std::ostream& os) const
   cmXCodeObject::PrintString(os, this->String);
 }
 
-void cmXCodeObject::SetString(std::string const& s)
+void cmXCodeObject::SetString(cm::string_view s)
 {
-  this->String = s;
+  this->String = std::string(s);
 }
