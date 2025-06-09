@@ -65,30 +65,34 @@
 #  include <StorageDefs.h>
 #endif
 
+namespace {
 // List of variables that are replaced when
 // rules are expanded.  These variables are
 // replaced in the form <var> with GetSafeDefinition(var).
 // ${LANG} is replaced in the variable first with all enabled
 // languages.
-static auto ruleReplaceVars = { "CMAKE_${LANG}_COMPILER",
-                                "CMAKE_SHARED_LIBRARY_CREATE_${LANG}_FLAGS",
-                                "CMAKE_SHARED_MODULE_CREATE_${LANG}_FLAGS",
-                                "CMAKE_SHARED_MODULE_${LANG}_FLAGS",
-                                "CMAKE_SHARED_LIBRARY_${LANG}_FLAGS",
-                                "CMAKE_${LANG}_LINK_FLAGS",
-                                "CMAKE_SHARED_LIBRARY_SONAME_${LANG}_FLAG",
-                                "CMAKE_${LANG}_ARCHIVE",
-                                "CMAKE_AR",
-                                "CMAKE_CURRENT_SOURCE_DIR",
-                                "CMAKE_CURRENT_BINARY_DIR",
-                                "CMAKE_RANLIB",
-                                "CMAKE_MT",
-                                "CMAKE_TAPI",
-                                "CMAKE_CUDA_HOST_COMPILER",
-                                "CMAKE_CUDA_HOST_LINK_LAUNCHER",
-                                "CMAKE_HIP_HOST_COMPILER",
-                                "CMAKE_HIP_HOST_LINK_LAUNCHER",
-                                "CMAKE_CL_SHOWINCLUDES_PREFIX" };
+auto ruleReplaceVars = {
+  "CMAKE_${LANG}_COMPILER",
+  "CMAKE_SHARED_LIBRARY_CREATE_${LANG}_FLAGS",
+  "CMAKE_SHARED_MODULE_CREATE_${LANG}_FLAGS",
+  "CMAKE_SHARED_MODULE_${LANG}_FLAGS",
+  "CMAKE_SHARED_LIBRARY_${LANG}_FLAGS",
+  "CMAKE_${LANG}_LINK_FLAGS",
+  "CMAKE_SHARED_LIBRARY_SONAME_${LANG}_FLAG",
+  "CMAKE_${LANG}_ARCHIVE",
+  "CMAKE_AR",
+  "CMAKE_CURRENT_SOURCE_DIR",
+  "CMAKE_CURRENT_BINARY_DIR",
+  "CMAKE_RANLIB",
+  "CMAKE_MT",
+  "CMAKE_TAPI",
+  "CMAKE_CUDA_HOST_COMPILER",
+  "CMAKE_CUDA_HOST_LINK_LAUNCHER",
+  "CMAKE_HIP_HOST_COMPILER",
+  "CMAKE_HIP_HOST_LINK_LAUNCHER",
+  "CMAKE_CL_SHOWINCLUDES_PREFIX",
+};
+}
 
 cmLocalGenerator::cmLocalGenerator(cmGlobalGenerator* gg, cmMakefile* makefile)
   : cmOutputConverter(makefile->GetStateSnapshot())
