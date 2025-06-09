@@ -16,6 +16,5 @@ macro(__compiler_nvhpc lang)
   set(CMAKE_${lang}_COMPILE_OPTIONS_EXTERNAL_TOOLCHAIN "--gcc-toolchain=")
   set(CMAKE_${lang}_COMPILE_OPTIONS_WARNING_AS_ERROR "-Werror")
 
-
   set(CMAKE_${lang}_LINK_MODE DRIVER)
 endmacro()
