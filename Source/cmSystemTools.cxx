@@ -4165,7 +4165,7 @@ std::string cmSystemTools::EncodeURL(std::string const& in, bool escapeSlashes)
       case ' ':
       case '=':
       case '%':
-        snprintf(hexCh, sizeof(hexCh), "%%%02X", static_cast<int>(c));
+        snprintf(hexCh, sizeof(hexCh), "%%%02X", static_cast<unsigned int>(c));
         break;
       case '/':
         if (escapeSlashes) {
