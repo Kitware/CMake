@@ -847,7 +847,6 @@ cmake_kwsys_config_replace_string ()
               s/@KWSYS_LFS_AVAILABLE@/${KWSYS_LFS_AVAILABLE}/g;
               s/@KWSYS_LFS_REQUESTED@/${KWSYS_LFS_REQUESTED}/g;
               s/@KWSYS_NAME_IS_KWSYS@/${KWSYS_NAME_IS_KWSYS}/g;
-              s/@KWSYS_STL_HAS_WSTRING@/${KWSYS_STL_HAS_WSTRING}/g;
               s/@KWSYS_CXX_HAS_EXT_STDIO_FILEBUF_H@/${KWSYS_CXX_HAS_EXT_STDIO_FILEBUF_H}/g;
              }" "${INFILE}" >> "${OUTFILE}${_tmp}"
     if test -f "${OUTFILE}${_tmp}"; then
@@ -1562,7 +1561,6 @@ KWSYS_NAME_IS_KWSYS=0
 KWSYS_BUILD_SHARED=0
 KWSYS_LFS_AVAILABLE=0
 KWSYS_LFS_REQUESTED=0
-KWSYS_STL_HAS_WSTRING=0
 KWSYS_CXX_HAS_EXT_STDIO_FILEBUF_H=0
 KWSYS_CXX_HAS_SETENV=0
 KWSYS_CXX_HAS_UNSETENV=0
@@ -1595,15 +1593,6 @@ if cmake_try_run "${cmake_cxx_compiler}" \
   echo "${cmake_cxx_compiler} has environ in stdlib.h"
 else
   echo "${cmake_cxx_compiler} does not have environ in stdlib.h"
-fi
-
-if cmake_try_run "${cmake_cxx_compiler}" \
-  "${cmake_cxx_flags} ${cmake_ld_flags} -DTEST_KWSYS_STL_HAS_WSTRING" \
-  "${cmake_source_dir}/Source/kwsys/kwsysPlatformTestsCXX.cxx" >> cmake_bootstrap.log 2>&1; then
-  KWSYS_STL_HAS_WSTRING=1
-  echo "${cmake_cxx_compiler} has stl wstring"
-else
-  echo "${cmake_cxx_compiler} does not have stl wstring"
 fi
 
 if cmake_try_run "${cmake_cxx_compiler}" \

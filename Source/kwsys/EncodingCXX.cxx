@@ -122,12 +122,10 @@ char const* const* Encoding::CommandLineArguments::argv() const
   return &this->argv_[0];
 }
 
-#if KWSYS_STL_HAS_WSTRING
-
 std::wstring Encoding::ToWide(std::string const& str)
 {
   std::wstring wstr;
-#  if defined(_WIN32)
+#if defined(_WIN32)
   int const wlength =
     MultiByteToWideChar(KWSYS_ENCODING_DEFAULT_CODEPAGE, 0, str.data(),
                         int(str.size()), nullptr, 0);
@@ -140,7 +138,7 @@ std::wstring Encoding::ToWide(std::string const& str)
     }
     delete[] wdata;
   }
-#  else
+#else
   size_t pos = 0;
   size_t nullPos = 0;
   do {
@@ -153,14 +151,14 @@ std::wstring Encoding::ToWide(std::string const& str)
       wstr += wchar_t('\0');
     }
   } while (nullPos != std::string::npos);
-#  endif
+#endif
   return wstr;
 }
 
 std::string Encoding::ToNarrow(std::wstring const& str)
 {
   std::string nstr;
-#  if defined(_WIN32)
+#if defined(_WIN32)
   int length =
     WideCharToMultiByte(KWSYS_ENCODING_DEFAULT_CODEPAGE, 0, str.c_str(),
                         int(str.size()), nullptr, 0, nullptr, nullptr);
@@ -174,7 +172,7 @@ std::string Encoding::ToNarrow(std::wstring const& str)
     }
     delete[] data;
   }
-#  else
+#else
   size_t pos = 0;
   size_t nullPos = 0;
   do {
@@ -187,7 +185,7 @@ std::string Encoding::ToNarrow(std::wstring const& str)
       nstr += '\0';
     }
   } while (nullPos != std::string::npos);
-#  endif
+#endif
   return nstr;
 }
 
@@ -221,7 +219,7 @@ std::string Encoding::ToNarrow(wchar_t const* wcstr)
   return str;
 }
 
-#  if defined(_WIN32)
+#if defined(_WIN32)
 // Convert local paths to UNC style paths
 std::wstring Encoding::ToWindowsExtendedPath(std::string const& source)
 {
@@ -285,8 +283,6 @@ std::wstring Encoding::ToWindowsExtendedPath(std::wstring const& wsource)
   // unchanged
   return wsource;
 }
-#  endif
-
-#endif // KWSYS_STL_HAS_WSTRING
+#endif
 
 } // namespace KWSYS_NAMESPACE

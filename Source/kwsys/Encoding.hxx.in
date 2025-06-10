@@ -45,8 +45,6 @@ public:
    * Convert between char and wchar_t
    */
 
-#if @KWSYS_NAMESPACE@_STL_HAS_WSTRING
-
   // Convert a narrow string to a wide string.
   // On Windows, UTF-8 is assumed, and on other platforms,
   // the current locale is assumed.
@@ -59,7 +57,7 @@ public:
   static std::string ToNarrow(std::wstring const& str);
   static std::string ToNarrow(wchar_t const* str);
 
-#  if defined(_WIN32)
+#if defined(_WIN32)
   /**
    * Convert the path to an extended length path to avoid MAX_PATH length
    * limitations on Windows. If the input is a local path the result will be
@@ -70,9 +68,7 @@ public:
   static std::wstring ToWindowsExtendedPath(std::string const&);
   static std::wstring ToWindowsExtendedPath(char const* source);
   static std::wstring ToWindowsExtendedPath(std::wstring const& wsource);
-#  endif
-
-#endif // @KWSYS_NAMESPACE@_STL_HAS_WSTRING
+#endif
 
 }; // class Encoding
 } // namespace @KWSYS_NAMESPACE@

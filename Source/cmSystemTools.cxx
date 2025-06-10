@@ -378,22 +378,14 @@ extern char** environ; // NOLINT(readability-redundant-declaration)
 #if !defined(CMAKE_BOOTSTRAP)
 static std::string cm_archive_entry_pathname(struct archive_entry* entry)
 {
-#  if cmsys_STL_HAS_WSTRING
   return cmsys::Encoding::ToNarrow(archive_entry_pathname_w(entry));
-#  else
-  return archive_entry_pathname(entry);
-#  endif
 }
 
 static int cm_archive_read_open_file(struct archive* a, char const* file,
                                      int block_size)
 {
-#  if cmsys_STL_HAS_WSTRING
   std::wstring wfile = cmsys::Encoding::ToWide(file);
   return archive_read_open_filename_w(a, wfile.c_str(), block_size);
-#  else
-  return archive_read_open_filename(a, file, block_size);
-#  endif
 }
 #endif
 
