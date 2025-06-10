@@ -2620,16 +2620,18 @@ int cmake::ActualConfigure()
   this->FileAPI = cm::make_unique<cmFileAPI>(this);
   this->FileAPI->ReadQueries();
 
+  this->Instrumentation = cm::make_unique<cmInstrumentation>(
+    this->State->GetBinaryDirectory(),
+    cmInstrumentation::LoadQueriesAfter::No);
+  this->Instrumentation->ClearGeneratedQueries();
+
   if (!this->GetIsInTryCompile()) {
     this->TruncateOutputLog("CMakeConfigureLog.yaml");
     this->ConfigureLog = cm::make_unique<cmConfigureLog>(
       cmStrCat(this->GetHomeOutputDirectory(), "/CMakeFiles"_s),
       this->FileAPI->GetConfigureLogVersions());
+    this->Instrumentation->LoadQueries();
   }
-
-  this->Instrumentation =
-    cm::make_unique<cmInstrumentation>(this->State->GetBinaryDirectory());
-  this->Instrumentation->ClearGeneratedQueries();
 #endif
 
   // actually do the configure
@@ -2645,7 +2647,9 @@ int cmake::ActualConfigure()
   };
   int ret = this->Instrumentation->InstrumentCommand(
     "configure", this->cmdArgs, [doConfigure]() { return doConfigure(); },
-    cm::nullopt, cm::nullopt, true);
+    cm::nullopt, cm::nullopt,
+    this->GetIsInTryCompile() ? cmInstrumentation::LoadQueriesAfter::No
+                              : cmInstrumentation::LoadQueriesAfter::Yes);
   if (ret != 0) {
     return ret;
   }
@@ -2688,7 +2692,6 @@ int cmake::ActualConfigure()
   }
   // Setup launchers for instrumentation
 #if !defined(CMAKE_BOOTSTRAP)
-  this->Instrumentation->LoadQueries();
   if (this->Instrumentation->HasQuery()) {
     std::string launcher;
     if (mf->IsOn("CTEST_USE_LAUNCHERS")) {
@@ -3046,7 +3049,6 @@ int cmake::Generate()
     return 0;
   };
 
-  this->Instrumentation->LoadQueries();
   int ret = this->Instrumentation->InstrumentCommand(
     "generate", this->cmdArgs, [doGenerate]() { return doGenerate(); });
   if (ret != 0) {

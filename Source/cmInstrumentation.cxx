@@ -3,11 +3,11 @@
 #include <chrono>
 #include <ctime>
 #include <iomanip>
-#include <memory>
 #include <set>
 #include <sstream>
 #include <utility>
 
+#include <cm/memory>
 #include <cm/optional>
 
 #include <cm3p/json/writer.h>
@@ -27,7 +27,10 @@
 #include "cmUVProcessChain.h"
 #include "cmValue.h"
 
-cmInstrumentation::cmInstrumentation(std::string const& binary_dir)
+using LoadQueriesAfter = cmInstrumentation::LoadQueriesAfter;
+
+cmInstrumentation::cmInstrumentation(std::string const& binary_dir,
+                                     LoadQueriesAfter loadQueries)
 {
   std::string const uuid =
     cmExperimental::DataForFeature(cmExperimental::Feature::Instrumentation)
@@ -40,7 +43,9 @@ cmInstrumentation::cmInstrumentation(std::string const& binary_dir)
     this->userTimingDirv1 =
       cmStrCat(configDir.value(), "/instrumentation-", uuid, "/v1");
   }
-  this->LoadQueries();
+  if (loadQueries == LoadQueriesAfter::Yes) {
+    this->LoadQueries();
+  }
 }
 
 void cmInstrumentation::LoadQueries()
@@ -124,6 +129,14 @@ void cmInstrumentation::LoadQueries()
       }
     }
   }
+}
+
+cmsys::SystemInformation& cmInstrumentation::GetSystemInformation()
+{
+  if (!this->systemInformation) {
+    this->systemInformation = cm::make_unique<cmsys::SystemInformation>();
+  }
+  return *this->systemInformation;
 }
 
 bool cmInstrumentation::ReadJSONQueries(std::string const& directory)
@@ -210,8 +223,7 @@ bool cmInstrumentation::HasPreOrPostBuildHook() const
 int cmInstrumentation::CollectTimingData(cmInstrumentationQuery::Hook hook)
 {
   // Don't run collection if hook is disabled
-  if (hook != cmInstrumentationQuery::Hook::Manual &&
-      this->hooks.find(hook) == this->hooks.end()) {
+  if (hook != cmInstrumentationQuery::Hook::Manual && !this->HasHook(hook)) {
     return 0;
   }
 
@@ -299,36 +311,38 @@ int cmInstrumentation::CollectTimingData(cmInstrumentationQuery::Hook hook)
 void cmInstrumentation::InsertDynamicSystemInformation(
   Json::Value& root, std::string const& prefix)
 {
-  cmsys::SystemInformation info;
   Json::Value data;
-  info.RunCPUCheck();
-  info.RunMemoryCheck();
+  double memory;
+  double load;
+  this->GetDynamicSystemInformation(memory, load);
   if (!root.isMember("dynamicSystemInformation")) {
     root["dynamicSystemInformation"] = Json::objectValue;
   }
   root["dynamicSystemInformation"][cmStrCat(prefix, "HostMemoryUsed")] =
-    (double)info.GetHostMemoryUsed();
-  root["dynamicSystemInformation"][cmStrCat(prefix, "CPULoadAverage")] =
-    info.GetLoadAverage();
+    memory;
+  root["dynamicSystemInformation"][cmStrCat(prefix, "CPULoadAverage")] = load;
 }
 
 void cmInstrumentation::GetDynamicSystemInformation(double& memory,
                                                     double& load)
 {
-  cmsys::SystemInformation info;
-  Json::Value data;
-  info.RunCPUCheck();
-  info.RunMemoryCheck();
+  cmsys::SystemInformation& info = this->GetSystemInformation();
+  if (!this->ranSystemChecks) {
+    info.RunCPUCheck();
+    info.RunMemoryCheck();
+    this->ranSystemChecks = true;
+  }
   memory = (double)info.GetHostMemoryUsed();
   load = info.GetLoadAverage();
 }
 
 void cmInstrumentation::InsertStaticSystemInformation(Json::Value& root)
 {
-  cmsys::SystemInformation info;
-  info.RunCPUCheck();
-  info.RunOSCheck();
-  info.RunMemoryCheck();
+  cmsys::SystemInformation& info = this->GetSystemInformation();
+  if (!this->ranOSCheck) {
+    info.RunOSCheck();
+    this->ranOSCheck = true;
+  }
   Json::Value infoRoot;
   infoRoot["familyId"] = info.GetFamilyID();
   infoRoot["hostname"] = info.GetHostname();
@@ -408,7 +422,7 @@ std::string cmInstrumentation::InstrumentTest(
     this->InsertDynamicSystemInformation(root, "after");
   }
 
-  cmsys::SystemInformation info;
+  cmsys::SystemInformation& info = this->GetSystemInformation();
   std::string file_name = cmStrCat(
     "test-",
     this->ComputeSuffixHash(cmStrCat(command_str, info.GetProcessId())),
@@ -430,12 +444,12 @@ int cmInstrumentation::InstrumentCommand(
   std::function<int()> const& callback,
   cm::optional<std::map<std::string, std::string>> options,
   cm::optional<std::map<std::string, std::string>> arrayOptions,
-  bool reloadQueriesAfterCommand)
+  LoadQueriesAfter reloadQueriesAfterCommand)
 {
 
   // Always begin gathering data for configure in case cmake_instrumentation
   // command creates a query
-  if (!this->hasQuery && !reloadQueriesAfterCommand) {
+  if (!this->hasQuery && reloadQueriesAfterCommand == LoadQueriesAfter::No) {
     return callback();
   }
 
@@ -457,7 +471,7 @@ int cmInstrumentation::InstrumentCommand(
   if (this->HasQuery(
         cmInstrumentationQuery::Query::DynamicSystemInformation)) {
     this->InsertDynamicSystemInformation(root, "before");
-  } else if (reloadQueriesAfterCommand) {
+  } else if (reloadQueriesAfterCommand == LoadQueriesAfter::Yes) {
     this->GetDynamicSystemInformation(preConfigureMemory, preConfigureLoad);
   }
 
@@ -466,9 +480,9 @@ int cmInstrumentation::InstrumentCommand(
   root["result"] = ret;
 
   // Exit early if configure didn't generate a query
-  if (reloadQueriesAfterCommand) {
+  if (reloadQueriesAfterCommand == LoadQueriesAfter::Yes) {
     this->LoadQueries();
-    if (!this->hasQuery) {
+    if (!this->HasQuery()) {
       return ret;
     }
     if (this->HasQuery(
@@ -530,7 +544,7 @@ int cmInstrumentation::InstrumentCommand(
   root["workingDir"] = cmSystemTools::GetLogicalWorkingDirectory();
 
   // Write Json
-  cmsys::SystemInformation info;
+  cmsys::SystemInformation& info = this->GetSystemInformation();
   std::string const& file_name = cmStrCat(
     command_type, "-",
     this->ComputeSuffixHash(cmStrCat(command_str, info.GetProcessId())),
@@ -625,7 +639,7 @@ int cmInstrumentation::CollectTimingAfterBuild(int ppid)
   };
   int ret = this->InstrumentCommand(
     "build", {}, [waitForBuild]() { return waitForBuild(); }, cm::nullopt,
-    cm::nullopt, false);
+    cm::nullopt, LoadQueriesAfter::No);
   this->CollectTimingData(cmInstrumentationQuery::Hook::PostBuild);
   return ret;
 }

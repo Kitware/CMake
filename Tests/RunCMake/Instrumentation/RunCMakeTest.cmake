@@ -6,7 +6,7 @@ function(instrument test)
   set(config "${CMAKE_CURRENT_LIST_DIR}/config")
   set(ENV{CMAKE_CONFIG_DIR} ${config})
   cmake_parse_arguments(ARGS
-    "BUILD;BUILD_MAKE_PROGRAM;INSTALL;TEST;COPY_QUERIES;NO_WARN;STATIC_QUERY;DYNAMIC_QUERY;INSTALL_PARALLEL;MANUAL_HOOK"
+    "BUILD;BUILD_MAKE_PROGRAM;INSTALL;TEST;COPY_QUERIES;COPY_QUERIES_GENERATED;NO_WARN;STATIC_QUERY;DYNAMIC_QUERY;INSTALL_PARALLEL;MANUAL_HOOK"
     "CHECK_SCRIPT;CONFIGURE_ARG" "" ${ARGN})
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/${test})
   set(uuid "a37d1069-1972-4901-b9c9-f194aaf2b6e0")
@@ -34,14 +34,18 @@ function(instrument test)
     list(APPEND ARGS_CONFIGURE_ARG "-DINSTRUMENT_COMMAND_FILE=${cmake_file}")
   endif()
 
-  # Configure generated query files to compare CMake output
+  set(copy_loc ${RunCMake_TEST_BINARY_DIR}/query)
+  if (ARGS_COPY_QUERIES_GENERATED)
+    set(ARGS_COPY_QUERIES TRUE)
+    set(copy_loc ${v1}/query/generated) # Copied files here should be cleared on configure
+  endif()
   if (ARGS_COPY_QUERIES)
-    file(MAKE_DIRECTORY ${RunCMake_TEST_BINARY_DIR}/query)
+    file(MAKE_DIRECTORY ${copy_loc})
     set(generated_queries "0;1;2")
     foreach(n IN LISTS generated_queries)
       configure_file(
         "${query_dir}/generated/query-${n}.json.in"
-        "${RunCMake_TEST_BINARY_DIR}/query/query-${n}.json"
+        "${copy_loc}/query-${n}.json"
       )
     endforeach()
   endif()
@@ -118,6 +122,10 @@ instrument(cmake-command-bad-arg NO_WARN)
 instrument(cmake-command-parallel-install
   BUILD INSTALL TEST NO_WARN INSTALL_PARALLEL DYNAMIC_QUERY
   CHECK_SCRIPT check-data-dir.cmake)
+instrument(cmake-command-resets-generated NO_WARN
+  COPY_QUERIES_GENERATED
+  CHECK_SCRIPT check-data-dir.cmake
+)
 
 # FIXME(#26668) This does not work on Windows
 if (UNIX)
