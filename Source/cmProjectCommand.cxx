@@ -262,12 +262,9 @@ bool cmProjectCommand(std::vector<std::string> const& args,
   createVariables("VERSION_MINOR"_s, version_components[1]);
   createVariables("VERSION_PATCH"_s, version_components[2]);
   createVariables("VERSION_TWEAK"_s, version_components[3]);
+  createVariables("COMPAT_VERSION"_s, prArgs.CompatVersion.value_or(""));
   createVariables("DESCRIPTION"_s, prArgs.Description.value_or(""));
   createVariables("HOMEPAGE_URL"_s, prArgs.HomepageURL.value_or(""));
-
-  if (enableCompatVersion) {
-    createVariables("COMPAT_VERSION"_s, prArgs.CompatVersion.value_or(""));
-  }
 
   if (unparsedArgs.empty() && !prArgs.Languages) {
     // if no language is specified do c and c++
