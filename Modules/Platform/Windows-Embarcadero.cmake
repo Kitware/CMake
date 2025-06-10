@@ -74,6 +74,8 @@ endif()
 macro(__embarcadero_language lang)
   set(CMAKE_${lang}_COMPILE_OPTIONS_DLL "${_tD}") # Note: This variable is a ';' separated list
   set(CMAKE_SHARED_LIBRARY_${lang}_FLAGS "${_tD}") # ... while this is a space separated string.
+  set(CMAKE_SHARED_LIBRARY_CREATE_${lang}_FLAGS "")
+  set(CMAKE_SHARED_MODULE_CREATE_${lang}_FLAGS "")
   set(CMAKE_${lang}_USE_RESPONSE_FILE_FOR_INCLUDES 1)
 
   set (CMAKE_${lang}_LINKER_WRAPPER_FLAG "-l")
