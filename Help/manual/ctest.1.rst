@@ -1619,12 +1619,14 @@ model is defined as follows:
   The string "ctestInfo".
 
 ``version``
-  A JSON object specifying the version components.  Its members are
+  A JSON object specifying the version components.  Its members are:
 
   ``major``
-    A non-negative integer specifying the major version component.
+    A positive integer specifying the major version component
+    of the JSON object model.
   ``minor``
-    A non-negative integer specifying the minor version component.
+    A non-negative integer specifying the minor version component
+    of the JSON object model.
 
 ``backtraceGraph``
     JSON object representing backtrace information with the
@@ -1638,32 +1640,54 @@ model is defined as follows:
       List of node JSON objects with members:
 
       ``command``
-        Index into the ``commands`` member of the ``backtraceGraph``.
+        An optional member present when the node represents a command
+        invocation within the file.  The value is an unsigned integer 0-based
+        index into the ``commands`` member of the ``backtraceGraph``.
       ``file``
-        Index into the ``files`` member of the ``backtraceGraph``.
+        An unsigned integer 0-based index into the ``files`` member of the
+        ``backtraceGraph``.
       ``line``
-        Line number in the file where the backtrace was added.
+        An optional member present when the node represents a line within
+        the file.  The value is an unsigned integer 1-based line number
+        in the file where the backtrace was added.
       ``parent``
-        Index into the ``nodes`` member of the ``backtraceGraph``
-        representing the parent in the graph.
+        An optional member present when the node is not the bottom of the
+        call stack.  The value is an unsigned integer 0-based index into the
+        ``nodes`` member of the ``backtraceGraph`` representing the parent
+        in the graph.
 
 ``tests``
   A JSON array listing information about each test.  Each entry
   is a JSON object with members:
 
   ``name``
-    Test name.
+    Test name. This cannot be empty.
   ``config``
-    Configuration that the test can run on.
-    Empty string means any config.
+    Optional field specifying the configuration for which the test will run.
+    This will always match the :option:`-C <ctest -C>` option specified on the
+    ``ctest`` command line.  If no such option was given, this field will not
+    be present.
   ``command``
-    List where the first element is the test command and the
-    remaining elements are the command arguments.
+    Optional array where the first element is the test command and the
+    remaining elements are the command arguments.  Normally, this field should
+    be present and non-empty, but in certain corner cases involving generator
+    expressions, it is possible for a test to have no command and therefore
+    this field can be missing.
   ``backtrace``
     Index into the ``nodes`` member of the ``backtraceGraph``.
   ``properties``
-    Test properties.
-    Can contain keys for each of the supported test properties.
+    Optional array of test properties.
+    Each array item will be a JSON object with the following members:
+
+    ``name``
+      The name of the test property. This cannot be empty.
+    ``value``
+      The property value, which can be a string, a number, a boolean, or an
+      array of strings.
+
+.. versionadded:: 4.1
+  The JSON output format is described in machine-readable form by
+  :download:`this JSON schema </manual/ctest/show-only-schema.json>`.
 
 .. _`ctest-resource-allocation`:
 
