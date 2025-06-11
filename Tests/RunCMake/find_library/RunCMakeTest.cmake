@@ -1,6 +1,7 @@
 include(RunCMake)
 
 run_cmake(ConfigureLogTransitions)
+run_cmake(ConfigureLogTransitionsSuppressed)
 run_cmake(Created)
 run_cmake(FromPrefixPath)
 run_cmake(FromPATHEnv)

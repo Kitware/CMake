@@ -9,9 +9,12 @@ run_cmake(ConfigureLog)
 run_cmake(ConfigureLogParameters1)
 run_cmake(ConfigureLogParameters2)
 run_cmake(ConfigureLogTransitionsConfig) # with `CONFIG`
+run_cmake(ConfigureLogTransitionsConfigSuppressed)
 run_cmake(ConfigureLogTransitionsConfig2) # without `CONFIG`, finding config
+run_cmake(ConfigureLogTransitionsConfig2Suppressed)
 run_cmake(ConfigureLogTransitionsModule) # with `MODULE`
 run_cmake(ConfigureLogTransitionsModule2) # without `MODULE`, finding module
+run_cmake(ConfigureLogTransitionsModule2Suppressed)
 run_cmake(EmptyRoots)
 run_cmake(FromPATHEnv)
 run_cmake_with_options(FromPATHEnvDebugPkg --debug-find-pkg=Resolved)

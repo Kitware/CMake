@@ -38,8 +38,10 @@ bool cmFindPathCommand::InitialPass(std::vector<std::string> const& argsIn)
     return false;
   }
 
-  this->DebugState = cm::make_unique<cmFindBaseDebugState>(this);
   this->FullDebugMode = this->ComputeIfDebugModeWanted(this->VariableName);
+  if (this->FullDebugMode || !this->ComputeIfImplicitDebugModeSuppressed()) {
+    this->DebugState = cm::make_unique<cmFindBaseDebugState>(this);
+  }
 
   if (this->IsFound()) {
     this->NormalizeFindResult();

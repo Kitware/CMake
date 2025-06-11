@@ -125,6 +125,11 @@ protected:
   bool ComputeIfDebugModeWanted();
   bool ComputeIfDebugModeWanted(std::string const& var);
 
+  /** The `InitialPass` functions of the child classes should not initialize
+     `DebugState` if there is not a debug mode wanted and these return `true`.
+   */
+  bool ComputeIfImplicitDebugModeSuppressed();
+
   // Path arguments prior to path manipulation routines
   std::vector<std::string> UserHintsArgs;
   std::vector<std::string> UserGuessArgs;
