@@ -136,6 +136,7 @@ protected:
   void AddPathSuffix(std::string const& arg);
 
   void DebugMessage(std::string const& msg) const;
+  bool FullDebugMode;
   std::unique_ptr<cmFindCommonDebugState> DebugState;
   bool NoDefaultPath;
   bool NoPackageRootPath;
@@ -184,6 +185,7 @@ protected:
   virtual void FoundAtImpl(std::string const& path, std::string regexName) = 0;
   virtual void FailedAtImpl(std::string const& path,
                             std::string regexName) = 0;
+  virtual bool ShouldImplicitlyLogEvents() const;
 
   virtual void WriteDebug() const = 0;
 #ifndef CMAKE_BOOTSTRAP

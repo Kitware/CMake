@@ -1,5 +1,6 @@
 include(RunCMake)
 
+run_cmake(ConfigureLogTransitions)
 run_cmake(EmptyOldStyle)
 run_cmake(FromPATHEnv)
 run_cmake(PrefixInPATH)

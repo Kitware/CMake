@@ -614,15 +614,13 @@ void cmFindPackageCommand::InheritOptions(cmFindPackageCommand* other)
 
 bool cmFindPackageCommand::IsFound() const
 {
-  return !this->FileFound.empty();
+  return this->InitialState == FindState::Found;
 }
 
 bool cmFindPackageCommand::IsDefined() const
 {
-  // A `find_package` always needs to be rerun because it could create
-  // variables, provide commands, or targets. Therefore it is never
-  // "predefined" whether it is found or not.
-  return false;
+  return this->InitialState == FindState::Found ||
+    this->InitialState == FindState::NotFound;
 }
 
 bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
@@ -728,9 +726,8 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
 
   // Process debug mode
   cmMakefile::DebugFindPkgRAII debugFindPkgRAII(this->Makefile, this->Name);
-  if (this->ComputeIfDebugModeWanted()) {
-    this->DebugState = cm::make_unique<cmFindPackageDebugState>(this);
-  }
+  this->DebugState = cm::make_unique<cmFindPackageDebugState>(this);
+  this->FullDebugMode = this->ComputeIfDebugModeWanted();
 
   // Parse the arguments.
   enum Doing
@@ -934,6 +931,41 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
     return false;
   }
 
+  bool canBeIrrelevant = true;
+  if (this->UseConfigFiles || this->UseCpsFiles) {
+    canBeIrrelevant = false;
+    if (cmValue v = this->Makefile->GetState()->GetCacheEntryValue(
+          cmStrCat(this->Name, "_DIR"))) {
+      if (!v.IsNOTFOUND()) {
+        this->InitialState = FindState::Found;
+      } else {
+        this->InitialState = FindState::NotFound;
+      }
+    }
+  }
+
+  if (this->UseFindModules &&
+      (this->InitialState == FindState::Undefined ||
+       this->InitialState == FindState::NotFound)) {
+    // There are no definitive cache variables to know if a given `Find` module
+    // has been searched for or not. However, if we have a `_FOUND` variable,
+    // use that as an indication of a previous search.
+    if (cmValue v =
+          this->Makefile->GetDefinition(cmStrCat(this->Name, "_FOUND"))) {
+      if (v.IsOn()) {
+        this->InitialState = FindState::Found;
+      } else {
+        this->InitialState = FindState::NotFound;
+      }
+    }
+  }
+
+  // If there is no signaling variable and there's no reason to expect a cache
+  // variable, mark the initial state as "irrelevant".
+  if (this->InitialState == FindState::Undefined && canBeIrrelevant) {
+    this->InitialState = FindState::Irrelevant;
+  }
+
   // Ignore EXACT with no version.
   if (this->VersionComplete.empty() && this->VersionExact) {
     this->VersionExact = false;
@@ -1131,6 +1163,9 @@ bool cmFindPackageCommand::FindPackage(
     if (this->Makefile->IsOn(cmStrCat(this->Name, "_FOUND"))) {
       if (this->DebugModeEnabled()) {
         this->DebugMessage("Package was found by the dependency provider");
+      }
+      if (this->DebugState) {
+        this->DebugState->FoundAt(searchPath);
       }
       this->FileFound = searchPath;
       this->FileFoundMode = FoundPackageMode::Provider;
@@ -1525,31 +1560,34 @@ bool cmFindPackageCommand::FindModule(bool& found)
     bool result = this->ReadListFile(mfile, DoPolicyScope);
     this->Makefile->RemoveDefinition(var);
 
-    if (this->DebugModeEnabled()) {
-      std::string const foundVar = cmStrCat(this->Name, "_FOUND");
-      if (this->Makefile->IsDefinitionSet(foundVar) &&
-          !this->Makefile->IsOn(foundVar)) {
+    std::string const foundVar = cmStrCat(this->Name, "_FOUND");
+    if (this->Makefile->IsDefinitionSet(foundVar) &&
+        !this->Makefile->IsOn(foundVar)) {
 
+      if (this->DebugModeEnabled()) {
         this->DebugBuffer = cmStrCat(
           this->DebugBuffer, "The module is considered not found due to ",
           foundVar, " being FALSE.");
+      }
 
-        this->ConsideredPaths.emplace_back(mfile, FoundPackageMode::Module,
-                                           SearchResult::NotFound);
-        std::string const notFoundMessageVar =
-          cmStrCat(this->Name, "_NOT_FOUND_MESSAGE");
-        if (cmValue notFoundMessage =
-              this->Makefile->GetDefinition(notFoundMessageVar)) {
+      this->ConsideredPaths.emplace_back(mfile, FoundPackageMode::Module,
+                                         SearchResult::NotFound);
+      std::string const notFoundMessageVar =
+        cmStrCat(this->Name, "_NOT_FOUND_MESSAGE");
+      if (cmValue notFoundMessage =
+            this->Makefile->GetDefinition(notFoundMessageVar)) {
 
-          this->ConsideredPaths.back().Message = *notFoundMessage;
-        }
-      } else {
-        this->FileFound = mfile;
-        this->FileFoundMode = FoundPackageMode::Module;
-        std::string const versionVar = cmStrCat(this->Name, "_VERSION");
-        if (cmValue version = this->Makefile->GetDefinition(versionVar)) {
-          this->VersionFound = *version;
-        }
+        this->ConsideredPaths.back().Message = *notFoundMessage;
+      }
+    } else {
+      if (this->DebugState) {
+        this->DebugState->FoundAt(mfile);
+      }
+      this->FileFound = mfile;
+      this->FileFoundMode = FoundPackageMode::Module;
+      std::string const versionVar = cmStrCat(this->Name, "_VERSION");
+      if (cmValue version = this->Makefile->GetDefinition(versionVar)) {
+        this->VersionFound = *version;
       }
     }
     return result;
@@ -1582,6 +1620,9 @@ bool cmFindPackageCommand::HandlePackageMode(
       std::string file;
       FoundPackageMode foundMode = FoundPackageMode::None;
       if (this->FindConfigFile(dir, pdt::Any, file, foundMode)) {
+        if (this->DebugState) {
+          this->DebugState->FoundAt(file);
+        }
         this->FileFound = std::move(file);
         this->FileFoundMode = foundMode;
         fileFound = true;
@@ -3469,6 +3510,19 @@ void cmFindPackageDebugState::FailedAtImpl(std::string const& path,
   (void)regexName;
 }
 
+bool cmFindPackageDebugState::ShouldImplicitlyLogEvents() const
+{
+  auto const* fpc = this->FindPackageCommand;
+  bool const canUsePackage = fpc->UseConfigFiles || fpc->UseCpsFiles;
+  return canUsePackage &&
+    fpc->FileFoundMode != cmFindPackageCommand::FoundPackageMode::Module &&
+    std::any_of(fpc->ConsideredPaths.begin(), fpc->ConsideredPaths.end(),
+                [](cmFindPackageCommand::ConsideredPath const& cp) {
+                  return cp.Mode >
+                    cmFindPackageCommand::FoundPackageMode::Module;
+                });
+}
+
 void cmFindPackageDebugState::WriteDebug() const
 {
 }
@@ -3669,7 +3723,7 @@ void cmFindPackageDebugState::WriteEvent(cmConfigureLog& log,
     log.EndObject();
   }
   // TODO: Add provider information (see #26925)
-  if (fpc->IsFound()) {
+  if (!fpc->FileFound.empty()) {
     log.BeginObject("found"_s);
     log.WriteValue("path"_s, fpc->FileFound);
     log.WriteValue("mode"_s, found_mode(fpc->FileFoundMode));
