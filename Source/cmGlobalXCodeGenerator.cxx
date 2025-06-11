@@ -14,6 +14,7 @@
 
 #include <cm/memory>
 #include <cm/optional>
+#include <cm/string_view>
 #include <cmext/algorithm>
 #include <cmext/string_view>
 
@@ -294,6 +295,40 @@ bool cmGlobalXCodeGenerator::FindMakeProgram(cmMakefile* mf)
   return true;
 }
 
+std::string cmGlobalXCodeGenerator::GetAppleSpecificPlatformName()
+{
+  std::string sdkRoot =
+    this->GetCMakeInstance()->GetState()->GetCacheEntryValue(
+      "CMAKE_OSX_SYSROOT");
+  sdkRoot = cmSystemTools::LowerCase(sdkRoot);
+
+  struct SdkDatabaseEntry
+  {
+    cm::string_view Name;
+    cm::string_view AppleName;
+  };
+
+  std::array<SdkDatabaseEntry, 6> const sdkDatabase{ {
+    { "appletvos"_s, "tvOS"_s },
+    { "appletvsimulator"_s, "tvOS Simulator"_s },
+    { "iphoneos"_s, "iOS"_s },
+    { "iphonesimulator"_s, "iOS Simulator"_s },
+    { "watchos"_s, "watchOS"_s },
+    { "watchsimulator"_s, "watchOS Simulator"_s },
+  } };
+
+  cm::string_view platformName = "MacOS"_s;
+  for (SdkDatabaseEntry const& entry : sdkDatabase) {
+    if (cmHasPrefix(sdkRoot, entry.Name) ||
+        sdkRoot.find(cmStrCat('/', entry.Name)) != std::string::npos) {
+      platformName = entry.AppleName;
+      break;
+    }
+  }
+
+  return std::string(platformName);
+}
+
 std::string const& cmGlobalXCodeGenerator::GetXcodeBuildCommand()
 {
   if (!this->XcodeBuildCommandInitialized) {
@@ -473,10 +508,15 @@ bool cmGlobalXCodeGenerator::Open(std::string const& bindir,
   bool ret = false;
 
 #ifdef HAVE_APPLICATION_SERVICES
-  std::string url = cmStrCat(bindir, '/', projectName, ".xcodeproj");
+  // If an external tool created a workspace then open it instead.
+  std::string url = cmStrCat(bindir, '/', projectName, ".xcworkspace");
+  bool const isWorkspace = cmSystemTools::FileIsDirectory(url);
+  if (!isWorkspace) {
+    url = cmStrCat(bindir, '/', projectName, ".xcodeproj");
+  }
 
   if (dryRun) {
-    return cmSystemTools::FileExists(url, false);
+    return cmSystemTools::FileIsDirectory(url);
   }
 
   CFStringRef cfStr = CFStringCreateWithCString(
@@ -508,31 +548,45 @@ cmGlobalXCodeGenerator::GenerateBuildCommand(
   int jobs, bool /*verbose*/, cmBuildOptions const& /*buildOptions*/,
   std::vector<std::string> const& makeOptions)
 {
+  // If an external tool created a workspace then build it instead.
+  std::string projectPath = cmStrCat(projectName, ".xcworkspace");
+  bool const isWorkspace = cmSystemTools::FileIsDirectory(projectPath);
+  if (!isWorkspace) {
+    projectPath = cmStrCat(projectName, ".xcodeproj");
+  }
+
+  std::string const targetFlag = isWorkspace ? "-scheme" : "-target";
+  std::string const projectFlag = isWorkspace ? "-workspace" : "-project";
+
   GeneratedMakeCommand makeCommand;
   // now build the test
   makeCommand.Add(
     this->SelectMakeProgram(makeProgram, this->GetXcodeBuildCommand()));
 
   if (!projectName.empty()) {
-    makeCommand.Add("-project");
-    std::string projectArg = cmStrCat(projectName, ".xcodeproj");
-    makeCommand.Add(projectArg);
+    makeCommand.Add(projectFlag, projectPath);
   }
   if (cm::contains(targetNames, "clean")) {
     makeCommand.Add("clean");
-    makeCommand.Add("-target", "ALL_BUILD");
+    makeCommand.Add(targetFlag, "ALL_BUILD");
   } else {
     makeCommand.Add("build");
     if (targetNames.empty() ||
         ((targetNames.size() == 1) && targetNames.front().empty())) {
-      makeCommand.Add("-target", "ALL_BUILD");
+      makeCommand.Add(targetFlag, "ALL_BUILD");
     } else {
       for (auto const& tname : targetNames) {
         if (!tname.empty()) {
-          makeCommand.Add("-target", tname);
+          makeCommand.Add(targetFlag, tname);
         }
       }
     }
+  }
+
+  if (isWorkspace) {
+    makeCommand.Add(
+      "-destination",
+      cmStrCat("generic/platform=", this->GetAppleSpecificPlatformName()));
   }
 
   if ((this->XcodeBuildSystem >= BuildSystem::Twelve) ||

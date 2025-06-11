@@ -334,6 +334,7 @@ protected:
   BuildSystem XcodeBuildSystem = BuildSystem::One;
 
 private:
+  std::string GetAppleSpecificPlatformName();
   std::string const& GetXcodeBuildCommand();
   std::string FindXcodeBuildCommand();
   std::string XcodeBuildCommand;
