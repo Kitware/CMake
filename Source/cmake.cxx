@@ -2607,7 +2607,7 @@ int cmake::ActualConfigure()
       this->IntermediateDirStrategy) {
     this->AddCacheEntry(
       "CMAKE_INTERMEDIATE_DIR_STRATEGY", *this->IntermediateDirStrategy,
-      "Select the intermediate directory strategy", cmStateEnums::STRING);
+      "Select the intermediate directory strategy", cmStateEnums::INTERNAL);
   }
 
   if (!this->State->GetInitializedCacheValue("CMAKE_TEST_LAUNCHER")) {

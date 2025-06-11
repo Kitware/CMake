@@ -1,0 +1,20 @@
+include(RunCMake)
+
+function(run_cmake_intdir_strategy base strategy)
+  unset(ENV{CMAKE_INTERMEDIATE_DIR_STRATEGY})
+
+  if (base STREQUAL "IntDirStrategyCache")
+    set(RunCMake_TEST_OPTIONS -DCMAKE_INTERMEDIATE_DIR_STRATEGY=${strategy})
+  elseif (base STREQUAL "IntDirStrategyEnv")
+    set(ENV{CMAKE_INTERMEDIATE_DIR_STRATEGY} "${strategy}")
+  else ()
+    message(FATAL_ERROR "unsupported base: ${base}")
+  endif ()
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/${base}${strategy}-build)
+  run_cmake(${base}${strategy})
+endfunction()
+
+foreach (strategy IN ITEMS INVALID FULL SHORT)
+  run_cmake_intdir_strategy(IntDirStrategyCache ${strategy})
+  run_cmake_intdir_strategy(IntDirStrategyEnv ${strategy})
+endforeach ()

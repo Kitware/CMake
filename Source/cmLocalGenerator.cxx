@@ -4287,6 +4287,11 @@ std::string cmLocalGenerator::GetObjectFileNameWithoutTarget(
   return this->CreateSafeUniqueObjectFileName(objectName, dir_max);
 }
 
+bool cmLocalGenerator::UseShortObjectNames() const
+{
+  return this->GlobalGenerator->UseShortObjectNames();
+}
+
 std::string cmLocalGenerator::GetObjectOutputRoot() const
 {
   return cmStrCat(this->GetCurrentBinaryDirectory(), "/CMakeFiles");

@@ -1440,6 +1440,20 @@ bool cmGlobalGenerator::Compute()
     return false;
   }
 
+  if (cmValue v = this->CMakeInstance->GetCacheDefinition(
+        "CMAKE_INTERMEDIATE_DIR_STRATEGY")) {
+    if (*v == "FULL") {
+      this->IntDirStrategy = IntermediateDirStrategy::Full;
+    } else if (*v == "SHORT") {
+      this->IntDirStrategy = IntermediateDirStrategy::Short;
+    } else {
+      this->GetCMakeInstance()->IssueMessage(
+        MessageType::FATAL_ERROR,
+        cmStrCat("Unsupported intermediate directory strategy '", *v, '\''));
+      return false;
+    }
+  }
+
   // Some generators track files replaced during the Generate.
   // Start with an empty vector:
   this->FilesReplacedDuringGenerate.clear();
@@ -1979,6 +1993,17 @@ void cmGlobalGenerator::ClearGeneratorMembers()
   this->RuntimeDependencySets.clear();
   this->RuntimeDependencySetsByName.clear();
   this->WarnedExperimental.clear();
+}
+
+bool cmGlobalGenerator::SupportsShortObjectNames() const
+{
+  return false;
+}
+
+bool cmGlobalGenerator::UseShortObjectNames() const
+{
+  return this->SupportsShortObjectNames() &&
+    this->IntDirStrategy == IntermediateDirStrategy::Short;
 }
 
 void cmGlobalGenerator::ComputeTargetObjectDirectory(

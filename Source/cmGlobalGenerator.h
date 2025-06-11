@@ -629,6 +629,9 @@ public:
     std::string const& filename) const;
   void AddCMP0068WarnTarget(std::string const& target);
 
+  virtual bool SupportsShortObjectNames() const;
+  bool UseShortObjectNames() const;
+
   virtual void ComputeTargetObjectDirectory(cmGeneratorTarget* gt) const;
 
   bool GenerateCPackPropertiesFile();
@@ -940,6 +943,13 @@ private:
     std::map<std::string, PerLanguageModuleDatabases>;
   PerConfigModuleDatabases PerConfigModuleDbs;
   PerLanguageModuleDatabases PerLanguageModuleDbs;
+
+  enum class IntermediateDirStrategy
+  {
+    Full,
+    Short,
+  };
+  IntermediateDirStrategy IntDirStrategy = IntermediateDirStrategy::Full;
 
 protected:
   float FirstTimeProgress;

@@ -438,6 +438,7 @@ public:
   std::string const& GetCurrentBinaryDirectory() const;
   std::string const& GetCurrentSourceDirectory() const;
 
+  bool UseShortObjectNames() const;
   virtual std::string GetObjectOutputRoot() const;
   virtual bool AlwaysUsesCMFPaths() const;
 
