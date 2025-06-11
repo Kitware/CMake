@@ -121,7 +121,7 @@ protected:
   void SelectDefaultSearchModes();
 
   /** The `InitialPass` functions of the child classes should set
-      this->DebugMode to the result of these.  */
+      this->FullDebugMode to the result of these.  */
   bool ComputeIfDebugModeWanted();
   bool ComputeIfDebugModeWanted(std::string const& var);
 
