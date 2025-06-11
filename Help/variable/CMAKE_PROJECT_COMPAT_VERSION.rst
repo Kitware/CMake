@@ -1,6 +1,8 @@
 CMAKE_PROJECT_COMPAT_VERSION
 ----------------------------
 
+.. versionadded:: 4.1
+
 .. note::
 
   Experimental. Gated by ``CMAKE_EXPERIMENTAL_EXPORT_PACKAGE_INFO``.
