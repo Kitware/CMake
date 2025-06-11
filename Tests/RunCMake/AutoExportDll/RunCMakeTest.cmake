@@ -60,7 +60,7 @@ if(EXPORTS)
 endif()
 
 function(run_AIXExportExplicit)
-  set(RunCMake_TEST_BINARY_DIR "${RunCMake_BINARY_DIR}/AIXExpotExplicit-build")
+  set(RunCMake_TEST_BINARY_DIR "${RunCMake_BINARY_DIR}/AIXExportExplicit-build")
   run_cmake(AIXExportExplicit)
   set(RunCMake_TEST_NO_CLEAN 1)
   set(RunCMake_TEST_OUTPUT_MERGE TRUE)
