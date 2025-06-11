@@ -141,7 +141,7 @@ macro(__BlueGeneQ_setup_dynamic compiler_id lang)
 
   # For dynamic executables, need to provide special BG/Q arguments.
   set(BGQ_${lang}_DEFAULT_EXE_FLAGS
-    "<FLAGS> <CMAKE_${lang}_LINK_FLAGS> <LINK_FLAGS> <OBJECTS> -o <TARGET> <LINK_LIBRARIES>")
+    "<FLAGS> <LINK_FLAGS> <OBJECTS> -o <TARGET> <LINK_LIBRARIES>")
   set(CMAKE_${lang}_LINK_EXECUTABLE
     "<CMAKE_${lang}_COMPILER> -Wl,-relax ${BGQ_${lang}_DYNAMIC_EXE_FLAGS} ${BGQ_${lang}_DEFAULT_EXE_FLAGS}")
 endmacro()
@@ -155,7 +155,7 @@ macro(__BlueGeneQ_setup_static compiler_id lang)
 
   # For static executables, use default link settings.
   set(BGQ_${lang}_DEFAULT_EXE_FLAGS
-    "<FLAGS> <CMAKE_${lang}_LINK_FLAGS> <LINK_FLAGS> <OBJECTS> -o <TARGET> <LINK_LIBRARIES>")
+    "<FLAGS> <LINK_FLAGS> <OBJECTS> -o <TARGET> <LINK_LIBRARIES>")
   set(CMAKE_${lang}_LINK_EXECUTABLE
     "<CMAKE_${lang}_COMPILER> -Wl,-relax ${BGQ_${lang}_DEFAULT_EXE_FLAGS}")
 endmacro()

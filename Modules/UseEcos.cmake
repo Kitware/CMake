@@ -279,8 +279,8 @@ macro(ECOS_ADD_EXECUTABLE _exe_NAME )
   set(CMAKE_CXX_COMPILE_OBJECT   "<CMAKE_CXX_COMPILER> <DEFINES> <INCLUDES> <FLAGS> -o <OBJECT> -c <SOURCE>")
 
   # Special link commands for eCos executables.
-  set(CMAKE_CXX_LINK_EXECUTABLE  "<CMAKE_CXX_COMPILER> <CMAKE_CXX_LINK_FLAGS> <OBJECTS> -o <TARGET> ${_ecos_EXTRA_LIBS} -nostdlib -nostartfiles -L${CMAKE_CURRENT_BINARY_DIR}/ecos/install/lib -Ttarget.ld ${ECOS_LD_MCPU}")
-  set(CMAKE_C_LINK_EXECUTABLE    "<CMAKE_C_COMPILER> <CMAKE_C_LINK_FLAGS> <OBJECTS> -o <TARGET> ${_ecos_EXTRA_LIBS} -nostdlib -nostartfiles -L${CMAKE_CURRENT_BINARY_DIR}/ecos/install/lib -Ttarget.ld ${ECOS_LD_MCPU}")
+  set(CMAKE_CXX_LINK_EXECUTABLE  "<CMAKE_CXX_COMPILER> <LINK_FLAGS> <OBJECTS> -o <TARGET> ${_ecos_EXTRA_LIBS} -nostdlib -nostartfiles -L${CMAKE_CURRENT_BINARY_DIR}/ecos/install/lib -Ttarget.ld ${ECOS_LD_MCPU}")
+  set(CMAKE_C_LINK_EXECUTABLE    "<CMAKE_C_COMPILER> <LINK_FLAGS> <OBJECTS> -o <TARGET> ${_ecos_EXTRA_LIBS} -nostdlib -nostartfiles -L${CMAKE_CURRENT_BINARY_DIR}/ecos/install/lib -Ttarget.ld ${ECOS_LD_MCPU}")
 
   # Some strict compiler flags.
   set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wstrict-prototypes")

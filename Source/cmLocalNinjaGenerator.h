@@ -45,9 +45,6 @@ public:
 
   std::unique_ptr<cmRulePlaceholderExpander> CreateRulePlaceholderExpander(
     cmBuildStep buildStep = cmBuildStep::Compile) const override;
-  std::unique_ptr<cmRulePlaceholderExpander> CreateRulePlaceholderExpander(
-    cmBuildStep buildStep, cmGeneratorTarget const* target,
-    std::string const& language) override;
 
   cmGlobalNinjaGenerator const* GetGlobalNinjaGenerator() const;
   cmGlobalNinjaGenerator* GetGlobalNinjaGenerator();
