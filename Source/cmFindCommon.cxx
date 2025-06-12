@@ -116,6 +116,14 @@ bool cmFindCommon::ComputeIfDebugModeWanted(std::string const& var)
     this->Makefile->GetCMakeInstance()->GetDebugFindOutput(var);
 }
 
+bool cmFindCommon::ComputeIfImplicitDebugModeSuppressed()
+{
+  // XXX(find-events): In the future, mirror the `ComputeIfDebugModeWanted`
+  // methods if more control is desired.
+  return this->Makefile->IsOn(
+    "CMAKE_FIND_DEBUG_MODE_NO_IMPLICIT_CONFIGURE_LOG");
+}
+
 void cmFindCommon::InitializeSearchPathGroups()
 {
   std::vector<PathLabel>* labels;
