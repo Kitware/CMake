@@ -1071,7 +1071,7 @@ Json::Value DirectoryObject::DumpInstaller(cmInstallGenerator* gen)
     installer["type"] = "fileSet";
     installer["destination"] = installFileSet->GetDestination(this->Config);
 
-    auto* fileSet = installFileSet->GetFileSet();
+    auto const* fileSet = installFileSet->GetFileSet();
     auto* target = installFileSet->GetTarget();
 
     auto dirCges = fileSet->CompileDirectoryEntries();

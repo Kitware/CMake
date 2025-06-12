@@ -7,7 +7,6 @@
 #include <map>
 #include <string>
 
-class cmFileSet;
 class cmGeneratorTarget;
 class cmInstallCxxModuleBmiGenerator;
 class cmInstallFileSetGenerator;
@@ -33,7 +32,7 @@ public:
   cmInstallTargetGenerator* FrameworkGenerator;
   cmInstallTargetGenerator* BundleGenerator;
   cmInstallFilesGenerator* HeaderGenerator;
-  std::map<cmFileSet*, cmInstallFileSetGenerator*> FileSetGenerators;
+  std::map<std::string, cmInstallFileSetGenerator*> FileSetGenerators;
   cmInstallCxxModuleBmiGenerator* CxxModuleBmiGenerator;
   ///@}
 

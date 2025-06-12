@@ -40,9 +40,8 @@ bool cmExportSet::Compute(cmLocalGenerator* lg)
       tgtExport->Target->Target->GetAllInterfaceFileSets();
     auto const fileSetInTargetExport =
       [&tgtExport, lg](std::string const& fileSetName) -> bool {
-      auto* fileSet = tgtExport->Target->Target->GetFileSet(fileSetName);
-
-      if (!tgtExport->FileSetGenerators.count(fileSet)) {
+      if (tgtExport->FileSetGenerators.find(fileSetName) ==
+          tgtExport->FileSetGenerators.end()) {
         lg->IssueMessage(MessageType::FATAL_ERROR,
                          cmStrCat("File set \"", fileSetName,
                                   "\" is listed in interface file sets of ",
