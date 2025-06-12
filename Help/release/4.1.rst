@@ -7,15 +7,74 @@ CMake 4.1 Release Notes
 
 Changes made since CMake 4.0 include the following.
 
+New Features
+============
+
+File-Based API
+--------------
+
+* The :manual:`cmake-file-api(7)` :ref:`v1 <file-api v1>` now writes
+  partial replies when buildsystem generation fails with an error.
+  See the :ref:`v1 Reply Error Index <file-api reply error index>`.
+
+Generators
+----------
+
+* :ref:`Makefile Generators` and :ref:`Ninja Generators` gained support
+  for adding a linker launcher with ``Fortran``, ``CUDA``, and ``HIP``.
+  See the :variable:`CMAKE_<LANG>_LINKER_LAUNCHER` variable
+  and :prop_tgt:`<LANG>_LINKER_LAUNCHER` target property for details.
+
+Command-Line
+------------
+
+* The :ref:`cmake --build <Build Tool Mode>` command-line tool, when used
+  with the :generator:`Xcode` generator, now detects when a third-party
+  tool has wrapped the generated ``.xcodeproj`` in a ``.xcworkspace``,
+  and drives the build through the workspace instead.
+
+Configure Log
+-------------
+
+* The :manual:`cmake-configure-log(7)` now reports events from
+  :command:`find_package` (in ``CONFIG`` mode), :command:`find_path`,
+  :command:`find_file`, :command:`find_library`, and :command:`find_program`
+  commands when first invoked, when their results transition between
+  "not found" and "found", or when enabled explicitly by the
+  :option:`--debug-find <cmake --debug-find>` command-line option.
+  See :ref:`find configure-log event` and
+  :ref:`find_package configure-log event`.  Logging may also be controlled
+  by the :variable:`CMAKE_FIND_DEBUG_MODE` and
+  :variable:`CMAKE_FIND_DEBUG_MODE_NO_IMPLICIT_CONFIGURE_LOG` variables.
+
+Compilers
+---------
+
+* `Diab compilers from Wind River Systems`_, versions 5.9.x+, are now
+  supported with :variable:`compiler id <CMAKE_<LANG>_COMPILER_ID>` ``Diab``
+  for languages ``ASM``, ``C``, and ``CXX``.
+
+.. _`Diab compilers from Wind River Systems`: https://www.windriver.com/resource/wind-river-diab-compiler-product-overview
+
+Commands
+--------
+
 * The :command:`add_dependencies` command may be called with no dependencies.
 
-* Enabling ``ASM`` no longer accidentally succeeds using ``MSVC``'s ``cl``
-  C compiler as an assembler.  See policy :policy:`CMP0194`.
+* The :command:`cmake_pkg_config` command now supports the ``IMPORT`` and
+  ``POPULATE`` subcommands for interfacing CMake targets with pkg-config based
+  dependencies.
 
-* The :prop_tgt:`AUTOMOC_INCLUDE_DIRECTORIES` target property and associated
-  :variable:`CMAKE_AUTOMOC_INCLUDE_DIRECTORIES` variable were added to
-  override the automatic discovery of moc includes from a target's transitive
-  include directories.
+* The :command:`install(DIRECTORY)` command gained a new
+  ``EXCLUDE_EMPTY_DIRECTORIES`` option to skip installation
+  of empty directories.
+
+* The :command:`project` command now has experimental support for the
+  ``COMPAT_VERSION`` keyword, gated by
+  ``CMAKE_EXPERIMENTAL_EXPORT_PACKAGE_INFO``.
+
+Variables
+---------
 
 * The :variable:`CMAKE_FIND_REQUIRED` variable was added to tell
   :command:`find_package`, :command:`find_path`, :command:`find_file`,
@@ -23,17 +82,80 @@ Changes made since CMake 4.0 include the following.
   by default.  The commands also gained an ``OPTIONAL`` keyword to ignore
   the variable for a specific call.
 
-* The :command:`cmake_pkg_config` command now supports the ``IMPORT`` and
-  ``POPULATE`` subcommands for interfacing CMake targets with pkg-config based
-  dependencies.
-
 * The :variable:`CMAKE_<LANG>_COMPILER_ARCHITECTURE_ID` variable is now
   populated for most compilers, and documented for public use.
 
-* The :ref:`find configure-log event` ``find-v1`` has been added to
-  :manual:`cmake-configure-log(7)` to track calls to the :command:`find_file`,
-  :command:`find_path`, :command:`find_library`, and :command:`find_program`
-  commands.
+* The :variable:`CMAKE_<LANG>_ICSTAT` variable and corresponding
+  :prop_tgt:`<LANG>_ICSTAT` target property were added to tell
+  the :ref:`Makefile Generators` and the :ref:`Ninja Generators`
+  to run the IAR ``icstat`` tool along with the compiler for
+  ``C`` and ``CXX`` languages.
+
+Environment Variables
+---------------------
+
+* The :envvar:`CMAKE_<LANG>_IMPLICIT_LINK_LIBRARIES_EXCLUDE` environment
+  variable was added to optionally exclude specific libraries from the
+  detected set of :variable:`CMAKE_<LANG>_IMPLICIT_LINK_LIBRARIES`.
+
+Properties
+----------
+
+* The :prop_tgt:`AUTOMOC_INCLUDE_DIRECTORIES` target property and associated
+  :variable:`CMAKE_AUTOMOC_INCLUDE_DIRECTORIES` variable were added to
+  override the automatic discovery of moc includes from a target's transitive
+  include directories.
+
+* The :prop_sf:`MACOSX_PACKAGE_LOCATION` source file property now
+  works when set on a source directory, and copies its entire tree
+  into the bundle.
+
+* The :prop_tgt:`PDB_NAME` and :prop_tgt:`COMPILE_PDB_NAME` target properties
+  now support :manual:`generator expressions <cmake-generator-expressions(7)>`.
+
+Modules
+-------
+
+* The :module:`FindASPELL` module now provides a version variable, imported
+  targets, and components to optionally select the Aspell library and
+  executable separately.
+
+* The :module:`FindBLAS` and :module:`FindLAPACK` modules now support the
+  NVIDIA Performance Libraries (NVPL).
+
+* The :module:`FindProtobuf` module's :command:`protobuf_generate(DEPENDENCIES)`
+  command argument now accepts multiple values.
+
+* The :module:`FindProtobuf` module's :command:`protobuf_generate_cpp` and
+  :command:`protobuf_generate_python` commands, together with their
+  ``Protobuf_IMPORT_DIRS`` and ``PROTOBUF_GENERATE_CPP_APPEND_PATH`` hint
+  variables, are now deprecated in favor of the :command:`protobuf_generate`
+  command.
+
+Regular Expressions
+-------------------
+
+* The :command:`string(REGEX MATCHALL)`, :command:`string(REGEX REPLACE)`, and
+  :command:`list(TRANSFORM REPLACE)` commands now match the regular expression
+  ``^`` anchor at most once in repeated searches, at the start of the input.
+  See policy :policy:`CMP0186`.
+
+* The :command:`string(REGEX REPLACE)` command now allows references to
+  unmatched groups.  They are replaced with empty strings.
+
+* The :command:`string(REGEX MATCH)`, :command:`string(REGEX MATCHALL)`, and
+  :command:`string(REGEX REPLACE)` commands now allow zero-length matches.
+
+CTest
+-----
+
+* :manual:`ctest(1)` gained a
+  :option:`--schedule-random-seed <ctest --schedule-random-seed>`
+  option to specify a numeric random seed to make
+  :option:`ctest --schedule-random` deterministic for reproduction.
+
+CPack
+-----
 
 * The :cpack_gen:`CPack NuGet Generator` gained option
   :variable:`CPACK_NUGET_SYMBOL_PACKAGE` to generate NuGet
@@ -45,48 +167,35 @@ Changes made since CMake 4.0 include the following.
   :variable:`CPACK_RPM_PACKAGE_SUPPLEMENTS`
   variables to specify the corresponding RPM spec fields.
 
-* :manual:`ctest(1)` gained a
-  :option:`--schedule-random-seed <ctest --schedule-random-seed>`
-  option to specify a numeric random seed to make
-  :option:`ctest --schedule-random` deterministic for reproduction.
-
-* `Diab compilers from Wind River Systems`_, versions 5.9.x+, are now
-  supported with :variable:`compiler id <CMAKE_<LANG>_COMPILER_ID>` ``Diab``
-  for languages ``ASM``, ``C``, and ``CXX``.
-
-.. _`Diab compilers from Wind River Systems`: https://www.windriver.com/resource/wind-river-diab-compiler-product-overview
-
-* The :module:`ExternalProject` module no longer checks the ``URL`` archive
-  file extension.  Any archive type that :option:`cmake -E tar <cmake-E tar>`
-  can extract is now allowed.
-
-* The :manual:`cmake-file-api(7)` :ref:`v1 <file-api v1>` now writes
-  partial replies when buildsystem generation fails with an error.
-  See the :ref:`v1 Reply Error Index <file-api reply error index>`.
-
-* The :module:`FindASPELL` module now provides version variable, imported
-  targets, and components to optionally select Aspell library and executable
-  separately.
+Deprecated and Removed Features
+===============================
 
 * The :module:`FindGTest` module's result variables ``GTEST_INCLUDE_DIRS``,
   ``GTEST_LIBRARIES``, ``GTEST_MAIN_LIBRARIES``, and ``GTEST_BOTH_LIBRARIES``
   are now deprecated in favor of using ``GTest::gtest`` and
   ``GTest::gtest_main`` imported targets.
 
-* The :module:`FindProtobuf` module's :command:`protobuf_generate(DEPENDENCIES)`
-  command argument now accepts multiple values.
-* The :module:`FindProtobuf` module's commands :command:`protobuf_generate_cpp`
-  and :command:`protobuf_generate_python` together with their hint variables
-  ``Protobuf_IMPORT_DIRS`` and ``PROTOBUF_GENERATE_CPP_APPEND_PATH`` are now
-  deprecated in favor of :command:`protobuf_generate`.
+* The :module:`FindGCCXML` module has been deprecated via policy
+  :policy:`CMP0188`.  Port projects to CastXML instead.
 
-* Modules :module:`FindPython3`, :module:`FindPython2` and :module:`FindPython`
-  enforce consistency of artifacts in cross-compiling mode. This prevent mixing
-  host and target artifacts. See policy :policy:`CMP0190` for more information.
+* The :module:`FindCABLE` module has been deprecated via policy
+  :policy:`CMP0191`.
 
-* The :genex:`TARGET_PROPERTY` generator expression now evaluates the
-  :prop_tgt:`LINK_LIBRARIES` and :prop_tgt:`INTERFACE_LINK_LIBRARIES`
-  target properties transitively.  See policy :policy:`CMP0189`.
+* The :module:`CMakeDetermineVSServicePack` module has been deprecated
+  via policy :policy:`CMP0196`.  Port projects to the
+  :variable:`CMAKE_<LANG>_COMPILER_VERSION` variable instead.
+
+Other Changes
+=============
+
+* The :module:`ExternalProject` module no longer checks the ``URL`` archive
+  file extension.  Any archive type that :option:`cmake -E tar <cmake-E tar>`
+  can extract is now allowed.
+
+* Modules :module:`FindPython3`, :module:`FindPython2` and
+  :module:`FindPython` now enforce consistency of artifacts in
+  cross-compiling mode.  This prevents mixing host and target artifacts.
+  See policy :policy:`CMP0190`.
 
 * The :module:`GNUInstallDirs` module now prefers to default
   ``SYSCONFDIR``, ``LOCALSTATEDIR``, and ``RUNSTATEDIR`` to
@@ -97,73 +206,17 @@ Changes made since CMake 4.0 include the following.
   variables with their leading ``usr/`` for install prefix ``/``.
   See policy :policy:`CMP0193`.
 
-* The :variable:`CMAKE_<LANG>_ICSTAT` variable and corresponding
-  :prop_tgt:`<LANG>_ICSTAT` target property were added to tell
-  the :ref:`Makefile Generators` and the :ref:`Ninja Generators`
-  to run the IAR ``icstat`` tool along with the compiler for
-  ``C`` and ``CXX`` languages.
-
-* The :manual:`cmake-configure-log(7)` will report events from ``find_``
-  commands without any find-debug flags (e.g.,
-  :variable:`CMAKE_FIND_DEBUG_MODE`) when they transition between "found" and
-  "not found" or when they are first defined. The
-  :variable:`CMAKE_FIND_DEBUG_MODE_NO_IMPLICIT_CONFIGURE_LOG` variable will
-  suppress these events without any explicit request for a debug mode.
-
-* The :envvar:`CMAKE_<LANG>_IMPLICIT_LINK_LIBRARIES_EXCLUDE` environment
-  variable was added to optionally exclude specific libraries from the
-  detected set of :variable:`CMAKE_<LANG>_IMPLICIT_LINK_LIBRARIES`.
-
-* The :command:`install(DIRECTORY)` command gained a new
-  ``EXCLUDE_EMPTY_DIRECTORIES`` option to skip installation
-  of empty directories.
-
 * The :command:`install(TARGETS)` command no longer ignores file sets which
   haven't been defined at the point it is called. The ordering of
   :command:`target_sources(FILE_SET)` and ``install(TARGETS)`` is no longer
   semantically relevant.
 
-* :ref:`Makefile Generators` and :ref:`Ninja Generators` gained support
-  for adding a linker launcher with ``Fortran``, ``CUDA``, and ``HIP``.
-  See the :variable:`CMAKE_<LANG>_LINKER_LAUNCHER` variable
-  and :prop_tgt:`<LANG>_LINKER_LAUNCHER` target property for details.
-
-* The :prop_sf:`MACOSX_PACKAGE_LOCATION` source file property now
-  works when set on a source directory, and copies its entire tree
-  into the bundle.
+* Enabling ``ASM`` no longer accidentally succeeds using ``MSVC``'s ``cl``
+  C compiler as an assembler.  See policy :policy:`CMP0194`.
 
 * The MSVC link ``-machine:`` flag is no longer added to the
   ``CMAKE_*_LINKER_FLAGS`` variables.  See policy :policy:`CMP0197`.
 
-* The :module:`FindBLAS` and :module:`FindLAPACK` modules now support the
-  NVIDIA Performance Libraries (NVPL).
-
-* The :prop_tgt:`PDB_NAME` and :prop_tgt:`COMPILE_PDB_NAME` target properties
-  now support :manual:`generator expressions <cmake-generator-expressions(7)>`.
-
-* The :command:`project` command now has experimental support for the
-  ``COMPAT_VERSION`` keyword, gated by
-  ``CMAKE_EXPERIMENTAL_EXPORT_PACKAGE_INFO``.
-
-* Regular expressions match the ``^`` anchor at most once in repeated
-  searches, at the start of the input.  See policy :policy:`CMP0186`.
-
-* References to unmatched groups are allowed, they are replaced with empty
-  strings.
-
-* Zero-length matches are always allowed.
-
-* The :module`:CMakeDetermineVSServicePack` module has been deprecated
-  via policy :policy:`CMP0196`.  Port projects to the
-  :variable:`CMAKE_<LANG>_COMPILER_VERSION` variable instead.
-
-* The :module:`FindCABLE` module has been deprecated via policy
-  :policy:`CMP0191`.
-
-* The :module:`FindGCCXML` module has been deprecated via policy
-  :policy:`CMP0188`.  Port projects to CastXML instead.
-
-* The :ref:`cmake --build <Build Tool Mode>` command-line tool, when used
-  with the :generator:`Xcode` generator, now detects when a third-party
-  tool has wrapped the generated ``.xcodeproj`` in a ``.xcworkspace``,
-  and drives the build through the workspace instead.
+* The :genex:`TARGET_PROPERTY` generator expression now evaluates the
+  :prop_tgt:`LINK_LIBRARIES` and :prop_tgt:`INTERFACE_LINK_LIBRARIES`
+  target properties transitively.  See policy :policy:`CMP0189`.
