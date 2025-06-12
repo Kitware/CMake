@@ -5,7 +5,11 @@
 FindBZip2
 ---------
 
-Finds the BZip2 data compression library (libbz2).
+Finds the BZip2 data compression library (libbz2):
+
+.. code-block:: cmake
+
+  find_package(BZip2 [<version>] [...])
 
 Imported Targets
 ^^^^^^^^^^^^^^^^
@@ -55,7 +59,9 @@ The following cache variables may also be set:
   The path to the BZip2 library for debug configurations.
 
 ``BZIP2_NEED_PREFIX``
-  Boolean indicating if the BZip2 functions are prefixed with ``BZ2_``.
+  Boolean indicating whether BZip2 functions are prefixed with ``BZ2_``
+  (e.g., ``BZ2_bzCompressInit()``).  Versions of BZip2 prior to 1.0.0 used
+  unprefixed function names (e.g., ``bzCompressInit()``).
 
 Legacy Variables
 ^^^^^^^^^^^^^^^^
@@ -117,7 +123,15 @@ if (BZip2_FOUND)
   set(CMAKE_REQUIRED_QUIET ${BZip2_FIND_QUIETLY})
   set(CMAKE_REQUIRED_INCLUDES ${BZIP2_INCLUDE_DIR})
   set(CMAKE_REQUIRED_LIBRARIES ${BZIP2_LIBRARIES})
-  check_symbol_exists(BZ2_bzCompressInit "bzlib.h" BZIP2_NEED_PREFIX)
+
+  # Versions before 1.0.2 required <stdio.h> for the FILE definition.
+  set(BZip2_headers "bzlib.h")
+  if(BZIP2_VERSION VERSION_LESS "1.0.2")
+    list(PREPEND BZip2_headers "stdio.h")
+  endif()
+  check_symbol_exists(BZ2_bzCompressInit "${BZip2_headers}" BZIP2_NEED_PREFIX)
+  unset(BZip2_headers)
+
   cmake_pop_check_state()
 
   if(NOT TARGET BZip2::BZip2)
