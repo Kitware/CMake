@@ -294,3 +294,10 @@ Changes made since CMake 4.0.0 include the following.
 * The :prop_tgt:`DEBUGGER_WORKING_DIRECTORY` target property is now
   used by the :generator:`Xcode` generator as a fallback for the
   :prop_tgt:`XCODE_SCHEME_WORKING_DIRECTORY` target property.
+
+4.0.3
+-----
+
+* This version made no changes to documented features or interfaces.
+  Some implementation updates were made to support ecosystem changes
+  and/or fix regressions.
