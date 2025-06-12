@@ -3,7 +3,7 @@ CMAKE_VS_NUGET_PACKAGE_RESTORE
 
 .. versionadded:: 3.23
 
-When using a Visual Studio generator, this cache variable controls
+When using :ref:`Visual Studio Generators`, this cache variable controls
 if msbuild should automatically attempt to restore NuGet packages
 prior to a build. NuGet packages can be defined using the
 :prop_tgt:`VS_PACKAGE_REFERENCES` property on a target. If no

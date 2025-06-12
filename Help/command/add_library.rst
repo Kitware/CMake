@@ -120,9 +120,9 @@ may contain only sources that compile, header files, and other files
 that would not affect linking of a normal library (e.g. ``.txt``).
 They may contain custom commands generating such sources, but not
 ``PRE_BUILD``, ``PRE_LINK``, or ``POST_BUILD`` commands.  Some native build
-systems (such as Xcode) may not like targets that have only object files, so
-consider adding at least one real source file to any target that references
-:genex:`$\<TARGET_OBJECTS:objlib\> <TARGET_OBJECTS>`.
+systems (such as :generator:`Xcode`) may not like targets that have only
+object files, so consider adding at least one real source file to any target
+that references :genex:`$\<TARGET_OBJECTS:objlib\> <TARGET_OBJECTS>`.
 
 .. versionadded:: 3.12
   Object libraries can be linked to with :command:`target_link_libraries`.

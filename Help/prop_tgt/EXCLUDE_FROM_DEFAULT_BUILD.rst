@@ -3,9 +3,9 @@ EXCLUDE_FROM_DEFAULT_BUILD
 
 Exclude a target from the solution build configuration.
 
-This property is only used by Visual Studio generators. When set to ``TRUE``,
-the target will be excluded from the build when the "Build Solution" command
-is run.
+This property is only used by :ref:`Visual Studio Generators`. When set to
+``TRUE``, the target will be excluded from the build when the "Build Solution"
+command is run.
 
 This property has a per-configuration version:
 :prop_tgt:`EXCLUDE_FROM_DEFAULT_BUILD_<CONFIG>`.

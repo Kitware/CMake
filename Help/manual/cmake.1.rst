@@ -712,7 +712,7 @@ following options:
   specific cache variable will be evaluated to decide, if package restoration
   should be performed.
 
-  When using the Visual Studio generator, package references are defined
+  When using :ref:`Visual Studio Generators`, package references are defined
   using the :prop_tgt:`VS_PACKAGE_REFERENCES` property. Package references
   are restored using NuGet. It can be disabled by setting the
   ``CMAKE_VS_NUGET_PACKAGE_RESTORE`` variable to ``OFF``.

@@ -5,9 +5,9 @@ CMP0132
 
 Do not set compiler environment variables on first run.
 
-Apart from when using the Xcode generator and some Visual Studio generators,
-CMake 3.23 and below will set environment variables like :envvar:`CC`,
-:envvar:`CXX`, etc. when the corresponding language is enabled.
+Apart from when using the :generator:`Xcode` generator and some :ref:`Visual
+Studio Generators`, CMake 3.23 and below will set environment variables like
+:envvar:`CC`, :envvar:`CXX`, etc. when the corresponding language is enabled.
 This only occurs on the very first time CMake is run in a build directory,
 and the environment variables are only defined at configure time, not build
 time. On subsequent CMake runs, these environment variables are not set,

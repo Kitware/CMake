@@ -4,7 +4,8 @@ FRAMEWORK_MULTI_CONFIG_POSTFIX_<CONFIG>
 .. versionadded:: 3.18
 
 Postfix to append to the framework file name for configuration ``<CONFIG>``,
-when using a multi-config generator (like Xcode and Ninja Multi-Config).
+when using a multi-config generator (like :generator:`Xcode` and
+:generator:`Ninja Multi-Config`).
 
 When building with configuration ``<CONFIG>`` the value of this property
 is appended to the framework file name built on disk.

@@ -5,7 +5,7 @@ VS_CSHARP_<tagname>
 
 Visual Studio and CSharp source-file-specific configuration.
 
-Tell the :manual:`Visual Studio generators <cmake-generators(7)>`
+Tell the :ref:`Visual Studio Generators`
 to set the source file tag ``<tagname>``
 to a given value in the generated Visual Studio CSharp
 project. Ignored on other generators and languages. This property

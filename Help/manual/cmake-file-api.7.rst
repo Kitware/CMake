@@ -1158,8 +1158,8 @@ with members:
   ``workingDirectory``
     Optional member that is present when the DEBUGGER_WORKING_DIRECTORY
     target property is set.
-    The member will also be present in Visual Studio Generator
-    scenarios when VS_DEBUGGER_WORKING_DIRECTORY is set.
+    The member will also be present in :ref:`Visual Studio Generators`
+    when VS_DEBUGGER_WORKING_DIRECTORY is set.
 
     This field was added in codemodel version 2.8.
 

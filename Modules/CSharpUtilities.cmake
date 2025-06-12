@@ -9,7 +9,7 @@ CSharpUtilities
 
 This utility module is intended to simplify the configuration of CSharp/.NET
 targets and provides a collection of commands for managing CSharp targets
-with Visual Studio generators, version 2010 and newer.
+with :ref:`Visual Studio Generators`, version 2010 and newer.
 
 Load this module in a CMake project with:
 
