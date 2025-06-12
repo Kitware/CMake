@@ -14,6 +14,7 @@
 #include "cmDepends.h"
 #include "cmGeneratorOptions.h"
 #include "cmLocalCommonGenerator.h"
+#include "cmStateTypes.h"
 
 class cmCustomCommand;
 class cmCustomCommandGenerator;
@@ -43,7 +44,9 @@ public:
    */
   void Generate() override;
 
-  std::string GetObjectOutputRoot() const override;
+  std::string GetObjectOutputRoot(
+    cmStateEnums::IntermediateDirKind kind =
+      cmStateEnums::IntermediateDirKind::ObjectFiles) const override;
 
   // this returns the relative path between the HomeOutputDirectory and this
   // local generators StartOutputDirectory

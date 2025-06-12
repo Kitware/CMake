@@ -45,6 +45,7 @@
 #include "cmStandardLevel.h"
 #include "cmStandardLevelResolver.h"
 #include "cmState.h"
+#include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSyntheticTargetCache.h"
 #include "cmSystemTools.h"
@@ -5363,26 +5364,29 @@ bool cmGeneratorTarget::NeedImportLibraryName(std::string const& config) const
       this->GetType() == cmStateEnums::MODULE_LIBRARY));
 }
 
-bool cmGeneratorTarget::GetUseShortObjectNames() const
+bool cmGeneratorTarget::GetUseShortObjectNames(
+  cmStateEnums::IntermediateDirKind kind) const
 {
-  return this->LocalGenerator->UseShortObjectNames();
+  return this->LocalGenerator->UseShortObjectNames(kind);
 }
 
-std::string cmGeneratorTarget::GetSupportDirectory() const
+std::string cmGeneratorTarget::GetSupportDirectory(
+  cmStateEnums::IntermediateDirKind kind) const
 {
   cmLocalGenerator* lg = this->GetLocalGenerator();
-  return cmStrCat(lg->GetObjectOutputRoot(), '/',
+  return cmStrCat(lg->GetObjectOutputRoot(kind), '/',
                   lg->GetTargetDirectory(this));
 }
 
-std::string cmGeneratorTarget::GetCMFSupportDirectory() const
+std::string cmGeneratorTarget::GetCMFSupportDirectory(
+  cmStateEnums::IntermediateDirKind kind) const
 {
   cmLocalGenerator* lg = this->GetLocalGenerator();
   if (!lg->AlwaysUsesCMFPaths()) {
     return cmStrCat(lg->GetCurrentBinaryDirectory(), "/CMakeFiles/",
                     lg->GetTargetDirectory(this));
   }
-  return cmStrCat(lg->GetObjectOutputRoot(), '/',
+  return cmStrCat(lg->GetObjectOutputRoot(kind), '/',
                   lg->GetTargetDirectory(this));
 }
 

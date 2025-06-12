@@ -630,7 +630,9 @@ public:
   void AddCMP0068WarnTarget(std::string const& target);
 
   virtual bool SupportsShortObjectNames() const;
-  bool UseShortObjectNames() const;
+  bool UseShortObjectNames(
+    cmStateEnums::IntermediateDirKind kind =
+      cmStateEnums::IntermediateDirKind::ObjectFiles) const;
   virtual std::string GetShortBinaryOutputDir() const;
   std::string ComputeTargetShortName(std::string const& bindir,
                                      std::string const& targetName) const;
@@ -953,6 +955,8 @@ private:
     Short,
   };
   IntermediateDirStrategy IntDirStrategy = IntermediateDirStrategy::Full;
+  IntermediateDirStrategy QtAutogenIntDirStrategy =
+    IntermediateDirStrategy::Full;
 
 protected:
   float FirstTimeProgress;

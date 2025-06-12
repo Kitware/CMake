@@ -460,20 +460,31 @@ bool cmQtAutoGenInitializer::InitCustomTargets()
     // Collapsed current binary directory
     std::string const cbd = cmSystemTools::CollapseFullPath(
       std::string(), this->Makefile->GetCurrentBinaryDirectory());
+    std::string infoDir;
+    std::string buildDir;
+    auto idirkind = cmStateEnums::IntermediateDirKind::QtAutogenMetadata;
+    if (this->GenTarget->GetUseShortObjectNames(idirkind)) {
+      infoDir = cmSystemTools::CollapseFullPath(
+        std::string(),
+        cmStrCat(this->GenTarget->GetSupportDirectory(idirkind),
+                 "/autogen_info"));
+      buildDir = cmSystemTools::CollapseFullPath(
+        std::string(),
+        cmStrCat(this->GenTarget->GetSupportDirectory(idirkind), "/autogen"));
+    } else {
+      infoDir = cmStrCat(cbd, "/CMakeFiles/", this->GenTarget->GetName(),
+                         "_autogen.dir");
+      buildDir = cmStrCat(cbd, '/', this->GenTarget->GetName(), "_autogen");
+    }
 
     // Info directory
-    // TODO: Split this? `AutogenInfo.json` is expected to always be under the
-    // `CMakeFiles` directory, but not all generators places its `<tgt>.dir`
-    // directories there.
-    this->Dir.Info = cmStrCat(cbd, "/CMakeFiles/", this->GenTarget->GetName(),
-                              "_autogen.dir");
+    this->Dir.Info = infoDir;
     cmSystemTools::ConvertToUnixSlashes(this->Dir.Info);
 
     // Build directory
     this->Dir.Build = this->GenTarget->GetSafeProperty("AUTOGEN_BUILD_DIR");
     if (this->Dir.Build.empty()) {
-      this->Dir.Build =
-        cmStrCat(cbd, '/', this->GenTarget->GetName(), "_autogen");
+      this->Dir.Build = buildDir;
     }
     cmSystemTools::ConvertToUnixSlashes(this->Dir.Build);
     this->Dir.RelativeBuild =

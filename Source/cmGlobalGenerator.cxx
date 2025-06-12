@@ -1453,6 +1453,20 @@ bool cmGlobalGenerator::Compute()
       return false;
     }
   }
+  if (cmValue v = this->CMakeInstance->GetCacheDefinition(
+        "CMAKE_AUTOGEN_INTERMEDIATE_DIR_STRATEGY")) {
+    if (*v == "FULL") {
+      this->QtAutogenIntDirStrategy = IntermediateDirStrategy::Full;
+    } else if (*v == "SHORT") {
+      this->QtAutogenIntDirStrategy = IntermediateDirStrategy::Short;
+    } else {
+      this->GetCMakeInstance()->IssueMessage(
+        MessageType::FATAL_ERROR,
+        cmStrCat("Unsupported autogen intermediate directory strategy '", *v,
+                 '\''));
+      return false;
+    }
+  }
 
   // Some generators track files replaced during the Generate.
   // Start with an empty vector:
@@ -2000,10 +2014,23 @@ bool cmGlobalGenerator::SupportsShortObjectNames() const
   return false;
 }
 
-bool cmGlobalGenerator::UseShortObjectNames() const
+bool cmGlobalGenerator::UseShortObjectNames(
+  cmStateEnums::IntermediateDirKind kind) const
 {
+  IntermediateDirStrategy strategy = IntermediateDirStrategy::Full;
+  switch (kind) {
+    case cmStateEnums::IntermediateDirKind::ObjectFiles:
+      strategy = this->IntDirStrategy;
+      break;
+    case cmStateEnums::IntermediateDirKind::QtAutogenMetadata:
+      strategy = this->QtAutogenIntDirStrategy;
+      break;
+    default:
+      assert(false);
+      break;
+  }
   return this->SupportsShortObjectNames() &&
-    this->IntDirStrategy == IntermediateDirStrategy::Short;
+    strategy == IntermediateDirStrategy::Short;
 }
 
 std::string cmGlobalGenerator::GetShortBinaryOutputDir() const

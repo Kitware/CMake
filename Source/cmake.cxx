@@ -935,6 +935,8 @@ void cmake::LoadEnvironmentPresets()
   readGeneratorVar("CMAKE_GENERATOR_TOOLSET", this->GeneratorToolset);
   this->IntermediateDirStrategy =
     cmSystemTools::GetEnvVar("CMAKE_INTERMEDIATE_DIR_STRATEGY");
+  this->AutogenIntermediateDirStrategy =
+    cmSystemTools::GetEnvVar("CMAKE_AUTOGEN_INTERMEDIATE_DIR_STRATEGY");
 }
 
 namespace {
@@ -2608,6 +2610,15 @@ int cmake::ActualConfigure()
     this->AddCacheEntry(
       "CMAKE_INTERMEDIATE_DIR_STRATEGY", *this->IntermediateDirStrategy,
       "Select the intermediate directory strategy", cmStateEnums::INTERNAL);
+  }
+  if (!this->State->GetInitializedCacheValue(
+        "CMAKE_AUTOGEN_INTERMEDIATE_DIR_STRATEGY") &&
+      this->AutogenIntermediateDirStrategy) {
+    this->AddCacheEntry(
+      "CMAKE_AUTOGEN_INTERMEDIATE_DIR_STRATEGY",
+      *this->AutogenIntermediateDirStrategy,
+      "Select the intermediate directory strategy for Autogen",
+      cmStateEnums::INTERNAL);
   }
 
   if (!this->State->GetInitializedCacheValue("CMAKE_TEST_LAUNCHER")) {

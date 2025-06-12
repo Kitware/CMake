@@ -201,9 +201,10 @@ void cmLocalUnixMakefileGenerator3::Generate()
   this->WriteDirectoryInformationFile();
 }
 
-std::string cmLocalUnixMakefileGenerator3::GetObjectOutputRoot() const
+std::string cmLocalUnixMakefileGenerator3::GetObjectOutputRoot(
+  cmStateEnums::IntermediateDirKind kind) const
 {
-  if (this->UseShortObjectNames()) {
+  if (this->UseShortObjectNames(kind)) {
     return cmStrCat(this->GetCurrentBinaryDirectory(), '/',
                     this->GetGlobalGenerator()->GetShortBinaryOutputDir());
   }

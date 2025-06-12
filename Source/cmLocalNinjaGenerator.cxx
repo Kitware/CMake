@@ -163,9 +163,10 @@ void cmLocalNinjaGenerator::Generate()
   }
 }
 
-std::string cmLocalNinjaGenerator::GetObjectOutputRoot() const
+std::string cmLocalNinjaGenerator::GetObjectOutputRoot(
+  cmStateEnums::IntermediateDirKind kind) const
 {
-  if (this->UseShortObjectNames()) {
+  if (this->UseShortObjectNames(kind)) {
     return cmStrCat(this->GetBinaryDirectory(), '/',
                     this->GetGlobalGenerator()->GetShortBinaryOutputDir());
   }

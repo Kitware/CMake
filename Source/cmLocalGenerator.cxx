@@ -4307,13 +4307,19 @@ std::string cmLocalGenerator::GetObjectFileNameWithoutTarget(
   return this->CreateSafeUniqueObjectFileName(objectName, dir_max);
 }
 
-bool cmLocalGenerator::UseShortObjectNames() const
+bool cmLocalGenerator::UseShortObjectNames(
+  cmStateEnums::IntermediateDirKind kind) const
 {
-  return this->GlobalGenerator->UseShortObjectNames();
+  return this->GlobalGenerator->UseShortObjectNames(kind);
 }
 
-std::string cmLocalGenerator::GetObjectOutputRoot() const
+std::string cmLocalGenerator::GetObjectOutputRoot(
+  cmStateEnums::IntermediateDirKind kind) const
 {
+  if (this->UseShortObjectNames(kind)) {
+    return cmStrCat(this->GetCurrentBinaryDirectory(), '/',
+                    this->GlobalGenerator->GetShortBinaryOutputDir());
+  }
   return cmStrCat(this->GetCurrentBinaryDirectory(), "/CMakeFiles");
 }
 

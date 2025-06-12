@@ -44,6 +44,7 @@ Environment Variables that Control the Build
 
    /envvar/ADSP_ROOT
    /envvar/CMAKE_APPLE_SILICON_PROCESSOR
+   /envvar/CMAKE_AUTOGEN_INTERMEDIATE_DIR_STRATEGY
    /envvar/CMAKE_BUILD_PARALLEL_LEVEL
    /envvar/CMAKE_BUILD_TYPE
    /envvar/CMAKE_COLOR_DIAGNOSTICS

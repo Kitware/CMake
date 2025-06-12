@@ -95,9 +95,10 @@ void cmLocalVisualStudioGenerator::ComputeObjectFilenames(
   }
 }
 
-std::string cmLocalVisualStudioGenerator::GetObjectOutputRoot() const
+std::string cmLocalVisualStudioGenerator::GetObjectOutputRoot(
+  cmStateEnums::IntermediateDirKind kind) const
 {
-  if (this->UseShortObjectNames()) {
+  if (this->UseShortObjectNames(kind)) {
     return cmStrCat(this->GetCurrentBinaryDirectory(), '/',
                     this->GetGlobalGenerator()->GetShortBinaryOutputDir());
   }

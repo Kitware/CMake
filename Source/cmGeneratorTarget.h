@@ -937,11 +937,17 @@ public:
   /** Return whether or not the target has a DLL import library.  */
   bool HasImportLibrary(std::string const& config) const;
 
-  bool GetUseShortObjectNames() const;
+  bool GetUseShortObjectNames(
+    cmStateEnums::IntermediateDirKind kind =
+      cmStateEnums::IntermediateDirKind::ObjectFiles) const;
 
   /** Get a build-tree directory in which to place target support files.  */
-  std::string GetSupportDirectory() const;
-  std::string GetCMFSupportDirectory() const;
+  std::string GetSupportDirectory(
+    cmStateEnums::IntermediateDirKind kind =
+      cmStateEnums::IntermediateDirKind::ObjectFiles) const;
+  std::string GetCMFSupportDirectory(
+    cmStateEnums::IntermediateDirKind kind =
+      cmStateEnums::IntermediateDirKind::ObjectFiles) const;
 
   /** Return whether this target may be used to link another target.  */
   bool IsLinkable() const;

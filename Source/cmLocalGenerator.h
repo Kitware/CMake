@@ -24,6 +24,7 @@
 #include "cmOutputConverter.h"
 #include "cmPolicies.h"
 #include "cmStateSnapshot.h"
+#include "cmStateTypes.h"
 #include "cmValue.h"
 
 class cmCompiledGeneratorExpression;
@@ -439,8 +440,12 @@ public:
   std::string const& GetCurrentBinaryDirectory() const;
   std::string const& GetCurrentSourceDirectory() const;
 
-  bool UseShortObjectNames() const;
-  virtual std::string GetObjectOutputRoot() const;
+  bool UseShortObjectNames(
+    cmStateEnums::IntermediateDirKind kind =
+      cmStateEnums::IntermediateDirKind::ObjectFiles) const;
+  virtual std::string GetObjectOutputRoot(
+    cmStateEnums::IntermediateDirKind kind =
+      cmStateEnums::IntermediateDirKind::ObjectFiles) const;
   virtual bool AlwaysUsesCMFPaths() const;
   virtual std::string GetShortObjectFileName(cmSourceFile const& source) const;
   virtual std::string ComputeShortTargetDirectory(

@@ -15,6 +15,7 @@
 #include "cmLocalCommonGenerator.h"
 #include "cmNinjaTypes.h"
 #include "cmOutputConverter.h"
+#include "cmStateTypes.h"
 
 class cmCustomCommand;
 class cmCustomCommandGenerator;
@@ -62,7 +63,9 @@ public:
   {
     return this->HomeRelativeOutputPath;
   }
-  std::string GetObjectOutputRoot() const override;
+  std::string GetObjectOutputRoot(
+    cmStateEnums::IntermediateDirKind kind =
+      cmStateEnums::IntermediateDirKind::ObjectFiles) const override;
 
   std::string BuildCommandLine(
     std::vector<std::string> const& cmdLines, std::string const& outputConfig,
