@@ -12,7 +12,7 @@ Synopsis
  project(<PROJECT-NAME>
          [VERSION <major>[.<minor>[.<patch>[.<tweak>]]]]
          [COMPAT_VERSION <major>[.<minor>[.<patch>[.<tweak>]]]]
-         [DESCRIPTION <project-description-string>]
+         [DESCRIPTION <description-string>]
          [HOMEPAGE_URL <url-string>]
          [LANGUAGES <language-name>...])
 
@@ -106,7 +106,7 @@ The options are:
     ``CMakeLists.txt``, then the compatibility version is also stored in the
     variable :variable:`CMAKE_PROJECT_COMPAT_VERSION`.
 
-``DESCRIPTION <project-description-string>``
+``DESCRIPTION <description-string>``
   .. versionadded:: 3.9
 
   Optional.
@@ -114,7 +114,7 @@ The options are:
 
   * :variable:`PROJECT_DESCRIPTION`, :variable:`<PROJECT-NAME>_DESCRIPTION`
 
-  to ``<project-description-string>``.
+  to ``<description-string>``.
   It is recommended that this description is a relatively short string,
   usually no more than a few words.
 

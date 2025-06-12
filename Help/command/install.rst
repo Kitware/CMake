@@ -1001,7 +1001,7 @@ Signatures
              [VERSION_SCHEMA <string>]]
             [DEFAULT_TARGETS <target>...]
             [DEFAULT_CONFIGURATIONS <config>...]
-            [DESCRIPTION <project-description-string>]
+            [DESCRIPTION <description-string>]
             [HOMEPAGE_URL <url-string>]
             [PERMISSIONS <permission>...]
             [CONFIGURATIONS <config>...]
@@ -1059,7 +1059,7 @@ Signatures
     configurations exists.  If not specified, CMake will fall back to the
     package's available configurations in an unspecified order.
 
-  ``DESCRIPTION <project-description-string>``
+  ``DESCRIPTION <description-string>``
     .. versionadded:: 4.1
 
     An informational description of the project.  It is recommended that this
