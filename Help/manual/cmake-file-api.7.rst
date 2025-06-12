@@ -1156,10 +1156,10 @@ with members:
   This field was added in codemodel version 2.8.
 
   ``workingDirectory``
-    Optional member that is present when the DEBUGGER_WORKING_DIRECTORY
-    target property is set.
+    Optional member that is present when the
+    :prop_tgt:`DEBUGGER_WORKING_DIRECTORY` target property is set.
     The member will also be present in :ref:`Visual Studio Generators`
-    when VS_DEBUGGER_WORKING_DIRECTORY is set.
+    when :prop_tgt:`VS_DEBUGGER_WORKING_DIRECTORY` is set.
 
     This field was added in codemodel version 2.8.
 
