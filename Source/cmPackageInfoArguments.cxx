@@ -60,6 +60,8 @@ bool cmPackageInfoArguments::Check(cmExecutionStatus& status,
     ENFORCE_REQUIRES("PACKAGE_INFO", this->LowerCase, "LOWER_CASE_FILE");
     ENFORCE_REQUIRES("PACKAGE_INFO", this->Appendix, "APPENDIX");
     ENFORCE_REQUIRES("PACKAGE_INFO", this->Version, "VERSION");
+    ENFORCE_REQUIRES("PACKAGE_INFO", this->Description, "DESCRIPTION");
+    ENFORCE_REQUIRES("PACKAGE_INFO", this->Website, "HOMEPAGE_URL");
     ENFORCE_REQUIRES("PACKAGE_INFO", this->DefaultTargets, "DEFAULT_TARGETS");
     ENFORCE_REQUIRES("PACKAGE_INFO", this->DefaultConfigs,
                      "DEFAULT_CONFIGURATIONS");
@@ -71,6 +73,8 @@ bool cmPackageInfoArguments::Check(cmExecutionStatus& status,
   // Check for incompatible options.
   if (!this->Appendix.empty()) {
     ENFORCE_EXCLUSIVE("APPENDIX", this->Version, "VERSION");
+    ENFORCE_EXCLUSIVE("APPENDIX", this->Description, "DESCRIPTION");
+    ENFORCE_EXCLUSIVE("APPENDIX", this->Website, "HOMEPAGE_URL");
     ENFORCE_EXCLUSIVE("APPENDIX", this->DefaultTargets, "DEFAULT_TARGETS");
     ENFORCE_EXCLUSIVE("APPENDIX", this->DefaultConfigs,
                       "DEFAULT_CONFIGURATIONS");
