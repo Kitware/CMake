@@ -12,6 +12,7 @@ Synopsis
  project(<PROJECT-NAME>
          [VERSION <major>[.<minor>[.<patch>[.<tweak>]]]]
          [COMPAT_VERSION <major>[.<minor>[.<patch>[.<tweak>]]]]
+         [SPDX_LICENSE <license-string>]
          [DESCRIPTION <description-string>]
          [HOMEPAGE_URL <url-string>]
          [LANGUAGES <language-name>...])
@@ -105,6 +106,29 @@ The options are:
     When the ``project()`` command is called from the top-level
     ``CMakeLists.txt``, then the compatibility version is also stored in the
     variable :variable:`CMAKE_PROJECT_COMPAT_VERSION`.
+
+``SPDX_LICENSE <license-string>``
+  .. versionadded:: 4.2
+
+  Optional.
+  Sets the variables
+
+  * :variable:`PROJECT_SPDX_LICENSE`,
+    :variable:`<PROJECT-NAME>_SPDX_LICENSE`
+
+  to ``<license-string>``, which shall be a |SPDX|_ (SPDX)
+  `License Expression`_ that describes the license(s) of the project as a
+  whole, including documentation, resources, or other materials distributed
+  with the project, in addition to software artifacts. See the SPDX
+  `License List`_ for a list of commonly used licenses and their identifiers.
+  See the :prop_tgt:`SPDX_LICENSE` property for specifying the license(s) on
+  individual software artifacts.
+
+.. _SPDX: https://spdx.dev/
+.. |SPDX| replace:: System Package Data Exchange
+
+.. _License Expression: https://spdx.github.io/spdx-spec/v3.0.1/annexes/spdx-license-expressions/
+.. _License List: https://spdx.org/licenses/
 
 ``DESCRIPTION <description-string>``
   .. versionadded:: 3.9

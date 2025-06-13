@@ -1,0 +1,1 @@
+  SPDX_LICENSE may be specified at most once.

@@ -66,6 +66,10 @@ run_cmake_with_options(ProjectCompatVersionInvalid ${opts})
 run_cmake_with_options(ProjectCompatVersionMissingVersion ${opts})
 run_cmake_with_options(ProjectCompatVersionNewer ${opts})
 run_cmake_with_options(ProjectCompatVersionNoArg ${opts})
+run_cmake_with_options(ProjectLicense ${opts})
+run_cmake_with_options(ProjectLicense2 ${opts})
+run_cmake_with_options(ProjectLicenseNoArg ${opts})
+run_cmake_with_options(ProjectLicenseNoArg2 ${opts})
 
 run_cmake(CMP0048-NEW)
 
