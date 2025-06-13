@@ -581,12 +581,12 @@ Paths are searched in the order described above.  The first viable package
 configuration file found is used, even if a newer version of the package
 resides later in the list of search paths.
 
-For search paths which contain glob expressions (``*``), the order in which
-directories matching the glob are searched is unspecified unless the
-:variable:`CMAKE_FIND_PACKAGE_SORT_ORDER` variable is set.  This variable,
-along with the :variable:`CMAKE_FIND_PACKAGE_SORT_DIRECTION` variable,
-determines the order in which CMake considers glob matches.  For example, if
-the file system contains the package configuration files
+For search paths which contain glob expressions (``*``), directories matching
+the glob are searched in natural, descending order by default. This behavior
+can be overridden by setting variables :variable:`CMAKE_FIND_PACKAGE_SORT_ORDER`
+and :variable:`CMAKE_FIND_PACKAGE_SORT_DIRECTION` accordingly. Those variables
+determine the order in which CMake considers glob matches. For example, if the
+file system contains the package configuration files
 
 ::
 
@@ -594,21 +594,21 @@ the file system contains the package configuration files
   <prefix>/example-1.10/example-config.cmake
   <prefix>/share/example-2.0/example-config.cmake
 
-it is unspecified (when the aforementioned variables are unset) whether
-``find_package(example)`` will find ``example-1.2`` or ``example-1.10``
-(assuming that both are viable), but ``find_package`` will *not* find
-``example-2.0``, because one of the other two will be found first.
+then ``find_package(example)`` will (when the aforementioned variables are
+unset) pick ``example-1.10`` (assuming both ``example-1.2`` and ``example-1.10``
+are viable). Note however that ``find_package`` will *not* find ``example-2.0``,
+because one of the other two will be found first.
 
 To control the order in which ``find_package`` searches directories that match
 a glob expression, use :variable:`CMAKE_FIND_PACKAGE_SORT_ORDER` and
 :variable:`CMAKE_FIND_PACKAGE_SORT_DIRECTION`.
-For instance, to cause the above example to select ``example-1.10``,
+For instance, to cause the above example to select ``example-1.2``,
 one can set
 
 .. code-block:: cmake
 
   set(CMAKE_FIND_PACKAGE_SORT_ORDER NATURAL)
-  set(CMAKE_FIND_PACKAGE_SORT_DIRECTION DEC)
+  set(CMAKE_FIND_PACKAGE_SORT_DIRECTION ASC)
 
 before calling ``find_package``.
 
@@ -623,6 +623,15 @@ before calling ``find_package``.
    in the search paths ``<prefix>/<name>.framework/Versions/*/Resources/``
    and ``<prefix>/<name>.framework/Versions/*/Resources/CMake``.  In previous
    versions of CMake, this order was unspecified.
+
+.. versionchanged:: 4.2
+   When encountering multiple viable matches, ``find_package`` now picks the
+   one with the most recent version by default. In previous versions of CMake,
+   the result was unspecified. Accordingly, the default of
+   :variable:`CMAKE_FIND_PACKAGE_SORT_ORDER` has changed from ``NONE`` to
+   ``NATURAL`` and :variable:`CMAKE_FIND_PACKAGE_SORT_DIRECTION`
+   now defaults to ``DEC`` (descending) instead of ``ASC`` (ascending).
+
 
 .. include:: include/FIND_XXX_ROOT.rst
 .. include:: include/FIND_XXX_ORDER.rst
