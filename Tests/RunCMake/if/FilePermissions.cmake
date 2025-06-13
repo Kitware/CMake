@@ -94,7 +94,7 @@ else()
       OR IS_READABLE "${CMAKE_CURRENT_BINARY_DIR}/executable-dir"
       OR IS_WRITABLE "${CMAKE_CURRENT_BINARY_DIR}/executable-dir")
     cleanup()
-    message(FATAL_ERROR "checks on \"${CMAKE_CURRENT_BINARY_DIR}/executable.txt\" failed")
+    message(FATAL_ERROR "checks on \"${CMAKE_CURRENT_BINARY_DIR}/executable-dir\" failed")
   endif()
 endif()
 
