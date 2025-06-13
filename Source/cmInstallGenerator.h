@@ -93,7 +93,7 @@ protected:
                        TweakMethod const& tweak);
 
   // Information shared by most generator types.
-  std::string const Destination;
+  std::string Destination;
   std::string const Component;
   MessageLevel const Message;
   bool const ExcludeFromAll;
