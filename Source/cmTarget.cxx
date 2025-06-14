@@ -2172,12 +2172,6 @@ void cmTarget::SetProperty(std::string const& prop, cmValue value)
 
     this->impl->Properties.SetProperty(prop, reusedFrom);
 
-    reusedTarget->SetProperty("COMPILE_PDB_NAME", reusedFrom);
-    reusedTarget->SetProperty("COMPILE_PDB_OUTPUT_DIRECTORY",
-                              cmStrCat(reusedFrom, ".dir/"));
-
-    cmValue tmp = reusedTarget->GetProperty("COMPILE_PDB_NAME");
-    this->SetProperty("COMPILE_PDB_NAME", tmp);
     this->AddUtility(reusedFrom, false, this->impl->Makefile);
   } else if (prop == propC_STANDARD || prop == propCXX_STANDARD ||
              prop == propCUDA_STANDARD || prop == propHIP_STANDARD ||

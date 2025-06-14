@@ -20,5 +20,8 @@ if it is set when a target is created.
   Contents of ``COMPILE_PDB_OUTPUT_DIRECTORY_<CONFIG>`` may use
   :manual:`generator expressions <cmake-generator-expressions(7)>`.
 
+If the :prop_tgt:`PRECOMPILE_HEADERS_REUSE_FROM` target is set, this property
+is ignored and the reusage target's value of this property is used instead.
+
 .. |PDB_XXX| replace:: :prop_tgt:`PDB_OUTPUT_DIRECTORY_<CONFIG>`
 .. include:: include/COMPILE_PDB_NOTE.rst

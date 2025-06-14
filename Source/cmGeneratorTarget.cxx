@@ -1269,6 +1269,12 @@ bool cmGeneratorTarget::GetPropertyAsBool(std::string const& prop) const
 std::string cmGeneratorTarget::GetCompilePDBName(
   std::string const& config) const
 {
+  if (cmGeneratorTarget const* reuseTarget = this->GetPchReuseTarget()) {
+    if (reuseTarget != this) {
+      return reuseTarget->GetCompilePDBName(config);
+    }
+  }
+
   // Check for a per-configuration output directory target property.
   std::string configUpper = cmSystemTools::UpperCase(config);
   std::string configProp = cmStrCat("COMPILE_PDB_NAME_", configUpper);
@@ -1288,6 +1294,12 @@ std::string cmGeneratorTarget::GetCompilePDBName(
     NameComponents const& components = GetFullNameInternalComponents(
       config, cmStateEnums::RuntimeBinaryArtifact);
     return components.prefix + pdbName + ".pdb";
+  }
+
+  if (this->PchReused) {
+    NameComponents const& components = GetFullNameInternalComponents(
+      config, cmStateEnums::RuntimeBinaryArtifact);
+    return cmStrCat(components.prefix, this->GetName(), ".pdb");
   }
 
   return "";
@@ -4441,7 +4453,14 @@ bool cmGeneratorTarget::ComputePDBOutputDir(std::string const& kind,
     }
   }
   if (out.empty()) {
-    return false;
+    // A target which is PCH-reused must have a stable PDB output directory so
+    // that the PDB can be stably referred to when consuming the PCH file.
+    if (this->PchReused) {
+      out = cmStrCat(this->GetLocalGenerator()->GetCurrentBinaryDirectory(),
+                     '/', this->GetName(), ".dir/");
+    } else {
+      return false;
+    }
   }
 
   // Convert the output path to a full path in case it is

@@ -21,5 +21,8 @@ This property is initialized by the value of the
 :variable:`CMAKE_COMPILE_PDB_OUTPUT_DIRECTORY` variable if it is
 set when a target is created.
 
+If the :prop_tgt:`PRECOMPILE_HEADERS_REUSE_FROM` target is set, this property
+is ignored and the reusage target's value of this property is used instead.
+
 .. |PDB_XXX| replace:: :prop_tgt:`PDB_OUTPUT_DIRECTORY`
 .. include:: include/COMPILE_PDB_NOTE.rst

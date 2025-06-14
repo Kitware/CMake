@@ -858,7 +858,7 @@ private:
   void CheckTargetLinkLibraries() const;
   bool CheckTargetsForMissingSources() const;
   bool CheckTargetsForType() const;
-  bool CheckTargetsForPchCompilePdb() const;
+  void MarkTargetsForPchReuse() const;
 
   void CreateLocalGenerators();
 
