@@ -692,6 +692,8 @@ public:
   std::vector<BT<std::string>> GetPrecompileHeaders(
     std::string const& config, std::string const& language) const;
 
+  cmGeneratorTarget const* GetPchReuseTarget() const;
+  cmGeneratorTarget* GetPchReuseTarget();
   std::vector<std::string> GetPchArchs(std::string const& config,
                                        std::string const& lang) const;
   std::string GetPchHeader(std::string const& config,
