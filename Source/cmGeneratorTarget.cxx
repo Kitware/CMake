@@ -1008,6 +1008,10 @@ std::set<cmLinkItem> const& cmGeneratorTarget::GetUtilityItems() const
           cmLinkItem(i.Value.first, i.Value.second, i.Backtrace));
       }
     }
+    if (cmGeneratorTarget const* reuseTarget = this->GetPchReuseTarget()) {
+      this->UtilityItems.insert(
+        cmLinkItem(reuseTarget, false, cmListFileBacktrace()));
+    }
   }
   return this->UtilityItems;
 }

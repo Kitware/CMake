@@ -1911,7 +1911,6 @@ MAKE_PROP(COMPILE_DEFINITIONS);
 MAKE_PROP(COMPILE_FEATURES);
 MAKE_PROP(COMPILE_OPTIONS);
 MAKE_PROP(PRECOMPILE_HEADERS);
-MAKE_PROP(PRECOMPILE_HEADERS_REUSE_FROM);
 MAKE_PROP(CUDA_CUBIN_COMPILATION);
 MAKE_PROP(CUDA_FATBIN_COMPILATION);
 MAKE_PROP(CUDA_OPTIX_COMPILATION);
@@ -2146,11 +2145,6 @@ void cmTarget::SetProperty(std::string const& prop, cmValue value)
                         "  compiler version ", compilerVersion, '.');
       this->impl->Makefile->IssueMessage(MessageType::FATAL_ERROR, e);
       return;
-    }
-  } else if (prop == propPRECOMPILE_HEADERS_REUSE_FROM) {
-    this->impl->Properties.SetProperty(prop, value);
-    if (value) {
-      this->AddUtility(*value, false, this->impl->Makefile);
     }
   } else if (prop == propC_STANDARD || prop == propCXX_STANDARD ||
              prop == propCUDA_STANDARD || prop == propHIP_STANDARD ||
