@@ -2148,13 +2148,6 @@ void cmTarget::SetProperty(std::string const& prop, cmValue value)
       return;
     }
   } else if (prop == propPRECOMPILE_HEADERS_REUSE_FROM) {
-    if (this->GetProperty("PRECOMPILE_HEADERS")) {
-      std::ostringstream e;
-      e << "PRECOMPILE_HEADERS property is already set on target (\""
-        << this->impl->Name << "\")\n";
-      this->impl->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
-      return;
-    }
     auto* reusedTarget = this->impl->Makefile->GetCMakeInstance()
                            ->GetGlobalGenerator()
                            ->FindTarget(value);
@@ -2201,15 +2194,6 @@ void cmTarget::AppendProperty(std::string const& prop,
       cmStrCat("IMPORTED_GLOBAL property can't be appended, only set on "
                "imported targets (\"",
                this->impl->Name, "\")\n"));
-  }
-  if (prop == propPRECOMPILE_HEADERS &&
-      this->GetProperty("PRECOMPILE_HEADERS_REUSE_FROM")) {
-    this->impl->Makefile->IssueMessage(
-      MessageType::FATAL_ERROR,
-      cmStrCat(
-        "PRECOMPILE_HEADERS_REUSE_FROM property is already set on target (\"",
-        this->impl->Name, "\")\n"));
-    return;
   }
 
   UsageRequirementProperty* usageRequirements[] = {

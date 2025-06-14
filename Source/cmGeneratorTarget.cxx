@@ -2817,6 +2817,13 @@ cmGeneratorTarget const* cmGeneratorTarget::GetPchReuseTarget() const
   if (!pchReuseFrom) {
     return nullptr;
   }
+  if (this->GetProperty("PRECOMPILE_HEADERS").IsOn()) {
+    this->Makefile->IssueMessage(
+      MessageType::FATAL_ERROR,
+      cmStrCat("PRECOMPILE_HEADERS property is already set on target (\"",
+               this->GetName(), "\")\n"));
+  }
+
   // Guaranteed to exist because `SetProperty` does a target lookup.
   return this->GetGlobalGenerator()->FindGeneratorTarget(*pchReuseFrom);
 }
@@ -2827,6 +2834,13 @@ cmGeneratorTarget* cmGeneratorTarget::GetPchReuseTarget()
   if (!pchReuseFrom) {
     return nullptr;
   }
+  if (this->GetProperty("PRECOMPILE_HEADERS").IsOn()) {
+    this->Makefile->IssueMessage(
+      MessageType::FATAL_ERROR,
+      cmStrCat("PRECOMPILE_HEADERS property is already set on target (\"",
+               this->GetName(), "\")\n"));
+  }
+
   // Guaranteed to exist because `SetProperty` does a target lookup.
   return this->GetGlobalGenerator()->FindGeneratorTarget(*pchReuseFrom);
 }
