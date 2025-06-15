@@ -2860,6 +2860,15 @@ cmGeneratorTarget const* cmGeneratorTarget::GetPchReuseTarget() const
   }
 
   if (generatorTarget) {
+    if (generatorTarget->GetPropertyAsBool("DISABLE_PRECOMPILE_HEADERS")) {
+      this->Makefile->IssueMessage(
+        MessageType::FATAL_ERROR,
+        cmStrCat(
+          "Target \"", *pchReuseFrom, "\" for the \"", this->GetName(),
+          R"(" target's "PRECOMPILE_HEADERS_REUSE_FROM" property has set "DISABLE_PRECOMPILE_HEADERS".)"));
+      return nullptr;
+    }
+
     if (auto const* recurseReuseTarget =
           generatorTarget->GetPchReuseTarget()) {
       return recurseReuseTarget;
@@ -2904,6 +2913,15 @@ cmGeneratorTarget* cmGeneratorTarget::GetPchReuseTarget()
   }
 
   if (generatorTarget) {
+    if (generatorTarget->GetPropertyAsBool("DISABLE_PRECOMPILE_HEADERS")) {
+      this->Makefile->IssueMessage(
+        MessageType::FATAL_ERROR,
+        cmStrCat(
+          "Target \"", *pchReuseFrom, "\" for the \"", this->GetName(),
+          R"(" target's "PRECOMPILE_HEADERS_REUSE_FROM" property has set "DISABLE_PRECOMPILE_HEADERS".)"));
+      return nullptr;
+    }
+
     if (auto* recurseReuseTarget = generatorTarget->GetPchReuseTarget()) {
       return recurseReuseTarget;
     }
