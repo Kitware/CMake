@@ -2981,7 +2981,10 @@ void cmLocalGenerator::CopyPchCompilePdb(
       configGenex(cmStrCat("-DPDB_PREFIX=", pdb_prefix)), configGenex("-P"),
       configGenex(copy_script) });
 
-  char const* no_message = "";
+  auto const comment =
+    cmStrCat("Copying PDB for PCH reuse from ", reuseTarget->GetName(),
+             " for ", target->GetName());
+  ;
 
   std::vector<std::string> outputs;
   outputs.push_back(configGenex(
@@ -2989,7 +2992,7 @@ void cmLocalGenerator::CopyPchCompilePdb(
 
   auto cc = cm::make_unique<cmCustomCommand>();
   cc->SetCommandLines(commandLines);
-  cc->SetComment(no_message);
+  cc->SetComment(comment.c_str());
   cc->SetStdPipesUTF8(true);
   cc->AppendDepends({ reuseTarget->GetPchFile(config, language) });
 
