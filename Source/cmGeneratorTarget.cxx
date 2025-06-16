@@ -1296,6 +1296,8 @@ std::string cmGeneratorTarget::GetCompilePDBName(
     return components.prefix + pdbName + ".pdb";
   }
 
+  // If the target is PCH-reused, we need a stable name for the PDB file so
+  // that reusing targets can construct a stable name for it.
   if (this->PchReused) {
     NameComponents const& components = GetFullNameInternalComponents(
       config, cmStateEnums::RuntimeBinaryArtifact);
@@ -2811,11 +2813,44 @@ std::string cmGeneratorTarget::GetClangTidyExportFixesDirectory(
   return cmSystemTools::CollapseFullPath(path);
 }
 
+struct CycleWatcher
+{
+  CycleWatcher(bool& flag)
+    : Flag(flag)
+  {
+    this->Flag = true;
+  }
+  ~CycleWatcher() { this->Flag = false; }
+  bool& Flag;
+};
+
 cmGeneratorTarget const* cmGeneratorTarget::GetPchReuseTarget() const
 {
+  if (this->ComputingPchReuse) {
+    // TODO: Get the full cycle.
+    if (!this->PchReuseCycleDetected) {
+      this->Makefile->IssueMessage(
+        MessageType::FATAL_ERROR,
+        cmStrCat("Circular PCH reuse target involving '", this->GetName(),
+                 '\''));
+    }
+    this->PchReuseCycleDetected = true;
+    return nullptr;
+  }
+  CycleWatcher watch(this->ComputingPchReuse);
+  (void)watch;
   cmValue pchReuseFrom = this->GetProperty("PRECOMPILE_HEADERS_REUSE_FROM");
   if (!pchReuseFrom) {
     return nullptr;
+  }
+  cmGeneratorTarget const* generatorTarget =
+    this->GetGlobalGenerator()->FindGeneratorTarget(*pchReuseFrom);
+  if (!generatorTarget) {
+    this->Makefile->IssueMessage(
+      MessageType::FATAL_ERROR,
+      cmStrCat(
+        "Target \"", *pchReuseFrom, "\" for the \"", this->GetName(),
+        R"(" target's "PRECOMPILE_HEADERS_REUSE_FROM" property does not exist.)"));
   }
   if (this->GetProperty("PRECOMPILE_HEADERS").IsOn()) {
     this->Makefile->IssueMessage(
@@ -2824,15 +2859,42 @@ cmGeneratorTarget const* cmGeneratorTarget::GetPchReuseTarget() const
                this->GetName(), "\")\n"));
   }
 
-  // Guaranteed to exist because `SetProperty` does a target lookup.
-  return this->GetGlobalGenerator()->FindGeneratorTarget(*pchReuseFrom);
+  if (generatorTarget) {
+    if (auto const* recurseReuseTarget =
+          generatorTarget->GetPchReuseTarget()) {
+      return recurseReuseTarget;
+    }
+  }
+  return generatorTarget;
 }
 
 cmGeneratorTarget* cmGeneratorTarget::GetPchReuseTarget()
 {
+  if (this->ComputingPchReuse) {
+    // TODO: Get the full cycle.
+    if (!this->PchReuseCycleDetected) {
+      this->Makefile->IssueMessage(
+        MessageType::FATAL_ERROR,
+        cmStrCat("Circular PCH reuse target involving '", this->GetName(),
+                 '\''));
+    }
+    this->PchReuseCycleDetected = true;
+    return nullptr;
+  }
+  CycleWatcher watch(this->ComputingPchReuse);
+  (void)watch;
   cmValue pchReuseFrom = this->GetProperty("PRECOMPILE_HEADERS_REUSE_FROM");
   if (!pchReuseFrom) {
     return nullptr;
+  }
+  cmGeneratorTarget* generatorTarget =
+    this->GetGlobalGenerator()->FindGeneratorTarget(*pchReuseFrom);
+  if (!generatorTarget) {
+    this->Makefile->IssueMessage(
+      MessageType::FATAL_ERROR,
+      cmStrCat(
+        "Target \"", *pchReuseFrom, "\" for the \"", this->GetName(),
+        R"(" target's "PRECOMPILE_HEADERS_REUSE_FROM" property does not exist.)"));
   }
   if (this->GetProperty("PRECOMPILE_HEADERS").IsOn()) {
     this->Makefile->IssueMessage(
@@ -2841,8 +2903,12 @@ cmGeneratorTarget* cmGeneratorTarget::GetPchReuseTarget()
                this->GetName(), "\")\n"));
   }
 
-  // Guaranteed to exist because `SetProperty` does a target lookup.
-  return this->GetGlobalGenerator()->FindGeneratorTarget(*pchReuseFrom);
+  if (generatorTarget) {
+    if (auto* recurseReuseTarget = generatorTarget->GetPchReuseTarget()) {
+      return recurseReuseTarget;
+    }
+  }
+  return generatorTarget;
 }
 
 std::vector<std::string> cmGeneratorTarget::GetPchArchs(
@@ -2873,6 +2939,7 @@ std::string cmGeneratorTarget::GetPchHeader(std::string const& config,
   }
   cmGeneratorTarget const* generatorTarget = this;
   cmGeneratorTarget const* reuseTarget = this->GetPchReuseTarget();
+  bool const haveReuseTarget = reuseTarget && reuseTarget != this;
   if (reuseTarget) {
     generatorTarget = reuseTarget;
   }
@@ -2882,7 +2949,7 @@ std::string cmGeneratorTarget::GetPchHeader(std::string const& config,
   if (inserted.second) {
     std::vector<BT<std::string>> const headers =
       this->GetPrecompileHeaders(config, language);
-    if (headers.empty() && !reuseTarget) {
+    if (headers.empty() && !haveReuseTarget) {
       return std::string();
     }
     std::string& filename = inserted.first->second;
@@ -2905,7 +2972,7 @@ std::string cmGeneratorTarget::GetPchHeader(std::string const& config,
                languageToExtension.at(language));
 
     std::string const filename_tmp = cmStrCat(filename, ".tmp");
-    if (!reuseTarget) {
+    if (!haveReuseTarget) {
       cmValue pchPrologue =
         this->Makefile->GetDefinition("CMAKE_PCH_PROLOGUE");
       cmValue pchEpilogue =
@@ -2981,6 +3048,7 @@ std::string cmGeneratorTarget::GetPchSource(std::string const& config,
 
     cmGeneratorTarget const* generatorTarget = this;
     cmGeneratorTarget const* reuseTarget = this->GetPchReuseTarget();
+    bool const haveReuseTarget = reuseTarget && reuseTarget != this;
     if (reuseTarget) {
       generatorTarget = reuseTarget;
     }
@@ -3009,7 +3077,7 @@ std::string cmGeneratorTarget::GetPchSource(std::string const& config,
     }
 
     std::string const filename_tmp = cmStrCat(filename, ".tmp");
-    if (!reuseTarget) {
+    if (!haveReuseTarget) {
       {
         cmGeneratedFileStream file(filename_tmp);
         file << "/* generated by CMake */\n";
@@ -4467,11 +4535,9 @@ bool cmGeneratorTarget::ComputePDBOutputDir(std::string const& kind,
     }
   }
   if (out.empty()) {
-    // A target which is PCH-reused must have a stable PDB output directory so
-    // that the PDB can be stably referred to when consuming the PCH file.
-    if (this->PchReused) {
-      out = cmStrCat(this->GetLocalGenerator()->GetCurrentBinaryDirectory(),
-                     '/', this->GetName(), ".dir/");
+    // Compile output should always have a path.
+    if (kind == "COMPILE_PDB"_s) {
+      out = this->GetSupportDirectory();
     } else {
       return false;
     }

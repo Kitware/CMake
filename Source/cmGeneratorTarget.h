@@ -1522,6 +1522,8 @@ private:
   };
   mutable std::map<std::string, InfoByConfig> Configs;
   bool PchReused = false;
+  mutable bool ComputingPchReuse = false;
+  mutable bool PchReuseCycleDetected = false;
 };
 
 class cmGeneratorTarget::TargetPropertyEntry

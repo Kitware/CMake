@@ -2148,24 +2148,10 @@ void cmTarget::SetProperty(std::string const& prop, cmValue value)
       return;
     }
   } else if (prop == propPRECOMPILE_HEADERS_REUSE_FROM) {
-    auto* reusedTarget = this->impl->Makefile->GetCMakeInstance()
-                           ->GetGlobalGenerator()
-                           ->FindTarget(value);
-    if (!reusedTarget) {
-      std::string const e(
-        "PRECOMPILE_HEADERS_REUSE_FROM set with non existing target");
-      this->impl->Makefile->IssueMessage(MessageType::FATAL_ERROR, e);
-      return;
+    this->impl->Properties.SetProperty(prop, value);
+    if (value) {
+      this->AddUtility(*value, false, this->impl->Makefile);
     }
-
-    std::string reusedFrom = reusedTarget->GetSafeProperty(prop);
-    if (reusedFrom.empty()) {
-      reusedFrom = *value;
-    }
-
-    this->impl->Properties.SetProperty(prop, reusedFrom);
-
-    this->AddUtility(reusedFrom, false, this->impl->Makefile);
   } else if (prop == propC_STANDARD || prop == propCXX_STANDARD ||
              prop == propCUDA_STANDARD || prop == propHIP_STANDARD ||
              prop == propOBJC_STANDARD || prop == propOBJCXX_STANDARD) {

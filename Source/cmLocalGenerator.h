@@ -640,7 +640,6 @@ private:
   void CopyPchCompilePdb(std::string const& config,
                          std::string const& language,
                          cmGeneratorTarget* target,
-                         std::string const& ReuseFrom,
                          cmGeneratorTarget* reuseTarget,
                          std::vector<std::string> const& extensions);
 

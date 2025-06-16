@@ -1,0 +1,2 @@
+((Classic Intel)?Warning #672: the command line options do not match those used[^
+]*)?
