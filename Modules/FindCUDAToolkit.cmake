@@ -458,6 +458,7 @@ nvToolsExt
 .. deprecated:: 3.25
 
   With CUDA 10.0+, use `nvtx3`_.
+  Starting in CUDA 12.9 the `nvToolsExt` library no longer exists
 
 The `legacy NVIDIA Tools Extension`_.
 This is a shared library only.
@@ -481,6 +482,14 @@ Introduced in CUDA 10.0.
 Targets created:
 
 - ``CUDA::nvtx3``
+
+
+- ``CUDA::nvtx3_interop``
+
+  .. versionadded:: 4.1
+
+  This is provided by CUDA 12.9 and above for use by languages that
+  cannot consume C++ header-only libraries, such as ``Fortran``.
 
 .. _`NVIDIA Tools Extension`: https://nvidia.github.io/NVTX/doxygen
 
@@ -1394,31 +1403,41 @@ if(CUDAToolkit_FOUND)
   _CUDAToolkit_find_and_add_import_lib(nvml ALT nvidia-ml nvml)
   _CUDAToolkit_find_and_add_import_lib(nvml_static ONLY_SEARCH_FOR libnvidia-ml.a libnvml.a)
 
-  if(WIN32)
-    # nvtools can be installed outside the CUDA toolkit directory
-    # so prefer the NVTOOLSEXT_PATH windows only environment variable
-    # In addition on windows the most common name is nvToolsExt64_1
-    find_library(CUDA_nvToolsExt_LIBRARY
-      NAMES nvToolsExt64_1 nvToolsExt64 nvToolsExt
-      PATHS ENV NVTOOLSEXT_PATH
-            ENV CUDA_PATH
-      PATH_SUFFIXES lib/x64 lib
-    )
-  endif()
-  _CUDAToolkit_find_and_add_import_lib(nvToolsExt ALT nvToolsExt64)
-
   if(CUDAToolkit_VERSION VERSION_GREATER_EQUAL 10.0)
-    # nvToolsExt is deprecated since nvtx3 introduction.
-    # Warn only if the project requires a sufficiently new CMake to make migration possible.
-    if(TARGET CUDA::nvToolsExt AND CMAKE_MINIMUM_REQUIRED_VERSION VERSION_GREATER_EQUAL 3.25)
-      set_property(TARGET CUDA::nvToolsExt PROPERTY DEPRECATION "nvToolsExt has been superseded by nvtx3 since CUDA 10.0 and CMake 3.25. Use CUDA::nvtx3 and include <nvtx3/nvToolsExt.h> instead.")
-    endif()
-
     # Header-only variant. Uses dlopen().
     if(NOT TARGET CUDA::nvtx3)
       add_library(CUDA::nvtx3 INTERFACE IMPORTED)
       target_include_directories(CUDA::nvtx3 SYSTEM INTERFACE "${CUDAToolkit_INCLUDE_DIRS}")
       target_link_libraries(CUDA::nvtx3 INTERFACE ${CMAKE_DL_LIBS})
+    endif()
+  endif()
+  if(CUDAToolkit_VERSION VERSION_GREATER_EQUAL 12.9)
+    if(NOT TARGET CUDA::nvtx3_interop)
+      _CUDAToolkit_find_and_add_import_lib(nvtx3_interop ALT nvtx3interop)
+    endif()
+  endif()
+
+  # nvToolsExt is removed starting in 12.9
+  if(CUDAToolkit_VERSION VERSION_LESS 12.9)
+    if(WIN32)
+      # nvtools can be installed outside the CUDA toolkit directory
+      # so prefer the NVTOOLSEXT_PATH windows only environment variable
+      # In addition on windows the most common name is nvToolsExt64_1
+      find_library(CUDA_nvToolsExt_LIBRARY
+        NAMES nvToolsExt64_1 nvToolsExt64 nvToolsExt
+        PATHS ENV NVTOOLSEXT_PATH
+              ENV CUDA_PATH
+        PATH_SUFFIXES lib/x64 lib
+      )
+    endif()
+    _CUDAToolkit_find_and_add_import_lib(nvToolsExt ALT nvToolsExt64)
+
+    if(CUDAToolkit_VERSION VERSION_GREATER_EQUAL 10.0)
+      # nvToolsExt is deprecated since nvtx3 introduction.
+      # Warn only if the project requires a sufficiently new CMake to make migration possible.
+      if(TARGET CUDA::nvToolsExt AND CMAKE_MINIMUM_REQUIRED_VERSION VERSION_GREATER_EQUAL 3.25)
+        set_property(TARGET CUDA::nvToolsExt PROPERTY DEPRECATION "nvToolsExt has been superseded by nvtx3 since CUDA 10.0 and CMake 3.25. Use CUDA::nvtx3 and include <nvtx3/nvToolsExt.h> instead.")
+      endif()
     endif()
   endif()
 
