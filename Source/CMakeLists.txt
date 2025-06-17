@@ -717,6 +717,9 @@ add_library(
   cmSiteNameCommand.h
   cmSourceGroupCommand.cxx
   cmSourceGroupCommand.h
+  cmSPDXSerializer.cxx
+  cmSPDXSerializer.h
+  cmSPDXTypes.def
   cmString.cxx
   cmString.hxx
   cmStringReplaceHelper.cxx
