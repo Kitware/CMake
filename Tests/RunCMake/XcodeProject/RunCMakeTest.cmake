@@ -184,6 +184,7 @@ if(XCODE_VERSION VERSION_GREATER_EQUAL 12)
     run_cmake(XcodeWorkspace)
     set(RunCMake_TEST_NO_CLEAN 1)
     run_cmake_command(XcodeWorkspace-build ${CMAKE_COMMAND} --build . --config Debug)
+    run_cmake_command(XcodeWorkspace-build2 ${CMAKE_COMMAND} --build . --config Debug --target custom1 custom2)
   endblock()
 endif()
 
