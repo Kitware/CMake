@@ -6,7 +6,7 @@ COMMON_LANGUAGE_RUNTIME
 By setting this target property, the target is configured to build with
 ``C++/CLI`` support.
 
-The Visual Studio generator defines the ``clr`` parameter depending on
+The :ref:`Visual Studio Generators` define the ``clr`` parameter depending on
 the value of the ``COMMON_LANGUAGE_RUNTIME`` target property:
 
 Not Set (default)

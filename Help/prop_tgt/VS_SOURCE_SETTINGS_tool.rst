@@ -5,7 +5,7 @@ VS_SOURCE_SETTINGS_<tool>
 
 Set any item metadata on all non-built files that use <tool>.
 
-Takes a list of ``Key=Value`` pairs. Tells the Visual Studio generator
+Takes a list of ``Key=Value`` pairs. Tells the :ref:`Visual Studio Generators`
 to set ``Key`` to ``Value`` as item metadata on all non-built files
 that use ``<tool>``.
 

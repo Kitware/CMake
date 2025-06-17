@@ -81,7 +81,7 @@ This module provides the following command:
     ``NEW``; otherwise, a fatal error will occur.
 
   .. versionadded:: 3.13
-    Support for Visual Studio generators.
+    Support for :ref:`Visual Studio Generators`.
 
   .. versionadded:: 3.24
     The check uses the caller's :variable:`CMAKE_<LANG>_FLAGS`

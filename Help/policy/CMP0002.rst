@@ -12,7 +12,8 @@ names must be globally unique because:
 
 * Unique names may be referenced unambiguously both in CMake
   code and on make tool command lines.
-* Logical names are used by Xcode and VS IDE generators
+* Logical names are used by :generator:`Xcode` and
+  :ref:`Visual Studio <Visual Studio Generators>` IDE generators
   to produce meaningful project names for the targets.
 
 The logical name of executable and library targets does not have to

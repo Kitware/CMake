@@ -129,7 +129,7 @@ not strictly necessary to use a corresponding
 command line environment when using a Visual Studio
 generator, doing so has no disadvantages.
 
-When using Xcode, there can be more than one Xcode
+When using :generator:`Xcode`, there can be more than one Xcode
 version installed.  Which one to use can be selected
 in a number of different ways, but the most common
 methods are:
@@ -195,7 +195,7 @@ VisualC++ compiler, or a combination of the two:
   $ cmake .. -G "Visual Studio 16"
   $ cmake .. -G "Visual Studio 16 2019"
 
-Visual Studio generators can target different architectures.
+:ref:`Visual Studio Generators` can target different architectures.
 One can specify the target architecture using the
 :option:`-A <cmake -A>` option:
 
@@ -285,8 +285,10 @@ the table below:
                                             ``Debug`` or ``Release``, determining
                                             debug/optimization flags.  This is only
                                             relevant for single-configuration buildsystems such
-                                            as ``Makefile`` and ``Ninja``.  Multi-configuration
-                                            buildsystems such as those for Visual Studio and Xcode
+                                            as :ref:`Makefile Generators` and
+                                            :ref:`Ninja Generators`.
+                                            Multi-configuration buildsystems such as those for
+                                            :ref:`Visual Studio Generators` and :generator`Xcode`
                                             ignore this setting.
  :variable:`CMAKE_INSTALL_PREFIX`           Location to install the
                                             software to with the
@@ -572,21 +574,21 @@ CMake provides some built-in targets for all buildsystems
 providing CMake files.
 
 ``all``
-  The default target used by ``Makefile`` and ``Ninja``
-  generators.  Builds all targets in the buildsystem,
-  except those which are excluded by their
-  :prop_tgt:`EXCLUDE_FROM_ALL` target property or
+  The default target used by :ref:`Makefile Generators`
+  and :ref:`Ninja Generators`.  Builds all targets in
+  the buildsystem, except those which are excluded by
+  their :prop_tgt:`EXCLUDE_FROM_ALL` target property or
   :prop_dir:`EXCLUDE_FROM_ALL` directory property.  The
   name ``ALL_BUILD`` is used for this purpose for the
-  Xcode and Visual Studio generators.
+  :generator:`Xcode` and :ref:`Visual Studio Generators`.
 ``help``
   Lists the targets available for build.  This target is
-  available when using the :generator:`Unix Makefiles` or
-  :generator:`Ninja` generator, and the exact output is
+  available when using the :ref:`Makefile Generators` or
+  :ref:`Ninja Generators`, and the exact output is
   tool-specific.
 ``clean``
   Delete built object files and other output files.  The
-  ``Makefile`` based generators create a ``clean`` target
+  :ref:`Makefile Generators` create a ``clean`` target
   per directory, so that an individual directory can be
   cleaned.  The ``Ninja`` tool provides its own granular
   ``-t clean`` system.
@@ -608,15 +610,15 @@ providing CMake files.
   automatically available if the CMake files provide
   CPack-based packages.
 
-For ``Makefile`` based systems, ``/fast`` variants of binary
+For :ref:`Makefile Generators`, ``/fast`` variants of binary
 build targets are provided. The ``/fast`` variants are used
 to build the specified target without regard for its
 dependencies.  The dependencies are not checked and
-are not rebuilt if out of date.  The :generator:`Ninja`
-generator is sufficiently fast at dependency checking that
+are not rebuilt if out of date.  The :ref:`Ninja Generators`
+are sufficiently fast at dependency checking that
 such targets are not provided for that generator.
 
-``Makefile`` based systems also provide build-targets to
+:ref:`Makefile Generators` also provide build-targets to
 preprocess, assemble and compile individual files in a
 particular directory.
 

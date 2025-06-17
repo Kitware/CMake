@@ -57,7 +57,8 @@ Options
   ``Release``, etc.), where ``<configurations>`` is a
   :ref:`semicolon-separated list <CMake Language Lists>`.
   When the CMake project uses a multi-configuration
-  generator such as Xcode or Visual Studio, this option is needed to tell
+  generator such as :generator:`Xcode` or
+  :ref:`Visual Studio <Visual Studio Generators>`, this option is needed to tell
   :program:`cpack` which built executables to include in the package.
   The user is responsible for ensuring that the configuration(s) listed
   have already been built before invoking :program:`cpack`.
