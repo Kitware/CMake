@@ -1,40 +1,52 @@
-CMake Error at BadArgs4\.cmake:3 \(export\):
+CMake Error at BadArgs4\.cmake:[0-9]+ \(export\):
   export LOWER_CASE_FILE requires PACKAGE_INFO\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:3 \(include\)
 
 
-CMake Error at BadArgs4\.cmake:4 \(export\):
+CMake Error at BadArgs4\.cmake:[0-9]+ \(export\):
   export APPENDIX requires PACKAGE_INFO\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:3 \(include\)
 
 
-CMake Error at BadArgs4\.cmake:5 \(export\):
+CMake Error at BadArgs4\.cmake:[0-9]+ \(export\):
   export VERSION requires PACKAGE_INFO\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:3 \(include\)
 
 
-CMake Error at BadArgs4\.cmake:6 \(export\):
+CMake Error at BadArgs4\.cmake:[0-9]+ \(export\):
+  export DESCRIPTION requires PACKAGE_INFO\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:3 \(include\)
+
+
+CMake Error at BadArgs4\.cmake:[0-9]+ \(export\):
+  export HOMEPAGE_URL requires PACKAGE_INFO\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:3 \(include\)
+
+
+CMake Error at BadArgs4\.cmake:[0-9]+ \(export\):
   export DEFAULT_TARGETS requires PACKAGE_INFO\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:3 \(include\)
 
 
-CMake Error at BadArgs4\.cmake:7 \(export\):
+CMake Error at BadArgs4\.cmake:[0-9]+ \(export\):
   export DEFAULT_CONFIGURATIONS requires PACKAGE_INFO\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:3 \(include\)
 
 
-CMake Error at BadArgs4\.cmake:8 \(export\):
+CMake Error at BadArgs4\.cmake:[0-9]+ \(export\):
   export PROJECT requires PACKAGE_INFO\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:3 \(include\)
 
 
-CMake Error at BadArgs4\.cmake:9 \(export\):
+CMake Error at BadArgs4\.cmake:[0-9]+ \(export\):
   export NO_PROJECT_METADATA requires PACKAGE_INFO\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:3 \(include\)

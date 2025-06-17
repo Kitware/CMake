@@ -1,6 +1,8 @@
 add_library(foo INTERFACE)
 install(TARGETS foo EXPORT foo DESTINATION .)
 install(PACKAGE_INFO test EXPORT foo APPENDIX test VERSION 1.0)
+install(PACKAGE_INFO test EXPORT foo APPENDIX test DESCRIPTION "Test")
+install(PACKAGE_INFO test EXPORT foo APPENDIX test HOMEPAGE_URL "example.com")
 install(PACKAGE_INFO test EXPORT foo APPENDIX test DEFAULT_TARGETS foo)
 install(PACKAGE_INFO test EXPORT foo APPENDIX test DEFAULT_CONFIGURATIONS test)
 install(PACKAGE_INFO test EXPORT foo APPENDIX test PROJECT foo)

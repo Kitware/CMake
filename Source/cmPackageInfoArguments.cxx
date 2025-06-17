@@ -17,80 +17,77 @@
 template void cmPackageInfoArguments::Bind<void>(cmArgumentParser<void>&,
                                                  cmPackageInfoArguments*);
 
+namespace {
+
+bool ArgWasSpecified(bool value)
+{
+  return value;
+}
+
+bool ArgWasSpecified(std::string const& value)
+{
+  return !value.empty();
+}
+
+bool ArgWasSpecified(std::vector<std::string> const& value)
+{
+  return !value.empty();
+}
+
+} // anonymous namespace
+
+#define ENFORCE_REQUIRES(req, value, arg)                                     \
+  do {                                                                        \
+    if (ArgWasSpecified(value)) {                                             \
+      status.SetError(arg " requires " req ".");                              \
+      return false;                                                           \
+    }                                                                         \
+  } while (false)
+
+#define ENFORCE_EXCLUSIVE(arg1, value, arg2)                                  \
+  do {                                                                        \
+    if (ArgWasSpecified(value)) {                                             \
+      status.SetError(arg1 " and " arg2 " are mutually exclusive.");          \
+      return false;                                                           \
+    }                                                                         \
+  } while (false)
+
 bool cmPackageInfoArguments::Check(cmExecutionStatus& status,
                                    bool enable) const
 {
   if (!enable) {
     // Check if any options were given.
-    if (this->LowerCase) {
-      status.SetError("LOWER_CASE_FILE requires PACKAGE_INFO.");
-      return false;
-    }
-    if (!this->Appendix.empty()) {
-      status.SetError("APPENDIX requires PACKAGE_INFO.");
-      return false;
-    }
-    if (!this->Version.empty()) {
-      status.SetError("VERSION requires PACKAGE_INFO.");
-      return false;
-    }
-    if (!this->DefaultTargets.empty()) {
-      status.SetError("DEFAULT_TARGETS requires PACKAGE_INFO.");
-      return false;
-    }
-    if (!this->DefaultConfigs.empty()) {
-      status.SetError("DEFAULT_CONFIGURATIONS requires PACKAGE_INFO.");
-      return false;
-    }
-    if (!this->ProjectName.empty()) {
-      status.SetError("PROJECT requires PACKAGE_INFO.");
-      return false;
-    }
-    if (this->NoProjectDefaults) {
-      status.SetError("NO_PROJECT_METADATA requires PACKAGE_INFO.");
-      return false;
-    }
+    ENFORCE_REQUIRES("PACKAGE_INFO", this->LowerCase, "LOWER_CASE_FILE");
+    ENFORCE_REQUIRES("PACKAGE_INFO", this->Appendix, "APPENDIX");
+    ENFORCE_REQUIRES("PACKAGE_INFO", this->Version, "VERSION");
+    ENFORCE_REQUIRES("PACKAGE_INFO", this->Description, "DESCRIPTION");
+    ENFORCE_REQUIRES("PACKAGE_INFO", this->Website, "HOMEPAGE_URL");
+    ENFORCE_REQUIRES("PACKAGE_INFO", this->DefaultTargets, "DEFAULT_TARGETS");
+    ENFORCE_REQUIRES("PACKAGE_INFO", this->DefaultConfigs,
+                     "DEFAULT_CONFIGURATIONS");
+    ENFORCE_REQUIRES("PACKAGE_INFO", this->ProjectName, "PROJECT");
+    ENFORCE_REQUIRES("PACKAGE_INFO", this->NoProjectDefaults,
+                     "NO_PROJECT_METADATA");
   }
 
   // Check for incompatible options.
   if (!this->Appendix.empty()) {
-    if (!this->Version.empty()) {
-      status.SetError("APPENDIX and VERSION are mutually exclusive.");
-      return false;
-    }
-    if (!this->DefaultTargets.empty()) {
-      status.SetError("APPENDIX and DEFAULT_TARGETS "
-                      "are mutually exclusive.");
-      return false;
-    }
-    if (!this->DefaultConfigs.empty()) {
-      status.SetError("APPENDIX and DEFAULT_CONFIGURATIONS "
-                      "are mutually exclusive.");
-      return false;
-    }
-    if (!this->ProjectName.empty()) {
-      status.SetError("APPENDIX and PROJECT are mutually exclusive.");
-      return false;
-    }
+    ENFORCE_EXCLUSIVE("APPENDIX", this->Version, "VERSION");
+    ENFORCE_EXCLUSIVE("APPENDIX", this->Description, "DESCRIPTION");
+    ENFORCE_EXCLUSIVE("APPENDIX", this->Website, "HOMEPAGE_URL");
+    ENFORCE_EXCLUSIVE("APPENDIX", this->DefaultTargets, "DEFAULT_TARGETS");
+    ENFORCE_EXCLUSIVE("APPENDIX", this->DefaultConfigs,
+                      "DEFAULT_CONFIGURATIONS");
+    ENFORCE_EXCLUSIVE("APPENDIX", this->ProjectName, "PROJECT");
   }
   if (this->NoProjectDefaults) {
-    if (!this->ProjectName.empty()) {
-      status.SetError("PROJECT and NO_PROJECT_METADATA "
-                      "are mutually exclusive.");
-      return false;
-    }
+    ENFORCE_EXCLUSIVE("PROJECT", this->ProjectName, "NO_PROJECT_METADATA");
   }
 
   // Check for options that require other options.
   if (this->Version.empty()) {
-    if (!this->VersionCompat.empty()) {
-      status.SetError("COMPAT_VERSION requires VERSION.");
-      return false;
-    }
-    if (!this->VersionSchema.empty()) {
-      status.SetError("VERSION_SCHEMA requires VERSION.");
-      return false;
-    }
+    ENFORCE_REQUIRES("VERSION", this->VersionCompat, "COMPAT_VERSION");
+    ENFORCE_REQUIRES("VERSION", this->VersionSchema, "VERSION_SCHEMA");
   }
 
   // Validate the package name.
@@ -106,6 +103,9 @@ bool cmPackageInfoArguments::Check(cmExecutionStatus& status,
 
   return true;
 }
+
+#undef ENFORCE_REQUIRES
+#undef ENFORCE_EXCLUSIVE
 
 bool cmPackageInfoArguments::SetMetadataFromProject(cmExecutionStatus& status)
 {
