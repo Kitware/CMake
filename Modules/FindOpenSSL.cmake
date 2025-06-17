@@ -296,9 +296,13 @@ elseif (MSVC)
     HINTS
     "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\OpenSSL (32-bit)_is1;Inno Setup: App Path]"
     "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\OpenSSL (64-bit)_is1;Inno Setup: App Path]"
+    "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\OpenSSL for ARM (64-bit)_is1;Inno Setup: App Path]"
     )
 
-  if("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
+  if ("${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "ARM64")
+    set(_arch "Win64-ARM")
+    file(TO_CMAKE_PATH "$ENV{PROGRAMFILES}" _programfiles)
+  elseif("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
     set(_arch "Win64")
     file(TO_CMAKE_PATH "$ENV{PROGRAMFILES}" _programfiles)
   else()
@@ -365,7 +369,9 @@ if(WIN32 AND NOT CYGWIN)
     endif ()
 
     # Since OpenSSL 1.1, lib names are like libcrypto32MTd.lib and libssl32MTd.lib
-    if( "${CMAKE_SIZEOF_VOID_P}" STREQUAL "8" )
+    if ("${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "ARM64")
+        set(_OPENSSL_MSVC_FOLDER_SUFFIX "arm64")
+    elseif( "${CMAKE_SIZEOF_VOID_P}" STREQUAL "8" )
         set(_OPENSSL_MSVC_ARCH_SUFFIX "64")
         set(_OPENSSL_MSVC_FOLDER_SUFFIX "x64")
     else()
