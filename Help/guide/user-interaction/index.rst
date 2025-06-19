@@ -288,7 +288,7 @@ the table below:
                                             as :ref:`Makefile Generators` and
                                             :ref:`Ninja Generators`.
                                             Multi-configuration buildsystems such as those for
-                                            :ref:`Visual Studio Generators` and :generator`Xcode`
+                                            :ref:`Visual Studio Generators` and :generator:`Xcode`
                                             ignore this setting.
  :variable:`CMAKE_INSTALL_PREFIX`           Location to install the
                                             software to with the
