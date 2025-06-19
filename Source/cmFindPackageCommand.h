@@ -334,10 +334,10 @@ private:
 
   class FlushDebugBufferOnExit;
 
-  /*! the selected sortOrder (None by default)*/
-  SortOrderType SortOrder = None;
-  /*! the selected sortDirection (Asc by default)*/
-  SortDirectionType SortDirection = Asc;
+  /*! the selected sortOrder (Natural by default)*/
+  SortOrderType SortOrder = Natural;
+  /*! the selected sortDirection (Dec by default)*/
+  SortDirectionType SortDirection = Dec;
 
   struct ConfigFileInfo
   {
