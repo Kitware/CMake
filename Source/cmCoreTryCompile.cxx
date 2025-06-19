@@ -1386,6 +1386,14 @@ void cmCoreTryCompile::FindOutputFile(std::string const& targetName)
     return;
   }
 
+  if (cmHasLiteralSuffix(outputFileLocation, ".js")) {
+    std::string wasmOutputLocation = cmStrCat(
+      outputFileLocation.substr(0, outputFileLocation.length() - 3), ".wasm");
+    if (cmSystemTools::FileExists(wasmOutputLocation)) {
+      outputFileLocation = wasmOutputLocation;
+    }
+  }
+
   this->OutputFile = cmSystemTools::CollapseFullPath(outputFileLocation);
 }
 

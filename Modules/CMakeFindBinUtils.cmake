@@ -219,6 +219,11 @@ else()
     list(PREPEND _CMAKE_LINKER_NAMES "armlink")
   endif()
 
+  if(EMSCRIPTEN)
+    list(PREPEND _CMAKE_AR_NAMES "emar")
+    list(PREPEND _CMAKE_RANLIB_NAMES "emranlib")
+  endif()
+
   list(APPEND _CMAKE_TOOL_VARS AR RANLIB STRIP LINKER NM OBJDUMP OBJCOPY READELF DLLTOOL ADDR2LINE TAPI)
 endif()
 
