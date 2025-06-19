@@ -1001,6 +1001,8 @@ Signatures
              [VERSION_SCHEMA <string>]]
             [DEFAULT_TARGETS <target>...]
             [DEFAULT_CONFIGURATIONS <config>...]
+            [LICENSE <license-string>]
+            [DEFAULT_LICENSE <license-string>]
             [DESCRIPTION <description-string>]
             [HOMEPAGE_URL <url-string>]
             [PERMISSIONS <permission>...]
@@ -1058,6 +1060,24 @@ Signatures
     mapping of the consumer's configuration to the package's available
     configurations exists.  If not specified, CMake will fall back to the
     package's available configurations in an unspecified order.
+
+  ``LICENSE <license-string>``
+    .. versionadded:: 4.2
+
+    A |SPDX|_ (SPDX) `License Expression`_ that describes the license(s) of the
+    project as a whole, including documentation, resources, or other materials
+    distributed with the project, in addition to software artifacts.  See the
+    SPDX `License List`_ for a list of commonly used licenses and their
+    identifiers.
+
+    The license of individual components is taken from the
+    :prop_tgt:`SPDX_LICENSE` property of their respective targets.
+
+  ``DEFAULT_LICENSE <license-string>``
+    .. versionadded:: 4.2
+
+    A |SPDX|_ (SPDX) `License Expression`_ that describes the license(s) of any
+    components which do not otherwise specify their license(s).
 
   ``DESCRIPTION <description-string>``
     .. versionadded:: 4.1
@@ -1291,3 +1311,9 @@ and by CPack. You can also invoke this script manually with
 
 .. _cps-version_schema: https://cps-org.github.io/cps/schema.html#version-schema
 .. |cps-version_schema| replace:: ``version_schema``
+
+.. _SPDX: https://spdx.dev/
+.. |SPDX| replace:: System Package Data Exchange
+
+.. _License Expression: https://spdx.github.io/spdx-spec/v3.0.1/annexes/spdx-license-expressions/
+.. _License List: https://spdx.org/licenses/

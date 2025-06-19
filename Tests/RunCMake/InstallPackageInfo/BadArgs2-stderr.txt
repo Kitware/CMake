@@ -5,6 +5,12 @@ Call Stack \(most recent call first\):
 
 
 CMake Error at BadArgs2.cmake:[0-9]+ \(install\):
+  install APPENDIX and LICENSE are mutually exclusive.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:3 \(include\)
+
+
+CMake Error at BadArgs2.cmake:[0-9]+ \(install\):
   install APPENDIX and DESCRIPTION are mutually exclusive.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:3 \(include\)

@@ -60,6 +60,8 @@ bool cmPackageInfoArguments::Check(cmExecutionStatus& status,
     ENFORCE_REQUIRES("PACKAGE_INFO", this->LowerCase, "LOWER_CASE_FILE");
     ENFORCE_REQUIRES("PACKAGE_INFO", this->Appendix, "APPENDIX");
     ENFORCE_REQUIRES("PACKAGE_INFO", this->Version, "VERSION");
+    ENFORCE_REQUIRES("PACKAGE_INFO", this->License, "LICENSE");
+    ENFORCE_REQUIRES("PACKAGE_INFO", this->DefaultLicense, "DEFAULT_LICENSE");
     ENFORCE_REQUIRES("PACKAGE_INFO", this->Description, "DESCRIPTION");
     ENFORCE_REQUIRES("PACKAGE_INFO", this->Website, "HOMEPAGE_URL");
     ENFORCE_REQUIRES("PACKAGE_INFO", this->DefaultTargets, "DEFAULT_TARGETS");
@@ -73,6 +75,7 @@ bool cmPackageInfoArguments::Check(cmExecutionStatus& status,
   // Check for incompatible options.
   if (!this->Appendix.empty()) {
     ENFORCE_EXCLUSIVE("APPENDIX", this->Version, "VERSION");
+    ENFORCE_EXCLUSIVE("APPENDIX", this->License, "LICENSE");
     ENFORCE_EXCLUSIVE("APPENDIX", this->Description, "DESCRIPTION");
     ENFORCE_EXCLUSIVE("APPENDIX", this->Website, "HOMEPAGE_URL");
     ENFORCE_EXCLUSIVE("APPENDIX", this->DefaultTargets, "DEFAULT_TARGETS");
@@ -134,6 +137,10 @@ bool cmPackageInfoArguments::SetMetadataFromProject(cmExecutionStatus& status)
     if (mapProjectValue(this->Version, "VERSION"_s)) {
       mapProjectValue(this->VersionCompat, "COMPAT_VERSION"_s);
     }
+  }
+
+  if (this->License.empty()) {
+    mapProjectValue(this->License, "SPDX_LICENSE"_s);
   }
 
   if (this->Description.empty()) {

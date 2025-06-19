@@ -141,6 +141,8 @@ Exporting Targets to the |CPS|
           [VERSION_SCHEMA <string>]]
          [DEFAULT_TARGETS <target>...]
          [DEFAULT_CONFIGURATIONS <config>...]
+         [LICENSE <license-string>]
+         [DEFAULT_LICENSE <license-string>]
          [DESCRIPTION <description-string>]
          [HOMEPAGE_URL <url-string>])
 
