@@ -4550,32 +4550,35 @@ bool cmVisualStudio10TargetGenerator::ComputeLinkOptions(
   }
 
   if (this->MSTools) {
-    if (this->GeneratorTarget->IsWin32Executable(config)) {
-      if (this->GlobalGenerator->TargetsWindowsCE()) {
-        linkOptions.AddFlag("SubSystem", "WindowsCE");
-        if (this->GeneratorTarget->GetType() == cmStateEnums::EXECUTABLE) {
-          if (this->ClOptions[config]->UsingUnicode()) {
-            linkOptions.AddFlag("EntryPointSymbol", "wWinMainCRTStartup");
-          } else {
-            linkOptions.AddFlag("EntryPointSymbol", "WinMainCRTStartup");
+    if (this->GeneratorTarget->GetType() == cmStateEnums::EXECUTABLE) {
+      // Specify an entry point for executables.
+      if (this->GeneratorTarget->IsWin32Executable(config)) {
+        if (this->GlobalGenerator->TargetsWindowsCE()) {
+          linkOptions.AddFlag("SubSystem", "WindowsCE");
+          if (this->GeneratorTarget->GetType() == cmStateEnums::EXECUTABLE) {
+            if (this->ClOptions[config]->UsingUnicode()) {
+              linkOptions.AddFlag("EntryPointSymbol", "wWinMainCRTStartup");
+            } else {
+              linkOptions.AddFlag("EntryPointSymbol", "WinMainCRTStartup");
+            }
           }
+        } else {
+          linkOptions.AddFlag("SubSystem", "Windows");
         }
       } else {
-        linkOptions.AddFlag("SubSystem", "Windows");
+        if (this->GlobalGenerator->TargetsWindowsCE()) {
+          linkOptions.AddFlag("SubSystem", "WindowsCE");
+          if (this->GeneratorTarget->GetType() == cmStateEnums::EXECUTABLE) {
+            if (this->ClOptions[config]->UsingUnicode()) {
+              linkOptions.AddFlag("EntryPointSymbol", "mainWCRTStartup");
+            } else {
+              linkOptions.AddFlag("EntryPointSymbol", "mainACRTStartup");
+            }
+          }
+        } else {
+          linkOptions.AddFlag("SubSystem", "Console");
+        };
       }
-    } else {
-      if (this->GlobalGenerator->TargetsWindowsCE()) {
-        linkOptions.AddFlag("SubSystem", "WindowsCE");
-        if (this->GeneratorTarget->GetType() == cmStateEnums::EXECUTABLE) {
-          if (this->ClOptions[config]->UsingUnicode()) {
-            linkOptions.AddFlag("EntryPointSymbol", "mainWCRTStartup");
-          } else {
-            linkOptions.AddFlag("EntryPointSymbol", "mainACRTStartup");
-          }
-        }
-      } else {
-        linkOptions.AddFlag("SubSystem", "Console");
-      };
     }
 
     if (cmValue stackVal = this->Makefile->GetDefinition(
@@ -4657,6 +4660,26 @@ bool cmVisualStudio10TargetGenerator::ComputeLinkOptions(
       if (strcmp(debug, "DebugFastLink") == 0) {
         linkOptions.AddFlag("GenerateDebugInformation", "Debug");
       }
+    }
+  }
+
+  if (this->ProjectType == VsProjectType::vcxproj && this->MSTools) {
+    // Suppress MSBuild default settings for which the project
+    // specifies no flags.
+    if (!linkOptions.HasFlag("DataExecutionPrevention")) {
+      linkOptions.AddFlag("DataExecutionPrevention", "");
+    }
+    if (!linkOptions.HasFlag("ImageHasSafeExceptionHandlers")) {
+      linkOptions.AddFlag("ImageHasSafeExceptionHandlers", "");
+    }
+    if (!linkOptions.HasFlag("LinkErrorReporting")) {
+      linkOptions.AddFlag("LinkErrorReporting", "");
+    }
+    if (!linkOptions.HasFlag("RandomizedBaseAddress")) {
+      linkOptions.AddFlag("RandomizedBaseAddress", "");
+    }
+    if (!linkOptions.HasFlag("SubSystem")) {
+      linkOptions.AddFlag("SubSystem", "");
     }
   }
 
