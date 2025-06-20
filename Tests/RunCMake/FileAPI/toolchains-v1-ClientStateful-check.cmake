@@ -8,4 +8,6 @@ set(expect
   )
 check_api("^${expect}$")
 
+check_stateful_queries(foo)
+
 check_python(toolchains-v1 index)

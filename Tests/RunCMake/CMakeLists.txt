@@ -420,7 +420,8 @@ if(CMAKE_USE_SYSTEM_JSONCPP)
   list(APPEND FileAPI_ARGS -DJsonCpp_VERSION_STRING=${JsonCpp_VERSION_STRING})
 endif()
 add_RunCMake_test(FileAPI -DPython_EXECUTABLE=${Python_EXECUTABLE}
-                          -DCMAKE_CXX_COMPILER_ID=${CMAKE_CXX_COMPILER_ID})
+                          -DCMAKE_CXX_COMPILER_ID=${CMAKE_CXX_COMPILER_ID}
+                          -DCMake_TEST_JSON_SCHEMA=${CMake_TEST_JSON_SCHEMA})
 if(CMAKE_GENERATOR MATCHES "Make|Ninja")
   add_RunCMake_test(Instrumentation)
 endif()

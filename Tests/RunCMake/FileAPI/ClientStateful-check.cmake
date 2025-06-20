@@ -65,4 +65,13 @@ set(expect
   )
 check_api("^${expect}$")
 
+check_stateful_queries(
+  request-version-1
+  request-version-1-1
+  request-version-2
+  request-array-version-1
+  request-array-version-1-1
+  request-array-version-2
+)
+
 check_python(ClientStateful index)
