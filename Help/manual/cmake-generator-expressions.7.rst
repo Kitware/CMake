@@ -1420,8 +1420,8 @@ Compile Context
   Note that for proper evaluation of this expression requires policy :policy:`CMP0099`
   to be set to ``NEW``.
 
-Linker Language And ID
-^^^^^^^^^^^^^^^^^^^^^^
+Link Language and ID
+^^^^^^^^^^^^^^^^^^^^
 
 .. genex:: $<LINK_LANGUAGE>
 
@@ -1826,6 +1826,209 @@ Link Context
   This expression is mainly useful when a device link step is also involved
   (see :genex:`$<DEVICE_LINK:list>` generator expression). This expression can
   only be used to specify link options.
+
+Linker ID and Frontend-Variant
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+See also the :variable:`CMAKE_<LANG>_COMPILER_LINKER_ID` and
+:variable:`CMAKE_<LANG>_COMPILER_LINKER_FRONTEND_VARIANT` variables, which are
+closely related to most of the expressions in this sub-section.
+
+.. genex:: $<C_COMPILER_LINKER_ID>
+
+  .. versionadded:: 4.2
+
+  CMake's linker id of the C linker used.
+
+.. genex:: $<C_COMPILER_LINKER_ID:linker_ids>
+
+  .. versionadded:: 4.2
+
+  where ``linker_ids`` is a comma-separated list.
+  ``1`` if CMake's linker id of the C linker matches any one
+  of the entries in ``linker_ids``, otherwise ``0``.
+
+.. genex:: $<CXX_COMPILER_LINKER_ID>
+
+  .. versionadded:: 4.2
+
+  CMake's linker id of the C++ linker used.
+
+.. genex:: $<CXX_COMPILER_LINKER_ID:linker_ids>
+
+  .. versionadded:: 4.2
+
+  where ``linker_ids`` is a comma-separated list.
+  ``1`` if CMake's linker id of the C++ linker matches any one
+  of the entries in ``linker_ids``, otherwise ``0``.
+
+.. genex:: $<CUDA_COMPILER_LINKER_ID>
+
+  .. versionadded:: 4.2
+
+  CMake's linker id of the CUDA linker used.
+
+.. genex:: $<CUDA_COMPILER_LINKER_ID:linker_ids>
+
+  .. versionadded:: 4.2
+
+  where ``linker_ids`` is a comma-separated list.
+  ``1`` if CMake's linker id of the CUDA linker matches any one
+  of the entries in ``linker_ids``, otherwise ``0``.
+
+.. genex:: $<OBJC_COMPILER_LINKER_ID>
+
+  .. versionadded:: 4.2
+
+  CMake's linker id of the Objective-C linker used.
+
+.. genex:: $<OBJC_COMPILER_LINKER_ID:linker_ids>
+
+  .. versionadded:: 4.2
+
+  where ``linker_ids`` is a comma-separated list.
+  ``1`` if CMake's linker id of the Objective-C linker matches any one
+  of the entries in ``linker_ids``, otherwise ``0``.
+
+.. genex:: $<OBJCXX_COMPILER_LINKER_ID>
+
+  .. versionadded:: 4.2
+
+  CMake's linker id of the Objective-C++ linker used.
+
+.. genex:: $<OBJCXX_COMPILER_LINKER_ID:linker_ids>
+
+  .. versionadded:: 4.2
+
+  where ``linker_ids`` is a comma-separated list.
+  ``1`` if CMake's linker id of the Objective-C++ linker matches any one
+  of the entries in ``linker_ids``, otherwise ``0``.
+
+.. genex:: $<Fortran_COMPILER_LINKER_ID>
+
+  .. versionadded:: 4.2
+
+  CMake's linker id of the Fortran linker used.
+
+.. genex:: $<Fortran_COMPILER_LINKER_ID:linker_ids>
+
+  .. versionadded:: 4.2
+
+  where ``linker_ids`` is a comma-separated list.
+  ``1`` if CMake's linker id of the Fortran linker matches any one
+  of the entries in ``linker_ids``, otherwise ``0``.
+
+.. genex:: $<HIP_COMPILER_LINKER_ID>
+
+  .. versionadded:: 4.2
+
+  CMake's linker id of the HIP linker used.
+
+.. genex:: $<HIP_COMPILER_LINKER_ID:linker_ids>
+
+  .. versionadded:: 4.2
+
+  where ``linker_ids`` is a comma-separated list.
+  ``1`` if CMake's linker id of the HIP linker matches any one
+  of the entries in ``linker_ids``, otherwise ``0``.
+
+.. genex:: $<C_COMPILER_LINKER_FRONTEND_VARIANT>
+
+  .. versionadded:: 4.2
+
+  CMake's linker frontend variant of the C linker used.
+
+.. genex:: $<C_COMPILER_LINKER_FRONTEND_VARIANT:variant_ids>
+
+  .. versionadded:: 4.2
+
+  where ``variant_ids`` is a comma-separated list.
+  ``1`` if CMake's linker frontend variant of the C linker matches any one
+  of the entries in ``variant_ids``, otherwise ``0``.
+
+.. genex:: $<CXX_COMPILER_LINKER_FRONTEND_VARIANT>
+
+  .. versionadded:: 4.2
+
+  CMake's linker frontend variant of the C++ linker used.
+
+.. genex:: $<CXX_COMPILER_LINKER_FRONTEND_VARIANT:variant_ids>
+
+  .. versionadded:: 4.2
+
+  where ``variant_ids`` is a comma-separated list.
+  ``1`` if CMake's linker frontend variant of the C++ linker matches any one
+  of the entries in ``variant_ids``, otherwise ``0``.
+
+.. genex:: $<CUDA_COMPILER_LINKER_FRONTEND_VARIANT>
+
+  .. versionadded:: 4.2
+
+  CMake's linker frontend variant of the CUDA linker used.
+
+.. genex:: $<CUDA_COMPILER_LINKER_FRONTEND_VARIANT:variant_ids>
+
+  .. versionadded:: 4.2
+
+  where ``variant_ids`` is a comma-separated list.
+  ``1`` if CMake's linker frontend variant of the CUDA linker matches any one
+  of the entries in ``variant_ids``, otherwise ``0``.
+
+.. genex:: $<OBJC_COMPILER_LINKER_FRONTEND_VARIANT>
+
+  .. versionadded:: 4.2
+
+  CMake's linker frontend variant of the Objective-C linker used.
+
+.. genex:: $<OBJC_COMPILER_LINKER_FRONTEND_VARIANT:variant_ids>
+
+  .. versionadded:: 4.2
+
+  where ``variant_ids`` is a comma-separated list.
+  ``1`` if CMake's linker frontend variant of the Objective-C linker matches
+  any one of the entries in ``variant_ids``, otherwise ``0``.
+
+.. genex:: $<OBJCXX_COMPILER_LINKER_FRONTEND_VARIANT>
+
+  .. versionadded:: 4.2
+
+  CMake's linker frontend variant of the Objective-C++ linker used.
+
+.. genex:: $<OBJCXX_COMPILER_LINKER_FRONTEND_VARIANT:variant_ids>
+
+  .. versionadded:: 4.2
+
+  where ``variant_ids`` is a comma-separated list.
+  ``1`` if CMake's linker frontend variant of the Objective-C++ linker matches
+  any one of the entries in ``variant_ids``, otherwise ``0``.
+
+.. genex:: $<Fortran_COMPILER_LINKER_FRONTEND_VARIANT>
+
+  .. versionadded:: 4.2
+
+  CMake's linker frontend variant of the Fortran linker used.
+
+.. genex:: $<Fortran_COMPILER_LINKER_FRONTEND_VARIANT:variant_ids>
+
+  .. versionadded:: 4.2
+
+  where ``variant_ids`` is a comma-separated list.
+  ``1`` if CMake's linker frontend variant of the Fortran linker matches
+  any one of the entries in ``variant_ids``, otherwise ``0``.
+
+.. genex:: $<HIP_COMPILER_LINKER_FRONTEND_VARIANT>
+
+  .. versionadded:: 4.2
+
+  CMake's linker frontend variant of the HIP linker used.
+
+.. genex:: $<HIP_COMPILER_LINKER_FRONTEND_VARIANT:variant_ids>
+
+  .. versionadded:: 4.2
+
+  where ``variant_ids`` is a comma-separated list.
+  ``1`` if CMake's linker frontend variant of the HIP linker matches
+  any one of the entries in ``variant_ids``, otherwise ``0``.
 
 
 .. _`Target-Dependent Expressions`:

@@ -2561,6 +2561,146 @@ static const struct LinkLanguageAndIdNode : public cmGeneratorExpressionNode
   }
 } linkLanguageAndIdNode;
 
+struct CompilerLinkerIdNode : public cmGeneratorExpressionNode
+{
+  CompilerLinkerIdNode(char const* lang)
+    : Language(lang)
+  {
+  }
+
+  int NumExpectedParameters() const override { return ZeroOrMoreParameters; }
+
+  std::string Evaluate(
+    std::vector<std::string> const& parameters,
+    cmGeneratorExpressionContext* context,
+    GeneratorExpressionContent const* content,
+    cmGeneratorExpressionDAGChecker* dagChecker) const override
+  {
+    if (!context->HeadTarget) {
+      reportError(
+        context, content->GetOriginalExpression(),
+        cmStrCat(
+          "$<", this->Language,
+          "_COMPILER_LINKER_ID> may only be used with binary targets. It may "
+          "not be used with add_custom_command or add_custom_target."));
+      return {};
+    }
+    return this->EvaluateWithLanguage(parameters, context, content, dagChecker,
+                                      this->Language);
+  }
+
+  std::string EvaluateWithLanguage(std::vector<std::string> const& parameters,
+                                   cmGeneratorExpressionContext* context,
+                                   GeneratorExpressionContent const* content,
+                                   cmGeneratorExpressionDAGChecker* /*unused*/,
+                                   std::string const& lang) const
+  {
+    std::string const& compilerLinkerId =
+      context->LG->GetMakefile()->GetSafeDefinition(
+        cmStrCat("CMAKE_", lang, "_COMPILER_LINKER_ID"));
+    if (parameters.empty()) {
+      return compilerLinkerId;
+    }
+    if (compilerLinkerId.empty()) {
+      return parameters.front().empty() ? "1" : "0";
+    }
+    static cmsys::RegularExpression compilerLinkerIdValidator(
+      "^[A-Za-z0-9_]*$");
+
+    for (auto const& param : parameters) {
+      if (!compilerLinkerIdValidator.find(param)) {
+        reportError(context, content->GetOriginalExpression(),
+                    "Expression syntax not recognized.");
+        return std::string();
+      }
+
+      if (param == compilerLinkerId) {
+        return "1";
+      }
+    }
+    return "0";
+  }
+
+  char const* const Language;
+};
+
+static CompilerLinkerIdNode const cCompilerLinkerIdNode("C"),
+  cxxCompilerLinkerIdNode("CXX"), cudaCompilerLinkerIdNode("CUDA"),
+  objcCompilerLinkerIdNode("OBJC"), objcxxCompilerLinkerIdNode("OBJCXX"),
+  fortranCompilerLinkerIdNode("Fortran"), hipCompilerLinkerIdNode("HIP");
+
+struct CompilerLinkerFrontendVariantNode : public cmGeneratorExpressionNode
+{
+  CompilerLinkerFrontendVariantNode(char const* lang)
+    : Language(lang)
+  {
+  }
+
+  int NumExpectedParameters() const override { return ZeroOrMoreParameters; }
+
+  std::string Evaluate(
+    std::vector<std::string> const& parameters,
+    cmGeneratorExpressionContext* context,
+    GeneratorExpressionContent const* content,
+    cmGeneratorExpressionDAGChecker* dagChecker) const override
+  {
+    if (!context->HeadTarget) {
+      reportError(
+        context, content->GetOriginalExpression(),
+        cmStrCat(
+          "$<", this->Language,
+          "_COMPILER_LINKER_FRONTEND_VARIANT> may only be used with binary "
+          "targets. It may not be used with add_custom_command or "
+          "add_custom_target."));
+      return {};
+    }
+    return this->EvaluateWithLanguage(parameters, context, content, dagChecker,
+                                      this->Language);
+  }
+
+  std::string EvaluateWithLanguage(std::vector<std::string> const& parameters,
+                                   cmGeneratorExpressionContext* context,
+                                   GeneratorExpressionContent const* content,
+                                   cmGeneratorExpressionDAGChecker* /*unused*/,
+                                   std::string const& lang) const
+  {
+    std::string const& compilerLinkerFrontendVariant =
+      context->LG->GetMakefile()->GetSafeDefinition(
+        cmStrCat("CMAKE_", lang, "_COMPILER_LINKER_FRONTEND_VARIANT"));
+    if (parameters.empty()) {
+      return compilerLinkerFrontendVariant;
+    }
+    if (compilerLinkerFrontendVariant.empty()) {
+      return parameters.front().empty() ? "1" : "0";
+    }
+    static cmsys::RegularExpression compilerLinkerFrontendVariantValidator(
+      "^[A-Za-z0-9_]*$");
+
+    for (auto const& param : parameters) {
+      if (!compilerLinkerFrontendVariantValidator.find(param)) {
+        reportError(context, content->GetOriginalExpression(),
+                    "Expression syntax not recognized.");
+        return {};
+      }
+      if (param == compilerLinkerFrontendVariant) {
+        return "1";
+      }
+    }
+    return "0";
+  }
+
+  char const* const Language;
+};
+
+static CompilerLinkerFrontendVariantNode const
+  cCompilerLinkerFrontendVariantNode("C"),
+  cxxCompilerLinkerFrontendVariantNode("CXX"),
+  cudaCompilerLinkerFrontendVariantNode("CUDA"),
+  objcCompilerLinkerFrontendVariantNode("OBJC"),
+  objcxxCompilerLinkerFrontendVariantNode("OBJCXX"),
+  fortranCompilerLinkerFrontendVariantNode("Fortran"),
+  hipCompilerLinkerFrontendVariantNode("HIP");
+
 static const struct LinkLibraryNode : public cmGeneratorExpressionNode
 {
   LinkLibraryNode() {} // NOLINT(modernize-use-equals-default)
@@ -4641,6 +4781,27 @@ cmGeneratorExpressionNode const* cmGeneratorExpressionNode::GetNode(
     { "COMPILE_LANGUAGE", &languageNode },
     { "LINK_LANG_AND_ID", &linkLanguageAndIdNode },
     { "LINK_LANGUAGE", &linkLanguageNode },
+    { "C_COMPILER_LINKER_ID", &cCompilerLinkerIdNode },
+    { "CXX_COMPILER_LINKER_ID", &cxxCompilerLinkerIdNode },
+    { "OBJC_COMPILER_LINKER_ID", &objcCompilerLinkerIdNode },
+    { "OBJCXX_COMPILER_LINKER_ID", &objcxxCompilerLinkerIdNode },
+    { "CUDA_COMPILER_LINKER_ID", &cudaCompilerLinkerIdNode },
+    { "Fortran_COMPILER_LINKER_ID", &fortranCompilerLinkerIdNode },
+    { "HIP_COMPILER_LINKER_ID", &hipCompilerLinkerIdNode },
+    { "C_COMPILER_LINKER_FRONTEND_VARIANT",
+      &cCompilerLinkerFrontendVariantNode },
+    { "CXX_COMPILER_LINKER_FRONTEND_VARIANT",
+      &cxxCompilerLinkerFrontendVariantNode },
+    { "CUDA_COMPILER_LINKER_FRONTEND_VARIANT",
+      &cudaCompilerLinkerFrontendVariantNode },
+    { "OBJC_COMPILER_LINKER_FRONTEND_VARIANT",
+      &objcCompilerLinkerFrontendVariantNode },
+    { "OBJCXX_COMPILER_LINKER_FRONTEND_VARIANT",
+      &objcxxCompilerLinkerFrontendVariantNode },
+    { "Fortran_COMPILER_LINKER_FRONTEND_VARIANT",
+      &fortranCompilerLinkerFrontendVariantNode },
+    { "HIP_COMPILER_LINKER_FRONTEND_VARIANT",
+      &hipCompilerLinkerFrontendVariantNode },
     { "LINK_LIBRARY", &linkLibraryNode },
     { "LINK_GROUP", &linkGroupNode },
     { "HOST_LINK", &hostLinkNode },
