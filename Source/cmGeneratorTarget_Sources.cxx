@@ -96,10 +96,11 @@ void addFileSetEntry(cmGeneratorTarget const* headTarget,
   }
   cmake* cm = headTarget->GetLocalGenerator()->GetCMakeInstance();
   for (auto& entryCge : fileSet->CompileFileEntries()) {
-    auto tpe = cmGeneratorTarget::TargetPropertyEntry::CreateFileSet(
-      dirs, contextSensitiveDirs, std::move(entryCge), fileSet);
-    entries.Entries.emplace_back(
-      EvaluateTargetPropertyEntry(headTarget, config, "", dagChecker, *tpe));
+    auto targetPropEntry =
+      cmGeneratorTarget::TargetPropertyEntry::CreateFileSet(
+        dirs, contextSensitiveDirs, std::move(entryCge), fileSet);
+    entries.Entries.emplace_back(EvaluateTargetPropertyEntry(
+      headTarget, config, "", dagChecker, *targetPropEntry));
     EvaluatedTargetPropertyEntry const& entry = entries.Entries.back();
     for (auto const& file : entry.Values) {
       auto* sf = headTarget->Makefile->GetOrCreateSource(file);
