@@ -1828,6 +1828,6 @@ The members specific to ``toolchains`` objects are:
   ``sourceFileExtensions``
     Optional member that is present when the
     :variable:`CMAKE_<LANG>_SOURCE_FILE_EXTENSIONS` variable is defined for
-    the current language. Its value is a JSON array of JSON strings where each
+    the current language. Its value is a JSON array of JSON strings where
     each string holds a file extension (without the leading dot) for the
     language.
