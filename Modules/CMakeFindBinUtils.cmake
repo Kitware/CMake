@@ -187,7 +187,7 @@ else()
   set(_CMAKE_TAPI_NAMES "tapi")
 
   # Prepend toolchain-specific names.
-  if("${CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_ID}" STREQUAL Clang)
+  if("x${CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_ID}" MATCHES "^x(Clang|IntelLLVM|LLVMFlang)$")
     if("x${CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_SIMULATE_ID}" STREQUAL "xMSVC")
       list(PREPEND _CMAKE_LINKER_NAMES "lld-link")
     elseif(NOT APPLE)
