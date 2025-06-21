@@ -47,6 +47,7 @@ endfunction()
 execGitCommand(-c init.defaultBranch=master init)
 execGitCommand(config --add user.email "testauthor@cmake.org")
 execGitCommand(config --add user.name testauthor)
+execGitCommand(config commit.gpgsign "false")
 
 # Create the initial repo structure
 execGitCommand(add firstFile.txt)
