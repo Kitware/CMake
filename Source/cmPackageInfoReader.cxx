@@ -479,6 +479,14 @@ std::unique_ptr<cmPackageInfoReader> cmPackageInfoReader::Read(
     }
   }
 
+  // Check for a default license.
+  Json::Value const& defaultLicense = reader->Data["default_license"];
+  if (!defaultLicense.isNull()) {
+    reader->DefaultLicense = defaultLicense.asString();
+  } else if (parent) {
+    reader->DefaultLicense = parent->DefaultLicense;
+  }
+
   return reader;
 }
 
@@ -582,12 +590,14 @@ void cmPackageInfoReader::SetImportProperty(cmTarget* target,
   }
 }
 
-void cmPackageInfoReader::SetMetaProperty(cmTarget* target,
-                                          cm::string_view property,
-                                          Json::Value const& value) const
+void cmPackageInfoReader::SetMetaProperty(
+  cmTarget* target, cm::string_view property, Json::Value const& value,
+  std::string const& defaultValue) const
 {
   if (!value.isNull()) {
     target->SetProperty(property.data(), value.asString());
+  } else if (!defaultValue.empty()) {
+    target->SetProperty(property.data(), defaultValue);
   }
 }
 
@@ -671,7 +681,8 @@ void cmPackageInfoReader::SetTargetProperties(
 
   // Add other information.
   if (configuration.empty()) {
-    this->SetMetaProperty(target, "SPDX_LICENSE"_s, data["license"]);
+    this->SetMetaProperty(target, "SPDX_LICENSE"_s, data["license"],
+                          this->DefaultLicense);
   }
 }
 
