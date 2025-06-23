@@ -274,7 +274,6 @@ function(run_Toolchain)
   # precedence over source dir
   file(WRITE ${binary_dir}/toolchain.cmake [=[
 set(CMAKE_SYSTEM_NAME Linux)
-set(toolchain_file binary_dir)
 ]=])
   run_cmake_with_options(toolchain-valid-rel-build-path -S ${source_dir} -B ${binary_dir} --toolchain toolchain.cmake)
 endfunction()
