@@ -139,17 +139,24 @@ endif()
 # variables around so they can be used in CMakeLists.txt.
 # In all other cases, the host and target platform are the same.
 if(CMAKE_TOOLCHAIN_FILE)
-  # at first try to load it as path relative to the directory from which cmake has been run
-  include("${CMAKE_BINARY_DIR}/${CMAKE_TOOLCHAIN_FILE}" OPTIONAL RESULT_VARIABLE _INCLUDED_TOOLCHAIN_FILE)
-  if(NOT _INCLUDED_TOOLCHAIN_FILE)
-     # if the file isn't found there, check the default locations
-     include("${CMAKE_TOOLCHAIN_FILE}" OPTIONAL RESULT_VARIABLE _INCLUDED_TOOLCHAIN_FILE)
-  endif()
-
-  if(_INCLUDED_TOOLCHAIN_FILE)
-    set(CMAKE_TOOLCHAIN_FILE "${_INCLUDED_TOOLCHAIN_FILE}" CACHE FILEPATH "The CMake toolchain file" FORCE)
+  if(IS_ABSOLUTE "${CMAKE_TOOLCHAIN_FILE}" AND EXISTS "${CMAKE_TOOLCHAIN_FILE}")
+    # Normalize the absolute path.
+    set(CMAKE_TOOLCHAIN_FILE "${CMAKE_TOOLCHAIN_FILE}" CACHE FILEPATH "The CMake toolchain file" FORCE)
+    set(CMAKE_TOOLCHAIN_FILE "$CACHE{CMAKE_TOOLCHAIN_FILE}")
+    include("${CMAKE_TOOLCHAIN_FILE}" OPTIONAL RESULT_VARIABLE _INCLUDED_TOOLCHAIN_FILE)
   else()
-    message(FATAL_ERROR "Could not find toolchain file: ${CMAKE_TOOLCHAIN_FILE}")
+    # at first try to load it as path relative to the directory from which cmake has been run
+    include("${CMAKE_BINARY_DIR}/${CMAKE_TOOLCHAIN_FILE}" OPTIONAL RESULT_VARIABLE _INCLUDED_TOOLCHAIN_FILE)
+    if(NOT _INCLUDED_TOOLCHAIN_FILE)
+      # if the file isn't found there, check the default locations
+      include("${CMAKE_TOOLCHAIN_FILE}" OPTIONAL RESULT_VARIABLE _INCLUDED_TOOLCHAIN_FILE)
+    endif()
+    if(_INCLUDED_TOOLCHAIN_FILE)
+      set(CMAKE_TOOLCHAIN_FILE "${_INCLUDED_TOOLCHAIN_FILE}" CACHE FILEPATH "The CMake toolchain file" FORCE)
+    endif()
+  endif()
+  if(NOT _INCLUDED_TOOLCHAIN_FILE)
+    message(FATAL_ERROR "Could not find toolchain file:\n \"${CMAKE_TOOLCHAIN_FILE}\"")
   endif()
 endif()
 

@@ -264,6 +264,10 @@ function(run_Toolchain)
   run_cmake_with_options(toolchain-no-arg -S ${source_dir} --toolchain=)
   run_cmake_with_options(toolchain-valid-abs-path -S ${source_dir} --toolchain "${source_dir}/toolchain.cmake")
   run_cmake_with_options(toolchain-valid-rel-src-path -S ${source_dir} --toolchain=toolchain.cmake)
+  run_cmake_with_options(toolchain-D-abs-path -S ${source_dir} -DCMAKE_TOOLCHAIN_FILE=${source_dir}/toolchain.cmake)
+  if(CMAKE_HOST_UNIX AND NOT CMAKE_SYSTEM_NAME STREQUAL "CYGWIN" AND NOT CMAKE_SYSTEM_NAME STREQUAL "MSYS")
+    run_cmake_with_options(toolchain-D-slash-abs-path -S ${source_dir} -DCMAKE_TOOLCHAIN_FILE=/${source_dir}/toolchain.cmake)
+  endif()
 
   set(RunCMake_TEST_NO_CLEAN 1)
   set(binary_dir ${RunCMake_BINARY_DIR}/Toolchain-build)
@@ -274,7 +278,6 @@ function(run_Toolchain)
   # precedence over source dir
   file(WRITE ${binary_dir}/toolchain.cmake [=[
 set(CMAKE_SYSTEM_NAME Linux)
-set(toolchain_file binary_dir)
 ]=])
   run_cmake_with_options(toolchain-valid-rel-build-path -S ${source_dir} -B ${binary_dir} --toolchain toolchain.cmake)
 endfunction()
