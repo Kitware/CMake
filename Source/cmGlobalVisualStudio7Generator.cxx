@@ -308,6 +308,26 @@ void cmGlobalVisualStudio7Generator::Generate()
     this->CallVisualStudioMacro(MacroReload,
                                 GetSLNFile(this->LocalGenerators[0].get()));
   }
+
+  if (this->Version == VSVersion::VS14 &&
+      !this->CMakeInstance->GetIsInTryCompile()) {
+    std::string cmakeWarnVS14;
+    if (cmValue cached = this->CMakeInstance->GetState()->GetCacheEntryValue(
+          "CMAKE_WARN_VS14")) {
+      this->CMakeInstance->MarkCliAsUsed("CMAKE_WARN_VS14");
+      cmakeWarnVS14 = *cached;
+    } else {
+      cmSystemTools::GetEnv("CMAKE_WARN_VS14", cmakeWarnVS14);
+    }
+    if (cmakeWarnVS14.empty() || !cmIsOff(cmakeWarnVS14)) {
+      this->CMakeInstance->IssueMessage(
+        MessageType::WARNING,
+        "The \"Visual Studio 14 2015\" generator is deprecated "
+        "and will be removed in a future version of CMake."
+        "\n"
+        "Add CMAKE_WARN_VS14=OFF to the cache to disable this warning.");
+    }
+  }
 }
 
 void cmGlobalVisualStudio7Generator::OutputSLNFile(

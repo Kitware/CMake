@@ -57,7 +57,7 @@ public:
   cmDocumentationEntry GetDocumentation() const override
   {
     return { std::string(vs14generatorName),
-             "Generates Visual Studio 2015 project files.  "
+             "Deprecated.  Generates Visual Studio 2015 project files.  "
              "Use -A option to specify architecture." };
   }
 
