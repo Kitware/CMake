@@ -95,6 +95,7 @@ if(do_git_tests)
     GIT_TAG ${TEST_GIT_TAG}
     GIT_CONFIG "user.email=testauthor@cmake.org"
                "user.name=testauthor"
+               "commit.gpgsign=false"
     CMAKE_GENERATOR "${CMAKE_GENERATOR}"
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
     INSTALL_COMMAND ""
