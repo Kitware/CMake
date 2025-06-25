@@ -56,9 +56,9 @@ public:
 
   cmDocumentationEntry GetDocumentation() const override
   {
-    return { cmStrCat(vs14generatorName, " [arch]"),
+    return { std::string(vs14generatorName),
              "Generates Visual Studio 2015 project files.  "
-             "Optional [arch] can be \"Win64\" or \"ARM\"." };
+             "Use -A option to specify architecture." };
   }
 
   std::vector<std::string> GetGeneratorNames() const override
