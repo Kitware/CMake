@@ -5,10 +5,10 @@
 check-file = true
 check-filename = true
 extend-ignore-re = [
-    # NOTE Allow to mark a block of text to exclude from spellchecking
-    "(?s)(#|/(/|\\*)|\\.\\.)\\s*(NOQA|noqa):? spellcheck(: *|=| +)off.*?\\n\\s*(#|/(/|\\*)|\\.\\.)\\s*(NOQA|noqa):? spellcheck(: *|=| +)on"
+    # NOTE Allow to mark block of text to exclude from spellchecking inside C++ or hash-style comments (CMake,Python,&etc.)
+    "(?s)(#|//)\\s*(NOQA|noqa):? spellcheck(: *|=| +)off.*?\\n\\s*(#|//)\\s*(NOQA|noqa):? spellcheck(: *|=| +)on"
     # NOTE Allow to mark a line to exclude from spellchecking
-  , "(?Rm)^.*(#|/(/|\\*)|\\.\\.)\\s*(NOQA|noqa):? spellcheck(: *|=| +)disable-line$"
+  , "(?Rm)^.*(#|//)\\s*(NOQA|noqa):? spellcheck(: *|=| +)disable-line$"
     # NOTE Stop checking from this line to the end of file
     # This line is a marker added by Git to the `COMMIT_EDITMSG`.
   , "(?sm)^# ------------------------ >8 ------------------------$.*"
@@ -34,7 +34,28 @@ ser = "ser"
 restat = "restat"
 # SpectreMitigation
 Spectre = "Spectre"
+# Identifier used in source code (`GlobalTargetInfo`)
+gti = "gti"
 
+[files]
+ignore-hidden = false
+ignore-dot = false
+extend-exclude = [
+    "CONTRIBUTORS.rst"
+    # Exclude third-party sources.
+  , "Source/CursesDialog/form/"
+  , "Source/kwsys/"
+  , "Source/bindexplib.cxx"
+  , "Source/cmcldeps.cxx"
+  , "Source/QtDialog/*.ui"
+  , "Utilities/cm*"
+  , "Utilities/ClangTidyModule"
+  , "Utilities/KWIML"
+    # FIXME: Fix spelling typos in tests.  Exclude for now.
+  , "Tests"
+  ]
+
+# BEGIN Type-specific settings
 [type.cmake.extend-identifiers]
 COMMANDs = "COMMANDs"
 xCOMMANDx = "xCOMMANDx"
@@ -60,20 +81,9 @@ SEH = "SEH"
 [type.py.extend-identifiers]
 typ = "typ"
 
-[files]
-ignore-hidden = false
-ignore-dot = false
-extend-exclude = [
-    "CONTRIBUTORS.rst"
-    # Exclude third-party sources.
-  , "Source/CursesDialog/form/"
-  , "Source/kwsys/"
-  , "Source/bindexplib.cxx"
-  , "Source/cmcldeps.cxx"
-  , "Source/QtDialog/*.ui"
-  , "Utilities/cm*"
-  , "Utilities/ClangTidyModule"
-  , "Utilities/KWIML"
-    # FIXME: Fix spelling typos in tests.  Exclude for now.
-  , "Tests"
+[type.rst]
+extend-ignore-re = [
+    # NOTE Allow to mark block of text to exclude from spellchecking as RST comments
+    "(?s)\\.\\.\\s+(NOQA|noqa):? spellcheck(: *|=| +)off.*?\\n\\.\\.\\s+(NOQA|noqa):? spellcheck(: *|=| +)on"
   ]
+# END Type-specific settings
