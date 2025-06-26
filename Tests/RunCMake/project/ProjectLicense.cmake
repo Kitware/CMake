@@ -1,0 +1,5 @@
+project(ProjectLicenseTest SPDX_LICENSE "BSD-3-Clause" LANGUAGES)
+if(NOT PROJECT_SPDX_LICENSE)
+  message(FATAL_ERROR "PROJECT_SPDX_LICENSE expected to be set")
+endif()
+message(STATUS "PROJECT_SPDX_LICENSE=${PROJECT_SPDX_LICENSE}")

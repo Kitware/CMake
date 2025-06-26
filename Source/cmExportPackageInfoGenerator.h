@@ -110,6 +110,8 @@ private:
   std::string const PackageVersionSchema;
   std::string const PackageDescription;
   std::string const PackageWebsite;
+  std::string const PackageLicense;
+  std::string const DefaultLicense;
   std::vector<std::string> DefaultTargets;
   std::vector<std::string> DefaultConfigurations;
 

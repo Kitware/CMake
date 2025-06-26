@@ -98,15 +98,16 @@ Variables that Provide Information
    /variable/CMAKE_OBJDUMP
    /variable/CMAKE_PARENT_LIST_FILE
    /variable/CMAKE_PATCH_VERSION
+   /variable/CMAKE_PROJECT_COMPAT_VERSION
    /variable/CMAKE_PROJECT_DESCRIPTION
    /variable/CMAKE_PROJECT_HOMEPAGE_URL
    /variable/CMAKE_PROJECT_NAME
+   /variable/CMAKE_PROJECT_SPDX_LICENSE
    /variable/CMAKE_PROJECT_VERSION
    /variable/CMAKE_PROJECT_VERSION_MAJOR
    /variable/CMAKE_PROJECT_VERSION_MINOR
    /variable/CMAKE_PROJECT_VERSION_PATCH
    /variable/CMAKE_PROJECT_VERSION_TWEAK
-   /variable/CMAKE_PROJECT_COMPAT_VERSION
    /variable/CMAKE_RANLIB
    /variable/CMAKE_ROOT
    /variable/CMAKE_RULE_MESSAGES
@@ -154,28 +155,30 @@ Variables that Provide Information
    /variable/CMAKE_XCODE_BUILD_SYSTEM
    /variable/CMAKE_XCODE_PLATFORM_TOOLSET
    /variable/PROJECT-NAME_BINARY_DIR
+   /variable/PROJECT-NAME_COMPAT_VERSION
    /variable/PROJECT-NAME_DESCRIPTION
    /variable/PROJECT-NAME_HOMEPAGE_URL
    /variable/PROJECT-NAME_IS_TOP_LEVEL
    /variable/PROJECT-NAME_SOURCE_DIR
+   /variable/PROJECT-NAME_SPDX_LICENSE
    /variable/PROJECT-NAME_VERSION
    /variable/PROJECT-NAME_VERSION_MAJOR
    /variable/PROJECT-NAME_VERSION_MINOR
    /variable/PROJECT-NAME_VERSION_PATCH
    /variable/PROJECT-NAME_VERSION_TWEAK
-   /variable/PROJECT-NAME_COMPAT_VERSION
    /variable/PROJECT_BINARY_DIR
+   /variable/PROJECT_COMPAT_VERSION
    /variable/PROJECT_DESCRIPTION
    /variable/PROJECT_HOMEPAGE_URL
    /variable/PROJECT_IS_TOP_LEVEL
    /variable/PROJECT_NAME
    /variable/PROJECT_SOURCE_DIR
+   /variable/PROJECT_SPDX_LICENSE
    /variable/PROJECT_VERSION
    /variable/PROJECT_VERSION_MAJOR
    /variable/PROJECT_VERSION_MINOR
    /variable/PROJECT_VERSION_PATCH
    /variable/PROJECT_VERSION_TWEAK
-   /variable/PROJECT_COMPAT_VERSION
 
 Variables that Change Behavior
 ==============================

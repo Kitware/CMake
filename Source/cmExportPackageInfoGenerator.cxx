@@ -39,6 +39,8 @@ cmExportPackageInfoGenerator::cmExportPackageInfoGenerator(
   , PackageVersionSchema(std::move(arguments.VersionSchema))
   , PackageDescription(std::move(arguments.Description))
   , PackageWebsite(std::move(arguments.Website))
+  , PackageLicense(std::move(arguments.License))
+  , DefaultLicense(std::move(arguments.DefaultLicense))
   , DefaultTargets(std::move(arguments.DefaultTargets))
   , DefaultConfigurations(std::move(arguments.DefaultConfigs))
 {
@@ -127,7 +129,8 @@ Json::Value cmExportPackageInfoGenerator::GeneratePackageInfo() const
 
   SetProperty(package, "description", this->PackageDescription);
   SetProperty(package, "website", this->PackageWebsite);
-  // TODO: license
+  SetProperty(package, "license", this->PackageLicense);
+  SetProperty(package, "default_license", this->DefaultLicense);
 
   return package;
 }

@@ -17,6 +17,18 @@ Call Stack \(most recent call first\):
 
 
 CMake Error at BadArgs4\.cmake:[0-9]+ \(export\):
+  export LICENSE requires PACKAGE_INFO\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:3 \(include\)
+
+
+CMake Error at BadArgs4\.cmake:[0-9]+ \(export\):
+  export DEFAULT_LICENSE requires PACKAGE_INFO\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:3 \(include\)
+
+
+CMake Error at BadArgs4\.cmake:[0-9]+ \(export\):
   export DESCRIPTION requires PACKAGE_INFO\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:3 \(include\)
