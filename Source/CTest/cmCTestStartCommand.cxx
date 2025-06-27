@@ -181,7 +181,7 @@ bool cmCTestStartCommand::InitialPass(std::vector<std::string> const& args,
   this->CTest->SetCTestConfigurationFromCMakeVariable(
     &mf, "BuildName", "CTEST_BUILD_NAME", quiet);
 
-  this->CTest->Initialize(bld_dir);
+  this->CTest->Initialize(binaryDir);
 
   cmCTestOptionalLog(
     this->CTest, OUTPUT,
