@@ -1301,6 +1301,12 @@ with members:
       A string specifying a fragment of the compile command line invocation.
       The value is encoded in the build system's native shell format.
 
+    ``backtrace``
+      Optional member that is present when a CMake language backtrace to
+      the command invocation that added this fragment is available.
+      The value is an unsigned integer 0-based index into the
+      ``backtraceGraph`` member's ``nodes`` array.
+
   ``includes``
     Optional member that is present when there are include directories.
     The value is a JSON array with an entry for each directory.  Each
