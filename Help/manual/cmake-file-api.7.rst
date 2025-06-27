@@ -1180,8 +1180,9 @@ with members:
     the ``backtraceGraph`` member's ``nodes`` array.
 
 ``fileSets``
-  A JSON array of entries corresponding to the target's file sets. Each entry
-  is a JSON object with members:
+  An optional member that is present when a target defines one or more
+  file sets.  The value is a JSON array of entries corresponding to the
+  target's file sets.  Each entry is a JSON object with members:
 
   ``name``
     A string specifying the name of the file set.
