@@ -9,8 +9,10 @@
 
 #include <cm/iomanip>
 #include <cm/optional>
+#include <cm/string>
 #include <cm/string_view>
 #include <cmext/algorithm>
+#include <cmext/string_view>
 
 #include <cm3p/curl/curl.h>
 #include <cm3p/json/reader.h>
@@ -225,6 +227,11 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(
       }
       std::string remote_file =
         remoteprefix + cmSystemTools::GetFilenameName(file);
+
+      // Erase non-filename and non-space whitespace characters.
+      cm::erase_if(remote_file, [](char c) {
+        return cm::contains("\\:*?\"<>|\n\r\t\f\v"_s, c);
+      });
 
       *this->LogFile << "\tUpload file: " << local_file << " to "
                      << remote_file << std::endl;

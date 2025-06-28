@@ -1005,32 +1005,7 @@ bool cmCTest::RunMakeCommand(std::string const& command, std::string& output,
 
 std::string cmCTest::SafeBuildIdField(std::string const& value)
 {
-  std::string safevalue(value);
-
-  if (!safevalue.empty()) {
-    // Disallow non-filename and non-space whitespace characters.
-    // If they occur, replace them with ""
-    //
-    char const* disallowed = "\\:*?\"<>|\n\r\t\f\v";
-
-    if (safevalue.find_first_of(disallowed) != std::string::npos) {
-      std::string::size_type i = 0;
-      std::string::size_type n = strlen(disallowed);
-      char replace[2];
-      replace[1] = 0;
-
-      for (i = 0; i < n; ++i) {
-        replace[0] = disallowed[i];
-        cmSystemTools::ReplaceString(safevalue, replace, "");
-      }
-    }
-  }
-
-  if (safevalue.empty()) {
-    safevalue = "(empty)";
-  }
-
-  return safevalue;
+  return value.empty() ? "(empty)" : value;
 }
 
 void cmCTest::StartXML(cmXMLWriter& xml, cmake* cm, bool append)
