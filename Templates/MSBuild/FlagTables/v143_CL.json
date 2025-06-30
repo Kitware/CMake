@@ -525,6 +525,13 @@
     "flags": []
   },
   {
+    "name": "LanguageStandard_C",
+    "switch": "std:clatest",
+    "comment": "Preview - Features from the Latest C Working Draft",
+    "value": "stdclatest",
+    "flags": []
+  },
+  {
     "name": "PrecompiledHeader",
     "switch": "Yc",
     "comment": "Create",

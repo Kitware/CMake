@@ -3553,6 +3553,19 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
       flagsC, this->GeneratorTarget, cmBuildStep::Compile, "C", configName);
     this->LocalGenerator->AddCompileOptions(flagsC, this->GeneratorTarget, "C",
                                             configName);
+
+    // Modules/Compiler/Clang-C.cmake has a special case for clang-cl versions
+    // that do not have a -std:c23 flag to pass the standard through to the
+    // underlying clang directly.  Unfortunately that flag applies to all
+    // sources in a single .vcxproj file, so if we have CXX sources too then
+    // we cannot use it.  Map it back to -std:clatest, even though that might
+    // enable a different C level, so it does not apply to CXX sources.
+    static std::string const kClangStdC23 = "-clang:-std=c23";
+    std::string::size_type p = flagsC.find(kClangStdC23);
+    if (p != std::string::npos) {
+      flagsC.replace(p, kClangStdC23.size(), "-std:clatest");
+    }
+
     Options optC(this->LocalGenerator, Options::Compiler,
                  gg->GetClFlagTable());
     optC.Parse(flagsC);
