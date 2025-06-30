@@ -33,7 +33,14 @@ namespace StdIo {
 
 namespace {
 
-#ifndef _WIN32
+#ifdef _WIN32
+#  ifndef ENABLE_VIRTUAL_TERMINAL_INPUT
+#    define ENABLE_VIRTUAL_TERMINAL_INPUT 0x0200
+#  endif
+#  ifndef ENABLE_VIRTUAL_TERMINAL_PROCESSING
+#    define ENABLE_VIRTUAL_TERMINAL_PROCESSING 0x0004
+#  endif
+#else
 // List of known `TERM` names that support VT100 escape sequences.
 // Order by `LC_COLLATE=C sort` to search using `std::lower_bound`.
 std::array<cm::string_view, 56> const kVT100Names{ {
