@@ -939,7 +939,7 @@ if((CMAKE_C_COMPILER_ID STREQUAL "AppleClang"
   endif()
 endif()
 
-if (CMAKE_SYSTEM_NAME MATCHES "(Linux|Darwin|Windows)"
+if (CMAKE_SYSTEM_NAME MATCHES "(Linux|Darwin|Windows|OpenBSD|FreeBSD|NetBSD|MirBSD)"
     AND CMAKE_C_COMPILER_ID MATCHES "^(AppleClang|Clang|GNU|MSVC|NVIDIA)$"
     AND NOT CMAKE_GENERATOR STREQUAL "Green Hills MULTI")
   add_RunCMake_test(LinkerSelection -DCMake_TEST_CUDA=${CMake_TEST_CUDA}
