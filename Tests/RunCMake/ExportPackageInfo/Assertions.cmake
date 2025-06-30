@@ -20,6 +20,11 @@ function(expect_array content expected_length)
   _expect("length" EQUAL "${actual_length}" "${expected_length}" ${ARGN})
 endfunction()
 
+function(expect_object content)
+  string(JSON actual_type TYPE "${content}" ${ARGN})
+  _expect("type" STREQUAL "${actual_type}" "OBJECT" ${ARGN})
+endfunction()
+
 function(expect_null content)
   string(JSON actual_type TYPE "${content}" ${ARGN})
   _expect("type" STREQUAL "${actual_type}" "NULL" ${ARGN})
