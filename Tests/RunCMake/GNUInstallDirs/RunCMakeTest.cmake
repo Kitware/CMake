@@ -39,3 +39,9 @@ endblock()
 
 run_cmake(GetAbs)
 run_cmake(NoSystem)
+
+run_cmake_with_options(ExplicitDefaults
+  -DCMAKE_INSTALL_BINDIR=bin
+  -DCMAKE_INSTALL_INCLUDEDIR=include
+  -DCMAKE_INSTALL_LIBDIR=lib
+)
