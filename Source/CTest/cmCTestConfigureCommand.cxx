@@ -115,11 +115,11 @@ bool cmCTestConfigureCommand::ExecuteConfigure(ConfigureArguments const& args,
     }
 
     configureCommand += " \"-S";
-    configureCommand += sourceDirectory;
+    configureCommand += cmSystemTools::CollapseFullPath(sourceDirectory);
     configureCommand += "\"";
 
     configureCommand += " \"-B";
-    configureCommand += buildDirectory;
+    configureCommand += cmSystemTools::CollapseFullPath(buildDirectory);
     configureCommand += "\"";
   }
 
