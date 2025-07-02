@@ -117,7 +117,7 @@ void cmExportInstallPackageInfoGenerator::GenerateImportTargetsConfig(
 {
   Json::Value root;
   root["name"] = this->GetPackageName();
-  root["configuration"] = config;
+  root["configuration"] = (config.empty() ? "noconfig" : config);
 
   Json::Value& components = root["components"];
 
