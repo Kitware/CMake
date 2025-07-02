@@ -325,8 +325,8 @@ Extension and stem examples
   cmake_path(GET dotPath STEM dotStem)
   cmake_path(GET dotDotPath EXTENSION dotDotExt)
   cmake_path(GET dotDotPath STEM dotDotStem)
-  cmake_path(GET dotMorePath EXTENSION someMoreExt)
-  cmake_path(GET dotMorePath STEM someMoreStem)
+  cmake_path(GET someMorePath EXTENSION someMoreExt)
+  cmake_path(GET someMorePath STEM someMoreStem)
   message("Dot extension is \"${dotExt}\"")
   message("Dot stem is \"${dotStem}\"")
   message("Dot-dot extension is \"${dotDotExt}\"")
@@ -623,7 +623,7 @@ equivalent to the following:
   cmake_path(HAS_FILENAME path has_filename)
   if(has_filename)
     cmake_path(REMOVE_FILENAME path)
-    cmake_path(APPEND path input);
+    cmake_path(APPEND path "${input}")
   endif()
 
 .. _REMOVE_EXTENSION:
@@ -648,10 +648,10 @@ is equivalent to the following:
 .. code-block:: cmake
 
   cmake_path(REMOVE_EXTENSION path)
-  if(NOT "input" MATCHES "^\\.")
+  if(NOT input MATCHES "^\\.")
     cmake_path(APPEND_STRING path ".")
   endif()
-  cmake_path(APPEND_STRING path "input")
+  cmake_path(APPEND_STRING path "${input}")
 
 
 .. _Path Generation:
