@@ -1,8 +1,8 @@
 # Set curl options as needed for CMake build
-if(CMAKE_SYSTEM_NAME MATCHES "^(AIX|SunOS)$")
-  set(_CURL_PREFILL OFF)
-else()
+if(WIN32)
   set(_CURL_PREFILL ON)
+else()
+  set(_CURL_PREFILL OFF)
 endif()
 set(BUILD_CURL_EXE OFF CACHE INTERNAL "No curl exe")
 set(BUILD_DASHBOARD_REPORTS OFF CACHE INTERNAL "No curl dashboard reports")
