@@ -103,7 +103,8 @@ void cmExportBuildPackageInfoGenerator::GenerateInterfacePropertiesConfig(
   Json::Value component =
     this->GenerateInterfaceConfigProperties(suffix, properties);
   if (!component.empty()) {
-    configurations[config] = std::move(component);
+    configurations[config.empty() ? std::string{ "noconfig" } : config] =
+      std::move(component);
   }
 }
 
