@@ -78,6 +78,18 @@ else()
   endif()
 
   set(CMAKE_C_STANDARD_LATEST 17)
+
+  if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 18.0)
+    # This version of clang-cl does not have a -std:c23 flag.
+    # Pass the standard through to the underlying clang directly.
+    # Note that cmVisualStudio10TargetGenerator::ComputeClOptions
+    # has a special case to map this back to -std:clatest in .vcxproj
+    # files that also have CXX sources.
+    set(CMAKE_C23_STANDARD_COMPILE_OPTION "-clang:-std=c23")
+    set(CMAKE_C23_EXTENSION_COMPILE_OPTION "-clang:-std=c23")
+
+    set(CMAKE_C_STANDARD_LATEST 23)
+  endif()
 endif()
 
 if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 2.1)

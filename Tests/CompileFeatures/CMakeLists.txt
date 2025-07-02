@@ -37,6 +37,15 @@ if(("23" IN_LIST CMake_TEST_CXX_STANDARDS OR CMAKE_CXX23_STANDARD_COMPILE_OPTION
   target_compile_features(test_cxx_std_23_with_c_std_11 PRIVATE cxx_std_23 c_std_11)
 endif()
 
+if(("23" IN_LIST CMake_TEST_C_STANDARDS OR CMAKE_C23_STANDARD_COMPILE_OPTION)
+  AND ("17" IN_LIST CMake_TEST_CXX_STANDARDS OR CMAKE_CXX17_STANDARD_COMPILE_OPTION)
+  # FIXME: "clang-cl -stc:clatest" does not enable C23.
+  AND NOT CMAKE_GENERATOR MATCHES "Visual Studio"
+  )
+  add_library(test_c_std_23_with_cxx_std_17 OBJECT c_std_23.c cxx_std_17.cpp)
+  target_compile_features(test_c_std_23_with_cxx_std_17 PRIVATE c_std_23 cxx_std_17)
+endif()
+
 macro(run_test feature lang)
   if (${feature} IN_LIST CMAKE_${lang}_COMPILE_FEATURES)
     add_library(test_${feature} OBJECT ${feature}.${ext_${lang}})
