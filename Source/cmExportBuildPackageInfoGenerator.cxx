@@ -3,6 +3,7 @@
 #include "cmExportBuildPackageInfoGenerator.h"
 
 #include <cassert>
+#include <map>
 #include <utility>
 #include <vector>
 
@@ -10,7 +11,9 @@
 
 #include <cm3p/json/value.h>
 
+#include "cmAlgorithms.h"
 #include "cmGeneratorExpression.h"
+#include "cmList.h"
 #include "cmPackageInfoArguments.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
@@ -66,6 +69,14 @@ bool cmExportBuildPackageInfoGenerator::GenerateMainFile(std::ostream& os)
       if (!configurations.empty()) {
         (*component)["configurations"] = configurations;
       }
+    }
+
+    // De-duplicate include directories prior to generation.
+    auto it = properties.find("INTERFACE_INCLUDE_DIRECTORIES");
+    if (it != properties.end()) {
+      auto list = cmList{ it->second };
+      list = cmList{ list.begin(), cmRemoveDuplicates(list) };
+      properties["INTERFACE_INCLUDE_DIRECTORIES"] = list.to_string();
     }
 
     // Set configuration-agnostic properties for component.

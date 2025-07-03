@@ -1,8 +1,4 @@
-extern
-#ifdef _WIN32
-__declspec(dllimport)
-#endif
-int answer(void);
+#include <liba.h>
 
 #ifdef _WIN32
 __declspec(dllexport)
