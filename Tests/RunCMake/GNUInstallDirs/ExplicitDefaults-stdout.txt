@@ -1,0 +1,6 @@
+-- CMAKE_INSTALL_BINDIR='bin'
+-- CMAKE_INSTALL_INCLUDEDIR='include'
+-- CMAKE_INSTALL_LIBDIR='lib'
+-- CMAKE_INSTALL_FULL_BINDIR='/usr/local/bin'
+-- CMAKE_INSTALL_FULL_INCLUDEDIR='/usr/local/include'
+-- CMAKE_INSTALL_FULL_LIBDIR='/usr/local/lib'
