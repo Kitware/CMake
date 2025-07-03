@@ -279,7 +279,10 @@ function(_GNUInstallDirs_cache_path var description)
       # the old default, reset the value to the new default
       if(${cmake_install_var} STREQUAL "$CACHE{${cmake_install_var}}"
           AND ${cmake_install_var} STREQUAL last_default)
-        set(${cmake_install_var} "${default}" CACHE PATH "${full_description}" FORCE)
+        set(full_description "${description} (${default})")
+        set_property(CACHE ${cmake_install_var} PROPERTY TYPE PATH)
+        set_property(CACHE ${cmake_install_var} PROPERTY VALUE "${default}")
+        set_property(CACHE ${cmake_install_var} PROPERTY HELPSTRING "${full_description}")
       endif()
       # Continue to normal flow
     endif()
