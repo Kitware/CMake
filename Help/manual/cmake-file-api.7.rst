@@ -822,6 +822,13 @@ with members:
 
       This type was added in codemodel version 2.4.
 
+    ``cxxModuleBmi``
+      An :command:`install(TARGETS)` call with ``CXX_MODULES_BMI``.
+      The ``destination`` member is populated and the ``isOptional`` member
+      may exist.  This type has an additional ``cxxModuleBmiTarget`` member.
+
+      This type was added in codemodel version 2.5.
+
   ``isExcludeFromAll``
     Optional member that is present with boolean value ``true`` when
     :command:`install` is called with the ``EXCLUDE_FROM_ALL`` option.
@@ -933,6 +940,21 @@ with members:
       object's ``targets`` array for the target.
 
     This field was added in codemodel version 2.4.
+
+  ``cxxModuleBmiTarget``
+    Optional member that is present when ``type`` is ``cxxModuleBmi``.
+    The value is a JSON object with members:
+
+    ``id``
+      A string uniquely identifying the target.  This matches
+      the ``id`` member of the target in the main "codemodel"
+      object's ``targets`` array.
+
+    ``index``
+      An unsigned integer 0-based index into the main "codemodel"
+      object's ``targets`` array for the target.
+
+    This field was added in codemodel version 2.5.
 
   ``scriptFile``
     Optional member that is present when ``type`` is ``script``.
