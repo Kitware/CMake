@@ -15,6 +15,10 @@
 #include "cmUuid.h"
 #include "cmWIXAccessControlList.h"
 
+#ifdef _WIN32
+#  include "cmsys/Encoding.hxx"
+#endif
+
 cmWIXFilesSourceWriter::cmWIXFilesSourceWriter(unsigned long wixVersion,
                                                cmCPackLog* logger,
                                                std::string const& filename,
@@ -144,7 +148,18 @@ std::string cmWIXFilesSourceWriter::EmitComponentFile(
   patch.ApplyFragment(componentId, *this);
   BeginElement("File");
   AddAttribute("Id", fileId);
-  AddAttribute("Source", CMakeToWixPath(filePath));
+
+  std::string sourcePath = CMakeToWixPath(filePath);
+#ifdef _WIN32
+  // WiX cannot handle long paths natively, but since v4,
+  // it supports long paths via UNC prefixes.
+  if (this->WixVersion >= 4) {
+    sourcePath = cmsys::Encoding::ToNarrow(
+      cmsys::Encoding::ToWindowsExtendedPath(sourcePath));
+  }
+#endif
+  AddAttribute("Source", sourcePath);
+
   AddAttribute("KeyPath", "yes");
 
   mode_t fileMode = 0;
