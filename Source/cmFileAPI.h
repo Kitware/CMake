@@ -64,6 +64,9 @@ public:
   bool AddProjectQuery(ObjectKind kind, unsigned majorVersion,
                        unsigned minorVersion);
 
+  /** Build a JSON object with major and minor fields.  */
+  static Json::Value BuildVersion(unsigned int major, unsigned int minor);
+
 private:
   cmake* CMakeInstance;
 
@@ -195,8 +198,6 @@ private:
 
   static char const* ObjectKindName(ObjectKind kind);
   static std::string ObjectName(Object const& o);
-
-  static Json::Value BuildVersion(unsigned int major, unsigned int minor);
 
   Json::Value BuildObject(Object const& object);
 

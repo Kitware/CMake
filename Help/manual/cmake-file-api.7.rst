@@ -704,6 +704,19 @@ A codemodel "directory" object is referenced by a `"codemodel" version 2`_
 object's ``directories`` array.  Each "directory" object is a JSON object
 with members:
 
+``codemodelVersion``
+  This specifies the codemodel version this file is part of.  It will match
+  the ``version`` field of the codemodel object kind that references this file.
+  It is a JSON object with the following members:
+
+  ``major``
+    The codemodel major version.
+
+  ``minor``
+    The codemodel minor version.
+
+  This field was added in codemodel version 2.9.
+
 ``paths``
   A JSON object containing members:
 
@@ -979,6 +992,19 @@ with members:
 A codemodel "target" object is referenced by a `"codemodel" version 2`_
 object's ``targets`` array.  Each "target" object is a JSON object
 with members:
+
+``codemodelVersion``
+  This specifies the codemodel version this file is part of.  It will match
+  the ``version`` field of the codemodel object kind that references this file.
+  It is a JSON object with the following members:
+
+  ``major``
+    The codemodel major version.
+
+  ``minor``
+    The codemodel minor version.
+
+  This field was added in codemodel version 2.9.
 
 ``name``
   A string specifying the logical name of the target.

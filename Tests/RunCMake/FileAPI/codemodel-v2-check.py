@@ -12,7 +12,9 @@ def read_codemodel_json_data(filename):
 def check_objects(o, g):
     assert is_list(o)
     assert len(o) == 1
-    check_index_object(o[0], "codemodel", 2, 8, check_object_codemodel(g))
+    major = 2
+    minor = 9
+    check_index_object(o[0], "codemodel", major, minor, check_object_codemodel(g, major, minor))
 
 def check_backtrace(t, b, backtrace):
     btg = t["backtraceGraph"]
@@ -52,7 +54,7 @@ def check_backtraces(t, actual, expected):
         check_backtrace(t, actual[i], expected[i])
         i += 1
 
-def check_directory(c):
+def check_directory(c, major, minor):
     def _check(actual, expected):
         assert is_dict(actual)
         expected_keys = ["build", "jsonFile", "source", "projectIndex"]
@@ -100,7 +102,12 @@ def check_directory(c):
             d = json.load(f)
 
         assert is_dict(d)
-        assert sorted(d.keys()) == ["backtraceGraph", "installers", "paths"]
+        assert sorted(d.keys()) == ["backtraceGraph", "codemodelVersion", "installers", "paths"]
+
+        # We get the values for major and minor directly rather than from the "expected" data.
+        # This avoids having to update every data file any time the major or minor version changes.
+        assert is_int(d["codemodelVersion"]["major"], major)
+        assert is_int(d["codemodelVersion"]["minor"], minor)
 
         assert is_string(d["paths"]["source"], actual["source"])
         assert is_string(d["paths"]["build"], actual["build"])
@@ -266,7 +273,7 @@ def check_backtrace_graph(btg):
 
         assert sorted(n.keys()) == sorted(expected_keys)
 
-def check_target(c):
+def check_target(c, major, minor):
     def _check(actual, expected):
         assert is_dict(actual)
         assert sorted(actual.keys()) == ["directoryIndex", "id", "jsonFile", "name", "projectIndex"]
@@ -281,7 +288,7 @@ def check_target(c):
         with open(filepath) as f:
             obj = json.load(f)
 
-        expected_keys = ["name", "id", "type", "backtraceGraph", "paths", "sources"]
+        expected_keys = ["codemodelVersion", "name", "id", "type", "backtraceGraph", "paths", "sources"]
         assert is_dict(obj)
         assert is_string(obj["name"], expected["name"])
         assert matches(obj["id"], expected["id"])
@@ -292,6 +299,13 @@ def check_target(c):
         assert sorted(obj["paths"].keys()) == ["build", "source"]
         assert matches(obj["paths"]["build"], expected["build"])
         assert matches(obj["paths"]["source"], expected["source"])
+
+        # We get the values for major and minor directly rather than from the "expected" data.
+        # This avoids having to update every data file any time the major or minor version changes.
+        assert is_dict(obj["codemodelVersion"])
+        assert sorted(obj["codemodelVersion"].keys()) == ["major", "minor"]
+        assert is_int(obj["codemodelVersion"]["major"], major)
+        assert is_int(obj["codemodelVersion"]["minor"], minor)
 
         def check_file_set(actual, expected):
             assert is_dict(actual)
@@ -794,9 +808,9 @@ def gen_check_directories(c, g):
 
     return expected
 
-def check_directories(c, g):
+def check_directories(c, g, major, minor):
     check_list_match(lambda a, e: matches(a["source"], e["source"]), c["directories"], gen_check_directories(c, g),
-                     check=check_directory(c),
+                     check=check_directory(c, major, minor),
                      check_exception=lambda a, e: "Directory source: %s" % a["source"],
                      missing_exception=lambda e: "Directory source: %s" % e["source"],
                      extra_exception=lambda a: "Directory source: %s" % a["source"])
@@ -1001,10 +1015,10 @@ def gen_check_targets(c, g, inSource):
 
     return expected
 
-def check_targets(c, g, inSource):
+def check_targets(c, g, major, minor, inSource):
     check_list_match(lambda a, e: matches(a["id"], e["id"]),
                      c["targets"], gen_check_targets(c, g, inSource),
-                     check=check_target(c),
+                     check=check_target(c, major, minor),
                      check_exception=lambda a, e: "Target ID: %s" % a["id"],
                      missing_exception=lambda e: "Target ID: %s" % e["id"],
                      extra_exception=lambda a: "Target ID: %s" % a["id"])
@@ -1045,14 +1059,14 @@ def check_projects(c, g):
                      missing_exception=lambda e: "Project name: %s" % e["name"],
                      extra_exception=lambda a: "Project name: %s" % a["name"])
 
-def check_object_codemodel_configuration(c, g, inSource):
+def check_object_codemodel_configuration(c, g, major, minor, inSource):
     assert sorted(c.keys()) == ["directories", "name", "projects", "targets"]
     assert is_string(c["name"])
-    check_directories(c, g)
-    check_targets(c, g, inSource)
+    check_directories(c, g, major, minor)
+    check_targets(c, g, major, minor, inSource)
     check_projects(c, g)
 
-def check_object_codemodel(g):
+def check_object_codemodel(g, major, minor):
     def _check(o):
         assert sorted(o.keys()) == ["configurations", "kind", "paths", "version"]
         # The "kind" and "version" members are handled by check_index_object.
@@ -1070,7 +1084,7 @@ def check_object_codemodel(g):
             assert o["configurations"][0]["name"] in ("", "Debug", "Release", "RelWithDebInfo", "MinSizeRel")
 
         for c in o["configurations"]:
-            check_object_codemodel_configuration(c, g, inSource)
+            check_object_codemodel_configuration(c, g, major, minor, inSource)
     return _check
 
 cxx_compiler_id = sys.argv[2]

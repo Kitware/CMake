@@ -223,21 +223,24 @@ Json::Value BacktraceData::Dump()
 class Codemodel
 {
   cmFileAPI& FileAPI;
-  unsigned int Version;
+  unsigned int VersionMajor;
+  unsigned int VersionMinor;
 
   Json::Value DumpPaths();
   Json::Value DumpConfigurations();
   Json::Value DumpConfiguration(std::string const& config);
 
 public:
-  Codemodel(cmFileAPI& fileAPI, unsigned int version);
+  Codemodel(cmFileAPI& fileAPI, unsigned int versionMajor,
+            unsigned int versionMinor);
   Json::Value Dump();
 };
 
 class CodemodelConfig
 {
   cmFileAPI& FileAPI;
-  unsigned int Version;
+  unsigned int VersionMajor;
+  unsigned int VersionMinor;
   std::string const& Config;
   std::string TopSource;
   std::string TopBuild;
@@ -290,8 +293,8 @@ class CodemodelConfig
   Json::Value DumpMinimumCMakeVersion(cmStateSnapshot s);
 
 public:
-  CodemodelConfig(cmFileAPI& fileAPI, unsigned int version,
-                  std::string const& config);
+  CodemodelConfig(cmFileAPI& fileAPI, unsigned int versionMajor,
+                  unsigned int versionMinor, std::string const& config);
   Json::Value Dump();
 };
 
@@ -392,6 +395,8 @@ namespace {
 class DirectoryObject
 {
   cmLocalGenerator const* LG = nullptr;
+  unsigned int VersionMajor;
+  unsigned int VersionMinor;
   std::string const& Config;
   TargetIndexMapType& TargetIndexMap;
   std::string TopSource;
@@ -409,7 +414,8 @@ class DirectoryObject
                                 std::string const& toPath);
 
 public:
-  DirectoryObject(cmLocalGenerator const* lg, std::string const& config,
+  DirectoryObject(cmLocalGenerator const* lg, unsigned int versionMajor,
+                  unsigned int versionMinor, std::string const& config,
                   TargetIndexMapType& targetIndexMap);
   Json::Value Dump();
 };
@@ -417,6 +423,8 @@ public:
 class Target
 {
   cmGeneratorTarget* GT;
+  unsigned int VersionMajor;
+  unsigned int VersionMinor;
   std::string const& Config;
   std::string TopSource;
   std::string TopBuild;
@@ -511,13 +519,16 @@ class Target
   Json::Value DumpDebugger();
 
 public:
-  Target(cmGeneratorTarget* gt, std::string const& config);
+  Target(cmGeneratorTarget* gt, unsigned int versionMajor,
+         unsigned int versionMinor, std::string const& config);
   Json::Value Dump();
 };
 
-Codemodel::Codemodel(cmFileAPI& fileAPI, unsigned int version)
+Codemodel::Codemodel(cmFileAPI& fileAPI, unsigned int versionMajor,
+                     unsigned int versionMinor)
   : FileAPI(fileAPI)
-  , Version(version)
+  , VersionMajor(versionMajor)
+  , VersionMinor(versionMinor)
 {
 }
 
@@ -557,19 +568,21 @@ Json::Value Codemodel::DumpConfigurations()
 
 Json::Value Codemodel::DumpConfiguration(std::string const& config)
 {
-  CodemodelConfig configuration(this->FileAPI, this->Version, config);
+  CodemodelConfig configuration(this->FileAPI, this->VersionMajor,
+                                this->VersionMinor, config);
   return configuration.Dump();
 }
 
-CodemodelConfig::CodemodelConfig(cmFileAPI& fileAPI, unsigned int version,
+CodemodelConfig::CodemodelConfig(cmFileAPI& fileAPI, unsigned int versionMajor,
+                                 unsigned int versionMinor,
                                  std::string const& config)
   : FileAPI(fileAPI)
-  , Version(version)
+  , VersionMajor(versionMajor)
+  , VersionMinor(versionMinor)
   , Config(config)
   , TopSource(this->FileAPI.GetCMakeInstance()->GetHomeDirectory())
   , TopBuild(this->FileAPI.GetCMakeInstance()->GetHomeOutputDirectory())
 {
-  static_cast<void>(this->Version);
 }
 
 Json::Value CodemodelConfig::Dump()
@@ -701,7 +714,7 @@ Json::Value CodemodelConfig::DumpTargets()
 Json::Value CodemodelConfig::DumpTarget(cmGeneratorTarget* gt,
                                         Json::ArrayIndex ti)
 {
-  Target t(gt, this->Config);
+  Target t(gt, this->VersionMajor, this->VersionMinor, this->Config);
   std::string prefix = "target-" + gt->GetName();
   if (!this->Config.empty()) {
     prefix += "-" + this->Config;
@@ -797,7 +810,8 @@ Json::Value CodemodelConfig::DumpDirectoryObject(Directory& d)
     prefix += "-" + this->Config;
   }
 
-  DirectoryObject dir(d.LocalGenerator, this->Config, this->TargetIndexMap);
+  DirectoryObject dir(d.LocalGenerator, this->VersionMajor, this->VersionMinor,
+                      this->Config, this->TargetIndexMap);
   return this->FileAPI.MaybeJsonFile(dir.Dump(), prefix);
 }
 
@@ -844,9 +858,13 @@ Json::Value CodemodelConfig::DumpMinimumCMakeVersion(cmStateSnapshot s)
 }
 
 DirectoryObject::DirectoryObject(cmLocalGenerator const* lg,
+                                 unsigned int versionMajor,
+                                 unsigned int versionMinor,
                                  std::string const& config,
                                  TargetIndexMapType& targetIndexMap)
   : LG(lg)
+  , VersionMajor(versionMajor)
+  , VersionMinor(versionMinor)
   , Config(config)
   , TargetIndexMap(targetIndexMap)
   , TopSource(lg->GetGlobalGenerator()->GetCMakeInstance()->GetHomeDirectory())
@@ -859,6 +877,8 @@ DirectoryObject::DirectoryObject(cmLocalGenerator const* lg,
 Json::Value DirectoryObject::Dump()
 {
   Json::Value directoryObject = Json::objectValue;
+  directoryObject["codemodelVersion"] =
+    cmFileAPI::BuildVersion(this->VersionMajor, this->VersionMinor);
   directoryObject["paths"] = this->DumpPaths();
   directoryObject["installers"] = this->DumpInstallers();
   directoryObject["backtraceGraph"] = this->Backtraces.Dump();
@@ -1186,8 +1206,11 @@ Json::Value DirectoryObject::DumpInstallerPath(std::string const& top,
   return installPath;
 }
 
-Target::Target(cmGeneratorTarget* gt, std::string const& config)
+Target::Target(cmGeneratorTarget* gt, unsigned int versionMajor,
+               unsigned int versionMinor, std::string const& config)
   : GT(gt)
+  , VersionMajor(versionMajor)
+  , VersionMinor(versionMinor)
   , Config(config)
   , TopSource(gt->GetGlobalGenerator()->GetCMakeInstance()->GetHomeDirectory())
   , TopBuild(
@@ -1203,6 +1226,8 @@ Json::Value Target::Dump()
 
   cmStateEnums::TargetType const type = this->GT->GetType();
 
+  target["codemodelVersion"] =
+    cmFileAPI::BuildVersion(this->VersionMajor, this->VersionMinor);
   target["name"] = this->GT->GetName();
   target["type"] = cmState::GetTargetTypeName(type);
   target["id"] = TargetId(this->GT, this->TopBuild);
@@ -2154,8 +2179,10 @@ Json::Value Target::DumpDebugger()
   return debuggerInformation;
 }
 
-Json::Value cmFileAPICodemodelDump(cmFileAPI& fileAPI, unsigned int version)
+Json::Value cmFileAPICodemodelDump(cmFileAPI& fileAPI,
+                                   unsigned int versionMajor,
+                                   unsigned int versionMinor)
 {
-  Codemodel codemodel(fileAPI, version);
+  Codemodel codemodel(fileAPI, versionMajor, versionMinor);
   return codemodel.Dump();
 }
