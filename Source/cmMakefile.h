@@ -391,6 +391,9 @@ public:
   void RecordPolicies(cmPolicies::PolicyMap& pm) const;
   //@}
 
+  /** Update CMAKE_PARENT_LIST_FILE based on CMP0198 policy status.  */
+  void UpdateParentListFileVariable();
+
   /** Helper class to push and pop policies automatically.  */
   class PolicyPushPop
   {

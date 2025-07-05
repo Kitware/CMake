@@ -92,6 +92,14 @@ Supported Policies
 
 The following policies are supported.
 
+Policies Introduced by CMake 4.2
+--------------------------------
+
+.. toctree::
+   :maxdepth: 1
+
+   CMP0198: CMAKE_PARENT_LIST_FILE is not defined in CMakeLists.txt. </policy/CMP0198>
+
 Policies Introduced by CMake 4.1
 --------------------------------
 
