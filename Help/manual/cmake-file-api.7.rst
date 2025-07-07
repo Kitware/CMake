@@ -822,6 +822,13 @@ with members:
 
       This type was added in codemodel version 2.4.
 
+    ``cxxModuleBmi``
+      An :command:`install(TARGETS)` call with ``CXX_MODULES_BMI``.
+      The ``destination`` member is populated and the ``isOptional`` member
+      may exist.  This type has an additional ``cxxModuleBmiTarget`` member.
+
+      This type was added in codemodel version 2.5.
+
   ``isExcludeFromAll``
     Optional member that is present with boolean value ``true`` when
     :command:`install` is called with the ``EXCLUDE_FROM_ALL`` option.
@@ -933,6 +940,21 @@ with members:
       object's ``targets`` array for the target.
 
     This field was added in codemodel version 2.4.
+
+  ``cxxModuleBmiTarget``
+    Optional member that is present when ``type`` is ``cxxModuleBmi``.
+    The value is a JSON object with members:
+
+    ``id``
+      A string uniquely identifying the target.  This matches
+      the ``id`` member of the target in the main "codemodel"
+      object's ``targets`` array.
+
+    ``index``
+      An unsigned integer 0-based index into the main "codemodel"
+      object's ``targets`` array for the target.
+
+    This field was added in codemodel version 2.5.
 
   ``scriptFile``
     Optional member that is present when ``type`` is ``script``.
@@ -1180,8 +1202,9 @@ with members:
     the ``backtraceGraph`` member's ``nodes`` array.
 
 ``fileSets``
-  A JSON array of entries corresponding to the target's file sets. Each entry
-  is a JSON object with members:
+  An optional member that is present when a target defines one or more
+  file sets.  The value is a JSON array of entries corresponding to the
+  target's file sets.  Each entry is a JSON object with members:
 
   ``name``
     A string specifying the name of the file set.
@@ -1300,6 +1323,12 @@ with members:
     ``fragment``
       A string specifying a fragment of the compile command line invocation.
       The value is encoded in the build system's native shell format.
+
+    ``backtrace``
+      Optional member that is present when a CMake language backtrace to
+      the command invocation that added this fragment is available.
+      The value is an unsigned integer 0-based index into the
+      ``backtraceGraph`` member's ``nodes`` array.
 
   ``includes``
     Optional member that is present when there are include directories.
@@ -1828,6 +1857,6 @@ The members specific to ``toolchains`` objects are:
   ``sourceFileExtensions``
     Optional member that is present when the
     :variable:`CMAKE_<LANG>_SOURCE_FILE_EXTENSIONS` variable is defined for
-    the current language. Its value is a JSON array of JSON strings where each
+    the current language. Its value is a JSON array of JSON strings where
     each string holds a file extension (without the leading dot) for the
     language.
