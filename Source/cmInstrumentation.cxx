@@ -621,6 +621,10 @@ std::string cmInstrumentation::ComputeSuffixTime()
  */
 int cmInstrumentation::SpawnBuildDaemon()
 {
+  // Do not inherit handles from the parent process, so that the daemon is
+  // fully detached. This helps prevent deadlock between the two.
+  uv_disable_stdio_inheritance();
+
   // preBuild Hook
   this->CollectTimingData(cmInstrumentationQuery::Hook::PreBuild);
 

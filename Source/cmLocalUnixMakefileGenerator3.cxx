@@ -74,21 +74,22 @@ std::string cmSplitExtension(std::string const& in, std::string& base)
   return ext;
 }
 
-#if !defined(CMAKE_BOOTSTRAP) && !defined(_WIN32)
+#ifndef CMAKE_BOOTSTRAP
 // Helper function to add the Start Instrumentation command
 void addInstrumentationCommand(cmInstrumentation* instrumentation,
                                std::vector<std::string>& commands)
 {
-  // FIXME(#26668) This does not work on Windows
   if (instrumentation->HasPreOrPostBuildHook()) {
     std::string instrumentationCommand =
       "$(CTEST_COMMAND) --start-instrumentation $(CMAKE_BINARY_DIR)";
+#  ifndef _WIN32
     /*
      * On Unix systems, Make will prefix the command with `/bin/sh -c`.
      * Use exec so that Make is the parent process of the command.
      * Add a `;` to convince BSD make to not optimize out the shell.
      */
     instrumentationCommand = cmStrCat("exec ", instrumentationCommand, " ;");
+#  endif
     commands.push_back(instrumentationCommand);
   }
 }
@@ -687,8 +688,7 @@ void cmLocalUnixMakefileGenerator3::WriteMakeVariables(
                     "CMAKE_COMMAND = "
                  << cmakeShellCommand << "\n";
 
-#if !defined(CMAKE_BOOTSTRAP) && !defined(_WIN32)
-  // FIXME(#26668) This does not work on Windows
+#ifndef CMAKE_BOOTSTRAP
   if (this->GetCMakeInstance()
         ->GetInstrumentation()
         ->HasPreOrPostBuildHook()) {
@@ -849,7 +849,7 @@ void cmLocalUnixMakefileGenerator3::WriteSpecialTargetsBottom(
 
     std::vector<std::string> no_depends;
     commands.push_back(std::move(runRule));
-#if !defined(CMAKE_BOOTSTRAP) && !defined(_WIN32)
+#ifndef CMAKE_BOOTSTRAP
     addInstrumentationCommand(this->GetCMakeInstance()->GetInstrumentation(),
                               commands);
 #endif
@@ -1855,7 +1855,7 @@ void cmLocalUnixMakefileGenerator3::WriteLocalAllRules(
         this->ConvertToOutputFormat(cmakefileName, cmOutputConverter::SHELL),
         " 1");
       commands.push_back(std::move(runRule));
-#if !defined(CMAKE_BOOTSTRAP) && !defined(_WIN32)
+#ifndef CMAKE_BOOTSTRAP
       addInstrumentationCommand(this->GetCMakeInstance()->GetInstrumentation(),
                                 commands);
 #endif

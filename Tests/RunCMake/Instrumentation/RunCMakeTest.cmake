@@ -129,8 +129,24 @@ instrument(cmake-command-resets-generated NO_WARN
   CHECK_SCRIPT check-data-dir.cmake
 )
 
-# FIXME(#26668) This does not work on Windows
-if (UNIX)
+if(RunCMake_GENERATOR STREQUAL "NMake Makefiles")
+ execute_process(
+   COMMAND "${RunCMake_MAKE_PROGRAM}" -?
+   OUTPUT_VARIABLE nmake_out
+   ERROR_VARIABLE nmake_out
+   RESULT_VARIABLE nmake_res
+   OUTPUT_STRIP_TRAILING_WHITESPACE
+   )
+   if(nmake_res EQUAL 0 AND nmake_out MATCHES "Program Maintenance Utility[^\n]+Version ([1-9][0-9.]+)")
+     set(nmake_version "${CMAKE_MATCH_1}")
+   else()
+     message(FATAL_ERROR "'nmake -?' reported:\n${nmake_out}")
+   endif()
+   if(nmake_version VERSION_LESS 9)
+     set(Skip_BUILD_MAKE_PROGRAM_Case 1)
+   endif()
+endif()
+if(NOT Skip_BUILD_MAKE_PROGRAM_Case)
   instrument(cmake-command-make-program NO_WARN
     BUILD_MAKE_PROGRAM
     CHECK_SCRIPT check-make-program-hooks.cmake)

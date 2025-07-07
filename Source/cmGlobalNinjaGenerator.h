@@ -535,8 +535,7 @@ private:
   void WriteTargetRebuildManifest(std::ostream& os);
   bool WriteTargetCleanAdditional(std::ostream& os);
   void WriteTargetClean(std::ostream& os);
-#if !defined(CMAKE_BOOTSTRAP) && !defined(_WIN32)
-  // FIXME(#26668) This does not work on Windows
+#ifndef CMAKE_BOOTSTRAP
   void WriteTargetInstrument(std::ostream& os);
 #endif
   void WriteTargetHelp(std::ostream& os);
