@@ -22,6 +22,7 @@
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmPolicies.h"
+#include "cmRange.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
@@ -35,7 +36,6 @@ void TopLevelCMakeVarCondSet(cmMakefile& mf, std::string const& name,
 
 struct ProjectArguments : ArgumentParser::ParseResult
 {
-  cm::optional<std::string> ProjectName;
   cm::optional<std::string> Version;
   cm::optional<std::string> CompatVersion;
   cm::optional<std::string> Description;
@@ -66,7 +66,6 @@ bool cmProjectCommand(std::vector<std::string> const& args,
   ProjectArgumentParser parser;
   parser.BindKeywordMissingValue(missingValueKeywords)
     .BindParsedKeywords(parsedKeywords)
-    .Bind(0, prArgs.ProjectName)
     .Bind("VERSION"_s, prArgs.Version)
     .Bind("DESCRIPTION"_s, prArgs.Description)
     .Bind("HOMEPAGE_URL"_s, prArgs.HomepageURL)
@@ -80,12 +79,23 @@ bool cmProjectCommand(std::vector<std::string> const& args,
     parser.Bind("COMPAT_VERSION"_s, prArgs.CompatVersion);
   }
 
-  parser.Parse(args, &unparsedArgs, 0);
-
-  if (!prArgs.ProjectName) {
+  if (args.empty()) {
     status.SetError("PROJECT called with incorrect number of arguments");
     return false;
   }
+
+  std::string const& projectName = args[0];
+  if (parser.HasKeyword(projectName)) {
+    mf.IssueMessage(
+      MessageType::AUTHOR_WARNING,
+      cmStrCat(
+        "project() called with '", projectName,
+        "' as first argument. The first parameter should be the project name, "
+        "not a keyword argument. See the cmake-commands(7) manual for correct "
+        "usage of the project() command."));
+  }
+
+  parser.Parse(cmMakeRange(args).advance(1), &unparsedArgs, 1);
 
   if (mf.IsRootMakefile() &&
       !mf.GetDefinition("CMAKE_MINIMUM_REQUIRED_VERSION")) {
@@ -100,16 +110,16 @@ bool cmProjectCommand(std::vector<std::string> const& args,
     return false;
   }
 
-  if (!IncludeByVariable(
-        status, "CMAKE_PROJECT_" + *prArgs.ProjectName + "_INCLUDE_BEFORE")) {
+  if (!IncludeByVariable(status,
+                         "CMAKE_PROJECT_" + projectName + "_INCLUDE_BEFORE")) {
     return false;
   }
 
-  mf.SetProjectName(*prArgs.ProjectName);
+  mf.SetProjectName(projectName);
 
   cmPolicies::PolicyStatus cmp0180 = mf.GetPolicyStatus(cmPolicies::CMP0180);
 
-  std::string varName = cmStrCat(*prArgs.ProjectName, "_BINARY_DIR"_s);
+  std::string varName = cmStrCat(projectName, "_BINARY_DIR"_s);
   bool nonCacheVarAlreadySet = mf.IsNormalDefinitionSet(varName);
   mf.AddCacheDefinition(varName, mf.GetCurrentBinaryDirectory(),
                         "Value Computed by CMake", cmStateEnums::STATIC);
@@ -117,7 +127,7 @@ bool cmProjectCommand(std::vector<std::string> const& args,
     mf.AddDefinition(varName, mf.GetCurrentBinaryDirectory());
   }
 
-  varName = cmStrCat(*prArgs.ProjectName, "_SOURCE_DIR"_s);
+  varName = cmStrCat(projectName, "_SOURCE_DIR"_s);
   nonCacheVarAlreadySet = mf.IsNormalDefinitionSet(varName);
   mf.AddCacheDefinition(varName, mf.GetCurrentSourceDirectory(),
                         "Value Computed by CMake", cmStateEnums::STATIC);
@@ -128,11 +138,11 @@ bool cmProjectCommand(std::vector<std::string> const& args,
   mf.AddDefinition("PROJECT_BINARY_DIR", mf.GetCurrentBinaryDirectory());
   mf.AddDefinition("PROJECT_SOURCE_DIR", mf.GetCurrentSourceDirectory());
 
-  mf.AddDefinition("PROJECT_NAME", *prArgs.ProjectName);
+  mf.AddDefinition("PROJECT_NAME", projectName);
 
   mf.AddDefinitionBool("PROJECT_IS_TOP_LEVEL", mf.IsRootMakefile());
 
-  varName = cmStrCat(*prArgs.ProjectName, "_IS_TOP_LEVEL"_s);
+  varName = cmStrCat(projectName, "_IS_TOP_LEVEL"_s);
   nonCacheVarAlreadySet = mf.IsNormalDefinitionSet(varName);
   mf.AddCacheDefinition(varName, mf.IsRootMakefile() ? "ON" : "OFF",
                         "Value Computed by CMake", cmStateEnums::STATIC);
@@ -140,7 +150,7 @@ bool cmProjectCommand(std::vector<std::string> const& args,
     mf.AddDefinition(varName, mf.IsRootMakefile() ? "ON" : "OFF");
   }
 
-  TopLevelCMakeVarCondSet(mf, "CMAKE_PROJECT_NAME", *prArgs.ProjectName);
+  TopLevelCMakeVarCondSet(mf, "CMAKE_PROJECT_NAME", projectName);
 
   std::set<cm::string_view> seenKeywords;
   for (cm::string_view keyword : parsedKeywords) {
@@ -253,7 +263,7 @@ bool cmProjectCommand(std::vector<std::string> const& args,
 
   auto createVariables = [&](cm::string_view var, std::string const& val) {
     mf.AddDefinition(cmStrCat("PROJECT_"_s, var), val);
-    mf.AddDefinition(cmStrCat(*prArgs.ProjectName, "_"_s, var), val);
+    mf.AddDefinition(cmStrCat(projectName, "_"_s, var), val);
     TopLevelCMakeVarCondSet(mf, cmStrCat("CMAKE_PROJECT_"_s, var), val);
   };
 
@@ -282,8 +292,8 @@ bool cmProjectCommand(std::vector<std::string> const& args,
     return false;
   }
 
-  if (!IncludeByVariable(
-        status, "CMAKE_PROJECT_" + *prArgs.ProjectName + "_INCLUDE")) {
+  if (!IncludeByVariable(status,
+                         "CMAKE_PROJECT_" + projectName + "_INCLUDE")) {
     return false;
   }
 
