@@ -300,6 +300,11 @@ bool testArgumentParserDynamic()
     return result.Func4(key, arg);
   };
 
+  cmArgumentParser<void> parserDynamic;
+  parserDynamic.Bind("OPTION_1"_s, result.Option1);
+  ASSERT_TRUE(parserDynamic.HasKeyword("OPTION_1"_s));
+  ASSERT_TRUE(!parserDynamic.HasKeyword("NOT_AN_OPTION"_s));
+
   static_cast<ArgumentParser::ParseResult&>(result) =
     cmArgumentParser<void>{}
       .Bind(0, result.Pos0)
@@ -424,6 +429,9 @@ BIND_TRAILING(parserTrailingDerivedStatic, DerivedTrailingPos);
 
 bool testArgumentParserStatic()
 {
+  ASSERT_TRUE(parserStatic.HasKeyword("OPTION_1"_s));
+  ASSERT_TRUE(!parserStatic.HasKeyword("NOT_AN_OPTION"_s));
+
   std::vector<std::string> unparsedArguments;
   Result const result = parserStatic.Parse(args, &unparsedArguments);
   if (!verifyResult(result, unparsedArguments)) {
@@ -438,6 +446,9 @@ bool testArgumentParserStatic()
 
 bool testArgumentParserDerivedStatic()
 {
+  ASSERT_TRUE(parserDerivedStatic.HasKeyword("OPTION_1"_s));
+  ASSERT_TRUE(!parserDerivedStatic.HasKeyword("NOT_AN_OPTION"_s));
+
   std::vector<std::string> unparsedArguments;
   Derived const result = parserDerivedStatic.Parse(args, &unparsedArguments);
   if (!verifyResult(result, unparsedArguments)) {
