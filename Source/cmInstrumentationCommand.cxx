@@ -35,9 +35,9 @@ bool validateVersion(std::string const& key, std::string const& versionString,
   }
   version = std::atoi(versionString.c_str());
   if (version != 1) {
-    status.SetError(cmStrCat(
-      "QUERY subcommand given an unsupported ", key, " \"", versionString,
-      "\" (the only currently supported version is 1)."));
+    status.SetError(
+      cmStrCat("given an unsupported ", key, " \"", versionString,
+               "\" (the only currently supported version is 1)."));
     return false;
   }
   return true;
@@ -79,7 +79,7 @@ bool cmInstrumentationCommand(std::vector<std::string> const& args,
   {
     ArgumentParser::NonEmpty<std::string> ApiVersion;
     ArgumentParser::NonEmpty<std::string> DataVersion;
-    ArgumentParser::NonEmpty<std::vector<std::string>> Queries;
+    ArgumentParser::NonEmpty<std::vector<std::string>> Options;
     ArgumentParser::NonEmpty<std::vector<std::string>> Hooks;
     ArgumentParser::NonEmpty<std::vector<std::vector<std::string>>> Callbacks;
   };
@@ -87,7 +87,7 @@ bool cmInstrumentationCommand(std::vector<std::string> const& args,
   static auto const parser = cmArgumentParser<Arguments>{}
                                .Bind("API_VERSION"_s, &Arguments::ApiVersion)
                                .Bind("DATA_VERSION"_s, &Arguments::DataVersion)
-                               .Bind("QUERIES"_s, &Arguments::Queries)
+                               .Bind("OPTIONS"_s, &Arguments::Options)
                                .Bind("HOOKS"_s, &Arguments::Hooks)
                                .Bind("CALLBACK"_s, &Arguments::Callbacks);
 
@@ -111,17 +111,17 @@ bool cmInstrumentationCommand(std::vector<std::string> const& args,
     return false;
   }
 
-  std::set<cmInstrumentationQuery::Query> queries;
-  auto queryParser = EnumParser<cmInstrumentationQuery::Query>(
-    cmInstrumentationQuery::QueryString);
-  for (auto const& arg : arguments.Queries) {
-    cmInstrumentationQuery::Query query;
-    if (!queryParser(arg, query)) {
+  std::set<cmInstrumentationQuery::Option> options;
+  auto optionParser = EnumParser<cmInstrumentationQuery::Option>(
+    cmInstrumentationQuery::OptionString);
+  for (auto const& arg : arguments.Options) {
+    cmInstrumentationQuery::Option option;
+    if (!optionParser(arg, option)) {
       status.SetError(
-        cmStrCat("given invalid argument to QUERIES \"", arg, '"'));
+        cmStrCat("given invalid argument to OPTIONS \"", arg, '"'));
       return false;
     }
-    queries.insert(query);
+    options.insert(option);
   }
 
   std::set<cmInstrumentationQuery::Hook> hooks;
@@ -140,7 +140,7 @@ bool cmInstrumentationCommand(std::vector<std::string> const& args,
   status.GetMakefile()
     .GetCMakeInstance()
     ->GetInstrumentation()
-    ->WriteJSONQuery(queries, hooks, arguments.Callbacks);
+    ->WriteJSONQuery(options, hooks, arguments.Callbacks);
 
   return true;
 }

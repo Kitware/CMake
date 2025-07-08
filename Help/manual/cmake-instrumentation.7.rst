@@ -192,7 +192,7 @@ key is required, but all other fields are optional.
   * ``postInstall``
   * ``postTest``
 
-``queries``
+``options``
   A list of strings specifying additional optional data to collect during
   instrumentation. Elements in this list should be one of the following:
 
@@ -209,10 +209,10 @@ key is required, but all other fields are optional.
 
 The ``callbacks`` listed will be invoked during the specified hooks
 *at a minimum*. When there are multiple query files, the ``callbacks``,
-``hooks`` and ``queries`` between them will be merged. Therefore, if any query
+``hooks`` and ``options`` between them will be merged. Therefore, if any query
 file includes any ``hooks``, every ``callback`` across all query files will be
 executed at every ``hook`` across all query files. Additionally, if any query
-file includes any optional ``queries``, the optional query data will be present
+file includes any optional ``options``, the optional query data will be present
 in all data files.
 
 Example:
@@ -229,7 +229,7 @@ Example:
       "postCMakeBuild",
       "postInstall"
     ],
-    "queries": [
+    "options": [
       "staticSystemInformation",
       "dynamicSystemInformation"
     ]

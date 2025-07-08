@@ -90,7 +90,7 @@ function(instrument test)
 endfunction()
 
 # Bad Queries
-instrument(bad-query)
+instrument(bad-option)
 instrument(bad-hook)
 instrument(empty)
 instrument(bad-version)
@@ -100,7 +100,7 @@ instrument(hooks-1 BUILD INSTALL TEST STATIC_QUERY)
 instrument(hooks-2 BUILD INSTALL TEST)
 instrument(hooks-no-callbacks MANUAL_HOOK)
 
-# Check data file contents
+# Check data file contents for optional query data
 instrument(no-query BUILD INSTALL TEST
   CHECK_SCRIPT check-data-dir.cmake)
 instrument(dynamic-query BUILD INSTALL TEST DYNAMIC_QUERY

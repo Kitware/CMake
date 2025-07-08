@@ -49,12 +49,12 @@ public:
                              std::string config);
   void GetPreTestStats();
   bool HasQuery() const;
-  bool HasQuery(cmInstrumentationQuery::Query) const;
-  bool HasHook(cmInstrumentationQuery::Hook) const;
+  bool HasOption(cmInstrumentationQuery::Option option) const;
+  bool HasHook(cmInstrumentationQuery::Hook hook) const;
   bool HasPreOrPostBuildHook() const;
   bool ReadJSONQueries(std::string const& directory);
   void ReadJSONQuery(std::string const& file);
-  void WriteJSONQuery(std::set<cmInstrumentationQuery::Query> const& queries,
+  void WriteJSONQuery(std::set<cmInstrumentationQuery::Option> const& options,
                       std::set<cmInstrumentationQuery::Hook> const& hooks,
                       std::vector<std::vector<std::string>> const& callback);
   void ClearGeneratedQueries();
@@ -62,7 +62,7 @@ public:
   int SpawnBuildDaemon();
   int CollectTimingAfterBuild(int ppid);
   void AddHook(cmInstrumentationQuery::Hook hook);
-  void AddQuery(cmInstrumentationQuery::Query query);
+  void AddOption(cmInstrumentationQuery::Option option);
   bool HasErrors() const;
   std::string const& GetCDashDir();
 
@@ -87,7 +87,7 @@ private:
   std::string timingDirv1;
   std::string userTimingDirv1;
   std::string cdashDir;
-  std::set<cmInstrumentationQuery::Query> queries;
+  std::set<cmInstrumentationQuery::Option> options;
   std::set<cmInstrumentationQuery::Hook> hooks;
   std::vector<std::string> callbacks;
   std::vector<std::string> queryFiles;
