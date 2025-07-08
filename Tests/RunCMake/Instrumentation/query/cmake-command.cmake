@@ -8,6 +8,7 @@
     API_VERSION 1
     DATA_VERSION 1
     HOOKS postGenerate
+    OPTIONS cdashSubmit cdashVerbose
     CALLBACK ${CMAKE_COMMAND} -E echo callback1
   )
   # Query 2

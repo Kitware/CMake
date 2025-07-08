@@ -15,7 +15,9 @@ public:
   enum Option
   {
     StaticSystemInformation,
-    DynamicSystemInformation
+    DynamicSystemInformation,
+    CDashSubmit,
+    CDashVerbose
   };
   static std::vector<std::string> const OptionString;
 

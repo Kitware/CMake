@@ -7,6 +7,9 @@
   [
     "postGenerate"
   ],
-  "options" : [],
+  "options" : [
+    "cdashSubmit",
+    "cdashVerbose"
+  ],
   "version" : 1
 }

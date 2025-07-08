@@ -33,6 +33,7 @@ public:
   cmInstrumentation(std::string const& binary_dir,
                     LoadQueriesAfter loadQueries = LoadQueriesAfter::Yes);
   void LoadQueries();
+  void CheckCDashVariable();
   int InstrumentCommand(
     std::string command_type, std::vector<std::string> const& command,
     std::function<int()> const& callback,
@@ -91,7 +92,7 @@ private:
   std::set<cmInstrumentationQuery::Hook> hooks;
   std::vector<std::string> callbacks;
   std::vector<std::string> queryFiles;
-  std::map<std::string, std::string> cdashSnippetsMap;
+  static std::map<std::string, std::string> cdashSnippetsMap;
   Json::Value preTestStats;
   std::string errorMsg;
   bool hasQuery = false;
@@ -101,4 +102,5 @@ private:
   std::unique_ptr<cmsys::SystemInformation> systemInformation;
   cmsys::SystemInformation& GetSystemInformation();
 #endif
+  int writtenJsonQueries = 0;
 };

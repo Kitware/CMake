@@ -114,7 +114,6 @@ struct cmCTest::Private
   bool UseHTTP10 = false;
   bool PrintLabels = false;
   bool Failover = false;
-  bool UseVerboseInstrumentation = false;
   cmJSONState parseState;
 
   bool FlushTestProgressLine = false;
@@ -318,10 +317,6 @@ cmCTest::cmCTest()
   envValue.clear();
   if (cmSystemTools::GetEnv("CTEST_PROGRESS_OUTPUT", envValue)) {
     this->Impl->TestProgressOutput = !cmIsOff(envValue);
-  }
-  envValue.clear();
-  if (cmSystemTools::GetEnv("CTEST_USE_VERBOSE_INSTRUMENTATION", envValue)) {
-    this->Impl->UseVerboseInstrumentation = !cmIsOff(envValue);
   }
   envValue.clear();
 
@@ -3629,11 +3624,6 @@ cmInstrumentation& cmCTest::GetInstrumentation()
   return *this->Impl->Instrumentation;
 }
 
-bool cmCTest::GetUseVerboseInstrumentation() const
-{
-  return this->Impl->UseVerboseInstrumentation;
-}
-
 void cmCTest::ConvertInstrumentationSnippetsToXML(cmXMLWriter& xml,
                                                   std::string const& subdir)
 {
@@ -3662,6 +3652,8 @@ void cmCTest::ConvertInstrumentationSnippetsToXML(cmXMLWriter& xml,
 bool cmCTest::ConvertInstrumentationJSONFileToXML(std::string const& fpath,
                                                   cmXMLWriter& xml)
 {
+  bool verboseCommands = this->GetInstrumentation().HasOption(
+    cmInstrumentationQuery::Option::CDashVerbose);
   Json::Value root;
   this->Impl->parseState = cmJSONState(fpath, &root);
   if (!this->Impl->parseState.errors.empty()) {
@@ -3710,7 +3702,7 @@ bool cmCTest::ConvertInstrumentationJSONFileToXML(std::string const& fpath,
       }
       // Truncate the full command line if verbose instrumentation
       // was not requested.
-      if (key == "command" && !this->GetUseVerboseInstrumentation()) {
+      if (key == "command" && !verboseCommands) {
         std::string command_str = root[key].asString();
         std::string truncated = command_str.substr(0, command_str.find(' '));
         if (command_str != truncated) {

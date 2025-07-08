@@ -436,7 +436,6 @@ public:
   std::vector<std::string> GetCommandLineHttpHeaders() const;
 
   cmInstrumentation& GetInstrumentation();
-  bool GetUseVerboseInstrumentation() const;
 
 private:
   int GenerateNotesFile(cmake* cm, std::string const& files);
