@@ -1,0 +1,87 @@
+Test project .*
+ *Start +[0-9]+: TEST:value/test\.case/0!5
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:value/test\.case/0!5 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:value/test\.case/1!5
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:value/test\.case/1!5 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:value/test\.case/named!5
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:value/test\.case/named!5 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:ns\.value/test\.case/0!5
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:ns\.value/test\.case/0!5 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:ns\.value/test\.case/1!5
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:ns\.value/test\.case/1!5 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:ns\.value/test\.case/named!5
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:ns\.value/test\.case/named!5 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:prefix/value/test\.case/0!5
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:prefix/value/test\.case/0!5 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:prefix/value/test\.case/1!5
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:prefix/value/test\.case/1!5 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:prefix/value/test\.case/named!5
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:prefix/value/test\.case/named!5 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:param/special\.case/0!5
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:param/special\.case/0!5 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:param/special\.case/1!5
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:param/special\.case/1!5 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:param/special\.case/2!5
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:param/special\.case/2!5 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:param/special\.case/3!5
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:param/special\.case/3!5 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:param/special\.case/4!5
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:param/special\.case/4!5 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:param/special\.case/5!5
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:param/special\.case/5!5 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:param/special\.case/6!5
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:param/special\.case/6!5 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:param/special\.case/7!5
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:param/special\.case/7!5 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:ns\.param/special\.case/0!5
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:ns\.param/special\.case/0!5 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:ns\.param/special\.case/1!5
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:ns\.param/special\.case/1!5 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:ns\.param/special\.case/2!5
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:ns\.param/special\.case/2!5 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:ns\.param/special\.case/3!5
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:ns\.param/special\.case/3!5 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:ns\.param/special\.case/4!5
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:ns\.param/special\.case/4!5 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:ns\.param/special\.case/5!5
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:ns\.param/special\.case/5!5 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:ns\.param/special\.case/6!5
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:ns\.param/special\.case/6!5 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:ns\.param/special\.case/7!5
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:ns\.param/special\.case/7!5 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:prefix/param/special\.case/0!5
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:prefix/param/special\.case/0!5 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:prefix/param/special\.case/1!5
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:prefix/param/special\.case/1!5 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:prefix/param/special\.case/2!5
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:prefix/param/special\.case/2!5 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:prefix/param/special\.case/3!5
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:prefix/param/special\.case/3!5 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:prefix/param/special\.case/4!5
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:prefix/param/special\.case/4!5 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:prefix/param/special\.case/5!5
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:prefix/param/special\.case/5!5 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:prefix/param/special\.case/6!5
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:prefix/param/special\.case/6!5 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:prefix/param/special\.case/7!5
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:prefix/param/special\.case/7!5 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:both_suite\.test<TYPE>!5
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:both_suite\.test<TYPE>!5 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:both_suite\.case/test<TYPE>!5
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:both_suite\.case/test<TYPE>!5 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:both\.test<TYPE>!5
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:both\.test<TYPE>!5 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:both\.case/test<TYPE>!5
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:both\.case/test<TYPE>!5 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:ns\.both\.test<TYPE>!5
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:ns\.both\.test<TYPE>!5 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:ns\.both\.case/test<TYPE>!5
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:ns\.both\.case/test<TYPE>!5 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:prefix/both\.test<TYPE>!5
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:prefix/both\.test<TYPE>!5 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:prefix/both\.case/test<TYPE>!5
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:prefix/both\.case/test<TYPE>!5 \.+ +Passed +[0-9.]+ sec
+
+100% tests passed, 0 tests failed out of [0-9]+
+
+Total Test time \(real\) = +[0-9.]+ sec

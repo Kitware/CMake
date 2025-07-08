@@ -1,0 +1,21 @@
+Test project .*
+ *Start +[0-9]+: TEST:both_suite\.test!7
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:both_suite\.test!7 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:both_suite\.case/test!7
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:both_suite\.case/test!7 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:both\.test<suite>!7
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:both\.test<suite>!7 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:both\.case/test<suite>!7
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:both\.case/test<suite>!7 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:ns\.both\.test<suite>!7
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:ns\.both\.test<suite>!7 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:ns\.both\.case/test<suite>!7
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:ns\.both\.case/test<suite>!7 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:prefix/both\.test<suite>!7
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:prefix/both\.test<suite>!7 \.+ +Passed +[0-9.]+ sec
+ *Start +[0-9]+: TEST:prefix/both\.case/test<suite>!7
+ *[0-9]+/[0-9]+ +Test +#[0-9]+: TEST:prefix/both\.case/test<suite>!7 \.+ +Passed +[0-9.]+ sec
+
+100% tests passed, 0 tests failed out of [0-9]+
+
+Total Test time \(real\) = +[0-9.]+ sec
