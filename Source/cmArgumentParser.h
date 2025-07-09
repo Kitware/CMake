@@ -394,6 +394,11 @@ public:
     this->Parse(result, args, unparsedArguments, pos);
     return result;
   }
+
+  bool HasKeyword(cm::string_view key) const
+  {
+    return this->Bindings.Keywords.Find(key) != this->Bindings.Keywords.end();
+  }
 };
 
 template <>
@@ -467,6 +472,11 @@ public:
     Instance instance(this->Bindings, &parseResult, unparsedArguments);
     instance.Parse(args, pos);
     return parseResult;
+  }
+
+  bool HasKeyword(cm::string_view key) const
+  {
+    return this->Bindings.Keywords.Find(key) != this->Bindings.Keywords.end();
   }
 
 protected:

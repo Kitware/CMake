@@ -21,6 +21,8 @@ if(CMake_TEST_RESOURCES)
   run_cmake(ExplicitRC)
 endif()
 
+run_cmake(KeywordProjectName)
+
 set(RunCMake_DEFAULT_stderr .)
 run_cmake(LanguagesDuplicate)
 unset(RunCMake_DEFAULT_stderr)
