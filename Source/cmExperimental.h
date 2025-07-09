@@ -18,7 +18,6 @@ public:
   enum class Feature
   {
     ExportPackageDependencies,
-    WindowsKernelModeDriver,
     CxxImportStd,
     ImportPackageInfo,
     ExportPackageInfo,
