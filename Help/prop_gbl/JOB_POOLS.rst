@@ -23,6 +23,9 @@ Defined pools can be used at different levels:
 * :command:`Custom commands <add_custom_command>` and
   :command:`custom targets <add_custom_target>` can specify pools using the
   option ``JOB_POOL``.
+* Per-source, by setting the source file property :prop_sf:`JOB_POOL_COMPILE`,
+  in case some specific source files require to override their global or
+  target assigned pool.
 
 Using a pool that is not defined by ``JOB_POOLS`` causes an error by ninja
 at build time.

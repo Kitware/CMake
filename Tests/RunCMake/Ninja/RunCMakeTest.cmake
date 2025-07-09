@@ -100,6 +100,7 @@ run_cmake_with_options(CustomCommandDepfile -DCMAKE_BUILD_TYPE=Debug)
 run_cmake_with_options(CustomCommandDepfileAsOutput -DCMAKE_BUILD_TYPE=Debug)
 run_cmake_with_options(CustomCommandDepfileAsByproduct -DCMAKE_BUILD_TYPE=Debug)
 run_cmake(CustomCommandJobPool)
+run_cmake(SourceFileJobPool)
 run_cmake(JobPoolUsesTerminal)
 
 run_cmake(RspFileC)

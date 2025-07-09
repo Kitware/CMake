@@ -236,8 +236,10 @@ protected:
   std::unique_ptr<cmOSXBundleGenerator> OSXBundleGenerator;
   std::set<std::string> MacContentFolders;
 
+  /// @param source may be nullptr.
   void addPoolNinjaVariable(std::string const& pool_property,
-                            cmGeneratorTarget* target, cmNinjaVars& vars);
+                            cmGeneratorTarget* target,
+                            cmSourceFile const* source, cmNinjaVars& vars);
 
   bool ForceResponseFile();
 
