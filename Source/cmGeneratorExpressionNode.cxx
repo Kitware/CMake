@@ -2227,8 +2227,6 @@ static const struct ConfigurationTestNode : public cmGeneratorExpressionNode
       return configurationNode.Evaluate(parameters, context, content, nullptr);
     }
     static cmsys::RegularExpression configValidator("^[A-Za-z0-9_]*$");
-    if (!configValidator.find(parameters.front())) {
-    }
 
     context->HadContextSensitiveCondition = true;
     bool firstParam = true;
