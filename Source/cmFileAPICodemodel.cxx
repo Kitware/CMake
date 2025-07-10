@@ -1068,10 +1068,16 @@ Json::Value DirectoryObject::DumpInstaller(cmInstallGenerator* gen)
     }
   } else if (auto* installFileSet =
                dynamic_cast<cmInstallFileSetGenerator*>(gen)) {
+    auto const* fileSet = installFileSet->GetFileSet();
+
+    // No fileSet by that name exists for the associated target
+    if (!fileSet) {
+      return installer;
+    }
+
     installer["type"] = "fileSet";
     installer["destination"] = installFileSet->GetDestination(this->Config);
 
-    auto const* fileSet = installFileSet->GetFileSet();
     auto* target = installFileSet->GetTarget();
 
     auto dirCges = fileSet->CompileDirectoryEntries();
