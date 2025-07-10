@@ -10,6 +10,8 @@
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmPolicies.h"
+#include "cmStateSnapshot.h"
+#include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
@@ -38,6 +40,13 @@ bool cmIncludeCommand(std::vector<std::string> const& args,
                     "include() only takes one file.");
     return false;
   }
+
+  if (status.GetMakefile().GetStateSnapshot().GetUnwindState() ==
+      cmStateEnums::UNWINDING) {
+    status.SetError("called while already in an UNWIND state");
+    return false;
+  }
+
   bool optional = false;
   bool noPolicyScope = false;
   std::string fname = args[0];
@@ -166,5 +175,22 @@ bool cmIncludeCommand(std::vector<std::string> const& args,
     status.SetError(m);
     return false;
   }
+
+  if (status.GetMakefile().GetStateSnapshot().GetUnwindState() ==
+      cmStateEnums::UNWINDING) {
+
+    if (status.GetMakefile().GetStateSnapshot().GetUnwindType() !=
+        cmStateEnums::CAN_UNWIND) {
+      std::string m = cmStrCat("requested file is attempting to unwind the "
+                               "stack in an invalid context:\n ",
+                               fname);
+      status.SetError(m);
+      cmSystemTools::SetFatalErrorOccurred();
+      return false;
+    }
+
+    status.SetReturnInvoked();
+  }
+
   return true;
 }

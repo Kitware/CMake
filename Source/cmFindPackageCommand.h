@@ -276,6 +276,7 @@ private:
   bool PolicyScope = true;
   bool GlobalScope = false;
   bool RegistryViewDefined = false;
+  bool ScopeUnwind = false;
   std::string LibraryArchitecture;
   std::vector<std::string> Names;
   std::set<std::string> IgnoredPaths;
