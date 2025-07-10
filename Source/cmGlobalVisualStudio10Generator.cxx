@@ -478,9 +478,7 @@ bool cmGlobalVisualStudio10Generator::InitializeSystem(cmMakefile* mf)
     if (!this->InitializeWindowsStore(mf)) {
       return false;
     }
-  } else if (this->SystemName == "WindowsKernelModeDriver"_s &&
-             cmExperimental::HasSupportEnabled(
-               *mf, cmExperimental::Feature::WindowsKernelModeDriver)) {
+  } else if (this->SystemName == "WindowsKernelModeDriver"_s) {
     this->SystemIsWindowsKernelModeDriver = true;
     if (!this->InitializeWindowsKernelModeDriver(mf)) {
       return false;
