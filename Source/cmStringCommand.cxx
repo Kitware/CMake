@@ -1059,7 +1059,8 @@ Json::Value ReadJson(std::string const& jsonstr)
   std::string error;
   if (!jsonReader->parse(jsonstr.data(), jsonstr.data() + jsonstr.size(),
                          &json, &error)) {
-    throw json_error(cmStrCat("failed parsing json string: "_s, error));
+    throw json_error(
+      cmStrCat("failed parsing json string:\n"_s, jsonstr, '\n', error));
   }
   return json;
 }
