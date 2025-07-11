@@ -6,7 +6,7 @@ function(instrument test)
   set(config "${CMAKE_CURRENT_LIST_DIR}/config")
   set(ENV{CMAKE_CONFIG_DIR} ${config})
   cmake_parse_arguments(ARGS
-    "BUILD;BUILD_MAKE_PROGRAM;INSTALL;TEST;COPY_QUERIES;COPY_QUERIES_GENERATED;NO_WARN;STATIC_QUERY;DYNAMIC_QUERY;INSTALL_PARALLEL;MANUAL_HOOK"
+    "BUILD;BUILD_MAKE_PROGRAM;INSTALL;TEST;COPY_QUERIES;COPY_QUERIES_GENERATED;NO_WARN;STATIC_QUERY;DYNAMIC_QUERY;INSTALL_PARALLEL;MANUAL_HOOK;PRESERVE_DATA;NO_CONFIGURE"
     "CHECK_SCRIPT;CONFIGURE_ARG" "" ${ARGN})
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/${test})
   set(uuid "d16a3082-c4e1-489b-b90c-55750a334f27")
@@ -15,7 +15,11 @@ function(instrument test)
 
   # Clear previous instrumentation data
   # We can't use RunCMake_TEST_NO_CLEAN 0 because we preserve queries placed in the build tree after
-  file(REMOVE_RECURSE ${RunCMake_TEST_BINARY_DIR})
+  if (ARGS_PRESERVE_DATA)
+    file(REMOVE_RECURSE ${RunCMake_TEST_BINARY_DIR}/CMakeFiles)
+  else()
+    file(REMOVE_RECURSE ${RunCMake_TEST_BINARY_DIR})
+  endif()
 
   # Set hook command
   set(static_query_hook_arg 0)
@@ -59,7 +63,9 @@ function(instrument test)
   if(NOT RunCMake_GENERATOR_IS_MULTI_CONFIG)
     set(maybe_CMAKE_BUILD_TYPE -DCMAKE_BUILD_TYPE=Debug)
   endif()
-  run_cmake_with_options(${test} ${ARGS_CONFIGURE_ARG} ${maybe_CMAKE_BUILD_TYPE})
+  if (NOT ARGS_NO_CONFIGURE)
+    run_cmake_with_options(${test} ${ARGS_CONFIGURE_ARG} ${maybe_CMAKE_BUILD_TYPE})
+  endif()
 
   # Follow-up Commands
   if (ARGS_BUILD)
@@ -112,7 +118,7 @@ instrument(dynamic-query BUILD INSTALL TEST DYNAMIC_QUERY
 instrument(both-query BUILD INSTALL TEST DYNAMIC_QUERY
   CHECK_SCRIPT check-data-dir.cmake)
 
-# cmake_instrumentation command
+# Test cmake_instrumentation command
 instrument(cmake-command
   COPY_QUERIES NO_WARN DYNAMIC_QUERY
   CHECK_SCRIPT check-generated-queries.cmake)
@@ -135,6 +141,25 @@ instrument(cmake-command-cmake-build NO_WARN
   CHECK_SCRIPT check-no-make-program-hooks.cmake
 )
 
+# Test CUSTOM_CONTENT
+instrument(cmake-command-custom-content NO_WARN BUILD
+  CONFIGURE_ARG "-DN=1"
+)
+instrument(cmake-command-custom-content NO_WARN BUILD
+  CONFIGURE_ARG "-DN=2"
+  CHECK_SCRIPT check-custom-content.cmake
+  PRESERVE_DATA
+)
+instrument(cmake-command-custom-content NO_WARN NO_CONFIGURE
+  MANUAL_HOOK
+  PRESERVE_DATA
+  CHECK_SCRIPT check-custom-content-removed.cmake
+)
+
+instrument(cmake-command-custom-content-bad-type NO_WARN)
+instrument(cmake-command-custom-content-bad-content NO_WARN)
+
+# Test make/ninja hooks
 if(RunCMake_GENERATOR STREQUAL "MSYS Makefiles")
   # FIXME(#27079): This does not work for MSYS Makefiles.
   set(Skip_BUILD_MAKE_PROGRAM_Case 1)

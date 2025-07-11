@@ -1,7 +1,7 @@
 include(${CMAKE_CURRENT_LIST_DIR}/verify-snippet.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/json.cmake)
 
-file(GLOB snippets ${v1}/data/*)
+file(GLOB snippets LIST_DIRECTORIES false ${v1}/data/*)
 if (NOT snippets)
   add_error("No snippet files generated")
 endif()

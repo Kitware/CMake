@@ -21,6 +21,7 @@ This allows for configuring instrumentation at the project-level.
     [HOOKS <hooks>...]
     [OPTIONS <options>...]
     [CALLBACK <callback>]
+    [CUSTOM_CONTENT <name> <type> <content>]
   )
 
 The ``API_VERSION`` and ``DATA_VERSION`` must always be given.  Currently, the
@@ -35,6 +36,35 @@ The ``CALLBACK`` keyword can be provided multiple times to create multiple callb
 Whenever ``cmake_instrumentation`` is invoked, a query file is generated in
 ``<build>/.cmake/instrumentation/v1/query/generated`` to enable instrumentation
 with the provided arguments.
+
+.. _`cmake_instrumentation Configure Content`:
+
+Custom Configure Content
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+The ``CUSTOM_CONTENT`` argument specifies certain data from configure time to
+include in each :ref:`cmake-instrumentation v1 Snippet File` that
+corresponds to the configure step associated with the command. This may be used
+to associate instrumentation data with certain information about its
+configuration, such as the optimization level or whether it is part of a
+coverage build.
+
+``CUSTOM_CONTENT`` expects ``name``, ``type`` and ``content`` arguments.
+
+``name`` is a specifier to identify the content being reported.
+
+``type`` specifies how the content should be interpreted. Supported values are:
+  * ``STRING`` the content is a string.
+  * ``BOOL`` the content should be interpreted as a boolean. It will be ``true``
+    under the same conditions that ``if()`` would be true for the given value.
+  * ``LIST`` the content is a CMake ``;`` separated list that should be parsed.
+  * ``JSON`` the content should be parsed as a JSON string. This can be a
+    number such as ``1`` or ``5.0``, a quoted string such as ``\"string\"``,
+    a boolean value ``true``/``false``, or a JSON object such as
+    ``{ \"key\" : \"value\" }`` that may be constructed using
+    ``string(JSON ...)`` commands.
+
+``content`` is the actual content to report.
 
 Example
 ^^^^^^^
@@ -51,6 +81,9 @@ equivalent JSON query file.
     OPTIONS staticSystemInformation dynamicSystemInformation
     CALLBACK ${CMAKE_COMMAND} -P /path/to/handle_data.cmake
     CALLBACK ${CMAKE_COMMAND} -P /path/to/handle_data_2.cmake
+    CUSTOM_CONTENT myString STRING string
+    CUSTOM_CONTENT myList   LIST   "item1;item2"
+    CUSTOM_CONTENT myObject JSON   "{ \"key\" : \"value\" }"
   )
 
 .. code-block:: json
@@ -67,4 +100,19 @@ equivalent JSON query file.
       "/path/to/cmake -P /path/to/handle_data.cmake"
       "/path/to/cmake -P /path/to/handle_data_2.cmake"
     ]
+  }
+
+This will also result in a configure content JSON being reported in each
+:ref:`cmake-instrumentation v1 Snippet File` with the following contents:
+
+.. code-block:: json
+
+  {
+    "myString": "string",
+    "myList": [
+      "item1", "item2"
+    ],
+    "myObject": {
+      "key": "value"
+    }
   }
