@@ -98,6 +98,7 @@ linkcheck_ignore = [
     r'https://web\.archive\.org/',
     r'https://www\.gnu\.org/',
     r'https://www\.intel\.com/',
+    r'https://[a-z0-9]+\.sourceforge\.net/?$',
     r'https://www\.tasking\.com($|/)',
 ]
 
