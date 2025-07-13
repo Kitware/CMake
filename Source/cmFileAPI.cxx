@@ -85,9 +85,9 @@ void cmFileAPI::ReadQueries()
   }
 }
 
-std::vector<unsigned long> cmFileAPI::GetConfigureLogVersions()
+std::vector<unsigned int> cmFileAPI::GetConfigureLogVersions()
 {
-  std::vector<unsigned long> versions;
+  std::vector<unsigned int> versions;
   auto getConfigureLogVersions = [&versions](Query const& q) {
     for (Object const& o : q.Known) {
       if (o.Kind == ObjectKind::ConfigureLog) {
@@ -126,7 +126,7 @@ std::vector<std::string> cmFileAPI::LoadDir(std::string const& dir)
   std::vector<std::string> files;
   cmsys::Directory d;
   d.Load(dir);
-  for (unsigned long i = 0; i < d.GetNumberOfFiles(); ++i) {
+  for (unsigned int i = 0; i < d.GetNumberOfFiles(); ++i) {
     std::string f = d.GetFile(i);
     if (f != "." && f != "..") {
       files.push_back(std::move(f));

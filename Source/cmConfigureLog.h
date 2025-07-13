@@ -22,12 +22,12 @@ class cmConfigureLog
 public:
   /** Construct with the log directory and a sorted list of enabled log
       versions.  The latest log version will be enabled regardless.  */
-  cmConfigureLog(std::string logDir, std::vector<unsigned long> logVersions);
+  cmConfigureLog(std::string logDir, std::vector<unsigned int> logVersions);
   ~cmConfigureLog();
 
   /** Return true if at least one of the log versions in the given sorted
       list is enabled.  */
-  bool IsAnyLogVersionEnabled(std::vector<unsigned long> const& v) const;
+  bool IsAnyLogVersionEnabled(std::vector<unsigned int> const& v) const;
 
   void EnsureInit();
 
@@ -60,7 +60,7 @@ public:
 
 private:
   std::string LogDir;
-  std::vector<unsigned long> LogVersions;
+  std::vector<unsigned int> LogVersions;
   cmsys::ofstream Stream;
   unsigned Indent = 0;
   bool Opened = false;

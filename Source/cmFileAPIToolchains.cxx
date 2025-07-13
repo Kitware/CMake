@@ -29,7 +29,7 @@ struct ToolchainVariable
 class Toolchains
 {
   cmFileAPI& FileAPI;
-  unsigned long Version;
+  unsigned int Version;
 
   Json::Value DumpToolchains();
   Json::Value DumpToolchain(std::string const& lang);
@@ -41,11 +41,11 @@ class Toolchains
                              ToolchainVariable const& variable);
 
 public:
-  Toolchains(cmFileAPI& fileAPI, unsigned long version);
+  Toolchains(cmFileAPI& fileAPI, unsigned int version);
   Json::Value Dump();
 };
 
-Toolchains::Toolchains(cmFileAPI& fileAPI, unsigned long version)
+Toolchains::Toolchains(cmFileAPI& fileAPI, unsigned int version)
   : FileAPI(fileAPI)
   , Version(version)
 {
@@ -143,7 +143,7 @@ void Toolchains::DumpToolchainVariable(cmMakefile const* mf,
 }
 }
 
-Json::Value cmFileAPIToolchainsDump(cmFileAPI& fileAPI, unsigned long version)
+Json::Value cmFileAPIToolchainsDump(cmFileAPI& fileAPI, unsigned int version)
 {
   Toolchains toolchains(fileAPI, version);
   return toolchains.Dump();
