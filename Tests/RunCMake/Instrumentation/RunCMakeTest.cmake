@@ -9,7 +9,7 @@ function(instrument test)
     "BUILD;BUILD_MAKE_PROGRAM;INSTALL;TEST;COPY_QUERIES;COPY_QUERIES_GENERATED;NO_WARN;STATIC_QUERY;DYNAMIC_QUERY;INSTALL_PARALLEL;MANUAL_HOOK"
     "CHECK_SCRIPT;CONFIGURE_ARG" "" ${ARGN})
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/${test})
-  set(uuid "a37d1069-1972-4901-b9c9-f194aaf2b6e0")
+  set(uuid "d16a3082-c4e1-489b-b90c-55750a334f27")
   set(v1 ${RunCMake_TEST_BINARY_DIR}/.cmake/instrumentation-${uuid}/v1)
   set(query_dir ${CMAKE_CURRENT_LIST_DIR}/query)
 
