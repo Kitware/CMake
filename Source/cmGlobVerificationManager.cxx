@@ -69,6 +69,22 @@ bool cmGlobVerificationManager::SaveVerificationScript(std::string const& path,
 
     verifyScriptFile << "if(NOT \"${NEW_GLOB}\" STREQUAL \"${OLD_GLOB}\")\n"
                      << "  message(\"-- GLOB mismatch!\")\n"
+                     << "  set(NEW_ONLY ${NEW_GLOB})\n"
+                     << "  set(OLD_ONLY ${OLD_GLOB})\n"
+                     << "  list(REMOVE_ITEM NEW_ONLY ${OLD_GLOB})\n"
+                     << "  list(REMOVE_ITEM OLD_ONLY ${NEW_GLOB})\n"
+                     << "  if(NEW_ONLY)\n"
+                     << "    message(\"The following files were added:\")\n"
+                     << "    foreach(VAR_FILE IN LISTS NEW_ONLY)\n"
+                     << "      message(\"  +${VAR_FILE}\")\n"
+                     << "    endforeach()\n"
+                     << "  endif()\n"
+                     << "  if(OLD_ONLY)\n"
+                     << "    message(\"The following files were removed:\")\n"
+                     << "    foreach(VAR_FILE IN LISTS OLD_ONLY)\n"
+                     << "      message(\"  -${VAR_FILE}\")\n"
+                     << "    endforeach()\n"
+                     << "  endif()\n"
                      << "  file(TOUCH_NOCREATE \"" << stampFile << "\")\n"
                      << "endif()\n";
   }
