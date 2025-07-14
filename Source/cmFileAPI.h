@@ -25,7 +25,7 @@ public:
   void ReadQueries();
 
   /** Get the list of configureLog object kind versions requested.  */
-  std::vector<unsigned long> GetConfigureLogVersions();
+  std::vector<unsigned int> GetConfigureLogVersions();
 
   /** Identify the situation in which WriteReplies is called.  */
   enum class IndexFor
@@ -83,7 +83,7 @@ private:
   struct Object
   {
     ObjectKind Kind;
-    unsigned long Version = 0;
+    unsigned int Version = 0;
     friend bool operator<(Object const& l, Object const& r)
     {
       if (l.Kind != r.Kind) {

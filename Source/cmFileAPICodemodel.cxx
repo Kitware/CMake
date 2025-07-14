@@ -223,21 +223,21 @@ Json::Value BacktraceData::Dump()
 class Codemodel
 {
   cmFileAPI& FileAPI;
-  unsigned long Version;
+  unsigned int Version;
 
   Json::Value DumpPaths();
   Json::Value DumpConfigurations();
   Json::Value DumpConfiguration(std::string const& config);
 
 public:
-  Codemodel(cmFileAPI& fileAPI, unsigned long version);
+  Codemodel(cmFileAPI& fileAPI, unsigned int version);
   Json::Value Dump();
 };
 
 class CodemodelConfig
 {
   cmFileAPI& FileAPI;
-  unsigned long Version;
+  unsigned int Version;
   std::string const& Config;
   std::string TopSource;
   std::string TopBuild;
@@ -290,7 +290,7 @@ class CodemodelConfig
   Json::Value DumpMinimumCMakeVersion(cmStateSnapshot s);
 
 public:
-  CodemodelConfig(cmFileAPI& fileAPI, unsigned long version,
+  CodemodelConfig(cmFileAPI& fileAPI, unsigned int version,
                   std::string const& config);
   Json::Value Dump();
 };
@@ -515,7 +515,7 @@ public:
   Json::Value Dump();
 };
 
-Codemodel::Codemodel(cmFileAPI& fileAPI, unsigned long version)
+Codemodel::Codemodel(cmFileAPI& fileAPI, unsigned int version)
   : FileAPI(fileAPI)
   , Version(version)
 {
@@ -561,7 +561,7 @@ Json::Value Codemodel::DumpConfiguration(std::string const& config)
   return configuration.Dump();
 }
 
-CodemodelConfig::CodemodelConfig(cmFileAPI& fileAPI, unsigned long version,
+CodemodelConfig::CodemodelConfig(cmFileAPI& fileAPI, unsigned int version,
                                  std::string const& config)
   : FileAPI(fileAPI)
   , Version(version)
@@ -2154,7 +2154,7 @@ Json::Value Target::DumpDebugger()
   return debuggerInformation;
 }
 
-Json::Value cmFileAPICodemodelDump(cmFileAPI& fileAPI, unsigned long version)
+Json::Value cmFileAPICodemodelDump(cmFileAPI& fileAPI, unsigned int version)
 {
   Codemodel codemodel(fileAPI, version);
   return codemodel.Dump();

@@ -13,17 +13,17 @@ namespace {
 class ConfigureLog
 {
   cmFileAPI& FileAPI;
-  unsigned long Version;
+  unsigned int Version;
 
   Json::Value DumpPath();
   Json::Value DumpEventKindNames();
 
 public:
-  ConfigureLog(cmFileAPI& fileAPI, unsigned long version);
+  ConfigureLog(cmFileAPI& fileAPI, unsigned int version);
   Json::Value Dump();
 };
 
-ConfigureLog::ConfigureLog(cmFileAPI& fileAPI, unsigned long version)
+ConfigureLog::ConfigureLog(cmFileAPI& fileAPI, unsigned int version)
   : FileAPI(fileAPI)
   , Version(version)
 {
@@ -62,8 +62,7 @@ Json::Value ConfigureLog::DumpEventKindNames()
 }
 }
 
-Json::Value cmFileAPIConfigureLogDump(cmFileAPI& fileAPI,
-                                      unsigned long version)
+Json::Value cmFileAPIConfigureLogDump(cmFileAPI& fileAPI, unsigned int version)
 {
   ConfigureLog configureLog(fileAPI, version);
   return configureLog.Dump();

@@ -22,7 +22,7 @@ namespace {
 class CMakeFiles
 {
   cmFileAPI& FileAPI;
-  unsigned long Version;
+  unsigned int Version;
   std::string CMakeModules;
   std::string const& TopSource;
   std::string const& TopBuild;
@@ -35,11 +35,11 @@ class CMakeFiles
   Json::Value DumpGlobDependent(cmGlobCacheEntry const& entry);
 
 public:
-  CMakeFiles(cmFileAPI& fileAPI, unsigned long version);
+  CMakeFiles(cmFileAPI& fileAPI, unsigned int version);
   Json::Value Dump();
 };
 
-CMakeFiles::CMakeFiles(cmFileAPI& fileAPI, unsigned long version)
+CMakeFiles::CMakeFiles(cmFileAPI& fileAPI, unsigned int version)
   : FileAPI(fileAPI)
   , Version(version)
   , CMakeModules(cmSystemTools::GetCMakeRoot() + "/Modules")
@@ -150,7 +150,7 @@ Json::Value CMakeFiles::DumpGlobDependent(cmGlobCacheEntry const& entry)
 }
 }
 
-Json::Value cmFileAPICMakeFilesDump(cmFileAPI& fileAPI, unsigned long version)
+Json::Value cmFileAPICMakeFilesDump(cmFileAPI& fileAPI, unsigned int version)
 {
   CMakeFiles cmakeFiles(fileAPI, version);
   return cmakeFiles.Dump();
