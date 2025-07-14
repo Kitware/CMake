@@ -357,6 +357,7 @@ The options are:
   Execute the command with the given current working directory.
   If it is a relative path, it will be interpreted relative to the
   build tree directory corresponding to the current source directory.
+  If not specified, set to :variable:`CMAKE_CURRENT_BINARY_DIR`.
 
   This option is currently ignored if ``APPEND`` is given, but a future
   version may use it.

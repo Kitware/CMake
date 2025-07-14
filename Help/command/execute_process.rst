@@ -75,7 +75,8 @@ Options:
 
 ``WORKING_DIRECTORY``
  The named directory will be set as the current working directory of
- the child processes.
+ the child processes. If not given, the child processes' working directory is
+ unspecified.
 
 ``TIMEOUT``
  After the specified number of seconds (fractions allowed), all unfinished
