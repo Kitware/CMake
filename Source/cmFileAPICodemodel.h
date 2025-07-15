@@ -9,4 +9,5 @@
 class cmFileAPI;
 
 extern Json::Value cmFileAPICodemodelDump(cmFileAPI& fileAPI,
-                                          unsigned int version);
+                                          unsigned int majorVersion,
+                                          unsigned int minorVersion);
