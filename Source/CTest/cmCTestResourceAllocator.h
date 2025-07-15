@@ -17,8 +17,15 @@ public:
 
     unsigned int Free() const { return this->Total - this->Locked; }
 
-    bool operator==(Resource const& other) const;
-    bool operator!=(Resource const& other) const;
+    friend bool operator==(Resource left, Resource right)
+    {
+      return left.Total == right.Total && left.Locked == right.Locked;
+    }
+
+    friend bool operator!=(Resource left, Resource right)
+    {
+      return !(left == right);
+    }
   };
 
   void InitializeFromResourceSpec(cmCTestResourceSpec const& spec);
