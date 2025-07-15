@@ -96,7 +96,7 @@ struct cmJSONHelperBuilder
     }
 
     template <typename U, typename M, typename F>
-    Object& Bind(cm::string_view const& name, M U::*member, F func,
+    Object& Bind(cm::string_view name, M U::*member, F func,
                  bool required = true)
     {
       return this->BindPrivate(
@@ -106,7 +106,7 @@ struct cmJSONHelperBuilder
         required);
     }
     template <typename M, typename F>
-    Object& Bind(cm::string_view const& name, std::nullptr_t, F func,
+    Object& Bind(cm::string_view name, std::nullptr_t, F func,
                  bool required = true)
     {
       return this->BindPrivate(
@@ -119,7 +119,7 @@ struct cmJSONHelperBuilder
         required);
     }
     template <typename F>
-    Object& Bind(cm::string_view const& name, F func, bool required = true)
+    Object& Bind(cm::string_view name, F func, bool required = true)
     {
       return this->BindPrivate(name, MemberFunction(func), required);
     }
@@ -197,7 +197,7 @@ struct cmJSONHelperBuilder
     JsonErrors::ObjectErrorGenerator Error;
     bool AllowExtra;
 
-    Object& BindPrivate(cm::string_view const& name, MemberFunction&& func,
+    Object& BindPrivate(cm::string_view name, MemberFunction&& func,
                         bool required)
     {
       this->Members.emplace_back(name, std::move(func), required);

@@ -3296,8 +3296,8 @@ bool cmSystemTools::GuessLibraryInstallName(std::string const& fullPath,
   return false;
 }
 
-static std::string::size_type cmSystemToolsFindRPath(
-  cm::string_view const& have, cm::string_view const& want)
+static std::string::size_type cmSystemToolsFindRPath(cm::string_view have,
+                                                     cm::string_view want)
 {
   std::string::size_type pos = 0;
   while (pos < have.size()) {

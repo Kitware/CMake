@@ -214,7 +214,7 @@ static std::string stripAllGeneratorExpressions(std::string const& input)
 }
 
 static void prefixItems(std::string const& content, std::string& result,
-                        cm::string_view const& prefix)
+                        cm::string_view prefix)
 {
   std::vector<std::string> entries;
   cmGeneratorExpression::Split(content, entries);
@@ -401,8 +401,7 @@ std::string cmGeneratorExpression::Collect(
   return extractAllGeneratorExpressions(input, &collected);
 }
 
-cm::string_view::size_type cmGeneratorExpression::Find(
-  cm::string_view const& input)
+cm::string_view::size_type cmGeneratorExpression::Find(cm::string_view input)
 {
   cm::string_view::size_type const openpos = input.find("$<");
   if (openpos != cm::string_view::npos &&

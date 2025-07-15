@@ -14,11 +14,9 @@ namespace ArgumentParser {
 auto KeywordActionMap::Emplace(cm::string_view name, KeywordAction action)
   -> std::pair<iterator, bool>
 {
-  auto const it =
-    std::lower_bound(this->begin(), this->end(), name,
-                     [](value_type const& elem, cm::string_view const& k) {
-                       return elem.first < k;
-                     });
+  auto const it = std::lower_bound(
+    this->begin(), this->end(), name,
+    [](value_type const& elem, cm::string_view k) { return elem.first < k; });
   return (it != this->end() && it->first == name)
     ? std::make_pair(it, false)
     : std::make_pair(this->emplace(it, name, std::move(action)), true);
@@ -26,11 +24,9 @@ auto KeywordActionMap::Emplace(cm::string_view name, KeywordAction action)
 
 auto KeywordActionMap::Find(cm::string_view name) const -> const_iterator
 {
-  auto const it =
-    std::lower_bound(this->begin(), this->end(), name,
-                     [](value_type const& elem, cm::string_view const& k) {
-                       return elem.first < k;
-                     });
+  auto const it = std::lower_bound(
+    this->begin(), this->end(), name,
+    [](value_type const& elem, cm::string_view k) { return elem.first < k; });
   return (it != this->end() && it->first == name) ? it : this->end();
 }
 
