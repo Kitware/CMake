@@ -230,7 +230,7 @@ std::string cmJoin(std::vector<std::string> const& rng,
   return cmJoinStrings(rng, separator, initial);
 }
 
-std::string cmJoin(cmStringRange const& rng, cm::string_view separator,
+std::string cmJoin(cmStringRange rng, cm::string_view separator,
                    cm::string_view initial)
 {
   return cmJoinStrings(rng, separator, initial);

@@ -48,7 +48,7 @@ public:
   static std::shared_ptr<cmDebuggerVariables> CreateIfAny(
     std::shared_ptr<cmDebuggerVariablesManager> const& variablesManager,
     std::string const& name, bool supportsVariableType,
-    cmBTStringRange const& entries);
+    cmBTStringRange entries);
 
   static std::shared_ptr<cmDebuggerVariables> CreateIfAny(
     std::shared_ptr<cmDebuggerVariablesManager> const& variablesManager,

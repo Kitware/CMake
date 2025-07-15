@@ -236,7 +236,7 @@ ArgumentParser::Continue cmCoreTryCompile::Arguments::SetSourceType(
 }
 
 Arguments cmCoreTryCompile::ParseArgs(
-  cmRange<std::vector<std::string>::const_iterator> const& args,
+  cmRange<std::vector<std::string>::const_iterator> args,
   cmArgumentParser<Arguments> const& parser,
   std::vector<std::string>& unparsedArguments)
 {

@@ -272,7 +272,7 @@ public:
   void InsertPrecompileHeader(BT<std::string> const& entry);
 
   void AppendBuildInterfaceIncludes();
-  void FinalizeTargetConfiguration(cmBTStringRange const& compileDefinitions);
+  void FinalizeTargetConfiguration(cmBTStringRange compileDefinitions);
 
   std::string GetDebugGeneratorExpressions(std::string const& value,
                                            cmTargetLinkLibraryType llt) const;
@@ -281,7 +281,7 @@ public:
   std::set<std::string> const& GetSystemIncludeDirectories() const;
 
   void AddInstallIncludeDirectories(cmTargetExport const& te,
-                                    cmStringRange const& incs);
+                                    cmStringRange incs);
   cmStringRange GetInstallIncludeDirectoriesEntries(
     cmTargetExport const& te) const;
 
