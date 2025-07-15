@@ -29,6 +29,20 @@
 #include "cmTimestamp.h"
 #include "cmake.h"
 
+#if defined(__clang__) && defined(__has_warning)
+#  if __has_warning("-Wrange-loop-analysis")
+#    if defined(__apple_build_version__)
+#      if __apple_build_version__ < 13000000
+#        define CM_CLANG_SUPPRESS_WARN_RANGE_LOOP_ANALYSIS
+#      endif
+#    else
+#      if __clang_major__ < 11
+#        define CM_CLANG_SUPPRESS_WARN_RANGE_LOOP_ANALYSIS
+#      endif
+#    endif
+#  endif
+#endif
+
 cmFileAPI::cmFileAPI(cmake* cm)
   : CMakeInstance(cm)
 {
@@ -89,7 +103,14 @@ std::vector<unsigned int> cmFileAPI::GetConfigureLogVersions()
 {
   std::vector<unsigned int> versions;
   auto getConfigureLogVersions = [&versions](Query const& q) {
-    for (Object const& o : q.Known) {
+#ifdef CM_CLANG_SUPPRESS_WARN_RANGE_LOOP_ANALYSIS
+#  pragma clang diagnostic push
+#  pragma clang diagnostic ignored "-Wrange-loop-analysis"
+#endif
+    for (Object const o : q.Known) {
+#ifdef CM_CLANG_SUPPRESS_WARN_RANGE_LOOP_ANALYSIS
+#  pragma clang diagnostic pop
+#endif
       if (o.Kind == ObjectKind::ConfigureLog) {
         versions.emplace_back(o.Version);
       }
@@ -446,7 +467,14 @@ Json::Value cmFileAPI::BuildCMake()
 Json::Value cmFileAPI::BuildReply(Query const& q)
 {
   Json::Value reply = Json::objectValue;
-  for (Object const& o : q.Known) {
+#ifdef CM_CLANG_SUPPRESS_WARN_RANGE_LOOP_ANALYSIS
+#  pragma clang diagnostic push
+#  pragma clang diagnostic ignored "-Wrange-loop-analysis"
+#endif
+  for (Object const o : q.Known) {
+#ifdef CM_CLANG_SUPPRESS_WARN_RANGE_LOOP_ANALYSIS
+#  pragma clang diagnostic pop
+#endif
     std::string const& name = ObjectName(o);
     reply[name] = this->BuildReplyEntry(o);
   }
@@ -457,7 +485,7 @@ Json::Value cmFileAPI::BuildReply(Query const& q)
   return reply;
 }
 
-Json::Value cmFileAPI::BuildReplyEntry(Object const& object)
+Json::Value cmFileAPI::BuildReplyEntry(Object object)
 {
   if (this->ReplyIndexFor != IndexFor::Success) {
     switch (object.Kind) {
@@ -481,7 +509,7 @@ Json::Value cmFileAPI::BuildReplyError(std::string const& error)
   return e;
 }
 
-Json::Value const& cmFileAPI::AddReplyIndexObject(Object const& o)
+Json::Value const& cmFileAPI::AddReplyIndexObject(Object o)
 {
   Json::Value& indexEntry = this->ReplyIndexObjects[o];
   if (!indexEntry.isNull()) {
@@ -515,7 +543,7 @@ char const* cmFileAPI::ObjectKindName(ObjectKind kind)
   return objectKindNames[static_cast<size_t>(kind)];
 }
 
-std::string cmFileAPI::ObjectName(Object const& o)
+std::string cmFileAPI::ObjectName(Object o)
 {
   std::string name = cmStrCat(ObjectKindName(o.Kind), "-v", o.Version);
   return name;
@@ -529,7 +557,7 @@ Json::Value cmFileAPI::BuildVersion(unsigned int major, unsigned int minor)
   return version;
 }
 
-Json::Value cmFileAPI::BuildObject(Object const& object)
+Json::Value cmFileAPI::BuildObject(Object object)
 {
   Json::Value value;
 
@@ -809,7 +837,7 @@ void cmFileAPI::BuildClientRequestCodeModel(
   }
 }
 
-Json::Value cmFileAPI::BuildCodeModel(Object const& object)
+Json::Value cmFileAPI::BuildCodeModel(Object object)
 {
   assert(object.Version == 2);
   Json::Value codemodel =
@@ -846,7 +874,7 @@ void cmFileAPI::BuildClientRequestConfigureLog(
   }
 }
 
-Json::Value cmFileAPI::BuildConfigureLog(Object const& object)
+Json::Value cmFileAPI::BuildConfigureLog(Object object)
 {
   Json::Value configureLog = cmFileAPIConfigureLogDump(*this, object.Version);
   configureLog["kind"] = this->ObjectKindName(object.Kind);
@@ -880,7 +908,7 @@ void cmFileAPI::BuildClientRequestCache(
   }
 }
 
-Json::Value cmFileAPI::BuildCache(Object const& object)
+Json::Value cmFileAPI::BuildCache(Object object)
 {
   Json::Value cache = cmFileAPICacheDump(*this, object.Version);
   cache["kind"] = this->ObjectKindName(object.Kind);
@@ -914,7 +942,7 @@ void cmFileAPI::BuildClientRequestCMakeFiles(
   }
 }
 
-Json::Value cmFileAPI::BuildCMakeFiles(Object const& object)
+Json::Value cmFileAPI::BuildCMakeFiles(Object object)
 {
   Json::Value cmakeFiles = cmFileAPICMakeFilesDump(*this, object.Version);
   cmakeFiles["kind"] = this->ObjectKindName(object.Kind);
@@ -948,7 +976,7 @@ void cmFileAPI::BuildClientRequestToolchains(
   }
 }
 
-Json::Value cmFileAPI::BuildToolchains(Object const& object)
+Json::Value cmFileAPI::BuildToolchains(Object object)
 {
   Json::Value toolchains = cmFileAPIToolchainsDump(*this, object.Version);
   toolchains["kind"] = this->ObjectKindName(object.Kind);
@@ -984,7 +1012,7 @@ void cmFileAPI::BuildClientRequestInternalTest(
   }
 }
 
-Json::Value cmFileAPI::BuildInternalTest(Object const& object)
+Json::Value cmFileAPI::BuildInternalTest(Object object)
 {
   Json::Value test = Json::objectValue;
   test["kind"] = this->ObjectKindName(object.Kind);

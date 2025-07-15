@@ -87,21 +87,18 @@ private:
   {
     ObjectKind Kind;
     unsigned int Version = 0;
-    friend bool operator<(Object const& l, Object const& r)
+    friend bool operator<(Object l, Object r)
     {
       if (l.Kind != r.Kind) {
         return l.Kind < r.Kind;
       }
       return l.Version < r.Version;
     }
-    friend bool operator==(Object const& l, Object const& r)
+    friend bool operator==(Object l, Object r)
     {
       return l.Kind == r.Kind && l.Version == r.Version;
     }
-    friend bool operator!=(Object const& l, Object const& r)
-    {
-      return !(l == r);
-    }
+    friend bool operator!=(Object l, Object r) { return !(l == r); }
   };
 
   /** Represent content of a query directory.  */
@@ -192,14 +189,14 @@ private:
   Json::Value BuildReplyIndex();
   Json::Value BuildCMake();
   Json::Value BuildReply(Query const& q);
-  Json::Value BuildReplyEntry(Object const& object);
+  Json::Value BuildReplyEntry(Object object);
   static Json::Value BuildReplyError(std::string const& error);
-  Json::Value const& AddReplyIndexObject(Object const& o);
+  Json::Value const& AddReplyIndexObject(Object o);
 
   static char const* ObjectKindName(ObjectKind kind);
-  static std::string ObjectName(Object const& o);
+  static std::string ObjectName(Object o);
 
-  Json::Value BuildObject(Object const& object);
+  Json::Value BuildObject(Object object);
 
   ClientRequests BuildClientRequests(Json::Value const& requests);
   ClientRequest BuildClientRequest(Json::Value const& request);
@@ -223,25 +220,25 @@ private:
 
   void BuildClientRequestCodeModel(
     ClientRequest& r, std::vector<RequestVersion> const& versions);
-  Json::Value BuildCodeModel(Object const& object);
+  Json::Value BuildCodeModel(Object object);
 
   void BuildClientRequestConfigureLog(
     ClientRequest& r, std::vector<RequestVersion> const& versions);
-  Json::Value BuildConfigureLog(Object const& object);
+  Json::Value BuildConfigureLog(Object object);
 
   void BuildClientRequestCache(ClientRequest& r,
                                std::vector<RequestVersion> const& versions);
-  Json::Value BuildCache(Object const& object);
+  Json::Value BuildCache(Object object);
 
   void BuildClientRequestCMakeFiles(
     ClientRequest& r, std::vector<RequestVersion> const& versions);
-  Json::Value BuildCMakeFiles(Object const& object);
+  Json::Value BuildCMakeFiles(Object object);
 
   void BuildClientRequestToolchains(
     ClientRequest& r, std::vector<RequestVersion> const& versions);
-  Json::Value BuildToolchains(Object const& object);
+  Json::Value BuildToolchains(Object object);
 
   void BuildClientRequestInternalTest(
     ClientRequest& r, std::vector<RequestVersion> const& versions);
-  Json::Value BuildInternalTest(Object const& object);
+  Json::Value BuildInternalTest(Object object);
 };
