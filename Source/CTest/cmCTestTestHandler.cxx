@@ -530,7 +530,7 @@ bool cmCTestTestHandler::ProcessOptions()
 
 void cmCTestTestHandler::LogTestSummary(std::vector<std::string> const& passed,
                                         std::vector<std::string> const& failed,
-                                        cmDuration const& durationInSecs)
+                                        cmDuration durationInSecs)
 {
   std::size_t total = passed.size() + failed.size();
 

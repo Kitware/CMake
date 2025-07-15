@@ -542,7 +542,7 @@ std::string cmStandardLevelResolver::GetEffectiveStandard(
 }
 
 std::string cmStandardLevelResolver::GetLevelString(
-  std::string const& lang, cmStandardLevel const& level) const
+  std::string const& lang, cmStandardLevel level) const
 {
   auto mapping = StandardComputerMapping.find(lang);
   if (mapping == StandardComputerMapping.end()) {

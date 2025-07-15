@@ -29,7 +29,7 @@
 
 namespace {
 
-inline int runTests(std::initializer_list<std::function<bool()>> const& tests,
+inline int runTests(std::initializer_list<std::function<bool()>> tests,
                     bool const fail_fast = true)
 {
   int result = 0;

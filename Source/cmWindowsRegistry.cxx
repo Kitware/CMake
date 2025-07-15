@@ -524,7 +524,7 @@ namespace std {
 template <>
 struct hash<cmWindowsRegistry::View>
 {
-  size_t operator()(cmWindowsRegistry::View const& v) const noexcept
+  size_t operator()(cmWindowsRegistry::View v) const noexcept
   {
     return static_cast<
       typename underlying_type<cmWindowsRegistry::View>::type>(v);

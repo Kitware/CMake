@@ -702,7 +702,7 @@ bool CheckPathParametersEx(cmGeneratorExpressionContext* ctx,
 }
 bool CheckPathParameters(cmGeneratorExpressionContext* ctx,
                          GeneratorExpressionContent const* cnt,
-                         cm::string_view option, Arguments const& args,
+                         cm::string_view option, Arguments args,
                          int required = 1)
 {
   return CheckPathParametersEx(ctx, cnt, option, args.size(), required);
@@ -1190,7 +1190,7 @@ inline bool CheckListParametersEx(cmGeneratorExpressionContext* ctx,
 }
 inline bool CheckListParameters(cmGeneratorExpressionContext* ctx,
                                 GeneratorExpressionContent const* cnt,
-                                cm::string_view option, Arguments const& args,
+                                cm::string_view option, Arguments args,
                                 int required = 1)
 {
   return CheckListParametersEx(ctx, cnt, option, args.size(), required);
@@ -1225,7 +1225,7 @@ bool GetNumericArgument(std::string const& arg, cmList::index_type& value)
 
 bool GetNumericArguments(
   cmGeneratorExpressionContext* ctx, GeneratorExpressionContent const* cnt,
-  Arguments const& args, std::vector<cmList::index_type>& indexes,
+  Arguments args, std::vector<cmList::index_type>& indexes,
   cmList::ExpandElements expandElements = cmList::ExpandElements::No)
 {
   using IndexRange = cmRange<Arguments::const_iterator>;

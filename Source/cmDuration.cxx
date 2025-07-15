@@ -4,7 +4,7 @@
 #include "cmDuration.h"
 
 template <typename T>
-T cmDurationTo(cmDuration const& duration)
+T cmDurationTo(cmDuration duration)
 {
   /* This works because the comparison operators for duration rely on
    * std::common_type.
@@ -23,5 +23,5 @@ T cmDurationTo(cmDuration const& duration)
     .count();
 }
 
-template int cmDurationTo<int>(cmDuration const&);
-template unsigned int cmDurationTo<unsigned int>(cmDuration const&);
+template int cmDurationTo<int>(cmDuration);
+template unsigned int cmDurationTo<unsigned int>(cmDuration);

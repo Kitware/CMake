@@ -93,7 +93,7 @@ public:
 
   cmQtAutoGenInitializer(cmQtAutoGenGlobalInitializer* globalInitializer,
                          cmGeneratorTarget* genTarget,
-                         IntegerVersion const& qtVersion, bool mocEnabled,
+                         IntegerVersion qtVersion, bool mocEnabled,
                          bool uicEnabled, bool rccEnabled,
                          bool globalAutogenTarget, bool globalAutoRccTarget);
 

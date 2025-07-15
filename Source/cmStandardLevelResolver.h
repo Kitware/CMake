@@ -30,7 +30,7 @@ public:
                                    std::string const& config) const;
 
   std::string GetLevelString(std::string const& lang,
-                             cmStandardLevel const& level) const;
+                             cmStandardLevel level) const;
 
   bool AddRequiredTargetFeature(cmTarget* target, std::string const& feature,
                                 std::string* error = nullptr) const;

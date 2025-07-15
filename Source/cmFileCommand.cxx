@@ -3848,7 +3848,7 @@ bool ValidateAndConvertPermissions(
   return true;
 }
 
-bool SetPermissions(std::string const& filename, mode_t const& perms,
+bool SetPermissions(std::string const& filename, mode_t perms,
                     cmExecutionStatus& status)
 {
   if (!cmSystemTools::SetPermissions(filename, perms)) {
@@ -3953,8 +3953,7 @@ bool HandleChmodCommandImpl(std::vector<std::string> const& args, bool recurse,
 
     if (cmSystemTools::FileExists(i, true)) {
       bool success = true;
-      mode_t const& filePermissions =
-        parsedArgs.FilePermissions ? fperms : perms;
+      mode_t filePermissions = parsedArgs.FilePermissions ? fperms : perms;
       if (filePermissions) {
         success = SetPermissions(i, filePermissions, status);
       }
@@ -3965,7 +3964,7 @@ bool HandleChmodCommandImpl(std::vector<std::string> const& args, bool recurse,
 
     else if (cmSystemTools::FileIsDirectory(i)) {
       bool success = true;
-      mode_t const& directoryPermissions =
+      mode_t directoryPermissions =
         parsedArgs.DirectoryPermissions ? dperms : perms;
       if (directoryPermissions) {
         success = SetPermissions(i, directoryPermissions, status);

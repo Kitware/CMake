@@ -388,8 +388,8 @@ public:
 
 #ifndef CMAKE_BOOTSTRAP
   void SetWarningFromPreset(std::string const& name,
-                            cm::optional<bool> const& warning,
-                            cm::optional<bool> const& error);
+                            cm::optional<bool> warning,
+                            cm::optional<bool> error);
   void ProcessPresetVariables();
   void PrintPresetVariables();
   void ProcessPresetEnvironment();

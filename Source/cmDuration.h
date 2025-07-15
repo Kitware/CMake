@@ -16,9 +16,9 @@ using cmDuration = std::chrono::duration<double, std::ratio<1>>;
  * the permissible valid values for T.
  */
 template <typename T>
-T cmDurationTo(cmDuration const& duration);
+T cmDurationTo(cmDuration duration);
 
 #ifndef CMDURATION_CPP
-extern template int cmDurationTo<int>(cmDuration const&);
-extern template unsigned int cmDurationTo<unsigned int>(cmDuration const&);
+extern template int cmDurationTo<int>(cmDuration);
+extern template unsigned int cmDurationTo<unsigned int>(cmDuration);
 #endif

@@ -34,7 +34,7 @@ public:
   // create a framework at a given root
   void CreateFramework(std::string const& targetName, std::string const& root,
                        std::string const& config,
-                       SkipParts const& skipParts = SkipParts{});
+                       SkipParts skipParts = SkipParts{});
 
   // create a cf bundle at a given root
   void CreateCFBundle(std::string const& targetName, std::string const& root,

@@ -394,7 +394,7 @@ void cmDebuggerAdapter::OnBeginFunctionCall(cmMakefile* mf,
     dap::array<dap::integer> hitBreakpoints;
     hitBreakpoints.resize(hits.size());
     std::transform(hits.begin(), hits.end(), hitBreakpoints.begin(),
-                   [&](int64_t const& id) { return dap::integer(id); });
+                   [&](int64_t id) { return dap::integer(id); });
     stoppedEvent.reason = "breakpoint";
     stoppedEvent.hitBreakpointIds = hitBreakpoints;
   }

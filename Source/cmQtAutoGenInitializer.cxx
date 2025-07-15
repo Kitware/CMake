@@ -325,8 +325,8 @@ cmQtAutoGen::ConfigStrings<std::vector<std::string>> generateListOptions(
 
 cmQtAutoGenInitializer::cmQtAutoGenInitializer(
   cmQtAutoGenGlobalInitializer* globalInitializer,
-  cmGeneratorTarget* genTarget, IntegerVersion const& qtVersion,
-  bool mocEnabled, bool uicEnabled, bool rccEnabled, bool globalAutogenTarget,
+  cmGeneratorTarget* genTarget, IntegerVersion qtVersion, bool mocEnabled,
+  bool uicEnabled, bool rccEnabled, bool globalAutogenTarget,
   bool globalAutoRccTarget)
   : GlobalInitializer(globalInitializer)
   , GenTarget(genTarget)

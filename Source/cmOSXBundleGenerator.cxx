@@ -58,7 +58,7 @@ void cmOSXBundleGenerator::CreateAppBundle(std::string const& targetName,
 
 void cmOSXBundleGenerator::CreateFramework(
   std::string const& targetName, std::string const& outpath,
-  std::string const& config, cmOSXBundleGenerator::SkipParts const& skipParts)
+  std::string const& config, cmOSXBundleGenerator::SkipParts skipParts)
 {
   if (this->MustSkip()) {
     return;

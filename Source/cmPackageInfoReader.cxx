@@ -180,7 +180,7 @@ std::string DeterminePrefix(std::string const& filepath,
 }
 
 // Extract key name from value iterator as string_view.
-cm::string_view IterKey(Json::Value::const_iterator const& iter)
+cm::string_view IterKey(Json::Value::const_iterator iter)
 {
   char const* end;
   char const* const start = iter.memberName(&end);
