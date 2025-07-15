@@ -463,7 +463,7 @@ std::string cmCommonTargetGenerator::GenerateCodeCheckRules(
           this->GlobalCommonGenerator->AddClangTidyExportFixesFile(fixesFile);
           cmSystemTools::MakeDirectory(
             cmSystemTools::GetFilenamePath(fixesFile));
-          if (!pathConverter) {
+          if (pathConverter) {
             fixesFile = pathConverter(fixesFile);
           }
           exportFixes = cmStrCat(";--export-fixes=", fixesFile);
