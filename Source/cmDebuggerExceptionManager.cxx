@@ -25,8 +25,7 @@ cmDebuggerExceptionManager::cmDebuggerExceptionManager(
     });
 
   // https://microsoft.github.io/debug-adapter-protocol/specification#Requests_ExceptionInfo
-  DapSession->registerHandler([&](dap::ExceptionInfoRequest const& request) {
-    (void)request;
+  DapSession->registerHandler([&](dap::ExceptionInfoRequest /*unused*/) {
     return HandleExceptionInfoRequest();
   });
 

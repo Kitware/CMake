@@ -164,8 +164,7 @@ cmDebuggerAdapter::cmDebuggerAdapter(
     });
 
   // https://microsoft.github.io/debug-adapter-protocol/specification#Requests_Threads
-  Session->registerHandler([this](dap::ThreadsRequest const& req) {
-    (void)req;
+  Session->registerHandler([this](dap::ThreadsRequest /*unused*/) {
     std::unique_lock<std::mutex> lock(Mutex);
     dap::ThreadsResponse response;
 
@@ -196,7 +195,7 @@ cmDebuggerAdapter::cmDebuggerAdapter(
   });
 
   // https://microsoft.github.io/debug-adapter-protocol/specification#Requests_Scopes
-  Session->registerHandler([this](dap::ScopesRequest const& request)
+  Session->registerHandler([this](dap::ScopesRequest request)
                              -> dap::ResponseOrError<dap::ScopesResponse> {
     std::unique_lock<std::mutex> lock(Mutex);
     return DefaultThread->GetScopesResponse(request.frameId,
@@ -210,8 +209,7 @@ cmDebuggerAdapter::cmDebuggerAdapter(
   });
 
   // https://microsoft.github.io/debug-adapter-protocol/specification#Requests_Pause
-  Session->registerHandler([this](dap::PauseRequest const& req) {
-    (void)req;
+  Session->registerHandler([this](dap::PauseRequest /*unused*/) {
     PauseRequest.store(true);
     return dap::PauseResponse();
   });
@@ -286,8 +284,7 @@ cmDebuggerAdapter::cmDebuggerAdapter(
   // The ConfigurationDone request is made by the client once all configuration
   // requests have been made.
   // https://microsoft.github.io/debug-adapter-protocol/specification#Requests_ConfigurationDone
-  Session->registerHandler([this](dap::ConfigurationDoneRequest const& req) {
-    (void)req;
+  Session->registerHandler([this](dap::ConfigurationDoneRequest /*unused*/) {
     ConfigurationDoneEvent->Fire();
     return dap::ConfigurationDoneResponse();
   });
