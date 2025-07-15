@@ -2167,7 +2167,7 @@ cmGlobalGenerator::GenerateBuildCommand(
   std::string const& /*unused*/, std::string const& /*unused*/,
   std::string const& /*unused*/, std::vector<std::string> const& /*unused*/,
   std::string const& /*unused*/, int /*unused*/, bool /*unused*/,
-  cmBuildOptions const& /*unused*/, std::vector<std::string> const& /*unused*/)
+  cmBuildOptions /*unused*/, std::vector<std::string> const& /*unused*/)
 {
   GeneratedMakeCommand makeCommand;
   makeCommand.Add("cmGlobalGenerator::GenerateBuildCommand not implemented");
@@ -2185,7 +2185,7 @@ int cmGlobalGenerator::Build(
   int jobs, std::string const& /*unused*/, std::string const& bindir,
   std::string const& projectName, std::vector<std::string> const& targets,
   std::ostream& ostr, std::string const& makeCommandCSTR,
-  std::string const& config, cmBuildOptions const& buildOptions, bool verbose,
+  std::string const& config, cmBuildOptions buildOptions, bool verbose,
   cmDuration timeout, cmSystemTools::OutputOption outputMode,
   std::vector<std::string> const& nativeOptions)
 {

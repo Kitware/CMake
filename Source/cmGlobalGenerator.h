@@ -254,8 +254,8 @@ public:
             std::string const& projectName,
             std::vector<std::string> const& targetNames, std::ostream& ostr,
             std::string const& makeProgram, std::string const& config,
-            cmBuildOptions const& buildOptions, bool verbose,
-            cmDuration timeout, cmSystemTools::OutputOption outputMode,
+            cmBuildOptions buildOptions, bool verbose, cmDuration timeout,
+            cmSystemTools::OutputOption outputMode,
             std::vector<std::string> const& nativeOptions =
               std::vector<std::string>());
 
@@ -273,7 +273,7 @@ public:
     std::string const& makeProgram, std::string const& projectName,
     std::string const& projectDir, std::vector<std::string> const& targetNames,
     std::string const& config, int jobs, bool verbose,
-    cmBuildOptions const& buildOptions = cmBuildOptions(),
+    cmBuildOptions buildOptions = cmBuildOptions(),
     std::vector<std::string> const& makeOptions = std::vector<std::string>());
 
   virtual void PrintBuildCommandAdvice(std::ostream& os, int jobs) const;
