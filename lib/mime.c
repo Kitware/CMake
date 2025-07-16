@@ -32,6 +32,7 @@ struct Curl_easy;
 #include "curlx/warnless.h"
 #include "urldata.h"
 #include "sendf.h"
+#include "transfer.h"
 #include "strdup.h"
 #include "curlx/base64.h"
 
@@ -45,7 +46,6 @@ struct Curl_easy;
 
 #include "rand.h"
 #include "slist.h"
-#include "strcase.h"
 #include "curlx/dynbuf.h"
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -67,12 +67,12 @@ static size_t mime_subparts_read(char *buffer, size_t size, size_t nitems,
 
 /* Encoders. */
 static size_t encoder_nop_read(char *buffer, size_t size, bool ateof,
-                                curl_mimepart *part);
+                               curl_mimepart *part);
 static curl_off_t encoder_nop_size(curl_mimepart *part);
 static size_t encoder_7bit_read(char *buffer, size_t size, bool ateof,
                                 curl_mimepart *part);
 static size_t encoder_base64_read(char *buffer, size_t size, bool ateof,
-                                curl_mimepart *part);
+                                  curl_mimepart *part);
 static curl_off_t encoder_base64_size(curl_mimepart *part);
 static size_t encoder_qp_read(char *buffer, size_t size, bool ateof,
                               curl_mimepart *part);
@@ -335,7 +335,7 @@ static char *match_header(struct curl_slist *hdr, const char *lbl, size_t len)
 {
   char *value = NULL;
 
-  if(strncasecompare(hdr->data, lbl, len) && hdr->data[len] == ':')
+  if(curl_strnequal(hdr->data, lbl, len) && hdr->data[len] == ':')
     for(value = hdr->data + len + 1; *value == ' '; value++)
       ;
   return value;
@@ -433,7 +433,7 @@ static size_t encoder_7bit_read(char *buffer, size_t size, bool ateof,
 
 /* Base64 content encoder. */
 static size_t encoder_base64_read(char *buffer, size_t size, bool ateof,
-                                curl_mimepart *part)
+                                  curl_mimepart *part)
 {
   struct mime_encoder_state *st = &part->encstate;
   size_t cursize = 0;
@@ -1478,7 +1478,7 @@ CURLcode curl_mime_encoder(curl_mimepart *part, const char *encoding)
     return CURLE_OK;    /* Removing current encoder. */
 
   for(mep = encoders; mep->name; mep++)
-    if(strcasecompare(encoding, mep->name)) {
+    if(curl_strequal(encoding, mep->name)) {
       part->encoder = mep;
       result = CURLE_OK;
     }
@@ -1742,7 +1742,7 @@ const char *Curl_mime_contenttype(const char *filename)
     for(i = 0; i < CURL_ARRAYSIZE(ctts); i++) {
       size_t len2 = strlen(ctts[i].extension);
 
-      if(len1 >= len2 && strcasecompare(nameend - len2, ctts[i].extension))
+      if(len1 >= len2 && curl_strequal(nameend - len2, ctts[i].extension))
         return ctts[i].type;
     }
   }
@@ -1752,7 +1752,7 @@ const char *Curl_mime_contenttype(const char *filename)
 static bool content_type_match(const char *contenttype,
                                const char *target, size_t len)
 {
-  if(contenttype && strncasecompare(contenttype, target, len))
+  if(contenttype && curl_strnequal(contenttype, target, len))
     switch(contenttype[len]) {
     case '\0':
     case '\t':
@@ -1825,7 +1825,7 @@ CURLcode Curl_mime_prepare_headers(struct Curl_easy *data,
   if(!search_header(part->userheaders, STRCONST("Content-Disposition"))) {
     if(!disposition)
       if(part->filename || part->name ||
-        (contenttype && !strncasecompare(contenttype, "multipart/", 10)))
+        (contenttype && !curl_strnequal(contenttype, "multipart/", 10)))
           disposition = DISPOSITION_DEFAULT;
     if(disposition && curl_strequal(disposition, "attachment") &&
      !part->name && !part->filename)
@@ -1962,6 +1962,7 @@ static CURLcode cr_mime_read(struct Curl_easy *data,
                              size_t *pnread, bool *peos)
 {
   struct cr_mime_ctx *ctx = reader->ctx;
+  CURLcode result = CURLE_OK;
   size_t nread;
   char tmp[256];
 
@@ -1990,15 +1991,12 @@ static CURLcode cr_mime_read(struct Curl_easy *data,
   }
 
   if(!Curl_bufq_is_empty(&ctx->tmpbuf)) {
-    CURLcode result = CURLE_OK;
-    ssize_t n = Curl_bufq_read(&ctx->tmpbuf, (unsigned char *)buf, blen,
-                               &result);
-    if(n < 0) {
+    result = Curl_bufq_read(&ctx->tmpbuf, (unsigned char *)buf, blen, &nread);
+    if(result) {
       ctx->errored = TRUE;
       ctx->error_result = result;
       return result;
     }
-    nread = (size_t)n;
   }
   else if(blen <= 4) {
     /* Curl_mime_read() may go into an infinite loop when reading
@@ -2008,22 +2006,20 @@ static CURLcode cr_mime_read(struct Curl_easy *data,
     CURL_TRC_READ(data, "cr_mime_read(len=%zu), small read, using tmp", blen);
     nread = Curl_mime_read(tmp, 1, sizeof(tmp), ctx->part);
     if(nread <= sizeof(tmp)) {
-      CURLcode result = CURLE_OK;
-      ssize_t n = Curl_bufq_write(&ctx->tmpbuf, (unsigned char *)tmp, nread,
-                                  &result);
-      if(n < 0) {
+      size_t n;
+      result = Curl_bufq_write(&ctx->tmpbuf, (unsigned char *)tmp, nread, &n);
+      if(result) {
         ctx->errored = TRUE;
         ctx->error_result = result;
         return result;
       }
       /* stored it, read again */
-      n = Curl_bufq_read(&ctx->tmpbuf, (unsigned char *)buf, blen, &result);
-      if(n < 0) {
+      result = Curl_bufq_cread(&ctx->tmpbuf, buf, blen, &nread);
+      if(result) {
         ctx->errored = TRUE;
         ctx->error_result = result;
         return result;
       }
-      nread = (size_t)n;
     }
   }
   else
@@ -2051,14 +2047,15 @@ static CURLcode cr_mime_read(struct Curl_easy *data,
     *peos = FALSE;
     ctx->errored = TRUE;
     ctx->error_result = CURLE_ABORTED_BY_CALLBACK;
-    return CURLE_ABORTED_BY_CALLBACK;
+    result = CURLE_ABORTED_BY_CALLBACK;
+    break;
 
   case CURL_READFUNC_PAUSE:
     /* CURL_READFUNC_PAUSE pauses read callbacks that feed socket writes */
     CURL_TRC_READ(data, "cr_mime_read(len=%zu), paused by callback", blen);
-    data->req.keepon |= KEEP_SEND_PAUSE; /* mark socket send as paused */
     *pnread = 0;
     *peos = FALSE;
+    result = Curl_xfer_pause_send(data, TRUE);
     break; /* nothing was read */
 
   case STOP_FILLING:
@@ -2068,7 +2065,8 @@ static CURLcode cr_mime_read(struct Curl_easy *data,
     *peos = FALSE;
     ctx->errored = TRUE;
     ctx->error_result = CURLE_READ_ERROR;
-    return CURLE_READ_ERROR;
+    result = CURLE_READ_ERROR;
+    break;
 
   default:
     if(nread > blen) {
@@ -2090,8 +2088,8 @@ static CURLcode cr_mime_read(struct Curl_easy *data,
 
   CURL_TRC_READ(data, "cr_mime_read(len=%zu, total=%" FMT_OFF_T
                 ", read=%"FMT_OFF_T") -> %d, %zu, %d",
-                blen, ctx->total_len, ctx->read_len, CURLE_OK, *pnread, *peos);
-  return CURLE_OK;
+                blen, ctx->total_len, ctx->read_len, result, *pnread, *peos);
+  return result;
 }
 
 static bool cr_mime_needs_rewind(struct Curl_easy *data,

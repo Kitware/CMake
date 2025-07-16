@@ -55,13 +55,13 @@
 #endif
 
 #include "urldata.h"
+#include "cfilters.h"
 #include "sendf.h"
 #include "hostip.h"
 #include "hash.h"
 #include "share.h"
 #include "url.h"
 #include "multiif.h"
-#include "inet_ntop.h"
 #include "curl_threads.h"
 #include "strdup.h"
 
@@ -423,6 +423,7 @@ static bool async_thrdd_init(struct Curl_easy *data,
   data->state.async.done = FALSE;
   data->state.async.port = port;
   data->state.async.ip_version = ip_version;
+  free(data->state.async.hostname);
   data->state.async.hostname = strdup(hostname);
   if(!data->state.async.hostname)
     goto err_exit;
@@ -741,7 +742,8 @@ struct Curl_addrinfo *Curl_async_getaddrinfo(struct Curl_easy *data,
 
   memset(&hints, 0, sizeof(hints));
   hints.ai_family = pf;
-  hints.ai_socktype = (data->conn->transport == TRNSPRT_TCP) ?
+  hints.ai_socktype =
+    (Curl_conn_get_transport(data, data->conn) == TRNSPRT_TCP) ?
     SOCK_STREAM : SOCK_DGRAM;
 
   /* fire up a new resolver thread! */

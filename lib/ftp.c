@@ -60,7 +60,7 @@
 #include "cf-socket.h"
 #include "connect.h"
 #include "strerror.h"
-#include "inet_ntop.h"
+#include "curlx/inet_ntop.h"
 #include "curlx/inet_pton.h"
 #include "select.h"
 #include "parsedate.h" /* for the week day and month names */
@@ -114,12 +114,14 @@ static const char * const ftp_state_names[]={
   "QUOTE",
   "RETR_PREQUOTE",
   "STOR_PREQUOTE",
+  "LIST_PREQUOTE",
   "POSTQUOTE",
   "CWD",
   "MKD",
   "MDTM",
   "TYPE",
   "LIST_TYPE",
+  "RETR_LIST_TYPE",
   "RETR_TYPE",
   "STOR_TYPE",
   "SIZE",
@@ -765,7 +767,12 @@ static CURLcode ftp_state_user(struct Curl_easy *data,
 static CURLcode ftp_state_pwd(struct Curl_easy *data,
                               struct ftp_conn *ftpc)
 {
-  CURLcode result = Curl_pp_sendf(data, &ftpc->pp, "%s", "PWD");
+  CURLcode result;
+#ifdef DEBUGBUILD
+  if(!data->id && getenv("CURL_FTP_PWD_STOP"))
+    return CURLE_OK;
+#endif
+  result = Curl_pp_sendf(data, &ftpc->pp, "%s", "PWD");
   if(!result)
     ftp_state(data, ftpc, FTP_PWD);
 
@@ -978,6 +985,12 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
       port_min = port_max = 0;
 
     if(addrlen) {
+      const struct Curl_sockaddr_ex *remote_addr =
+       Curl_conn_get_remote_addr(data, FIRSTSOCKET);
+
+      DEBUGASSERT(remote_addr);
+      if(!remote_addr)
+        goto out;
       DEBUGASSERT(addr);
       if(addrlen >= sizeof(ipstr))
         goto out;
@@ -985,9 +998,9 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
       ipstr[addrlen] = 0;
 
       /* attempt to get the address of the given interface name */
-      switch(Curl_if2ip(conn->remote_addr->family,
+      switch(Curl_if2ip(remote_addr->family,
 #ifdef USE_IPV6
-                        Curl_ipv6_scope(&conn->remote_addr->curl_sa_addr),
+                        Curl_ipv6_scope(&remote_addr->curl_sa_addr),
                         conn->scope_id,
 #endif
                         ipstr, hbuf, sizeof(hbuf))) {
@@ -1020,11 +1033,11 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
     switch(sa->sa_family) {
 #ifdef USE_IPV6
     case AF_INET6:
-      r = Curl_inet_ntop(sa->sa_family, &sa6->sin6_addr, hbuf, sizeof(hbuf));
+      r = curlx_inet_ntop(sa->sa_family, &sa6->sin6_addr, hbuf, sizeof(hbuf));
       break;
 #endif
     default:
-      r = Curl_inet_ntop(sa->sa_family, &sa4->sin_addr, hbuf, sizeof(hbuf));
+      r = curlx_inet_ntop(sa->sa_family, &sa4->sin_addr, hbuf, sizeof(hbuf));
       break;
     }
     if(!r) {
@@ -1052,7 +1065,8 @@ static CURLcode ftp_state_use_port(struct Curl_easy *data,
   /* step 2, create a socket for the requested address */
   error = 0;
   for(ai = res; ai; ai = ai->ai_next) {
-    if(Curl_socket_open(data, ai, NULL, conn->transport, &portsock)) {
+    if(Curl_socket_open(data, ai, NULL,
+                        Curl_conn_get_transport(data, conn), &portsock)) {
       error = SOCKERRNO;
       continue;
     }
@@ -1245,7 +1259,7 @@ out:
     }
     data->conn->bits.do_more = FALSE;
     Curl_pgrsTime(data, TIMER_STARTACCEPT);
-    Curl_expire(data, data->set.accepttimeout ?
+    Curl_expire(data, (data->set.accepttimeout > 0) ?
                 data->set.accepttimeout: DEFAULT_ACCEPT_TIMEOUT,
                 EXPIRE_FTP_ACCEPT);
   }
@@ -1448,6 +1462,14 @@ static CURLcode ftp_state_list(struct Curl_easy *data,
   return result;
 }
 
+static CURLcode ftp_state_list_prequote(struct Curl_easy *data,
+                                        struct ftp_conn *ftpc,
+                                        struct FTP *ftp)
+{
+  /* We have sent the TYPE, now we must send the list of prequote strings */
+  return ftp_state_quote(data, ftpc, ftp, TRUE, FTP_LIST_PREQUOTE);
+}
+
 static CURLcode ftp_state_retr_prequote(struct Curl_easy *data,
                                         struct ftp_conn *ftpc,
                                         struct FTP *ftp)
@@ -1636,6 +1658,7 @@ static CURLcode ftp_state_quote(struct Curl_easy *data,
     break;
   case FTP_RETR_PREQUOTE:
   case FTP_STOR_PREQUOTE:
+  case FTP_LIST_PREQUOTE:
     item = data->set.prequote;
     break;
   case FTP_POSTQUOTE:
@@ -1724,6 +1747,10 @@ static CURLcode ftp_state_quote(struct Curl_easy *data,
       result = ftp_state_ul_setup(data, ftpc, ftp, FALSE);
       break;
     case FTP_POSTQUOTE:
+      break;
+    case FTP_LIST_PREQUOTE:
+      ftp_state(data, ftpc, FTP_LIST_TYPE);
+      result = ftp_state_list(data, ftpc, ftp);
       break;
     }
   }
@@ -2198,6 +2225,8 @@ static CURLcode ftp_state_type_resp(struct Curl_easy *data,
     result = ftp_state_retr_prequote(data, ftpc, ftp);
   else if(instate == FTP_STOR_TYPE)
     result = ftp_state_stor_prequote(data, ftpc, ftp);
+  else if(instate == FTP_RETR_LIST_TYPE)
+    result = ftp_state_list_prequote(data, ftpc, ftp);
 
   return result;
 }
@@ -2961,7 +2990,7 @@ static CURLcode ftp_pp_statemachine(struct Curl_easy *data,
           return CURLE_OUT_OF_MEMORY;
 
         /* Check for special servers here. */
-        if(strcasecompare(os, "OS/400")) {
+        if(curl_strequal(os, "OS/400")) {
           /* Force OS400 name format 1. */
           result = Curl_pp_sendf(data, &ftpc->pp, "%s", "SITE NAMEFMT 1");
           if(result) {
@@ -3002,6 +3031,7 @@ static CURLcode ftp_pp_statemachine(struct Curl_easy *data,
     case FTP_POSTQUOTE:
     case FTP_RETR_PREQUOTE:
     case FTP_STOR_PREQUOTE:
+    case FTP_LIST_PREQUOTE:
       if((ftpcode >= 400) && !ftpc->count2) {
         /* failure response code, and not allowed to fail */
         failf(data, "QUOT command failed with %03d", ftpcode);
@@ -3071,6 +3101,7 @@ static CURLcode ftp_pp_statemachine(struct Curl_easy *data,
     case FTP_LIST_TYPE:
     case FTP_RETR_TYPE:
     case FTP_STOR_TYPE:
+    case FTP_RETR_LIST_TYPE:
       result = ftp_state_type_resp(data, ftpc, ftp, ftpcode, ftpc->state);
       break;
 
@@ -3125,8 +3156,8 @@ static CURLcode ftp_pp_statemachine(struct Curl_easy *data,
 
 /* called repeatedly until done from multi.c */
 static CURLcode ftp_statemach(struct Curl_easy *data,
-                               struct ftp_conn *ftpc,
-                               bool *done)
+                              struct ftp_conn *ftpc,
+                              bool *done)
 {
   CURLcode result = Curl_pp_statemach(data, &ftpc->pp, FALSE, FALSE);
 
@@ -3675,7 +3706,8 @@ static CURLcode ftp_do_more(struct Curl_easy *data, int *completep)
 
       if(result)
         ;
-      else if(data->state.list_only || !ftpc->file) {
+      else if((data->state.list_only || !ftpc->file) &&
+              !(data->set.prequote)) {
         /* The specified path ends with a slash, and therefore we think this
            is a directory that is requested, use LIST. But before that we
            need to set ASCII transfer mode. */
@@ -3689,8 +3721,14 @@ static CURLcode ftp_do_more(struct Curl_easy *data, int *completep)
         /* otherwise just fall through */
       }
       else {
-        result = ftp_nb_type(data, ftpc, ftp, data->state.prefer_ascii,
-                             FTP_RETR_TYPE);
+        if(data->set.prequote && !ftpc->file) {
+          result = ftp_nb_type(data, ftpc, ftp, TRUE,
+                               FTP_RETR_LIST_TYPE);
+        }
+        else {
+          result = ftp_nb_type(data, ftpc, ftp, data->state.prefer_ascii,
+                               FTP_RETR_TYPE);
+        }
         if(result)
           return result;
       }
@@ -4117,7 +4155,7 @@ static CURLcode ftp_disconnect(struct Curl_easy *data,
      will try to send the QUIT command, otherwise it will just return.
   */
   ftpc->shutdown = TRUE;
-  if(dead_connection)
+  if(dead_connection || Curl_pp_needs_flush(data, &ftpc->pp))
     ftpc->ctl_valid = FALSE;
 
   /* The FTP session may or may not have been allocated/setup at this point! */

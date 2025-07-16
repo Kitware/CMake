@@ -66,7 +66,7 @@
 #include "url.h" /* for Curl_safefree() */
 #include "multiif.h"
 #include "sockaddr.h" /* required for Curl_sockaddr_storage */
-#include "inet_ntop.h"
+#include "curlx/inet_ntop.h"
 #include "curlx/inet_pton.h"
 #include "vtls/vtls.h" /* for vtsl cfilters */
 #include "progress.h"
@@ -78,7 +78,6 @@
 #include "vquic/vquic.h" /* for quic cfilters */
 #include "http_proxy.h"
 #include "socks.h"
-#include "strcase.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -90,15 +89,15 @@
 enum alpnid Curl_alpn2alpnid(const char *name, size_t len)
 {
   if(len == 2) {
-    if(strncasecompare(name, "h1", 2))
+    if(curl_strnequal(name, "h1", 2))
       return ALPN_h1;
-    if(strncasecompare(name, "h2", 2))
+    if(curl_strnequal(name, "h2", 2))
       return ALPN_h2;
-    if(strncasecompare(name, "h3", 2))
+    if(curl_strnequal(name, "h3", 2))
       return ALPN_h3;
   }
   else if(len == 8) {
-    if(strncasecompare(name, "http/1.1", 8))
+    if(curl_strnequal(name, "http/1.1", 8))
       return ALPN_h1;
   }
   return ALPN_none; /* unknown, probably rubbish input */
@@ -172,11 +171,11 @@ void Curl_shutdown_start(struct Curl_easy *data, int sockindex,
   }
   data->conn->shutdown.start[sockindex] = *nowp;
   data->conn->shutdown.timeout_ms = (timeout_ms > 0) ?
-    (unsigned int)timeout_ms :
+    (timediff_t)timeout_ms :
     ((data->set.shutdowntimeout > 0) ?
      data->set.shutdowntimeout : DEFAULT_SHUTDOWN_TIMEOUT_MS);
   /* Set a timer, unless we operate on the admin handle */
-  if(data->mid && data->conn->shutdown.timeout_ms)
+  if(data->mid && (data->conn->shutdown.timeout_ms > 0))
     Curl_expire_ex(data, nowp, data->conn->shutdown.timeout_ms,
                    EXPIRE_SHUTDOWN);
 }
@@ -187,7 +186,8 @@ timediff_t Curl_shutdown_timeleft(struct connectdata *conn, int sockindex,
   struct curltime now;
   timediff_t left_ms;
 
-  if(!conn->shutdown.start[sockindex].tv_sec || !conn->shutdown.timeout_ms)
+  if(!conn->shutdown.start[sockindex].tv_sec ||
+     (conn->shutdown.timeout_ms <= 0))
     return 0; /* not started or no limits */
 
   if(!nowp) {
@@ -254,8 +254,8 @@ addr_next_match(const struct Curl_addrinfo *addr, int family)
   return NULL;
 }
 
-/* retrieves ip address and port from a sockaddr structure.
-   note it calls Curl_inet_ntop which sets errno on fail, not SOCKERRNO. */
+/* retrieves ip address and port from a sockaddr structure. note it calls
+   curlx_inet_ntop which sets errno on fail, not SOCKERRNO. */
 bool Curl_addr2string(struct sockaddr *sa, curl_socklen_t salen,
                       char *addr, int *port)
 {
@@ -272,7 +272,7 @@ bool Curl_addr2string(struct sockaddr *sa, curl_socklen_t salen,
   switch(sa->sa_family) {
     case AF_INET:
       si = (struct sockaddr_in *)(void *) sa;
-      if(Curl_inet_ntop(sa->sa_family, &si->sin_addr, addr, MAX_IPADR_LEN)) {
+      if(curlx_inet_ntop(sa->sa_family, &si->sin_addr, addr, MAX_IPADR_LEN)) {
         unsigned short us_port = ntohs(si->sin_port);
         *port = us_port;
         return TRUE;
@@ -281,7 +281,8 @@ bool Curl_addr2string(struct sockaddr *sa, curl_socklen_t salen,
 #ifdef USE_IPV6
     case AF_INET6:
       si6 = (struct sockaddr_in6 *)(void *) sa;
-      if(Curl_inet_ntop(sa->sa_family, &si6->sin6_addr, addr, MAX_IPADR_LEN)) {
+      if(curlx_inet_ntop(sa->sa_family, &si6->sin6_addr, addr,
+                         MAX_IPADR_LEN)) {
         unsigned short us_port = ntohs(si6->sin6_port);
         *port = us_port;
         return TRUE;
@@ -389,7 +390,6 @@ struct eyeballer {
   expire_id timeout_id;              /* ID for Curl_expire() */
   CURLcode result;
   int error;
-  BIT(rewinded);                     /* if we rewinded the addr list */
   BIT(has_started);                  /* attempts have started */
   BIT(is_done);                      /* out of addresses/time */
   BIT(connected);                    /* cf has connected */
@@ -455,7 +455,7 @@ static CURLcode eyeballer_new(struct eyeballer **pballer,
 }
 
 static void baller_close(struct eyeballer *baller,
-                          struct Curl_easy *data)
+                         struct Curl_easy *data)
 {
   if(baller && baller->cf) {
     Curl_conn_cf_discard_chain(&baller->cf, data);
@@ -463,7 +463,7 @@ static void baller_close(struct eyeballer *baller,
 }
 
 static void baller_free(struct eyeballer *baller,
-                         struct Curl_easy *data)
+                        struct Curl_easy *data)
 {
   if(baller) {
     baller_close(baller, data);
@@ -473,7 +473,6 @@ static void baller_free(struct eyeballer *baller,
 
 static void baller_rewind(struct eyeballer *baller)
 {
-  baller->rewinded = TRUE;
   baller->addr = baller->first;
   baller->inconclusive = FALSE;
 }
@@ -682,7 +681,7 @@ evaluate:
         /* next attempt was started */
         CURL_TRC_CF(data, cf, "%s trying next", baller->name);
         ++ongoing;
-        Curl_expire(data, 0, EXPIRE_RUN_NOW);
+        Curl_multi_mark_dirty(data);
       }
     }
   }
@@ -832,7 +831,7 @@ static CURLcode start_connect(struct Curl_cfilter *cf,
     addr1 = addr_first_match(dns->addr, ai_family1);
     /* no ip address families, probably AF_UNIX or something, use the
      * address family given to us */
-    if(!addr1  && !addr0 && dns->addr) {
+    if(!addr1 && !addr0 && dns->addr) {
       ai_family0 = dns->addr->ai_family;
       addr0 = addr_first_match(dns->addr, ai_family0);
     }
@@ -932,8 +931,8 @@ static CURLcode cf_he_shutdown(struct Curl_cfilter *cf,
 }
 
 static void cf_he_adjust_pollset(struct Curl_cfilter *cf,
-                                  struct Curl_easy *data,
-                                  struct easy_pollset *ps)
+                                 struct Curl_easy *data,
+                                 struct easy_pollset *ps)
 {
   struct cf_he_ctx *ctx = cf->ctx;
   size_t i;
@@ -993,11 +992,11 @@ static CURLcode cf_he_connect(struct Curl_cfilter *cf,
           struct ip_quadruple ipquad;
           int is_ipv6;
           if(!Curl_conn_cf_get_ip_info(cf->next, data, &is_ipv6, &ipquad)) {
-            const char *host, *disphost;
+            const char *host;
             int port;
-            cf->next->cft->get_host(cf->next, data, &host, &disphost, &port);
+            Curl_conn_get_current_host(data, cf->sockindex, &host, &port);
             CURL_TRC_CF(data, cf, "Connected to %s (%s) port %u",
-                        disphost, ipquad.remote_ip, ipquad.remote_port);
+                        host, ipquad.remote_ip, ipquad.remote_port);
           }
         }
         data->info.numconnects++; /* to track the # of connections made */
@@ -1046,8 +1045,8 @@ static bool cf_he_data_pending(struct Curl_cfilter *cf,
 }
 
 static struct curltime get_max_baller_time(struct Curl_cfilter *cf,
-                                          struct Curl_easy *data,
-                                          int query)
+                                           struct Curl_easy *data,
+                                           int query)
 {
   struct cf_he_ctx *ctx = cf->ctx;
   struct curltime t, tmax;
@@ -1134,7 +1133,6 @@ struct Curl_cftype Curl_cft_happy_eyeballs = {
   cf_he_connect,
   cf_he_close,
   cf_he_shutdown,
-  Curl_cf_def_get_host,
   cf_he_adjust_pollset,
   cf_he_data_pending,
   Curl_cf_def_send,
@@ -1398,7 +1396,6 @@ struct Curl_cftype Curl_cft_setup = {
   cf_setup_connect,
   cf_setup_close,
   Curl_cf_def_shutdown,
-  Curl_cf_def_get_host,
   Curl_cf_def_adjust_pollset,
   Curl_cf_def_data_pending,
   Curl_cf_def_send,
@@ -1518,7 +1515,8 @@ CURLcode Curl_conn_setup(struct Curl_easy *data,
 
   /* Still no cfilter set, apply default. */
   if(!conn->cfilter[sockindex]) {
-    result = cf_setup_add(data, conn, sockindex, conn->transport, ssl_mode);
+    result = cf_setup_add(data, conn, sockindex,
+                          conn->transport_wanted, ssl_mode);
     if(result)
       goto out;
   }

@@ -54,7 +54,7 @@
 #include "rand.h"
 #include "share.h"
 #include "url.h"
-#include "inet_ntop.h"
+#include "curlx/inet_ntop.h"
 #include "curlx/inet_pton.h"
 #include "multiif.h"
 #include "doh.h"
@@ -145,14 +145,14 @@ void Curl_printable_address(const struct Curl_addrinfo *ai, char *buf,
   case AF_INET: {
     const struct sockaddr_in *sa4 = (const void *)ai->ai_addr;
     const struct in_addr *ipaddr4 = &sa4->sin_addr;
-    (void)Curl_inet_ntop(ai->ai_family, (const void *)ipaddr4, buf, bufsize);
+    (void)curlx_inet_ntop(ai->ai_family, (const void *)ipaddr4, buf, bufsize);
     break;
   }
 #ifdef USE_IPV6
   case AF_INET6: {
     const struct sockaddr_in6 *sa6 = (const void *)ai->ai_addr;
     const struct in6_addr *ipaddr6 = &sa6->sin6_addr;
-    (void)Curl_inet_ntop(ai->ai_family, (const void *)ipaddr6, buf, bufsize);
+    (void)curlx_inet_ntop(ai->ai_family, (const void *)ipaddr6, buf, bufsize);
     break;
   }
 #endif
@@ -505,6 +505,8 @@ Curl_dnscache_mk_entry(struct Curl_easy *data,
       return NULL;
     }
   }
+#else
+  (void)data;
 #endif
   if(!hostlen)
     hostlen = strlen(hostname);
@@ -730,7 +732,7 @@ static bool tailmatch(const char *full, size_t flen,
 {
   if(plen > flen)
     return FALSE;
-  return strncasecompare(part, &full[flen - plen], plen);
+  return curl_strnequal(part, &full[flen - plen], plen);
 }
 
 static struct Curl_addrinfo *
@@ -872,8 +874,8 @@ CURLcode Curl_resolv(struct Curl_easy *data,
     goto error;
 
   if(!is_ipaddr &&
-     (strcasecompare(hostname, "localhost") ||
-      strcasecompare(hostname, "localhost.") ||
+     (curl_strequal(hostname, "localhost") ||
+      curl_strequal(hostname, "localhost.") ||
       tailmatch(hostname, hostname_len, STRCONST(".localhost")) ||
       tailmatch(hostname, hostname_len, STRCONST(".localhost.")))) {
     addr = get_localhost(port, hostname);

@@ -56,8 +56,6 @@
 #  define ALLOC_SIZE2(n, s)
 #endif
 
-#define CURL_MT_LOGFNAME_BUFSIZE 512
-
 /* Avoid redundant redeclaration warnings with modern compilers, when including
    this header multiple times. */
 #ifndef HEADER_CURL_MEMDEBUG_H_EXTERNS
@@ -126,8 +124,6 @@ CURL_EXTERN ALLOC_FUNC
 
 #endif /* HEADER_CURL_MEMDEBUG_H_EXTERNS */
 
-#ifndef MEMDEBUG_NODEFINES
-
 /* Set this symbol on the command-line, recompile all lib-sources */
 #undef strdup
 #define strdup(ptr) curl_dbg_strdup(ptr, __LINE__, __FILE__)
@@ -145,34 +141,29 @@ CURL_EXTERN ALLOC_FUNC
 #define recv(a,b,c,d) curl_dbg_recv(a,b,c,d, __LINE__, __FILE__)
 
 #ifdef _WIN32
-#  ifdef UNICODE
-#    undef wcsdup
-#    define wcsdup(ptr) curl_dbg_wcsdup(ptr, __LINE__, __FILE__)
-#    undef _wcsdup
-#    define _wcsdup(ptr) curl_dbg_wcsdup(ptr, __LINE__, __FILE__)
-#    undef _tcsdup
-#    define _tcsdup(ptr) curl_dbg_wcsdup(ptr, __LINE__, __FILE__)
-#  else
-#    undef _tcsdup
-#    define _tcsdup(ptr) curl_dbg_strdup(ptr, __LINE__, __FILE__)
-#  endif
+#undef _tcsdup
+#ifdef UNICODE
+#define _tcsdup(ptr) curl_dbg_wcsdup(ptr, __LINE__, __FILE__)
+#else
+#define _tcsdup(ptr) curl_dbg_strdup(ptr, __LINE__, __FILE__)
 #endif
+#endif /* _WIN32 */
 
 #undef socket
-#define socket(domain,type,protocol)\
- curl_dbg_socket((int)domain, type, protocol, __LINE__, __FILE__)
+#define socket(domain,type,protocol) \
+  curl_dbg_socket((int)domain, type, protocol, __LINE__, __FILE__)
 #undef accept /* for those with accept as a macro */
-#define accept(sock,addr,len)\
- curl_dbg_accept(sock, addr, len, __LINE__, __FILE__)
+#define accept(sock,addr,len) \
+  curl_dbg_accept(sock, addr, len, __LINE__, __FILE__)
 #ifdef HAVE_ACCEPT4
 #undef accept4 /* for those with accept4 as a macro */
-#define accept4(sock,addr,len,flags)\
- curl_dbg_accept4(sock, addr, len, flags, __LINE__, __FILE__)
+#define accept4(sock,addr,len,flags) \
+  curl_dbg_accept4(sock, addr, len, flags, __LINE__, __FILE__)
 #endif
 #ifdef HAVE_SOCKETPAIR
-#define socketpair(domain,type,protocol,socket_vector)\
- curl_dbg_socketpair((int)domain, type, protocol, socket_vector, \
-                     __LINE__, __FILE__)
+#define socketpair(domain,type,protocol,socket_vector) \
+  curl_dbg_socketpair((int)domain, type, protocol, socket_vector, \
+                      __LINE__, __FILE__)
 #endif
 
 /* sclose is probably already defined, redefine it! */
@@ -185,9 +176,8 @@ CURL_EXTERN ALLOC_FUNC
 #define fopen(file,mode) curl_dbg_fopen(file,mode,__LINE__,__FILE__)
 #undef fdopen
 #define fdopen(file,mode) curl_dbg_fdopen(file,mode,__LINE__,__FILE__)
+#undef fclose
 #define fclose(file) curl_dbg_fclose(file,__LINE__,__FILE__)
-
-#endif /* MEMDEBUG_NODEFINES */
 
 #endif /* CURLDEBUG */
 
