@@ -589,6 +589,9 @@ class cmMakefile;
          "The CMakeDetermineVSServicePack module is removed.", 4, 1, 0, WARN) \
   SELECT(POLICY, CMP0197,                                                     \
          "MSVC link -machine: flag is not in CMAKE_*_LINKER_FLAGS.", 4, 1, 0, \
+         WARN)                                                                \
+  SELECT(POLICY, CMP0198,                                                     \
+         "CMAKE_PARENT_LIST_FILE is not defined in CMakeLists.txt.", 4, 2, 0, \
          WARN)
 
 #define CM_SELECT_ID(F, A1, A2, A3, A4, A5, A6) F(A1)

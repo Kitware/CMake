@@ -1553,7 +1553,23 @@ void cmMakefile::Configure()
   cmSystemTools::MakeDirectory(filesDir);
 
   assert(cmSystemTools::FileExists(currentStart, true));
-  this->AddDefinition(kCMAKE_PARENT_LIST_FILE, currentStart);
+
+  // In the top-most directory, cmake_minimum_required() may not have been
+  // called yet, so ApplyPolicyVersion() may not have handled the default
+  // policy value.  Check them here.
+  if (this->GetPolicyStatus(cmPolicies::CMP0198) == cmPolicies::WARN) {
+    if (cmValue defaultValue =
+          this->GetDefinition("CMAKE_POLICY_DEFAULT_CMP0198")) {
+      if (*defaultValue == "NEW") {
+        this->SetPolicy(cmPolicies::CMP0198, cmPolicies::NEW);
+      } else if (*defaultValue == "OLD") {
+        this->SetPolicy(cmPolicies::CMP0198, cmPolicies::OLD);
+      }
+    }
+  }
+
+  // Set CMAKE_PARENT_LIST_FILE for CMakeLists.txt based on CMP0198 policy
+  this->UpdateParentListFileVariable();
 
 #ifdef CMake_ENABLE_DEBUGGER
   if (this->GetCMakeInstance()->GetDebugAdapter()) {
@@ -4092,6 +4108,12 @@ bool cmMakefile::SetPolicy(cmPolicies::PolicyID id,
   }
 
   this->StateSnapshot.SetPolicy(id, status);
+
+  // Handle CMAKE_PARENT_LIST_FILE for CMP0198 policy changes
+  if (id == cmPolicies::CMP0198) {
+    this->UpdateParentListFileVariable();
+  }
+
   return true;
 }
 
@@ -4142,6 +4164,21 @@ bool cmMakefile::SetPolicyVersion(std::string const& version_min,
 {
   return cmPolicies::ApplyPolicyVersion(this, version_min, version_max,
                                         cmPolicies::WarnCompat::On);
+}
+
+void cmMakefile::UpdateParentListFileVariable()
+{
+  // CMP0198 determines CMAKE_PARENT_LIST_FILE behavior in CMakeLists.txt
+  if (this->GetPolicyStatus(cmPolicies::CMP0198) == cmPolicies::NEW) {
+    this->RemoveDefinition(kCMAKE_PARENT_LIST_FILE);
+  } else {
+    std::string currentSourceDir =
+      this->StateSnapshot.GetDirectory().GetCurrentSource();
+    std::string currentStart =
+      this->GetCMakeInstance()->GetCMakeListFile(currentSourceDir);
+
+    this->AddDefinition(kCMAKE_PARENT_LIST_FILE, currentStart);
+  }
 }
 
 cmMakefile::VariablePushPop::VariablePushPop(cmMakefile* m)
