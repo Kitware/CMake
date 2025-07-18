@@ -3,7 +3,7 @@ set(CMAKE_SHARED_LIBRARY_SUFFIX ".so")          # .so
 set(CMAKE_SHARED_LIBRARY_ARCHIVE_SUFFIX ".a")   # .a
 set(CMAKE_AIX_IMPORT_FILE_PREFIX "")
 set(CMAKE_AIX_IMPORT_FILE_SUFFIX ".imp")
-set(CMAKE_DL_LIBS "-lld")
+set(CMAKE_DL_LIBS "ld")
 
 # RPATH support on AIX is called libpath.  By default the runtime
 # libpath is paths specified by -L followed by /usr/lib and /lib.  In
