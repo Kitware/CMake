@@ -653,7 +653,7 @@ Example: Custom Configuration File
 
 In the following example, a custom ``Doxyfile`` configuration file is created
 in the current binary directory (:variable:`CMAKE_CURRENT_BINARY_DIR`) prior
-to calling the ``doxygen_add_doxs()``.  This allows project-specific
+to calling the ``doxygen_add_docs()``.  This allows project-specific
 configuration tags to be customized as needed:
 
 .. code-block:: cmake
@@ -664,7 +664,7 @@ configuration tags to be customized as needed:
   if(Doxygen_FOUND)
     configure_file(Doxyfile.in Doxyfile)
 
-    doxygen_add_doxs(
+    doxygen_add_docs(
       example_docs
       foo.c bar.c
       ALL
