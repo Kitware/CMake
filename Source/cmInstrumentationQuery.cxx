@@ -15,8 +15,9 @@
 #include "cmJSONHelpers.h"
 #include "cmStringAlgorithms.h"
 
-std::vector<std::string> const cmInstrumentationQuery::QueryString{
-  "staticSystemInformation", "dynamicSystemInformation"
+std::vector<std::string> const cmInstrumentationQuery::OptionString{
+  "staticSystemInformation", "dynamicSystemInformation", "cdashSubmit",
+  "cdashVerbose"
 };
 std::vector<std::string> const cmInstrumentationQuery::HookString{
   "postGenerate",  "preBuild",        "postBuild",
@@ -64,11 +65,11 @@ static std::function<bool(E&, Json::Value const*, cmJSONState*)> EnumHelper(
     return false;
   };
 }
-static auto const QueryHelper = EnumHelper<cmInstrumentationQuery::Query>(
-  cmInstrumentationQuery::QueryString, "query");
+static auto const OptionHelper = EnumHelper<cmInstrumentationQuery::Option>(
+  cmInstrumentationQuery::OptionString, "option");
 static auto const QueryListHelper =
-  JSONHelperBuilder::Vector<cmInstrumentationQuery::Query>(
-    ErrorMessages::InvalidArray, QueryHelper);
+  JSONHelperBuilder::Vector<cmInstrumentationQuery::Option>(
+    ErrorMessages::InvalidArray, OptionHelper);
 static auto const HookHelper = EnumHelper<cmInstrumentationQuery::Hook>(
   cmInstrumentationQuery::HookString, "hook");
 static auto const HookListHelper =
@@ -85,13 +86,13 @@ static auto const QueryRootHelper =
   JSONHelperBuilder::Object<QueryRoot>(ErrorMessages::InvalidRootQueryObject,
                                        false)
     .Bind("version"_s, &QueryRoot::version, VersionHelper, true)
-    .Bind("queries"_s, &QueryRoot::queries, QueryListHelper, false)
+    .Bind("options"_s, &QueryRoot::options, QueryListHelper, false)
     .Bind("hooks"_s, &QueryRoot::hooks, HookListHelper, false)
     .Bind("callbacks"_s, &QueryRoot::callbacks, CallbackListHelper, false);
 
 bool cmInstrumentationQuery::ReadJSON(std::string const& filename,
                                       std::string& errorMessage,
-                                      std::set<Query>& queries,
+                                      std::set<Option>& options,
                                       std::set<Hook>& hooks,
                                       std::vector<std::string>& callbacks)
 {
@@ -105,8 +106,8 @@ bool cmInstrumentationQuery::ReadJSON(std::string const& filename,
     errorMessage = this->parseState.GetErrorMessage(true);
     return false;
   }
-  std::move(this->queryRoot.queries.begin(), this->queryRoot.queries.end(),
-            std::inserter(queries, queries.end()));
+  std::move(this->queryRoot.options.begin(), this->queryRoot.options.end(),
+            std::inserter(options, options.end()));
   std::move(this->queryRoot.hooks.begin(), this->queryRoot.hooks.end(),
             std::inserter(hooks, hooks.end()));
   std::move(this->queryRoot.callbacks.begin(), this->queryRoot.callbacks.end(),

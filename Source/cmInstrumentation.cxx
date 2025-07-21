@@ -29,6 +29,53 @@
 
 using LoadQueriesAfter = cmInstrumentation::LoadQueriesAfter;
 
+std::map<std::string, std::string> cmInstrumentation::cdashSnippetsMap = {
+  {
+    "configure",
+    "configure",
+  },
+  {
+    "generate",
+    "configure",
+  },
+  {
+    "compile",
+    "build",
+  },
+  {
+    "link",
+    "build",
+  },
+  {
+    "custom",
+    "build",
+  },
+  {
+    "build",
+    "skip",
+  },
+  {
+    "cmakeBuild",
+    "build",
+  },
+  {
+    "cmakeInstall",
+    "build",
+  },
+  {
+    "install",
+    "build",
+  },
+  {
+    "ctest",
+    "build",
+  },
+  {
+    "test",
+    "test",
+  }
+};
+
 cmInstrumentation::cmInstrumentation(std::string const& binary_dir,
                                      LoadQueriesAfter loadQueries)
 {
@@ -38,6 +85,7 @@ cmInstrumentation::cmInstrumentation(std::string const& binary_dir,
   this->binaryDir = binary_dir;
   this->timingDirv1 =
     cmStrCat(this->binaryDir, "/.cmake/instrumentation-", uuid, "/v1");
+  this->cdashDir = cmStrCat(this->timingDirv1, "/cdash");
   if (cm::optional<std::string> configDir =
         cmSystemTools::GetCMakeConfigDirectory()) {
     this->userTimingDirv1 =
@@ -60,7 +108,10 @@ void cmInstrumentation::LoadQueries()
     this->hasQuery = this->hasQuery ||
       this->ReadJSONQueries(cmStrCat(this->userTimingDirv1, "/query"));
   }
+}
 
+void cmInstrumentation::CheckCDashVariable()
+{
   std::string envVal;
   if (cmSystemTools::GetEnv("CTEST_USE_INSTRUMENTATION", envVal) &&
       !cmIsOff(envVal)) {
@@ -69,63 +120,23 @@ void cmInstrumentation::LoadQueries()
                                  cmExperimental::Feature::Instrumentation)
                                  .Uuid;
       if (envVal == uuid) {
+        std::set<cmInstrumentationQuery::Option> options_ = {
+          cmInstrumentationQuery::Option::CDashSubmit,
+          cmInstrumentationQuery::Option::DynamicSystemInformation
+        };
+        if (cmSystemTools::GetEnv("CTEST_USE_VERBOSE_INSTRUMENTATION",
+                                  envVal) &&
+            !cmIsOff(envVal)) {
+          options_.insert(cmInstrumentationQuery::Option::CDashVerbose);
+        }
+        for (auto const& option : options_) {
+          this->AddOption(option);
+        }
+        std::set<cmInstrumentationQuery::Hook> hooks_ = {
+          cmInstrumentationQuery::Hook::PrepareForCDash
+        };
         this->AddHook(cmInstrumentationQuery::Hook::PrepareForCDash);
-        this->AddQuery(
-          cmInstrumentationQuery::Query::DynamicSystemInformation);
-        this->cdashDir = cmStrCat(this->timingDirv1, "/cdash");
-        cmSystemTools::MakeDirectory(this->cdashDir);
-        cmSystemTools::MakeDirectory(cmStrCat(this->cdashDir, "/configure"));
-        cmSystemTools::MakeDirectory(cmStrCat(this->cdashDir, "/build"));
-        cmSystemTools::MakeDirectory(
-          cmStrCat(this->cdashDir, "/build/commands"));
-        cmSystemTools::MakeDirectory(
-          cmStrCat(this->cdashDir, "/build/targets"));
-        cmSystemTools::MakeDirectory(cmStrCat(this->cdashDir, "/test"));
-        this->cdashSnippetsMap = { {
-                                     "configure",
-                                     "configure",
-                                   },
-                                   {
-                                     "generate",
-                                     "configure",
-                                   },
-                                   {
-                                     "compile",
-                                     "build",
-                                   },
-                                   {
-                                     "link",
-                                     "build",
-                                   },
-                                   {
-                                     "custom",
-                                     "build",
-                                   },
-                                   {
-                                     "build",
-                                     "skip",
-                                   },
-                                   {
-                                     "cmakeBuild",
-                                     "build",
-                                   },
-                                   {
-                                     "cmakeInstall",
-                                     "build",
-                                   },
-                                   {
-                                     "install",
-                                     "build",
-                                   },
-                                   {
-                                     "ctest",
-                                     "build",
-                                   },
-                                   {
-                                     "test",
-                                     "test",
-                                   } };
-        this->hasQuery = true;
+        this->WriteJSONQuery(options_, hooks_, {});
       }
     }
   }
@@ -159,7 +170,7 @@ bool cmInstrumentation::ReadJSONQueries(std::string const& directory)
 void cmInstrumentation::ReadJSONQuery(std::string const& file)
 {
   auto query = cmInstrumentationQuery();
-  query.ReadJSON(file, this->errorMsg, this->queries, this->hooks,
+  query.ReadJSON(file, this->errorMsg, this->options, this->hooks,
                  this->callbacks);
   if (!this->errorMsg.empty()) {
     cmSystemTools::Error(cmStrCat(
@@ -174,15 +185,15 @@ bool cmInstrumentation::HasErrors() const
 }
 
 void cmInstrumentation::WriteJSONQuery(
-  std::set<cmInstrumentationQuery::Query> const& queries_,
+  std::set<cmInstrumentationQuery::Option> const& options_,
   std::set<cmInstrumentationQuery::Hook> const& hooks_,
   std::vector<std::vector<std::string>> const& callbacks_)
 {
   Json::Value root;
   root["version"] = 1;
-  root["queries"] = Json::arrayValue;
-  for (auto const& query : queries_) {
-    root["queries"].append(cmInstrumentationQuery::QueryString[query]);
+  root["options"] = Json::arrayValue;
+  for (auto const& option : options_) {
+    root["options"].append(cmInstrumentationQuery::OptionString[option]);
   }
   root["hooks"] = Json::arrayValue;
   for (auto const& hook : hooks_) {
@@ -192,13 +203,9 @@ void cmInstrumentation::WriteJSONQuery(
   for (auto const& callback : callbacks_) {
     root["callbacks"].append(cmInstrumentation::GetCommandStr(callback));
   }
-  cmsys::Directory d;
-  int n = 0;
-  if (d.Load(cmStrCat(this->timingDirv1, "/query/generated"))) {
-    n = (int)d.GetNumberOfFiles() - 2; // Don't count '.' or '..'
-  }
-  this->WriteInstrumentationJson(root, "query/generated",
-                                 cmStrCat("query-", n, ".json"));
+  this->WriteInstrumentationJson(
+    root, "query/generated",
+    cmStrCat("query-", this->writtenJsonQueries++, ".json"));
 }
 
 void cmInstrumentation::ClearGeneratedQueries()
@@ -214,9 +221,9 @@ bool cmInstrumentation::HasQuery() const
   return this->hasQuery;
 }
 
-bool cmInstrumentation::HasQuery(cmInstrumentationQuery::Query query) const
+bool cmInstrumentation::HasOption(cmInstrumentationQuery::Option option) const
 {
-  return (this->queries.find(query) != this->queries.end());
+  return (this->options.find(option) != this->options.end());
 }
 
 bool cmInstrumentation::HasHook(cmInstrumentationQuery::Hook hook) const
@@ -281,7 +288,8 @@ int cmInstrumentation::CollectTimingData(cmInstrumentationQuery::Hook hook)
   index["dataDir"] = directory;
   index["buildDir"] = this->binaryDir;
   index["version"] = 1;
-  if (this->HasQuery(cmInstrumentationQuery::Query::StaticSystemInformation)) {
+  if (this->HasOption(
+        cmInstrumentationQuery::Option::StaticSystemInformation)) {
     this->InsertStaticSystemInformation(index);
   }
   for (auto const& file : files) {
@@ -305,7 +313,7 @@ int cmInstrumentation::CollectTimingData(cmInstrumentationQuery::Hook hook)
   }
 
   // Special case for CDash collation
-  if (this->HasHook(cmInstrumentationQuery::Hook::PrepareForCDash)) {
+  if (this->HasOption(cmInstrumentationQuery::Option::CDashSubmit)) {
     this->PrepareDataForCDash(directory, index_path);
   }
 
@@ -427,8 +435,8 @@ std::string cmInstrumentation::InstrumentTest(
 
   // Post-Command
   this->InsertTimingData(root, steadyStart, systemStart);
-  if (this->HasQuery(
-        cmInstrumentationQuery::Query::DynamicSystemInformation)) {
+  if (this->HasOption(
+        cmInstrumentationQuery::Option::DynamicSystemInformation)) {
     this->InsertDynamicSystemInformation(root, "after");
   }
 
@@ -443,8 +451,8 @@ std::string cmInstrumentation::InstrumentTest(
 
 void cmInstrumentation::GetPreTestStats()
 {
-  if (this->HasQuery(
-        cmInstrumentationQuery::Query::DynamicSystemInformation)) {
+  if (this->HasOption(
+        cmInstrumentationQuery::Option::DynamicSystemInformation)) {
     this->InsertDynamicSystemInformation(this->preTestStats, "before");
   }
 }
@@ -452,8 +460,8 @@ void cmInstrumentation::GetPreTestStats()
 int cmInstrumentation::InstrumentCommand(
   std::string command_type, std::vector<std::string> const& command,
   std::function<int()> const& callback,
-  cm::optional<std::map<std::string, std::string>> options,
-  cm::optional<std::map<std::string, std::string>> arrayOptions,
+  cm::optional<std::map<std::string, std::string>> data,
+  cm::optional<std::map<std::string, std::string>> arrayData,
   LoadQueriesAfter reloadQueriesAfterCommand)
 {
 
@@ -478,8 +486,8 @@ int cmInstrumentation::InstrumentCommand(
   auto system_start = std::chrono::system_clock::now();
   double preConfigureMemory = 0;
   double preConfigureLoad = 0;
-  if (this->HasQuery(
-        cmInstrumentationQuery::Query::DynamicSystemInformation)) {
+  if (this->HasOption(
+        cmInstrumentationQuery::Option::DynamicSystemInformation)) {
     this->InsertDynamicSystemInformation(root, "before");
   } else if (reloadQueriesAfterCommand == LoadQueriesAfter::Yes) {
     this->GetDynamicSystemInformation(preConfigureMemory, preConfigureLoad);
@@ -495,8 +503,8 @@ int cmInstrumentation::InstrumentCommand(
     if (!this->HasQuery()) {
       return ret;
     }
-    if (this->HasQuery(
-          cmInstrumentationQuery::Query::DynamicSystemInformation)) {
+    if (this->HasOption(
+          cmInstrumentationQuery::Option::DynamicSystemInformation)) {
       root["dynamicSystemInformation"] = Json::objectValue;
       root["dynamicSystemInformation"]["beforeHostMemoryUsed"] =
         preConfigureMemory;
@@ -507,14 +515,14 @@ int cmInstrumentation::InstrumentCommand(
 
   // Post-Command
   this->InsertTimingData(root, steady_start, system_start);
-  if (this->HasQuery(
-        cmInstrumentationQuery::Query::DynamicSystemInformation)) {
+  if (this->HasOption(
+        cmInstrumentationQuery::Option::DynamicSystemInformation)) {
     this->InsertDynamicSystemInformation(root, "after");
   }
 
   // Gather additional data
-  if (options.has_value()) {
-    for (auto const& item : options.value()) {
+  if (data.has_value()) {
+    for (auto const& item : data.value()) {
       if (item.first == "role" && !item.second.empty()) {
         command_type = item.second;
       } else if (!item.second.empty()) {
@@ -529,8 +537,8 @@ int cmInstrumentation::InstrumentCommand(
     root["config"] = "";
   }
 
-  if (arrayOptions.has_value()) {
-    for (auto const& item : arrayOptions.value()) {
+  if (arrayData.has_value()) {
+    for (auto const& item : arrayData.value()) {
       if (item.first == "targetLabels" && command_type != "link") {
         continue;
       }
@@ -659,9 +667,9 @@ void cmInstrumentation::AddHook(cmInstrumentationQuery::Hook hook)
   this->hooks.insert(hook);
 }
 
-void cmInstrumentation::AddQuery(cmInstrumentationQuery::Query query)
+void cmInstrumentation::AddOption(cmInstrumentationQuery::Option option)
 {
-  this->queries.insert(query);
+  this->options.insert(option);
 }
 
 std::string const& cmInstrumentation::GetCDashDir()
@@ -675,6 +683,13 @@ std::string const& cmInstrumentation::GetCDashDir()
 void cmInstrumentation::PrepareDataForCDash(std::string const& data_dir,
                                             std::string const& index_path)
 {
+  cmSystemTools::MakeDirectory(this->cdashDir);
+  cmSystemTools::MakeDirectory(cmStrCat(this->cdashDir, "/configure"));
+  cmSystemTools::MakeDirectory(cmStrCat(this->cdashDir, "/build"));
+  cmSystemTools::MakeDirectory(cmStrCat(this->cdashDir, "/build/commands"));
+  cmSystemTools::MakeDirectory(cmStrCat(this->cdashDir, "/build/targets"));
+  cmSystemTools::MakeDirectory(cmStrCat(this->cdashDir, "/test"));
+
   Json::Value root;
   std::string error_msg;
   cmJSONState parseState = cmJSONState(index_path, &root);

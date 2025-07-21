@@ -2644,6 +2644,7 @@ int cmake::ActualConfigure()
       cmStrCat(this->GetHomeOutputDirectory(), "/CMakeFiles"_s),
       this->FileAPI->GetConfigureLogVersions());
     this->Instrumentation->LoadQueries();
+    this->Instrumentation->CheckCDashVariable();
   }
 #endif
 

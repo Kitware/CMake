@@ -1,6 +1,6 @@
 {
   "callbacks" : [],
   "hooks" : [],
-  "queries" : [],
+  "options" : [],
   "version": 1
 }

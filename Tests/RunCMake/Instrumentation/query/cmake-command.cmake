@@ -8,6 +8,7 @@
     API_VERSION 1
     DATA_VERSION 1
     HOOKS postGenerate
+    OPTIONS cdashSubmit cdashVerbose
     CALLBACK ${CMAKE_COMMAND} -E echo callback1
   )
   # Query 2
@@ -15,7 +16,7 @@
     API_VERSION 1
     DATA_VERSION 1
     HOOKS postCMakeBuild
-    QUERIES staticSystemInformation dynamicSystemInformation
+    OPTIONS staticSystemInformation dynamicSystemInformation
     CALLBACK ${CMAKE_COMMAND} -E echo callback2
     CALLBACK ${CMAKE_COMMAND} -E echo callback3
   )

@@ -1,0 +1,4 @@
+{
+  "version": 1,
+  "options": ["staticSystemInformation", "bad option"]
+}
