@@ -196,6 +196,9 @@ key is required, but all other fields are optional.
   * ``postInstall``
   * ``postTest``
 
+  ``preBuild`` and ``postBuild`` are not supported with the
+  :generator:`MSYS Makefiles` generator.
+
 ``options``
   A list of strings used to enable certain optional behavior, including the
   collection of certain additional data. Elements in this list should be one of

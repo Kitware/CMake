@@ -129,7 +129,10 @@ instrument(cmake-command-resets-generated NO_WARN
   CHECK_SCRIPT check-data-dir.cmake
 )
 
-if(RunCMake_GENERATOR STREQUAL "NMake Makefiles")
+if(RunCMake_GENERATOR STREQUAL "MSYS Makefiles")
+  # FIXME(#27079): This does not work for MSYS Makefiles.
+  set(Skip_BUILD_MAKE_PROGRAM_Case 1)
+elseif(RunCMake_GENERATOR STREQUAL "NMake Makefiles")
  execute_process(
    COMMAND "${RunCMake_MAKE_PROGRAM}" -?
    OUTPUT_VARIABLE nmake_out

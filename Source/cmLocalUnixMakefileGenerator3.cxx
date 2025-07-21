@@ -691,7 +691,9 @@ void cmLocalUnixMakefileGenerator3::WriteMakeVariables(
 #ifndef CMAKE_BOOTSTRAP
   if (this->GetCMakeInstance()
         ->GetInstrumentation()
-        ->HasPreOrPostBuildHook()) {
+        ->HasPreOrPostBuildHook() &&
+      // FIXME(#27079): This does not work for MSYS Makefiles.
+      this->GlobalGenerator->GetName() != "MSYS Makefiles") {
     std::string ctestShellCommand =
       getShellCommand(cmSystemTools::GetCTestCommand());
     makefileStream << "# The CTest executable.\n"
@@ -850,8 +852,11 @@ void cmLocalUnixMakefileGenerator3::WriteSpecialTargetsBottom(
     std::vector<std::string> no_depends;
     commands.push_back(std::move(runRule));
 #ifndef CMAKE_BOOTSTRAP
-    addInstrumentationCommand(this->GetCMakeInstance()->GetInstrumentation(),
-                              commands);
+    // FIXME(#27079): This does not work for MSYS Makefiles.
+    if (this->GlobalGenerator->GetName() != "MSYS Makefiles") {
+      addInstrumentationCommand(this->GetCMakeInstance()->GetInstrumentation(),
+                                commands);
+    }
 #endif
     if (!this->IsRootMakefile()) {
       this->CreateCDCommand(commands, this->GetBinaryDirectory(),
@@ -1856,8 +1861,11 @@ void cmLocalUnixMakefileGenerator3::WriteLocalAllRules(
         " 1");
       commands.push_back(std::move(runRule));
 #ifndef CMAKE_BOOTSTRAP
-      addInstrumentationCommand(this->GetCMakeInstance()->GetInstrumentation(),
-                                commands);
+      // FIXME(#27079): This does not work for MSYS Makefiles.
+      if (this->GlobalGenerator->GetName() != "MSYS Makefiles") {
+        addInstrumentationCommand(
+          this->GetCMakeInstance()->GetInstrumentation(), commands);
+      }
 #endif
     }
     this->CreateCDCommand(commands, this->GetBinaryDirectory(),
