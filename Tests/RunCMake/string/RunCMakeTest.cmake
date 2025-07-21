@@ -24,6 +24,7 @@ run_cmake(JoinNoVar)
 run_cmake(Timestamp)
 if(NOT CMAKE_SYSTEM_NAME STREQUAL "AIX" # FIXME: Needs 64-bit build
     AND NOT CMAKE_SYSTEM_NAME STREQUAL "SunOS" # FIXME: Needs 64-bit build
+    AND NOT CMake_TEST_NO_64BIT_TIME
     )
   run_cmake(Timestamp2038)
 endif()

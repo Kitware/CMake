@@ -748,6 +748,7 @@ add_RunCMake_test(set_property)
 add_RunCMake_test(string
   -DCMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME}
   -DCMAKE_SYSTEM_PROCESSOR=${CMAKE_SYSTEM_PROCESSOR}
+  -DCMake_TEST_NO_64BIT_TIME=${CMake_TEST_NO_64BIT_TIME}
   )
 add_RunCMake_test(test_include_dirs)
 add_RunCMake_test(BundleUtilities)
