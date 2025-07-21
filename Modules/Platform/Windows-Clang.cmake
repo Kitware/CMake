@@ -36,6 +36,8 @@ macro(__windows_compiler_clang_gnu lang)
   set(CMAKE_${lang}_LINK_DEF_FILE_FLAG "-Xlinker /DEF:")
   set(CMAKE_LINK_DEF_FILE_FLAG "${CMAKE_${lang}_LINK_DEF_FILE_FLAG}")
 
+  set(CMAKE_${lang}_COMPILE_OPTIONS_SYSROOT "--sysroot=")
+
   set(CMAKE_${lang}_LINKER_WRAPPER_FLAG "-Xlinker" " ")
   set(CMAKE_${lang}_LINKER_WRAPPER_FLAG_SEP)
 
