@@ -630,6 +630,12 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
     return false;
   }
 
+  if (this->Makefile->GetStateSnapshot().GetUnwindState() ==
+      cmStateEnums::UNWINDING) {
+    this->SetError("called while already in an UNWIND state");
+    return false;
+  }
+
   // Lookup required version of CMake.
   if (cmValue const rv =
         this->Makefile->GetDefinition("CMAKE_MINIMUM_REQUIRED_VERSION")) {
@@ -839,6 +845,14 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
           cmStrCat("given invalid value for REGISTRY_VIEW: ", args[i]));
         return false;
       }
+    } else if (args[i] == "UNWIND_INCLUDE") {
+      if (this->Makefile->GetStateSnapshot().GetUnwindType() !=
+          cmStateEnums::CAN_UNWIND) {
+        this->SetError("called with UNWIND_INCLUDE in an invalid context");
+        return false;
+      }
+      this->ScopeUnwind = true;
+      doing = DoingNone;
     } else if (this->CheckCommonArgument(args[i])) {
       configArgs.push_back(i);
       doing = DoingNone;
@@ -1053,8 +1067,18 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
       this->VersionMaxPatch, this->VersionMaxTweak);
   }
 
-  return this->FindPackage(this->BypassProvider ? std::vector<std::string>{}
-                                                : args);
+  bool result = this->FindPackage(
+    this->BypassProvider ? std::vector<std::string>{} : args);
+
+  std::string const foundVar = cmStrCat(this->Name, "_FOUND");
+  bool const isFound = this->Makefile->IsOn(foundVar) ||
+    this->Makefile->IsOn(cmSystemTools::UpperCase(foundVar));
+
+  if (this->ScopeUnwind && (!result || !isFound)) {
+    this->Makefile->GetStateSnapshot().SetUnwindState(cmStateEnums::UNWINDING);
+  }
+
+  return result;
 }
 
 bool cmFindPackageCommand::FindPackage(
@@ -2047,12 +2071,24 @@ bool cmFindPackageCommand::ReadListFile(std::string const& f,
   ITScope scope = this->GlobalScope ? ITScope::Global : ITScope::Local;
   cmMakefile::SetGlobalTargetImportScope globScope(this->Makefile, scope);
 
-  if (this->Makefile->ReadDependentFile(f, noPolicyScope)) {
-    return true;
+  auto oldUnwind = this->Makefile->GetStateSnapshot().GetUnwindType();
+
+  // This allows child snapshots to inherit the CAN_UNWIND state from us, we'll
+  // reset it immediately after the dependent file is done
+  this->Makefile->GetStateSnapshot().SetUnwindType(cmStateEnums::CAN_UNWIND);
+  bool result = this->Makefile->ReadDependentFile(f, noPolicyScope);
+
+  this->Makefile->GetStateSnapshot().SetUnwindType(oldUnwind);
+  this->Makefile->GetStateSnapshot().SetUnwindState(
+    cmStateEnums::NOT_UNWINDING);
+
+  if (!result) {
+    std::string const e =
+      cmStrCat("Error reading CMake code from \"", f, "\".");
+    this->SetError(e);
   }
-  std::string const e = cmStrCat("Error reading CMake code from \"", f, "\".");
-  this->SetError(e);
-  return false;
+
+  return result;
 }
 
 bool cmFindPackageCommand::ReadPackage()

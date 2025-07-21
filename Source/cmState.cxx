@@ -1030,6 +1030,7 @@ cmStateSnapshot cmState::Pop(cmStateSnapshot const& originSnapshot)
   prevPos->LinkDirectoriesPosition =
     prevPos->BuildSystemDirectory->LinkDirectories.size();
   prevPos->BuildSystemDirectory->CurrentScope = prevPos;
+  prevPos->UnwindState = pos->UnwindState;
 
   if (!pos->Keep && this->SnapshotData.IsLast(pos)) {
     if (pos->Vars != prevPos->Vars) {
