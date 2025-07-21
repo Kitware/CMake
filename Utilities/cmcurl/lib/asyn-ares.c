@@ -48,6 +48,7 @@
 #endif
 
 #include "urldata.h"
+#include "cfilters.h"
 #include "sendf.h"
 #include "hostip.h"
 #include "hash.h"
@@ -451,8 +452,7 @@ CURLcode Curl_async_await(struct Curl_easy *data,
   /* Operation complete, if the lookup was successful we now have the entry
      in the cache. */
   data->state.async.done = TRUE;
-  if(entry)
-    *entry = data->state.async.dns;
+  *entry = data->state.async.dns;
 
   if(result)
     ares_cancel(ares->channel);
@@ -758,7 +758,8 @@ struct Curl_addrinfo *Curl_async_getaddrinfo(struct Curl_easy *data,
                  (pf == PF_UNSPEC) ? "A+AAAA" :
                  ((pf == PF_INET) ? "A" : "AAAA"));
     hints.ai_family = pf;
-    hints.ai_socktype = (data->conn->transport == TRNSPRT_TCP) ?
+    hints.ai_socktype =
+      (Curl_conn_get_transport(data, data->conn) == TRNSPRT_TCP) ?
       SOCK_STREAM : SOCK_DGRAM;
     /* Since the service is a numerical one, set the hint flags
      * accordingly to save a call to getservbyname in inside C-Ares

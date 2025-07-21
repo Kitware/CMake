@@ -190,8 +190,6 @@ CURLcode Curl_pin_peer_pubkey(struct Curl_easy *data,
 
 bool Curl_ssl_cert_status_request(void);
 
-bool Curl_ssl_false_start(void);
-
 /* The maximum size of the SSL channel binding is 85 bytes, as defined in
  * RFC 5929, Section 4.1. The 'tls-server-end-point:' prefix is 21 bytes long,
  * and SHA-512 is the longest supported hash algorithm, with a digest length of
@@ -209,7 +207,7 @@ bool Curl_ssl_false_start(void);
  * returned.
  */
 CURLcode Curl_ssl_get_channel_binding(struct Curl_easy *data, int sockindex,
-                                       struct dynbuf *binding);
+                                      struct dynbuf *binding);
 
 #define SSL_SHUTDOWN_TIMEOUT 10000 /* ms */
 
@@ -234,16 +232,6 @@ CURLcode Curl_cf_ssl_proxy_insert_after(struct Curl_cfilter *cf_at,
  * `data` maybe NULL for the features of the default implementation.
  */
 bool Curl_ssl_supports(struct Curl_easy *data, unsigned int ssl_option);
-
-/**
- * Get the internal ssl instance (like OpenSSL's SSL*) from the filter
- * chain at `sockindex` of type specified by `info`.
- * For `n` == 0, the first active (top down) instance is returned.
- * 1 gives the second active, etc.
- * NULL is returned when no active SSL filter is present.
- */
-void *Curl_ssl_get_internals(struct Curl_easy *data, int sockindex,
-                             CURLINFO info, int n);
 
 /**
  * Get the ssl_config_data in `data` that is relevant for cfilter `cf`.
@@ -274,8 +262,6 @@ extern struct Curl_cftype Curl_cft_ssl_proxy;
 #define Curl_ssl_free_certinfo(x) Curl_nop_stmt
 #define Curl_ssl_random(x,y,z) ((void)x, CURLE_NOT_BUILT_IN)
 #define Curl_ssl_cert_status_request() FALSE
-#define Curl_ssl_false_start() FALSE
-#define Curl_ssl_get_internals(a,b,c,d) NULL
 #define Curl_ssl_supports(a,b) FALSE
 #define Curl_ssl_cfilter_add(a,b,c) CURLE_NOT_BUILT_IN
 #define Curl_ssl_cfilter_remove(a,b,c) CURLE_OK

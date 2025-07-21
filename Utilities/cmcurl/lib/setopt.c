@@ -60,6 +60,35 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
+
+static CURLcode setopt_set_timeout_sec(timediff_t *ptimeout_ms, long secs)
+{
+  if(secs < 0)
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+#if LONG_MAX > (TIMEDIFF_T_MAX/1000)
+  if(secs > (TIMEDIFF_T_MAX/1000)) {
+    *ptimeout_ms = TIMEDIFF_T_MAX;
+    return CURLE_OK;
+  }
+#endif
+  *ptimeout_ms = (timediff_t)secs * 1000;
+  return CURLE_OK;
+}
+
+static CURLcode setopt_set_timeout_ms(timediff_t *ptimeout_ms, long ms)
+{
+  if(ms < 0)
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+#if LONG_MAX > TIMEDIFF_T_MAX
+  if(ms > TIMEDIFF_T_MAX) {
+    *ptimeout_ms = TIMEDIFF_T_MAX;
+    return CURLE_OK;
+  }
+#endif
+  *ptimeout_ms = (timediff_t)ms;
+  return CURLE_OK;
+}
+
 CURLcode Curl_setstropt(char **charp, const char *s)
 {
   /* Release the previous storage at `charp' and replace by a dynamic storage
@@ -211,6 +240,7 @@ static CURLcode protocol2num(const char *str, curl_prot_t *val)
   return CURLE_OK;
 }
 
+#if !defined(CURL_DISABLE_HTTP) || !defined(CURL_DISABLE_PROXY)
 static CURLcode httpauth(struct Curl_easy *data, bool proxy,
                          unsigned long auth)
 {
@@ -255,6 +285,7 @@ static CURLcode httpauth(struct Curl_easy *data, bool proxy,
     data->set.httpauth = auth;
   return CURLE_OK;
 }
+#endif /* !CURL_DISABLE_HTTP || !CURL_DISABLE_PROXY */
 
 #ifndef CURL_DISABLE_HTTP
 static CURLcode setopt_HTTP_VERSION(struct Curl_easy *data, long arg)
@@ -526,21 +557,15 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
      * Option that specifies how quickly a server response must be obtained
      * before it is considered failure. For pingpong protocols.
      */
-    if((arg >= 0) && (arg <= (INT_MAX/1000)))
-      data->set.server_response_timeout = (unsigned int)arg * 1000;
-    else
-      return CURLE_BAD_FUNCTION_ARGUMENT;
-    break;
+    return setopt_set_timeout_sec(&data->set.server_response_timeout, arg);
+
   case CURLOPT_SERVER_RESPONSE_TIMEOUT_MS:
     /*
      * Option that specifies how quickly a server response must be obtained
      * before it is considered failure. For pingpong protocols.
      */
-    if((arg >= 0) && (arg <= INT_MAX))
-      data->set.server_response_timeout = (unsigned int)arg;
-    else
-      return CURLE_BAD_FUNCTION_ARGUMENT;
-    break;
+    return setopt_set_timeout_ms(&data->set.server_response_timeout, arg);
+
 #ifndef CURL_DISABLE_TFTP
   case CURLOPT_TFTP_NO_OPTIONS:
     /*
@@ -883,10 +908,8 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
     /*
      * The maximum time for curl to wait for FTP server connect
      */
-    if(uarg > UINT_MAX)
-      uarg = UINT_MAX;
-    data->set.accepttimeout = (unsigned int)uarg;
-    break;
+    return setopt_set_timeout_ms(&data->set.accepttimeout, arg);
+
   case CURLOPT_WILDCARDMATCH:
     data->set.wildcard_enabled = enabled;
     break;
@@ -943,33 +966,19 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
      * The maximum time you allow curl to use for a single transfer
      * operation.
      */
-    if((arg >= 0) && (arg <= (INT_MAX/1000)))
-      data->set.timeout = (unsigned int)arg * 1000;
-    else
-      return CURLE_BAD_FUNCTION_ARGUMENT;
-    break;
+    return setopt_set_timeout_sec(&data->set.timeout, arg);
 
   case CURLOPT_TIMEOUT_MS:
-    if(uarg > UINT_MAX)
-      uarg = UINT_MAX;
-    data->set.timeout = (unsigned int)uarg;
-    break;
+    return setopt_set_timeout_ms(&data->set.timeout, arg);
 
   case CURLOPT_CONNECTTIMEOUT:
     /*
      * The maximum time you allow curl to use to connect.
      */
-    if((arg >= 0) && (arg <= (INT_MAX/1000)))
-      data->set.connecttimeout = (unsigned int)arg * 1000;
-    else
-      return CURLE_BAD_FUNCTION_ARGUMENT;
-    break;
+    return setopt_set_timeout_sec(&data->set.connecttimeout, arg);
 
   case CURLOPT_CONNECTTIMEOUT_MS:
-    if(uarg > UINT_MAX)
-      uarg = UINT_MAX;
-    data->set.connecttimeout = (unsigned int)uarg;
-    break;
+    return setopt_set_timeout_ms(&data->set.connecttimeout, arg);
 
   case CURLOPT_RESUME_FROM:
     /*
@@ -1074,13 +1083,9 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
     break;
   case CURLOPT_SSL_FALSESTART:
     /*
-     * Enable TLS false start.
+     * No TLS backends support false start anymore.
      */
-    if(!Curl_ssl_false_start())
-      return CURLE_NOT_BUILT_IN;
-
-    data->set.ssl.falsestart = enabled;
-    break;
+    return CURLE_NOT_BUILT_IN;
   case CURLOPT_CERTINFO:
 #ifdef USE_SSL
     if(Curl_ssl_supports(data, SSLSUPP_CERTINFO))
@@ -1347,10 +1352,8 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
     data->set.suppress_connect_headers = enabled;
     break;
   case CURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS:
-    if(uarg > UINT_MAX)
-      uarg = UINT_MAX;
-    data->set.happy_eyeballs_timeout = (unsigned int)uarg;
-    break;
+    return setopt_set_timeout_ms(&data->set.happy_eyeballs_timeout, arg);
+
 #ifndef CURL_DISABLE_SHUFFLE_DNS
   case CURLOPT_DNS_SHUFFLE_ADDRESSES:
     data->set.dns_shuffle_addresses = enabled;
@@ -1366,15 +1369,11 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
     data->set.upkeep_interval_ms = arg;
     break;
   case CURLOPT_MAXAGE_CONN:
-    if(arg < 0)
-      return CURLE_BAD_FUNCTION_ARGUMENT;
-    data->set.maxage_conn = arg;
-    break;
+    return setopt_set_timeout_sec(&data->set.conn_max_idle_ms, arg);
+
   case CURLOPT_MAXLIFETIME_CONN:
-    if(arg < 0)
-      return CURLE_BAD_FUNCTION_ARGUMENT;
-    data->set.maxlifetime_conn = arg;
-    break;
+    return setopt_set_timeout_sec(&data->set.conn_max_age_ms, arg);
+
 #ifndef CURL_DISABLE_HSTS
   case CURLOPT_HSTS_CTRL:
     if(arg & CURLHSTS_ENABLE) {
@@ -1877,23 +1876,23 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
     if(!ptr)
       break;
 
-    if(strcasecompare(ptr, "ALL")) {
+    if(curl_strequal(ptr, "ALL")) {
       /* clear all cookies */
       Curl_share_lock(data, CURL_LOCK_DATA_COOKIE, CURL_LOCK_ACCESS_SINGLE);
       Curl_cookie_clearall(data->cookies);
       Curl_share_unlock(data, CURL_LOCK_DATA_COOKIE);
     }
-    else if(strcasecompare(ptr, "SESS")) {
+    else if(curl_strequal(ptr, "SESS")) {
       /* clear session cookies */
       Curl_share_lock(data, CURL_LOCK_DATA_COOKIE, CURL_LOCK_ACCESS_SINGLE);
       Curl_cookie_clearsess(data->cookies);
       Curl_share_unlock(data, CURL_LOCK_DATA_COOKIE);
     }
-    else if(strcasecompare(ptr, "FLUSH")) {
+    else if(curl_strequal(ptr, "FLUSH")) {
       /* flush cookies to file, takes care of the locking */
       Curl_flush_cookies(data, FALSE);
     }
-    else if(strcasecompare(ptr, "RELOAD")) {
+    else if(curl_strequal(ptr, "RELOAD")) {
       /* reload cookies from file */
       Curl_cookie_loadfiles(data);
       break;
@@ -2557,12 +2556,12 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
     return Curl_setstropt(&data->set.str[STRING_TLSAUTH_PASSWORD_PROXY], ptr);
 #endif
   case CURLOPT_TLSAUTH_TYPE:
-    if(ptr && !strcasecompare(ptr, "SRP"))
+    if(ptr && !curl_strequal(ptr, "SRP"))
       return CURLE_BAD_FUNCTION_ARGUMENT;
     break;
 #ifndef CURL_DISABLE_PROXY
   case CURLOPT_PROXY_TLSAUTH_TYPE:
-    if(ptr && !strcasecompare(ptr, "SRP"))
+    if(ptr && !curl_strequal(ptr, "SRP"))
       return CURLE_BAD_FUNCTION_ARGUMENT;
     break;
 #endif

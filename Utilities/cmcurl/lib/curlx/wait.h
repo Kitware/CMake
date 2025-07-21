@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_BEARSSL_H
-#define HEADER_CURL_BEARSSL_H
+#ifndef HEADER_CURL_WAIT_H
+#define HEADER_CURL_WAIT_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) Michael Forney, <mforney@mforney.org>
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -26,9 +26,6 @@
 
 #include "../curl_setup.h"
 
-#ifdef USE_BEARSSL
+int curlx_wait_ms(timediff_t timeout_ms);
 
-extern const struct Curl_ssl Curl_ssl_bearssl;
-
-#endif /* USE_BEARSSL */
-#endif /* HEADER_CURL_BEARSSL_H */
+#endif /* HEADER_CURL_WAIT_H */

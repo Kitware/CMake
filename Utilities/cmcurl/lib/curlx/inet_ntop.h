@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_SECTRANSP_H
-#define HEADER_CURL_SECTRANSP_H
+#ifndef HEADER_CURL_INET_NTOP_H
+#define HEADER_CURL_INET_NTOP_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -7,7 +7,6 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) Nick Zitzmann, <nickzman@gmail.com>.
  * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
@@ -24,11 +23,29 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
+
 #include "../curl_setup.h"
 
-#ifdef USE_SECTRANSP
+char *curlx_inet_ntop(int af, const void *addr, char *buf, size_t size);
 
-extern const struct Curl_ssl Curl_ssl_sectransp;
+#ifdef HAVE_INET_NTOP
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#ifndef _WIN32
+#include <sys/socket.h>
+#endif
+#ifdef HAVE_ARPA_INET_H
+#include <arpa/inet.h>
+#endif
+#ifdef __AMIGA__
+#define curlx_inet_ntop(af,addr,buf,size)                               \
+  (char *)inet_ntop(af, CURL_UNCONST(addr), (unsigned char *)buf,       \
+                    (curl_socklen_t)(size))
+#else
+#define curlx_inet_ntop(af,addr,buf,size)                \
+  inet_ntop(af, addr, buf, (curl_socklen_t)(size))
+#endif
+#endif
 
-#endif /* USE_SECTRANSP */
-#endif /* HEADER_CURL_SECTRANSP_H */
+#endif /* HEADER_CURL_INET_NTOP_H */

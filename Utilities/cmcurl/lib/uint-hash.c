@@ -107,8 +107,8 @@ static void uint_hash_entry_unlink(struct uint_hash *h,
 }
 
 static void uint_hash_elem_link(struct uint_hash *h,
-                                 struct uint_hash_entry **he_anchor,
-                                 struct uint_hash_entry *he)
+                                struct uint_hash_entry **he_anchor,
+                                struct uint_hash_entry *he)
 {
   he->next = *he_anchor;
   *he_anchor = he;
@@ -206,10 +206,12 @@ static void uint_hash_clear(struct uint_hash *h)
   }
 }
 
-void Curl_uint_hash_clear(struct uint_hash *h)
+#ifdef UNITTESTS
+UNITTEST void Curl_uint_hash_clear(struct uint_hash *h)
 {
   uint_hash_clear(h);
 }
+#endif
 
 void Curl_uint_hash_destroy(struct uint_hash *h)
 {

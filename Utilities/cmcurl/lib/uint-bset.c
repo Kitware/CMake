@@ -45,7 +45,8 @@ void Curl_uint_bset_init(struct uint_bset *bset)
 
 CURLcode Curl_uint_bset_resize(struct uint_bset *bset, unsigned int nmax)
 {
-  unsigned int nslots = (nmax + 63) / 64;
+  unsigned int nslots = (nmax < (UINT_MAX-63)) ?
+                        ((nmax + 63) / 64) : (UINT_MAX / 64);
 
   DEBUGASSERT(bset->init == CURL_UINT_BSET_MAGIC);
   if(nslots != bset->nslots) {
@@ -60,6 +61,7 @@ CURLcode Curl_uint_bset_resize(struct uint_bset *bset, unsigned int nmax)
     }
     bset->slots = slots;
     bset->nslots = nslots;
+    bset->first_slot_used = 0;
   }
   return CURLE_OK;
 }
@@ -72,14 +74,13 @@ void Curl_uint_bset_destroy(struct uint_bset *bset)
   memset(bset, 0, sizeof(*bset));
 }
 
-
-unsigned int Curl_uint_bset_capacity(struct uint_bset *bset)
+#ifdef UNITTESTS
+UNITTEST unsigned int Curl_uint_bset_capacity(struct uint_bset *bset)
 {
   return bset->nslots * 64;
 }
 
-
-unsigned int Curl_uint_bset_count(struct uint_bset *bset)
+UNITTEST unsigned int Curl_uint_bset_count(struct uint_bset *bset)
 {
   unsigned int i;
   unsigned int n = 0;
@@ -89,12 +90,12 @@ unsigned int Curl_uint_bset_count(struct uint_bset *bset)
   }
   return n;
 }
-
+#endif
 
 bool Curl_uint_bset_empty(struct uint_bset *bset)
 {
   unsigned int i;
-  for(i = 0; i < bset->nslots; ++i) {
+  for(i = bset->first_slot_used; i < bset->nslots; ++i) {
     if(bset->slots[i])
       return FALSE;
   }
@@ -104,8 +105,10 @@ bool Curl_uint_bset_empty(struct uint_bset *bset)
 
 void Curl_uint_bset_clear(struct uint_bset *bset)
 {
-  if(bset->nslots)
+  if(bset->nslots) {
     memset(bset->slots, 0, bset->nslots * sizeof(curl_uint64_t));
+    bset->first_slot_used = UINT_MAX;
+  }
 }
 
 
@@ -115,6 +118,8 @@ bool Curl_uint_bset_add(struct uint_bset *bset, unsigned int i)
   if(islot >= bset->nslots)
     return FALSE;
   bset->slots[islot] |= ((curl_uint64_t)1 << (i % 64));
+  if(islot < bset->first_slot_used)
+    bset->first_slot_used = islot;
   return TRUE;
 }
 
@@ -139,13 +144,14 @@ bool Curl_uint_bset_contains(struct uint_bset *bset, unsigned int i)
 bool Curl_uint_bset_first(struct uint_bset *bset, unsigned int *pfirst)
 {
   unsigned int i;
-  for(i = 0; i < bset->nslots; ++i) {
+  for(i = bset->first_slot_used; i < bset->nslots; ++i) {
     if(bset->slots[i]) {
       *pfirst = (i * 64) + CURL_CTZ64(bset->slots[i]);
+      bset->first_slot_used = i;
       return TRUE;
     }
   }
-  *pfirst = UINT_MAX; /* a value we cannot store */
+  bset->first_slot_used = *pfirst = UINT_MAX;
   return FALSE;
 }
 
@@ -183,11 +189,11 @@ unsigned int Curl_popcount64(curl_uint64_t x)
   /* Compute the "Hamming Distance" between 'x' and 0,
    * which is the number of set bits in 'x'.
    * See: https://en.wikipedia.org/wiki/Hamming_weight */
-  const curl_uint64_t m1  = CURL_OFF_TU_C(0x5555555555555555); /* 0101+ */
-  const curl_uint64_t m2  = CURL_OFF_TU_C(0x3333333333333333); /* 00110011+ */
-  const curl_uint64_t m4  = CURL_OFF_TU_C(0x0f0f0f0f0f0f0f0f); /* 00001111+ */
+  const curl_uint64_t m1  = 0x5555555555555555LL; /* 0101+ */
+  const curl_uint64_t m2  = 0x3333333333333333LL; /* 00110011+ */
+  const curl_uint64_t m4  = 0x0f0f0f0f0f0f0f0fLL; /* 00001111+ */
    /* 1 + 256^1 + 256^2 + 256^3 + ... + 256^7 */
-  const curl_uint64_t h01 = CURL_OFF_TU_C(0x0101010101010101);
+  const curl_uint64_t h01 = 0x0101010101010101LL;
   x -= (x >> 1) & m1;             /* replace every 2 bits with bits present */
   x = (x & m2) + ((x >> 2) & m2); /* replace every nibble with bits present */
   x = (x + (x >> 4)) & m4;        /* replace every byte with bits present */
@@ -203,11 +209,11 @@ unsigned int Curl_ctz64(curl_uint64_t x)
 {
   /* count trailing zeros in a curl_uint64_t.
    * divide and conquer to find the number of lower 0 bits */
-  const curl_uint64_t ml32 = CURL_OFF_TU_C(0xFFFFFFFF); /* lower 32 bits */
-  const curl_uint64_t ml16 = CURL_OFF_TU_C(0x0000FFFF); /* lower 16 bits */
-  const curl_uint64_t ml8  = CURL_OFF_TU_C(0x000000FF); /* lower 8 bits */
-  const curl_uint64_t ml4  = CURL_OFF_TU_C(0x0000000F); /* lower 4 bits */
-  const curl_uint64_t ml2  = CURL_OFF_TU_C(0x00000003); /* lower 2 bits */
+  const curl_uint64_t ml32 = 0xFFFFFFFF; /* lower 32 bits */
+  const curl_uint64_t ml16 = 0x0000FFFF; /* lower 16 bits */
+  const curl_uint64_t ml8  = 0x000000FF; /* lower 8 bits */
+  const curl_uint64_t ml4  = 0x0000000F; /* lower 4 bits */
+  const curl_uint64_t ml2  = 0x00000003; /* lower 2 bits */
   unsigned int n;
 
   if(!x)

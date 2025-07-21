@@ -32,7 +32,6 @@
 #include "urldata.h"
 #include "altsvc.h"
 #include "curl_get_line.h"
-#include "strcase.h"
 #include "parsedate.h"
 #include "sendf.h"
 #include "curlx/warnless.h"
@@ -416,7 +415,7 @@ static bool hostcompare(const char *host, const char *check)
   if(hlen != clen)
     /* they cannot match if they have different lengths */
     return FALSE;
-  return strncasecompare(host, check, hlen);
+  return curl_strnequal(host, check, hlen);
 }
 
 /* altsvc_flush() removes all alternatives for this source origin from the
@@ -487,8 +486,7 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
   DEBUGASSERT(asi);
 
   /* initial check for "clear" */
-  if(!curlx_str_until(&p, &alpn, MAX_ALTSVC_LINE, ';') &&
-     !curlx_str_single(&p, ';')) {
+  if(!curlx_str_cspn(&p, &alpn, ";\n\r")) {
     curlx_str_trimblanks(&alpn);
     /* "clear" is a magic keyword */
     if(curlx_str_casecompare(&alpn, "clear")) {
@@ -665,5 +663,9 @@ bool Curl_altsvc_lookup(struct altsvcinfo *asi,
   }
   return FALSE;
 }
+
+#if defined(DEBUGBUILD) || defined(UNITTESTS)
+#undef time
+#endif
 
 #endif /* !CURL_DISABLE_HTTP && !CURL_DISABLE_ALTSVC */

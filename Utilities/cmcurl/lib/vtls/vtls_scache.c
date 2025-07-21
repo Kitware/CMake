@@ -29,9 +29,6 @@
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
-#ifdef HAVE_SYS_STAT_H
-#include <sys/stat.h>
-#endif
 #ifdef HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
@@ -376,9 +373,9 @@ void Curl_ssl_scache_unlock(struct Curl_easy *data)
 }
 
 static CURLcode cf_ssl_peer_key_add_path(struct dynbuf *buf,
-                                          const char *name,
-                                          char *path,
-                                          bool *is_local)
+                                         const char *name,
+                                         char *path,
+                                         bool *is_local)
 {
   if(path && path[0]) {
     /* We try to add absolute paths, so that the session key can stay
@@ -410,8 +407,8 @@ static CURLcode cf_ssl_peer_key_add_path(struct dynbuf *buf,
 }
 
 static CURLcode cf_ssl_peer_key_add_hash(struct dynbuf *buf,
-                                          const char *name,
-                                          struct curl_blob *blob)
+                                         const char *name,
+                                         struct curl_blob *blob)
 {
   CURLcode r = CURLE_OK;
   if(blob && blob->len) {
@@ -649,7 +646,7 @@ cf_ssl_find_peer_by_key(struct Curl_easy *data,
   /* check for entries with known peer_key */
   for(i = 0; scache && i < scache->peer_count; i++) {
     if(scache->peers[i].ssl_peer_key &&
-       strcasecompare(ssl_peer_key, scache->peers[i].ssl_peer_key) &&
+       curl_strequal(ssl_peer_key, scache->peers[i].ssl_peer_key) &&
        cf_ssl_scache_match_auth(&scache->peers[i], conn_config)) {
       /* yes, we have a cached session for this! */
       *ppeer = &scache->peers[i];
@@ -868,9 +865,9 @@ CURLcode Curl_ssl_scache_put(struct Curl_cfilter *cf,
 }
 
 void Curl_ssl_scache_return(struct Curl_cfilter *cf,
-                           struct Curl_easy *data,
-                           const char *ssl_peer_key,
-                           struct Curl_ssl_session *s)
+                            struct Curl_easy *data,
+                            const char *ssl_peer_key,
+                            struct Curl_ssl_session *s)
 {
   /* See RFC 8446 C.4:
    * "Clients SHOULD NOT reuse a ticket for multiple connections." */

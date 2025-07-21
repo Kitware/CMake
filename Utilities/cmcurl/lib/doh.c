@@ -257,7 +257,7 @@ static void doh_probe_done(struct Curl_easy *data,
 
     if(!dohp->pending) {
       /* DoH completed, run the transfer picking up the results */
-      Curl_expire(data, 0, EXPIRE_RUN_NOW);
+      Curl_multi_mark_dirty(data);
     }
   }
 }
@@ -377,8 +377,6 @@ static CURLcode doh_probe_run(struct Curl_easy *data,
      options should be added to check doh proxy insecure separately,
      CURLOPT_DOH_PROXY_SSL_VERIFYHOST and CURLOPT_DOH_PROXY_SSL_VERIFYPEER.
      */
-  if(data->set.ssl.falsestart)
-    ERROR_CHECK_SETOPT(CURLOPT_SSL_FALSESTART, 1L);
   if(data->set.str[STRING_SSL_CAFILE]) {
     ERROR_CHECK_SETOPT(CURLOPT_CAINFO,
                        data->set.str[STRING_SSL_CAFILE]);
@@ -590,7 +588,7 @@ static void doh_store_a(const unsigned char *doh, int index,
 }
 
 static void doh_store_aaaa(const unsigned char *doh, int index,
-                              struct dohentry *d)
+                           struct dohentry *d)
 {
   /* silently ignore addresses over the limit */
   if(d->numaddr < DOH_MAX_ADDR) {
