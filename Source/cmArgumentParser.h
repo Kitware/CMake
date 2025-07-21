@@ -190,14 +190,25 @@ class Instance
 public:
   Instance(ActionMap const& bindings, ParseResult* parseResult,
            std::vector<std::string>* unparsedArguments, void* result = nullptr)
-
-    : ParseState(bindings, result)
-    , ParseResults(parseResult)
+    : ParseResults(parseResult)
     , UnparsedArguments(unparsedArguments)
   {
+    PushState(bindings, result);
   }
 
-  ParserState& GetState() { return ParseState; }
+  ParserState& GetState() { return this->Stack.back(); }
+
+  void PushState(ActionMap const& bindings, void* result)
+  {
+    this->Stack.emplace_back(bindings, result);
+  }
+
+  void PopState()
+  {
+    if (!this->Stack.empty()) {
+      this->Stack.pop_back();
+    }
+  }
 
   void Bind(std::function<Continue(cm::string_view)> f, ExpectAtLeast expect);
   void Bind(bool& val);
@@ -207,6 +218,7 @@ public:
   void Bind(MaybeEmpty<std::vector<std::string>>& val);
   void Bind(NonEmpty<std::vector<std::string>>& val);
   void Bind(std::vector<std::vector<std::string>>& val);
+
   template <typename U>
   void Bind(NonEmpty<std::vector<std::pair<std::string, U>>>& val,
             U const& context)
@@ -239,20 +251,39 @@ public:
   }
 
   template <typename Range>
-  void Parse(Range const& args, std::size_t pos = 0)
+  void Parse(Range& args, std::size_t const pos = 0)
   {
     GetState().Pos = pos;
+    for (cm::string_view arg : args) {
+      for (size_t j = 0; j < FindKeywordOwnerLevel(arg); ++j) {
+        this->PopState();
+      }
 
-    for (cm::string_view const arg : args) {
       this->Consume(arg);
       GetState().Pos++;
     }
 
     this->FinishKeyword();
+
+    while (this->Stack.size() > 1) {
+      this->FinishKeyword();
+      this->PopState();
+    }
+  }
+
+  std::size_t FindKeywordOwnerLevel(cm::string_view arg) const
+  {
+    for (std::size_t i = Stack.size(); i--;) {
+      if (this->Stack[i].Bindings.Keywords.Find(arg) !=
+          this->Stack[i].Bindings.Keywords.end()) {
+        return (this->Stack.size() - 1) - i;
+      }
+    }
+    return 0;
   }
 
 private:
-  ParserState ParseState;
+  std::vector<ParserState> Stack;
   ParseResult* ParseResults = nullptr;
   std::vector<std::string>* UnparsedArguments = nullptr;
 
@@ -269,6 +300,8 @@ template <typename Result>
 class cmArgumentParser : private ArgumentParser::Base
 {
 public:
+  using Base::Bindings;
+
   // I *think* this function could be made `constexpr` when the code is
   // compiled as C++20.  This would allow building a parser at compile time.
   template <typename T, typename cT = cm::member_pointer_class_t<T>,
@@ -393,6 +426,39 @@ public:
     return *this;
   }
 
+  template <typename T, typename U>
+  cmArgumentParser& BindSubParser(cm::static_string_view name,
+                                  cmArgumentParser<T>& parser,
+                                  cm::optional<T> U::*member)
+  {
+
+    this->Base::Bind(name, [name, parser, member](Instance& instance) {
+      auto* parentResult = static_cast<Result*>(instance.GetState().Result);
+      auto& childResult = parentResult->*member;
+      childResult.emplace(T());
+      instance.Bind(nullptr, ExpectAtLeast{ 0 });
+      instance.PushState(parser.Bindings, &(*childResult));
+      instance.Consume(name);
+    });
+
+    return *this;
+  }
+
+  template <typename T, typename U>
+  cmArgumentParser& BindSubParser(cm::static_string_view name,
+                                  cmArgumentParser<T>& parser, T U::*member)
+  {
+    this->Base::Bind(name, [name, parser, member](Instance& instance) {
+      auto* parentResult = static_cast<Result*>(instance.GetState().Result);
+      auto* childResult = &(parentResult->*member);
+      instance.Bind(nullptr, ExpectAtLeast{ 1 });
+      instance.PushState(parser.Bindings, childResult);
+      instance.Consume(name);
+    });
+
+    return *this;
+  }
+
   template <typename Range>
   bool Parse(Result& result, Range const& args,
              std::vector<std::string>* unparsedArguments,
@@ -425,6 +491,8 @@ template <>
 class cmArgumentParser<void> : private ArgumentParser::Base
 {
 public:
+  using Base::Bindings;
+
   template <typename T>
   cmArgumentParser& Bind(cm::static_string_view name, T& ref)
   {
@@ -480,6 +548,32 @@ public:
   {
     this->Base::BindTrailingArgs(
       [&ref](Instance& instance) { instance.Bind(ref); });
+    return *this;
+  }
+
+  template <typename T, typename U>
+  cmArgumentParser& BindSubParser(cm::static_string_view name,
+                                  cmArgumentParser<T>& parser,
+                                  cm::optional<U>& subResult)
+  {
+    this->Base::Bind(name, [name, parser, &subResult](Instance& instance) {
+      subResult.emplace(U());
+      instance.Bind(nullptr, ExpectAtLeast{ 0 });
+      instance.PushState(parser.Bindings, &(*subResult));
+      instance.Consume(name);
+    });
+    return *this;
+  }
+
+  template <typename T, typename U>
+  cmArgumentParser& BindSubParser(cm::static_string_view name,
+                                  cmArgumentParser<T>& parser, U& subResult)
+  {
+    this->Base::Bind(name, [name, parser, &subResult](Instance& instance) {
+      instance.Bind(nullptr, ExpectAtLeast{ 1 });
+      instance.PushState(parser.Bindings, &subResult);
+      instance.Consume(name);
+    });
     return *this;
   }
 

@@ -186,11 +186,11 @@ void Instance::Consume(cm::string_view arg)
 
 void Instance::FinishKeyword()
 {
-  ParserState& state = this->GetState();
-
-  if (state.DoneWithPositional) {
+  ParserState const& state = this->GetState();
+  if (!state.DoneWithPositional) {
     return;
   }
+
   if (state.KeywordValuesSeen < state.KeywordValuesExpected) {
     if (this->ParseResults) {
       this->ParseResults->AddKeywordError(state.Keyword,
