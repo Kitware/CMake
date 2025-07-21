@@ -56,8 +56,8 @@ auto PositionActionMap::Find(std::size_t pos) const -> const_iterator
 void Instance::Bind(std::function<Continue(cm::string_view)> f,
                     ExpectAtLeast expect)
 {
-  this->KeywordValueFunc = std::move(f);
-  this->KeywordValuesExpected = expect.Count;
+  this->GetState().KeywordValueFunc = std::move(f);
+  this->GetState().KeywordValuesExpected = expect.Count;
 }
 
 void Instance::Bind(bool& val)
@@ -81,7 +81,7 @@ void Instance::Bind(NonEmpty<std::string>& val)
   this->Bind(
     [this, &val](cm::string_view arg) -> Continue {
       if (arg.empty() && this->ParseResults) {
-        this->ParseResults->AddKeywordError(this->Keyword,
+        this->ParseResults->AddKeywordError(this->GetState().Keyword,
                                             "  empty string not allowed\n");
       }
       val = std::string(arg);
@@ -132,48 +132,50 @@ void Instance::Bind(std::vector<std::vector<std::string>>& multiVal)
     ExpectAtLeast{ 0 });
 }
 
-void Instance::Consume(std::size_t pos, cm::string_view arg)
+void Instance::Consume(cm::string_view arg)
 {
-  auto const it = this->Bindings.Keywords.Find(arg);
-  if (it != this->Bindings.Keywords.end()) {
+  ParserState& state = this->GetState();
+
+  auto const it = state.Bindings.Keywords.Find(arg);
+  if (it != state.Bindings.Keywords.end()) {
     this->FinishKeyword();
-    this->Keyword = it->first;
-    this->KeywordValuesSeen = 0;
-    this->DoneWithPositional = true;
-    if (this->Bindings.ParsedKeyword) {
-      this->Bindings.ParsedKeyword(*this, it->first);
+    state.Keyword = it->first;
+    state.KeywordValuesSeen = 0;
+    state.DoneWithPositional = true;
+    if (state.Bindings.ParsedKeyword) {
+      state.Bindings.ParsedKeyword(*this, it->first);
     }
     it->second(*this);
     return;
   }
 
-  if (!this->DoneWithPositional) {
-    auto const pit = this->Bindings.Positions.Find(pos);
-    if (pit != this->Bindings.Positions.end()) {
-      pit->second(*this, pos, arg);
+  if (!state.DoneWithPositional) {
+    auto const pit = state.Bindings.Positions.Find(state.Pos);
+    if (pit != state.Bindings.Positions.end()) {
+      pit->second(*this, state.Pos, arg);
       return;
     }
 
-    if (this->Bindings.TrailingArgs) {
-      this->Keyword = ""_s;
-      this->KeywordValuesSeen = 0;
-      this->DoneWithPositional = true;
-      this->Bindings.TrailingArgs(*this);
-      if (!this->KeywordValueFunc) {
+    if (state.Bindings.TrailingArgs) {
+      state.Keyword = ""_s;
+      state.KeywordValuesSeen = 0;
+      state.DoneWithPositional = true;
+      state.Bindings.TrailingArgs(*this);
+      if (!state.KeywordValueFunc) {
         return;
       }
     }
   }
 
-  if (this->KeywordValueFunc) {
-    switch (this->KeywordValueFunc(arg)) {
+  if (state.KeywordValueFunc) {
+    switch (state.KeywordValueFunc(arg)) {
       case Continue::Yes:
         break;
       case Continue::No:
-        this->KeywordValueFunc = nullptr;
+        state.KeywordValueFunc = nullptr;
         break;
     }
-    ++this->KeywordValuesSeen;
+    ++state.KeywordValuesSeen;
     return;
   }
 
@@ -184,16 +186,18 @@ void Instance::Consume(std::size_t pos, cm::string_view arg)
 
 void Instance::FinishKeyword()
 {
-  if (!this->DoneWithPositional) {
+  ParserState& state = this->GetState();
+
+  if (state.DoneWithPositional) {
     return;
   }
-  if (this->KeywordValuesSeen < this->KeywordValuesExpected) {
+  if (state.KeywordValuesSeen < state.KeywordValuesExpected) {
     if (this->ParseResults) {
-      this->ParseResults->AddKeywordError(this->Keyword,
+      this->ParseResults->AddKeywordError(state.Keyword,
                                           "  missing required value\n");
     }
-    if (this->Bindings.KeywordMissingValue) {
-      this->Bindings.KeywordMissingValue(*this, this->Keyword);
+    if (state.Bindings.KeywordMissingValue) {
+      state.Bindings.KeywordMissingValue(*this, state.Keyword);
     }
   }
 }
