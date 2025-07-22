@@ -140,6 +140,13 @@ l:clang-analyzer-fedora42:
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
+l:clazy-fedora42:
+    extends:
+        - .fedora42_clazy
+        - .cmake_build_linux
+        - .linux_x86_64_tags
+        - .run_automatically
+
 # Linux builds
 
 b:centos7-x86_64:

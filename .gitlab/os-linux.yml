@@ -115,6 +115,15 @@
         CTEST_NO_WARNINGS_ALLOWED: 1
         CMAKE_CI_NO_INSTALL: 1
 
+.fedora42_clazy:
+    extends: .fedora42
+
+    variables:
+        CMAKE_CONFIGURATION: fedora42_clazy
+        CMAKE_CI_BUILD_TYPE: Debug
+        CTEST_NO_WARNINGS_ALLOWED: 1
+        CMAKE_CI_NO_INSTALL: 1
+
 .fedora42_sphinx:
     extends: .fedora42
 
