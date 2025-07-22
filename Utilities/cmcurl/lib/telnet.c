@@ -57,7 +57,6 @@
 #include "system_win32.h"
 #include "arpa_telnet.h"
 #include "select.h"
-#include "strcase.h"
 #include "curlx/warnless.h"
 #include "curlx/strparse.h"
 
@@ -171,7 +170,7 @@ static void sendsuboption(struct Curl_easy *data,
 
 static CURLcode telnet_do(struct Curl_easy *data, bool *done);
 static CURLcode telnet_done(struct Curl_easy *data,
-                                 CURLcode, bool premature);
+                            CURLcode, bool premature);
 static CURLcode send_telnet_data(struct Curl_easy *data,
                                  struct TELNET *tn,
                                  char *buffer, ssize_t nread);
@@ -839,7 +838,7 @@ static CURLcode check_telnet_options(struct Curl_easy *data,
       switch(olen) {
       case 5:
         /* Terminal type */
-        if(strncasecompare(option, "TTYPE", 5)) {
+        if(curl_strnequal(option, "TTYPE", 5)) {
           tn->subopt_ttype = arg;
           tn->us_preferred[CURL_TELOPT_TTYPE] = CURL_YES;
           break;
@@ -849,7 +848,7 @@ static CURLcode check_telnet_options(struct Curl_easy *data,
 
       case 8:
         /* Display variable */
-        if(strncasecompare(option, "XDISPLOC", 8)) {
+        if(curl_strnequal(option, "XDISPLOC", 8)) {
           tn->subopt_xdisploc = arg;
           tn->us_preferred[CURL_TELOPT_XDISPLOC] = CURL_YES;
           break;
@@ -859,7 +858,7 @@ static CURLcode check_telnet_options(struct Curl_easy *data,
 
       case 7:
         /* Environment variable */
-        if(strncasecompare(option, "NEW_ENV", 7)) {
+        if(curl_strnequal(option, "NEW_ENV", 7)) {
           beg = curl_slist_append(tn->telnet_vars, arg);
           if(!beg) {
             result = CURLE_OUT_OF_MEMORY;
@@ -874,7 +873,7 @@ static CURLcode check_telnet_options(struct Curl_easy *data,
 
       case 2:
         /* Window Size */
-        if(strncasecompare(option, "WS", 2)) {
+        if(curl_strnequal(option, "WS", 2)) {
           const char *p = arg;
           curl_off_t x = 0;
           curl_off_t y = 0;
@@ -896,7 +895,7 @@ static CURLcode check_telnet_options(struct Curl_easy *data,
 
       case 6:
         /* To take care or not of the 8th bit in data exchange */
-        if(strncasecompare(option, "BINARY", 6)) {
+        if(curl_strnequal(option, "BINARY", 6)) {
           int binary_option = atoi(arg);
           if(binary_option != 1) {
             tn->us_preferred[CURL_TELOPT_BINARY] = CURL_NO;
@@ -1314,8 +1313,8 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
   int poll_cnt;
   curl_off_t total_dl = 0;
   curl_off_t total_ul = 0;
+  ssize_t snread;
 #endif
-  ssize_t nread;
   struct curltime now;
   bool keepon = TRUE;
   char buffer[4*1024];
@@ -1464,6 +1463,7 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
       }
       if(events.lNetworkEvents & FD_READ) {
         /* read data from network */
+        size_t nread;
         result = Curl_xfer_recv(data, buffer, sizeof(buffer), &nread);
         /* read would have blocked. Loop again */
         if(result == CURLE_AGAIN)
@@ -1475,7 +1475,7 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
         }
         /* returned zero but actually received 0 or less here,
            the server closed the connection and we bail out */
-        else if(nread <= 0) {
+        else if(!nread) {
           keepon = FALSE;
           break;
         }
@@ -1550,6 +1550,7 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
     default:                    /* read! */
       if(pfd[0].revents & POLLIN) {
         /* read data from network */
+        size_t nread;
         result = Curl_xfer_recv(data, buffer, sizeof(buffer), &nread);
         /* read would have blocked. Loop again */
         if(result == CURLE_AGAIN)
@@ -1567,7 +1568,7 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
         }
         /* returned zero but actually received 0 or less here,
            the server closed the connection and we bail out */
-        else if(nread <= 0) {
+        else if(!nread) {
           keepon = FALSE;
           break;
         }
@@ -1590,34 +1591,34 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
         }
       }
 
-      nread = 0;
+      snread = 0;
       if(poll_cnt == 2) {
         if(pfd[1].revents & POLLIN) { /* read from in file */
-          nread = read(pfd[1].fd, buffer, sizeof(buffer));
+          snread = read(pfd[1].fd, buffer, sizeof(buffer));
         }
       }
       else {
         /* read from user-supplied method */
-        nread = (int)data->state.fread_func(buffer, 1, sizeof(buffer),
+        snread = (int)data->state.fread_func(buffer, 1, sizeof(buffer),
                                             data->state.in);
-        if(nread == CURL_READFUNC_ABORT) {
+        if(snread == CURL_READFUNC_ABORT) {
           keepon = FALSE;
           break;
         }
-        if(nread == CURL_READFUNC_PAUSE)
+        if(snread == CURL_READFUNC_PAUSE)
           break;
       }
 
-      if(nread > 0) {
-        result = send_telnet_data(data, tn, buffer, nread);
+      if(snread > 0) {
+        result = send_telnet_data(data, tn, buffer, snread);
         if(result) {
           keepon = FALSE;
           break;
         }
-        total_ul += nread;
+        total_ul += snread;
         Curl_pgrsSetUploadCounter(data, total_ul);
       }
-      else if(nread < 0)
+      else if(snread < 0)
         keepon = FALSE;
 
       break;

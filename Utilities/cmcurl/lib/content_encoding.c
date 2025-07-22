@@ -52,7 +52,6 @@
 #include "http.h"
 #include "content_encoding.h"
 #include "strdup.h"
-#include "strcase.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -343,7 +342,7 @@ static CURLcode gzip_do_write(struct Curl_easy *data,
 }
 
 static void gzip_do_close(struct Curl_easy *data,
-                              struct Curl_cwriter *writer)
+                          struct Curl_cwriter *writer)
 {
   struct zlib_writer *zp = (struct zlib_writer *) writer;
   z_stream *z = &zp->z;     /* zlib state structure */
@@ -464,7 +463,7 @@ static CURLcode brotli_do_write(struct Curl_easy *data,
 }
 
 static void brotli_do_close(struct Curl_easy *data,
-                                struct Curl_cwriter *writer)
+                            struct Curl_cwriter *writer)
 {
   struct brotli_writer *bp = (struct brotli_writer *) writer;
   (void) data;
@@ -567,7 +566,7 @@ static CURLcode zstd_do_write(struct Curl_easy *data,
 }
 
 static void zstd_do_close(struct Curl_easy *data,
-                              struct Curl_cwriter *writer)
+                          struct Curl_cwriter *writer)
 {
   struct zstd_writer *zp = (struct zstd_writer *) writer;
   (void)data;
@@ -636,7 +635,7 @@ void Curl_all_content_encodings(char *buf, size_t blen)
 
   for(cep = general_unencoders; *cep; cep++) {
     ce = *cep;
-    if(!strcasecompare(ce->name, CONTENT_ENCODING_DEFAULT))
+    if(!curl_strequal(ce->name, CONTENT_ENCODING_DEFAULT))
       len += strlen(ce->name) + 2;
   }
 
@@ -648,7 +647,7 @@ void Curl_all_content_encodings(char *buf, size_t blen)
     char *p = buf;
     for(cep = general_unencoders; *cep; cep++) {
       ce = *cep;
-      if(!strcasecompare(ce->name, CONTENT_ENCODING_DEFAULT)) {
+      if(!curl_strequal(ce->name, CONTENT_ENCODING_DEFAULT)) {
         strcpy(p, ce->name);
         p += strlen(p);
         *p++ = ',';
@@ -688,7 +687,7 @@ static CURLcode error_do_write(struct Curl_easy *data,
 }
 
 static void error_do_close(struct Curl_easy *data,
-                               struct Curl_cwriter *writer)
+                           struct Curl_cwriter *writer)
 {
   (void) data;
   (void) writer;
@@ -713,8 +712,8 @@ static const struct Curl_cwtype *find_unencode_writer(const char *name,
   if(phase == CURL_CW_TRANSFER_DECODE) {
     for(cep = transfer_unencoders; *cep; cep++) {
       const struct Curl_cwtype *ce = *cep;
-      if((strncasecompare(name, ce->name, len) && !ce->name[len]) ||
-         (ce->alias && strncasecompare(name, ce->alias, len)
+      if((curl_strnequal(name, ce->name, len) && !ce->name[len]) ||
+         (ce->alias && curl_strnequal(name, ce->alias, len)
                     && !ce->alias[len]))
         return ce;
     }
@@ -722,8 +721,8 @@ static const struct Curl_cwtype *find_unencode_writer(const char *name,
   /* look among the general decoders */
   for(cep = general_unencoders; *cep; cep++) {
     const struct Curl_cwtype *ce = *cep;
-    if((strncasecompare(name, ce->name, len) && !ce->name[len]) ||
-       (ce->alias && strncasecompare(name, ce->alias, len) && !ce->alias[len]))
+    if((curl_strnequal(name, ce->name, len) && !ce->name[len]) ||
+       (ce->alias && curl_strnequal(name, ce->alias, len) && !ce->alias[len]))
       return ce;
   }
   return NULL;
@@ -761,12 +760,12 @@ CURLcode Curl_build_unencoding_stack(struct Curl_easy *data,
       CURL_TRC_WRITE(data, "looking for %s decoder: %.*s",
                      is_transfer ? "transfer" : "content", (int)namelen, name);
       is_chunked = (is_transfer && (namelen == 7) &&
-                    strncasecompare(name, "chunked", 7));
+                    curl_strnequal(name, "chunked", 7));
       /* if we skip the decoding in this phase, do not look further.
        * Exception is "chunked" transfer-encoding which always must happen */
       if((is_transfer && !data->set.http_transfer_encoding && !is_chunked) ||
          (!is_transfer && data->set.http_ce_skip)) {
-        bool is_identity = strncasecompare(name, "identity", 8);
+        bool is_identity = curl_strnequal(name, "identity", 8);
         /* not requested, ignore */
         CURL_TRC_WRITE(data, "decoder not requested, ignored: %.*s",
                        (int)namelen, name);

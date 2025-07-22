@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_INET_NTOP_H
-#define HEADER_CURL_INET_NTOP_H
+#ifndef HEADER_CURL_TOOL_BINMODE_H
+#define HEADER_CURL_TOOL_BINMODE_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -23,29 +23,17 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
+#include "../curl_setup.h"
 
-#include "curl_setup.h"
-
-char *Curl_inet_ntop(int af, const void *addr, char *buf, size_t size);
-
-#ifdef HAVE_INET_NTOP
-#ifdef HAVE_NETINET_IN_H
-#include <netinet/in.h>
-#endif
-#ifdef HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#endif
-#ifdef HAVE_ARPA_INET_H
-#include <arpa/inet.h>
-#endif
-#ifdef __AMIGA__
-#define Curl_inet_ntop(af,addr,buf,size)                                \
-  (char *)inet_ntop(af, CURL_UNCONST(addr), (unsigned char *)buf,       \
-                    (curl_socklen_t)(size))
+#if (defined(HAVE_SETMODE) || defined(HAVE__SETMODE)) && defined(O_BINARY)
+/* Requires io.h and/or fcntl.h when available */
+#ifdef HAVE__SETMODE
+#  define CURLX_SET_BINMODE(stream)  (void)_setmode(fileno(stream), O_BINARY)
 #else
-#define Curl_inet_ntop(af,addr,buf,size)                \
-  inet_ntop(af, addr, buf, (curl_socklen_t)(size))
+#  define CURLX_SET_BINMODE(stream)  (void)setmode(fileno(stream), O_BINARY)
 #endif
+#else
+#  define CURLX_SET_BINMODE(stream)  (void)stream; Curl_nop_stmt
 #endif
 
-#endif /* HEADER_CURL_INET_NTOP_H */
+#endif /* HEADER_CURL_TOOL_BINMODE_H */

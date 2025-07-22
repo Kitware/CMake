@@ -83,16 +83,16 @@
 static void MSH3_CALL msh3_conn_connected(MSH3_CONNECTION *Connection,
                                           void *IfContext);
 static void MSH3_CALL msh3_conn_shutdown_complete(MSH3_CONNECTION *Connection,
-                                          void *IfContext);
+                                                  void *IfContext);
 static void MSH3_CALL msh3_conn_new_request(MSH3_CONNECTION *Connection,
-                                          void *IfContext,
-                                          MSH3_REQUEST *Request);
+                                            void *IfContext,
+                                            MSH3_REQUEST *Request);
 static void MSH3_CALL msh3_header_received(MSH3_REQUEST *Request,
                                            void *IfContext,
                                            const MSH3_HEADER *Header);
 static bool MSH3_CALL msh3_data_received(MSH3_REQUEST *Request,
-                                        void *IfContext, uint32_t *Length,
-                                        const uint8_t *Data);
+                                         void *IfContext, uint32_t *Length,
+                                         const uint8_t *Data);
 static void MSH3_CALL msh3_complete(MSH3_REQUEST *Request, void *IfContext,
                                     bool Aborted, uint64_t AbortError);
 static void MSH3_CALL msh3_shutdown_complete(MSH3_REQUEST *Request,
@@ -244,33 +244,17 @@ static void h3_data_done(struct Curl_cfilter *cf, struct Curl_easy *data)
 static void drain_stream_from_other_thread(struct Curl_easy *data,
                                            struct h3_stream_ctx *stream)
 {
-  unsigned char bits;
-
-  /* risky */
-  bits = CURL_CSELECT_IN;
-  if(stream && !stream->upload_done)
-    bits |= CURL_CSELECT_OUT;
-  if(data->state.select_bits != bits) {
-    data->state.select_bits = bits;
-    /* cannot expire from other thread */
-  }
+  (void)data;
+  (void)stream;
+  /* cannot expire from other thread.
+     here is the disconnect between msh3 and curl */
 }
 
 static void h3_drain_stream(struct Curl_cfilter *cf,
                             struct Curl_easy *data)
 {
-  struct cf_msh3_ctx *ctx = cf->ctx;
-  struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
-  unsigned char bits;
-
   (void)cf;
-  bits = CURL_CSELECT_IN;
-  if(stream && !stream->upload_done)
-    bits |= CURL_CSELECT_OUT;
-  if(data->state.select_bits != bits) {
-    data->state.select_bits = bits;
-    Curl_expire(data, 0, EXPIRE_RUN_NOW);
-  }
+  Curl_multi_mark_dirty(data);
 }
 
 static const MSH3_CONNECTION_IF msh3_conn_if = {
@@ -294,7 +278,7 @@ static void MSH3_CALL msh3_conn_connected(MSH3_CONNECTION *Connection,
 }
 
 static void MSH3_CALL msh3_conn_shutdown_complete(MSH3_CONNECTION *Connection,
-                                          void *IfContext)
+                                                  void *IfContext)
 {
   struct Curl_cfilter *cf = IfContext;
   struct cf_msh3_ctx *ctx = cf->ctx;
@@ -307,8 +291,8 @@ static void MSH3_CALL msh3_conn_shutdown_complete(MSH3_CONNECTION *Connection,
 }
 
 static void MSH3_CALL msh3_conn_new_request(MSH3_CONNECTION *Connection,
-                                          void *IfContext,
-                                          MSH3_REQUEST *Request)
+                                            void *IfContext,
+                                            MSH3_REQUEST *Request)
 {
   (void)Connection;
   (void)IfContext;
@@ -361,17 +345,16 @@ static CURLcode write_resp_raw(struct Curl_easy *data,
   struct cf_msh3_ctx *ctx = h3_get_msh3_ctx(data);
   struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
   CURLcode result = CURLE_OK;
-  ssize_t nwritten;
+  size_t nwritten;
 
   if(!stream)
     return CURLE_RECV_ERROR;
 
-  nwritten = Curl_bufq_write(&stream->recvbuf, mem, memlen, &result);
-  if(nwritten < 0) {
+  result = Curl_bufq_write(&stream->recvbuf, mem, memlen, &nwritten);
+  if(result)
     return result;
-  }
 
-  if((size_t)nwritten < memlen) {
+  if(nwritten < memlen) {
     /* This MUST not happen. Our recbuf is dimensioned to hold the
      * full max_stream_window and then some for this very reason. */
     DEBUGASSERT(0);
@@ -518,40 +501,33 @@ static void MSH3_CALL msh3_data_sent(MSH3_REQUEST *Request,
   (void)SendContext;
 }
 
-static ssize_t recv_closed_stream(struct Curl_cfilter *cf,
-                                  struct Curl_easy *data,
-                                  CURLcode *err)
+static CURLcode recv_closed_stream(struct Curl_cfilter *cf,
+                                   struct Curl_easy *data,
+                                   size_t *pnread)
 {
   struct cf_msh3_ctx *ctx = cf->ctx;
   struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
-  ssize_t nread = -1;
 
-  if(!stream) {
-    *err = CURLE_RECV_ERROR;
-    return -1;
-  }
   (void)cf;
+  *pnread = 0;
+  if(!stream)
+    return CURLE_RECV_ERROR;
+
   if(stream->reset) {
     failf(data, "HTTP/3 stream reset by server");
-    *err = CURLE_PARTIAL_FILE;
-    CURL_TRC_CF(data, cf, "cf_recv, was reset -> %d", *err);
-    goto out;
+    CURL_TRC_CF(data, cf, "cf_recv, was reset");
+    return CURLE_PARTIAL_FILE;
   }
   else if(stream->error3) {
     failf(data, "HTTP/3 stream was not closed cleanly: (error %zd)",
           (ssize_t)stream->error3);
-    *err = CURLE_HTTP3;
-    CURL_TRC_CF(data, cf, "cf_recv, closed uncleanly -> %d", *err);
-    goto out;
+    CURL_TRC_CF(data, cf, "cf_recv, closed uncleanly");
+    return CURLE_HTTP3;
   }
   else {
-    CURL_TRC_CF(data, cf, "cf_recv, closed ok -> %d", *err);
+    CURL_TRC_CF(data, cf, "cf_recv, closed ok");
   }
-  *err = CURLE_OK;
-  nread = 0;
-
-out:
-  return nread;
+  return CURLE_OK;
 }
 
 static void set_quic_expire(struct Curl_cfilter *cf, struct Curl_easy *data)
@@ -571,60 +547,56 @@ static void set_quic_expire(struct Curl_cfilter *cf, struct Curl_easy *data)
   }
 }
 
-static ssize_t cf_msh3_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
-                            char *buf, size_t len, CURLcode *err)
+static CURLcode cf_msh3_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
+                             char *buf, size_t len, size_t *pnread)
 {
   struct cf_msh3_ctx *ctx = cf->ctx;
   struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
-  ssize_t nread = -1;
   struct cf_call_data save;
+  CURLcode result = CURLE_OK;
 
+  *pnread = 0;
   CURL_TRC_CF(data, cf, "cf_recv(len=%zu), stream=%d", len, !!stream);
-  if(!stream) {
-    *err = CURLE_RECV_ERROR;
-    return -1;
-  }
+  if(!stream)
+    return CURLE_RECV_ERROR;
   CF_DATA_SAVE(save, cf, data);
 
   msh3_lock_acquire(&stream->recv_lock);
 
   if(stream->recv_error) {
     failf(data, "request aborted");
-    *err = stream->recv_error;
+    result = stream->recv_error;
     goto out;
   }
 
-  *err = CURLE_OK;
-
   if(!Curl_bufq_is_empty(&stream->recvbuf)) {
-    nread = Curl_bufq_read(&stream->recvbuf,
-                           (unsigned char *)buf, len, err);
-    CURL_TRC_CF(data, cf, "read recvbuf(len=%zu) -> %zd, %d",
-                len, nread, *err);
-    if(nread < 0)
+    result = Curl_bufq_cread(&stream->recvbuf, buf, len, pnread);
+    CURL_TRC_CF(data, cf, "read recvbuf(len=%zu) -> %d, %zu",
+                len, result, *pnread);
+    if(result)
       goto out;
     if(stream->closed)
       h3_drain_stream(cf, data);
   }
   else if(stream->closed) {
-    nread = recv_closed_stream(cf, data, err);
+    result = recv_closed_stream(cf, data, pnread);
     goto out;
   }
   else {
     CURL_TRC_CF(data, cf, "req: nothing here, call again");
-    *err = CURLE_AGAIN;
+    result = CURLE_AGAIN;
   }
 
 out:
   msh3_lock_release(&stream->recv_lock);
   set_quic_expire(cf, data);
   CF_DATA_RESTORE(cf, save);
-  return nread;
+  return result;
 }
 
-static ssize_t cf_msh3_send(struct Curl_cfilter *cf, struct Curl_easy *data,
-                            const void *buf, size_t len, bool eos,
-                            CURLcode *err)
+static CURLcode cf_msh3_send(struct Curl_cfilter *cf, struct Curl_easy *data,
+                             const void *buf, size_t len, bool eos,
+                             size_t *pnwritten)
 {
   struct cf_msh3_ctx *ctx = cf->ctx;
   struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
@@ -634,7 +606,9 @@ static ssize_t cf_msh3_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   size_t nheader, i;
   ssize_t nwritten = -1;
   struct cf_call_data save;
+  CURLcode result = CURLE_OK;
 
+  *pnwritten = 0;
   CF_DATA_SAVE(save, cf, data);
 
   Curl_h1_req_parse_init(&h1, H1_PARSE_DEFAULT_MAX_LINE_LEN);
@@ -648,23 +622,21 @@ static ssize_t cf_msh3_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     /* The first send on the request contains the headers and possibly some
        data. Parse out the headers and create the request, then if there is
        any data left over go ahead and send it too. */
-    nwritten = Curl_h1_req_parse_read(&h1, buf, len, NULL, 0, err);
+    nwritten = Curl_h1_req_parse_read(&h1, buf, len, NULL, 0, &result);
     if(nwritten < 0)
       goto out;
     DEBUGASSERT(h1.done);
     DEBUGASSERT(h1.req);
+    *pnwritten = (size_t)nwritten;
 
-    *err = Curl_http_req_to_h2(&h2_headers, h1.req, data);
-    if(*err) {
-      nwritten = -1;
+    result = Curl_http_req_to_h2(&h2_headers, h1.req, data);
+    if(result)
       goto out;
-    }
 
     nheader = Curl_dynhds_count(&h2_headers);
     nva = malloc(sizeof(MSH3_HEADER) * nheader);
     if(!nva) {
-      *err = CURLE_OUT_OF_MEMORY;
-      nwritten = -1;
+      result = CURLE_OUT_OF_MEMORY;
       goto out;
     }
 
@@ -683,11 +655,10 @@ static ssize_t cf_msh3_send(struct Curl_cfilter *cf, struct Curl_easy *data,
                                   MSH3_REQUEST_FLAG_NONE);
     if(!stream->req) {
       failf(data, "request open failed");
-      *err = CURLE_SEND_ERROR;
-      goto out;
+      result = CURLE_SEND_ERROR;
     }
-    *err = CURLE_OK;
-    nwritten = len;
+    result = CURLE_OK;
+    *pnwritten = len;
     goto out;
   }
   else {
@@ -699,14 +670,14 @@ static ssize_t cf_msh3_send(struct Curl_cfilter *cf, struct Curl_easy *data,
 
     if(!MsH3RequestSend(stream->req, MSH3_REQUEST_FLAG_NONE, buf,
                         (uint32_t)len, stream)) {
-      *err = CURLE_SEND_ERROR;
+      result = CURLE_SEND_ERROR;
       goto out;
     }
 
     /* msh3/msquic will hold onto this memory until the send complete event.
        How do we make sure curl does not free it until then? */
-    *err = CURLE_OK;
-    nwritten = len;
+    result = CURLE_OK;
+    *pnwritten = len;
   }
 
 out:
@@ -715,7 +686,7 @@ out:
   Curl_h1_req_parse_free(&h1);
   Curl_dynhds_free(&h2_headers);
   CF_DATA_RESTORE(cf, save);
-  return nwritten;
+  return result;
 }
 
 static void cf_msh3_adjust_pollset(struct Curl_cfilter *cf,
@@ -964,8 +935,6 @@ static void cf_msh3_close(struct Curl_cfilter *cf, struct Curl_easy *data)
                     "conn->sock[], discarding", (int)ctx->sock[SP_LOCAL]);
         ctx->sock[SP_LOCAL] = CURL_SOCKET_BAD;
       }
-      if(cf->sockindex == FIRSTSOCKET)
-        cf->conn->remote_addr = NULL;
     }
     if(ctx->sock[SP_LOCAL] != CURL_SOCKET_BAD) {
       sclose(ctx->sock[SP_LOCAL]);
@@ -1049,7 +1018,6 @@ struct Curl_cftype Curl_cft_http3 = {
   cf_msh3_connect,
   cf_msh3_close,
   Curl_cf_def_shutdown,
-  Curl_cf_def_get_host,
   cf_msh3_adjust_pollset,
   cf_msh3_data_pending,
   cf_msh3_send,

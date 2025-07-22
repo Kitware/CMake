@@ -81,7 +81,7 @@ enum connect_t {
 
 struct socks_state {
   enum connect_t state;
-  ssize_t outstanding;  /* send this many bytes more */
+  size_t outstanding;  /* send this many bytes more */
   unsigned char buffer[CURL_SOCKS_BUF_SIZE];
   unsigned char *outp; /* send from this pointer */
 
@@ -101,54 +101,41 @@ struct socks_state {
 int Curl_blockread_all(struct Curl_cfilter *cf,
                        struct Curl_easy *data,   /* transfer */
                        char *buf,                /* store read data here */
-                       ssize_t buffersize,       /* max amount to read */
-                       ssize_t *n)               /* amount bytes read */
+                       size_t blen,              /* space in buf */
+                       size_t *pnread)           /* amount bytes read */
 {
-  ssize_t nread = 0;
-  ssize_t allread = 0;
-  int result;
-  CURLcode err = CURLE_OK;
+  size_t nread = 0;
+  CURLcode err;
 
-  *n = 0;
+  *pnread = 0;
   for(;;) {
     timediff_t timeout_ms = Curl_timeleft(data, NULL, TRUE);
     if(timeout_ms < 0) {
       /* we already got the timeout */
-      result = CURLE_OPERATION_TIMEDOUT;
-      break;
+      return CURLE_OPERATION_TIMEDOUT;
     }
     if(!timeout_ms)
       timeout_ms = TIMEDIFF_T_MAX;
     if(SOCKET_READABLE(cf->conn->sock[cf->sockindex], timeout_ms) <= 0) {
-      result = ~CURLE_OK;
-      break;
+      return ~CURLE_OK;
     }
-    nread = Curl_conn_cf_recv(cf->next, data, buf, buffersize, &err);
-    if(nread <= 0) {
-      result = (int)err;
-      if(CURLE_AGAIN == err)
-        continue;
-      if(err) {
-        break;
-      }
-    }
+    err = Curl_conn_cf_recv(cf->next, data, buf, blen, &nread);
+    if(CURLE_AGAIN == err)
+      continue;
+    else if(err)
+      return (int)err;
 
-    if(buffersize == nread) {
-      allread += nread;
-      *n = allread;
-      result = CURLE_OK;
-      break;
+    if(blen == nread) {
+      *pnread += nread;
+      return CURLE_OK;
     }
-    if(!nread) {
-      result = ~CURLE_OK;
-      break;
-    }
+    if(!nread) /* EOF */
+      return ~CURLE_OK;
 
-    buffersize -= nread;
     buf += nread;
-    allread += nread;
+    blen -= nread;
+    *pnread += nread;
   }
-  return result;
 }
 #endif
 
@@ -213,24 +200,25 @@ static CURLproxycode socks_state_send(struct Curl_cfilter *cf,
                                       CURLproxycode failcode,
                                       const char *description)
 {
-  ssize_t nwritten;
+  size_t nwritten;
   CURLcode result;
 
-  nwritten = Curl_conn_cf_send(cf->next, data, (char *)sx->outp,
-                               sx->outstanding, FALSE, &result);
-  if(nwritten <= 0) {
-    if(CURLE_AGAIN == result) {
+  result = Curl_conn_cf_send(cf->next, data, (char *)sx->outp,
+                             sx->outstanding, FALSE, &nwritten);
+  if(result) {
+    if(CURLE_AGAIN == result)
       return CURLPX_OK;
-    }
-    else if(CURLE_OK == result) {
-      /* connection closed */
-      failf(data, "connection to proxy closed");
-      return CURLPX_CLOSED;
-    }
+
     failf(data, "Failed to send %s: %s", description,
           curl_easy_strerror(result));
     return failcode;
   }
+  else if(!nwritten) {
+    /* connection closed */
+    failf(data, "connection to proxy closed");
+    return CURLPX_CLOSED;
+  }
+
   DEBUGASSERT(sx->outstanding >= nwritten);
   /* not done, remain in state */
   sx->outstanding -= nwritten;
@@ -244,23 +232,23 @@ static CURLproxycode socks_state_recv(struct Curl_cfilter *cf,
                                       CURLproxycode failcode,
                                       const char *description)
 {
-  ssize_t nread;
+  size_t nread;
   CURLcode result;
 
-  nread = Curl_conn_cf_recv(cf->next, data, (char *)sx->outp,
-                            sx->outstanding, &result);
-  if(nread <= 0) {
-    if(CURLE_AGAIN == result) {
+  result = Curl_conn_cf_recv(cf->next, data, (char *)sx->outp,
+                            sx->outstanding, &nread);
+  if(result) {
+    if(CURLE_AGAIN == result)
       return CURLPX_OK;
-    }
-    else if(CURLE_OK == result) {
-      /* connection closed */
-      failf(data, "connection to proxy closed");
-      return CURLPX_CLOSED;
-    }
+
     failf(data, "SOCKS: Failed receiving %s: %s", description,
           curl_easy_strerror(result));
     return failcode;
+  }
+  else if(!nread) {
+    /* connection closed */
+    failf(data, "connection to proxy closed");
+    return CURLPX_CLOSED;
   }
   /* remain in reading state */
   DEBUGASSERT(sx->outstanding >= nread);
@@ -1158,8 +1146,8 @@ static CURLcode socks_proxy_cf_connect(struct Curl_cfilter *cf,
 }
 
 static void socks_cf_adjust_pollset(struct Curl_cfilter *cf,
-                                     struct Curl_easy *data,
-                                     struct easy_pollset *ps)
+                                    struct Curl_easy *data,
+                                    struct easy_pollset *ps)
 {
   struct socks_state *sx = cf->ctx;
 
@@ -1199,21 +1187,25 @@ static void socks_proxy_cf_destroy(struct Curl_cfilter *cf,
   socks_proxy_cf_free(cf);
 }
 
-static void socks_cf_get_host(struct Curl_cfilter *cf,
-                              struct Curl_easy *data,
-                              const char **phost,
-                              const char **pdisplay_host,
-                              int *pport)
+static CURLcode socks_cf_query(struct Curl_cfilter *cf,
+                               struct Curl_easy *data,
+                               int query, int *pres1, void *pres2)
 {
-  (void)data;
-  if(!cf->connected) {
-    *phost = cf->conn->socks_proxy.host.name;
-    *pdisplay_host = cf->conn->http_proxy.host.dispname;
-    *pport = (int)cf->conn->socks_proxy.port;
+  struct socks_state *sx = cf->ctx;
+
+  if(sx) {
+    switch(query) {
+    case CF_QUERY_HOST_PORT:
+      *pres1 = sx->remote_port;
+      *((const char **)pres2) = sx->hostname;
+      return CURLE_OK;
+    default:
+      break;
+    }
   }
-  else {
-    cf->next->cft->get_host(cf->next, data, phost, pdisplay_host, pport);
-  }
+  return cf->next ?
+    cf->next->cft->query(cf->next, data, query, pres1, pres2) :
+    CURLE_UNKNOWN_OPTION;
 }
 
 struct Curl_cftype Curl_cft_socks_proxy = {
@@ -1224,7 +1216,6 @@ struct Curl_cftype Curl_cft_socks_proxy = {
   socks_proxy_cf_connect,
   socks_proxy_cf_close,
   Curl_cf_def_shutdown,
-  socks_cf_get_host,
   socks_cf_adjust_pollset,
   Curl_cf_def_data_pending,
   Curl_cf_def_send,
@@ -1232,7 +1223,7 @@ struct Curl_cftype Curl_cft_socks_proxy = {
   Curl_cf_def_cntrl,
   Curl_cf_def_conn_is_alive,
   Curl_cf_def_conn_keep_alive,
-  Curl_cf_def_query,
+  socks_cf_query,
 };
 
 CURLcode Curl_cf_socks_proxy_insert_after(struct Curl_cfilter *cf_at,
