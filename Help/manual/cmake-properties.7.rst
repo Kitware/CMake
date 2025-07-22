@@ -580,6 +580,7 @@ Properties on Source Files
    /prop_sf/MACOSX_PACKAGE_LOCATION
    /prop_sf/OBJECT_DEPENDS
    /prop_sf/OBJECT_OUTPUTS
+   /prop_sf/JOB_POOL_COMPILE
    /prop_sf/SKIP_AUTOGEN
    /prop_sf/SKIP_AUTOMOC
    /prop_sf/SKIP_AUTORCC

@@ -1606,7 +1606,7 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
     }
 
     this->addPoolNinjaVariable("JOB_POOL_COMPILE", this->GetGeneratorTarget(),
-                               ppBuild.Variables);
+                               source, ppBuild.Variables);
 
     this->GetGlobalGenerator()->WriteBuild(this->GetImplFileStream(fileConfig),
                                            ppBuild, commandLineLengthLimit);
@@ -1639,13 +1639,13 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
     objectFileDir, cmOutputConverter::SHELL);
 
   this->addPoolNinjaVariable("JOB_POOL_COMPILE", this->GetGeneratorTarget(),
-                             vars);
+                             source, vars);
 
   if (!pchSources.empty() && !source->GetProperty("SKIP_PRECOMPILE_HEADERS")) {
     auto pchIt = pchSources.find(source->GetFullPath());
     if (pchIt != pchSources.end()) {
       this->addPoolNinjaVariable("JOB_POOL_PRECOMPILE_HEADER",
-                                 this->GetGeneratorTarget(), vars);
+                                 this->GetGeneratorTarget(), nullptr, vars);
     }
   }
 
@@ -1836,7 +1836,7 @@ void cmNinjaTargetGenerator::WriteCxxModuleBmiBuildStatement(
     }
 
     this->addPoolNinjaVariable("JOB_POOL_COMPILE", this->GetGeneratorTarget(),
-                               ppBuild.Variables);
+                               source, ppBuild.Variables);
 
     this->GetGlobalGenerator()->WriteBuild(this->GetImplFileStream(fileConfig),
                                            ppBuild, commandLineLengthLimit);
@@ -1864,7 +1864,7 @@ void cmNinjaTargetGenerator::WriteCxxModuleBmiBuildStatement(
     bmiFileDir, cmOutputConverter::SHELL);
 
   this->addPoolNinjaVariable("JOB_POOL_COMPILE", this->GetGeneratorTarget(),
-                             vars);
+                             source, vars);
 
   bmiBuild.RspFile = cmStrCat(bmiFileName, ".rsp");
 
@@ -2494,9 +2494,18 @@ void cmNinjaTargetGenerator::RemoveDepfileBinding(cmNinjaVars& vars) const
 
 void cmNinjaTargetGenerator::addPoolNinjaVariable(
   std::string const& pool_property, cmGeneratorTarget* target,
-  cmNinjaVars& vars)
+  cmSourceFile const* source, cmNinjaVars& vars)
 {
-  cmValue pool = target->GetProperty(pool_property);
+  // First check the current source properties, then if not found, its target
+  // ones. Allows to override a target-wide compile pool with a source-specific
+  // one.
+  cmValue pool = {};
+  if (source) {
+    pool = source->GetProperty(pool_property);
+  }
+  if (!pool) {
+    pool = target->GetProperty(pool_property);
+  }
   if (pool) {
     vars["pool"] = *pool;
   }
