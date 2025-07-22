@@ -51,6 +51,12 @@ public:
     Foreign,
   };
 
+  enum class Origin
+  {
+    Cps,
+    Unknown,
+  };
+
   enum class PerConfig
   {
     Yes,
@@ -69,6 +75,12 @@ public:
 
   //! Return the type of target.
   cmStateEnums::TargetType GetType() const;
+
+  //! Set the origin of the target.
+  void SetOrigin(Origin origin);
+
+  //! Return the origin of the target.
+  Origin GetOrigin() const;
 
   //! Get the cmMakefile that owns this target.
   cmMakefile* GetMakefile() const;

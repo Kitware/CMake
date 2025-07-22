@@ -589,6 +589,7 @@ class cmTargetInternals
 {
 public:
   cmStateEnums::TargetType TargetType;
+  cmTarget::Origin Origin = cmTarget::Origin::Unknown;
   cmMakefile* Makefile;
   cmPolicies::PolicyMap PolicyMap;
   cmTarget const* TemplateTarget;
@@ -1110,6 +1111,18 @@ cmTarget& cmTarget::operator=(cmTarget&&) noexcept = default;
 cmStateEnums::TargetType cmTarget::GetType() const
 {
   return this->impl->TargetType;
+}
+
+void cmTarget::SetOrigin(Origin origin)
+{
+  assert(origin != cmTarget::Origin::Unknown);
+  assert(this->impl->Origin == cmTarget::Origin::Unknown);
+  this->impl->Origin = origin;
+}
+
+cmTarget::Origin cmTarget::GetOrigin() const
+{
+  return this->impl->Origin;
 }
 
 cmMakefile* cmTarget::GetMakefile() const

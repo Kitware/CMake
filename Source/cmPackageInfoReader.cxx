@@ -692,6 +692,7 @@ cmTarget* cmPackageInfoReader::AddLibraryComponent(
 {
   // Create the imported target.
   cmTarget* const target = makefile->AddImportedTarget(name, type, false);
+  target->SetOrigin(cmTarget::Origin::Cps);
 
   // Set default configurations.
   if (!this->DefaultConfigurations.empty()) {
