@@ -10,7 +10,7 @@ Few examples of the values this variable is set to:
   On most Unix-like systems.
 
 ``-lld``
-  On AIX.
+  On AIX, prior to CMake 4.2.
 
 ``dld``
   On HP-UX.
