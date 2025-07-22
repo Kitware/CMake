@@ -38,6 +38,7 @@ texinfo
 
 # Install lint tools.
 clang-analyzer
+clazy
 codespell
 
 # Tools needed for the test suite.
