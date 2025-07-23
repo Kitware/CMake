@@ -1340,6 +1340,12 @@ add_RunCMake_test(PrecompileHeaders -DCMAKE_C_COMPILER_ID=${CMAKE_C_COMPILER_ID}
   -DCMAKE_C_SIMULATE_ID=${CMAKE_C_SIMULATE_ID}
   -DCMAKE_C_COMPILER_VERSION=${CMAKE_C_COMPILER_VERSION})
 
+# This test can take a long time due to the number of test cases.
+# Provide an option to customize it.
+if(DEFINED CMake_TEST_PrecompileHeaders_TIMEOUT)
+  set_property(TEST RunCMake.PrecompileHeaders PROPERTY TIMEOUT ${CMake_TEST_PrecompileHeaders_TIMEOUT})
+endif()
+
 add_RunCMake_test(UnityBuild -DCMake_TEST_OBJC=${CMake_TEST_OBJC} -DCMake_TEST_CUDA=${CMake_TEST_CUDA})
 set_property(TEST RunCMake.UnityBuild APPEND
   PROPERTY LABELS "CUDA")

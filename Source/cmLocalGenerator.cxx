@@ -2779,8 +2779,8 @@ void cmLocalGenerator::AddPchDependencies(cmGeneratorTarget* target)
           continue;
         }
 
-        cmValue ReuseFrom =
-          target->GetProperty("PRECOMPILE_HEADERS_REUSE_FROM");
+        auto* reuseTarget = target->GetPchReuseTarget();
+        bool const haveReuseTarget = reuseTarget && reuseTarget != target;
 
         auto* pch_sf = this->Makefile->GetOrCreateSource(
           pchSource, false, cmSourceFileLocationKind::Known);
@@ -2789,7 +2789,7 @@ void cmLocalGenerator::AddPchDependencies(cmGeneratorTarget* target)
         pch_sf->SetProperty("CXX_SCAN_FOR_MODULES", "0");
 
         if (!this->GetGlobalGenerator()->IsXcode()) {
-          if (!ReuseFrom) {
+          if (!haveReuseTarget) {
             target->AddSource(pchSource, true);
           }
 
@@ -2797,14 +2797,11 @@ void cmLocalGenerator::AddPchDependencies(cmGeneratorTarget* target)
 
           // Exclude the pch files from linking
           if (this->Makefile->IsOn("CMAKE_LINK_PCH")) {
-            if (!ReuseFrom) {
+            if (!haveReuseTarget) {
               pch_sf->AppendProperty(
                 "OBJECT_OUTPUTS",
                 cmStrCat("$<$<CONFIG:", config, ">:", pchFile, '>'));
             } else {
-              auto* reuseTarget =
-                this->GlobalGenerator->FindGeneratorTarget(*ReuseFrom);
-
               if (this->Makefile->IsOn("CMAKE_PCH_COPY_COMPILE_PDB")) {
 
                 std::string const compilerId =
@@ -2850,11 +2847,11 @@ void cmLocalGenerator::AddPchDependencies(cmGeneratorTarget* target)
                 }
 
                 if (editAndContinueDebugInfo || msvc2008OrLess) {
-                  this->CopyPchCompilePdb(config, lang, target, *ReuseFrom,
-                                          reuseTarget, { ".pdb", ".idb" });
+                  this->CopyPchCompilePdb(config, lang, target, reuseTarget,
+                                          { ".pdb", ".idb" });
                 } else if (programDatabaseDebugInfo) {
-                  this->CopyPchCompilePdb(config, lang, target, *ReuseFrom,
-                                          reuseTarget, { ".pdb" });
+                  this->CopyPchCompilePdb(config, lang, target, reuseTarget,
+                                          { ".pdb" });
                 }
               }
 
@@ -2906,18 +2903,11 @@ void cmLocalGenerator::AddPchDependencies(cmGeneratorTarget* target)
 
 void cmLocalGenerator::CopyPchCompilePdb(
   std::string const& config, std::string const& language,
-  cmGeneratorTarget* target, std::string const& ReuseFrom,
-  cmGeneratorTarget* reuseTarget, std::vector<std::string> const& extensions)
+  cmGeneratorTarget* target, cmGeneratorTarget* reuseTarget,
+  std::vector<std::string> const& extensions)
 {
-  std::string const pdb_prefix =
-    this->GetGlobalGenerator()->IsMultiConfig() ? cmStrCat(config, '/') : "";
-
-  std::string const target_compile_pdb_dir =
-    cmStrCat(target->GetLocalGenerator()->GetCurrentBinaryDirectory(), '/',
-             target->GetName(), ".dir/");
-
-  std::string const copy_script =
-    cmStrCat(target_compile_pdb_dir, "copy_idb_pdb_", config, ".cmake");
+  std::string const copy_script = cmStrCat(target->GetSupportDirectory(),
+                                           "/copy_idb_pdb_", config, ".cmake");
   cmGeneratedFileStream file(copy_script);
 
   file << "# CMake generated file\n";
@@ -2926,28 +2916,37 @@ void cmLocalGenerator::CopyPchCompilePdb(
        << "# by mspdbsrv. The foreach retry loop is needed to make sure\n"
        << "# the pdb file is ready to be copied.\n\n";
 
+  auto configGenex = [&](cm::string_view expr) -> std::string {
+    if (this->GetGlobalGenerator()->IsMultiConfig()) {
+      return cmStrCat("$<$<CONFIG:", config, ">:", expr, '>');
+    }
+    return std::string(expr);
+  };
+
+  std::vector<std::string> outputs;
+  auto replaceExtension = [](std::string const& path,
+                             std::string const& ext) -> std::string {
+    auto const dir = cmSystemTools::GetFilenamePath(path);
+    auto const base = cmSystemTools::GetFilenameWithoutLastExtension(path);
+    if (dir.empty()) {
+      return cmStrCat(base, ext);
+    }
+    return cmStrCat(dir, '/', base, ext);
+  };
   for (auto const& extension : extensions) {
     std::string const from_file =
-      cmStrCat(reuseTarget->GetLocalGenerator()->GetCurrentBinaryDirectory(),
-               '/', ReuseFrom, ".dir/${PDB_PREFIX}", ReuseFrom, extension);
-
-    std::string const to_dir =
-      cmStrCat(target->GetLocalGenerator()->GetCurrentBinaryDirectory(), '/',
-               target->GetName(), ".dir/${PDB_PREFIX}");
-
-    std::string const to_file = cmStrCat(to_dir, ReuseFrom, extension);
-
-    std::string dest_file = to_file;
-
-    std::string const& prefix = target->GetSafeProperty("PREFIX");
-    if (!prefix.empty()) {
-      dest_file = cmStrCat(to_dir, prefix, ReuseFrom, extension);
-    }
+      replaceExtension(reuseTarget->GetCompilePDBPath(config), extension);
+    std::string const to_dir = target->GetCompilePDBDirectory(config);
+    std::string const to_file = cmStrCat(
+      replaceExtension(reuseTarget->GetCompilePDBName(config), extension),
+      '/');
+    std::string const dest_file = cmStrCat(to_dir, to_file);
 
     file << "foreach(retry RANGE 1 30)\n";
     file << "  if (EXISTS \"" << from_file << "\" AND (NOT EXISTS \""
-         << dest_file << "\" OR NOT \"" << dest_file << "  \" IS_NEWER_THAN \""
+         << dest_file << "\" OR NOT \"" << dest_file << "\" IS_NEWER_THAN \""
          << from_file << "\"))\n";
+    file << "    file(MAKE_DIRECTORY \"" << to_dir << "\")\n";
     file << "    execute_process(COMMAND ${CMAKE_COMMAND} -E copy";
     file << " \"" << from_file << "\""
          << " \"" << to_dir << "\" RESULT_VARIABLE result "
@@ -2956,10 +2955,6 @@ void cmLocalGenerator::CopyPchCompilePdb(
          << "      execute_process(COMMAND ${CMAKE_COMMAND}"
          << " -E sleep 1)\n"
          << "    else()\n";
-    if (!prefix.empty()) {
-      file << "  file(REMOVE \"" << dest_file << "\")\n";
-      file << "  file(RENAME \"" << to_file << "\" \"" << dest_file << "\")\n";
-    }
     file << "      break()\n"
          << "    endif()\n";
     file << "  elseif(NOT EXISTS \"" << from_file << "\")\n"
@@ -2967,31 +2962,24 @@ void cmLocalGenerator::CopyPchCompilePdb(
          << " -E sleep 1)\n"
          << "  endif()\n";
     file << "endforeach()\n";
+    outputs.push_back(configGenex(dest_file));
   }
 
-  auto configGenex = [&](cm::string_view expr) -> std::string {
-    if (this->GetGlobalGenerator()->IsMultiConfig()) {
-      return cmStrCat("$<$<CONFIG:", config, ">:", expr, '>');
-    }
-    return std::string(expr);
-  };
+  cmCustomCommandLines commandLines =
+    cmMakeSingleCommandLine({ configGenex(cmSystemTools::GetCMakeCommand()),
+                              configGenex("-P"), configGenex(copy_script) });
 
-  cmCustomCommandLines commandLines = cmMakeSingleCommandLine(
-    { configGenex(cmSystemTools::GetCMakeCommand()),
-      configGenex(cmStrCat("-DPDB_PREFIX=", pdb_prefix)), configGenex("-P"),
-      configGenex(copy_script) });
-
-  char const* no_message = "";
-
-  std::vector<std::string> outputs;
-  outputs.push_back(configGenex(
-    cmStrCat(target_compile_pdb_dir, pdb_prefix, ReuseFrom, ".pdb")));
+  auto const comment =
+    cmStrCat("Copying PDB for PCH reuse from ", reuseTarget->GetName(),
+             " for ", target->GetName());
+  ;
 
   auto cc = cm::make_unique<cmCustomCommand>();
   cc->SetCommandLines(commandLines);
-  cc->SetComment(no_message);
+  cc->SetComment(comment.c_str());
   cc->SetStdPipesUTF8(true);
-  cc->AppendDepends({ reuseTarget->GetPchFile(config, language) });
+  cc->AppendDepends(
+    { reuseTarget->GetPchFile(config, language), copy_script });
 
   if (this->GetGlobalGenerator()->IsVisualStudio()) {
     cc->SetByproducts(outputs);
@@ -3007,9 +2995,6 @@ void cmLocalGenerator::CopyPchCompilePdb(
       target->AddSource(copy_rule->ResolveFullPath());
     }
   }
-
-  target->Target->SetProperty("COMPILE_PDB_OUTPUT_DIRECTORY",
-                              target_compile_pdb_dir);
 }
 
 cm::optional<std::string> cmLocalGenerator::GetMSVCDebugFormatName(

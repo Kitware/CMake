@@ -1911,7 +1911,6 @@ MAKE_PROP(COMPILE_DEFINITIONS);
 MAKE_PROP(COMPILE_FEATURES);
 MAKE_PROP(COMPILE_OPTIONS);
 MAKE_PROP(PRECOMPILE_HEADERS);
-MAKE_PROP(PRECOMPILE_HEADERS_REUSE_FROM);
 MAKE_PROP(CUDA_CUBIN_COMPILATION);
 MAKE_PROP(CUDA_FATBIN_COMPILATION);
 MAKE_PROP(CUDA_OPTIX_COMPILATION);
@@ -2147,38 +2146,6 @@ void cmTarget::SetProperty(std::string const& prop, cmValue value)
       this->impl->Makefile->IssueMessage(MessageType::FATAL_ERROR, e);
       return;
     }
-  } else if (prop == propPRECOMPILE_HEADERS_REUSE_FROM) {
-    if (this->GetProperty("PRECOMPILE_HEADERS")) {
-      std::ostringstream e;
-      e << "PRECOMPILE_HEADERS property is already set on target (\""
-        << this->impl->Name << "\")\n";
-      this->impl->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
-      return;
-    }
-    auto* reusedTarget = this->impl->Makefile->GetCMakeInstance()
-                           ->GetGlobalGenerator()
-                           ->FindTarget(value);
-    if (!reusedTarget) {
-      std::string const e(
-        "PRECOMPILE_HEADERS_REUSE_FROM set with non existing target");
-      this->impl->Makefile->IssueMessage(MessageType::FATAL_ERROR, e);
-      return;
-    }
-
-    std::string reusedFrom = reusedTarget->GetSafeProperty(prop);
-    if (reusedFrom.empty()) {
-      reusedFrom = *value;
-    }
-
-    this->impl->Properties.SetProperty(prop, reusedFrom);
-
-    reusedTarget->SetProperty("COMPILE_PDB_NAME", reusedFrom);
-    reusedTarget->SetProperty("COMPILE_PDB_OUTPUT_DIRECTORY",
-                              cmStrCat(reusedFrom, ".dir/"));
-
-    cmValue tmp = reusedTarget->GetProperty("COMPILE_PDB_NAME");
-    this->SetProperty("COMPILE_PDB_NAME", tmp);
-    this->AddUtility(reusedFrom, false, this->impl->Makefile);
   } else if (prop == propC_STANDARD || prop == propCXX_STANDARD ||
              prop == propCUDA_STANDARD || prop == propHIP_STANDARD ||
              prop == propOBJC_STANDARD || prop == propOBJCXX_STANDARD) {
@@ -2207,15 +2174,6 @@ void cmTarget::AppendProperty(std::string const& prop,
       cmStrCat("IMPORTED_GLOBAL property can't be appended, only set on "
                "imported targets (\"",
                this->impl->Name, "\")\n"));
-  }
-  if (prop == propPRECOMPILE_HEADERS &&
-      this->GetProperty("PRECOMPILE_HEADERS_REUSE_FROM")) {
-    this->impl->Makefile->IssueMessage(
-      MessageType::FATAL_ERROR,
-      cmStrCat(
-        "PRECOMPILE_HEADERS_REUSE_FROM property is already set on target (\"",
-        this->impl->Name, "\")\n"));
-    return;
   }
 
   UsageRequirementProperty* usageRequirements[] = {

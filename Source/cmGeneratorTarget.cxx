@@ -1008,6 +1008,10 @@ std::set<cmLinkItem> const& cmGeneratorTarget::GetUtilityItems() const
           cmLinkItem(i.Value.first, i.Value.second, i.Backtrace));
       }
     }
+    if (cmGeneratorTarget const* reuseTarget = this->GetPchReuseTarget()) {
+      this->UtilityItems.insert(
+        cmLinkItem(reuseTarget, false, cmListFileBacktrace()));
+    }
   }
   return this->UtilityItems;
 }
@@ -1269,6 +1273,12 @@ bool cmGeneratorTarget::GetPropertyAsBool(std::string const& prop) const
 std::string cmGeneratorTarget::GetCompilePDBName(
   std::string const& config) const
 {
+  if (cmGeneratorTarget const* reuseTarget = this->GetPchReuseTarget()) {
+    if (reuseTarget != this) {
+      return reuseTarget->GetCompilePDBName(config);
+    }
+  }
+
   // Check for a per-configuration output directory target property.
   std::string configUpper = cmSystemTools::UpperCase(config);
   std::string configProp = cmStrCat("COMPILE_PDB_NAME_", configUpper);
@@ -1288,6 +1298,14 @@ std::string cmGeneratorTarget::GetCompilePDBName(
     NameComponents const& components = GetFullNameInternalComponents(
       config, cmStateEnums::RuntimeBinaryArtifact);
     return components.prefix + pdbName + ".pdb";
+  }
+
+  // If the target is PCH-reused, we need a stable name for the PDB file so
+  // that reusing targets can construct a stable name for it.
+  if (this->PchReused) {
+    NameComponents const& components = GetFullNameInternalComponents(
+      config, cmStateEnums::RuntimeBinaryArtifact);
+    return cmStrCat(components.prefix, this->GetName(), ".pdb");
   }
 
   return "";
@@ -2799,6 +2817,122 @@ std::string cmGeneratorTarget::GetClangTidyExportFixesDirectory(
   return cmSystemTools::CollapseFullPath(path);
 }
 
+struct CycleWatcher
+{
+  CycleWatcher(bool& flag)
+    : Flag(flag)
+  {
+    this->Flag = true;
+  }
+  ~CycleWatcher() { this->Flag = false; }
+  bool& Flag;
+};
+
+cmGeneratorTarget const* cmGeneratorTarget::GetPchReuseTarget() const
+{
+  if (this->ComputingPchReuse) {
+    // TODO: Get the full cycle.
+    if (!this->PchReuseCycleDetected) {
+      this->Makefile->IssueMessage(
+        MessageType::FATAL_ERROR,
+        cmStrCat("Circular PCH reuse target involving '", this->GetName(),
+                 '\''));
+    }
+    this->PchReuseCycleDetected = true;
+    return nullptr;
+  }
+  CycleWatcher watch(this->ComputingPchReuse);
+  (void)watch;
+  cmValue pchReuseFrom = this->GetProperty("PRECOMPILE_HEADERS_REUSE_FROM");
+  if (!pchReuseFrom) {
+    return nullptr;
+  }
+  cmGeneratorTarget const* generatorTarget =
+    this->GetGlobalGenerator()->FindGeneratorTarget(*pchReuseFrom);
+  if (!generatorTarget) {
+    this->Makefile->IssueMessage(
+      MessageType::FATAL_ERROR,
+      cmStrCat(
+        "Target \"", *pchReuseFrom, "\" for the \"", this->GetName(),
+        R"(" target's "PRECOMPILE_HEADERS_REUSE_FROM" property does not exist.)"));
+  }
+  if (this->GetProperty("PRECOMPILE_HEADERS").IsOn()) {
+    this->Makefile->IssueMessage(
+      MessageType::FATAL_ERROR,
+      cmStrCat("PRECOMPILE_HEADERS property is already set on target (\"",
+               this->GetName(), "\")\n"));
+  }
+
+  if (generatorTarget) {
+    if (generatorTarget->GetPropertyAsBool("DISABLE_PRECOMPILE_HEADERS")) {
+      this->Makefile->IssueMessage(
+        MessageType::FATAL_ERROR,
+        cmStrCat(
+          "Target \"", *pchReuseFrom, "\" for the \"", this->GetName(),
+          R"(" target's "PRECOMPILE_HEADERS_REUSE_FROM" property has set "DISABLE_PRECOMPILE_HEADERS".)"));
+      return nullptr;
+    }
+
+    if (auto const* recurseReuseTarget =
+          generatorTarget->GetPchReuseTarget()) {
+      return recurseReuseTarget;
+    }
+  }
+  return generatorTarget;
+}
+
+cmGeneratorTarget* cmGeneratorTarget::GetPchReuseTarget()
+{
+  if (this->ComputingPchReuse) {
+    // TODO: Get the full cycle.
+    if (!this->PchReuseCycleDetected) {
+      this->Makefile->IssueMessage(
+        MessageType::FATAL_ERROR,
+        cmStrCat("Circular PCH reuse target involving '", this->GetName(),
+                 '\''));
+    }
+    this->PchReuseCycleDetected = true;
+    return nullptr;
+  }
+  CycleWatcher watch(this->ComputingPchReuse);
+  (void)watch;
+  cmValue pchReuseFrom = this->GetProperty("PRECOMPILE_HEADERS_REUSE_FROM");
+  if (!pchReuseFrom) {
+    return nullptr;
+  }
+  cmGeneratorTarget* generatorTarget =
+    this->GetGlobalGenerator()->FindGeneratorTarget(*pchReuseFrom);
+  if (!generatorTarget) {
+    this->Makefile->IssueMessage(
+      MessageType::FATAL_ERROR,
+      cmStrCat(
+        "Target \"", *pchReuseFrom, "\" for the \"", this->GetName(),
+        R"(" target's "PRECOMPILE_HEADERS_REUSE_FROM" property does not exist.)"));
+  }
+  if (this->GetProperty("PRECOMPILE_HEADERS").IsOn()) {
+    this->Makefile->IssueMessage(
+      MessageType::FATAL_ERROR,
+      cmStrCat("PRECOMPILE_HEADERS property is already set on target (\"",
+               this->GetName(), "\")\n"));
+  }
+
+  if (generatorTarget) {
+    if (generatorTarget->GetPropertyAsBool("DISABLE_PRECOMPILE_HEADERS")) {
+      this->Makefile->IssueMessage(
+        MessageType::FATAL_ERROR,
+        cmStrCat(
+          "Target \"", *pchReuseFrom, "\" for the \"", this->GetName(),
+          R"(" target's "PRECOMPILE_HEADERS_REUSE_FROM" property has set "DISABLE_PRECOMPILE_HEADERS".)"));
+      return nullptr;
+    }
+
+    if (auto* recurseReuseTarget = generatorTarget->GetPchReuseTarget()) {
+      return recurseReuseTarget;
+    }
+  }
+  return generatorTarget;
+}
+
 std::vector<std::string> cmGeneratorTarget::GetPchArchs(
   std::string const& config, std::string const& lang) const
 {
@@ -2826,23 +2960,21 @@ std::string cmGeneratorTarget::GetPchHeader(std::string const& config,
     return std::string();
   }
   cmGeneratorTarget const* generatorTarget = this;
-  cmValue pchReuseFrom =
-    generatorTarget->GetProperty("PRECOMPILE_HEADERS_REUSE_FROM");
+  cmGeneratorTarget const* reuseTarget = this->GetPchReuseTarget();
+  bool const haveReuseTarget = reuseTarget && reuseTarget != this;
+  if (reuseTarget) {
+    generatorTarget = reuseTarget;
+  }
 
   auto const inserted =
     this->PchHeaders.insert(std::make_pair(language + config + arch, ""));
   if (inserted.second) {
     std::vector<BT<std::string>> const headers =
       this->GetPrecompileHeaders(config, language);
-    if (headers.empty() && !pchReuseFrom) {
+    if (headers.empty() && !haveReuseTarget) {
       return std::string();
     }
     std::string& filename = inserted.first->second;
-
-    if (pchReuseFrom) {
-      generatorTarget =
-        this->GetGlobalGenerator()->FindGeneratorTarget(*pchReuseFrom);
-    }
 
     std::map<std::string, std::string> const languageToExtension = {
       { "C", ".h" },
@@ -2862,7 +2994,7 @@ std::string cmGeneratorTarget::GetPchHeader(std::string const& config,
                languageToExtension.at(language));
 
     std::string const filename_tmp = cmStrCat(filename, ".tmp");
-    if (!pchReuseFrom) {
+    if (!haveReuseTarget) {
       cmValue pchPrologue =
         this->Makefile->GetDefinition("CMAKE_PCH_PROLOGUE");
       cmValue pchEpilogue =
@@ -2937,11 +3069,10 @@ std::string cmGeneratorTarget::GetPchSource(std::string const& config,
     std::string& filename = inserted.first->second;
 
     cmGeneratorTarget const* generatorTarget = this;
-    cmValue pchReuseFrom =
-      generatorTarget->GetProperty("PRECOMPILE_HEADERS_REUSE_FROM");
-    if (pchReuseFrom) {
-      generatorTarget =
-        this->GetGlobalGenerator()->FindGeneratorTarget(*pchReuseFrom);
+    cmGeneratorTarget const* reuseTarget = this->GetPchReuseTarget();
+    bool const haveReuseTarget = reuseTarget && reuseTarget != this;
+    if (reuseTarget) {
+      generatorTarget = reuseTarget;
     }
 
     filename =
@@ -2968,7 +3099,7 @@ std::string cmGeneratorTarget::GetPchSource(std::string const& config,
     }
 
     std::string const filename_tmp = cmStrCat(filename, ".tmp");
-    if (!pchReuseFrom) {
+    if (!haveReuseTarget) {
       {
         cmGeneratedFileStream file(filename_tmp);
         file << "/* generated by CMake */\n";
@@ -3034,11 +3165,9 @@ std::string cmGeneratorTarget::GetPchFile(std::string const& config,
       };
 
       cmGeneratorTarget* generatorTarget = this;
-      cmValue pchReuseFrom =
-        generatorTarget->GetProperty("PRECOMPILE_HEADERS_REUSE_FROM");
-      if (pchReuseFrom) {
-        generatorTarget =
-          this->GetGlobalGenerator()->FindGeneratorTarget(*pchReuseFrom);
+      cmGeneratorTarget* reuseTarget = this->GetPchReuseTarget();
+      if (reuseTarget) {
+        generatorTarget = reuseTarget;
       }
 
       std::string const pchFileObject =
@@ -4428,7 +4557,12 @@ bool cmGeneratorTarget::ComputePDBOutputDir(std::string const& kind,
     }
   }
   if (out.empty()) {
-    return false;
+    // Compile output should always have a path.
+    if (kind == "COMPILE_PDB"_s) {
+      out = this->GetSupportDirectory();
+    } else {
+      return false;
+    }
   }
 
   // Convert the output path to a full path in case it is

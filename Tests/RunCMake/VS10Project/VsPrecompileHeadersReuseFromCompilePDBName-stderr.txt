@@ -1,7 +1,0 @@
-CMake Error at VsPrecompileHeadersReuseFromCompilePDBName.cmake:6 \(add_library\):
-  PRECOMPILE_HEADERS_REUSE_FROM property is set on target \("b"\).  Reusable
-  precompile headers requires the COMPILE_PDB_NAME property to have the value
-  "a"
-
-Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)

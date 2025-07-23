@@ -692,6 +692,9 @@ public:
   std::vector<BT<std::string>> GetPrecompileHeaders(
     std::string const& config, std::string const& language) const;
 
+  void MarkAsPchReused() { this->PchReused = true; }
+  cmGeneratorTarget const* GetPchReuseTarget() const;
+  cmGeneratorTarget* GetPchReuseTarget();
   std::vector<std::string> GetPchArchs(std::string const& config,
                                        std::string const& lang) const;
   std::string GetPchHeader(std::string const& config,
@@ -1518,6 +1521,9 @@ private:
     std::map<cmSourceFile const*, ClassifiedFlags> SourceFlags;
   };
   mutable std::map<std::string, InfoByConfig> Configs;
+  bool PchReused = false;
+  mutable bool ComputingPchReuse = false;
+  mutable bool PchReuseCycleDetected = false;
 };
 
 class cmGeneratorTarget::TargetPropertyEntry
