@@ -189,12 +189,15 @@ key is required, but all other fields are optional.
   should be one of the following:
 
   * ``postGenerate``
-  * ``preBuild`` (called when ``ninja``  or ``make`` is invoked; unavailable on Windows)
-  * ``postBuild`` (called when ``ninja`` or ``make`` completes; unavailable on Windows)
+  * ``preBuild`` (called when ``ninja``  or ``make`` is invoked)
+  * ``postBuild`` (called when ``ninja`` or ``make`` completes)
   * ``preCMakeBuild`` (called when ``cmake --build`` is invoked)
   * ``postCMakeBuild`` (called when ``cmake --build`` completes)
   * ``postInstall``
   * ``postTest``
+
+  ``preBuild`` and ``postBuild`` are not supported with the
+  :generator:`MSYS Makefiles` generator.
 
 ``options``
   A list of strings used to enable certain optional behavior, including the

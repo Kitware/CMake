@@ -66,7 +66,9 @@ function(instrument test)
     run_cmake_command(${test}-build ${CMAKE_COMMAND} --build . --config Debug)
   endif()
   if (ARGS_BUILD_MAKE_PROGRAM)
+    set(RunCMake_TEST_OUTPUT_MERGE 1)
     run_cmake_command(${test}-make-program ${RunCMake_MAKE_PROGRAM})
+    unset(RunCMake_TEST_OUTPUT_MERGE)
   endif()
   if (ARGS_INSTALL)
     run_cmake_command(${test}-install ${CMAKE_COMMAND} --install . --prefix install --config Debug)
@@ -127,8 +129,27 @@ instrument(cmake-command-resets-generated NO_WARN
   CHECK_SCRIPT check-data-dir.cmake
 )
 
-# FIXME(#26668) This does not work on Windows
-if (UNIX)
+if(RunCMake_GENERATOR STREQUAL "MSYS Makefiles")
+  # FIXME(#27079): This does not work for MSYS Makefiles.
+  set(Skip_BUILD_MAKE_PROGRAM_Case 1)
+elseif(RunCMake_GENERATOR STREQUAL "NMake Makefiles")
+ execute_process(
+   COMMAND "${RunCMake_MAKE_PROGRAM}" -?
+   OUTPUT_VARIABLE nmake_out
+   ERROR_VARIABLE nmake_out
+   RESULT_VARIABLE nmake_res
+   OUTPUT_STRIP_TRAILING_WHITESPACE
+   )
+   if(nmake_res EQUAL 0 AND nmake_out MATCHES "Program Maintenance Utility[^\n]+Version ([1-9][0-9.]+)")
+     set(nmake_version "${CMAKE_MATCH_1}")
+   else()
+     message(FATAL_ERROR "'nmake -?' reported:\n${nmake_out}")
+   endif()
+   if(nmake_version VERSION_LESS 9)
+     set(Skip_BUILD_MAKE_PROGRAM_Case 1)
+   endif()
+endif()
+if(NOT Skip_BUILD_MAKE_PROGRAM_Case)
   instrument(cmake-command-make-program NO_WARN
     BUILD_MAKE_PROGRAM
     CHECK_SCRIPT check-make-program-hooks.cmake)

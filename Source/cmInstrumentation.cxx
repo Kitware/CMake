@@ -612,27 +612,31 @@ std::string cmInstrumentation::ComputeSuffixTime()
 }
 
 /*
- * Called by ctest --start-instrumentation as part of the START_INSTRUMENTATION
- * rule when using the Ninja generator.
- * This creates a detached process which waits for the Ninja process to die
- * before running the postBuild hook. In this way, the postBuild hook triggers
- * after every ninja invocation, regardless of whether the build passed or
- * failed.
+ * Called by ctest --start-instrumentation.
+ *
+ * This creates a detached process which waits for the parent process (i.e.,
+ * the build system) to die before running the postBuild hook. In this way, the
+ * postBuild hook triggers after every invocation of the build system,
+ * regardless of whether the build passed or failed.
  */
 int cmInstrumentation::SpawnBuildDaemon()
 {
+  // Do not inherit handles from the parent process, so that the daemon is
+  // fully detached. This helps prevent deadlock between the two.
+  uv_disable_stdio_inheritance();
+
   // preBuild Hook
   this->CollectTimingData(cmInstrumentationQuery::Hook::PreBuild);
 
   // postBuild Hook
   if (this->HasHook(cmInstrumentationQuery::Hook::PostBuild)) {
-    auto ninja_pid = uv_os_getppid();
-    if (ninja_pid) {
+    auto ppid = uv_os_getppid();
+    if (ppid) {
       std::vector<std::string> args;
       args.push_back(cmSystemTools::GetCTestCommand());
       args.push_back("--wait-and-collect-instrumentation");
       args.push_back(this->binaryDir);
-      args.push_back(std::to_string(ninja_pid));
+      args.push_back(std::to_string(ppid));
       auto builder = cmUVProcessChainBuilder().SetDetached().AddCommand(args);
       auto chain = builder.Start();
       uv_run(&chain.GetLoop(), UV_RUN_DEFAULT);

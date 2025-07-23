@@ -1772,8 +1772,7 @@ void cmGlobalNinjaGenerator::WriteBuiltinTargets(std::ostream& os)
   this->WriteTargetRebuildManifest(os);
   this->WriteTargetClean(os);
   this->WriteTargetHelp(os);
-#if !defined(CMAKE_BOOTSTRAP) && !defined(_WIN32)
-  // FIXME(#26668) This does not work on Windows
+#ifndef CMAKE_BOOTSTRAP
   if (this->GetCMakeInstance()
         ->GetInstrumentation()
         ->HasPreOrPostBuildHook()) {
@@ -1854,8 +1853,7 @@ void cmGlobalNinjaGenerator::WriteTargetRebuildManifest(std::ostream& os)
   }
   reBuild.ImplicitDeps.push_back(this->CMakeCacheFile);
 
-#if !defined(CMAKE_BOOTSTRAP) && !defined(_WIN32)
-  // FIXME(#26668) This does not work on Windows
+#ifndef CMAKE_BOOTSTRAP
   if (this->GetCMakeInstance()
         ->GetInstrumentation()
         ->HasPreOrPostBuildHook()) {
@@ -2208,8 +2206,7 @@ void cmGlobalNinjaGenerator::WriteTargetHelp(std::ostream& os)
   }
 }
 
-#if !defined(CMAKE_BOOTSTRAP) && !defined(_WIN32)
-// FIXME(#26668) This does not work on Windows
+#ifndef CMAKE_BOOTSTRAP
 void cmGlobalNinjaGenerator::WriteTargetInstrument(std::ostream& os)
 {
   // Write rule
@@ -2218,11 +2215,13 @@ void cmGlobalNinjaGenerator::WriteTargetInstrument(std::ostream& os)
     rule.Command = cmStrCat(
       '"', cmSystemTools::GetCTestCommand(), "\" --start-instrumentation \"",
       this->GetCMakeInstance()->GetHomeOutputDirectory(), '"');
+#  ifndef _WIN32
     /*
      * On Unix systems, Ninja will prefix the command with `/bin/sh -c`.
      * Use exec so that Ninja is the parent process of the command.
      */
     rule.Command = cmStrCat("exec ", rule.Command);
+#  endif
     rule.Description = "Collecting build metrics";
     rule.Comment = "Rule to initialize instrumentation daemon.";
     rule.Restat = "1";
