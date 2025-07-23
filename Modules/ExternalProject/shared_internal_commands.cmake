@@ -1896,6 +1896,7 @@ macro(_ep_get_add_keywords out_var)
     # Configure step options
     #
     CONFIGURE_COMMAND
+    CONFIGURE_ENVIRONMENT_MODIFICATION
     CMAKE_COMMAND
     CMAKE_GENERATOR
     CMAKE_GENERATOR_PLATFORM
@@ -1910,6 +1911,7 @@ macro(_ep_get_add_keywords out_var)
     # Build step options
     #
     BUILD_COMMAND
+    BUILD_ENVIRONMENT_MODIFICATION
     BUILD_IN_SOURCE
     BUILD_ALWAYS
     BUILD_BYPRODUCTS
@@ -1918,12 +1920,14 @@ macro(_ep_get_add_keywords out_var)
     # Install step options
     #
     INSTALL_COMMAND
+    INSTALL_ENVIRONMENT_MODIFICATION
     INSTALL_BYPRODUCTS
     INSTALL_JOB_SERVER_AWARE
     #
     # Test step options
     #
     TEST_COMMAND
+    TEST_ENVIRONMENT_MODIFICATION
     TEST_BEFORE_INSTALL
     TEST_AFTER_INSTALL
     TEST_EXCLUDE_FROM_MAIN

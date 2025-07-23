@@ -2287,6 +2287,7 @@ syn keyword cmakeKWExternalProject contained
             \ BUILD_ALWAYS
             \ BUILD_BYPRODUCTS
             \ BUILD_COMMAND
+            \ BUILD_ENVIRONMENT_MODIFICATION
             \ BUILD_IN_SOURCE
             \ CHECKOUT
             \ CMAKE_ARGS
@@ -2296,6 +2297,7 @@ syn keyword cmakeKWExternalProject contained
             \ CMAKE_INSTALL_MODE
             \ COMMENT
             \ CONFIGURE_COMMAND
+            \ CONFIGURE_ENVIRONMENT_MODIFICATION
             \ CONFIGURE_HANDLED_BY_BUILD
             \ CVS
             \ CVSROOT
@@ -2312,6 +2314,7 @@ syn keyword cmakeKWExternalProject contained
             \ DOWNLOAD_NAME
             \ DOWNLOAD_NO_EXTRACT
             \ DOWNLOAD_NO_PROGRESS
+            \ ENVIRONMENT_MODIFICATION
             \ EP_BASE
             \ EP_INDEPENDENT_STEP_TARGETS
             \ EP_PREFIX
@@ -2341,6 +2344,7 @@ syn keyword cmakeKWExternalProject contained
             \ INSTALL_BYPRODUCTS
             \ INSTALL_COMMAND
             \ INSTALL_DIR
+            \ INSTALL_ENVIRONMENT_MODIFICATION
             \ JOB_POOLS
             \ LIST_SEPARATOR
             \ LOG_BUILD
@@ -2380,6 +2384,7 @@ syn keyword cmakeKWExternalProject contained
             \ TEST_AFTER_INSTALL
             \ TEST_BEFORE_INSTALL
             \ TEST_COMMAND
+            \ TEST_ENVIRONMENT_MODIFICATION
             \ TEST_EXCLUDE_FROM_MAIN
             \ TIMEOUT
             \ TLS_CAINFO

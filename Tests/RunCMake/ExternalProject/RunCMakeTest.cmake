@@ -259,3 +259,8 @@ if(GIT_EXECUTABLE)
   run_cmake(TLSVersionBadVar)
   run_cmake(TLSVersionBadEnv)
 endif()
+
+set(RunCMake_TEST_OUTPUT_MERGE 1)
+__ep_test_with_build(EnvVars)
+unset(RunCMake_TEST_OUTPUT_MERGE)
+run_cmake(InvalidEnvModification)
