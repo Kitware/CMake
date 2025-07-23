@@ -264,8 +264,7 @@ endif()
 
 
 if(CMAKE_PLATFORM_HAS_INSTALLNAME)
-  find_program(CMAKE_INSTALL_NAME_TOOL NAMES ${_CMAKE_TOOLCHAIN_PREFIX}install_name_tool HINTS ${_CMAKE_TOOLCHAIN_LOCATION} NO_CMAKE_PATH NO_CMAKE_ENVIRONMENT_PATH)
-
+  find_program(CMAKE_INSTALL_NAME_TOOL NAMES ${_CMAKE_TOOLCHAIN_PREFIX}install_name_tool llvm-install-name-tool HINTS ${_CMAKE_TOOLCHAIN_LOCATION} NO_CMAKE_PATH NO_CMAKE_ENVIRONMENT_PATH)
   if(NOT CMAKE_INSTALL_NAME_TOOL)
     message(FATAL_ERROR "Could not find install_name_tool, please check your installation.")
   endif()
