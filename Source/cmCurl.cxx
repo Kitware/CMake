@@ -64,7 +64,23 @@ static_assert(CURL_SSLVERSION_LAST == 8,
     // curl 8.3.0 through 8.5.x did not re-initialize LibreSSL correctly,
     // so prefer the Secure Transport backend by default in those versions.
     if (cv->version_num >= 0x080300 && cv->version_num < 0x080600) {
+#  if defined(__clang__)
+#    define CM_CURL_DEPRECATED_CURLSSLBACKEND_SECURETRANSPORT_CLANG
+#    pragma clang diagnostic push
+#    pragma clang diagnostic ignored "-Wdeprecated-declarations"
+#  elif defined(__GNUC__)
+#    define CM_CURL_DEPRECATED_CURLSSLBACKEND_SECURETRANSPORT_GCC
+#    pragma GCC diagnostic push
+#    pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#  endif
       curl_global_sslset(CURLSSLBACKEND_SECURETRANSPORT, NULL, NULL);
+#  if defined(CM_CURL_DEPRECATED_CURLSSLBACKEND_SECURETRANSPORT_CLANG)
+#    undef CM_CURL_DEPRECATED_CURLSSLBACKEND_SECURETRANSPORT_CLANG
+#    pragma clang diagnostic pop
+#  elif defined(CM_CURL_DEPRECATED_CURLSSLBACKEND_SECURETRANSPORT_GCC)
+#    undef CM_CURL_DEPRECATED_CURLSSLBACKEND_SECURETRANSPORT_GCC
+#    pragma GCC diagnostic pop
+#  endif
     }
   }
 #endif
