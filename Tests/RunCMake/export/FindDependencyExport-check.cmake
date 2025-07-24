@@ -1,35 +1,35 @@
 file(READ "${RunCMake_TEST_BINARY_DIR}/mytargets.cmake" mytargets)
-if("${mytargets}" MATCHES "find_dependency\\(P1")
+if("${mytargets}" MATCHES "__find_dependency_no_return\\(P1")
   string(APPEND RunCMake_TEST_FAILED "P1 dependency should not be exported but it is\n")
 endif()
-if(NOT "${mytargets}" MATCHES "find_dependency\\(P2 \"VERSION\" \"1\\.0\"\\)")
+if(NOT "${mytargets}" MATCHES "__find_dependency_no_return\\(P2")
   string(APPEND RunCMake_TEST_FAILED "P2 dependency should be exported but it is not\n")
 endif()
-if(NOT "${mytargets}" MATCHES "find_dependency\\(P3\\)")
+if(NOT "${mytargets}" MATCHES "__find_dependency_no_return\\(P3")
   string(APPEND RunCMake_TEST_FAILED "P3 dependency should be exported but it is not\n")
 endif()
-if(NOT "${mytargets}" MATCHES "find_dependency\\(P4\\)")
+if(NOT "${mytargets}" MATCHES "__find_dependency_no_return\\(P4")
   string(APPEND RunCMake_TEST_FAILED "P4 dependency should be exported but it is not\n")
 endif()
-if("${mytargets}" MATCHES "find_dependency\\(P5")
+if("${mytargets}" MATCHES "__find_dependency_no_return\\(P5")
   string(APPEND RunCMake_TEST_FAILED "P5 dependency should not be exported but it is\n")
 endif()
-if(NOT "${mytargets}" MATCHES "find_dependency\\(P6\\)")
+if(NOT "${mytargets}" MATCHES "__find_dependency_no_return\\(P6")
   string(APPEND RunCMake_TEST_FAILED "P6 dependency should be exported but it is not\n")
 endif()
-if("${mytargets}" MATCHES "find_dependency\\(P7")
+if("${mytargets}" MATCHES "__find_dependency_no_return\\(P7")
   string(APPEND RunCMake_TEST_FAILED "P7 dependency should not be exported but it is\n")
 endif()
-if(NOT "${mytargets}" MATCHES "find_dependency\\(P3[^
-]*\\)
-find_dependency\\(P2[^
-]*\\)
-find_dependency\\(P8[^
-]*\\)
-find_dependency\\(P6[^
-]*\\)
-find_dependency\\(P9[^
-]*\\)
-find_dependency\\(P4")
+if(NOT "${mytargets}" MATCHES "__find_dependency_no_return\\(P3[^
+]*\\)(.*)
+__find_dependency_no_return\\(P2[^
+]*\\)(.*)
+__find_dependency_no_return\\(P8[^
+]*\\)(.*)
+__find_dependency_no_return\\(P6[^
+]*\\)(.*)
+__find_dependency_no_return\\(P9[^
+]*\\)(.*)
+__find_dependency_no_return\\(P4")
   string(APPEND RunCMake_TEST_FAILED "Dependencies are not in the correct order\n")
 endif()
