@@ -2247,6 +2247,48 @@ SystemTools::CopyStatus SystemTools::CopyFileIfDifferent(
   return CopyStatus{ Status::Success(), CopyStatus::NoPath };
 }
 
+SystemTools::CopyStatus SystemTools::CopyFileIfNewer(
+  std::string const& source, std::string const& destination)
+{
+  // special check for a destination that is a directory
+  // FileTimeCompare does not handle file to directory compare
+  if (SystemTools::FileIsDirectory(destination)) {
+    std::string const new_destination = FileInDir(source, destination);
+    if (!SystemTools::ComparePath(new_destination, destination)) {
+      return SystemTools::CopyFileIfNewer(source, new_destination);
+    }
+    // If source and destination are the same path, don't copy
+    return CopyStatus{ Status::Success(), CopyStatus::NoPath };
+  }
+
+  // source and destination are files so do a copy if source is newer
+  // Check if source file exists first
+  if (!SystemTools::FileExists(source)) {
+    return CopyStatus{ Status::POSIX_errno(), CopyStatus::SourcePath };
+  }
+  // If destination doesn't exist, always copy
+  if (!SystemTools::FileExists(destination)) {
+    return SystemTools::CopyFileAlways(source, destination);
+  }
+  // Check if source is newer than destination
+  int timeResult;
+  Status timeStatus =
+    SystemTools::FileTimeCompare(source, destination, &timeResult);
+  if (timeStatus.IsSuccess()) {
+    if (timeResult > 0) {
+      // Source is newer, copy it
+      return SystemTools::CopyFileAlways(source, destination);
+    } else {
+      // Source is not newer, no need to copy
+      return CopyStatus{ Status::Success(), CopyStatus::NoPath };
+    }
+  } else {
+    // Time comparison failed, be conservative and copy to ensure updates are
+    // not missed
+    return SystemTools::CopyFileAlways(source, destination);
+  }
+}
+
 #define KWSYS_ST_BUFFER 4096
 
 bool SystemTools::FilesDiffer(std::string const& source,
@@ -2585,13 +2627,29 @@ SystemTools::CopyStatus SystemTools::CopyFileAlways(
 
 SystemTools::CopyStatus SystemTools::CopyAFile(std::string const& source,
                                                std::string const& destination,
+                                               SystemTools::CopyWhen when)
+{
+  switch (when) {
+    case SystemTools::CopyWhen::Always:
+      return SystemTools::CopyFileAlways(source, destination);
+    case SystemTools::CopyWhen::OnlyIfDifferent:
+      return SystemTools::CopyFileIfDifferent(source, destination);
+    case SystemTools::CopyWhen::OnlyIfNewer:
+      return SystemTools::CopyFileIfNewer(source, destination);
+    default:
+      break;
+  }
+  // Should not reach here
+  return CopyStatus{ Status::POSIX_errno(), CopyStatus::NoPath };
+}
+
+SystemTools::CopyStatus SystemTools::CopyAFile(std::string const& source,
+                                               std::string const& destination,
                                                bool always)
 {
-  if (always) {
-    return SystemTools::CopyFileAlways(source, destination);
-  } else {
-    return SystemTools::CopyFileIfDifferent(source, destination);
-  }
+  return SystemTools::CopyAFile(source, destination,
+                                always ? CopyWhen::Always
+                                       : CopyWhen::OnlyIfDifferent);
 }
 
 /**
@@ -2599,7 +2657,8 @@ SystemTools::CopyStatus SystemTools::CopyAFile(std::string const& source,
  * "destination".
  */
 Status SystemTools::CopyADirectory(std::string const& source,
-                                   std::string const& destination, bool always)
+                                   std::string const& destination,
+                                   SystemTools::CopyWhen when)
 {
   Status status;
   Directory dir;
@@ -2622,12 +2681,12 @@ Status SystemTools::CopyADirectory(std::string const& source,
         std::string fullDestPath = destination;
         fullDestPath += "/";
         fullDestPath += dir.GetFile(static_cast<unsigned long>(fileNum));
-        status = SystemTools::CopyADirectory(fullPath, fullDestPath, always);
+        status = SystemTools::CopyADirectory(fullPath, fullDestPath, when);
         if (!status.IsSuccess()) {
           return status;
         }
       } else {
-        status = SystemTools::CopyAFile(fullPath, destination, always);
+        status = SystemTools::CopyAFile(fullPath, destination, when);
         if (!status.IsSuccess()) {
           return status;
         }
@@ -2636,6 +2695,14 @@ Status SystemTools::CopyADirectory(std::string const& source,
   }
 
   return status;
+}
+
+Status SystemTools::CopyADirectory(std::string const& source,
+                                   std::string const& destination, bool always)
+{
+  return SystemTools::CopyADirectory(source, destination,
+                                     always ? CopyWhen::Always
+                                            : CopyWhen::OnlyIfDifferent);
 }
 
 // return size of file; also returns zero if no file exists

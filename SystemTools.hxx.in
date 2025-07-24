@@ -578,6 +578,13 @@ public:
                                         std::string const& destination);
 
   /**
+   * Copy the source file to the destination file only
+   * if the source file is newer than the destination file.
+   */
+  static CopyStatus CopyFileIfNewer(std::string const& source,
+                                    std::string const& destination);
+
+  /**
    * Compare the contents of two files.  Return true if different
    */
   static bool FilesDiffer(std::string const& source,
@@ -658,24 +665,34 @@ public:
   static CopyStatus CopyFileAlways(std::string const& source,
                                    std::string const& destination);
 
+  enum class CopyWhen
+  {
+    Always,
+    OnlyIfDifferent,
+    OnlyIfNewer,
+  };
+
   /**
-   * Copy a file.  If the "always" argument is true the file is always
-   * copied.  If it is false, the file is copied only if it is new or
-   * has changed.
+   * Copy a file with specified copy behavior.
    */
   static CopyStatus CopyAFile(std::string const& source,
                               std::string const& destination,
-                              bool always = true);
+                              CopyWhen when = CopyWhen::Always);
+  static CopyStatus CopyAFile(std::string const& source,
+                              std::string const& destination, bool always);
 
   /**
    * Copy content directory to another directory with all files and
-   * subdirectories.  If the "always" argument is true all files are
-   * always copied.  If it is false, only files that have changed or
-   * are new are copied.
+   * subdirectories.  The "when" argument controls when files are copied:
+   * Always: all files are always copied.
+   * OnlyIfDifferent: only files that have changed are copied.
+   * OnlyIfNewer: only files that are newer than the destination are copied.
    */
   static Status CopyADirectory(std::string const& source,
                                std::string const& destination,
-                               bool always = true);
+                               CopyWhen when = CopyWhen::Always);
+  static Status CopyADirectory(std::string const& source,
+                               std::string const& destination, bool always);
 
   /**
    * Remove a file
