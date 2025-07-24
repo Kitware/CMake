@@ -56,6 +56,12 @@ Compilers
 
 .. _`Diab compilers from Wind River Systems`: https://www.windriver.com/resource/wind-river-diab-compiler-product-overview
 
+* `Renesas Compilers`_ are now supported with
+  :variable:`compiler id <CMAKE_<LANG>_COMPILER_ID>` ``Renesas`` for
+  languages ``ASM`` and ``C``.
+
+.. _Renesas Compilers: https://www.renesas.com
+
 Commands
 --------
 
