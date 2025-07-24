@@ -47,6 +47,8 @@ set(module_symbols
   mymodule_MP_mysub       # NAG
   _QMmy_modulePmy_sub     # LLVMFlang
   _QMmymodulePmysub       # LLVMFlang
+  __module_my_module_my_sub # LFortran
+  __module_mymodule_mysub   # LFortran
   ${FortranCInterface_MODULE_SYMBOLS}
   )
 list(REMOVE_DUPLICATES module_symbols)
