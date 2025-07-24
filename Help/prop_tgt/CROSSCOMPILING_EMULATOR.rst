@@ -20,3 +20,6 @@ for built target system executables.
 This property is initialized by the value of the
 :variable:`CMAKE_CROSSCOMPILING_EMULATOR` variable if it is set when a target
 is created.
+
+This property is not supported when using the old form of :command:`add_test`
+(i.e. without the ``NAME`` and ``COMMAND`` keywords).
