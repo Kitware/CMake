@@ -618,7 +618,7 @@ bool cmFileCopier::InstallFile(std::string const& fromFile,
 
   // Copy the file.
   if (copy) {
-    auto copy_status = cmSystemTools::CopyAFile(fromFile, toFile, true);
+    auto copy_status = cmSystemTools::CopyAFile(fromFile, toFile);
     if (!copy_status) {
       std::ostringstream e;
       e << this->Name << " cannot copy file \"" << fromFile << "\" to \""
