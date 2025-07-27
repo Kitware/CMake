@@ -90,15 +90,42 @@ endmacro()
 # If any of these modules reported that it was found a version number should have been
 # reported.
 
-foreach(VTEST ALSA ARMADILLO BZIP2 CUPS CURL EXPAT FREETYPE GETTEXT GIT HG
-        HSPELL ICOTOOL JASPER LIBLZMA LIBXML2 LIBXSLT LTTNGUST PERL PKG_CONFIG
-        PostgreSQL TIFF ZLIB)
-    check_version_string(${VTEST} ${VTEST}_VERSION_STRING)
+foreach(
+  VTEST
+    ALSA ARMADILLO
+    BZIP2
+    CUPS CURL
+    EXPAT
+    FREETYPE
+    GETTEXT GIT
+    HG HSPELL
+    ICOTOOL
+    JASPER
+    LIBLZMA LIBXML2 LIBXSLT LTTNGUST
+    PERL PKG_CONFIG PostgreSQL
+    TIFF
+    ZLIB
+)
+  check_version_string(${VTEST} ${VTEST}_VERSION_STRING)
 endforeach()
 
-foreach(VTEST BISON Boost BZIP2 CUDA DOXYGEN FLEX GIF GTK2
-    HDF5 JPEG LibArchive LIBLZMA OPENSCENEGRAPH Ruby RUBY SWIG Protobuf ZLIB)
-    check_version_string(${VTEST} ${VTEST}_VERSION)
+foreach(
+  VTEST
+    BISON Boost BZip2 BZIP2
+    CUDA
+    DOXYGEN
+    FLEX
+    GIF GTK2
+    HDF5
+    JPEG
+    LibArchive LIBLZMA
+    OPENSCENEGRAPH
+    Protobuf
+    Ruby RUBY
+    SWIG
+    ZLIB
+)
+  check_version_string(${VTEST} ${VTEST}_VERSION)
 endforeach()
 
 check_version_string(PYTHONINTERP PYTHON_VERSION_STRING)
