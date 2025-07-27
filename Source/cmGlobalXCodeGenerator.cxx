@@ -551,6 +551,15 @@ cmGlobalXCodeGenerator::GenerateBuildCommand(
   std::string const xcodebuild =
     this->SelectMakeProgram(makeProgram, this->GetXcodeBuildCommand());
 
+  // Note that projectName can be empty, such as from a command like this one:
+  //   ctest --build-and-test . build --build-generator Xcode
+  // If projectName is empty, then isWorkspace set further below will always
+  // be false because workspacePath will never point to a valid workspace file.
+  // And if projectName is empty, we don't add any -workspace or -project
+  // option to the xcodebuild command line because we don't know what to put
+  // after either option. For that scenario, we rely on xcodebuild finding
+  // exactly one .xcodeproj file in the working directory.
+
   std::string const workspacePath = cmStrCat(projectName, ".xcworkspace");
   std::string const projectPath = cmStrCat(projectName, ".xcodeproj");
 
@@ -563,7 +572,7 @@ cmGlobalXCodeGenerator::GenerateBuildCommand(
 
   if (isWorkspace) {
     requiredArgs.insert(requiredArgs.end(), { "-workspace", workspacePath });
-  } else {
+  } else if (!projectName.empty()) {
     requiredArgs.insert(requiredArgs.end(), { "-project", projectPath });
   }
 
