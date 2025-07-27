@@ -1,0 +1,1 @@
+^Error copying file \(if different\) from ".+" to ".+"\.$

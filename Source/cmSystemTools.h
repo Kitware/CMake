@@ -167,11 +167,6 @@ public:
   static bool SimpleGlob(std::string const& glob,
                          std::vector<std::string>& files, int type = 0);
 
-  enum class CopyWhen
-  {
-    Always,
-    OnlyIfDifferent,
-  };
   enum class CopyInputRecent
   {
     No,
@@ -209,6 +204,15 @@ public:
                                    std::string const& newname, CopyWhen when,
                                    CopyInputRecent inputRecent,
                                    std::string* err = nullptr);
+
+  /** Copy a file if it is newer than the destination. */
+  static bool CopyFileIfNewer(std::string const& source,
+                              std::string const& destination);
+
+  /** Copy directory contents with specified copy behavior. */
+  static bool CopyADirectory(std::string const& source,
+                             std::string const& destination,
+                             CopyWhen when = CopyWhen::Always);
 
   enum class Replace
   {

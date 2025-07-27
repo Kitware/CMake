@@ -616,6 +616,16 @@ run_cmake_command(E_copy_if_different-three-source-files-target-is-directory
   ${CMAKE_COMMAND} -E copy_if_different ${in}/f1.txt ${in}/f2.txt ${in}/f3.txt ${out})
 run_cmake_command(E_copy_if_different-three-source-files-target-is-file
   ${CMAKE_COMMAND} -E copy_if_different ${in}/f1.txt ${in}/f2.txt ${in}/f3.txt ${out}/f1.txt)
+run_cmake_command(E_copy_if_different-nonexistent-source
+  ${CMAKE_COMMAND} -E copy_if_different ${in}/nonexistent.txt ${out})
+run_cmake_command(E_copy_if_newer-one-source-directory-target-is-directory
+  ${CMAKE_COMMAND} -E copy_if_newer ${in}/f1.txt ${out})
+run_cmake_command(E_copy_if_newer-three-source-files-target-is-directory
+  ${CMAKE_COMMAND} -E copy_if_newer ${in}/f1.txt ${in}/f2.txt ${in}/f3.txt ${out})
+run_cmake_command(E_copy_if_newer-three-source-files-target-is-file
+  ${CMAKE_COMMAND} -E copy_if_newer ${in}/f1.txt ${in}/f2.txt ${in}/f3.txt ${out}/f1.txt)
+run_cmake_command(E_copy_if_newer-nonexistent-source
+  ${CMAKE_COMMAND} -E copy_if_newer ${in}/nonexistent.txt ${out})
 unset(in)
 unset(out)
 
@@ -625,6 +635,10 @@ file(REMOVE_RECURSE "${out}")
 file(MAKE_DIRECTORY ${out})
 run_cmake_command(E_copy_directory_if_different
   ${CMAKE_COMMAND} -E copy_directory_if_different ${in} ${out})
+run_cmake_command(E_copy_directory_if_newer
+  ${CMAKE_COMMAND} -E copy_directory_if_newer ${in} ${out})
+run_cmake_command(E_copy_directory_if_newer-nonexistent-source
+  ${CMAKE_COMMAND} -E copy_directory_if_newer ${in}/nonexistent ${out}/target)
 unset(in)
 unset(out)
 

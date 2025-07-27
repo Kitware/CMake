@@ -1571,6 +1571,18 @@ cmSystemTools::CopyResult cmSystemTools::CopySingleFile(
         return CopyResult::Success;
       }
       break;
+    case CopyWhen::OnlyIfNewer: {
+      if (!SystemTools::FileExists(newname)) {
+        break;
+      }
+      int timeResult = 0;
+      cmsys::Status timeStatus =
+        cmsys::SystemTools::FileTimeCompare(oldname, newname, &timeResult);
+      if (timeStatus.IsSuccess() && timeResult <= 0) {
+        return CopyResult::Success;
+      }
+      break;
+    }
   }
 
   mode_t perm = 0;
@@ -1630,6 +1642,20 @@ cmSystemTools::CopyResult cmSystemTools::CopySingleFile(
     }
   }
   return CopyResult::Success;
+}
+
+bool cmSystemTools::CopyFileIfNewer(std::string const& source,
+                                    std::string const& destination)
+{
+  return cmsys::SystemTools::CopyFileIfNewer(source, destination).IsSuccess();
+}
+
+bool cmSystemTools::CopyADirectory(std::string const& source,
+                                   std::string const& destination,
+                                   CopyWhen when)
+{
+  return cmsys::SystemTools::CopyADirectory(source, destination, when)
+    .IsSuccess();
 }
 
 bool cmSystemTools::RenameFile(std::string const& oldname,
