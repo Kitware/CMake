@@ -125,6 +125,10 @@ query it writes to build trees to request newer object versions.
 This can be used to avoid asking CMake to generate multiple object
 versions unnecessarily.
 
+.. versionadded:: 4.1
+  The ``query.json`` file is described in machine-readable form by
+  :download:`this JSON schema </manual/file_api/schema_stateful_query.json>`.
+
 A ``query.json`` file must contain a JSON object:
 
 .. code-block:: json
@@ -199,6 +203,10 @@ is given a new name and any old one is deleted.  During the short
 time between these steps there may be multiple index files present;
 the one with the largest name in lexicographic order is the current
 index file.
+
+.. versionadded:: 4.1
+  The reply index file is described in machine-readable form by
+  :download:`this JSON schema </manual/file_api/schema_index.json>`.
 
 The reply index file contains a JSON object:
 
@@ -471,6 +479,10 @@ There is only one ``codemodel`` object major version, version 2.
 Version 1 does not exist to avoid confusion with that from
 :manual:`cmake-server(7)` mode.
 
+.. versionadded:: 4.1
+  The ``codemodel`` object kind reply is described in machine-readable form
+  by :download:`this JSON schema </manual/file_api/schema_codemodel.json>`.
+
 "codemodel" version 2
 ^^^^^^^^^^^^^^^^^^^^^
 
@@ -699,6 +711,10 @@ The members specific to ``codemodel`` objects are:
 
 "codemodel" version 2 "directory" object
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. versionadded:: 4.1
+  The ``directory`` object reply is described in machine-readable form by
+  :download:`this JSON schema </manual/file_api/schema_directory.json>`.
 
 A codemodel "directory" object is referenced by a `"codemodel" version 2`_
 object's ``directories`` array.  Each "directory" object is a JSON object
@@ -988,6 +1004,10 @@ with members:
 
 "codemodel" version 2 "target" object
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. versionadded:: 4.1
+  The ``target`` object reply is described in machine-readable form by
+  :download:`this JSON schema </manual/file_api/schema_target.json>`.
 
 A codemodel "target" object is referenced by a `"codemodel" version 2`_
 object's ``targets`` array.  Each "target" object is a JSON object
@@ -1497,6 +1517,10 @@ a :manual:`cmake-configure-log(7)` file.
 
 There is only one ``configureLog`` object major version, version 1.
 
+.. versionadded:: 4.1
+  The ``configureLog`` object kind reply is described in machine-readable form
+  by :download:`this JSON schema </manual/file_api/schema_configureLog.json>`.
+
 "configureLog" version 1
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -1536,6 +1560,10 @@ The ``cache`` object kind lists cache entries.  These are the
 There is only one ``cache`` object major version, version 2.
 Version 1 does not exist to avoid confusion with that from
 :manual:`cmake-server(7)` mode.
+
+.. versionadded:: 4.1
+  The ``cache`` object kind reply is described in machine-readable form by
+  :download:`this JSON schema </manual/file_api/schema_cache.json>`.
 
 "cache" version 2
 ^^^^^^^^^^^^^^^^^
@@ -1608,6 +1636,10 @@ configuring and generating the build system.  These include the
 ``CMakeLists.txt`` files as well as included ``.cmake`` files.
 
 There is only one ``cmakeFiles`` object major version, version 1.
+
+.. versionadded:: 4.1
+  The ``cmakeFiles`` object kind reply is described in machine-readable form
+  by :download:`this JSON schema </manual/file_api/schema_cmakeFiles.json>`.
 
 "cmakeFiles" version 1
 ^^^^^^^^^^^^^^^^^^^^^^
@@ -1737,6 +1769,10 @@ The ``toolchains`` object kind lists properties of the toolchains used during
 the build.  These include the language, compiler path, ID, and version.
 
 There is only one ``toolchains`` object major version, version 1.
+
+.. versionadded:: 4.1
+  The ``toolchains`` object kind reply is described in machine-readable form
+  by :download:`this JSON schema </manual/file_api/schema_toolchains.json>`.
 
 "toolchains" version 1
 ^^^^^^^^^^^^^^^^^^^^^^
