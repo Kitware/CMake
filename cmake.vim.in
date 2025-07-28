@@ -13,16 +13,25 @@
 "               https://cmake.org/licensing
 "               This implies that distribution with Vim is allowed
 
-if exists("b:current_syntax")
+if exists('b:current_syntax')
   finish
 endif
-let s:keepcpo= &cpo
-set cpo&vim
+let s:keepcpo= &cpoptions
+set cpoptions&vim
 
-syn region cmakeBracketArgument start="\[\z(=\?\|=[0-9]*\)\[" end="\]\z1\]" contains=cmakeTodo,@Spell
+syn cluster cmakeControl contains=
+      \ cmakeIf,
+      \ cmakeElse,
+      \ cmakeForeach,
+      \ cmakeWhile,
+      \ cmakeBlock,
+      \ cmakeFunction,
+      \ cmakeMacro
 
-syn region cmakeComment start="#" end="$" contains=cmakeTodo,@Spell
-syn region cmakeBracketComment start="\[\z(=*\)\[" end="\]\z1\]" contains=cmakeTodo,@Spell
+syn region cmakeBracketArgument start="\[\z(=*\)\[" end="\]\z1\]" fold contains=cmakeTodo,@Spell
+
+syn region cmakeComment start="#\(\[=*\[\)\@!" end="$" contains=cmakeTodo,@Spell
+syn region cmakeBracketComment start="#\[\z(=*\)\[" end="\]\z1\]" fold contains=cmakeTodo,@Spell
 
 syn match cmakeEscaped /\(\\\\\|\\"\|\\n\|\\t\)/ contained
 syn region cmakeRegistry start="\[" end="]" contained oneline contains=cmakeTodo,cmakeEscaped
@@ -35,7 +44,15 @@ syn region cmakeVariableValue start="${" end="}" contained oneline contains=cmak
 
 syn region cmakeEnvironment start="$ENV{" end="}" contained oneline contains=cmakeTodo
 
-syn region cmakeArguments start="(" end=")" contains=ALLBUT,cmakeGeneratorExpressions,cmakeCommand,cmakeCommandConditional,cmakeCommandRepeat,cmakeCommandDeprecated,cmakeCommandManuallyAdded,cmakeArguments,cmakeTodo,@Spell
+syn region cmakeArguments start="(" end=")" contains=ALLBUT,@cmakeControl,cmakeGeneratorExpressions,cmakeCommand,cmakeCommandDeprecated,cmakeCommandManuallyAdded,cmakeArguments,cmakeTodo,@Spell fold
+syn region cmakeIf matchgroup=cmakeKeyword start=/^\s*\<if\>/ end=/^\s*\<endif\>/ transparent fold contains=@cmakeControl,cmakeArguments
+syn match cmakeElse /^\s*\<else\(if\)\?\>/ contained contains=NONE
+
+syn region cmakeForeach matchgroup=cmakeKeyword start=/^\s*\<foreach\>/ end=/^\s*\<endforeach\>/ transparent fold contains=@cmakeControl,cmakeArguments
+syn region cmakeWhile matchgroup=cmakeKeyword start=/^\s*\<while\>/ end=/^\s*\<endwhile\>/ transparent fold contains=@cmakeControl,cmakeArguments
+syn region cmakeFunction matchgroup=cmakeKeyword start=/^\s*\<function\>/ end=/^\s*\<endfunction\>/ transparent fold contains=@cmakeControl,cmakeArguments
+syn region cmakeBlock matchgroup=cmakeKeyword start=/^\s*\<block\>/ end=/^\s*\<endblock\>/ transparent fold contains=@cmakeControl,cmakeArguments
+syn region cmakeMacro matchgroup=cmakeKeyword start=/^\s*\<macro\>/ end=/^\s*\<endmacro\>/ transparent fold contains=@cmakeControl,cmakeArguments
 
 syn case match
 
@@ -59,14 +76,6 @@ syn keyword cmakeCommand
 @COMMAND_LIST@
             \ nextgroup=cmakeArguments
 
-syn keyword cmakeCommandConditional
-@CONDITIONALS@
-            \ nextgroup=cmakeArguments
-
-syn keyword cmakeCommandRepeat
-@LOOPS@
-            \ nextgroup=cmakeArguments
-
 syn keyword cmakeCommandDeprecated
 @DEPRECATED@
             \ nextgroup=cmakeArguments
@@ -80,14 +89,14 @@ syn keyword cmakeTodo
 hi def link cmakeBracketArgument String
 hi def link cmakeBracketComment Comment
 hi def link cmakeCommand Function
-hi def link cmakeCommandConditional Conditional
 hi def link cmakeCommandDeprecated WarningMsg
-hi def link cmakeCommandRepeat Repeat
 hi def link cmakeComment Comment
+hi def link cmakeElse Conditional
 hi def link cmakeEnvironment Special
 hi def link cmakeEscaped Special
 hi def link cmakeGeneratorExpression WarningMsg
 hi def link cmakeGeneratorExpressions Constant
+hi def link cmakeKeyword Conditional
 hi def link cmakeModule Include
 hi def link cmakeProperty Constant
 hi def link cmakeRegistry Underlined
@@ -122,9 +131,9 @@ hi def link cmakeKWconfigure_package_config_file ModeMsg
 hi def link cmakeKWwrite_basic_package_version_file ModeMsg
 hi def link cmakeKWconfigure_package_config_file_constants Constant
 
-let b:current_syntax = "cmake"
+let b:current_syntax = 'cmake'
 
-let &cpo = s:keepcpo
+let &cpoptions = s:keepcpo
 unlet s:keepcpo
 
 " vim: set nowrap:
