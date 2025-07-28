@@ -208,38 +208,65 @@ static bool HandleTargetsMode(std::vector<std::string> const& args,
 static bool HandleExportMode(std::vector<std::string> const& args,
                              cmExecutionStatus& status)
 {
-  struct Arguments : cmPackageInfoArguments
+  struct ExportArguments
   {
-    cm::optional<ArgumentParser::MaybeEmpty<std::vector<std::string>>> Targets;
     ArgumentParser::NonEmpty<std::string> ExportSetName;
     ArgumentParser::NonEmpty<std::string> Namespace;
     ArgumentParser::NonEmpty<std::string> Filename;
     ArgumentParser::NonEmpty<std::string> CxxModulesDirectory;
-    std::vector<std::vector<std::string>> PackageDependencyArgs;
+    cm::optional<cmPackageInfoArguments> PackageInfo;
     bool ExportPackageDependencies = false;
-    std::vector<std::vector<std::string>> TargetArgs;
   };
 
   auto parser =
-    cmArgumentParser<Arguments>{}
-      .Bind("EXPORT"_s, &Arguments::ExportSetName)
-      .Bind("NAMESPACE"_s, &Arguments::Namespace)
-      .Bind("FILE"_s, &Arguments::Filename)
-      .Bind("CXX_MODULES_DIRECTORY"_s, &Arguments::CxxModulesDirectory);
+    cmArgumentParser<ExportArguments>{}
+      .Bind("EXPORT"_s, &ExportArguments::ExportSetName)
+      .Bind("NAMESPACE"_s, &ExportArguments::Namespace)
+      .Bind("FILE"_s, &ExportArguments::Filename)
+      .Bind("CXX_MODULES_DIRECTORY"_s, &ExportArguments::CxxModulesDirectory);
 
   if (cmExperimental::HasSupportEnabled(
         status.GetMakefile(),
         cmExperimental::Feature::ExportPackageDependencies)) {
     parser.Bind("EXPORT_PACKAGE_DEPENDENCIES"_s,
-                &Arguments::ExportPackageDependencies);
+                &ExportArguments::ExportPackageDependencies);
   }
+
+  cmArgumentParser<cmPackageInfoArguments> packageInfoParser;
+  cmPackageInfoArguments::Bind(packageInfoParser);
+
   if (cmExperimental::HasSupportEnabled(
         status.GetMakefile(), cmExperimental::Feature::ExportPackageInfo)) {
-    cmPackageInfoArguments::Bind(parser);
+    parser.BindSubParser("PACKAGE_INFO"_s, packageInfoParser,
+                         &ExportArguments::PackageInfo);
   }
 
   std::vector<std::string> unknownArgs;
-  Arguments arguments = parser.Parse(args, &unknownArgs);
+  ExportArguments arguments = parser.Parse(args, &unknownArgs);
+
+  cmMakefile& mf = status.GetMakefile();
+  cmGlobalGenerator* gg = mf.GetGlobalGenerator();
+
+  if (arguments.PackageInfo) {
+    if (arguments.PackageInfo->PackageName.empty()) {
+      if (!arguments.PackageInfo->Check(status, false)) {
+        return false;
+      }
+    } else {
+      if (!arguments.Filename.empty()) {
+        status.SetError("PACKAGE_INFO and FILE are mutually exclusive.");
+        return false;
+      }
+      if (!arguments.Namespace.empty()) {
+        status.SetError("PACKAGE_INFO and NAMESPACE are mutually exclusive.");
+        return false;
+      }
+      if (!arguments.PackageInfo->Check(status) ||
+          !arguments.PackageInfo->SetMetadataFromProject(status)) {
+        return false;
+      }
+    }
+  }
 
   if (!unknownArgs.empty()) {
     status.SetError("EXPORT subcommand given unknown argument: \"" +
@@ -247,40 +274,14 @@ static bool HandleExportMode(std::vector<std::string> const& args,
     return false;
   }
 
-  if (arguments.PackageName.empty()) {
-    if (!arguments.Check(status, false)) {
-      return false;
-    }
-  } else {
-    if (!arguments.Filename.empty()) {
-      status.SetError("PACKAGE_INFO and FILE are mutually exclusive.");
-      return false;
-    }
-    if (!arguments.Namespace.empty()) {
-      status.SetError("PACKAGE_INFO and NAMESPACE are mutually exclusive.");
-      return false;
-    }
-    if (!arguments.Check(status) ||
-        !arguments.SetMetadataFromProject(status)) {
-      return false;
-    }
-  }
-
   std::string fname;
-  bool cps = false;
   if (arguments.Filename.empty()) {
-    if (args[0] != "EXPORT") {
-      status.SetError("FILE <filename> option missing.");
-      return false;
-    }
-    if (arguments.PackageName.empty()) {
-      fname = arguments.ExportSetName + ".cmake";
+    if (arguments.PackageInfo) {
+      fname = arguments.PackageInfo->GetPackageFileName();
     } else {
-      fname = arguments.GetPackageFileName();
-      cps = true;
+      fname = arguments.ExportSetName + ".cmake";
     }
   } else {
-    // Make sure the file has a .cmake extension.
     if (cmSystemTools::GetFilenameLastExtension(arguments.Filename) !=
         ".cmake") {
       std::ostringstream e;
@@ -292,9 +293,6 @@ static bool HandleExportMode(std::vector<std::string> const& args,
     fname = arguments.Filename;
   }
 
-  cmMakefile& mf = status.GetMakefile();
-
-  // Get the file to write.
   if (cmSystemTools::FileIsFullPath(fname)) {
     if (!mf.CanIWriteThisFile(fname)) {
       std::ostringstream e;
@@ -309,8 +307,14 @@ static bool HandleExportMode(std::vector<std::string> const& args,
     fname = dir + "/" + fname;
   }
 
-  std::vector<cmExportBuildFileGenerator::TargetExport> targets;
-  cmGlobalGenerator* gg = mf.GetGlobalGenerator();
+  if (gg->GetExportedTargetsFile(fname)) {
+    if (arguments.PackageInfo) {
+      status.SetError(cmStrCat("command already specified for the file "_s,
+                               cmSystemTools::GetFilenameName(fname), '.'));
+      return false;
+    }
+  }
+
   cmExportSet* exportSet = nullptr;
   cmExportSetMap& setMap = gg->GetExportSets();
   auto const it = setMap.find(arguments.ExportSetName);
@@ -322,38 +326,11 @@ static bool HandleExportMode(std::vector<std::string> const& args,
   }
   exportSet = &it->second;
 
-  // if cmExportBuildFileGenerator is already defined for the file
-  // and APPEND is not specified, if CMP0103 is OLD ignore previous definition
-  // else raise an error
-  if (gg->GetExportedTargetsFile(fname)) {
-    if (cps) {
-      status.SetError(cmStrCat("command already specified for the file "_s,
-                               cmSystemTools::GetFilenameName(fname), '.'));
-      return false;
-    }
-    switch (mf.GetPolicyStatus(cmPolicies::CMP0103)) {
-      case cmPolicies::WARN:
-        mf.IssueMessage(
-          MessageType::AUTHOR_WARNING,
-          cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0103),
-                   "\n"
-                   "export() command already specified for the file\n  ",
-                   arguments.Filename, "\nDid you miss 'APPEND' keyword?"));
-        CM_FALLTHROUGH;
-      case cmPolicies::OLD:
-        break;
-      default:
-        status.SetError(cmStrCat("command already specified for the file\n  ",
-                                 arguments.Filename,
-                                 "\nDid you miss 'APPEND' keyword?"));
-        return false;
-    }
-  }
-
   // Set up export file generation.
   std::unique_ptr<cmExportBuildFileGenerator> ebfg = nullptr;
-  if (cps) {
-    auto ebpg = cm::make_unique<cmExportBuildPackageInfoGenerator>(arguments);
+  if (arguments.PackageInfo) {
+    auto ebpg = cm::make_unique<cmExportBuildPackageInfoGenerator>(
+      *arguments.PackageInfo);
     ebfg = std::move(ebpg);
   } else {
     auto ebcg = cm::make_unique<cmExportBuildCMakeConfigGenerator>();
@@ -367,8 +344,6 @@ static bool HandleExportMode(std::vector<std::string> const& args,
   if (exportSet) {
     ebfg->SetExportSet(exportSet);
   }
-
-  // Compute the set of configurations exported.
   std::vector<std::string> configurationTypes =
     mf.GetGeneratorConfigs(cmMakefile::IncludeEmptyConfig);
 
@@ -389,14 +364,8 @@ static bool HandleSetupMode(std::vector<std::string> const& args,
   struct SetupArguments
   {
     ArgumentParser::NonEmpty<std::string> ExportSetName;
-    ArgumentParser::NonEmpty<std::string> Namespace;
-    ArgumentParser::NonEmpty<std::string> Filename;
-    ArgumentParser::NonEmpty<std::string> AndroidMKFile;
     ArgumentParser::NonEmpty<std::string> CxxModulesDirectory;
-    bool Append = false;
-    bool ExportOld = false;
     std::vector<std::vector<std::string>> PackageDependencyArgs;
-    bool ExportPackageDependencies = false;
     std::vector<std::vector<std::string>> TargetArgs;
   };
 
