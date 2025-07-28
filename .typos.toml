@@ -70,6 +70,8 @@ nto = "nto"
 
 [type.cpp.extend-identifiers]
 APPENDed = "APPENDed"
+setp = "setp"
+setp_ = "setp_"
 
 [type.json.extend-identifiers]
 # Some compiler options from `Templates/MSBuild/FlagTables/*.json` trigger too many false-positives.

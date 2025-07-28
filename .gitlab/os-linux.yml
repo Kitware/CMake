@@ -83,7 +83,7 @@
 ### Fedora
 
 .fedora42:
-    image: "kitware/cmake:ci-fedora42-x86_64-2025-04-22"
+    image: "kitware/cmake:ci-fedora42-x86_64-2025-07-22"
 
     variables:
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci/long file name for testing purposes"
@@ -111,6 +111,15 @@
 
     variables:
         CMAKE_CONFIGURATION: fedora42_clang_analyzer
+        CMAKE_CI_BUILD_TYPE: Debug
+        CTEST_NO_WARNINGS_ALLOWED: 1
+        CMAKE_CI_NO_INSTALL: 1
+
+.fedora42_clazy:
+    extends: .fedora42
+
+    variables:
+        CMAKE_CONFIGURATION: fedora42_clazy
         CMAKE_CI_BUILD_TYPE: Debug
         CTEST_NO_WARNINGS_ALLOWED: 1
         CMAKE_CI_NO_INSTALL: 1

@@ -303,7 +303,7 @@ std::map<std::string, std::string> GetOSReleaseVariables(
     scripts = gl.GetFiles();
   }
 
-  // 2. User provided (append to the CMake prvided)
+  // 2. User provided (append to the CMake provided)
   cmList::append(
     scripts, makefile.GetDefinition("CMAKE_GET_OS_RELEASE_FALLBACK_SCRIPTS"));
 
