@@ -130,6 +130,14 @@
         CMAKE_CONFIGURATION: macos_x86_64_ninja_ub
         CMAKE_CI_NIGHTLY_IGNORE_DEPS: "true"
 
+.macos_arm64_fastbuild:
+    extends: .macos
+
+    variables:
+        CMAKE_CONFIGURATION: macos_arm64_fastbuild
+        CMAKE_GENERATOR: FASTBuild
+        CMAKE_CI_NIGHTLY_IGNORE_DEPS: "true"
+
 ## Tags
 
 .macos_x86_64_tags:

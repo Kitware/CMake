@@ -235,6 +235,14 @@
         CMAKE_CI_IN_SYMLINK_TREE: 1
         CMAKE_CI_BUILD_DIR: "real_work/work/build"
 
+.fedora42_fastbuild:
+    extends: .fedora42
+
+    variables:
+        CMAKE_CONFIGURATION: fedora42_fastbuild
+        CTEST_NO_WARNINGS_ALLOWED: 1
+        CMAKE_GENERATOR: "FASTBuild"
+
 ### Clang Compiler
 
 .debian12_makefiles_clang:

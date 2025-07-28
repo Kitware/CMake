@@ -315,6 +315,16 @@ t:fedora42-makefiles-nospace:
         CMAKE_CI_BUILD_NAME: fedora42_makefiles_nospace
         CMAKE_CI_JOB_NIGHTLY: "true"
 
+t:fedora42-fastbuild:
+    extends:
+        - .fedora42_fastbuild
+        - .cmake_test_linux_release
+        - .linux_x86_64_v3_tags
+        - .run_dependent
+        - .needs_centos7_x86_64
+    variables:
+        CMAKE_CI_JOB_NIGHTLY: "true"
+
 t:nvhpc24.9-ninja:
     extends:
         - .nvhpc_ninja
@@ -1053,6 +1063,18 @@ t:macos-arm64-xcode:
     needs:
         - t:macos-arm64-ninja
 
+t:macos-arm64-fastbuild:
+    extends:
+        - .macos_arm64_fastbuild
+        - .cmake_test_macos_external
+        - .macos_arm64_tags_ext
+        - .cmake_junit_artifacts
+        - .run_dependent
+    needs:
+        - t:macos-arm64-ninja
+    variables:
+        CMAKE_CI_JOB_NIGHTLY: "true"
+
 t:macos-arm64-xcode-symlinked:
     extends:
         - .macos_arm64_xcode_symlinked
@@ -1232,6 +1254,18 @@ t:windows-vs2022-x64-nmake:
 t:windows-vs2022-x64-jom:
     extends:
         - .windows_vs2022_x64_jom
+        - .cmake_test_windows_external
+        - .windows_x86_64_tags_concurrent_vs2022
+        - .cmake_junit_artifacts
+        - .run_dependent
+    needs:
+        - t:windows-vs2022-x64-ninja
+    variables:
+        CMAKE_CI_JOB_NIGHTLY: "true"
+
+t:windows-vs2022-x64-fastbuild:
+    extends:
+        - .windows_vs2022_x64_fastbuild
         - .cmake_test_windows_external
         - .windows_x86_64_tags_concurrent_vs2022
         - .cmake_junit_artifacts
