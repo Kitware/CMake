@@ -40,6 +40,12 @@ static unsigned short const info_byte_order_little_endian[] = {
 #  define ABI_ID "ELF"
 #endif
 
+/* Construct the string literal in pieces to prevent the source from
+   getting matched.  Store it in a pointer rather than an array
+   because some compilers will just produce instructions to fill the
+   array rather than assigning a pointer to a static array.  */
 #if defined(ABI_ID)
-static char const info_abi[] = "INFO:abi[" ABI_ID "]";
+static char const* info_abi = "INFO"
+                              ":"
+                              "abi[" ABI_ID "]";
 #endif
