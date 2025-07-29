@@ -312,7 +312,8 @@ std::string DebGenerator::generateMD5File() const
 
 bool DebGenerator::generateControlTar(std::string const& md5Filename) const
 {
-  std::string filename_control_tar = this->WorkDir + "/control.tar.gz";
+  std::string filename_control_tar =
+    this->WorkDir + "/control.tar" + this->CompressionSuffix;
 
   cmGeneratedFileStream fileStream_control_tar;
   fileStream_control_tar.Open(filename_control_tar, false, true);
@@ -322,8 +323,7 @@ bool DebGenerator::generateControlTar(std::string const& md5Filename) const
                     << filename_control_tar << "\" for writing" << std::endl);
     return false;
   }
-  cmArchiveWrite control_tar(fileStream_control_tar,
-                             cmArchiveWrite::CompressGZip,
+  cmArchiveWrite control_tar(fileStream_control_tar, this->TarCompressionType,
                              this->DebianArchiveType);
   if (!control_tar.Open()) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
@@ -484,7 +484,8 @@ bool DebGenerator::generateDeb() const
   deb.SetUNAMEAndGNAME("root", "root");
 
   if (!deb.Add(tlDir + "debian-binary", tlDir.length()) ||
-      !deb.Add(tlDir + "control.tar.gz", tlDir.length()) ||
+      !deb.Add(tlDir + "control.tar" + this->CompressionSuffix,
+               tlDir.length()) ||
       !deb.Add(tlDir + "data.tar" + this->CompressionSuffix, tlDir.length())) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
                   "Error creating debian package:\n"
