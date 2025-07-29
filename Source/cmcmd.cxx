@@ -2260,7 +2260,9 @@ int cmcmd::VisualStudioLink(std::vector<std::string> const& args, int type,
   std::vector<std::string> expandedArgs;
   for (std::string const& i : args) {
     // check for nmake temporary files
-    if (i[0] == '@' && !cmHasLiteralPrefix(i, "@CMakeFiles")) {
+    if (i[0] == '@' &&
+        !(cmHasLiteralPrefix(i, "@CMakeFiles") ||
+          cmHasLiteralPrefix(i, "@.o/") || cmHasLiteralPrefix(i, "@.o\\"))) {
       cmsys::ifstream fin(i.substr(1).c_str());
       std::string line;
       while (cmSystemTools::GetLineFromStream(fin, line)) {
