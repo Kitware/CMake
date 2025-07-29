@@ -71,10 +71,6 @@ Commands
   ``POPULATE`` subcommands for interfacing CMake targets with pkg-config based
   dependencies.
 
-* The :command:`install(DIRECTORY)` command gained a new
-  ``EXCLUDE_EMPTY_DIRECTORIES`` option to skip installation
-  of empty directories.
-
 * The :command:`project` command now has experimental support for the
   ``COMPAT_VERSION`` keyword, gated by
   ``CMAKE_EXPERIMENTAL_EXPORT_PACKAGE_INFO``.
