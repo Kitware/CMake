@@ -12,8 +12,8 @@
 
 #include <cm/optional>
 
-#include "cmConstStack.h"
 #include "cmList.h"
+#include "cmStack.h"
 #include "cmSystemTools.h"
 
 /** \class cmListFileCache
@@ -169,11 +169,12 @@ bool operator!=(cmListFileContext const& lhs, cmListFileContext const& rhs);
 class cmListFileBacktrace
   : public cmConstStack<cmListFileContext, cmListFileBacktrace>
 {
-  using cmConstStack::cmConstStack;
-  friend class cmConstStack<cmListFileContext, cmListFileBacktrace>;
+  using cmStack::cmStack;
+  friend cmListFileBacktrace::Base;
 };
 #ifndef cmListFileCache_cxx
-extern template class cmConstStack<cmListFileContext, cmListFileBacktrace>;
+extern template class cmStack<cmListFileContext const, cmListFileBacktrace,
+                              cmStackType::Const>;
 #endif
 
 // Wrap type T as a value with a backtrace.  For purposes of

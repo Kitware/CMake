@@ -3,5 +3,6 @@
 #define cmFindPackageStack_cxx
 #include "cmFindPackageStack.h"
 
-#include "cmConstStack.tcc" // IWYU pragma: keep
-template class cmConstStack<cmFindPackageCall, cmFindPackageStack>;
+#include "cmStack.tcc" // IWYU pragma: keep
+template class cmStack<cmFindPackageCall const, cmFindPackageStack,
+                       cmStackType::Const>;

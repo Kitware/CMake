@@ -7,7 +7,7 @@
 #include <memory>
 #include <string>
 
-#include "cmConstStack.h"
+#include "cmStack.h"
 
 /**
  * Represents one call to find_package.
@@ -25,9 +25,10 @@ public:
 class cmFindPackageStack
   : public cmConstStack<cmFindPackageCall, cmFindPackageStack>
 {
-  using cmConstStack::cmConstStack;
-  friend class cmConstStack<cmFindPackageCall, cmFindPackageStack>;
+  using cmStack::cmStack;
+  friend cmFindPackageStack::Base;
 };
 #ifndef cmFindPackageStack_cxx
-extern template class cmConstStack<cmFindPackageCall, cmFindPackageStack>;
+extern template class cmStack<cmFindPackageCall const, cmFindPackageStack,
+                              cmStackType::Const>;
 #endif

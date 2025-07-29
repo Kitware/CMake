@@ -456,8 +456,9 @@ bool cmListFile::ParseString(char const* str, char const* virtual_filename,
   return !parseError;
 }
 
-#include "cmConstStack.tcc"
-template class cmConstStack<cmListFileContext, cmListFileBacktrace>;
+#include "cmStack.tcc"
+template class cmStack<cmListFileContext const, cmListFileBacktrace,
+                       cmStackType::Const>;
 
 std::ostream& operator<<(std::ostream& os, cmListFileContext const& lfc)
 {
