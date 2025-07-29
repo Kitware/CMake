@@ -24,7 +24,7 @@ my %unwanted = map { $_ => 1 } qw(VS CXX IDE NOTFOUND NO_ DFOO DBAR NEW GNU);
 
 # control-statements
 my %conditional = map { $_ => 1 } qw(if else elseif endif);
-my %loop = map { $_ => 1 } qw(foreach while endforeach endwhile);
+my %loopetc = map { $_ => 1 } qw(block foreach function macro while endblock endfunction endforeach endmacro endwhile);
 
 # decrecated
 my %deprecated = map { $_ => 1 } qw(build_name exec_program export_library_dependencies install_files install_programs install_targets link_libraries make_directory output_required_files remove subdir_depends subdirs use_mangled_mesa utility_source variable_requires write_file);
@@ -141,7 +141,7 @@ while(<IN>)
 		if ($1 eq "COMMAND_LIST") {
 			# do not include "special" commands in this list
 			my @tmp = grep { ! exists $conditional{$_} and
-			                 ! exists $loop{$_} and
+			                 ! exists $loopetc{$_} and
 			                 ! exists $deprecated{$_} } @commands;
 			print_list(\*OUT, @tmp);
 		} elsif ($1 eq "VARIABLE_LIST") {
@@ -150,10 +150,6 @@ while(<IN>)
 			print_list(\*OUT, @modules);
 		} elsif ($1 eq "GENERATOR_EXPRESSIONS") {
 			print_list(\*OUT, @generator_expr);
-		} elsif ($1 eq "CONDITIONALS") {
-			print_list(\*OUT, keys %conditional);
-		} elsif ($1 eq "LOOPS") {
-			print_list(\*OUT, keys %loop);
 		} elsif ($1 eq "DEPRECATED") {
 			print_list(\*OUT, keys %deprecated);
 		} elsif ($1 eq "PROPERTIES") {
