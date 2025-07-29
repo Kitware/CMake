@@ -1,0 +1,5 @@
+# Allows GDB to follow child processes
+set follow-fork-mode child
+
+# Allows the parent process continue in parallel
+set non-stop on
