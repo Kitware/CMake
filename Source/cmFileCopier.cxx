@@ -25,10 +25,6 @@
 
 #include <cstring>
 #include <sstream>
-#include <utility>
-
-#include <cm/string_view>
-#include <cmext/string_view>
 
 using namespace cmFSPermissions;
 
@@ -297,13 +293,6 @@ bool cmFileCopier::CheckKeyword(std::string const& arg)
     } else {
       this->Doing = DoingNone;
       this->MatchlessFiles = false;
-    }
-  } else if (arg == "EXCLUDE_EMPTY_DIRECTORIES") {
-    if (this->CurrentMatchRule) {
-      this->NotAfterMatch(arg);
-    } else {
-      this->Doing = DoingNone;
-      this->ExcludeEmptyDirectories = true;
     }
   } else {
     return false;
@@ -658,29 +647,6 @@ bool cmFileCopier::InstallFile(std::string const& fromFile,
   return this->SetPermissions(toFile, permissions);
 }
 
-static bool IsEmptyDirectory(std::string const& path,
-                             std::unordered_map<std::string, bool>& cache)
-{
-  auto i = cache.find(path);
-  if (i == cache.end()) {
-    bool isEmpty = (!cmSystemTools::FileIsSymlink(path) &&
-                    cmSystemTools::FileIsDirectory(path));
-    if (isEmpty) {
-      cmsys::Directory d;
-      d.Load(path);
-      unsigned long numFiles = d.GetNumberOfFiles();
-      for (unsigned long fi = 0; isEmpty && fi < numFiles; ++fi) {
-        std::string const& name = d.GetFileName(fi);
-        if (name != "."_s && name != ".."_s) {
-          isEmpty = IsEmptyDirectory(d.GetFilePath(fi), cache);
-        }
-      }
-    }
-    i = cache.emplace(path, isEmpty).first;
-  }
-  return i->second;
-}
-
 bool cmFileCopier::InstallDirectory(std::string const& source,
                                     std::string const& destination,
                                     MatchProperties match_properties)
@@ -753,11 +719,6 @@ bool cmFileCopier::InstallDirectory(std::string const& source,
           strcmp(dir.GetFile(fileNum), "..") == 0)) {
       std::string fromPath = cmStrCat(source, '/', dir.GetFile(fileNum));
       std::string toPath = cmStrCat(destination, '/', dir.GetFile(fileNum));
-      if (this->ExcludeEmptyDirectories &&
-          IsEmptyDirectory(fromPath, this->DirEmptyCache)) {
-        continue;
-      }
-
       if (!this->Install(fromPath, toPath)) {
         return false;
       }
