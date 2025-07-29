@@ -111,6 +111,7 @@ endforeach()
 
 foreach(
   VTEST
+    ALSA
     BISON Boost BZip2 BZIP2
     CUDA
     DOXYGEN

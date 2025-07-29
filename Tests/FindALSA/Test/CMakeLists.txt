@@ -4,7 +4,7 @@ include(CTest)
 
 find_package(ALSA REQUIRED)
 
-add_definitions(-DCMAKE_EXPECTED_ALSA_VERSION="${ALSA_VERSION_STRING}")
+add_definitions(-DCMAKE_EXPECTED_ALSA_VERSION="${ALSA_VERSION}")
 
 add_executable(test_tgt main.c)
 target_link_libraries(test_tgt ALSA::ALSA)
