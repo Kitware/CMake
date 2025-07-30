@@ -1191,7 +1191,9 @@ add_library(
   CPack/cmCPackArchiveGenerator.cxx
   CPack/cmCPackComponentGroup.cxx
   CPack/cmCPackDebGenerator.cxx
+  CPack/cmCPackDebGenerator.h
   CPack/cmCPackExternalGenerator.cxx
+  CPack/cmCPackExternalGenerator.h
   CPack/cmCPackGeneratorFactory.cxx
   CPack/cmCPackGenerator.cxx
   CPack/cmCPackLog.cxx
@@ -1254,6 +1256,15 @@ if(UNIX)
     set(FREEBSD_PKG_INCLUDE_DIRS NOTFOUND)
     set(FREEBSD_PKG_LIBRARIES NOTFOUND)
   endif()
+endif()
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  target_sources(
+    CPackLib
+    PRIVATE
+      CPack/cmCPackAppImageGenerator.cxx
+      CPack/cmCPackAppImageGenerator.h
+    )
 endif()
 
 if(CYGWIN)
