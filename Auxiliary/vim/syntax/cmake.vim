@@ -1,13 +1,13 @@
 " Vim syntax file
 " Program:      CMake - Cross-Platform Makefile Generator
-" Version:      cmake version 3.27.20230713-gdc88dd5
+" Version:      cmake version 4.1.20250715-g2c3f83a
 " Language:     CMake
 " Author:       Andy Cedilnik <andy.cedilnik@kitware.com>,
 "               Nicholas Hutchinson <nshutchinson@gmail.com>,
 "               Patrick Boettcher <patrick.boettcher@posteo.de>
 " Maintainer:   Dimitri Merejkowsky <d.merej@gmail.com>
 " Former Maintainer: Karthik Krishnan <karthik.krishnan@kitware.com>
-" Last Change:  2023 Jul 13
+" Last Change:  2025 Jul 15
 "
 " License:      The CMake license applies to this file. See
 "               https://cmake.org/licensing
@@ -19,10 +19,19 @@ endif
 let s:keepcpo= &cpo
 set cpo&vim
 
-syn region cmakeBracketArgument start="\[\z(=*\)\[" end="\]\z1\]" contains=cmakeTodo,@Spell
+syn cluster cmakeControl contains=
+      \ cmakeIf,
+      \ cmakeElse,
+      \ cmakeForeach,
+      \ cmakeWhile,
+      \ cmakeBlock,
+      \ cmakeFunction,
+      \ cmakeMacro
+
+syn region cmakeBracketArgument start="\[\z(=*\)\[" end="\]\z1\]" fold contains=cmakeTodo,@Spell
 
 syn region cmakeComment start="#\(\[=*\[\)\@!" end="$" contains=cmakeTodo,@Spell
-syn region cmakeBracketComment start="#\[\z(=*\)\[" end="\]\z1\]" contains=cmakeTodo,@Spell
+syn region cmakeBracketComment start="#\[\z(=*\)\[" end="\]\z1\]" fold contains=cmakeTodo,@Spell
 
 syn match cmakeEscaped /\(\\\\\|\\"\|\\n\|\\t\)/ contained
 syn region cmakeRegistry start="\[" end="]" contained oneline contains=cmakeTodo,cmakeEscaped
@@ -35,7 +44,15 @@ syn region cmakeVariableValue start="${" end="}" contained oneline contains=cmak
 
 syn region cmakeEnvironment start="$ENV{" end="}" contained oneline contains=cmakeTodo
 
-syn region cmakeArguments start="(" end=")" contains=ALLBUT,cmakeGeneratorExpressions,cmakeCommand,cmakeCommandConditional,cmakeCommandRepeat,cmakeCommandDeprecated,cmakeCommandManuallyAdded,cmakeArguments,cmakeTodo,@Spell
+syn region cmakeArguments start="(" end=")" contains=ALLBUT,@cmakeControl,cmakeGeneratorExpressions,cmakeCommand,cmakeCommandDeprecated,cmakeCommandManuallyAdded,cmakeArguments,cmakeTodo,@Spell fold
+syn region cmakeIf matchgroup=cmakeKeyword start=/^\s*\<if\>/ end=/^\s*\<endif\>/ transparent fold contains=@cmakeControl,cmakeArguments
+syn match cmakeElse /^\s*\<else\(if\)\?\>/ contained contains=NONE
+
+syn region cmakeForeach matchgroup=cmakeKeyword start=/^\s*\<foreach\>/ end=/^\s*\<endforeach\>/ transparent fold contains=@cmakeControl,cmakeArguments
+syn region cmakeWhile matchgroup=cmakeKeyword start=/^\s*\<while\>/ end=/^\s*\<endwhile\>/ transparent fold contains=@cmakeControl,cmakeArguments
+syn region cmakeFunction matchgroup=cmakeKeyword start=/^\s*\<function\>/ end=/^\s*\<endfunction\>/ transparent fold contains=@cmakeControl,cmakeArguments
+syn region cmakeBlock matchgroup=cmakeKeyword start=/^\s*\<block\>/ end=/^\s*\<endblock\>/ transparent fold contains=@cmakeControl,cmakeArguments
+syn region cmakeMacro matchgroup=cmakeKeyword start=/^\s*\<macro\>/ end=/^\s*\<endmacro\>/ transparent fold contains=@cmakeControl,cmakeArguments
 
 syn case match
 
@@ -45,6 +62,7 @@ syn keyword cmakeProperty contained
             \ ADDITIONAL_MAKE_CLEAN_FILES
             \ ADVANCED
             \ AIX_EXPORT_ALL_SYMBOLS
+            \ AIX_SHARED_LIBRARY_ARCHIVE
             \ ALIASED_TARGET
             \ ALIAS_GLOBAL
             \ ALLOW_DUPLICATE_CUSTOM_TARGETS
@@ -69,20 +87,20 @@ syn keyword cmakeProperty contained
             \ ARCHIVE_OUTPUT_NAME
             \ ATTACHED_FILES
             \ ATTACHED_FILES_ON_FAIL
+            \ AUTOGEN_BETTER_GRAPH_MULTI_CONFIG
             \ AUTOGEN_BUILD_DIR
             \ AUTOGEN_COMMAND_LINE_LENGTH_MAX
             \ AUTOGEN_ORIGIN_DEPENDS
             \ AUTOGEN_PARALLEL
             \ AUTOGEN_SOURCE_GROUP
-            \ AUTOGEN_USE_SYSTEM_INCLUDE
             \ AUTOGEN_TARGETS_FOLDER
             \ AUTOGEN_TARGET_DEPENDS
             \ AUTOGEN_USE_SYSTEM_INCLUDE
-            \ AUTOGEN_BETTER_GRAPH_MULTI_CONFIG
             \ AUTOMOC
             \ AUTOMOC_COMPILER_PREDEFINES
             \ AUTOMOC_DEPEND_FILTERS
             \ AUTOMOC_EXECUTABLE
+            \ AUTOMOC_INCLUDE_DIRECTORIES
             \ AUTOMOC_MACRO_NAMES
             \ AUTOMOC_MOC_OPTIONS
             \ AUTOMOC_PATH_PREFIX
@@ -111,6 +129,7 @@ syn keyword cmakeProperty contained
             \ CMAKE_CUDA_KNOWN_FEATURES
             \ CMAKE_CXX_KNOWN_FEATURES
             \ CMAKE_C_KNOWN_FEATURES
+            \ CMAKE_HIP_KNOWN_FEATURES
             \ CMAKE_ROLE
             \ COMMON_LANGUAGE_RUNTIME
             \ COMPATIBLE_INTERFACE_BOOL
@@ -147,15 +166,16 @@ syn keyword cmakeProperty contained
             \ CXX_MODULE_DIRS
             \ CXX_MODULE_SET
             \ CXX_MODULE_SETS
+            \ CXX_MODULE_STD
             \ CXX_SCAN_FOR_MODULES
             \ CXX_STANDARD
             \ CXX_STANDARD_REQUIRED
             \ C_EXTENSIONS
             \ C_STANDARD
             \ C_STANDARD_REQUIRED
+            \ DEBUGGER_WORKING_DIRECTORY
             \ DEBUG_CONFIGURATIONS
             \ DEBUG_POSTFIX
-            \ DEBUGGER_WORKING_DIRECTORY
             \ DEFINE_SYMBOL
             \ DEFINITIONS
             \ DEPENDS
@@ -178,7 +198,9 @@ syn keyword cmakeProperty contained
             \ ENVIRONMENT_MODIFICATION
             \ EXCLUDE_FROM_ALL
             \ EXCLUDE_FROM_DEFAULT_BUILD
+            \ EXPORT_BUILD_DATABASE
             \ EXPORT_COMPILE_COMMANDS
+            \ EXPORT_FIND_PACKAGE_NAME
             \ EXPORT_NAME
             \ EXPORT_NO_SYSTEM
             \ EXPORT_PROPERTIES
@@ -195,11 +217,13 @@ syn keyword cmakeProperty contained
             \ FOLDER
             \ FRAMEWORK
             \ FRAMEWORK_VERSION
+            \ Fortran_BUILDING_INSTRINSIC_MODULES
             \ Fortran_BUILDING_INTRINSIC_MODULES
             \ Fortran_FORMAT
             \ Fortran_MODULE_DIRECTORY
             \ Fortran_PREPROCESS
             \ GENERATED
+            \ GENERATED_RESOURCE_SPEC_FILE
             \ GENERATOR_FILE_NAME
             \ GENERATOR_IS_MULTI_CONFIG
             \ GHS_INTEGRITY_APP
@@ -221,6 +245,11 @@ syn keyword cmakeProperty contained
             \ IMPORTED
             \ IMPORTED_COMMON_LANGUAGE_RUNTIME
             \ IMPORTED_CONFIGURATIONS
+            \ IMPORTED_CXX_MODULES_COMPILE_DEFINITIONS
+            \ IMPORTED_CXX_MODULES_COMPILE_FEATURES
+            \ IMPORTED_CXX_MODULES_COMPILE_OPTIONS
+            \ IMPORTED_CXX_MODULES_INCLUDE_DIRECTORIES
+            \ IMPORTED_CXX_MODULES_LINK_LIBRARIES
             \ IMPORTED_GLOBAL
             \ IMPORTED_IMPLIB
             \ IMPORTED_LIBNAME
@@ -239,12 +268,12 @@ syn keyword cmakeProperty contained
             \ INCLUDE_DIRECTORIES
             \ INCLUDE_REGULAR_EXPRESSION
             \ INSTALL_NAME_DIR
+            \ INSTALL_PARALLEL
             \ INSTALL_REMOVE_ENVIRONMENT_RPATH
             \ INSTALL_RPATH
             \ INSTALL_RPATH_USE_LINK_PATH
             \ INTERFACE_AUTOMOC_MACRO_NAMES
             \ INTERFACE_AUTOUIC_OPTIONS
-            \ INTERFACE_AUTOMOC_MACRO_NAMES
             \ INTERFACE_COMPILE_DEFINITIONS
             \ INTERFACE_COMPILE_FEATURES
             \ INTERFACE_COMPILE_OPTIONS
@@ -278,6 +307,7 @@ syn keyword cmakeProperty contained
             \ LIBRARY_OUTPUT_DIRECTORY
             \ LIBRARY_OUTPUT_NAME
             \ LINKER_LANGUAGE
+            \ LINKER_TYPE
             \ LINK_DEPENDS
             \ LINK_DEPENDS_NO_SHARED
             \ LINK_DIRECTORIES
@@ -286,10 +316,12 @@ syn keyword cmakeProperty contained
             \ LINK_INTERFACE_MULTIPLICITY
             \ LINK_LIBRARIES
             \ LINK_LIBRARIES_ONLY_TARGETS
+            \ LINK_LIBRARIES_STRATEGY
             \ LINK_LIBRARY_OVERRIDE
             \ LINK_OPTIONS
             \ LINK_SEARCH_END_STATIC
             \ LINK_SEARCH_START_STATIC
+            \ LINK_WARNING_AS_ERROR
             \ LINK_WHAT_YOU_USE
             \ LISTFILE_STACK
             \ LOCATION
@@ -340,6 +372,7 @@ syn keyword cmakeProperty contained
             \ PROCESSORS
             \ PROCESSOR_AFFINITY
             \ PROJECT_LABEL
+            \ PROPAGATE_TOP_LEVEL_INCLUDES_TO_TRY_COMPILE
             \ PUBLIC_HEADER
             \ REPORT_UNDEFINED_PROPERTIES
             \ REQUIRED_FILES
@@ -366,6 +399,7 @@ syn keyword cmakeProperty contained
             \ SOURCES
             \ SOURCE_DIR
             \ SOVERSION
+            \ SPDX_LICENSE
             \ STATIC_LIBRARY_FLAGS
             \ STATIC_LIBRARY_OPTIONS
             \ STRINGS
@@ -373,28 +407,32 @@ syn keyword cmakeProperty contained
             \ SUFFIX
             \ SYMBOLIC
             \ SYSTEM
+            \ Swift_COMPILATION_MODE
             \ Swift_DEPENDENCIES_FILE
             \ Swift_DIAGNOSTICS_FILE
             \ Swift_LANGUAGE_VERSION
             \ Swift_MODULE_DIRECTORY
             \ Swift_MODULE_NAME
-            \ Swift_COMPILATION_MODE
             \ TARGET_ARCHIVES_MAY_BE_SHARED_LIBS
             \ TARGET_MESSAGES
             \ TARGET_SUPPORTS_SHARED_LIBS
             \ TESTS
             \ TEST_INCLUDE_FILE
             \ TEST_INCLUDE_FILES
+            \ TEST_LAUNCHER
             \ TIMEOUT
             \ TIMEOUT_AFTER_MATCH
             \ TIMEOUT_SIGNAL_GRACE_PERIOD
             \ TIMEOUT_SIGNAL_NAME
+            \ TRANSITIVE_COMPILE_PROPERTIES
+            \ TRANSITIVE_LINK_PROPERTIES
             \ TYPE
             \ UNITY_BUILD
             \ UNITY_BUILD_BATCH_SIZE
             \ UNITY_BUILD_CODE_AFTER_INCLUDE
             \ UNITY_BUILD_CODE_BEFORE_INCLUDE
             \ UNITY_BUILD_MODE
+            \ UNITY_BUILD_RELOCATABLE
             \ UNITY_BUILD_UNIQUE_ID
             \ UNITY_GROUP
             \ USE_FOLDERS
@@ -405,6 +443,7 @@ syn keyword cmakeProperty contained
             \ VISIBILITY_INLINES_HIDDEN
             \ VS_CONFIGURATION_TYPE
             \ VS_COPY_TO_OUT_DIR
+            \ VS_CUSTOM_COMMAND_DISABLE_PARALLEL_BUILD
             \ VS_DEBUGGER_COMMAND
             \ VS_DEBUGGER_COMMAND_ARGUMENTS
             \ VS_DEBUGGER_ENVIRONMENT
@@ -418,6 +457,7 @@ syn keyword cmakeProperty contained
             \ VS_DOTNET_STARTUP_OBJECT
             \ VS_DOTNET_TARGET_FRAMEWORK_VERSION
             \ VS_DPI_AWARE
+            \ VS_FILTER_PROPS
             \ VS_FRAMEWORK_REFERENCES
             \ VS_GLOBAL_KEYWORD
             \ VS_GLOBAL_PROJECT_TYPES
@@ -450,10 +490,11 @@ syn keyword cmakeProperty contained
             \ VS_SHADER_TYPE
             \ VS_SHADER_VARIABLE_NAME
             \ VS_SOLUTION_DEPLOY
+            \ VS_SOLUTION_ITEMS
             \ VS_STARTUP_PROJECT
             \ VS_TOOL_OVERRIDE
             \ VS_USER_PROPS
-            \ VS_FILTER_PROPS
+            \ VS_USE_DEBUG_LIBRARIES
             \ VS_WINDOWS_TARGET_PLATFORM_MIN_VERSION
             \ VS_WINRT_COMPONENT
             \ VS_WINRT_EXTENSIONS
@@ -479,45 +520,46 @@ syn keyword cmakeProperty contained
             \ XCODE_SCHEME_ARGUMENTS
             \ XCODE_SCHEME_DEBUG_AS_ROOT
             \ XCODE_SCHEME_DEBUG_DOCUMENT_VERSIONING
-            \ XCODE_SCHEME_ENABLE_GPU_FRAME_CAPTURE_MODE
             \ XCODE_SCHEME_DISABLE_MAIN_THREAD_CHECKER
             \ XCODE_SCHEME_DYNAMIC_LIBRARY_LOADS
             \ XCODE_SCHEME_DYNAMIC_LINKER_API_USAGE
             \ XCODE_SCHEME_ENABLE_GPU_API_VALIDATION
+            \ XCODE_SCHEME_ENABLE_GPU_FRAME_CAPTURE_MODE
             \ XCODE_SCHEME_ENABLE_GPU_SHADER_VALIDATION
             \ XCODE_SCHEME_ENVIRONMENT
             \ XCODE_SCHEME_EXECUTABLE
             \ XCODE_SCHEME_GUARD_MALLOC
+            \ XCODE_SCHEME_LAUNCH_CONFIGURATION
             \ XCODE_SCHEME_LAUNCH_MODE
             \ XCODE_SCHEME_LLDB_INIT_FILE
             \ XCODE_SCHEME_MAIN_THREAD_CHECKER_STOP
             \ XCODE_SCHEME_MALLOC_GUARD_EDGES
             \ XCODE_SCHEME_MALLOC_SCRIBBLE
             \ XCODE_SCHEME_MALLOC_STACK
+            \ XCODE_SCHEME_TEST_CONFIGURATION
             \ XCODE_SCHEME_THREAD_SANITIZER
             \ XCODE_SCHEME_THREAD_SANITIZER_STOP
             \ XCODE_SCHEME_UNDEFINED_BEHAVIOUR_SANITIZER
             \ XCODE_SCHEME_UNDEFINED_BEHAVIOUR_SANITIZER_STOP
-            \ XCODE_SCHEME_ENABLE_GPU_API_VALIDATION
-            \ XCODE_SCHEME_ENABLE_GPU_SHADER_VALIDATION
-            \ XCODE_SCHEME_LAUNCH_CONFIGURATION
-            \ XCODE_SCHEME_TEST_CONFIGURATION
             \ XCODE_SCHEME_WORKING_DIRECTORY
             \ XCODE_SCHEME_ZOMBIE_OBJECTS
             \ XCODE_XCCONFIG
             \ XCTEST
 
 syn keyword cmakeVariable contained
+            \ AIX
             \ ANDROID
             \ APPLE
             \ BORLAND
             \ BSD
             \ BUILD_SHARED_LIBS
+            \ BUILD_TESTING
             \ CACHE
             \ CMAKE_ABSOLUTE_DESTINATION_FILES
             \ CMAKE_ADD_CUSTOM_COMMAND_DEPENDS_EXPLICIT_ONLY
             \ CMAKE_ADSP_ROOT
             \ CMAKE_AIX_EXPORT_ALL_SYMBOLS
+            \ CMAKE_AIX_SHARED_LIBRARY_ARCHIVE
             \ CMAKE_ANDROID_ANT_ADDITIONAL_OPTIONS
             \ CMAKE_ANDROID_API
             \ CMAKE_ANDROID_API_MIN
@@ -556,9 +598,12 @@ syn keyword cmakeVariable contained
             \ CMAKE_ASM_ANDROID_TOOLCHAIN_MACHINE
             \ CMAKE_ASM_ANDROID_TOOLCHAIN_PREFIX
             \ CMAKE_ASM_ANDROID_TOOLCHAIN_SUFFIX
+            \ CMAKE_ASM_ARCHIVER_WRAPPER_FLAG
+            \ CMAKE_ASM_ARCHIVER_WRAPPER_FLAG_SEP
             \ CMAKE_ASM_ARCHIVE_APPEND
             \ CMAKE_ASM_ARCHIVE_CREATE
             \ CMAKE_ASM_ARCHIVE_FINISH
+            \ CMAKE_ASM_ATTRIBUTES
             \ CMAKE_ASM_BYTE_ORDER
             \ CMAKE_ASM_CLANG_TIDY
             \ CMAKE_ASM_CLANG_TIDY_EXPORT_FIXES_DIR
@@ -570,6 +615,10 @@ syn keyword cmakeVariable contained
             \ CMAKE_ASM_COMPILER_FRONTEND_VARIANT
             \ CMAKE_ASM_COMPILER_ID
             \ CMAKE_ASM_COMPILER_LAUNCHER
+            \ CMAKE_ASM_COMPILER_LINKER
+            \ CMAKE_ASM_COMPILER_LINKER_FRONTEND_VARIANT
+            \ CMAKE_ASM_COMPILER_LINKER_ID
+            \ CMAKE_ASM_COMPILER_LINKER_VERSION
             \ CMAKE_ASM_COMPILER_LOADED
             \ CMAKE_ASM_COMPILER_PREDEFINES_COMMAND
             \ CMAKE_ASM_COMPILER_RANLIB
@@ -580,8 +629,10 @@ syn keyword cmakeVariable contained
             \ CMAKE_ASM_CPPCHECK
             \ CMAKE_ASM_CPPLINT
             \ CMAKE_ASM_CREATE_SHARED_LIBRARY
+            \ CMAKE_ASM_CREATE_SHARED_LIBRARY_ARCHIVE
             \ CMAKE_ASM_CREATE_SHARED_MODULE
             \ CMAKE_ASM_CREATE_STATIC_LIBRARY
+            \ CMAKE_ASM_DEVICE_LINK_MODE
             \ CMAKE_ASM_EXTENSIONS
             \ CMAKE_ASM_EXTENSIONS_DEFAULT
             \ CMAKE_ASM_FLAGS
@@ -594,6 +645,10 @@ syn keyword cmakeVariable contained
             \ CMAKE_ASM_FLAGS_RELEASE_INIT
             \ CMAKE_ASM_FLAGS_RELWITHDEBINFO
             \ CMAKE_ASM_FLAGS_RELWITHDEBINFO_INIT
+            \ CMAKE_ASM_HOST_COMPILER
+            \ CMAKE_ASM_HOST_COMPILER_ID
+            \ CMAKE_ASM_HOST_COMPILER_VERSION
+            \ CMAKE_ASM_ICSTAT
             \ CMAKE_ASM_IGNORE_EXTENSIONS
             \ CMAKE_ASM_IMPLICIT_INCLUDE_DIRECTORIES
             \ CMAKE_ASM_IMPLICIT_LINK_DIRECTORIES
@@ -607,18 +662,23 @@ syn keyword cmakeVariable contained
             \ CMAKE_ASM_LINKER_PREFERENCE_PROPAGATES
             \ CMAKE_ASM_LINKER_WRAPPER_FLAG
             \ CMAKE_ASM_LINKER_WRAPPER_FLAG_SEP
+            \ CMAKE_ASM_LINK_DEF_FILE_FLAG
             \ CMAKE_ASM_LINK_EXECUTABLE
             \ CMAKE_ASM_LINK_LIBRARY_FILE_FLAG
             \ CMAKE_ASM_LINK_LIBRARY_FLAG
             \ CMAKE_ASM_LINK_LIBRARY_SUFFIX
+            \ CMAKE_ASM_LINK_MODE
             \ CMAKE_ASM_LINK_WHAT_YOU_USE_FLAG
             \ CMAKE_ASM_MASM
             \ CMAKE_ASM_MASM_ANDROID_TOOLCHAIN_MACHINE
             \ CMAKE_ASM_MASM_ANDROID_TOOLCHAIN_PREFIX
             \ CMAKE_ASM_MASM_ANDROID_TOOLCHAIN_SUFFIX
+            \ CMAKE_ASM_MASM_ARCHIVER_WRAPPER_FLAG
+            \ CMAKE_ASM_MASM_ARCHIVER_WRAPPER_FLAG_SEP
             \ CMAKE_ASM_MASM_ARCHIVE_APPEND
             \ CMAKE_ASM_MASM_ARCHIVE_CREATE
             \ CMAKE_ASM_MASM_ARCHIVE_FINISH
+            \ CMAKE_ASM_MASM_ATTRIBUTES
             \ CMAKE_ASM_MASM_BYTE_ORDER
             \ CMAKE_ASM_MASM_CLANG_TIDY
             \ CMAKE_ASM_MASM_CLANG_TIDY_EXPORT_FIXES_DIR
@@ -630,6 +690,10 @@ syn keyword cmakeVariable contained
             \ CMAKE_ASM_MASM_COMPILER_FRONTEND_VARIANT
             \ CMAKE_ASM_MASM_COMPILER_ID
             \ CMAKE_ASM_MASM_COMPILER_LAUNCHER
+            \ CMAKE_ASM_MASM_COMPILER_LINKER
+            \ CMAKE_ASM_MASM_COMPILER_LINKER_FRONTEND_VARIANT
+            \ CMAKE_ASM_MASM_COMPILER_LINKER_ID
+            \ CMAKE_ASM_MASM_COMPILER_LINKER_VERSION
             \ CMAKE_ASM_MASM_COMPILER_LOADED
             \ CMAKE_ASM_MASM_COMPILER_PREDEFINES_COMMAND
             \ CMAKE_ASM_MASM_COMPILER_RANLIB
@@ -640,8 +704,10 @@ syn keyword cmakeVariable contained
             \ CMAKE_ASM_MASM_CPPCHECK
             \ CMAKE_ASM_MASM_CPPLINT
             \ CMAKE_ASM_MASM_CREATE_SHARED_LIBRARY
+            \ CMAKE_ASM_MASM_CREATE_SHARED_LIBRARY_ARCHIVE
             \ CMAKE_ASM_MASM_CREATE_SHARED_MODULE
             \ CMAKE_ASM_MASM_CREATE_STATIC_LIBRARY
+            \ CMAKE_ASM_MASM_DEVICE_LINK_MODE
             \ CMAKE_ASM_MASM_EXTENSIONS
             \ CMAKE_ASM_MASM_EXTENSIONS_DEFAULT
             \ CMAKE_ASM_MASM_FLAGS
@@ -654,6 +720,10 @@ syn keyword cmakeVariable contained
             \ CMAKE_ASM_MASM_FLAGS_RELEASE_INIT
             \ CMAKE_ASM_MASM_FLAGS_RELWITHDEBINFO
             \ CMAKE_ASM_MASM_FLAGS_RELWITHDEBINFO_INIT
+            \ CMAKE_ASM_MASM_HOST_COMPILER
+            \ CMAKE_ASM_MASM_HOST_COMPILER_ID
+            \ CMAKE_ASM_MASM_HOST_COMPILER_VERSION
+            \ CMAKE_ASM_MASM_ICSTAT
             \ CMAKE_ASM_MASM_IGNORE_EXTENSIONS
             \ CMAKE_ASM_MASM_IMPLICIT_INCLUDE_DIRECTORIES
             \ CMAKE_ASM_MASM_IMPLICIT_LINK_DIRECTORIES
@@ -667,10 +737,12 @@ syn keyword cmakeVariable contained
             \ CMAKE_ASM_MASM_LINKER_PREFERENCE_PROPAGATES
             \ CMAKE_ASM_MASM_LINKER_WRAPPER_FLAG
             \ CMAKE_ASM_MASM_LINKER_WRAPPER_FLAG_SEP
+            \ CMAKE_ASM_MASM_LINK_DEF_FILE_FLAG
             \ CMAKE_ASM_MASM_LINK_EXECUTABLE
             \ CMAKE_ASM_MASM_LINK_LIBRARY_FILE_FLAG
             \ CMAKE_ASM_MASM_LINK_LIBRARY_FLAG
             \ CMAKE_ASM_MASM_LINK_LIBRARY_SUFFIX
+            \ CMAKE_ASM_MASM_LINK_MODE
             \ CMAKE_ASM_MASM_LINK_WHAT_YOU_USE_FLAG
             \ CMAKE_ASM_MASM_OUTPUT_EXTENSION
             \ CMAKE_ASM_MASM_PLATFORM_ID
@@ -681,17 +753,23 @@ syn keyword cmakeVariable contained
             \ CMAKE_ASM_MASM_STANDARD
             \ CMAKE_ASM_MASM_STANDARD_DEFAULT
             \ CMAKE_ASM_MASM_STANDARD_INCLUDE_DIRECTORIES
+            \ CMAKE_ASM_MASM_STANDARD_LATEST
             \ CMAKE_ASM_MASM_STANDARD_LIBRARIES
+            \ CMAKE_ASM_MASM_STANDARD_LINK_DIRECTORIES
             \ CMAKE_ASM_MASM_STANDARD_REQUIRED
             \ CMAKE_ASM_MASM_SUPPORTED
+            \ CMAKE_ASM_MASM_USING_LINKER_MODE
             \ CMAKE_ASM_MASM_VISIBILITY_PRESET
             \ CMAKE_ASM_NASM
             \ CMAKE_ASM_NASM_ANDROID_TOOLCHAIN_MACHINE
             \ CMAKE_ASM_NASM_ANDROID_TOOLCHAIN_PREFIX
             \ CMAKE_ASM_NASM_ANDROID_TOOLCHAIN_SUFFIX
+            \ CMAKE_ASM_NASM_ARCHIVER_WRAPPER_FLAG
+            \ CMAKE_ASM_NASM_ARCHIVER_WRAPPER_FLAG_SEP
             \ CMAKE_ASM_NASM_ARCHIVE_APPEND
             \ CMAKE_ASM_NASM_ARCHIVE_CREATE
             \ CMAKE_ASM_NASM_ARCHIVE_FINISH
+            \ CMAKE_ASM_NASM_ATTRIBUTES
             \ CMAKE_ASM_NASM_BYTE_ORDER
             \ CMAKE_ASM_NASM_CLANG_TIDY
             \ CMAKE_ASM_NASM_CLANG_TIDY_EXPORT_FIXES_DIR
@@ -703,6 +781,10 @@ syn keyword cmakeVariable contained
             \ CMAKE_ASM_NASM_COMPILER_FRONTEND_VARIANT
             \ CMAKE_ASM_NASM_COMPILER_ID
             \ CMAKE_ASM_NASM_COMPILER_LAUNCHER
+            \ CMAKE_ASM_NASM_COMPILER_LINKER
+            \ CMAKE_ASM_NASM_COMPILER_LINKER_FRONTEND_VARIANT
+            \ CMAKE_ASM_NASM_COMPILER_LINKER_ID
+            \ CMAKE_ASM_NASM_COMPILER_LINKER_VERSION
             \ CMAKE_ASM_NASM_COMPILER_LOADED
             \ CMAKE_ASM_NASM_COMPILER_PREDEFINES_COMMAND
             \ CMAKE_ASM_NASM_COMPILER_RANLIB
@@ -713,8 +795,10 @@ syn keyword cmakeVariable contained
             \ CMAKE_ASM_NASM_CPPCHECK
             \ CMAKE_ASM_NASM_CPPLINT
             \ CMAKE_ASM_NASM_CREATE_SHARED_LIBRARY
+            \ CMAKE_ASM_NASM_CREATE_SHARED_LIBRARY_ARCHIVE
             \ CMAKE_ASM_NASM_CREATE_SHARED_MODULE
             \ CMAKE_ASM_NASM_CREATE_STATIC_LIBRARY
+            \ CMAKE_ASM_NASM_DEVICE_LINK_MODE
             \ CMAKE_ASM_NASM_EXTENSIONS
             \ CMAKE_ASM_NASM_EXTENSIONS_DEFAULT
             \ CMAKE_ASM_NASM_FLAGS
@@ -727,6 +811,10 @@ syn keyword cmakeVariable contained
             \ CMAKE_ASM_NASM_FLAGS_RELEASE_INIT
             \ CMAKE_ASM_NASM_FLAGS_RELWITHDEBINFO
             \ CMAKE_ASM_NASM_FLAGS_RELWITHDEBINFO_INIT
+            \ CMAKE_ASM_NASM_HOST_COMPILER
+            \ CMAKE_ASM_NASM_HOST_COMPILER_ID
+            \ CMAKE_ASM_NASM_HOST_COMPILER_VERSION
+            \ CMAKE_ASM_NASM_ICSTAT
             \ CMAKE_ASM_NASM_IGNORE_EXTENSIONS
             \ CMAKE_ASM_NASM_IMPLICIT_INCLUDE_DIRECTORIES
             \ CMAKE_ASM_NASM_IMPLICIT_LINK_DIRECTORIES
@@ -740,10 +828,12 @@ syn keyword cmakeVariable contained
             \ CMAKE_ASM_NASM_LINKER_PREFERENCE_PROPAGATES
             \ CMAKE_ASM_NASM_LINKER_WRAPPER_FLAG
             \ CMAKE_ASM_NASM_LINKER_WRAPPER_FLAG_SEP
+            \ CMAKE_ASM_NASM_LINK_DEF_FILE_FLAG
             \ CMAKE_ASM_NASM_LINK_EXECUTABLE
             \ CMAKE_ASM_NASM_LINK_LIBRARY_FILE_FLAG
             \ CMAKE_ASM_NASM_LINK_LIBRARY_FLAG
             \ CMAKE_ASM_NASM_LINK_LIBRARY_SUFFIX
+            \ CMAKE_ASM_NASM_LINK_MODE
             \ CMAKE_ASM_NASM_LINK_WHAT_YOU_USE_FLAG
             \ CMAKE_ASM_NASM_OUTPUT_EXTENSION
             \ CMAKE_ASM_NASM_PLATFORM_ID
@@ -754,9 +844,12 @@ syn keyword cmakeVariable contained
             \ CMAKE_ASM_NASM_STANDARD
             \ CMAKE_ASM_NASM_STANDARD_DEFAULT
             \ CMAKE_ASM_NASM_STANDARD_INCLUDE_DIRECTORIES
+            \ CMAKE_ASM_NASM_STANDARD_LATEST
             \ CMAKE_ASM_NASM_STANDARD_LIBRARIES
+            \ CMAKE_ASM_NASM_STANDARD_LINK_DIRECTORIES
             \ CMAKE_ASM_NASM_STANDARD_REQUIRED
             \ CMAKE_ASM_NASM_SUPPORTED
+            \ CMAKE_ASM_NASM_USING_LINKER_MODE
             \ CMAKE_ASM_NASM_VISIBILITY_PRESET
             \ CMAKE_ASM_OUTPUT_EXTENSION
             \ CMAKE_ASM_PLATFORM_ID
@@ -767,9 +860,12 @@ syn keyword cmakeVariable contained
             \ CMAKE_ASM_STANDARD
             \ CMAKE_ASM_STANDARD_DEFAULT
             \ CMAKE_ASM_STANDARD_INCLUDE_DIRECTORIES
+            \ CMAKE_ASM_STANDARD_LATEST
             \ CMAKE_ASM_STANDARD_LIBRARIES
+            \ CMAKE_ASM_STANDARD_LINK_DIRECTORIES
             \ CMAKE_ASM_STANDARD_REQUIRED
             \ CMAKE_ASM_SUPPORTED
+            \ CMAKE_ASM_USING_LINKER_MODE
             \ CMAKE_ASM_VISIBILITY_PRESET
             \ CMAKE_AUTOGEN_BETTER_GRAPH_MULTI_CONFIG
             \ CMAKE_AUTOGEN_COMMAND_LINE_LENGTH_MAX
@@ -781,20 +877,18 @@ syn keyword cmakeVariable contained
             \ CMAKE_AUTOMOC_COMPILER_PREDEFINES
             \ CMAKE_AUTOMOC_DEPEND_FILTERS
             \ CMAKE_AUTOMOC_EXECUTABLE
+            \ CMAKE_AUTOMOC_INCLUDE_DIRECTORIES
             \ CMAKE_AUTOMOC_MACRO_NAMES
             \ CMAKE_AUTOMOC_MOC_OPTIONS
             \ CMAKE_AUTOMOC_PATH_PREFIX
             \ CMAKE_AUTOMOC_RELAXED_MODE
-            \ CMAKE_AUTOMOC_EXECUTABLE
             \ CMAKE_AUTORCC
             \ CMAKE_AUTORCC_EXECUTABLE
             \ CMAKE_AUTORCC_OPTIONS
-            \ CMAKE_AUTORCC_EXECUTABLE
             \ CMAKE_AUTOUIC
             \ CMAKE_AUTOUIC_EXECUTABLE
             \ CMAKE_AUTOUIC_OPTIONS
             \ CMAKE_AUTOUIC_SEARCH_PATHS
-            \ CMAKE_AUTOUIC_EXECUTABLE
             \ CMAKE_BACKWARDS_COMPATIBILITY
             \ CMAKE_BINARY_DIR
             \ CMAKE_BUILD_RPATH
@@ -832,9 +926,12 @@ syn keyword cmakeVariable contained
             \ CMAKE_CSharp_ANDROID_TOOLCHAIN_MACHINE
             \ CMAKE_CSharp_ANDROID_TOOLCHAIN_PREFIX
             \ CMAKE_CSharp_ANDROID_TOOLCHAIN_SUFFIX
+            \ CMAKE_CSharp_ARCHIVER_WRAPPER_FLAG
+            \ CMAKE_CSharp_ARCHIVER_WRAPPER_FLAG_SEP
             \ CMAKE_CSharp_ARCHIVE_APPEND
             \ CMAKE_CSharp_ARCHIVE_CREATE
             \ CMAKE_CSharp_ARCHIVE_FINISH
+            \ CMAKE_CSharp_ATTRIBUTES
             \ CMAKE_CSharp_BYTE_ORDER
             \ CMAKE_CSharp_CLANG_TIDY
             \ CMAKE_CSharp_CLANG_TIDY_EXPORT_FIXES_DIR
@@ -846,6 +943,10 @@ syn keyword cmakeVariable contained
             \ CMAKE_CSharp_COMPILER_FRONTEND_VARIANT
             \ CMAKE_CSharp_COMPILER_ID
             \ CMAKE_CSharp_COMPILER_LAUNCHER
+            \ CMAKE_CSharp_COMPILER_LINKER
+            \ CMAKE_CSharp_COMPILER_LINKER_FRONTEND_VARIANT
+            \ CMAKE_CSharp_COMPILER_LINKER_ID
+            \ CMAKE_CSharp_COMPILER_LINKER_VERSION
             \ CMAKE_CSharp_COMPILER_LOADED
             \ CMAKE_CSharp_COMPILER_PREDEFINES_COMMAND
             \ CMAKE_CSharp_COMPILER_RANLIB
@@ -856,8 +957,10 @@ syn keyword cmakeVariable contained
             \ CMAKE_CSharp_CPPCHECK
             \ CMAKE_CSharp_CPPLINT
             \ CMAKE_CSharp_CREATE_SHARED_LIBRARY
+            \ CMAKE_CSharp_CREATE_SHARED_LIBRARY_ARCHIVE
             \ CMAKE_CSharp_CREATE_SHARED_MODULE
             \ CMAKE_CSharp_CREATE_STATIC_LIBRARY
+            \ CMAKE_CSharp_DEVICE_LINK_MODE
             \ CMAKE_CSharp_EXTENSIONS
             \ CMAKE_CSharp_EXTENSIONS_DEFAULT
             \ CMAKE_CSharp_FLAGS
@@ -870,6 +973,10 @@ syn keyword cmakeVariable contained
             \ CMAKE_CSharp_FLAGS_RELEASE_INIT
             \ CMAKE_CSharp_FLAGS_RELWITHDEBINFO
             \ CMAKE_CSharp_FLAGS_RELWITHDEBINFO_INIT
+            \ CMAKE_CSharp_HOST_COMPILER
+            \ CMAKE_CSharp_HOST_COMPILER_ID
+            \ CMAKE_CSharp_HOST_COMPILER_VERSION
+            \ CMAKE_CSharp_ICSTAT
             \ CMAKE_CSharp_IGNORE_EXTENSIONS
             \ CMAKE_CSharp_IMPLICIT_INCLUDE_DIRECTORIES
             \ CMAKE_CSharp_IMPLICIT_LINK_DIRECTORIES
@@ -883,10 +990,12 @@ syn keyword cmakeVariable contained
             \ CMAKE_CSharp_LINKER_PREFERENCE_PROPAGATES
             \ CMAKE_CSharp_LINKER_WRAPPER_FLAG
             \ CMAKE_CSharp_LINKER_WRAPPER_FLAG_SEP
+            \ CMAKE_CSharp_LINK_DEF_FILE_FLAG
             \ CMAKE_CSharp_LINK_EXECUTABLE
             \ CMAKE_CSharp_LINK_LIBRARY_FILE_FLAG
             \ CMAKE_CSharp_LINK_LIBRARY_FLAG
             \ CMAKE_CSharp_LINK_LIBRARY_SUFFIX
+            \ CMAKE_CSharp_LINK_MODE
             \ CMAKE_CSharp_LINK_WHAT_YOU_USE_FLAG
             \ CMAKE_CSharp_OUTPUT_EXTENSION
             \ CMAKE_CSharp_PLATFORM_ID
@@ -897,9 +1006,12 @@ syn keyword cmakeVariable contained
             \ CMAKE_CSharp_STANDARD
             \ CMAKE_CSharp_STANDARD_DEFAULT
             \ CMAKE_CSharp_STANDARD_INCLUDE_DIRECTORIES
+            \ CMAKE_CSharp_STANDARD_LATEST
             \ CMAKE_CSharp_STANDARD_LIBRARIES
+            \ CMAKE_CSharp_STANDARD_LINK_DIRECTORIES
             \ CMAKE_CSharp_STANDARD_REQUIRED
             \ CMAKE_CSharp_SUPPORTED
+            \ CMAKE_CSharp_USING_LINKER_MODE
             \ CMAKE_CSharp_VISIBILITY_PRESET
             \ CMAKE_CTEST_ARGUMENTS
             \ CMAKE_CTEST_COMMAND
@@ -908,9 +1020,12 @@ syn keyword cmakeVariable contained
             \ CMAKE_CUDA_ANDROID_TOOLCHAIN_PREFIX
             \ CMAKE_CUDA_ANDROID_TOOLCHAIN_SUFFIX
             \ CMAKE_CUDA_ARCHITECTURES
+            \ CMAKE_CUDA_ARCHIVER_WRAPPER_FLAG
+            \ CMAKE_CUDA_ARCHIVER_WRAPPER_FLAG_SEP
             \ CMAKE_CUDA_ARCHIVE_APPEND
             \ CMAKE_CUDA_ARCHIVE_CREATE
             \ CMAKE_CUDA_ARCHIVE_FINISH
+            \ CMAKE_CUDA_ATTRIBUTES
             \ CMAKE_CUDA_BYTE_ORDER
             \ CMAKE_CUDA_CLANG_TIDY
             \ CMAKE_CUDA_CLANG_TIDY_EXPORT_FIXES_DIR
@@ -922,6 +1037,10 @@ syn keyword cmakeVariable contained
             \ CMAKE_CUDA_COMPILER_FRONTEND_VARIANT
             \ CMAKE_CUDA_COMPILER_ID
             \ CMAKE_CUDA_COMPILER_LAUNCHER
+            \ CMAKE_CUDA_COMPILER_LINKER
+            \ CMAKE_CUDA_COMPILER_LINKER_FRONTEND_VARIANT
+            \ CMAKE_CUDA_COMPILER_LINKER_ID
+            \ CMAKE_CUDA_COMPILER_LINKER_VERSION
             \ CMAKE_CUDA_COMPILER_LOADED
             \ CMAKE_CUDA_COMPILER_PREDEFINES_COMMAND
             \ CMAKE_CUDA_COMPILER_RANLIB
@@ -933,8 +1052,10 @@ syn keyword cmakeVariable contained
             \ CMAKE_CUDA_CPPCHECK
             \ CMAKE_CUDA_CPPLINT
             \ CMAKE_CUDA_CREATE_SHARED_LIBRARY
+            \ CMAKE_CUDA_CREATE_SHARED_LIBRARY_ARCHIVE
             \ CMAKE_CUDA_CREATE_SHARED_MODULE
             \ CMAKE_CUDA_CREATE_STATIC_LIBRARY
+            \ CMAKE_CUDA_DEVICE_LINK_MODE
             \ CMAKE_CUDA_EXTENSIONS
             \ CMAKE_CUDA_EXTENSIONS_DEFAULT
             \ CMAKE_CUDA_FLAGS
@@ -948,6 +1069,9 @@ syn keyword cmakeVariable contained
             \ CMAKE_CUDA_FLAGS_RELWITHDEBINFO
             \ CMAKE_CUDA_FLAGS_RELWITHDEBINFO_INIT
             \ CMAKE_CUDA_HOST_COMPILER
+            \ CMAKE_CUDA_HOST_COMPILER_ID
+            \ CMAKE_CUDA_HOST_COMPILER_VERSION
+            \ CMAKE_CUDA_ICSTAT
             \ CMAKE_CUDA_IGNORE_EXTENSIONS
             \ CMAKE_CUDA_IMPLICIT_INCLUDE_DIRECTORIES
             \ CMAKE_CUDA_IMPLICIT_LINK_DIRECTORIES
@@ -961,10 +1085,12 @@ syn keyword cmakeVariable contained
             \ CMAKE_CUDA_LINKER_PREFERENCE_PROPAGATES
             \ CMAKE_CUDA_LINKER_WRAPPER_FLAG
             \ CMAKE_CUDA_LINKER_WRAPPER_FLAG_SEP
+            \ CMAKE_CUDA_LINK_DEF_FILE_FLAG
             \ CMAKE_CUDA_LINK_EXECUTABLE
             \ CMAKE_CUDA_LINK_LIBRARY_FILE_FLAG
             \ CMAKE_CUDA_LINK_LIBRARY_FLAG
             \ CMAKE_CUDA_LINK_LIBRARY_SUFFIX
+            \ CMAKE_CUDA_LINK_MODE
             \ CMAKE_CUDA_LINK_WHAT_YOU_USE_FLAG
             \ CMAKE_CUDA_OUTPUT_EXTENSION
             \ CMAKE_CUDA_PLATFORM_ID
@@ -978,10 +1104,13 @@ syn keyword cmakeVariable contained
             \ CMAKE_CUDA_STANDARD
             \ CMAKE_CUDA_STANDARD_DEFAULT
             \ CMAKE_CUDA_STANDARD_INCLUDE_DIRECTORIES
+            \ CMAKE_CUDA_STANDARD_LATEST
             \ CMAKE_CUDA_STANDARD_LIBRARIES
+            \ CMAKE_CUDA_STANDARD_LINK_DIRECTORIES
             \ CMAKE_CUDA_STANDARD_REQUIRED
             \ CMAKE_CUDA_SUPPORTED
             \ CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES
+            \ CMAKE_CUDA_USING_LINKER_MODE
             \ CMAKE_CUDA_VISIBILITY_PRESET
             \ CMAKE_CURRENT_BINARY_DIR
             \ CMAKE_CURRENT_FUNCTION
@@ -996,9 +1125,12 @@ syn keyword cmakeVariable contained
             \ CMAKE_CXX_ANDROID_TOOLCHAIN_MACHINE
             \ CMAKE_CXX_ANDROID_TOOLCHAIN_PREFIX
             \ CMAKE_CXX_ANDROID_TOOLCHAIN_SUFFIX
+            \ CMAKE_CXX_ARCHIVER_WRAPPER_FLAG
+            \ CMAKE_CXX_ARCHIVER_WRAPPER_FLAG_SEP
             \ CMAKE_CXX_ARCHIVE_APPEND
             \ CMAKE_CXX_ARCHIVE_CREATE
             \ CMAKE_CXX_ARCHIVE_FINISH
+            \ CMAKE_CXX_ATTRIBUTES
             \ CMAKE_CXX_BYTE_ORDER
             \ CMAKE_CXX_CLANG_TIDY
             \ CMAKE_CXX_CLANG_TIDY_EXPORT_FIXES_DIR
@@ -1009,7 +1141,12 @@ syn keyword cmakeVariable contained
             \ CMAKE_CXX_COMPILER_EXTERNAL_TOOLCHAIN
             \ CMAKE_CXX_COMPILER_FRONTEND_VARIANT
             \ CMAKE_CXX_COMPILER_ID
+            \ CMAKE_CXX_COMPILER_IMPORT_STD
             \ CMAKE_CXX_COMPILER_LAUNCHER
+            \ CMAKE_CXX_COMPILER_LINKER
+            \ CMAKE_CXX_COMPILER_LINKER_FRONTEND_VARIANT
+            \ CMAKE_CXX_COMPILER_LINKER_ID
+            \ CMAKE_CXX_COMPILER_LINKER_VERSION
             \ CMAKE_CXX_COMPILER_LOADED
             \ CMAKE_CXX_COMPILER_PREDEFINES_COMMAND
             \ CMAKE_CXX_COMPILER_RANLIB
@@ -1021,8 +1158,10 @@ syn keyword cmakeVariable contained
             \ CMAKE_CXX_CPPCHECK
             \ CMAKE_CXX_CPPLINT
             \ CMAKE_CXX_CREATE_SHARED_LIBRARY
+            \ CMAKE_CXX_CREATE_SHARED_LIBRARY_ARCHIVE
             \ CMAKE_CXX_CREATE_SHARED_MODULE
             \ CMAKE_CXX_CREATE_STATIC_LIBRARY
+            \ CMAKE_CXX_DEVICE_LINK_MODE
             \ CMAKE_CXX_EXTENSIONS
             \ CMAKE_CXX_EXTENSIONS_DEFAULT
             \ CMAKE_CXX_FLAGS
@@ -1035,6 +1174,10 @@ syn keyword cmakeVariable contained
             \ CMAKE_CXX_FLAGS_RELEASE_INIT
             \ CMAKE_CXX_FLAGS_RELWITHDEBINFO
             \ CMAKE_CXX_FLAGS_RELWITHDEBINFO_INIT
+            \ CMAKE_CXX_HOST_COMPILER
+            \ CMAKE_CXX_HOST_COMPILER_ID
+            \ CMAKE_CXX_HOST_COMPILER_VERSION
+            \ CMAKE_CXX_ICSTAT
             \ CMAKE_CXX_IGNORE_EXTENSIONS
             \ CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES
             \ CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES
@@ -1048,11 +1191,14 @@ syn keyword cmakeVariable contained
             \ CMAKE_CXX_LINKER_PREFERENCE_PROPAGATES
             \ CMAKE_CXX_LINKER_WRAPPER_FLAG
             \ CMAKE_CXX_LINKER_WRAPPER_FLAG_SEP
+            \ CMAKE_CXX_LINK_DEF_FILE_FLAG
             \ CMAKE_CXX_LINK_EXECUTABLE
             \ CMAKE_CXX_LINK_LIBRARY_FILE_FLAG
             \ CMAKE_CXX_LINK_LIBRARY_FLAG
             \ CMAKE_CXX_LINK_LIBRARY_SUFFIX
+            \ CMAKE_CXX_LINK_MODE
             \ CMAKE_CXX_LINK_WHAT_YOU_USE_FLAG
+            \ CMAKE_CXX_MODULE_STD
             \ CMAKE_CXX_OUTPUT_EXTENSION
             \ CMAKE_CXX_PLATFORM_ID
             \ CMAKE_CXX_SCAN_FOR_MODULES
@@ -1063,16 +1209,22 @@ syn keyword cmakeVariable contained
             \ CMAKE_CXX_STANDARD
             \ CMAKE_CXX_STANDARD_DEFAULT
             \ CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES
+            \ CMAKE_CXX_STANDARD_LATEST
             \ CMAKE_CXX_STANDARD_LIBRARIES
+            \ CMAKE_CXX_STANDARD_LINK_DIRECTORIES
             \ CMAKE_CXX_STANDARD_REQUIRED
             \ CMAKE_CXX_SUPPORTED
+            \ CMAKE_CXX_USING_LINKER_MODE
             \ CMAKE_CXX_VISIBILITY_PRESET
             \ CMAKE_C_ANDROID_TOOLCHAIN_MACHINE
             \ CMAKE_C_ANDROID_TOOLCHAIN_PREFIX
             \ CMAKE_C_ANDROID_TOOLCHAIN_SUFFIX
+            \ CMAKE_C_ARCHIVER_WRAPPER_FLAG
+            \ CMAKE_C_ARCHIVER_WRAPPER_FLAG_SEP
             \ CMAKE_C_ARCHIVE_APPEND
             \ CMAKE_C_ARCHIVE_CREATE
             \ CMAKE_C_ARCHIVE_FINISH
+            \ CMAKE_C_ATTRIBUTES
             \ CMAKE_C_BYTE_ORDER
             \ CMAKE_C_CLANG_TIDY
             \ CMAKE_C_CLANG_TIDY_EXPORT_FIXES_DIR
@@ -1084,6 +1236,10 @@ syn keyword cmakeVariable contained
             \ CMAKE_C_COMPILER_FRONTEND_VARIANT
             \ CMAKE_C_COMPILER_ID
             \ CMAKE_C_COMPILER_LAUNCHER
+            \ CMAKE_C_COMPILER_LINKER
+            \ CMAKE_C_COMPILER_LINKER_FRONTEND_VARIANT
+            \ CMAKE_C_COMPILER_LINKER_ID
+            \ CMAKE_C_COMPILER_LINKER_VERSION
             \ CMAKE_C_COMPILER_LOADED
             \ CMAKE_C_COMPILER_PREDEFINES_COMMAND
             \ CMAKE_C_COMPILER_RANLIB
@@ -1095,8 +1251,10 @@ syn keyword cmakeVariable contained
             \ CMAKE_C_CPPCHECK
             \ CMAKE_C_CPPLINT
             \ CMAKE_C_CREATE_SHARED_LIBRARY
+            \ CMAKE_C_CREATE_SHARED_LIBRARY_ARCHIVE
             \ CMAKE_C_CREATE_SHARED_MODULE
             \ CMAKE_C_CREATE_STATIC_LIBRARY
+            \ CMAKE_C_DEVICE_LINK_MODE
             \ CMAKE_C_EXTENSIONS
             \ CMAKE_C_EXTENSIONS_DEFAULT
             \ CMAKE_C_FLAGS
@@ -1109,6 +1267,10 @@ syn keyword cmakeVariable contained
             \ CMAKE_C_FLAGS_RELEASE_INIT
             \ CMAKE_C_FLAGS_RELWITHDEBINFO
             \ CMAKE_C_FLAGS_RELWITHDEBINFO_INIT
+            \ CMAKE_C_HOST_COMPILER
+            \ CMAKE_C_HOST_COMPILER_ID
+            \ CMAKE_C_HOST_COMPILER_VERSION
+            \ CMAKE_C_ICSTAT
             \ CMAKE_C_IGNORE_EXTENSIONS
             \ CMAKE_C_IMPLICIT_INCLUDE_DIRECTORIES
             \ CMAKE_C_IMPLICIT_LINK_DIRECTORIES
@@ -1122,10 +1284,12 @@ syn keyword cmakeVariable contained
             \ CMAKE_C_LINKER_PREFERENCE_PROPAGATES
             \ CMAKE_C_LINKER_WRAPPER_FLAG
             \ CMAKE_C_LINKER_WRAPPER_FLAG_SEP
+            \ CMAKE_C_LINK_DEF_FILE_FLAG
             \ CMAKE_C_LINK_EXECUTABLE
             \ CMAKE_C_LINK_LIBRARY_FILE_FLAG
             \ CMAKE_C_LINK_LIBRARY_FLAG
             \ CMAKE_C_LINK_LIBRARY_SUFFIX
+            \ CMAKE_C_LINK_MODE
             \ CMAKE_C_LINK_WHAT_YOU_USE_FLAG
             \ CMAKE_C_OUTPUT_EXTENSION
             \ CMAKE_C_PLATFORM_ID
@@ -1136,13 +1300,16 @@ syn keyword cmakeVariable contained
             \ CMAKE_C_STANDARD
             \ CMAKE_C_STANDARD_DEFAULT
             \ CMAKE_C_STANDARD_INCLUDE_DIRECTORIES
+            \ CMAKE_C_STANDARD_LATEST
             \ CMAKE_C_STANDARD_LIBRARIES
+            \ CMAKE_C_STANDARD_LINK_DIRECTORIES
             \ CMAKE_C_STANDARD_REQUIRED
             \ CMAKE_C_SUPPORTED
+            \ CMAKE_C_USING_LINKER_MODE
             \ CMAKE_C_VISIBILITY_PRESET
+            \ CMAKE_DEBUGGER_WORKING_DIRECTORY
             \ CMAKE_DEBUG_POSTFIX
             \ CMAKE_DEBUG_TARGET_PROPERTIES
-            \ CMAKE_DEBUGGER_WORKING_DIRECTORY
             \ CMAKE_DEFAULT_BUILD_TYPE
             \ CMAKE_DEFAULT_CONFIGS
             \ CMAKE_DEPENDS_IN_PROJECT_ONLY
@@ -1178,16 +1345,20 @@ syn keyword cmakeVariable contained
             \ CMAKE_EXECUTABLE_SUFFIX_RC
             \ CMAKE_EXECUTABLE_SUFFIX_Swift
             \ CMAKE_EXECUTE_PROCESS_COMMAND_ECHO
+            \ CMAKE_EXECUTE_PROCESS_COMMAND_ERROR_IS_FATAL
             \ CMAKE_EXE_LINKER_FLAGS
             \ CMAKE_EXE_LINKER_FLAGS_INIT
+            \ CMAKE_EXPORT_BUILD_DATABASE
             \ CMAKE_EXPORT_COMPILE_COMMANDS
-            \ CMAKE_EXPORT_SARIF
+            \ CMAKE_EXPORT_FIND_PACKAGE_NAME
             \ CMAKE_EXPORT_NO_PACKAGE_REGISTRY
             \ CMAKE_EXPORT_PACKAGE_REGISTRY
+            \ CMAKE_EXPORT_SARIF
             \ CMAKE_EXTRA_GENERATOR
             \ CMAKE_EXTRA_SHARED_LIBRARY_SUFFIXES
             \ CMAKE_FIND_APPBUNDLE
             \ CMAKE_FIND_DEBUG_MODE
+            \ CMAKE_FIND_DEBUG_MODE_NO_IMPLICIT_CONFIGURE_LOG
             \ CMAKE_FIND_FRAMEWORK
             \ CMAKE_FIND_LIBRARY_CUSTOM_LIB_SUFFIX
             \ CMAKE_FIND_LIBRARY_PREFIXES
@@ -1203,13 +1374,13 @@ syn keyword cmakeVariable contained
             \ CMAKE_FIND_PACKAGE_SORT_ORDER
             \ CMAKE_FIND_PACKAGE_TARGETS_GLOBAL
             \ CMAKE_FIND_PACKAGE_WARN_NO_MODULE
+            \ CMAKE_FIND_REQUIRED
             \ CMAKE_FIND_ROOT_PATH
             \ CMAKE_FIND_ROOT_PATH_MODE_INCLUDE
             \ CMAKE_FIND_ROOT_PATH_MODE_LIBRARY
             \ CMAKE_FIND_ROOT_PATH_MODE_PACKAGE
             \ CMAKE_FIND_ROOT_PATH_MODE_PROGRAM
             \ CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH
-            \ CMAKE_FIND_USE_INSTALL_PREFIX
             \ CMAKE_FIND_USE_CMAKE_PATH
             \ CMAKE_FIND_USE_CMAKE_SYSTEM_PATH
             \ CMAKE_FIND_USE_INSTALL_PREFIX
@@ -1224,9 +1395,12 @@ syn keyword cmakeVariable contained
             \ CMAKE_Fortran_ANDROID_TOOLCHAIN_MACHINE
             \ CMAKE_Fortran_ANDROID_TOOLCHAIN_PREFIX
             \ CMAKE_Fortran_ANDROID_TOOLCHAIN_SUFFIX
+            \ CMAKE_Fortran_ARCHIVER_WRAPPER_FLAG
+            \ CMAKE_Fortran_ARCHIVER_WRAPPER_FLAG_SEP
             \ CMAKE_Fortran_ARCHIVE_APPEND
             \ CMAKE_Fortran_ARCHIVE_CREATE
             \ CMAKE_Fortran_ARCHIVE_FINISH
+            \ CMAKE_Fortran_ATTRIBUTES
             \ CMAKE_Fortran_BYTE_ORDER
             \ CMAKE_Fortran_CLANG_TIDY
             \ CMAKE_Fortran_CLANG_TIDY_EXPORT_FIXES_DIR
@@ -1238,6 +1412,10 @@ syn keyword cmakeVariable contained
             \ CMAKE_Fortran_COMPILER_FRONTEND_VARIANT
             \ CMAKE_Fortran_COMPILER_ID
             \ CMAKE_Fortran_COMPILER_LAUNCHER
+            \ CMAKE_Fortran_COMPILER_LINKER
+            \ CMAKE_Fortran_COMPILER_LINKER_FRONTEND_VARIANT
+            \ CMAKE_Fortran_COMPILER_LINKER_ID
+            \ CMAKE_Fortran_COMPILER_LINKER_VERSION
             \ CMAKE_Fortran_COMPILER_LOADED
             \ CMAKE_Fortran_COMPILER_PREDEFINES_COMMAND
             \ CMAKE_Fortran_COMPILER_RANLIB
@@ -1248,8 +1426,10 @@ syn keyword cmakeVariable contained
             \ CMAKE_Fortran_CPPCHECK
             \ CMAKE_Fortran_CPPLINT
             \ CMAKE_Fortran_CREATE_SHARED_LIBRARY
+            \ CMAKE_Fortran_CREATE_SHARED_LIBRARY_ARCHIVE
             \ CMAKE_Fortran_CREATE_SHARED_MODULE
             \ CMAKE_Fortran_CREATE_STATIC_LIBRARY
+            \ CMAKE_Fortran_DEVICE_LINK_MODE
             \ CMAKE_Fortran_EXTENSIONS
             \ CMAKE_Fortran_EXTENSIONS_DEFAULT
             \ CMAKE_Fortran_FLAGS
@@ -1263,6 +1443,10 @@ syn keyword cmakeVariable contained
             \ CMAKE_Fortran_FLAGS_RELWITHDEBINFO
             \ CMAKE_Fortran_FLAGS_RELWITHDEBINFO_INIT
             \ CMAKE_Fortran_FORMAT
+            \ CMAKE_Fortran_HOST_COMPILER
+            \ CMAKE_Fortran_HOST_COMPILER_ID
+            \ CMAKE_Fortran_HOST_COMPILER_VERSION
+            \ CMAKE_Fortran_ICSTAT
             \ CMAKE_Fortran_IGNORE_EXTENSIONS
             \ CMAKE_Fortran_IMPLICIT_INCLUDE_DIRECTORIES
             \ CMAKE_Fortran_IMPLICIT_LINK_DIRECTORIES
@@ -1276,10 +1460,12 @@ syn keyword cmakeVariable contained
             \ CMAKE_Fortran_LINKER_PREFERENCE_PROPAGATES
             \ CMAKE_Fortran_LINKER_WRAPPER_FLAG
             \ CMAKE_Fortran_LINKER_WRAPPER_FLAG_SEP
+            \ CMAKE_Fortran_LINK_DEF_FILE_FLAG
             \ CMAKE_Fortran_LINK_EXECUTABLE
             \ CMAKE_Fortran_LINK_LIBRARY_FILE_FLAG
             \ CMAKE_Fortran_LINK_LIBRARY_FLAG
             \ CMAKE_Fortran_LINK_LIBRARY_SUFFIX
+            \ CMAKE_Fortran_LINK_MODE
             \ CMAKE_Fortran_LINK_WHAT_YOU_USE_FLAG
             \ CMAKE_Fortran_MODDIR_DEFAULT
             \ CMAKE_Fortran_MODDIR_FLAG
@@ -1295,9 +1481,12 @@ syn keyword cmakeVariable contained
             \ CMAKE_Fortran_STANDARD
             \ CMAKE_Fortran_STANDARD_DEFAULT
             \ CMAKE_Fortran_STANDARD_INCLUDE_DIRECTORIES
+            \ CMAKE_Fortran_STANDARD_LATEST
             \ CMAKE_Fortran_STANDARD_LIBRARIES
+            \ CMAKE_Fortran_STANDARD_LINK_DIRECTORIES
             \ CMAKE_Fortran_STANDARD_REQUIRED
             \ CMAKE_Fortran_SUPPORTED
+            \ CMAKE_Fortran_USING_LINKER_MODE
             \ CMAKE_Fortran_VISIBILITY_PRESET
             \ CMAKE_GENERATOR
             \ CMAKE_GENERATOR_INSTANCE
@@ -1314,9 +1503,12 @@ syn keyword cmakeVariable contained
             \ CMAKE_HIP_ANDROID_TOOLCHAIN_PREFIX
             \ CMAKE_HIP_ANDROID_TOOLCHAIN_SUFFIX
             \ CMAKE_HIP_ARCHITECTURES
+            \ CMAKE_HIP_ARCHIVER_WRAPPER_FLAG
+            \ CMAKE_HIP_ARCHIVER_WRAPPER_FLAG_SEP
             \ CMAKE_HIP_ARCHIVE_APPEND
             \ CMAKE_HIP_ARCHIVE_CREATE
             \ CMAKE_HIP_ARCHIVE_FINISH
+            \ CMAKE_HIP_ATTRIBUTES
             \ CMAKE_HIP_BYTE_ORDER
             \ CMAKE_HIP_CLANG_TIDY
             \ CMAKE_HIP_CLANG_TIDY_EXPORT_FIXES_DIR
@@ -1328,6 +1520,10 @@ syn keyword cmakeVariable contained
             \ CMAKE_HIP_COMPILER_FRONTEND_VARIANT
             \ CMAKE_HIP_COMPILER_ID
             \ CMAKE_HIP_COMPILER_LAUNCHER
+            \ CMAKE_HIP_COMPILER_LINKER
+            \ CMAKE_HIP_COMPILER_LINKER_FRONTEND_VARIANT
+            \ CMAKE_HIP_COMPILER_LINKER_ID
+            \ CMAKE_HIP_COMPILER_LINKER_VERSION
             \ CMAKE_HIP_COMPILER_LOADED
             \ CMAKE_HIP_COMPILER_PREDEFINES_COMMAND
             \ CMAKE_HIP_COMPILER_RANLIB
@@ -1339,8 +1535,10 @@ syn keyword cmakeVariable contained
             \ CMAKE_HIP_CPPCHECK
             \ CMAKE_HIP_CPPLINT
             \ CMAKE_HIP_CREATE_SHARED_LIBRARY
+            \ CMAKE_HIP_CREATE_SHARED_LIBRARY_ARCHIVE
             \ CMAKE_HIP_CREATE_SHARED_MODULE
             \ CMAKE_HIP_CREATE_STATIC_LIBRARY
+            \ CMAKE_HIP_DEVICE_LINK_MODE
             \ CMAKE_HIP_EXTENSIONS
             \ CMAKE_HIP_EXTENSIONS_DEFAULT
             \ CMAKE_HIP_FLAGS
@@ -1353,6 +1551,10 @@ syn keyword cmakeVariable contained
             \ CMAKE_HIP_FLAGS_RELEASE_INIT
             \ CMAKE_HIP_FLAGS_RELWITHDEBINFO
             \ CMAKE_HIP_FLAGS_RELWITHDEBINFO_INIT
+            \ CMAKE_HIP_HOST_COMPILER
+            \ CMAKE_HIP_HOST_COMPILER_ID
+            \ CMAKE_HIP_HOST_COMPILER_VERSION
+            \ CMAKE_HIP_ICSTAT
             \ CMAKE_HIP_IGNORE_EXTENSIONS
             \ CMAKE_HIP_IMPLICIT_INCLUDE_DIRECTORIES
             \ CMAKE_HIP_IMPLICIT_LINK_DIRECTORIES
@@ -1366,12 +1568,15 @@ syn keyword cmakeVariable contained
             \ CMAKE_HIP_LINKER_PREFERENCE_PROPAGATES
             \ CMAKE_HIP_LINKER_WRAPPER_FLAG
             \ CMAKE_HIP_LINKER_WRAPPER_FLAG_SEP
+            \ CMAKE_HIP_LINK_DEF_FILE_FLAG
             \ CMAKE_HIP_LINK_EXECUTABLE
             \ CMAKE_HIP_LINK_LIBRARY_FILE_FLAG
             \ CMAKE_HIP_LINK_LIBRARY_FLAG
             \ CMAKE_HIP_LINK_LIBRARY_SUFFIX
+            \ CMAKE_HIP_LINK_MODE
             \ CMAKE_HIP_LINK_WHAT_YOU_USE_FLAG
             \ CMAKE_HIP_OUTPUT_EXTENSION
+            \ CMAKE_HIP_PLATFORM
             \ CMAKE_HIP_PLATFORM_ID
             \ CMAKE_HIP_SIMULATE_ID
             \ CMAKE_HIP_SIMULATE_VERSION
@@ -1380,13 +1585,18 @@ syn keyword cmakeVariable contained
             \ CMAKE_HIP_STANDARD
             \ CMAKE_HIP_STANDARD_DEFAULT
             \ CMAKE_HIP_STANDARD_INCLUDE_DIRECTORIES
+            \ CMAKE_HIP_STANDARD_LATEST
             \ CMAKE_HIP_STANDARD_LIBRARIES
+            \ CMAKE_HIP_STANDARD_LINK_DIRECTORIES
             \ CMAKE_HIP_STANDARD_REQUIRED
             \ CMAKE_HIP_SUPPORTED
+            \ CMAKE_HIP_USING_LINKER_MODE
             \ CMAKE_HIP_VISIBILITY_PRESET
             \ CMAKE_HOME_DIRECTORY
+            \ CMAKE_HOST_AIX
             \ CMAKE_HOST_APPLE
             \ CMAKE_HOST_BSD
+            \ CMAKE_HOST_EXECUTABLE_SUFFIX
             \ CMAKE_HOST_LINUX
             \ CMAKE_HOST_SOLARIS
             \ CMAKE_HOST_SYSTEM
@@ -1427,9 +1637,12 @@ syn keyword cmakeVariable contained
             \ CMAKE_Java_ANDROID_TOOLCHAIN_MACHINE
             \ CMAKE_Java_ANDROID_TOOLCHAIN_PREFIX
             \ CMAKE_Java_ANDROID_TOOLCHAIN_SUFFIX
+            \ CMAKE_Java_ARCHIVER_WRAPPER_FLAG
+            \ CMAKE_Java_ARCHIVER_WRAPPER_FLAG_SEP
             \ CMAKE_Java_ARCHIVE_APPEND
             \ CMAKE_Java_ARCHIVE_CREATE
             \ CMAKE_Java_ARCHIVE_FINISH
+            \ CMAKE_Java_ATTRIBUTES
             \ CMAKE_Java_BYTE_ORDER
             \ CMAKE_Java_CLANG_TIDY
             \ CMAKE_Java_CLANG_TIDY_EXPORT_FIXES_DIR
@@ -1441,6 +1654,10 @@ syn keyword cmakeVariable contained
             \ CMAKE_Java_COMPILER_FRONTEND_VARIANT
             \ CMAKE_Java_COMPILER_ID
             \ CMAKE_Java_COMPILER_LAUNCHER
+            \ CMAKE_Java_COMPILER_LINKER
+            \ CMAKE_Java_COMPILER_LINKER_FRONTEND_VARIANT
+            \ CMAKE_Java_COMPILER_LINKER_ID
+            \ CMAKE_Java_COMPILER_LINKER_VERSION
             \ CMAKE_Java_COMPILER_LOADED
             \ CMAKE_Java_COMPILER_PREDEFINES_COMMAND
             \ CMAKE_Java_COMPILER_RANLIB
@@ -1451,8 +1668,10 @@ syn keyword cmakeVariable contained
             \ CMAKE_Java_CPPCHECK
             \ CMAKE_Java_CPPLINT
             \ CMAKE_Java_CREATE_SHARED_LIBRARY
+            \ CMAKE_Java_CREATE_SHARED_LIBRARY_ARCHIVE
             \ CMAKE_Java_CREATE_SHARED_MODULE
             \ CMAKE_Java_CREATE_STATIC_LIBRARY
+            \ CMAKE_Java_DEVICE_LINK_MODE
             \ CMAKE_Java_EXTENSIONS
             \ CMAKE_Java_EXTENSIONS_DEFAULT
             \ CMAKE_Java_FLAGS
@@ -1465,6 +1684,10 @@ syn keyword cmakeVariable contained
             \ CMAKE_Java_FLAGS_RELEASE_INIT
             \ CMAKE_Java_FLAGS_RELWITHDEBINFO
             \ CMAKE_Java_FLAGS_RELWITHDEBINFO_INIT
+            \ CMAKE_Java_HOST_COMPILER
+            \ CMAKE_Java_HOST_COMPILER_ID
+            \ CMAKE_Java_HOST_COMPILER_VERSION
+            \ CMAKE_Java_ICSTAT
             \ CMAKE_Java_IGNORE_EXTENSIONS
             \ CMAKE_Java_IMPLICIT_INCLUDE_DIRECTORIES
             \ CMAKE_Java_IMPLICIT_LINK_DIRECTORIES
@@ -1478,10 +1701,12 @@ syn keyword cmakeVariable contained
             \ CMAKE_Java_LINKER_PREFERENCE_PROPAGATES
             \ CMAKE_Java_LINKER_WRAPPER_FLAG
             \ CMAKE_Java_LINKER_WRAPPER_FLAG_SEP
+            \ CMAKE_Java_LINK_DEF_FILE_FLAG
             \ CMAKE_Java_LINK_EXECUTABLE
             \ CMAKE_Java_LINK_LIBRARY_FILE_FLAG
             \ CMAKE_Java_LINK_LIBRARY_FLAG
             \ CMAKE_Java_LINK_LIBRARY_SUFFIX
+            \ CMAKE_Java_LINK_MODE
             \ CMAKE_Java_LINK_WHAT_YOU_USE_FLAG
             \ CMAKE_Java_OUTPUT_EXTENSION
             \ CMAKE_Java_PLATFORM_ID
@@ -1492,9 +1717,12 @@ syn keyword cmakeVariable contained
             \ CMAKE_Java_STANDARD
             \ CMAKE_Java_STANDARD_DEFAULT
             \ CMAKE_Java_STANDARD_INCLUDE_DIRECTORIES
+            \ CMAKE_Java_STANDARD_LATEST
             \ CMAKE_Java_STANDARD_LIBRARIES
+            \ CMAKE_Java_STANDARD_LINK_DIRECTORIES
             \ CMAKE_Java_STANDARD_REQUIRED
             \ CMAKE_Java_SUPPORTED
+            \ CMAKE_Java_USING_LINKER_MODE
             \ CMAKE_Java_VISIBILITY_PRESET
             \ CMAKE_KATE_FILES_MODE
             \ CMAKE_KATE_MAKE_ARGUMENTS
@@ -1503,19 +1731,23 @@ syn keyword cmakeVariable contained
             \ CMAKE_LIBRARY_OUTPUT_DIRECTORY
             \ CMAKE_LIBRARY_PATH
             \ CMAKE_LIBRARY_PATH_FLAG
+            \ CMAKE_LINKER_TYPE
             \ CMAKE_LINK_DEF_FILE_FLAG
             \ CMAKE_LINK_DEPENDS_NO_SHARED
             \ CMAKE_LINK_DEPENDS_USE_LINKER
             \ CMAKE_LINK_DIRECTORIES_BEFORE
             \ CMAKE_LINK_INTERFACE_LIBRARIES
             \ CMAKE_LINK_LIBRARIES_ONLY_TARGETS
+            \ CMAKE_LINK_LIBRARIES_STRATEGY
             \ CMAKE_LINK_LIBRARY_FILE_FLAG
             \ CMAKE_LINK_LIBRARY_FLAG
             \ CMAKE_LINK_LIBRARY_SUFFIX
             \ CMAKE_LINK_SEARCH_END_STATIC
             \ CMAKE_LINK_SEARCH_START_STATIC
+            \ CMAKE_LINK_WARNING_AS_ERROR
             \ CMAKE_LINK_WHAT_YOU_USE
             \ CMAKE_LINK_WHAT_YOU_USE_CHECK
+            \ CMAKE_LIST_FILE_NAME
             \ CMAKE_MACOSX_BUNDLE
             \ CMAKE_MACOSX_RPATH
             \ CMAKE_MAJOR_VERSION
@@ -1552,6 +1784,7 @@ syn keyword cmakeVariable contained
             \ CMAKE_OBJC_LINKER_LAUNCHER
             \ CMAKE_OBJC_STANDARD
             \ CMAKE_OBJC_STANDARD_REQUIRED
+            \ CMAKE_OBJDUMP
             \ CMAKE_OBJECT_PATH_MAX
             \ CMAKE_OPTIMIZE_DEPENDENCIES
             \ CMAKE_OSX_ARCHITECTURES
@@ -1562,15 +1795,23 @@ syn keyword cmakeVariable contained
             \ CMAKE_PCH_INSTANTIATE_TEMPLATES
             \ CMAKE_PCH_WARN_INVALID
             \ CMAKE_PDB_OUTPUT_DIRECTORY
+            \ CMAKE_PKG_CONFIG_DISABLE_UNINSTALLED
+            \ CMAKE_PKG_CONFIG_PC_LIB_DIRS
+            \ CMAKE_PKG_CONFIG_PC_PATH
+            \ CMAKE_PKG_CONFIG_SYSROOT_DIR
+            \ CMAKE_PKG_CONFIG_TOP_BUILD_DIR
             \ CMAKE_PLATFORM_NO_VERSIONED_SONAME
+            \ CMAKE_POLICY_VERSION_MINIMUM
             \ CMAKE_POSITION_INDEPENDENT_CODE
             \ CMAKE_PREFIX_PATH
             \ CMAKE_PROGRAM_PATH
+            \ CMAKE_PROJECT_COMPAT_VERSION
             \ CMAKE_PROJECT_DESCRIPTION
             \ CMAKE_PROJECT_HOMEPAGE_URL
             \ CMAKE_PROJECT_INCLUDE
             \ CMAKE_PROJECT_INCLUDE_BEFORE
             \ CMAKE_PROJECT_NAME
+            \ CMAKE_PROJECT_SPDX_LICENSE
             \ CMAKE_PROJECT_TOP_LEVEL_INCLUDES
             \ CMAKE_PROJECT_VERSION
             \ CMAKE_PROJECT_VERSION_MAJOR
@@ -1582,9 +1823,12 @@ syn keyword cmakeVariable contained
             \ CMAKE_RC_ANDROID_TOOLCHAIN_MACHINE
             \ CMAKE_RC_ANDROID_TOOLCHAIN_PREFIX
             \ CMAKE_RC_ANDROID_TOOLCHAIN_SUFFIX
+            \ CMAKE_RC_ARCHIVER_WRAPPER_FLAG
+            \ CMAKE_RC_ARCHIVER_WRAPPER_FLAG_SEP
             \ CMAKE_RC_ARCHIVE_APPEND
             \ CMAKE_RC_ARCHIVE_CREATE
             \ CMAKE_RC_ARCHIVE_FINISH
+            \ CMAKE_RC_ATTRIBUTES
             \ CMAKE_RC_BYTE_ORDER
             \ CMAKE_RC_CLANG_TIDY
             \ CMAKE_RC_CLANG_TIDY_EXPORT_FIXES_DIR
@@ -1596,6 +1840,10 @@ syn keyword cmakeVariable contained
             \ CMAKE_RC_COMPILER_FRONTEND_VARIANT
             \ CMAKE_RC_COMPILER_ID
             \ CMAKE_RC_COMPILER_LAUNCHER
+            \ CMAKE_RC_COMPILER_LINKER
+            \ CMAKE_RC_COMPILER_LINKER_FRONTEND_VARIANT
+            \ CMAKE_RC_COMPILER_LINKER_ID
+            \ CMAKE_RC_COMPILER_LINKER_VERSION
             \ CMAKE_RC_COMPILER_LOADED
             \ CMAKE_RC_COMPILER_PREDEFINES_COMMAND
             \ CMAKE_RC_COMPILER_RANLIB
@@ -1606,8 +1854,10 @@ syn keyword cmakeVariable contained
             \ CMAKE_RC_CPPCHECK
             \ CMAKE_RC_CPPLINT
             \ CMAKE_RC_CREATE_SHARED_LIBRARY
+            \ CMAKE_RC_CREATE_SHARED_LIBRARY_ARCHIVE
             \ CMAKE_RC_CREATE_SHARED_MODULE
             \ CMAKE_RC_CREATE_STATIC_LIBRARY
+            \ CMAKE_RC_DEVICE_LINK_MODE
             \ CMAKE_RC_EXTENSIONS
             \ CMAKE_RC_EXTENSIONS_DEFAULT
             \ CMAKE_RC_FLAGS
@@ -1620,6 +1870,10 @@ syn keyword cmakeVariable contained
             \ CMAKE_RC_FLAGS_RELEASE_INIT
             \ CMAKE_RC_FLAGS_RELWITHDEBINFO
             \ CMAKE_RC_FLAGS_RELWITHDEBINFO_INIT
+            \ CMAKE_RC_HOST_COMPILER
+            \ CMAKE_RC_HOST_COMPILER_ID
+            \ CMAKE_RC_HOST_COMPILER_VERSION
+            \ CMAKE_RC_ICSTAT
             \ CMAKE_RC_IGNORE_EXTENSIONS
             \ CMAKE_RC_IMPLICIT_INCLUDE_DIRECTORIES
             \ CMAKE_RC_IMPLICIT_LINK_DIRECTORIES
@@ -1633,10 +1887,12 @@ syn keyword cmakeVariable contained
             \ CMAKE_RC_LINKER_PREFERENCE_PROPAGATES
             \ CMAKE_RC_LINKER_WRAPPER_FLAG
             \ CMAKE_RC_LINKER_WRAPPER_FLAG_SEP
+            \ CMAKE_RC_LINK_DEF_FILE_FLAG
             \ CMAKE_RC_LINK_EXECUTABLE
             \ CMAKE_RC_LINK_LIBRARY_FILE_FLAG
             \ CMAKE_RC_LINK_LIBRARY_FLAG
             \ CMAKE_RC_LINK_LIBRARY_SUFFIX
+            \ CMAKE_RC_LINK_MODE
             \ CMAKE_RC_LINK_WHAT_YOU_USE_FLAG
             \ CMAKE_RC_OUTPUT_EXTENSION
             \ CMAKE_RC_PLATFORM_ID
@@ -1647,14 +1903,18 @@ syn keyword cmakeVariable contained
             \ CMAKE_RC_STANDARD
             \ CMAKE_RC_STANDARD_DEFAULT
             \ CMAKE_RC_STANDARD_INCLUDE_DIRECTORIES
+            \ CMAKE_RC_STANDARD_LATEST
             \ CMAKE_RC_STANDARD_LIBRARIES
+            \ CMAKE_RC_STANDARD_LINK_DIRECTORIES
             \ CMAKE_RC_STANDARD_REQUIRED
             \ CMAKE_RC_SUPPORTED
+            \ CMAKE_RC_USING_LINKER_MODE
             \ CMAKE_RC_VISIBILITY_PRESET
             \ CMAKE_ROOT
             \ CMAKE_RULE_MESSAGES
             \ CMAKE_RUNTIME_OUTPUT_DIRECTORY
             \ CMAKE_SCRIPT_MODE_FILE
+            \ CMAKE_SHARED_LIBRARY_ARCHIVE_SUFFIX
             \ CMAKE_SHARED_LIBRARY_ENABLE_EXPORTS
             \ CMAKE_SHARED_LIBRARY_PREFIX
             \ CMAKE_SHARED_LIBRARY_SUFFIX
@@ -1697,12 +1957,16 @@ syn keyword cmakeVariable contained
             \ CMAKE_Swift_ANDROID_TOOLCHAIN_MACHINE
             \ CMAKE_Swift_ANDROID_TOOLCHAIN_PREFIX
             \ CMAKE_Swift_ANDROID_TOOLCHAIN_SUFFIX
+            \ CMAKE_Swift_ARCHIVER_WRAPPER_FLAG
+            \ CMAKE_Swift_ARCHIVER_WRAPPER_FLAG_SEP
             \ CMAKE_Swift_ARCHIVE_APPEND
             \ CMAKE_Swift_ARCHIVE_CREATE
             \ CMAKE_Swift_ARCHIVE_FINISH
+            \ CMAKE_Swift_ATTRIBUTES
             \ CMAKE_Swift_BYTE_ORDER
             \ CMAKE_Swift_CLANG_TIDY
             \ CMAKE_Swift_CLANG_TIDY_EXPORT_FIXES_DIR
+            \ CMAKE_Swift_COMPILATION_MODE
             \ CMAKE_Swift_COMPILER
             \ CMAKE_Swift_COMPILER_ABI
             \ CMAKE_Swift_COMPILER_AR
@@ -1711,6 +1975,10 @@ syn keyword cmakeVariable contained
             \ CMAKE_Swift_COMPILER_FRONTEND_VARIANT
             \ CMAKE_Swift_COMPILER_ID
             \ CMAKE_Swift_COMPILER_LAUNCHER
+            \ CMAKE_Swift_COMPILER_LINKER
+            \ CMAKE_Swift_COMPILER_LINKER_FRONTEND_VARIANT
+            \ CMAKE_Swift_COMPILER_LINKER_ID
+            \ CMAKE_Swift_COMPILER_LINKER_VERSION
             \ CMAKE_Swift_COMPILER_LOADED
             \ CMAKE_Swift_COMPILER_PREDEFINES_COMMAND
             \ CMAKE_Swift_COMPILER_RANLIB
@@ -1721,8 +1989,10 @@ syn keyword cmakeVariable contained
             \ CMAKE_Swift_CPPCHECK
             \ CMAKE_Swift_CPPLINT
             \ CMAKE_Swift_CREATE_SHARED_LIBRARY
+            \ CMAKE_Swift_CREATE_SHARED_LIBRARY_ARCHIVE
             \ CMAKE_Swift_CREATE_SHARED_MODULE
             \ CMAKE_Swift_CREATE_STATIC_LIBRARY
+            \ CMAKE_Swift_DEVICE_LINK_MODE
             \ CMAKE_Swift_EXTENSIONS
             \ CMAKE_Swift_EXTENSIONS_DEFAULT
             \ CMAKE_Swift_FLAGS
@@ -1735,6 +2005,10 @@ syn keyword cmakeVariable contained
             \ CMAKE_Swift_FLAGS_RELEASE_INIT
             \ CMAKE_Swift_FLAGS_RELWITHDEBINFO
             \ CMAKE_Swift_FLAGS_RELWITHDEBINFO_INIT
+            \ CMAKE_Swift_HOST_COMPILER
+            \ CMAKE_Swift_HOST_COMPILER_ID
+            \ CMAKE_Swift_HOST_COMPILER_VERSION
+            \ CMAKE_Swift_ICSTAT
             \ CMAKE_Swift_IGNORE_EXTENSIONS
             \ CMAKE_Swift_IMPLICIT_INCLUDE_DIRECTORIES
             \ CMAKE_Swift_IMPLICIT_LINK_DIRECTORIES
@@ -1749,10 +2023,12 @@ syn keyword cmakeVariable contained
             \ CMAKE_Swift_LINKER_PREFERENCE_PROPAGATES
             \ CMAKE_Swift_LINKER_WRAPPER_FLAG
             \ CMAKE_Swift_LINKER_WRAPPER_FLAG_SEP
+            \ CMAKE_Swift_LINK_DEF_FILE_FLAG
             \ CMAKE_Swift_LINK_EXECUTABLE
             \ CMAKE_Swift_LINK_LIBRARY_FILE_FLAG
             \ CMAKE_Swift_LINK_LIBRARY_FLAG
             \ CMAKE_Swift_LINK_LIBRARY_SUFFIX
+            \ CMAKE_Swift_LINK_MODE
             \ CMAKE_Swift_LINK_WHAT_YOU_USE_FLAG
             \ CMAKE_Swift_MODULE_DIRECTORY
             \ CMAKE_Swift_NUM_THREADS
@@ -1765,13 +2041,18 @@ syn keyword cmakeVariable contained
             \ CMAKE_Swift_STANDARD
             \ CMAKE_Swift_STANDARD_DEFAULT
             \ CMAKE_Swift_STANDARD_INCLUDE_DIRECTORIES
+            \ CMAKE_Swift_STANDARD_LATEST
             \ CMAKE_Swift_STANDARD_LIBRARIES
+            \ CMAKE_Swift_STANDARD_LINK_DIRECTORIES
             \ CMAKE_Swift_STANDARD_REQUIRED
             \ CMAKE_Swift_SUPPORTED
+            \ CMAKE_Swift_USING_LINKER_MODE
             \ CMAKE_Swift_VISIBILITY_PRESET
             \ CMAKE_TASKING_TOOLSET
+            \ CMAKE_TEST_LAUNCHER
             \ CMAKE_TLS_CAINFO
             \ CMAKE_TLS_VERIFY
+            \ CMAKE_TLS_VERSION
             \ CMAKE_TOOLCHAIN_FILE
             \ CMAKE_TRY_COMPILE_CONFIGURATION
             \ CMAKE_TRY_COMPILE_NO_PLATFORM_VARIABLES
@@ -1780,6 +2061,7 @@ syn keyword cmakeVariable contained
             \ CMAKE_TWEAK_VERSION
             \ CMAKE_UNITY_BUILD
             \ CMAKE_UNITY_BUILD_BATCH_SIZE
+            \ CMAKE_UNITY_BUILD_RELOCATABLE
             \ CMAKE_UNITY_BUILD_UNIQUE_ID
             \ CMAKE_USER_MAKE_RULES_OVERRIDE
             \ CMAKE_USER_MAKE_RULES_OVERRIDE_ASM
@@ -1818,6 +2100,7 @@ syn keyword cmakeVariable contained
             \ CMAKE_VS_PLATFORM_TOOLSET
             \ CMAKE_VS_PLATFORM_TOOLSET_CUDA
             \ CMAKE_VS_PLATFORM_TOOLSET_CUDA_CUSTOM_DIR
+            \ CMAKE_VS_PLATFORM_TOOLSET_FORTRAN
             \ CMAKE_VS_PLATFORM_TOOLSET_HOST_ARCHITECTURE
             \ CMAKE_VS_PLATFORM_TOOLSET_VERSION
             \ CMAKE_VS_SDK_EXCLUDE_DIRECTORIES
@@ -1830,6 +2113,7 @@ syn keyword cmakeVariable contained
             \ CMAKE_VS_TARGET_FRAMEWORK_IDENTIFIER
             \ CMAKE_VS_TARGET_FRAMEWORK_TARGETS_VERSION
             \ CMAKE_VS_TARGET_FRAMEWORK_VERSION
+            \ CMAKE_VS_USE_DEBUG_LIBRARIES
             \ CMAKE_VS_VERSION_BUILD_NUMBER
             \ CMAKE_VS_WINDOWS_TARGET_PLATFORM_MIN_VERSION
             \ CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION
@@ -1840,6 +2124,7 @@ syn keyword cmakeVariable contained
             \ CMAKE_WATCOM_RUNTIME_LIBRARY
             \ CMAKE_WIN32_EXECUTABLE
             \ CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS
+            \ CMAKE_WINDOWS_KMDF_VERSION
             \ CMAKE_XCODE_BUILD_SYSTEM
             \ CMAKE_XCODE_GENERATE_SCHEME
             \ CMAKE_XCODE_GENERATE_TOP_LEVEL_PROJECT_ONLY
@@ -1848,28 +2133,26 @@ syn keyword cmakeVariable contained
             \ CMAKE_XCODE_SCHEME_ADDRESS_SANITIZER
             \ CMAKE_XCODE_SCHEME_ADDRESS_SANITIZER_USE_AFTER_RETURN
             \ CMAKE_XCODE_SCHEME_DEBUG_DOCUMENT_VERSIONING
-            \ CMAKE_XCODE_SCHEME_ENABLE_GPU_FRAME_CAPTURE_MODE
             \ CMAKE_XCODE_SCHEME_DISABLE_MAIN_THREAD_CHECKER
             \ CMAKE_XCODE_SCHEME_DYNAMIC_LIBRARY_LOADS
             \ CMAKE_XCODE_SCHEME_DYNAMIC_LINKER_API_USAGE
             \ CMAKE_XCODE_SCHEME_ENABLE_GPU_API_VALIDATION
+            \ CMAKE_XCODE_SCHEME_ENABLE_GPU_FRAME_CAPTURE_MODE
             \ CMAKE_XCODE_SCHEME_ENABLE_GPU_SHADER_VALIDATION
             \ CMAKE_XCODE_SCHEME_ENVIRONMENT
             \ CMAKE_XCODE_SCHEME_GUARD_MALLOC
+            \ CMAKE_XCODE_SCHEME_LAUNCH_CONFIGURATION
             \ CMAKE_XCODE_SCHEME_LAUNCH_MODE
             \ CMAKE_XCODE_SCHEME_LLDB_INIT_FILE
             \ CMAKE_XCODE_SCHEME_MAIN_THREAD_CHECKER_STOP
             \ CMAKE_XCODE_SCHEME_MALLOC_GUARD_EDGES
             \ CMAKE_XCODE_SCHEME_MALLOC_SCRIBBLE
             \ CMAKE_XCODE_SCHEME_MALLOC_STACK
+            \ CMAKE_XCODE_SCHEME_TEST_CONFIGURATION
             \ CMAKE_XCODE_SCHEME_THREAD_SANITIZER
             \ CMAKE_XCODE_SCHEME_THREAD_SANITIZER_STOP
             \ CMAKE_XCODE_SCHEME_UNDEFINED_BEHAVIOUR_SANITIZER
             \ CMAKE_XCODE_SCHEME_UNDEFINED_BEHAVIOUR_SANITIZER_STOP
-            \ CMAKE_XCODE_SCHEME_ENABLE_GPU_API_VALIDATION
-            \ CMAKE_XCODE_SCHEME_ENABLE_GPU_SHADER_VALIDATION
-            \ CMAKE_XCODE_SCHEME_LAUNCH_CONFIGURATION
-            \ CMAKE_XCODE_SCHEME_TEST_CONFIGURATION
             \ CMAKE_XCODE_SCHEME_WORKING_DIRECTORY
             \ CMAKE_XCODE_SCHEME_ZOMBIE_OBJECTS
             \ CMAKE_XCODE_XCCONFIG
@@ -1903,7 +2186,6 @@ syn keyword cmakeVariable contained
             \ CTEST_CUSTOM_MAXIMUM_NUMBER_OF_ERRORS
             \ CTEST_CUSTOM_MAXIMUM_NUMBER_OF_WARNINGS
             \ CTEST_CUSTOM_MAXIMUM_PASSED_TEST_OUTPUT_SIZE
-            \ CTEST_CUSTOM_TEST_OUTPUT_TRUNCATION
             \ CTEST_CUSTOM_MEMCHECK_IGNORE
             \ CTEST_CUSTOM_POST_MEMCHECK
             \ CTEST_CUSTOM_POST_TEST
@@ -1923,6 +2205,7 @@ syn keyword cmakeVariable contained
             \ CTEST_DROP_SITE_PASSWORD
             \ CTEST_DROP_SITE_USER
             \ CTEST_EXTRA_COVERAGE_GLOB
+            \ CTEST_EXTRA_SUBMIT_FILES
             \ CTEST_GIT_COMMAND
             \ CTEST_GIT_INIT_SUBMODULES
             \ CTEST_GIT_UPDATE_CUSTOM
@@ -1936,6 +2219,7 @@ syn keyword cmakeVariable contained
             \ CTEST_MEMORYCHECK_SUPPRESSIONS_FILE
             \ CTEST_MEMORYCHECK_TYPE
             \ CTEST_NIGHTLY_START_TIME
+            \ CTEST_NOTES_FILES
             \ CTEST_P4_CLIENT
             \ CTEST_P4_COMMAND
             \ CTEST_P4_OPTIONS
@@ -1953,6 +2237,8 @@ syn keyword cmakeVariable contained
             \ CTEST_SVN_UPDATE_OPTIONS
             \ CTEST_TEST_LOAD
             \ CTEST_TEST_TIMEOUT
+            \ CTEST_TLS_VERIFY
+            \ CTEST_TLS_VERSION
             \ CTEST_TRIGGER_SITE
             \ CTEST_UPDATE_COMMAND
             \ CTEST_UPDATE_OPTIONS
@@ -2259,17 +2545,20 @@ syn keyword cmakeVariable contained
             \ MSVC_VERSION
             \ MSYS
             \ PROJECT_BINARY_DIR
+            \ PROJECT_COMPAT_VERSION
             \ PROJECT_DESCRIPTION
             \ PROJECT_HOMEPAGE_URL
             \ PROJECT_IS_TOP_LEVEL
             \ PROJECT_NAME
             \ PROJECT_SOURCE_DIR
+            \ PROJECT_SPDX_LICENSE
             \ PROJECT_VERSION
             \ PROJECT_VERSION_MAJOR
             \ PROJECT_VERSION_MINOR
             \ PROJECT_VERSION_PATCH
             \ PROJECT_VERSION_TWEAK
             \ UNIX
+            \ WASI
             \ WIN32
             \ WINCE
             \ WINDOWS_PHONE
@@ -2289,6 +2578,7 @@ syn keyword cmakeKWExternalProject contained
             \ BUILD_COMMAND
             \ BUILD_ENVIRONMENT_MODIFICATION
             \ BUILD_IN_SOURCE
+            \ BUILD_JOB_SERVER_AWARE
             \ CHECKOUT
             \ CMAKE_ARGS
             \ CMAKE_CACHE_ARGS
@@ -2304,6 +2594,7 @@ syn keyword cmakeKWExternalProject contained
             \ CVS_MODULE
             \ CVS_REPOSITORY
             \ CVS_TAG
+            \ DCMAKE_PREFIX_PATH
             \ DEPENDEES
             \ DEPENDERS
             \ DEPENDS
@@ -2314,7 +2605,6 @@ syn keyword cmakeKWExternalProject contained
             \ DOWNLOAD_NAME
             \ DOWNLOAD_NO_EXTRACT
             \ DOWNLOAD_NO_PROGRESS
-            \ ENVIRONMENT_MODIFICATION
             \ EP_BASE
             \ EP_INDEPENDENT_STEP_TARGETS
             \ EP_PREFIX
@@ -2345,7 +2635,7 @@ syn keyword cmakeKWExternalProject contained
             \ INSTALL_COMMAND
             \ INSTALL_DIR
             \ INSTALL_ENVIRONMENT_MODIFICATION
-            \ JOB_POOLS
+            \ INSTALL_JOB_SERVER_AWARE
             \ LIST_SEPARATOR
             \ LOG_BUILD
             \ LOG_CONFIGURE
@@ -2389,6 +2679,7 @@ syn keyword cmakeKWExternalProject contained
             \ TIMEOUT
             \ TLS_CAINFO
             \ TLS_VERIFY
+            \ TLS_VERSION
             \ TMP_DIR
             \ TRUE
             \ UPDATE_COMMAND
@@ -2412,11 +2703,10 @@ syn keyword cmakeKWFetchContent contained
             \ BYPASS_PROVIDER
             \ CMAKE_PROJECT_
             \ CONFIGURE_COMMAND
-            \ COPY
             \ CORRECT
             \ DCMAKE_TOOLCHAIN_FILE
-            \ DESTINATION
             \ DOWNLOAD_NO_EXTRACT
+            \ EXCLUDE_FROM_ALL
             \ EXISTS
             \ FETCHCONTENT_BASE_DIR
             \ FETCHCONTENT_FULLY_DISCONNECTED
@@ -2438,6 +2728,7 @@ syn keyword cmakeKWFetchContent contained
             \ NAME
             \ NAMES
             \ NEVER
+            \ NOT
             \ NOTE
             \ OFF
             \ OPTIONAL
@@ -2446,6 +2737,7 @@ syn keyword cmakeKWFetchContent contained
             \ PACKAGE_VERSION_COMPATIBLE
             \ PACKAGE_VERSION_EXACT
             \ QUIET
+            \ REQUIRED
             \ SOURCE_SUBDIR
             \ STREQUAL
             \ SUBBUILD_DIR
@@ -2454,10 +2746,10 @@ syn keyword cmakeKWFetchContent contained
             \ SYSTEM
             \ TARGET
             \ TEST_COMMAND
-            \ TRUE
             \ URL
             \ URL_HASH
             \ VERIFY_INTERFACE_HEADER_SETS
+            \ WARNING
             \ WRITE
             \ WRONG
             \ _BINARY_DIR
@@ -2480,11 +2772,13 @@ syn keyword cmakeKWadd_compile_options contained
             \ _FLAGS_
 
 syn keyword cmakeKWadd_custom_command contained
+            \ ALIAS
             \ APPEND
             \ ARGS
             \ BNF
             \ BYPRODUCTS
             \ CC
+            \ CODEGEN
             \ COMMAND
             \ COMMAND_EXPAND_LISTS
             \ COMMENT
@@ -2498,11 +2792,14 @@ syn keyword cmakeKWadd_custom_command contained
             \ INCLUDE_DIRECTORIES
             \ JOB_POOL
             \ JOB_POOLS
+            \ JOB_SERVER_AWARE
             \ JOIN
             \ MAIN_DEPENDENCY
             \ MODULE
             \ NOT
+            \ OPTIMIZE_DEPENDENCIES
             \ OUTPUT
+            \ OUTPUTS
             \ PATH
             \ POST_BUILD
             \ PRE_BUILD
@@ -2530,6 +2827,7 @@ syn keyword cmakeKWadd_custom_target contained
             \ INCLUDE_DIRECTORIES
             \ JOB_POOL
             \ JOB_POOLS
+            \ JOB_SERVER_AWARE
             \ JOIN
             \ PATH
             \ SOURCES
@@ -2547,6 +2845,7 @@ syn keyword cmakeKWadd_definitions contained
 
 syn keyword cmakeKWadd_dependencies contained
             \ DEPENDS
+            \ MANUALLY_ADDED_DEPENDENCIES
             \ OBJECT_DEPENDS
 
 syn keyword cmakeKWadd_executable contained
@@ -2578,7 +2877,6 @@ syn keyword cmakeKWadd_library contained
             \ HEADER_FILE_ONLY
             \ HEADER_SETS
             \ IMPORTED
-            \ IMPORTED_
             \ IMPORTED_IMPLIB
             \ IMPORTED_IMPLIB_
             \ IMPORTED_LOCATION
@@ -2594,7 +2892,6 @@ syn keyword cmakeKWadd_library contained
             \ LIBRARY_OUTPUT_DIRECTORY
             \ MODULE
             \ OBJECT
-            \ ON
             \ OUTPUT_NAME
             \ POSITION_INDEPENDENT_CODE
             \ POST_BUILD
@@ -2636,22 +2933,25 @@ syn keyword cmakeKWadd_subdirectory contained
             \ SYSTEM
 
 syn keyword cmakeKWadd_test contained
-            \ BUILD_TESTING
             \ COMMAND
             \ COMMAND_EXPAND_LISTS
             \ CONFIGURATIONS
+            \ CROSSCOMPILING_EMULATOR
             \ FAIL_REGULAR_EXPRESSION
             \ NAME
             \ OFF
             \ PASS_REGULAR_EXPRESSION
             \ SKIP_REGULAR_EXPRESSION
             \ TARGET_FILE
+            \ TEST
+            \ TEST_LAUNCHER
             \ WILL_FAIL
             \ WORKING_DIRECTORY
 
 syn keyword cmakeKWblock contained
             \ PARENT_SCOPE
             \ POLICIES
+            \ POP
             \ PROPAGATE
             \ PUSH
             \ SCOPE_FOR
@@ -2728,6 +3028,7 @@ syn keyword cmakeKWcmake_host_system_information contained
             \ LISTS
             \ LTS
             \ MATCHES
+            \ MSYSTEM_PREFIX
             \ NNN
             \ NOT
             \ NUMBER_OF_LOGICAL_CORES
@@ -2760,6 +3061,16 @@ syn keyword cmakeKWcmake_host_system_information contained
             \ VIEW
             \ WINDOWS_REGISTRY
 
+syn keyword cmakeKWcmake_instrumentation contained
+            \ API
+            \ API_VERSION
+            \ CALLBACK
+            \ CMAKE_EXPERIMENTAL_INSTRUMENTATION
+            \ DATA_VERSION
+            \ HOOKS
+            \ JSON
+            \ QUERIES
+
 syn keyword cmakeKWcmake_language contained
             \ AND
             \ ANY
@@ -2776,6 +3087,7 @@ syn keyword cmakeKWcmake_language contained
             \ DEFER
             \ DIRECTORY
             \ EVAL
+            \ EXIT
             \ FALSE
             \ FETCHCONTENT_MAKEAVAILABLE_SERIAL
             \ FETCHCONTENT_SOURCE_DIR_
@@ -2795,6 +3107,7 @@ syn keyword cmakeKWcmake_language contained
             \ OVERRIDE_FIND_PACKAGE
             \ PATH
             \ POP_BACK
+            \ PROPAGATE_TOP_LEVEL_INCLUDES_TO_TRY_COMPILE
             \ QUIET
             \ SET_DEPENDENCY_PROVIDER
             \ SOURCE_DIR
@@ -2808,7 +3121,9 @@ syn keyword cmakeKWcmake_language contained
             \ _PATH
 
 syn keyword cmakeKWcmake_minimum_required contained
+            \ CMAKE_POLICY_DEFAULT_CMP
             \ FATAL_ERROR
+            \ NNNN
             \ VERSION
 
 syn keyword cmakeKWcmake_parse_arguments contained
@@ -2818,21 +3133,13 @@ syn keyword cmakeKWcmake_parse_arguments contained
             \ FALSE
             \ FAST
             \ FILES
-            \ MY_INSTALL
-            \ MY_INSTALL_CONFIGURATIONS
-            \ MY_INSTALL_DESTINATION
-            \ MY_INSTALL_FAST
-            \ MY_INSTALL_KEYWORDS_MISSING_VALUES
-            \ MY_INSTALL_OPTIONAL
-            \ MY_INSTALL_RENAME
-            \ MY_INSTALL_TARGETS
-            \ MY_INSTALL_UNPARSED_ARGUMENTS
+            \ NOTE
             \ OPTIONAL
             \ PARSE_ARGV
             \ RENAME
             \ TARGETS
             \ TRUE
-            \ UNDEFINED
+            \ UNSET
             \ _KEYWORDS_MISSING_VALUES
             \ _UNPARSED_ARGUMENTS
 
@@ -2897,6 +3204,72 @@ syn keyword cmakeKWcmake_path contained
             \ TO_NATIVE_PATH_LIST
             \ TRUE
             \ XOR
+
+syn keyword cmakeKWcmake_pkg_config contained
+            \ ALLOW_SYSTEM_INCLUDES
+            \ ALLOW_SYSTEM_LIBS
+            \ BEST_EFFORT
+            \ BIND_PC_REQUIRES
+            \ CMAKE_PKG_CONFIG_ALLOW_SYS_INCLUDES
+            \ CMAKE_PKG_CONFIG_ALLOW_SYS_LIBS
+            \ CMAKE_PKG_CONFIG_CFLAGS
+            \ CMAKE_PKG_CONFIG_COMPILE_OPTIONS
+            \ CMAKE_PKG_CONFIG_CONFLICTS
+            \ CMAKE_PKG_CONFIG_DESCRIPTION
+            \ CMAKE_PKG_CONFIG_INCLUDES
+            \ CMAKE_PKG_CONFIG_LIBDIRS
+            \ CMAKE_PKG_CONFIG_LIBNAMES
+            \ CMAKE_PKG_CONFIG_LIBS
+            \ CMAKE_PKG_CONFIG_LINK_OPTIONS
+            \ CMAKE_PKG_CONFIG_NAME
+            \ CMAKE_PKG_CONFIG_PKGCONF_INCLUDES
+            \ CMAKE_PKG_CONFIG_PKGCONF_LIB_DIRS
+            \ CMAKE_PKG_CONFIG_PROVIDES
+            \ CMAKE_PKG_CONFIG_REQUIRES
+            \ CMAKE_PKG_CONFIG_SYS_INCLUDE_DIRS
+            \ CMAKE_PKG_CONFIG_SYS_LIB_DIRS
+            \ CMAKE_PKG_CONFIG_VERSION
+            \ CPATH
+            \ CPLUS_INCLUDE_PATH
+            \ C_INCLUDE_PATH
+            \ DISABLE_UNINSTALLED
+            \ ENV_MODE
+            \ EXACT
+            \ EXTRACT
+            \ FDO
+            \ IGNORE
+            \ IMPORT
+            \ IMPORTED
+            \ INTERFACE_LINK_LIBRARIES
+            \ OBJC_INCLUDE_PATH
+            \ PC_LIBDIR
+            \ PC_PATH
+            \ PC_SYSROOT_DIR
+            \ PERMISSIVE
+            \ PKGCONF
+            \ PKGCONFIG_
+            \ PKG_CONFIG_
+            \ PKG_CONFIG_ALLOW_
+            \ PKG_CONFIG_ALLOW_SYSTEM_CFLAGS
+            \ PKG_CONFIG_ALLOW_SYSTEM_LIBS
+            \ PKG_CONFIG_DISABLE_UNINSTALLED
+            \ PKG_CONFIG_LIBDIR
+            \ PKG_CONFIG_PATH
+            \ PKG_CONFIG_SYSROOT_DIR
+            \ PKG_CONFIG_SYSROOT_PATH
+            \ PKG_CONFIG_SYSTEM_INCLUDE_PATH
+            \ PKG_CONFIG_SYSTEM_LIBRARY_PATH
+            \ PKG_CONFIG_TOP_BUILD_DIR
+            \ POPULATE
+            \ PREFIX
+            \ QUIET
+            \ REQUIRED
+            \ STRICTNESS
+            \ SYSTEM_INCLUDE_DIRS
+            \ SYSTEM_LIBRARY_DIRS
+            \ TOP_BUILD_DIR
+            \ _FOUND
+            \ _PRIVATE
 
 syn keyword cmakeKWcmake_policy contained
             \ CMAKE_POLICY_DEFAULT_CMP
@@ -3016,8 +3389,6 @@ syn keyword cmakeKWctest_submit contained
             \ CAPTURE_CMAKE_ERROR
             \ CDASH_UPLOAD
             \ CDASH_UPLOAD_TYPE
-            \ CTEST_EXTRA_SUBMIT_FILES
-            \ CTEST_NOTES_FILES
             \ FILES
             \ HTTPHEADER
             \ PARTS
@@ -3039,10 +3410,13 @@ syn keyword cmakeKWctest_test contained
             \ EXCLUDE_FIXTURE
             \ EXCLUDE_FIXTURE_CLEANUP
             \ EXCLUDE_FIXTURE_SETUP
+            \ EXCLUDE_FROM_FILE
             \ EXCLUDE_LABEL
             \ INCLUDE
+            \ INCLUDE_FROM_FILE
             \ INCLUDE_LABEL
             \ LABELS
+            \ NOT
             \ OFF
             \ ON
             \ OUTPUT_JUNIT
@@ -3079,11 +3453,14 @@ syn keyword cmakeKWdefine_property contained
             \ BRIEF_DOCS
             \ CACHED_VARIABLE
             \ CMAKE_
+            \ DEFINED
             \ DIRECTORY
             \ FULL_DOCS
             \ GLOBAL
             \ INHERITED
             \ INITIALIZE_FROM_VARIABLE
+            \ MY_NEW_PROP
+            \ NONE
             \ PROPERTY
             \ SOURCE
             \ TARGET
@@ -3110,13 +3487,15 @@ syn keyword cmakeKWenable_language contained
             \ OBJCXX
             \ OPTIONAL
 
-syn keyword cmakeKWenable_testing contained
-            \ BUILD_TESTING
-
 syn keyword cmakeKWexec_program contained
             \ ARGS
+            \ COMMAND
+            \ ERROR_VARIABLE
+            \ OUTPUT_STRIP_TRAILING_WHITESPACE
             \ OUTPUT_VARIABLE
+            \ RESULT_VARIABLE
             \ RETURN_VALUE
+            \ WORKING_DIRECTORY
 
 syn keyword cmakeKWexecute_process contained
             \ ANSI
@@ -3153,17 +3532,43 @@ syn keyword cmakeKWexecute_process contained
 syn keyword cmakeKWexport contained
             \ ANDROID_MK
             \ APPEND
+            \ APPENDIX
+            \ AUTO
+            \ CMAKE_EXPERIMENTAL_EXPORT_PACKAGE_DEPENDENCIES
+            \ CMAKE_EXPERIMENTAL_EXPORT_PACKAGE_INFO
+            \ CMAKE_MAP_IMPORTED_CONFIG_
+            \ COMPAT_VERSION
             \ CONFIG
+            \ CPS
             \ CXX_MODULES_DIRECTORY
+            \ DEFAULT_CONFIGURATIONS
+            \ DEFAULT_LICENSE
+            \ DEFAULT_TARGETS
+            \ DESCRIPTION
+            \ ENABLED
             \ EXPORT
             \ EXPORT_LINK_INTERFACE_LIBRARIES
+            \ EXPORT_PACKAGE_DEPENDENCIES
+            \ EXTRA_ARGS
             \ FILE
+            \ HOMEPAGE_URL
             \ IMPORTED_
+            \ LICENSE
+            \ LOWER_CASE_FILE
             \ NAMESPACE
             \ NDK
+            \ NO_PROJECT_METADATA
             \ OLD
             \ PACKAGE
+            \ PACKAGE_DEPENDENCY
+            \ PACKAGE_INFO
+            \ PROJECT
+            \ REQUIRED
+            \ SETUP
             \ TARGETS
+            \ VERSION
+            \ VERSION_SCHEMA
+            \ XCFRAMEWORK_LOCATION
 
 syn keyword cmakeKWexport_library_dependencies contained
             \ APPEND
@@ -3185,7 +3590,7 @@ syn keyword cmakeKWfile contained
             \ CMAKE_GET_RUNTIME_DEPENDENCIES_PLATFORM
             \ CMAKE_GET_RUNTIME_DEPENDENCIES_TOOL
             \ CMAKE_INSTALL_MODE
-            \ CMAKE_OBJDUMP
+            \ CMAKE_MATCH_
             \ CODE
             \ COMPILE_FEATURES
             \ COMPRESSION
@@ -3202,13 +3607,14 @@ syn keyword cmakeKWfile contained
             \ CREATE_LINK
             \ CRLF
             \ DESTINATION
-            \ DIRECTORIES
             \ DIRECTORY_PERMISSIONS
             \ DLL
             \ DOS
             \ DOWNLOAD
+            \ ELF
             \ ENCODING
             \ ESCAPE_QUOTES
+            \ EXCLUDE
             \ EXECUTABLES
             \ EXPAND_TILDE
             \ EXPECTED_HASH
@@ -3249,6 +3655,7 @@ syn keyword cmakeKWfile contained
             \ LOCK
             \ LOG
             \ MAKE_DIRECTORY
+            \ MATCHALL
             \ MODULES
             \ MTIME
             \ MYLIBRARY
@@ -3314,6 +3721,7 @@ syn keyword cmakeKWfile contained
             \ TIMESTAMP
             \ TLS_CAINFO
             \ TLS_VERIFY
+            \ TLS_VERSION
             \ TOUCH
             \ TOUCH_NOCREATE
             \ TO_CMAKE_PATH
@@ -3328,7 +3736,9 @@ syn keyword cmakeKWfile contained
             \ USE_SOURCE_PERMISSIONS
             \ UTC
             \ UTF
+            \ VAR
             \ VERBOSE
+            \ WORKING_DIRECTORY
             \ WORLD_EXECUTE
             \ WORLD_READ
             \ WORLD_WRITE
@@ -3344,7 +3754,9 @@ syn keyword cmakeKWfind_file contained
             \ DOC
             \ DVAR
             \ FALSE
+            \ FIND_XXX_ORDER
             \ FIND_XXX_REGISTRY_VIEW
+            \ FIND_XXX_ROOT
             \ HINTS
             \ HOST
             \ INCLUDE
@@ -3361,6 +3773,7 @@ syn keyword cmakeKWfind_file contained
             \ NO_PACKAGE_ROOT_PATH
             \ NO_SYSTEM_ENVIRONMENT_PATH
             \ ONLY_CMAKE_FIND_ROOT_PATH
+            \ OPTIONAL
             \ PACKAGENAME
             \ PARENT_SCOPE
             \ PATHS
@@ -3379,7 +3792,9 @@ syn keyword cmakeKWfind_library contained
             \ DOC
             \ DVAR
             \ FALSE
+            \ FIND_XXX_ORDER
             \ FIND_XXX_REGISTRY_VIEW
+            \ FIND_XXX_ROOT
             \ HINTS
             \ HOST
             \ LIB
@@ -3397,6 +3812,7 @@ syn keyword cmakeKWfind_library contained
             \ NO_PACKAGE_ROOT_PATH
             \ NO_SYSTEM_ENVIRONMENT_PATH
             \ ONLY_CMAKE_FIND_ROOT_PATH
+            \ OPTIONAL
             \ PACKAGENAME
             \ PARENT_SCOPE
             \ PATHS
@@ -3409,17 +3825,17 @@ syn keyword cmakeKWfind_library contained
 
 syn keyword cmakeKWfind_package contained
             \ ABI
+            \ ASC
             \ BOTH
             \ BUNDLE
             \ BYPASS_PROVIDER
             \ CATEGORY
             \ CMAKE_DISABLE_FIND_PACKAGE_
-            \ CMAKE_REQUIRE_FIND_PACKAGE_
+            \ CMAKE_EXPERIMENTAL_FIND_CPS_PACKAGES
             \ CMAKE_FIND_ROOT_PATH_BOTH
             \ CMAKE_FIND_USE_
             \ CMAKE_REQUIRE_FIND_PACKAGE_
             \ COMPONENTS
-            \ CONFIG
             \ CONFIGS
             \ DEC
             \ DVAR
@@ -3427,6 +3843,7 @@ syn keyword cmakeKWfind_package contained
             \ EXCLUDE
             \ FALSE
             \ FIND_PACKAGE_VERSION_FORMAT
+            \ FIND_XXX_REGISTRY_VIEW
             \ FRAMEWORK
             \ GLOBAL
             \ HINTS
@@ -3435,6 +3852,7 @@ syn keyword cmakeKWfind_package contained
             \ MODULE
             \ NAMES
             \ NATURAL
+            \ NONE
             \ NO_CMAKE_BUILDS_PATH
             \ NO_CMAKE_ENVIRONMENT_PATH
             \ NO_CMAKE_FIND_ROOT_PATH
@@ -3448,8 +3866,8 @@ syn keyword cmakeKWfind_package contained
             \ NO_PACKAGE_ROOT_PATH
             \ NO_POLICY_SCOPE
             \ NO_SYSTEM_ENVIRONMENT_PATH
-            \ OLD
             \ ONLY_CMAKE_FIND_ROOT_PATH
+            \ OPTIONAL
             \ OPTIONAL_COMPONENTS
             \ PACKAGENAME
             \ PACKAGE_FIND_NAME
@@ -3482,7 +3900,6 @@ syn keyword cmakeKWfind_package contained
             \ QUIET
             \ REGISTRY_VIEW
             \ REQUIRED
-            \ SET
             \ TARGET
             \ TRUE
             \ VALUE
@@ -3506,7 +3923,9 @@ syn keyword cmakeKWfind_path contained
             \ DOC
             \ DVAR
             \ FALSE
+            \ FIND_XXX_ORDER
             \ FIND_XXX_REGISTRY_VIEW
+            \ FIND_XXX_ROOT
             \ HINTS
             \ HOST
             \ INCLUDE
@@ -3523,6 +3942,7 @@ syn keyword cmakeKWfind_path contained
             \ NO_PACKAGE_ROOT_PATH
             \ NO_SYSTEM_ENVIRONMENT_PATH
             \ ONLY_CMAKE_FIND_ROOT_PATH
+            \ OPTIONAL
             \ PACKAGENAME
             \ PARENT_SCOPE
             \ PATHS
@@ -3541,10 +3961,13 @@ syn keyword cmakeKWfind_program contained
             \ DOC
             \ DVAR
             \ FALSE
+            \ FIND_XXX_ORDER
             \ FIND_XXX_REGISTRY_VIEW
+            \ FIND_XXX_ROOT
             \ HINTS
             \ HOST
             \ MATCHES
+            \ MY_SCRIPT
             \ NAMES
             \ NAMES_PER_DIR
             \ NOT
@@ -3558,6 +3981,7 @@ syn keyword cmakeKWfind_program contained
             \ NO_PACKAGE_ROOT_PATH
             \ NO_SYSTEM_ENVIRONMENT_PATH
             \ ONLY_CMAKE_FIND_ROOT_PATH
+            \ OPTIONAL
             \ PACKAGENAME
             \ PARENT_SCOPE
             \ PATHS
@@ -3640,11 +4064,10 @@ syn keyword cmakeKWget_source_file_property contained
 
 syn keyword cmakeKWget_target_property contained
             \ INHERITED
-            \ VAR
 
 syn keyword cmakeKWget_test_property contained
+            \ DIRECTORY
             \ INHERITED
-            \ VAR
 
 syn keyword cmakeKWif contained
             \ CMAKE_MATCH_
@@ -3661,15 +4084,17 @@ syn keyword cmakeKWif contained
             \ IN_LIST
             \ IS_ABSOLUTE
             \ IS_DIRECTORY
+            \ IS_EXECUTABLE
             \ IS_NEWER_THAN
+            \ IS_READABLE
             \ IS_SYMLINK
+            \ IS_WRITABLE
             \ LESS
             \ LESS_EQUAL
             \ MATCHES
             \ NNNN
             \ NOT
             \ OFF
-            \ OR
             \ PATH_EQUAL
             \ POLICY
             \ STREQUAL
@@ -3713,15 +4138,14 @@ syn keyword cmakeKWinclude_guard contained
             \ __CURRENT_FILE_VAR__
 
 syn keyword cmakeKWinstall contained
-            \ AFTER
-            \ AIX
             \ ALL_COMPONENTS
+            \ APPENDIX
             \ APT
             \ ARCHIVE
-            \ BEFORE
             \ BUILD_TYPE
-            \ BUNDLE
             \ BUNDLE_EXECUTABLE
+            \ CMAKE_EXPERIMENTAL_EXPORT_PACKAGE_DEPENDENCIES
+            \ CMAKE_EXPERIMENTAL_EXPORT_PACKAGE_INFO
             \ CMAKE_INSTALL_BINDIR
             \ CMAKE_INSTALL_DATADIR
             \ CMAKE_INSTALL_DATAROOTDIR
@@ -3729,6 +4153,7 @@ syn keyword cmakeKWinstall contained
             \ CMAKE_INSTALL_INCLUDEDIR
             \ CMAKE_INSTALL_INFODIR
             \ CMAKE_INSTALL_LIBDIR
+            \ CMAKE_INSTALL_LIBEXECDIR
             \ CMAKE_INSTALL_LOCALEDIR
             \ CMAKE_INSTALL_LOCALSTATEDIR
             \ CMAKE_INSTALL_MANDIR
@@ -3737,9 +4162,12 @@ syn keyword cmakeKWinstall contained
             \ CMAKE_INSTALL_SBINDIR
             \ CMAKE_INSTALL_SHARESTATEDIR
             \ CMAKE_INSTALL_SYSCONFDIR
+            \ CMAKE_MAP_IMPORTED_CONFIG_
             \ CODE
+            \ COMPAT_VERSION
             \ COMPONENT
             \ CONFIGURATIONS
+            \ CPS
             \ CVS
             \ CXX_MODULES_BMI
             \ CXX_MODULES_DIRECTORY
@@ -3747,19 +4175,28 @@ syn keyword cmakeKWinstall contained
             \ DATAROOT
             \ DBUILD_TYPE
             \ DCOMPONENT
+            \ DEFAULT_CONFIGURATIONS
+            \ DEFAULT_LICENSE
+            \ DEFAULT_TARGETS
+            \ DESCRIPTION
             \ DESTDIR
             \ DESTINATION
             \ DIRECTORY
             \ DIRECTORY_PERMISSIONS
             \ DLL
             \ DOC
+            \ ENABLED
             \ ENABLE_EXPORTS
+            \ EXCLUDE_EMPTY_DIRECTORIES
             \ EXCLUDE_FROM_ALL
             \ EXECUTABLES
             \ EXPORT
             \ EXPORT_ANDROID_MK
+            \ EXPORT_FIND_PACKAGE_NAME
             \ EXPORT_LINK_INTERFACE_LIBRARIES
             \ EXPORT_NAME
+            \ EXPORT_PACKAGE_DEPENDENCIES
+            \ EXTRA_ARGS
             \ FILES
             \ FILES_MATCHING
             \ FILE_PERMISSIONS
@@ -3770,15 +4207,19 @@ syn keyword cmakeKWinstall contained
             \ GROUP_READ
             \ GROUP_WRITE
             \ HEADERS
+            \ HOMEPAGE_URL
             \ IMPORTED_RUNTIME_ARTIFACTS
             \ INCLUDES
-            \ INFO
+            \ INSTALL_PARALLEL
             \ INSTALL_PREFIX
             \ INTERFACE
             \ INTERFACE_INCLUDE_DIRECTORIES
+            \ LIBEXEC
             \ LIBRARY
+            \ LICENSE
             \ LOCALE
             \ LOCALSTATE
+            \ LOWER_CASE_FILE
             \ MACOSX_BUNDLE
             \ MAN
             \ MESSAGE_NEVER
@@ -3787,11 +4228,14 @@ syn keyword cmakeKWinstall contained
             \ NAMELINK_SKIP
             \ NAMESPACE
             \ NDK
+            \ NO_PROJECT_METADATA
             \ OBJECTS
+            \ OFF
             \ OPTIONAL
             \ OWNER_EXECUTE
             \ OWNER_READ
             \ OWNER_WRITE
+            \ PACKAGE_INFO
             \ PATTERN
             \ PERMISSIONS
             \ POST_EXCLUDE_FILES
@@ -3804,9 +4248,12 @@ syn keyword cmakeKWinstall contained
             \ PRE_INSTALL_SCRIPT
             \ PRIVATE_HEADER
             \ PROGRAMS
+            \ PROJECT
             \ PROPERTIES
+            \ PROPERTY
             \ PUBLIC_HEADER
             \ RENAME
+            \ REQUIRED
             \ RESOURCE
             \ RPM
             \ RUNSTATE
@@ -3816,8 +4263,11 @@ syn keyword cmakeKWinstall contained
             \ SCRIPT
             \ SETGID
             \ SETUID
+            \ SETUP
             \ SHAREDSTATE
             \ SOVERSION
+            \ SPDX
+            \ SPDX_LICENSE
             \ STATIC
             \ SYSCONF
             \ TARGETS
@@ -3825,6 +4275,7 @@ syn keyword cmakeKWinstall contained
             \ TYPE
             \ USE_SOURCE_PERMISSIONS
             \ VERSION
+            \ VERSION_SCHEMA
             \ WORLD_EXECUTE
             \ WORLD_READ
             \ WORLD_WRITE
@@ -3901,7 +4352,9 @@ syn keyword cmakeKWlist contained
 syn keyword cmakeKWload_cache contained
             \ EXCLUDE
             \ INCLUDE_INTERNALS
+            \ OTHER_PROJECT_INTERNAL_CACHE_VAR
             \ READ_WITH_PREFIX
+            \ STATUS
 
 syn keyword cmakeKWload_command contained
             \ CMAKE_LOADED_COMMAND_
@@ -3960,7 +4413,10 @@ syn keyword cmakeKWproject contained
             \ ASM_MASM
             \ ASM_NASM
             \ ATT
+            \ CMAKE_EXPERIMENTAL_EXPORT_PACKAGE_INFO
             \ CMAKE_PROJECT_
+            \ COMPAT_VERSION
+            \ CPS
             \ CUDA
             \ DESCRIPTION
             \ HIP
@@ -3972,14 +4428,16 @@ syn keyword cmakeKWproject contained
             \ OBJC
             \ OBJCXX
             \ PROJECT
+            \ SPDX_LICENSE
             \ VERSION
             \ _BINARY_DIR
+            \ _COMPAT_VERSION
             \ _DESCRIPTION
             \ _HOMEPAGE_URL
             \ _INCLUDE_BEFORE
             \ _IS_TOP_LEVEL
             \ _SOURCE_DIR
-            \ _VERSION
+            \ _SPDX_LICENSE
             \ _VERSION_MAJOR
             \ _VERSION_MINOR
             \ _VERSION_PATCH
@@ -4056,6 +4514,7 @@ syn keyword cmakeKWset_target_properties contained
             \ PROPERTIES
 
 syn keyword cmakeKWset_tests_properties contained
+            \ DIRECTORY
             \ NAME
             \ PROPERTIES
 
@@ -4200,28 +4659,35 @@ syn keyword cmakeKWtarget_link_directories contained
 
 syn keyword cmakeKWtarget_link_libraries contained
             \ ALIAS
+            \ CMAKE_
             \ DA
             \ DAG
             \ DEBUG_CONFIGURATIONS
             \ DOBJ
+            \ GCC
             \ IMPORTED
+            \ IMPORTED_CONFIGURATIONS
             \ IMPORTED_NO_SONAME
             \ INTERFACE
             \ INTERFACE_LINK_LIBRARIES
+            \ LANG
+            \ LINKER
             \ LINK_FLAGS
             \ LINK_INTERFACE_LIBRARIES
-            \ LINK_INTERFACE_LIBRARIES_DEBUG
             \ LINK_INTERFACE_MULTIPLICITY
+            \ LINK_LIBRARIES_STRATEGY
             \ LINK_OPTIONS
             \ LINK_PRIVATE
             \ LINK_PUBLIC
             \ OBJECT
-            \ OLD
             \ PRIVATE
             \ PUBLIC
             \ SHARED
+            \ SHELL
             \ STATIC
             \ TARGET_OBJECTS
+            \ _LINKER_WRAPPER_FLAG
+            \ _LINKER_WRAPPER_FLAG_SEP
 
 syn keyword cmakeKWtarget_link_options contained
             \ ALIAS
@@ -4255,7 +4721,6 @@ syn keyword cmakeKWtarget_precompile_headers contained
             \ BUILD_INTERFACE
             \ COMPILE_LANGUAGE
             \ DISABLE_PRECOMPILE_HEADERS
-            \ EXPORT
             \ FI
             \ GCC
             \ IMPORTED
@@ -4317,27 +4782,29 @@ syn keyword cmakeKWtry_compile contained
             \ CUDA_STANDARD
             \ CUDA_STANDARD_REQUIRED
             \ CXX_EXTENSIONS
+            \ CXX_MODULE
+            \ CXX_MODULES
             \ CXX_STANDARD
             \ CXX_STANDARD_REQUIRED
             \ C_EXTENSIONS
             \ C_STANDARD
             \ C_STANDARD_REQUIRED
+            \ DCOMPILE_DEFINITIONS
             \ DEFINED
             \ DLINK_LIBRARIES
             \ DVAR
             \ EXECUTABLE
             \ FALSE
+            \ FILE_SET
             \ GHS
-            \ HIP_EXTENSIONS
-            \ HIP_STANDARD
-            \ HIP_STANDARD_REQUIRED
             \ INCLUDE_DIRECTORIES
-            \ LANG
+            \ LINKER_LANGUAGE
             \ LINK_DIRECTORIES
             \ LINK_LIBRARIES
             \ LINK_OPTIONS
             \ LOG_DESCRIPTION
             \ MULTI
+            \ NORMAL
             \ NOT
             \ NO_CACHE
             \ NO_LOG
@@ -4350,8 +4817,9 @@ syn keyword cmakeKWtry_compile contained
             \ OUTPUT_VARIABLE
             \ PRIVATE
             \ PROJECT
+            \ PROPAGATE_TOP_LEVEL_INCLUDES_TO_TRY_COMPILE
             \ RESULTVAR
-            \ SOURCES
+            \ SOURCES_TYPE
             \ SOURCE_DIR
             \ SOURCE_FROM_CONTENT
             \ SOURCE_FROM_FILE
@@ -4360,7 +4828,6 @@ syn keyword cmakeKWtry_compile contained
             \ STATIC_LIBRARY_OPTIONS
             \ TARGET
             \ TRUE
-            \ TYPE
             \ VALUE
             \ _EXTENSIONS
             \ _STANDARD
@@ -4374,8 +4841,8 @@ syn keyword cmakeKWtry_run contained
             \ COPY_FILE
             \ COPY_FILE_ERROR
             \ FAILED_TO_RUN
-            \ FALSE
             \ LANG
+            \ LINKER_LANGUAGE
             \ LINK_LIBRARIES
             \ LINK_OPTIONS
             \ LOG_DESCRIPTION
@@ -4384,11 +4851,10 @@ syn keyword cmakeKWtry_run contained
             \ RUN_OUTPUT_STDERR_VARIABLE
             \ RUN_OUTPUT_STDOUT_VARIABLE
             \ RUN_OUTPUT_VARIABLE
-            \ SOURCES
+            \ SOURCES_TYPE
             \ SOURCE_FROM_CONTENT
             \ SOURCE_FROM_FILE
             \ SOURCE_FROM_VAR
-            \ TRUE
             \ WORKING_DIRECTORY
             \ _EXTENSIONS
             \ _STANDARD
@@ -4428,7 +4894,6 @@ syn keyword cmakeKWwrite_file contained
 syn keyword cmakeGeneratorExpressions contained
             \ ABSOLUTE_PATH
             \ ACTION
-            \ AIX
             \ ANGLE
             \ APPEND
             \ ARCHIVE_OUTPUT_NAME
@@ -4445,6 +4910,7 @@ syn keyword cmakeGeneratorExpressions contained
             \ COMMAND_CONFIG
             \ COMMAND_EXPAND_LISTS
             \ COMPARE
+            \ COMPATIBLE_INTERFACE_
             \ COMPILE_DEFINITIONS
             \ COMPILE_FEATURES
             \ COMPILE_LANGUAGE
@@ -4458,16 +4924,25 @@ syn keyword cmakeGeneratorExpressions contained
             \ CONFIG
             \ CONFIGURATION
             \ CONTENT
+            \ CUDA_COMPILER_FRONTEND_VARIANT
             \ CUDA_COMPILER_ID
+            \ CUDA_COMPILER_LINKER_FRONTEND_VARIANT
+            \ CUDA_COMPILER_LINKER_ID
             \ CUDA_COMPILER_VERSION
             \ CUDA_RESOLVE_DEVICE_SYMBOLS
             \ CUDA_SEPARABLE_COMPILATION
             \ CUSTOM_KEYS
+            \ CXX_COMPILER_FRONTEND_VARIANT
             \ CXX_COMPILER_ID
+            \ CXX_COMPILER_LINKER_FRONTEND_VARIANT
+            \ CXX_COMPILER_LINKER_ID
             \ CXX_COMPILER_VERSION
             \ CXX_CONFIG
             \ CXX_STANDARD
+            \ C_COMPILER_FRONTEND_VARIANT
             \ C_COMPILER_ID
+            \ C_COMPILER_LINKER_FRONTEND_VARIANT
+            \ C_COMPILER_LINKER_ID
             \ C_COMPILER_VERSION
             \ C_STANDARD
             \ DEBUG_MODE
@@ -4506,9 +4981,11 @@ syn keyword cmakeGeneratorExpressions contained
             \ HAS_ROOT_PATH
             \ HAS_STEM
             \ HAVE_SOME_FEATURE
+            \ HIP_COMPILER_FRONTEND_VARIANT
             \ HIP_COMPILER_ID
+            \ HIP_COMPILER_LINKER_FRONTEND_VARIANT
+            \ HIP_COMPILER_LINKER_ID
             \ HIP_COMPILER_VERSION
-            \ HIP_STANDARD
             \ HOST_LINK
             \ IF
             \ IGNORE
@@ -4524,7 +5001,9 @@ syn keyword cmakeGeneratorExpressions contained
             \ INSTALL_RPATH
             \ INTERFACE_LINK_LIBRARIES
             \ INTERFACE_LINK_LIBRARIES_DIRECT
+            \ INTERFACE_PROP
             \ IN_LIST
+            \ ISPC_COMPILER_FRONTEND_VARIANT
             \ ISPC_COMPILER_ID
             \ ISPC_COMPILER_VERSION
             \ IS_ABSOLUTE
@@ -4551,14 +5030,21 @@ syn keyword cmakeGeneratorExpressions contained
             \ MAKE_C_IDENTIFIER
             \ MAP_IMPORTED_CONFIG_
             \ MODULE
+            \ NATIVE_PATH
             \ NATURAL
             \ NO
             \ NORMALIZE
             \ NORMAL_PATH
             \ NOT
+            \ OBJCXX_COMPILER_FRONTEND_VARIANT
             \ OBJCXX_COMPILER_ID
+            \ OBJCXX_COMPILER_LINKER_FRONTEND_VARIANT
+            \ OBJCXX_COMPILER_LINKER_ID
             \ OBJCXX_COMPILER_VERSION
+            \ OBJC_COMPILER_FRONTEND_VARIANT
             \ OBJC_COMPILER_ID
+            \ OBJC_COMPILER_LINKER_FRONTEND_VARIANT
+            \ OBJC_COMPILER_LINKER_ID
             \ OBJC_COMPILER_VERSION
             \ OBJECT
             \ OFF
@@ -4582,6 +5068,7 @@ syn keyword cmakeGeneratorExpressions contained
             \ PREPEND
             \ PRIVATE
             \ PUBLIC
+            \ QUOTE
             \ REGEX
             \ RELATIVE_PATH
             \ REMOVE_AT
@@ -4670,6 +5157,8 @@ syn keyword cmakeGeneratorExpressions contained
             \ TRANSFORM_REPLACE
             \ TRANSFORM_STRIP
             \ TRANSFORM_TOLOWER
+            \ TRANSITIVE_COMPILE_PROPERTIES
+            \ TRANSITIVE_LINK_PROPERTIES
             \ UNKNOWN
             \ UPPER_CASE
             \ VERBATIM
@@ -4679,6 +5168,9 @@ syn keyword cmakeGeneratorExpressions contained
             \ VERSION_LESS_EQUAL
             \ WHOLE_ARCHIVE
             \ WRONG
+            \ _COMPILER_FRONTEND_VARIANT
+            \ _COMPILER_LINKER_FRONTEND_VARIANT
+            \ _COMPILER_LINKER_ID
             \ _LINK_GROUP_USING_
             \ _LINK_LIBRARY_USING_
             \ _POSTFIX
@@ -4699,15 +5191,16 @@ syn keyword cmakeCommand
             \ add_subdirectory
             \ add_test
             \ aux_source_directory
-            \ block
             \ break
             \ build_command
             \ cmake_file_api
             \ cmake_host_system_information
+            \ cmake_instrumentation
             \ cmake_language
             \ cmake_minimum_required
             \ cmake_parse_arguments
             \ cmake_path
+            \ cmake_pkg_config
             \ cmake_policy
             \ configure_file
             \ continue
@@ -4728,9 +5221,6 @@ syn keyword cmakeCommand
             \ define_property
             \ enable_language
             \ enable_testing
-            \ endblock
-            \ endfunction
-            \ endmacro
             \ execute_process
             \ export
             \ file
@@ -4740,7 +5230,6 @@ syn keyword cmakeCommand
             \ find_path
             \ find_program
             \ fltk_wrap_ui
-            \ function
             \ get_cmake_property
             \ get_directory_property
             \ get_filename_component
@@ -4758,7 +5247,6 @@ syn keyword cmakeCommand
             \ list
             \ load_cache
             \ load_command
-            \ macro
             \ mark_as_advanced
             \ math
             \ message
@@ -4793,20 +5281,6 @@ syn keyword cmakeCommand
             \ variable_watch
             \ nextgroup=cmakeArguments
 
-syn keyword cmakeCommandConditional
-            \ else
-            \ elseif
-            \ endif
-            \ if
-            \ nextgroup=cmakeArguments
-
-syn keyword cmakeCommandRepeat
-            \ endforeach
-            \ endwhile
-            \ foreach
-            \ while
-            \ nextgroup=cmakeArguments
-
 syn keyword cmakeCommandDeprecated
             \ build_name
             \ exec_program
@@ -4835,14 +5309,14 @@ syn keyword cmakeTodo
 hi def link cmakeBracketArgument String
 hi def link cmakeBracketComment Comment
 hi def link cmakeCommand Function
-hi def link cmakeCommandConditional Conditional
 hi def link cmakeCommandDeprecated WarningMsg
-hi def link cmakeCommandRepeat Repeat
 hi def link cmakeComment Comment
+hi def link cmakeElse Conditional
 hi def link cmakeEnvironment Special
 hi def link cmakeEscaped Special
 hi def link cmakeGeneratorExpression WarningMsg
 hi def link cmakeGeneratorExpressions Constant
+hi def link cmakeKeyword Conditional
 hi def link cmakeModule Include
 hi def link cmakeProperty Constant
 hi def link cmakeRegistry Underlined
@@ -4868,10 +5342,12 @@ hi def link cmakeKWblock ModeMsg
 hi def link cmakeKWbuild_command ModeMsg
 hi def link cmakeKWcmake_file_api ModeMsg
 hi def link cmakeKWcmake_host_system_information ModeMsg
+hi def link cmakeKWcmake_instrumentation ModeMsg
 hi def link cmakeKWcmake_language ModeMsg
 hi def link cmakeKWcmake_minimum_required ModeMsg
 hi def link cmakeKWcmake_parse_arguments ModeMsg
 hi def link cmakeKWcmake_path ModeMsg
+hi def link cmakeKWcmake_pkg_config ModeMsg
 hi def link cmakeKWcmake_policy ModeMsg
 hi def link cmakeKWconfigure_file ModeMsg
 hi def link cmakeKWcreate_test_sourcelist ModeMsg
@@ -4888,7 +5364,6 @@ hi def link cmakeKWctest_upload ModeMsg
 hi def link cmakeKWdefine_property ModeMsg
 hi def link cmakeKWdoxygen_add_docs ModeMsg
 hi def link cmakeKWenable_language ModeMsg
-hi def link cmakeKWenable_testing ModeMsg
 hi def link cmakeKWexec_program ModeMsg
 hi def link cmakeKWexecute_process ModeMsg
 hi def link cmakeKWexport ModeMsg
