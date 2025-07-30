@@ -492,9 +492,10 @@ if(NOT CMake_TEST_EXTERNAL_CMAKE)
         NOT "x${CMAKE_C_SIMULATE_ID}" STREQUAL "xMSVC") OR
        CMAKE_C_COMPILER_ID STREQUAL "AppleClang" OR
        CMAKE_C_COMPILER_ID STREQUAL "LCC")
-      set(C_FLAGS_LIST -Wcast-align -Werror-implicit-function-declaration -Wchar-subscripts
+      set(C_FLAGS_LIST -Wcast-align -Wchar-subscripts
                        -Wall -W -Wpointer-arith -Wwrite-strings -Wformat-security
                        -Wmissing-format-attribute -fno-common -Wundef
+                       -Werror=implicit-function-declaration
                        -Wstrict-prototypes
       )
       set(CXX_FLAGS_LIST -Wnon-virtual-dtor -Wcast-align -Wchar-subscripts -Wall -W
