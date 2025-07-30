@@ -2226,9 +2226,11 @@ static const struct ConfigurationTestNode : public cmGeneratorExpressionNode
     if (parameters.empty()) {
       return configurationNode.Evaluate(parameters, context, content, nullptr);
     }
-    static cmsys::RegularExpression configValidator("^[A-Za-z0-9_]*$");
 
     context->HadContextSensitiveCondition = true;
+
+    // First, validate our arguments.
+    static cmsys::RegularExpression configValidator("^[A-Za-z0-9_]*$");
     bool firstParam = true;
     for (auto const& param : parameters) {
       if (!configValidator.find(param)) {
@@ -2248,41 +2250,109 @@ static const struct ConfigurationTestNode : public cmGeneratorExpressionNode
         context->LG->GetCMakeInstance()->IssueMessage(
           MessageType::WARNING, e.str(), context->Backtrace);
       }
-
       firstParam = false;
-      if (context->Config.empty()) {
-        if (param.empty()) {
+    }
+
+    // Determine the context(s) in which the expression should be evaluated. If
+    // CMPxxxx is NEW, the context is exactly one of the imported target's
+    // selected configuration, if applicable, or the consuming target's
+    // configuration, otherwise.
+    //
+    // If CMPxxxx is OLD, we evaluate first in the context of the consuming
+    // target, then, if the consumed target is imported, we evaluate based on
+    // the mapped configurations (this logic is... problematic; see comment
+    // below), then finally based on the selected configuration of the imported
+    // target.
+    bool const targetIsImported =
+      (context->CurrentTarget && context->CurrentTarget->IsImported());
+    bool const oldPolicy = [&] {
+      if (!targetIsImported) {
+        // For non-imported targets, there is no behavior difference between
+        // the OLD and NEW policy.
+        return false;
+      }
+      cmTarget const* const t = context->CurrentTarget->Target;
+      if (t->GetOrigin() == cmTarget::Origin::Cps) {
+        // Generator expressions appearing on targets imported from CPS should
+        // always be evaluated according to the selected configuration of the
+        // imported target, i.e. the NEW policy.
+        return false;
+      }
+      switch (context->HeadTarget->GetPolicyStatusCMP0199()) {
+        case cmPolicies::WARN:
+          if (context->LG->GetMakefile()->PolicyOptionalWarningEnabled(
+                "CMAKE_POLICY_WARNING_CMP0199")) {
+            std::string const err =
+              cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0199),
+                       "\nEvaluation of $<CONFIG> for imported target  \"",
+                       context->CurrentTarget->GetName(), "\", used by \"",
+                       context->HeadTarget->GetName(),
+                       "\", may match multiple configurations.\n");
+            context->LG->GetCMakeInstance()->IssueMessage(
+              MessageType ::AUTHOR_WARNING, err, context->Backtrace);
+          }
+          CM_FALLTHROUGH;
+        case cmPolicies::OLD:
+          return true;
+        case cmPolicies::NEW:
+          return false;
+      }
+
+      // Should be unreachable
+      assert(false);
+      return false;
+    }();
+
+    if (!targetIsImported || oldPolicy) {
+      // Does the consuming target's configuration match any of the arguments?
+      for (auto const& param : parameters) {
+        if (context->Config.empty()) {
+          if (param.empty()) {
+            return "1";
+          }
+        } else if (cmsysString_strcasecmp(param.c_str(),
+                                          context->Config.c_str()) == 0) {
           return "1";
         }
-      } else if (cmsysString_strcasecmp(param.c_str(),
-                                        context->Config.c_str()) == 0) {
-        return "1";
       }
     }
 
-    if (context->CurrentTarget && context->CurrentTarget->IsImported()) {
+    if (targetIsImported) {
       cmValue loc = nullptr;
       cmValue imp = nullptr;
       std::string suffix;
       if (context->CurrentTarget->Target->GetMappedConfig(context->Config, loc,
                                                           imp, suffix)) {
-        // This imported target has an appropriate location
-        // for this (possibly mapped) config.
-        // Check if there is a proper config mapping for the tested config.
-        cmList mappedConfigs;
-        std::string mapProp = cmStrCat(
-          "MAP_IMPORTED_CONFIG_", cmSystemTools::UpperCase(context->Config));
-        if (cmValue mapValue = context->CurrentTarget->GetProperty(mapProp)) {
-          mappedConfigs.assign(cmSystemTools::UpperCase(*mapValue));
+        if (oldPolicy) {
+          // If the target has a MAP_IMPORTED_CONFIG_<CONFIG> property for the
+          // consumer's <CONFIG>, match *any* config in that list, regardless
+          // of whether it's valid or of what GetMappedConfig actually picked.
+          // This will result in $<CONFIG> producing '1' for multiple configs,
+          // and is almost certainly wrong, but it's what CMake did for a very
+          // long time, and... Hyrum's Law.
+          cmList mappedConfigs;
+          std::string mapProp = cmStrCat(
+            "MAP_IMPORTED_CONFIG_", cmSystemTools::UpperCase(context->Config));
+          if (cmValue mapValue =
+                context->CurrentTarget->GetProperty(mapProp)) {
+            mappedConfigs.assign(cmSystemTools::UpperCase(*mapValue));
 
-          for (auto const& param : parameters) {
-            if (cm::contains(mappedConfigs, cmSystemTools::UpperCase(param))) {
-              return "1";
+            for (auto const& param : parameters) {
+              if (cm::contains(mappedConfigs,
+                               cmSystemTools::UpperCase(param))) {
+                return "1";
+              }
             }
+
+            return "0";
           }
-        } else if (!suffix.empty()) {
-          // There is no explicit mapping for the tested config, so use
-          // the configuration of the imported location that was selected.
+        }
+
+        // This imported target has an appropriate location for this (possibly
+        // mapped) config.
+        if (!suffix.empty()) {
+          // Use the (possibly mapped) configuration of the imported location
+          // that was selected.
           for (auto const& param : parameters) {
             if (cmStrCat('_', cmSystemTools::UpperCase(param)) == suffix) {
               return "1";
@@ -2291,6 +2361,7 @@ static const struct ConfigurationTestNode : public cmGeneratorExpressionNode
         }
       }
     }
+
     return "0";
   }
 } configurationTestNode;

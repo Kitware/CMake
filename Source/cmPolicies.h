@@ -592,7 +592,11 @@ class cmMakefile;
          WARN)                                                                \
   SELECT(POLICY, CMP0198,                                                     \
          "CMAKE_PARENT_LIST_FILE is not defined in CMakeLists.txt.", 4, 2, 0, \
-         WARN)
+         WARN)                                                                \
+  SELECT(                                                                     \
+    POLICY, CMP0199,                                                          \
+    "$<CONFIG:cfgs> only matches the configuration of the consumed target.",  \
+    4, 2, 0, WARN)
 
 #define CM_SELECT_ID(F, A1, A2, A3, A4, A5, A6) F(A1)
 #define CM_FOR_EACH_POLICY_ID(POLICY)                                         \
@@ -640,7 +644,8 @@ class cmMakefile;
   F(CMP0179)                                                                  \
   F(CMP0181)                                                                  \
   F(CMP0182)                                                                  \
-  F(CMP0195)
+  F(CMP0195)                                                                  \
+  F(CMP0199)
 
 #define CM_FOR_EACH_CUSTOM_COMMAND_POLICY(F)                                  \
   F(CMP0116)                                                                  \
