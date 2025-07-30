@@ -42,8 +42,7 @@ set_source_files_properties(foo_precompile.c PROPERTIES
 
 # Setup dependencies for precompiled header creation and use.  The VS
 # IDE takes care of this automatically.
-if("${CMAKE_GENERATOR}" MATCHES "Makefile" OR
-   "${CMAKE_GENERATOR}" MATCHES "Ninja")
+if("${CMAKE_GENERATOR}" MATCHES "Makefile|Ninja|FASTBuild")
   # This source file creates the precompiled header as a side-effect.
   set_source_files_properties(foo_precompile.c PROPERTIES
     OBJECT_OUTPUTS "${PCH_DIR}/foo_precompiled.pch")

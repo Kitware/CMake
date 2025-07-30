@@ -388,7 +388,7 @@ endif()
 unset(__WINDOWS_MSVC_CMP0184)
 
 macro(__windows_compiler_msvc lang)
-  if(NOT MSVC_VERSION LESS 1400)
+  if(NOT MSVC_VERSION LESS 1400 AND NOT CMAKE_GENERATOR MATCHES "FASTBuild")
     # for 2005 make sure the manifest is put in the dll with mt
     set(_CMAKE_VS_LINK_DLL "<CMAKE_COMMAND> -E vs_link_dll --msvc-ver=${MSVC_VERSION} --intdir=<OBJECT_DIR> --rc=<CMAKE_RC_COMPILER> --mt=<CMAKE_MT> --manifests <MANIFESTS> -- ")
     set(_CMAKE_VS_LINK_EXE "<CMAKE_COMMAND> -E vs_link_exe --msvc-ver=${MSVC_VERSION} --intdir=<OBJECT_DIR> --rc=<CMAKE_RC_COMPILER> --mt=<CMAKE_MT> --manifests <MANIFESTS> -- ")

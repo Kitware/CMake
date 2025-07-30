@@ -281,6 +281,10 @@ std::string cmOutputConverter::EscapeForShell(cm::string_view str,
   if (!this->GetState()->UseWindowsShell()) {
     flags |= Shell_Flag_IsUnix;
   }
+  if (this->GetState()->UseFastbuildMake()) {
+    // Fastbuild needs to escape very few characters.
+    flags = Shell_Flag_Fastbuild;
+  }
 
   return cmOutputConverter::EscapeForShell(str, flags);
 }
@@ -434,6 +438,10 @@ bool cmOutputConverter::Shell_CharNeedsQuotes(char c, int flags)
   /* On all platforms quotes are needed to preserve whitespace.  */
   if (Shell_CharIsWhitespace(c)) {
     return true;
+  }
+
+  if (flags & Shell_Flag_Fastbuild) {
+    return false;
   }
 
   /* Quote hyphens in response files */
@@ -645,6 +653,8 @@ std::string cmOutputConverter::Shell_GetArgument(cm::string_view in, int flags)
            quoting.  Either way the $ is isolated from surrounding
            text to avoid looking like a variable reference.  */
         out += "\"$\"";
+      } else if (flags & Shell_Flag_Fastbuild) {
+        out += "^$";
       } else {
         /* Otherwise a dollar is written just $. */
         out += '$';
@@ -684,6 +694,8 @@ std::string cmOutputConverter::Shell_GetArgument(cm::string_view in, int flags)
       } else {
         out += '\n';
       }
+    } else if (*cit == '^' && (flags & Shell_Flag_Fastbuild)) {
+      out += "^^";
     } else {
       /* Store this character.  */
       out += *cit;

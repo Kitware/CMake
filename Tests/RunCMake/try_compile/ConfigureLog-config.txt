@@ -86,7 +86,7 @@ events:(
       variable: "COMPILE_RESULT"
       cached: true
       stdout: \|.*
-      exitCode: [1-9][0-9]*
+      exitCode: -?[1-9][0-9]*
   -
     kind: "try_compile-v1"
     backtrace:

@@ -27,6 +27,6 @@
  *-- Separator: ,
  *-- List: 7,8,9
 .*(Performing build step for 'DefaultCommandEnvVars'|DefaultCommandEnvVars-build).*
- *-- Stage: build
+.*-- Stage: build
  *-- Separator: ,
  *-- List: 7,8,9,10

@@ -782,6 +782,18 @@ add_library(
   cmNinjaLinkLineComputer.h
   cmNinjaLinkLineDeviceComputer.cxx
   cmNinjaLinkLineDeviceComputer.h
+  # FASTBuild support
+  cmGlobalFastbuildGenerator.cxx
+  cmGlobalFastbuildGenerator.h
+  cmLocalFastbuildGenerator.cxx
+  cmLocalFastbuildGenerator.h
+  cmFastbuildTargetGenerator.cxx
+  cmFastbuildTargetGenerator.h
+  cmFastbuildLinkLineComputer.cxx
+  cmFastbuildNormalTargetGenerator.cxx
+  cmFastbuildNormalTargetGenerator.h
+  cmFastbuildUtilityTargetGenerator.cxx
+  cmFastbuildUtilityTargetGenerator.h
 
   cm_get_date.h
   cm_get_date.c

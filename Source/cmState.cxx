@@ -790,6 +790,16 @@ bool cmState::UseNinjaMulti() const
   return this->NinjaMulti;
 }
 
+void cmState::SetFastbuildMake(bool fastbuildMake)
+{
+  this->FastbuildMake = fastbuildMake;
+}
+
+bool cmState::UseFastbuildMake() const
+{
+  return this->FastbuildMake;
+}
+
 unsigned int cmState::GetCacheMajorVersion() const
 {
   return this->CacheManager->GetCacheMajorVersion();

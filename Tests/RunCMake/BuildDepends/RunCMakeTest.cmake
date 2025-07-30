@@ -73,10 +73,16 @@ if(CMake_TEST_Fortran
     # FIXME(lfortran): The compiler fails on the test's includes.
     AND NOT CMAKE_Fortran_COMPILER_ID STREQUAL "LFortran"
     )
-  run_BuildDepends(FortranInclude)
+  if(NOT RunCMake_GENERATOR MATCHES "FASTBuild")
+    run_BuildDepends(FortranInclude)
+  endif()
 endif()
 
-run_BuildDepends(Custom-Symbolic-and-Byproduct)
+# By default, FASTBuild will only create "run always" commands if we only have SYMBOLIC output.
+# However, this declares a custom command with NON-SYMBOLIC output and expects it to always run.
+if(NOT RunCMake_GENERATOR MATCHES "FASTBuild")
+  run_BuildDepends(Custom-Symbolic-and-Byproduct)
+endif()
 run_BuildDepends(Custom-Always)
 
 set(RunCMake_TEST_OUTPUT_MERGE_save "${RunCMake_TEST_OUTPUT_MERGE}")

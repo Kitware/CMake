@@ -28,6 +28,9 @@ endif()
 if("${CMAKE_GENERATOR}" MATCHES "Visual Studio")
   set(PP_VS 1)
 endif()
+if("${CMAKE_GENERATOR}" MATCHES "FASTBuild")
+  set(PP_FASTBUILD 1)
+endif()
 if(CMAKE_C_COMPILER_ID STREQUAL "Clang" AND
    "x${CMAKE_C_SIMULATE_ID}" STREQUAL "xMSVC")
    set(CLANG_MSVC_WINDOWS 1)
@@ -107,9 +110,11 @@ if(NOT PP_BORLAND AND NOT PP_MINGW AND NOT PP_NMAKE)
 endif()
 
 set(EXPR_OP1 "/")
-if((NOT MSVC OR PP_NMAKE) AND
+if(NOT PP_FASTBUILD AND (NOT MSVC OR PP_NMAKE) AND
    NOT CMAKE_C_COMPILER_ID STREQUAL "Intel" AND
    NOT CLANG_MSVC_WINDOWS)
+  # FASTBuild does not support escaping of '%' character in the command line.
+  # See https://github.com/fastbuild/fastbuild/issues/390 for more details.
   # MSVC cl, Intel icl: %
   # When the cl compiler is invoked from the command line then % must
   # be written %% (to distinguish from %ENV% syntax).  However cl does

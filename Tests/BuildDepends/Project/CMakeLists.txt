@@ -4,7 +4,7 @@ project(testRebuild)
 if(APPLE AND CMake_TEST_XCODE_VERSION)
   # only use multi-arch if the sysroot exists on this machine
   # Ninja needs -M which could not be used with multiple -arch flags
-  if(EXISTS "${CMAKE_OSX_SYSROOT}" AND NOT "${CMAKE_GENERATOR}" MATCHES "Ninja")
+  if(EXISTS "${CMAKE_OSX_SYSROOT}" AND NOT "${CMAKE_GENERATOR}" MATCHES "Ninja|FASTBuild")
     if(CMake_TEST_XCODE_VERSION VERSION_GREATER_EQUAL 12)
       set(CMAKE_OSX_ARCHITECTURES arm64 x86_64)
     elseif(CMake_TEST_XCODE_VERSION VERSION_GREATER_EQUAL 10)

@@ -140,6 +140,7 @@ cmGlobalGenerator::cmGlobalGenerator(cmake* cm)
   cm->GetState()->SetWindowsShell(false);
   cm->GetState()->SetWindowsVSIDE(false);
 
+  cm->GetState()->SetFastbuildMake(false);
 #if !defined(CMAKE_BOOTSTRAP)
   Json::StreamWriterBuilder wbuilder;
   wbuilder["indentation"] = "\t";
