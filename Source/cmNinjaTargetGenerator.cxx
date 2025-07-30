@@ -666,6 +666,7 @@ void cmNinjaTargetGenerator::WriteCompileRule(std::string const& lang,
   vars.TargetPDB = "$TARGET_PDB";
   vars.TargetCompilePDB = "$TARGET_COMPILE_PDB";
   vars.ObjectDir = "$OBJECT_DIR";
+  vars.TargetSupportDir = "$TARGET_SUPPORT_DIR";
   vars.ObjectFileDir = "$OBJECT_FILE_DIR";
   vars.CudaCompileMode = "$CUDA_COMPILE_MODE";
   vars.ISPCHeader = "$ISPC_HEADER_FILE";
@@ -1377,6 +1378,8 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
 {
   std::string const language = source->GetLanguage();
   std::string const sourceFilePath = this->GetCompiledSourceNinjaPath(source);
+  std::string const targetSupportDir =
+    this->ConvertToNinjaPath(this->GeneratorTarget->GetCMFSupportDirectory());
   std::string const objectDir =
     this->ConvertToNinjaPath(this->GetObjectFileDir(config));
   std::string const objectFileName =
@@ -1411,6 +1414,12 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
   vars["DEFINES"] = this->ComputeDefines(source, language, config);
   vars["INCLUDES"] = this->ComputeIncludes(source, language, config);
   vars["CONFIG"] = config;
+  if (this->GetGeneratorTarget()->GetUseShortObjectNames()) {
+    vars.emplace(
+      "description",
+      cmStrCat("Compiling object ", objectFileName, " from source ",
+               this->GetLocalGenerator()->GetRelativeSourceFileName(*source)));
+  }
 
   auto compilerLauncher = this->GetCompilerLauncher(language, config);
 
@@ -1460,8 +1469,8 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
 
   if (firstForConfig) {
     this->ExportObjectCompileCommand(
-      language, sourceFilePath, objectDir, objectFileName, objectFileDir,
-      vars["FLAGS"], vars["DEFINES"], vars["INCLUDES"],
+      language, sourceFilePath, objectDir, targetSupportDir, objectFileName,
+      objectFileDir, vars["FLAGS"], vars["DEFINES"], vars["INCLUDES"],
       vars["TARGET_COMPILE_PDB"], vars["TARGET_PDB"], config, withScanning);
   }
 
@@ -1635,6 +1644,9 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
 
   vars["OBJECT_DIR"] = this->GetLocalGenerator()->ConvertToOutputFormat(
     objectDir, cmOutputConverter::SHELL);
+  vars["TARGET_SUPPORT_DIR"] =
+    this->GetLocalGenerator()->ConvertToOutputFormat(targetSupportDir,
+                                                     cmOutputConverter::SHELL);
   vars["OBJECT_FILE_DIR"] = this->GetLocalGenerator()->ConvertToOutputFormat(
     objectFileDir, cmOutputConverter::SHELL);
 
@@ -1748,6 +1760,8 @@ void cmNinjaTargetGenerator::WriteCxxModuleBmiBuildStatement(
   }
 
   std::string const sourceFilePath = this->GetCompiledSourceNinjaPath(source);
+  std::string const targetSupportDir =
+    this->ConvertToNinjaPath(this->GeneratorTarget->GetCMFSupportDirectory());
   std::string const bmiDir = this->ConvertToNinjaPath(
     cmStrCat(this->GeneratorTarget->GetSupportDirectory(),
              this->GetGlobalGenerator()->ConfigDirectory(config)));
@@ -1799,9 +1813,10 @@ void cmNinjaTargetGenerator::WriteCxxModuleBmiBuildStatement(
 
   if (firstForConfig) {
     this->ExportObjectCompileCommand(
-      language, sourceFilePath, bmiDir, bmiFileName, bmiFileDir, vars["FLAGS"],
-      vars["DEFINES"], vars["INCLUDES"], vars["TARGET_COMPILE_PDB"],
-      vars["TARGET_PDB"], config, WithScanning::Yes);
+      language, sourceFilePath, bmiDir, targetSupportDir, bmiFileName,
+      bmiFileDir, vars["FLAGS"], vars["DEFINES"], vars["INCLUDES"],
+      vars["TARGET_COMPILE_PDB"], vars["TARGET_PDB"], config,
+      WithScanning::Yes);
   }
 
   bmiBuild.Outputs.push_back(bmiFileName);
@@ -1860,6 +1875,9 @@ void cmNinjaTargetGenerator::WriteCxxModuleBmiBuildStatement(
 
   vars["OBJECT_DIR"] = this->GetLocalGenerator()->ConvertToOutputFormat(
     bmiDir, cmOutputConverter::SHELL);
+  vars["TARGET_SUPPORT_DIR"] =
+    this->GetLocalGenerator()->ConvertToOutputFormat(targetSupportDir,
+                                                     cmOutputConverter::SHELL);
   vars["OBJECT_FILE_DIR"] = this->GetLocalGenerator()->ConvertToOutputFormat(
     bmiFileDir, cmOutputConverter::SHELL);
 
@@ -2203,11 +2221,12 @@ void cmNinjaTargetGenerator::EmitSwiftDependencyInfo(
 
 void cmNinjaTargetGenerator::ExportObjectCompileCommand(
   std::string const& language, std::string const& sourceFileName,
-  std::string const& objectDir, std::string const& objectFileName,
-  std::string const& objectFileDir, std::string const& flags,
-  std::string const& defines, std::string const& includes,
-  std::string const& targetCompilePdb, std::string const& targetPdb,
-  std::string const& outputConfig, WithScanning withScanning)
+  std::string const& objectDir, std::string const& targetSupportDir,
+  std::string const& objectFileName, std::string const& objectFileDir,
+  std::string const& flags, std::string const& defines,
+  std::string const& includes, std::string const& targetCompilePdb,
+  std::string const& targetPdb, std::string const& outputConfig,
+  WithScanning withScanning)
 {
   if (!this->GeneratorTarget->GetPropertyAsBool("EXPORT_COMPILE_COMMANDS")) {
     return;
@@ -2254,6 +2273,7 @@ void cmNinjaTargetGenerator::ExportObjectCompileCommand(
                                                 cmOutputConverter::SHELL);
   compileObjectVars.Object = escapedObjectFileName.c_str();
   compileObjectVars.ObjectDir = objectDir.c_str();
+  compileObjectVars.TargetSupportDir = targetSupportDir.c_str();
   compileObjectVars.ObjectFileDir = objectFileDir.c_str();
   compileObjectVars.Flags = fullFlags.c_str();
   compileObjectVars.Defines = defines.c_str();

@@ -1,3 +1,5 @@
+set(CMAKE_INTERMEDIATE_DIR_STRATEGY FULL CACHE STRING "" FORCE)
+
 enable_language(CXX)
 
 foreach(i 1 2 3)

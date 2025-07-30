@@ -163,6 +163,16 @@ void cmLocalNinjaGenerator::Generate()
   }
 }
 
+std::string cmLocalNinjaGenerator::GetObjectOutputRoot(
+  cmStateEnums::IntermediateDirKind kind) const
+{
+  if (this->UseShortObjectNames(kind)) {
+    return cmStrCat(this->GetBinaryDirectory(), '/',
+                    this->GetGlobalGenerator()->GetShortBinaryOutputDir());
+  }
+  return cmStrCat(this->GetCurrentBinaryDirectory(), "/CMakeFiles");
+}
+
 // Non-virtual public methods.
 
 cmGlobalNinjaGenerator const* cmLocalNinjaGenerator::GetGlobalNinjaGenerator()

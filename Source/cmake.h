@@ -768,6 +768,8 @@ protected:
   std::string GeneratorInstance;
   std::string GeneratorPlatform;
   std::string GeneratorToolset;
+  cm::optional<std::string> IntermediateDirStrategy;
+  cm::optional<std::string> AutogenIntermediateDirStrategy;
   bool GeneratorInstanceSet = false;
   bool GeneratorPlatformSet = false;
   bool GeneratorToolsetSet = false;

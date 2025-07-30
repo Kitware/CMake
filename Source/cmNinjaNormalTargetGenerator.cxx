@@ -332,6 +332,7 @@ void cmNinjaNormalTargetGenerator::WriteNvidiaDeviceLinkRule(
     }
 
     vars.ObjectDir = "$OBJECT_DIR";
+    vars.TargetSupportDir = "$TARGET_SUPPORT_DIR";
 
     vars.Target = "$TARGET_FILE";
 
@@ -532,6 +533,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkRule(
     }
 
     vars.ObjectDir = "$OBJECT_DIR";
+    vars.TargetSupportDir = "$TARGET_SUPPORT_DIR";
 
     vars.Target = "$TARGET_FILE";
 
@@ -1075,6 +1077,14 @@ void cmNinjaNormalTargetGenerator::WriteNvidiaDeviceLinkStatement(
     this->ConvertToNinjaPath(objPath), cmOutputConverter::SHELL);
   this->EnsureDirectoryExists(objPath);
 
+  std::string const targetSupportPath =
+    this->GetGeneratorTarget()->GetCMFSupportDirectory();
+
+  vars["TARGET_SUPPORT_DIR"] =
+    this->GetLocalGenerator()->ConvertToOutputFormat(
+      this->ConvertToNinjaPath(targetSupportPath), cmOutputConverter::SHELL);
+  this->EnsureDirectoryExists(targetSupportPath);
+
   this->SetMsvcTargetPdbVariable(vars, config);
 
   std::string& linkLibraries = vars["LINK_LIBRARIES"];
@@ -1396,6 +1406,12 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement(
   vars["OBJECT_DIR"] = this->GetLocalGenerator()->ConvertToOutputFormat(
     this->ConvertToNinjaPath(objPath), cmOutputConverter::SHELL);
   this->EnsureDirectoryExists(objPath);
+
+  std::string const targetSupportPath = gt->GetCMFSupportDirectory();
+  vars["TARGET_SUPPORT_DIR"] =
+    this->GetLocalGenerator()->ConvertToOutputFormat(
+      this->ConvertToNinjaPath(targetSupportPath), cmOutputConverter::SHELL);
+  this->EnsureDirectoryExists(targetSupportPath);
 
   std::string& linkLibraries = vars["LINK_LIBRARIES"];
   std::string& link_path = vars["LINK_PATH"];

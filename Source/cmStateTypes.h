@@ -89,6 +89,12 @@ enum ArtifactType
   RuntimeBinaryArtifact,
   ImportLibraryArtifact
 };
+
+enum class IntermediateDirKind
+{
+  ObjectFiles,
+  QtAutogenMetadata,
+};
 }
 
 namespace cmTraceEnums {

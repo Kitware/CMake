@@ -201,6 +201,16 @@ void cmLocalUnixMakefileGenerator3::Generate()
   this->WriteDirectoryInformationFile();
 }
 
+std::string cmLocalUnixMakefileGenerator3::GetObjectOutputRoot(
+  cmStateEnums::IntermediateDirKind kind) const
+{
+  if (this->UseShortObjectNames(kind)) {
+    return cmStrCat(this->GetCurrentBinaryDirectory(), '/',
+                    this->GetGlobalGenerator()->GetShortBinaryOutputDir());
+  }
+  return cmStrCat(this->GetCurrentBinaryDirectory(), "/CMakeFiles");
+}
+
 void cmLocalUnixMakefileGenerator3::ComputeHomeRelativeOutputPath()
 {
   // Compute the path to use when referencing the current output
@@ -1036,6 +1046,14 @@ void cmLocalUnixMakefileGenerator3::AppendCustomCommand(
       if (cmNonempty(val)) {
         // Expand rule variables referenced in the given launcher command.
         cmRulePlaceholderExpander::RuleVariables vars;
+        std::string targetSupportDir =
+          target->GetGlobalGenerator()->ConvertToOutputPath(
+            target->GetCMFSupportDirectory());
+        targetSupportDir = target->GetLocalGenerator()->ConvertToOutputFormat(
+          target->GetLocalGenerator()->MaybeRelativeToTopBinDir(
+            targetSupportDir),
+          cmOutputConverter::SHELL);
+        vars.TargetSupportDir = targetSupportDir.c_str();
         vars.CMTargetName = target->GetName().c_str();
         vars.CMTargetType =
           cmState::GetTargetTypeName(target->GetType()).c_str();
@@ -1368,7 +1386,8 @@ std::string cmLocalUnixMakefileGenerator3::CreateMakeVariable(
 }
 
 bool cmLocalUnixMakefileGenerator3::UpdateDependencies(
-  std::string const& tgtInfo, bool verbose, bool color)
+  std::string const& tgtInfo, std::string const& targetName, bool verbose,
+  bool color)
 {
   // read in the target info file
   if (!this->Makefile->ReadListFile(tgtInfo) ||
@@ -1465,8 +1484,6 @@ bool cmLocalUnixMakefileGenerator3::UpdateDependencies(
     if (needRescanDependInfo || needRescanDirInfo || needRescanDependencies) {
       // The dependencies must be regenerated.
       if (verbose) {
-        std::string targetName = cmSystemTools::GetFilenameName(targetDir);
-        targetName = targetName.substr(0, targetName.length() - 4);
         std::string message =
           cmStrCat("Scanning dependencies of target ", targetName);
         echoColor(message);
@@ -1500,10 +1517,6 @@ bool cmLocalUnixMakefileGenerator3::UpdateDependencies(
                       : std::function<bool(std::string const&)>())) {
       // regenerate dependencies files
       if (verbose) {
-        std::string targetName = cmCMakePath(targetDir)
-                                   .GetFileName()
-                                   .RemoveExtension()
-                                   .GenericString();
         auto message =
           cmStrCat("Consolidate compiler generated dependencies of target ",
                    targetName);

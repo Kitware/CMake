@@ -34,6 +34,7 @@ public:
   std::string GetTargetFortranFlags(cmGeneratorTarget const* target,
                                     std::string const& config) override;
 
+  std::string ComputeLongTargetDirectory(cmGeneratorTarget const* gt) const;
   std::string GetTargetDirectory(
     cmGeneratorTarget const* target) const override;
 

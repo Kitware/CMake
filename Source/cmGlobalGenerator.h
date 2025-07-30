@@ -629,6 +629,14 @@ public:
     std::string const& filename) const;
   void AddCMP0068WarnTarget(std::string const& target);
 
+  virtual bool SupportsShortObjectNames() const;
+  bool UseShortObjectNames(
+    cmStateEnums::IntermediateDirKind kind =
+      cmStateEnums::IntermediateDirKind::ObjectFiles) const;
+  virtual std::string GetShortBinaryOutputDir() const;
+  std::string ComputeTargetShortName(std::string const& bindir,
+                                     std::string const& targetName) const;
+
   virtual void ComputeTargetObjectDirectory(cmGeneratorTarget* gt) const;
 
   bool GenerateCPackPropertiesFile();
@@ -940,6 +948,15 @@ private:
     std::map<std::string, PerLanguageModuleDatabases>;
   PerConfigModuleDatabases PerConfigModuleDbs;
   PerLanguageModuleDatabases PerLanguageModuleDbs;
+
+  enum class IntermediateDirStrategy
+  {
+    Full,
+    Short,
+  };
+  IntermediateDirStrategy IntDirStrategy = IntermediateDirStrategy::Full;
+  IntermediateDirStrategy QtAutogenIntDirStrategy =
+    IntermediateDirStrategy::Full;
 
 protected:
   float FirstTimeProgress;

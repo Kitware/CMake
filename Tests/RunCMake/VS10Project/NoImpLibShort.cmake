@@ -1,0 +1,5 @@
+set(CMAKE_INTERMEDIATE_DIR_STRATEGY SHORT CACHE STRING "" FORCE)
+
+enable_language(C)
+set(CMAKE_IMPORT_LIBRARY_SUFFIX  "")
+add_library(foo SHARED empty.c)

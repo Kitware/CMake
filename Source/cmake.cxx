@@ -933,6 +933,10 @@ void cmake::LoadEnvironmentPresets()
   readGeneratorVar("CMAKE_GENERATOR_INSTANCE", this->GeneratorInstance);
   readGeneratorVar("CMAKE_GENERATOR_PLATFORM", this->GeneratorPlatform);
   readGeneratorVar("CMAKE_GENERATOR_TOOLSET", this->GeneratorToolset);
+  this->IntermediateDirStrategy =
+    cmSystemTools::GetEnvVar("CMAKE_INTERMEDIATE_DIR_STRATEGY");
+  this->AutogenIntermediateDirStrategy =
+    cmSystemTools::GetEnvVar("CMAKE_AUTOGEN_INTERMEDIATE_DIR_STRATEGY");
 }
 
 namespace {
@@ -2600,6 +2604,23 @@ int cmake::ActualConfigure()
                         "Name of generator toolset.", cmStateEnums::INTERNAL);
   }
 
+  if (!this->State->GetInitializedCacheValue(
+        "CMAKE_INTERMEDIATE_DIR_STRATEGY") &&
+      this->IntermediateDirStrategy) {
+    this->AddCacheEntry(
+      "CMAKE_INTERMEDIATE_DIR_STRATEGY", *this->IntermediateDirStrategy,
+      "Select the intermediate directory strategy", cmStateEnums::INTERNAL);
+  }
+  if (!this->State->GetInitializedCacheValue(
+        "CMAKE_AUTOGEN_INTERMEDIATE_DIR_STRATEGY") &&
+      this->AutogenIntermediateDirStrategy) {
+    this->AddCacheEntry(
+      "CMAKE_AUTOGEN_INTERMEDIATE_DIR_STRATEGY",
+      *this->AutogenIntermediateDirStrategy,
+      "Select the intermediate directory strategy for Autogen",
+      cmStateEnums::INTERNAL);
+  }
+
   if (!this->State->GetInitializedCacheValue("CMAKE_TEST_LAUNCHER")) {
     cm::optional<std::string> testLauncher =
       cmSystemTools::GetEnvVar("CMAKE_TEST_LAUNCHER");
@@ -2710,7 +2731,8 @@ int cmake::ActualConfigure()
     if (mf->IsOn("CTEST_USE_LAUNCHERS")) {
       launcher = cmStrCat('"', cmSystemTools::GetCTestCommand(),
                           "\" --launch "
-                          "--current-build-dir <CMAKE_CURRENT_BINARY_DIR> ");
+                          "--current-build-dir <CMAKE_CURRENT_BINARY_DIR> "
+                          "--object-dir <TARGET_SUPPORT_DIR> ");
     } else {
       launcher =
         cmStrCat('"', cmSystemTools::GetCTestCommand(), "\" --instrument ");

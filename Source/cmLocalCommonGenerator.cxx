@@ -89,7 +89,7 @@ std::string cmLocalCommonGenerator::GetTargetFortranFlags(
   return flags;
 }
 
-std::string cmLocalCommonGenerator::GetTargetDirectory(
+std::string cmLocalCommonGenerator::ComputeLongTargetDirectory(
   cmGeneratorTarget const* target) const
 {
   std::string dir = target->GetName();
@@ -99,6 +99,15 @@ std::string cmLocalCommonGenerator::GetTargetDirectory(
   dir += ".dir";
 #endif
   return dir;
+}
+
+std::string cmLocalCommonGenerator::GetTargetDirectory(
+  cmGeneratorTarget const* target) const
+{
+  if (target->GetUseShortObjectNames()) {
+    return this->ComputeShortTargetDirectory(target);
+  }
+  return this->ComputeLongTargetDirectory(target);
 }
 
 void cmLocalCommonGenerator::ComputeObjectFilenames(

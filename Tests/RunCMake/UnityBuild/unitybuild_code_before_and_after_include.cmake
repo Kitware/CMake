@@ -1,3 +1,5 @@
+set(CMAKE_INTERMEDIATE_DIR_STRATEGY FULL CACHE STRING "" FORCE)
+
 project(unitybuild_code_before_and_after_include C)
 
 set(src "${CMAKE_CURRENT_BINARY_DIR}/s1.c")

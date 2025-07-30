@@ -184,6 +184,8 @@ public:
   bool IsMsBuildRestoreSupported() const;
   bool IsBuildInParallelSupported() const;
 
+  bool SupportsShortObjectNames() const override;
+
 protected:
   cmGlobalVisualStudio10Generator(cmake* cm, std::string const& name);
 

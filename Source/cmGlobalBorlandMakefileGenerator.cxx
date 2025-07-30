@@ -80,6 +80,11 @@ cmGlobalBorlandMakefileGenerator::GenerateBuildCommand(
     cmake::NO_BUILD_PARALLEL_LEVEL, verbose, buildOptions, makeOptions);
 }
 
+std::string cmGlobalBorlandMakefileGenerator::GetShortBinaryOutputDir() const
+{
+  return "_o";
+}
+
 void cmGlobalBorlandMakefileGenerator::PrintBuildCommandAdvice(
   std::ostream& os, int jobs) const
 {

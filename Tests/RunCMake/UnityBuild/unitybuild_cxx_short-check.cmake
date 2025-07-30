@@ -1,0 +1,5 @@
+set(unitybuild_cxx "${RunCMake_TEST_BINARY_DIR}/.o/9bc0d702/Unity/unity_0_cxx.cxx")
+if(NOT EXISTS "${unitybuild_cxx}")
+  set(RunCMake_TEST_FAILED "Generated unity source files ${unitybuild_cxx} does not exist.")
+  return()
+endif()

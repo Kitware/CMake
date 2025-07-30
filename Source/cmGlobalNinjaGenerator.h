@@ -391,6 +391,7 @@ public:
   void AddTargetAlias(std::string const& alias, cmGeneratorTarget* target,
                       std::string const& config);
 
+  bool SupportsShortObjectNames() const override;
   void ComputeTargetObjectDirectory(cmGeneratorTarget* gt) const override;
 
   // Ninja generator uses 'deps' and 'msvc_deps_prefix' introduced in 1.3

@@ -28,7 +28,7 @@
                 },
                 {
                     "file": "^codemodel-v2\\.cmake$",
-                    "line": 5,
+                    "line": 7,
                     "command": "include",
                     "hasParent": true
                 },
@@ -91,7 +91,7 @@
                         },
                         {
                             "file": "^codemodel-v2\\.cmake$",
-                            "line": 5,
+                            "line": 7,
                             "command": "include",
                             "hasParent": true
                         },
@@ -134,7 +134,7 @@
         },
         {
             "file": "^codemodel-v2\\.cmake$",
-            "line": 5,
+            "line": 7,
             "command": "include",
             "hasParent": true
         },

@@ -1361,6 +1361,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
       std::string homeOutDir;
       std::string startOutDir;
       std::string depInfo;
+      std::string targetName;
       bool color = false;
       if (args.size() >= 8) {
         // Full signature:
@@ -1369,6 +1370,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
         //                    <home-src-dir> <start-src-dir>
         //                    <home-out-dir> <start-out-dir>
         //                    <dep-info> [--color=$(COLOR)]
+        //                    <target-name>
         //
         // All paths are provided.
         gen = args[2];
@@ -1377,9 +1379,18 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
         homeOutDir = args[5];
         startOutDir = args[6];
         depInfo = args[7];
+        size_t targetNameIdx = 8;
         if (args.size() >= 9 && cmHasLiteralPrefix(args[8], "--color=")) {
           // Enable or disable color based on the switch value.
+          targetNameIdx = 9;
           color = (args[8].size() == 8 || cmIsOn(args[8].substr(8)));
+        }
+        if (args.size() > targetNameIdx) {
+          targetName = args[targetNameIdx];
+        } else {
+          std::string targetDir = cmSystemTools::GetFilenamePath(depInfo);
+          targetDir = cmSystemTools::GetFilenameName(targetDir);
+          targetName = targetDir.substr(0, targetDir.size() - 4);
         }
       } else {
         // Support older signature for existing makefiles:
@@ -1396,6 +1407,10 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
         homeOutDir = args[3];
         startOutDir = args[3];
         depInfo = args[5];
+        // Strip the `.dir` suffix. Old CMake always uses this pattern.
+        std::string targetDir = cmSystemTools::GetFilenamePath(depInfo);
+        targetDir = cmSystemTools::GetFilenameName(targetDir);
+        targetName = targetDir.substr(0, targetDir.size() - 4);
       }
 
       // Create a local generator configured for the directory in
@@ -1421,7 +1436,9 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
         lgd->SetRelativePathTop(homeDir, homeOutDir);
 
         // Actually scan dependencies.
-        return lgd->UpdateDependencies(depInfo, verbose, color) ? 0 : 2;
+        return lgd->UpdateDependencies(depInfo, targetName, verbose, color)
+          ? 0
+          : 2;
       }
       return 1;
     }
@@ -2243,7 +2260,9 @@ int cmcmd::VisualStudioLink(std::vector<std::string> const& args, int type,
   std::vector<std::string> expandedArgs;
   for (std::string const& i : args) {
     // check for nmake temporary files
-    if (i[0] == '@' && !cmHasLiteralPrefix(i, "@CMakeFiles")) {
+    if (i[0] == '@' &&
+        !(cmHasLiteralPrefix(i, "@CMakeFiles") ||
+          cmHasLiteralPrefix(i, "@.o/") || cmHasLiteralPrefix(i, "@.o\\"))) {
       cmsys::ifstream fin(i.substr(1).c_str());
       std::string line;
       while (cmSystemTools::GetLineFromStream(fin, line)) {

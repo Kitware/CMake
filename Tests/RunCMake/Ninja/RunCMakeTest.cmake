@@ -83,6 +83,16 @@ function(run_VerboseBuild)
 endfunction()
 run_VerboseBuild()
 
+function(run_VerboseBuildShort)
+  run_cmake(VerboseBuildShort)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/VerboseBuildShort-build)
+  set(RunCMake_TEST_OUTPUT_MERGE 1)
+  run_cmake_command(VerboseBuildShort-build ${CMAKE_COMMAND} --build . -v --clean-first)
+  run_cmake_command(VerboseBuildShort-nowork ${CMAKE_COMMAND} --build . --verbose)
+endfunction()
+run_VerboseBuildShort()
+
 function(run_CMP0058 case)
   # Use a single build tree for a few tests without cleaning.
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/CMP0058-${case}-build)
@@ -194,6 +204,23 @@ function (run_LooseObjectDepends)
   endif ()
 endfunction ()
 run_LooseObjectDepends()
+
+function (run_LooseObjectDependsShort)
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/LooseObjectDependsShort-build)
+  run_cmake(LooseObjectDependsShort)
+  run_ninja("${RunCMake_TEST_BINARY_DIR}" ".o/e86fd702/b1363cd8${CMAKE_C_OUTPUT_EXTENSION}")
+  if (EXISTS "${RunCMake_TEST_BINARY_DIR}/${CMAKE_SHARED_LIBRARY_PREFIX}dep${CMAKE_SHARED_LIBRARY_SUFFIX}")
+    message(FATAL_ERROR
+      "The `dep` library was created when requesting an object file to be "
+      "built; this should no longer be necessary.")
+  endif ()
+  if (EXISTS "${RunCMake_TEST_BINARY_DIR}/.o/600bd702/d56215${CMAKE_C_OUTPUT_EXTENSION}")
+    message(FATAL_ERROR
+      "The `dep.c` object file was created when requesting an object file to "
+      "be built; this should no longer be necessary.")
+  endif ()
+endfunction ()
+run_LooseObjectDependsShort()
 
 function (run_CustomCommandExplictDepends)
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/CustomCommandExplicitDepends-build)
@@ -425,3 +452,5 @@ if(CMake_TEST_Qt_version)
 endif()
 
 run_cmake(LINK_OPTIONSWithNewlines)
+
+run_cmake(StaticLibShort)

@@ -45,6 +45,7 @@
 #include "cmStandardLevel.h"
 #include "cmStandardLevelResolver.h"
 #include "cmState.h"
+#include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSyntheticTargetCache.h"
 #include "cmSystemTools.h"
@@ -2358,6 +2359,7 @@ cmGeneratorTarget::GetClassifiedFlagsForSource(cmSourceFile const* sf,
     vars.Object = sfVars.ObjectFileDir.c_str();
     vars.ObjectDir = sfVars.ObjectDir.c_str();
     vars.ObjectFileDir = sfVars.ObjectFileDir.c_str();
+    vars.TargetSupportDir = sfVars.TargetSupportDir.c_str();
     vars.Flags = PlaceholderFlags.c_str();
     vars.DependencyFile = sfVars.DependencyFile.c_str();
     vars.DependencyTarget = sfVars.DependencyTarget.c_str();
@@ -2438,12 +2440,16 @@ cmGeneratorTarget::SourceVariables cmGeneratorTarget::GetSourceVariables(
 
   // Object settings.
   {
+    std::string const targetSupportDir = lg->MaybeRelativeToTopBinDir(
+      gg->ConvertToOutputPath(this->GetCMFSupportDirectory()));
     std::string const objectDir = gg->ConvertToOutputPath(
       cmStrCat(this->GetSupportDirectory(), gg->GetConfigDirectory(config)));
     std::string const objectFileName = this->GetObjectName(sf);
     std::string const objectFilePath =
       cmStrCat(objectDir, '/', objectFileName);
 
+    vars.TargetSupportDir =
+      lg->ConvertToOutputFormat(targetSupportDir, cmOutputConverter::SHELL);
     vars.ObjectDir =
       lg->ConvertToOutputFormat(objectDir, cmOutputConverter::SHELL);
     vars.ObjectFileDir =
@@ -2989,6 +2995,7 @@ std::string cmGeneratorTarget::GetPchHeader(std::string const& config,
       filename = cmStrCat(filename, '/', config);
     }
 
+    // This is acceptable as its the source file, won't have a rename/hash
     filename =
       cmStrCat(filename, "/cmake_pch", arch.empty() ? "" : cmStrCat('_', arch),
                languageToExtension.at(language));
@@ -3130,12 +3137,9 @@ std::string cmGeneratorTarget::GetPchFileObject(std::string const& config,
 
     auto* pchSf = this->Makefile->GetOrCreateSource(
       pchSource, false, cmSourceFileLocationKind::Known);
-
-    filename = cmStrCat(this->ObjectDirectory, this->GetObjectName(pchSf));
-    if (this->GetGlobalGenerator()->IsMultiConfig()) {
-      cmSystemTools::ReplaceString(
-        filename, this->GetGlobalGenerator()->GetCMakeCFGIntDir(), config);
-    }
+    pchSf->ResolveFullPath();
+    filename = cmStrCat(this->GetObjectDirectory(config), '/',
+                        this->GetObjectName(pchSf));
   }
   return inserted.first->second;
 }
@@ -3176,8 +3180,18 @@ std::string cmGeneratorTarget::GetPchFile(std::string const& config,
         pchFile = replaceExtension(pchFileObject, pchExtension);
       }
     } else {
-      pchFile = this->GetPchHeader(config, language, arch);
-      pchFile += pchExtension;
+      if (this->GetUseShortObjectNames()) {
+        auto pchSource = this->GetPchSource(config, language, arch);
+        auto* pchSf = this->Makefile->GetOrCreateSource(
+          pchSource, false, cmSourceFileLocationKind::Known);
+        pchSf->ResolveFullPath();
+        pchFile = cmStrCat(
+          this->GetSupportDirectory(), '/',
+          this->LocalGenerator->GetShortObjectFileName(*pchSf), pchExtension);
+      } else {
+        pchFile =
+          cmStrCat(this->GetPchHeader(config, language, arch), pchExtension);
+      }
     }
   }
   return inserted.first->second;
@@ -5350,21 +5364,29 @@ bool cmGeneratorTarget::NeedImportLibraryName(std::string const& config) const
       this->GetType() == cmStateEnums::MODULE_LIBRARY));
 }
 
-std::string cmGeneratorTarget::GetSupportDirectory() const
+bool cmGeneratorTarget::GetUseShortObjectNames(
+  cmStateEnums::IntermediateDirKind kind) const
+{
+  return this->LocalGenerator->UseShortObjectNames(kind);
+}
+
+std::string cmGeneratorTarget::GetSupportDirectory(
+  cmStateEnums::IntermediateDirKind kind) const
 {
   cmLocalGenerator* lg = this->GetLocalGenerator();
-  return cmStrCat(lg->GetObjectOutputRoot(), '/',
+  return cmStrCat(lg->GetObjectOutputRoot(kind), '/',
                   lg->GetTargetDirectory(this));
 }
 
-std::string cmGeneratorTarget::GetCMFSupportDirectory() const
+std::string cmGeneratorTarget::GetCMFSupportDirectory(
+  cmStateEnums::IntermediateDirKind kind) const
 {
   cmLocalGenerator* lg = this->GetLocalGenerator();
   if (!lg->AlwaysUsesCMFPaths()) {
     return cmStrCat(lg->GetCurrentBinaryDirectory(), "/CMakeFiles/",
                     lg->GetTargetDirectory(this));
   }
-  return cmStrCat(lg->GetObjectOutputRoot(), '/',
+  return cmStrCat(lg->GetObjectOutputRoot(kind), '/',
                   lg->GetTargetDirectory(this));
 }
 

@@ -78,6 +78,8 @@ auto ruleReplaceVars = {
   "CMAKE_SHARED_LIBRARY_SONAME_${LANG}_FLAG",
   "CMAKE_${LANG}_ARCHIVE",
   "CMAKE_AR",
+  "CMAKE_SOURCE_DIR",
+  "CMAKE_BINARY_DIR",
   "CMAKE_CURRENT_SOURCE_DIR",
   "CMAKE_CURRENT_BINARY_DIR",
   "CMAKE_RANLIB",
@@ -4186,9 +4188,8 @@ std::string relativeIfUnder(std::string const& top, std::string const& cur,
 }
 }
 
-std::string cmLocalGenerator::GetObjectFileNameWithoutTarget(
-  cmSourceFile const& source, std::string const& dir_max,
-  bool* hasSourceExtension, char const* customOutputExtension)
+std::string cmLocalGenerator::GetRelativeSourceFileName(
+  cmSourceFile const& source) const
 {
   // Construct the object file name using the full path to the source
   // file which is its only unique identification.
@@ -4221,7 +4222,17 @@ std::string cmLocalGenerator::GetObjectFileNameWithoutTarget(
   } else {
     objectName = relFromSource;
   }
+  return objectName;
+}
 
+std::string cmLocalGenerator::GetObjectFileNameWithoutTarget(
+  cmSourceFile const& source, std::string const& dir_max,
+  bool* hasSourceExtension, char const* customOutputExtension)
+{
+
+  // This can return an absolute path in the case where source is
+  // not relative to the current source or binary directoreis
+  std::string objectName = this->GetRelativeSourceFileName(source);
   // if it is still a full path check for the try compile case
   // try compile never have in source sources, and should not
   // have conflicting source file names in the same target
@@ -4230,13 +4241,21 @@ std::string cmLocalGenerator::GetObjectFileNameWithoutTarget(
       objectName = cmSystemTools::GetFilenameName(source.GetFullPath());
     }
   }
+  bool const isPchObject = objectName.find("cmake_pch") != std::string::npos;
+
+  // Short object path policy selected, use as little info as necessary to
+  // select an object name
+  bool keptSourceExtension = true;
+  if (this->UseShortObjectNames()) {
+    objectName = this->GetShortObjectFileName(source);
+    keptSourceExtension = false;
+  }
 
   // Ensure that for the CMakeFiles/<target>.dir/generated_source_file
   // we don't end up having:
   // CMakeFiles/<target>.dir/CMakeFiles/<target>.dir/generated_source_file.obj
   cmValue unitySourceFile = source.GetProperty("UNITY_SOURCE_FILE");
   cmValue pchExtension = source.GetProperty("PCH_EXTENSION");
-  bool const isPchObject = objectName.find("cmake_pch") != std::string::npos;
   if (unitySourceFile || pchExtension || isPchObject) {
     if (pchExtension) {
       customOutputExtension = pchExtension->c_str();
@@ -4250,7 +4269,6 @@ std::string cmLocalGenerator::GetObjectFileNameWithoutTarget(
 
   // Replace the original source file extension with the object file
   // extension.
-  bool keptSourceExtension = true;
   if (!source.GetPropertyAsBool("KEEP_EXTENSION")) {
     // Decide whether this language wants to replace the source
     // extension with the object extension.
@@ -4270,6 +4288,10 @@ std::string cmLocalGenerator::GetObjectFileNameWithoutTarget(
       }
     }
 
+    // Strip source file extension when shortening object file paths
+    if (this->UseShortObjectNames()) {
+      objectName = cmSystemTools::GetFilenameWithoutExtension(objectName);
+    }
     // Store the new extension.
     if (customOutputExtension) {
       objectName += customOutputExtension;
@@ -4285,14 +4307,45 @@ std::string cmLocalGenerator::GetObjectFileNameWithoutTarget(
   return this->CreateSafeUniqueObjectFileName(objectName, dir_max);
 }
 
-std::string cmLocalGenerator::GetObjectOutputRoot() const
+bool cmLocalGenerator::UseShortObjectNames(
+  cmStateEnums::IntermediateDirKind kind) const
 {
+  return this->GlobalGenerator->UseShortObjectNames(kind);
+}
+
+std::string cmLocalGenerator::GetObjectOutputRoot(
+  cmStateEnums::IntermediateDirKind kind) const
+{
+  if (this->UseShortObjectNames(kind)) {
+    return cmStrCat(this->GetCurrentBinaryDirectory(), '/',
+                    this->GlobalGenerator->GetShortBinaryOutputDir());
+  }
   return cmStrCat(this->GetCurrentBinaryDirectory(), "/CMakeFiles");
 }
 
 bool cmLocalGenerator::AlwaysUsesCMFPaths() const
 {
   return true;
+}
+
+std::string cmLocalGenerator::GetShortObjectFileName(
+  cmSourceFile const& source) const
+{
+  std::string objectName = this->GetRelativeSourceFileName(source);
+  std::string objectFileName =
+    cmSystemTools::GetFilenameName(source.GetFullPath());
+  cmCryptoHash objNameHasher(cmCryptoHash::AlgoSHA3_512);
+  std::string terseObjectName =
+    objNameHasher.HashString(objectName).substr(0, 8);
+  return terseObjectName;
+}
+
+std::string cmLocalGenerator::ComputeShortTargetDirectory(
+  cmGeneratorTarget const* target) const
+{
+  auto const& tgtName = target->GetName();
+  return this->GetGlobalGenerator()->ComputeTargetShortName(
+    this->GetCurrentBinaryDirectory(), tgtName);
 }
 
 std::string cmLocalGenerator::GetSourceFileLanguage(cmSourceFile const& source)

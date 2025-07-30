@@ -48,6 +48,7 @@ public:
     char const* DynDepFile = nullptr;
     char const* Output = nullptr;
     char const* Object = nullptr;
+    char const* TargetSupportDir = nullptr;
     char const* ObjectDir = nullptr;
     char const* ObjectFileDir = nullptr;
     char const* Flags = nullptr;

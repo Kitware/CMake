@@ -1440,6 +1440,34 @@ bool cmGlobalGenerator::Compute()
     return false;
   }
 
+  if (cmValue v = this->CMakeInstance->GetCacheDefinition(
+        "CMAKE_INTERMEDIATE_DIR_STRATEGY")) {
+    if (*v == "FULL") {
+      this->IntDirStrategy = IntermediateDirStrategy::Full;
+    } else if (*v == "SHORT") {
+      this->IntDirStrategy = IntermediateDirStrategy::Short;
+    } else {
+      this->GetCMakeInstance()->IssueMessage(
+        MessageType::FATAL_ERROR,
+        cmStrCat("Unsupported intermediate directory strategy '", *v, '\''));
+      return false;
+    }
+  }
+  if (cmValue v = this->CMakeInstance->GetCacheDefinition(
+        "CMAKE_AUTOGEN_INTERMEDIATE_DIR_STRATEGY")) {
+    if (*v == "FULL") {
+      this->QtAutogenIntDirStrategy = IntermediateDirStrategy::Full;
+    } else if (*v == "SHORT") {
+      this->QtAutogenIntDirStrategy = IntermediateDirStrategy::Short;
+    } else {
+      this->GetCMakeInstance()->IssueMessage(
+        MessageType::FATAL_ERROR,
+        cmStrCat("Unsupported autogen intermediate directory strategy '", *v,
+                 '\''));
+      return false;
+    }
+  }
+
   // Some generators track files replaced during the Generate.
   // Start with an empty vector:
   this->FilesReplacedDuringGenerate.clear();
@@ -1979,6 +2007,47 @@ void cmGlobalGenerator::ClearGeneratorMembers()
   this->RuntimeDependencySets.clear();
   this->RuntimeDependencySetsByName.clear();
   this->WarnedExperimental.clear();
+}
+
+bool cmGlobalGenerator::SupportsShortObjectNames() const
+{
+  return false;
+}
+
+bool cmGlobalGenerator::UseShortObjectNames(
+  cmStateEnums::IntermediateDirKind kind) const
+{
+  IntermediateDirStrategy strategy = IntermediateDirStrategy::Full;
+  switch (kind) {
+    case cmStateEnums::IntermediateDirKind::ObjectFiles:
+      strategy = this->IntDirStrategy;
+      break;
+    case cmStateEnums::IntermediateDirKind::QtAutogenMetadata:
+      strategy = this->QtAutogenIntDirStrategy;
+      break;
+    default:
+      assert(false);
+      break;
+  }
+  return this->SupportsShortObjectNames() &&
+    strategy == IntermediateDirStrategy::Short;
+}
+
+std::string cmGlobalGenerator::GetShortBinaryOutputDir() const
+{
+  return ".o";
+}
+
+std::string cmGlobalGenerator::ComputeTargetShortName(
+  std::string const& bindir, std::string const& targetName) const
+{
+  auto const& rcwbd =
+    this->LocalGenerators[0]->MaybeRelativeToTopBinDir(bindir);
+  cmCryptoHash hasher(cmCryptoHash::AlgoSHA3_512);
+  constexpr size_t HASH_TRUNCATION = 4;
+  auto dirHash = hasher.HashString(rcwbd).substr(0, HASH_TRUNCATION);
+  auto tgtHash = hasher.HashString(targetName).substr(0, HASH_TRUNCATION);
+  return cmStrCat(tgtHash, dirHash);
 }
 
 void cmGlobalGenerator::ComputeTargetObjectDirectory(

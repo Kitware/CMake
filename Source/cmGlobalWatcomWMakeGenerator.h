@@ -55,6 +55,8 @@ public:
 
   bool IsGNUMakeJobServerAware() const override { return false; }
 
+  std::string GetShortBinaryOutputDir() const override;
+
 protected:
   std::vector<GeneratedMakeCommand> GenerateBuildCommand(
     std::string const& makeProgram, std::string const& projectName,

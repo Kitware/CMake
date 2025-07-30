@@ -2721,6 +2721,18 @@ void cmVisualStudio10TargetGenerator::WriteAllSources(Elem& e0)
         this->WriteExcludeFromBuild(e2, exclude_configs);
       }
 
+      if (this->GlobalGenerator->UseShortObjectNames()) {
+        std::string outputName = "ObjectFileName";
+        if (si.Source->GetLanguage() == "CUDA"_s) {
+          outputName = "CompileOut";
+        }
+        e2.Element(
+          outputName,
+          cmStrCat("$(IntDir)",
+                   this->LocalGenerator->GetShortObjectFileName(*si.Source),
+                   ".obj"));
+      }
+
       this->FinishWritingSource(e2, toolSettings);
     } else if (fs && fs->GetType() == "CXX_MODULES"_s) {
       this->GeneratorTarget->Makefile->IssueMessage(
@@ -3078,9 +3090,20 @@ void cmVisualStudio10TargetGenerator::WritePathAndIncrementalLinkOptions(
   for (std::string const& config : this->Configurations) {
     std::string const cond = this->CalcCondition(config);
 
+    std::string fullIntermediateDir =
+      cmStrCat(this->GeneratorTarget->GetSupportDirectory(), '/', config, '/');
+    cmSystemTools::MakeDirectory(fullIntermediateDir);
+    std::string intermediateDir =
+      this->LocalGenerator->MaybeRelativeToCurBinDir(fullIntermediateDir);
+    ConvertToWindowsSlash(intermediateDir);
+
     if (ttype >= cmStateEnums::UTILITY) {
-      e1.WritePlatformConfigTag(
-        "IntDir", cond, R"($(Platform)\$(Configuration)\$(ProjectName)\)");
+      if (this->GlobalGenerator->UseShortObjectNames()) {
+        e1.WritePlatformConfigTag("IntDir", cond, intermediateDir);
+      } else {
+        e1.WritePlatformConfigTag(
+          "IntDir", cond, R"($(Platform)\$(Configuration)\$(ProjectName)\)");
+      }
     } else {
       if (ttype == cmStateEnums::SHARED_LIBRARY ||
           ttype == cmStateEnums::MODULE_LIBRARY ||
@@ -3092,9 +3115,6 @@ void cmVisualStudio10TargetGenerator::WritePathAndIncrementalLinkOptions(
         }
       }
 
-      std::string intermediateDir =
-        this->LocalGenerator->MaybeRelativeToCurBinDir(cmStrCat(
-          this->GeneratorTarget->GetSupportDirectory(), '/', config, '/'));
       std::string outDir;
       std::string targetNameFull;
       if (ttype == cmStateEnums::OBJECT_LIBRARY) {
@@ -3104,7 +3124,6 @@ void cmVisualStudio10TargetGenerator::WritePathAndIncrementalLinkOptions(
         outDir = cmStrCat(this->GeneratorTarget->GetDirectory(config), '/');
         targetNameFull = this->GeneratorTarget->GetFullName(config);
       }
-      ConvertToWindowsSlash(intermediateDir);
       ConvertToWindowsSlash(outDir);
 
       e1.WritePlatformConfigTag("OutDir", cond, outDir);

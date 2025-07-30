@@ -3,6 +3,8 @@ cmake_policy(SET CMP0184 NEW)
 project(FortranOnly Fortran)
 message("CTEST_FULL_OUTPUT ")
 
+set(CMAKE_INTERMEDIATE_DIR_STRATEGY FULL CACHE STRING "" FORCE)
+
 if("${CMAKE_Fortran_COMPILER_ID};${CMAKE_Fortran_SIMULATE_ID}" MATCHES "^Intel(LLVM)?;MSVC$")
   string(APPEND CMAKE_Fortran_FLAGS_DEBUG " -Z7")
   string(APPEND CMAKE_Fortran_FLAGS_RELWITHDEBINFO " -Z7")

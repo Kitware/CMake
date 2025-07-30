@@ -44,6 +44,7 @@ Environment Variables that Control the Build
 
    /envvar/ADSP_ROOT
    /envvar/CMAKE_APPLE_SILICON_PROCESSOR
+   /envvar/CMAKE_AUTOGEN_INTERMEDIATE_DIR_STRATEGY
    /envvar/CMAKE_BUILD_PARALLEL_LEVEL
    /envvar/CMAKE_BUILD_TYPE
    /envvar/CMAKE_COLOR_DIAGNOSTICS
@@ -65,6 +66,7 @@ Environment Variables that Control the Build
    /envvar/CMAKE_LANG_IMPLICIT_LINK_LIBRARIES_EXCLUDE
    /envvar/CMAKE_LANG_LINKER_LAUNCHER
    /envvar/CMAKE_MSVCIDE_RUN_PATH
+   /envvar/CMAKE_INTERMEDIATE_DIR_STRATEGY
    /envvar/CMAKE_NO_VERBOSE
    /envvar/CMAKE_OSX_ARCHITECTURES
    /envvar/CMAKE_TEST_LAUNCHER

@@ -51,8 +51,14 @@ void cmLocalVisualStudioGenerator::ComputeObjectFilenames(
 
   for (auto const& si : mapping) {
     cmSourceFile const* sf = si.first;
-    std::string objectNameLower = cmSystemTools::LowerCase(
-      cmSystemTools::GetFilenameWithoutLastExtension(sf->GetFullPath()));
+    std::string baseObjectName;
+    if (gt->GetUseShortObjectNames()) {
+      baseObjectName = this->GetShortObjectFileName(*sf);
+    } else {
+      baseObjectName =
+        cmSystemTools::GetFilenameWithoutLastExtension(sf->GetFullPath());
+    }
+    std::string objectNameLower = cmSystemTools::LowerCase(baseObjectName);
     if (custom_ext) {
       objectNameLower += custom_ext;
     } else {
@@ -67,8 +73,13 @@ void cmLocalVisualStudioGenerator::ComputeObjectFilenames(
 
   for (auto& si : mapping) {
     cmSourceFile const* sf = si.first;
-    std::string objectName =
-      cmSystemTools::GetFilenameWithoutLastExtension(sf->GetFullPath());
+    std::string objectName;
+    if (gt->GetUseShortObjectNames()) {
+      objectName = this->GetShortObjectFileName(*sf);
+    } else {
+      objectName =
+        cmSystemTools::GetFilenameWithoutLastExtension(sf->GetFullPath());
+    }
     if (custom_ext) {
       objectName += custom_ext;
     } else {
@@ -84,8 +95,13 @@ void cmLocalVisualStudioGenerator::ComputeObjectFilenames(
   }
 }
 
-std::string cmLocalVisualStudioGenerator::GetObjectOutputRoot() const
+std::string cmLocalVisualStudioGenerator::GetObjectOutputRoot(
+  cmStateEnums::IntermediateDirKind kind) const
 {
+  if (this->UseShortObjectNames(kind)) {
+    return cmStrCat(this->GetCurrentBinaryDirectory(), '/',
+                    this->GetGlobalGenerator()->GetShortBinaryOutputDir());
+  }
   return this->GetCurrentBinaryDirectory();
 }
 
