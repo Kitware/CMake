@@ -495,6 +495,7 @@ if(NOT CMake_TEST_EXTERNAL_CMAKE)
       set(C_FLAGS_LIST -Wcast-align -Werror-implicit-function-declaration -Wchar-subscripts
                        -Wall -W -Wpointer-arith -Wwrite-strings -Wformat-security
                        -Wmissing-format-attribute -fno-common -Wundef
+                       -Wstrict-prototypes
       )
       set(CXX_FLAGS_LIST -Wnon-virtual-dtor -Wcast-align -Wchar-subscripts -Wall -W
                          -Wshadow -Wpointer-arith -Wformat-security -Wundef
