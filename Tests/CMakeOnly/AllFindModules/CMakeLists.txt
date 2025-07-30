@@ -120,7 +120,7 @@ foreach(
     JPEG
     LibArchive LIBLZMA
     OPENSCENEGRAPH
-    Protobuf
+    PostgreSQL Protobuf
     Ruby RUBY
     SWIG
     ZLIB
