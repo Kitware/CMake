@@ -1,30 +1,45 @@
 include(RunCTest)
 
-function(run_InstrumentationInCTestXML CASE_NAME USE_INSTRUMENTATION USE_VERBOSE_INSTRUMENTATION)
-  if(USE_VERBOSE_INSTRUMENTATION)
+function(run_InstrumentationInCTestXML CASE_NAME)
+  cmake_parse_arguments(ARGS "USE_INSTRUMENTATION_ENV_VARS;USE_VERBOSE_INSTRUMENTATION;USE_CMAKE_INSTRUMENTATION_CMD" "" "" ${ARGN})
+  if(ARGS_USE_VERBOSE_INSTRUMENTATION)
     set(ENV{CTEST_USE_VERBOSE_INSTRUMENTATION} "1")
     set(RunCMake_USE_VERBOSE_INSTRUMENTATION TRUE)
   else()
     set(ENV{CTEST_USE_VERBOSE_INSTRUMENTATION} "0")
     set(RunCMake_USE_VERBOSE_INSTRUMENTATION FALSE)
   endif()
-  if(USE_INSTRUMENTATION)
-    set(ENV{CTEST_USE_INSTRUMENTATION} "1")
+  if(ARGS_USE_INSTRUMENTATION_ENV_VARS)
     set(ENV{CTEST_EXPERIMENTAL_INSTRUMENTATION} "d16a3082-c4e1-489b-b90c-55750a334f27")
+    set(ENV{CTEST_USE_INSTRUMENTATION} "1")
     set(RunCMake_USE_INSTRUMENTATION TRUE)
-    set(CASE_NAME InstrumentationInCTestXML)
   else()
-    set(ENV{CTEST_USE_INSTRUMENTATION} "0")
     set(ENV{CTEST_EXPERIMENTAL_INSTRUMENTATION} "0")
+    set(ENV{CTEST_USE_INSTRUMENTATION} "0")
     set(RunCMake_USE_INSTRUMENTATION FALSE)
-    set(CASE_NAME NoInstrumentationInCTestXML)
   endif()
+  if (ARGS_USE_CMAKE_INSTRUMENTATION_CMD)
+    set(RunCMake_USE_CMAKE_INSTRUMENTATION_CMD TRUE)
+    set(RunCMake_USE_INSTRUMENTATION TRUE)
+  else()
+    set(RunCMake_USE_CMAKE_INSTRUMENTATION_CMD FALSE)
+    set(RunCMake_USE_INSTRUMENTATION FALSE)
+  endif()
+
   configure_file(${RunCMake_SOURCE_DIR}/main.c
                  ${RunCMake_BINARY_DIR}/${CASE_NAME}/main.c COPYONLY)
   run_ctest("${CASE_NAME}")
   unset(RunCMake_USE_LAUNCHERS)
   unset(RunCMake_USE_INSTRUMENTATION)
 endfunction()
-run_InstrumentationInCTestXML(InstrumentationInCTestXML ON OFF)
-run_InstrumentationInCTestXML(VerboseInstrumentationInCTestXML ON ON)
-run_InstrumentationInCTestXML(NoInstrumentationInCTestXML OFF OFF)
+run_InstrumentationInCTestXML(NoInstrumentationInCTestXML)
+run_InstrumentationInCTestXML(InstrumentationInCTestXML
+  USE_INSTRUMENTATION_ENV_VARS
+)
+run_InstrumentationInCTestXML(VerboseInstrumentationInCTestXML
+  USE_INSTRUMENTATION_ENV_VARS
+  USE_VERBOSE_INSTRUMENTATION
+)
+run_InstrumentationInCTestXML(InstrumentationInCTestXMLWithCmd
+  USE_CMAKE_INSTRUMENTATION_CMD
+)
