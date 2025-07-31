@@ -48,6 +48,20 @@ run_cmake(FILTER-InvalidOperator)
 run_cmake(FILTER-Exclude)
 run_cmake(FILTER-Include)
 
+function(run_cmake_build test)
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/${test}-build)
+  if (RunCMake_GENERATOR_IS_MULTI_CONFIG)
+    list(APPEND RunCMake_TEST_OPTIONS -DCMAKE_CONFIGURATION_TYPES=Release)
+  else()
+    list(APPEND RunCMake_TEST_OPTIONS -DCMAKE_BUILD_TYPE=Release)
+  endif()
+
+  run_cmake(${test})
+
+  set(RunCMake_TEST_NO_CLEAN TRUE)
+  run_cmake_command(${test}-build ${CMAKE_COMMAND} --build . --config Release)
+endfunction()
+
 function(run_linker_genex test lang type)
   set(options_args CHECK_RESULT EXECUTE)
   cmake_parse_arguments(PARSE_ARGV 3 RLG "${options_args}" "" "")
@@ -103,6 +117,11 @@ else()
   set(RunCMake_TEST_OPTIONS [==[-DCMAKE_BUILD_TYPE=]==])
 endif()
 run_cmake(CONFIG-empty-entries)
+unset(RunCMake_TEST_OPTIONS)
+
+run_cmake(CMP0199-WARN)
+run_cmake_build(CMP0199-OLD)
+run_cmake_build(CMP0199-NEW)
 
 set(RunCMake_TEST_OPTIONS -DCMAKE_POLICY_DEFAULT_CMP0085:STRING=OLD)
 run_cmake(CMP0085-OLD)
