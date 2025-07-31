@@ -8,7 +8,11 @@ FindLTTngUST
 .. versionadded:: 3.6
 
 Finds the `LTTng <https://lttng.org/>`_ (Linux Trace Toolkit: next generation)
-user space tracing library (LTTng-UST).
+user space tracing library (LTTng-UST):
+
+.. code-block:: cmake
+
+  find_package(LTTngUST [<version>] [...])
 
 Imported Targets
 ^^^^^^^^^^^^^^^^
@@ -27,10 +31,15 @@ This module sets the following variables:
 ``LTTngUST_FOUND``
   Boolean indicating whether the LTTng-UST library is found.  For backward
   compatibility, the ``LTTNGUST_FOUND`` variable is also set to the same value.
-``LTTNGUST_VERSION_STRING``
+
+``LTTngUST_VERSION``
+  .. versionadded:: 4.2
+
   The LTTng-UST version.
+
 ``LTTNGUST_HAS_TRACEF``
   ``TRUE`` if the ``tracef()`` API is available in the system's LTTng-UST.
+
 ``LTTNGUST_HAS_TRACELOG``
   ``TRUE`` if the ``tracelog()`` API is available in the system's LTTng-UST.
 
@@ -43,6 +52,17 @@ The following cache variables may also be set:
   The LTTng-UST include directories.
 ``LTTNGUST_LIBRARIES``
   The libraries needed to use LTTng-UST.
+
+Deprecated Variables
+^^^^^^^^^^^^^^^^^^^^
+
+The following variables are provided for backward compatibility:
+
+``LTTNGUST_VERSION_STRING``
+  .. deprecated:: 4.2
+    Superseded by the ``LTTngUST_VERSION``.
+
+  The LTTng-UST version.
 
 Examples
 ^^^^^^^^
@@ -90,8 +110,9 @@ if(LTTNGUST_INCLUDE_DIRS AND LTTNGUST_LIBRARIES)
            lttngust_v_minor "${lttngust_version_minor_string}")
     string(REGEX REPLACE ".*[\t ]+([0-9]+).*" "\\1"
            lttngust_v_patch "${lttngust_version_patch_string}")
-    set(LTTNGUST_VERSION_STRING
+    set(LTTngUST_VERSION
         "${lttngust_v_major}.${lttngust_v_minor}.${lttngust_v_patch}")
+    set(LTTNGUST_VERSION_STRING "${LTTngUST_VERSION}")
     unset(lttngust_version_major_string)
     unset(lttngust_version_minor_string)
     unset(lttngust_version_patch_string)
@@ -119,7 +140,7 @@ include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(LTTngUST
                                   REQUIRED_VARS LTTNGUST_LIBRARIES
                                                 LTTNGUST_INCLUDE_DIRS
-                                  VERSION_VAR LTTNGUST_VERSION_STRING)
+                                  VERSION_VAR LTTngUST_VERSION)
 mark_as_advanced(LTTNGUST_LIBRARIES LTTNGUST_INCLUDE_DIRS)
 
 cmake_policy(POP)
