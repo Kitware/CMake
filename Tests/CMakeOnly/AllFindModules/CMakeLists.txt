@@ -119,7 +119,7 @@ foreach(
     FLEX Freetype
     GIF GTK2
     HDF5
-    JPEG
+    Jasper JPEG
     LibArchive LIBLZMA
     OPENSCENEGRAPH
     PostgreSQL Protobuf
