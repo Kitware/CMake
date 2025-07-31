@@ -22,6 +22,9 @@ Find Modules
 * The :module:`FindLibXslt` module now provides a ``LibXslt_VERSION`` result
   variable.  The ``LIBXSLT_VERSION_STRING`` result variable is deprecated.
 
+* The :module:`FindPNG` module now provides a ``PNG_VERSION`` result
+  variable.  The ``PNG_VERSION_STRING`` result variable is deprecated.
+
 * The :module:`FindPostgreSQL` module now provides a ``PostgreSQL_VERSION``
   result variable.  The ``PostgreSQL_VERSION_STRING`` result variable is
   deprecated.

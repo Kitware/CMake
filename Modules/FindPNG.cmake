@@ -5,7 +5,11 @@
 FindPNG
 -------
 
-Finds libpng, the official reference library for the PNG image format.
+Finds libpng, the official reference library for the PNG image format:
+
+.. code-block:: cmake
+
+  find_package(PNG [<version>] [...])
 
 .. note::
 
@@ -15,11 +19,11 @@ Finds libpng, the official reference library for the PNG image format.
 Imported Targets
 ^^^^^^^^^^^^^^^^
 
-.. versionadded:: 3.5
-
 This module defines the following :ref:`Imported Targets`:
 
 ``PNG::PNG``
+  .. versionadded:: 3.5
+
   The libpng library, if found.
 
 Result Variables
@@ -27,28 +31,47 @@ Result Variables
 
 This module sets the following variables:
 
+``PNG_FOUND``
+  Boolean indicating whether (the requested version of) PNG library is found.
+
+``PNG_VERSION``
+  .. versionadded:: 4.2
+
+  The version of the PNG library found.
+
 ``PNG_INCLUDE_DIRS``
   Directory containing the PNG headers (e.g., ``png.h``).
+
 ``PNG_LIBRARIES``
   PNG libraries required for linking.
+
 ``PNG_DEFINITIONS``
   Compile definitions for using PNG, if any.  They can be added with
   :command:`target_compile_definitions` command when not using the ``PNG::PNG``
   imported target.
-``PNG_FOUND``
-  True if PNG library is found.
-``PNG_VERSION_STRING``
-  The version of the PNG library found.
 
-Obsolete Variables
-^^^^^^^^^^^^^^^^^^
+Deprecated Variables
+^^^^^^^^^^^^^^^^^^^^
 
 The following variables may also be set for backward compatibility:
 
 ``PNG_LIBRARY``
+  .. deprecated:: 3.0
+    Use the ``PNG::PNG`` imported target.
+
   Path to the PNG library.
+
 ``PNG_INCLUDE_DIR``
+  .. deprecated:: 3.0
+    Use the ``PNG::PNG`` imported target.
+
   Directory containing the PNG headers (same as ``PNG_INCLUDE_DIRS``).
+
+``PNG_VERSION_STRING``
+  .. deprecated:: 4.2
+    Superseded by the ``PNG_VERSION``.
+
+  The version of the PNG library found.
 
 Examples
 ^^^^^^^^
@@ -184,7 +207,8 @@ if(ZLIB_FOUND)
   if (PNG_PNG_INCLUDE_DIR AND EXISTS "${PNG_PNG_INCLUDE_DIR}/png.h")
       file(STRINGS "${PNG_PNG_INCLUDE_DIR}/png.h" png_version_str REGEX "^#define[ \t]+PNG_LIBPNG_VER_STRING[ \t]+\".+\"")
 
-      string(REGEX REPLACE "^#define[ \t]+PNG_LIBPNG_VER_STRING[ \t]+\"([^\"]+)\".*" "\\1" PNG_VERSION_STRING "${png_version_str}")
+      string(REGEX REPLACE "^#define[ \t]+PNG_LIBPNG_VER_STRING[ \t]+\"([^\"]+)\".*" "\\1" PNG_VERSION "${png_version_str}")
+      set(PNG_VERSION_STRING "${PNG_VERSION}")
       unset(png_version_str)
   endif ()
 endif()
@@ -192,6 +216,6 @@ endif()
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(PNG
                                   REQUIRED_VARS PNG_LIBRARY PNG_PNG_INCLUDE_DIR
-                                  VERSION_VAR PNG_VERSION_STRING)
+                                  VERSION_VAR PNG_VERSION)
 
 cmake_policy(POP)
