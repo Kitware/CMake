@@ -115,6 +115,7 @@ foreach(
     BISON Boost BZip2 BZIP2
     CUDA
     DOXYGEN
+    EXPAT
     FLEX
     GIF GTK2
     HDF5
