@@ -1034,17 +1034,7 @@ public:
   // searches
   std::deque<std::vector<std::string>> FindPackageRootPathStack;
 
-  class FindPackageStackRAII
-  {
-    cmMakefile* Makefile;
-
-  public:
-    FindPackageStackRAII(cmMakefile* mf, std::string const& pkg);
-    ~FindPackageStackRAII();
-
-    FindPackageStackRAII(FindPackageStackRAII const&) = delete;
-    FindPackageStackRAII& operator=(FindPackageStackRAII const&) = delete;
-  };
+  friend class cmFindPackageStackRAII;
 
   class DebugFindPkgRAII
   {

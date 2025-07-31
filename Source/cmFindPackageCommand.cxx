@@ -28,6 +28,7 @@
 #include "cmDependencyProvider.h"
 #include "cmExecutionStatus.h"
 #include "cmExperimental.h"
+#include "cmFindPackageStack.h"
 #include "cmList.h"
 #include "cmListFileCache.h"
 #include "cmMakefile.h"
@@ -1221,8 +1222,7 @@ bool cmFindPackageCommand::FindPackage(
   FlushDebugBufferOnExit flushDebugBufferOnExit(*this);
   PushPopRootPathStack pushPopRootPathStack(*this);
   SetRestoreFindDefinitions setRestoreFindDefinitions(*this);
-  cmMakefile::FindPackageStackRAII findPackageStackRAII(this->Makefile,
-                                                        this->Name);
+  cmFindPackageStackRAII findPackageStackRAII(this->Makefile, this->Name);
 
   // See if we have been told to delegate to FetchContent or some other
   // redirected config package first. We have to check all names that
