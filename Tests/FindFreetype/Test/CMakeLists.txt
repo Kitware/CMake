@@ -4,7 +4,7 @@ include(CTest)
 
 find_package(Freetype REQUIRED)
 
-add_definitions(-DCMAKE_EXPECTED_FREETYPE_VERSION="${FREETYPE_VERSION_STRING}")
+add_definitions(-DCMAKE_EXPECTED_FREETYPE_VERSION="${Freetype_VERSION}")
 
 add_executable(testfreetype_tgt main.c)
 target_link_libraries(testfreetype_tgt Freetype::Freetype)

@@ -116,7 +116,7 @@ foreach(
     CUDA
     DOXYGEN
     EXPAT
-    FLEX
+    FLEX Freetype
     GIF GTK2
     HDF5
     JPEG
