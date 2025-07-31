@@ -120,7 +120,7 @@ foreach(
     GIF GTK2
     HDF5
     Jasper JPEG
-    LibArchive LIBLZMA
+    LibArchive LIBLZMA LibXml2
     OPENSCENEGRAPH
     PostgreSQL Protobuf
     Ruby RUBY

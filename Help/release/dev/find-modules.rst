@@ -16,6 +16,9 @@ Find Modules
 * The :module:`FindJasper` module now provides a ``Jasper_VERSION`` result
   variable.  The ``JASPER_VERSION_STRING`` result variable is deprecated.
 
+* The :module:`FindLibXml2` module now provides a ``LibXml2_VERSION`` result
+  variable.  The ``LIBXML2_VERSION_STRING`` result variable is deprecated.
+
 * The :module:`FindPostgreSQL` module now provides a ``PostgreSQL_VERSION``
   result variable.  The ``PostgreSQL_VERSION_STRING`` result variable is
   deprecated.
