@@ -5,7 +5,11 @@
 FindALSA
 --------
 
-Finds the Advanced Linux Sound Architecture (ALSA) library (``asound``).
+Finds the Advanced Linux Sound Architecture (ALSA) library (``asound``):
+
+.. code-block:: cmake
+
+  find_package(ALSA [<version>] [...])
 
 Imported Targets
 ^^^^^^^^^^^^^^^^
@@ -24,7 +28,12 @@ Result Variables
 This module defines the following variables:
 
 ``ALSA_FOUND``
-  Boolean indicating whether the ALSA library is found.
+  Boolean indicating whether (the requested version of) ALSA library is found.
+
+``ALSA_VERSION``
+  .. versionadded:: 4.2
+
+  The version of ALSA found.
 
 ``ALSA_LIBRARIES``
   List of libraries needed for linking to use ALSA library.
@@ -42,6 +51,17 @@ The following cache variables may also be set:
 
 ``ALSA_LIBRARY``
   The absolute path of the asound library.
+
+Deprecated Variables
+^^^^^^^^^^^^^^^^^^^^
+
+The following variables are provided for backward compatibility:
+
+``ALSA_VERSION_STRING``
+  .. deprecated:: 4.2
+    Superseded by the ``ALSA_VERSION``.
+
+  The version of ALSA found.
 
 Examples
 ^^^^^^^^
@@ -68,14 +88,15 @@ find_library(ALSA_LIBRARY NAMES asound
 if(ALSA_INCLUDE_DIR AND EXISTS "${ALSA_INCLUDE_DIR}/alsa/version.h")
   file(STRINGS "${ALSA_INCLUDE_DIR}/alsa/version.h" alsa_version_str REGEX "^#define[\t ]+SND_LIB_VERSION_STR[\t ]+\".*\"")
 
-  string(REGEX REPLACE "^.*SND_LIB_VERSION_STR[\t ]+\"([^\"]*)\".*$" "\\1" ALSA_VERSION_STRING "${alsa_version_str}")
+  string(REGEX REPLACE "^.*SND_LIB_VERSION_STR[\t ]+\"([^\"]*)\".*$" "\\1" ALSA_VERSION "${alsa_version_str}")
+  set(ALSA_VERSION_STRING "${ALSA_VERSION}")
   unset(alsa_version_str)
 endif()
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(ALSA
                                   REQUIRED_VARS ALSA_LIBRARY ALSA_INCLUDE_DIR
-                                  VERSION_VAR ALSA_VERSION_STRING)
+                                  VERSION_VAR ALSA_VERSION)
 
 if(ALSA_FOUND)
   set( ALSA_LIBRARIES ${ALSA_LIBRARY} )
