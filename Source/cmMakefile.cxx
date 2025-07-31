@@ -4238,18 +4238,19 @@ cmFindPackageStackRAII::cmFindPackageStackRAII(cmMakefile* mf,
   this->Makefile->FindPackageStack =
     this->Makefile->FindPackageStack.Push(cmFindPackageCall{
       name,
+      cmPackageInformation(),
       this->Makefile->FindPackageStackNextIndex,
     });
   this->Makefile->FindPackageStackNextIndex++;
 }
 
-void cmFindPackageStackRAII::BindTop(cmFindPackageCall*& value)
+void cmFindPackageStackRAII::BindTop(cmPackageInformation*& value)
 {
   if (this->Value) {
     *this->Value = nullptr;
   }
   this->Value = &value;
-  value = &this->Makefile->FindPackageStack.cmStack::Top();
+  value = &this->Makefile->FindPackageStack.cmStack::Top().PackageInfo;
 }
 
 cmFindPackageStackRAII::~cmFindPackageStackRAII()

@@ -5,11 +5,32 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <memory>
+#include <set>
 #include <string>
+
+#include <cm/optional>
 
 #include "cmStack.h"
 
 class cmMakefile;
+
+/**
+ * This data represents the actual contents of find_package
+ * <PACKAGE>-Config.cmake or <PACKAGE>.cps file, and not what is passed
+ * to the find_package command. They can be the same, but it is not guaranteed.
+ */
+
+class cmPackageInformation
+{
+public:
+  cm::optional<std::string> Directory;
+  cm::optional<std::string> Version;
+  cm::optional<std::string> Description;
+  cm::optional<std::string> License;
+  cm::optional<std::string> Website;
+  cm::optional<std::string> PackageUrl;
+  std::set<std::string> Components;
+};
 
 /**
  * Represents one call to find_package.
@@ -17,7 +38,8 @@ class cmMakefile;
 class cmFindPackageCall
 {
 public:
-  std::string Name;
+  std::string const Name;
+  cmPackageInformation PackageInfo;
   unsigned int Index;
 };
 
@@ -28,7 +50,7 @@ public:
 class cmFindPackageStackRAII
 {
   cmMakefile* Makefile;
-  cmFindPackageCall** Value = nullptr;
+  cmPackageInformation** Value = nullptr;
 
 public:
   cmFindPackageStackRAII(cmMakefile* mf, std::string const& pkg);
@@ -40,7 +62,7 @@ public:
   /** Get a mutable pointer to the top of the stack.
       The pointer is invalidated if BindTop is called again or when the
       cmFindPackageStackRAII goes out of scope.  */
-  void BindTop(cmFindPackageCall*& value);
+  void BindTop(cmPackageInformation*& value);
 };
 
 /**
