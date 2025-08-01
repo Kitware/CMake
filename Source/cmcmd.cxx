@@ -97,7 +97,9 @@ char const* const HELP_AVAILABLE_COMMANDS = R"(Available commands:
   copy <file>... destination  - copy files to destination (either file or directory)
   copy_directory <dir>... destination   - copy content of <dir>... directories to 'destination' directory
   copy_directory_if_different <dir>... destination   - copy changed content of <dir>... directories to 'destination' directory
+  copy_directory_if_newer <dir>... destination   - copy newer content of <dir>... directories to 'destination' directory
   copy_if_different <file>... destination  - copy files if it has changed
+  copy_if_newer <file>... destination  - copy files if source is newer than destination
   echo [<string>...]        - displays arguments as text
   echo_append [<string>...] - displays arguments as text but no new line
   env [--unset=NAME ...] [NAME=VALUE ...] [--] <command> [<arg>...]
@@ -778,15 +780,45 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
       return return_value;
     }
 
+    // Copy file if newer.
+    if (args[1] == "copy_if_newer" && args.size() > 3) {
+      // If multiple source files specified,
+      // then destination must be directory
+      if ((args.size() > 4) &&
+          (!cmSystemTools::FileIsDirectory(args.back()))) {
+        std::cerr << "Error: Target (for copy_if_newer command) \""
+                  << args.back() << "\" is not a directory.\n";
+        return 1;
+      }
+      // If error occurs we want to continue copying next files.
+      bool return_value = false;
+      for (auto const& arg : cmMakeRange(args).advance(2).retreat(1)) {
+        if (!cmSystemTools::CopyFileIfNewer(arg, args.back())) {
+          std::cerr << "Error copying file (if newer) from \"" << arg
+                    << "\" to \"" << args.back() << "\".\n";
+          return_value = true;
+        }
+      }
+      return return_value;
+    }
+
     // Copy directory contents
     if ((args[1] == "copy_directory" ||
-         args[1] == "copy_directory_if_different") &&
+         args[1] == "copy_directory_if_different" ||
+         args[1] == "copy_directory_if_newer") &&
         args.size() > 3) {
       // If error occurs we want to continue copying next files.
       bool return_value = false;
-      bool const copy_always = (args[1] == "copy_directory");
+
+      cmsys::SystemTools::CopyWhen when = cmsys::SystemTools::CopyWhen::Always;
+      if (args[1] == "copy_directory_if_different") {
+        when = cmsys::SystemTools::CopyWhen::OnlyIfDifferent;
+      } else if (args[1] == "copy_directory_if_newer") {
+        when = cmsys::SystemTools::CopyWhen::OnlyIfNewer;
+      }
+
       for (auto const& arg : cmMakeRange(args).advance(2).retreat(1)) {
-        if (!cmSystemTools::CopyADirectory(arg, args.back(), copy_always)) {
+        if (!cmSystemTools::CopyADirectory(arg, args.back(), when)) {
           std::cerr << "Error copying directory from \"" << arg << "\" to \""
                     << args.back() << "\".\n";
           return_value = true;

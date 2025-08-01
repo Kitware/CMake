@@ -5633,7 +5633,8 @@ void cmVisualStudio10TargetGenerator::WriteMissingFilesWP80(Elem& e1)
   this->AddedFiles.push_back(smallLogo);
 
   std::string logo = cmStrCat(this->DefaultArtifactDir, "/Logo.png");
-  cmSystemTools::CopyAFile(cmStrCat(templateFolder, "/Logo.png"), logo, false);
+  cmSystemTools::CopyAFile(cmStrCat(templateFolder, "/Logo.png"), logo,
+                           cmSystemTools::CopyWhen::OnlyIfDifferent);
   ConvertToWindowsSlash(logo);
   Elem(e1, "Image").Attribute("Include", logo);
   this->AddedFiles.push_back(logo);
@@ -5913,7 +5914,8 @@ void cmVisualStudio10TargetGenerator::WriteCommonMissingFiles(
   this->AddedFiles.push_back(smallLogo44);
 
   std::string logo = cmStrCat(this->DefaultArtifactDir, "/Logo.png");
-  cmSystemTools::CopyAFile(cmStrCat(templateFolder, "/Logo.png"), logo, false);
+  cmSystemTools::CopyAFile(cmStrCat(templateFolder, "/Logo.png"), logo,
+                           cmSystemTools::CopyWhen::OnlyIfDifferent);
   ConvertToWindowsSlash(logo);
   Elem(e1, "Image").Attribute("Include", logo);
   this->AddedFiles.push_back(logo);

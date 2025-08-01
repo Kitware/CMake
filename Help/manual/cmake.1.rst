@@ -1029,6 +1029,19 @@ Available commands are:
   ``copy_directory_if_different`` does follow symlinks.
   The command fails when the source directory does not exist.
 
+.. option:: copy_directory_if_newer <dir>... <destination>
+
+  .. versionadded:: 4.2
+
+  Copy content of ``<dir>...`` directories to ``<destination>`` directory
+  if source files are newer than destination files (based on file timestamps).
+  If ``<destination>`` directory does not exist it will be created.
+
+  ``copy_directory_if_newer`` does follow symlinks.
+  The command fails when the source directory does not exist.
+  This is faster than ``copy_directory_if_different`` as it only compares
+  file timestamps instead of file contents.
+
 .. option:: copy_if_different <file>... <destination>
 
   Copy files to ``<destination>`` (either file or directory) if
@@ -1039,6 +1052,18 @@ Available commands are:
 
   .. versionadded:: 3.5
     Support for multiple input files.
+
+.. option:: copy_if_newer <file>... <destination>
+
+  .. versionadded:: 4.2
+
+  Copy files to ``<destination>`` (either file or directory) if
+  source files are newer than destination files (based on file timestamps).
+  If multiple files are specified, the ``<destination>`` must be
+  directory and it must exist.
+  ``copy_if_newer`` does follow symlinks.
+  This is faster than ``copy_if_different`` as it only compares
+  file timestamps instead of file contents.
 
 .. option:: create_symlink <old> <new>
 
