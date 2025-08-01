@@ -492,13 +492,21 @@ if(NOT CMake_TEST_EXTERNAL_CMAKE)
         NOT "x${CMAKE_C_SIMULATE_ID}" STREQUAL "xMSVC") OR
        CMAKE_C_COMPILER_ID STREQUAL "AppleClang" OR
        CMAKE_C_COMPILER_ID STREQUAL "LCC")
-      set(C_FLAGS_LIST -Wcast-align -Werror-implicit-function-declaration -Wchar-subscripts
+      set(C_FLAGS_LIST -Wcast-align -Wchar-subscripts
                        -Wall -W -Wpointer-arith -Wwrite-strings -Wformat-security
                        -Wmissing-format-attribute -fno-common -Wundef
+                       -Werror=implicit-function-declaration
+                       -Wstrict-prototypes
       )
       set(CXX_FLAGS_LIST -Wnon-virtual-dtor -Wcast-align -Wchar-subscripts -Wall -W
                          -Wshadow -Wpointer-arith -Wformat-security -Wundef
       )
+      if(CMAKE_CXX_COMPILER_ID MATCHES "Clang" AND
+          NOT (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 11))
+        list(APPEND CXX_FLAGS_LIST
+          -Wundefined-func-template
+        )
+      endif()
 
       foreach(FLAG_LANG IN ITEMS C CXX)
         foreach(FLAG IN LISTS ${FLAG_LANG}_FLAGS_LIST)
