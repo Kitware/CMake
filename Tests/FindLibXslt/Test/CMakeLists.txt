@@ -6,7 +6,7 @@ find_package(Iconv)
 find_package(LibXml2 REQUIRED)
 find_package(LibXslt REQUIRED)
 
-add_definitions(-DCMAKE_EXPECTED_LibXslt_VERSION="${LIBXSLT_VERSION_STRING}")
+add_definitions(-DCMAKE_EXPECTED_LibXslt_VERSION="${LibXslt_VERSION}")
 
 add_executable(libxslt_tgt libxslt.c)
 if(Iconv_FOUND)
