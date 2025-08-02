@@ -103,6 +103,7 @@ foreach(
     JASPER
     LIBLZMA LIBXML2 LIBXSLT LTTNGUST
     PERL PKG_CONFIG PNG PostgreSQL
+    SDL
     TIFF
     ZLIB
 )
@@ -124,7 +125,7 @@ foreach(
     OPENSCENEGRAPH
     PNG PostgreSQL Protobuf
     Ruby RUBY
-    SWIG
+    SDL SWIG
     ZLIB
 )
   check_version_string(${VTEST} ${VTEST}_VERSION)
