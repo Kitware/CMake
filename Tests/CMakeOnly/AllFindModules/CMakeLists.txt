@@ -113,7 +113,7 @@ foreach(
   VTEST
     ALSA
     BISON Boost BZip2 BZIP2
-    CUDA
+    CUDA Cups
     DOXYGEN
     EXPAT
     FLEX Freetype

@@ -7,6 +7,9 @@ Find Modules
 * The :module:`FindBZip2` module now provides a ``BZip2_VERSION`` result
   variable.  The ``BZIP2_VERSION`` result variable is deprecated.
 
+* The :module:`FindCups` module now provides a ``Cups_VERSION`` result
+  variable.  The ``CUPS_VERSION_STRING`` result variable is deprecated.
+
 * The :module:`FindEXPAT` module now provides a ``EXPAT_VERSION`` result
   variable.  The ``EXPAT_VERSION_STRING`` result variable is deprecated.
 
