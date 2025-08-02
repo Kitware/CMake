@@ -270,8 +270,8 @@ that may contain the following fields:
 ``graphviz``
   An optional string representing the path to the graphviz input file,
   that will contain all the library and executable dependencies
-  in the project. See the documentation for :module:`CMakeGraphVizOptions`
-  for more details.
+  in the project.  See the documentation for :option:`cmake --graphviz` for
+  more details.
 
   This field supports `macro expansion`_. If a relative path is specified,
   it is calculated relative to the current working directory. It is allowed
