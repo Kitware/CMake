@@ -30,8 +30,8 @@ These modules are loaded using the :command:`include` command.
    /module/CheckFortranSourceCompiles
    /module/CheckFortranSourceRuns
    /module/CheckFunctionExists
-   /module/CheckIncludeFileCXX
    /module/CheckIncludeFile
+   /module/CheckIncludeFileCXX
    /module/CheckIncludeFiles
    /module/CheckIPOSupported
    /module/CheckLanguage
@@ -55,7 +55,6 @@ These modules are loaded using the :command:`include` command.
    /module/CMakeBackwardCompatibilityCXX
    /module/CMakeDependentOption
    /module/CMakeFindDependencyMacro
-   /module/CMakeFindPackageMode
    /module/CMakeGraphVizOptions
    /module/CMakePackageConfigHelpers
    /module/CMakePrintHelpers
@@ -69,7 +68,6 @@ These modules are loaded using the :command:`include` command.
    /module/CSharpUtilities
    /module/CTest
    /module/CTestCoverageCollectGCOV
-   /module/CTestScriptMode
    /module/CTestUseLaunchers
    /module/DeployQt4
    /module/ExternalData
@@ -186,7 +184,6 @@ They are normally called through the :command:`find_package` command.
    /module/FindOpenSSL
    /module/FindOpenThreads
    /module/Findosg
-   /module/Findosg_functions
    /module/FindosgAnimation
    /module/FindosgDB
    /module/FindosgFX
@@ -232,8 +229,8 @@ They are normally called through the :command:`find_package` command.
    /module/FindSDL_sound
    /module/FindSDL_ttf
    /module/FindSelfPackers
-   /module/FindSquish
    /module/FindSQLite3
+   /module/FindSquish
    /module/FindSubversion
    /module/FindSWIG
    /module/FindTCL
@@ -271,7 +268,6 @@ Deprecated Utility Modules
    /module/Documentation
    /module/GetPrerequisites
    /module/MacroAddFileDependencies
-   /module/SquishTestScript
    /module/TestBigEndian
    /module/TestCXXAcceptsFlag
    /module/Use_wxWindows
@@ -322,3 +318,16 @@ used directly.
    /module/CPackProductBuild
    /module/CPackRPM
    /module/CPackWIX
+
+Miscellaneous Modules
+---------------------
+
+These internal modules are not intended to be included directly in projects:
+
+.. toctree::
+   :maxdepth: 1
+
+   /module/CMakeFindPackageMode
+   /module/CTestScriptMode
+   /module/Findosg_functions
+   /module/SquishTestScript
