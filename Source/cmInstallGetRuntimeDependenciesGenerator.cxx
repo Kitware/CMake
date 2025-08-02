@@ -24,7 +24,7 @@
 
 namespace {
 template <typename T, typename F>
-void WriteMultiArgument(std::ostream& os, cm::string_view const& keyword,
+void WriteMultiArgument(std::ostream& os, cm::string_view keyword,
                         std::vector<T> const& list,
                         cmScriptGeneratorIndent indent, F transform)
 {
@@ -42,7 +42,7 @@ void WriteMultiArgument(std::ostream& os, cm::string_view const& keyword,
 }
 
 void WriteFilesArgument(
-  std::ostream& os, cm::string_view const& keyword,
+  std::ostream& os, cm::string_view keyword,
   std::vector<std::unique_ptr<cmInstallRuntimeDependencySet::Item>> const&
     items,
   std::string const& config, cmScriptGeneratorIndent indent)
@@ -53,8 +53,7 @@ void WriteFilesArgument(
       -> std::string { return cmStrCat('"', i->GetItemPath(config), '"'); });
 }
 
-void WriteGenexEvaluatorArgument(std::ostream& os,
-                                 cm::string_view const& keyword,
+void WriteGenexEvaluatorArgument(std::ostream& os, cm::string_view keyword,
                                  std::vector<std::string> const& genexes,
                                  std::string const& config,
                                  cmLocalGenerator* lg,

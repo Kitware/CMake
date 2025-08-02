@@ -72,15 +72,3 @@ bool cmCTestResourceAllocator::DeallocateResource(std::string const& name,
   resIt->second.Locked -= slots;
   return true;
 }
-
-bool cmCTestResourceAllocator::Resource::operator==(
-  Resource const& other) const
-{
-  return this->Total == other.Total && this->Locked == other.Locked;
-}
-
-bool cmCTestResourceAllocator::Resource::operator!=(
-  Resource const& other) const
-{
-  return !(*this == other);
-}

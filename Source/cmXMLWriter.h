@@ -108,8 +108,7 @@ private:
    * Therefore we must assume it is an arbitrary point in time. Instead of this
    * method, it is recommended to convert it by means of the to_time_t method.
    */
-  static std::time_t SafeContent(
-    std::chrono::system_clock::time_point const& value)
+  static std::time_t SafeContent(std::chrono::system_clock::time_point value)
   {
     return std::chrono::system_clock::to_time_t(value);
   }

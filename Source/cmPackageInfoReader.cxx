@@ -180,7 +180,7 @@ std::string DeterminePrefix(std::string const& filepath,
 }
 
 // Extract key name from value iterator as string_view.
-cm::string_view IterKey(Json::Value::const_iterator const& iter)
+cm::string_view IterKey(Json::Value::const_iterator iter)
 {
   char const* end;
   char const* const start = iter.memberName(&end);
@@ -719,7 +719,7 @@ bool cmPackageInfoReader::ImportTargets(cmMakefile* makefile,
   Json::Value const& components = this->Data["components"];
 
   for (auto ci = components.begin(), ce = components.end(); ci != ce; ++ci) {
-    cm::string_view const& name = IterKey(ci);
+    cm::string_view const name = IterKey(ci);
     std::string const& type =
       cmSystemTools::LowerCase((*ci)["type"].asString());
 
@@ -798,7 +798,7 @@ bool cmPackageInfoReader::ImportTargetConfigurations(
 
   for (auto ci = components.begin(), ce = components.end(); ci != ce; ++ci) {
     // Get component name and look up target.
-    cm::string_view const& name = IterKey(ci);
+    cm::string_view const name = IterKey(ci);
     auto const& ti = this->ComponentTargets.find(std::string{ name });
     if (ti == this->ComponentTargets.end()) {
       status.SetError(cmStrCat("component "_s, name, " was not found"_s));

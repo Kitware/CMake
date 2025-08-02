@@ -83,8 +83,7 @@ std::shared_ptr<cmDebuggerVariables> cmDebuggerVariablesHelper::CreateIfAny(
 
 std::shared_ptr<cmDebuggerVariables> cmDebuggerVariablesHelper::CreateIfAny(
   std::shared_ptr<cmDebuggerVariablesManager> const& variablesManager,
-  std::string const& name, bool supportsVariableType,
-  cmBTStringRange const& entries)
+  std::string const& name, bool supportsVariableType, cmBTStringRange entries)
 {
   if (entries.empty()) {
     return {};

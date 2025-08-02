@@ -87,7 +87,7 @@ struct IntoString<std::string> : std::true_type
 template <>
 struct IntoString<char> : std::true_type
 {
-  static std::string into_string(char const& c) { return std::string(1, c); }
+  static std::string into_string(char c) { return std::string(1, c); }
 };
 
 /**
@@ -142,19 +142,27 @@ struct AsStringView<std::string> : std::true_type
 template <>
 struct AsStringView<char> : std::true_type
 {
-  static string_view view(char const& s) { return string_view(&s, 1); }
+  static string_view view(
+    char const& s) // clazy:exclude=function-args-by-value
+  {
+    return string_view(&s, 1);
+  }
 };
 
 template <>
 struct AsStringView<string_view> : std::true_type
 {
-  static string_view view(string_view const& s) { return s; }
+  static string_view view(string_view s) { return s; }
 };
 
 template <>
 struct AsStringView<static_string_view> : std::true_type
 {
-  static string_view view(static_string_view const& s) { return s; }
+  static string_view view(
+    static_string_view const& s) // clazy:exclude=function-args-by-value
+  {
+    return s;
+  }
 };
 
 template <>

@@ -470,8 +470,7 @@ cmGlobalGhsMultiGenerator::GenerateBuildCommand(
   std::string const& makeProgram, std::string const& projectName,
   std::string const& projectDir, std::vector<std::string> const& targetNames,
   std::string const& /*config*/, int jobs, bool verbose,
-  cmBuildOptions const& /*buildOptions*/,
-  std::vector<std::string> const& makeOptions)
+  cmBuildOptions /*buildOptions*/, std::vector<std::string> const& makeOptions)
 {
   GeneratedMakeCommand makeCommand;
 

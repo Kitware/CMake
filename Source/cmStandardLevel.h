@@ -14,7 +14,7 @@ public:
   {
   }
   size_t Index() const { return index_; }
-  friend bool operator<(cmStandardLevel const& l, cmStandardLevel const& r)
+  friend bool operator<(cmStandardLevel l, cmStandardLevel r)
   {
     return l.index_ < r.index_;
   }

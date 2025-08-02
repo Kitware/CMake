@@ -10,7 +10,6 @@ export CLAZY_CHECKS="level2\
 ,no-copyable-polymorphic\
 ,no-ctor-missing-parent-argument\
 ,no-function-args-by-ref\
-,no-function-args-by-value\
 ,no-missing-qobject-macro\
 ,no-non-pod-global-static\
 ,no-old-style-connect\

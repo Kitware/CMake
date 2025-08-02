@@ -1626,7 +1626,7 @@ std::set<std::string> const& cmTarget::GetSystemIncludeDirectories() const
 }
 
 void cmTarget::AddInstallIncludeDirectories(cmTargetExport const& te,
-                                            cmStringRange const& incs)
+                                            cmStringRange incs)
 {
   std::copy(
     incs.begin(), incs.end(),
@@ -2403,8 +2403,7 @@ bool CheckLinkLibraryPattern(UsageRequirementProperty const& usage,
 }
 }
 
-void cmTarget::FinalizeTargetConfiguration(
-  cmBTStringRange const& compileDefinitions)
+void cmTarget::FinalizeTargetConfiguration(cmBTStringRange compileDefinitions)
 {
   if (this->GetType() == cmStateEnums::GLOBAL_TARGET) {
     return;
