@@ -5,7 +5,11 @@
 FindAVIFile
 -----------
 
-Finds `AVIFile <https://avifile.sourceforge.net/>`_ library and include paths.
+Finds `AVIFile <https://avifile.sourceforge.net/>`_ library and include paths:
+
+.. code-block:: cmake
+
+  find_package(AVIFile [...])
 
 AVIFile is a set of libraries for i386 machines to use various AVI codecs.
 Support is limited beyond Linux.  Windows provides native AVI support, and so
@@ -17,8 +21,8 @@ Result Variables
 This module defines the following variables:
 
 ``AVIFile_FOUND``
-  True if AVIFile is found.  For backward compatibility, the ``AVIFILE_FOUND``
-  variable is also set to the same value.
+  Boolean indicating whether AVIFile is found.  For backward compatibility,
+  the ``AVIFILE_FOUND`` variable is also set to the same value.
 ``AVIFILE_LIBRARIES``
   The libraries to link against.
 ``AVIFILE_DEFINITIONS``
@@ -27,7 +31,7 @@ This module defines the following variables:
 Cache Variables
 ^^^^^^^^^^^^^^^
 
-The following cache variables may be also set:
+The following cache variables may also be set:
 
 ``AVIFILE_INCLUDE_DIR``
   Directory containing ``avifile.h`` and other AVIFile headers.
@@ -35,11 +39,26 @@ The following cache variables may be also set:
 Examples
 ^^^^^^^^
 
-Finding AVIFile:
+Finding AVIFile and conditionally creating an interface :ref:`Imported Target
+<Imported Targets>` that encapsulates its usage requirements for linking to a
+project target:
 
 .. code-block:: cmake
 
   find_package(AVIFile)
+
+  if(AVIFile_FOUND AND NOT TARGET AVIFile::AVIFile)
+    add_library(AVIFile::AVIFile INTERFACE IMPORTED)
+    set_target_properties(
+      AVIFile::AVIFile
+      PROPERTIES
+        INTERFACE_INCLUDE_DIRECTORIES "${AVIFILE_INCLUDE_DIR}"
+        INTERFACE_LINK_LIBRARIES "${AVIFILE_LIBRARIES}"
+        INTERFACE_COMPILE_DEFINITIONS "${AVIFILE_DEFINITIONS}"
+    )
+  endif()
+
+  target_link_libraries(example PRIVATE AVIFile::AVIFile)
 #]=======================================================================]
 
 if (UNIX)
@@ -50,7 +69,10 @@ if (UNIX)
 endif ()
 
 include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(AVIFile DEFAULT_MSG AVIFILE_INCLUDE_DIR AVIFILE_AVIPLAY_LIBRARY)
+find_package_handle_standard_args(
+  AVIFile
+  REQUIRED_VARS AVIFILE_AVIPLAY_LIBRARY AVIFILE_INCLUDE_DIR
+)
 
 if (AVIFile_FOUND)
     set(AVIFILE_LIBRARIES ${AVIFILE_AVIPLAY_LIBRARY})
