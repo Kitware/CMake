@@ -8,7 +8,11 @@ FindSDL_gfx
 .. versionadded:: 3.25
 
 Finds the SDL_gfx library that provides graphics support in SDL (Simple
-DirectMedia Layer) applications.
+DirectMedia Layer) applications:
+
+.. code-block:: cmake
+
+  find_package(SDL_gfx [<version>] [...])
 
 .. note::
 
@@ -30,10 +34,13 @@ Result Variables
 This module defines the following variables:
 
 ``SDL_gfx_FOUND``
-  Boolean indicating whether the (requested version of) SDL_gfx library is
+  Boolean indicating whether (the requested version of) SDL_gfx library is
   found.  For backward compatibility, the ``SDL_GFX_FOUND`` variable is also set
   to the same value.
-``SDL_GFX_VERSION_STRING``
+
+``SDL_gfx_VERSION``
+  .. versionadded:: 4.2
+
   The human-readable string containing the version of SDL_gfx found.
 
 Cache Variables
@@ -43,6 +50,7 @@ The following cache variables may also be set:
 
 ``SDL_GFX_INCLUDE_DIRS``
   The directory containing the headers needed to use SDL_gfx.
+
 ``SDL_GFX_LIBRARIES``
   The path to the SDL_gfx library needed to link against to use SDL_gfx.
 
@@ -56,6 +64,17 @@ This module accepts the following variables:
   in a custom location.  It should point to the installation destination that
   was used when configuring, building, and installing SDL library:
   ``./configure --prefix=$SDLDIR``.
+
+Deprecated Variables
+^^^^^^^^^^^^^^^^^^^^
+
+The following variables are provided for backward compatibility:
+
+``SDL_GFX_VERSION_STRING``
+  .. deprecated:: 4.2
+    Use the ``SDL_gfx_VERSION``.
+
+  The human-readable string containing the version of SDL_gfx found.
 
 Examples
 ^^^^^^^^
@@ -113,7 +132,8 @@ if(SDL_GFX_INCLUDE_DIRS AND EXISTS "${SDL_GFX_INCLUDE_DIRS}/SDL_gfxPrimitives.h"
   string(REGEX REPLACE "^#define[ \t]+SDL_GFXPRIMITIVES_MAJOR[ \t]+([0-9]+)$" "\\1" SDL_GFX_VERSION_MAJOR "${SDL_GFX_VERSION_MAJOR_LINE}")
   string(REGEX REPLACE "^#define[ \t]+SDL_GFXPRIMITIVES_MINOR[ \t]+([0-9]+)$" "\\1" SDL_GFX_VERSION_MINOR "${SDL_GFX_VERSION_MINOR_LINE}")
   string(REGEX REPLACE "^#define[ \t]+SDL_GFXPRIMITIVES_MICRO[ \t]+([0-9]+)$" "\\1" SDL_GFX_VERSION_PATCH "${SDL_GFX_VERSION_PATCH_LINE}")
-  set(SDL_GFX_VERSION_STRING ${SDL_GFX_VERSION_MAJOR}.${SDL_GFX_VERSION_MINOR}.${SDL_GFX_VERSION_PATCH})
+  set(SDL_gfx_VERSION ${SDL_GFX_VERSION_MAJOR}.${SDL_GFX_VERSION_MINOR}.${SDL_GFX_VERSION_PATCH})
+  set(SDL_GFX_VERSION_STRING "${SDL_gfx_VERSION}")
   unset(SDL_GFX_VERSION_MAJOR_LINE)
   unset(SDL_GFX_VERSION_MINOR_LINE)
   unset(SDL_GFX_VERSION_PATCH_LINE)
@@ -126,7 +146,7 @@ include(FindPackageHandleStandardArgs)
 
 find_package_handle_standard_args(SDL_gfx
                                   REQUIRED_VARS SDL_GFX_LIBRARIES SDL_GFX_INCLUDE_DIRS
-                                  VERSION_VAR SDL_GFX_VERSION_STRING)
+                                  VERSION_VAR SDL_gfx_VERSION)
 
 if(SDL_gfx_FOUND)
   if(NOT TARGET SDL::SDL_gfx)

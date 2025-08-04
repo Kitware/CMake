@@ -6,7 +6,11 @@ FindSDL_net
 -----------
 
 Finds the SDL_net library, a cross-platform network library for use with the
-SDL (Simple DirectMedia Layer) applications.
+SDL (Simple DirectMedia Layer) applications:
+
+.. code-block:: cmake
+
+  find_package(SDL_net [<version>] [...])
 
 .. note::
 
@@ -26,7 +30,9 @@ This module defines the following variables:
   found.  For backward compatibility, the ``SDL_NET_FOUND`` variable is also set
   to the same value.
 
-``SDL_NET_VERSION_STRING``
+``SDL_net_VERSION``
+  ..versionadded:: 4.2
+
   The human-readable string containing the version of SDL_net found.
 
 ``SDL_NET_INCLUDE_DIRS``
@@ -35,10 +41,27 @@ This module defines the following variables:
 ``SDL_NET_LIBRARIES``
   Libraries needed to link against to use the SDL_net library.
 
+Hints
+^^^^^
+
+This module accepts the following variables:
+
+``SDLDIR``
+  Environment variable that can be set to help locate an SDL library installed
+  in a custom location.  It should point to the installation destination that
+  was used when configuring, building, and installing SDL library:
+  ``./configure --prefix=$SDLDIR``.
+
 Deprecated Variables
 ^^^^^^^^^^^^^^^^^^^^
 
-For backward compatibility the following variables are also set:
+The following variables are provided for backward compatibility:
+
+``SDL_NET_VERSION_STRING``
+  .. deprecated:: 4.2
+    Use the ``SDL_net_VERSION``.
+
+  The human-readable string containing the version of SDL_net found.
 
 ``SDLNET_FOUND``
   .. deprecated:: 2.8.10
@@ -51,17 +74,6 @@ For backward compatibility the following variables are also set:
 ``SDLNET_LIBRARY``
   .. deprecated:: 2.8.10
     Use the ``SDL_NET_LIBRARIES``, which has the same value.
-
-Hints
-^^^^^
-
-This module accepts the following variables:
-
-``SDLDIR``
-  Environment variable that can be set to help locate an SDL library installed
-  in a custom location.  It should point to the installation destination that
-  was used when configuring, building, and installing SDL library:
-  ``./configure --prefix=$SDLDIR``.
 
 Examples
 ^^^^^^^^
@@ -141,7 +153,8 @@ if(SDL_NET_INCLUDE_DIR AND EXISTS "${SDL_NET_INCLUDE_DIR}/SDL_net.h")
   string(REGEX REPLACE "^#define[ \t]+SDL_NET_MAJOR_VERSION[ \t]+([0-9]+)$" "\\1" SDL_NET_VERSION_MAJOR "${SDL_NET_VERSION_MAJOR_LINE}")
   string(REGEX REPLACE "^#define[ \t]+SDL_NET_MINOR_VERSION[ \t]+([0-9]+)$" "\\1" SDL_NET_VERSION_MINOR "${SDL_NET_VERSION_MINOR_LINE}")
   string(REGEX REPLACE "^#define[ \t]+SDL_NET_PATCHLEVEL[ \t]+([0-9]+)$" "\\1" SDL_NET_VERSION_PATCH "${SDL_NET_VERSION_PATCH_LINE}")
-  set(SDL_NET_VERSION_STRING ${SDL_NET_VERSION_MAJOR}.${SDL_NET_VERSION_MINOR}.${SDL_NET_VERSION_PATCH})
+  set(SDL_net_VERSION ${SDL_NET_VERSION_MAJOR}.${SDL_NET_VERSION_MINOR}.${SDL_NET_VERSION_PATCH})
+  set(SDL_NET_VERSION_STRING "${SDL_net_VERSION}")
   unset(SDL_NET_VERSION_MAJOR_LINE)
   unset(SDL_NET_VERSION_MINOR_LINE)
   unset(SDL_NET_VERSION_PATCH_LINE)
@@ -157,7 +170,7 @@ include(FindPackageHandleStandardArgs)
 
 find_package_handle_standard_args(SDL_net
                                   REQUIRED_VARS SDL_NET_LIBRARIES SDL_NET_INCLUDE_DIRS
-                                  VERSION_VAR SDL_NET_VERSION_STRING)
+                                  VERSION_VAR SDL_net_VERSION)
 
 # for backward compatibility
 set(SDLNET_LIBRARY ${SDL_NET_LIBRARIES})

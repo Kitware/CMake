@@ -6,7 +6,11 @@ FindSDL_mixer
 -------------
 
 Finds the SDL_mixer library that provides an audio mixer with support for
-various file formats in SDL (Simple DirectMedia Layer) applications.
+various file formats in SDL (Simple DirectMedia Layer) applications:
+
+.. code-block:: cmake
+
+  find_package(SDL_mixer [<version>] [...])
 
 .. note::
 
@@ -26,7 +30,9 @@ This module defines the following variables:
   found.  For backward compatibility, the ``SDL_MIXER_FOUND`` variable is also
   set to the same value.
 
-``SDL_MIXER_VERSION_STRING``
+``SDL_mixer_VERSION``
+  .. versionadded:: 4.2
+
   The human-readable string containing the version of SDL_mixer found.
 
 ``SDL_MIXER_INCLUDE_DIRS``
@@ -49,7 +55,13 @@ This module accepts the following variables:
 Deprecated Variables
 ^^^^^^^^^^^^^^^^^^^^
 
-For backward compatibility the following variables are also set:
+The following variables are provided for backward compatibility:
+
+``SDL_MIXER_VERSION_STRING``
+  .. deprecated:: 4.2
+    Use the ``SDL_mixer_VERSION``.
+
+  The human-readable string containing the version of SDL_mixer found.
 
 ``SDLMIXER_FOUND``
   .. deprecated:: 2.8.10
@@ -141,7 +153,8 @@ if(SDL_MIXER_INCLUDE_DIR AND EXISTS "${SDL_MIXER_INCLUDE_DIR}/SDL_mixer.h")
   string(REGEX REPLACE "^#define[ \t]+SDL_MIXER_MAJOR_VERSION[ \t]+([0-9]+)$" "\\1" SDL_MIXER_VERSION_MAJOR "${SDL_MIXER_VERSION_MAJOR_LINE}")
   string(REGEX REPLACE "^#define[ \t]+SDL_MIXER_MINOR_VERSION[ \t]+([0-9]+)$" "\\1" SDL_MIXER_VERSION_MINOR "${SDL_MIXER_VERSION_MINOR_LINE}")
   string(REGEX REPLACE "^#define[ \t]+SDL_MIXER_PATCHLEVEL[ \t]+([0-9]+)$" "\\1" SDL_MIXER_VERSION_PATCH "${SDL_MIXER_VERSION_PATCH_LINE}")
-  set(SDL_MIXER_VERSION_STRING ${SDL_MIXER_VERSION_MAJOR}.${SDL_MIXER_VERSION_MINOR}.${SDL_MIXER_VERSION_PATCH})
+  set(SDL_mixer_VERSION ${SDL_MIXER_VERSION_MAJOR}.${SDL_MIXER_VERSION_MINOR}.${SDL_MIXER_VERSION_PATCH})
+  set(SDL_MIXER_VERSION_STRING "${SDL_mixer_VERSION}")
   unset(SDL_MIXER_VERSION_MAJOR_LINE)
   unset(SDL_MIXER_VERSION_MINOR_LINE)
   unset(SDL_MIXER_VERSION_PATCH_LINE)
@@ -157,7 +170,7 @@ include(FindPackageHandleStandardArgs)
 
 find_package_handle_standard_args(SDL_mixer
                                   REQUIRED_VARS SDL_MIXER_LIBRARIES SDL_MIXER_INCLUDE_DIRS
-                                  VERSION_VAR SDL_MIXER_VERSION_STRING)
+                                  VERSION_VAR SDL_mixer_VERSION)
 
 # for backward compatibility
 set(SDLMIXER_LIBRARY ${SDL_MIXER_LIBRARIES})

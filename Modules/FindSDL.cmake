@@ -5,8 +5,14 @@
 FindSDL
 -------
 
-Finds the SDL (Simple DirectMedia Layer) library.  SDL is a cross-platform
-library for developing multimedia software, such as games and emulators.
+Finds the SDL (Simple DirectMedia Layer) library:
+
+.. code-block:: cmake
+
+  find_package(SDL [<version>] [...])
+
+SDL is a cross-platform library for developing multimedia software, such as
+games and emulators.
 
 .. note::
 
@@ -127,7 +133,7 @@ value.  If they are not set, ``SDL_LIBRARY`` will remain undefined.
 Deprecated Variables
 ^^^^^^^^^^^^^^^^^^^^
 
-These variables are obsolete and provided for backwards compatibility:
+The following variables are provided for backward compatibility:
 
 ``SDL_VERSION_STRING``
   .. deprecated:: 3.19
@@ -288,7 +294,7 @@ include(FindPackageHandleStandardArgs)
 
 find_package_handle_standard_args(SDL
                                   REQUIRED_VARS SDL_LIBRARY SDL_INCLUDE_DIR
-                                  VERSION_VAR SDL_VERSION_STRING)
+                                  VERSION_VAR SDL_VERSION)
 
 if(SDL_FOUND)
   set(SDL_LIBRARIES ${SDL_LIBRARY})

@@ -31,3 +31,9 @@ Find Modules
 * The :module:`FindPostgreSQL` module now provides a ``PostgreSQL_VERSION``
   result variable.  The ``PostgreSQL_VERSION_STRING`` result variable is
   deprecated.
+
+* The :module:`FindSDL_gfx`, :module:`FindSDL_image`, :module:`FindSDL_mixer`,
+  :module:`FindSDL_net`, :module:`FindSDL_sound`, and :module:`FindSDL_ttf`
+  modules now provide their respective ``<PackageName>_VERSION`` result
+  variables. Previous ``<PACKAGENAME>_VERSION_STRING`` result variables
+  are deprecated.
