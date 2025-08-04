@@ -5,7 +5,11 @@
 FindZLIB
 --------
 
-Finds the native zlib data compression library.
+Finds the native zlib data compression library:
+
+.. code-block:: cmake
+
+  find_package(ZLIB [<version>] [...])
 
 Imported Targets
 ^^^^^^^^^^^^^^^^
@@ -23,6 +27,14 @@ Result Variables
 
 This module defines the following variables:
 
+``ZLIB_FOUND``
+  Boolean indicating whether (the requested version of) zlib is found.
+
+``ZLIB_VERSION``
+  .. versionadded:: 3.26
+
+  The version of zlib found.
+
 ``ZLIB_INCLUDE_DIRS``
   Include directories containing ``zlib.h`` and other headers needed to use
   zlib.
@@ -32,58 +44,6 @@ This module defines the following variables:
 
   .. versionchanged:: 3.4
     Debug and Release library variants can be now found separately.
-
-``ZLIB_FOUND``
-  True if zlib is found.
-
-``ZLIB_VERSION``
-  .. versionadded:: 3.26
-
-  The version of zlib found.
-
-Legacy Variables
-^^^^^^^^^^^^^^^^
-
-The following variables are provided for backward compatibility:
-
-``ZLIB_VERSION_MAJOR``
-  The major version of zlib.
-
-  .. versionchanged:: 3.26
-    Superseded by ``ZLIB_VERSION``.
-
-``ZLIB_VERSION_MINOR``
-  The minor version of zlib.
-
-  .. versionchanged:: 3.26
-    Superseded by ``ZLIB_VERSION``.
-
-``ZLIB_VERSION_PATCH``
-  The patch version of zlib.
-
-  .. versionchanged:: 3.26
-    Superseded by ``ZLIB_VERSION``.
-
-``ZLIB_VERSION_TWEAK``
-  The tweak version of zlib.
-
-  .. versionchanged:: 3.26
-    Superseded by ``ZLIB_VERSION``.
-
-``ZLIB_VERSION_STRING``
-  The version of zlib found (x.y.z).
-
-  .. versionchanged:: 3.26
-    Superseded by ``ZLIB_VERSION``.
-
-``ZLIB_MAJOR_VERSION``
-  The major version of zlib.  Superseded by ``ZLIB_VERSION_MAJOR``.
-
-``ZLIB_MINOR_VERSION``
-  The minor version of zlib.  Superseded by ``ZLIB_VERSION_MINOR``.
-
-``ZLIB_PATCH_VERSION``
-  The patch version of zlib.  Superseded by ``ZLIB_VERSION_PATCH``.
 
 Hints
 ^^^^^
@@ -99,6 +59,59 @@ This module accepts the following variables:
 
   Set this variable to ``ON`` before calling ``find_package(ZLIB)`` to look for
   static libraries.  Default is ``OFF``.
+
+Deprecated Variables
+^^^^^^^^^^^^^^^^^^^^
+
+The following variables are provided for backward compatibility:
+
+``ZLIB_VERSION_MAJOR``
+  .. deprecated:: 3.26
+    Superseded by ``ZLIB_VERSION``.
+
+  The major version of zlib.
+
+``ZLIB_VERSION_MINOR``
+  .. deprecated:: 3.26
+    Superseded by ``ZLIB_VERSION``.
+
+  The minor version of zlib.
+
+``ZLIB_VERSION_PATCH``
+  .. deprecated:: 3.26
+    Superseded by ``ZLIB_VERSION``.
+
+  The patch version of zlib.
+
+``ZLIB_VERSION_TWEAK``
+  .. deprecated:: 3.26
+    Superseded by ``ZLIB_VERSION``.
+
+  The tweak version of zlib.
+
+``ZLIB_VERSION_STRING``
+  .. deprecated:: 3.26
+    Superseded by ``ZLIB_VERSION``.
+
+  The version of zlib found (x.y.z).
+
+``ZLIB_MAJOR_VERSION``
+  .. deprecated:: 3.26
+    Superseded by ``ZLIB_VERSION``.
+
+  The major version of zlib.
+
+``ZLIB_MINOR_VERSION``
+  .. deprecated:: 3.26
+    Superseded by ``ZLIB_VERSION``.
+
+  The minor version of zlib.
+
+``ZLIB_PATCH_VERSION``
+  .. deprecated:: 3.26
+    Superseded by ``ZLIB_VERSION``.
+
+  The patch version of zlib.
 
 Examples
 ^^^^^^^^
