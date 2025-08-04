@@ -1,0 +1,2 @@
+
+set(CACHE{VAR} TYPE HELP VALUE)
