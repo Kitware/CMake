@@ -5,16 +5,58 @@
 FindOpenMP
 ----------
 
-Finds Open Multi-Processing (OpenMP) support.
+Finds Open Multi-Processing (OpenMP) support in a compiler:
 
-This module can be used to detect OpenMP support in a compiler.  If
-the compiler supports OpenMP, the flags required to compile with
-OpenMP support are returned in variables for the different languages.
-The variables may be empty if the compiler does not need a special
-flag to support OpenMP.
+.. code-block:: cmake
+
+  find_package(OpenMP [<version>] [COMPONENTS <components>...] [...])
+
+If the compiler supports OpenMP, the flags required to compile with OpenMP
+support are returned in variables for the different languages.  The variables
+may be empty if the compiler does not need a special flag to support OpenMP.
 
 .. versionadded:: 3.5
   Clang support.
+
+Components
+^^^^^^^^^^
+
+This module supports components that can be specified using the standard
+syntax:
+
+.. code-block:: cmake
+
+  find_package(OpenMP [COMPONENTS <components>...])
+
+Each of these components controls the various languages to search OpenMP
+support for.  The following components are exposed:
+
+``C``
+  .. versionadded:: 3.10
+
+``CXX``
+  .. versionadded:: 3.10
+
+``Fortran``
+  .. versionadded:: 3.10
+
+``CUDA``
+  .. versionadded:: 3.31
+
+  The ``CUDA`` language component is supported when using a CUDA compiler
+  that supports OpenMP on the host.
+
+If no components are specified, module checks for all of them automatically.
+
+Imported Targets
+^^^^^^^^^^^^^^^^
+
+This module provides the following :ref:`Imported Targets`:
+
+``OpenMP::OpenMP_<lang>``
+  .. versionadded:: 3.9
+
+  Target encapsulating the OpenMP usage requirements for language ``<lang>``.
 
 Input Variables
 ^^^^^^^^^^^^^^^
@@ -33,25 +75,17 @@ The following variables may be set to influence this module's behavior:
 Result Variables
 ^^^^^^^^^^^^^^^^
 
-.. versionadded:: 3.10
-  The module exposes the components ``C``, ``CXX``, and ``Fortran``.
-  Each of these controls the various languages to search OpenMP support for.
-
-.. versionadded:: 3.31
-  The ``CUDA`` language component is supported when using a CUDA compiler
-  that supports OpenMP on the host.
-
-Depending on the enabled components the following variables will be set:
+This module defines the following variables:
 
 ``OpenMP_FOUND``
-  Variable indicating that OpenMP flags for all requested languages have been found.
-  If no components are specified, this is true if OpenMP settings for all enabled languages
-  were detected.
+  Boolean variable indicating that OpenMP flags for all requested languages
+  have been found.  If no components are specified, this is true if OpenMP
+  settings for all enabled languages were detected.
 ``OpenMP_VERSION``
-  Minimal version of the OpenMP standard detected among the requested languages,
-  or all enabled languages if no components were specified.
+  Minimal version of the OpenMP standard detected among the requested
+  languages, or all enabled languages if no components were specified.
 
-This module will set the following variables per language in your
+This module will set the following variables per language in the
 project, where ``<lang>`` is one of C, CXX, CUDA, or Fortran:
 
 ``OpenMP_<lang>_FOUND``
@@ -66,23 +100,21 @@ For linking with OpenMP code written in ``<lang>``, the following
 variables are provided:
 
 ``OpenMP_<lang>_LIB_NAMES``
-  :ref:`;-list <CMake Language Lists>` of libraries for OpenMP programs for ``<lang>``.
+  :ref:`semicolon-separated list <CMake Language Lists>` of libraries for
+  OpenMP programs for ``<lang>``.
 ``OpenMP_<libname>_LIBRARY``
-  Location of the individual libraries needed for OpenMP support in ``<lang>``.
+  Location of the individual libraries needed for OpenMP support in
+  ``<lang>``.
 ``OpenMP_<lang>_LIBRARIES``
   A list of libraries needed to link with OpenMP code written in ``<lang>``.
-
-Additionally, the module provides :prop_tgt:`IMPORTED` targets:
-
-``OpenMP::OpenMP_<lang>``
-  Target for using OpenMP from ``<lang>``.
 
 Specifically for Fortran, the module sets the following variables:
 
 ``OpenMP_Fortran_HAVE_OMPLIB_HEADER``
   Boolean indicating if OpenMP is accessible through ``omp_lib.h``.
 ``OpenMP_Fortran_HAVE_OMPLIB_MODULE``
-  Boolean indicating if OpenMP is accessible through the ``omp_lib`` Fortran module.
+  Boolean indicating if OpenMP is accessible through the ``omp_lib`` Fortran
+  module.
 
 The module will also try to provide the OpenMP version variables:
 
@@ -108,6 +140,17 @@ provided directly by setting the ``OpenMP_<lang>_INCLUDE_DIR`` cache variable.
 Note that this variable is an _input_ control to the module.  Project code
 should use the ``OpenMP_<lang>_INCLUDE_DIRS`` _output_ variable if it needs
 to know what include directories are needed.
+
+Examples
+^^^^^^^^
+
+Finding OpenMP support and linking the imported target to a project target
+using the C language component:
+
+.. code-block:: cmake
+
+  find_package(OpenMP)
+  target_link_libraries(project_target PRIVATE OpenMP::OpenMP_C)
 #]=======================================================================]
 
 cmake_policy(PUSH)
