@@ -37,7 +37,7 @@ This module provides the following :ref:`Imported Targets`:
 Result Variables
 ^^^^^^^^^^^^^^^^
 
-This module sets the following variables:
+This module defines the following variables:
 
 ``LibXslt_FOUND``
   Boolean indicating whether (the requested version of) libxslt is found.

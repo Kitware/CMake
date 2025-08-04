@@ -5,7 +5,11 @@
 FindDevIL
 ---------
 
-Finds the Developer's Image Library, `DevIL <https://openil.sourceforge.net/>`_.
+Finds the Developer's Image Library, `DevIL <https://openil.sourceforge.net/>`_:
+
+.. code-block:: cmake
+
+  find_package(DevIL [...])
 
 The DevIL package internally consists of the following libraries, all
 distributed as part of the same release:

@@ -5,7 +5,11 @@
 FindTCL
 -------
 
-Finds the Tcl (Tool Command Language), dynamic programming language.
+Finds the Tcl (Tool Command Language), dynamic programming language:
+
+.. code-block:: cmake
+
+  find_package(TCL [...])
 
 This module locates a Tcl installation, including its include directories and
 libraries, and determines the appropriate Tcl library name for linking.  As part
@@ -44,13 +48,11 @@ The following cache variables may also be set:
 ``TK_WISH``
   The path to the ``wish`` windowing shell command-line executable.
 
-
 Other Libraries
 ^^^^^^^^^^^^^^^
 
 The Tcl Stub Library can be found using the separate :module:`FindTclStub`
 module.
-
 
 Examples
 ^^^^^^^^

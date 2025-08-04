@@ -8,9 +8,15 @@ FindIntl
 .. versionadded:: 3.2
 
 Finds internationalization support that includes message translation functions
-such as ``gettext()``.  These functions originate from the GNU ``libintl``
-library, which is part of the GNU gettext utilities, but may also be provided by
-the standard C library.
+such as ``gettext()``:
+
+.. code-block:: cmake
+
+  find_package(Intl [<version>] [...])
+
+These functions originate from the GNU ``libintl`` library, which is part
+of the GNU gettext utilities, but may also be provided by the standard C
+library.
 
 Imported Targets
 ^^^^^^^^^^^^^^^^
@@ -28,13 +34,7 @@ Result Variables
 This module defines the following variables:
 
 ``Intl_FOUND``
-  Boolean indicating whether the Intl is found.
-
-``Intl_INCLUDE_DIRS``
-  Include directories containing headers needed to use Intl.
-
-``Intl_LIBRARIES``
-  The libraries needed to link against to use Intl.
+  Boolean indicating whether (the requested version of) Intl is found.
 
 ``Intl_VERSION``
   .. versionadded:: 3.21
@@ -61,22 +61,28 @@ This module defines the following variables:
 
   The patch version of Intl found.
 
+``Intl_INCLUDE_DIRS``
+  Include directories containing headers needed to use Intl.
+
+``Intl_LIBRARIES``
+  The libraries needed to link against to use Intl.
+
 Cache Variables
 ^^^^^^^^^^^^^^^
 
 The following cache variables may also be set:
-
-``Intl_INCLUDE_DIR``
-  The directory containing the ``libintl.h`` header file.
-
-``Intl_LIBRARY``
-  The path to the Intl library (if any).
 
 ``Intl_IS_BUILT_IN``
   .. versionadded:: 3.20
 
   Boolean indicating whether the found Intl functionality is provided by the
   standard C library rather than a separate ``libintl`` library.
+
+``Intl_INCLUDE_DIR``
+  The directory containing the ``libintl.h`` header file.
+
+``Intl_LIBRARY``
+  The path to the Intl library (if any).
 
 .. note::
   On some platforms, such as Linux with GNU libc, the gettext functions are

@@ -47,7 +47,7 @@ Result Variables
 This module defines the following variables:
 
 ``Boost_FOUND``
-  True if headers and requested libraries were found.
+  Boolean indicating whether headers and requested libraries were found.
 
 ``Boost_INCLUDE_DIRS``
   Boost include directories.
@@ -59,7 +59,8 @@ This module defines the following variables:
   Boost component libraries to be linked.
 
 ``Boost_<COMPONENT>_FOUND``
-  True if component ``<COMPONENT>`` was found (``<COMPONENT>`` name is upper-case).
+  Boolean indicating whether the component ``<COMPONENT>`` was found
+  (``<COMPONENT>`` name is upper-case).
 
 ``Boost_<COMPONENT>_LIBRARY``
   Libraries to link for component ``<COMPONENT>`` (may include
@@ -102,7 +103,7 @@ This module defines the following variables:
 .. versionadded:: 3.15
   The ``Boost_VERSION_<PART>`` variables.
 
-Cache variables
+Cache Variables
 ^^^^^^^^^^^^^^^
 
 Search results are saved persistently in CMake cache entries:
@@ -172,7 +173,7 @@ Imported Targets
 
 .. versionadded:: 3.5
 
-This module defines the following :prop_tgt:`IMPORTED` targets:
+This module provides the following :ref:`Imported Targets`:
 
 ``Boost::boost``
   Target for header-only dependencies. (Boost include directory).

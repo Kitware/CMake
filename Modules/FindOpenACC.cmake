@@ -7,9 +7,12 @@ FindOpenACC
 
 .. versionadded:: 3.10
 
-Detect OpenACC support by the compiler.
+Finds and detects the OpenACC support in a compiler:
 
-This module can be used to detect OpenACC support in a compiler.
+.. code-block:: cmake
+
+  find_package(OpenACC [<version>] [...])
+
 If the compiler supports OpenACC, the flags required to compile with
 OpenACC support are returned in variables for the different languages.
 Currently, only NVHPC, PGI, GNU and Cray compilers are supported.
@@ -17,28 +20,31 @@ Currently, only NVHPC, PGI, GNU and Cray compilers are supported.
 Imported Targets
 ^^^^^^^^^^^^^^^^
 
-.. versionadded:: 3.16
-
-The module provides :prop_tgt:`IMPORTED` targets:
+This module provides the following :ref:`Imported Targets`:
 
 ``OpenACC::OpenACC_<lang>``
-  Target for using OpenACC from ``<lang>``.
+  .. versionadded:: 3.16
 
-Variables
-^^^^^^^^^
+  Target encapsulating the usage requirements for using OpenACC from
+  ``<lang>``.  This target is available only if OpenACC support is found.
+  ``<lang>`` is one of C, CXX, or Fortran.
 
-The module defines the following variables:
+Result Variables
+^^^^^^^^^^^^^^^^
+
+This module defines the following variables:
 
 ``OpenACC_FOUND``
   .. versionadded:: 3.25
 
-  Variable indicating that OpenACC flags for at least one languages have been found.
+  Boolean variable indicating that OpenACC flags for at least one languages
+  have been found.
 
-This module will set the following variables per language in your
+This module will set the following variables per language in the
 project, where ``<lang>`` is one of C, CXX, or Fortran:
 
 ``OpenACC_<lang>_FOUND``
-  Variable indicating if OpenACC support for ``<lang>`` was detected.
+  Boolean variable indicating if OpenACC support for ``<lang>`` was detected.
 ``OpenACC_<lang>_FLAGS``
   OpenACC compiler flags for ``<lang>``, separated by spaces.
 ``OpenACC_<lang>_OPTIONS``
@@ -65,9 +71,21 @@ the OpenACC specification implemented by the ``<lang>`` compiler.
 Input Variables
 ^^^^^^^^^^^^^^^
 
+This module accepts the following variables:
+
 ``OpenACC_ACCEL_TARGET=<target>``
-If set, will the correct target accelerator flag set to the <target> will
-be returned with OpenACC_<lang>_FLAGS.
+  If set, the correct target accelerator flag set to the ``<target>``
+  will be returned with the ``OpenACC_<lang>_FLAGS`` variable.
+
+Examples
+^^^^^^^^
+
+Finding OpenACC support and linking the imported target to a project target:
+
+.. code-block:: cmake
+
+  find_package(OpenACC)
+  target_link_libraries(example PRIVATE OpenACC::OpenACC_C)
 #]=======================================================================]
 
 cmake_policy(PUSH)

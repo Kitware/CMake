@@ -15,7 +15,11 @@ FindProducer
   OpenSceneGraph usage, refer to the :module:`FindOpenSceneGraph` module.
 
 This module finds the Producer library, a windowing and event handling library
-designed primarily for real-time graphics applications.
+designed primarily for real-time graphics applications:
+
+.. code-block:: cmake
+
+  find_package(Producer [...])
 
 Producer library headers are intended to be included in C++ project source code
 as:

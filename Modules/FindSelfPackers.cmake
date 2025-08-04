@@ -5,7 +5,11 @@
 FindSelfPackers
 ---------------
 
-Finds `UPX <https://upx.github.io/>`_, the Ultimate Packer for eXecutables.
+Finds `UPX <https://upx.github.io/>`_, the Ultimate Packer for eXecutables:
+
+.. code-block:: cmake
+
+  find_package(SelfPackers [...])
 
 This module searches for executable packers-tools that compress executables or
 shared libraries into on-the-fly, self-extracting versions.  It currently
@@ -14,7 +18,7 @@ supports ``UPX``.
 Cache Variables
 ^^^^^^^^^^^^^^^
 
-The following cache variables may be set:
+The following cache variables may also be set:
 
 ``SELF_PACKER_FOR_EXECUTABLE``
   Path to the executable packer for compressing executables.

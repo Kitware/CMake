@@ -6,7 +6,11 @@ FindTclStub
 -----------
 
 Finds the Tcl Stub Library, which is used for building version-independent Tcl
-extensions.
+extensions:
+
+.. code-block:: cmake
+
+  find_package(TclStub [...])
 
 Tcl (Tool Command Language) is a dynamic programming language, and the Tcl Stub
 Library provides a mechanism to allow Tcl extensions to be compiled in a way

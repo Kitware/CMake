@@ -5,9 +5,15 @@
 FindQt4
 -------
 
-This module finds Qt4, a cross-platform application development framework for
-creating graphical user interfaces and applications.  It defines a number of
-imported targets, macros, and variables to use Qt4 in the project.
+Finds Qt4, a cross-platform application development framework for creating
+graphical user interfaces and applications:
+
+.. code-block:: cmake
+
+  find_package(Qt4 [<version>] [...])
+
+This module defines a number of imported targets, macros, and variables to
+use Qt4 in the project.
 
 .. note::
 
@@ -39,7 +45,7 @@ Imported Targets
 ^^^^^^^^^^^^^^^^
 
 Qt libraries can be linked using their corresponding
-:ref:`IMPORTED target <Imported Targets>` with the
+:ref:`Imported Target <Imported Targets>` with the
 :command:`target_link_libraries` command:
 
 .. code-block:: cmake
@@ -118,7 +124,7 @@ This module provides the following imported targets, if found:
 Result Variables
 ^^^^^^^^^^^^^^^^
 
-This module sets the following variables:
+This module defines the following variables:
 
 ``Qt4_FOUND``
   Boolean whether Qt4 has been found.  If false, don't try to use Qt4.

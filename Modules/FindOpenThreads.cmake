@@ -5,7 +5,11 @@
 FindOpenThreads
 ---------------
 
-Finds the OpenThreads C++ based threading library.
+Finds the OpenThreads C++ based threading library:
+
+.. code-block:: cmake
+
+  find_package(OpenThreads [...])
 
 OpenThreads header files are intended to be included as:
 

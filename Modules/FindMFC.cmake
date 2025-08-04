@@ -6,7 +6,11 @@ FindMFC
 -------
 
 Finds the native Microsoft Foundation Class Library (MFC) for developing MFC
-applications on Windows.
+applications on Windows:
+
+.. code-block:: cmake
+
+  find_package(MFC [...])
 
 .. note::
 

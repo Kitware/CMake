@@ -8,8 +8,13 @@ FindVulkan
 .. versionadded:: 3.7
 
 Finds Vulkan, a low-overhead, cross-platform 3D graphics and computing API,
-along with related development tools typically provided by the Vulkan SDK.  This
-includes commonly used utilities such as shader compilers and SPIR-V tools
+along with related development tools typically provided by the Vulkan SDK:
+
+.. code-block:: cmake
+
+  find_package(Vulkan [<version>] [COMPONENTS <components>...] [...])
+
+Vulkan includes commonly used utilities such as shader compilers and SPIR-V tools
 (e.g., DXC, ``glslc``, ``glslang``, etc.) that support Vulkan-based development
 workflows.
 

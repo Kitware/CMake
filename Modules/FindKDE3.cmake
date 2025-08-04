@@ -13,9 +13,15 @@ FindKDE3
   `KDE documentation
   <https://develop.kde.org/docs/getting-started/building/cmake-build/>`_.
 
-This module finds KDE 3 include directories, libraries, and KDE-specific
-preprocessor tools.  It provides usage requirements for building KDE 3 software
-and defines several helper commands to simplify working with KDE 3 in CMake.
+Finds KDE 3 include directories, libraries, and KDE-specific preprocessor
+tools:
+
+.. code-block:: cmake
+
+  find_package(KDE3 [...])
+
+This module provides usage requirements for building KDE 3 software and
+defines several helper commands to simplify working with KDE 3 in CMake.
 
 Result Variables
 ^^^^^^^^^^^^^^^^

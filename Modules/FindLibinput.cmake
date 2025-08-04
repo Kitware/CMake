@@ -8,7 +8,11 @@ FindLibinput
 .. versionadded:: 3.14
 
 Finds the libinput library which handles input devices in Wayland compositors
-and provides a generic X.Org input driver.
+and provides a generic X.Org input driver:
+
+.. code-block:: cmake
+
+  find_package(Libinput [<version>] [...])
 
 Imported Targets
 ^^^^^^^^^^^^^^^^

@@ -107,7 +107,7 @@ Imported Targets
 
 An :ref:`imported target <Imported targets>` named ``CUDA::toolkit`` is provided.
 
-This module defines :prop_tgt:`IMPORTED` targets for each
+This module provides :ref:`Imported Targets` for each
 of the following libraries that are part of the CUDAToolkit:
 
 - `CUDA Runtime Library`_
@@ -568,8 +568,6 @@ Result variables
     found to determine the CUDA Toolkit version as well as determining other
     features of the Toolkit.  This variable is set for the convenience of
     modules that depend on this one.
-
-
 #]=======================================================================]
 
 # NOTE: much of this was simply extracted from FindCUDA.cmake.

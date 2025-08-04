@@ -5,12 +5,23 @@
 FindASPELL
 ----------
 
-Finds the GNU Aspell spell checker library.
+Finds the GNU Aspell spell checker library:
+
+.. code-block:: cmake
+
+  find_package(ASPELL [<version>] [COMPONENTS <components>] [...])
 
 Components
 ^^^^^^^^^^
 
-This module supports the following components:
+This module supports optional components which can be specified using the
+:command:`find_package` command:
+
+.. code-block:: cmake
+
+  find_package(ASPELL [COMPONENTS <components>...])
+
+Supported components include:
 
 ``ASPELL``
   .. versionadded:: 4.1
@@ -22,13 +33,7 @@ This module supports the following components:
 
   Finds the Aspell command-line interactive spell checker executable.
 
-Components can be specified using the standard CMake syntax:
-
-.. code-block:: cmake
-
-  find_package(ASPELL [COMPONENTS <components>...])
-
-If no ``COMPONENTS`` are specified, the module searches for both the ``ASPELL``
+If no components are specified, the module searches for both the ``ASPELL``
 and ``Executable`` components by default.
 
 Imported Targets

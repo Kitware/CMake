@@ -31,7 +31,7 @@ Behavior:
 Result Variables
 ^^^^^^^^^^^^^^^^
 
-This module sets the following variables:
+This module defines the following variables:
 
 ``QT4_INSTALLED``
   ``TRUE`` if Qt4 is found.

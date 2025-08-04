@@ -6,7 +6,11 @@ FindJava
 --------
 
 Finds the Java installation and determines its runtime tools and development
-components.
+components:
+
+.. code-block:: cmake
+
+  find_package(Java [<version>] [COMPONENTS <components>...] [...])
 
 .. versionadded:: 3.10
   Support for Java 9+ version parsing.
@@ -14,7 +18,14 @@ components.
 Components
 ^^^^^^^^^^
 
-This module supports the following components:
+This module supports optional components, which can be specified with the
+:command:`find_package` command:
+
+.. code-block:: cmake
+
+  find_package(Java [COMPONENTS <components>...])
+
+Supported components include:
 
 ``Runtime``
   Finds the Java Runtime Environment used to execute Java byte-compiled
@@ -35,13 +46,7 @@ This module supports the following components:
 
   Finds the signer and verifier tool for Java Archive (JAR) files.
 
-Components can optionally be specified using the standard syntax with:
-
-.. code-block:: cmake
-
-  find_package(Java [COMPONENTS <components>...])
-
-If no ``COMPONENTS`` are specified, the module searches for the ``Runtime``
+If no components are specified, the module searches for the ``Runtime``
 component by default.
 
 Result Variables

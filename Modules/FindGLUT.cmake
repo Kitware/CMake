@@ -5,8 +5,13 @@
 FindGLUT
 --------
 
-Finds the OpenGL Utility Toolkit (GLUT) library, which provides a simple API for
-creating windows, handling input, and managing events in OpenGL applications.
+Finds the OpenGL Utility Toolkit (GLUT) library, which provides a simple API
+for creating windows, handling input, and managing events in OpenGL
+applications:
+
+.. code-block:: cmake
+
+  find_package(GLUT [...])
 
 Imported Targets
 ^^^^^^^^^^^^^^^^

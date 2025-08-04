@@ -7,7 +7,12 @@ FindIce
 
 .. versionadded:: 3.1
 
-Finds the Internet Communication Engine (Ice) programs, libraries and datafiles.
+Finds the Internet Communication Engine (Ice) programs, libraries and datafiles:
+
+.. code-block:: cmake
+
+  find_package(Ice [<version>] COMPONENTS <components>... [...])
+
 Ice is an open-source remote procedure call (RPC) framework developed by ZeroC
 and provides SDKs for various languages to develop network applications.
 

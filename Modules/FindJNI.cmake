@@ -5,7 +5,11 @@
 FindJNI
 -------
 
-Finds the Java Native Interface (JNI) include directories and libraries.
+Finds the Java Native Interface (JNI) include directories and libraries:
+
+.. code-block:: cmake
+
+  find_package(JNI [<version>] [COMPONENTS <components>...] [...])
 
 JNI enables Java code running in a Java Virtual Machine (JVM) or Dalvik Virtual
 Machine (DVM) on Android to call and be called by native applications and

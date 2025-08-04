@@ -14,7 +14,11 @@ FindFLTK2
   modern versions, use the :module:`FindFLTK` module instead.
 
 Finds the Fast Light Toolkit (FLTK) version 2.x, a cross-platform toolkit for
-GUI development.
+GUI development:
+
+.. code-block:: cmake
+
+  find_package(FLTK2 [...])
 
 Result Variables
 ^^^^^^^^^^^^^^^^

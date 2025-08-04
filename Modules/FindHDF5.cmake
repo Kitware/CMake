@@ -10,7 +10,7 @@ self-describing array data:
 
 .. code-block:: cmake
 
-  find_package(HDF5 [<version>] ... [COMPONENTS <components>...] ...)
+  find_package(HDF5 [<version>] [COMPONENTS <components>...] [...])
 
 If the HDF5 library is built using its CMake-based build system, it will as
 of HDF5 version 1.8.15 provide its own CMake Package Configuration file

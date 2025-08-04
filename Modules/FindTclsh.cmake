@@ -6,7 +6,11 @@ FindTclsh
 ---------
 
 Finds the Tcl shell command-line executable (``tclsh``), which includes the Tcl
-(Tool Command Language) interpreter.
+(Tool Command Language) interpreter:
+
+.. code-block:: cmake
+
+  find_package(Tclsh [...])
 
 Result Variables
 ^^^^^^^^^^^^^^^^

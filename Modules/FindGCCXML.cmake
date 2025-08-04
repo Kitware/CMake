@@ -7,14 +7,30 @@ FindGCCXML
 
 .. versionchanged:: 4.1
   This module is available only if policy :policy:`CMP0188` is not set to ``NEW``.
-  Port projects to search for CastXML by calling ``find_program`` directly.
+  Port projects to search for CastXML by calling :command:`find_program` directly.
 
-Find the GCC-XML front-end executable.
+Finds the GCC-XML front-end executable:
 
-This module will define the following variables:
+.. code-block:: cmake
+
+  find_package(GCCXML [...])
+
+Cache Variables
+^^^^^^^^^^^^^^^
+
+The following cache variables may also be set:
 
 ``GCCXML``
   The GCC-XML front-end executable.
+
+Examples
+^^^^^^^^
+
+In new code, find CastXML with :command:`find_program` instead:
+
+.. code-block:: cmake
+
+  find_program(CASTXML_EXECUTABLE castxml)
 #]=======================================================================]
 
 cmake_policy(GET CMP0188 _FindGCCXML_CMP0188)

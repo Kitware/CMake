@@ -5,7 +5,11 @@
 FindPHP4
 --------
 
-Finds PHP version 4, a general-purpose scripting language.
+Finds PHP version 4, a general-purpose scripting language:
+
+.. code-block:: cmake
+
+  find_package(PHP4 [...])
 
 .. note::
 

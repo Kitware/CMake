@@ -6,7 +6,11 @@ FindCxxTest
 -----------
 
 Finds `CxxTest`_, a C++ unit testing framework suite, and provides a helper
-command to create test runners and integrate them with CTest.
+command to create test runners and integrate them with CTest:
+
+.. code-block:: cmake
+
+  find_package(CxxTest [...])
 
 .. _`CxxTest`: https://github.com/CxxTest/cxxtest
 

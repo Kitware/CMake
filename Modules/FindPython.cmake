@@ -87,7 +87,7 @@ To manage concurrent versions 3 and 2 of Python, use :module:`FindPython3` and
 Imported Targets
 ^^^^^^^^^^^^^^^^
 
-This module defines the following :ref:`Imported Targets <Imported Targets>`:
+This module provides the following :ref:`Imported Targets`:
 
 .. versionchanged:: 3.14
   :ref:`Imported Targets <Imported Targets>` are only created when
@@ -138,7 +138,7 @@ This module defines the following :ref:`Imported Targets <Imported Targets>`:
 Result Variables
 ^^^^^^^^^^^^^^^^
 
-This module will set the following variables in your project
+This module defines the following variables
 (see :ref:`Standard Variable Names <CMake Developer Standard Variable Names>`):
 
 ``Python_FOUND``

@@ -5,8 +5,12 @@
 FindQt3
 -------
 
-This module finds Qt3, a cross-platform application development framework for
-creating graphical user interfaces and applications.
+Finds Qt3, a cross-platform application development framework for creating
+graphical user interfaces and applications:
+
+.. code-block:: cmake
+
+  find_package(Qt3 [<version>] [...])
 
 .. note::
 
@@ -17,13 +21,13 @@ creating graphical user interfaces and applications.
 Result Variables
 ^^^^^^^^^^^^^^^^
 
-This module sets the following variables:
+This module defines the following variables:
 
 ``Qt3_FOUND``
-  True if Qt3 has been found.
+  Boolean indicating whether Qt3 has been found.
 ``QT_FOUND``
-  True if Qt3 has been found.  This variable is for compatibility with other Qt
-  find modules.
+  Boolean indicating whether Qt3 has been found.  This variable is for
+  compatibility with other Qt find modules.
 ``QT_VERSION_STRING``
   The version of Qt3 that was found.
 ``QT_LIBRARIES``

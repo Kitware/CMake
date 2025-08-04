@@ -8,7 +8,11 @@ FindCABLE
 .. versionchanged:: 4.1
   This module is available only if policy :policy:`CMP0191` is not set to ``NEW``.
 
-Finds the CABLE installation and determines its include paths and libraries.
+Finds the CABLE installation and determines its include paths and libraries:
+
+.. code-block:: cmake
+
+  find_package(CABLE [...])
 
 Package called CABLE (CABLE Automates Bindings for Language Extension) was
 initially developed by Kitware to generate bindings to C++ classes for use in
@@ -25,7 +29,7 @@ package.
 Cache Variables
 ^^^^^^^^^^^^^^^
 
-The following cache variables may be set when using this module:
+The following cache variables may also be set:
 
 ``CABLE``
   Path to the ``cable`` executable.
