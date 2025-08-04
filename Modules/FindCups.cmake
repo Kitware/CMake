@@ -5,7 +5,11 @@
 FindCups
 --------
 
-Finds the Common UNIX Printing System (CUPS).
+Finds the Common UNIX Printing System (CUPS):
+
+.. code-block:: cmake
+
+  find_package(Cups [<version>] [...])
 
 Imported Targets
 ^^^^^^^^^^^^^^^^
@@ -24,12 +28,17 @@ Result Variables
 This module defines the following variables:
 
 ``Cups_FOUND``
-  Boolean indicating whether the CUPS is found.  For backward compatibility, the
-  ``CUPS_FOUND`` variable is also set to the same value.
+  Boolean indicating whether (the requested version of) CUPS is found.  For
+  backward compatibility, the ``CUPS_FOUND`` variable is also set to the
+  same value.
+
+``Cups_VERSION``
+  .. versionadded:: 4.2
+
+  The version of CUPS found.
+
 ``CUPS_INCLUDE_DIRS``
   Include directories needed for using CUPS.
-``CUPS_VERSION_STRING``
-  The version of CUPS found.
 
 Cache Variables
 ^^^^^^^^^^^^^^^
@@ -38,6 +47,7 @@ The following cache variables may also be set:
 
 ``CUPS_INCLUDE_DIR``
   The directory containing the CUPS headers.
+
 ``CUPS_LIBRARIES``
   Libraries needed to link against to use CUPS.
 
@@ -49,6 +59,17 @@ This module accepts the following variables:
 ``CUPS_REQUIRE_IPP_DELETE_ATTRIBUTE``
   Set this variable to ``TRUE`` to require CUPS version which features the
   ``ippDeleteAttribute()`` function (i.e. at least of CUPS ``1.1.19``).
+
+Deprecated Variables
+^^^^^^^^^^^^^^^^^^^^
+
+The following variables are provided for backward compatibility:
+
+``CUPS_VERSION_STRING``
+  .. deprecated:: 4.2
+    Superseded by the ``Cups_VERSION``.
+
+  The version of CUPS found.
 
 Examples
 ^^^^^^^^
@@ -83,19 +104,20 @@ if (CUPS_INCLUDE_DIR AND EXISTS "${CUPS_INCLUDE_DIR}/cups/cups.h")
     file(STRINGS "${CUPS_INCLUDE_DIR}/cups/cups.h" cups_version_str
          REGEX "^#[\t ]*define[\t ]+CUPS_VERSION_(MAJOR|MINOR|PATCH)[\t ]+[0-9]+$")
 
-    unset(CUPS_VERSION_STRING)
+    unset(Cups_VERSION)
     foreach(VPART MAJOR MINOR PATCH)
         foreach(VLINE ${cups_version_str})
             if(VLINE MATCHES "^#[\t ]*define[\t ]+CUPS_VERSION_${VPART}[\t ]+([0-9]+)$")
                 set(CUPS_VERSION_PART "${CMAKE_MATCH_1}")
-                if(CUPS_VERSION_STRING)
-                    string(APPEND CUPS_VERSION_STRING ".${CUPS_VERSION_PART}")
+                if(Cups_VERSION)
+                    string(APPEND Cups_VERSION ".${CUPS_VERSION_PART}")
                 else()
-                    set(CUPS_VERSION_STRING "${CUPS_VERSION_PART}")
+                    set(Cups_VERSION "${CUPS_VERSION_PART}")
                 endif()
             endif()
         endforeach()
     endforeach()
+    set(CUPS_VERSION_STRING ${Cups_VERSION})
 endif ()
 
 include(FindPackageHandleStandardArgs)
@@ -103,11 +125,11 @@ include(FindPackageHandleStandardArgs)
 if (CUPS_REQUIRE_IPP_DELETE_ATTRIBUTE)
     find_package_handle_standard_args(Cups
                                       REQUIRED_VARS CUPS_LIBRARIES CUPS_INCLUDE_DIR CUPS_HAS_IPP_DELETE_ATTRIBUTE
-                                      VERSION_VAR CUPS_VERSION_STRING)
+                                      VERSION_VAR Cups_VERSION)
 else ()
     find_package_handle_standard_args(Cups
                                       REQUIRED_VARS CUPS_LIBRARIES CUPS_INCLUDE_DIR
-                                      VERSION_VAR CUPS_VERSION_STRING)
+                                      VERSION_VAR Cups_VERSION)
 endif ()
 
 mark_as_advanced(CUPS_INCLUDE_DIR CUPS_LIBRARIES)
