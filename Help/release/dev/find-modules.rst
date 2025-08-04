@@ -31,6 +31,9 @@ Find Modules
 * The :module:`FindLTTngUST` module now provides a ``LTTngUST_VERSION`` result
   variable.  The ``LTTNGUST_VERSION_STRING`` result variable is deprecated.
 
+* The :module:`FindOpenSSL` module now provides an ``OpenSSL_VERSION`` result
+  variable.  The ``OPENSSL_VERSION`` result variable is deprecated.
+
 * The :module:`FindPNG` module now provides a ``PNG_VERSION`` result
   variable.  The ``PNG_VERSION_STRING`` result variable is deprecated.
 
