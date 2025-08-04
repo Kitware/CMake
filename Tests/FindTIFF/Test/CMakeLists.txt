@@ -6,6 +6,10 @@ find_package(TIFF REQUIRED COMPONENTS CXX)
 
 add_executable(test_tiff_tgt main.c)
 target_link_libraries(test_tiff_tgt TIFF::TIFF)
+target_compile_definitions(
+  test_tiff_tgt
+  PRIVATE CMAKE_EXPECTED_TIFF_VERSION="${TIFF_VERSION}"
+)
 add_test(NAME test_tiff_tgt COMMAND test_tiff_tgt)
 
 add_executable(test_tiffxx_tgt main.cxx)
@@ -15,6 +19,10 @@ add_test(NAME test_tiffxx_tgt COMMAND test_tiffxx_tgt)
 add_executable(test_tiff_var main.c)
 target_include_directories(test_tiff_var PRIVATE ${TIFF_INCLUDE_DIRS})
 target_link_libraries(test_tiff_var PRIVATE ${TIFF_LIBRARIES})
+target_compile_definitions(
+  test_tiff_var
+  PRIVATE CMAKE_EXPECTED_TIFF_VERSION="${TIFF_VERSION}"
+)
 add_test(NAME test_tiff_var COMMAND test_tiff_var)
 
 add_executable(test_tiffxx_var main.cxx)
