@@ -112,7 +112,7 @@ endforeach()
 
 foreach(
   VTEST
-    ALSA
+    ALSA Armadillo
     BISON Boost BZip2 BZIP2
     CUDA Cups
     DOXYGEN

@@ -4,6 +4,12 @@ Find Modules
 * The :module:`FindALSA` module now provides a ``ALSA_VERSION`` result
   variable.  The ``ALSA_VERSION_STRING`` result variable is deprecated.
 
+* The :module:`FindArmadillo` module now provides an ``Armadillo_VERSION``,
+  and ``Armadillo_VERSION_NAME`` result variables.  The
+  ``ARMADILLO_VERSION_STRING``, ``ARMADILLO_VERSION_MAJOR``,
+  ``ARMADILLO_VERSION_MINOR``, ``ARMADILLO_VERSION_PATCH``, and
+  ``ARMADILLO_VERSION_NAME`` result variables are deprecated.
+
 * The :module:`FindBZip2` module now provides a ``BZip2_VERSION`` result
   variable.  The ``BZIP2_VERSION`` result variable is deprecated.
 
