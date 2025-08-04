@@ -6,7 +6,11 @@ FindBacktrace
 -------------
 
 Finds `backtrace(3) <https://man7.org/linux/man-pages/man3/backtrace.3.html>`_,
-a library that provides functions for application self-debugging.
+a library that provides functions for application self-debugging:
+
+.. code-block:: cmake
+
+  find_package(Backtrace [...])
 
 This module checks whether ``backtrace(3)`` is supported, either through the
 standard C library (``libc``), or a separate library.
@@ -14,11 +18,11 @@ standard C library (``libc``), or a separate library.
 Imported Targets
 ^^^^^^^^^^^^^^^^
 
-.. versionadded:: 3.30
-
 This module provides the following :ref:`Imported Targets`:
 
 ``Backtrace::Backtrace``
+  .. versionadded:: 3.30
+
   An interface library encapsulating the usage requirements of Backtrace.  This
   target is available only when Backtrace is found.
 
@@ -27,12 +31,14 @@ Result Variables
 
 This module defines the following variables:
 
-``Backtrace_INCLUDE_DIRS``
-  The include directories needed to use ``backtrace(3)`` header.
-``Backtrace_LIBRARIES``
-  The libraries (linker flags) needed to use ``backtrace(3)``, if any.
 ``Backtrace_FOUND``
   Boolean indicating whether the ``backtrace(3)`` support is available.
+
+``Backtrace_INCLUDE_DIRS``
+  The include directories needed to use ``backtrace(3)`` header.
+
+``Backtrace_LIBRARIES``
+  The libraries (linker flags) needed to use ``backtrace(3)``, if any.
 
 Cache Variables
 ^^^^^^^^^^^^^^^
@@ -43,10 +49,12 @@ The following cache variables are also available to set or use:
   The header file needed for ``backtrace(3)``.  This variable allows dynamic
   usage of the header in the project code.  It can also be overridden by the
   user.
-``Backtrace_LIBRARY``
-  The external library providing backtrace, if any.
+
 ``Backtrace_INCLUDE_DIR``
   The directory holding the ``backtrace(3)`` header.
+
+``Backtrace_LIBRARY``
+  The external library providing backtrace, if any.
 
 Examples
 ^^^^^^^^
