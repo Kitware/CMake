@@ -118,7 +118,7 @@ foreach(
     DOXYGEN
     EXPAT
     FLEX Freetype
-    GIF GTK2
+    Gettext GIF GTK2
     HDF5
     Jasper JPEG
     LibArchive LibLZMA LIBLZMA LibXml2 LibXslt LTTngUST
