@@ -67,6 +67,8 @@ function(instrument test)
   endif()
   if (ARGS_BUILD_MAKE_PROGRAM)
     set(RunCMake_TEST_OUTPUT_MERGE 1)
+    # Force reconfigure to test for double preBuild & postBuild hooks
+    file(TOUCH ${RunCMake_TEST_BINARY_DIR}/CMakeCache.txt)
     run_cmake_command(${test}-make-program ${RunCMake_MAKE_PROGRAM})
     unset(RunCMake_TEST_OUTPUT_MERGE)
   endif()
@@ -127,6 +129,10 @@ instrument(cmake-command-parallel-install
 instrument(cmake-command-resets-generated NO_WARN
   COPY_QUERIES_GENERATED
   CHECK_SCRIPT check-data-dir.cmake
+)
+instrument(cmake-command-cmake-build NO_WARN
+  BUILD
+  CHECK_SCRIPT check-no-make-program-hooks.cmake
 )
 
 if(RunCMake_GENERATOR STREQUAL "MSYS Makefiles")

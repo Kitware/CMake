@@ -4041,6 +4041,9 @@ int cmake::Build(int jobs, std::string dir, std::vector<std::string> targets,
   };
 
 #if !defined(CMAKE_BOOTSTRAP)
+  // Block the instrumentation build daemon from spawning during this build.
+  // This lock will be released when the process exits at the end of the build.
+  instrumentation.LockBuildDaemon();
   int buildresult =
     instrumentation.InstrumentCommand("cmakeBuild", args, doBuild);
   instrumentation.CollectTimingData(
