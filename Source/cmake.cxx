@@ -2664,7 +2664,6 @@ int cmake::ActualConfigure()
     this->ConfigureLog = cm::make_unique<cmConfigureLog>(
       cmStrCat(this->GetHomeOutputDirectory(), "/CMakeFiles"_s),
       this->FileAPI->GetConfigureLogVersions());
-    this->Instrumentation->LoadQueries();
     this->Instrumentation->CheckCDashVariable();
   }
 #endif
@@ -3109,10 +3108,6 @@ int cmake::Generate()
         << ms.count() / 1000.0L << "s)";
     this->UpdateProgress(msg.str(), -1);
   }
-#if !defined(CMAKE_BOOTSTRAP)
-  this->Instrumentation->CollectTimingData(
-    cmInstrumentationQuery::Hook::PostGenerate);
-#endif
   if (!this->GraphVizFile.empty()) {
     std::cout << "Generate graphviz: " << this->GraphVizFile << '\n';
     this->GenerateGraphViz(this->GraphVizFile);
@@ -3132,6 +3127,8 @@ int cmake::Generate()
   this->SaveCache(this->GetHomeOutputDirectory());
 
 #if !defined(CMAKE_BOOTSTRAP)
+  this->Instrumentation->CollectTimingData(
+    cmInstrumentationQuery::Hook::PostGenerate);
   this->GlobalGenerator->WriteInstallJson();
   this->FileAPI->WriteReplies(cmFileAPI::IndexFor::Success);
 #endif
