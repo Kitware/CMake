@@ -27,6 +27,7 @@ option(SPHINX_LINKCHECK "Check external links mentioned in documentation" OFF)
 option(SPHINX_QTHELP "Build Qt help with Sphinx" OFF)
 option(SPHINX_LATEXPDF "Build PDF help with Sphinx using LaTeX" OFF)
 option(SPHINX_TEXT "Build text help with Sphinx (not installed)" OFF)
+option(SPHINX_INCLUDE_IN_ALL "Build Sphinx documentation by default" ON)
 find_program(SPHINX_EXECUTABLE
   NAMES sphinx-build
   DOC "Sphinx Documentation Builder (sphinx-doc.org)"
@@ -254,7 +255,11 @@ foreach(format IN LISTS doc_formats)
   endif()
 endforeach()
 
-add_custom_target(documentation ALL DEPENDS ${doc_format_outputs})
+if (SPHINX_INCLUDE_IN_ALL)
+  set(add_documentation_to_all ALL)
+endif()
+
+add_custom_target(documentation ${add_documentation_to_all} DEPENDS ${doc_format_outputs})
 
 if(CMake_SPHINX_DEPEND_ON_EXECUTABLES)
   foreach(t IN ITEMS cmake ccmake cmake-gui cpack ctest)
