@@ -931,21 +931,24 @@ bool cmQtAutoGenInitializer::InitRcc()
 
   // Disable zstd if it is not supported
   {
-    std::string const qtFeatureZSTD = "QT_FEATURE_zstd";
-    if (this->GenTarget->Target->GetMakefile()->IsDefinitionSet(
-          qtFeatureZSTD)) {
-      auto const zstdDef =
-        this->GenTarget->Target->GetMakefile()->GetSafeDefinition(
-          qtFeatureZSTD);
-      auto const zstdVal = cmValue(zstdDef);
-      if (zstdVal.IsOff()) {
-        auto const& kw = this->GlobalInitializer->kw();
-        auto rccOptions = this->GenTarget->GetSafeProperty(kw.AUTORCC_OPTIONS);
-        std::string const nozstd = "--no-zstd";
-        if (rccOptions.find(nozstd) == std::string::npos) {
-          rccOptions.append(";" + nozstd + ";");
+    if (this->QtVersion.Major >= 6) {
+      std::string const qtFeatureZSTD = "QT_FEATURE_zstd";
+      if (this->GenTarget->Target->GetMakefile()->IsDefinitionSet(
+            qtFeatureZSTD)) {
+        auto const zstdDef =
+          this->GenTarget->Target->GetMakefile()->GetSafeDefinition(
+            qtFeatureZSTD);
+        auto const zstdVal = cmValue(zstdDef);
+        if (zstdVal.IsOff()) {
+          auto const& kw = this->GlobalInitializer->kw();
+          auto rccOptions =
+            this->GenTarget->GetSafeProperty(kw.AUTORCC_OPTIONS);
+          std::string const nozstd = "--no-zstd";
+          if (rccOptions.find(nozstd) == std::string::npos) {
+            rccOptions.append(";" + nozstd + ";");
+          }
+          this->GenTarget->Target->SetProperty(kw.AUTORCC_OPTIONS, rccOptions);
         }
-        this->GenTarget->Target->SetProperty(kw.AUTORCC_OPTIONS, rccOptions);
       }
     }
   }
