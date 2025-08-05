@@ -5,64 +5,54 @@
 FindRuby
 --------
 
-This module determines if Ruby is installed and finds the locations of its
-include files and libraries. Ruby 1.8 through 3.4 are supported.
-
-The minimum required version of Ruby can be specified using the
-standard syntax, e.g.
+Finds Ruby installation and the locations of its include files and libraries:
 
 .. code-block:: cmake
 
-  find_package(Ruby 3.2.6 EXACT REQUIRED)
-  # OR
-  find_package(Ruby 3.2)
+  find_package(Ruby [<version>] [...])
 
-Virtual environments, such as RVM or RBENV, are supported.
+Ruby is a general-purpose programming language.  This module supports Ruby
+1.8 through 3.4.  Virtual environments, such as RVM or RBENV, are also
+supported.
 
 Result Variables
 ^^^^^^^^^^^^^^^^
 
-This module will set the following variables in your project:
+This module defines the following variables:
 
 ``Ruby_FOUND``
-  set to true if ruby was found successfully
-``Ruby_EXECUTABLE``
-  full path to the ruby binary
-``Ruby_INCLUDE_DIRS``
-  include dirs to be used when using the ruby library
-``Ruby_LIBRARIES``
-  .. versionadded:: 3.18
-    libraries needed to use ruby from C.
+  Boolean indicating whether (the requested version of) ruby is found.
+
 ``Ruby_VERSION``
-  the version of ruby which was found, e.g. "3.2.6"
+  The version of ruby which was found, e.g. ``3.2.6``.
+
 ``Ruby_VERSION_MAJOR``
   Ruby major version.
+
 ``Ruby_VERSION_MINOR``
   Ruby minor version.
+
 ``Ruby_VERSION_PATCH``
   Ruby patch version.
+
+``Ruby_EXECUTABLE``
+  The full path to the ruby binary.
+
+``Ruby_INCLUDE_DIRS``
+  Include dirs to be used when using the ruby library.
+
+``Ruby_LIBRARIES``
+  .. versionadded:: 3.18
+
+  Libraries needed to use ruby from C.
 
 .. versionchanged:: 3.18
   Previous versions of CMake used the ``RUBY_`` prefix for all variables.
 
-.. deprecated:: 4.0
-  The following variables are deprecated.  See policy :policy:`CMP0185`.
-
-  ``RUBY_EXECUTABLE``
-    same as ``Ruby_EXECUTABLE``.
-  ``RUBY_INCLUDE_DIRS``
-    same as ``Ruby_INCLUDE_DIRS``.
-  ``RUBY_INCLUDE_PATH``
-    same as ``Ruby_INCLUDE_DIRS``.
-  ``RUBY_LIBRARY``
-    same as ``Ruby_LIBRARY``.
-  ``RUBY_VERSION``
-    same as ``Ruby_VERSION``.
-  ``RUBY_FOUND``
-    same as ``Ruby_FOUND``.
-
 Hints
 ^^^^^
+
+This module accepts the following variables:
 
 ``Ruby_FIND_VIRTUALENV``
   .. versionadded:: 3.18
@@ -84,6 +74,38 @@ Hints
   ``rbenv``
     Requires that ``rbenv`` is installed in ``~/.rbenv/bin``
     or that the ``RBENV_ROOT`` environment variable is defined.
+
+Deprecated Variables
+^^^^^^^^^^^^^^^^^^^^
+
+The following variables are provided for backward compatibility:
+
+.. deprecated:: 4.0
+  The following variables are deprecated.  See policy :policy:`CMP0185`.
+
+  ``RUBY_FOUND``
+    Same as ``Ruby_FOUND``.
+  ``RUBY_VERSION``
+    Same as ``Ruby_VERSION``.
+  ``RUBY_EXECUTABLE``
+    Same as ``Ruby_EXECUTABLE``.
+  ``RUBY_INCLUDE_DIRS``
+    Same as ``Ruby_INCLUDE_DIRS``.
+  ``RUBY_INCLUDE_PATH``
+    Same as ``Ruby_INCLUDE_DIRS``.
+  ``RUBY_LIBRARY``
+    Same as ``Ruby_LIBRARY``.
+
+Examples
+^^^^^^^^
+
+Finding Ruby and specifying the minimum required version:
+
+.. code-block:: cmake
+
+  find_package(Ruby 3.2.6 EXACT REQUIRED)
+  # or
+  find_package(Ruby 3.2)
 #]=======================================================================]
 
 cmake_policy(GET CMP0185 _Ruby_CMP0185)
