@@ -5,14 +5,47 @@
 FindBLAS
 --------
 
-Find Basic Linear Algebra Subprograms (BLAS) library
+Finds the installed Basic Linear Algebra Subprograms (BLAS) Fortran library,
+which implements the `BLAS linear-algebra interface`_:
 
-This module finds an installed Fortran library that implements the
-`BLAS linear-algebra interface`_.
+.. code-block:: cmake
+
+  find_package(BLAS [...])
 
 At least one of the ``C``, ``CXX``, or ``Fortran`` languages must be enabled.
 
 .. _`BLAS linear-algebra interface`: https://netlib.org/blas/
+
+Imported Targets
+^^^^^^^^^^^^^^^^
+
+This module provides the following :ref:`Imported Targets`:
+
+``BLAS::BLAS``
+  .. versionadded:: 3.18
+
+  Target encapsulating the libraries and usage requirements to use BLAS,
+  available only if BLAS is found.
+
+Result Variables
+^^^^^^^^^^^^^^^^
+
+This module defines the following variables:
+
+``BLAS_FOUND``
+  Boolean indicating whether the library implementing the BLAS interface is
+  found.
+``BLAS_LINKER_FLAGS``
+  Uncached list of required linker flags (excluding ``-l`` and ``-L``).
+``BLAS_LIBRARIES``
+  Uncached list of libraries (using full path name) to link against
+  to use BLAS (may be empty if compiler implicitly links BLAS).
+``BLAS95_LIBRARIES``
+  Uncached list of libraries (using full path name) to link against
+  to use BLAS95 interface.
+``BLAS95_FOUND``
+  Boolean indicating whether the library implementing the BLAS95 interface
+  is found.
 
 Input Variables
 ^^^^^^^^^^^^^^^
@@ -20,19 +53,19 @@ Input Variables
 The following variables may be set to influence this module's behavior:
 
 ``BLA_STATIC``
-  if ``ON`` use static linkage
+  If ``ON``, the static linkage will be used.
 
 ``BLA_VENDOR``
   Set to one of the :ref:`BLAS/LAPACK Vendors` to search for BLAS only
   from the specified vendor.  If not set, all vendors are considered.
 
 ``BLA_F95``
-  if ``ON`` tries to find the BLAS95 interfaces
+  If ``ON``, the module tries to find the BLAS95 interfaces.
 
 ``BLA_PREFER_PKGCONFIG``
   .. versionadded:: 3.11
 
-  if set ``pkg-config`` will be used to search for a BLAS library first
+  If set, ``pkg-config`` will be used to search for a BLAS library first
   and if one is found that is preferred
 
 ``BLA_PKGCONFIG_BLAS``
@@ -69,41 +102,13 @@ The following variables may be set to influence this module's behavior:
 
   This is currently only supported by NVIDIA NVPL.
 
-Imported Targets
-^^^^^^^^^^^^^^^^
-
-This module defines the following :prop_tgt:`IMPORTED` targets:
-
-``BLAS::BLAS``
-  .. versionadded:: 3.18
-
-  The libraries to use for BLAS, if found.
-
-Result Variables
-^^^^^^^^^^^^^^^^
-
-This module defines the following variables:
-
-``BLAS_FOUND``
-  library implementing the BLAS interface is found
-``BLAS_LINKER_FLAGS``
-  uncached list of required linker flags (excluding ``-l`` and ``-L``).
-``BLAS_LIBRARIES``
-  uncached list of libraries (using full path name) to link against
-  to use BLAS (may be empty if compiler implicitly links BLAS)
-``BLAS95_LIBRARIES``
-  uncached list of libraries (using full path name) to link against
-  to use BLAS95 interface
-``BLAS95_FOUND``
-  library implementing the BLAS95 interface is found
-
 .. _`BLAS/LAPACK Vendors`:
 
 BLAS/LAPACK Vendors
 ^^^^^^^^^^^^^^^^^^^
 
 ``Generic``
-  Generic reference implementation
+  Generic reference implementation.
 
 ``ACML``, ``ACML_MP``, ``ACML_GPU``
   AMD Core Math Library
@@ -111,31 +116,31 @@ BLAS/LAPACK Vendors
 ``AOCL``, ``AOCL_mt``
   .. versionadded:: 3.27
 
-  AMD Optimizing CPU Libraries
+  AMD Optimizing CPU Libraries.
 
 ``Apple``, ``NAS``
-  Apple BLAS (Accelerate), and Apple NAS (vecLib)
+  Apple BLAS (Accelerate), and Apple NAS (vecLib).
 
 ``Arm``, ``Arm_mp``, ``Arm_ilp64``, ``Arm_ilp64_mp``
   .. versionadded:: 3.18
 
-  Arm Performance Libraries
+  Arm Performance Libraries.
 
 ``ATLAS``
-  Automatically Tuned Linear Algebra Software
+  Automatically Tuned Linear Algebra Software.
 
 ``CXML``, ``DXML``
-  Compaq/Digital Extended Math Library
+  Compaq/Digital Extended Math Library.
 
 ``EML``, ``EML_mt``
   .. versionadded:: 3.20
 
-  Elbrus Math Library
+  Elbrus Math Library.
 
 ``FLAME``
   .. versionadded:: 3.11
 
-  BLIS Framework
+  BLIS Framework.
 
 ``FlexiBLAS``
   .. versionadded:: 3.19
@@ -143,71 +148,71 @@ BLAS/LAPACK Vendors
 ``Fujitsu_SSL2``, ``Fujitsu_SSL2BLAMP``, ``Fujitsu_SSL2SVE``, ``Fujitsu_SSL2BLAMPSVE``
   .. versionadded:: 3.20
 
-  Fujitsu SSL2 serial and parallel blas/lapack with SVE instructions
+  Fujitsu SSL2 serial and parallel blas/lapack with SVE instructions.
 
 ``Goto``
-  GotoBLAS
+  GotoBLAS.
 
 ``IBMESSL``, ``IBMESSL_SMP``
 
-  IBM Engineering and Scientific Subroutine Library
+  IBM Engineering and Scientific Subroutine Library.
 
 ``Intel``
-  Intel MKL 32 bit and 64 bit obsolete versions
+  Intel MKL 32 bit and 64 bit obsolete versions.
 
 ``Intel10_32``
-  Intel MKL v10 32 bit, threaded code
+  Intel MKL v10 32 bit, threaded code.
 
 ``Intel10_64lp``
-  Intel MKL v10+ 64 bit, threaded code, lp64 model
+  Intel MKL v10+ 64 bit, threaded code, lp64 model.
 
 ``Intel10_64lp_seq``
-  Intel MKL v10+ 64 bit, sequential code, lp64 model
+  Intel MKL v10+ 64 bit, sequential code, lp64 model.
 
 ``Intel10_64ilp``
   .. versionadded:: 3.13
 
-  Intel MKL v10+ 64 bit, threaded code, ilp64 model
+  Intel MKL v10+ 64 bit, threaded code, ilp64 model.
 
 ``Intel10_64ilp_seq``
   .. versionadded:: 3.13
 
-  Intel MKL v10+ 64 bit, sequential code, ilp64 model
+  Intel MKL v10+ 64 bit, sequential code, ilp64 model.
 
 ``Intel10_64_dyn``
   .. versionadded:: 3.17
 
-  Intel MKL v10+ 64 bit, single dynamic library
+  Intel MKL v10+ 64 bit, single dynamic library.
 
 ``libblastrampoline``
   .. versionadded:: 3.30
 
-  A BLAS/LAPACK demuxing library using PLT trampolines
+  A BLAS/LAPACK demuxing library using PLT trampolines.
 
 ``NVPL``
   .. versionadded:: 4.1
 
-  NVIDIA Performance Libraries
+  NVIDIA Performance Libraries.
 
 ``NVHPC``
   .. versionadded:: 3.21
 
-  NVIDIA HPC SDK
+  NVIDIA HPC SDK.
 
 ``OpenBLAS``
   .. versionadded:: 3.6
 
 ``PhiPACK``
-  Portable High Performance ANSI C (PHiPAC)
+  Portable High Performance ANSI C (PHiPAC).
 
 ``SCSL``, ``SCSL_mp``
-  Scientific Computing Software Library
+  Scientific Computing Software Library.
 
 ``SGIMATH``
-  SGI Scientific Mathematical Library
+  SGI Scientific Mathematical Library.
 
 ``SunPerf``
-  Sun Performance Library
+  Sun Performance Library.
 
 .. _`Intel MKL`:
 
@@ -270,6 +275,15 @@ linked against MKL to run.
 
     . /opt/intel/oneapi/compiler/latest/env/vars.sh
 
+Examples
+^^^^^^^^
+
+Finding BLAS and linking it to a project target:
+
+.. code-block:: cmake
+
+  find_package(BLAS)
+  target_link_libraries(example PRIVATE BLAS::BLAS)
 #]=======================================================================]
 
 # The approach follows that of the ``autoconf`` macro file, ``acx_blas.m4``
