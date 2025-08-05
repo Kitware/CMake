@@ -1578,7 +1578,8 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement(
   }
 
   // Add dependencies on swiftmodule files when using the swift linker
-  if (this->TargetLinkLanguage(config) == "Swift") {
+  if (!this->GetLocalGenerator()->IsSplitSwiftBuild() &&
+      this->TargetLinkLanguage(config) == "Swift") {
     if (cmComputeLinkInformation* cli =
           this->GeneratorTarget->GetLinkInformation(config)) {
       for (auto const& dependency : cli->GetItems()) {
