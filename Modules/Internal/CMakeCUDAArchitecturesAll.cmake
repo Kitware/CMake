@@ -76,7 +76,7 @@ function(cmake_cuda_architectures_all lang lang_var_)
     list(REMOVE_ITEM CMAKE_CUDA_ARCHITECTURES_ALL_MAJOR 35)
   endif()
 
-  if(${lang_var_}TOOLKIT_VERSION VERSION_GREATER_EQUAL 12.8)
+  if(${lang_var_}TOOLKIT_VERSION VERSION_GREATER_EQUAL 12.8 AND ${lang_var_}TOOLKIT_VERSION VERSION_LESS 12.9)
     if(CMAKE_${lang}_COMPILER_ID STREQUAL "NVIDIA"
         OR (CMAKE_${lang}_COMPILER_ID STREQUAL "Clang" AND CMAKE_${lang}_COMPILER_VERSION VERSION_GREATER_EQUAL 20.1)
         )
@@ -89,7 +89,8 @@ function(cmake_cuda_architectures_all lang lang_var_)
     if(CMAKE_${lang}_COMPILER_ID STREQUAL "NVIDIA"
         OR (CMAKE_${lang}_COMPILER_ID STREQUAL "Clang" AND CMAKE_${lang}_COMPILER_VERSION VERSION_GREATER_EQUAL 21.1)
         )
-      list(APPEND CMAKE_CUDA_ARCHITECTURES_ALL 103 121)
+      list(APPEND CMAKE_CUDA_ARCHITECTURES_ALL 100 101 103 120 121)
+      list(APPEND CMAKE_CUDA_ARCHITECTURES_ALL_MAJOR 100 120)
     endif()
   endif()
 
