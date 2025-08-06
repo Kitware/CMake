@@ -43,6 +43,10 @@ Find Modules
 * The :module:`FindLTTngUST` module now provides a ``LTTngUST_VERSION`` result
   variable.  The ``LTTNGUST_VERSION_STRING`` result variable is deprecated.
 
+* The :module:`FindOpenSceneGraph` module now provides an
+  ``OpenSceneGraph_VERSION`` result variable.  The ``OPENSCENEGRAPH_VERSION``
+  result variable is deprecated.
+
 * The :module:`FindOpenSSL` module now provides an ``OpenSSL_VERSION`` result
   variable.  The ``OPENSSL_VERSION`` result variable is deprecated.
 

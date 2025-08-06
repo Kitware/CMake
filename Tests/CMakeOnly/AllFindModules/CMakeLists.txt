@@ -122,7 +122,7 @@ foreach(
     HDF5
     Jasper JPEG
     LibArchive LibLZMA LIBLZMA LibXml2 LibXslt LTTngUST
-    OPENSCENEGRAPH OpenSSL OPENSSL
+    OpenSceneGraph OPENSCENEGRAPH OpenSSL OPENSSL
     PNG PostgreSQL Protobuf
     Ruby RUBY
     SDL SWIG
