@@ -10,7 +10,7 @@ messages:
 
 .. code-block:: cmake
 
-  find_package(Gettext [<version>] ...)
+  find_package(Gettext [<version>] [...])
 
 GNU gettext is a system for internationalization (i18n) and localization
 (l10n), consisting of command-line tools and a runtime library (``libintl``).
@@ -40,7 +40,9 @@ This module defines the following variables:
   backward compatibility, the ``GETTEXT_FOUND`` variable is also set to the same
   value.
 
-``GETTEXT_VERSION_STRING``
+``Gettext_VERSION``
+  .. versionadded:: 4.2
+
   The version of gettext found.
 
 Cache Variables
@@ -193,6 +195,17 @@ gettext is found:
   .. note::
     For better control over build and installation behavior, use
     :command:`gettext_process_po_files` instead.
+
+Deprecated Variables
+^^^^^^^^^^^^^^^^^^^^
+
+The following variables are provided for backward compatibility:
+
+``GETTEXT_VERSION_STRING``
+  .. deprecated:: 4.2
+    Superseded by the ``Gettext_VERSION``.
+
+  The version of gettext found.
 
 Examples
 ^^^^^^^^
@@ -398,7 +411,8 @@ if(GETTEXT_MSGMERGE_EXECUTABLE)
   get_filename_component(msgmerge_name ${GETTEXT_MSGMERGE_EXECUTABLE} NAME)
   get_filename_component(msgmerge_namewe ${GETTEXT_MSGMERGE_EXECUTABLE} NAME_WE)
   if(gettext_version MATCHES "^(${msgmerge_name}|${msgmerge_namewe}) \\([^\\)]*\\) ([0-9\\.]+[^ \n]*)")
-    set(GETTEXT_VERSION_STRING "${CMAKE_MATCH_2}")
+    set(Gettext_VERSION "${CMAKE_MATCH_2}")
+    set(GETTEXT_VERSION_STRING "${Gettext_VERSION}")
   endif()
   unset(gettext_version)
   unset(msgmerge_name)
@@ -408,7 +422,7 @@ endif()
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(Gettext
                                   REQUIRED_VARS GETTEXT_MSGMERGE_EXECUTABLE GETTEXT_MSGFMT_EXECUTABLE
-                                  VERSION_VAR GETTEXT_VERSION_STRING)
+                                  VERSION_VAR Gettext_VERSION)
 
 function(_GETTEXT_GET_UNIQUE_TARGET_NAME _name _unique_name)
   set(propertyName "_GETTEXT_UNIQUE_COUNTER_${_name}")

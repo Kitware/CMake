@@ -25,6 +25,9 @@ Find Modules
 * The :module:`FindFreetype` module now provides a ``Freetype_VERSION`` result
   variable.  The ``FREETYPE_VERSION_STRING`` result variable is deprecated.
 
+* The :module:`FindGettext` module now provides a ``Gettext_VERSION`` result
+  variable.  The ``GETTEXT_VERSION_STRING`` result variable is deprecated.
+
 * The :module:`FindJasper` module now provides a ``Jasper_VERSION`` result
   variable.  The ``JASPER_VERSION_STRING`` result variable is deprecated.
 
