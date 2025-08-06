@@ -5,7 +5,11 @@
 FindOpenSSL
 -----------
 
-Finds the installed OpenSSL encryption library and determines its version.
+Finds the installed OpenSSL encryption library and determines its version:
+
+.. code-block:: cmake
+
+  find_package(OpenSSL [<version>] [COMPONENTS <components>...] [...])
 
 .. versionadded:: 3.20
   Support for specifying version range when calling the :command:`find_package`
@@ -95,23 +99,34 @@ Result Variables
 This module defines the following variables:
 
 ``OpenSSL_FOUND``
-  Boolean indicating whether the OpenSSL library has been found.  For backward
-  compatibility, the ``OPENSSL_FOUND`` variable is also set to the same value.
+  Boolean indicating whether (the requested version of) OpenSSL library has
+  been found.  For backward compatibility, the ``OPENSSL_FOUND`` variableđ
+  is also set to the same value.
+
+``OpenSSL_VERSION``
+  .. versionadded:: 4.2
+
+  The OpenSSL version found.  This is set to
+  ``<major>.<minor>.<revision><patch>`` (e.g., ``0.9.8s``).
+
 ``OPENSSL_INCLUDE_DIR``
   The OpenSSL include directory.
+
 ``OPENSSL_CRYPTO_LIBRARY``
   The OpenSSL ``crypto`` library.
+
 ``OPENSSL_CRYPTO_LIBRARIES``
   The OpenSSL ``crypto`` library and its dependencies.
+
 ``OPENSSL_SSL_LIBRARY``
   The OpenSSL ``ssl`` library.
+
 ``OPENSSL_SSL_LIBRARIES``
   The OpenSSL ``ssl`` library and its dependencies.
+
 ``OPENSSL_LIBRARIES``
   All OpenSSL libraries and their dependencies.
-``OPENSSL_VERSION``
-  The OpenSSL version found.  This is set to
-  ``<major>.<minor>.<revision><patch>`` (e.g. ``0.9.8s``).
+
 ``OPENSSL_APPLINK_SOURCE``
   The sources in the target ``OpenSSL::applink`` mentioned above.  This variable
   is only defined if found OpenSSL version is at least 0.9.8 and the platform is
@@ -141,6 +156,17 @@ This module accepts the following variables to control the search behavior:
   On UNIX-like systems, ``pkg-config`` is used to locate OpenSSL.  Set the
   ``PKG_CONFIG_PATH`` environment variable to specify alternate locations, which
   is useful on systems with multiple library installations.
+
+Deprecated Variables
+^^^^^^^^^^^^^^^^^^^^
+
+The following variables are provided for backward compatibility:
+
+``OPENSSL_VERSION``
+  .. deprecated:: 4.2
+    Superseded by the ``OpenSSL_VERSION``.
+
+  The version of OpenSSL found.
 
 Examples
 ^^^^^^^^
@@ -661,7 +687,8 @@ if(OPENSSL_INCLUDE_DIR AND EXISTS "${OPENSSL_INCLUDE_DIR}/openssl/opensslv.h")
       string(ASCII "${OPENSSL_VERSION_PATCH_ASCII}" OPENSSL_VERSION_PATCH_STRING)
     endif ()
 
-    set(OPENSSL_VERSION "${OPENSSL_VERSION_MAJOR}.${OPENSSL_VERSION_MINOR}.${OPENSSL_VERSION_FIX}${OPENSSL_VERSION_PATCH_STRING}")
+    set(OpenSSL_VERSION "${OPENSSL_VERSION_MAJOR}.${OPENSSL_VERSION_MINOR}.${OPENSSL_VERSION_FIX}${OPENSSL_VERSION_PATCH_STRING}")
+    set(OPENSSL_VERSION "${OpenSSL_VERSION}")
   else ()
     # Since OpenSSL 3.0.0, the new version format is MAJOR.MINOR.PATCH and
     # a new OPENSSL_VERSION_STR macro contains exactly that
@@ -670,10 +697,11 @@ if(OPENSSL_INCLUDE_DIR AND EXISTS "${OPENSSL_INCLUDE_DIR}/openssl/opensslv.h")
     string(REGEX REPLACE "^.*OPENSSL_VERSION_STR[\t ]+\"([0-9]+\\.[0-9]+\\.[0-9]+)\".*$"
            "\\1" OPENSSL_VERSION_STR "${OPENSSL_VERSION_STR}")
 
-    set(OPENSSL_VERSION "${OPENSSL_VERSION_STR}")
+    set(OpenSSL_VERSION "${OPENSSL_VERSION_STR}")
+    set(OPENSSL_VERSION "${OpenSSL_VERSION}")
 
     # Setting OPENSSL_VERSION_MAJOR OPENSSL_VERSION_MINOR and OPENSSL_VERSION_FIX
-    string(REGEX MATCHALL "([0-9])+" OPENSSL_VERSION_NUMBER "${OPENSSL_VERSION}")
+    string(REGEX MATCHALL "([0-9])+" OPENSSL_VERSION_NUMBER "${OpenSSL_VERSION}")
     list(POP_FRONT OPENSSL_VERSION_NUMBER
       OPENSSL_VERSION_MAJOR
       OPENSSL_VERSION_MINOR
@@ -718,7 +746,7 @@ find_package_handle_standard_args(OpenSSL
     OPENSSL_CRYPTO_LIBRARY
     OPENSSL_INCLUDE_DIR
   VERSION_VAR
-    OPENSSL_VERSION
+    OpenSSL_VERSION
   HANDLE_VERSION_RANGE
   HANDLE_COMPONENTS
   FAIL_MESSAGE
