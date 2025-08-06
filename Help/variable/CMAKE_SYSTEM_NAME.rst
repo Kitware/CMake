@@ -104,3 +104,15 @@ Platform-specific notes:
 * Cygwin's ``cmake`` package (``/usr/bin/cmake``) uses system name ``CYGWIN``.
   A non-cygwin CMake on Windows (e.g. ``$PROGRAMFILES/CMake/bin/cmake``)
   uses system name ``Windows`` even when it runs under a Cygwin environment.
+
+Removed Platforms
+^^^^^^^^^^^^^^^^^
+
+The following platforms were once supported by CMake and got removed either due
+to platform's EOL, or other incompatibilities:
+
+========================= ===================================== ================
+Value                     Name                                  Removed in CMake
+========================= ===================================== ================
+``kFreeBSD``              FreeBSD kernel with a GNU userland    4.1
+========================= ===================================== ================
