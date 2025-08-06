@@ -7,7 +7,11 @@ FindGSL
 
 .. versionadded:: 3.2
 
-Finds the native GNU Scientific Library (GSL) includes and libraries.
+Finds the native GNU Scientific Library (GSL) includes and libraries:
+
+.. code-block:: cmake
+
+  find_package(GSL [<version>] [...])
 
 The GNU Scientific Library (GSL) is a numerical library for C and C++
 programmers. It is free software under the GNU General Public
@@ -16,43 +20,31 @@ License.
 Imported Targets
 ^^^^^^^^^^^^^^^^
 
-If GSL is found, this module defines the following :ref:`Imported Targets`:
+This module provides the following :ref:`Imported Targets`:
 
 ``GSL::gsl``
-  The main GSL library that provides all usage requirements to use GSL.
+  Target encapsulating the main GSL library and all usage requirements,
+  available only if GSL is found.
+
 ``GSL::gslcblas``
-  The CBLAS support library used by GSL.  It is linked also into the
-  ``GSL::gsl`` target but provided separately for granularity.
+  Target encapsulating the usage requirements of the CBLAS support library
+  used by GSL.  This target is available if GSL is found.  It is linked also
+  into the ``GSL::gsl`` target but provided separately for granularity.
 
 Result Variables
 ^^^^^^^^^^^^^^^^
 
-This module will set the following variables in the project:
+This module defines the following variables:
 
 ``GSL_FOUND``
-  True if GSL is found on the local system.
+  Boolean indicating whether (the requested version of) GSL is found on the
+  local system.
+``GSL_VERSION``
+  The version of the discovered GSL installation.
 ``GSL_INCLUDE_DIRS``
   Directory containing GSL header files.
 ``GSL_LIBRARIES``
   The GSL libraries.
-``GSL_VERSION``
-  The version of the discovered GSL installation.
-
-Hints
-^^^^^
-
-``GSL_ROOT_DIR``
-  Set this variable to a directory that contains a GSL installation.
-
-  If this variable is not set, this module will use pkg-config and default paths
-  to find GSL.  If this variable is provided, then this module expects to find
-  libraries at ``${GSL_ROOT_DIR}/lib`` and the GSL headers at
-  ``${GSL_ROOT_DIR}/include/gsl``.
-
-  The library directory may optionally provide Release and Debug folders.  If
-  available, the libraries named ``gsld``, ``gslblasd`` or ``cblasd`` are
-  recognized as debug libraries.  For Unix-like systems, this module will also
-  use ``gsl-config`` (if found) to aid in the discovery of GSL.
 
 Cache Variables
 ^^^^^^^^^^^^^^^
@@ -71,6 +63,24 @@ help this module find the correct files:
   Location of the GSL library.
 ``GSL_LIBRARY_DEBUG``
   Location of the debug GSL library (if any).
+
+Hints
+^^^^^
+
+This module accepts the following variables:
+
+``GSL_ROOT_DIR``
+  Set this variable to a directory that contains a GSL installation.
+
+  If this variable is not set, this module will use pkg-config and default paths
+  to find GSL.  If this variable is provided, then this module expects to find
+  libraries at ``${GSL_ROOT_DIR}/lib`` and the GSL headers at
+  ``${GSL_ROOT_DIR}/include/gsl``.
+
+  The library directory may optionally provide Release and Debug folders.  If
+  available, the libraries named ``gsld``, ``gslblasd`` or ``cblasd`` are
+  recognized as debug libraries.  For Unix-like systems, this module will also
+  use ``gsl-config`` (if found) to aid in the discovery of GSL.
 
 Examples
 ^^^^^^^^
@@ -174,8 +184,6 @@ if( NOT GSL_VERSION )
 endif()
 
 #=============================================================================
-# handle the QUIETLY and REQUIRED arguments and set GSL_FOUND to TRUE if all
-# listed variables are TRUE
 find_package_handle_standard_args( GSL
   REQUIRED_VARS
     GSL_INCLUDE_DIR
