@@ -98,8 +98,7 @@ Enabling Instrumentation for CDash Submissions
 ----------------------------------------------
 
 You can enable instrumentation when using CTest in :ref:`Dashboard Client`
-mode by setting the :envvar:`CTEST_USE_INSTRUMENTATION` environment variable
-to the current UUID for the ``CMAKE_EXPERIMENTAL_INSTRUMENTATION`` feature.
+mode by setting the :envvar:`CTEST_USE_INSTRUMENTATION` environment variable.
 Doing so automatically enables the ``dynamicSystemInformation`` option.
 
 The following table shows how each type of instrumented command gets mapped
