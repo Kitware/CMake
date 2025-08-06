@@ -2,6 +2,14 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmSetCommand.h"
 
+#include <algorithm>
+
+#include <cm/optional>
+#include <cm/string_view>
+#include <cmext/string_view>
+
+#include "cmArgumentParser.h"
+#include "cmArgumentParserTypes.h"
 #include "cmExecutionStatus.h"
 #include "cmList.h"
 #include "cmMakefile.h"
@@ -22,8 +30,8 @@ bool cmSetCommand(std::vector<std::string> const& args,
     return false;
   }
 
-  // watch for ENV signatures
   auto const& variable = args[0]; // VAR is always first
+  // watch for ENV{} signature
   if (cmHasLiteralPrefix(variable, "ENV{") && variable.size() > 5) {
     // what is the variable name
     auto const& varName = variable.substr(4, variable.size() - 5);
@@ -55,6 +63,81 @@ bool cmSetCommand(std::vector<std::string> const& args,
     if (currValueSet) {
       cmSystemTools::PutEnv(putEnvArg);
     }
+    return true;
+  }
+
+  // watch for CACHE{} signature
+  if (cmHasLiteralPrefix(variable, "CACHE{") && variable.size() > 7 &&
+      cmHasLiteralSuffix(variable, "}")) {
+    // what is the variable name
+    auto const& varName = variable.substr(6, variable.size() - 7);
+    // VALUE handling
+    auto valueArg = std::find(args.cbegin() + 1, args.cend(), "VALUE");
+    if (valueArg == args.cend()) {
+      status.SetError("Required argument 'VALUE' is missing.");
+      return false;
+    }
+    auto value = cmMakeRange(valueArg + 1, args.cend());
+    // Handle options
+    struct Arguments : public ArgumentParser::ParseResult
+    {
+      ArgumentParser::Continue validateTypeValue(cm::string_view type)
+      {
+        if (!cmState::StringToCacheEntryType(std::string{ type },
+                                             this->Type)) {
+          this->AddKeywordError("TYPE"_s,
+                                cmStrCat("Invalid value: ", type, '.'));
+        }
+        return ArgumentParser::Continue::No;
+      }
+      cmStateEnums::CacheEntryType Type = cmStateEnums::UNINITIALIZED;
+      cm::optional<ArgumentParser::NonEmpty<std::vector<std::string>>> Help;
+      bool Force = false;
+    };
+    static auto const optionsParser =
+      cmArgumentParser<Arguments>{}
+        .Bind("TYPE"_s, &Arguments::validateTypeValue)
+        .Bind("HELP"_s, &Arguments::Help)
+        .Bind("FORCE"_s, &Arguments::Force);
+    std::vector<std::string> unrecognizedArguments;
+    auto parsedArgs = optionsParser.Parse(
+      cmMakeRange(args.cbegin() + 1, valueArg), &unrecognizedArguments);
+    if (!unrecognizedArguments.empty()) {
+      status.SetError(cmStrCat("Called with unsupported argument(s): ",
+                               cmJoin(unrecognizedArguments, ",  "_s), '.'));
+      return false;
+    }
+    if (parsedArgs.MaybeReportError(status.GetMakefile())) {
+      return false;
+    }
+
+    // see if this is already in the cache
+    cmState* state = status.GetMakefile().GetState();
+    cmValue existingValue = state->GetCacheEntryValue(varName);
+    cmStateEnums::CacheEntryType existingType =
+      state->GetCacheEntryType(varName);
+    if (parsedArgs.Type == cmStateEnums::UNINITIALIZED) {
+      parsedArgs.Type = existingType == cmStateEnums::UNINITIALIZED
+        ? cmStateEnums::STRING
+        : existingType;
+    }
+    std::string help = parsedArgs.Help
+      ? cmJoin(*parsedArgs.Help, "")
+      : *state->GetCacheEntryProperty(varName, "HELPSTRING");
+    if (existingValue && existingType != cmStateEnums::UNINITIALIZED) {
+      // if the set is trying to CACHE the value but the value
+      // is already in the cache and the type is not internal
+      // then leave now without setting any definitions in the cache
+      // or the makefile
+      if (parsedArgs.Type != cmStateEnums::INTERNAL && !parsedArgs.Force) {
+        return true;
+      }
+    }
+
+    status.GetMakefile().AddCacheDefinition(
+      varName,
+      valueArg == args.cend() ? *existingValue : cmList::to_string(value),
+      help, parsedArgs.Type, parsedArgs.Force);
     return true;
   }
 
