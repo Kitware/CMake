@@ -58,3 +58,6 @@ Find Modules
   modules now provide their respective ``<PackageName>_VERSION`` result
   variables. Previous ``<PACKAGENAME>_VERSION_STRING`` result variables
   are deprecated.
+
+* The :module:`FindTIFF` module now provides a ``TIFF_VERSION`` result
+  variable.  The ``TIFF_VERSION_STRING`` result variable is deprecated.

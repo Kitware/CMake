@@ -126,6 +126,7 @@ foreach(
     PNG PostgreSQL Protobuf
     Ruby RUBY
     SDL SWIG
+    TIFF
     ZLIB
 )
   check_version_string(${VTEST} ${VTEST}_VERSION)
