@@ -6,15 +6,19 @@ FindWget
 --------
 
 This module finds the ``wget`` command-line tool for retrieving content from web
-servers.
+servers:
+
+.. code-block:: cmake
+
+  find_package(Wget [...])
 
 Result Variables
 ^^^^^^^^^^^^^^^^
 
-This module defines the following local variables:
+This module defines the following variables:
 
 ``Wget_FOUND``
-  True if ``wget`` has been found.
+  Boolean indicating whether ``wget`` has been found.
 
 Cache Variables
 ^^^^^^^^^^^^^^^

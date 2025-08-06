@@ -7,7 +7,11 @@ FindXCTest
 
 .. versionadded:: 3.3
 
-Finds the XCTest framework for writing unit tests in Xcode projects.
+Finds the XCTest framework for writing unit tests in Xcode projects:
+
+.. code-block:: cmake
+
+  find_package(XCTest [...])
 
 .. note::
 

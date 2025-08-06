@@ -6,7 +6,11 @@ FindQuickTime
 -------------
 
 Finds the QuickTime multimedia framework, which provides support for video,
-audio, and interactive media.
+audio, and interactive media:
+
+.. code-block:: cmake
+
+  find_package(QuickTime [...])
 
 .. note::
 
@@ -48,11 +52,24 @@ This module accepts the following variables:
 Examples
 ^^^^^^^^
 
-Finding QuickTime library:
+Finding QuickTime library and creating an imported interface target for
+linking it to a project target:
 
 .. code-block:: cmake
 
   find_package(QuickTime)
+
+  if(QuickTime_FOUND AND NOT TARGET QuickTime::QuickTime)
+    add_library(QuickTime::QuickTime INTERFACE IMPORTED)
+    set_target_properties(
+      QuickTime::QuickTime
+      PROPERTIES
+        INTERFACE_INCLUDE_DIRECTORIES "${QUICKTIME_INCLUDE_DIR}"
+        INTERFACE_LINK_LIBRARIES "${QUICKTIME_LIBRARY}"
+    )
+  endif()
+
+  target_link_libraries(example PRIVATE QuickTime::QuickTime)
 #]=======================================================================]
 
 find_path(QUICKTIME_INCLUDE_DIR QuickTime/QuickTime.h QuickTime.h

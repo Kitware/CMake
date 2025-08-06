@@ -7,9 +7,14 @@ FindIconv
 
 .. versionadded:: 3.11
 
-This module finds the ``iconv()`` POSIX.1 functions on the system.  These
-functions might be provided in the standard C library or externally in the form
-of an additional library.
+Finds the ``iconv()`` POSIX.1 functions on the system:
+
+.. code-block:: cmake
+
+  find_package(Iconv [<version>] [...])
+
+Iconv functions might be provided in the standard C library or externally
+in the form of an additional library.
 
 Imported Targets
 ^^^^^^^^^^^^^^^^
@@ -26,13 +31,8 @@ Result Variables
 This module defines the following variables:
 
 ``Iconv_FOUND``
-  Boolean indicating if the iconv support was found.
-
-``Iconv_INCLUDE_DIRS``
-  The include directories containing the iconv headers.
-
-``Iconv_LIBRARIES``
-  The iconv libraries to be linked.
+  Boolean indicating whether the (requested version of) iconv support was
+  found.
 
 ``Iconv_VERSION``
   .. versionadded:: 3.21
@@ -53,16 +53,22 @@ This module defines the following variables:
 
   The minor version of iconv.
 
-``Iconv_IS_BUILT_IN``
-  A boolean variable indicating whether iconv support is stemming from the C
-  standard library or not.  Even if the C library provides ``iconv()``, the
-  presence of an external ``libiconv`` implementation might lead to this being
-  false.
+``Iconv_INCLUDE_DIRS``
+  The include directories containing the iconv headers.
+
+``Iconv_LIBRARIES``
+  The iconv libraries to be linked.
 
 Cache Variables
 ^^^^^^^^^^^^^^^
 
 The following cache variables may also be set:
+
+``Iconv_IS_BUILT_IN``
+  A boolean variable indicating whether iconv support is stemming from the C
+  standard library or not.  Even if the C library provides ``iconv()``, the
+  presence of an external ``libiconv`` implementation might lead to this being
+  false.
 
 ``Iconv_INCLUDE_DIR``
   The directory containing the iconv headers.

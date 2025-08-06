@@ -17,7 +17,7 @@ user space tracing library (LTTng-UST):
 Imported Targets
 ^^^^^^^^^^^^^^^^
 
-This module defines the following :ref:`Imported Targets`:
+This module provides the following :ref:`Imported Targets`:
 
 ``LTTng::UST``
   Target providing the LTTng-UST library usage requirements.  This target is
@@ -26,7 +26,7 @@ This module defines the following :ref:`Imported Targets`:
 Result Variables
 ^^^^^^^^^^^^^^^^
 
-This module sets the following variables:
+This module defines the following variables:
 
 ``LTTngUST_FOUND``
   Boolean indicating whether the LTTng-UST library is found.  For backward

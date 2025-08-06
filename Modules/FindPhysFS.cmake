@@ -5,7 +5,11 @@
 FindPhysFS
 ----------
 
-Finds the PhysicsFS library (PhysFS) for file I/O abstraction.
+Finds the PhysicsFS library (PhysFS) for file I/O abstraction:
+
+.. code-block:: cmake
+
+  find_package(PhysFS [...])
 
 Result Variables
 ^^^^^^^^^^^^^^^^
@@ -21,11 +25,11 @@ Cache Variables
 
 The following cache variables may also be set:
 
+``PHYSFS_INCLUDE_DIR``
+  Directory containing the ``<physfs.h>`` and related headers needed for using
+  the library.
 ``PHYSFS_LIBRARY``
   Path to the PhysicsFS library needed to link against.
-``PHYSFS_INCLUDE_DIR``
-  Directory containing the ``physfs.h`` and related headers needed for using
-  the library.
 
 Hints
 ^^^^^

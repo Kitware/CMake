@@ -5,8 +5,14 @@
 FindLATEX
 ---------
 
-Finds LaTeX compiler and Latex-related software like BibTeX.  LaTeX is a
-typesetting system for the production of technical and scientific documentation.
+Finds LaTeX compiler and Latex-related software like BibTeX:
+
+.. code-block:: cmake
+
+  find_package(LATEX [...])
+
+LaTeX is a typesetting system for the production of technical and scientific
+documentation.
 
 Components
 ^^^^^^^^^^
@@ -40,7 +46,7 @@ Supported components are:
   Finds the MakeIndex compiler.
 
 ``XINDY``
-  Find the xindy compiler.
+  Finds the xindy compiler.
 
 ``DVIPS``
   Finds the DVI-to-PostScript (DVIPS) converter.

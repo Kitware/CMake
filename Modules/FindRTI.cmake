@@ -5,7 +5,11 @@
 FindRTI
 -------
 
-Finds HLA RTI standard libraries and their include directories.
+Finds HLA RTI standard libraries and their include directories:
+
+.. code-block:: cmake
+
+  find_package(RTI [...])
 
 `RTI <https://en.wikipedia.org/wiki/Run-time_infrastructure_(simulation)>`_
 (Run-Time Infrastructure) is a simulation infrastructure standardized by IEEE
@@ -19,7 +23,7 @@ Result Variables
 This module defines the following variables:
 
 ``RTI_FOUND``
-  Set to FALSE if any HLA RTI was not found.
+  Boolean indicating whether HLA RTI is found.
 ``RTI_LIBRARIES``
   The libraries to link against to use RTI.
 ``RTI_DEFINITIONS``
@@ -37,11 +41,25 @@ The following cache variables may also be set:
 Examples
 ^^^^^^^^
 
-Finding RTI:
+Finding RTI and creating an imported interface target for linking it to a
+project target:
 
 .. code-block:: cmake
 
   find_package(RTI)
+
+  if(RTI_FOUND AND NOT TARGET RTI::RTI)
+    add_library(RTI::RTI INTERFACE IMPORTED)
+    set_target_properties(
+      RTI::RTI
+      PROPERTIES
+        INTERFACE_INCLUDE_DIRECTORIES "${RTI_INCLUDE_DIR}"
+        INTERFACE_LINK_LIBRARIES "${RTI_LIBRARIES}"
+        INTERFACE_COMPILE_DEFINITIONS "${RTI_DEFINITIONS}"
+    )
+  endif()
+
+  target_link_libraries(example PRIVATE RTI::RTI)
 #]=======================================================================]
 
 macro(RTI_MESSAGE_QUIETLY QUIET TYPE MSG)

@@ -5,7 +5,11 @@
 FindGLEW
 --------
 
-Finds the OpenGL Extension Wrangler Library (GLEW).
+Finds the OpenGL Extension Wrangler Library (GLEW):
+
+.. code-block:: cmake
+
+  find_package(GLEW [<version>] [...])
 
 GLEW is a cross-platform C/C++ library that helps manage OpenGL extensions by
 providing efficient run-time mechanisms to query and load OpenGL functionality
@@ -53,7 +57,7 @@ Result Variables
 This module defines the following variables:
 
 ``GLEW_FOUND``
-  Boolean indicating whether GLEW is found.
+  Boolean indicating whether (the requested version of) GLEW is found.
 
 ``GLEW_VERSION``
   .. versionadded:: 3.15

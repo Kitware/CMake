@@ -11,6 +11,9 @@ Finds the FreeType font renderer library:
 
   find_package(Freetype [<version>] [...])
 
+.. versionadded:: 3.7
+  Debug and Release (optimized) library variants are found separately.
+
 Imported Targets
 ^^^^^^^^^^^^^^^^
 

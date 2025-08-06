@@ -5,8 +5,12 @@
 FindHTMLHelp
 ------------
 
-This module finds the Microsoft HTML Help Compiler and its API.  It is part of
-the HTML Help Workshop.
+Finds the Microsoft HTML Help Compiler and its API which is part of the HTML
+Help Workshop:
+
+.. code-block:: cmake
+
+  find_package(HTMLHelp [...])
 
 .. note::
 
@@ -17,7 +21,7 @@ the HTML Help Workshop.
 Cache Variables
 ^^^^^^^^^^^^^^^
 
-This module may set the following cache variables:
+The following cache variables may also be set:
 
 ``HTML_HELP_COMPILER``
   Full path to the HTML Help Compiler (``hhc.exe``), used to compile ``.chm``

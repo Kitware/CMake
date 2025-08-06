@@ -5,18 +5,24 @@
 FindLibArchive
 --------------
 
-Finds the libarchive library and include directories.  Libarchive is a
-multi-format archive and compression library.
+Finds the libarchive library and include directories:
 
-Import Targets
-^^^^^^^^^^^^^^
+.. code-block:: cmake
 
-This module defines the following :ref:`Imported Targets`:
+  find_package(LibArchive [<version>] [...])
+
+Libarchive is a multi-format archive and compression library.
+
+Imported Targets
+^^^^^^^^^^^^^^^^
+
+This module provides the following :ref:`Imported Targets`:
 
 ``LibArchive::LibArchive``
   .. versionadded:: 3.17
 
-  A target for linking against libarchive.
+  A target encapsulating the libarchive usage requirements, available only
+  if libarchive is found.
 
 Result Variables
 ^^^^^^^^^^^^^^^^
@@ -24,11 +30,8 @@ Result Variables
 This module defines the following variables:
 
 ``LibArchive_FOUND``
-  Boolean indicating whether libarchive was found.
-``LibArchive_INCLUDE_DIRS``
-  Include search path for using libarchive.
-``LibArchive_LIBRARIES``
-  Libraries to link against libarchive.
+  Boolean indicating whether (the requested version of) libarchive was found.
+
 ``LibArchive_VERSION``
   A 3-component version string (``major.minor.patch``) of libarchive found.
 
@@ -40,10 +43,16 @@ This module defines the following variables:
     only for libarchive versions 3.1 and earlier.  In CMake 3.6 and newer, this
     variable will be set for all libarchive versions.
 
+``LibArchive_INCLUDE_DIRS``
+  Include search path for using libarchive.
+
+``LibArchive_LIBRARIES``
+  Libraries to link against libarchive.
+
 Examples
 ^^^^^^^^
 
-Finding LibArchive and linking it to a project target:
+Finding libarchive and linking it to a project target:
 
 .. code-block:: cmake
 

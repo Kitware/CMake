@@ -5,7 +5,11 @@
 FindCoin3D
 ----------
 
-Finds Coin3D (Open Inventor).
+Finds Coin3D (Open Inventor):
+
+.. code-block:: cmake
+
+  find_package(Coin3D [...])
 
 Coin3D is an implementation of the Open Inventor API.  It provides
 data structures and algorithms for 3D visualization.
@@ -16,8 +20,8 @@ Result Variables
 This module defines the following variables:
 
 ``Coin3D_FOUND``
-  True if Coin3D, Open Inventor was found.  For backward compatibility, the
-  ``COIN3D_FOUND`` variable is also set to the same value.
+  Boolean indicating whether Coin3D, Open Inventor is found.  For backward
+  compatibility, the ``COIN3D_FOUND`` variable is also set to the same value.
 
 Cache Variables
 ^^^^^^^^^^^^^^^
@@ -32,11 +36,25 @@ The following cache variables may also be set:
 Examples
 ^^^^^^^^
 
-Finding Coin3D:
+Finding Coin3D and conditionally creating an interface :ref:`imported target
+<Imported Targets>` that encapsulates its usage requirements for linking to a
+project target:
 
 .. code-block:: cmake
 
   find_package(Coin3D)
+
+  if(Coin3D_FOUND AND NOT TARGET Coin3D::Coin3D)
+    add_library(Coin3D::Coin3D INTERFACE IMPORTED)
+    set_target_properties(
+      Coin3D::Coin3D
+      PROPERTIES
+        INTERFACE_INCLUDE_DIRECTORIES "${COIN3D_INCLUDE_DIRS}"
+        INTERFACE_LINK_LIBRARIES "${COIN3D_LIBRARIES}"
+    )
+  endif()
+
+  target_link_libraries(example PRIVATE Coin3D::Coin3D)
 #]=======================================================================]
 
 if (WIN32)

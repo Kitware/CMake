@@ -7,7 +7,11 @@ FindXalanC
 
 .. versionadded:: 3.5
 
-Finds the Apache Xalan-C++ XSL transform processor headers and libraries.
+Finds the Apache Xalan-C++ XSL transform processor headers and libraries:
+
+.. code-block:: cmake
+
+  find_package(XalaxC [<version>] [...])
 
 .. note::
 
@@ -29,7 +33,7 @@ Result Variables
 This module defines the following variables:
 
 ``XalanC_FOUND``
-  Boolean indicating whether the Xalan-C++ is found.
+  Boolean indicating whether (the requested version of) Xalan-C++ is found.
 ``XalanC_VERSION``
   The version of the found Xalan-C++ library.
 ``XalanC_INCLUDE_DIRS``

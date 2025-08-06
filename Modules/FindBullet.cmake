@@ -5,7 +5,11 @@
 FindBullet
 ----------
 
-Finds the Bullet physics engine.
+Finds the Bullet physics engine:
+
+.. code-block:: cmake
+
+  find_package(Bullet [...])
 
 Result Variables
 ^^^^^^^^^^^^^^^^
@@ -13,8 +17,8 @@ Result Variables
 This module defines the following variables:
 
 ``Bullet_FOUND``
-  Boolean true if Bullet was found.  For backward compatibility, the
-  ``BULLET_FOUND`` variable is also set to the same value.
+  Boolean indicating whether Bullet was found.  For backward compatibility,
+  the ``BULLET_FOUND`` variable is also set to the same value.
 ``BULLET_INCLUDE_DIRS``
   The Bullet include directories.
 ``BULLET_LIBRARIES``
@@ -33,11 +37,25 @@ This module accepts the following variables:
 Examples
 ^^^^^^^^
 
-Finding Bullet:
+Finding Bullet and conditionally creating an interface :ref:`imported target
+<Imported Targets>` that encapsulates its usage requirements for linking to a
+project target:
 
 .. code-block:: cmake
 
   find_package(Bullet)
+
+  if(Bullet_FOUND AND NOT TARGET Bullet::Bullet)
+    add_library(Bullet::Bullet INTERFACE IMPORTED)
+    set_target_properties(
+      Bullet::Bullet
+      PROPERTIES
+        INTERFACE_INCLUDE_DIRECTORIES "${BULLET_INCLUDE_DIRS}"
+        INTERFACE_LINK_LIBRARIES "${BULLET_LIBRARIES}"
+    )
+  endif()
+
+  target_link_libraries(example PRIVATE Bullet::Bullet)
 #]=======================================================================]
 
 macro(_FIND_BULLET_LIBRARY _var)

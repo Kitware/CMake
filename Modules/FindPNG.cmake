@@ -19,17 +19,18 @@ Finds libpng, the official reference library for the PNG image format:
 Imported Targets
 ^^^^^^^^^^^^^^^^
 
-This module defines the following :ref:`Imported Targets`:
+This module provides the following :ref:`Imported Targets`:
 
 ``PNG::PNG``
   .. versionadded:: 3.5
 
-  The libpng library, if found.
+  Target encapsulating the libpng library usage requirements, available if
+  libpng is found.
 
 Result Variables
 ^^^^^^^^^^^^^^^^
 
-This module sets the following variables:
+This module defines the following variables:
 
 ``PNG_FOUND``
   Boolean indicating whether (the requested version of) PNG library is found.

@@ -7,7 +7,11 @@ FindFontconfig
 
 .. versionadded:: 3.14
 
-Finds Fontconfig, a library for font configuration and customization.
+Finds Fontconfig, a library for font configuration and customization:
+
+.. code-block:: cmake
+
+  find_package(Fontconfig [<version>] [...])
 
 Imported Targets
 ^^^^^^^^^^^^^^^^

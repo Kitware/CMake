@@ -10,7 +10,7 @@ and provides CMake commands to create custom build rules for using Flex:
 
 .. code-block:: cmake
 
-  find_package(FLEX [<version>] ...)
+  find_package(FLEX [<version>] [...])
 
 Flex generates lexical analyzers, also known as *scanners* or *lexers*.  It also
 includes a runtime library (``fl``) that supplies support functions for the

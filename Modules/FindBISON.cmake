@@ -10,7 +10,7 @@ generate custom build rules for using Bison:
 
 .. code-block:: cmake
 
-  find_package(BISON [<version>] ...)
+  find_package(BISON [<version>] [...])
 
 Bison is a parser generator that replaced earlier Yacc (Yet Another
 Compiler-Compiler).  On Unix-like systems, most common implementation is
