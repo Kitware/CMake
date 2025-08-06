@@ -16,6 +16,9 @@ Find Modules
 * The :module:`FindCups` module now provides a ``Cups_VERSION`` result
   variable.  The ``CUPS_VERSION_STRING`` result variable is deprecated.
 
+* The :module:`FindDoxygen` module now provides a ``Doxygen_VERSION`` result
+  variable.  The ``DOXYGEN_VERSION`` result variable is deprecated.
+
 * The :module:`FindEXPAT` module now provides a ``EXPAT_VERSION`` result
   variable.  The ``EXPAT_VERSION_STRING`` result variable is deprecated.
 

@@ -2512,6 +2512,7 @@ syn keyword cmakeVariable contained
             \ DOXYGEN_USE_PDFLATEX
             \ DOXYGEN_VERBATIM_HEADERS
             \ DOXYGEN_VERBATIM_VARS
+            \ Doxygen_VERSION
             \ DOXYGEN_VERSION
             \ DOXYGEN_WARNINGS
             \ DOXYGEN_WARN_AS_ERROR
