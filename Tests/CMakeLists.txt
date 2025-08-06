@@ -36,6 +36,8 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/CheckSwift.cmake)
 set(TEST_HOME "${CMake_BINARY_DIR}/Tests/CMakeFiles/TestHome")
 set(TEST_CONFIG_ENV_CODE "# Isolate tests from user-wide configuration.
 set(ENV{CMAKE_CONFIG_DIR} \"${TEST_HOME}/.config/cmake\")\n")
+set(TEST_INSTRUMENTATION_ENV_CODE "# Isolate tests from CTEST_USE_INSTRUMENTATION var
+unset(ENV{CTEST_USE_INSTRUMENTATION})\n")
 file(MAKE_DIRECTORY "${TEST_HOME}/.config/cmake")
 
 # Fake a user home directory to avoid polluting the real one.
