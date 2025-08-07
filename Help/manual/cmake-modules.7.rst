@@ -55,7 +55,6 @@ These modules are loaded using the :command:`include` command.
    /module/CMakeBackwardCompatibilityCXX
    /module/CMakeDependentOption
    /module/CMakeFindDependencyMacro
-   /module/CMakeGraphVizOptions
    /module/CMakePackageConfigHelpers
    /module/CMakePrintHelpers
    /module/CMakePrintSystemInformation
@@ -328,6 +327,7 @@ These internal modules are not intended to be included directly in projects:
    :maxdepth: 1
 
    /module/CMakeFindPackageMode
+   /module/CMakeGraphVizOptions
    /module/CTestScriptMode
    /module/Findosg_functions
    /module/SquishTestScript
