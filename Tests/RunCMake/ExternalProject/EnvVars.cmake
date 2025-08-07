@@ -11,8 +11,10 @@ ExternalProject_Add(CustomCommandEnvVars
   UPDATE_COMMAND ""
   PATCH_COMMAND ""
   LIST_SEPARATOR ,
-  CONFIGURE_COMMAND "${CMAKE_COMMAND}" -P ${ScriptPath}
+  CONFIGURE_COMMAND ""
+  COMMAND "${CMAKE_COMMAND}" -P ${ScriptPath}
   COMMAND "${CMAKE_COMMAND}" -DVARNAME=Stage -P ${ScriptPath}
+  COMMAND ""
   COMMAND "${CMAKE_COMMAND}" -DVARNAME=ListVar -P ${ScriptPath}
   CONFIGURE_ENVIRONMENT_MODIFICATION
     Stage=set:config
