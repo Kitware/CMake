@@ -19,6 +19,8 @@
 
 #include "cmCryptoHash.h"
 #include "cmExperimental.h"
+#include "cmFileLock.h"
+#include "cmFileLockResult.h"
 #include "cmInstrumentationQuery.h"
 #include "cmJSONState.h"
 #include "cmStringAlgorithms.h"
@@ -626,7 +628,11 @@ int cmInstrumentation::SpawnBuildDaemon()
   uv_disable_stdio_inheritance();
 
   // preBuild Hook
-  this->CollectTimingData(cmInstrumentationQuery::Hook::PreBuild);
+  if (this->LockBuildDaemon()) {
+    // Release lock before spawning the build daemon, to prevent blocking it.
+    this->lock.Release();
+    this->CollectTimingData(cmInstrumentationQuery::Hook::PreBuild);
+  }
 
   // postBuild Hook
   if (this->HasHook(cmInstrumentationQuery::Hook::PostBuild)) {
@@ -645,6 +651,16 @@ int cmInstrumentation::SpawnBuildDaemon()
   return 0;
 }
 
+// Prevent multiple build daemons from running simultaneously
+bool cmInstrumentation::LockBuildDaemon()
+{
+  std::string const lockFile = cmStrCat(this->timingDirv1, "/.build.lock");
+  if (!cmSystemTools::FileExists(lockFile)) {
+    cmSystemTools::Touch(lockFile, true);
+  }
+  return this->lock.Lock(lockFile, 0).IsOk();
+}
+
 /*
  * Always called by ctest --wait-and-collect-instrumentation in a detached
  * process. Waits for the given PID to end before running the postBuild hook.
@@ -653,6 +669,11 @@ int cmInstrumentation::SpawnBuildDaemon()
  */
 int cmInstrumentation::CollectTimingAfterBuild(int ppid)
 {
+  // Check if another process is already instrumenting the build.
+  // This lock will be released when the process exits at the end of the build.
+  if (!this->LockBuildDaemon()) {
+    return 0;
+  }
   std::function<int()> waitForBuild = [ppid]() -> int {
     while (0 == uv_kill(ppid, 0)) {
       cmSystemTools::Delay(100);

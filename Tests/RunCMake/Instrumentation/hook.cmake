@@ -76,6 +76,9 @@ endif()
 
 get_filename_component(dataDir ${index} DIRECTORY)
 get_filename_component(v1 ${dataDir} DIRECTORY)
+if (EXISTS ${v1}/${hook}.hook)
+  add_error("Received multiple triggers of the same hook: ${hook}")
+endif()
 file(WRITE ${v1}/${hook}.hook "${ERROR_MESSAGE}")
 
 if (NOT ERROR_MESSAGE MATCHES "^$")

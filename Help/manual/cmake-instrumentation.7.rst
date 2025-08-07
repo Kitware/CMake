@@ -198,7 +198,8 @@ key is required, but all other fields are optional.
   * ``postTest``
 
   ``preBuild`` and ``postBuild`` are not supported with the
-  :generator:`MSYS Makefiles` generator.
+  :generator:`MSYS Makefiles` generator. Additionally, they will not be
+  triggered when the build tool is invoked by ``cmake --build``.
 
 ``options``
   A list of strings used to enable certain optional behavior, including the

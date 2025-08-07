@@ -15,6 +15,8 @@
 #include <cm/optional>
 
 #include <cm3p/json/value.h>
+
+#include "cmFileLock.h"
 #ifndef CMAKE_BOOTSTRAP
 #  include <cmsys/SystemInformation.hxx>
 #endif
@@ -61,6 +63,7 @@ public:
   void ClearGeneratedQueries();
   int CollectTimingData(cmInstrumentationQuery::Hook hook);
   int SpawnBuildDaemon();
+  bool LockBuildDaemon();
   int CollectTimingAfterBuild(int ppid);
   void AddHook(cmInstrumentationQuery::Hook hook);
   void AddOption(cmInstrumentationQuery::Option option);
@@ -103,4 +106,5 @@ private:
   cmsys::SystemInformation& GetSystemInformation();
 #endif
   int writtenJsonQueries = 0;
+  cmFileLock lock;
 };
