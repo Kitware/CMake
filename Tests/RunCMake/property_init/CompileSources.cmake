@@ -78,6 +78,7 @@ set(properties
   "BUILD_WITH_INSTALL_NAME_DIR"             "@rpath/"           "<SAME>"
   ### Install
   "INSTALL_NAME_DIR"                        "@rpath/"           "<SAME>"
+  "INSTALL_OBJECT_NAME_STRATEGY"            "SHORT"             "<SAME>"
   "INSTALL_REMOVE_ENVIRONMENT_RPATH"        "ON"                "<SAME>"
   "INSTALL_RPATH"                           "@rpath/"           "<SAME>"
   "INSTALL_RPATH_USE_LINK_PATH"             "ON"                "<SAME>"
