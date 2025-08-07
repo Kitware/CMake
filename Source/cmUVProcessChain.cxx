@@ -564,7 +564,7 @@ cmUVProcessChain::Status::GetException() const
       case STATUS_NO_MEMORY:
       default: {
         char buf[256];
-        snprintf(buf, sizeof(buf), "Exit code 0x%x\n",
+        snprintf(buf, sizeof(buf), "Exit code 0x%x",
                  static_cast<unsigned int>(this->ExitStatus));
         return std::make_pair(ExceptionCode::Other, buf);
       }

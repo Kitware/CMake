@@ -536,7 +536,7 @@ std::string cmProcess::GetExitExceptionString() const
     case STATUS_NO_MEMORY:
     default:
       char buf[1024];
-      char const* fmt = "Exit code 0x%" KWIML_INT_PRIx64 "\n";
+      char const* fmt = "Exit code 0x%" KWIML_INT_PRIx64;
       snprintf(buf, sizeof(buf), fmt, this->ExitValue);
       exception_str.assign(buf);
   }
