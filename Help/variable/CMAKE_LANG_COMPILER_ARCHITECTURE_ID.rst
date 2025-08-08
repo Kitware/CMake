@@ -123,6 +123,9 @@ targets a UNIX platform.
 ``sparcv9``
   SPARC 64-bit
 
+``sw_64``
+  Sunway
+
 ``x86_64``
   Intel 64-bit
 

@@ -113,6 +113,8 @@
         PRINT *, 'INFO:arch[riscv64]'
 #elif defined(__riscv) && __riscv_xlen == 32
         PRINT *, 'INFO:arch[riscv32]'
+#elif defined(__sw_64) || defined(__sw_64__)
+        PRINT *, 'INFO:arch[sw_64]'
 #elif defined(__s390x__)
         PRINT *, 'INFO:arch[s390x]'
 #elif defined(__s390__)

@@ -105,6 +105,8 @@ PRINT *, 'INFO:arch[loongarch64]'
 PRINT *, 'INFO:arch[loongarch32]'
 #elif defined(__m68k__)
 PRINT *, 'INFO:arch[m68k]'
+#elif defined(__sw_64)
+PRINT *, 'INFO:arch[sw_64]'
 #elif defined(__mips64) || defined(__mips64__)
 #  if defined(_MIPSEL)
 PRINT *, 'INFO:arch[mips64el]'
