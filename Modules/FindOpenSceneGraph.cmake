@@ -5,7 +5,11 @@
 FindOpenSceneGraph
 ------------------
 
-Finds `OpenSceneGraph`_ (OSG), a 3D graphics application programming interface.
+Finds `OpenSceneGraph`_ (OSG), a 3D graphics application programming interface:
+
+.. code-block:: cmake
+
+  find_package(OpenSceneGraph [<version>] [COMPONENTS <components>...] [...])
 
 .. note::
 
@@ -153,12 +157,14 @@ Result Variables
 This module defines the following variables:
 
 ``OpenSceneGraph_FOUND``
-  Boolean indicating whether the (requested version of) OpenSceneGraph with all
+  Boolean indicating whether (the requested version of) OpenSceneGraph with all
   specified components is found.  For backward compatibility, the
   ``OPENSCENEGRAPH_FOUND`` variable is also set to the same value.
 
-``OPENSCENEGRAPH_VERSION``
-  The version of the OSG which was found.
+``OpenSceneGraph_VERSION``
+  .. versionadded:: 4.2
+
+  The version of OpenSceneGraph found.
 
 ``OPENSCENEGRAPH_INCLUDE_DIRS``
   Include directories containing headers needed to use OpenSceneGraph.
@@ -196,6 +202,17 @@ Additionally, the following variables are also respected:
 
 ``OSG_ROOT``
   Environment variable treated the same as ``OSG_DIR``.
+
+Deprecated Variables
+^^^^^^^^^^^^^^^^^^^^
+
+The following variables are provided for backward compatibility:
+
+``OPENSCENEGRAPH_VERSION``
+  .. deprecated:: 4.2
+    Superseded by the ``OpenSceneGraph_VERSION``.
+
+  The version of OpenSceneGraph found.
 
 Examples
 ^^^^^^^^
@@ -324,9 +341,11 @@ if(OSG_INCLUDE_DIR)
 
     set(OPENSCENEGRAPH_VERSION "${_osg_VERSION_MAJOR}.${_osg_VERSION_MINOR}.${_osg_VERSION_PATCH}"
                                 CACHE INTERNAL "The version of OSG which was detected")
+    set(OpenSceneGraph_VERSION "${OPENSCENEGRAPH_VERSION}")
+
     if(OpenSceneGraph_DEBUG)
         message(STATUS "[ FindOpenSceneGraph.cmake:${CMAKE_CURRENT_LIST_LINE} ] "
-            "Detected version ${OPENSCENEGRAPH_VERSION}")
+            "Detected version ${OpenSceneGraph_VERSION}")
     endif()
 endif()
 
@@ -374,7 +393,7 @@ endif()
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(OpenSceneGraph
                                   REQUIRED_VARS OPENSCENEGRAPH_LIBRARIES OPENSCENEGRAPH_INCLUDE_DIR ${_osg_component_founds}
-                                  VERSION_VAR OPENSCENEGRAPH_VERSION)
+                                  VERSION_VAR OpenSceneGraph_VERSION)
 
 unset(_osg_component_founds)
 
