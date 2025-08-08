@@ -5,133 +5,251 @@
 FindwxWidgets
 -------------
 
-Find a wxWidgets (a.k.a., wxWindows) installation.
+Finds a wxWidgets installation and provides usage requirements for usage in
+projects:
 
-This module finds if wxWidgets is installed and selects a default
-configuration to use.  wxWidgets is a modular library.  To specify the
-modules that you will use, you need to name them as components to the
-package:
+.. code-block:: cmake
 
-find_package(wxWidgets COMPONENTS core base ... OPTIONAL_COMPONENTS net ...)
+  find_package(wxWidgets [<version>] [COMPONENTS <components>...] [...])
+
+wxWidgets (formerly known as wxWindows) is a widget toolkit and tools
+library for creating graphical user interfaces (GUIs) for cross-platform
+applications.
 
 .. versionadded:: 3.4
-  Support for :command:`find_package` version argument; ``webview`` component.
+  Support for :command:`find_package` version argument.
 
 .. versionadded:: 3.14
   ``OPTIONAL_COMPONENTS`` support.
 
-There are two search branches: a windows style and a unix style.  For
-windows, the following variables are searched for and set to defaults
-in case of multiple choices.  Change them if the defaults are not
-desired (i.e., these are the only variables you should change to
-select a configuration):
+Components
+^^^^^^^^^^
 
-::
-
-  wxWidgets_ROOT_DIR      - Base wxWidgets directory
-                            (e.g., C:/wxWidgets-3.2.0).
-  wxWidgets_LIB_DIR       - Path to wxWidgets libraries
-                            (e.g., C:/wxWidgets-3.2.0/lib/vc_x64_lib).
-  wxWidgets_CONFIGURATION - Configuration to use
-                            (e.g., msw, mswd, mswu, mswunivud, etc.)
-  wxWidgets_EXCLUDE_COMMON_LIBRARIES
-                          - Set to TRUE to exclude linking of
-                            commonly required libs (e.g., png tiff
-                            jpeg zlib regex expat scintilla lexilla).
-
-
-
-For unix style it uses the wx-config utility.  You can select between
-debug/release, unicode/ansi, universal/non-universal, and
-static/shared in the QtDialog or ccmake interfaces by turning ON/OFF
-the following variables:
-
-::
-
-  wxWidgets_USE_DEBUG
-  wxWidgets_USE_UNICODE
-  wxWidgets_USE_UNIVERSAL
-  wxWidgets_USE_STATIC
-
-There is also a wxWidgets_CONFIG_OPTIONS variable for all other
-options that need to be passed to the wx-config utility.  For example,
-to use the base toolkit found in the /usr/local path, set the variable
-(before calling the FIND_PACKAGE command) as such:
+wxWidgets is a modular library.  This module supports components to specify
+the modules to use.  Components can be specified with the
+:command:`find_package` command:
 
 .. code-block:: cmake
 
-  set(wxWidgets_CONFIG_OPTIONS --toolkit=base --prefix=/usr)
+  find_package(
+    wxWidgets
+    [COMPONENTS <components>...]
+    [OPTIONAL_COMPONENTS <components>...]
+  )
 
+Supported components include:
 
+``base``
+  Finds the library that provides mandatory classes that any wxWidgets code
+  depends on.  This component is always required for applications
+  implementing wxWidgets.
 
-The following are set after the configuration is done for both windows
-and unix style:
+``core``
+  Finds the library that provides basic GUI classes such as GDI classes or
+  controls.
 
-::
+``gl``
+  Finds the OpenGL support.
 
-  wxWidgets_FOUND            - Set to TRUE if wxWidgets was found.
-  wxWidgets_INCLUDE_DIRS     - Include directories for WIN32
-                               i.e., where to find "wx/wx.h" and
-                               "wx/setup.h"; possibly empty for unices.
-  wxWidgets_LIBRARIES        - Path to the wxWidgets libraries.
-  wxWidgets_LIBRARY_DIRS     - compile time link dirs, useful for
-                               rpath on UNIX. Typically an empty string
-                               in WIN32 environment.
-  wxWidgets_DEFINITIONS      - Contains defines required to compile/link
-                               against WX, e.g. WXUSINGDLL
-  wxWidgets_DEFINITIONS_DEBUG- Contains defines required to compile/link
-                               against WX debug builds, e.g. __WXDEBUG__
-  wxWidgets_CXX_FLAGS        - Include dirs and compiler flags for
-                               unices, empty on WIN32. Essentially
-                               "`wx-config --cxxflags`".
-  wxWidgets_USE_FILE         - Convenience include file.
+``mono``
+  Finds the wxWidgets monolithic library.
 
-.. versionadded:: 3.11
-  The following environment variables can be used as hints: ``WX_CONFIG``,
-  ``WXRC_CMD``.
+``aui``
+  Finds the Advanced User Interface docking library.
 
+``net``
+  Finds the library that provides network access.
 
-Sample usage:
+``webview``
+  .. versionadded:: 3.4
 
-.. code-block:: cmake
+  Finds the library that provides rendering of web documents
+  (HTML/CSS/JavaScript).
 
-   # Note that for MinGW users the order of libs is important!
-   find_package(wxWidgets COMPONENTS gl core base OPTIONAL_COMPONENTS net)
-   if(wxWidgets_FOUND)
-     include(${wxWidgets_USE_FILE})
-     # and for each of your dependent executable/library targets:
-     target_link_libraries(<YourTarget> ${wxWidgets_LIBRARIES})
-   endif()
+For a full list of supported wxWidgets components, refer to the upstream
+documentation.
 
-
-
-If wxWidgets is required (i.e., not an optional part):
-
-.. code-block:: cmake
-
-   find_package(wxWidgets REQUIRED gl core base OPTIONAL_COMPONENTS net)
-   include(${wxWidgets_USE_FILE})
-   # and for each of your dependent executable/library targets:
-   target_link_libraries(<YourTarget> ${wxWidgets_LIBRARIES})
+If no components are specified, this module by default searches for ``core``
+and ``base`` components.
 
 Imported Targets
 ^^^^^^^^^^^^^^^^
 
-.. versionadded:: 3.27
-
-This module defines the following :prop_tgt:`IMPORTED` targets:
+This module provides the following :ref:`Imported Targets`:
 
 ``wxWidgets::wxWidgets``
-  An interface library providing usage requirements for the found components.
-#]=======================================================================]
+  .. versionadded:: 3.27
 
-#
-# FIXME: check this and provide a correct sample usage...
-#        Remember to connect back to the upper text.
-# Sample usage with monolithic wx build:
-#
-#   find_package(wxWidgets COMPONENTS mono)
-#   ...
+  An interface imported target encapsulating the wxWidgets usage requirements
+  for the found components, available if wxWidgets is found.
+
+Result Variables
+^^^^^^^^^^^^^^^^
+
+This module defines the following variables:
+
+``wxWidgets_FOUND``
+  Boolean indicating whether (the requested version of) wxWidgets and all
+  its requested components are found.
+
+``wxWidgets_VERSION_STRING``
+  .. versionadded:: 3.4
+
+  The version of the wxWidgets found.
+
+``wxWidgets_INCLUDE_DIRS``
+  Include directories for WIN32, i.e., where to find ``<wx/wx.h>`` and
+  ``<wx/setup.h>``; possibly empty for Unix-like systems.
+
+``wxWidgets_LIBRARIES``
+  Path to the wxWidgets libraries.
+
+``wxWidgets_LIBRARY_DIRS``
+  Compile time link dirs, useful for setting ``rpath`` on Unix-like systems.
+  Typically an empty string in WIN32 environment.
+
+``wxWidgets_DEFINITIONS``
+  Contains compile definitions required to compile/link against WX, e.g.
+  ``WXUSINGDLL``.
+
+``wxWidgets_DEFINITIONS_DEBUG``
+  Contains compile definitions required to compile/link against WX debug builds,
+  e.g. ``__WXDEBUG__``.
+
+``wxWidgets_CXX_FLAGS``
+  Include directories and compiler flags for Unix-like systems, empty on
+  Windows. Essentially the output of ``wx-config --cxxflags``.
+
+``wxWidgets_USE_FILE``
+  Name of the CMake module for using wxWidgets in current directory.  For
+  usage details refer to the :module:`UsewxWidgets` module.
+
+Hints
+^^^^^
+
+This module accepts the following variables before calling
+``find_package(wxWidgets)``:
+
+``WX_CONFIG``
+  .. versionadded:: 3.11
+
+  Environment variable to manually specify the name of the wxWidgets library
+  configuration provider executable that will be searched besides the default
+  name ``wx-config``.
+
+``WXRC_CMD``
+  .. versionadded:: 3.11
+
+  Environment variable to manually specify the name of the wxWidgets resource
+  file compiler executable that will be searched besides the default name
+  ``wxrc``.
+
+There are two search branches: a Windows style and a Unix style.  For
+Windows, the following variables are searched for and set to defaults
+in case of multiple choices.  Change them if the defaults are not
+desired (i.e., these are the only variables that should be changed to
+select a configuration):
+
+``wxWidgets_ROOT_DIR``
+  Base wxWidgets directory (e.g., ``C:/wxWidgets-3.2.0``).
+
+``wxWidgets_LIB_DIR``
+  Path to wxWidgets libraries (e.g., ``C:/wxWidgets-3.2.0/lib/vc_x64_lib``).
+
+``wxWidgets_CONFIGURATION``
+  Configuration to use (e.g., msw, mswd, mswu, mswunivud, etc.)
+
+``wxWidgets_EXCLUDE_COMMON_LIBRARIES``
+  Set to TRUE to exclude linking of commonly required libs (e.g., png, tiff,
+  jpeg, zlib, regex, expat, scintilla, lexilla, etc.).
+
+For Unix style this module uses the ``wx-config`` utility.  Selecting
+between debug/release, unicode/ansi, universal/non-universal, and
+static/shared is possible in the QtDialog or ccmake interfaces by turning
+ON/OFF the following variables:
+
+``wxWidgets_USE_DEBUG``
+  If enabled, the wxWidgets debug build will be searched.
+
+``wxWidgets_USE_UNICODE``
+  If enabled, the wxWidgets unicode build will be searched.
+
+``wxWidgets_USE_UNIVERSAL``
+  If enabled, the wxWidgets universal build will be searched.
+
+``wxWidgets_USE_STATIC``
+  If enabled, static wxWidgets libraries will be linked.
+
+``wxWidgets_CONFIG_OPTIONS``
+  This variable can be used for all other options that need to be passed to
+  the wx-config utility.  For example, to use the base toolkit found on the
+  system at ``/usr`` install prefix, set the variable (before calling the
+  :command:`find_package` command) as such:
+
+  .. code-block:: cmake
+
+    set(wxWidgets_CONFIG_OPTIONS --toolkit=base --prefix=/usr)
+
+Examples
+^^^^^^^^
+
+Example: Finding wxWidgets
+""""""""""""""""""""""""""
+
+Finding wxWidgets and making it required (if wxWidgets is not found,
+processing stops with an error message):
+
+.. code-block:: cmake
+
+   find_package(wxWidgets REQUIRED)
+
+Example: Using Imported Target
+""""""""""""""""""""""""""""""
+
+Finding wxWidgets and using imported target in a project:
+
+.. code-block:: cmake
+
+  find_package(wxWidgets)
+  target_link_libraries(example PRIVATE wxWidgets::wxWidgets)
+
+Example: Using Components
+"""""""""""""""""""""""""
+
+Finding wxWidgets and specifying components:
+
+.. code-block:: cmake
+
+  find_package(wxWidgets COMPONENTS gl core base OPTIONAL_COMPONENTS net)
+  target_link_libraries(example PRIVATE wxWidgets::wxWidgets)
+
+Example: Monolithic wxWidgets Build
+"""""""""""""""""""""""""""""""""""
+
+Sample usage with monolithic wxWidgets build:
+
+.. code-block:: cmake
+
+  find_package(wxWidgets COMPONENTS mono)
+  target_link_libraries(example PRIVATE wxWidgets::wxWidgets)
+
+Example: Using Variables
+""""""""""""""""""""""""
+
+Finding and using wxWidgets in CMake versions prior to 3.27, when the
+imported target wasn't yet available:
+
+.. code-block:: cmake
+
+  # Note that for MinGW users the order of libs is important.
+  find_package(wxWidgets COMPONENTS gl core base OPTIONAL_COMPONENTS net)
+
+  if(wxWidgets_FOUND)
+    include(${wxWidgets_USE_FILE})
+    # and for each of the project dependent executable/library targets:
+    target_link_libraries(example ${wxWidgets_LIBRARIES})
+  endif()
+#]=======================================================================]
 
 # NOTES
 #
