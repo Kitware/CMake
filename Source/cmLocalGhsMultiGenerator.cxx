@@ -15,6 +15,10 @@
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
+namespace cmStateEnums {
+enum class IntermediateDirKind;
+}
+
 cmLocalGhsMultiGenerator::cmLocalGhsMultiGenerator(cmGlobalGenerator* gg,
                                                    cmMakefile* mf)
   : cmLocalGenerator(gg, mf)
@@ -24,7 +28,8 @@ cmLocalGhsMultiGenerator::cmLocalGhsMultiGenerator(cmGlobalGenerator* gg,
 cmLocalGhsMultiGenerator::~cmLocalGhsMultiGenerator() = default;
 
 std::string cmLocalGhsMultiGenerator::GetTargetDirectory(
-  cmGeneratorTarget const* target) const
+  cmGeneratorTarget const* target,
+  cmStateEnums::IntermediateDirKind /*kind*/) const
 {
   std::string dir = cmStrCat(target->GetName(), ".dir");
   return dir;

@@ -15,6 +15,9 @@ class cmGlobalGenerator;
 class cmMakefile;
 struct cmObjectLocations;
 class cmSourceFile;
+namespace cmStateEnums {
+enum class IntermediateDirKind;
+}
 
 /** \class cmLocalCommonGenerator
  * \brief Common infrastructure for Makefile and Ninja local generators.
@@ -37,7 +40,8 @@ public:
 
   std::string ComputeLongTargetDirectory(cmGeneratorTarget const* gt) const;
   std::string GetTargetDirectory(
-    cmGeneratorTarget const* target) const override;
+    cmGeneratorTarget const* target,
+    cmStateEnums::IntermediateDirKind kind) const override;
 
   void ComputeObjectFilenames(
     std::map<cmSourceFile const*, cmObjectLocations>& mapping,

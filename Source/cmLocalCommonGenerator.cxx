@@ -105,9 +105,10 @@ std::string cmLocalCommonGenerator::ComputeLongTargetDirectory(
 }
 
 std::string cmLocalCommonGenerator::GetTargetDirectory(
-  cmGeneratorTarget const* target) const
+  cmGeneratorTarget const* target,
+  cmStateEnums::IntermediateDirKind kind) const
 {
-  if (target->GetUseShortObjectNames()) {
+  if (target->GetUseShortObjectNames(kind)) {
     return this->ComputeShortTargetDirectory(target);
   }
   return this->ComputeLongTargetDirectory(target);

@@ -5436,7 +5436,7 @@ std::string cmGeneratorTarget::GetSupportDirectory(
 {
   cmLocalGenerator* lg = this->GetLocalGenerator();
   return cmStrCat(lg->GetObjectOutputRoot(kind), '/',
-                  lg->GetTargetDirectory(this));
+                  lg->GetTargetDirectory(this, kind));
 }
 
 std::string cmGeneratorTarget::GetCMFSupportDirectory(
@@ -5445,10 +5445,10 @@ std::string cmGeneratorTarget::GetCMFSupportDirectory(
   cmLocalGenerator* lg = this->GetLocalGenerator();
   if (!lg->AlwaysUsesCMFPaths()) {
     return cmStrCat(lg->GetCurrentBinaryDirectory(), "/CMakeFiles/",
-                    lg->GetTargetDirectory(this));
+                    lg->GetTargetDirectory(this, kind));
   }
   return cmStrCat(lg->GetObjectOutputRoot(kind), '/',
-                  lg->GetTargetDirectory(this));
+                  lg->GetTargetDirectory(this, kind));
 }
 
 bool cmGeneratorTarget::IsLinkable() const
