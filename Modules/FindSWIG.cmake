@@ -5,41 +5,69 @@
 FindSWIG
 --------
 
-Find the Simplified Wrapper and Interface Generator (SWIG_) executable.
+Finds the installed Simplified Wrapper and Interface Generator (SWIG_)
+executable and determines its version:
 
-This module finds an installed SWIG and determines its version.
+.. code-block:: cmake
 
-.. versionadded:: 3.18
-  If a ``COMPONENTS`` or ``OPTIONAL_COMPONENTS`` argument is given to the
-  :command:`find_package` command, it will also determine supported target
-  languages.
+  find_package(SWIG [<version>] [COMPONENTS <langs>...] [...])
 
 .. versionadded:: 3.19
-  When a version is requested, it can be specified as a simple value or as a
-  range. For a detailed description of version range usage and capabilities,
-  refer to the :command:`find_package` command.
+  Support for specifying version range when calling the :command:`find_package`
+  command.  When a version is requested, it can be specified as a single
+  value as before, and now also a version range can be used.  For a detailed
+  description of version range usage and capabilities, refer to the
+  :command:`find_package` command.
 
-The module defines the following variables:
+Components
+^^^^^^^^^^
+
+.. versionadded:: 3.18
+
+This module supports optional components to specify target languages.
+
+If a ``COMPONENTS`` or ``OPTIONAL_COMPONENTS`` argument is given to the
+:command:`find_package` command, it will also determine supported target
+languages.
+
+.. code-block:: cmake
+
+  find_package(SWIG [COMPONENTS <langs>...] [OPTIONAL_COMPONENTS <langs>...])
+
+Any ``COMPONENTS`` given to ``find_package()`` should be the names of
+supported target languages as provided to the ``LANGUAGE`` argument of
+:command:`swig_add_library`, such as ``python`` or ``perl5``.  Language
+names *must* be lowercase.
+
+Result Variables
+^^^^^^^^^^^^^^^^
+
+This module defines the following variables:
 
 ``SWIG_FOUND``
-  Whether SWIG and any required components were found on the system.
-``SWIG_EXECUTABLE``
-  Path to the SWIG executable.
-``SWIG_DIR``
-  Path to the installed SWIG ``Lib`` directory (result of ``swig -swiglib``).
+  Boolean indicating whether (the requested version of) SWIG and any required
+  components are found on the system.
 ``SWIG_VERSION``
   SWIG executable version (result of ``swig -version``).
 ``SWIG_<lang>_FOUND``
   If ``COMPONENTS`` or ``OPTIONAL_COMPONENTS`` are requested, each available
   target language ``<lang>`` (lowercase) will be set to TRUE.
+``SWIG_DIR``
+  Path to the installed SWIG ``Lib`` directory (result of ``swig -swiglib``).
 
-Any ``COMPONENTS`` given to ``find_package`` should be the names of supported
-target languages as provided to the LANGUAGE argument of ``swig_add_library``,
-such as ``python`` or ``perl5``. Language names *must* be lowercase.
+Cache Variables
+^^^^^^^^^^^^^^^
 
-All information is collected from the ``SWIG_EXECUTABLE``, so the version
-to be found can be changed from the command line by means of setting
-``SWIG_EXECUTABLE``.
+The following cache variables may also be set:
+
+``SWIG_EXECUTABLE``
+  The path to the SWIG executable.
+
+  This executable is used to retrieve all information for this module. It can
+  be also manually set to change the version to be found from the command line.
+
+Examples
+^^^^^^^^
 
 Example usage requiring SWIG 4.0 or higher and Python language support, with
 optional Fortran support:
@@ -54,8 +82,23 @@ optional Fortran support:
      endif()
    endif()
 
-.. _SWIG: https://swig.org
+This module is commonly used in conjunction with the :module:`UseSWIG` module:
 
+.. code-block:: cmake
+
+  find_package(SWIG COMPONENTS python)
+  if(SWIG_FOUND)
+    include(UseSWIG)
+
+    swig_add_library(mymod LANGUAGE python SOURCES mymod.i)
+  endif()
+
+See Also
+^^^^^^^^
+
+* The :module:`UseSWIG` module to use SWIG in CMake.
+
+.. _SWIG: https://swig.org
 #]=======================================================================]
 
 include(FindPackageHandleStandardArgs)
