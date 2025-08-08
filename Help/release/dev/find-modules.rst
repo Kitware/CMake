@@ -46,6 +46,14 @@ Find Modules
 * The :module:`FindLTTngUST` module now provides a ``LTTngUST_VERSION`` result
   variable.  The ``LTTNGUST_VERSION_STRING`` result variable is deprecated.
 
+* The :module:`FindLua` module now provides ``Lua_VERSION``,
+  ``Lua_VERSION_MAJOR``, ``Lua_VERSION_MINOR``, and ``Lua_VERSION_PATCH``
+  result variables.  The ``LUA_VERSION_STRING``, ``LUA_VERSION_MAJOR``,
+  ``LUA_VERSION_MINOR``, and ``LUA_VERSION_PATCH`` result variables are
+  deprecated.  The :module:`FindLua51` module now similarly provides a
+  ``Lua_VERSION`` instead of the now deprecated ``LUA_VERSION_STRING`` result
+  variable.
+
 * The :module:`FindOpenSceneGraph` module now provides an
   ``OpenSceneGraph_VERSION`` result variable.  The ``OPENSCENEGRAPH_VERSION``
   result variable is deprecated.

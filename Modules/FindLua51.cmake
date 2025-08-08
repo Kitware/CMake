@@ -11,7 +11,13 @@ FindLua51
   not maintained anymore.  In new code use the latest supported Lua version and
   the version-agnostic module :module:`FindLua` instead.
 
-Finds the Lua library.  Lua is a embeddable scripting language.
+Finds the Lua library:
+
+.. code-block:: cmake
+
+  find_package(Lua51 [<version>] [...])
+
+Lua is a embeddable scripting language.
 
 When working with Lua, its library headers are intended to be included in
 project source code as:
@@ -35,9 +41,13 @@ Result Variables
 This module defines the following variables:
 
 ``Lua51_FOUND``
-  Boolean indicating whether Lua is found.  For backward compatibility, the
-  ``LUA51_FOUND`` variable is also set to the same value.
-``LUA_VERSION_STRING``
+  Boolean indicating whether (the requested version of) Lua is found.  For
+  backward compatibility, the ``LUA51_FOUND`` variable is also set to the
+  same value.
+
+``Lua_VERSION``
+  .. versionadded:: 4.2
+
   The version of Lua found.
 
 Cache Variables
@@ -48,8 +58,20 @@ The following cache variables may also be set:
 ``LUA_INCLUDE_DIR``
   The directory containing the Lua header files, such as ``lua.h``,
   ``lualib.h``, and ``lauxlib.h``, needed to use Lua.
+
 ``LUA_LIBRARIES``
   Libraries needed to link against to use Lua.
+
+Deprecated Variables
+^^^^^^^^^^^^^^^^^^^^
+
+The following variables are provided for backward compatibility:
+
+``LUA_VERSION_STRING``
+  .. deprecated:: 4.2
+    Superseded by the ``Lua_VERSION``.
+
+  The version of Lua found.
 
 Examples
 ^^^^^^^^
@@ -118,14 +140,15 @@ endif()
 if(LUA_INCLUDE_DIR AND EXISTS "${LUA_INCLUDE_DIR}/lua.h")
   file(STRINGS "${LUA_INCLUDE_DIR}/lua.h" lua_version_str REGEX "^#define[ \t]+LUA_RELEASE[ \t]+\"Lua .+\"")
 
-  string(REGEX REPLACE "^#define[ \t]+LUA_RELEASE[ \t]+\"Lua ([^\"]+)\".*" "\\1" LUA_VERSION_STRING "${lua_version_str}")
+  string(REGEX REPLACE "^#define[ \t]+LUA_RELEASE[ \t]+\"Lua ([^\"]+)\".*" "\\1" Lua_VERSION "${lua_version_str}")
+  set(LUA_VERSION_STRING "${Lua_VERSION}")
   unset(lua_version_str)
 endif()
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(Lua51
                                   REQUIRED_VARS LUA_LIBRARIES LUA_INCLUDE_DIR
-                                  VERSION_VAR LUA_VERSION_STRING)
+                                  VERSION_VAR Lua_VERSION)
 
 mark_as_advanced(LUA_INCLUDE_DIR LUA_LIBRARIES LUA_LIBRARY LUA_MATH_LIBRARY)
 
