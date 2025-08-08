@@ -2,7 +2,7 @@ if (NOT RunCMake_GENERATOR_IS_MULTI_CONFIG)
   return()
 endif()
 
-set(foo_pch_header "${RunCMake_TEST_BINARY_DIR}/CMakeFiles/4bcad702/Debug/cmake_pch.h")
+set(foo_pch_header "${RunCMake_TEST_BINARY_DIR}/.o/4bcad702/Debug/cmake_pch.h")
 
 if (NOT EXISTS ${foo_pch_header})
   set(RunCMake_TEST_FAILED "Generated foo pch header ${foo_pch_header} does not exist")
