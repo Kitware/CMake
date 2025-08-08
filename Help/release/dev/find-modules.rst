@@ -71,5 +71,9 @@ Find Modules
   ``SQUISH_VERSION_MINOR``, and ``SQUISH_VERSION_PATCH`` result variables
   are deprecated.
 
+* The :module:`FindSubversion` module now provides a ``Subversion_VERSION``
+  result variable.  The ``Subversion_VERSION_SVN`` result variable is
+  deprecated.
+
 * The :module:`FindTIFF` module now provides a ``TIFF_VERSION`` result
   variable.  The ``TIFF_VERSION_STRING`` result variable is deprecated.
