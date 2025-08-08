@@ -5,27 +5,77 @@
 FindThreads
 -----------
 
-This module determines the thread library of the system.
+Finds and determines the thread library of the system for multithreading
+support:
+
+.. code-block:: cmake
+
+  find_package(Threads [...])
+
+Multithreading enables concurrent execution within a single program,
+typically by creating multiple threads of execution.  Most commonly, this
+is done using libraries such as POSIX Threads (``pthreads``) on Unix-like
+systems or Windows threads on Windows.
+
+This module abstracts the platform-specific differences and detects how to
+enable thread support - whether it requires linking to a specific library,
+adding compiler flags (like ``-pthread``), or both.  On some platforms,
+threading is also implicitly available in default libraries without the
+need to use additional flags or libraries.
+
+This module is suitable for use in both C and C++ projects (and occasionally
+other compiled languages) that rely on system-level threading APIs.
+
+Using this module ensures that project builds correctly across different
+platforms by handling the detection and setup of thread support in a
+portable way.
+
+C and C++ Language Standards
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The C11 standard introduced a minimal cross-platform thread API via
+``<threads.h>`` header file, and C++11 added ``<thread>`` header to the
+standard library, offering high-level multithreading support.  These standard
+headers allow writing portable threaded code at the language level, without
+directly using platform-specific APIs like ``pthreads`` or Windows threads.
+
+However, even with standard C11 or C++11 threads support available, there
+may still be a need for platform-specific compiler or linker flags (e.g.,
+``-pthread`` on Unix-like systems) for some applications.  This is where
+FindThreads remains relevant - it ensures these flags and any required
+libraries are correctly set up, even if not explicitly using system APIs.
+
+In short:
+
+* Use ``<thread>`` (C++11 and later) or ``<threads.h>`` (C11) in source code
+  for portability and simpler syntax.
+
+* Use ``find_package(Threads)`` in CMake project when application needs the
+  traditional threading support and to ensure code compiles and links
+  correctly across different platforms.
 
 Imported Targets
 ^^^^^^^^^^^^^^^^
 
-.. versionadded:: 3.1
-
-This module defines the following :prop_tgt:`IMPORTED` target:
+This module provides the following :ref:`Imported Targets`:
 
 ``Threads::Threads``
-  The thread library, if found.
+  .. versionadded:: 3.1
+
+  Target encapsulating the usage requirements to enable threading through
+  flags or a threading library, if found.  This target is available if
+  threads are detected as supported.
 
 Result Variables
 ^^^^^^^^^^^^^^^^
 
-The following variables are set:
+This module defines the following variables:
 
 ``Threads_FOUND``
-  If a supported thread library was found.
+  Boolean indicating whether Threads is supported, either through a separate
+  library or a standard library.
 ``CMAKE_THREAD_LIBS_INIT``
-  The thread library to use. This may be empty if the thread functions
+  The thread library to use.  This may be empty if the thread functions
   are provided by the system libraries and no special flags are needed
   to use them.
 ``CMAKE_USE_WIN32_THREADS_INIT``
@@ -38,17 +88,30 @@ The following variables are set:
 Variables Affecting Behavior
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. variable:: THREADS_PREFER_PTHREAD_FLAG
+This module accepts the following variables before calling
+``find_package(Threads)``:
 
+``THREADS_PREFER_PTHREAD_FLAG``
   .. versionadded:: 3.1
 
-  If the use of the -pthread compiler and linker flag is preferred then
-  the caller can set this variable to TRUE. The compiler flag can only be
-  used with the imported target. Use of both the imported target as well
-  as this switch is highly recommended for new code.
+  If the use of the ``-pthread`` compiler and linker flag is preferred then
+  the caller can set this variable to boolean true.  The compiler flag can
+  only be used with the imported target.  Use of both the imported target
+  as well as this switch is highly recommended for new code.
 
   This variable has no effect if the system libraries provide the
   thread functions, i.e. when ``CMAKE_THREAD_LIBS_INIT`` will be empty.
+
+Examples
+^^^^^^^^
+
+Finding Threads and linking the imported target to a project target:
+
+.. code-block:: cmake
+
+  set(THREADS_PREFER_PTHREAD_FLAG TRUE)
+  find_package(Threads)
+  target_link_libraries(example PRIVATE Threads::Threads)
 #]=======================================================================]
 
 include (CheckLibraryExists)
@@ -225,7 +288,7 @@ set(CMAKE_REQUIRED_QUIET ${CMAKE_REQUIRED_QUIET_SAVE})
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(Threads DEFAULT_MSG Threads_FOUND)
 
-if(THREADS_FOUND AND NOT TARGET Threads::Threads)
+if(Threads_FOUND AND NOT TARGET Threads::Threads)
   add_library(Threads::Threads INTERFACE IMPORTED)
 
   if(THREADS_HAVE_PTHREAD_ARG)
