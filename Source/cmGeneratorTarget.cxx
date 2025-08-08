@@ -3188,8 +3188,12 @@ std::string cmGeneratorTarget::GetPchFile(std::string const& config,
         auto* pchSf = this->Makefile->GetOrCreateSource(
           pchSource, false, cmSourceFileLocationKind::Known);
         pchSf->ResolveFullPath();
+        std::string cfgSubdir;
+        if (this->GetGlobalGenerator()->IsMultiConfig()) {
+          cfgSubdir = cmStrCat(config, '/');
+        }
         pchFile = cmStrCat(
-          this->GetSupportDirectory(), '/',
+          this->GetSupportDirectory(), '/', cfgSubdir,
           this->LocalGenerator->GetShortObjectFileName(*pchSf), pchExtension);
       } else {
         pchFile =
