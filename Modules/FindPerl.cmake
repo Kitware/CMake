@@ -5,8 +5,13 @@
 FindPerl
 --------
 
-Finds a Perl interpreter.  Perl is a general-purpose, interpreted, dynamic
-programming language.
+Finds a Perl interpreter:
+
+.. code-block:: cmake
+
+  find_package(Perl [<version>] [...])
+
+Perl is a general-purpose, interpreted, dynamic programming language.
 
 Result Variables
 ^^^^^^^^^^^^^^^^
@@ -14,10 +19,13 @@ Result Variables
 This module defines the following variables:
 
 ``Perl_FOUND``
-  True if the Perl executable was found.  For backward compatibility, the
-  ``PERL_FOUND`` variable is also set to the same value.
+  Boolean indicating whether the (requested version of) Perl executable is
+  found.  For backward compatibility, the ``PERL_FOUND`` variable is also
+  set to the same value.
 
-``PERL_VERSION_STRING``
+``Perl_VERSION``
+  .. versionadded:: 4.2
+
   The version of Perl found.
 
 Cache Variables
@@ -28,14 +36,34 @@ The following cache variables may also be set:
 ``PERL_EXECUTABLE``
   Full path to the ``perl`` executable.
 
+Deprecated Variables
+^^^^^^^^^^^^^^^^^^^^
+
+The following variables are provided for backward compatibility:
+
+``PERL_VERSION_STRING``
+  .. deprecated:: 4.2
+    Superseded by the ``Perl_VERSION``.
+
+  The version of Perl found.
+
 Examples
 ^^^^^^^^
 
-Finding the Perl interpreter:
+Finding the Perl interpreter and executing it in a process:
 
 .. code-block:: cmake
 
   find_package(Perl)
+
+  if(Perl_FOUND)
+    execute_process(COMMAND ${PERL_EXECUTABLE} --help)
+  endif()
+
+See Also
+^^^^^^^^
+
+* The :module:`FindPerlLibs` to find Perl libraries.
 #]=======================================================================]
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindCygwin.cmake)
@@ -64,7 +92,6 @@ find_program(PERL_EXECUTABLE
   )
 
 if(PERL_EXECUTABLE)
-  ### PERL_VERSION
   execute_process(
     COMMAND
       ${PERL_EXECUTABLE} -V:version
@@ -76,7 +103,8 @@ if(PERL_EXECUTABLE)
       OUTPUT_STRIP_TRAILING_WHITESPACE
   )
   if(NOT PERL_VERSION_RESULT_VARIABLE AND NOT PERL_VERSION_OUTPUT_VARIABLE MATCHES "^version='UNKNOWN'")
-    string(REGEX REPLACE "version='([^']+)'.*" "\\1" PERL_VERSION_STRING ${PERL_VERSION_OUTPUT_VARIABLE})
+    string(REGEX REPLACE "version='([^']+)'.*" "\\1" Perl_VERSION ${PERL_VERSION_OUTPUT_VARIABLE})
+    set(PERL_VERSION_STRING "${Perl_VERSION}")
   else()
     execute_process(
       COMMAND ${PERL_EXECUTABLE} -v
@@ -86,9 +114,11 @@ if(PERL_EXECUTABLE)
       OUTPUT_STRIP_TRAILING_WHITESPACE
     )
     if(NOT PERL_VERSION_RESULT_VARIABLE AND PERL_VERSION_OUTPUT_VARIABLE MATCHES "This is perl.*[ \\(]v([0-9\\._]+)[ \\)]")
-      set(PERL_VERSION_STRING "${CMAKE_MATCH_1}")
+      set(Perl_VERSION "${CMAKE_MATCH_1}")
+      set(PERL_VERSION_STRING "${Perl_VERSION}")
     elseif(NOT PERL_VERSION_RESULT_VARIABLE AND PERL_VERSION_OUTPUT_VARIABLE MATCHES "This is perl, version ([0-9\\._]+) +")
-      set(PERL_VERSION_STRING "${CMAKE_MATCH_1}")
+      set(Perl_VERSION "${CMAKE_MATCH_1}")
+      set(PERL_VERSION_STRING "${Perl_VERSION}")
     endif()
   endif()
 endif()
@@ -105,7 +135,7 @@ if (CMAKE_FIND_PACKAGE_NAME STREQUAL "PerlLibs")
 endif ()
 find_package_handle_standard_args(Perl
                                   REQUIRED_VARS PERL_EXECUTABLE
-                                  VERSION_VAR PERL_VERSION_STRING)
+                                  VERSION_VAR Perl_VERSION)
 unset(FPHSA_NAME_MISMATCHED)
 
 mark_as_advanced(PERL_EXECUTABLE)

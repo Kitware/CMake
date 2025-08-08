@@ -123,7 +123,7 @@ foreach(
     Jasper JPEG
     LibArchive LibLZMA LIBLZMA LibXml2 LibXslt LTTngUST
     OpenSceneGraph OPENSCENEGRAPH OpenSSL OPENSSL
-    PNG PostgreSQL Protobuf
+    Perl PerlLibs PNG PostgreSQL Protobuf
     Ruby RUBY
     SDL SWIG
     TIFF
