@@ -66,5 +66,10 @@ Find Modules
   variables. Previous ``<PACKAGENAME>_VERSION_STRING`` result variables
   are deprecated.
 
+* The :module:`FindSquish` module now provides a ``Squish_VERSION`` result
+  variable.  The ``SQUISH_VERSION``, ``SQUISH_VERSION_MAJOR``,
+  ``SQUISH_VERSION_MINOR``, and ``SQUISH_VERSION_PATCH`` result variables
+  are deprecated.
+
 * The :module:`FindTIFF` module now provides a ``TIFF_VERSION`` result
   variable.  The ``TIFF_VERSION_STRING`` result variable is deprecated.
