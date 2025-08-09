@@ -10,7 +10,7 @@ UsePkgConfig
   This module should no longer be used.  Instead, use the
   :module:`FindPkgConfig` module or the :command:`cmake_pkg_config` command.
 
-  This module provided a macro for finding external packages using
+  This module provided a command for finding external packages using
   ``pkg-config`` command-line utility.  It has been replaced by the more
   convenient ``FindPkgConfig`` module, which is commonly used in
   :ref:`Find Modules`.
@@ -18,10 +18,16 @@ UsePkgConfig
   As of CMake 3.31, the built-in :command:`cmake_pkg_config` command provides
   even more features to extract package information.
 
-Macros
-^^^^^^
+Load this module in a CMake project with:
 
-This module defines the following macro:
+.. code-block:: cmake
+
+  include(UsePkgConfig)
+
+Commands
+^^^^^^^^
+
+This module provides the following command:
 
 .. command:: pkgconfig
 
@@ -31,9 +37,10 @@ This module defines the following macro:
 
     pkgconfig(<package> <includedir> <libdir> <linkflags> <cflags>)
 
-  This macro invokes ``pkg-config`` command-line utility to retrieve the package
-  information into specified variables.  If ``pkg-config`` or the specified
-  package ``<package>`` is NOT found, the result variables remain empty.
+  This command invokes ``pkg-config`` command-line utility to retrieve the
+  package information into specified variables.  If ``pkg-config`` or the
+  specified package ``<package>`` is NOT found, the result variables remain
+  empty.
 
   The arguments are:
 
