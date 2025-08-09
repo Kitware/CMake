@@ -3183,7 +3183,7 @@ std::string cmGeneratorTarget::GetPchFile(std::string const& config,
         pchFile = replaceExtension(pchFileObject, pchExtension);
       }
     } else {
-      if (this->GetUseShortObjectNames()) {
+      if (this->GetUseShortObjectNames() && !pchExtension.empty()) {
         auto pchSource = this->GetPchSource(config, language, arch);
         auto* pchSf = this->Makefile->GetOrCreateSource(
           pchSource, false, cmSourceFileLocationKind::Known);
