@@ -212,7 +212,7 @@ if(NOT UNIX AND KDE3_FIND_REQUIRED)
 endif()
 
 # If Qt4 has already been found, fail.
-if(QT4_FOUND)
+if(Qt4_FOUND)
   if(KDE3_FIND_REQUIRED)
     message( FATAL_ERROR "KDE3/Qt3 and Qt4 cannot be used together in one project.")
   else()

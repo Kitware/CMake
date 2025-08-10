@@ -44,7 +44,7 @@ foreach(FIND_MODULE IN LISTS FIND_MODULES)
 endforeach()
 
 # Qt4 is not present, so we can check Qt3
-if (NOT QT4_FOUND)
+if (NOT Qt4_FOUND)
     set(DESIRED_QT_VERSION 3)
     foreach(FIND_MODULE ${NO_QT4_MODULES} "Qt")
         do_find(${FIND_MODULE})
