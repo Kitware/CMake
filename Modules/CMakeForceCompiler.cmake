@@ -9,66 +9,98 @@ CMakeForceCompiler
 
   Do not use.
 
-The macros provided by this module were once intended for use by
-cross-compiling toolchain files when CMake was not able to automatically
-detect the compiler identification.  Since the introduction of this module,
-CMake's compiler identification capabilities have improved and can now be
-taught to recognize any compiler.  Furthermore, the suite of information
-CMake detects from a compiler is now too extensive to be provided by
-toolchain files using these macros.
+  The commands provided by this module were once intended for use by
+  cross-compiling toolchain files when CMake was not able to automatically
+  detect the compiler identification.  Since the introduction of this module,
+  CMake's compiler identification capabilities have improved and can now be
+  taught to recognize any compiler.  Furthermore, the suite of information
+  CMake detects from a compiler is now too extensive to be provided by
+  toolchain files using these macros.
 
-One common use case for this module was to skip CMake's checks for a
-working compiler when using a cross-compiler that cannot link binaries
-without special flags or custom linker scripts.  This case is now supported
-by setting the :variable:`CMAKE_TRY_COMPILE_TARGET_TYPE` variable in the
-toolchain file instead.
+  One common use case for this module was to skip CMake's checks for a
+  working compiler when using a cross-compiler that cannot link binaries
+  without special flags or custom linker scripts.  This case is now supported
+  by setting the :variable:`CMAKE_TRY_COMPILE_TARGET_TYPE` variable in the
+  toolchain file instead.
 
--------------------------------------------------------------------------
-
-Macro ``CMAKE_FORCE_C_COMPILER`` has the following signature:
+Load this module in a CMake toolchain file:
 
 .. code-block:: cmake
 
-   CMAKE_FORCE_C_COMPILER(<compiler> <compiler-id>)
+  include(CMakeForceCompiler)
 
-It sets :variable:`CMAKE_C_COMPILER <CMAKE_<LANG>_COMPILER>` to
-the given compiler and the cmake internal variable
-:variable:`CMAKE_C_COMPILER_ID <CMAKE_<LANG>_COMPILER_ID>` to the given
-compiler-id.  It also bypasses the check for working compiler and basic
-compiler information tests.
+Commands
+^^^^^^^^
 
-Macro ``CMAKE_FORCE_CXX_COMPILER`` has the following signature:
+This module provides the following commands:
+
+.. command:: cmake_force_c_compiler
+
+  Sets the :variable:`CMAKE_C_COMPILER <CMAKE_<LANG>_COMPILER>` variable to
+  the given compiler and the :variable:`CMAKE_C_COMPILER_ID
+  <CMAKE_<LANG>_COMPILER_ID>` variable to the given compiler-id:
+
+  .. code-block:: cmake
+
+    cmake_force_c_compiler(<compiler> <compiler-id>)
+
+  This command also bypasses the check for working compiler and basic
+  compiler information tests.
+
+.. command:: cmake_force_cxx_compiler
+
+  Sets the :variable:`CMAKE_CXX_COMPILER <CMAKE_<LANG>_COMPILER>` variable
+  to the given compiler and the :variable:`CMAKE_CXX_COMPILER_ID
+  <CMAKE_<LANG>_COMPILER_ID>` variable to the given compiler-id:
+
+  .. code-block:: cmake
+
+    cmake_force_cxx_compiler(<compiler> <compiler-id>)
+
+  This command also bypasses the check for working compiler and basic
+  compiler information tests.
+
+.. command:: cmake_force_fortran_compiler
+
+  Sets the :variable:`CMAKE_Fortran_COMPILER <CMAKE_<LANG>_COMPILER>`
+  variable to the given compiler and the
+  :variable:`CMAKE_Fortran_COMPILER_ID <CMAKE_<LANG>_COMPILER_ID>` variable
+  to the given compiler-id:
+
+  .. code-block:: cmake
+
+    cmake_force_fortran_compiler(<compiler> <compiler-id>)
+
+  This command also bypasses the check for working compiler and basic
+  compiler information tests.
+
+Examples
+^^^^^^^^
+
+A simple toolchain file using this module could look like this:
 
 .. code-block:: cmake
+  :caption: ``cmake/toolchains/example-toolchain.cmake``
 
-   CMAKE_FORCE_CXX_COMPILER(<compiler> <compiler-id>)
+  include(CMakeForceCompiler)
+  set(CMAKE_SYSTEM_NAME Generic)
+  cmake_force_c_compiler(chc12 MetrowerksHicross)
+  cmake_force_cxx_compiler(chc12 MetrowerksHicross)
 
-It sets :variable:`CMAKE_CXX_COMPILER <CMAKE_<LANG>_COMPILER>` to
-the given compiler and the cmake internal variable
-:variable:`CMAKE_CXX_COMPILER_ID <CMAKE_<LANG>_COMPILER_ID>` to the given
-compiler-id.  It also bypasses the check for working compiler and basic
-compiler information tests.
-
-Macro ``CMAKE_FORCE_Fortran_COMPILER`` has the following signature:
-
-.. code-block:: cmake
-
-   CMAKE_FORCE_Fortran_COMPILER(<compiler> <compiler-id>)
-
-It sets :variable:`CMAKE_Fortran_COMPILER <CMAKE_<LANG>_COMPILER>` to
-the given compiler and the cmake internal variable
-:variable:`CMAKE_Fortran_COMPILER_ID <CMAKE_<LANG>_COMPILER_ID>` to the given
-compiler-id.  It also bypasses the check for working compiler and basic
-compiler information tests.
-
-So a simple toolchain file could look like this:
+In new CMake code, compiler is detected automatically when setting required
+variables instead:
 
 .. code-block:: cmake
+  :caption: ``cmake/toolchains/example-toolchain.cmake``
 
-   include (CMakeForceCompiler)
-   set(CMAKE_SYSTEM_NAME Generic)
-   CMAKE_FORCE_C_COMPILER   (chc12 MetrowerksHicross)
-   CMAKE_FORCE_CXX_COMPILER (chc12 MetrowerksHicross)
+  set(CMAKE_SYSTEM_NAME Generic)
+  set(CMAKE_C_COMPILER chc12)
+  set(CMAKE_CXX_COMPILER chc12)
+
+See Also
+^^^^^^^^
+
+* :manual:`cmake-toolchains(7)`
 #]=======================================================================]
 
 macro(CMAKE_FORCE_C_COMPILER compiler id)
