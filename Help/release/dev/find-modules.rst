@@ -31,6 +31,9 @@ Find Modules
 * The :module:`FindGnuplot` module now provides a ``Gnuplot_VERSION`` result
   variable.  The ``GNUPLOT_VERSION_STRING`` result variable is deprecated.
 
+* The :module:`FindGnuTLS` module now provides a ``GnuTLS_VERSION`` result
+  variable.  The ``GNUTLS_VERSION`` result variable is deprecated.
+
 * The :module:`FindJasper` module now provides a ``Jasper_VERSION`` result
   variable.  The ``JASPER_VERSION_STRING`` result variable is deprecated.
 
