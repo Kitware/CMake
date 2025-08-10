@@ -75,7 +75,7 @@ Modules
 
 * The :module:`FindMatlab` module now provides imported targets.
 
-* The :module:`FindPkgConfig` module gained a :variable:`PKG_CONFIG_ARGN`
+* The :module:`FindPkgConfig` module gained a ``PKG_CONFIG_ARGN``
   variable to specify arguments to ``pkg-config`` calls.
 
 * The :module:`GoogleTest` module :command:`gtest_discover_tests`
