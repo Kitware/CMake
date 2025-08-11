@@ -6,28 +6,38 @@ AddFileDependencies
 -------------------
 
 .. deprecated:: 3.20
+  Do not use this module in new code.
 
-Add dependencies to a source file.
+  Instead use the :command:`set_property` command to append to the
+  :prop_sf:`OBJECT_DEPENDS` source file property directly:
+
+  .. code-block:: cmake
+
+    set_property(SOURCE <source> APPEND PROPERTY OBJECT_DEPENDS <files>...)
+
+Load this module in a CMake project with:
 
 .. code-block:: cmake
 
-  add_file_dependencies(<source> <files>...)
+  include(AddFileDependencies)
 
-Adds the given ``<files>`` to the dependencies of file ``<source>``.
+Commands
+^^^^^^^^
 
-Do not use this command in new code.  It is just a wrapper around:
+This module provides the following command:
 
-.. code-block:: cmake
+.. command:: add_file_dependencies
 
-  set_property(SOURCE <source> APPEND PROPERTY OBJECT_DEPENDS <files>...)
+  Adds dependencies to a source file:
 
-Instead use the :command:`set_property` command to append to the
-:prop_sf:`OBJECT_DEPENDS` source file property directly.
+  .. code-block:: cmake
 
+    add_file_dependencies(<source> <files>...)
+
+  This command adds the given ``<files>`` to the dependencies of file
+  ``<source>``.
 #]=======================================================================]
 
 function(add_file_dependencies _file)
-
   set_property(SOURCE "${_file}" APPEND PROPERTY OBJECT_DEPENDS "${ARGN}")
-
 endfunction()
