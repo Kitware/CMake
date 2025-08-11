@@ -5,7 +5,7 @@ CMP0183
 
 :command:`add_feature_info` supports full :ref:`Condition Syntax`.
 
-The ``<enabled>`` parameter accepts a :ref:`semicolon-separated list <CMake
+The ``<condition>`` parameter accepts a :ref:`semicolon-separated list <CMake
 Language Lists>` of conditions.  CMake 3.31 and lower evaluate each
 ``condition`` as ``if(${condition})``, which does not properly handle
 conditions with nested paren groups.  CMake 4.0 and above instead prefer
