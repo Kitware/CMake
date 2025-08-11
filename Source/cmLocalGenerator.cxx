@@ -2837,18 +2837,7 @@ void cmLocalGenerator::AddPchDependencies(cmGeneratorTarget* target)
                     langFlags.find("-Zi") != std::string::npos;
                 }
 
-                // MSVC 2008 is producing both .pdb and .idb files with /Zi.
-                bool msvc2008OrLess =
-                  cmSystemTools::VersionCompare(cmSystemTools::OP_LESS,
-                                                compilerVersion, "16.0") &&
-                  compilerId == "MSVC";
-                // but not when used via toolset -Tv90
-                if (this->Makefile->GetSafeDefinition(
-                      "CMAKE_VS_PLATFORM_TOOLSET") == "v90") {
-                  msvc2008OrLess = false;
-                }
-
-                if (editAndContinueDebugInfo || msvc2008OrLess) {
+                if (editAndContinueDebugInfo) {
                   this->CopyPchCompilePdb(config, lang, target, reuseTarget,
                                           { ".pdb", ".idb" });
                 } else if (programDatabaseDebugInfo) {
