@@ -115,7 +115,7 @@ foreach(
     ALSA Armadillo
     BISON Boost BZip2 BZIP2
     CUDA Cups
-    Doxygen DOXYGEN
+    DevIL Doxygen DOXYGEN
     EXPAT
     FLEX Freetype
     Gettext GIF GTK2
