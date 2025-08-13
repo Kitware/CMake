@@ -56,3 +56,5 @@ run_cmake(RepeatNegativeCount)
 run_cmake(Hex)
 run_cmake(HexTooManyArgs)
 run_cmake(HexNotEnoughArgs)
+
+run_cmake(GenexpStrip)
