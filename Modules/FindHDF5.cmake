@@ -71,8 +71,9 @@ This module provides the following :ref:`Imported Targets`:
 ``HDF5::HDF5``
   .. versionadded:: 3.19
 
-  Target encapsulating the usage requirements for all found HDF5 libraries
-  (``HDF5_LIBRARIES``), available if HDF5 and all required components are found.
+  Target encapsulating the usage requirements for all found HDF5 binding
+  libraries (``HDF5_LIBRARIES``), available if HDF5 and all required components
+  are found.
 
 ``hdf5::hdf5``
   .. versionadded:: 3.19
