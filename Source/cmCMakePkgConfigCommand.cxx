@@ -911,6 +911,9 @@ std::pair<bool, bool> PopulatePCTarget(PopulateArguments& args,
   auto& pcEnv = maybeEnv->first;
   auto& imEnv = maybeEnv->second;
 
+  pcEnv.AllowSysCflags = true;
+  pcEnv.AllowSysLibs = true;
+
   pkgProviders providers;
   if (args.Providers) {
     for (auto const& provider_str : *args.Providers) {
