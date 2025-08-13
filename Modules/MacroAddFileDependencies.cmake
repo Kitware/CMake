@@ -6,24 +6,38 @@ MacroAddFileDependencies
 ------------------------
 
 .. deprecated:: 3.14
+  Do not use this module in new code.
+
+  Instead use the :command:`set_property` command to append to the
+  :prop_sf:`OBJECT_DEPENDS` source file property directly:
+
+  .. code-block:: cmake
+
+    set_property(SOURCE <source> APPEND PROPERTY OBJECT_DEPENDS <files>...)
+
+Load this module in a CMake project with:
 
 .. code-block:: cmake
 
-  macro_add_file_dependencies(<source> <files>...)
+  include(MacroAddFileDependencies)
 
-Do not use this command in new code.  It is just a wrapper around:
+Commands
+^^^^^^^^
 
-.. code-block:: cmake
+This module provides the following command:
 
-  set_property(SOURCE <source> APPEND PROPERTY OBJECT_DEPENDS <files>...)
+.. command:: macro_add_file_dependencies
 
-Instead use the :command:`set_property` command to append to the
-:prop_sf:`OBJECT_DEPENDS` source file property directly.
+  Adds dependencies to a source file:
 
+  .. code-block:: cmake
+
+    macro_add_file_dependencies(<source> <files>...)
+
+  This command adds the given ``<files>`` to the dependencies of file
+  ``<source>``.
 #]=======================================================================]
 
-macro (MACRO_ADD_FILE_DEPENDENCIES _file)
-
+macro(MACRO_ADD_FILE_DEPENDENCIES _file)
   set_property(SOURCE "${_file}" APPEND PROPERTY OBJECT_DEPENDS "${ARGN}")
-
-endmacro ()
+endmacro()
