@@ -56,6 +56,15 @@ std::string AppendAndTrim(std::string& str, cm::string_view sv)
   return { &*begin, static_cast<std::size_t>(cur - begin) + 1 };
 }
 
+cm::string_view TrimFlag(cm::string_view flag)
+{
+  std::size_t trim_size = 2;
+  for (auto c = flag.rbegin(); c != flag.rend() && std::isspace(*c); ++c) {
+    ++trim_size;
+  }
+  return { flag.data() + 2, flag.size() - trim_size };
+}
+
 } // namespace
 
 std::string cmPkgConfigVersionReq::string() const
@@ -460,12 +469,10 @@ cmPkgConfigCflagsResult cmPkgConfigResolver::MangleCflags(
 
   for (auto flag : flags) {
     if (flag.rfind("-I", 0) == 0) {
-      cm::string_view noprefix{ flag.data() + 2, flag.size() - 2 };
-
-      if (std::all_of(syspaths.begin(), syspaths.end(),
-                      [&](std::string const& path) {
-                        return noprefix.rfind(path, 0) == noprefix.npos;
-                      })) {
+      cm::string_view trimmed = TrimFlag(flag);
+      if (std::all_of(
+            syspaths.begin(), syspaths.end(),
+            [&](std::string const& path) { return path != trimmed; })) {
         result.Includes.emplace_back(AppendAndTrim(result.Flagline, flag));
       }
 
@@ -486,12 +493,10 @@ cmPkgConfigCflagsResult cmPkgConfigResolver::MangleCflags(
   for (auto flag : flags) {
     if (flag.rfind("-I", 0) == 0) {
       std::string reroot = Reroot(flag, "-I", sysroot);
-      cm::string_view noprefix{ reroot.data() + 2, reroot.size() - 2 };
-
-      if (std::all_of(syspaths.begin(), syspaths.end(),
-                      [&](std::string const& path) {
-                        return noprefix.rfind(path, 0) == noprefix.npos;
-                      })) {
+      cm::string_view trimmed = TrimFlag(reroot);
+      if (std::all_of(
+            syspaths.begin(), syspaths.end(),
+            [&](std::string const& path) { return path != trimmed; })) {
         result.Includes.emplace_back(AppendAndTrim(result.Flagline, reroot));
       }
 
@@ -548,12 +553,10 @@ cmPkgConfigLibsResult cmPkgConfigResolver::MangleLibs(
 
   for (auto flag : flags) {
     if (flag.rfind("-L", 0) == 0) {
-      cm::string_view noprefix{ flag.data() + 2, flag.size() - 2 };
-
-      if (std::all_of(syspaths.begin(), syspaths.end(),
-                      [&](std::string const& path) {
-                        return noprefix.rfind(path, 0) == noprefix.npos;
-                      })) {
+      cm::string_view trimmed = TrimFlag(flag);
+      if (std::all_of(
+            syspaths.begin(), syspaths.end(),
+            [&](std::string const& path) { return path != trimmed; })) {
         result.LibDirs.emplace_back(AppendAndTrim(result.Flagline, flag));
       }
 
@@ -576,12 +579,10 @@ cmPkgConfigLibsResult cmPkgConfigResolver::MangleLibs(
   for (auto flag : flags) {
     if (flag.rfind("-L", 0) == 0) {
       std::string reroot = Reroot(flag, "-L", sysroot);
-      cm::string_view noprefix{ reroot.data() + 2, reroot.size() - 2 };
-
-      if (std::all_of(syspaths.begin(), syspaths.end(),
-                      [&](std::string const& path) {
-                        return noprefix.rfind(path, 0) == noprefix.npos;
-                      })) {
+      cm::string_view trimmed = TrimFlag(reroot);
+      if (std::all_of(
+            syspaths.begin(), syspaths.end(),
+            [&](std::string const& path) { return path != trimmed; })) {
         result.LibDirs.emplace_back(AppendAndTrim(result.Flagline, reroot));
       }
 
