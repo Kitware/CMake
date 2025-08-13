@@ -9,6 +9,7 @@
 
 #include <cm3p/json/value.h>
 
+#include "cmGlobalGenerator.h"
 #include "cmJSONHelpers.h"
 #include "cmJSONState.h"
 #include "cmMakefile.h"
@@ -124,6 +125,12 @@ cm::optional<cmXcFrameworkPlist> cmParseXcFrameworkPlist(
   std::string const& xcframeworkPath, cmMakefile const& mf,
   cmListFileBacktrace const& bt)
 {
+  cmGlobalGenerator* gen = mf.GetGlobalGenerator();
+  if (cm::optional<cmXcFrameworkPlist> cached =
+        gen->GetXcFrameworkPListContent(xcframeworkPath)) {
+    return cached;
+  }
+
   std::string plistPath = cmStrCat(xcframeworkPath, "/Info.plist");
 
   auto value = cmParsePlist(plistPath);
@@ -162,6 +169,7 @@ cm::optional<cmXcFrameworkPlist> cmParseXcFrameworkPlist(
     return cm::nullopt;
   }
   plist.Path = plistPath;
+  gen->SetXcFrameworkPListContent(xcframeworkPath, plist);
   return cm::optional<cmXcFrameworkPlist>(plist);
 }
 

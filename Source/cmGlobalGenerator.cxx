@@ -61,6 +61,7 @@
 #include "cmValue.h"
 #include "cmVersion.h"
 #include "cmWorkingDirectory.h"
+#include "cmXcFramework.h"
 #include "cmake.h"
 
 #if !defined(CMAKE_BOOTSTRAP)
@@ -2002,6 +2003,7 @@ void cmGlobalGenerator::ClearGeneratorMembers()
   this->ProjectMap.clear();
   this->RuleHashes.clear();
   this->DirectoryContentMap.clear();
+  this->XcFrameworkPListContentMap.clear();
   this->BinaryDirectories.clear();
   this->GeneratedFiles.clear();
   this->RuntimeDependencySets.clear();
@@ -3966,4 +3968,21 @@ bool cmGlobalGenerator::ShouldWarnExperimental(cm::string_view featureName,
   return this->WarnedExperimental
     .emplace(cmStrCat(featureName, '-', featureUuid))
     .second;
+}
+
+cm::optional<cmXcFrameworkPlist> cmGlobalGenerator::GetXcFrameworkPListContent(
+  std::string const& path) const
+{
+  cm::optional<cmXcFrameworkPlist> result;
+  auto i = this->XcFrameworkPListContentMap.find(path);
+  if (i != this->XcFrameworkPListContentMap.end()) {
+    result = i->second;
+  }
+  return result;
+}
+
+void cmGlobalGenerator::SetXcFrameworkPListContent(
+  std::string const& path, cmXcFrameworkPlist const& content)
+{
+  this->XcFrameworkPListContentMap.emplace(path, content);
 }
