@@ -154,7 +154,7 @@ libraries) should search for the components listed in
 ``Foo_FIND_COMPONENTS`` if it is set , and only set ``Foo_FOUND`` to
 true if for each searched-for component ``<c>`` that was not found,
 ``Foo_FIND_REQUIRED_<c>`` is not set to true.  The ``HANDLE_COMPONENTS``
-argument of ``find_package_handle_standard_args()`` can be used to
+argument of :command:`find_package_handle_standard_args` can be used to
 implement this.
 
 If ``Foo_FIND_COMPONENTS`` is not set, which modules are searched for
