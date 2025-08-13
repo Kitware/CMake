@@ -7,28 +7,454 @@ FindPkgConfig
 
 A ``pkg-config`` module for CMake.
 
-Finds the ``pkg-config`` executable and adds the :command:`pkg_get_variable`,
-:command:`pkg_check_modules` and :command:`pkg_search_module` commands. The
-following variables will also be set:
+Finds the ``pkg-config`` executable and provides commands to use it in
+CMake:
+
+.. code-block:: cmake
+
+  find_package(PkgConfig [<version>] [QUIET] [REQUIRED] [...])
+
+``pkg-config`` is a command-line program for configuring build dependency
+information.  Initially developed by FreeDesktop, it is also available in
+several implementations, such as pkgconf, u-config, and similar.  It reads
+package data from the so-called PC metadata files (``<module-name>.pc``)
+that may come installed with packages.  This module is a wrapper around the
+``pkg-config`` command-line executable.
+
+Result Variables
+^^^^^^^^^^^^^^^^
+
+This module defines the following variables:
 
 ``PKG_CONFIG_FOUND``
-  True if a pkg-config executable was found.
+  Boolean indicating whether the (requested version of) ``pkg-config``
+  executable is found.
 
 ``PKG_CONFIG_VERSION_STRING``
-  The version of pkg-config that was found.
+  The version of ``pkg-config`` that was found.
 
 ``PKG_CONFIG_EXECUTABLE``
-  The pathname of the pkg-config program.
+  The pathname of the ``pkg-config`` program.
 
 ``PKG_CONFIG_ARGN``
   .. versionadded:: 3.22
 
-  A list of arguments to pass to pkg-config.
+  A list of arguments to pass to ``pkg-config``.
 
 Both ``PKG_CONFIG_EXECUTABLE`` and ``PKG_CONFIG_ARGN`` are initialized by the
-module, but may be overridden by the user.  See `Variables Affecting Behavior`_
-for how these variables are initialized.
+module, but may be overridden by the user.  See `Hints`_ for how these
+variables are initialized.
 
+Commands
+^^^^^^^^
+
+This module provides the following commands, if ``pkg-config`` is found:
+
+* :command:`pkg_check_modules`
+* :command:`pkg_search_module`
+* :command:`pkg_get_variable`
+
+.. command:: pkg_check_modules
+
+  Checks for all the given modules, setting a variety of result variables
+  in the calling scope:
+
+  .. code-block:: cmake
+
+    pkg_check_modules(
+      <prefix>
+      [QUIET]
+      [REQUIRED]
+      [NO_CMAKE_PATH]
+      [NO_CMAKE_ENVIRONMENT_PATH]
+      [IMPORTED_TARGET [GLOBAL]]
+      <module-spec> [<module-spec>...]
+    )
+
+  .. rubric:: The arguments are:
+
+  ``<prefix>``
+    Prefix string prepended to result variables for the specified modules.
+
+  ``QUIET``
+    When this argument is given, no status messages will be printed.
+
+  ``REQUIRED``
+    When this argument is given, the command will fail with an error if any
+    of the specified module(s) could not be found.
+
+  ``NO_CMAKE_PATH``, ``NO_CMAKE_ENVIRONMENT_PATH``
+    .. versionadded:: 3.3
+
+    The :variable:`CMAKE_PREFIX_PATH`,
+    :variable:`CMAKE_FRAMEWORK_PATH`, and :variable:`CMAKE_APPBUNDLE_PATH` cache
+    and environment variables will be added to the ``pkg-config`` search path.
+    The ``NO_CMAKE_PATH`` and ``NO_CMAKE_ENVIRONMENT_PATH`` arguments
+    disable this behavior for the cache variables and environment variables
+    respectively.
+    The ``PKG_CONFIG_USE_CMAKE_PREFIX_PATH`` variable set to ``FALSE``
+    disables this behavior globally.
+
+    .. This was actually added in 3.1, but didn't work until 3.3.
+
+  ``IMPORTED_TARGET [GLOBAL]``
+    .. versionadded:: 3.7
+
+    This argument will create an :ref:`imported target <Imported Targets>`
+    named ``PkgConfig::<prefix>`` that can be passed directly as an argument
+    to :command:`target_link_libraries`.  It will encapsulate usage
+    requirements for all specified modules ``<module-spec>...`` at once.
+
+    .. This was actually added in 3.6, but didn't work until 3.7.
+
+    ``GLOBAL``
+      .. versionadded:: 3.13
+
+      This argument is used together with ``IMPORTED_TARGET`` and will make
+      the imported target available in global scope.
+
+    .. versionadded:: 3.15
+      Non-library linker options reported by ``pkg-config`` are stored in the
+      :prop_tgt:`INTERFACE_LINK_OPTIONS` target property.
+
+    .. versionchanged:: 3.18
+      Include directories specified with ``-isystem`` are stored in the
+      :prop_tgt:`INTERFACE_INCLUDE_DIRECTORIES` target property.  Previous
+      versions of CMake left them in the :prop_tgt:`INTERFACE_COMPILE_OPTIONS`
+      property.
+
+  ``<module-spec>``
+    Each ``<module-spec>`` can be either a bare module name (as defined in
+    its PC metadata file name ``<module-name>.pc``) or it can be a module
+    name with a version constraint (operators ``=``, ``<``, ``>``, ``<=``
+    and ``>=`` are supported).  The following are examples for a module
+    named ``foo`` with various constraints:
+
+    - ``foo`` matches any version.
+    - ``foo<2`` only matches versions before 2.
+    - ``foo>=3.1`` matches any version from 3.1 or later.
+    - ``foo=1.2.3`` requires that foo must be exactly version 1.2.3.
+
+  .. rubric:: Result Variables
+
+  The following variables may be set upon return.  Two sets of values exist:
+  One for the common case (``<XXX> = <prefix>``) and another for the
+  information ``pkg-config`` provides when called with the ``--static``
+  option (``<XXX> = <prefix>_STATIC``).
+
+  ``<XXX>_FOUND``
+    Boolean variable set to 1 if module(s) exist.
+  ``<XXX>_LIBRARIES``
+    A list of only the libraries (without the ``-l``).
+  ``<XXX>_LINK_LIBRARIES``
+    The libraries and their absolute paths.
+  ``<XXX>_LIBRARY_DIRS``
+    The paths of the libraries (without the ``-L``).
+  ``<XXX>_LDFLAGS``
+    All required linker flags.
+  ``<XXX>_LDFLAGS_OTHER``
+    All other linker flags.
+  ``<XXX>_INCLUDE_DIRS``
+    The ``-I`` preprocessor flags (without the ``-I``).
+  ``<XXX>_CFLAGS``
+    All required cflags.
+  ``<XXX>_CFLAGS_OTHER``
+    The other compiler flags.
+
+  All but ``<XXX>_FOUND`` may be a :ref:`semicolon-separated list
+  <CMake Language Lists>` if the
+  associated variable returned from ``pkg-config`` has multiple values.
+
+  .. versionchanged:: 3.18
+    Include directories specified with ``-isystem`` are stored in the
+    ``<XXX>_INCLUDE_DIRS`` variable.  Previous versions of CMake left them
+    in ``<XXX>_CFLAGS_OTHER``.
+
+  There are some special variables whose prefix depends on the number of
+  ``<module-spec>`` given.  When there is only one ``<module-spec>``,
+  ``<YYY>`` will simply be ``<prefix>``, but if two or more ``<module-spec>``
+  items are given, ``<YYY>`` will be ``<prefix>_<module-name>``.
+
+  ``<YYY>_VERSION``
+    The version of the module.
+  ``<YYY>_PREFIX``
+    The prefix directory of the module.
+  ``<YYY>_INCLUDEDIR``
+    The include directory of the module.
+  ``<YYY>_LIBDIR``
+    The lib directory of the module.
+
+  .. versionchanged:: 3.8
+    For any given ``<prefix>``, ``pkg_check_modules()`` can be called multiple
+    times with different parameters.  Previous versions of CMake cached and
+    returned the first successful result.
+
+  .. versionchanged:: 3.16
+    If a full path to the found library can't be determined, but it's still
+    visible to the linker, pass it through as ``-l<name>``.  Previous versions
+    of CMake failed in this case.
+
+.. command:: pkg_search_module
+
+  Searches for the first successful match from one or more provided module
+  specifications:
+
+  .. code-block:: cmake
+
+    pkg_search_module(
+      <prefix>
+      [QUIET]
+      [REQUIRED]
+      [NO_CMAKE_PATH]
+      [NO_CMAKE_ENVIRONMENT_PATH]
+      [IMPORTED_TARGET [GLOBAL]]
+      <module-spec> [<module-spec>...]
+    )
+
+  The behavior and arguments of this command are the same as
+  :command:`pkg_check_modules`, except that rather than checking for all
+  the specified modules, it searches for just the first successful match.
+
+  This command can be used, for example, when some package is known to have
+  possible multiple ``<module-spec>`` on different platforms or versions for
+  the same package.
+
+  .. rubric:: Result Variables
+
+  This command defines the same variables as described above with addition
+  to:
+
+  ``<prefix>_MODULE_NAME``
+    .. versionadded:: 3.16
+
+    If a module is found, the ``<prefix>_MODULE_NAME`` variable will contain
+    the name of the matching module. This variable can be used if the
+    :command:`pkg_get_variable` command needs to be called with the
+    ``<module-name>`` argument that was found by the
+    :command:`pkg_search_module`.
+
+.. command:: pkg_get_variable
+
+  .. versionadded:: 3.4
+
+  Retrieves the value of a ``pkg-config`` variable and stores it in the
+  result variable in the calling scope:
+
+  .. code-block:: cmake
+
+    pkg_get_variable(
+      <result-var>
+      <module-name>
+      <var-name>
+      [DEFINE_VARIABLES <key>=<value>...]
+    )
+
+  .. rubric:: The arguments are:
+
+  ``<result-var>``
+    Name of the result variable that will contain the value of ``pkg-config``
+    variable.  If ``pkg-config`` returns multiple values for the specified
+    variable ``<var-name>``, ``<result-var>`` will contain a
+    :ref:`semicolon-separated list <CMake Language Lists>`.
+
+  ``<module-name>``
+    Name of the module as defined in its PC metadata file name
+    (``<module-name>.pc``).
+
+  ``<var-name>``
+    The ``pkg-config`` variable name from the PC metadata file
+    ``<module-name>.pc``.
+
+  ``DEFINE_VARIABLES <key>=<value>...``
+    .. versionadded:: 3.28
+
+    Specify key-value pairs to redefine variables affecting the variable
+    retrieved with ``pkg-config``.
+
+Hints
+^^^^^
+
+This module accepts the following variables before calling
+``find_package(PkgConfig)`` to influence this module's behavior:
+
+``ENV{PKG_CONFIG_PATH}``
+  Environment variable that specifies additional paths in which
+  ``pkg-config`` will search for its ``.pc`` files.  The ``pkg-config``
+  tool by default uses this variable, while CMake also provides more common
+  :variable:`CMAKE_PREFIX_PATH` variable to specify additional paths where
+  to look for packages and their ``.pc`` files.
+
+``ENV{PKG_CONFIG}``
+  .. versionadded:: 3.1
+
+  Environment variable that can be set to the path of the ``pkg-config``
+  executable and can be used to initialize the ``PKG_CONFIG_EXECUTABLE``
+  variable, if it has not yet been set.
+
+``PKG_CONFIG_EXECUTABLE``
+
+  This cache variable can be set to the path of the ``pkg-config``
+  executable.  :command:`find_program` is called internally by the module
+  with this variable.
+
+  .. versionchanged:: 3.22
+    If the ``PKG_CONFIG`` environment variable is set, only the first
+    argument is taken from it when using it as a hint.
+
+``PKG_CONFIG_ARGN``
+
+  .. versionadded:: 3.22
+
+  This cache variable can be set to a list of arguments to additionally pass
+  to ``pkg-config`` if needed. If not provided, it will be initialized from
+  the ``PKG_CONFIG`` environment variable, if set. The first argument in that
+  environment variable is assumed to be the ``pkg-config`` program, while all
+  remaining arguments after that are used to initialize ``PKG_CONFIG_ARGN``.
+  If no such environment variable is defined, ``PKG_CONFIG_ARGN`` is
+  initialized to an empty string. The module does not update the variable once
+  it has been set in the cache.
+
+``PKG_CONFIG_USE_CMAKE_PREFIX_PATH``
+
+  .. versionadded:: 3.1
+
+  Specifies whether :command:`pkg_check_modules` and
+  :command:`pkg_search_module` should add the paths in the
+  :variable:`CMAKE_PREFIX_PATH`, :variable:`CMAKE_FRAMEWORK_PATH` and
+  :variable:`CMAKE_APPBUNDLE_PATH` cache and environment variables to the
+  ``pkg-config`` search path.
+
+  If this variable is not set, this behavior is enabled by default if
+  :variable:`CMAKE_MINIMUM_REQUIRED_VERSION` is 3.1 or later, disabled
+  otherwise.
+
+Examples
+^^^^^^^^
+
+Examples: Finding pkg-config
+""""""""""""""""""""""""""""
+
+Finding ``pkg-config``:
+
+.. code-block:: cmake
+
+  find_package(PkgConfig)
+
+Finding ``pkg-config`` and making it required (if not found, processing stops
+with an error message):
+
+.. code-block:: cmake
+
+  find_package(PkgConfig REQUIRED)
+
+Finding ``pkg-config`` quietly without printing status message as commonly
+used in find modules:
+
+.. code-block:: cmake
+
+  find_package(PkgConfig QUIET)
+
+Examples: Using ``pkg_check_modules()``
+"""""""""""""""""""""""""""""""""""""""
+
+Checking for any version of glib2.  If found, the output variable
+``GLIB2_VERSION`` will hold the actual version found:
+
+.. code-block:: cmake
+
+  find_package(PkgConfig QUIET)
+
+  if(PKG_CONFIG_FOUND)
+    pkg_check_modules(GLIB2 glib-2.0)
+  endif()
+
+The following example looks for at least version 2.10 of glib2.  If found,
+the output variable ``GLIB2_VERSION`` will hold the actual version found:
+
+.. code-block:: cmake
+
+  find_package(PkgConfig QUIET)
+
+  if(PKG_CONFIG_FOUND)
+    pkg_check_modules(GLIB2 glib-2.0>=2.10)
+  endif()
+
+The following example looks for both glib2-2.0 (at least version 2.10) and
+any version of gtk2+-2.0.  Only if both are found will ``FOO`` be considered
+found.  The ``FOO_glib-2.0_VERSION`` and ``FOO_gtk+-2.0_VERSION`` variables
+will be set to their respective found module versions.
+
+.. code-block:: cmake
+
+  find_package(PkgConfig QUIET)
+
+  if(PKG_CONFIG_FOUND)
+    pkg_check_modules(FOO glib-2.0>=2.10 gtk+-2.0)
+  endif()
+
+The following example requires any version of ``xrender``:
+
+.. code-block:: cmake
+
+  find_package(PkgConfig QUIET REQUIRED)
+  pkg_check_modules(XRENDER REQUIRED xrender)
+
+Example output variables set by a successful call::
+
+  XRENDER_LIBRARIES=Xrender;X11
+  XRENDER_STATIC_LIBRARIES=Xrender;X11;pthread;Xau;Xdmcp
+
+Example: Using ``pkg_search_module()``
+""""""""""""""""""""""""""""""""""""""
+
+Searching for LibXml2 package, which might be provided with different
+module specifications (``libxml-2.0`` or ``libxml2``):
+
+.. code-block:: cmake
+
+  find_package(PkgConfig QUIET)
+
+  if(PKG_CONFIG_FOUND)
+    pkg_search_module(BAR libxml-2.0 libxml2 libxml>=2)
+  endif()
+
+Example: Creating Imported Target
+"""""""""""""""""""""""""""""""""
+
+In the following example an imported target is created from the module
+specifications to use in the project directly without using a find module.
+These imported targets can be used, for example, in cases, where package is
+known to support ``pkg-config`` on all supported platforms:
+
+.. code-block:: cmake
+
+  find_package(PkgConfig QUIET REQUIRED)
+  pkg_check_modules(GTK REQUIRED IMPORTED_TARGET gtk4>=4.14)
+  target_link_libraries(example PRIVATE PkgConfig::GTK)
+
+Example: Using ``pkg_get_variable()``
+"""""""""""""""""""""""""""""""""""""
+
+Retrieving the value of ``pkg-config`` variable ``girdir`` from the package
+Gobject:
+
+.. code-block:: cmake
+
+  find_package(PkgConfig QUIET)
+
+  if(PKG_CONFIG_FOUND)
+    pkg_get_variable(GI_GIRDIR gobject-introspection-1.0 girdir)
+  endif()
+
+  message(STATUS "${GI_GIRDIR}")
+
+See Also
+^^^^^^^^
+
+* The :command:`cmake_pkg_config` command for a modern and more advanced
+  way to work with ``pkg-config`` in CMake without requiring ``pkg-config``
+  executable to be installed.
+* :ref:`Find Modules` for details how to write a find module.
 #]========================================]
 
 ### Common stuff ####
@@ -703,161 +1129,6 @@ macro(_pkg_check_modules_internal _is_required _is_silent _no_cmake_path _no_cma
   endif()
 endmacro()
 
-
-#[========================================[.rst:
-.. command:: pkg_check_modules
-
-  Checks for all the given modules, setting a variety of result variables in
-  the calling scope.
-
-  .. code-block:: cmake
-
-    pkg_check_modules(<prefix>
-                      [REQUIRED] [QUIET]
-                      [NO_CMAKE_PATH]
-                      [NO_CMAKE_ENVIRONMENT_PATH]
-                      [IMPORTED_TARGET [GLOBAL]]
-                      <moduleSpec> [<moduleSpec>...])
-
-  When the ``REQUIRED`` argument is given, the command will fail with an error
-  if module(s) could not be found.
-
-  When the ``QUIET`` argument is given, no status messages will be printed.
-
-  .. versionadded:: 3.3
-    The :variable:`CMAKE_PREFIX_PATH`,
-    :variable:`CMAKE_FRAMEWORK_PATH`, and :variable:`CMAKE_APPBUNDLE_PATH` cache
-    and environment variables will be added to the ``pkg-config`` search path.
-    The ``NO_CMAKE_PATH`` and ``NO_CMAKE_ENVIRONMENT_PATH`` arguments
-    disable this behavior for the cache variables and environment variables
-    respectively.
-    The :variable:`PKG_CONFIG_USE_CMAKE_PREFIX_PATH` variable set to ``FALSE``
-    disables this behavior globally.
-
-    .. This was actually added in 3.1, but didn't work until 3.3.
-
-  .. versionadded:: 3.7
-    The ``IMPORTED_TARGET`` argument will create an imported target named
-    ``PkgConfig::<prefix>`` that can be passed directly as an argument to
-    :command:`target_link_libraries`.
-
-    .. This was actually added in 3.6, but didn't work until 3.7.
-
-  .. versionadded:: 3.13
-    The ``GLOBAL`` argument will make the
-    imported target available in global scope.
-
-  .. versionadded:: 3.15
-    Non-library linker options reported by ``pkg-config`` are stored in the
-    :prop_tgt:`INTERFACE_LINK_OPTIONS` target property.
-
-  .. versionchanged:: 3.18
-    Include directories specified with ``-isystem`` are stored in the
-    :prop_tgt:`INTERFACE_INCLUDE_DIRECTORIES` target property.  Previous
-    versions of CMake left them in the :prop_tgt:`INTERFACE_COMPILE_OPTIONS`
-    property.
-
-  Each ``<moduleSpec>`` can be either a bare module name or it can be a
-  module name with a version constraint (operators ``=``, ``<``, ``>``,
-  ``<=`` and ``>=`` are supported).  The following are examples for a module
-  named ``foo`` with various constraints:
-
-  - ``foo`` matches any version.
-  - ``foo<2`` only matches versions before 2.
-  - ``foo>=3.1`` matches any version from 3.1 or later.
-  - ``foo=1.2.3`` requires that foo must be exactly version 1.2.3.
-
-  The following variables may be set upon return.  Two sets of values exist:
-  One for the common case (``<XXX> = <prefix>``) and another for the
-  information ``pkg-config`` provides when called with the ``--static``
-  option (``<XXX> = <prefix>_STATIC``).
-
-  ``<XXX>_FOUND``
-    set to 1 if module(s) exist
-  ``<XXX>_LIBRARIES``
-    only the libraries (without the '-l')
-  ``<XXX>_LINK_LIBRARIES``
-    the libraries and their absolute paths
-  ``<XXX>_LIBRARY_DIRS``
-    the paths of the libraries (without the '-L')
-  ``<XXX>_LDFLAGS``
-    all required linker flags
-  ``<XXX>_LDFLAGS_OTHER``
-    all other linker flags
-  ``<XXX>_INCLUDE_DIRS``
-    the '-I' preprocessor flags (without the '-I')
-  ``<XXX>_CFLAGS``
-    all required cflags
-  ``<XXX>_CFLAGS_OTHER``
-    the other compiler flags
-
-  All but ``<XXX>_FOUND`` may be a :ref:`;-list <CMake Language Lists>` if the
-  associated variable returned from ``pkg-config`` has multiple values.
-
-  .. versionchanged:: 3.18
-    Include directories specified with ``-isystem`` are stored in the
-    ``<XXX>_INCLUDE_DIRS`` variable.  Previous versions of CMake left them
-    in ``<XXX>_CFLAGS_OTHER``.
-
-  There are some special variables whose prefix depends on the number of
-  ``<moduleSpec>`` given.  When there is only one ``<moduleSpec>``,
-  ``<YYY>`` will simply be ``<prefix>``, but if two or more ``<moduleSpec>``
-  items are given, ``<YYY>`` will be ``<prefix>_<moduleName>``.
-
-  ``<YYY>_VERSION``
-    version of the module
-  ``<YYY>_PREFIX``
-    prefix directory of the module
-  ``<YYY>_INCLUDEDIR``
-    include directory of the module
-  ``<YYY>_LIBDIR``
-    lib directory of the module
-
-  .. versionchanged:: 3.8
-    For any given ``<prefix>``, ``pkg_check_modules()`` can be called multiple
-    times with different parameters.  Previous versions of CMake cached and
-    returned the first successful result.
-
-  .. versionchanged:: 3.16
-    If a full path to the found library can't be determined, but it's still
-    visible to the linker, pass it through as ``-l<name>``.  Previous versions
-    of CMake failed in this case.
-
-  Examples:
-
-  .. code-block:: cmake
-
-    pkg_check_modules (GLIB2 glib-2.0)
-
-  Looks for any version of glib2.  If found, the output variable
-  ``GLIB2_VERSION`` will hold the actual version found.
-
-  .. code-block:: cmake
-
-    pkg_check_modules (GLIB2 glib-2.0>=2.10)
-
-  Looks for at least version 2.10 of glib2.  If found, the output variable
-  ``GLIB2_VERSION`` will hold the actual version found.
-
-  .. code-block:: cmake
-
-    pkg_check_modules (FOO glib-2.0>=2.10 gtk+-2.0)
-
-  Looks for both glib2-2.0 (at least version 2.10) and any version of
-  gtk2+-2.0.  Only if both are found will ``FOO`` be considered found.
-  The ``FOO_glib-2.0_VERSION`` and ``FOO_gtk+-2.0_VERSION`` variables will be
-  set to their respective found module versions.
-
-  .. code-block:: cmake
-
-    pkg_check_modules (XRENDER REQUIRED xrender)
-
-  Requires any version of ``xrender``.  Example output variables set by a
-  successful call::
-
-    XRENDER_LIBRARIES=Xrender;X11
-    XRENDER_STATIC_LIBRARIES=Xrender;X11;pthread;Xau;Xdmcp
-#]========================================]
 macro(pkg_check_modules _prefix _module0)
   _pkgconfig_parse_options(_pkg_modules _pkg_is_required _pkg_is_silent _no_cmake_path _no_cmake_environment_path _imp_target _imp_target_global "${_module0}" ${ARGN})
   # check cached value
@@ -877,34 +1148,6 @@ macro(pkg_check_modules _prefix _module0)
   endif()
 endmacro()
 
-
-#[========================================[.rst:
-.. command:: pkg_search_module
-
-  The behavior of this command is the same as :command:`pkg_check_modules`,
-  except that rather than checking for all the specified modules, it searches
-  for just the first successful match.
-
-  .. code-block:: cmake
-
-    pkg_search_module(<prefix>
-                      [REQUIRED] [QUIET]
-                      [NO_CMAKE_PATH]
-                      [NO_CMAKE_ENVIRONMENT_PATH]
-                      [IMPORTED_TARGET [GLOBAL]]
-                      <moduleSpec> [<moduleSpec>...])
-
-  .. versionadded:: 3.16
-    If a module is found, the ``<prefix>_MODULE_NAME`` variable will contain the
-    name of the matching module. This variable can be used if you need to run
-    :command:`pkg_get_variable`.
-
-  Example:
-
-  .. code-block:: cmake
-
-    pkg_search_module (BAR libxml-2.0 libxml2 libxml>=2)
-#]========================================]
 macro(pkg_search_module _prefix _module0)
   _pkgconfig_parse_options(_pkg_modules_alt _pkg_is_required _pkg_is_silent _no_cmake_path _no_cmake_environment_path _imp_target _imp_target_global "${_module0}" ${ARGN})
   # check cached value
@@ -939,36 +1182,6 @@ macro(pkg_search_module _prefix _module0)
   endif()
 endmacro()
 
-#[========================================[.rst:
-.. command:: pkg_get_variable
-
-  .. versionadded:: 3.4
-
-  Retrieves the value of a pkg-config variable ``varName`` and stores it in the
-  result variable ``resultVar`` in the calling scope.
-
-  .. code-block:: cmake
-
-    pkg_get_variable(<resultVar> <moduleName> <varName>
-                     [DEFINE_VARIABLES <key>=<value>...])
-
-  If ``pkg-config`` returns multiple values for the specified variable,
-  ``resultVar`` will contain a :ref:`;-list <CMake Language Lists>`.
-
-  Options:
-
-  ``DEFINE_VARIABLES <key>=<value>...``
-    .. versionadded:: 3.28
-
-    Specify key-value pairs to redefine variables affecting the variable
-    retrieved with ``pkg-config``.
-
-  For example:
-
-  .. code-block:: cmake
-
-    pkg_get_variable(GI_GIRDIR gobject-introspection-1.0 girdir)
-#]========================================]
 function (pkg_get_variable result pkg variable)
   set(_multiValueArgs DEFINE_VARIABLES)
 
@@ -989,55 +1202,3 @@ function (pkg_get_variable result pkg variable)
     PARENT_SCOPE)
   _pkg_restore_path_internal()
 endfunction ()
-
-
-#[========================================[.rst:
-Variables Affecting Behavior
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. variable:: PKG_CONFIG_EXECUTABLE
-
-  This cache variable can be set to the path of the pkg-config executable.
-  :command:`find_program` is called internally by the module with this
-  variable.
-
-  .. versionadded:: 3.1
-    The ``PKG_CONFIG`` environment variable can be used as a hint if
-    ``PKG_CONFIG_EXECUTABLE`` has not yet been set.
-
-  .. versionchanged:: 3.22
-    If the ``PKG_CONFIG`` environment variable is set, only the first
-    argument is taken from it when using it as a hint.
-
-.. variable:: PKG_CONFIG_ARGN
-
-  .. versionadded:: 3.22
-
-  This cache variable can be set to a list of arguments to additionally pass
-  to pkg-config if needed. If not provided, it will be initialized from the
-  ``PKG_CONFIG`` environment variable, if set. The first argument in that
-  environment variable is assumed to be the pkg-config program, while all
-  remaining arguments after that are used to initialize ``PKG_CONFIG_ARGN``.
-  If no such environment variable is defined, ``PKG_CONFIG_ARGN`` is
-  initialized to an empty string. The module does not update the variable once
-  it has been set in the cache.
-
-.. variable:: PKG_CONFIG_USE_CMAKE_PREFIX_PATH
-
-  .. versionadded:: 3.1
-
-  Specifies whether :command:`pkg_check_modules` and
-  :command:`pkg_search_module` should add the paths in the
-  :variable:`CMAKE_PREFIX_PATH`, :variable:`CMAKE_FRAMEWORK_PATH` and
-  :variable:`CMAKE_APPBUNDLE_PATH` cache and environment variables to the
-  ``pkg-config`` search path.
-
-  If this variable is not set, this behavior is enabled by default if
-  :variable:`CMAKE_MINIMUM_REQUIRED_VERSION` is 3.1 or later, disabled
-  otherwise.
-#]========================================]
-
-
-### Local Variables:
-### mode: cmake
-### End:

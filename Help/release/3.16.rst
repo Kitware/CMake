@@ -165,7 +165,7 @@ Modules
   a new ``REASON_FAILURE_MESSAGE`` option to specify a message
   giving the reason for the failure.
 
-* The :module:`FindPkgConfig` module :command:`pkg_search_module` macro
+* The :module:`FindPkgConfig` module :command:`pkg_search_module` command
   now defines a ``<prefix>_MODULE_NAME`` result variable containing the
   first matching module name.
 
