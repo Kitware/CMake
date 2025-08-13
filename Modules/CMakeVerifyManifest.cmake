@@ -5,31 +5,53 @@
 CMakeVerifyManifest
 -------------------
 
-Use this script to verify that embedded manifests and side-by-side
-manifests for a project match.
+This module is intended to be used in command-line mode using the
+:ref:`cmake -P <Script Processing Mode>` to verify that embedded manifests
+and side-by-side manifests for a project match.
 
-This script first recursively globs ``*.manifest`` files from
-the current directory and creates a list of allowed version.
-Additional versions can be passed by setting ``allow_versions``
-from the invocation command.
-Next, the script globs ``*.exe`` and ``*.dll`` files.  Each
+Load this module in a CMake script with:
+
+.. code-block:: cmake
+
+  include(CMakeVerifyManifest)
+
+This module first recursively globs ``*.manifest`` files from
+the current source directory and creates a list of allowed versions.
+
+Next, the script globs all ``*.exe`` and ``*.dll`` files.  Each
 ``.exe`` and ``.dll`` file is scanned for embedded manifests and
 the versions of CRT are checked to be in the list of allowed
-version.
+versions.
 
-Example
-^^^^^^^
+Input Variables
+^^^^^^^^^^^^^^^
 
-To run this script, navigate to a directory and run the script
-with ``cmake -P``.
+This module accepts the following variables:
 
-::
+``allow_versions``
+  Additional versions can be passed by setting the ``allow_versions``
+  variable from the invocation command.  This enables using additional
+  embedded manifest versions in a project, even if that version was not
+  found in a ``.manifest`` file.
 
-  cmake -Dallow_versions=8.0.50608.0 -PCMakeVerifyManifest.cmake
+Examples
+^^^^^^^^
 
-This call allows an embedded manifest of 8.0.50608.0 to be used
-in a project, even if that version was not found in a
-``.manifest`` file.
+To use this module in the project, create a local command-line script (for
+example, in the project's subdirectory ``cmake/scripts``) and include the
+module:
+
+.. code-block:: cmake
+  :caption: ``cmake/scripts/verify-manifest.cmake``
+
+  include(CMakeVerifyManifest)
+
+Then run the local script in command-line and, for example, specify
+additional embedded manifest of ``8.0.50608.0`` to be used in a project:
+
+.. code-block:: shell
+
+  cmake -Dallow_versions=8.0.50608.0 -Pcmake/scripts/verify-manifest.cmake
 #]=======================================================================]
 
 # crt_version:
