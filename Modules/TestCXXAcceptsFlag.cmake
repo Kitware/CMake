@@ -12,11 +12,19 @@ TestCXXAcceptsFlag
   :module:`CheckCompilerFlag` module is also available for checking flags across
   multiple languages.
 
-This module provides a macro to test whether the C++ (CXX) compiler supports
+This module provides a command to test whether the C++ (CXX) compiler supports
 specific flags.
 
-Macros
-^^^^^^
+Load this module in a CMake project with:
+
+.. code-block:: cmake
+
+  include(TestCXXAcceptsFlag)
+
+Commands
+^^^^^^^^
+
+This module provides the following command:
 
 .. command:: check_cxx_accepts_flag
 
