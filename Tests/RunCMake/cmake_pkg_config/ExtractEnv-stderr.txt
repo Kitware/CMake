@@ -1,5 +1,5 @@
-Includes: -I/Alpha;-I/Gamma
-LibDirs: -L/Delta;-L/Zeta
+Includes: -I/Alpha;-I/Alpha/sub;-I/Gamma
+LibDirs: -L/Delta;-L/Delta/sub;-L/Zeta
 Cflags: QuxInstalled
 PC_LIB_DIRS: Alpha;Beta
 PC_PATH: [^
