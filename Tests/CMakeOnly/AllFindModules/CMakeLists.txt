@@ -97,7 +97,7 @@ foreach(
     CUPS CURL
     EXPAT
     FREETYPE
-    GETTEXT GIT
+    GETTEXT GIT GNUTLS
     HG HSPELL
     ICOTOOL
     JASPER
@@ -118,7 +118,7 @@ foreach(
     Doxygen DOXYGEN
     EXPAT
     FLEX Freetype
-    Gettext GIF GTK2
+    Gettext GIF GnuTLS GNUTLS GTK2
     HDF5
     Jasper JPEG
     LibArchive LibLZMA LIBLZMA LibXml2 LibXslt LTTngUST

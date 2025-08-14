@@ -5,12 +5,17 @@
 FindGnuTLS
 ----------
 
-Finds the GNU Transport Layer Security library (GnuTLS).  The GnuTLS
-package includes the main libraries (libgnutls and libdane), as well as the
-optional gnutls-openssl compatibility extra library.  They are all distributed
-as part of the same release.  This module checks for the presence of the main
-libgnutls library and provides usage requirements for integrating GnuTLS into
-CMake projects.
+Finds the GNU Transport Layer Security library (GnuTLS):
+
+.. code-block:: cmake
+
+  find_package(GnuTLS [<version>] [...])
+
+The GnuTLS package includes the main libraries (libgnutls and libdane), as
+well as the optional gnutls-openssl compatibility extra library.  They are
+all distributed as part of the same release.  This module checks for the
+presence of the main libgnutls library and provides usage requirements for
+integrating GnuTLS into CMake projects.
 
 Imported Targets
 ^^^^^^^^^^^^^^^^
@@ -29,12 +34,12 @@ Result Variables
 This module defines the following variables:
 
 ``GnuTLS_FOUND``
-  Boolean indicating whether the (requested version of) GnuTLS is found.  For
+  Boolean indicating whether (the requested version of) GnuTLS is found.  For
   backward compatibility, the ``GNUTLS_FOUND`` variable is also set to the same
   value.
 
-``GNUTLS_VERSION``
-  .. versionadded:: 3.16
+``GnuTLS_VERSION``
+  .. versionadded:: 4.2
 
   The version of GnuTLS found.
 
@@ -61,13 +66,16 @@ The following cache variables may also be set:
 Deprecated Variables
 ^^^^^^^^^^^^^^^^^^^^
 
-These variables are provided for backward compatibility:
+The following variables are provided for backward compatibility:
 
 ``GNUTLS_VERSION_STRING``
   .. deprecated:: 3.16
-    Superseded by ``GNUTLS_VERSION``.
+    Use the ``GnuTLS_VERSION``, which has the same value.
 
-  The version of GnuTLS found.
+``GNUTLS_VERSION``
+  .. versionadded:: 3.16
+  .. deprecated:: 4.2
+    Use the ``GnuTLS_VERSION``, which has the same value.
 
 Examples
 ^^^^^^^^
@@ -79,6 +87,9 @@ Finding GnuTLS and linking it to a project target:
   find_package(GnuTLS)
   target_link_libraries(project_target PRIVATE GnuTLS::GnuTLS)
 #]=======================================================================]
+
+cmake_policy(PUSH)
+cmake_policy(SET CMP0159 NEW) # file(STRINGS) with REGEX updates CMAKE_MATCH_<n>
 
 if (GNUTLS_INCLUDE_DIR AND GNUTLS_LIBRARY)
   # in cache already
@@ -94,9 +105,6 @@ if (NOT WIN32)
     pkg_check_modules(PC_GNUTLS QUIET gnutls)
   endif()
   set(GNUTLS_DEFINITIONS ${PC_GNUTLS_CFLAGS_OTHER})
-  set(GNUTLS_VERSION ${PC_GNUTLS_VERSION})
-  # keep for backward compatibility
-  set(GNUTLS_VERSION_STRING ${PC_GNUTLS_VERSION})
 endif ()
 
 find_path(GNUTLS_INCLUDE_DIR gnutls/gnutls.h
@@ -113,10 +121,43 @@ find_library(GNUTLS_LIBRARY NAMES gnutls libgnutls
 
 mark_as_advanced(GNUTLS_INCLUDE_DIR GNUTLS_LIBRARY)
 
+if(GNUTLS_INCLUDE_DIR AND EXISTS "${GNUTLS_INCLUDE_DIR}/gnutls/gnutls.h")
+  file(
+    STRINGS
+    "${GNUTLS_INCLUDE_DIR}/gnutls/gnutls.h"
+    gnutls_version
+    # GnuTLS versions prior to 2.7.2 defined LIBGNUTLS_VERSION instead of the
+    # current GNUTLS_VERSION.
+    REGEX "^#define[\t ]+(LIB)?GNUTLS_VERSION[\t ]+\".*\""
+  )
+
+  string(
+    REGEX REPLACE
+    "^.*GNUTLS_VERSION[\t ]+\"([^\"]*)\".*$"
+    "\\1"
+    GnuTLS_VERSION
+    "${gnutls_version}"
+  )
+  unset(gnutls_version)
+
+  # Fallback to version defined by pkg-config if not successful.
+  if(
+    NOT GnuTLS_VERSION
+    AND PC_GNUTLS_VERSION
+    AND GNUTLS_INCLUDE_DIR IN_LIST PC_GNUTLS_INCLUDE_DIRS
+  )
+    set(GnuTLS_VERSION "${PC_GNUTLS_VERSION}")
+  endif()
+
+  # For backward compatibility.
+  set(GNUTLS_VERSION "${GnuTLS_VERSION}")
+  set(GNUTLS_VERSION_STRING "${GnuTLS_VERSION}")
+endif()
+
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(GnuTLS
                                   REQUIRED_VARS GNUTLS_LIBRARY GNUTLS_INCLUDE_DIR
-                                  VERSION_VAR GNUTLS_VERSION_STRING)
+                                  VERSION_VAR GnuTLS_VERSION)
 
 if(GnuTLS_FOUND)
   set(GNUTLS_LIBRARIES    ${GNUTLS_LIBRARY})
@@ -131,3 +172,5 @@ if(GnuTLS_FOUND)
       IMPORTED_LOCATION "${GNUTLS_LIBRARIES}")
   endif()
 endif()
+
+cmake_policy(POP)
