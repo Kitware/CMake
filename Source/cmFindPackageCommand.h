@@ -37,6 +37,7 @@ class cmExecutionStatus;
 class cmMakefile;
 class cmPackageState;
 class cmSearchPath;
+class cmPackageInformation;
 
 /** \class cmFindPackageCommand
  * \brief Load settings from an external project.
@@ -286,6 +287,8 @@ private:
   std::set<std::string> OptionalComponents;
   std::set<std::string> RequiredTargets;
   std::string DebugBuffer;
+  cmPackageInformation* CurrentPackageInfo;
+
   enum class SearchResult
   {
     InsufficientVersion,

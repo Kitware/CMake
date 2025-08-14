@@ -1224,6 +1224,8 @@ bool cmFindPackageCommand::FindPackage(
   SetRestoreFindDefinitions setRestoreFindDefinitions(*this);
   cmFindPackageStackRAII findPackageStackRAII(this->Makefile, this->Name);
 
+  findPackageStackRAII.BindTop(this->CurrentPackageInfo);
+
   // See if we have been told to delegate to FetchContent or some other
   // redirected config package first. We have to check all names that
   // find_package() may look for, but only need to invoke the override for the
@@ -1270,6 +1272,8 @@ bool cmFindPackageCommand::FindPackage(
       this->Names.clear();
       this->Names.emplace_back(overrideName); // Force finding this one
       this->Variable = cmStrCat(this->Name, "_DIR");
+      this->CurrentPackageInfo->Directory = redirectsDir;
+      this->CurrentPackageInfo->Version = this->VersionFound;
       this->SetConfigDirCacheVariable(redirectsDir);
       break;
     }
@@ -1342,7 +1346,6 @@ bool cmFindPackageCommand::FindPackage(
   }
 
   this->AppendSuccessInformation();
-
   return loadedPackage;
 }
 
@@ -1971,6 +1974,8 @@ bool cmFindPackageCommand::FindConfig()
   std::string init;
   if (found) {
     init = cmSystemTools::GetFilenamePath(this->FileFound);
+    this->CurrentPackageInfo->Directory = init;
+    this->CurrentPackageInfo->Version = this->VersionFound;
   } else {
     init = this->Variable + "-NOTFOUND";
   }

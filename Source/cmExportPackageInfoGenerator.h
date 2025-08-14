@@ -6,13 +6,13 @@
 
 #include <iosfwd>
 #include <map>
-#include <set>
 #include <string>
 #include <vector>
 
 #include <cm/string_view>
 
 #include "cmExportFileGenerator.h"
+#include "cmFindPackageStack.h"
 #include "cmStateTypes.h"
 
 namespace Json {
@@ -112,9 +112,10 @@ private:
   std::string const PackageWebsite;
   std::string const PackageLicense;
   std::string const DefaultLicense;
+
   std::vector<std::string> DefaultTargets;
   std::vector<std::string> DefaultConfigurations;
 
   std::map<std::string, std::string> LinkTargets;
-  std::map<std::string, std::set<std::string>> Requirements;
+  std::map<std::string, cmPackageInformation> Requirements;
 };

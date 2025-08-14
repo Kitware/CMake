@@ -5,9 +5,11 @@
 #include <cstddef>
 #include <memory>
 #include <set>
+#include <type_traits>
 #include <utility>
 #include <vector>
 
+#include <cm/optional>
 #include <cm/string_view>
 #include <cmext/algorithm>
 #include <cmext/string_view>
@@ -27,7 +29,6 @@
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
-#include "cmValue.h"
 
 static std::string const kCPS_VERSION_STR = "0.13.0";
 
@@ -146,15 +147,25 @@ void cmExportPackageInfoGenerator::GeneratePackageRequires(
       auto data = Json::Value{ Json::objectValue };
 
       // Add required components.
-      if (!requirement.second.empty()) {
+      if (!requirement.second.Components.empty()) {
         auto components = Json::Value{ Json::arrayValue };
-        for (std::string const& component : requirement.second) {
+        for (std::string const& component : requirement.second.Components) {
           components.append(component);
         }
         data["components"] = components;
       }
 
-      // TODO: version, hint
+      // Add additional dependency information.
+      if (requirement.second.Directory) {
+        auto hints = Json::Value{ Json::arrayValue };
+        hints.append(*requirement.second.Directory);
+        data["hints"] = hints;
+      }
+
+      if (requirement.second.Version) {
+        data["version"] = *requirement.second.Version;
+      }
+
       requirements[requirement.first] = data;
     }
   }
@@ -283,16 +294,24 @@ bool cmExportPackageInfoGenerator::NoteLinkedTarget(
 
   if (linkedTarget->IsImported()) {
     // Target is imported from a found package.
-    auto pkgName = [linkedTarget]() -> std::string {
-      auto const& pkgStack = linkedTarget->Target->GetFindPackageStack();
+    using Package = cm::optional<std::pair<std::string, cmPackageInformation>>;
+    auto pkgInfo = [](cmTarget* t) -> Package {
+      cmFindPackageStack pkgStack = t->GetFindPackageStack();
       if (!pkgStack.Empty()) {
-        return pkgStack.Top().Name;
+        return std::make_pair(pkgStack.Top().Name, pkgStack.Top().PackageInfo);
       }
 
-      return linkedTarget->Target->GetProperty("EXPORT_FIND_PACKAGE_NAME");
-    }();
+      cmPackageInformation package;
+      std::string const pkgName =
+        t->GetSafeProperty("EXPORT_FIND_PACKAGE_NAME");
+      if (pkgName.empty()) {
+        return cm::nullopt;
+      }
 
-    if (pkgName.empty()) {
+      return std::make_pair(pkgName, package);
+    }(linkedTarget->Target);
+
+    if (!pkgInfo) {
       target->Makefile->IssueMessage(
         MessageType::FATAL_ERROR,
         cmStrCat("Target \"", target->GetName(),
@@ -300,6 +319,8 @@ bool cmExportPackageInfoGenerator::NoteLinkedTarget(
                  "\" which does not come from any known package."));
       return false;
     }
+
+    std::string const& pkgName = pkgInfo->first;
 
     auto const& prefix = cmStrCat(pkgName, "::");
     if (!cmHasPrefix(linkedName, prefix)) {
@@ -314,8 +335,9 @@ bool cmExportPackageInfoGenerator::NoteLinkedTarget(
 
     std::string component = linkedName.substr(prefix.length());
     this->LinkTargets.emplace(linkedName, cmStrCat(pkgName, ':', component));
-    // TODO: Record package version, hint.
-    this->Requirements[pkgName].emplace(std::move(component));
+    cmPackageInformation& req =
+      this->Requirements.insert(std::move(*pkgInfo)).first->second;
+    req.Components.emplace(std::move(component));
     return true;
   }
 
@@ -339,7 +361,7 @@ bool cmExportPackageInfoGenerator::NoteLinkedTarget(
       this->LinkTargets.emplace(linkedName, cmStrCat(':', component));
     } else {
       this->LinkTargets.emplace(linkedName, cmStrCat(pkgName, ':', component));
-      this->Requirements[pkgName].emplace(std::move(component));
+      this->Requirements[pkgName].Components.emplace(std::move(component));
     }
     return true;
   }
