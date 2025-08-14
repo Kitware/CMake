@@ -2837,18 +2837,7 @@ void cmLocalGenerator::AddPchDependencies(cmGeneratorTarget* target)
                     langFlags.find("-Zi") != std::string::npos;
                 }
 
-                // MSVC 2008 is producing both .pdb and .idb files with /Zi.
-                bool msvc2008OrLess =
-                  cmSystemTools::VersionCompare(cmSystemTools::OP_LESS,
-                                                compilerVersion, "16.0") &&
-                  compilerId == "MSVC";
-                // but not when used via toolset -Tv90
-                if (this->Makefile->GetSafeDefinition(
-                      "CMAKE_VS_PLATFORM_TOOLSET") == "v90") {
-                  msvc2008OrLess = false;
-                }
-
-                if (editAndContinueDebugInfo || msvc2008OrLess) {
+                if (editAndContinueDebugInfo) {
                   this->CopyPchCompilePdb(config, lang, target, reuseTarget,
                                           { ".pdb", ".idb" });
                 } else if (programDatabaseDebugInfo) {
@@ -2939,10 +2928,9 @@ void cmLocalGenerator::CopyPchCompilePdb(
     std::string const from_file =
       replaceExtension(reuseTarget->GetCompilePDBPath(config), extension);
     std::string const to_dir = target->GetCompilePDBDirectory(config);
-    std::string const to_file = cmStrCat(
-      replaceExtension(reuseTarget->GetCompilePDBName(config), extension),
-      '/');
-    std::string const dest_file = cmStrCat(to_dir, to_file);
+    std::string const to_file =
+      replaceExtension(reuseTarget->GetCompilePDBName(config), extension);
+    std::string const dest_file = cmStrCat(to_dir, '/', to_file);
 
     file << "foreach(retry RANGE 1 30)\n";
     file << "  if (EXISTS \"" << from_file << "\" AND (NOT EXISTS \""
