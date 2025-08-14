@@ -141,9 +141,13 @@ void Print(OStream& os, TermAttrSet const& attrs,
       f(os.IOS());
       break;
     case TermKind::VT100:
-      SetVT100Attrs(os.IOS(), attrs);
-      f(os.IOS());
-      SetVT100Attrs(os.IOS(), TermAttr::Normal);
+      if (!attrs.empty()) {
+        SetVT100Attrs(os.IOS(), attrs);
+        f(os.IOS());
+        SetVT100Attrs(os.IOS(), TermAttr::Normal);
+      } else {
+        f(os.IOS());
+      }
       break;
 #ifdef _WIN32
     case TermKind::Console: {
