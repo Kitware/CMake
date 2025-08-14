@@ -164,33 +164,36 @@ static std::string extractAllGeneratorExpressions(
   std::string result;
   std::string::size_type pos = 0;
   std::string::size_type lastPos = pos;
-  // stack of { Generator Expression Name, Start Position of Value }
-  std::stack<std::pair<std::string, std::string::size_type>> genexps;
+  std::stack<char const*> starts; // indices of "$<"
+  std::stack<char const*> colons; // indices of ":"
   while ((pos = input.find("$<", lastPos)) != std::string::npos) {
     result += input.substr(lastPos, pos - lastPos);
+    starts.push(input.c_str() + pos);
     pos += 2;
     char const* c = input.c_str() + pos;
-    char const* cName = c;
     char const* const cStart = c;
     for (; *c; ++c) {
       if (cmGeneratorExpression::StartsWithGeneratorExpression(c)) {
+        starts.push(c);
         ++c;
-        cName = c + 1;
         continue;
       }
-      if (c[0] == ':' && cName) {
-        genexps.push({ input.substr(pos + (cName - cStart), c - cName),
-                       pos + (c + 1 - cStart) });
-        cName = nullptr;
-      } else if (c[0] == '>') {
-        if (!cName && !genexps.empty()) {
-          if (collected) {
-            (*collected)[genexps.top().first].push_back(input.substr(
-              genexps.top().second, pos + c - cStart - genexps.top().second));
-          }
-          genexps.pop();
+      if (c[0] == ':') {
+        if (colons.size() < starts.size()) {
+          colons.push(c);
         }
-        if (genexps.empty()) {
+      } else if (c[0] == '>') {
+        if (collected && !starts.empty() && !colons.empty()) {
+          (*collected)[std::string(starts.top() + 2, colons.top())].push_back(
+            std::string(colons.top() + 1, c));
+        }
+        if (!starts.empty()) {
+          starts.pop();
+        }
+        if (!colons.empty()) {
+          colons.pop();
+        }
+        if (starts.empty()) {
           break;
         }
       }
@@ -202,7 +205,7 @@ static std::string extractAllGeneratorExpressions(
     pos += traversed;
     lastPos = pos;
   }
-  if (genexps.empty()) {
+  if (starts.empty()) {
     result += input.substr(lastPos);
   }
   return cmGeneratorExpression::StripEmptyListElements(result);
