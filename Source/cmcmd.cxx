@@ -1923,7 +1923,7 @@ int cmcmd::ExecuteEchoColor(std::vector<std::string> const& args)
 
   bool enabled = true;
   static cm::StdIo::TermAttrSet const noAttrs;
-  cm::StdIo::TermAttrSet attrs = cm::StdIo::TermAttr::Normal;
+  cm::StdIo::TermAttrSet attrs;
   bool newline = true;
   std::string progressDir;
   for (auto const& arg : cmMakeRange(args).advance(2)) {
@@ -1959,6 +1959,9 @@ int cmcmd::ExecuteEchoColor(std::vector<std::string> const& args)
     } else if (arg == "--white") {
       attrs = cm::StdIo::TermAttr::ForegroundWhite;
     } else if (arg == "--bold") {
+      if (attrs.empty()) {
+        attrs = cm::StdIo::TermAttr::Normal;
+      }
       attrs |= cm::StdIo::TermAttr::ForegroundBold;
     } else if (arg == "--no-newline") {
       newline = false;
