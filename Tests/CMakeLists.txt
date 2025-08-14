@@ -593,11 +593,11 @@ if(BUILD_TESTING)
   if(NOT DEFINED CMake_TEST_Qt4)
     set(CMake_TEST_Qt4 1)
   endif()
-  if(CMake_TEST_Qt4 AND NOT QT4_FOUND)
+  if(CMake_TEST_Qt4 AND NOT Qt4_FOUND)
     find_package(Qt4 QUIET)
   endif()
 
-  if(CMake_TEST_Qt4 AND QT4_FOUND)
+  if(CMake_TEST_Qt4 AND Qt4_FOUND)
     # test whether the Qt4 which has been found works, on some machines
     # which run nightly builds there were errors like "wrong file format"
     # for libQtCore.so. So first check it works, and only if it does add

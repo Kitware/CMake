@@ -92,7 +92,7 @@ cmake_policy(SET CMP0159 NEW) # file(STRINGS) with REGEX updates CMAKE_MATCH_<n>
 #  QT_WRAP_UI set true if QT_UIC_EXECUTABLE is found
 
 # If Qt4 has already been found, fail.
-if(QT4_FOUND)
+if(Qt4_FOUND)
   if(Qt3_FIND_REQUIRED)
     message( FATAL_ERROR "Qt3 and Qt4 cannot be used together in one project.")
   else()
