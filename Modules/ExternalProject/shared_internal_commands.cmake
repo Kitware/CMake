@@ -1596,7 +1596,7 @@ function(_ep_add_update_command name)
       set(hg_tag "tip")
     endif()
 
-    if("${HG_VERSION_STRING}" STREQUAL "2.1")
+    if("${Hg_VERSION}" STREQUAL "2.1")
       set(notesAnchor
         "#A2.1.1:_revert_pull_return_code_change.2C_compile_issue_on_OS_X"
       )
