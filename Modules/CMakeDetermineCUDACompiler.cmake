@@ -257,21 +257,27 @@ if(CMAKE_CUDA_COMPILER_ID STREQUAL "Clang")
   # _CUDA_TARGET_DIR always points to the directory containing the include directory.
   # On a scattered installation /usr, on a non-scattered something like /usr/local/cuda or /usr/local/cuda-10.2/targets/aarch64-linux.
   if(EXISTS "${_CUDA_TARGET_DIR}/include/cuda_runtime.h")
-    set(_CUDA_INCLUDE_DIR "${_CUDA_TARGET_DIR}/include")
+    set(_CUDA_INCLUDE_DIRS "${_CUDA_TARGET_DIR}/include")
   else()
-    message(FATAL_ERROR "Unable to find cuda_runtime.h in \"${_CUDA_TARGET_DIR}/include\" for _CUDA_INCLUDE_DIR.")
+    message(FATAL_ERROR "Unable to find cuda_runtime.h in \"${_CUDA_TARGET_DIR}/include\" for _CUDA_INCLUDE_DIRS.")
+  endif()
+
+  # CUDA 13 has multiple includes that are implicitly added by nvcc that we need to replicate for
+  # clang-cuda
+  if(EXISTS "${_CUDA_TARGET_DIR}/include/cccl")
+    list(APPEND _CUDA_INCLUDE_DIRS "${_CUDA_TARGET_DIR}/include/cccl")
   endif()
 
   # Clang does not add any CUDA SDK libraries or directories when invoking the host linker.
   # Add the CUDA toolkit library directory ourselves so that linking works.
   # The CUDA runtime libraries are handled elsewhere by CMAKE_CUDA_RUNTIME_LIBRARY.
-  set(CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES "${_CUDA_INCLUDE_DIR}")
+  set(CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES "${_CUDA_INCLUDE_DIRS}")
   set(CMAKE_CUDA_HOST_IMPLICIT_LINK_DIRECTORIES "${_CUDA_LIBRARY_DIR}")
   set(CMAKE_CUDA_HOST_IMPLICIT_LINK_LIBRARIES "")
   set(CMAKE_CUDA_HOST_IMPLICIT_LINK_FRAMEWORK_DIRECTORIES "")
 
   # Don't leak variables unnecessarily to user code.
-  unset(_CUDA_INCLUDE_DIR)
+  unset(_CUDA_INCLUDE_DIRS)
   unset(_CUDA_LIBRARY_DIR)
   unset(_CUDA_TARGET_DIR)
 elseif(CMAKE_CUDA_COMPILER_ID STREQUAL "NVIDIA")
