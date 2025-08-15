@@ -133,4 +133,5 @@ foreach(
 endforeach()
 
 check_version_string(PYTHONINTERP PYTHON_VERSION_STRING)
+check_version_string(SUBVERSION Subversion_VERSION)
 check_version_string(SUBVERSION Subversion_VERSION_SVN)

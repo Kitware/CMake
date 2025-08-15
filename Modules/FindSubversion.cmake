@@ -22,7 +22,9 @@ This module defines the following variables:
   client is found.  For backward compatibility, the ``SUBVERSION_FOUND``
   variable is also set to the same value.
 
-``Subversion_VERSION_SVN``
+``Subversion_VERSION``
+  .. versionadded:: 4.2
+
   Version of the ``svn`` command-line client found.
 
 Cache Variables
@@ -92,6 +94,17 @@ client is found:
   ``<var-prefix>_LAST_CHANGED_LOG``
     Last log of the base revision of a Subversion working copy located at
     ``<dir>``.
+
+Deprecated Variables
+^^^^^^^^^^^^^^^^^^^^
+
+The following variables are provided for backward compatibility:
+
+``Subversion_VERSION_SVN``
+  .. deprecated:: 4.2
+    Use the ``Subversion_VERSION``.
+
+  Version of the ``svn`` command-line client found.
 
 Examples
 ^^^^^^^^
@@ -166,6 +179,12 @@ if(Subversion_SVN_EXECUTABLE)
     endif()
   endif()
 
+  if(DEFINED Subversion_VERSION_SVN)
+    set(Subversion_VERSION "${Subversion_VERSION_SVN}")
+  else()
+    unset(Subversion_VERSION)
+  endif()
+
   macro(Subversion_WC_INFO dir prefix)
 
     cmake_parse_arguments(
@@ -229,7 +248,7 @@ endif()
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(Subversion REQUIRED_VARS Subversion_SVN_EXECUTABLE
-                                             VERSION_VAR Subversion_VERSION_SVN )
+                                             VERSION_VAR Subversion_VERSION)
 
 # for compatibility
 set(Subversion_SVN_FOUND ${Subversion_FOUND})
