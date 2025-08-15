@@ -11,7 +11,13 @@ FindLua50
   not maintained anymore.  In new code use the latest supported Lua version and
   the version-agnostic module :module:`FindLua` instead.
 
-Finds the Lua library.  Lua is a embeddable scripting language.
+Finds the Lua library:
+
+.. code-block:: cmake
+
+  find_package(Lua50 [...])
+
+Lua is a embeddable scripting language.
 
 When working with Lua, its library headers are intended to be included in
 project source code as:
