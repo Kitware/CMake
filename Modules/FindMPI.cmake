@@ -5,7 +5,11 @@
 FindMPI
 -------
 
-Find a Message Passing Interface (MPI) implementation.
+Finds a Message Passing Interface (MPI) implementation:
+
+.. code-block:: cmake
+
+  find_package(MPI [<version>] [COMPONENTS <langs>...] [...])
 
 The Message Passing Interface (MPI) is a library used to write
 high-performance distributed-memory parallel applications, and is
@@ -14,253 +18,409 @@ by the MPI forum) for which many implementations are available.
 
 .. versionadded:: 3.10
   Major overhaul of the module: many new variables, per-language components,
-  support for a wider variety of runtimes.
+  and support for a wider variety of runtimes.
 
-Variables for using MPI
-^^^^^^^^^^^^^^^^^^^^^^^
+Components
+^^^^^^^^^^
 
-The module exposes the components ``C``, ``CXX``, ``MPICXX`` and ``Fortran``.
-Each of these controls the various MPI languages to search for.
-The difference between ``CXX`` and ``MPICXX`` is that ``CXX`` refers to the
-MPI C API being usable from C++, whereas ``MPICXX`` refers to the MPI-2 C++ API
-that was removed again in MPI-3.
+This module supports optional components that can be specified with the
+:command:`find_package` command to control which MPI languages to search
+for:
 
-Depending on the enabled components the following variables will be set:
+.. code-block:: cmake
+
+  find_package(MPI [COMPONENTS <langs>...])
+
+Supported components include:
+
+``C``
+  .. versionadded:: 3.10
+
+  Finds MPI C API.
+
+``CXX``
+  .. versionadded:: 3.10
+
+  Finds the MPI C API that is usable from C++.
+
+``MPICXX``
+  .. versionadded:: 3.10
+
+  Finds the MPI-2 C++ API that was removed in MPI-3.
+
+``Fortran``
+  .. versionadded:: 3.10
+
+  Finds the MPI Fortran API.
+
+If no components are specified, module searches for the ``C``, ``CXX``, and
+``Fortran`` components automatically, depending on which languages are
+enabled in the project.
+
+Imported Targets
+^^^^^^^^^^^^^^^^
+
+This module provides the following :ref:`Imported Targets`:
+
+``MPI::MPI_<lang>``
+  .. versionadded:: 3.9
+
+  Target encapsulating usage requirements for using MPI from language
+  ``<lang>``, available if MPI is found.  The ``<lang>`` is a specified
+  component name as listed above.
+
+Result Variables
+^^^^^^^^^^^^^^^^
+
+This module defines the following variables:
 
 ``MPI_FOUND``
-  Variable indicating that MPI settings for all requested languages have been found.
-  If no components are specified, this is true if MPI settings for all enabled languages
-  were detected. Note that the ``MPICXX`` component does not affect this variable.
-``MPI_VERSION``
-  Minimal version of MPI detected among the requested languages, or all enabled languages
-  if no components were specified.
+  Boolean variable indicating that MPI settings for all requested components
+  (languages) have been found.  If no components are specified, this is
+  true if MPI settings for all enabled languages were detected.  Note that
+  the ``MPICXX`` component does not affect this variable.
 
-This module will set the following variables per language in your
-project, where ``<lang>`` is one of C, CXX, or Fortran:
+``MPI_VERSION``
+  Minimal version of MPI detected among the requested languages, or all
+  enabled languages if no components were specified.
+
+This module will set the following variables per language in CMake project,
+where ``<lang>`` is one of C, CXX, or Fortran:
 
 ``MPI_<lang>_FOUND``
-  Variable indicating the MPI settings for ``<lang>`` were found and that
-  simple MPI test programs compile with the provided settings.
+  Boolean variable indicating the MPI settings for ``<lang>`` were found
+  and that simple MPI test programs compile with the provided settings.
+
 ``MPI_<lang>_COMPILER``
   MPI compiler for ``<lang>`` if such a program exists.
+
 ``MPI_<lang>_COMPILE_OPTIONS``
-  Compilation options for MPI programs in ``<lang>``, given as a :ref:`;-list <CMake Language Lists>`.
+  Compilation options for MPI programs in ``<lang>``, given as a
+  :ref:`semicolon-separated list <CMake Language Lists>`.
+
 ``MPI_<lang>_COMPILE_DEFINITIONS``
-  Compilation definitions for MPI programs in ``<lang>``, given as a :ref:`;-list <CMake Language Lists>`.
+  Compilation definitions for MPI programs in ``<lang>``, given as a
+  :ref:`semicolon-separated list <CMake Language Lists>`.
+
 ``MPI_<lang>_INCLUDE_DIRS``
   Include path(s) for MPI header.
+
 ``MPI_<lang>_LINK_FLAGS``
   Linker flags for MPI programs.
+
 ``MPI_<lang>_LIBRARIES``
   All libraries to link MPI programs against.
 
-.. versionadded:: 3.9
-  Additionally, the following :prop_tgt:`IMPORTED` targets are defined:
-
-``MPI::MPI_<lang>``
-  Target for using MPI from ``<lang>``.
-
-The following variables indicating which bindings are present will be defined:
+The following variables indicating which bindings are present will be
+defined:
 
 ``MPI_MPICXX_FOUND``
-  Variable indicating whether the MPI-2 C++ bindings are present (introduced in MPI-2, removed with MPI-3).
+  Boolean variable indicating whether the MPI-2 C++ bindings are present
+  (introduced in MPI-2, removed with MPI-3).
+
 ``MPI_Fortran_HAVE_F77_HEADER``
-  True if the Fortran 77 header ``mpif.h`` is available.
+  True if the Fortran 77 header ``<mpif.h>`` is available.
+
 ``MPI_Fortran_HAVE_F90_MODULE``
-  True if the Fortran 90 module ``mpi`` can be used for accessing MPI (MPI-2 and higher only).
+  True if the Fortran 90 module ``mpi`` can be used for accessing MPI (MPI-2
+  and higher only).
+
 ``MPI_Fortran_HAVE_F08_MODULE``
-  True if the Fortran 2008 ``mpi_f08`` is available to MPI programs (MPI-3 and higher only).
+  True if the Fortran 2008 ``mpi_f08`` is available to MPI programs (MPI-3
+  and higher only).
 
-If possible, the MPI version will be determined by this module. The facilities to detect the MPI version
-were introduced with MPI-1.2, and therefore cannot be found for older MPI versions.
+If possible, the MPI version will be determined by this module.  The
+facilities to detect the MPI version were introduced with MPI-1.2, and
+therefore cannot be found for older MPI versions.
 
-``MPI_<lang>_VERSION_MAJOR``
-  Major version of MPI implemented for ``<lang>`` by the MPI distribution.
-``MPI_<lang>_VERSION_MINOR``
-  Minor version of MPI implemented for ``<lang>`` by the MPI distribution.
 ``MPI_<lang>_VERSION``
   MPI version implemented for ``<lang>`` by the MPI distribution.
 
-Note that there's no variable for the C bindings being accessible through ``mpi.h``, since the MPI standards
-always have required this binding to work in both C and C++ code.
+``MPI_<lang>_VERSION_MAJOR``
+  Major version of MPI implemented for ``<lang>`` by the MPI distribution.
 
-For running MPI programs, the module sets the following variables
+``MPI_<lang>_VERSION_MINOR``
+  Minor version of MPI implemented for ``<lang>`` by the MPI distribution.
+
+Note that there's no variable for the C bindings being accessible through
+``<mpi.h>``, since the MPI standards always have required this binding to
+work in both C and C++ code.
+
+For running MPI programs, the module sets the following variables:
 
 ``MPIEXEC_EXECUTABLE``
   Executable for running MPI programs, if such exists.
+
 ``MPIEXEC_NUMPROC_FLAG``
-  Flag to pass to ``mpiexec`` before giving it the number of processors to run on.
+  Flag to pass to ``mpiexec`` before giving it the number of processors to
+  run on.
+
 ``MPIEXEC_MAX_NUMPROCS``
-  Number of MPI processors to utilize. Defaults to the number
-  of processors detected on the host system.
+  Number of MPI processors to utilize.  Defaults to the number of
+  processors detected on the host system.
+
 ``MPIEXEC_PREFLAGS``
   Flags to pass to ``mpiexec`` directly before the executable to run.
+
 ``MPIEXEC_POSTFLAGS``
   Flags to pass to ``mpiexec`` after other flags.
 
-Variables for locating MPI
+Variables for Locating MPI
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-This module performs a four step search for an MPI implementation:
+This module performs a four-step search for an MPI implementation:
 
-1. Search for ``MPIEXEC_EXECUTABLE`` and, if found, use its base directory.
-2. Check if the compiler has MPI support built-in. This is the case if the user passed a
-   compiler wrapper as ``CMAKE_<LANG>_COMPILER`` or if they use Cray system compiler wrappers.
-3. Attempt to find an MPI compiler wrapper and determine the compiler information from it.
-4. Try to find an MPI implementation that does not ship such a wrapper by guessing settings.
-   Currently, only Microsoft MPI and MPICH2 on Windows are supported.
+1. Searches for ``MPIEXEC_EXECUTABLE`` and, if found, uses its base
+   directory.
+2. Checks if the compiler has MPI support built-in.  This is the case if
+   the user passed a compiler wrapper as :variable:`CMAKE_<LANG>_COMPILER`
+   or if they use Cray system compiler wrappers.
+3. Attempts to find an MPI compiler wrapper and determines the compiler
+   information from it.
+4. Tries to find an MPI implementation that does not ship such a wrapper by
+   guessing settings.  Currently, only Microsoft MPI and MPICH2 on Windows
+   are supported.
 
-For controlling the ``MPIEXEC_EXECUTABLE`` step, the following variables may be set:
+For controlling the ``MPIEXEC_EXECUTABLE`` step, the following variables
+may be set:
 
 ``MPIEXEC_EXECUTABLE``
   Manually specify the location of ``mpiexec``.
+
 ``MPI_HOME``
   Specify the base directory of the MPI installation.
+
 ``ENV{MPI_HOME}``
   Environment variable to specify the base directory of the MPI installation.
+
 ``ENV{I_MPI_ROOT}``
   Environment variable to specify the base directory of the MPI installation.
 
-For controlling the compiler wrapper step, the following variables may be set:
+For controlling the compiler wrapper step, the following variables may be
+set:
 
 ``MPI_<lang>_COMPILER``
   Search for the specified compiler wrapper and use it.
+
 ``MPI_<lang>_COMPILER_FLAGS``
-  Flags to pass to the MPI compiler wrapper during interrogation. Some compiler wrappers
-  support linking debug or tracing libraries if a specific flag is passed and this variable
-  may be used to obtain them.
+  Flags to pass to the MPI compiler wrapper during interrogation.  Some
+  compiler wrappers support linking debug or tracing libraries if a specific
+  flag is passed and this variable may be used to obtain them.
+
 ``MPI_COMPILER_FLAGS``
-  Used to initialize ``MPI_<lang>_COMPILER_FLAGS`` if no language specific flag has been given.
-  Empty by default.
+  Used to initialize ``MPI_<lang>_COMPILER_FLAGS`` if no language specific
+  flag has been given.  Empty by default.
+
 ``MPI_EXECUTABLE_SUFFIX``
-  A suffix which is appended to all names that are being looked for. For instance you may set this
-  to ``.mpich`` or ``.openmpi`` to prefer the one or the other on Debian and its derivatives.
+  A suffix which is appended to all names that are being looked for.  For
+  instance, it may be set to ``.mpich`` or ``.openmpi`` to prefer the one
+  or the other on Debian and its derivatives.
 
 In order to control the guessing step, the following variable may be set:
 
 ``MPI_GUESS_LIBRARY_NAME``
-  Valid values are ``MSMPI`` and ``MPICH2``. If set, only the given library will be searched for.
-  By default, ``MSMPI`` will be preferred over ``MPICH2`` if both are available.
-  This also sets ``MPI_SKIP_COMPILER_WRAPPER`` to ``true``, which may be overridden.
+  Valid values are ``MSMPI`` and ``MPICH2``.  If set, only the given library
+  will be searched for.  By default, ``MSMPI`` will be preferred over
+  ``MPICH2`` if both are available.  This also sets
+  ``MPI_SKIP_COMPILER_WRAPPER`` variable to ``true``, which may be
+  overridden.
 
 Each of the search steps may be skipped with the following control variables:
 
 ``MPI_ASSUME_NO_BUILTIN_MPI``
-  If true, the module assumes that the compiler itself does not provide an MPI implementation and
-  skips to step 2.
+  If true, the module assumes that the compiler itself does not provide an
+  MPI implementation and skips to step 2.
+
 ``MPI_SKIP_COMPILER_WRAPPER``
   If true, no compiler wrapper will be searched for.
+
 ``MPI_SKIP_GUESSING``
   If true, the guessing step will be skipped.
 
-Additionally, the following control variable is available to change search behavior:
+Additionally, the following control variable is available to change search
+behavior:
 
 ``MPI_CXX_SKIP_MPICXX``
   Add some definitions that will disable the MPI-2 C++ bindings.
-  Currently supported are MPICH, Open MPI, Platform MPI and derivatives thereof,
-  for example MVAPICH or Intel MPI.
+  Currently supported are MPICH, Open MPI, Platform MPI and derivatives
+  thereof, for example, MVAPICH or Intel MPI.
 
-If the find procedure fails for a variable ``MPI_<lang>_WORKS``, then the settings detected by or passed to
-the module did not work and even a simple MPI test program failed to compile.
+If the find procedure fails for the module's internal variable
+``MPI_<lang>_WORKS``, then the settings detected by or passed to the module
+did not work and even a simple MPI test program failed to compile.
 
-If all of these parameters were not sufficient to find the right MPI implementation, a user may
-disable the entire autodetection process by specifying both a list of libraries in ``MPI_<lang>_LIBRARIES``
-and a list of include directories in ``MPI_<lang>_ADDITIONAL_INCLUDE_DIRS``.
-Any other variable may be set in addition to these two. The module will then validate the MPI settings and store the
-settings in the cache.
+If all of these parameters were not sufficient to find the right MPI
+implementation, a user may disable the entire autodetection process by
+specifying both a list of libraries in ``MPI_<lang>_LIBRARIES`` and a list
+of include directories in ``MPI_<lang>_ADDITIONAL_INCLUDE_DIRS``.  Any other
+variable may be set in addition to these two.  The module will then validate
+the MPI settings and store the settings in the cache.
 
-Cache variables for MPI
-^^^^^^^^^^^^^^^^^^^^^^^
+Cache Variables
+^^^^^^^^^^^^^^^
 
-The variable ``MPI_<lang>_INCLUDE_DIRS`` will be assembled from the following variables.
+The variable ``MPI_<lang>_INCLUDE_DIRS`` will be assembled from the
+following variables.
+
 For C and CXX:
 
 ``MPI_<lang>_HEADER_DIR``
-  Location of the ``mpi.h`` header on disk.
+  Location of the ``<mpi.h>`` header on disk.
 
 For Fortran:
 
 ``MPI_Fortran_F77_HEADER_DIR``
-  Location of the Fortran 77 header ``mpif.h``, if it exists.
+  Location of the Fortran 77 header ``<mpif.h>``, if it exists.
+
 ``MPI_Fortran_MODULE_DIR``
   Location of the ``mpi`` or ``mpi_f08`` modules, if available.
 
 For all languages the following variables are additionally considered:
 
 ``MPI_<lang>_ADDITIONAL_INCLUDE_DIRS``
-  A :ref:`;-list <CMake Language Lists>` of paths needed in addition to the normal include directories.
-``MPI_<include_name>_INCLUDE_DIR``
-  Path variables for include folders referred to by ``<include_name>``.
+  A :ref:`semicolon-separated list <CMake Language Lists>` of paths needed
+  in addition to the normal include directories.
+
+``MPI_<include-name>_INCLUDE_DIR``
+  Path variables for include folders referred to by ``<include-name>``.
+
 ``MPI_<lang>_ADDITIONAL_INCLUDE_VARS``
-  A :ref:`;-list <CMake Language Lists>` of ``<include_name>`` that will be added to the include locations of ``<lang>``.
+  A :ref:`semicolon-separated list <CMake Language Lists>` of
+  ``<include-name>`` that will be added to the include locations of
+  ``<lang>``.
 
-The variable ``MPI_<lang>_LIBRARIES`` will be assembled from the following variables:
+The variable ``MPI_<lang>_LIBRARIES`` will be assembled from the following
+variables:
 
-``MPI_<lib_name>_LIBRARY``
-  The location of a library called ``<lib_name>`` for use with MPI.
+``MPI_<lib-name>_LIBRARY``
+  The location of a library called ``<lib-name>`` for use with MPI.
+
 ``MPI_<lang>_LIB_NAMES``
-  A :ref:`;-list <CMake Language Lists>` of ``<lib_name>`` that will be added to the include locations of ``<lang>``.
+  A :ref:`semicolon-separated list <CMake Language Lists>` of ``<lib-name>``
+  that will be added to the include locations of ``<lang>``.
 
-Usage of mpiexec
-^^^^^^^^^^^^^^^^
+Advanced Variables for Using MPI
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-When using ``MPIEXEC_EXECUTABLE`` to execute MPI applications, you should typically
-use all of the ``MPIEXEC_EXECUTABLE`` flags as follows:
+The module can perform some advanced feature detections upon explicit
+request.
+
+.. note::
+
+  The following checks cannot be performed without *executing* an MPI test
+  program.  Consider the special considerations for the behavior of
+  :command:`try_run` during cross compilation.  Moreover, running an MPI
+  program can cause additional issues, like a firewall notification on some
+  systems.  These detections should be only enabled if information is
+  absolutely needed.
+
+If the following variables are set to true, the respective search will be
+performed:
+
+``MPI_DETERMINE_Fortran_CAPABILITIES``
+  Determine for all available Fortran bindings what the values of
+  ``MPI_SUBARRAYS_SUPPORTED`` and ``MPI_ASYNC_PROTECTS_NONBLOCKING`` are
+  and make their values available as ``MPI_Fortran_<binding>_SUBARRAYS``
+  and ``MPI_Fortran_<binding>_ASYNCPROT``, where ``<binding>`` is one of
+  ``F77_HEADER``, ``F90_MODULE`` and ``F08_MODULE``.
+
+``MPI_DETERMINE_LIBRARY_VERSION``
+  For each language, find the output of ``MPI_Get_library_version`` and
+  make it available as ``MPI_<lang>_LIBRARY_VERSION_STRING``.  This
+  information is usually tied to the runtime component of an MPI
+  implementation and might differ depending on ``<lang>``.
+  Note that the return value is entirely implementation defined.  This
+  information might be used to identify the MPI vendor and for example pick
+  the correct one of multiple third party binaries that matches the MPI
+  vendor.
+
+Deprecated Variables
+^^^^^^^^^^^^^^^^^^^^
+
+The following variables are provided for backward compatibility:
+
+``MPI_COMPILER``
+  .. deprecated:: 2.8.5
+    Use the ``MPI_<lang>_COMPILER`` instead.
+
+``MPI_LIBRARY``
+  .. deprecated:: 2.8.5
+    Use the ``MPI_<lang>_LIBRARIES`` instead.
+
+``MPI_EXTRA_LIBRARY``
+  .. deprecated:: 2.8.5
+    Use the ``MPI_<lang>_LIBRARIES`` instead.
+
+``MPI_COMPILE_FLAGS``
+  .. deprecated:: 2.8.5
+    Use ``MPI_<lang>_COMPILE_OPTIONS`` and ``MPI_<lang>_COMPILE_DEFINITIONS``
+    instead.
+
+``MPI_INCLUDE_PATH``
+  .. deprecated:: 2.8.5
+    Use the ``MPI_<lang>_INCLUDE_DIRS`` instead.
+
+``MPI_LINK_FLAGS``
+  .. deprecated:: 2.8.5
+    Use the ``MPI_<lang>_LINK_FLAGS`` instead.
+
+``MPI_LIBRARIES``
+  .. deprecated:: 2.8.5
+    Use the ``MPI_<lang>_LIBRARIES`` instead.
+
+``MPI_<lang>_COMPILE_FLAGS``
+  .. deprecated:: 3.10
+    Use the ``MPI_<lang>_COMPILE_OPTIONS`` and
+    ``MPI_<lang>_COMPILE_DEFINITIONS`` instead.
+
+``MPI_<lang>_INCLUDE_PATH``
+  .. deprecated:: 3.10
+    For consumption use ``MPI_<lang>_INCLUDE_DIRS`` and for specifying
+    folders use ``MPI_<lang>_ADDITIONAL_INCLUDE_DIRS`` instead.
+
+``MPIEXEC``
+  .. deprecated:: 3.10
+    Use ``MPIEXEC_EXECUTABLE`` instead.
+
+Examples
+^^^^^^^^
+
+Example: Basic Usage
+""""""""""""""""""""
+
+Finding MPI and linking imported target to project target:
 
 .. code-block:: cmake
 
-   ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS}
-     ${MPIEXEC_PREFLAGS} EXECUTABLE ${MPIEXEC_POSTFLAGS} ARGS
+  find_package(MPI)
+  target_link_libraries(example PRIVATE MPI::MPI_C)
 
-where ``EXECUTABLE`` is the MPI program, and ``ARGS`` are the arguments to
-pass to the MPI program.
+Example: Usage of mpiexec
+"""""""""""""""""""""""""
 
-Advanced variables for using MPI
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+When using ``MPIEXEC_EXECUTABLE`` to execute MPI applications, typically
+all of the ``MPIEXEC_EXECUTABLE`` flags should be used as follows.
 
-The module can perform some advanced feature detections upon explicit request.
+In the following example, the command is executed in a process.
+``<executable>`` should be replaced with the MPI program, and ``<args>``
+with the arguments to pass to the MPI program.
 
-**Important notice:** The following checks cannot be performed without *executing* an MPI test program.
-Consider the special considerations for the behavior of :command:`try_run` during cross compilation.
-Moreover, running an MPI program can cause additional issues, like a firewall notification on some systems.
-You should only enable these detections if you absolutely need the information.
+.. code-block:: cmake
 
-If the following variables are set to true, the respective search will be performed:
+  find_package(MPI)
 
-``MPI_DETERMINE_Fortran_CAPABILITIES``
-  Determine for all available Fortran bindings what the values of ``MPI_SUBARRAYS_SUPPORTED`` and
-  ``MPI_ASYNC_PROTECTS_NONBLOCKING`` are and make their values available as ``MPI_Fortran_<binding>_SUBARRAYS``
-  and ``MPI_Fortran_<binding>_ASYNCPROT``, where ``<binding>`` is one of ``F77_HEADER``, ``F90_MODULE`` and
-  ``F08_MODULE``.
-``MPI_DETERMINE_LIBRARY_VERSION``
-  For each language, find the output of ``MPI_Get_library_version`` and make it available as ``MPI_<lang>_LIBRARY_VERSION_STRING``.
-  This information is usually tied to the runtime component of an MPI implementation and might differ depending on ``<lang>``.
-  Note that the return value is entirely implementation defined. This information might be used to identify
-  the MPI vendor and for example pick the correct one of multiple third party binaries that matches the MPI vendor.
-
-Backward Compatibility
-^^^^^^^^^^^^^^^^^^^^^^
-
-.. deprecated:: 3.10
-
-For backward compatibility with older versions of FindMPI, these
-variables are set:
-
-::
-
-   MPI_COMPILER        MPI_LIBRARY        MPI_EXTRA_LIBRARY
-   MPI_COMPILE_FLAGS   MPI_INCLUDE_PATH   MPI_LINK_FLAGS
-   MPI_LIBRARIES
-
-In new projects, please use the ``MPI_<lang>_XXX`` equivalents.
-Additionally, the following variables are deprecated:
-
-``MPI_<lang>_COMPILE_FLAGS``
-  Use ``MPI_<lang>_COMPILE_OPTIONS`` and ``MPI_<lang>_COMPILE_DEFINITIONS`` instead.
-``MPI_<lang>_INCLUDE_PATH``
-  For consumption use ``MPI_<lang>_INCLUDE_DIRS`` and for specifying folders use ``MPI_<lang>_ADDITIONAL_INCLUDE_DIRS`` instead.
-``MPIEXEC``
-  Use ``MPIEXEC_EXECUTABLE`` instead.
+  if(MPI_FOUND)
+    execute_process(
+      COMMAND
+        ${MPIEXEC_EXECUTABLE}
+        ${MPIEXEC_NUMPROC_FLAG}
+        ${MPIEXEC_MAX_NUMPROCS}
+        ${MPIEXEC_PREFLAGS}
+        <executable>
+        ${MPIEXEC_POSTFLAGS}
+        <args>
+    )
+  endif()
 #]=======================================================================]
 
 cmake_policy(PUSH)
@@ -982,7 +1142,7 @@ function(_MPI_guess_settings LANG)
 
         # Our strategy is now to locate all libraries, but enter msmpifec into the LIB_NAMES array.
         # Should this not be adequate it's a straightforward way for a user to change the LIB_NAMES array and
-        # have his library found. Still, this should not be necessary outside of exceptional cases, as reasoned.
+        # have their library found. Still, this should not be necessary outside of exceptional cases, as reasoned.
         if (LANG STREQUAL "Fortran")
           set(MPI_MSMPI_CALLINGCONVS c)
           if(CMAKE_SIZEOF_VOID_P EQUAL "4")
