@@ -5,42 +5,66 @@
 UsewxWidgets
 ------------
 
+This module serves as a convenience wrapper for using the wxWidgets
+library (formerly known as wxWindows) and propagates its usage requirements,
+such as library directories, include directories, and compiler flags, into
+the current directory scope for use by targets.
+
+Load this module in a CMake project with:
+
+.. code-block:: cmake
+
+  include(UsewxWidgets)
+
 This module calls :command:`include_directories` and
-:command:`link_directories`, sets compile definitions for the current directory
-and appends some compile flags to use wxWidgets library after calling the
-:module:`find_package(wxWidgets) <FindwxWidgets>`.
+:command:`link_directories`, sets compile definitions for the current
+directory and appends some compile flags to use wxWidgets library after
+calling the :module:`find_package(wxWidgets) <FindwxWidgets>`.
 
 Examples
 ^^^^^^^^
 
-Include ``UsewxWidgets`` module in project's ``CMakeLists.txt``:
+Include this module in a project after finding wxWidgets to configure its
+usage requirements:
 
 .. code-block:: cmake
+  :caption: ``CMakeLists.txt``
 
   # Note that for MinGW users the order of libraries is important.
   find_package(wxWidgets REQUIRED net gl core base)
 
-  # Above also sets the wxWidgets_USE_FILE variable that points to this module.
-  include(${wxWidgets_USE_FILE})
+  add_library(example example.cxx)
 
-  # Link wxWidgets libraries for each dependent executable/library target.
-  target_link_libraries(<ProjectTarget> ${wxWidgets_LIBRARIES})
+  if(wxWidgets_FOUND)
+    # Above also sets the wxWidgets_USE_FILE variable that points to this module.
+    include(${wxWidgets_USE_FILE})
+
+    # Link wxWidgets libraries for each dependent executable/library target.
+    target_link_libraries(example PRIVATE ${wxWidgets_LIBRARIES})
+  endif()
 
 As of CMake 3.27, a better approach is to link only the
-:module:`wxWidgets::wxWidgets <FindwxWidgets>` ``IMPORTED`` target to specific
-targets that require it, rather than including this module. Imported targets
-provide better control of the package usage properties, such as include
-directories and compile flags, by applying them only to the targets they are
-linked to, avoiding unnecessary propagation to all targets in the current
-directory.
+:module:`wxWidgets::wxWidgets <FindwxWidgets>` imported target to specific
+targets that require it, rather than including this module.  Imported
+targets provide better control of the package usage properties, such as
+include directories and compile flags, by applying them only to the targets
+they are linked to, avoiding unnecessary propagation to all targets in the
+current directory.
 
 .. code-block:: cmake
+  :caption: ``CMakeLists.txt``
 
-  # CMakeLists.txt
   find_package(wxWidgets)
 
+  add_library(example example.cxx)
+
   # Link the imported target for each dependent executable/library target.
-  target_link_libraries(<ProjectTarget> wxWidgets::wxWidgets)
+  target_link_libraries(example PRIVATE wxWidgets::wxWidgets)
+
+See Also
+^^^^^^^^
+
+* The :module:`FindwxWidgets` module to find wxWidgets.
 #]=======================================================================]
 
 # Author: Jan Woetzel <jw -at- mip.informatik.uni-kiel.de>
