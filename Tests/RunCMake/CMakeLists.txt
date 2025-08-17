@@ -417,7 +417,7 @@ endif()
 add_RunCMake_test(FeatureSummary)
 add_RunCMake_test(FPHSA)
 if(CMAKE_USE_SYSTEM_JSONCPP)
-  list(APPEND FileAPI_ARGS -DJsonCpp_VERSION_STRING=${JsonCpp_VERSION_STRING})
+  list(APPEND FileAPI_ARGS -DJsonCpp_VERSION=${JsonCpp_VERSION})
 endif()
 add_RunCMake_test(FileAPI -DPython_EXECUTABLE=${Python_EXECUTABLE}
                           -DCMAKE_CXX_COMPILER_ID=${CMAKE_CXX_COMPILER_ID}
