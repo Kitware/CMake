@@ -4,6 +4,8 @@ include(CTest)
 
 find_package(wxWidgets REQUIRED)
 
+add_compile_definitions(CMAKE_EXPECTED_WXWIDGETS_VERSION="${wxWidgets_VERSION}")
+
 add_executable(test_tgt main.cpp)
 target_link_libraries(test_tgt wxWidgets::wxWidgets)
 add_test(NAME test_tgt COMMAND test_tgt)

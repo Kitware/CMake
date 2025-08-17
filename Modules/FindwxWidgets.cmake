@@ -92,8 +92,8 @@ This module defines the following variables:
   Boolean indicating whether (the requested version of) wxWidgets and all
   its requested components are found.
 
-``wxWidgets_VERSION_STRING``
-  .. versionadded:: 3.4
+``wxWidgets_VERSION``
+  .. versionadded:: 4.2
 
   The version of the wxWidgets found.
 
@@ -189,6 +189,19 @@ ON/OFF the following variables:
   .. code-block:: cmake
 
     set(wxWidgets_CONFIG_OPTIONS --toolkit=base --prefix=/usr)
+
+Deprecated Variables
+^^^^^^^^^^^^^^^^^^^^
+
+The following variables are provided for backward compatibility:
+
+``wxWidgets_VERSION_STRING``
+  .. deprecated:: 4.2
+    Use ``wxWidgets_VERSION``, which has the same value.
+
+  .. versionadded:: 3.4
+
+  The version of the wxWidgets found.
 
 Examples
 ^^^^^^^^
@@ -365,12 +378,12 @@ macro(wx_extract_version)
   string(REGEX REPLACE "^(.*\n)?#define +wxSUBRELEASE_NUMBER +([0-9]+).*"
     "\\2" wxWidgets_VERSION_TWEAK "${_wx_version_h}" )
 
-  set(wxWidgets_VERSION_STRING
-    "${wxWidgets_VERSION_MAJOR}.${wxWidgets_VERSION_MINOR}.${wxWidgets_VERSION_PATCH}" )
+  set(wxWidgets_VERSION
+    "${wxWidgets_VERSION_MAJOR}.${wxWidgets_VERSION_MINOR}.${wxWidgets_VERSION_PATCH}")
   if(${wxWidgets_VERSION_TWEAK} GREATER 0)
-    string(APPEND wxWidgets_VERSION_STRING ".${wxWidgets_VERSION_TWEAK}")
+    string(APPEND wxWidgets_VERSION ".${wxWidgets_VERSION_TWEAK}")
   endif()
-  dbg_msg("wxWidgets_VERSION_STRING:    ${wxWidgets_VERSION_STRING}")
+  set(wxWidgets_VERSION_STRING "${wxWidgets_VERSION}")
 endmacro()
 
 #=====================================================================
@@ -1132,7 +1145,7 @@ endif()
 
 find_package_handle_standard_args(wxWidgets
   REQUIRED_VARS wxWidgets_LIBRARIES wxWidgets_INCLUDE_DIRS
-  VERSION_VAR   wxWidgets_VERSION_STRING
+  VERSION_VAR wxWidgets_VERSION
   ${wxWidgets_HANDLE_COMPONENTS}
   )
 unset(wxWidgets_HANDLE_COMPONENTS)

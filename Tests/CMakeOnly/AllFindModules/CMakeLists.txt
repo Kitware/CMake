@@ -105,6 +105,7 @@ foreach(
     PERL PKG_CONFIG PNG PostgreSQL
     SDL
     TIFF
+    wxWidgets
     ZLIB
 )
   check_version_string(${VTEST} ${VTEST}_VERSION_STRING)
@@ -127,6 +128,7 @@ foreach(
     Ruby RUBY
     SDL SWIG
     TIFF
+    wxWidgets
     ZLIB
 )
   check_version_string(${VTEST} ${VTEST}_VERSION)
