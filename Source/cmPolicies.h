@@ -600,6 +600,10 @@ class cmMakefile;
   SELECT(POLICY, CMP0200,                                                     \
          "Location and configuration selection for imported targets is more " \
          "consistent.",                                                       \
+         4, 2, 0, WARN)                                                       \
+  SELECT(POLICY, CMP0201,                                                     \
+         "The Python::NumPy target does not depend on the Python::Module "    \
+         "target.",                                                           \
          4, 2, 0, WARN)
 
 #define CM_SELECT_ID(F, A1, A2, A3, A4, A5, A6) F(A1)

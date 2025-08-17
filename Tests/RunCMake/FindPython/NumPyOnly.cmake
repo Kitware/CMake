@@ -2,9 +2,15 @@ enable_language(C)
 
 include(CTest)
 
+cmake_policy(GET CMP0201 numpy_policy)
+
+if(numpy_policy STREQUAL NEW)
+  set(components "Development.Module")
+endif()
+
 if(CMake_TEST_FindPython2_NumPy)
 
-  find_package (Python2 REQUIRED COMPONENTS NumPy)
+  find_package (Python2 REQUIRED COMPONENTS ${components} NumPy)
 
   Python2_add_library (arraytest2 MODULE arraytest.c)
   target_compile_definitions (arraytest2 PRIVATE PYTHON2)
@@ -18,7 +24,7 @@ endif()
 
 if(CMake_TEST_FindPython3_NumPy)
 
-  find_package (Python3 REQUIRED COMPONENTS NumPy)
+  find_package (Python3 REQUIRED COMPONENTS ${components} NumPy)
 
   Python3_add_library (arraytest3 MODULE arraytest.c)
   target_compile_definitions (arraytest3 PRIVATE PYTHON3)
