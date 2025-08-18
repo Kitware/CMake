@@ -34,6 +34,9 @@ Find Modules
 * The :module:`FindGnuTLS` module now provides a ``GnuTLS_VERSION`` result
   variable.  The ``GNUTLS_VERSION`` result variable is deprecated.
 
+* The :module:`FindHg` module now provides a ``Hg_VERSION`` result
+  variable.  The ``HG_VERSION_STRING`` result variable is deprecated.
+
 * The :module:`FindJasper` module now provides a ``Jasper_VERSION`` result
   variable.  The ``JASPER_VERSION_STRING`` result variable is deprecated.
 
