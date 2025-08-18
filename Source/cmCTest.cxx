@@ -717,6 +717,13 @@ int cmCTest::ProcessSteps()
   this->UpdateCTestConfiguration();
   this->BlockTestErrorDiagnostics();
 
+  if (this->GetCTestConfiguration("TimeOut").empty()) {
+    this->SetCTestConfiguration(
+      "TimeOut",
+      std::to_string(cmDurationTo<unsigned int>(cmCTest::MaxDuration())),
+      true);
+  }
+
   int res = 0;
   cmCTestScriptHandler script(this);
   script.CreateCMake();
@@ -3259,6 +3266,9 @@ void cmCTest::SetCMakeVariables(cmMakefile& mf)
   // CTest Build Step
   set("CTEST_BUILD_COMMAND", "MakeCommand");
   set("CTEST_USE_LAUNCHERS", "UseLaunchers");
+
+  // CTest Test Step
+  set("CTEST_TEST_TIMEOUT", "TimeOut");
 
   // CTest Coverage Step
   set("CTEST_COVERAGE_COMMAND", "CoverageCommand");
