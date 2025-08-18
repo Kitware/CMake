@@ -3541,6 +3541,9 @@ cmDuration cmCTest::GetElapsedTime() const
 
 cmDuration cmCTest::GetRemainingTimeAllowed() const
 {
+  if (this->Impl->TimeLimit == cmCTest::MaxDuration()) {
+    return cmCTest::MaxDuration();
+  }
   return this->Impl->TimeLimit - this->GetElapsedTime();
 }
 
