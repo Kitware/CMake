@@ -5,6 +5,7 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <cstddef>
+#include <functional>
 #include <map>
 #include <memory>
 #include <set>
@@ -20,6 +21,7 @@
 #include "cmAlgorithms.h"
 #include "cmLinkItem.h"
 #include "cmListFileCache.h"
+#include "cmObjectLocation.h"
 #include "cmPolicies.h"
 #include "cmStandardLevel.h"
 #include "cmStateTypes.h"
@@ -298,9 +300,14 @@ public:
                                   cmStateEnums::RuntimeBinaryArtifact) const;
 
   /** Get the names of an object library's object files underneath
-      its object file directory.  */
+      its object file directory for the build.  */
   void GetTargetObjectNames(std::string const& config,
                             std::vector<std::string>& objects) const;
+  /** Get the build and install locations of objects for a given context. */
+  void GetTargetObjectLocations(
+    std::string const& config,
+    std::function<void(cmObjectLocation const&, cmObjectLocation const&)> cb)
+    const;
 
   /** What hierarchy level should the reported directory contain */
   enum BundleDirectoryLevel
@@ -940,6 +947,7 @@ public:
   bool GetUseShortObjectNames(
     cmStateEnums::IntermediateDirKind kind =
       cmStateEnums::IntermediateDirKind::ObjectFiles) const;
+  cmObjectLocations::UseShortPath GetUseShortObjectNamesForInstall() const;
 
   /** Get a build-tree directory in which to place target support files.  */
   std::string GetSupportDirectory(
@@ -1142,7 +1150,7 @@ private:
   using SourceEntriesType = std::map<cmSourceFile const*, SourceEntry>;
   SourceEntriesType SourceDepends;
   mutable std::set<std::string> VisitedConfigsForObjects;
-  mutable std::map<cmSourceFile const*, std::string> Objects;
+  mutable std::map<cmSourceFile const*, cmObjectLocations> Objects;
   std::set<cmSourceFile const*> ExplicitObjectName;
 
   using TargetPtrToBoolMap = std::unordered_map<cmTarget*, bool>;

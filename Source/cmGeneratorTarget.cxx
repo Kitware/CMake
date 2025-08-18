@@ -856,7 +856,10 @@ bool cmGeneratorTarget::IsIPOEnabled(std::string const& lang,
 std::string const& cmGeneratorTarget::GetObjectName(cmSourceFile const* file)
 {
   this->ComputeObjectMapping();
-  return this->Objects[file];
+  auto const useShortPaths = this->GetUseShortObjectNames()
+    ? cmObjectLocations::UseShortPath::Yes
+    : cmObjectLocations::UseShortPath::No;
+  return this->Objects[file].GetPath(useShortPaths);
 }
 
 char const* cmGeneratorTarget::GetCustomObjectExtension() const
@@ -3995,9 +3998,21 @@ std::string cmGeneratorTarget::GetObjectDirectory(
 void cmGeneratorTarget::GetTargetObjectNames(
   std::string const& config, std::vector<std::string>& objects) const
 {
+  this->GetTargetObjectLocations(
+    config,
+    [&objects](cmObjectLocation const& buildLoc, cmObjectLocation const&) {
+      objects.push_back(buildLoc.GetPath());
+    });
+}
+
+void cmGeneratorTarget::GetTargetObjectLocations(
+  std::string const& config,
+  std::function<void(cmObjectLocation const&, cmObjectLocation const&)> cb)
+  const
+{
   std::vector<cmSourceFile const*> objectSources;
   this->GetObjectSources(objectSources, config);
-  std::map<cmSourceFile const*, std::string> mapping;
+  std::map<cmSourceFile const*, cmObjectLocations> mapping;
 
   for (cmSourceFile const* sf : objectSources) {
     mapping[sf];
@@ -4005,12 +4020,20 @@ void cmGeneratorTarget::GetTargetObjectNames(
 
   this->LocalGenerator->ComputeObjectFilenames(mapping, this);
 
+  auto const buildUseShortPaths = this->GetUseShortObjectNames()
+    ? cmObjectLocations::UseShortPath::Yes
+    : cmObjectLocations::UseShortPath::No;
+  auto const installUseShortPaths = this->GetUseShortObjectNamesForInstall();
+
   for (cmSourceFile const* src : objectSources) {
     // Find the object file name corresponding to this source file.
     auto map_it = mapping.find(src);
+    auto const& buildLoc = map_it->second.GetLocation(buildUseShortPaths);
+    auto const& installLoc = map_it->second.GetLocation(installUseShortPaths);
     // It must exist because we populated the mapping just above.
-    assert(!map_it->second.empty());
-    objects.push_back(map_it->second);
+    assert(!buildLoc.GetPath().empty());
+    assert(!installLoc.GetPath().empty());
+    cb(buildLoc, installLoc);
   }
 
   // We need to compute the relative path from the root of
@@ -4020,7 +4043,9 @@ void cmGeneratorTarget::GetTargetObjectNames(
   auto ispcObjects = this->GetGeneratedISPCObjects(config);
   for (std::string const& output : ispcObjects) {
     auto relativePathFromObjectDir = output.substr(rootObjectDir.size());
-    objects.push_back(relativePathFromObjectDir);
+    cmObjectLocation ispcLoc(relativePathFromObjectDir);
+    // FIXME: apply short path to this object if needed.
+    cb(ispcLoc, ispcLoc);
   }
 }
 
@@ -5368,6 +5393,25 @@ bool cmGeneratorTarget::GetUseShortObjectNames(
   cmStateEnums::IntermediateDirKind kind) const
 {
   return this->LocalGenerator->UseShortObjectNames(kind);
+}
+
+cmObjectLocations::UseShortPath
+cmGeneratorTarget::GetUseShortObjectNamesForInstall() const
+{
+  auto prop = this->Target->GetProperty("INSTALL_OBJECT_NAME_STRATEGY");
+  if (prop == "SHORT"_s) {
+    return cmObjectLocations::UseShortPath::Yes;
+  }
+  if (prop == "FULL"_s) {
+    return cmObjectLocations::UseShortPath::No;
+  }
+  if (prop.IsSet()) {
+    this->Makefile->IssueMessage(
+      MessageType::FATAL_ERROR,
+      cmStrCat("Property INSTALL_OBJECT_NAME_STRATEGY of target \"",
+               this->GetName(), "\" set to the unsupported strategy ", prop));
+  }
+  return cmObjectLocations::UseShortPath::No;
 }
 
 std::string cmGeneratorTarget::GetSupportDirectory(

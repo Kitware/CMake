@@ -6,9 +6,12 @@
 #include <utility>
 #include <vector>
 
+#include <cm/optional>
+
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
+#include "cmObjectLocation.h"
 #include "cmOutputConverter.h"
 #include "cmStateDirectory.h"
 #include "cmStateSnapshot.h"
@@ -111,7 +114,7 @@ std::string cmLocalCommonGenerator::GetTargetDirectory(
 }
 
 void cmLocalCommonGenerator::ComputeObjectFilenames(
-  std::map<cmSourceFile const*, std::string>& mapping,
+  std::map<cmSourceFile const*, cmObjectLocations>& mapping,
   cmGeneratorTarget const* gt)
 {
   // Determine if these object files should use a custom extension
@@ -119,7 +122,11 @@ void cmLocalCommonGenerator::ComputeObjectFilenames(
   for (auto& si : mapping) {
     cmSourceFile const* sf = si.first;
     bool keptSourceExtension;
-    si.second = this->GetObjectFileNameWithoutTarget(
-      *sf, gt->ObjectDirectory, &keptSourceExtension, custom_ext);
+    bool force = true;
+    si.second.ShortLoc.emplace(this->GetObjectFileNameWithoutTarget(
+      *sf, gt->ObjectDirectory, &keptSourceExtension, custom_ext, &force));
+    force = false;
+    si.second.LongLoc.Update(this->GetObjectFileNameWithoutTarget(
+      *sf, gt->ObjectDirectory, &keptSourceExtension, custom_ext, &force));
   }
 }

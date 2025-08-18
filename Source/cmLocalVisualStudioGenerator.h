@@ -10,6 +10,7 @@
 
 #include "cmGlobalVisualStudioGenerator.h"
 #include "cmLocalGenerator.h"
+#include "cmObjectLocation.h"
 #include "cmStateTypes.h"
 #include "cmVsProjectType.h"
 
@@ -49,7 +50,7 @@ public:
     cmGeneratorTarget const*) const = 0;
 
   void ComputeObjectFilenames(
-    std::map<cmSourceFile const*, std::string>& mapping,
+    std::map<cmSourceFile const*, cmObjectLocations>& mapping,
     cmGeneratorTarget const* = nullptr) override;
 
   std::string GetObjectOutputRoot(

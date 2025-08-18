@@ -37,6 +37,7 @@ class cmImplicitDependsList;
 class cmLinkLineComputer;
 class cmLinkLineDeviceComputer;
 class cmMakefile;
+struct cmObjectLocations;
 class cmRulePlaceholderExpander;
 class cmSourceFile;
 class cmState;
@@ -473,7 +474,8 @@ public:
   std::string GetObjectFileNameWithoutTarget(
     cmSourceFile const& source, std::string const& dir_max,
     bool* hasSourceExtension = nullptr,
-    char const* customOutputExtension = nullptr);
+    char const* customOutputExtension = nullptr,
+    bool const* forceShortObjectName = nullptr);
 
   /** Fill out the static linker flags for the given target.  */
   void GetStaticLibraryFlags(std::string& flags, std::string const& config,
@@ -524,7 +526,7 @@ public:
                                             std::string const& config);
 
   virtual void ComputeObjectFilenames(
-    std::map<cmSourceFile const*, std::string>& mapping,
+    std::map<cmSourceFile const*, cmObjectLocations>& mapping,
     cmGeneratorTarget const* gt = nullptr);
 
   bool IsWindowsShell() const;

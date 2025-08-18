@@ -5,9 +5,12 @@
 #include <utility>
 #include <vector>
 
+#include <cm/optional>
+
 #include "cmGeneratorTarget.h"
 #include "cmGhsMultiTargetGenerator.h"
 #include "cmGlobalGenerator.h"
+#include "cmObjectLocation.h"
 #include "cmSourceFile.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
@@ -41,7 +44,7 @@ void cmLocalGhsMultiGenerator::Generate()
 }
 
 void cmLocalGhsMultiGenerator::ComputeObjectFilenames(
-  std::map<cmSourceFile const*, std::string>& mapping,
+  std::map<cmSourceFile const*, cmObjectLocations>& mapping,
   cmGeneratorTarget const* gt)
 {
   std::string dir_max = cmStrCat(gt->GetSupportDirectory(), '/');
@@ -63,17 +66,21 @@ void cmLocalGhsMultiGenerator::ComputeObjectFilenames(
   // object name computation.
   for (auto& si : mapping) {
     cmSourceFile const* sf = si.first;
-    std::string objectName = cmStrCat(
+    bool forceShortObjectName = true;
+    std::string shortObjectName = this->GetObjectFileNameWithoutTarget(
+      *sf, dir_max, nullptr, nullptr, &forceShortObjectName);
+    std::string longObjectName = cmStrCat(
       cmSystemTools::GetFilenameWithoutLastExtension(sf->GetFullPath()),
       this->GlobalGenerator->GetLanguageOutputExtension(*sf));
 
-    if (counts[cmSystemTools::LowerCase(objectName)] > 1) {
+    if (counts[cmSystemTools::LowerCase(longObjectName)] > 1) {
       const_cast<cmGeneratorTarget*>(gt)->AddExplicitObjectName(sf);
-      bool keptSourceExtension;
-      objectName = this->GetObjectFileNameWithoutTarget(*sf, dir_max,
-                                                        &keptSourceExtension);
-      cmsys::SystemTools::ReplaceString(objectName, "/", "_");
+      forceShortObjectName = false;
+      longObjectName = this->GetObjectFileNameWithoutTarget(
+        *sf, dir_max, nullptr, nullptr, &forceShortObjectName);
+      cmsys::SystemTools::ReplaceString(longObjectName, "/", "_");
     }
-    si.second = objectName;
+    si.second.ShortLoc.emplace(shortObjectName);
+    si.second.LongLoc.Update(longObjectName);
   }
 }
