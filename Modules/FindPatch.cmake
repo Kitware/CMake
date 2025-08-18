@@ -8,7 +8,11 @@ FindPatch
 .. versionadded:: 3.10
 
 Finds the ``patch`` command-line executable for applying diff patches to
-original files.
+original files:
+
+.. code-block:: cmake
+
+  find_package(Patch [...])
 
 Imported Targets
 ^^^^^^^^^^^^^^^^

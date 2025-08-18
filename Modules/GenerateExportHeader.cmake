@@ -8,7 +8,7 @@ GenerateExportHeader
 This module provides commands for generating a header file containing
 preprocessor macro definitions to control C/C++ symbol visibility.
 
-Load this module in CMake project with:
+Load this module in a CMake project with:
 
 .. code-block:: cmake
 

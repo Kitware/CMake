@@ -14,8 +14,8 @@ FindProducer
   library became obsolete and is no longer maintained.  For details about
   OpenSceneGraph usage, refer to the :module:`FindOpenSceneGraph` module.
 
-This module finds the Producer library, a windowing and event handling library
-designed primarily for real-time graphics applications:
+Finds the Producer library, a windowing and event handling library designed
+primarily for real-time graphics applications:
 
 .. code-block:: cmake
 

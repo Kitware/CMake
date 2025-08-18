@@ -5,7 +5,14 @@
 FindDCMTK
 ---------
 
-Find DICOM ToolKit (DCMTK) libraries and applications
+Finds the DICOM ToolKit (DCMTK) libraries and applications:
+
+.. code-block:: cmake
+
+  find_package(DCMTK [...])
+
+DCMTK is a set of libraries and applications implementing large parts of
+the DICOM Standard (Digital Imaging and Communications in Medicine).
 
 The module defines the following variables::
 

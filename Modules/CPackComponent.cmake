@@ -5,7 +5,14 @@
 CPackComponent
 --------------
 
-Configure components for binary installers and source packages.
+This module provides commands to configure components for binary installers
+and source packages.
+
+Load this module in a CMake project with:
+
+.. code-block:: cmake
+
+  include(CPackComponent)
 
 .. only:: html
 
@@ -14,7 +21,7 @@ Configure components for binary installers and source packages.
 Introduction
 ^^^^^^^^^^^^
 
-This module is automatically included by :module:`CPack`.
+This module is also automatically included by :module:`CPack`.
 
 Certain binary installers (especially the graphical installers) generated
 by CPack allow users to select individual application *components* to install.

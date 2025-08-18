@@ -5,8 +5,14 @@
 FindPike
 --------
 
-Finds the Pike compiler and interpreter.  Pike is interpreted, general purpose,
-high-level, dynamic programming language.
+Finds the Pike compiler and interpreter:
+
+.. code-block:: cmake
+
+  find_package(Pike [...])
+
+Pike is interpreted, general purpose, high-level, dynamic programming
+language.
 
 Cache Variables
 ^^^^^^^^^^^^^^^

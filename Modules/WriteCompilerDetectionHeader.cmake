@@ -11,7 +11,20 @@ WriteCompilerDetectionHeader
 
 .. versionadded:: 3.1
 
-This module provides the function ``write_compiler_detection_header()``.
+This module provides a command to generate header with preprocessor macros.
+
+Load this module in a CMake project with:
+
+.. code-block:: cmake
+
+  include(WriteCompilerDetectionHeader)
+
+Commands
+^^^^^^^^
+
+This module provides the following command:
+
+.. command:: write_compiler_detection_header
 
 This function can be used to generate a file suitable for preprocessor
 inclusion which contains macros to be used in source code:

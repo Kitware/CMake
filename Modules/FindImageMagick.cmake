@@ -6,7 +6,11 @@ FindImageMagick
 ---------------
 
 Finds ImageMagick, a software suite for displaying, converting, and manipulating
-raster images.
+raster images:
+
+.. code-block:: cmake
+
+  find_package(ImageMagick [<version>] [COMPONENTS <components>...] [...])
 
 .. versionadded:: 3.9
   Support for ImageMagick 7.

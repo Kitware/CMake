@@ -11,9 +11,14 @@ FindQt
   ``NEW``.  It supports only Qt3 and Qt4.  For Qt5 or later versions see
   :manual:`cmake-qt(7)`.
 
-This module finds an installed version of Qt3 or Qt4.  Qt is a cross-platform
-application development framework for creating graphical user interfaces and
-applications.
+Finds an installed version of Qt3 or Qt4:
+
+.. code-block:: cmake
+
+  find_package(Qt [...])
+
+Qt is a cross-platform application development framework for creating
+graphical user interfaces and applications.
 
 Use this module only if the project can work with both Qt3 and Qt4
 versions.  If a specific version is required, use :module:`FindQt4` or

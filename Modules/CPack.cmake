@@ -5,7 +5,13 @@
 CPack
 -----
 
-Configure generators for binary installers and source packages.
+This module configures generators for binary installers and source packages.
+
+Load this module in a CMake project with:
+
+.. code-block:: cmake
+
+  include(CPack)
 
 Introduction
 ^^^^^^^^^^^^

@@ -13,9 +13,13 @@ FindPythonLibs
   Use :module:`FindPython3`, :module:`FindPython2`, or :module:`FindPython`
   instead.
 
-This module finds the Python installation and determines the location of its
-include directories and libraries, as well as the name of the Python library to
-link against.
+Finds the Python installation and determines the location of its include
+directories and libraries, as well as the name of the Python library to
+link against:
+
+.. code-block:: cmake
+
+  find_package(PythonLibs [<version>] [...])
 
 .. note::
 

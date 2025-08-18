@@ -9,7 +9,11 @@ FindUnixCommands
 
   Use :option:`${CMAKE_COMMAND} -E <cmake -E>` subcommands instead.
 
-Find Unix commands, including the ones from Cygwin
+Finds Unix commands, including the ones from Cygwin:
+
+.. code-block:: cmake
+
+  find_package(UnixCommands [...])
 
 This module looks for the Unix commands ``bash``, ``cp``, ``gzip``,
 ``mv``, ``rm``, and ``tar`` and stores the result in the variables

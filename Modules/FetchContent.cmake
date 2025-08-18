@@ -11,6 +11,15 @@ FetchContent
 
   .. contents::
 
+This module provides commands to populate content at configure time or as
+part of the calling script.
+
+Load this module in CMake with:
+
+.. code-block:: cmake
+
+  include(FetchContent)
+
 .. note:: The :guide:`Using Dependencies Guide` provides a high-level
   introduction to this general topic. It provides a broader overview of
   where the ``FetchContent`` module fits into the bigger picture,

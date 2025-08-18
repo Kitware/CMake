@@ -7,7 +7,11 @@ FindOpenCL
 
 .. versionadded:: 3.1
 
-Finds Open Computing Language (OpenCL).
+Finds Open Computing Language (OpenCL):
+
+.. code-block:: cmake
+
+  find_package(OpenCL [<version>] [...])
 
 .. versionadded:: 3.10
   Detection of OpenCL 2.1 and 2.2.

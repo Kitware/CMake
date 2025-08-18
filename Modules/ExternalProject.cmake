@@ -11,6 +11,15 @@ ExternalProject
 
    .. contents::
 
+This module provides commands to download and build external projects as
+part of CMake build phase.
+
+Load this module in CMake with:
+
+.. code-block:: cmake
+
+  include(ExternalProject)
+
 External Project Definition
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

@@ -5,6 +5,26 @@
 CMakeFindDependencyMacro
 ------------------------
 
+This module provides a command implemented as a macro that finds dependency
+for a package.
+
+Load this module in a CMake package configuration file with:
+
+.. code-block:: cmake
+  :caption: ``FooConfig.cmake`` or ``foo-config.cmake``:
+
+  include(CMakeFindDependencyMacro)
+
+.. note::
+
+  This module is designed to be used in a :ref:`Package Configuration File
+  <Config File Packages>` (``<PackageName>Config.cmake``).
+
+Commands
+^^^^^^^^
+
+This module provides the following command:
+
 .. command:: find_dependency
 
   The ``find_dependency()`` macro wraps a :command:`find_package` call for

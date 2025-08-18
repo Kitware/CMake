@@ -5,10 +5,6 @@
 FindGTK
 -------
 
-Finds GTK, glib and GTKGLArea.
-
-GTK is a multi-platform toolkit for creating graphical user interfaces.
-
 .. note::
 
   This module works only on Unix-like systems and was intended for early GTK
@@ -21,6 +17,14 @@ GTK is a multi-platform toolkit for creating graphical user interfaces.
     find_package(PkgConfig REQUIRED)
     pkg_check_modules(GTK REQUIRED IMPORTED_TARGET gtk4>=4.14)
     target_link_libraries(example PRIVATE PkgConfig::GTK)
+
+Finds GTK, glib and GTKGLArea:
+
+.. code-block:: cmake
+
+  find_package(GTK [...])
+
+GTK is a multi-platform toolkit for creating graphical user interfaces.
 
 Result Variables
 ^^^^^^^^^^^^^^^^

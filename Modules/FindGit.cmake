@@ -5,7 +5,11 @@
 FindGit
 -------
 
-Finds the Git distributed version control system.
+Finds the Git distributed version control system:
+
+.. code-block:: cmake
+
+  find_package(Git [<version>] [...])
 
 Imported Targets
 ^^^^^^^^^^^^^^^^

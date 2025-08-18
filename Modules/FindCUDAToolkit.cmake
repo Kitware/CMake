@@ -7,9 +7,14 @@ FindCUDAToolkit
 
 .. versionadded:: 3.17
 
-This script locates the NVIDIA CUDA toolkit and the associated libraries, but
-does not require the ``CUDA`` language be enabled for a given project. This
-module does not search for the NVIDIA CUDA Samples.
+Finds the NVIDIA CUDA toolkit and the associated libraries, but does not
+require the ``CUDA`` language be enabled for a given project:
+
+.. code-block:: cmake
+
+  find_package(CUDAToolkit [<version>] [QUIET] [REQUIRED] [EXACT] [...])
+
+This module does not search for the NVIDIA CUDA Samples.
 
 .. versionadded:: 3.19
   QNX support.

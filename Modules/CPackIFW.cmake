@@ -11,6 +11,12 @@ This module looks for the location of the command-line utilities supplied with t
 `Qt Installer Framework <https://doc.qt.io/qtinstallerframework/index.html>`_
 (QtIFW).
 
+Load this module in a CMake project with:
+
+.. code-block:: cmake
+
+  include(CPackIFW)
+
 The module also defines several commands to control the behavior of the
 :cpack_gen:`CPack IFW Generator`.
 

@@ -9,6 +9,12 @@ This file provides support for ``Java``.  It is assumed that
 :module:`FindJava` has already been loaded.  See :module:`FindJava` for
 information on how to load Java into your CMake project.
 
+Load this module in a CMake project with:
+
+.. code-block:: cmake
+
+  include(UseJava)
+
 Synopsis
 ^^^^^^^^
 
