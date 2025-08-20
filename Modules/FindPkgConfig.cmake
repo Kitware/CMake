@@ -30,7 +30,9 @@ This module defines the following variables:
   Boolean indicating whether the (requested version of) ``pkg-config``
   executable is found.
 
-``PKG_CONFIG_VERSION_STRING``
+``PkgConfig_VERSION``
+  .. versionadded:: 4.2
+
   The version of ``pkg-config`` that was found.
 
 ``PKG_CONFIG_EXECUTABLE``
@@ -328,6 +330,17 @@ This module accepts the following variables before calling
   :variable:`CMAKE_MINIMUM_REQUIRED_VERSION` is 3.1 or later, disabled
   otherwise.
 
+Deprecated Variables
+^^^^^^^^^^^^^^^^^^^^
+
+The following variables are provided for backward compatibility:
+
+``PKG_CONFIG_VERSION_STRING``
+  .. deprecated:: 4.2
+    Use ``PkgConfig_VERSION``, which has the same value.
+
+  The version of ``pkg-config`` that was found.
+
 Examples
 ^^^^^^^^
 
@@ -506,7 +519,7 @@ mark_as_advanced(PKG_CONFIG_ARGN)
 set(_PKG_CONFIG_FAILURE_MESSAGE "")
 if (PKG_CONFIG_EXECUTABLE)
   execute_process(COMMAND ${PKG_CONFIG_EXECUTABLE} ${PKG_CONFIG_ARGN} --version
-    OUTPUT_VARIABLE PKG_CONFIG_VERSION_STRING OUTPUT_STRIP_TRAILING_WHITESPACE
+    OUTPUT_VARIABLE PkgConfig_VERSION OUTPUT_STRIP_TRAILING_WHITESPACE
     ERROR_VARIABLE _PKG_CONFIG_VERSION_ERROR ERROR_STRIP_TRAILING_WHITESPACE
     RESULT_VARIABLE _PKG_CONFIG_VERSION_RESULT
     )
@@ -519,22 +532,28 @@ if (PKG_CONFIG_EXECUTABLE)
     string(APPEND _PKG_CONFIG_FAILURE_MESSAGE
       "The command\n"
       "      \"${PKG_CONFIG_EXECUTABLE}\"${PKG_CONFIG_ARGN} --version\n"
-      "    failed with output:\n${PKG_CONFIG_VERSION_STRING}\n"
+      "    failed with output:\n${PkgConfig_VERSION}\n"
       "    stderr: \n${_PKG_CONFIG_VERSION_ERROR}\n"
       "    result: \n${_PKG_CONFIG_VERSION_RESULT}"
       )
     set(PKG_CONFIG_EXECUTABLE "")
     set(PKG_CONFIG_ARGN "")
-    unset(PKG_CONFIG_VERSION_STRING)
+    unset(PkgConfig_VERSION)
   endif ()
   unset(_PKG_CONFIG_VERSION_RESULT)
 endif ()
+
+# For backward compatibility.
+unset(PKG_CONFIG_VERSION_STRING)
+if(DEFINED PkgConfig_VERSION)
+  set(PKG_CONFIG_VERSION_STRING "${PkgConfig_VERSION}")
+endif()
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(PkgConfig
                                   REQUIRED_VARS PKG_CONFIG_EXECUTABLE
                                   REASON_FAILURE_MESSAGE "${_PKG_CONFIG_FAILURE_MESSAGE}"
-                                  VERSION_VAR PKG_CONFIG_VERSION_STRING)
+                                  VERSION_VAR PkgConfig_VERSION)
 
 # This is needed because the module name is "PkgConfig" but the name of
 # this variable has always been PKG_CONFIG_FOUND so this isn't automatically
@@ -580,8 +599,8 @@ macro(_pkgconfig_invoke _pkglist _prefix _varname _regexp)
 
     # pkg-config <0.29.1 and pkgconf <1.5.1 prints quoted variables without unquoting
     # unquote only if quotes are first and last characters
-    if((PKG_CONFIG_VERSION_STRING VERSION_LESS 0.29.1) OR
-        (PKG_CONFIG_VERSION_STRING VERSION_GREATER_EQUAL 1.0 AND PKG_CONFIG_VERSION_STRING VERSION_LESS 1.5.1))
+    if((PkgConfig_VERSION VERSION_LESS 0.29.1) OR
+        (PkgConfig_VERSION VERSION_GREATER_EQUAL 1.0 AND PkgConfig_VERSION VERSION_LESS 1.5.1))
       if (_pkgconfig_invoke_result MATCHES "^\"(.*)\"$")
         set(_pkgconfig_invoke_result "${CMAKE_MATCH_1}")
       elseif(_pkgconfig_invoke_result MATCHES "^'(.*)'$")

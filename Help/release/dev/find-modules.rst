@@ -73,6 +73,10 @@ Find Modules
 * The :module:`FindPerlLibs` module now provides a ``PerlLibs_VERSION``
   result variable.
 
+* The :module:`FindPkgConfig` module now provides a ``PkgConfig_VERSION``
+  result variable.  The ``PKG_CONFIG_VERSION_STRING`` result variable is
+  deprecated.
+
 * The :module:`FindPNG` module now provides a ``PNG_VERSION`` result
   variable.  The ``PNG_VERSION_STRING`` result variable is deprecated.
 
