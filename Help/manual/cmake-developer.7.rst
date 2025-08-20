@@ -415,7 +415,7 @@ starting point.
 .. code-block:: cmake
 
   find_package(PkgConfig)
-  if(PKG_CONFIG_FOUND)
+  if(PkgConfig_FOUND)
     pkg_check_modules(PC_Foo QUIET Foo)
   endif()
 

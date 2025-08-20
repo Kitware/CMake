@@ -77,7 +77,7 @@ include(${CMAKE_CURRENT_LIST_DIR}/SelectLibraryConfigurations.cmake)
 include(FindPackageHandleStandardArgs)
 
 find_package(PkgConfig QUIET)
-if(PKG_CONFIG_FOUND)
+if(PkgConfig_FOUND)
   pkg_check_modules(PC_GLUT QUIET glut)
   if(NOT PC_GLUT_FOUND)
     pkg_check_modules(PC_GLUT QUIET freeglut)

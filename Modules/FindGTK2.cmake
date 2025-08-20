@@ -707,7 +707,7 @@ endif()
 # used to compute the arch-specific include prefixes. While at it,
 # also retrieve their INCLUDEDIR, to accommodate non-standard layouts.
 find_package(PkgConfig QUIET)
-if(PKG_CONFIG_FOUND)
+if(PkgConfig_FOUND)
   pkg_check_modules(PC_GTK2 QUIET gtk+-2.0)
   if(PC_GTK2_FOUND)
     pkg_get_variable(PC_GTK2_INCLUDEDIR gtk+-2.0 includedir)

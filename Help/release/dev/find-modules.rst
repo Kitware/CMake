@@ -77,6 +77,10 @@ Find Modules
   result variable.  The ``PKG_CONFIG_VERSION_STRING`` result variable is
   deprecated.
 
+* The :module:`FindPkgConfig` module's result variable ``PKG_CONFIG_FOUND``
+  is deprecated in favor of ``PkgConfig_FOUND``, which is available since
+  CMake 3.3 and has the same value.
+
 * The :module:`FindPNG` module now provides a ``PNG_VERSION`` result
   variable.  The ``PNG_VERSION_STRING`` result variable is deprecated.
 

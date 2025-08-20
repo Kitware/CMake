@@ -26,7 +26,9 @@ Result Variables
 
 This module defines the following variables:
 
-``PKG_CONFIG_FOUND``
+``PkgConfig_FOUND``
+  .. versionadded:: 3.3
+
   Boolean indicating whether the (requested version of) ``pkg-config``
   executable is found.
 
@@ -335,6 +337,13 @@ Deprecated Variables
 
 The following variables are provided for backward compatibility:
 
+``PKG_CONFIG_FOUND``
+  .. deprecated:: 4.2
+    Use ``PkgConfig_FOUND``, which has the same value.
+
+  Boolean indicating whether the (requested version of) ``pkg-config``
+  executable is found.
+
 ``PKG_CONFIG_VERSION_STRING``
   .. deprecated:: 4.2
     Use ``PkgConfig_VERSION``, which has the same value.
@@ -377,7 +386,7 @@ Checking for any version of glib2.  If found, the output variable
 
   find_package(PkgConfig QUIET)
 
-  if(PKG_CONFIG_FOUND)
+  if(PkgConfig_FOUND)
     pkg_check_modules(GLIB2 glib-2.0)
   endif()
 
@@ -388,7 +397,7 @@ the output variable ``GLIB2_VERSION`` will hold the actual version found:
 
   find_package(PkgConfig QUIET)
 
-  if(PKG_CONFIG_FOUND)
+  if(PkgConfig_FOUND)
     pkg_check_modules(GLIB2 glib-2.0>=2.10)
   endif()
 
@@ -401,7 +410,7 @@ will be set to their respective found module versions.
 
   find_package(PkgConfig QUIET)
 
-  if(PKG_CONFIG_FOUND)
+  if(PkgConfig_FOUND)
     pkg_check_modules(FOO glib-2.0>=2.10 gtk+-2.0)
   endif()
 
@@ -427,7 +436,7 @@ module specifications (``libxml-2.0`` or ``libxml2``):
 
   find_package(PkgConfig QUIET)
 
-  if(PKG_CONFIG_FOUND)
+  if(PkgConfig_FOUND)
     pkg_search_module(BAR libxml-2.0 libxml2 libxml>=2)
   endif()
 
@@ -455,7 +464,7 @@ Gobject:
 
   find_package(PkgConfig QUIET)
 
-  if(PKG_CONFIG_FOUND)
+  if(PkgConfig_FOUND)
     pkg_get_variable(GI_GIRDIR gobject-introspection-1.0 girdir)
   endif()
 
@@ -558,7 +567,7 @@ find_package_handle_standard_args(PkgConfig
 # This is needed because the module name is "PkgConfig" but the name of
 # this variable has always been PKG_CONFIG_FOUND so this isn't automatically
 # handled by FPHSA.
-set(PKG_CONFIG_FOUND "${PKGCONFIG_FOUND}")
+set(PKG_CONFIG_FOUND "${PkgConfig_FOUND}")
 
 # Unsets the given variables
 macro(_pkgconfig_unset var)

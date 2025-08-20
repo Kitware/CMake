@@ -80,7 +80,7 @@ Migrating to the :module:`FindPkgConfig`  would look something like this:
 .. code-block:: cmake
 
   find_package(PkgConfig QUIET)
-  if(PKG_CONFIG_FOUND)
+  if(PkgConfig_FOUND)
     pkg_check_modules(LIBART QUIET libart-2.0)
   endif()
 
