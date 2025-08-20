@@ -1619,7 +1619,7 @@
     "comment": "Module Output File Name",
     "value": "",
     "flags": [
-      "UserValue"
+      "UserFollowing"
     ]
   },
   {
