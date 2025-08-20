@@ -19,6 +19,8 @@ namespace CSharp
         + "Visual Studio"
 #elif PlatformToolsetv143
         + "Visual Studio"
+#elif PlatformToolsetv145
+        + "Visual Studio"
 #else
         + "unknown"
 #endif
@@ -53,6 +55,8 @@ namespace CSharp
         + "2019"
 #elif PlatformToolsetv143
         + "2022"
+#elif PlatformToolsetv145
+        + "2026"
 #else
         + "9999"
 #endif
