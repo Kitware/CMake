@@ -1511,16 +1511,6 @@
     ]
   },
   {
-    "name": "PREfastAdditionalOptions",
-    "switch": "analyze:",
-    "comment": "Additional Code Analysis Native options",
-    "value": "",
-    "flags": [
-      "UserValue",
-      "SemicolonAppendable"
-    ]
-  },
-  {
     "name": "PREfastAdditionalPlugins",
     "switch": "analyze:plugin",
     "comment": "Additional Code Analysis Native plugins",
@@ -1685,7 +1675,7 @@
     "comment": "Code Analysis Log",
     "value": "",
     "flags": [
-      "UserValue"
+      "UserFollowing"
     ]
   },
   {
