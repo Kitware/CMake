@@ -876,13 +876,6 @@
     "flags": []
   },
   {
-    "name": "UseDynamicDebugging",
-    "switch": "dynamicdeopt",
-    "comment": "Support C++ Dynamic Debugging",
-    "value": "true",
-    "flags": []
-  },
-  {
     "name": "CompileAsWinRT",
     "switch": "ZW",
     "comment": "Consume Windows Runtime Extension",
@@ -1521,6 +1514,13 @@
     "flags": [
       "UserValue"
     ]
+  },
+  {
+    "name": "UseDynamicDebugging",
+    "switch": "dynamicdeopt",
+    "comment": "Support C++ Dynamic Debugging",
+    "value": "true",
+    "flags": []
   },
   {
     "name": "WarningVersion",

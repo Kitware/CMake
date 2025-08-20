@@ -684,13 +684,6 @@
     "flags": []
   },
   {
-    "name": "UseDynamicDebugging",
-    "switch": "dynamicdeopt",
-    "comment": "Support C++ Dynamic Debugging",
-    "value": "true",
-    "flags": []
-  },
-  {
     "name": "LargeAddressAware",
     "switch": "LARGEADDRESSAWARE:NO",
     "comment": "Enable Large Addresses",
@@ -1163,6 +1156,13 @@
     "flags": [
       "UserValue"
     ]
+  },
+  {
+    "name": "UseDynamicDebugging",
+    "switch": "dynamicdeopt",
+    "comment": "Support C++ Dynamic Debugging",
+    "value": "true",
+    "flags": []
   },
   {
     "name": "HeapReserveSize",
