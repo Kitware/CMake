@@ -97,3 +97,7 @@ Find Modules
 
 * The :module:`FindTIFF` module now provides a ``TIFF_VERSION`` result
   variable.  The ``TIFF_VERSION_STRING`` result variable is deprecated.
+
+* The :module:`FindwxWidgets` module now provides a ``wxWidgets_VERSION``
+  result variable.  The ``wxWidgets_VERSION_STRING`` result variable is
+  deprecated.
