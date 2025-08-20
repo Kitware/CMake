@@ -115,6 +115,8 @@ char const* cmGlobalVisualStudioGenerator::GetIDEVersion() const
       return "16.0";
     case cmGlobalVisualStudioGenerator::VSVersion::VS17:
       return "17.0";
+    case cmGlobalVisualStudioGenerator::VSVersion::VS18:
+      return "18.0";
   }
   return "";
 }
@@ -149,6 +151,11 @@ void cmGlobalVisualStudioGenerator::WriteSLNHeader(std::ostream& fout) const
       // Visual Studio 17 writes .sln format 12.00
       fout << "Microsoft Visual Studio Solution File, Format Version 12.00\n";
       fout << "# Visual Studio Version 17\n";
+      break;
+    case cmGlobalVisualStudioGenerator::VSVersion::VS18:
+      // Visual Studio 18 writes .sln format 12.00
+      fout << "Microsoft Visual Studio Solution File, Format Version 12.00\n";
+      fout << "# Visual Studio Version 18\n";
       break;
   }
 }

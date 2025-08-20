@@ -26,6 +26,7 @@ public:
   static std::unique_ptr<cmGlobalGeneratorFactory> NewFactory15();
   static std::unique_ptr<cmGlobalGeneratorFactory> NewFactory16();
   static std::unique_ptr<cmGlobalGeneratorFactory> NewFactory17();
+  static std::unique_ptr<cmGlobalGeneratorFactory> NewFactory18();
 
   bool MatchesGeneratorName(std::string const& name) const override;
 
@@ -89,6 +90,8 @@ private:
   friend class Factory16;
   class Factory17;
   friend class Factory17;
+  class Factory18;
+  friend class Factory18;
   mutable cmVSSetupAPIHelper vsSetupAPIHelper;
 
   bool ParseGeneratorInstance(std::string const& is, cmMakefile* mf);
