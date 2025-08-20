@@ -1,0 +1,2 @@
+1: Test timeout computed to be: 10000000
+1/1 Test #1: test1[ ]
