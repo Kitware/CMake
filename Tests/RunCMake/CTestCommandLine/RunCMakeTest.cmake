@@ -630,6 +630,21 @@ run_output_junit()
 
 run_cmake_command(invalid-ctest-argument ${CMAKE_CTEST_COMMAND} --not-a-valid-ctest-argument)
 
+block()
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/TimeoutDefault)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
+  file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
+  file(WRITE "${RunCMake_TEST_BINARY_DIR}/DartConfiguration.tcl" "
+BuildDirectory: ${RunCMake_TEST_BINARY_DIR}
+")
+  file(WRITE "${RunCMake_TEST_BINARY_DIR}/CTestTestfile.cmake" "
+add_test(test1 \"${CMAKE_COMMAND}\" -E true)
+")
+  run_cmake_command(TimeoutDefault ${CMAKE_CTEST_COMMAND} -V)
+  run_cmake_command(TimeoutDefault-T-Test ${CMAKE_CTEST_COMMAND} -V -T Test)
+endblock()
+
 if(WIN32)
   block()
     set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/TimeoutSignalWindows)
