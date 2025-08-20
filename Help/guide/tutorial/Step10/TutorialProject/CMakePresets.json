@@ -1,0 +1,16 @@
+{
+  "version": 4,
+  "configurePresets": [
+    {
+      "name": "tutorial",
+      "displayName": "Tutorial Preset",
+      "description": "Preset to use with the tutorial",
+      "binaryDir": "${sourceDir}/build",
+      "cacheVariables": {
+        "TODO4": "Add ${sourceParentDir}/install to CMAKE_PREFIX_PATH",
+        "TUTORIAL_USE_STD_SQRT": "OFF",
+        "TUTORIAL_ENABLE_IPO": "OFF"
+      }
+    }
+  ]
+}

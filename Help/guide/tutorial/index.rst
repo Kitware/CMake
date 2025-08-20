@@ -20,18 +20,17 @@ provides the complete solution for the previous step.
 .. toctree::
   :maxdepth: 2
 
-  A Basic Starting Point
-  Adding a Library
-  Adding Usage Requirements for a Library
-  Adding Generator Expressions
-  Installing and Testing
-  Adding Support for a Testing Dashboard
-  Adding System Introspection
-  Adding a Custom Command and Generated File
-  Packaging an Installer
-  Selecting Static or Shared Libraries
-  Adding Export Configuration
-  Packaging Debug and Release
+  Getting Started with CMake
+  CMake Language Fundamentals
+  Configuration and Cache Variables
+  In-Depth CMake Target Commands
+  In-Depth CMake Library Concepts
+  In-Depth System Introspection
+  Custom Commands and Generated Files
+  Testing and CTest
+  Installation Commands and Concepts
+  Finding Dependencies
+  Miscellaneous Features
 
 ..
   Whenever a step above is renamed or removed, leave forwarding text in
