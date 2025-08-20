@@ -13,6 +13,12 @@ This module sets the ``RULE_LAUNCH_*`` global properties when the
 * :prop_gbl:`RULE_LAUNCH_CUSTOM`
 * :prop_gbl:`RULE_LAUNCH_LINK`
 
+Load this module in a CMake project with:
+
+.. code-block:: cmake
+
+  include(CTestUseLaunchers)
+
 The ``CTestUseLaunchers`` module is automatically included by the
 :module:`CTest` module when ``include(CTest)`` is called.  However, it is
 provided as a separate module so that projects can use the

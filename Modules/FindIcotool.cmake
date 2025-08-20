@@ -6,7 +6,11 @@ FindIcotool
 -----------
 
 Finds ``icotool``, command-line program for converting and creating Win32 icon
-and cursor files.
+and cursor files:
+
+.. code-block:: cmake
+
+  find_package(Icotool [<version>] [...])
 
 Result Variables
 ^^^^^^^^^^^^^^^^

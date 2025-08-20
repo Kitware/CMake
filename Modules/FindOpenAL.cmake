@@ -5,7 +5,11 @@
 FindOpenAL
 ----------
 
-Finds the Open Audio Library (OpenAL).
+Finds the Open Audio Library (OpenAL):
+
+.. code-block:: cmake
+
+  find_package(OpenAL [<version>] [...])
 
 OpenAL is a cross-platform 3D audio API designed for efficient rendering of
 multichannel three-dimensional positional audio.  It is commonly used in games

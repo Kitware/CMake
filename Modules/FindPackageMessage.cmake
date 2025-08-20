@@ -6,11 +6,13 @@ FindPackageMessage
 ------------------
 
 This module provides a command for printing find result messages and is
-intended for use in :ref:`Find Modules`.
+intended for use in :ref:`Find Modules` implementing
+:command:`find_package(<PackageName>)` calls.
 
-Load it in a CMake find module with:
+Load this module in a CMake find module with:
 
 .. code-block:: cmake
+  :caption: ``FindFoo.cmake``
 
   include(FindPackageMessage)
 

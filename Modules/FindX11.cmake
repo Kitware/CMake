@@ -5,9 +5,13 @@
 FindX11
 -------
 
-Find X11 installation
+Finds the X11 installation on Unix-like systems:
 
-Try to find X11 on UNIX systems. The following values are defined
+.. code-block:: cmake
+
+  find_package(X11 [COMPONENTS <components>...] [...])
+
+The following values are defined
 
 ::
 

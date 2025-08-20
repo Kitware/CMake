@@ -5,14 +5,10 @@
 FindGTK2
 --------
 
-Finds the GTK widget libraries and several of its other optional components.
-
-GTK is a multi-platform toolkit for creating graphical user interfaces.
-
 .. note::
 
-  This module is specifically for GTK version 2.x, which is obsolete and no
-  longer maintained.  Use the latest supported GTK version and
+  This module is intended specifically for GTK version 2.x, which is obsolete
+  and no longer maintained.  Use the latest supported GTK version and
   :module:`FindPkgConfig` module to find GTK in CMake instead of this module.
   For example:
 
@@ -21,6 +17,14 @@ GTK is a multi-platform toolkit for creating graphical user interfaces.
     find_package(PkgConfig REQUIRED)
     pkg_check_modules(GTK REQUIRED IMPORTED_TARGET gtk4>=4.14)
     target_link_libraries(example PRIVATE PkgConfig::GTK)
+
+Finds the GTK widget libraries and several of its other optional components:
+
+.. code-block:: cmake
+
+  find_package(GTK2 [<version>] [COMPONENTS <components>...] [...])
+
+GTK is a multi-platform toolkit for creating graphical user interfaces.
 
 Components
 ^^^^^^^^^^

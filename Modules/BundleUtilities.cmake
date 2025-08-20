@@ -9,7 +9,7 @@ This module provides utility commands for assembling standalone,
 bundle-style applications with CMake, such as macOS ``.app`` bundles or
 similar directory-based application bundles on other operating systems.
 
-Load this module in CMake installation with:
+Load this module in a CMake installation with:
 
 .. code-block:: cmake
 

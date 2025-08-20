@@ -5,13 +5,15 @@
 SelectLibraryConfigurations
 ---------------------------
 
-This module is intended for use in :ref:`Find Modules` and provides a
-command to automatically set library variables when package is available
-with multiple :ref:`Build Configurations`.
+This module provides a command to automatically set library variables when
+package is available with multiple :ref:`Build Configurations`.  It is
+intended for use in :ref:`Find Modules` implementing
+:command:`find_package(<PackageName>)` calls.
 
-Load it in a CMake find module with:
+Load this module in a CMake find module with:
 
 .. code-block:: cmake
+  :caption: ``FindFoo.cmake``
 
   include(SelectLibraryConfigurations)
 

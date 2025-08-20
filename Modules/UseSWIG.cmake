@@ -5,12 +5,18 @@
 UseSWIG
 -------
 
-This file provides support for ``SWIG``. It is assumed that :module:`FindSWIG`
-module has already been loaded.
-
 .. only:: html
 
   .. contents::
+
+This module provides support for ``SWIG``. It is assumed that :module:`FindSWIG`
+module has already been loaded.
+
+Load this module in a CMake project with:
+
+.. code-block:: cmake
+
+  include(UseSWIG)
 
 CMake Commands
 ^^^^^^^^^^^^^^

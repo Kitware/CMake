@@ -7,8 +7,12 @@ FindPython
 
 .. versionadded:: 3.12
 
-Find Python interpreter, compiler and development environment (include
-directories and libraries).
+Finds Python interpreter, compiler and development environment (include
+directories and libraries):
+
+.. code-block:: cmake
+
+  find_package(Python [<version>] [COMPONENTS <components>...] [...])
 
 .. versionadded:: 3.19
   When a version is requested, it can be specified as a simple value or as a

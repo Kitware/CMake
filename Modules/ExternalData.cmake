@@ -9,7 +9,14 @@ ExternalData
 
    .. contents::
 
-Manage data files stored outside source tree
+This module provides commands to manage data files stored outside source
+tree.
+
+Load this module in a CMake project with:
+
+.. code-block:: cmake
+
+  include(ExternalData)
 
 Introduction
 ^^^^^^^^^^^^

@@ -5,7 +5,11 @@
 FindHSPELL
 ----------
 
-Finds Hebrew spell-checker (Hspell) and morphology engine.
+Finds the Hebrew spell-checker and morphology engine (Hspell):
+
+.. code-block:: cmake
+
+  find_package(HSPELL [<version>] [...])
 
 Result Variables
 ^^^^^^^^^^^^^^^^

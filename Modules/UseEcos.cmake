@@ -8,7 +8,7 @@ UseEcos
 This module defines variables and provides commands required to build an eCos
 application.
 
-Load this module in CMake project with:
+Load this module in a CMake project with:
 
 .. code-block:: cmake
 

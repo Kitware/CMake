@@ -6,7 +6,11 @@ FindMatlab
 ----------
 
 Finds Matlab or Matlab Compiler Runtime (MCR) and provides Matlab tools,
-libraries and compilers to CMake.
+libraries and compilers to CMake:
+
+.. code-block:: cmake
+
+  find_package(Matlab [<version>] [COMPONENTS <components>...] [...])
 
 This package primary purpose is to find the libraries associated with Matlab
 or the MCR in order to be able to build Matlab extensions (mex files). It

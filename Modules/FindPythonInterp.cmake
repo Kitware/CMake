@@ -13,8 +13,11 @@ FindPythonInterp
   Use :module:`FindPython3`, :module:`FindPython2`, or :module:`FindPython`
   instead.
 
-This module finds the Python interpreter and determines the location of its
-executable.
+Finds the Python interpreter and determines the location of its executable:
+
+.. code-block:: cmake
+
+  find_package(PythonInterp [<version>] [...])
 
 .. note::
 

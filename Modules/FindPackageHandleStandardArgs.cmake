@@ -5,7 +5,7 @@
 FindPackageHandleStandardArgs
 -----------------------------
 
-This module provides commands intended to be used in :ref:`Find Modules`
+This module provides commands intended for use in :ref:`Find Modules`
 implementing :command:`find_package(<PackageName>)` calls.
 
 Load this module in a CMake find module with:
