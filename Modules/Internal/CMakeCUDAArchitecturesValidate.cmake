@@ -5,6 +5,11 @@ function(cmake_cuda_architectures_validate lang)
   if(DEFINED CMAKE_${lang}_ARCHITECTURES)
     if(CMAKE_${lang}_ARCHITECTURES STREQUAL "")
       message(FATAL_ERROR "CMAKE_${lang}_ARCHITECTURES must be non-empty if set.")
+    elseif(CMAKE_${lang}_ARCHITECTURES MATCHES [["]])
+      message(FATAL_ERROR
+        "CMAKE_${lang}_ARCHITECTURES contains literal quotes:\n"
+        "  ${CMAKE_${lang}_ARCHITECTURES}\n"
+      )
     elseif(CMAKE_${lang}_ARCHITECTURES AND NOT CMAKE_${lang}_ARCHITECTURES MATCHES "^([0-9]+(a|f)?(-real|-virtual)?(;[0-9]+(a|f)?(-real|-virtual)?|;)*|all|all-major|native)$")
       message(FATAL_ERROR
         "CMAKE_${lang}_ARCHITECTURES:\n"
