@@ -971,20 +971,6 @@
     "flags": []
   },
   {
-    "name": "EnableASAN",
-    "switch": "fsanitize=address",
-    "comment": "Enable Address Sanitizer",
-    "value": "true",
-    "flags": []
-  },
-  {
-    "name": "EnableFuzzer",
-    "switch": "fsanitize=fuzzer",
-    "comment": "Enable Fuzzer Support (Experimental)",
-    "value": "true",
-    "flags": []
-  },
-  {
     "name": "IntrinsicFunctions",
     "switch": "Oi",
     "comment": "Enable Intrinsic Functions",
