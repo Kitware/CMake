@@ -1295,6 +1295,15 @@
     ]
   },
   {
+    "name": "GenerateModuleDependencies",
+    "switch": "sourceDependencies:directives",
+    "comment": "Generate Module Dependencies File",
+    "value": "true",
+    "flags": [
+      "Continue"
+    ]
+  },
+  {
     "name": "GenerateXMLDocumentationFiles",
     "switch": "doc",
     "comment": "Generate XML Documentation Files",
@@ -1311,8 +1320,6 @@
     "comment": "Generate Source Dependencies File",
     "value": "true",
     "flags": [
-      "UserValue",
-      "UserIgnored",
       "Continue"
     ]
   },
@@ -1617,6 +1624,15 @@
     ]
   },
   {
+    "name": "ModuleDependenciesFile",
+    "switch": "sourceDependencies:directives",
+    "comment": "Module Dependencies File Name",
+    "value": "",
+    "flags": [
+      "UserFollowing"
+    ]
+  },
+  {
     "name": "ObjectFileName",
     "switch": "Fo",
     "comment": "Object File Name",
@@ -1650,8 +1666,7 @@
     "comment": "Source Dependencies File Name",
     "value": "",
     "flags": [
-      "UserValue",
-      "UserRequired"
+      "UserFollowing"
     ]
   },
   {
