@@ -1291,8 +1291,6 @@
     "comment": "Generate Module Dependencies File",
     "value": "true",
     "flags": [
-      "UserValue",
-      "UserIgnored",
       "Continue"
     ]
   },
@@ -1615,8 +1613,7 @@
     "comment": "Module Dependencies File Name",
     "value": "",
     "flags": [
-      "UserValue",
-      "UserRequired"
+      "UserFollowing"
     ]
   },
   {
