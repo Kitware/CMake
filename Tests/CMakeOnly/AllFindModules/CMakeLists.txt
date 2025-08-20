@@ -121,6 +121,7 @@ foreach(
     FLEX Freetype
     Gettext GIF GnuTLS GNUTLS GTK2
     HDF5 Hg HSPELL
+    Icotool
     Jasper JPEG
     LibArchive LibLZMA LIBLZMA LibXml2 LibXslt LTTngUST
     OpenSceneGraph OPENSCENEGRAPH OpenSSL OPENSSL
