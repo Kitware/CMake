@@ -1318,15 +1318,6 @@
     ]
   },
   {
-    "name": "MergeSections",
-    "switch": "MERGE:",
-    "comment": "Merge Sections",
-    "value": "",
-    "flags": [
-      "UserValue"
-    ]
-  },
-  {
     "name": "LinkKeyFile",
     "switch": "KEYFILE:",
     "comment": "Key File",
