@@ -120,31 +120,39 @@
   },
   {
     "name": "GenerateDebugInformation",
-    "switch": "",
-    "comment": "No",
-    "value": "false",
-    "flags": []
-  },
-  {
-    "name": "GenerateDebugInformation",
     "switch": "DEBUG",
     "comment": "Generate Debug Information",
     "value": "true",
-    "flags": []
+    "flags": [
+      "CaseInsensitive"
+    ]
   },
   {
     "name": "GenerateDebugInformation",
     "switch": "DEBUG:FASTLINK",
     "comment": "Generate Debug Information optimized for faster links",
     "value": "DebugFastLink",
-    "flags": []
+    "flags": [
+      "CaseInsensitive"
+    ]
   },
   {
     "name": "GenerateDebugInformation",
     "switch": "DEBUG:FULL",
     "comment": "Generate Debug Information optimized for sharing and publishing",
     "value": "DebugFull",
-    "flags": []
+    "flags": [
+      "CaseInsensitive"
+    ]
+  },
+  {
+    "name": "GenerateDebugInformation",
+    "switch": "DEBUG:NONE",
+    "comment": "Produces no debugging information",
+    "value": "false",
+    "flags": [
+      "CaseInsensitive"
+    ]
   },
   {
     "name": "SubSystem",
