@@ -623,7 +623,7 @@ std::string cmGlobalVisualStudio7Generator::WriteUtilityDepend(
     target->GetLocalGenerator()->MaybeRelativeToCurBinDir(
       cmStrCat(target->GetSupportDirectory(), '\\'));
   for (std::string const& i : configs) {
-    std::string intDir = cmStrCat(intDir, i);
+    std::string intDir = cmStrCat(intDirPrefix, i);
 
     /* clang-format off */
     fout <<
