@@ -10,7 +10,7 @@ Finds the Tcl shell command-line executable (``tclsh``), which includes the Tcl
 
 .. code-block:: cmake
 
-  find_package(Tclsh [...])
+  find_package(Tclsh [<version>] [...])
 
 Result Variables
 ^^^^^^^^^^^^^^^^
@@ -18,9 +18,14 @@ Result Variables
 This module defines the following variables:
 
 ``Tclsh_FOUND``
-  Boolean indicating whether the ``tclsh`` executable (and the requested
-  version, if specified) is found.  For backward compatibility, the
-  ``TCLSH_FOUND`` variable is also set to the same value.
+  Boolean indicating whether the (requested version of) ``tclsh`` executable
+  is found.  For backward compatibility, the ``TCLSH_FOUND`` variable is
+  also set to the same value.
+
+``Tclsh_VERSION``
+  .. versionadded:: 4.2
+
+  The version of ``tclsh`` found.
 
 Cache Variables
 ^^^^^^^^^^^^^^^
@@ -30,14 +35,30 @@ The following cache variables may also be set:
 ``TCL_TCLSH``
   The path to the ``tclsh`` executable.
 
+Deprecated Variables
+^^^^^^^^^^^^^^^^^^^^
+
+The following variables are provided for backward compatibility:
+
+``TCLSH_VERSION_STRING``
+  .. deprecated:: 4.2
+    Use ``Tclsh_VERSION``, which has the same value.
+
+  The version of ``tclsh`` found.
+
 Examples
 ^^^^^^^^
 
-Finding the ``tclsh`` command-line executable:
+In the following example, this module is used to find the ``tclsh``
+command-line executable, which is then executed in a process to evaluate
+TCL code from the script file located in the project source directory:
 
 .. code-block:: cmake
 
   find_package(Tclsh)
+  if(Tclsh_FOUND)
+    execute_process(COMMAND ${TCL_TCLSH} example-script.tcl)
+  endif()
 
 See Also
 ^^^^^^^^
@@ -108,9 +129,10 @@ find_program(TCL_TCLSH
 if(TCL_TCLSH)
   execute_process(COMMAND "${CMAKE_COMMAND}" -E echo puts "\$tcl_version"
                   COMMAND "${TCL_TCLSH}"
-                  OUTPUT_VARIABLE TCLSH_VERSION_STRING
+                  OUTPUT_VARIABLE Tclsh_VERSION
                   ERROR_QUIET
                   OUTPUT_STRIP_TRAILING_WHITESPACE)
+  set(TCLSH_VERSION_STRING "${Tclsh_VERSION}")
 endif()
 
 include(FindPackageHandleStandardArgs)
@@ -124,7 +146,7 @@ if (CMAKE_FIND_PACKAGE_NAME STREQUAL "TCL" OR
 endif ()
 find_package_handle_standard_args(Tclsh
                                   REQUIRED_VARS TCL_TCLSH
-                                  VERSION_VAR TCLSH_VERSION_STRING)
+                                  VERSION_VAR Tclsh_VERSION)
 unset(FPHSA_NAME_MISMATCHED)
 
 mark_as_advanced(TCL_TCLSH)
