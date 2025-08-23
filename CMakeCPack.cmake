@@ -52,7 +52,7 @@ if(NOT DEFINED CPACK_SYSTEM_NAME)
 endif()
 
 # Command for configure IFW script templates
-include(${CMake_SOURCE_DIR}/Modules/CPackIFWConfigureFile.cmake)
+include(CPackIFWConfigureFile)
 
 # Advanced IFW configuration
 set(_cpifwrc CPACK_IFW_COMPONENT_GROUP_CMAKE_)

@@ -36,10 +36,6 @@ The module defines the following commands:
 
 #]=======================================================================]
 
-# NOTE: This file used to himself packaging via CPack IFW generator and
-# should be compatible with minimal CMake version defined in
-# ../CMakeLists.txt file.
-
 if(NOT DEFINED CPackIFWConfigureFile_CMake_INCLUDED)
 set(CPackIFWConfigureFile_CMake_INCLUDED 1)
 
