@@ -24,14 +24,20 @@ Result Variables
 This module defines the following variables:
 
 ``Qt3_FOUND``
-  Boolean indicating whether Qt3 has been found.
+  Boolean indicating whether (the requested version of) Qt3 has been found.
+
 ``QT_FOUND``
   Boolean indicating whether Qt3 has been found.  This variable is for
   compatibility with other Qt find modules.
-``QT_VERSION_STRING``
+
+``Qt3_VERSION``
+  .. versionadded:: 4.2
+
   The version of Qt3 that was found.
+
 ``QT_LIBRARIES``
   Libraries needed to link against for using Qt3.
+
 ``QT_DEFINITIONS``
   A list of compile definitions to use when compiling code that uses Qt3.
 
@@ -60,6 +66,17 @@ Hints
 ``QT_MT_REQUIRED``
   To search for the multithreaded version of Qt3, set this variable to ``TRUE``
   before looking for Qt3.
+
+Deprecated Variables
+^^^^^^^^^^^^^^^^^^^^
+
+The following variables are provided for backward compatibility:
+
+``QT_VERSION_STRING``
+  .. deprecated:: 4.2
+    Use ``Qt3_VERSION``, which has the same value.
+
+  The version of Qt3 that was found.
 
 Examples
 ^^^^^^^^
@@ -138,7 +155,8 @@ if(QT_INCLUDE_DIR)
   # Under windows the qt library (MSVC) has the format qt-mtXYZ where XYZ is the
   # version X.Y.Z, so we need to remove the dots from version
   string(REGEX REPLACE "\\." "" qt_version_str_lib "${qt_version_str}")
-  set(QT_VERSION_STRING "${qt_version_str}")
+  set(Qt3_VERSION "${qt_version_str}")
+  set(QT_VERSION_STRING "${Qt3_VERSION}")
 endif()
 
 file(GLOB GLOB_PATHS_LIB /usr/lib/qt-3*/lib/)
@@ -265,7 +283,7 @@ if (CMAKE_FIND_PACKAGE_NAME STREQUAL "Qt")
 endif ()
 find_package_handle_standard_args(Qt3
                                   REQUIRED_VARS QT_QT_LIBRARY QT_INCLUDE_DIR QT_MOC_EXECUTABLE
-                                  VERSION_VAR QT_VERSION_STRING)
+                                  VERSION_VAR Qt3_VERSION)
 unset(FPHSA_NAME_MISMATCHED)
 set(QT_FOUND ${QT3_FOUND} )
 

@@ -84,6 +84,9 @@ Find Modules
   result variable.  The ``PostgreSQL_VERSION_STRING`` result variable is
   deprecated.
 
+* The :module:`FindQt3` module now provides a ``Qt3_VERSION`` result
+  variable.  The ``QT_VERSION_STRING`` result variable is deprecated.
+
 * The :module:`FindSDL_gfx`, :module:`FindSDL_image`, :module:`FindSDL_mixer`,
   :module:`FindSDL_net`, :module:`FindSDL_sound`, and :module:`FindSDL_ttf`
   modules now provide their respective ``<PackageName>_VERSION`` result
