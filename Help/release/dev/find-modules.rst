@@ -60,6 +60,9 @@ Find Modules
   ``Lua_VERSION`` instead of the now deprecated ``LUA_VERSION_STRING`` result
   variable.
 
+* The :module:`FindOpenCL` module now provides an ``OpenCL_VERSION`` result
+  variable.  The ``OpenCL_VERSION_STRING`` result variable is deprecated.
+
 * The :module:`FindOpenSceneGraph` module now provides an
   ``OpenSceneGraph_VERSION`` result variable.  The ``OPENSCENEGRAPH_VERSION``
   result variable is deprecated.

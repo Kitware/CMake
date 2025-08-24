@@ -102,6 +102,7 @@ foreach(
     ICOTOOL
     JASPER
     LIBLZMA LIBXML2 LIBXSLT LTTNGUST
+    OpenCL
     PERL PKG_CONFIG PNG PostgreSQL
     SDL
     TIFF
@@ -123,7 +124,7 @@ foreach(
     HDF5 Hg
     Jasper JPEG
     LibArchive LibLZMA LIBLZMA LibXml2 LibXslt LTTngUST
-    OpenSceneGraph OPENSCENEGRAPH OpenSSL OPENSSL
+    OpenCL OpenSceneGraph OPENSCENEGRAPH OpenSSL OPENSSL
     Perl PerlLibs PkgConfig PNG PostgreSQL Protobuf
     Ruby RUBY
     SDL SWIG
