@@ -105,3 +105,7 @@ Find Modules
 * The :module:`FindwxWidgets` module now provides a ``wxWidgets_VERSION``
   result variable.  The ``wxWidgets_VERSION_STRING`` result variable is
   deprecated.
+
+* The :module:`FindwxWidgets` module's result variable
+  ``wxWidgets_USE_FILE`` is now deprecated in favor of including the
+  :module:`UsewxWidgets` module directly.

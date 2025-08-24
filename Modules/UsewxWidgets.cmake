@@ -31,13 +31,12 @@ usage requirements:
   :caption: ``CMakeLists.txt``
 
   # Note that for MinGW users the order of libraries is important.
-  find_package(wxWidgets REQUIRED net gl core base)
+  find_package(wxWidgets COMPONENTS net gl core base)
 
   add_library(example example.cxx)
 
   if(wxWidgets_FOUND)
-    # Above also sets the wxWidgets_USE_FILE variable that points to this module.
-    include(${wxWidgets_USE_FILE})
+    include(UsewxWidgets)
 
     # Link wxWidgets libraries for each dependent executable/library target.
     target_link_libraries(example PRIVATE ${wxWidgets_LIBRARIES})
@@ -54,7 +53,7 @@ current directory.
 .. code-block:: cmake
   :caption: ``CMakeLists.txt``
 
-  find_package(wxWidgets)
+  find_package(wxWidgets COMPONENTS net gl core base)
 
   add_library(example example.cxx)
 
