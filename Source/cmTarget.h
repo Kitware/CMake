@@ -350,6 +350,15 @@ private:
   // Internal representation details.
   friend class cmGeneratorTarget;
 
+  bool GetMappedConfigOld(std::string const& desired_config, cmValue& loc,
+                          cmValue& imp, std::string& suffix) const;
+  bool GetMappedConfigNew(std::string const& desired_config, cmValue& loc,
+                          cmValue& imp, std::string& suffix) const;
+  cmValue GetLocation(std::string const& base,
+                      std::string const& suffix) const;
+  bool GetLocation(std::string const& config, cmValue& loc, cmValue& imp,
+                   std::string& suffix) const;
+
   char const* GetSuffixVariableInternal(
     cmStateEnums::ArtifactType artifact) const;
   char const* GetPrefixVariableInternal(

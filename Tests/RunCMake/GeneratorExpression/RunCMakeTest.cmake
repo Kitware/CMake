@@ -123,6 +123,12 @@ run_cmake(CMP0199-WARN)
 run_cmake_build(CMP0199-OLD)
 run_cmake_build(CMP0199-NEW)
 
+run_cmake(CMP0200-WARN)
+run_cmake_build(CMP0200-OLD)
+run_cmake_build(CMP0200-NEW)
+
+run_cmake_build(CMP0199-NEW+CMP0200-NEW)
+
 set(RunCMake_TEST_OPTIONS -DCMAKE_POLICY_DEFAULT_CMP0085:STRING=OLD)
 run_cmake(CMP0085-OLD)
 unset(RunCMake_TEST_OPTIONS)

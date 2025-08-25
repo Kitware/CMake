@@ -98,6 +98,7 @@ Policies Introduced by CMake 4.2
 .. toctree::
    :maxdepth: 1
 
+   CMP0200: Location and configuration selection for imported targets is more consistent. </policy/CMP0200>
    CMP0199: $<CONFIG> only matches the configuration of the consumed target. </policy/CMP0199>
    CMP0198: CMAKE_PARENT_LIST_FILE is not defined in CMakeLists.txt. </policy/CMP0198>
 
