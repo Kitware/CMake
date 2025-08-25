@@ -967,7 +967,11 @@ if(WIN32)
 
     # Add a manifest file to executables on Windows to allow for
     # GetVersion to work properly on Windows 8 and above.
-    target_sources(ManifestLib INTERFACE cmake.version.manifest)
+    if(MSVC)
+      target_sources(ManifestLib INTERFACE cmake.version.manifest)
+    else()
+      target_sources(ManifestLib INTERFACE cmake.version.manifest.rc)
+    endif()
   endif()
 endif()
 
