@@ -306,7 +306,7 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
     std::string argS = cmStrCat("-S", lg.GetSourceDirectory());
     std::string argB = cmStrCat("-B", lg.GetBinaryDirectory());
     std::string const sln =
-      cmStrCat(lg.GetBinaryDirectory(), '/', lg.GetProjectName(), ".sln");
+      this->GetSLNFile(lg.GetBinaryDirectory(), lg.GetProjectName());
     cmCustomCommandLines commandLines = cmMakeSingleCommandLine(
       { cmSystemTools::GetCMakeCommand(), argS, argB, "--check-stamp-list",
         stampList, "--vs-solution-file", sln });

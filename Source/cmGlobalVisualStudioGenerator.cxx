@@ -38,14 +38,6 @@
 #include "cmUuid.h"
 #include "cmake.h"
 
-namespace {
-std::string GetSLNFile(cmLocalGenerator const* root)
-{
-  return cmStrCat(root->GetCurrentBinaryDirectory(), '/',
-                  root->GetProjectName(), ".sln");
-}
-}
-
 cmGlobalVisualStudioGenerator::cmGlobalVisualStudioGenerator(cmake* cm)
   : cmGlobalGenerator(cm)
 {
@@ -771,7 +763,7 @@ bool cmGlobalVisualStudioGenerator::Open(std::string const& bindir,
                                          std::string const& projectName,
                                          bool dryRun)
 {
-  std::string sln = cmStrCat(bindir, '/', projectName, ".sln");
+  std::string sln = this->GetSLNFile(bindir, projectName);
 
   if (dryRun) {
     return cmSystemTools::FileExists(sln, true);
@@ -1090,6 +1082,24 @@ cm::VS::Solution cmGlobalVisualStudioGenerator::CreateSolution(
   solution.CanonicalizeOrder();
 
   return solution;
+}
+
+std::string cmGlobalVisualStudioGenerator::GetSLNFile(
+  cmLocalGenerator const* root) const
+{
+  return this->GetSLNFile(root->GetCurrentBinaryDirectory(),
+                          root->GetProjectName());
+}
+
+std::string cmGlobalVisualStudioGenerator::GetSLNFile(
+  std::string const& projectDir, std::string const& projectName) const
+{
+  std::string slnFile = projectDir;
+  if (!slnFile.empty()) {
+    slnFile.push_back('/');
+  }
+  slnFile = cmStrCat(slnFile, projectName, ".sln");
+  return slnFile;
 }
 
 void cmGlobalVisualStudioGenerator::Generate()

@@ -1065,6 +1065,8 @@ cmGlobalVisualStudio10Generator::GenerateBuildCommand(
   std::string makeProgramSelected =
     this->SelectMakeProgram(makeProgram, this->GetMSBuildCommand());
 
+  std::string const slnFile = this->GetSLNFile(projectDir, projectName);
+
   // Check if the caller explicitly requested a devenv tool.
   std::string makeProgramLower = makeProgramSelected;
   cmSystemTools::LowerCase(makeProgramLower);
@@ -1079,12 +1081,6 @@ cmGlobalVisualStudio10Generator::GenerateBuildCommand(
   // an Intel Fortran .vfproj then we have to use devenv. Parse it to find out.
   cmSlnData slnData;
   {
-    std::string slnFile;
-    if (!projectDir.empty()) {
-      slnFile = cmStrCat(projectDir, '/');
-    }
-    slnFile += projectName;
-    slnFile += ".sln";
     cmVisualStudioSlnParser parser;
     if (parser.ParseFile(slnFile, slnData,
                          cmVisualStudioSlnParser::DataGroupAll)) {
@@ -1125,7 +1121,7 @@ cmGlobalVisualStudio10Generator::GenerateBuildCommand(
     makeCommand.Add(makeProgramSelected);
 
     if (tname == "clean"_s) {
-      makeCommand.Add(cmStrCat(projectName, ".sln"));
+      makeCommand.Add(slnFile);
       makeCommand.Add("/t:Clean");
     } else {
       std::string targetProject = cmStrCat(tname, ".vcxproj");

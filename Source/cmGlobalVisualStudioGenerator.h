@@ -196,6 +196,10 @@ protected:
   cm::VS::Solution::Folder* CreateSolutionFolder(
     cm::VS::Solution& solution, cm::string_view rawName) const;
 
+  std::string GetSLNFile(cmLocalGenerator const* root) const;
+  std::string GetSLNFile(std::string const& projectDir,
+                         std::string const& projectName) const;
+
   void Generate() override;
 
   void GenerateSolution(cmLocalGenerator const* root,
