@@ -93,10 +93,6 @@ expected prototype:
   )
 #]=======================================================================]
 
-#
-
-get_filename_component(__check_proto_def_dir "${CMAKE_CURRENT_LIST_FILE}" PATH)
-
 include_guard(GLOBAL)
 
 function(check_prototype_definition _FUNCTION _PROTOTYPE _RETURN _HEADER _VARIABLE)
@@ -143,7 +139,7 @@ function(check_prototype_definition _FUNCTION _PROTOTYPE _RETURN _HEADER _VARIAB
     set(CHECK_PROTOTYPE_DEFINITION_PROTO ${_PROTOTYPE})
     set(CHECK_PROTOTYPE_DEFINITION_RETURN ${_RETURN})
 
-    file(READ ${__check_proto_def_dir}/CheckPrototypeDefinition.c.in _SOURCE)
+    file(READ ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/CheckPrototypeDefinition.c.in _SOURCE)
     string(CONFIGURE "${_SOURCE}" _SOURCE @ONLY)
 
     try_compile(${_VARIABLE}
