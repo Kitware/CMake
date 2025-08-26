@@ -170,8 +170,6 @@ the result may be::
 include(CheckIncludeFile)
 include(CheckIncludeFileCXX)
 
-get_filename_component(__check_type_size_dir "${CMAKE_CURRENT_LIST_FILE}" PATH)
-
 include_guard(GLOBAL)
 
 block(SCOPE_FOR POLICIES)
@@ -232,7 +230,7 @@ function(__check_type_size_impl type var map builtin language)
 
   # Perform the check.
   set(bin ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CheckTypeSize/${var}.bin)
-  file(READ ${__check_type_size_dir}/CheckTypeSize.c.in src_content)
+  file(READ ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/CheckTypeSize.c.in src_content)
   string(CONFIGURE "${src_content}" src_content @ONLY)
   try_compile(HAVE_${var} SOURCE_FROM_VAR "${src}" src_content
     COMPILE_DEFINITIONS ${CMAKE_REQUIRED_DEFINITIONS}
@@ -280,7 +278,7 @@ function(__check_type_size_impl type var map builtin language)
 
     # Update the architecture-to-size map.
     if(mismatch AND keys)
-      configure_file(${__check_type_size_dir}/CheckTypeSizeMap.cmake.in ${map} @ONLY)
+      configure_file(${CMAKE_CURRENT_FUNCTION_LIST_DIR}/CheckTypeSizeMap.cmake.in ${map} @ONLY)
       set(${var} 0)
     else()
       file(REMOVE ${map})
