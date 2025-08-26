@@ -584,10 +584,8 @@ endif()
 # This macro helps us find the location of helper files we will need the full path to
 macro(CUDA_FIND_HELPER_FILE _name _extension)
   set(_full_name "${_name}.${_extension}")
-  # CMAKE_CURRENT_LIST_FILE contains the full path to the file currently being
-  # processed.  Using this variable, we can pull out the current path, and
+  # Using CMAKE_CURRENT_LIST_DIR, we can pull out the current path, and
   # provide a way to get access to the other files we need local to here.
-  get_filename_component(CMAKE_CURRENT_LIST_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
   set(CUDA_${_name} "${CMAKE_CURRENT_LIST_DIR}/FindCUDA/${_full_name}")
   if(NOT EXISTS "${CUDA_${_name}}")
     set(error_message "${_full_name} not found in ${CMAKE_CURRENT_LIST_DIR}/FindCUDA")
