@@ -1475,12 +1475,16 @@ endif()
 
 
 # handle components
+cmake_policy (GET CMP0201 _${_PYTHON_PREFIX}_NUMPY_POLICY)
 if (NOT ${_PYTHON_BASE}_FIND_COMPONENTS)
   set (${_PYTHON_BASE}_FIND_COMPONENTS Interpreter)
   set (${_PYTHON_BASE}_FIND_REQUIRED_Interpreter TRUE)
 endif()
 if ("NumPy" IN_LIST ${_PYTHON_BASE}_FIND_COMPONENTS)
-  list (APPEND ${_PYTHON_BASE}_FIND_COMPONENTS "Interpreter" "Development.Module")
+  list (APPEND ${_PYTHON_BASE}_FIND_COMPONENTS "Interpreter")
+  if(NOT _${_PYTHON_PREFIX}_NUMPY_POLICY STREQUAL "NEW")
+    list (APPEND ${_PYTHON_BASE}_FIND_COMPONENTS "Development.Module")
+  endif()
 endif()
 if ("Development" IN_LIST ${_PYTHON_BASE}_FIND_COMPONENTS)
   list (APPEND ${_PYTHON_BASE}_FIND_COMPONENTS "Development.Module" "Development.Embed")
@@ -4050,7 +4054,12 @@ if ("NumPy" IN_LIST ${_PYTHON_BASE}_FIND_COMPONENTS AND ${_PYTHON_PREFIX}_Interp
     set (_${_PYTHON_PREFIX}_NumPy_INCLUDE_DIR "${${_PYTHON_PREFIX}_NumPy_INCLUDE_DIR}" CACHE INTERNAL "")
   elseif (DEFINED _${_PYTHON_PREFIX}_NumPy_INCLUDE_DIR)
     # compute numpy signature. Depends on interpreter and development signatures
-    string (MD5 __${_PYTHON_PREFIX}_NUMPY_SIGNATURE "${_${_PYTHON_PREFIX}_INTERPRETER_SIGNATURE}:${_${_PYTHON_PREFIX}_DEVELOPMENT_MODULE_SIGNATURE}:${_${_PYTHON_PREFIX}_NumPy_INCLUDE_DIR}")
+    set(__${_PYTHON_PREFIX}_NUMPY_SIGNATURE "${_${_PYTHON_PREFIX}_INTERPRETER_SIGNATURE}")
+    if(NOT _${_PYTHON_PREFIX}_NUMPY_POLICY STREQUAL "NEW")
+      string(APPEND __${_PYTHON_PREFIX}_NUMPY_SIGNATURE ":${_${_PYTHON_PREFIX}_DEVELOPMENT_MODULE_SIGNATURE}")
+    endif()
+    string(APPEND __${_PYTHON_PREFIX}_NUMPY_SIGNATURE ":${_${_PYTHON_PREFIX}_NumPy_INCLUDE_DIR}")
+    string (MD5 __${_PYTHON_PREFIX}_NUMPY_SIGNATURE "${__${_PYTHON_PREFIX}_NUMPY_SIGNATURE}")
     if (NOT __${_PYTHON_PREFIX}_NUMPY_SIGNATURE STREQUAL _${_PYTHON_PREFIX}_NUMPY_SIGNATURE
         OR NOT EXISTS "${_${_PYTHON_PREFIX}_NumPy_INCLUDE_DIR}")
       unset (_${_PYTHON_PREFIX}_NumPy_INCLUDE_DIR CACHE)
@@ -4101,8 +4110,12 @@ if ("NumPy" IN_LIST ${_PYTHON_BASE}_FIND_COMPONENTS AND ${_PYTHON_PREFIX}_Interp
       unset (${_PYTHON_PREFIX}_NumPy_VERSION)
     endif()
 
-    # final step: set NumPy founded only if Development.Module component is founded as well
-    set(${_PYTHON_PREFIX}_NumPy_FOUND ${${_PYTHON_PREFIX}_Development.Module_FOUND})
+    if(NOT _${_PYTHON_PREFIX}_NUMPY_POLICY STREQUAL "NEW")
+      # final step: set NumPy founded only if Development.Module component is founded as well
+      set(${_PYTHON_PREFIX}_NumPy_FOUND ${${_PYTHON_PREFIX}_Development.Module_FOUND})
+    else()
+      set (${_PYTHON_PREFIX}_NumPy_FOUND TRUE)
+    endif()
   else()
     set (${_PYTHON_PREFIX}_NumPy_FOUND FALSE)
   endif()
@@ -4117,7 +4130,12 @@ if ("NumPy" IN_LIST ${_PYTHON_BASE}_FIND_COMPONENTS AND ${_PYTHON_PREFIX}_Interp
     unset (_${_PYTHON_PREFIX}_NumPy_REASON_FAILURE CACHE)
 
     # compute and save numpy signature
-    string (MD5 __${_PYTHON_PREFIX}_NUMPY_SIGNATURE "${_${_PYTHON_PREFIX}_INTERPRETER_SIGNATURE}:${_${_PYTHON_PREFIX}_DEVELOPMENT_MODULE_SIGNATURE}:${${_PYTHON_PREFIX}_NumPyINCLUDE_DIR}")
+    set (__${_PYTHON_PREFIX}_NUMPY_SIGNATURE "${_${_PYTHON_PREFIX}_INTERPRETER_SIGNATURE}")
+    if(NOT _${_PYTHON_PREFIX}_NUMPY_POLICY STREQUAL "NEW")
+      string (APPEND __${_PYTHON_PREFIX}_NUMPY_SIGNATURE ":${_${_PYTHON_PREFIX}_DEVELOPMENT_MODULE_SIGNATURE}")
+    endif()
+    string (APPEND __${_PYTHON_PREFIX}_NUMPY_SIGNATURE ":${${_PYTHON_PREFIX}_NumPyINCLUDE_DIR}")
+    string (MD5 __${_PYTHON_PREFIX}_NUMPY_SIGNATURE "${__${_PYTHON_PREFIX}_NUMPY_SIGNATURE}")
     set (_${_PYTHON_PREFIX}_NUMPY_SIGNATURE "${__${_PYTHON_PREFIX}_NUMPY_SIGNATURE}" CACHE INTERNAL "")
   else()
     unset (_${_PYTHON_PREFIX}_NUMPY_SIGNATURE CACHE)
@@ -4454,11 +4472,14 @@ if(_${_PYTHON_PREFIX}_CMAKE_ROLE STREQUAL "PROJECT")
   endif()
 
   if ("NumPy" IN_LIST ${_PYTHON_BASE}_FIND_COMPONENTS AND ${_PYTHON_PREFIX}_NumPy_FOUND
-      AND NOT TARGET ${_PYTHON_PREFIX}::NumPy AND TARGET ${_PYTHON_PREFIX}::Module)
+      AND NOT TARGET ${_PYTHON_PREFIX}::NumPy AND
+      (_${_PYTHON_PREFIX}_NUMPY_POLICY STREQUAL "NEW" OR TARGET ${_PYTHON_PREFIX}::Module))
     add_library (${_PYTHON_PREFIX}::NumPy INTERFACE IMPORTED)
     set_property (TARGET ${_PYTHON_PREFIX}::NumPy
                   PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${${_PYTHON_PREFIX}_NumPy_INCLUDE_DIRS}")
-    target_link_libraries (${_PYTHON_PREFIX}::NumPy INTERFACE ${_PYTHON_PREFIX}::Module)
+    if(NOT _${_PYTHON_PREFIX}_NUMPY_POLICY STREQUAL "NEW")
+      target_link_libraries (${_PYTHON_PREFIX}::NumPy INTERFACE ${_PYTHON_PREFIX}::Module)
+    endif()
   endif()
 endif()
 

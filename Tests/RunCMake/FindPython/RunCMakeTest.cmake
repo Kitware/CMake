@@ -350,14 +350,23 @@ if(CMake_TEST_FindPython_Various)
   endif()
 
   if(CMake_TEST_FindPython2_NumPy OR CMake_TEST_FindPython3_NumPy)
-    run_python(NumPy ACTION RUN
-                     OPTIONS -DCMake_TEST_FindPython2_NumPy=${CMake_TEST_FindPython2_NumPy}
-                             -DCMake_TEST_FindPython3_NumPy=${CMake_TEST_FindPython3_NumPy})
-    run_python(NumPyOnly ACTION RUN
-                         OPTIONS -DCMake_TEST_FindPython2_NumPy=${CMake_TEST_FindPython2_NumPy}
-                                 -DCMake_TEST_FindPython3_NumPy=${CMake_TEST_FindPython3_NumPy})
-    if(CMake_TEST_FindPython3_NumPy)
-      custom_failure_message_check("NumPy" "Interpreter:Development:NumPy" -DPython3_NumPy_INCLUDE_DIR=/not/found/numpy/include)
+    run_python(NumPy-CMP0201-OLD ACTION RUN
+                                 OPTIONS -DCMake_TEST_FindPython2_NumPy=${CMake_TEST_FindPython2_NumPy}
+                                         -DCMake_TEST_FindPython3_NumPy=${CMake_TEST_FindPython3_NumPy})
+    run_python(NumPy-CMP0201-NEW ACTION RUN
+                                 OPTIONS -DCMake_TEST_FindPython2_NumPy=${CMake_TEST_FindPython2_NumPy}
+                                         -DCMake_TEST_FindPython3_NumPy=${CMake_TEST_FindPython3_NumPy})
+    run_python(NumPyOnly-CMP0201-OLD ACTION RUN
+                                     OPTIONS -DCMake_TEST_FindPython2_NumPy=${CMake_TEST_FindPython2_NumPy}
+                                             -DCMake_TEST_FindPython3_NumPy=${CMake_TEST_FindPython3_NumPy})
+     run_python(NumPyOnly-CMP0201-NEW ACTION RUN
+                                      OPTIONS -DCMake_TEST_FindPython2_NumPy=${CMake_TEST_FindPython2_NumPy}
+                                              -DCMake_TEST_FindPython3_NumPy=${CMake_TEST_FindPython3_NumPy})
+   if(CMake_TEST_FindPython3_NumPy)
+     if(CMake_TEST_FindPython3_SABIModule)
+       run_python(NumPySABIModule ACTION RUN)
+     endif()
+     custom_failure_message_check("NumPy" "Interpreter:Development:NumPy" -DPython3_NumPy_INCLUDE_DIR=/not/found/numpy/include)
     endif()
   endif()
 

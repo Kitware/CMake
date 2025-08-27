@@ -35,10 +35,14 @@ The following components are supported:
     * ``Development.Embed``: search for artifacts for Python 2 embedding
       developments.
 
-* ``NumPy``: search for NumPy include directories.
-
 .. versionadded:: 3.14
-  Added the ``NumPy`` component.
+
+  * ``NumPy``: search for NumPy include directories. Specifying this component
+    imply also the components ``Interpreter`` and ``Development.Module``.
+
+  .. versionchanged:: 4.2
+    The component ``Development.Module`` is no longer implied when the policy
+    :policy:`CMP0201` is set to ``NEW``.
 
 If no ``COMPONENTS`` are specified, ``Interpreter`` is assumed.
 
@@ -125,6 +129,11 @@ This module provides the following :ref:`Imported Targets`:
   .. versionadded:: 3.14
 
   NumPy library for Python 2. Target defined if component ``NumPy`` is found.
+  Moreover, this target has the ``Python2::Module`` target as dependency.
+
+  .. versionchanged:: 4.2
+    This target does not have anymore the ``Python2::Module`` target as
+    dependency when the policy :policy:`CMP0201` is set to ``NEW``.
 
 Result Variables
 ^^^^^^^^^^^^^^^^
