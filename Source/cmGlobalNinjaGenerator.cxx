@@ -714,8 +714,9 @@ void cmGlobalNinjaGenerator::CleanMetaData()
     auto output_it = outputs.begin();
     size_t static_arg_size = ninja_tool_arg_size + this->NinjaCommand.size() +
       this->GetCMakeInstance()->GetHomeOutputDirectory().size();
-    // The Windows command-line length limit is 32768.  Leave plenty.
-    constexpr size_t maximum_arg_size = 30000;
+    // The Windows command-line length limit is 32768, but if `ninja` is
+    // wrapped by a `.bat` file, the limit is 8192.  Leave plenty.
+    constexpr size_t maximum_arg_size = 8000;
     while (output_it != outputs.end()) {
       size_t total_arg_size = static_arg_size;
       std::vector<char const*> args;
