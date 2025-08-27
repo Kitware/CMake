@@ -210,6 +210,39 @@ void cmInstrumentation::WriteJSONQuery(
     cmStrCat("query-", this->writtenJsonQueries++, ".json"));
 }
 
+void cmInstrumentation::AddCustomContent(std::string const& name,
+                                         Json::Value const& contents)
+{
+  this->customContent[name] = contents;
+}
+
+void cmInstrumentation::WriteCustomContent()
+{
+  if (!this->customContent.isNull()) {
+    this->WriteInstrumentationJson(
+      this->customContent, "data/content",
+      cmStrCat("configure-", this->ComputeSuffixTime(), ".json"));
+  }
+}
+
+std::string cmInstrumentation::GetLatestContentFile()
+{
+  std::string contentFile;
+  if (cmSystemTools::FileExists(
+        cmStrCat(this->timingDirv1, "/data/content"))) {
+    cmsys::Directory d;
+    if (d.Load(cmStrCat(this->timingDirv1, "/data/content"))) {
+      for (unsigned int i = 0; i < d.GetNumberOfFiles(); i++) {
+        std::string fname = d.GetFileName(i);
+        if (fname != "." && fname != ".." && fname > contentFile) {
+          contentFile = fname;
+        }
+      }
+    }
+  }
+  return contentFile;
+}
+
 void cmInstrumentation::ClearGeneratedQueries()
 {
   std::string dir = cmStrCat(this->timingDirv1, "/query/generated");
@@ -262,10 +295,8 @@ int cmInstrumentation::CollectTimingData(cmInstrumentationQuery::Hook hook)
     for (unsigned int i = 0; i < d.GetNumberOfFiles(); i++) {
       std::string fpath = d.GetFilePath(i);
       std::string fname = d.GetFile(i);
-      if (fname.rfind('.', 0) == 0) {
-        continue;
-      }
-      if (fname == file_name) {
+      if (fname.rfind('.', 0) == 0 || fname == file_name ||
+          d.FileIsDirectory(i)) {
         continue;
       }
       if (fname.rfind("index-", 0) == 0) {
@@ -324,6 +355,26 @@ int cmInstrumentation::CollectTimingData(cmInstrumentationQuery::Hook hook)
     cmSystemTools::RemoveFile(cmStrCat(directory, '/', f.asString()));
   }
   cmSystemTools::RemoveFile(index_path);
+
+  // Delete old content files
+  std::string const contentDir = cmStrCat(this->timingDirv1, "/data/content");
+  if (cmSystemTools::FileExists(contentDir)) {
+    std::string latestContent = this->GetLatestContentFile();
+    if (d.Load(contentDir)) {
+      for (unsigned int i = 0; i < d.GetNumberOfFiles(); i++) {
+        std::string fname = d.GetFileName(i);
+        std::string fpath = d.GetFilePath(i);
+        if (fname != "." && fname != ".." && fname != latestContent) {
+          int compare;
+          cmSystemTools::FileTimeCompare(
+            cmStrCat(contentDir, '/', latestContent), fpath, &compare);
+          if (compare == 1) {
+            cmSystemTools::RemoveFile(fpath);
+          }
+        }
+      }
+    }
+  }
 
   return 0;
 }
@@ -499,6 +550,11 @@ int cmInstrumentation::InstrumentCommand(
   int ret = callback();
   root["result"] = ret;
 
+  // Write configure content if command was configure
+  if (command_type == "configure") {
+    this->WriteCustomContent();
+  }
+
   // Exit early if configure didn't generate a query
   if (reloadQueriesAfterCommand == LoadQueriesAfter::Yes) {
     this->LoadQueries();
@@ -562,6 +618,12 @@ int cmInstrumentation::InstrumentCommand(
   }
   root["role"] = command_type;
   root["workingDir"] = cmSystemTools::GetLogicalWorkingDirectory();
+
+  // Add custom configure content
+  std::string contentFile = this->GetLatestContentFile();
+  if (!contentFile.empty()) {
+    root["configureContent"] = cmStrCat("content/", contentFile);
+  }
 
   // Write Json
   cmsys::SystemInformation& info = this->GetSystemInformation();

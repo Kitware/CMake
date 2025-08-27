@@ -158,6 +158,10 @@ subdirectories:
   files, they should never be removed by other processes. Data collected here
   remains until after `Indexing`_ occurs and all `Callbacks`_ are executed.
 
+``data/content/``
+  A subset of the collected data, containing any
+  :ref:`cmake_instrumentation Configure Content` files.
+
 ``cdash/``
   Holds temporary files used internally to generate XML content to be submitted
   to CDash.
@@ -286,6 +290,8 @@ the `v1 Snippet File`_ and `v1 Index File`_. When using the `API v1`_, these
 files live in ``<build>/.cmake/instrumentation/v1/data/`` under the project
 build tree.
 
+.. _`cmake-instrumentation v1 Snippet File`:
+
 v1 Snippet File
 ---------------
 
@@ -394,6 +400,11 @@ and contain the following data:
     ``afterCPULoadAverage``
       The Average CPU Load at ``timeStop``.
 
+  ``configureContent``
+    The path to a :ref:`cmake_instrumentation Configure Content` file located under ``data``,
+    which may contain information about the CMake configure step corresponding
+    to this data.
+
 Example:
 
 .. code-block:: json
@@ -417,7 +428,8 @@ Example:
       "beforeHostMemoryUsed" : 6635832.0
     },
     "timeStart" : 1737053448177,
-    "duration" : 31
+    "duration" : 31,
+    "configureContent" : "content/configure-2025-07-11T12-46-32-0572.json"
   }
 
 v1 Index File
