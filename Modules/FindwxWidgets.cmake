@@ -120,10 +120,6 @@ This module defines the following variables:
   Include directories and compiler flags for Unix-like systems, empty on
   Windows. Essentially the output of ``wx-config --cxxflags``.
 
-``wxWidgets_USE_FILE``
-  Name of the CMake module for using wxWidgets in current directory.  For
-  usage details refer to the :module:`UsewxWidgets` module.
-
 Hints
 ^^^^^
 
@@ -203,6 +199,25 @@ The following variables are provided for backward compatibility:
 
   The version of the wxWidgets found.
 
+``wxWidgets_USE_FILE``
+  .. deprecated:: 4.2
+    Instead of using this variable, include the :module:`UsewxWidgets`
+    module directly:
+
+    .. code-block:: cmake
+
+      include(UsewxWidgets)
+
+  The path to the :module:`UsewxWidgets` module for using wxWidgets in the
+  current directory.  For example:
+
+  .. code-block:: cmake
+
+    find_package(wxWidgets)
+    if(wxWidgets_FOUND)
+      include(${wxWidgets_USE_FILE})
+    endif()
+
 Examples
 ^^^^^^^^
 
@@ -258,7 +273,7 @@ imported target wasn't yet available:
   find_package(wxWidgets COMPONENTS gl core base OPTIONAL_COMPONENTS net)
 
   if(wxWidgets_FOUND)
-    include(${wxWidgets_USE_FILE})
+    include(UsewxWidgets)
     # and for each of the project dependent executable/library targets:
     target_link_libraries(example ${wxWidgets_LIBRARIES})
   endif()
@@ -340,16 +355,13 @@ DBG_MSG("wxWidgets_FIND_COMPONENTS : ${wxWidgets_FIND_COMPONENTS}")
 # Add the convenience use file if available.
 #
 # Get dir of this file which may reside in:
-# - CMAKE_MAKE_ROOT/Modules on CMake installation
-# - CMAKE_MODULE_PATH if user prefers his own specialized version
-set(wxWidgets_USE_FILE "")
-get_filename_component(
-  wxWidgets_CURRENT_LIST_DIR ${CMAKE_CURRENT_LIST_FILE} PATH)
+# - CMAKE_ROOT/Modules on CMake installation
+# - CMAKE_MODULE_PATH if the user prefers their own specialized version
+set(wxWidgets_CURRENT_LIST_DIR "${CMAKE_CURRENT_LIST_DIR}")
 # Prefer an existing customized version, but the user might override
 # the FindwxWidgets module and not the UsewxWidgets one.
 if(EXISTS "${wxWidgets_CURRENT_LIST_DIR}/UsewxWidgets.cmake")
-  set(wxWidgets_USE_FILE
-    "${wxWidgets_CURRENT_LIST_DIR}/UsewxWidgets.cmake")
+  set(wxWidgets_USE_FILE "${wxWidgets_CURRENT_LIST_DIR}/UsewxWidgets.cmake")
 else()
   set(wxWidgets_USE_FILE UsewxWidgets)
 endif()
@@ -1130,7 +1142,6 @@ DBG_MSG("wxWidgets_INCLUDE_DIRS    : ${wxWidgets_INCLUDE_DIRS}")
 DBG_MSG("wxWidgets_LIBRARY_DIRS    : ${wxWidgets_LIBRARY_DIRS}")
 DBG_MSG("wxWidgets_LIBRARIES       : ${wxWidgets_LIBRARIES}")
 DBG_MSG("wxWidgets_CXX_FLAGS       : ${wxWidgets_CXX_FLAGS}")
-DBG_MSG("wxWidgets_USE_FILE        : ${wxWidgets_USE_FILE}")
 
 #=====================================================================
 #=====================================================================
