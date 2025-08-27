@@ -4,7 +4,15 @@
   "cps_path": "@prefix@/cps",
   "configurations": [ "Default" ],
   "components": {
-    "Target": {
+    "Target1": {
+      "type": "interface",
+      "configurations": {
+        "Test": {
+          "includes": [ "@prefix@/include" ]
+        }
+      }
+    },
+    "Target2": {
       "type": "interface",
       "configurations": {
         "Test": {

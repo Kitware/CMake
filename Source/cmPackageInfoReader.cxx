@@ -2,11 +2,13 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmPackageInfoReader.h"
 
+#include <algorithm>
 #include <initializer_list>
 #include <limits>
 #include <unordered_map>
 #include <utility>
 
+#include <cmext/algorithm>
 #include <cmext/string_view>
 
 #include <cm3p/json/reader.h>
@@ -17,12 +19,14 @@
 #include "cmsys/RegularExpression.hxx"
 
 #include "cmExecutionStatus.h"
+#include "cmList.h"
 #include "cmListFileCache.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
+#include "cmValue.h"
 
 namespace {
 
@@ -572,6 +576,49 @@ std::string cmPackageInfoReader::ResolvePath(std::string path) const
   return path;
 }
 
+void cmPackageInfoReader::AddTargetConfiguration(
+  cmTarget* target, cm::string_view configuration) const
+{
+  static std::string const icProp = "IMPORTED_CONFIGURATIONS";
+
+  std::string const& configUpper = cmSystemTools::UpperCase(configuration);
+
+  // Get existing list of imported configurations.
+  cmList configs;
+  if (cmValue v = target->GetProperty(icProp)) {
+    configs.assign(cmSystemTools::UpperCase(*v));
+  } else {
+    // If the existing list is empty, just add the new one and return.
+    target->SetProperty(icProp, configUpper);
+    return;
+  }
+
+  if (cm::contains(configs, configUpper)) {
+    // If the configuration is already listed, we don't need to do anything.
+    return;
+  }
+
+  // Add the new configuration.
+  configs.append(configUpper);
+
+  // Rebuild the configuration list by extracting any configuration in the
+  // default configurations and reinserting it at the beginning of the list
+  // according to the order of the default configurations.
+  std::vector<std::string> newConfigs;
+  for (std::string const& c : this->DefaultConfigurations) {
+    auto ci = std::find(configs.begin(), configs.end(), c);
+    if (ci != configs.end()) {
+      newConfigs.emplace_back(std::move(*ci));
+      configs.erase(ci);
+    }
+  }
+  for (std::string& c : configs) {
+    newConfigs.emplace_back(std::move(c));
+  }
+
+  target->SetProperty("IMPORTED_CONFIGURATIONS", cmJoin(newConfigs, ";"_s));
+}
+
 void cmPackageInfoReader::SetImportProperty(cmTarget* target,
                                             cm::string_view property,
                                             cm::string_view configuration,
@@ -607,9 +654,7 @@ void cmPackageInfoReader::SetTargetProperties(
 {
   // Add configuration (if applicable).
   if (!configuration.empty()) {
-    target->AppendProperty("IMPORTED_CONFIGURATIONS",
-                           cmSystemTools::UpperCase(configuration),
-                           makefile->GetBacktrace());
+    this->AddTargetConfiguration(target, configuration);
   }
 
   // Add compile and link features.
@@ -693,12 +738,6 @@ cmTarget* cmPackageInfoReader::AddLibraryComponent(
   // Create the imported target.
   cmTarget* const target = makefile->AddImportedTarget(name, type, false);
   target->SetOrigin(cmTarget::Origin::Cps);
-
-  // Set default configurations.
-  if (!this->DefaultConfigurations.empty()) {
-    target->SetProperty("IMPORTED_CONFIGURATIONS",
-                        cmJoin(this->DefaultConfigurations, ";"_s));
-  }
 
   // Set target properties.
   this->SetTargetProperties(makefile, target, data, package, {});
