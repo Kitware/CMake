@@ -880,7 +880,7 @@ if (CMake_TEST_Qt4 AND Qt4_FOUND)
 endif()
 
 find_package(PkgConfig QUIET)
-if(PKG_CONFIG_FOUND)
+if(PkgConfig_FOUND)
   add_RunCMake_test(FindPkgConfig)
 endif()
 

@@ -285,7 +285,7 @@ endfunction()
 
 if (UNIX)
   find_package(PkgConfig QUIET)
-  if(PKG_CONFIG_FOUND)
+  if(PkgConfig_FOUND)
     pkg_check_modules(_OPENSSL QUIET openssl)
   endif()
 endif ()

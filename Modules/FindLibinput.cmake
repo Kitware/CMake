@@ -57,7 +57,7 @@ Finding the libinput library and linking it to a project target:
 # Use pkg-config to get the directories and then use these values
 # in the FIND_PATH() and FIND_LIBRARY() calls
 find_package(PkgConfig QUIET)
-if(PKG_CONFIG_FOUND)
+if(PkgConfig_FOUND)
   pkg_check_modules(PKG_Libinput QUIET libinput)
 endif()
 

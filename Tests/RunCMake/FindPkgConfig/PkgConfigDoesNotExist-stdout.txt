@@ -2,5 +2,6 @@
     Reason given by package: The command
       "pkg-config-does-not-exist" --version
     failed with output.*
+-- PkgConfig_FOUND='FALSE'
 -- PKG_CONFIG_FOUND='FALSE'
 -- PKG_CONFIG_EXECUTABLE=''

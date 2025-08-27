@@ -101,7 +101,7 @@ if (NOT WIN32)
   # in the find_path() and find_library() calls
   # also fills in GNUTLS_DEFINITIONS, although that isn't normally useful
   find_package(PkgConfig QUIET)
-  if(PKG_CONFIG_FOUND)
+  if(PkgConfig_FOUND)
     pkg_check_modules(PC_GNUTLS QUIET gnutls)
   endif()
   set(GNUTLS_DEFINITIONS ${PC_GNUTLS_CFLAGS_OTHER})

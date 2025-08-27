@@ -151,7 +151,7 @@ find_package(PkgConfig QUIET)
 function(FIND_IMAGEMAGICK_API component header)
   set(ImageMagick_${component}_FOUND FALSE PARENT_SCOPE)
 
-  if(PKG_CONFIG_FOUND)
+  if(PkgConfig_FOUND)
     pkg_check_modules(PC_${component} QUIET ${component})
   endif()
 
