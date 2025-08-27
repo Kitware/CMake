@@ -1319,12 +1319,10 @@ inline std::vector<std::string>& operator+=(std::vector<std::string>& l,
   return l;
 }
 
-namespace std {
 inline void swap(cmList& lhs, cmList& rhs) noexcept
 {
   lhs.swap(rhs);
 }
-} // namespace std
 
 namespace cm {
 inline void erase(cmList& list, std::string const& value)
