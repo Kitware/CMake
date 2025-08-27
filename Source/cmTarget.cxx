@@ -3416,8 +3416,7 @@ cmValue cmTarget::GetLocation(std::string const& base,
 bool cmTarget::GetLocation(std::string const& config, cmValue& loc,
                            cmValue& imp, std::string& suffix) const
 {
-  suffix = (config.empty() ? std::string{}
-                           : cmStrCat('_', cmSystemTools::UpperCase(config)));
+  suffix = (config.empty() ? std::string{} : cmStrCat('_', config));
 
   // There may be only IMPORTED_IMPLIB for a shared library or an executable
   // with exports.
@@ -3446,23 +3445,24 @@ bool cmTarget::GetLocation(std::string const& config, cmValue& loc,
   return loc || imp || (this->GetType() == cmStateEnums::INTERFACE_LIBRARY);
 }
 
-bool cmTarget::GetMappedConfigNew(std::string const& desiredConfig,
-                                  cmValue& loc, cmValue& imp,
-                                  std::string& suffix) const
+bool cmTarget::GetMappedConfigNew(std::string desiredConfig, cmValue& loc,
+                                  cmValue& imp, std::string& suffix) const
 {
+  desiredConfig = cmSystemTools::UpperCase(desiredConfig);
+
   // Get configuration mapping, if present.
   cmList mappedConfigs;
   if (!desiredConfig.empty()) {
-    std::string mapProp = cmStrCat("MAP_IMPORTED_CONFIG_",
-                                   cmSystemTools::UpperCase(desiredConfig));
+    std::string mapProp = cmStrCat("MAP_IMPORTED_CONFIG_", desiredConfig);
     if (cmValue mapValue = this->GetProperty(mapProp)) {
-      mappedConfigs.assign(*mapValue, cmList::EmptyElements::Yes);
+      mappedConfigs.assign(cmSystemTools::UpperCase(*mapValue),
+                           cmList::EmptyElements::Yes);
     }
   }
 
   // Get imported configurations, if specified.
   if (cmValue iconfigs = this->GetProperty("IMPORTED_CONFIGURATIONS")) {
-    cmList const availableConfigs{ iconfigs };
+    cmList const availableConfigs{ cmSystemTools::UpperCase(*iconfigs) };
 
     if (!mappedConfigs.empty()) {
       for (auto const& c : mappedConfigs) {

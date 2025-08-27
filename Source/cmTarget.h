@@ -352,7 +352,7 @@ private:
 
   bool GetMappedConfigOld(std::string const& desired_config, cmValue& loc,
                           cmValue& imp, std::string& suffix) const;
-  bool GetMappedConfigNew(std::string const& desiredConfig, cmValue& loc,
+  bool GetMappedConfigNew(std::string desiredConfig, cmValue& loc,
                           cmValue& imp, std::string& suffix) const;
   cmValue GetLocation(std::string const& base,
                       std::string const& suffix) const;
