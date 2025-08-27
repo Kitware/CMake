@@ -104,7 +104,7 @@ foreach(
     LIBLZMA LIBXML2 LIBXSLT LTTNGUST
     PERL PKG_CONFIG PNG PostgreSQL
     SDL
-    TIFF
+    TCLSH TIFF
     wxWidgets
     ZLIB
 )
@@ -127,7 +127,7 @@ foreach(
     Perl PerlLibs PkgConfig PNG PostgreSQL Protobuf
     Ruby RUBY
     SDL SWIG
-    TIFF
+    Tclsh TIFF
     wxWidgets
     ZLIB
 )

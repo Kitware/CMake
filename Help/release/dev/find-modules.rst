@@ -103,6 +103,9 @@ Find Modules
   result variable.  The ``Subversion_VERSION_SVN`` result variable is
   deprecated.
 
+* The :module:`FindTclsh` module now provides a ``Tclsh_VERSION`` result
+  variable.  The ``TCLSH_VERSION_STRING`` result variable is deprecated.
+
 * The :module:`FindTIFF` module now provides a ``TIFF_VERSION`` result
   variable.  The ``TIFF_VERSION_STRING`` result variable is deprecated.
 
