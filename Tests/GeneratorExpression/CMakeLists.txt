@@ -405,7 +405,7 @@ add_executable(srcgenex_includes_basic "${CMAKE_CURRENT_BINARY_DIR}/srcgenex_inc
 # first include directory is useless but ensure list aspect is tested
 set_property(SOURCE "${CMAKE_CURRENT_BINARY_DIR}/srcgenex_includes_basic.c"
              PROPERTY INCLUDE_DIRECTORIES "${CMAKE_CURRENT_BINARY_DIR}" "${CMAKE_CURRENT_BINARY_DIR}/sf_includes_basic")
-if (CMAKE_GENERATOR MATCHES "Makefiles|Ninja|Watcom WMake")
+if (CMAKE_GENERATOR MATCHES "Makefiles|Ninja|Watcom WMake|FASTBuild")
   add_executable(srcgenex_includes_COMPILE_LANGUAGE "${CMAKE_CURRENT_BINARY_DIR}/srcgenex_includes_COMPILE_LANGUAGE.c")
   # first include directory is useless but ensure list aspect is tested
   set_property(SOURCE "${CMAKE_CURRENT_BINARY_DIR}/srcgenex_includes_COMPILE_LANGUAGE.c"

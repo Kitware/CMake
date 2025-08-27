@@ -1,4 +1,4 @@
-if(NOT CMAKE_GENERATOR MATCHES "Xcode|Ninja")
+if(NOT CMAKE_GENERATOR MATCHES "Xcode|Ninja|FASTBuild")
   set(CMAKE_Swift_COMPILER "")
   return()
 endif()

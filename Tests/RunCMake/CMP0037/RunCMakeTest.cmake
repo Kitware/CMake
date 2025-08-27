@@ -11,6 +11,6 @@ run_cmake(NEW-cond-package)
 
 run_cmake(alias-test-NEW)
 
-if(RunCMake_GENERATOR MATCHES "Make|Ninja")
+if(RunCMake_GENERATOR MATCHES "Make|Ninja|FASTBuild")
   run_cmake(NEW-cond-package_source)
 endif()

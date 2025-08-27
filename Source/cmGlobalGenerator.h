@@ -564,6 +564,8 @@ public:
 
   virtual bool IsNinja() const { return false; }
 
+  virtual bool IsFastbuild() const { return false; }
+
   /** Return true if we know the exact location of object files for the given
      cmTarget. If false, store the reason in the given string. This is
      meaningful only after EnableLanguage has been called.  */

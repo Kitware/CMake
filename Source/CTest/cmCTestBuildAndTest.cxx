@@ -57,7 +57,8 @@ bool cmCTestBuildAndTest::RunCMake(cmake* cm)
   }
   if (!this->BuildMakeProgram.empty() &&
       (this->BuildGenerator.find("Make") != std::string::npos ||
-       this->BuildGenerator.find("Ninja") != std::string::npos)) {
+       this->BuildGenerator.find("Ninja") != std::string::npos ||
+       this->BuildGenerator.find("FASTBuild") != std::string::npos)) {
     args.push_back("-DCMAKE_MAKE_PROGRAM:FILEPATH=" + this->BuildMakeProgram);
   }
 

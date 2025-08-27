@@ -9,7 +9,7 @@ function (run_cmake_AutoExport name dir)
   run_cmake(${name})
   unset(RunCMake_TEST_OPTIONS)
   # don't run this test on Watcom or Borland make as it is not supported
-  if(RunCMake_GENERATOR MATCHES "Watcom WMake|Borland Makefiles")
+  if(RunCMake_GENERATOR MATCHES "Watcom WMake|Borland Makefiles|FASTBuild")
     return()
   endif()
   if(CMAKE_CXX_COMPILER_ID STREQUAL "OrangeC")

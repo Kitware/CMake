@@ -248,6 +248,13 @@ if (CMAKE_GENERATOR MATCHES "Ninja")
         pch_pool=1)
 endif ()
 
+# FASTBuild requires that launchers actually be available
+# at configure time
+if(CMAKE_GENERATOR MATCHES FASTBuild)
+  file(TOUCH "${dir}/ccache")
+  file(CHMOD "${dir}/ccache" PERMISSIONS OWNER_READ OWNER_EXECUTE)
+endif()
+
 prepare_target_types(can_compile_sources
   EXECUTABLE SHARED STATIC MODULE OBJECT)
 

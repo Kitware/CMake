@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.10)
 project(FortranModules Fortran)
 
+if(CMAKE_GENERATOR MATCHES "FASTBuild")
+  return()
+endif()
+
 if("${CMAKE_Fortran_COMPILER_ID};${CMAKE_Fortran_SIMULATE_ID}" MATCHES "^Intel(LLVM)?;MSVC$")
   string(APPEND CMAKE_Fortran_FLAGS_DEBUG " -Z7")
   string(APPEND CMAKE_Fortran_FLAGS_RELWITHDEBINFO " -Z7")

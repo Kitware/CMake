@@ -2847,8 +2847,13 @@ void cmLocalGenerator::AddPchDependencies(cmGeneratorTarget* target)
               }
 
               // Link to the pch object file
-              std::string pchSourceObj =
-                reuseTarget->GetPchFileObject(config, lang, arch);
+              std::string pchSourceObj;
+              // Fastbuild will propagate pch.obj for us, no need to link to it
+              // explicitly.
+              if (!this->GetGlobalGenerator()->IsFastbuild()) {
+                pchSourceObj =
+                  reuseTarget->GetPchFileObject(config, lang, arch);
+              }
 
               if (target->GetType() != cmStateEnums::OBJECT_LIBRARY) {
                 std::string linkerProperty = "LINK_FLAGS_";
@@ -2970,6 +2975,11 @@ void cmLocalGenerator::CopyPchCompilePdb(
   cc->SetStdPipesUTF8(true);
   cc->AppendDepends(
     { reuseTarget->GetPchFile(config, language), copy_script });
+  // Fastbuild needs to know that this custom command actually depends on a
+  // target that produces PCH, so it can sort by dependencies correctly.
+  if (this->GetGlobalGenerator()->IsFastbuild()) {
+    cc->AppendDepends({ reuseTarget->GetName() });
+  }
 
   if (this->GetGlobalGenerator()->IsVisualStudio()) {
     cc->SetByproducts(outputs);

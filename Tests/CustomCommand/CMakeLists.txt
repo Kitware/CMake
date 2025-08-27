@@ -485,6 +485,12 @@ add_library(NormOutput "${gen_file}")
 string(APPEND gen_path "/bar")
 set(gen_file "${gen_path}/bar.cxx")
 
+# FASTBuild doesn't support directories as an output of custom commands,
+# so mark the output as SYMBOLIC to let FASTBuild know that it's not expected to appear on disk.
+if(CMAKE_GENERATOR MATCHES "FASTBuild")
+  set_property(SOURCE "${gen_path}" PROPERTY SYMBOLIC ON)
+endif()
+
 add_custom_command(
   OUTPUT "${gen_path}"
   COMMAND ${CMAKE_COMMAND} -E make_directory "${gen_path}"

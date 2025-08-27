@@ -113,7 +113,7 @@ if(BUILD_TESTING)
   # some old versions of make simply cannot handle spaces in paths
   if(MAKE_IS_GNU OR
       CMAKE_MAKE_PROGRAM MATCHES "nmake|gmake|wmake" OR
-      CMAKE_GENERATOR MATCHES "Visual Studio|Xcode|Borland|Ninja")
+      CMAKE_GENERATOR MATCHES "Visual Studio|Xcode|Borland|Ninja|FASTBuild")
     set(MAKE_SUPPORTS_SPACES 1)
   else()
     set(MAKE_SUPPORTS_SPACES 0)
@@ -786,7 +786,7 @@ if(BUILD_TESTING)
 
   # test for correct sub-project generation
   # not implemented in Xcode or Ninja
-  if(NOT CMAKE_GENERATOR MATCHES "Xcode|Ninja")
+  if(NOT CMAKE_GENERATOR MATCHES "Xcode|Ninja|FASTBuild")
     # run cmake and configure all of SubProject
     # but only build the independent executable car
     add_test(SubProject ${CMAKE_CTEST_COMMAND}
@@ -2113,8 +2113,7 @@ if(BUILD_TESTING)
 
   ADD_TEST_MACRO(CheckCompilerRelatedVariables CheckCompilerRelatedVariables)
 
-  if("${CMAKE_GENERATOR}" MATCHES "Makefile" OR
-     "${CMAKE_GENERATOR}" MATCHES "^Ninja$")
+  if("${CMAKE_GENERATOR}" MATCHES "^Ninja$|Makefile|FASTBuild")
     add_test(MakeClean ${CMAKE_CTEST_COMMAND}
       --build-and-test
       "${CMake_SOURCE_DIR}/Tests/MakeClean"
@@ -3131,7 +3130,7 @@ if(BUILD_TESTING)
         )
     endif()
 
-    if("${CMAKE_GENERATOR}" MATCHES "Makefiles" OR "${CMAKE_GENERATOR}" MATCHES "Ninja")
+    if("${CMAKE_GENERATOR}" MATCHES "Makefiles|Ninja|FASTBuild")
       configure_file("${CMake_SOURCE_DIR}/Tests/CTestTestLaunchers/test.cmake.in"
         "${CMake_BINARY_DIR}/Tests/CTestTestLaunchers/test.cmake" @ONLY ESCAPE_QUOTES)
       add_test(CTestTestLaunchers ${CMAKE_CTEST_COMMAND}
@@ -3461,7 +3460,7 @@ if(BUILD_TESTING)
     --test-command IncludeDirectories)
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/IncludeDirectories")
 
-  if(CMAKE_GENERATOR MATCHES "^((Unix|MSYS) Makefiles|Ninja)$" AND
+  if(CMAKE_GENERATOR MATCHES "^((Unix|MSYS) Makefiles|Ninja|FASTBuild)$" AND
      ((CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 4.4)
       OR (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND NOT "x${CMAKE_CXX_SIMULATE_ID}" STREQUAL "xMSVC")
       OR (CMAKE_CXX_COMPILER_ID STREQUAL "LCC")

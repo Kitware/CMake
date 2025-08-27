@@ -80,7 +80,7 @@ events:(
       variable: "COMPILE_RESULT"
       cached: true
       stdout: \|.*
-      exitCode: [1-9][0-9]*
+      exitCode: -?[1-9][0-9]*
     runResult:
       variable: "RUN_RESULT"
       cached: true

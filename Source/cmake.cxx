@@ -10,6 +10,7 @@
 #include <initializer_list>
 #include <iomanip>
 #include <iostream>
+#include <iterator>
 #include <sstream>
 #include <stdexcept>
 #include <utility>
@@ -100,6 +101,7 @@
 #    include <cmext/memory>
 
 #    include "cmGlobalBorlandMakefileGenerator.h"
+#    include "cmGlobalFastbuildGenerator.h"
 #    include "cmGlobalJOMMakefileGenerator.h"
 #    include "cmGlobalNMakeMakefileGenerator.h"
 #    include "cmGlobalVisualStudio14Generator.h"
@@ -123,6 +125,7 @@
 #elif defined(CMAKE_BOOTSTRAP_NINJA)
 #  include "cmGlobalNinjaGenerator.h"
 #endif
+#include "cmGlobalFastbuildGenerator.h"
 
 #if !defined(CMAKE_BOOTSTRAP)
 #  include "cmExtraCodeBlocksGenerator.h"
@@ -3032,6 +3035,23 @@ int cmake::Run(std::vector<std::string> const& args, bool noconfigure)
   if (!this->CheckBuildSystem()) {
     return 0;
   }
+  // After generating fbuild.bff, FastBuild sees rebuild-bff as outdated since
+  // it hasn’t built the target yet. To make it a no-op for future runs, we
+  // trigger a dummy fbuild invocation that creates this marker file and runs
+  // CMake, marking rebuild-bff as up-to-date.
+  std::string const FBuildRestatFile =
+    cmStrCat(this->GetHomeOutputDirectory(), '/', FASTBUILD_RESTAT_FILE);
+  if (cmSystemTools::FileExists(FBuildRestatFile)) {
+    cmsys::ifstream restat(FBuildRestatFile.c_str(),
+                           std::ios::in | std::ios::binary);
+    std::string const file((std::istreambuf_iterator<char>(restat)),
+                           std::istreambuf_iterator<char>());
+    // On Windows can not delete file if it's still opened.
+    restat.close();
+    cmSystemTools::Touch(file, true);
+    cmSystemTools::RemoveFile(FBuildRestatFile);
+    return 0;
+  }
 
 #ifdef CMake_ENABLE_DEBUGGER
   if (!this->StartDebuggerIfEnabled()) {
@@ -3253,6 +3273,7 @@ void cmake::AddDefaultGenerators()
   this->Generators.push_back(cmGlobalUnixMakefileGenerator3::NewFactory());
   this->Generators.push_back(cmGlobalNinjaGenerator::NewFactory());
   this->Generators.push_back(cmGlobalNinjaMultiGenerator::NewFactory());
+  this->Generators.push_back(cmGlobalFastbuildGenerator::NewFactory());
 #elif defined(CMAKE_BOOTSTRAP_NINJA)
   this->Generators.push_back(cmGlobalNinjaGenerator::NewFactory());
 #elif defined(CMAKE_BOOTSTRAP_MAKEFILES)

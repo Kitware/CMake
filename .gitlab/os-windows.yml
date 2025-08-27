@@ -189,6 +189,14 @@
         CMAKE_CI_BUILD_TYPE: Release
         CMAKE_CI_NIGHTLY_IGNORE_DEPS: "true"
 
+.windows_fastbuild:
+    extends: .windows
+
+    variables:
+        CMAKE_GENERATOR: "FASTBuild"
+        CMAKE_CI_BUILD_TYPE: Release
+        CMAKE_CI_NIGHTLY_IGNORE_DEPS: "true"
+
 .windows_vs2022_x64_nmake:
     extends:
         - .windows_nmake
@@ -212,6 +220,14 @@
 
     variables:
         CMAKE_CONFIGURATION: windows_vs2022_x64_ninja_multi
+
+.windows_vs2022_x64_fastbuild:
+    extends:
+        - .windows_fastbuild
+        - .windows_vcvarsall_vs2022_x64
+
+    variables:
+        CMAKE_CONFIGURATION: windows_vs2022_x64_fastbuild
 
 .windows_clang_ninja:
     extends:

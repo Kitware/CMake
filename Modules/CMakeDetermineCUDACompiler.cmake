@@ -4,9 +4,10 @@
 include(${CMAKE_ROOT}/Modules/CMakeDetermineCompiler.cmake)
 include(${CMAKE_ROOT}/Modules/CMakeParseImplicitLinkInfo.cmake)
 
-if(NOT ((CMAKE_GENERATOR MATCHES "Make") OR
-        (CMAKE_GENERATOR MATCHES "Ninja") OR
-        (CMAKE_GENERATOR MATCHES "Visual Studio (1|[9][0-9])")))
+if( NOT ( ("${CMAKE_GENERATOR}" MATCHES "Make") OR
+          ("${CMAKE_GENERATOR}" MATCHES "Ninja") OR
+          ("${CMAKE_GENERATOR}" MATCHES "FASTBuild") OR
+          ("${CMAKE_GENERATOR}" MATCHES "Visual Studio (1|[9][0-9])") ) )
   message(FATAL_ERROR "CUDA language not currently supported by \"${CMAKE_GENERATOR}\" generator")
 endif()
 

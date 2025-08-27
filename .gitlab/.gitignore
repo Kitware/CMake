@@ -3,6 +3,7 @@
 /bcc*
 /cmake*
 /emsdk
+/fastbuild
 /iar
 /intel
 /ispc*

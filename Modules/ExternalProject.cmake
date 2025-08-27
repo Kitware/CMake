@@ -3231,11 +3231,11 @@ function(ExternalProject_Add name)
   # rebuilds.  It is important that 'done' is not the output of any
   # custom command so that CMake does not propagate build rules to
   # other external project targets, which may cause problems during
-  # parallel builds.  However, the Ninja generator needs to see the entire
+  # parallel builds.  However, the Ninja and Fastbuild generators need to see the entire
   # dependency graph, and can cope with custom commands belonging to
-  # multiple targets, so we add the 'done' mark as an output for Ninja only.
+  # multiple targets, so we add the 'done' mark as an output for Ninja and Fastbuild only.
   set(complete_outputs ${complete_stamp_file})
-  if(${CMAKE_GENERATOR} MATCHES "Ninja")
+  if(${CMAKE_GENERATOR} MATCHES "Ninja|FASTBuild")
     set(complete_outputs ${complete_outputs} ${done_stamp_file})
   endif()
 

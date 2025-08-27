@@ -3233,8 +3233,17 @@ std::string cmGeneratorTarget::GetPchCreateCompileOptions(
     std::string const pchHeader = this->GetPchHeader(config, language, arch);
     std::string const pchFile = this->GetPchFile(config, language, arch);
 
-    cmSystemTools::ReplaceString(createOptionList, "<PCH_HEADER>", pchHeader);
-    cmSystemTools::ReplaceString(createOptionList, "<PCH_FILE>", pchFile);
+    if (GlobalGenerator->IsFastbuild()) {
+      // Account for potential spaces in a shell-friendly way.
+      cmSystemTools::ReplaceString(createOptionList, "<PCH_HEADER>",
+                                   '"' + pchHeader + '"');
+      cmSystemTools::ReplaceString(createOptionList, "<PCH_FILE>",
+                                   '"' + pchFile + '"');
+    } else {
+      cmSystemTools::ReplaceString(createOptionList, "<PCH_HEADER>",
+                                   pchHeader);
+      cmSystemTools::ReplaceString(createOptionList, "<PCH_FILE>", pchFile);
+    }
   }
   return inserted.first->second;
 }
@@ -3268,8 +3277,16 @@ std::string cmGeneratorTarget::GetPchUseCompileOptions(
     std::string const pchHeader = this->GetPchHeader(config, language, arch);
     std::string const pchFile = this->GetPchFile(config, language, arch);
 
-    cmSystemTools::ReplaceString(useOptionList, "<PCH_HEADER>", pchHeader);
-    cmSystemTools::ReplaceString(useOptionList, "<PCH_FILE>", pchFile);
+    if (GlobalGenerator->IsFastbuild()) {
+      // Account for potential spaces in a shell-friendly way.
+      cmSystemTools::ReplaceString(useOptionList, "<PCH_HEADER>",
+                                   '"' + pchHeader + '"');
+      cmSystemTools::ReplaceString(useOptionList, "<PCH_FILE>",
+                                   '"' + pchFile + '"');
+    } else {
+      cmSystemTools::ReplaceString(useOptionList, "<PCH_HEADER>", pchHeader);
+      cmSystemTools::ReplaceString(useOptionList, "<PCH_FILE>", pchFile);
+    }
   }
   return inserted.first->second;
 }

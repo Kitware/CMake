@@ -103,7 +103,8 @@ public:
     Shell_Flag_IsResponse = (1 << 10),
 
     /** The target shell is in a Ninja build file.  */
-    Shell_Flag_Ninja = (1 << 11)
+    Shell_Flag_Ninja = (1 << 11),
+    Shell_Flag_Fastbuild = (1 << 12),
   };
 
   std::string EscapeForShell(cm::string_view str, bool makeVars = false,

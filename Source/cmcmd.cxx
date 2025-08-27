@@ -1381,6 +1381,18 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
     }
 
     // Internal CMake dependency scanning support.
+    // The format is: -E cmake_fastbuild_check_depends <dummy_file>
+    // <space_separated_list_of_real_outputs>
+    if (args[1] == "cmake_fastbuild_check_depends" && args.size() >= 3) {
+      auto const dummyFile = args[2];
+      for (auto const& arg : cmMakeRange(args).advance(3)) {
+        if (!cmSystemTools::FileExists(arg)) {
+          cmSystemTools::RemoveFile(dummyFile);
+          return 0;
+        }
+      }
+      return 0;
+    }
     if (args[1] == "cmake_depends" && args.size() >= 6) {
       bool const verbose = isCMakeVerbose();
 

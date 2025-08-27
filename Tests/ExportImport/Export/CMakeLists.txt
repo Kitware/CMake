@@ -721,7 +721,7 @@ export(TARGETS testLinkDirectories NAMESPACE bld_ APPEND FILE ExportBuildTree.cm
 
 #------------------------------------------------------------------------------
 # test export of INTERFACE_LINK_DEPENDS
-if(CMAKE_GENERATOR MATCHES "Make|Ninja")
+if(CMAKE_GENERATOR MATCHES "Make|Ninja|FASTBuild")
   add_library(testLinkDepends INTERFACE)
   set_property(TARGET testLinkDepends PROPERTY INTERFACE_LINK_DEPENDS
     $<BUILD_INTERFACE:BUILD_LINK_DEPENDS>
