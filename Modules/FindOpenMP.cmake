@@ -419,7 +419,7 @@ function(_OPENMP_GET_FLAGS LANG FLAG_MODE OPENMP_FLAG_VAR OPENMP_LIB_NAMES_VAR)
           break()
         endif()
       endif()
-    elseif(CMAKE_${LANG}_COMPILER_ID STREQUAL "LLVMFlang" AND WIN32)
+    elseif(CMAKE_${LANG}_COMPILER_ID STREQUAL "LLVMFlang")
       find_library(OpenMP_libomp_LIBRARY
         NAMES omp
         HINTS ${CMAKE_${LANG}_IMPLICIT_LINK_DIRECTORIES}
