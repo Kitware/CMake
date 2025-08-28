@@ -26,7 +26,7 @@ json_has_key("${index}" "${contents}" dataDir)
 json_has_key("${index}" "${contents}" snippets)
 
 if (NOT version EQUAL 1)
-    add_error("Version must be 1, got: ${version}")
+  add_error("Version must be 1, got: ${version}")
 endif()
 
 string(JSON length LENGTH "${snippets}")
