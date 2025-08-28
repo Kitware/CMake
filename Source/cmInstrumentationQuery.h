@@ -17,7 +17,8 @@ public:
     StaticSystemInformation,
     DynamicSystemInformation,
     CDashSubmit,
-    CDashVerbose
+    CDashVerbose,
+    Trace
   };
   static std::vector<std::string> const OptionString;
 

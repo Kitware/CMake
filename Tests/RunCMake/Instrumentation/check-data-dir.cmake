@@ -13,7 +13,7 @@ foreach(snippet IN LISTS snippets)
   read_json("${snippet}" contents)
 
   # Verify snippet file is valid
-  verify_snippet("${snippet}" "${contents}")
+  verify_snippet_file("${snippet}" "${contents}")
 
   # Append to list of collected snippet roles
   if (NOT role IN_LIST FOUND_SNIPPETS)

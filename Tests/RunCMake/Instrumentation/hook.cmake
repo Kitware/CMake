@@ -2,11 +2,16 @@ cmake_minimum_required(VERSION 3.30)
 
 include(${CMAKE_CURRENT_LIST_DIR}/json.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/verify-snippet.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/verify-trace.cmake)
+
 # Test CALLBACK script. Prints output information and verifies index file
-# Called as: cmake -P hook.cmake [CheckForStaticQuery?] [index.json]
-set(index ${CMAKE_ARGV4})
+# Called as: cmake -P hook.cmake [CheckForStaticQuery?] [CheckForTrace?] [index.json]
+set(index ${CMAKE_ARGV5})
 if (NOT ${CMAKE_ARGV3})
   set(hasStaticInfo "UNEXPECTED")
+endif()
+if (NOT ${CMAKE_ARGV4})
+  set(hasTrace "UNEXPECTED")
 endif()
 read_json("${index}" contents)
 string(JSON hook GET "${contents}" hook)
@@ -29,16 +34,59 @@ if (NOT version EQUAL 1)
   add_error("Version must be 1, got: ${version}")
 endif()
 
-string(JSON length LENGTH "${snippets}")
-math(EXPR length "${length}-1")
-foreach(i RANGE ${length})
+string(JSON n_snippets LENGTH "${snippets}")
+
+math(EXPR snippets_range "${n_snippets}-1")
+foreach(i RANGE ${snippets_range})
   string(JSON filename GET "${snippets}" ${i})
   if (NOT EXISTS ${dataDir}/${filename})
     add_error("Listed snippet: ${dataDir}/${filename} does not exist")
   endif()
   read_json(${dataDir}/${filename} snippet_contents)
-  verify_snippet(${dataDir}/${filename} "${snippet_contents}")
+  verify_snippet_file(${dataDir}/${filename} "${snippet_contents}")
 endforeach()
+
+json_has_key("${index}" "${contents}" trace ${hasTrace})
+if (NOT hasTrace STREQUAL UNEXPECTED)
+  if (NOT EXISTS ${dataDir}/${trace})
+    add_error("Listed trace file: ${dataDir}/${trace} does not exist")
+  endif()
+  verify_trace_file_name("${index}" "${trace}")
+  read_json(${dataDir}/${trace} trace_contents)
+  string(JSON n_entries LENGTH "${trace_contents}")
+  if (n_entries EQUAL 0)
+    add_error("Listed trace file: ${dataDir}/${trace} has no entries")
+  endif()
+  if (NOT n_entries EQUAL n_snippets)
+    add_error("Differing number of trace entries (${n_entries}) and snippets (${n_snippets})")
+  endif()
+
+  math(EXPR entries_range "${n_entries}-1")
+  foreach (i RANGE ${entries_range})
+    string(JSON entry GET "${trace_contents}" ${i})
+    verify_trace_entry("${trace}" "${entry}")
+
+    # In addition to validating the data in the trace entry, check that
+    # it is strictly equal to its corresponding snippet data.
+    # Ideally, the args from all trace entries could be checked at once
+    # against the list of snippets from the index file, but the order of
+    # snippets is not preserved in the trace file, so being equal to data from
+    # any snippet file is sufficient.
+    set(args_equals_snippet OFF)
+    string(JSON trace_args GET "${entry}" args)
+    foreach (j RANGE ${entries_range})
+      string(JSON snippet_file GET "${snippets}" ${j})
+      read_json(${dataDir}/${snippet_file} snippet_contents)
+      string(JSON args_equals_snippet EQUAL "${snippet_contents}" "${trace_args}")
+      if (args_equals_snippet)
+        break()
+      endif()
+    endforeach()
+    if (NOT args_equals_snippet)
+      add_error("Trace entry args does not match any snippet data: ${entry}")
+    endif()
+  endforeach()
+endif()
 
 json_has_key("${index}" "${contents}" staticSystemInformation ${hasStaticInfo})
 if (NOT hasStaticInfo STREQUAL UNEXPECTED)

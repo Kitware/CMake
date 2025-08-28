@@ -16,7 +16,7 @@
     API_VERSION 1
     DATA_VERSION 1
     HOOKS postCMakeBuild
-    OPTIONS staticSystemInformation dynamicSystemInformation
+    OPTIONS staticSystemInformation dynamicSystemInformation trace
     CALLBACK ${CMAKE_COMMAND} -E echo callback2
     CALLBACK ${CMAKE_COMMAND} -E echo callback3
   )

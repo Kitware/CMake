@@ -16,6 +16,7 @@ function(instrument test)
     "COPY_QUERIES_GENERATED"
     "STATIC_QUERY"
     "DYNAMIC_QUERY"
+    "TRACE_QUERY"
     "MANUAL_HOOK"
     "PRESERVE_DATA"
     "NO_CONFIGURE"
@@ -39,7 +40,11 @@ function(instrument test)
   if (ARGS_STATIC_QUERY)
     set(static_query_hook_arg 1)
   endif()
-  set(GET_HOOK "\\\"${CMAKE_COMMAND}\\\" -P \\\"${RunCMake_SOURCE_DIR}/hook.cmake\\\" ${static_query_hook_arg}")
+  set(trace_query_hook_arg 0)
+  if (ARGS_TRACE_QUERY)
+    set(trace_query_hook_arg 1)
+  endif()
+  set(GET_HOOK "\\\"${CMAKE_COMMAND}\\\" -P \\\"${RunCMake_SOURCE_DIR}/hook.cmake\\\" ${static_query_hook_arg} ${trace_query_hook_arg}")
 
   # Load query JSON and cmake (with cmake_instrumentation(...)) files
   set(query ${query_dir}/${test}.json.in)
@@ -178,6 +183,19 @@ instrument(cmake-command-custom-content
 )
 instrument(cmake-command-custom-content-bad-type NO_WARN)
 instrument(cmake-command-custom-content-bad-content NO_WARN)
+
+# Test Google trace
+instrument(trace-query
+  BUILD INSTALL TEST TRACE_QUERY
+  CHECK_SCRIPT check-generated-queries.cmake
+)
+instrument(cmake-command-trace
+  NO_WARN BUILD INSTALL TEST TRACE_QUERY
+)
+instrument(cmake-command-trace
+  NO_WARN BUILD PRESERVE_DATA
+  CHECK_SCRIPT check-trace-removed.cmake
+)
 
 # Test make/ninja hooks
 if(RunCMake_GENERATOR STREQUAL "MSYS Makefiles")

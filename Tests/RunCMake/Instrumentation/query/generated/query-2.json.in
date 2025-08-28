@@ -11,7 +11,8 @@
   "options" :
   [
     "staticSystemInformation",
-    "dynamicSystemInformation"
+    "dynamicSystemInformation",
+    "trace"
   ],
   "version": 1
 }

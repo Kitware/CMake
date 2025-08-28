@@ -17,7 +17,7 @@
 
 std::vector<std::string> const cmInstrumentationQuery::OptionString{
   "staticSystemInformation", "dynamicSystemInformation", "cdashSubmit",
-  "cdashVerbose"
+  "cdashVerbose", "trace"
 };
 std::vector<std::string> const cmInstrumentationQuery::HookString{
   "postGenerate",  "preBuild",        "postBuild",
