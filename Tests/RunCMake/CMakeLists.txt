@@ -213,6 +213,9 @@ elseif(CMake_TEST_Qt5)
     set(ninja_test_with_qt_version 5)
   endif()
 endif()
+if(CMAKE_GENERATOR MATCHES "FASTBuild")
+  add_RunCMake_test(FASTBuild)
+endif()
 if(CMAKE_GENERATOR MATCHES "Ninja")
   set(Ninja_ARGS
     -DCMAKE_C_COMPILER_ID=${CMAKE_C_COMPILER_ID}

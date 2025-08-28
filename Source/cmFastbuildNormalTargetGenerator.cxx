@@ -1220,6 +1220,13 @@ cmFastbuildNormalTargetGenerator::GenerateObjects()
 
     std::string const staticCheckOptions = ComputeCodeCheckOptions(srcFile);
 
+    auto const isDisabled = [this](char const* prop) {
+      auto const propValue = this->GeneratorTarget->GetProperty(prop);
+      return propValue && propValue.IsOff();
+    };
+    bool const disableCaching = isDisabled("FASTBUILD_CACHING");
+    bool const disableDistribution = isDisabled("FASTBUILD_DISTRIBUTION");
+
     for (auto const& arch : this->GetArches()) {
       std::string const compileOptions = GetCompileOptions(srcFile, arch);
 
@@ -1260,6 +1267,12 @@ cmFastbuildNormalTargetGenerator::GenerateObjects()
       // (.CompilerOptions, .PCH*, etc.). Short circuit this iteration.
       if (!objectListNode.CompilerOptions.empty()) {
         continue;
+      }
+      if (disableCaching) {
+        objectListNode.AllowCaching = false;
+      }
+      if (disableDistribution) {
+        objectListNode.AllowDistribution = false;
       }
 
       objectListNode.CompilerOutputPath = objOutDirWithPossibleSubdir;

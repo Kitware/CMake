@@ -40,6 +40,17 @@ The following variables can be used to configure this generator:
 * :variable:`CMAKE_FASTBUILD_USE_LIGHTCACHE`
 * :variable:`CMAKE_FASTBUILD_VERBOSE_GENERATOR`
 
+Target Properties
+-----------------
+
+The following target properties can be used to fine-tune behavior on a
+per-target basis:
+
+* :prop_tgt:`FASTBUILD_CACHING` –
+  disables caching for a specific target.
+* :prop_tgt:`FASTBUILD_DISTRIBUTION` –
+  disables distributed compilation for a specific target.
+
 Notes
 -----
 

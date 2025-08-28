@@ -1174,6 +1174,12 @@ void cmGlobalFastbuildGenerator::WriteObjectList(
                   Quote(ObjectList.CompilerOutputExtension), 2);
     WriteVariable("CompilerOutputKeepBaseExtension", "true", 2);
     WriteArray("CompilerInputFiles", Wrap(ObjectList.CompilerInputFiles), 2);
+    if (!ObjectList.AllowCaching) {
+      WriteVariable("AllowCaching", "false", 2);
+    }
+    if (!ObjectList.AllowDistribution) {
+      WriteVariable("AllowDistribution", "false", 2);
+    }
     if (ObjectList.Hidden) {
       WriteVariable("Hidden", "true", 2);
     }

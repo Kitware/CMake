@@ -207,6 +207,8 @@ struct FastbuildObjectListNode : public FastbuildTargetBase
   std::string PCHOptions;
 
   std::vector<std::string> CompilerInputFiles;
+  bool AllowCaching = true;
+  bool AllowDistribution = true;
 
   std::set<std::string> ObjectOutputs;
   std::set<std::string> ObjectDepends;
