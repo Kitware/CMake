@@ -422,10 +422,6 @@ void cmGlobalVisualStudio7Generator::WriteTargetsToSolution(
     }
     bool written = false;
 
-    for (auto const& c : configs) {
-      target->CheckCxxModuleStatus(c);
-    }
-
     // handle external vc project files
     cmValue expath = target->GetProperty("EXTERNAL_MSPROJECT");
     if (expath) {
