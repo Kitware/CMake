@@ -88,7 +88,7 @@ public:
   virtual void OutputSLNFile();
 
   //! Lookup a stored GUID or compute one deterministically.
-  std::string GetGUID(std::string const& name);
+  std::string GetGUID(std::string const& name) const;
 
   /** Append the subdirectory for the given configuration.  */
   void AppendDirectoryForConfig(std::string const& prefix,
@@ -150,21 +150,21 @@ protected:
   virtual void WriteSLNFile(
     std::ostream& fout, cmLocalGenerator* root,
     OrderedTargetDependSet const& orderedProjectTargets,
-    VSFolders const& vsFolders) = 0;
+    VSFolders const& vsFolders) const = 0;
   virtual void WriteProject(std::ostream& fout, std::string const& name,
                             std::string const& path,
-                            cmGeneratorTarget const* t) = 0;
+                            cmGeneratorTarget const* t) const = 0;
   virtual void WriteProjectDepends(std::ostream& fout, std::string const& name,
                                    std::string const& path,
-                                   cmGeneratorTarget const* t) = 0;
+                                   cmGeneratorTarget const* t) const = 0;
   virtual void WriteProjectConfigurations(
     std::ostream& fout, std::string const& name,
     cmGeneratorTarget const& target, std::vector<std::string> const& configs,
     std::set<std::string> const& configsPartOfDefaultBuild,
-    std::string const& platformMapping = "") = 0;
+    std::string const& platformMapping = "") const = 0;
   virtual void WriteSLNGlobalSections(std::ostream& fout,
-                                      cmLocalGenerator* root);
-  virtual void WriteSLNFooter(std::ostream& fout);
+                                      cmLocalGenerator* root) const;
+  virtual void WriteSLNFooter(std::ostream& fout) const;
   std::string WriteUtilityDepend(cmGeneratorTarget const* target) override;
 
   VSFolders CreateSolutionFolders(
@@ -172,34 +172,35 @@ protected:
 
   virtual void WriteTargetsToSolution(
     std::ostream& fout, cmLocalGenerator* root,
-    OrderedTargetDependSet const& projectTargets);
+    OrderedTargetDependSet const& projectTargets) const;
   virtual void WriteTargetConfigurations(
     std::ostream& fout, std::vector<std::string> const& configs,
-    OrderedTargetDependSet const& projectTargets);
+    OrderedTargetDependSet const& projectTargets) const;
 
   virtual void WriteExternalProject(
     std::ostream& fout, std::string const& name, std::string const& path,
     cmValue typeGuid,
-    std::set<BT<std::pair<std::string, bool>>> const& dependencies) = 0;
+    std::set<BT<std::pair<std::string, bool>>> const& dependencies) const = 0;
 
-  std::string ConvertToSolutionPath(std::string const& path);
+  std::string ConvertToSolutionPath(std::string const& path) const;
 
   std::set<std::string> IsPartOfDefaultBuild(
     std::vector<std::string> const& configs,
     OrderedTargetDependSet const& projectTargets,
-    cmGeneratorTarget const* target);
+    cmGeneratorTarget const* target) const;
   bool IsDependedOn(OrderedTargetDependSet const& projectTargets,
-                    cmGeneratorTarget const* target);
+                    cmGeneratorTarget const* target) const;
   std::map<std::string, std::string> GUIDMap;
 
-  virtual void WriteFolders(std::ostream& fout, VSFolders const& vsFolders);
+  virtual void WriteFolders(std::ostream& fout,
+                            VSFolders const& vsFolders) const;
   virtual void WriteFoldersContent(std::ostream& fout,
-                                   VSFolders const& vsFolders);
+                                   VSFolders const& vsFolders) const;
 
   virtual void AddSolutionItems(cmLocalGenerator* root,
                                 VSFolders& vsFolders) = 0;
   virtual void WriteFolderSolutionItems(
-    std::ostream& fout, cmVisualStudioFolder const& folder) = 0;
+    std::ostream& fout, cmVisualStudioFolder const& folder) const = 0;
 
   bool MarmasmEnabled;
   bool MasmEnabled;

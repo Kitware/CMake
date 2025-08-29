@@ -568,7 +568,7 @@ void cmGlobalVisualStudio14Generator::AddSolutionItems(cmLocalGenerator* root,
 }
 
 void cmGlobalVisualStudio14Generator::WriteFolderSolutionItems(
-  std::ostream& fout, cmVisualStudioFolder const& folder)
+  std::ostream& fout, cmVisualStudioFolder const& folder) const
 {
   fout << "\tProjectSection(SolutionItems) = preProject\n";
 

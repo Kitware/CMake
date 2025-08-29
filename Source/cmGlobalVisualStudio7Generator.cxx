@@ -350,7 +350,7 @@ void cmGlobalVisualStudio7Generator::OutputSLNFile()
 
 void cmGlobalVisualStudio7Generator::WriteTargetConfigurations(
   std::ostream& fout, std::vector<std::string> const& configs,
-  OrderedTargetDependSet const& projectTargets)
+  OrderedTargetDependSet const& projectTargets) const
 {
   // loop over again and write out configurations for each target
   // in the solution
@@ -443,7 +443,7 @@ cmVisualStudioFolder* cmGlobalVisualStudio7Generator::VSFolders::Create(
 
 void cmGlobalVisualStudio7Generator::WriteTargetsToSolution(
   std::ostream& fout, cmLocalGenerator* root,
-  OrderedTargetDependSet const& projectTargets)
+  OrderedTargetDependSet const& projectTargets) const
 {
   std::vector<std::string> configs =
     root->GetMakefile()->GetGeneratorConfigs(cmMakefile::ExcludeEmptyConfig);
@@ -476,8 +476,8 @@ void cmGlobalVisualStudio7Generator::WriteTargetsToSolution(
   }
 }
 
-void cmGlobalVisualStudio7Generator::WriteFolders(std::ostream& fout,
-                                                  VSFolders const& vsFolders)
+void cmGlobalVisualStudio7Generator::WriteFolders(
+  std::ostream& fout, VSFolders const& vsFolders) const
 {
   cm::string_view const prefix = "CMAKE_FOLDER_GUID_";
   std::string guidProjectTypeFolder = "2150E333-8FDC-42A3-9474-1A3956D46DE8";
@@ -504,7 +504,7 @@ void cmGlobalVisualStudio7Generator::WriteFolders(std::ostream& fout,
 }
 
 void cmGlobalVisualStudio7Generator::WriteFoldersContent(
-  std::ostream& fout, VSFolders const& vsFolders)
+  std::ostream& fout, VSFolders const& vsFolders) const
 {
   for (auto const& iter : vsFolders.Folders) {
     std::string key(iter.first);
@@ -520,7 +520,7 @@ void cmGlobalVisualStudio7Generator::WriteFoldersContent(
 }
 
 std::string cmGlobalVisualStudio7Generator::ConvertToSolutionPath(
-  std::string const& path)
+  std::string const& path) const
 {
   // Convert to backslashes.  Do not use ConvertToOutputPath because
   // we will add quoting ourselves, and we know these projects always
@@ -534,7 +534,7 @@ std::string cmGlobalVisualStudio7Generator::ConvertToSolutionPath(
 }
 
 void cmGlobalVisualStudio7Generator::WriteSLNGlobalSections(
-  std::ostream& fout, cmLocalGenerator* root)
+  std::ostream& fout, cmLocalGenerator* root) const
 {
   std::string const guid =
     this->GetGUID(cmStrCat(root->GetProjectName(), ".sln"));
@@ -600,7 +600,7 @@ void cmGlobalVisualStudio7Generator::WriteSLNGlobalSections(
 }
 
 // Standard end of dsw file
-void cmGlobalVisualStudio7Generator::WriteSLNFooter(std::ostream& fout)
+void cmGlobalVisualStudio7Generator::WriteSLNFooter(std::ostream& fout) const
 {
   fout << "EndGlobal\n";
 }
@@ -668,7 +668,8 @@ std::string cmGlobalVisualStudio7Generator::WriteUtilityDepend(
   return pname;
 }
 
-std::string cmGlobalVisualStudio7Generator::GetGUID(std::string const& name)
+std::string cmGlobalVisualStudio7Generator::GetGUID(
+  std::string const& name) const
 {
   std::string const& guidStoreName = cmStrCat(name, "_GUID_CMAKE");
   if (cmValue storedGUID =
@@ -702,7 +703,7 @@ void cmGlobalVisualStudio7Generator::AppendDirectoryForConfig(
 std::set<std::string> cmGlobalVisualStudio7Generator::IsPartOfDefaultBuild(
   std::vector<std::string> const& configs,
   OrderedTargetDependSet const& projectTargets,
-  cmGeneratorTarget const* target)
+  cmGeneratorTarget const* target) const
 {
   std::set<std::string> activeConfigs;
   // if it is a utility target then only make it part of the
@@ -745,7 +746,8 @@ std::set<std::string> cmGlobalVisualStudio7Generator::IsPartOfDefaultBuild(
 }
 
 bool cmGlobalVisualStudio7Generator::IsDependedOn(
-  OrderedTargetDependSet const& projectTargets, cmGeneratorTarget const* gtIn)
+  OrderedTargetDependSet const& projectTargets,
+  cmGeneratorTarget const* gtIn) const
 {
   return std::any_of(projectTargets.begin(), projectTargets.end(),
                      [this, gtIn](cmTargetDepend const& l) {

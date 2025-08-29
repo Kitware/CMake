@@ -68,8 +68,8 @@ protected:
 
   void AddSolutionItems(cmLocalGenerator* root, VSFolders& vsFolders) override;
 
-  void WriteFolderSolutionItems(std::ostream& fout,
-                                cmVisualStudioFolder const& folder) override;
+  void WriteFolderSolutionItems(
+    std::ostream& fout, cmVisualStudioFolder const& folder) const override;
 
 private:
   class Factory;

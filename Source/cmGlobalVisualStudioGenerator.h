@@ -93,7 +93,7 @@ public:
   void CallVisualStudioMacro(MacroName m, std::string const& vsSolutionFile);
 
   // return true if target is fortran only
-  bool TargetIsFortranOnly(cmGeneratorTarget const* gt);
+  bool TargetIsFortranOnly(cmGeneratorTarget const* gt) const;
 
   // return true if target should be included in solution.
   virtual bool IsInSolution(cmGeneratorTarget const* gt) const;
@@ -172,7 +172,7 @@ protected:
 
   char const* GetIDEVersion() const;
 
-  void WriteSLNHeader(std::ostream& fout);
+  void WriteSLNHeader(std::ostream& fout) const;
 
   bool ComputeTargetDepends() override;
   class VSDependSet : public std::set<std::string>
