@@ -316,7 +316,6 @@ void cmGlobalVisualStudio7Generator::OutputSLNFile(
   if (generators.empty()) {
     return;
   }
-  this->CurrentProject = root->GetProjectName();
   std::string fname = GetSLNFile(root);
   cmGeneratedFileStream fout(fname);
   fout.SetCopyIfDifferent(true);

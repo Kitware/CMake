@@ -192,9 +192,6 @@ protected:
 
   std::map<std::string, cmVisualStudioFolder> VisualStudioFolders;
 
-  // Set during OutputSLNFile with the name of the current project.
-  // There is one SLN file per project.
-  std::string CurrentProject;
   bool MarmasmEnabled;
   bool MasmEnabled;
   bool NasmEnabled;
