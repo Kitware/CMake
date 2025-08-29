@@ -299,8 +299,11 @@ void cmGlobalVisualStudio7Generator::Generate()
   // first do the superclass method
   this->cmGlobalVisualStudioGenerator::Generate();
 
-  // Now write out the VS Solution file.
-  this->OutputSLNFile();
+  // Now write out the VS Solution files.
+  for (auto& it : this->ProjectMap) {
+    this->OutputSLNFile(it.second[0], it.second);
+  }
+
   // If any solution or project files changed during the generation,
   // tell Visual Studio to reload them...
   if (!cmSystemTools::GetErrorOccurredFlag() &&
@@ -337,14 +340,6 @@ void cmGlobalVisualStudio7Generator::OutputSLNFile(
   this->WriteSLNFile(fout, root, orderedProjectTargets, vsFolders);
   if (fout.Close()) {
     this->FileReplacedDuringGenerate(fname);
-  }
-}
-
-// output the SLN file
-void cmGlobalVisualStudio7Generator::OutputSLNFile()
-{
-  for (auto& it : this->ProjectMap) {
-    this->OutputSLNFile(it.second[0], it.second);
   }
 }
 

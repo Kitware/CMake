@@ -82,11 +82,6 @@ public:
     std::vector<std::string> const& makeOptions =
       std::vector<std::string>()) override;
 
-  /**
-   * Generate the VS Solution file.
-   */
-  virtual void OutputSLNFile();
-
   //! Lookup a stored GUID or compute one deterministically.
   std::string GetGUID(std::string const& name) const;
 
