@@ -25,21 +25,13 @@ cmGlobalVisualStudio71Generator::cmGlobalVisualStudio71Generator(cmake* cm)
 
 void cmGlobalVisualStudio71Generator::WriteSLNFile(
   std::ostream& fout, cmLocalGenerator* root,
-  std::vector<cmLocalGenerator*>& generators)
+  OrderedTargetDependSet const& orderedProjectTargets)
 {
   std::vector<std::string> configs =
     root->GetMakefile()->GetGeneratorConfigs(cmMakefile::ExcludeEmptyConfig);
 
   // Write out the header for a SLN file
   this->WriteSLNHeader(fout);
-
-  // Collect all targets under this root generator and the transitive
-  // closure of their dependencies.
-  TargetDependSet projectTargets;
-  TargetDependSet originalTargets;
-  this->GetTargetSets(projectTargets, originalTargets, root, generators);
-  OrderedTargetDependSet orderedProjectTargets(
-    projectTargets, this->GetStartupProjectName(root));
 
   // Generate the targets specification to a string.  We will put this in
   // the actual .sln file later.  As a side effect, this method also

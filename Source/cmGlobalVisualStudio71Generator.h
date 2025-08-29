@@ -28,8 +28,9 @@ public:
   cmGlobalVisualStudio71Generator(cmake* cm);
 
 protected:
-  void WriteSLNFile(std::ostream& fout, cmLocalGenerator* root,
-                    std::vector<cmLocalGenerator*>& generators) override;
+  void WriteSLNFile(
+    std::ostream& fout, cmLocalGenerator* root,
+    OrderedTargetDependSet const& orderedProjectTargets) override;
   virtual void WriteSolutionConfigurations(
     std::ostream& fout, std::vector<std::string> const& configs);
   void WriteProject(std::ostream& fout, std::string const& name,

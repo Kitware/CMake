@@ -316,13 +316,22 @@ void cmGlobalVisualStudio7Generator::OutputSLNFile(
   if (generators.empty()) {
     return;
   }
+
+  // Collect all targets under this root generator and the transitive
+  // closure of their dependencies.
+  TargetDependSet projectTargets;
+  TargetDependSet originalTargets;
+  this->GetTargetSets(projectTargets, originalTargets, root, generators);
+  OrderedTargetDependSet orderedProjectTargets(
+    projectTargets, this->GetStartupProjectName(root));
+
   std::string fname = GetSLNFile(root);
   cmGeneratedFileStream fout(fname);
   fout.SetCopyIfDifferent(true);
   if (!fout) {
     return;
   }
-  this->WriteSLNFile(fout, root, generators);
+  this->WriteSLNFile(fout, root, orderedProjectTargets);
   if (fout.Close()) {
     this->FileReplacedDuringGenerate(fname);
   }

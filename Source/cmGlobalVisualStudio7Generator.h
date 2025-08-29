@@ -141,8 +141,9 @@ protected:
 
   virtual void OutputSLNFile(cmLocalGenerator* root,
                              std::vector<cmLocalGenerator*>& generators);
-  virtual void WriteSLNFile(std::ostream& fout, cmLocalGenerator* root,
-                            std::vector<cmLocalGenerator*>& generators) = 0;
+  virtual void WriteSLNFile(
+    std::ostream& fout, cmLocalGenerator* root,
+    OrderedTargetDependSet const& orderedProjectTargets) = 0;
   virtual void WriteProject(std::ostream& fout, std::string const& name,
                             std::string const& path,
                             cmGeneratorTarget const* t) = 0;
