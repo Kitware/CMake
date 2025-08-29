@@ -25,7 +25,8 @@ cmGlobalVisualStudio71Generator::cmGlobalVisualStudio71Generator(cmake* cm)
 
 void cmGlobalVisualStudio71Generator::WriteSLNFile(
   std::ostream& fout, cmLocalGenerator* root,
-  OrderedTargetDependSet const& orderedProjectTargets)
+  OrderedTargetDependSet const& orderedProjectTargets,
+  VSFolders const& vsFolders)
 {
   std::vector<std::string> configs =
     root->GetMakefile()->GetGeneratorConfigs(cmMakefile::ExcludeEmptyConfig);
@@ -33,21 +34,13 @@ void cmGlobalVisualStudio71Generator::WriteSLNFile(
   // Write out the header for a SLN file
   this->WriteSLNHeader(fout);
 
-  // Generate the targets specification to a string.  We will put this in
-  // the actual .sln file later.  As a side effect, this method also
-  // populates the set of folders.
-  std::ostringstream targetsSlnString;
-  this->WriteTargetsToSolution(targetsSlnString, root, orderedProjectTargets);
-
-  this->AddSolutionItems(root);
-
   // Generate folder specification.
-  if (!this->VisualStudioFolders.empty()) {
-    this->WriteFolders(fout);
+  if (!vsFolders.Folders.empty()) {
+    this->WriteFolders(fout, vsFolders);
   }
 
   // Now write the actual target specification content.
-  fout << targetsSlnString.str();
+  this->WriteTargetsToSolution(fout, root, orderedProjectTargets);
 
   // Write out the configurations information for the solution
   fout << "Global\n";
@@ -59,10 +52,10 @@ void cmGlobalVisualStudio71Generator::WriteSLNFile(
   this->WriteTargetConfigurations(fout, configs, orderedProjectTargets);
   fout << "\tEndGlobalSection\n";
 
-  if (!this->VisualStudioFolders.empty()) {
+  if (!vsFolders.Folders.empty()) {
     // Write out project folders
     fout << "\tGlobalSection(NestedProjects) = preSolution\n";
-    this->WriteFoldersContent(fout);
+    this->WriteFoldersContent(fout, vsFolders);
     fout << "\tEndGlobalSection\n";
   }
 

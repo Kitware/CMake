@@ -325,13 +325,16 @@ void cmGlobalVisualStudio7Generator::OutputSLNFile(
   OrderedTargetDependSet orderedProjectTargets(
     projectTargets, this->GetStartupProjectName(root));
 
+  VSFolders vsFolders = this->CreateSolutionFolders(orderedProjectTargets);
+  this->AddSolutionItems(root, vsFolders);
+
   std::string fname = GetSLNFile(root);
   cmGeneratedFileStream fout(fname);
   fout.SetCopyIfDifferent(true);
   if (!fout) {
     return;
   }
-  this->WriteSLNFile(fout, root, orderedProjectTargets);
+  this->WriteSLNFile(fout, root, orderedProjectTargets, vsFolders);
   if (fout.Close()) {
     this->FileReplacedDuringGenerate(fname);
   }
@@ -382,7 +385,29 @@ void cmGlobalVisualStudio7Generator::WriteTargetConfigurations(
   }
 }
 
-cmVisualStudioFolder* cmGlobalVisualStudio7Generator::CreateSolutionFolders(
+cmGlobalVisualStudio7Generator::VSFolders
+cmGlobalVisualStudio7Generator::CreateSolutionFolders(
+  OrderedTargetDependSet const& orderedProjectTargets)
+{
+  VSFolders vsFolders;
+  if (!this->UseFolderProperty()) {
+    return vsFolders;
+  }
+  for (cmGeneratorTarget const* target : orderedProjectTargets) {
+    if (this->IsInSolution(target) &&
+        (target->GetProperty("EXTERNAL_MSPROJECT") ||
+         target->GetProperty("GENERATOR_FILE_NAME"))) {
+      // Create "solution folder" information from FOLDER target property
+      if (cmVisualStudioFolder* folder =
+            vsFolders.Create(target->GetEffectiveFolderName())) {
+        folder->Projects.insert(target->GetName());
+      }
+    }
+  }
+  return vsFolders;
+}
+
+cmVisualStudioFolder* cmGlobalVisualStudio7Generator::VSFolders::Create(
   std::string const& path)
 {
   if (path.empty()) {
@@ -402,7 +427,7 @@ cmVisualStudioFolder* cmGlobalVisualStudio7Generator::CreateSolutionFolders(
     if (cumulativePath.empty()) {
       cumulativePath = cmStrCat("CMAKE_FOLDER_GUID_", iter);
     } else {
-      this->VisualStudioFolders[cumulativePath].Projects.insert(
+      this->Folders[cumulativePath].Projects.insert(
         cmStrCat(cumulativePath, '/', iter));
 
       cumulativePath = cmStrCat(cumulativePath, '/', iter);
@@ -413,15 +438,13 @@ cmVisualStudioFolder* cmGlobalVisualStudio7Generator::CreateSolutionFolders(
     return nullptr;
   }
 
-  return &this->VisualStudioFolders[cumulativePath];
+  return &this->Folders[cumulativePath];
 }
 
 void cmGlobalVisualStudio7Generator::WriteTargetsToSolution(
   std::ostream& fout, cmLocalGenerator* root,
   OrderedTargetDependSet const& projectTargets)
 {
-  VisualStudioFolders.clear();
-
   std::vector<std::string> configs =
     root->GetMakefile()->GetGeneratorConfigs(cmMakefile::ExcludeEmptyConfig);
 
@@ -429,8 +452,6 @@ void cmGlobalVisualStudio7Generator::WriteTargetsToSolution(
     if (!this->IsInSolution(target)) {
       continue;
     }
-    bool written = false;
-
     // handle external vc project files
     cmValue expath = target->GetProperty("EXTERNAL_MSPROJECT");
     if (expath) {
@@ -440,7 +461,6 @@ void cmGlobalVisualStudio7Generator::WriteTargetsToSolution(
       this->WriteExternalProject(fout, project, location,
                                  target->GetProperty("VS_PROJECT_TYPE"),
                                  target->GetUtilities());
-      written = true;
     } else {
       cmValue vcprojName = target->GetProperty("GENERATOR_FILE_NAME");
       if (vcprojName) {
@@ -451,28 +471,17 @@ void cmGlobalVisualStudio7Generator::WriteTargetsToSolution(
           dir.clear(); // msbuild cannot handle ".\" prefix
         }
         this->WriteProject(fout, *vcprojName, dir, target);
-        written = true;
-      }
-    }
-
-    // Create "solution folder" information from FOLDER target property
-    //
-    if (written && this->UseFolderProperty()) {
-      cmVisualStudioFolder* folder =
-        this->CreateSolutionFolders(target->GetEffectiveFolderName());
-
-      if (folder != nullptr) {
-        folder->Projects.insert(target->GetName());
       }
     }
   }
 }
 
-void cmGlobalVisualStudio7Generator::WriteFolders(std::ostream& fout)
+void cmGlobalVisualStudio7Generator::WriteFolders(std::ostream& fout,
+                                                  VSFolders const& vsFolders)
 {
   cm::string_view const prefix = "CMAKE_FOLDER_GUID_";
   std::string guidProjectTypeFolder = "2150E333-8FDC-42A3-9474-1A3956D46DE8";
-  for (auto const& iter : VisualStudioFolders) {
+  for (auto const& iter : vsFolders.Folders) {
     std::string fullName = iter.first;
     std::string guid = this->GetGUID(fullName);
 
@@ -494,9 +503,10 @@ void cmGlobalVisualStudio7Generator::WriteFolders(std::ostream& fout)
   }
 }
 
-void cmGlobalVisualStudio7Generator::WriteFoldersContent(std::ostream& fout)
+void cmGlobalVisualStudio7Generator::WriteFoldersContent(
+  std::ostream& fout, VSFolders const& vsFolders)
 {
-  for (auto const& iter : VisualStudioFolders) {
+  for (auto const& iter : vsFolders.Folders) {
     std::string key(iter.first);
     std::string guidParent(this->GetGUID(key));
 

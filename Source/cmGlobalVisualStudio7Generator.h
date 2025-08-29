@@ -134,6 +134,12 @@ protected:
 
   void Generate() override;
 
+  struct VSFolders
+  {
+    std::map<std::string, cmVisualStudioFolder> Folders;
+    cmVisualStudioFolder* Create(std::string const& path);
+  };
+
   std::string const& GetDevEnvCommand();
   virtual std::string FindDevEnvCommand();
 
@@ -143,7 +149,8 @@ protected:
                              std::vector<cmLocalGenerator*>& generators);
   virtual void WriteSLNFile(
     std::ostream& fout, cmLocalGenerator* root,
-    OrderedTargetDependSet const& orderedProjectTargets) = 0;
+    OrderedTargetDependSet const& orderedProjectTargets,
+    VSFolders const& vsFolders) = 0;
   virtual void WriteProject(std::ostream& fout, std::string const& name,
                             std::string const& path,
                             cmGeneratorTarget const* t) = 0;
@@ -160,7 +167,8 @@ protected:
   virtual void WriteSLNFooter(std::ostream& fout);
   std::string WriteUtilityDepend(cmGeneratorTarget const* target) override;
 
-  cmVisualStudioFolder* CreateSolutionFolders(std::string const& path);
+  VSFolders CreateSolutionFolders(
+    OrderedTargetDependSet const& orderedProjectTargets);
 
   virtual void WriteTargetsToSolution(
     std::ostream& fout, cmLocalGenerator* root,
@@ -184,14 +192,14 @@ protected:
                     cmGeneratorTarget const* target);
   std::map<std::string, std::string> GUIDMap;
 
-  virtual void WriteFolders(std::ostream& fout);
-  virtual void WriteFoldersContent(std::ostream& fout);
+  virtual void WriteFolders(std::ostream& fout, VSFolders const& vsFolders);
+  virtual void WriteFoldersContent(std::ostream& fout,
+                                   VSFolders const& vsFolders);
 
-  virtual void AddSolutionItems(cmLocalGenerator* root) = 0;
+  virtual void AddSolutionItems(cmLocalGenerator* root,
+                                VSFolders& vsFolders) = 0;
   virtual void WriteFolderSolutionItems(
     std::ostream& fout, cmVisualStudioFolder const& folder) = 0;
-
-  std::map<std::string, cmVisualStudioFolder> VisualStudioFolders;
 
   bool MarmasmEnabled;
   bool MasmEnabled;
