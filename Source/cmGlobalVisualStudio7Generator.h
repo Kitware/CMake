@@ -83,7 +83,7 @@ public:
       std::vector<std::string>()) override;
 
   /**
-   * Generate the DSW workspace file.
+   * Generate the VS Solution file.
    */
   virtual void OutputSLNFile();
 

@@ -299,7 +299,7 @@ void cmGlobalVisualStudio7Generator::Generate()
   // first do the superclass method
   this->cmGlobalVisualStudioGenerator::Generate();
 
-  // Now write out the DSW
+  // Now write out the VS Solution file.
   this->OutputSLNFile();
   // If any solution or project files changed during the generation,
   // tell Visual Studio to reload them...
