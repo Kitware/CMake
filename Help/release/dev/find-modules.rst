@@ -37,6 +37,12 @@ Find Modules
 * The :module:`FindHg` module now provides a ``Hg_VERSION`` result
   variable.  The ``HG_VERSION_STRING`` result variable is deprecated.
 
+* The :module:`FindHSPELL` module now provides a ``HSPELL_VERSION`` result
+  variable.  The ``HSPELL_VERSION_STRING`` result variable is deprecated.
+
+* The :module:`FindIcotool` module now provides a ``Icotool_VERSION`` result
+  variable.  The ``ICOTOOL_VERSION_STRING`` result variable is deprecated.
+
 * The :module:`FindJasper` module now provides a ``Jasper_VERSION`` result
   variable.  The ``JASPER_VERSION_STRING`` result variable is deprecated.
 
