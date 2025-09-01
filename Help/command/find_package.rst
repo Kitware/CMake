@@ -338,7 +338,9 @@ an error describing the problem unless the ``QUIET`` argument is
 specified.  If ``REQUIRED`` is specified and the package is not found, a
 fatal error is generated and the configure step stops executing.  If
 ``<PackageName>_DIR`` has been set to a directory not containing a
-configuration file, CMake will ignore it and search from scratch.
+configuration file, or if the requested version is not compatible
+with the package found in that directory (see :ref:`version selection`),
+CMake will ignore it and search from scratch.
 
 Package maintainers providing package configuration files are encouraged to
 name and install them such that the :ref:`search procedure` outlined below
