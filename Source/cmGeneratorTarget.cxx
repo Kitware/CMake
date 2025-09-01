@@ -1153,6 +1153,11 @@ bool cmGeneratorTarget::IsImportedGloballyVisible() const
   return this->Target->IsImportedGloballyVisible();
 }
 
+bool cmGeneratorTarget::IsSymbolic() const
+{
+  return this->Target->IsSymbolic();
+}
+
 bool cmGeneratorTarget::IsForeign() const
 {
   return this->Target->IsForeign();

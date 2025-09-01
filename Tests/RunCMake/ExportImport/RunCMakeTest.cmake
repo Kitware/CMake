@@ -18,11 +18,14 @@ function(run_ExportImport_test case)
   run_cmake_with_options(${case}-import
     -Dfoo_DIR=${CMAKE_INSTALL_PREFIX}/lib/cmake/foo
     -Dbar_DIR=${CMAKE_INSTALL_PREFIX}/lib/cmake/bar
+    -Dgui_DIR=${CMAKE_INSTALL_PREFIX}/lib/cmake/gui
     )
 endfunction()
 
 run_ExportImport_test(SharedDep)
 run_ExportImport_test(SpdxLicenseProperty)
+run_ExportImport_test(InterfaceWithSymbolic)
+
 
 function(run_ExportImportBuildInstall_test case)
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/${case}-export-build)

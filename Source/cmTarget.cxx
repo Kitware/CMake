@@ -608,6 +608,7 @@ public:
   bool IsAndroid;
   bool BuildInterfaceIncludesAppended;
   bool PerConfig;
+  bool IsSymbolic;
   cmTarget::Visibility TargetVisibility;
   std::set<BT<std::pair<std::string, bool>>> Utilities;
   std::set<std::string> CodegenDependencies;
@@ -885,6 +886,7 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
   this->impl->IsAIX = false;
   this->impl->IsApple = false;
   this->impl->IsAndroid = false;
+  this->impl->IsSymbolic = false;
   this->impl->TargetVisibility = vis;
   this->impl->BuildInterfaceIncludesAppended = false;
   this->impl->PerConfig = (perConfig == PerConfig::Yes);
@@ -1946,6 +1948,7 @@ MAKE_PROP(LINK_LIBRARIES);
 MAKE_PROP(MANUALLY_ADDED_DEPENDENCIES);
 MAKE_PROP(NAME);
 MAKE_PROP(SOURCES);
+MAKE_PROP(SYMBOLIC);
 MAKE_PROP(TYPE);
 MAKE_PROP(BINARY_DIR);
 MAKE_PROP(SOURCE_DIR);
@@ -2047,6 +2050,7 @@ bool IsSettableProperty(cmMakefile* context, cmTarget* target,
     { "MANUALLY_ADDED_DEPENDENCIES", { ROC::All } },
     { "NAME", { ROC::All } },
     { "SOURCES", { ROC::Imported } },
+    { "SYMBOLIC", { ROC::All } },
     { "TYPE", { ROC::All } },
     { "ALIAS_GLOBAL", { ROC::All, cmPolicies::CMP0160 } },
     { "BINARY_DIR", { ROC::All, cmPolicies::CMP0160 } },
@@ -2065,6 +2069,11 @@ bool IsSettableProperty(cmMakefile* context, cmTarget* target,
   }
   return true;
 }
+}
+
+void cmTarget::SetSymbolic(bool const value)
+{
+  this->impl->IsSymbolic = value;
 }
 
 void cmTarget::SetProperty(std::string const& prop, cmValue value)
@@ -2606,6 +2615,7 @@ cmValue cmTarget::GetProperty(std::string const& prop) const
     propBINARY_DIR,
     propSOURCE_DIR,
     propSOURCES,
+    propSYMBOLIC,
     propINTERFACE_LINK_LIBRARIES,
     propINTERFACE_LINK_LIBRARIES_DIRECT,
     propINTERFACE_LINK_LIBRARIES_DIRECT_EXCLUDE,
@@ -2624,6 +2634,10 @@ cmValue cmTarget::GetProperty(std::string const& prop) const
         return nullptr;
       }
       return cmValue(propertyIter->second.Value);
+    }
+
+    if (prop == propSYMBOLIC) {
+      return this->IsSymbolic() ? cmValue(propTRUE) : cmValue(propFALSE);
     }
 
     UsageRequirementProperty const* usageRequirements[] = {
@@ -2758,6 +2772,11 @@ bool cmTarget::IsAIX() const
 bool cmTarget::IsApple() const
 {
   return this->impl->IsApple;
+}
+
+bool cmTarget::IsSymbolic() const
+{
+  return this->impl->IsSymbolic;
 }
 
 bool cmTarget::IsNormal() const

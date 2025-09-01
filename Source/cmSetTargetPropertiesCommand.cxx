@@ -40,6 +40,10 @@ bool cmSetTargetPropertiesCommand(std::vector<std::string> const& args,
       return false;
     }
     if (cmTarget* target = mf.FindTargetToUse(tname)) {
+      if (target->IsSymbolic()) {
+        status.SetError("can not be used on a SYMBOLIC target.");
+        return false;
+      }
       // loop through all the props and set them
       for (auto k = propsIter + 1; k != args.end(); k += 2) {
         target->SetProperty(*k, *(k + 1));

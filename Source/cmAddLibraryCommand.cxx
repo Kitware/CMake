@@ -33,6 +33,7 @@ bool cmAddLibraryCommand(std::vector<std::string> const& args,
   bool excludeFromAll = false;
   bool importTarget = false;
   bool importGlobal = false;
+  bool symbolicTarget = false;
 
   auto s = args.begin();
 
@@ -117,6 +118,9 @@ bool cmAddLibraryCommand(std::vector<std::string> const& args,
     } else if (*s == "EXCLUDE_FROM_ALL") {
       ++s;
       excludeFromAll = true;
+    } else if (*s == "SYMBOLIC") {
+      ++s;
+      symbolicTarget = true;
     } else if (*s == "IMPORTED") {
       ++s;
       importTarget = true;
@@ -223,9 +227,9 @@ bool cmAddLibraryCommand(std::vector<std::string> const& args,
   }
 
   /* ideally we should check whether for the linker language of the target
-    CMAKE_${LANG}_CREATE_SHARED_LIBRARY is defined and if not default to
-    STATIC. But at this point we know only the name of the target, but not
-    yet its linker language. */
+     CMAKE_${LANG}_CREATE_SHARED_LIBRARY is defined and if not default to
+     STATIC. But at this point we know only the name of the target, but not
+     yet its linker language. */
   if ((type == cmStateEnums::SHARED_LIBRARY ||
        type == cmStateEnums::MODULE_LIBRARY) &&
       !mf.GetState()->GetGlobalPropertyAsBool("TARGET_SUPPORTS_SHARED_LIBS")) {
@@ -282,7 +286,8 @@ bool cmAddLibraryCommand(std::vector<std::string> const& args,
     }
 
     // Create the imported target.
-    mf.AddImportedTarget(libName, type, importGlobal);
+    cmTarget* target = mf.AddImportedTarget(libName, type, importGlobal);
+    target->SetSymbolic(symbolicTarget);
     return true;
   }
 
@@ -312,8 +317,15 @@ bool cmAddLibraryCommand(std::vector<std::string> const& args,
     }
   }
 
+  if (symbolicTarget && type != cmStateEnums::INTERFACE_LIBRARY) {
+    status.SetError(
+      "SYMBOLIC option may only be used with INTERFACE libraries");
+    return false;
+  }
+
   std::vector<std::string> srcs(s, args.end());
-  mf.AddLibrary(libName, type, srcs, excludeFromAll);
+  cmTarget* target = mf.AddLibrary(libName, type, srcs, excludeFromAll);
+  target->SetSymbolic(symbolicTarget);
 
   return true;
 }
