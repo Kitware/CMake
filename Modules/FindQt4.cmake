@@ -1326,19 +1326,13 @@ if (QT_QMAKE_EXECUTABLE AND
     QT_LUPDATE_EXECUTABLE QT_LRELEASE_EXECUTABLE QT_QCOLLECTIONGENERATOR_EXECUTABLE
     QT_DESIGNER_EXECUTABLE QT_LINGUIST_EXECUTABLE)
 
-
-  # get the directory of the current file, used later on in the file
-  get_filename_component( _qt4_current_dir  "${CMAKE_CURRENT_LIST_FILE}" PATH)
-
-
   ###############################################
   #
   #       configuration/system dependent settings
   #
   ###############################################
 
-  include("${_qt4_current_dir}/Qt4ConfigDependentSettings.cmake")
-
+  include(${CMAKE_CURRENT_LIST_DIR}/Qt4ConfigDependentSettings.cmake)
 
   #######################################
   #
@@ -1425,14 +1419,13 @@ if (QT_QMAKE_EXECUTABLE AND
     endforeach()
   endforeach()
 
-
   ######################################
   #
   #       Macros for building Qt files
   #
   ######################################
 
-  include("${_qt4_current_dir}/Qt4Macros.cmake")
+  include(${CMAKE_CURRENT_LIST_DIR}/Qt4Macros.cmake)
 
 endif()
 
