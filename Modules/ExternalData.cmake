@@ -492,7 +492,7 @@ function(ExternalData_add_target target)
 
   # Store configuration for use by build-time script.
   set(config ${CMAKE_CURRENT_BINARY_DIR}/${target}_config.cmake)
-  configure_file(${_ExternalData_SELF_DIR}/ExternalData_config.cmake.in ${config} @ONLY)
+  configure_file(${CMAKE_CURRENT_FUNCTION_LIST_DIR}/ExternalData_config.cmake.in ${config} @ONLY)
 
   set(files "")
 
@@ -524,7 +524,7 @@ function(ExternalData_add_target target)
                                    -DExternalData_ACTION=local
                                    -DExternalData_SHOW_PROGRESS=${_ExternalData_add_target_SHOW_PROGRESS}
                                    -DExternalData_CONFIG=${config}
-                                   -P ${_ExternalData_SELF}
+                                   -P ${CMAKE_CURRENT_FUNCTION_LIST_FILE}
           MAIN_DEPENDENCY "${name}"
           )
       endif()
@@ -561,7 +561,7 @@ function(ExternalData_add_target target)
                                    -DExternalData_ACTION=fetch
                                    -DExternalData_SHOW_PROGRESS=${_ExternalData_add_target_SHOW_PROGRESS}
                                    -DExternalData_CONFIG=${config}
-                                   -P ${_ExternalData_SELF}
+                                   -P ${CMAKE_CURRENT_FUNCTION_LIST_FILE}
           # Update whenever the object hash changes.
           MAIN_DEPENDENCY "${name}${first_ext}"
           )
@@ -615,8 +615,6 @@ endfunction()
 
 set(_ExternalData_REGEX_ALGO "MD5|SHA1|SHA224|SHA256|SHA384|SHA512|SHA3_224|SHA3_256|SHA3_384|SHA3_512")
 set(_ExternalData_REGEX_EXT "md5|sha1|sha224|sha256|sha384|sha512|sha3-224|sha3-256|sha3-384|sha3-512")
-set(_ExternalData_SELF "${CMAKE_CURRENT_LIST_FILE}")
-get_filename_component(_ExternalData_SELF_DIR "${_ExternalData_SELF}" PATH)
 
 function(_ExternalData_compute_hash var_hash algo file)
   if("${algo}" MATCHES "^${_ExternalData_REGEX_ALGO}$")
