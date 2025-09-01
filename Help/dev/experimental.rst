@@ -127,15 +127,15 @@ In order to activate support for the :command:`cmake_instrumentation` command,
 set
 
 * variable ``CMAKE_EXPERIMENTAL_INSTRUMENTATION`` to
-* value ``d16a3082-c4e1-489b-b90c-55750a334f27``.
+* value ``f4f3d5ea-0915-470f-9628-4615e72f738a``.
 
 To enable instrumentation at the user-level, files should be placed under
 either
-``<CMAKE_CONFIG_DIR>/instrumentation-d16a3082-c4e1-489b-b90c-55750a334f27`` or
-``<CMAKE_BINARY_DIR>/.cmake/instrumentation-d16a3082-c4e1-489b-b90c-55750a334f27``.
+``<CMAKE_CONFIG_DIR>/instrumentation-f4f3d5ea-0915-470f-9628-4615e72f738a`` or
+``<CMAKE_BINARY_DIR>/.cmake/instrumentation-f4f3d5ea-0915-470f-9628-4615e72f738a``.
 
 To include instrumentation data in CTest XML files (for submission to CDash),
 you need to set the following environment variables:
 
 * ``CTEST_USE_INSTRUMENTATION=1``
-* ``CTEST_EXPERIMENTAL_INSTRUMENTATION=d16a3082-c4e1-489b-b90c-55750a334f27``
+* ``CTEST_EXPERIMENTAL_INSTRUMENTATION=f4f3d5ea-0915-470f-9628-4615e72f738a``

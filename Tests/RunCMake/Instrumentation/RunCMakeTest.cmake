@@ -23,7 +23,7 @@ function(instrument test)
   )
   cmake_parse_arguments(ARGS "${OPTIONS}" "CHECK_SCRIPT;CONFIGURE_ARG" "" ${ARGN})
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/${test})
-  set(uuid "d16a3082-c4e1-489b-b90c-55750a334f27")
+  set(uuid "f4f3d5ea-0915-470f-9628-4615e72f738a")
   set(v1 ${RunCMake_TEST_BINARY_DIR}/.cmake/instrumentation-${uuid}/v1)
   set(query_dir ${CMAKE_CURRENT_LIST_DIR}/query)
 

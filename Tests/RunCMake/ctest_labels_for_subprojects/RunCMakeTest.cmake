@@ -38,7 +38,7 @@ file(COPY "${CTEST_RUNCMAKE_SOURCE_DIRECTORY}/MyThirdPartyDependency"
   if(USE_INSTRUMENTATION)
     set(CASE_CMAKELISTS_SUFFIX_CODE [[
   add_subdirectory(MyThirdPartyDependency)
-  set(CMAKE_EXPERIMENTAL_INSTRUMENTATION "d16a3082-c4e1-489b-b90c-55750a334f27")
+  set(CMAKE_EXPERIMENTAL_INSTRUMENTATION "f4f3d5ea-0915-470f-9628-4615e72f738a")
   cmake_instrumentation(DATA_VERSION 1 API_VERSION 1)
     ]])
     set(RunCMake-check-file CTestScriptVariableCommandLine-check.cmake)
