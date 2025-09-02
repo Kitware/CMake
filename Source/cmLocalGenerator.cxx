@@ -1443,7 +1443,7 @@ void cmLocalGenerator::GetDeviceLinkFlags(
 
   auto linklang = linkLineComputer.GetLinkerLanguage(target, config);
   auto ipoEnabled = target->IsIPOEnabled(linklang, config);
-  if (!ipoEnabled) {
+  if (!ipoEnabled && pcli) {
     ipoEnabled = linkLineComputer.ComputeRequiresDeviceLinkingIPOFlag(*pcli);
   }
   if (ipoEnabled) {
@@ -2989,9 +2989,8 @@ void cmLocalGenerator::CopyPchCompilePdb(
   } else {
     cc->SetOutputs(outputs);
     cmSourceFile* copy_rule = this->AddCustomCommandToOutput(std::move(cc));
-    copy_rule->SetProperty("CXX_SCAN_FOR_MODULES", "0");
-
     if (copy_rule) {
+      copy_rule->SetProperty("CXX_SCAN_FOR_MODULES", "0");
       target->AddSource(copy_rule->ResolveFullPath());
     }
   }
