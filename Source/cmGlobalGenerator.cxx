@@ -3436,9 +3436,12 @@ cmValue cmGlobalGenerator::GetDebuggerWorkingDirectory(
 }
 
 cmGlobalGenerator::TargetDependSet const&
-cmGlobalGenerator::GetTargetDirectDepends(cmGeneratorTarget const* target)
+cmGlobalGenerator::GetTargetDirectDepends(
+  cmGeneratorTarget const* target) const
 {
-  return this->TargetDependencies[target];
+  auto i = this->TargetDependencies.find(target);
+  assert(i != this->TargetDependencies.end());
+  return i->second;
 }
 
 bool cmGlobalGenerator::TargetOrderIndexLess(cmGeneratorTarget const* l,

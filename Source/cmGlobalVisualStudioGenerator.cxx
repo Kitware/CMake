@@ -119,7 +119,7 @@ char const* cmGlobalVisualStudioGenerator::GetIDEVersion() const
   return "";
 }
 
-void cmGlobalVisualStudioGenerator::WriteSLNHeader(std::ostream& fout)
+void cmGlobalVisualStudioGenerator::WriteSLNHeader(std::ostream& fout) const
 {
   char utf8bom[] = { char(0xEF), char(0xBB), char(0xBF) };
   fout.write(utf8bom, 3);
@@ -780,7 +780,7 @@ void RegisterVisualStudioMacros(std::string const& macrosFile,
   }
 }
 bool cmGlobalVisualStudioGenerator::TargetIsFortranOnly(
-  cmGeneratorTarget const* gt)
+  cmGeneratorTarget const* gt) const
 {
   // If there's only one source language, Fortran has to be used
   // in order for the sources to compile.

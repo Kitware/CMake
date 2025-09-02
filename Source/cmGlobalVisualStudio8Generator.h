@@ -73,16 +73,17 @@ protected:
 
   static cmIDEFlagTable const* GetExtraFlagTableVS8();
   void WriteSolutionConfigurations(
-    std::ostream& fout, std::vector<std::string> const& configs) override;
+    std::ostream& fout,
+    std::vector<std::string> const& configs) const override;
   void WriteProjectConfigurations(
     std::ostream& fout, std::string const& name,
     cmGeneratorTarget const& target, std::vector<std::string> const& configs,
     std::set<std::string> const& configsPartOfDefaultBuild,
-    std::string const& platformMapping = "") override;
+    std::string const& platformMapping = "") const override;
   bool ComputeTargetDepends() override;
   void WriteProjectDepends(std::ostream& fout, std::string const& name,
                            std::string const& path,
-                           cmGeneratorTarget const* t) override;
+                           cmGeneratorTarget const* t) const override;
 
   bool UseFolderProperty() const override;
 
