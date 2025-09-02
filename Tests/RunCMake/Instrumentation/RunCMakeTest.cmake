@@ -160,7 +160,10 @@ instrument(cmake-command-custom-content-bad-type NO_WARN)
 instrument(cmake-command-custom-content-bad-content NO_WARN)
 
 # Test make/ninja hooks
-if(RunCMake_GENERATOR STREQUAL "MSYS Makefiles")
+if(RunCMake_GENERATOR STREQUAL "FASTBuild")
+  # FIXME(#27184): This does not work for FASTBuild.
+  set(Skip_BUILD_MAKE_PROGRAM_Case 1)
+elseif(RunCMake_GENERATOR STREQUAL "MSYS Makefiles")
   # FIXME(#27079): This does not work for MSYS Makefiles.
   set(Skip_BUILD_MAKE_PROGRAM_Case 1)
 elseif(RunCMake_GENERATOR STREQUAL "NMake Makefiles")
