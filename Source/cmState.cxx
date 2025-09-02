@@ -27,6 +27,10 @@
 #include "cmSystemTools.h"
 #include "cmake.h"
 
+namespace cmStateDetail {
+std::string const PropertySentinel = std::string{};
+} // namespace cmStateDetail
+
 cmState::cmState(Mode mode, ProjectKind projectKind)
   : StateMode(mode)
   , StateProjectKind(projectKind)
