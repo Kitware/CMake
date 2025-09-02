@@ -20,17 +20,26 @@ This module provides the following command:
 
 .. command:: check_include_file_cxx
 
-  Checks once whether a header file can be included in C++ code:
+  Checks once whether a header file exists and can be included in C++ code:
 
   .. code-block:: cmake
 
     check_include_file_cxx(<include> <variable> [<flags>])
 
-  This command checks once whether the given ``<include>`` header file
-  exists and can be included in a ``CXX`` source file.  The result of the
-  check is stored in an internal cache variable named ``<variable>``.  The
-  optional third argument may be used to add additional compilation flags
-  to the check (or use the ``CMAKE_REQUIRED_FLAGS`` variable below).
+  .. rubric:: The arguments are:
+
+  ``<include>``
+    A header file to be checked.
+
+  ``<variable>``
+    The name of the variable to store the result of the check.  This
+    variable will be created as an internal cache variable.
+
+  ``<flags>``
+    (Optional) A :ref:`semicolon-separated list <CMake Language Lists>` of
+    additional compilation flags to be added to the check.  Alternatively,
+    flags can be also specified with the ``CMAKE_REQUIRED_FLAGS`` variable
+    below.
 
   .. rubric:: Variables Affecting the Check
 

@@ -20,17 +20,26 @@ This module provides the following command:
 
 .. command:: check_include_file
 
-  Checks once whether a header file can be included in C code:
+  Checks once whether a header file exists and can be included in C code:
 
   .. code-block:: cmake
 
     check_include_file(<include> <variable> [<flags>])
 
-  This command checks once whether the given ``<include>`` header file
-  exists and can be included in a C source file.  The result of the check
-  is stored in an internal cache variable named ``<variable>``.  The
-  optional third argument may be used to add additional compilation flags
-  to the check (or use the ``CMAKE_REQUIRED_FLAGS`` variable below).
+  .. rubric:: The arguments are:
+
+  ``<include>``
+    A header file to be checked.
+
+  ``<variable>``
+    The name of the variable to store the result of the check.  This
+    variable will be created as an internal cache variable.
+
+  ``<flags>``
+    (Optional) A :ref:`semicolon-separated list <CMake Language Lists>` of
+    additional compilation flags to be added to the check.  Alternatively,
+    flags can be also specified with the ``CMAKE_REQUIRED_FLAGS`` variable
+    below.
 
   .. rubric:: Variables Affecting the Check
 
@@ -76,7 +85,7 @@ Example: Isolated Check
 In the following example, this module is used in combination with the
 :module:`CMakePushCheckState` module to temporarily modify the required
 compile definitions (via ``CMAKE_REQUIRED_DEFINITIONS``) and verify whether
-the C header ``ucontext.h`` is available.  The result is stored
+the C header ``<ucontext.h>`` is available.  The result is stored
 in the internal cache variable ``HAVE_UCONTEXT_H``.
 
 For example, on macOS, the ``ucontext`` API is deprecated, and headers may
@@ -95,7 +104,7 @@ features (values 500 or greater).
       set(CMAKE_REQUIRED_DEFINITIONS -D_XOPEN_SOURCE)
     endif()
 
-    check_include_files(ucontext.h HAVE_UCONTEXT_H)
+    check_include_file(ucontext.h HAVE_UCONTEXT_H)
   cmake_pop_check_state()
 
 See Also
