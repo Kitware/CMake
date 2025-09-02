@@ -29,6 +29,10 @@ else()
   string(REPLACE "${CMAKE_END_TEMP_FILE}" "" CMAKE_C_LINK_EXECUTABLE "${CMAKE_C_LINK_EXECUTABLE}")
 
   add_executable(main main.c)
+  if(CMAKE_GENERATOR MATCHES "FASTBuild")
+    # FASTBuild needs output to exist.
+    file(TOUCH "${CMAKE_CURRENT_BINARY_DIR}${cfg_dir}/main${CMAKE_EXECUTABLE_SUFFIX}")
+  endif()
   if (NOT DEFINED CMAKE_LINK_WARNING_AS_ERROR)
     set_property(TARGET main PROPERTY LINK_WARNING_AS_ERROR ${link_warning_as_error})
   endif()

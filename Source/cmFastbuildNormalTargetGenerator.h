@@ -126,7 +126,6 @@ private:
                                   std::string& outLinkerExecutable,
                                   std::string& outLinkerArgs);
 
-  void ApplyCompileRuleLauncher(std::string& command);
   void ApplyLinkRuleLauncher(std::string& command);
   void ApplyLWYUToLinkerCommand(FastbuildLinkerNode& linkerNode);
 

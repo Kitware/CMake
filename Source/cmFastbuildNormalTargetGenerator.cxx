@@ -332,24 +332,13 @@ bool cmFastbuildNormalTargetGenerator::DetectBaseLinkerCommand(
   return true;
 }
 
-void cmFastbuildNormalTargetGenerator::ApplyCompileRuleLauncher(
+void cmFastbuildNormalTargetGenerator::ApplyLinkRuleLauncher(
   std::string& command)
 {
   std::string const val = this->GetLocalGenerator()->GetRuleLauncher(
     this->GetGeneratorTarget(), "RULE_LAUNCH_LINK", Config);
   if (cmNonempty(val)) {
     LogMessage("RULE_LAUNCH_LINK: " + val);
-    command = cmStrCat(val, " ", command);
-  }
-}
-
-void cmFastbuildNormalTargetGenerator::ApplyLinkRuleLauncher(
-  std::string& command)
-{
-  std::string const val = this->GetLocalGenerator()->GetRuleLauncher(
-    this->GetGeneratorTarget(), "RULE_LAUNCH_COMPILE", Config);
-  if (cmNonempty(val)) {
-    LogMessage("RULE_LAUNCH_COMPILE: " + val);
     command = cmStrCat(val, " ", command);
   }
 }
