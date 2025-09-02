@@ -7,9 +7,9 @@
 function(do_match_config_test)
   add_library(lib_match INTERFACE IMPORTED)
   set_target_properties(lib_match PROPERTIES
-    IMPORTED_CONFIGURATIONS "RELEASE;DEBUG"
+    IMPORTED_CONFIGURATIONS "TEST;RELEASE;DEBUG"
     INTERFACE_COMPILE_DEFINITIONS
-      "$<$<CONFIG:debug>:DEBUG>;$<$<CONFIG:release>:RELEASE>"
+      "$<$<CONFIG:debug>:DEBUG>;$<$<CONFIG:release>:RELEASE>;$<$<CONFIG:test>:TEST>"
   )
 
   add_executable(exe_match configtest.c)

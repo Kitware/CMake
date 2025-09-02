@@ -3210,7 +3210,7 @@ bool cmTargetInternals::CheckImportedLibName(std::string const& prop,
   return true;
 }
 
-bool cmTarget::GetMappedConfig(std::string const& desired_config, cmValue& loc,
+bool cmTarget::GetMappedConfig(std::string const& desiredConfig, cmValue& loc,
                                cmValue& imp, std::string& suffix) const
 {
   switch (this->GetPolicyStatusCMP0200()) {
@@ -3221,9 +3221,9 @@ bool cmTarget::GetMappedConfig(std::string const& desired_config, cmValue& loc,
       }
       CM_FALLTHROUGH;
     case cmPolicies::OLD:
-      return this->GetMappedConfigOld(desired_config, loc, imp, suffix);
+      return this->GetMappedConfigOld(desiredConfig, loc, imp, suffix);
     case cmPolicies::NEW:
-      return this->GetMappedConfigNew(desired_config, loc, imp, suffix);
+      return this->GetMappedConfigNew(desiredConfig, loc, imp, suffix);
   }
 
   cmValue newLoc;
@@ -3231,9 +3231,9 @@ bool cmTarget::GetMappedConfig(std::string const& desired_config, cmValue& loc,
   std::string newSuffix;
 
   bool const newResult =
-    this->GetMappedConfigNew(desired_config, newLoc, newImp, newSuffix);
+    this->GetMappedConfigNew(desiredConfig, newLoc, newImp, newSuffix);
 
-  if (!this->GetMappedConfigOld(desired_config, loc, imp, suffix)) {
+  if (!this->GetMappedConfigOld(desiredConfig, loc, imp, suffix)) {
     if (newResult) {
       // NEW policy found a configuration, OLD did not.
       auto newConfig = cm::string_view{ newSuffix }.substr(1);
@@ -3416,8 +3416,7 @@ cmValue cmTarget::GetLocation(std::string const& base,
 bool cmTarget::GetLocation(std::string const& config, cmValue& loc,
                            cmValue& imp, std::string& suffix) const
 {
-  suffix = (config.empty() ? std::string{}
-                           : cmStrCat('_', cmSystemTools::UpperCase(config)));
+  suffix = (config.empty() ? std::string{} : cmStrCat('_', config));
 
   // There may be only IMPORTED_IMPLIB for a shared library or an executable
   // with exports.
@@ -3446,23 +3445,24 @@ bool cmTarget::GetLocation(std::string const& config, cmValue& loc,
   return loc || imp || (this->GetType() == cmStateEnums::INTERFACE_LIBRARY);
 }
 
-bool cmTarget::GetMappedConfigNew(std::string const& desired_config,
-                                  cmValue& loc, cmValue& imp,
-                                  std::string& suffix) const
+bool cmTarget::GetMappedConfigNew(std::string desiredConfig, cmValue& loc,
+                                  cmValue& imp, std::string& suffix) const
 {
+  desiredConfig = cmSystemTools::UpperCase(desiredConfig);
+
   // Get configuration mapping, if present.
   cmList mappedConfigs;
-  if (!desired_config.empty()) {
-    std::string mapProp = cmStrCat("MAP_IMPORTED_CONFIG_",
-                                   cmSystemTools::UpperCase(desired_config));
+  if (!desiredConfig.empty()) {
+    std::string mapProp = cmStrCat("MAP_IMPORTED_CONFIG_", desiredConfig);
     if (cmValue mapValue = this->GetProperty(mapProp)) {
-      mappedConfigs.assign(*mapValue, cmList::EmptyElements::Yes);
+      mappedConfigs.assign(cmSystemTools::UpperCase(*mapValue),
+                           cmList::EmptyElements::Yes);
     }
   }
 
   // Get imported configurations, if specified.
   if (cmValue iconfigs = this->GetProperty("IMPORTED_CONFIGURATIONS")) {
-    cmList const availableConfigs{ iconfigs };
+    cmList const availableConfigs{ cmSystemTools::UpperCase(*iconfigs) };
 
     if (!mappedConfigs.empty()) {
       for (auto const& c : mappedConfigs) {
@@ -3478,8 +3478,8 @@ bool cmTarget::GetMappedConfigNew(std::string const& desired_config,
     }
 
     // There is no mapping; try the requested configuration first.
-    if (cm::contains(availableConfigs, desired_config)) {
-      this->GetLocation(desired_config, loc, imp, suffix);
+    if (cm::contains(availableConfigs, desiredConfig)) {
+      this->GetLocation(desiredConfig, loc, imp, suffix);
       return true;
     }
 
@@ -3504,7 +3504,7 @@ bool cmTarget::GetMappedConfigNew(std::string const& desired_config,
 
   // There is no mapping and no explicit list of configurations; the only
   // configuration left to try is the requested configuration.
-  if (this->GetLocation(desired_config, loc, imp, suffix)) {
+  if (this->GetLocation(desiredConfig, loc, imp, suffix)) {
     return true;
   }
 
