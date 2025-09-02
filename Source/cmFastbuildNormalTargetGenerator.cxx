@@ -250,6 +250,9 @@ bool cmFastbuildNormalTargetGenerator::DetectBaseLinkerCommand(
   cmRulePlaceholderExpander::RuleVariables vars;
   vars.CMTargetName = this->GeneratorTarget->GetName().c_str();
   vars.CMTargetType = cmState::GetTargetTypeName(targetType).c_str();
+  vars.CMTargetLabels =
+    this->GetGeneratorTarget()->GetTargetLabelsString().c_str();
+  vars.Config = Config.c_str();
   vars.Language = linkLanguage.c_str();
   std::string const manifests =
     cmJoin(this->GetManifestsAsFastbuildPath(), " ");
