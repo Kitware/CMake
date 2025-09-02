@@ -52,7 +52,7 @@ private:
   std::vector<std::string> HttpHeaders;
   std::string HTTPProxyAuth;
   std::string HTTPProxy;
-  curl_proxytype HTTPProxyType;
+  long HTTPProxyType;
   bool UseHttp10 = false;
   bool Quiet = false;
   int TimeOutSeconds = 0;
