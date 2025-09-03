@@ -67,6 +67,8 @@ public:
     QtAutogenSource,
   };
   void SetSpecialSourceType(SpecialSourceType type);
+  bool IsPchHeader() const;
+  bool IsPchSource() const;
 
   //! Set/Get a property of this source file
   void SetProperty(std::string const& prop, cmValue value);

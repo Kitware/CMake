@@ -4258,7 +4258,7 @@ std::string cmLocalGenerator::GetObjectFileNameWithoutTarget(
       objectName = cmSystemTools::GetFilenameName(source.GetFullPath());
     }
   }
-  bool const isPchObject = objectName.find("cmake_pch") != std::string::npos;
+  bool const isPchObject = source.IsPchHeader() || source.IsPchSource();
 
   // Short object path policy selected, use as little info as necessary to
   // select an object name
