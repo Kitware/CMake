@@ -14,11 +14,15 @@ function(expect_empty SUFFIX)
 endfunction()
 
 project(Omissions LANGUAGES)
-expect_empty(VERSION)
-expect_empty(VERSION_MAJOR)
-expect_empty(VERSION_MINOR)
-expect_empty(VERSION_PATCH)
-expect_empty(VERSION_TWEAK)
+
+# TODO: Test these when a policy is in place to handle projects expecting
+# legacy handling of the version variables
+# expect_empty(VERSION)
+# expect_empty(VERSION_MAJOR)
+# expect_empty(VERSION_MINOR)
+# expect_empty(VERSION_PATCH)
+# expect_empty(VERSION_TWEAK)
+
 expect_empty(COMPAT_VERSION)
 expect_empty(SPDX_LICENSE)
 expect_empty(DESCRIPTION)
