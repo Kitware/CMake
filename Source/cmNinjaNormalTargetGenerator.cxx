@@ -446,6 +446,13 @@ void cmNinjaNormalTargetGenerator::WriteDeviceLinkRules(
   this->GetGlobalGenerator()->AddRule(rule);
 }
 
+static void NinjaSafeComment(std::string& comment)
+{
+  // Replace control characters in comments.
+  cmSystemTools::ReplaceString(comment, "\n", " / ");
+  cmSystemTools::ReplaceString(comment, "$", "$$");
+}
+
 void cmNinjaNormalTargetGenerator::WriteLinkRule(
   bool useResponseFile, std::string const& config,
   std::vector<std::string> const& preLinkComments,
@@ -609,10 +616,12 @@ void cmNinjaNormalTargetGenerator::WriteLinkRule(
     char const* presep = "";
     char const* postsep = "";
     auto prelink = cmJoin(preLinkComments, "; ");
+    NinjaSafeComment(prelink);
     if (!prelink.empty()) {
       presep = "; ";
     }
     auto postbuild = cmJoin(postBuildComments, "; ");
+    NinjaSafeComment(postbuild);
     if (!postbuild.empty()) {
       postsep = "; ";
     }
