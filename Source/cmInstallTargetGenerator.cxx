@@ -260,7 +260,10 @@ cmInstallTargetGenerator::Files cmInstallTargetGenerator::GetFiles(
       files.NoTweak = true;
       files.Rename = true;
       files.FromDir = this->Target->GetObjectDirectory(config);
-      files.ToDir = computeInstallObjectDir(this->Target, config);
+      if (!this->Target->GetPropertyAsBool(
+            "INSTALL_OBJECT_ONLY_USE_DESTINATION")) {
+        files.ToDir = computeInstallObjectDir(this->Target, config);
+      }
       for (auto const& obj : objects) {
         files.From.emplace_back(obj.first.GetPath());
         files.To.emplace_back(obj.second.GetPath());
@@ -460,9 +463,13 @@ void cmInstallTargetGenerator::GetInstallObjectNames(
     };
   this->Target->GetTargetObjectLocations(config, storeObjectLocations);
   objects.reserve(installedObjects.size());
-  auto const rootDir = computeInstallObjectDir(this->Target, config);
+  std::string rootDir;
+  if (!this->Target->GetPropertyAsBool(
+        "INSTALL_OBJECT_ONLY_USE_DESTINATION")) {
+    rootDir = cmStrCat(computeInstallObjectDir(this->Target, config), '/');
+  }
   for (cmObjectLocation const& o : installedObjects) {
-    objects.emplace_back(cmStrCat(rootDir, '/', o.GetPath()));
+    objects.emplace_back(cmStrCat(rootDir, o.GetPath()));
   }
 }
 
