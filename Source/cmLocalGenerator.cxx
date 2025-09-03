@@ -4240,7 +4240,7 @@ std::string cmLocalGenerator::GetObjectFileNameWithoutTarget(
   }
 
   // This can return an absolute path in the case where source is
-  // not relative to the current source or binary directoreis
+  // not relative to the current source or binary directories
   std::string objectName = this->GetRelativeSourceFileName(source);
   // if it is still a full path check for the try compile case
   // try compile never have in source sources, and should not
