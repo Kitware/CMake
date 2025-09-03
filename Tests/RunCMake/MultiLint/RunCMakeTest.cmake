@@ -36,12 +36,13 @@ function(run_skip_linting test_name)
     run_cmake_command(${test_name}-Build ${CMAKE_COMMAND} --build .)
 endfunction()
 
-run_skip_linting(C_skip_linting_ON)
-run_skip_linting(CXX_skip_linting_ON)
-run_skip_linting(C_skip_linting_OFF)
-run_skip_linting(CXX_skip_linting_OFF)
+foreach(lang IN ITEMS C CXX)
+  # Testing `SKIP_LINTING=ON`
+  run_skip_linting(${lang}_skip_linting_ON)
+  if(NOT RunCMake_GENERATOR STREQUAL "Watcom WMake")
+    run_skip_linting(${lang}-launch_skip_linting_ON)
+  endif()
 
-if(NOT RunCMake_GENERATOR STREQUAL "Watcom WMake")
-  run_skip_linting(C-launch_skip_linting_ON)
-  run_skip_linting(CXX-launch_skip_linting_ON)
-endif()
+  # Testing `SKIP_LINTING=OFF`
+  run_skip_linting(${lang}_skip_linting_OFF)
+endforeach()
