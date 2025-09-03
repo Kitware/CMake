@@ -1423,8 +1423,12 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
 
   auto compilerLauncher = this->GetCompilerLauncher(language, config);
 
-  cmValue const skipCodeCheck = source->GetProperty("SKIP_LINTING");
-  if (!skipCodeCheck.IsOn()) {
+  cmValue const srcSkipCodeCheckVal = source->GetProperty("SKIP_LINTING");
+  bool const skipCodeCheck = srcSkipCodeCheckVal.IsSet()
+    ? srcSkipCodeCheckVal.IsOn()
+    : this->GetGeneratorTarget()->GetPropertyAsBool("SKIP_LINTING");
+
+  if (!skipCodeCheck) {
     auto const cmakeCmd = this->GetLocalGenerator()->ConvertToOutputFormat(
       cmSystemTools::GetCMakeCommand(), cmLocalGenerator::SHELL);
     vars["CODE_CHECK"] =

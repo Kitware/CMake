@@ -1091,8 +1091,12 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
       compilerLauncher = GetCompilerLauncher(lang, config);
     }
 
-    cmValue const skipCodeCheck = source.GetProperty("SKIP_LINTING");
-    if (!skipCodeCheck.IsOn()) {
+    cmValue const srcSkipCodeCheckVal = source.GetProperty("SKIP_LINTING");
+    bool const skipCodeCheck = srcSkipCodeCheckVal.IsSet()
+      ? srcSkipCodeCheckVal.IsOn()
+      : this->GetGeneratorTarget()->GetPropertyAsBool("SKIP_LINTING");
+
+    if (!skipCodeCheck) {
       std::string const codeCheck = this->GenerateCodeCheckRules(
         source, compilerLauncher, "$(CMAKE_COMMAND)", config, nullptr);
       if (!codeCheck.empty()) {

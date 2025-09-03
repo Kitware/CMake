@@ -41,3 +41,8 @@ By using the ``SKIP_LINTING`` property, you can selectively exclude specific
 source files from the linting process. This allows you to focus the
 linting tools on the relevant parts of your project, enhancing the efficiency
 and effectiveness of the linting workflow.
+
+See Also
+^^^^^^^^
+
+* :prop_tgt:`SKIP_LINTING` target property

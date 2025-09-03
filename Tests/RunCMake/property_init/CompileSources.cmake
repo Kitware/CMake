@@ -113,6 +113,7 @@ set(properties
   "OBJCXX_LINKER_LAUNCHER"                  "ccache"            "<SAME>"
 
   # Static analysis
+  "SKIP_LINTING"                            "OFF"               "<SAME>"
   ## C
   "C_CLANG_TIDY"                            "clang-tidy"        "<SAME>"
   "C_CLANG_TIDY_EXPORT_FIXES_DIR"           "${dir}"            "<SAME>"

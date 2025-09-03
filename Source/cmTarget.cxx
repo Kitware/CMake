@@ -464,6 +464,7 @@ TargetProperty const StaticTargetProperties[] = {
   { "Fortran_LINKER_LAUNCHER"_s, IC::CanCompileSources },
 
   // Static analysis
+  { "SKIP_LINTING"_s, IC::CanCompileSources },
   // -- C
   { "C_CLANG_TIDY"_s, IC::CanCompileSources },
   { "C_CLANG_TIDY_EXPORT_FIXES_DIR"_s, IC::CanCompileSources },
@@ -1804,6 +1805,7 @@ void cmTarget::CopyImportedCxxModulesProperties(cmTarget const* tgt)
     "CXX_CPPCHECK",
     "CXX_ICSTAT",
     "CXX_INCLUDE_WHAT_YOU_USE",
+    "SKIP_LINTING",
 
     // Build graph properties
     "EXCLUDE_FROM_ALL",
