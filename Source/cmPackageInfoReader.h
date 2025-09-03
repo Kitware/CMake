@@ -91,6 +91,9 @@ private:
                                 Json::Value const& data,
                                 std::string const& package) const;
 
+  void AddTargetConfiguration(cmTarget* target,
+                              cm::string_view configuration) const;
+
   void SetTargetProperties(cmMakefile* makefile, cmTarget* target,
                            Json::Value const& data, std::string const& package,
                            cm::string_view configuration) const;

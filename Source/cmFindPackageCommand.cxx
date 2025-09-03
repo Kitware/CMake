@@ -2107,7 +2107,10 @@ bool cmFindPackageCommand::ReadPackage()
   bool const hasComponentsRequested =
     !this->RequiredComponents.empty() || !this->OptionalComponents.empty();
 
-  cmMakefile::CallRAII scope{ this->Makefile, this->FileFound, this->Status };
+  cmMakefile::CallRAII cs{ this->Makefile, this->FileFound, this->Status };
+  cmMakefile::PolicyPushPop ps{ this->Makefile };
+
+  this->Makefile->SetPolicy(cmPolicies::CMP0200, cmPolicies::NEW);
 
   // Loop over appendices.
   auto iter = this->CpsAppendices.begin();
