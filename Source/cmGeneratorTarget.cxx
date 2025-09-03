@@ -566,10 +566,11 @@ void cmGeneratorTarget::AddSourceCommon(std::string const& src, bool before)
   this->ClearSourcesCache();
 }
 
-void cmGeneratorTarget::AddSource(std::string const& src, bool before)
+cmSourceFile* cmGeneratorTarget::AddSource(std::string const& src, bool before)
 {
-  this->Target->AddSource(src, before);
+  auto* sf = this->Target->AddSource(src, before);
   this->AddSourceCommon(src, before);
+  return sf;
 }
 
 void cmGeneratorTarget::AddTracedSources(std::vector<std::string> const& srcs)

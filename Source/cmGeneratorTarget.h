@@ -845,7 +845,7 @@ public:
    */
   void ClearLinkInterfaceCache();
 
-  void AddSource(std::string const& src, bool before = false);
+  cmSourceFile* AddSource(std::string const& src, bool before = false);
   void AddTracedSources(std::vector<std::string> const& srcs);
 
   /**
