@@ -974,7 +974,8 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
             std::string cleanArgs =
               cmStrCat("-E chdir \"", lgen->GetObjectOutputRoot(), "\" \"",
                        cmSystemTools::GetCMakeCommand(), "\" -P \"");
-            cleanArgs += lgen->GetTargetDirectory(target.get());
+            cleanArgs += lgen->GetTargetDirectory(
+              target.get(), cmStateEnums::IntermediateDirKind::ObjectFiles);
             cleanArgs += "/cmake_clean.cmake\"";
             cmExtraEclipseCDT4Generator::AppendTarget(
               xml, "Clean", cmSystemTools::GetCMakeCommand(), cleanArgs,

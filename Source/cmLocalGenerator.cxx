@@ -4381,7 +4381,8 @@ std::string const& cmLocalGenerator::GetCurrentSourceDirectory() const
 }
 
 std::string cmLocalGenerator::GetTargetDirectory(
-  cmGeneratorTarget const* /*unused*/) const
+  cmGeneratorTarget const* /*unused*/,
+  cmStateEnums::IntermediateDirKind /*kind*/) const
 {
   cmSystemTools::Error("GetTargetDirectory"
                        " called on cmLocalGenerator");

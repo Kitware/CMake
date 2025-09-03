@@ -3183,13 +3183,17 @@ std::string cmGeneratorTarget::GetPchFile(std::string const& config,
         pchFile = replaceExtension(pchFileObject, pchExtension);
       }
     } else {
-      if (this->GetUseShortObjectNames()) {
+      if (this->GetUseShortObjectNames() && !pchExtension.empty()) {
         auto pchSource = this->GetPchSource(config, language, arch);
         auto* pchSf = this->Makefile->GetOrCreateSource(
           pchSource, false, cmSourceFileLocationKind::Known);
         pchSf->ResolveFullPath();
+        std::string cfgSubdir;
+        if (this->GetGlobalGenerator()->IsMultiConfig()) {
+          cfgSubdir = cmStrCat(config, '/');
+        }
         pchFile = cmStrCat(
-          this->GetSupportDirectory(), '/',
+          this->GetSupportDirectory(), '/', cfgSubdir,
           this->LocalGenerator->GetShortObjectFileName(*pchSf), pchExtension);
       } else {
         pchFile =
@@ -5436,7 +5440,7 @@ std::string cmGeneratorTarget::GetSupportDirectory(
 {
   cmLocalGenerator* lg = this->GetLocalGenerator();
   return cmStrCat(lg->GetObjectOutputRoot(kind), '/',
-                  lg->GetTargetDirectory(this));
+                  lg->GetTargetDirectory(this, kind));
 }
 
 std::string cmGeneratorTarget::GetCMFSupportDirectory(
@@ -5445,10 +5449,10 @@ std::string cmGeneratorTarget::GetCMFSupportDirectory(
   cmLocalGenerator* lg = this->GetLocalGenerator();
   if (!lg->AlwaysUsesCMFPaths()) {
     return cmStrCat(lg->GetCurrentBinaryDirectory(), "/CMakeFiles/",
-                    lg->GetTargetDirectory(this));
+                    lg->GetTargetDirectory(this, kind));
   }
   return cmStrCat(lg->GetObjectOutputRoot(kind), '/',
-                  lg->GetTargetDirectory(this));
+                  lg->GetTargetDirectory(this, kind));
 }
 
 bool cmGeneratorTarget::IsLinkable() const

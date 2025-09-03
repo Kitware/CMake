@@ -20,3 +20,6 @@ target_precompile_headers(bar INTERFACE include/bar.h)
 
 add_executable(foobar foobar.c)
 target_link_libraries(foobar foo bar)
+
+enable_testing()
+add_test(NAME foobar COMMAND foobar)

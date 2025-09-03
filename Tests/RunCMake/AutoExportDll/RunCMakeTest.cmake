@@ -62,7 +62,7 @@ function (run_cmake_AutoExport name dir)
   endif()
 endfunction ()
 run_cmake_AutoExport(AutoExport "say.dir")
-if (CMAKE_GENERATOR MATCHES "(Ninja|Makefiles|Visual Studio)")
+if (RunCMake_GENERATOR MATCHES "(Ninja|Makefiles|Visual Studio)")
   run_cmake_AutoExport(AutoExportShort ".o/0cb3d702")
 endif ()
 

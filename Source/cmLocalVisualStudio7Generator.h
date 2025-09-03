@@ -12,6 +12,7 @@
 #include <vector>
 
 #include "cmLocalVisualStudioGenerator.h"
+#include "cmStateTypes.h"
 #include "cmVisualStudioGeneratorOptions.h"
 
 class cmCustomCommand;
@@ -76,7 +77,8 @@ public:
   void SetBuildType(BuildType, std::string const& name);
 
   std::string GetTargetDirectory(
-    cmGeneratorTarget const* target) const override;
+    cmGeneratorTarget const* target,
+    cmStateEnums::IntermediateDirKind kind) const override;
   cmSourceFile* CreateVCProjBuildRule();
   void WriteStampFiles();
   std::string ComputeLongestObjectDirectory(

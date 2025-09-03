@@ -30,7 +30,8 @@ public:
 
   ~cmLocalXCodeGenerator() override;
   std::string GetTargetDirectory(
-    cmGeneratorTarget const* target) const override;
+    cmGeneratorTarget const* target,
+    cmStateEnums::IntermediateDirKind kind) const override;
   void AppendFlagEscape(std::string& flags,
                         std::string const& rawFlag) const override;
   void Generate() override;

@@ -2229,10 +2229,11 @@ void cmLocalVisualStudio7Generator::ReadAndStoreExternalGUID(
 }
 
 std::string cmLocalVisualStudio7Generator::GetTargetDirectory(
-  cmGeneratorTarget const* target) const
+  cmGeneratorTarget const* target,
+  cmStateEnums::IntermediateDirKind kind) const
 {
   std::string dir;
-  if (target->GetUseShortObjectNames()) {
+  if (target->GetUseShortObjectNames(kind)) {
     dir = this->ComputeShortTargetDirectory(target);
   } else {
     dir = cmStrCat(target->GetName(), ".dir");
