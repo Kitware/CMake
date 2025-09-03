@@ -452,6 +452,7 @@ public:
   virtual std::string GetShortObjectFileName(cmSourceFile const& source) const;
   virtual std::string ComputeShortTargetDirectory(
     cmGeneratorTarget const* gt) const;
+  std::string GetCustomObjectFileName(cmSourceFile const& source) const;
 
   /**
    * Generate a macOS application bundle Info.plist file.

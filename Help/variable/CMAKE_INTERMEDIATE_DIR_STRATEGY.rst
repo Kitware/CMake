@@ -10,7 +10,8 @@ supported values are:
 - ``FULL``: Intermediate directories are named based on a
   ``<TARGET_NAME>.dir`` pattern (with some slight deviations and sanitizations
   applied in various places). Object file names are based on the filename of
-  the source file being compiled.
+  the source file being compiled or, if set, its :prop_sf:`OBJECT_NAME`
+  property.
 - ``SHORT``: Intermediate directories are named from the hash of the target
   name and the build directory location. Object file names are based on hashes
   of the source file name to reduce path lengths. This may help with projects

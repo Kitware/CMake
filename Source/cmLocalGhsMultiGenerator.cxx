@@ -60,10 +60,16 @@ void cmLocalGhsMultiGenerator::ComputeObjectFilenames(
 
   for (auto const& si : mapping) {
     cmSourceFile const* sf = si.first;
-    std::string objectNameLower = cmStrCat(
-      cmSystemTools::LowerCase(
-        cmSystemTools::GetFilenameWithoutLastExtension(sf->GetFullPath())),
-      this->GlobalGenerator->GetLanguageOutputExtension(*sf));
+    std::string objectName;
+    auto customObjectName = this->GetCustomObjectFileName(*sf);
+    if (customObjectName.empty()) {
+      objectName =
+        cmSystemTools::GetFilenameWithoutLastExtension(sf->GetFullPath());
+    } else {
+      objectName = std::move(customObjectName);
+    }
+    objectName += this->GlobalGenerator->GetLanguageOutputExtension(*sf);
+    std::string objectNameLower = cmSystemTools::LowerCase(objectName);
     counts[objectNameLower] += 1;
   }
 
@@ -74,9 +80,16 @@ void cmLocalGhsMultiGenerator::ComputeObjectFilenames(
     bool forceShortObjectName = true;
     std::string shortObjectName = this->GetObjectFileNameWithoutTarget(
       *sf, dir_max, nullptr, nullptr, &forceShortObjectName);
-    std::string longObjectName = cmStrCat(
-      cmSystemTools::GetFilenameWithoutLastExtension(sf->GetFullPath()),
-      this->GlobalGenerator->GetLanguageOutputExtension(*sf));
+    std::string longObjectName;
+    auto customObjectName = this->GetCustomObjectFileName(*sf);
+    if (customObjectName.empty()) {
+      longObjectName =
+        cmSystemTools::GetFilenameWithoutLastExtension(sf->GetFullPath());
+    } else {
+      longObjectName = std::move(customObjectName);
+      const_cast<cmGeneratorTarget*>(gt)->AddExplicitObjectName(sf);
+    }
+    longObjectName += this->GlobalGenerator->GetLanguageOutputExtension(*sf);
 
     if (counts[cmSystemTools::LowerCase(longObjectName)] > 1) {
       const_cast<cmGeneratorTarget*>(gt)->AddExplicitObjectName(sf);

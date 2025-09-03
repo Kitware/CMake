@@ -25,6 +25,7 @@
 #include "cmsys/RegularExpression.hxx"
 
 #include "cmAlgorithms.h"
+#include "cmCMakePath.h"
 #include "cmComputeLinkInformation.h"
 #include "cmCryptoHash.h"
 #include "cmCustomCommand.h"
@@ -4237,6 +4238,94 @@ std::string cmLocalGenerator::GetRelativeSourceFileName(
   return objectName;
 }
 
+std::string cmLocalGenerator::GetCustomObjectFileName(
+  cmSourceFile const& source) const
+{
+  if (!this->GetGlobalGenerator()->SupportsCustomObjectNames()) {
+    return std::string{};
+  }
+
+  if (auto objName = source.GetProperty("OBJECT_NAME")) {
+    cmGeneratorExpression ge(*this->GetCMakeInstance());
+    auto cge = ge.Parse(objName);
+    static std::string const INVALID_GENEX =
+      "_cmake_invalid_object_name_genex";
+    static std::string const INVALID_VALUE =
+      "_cmake_invalid_object_name_value";
+
+    if (!cge) {
+      this->Makefile->IssueMessage(
+        MessageType::FATAL_ERROR,
+        cmStrCat("The  \"OBJECT_NAME\" property for\n  ", source.GetFullPath(),
+                 "\nis not a valid generator expression (", objName, ")."));
+      return INVALID_GENEX;
+    }
+    if (cge->GetHadHeadSensitiveCondition()) {
+      // Not reachable; all target-sensitive  genexes actually fail to parse.
+      this->Makefile->IssueMessage(
+        MessageType::FATAL_ERROR,
+        cmStrCat("The  \"OBJECT_NAME\" property for\n  ", source.GetFullPath(),
+                 "\ncontains a condition that queries the consuming target "
+                 "which is not supported (",
+                 objName, ")."));
+      return INVALID_GENEX;
+    }
+    if (cge->GetHadLinkLanguageSensitiveCondition()) {
+      // Not reachable; all target-sensitive  genexes actually fail to parse.
+      this->Makefile->IssueMessage(
+        MessageType::FATAL_ERROR,
+        cmStrCat("The  \"OBJECT_NAME\" property for\n  ", source.GetFullPath(),
+                 "\ncontains a condition that queries the link language "
+                 "which is not supported (",
+                 objName, ")."));
+      return INVALID_GENEX;
+    }
+
+    auto objNameValue = cge->Evaluate(this, "");
+    if (cge->GetHadContextSensitiveCondition()) {
+      this->Makefile->IssueMessage(
+        MessageType::FATAL_ERROR,
+        cmStrCat("The  \"OBJECT_NAME\" property for\n  ", source.GetFullPath(),
+                 "\ncontains a context-sensitive condition which is not "
+                 "supported (",
+                 objName, ")."));
+      return INVALID_GENEX;
+    }
+
+    // Skip if it evaluates to empty.
+    if (!objNameValue.empty()) {
+      cmCMakePath objNamePath = objNameValue;
+      // Verify that it is a relative path.
+      if (objNamePath.IsAbsolute()) {
+        this->Makefile->IssueMessage(
+          MessageType::FATAL_ERROR,
+          cmStrCat(
+            "The  \"OBJECT_NAME\" property for\n  ", source.GetFullPath(),
+            "\nresolves to an absolute path which is not supported:\n  ",
+            objNameValue));
+        return INVALID_VALUE;
+      }
+      auto isInvalidComponent = [](cmCMakePath const& component) -> bool {
+        return component == ".."_s;
+      };
+      // Verify that it contains no `..` components.
+      if (std::any_of(objNamePath.begin(), objNamePath.end(),
+                      isInvalidComponent)) {
+        this->Makefile->IssueMessage(
+          MessageType::FATAL_ERROR,
+          cmStrCat("The  \"OBJECT_NAME\" property for\n  ",
+                   source.GetFullPath(), "\ncontains an invalid component (",
+                   objNameValue, ")."));
+        return INVALID_VALUE;
+      }
+
+      return objNameValue;
+    }
+  }
+
+  return std::string{};
+}
+
 std::string cmLocalGenerator::GetObjectFileNameWithoutTarget(
   cmSourceFile const& source, std::string const& dir_max,
   bool* hasSourceExtension, char const* customOutputExtension,
@@ -4245,6 +4334,17 @@ std::string cmLocalGenerator::GetObjectFileNameWithoutTarget(
   bool useShortObjectNames = this->UseShortObjectNames();
   if (forceShortObjectName) {
     useShortObjectNames = *forceShortObjectName;
+  }
+
+  if (!useShortObjectNames) {
+    auto customName = this->GetCustomObjectFileName(source);
+    if (!customName.empty()) {
+      auto ext = this->GlobalGenerator->GetLanguageOutputExtension(source);
+      if (customOutputExtension) {
+        ext = *customOutputExtension;
+      }
+      return cmStrCat(customName, ext);
+    }
   }
 
   // This can return an absolute path in the case where source is

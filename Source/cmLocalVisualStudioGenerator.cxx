@@ -55,8 +55,13 @@ void cmLocalVisualStudioGenerator::ComputeObjectFilenames(
     if (gt->GetUseShortObjectNames()) {
       baseObjectName = this->GetShortObjectFileName(*sf);
     } else {
-      baseObjectName =
-        cmSystemTools::GetFilenameWithoutLastExtension(sf->GetFullPath());
+      auto customObjectName = this->GetCustomObjectFileName(*sf);
+      if (customObjectName.empty()) {
+        baseObjectName =
+          cmSystemTools::GetFilenameWithoutLastExtension(sf->GetFullPath());
+      } else {
+        baseObjectName = std::move(customObjectName);
+      }
     }
     std::string objectNameLower = cmSystemTools::LowerCase(baseObjectName);
     if (custom_ext) {
@@ -74,8 +79,15 @@ void cmLocalVisualStudioGenerator::ComputeObjectFilenames(
   for (auto& si : mapping) {
     cmSourceFile const* sf = si.first;
     std::string shortObjectName = this->GetShortObjectFileName(*sf);
-    std::string longObjectName =
-      cmSystemTools::GetFilenameWithoutLastExtension(sf->GetFullPath());
+    std::string longObjectName;
+    auto customObjectName = this->GetCustomObjectFileName(*sf);
+    if (customObjectName.empty()) {
+      longObjectName =
+        cmSystemTools::GetFilenameWithoutLastExtension(sf->GetFullPath());
+    } else {
+      longObjectName = std::move(customObjectName);
+      const_cast<cmGeneratorTarget*>(gt)->AddExplicitObjectName(sf);
+    }
     if (custom_ext) {
       shortObjectName += custom_ext;
       longObjectName += custom_ext;
