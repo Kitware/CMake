@@ -1,3 +1,5 @@
+enable_language(CXX)
+
 # Protect tests from running inside the default install prefix.
 set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_BINARY_DIR}/NotDefaultPrefix")
 
