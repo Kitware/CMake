@@ -3147,6 +3147,7 @@ void cmMakefile::AddTargetObject(std::string const& tgtName,
 {
   cmSourceFile* sf =
     this->GetOrCreateSource(objFile, true, cmSourceFileLocationKind::Known);
+  sf->SetSpecialSourceType(cmSourceFile::SpecialSourceType::Object);
   sf->SetObjectLibrary(tgtName);
   sf->SetProperty("EXTERNAL_OBJECT", "1");
   // TODO: Compute a language for this object based on the associated source

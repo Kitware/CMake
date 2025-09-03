@@ -43,6 +43,8 @@ bool cmQTWrapCPPCommand(std::vector<std::string> const& args,
       std::string newName =
         cmStrCat(mf.GetCurrentBinaryDirectory(), "/moc_", srcName, ".cxx");
       cmSourceFile* sf = mf.GetOrCreateSource(newName, true);
+      sf->SetSpecialSourceType(
+        cmSourceFile::SpecialSourceType::QtWrapCppSource);
       if (curr) {
         sf->SetProperty("ABSTRACT", curr->GetProperty("ABSTRACT"));
       }

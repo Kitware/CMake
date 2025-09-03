@@ -158,7 +158,8 @@ void cmLocalXCodeGenerator::AddXCConfigSources(cmGeneratorTarget* target)
       *xcconfig,
       this, config);
     if (!file.empty()) {
-      target->AddSource(file);
+      auto* xcconfig_sf = target->AddSource(file);
+      xcconfig_sf->SetSpecialSourceType(cmSourceFile::SpecialSourceType::XcodeXCConfigFile);
     }
   }
 }

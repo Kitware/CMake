@@ -3141,6 +3141,7 @@ std::string cmGeneratorTarget::GetPchFileObject(std::string const& config,
 
     auto* pchSf = this->Makefile->GetOrCreateSource(
       pchSource, false, cmSourceFileLocationKind::Known);
+    pchSf->SetSpecialSourceType(cmSourceFile::SpecialSourceType::PchSource);
     pchSf->ResolveFullPath();
     filename = cmStrCat(this->GetObjectDirectory(config), '/',
                         this->GetObjectName(pchSf));
@@ -3188,6 +3189,8 @@ std::string cmGeneratorTarget::GetPchFile(std::string const& config,
         auto pchSource = this->GetPchSource(config, language, arch);
         auto* pchSf = this->Makefile->GetOrCreateSource(
           pchSource, false, cmSourceFileLocationKind::Known);
+        pchSf->SetSpecialSourceType(
+          cmSourceFile::SpecialSourceType::PchSource);
         pchSf->ResolveFullPath();
         std::string cfgSubdir;
         if (this->GetGlobalGenerator()->IsMultiConfig()) {
@@ -5798,6 +5801,8 @@ std::string cmGeneratorTarget::GenerateHeaderSetVerificationFile(
     this->LocalGenerator->GetCurrentBinaryDirectory(), '/', this->GetName(),
     "_verify_interface_header_sets/", headerFilename, extension);
   auto* verificationSource = this->Makefile->GetOrCreateSource(filename);
+  source.SetSpecialSourceType(
+    cmSourceFile::SpecialSourceType::HeaderSetVerificationSource);
   verificationSource->SetProperty("LANGUAGE", language);
 
   cmSystemTools::MakeDirectory(cmSystemTools::GetFilenamePath(filename));

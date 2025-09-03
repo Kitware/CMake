@@ -29,6 +29,11 @@ cmSourceFile::cmSourceFile(cmMakefile* mf, std::string const& name,
   }
 }
 
+void cmSourceFile::SetSpecialSourceType(cmSourceFile::SpecialSourceType type)
+{
+  this->SpecialSource = type;
+}
+
 std::string const& cmSourceFile::GetExtension() const
 {
   return this->Extension;
