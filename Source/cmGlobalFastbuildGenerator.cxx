@@ -890,7 +890,7 @@ void cmGlobalFastbuildGenerator::WriteCompilers()
       std::map<std::string, std::string> compilerIdToFastbuildFamily = {
         { "MSVC", "msvc" },        { "Clang", "clang" },
         { "AppleClang", "clang" }, { "GNU", "gcc" },
-        { "NVIDIA", "cuda-nvcc" },
+        { "NVIDIA", "cuda-nvcc" }, { "Clang-cl", "clang-cl" },
       };
       auto ft = compilerIdToFastbuildFamily.find(compilerDef.CmakeCompilerID);
       if (ft != compilerIdToFastbuildFamily.end()) {
@@ -969,6 +969,11 @@ void cmGlobalFastbuildGenerator::AddCompiler(std::string const& language,
   compilerDef.Executable = compilerLocation;
   compilerDef.CmakeCompilerID =
     mf->GetSafeDefinition("CMAKE_" + language + "_COMPILER_ID");
+  if (compilerDef.CmakeCompilerID == "Clang" &&
+      mf->GetSafeDefinition("CMAKE_" + language +
+                            "_COMPILER_FRONTEND_VARIANT") == "MSVC") {
+    compilerDef.CmakeCompilerID = "Clang-cl";
+  }
 
   compilerDef.CmakeCompilerVersion =
     mf->GetSafeDefinition("CMAKE_" + language + "_COMPILER_VERSION");

@@ -158,9 +158,15 @@ macro(__enable_llvm_rc_preprocessing clang_option_prefix extra_pp_flags)
     endif()
     if(DEFINED CMAKE_RC_PREPROCESSOR)
       set(CMAKE_DEPFILE_FLAGS_RC "${clang_option_prefix}-MD ${clang_option_prefix}-MF ${clang_option_prefix}<DEP_FILE>")
-      # The <FLAGS> are passed to the preprocess and the resource compiler to pick
-      # up the eventual -D / -C options passed through the CMAKE_RC_FLAGS.
-      set(CMAKE_RC_COMPILE_OBJECT "<CMAKE_COMMAND> -E cmake_llvm_rc <SOURCE> <OBJECT>.pp <${CMAKE_RC_PREPROCESSOR}> <DEFINES> -DRC_INVOKED <INCLUDES> <FLAGS> ${extra_pp_flags} -E -- <SOURCE> ++ <CMAKE_RC_COMPILER> <DEFINES> -I <SOURCE_DIR> <INCLUDES> <FLAGS> /fo <OBJECT> <OBJECT>.pp")
+      # llvm-rc runs preprocessor starting from LLVM-13, so we can run it directly instead of using "cmake_llvm_rc".
+      # See https://reviews.llvm.org/D100755 for more details.
+      if (CMAKE_GENERATOR MATCHES "FASTBuild")
+        set(CMAKE_RC_COMPILE_OBJECT "<CMAKE_RC_COMPILER> <DEFINES> -I <SOURCE_DIR> <INCLUDES> <FLAGS> /fo<OBJECT> <SOURCE>")
+      else()
+        # The <FLAGS> are passed to the preprocess and the resource compiler to pick
+        # up the eventual -D / -C options passed through the CMAKE_RC_FLAGS.
+        set(CMAKE_RC_COMPILE_OBJECT "<CMAKE_COMMAND> -E cmake_llvm_rc <SOURCE> <OBJECT>.pp <${CMAKE_RC_PREPROCESSOR}> <DEFINES> -DRC_INVOKED <INCLUDES> <FLAGS> ${extra_pp_flags} -E -- <SOURCE> ++ <CMAKE_RC_COMPILER> <DEFINES> -I <SOURCE_DIR> <INCLUDES> <FLAGS> /fo <OBJECT> <OBJECT>.pp")
+      endif()
       if(CMAKE_GENERATOR MATCHES "Ninja")
         set(CMAKE_NINJA_CMCLDEPS_RC 0)
         set(CMAKE_NINJA_DEP_TYPE_RC gcc)
