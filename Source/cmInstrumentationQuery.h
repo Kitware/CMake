@@ -29,8 +29,8 @@ public:
     PostBuild,
     PreCMakeBuild,
     PostCMakeBuild,
-    PostTest,
-    PostInstall,
+    PostCTest,
+    PostCMakeInstall,
     PrepareForCDash,
     Manual
   };

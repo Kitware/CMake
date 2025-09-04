@@ -1,1 +1,1 @@
-.*\-\- postTest$
+.*\-\- postCTest$

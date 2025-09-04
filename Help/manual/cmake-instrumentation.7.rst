@@ -203,8 +203,8 @@ key is required, but all other fields are optional.
   * ``postBuild`` (called when ``ninja`` or ``make`` completes)
   * ``preCMakeBuild`` (called when ``cmake --build`` is invoked)
   * ``postCMakeBuild`` (called when ``cmake --build`` completes)
-  * ``postInstall``
-  * ``postTest``
+  * ``postCMakeInstall``
+  * ``postCTest``
 
   ``preBuild`` and ``postBuild`` are not supported when using the
   :generator:`MSYS Makefiles` or :generator:`FASTBuild` generators.
@@ -264,7 +264,7 @@ Example:
     ],
     "hooks": [
       "postCMakeBuild",
-      "postInstall"
+      "postCMakeInstall"
     ],
     "options": [
       "staticSystemInformation",

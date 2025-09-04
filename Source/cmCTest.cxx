@@ -2673,7 +2673,7 @@ int cmCTest::ExecuteTests(std::vector<std::string> const& args)
     return handler.ProcessHandler();
   };
   int ret = instrumentation.InstrumentCommand("ctest", args, processHandler);
-  instrumentation.CollectTimingData(cmInstrumentationQuery::Hook::PostTest);
+  instrumentation.CollectTimingData(cmInstrumentationQuery::Hook::PostCTest);
   if (ret < 0) {
     cmCTestLog(this, ERROR_MESSAGE, "Errors while running CTest\n");
     if (!this->Impl->OutputTestOutputOnTestFailure) {
