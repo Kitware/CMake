@@ -8,6 +8,18 @@ if (RunCMake_GENERATOR STREQUAL "Xcode" AND "$ENV{CMAKE_OSX_ARCHITECTURES}" MATC
   return ()
 endif ()
 
+if (RunCMake_GENERATOR STREQUAL "FASTBuild")
+  # FASTBuild does not offer full control over object paths. Just skip all
+  # tests rather than expecting some half-supported behavior.
+  return ()
+endif ()
+
+if (RunCMake_GENERATOR STREQUAL "Xcode")
+  # Xcode does not offer full control over object paths. Just skip all tests
+  # rather than expecting some half-supported behavior.
+  return ()
+endif ()
+
 function(run_build_test case)
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/${case}-build)
   set(RunCMake_TEST_OPTIONS -DCMAKE_BUILD_TYPE:STRING=Debug)

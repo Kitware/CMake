@@ -174,6 +174,8 @@ public:
     return false;
   }
 
+  virtual bool SupportsCustomObjectNames() const { return true; }
+
   virtual bool SupportsBuildDatabase() const { return false; }
   bool AddBuildDatabaseTargets();
   void AddBuildDatabaseFile(std::string const& lang, std::string const& config,
