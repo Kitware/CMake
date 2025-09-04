@@ -664,12 +664,7 @@ public:
 
   iterator() = default;
 
-  iterator(iterator const& other)
-    : Iterator(other.Iterator)
-    , Path(other.Path)
-    , PathElement(*this->Iterator)
-  {
-  }
+  iterator(iterator const& other) = default;
 
   ~iterator() = default;
 
@@ -678,7 +673,7 @@ public:
     if (this != &other) {
       this->Iterator = other.Iterator;
       this->Path = other.Path;
-      this->PathElement = *this->Iterator;
+      this->PathElement = other.PathElement;
     }
 
     return *this;
@@ -691,7 +686,9 @@ public:
   iterator& operator++()
   {
     ++this->Iterator;
-    this->PathElement = *this->Iterator;
+    if (this->Path && this->Iterator != this->Path->Path.end()) {
+      this->PathElement = *this->Iterator;
+    }
 
     return *this;
   }
@@ -706,7 +703,9 @@ public:
   iterator& operator--()
   {
     --this->Iterator;
-    this->PathElement = *this->Iterator;
+    if (this->Path && this->Iterator != this->Path->Path.end()) {
+      this->PathElement = *this->Iterator;
+    }
 
     return *this;
   }
@@ -725,8 +724,10 @@ private:
   iterator(cmCMakePath const* path, cm::filesystem::path::iterator const& it)
     : Iterator(it)
     , Path(path)
-    , PathElement(*this->Iterator)
   {
+    if (this->Path && this->Iterator != this->Path->Path.end()) {
+      this->PathElement = *this->Iterator;
+    }
   }
 
   cm::filesystem::path::iterator Iterator;
