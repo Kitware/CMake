@@ -15,6 +15,7 @@
 #include <cm/optional>
 
 #include <cm3p/json/value.h>
+#include <stddef.h>
 
 #include "cmFileLock.h"
 #ifndef CMAKE_BOOTSTRAP
@@ -62,7 +63,7 @@ public:
                       std::vector<std::vector<std::string>> const& callback);
   void AddCustomContent(std::string const& name, Json::Value const& contents);
   void WriteCustomContent();
-  std::string GetLatestContentFile();
+  std::string GetLatestFile(std::string const& dataSubdir);
   void ClearGeneratedQueries();
   int CollectTimingData(cmInstrumentationQuery::Hook hook);
   int SpawnBuildDaemon();
@@ -74,6 +75,8 @@ public:
   std::string const& GetCDashDir();
 
 private:
+  Json::Value ReadJsonSnippet(std::string const& directory,
+                              std::string const& file_name);
   void WriteInstrumentationJson(Json::Value& index,
                                 std::string const& directory,
                                 std::string const& file_name);
@@ -90,6 +93,12 @@ private:
   static std::string ComputeSuffixTime();
   void PrepareDataForCDash(std::string const& data_dir,
                            std::string const& index_path);
+  void RemoveOldFiles(std::string const& dataSubdir);
+  void WriteTraceFile(Json::Value const& index, std::string const& trace_name);
+  void AppendTraceEvent(Json::Value& trace, std::vector<uint64_t>& workers,
+                        Json::Value const& snippetData);
+  size_t AssignTargetToTraceThread(std::vector<uint64_t>& workers,
+                                   uint64_t timeStart, uint64_t duration);
   std::string binaryDir;
   std::string timingDirv1;
   std::string userTimingDirv1;

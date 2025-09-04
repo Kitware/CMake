@@ -78,7 +78,7 @@ equivalent JSON query file.
     API_VERSION 1
     DATA_VERSION 1
     HOOKS postGenerate preCMakeBuild postCMakeBuild
-    OPTIONS staticSystemInformation dynamicSystemInformation
+    OPTIONS staticSystemInformation dynamicSystemInformation trace
     CALLBACK ${CMAKE_COMMAND} -P /path/to/handle_data.cmake
     CALLBACK ${CMAKE_COMMAND} -P /path/to/handle_data_2.cmake
     CUSTOM_CONTENT myString STRING string
@@ -94,7 +94,7 @@ equivalent JSON query file.
       "postGenerate", "preCMakeBuild", "postCMakeBuild"
     ],
     "options": [
-      "staticSystemInformation", "dynamicSystemInformation"
+      "staticSystemInformation", "dynamicSystemInformation", "trace"
     ],
     "callbacks": [
       "/path/to/cmake -P /path/to/handle_data.cmake"

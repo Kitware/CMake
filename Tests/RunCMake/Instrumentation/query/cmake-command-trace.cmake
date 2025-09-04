@@ -2,6 +2,7 @@ file(TO_CMAKE_PATH "${CMAKE_SOURCE_DIR}/../hook.cmake" hook_path)
 cmake_instrumentation(
   API_VERSION 1
   DATA_VERSION 1
-  HOOKS preBuild postBuild postCMakeBuild
-  CALLBACK ${CMAKE_COMMAND} -P ${hook_path} 0 0
+  OPTIONS trace
+  HOOKS postBuild postInstall postTest
+  CALLBACK ${CMAKE_COMMAND} -P ${hook_path} 0 1
 )

@@ -65,7 +65,7 @@ cmExperimental::FeatureData const LookupTable[] = {
     cmExperimental::TryCompileCondition::Never },
   // Instrumentation
   { "Instrumentation",
-    "d16a3082-c4e1-489b-b90c-55750a334f27",
+    "f4f3d5ea-0915-470f-9628-4615e72f738a",
     "CMAKE_EXPERIMENTAL_INSTRUMENTATION",
     "CMake's support for collecting instrumentation data is experimental. It "
     "is meant only for experimentation and feedback to CMake developers.",

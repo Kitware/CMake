@@ -1,4 +1,4 @@
-include(${CMAKE_CURRENT_LIST_DIR}/verify-snippet.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/json.cmake)
 
 if (NOT IS_DIRECTORY "${v1}/data/content")
   add_error("Custom content directory does not exist.")

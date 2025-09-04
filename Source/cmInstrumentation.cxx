@@ -1,5 +1,6 @@
 #include "cmInstrumentation.h"
 
+#include <algorithm>
 #include <chrono>
 #include <ctime>
 #include <iomanip>
@@ -10,12 +11,14 @@
 #include <cm/memory>
 #include <cm/optional>
 
+#include <cm3p/json/reader.h>
+#include <cm3p/json/version.h>
 #include <cm3p/json/writer.h>
 #include <cm3p/uv.h>
 
 #include "cmsys/Directory.hxx"
 #include "cmsys/FStream.hxx"
-#include <cmsys/SystemInformation.hxx>
+#include "cmsys/SystemInformation.hxx"
 
 #include "cmCryptoHash.h"
 #include "cmExperimental.h"
@@ -225,22 +228,54 @@ void cmInstrumentation::WriteCustomContent()
   }
 }
 
-std::string cmInstrumentation::GetLatestContentFile()
+std::string cmInstrumentation::GetLatestFile(std::string const& dataSubdir)
 {
-  std::string contentFile;
-  if (cmSystemTools::FileExists(
-        cmStrCat(this->timingDirv1, "/data/content"))) {
+  std::string fullDir = cmStrCat(this->timingDirv1, "/data/", dataSubdir);
+  std::string latestFile;
+  if (cmSystemTools::FileExists(fullDir)) {
     cmsys::Directory d;
-    if (d.Load(cmStrCat(this->timingDirv1, "/data/content"))) {
+    if (d.Load(fullDir)) {
       for (unsigned int i = 0; i < d.GetNumberOfFiles(); i++) {
         std::string fname = d.GetFileName(i);
-        if (fname != "." && fname != ".." && fname > contentFile) {
-          contentFile = fname;
+        if (fname != "." && fname != ".." && fname > latestFile) {
+          latestFile = fname;
         }
       }
     }
   }
-  return contentFile;
+  return latestFile;
+}
+
+void cmInstrumentation::RemoveOldFiles(std::string const& dataSubdir)
+{
+  std::string const dataSubdirPath =
+    cmStrCat(this->timingDirv1, "/data/", dataSubdir);
+  if (cmSystemTools::FileExists(dataSubdirPath)) {
+    std::string latestFile = this->GetLatestFile(dataSubdir);
+    cmsys::Directory d;
+    if (d.Load(dataSubdirPath)) {
+      for (unsigned int i = 0; i < d.GetNumberOfFiles(); i++) {
+        std::string fname = d.GetFileName(i);
+        std::string fpath = d.GetFilePath(i);
+        if (fname != "." && fname != ".." && fname < latestFile) {
+          if (dataSubdir == "trace") {
+            // Check if this trace file shares a name with any existing index
+            // files, in which case it is listed by that index file and a
+            // callback is running, so we shouldn't delete it yet.
+            std::string index = "index-";
+            std::string json = ".json";
+            std::string timestamp = fname.substr(
+              index.size(), fname.size() - index.size() - json.size() - 1);
+            if (cmSystemTools::FileExists(cmStrCat(
+                  this->timingDirv1, "/data/index-", timestamp, ".json"))) {
+              continue;
+            }
+          }
+          cmSystemTools::RemoveFile(fpath);
+        }
+      }
+    }
+  }
 }
 
 void cmInstrumentation::ClearGeneratedQueries()
@@ -281,9 +316,9 @@ int cmInstrumentation::CollectTimingData(cmInstrumentationQuery::Hook hook)
 
   // Touch index file immediately to claim snippets
   std::string const& directory = cmStrCat(this->timingDirv1, "/data");
-  std::string const& file_name =
-    cmStrCat("index-", ComputeSuffixTime(), ".json");
-  std::string index_path = cmStrCat(directory, '/', file_name);
+  std::string suffix_time = ComputeSuffixTime();
+  std::string const& index_name = cmStrCat("index-", suffix_time, ".json");
+  std::string index_path = cmStrCat(directory, '/', index_name);
   cmSystemTools::Touch(index_path, true);
 
   // Gather Snippets
@@ -295,7 +330,7 @@ int cmInstrumentation::CollectTimingData(cmInstrumentationQuery::Hook hook)
     for (unsigned int i = 0; i < d.GetNumberOfFiles(); i++) {
       std::string fpath = d.GetFilePath(i);
       std::string fname = d.GetFile(i);
-      if (fname.rfind('.', 0) == 0 || fname == file_name ||
+      if (fname.rfind('.', 0) == 0 || fname == index_name ||
           d.FileIsDirectory(i)) {
         continue;
       }
@@ -336,7 +371,16 @@ int cmInstrumentation::CollectTimingData(cmInstrumentationQuery::Hook hook)
       }
     }
   }
-  this->WriteInstrumentationJson(index, "data", file_name);
+
+  // Parse snippets into the Google trace file
+  if (this->HasOption(cmInstrumentationQuery::Option::Trace)) {
+    std::string trace_name = cmStrCat("trace-", suffix_time, ".json");
+    this->WriteTraceFile(index, trace_name);
+    index["trace"] = "trace/" + trace_name;
+  }
+
+  // Write index file
+  this->WriteInstrumentationJson(index, "data", index_name);
 
   // Execute callbacks
   for (auto& cb : this->callbacks) {
@@ -356,25 +400,9 @@ int cmInstrumentation::CollectTimingData(cmInstrumentationQuery::Hook hook)
   }
   cmSystemTools::RemoveFile(index_path);
 
-  // Delete old content files
-  std::string const contentDir = cmStrCat(this->timingDirv1, "/data/content");
-  if (cmSystemTools::FileExists(contentDir)) {
-    std::string latestContent = this->GetLatestContentFile();
-    if (d.Load(contentDir)) {
-      for (unsigned int i = 0; i < d.GetNumberOfFiles(); i++) {
-        std::string fname = d.GetFileName(i);
-        std::string fpath = d.GetFilePath(i);
-        if (fname != "." && fname != ".." && fname != latestContent) {
-          int compare;
-          cmSystemTools::FileTimeCompare(
-            cmStrCat(contentDir, '/', latestContent), fpath, &compare);
-          if (compare == 1) {
-            cmSystemTools::RemoveFile(fpath);
-          }
-        }
-      }
-    }
-  }
+  // Delete old content and trace files
+  this->RemoveOldFiles("content");
+  this->RemoveOldFiles("trace");
 
   return 0;
 }
@@ -451,6 +479,27 @@ void cmInstrumentation::InsertTimingData(
                         .count();
   root["timeStart"] = static_cast<Json::Value::UInt64>(timeStart);
   root["duration"] = static_cast<Json::Value::UInt64>(duration);
+}
+
+Json::Value cmInstrumentation::ReadJsonSnippet(std::string const& directory,
+                                               std::string const& file_name)
+{
+  Json::CharReaderBuilder builder;
+  builder["collectComments"] = false;
+  cmsys::ifstream ftmp(cmStrCat(directory, '/', file_name).c_str());
+  Json::Value snippetData;
+  builder["collectComments"] = false;
+
+  if (!Json::parseFromStream(builder, ftmp, &snippetData, nullptr)) {
+#if JSONCPP_VERSION_HEXA < 0x01070300
+    snippetData = Json::Value::null;
+#else
+    snippetData = Json::Value::nullSingleton();
+#endif
+  }
+
+  ftmp.close();
+  return snippetData;
 }
 
 void cmInstrumentation::WriteInstrumentationJson(Json::Value& root,
@@ -620,7 +669,7 @@ int cmInstrumentation::InstrumentCommand(
   root["workingDir"] = cmSystemTools::GetLogicalWorkingDirectory();
 
   // Add custom configure content
-  std::string contentFile = this->GetLatestContentFile();
+  std::string contentFile = this->GetLatestFile("content");
   if (!contentFile.empty()) {
     root["configureContent"] = cmStrCat("content/", contentFile);
   }
@@ -858,4 +907,94 @@ void cmInstrumentation::PrepareDataForCDash(std::string const& data_dir,
       cmSystemTools::Error(error_msg);
     }
   }
+}
+
+void cmInstrumentation::WriteTraceFile(Json::Value const& index,
+                                       std::string const& trace_name)
+{
+  std::string const& directory = cmStrCat(this->timingDirv1, "/data");
+  std::vector<Json::Value> snippets = std::vector<Json::Value>();
+  for (auto const& f : index["snippets"]) {
+    Json::Value snippetData = this->ReadJsonSnippet(directory, f.asString());
+    snippets.push_back(snippetData);
+  }
+  // Reverse-sort snippets by timeEnd (timeStart + duration) as a
+  // prerequisite for AssignTargetToTraceThread().
+  std::sort(snippets.begin(), snippets.end(),
+            [](Json::Value snippetA, Json::Value snippetB) {
+              uint64_t timeEndA = snippetA["timeStart"].asUInt64() +
+                snippetA["duration"].asUInt64();
+              uint64_t timeEndB = snippetB["timeStart"].asUInt64() +
+                snippetB["duration"].asUInt64();
+              return timeEndA > timeEndB;
+            });
+
+  Json::Value trace = Json::arrayValue;
+  std::vector<uint64_t> workers = std::vector<uint64_t>();
+  for (auto const& snippetData : snippets) {
+    this->AppendTraceEvent(trace, workers, snippetData);
+  }
+
+  this->WriteInstrumentationJson(trace, "data/trace", trace_name);
+}
+
+void cmInstrumentation::AppendTraceEvent(Json::Value& trace,
+                                         std::vector<uint64_t>& workers,
+                                         Json::Value const& snippetData)
+{
+  Json::Value snippetTraceEvent;
+
+  // Provide a useful trace event name depending on what data is available
+  // from the snippet.
+  std::string name = snippetData["role"].asString();
+  if (snippetData["role"] == "compile") {
+    name = cmStrCat("compile: ", snippetData["source"].asString());
+  } else if (snippetData["role"] == "link") {
+    name = cmStrCat("link: ", snippetData["target"].asString());
+  } else if (snippetData["role"] == "custom" ||
+             snippetData["role"] == "install") {
+    name = snippetData["command"].asString();
+  } else if (snippetData["role"] == "test") {
+    name = cmStrCat("test: ", snippetData["testName"].asString());
+  }
+  snippetTraceEvent["name"] = name;
+
+  snippetTraceEvent["cat"] = snippetData["role"];
+  snippetTraceEvent["ph"] = "X";
+  snippetTraceEvent["args"] = snippetData;
+
+  // Time in the Trace Event Format is stored in microseconds
+  // but the snippet files store time in milliseconds.
+  snippetTraceEvent["ts"] = snippetData["timeStart"].asUInt64() * 1000;
+  snippetTraceEvent["dur"] = snippetData["duration"].asUInt64() * 1000;
+
+  // Assign an arbitrary PID, since this data isn't useful for the
+  // visualization in our case.
+  snippetTraceEvent["pid"] = 0;
+  // Assign TID of 0 for snippets which will have other snippet data
+  // visualized "underneath" them. (For others, start from 1.)
+  if (snippetData["role"] == "build" || snippetData["role"] == "cmakeBuild" ||
+      snippetData["role"] == "ctest" ||
+      snippetData["role"] == "cmakeInstall") {
+    snippetTraceEvent["tid"] = 0;
+  } else {
+    snippetTraceEvent["tid"] = static_cast<Json::Value::UInt64>(
+      AssignTargetToTraceThread(workers, snippetData["timeStart"].asUInt64(),
+                                snippetData["duration"].asUInt64()));
+  }
+
+  trace.append(snippetTraceEvent);
+}
+
+size_t cmInstrumentation::AssignTargetToTraceThread(
+  std::vector<uint64_t>& workers, uint64_t timeStart, uint64_t duration)
+{
+  for (size_t i = 0; i < workers.size(); i++) {
+    if (workers[i] >= timeStart + duration) {
+      workers[i] = timeStart;
+      return i + 1;
+    }
+  }
+  workers.push_back(timeStart);
+  return workers.size();
 }
