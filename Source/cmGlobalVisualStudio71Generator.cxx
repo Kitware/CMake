@@ -109,43 +109,6 @@ void cmGlobalVisualStudio71Generator::WriteProject(
   fout << "\tEndProjectSection\n";
 
   fout << "EndProject\n";
-
-  auto ui = this->UtilityDepends.find(t);
-  if (ui != this->UtilityDepends.end()) {
-    char const* uname = ui->second.c_str();
-    /* clang-format off */
-    fout << R"(Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = ")"
-         << uname << "\", \""
-         << this->ConvertToSolutionPath(dir) << (dir[0]? "\\":"")
-         << uname << ".vcproj" << "\", \"{"
-         << this->GetGUID(uname) << "}\"\n"
-         << "\tProjectSection(ProjectDependencies) = postProject\n"
-            "\t\t{" << guid << "} = {" << guid << "}\n"
-            "\tEndProjectSection\n"
-            "EndProject\n";
-    /* clang-format on */
-  }
-}
-
-// Write a dsp file into the SLN file,
-// Note, that dependencies from executables to
-// the libraries it uses are also done here
-void cmGlobalVisualStudio71Generator::WriteProjectDepends(
-  std::ostream& fout, std::string const&, std::string const&,
-  cmGeneratorTarget const* target) const
-{
-  auto i = this->VSTargetDepends.find(target);
-  assert(i != this->VSTargetDepends.end());
-  VSDependSet const& depends = i->second;
-  for (std::string const& name : depends) {
-    std::string guid = this->GetGUID(name);
-    if (guid.empty()) {
-      std::string m = cmStrCat("Target: ", target->GetName(),
-                               " depends on unknown target: ", name);
-      cmSystemTools::Error(m);
-    }
-    fout << "\t\t{" << guid << "} = {" << guid << "}\n";
-  }
 }
 
 // Write a dsp file into the SLN file, Note, that dependencies from

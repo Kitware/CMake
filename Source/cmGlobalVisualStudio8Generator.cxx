@@ -450,14 +450,6 @@ bool cmGlobalVisualStudio8Generator::TargetSystemSupportsDeployment() const
   return this->TargetsWindowsCE();
 }
 
-bool cmGlobalVisualStudio8Generator::ComputeTargetDepends()
-{
-  // Skip over the cmGlobalVisualStudioGenerator implementation!
-  // We do not need the support that VS <= 7.1 needs.
-  // NOLINTNEXTLINE(bugprone-parent-virtual-call)
-  return this->cmGlobalGenerator::ComputeTargetDepends();
-}
-
 void cmGlobalVisualStudio8Generator::WriteProjectDepends(
   std::ostream& fout, std::string const&, std::string const&,
   cmGeneratorTarget const* gt) const

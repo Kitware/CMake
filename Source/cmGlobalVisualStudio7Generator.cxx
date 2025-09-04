@@ -600,69 +600,6 @@ void cmGlobalVisualStudio7Generator::WriteSLNFooter(std::ostream& fout) const
   fout << "EndGlobal\n";
 }
 
-std::string cmGlobalVisualStudio7Generator::WriteUtilityDepend(
-  cmGeneratorTarget const* target)
-{
-  std::vector<std::string> configs =
-    target->Target->GetMakefile()->GetGeneratorConfigs(
-      cmMakefile::ExcludeEmptyConfig);
-  std::string pname = cmStrCat(target->GetName(), "_UTILITY");
-  std::string fname =
-    cmStrCat(target->GetLocalGenerator()->GetCurrentBinaryDirectory(), '/',
-             pname, ".vcproj");
-  cmGeneratedFileStream fout(fname);
-  fout.SetCopyIfDifferent(true);
-  std::string guid = this->GetGUID(pname);
-
-  /* clang-format off */
-  fout <<
-    R"(<?xml version="1.0" encoding = ")"
-    << this->Encoding() << "\"?>\n"
-    "<VisualStudioProject\n"
-    "\tProjectType=\"Visual C++\"\n"
-    "\tVersion=\"" << this->GetIDEVersion() << "0\"\n"
-    "\tName=\"" << pname << "\"\n"
-    "\tProjectGUID=\"{" << guid << "}\"\n"
-    "\tKeyword=\"Win32Proj\">\n"
-    "\t<Platforms><Platform Name=\"Win32\"/></Platforms>\n"
-    "\t<Configurations>\n"
-    ;
-  /* clang-format on */
-  std::string intDirPrefix =
-    target->GetLocalGenerator()->MaybeRelativeToCurBinDir(
-      cmStrCat(target->GetSupportDirectory(), '\\'));
-  for (std::string const& i : configs) {
-    std::string intDir = cmStrCat(intDirPrefix, i);
-
-    /* clang-format off */
-    fout <<
-      "\t\t<Configuration\n"
-      "\t\t\tName=\"" << i << "|Win32\"\n"
-      "\t\t\tOutputDirectory=\"" << i << "\"\n"
-      "\t\t\tIntermediateDirectory=\"" << intDir << "\"\n"
-      "\t\t\tConfigurationType=\"10\"\n"
-      "\t\t\tUseOfMFC=\"0\"\n"
-      "\t\t\tATLMinimizesCRunTimeLibraryUsage=\"FALSE\"\n"
-      "\t\t\tCharacterSet=\"2\">\n"
-      "\t\t</Configuration>\n"
-      ;
-    /* clang-format on */
-  }
-  /* clang-format off */
-  fout <<
-    "\t</Configurations>\n"
-    "\t<Files></Files>\n"
-    "\t<Globals></Globals>\n"
-    "</VisualStudioProject>\n"
-    ;
-  /* clang-format on */
-
-  if (fout.Close()) {
-    this->FileReplacedDuringGenerate(fname);
-  }
-  return pname;
-}
-
 std::string cmGlobalVisualStudio7Generator::GetGUID(
   std::string const& name) const
 {
