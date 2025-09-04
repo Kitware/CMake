@@ -206,6 +206,8 @@ syn keyword cmakeProperty contained
             \ EXPORT_PROPERTIES
             \ EXTERNAL_OBJECT
             \ EchoString
+            \ FASTBUILD_CACHING
+            \ FASTBUILD_DISTRIBUTION
             \ FAIL_REGULAR_EXPRESSION
             \ FIND_LIBRARY_USE_LIB32_PATHS
             \ FIND_LIBRARY_USE_LIB64_PATHS

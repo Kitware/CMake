@@ -226,6 +226,8 @@ Properties on Targets
    /prop_tgt/EXPORT_NAME
    /prop_tgt/EXPORT_NO_SYSTEM
    /prop_tgt/EXPORT_PROPERTIES
+   /prop_tgt/FASTBUILD_CACHING
+   /prop_tgt/FASTBUILD_DISTRIBUTION
    /prop_tgt/FOLDER
    /prop_tgt/Fortran_BUILDING_INTRINSIC_MODULES
    /prop_tgt/Fortran_FORMAT
