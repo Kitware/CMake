@@ -21,8 +21,8 @@ The CMake Instrumentation API allows for the collection of timing data, target
 information and system diagnostic information during the configure, generate,
 build, test and install steps for a CMake project.
 
-This feature is only available for projects using the :ref:`Makefile Generators`
-or the :ref:`Ninja Generators`.
+This feature is only available for projects using the
+:ref:`Makefile Generators`, :ref:`Ninja Generators` or :generator:`FASTBuild`.
 
 All interactions with the CMake instrumentation API must specify both an API
 version and a Data version. At this time, there is only one version for each of
@@ -200,9 +200,10 @@ key is required, but all other fields are optional.
   * ``postInstall``
   * ``postTest``
 
-  ``preBuild`` and ``postBuild`` are not supported with the
-  :generator:`MSYS Makefiles` generator. Additionally, they will not be
-  triggered when the build tool is invoked by ``cmake --build``.
+  ``preBuild`` and ``postBuild`` are not supported when using the
+  :generator:`MSYS Makefiles` or :generator:`FASTBuild` generators.
+  Additionally, they will not be triggered when the build tool is invoked by
+  ``cmake --build``.
 
 ``options``
   A list of strings used to enable certain optional behavior, including the
