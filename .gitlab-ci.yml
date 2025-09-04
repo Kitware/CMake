@@ -1097,7 +1097,7 @@ t:macos-x86_64-ninja-ub:
     needs:
         - t:macos-x86_64-ninja
     variables:
-        CMAKE_CI_JOB_NIGHTLY: "true"
+        CMAKE_CI_NO_MR: "true"
 
 t:macos-arm64-xcode-ub:
     extends:
