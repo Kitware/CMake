@@ -35,7 +35,7 @@ function(__linker_gnu lang)
 
     if (NOT DEFINED CMAKE_${lang}_LINKER_DEPFILE_SUPPORTED)
       ## check if this feature is supported by the linker
-      if (CMAKE_${lang}_COMPILER_LINKER AND CMAKE_${lang}_COMPILER_LINKER_ID MATCHES "GNU|LLD")
+      if (CMAKE_${lang}_COMPILER_LINKER AND CMAKE_${lang}_COMPILER_LINKER_ID MATCHES "GNU|LLD|MOLD")
         execute_process(COMMAND "${CMAKE_${lang}_COMPILER_LINKER}" --help
                         OUTPUT_VARIABLE _linker_capabilities
                         ERROR_VARIABLE _linker_capabilities)
