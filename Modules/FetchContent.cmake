@@ -1138,7 +1138,7 @@ current working directory.
 # FetchContent_MakeAvailable() implementation details are excluded for
 # backward compatibility reasons (see just after the endblock()).
 block(SCOPE_FOR POLICIES)
-cmake_policy(VERSION 3.29)
+cmake_policy(VERSION 4.1)
 
 include(${CMAKE_CURRENT_LIST_DIR}/ExternalProject/shared_internal_commands.cmake)
 
