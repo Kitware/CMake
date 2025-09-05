@@ -20,6 +20,7 @@
 #include "cmsys/FStream.hxx"
 #include "cmsys/SystemInformation.hxx"
 
+#include "cmCMakePath.h"
 #include "cmCryptoHash.h"
 #include "cmExperimental.h"
 #include "cmFileLock.h"
@@ -946,16 +947,19 @@ void cmInstrumentation::AppendTraceEvent(Json::Value& trace,
 
   // Provide a useful trace event name depending on what data is available
   // from the snippet.
-  std::string name = snippetData["role"].asString();
+  std::string name = cmStrCat(snippetData["role"].asString(), ": ");
   if (snippetData["role"] == "compile") {
-    name = cmStrCat("compile: ", snippetData["source"].asString());
+    name.append(snippetData["source"].asString());
   } else if (snippetData["role"] == "link") {
-    name = cmStrCat("link: ", snippetData["target"].asString());
-  } else if (snippetData["role"] == "custom" ||
-             snippetData["role"] == "install") {
-    name = snippetData["command"].asString();
+    name.append(snippetData["target"].asString());
+  } else if (snippetData["role"] == "install") {
+    cmCMakePath workingDir(snippetData["workingDir"].asCString());
+    std::string lastDirName = workingDir.GetFileName().String();
+    name.append(lastDirName);
+  } else if (snippetData["role"] == "custom") {
+    name.append(snippetData["command"].asString());
   } else if (snippetData["role"] == "test") {
-    name = cmStrCat("test: ", snippetData["testName"].asString());
+    name.append(snippetData["testName"].asString());
   }
   snippetTraceEvent["name"] = name;
 
