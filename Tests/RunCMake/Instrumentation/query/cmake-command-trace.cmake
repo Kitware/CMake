@@ -3,6 +3,6 @@ cmake_instrumentation(
   API_VERSION 1
   DATA_VERSION 1
   OPTIONS trace
-  HOOKS postBuild postInstall postTest
+  HOOKS postBuild postCMakeInstall postCTest
   CALLBACK ${CMAKE_COMMAND} -P ${hook_path} 0 1
 )

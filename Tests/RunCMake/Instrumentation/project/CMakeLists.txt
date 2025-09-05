@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.30)
 project(instrumentation)
 enable_testing()
 if (EXISTS ${INSTRUMENT_COMMAND_FILE})
-  set(CMAKE_EXPERIMENTAL_INSTRUMENTATION "f4f3d5ea-0915-470f-9628-4615e72f738a")
+  set(CMAKE_EXPERIMENTAL_INSTRUMENTATION "2555e60c-9119-46fb-af73-8c54e9b6b326")
   include(${INSTRUMENT_COMMAND_FILE})
 endif()
 

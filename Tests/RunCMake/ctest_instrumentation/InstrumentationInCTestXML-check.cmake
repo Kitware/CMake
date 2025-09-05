@@ -1,4 +1,4 @@
-set(timingDir "${RunCMake_TEST_BINARY_DIR}/.cmake/instrumentation-f4f3d5ea-0915-470f-9628-4615e72f738a/v1")
+set(timingDir "${RunCMake_TEST_BINARY_DIR}/.cmake/instrumentation-2555e60c-9119-46fb-af73-8c54e9b6b326/v1")
 file(READ "${timingDir}/query/generated/query-0.json" jsonData)
 string(JSON options GET "${jsonData}" options)
 if (options MATCHES cdashVerbose AND NOT ${RunCMake_USE_VERBOSE_INSTRUMENTATION})
