@@ -1290,6 +1290,12 @@ endif()
 
 add_RunCMake_test_group(CPack "${cpack_tests}")
 
+if(CMake_TEST_CPACK_APPIMAGE)
+  add_RunCMake_test(CPack_AppImage
+    -DCMake_TEST_CPACK_APPIMAGE_RUNTIME_FILE=${CMake_TEST_CPACK_APPIMAGE_RUNTIME_FILE}
+  )
+endif()
+
 if(CMake_TEST_CPACK_WIX3 OR CMake_TEST_CPACK_WIX4)
   add_RunCMake_test(CPack_WIX
     -DCMake_TEST_CPACK_WIX3=${CMake_TEST_CPACK_WIX3}

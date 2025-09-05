@@ -39,6 +39,10 @@
 #  include "WiX/cmCPackWIXGenerator.h"
 #endif
 
+#ifdef __linux__
+#  include "cmCPackAppImageGenerator.h"
+#endif
+
 cmCPackGeneratorFactory::cmCPackGeneratorFactory()
 {
   if (cmCPackArchiveGenerator::CanGenerate()) {
@@ -130,6 +134,12 @@ cmCPackGeneratorFactory::cmCPackGeneratorFactory()
   if (cmCPackFreeBSDGenerator::CanGenerate()) {
     this->RegisterGenerator("FREEBSD", "FreeBSD pkg(8) packages",
                             cmCPackFreeBSDGenerator::CreateGenerator);
+  }
+#endif
+#ifdef __linux__
+  if (cmCPackAppImageGenerator::CanGenerate()) {
+    this->RegisterGenerator("AppImage", "AppImage packages",
+                            cmCPackAppImageGenerator::CreateGenerator);
   }
 #endif
 }

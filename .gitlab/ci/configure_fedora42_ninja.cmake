@@ -1,5 +1,7 @@
 set(CMake_TEST_GUI "ON" CACHE BOOL "")
 if (NOT "$ENV{CMAKE_CI_NIGHTLY}" STREQUAL "")
+  set(CMake_TEST_CPACK_APPIMAGE "ON" CACHE STRING "")
+  set(CMake_TEST_CPACK_APPIMAGE_RUNTIME_FILE "$ENV{CI_PROJECT_DIR}/.gitlab/appimagetool/lib/appimagetool/runtime" CACHE FILEPATH "")
   set(CMake_TEST_ISPC "ON" CACHE STRING "")
 endif()
 set(CMake_TEST_MODULE_COMPILATION "named,compile_commands,collation,partitions,internal_partitions,export_bmi,install_bmi,shared,bmionly,build_database" CACHE STRING "")
