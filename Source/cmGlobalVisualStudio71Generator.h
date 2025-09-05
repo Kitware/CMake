@@ -36,9 +36,6 @@ protected:
   void WriteProject(std::ostream& fout, std::string const& name,
                     std::string const& path,
                     cmGeneratorTarget const* t) const override;
-  void WriteProjectDepends(std::ostream& fout, std::string const& name,
-                           std::string const& path,
-                           cmGeneratorTarget const* t) const override;
   void WriteProjectConfigurations(
     std::ostream& fout, std::string const& name,
     cmGeneratorTarget const& target, std::vector<std::string> const& configs,

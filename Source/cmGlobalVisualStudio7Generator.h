@@ -160,7 +160,6 @@ protected:
   virtual void WriteSLNGlobalSections(std::ostream& fout,
                                       cmLocalGenerator* root) const;
   virtual void WriteSLNFooter(std::ostream& fout) const;
-  std::string WriteUtilityDepend(cmGeneratorTarget const* target) override;
 
   VSFolders CreateSolutionFolders(
     OrderedTargetDependSet const& orderedProjectTargets);

@@ -174,21 +174,6 @@ protected:
 
   void WriteSLNHeader(std::ostream& fout) const;
 
-  bool ComputeTargetDepends() override;
-  class VSDependSet : public std::set<std::string>
-  {
-  };
-  class VSDependMap : public std::map<cmGeneratorTarget const*, VSDependSet>
-  {
-  };
-  VSDependMap VSTargetDepends;
-  void ComputeVSTargetDepends(cmGeneratorTarget*);
-
-  virtual std::string WriteUtilityDepend(cmGeneratorTarget const*) = 0;
-  std::string GetUtilityDepend(cmGeneratorTarget const* target);
-  using UtilityDependsMap = std::map<cmGeneratorTarget const*, std::string>;
-  UtilityDependsMap UtilityDepends;
-
   VSVersion Version;
   bool ExpressEdition;
 
@@ -201,16 +186,6 @@ private:
                            cmValue) const override
   {
   }
-
-  void FollowLinkDepends(cmGeneratorTarget const* target,
-                         std::set<cmGeneratorTarget const*>& linked);
-
-  class TargetSetMap : public std::map<cmGeneratorTarget*, TargetSet>
-  {
-  };
-  TargetSetMap TargetLinkClosure;
-  void FillLinkClosure(cmGeneratorTarget const* target, TargetSet& linked);
-  TargetSet const& GetTargetLinkClosure(cmGeneratorTarget* target);
 };
 
 class cmGlobalVisualStudioGenerator::OrderedTargetDependSet
