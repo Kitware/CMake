@@ -120,9 +120,10 @@ Commands
   The ``<contentOptions>`` can be any of the download, update, or patch options
   that the :command:`ExternalProject_Add` command understands.  The configure,
   build, install, and test steps are explicitly disabled, so options related
-  to those steps will be ignored.  The ``SOURCE_SUBDIR`` option is an
-  exception, see :command:`FetchContent_MakeAvailable` for details on how that
-  affects behavior.
+  to those steps are prohibited and will be discarded if given.
+  The ``SOURCE_SUBDIR`` option is an exception, see
+  :command:`FetchContent_MakeAvailable` for details on how that affects
+  behavior.
 
   .. versionchanged:: 3.30
     When policy :policy:`CMP0168` is set to ``NEW``, some output-related and
