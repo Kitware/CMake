@@ -2943,9 +2943,8 @@ void cmLocalGenerator::CopyPchCompilePdb(
          << from_file << "\"))\n";
     file << "    file(MAKE_DIRECTORY \"" << to_dir << "\")\n";
     file << "    execute_process(COMMAND ${CMAKE_COMMAND} -E copy";
-    file << " \"" << from_file << "\""
-         << " \"" << to_dir << "\" RESULT_VARIABLE result "
-         << " ERROR_QUIET)\n";
+    file << " \"" << from_file << "\"" << " \"" << to_dir
+         << "\" RESULT_VARIABLE result " << " ERROR_QUIET)\n";
     file << "    if (NOT result EQUAL 0)\n"
          << "      execute_process(COMMAND ${CMAKE_COMMAND}"
          << " -E sleep 1)\n"
@@ -2953,8 +2952,7 @@ void cmLocalGenerator::CopyPchCompilePdb(
     file << "      break()\n"
          << "    endif()\n";
     file << "  elseif(NOT EXISTS \"" << from_file << "\")\n"
-         << "    execute_process(COMMAND ${CMAKE_COMMAND}"
-         << " -E sleep 1)\n"
+         << "    execute_process(COMMAND ${CMAKE_COMMAND}" << " -E sleep 1)\n"
          << "  endif()\n";
     file << "endforeach()\n";
     outputs.push_back(configGenex(dest_file));
@@ -3173,6 +3171,14 @@ std::string unity_file_extension(std::string const& lang)
   }
   return extension;
 }
+
+char const* unity_file_prefix(cmGeneratorTarget* target)
+{
+  if (cmValue val = target->GetProperty("UNITY_BUILD_FILENAME_PREFIX")) {
+    return val->c_str();
+  }
+  return "unity_";
+}
 }
 
 std::vector<cmLocalGenerator::UnitySource>
@@ -3186,15 +3192,15 @@ cmLocalGenerator::AddUnityFilesModeAuto(
   if (batchSize == 0) {
     batchSize = filtered_sources.size();
   }
-
+  char const* filename_prefix = unity_file_prefix(target);
   std::vector<UnitySource> unity_files;
   for (size_t itemsLeft = filtered_sources.size(), chunk, batch = 0;
        itemsLeft > 0; itemsLeft -= chunk, ++batch) {
 
     chunk = std::min(itemsLeft, batchSize);
 
-    std::string filename =
-      cmStrCat(filename_base, "unity_", batch, unity_file_extension(lang));
+    std::string filename = cmStrCat(filename_base, filename_prefix, batch,
+                                    unity_file_extension(lang));
     auto const begin = filtered_sources.begin() + batch * batchSize;
     auto const end = begin + chunk;
     unity_files.emplace_back(this->WriteUnitySource(
@@ -3230,10 +3236,11 @@ cmLocalGenerator::AddUnityFilesModeGroup(
     }
   }
 
+  char const* filename_prefix = unity_file_prefix(target);
   for (auto const& item : explicit_mapping) {
     auto const& name = item.first;
-    std::string filename =
-      cmStrCat(filename_base, "unity_", name, unity_file_extension(lang));
+    std::string filename = cmStrCat(filename_base, filename_prefix, name,
+                                    unity_file_extension(lang));
     unity_files.emplace_back(this->WriteUnitySource(
       target, configs, cmMakeRange(item.second), beforeInclude, afterInclude,
       std::move(filename), filename_base, pathMode));
