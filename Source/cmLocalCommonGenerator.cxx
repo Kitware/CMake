@@ -129,5 +129,7 @@ void cmLocalCommonGenerator::ComputeObjectFilenames(
     force = false;
     si.second.LongLoc.Update(this->GetObjectFileNameWithoutTarget(
       *sf, gt->ObjectDirectory, &keptSourceExtension, custom_ext, &force));
+    this->FillCustomInstallObjectLocations(*sf, config, custom_ext,
+                                           si.second.InstallLongLoc);
   }
 }

@@ -100,5 +100,7 @@ void cmLocalGhsMultiGenerator::ComputeObjectFilenames(
     }
     si.second.ShortLoc.emplace(shortObjectName);
     si.second.LongLoc.Update(longObjectName);
+    this->FillCustomInstallObjectLocations(*sf, config, nullptr,
+                                           si.second.InstallLongLoc);
   }
 }

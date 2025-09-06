@@ -66,6 +66,8 @@ void cmLocalFastbuildGenerator::ComputeObjectFilenames(
     cmSourceFile const* sf = si.first;
     si.second.LongLoc =
       this->GetObjectFileNameWithoutTarget(*sf, gt->ObjectDirectory);
+    this->FillCustomInstallObjectLocations(*sf, config, nullptr,
+                                           si.second.InstallLongLoc);
   }
 }
 

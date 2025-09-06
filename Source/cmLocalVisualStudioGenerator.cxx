@@ -104,6 +104,8 @@ void cmLocalVisualStudioGenerator::ComputeObjectFilenames(
     }
     si.second.ShortLoc.emplace(shortObjectName);
     si.second.LongLoc.Update(longObjectName);
+    this->FillCustomInstallObjectLocations(*sf, config, custom_ext,
+                                           si.second.InstallLongLoc);
   }
 }
 

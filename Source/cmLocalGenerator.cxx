@@ -45,6 +45,7 @@
 #include "cmList.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
+#include "cmObjectLocation.h"
 #include "cmRange.h"
 #include "cmRulePlaceholderExpander.h"
 #include "cmSourceFile.h"
@@ -4324,6 +4325,105 @@ std::string cmLocalGenerator::GetCustomObjectFileName(
   }
 
   return std::string{};
+}
+
+std::string cmLocalGenerator::GetCustomInstallObjectFileName(
+  cmSourceFile const& source, std::string const& config,
+  char const* custom_ext) const
+{
+  if (auto objName = source.GetProperty("INSTALL_OBJECT_NAME")) {
+    cmGeneratorExpression ge(*this->GetCMakeInstance());
+    auto cge = ge.Parse(objName);
+    static std::string const INVALID_GENEX =
+      "_cmake_invalid_object_name_genex";
+    static std::string const INVALID_VALUE =
+      "_cmake_invalid_object_name_value";
+
+    if (!cge) {
+      this->Makefile->IssueMessage(
+        MessageType::FATAL_ERROR,
+        cmStrCat("The  \"INSTALL_OBJECT_NAME\" property for\n  ",
+                 source.GetFullPath(),
+                 "\nis not a valid generator expression (", objName, ")."));
+      return INVALID_GENEX;
+    }
+    if (cge->GetHadHeadSensitiveCondition()) {
+      // Not reachable; all target-sensitive  genexes actually fail to parse.
+      this->Makefile->IssueMessage(
+        MessageType::FATAL_ERROR,
+        cmStrCat("The  \"INSTALL_OBJECT_NAME\" property for\n  ",
+                 source.GetFullPath(),
+                 "\ncontains a condition that queries the consuming target "
+                 "which is not supported (",
+                 objName, ")."));
+      return INVALID_GENEX;
+    }
+    if (cge->GetHadLinkLanguageSensitiveCondition()) {
+      // Not reachable; all target-sensitive  genexes actually fail to parse.
+      this->Makefile->IssueMessage(
+        MessageType::FATAL_ERROR,
+        cmStrCat("The  \"INSTALL_OBJECT_NAME\" property for\n  ",
+                 source.GetFullPath(),
+                 "\ncontains a condition that queries the link language "
+                 "which is not supported (",
+                 objName, ")."));
+      return INVALID_GENEX;
+    }
+
+    auto objNameValue = cge->Evaluate(this, config);
+
+    // Skip if it evaluates to empty.
+    if (!objNameValue.empty()) {
+      cmCMakePath objNamePath = objNameValue;
+      // Verify that it is a relative path.
+      if (objNamePath.IsAbsolute()) {
+        this->Makefile->IssueMessage(
+          MessageType::FATAL_ERROR,
+          cmStrCat(
+            "The  \"INSTALL_OBJECT_NAME\" property for\n  ",
+            source.GetFullPath(),
+            "\nresolves to an absolute path which is not supported:\n  ",
+            objNameValue));
+        return INVALID_VALUE;
+      }
+      auto isInvalidComponent = [](cmCMakePath const& component) -> bool {
+        return component == ".."_s;
+      };
+      // Verify that it contains no `..` components.
+      if (std::any_of(objNamePath.begin(), objNamePath.end(),
+                      isInvalidComponent)) {
+        this->Makefile->IssueMessage(
+          MessageType::FATAL_ERROR,
+          cmStrCat("The  \"INSTALL_OBJECT_NAME\" property for\n  ",
+                   source.GetFullPath(), "\ncontains an invalid component (",
+                   objNameValue, ")."));
+        return INVALID_VALUE;
+      }
+
+      if (custom_ext) {
+        objNameValue += custom_ext;
+      } else {
+        objNameValue +=
+          this->GetGlobalGenerator()->GetLanguageOutputExtension(source);
+      }
+
+      return objNameValue;
+    }
+  }
+
+  return std::string{};
+}
+
+void cmLocalGenerator::FillCustomInstallObjectLocations(
+  cmSourceFile const& source, std::string const& config,
+  char const* custom_ext,
+  std::map<std::string, cmObjectLocation>& mapping) const
+{
+  auto installLoc =
+    this->GetCustomInstallObjectFileName(source, config, custom_ext);
+  if (!installLoc.empty()) {
+    mapping[config] = installLoc;
+  }
 }
 
 std::string cmLocalGenerator::GetObjectFileNameWithoutTarget(

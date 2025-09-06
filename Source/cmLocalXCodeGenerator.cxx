@@ -142,6 +142,7 @@ void cmLocalXCodeGenerator::ComputeObjectFilenames(
     }
     si.second.ShortLoc.emplace(shortObjectName);
     si.second.LongLoc.Update(longObjectName);
+    this->FillCustomInstallObjectLocations(*sf, config, ".o", si.second.InstallLongLoc);
   }
 }
 
