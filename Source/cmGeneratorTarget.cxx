@@ -4054,7 +4054,8 @@ void cmGeneratorTarget::GetTargetObjectLocations(
     // Find the object file name corresponding to this source file.
     auto map_it = mapping.find(src);
     auto const& buildLoc = map_it->second.GetLocation(buildUseShortPaths);
-    auto const& installLoc = map_it->second.GetLocation(installUseShortPaths);
+    auto const& installLoc =
+      map_it->second.GetInstallLocation(installUseShortPaths, config);
     // It must exist because we populated the mapping just above.
     assert(!buildLoc.GetPath().empty());
     assert(!installLoc.GetPath().empty());

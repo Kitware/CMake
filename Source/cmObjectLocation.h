@@ -4,6 +4,7 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <map>
 #include <string>
 #include <utility>
 
@@ -39,6 +40,7 @@ struct cmObjectLocations
 
   cm::optional<cmObjectLocation> ShortLoc;
   cmObjectLocation LongLoc;
+  std::map<std::string, cmObjectLocation> InstallLongLoc;
 
   enum class UseShortPath
   {
@@ -47,4 +49,9 @@ struct cmObjectLocations
   };
   cmObjectLocation const& GetLocation(UseShortPath use) const;
   std::string const& GetPath(UseShortPath use) const;
+
+  cmObjectLocation const& GetInstallLocation(UseShortPath use,
+                                             std::string const& config) const;
+  std::string const& GetInstallPath(UseShortPath use,
+                                    std::string const& config) const;
 };

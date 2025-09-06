@@ -45,3 +45,22 @@ std::string const& cmObjectLocations::GetPath(UseShortPath use) const
 {
   return this->GetLocation(use).GetPath();
 }
+
+cmObjectLocation const& cmObjectLocations::GetInstallLocation(
+  UseShortPath use, std::string const& config) const
+{
+  if (use == UseShortPath::Yes && this->ShortLoc) {
+    return *this->ShortLoc;
+  }
+  auto it = this->InstallLongLoc.find(config);
+  if (it != this->InstallLongLoc.end()) {
+    return it->second;
+  }
+  return this->LongLoc;
+}
+
+std::string const& cmObjectLocations::GetInstallPath(
+  UseShortPath use, std::string const& config) const
+{
+  return this->GetInstallLocation(use, config).GetPath();
+}
