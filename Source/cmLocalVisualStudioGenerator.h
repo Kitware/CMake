@@ -51,7 +51,7 @@ public:
 
   void ComputeObjectFilenames(
     std::map<cmSourceFile const*, cmObjectLocations>& mapping,
-    cmGeneratorTarget const* = nullptr) override;
+    std::string const& config, cmGeneratorTarget const* = nullptr) override;
 
   std::string GetObjectOutputRoot(
     cmStateEnums::IntermediateDirKind kind =

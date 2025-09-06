@@ -723,7 +723,7 @@ void cmGlobalVisualStudioGenerator::AddSymbolExportCommand(
   for (cmSourceFile const* it : objectSources) {
     mapping[it];
   }
-  gt->LocalGenerator->ComputeObjectFilenames(mapping, gt);
+  gt->LocalGenerator->ComputeObjectFilenames(mapping, configName, gt);
   std::string obj_dir = gt->ObjectDirectory;
   std::string cmakeCommand = cmSystemTools::GetCMakeCommand();
   std::string obj_dir_expanded = obj_dir;

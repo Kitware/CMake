@@ -121,6 +121,7 @@ void cmLocalXCodeGenerator::AddGeneratorSpecificInstallSetup(std::ostream& os)
 
 void cmLocalXCodeGenerator::ComputeObjectFilenames(
   std::map<cmSourceFile const*, cmObjectLocations>& mapping,
+  std::string const& config,
   cmGeneratorTarget const*)
 {
   // Count the number of object files with each name. Warn about duplicate

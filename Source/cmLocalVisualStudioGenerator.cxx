@@ -40,7 +40,7 @@ cmLocalVisualStudioGenerator::GetVersion() const
 
 void cmLocalVisualStudioGenerator::ComputeObjectFilenames(
   std::map<cmSourceFile const*, cmObjectLocations>& mapping,
-  cmGeneratorTarget const* gt)
+  std::string const& config, cmGeneratorTarget const* gt)
 {
   char const* custom_ext = gt->GetCustomObjectExtension();
   std::string dir_max = this->ComputeLongestObjectDirectory(gt);

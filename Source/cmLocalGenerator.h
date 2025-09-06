@@ -529,7 +529,7 @@ public:
 
   virtual void ComputeObjectFilenames(
     std::map<cmSourceFile const*, cmObjectLocations>& mapping,
-    cmGeneratorTarget const* gt = nullptr);
+    std::string const& config, cmGeneratorTarget const* gt = nullptr);
 
   bool IsWindowsShell() const;
   bool IsWatcomWMake() const;

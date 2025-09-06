@@ -698,7 +698,7 @@ void cmGeneratorTarget::GetObjectSources(
     this->Objects[it];
   }
 
-  this->LocalGenerator->ComputeObjectFilenames(this->Objects, this);
+  this->LocalGenerator->ComputeObjectFilenames(this->Objects, config, this);
   this->VisitedConfigsForObjects.insert(config);
 }
 
@@ -4043,7 +4043,7 @@ void cmGeneratorTarget::GetTargetObjectLocations(
     mapping[sf];
   }
 
-  this->LocalGenerator->ComputeObjectFilenames(mapping, this);
+  this->LocalGenerator->ComputeObjectFilenames(mapping, config, this);
 
   auto const buildUseShortPaths = this->GetUseShortObjectNames()
     ? cmObjectLocations::UseShortPath::Yes

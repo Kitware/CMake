@@ -50,7 +50,7 @@ void cmLocalGhsMultiGenerator::Generate()
 
 void cmLocalGhsMultiGenerator::ComputeObjectFilenames(
   std::map<cmSourceFile const*, cmObjectLocations>& mapping,
-  cmGeneratorTarget const* gt)
+  std::string const& config, cmGeneratorTarget const* gt)
 {
   std::string dir_max = cmStrCat(gt->GetSupportDirectory(), '/');
 
