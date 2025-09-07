@@ -2235,13 +2235,23 @@ In the following, the phrase "the ``tgt`` filename" means the name of the
   expression is evaluated on, unless the expression is being used in
   :command:`add_custom_command` or :command:`add_custom_target`.
 
-.. genex:: $<TARGET_FILE_BASE_NAME:tgt>
+.. genex:: $<TARGET_FILE_BASE_NAME:tgt[,POSTFIX:(INCLUDE|EXCLUDE)]>
 
   .. versionadded:: 3.15
 
+  .. versionadded:: 4.2
+    The option ``POSTFIX``, which can be used to control the inclusion or not
+    of the :prop_tgt:`<CONFIG>_POSTFIX` target property value as part of the
+    base name. The default is ``POSTFIX:INCLUDE``.
+
   Base name of ``tgt``, i.e. ``$<TARGET_FILE_NAME:tgt>`` without prefix and
-  suffix.
-  For example, if the ``tgt`` filename is ``libbase.so``, the base name is ``base``.
+  suffix and, optionally, postfix.
+  For example, if the ``tgt`` filename is ``libbase_postfix.so``, the base name
+  is:
+
+    * ``base_postfix`` for ``$<TARGET_FILE_BASE_NAME:tgt>`` or
+      ``$<TARGET_FILE_BASE_NAME:tgt,POSTFIX:INCLUDE>``.
+    * ``base`` for ``$<TARGET_FILE_BASE_NAME:tgt,POSTFIX:EXCLUDE>``.
 
   See also the :prop_tgt:`OUTPUT_NAME`, :prop_tgt:`ARCHIVE_OUTPUT_NAME`,
   :prop_tgt:`LIBRARY_OUTPUT_NAME` and :prop_tgt:`RUNTIME_OUTPUT_NAME`
@@ -2303,13 +2313,23 @@ In the following, the phrase "the ``tgt`` filename" means the name of the
   This expands to an empty string when there is no import file associated
   with the target.
 
-.. genex:: $<TARGET_IMPORT_FILE_BASE_NAME:tgt>
+.. genex:: $<TARGET_IMPORT_FILE_BASE_NAME:tgt[,POSTFIX:(INCLUDE|EXCLUDE)]>
 
   .. versionadded:: 3.27
 
+  .. versionadded:: 4.2
+    The option ``POSTFIX``, which can be used to control the inclusion or not
+    of the :prop_tgt:`<CONFIG>_POSTFIX` target property value as part of the
+    base name. The default is ``POSTFIX:INCLUDE``.
+
   Base name of the linker import file of the target ``tgt`` without prefix or
-  suffix. For example, if the target file name is ``libbase.tbd``, the base
-  name is ``base``.
+  suffix and, optionally, postfix.
+  For example, if the target file name is ``libbase_postfix.tbd``, the base
+  name is:
+
+    * ``base_postfix`` for ``$<TARGET_IMPORT_FILE_BASE_NAME:tgt>`` or
+      ``$<TARGET_IMPORT_FILE_BASE_NAME:tgt,POSTFIX:INCLUDE>``.
+    * ``base`` for ``$<TARGET_IMPORT_FILE_BASE_NAME:tgt,POSTFIX:EXCLUDE>``.
 
   See also the :prop_tgt:`OUTPUT_NAME` and :prop_tgt:`ARCHIVE_OUTPUT_NAME`
   target properties, their configuration-specific variants
@@ -2379,13 +2399,23 @@ In the following, the phrase "the ``tgt`` filename" means the name of the
   :genex:`$<TARGET_LINKER_IMPORT_FILE>` generator expressions, depending on the
   characteristics of the target and the platform.
 
-.. genex:: $<TARGET_LINKER_FILE_BASE_NAME:tgt>
+.. genex:: $<TARGET_LINKER_FILE_BASE_NAME:tgt[,POSTFIX:(INCLUDE|EXCLUDE)]>
 
   .. versionadded:: 3.15
 
+  .. versionadded:: 4.2
+    The option ``POSTFIX``, which can be used to control the inclusion or not
+    of the :prop_tgt:`<CONFIG>_POSTFIX` target property value as part of the
+    base name. The default is ``POSTFIX:INCLUDE``.
+
   Base name of file used to link the target ``tgt``, i.e.
-  :genex:`$<TARGET_LINKER_FILE_NAME:tgt>` without prefix and suffix. For
-  example, if target file name is ``libbase.a``, the base name is ``base``.
+  :genex:`$<TARGET_LINKER_FILE_NAME:tgt>` without prefix and suffix, and,
+  optionally, postfix.
+  For example, if target file name is ``libbase_postfix.a``, the base name is:
+
+    * ``base_postfix`` for ``$<TARGET_LINKER_FILE_BASE_NAME:tgt>`` or
+      ``$<TARGET_LINKER_FILE_BASE_NAME:tgt,POSTFIX:INCLUDE>``.
+    * ``base`` for ``$<TARGET_LINKER_FILE_BASE_NAME:tgt,POSTFIX:EXCLUDE>``.
 
   See also the :prop_tgt:`OUTPUT_NAME`, :prop_tgt:`ARCHIVE_OUTPUT_NAME`,
   and :prop_tgt:`LIBRARY_OUTPUT_NAME` target properties, their
@@ -2447,13 +2477,24 @@ In the following, the phrase "the ``tgt`` filename" means the name of the
   ``tgt`` represents (``.a``, ``.so``, ``.dylib``). So, on DLL platforms, it
   will be an empty string.
 
-.. genex:: $<TARGET_LINKER_LIBRARY_FILE_BASE_NAME:tgt>
+.. genex:: $<TARGET_LINKER_LIBRARY_FILE_BASE_NAME:tgt[,POSTFIX:(INCLUDE|EXCLUDE)]>
 
   .. versionadded:: 3.27
 
+  .. versionadded:: 4.2
+    The option ``POSTFIX``, which can be used to control the inclusion or not
+    of the :prop_tgt:`<CONFIG>_POSTFIX` target property value as part of the
+    base name. The default is ``POSTFIX:INCLUDE``.
+
   Base name of library file used to link the target ``tgt``, i.e.
-  :genex:`$<TARGET_LINKER_LIBRARY_FILE_NAME:tgt>` without prefix and suffix.
-  For example, if target file name is ``libbase.a``, the base name is ``base``.
+  :genex:`$<TARGET_LINKER_LIBRARY_FILE_NAME:tgt>` without prefix and
+  suffix,and, optionally, postfix.
+  For example, if target file name is ``libbase_postfix.a``, the base name is:
+
+    * ``base_postfix`` for ``$<TARGET_LINKER_LIBRARY_FILE_BASE_NAME:tgt>`` or
+      ``$<TARGET_LINKER_LIBRARY_FILE_BASE_NAME:tgt,POSTFIX:INCLUDE>``.
+    * ``base`` for
+      ``$<TARGET_LINKER_LIBRARY_FILE_BASE_NAME:tgt,POSTFIX:EXCLUDE>``.
 
   See also the :prop_tgt:`OUTPUT_NAME`, :prop_tgt:`ARCHIVE_OUTPUT_NAME`,
   and :prop_tgt:`LIBRARY_OUTPUT_NAME` target properties, their
@@ -2517,13 +2558,24 @@ In the following, the phrase "the ``tgt`` filename" means the name of the
   (``.lib``, ``.tbd``). So, when no import file is involved in the link step,
   an empty string is returned.
 
-.. genex:: $<TARGET_LINKER_IMPORT_FILE_BASE_NAME:tgt>
+.. genex:: $<TARGET_LINKER_IMPORT_FILE_BASE_NAME:tgt[,POSTFIX:(INCLUDE|EXCLUDE)]>
 
   .. versionadded:: 3.27
 
+  .. versionadded:: 4.2
+    The option ``POSTFIX``, which can be used to control the inclusion or not
+    of the :prop_tgt:`<CONFIG>_POSTFIX` target property value as part of the
+    base name. The default is ``POSTFIX:INCLUDE``.
+
   Base name of the import file used to link the target ``tgt``, i.e.
-  :genex:`$<TARGET_LINKER_IMPORT_FILE_NAME:tgt>` without prefix and suffix.
-  For example, if target file name is ``libbase.tbd``, the base name is ``base``.
+  :genex:`$<TARGET_LINKER_IMPORT_FILE_NAME:tgt>` without prefix and suffix,
+  and, optionally, postfix.
+  For example, if target file name is ``libbase_postfix.tbd``, the base name is
+
+    * ``base_postfix`` for ``$<TARGET_LINKER_IMPORT_FILE_BASE_NAME:tgt>`` or
+      ``$<TARGET_LINKER_IMPORT_FILE_BASE_NAME:tgt,POSTFIX:INCLUDE>``.
+    * ``base`` for
+      ``$<TARGET_LINKER_IMPORT_FILE_BASE_NAME:tgt,POSTFIX:EXCLUDE>``.
 
   See also the :prop_tgt:`OUTPUT_NAME` and :prop_tgt:`ARCHIVE_OUTPUT_NAME`,
   target properties, their configuration-specific variants
