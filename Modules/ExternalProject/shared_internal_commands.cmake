@@ -1,4 +1,4 @@
-cmake_policy(VERSION 3.25)
+cmake_policy(VERSION 4.1)
 
 # Determine the remote URL of the project containing the working_directory.
 # This will leave output_variable unset if the URL can't be determined.
