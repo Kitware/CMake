@@ -434,10 +434,11 @@ macro(__windows_compiler_msvc lang)
     # macOS paths usually start with /Users/*. Unfortunately, clang-cl interprets
     # paths starting with /U as macro undefines, so we need to put a -- before the
     # input file path to force it to be treated as a path.
-    string(REPLACE "-c <SOURCE>" "-c -- <SOURCE>" CMAKE_${lang}_COMPILE_OBJECT "${CMAKE_${lang}_COMPILE_OBJECT}")
-    string(REPLACE "-c <SOURCE>" "-c -- <SOURCE>" CMAKE_${lang}_CREATE_PREPROCESSED_SOURCE "${CMAKE_${lang}_CREATE_PREPROCESSED_SOURCE}")
-    string(REPLACE "-c <SOURCE>" "-c -- <SOURCE>" CMAKE_${lang}_CREATE_ASSEMBLY_SOURCE "${CMAKE_${lang}_CREATE_ASSEMBLY_SOURCE}")
-
+    if(NOT CMAKE_GENERATOR MATCHES "FASTBuild")
+      string(REPLACE "-c <SOURCE>" "-c -- <SOURCE>" CMAKE_${lang}_COMPILE_OBJECT "${CMAKE_${lang}_COMPILE_OBJECT}")
+      string(REPLACE "-c <SOURCE>" "-c -- <SOURCE>" CMAKE_${lang}_CREATE_PREPROCESSED_SOURCE "${CMAKE_${lang}_CREATE_PREPROCESSED_SOURCE}")
+      string(REPLACE "-c <SOURCE>" "-c -- <SOURCE>" CMAKE_${lang}_CREATE_ASSEMBLY_SOURCE "${CMAKE_${lang}_CREATE_ASSEMBLY_SOURCE}")
+    endif()
   elseif(MSVC_VERSION GREATER_EQUAL 1913)
     # At least MSVC toolet 14.13 from VS 2017 15.6
     set(CMAKE_PCH_PROLOGUE "#pragma system_header")
