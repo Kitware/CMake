@@ -204,8 +204,8 @@ installers.  The most commonly-used variables are:
 
   .. versionadded:: 3.7
 
-  An algorithm that will be used to generate an additional file with the
-  checksum of the package.  The output file name will be:
+  One or multiple algorithms that will be used to generate additional files with
+  the checksum of the package.  The output file names will be:
 
   .. code-block:: cmake
 
@@ -213,6 +213,9 @@ installers.  The most commonly-used variables are:
 
   Supported algorithms are those listed by the
   :ref:`string(\<HASH\>) <Supported Hash Algorithms>` command.
+
+  .. versionchanged:: 4.2
+    The variable accepts a list of algorithms.
 
 .. variable:: CPACK_PROJECT_CONFIG_FILE
 
