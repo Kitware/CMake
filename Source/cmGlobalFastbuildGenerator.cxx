@@ -538,12 +538,8 @@ void cmGlobalFastbuildGenerator::WriteSettings()
   auto val = this->GetSafeGlobalSetting(FASTBUILD_CACHE_PATH);
   if (!val.empty()) {
     cacheDir = std::move(val);
-  } else {
-    // Default value.
-    cacheDir =
-      this->GetCMakeInstance()->GetHomeOutputDirectory() + "/fbuild.cache";
+    cmSystemTools::ConvertToOutputSlashes(cacheDir);
   }
-  cmSystemTools::ConvertToOutputSlashes(cacheDir);
 
   WriteDivider();
   *this->BuildFileStream << "// Settings\n\n";

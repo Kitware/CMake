@@ -1,9 +1,10 @@
 CMAKE_FASTBUILD_CACHE_PATH
----------------------------
+--------------------------
 
-Specifies the directory for the FASTBuild artifact cache.
+Specifies the directory for the FASTBuild artifact cache in the generated file.
 
-Defaults to :variable:`CMAKE_BINARY_DIR` ``/fbuild.cache`` if not set.
+If not set, FASTBuild will use the ``FASTBUILD_CACHE_PATH`` environment
+variable at build time.
 
 See the `FASTBuild caching documentation <https://www.fastbuild.org/docs/features/caching.html>`_
 for more information.
