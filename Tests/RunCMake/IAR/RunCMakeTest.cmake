@@ -13,6 +13,7 @@ function(run_toolchain case)
   run_cmake_with_options(${case} "-DPSEUDO_ICSTAT=${PSEUDO_ICSTAT}" ${ARGN})
   set(RunCMake_TEST_NO_CLEAN 1)
   set(RunCMake_TEST_OUTPUT_MERGE 1)
+  run_cmake_command(${case}-reconfig ${CMAKE_COMMAND} .)
   run_cmake_command(${case}-build ${CMAKE_COMMAND} --build .)
 endfunction()
 
