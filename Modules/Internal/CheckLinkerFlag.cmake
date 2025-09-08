@@ -27,7 +27,7 @@ function(CMAKE_CHECK_LINKER_FLAG _lang _flag _var)
   foreach(flag IN LISTS _flag)
     string(REGEX REPLACE "([][+.*?()^$])" [[\\\1]] _flag_regex "${flag}")
     list(APPEND _common_patterns
-      FAIL_REGEX "warning: .*${_flag_regex}.* ignored"
+      FAIL_REGEX "warning: [^\n]*${_flag_regex}[^\n]* ignored"
       )
   endforeach()
 
