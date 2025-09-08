@@ -64,6 +64,12 @@ else()
   set(conf_baseurl "")
 endif()
 
+if(CMake_SPHINX_CMAKE_ORG)
+  set(conf_cmakeorg "True")
+else()
+  set(conf_cmakeorg "False")
+endif()
+
 set(conf_docs "${CMake_SOURCE_DIR}/Help")
 set(conf_path "${CMAKE_CURRENT_SOURCE_DIR}")
 set(conf_version "${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}.${CMake_VERSION_PATCH}")

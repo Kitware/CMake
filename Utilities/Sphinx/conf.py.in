@@ -35,6 +35,9 @@ templates_path = ['@conf_path@/templates']
 nitpicky = True
 smartquotes = False
 
+if @conf_cmakeorg@:
+    tags.add('cmakeorg')
+
 cmake_manuals = sorted(glob.glob(r'@conf_docs@/manual/*.rst'))
 cmake_manual_description = re.compile(r'^\.\. cmake-manual-description:(.*)$')
 man_pages = []
