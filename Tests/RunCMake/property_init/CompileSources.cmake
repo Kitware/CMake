@@ -79,6 +79,7 @@ set(properties
   ### Install
   "INSTALL_NAME_DIR"                        "@rpath/"           "<SAME>"
   "INSTALL_OBJECT_NAME_STRATEGY"            "SHORT"             "<SAME>"
+  "INSTALL_OBJECT_ONLY_USE_DESTINATION"     "ON"                "<SAME>"
   "INSTALL_REMOVE_ENVIRONMENT_RPATH"        "ON"                "<SAME>"
   "INSTALL_RPATH"                           "@rpath/"           "<SAME>"
   "INSTALL_RPATH_USE_LINK_PATH"             "ON"                "<SAME>"

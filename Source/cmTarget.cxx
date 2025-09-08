@@ -420,6 +420,7 @@ TargetProperty const StaticTargetProperties[] = {
   // ---- Install
   { "INSTALL_NAME_DIR"_s, IC::CanCompileSources },
   { "INSTALL_OBJECT_NAME_STRATEGY"_s, IC::CanCompileSources },
+  { "INSTALL_OBJECT_ONLY_USE_DESTINATION"_s, IC::CanCompileSources },
   { "INSTALL_REMOVE_ENVIRONMENT_RPATH"_s, IC::CanCompileSources },
   { "INSTALL_RPATH"_s, ""_s, IC::CanCompileSources },
   { "INSTALL_RPATH_USE_LINK_PATH"_s, "OFF"_s, IC::CanCompileSources },
