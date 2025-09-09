@@ -1,1 +1,1 @@
-check_project(CustomTypePlatform external "" "aaa-bbb-ccc-ddd-eee" "Custom Platform" "")
+include(${CMAKE_CURRENT_LIST_DIR}/CustomTypePlatform-check-sln.cmake)

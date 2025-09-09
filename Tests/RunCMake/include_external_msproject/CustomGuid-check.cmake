@@ -1,1 +1,1 @@
-check_project(CustomGuid external "aaa-bbb-ccc-000" "" "" "")
+include(${CMAKE_CURRENT_LIST_DIR}/CustomGuid-check-sln.cmake)

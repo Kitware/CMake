@@ -1,3 +1,1 @@
-parseGlobalSections(pre post Override3)
-testGlobalSection(post ExtensibilityGlobals Key1=Value1 "SolutionGuid={custom-guid}")
-testGlobalSection(post ExtensibilityAddIns)
+include(${CMAKE_CURRENT_LIST_DIR}/Override3-check-sln.cmake)
