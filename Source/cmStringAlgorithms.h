@@ -167,7 +167,7 @@ void cmTokenize(OutIt outIt, cm::string_view str, Sep sep,
   }
   // clang-format on
   if (!hasTokens && mode == cmTokenizerMode::Legacy) {
-    *outIt = {};
+    *outIt = StringT{};
   }
 }
 
