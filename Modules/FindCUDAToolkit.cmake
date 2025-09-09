@@ -769,6 +769,65 @@ else()
 
   endfunction()
 
+  function(_CUDAToolkit_guess_root_dir)
+    # CUDAToolkit_ROOT cmake / env variable not specified, try platform defaults.
+    #
+    # - Linux: /usr/local/cuda-X.Y
+    # - macOS: /Developer/NVIDIA/CUDA-X.Y
+    # - Windows: C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\vX.Y
+    #
+    # We will also search the default symlink location /usr/local/cuda first since
+    # if CUDAToolkit_ROOT is not specified, it is assumed that the symlinked
+    # directory is the desired location.
+    if(UNIX)
+      if(NOT APPLE)
+        set(platform_base "/usr/local/cuda-")
+      else()
+        set(platform_base "/Developer/NVIDIA/CUDA-")
+      endif()
+    else()
+      set(platform_base "C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v")
+    endif()
+
+    # Build out a descending list of possible cuda installations, e.g.
+    file(GLOB possible_paths "${platform_base}*")
+    # Iterate the glob results and create a descending list.
+    set(versions)
+    foreach(p ${possible_paths})
+      # Extract version number from end of string
+      string(REGEX MATCH "[0-9][0-9]?\\.[0-9]$" p_version ${p})
+      if(IS_DIRECTORY ${p} AND p_version)
+        list(APPEND versions ${p_version})
+      endif()
+    endforeach()
+
+    # Sort numerically in descending order, so we try the newest versions first.
+    list(SORT versions COMPARE NATURAL ORDER DESCENDING)
+
+    # With a descending list of versions, populate possible paths to search.
+    set(search_paths)
+    foreach(v ${versions})
+      list(APPEND search_paths "${platform_base}${v}")
+    endforeach()
+
+    # Force the global default /usr/local/cuda to the front on Unix.
+    if(UNIX)
+      list(INSERT search_paths 0 "/usr/local/cuda")
+    endif()
+
+    # Now search for the toolkit again using the platform default search paths.
+    _CUDAToolkit_find_root_dir(SEARCH_PATHS "${search_paths}" FIND_FLAGS PATH_SUFFIXES bin)
+    if(CUDAToolkit_ROOT_DIR)
+      set(CUDAToolkit_ROOT_DIR "${CUDAToolkit_ROOT_DIR}" PARENT_SCOPE)
+    endif()
+
+    # We are done with these variables now, cleanup for caller.
+    unset(platform_base)
+    unset(possible_paths)
+    unset(versions)
+    unset(search_paths)
+  endfunction()
+
   function(_CUDAToolkit_find_version_file result_variable)
     # We first check for a non-scattered installation to prefer it over a scattered installation.
     set(version_files version.txt version.json)
@@ -856,70 +915,16 @@ else()
       return()
     endif()
   endif()
-
-  # CUDAToolkit_ROOT cmake / env variable not specified, try platform defaults.
-  #
-  # - Linux: /usr/local/cuda-X.Y
-  # - macOS: /Developer/NVIDIA/CUDA-X.Y
-  # - Windows: C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\vX.Y
-  #
-  # We will also search the default symlink location /usr/local/cuda first since
-  # if CUDAToolkit_ROOT is not specified, it is assumed that the symlinked
-  # directory is the desired location.
+  # Try guessing where CUDA is installed
   if(NOT CUDAToolkit_ROOT_DIR)
-    if(UNIX)
-      if(NOT APPLE)
-        set(platform_base "/usr/local/cuda-")
-      else()
-        set(platform_base "/Developer/NVIDIA/CUDA-")
-      endif()
-    else()
-      set(platform_base "C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v")
-    endif()
-
-    # Build out a descending list of possible cuda installations, e.g.
-    file(GLOB possible_paths "${platform_base}*")
-    # Iterate the glob results and create a descending list.
-    set(versions)
-    foreach(p ${possible_paths})
-      # Extract version number from end of string
-      string(REGEX MATCH "[0-9][0-9]?\\.[0-9]$" p_version ${p})
-      if(IS_DIRECTORY ${p} AND p_version)
-        list(APPEND versions ${p_version})
-      endif()
-    endforeach()
-
-    # Sort numerically in descending order, so we try the newest versions first.
-    list(SORT versions COMPARE NATURAL ORDER DESCENDING)
-
-    # With a descending list of versions, populate possible paths to search.
-    set(search_paths)
-    foreach(v ${versions})
-      list(APPEND search_paths "${platform_base}${v}")
-    endforeach()
-
-    # Force the global default /usr/local/cuda to the front on Unix.
-    if(UNIX)
-      list(INSERT search_paths 0 "/usr/local/cuda")
-    endif()
-
-    # Now search for the toolkit again using the platform default search paths.
-    _CUDAToolkit_find_root_dir(SEARCH_PATHS "${search_paths}" FIND_FLAGS PATH_SUFFIXES bin)
-
-    # We are done with these variables now, cleanup for caller.
-    unset(platform_base)
-    unset(possible_paths)
-    unset(versions)
-    unset(search_paths)
-
+    _CUDAToolkit_guess_root_dir()
     if(NOT CUDAToolkit_ROOT_DIR)
-      if(CUDAToolkit_FIND_REQUIRED)
-        message(FATAL_ERROR "Could not find nvcc, please set CUDAToolkit_ROOT.")
-      elseif(NOT CUDAToolkit_FIND_QUIETLY)
-        message(STATUS "Could not find nvcc, please set CUDAToolkit_ROOT.")
-      endif()
-
       set(CUDAToolkit_FOUND FALSE)
+      if(CUDAToolkit_FIND_REQUIRED)
+        message(FATAL_ERROR "Could not find `nvcc`, please set CUDAToolkit_ROOT.")
+      elseif(NOT CUDAToolkit_FIND_QUIETLY)
+        message(STATUS "Could not find `nvcc`, please set CUDAToolkit_ROOT.")
+      endif()
       return()
     endif()
   endif()
