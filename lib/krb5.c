@@ -130,7 +130,7 @@ krb5_init(void *app_data)
 static int
 krb5_check_prot(void *app_data, int level)
 {
-  (void)app_data; /* unused */
+  (void)app_data;
   if(level == PROT_CONFIDENTIAL)
     return -1;
   return 0;
@@ -138,8 +138,7 @@ krb5_check_prot(void *app_data, int level)
 
 static int
 krb5_decode(void *app_data, void *buf, int len,
-            int level UNUSED_PARAM,
-            struct connectdata *conn UNUSED_PARAM)
+            int level, struct connectdata *conn)
 {
   gss_ctx_id_t *context = app_data;
   OM_uint32 maj, min;
@@ -470,7 +469,7 @@ static int ftp_send_command(struct Curl_easy *data, const char *message, ...)
       ftp_code = -1;
   }
 
-  (void)nread; /* Unused */
+  (void)nread;
   return ftp_code;
 }
 
@@ -703,7 +702,7 @@ static CURLcode sec_send(struct Curl_easy *data, int sockindex,
                          const void *buffer, size_t len, bool eos,
                          size_t *pnwritten)
 {
-  (void)eos; /* unused */
+  (void)eos;
   return sec_write(data, sockindex, buffer, len, pnwritten);
 }
 
@@ -718,7 +717,7 @@ int Curl_sec_read_msg(struct Curl_easy *data, struct connectdata *conn,
   size_t decoded_sz = 0;
   CURLcode error;
 
-  (void) data;
+  (void)data;
 
   if(!conn->mech)
     /* not initialized, return error */

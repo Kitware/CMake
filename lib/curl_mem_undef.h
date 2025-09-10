@@ -1,5 +1,3 @@
-#ifndef HEADER_CURL_VQUIC_CURL_MSH3_H
-#define HEADER_CURL_VQUIC_CURL_MSH3_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -24,23 +22,34 @@
  *
  ***************************************************************************/
 
-#include "../curl_setup.h"
+/* Unset redefined system symbols. */
 
-#ifdef USE_MSH3
+#undef strdup
+#undef malloc
+#undef calloc
+#undef realloc
+#undef free
+#undef send
+#undef recv
 
-#include <msh3.h>
+#ifdef _WIN32
+#undef _tcsdup
+#endif
 
-void Curl_msh3_ver(char *p, size_t len);
+#undef socket
+#ifdef HAVE_ACCEPT4
+#undef accept4
+#endif
+#ifdef HAVE_SOCKETPAIR
+#undef socketpair
+#endif
 
-CURLcode Curl_cf_msh3_create(struct Curl_cfilter **pcf,
-                             struct Curl_easy *data,
-                             struct connectdata *conn,
-                             const struct Curl_addrinfo *ai);
+#undef fopen
+#ifdef CURL_FOPEN
+#define fopen(fname, mode) CURL_FOPEN(fname, mode)
+#endif
+#undef fdopen
+#undef fclose
 
-bool Curl_conn_is_msh3(const struct Curl_easy *data,
-                       const struct connectdata *conn,
-                       int sockindex);
-
-#endif /* USE_MSQUIC */
-
-#endif /* HEADER_CURL_VQUIC_CURL_MSH3_H */
+#undef HEADER_CURL_MEMORY_H
+#undef HEADER_CURL_MEMDEBUG_H

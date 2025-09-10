@@ -63,10 +63,6 @@
 #include <unistd.h>
 #endif
 
-#if defined(HAVE_STDINT_H) || defined(USE_WOLFSSL)
-#include <stdint.h>
-#endif
-
 /* Macro to strip 'const' without triggering a compiler warning.
    Use it for APIs that do not or cannot support the const qualifier. */
 #ifdef HAVE_STDINT_H
@@ -205,8 +201,6 @@ struct timeval {
 #else
 #  define CURL_SCLOSE(x)  close((x))
 #endif
-
-#define sclose(x)  CURL_SCLOSE(x)
 
 /*
  * Stack-independent version of fcntl() on sockets:

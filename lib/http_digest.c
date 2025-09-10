@@ -120,7 +120,7 @@ CURLcode Curl_output_digest(struct Curl_easy *data,
   if(!passwdp)
     passwdp = "";
 
-#if defined(USE_WINDOWS_SSPI)
+#ifdef USE_WINDOWS_SSPI
   have_chlg = !!digest->input_token;
 #else
   have_chlg = !!digest->nonce;
@@ -141,7 +141,7 @@ CURLcode Curl_output_digest(struct Curl_easy *data,
      https://httpd.apache.org/docs/2.2/mod/mod_auth_digest.html#msie
 
      Further details on Digest implementation differences:
-     http://www.fngtps.com/2006/09/http-authentication
+     https://web.archive.org/web/2009/fngtps.com/2006/09/http-authentication
   */
 
   if(authp->iestyle) {
