@@ -86,7 +86,8 @@ private:
     std::string const& rootPath, std::string const& featureId,
     cmWIXDirectoriesSourceWriter& directoryDefinitions,
     cmWIXFilesSourceWriter& fileDefinitions,
-    cmWIXFeaturesSourceWriter& featureDefinitions, cmWIXShortcuts& shortcuts);
+    cmWIXFeaturesSourceWriter& featureDefinitions, cmWIXShortcuts& shortcuts,
+    int diskId);
 
   bool CreateShortcuts(std::string const& cpackComponentName,
                        std::string const& featureId,
@@ -122,7 +123,7 @@ private:
     cmWIXFeaturesSourceWriter& featureDefinitions,
     std::vector<std::string> const& packageExecutables,
     std::vector<std::string> const& desktopExecutables,
-    cmWIXShortcuts& shortcuts);
+    cmWIXShortcuts& shortcuts, int diskId);
 
   bool RequireOption(std::string const& name, std::string& value) const;
 

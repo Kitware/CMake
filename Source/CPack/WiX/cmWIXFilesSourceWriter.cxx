@@ -122,7 +122,7 @@ std::string cmWIXFilesSourceWriter::EmitComponentCreateFolder(
 std::string cmWIXFilesSourceWriter::EmitComponentFile(
   std::string const& directoryId, std::string const& id,
   std::string const& filePath, cmWIXPatch& patch,
-  cmInstalledFile const* installedFile)
+  cmInstalledFile const* installedFile, int diskId)
 {
   std::string componentId = std::string("CM_C") + id;
   std::string fileId = std::string("CM_F") + id;
@@ -135,6 +135,10 @@ std::string cmWIXFilesSourceWriter::EmitComponentFile(
   BeginElement("Component");
   AddAttribute("Id", componentId);
   AddAttribute("Guid", guid);
+
+  if (diskId) {
+    AddAttribute("DiskId", std::to_string(diskId));
+  }
 
   if (installedFile) {
     if (installedFile->GetPropertyAsBool("CPACK_NEVER_OVERWRITE")) {
