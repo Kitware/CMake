@@ -404,6 +404,7 @@ Properties on Targets
    /prop_tgt/RUNTIME_OUTPUT_NAME
    /prop_tgt/RUNTIME_OUTPUT_NAME_CONFIG
    /prop_tgt/SKIP_BUILD_RPATH
+   /prop_tgt/SKIP_LINTING
    /prop_tgt/SOURCE_DIR
    /prop_tgt/SOURCES
    /prop_tgt/SOVERSION

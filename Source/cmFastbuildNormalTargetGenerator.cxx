@@ -1011,14 +1011,18 @@ void cmFastbuildNormalTargetGenerator::CollapseAllExecsIntoOneScriptfile(
 std::string cmFastbuildNormalTargetGenerator::ComputeCodeCheckOptions(
   cmSourceFile const& srcFile)
 {
-  cmValue const skipCodeCheck = srcFile.GetProperty("SKIP_LINTING");
-  std::string staticCheckRule;
-  if (!skipCodeCheck.IsOn()) {
-    std::string compilerLauncher;
-    staticCheckRule = this->GenerateCodeCheckRules(srcFile, compilerLauncher,
-                                                   "", Config, nullptr);
-    LogMessage(cmStrCat("CodeCheck: ", staticCheckRule));
+  cmValue const srcSkipCodeCheckVal = srcFile.GetProperty("SKIP_LINTING");
+  bool const skipCodeCheck = srcSkipCodeCheckVal.IsSet()
+    ? srcSkipCodeCheckVal.IsOn()
+    : this->GetGeneratorTarget()->GetPropertyAsBool("SKIP_LINTING");
+
+  if (skipCodeCheck) {
+    return {};
   }
+  std::string compilerLauncher;
+  std::string staticCheckRule = this->GenerateCodeCheckRules(
+    srcFile, compilerLauncher, "", Config, nullptr);
+  LogMessage(cmStrCat("CodeCheck: ", staticCheckRule));
   return staticCheckRule;
 }
 
