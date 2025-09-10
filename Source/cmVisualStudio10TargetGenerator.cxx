@@ -3664,6 +3664,17 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
     if (!clOptions.HasFlag("BasicRuntimeChecks")) {
       clOptions.AddFlag("BasicRuntimeChecks", "Default");
     }
+    if (!clOptions.HasFlag("BufferSecurityCheck")) {
+      clOptions.AddFlag("BufferSecurityCheck", "");
+    }
+    if (!clOptions.HasFlag("CallingConvention")) {
+      clOptions.AddFlag("CallingConvention", "");
+    }
+    // We cannot use the `Default` value, because it is incompatible with
+    // VS2019 & first releases of VS2022
+    if (!clOptions.HasFlag("FloatingPointModel")) {
+      clOptions.AddFlag("FloatingPointModel", "");
+    }
     if (!clOptions.HasFlag("ForceConformanceInForLoopScope")) {
       clOptions.AddFlag("ForceConformanceInForLoopScope", "");
     }
