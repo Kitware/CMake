@@ -724,8 +724,8 @@ int cmCTest::ProcessSteps()
   this->SetTimeLimit(mf.GetDefinition("CTEST_TIME_LIMIT"));
   this->SetCMakeVariables(mf);
   std::vector<cmListFileArgument> args{
-    cmListFileArgument("RETURN_VALUE", cmListFileArgument::Unquoted, 0),
-    cmListFileArgument("return_value", cmListFileArgument::Unquoted, 0),
+    cmListFileArgument("RETURN_VALUE"_s, cmListFileArgument::Unquoted, 0),
+    cmListFileArgument("return_value"_s, cmListFileArgument::Unquoted, 0),
   };
 
   if (this->Impl->Parts[PartStart]) {
@@ -843,12 +843,12 @@ int cmCTest::ProcessSteps()
     auto const func = cmListFileFunction(
       "ctest_submit", 0, 0,
       {
-        cmListFileArgument("RETRY_COUNT", cmListFileArgument::Unquoted, 0),
+        cmListFileArgument("RETRY_COUNT"_s, cmListFileArgument::Unquoted, 0),
         cmListFileArgument(count, cmListFileArgument::Quoted, 0),
-        cmListFileArgument("RETRY_DELAY", cmListFileArgument::Unquoted, 0),
+        cmListFileArgument("RETRY_DELAY"_s, cmListFileArgument::Unquoted, 0),
         cmListFileArgument(delay, cmListFileArgument::Quoted, 0),
-        cmListFileArgument("RETURN_VALUE", cmListFileArgument::Unquoted, 0),
-        cmListFileArgument("return_value", cmListFileArgument::Unquoted, 0),
+        cmListFileArgument("RETURN_VALUE"_s, cmListFileArgument::Unquoted, 0),
+        cmListFileArgument("return_value"_s, cmListFileArgument::Unquoted, 0),
       });
     auto status = cmExecutionStatus(mf);
     if (!mf.ExecuteCommand(func, status) ||

@@ -1171,7 +1171,7 @@ bool cmFindPackageCommand::FindPackage(
     }
     std::vector<cmListFileArgument> listFileArgs(argsForProvider.size() + 1);
     listFileArgs[0] =
-      cmListFileArgument("FIND_PACKAGE", cmListFileArgument::Unquoted, 0);
+      cmListFileArgument("FIND_PACKAGE"_s, cmListFileArgument::Unquoted, 0);
     std::transform(argsForProvider.begin(), argsForProvider.end(),
                    listFileArgs.begin() + 1, [](std::string const& arg) {
                      return cmListFileArgument(arg,

@@ -36,19 +36,19 @@ struct cmListFileLexer_s
   int comment;
   int line;
   int column;
-  int size;
+  size_t size;
   FILE* file;
   size_t cr;
   char* string_buffer;
   char* string_position;
-  int string_left;
+  size_t string_left;
   yyscan_t scanner;
 };
 
 static void cmListFileLexerSetToken(cmListFileLexer* lexer, const char* text,
-                                    int length);
+                                    size_t length);
 static void cmListFileLexerAppend(cmListFileLexer* lexer, const char* text,
-                                  int length);
+                                  size_t length);
 static int cmListFileLexerInput(cmListFileLexer* lexer, char* buffer,
                                 size_t bufferSize);
 static void cmListFileLexerInit(cmListFileLexer* lexer);
@@ -90,15 +90,17 @@ LEGACY {MAKEVAR}|{UNQUOTED}|\"({MAKEVAR}|{UNQUOTED}|[ \t[=])*\"
 
 #?\[=*\[\n? {
   const char* bracket = yytext;
+  size_t length = yyleng;
   lexer->comment = yytext[0] == '#';
   if (lexer->comment) {
     lexer->token.type = cmListFileLexer_Token_CommentBracket;
     bracket += 1;
+    --length;
   } else {
     lexer->token.type = cmListFileLexer_Token_ArgumentBracket;
   }
   cmListFileLexerSetToken(lexer, "", 0);
-  lexer->bracket = strchr(bracket+1, '[') - bracket;
+  lexer->bracket = (char*)memchr(bracket + 1, '[', length - 1) - bracket;
   if (yytext[yyleng-1] == '\n') {
     ++lexer->line;
     lexer->column = 1;
@@ -151,7 +153,6 @@ LEGACY {MAKEVAR}|{UNQUOTED}|\"({MAKEVAR}|{UNQUOTED}|[ \t[=])*\"
   lexer->column += yyleng;
   /* Erase the partial bracket from the token.  */
   lexer->token.length -= lexer->bracket;
-  lexer->token.text[lexer->token.length] = 0;
   BEGIN(INITIAL);
   return 1;
 }
@@ -266,7 +267,7 @@ LEGACY {MAKEVAR}|{UNQUOTED}|\"({MAKEVAR}|{UNQUOTED}|[ \t[=])*\"
 
 /*--------------------------------------------------------------------------*/
 static void cmListFileLexerSetToken(cmListFileLexer* lexer, const char* text,
-                                    int length)
+                                    size_t length)
 {
   /* Set the token line and column number.  */
   lexer->token.line = lexer->line;
@@ -275,7 +276,7 @@ static void cmListFileLexerSetToken(cmListFileLexer* lexer, const char* text,
   /* Use the same buffer if possible.  */
   if (lexer->token.text) {
     if (text && length < lexer->size) {
-      strcpy(lexer->token.text, text);
+      memcpy(lexer->token.text, text, length);
       lexer->token.length = length;
       return;
     }
@@ -285,10 +286,11 @@ static void cmListFileLexerSetToken(cmListFileLexer* lexer, const char* text,
   }
 
   /* Need to extend the buffer.  */
-  if (text) {
-    lexer->token.text = strdup(text);
+  if (length > 0) {
+    lexer->token.text = (char*)malloc(length);
+    memcpy(lexer->token.text, text, length);
     lexer->token.length = length;
-    lexer->size = length + 1;
+    lexer->size = length;
   } else {
     lexer->token.length = 0;
   }
@@ -296,15 +298,15 @@ static void cmListFileLexerSetToken(cmListFileLexer* lexer, const char* text,
 
 /*--------------------------------------------------------------------------*/
 static void cmListFileLexerAppend(cmListFileLexer* lexer, const char* text,
-                                  int length)
+                                  size_t length)
 {
   char* temp;
-  int newSize;
+  size_t newSize;
 
   /* If the appended text will fit in the buffer, do not reallocate.  */
-  newSize = lexer->token.length + length + 1;
+  newSize = lexer->token.length + length;
   if (lexer->token.text && newSize <= lexer->size) {
-    strcpy(lexer->token.text + lexer->token.length, text);
+    memcpy(lexer->token.text + lexer->token.length, text, length);
     lexer->token.length += length;
     return;
   }
@@ -316,7 +318,6 @@ static void cmListFileLexerAppend(cmListFileLexer* lexer, const char* text,
     free(lexer->token.text);
   }
   memcpy(temp + lexer->token.length, text, length);
-  temp[lexer->token.length + length] = 0;
   lexer->token.text = temp;
   lexer->token.length += length;
   lexer->size = newSize;
@@ -356,9 +357,9 @@ static int cmListFileLexerInput(cmListFileLexer* lexer, char* buffer,
       lexer->cr = cr;
       return n;
     } else if (lexer->string_left) {
-      int length = lexer->string_left;
-      if ((int)bufferSize < length) {
-        length = (int)bufferSize;
+      size_t length = lexer->string_left;
+      if (bufferSize < length) {
+        length = bufferSize;
       }
       memcpy(buffer, lexer->string_position, length);
       lexer->string_position += length;
@@ -478,15 +479,18 @@ int cmListFileLexer_SetFileName(cmListFileLexer* lexer, const char* name,
 }
 
 /*--------------------------------------------------------------------------*/
-int cmListFileLexer_SetString(cmListFileLexer* lexer, const char* text)
+int cmListFileLexer_SetString(cmListFileLexer* lexer, char const* text,
+                              size_t length)
 {
   int result = 1;
   cmListFileLexerDestroy(lexer);
-  if (text) {
-    int length = (int)strlen(text);
-    lexer->string_buffer = (char*)malloc(length + 1);
+  /* text might be not NULL while length is 0. However, on some platforms
+     malloc(0) will return NULL. To avoid signaling an error to the caller in
+     such cases, ensure nonzero length. */
+  if (length > 0) {
+    lexer->string_buffer = (char*)malloc(length);
     if (lexer->string_buffer) {
-      strcpy(lexer->string_buffer, text);
+      memcpy(lexer->string_buffer, text, length);
       lexer->string_position = lexer->string_buffer;
       lexer->string_left = length;
     } else {

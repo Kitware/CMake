@@ -11,6 +11,7 @@
 #include <vector>
 
 #include <cm/optional>
+#include <cm/string_view>
 
 #include "cmList.h"
 #include "cmStack.h"
@@ -34,8 +35,8 @@ struct cmListFileArgument
     Bracket
   };
   cmListFileArgument() = default;
-  cmListFileArgument(std::string v, Delimiter d, long line)
-    : Value(std::move(v))
+  cmListFileArgument(cm::string_view v, Delimiter d, long line)
+    : Value(v.data(), v.size())
     , Delim(d)
     , Line(line)
   {
@@ -241,7 +242,7 @@ struct cmListFile
   bool ParseFile(char const* path, cmMessenger* messenger,
                  cmListFileBacktrace const& lfbt);
 
-  bool ParseString(char const* str, char const* virtual_filename,
+  bool ParseString(cm::string_view str, char const* virtual_filename,
                    cmMessenger* messenger, cmListFileBacktrace const& lfbt);
 
   std::vector<cmListFileFunction> Functions;

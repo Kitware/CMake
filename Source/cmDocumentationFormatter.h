@@ -8,13 +8,15 @@
 #include <iosfwd>
 #include <string>
 
+#include <cm/string_view>
+
 class cmDocumentationSection;
 
 /** Print documentation in a simple text format. */
 class cmDocumentationFormatter
 {
 public:
-  std::string Format(std::string text) const;
+  std::string Format(cm::string_view text) const;
   void PrintSection(std::ostream& os, cmDocumentationSection const& section);
   void PrintFormatted(std::ostream& os, std::string const& text) const
   {

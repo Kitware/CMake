@@ -2,6 +2,8 @@
 #include <string>
 #include <vector>
 
+#include <cmext/string_view>
+
 #include <cm3p/cppdap/optional.h>
 #include <cm3p/cppdap/protocol.h>
 #include <cm3p/cppdap/types.h>
@@ -17,7 +19,7 @@ static bool testStackFrameFunctionName(
   auto thread = std::make_shared<cmDebugger::cmDebuggerThread>(0, "name");
   auto const* functionName = "function_name";
   auto arguments = std::vector<cmListFileArgument>{ cmListFileArgument(
-    "arg", cmListFileArgument::Delimiter::Unquoted, 0) };
+    "arg"_s, cmListFileArgument::Delimiter::Unquoted, 0) };
   cmListFileFunction func(functionName, 10, 20, arguments);
   thread->PushStackFrame(nullptr, "CMakeLists.txt", func);
 
