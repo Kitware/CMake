@@ -910,22 +910,23 @@ else()
   # Try user provided path
   if(NOT CUDAToolkit_ROOT_DIR AND DEFINED CUDAToolkit_ROOT)
     _CUDAToolkit_find_root_dir(SEARCH_PATHS "${CUDAToolkit_ROOT}" FIND_FLAGS PATH_SUFFIXES bin NO_DEFAULT_PATH)
+    if(NOT CUDAToolkit_ROOT_DIR)
+      # If the user specified CUDAToolkit_ROOT but the toolkit could not be found, this is an error.
+      _CUDAToolkit_find_failure_message(VARIABLE)
+    endif()
   endif()
 
   if(NOT CUDAToolkit_ROOT_DIR AND DEFINED ENV{CUDAToolkit_ROOT})
     _CUDAToolkit_find_root_dir(SEARCH_PATHS "$ENV{CUDAToolkit_ROOT}" FIND_FLAGS PATH_SUFFIXES bin NO_DEFAULT_PATH)
+    if(NOT CUDAToolkit_ROOT_DIR)
+      # If the user specified ENV{CUDAToolkit_ROOT} but the toolkit could not be found, this is an error.
+      _CUDAToolkit_find_failure_message(ENV)
+    endif()
   endif()
 
   # Try users PATH, and CUDA_PATH env variable
   if(NOT CUDAToolkit_ROOT_DIR)
     _CUDAToolkit_find_root_dir(FIND_FLAGS PATHS ENV CUDA_PATH PATH_SUFFIXES bin)
-  endif()
-
-  # If the user specified CUDAToolkit_ROOT but the toolkit could not be found, this is an error.
-  if(NOT CUDAToolkit_ROOT_DIR AND DEFINED CUDAToolkit_ROOT)
-    _CUDAToolkit_find_failure_message(VARIABLE)
-  elseif(NOT CUDAToolkit_ROOT_DIR AND DEFINED ENV{CUDAToolkit_ROOT})
-    _CUDAToolkit_find_failure_message(ENV)
   endif()
 
   # Try guessing where CUDA is installed
