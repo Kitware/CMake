@@ -570,7 +570,7 @@ void cmFastbuildNormalTargetGenerator::GenerateModuleDefinitionInfo(
       for (cmSourceFile const* it : objectSources) {
         mapping[it];
       }
-      GeneratorTarget->LocalGenerator->ComputeObjectFilenames(mapping,
+      GeneratorTarget->LocalGenerator->ComputeObjectFilenames(mapping, Config,
                                                               GeneratorTarget);
 
       std::vector<std::string> objs;

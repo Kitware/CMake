@@ -116,7 +116,7 @@ std::string cmLocalCommonGenerator::GetTargetDirectory(
 
 void cmLocalCommonGenerator::ComputeObjectFilenames(
   std::map<cmSourceFile const*, cmObjectLocations>& mapping,
-  cmGeneratorTarget const* gt)
+  std::string const& config, cmGeneratorTarget const* gt)
 {
   // Determine if these object files should use a custom extension
   char const* custom_ext = gt->GetCustomObjectExtension();
@@ -129,5 +129,7 @@ void cmLocalCommonGenerator::ComputeObjectFilenames(
     force = false;
     si.second.LongLoc.Update(this->GetObjectFileNameWithoutTarget(
       *sf, gt->ObjectDirectory, &keptSourceExtension, custom_ext, &force));
+    this->FillCustomInstallObjectLocations(*sf, config, custom_ext,
+                                           si.second.InstallLongLoc);
   }
 }

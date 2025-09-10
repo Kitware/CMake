@@ -2721,16 +2721,21 @@ void cmVisualStudio10TargetGenerator::WriteAllSources(Elem& e0)
         this->WriteExcludeFromBuild(e2, exclude_configs);
       }
 
+      std::string customObjectName;
       if (this->GlobalGenerator->UseShortObjectNames()) {
+        customObjectName =
+          this->LocalGenerator->GetShortObjectFileName(*si.Source);
+      } else {
+        customObjectName =
+          this->LocalGenerator->GetCustomObjectFileName(*si.Source);
+      }
+      if (!customObjectName.empty()) {
         std::string outputName = "ObjectFileName";
         if (si.Source->GetLanguage() == "CUDA"_s) {
           outputName = "CompileOut";
         }
-        e2.Element(
-          outputName,
-          cmStrCat("$(IntDir)",
-                   this->LocalGenerator->GetShortObjectFileName(*si.Source),
-                   ".obj"));
+        e2.Element(outputName,
+                   cmStrCat("$(IntDir)", customObjectName, ".obj"));
       }
 
       this->FinishWritingSource(e2, toolSettings);

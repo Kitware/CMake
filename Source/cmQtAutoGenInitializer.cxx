@@ -2105,6 +2105,8 @@ cmSourceFile* cmQtAutoGenInitializer::RegisterGeneratedSource(
   std::string const& filename)
 {
   cmSourceFile* gFile = this->Makefile->GetOrCreateSource(filename, true);
+  gFile->SetSpecialSourceType(
+    cmSourceFile::SpecialSourceType::QtAutogenSource);
   gFile->MarkAsGenerated();
   gFile->SetProperty("SKIP_AUTOGEN", "1");
   gFile->SetProperty("SKIP_LINTING", "ON");

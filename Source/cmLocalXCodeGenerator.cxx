@@ -121,6 +121,7 @@ void cmLocalXCodeGenerator::AddGeneratorSpecificInstallSetup(std::ostream& os)
 
 void cmLocalXCodeGenerator::ComputeObjectFilenames(
   std::map<cmSourceFile const*, cmObjectLocations>& mapping,
+  std::string const& config,
   cmGeneratorTarget const*)
 {
   // Count the number of object files with each name. Warn about duplicate
@@ -141,6 +142,7 @@ void cmLocalXCodeGenerator::ComputeObjectFilenames(
     }
     si.second.ShortLoc.emplace(shortObjectName);
     si.second.LongLoc.Update(longObjectName);
+    this->FillCustomInstallObjectLocations(*sf, config, ".o", si.second.InstallLongLoc);
   }
 }
 
@@ -158,7 +160,8 @@ void cmLocalXCodeGenerator::AddXCConfigSources(cmGeneratorTarget* target)
       *xcconfig,
       this, config);
     if (!file.empty()) {
-      target->AddSource(file);
+      auto* xcconfig_sf = target->AddSource(file);
+      xcconfig_sf->SetSpecialSourceType(cmSourceFile::SpecialSourceType::XcodeXCConfigFile);
     }
   }
 }

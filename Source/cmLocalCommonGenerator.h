@@ -45,7 +45,7 @@ public:
 
   void ComputeObjectFilenames(
     std::map<cmSourceFile const*, cmObjectLocations>& mapping,
-    cmGeneratorTarget const* gt = nullptr) override;
+    std::string const& config, cmGeneratorTarget const* gt = nullptr) override;
 
 protected:
   std::vector<std::string> ConfigNames;

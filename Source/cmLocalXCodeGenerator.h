@@ -38,7 +38,7 @@ public:
   void AddGeneratorSpecificInstallSetup(std::ostream& os) override;
   void ComputeObjectFilenames(
     std::map<cmSourceFile const*, cmObjectLocations>& mapping,
-    cmGeneratorTarget const* gt = nullptr) override;
+    std::string const& config, cmGeneratorTarget const* gt = nullptr) override;
 
   void AddXCConfigSources(cmGeneratorTarget* target) override;
 

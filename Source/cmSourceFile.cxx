@@ -29,6 +29,21 @@ cmSourceFile::cmSourceFile(cmMakefile* mf, std::string const& name,
   }
 }
 
+void cmSourceFile::SetSpecialSourceType(cmSourceFile::SpecialSourceType type)
+{
+  this->SpecialSource = type;
+}
+
+bool cmSourceFile::IsPchHeader() const
+{
+  return this->SpecialSource == SpecialSourceType::PchHeader;
+}
+
+bool cmSourceFile::IsPchSource() const
+{
+  return this->SpecialSource == SpecialSourceType::PchSource;
+}
+
 std::string const& cmSourceFile::GetExtension() const
 {
   return this->Extension;

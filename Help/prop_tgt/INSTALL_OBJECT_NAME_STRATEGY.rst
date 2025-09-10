@@ -7,7 +7,8 @@ INSTALL_OBJECT_NAME_STRATEGY
 specifying the strategy to use when naming installed object files. The
 supported values are:
 
-- ``FULL``: Object files are named after the associated source file.
+- ``FULL``: Object files are named after the associated source file or
+  its :prop_sf:`OBJECT_NAME` property.
 - ``SHORT``: Object files are named based on the hash of the source file name
   to reduce path lengths.
 

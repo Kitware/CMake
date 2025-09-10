@@ -1,0 +1,5 @@
+set(ext_suffix ".c")
+if (RunCMake_GENERATOR MATCHES "(Visual Studio|Xcode)")
+  set(ext_suffix "")
+endif ()
+check_build_object(objlib "lib${ext_suffix}")

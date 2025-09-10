@@ -116,6 +116,8 @@ public:
 
   bool ShouldStripResourcePath(cmMakefile*) const override;
 
+  bool SupportsCustomObjectNames() const override { return false; }
+
   /**
    * Used to determine if this generator supports DEPFILE option.
    */

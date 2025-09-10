@@ -566,10 +566,11 @@ void cmGeneratorTarget::AddSourceCommon(std::string const& src, bool before)
   this->ClearSourcesCache();
 }
 
-void cmGeneratorTarget::AddSource(std::string const& src, bool before)
+cmSourceFile* cmGeneratorTarget::AddSource(std::string const& src, bool before)
 {
-  this->Target->AddSource(src, before);
+  auto* sf = this->Target->AddSource(src, before);
   this->AddSourceCommon(src, before);
+  return sf;
 }
 
 void cmGeneratorTarget::AddTracedSources(std::vector<std::string> const& srcs)
@@ -697,7 +698,7 @@ void cmGeneratorTarget::GetObjectSources(
     this->Objects[it];
   }
 
-  this->LocalGenerator->ComputeObjectFilenames(this->Objects, this);
+  this->LocalGenerator->ComputeObjectFilenames(this->Objects, config, this);
   this->VisitedConfigsForObjects.insert(config);
 }
 
@@ -3140,6 +3141,7 @@ std::string cmGeneratorTarget::GetPchFileObject(std::string const& config,
 
     auto* pchSf = this->Makefile->GetOrCreateSource(
       pchSource, false, cmSourceFileLocationKind::Known);
+    pchSf->SetSpecialSourceType(cmSourceFile::SpecialSourceType::PchSource);
     pchSf->ResolveFullPath();
     filename = cmStrCat(this->GetObjectDirectory(config), '/',
                         this->GetObjectName(pchSf));
@@ -3187,6 +3189,8 @@ std::string cmGeneratorTarget::GetPchFile(std::string const& config,
         auto pchSource = this->GetPchSource(config, language, arch);
         auto* pchSf = this->Makefile->GetOrCreateSource(
           pchSource, false, cmSourceFileLocationKind::Known);
+        pchSf->SetSpecialSourceType(
+          cmSourceFile::SpecialSourceType::PchSource);
         pchSf->ResolveFullPath();
         std::string cfgSubdir;
         if (this->GetGlobalGenerator()->IsMultiConfig()) {
@@ -4039,7 +4043,7 @@ void cmGeneratorTarget::GetTargetObjectLocations(
     mapping[sf];
   }
 
-  this->LocalGenerator->ComputeObjectFilenames(mapping, this);
+  this->LocalGenerator->ComputeObjectFilenames(mapping, config, this);
 
   auto const buildUseShortPaths = this->GetUseShortObjectNames()
     ? cmObjectLocations::UseShortPath::Yes
@@ -4050,7 +4054,8 @@ void cmGeneratorTarget::GetTargetObjectLocations(
     // Find the object file name corresponding to this source file.
     auto map_it = mapping.find(src);
     auto const& buildLoc = map_it->second.GetLocation(buildUseShortPaths);
-    auto const& installLoc = map_it->second.GetLocation(installUseShortPaths);
+    auto const& installLoc =
+      map_it->second.GetInstallLocation(installUseShortPaths, config);
     // It must exist because we populated the mapping just above.
     assert(!buildLoc.GetPath().empty());
     assert(!installLoc.GetPath().empty());
@@ -5797,6 +5802,8 @@ std::string cmGeneratorTarget::GenerateHeaderSetVerificationFile(
     this->LocalGenerator->GetCurrentBinaryDirectory(), '/', this->GetName(),
     "_verify_interface_header_sets/", headerFilename, extension);
   auto* verificationSource = this->Makefile->GetOrCreateSource(filename);
+  source.SetSpecialSourceType(
+    cmSourceFile::SpecialSourceType::HeaderSetVerificationSource);
   verificationSource->SetProperty("LANGUAGE", language);
 
   cmSystemTools::MakeDirectory(cmSystemTools::GetFilenamePath(filename));

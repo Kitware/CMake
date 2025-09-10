@@ -60,12 +60,14 @@ cmLocalFastbuildGenerator::GetGlobalFastbuildGenerator()
 
 void cmLocalFastbuildGenerator::ComputeObjectFilenames(
   std::map<cmSourceFile const*, cmObjectLocations>& mapping,
-  cmGeneratorTarget const* gt)
+  std::string const& config, cmGeneratorTarget const* gt)
 {
   for (auto& si : mapping) {
     cmSourceFile const* sf = si.first;
     si.second.LongLoc =
       this->GetObjectFileNameWithoutTarget(*sf, gt->ObjectDirectory);
+    this->FillCustomInstallObjectLocations(*sf, config, nullptr,
+                                           si.second.InstallLongLoc);
   }
 }
 

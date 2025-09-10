@@ -37,6 +37,7 @@ class cmImplicitDependsList;
 class cmLinkLineComputer;
 class cmLinkLineDeviceComputer;
 class cmMakefile;
+struct cmObjectLocation;
 struct cmObjectLocations;
 class cmRulePlaceholderExpander;
 class cmSourceFile;
@@ -452,6 +453,14 @@ public:
   virtual std::string GetShortObjectFileName(cmSourceFile const& source) const;
   virtual std::string ComputeShortTargetDirectory(
     cmGeneratorTarget const* gt) const;
+  std::string GetCustomObjectFileName(cmSourceFile const& source) const;
+  std::string GetCustomInstallObjectFileName(cmSourceFile const& source,
+                                             std::string const& config,
+                                             char const* custom_ext) const;
+  void FillCustomInstallObjectLocations(
+    cmSourceFile const& source, std::string const& config,
+    char const* custom_ext,
+    std::map<std::string, cmObjectLocation>& mapping) const;
 
   /**
    * Generate a macOS application bundle Info.plist file.
@@ -528,7 +537,7 @@ public:
 
   virtual void ComputeObjectFilenames(
     std::map<cmSourceFile const*, cmObjectLocations>& mapping,
-    cmGeneratorTarget const* gt = nullptr);
+    std::string const& config, cmGeneratorTarget const* gt = nullptr);
 
   bool IsWindowsShell() const;
   bool IsWatcomWMake() const;

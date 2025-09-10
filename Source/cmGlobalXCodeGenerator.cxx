@@ -740,7 +740,9 @@ void cmGlobalXCodeGenerator::AddExtraTargets(
       this->CurrentMakefile->GetSafeDefinition("CMAKE_XCODE_XCCONFIG"),
       this->CurrentLocalGenerator, config);
     if (!xcconfig.empty()) {
-      allbuild->AddSource(xcconfig);
+      auto* xcconfig_sf = allbuild->AddSource(xcconfig);
+      xcconfig_sf->SetSpecialSourceType(
+        cmSourceFile::SpecialSourceType::XcodeXCConfigFile);
     }
   }
 
@@ -1161,6 +1163,8 @@ void cmGlobalXCodeGenerator::AddXCodeProjBuildRule(
     target->GetLocalGenerator()->GetCurrentSourceDirectory());
   cmSourceFile* srcCMakeLists = target->Makefile->GetOrCreateSource(
     listfile, false, cmSourceFileLocationKind::Known);
+  srcCMakeLists->SetSpecialSourceType(
+    cmSourceFile::SpecialSourceType::CMakeLists);
   if (!cm::contains(sources, srcCMakeLists)) {
     sources.push_back(srcCMakeLists);
   }
@@ -1538,6 +1542,7 @@ bool cmGlobalXCodeGenerator::CreateXCodeTarget(
     std::string plist = this->ComputeInfoPListLocation(gtgt);
     cmSourceFile* sf = gtgt->Makefile->GetOrCreateSource(
       plist, true, cmSourceFileLocationKind::Known);
+    sf->SetSpecialSourceType(cmSourceFile::SpecialSourceType::BundleInfoPlist);
     commonSourceFiles.push_back(sf);
   }
 
@@ -1811,6 +1816,8 @@ void cmGlobalXCodeGenerator::ForceLinkerLanguage(cmGeneratorTarget* gtgt)
     fout << '\n';
   }
   if (cmSourceFile* sf = mf->GetOrCreateSource(fname)) {
+    sf->SetSpecialSourceType(
+      cmSourceFile::SpecialSourceType::XcodeForceLinkerSource);
     sf->SetProperty("LANGUAGE", llang);
     sf->SetProperty("CXX_SCAN_FOR_MODULES", "0");
     gtgt->AddSource(fname);
@@ -4519,6 +4526,7 @@ bool cmGlobalXCodeGenerator::CreateGroups(
           gtgt->GetLocalGenerator()->GetCurrentSourceDirectory());
         cmSourceFile* sf = gtgt->Makefile->GetOrCreateSource(
           listfile, false, cmSourceFileLocationKind::Known);
+        sf->SetSpecialSourceType(cmSourceFile::SpecialSourceType::CMakeLists);
         addSourceToGroup(sf->ResolveFullPath());
       }
 
@@ -4527,6 +4535,8 @@ bool cmGlobalXCodeGenerator::CreateGroups(
         std::string plist = this->ComputeInfoPListLocation(gtgt.get());
         cmSourceFile* sf = gtgt->Makefile->GetOrCreateSource(
           plist, true, cmSourceFileLocationKind::Known);
+        sf->SetSpecialSourceType(
+          cmSourceFile::SpecialSourceType::BundleInfoPlist);
         addSourceToGroup(sf->ResolveFullPath());
       }
     }

@@ -1,0 +1,1 @@
+((NMake Makefiles)?unresolved external symbol [fg] referenced in function main|(Watcom WMake)?undefined symbol [fg]_|)
