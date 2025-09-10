@@ -157,8 +157,8 @@ static CURLcode smtp_connect(struct Curl_easy *data, bool *done);
 static CURLcode smtp_disconnect(struct Curl_easy *data,
                                 struct connectdata *conn, bool dead);
 static CURLcode smtp_multi_statemach(struct Curl_easy *data, bool *done);
-static int smtp_getsock(struct Curl_easy *data,
-                        struct connectdata *conn, curl_socket_t *socks);
+static CURLcode smtp_pollset(struct Curl_easy *data,
+                             struct easy_pollset *ps);
 static CURLcode smtp_doing(struct Curl_easy *data, bool *dophase_done);
 static CURLcode smtp_setup_connection(struct Curl_easy *data,
                                       struct connectdata *conn);
@@ -169,7 +169,8 @@ static CURLcode smtp_parse_url_path(struct Curl_easy *data,
 static CURLcode smtp_parse_custom_request(struct Curl_easy *data,
                                           struct SMTP *smtp);
 static CURLcode smtp_parse_address(const char *fqma,
-                                   char **address, struct hostname *host);
+                                   char **address, struct hostname *host,
+                                   const char **suffix);
 static CURLcode smtp_perform_auth(struct Curl_easy *data, const char *mech,
                                   const struct bufref *initresp);
 static CURLcode smtp_continue_auth(struct Curl_easy *data, const char *mech,
@@ -191,10 +192,10 @@ const struct Curl_handler Curl_handler_smtp = {
   smtp_connect,                     /* connect_it */
   smtp_multi_statemach,             /* connecting */
   smtp_doing,                       /* doing */
-  smtp_getsock,                     /* proto_getsock */
-  smtp_getsock,                     /* doing_getsock */
-  ZERO_NULL,                        /* domore_getsock */
-  ZERO_NULL,                        /* perform_getsock */
+  smtp_pollset,                     /* proto_pollset */
+  smtp_pollset,                     /* doing_pollset */
+  ZERO_NULL,                        /* domore_pollset */
+  ZERO_NULL,                        /* perform_pollset */
   smtp_disconnect,                  /* disconnect */
   ZERO_NULL,                        /* write_resp */
   ZERO_NULL,                        /* write_resp_hd */
@@ -222,10 +223,10 @@ const struct Curl_handler Curl_handler_smtps = {
   smtp_connect,                     /* connect_it */
   smtp_multi_statemach,             /* connecting */
   smtp_doing,                       /* doing */
-  smtp_getsock,                     /* proto_getsock */
-  smtp_getsock,                     /* doing_getsock */
-  ZERO_NULL,                        /* domore_getsock */
-  ZERO_NULL,                        /* perform_getsock */
+  smtp_pollset,                     /* proto_pollset */
+  smtp_pollset,                     /* doing_pollset */
+  ZERO_NULL,                        /* domore_pollset */
+  ZERO_NULL,                        /* perform_pollset */
   smtp_disconnect,                  /* disconnect */
   ZERO_NULL,                        /* write_resp */
   ZERO_NULL,                        /* write_resp_hd */
@@ -357,7 +358,7 @@ static void smtp_state(struct Curl_easy *data,
                        struct smtp_conn *smtpc,
                        smtpstate newstate)
 {
-#if !defined(CURL_DISABLE_VERBOSE_STRINGS)
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
   /* for debug purposes */
   static const char * const names[] = {
     "STOP",
@@ -379,6 +380,8 @@ static void smtp_state(struct Curl_easy *data,
   if(smtpc->state != newstate)
     CURL_TRC_SMTP(data, "state change from %s to %s",
                   names[smtpc->state], names[newstate]);
+#else
+  (void)data;
 #endif
 
   smtpc->state = newstate;
@@ -618,11 +621,12 @@ static CURLcode smtp_perform_command(struct Curl_easy *data,
     if((!smtp->custom) || (!smtp->custom[0])) {
       char *address = NULL;
       struct hostname host = { NULL, NULL, NULL, NULL };
+      const char *suffix = "";
 
       /* Parse the mailbox to verify into the local address and hostname
          parts, converting the hostname to an IDN A-label if necessary */
       result = smtp_parse_address(smtp->rcpt->data,
-                                  &address, &host);
+                                  &address, &host, &suffix);
       if(result)
         return result;
 
@@ -692,11 +696,12 @@ static CURLcode smtp_perform_mail(struct Curl_easy *data,
   if(data->set.str[STRING_MAIL_FROM]) {
     char *address = NULL;
     struct hostname host = { NULL, NULL, NULL, NULL };
+    const char *suffix = "";
 
     /* Parse the FROM mailbox into the local address and hostname parts,
        converting the hostname to an IDN A-label if necessary */
     result = smtp_parse_address(data->set.str[STRING_MAIL_FROM],
-                                &address, &host);
+                                &address, &host, &suffix);
     if(result)
       goto out;
 
@@ -707,14 +712,14 @@ static CURLcode smtp_perform_mail(struct Curl_easy *data,
             (!Curl_is_ASCII_name(host.name)));
 
     if(host.name) {
-      from = aprintf("<%s@%s>", address, host.name);
+      from = aprintf("<%s@%s>%s", address, host.name, suffix);
 
       Curl_free_idnconverted_hostname(&host);
     }
     else
       /* An invalid mailbox was provided but we will simply let the server
          worry about that and reply with a 501 error */
-      from = aprintf("<%s>", address);
+      from = aprintf("<%s>%s", address, suffix);
 
     free(address);
   }
@@ -732,11 +737,12 @@ static CURLcode smtp_perform_mail(struct Curl_easy *data,
     if(data->set.str[STRING_MAIL_AUTH][0] != '\0') {
       char *address = NULL;
       struct hostname host = { NULL, NULL, NULL, NULL };
+      const char *suffix = "";
 
       /* Parse the AUTH mailbox into the local address and hostname parts,
          converting the hostname to an IDN A-label if necessary */
       result = smtp_parse_address(data->set.str[STRING_MAIL_AUTH],
-                                  &address, &host);
+                                  &address, &host, &suffix);
       if(result)
         goto out;
 
@@ -748,14 +754,14 @@ static CURLcode smtp_perform_mail(struct Curl_easy *data,
         utf8 = TRUE;
 
       if(host.name) {
-        auth = aprintf("<%s@%s>", address, host.name);
+        auth = aprintf("<%s@%s>%s", address, host.name, suffix);
 
         Curl_free_idnconverted_hostname(&host);
       }
       else
         /* An invalid mailbox was provided but we will simply let the server
            worry about it */
-        auth = aprintf("<%s>", address);
+        auth = aprintf("<%s>%s", address, suffix);
       free(address);
     }
     else
@@ -865,22 +871,24 @@ static CURLcode smtp_perform_rcpt_to(struct Curl_easy *data,
   CURLcode result = CURLE_OK;
   char *address = NULL;
   struct hostname host = { NULL, NULL, NULL, NULL };
+  const char *suffix = "";
 
   /* Parse the recipient mailbox into the local address and hostname parts,
      converting the hostname to an IDN A-label if necessary */
   result = smtp_parse_address(smtp->rcpt->data,
-                              &address, &host);
+                              &address, &host, &suffix);
   if(result)
     return result;
 
   /* Send the RCPT TO command */
   if(host.name)
-    result = Curl_pp_sendf(data, &smtpc->pp, "RCPT TO:<%s@%s>",
-                           address, host.name);
+    result = Curl_pp_sendf(data, &smtpc->pp, "RCPT TO:<%s@%s>%s",
+                           address, host.name, suffix);
   else
     /* An invalid mailbox was provided but we will simply let the server worry
        about that and reply with a 501 error */
-    result = Curl_pp_sendf(data, &smtpc->pp, "RCPT TO:<%s>", address);
+    result = Curl_pp_sendf(data, &smtpc->pp, "RCPT TO:<%s>%s",
+                           address, suffix);
 
   Curl_free_idnconverted_hostname(&host);
   free(address);
@@ -916,7 +924,7 @@ static CURLcode smtp_state_servergreet_resp(struct Curl_easy *data,
                                             smtpstate instate)
 {
   CURLcode result = CURLE_OK;
-  (void)instate; /* no use for this yet */
+  (void)instate;
 
   if(smtpcode/100 != 2) {
     failf(data, "Got unexpected smtp-server response: %d", smtpcode);
@@ -935,7 +943,7 @@ static CURLcode smtp_state_starttls_resp(struct Curl_easy *data,
                                          smtpstate instate)
 {
   CURLcode result = CURLE_OK;
-  (void)instate; /* no use for this yet */
+  (void)instate;
 
   /* Pipelining in response is forbidden. */
   if(smtpc->pp.overflow)
@@ -965,7 +973,7 @@ static CURLcode smtp_state_ehlo_resp(struct Curl_easy *data,
   const char *line = curlx_dyn_ptr(&smtpc->pp.recvbuf);
   size_t len = smtpc->pp.nfinal;
 
-  (void)instate; /* no use for this yet */
+  (void)instate;
 
   if(smtpcode/100 != 2 && smtpcode != 1) {
     if(data->set.use_ssl <= CURLUSESSL_TRY
@@ -1066,7 +1074,7 @@ static CURLcode smtp_state_helo_resp(struct Curl_easy *data,
                                      smtpstate instate)
 {
   CURLcode result = CURLE_OK;
-  (void)instate; /* no use for this yet */
+  (void)instate;
 
   if(smtpcode/100 != 2) {
     failf(data, "Remote access denied: %d", smtpcode);
@@ -1088,7 +1096,7 @@ static CURLcode smtp_state_auth_resp(struct Curl_easy *data,
   CURLcode result = CURLE_OK;
   saslprogress progress;
 
-  (void)instate; /* no use for this yet */
+  (void)instate;
 
   result = Curl_sasl_continue(&smtpc->sasl, data, smtpcode, &progress);
   if(!result)
@@ -1118,7 +1126,7 @@ static CURLcode smtp_state_command_resp(struct Curl_easy *data,
   char *line = curlx_dyn_ptr(&smtpc->pp.recvbuf);
   size_t len = smtpc->pp.nfinal;
 
-  (void)instate; /* no use for this yet */
+  (void)instate;
 
   if((smtp->rcpt && smtpcode/100 != 2 && smtpcode != 553 && smtpcode != 1) ||
      (!smtp->rcpt && smtpcode/100 != 2 && smtpcode != 1)) {
@@ -1158,7 +1166,7 @@ static CURLcode smtp_state_mail_resp(struct Curl_easy *data,
                                      smtpstate instate)
 {
   CURLcode result = CURLE_OK;
-  (void)instate; /* no use for this yet */
+  (void)instate;
 
   if(smtpcode/100 != 2) {
     failf(data, "MAIL failed: %d", smtpcode);
@@ -1182,7 +1190,7 @@ static CURLcode smtp_state_rcpt_resp(struct Curl_easy *data,
   bool is_smtp_err = FALSE;
   bool is_smtp_blocking_err = FALSE;
 
-  (void)instate; /* no use for this yet */
+  (void)instate;
 
   is_smtp_err = (smtpcode/100 != 2);
 
@@ -1238,7 +1246,7 @@ static CURLcode smtp_state_data_resp(struct Curl_easy *data,
                                      smtpstate instate)
 {
   CURLcode result = CURLE_OK;
-  (void)instate; /* no use for this yet */
+  (void)instate;
 
   if(smtpcode != 354) {
     failf(data, "DATA failed: %d", smtpcode);
@@ -1249,7 +1257,7 @@ static CURLcode smtp_state_data_resp(struct Curl_easy *data,
     Curl_pgrsSetUploadSize(data, data->state.infilesize);
 
     /* SMTP upload */
-    Curl_xfer_setup1(data, CURL_XFER_SEND, -1, FALSE);
+    Curl_xfer_setup_send(data, FIRSTSOCKET);
 
     /* End of DO phase */
     smtp_state(data, smtpc, SMTP_STOP);
@@ -1267,7 +1275,7 @@ static CURLcode smtp_state_postdata_resp(struct Curl_easy *data,
 {
   CURLcode result = CURLE_OK;
 
-  (void)instate; /* no use for this yet */
+  (void)instate;
 
   if(smtpcode != 250)
     result = CURLE_WEIRD_SERVER_REPLY;
@@ -1405,12 +1413,12 @@ static CURLcode smtp_block_statemach(struct Curl_easy *data,
 }
 
 /* For the SMTP "protocol connect" and "doing" phases only */
-static int smtp_getsock(struct Curl_easy *data,
-                        struct connectdata *conn, curl_socket_t *socks)
+static CURLcode smtp_pollset(struct Curl_easy *data,
+                             struct easy_pollset *ps)
 {
-  struct smtp_conn *smtpc = Curl_conn_meta_get(conn, CURL_META_SMTP_CONN);
-  return smtpc ?
-         Curl_pp_getsock(data, &smtpc->pp, socks) : GETSOCK_BLANK;
+  struct smtp_conn *smtpc =
+    Curl_conn_meta_get(data->conn, CURL_META_SMTP_CONN);
+  return smtpc ? Curl_pp_pollset(data, &smtpc->pp, ps) : CURLE_OK;
 }
 
 /***********************************************************************
@@ -1866,10 +1874,11 @@ static CURLcode smtp_parse_custom_request(struct Curl_easy *data,
  * the address part with the hostname being NULL.
  */
 static CURLcode smtp_parse_address(const char *fqma, char **address,
-                                   struct hostname *host)
+                                   struct hostname *host, const char **suffix)
 {
   CURLcode result = CURLE_OK;
   size_t length;
+  char *addressend;
 
   /* Duplicate the fully qualified email address so we can manipulate it,
      ensuring it does not contain the delimiters if specified */
@@ -1877,10 +1886,19 @@ static CURLcode smtp_parse_address(const char *fqma, char **address,
   if(!dup)
     return CURLE_OUT_OF_MEMORY;
 
-  length = strlen(dup);
-  if(length) {
-    if(dup[length - 1] == '>')
-      dup[length - 1] = '\0';
+  if(fqma[0] != '<') {
+    length = strlen(dup);
+    if(length) {
+      if(dup[length - 1] == '>')
+        dup[length - 1] = '\0';
+    }
+  }
+  else {
+    addressend = strrchr(dup, '>');
+    if(addressend) {
+      *addressend = '\0';
+      *suffix = addressend + 1;
+    }
   }
 
   /* Extract the hostname from the address (if we can) */
@@ -1890,7 +1908,7 @@ static CURLcode smtp_parse_address(const char *fqma, char **address,
     host->name = host->name + 1;
 
     /* Attempt to convert the hostname to IDN ACE */
-    (void) Curl_idnconvert_hostname(host);
+    (void)Curl_idnconvert_hostname(host);
 
     /* If Curl_idnconvert_hostname() fails then we shall attempt to continue
        and send the hostname using UTF-8 rather than as 7-bit ACE (which is
@@ -2051,8 +2069,7 @@ static const struct Curl_crtype cr_eob = {
   Curl_creader_def_needs_rewind,
   cr_eob_total_length,
   Curl_creader_def_resume_from,
-  Curl_creader_def_rewind,
-  Curl_creader_def_unpause,
+  Curl_creader_def_cntrl,
   Curl_creader_def_is_paused,
   Curl_creader_def_done,
   sizeof(struct cr_eob_ctx)
