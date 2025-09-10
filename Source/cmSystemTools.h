@@ -517,6 +517,29 @@ public:
   };
 #endif
 
+  /** \class ScopedEnv
+   * \brief An RAII class to temporarily set/unset an environment variable.
+   *
+   * The value passed to the constructor is put into the environment. This
+   * variable is of the form "var=value" and the original value of the "var"
+   * environment variable is saved. When the object is destroyed, the original
+   * value for the environment variable is restored. If the variable didn't
+   * exist, it will be unset.
+   */
+  class ScopedEnv
+  {
+  public:
+    ScopedEnv(cm::string_view val);
+    ~ScopedEnv();
+
+    ScopedEnv(ScopedEnv const&) = delete;
+    ScopedEnv& operator=(ScopedEnv const&) = delete;
+
+  private:
+    std::string Key;
+    cm::optional<std::string> Original;
+  };
+
   /** Setup the environment to enable VS 8 IDE output.  */
   static void EnableVSConsoleOutput();
 

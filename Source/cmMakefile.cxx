@@ -3239,6 +3239,14 @@ int cmMakefile::TryCompile(std::string const& srcdir,
     return 1;
   }
 
+  // unset the NINJA_STATUS environment variable while running try compile.
+  // since we parse the output, we need to ensure there aren't any unexpected
+  // characters that will cause issues, such as ANSI color escape codes.
+  cm::optional<cmSystemTools::ScopedEnv> maybeNinjaStatus;
+  if (this->GetGlobalGenerator()->IsNinja()) {
+    maybeNinjaStatus.emplace("NINJA_STATUS=");
+  }
+
   // make sure the same generator is used
   // use this program as the cmake to be run, it should not
   // be run that way but the cmake object requires a valid path

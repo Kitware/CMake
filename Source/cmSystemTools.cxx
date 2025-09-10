@@ -2310,6 +2310,41 @@ cmSystemTools::SaveRestoreEnvironment::~SaveRestoreEnvironment()
 }
 #endif
 
+cmSystemTools::ScopedEnv::ScopedEnv(cm::string_view var)
+{
+  std::string::size_type pos = var.find('=');
+  if (pos != std::string::npos) {
+    this->Key = std::string{ var.substr(0, pos) };
+    this->Original = cmSystemTools::GetEnvVar(this->Key);
+
+    cm::string_view value = var.substr(pos + 1);
+
+    if (!this->Original && value.empty()) {
+      // nothing to do if the environment variable wasn't already set and the
+      // new value is also empty. clear the Key member so the destructor also
+      // does nothing.
+      this->Key.clear();
+    } else {
+      if (value.empty()) {
+        cmSystemTools::UnPutEnv(this->Key);
+      } else {
+        cmSystemTools::PutEnv(cmStrCat(this->Key, '=', value));
+      }
+    }
+  }
+}
+
+cmSystemTools::ScopedEnv::~ScopedEnv()
+{
+  if (!this->Key.empty()) {
+    if (this->Original) {
+      cmSystemTools::PutEnv(cmStrCat(this->Key, '=', *this->Original));
+    } else {
+      cmSystemTools::UnPutEnv(Key);
+    }
+  }
+}
+
 void cmSystemTools::EnableVSConsoleOutput()
 {
 #ifdef _WIN32
