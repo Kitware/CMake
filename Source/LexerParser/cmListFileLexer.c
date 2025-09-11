@@ -2715,6 +2715,7 @@ void cmListFileLexer_Delete(cmListFileLexer* lexer)
 static cmListFileLexer_BOM cmListFileLexer_ReadBOM(FILE* f)
 {
   unsigned char b[2];
+  size_t n;
   if (fread(b, 1, 2, f) == 2) {
     if (b[0] == 0xEF && b[1] == 0xBB) {
       if (fread(b, 1, 1, f) == 1 && b[0] == 0xBF) {
@@ -2730,13 +2731,21 @@ static cmListFileLexer_BOM cmListFileLexer_ReadBOM(FILE* f)
     } else if (b[0] == 0xFF && b[1] == 0xFE) {
       fpos_t p;
       fgetpos(f, &p);
-      if (fread(b, 1, 2, f) == 2 && b[0] == 0 && b[1] == 0) {
+      n = fread(b, 1, 2, f);
+      if (n == 2 && b[0] == 0 && b[1] == 0) {
         return cmListFileLexer_BOM_UTF32LE;
       }
       if (fsetpos(f, &p) != 0) {
         return cmListFileLexer_BOM_Broken;
       }
-      return cmListFileLexer_BOM_UTF16LE;
+      /* In case we were able to subsequently read only a single byte out of two
+         (i.e., three in total), the file must be corrupt and the BOM cannot
+         represent a UTF-16-LE BOM since each code unit must consist of two
+         bytes. This avoids incorrectly detecting an incomplete UTF-32-LE BOM as
+         UTF-16-LE input. */
+      if (n % 2 == 0) {
+        return cmListFileLexer_BOM_UTF16LE;
+      }
     }
   }
   if (fseek(f, 0, SEEK_SET) != 0) {
