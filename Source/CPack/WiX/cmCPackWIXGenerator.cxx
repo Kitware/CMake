@@ -1015,6 +1015,10 @@ void cmCPackWIXGenerator::AddDirectoryAndFileDefinitions(
 
   if (emptyDirectory) {
     createDirectory = true;
+
+    if (directoryId == "INSTALL_ROOT") {
+      return;
+    }
   }
 
   if (directoryInstalledFile) {

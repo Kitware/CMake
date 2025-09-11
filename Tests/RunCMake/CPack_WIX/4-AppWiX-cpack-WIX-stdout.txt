@@ -3,6 +3,8 @@ CPack: Install projects
 CPack: - Install project: CPackWiXGenerator \[Release\]
 CPack: -   Install component: applications
 CPack: -   Install component: applications2
+CPack: -   Install component: empty1
+CPack: -   Install component: empty2
 CPack: -   Install component: extras
 CPack: -   Install component: headers
 CPack: -   Install component: libraries
