@@ -24,7 +24,8 @@
 
 #include "curl_setup.h"
 
-#if defined(USE_NGHTTP2) && !defined(CURL_DISABLE_PROXY)
+#if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_PROXY) && \
+  defined(USE_NGHTTP2)
 
 #include <nghttp2/nghttp2.h>
 #include "urldata.h"
@@ -40,6 +41,7 @@
 #include "http_proxy.h"
 #include "multiif.h"
 #include "sendf.h"
+#include "select.h"
 #include "cf-h2-proxy.h"
 
 /* The last 3 #include files should be in this order */
@@ -472,7 +474,7 @@ static CURLcode proxy_h2_progress_ingress(struct Curl_cfilter *cf,
                 Curl_bufq_len(&ctx->inbufq), result, nread);
     if(result) {
       if(result != CURLE_AGAIN) {
-        failf(data, "Failed receiving HTTP2 data");
+        failf(data, "Failed receiving HTTP2 proxy data");
         return result;
       }
       break;
@@ -539,7 +541,7 @@ static ssize_t on_session_send(nghttp2_session *h2,
   if(!nwritten)
     return NGHTTP2_ERR_WOULDBLOCK;
 
-  return (nwritten  > SSIZE_T_MAX) ?
+  return (nwritten  > SSIZE_MAX) ?
     NGHTTP2_ERR_CALLBACK_FAILURE : (ssize_t)nwritten;
 }
 
@@ -815,7 +817,7 @@ static ssize_t tunnel_send_callback(nghttp2_session *session,
 
   CURL_TRC_CF(data, cf, "[%d] tunnel_send_callback -> %zd",
               ts->stream_id, nread);
-  return (nread  > SSIZE_T_MAX) ?
+  return (nread  > SSIZE_MAX) ?
     NGHTTP2_ERR_CALLBACK_FAILURE : (ssize_t)nread;
 }
 
@@ -1201,14 +1203,15 @@ static bool cf_h2_proxy_data_pending(struct Curl_cfilter *cf,
   return cf->next ? cf->next->cft->has_data_pending(cf->next, data) : FALSE;
 }
 
-static void cf_h2_proxy_adjust_pollset(struct Curl_cfilter *cf,
-                                       struct Curl_easy *data,
-                                       struct easy_pollset *ps)
+static CURLcode cf_h2_proxy_adjust_pollset(struct Curl_cfilter *cf,
+                                           struct Curl_easy *data,
+                                           struct easy_pollset *ps)
 {
   struct cf_h2_proxy_ctx *ctx = cf->ctx;
   struct cf_call_data save;
   curl_socket_t sock = Curl_conn_cf_get_socket(cf, data);
   bool want_recv, want_send;
+  CURLcode result = CURLE_OK;
 
   if(!cf->connected && ctx->h2) {
     want_send = nghttp2_session_want_write(ctx->h2) ||
@@ -1233,9 +1236,9 @@ static void cf_h2_proxy_adjust_pollset(struct Curl_cfilter *cf,
                 !Curl_bufq_is_empty(&ctx->outbufq) ||
                 !Curl_bufq_is_empty(&ctx->tunnel.sendbuf);
 
-    Curl_pollset_set(data, ps, sock, want_recv, want_send);
-    CURL_TRC_CF(data, cf, "adjust_pollset, want_recv=%d want_send=%d",
-                want_recv, want_send);
+    result = Curl_pollset_set(data, ps, sock, want_recv, want_send);
+    CURL_TRC_CF(data, cf, "adjust_pollset, want_recv=%d want_send=%d -> %d",
+                want_recv, want_send, result);
     CF_DATA_RESTORE(cf, save);
   }
   else if(ctx->sent_goaway && !cf->shutdown) {
@@ -1245,11 +1248,12 @@ static void cf_h2_proxy_adjust_pollset(struct Curl_cfilter *cf,
                 !Curl_bufq_is_empty(&ctx->outbufq) ||
                 !Curl_bufq_is_empty(&ctx->tunnel.sendbuf);
     want_recv = nghttp2_session_want_read(ctx->h2);
-    Curl_pollset_set(data, ps, sock, want_recv, want_send);
-    CURL_TRC_CF(data, cf, "adjust_pollset, want_recv=%d want_send=%d",
-                want_recv, want_send);
+    result = Curl_pollset_set(data, ps, sock, want_recv, want_send);
+    CURL_TRC_CF(data, cf, "adjust_pollset, want_recv=%d want_send=%d -> %d",
+                want_recv, want_send, result);
     CF_DATA_RESTORE(cf, save);
   }
+  return result;
 }
 
 static CURLcode h2_handle_tunnel_close(struct Curl_cfilter *cf,
@@ -1533,6 +1537,12 @@ static CURLcode cf_h2_proxy_query(struct Curl_cfilter *cf,
     }
     break;
   }
+  case CF_QUERY_ALPN_NEGOTIATED: {
+    const char **palpn = pres2;
+    DEBUGASSERT(palpn);
+    *palpn = NULL;
+    return CURLE_OK;
+  }
   default:
     break;
   }
@@ -1606,4 +1616,4 @@ out:
   return result;
 }
 
-#endif /* defined(USE_NGHTTP2) && !defined(CURL_DISABLE_PROXY) */
+#endif /* !CURL_DISABLE_HTTP && !CURL_DISABLE_PROXY && USE_NGHTTP2 */
