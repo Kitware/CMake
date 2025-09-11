@@ -35,5 +35,6 @@ public:
   std::string EmitComponentFile(std::string const& directoryId,
                                 std::string const& id,
                                 std::string const& filePath, cmWIXPatch& patch,
-                                cmInstalledFile const* installedFile);
+                                cmInstalledFile const* installedFile,
+                                int diskId);
 };

@@ -430,6 +430,7 @@ void cmCPackWIXGenerator::CreateWiXVariablesIncludeFile()
   CopyDefinition(includeFile, "CPACK_WIX_PROGRAM_MENU_FOLDER");
   CopyDefinition(includeFile, "CPACK_WIX_UI_REF");
   CopyDefinition(includeFile, "CPACK_WIX_INSTALL_SCOPE");
+  CopyDefinition(includeFile, "CPACK_WIX_CAB_PER_COMPONENT");
 }
 
 void cmCPackWIXGenerator::CreateWiXPropertiesIncludeFile()
@@ -491,6 +492,22 @@ void cmCPackWIXGenerator::CreateWiXProductFragmentIncludeFile()
                                 includeFilename, this->ComponentGuidType,
                                 cmWIXSourceWriter::INCLUDE_ELEMENT_ROOT);
   InjectXmlNamespaces(includeFile);
+
+  bool perComponentCab = GetOption("CPACK_WIX_CAB_PER_COMPONENT").IsOn();
+
+  if (perComponentCab) {
+    std::size_t cabCount = std::max<std::size_t>(1, this->Components.size());
+
+    for (std::size_t i = 0; i < cabCount; ++i) {
+      std::string diskId = std::to_string(i + 1);
+
+      includeFile.BeginElement("Media");
+      includeFile.AddAttribute("Id", diskId);
+      includeFile.AddAttribute("Cabinet", "media" + diskId + ".cab");
+      includeFile.AddAttribute("EmbedCab", "yes");
+      includeFile.EndElement("Media");
+    }
+  }
 
   this->Patch->ApplyFragment("#PRODUCT", includeFile);
 }
@@ -617,11 +634,17 @@ bool cmCPackWIXGenerator::CreateWiXSourceFiles()
   if (Components.empty()) {
     AddComponentsToFeature(toplevel, "ProductFeature", directoryDefinitions,
                            fileDefinitions, featureDefinitions,
-                           globalShortcuts);
+                           globalShortcuts, 0);
 
     globalShortcuts.AddShortcutTypes(emittedShortcutTypes);
   } else {
+    bool perComponentCab = GetOption("CPACK_WIX_CAB_PER_COMPONENT").IsOn();
+
+    std::size_t componentDiskId = 0;
+
     for (auto const& i : this->Components) {
+      ++componentDiskId;
+
       cmCPackComponent const& component = i.second;
 
       std::string componentPath = cmStrCat(toplevel, '/', component.Name);
@@ -631,7 +654,8 @@ bool cmCPackWIXGenerator::CreateWiXSourceFiles()
       cmWIXShortcuts featureShortcuts;
       AddComponentsToFeature(componentPath, componentFeatureId,
                              directoryDefinitions, fileDefinitions,
-                             featureDefinitions, featureShortcuts);
+                             featureDefinitions, featureShortcuts,
+                             perComponentCab ? componentDiskId : 0);
 
       featureShortcuts.AddShortcutTypes(emittedShortcutTypes);
 
@@ -779,7 +803,8 @@ bool cmCPackWIXGenerator::AddComponentsToFeature(
   std::string const& rootPath, std::string const& featureId,
   cmWIXDirectoriesSourceWriter& directoryDefinitions,
   cmWIXFilesSourceWriter& fileDefinitions,
-  cmWIXFeaturesSourceWriter& featureDefinitions, cmWIXShortcuts& shortcuts)
+  cmWIXFeaturesSourceWriter& featureDefinitions, cmWIXShortcuts& shortcuts,
+  int diskId)
 {
   featureDefinitions.BeginElement("FeatureRef");
   featureDefinitions.AddAttribute("Id", featureId);
@@ -807,7 +832,7 @@ bool cmCPackWIXGenerator::AddComponentsToFeature(
   AddDirectoryAndFileDefinitions(
     rootPath, "INSTALL_ROOT", directoryDefinitions, fileDefinitions,
     featureDefinitions, cpackPackageExecutablesList,
-    cpackPackageDesktopLinksList, shortcuts);
+    cpackPackageDesktopLinksList, shortcuts, diskId);
 
   featureDefinitions.EndElement("FeatureRef");
 
@@ -995,7 +1020,7 @@ void cmCPackWIXGenerator::AddDirectoryAndFileDefinitions(
   cmWIXFeaturesSourceWriter& featureDefinitions,
   std::vector<std::string> const& packageExecutables,
   std::vector<std::string> const& desktopExecutables,
-  cmWIXShortcuts& shortcuts)
+  cmWIXShortcuts& shortcuts, int diskId)
 {
   cmsys::Directory dir;
   dir.Load(topdir.c_str());
@@ -1054,9 +1079,10 @@ void cmCPackWIXGenerator::AddDirectoryAndFileDefinitions(
       directoryDefinitions.AddAttribute("Name", fileName);
       this->Patch->ApplyFragment(subDirectoryId, directoryDefinitions);
 
-      AddDirectoryAndFileDefinitions(
-        fullPath, subDirectoryId, directoryDefinitions, fileDefinitions,
-        featureDefinitions, packageExecutables, desktopExecutables, shortcuts);
+      AddDirectoryAndFileDefinitions(fullPath, subDirectoryId,
+                                     directoryDefinitions, fileDefinitions,
+                                     featureDefinitions, packageExecutables,
+                                     desktopExecutables, shortcuts, diskId);
 
       directoryDefinitions.EndElement("Directory");
     } else {
@@ -1068,7 +1094,7 @@ void cmCPackWIXGenerator::AddDirectoryAndFileDefinitions(
       }
 
       std::string componentId = fileDefinitions.EmitComponentFile(
-        directoryId, id, fullPath, *(this->Patch), installedFile);
+        directoryId, id, fullPath, *(this->Patch), installedFile, diskId);
 
       featureDefinitions.EmitComponentRef(componentId);
 
