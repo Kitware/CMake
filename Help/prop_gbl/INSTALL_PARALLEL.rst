@@ -23,5 +23,5 @@ explicit dependency on the ``install/local`` target for each subdirectory.
 Calls to :command:`install(CODE)` or :command:`install(SCRIPT)` might depend
 on actions performed by an earlier :command:`install` command in a different
 directory such as files installed or variable settings. If the project has
-such order-dependent installation logic, parallel installation should be
+such order-dependent installation logic, parallel installation should
 not be enabled, in order to prevent possible race conditions.
