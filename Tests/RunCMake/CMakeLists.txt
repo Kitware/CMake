@@ -829,6 +829,8 @@ add_RunCMake_test(CXXModules
   -DCMake_TEST_MODULE_COMPILATION_RULES=${CMake_TEST_MODULE_COMPILATION_RULES}
   -DCMake_TEST_CXX_STDLIB_MODULES_JSON=${CMake_TEST_CXX_STDLIB_MODULES_JSON}
 )
+set_property(TEST RunCMake.CXXModules APPEND
+  PROPERTY LABELS "CXXModules")
 
 # ctresalloc links against CMakeLib and CTestLib, which means it can't be built
 # if CMake_TEST_EXTERNAL_CMAKE is activated (the compiler might be different.)
