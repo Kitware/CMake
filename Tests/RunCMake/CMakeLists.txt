@@ -827,6 +827,7 @@ set_property(TEST RunCMake.DependencyGraph APPEND PROPERTY LABELS "Fortran")
 add_RunCMake_test(CXXModules
   -DCMake_TEST_MODULE_COMPILATION=${CMake_TEST_MODULE_COMPILATION}
   -DCMake_TEST_MODULE_COMPILATION_RULES=${CMake_TEST_MODULE_COMPILATION_RULES}
+  -DCMake_TEST_CXX_STDLIB_MODULES_JSON=${CMake_TEST_CXX_STDLIB_MODULES_JSON}
 )
 
 # ctresalloc links against CMakeLib and CTestLib, which means it can't be built
