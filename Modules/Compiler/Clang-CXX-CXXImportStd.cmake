@@ -10,21 +10,25 @@ function (_cmake_cxx_import_std std variable)
     return ()
   endif ()
 
-  execute_process(
-    COMMAND
-      "${CMAKE_CXX_COMPILER}"
-      ${CMAKE_CXX_COMPILER_ID_ARG1}
-      "-print-file-name=${_clang_modules_json_impl}.modules.json"
-    OUTPUT_VARIABLE _clang_libcxx_modules_json_file
-    ERROR_VARIABLE _clang_libcxx_modules_json_file_err
-    RESULT_VARIABLE _clang_libcxx_modules_json_file_res
-    OUTPUT_STRIP_TRAILING_WHITESPACE
-    ERROR_STRIP_TRAILING_WHITESPACE)
-  if (_clang_libcxx_modules_json_file_res)
-    set("${variable}"
-      "set(CMAKE_CXX${std}_COMPILER_IMPORT_STD_NOT_FOUND_MESSAGE \"Could not find `${_clang_modules_json_impl}.modules.json` resource\")\n"
-      PARENT_SCOPE)
-    return ()
+  if (CMAKE_CXX_STDLIB_MODULES_JSON)
+    set(_clang_libcxx_modules_json_file "${CMAKE_CXX_STDLIB_MODULES_JSON}")
+  else ()
+    execute_process(
+      COMMAND
+        "${CMAKE_CXX_COMPILER}"
+        ${CMAKE_CXX_COMPILER_ID_ARG1}
+        "-print-file-name=${_clang_modules_json_impl}.modules.json"
+      OUTPUT_VARIABLE _clang_libcxx_modules_json_file
+      ERROR_VARIABLE _clang_libcxx_modules_json_file_err
+      RESULT_VARIABLE _clang_libcxx_modules_json_file_res
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+      ERROR_STRIP_TRAILING_WHITESPACE)
+    if (_clang_libcxx_modules_json_file_res)
+      set("${variable}"
+        "set(CMAKE_CXX${std}_COMPILER_IMPORT_STD_NOT_FOUND_MESSAGE \"Could not find `${_clang_modules_json_impl}.modules.json` resource\")\n"
+        PARENT_SCOPE)
+      return ()
+    endif ()
   endif ()
 
   # Without this file, we do not have modules installed.

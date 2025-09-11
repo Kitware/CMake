@@ -45,6 +45,7 @@ Variables that Provide Information
    /variable/CMAKE_CURRENT_LIST_FILE
    /variable/CMAKE_CURRENT_LIST_LINE
    /variable/CMAKE_CURRENT_SOURCE_DIR
+   /variable/CMAKE_CXX_STDLIB_MODULES_JSON
    /variable/CMAKE_DEBUG_TARGET_PROPERTIES
    /variable/CMAKE_DIRECTORY_LABELS
    /variable/CMAKE_DL_LIBS
