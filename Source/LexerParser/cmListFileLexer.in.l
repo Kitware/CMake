@@ -74,7 +74,7 @@ static void cmListFileLexerDestroy(cmListFileLexer* lexer);
 %x COMMENT
 
 MAKEVAR \$\([A-Za-z0-9_]*\)
-UNQUOTED ([^ \0\t\r\n\(\)#\\\"[=]|\\[^\0\n])
+UNQUOTED ([^ \t\r\n\(\)#\\\"[=]|\\[^\n])
 LEGACY {MAKEVAR}|{UNQUOTED}|\"({MAKEVAR}|{UNQUOTED}|[ \t[=])*\"
 
 %%
@@ -115,7 +115,10 @@ LEGACY {MAKEVAR}|{UNQUOTED}|\"({MAKEVAR}|{UNQUOTED}|[ \t[=])*\"
   BEGIN(COMMENT);
 }
 
-<COMMENT>[^\0\n]* {
+<COMMENT>[^\n]* {
+  if (memchr(yytext, '\0', yyleng) != NULL) {
+    lexer->token.type = cmListFileLexer_Token_BadCharacter;
+  }
   lexer->column += yyleng;
 }
 
@@ -157,7 +160,10 @@ LEGACY {MAKEVAR}|{UNQUOTED}|\"({MAKEVAR}|{UNQUOTED}|[ \t[=])*\"
   return 1;
 }
 
-<BRACKET>([^]\0\n])+ {
+<BRACKET>([^]\n])+ {
+  if (memchr(yytext, '\0', yyleng) != NULL) {
+    lexer->token.type = cmListFileLexer_Token_BadCharacter;
+  }
   cmListFileLexerAppend(lexer, yytext, yyleng);
   lexer->column += yyleng;
 }
@@ -169,7 +175,10 @@ LEGACY {MAKEVAR}|{UNQUOTED}|\"({MAKEVAR}|{UNQUOTED}|[ \t[=])*\"
   BEGIN(BRACKET);
 }
 
-<BRACKET,BRACKETEND>[^\0\n] {
+<BRACKET,BRACKETEND>[^\n] {
+  if (memchr(yytext, '\0', yyleng) != NULL) {
+    lexer->token.type = cmListFileLexer_Token_BadCharacter;
+  }
   cmListFileLexerAppend(lexer, yytext, yyleng);
   lexer->column += yyleng;
   BEGIN(BRACKET);
@@ -182,7 +191,12 @@ LEGACY {MAKEVAR}|{UNQUOTED}|\"({MAKEVAR}|{UNQUOTED}|[ \t[=])*\"
 }
 
 ({UNQUOTED}|=|\[=*{UNQUOTED})({UNQUOTED}|[[=])* {
-  lexer->token.type = cmListFileLexer_Token_ArgumentUnquoted;
+  if (memchr(yytext, '\0', yyleng) != NULL) {
+    /* An unquoted argument that contains a null character. */
+    lexer->token.type = cmListFileLexer_Token_BadCharacter;
+  } else {
+    lexer->token.type = cmListFileLexer_Token_ArgumentUnquoted;
+  }
   cmListFileLexerSetToken(lexer, yytext, yyleng);
   lexer->column += yyleng;
   return 1;
@@ -209,7 +223,10 @@ LEGACY {MAKEVAR}|{UNQUOTED}|\"({MAKEVAR}|{UNQUOTED}|[ \t[=])*\"
   BEGIN(STRING);
 }
 
-<STRING>([^\\\0\n\"]|\\[^\0\n])+ {
+<STRING>([^\\\n\"]|\\[^\n])+ {
+  if (memchr(yytext, '\0', yyleng) != NULL) {
+    lexer->token.type = cmListFileLexer_Token_BadCharacter;
+  }
   cmListFileLexerAppend(lexer, yytext, yyleng);
   lexer->column += yyleng;
 }
@@ -232,7 +249,10 @@ LEGACY {MAKEVAR}|{UNQUOTED}|\"({MAKEVAR}|{UNQUOTED}|[ \t[=])*\"
   return 1;
 }
 
-<STRING>[^\0\n] {
+<STRING>[^\n] {
+  if (memchr(yytext, '\0', yyleng) != NULL) {
+    lexer->token.type = cmListFileLexer_Token_BadCharacter;
+  }
   cmListFileLexerAppend(lexer, yytext, yyleng);
   lexer->column += yyleng;
 }
