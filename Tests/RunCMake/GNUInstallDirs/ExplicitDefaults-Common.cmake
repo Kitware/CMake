@@ -1,6 +1,5 @@
 set(CMAKE_SIZEOF_VOID_P 8)
 set(CMAKE_LIBRARY_ARCHITECTURE "arch")
-set(CMAKE_INSTALL_PREFIX "/usr/local")
 include(GNUInstallDirs)
 set(dirs
   BINDIR
