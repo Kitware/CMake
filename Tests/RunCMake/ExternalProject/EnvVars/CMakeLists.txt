@@ -6,6 +6,13 @@ message(STATUS "${VARIABLE}: $ENV{${VARIABLE}}")
 message(STATUS "Separator: $ENV{ListSeparator}")
 message(STATUS "List: $ENV{ListVar}")
 
+if(MYLIST)
+  message(STATUS "MYLIST:")
+  foreach(__item IN LISTS MYLIST)
+    message(STATUS "-- ${__item}")
+  endforeach()
+endif()
+
 add_custom_target(EchoEnvVars ALL COMMENT "Build environment..."
   COMMAND "${CMAKE_COMMAND}" -P "${CMAKE_CURRENT_SOURCE_DIR}/EchoVar.cmake")
 

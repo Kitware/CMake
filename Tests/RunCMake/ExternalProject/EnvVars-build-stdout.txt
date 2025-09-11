@@ -7,7 +7,11 @@
 .*(Performing configure step for 'CustomCommand'|CustomCommand-configure).*
  *-- Stage: config
  *-- Separator: ;
- *-- List: 4;5;6.*
+ *-- List: 4;5;6
+ *-- MYLIST:
+ *-- -- a
+ *-- -- b
+ *-- -- c.*
  *-- Variable - Stage: config.*
  *-- Variable - ListVar: 4;5;6
 .*(Performing build step for 'CustomCommand'|CustomCommand-build).*
@@ -33,12 +37,21 @@
 .*(Performing configure step for 'DefaultCommandListSep'|DefaultCommandListSep-configure).*
  *-- ConfigVar: config
  *-- Separator: ;
+ *-- List: 9;8;7
+ *-- MYLIST:
+ *-- -- d
+ *-- -- e
+ *-- -- f
+ *-- -- g
+.*(Performing configure step for 'DefaultCommandListColon'|DefaultCommandListColon-configure).*
+ *-- ConfigVar: config
+ *-- Separator: ;
  *-- List: 10;11;12
-.*(Performing build step for 'DefaultCommandListSep'|DefaultCommandListSep-build).*
+.*(Performing build step for 'DefaultCommandListColon'|DefaultCommandListColon-build).*
  *-- Stage: build
  *-- Separator: ;
  *-- List: 10;11;12
-.*(Performing install step for 'DefaultCommandListSep'|DefaultCommandListSep-install).*
+.*(Performing install step for 'DefaultCommandListColon'|DefaultCommandListColon-install).*
  *-- Stage: install
  *-- Separator: ;
  *-- List: 10;11;12;13

@@ -12,9 +12,13 @@ ExternalProject_Add(CustomCommand
   PATCH_COMMAND ""
   LIST_SEPARATOR ,
   CONFIGURE_COMMAND ""
-  COMMAND "${CMAKE_COMMAND}" -P ${ScriptPath}
+  COMMAND
+  COMMAND "${CMAKE_COMMAND}" -DMYLIST='a,b,c' -P ${ScriptPath}
   COMMAND "${CMAKE_COMMAND}" -DVARNAME=Stage -P ${ScriptPath}
   COMMAND ""
+  COMMAND COMMAND COMMAND
+  COMMAND "${CMAKE_COMMAND}" -E echo "" ""
+  COMMAND
   COMMAND "${CMAKE_COMMAND}" -DVARNAME=ListVar -P ${ScriptPath}
   CONFIGURE_ENVIRONMENT_MODIFICATION
     Stage=set:config
@@ -75,17 +79,34 @@ ExternalProject_Add(DefaultCommand
     Stage=set:install
     Separator=set:,)
 
+ExternalProject_Add(DefaultCommandListSep
+  SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/EnvVars"
+  DOWNLOAD_COMMAND ""
+  UPDATE_COMMAND ""
+  PATCH_COMMAND ""
+  DEPENDS DefaultCommand
+  LIST_SEPARATOR `
+  CMAKE_ARGS
+    -DVARIABLE=ConfigVar
+    -DMYLIST=d`e`f`g
+  CONFIGURE_ENVIRONMENT_MODIFICATION
+    ConfigVar=set:config
+    ListVar=set:9`8`7
+    ListSeparator=set:`
+  BUILD_COMMAND ""
+  INSTALL_COMMAND "")
+
 # Using `:` as a list separator on Windows does not work as it replaces the `:`
 # between the drive letter and the filepath with `;`.
 if(NOT WIN32)
   # Ensure that using `:` as a list-separator does not break setting environment
   # variables
-  ExternalProject_Add(DefaultCommandListSep
+  ExternalProject_Add(DefaultCommandListColon
     SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/EnvVars"
     DOWNLOAD_COMMAND ""
     UPDATE_COMMAND ""
     PATCH_COMMAND ""
-    DEPENDS DefaultCommand
+    DEPENDS DefaultCommandListSep
     LIST_SEPARATOR :
     CMAKE_ARGS
       -DVARIABLE=ConfigVar
