@@ -1123,17 +1123,16 @@ cmGlobalVisualStudio10Generator::GenerateBuildCommand(
     GeneratedMakeCommand makeCommand;
     makeCommand.RequiresOutputForward = requiresOutputForward;
     makeCommand.Add(makeProgramSelected);
-    cm::optional<cmSlnProjectEntry> proj = cm::nullopt;
 
     if (tname == "clean"_s) {
       makeCommand.Add(cmStrCat(projectName, ".sln"));
       makeCommand.Add("/t:Clean");
     } else {
       std::string targetProject = cmStrCat(tname, ".vcxproj");
-      proj = slnData.GetProjectByName(tname);
       if (targetProject.find('/') == std::string::npos) {
         // it might be in a subdir
-        if (proj) {
+        if (cm::optional<cmSlnProjectEntry> proj =
+              slnData.GetProjectByName(tname)) {
           targetProject = proj->GetRelativePath();
           cmSystemTools::ConvertToUnixSlashes(targetProject);
         }
@@ -1205,17 +1204,6 @@ cmGlobalVisualStudio10Generator::GenerateBuildCommand(
     }
 
     std::string platform = GetPlatformName();
-    if (proj) {
-      std::string extension =
-        cmSystemTools::GetFilenameLastExtension(proj->GetRelativePath());
-      extension = cmSystemTools::LowerCase(extension);
-      if (extension == ".csproj"_s) {
-        // Use correct platform name
-        platform =
-          slnData.GetConfigurationTarget(tname, plainConfig, platform);
-      }
-    }
-
     makeCommand.Add(cmStrCat("/p:Configuration=", plainConfig));
     makeCommand.Add(cmStrCat("/p:Platform=", platform));
     makeCommand.Add(
