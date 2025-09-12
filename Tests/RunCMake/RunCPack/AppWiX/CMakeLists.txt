@@ -33,6 +33,9 @@ install(FILES mylib.h "file with spaces.h"
   DESTINATION include
   COMPONENT headers)
 
+install(CODE "" COMPONENT "empty1")
+install(CODE "" COMPONENT "empty2")
+
 set(CPACK_GENERATOR "WIX")
 
 set(CPACK_PACKAGE_NAME "MyLib")
