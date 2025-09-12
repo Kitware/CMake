@@ -1198,14 +1198,9 @@ cmGlobalVisualStudio10Generator::GenerateBuildCommand(
       }
     }
 
-    std::string plainConfig = config;
-    if (config.empty()) {
-      plainConfig = "Debug";
-    }
-
-    std::string platform = GetPlatformName();
-    makeCommand.Add(cmStrCat("/p:Configuration=", plainConfig));
-    makeCommand.Add(cmStrCat("/p:Platform=", platform));
+    makeCommand.Add(
+      cmStrCat("/p:Configuration=", config.empty() ? "Debug" : config));
+    makeCommand.Add(cmStrCat("/p:Platform=", this->GetPlatformName()));
     makeCommand.Add(
       cmStrCat("/p:VisualStudioVersion=", this->GetIDEVersion()));
 
