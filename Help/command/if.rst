@@ -264,7 +264,7 @@ Comparisons
   True if the given string or variable's value matches the given regular
   expression.  See :ref:`Regex Specification` for regex format.
 
-  .. versionadded:: 3.9
+  .. versionadded:: 2.6
    ``()`` groups are captured in :variable:`CMAKE_MATCH_<n>` variables.
 
 .. signature:: if(<variable|string> LESS <variable|string>)
