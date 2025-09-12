@@ -320,8 +320,7 @@ bool cmVisualStudioSlnParser::State::Process(
         std::string guid = tagElements[0];
         std::string solutionConfiguration = tagElements[1];
         std::string activeBuild = tagElements[2];
-        cm::optional<cmSlnProjectEntry> projectEntry =
-          output.GetProjectByGUID(guid);
+        cmSlnProjectEntry* projectEntry = output.GetProjectByGUID(guid);
 
         if (!projectEntry) {
           result.SetError(ResultErrorInputStructure, this->GetCurrentLine());

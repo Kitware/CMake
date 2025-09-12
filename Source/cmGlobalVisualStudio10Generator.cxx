@@ -1131,8 +1131,7 @@ cmGlobalVisualStudio10Generator::GenerateBuildCommand(
       std::string targetProject = cmStrCat(tname, ".vcxproj");
       if (targetProject.find('/') == std::string::npos) {
         // it might be in a subdir
-        if (cm::optional<cmSlnProjectEntry> proj =
-              slnData.GetProjectByName(tname)) {
+        if (cmSlnProjectEntry const* proj = slnData.GetProjectByName(tname)) {
           targetProject = proj->GetRelativePath();
           cmSystemTools::ConvertToUnixSlashes(targetProject);
         }

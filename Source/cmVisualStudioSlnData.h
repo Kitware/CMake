@@ -8,8 +8,6 @@
 #include <string>
 #include <vector>
 
-#include <cm/optional>
-
 class cmSlnProjectEntry
 {
 public:
@@ -30,7 +28,7 @@ public:
                                std::string const& projectConfiguration);
 
   std::string GetProjectConfiguration(
-    std::string const& solutionConfiguration);
+    std::string const& solutionConfiguration) const;
 
 private:
   std::string Guid, Name, RelativePath;
@@ -56,10 +54,9 @@ public:
     minimumVisualStudioVersion = version;
   }
 
-  cm::optional<cmSlnProjectEntry> GetProjectByGUID(
-    std::string const& projectGUID) const;
+  cmSlnProjectEntry* GetProjectByGUID(std::string const& projectGUID);
 
-  cm::optional<cmSlnProjectEntry> GetProjectByName(
+  cmSlnProjectEntry const* GetProjectByName(
     std::string const& projectName) const;
 
   std::vector<cmSlnProjectEntry> GetProjects() const;
