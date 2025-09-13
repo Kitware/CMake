@@ -99,7 +99,7 @@ foreach(
     FREETYPE
     GETTEXT GIT GNUTLS
     HG HSPELL
-    ICOTOOL
+    ICOTOOL ImageMagick
     JASPER
     LIBLZMA LIBXML2 LIBXSLT LTTNGUST
     OpenCL
@@ -122,7 +122,7 @@ foreach(
     FLEX Freetype
     Gettext GIF GnuTLS GNUTLS GTK2
     HDF5 Hg HSPELL
-    Icotool
+    Icotool ImageMagick
     Jasper JPEG
     LibArchive LibLZMA LIBLZMA LibXml2 LibXslt LTTngUST
     OpenCL OpenSceneGraph OPENSCENEGRAPH OpenSSL OPENSSL

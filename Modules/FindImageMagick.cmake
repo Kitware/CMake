@@ -82,11 +82,15 @@ Result Variables
 This module defines the following variables:
 
 ``ImageMagick_FOUND``
-  Boolean indicating whether ImageMagick and all its requested components are
-  found.
+  Boolean indicating whether (the requested version of) ImageMagick and all
+  its requested components are found.
 
-``ImageMagick_VERSION_STRING``
-  The version of ImageMagick found.
+``ImageMagick_VERSION``
+  .. versionadded:: 4.2
+
+  The version of ImageMagick found in form of
+  ``<major>.<minor>.<patch>-<addendum>`` (e.g., ``6.9.12-98``, where ``98``
+  is the addendum release number).
 
   .. note::
 
@@ -131,6 +135,17 @@ The following cache variables may also be set:
 ``ImageMagick_EXECUTABLE_DIR``
   The full path to directory containing ImageMagick executables.
 
+Deprecated Variables
+^^^^^^^^^^^^^^^^^^^^
+
+The following variables are provided for backward compatibility:
+
+``ImageMagick_VERSION_STRING``
+  .. deprecated:: 4.2
+    Use ``ImageMagick_VERSION``, which has the same value.
+
+  The version of ImageMagick found.
+
 Examples
 ^^^^^^^^
 
@@ -142,6 +157,10 @@ target:
   find_package(ImageMagick COMPONENTS Magick++)
   target_link_libraries(example PRIVATE ImageMagick::Magick++)
 #]=======================================================================]
+
+cmake_policy(PUSH)
+cmake_policy(SET CMP0140 NEW)
+cmake_policy(SET CMP0159 NEW) # file(STRINGS) with REGEX updates CMAKE_MATCH_<n>
 
 find_package(PkgConfig QUIET)
 
@@ -257,6 +276,60 @@ function(FIND_IMAGEMAGICK_EXE component)
   endif()
 endfunction()
 
+function(_ImageMagick_GetVersion)
+  unset(version)
+
+  if(ImageMagick_mogrify_EXECUTABLE)
+    execute_process(
+      COMMAND ${ImageMagick_mogrify_EXECUTABLE} -version
+      OUTPUT_VARIABLE version
+      ERROR_QUIET
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+
+    if(version MATCHES "^Version: ImageMagick ([-0-9.]+)")
+      set(version "${CMAKE_MATCH_1}")
+    endif()
+  elseif(ImageMagick_INCLUDE_DIRS)
+    # MagickLibSubversion was used in ImageMagick <= 6.5.
+    set(
+      regex
+      "^[\t ]*#[\t ]*define[\t ]+(MagickLibVersionText|MagickLibAddendum|MagickLibSubversion)[\t ]+\"([-0-9.]+)\""
+    )
+
+    foreach(dir IN LISTS ImageMagick_INCLUDE_DIRS)
+      if(EXISTS ${dir}/magick/version.h)
+        file(STRINGS "${dir}/magick/version.h" results REGEX "${regex}")
+
+        foreach(line ${results})
+          if(line MATCHES "${regex}")
+            if(DEFINED version)
+              string(APPEND version "${CMAKE_MATCH_2}")
+            else()
+              set(version "${CMAKE_MATCH_2}")
+            endif()
+
+            if(CMAKE_MATCH_1 STREQUAL "MagickLibAddendum")
+              break()
+            endif()
+          endif()
+        endforeach()
+      endif()
+
+      if(DEFINED version)
+        break()
+      endif()
+    endforeach()
+  endif()
+
+  if(DEFINED version)
+    set(ImageMagick_VERSION "${version}")
+    set(ImageMagick_VERSION_STRING "${ImageMagick_VERSION}")
+  endif()
+
+  return(PROPAGATE ImageMagick_VERSION ImageMagick_VERSION_STRING)
+endfunction()
+
 #---------------------------------------------------------------------
 # Start Actual Work
 #---------------------------------------------------------------------
@@ -344,16 +417,7 @@ endif()
 set(ImageMagick_INCLUDE_DIRS ${ImageMagick_INCLUDE_DIRS})
 set(ImageMagick_LIBRARIES ${ImageMagick_LIBRARIES})
 
-if(ImageMagick_mogrify_EXECUTABLE)
-  execute_process(COMMAND ${ImageMagick_mogrify_EXECUTABLE} -version
-                  OUTPUT_VARIABLE imagemagick_version
-                  ERROR_QUIET
-                  OUTPUT_STRIP_TRAILING_WHITESPACE)
-  if(imagemagick_version MATCHES "^Version: ImageMagick ([-0-9\\.]+)")
-    set(ImageMagick_VERSION_STRING "${CMAKE_MATCH_1}")
-  endif()
-  unset(imagemagick_version)
-endif()
+_ImageMagick_GetVersion()
 
 #---------------------------------------------------------------------
 # Standard Package Output
@@ -361,7 +425,7 @@ endif()
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(ImageMagick
                                   REQUIRED_VARS ${ImageMagick_REQUIRED_VARS}
-                                  VERSION_VAR ImageMagick_VERSION_STRING
+                                  VERSION_VAR ImageMagick_VERSION
   )
 
 #---------------------------------------------------------------------
@@ -387,3 +451,5 @@ mark_as_advanced(
   IMAGEMAGICK_MONTAGE_EXECUTABLE
   IMAGEMAGICK_COMPOSITE_EXECUTABLE
   )
+
+cmake_policy(POP)
