@@ -4,6 +4,9 @@
     "directorySource": "^cxx$",
     "projectName": "Cxx",
     "type": "UTILITY",
+    "imported": null,
+    "local": null,
+    "abstract": null,
     "isGeneratorProvided": true,
     "fileSets": null,
     "sources": [

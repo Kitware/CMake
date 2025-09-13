@@ -60,7 +60,7 @@
       "type": "string",
       "description": "Unique identifier for the target. The format is unspecified and should not be interpreted by clients."
     },
-    "type": {
+    "typeV2_0": {
       "type": "string",
       "enum": [
         "EXECUTABLE",
@@ -71,6 +71,31 @@
         "INTERFACE_LIBRARY",
         "UTILITY"
       ]
+    },
+    "typeV2_9": {
+      "type": "string",
+      "enum": [
+        "EXECUTABLE",
+        "STATIC_LIBRARY",
+        "SHARED_LIBRARY",
+        "MODULE_LIBRARY",
+        "OBJECT_LIBRARY",
+        "INTERFACE_LIBRARY",
+        "UNKNOWN_LIBRARY",
+        "UTILITY"
+      ]
+    },
+    "importedV2_9": {
+      "type": "boolean",
+      "description": "True if the target is imported"
+    },
+    "localV2_9": {
+      "type": "boolean",
+      "description": "True if the target is defined in a local scope rather than being a global target"
+    },
+    "abstractV2_9": {
+      "type": "boolean",
+      "description": "True if the target is not part of the build system"
     },
     "backtrace": {
       "type": "integer",
@@ -865,7 +890,7 @@
           "$ref": "#/definitions/id"
         },
         "type": {
-          "$ref": "#/definitions/type"
+          "$ref": "#/definitions/typeV2_0"
         },
         "backtrace": {
           "$ref": "#/definitions/backtrace"
@@ -929,7 +954,7 @@
           "$ref": "#/definitions/id"
         },
         "type": {
-          "$ref": "#/definitions/type"
+          "$ref": "#/definitions/typeV2_0"
         },
         "backtrace": {
           "$ref": "#/definitions/backtrace"
@@ -993,7 +1018,7 @@
           "$ref": "#/definitions/id"
         },
         "type": {
-          "$ref": "#/definitions/type"
+          "$ref": "#/definitions/typeV2_0"
         },
         "backtrace": {
           "$ref": "#/definitions/backtrace"
@@ -1057,7 +1082,7 @@
           "$ref": "#/definitions/id"
         },
         "type": {
-          "$ref": "#/definitions/type"
+          "$ref": "#/definitions/typeV2_0"
         },
         "backtrace": {
           "$ref": "#/definitions/backtrace"
@@ -1124,7 +1149,7 @@
           "$ref": "#/definitions/id"
         },
         "type": {
-          "$ref": "#/definitions/type"
+          "$ref": "#/definitions/typeV2_0"
         },
         "backtrace": {
           "$ref": "#/definitions/backtrace"
@@ -1191,7 +1216,7 @@
           "$ref": "#/definitions/id"
         },
         "type": {
-          "$ref": "#/definitions/type"
+          "$ref": "#/definitions/typeV2_0"
         },
         "backtrace": {
           "$ref": "#/definitions/backtrace"
@@ -1261,7 +1286,7 @@
           "$ref": "#/definitions/id"
         },
         "type": {
-          "$ref": "#/definitions/type"
+          "$ref": "#/definitions/typeV2_0"
         },
         "backtrace": {
           "$ref": "#/definitions/backtrace"
@@ -1338,7 +1363,16 @@
           "$ref": "#/definitions/id"
         },
         "type": {
-          "$ref": "#/definitions/type"
+          "$ref": "#/definitions/typeV2_9"
+        },
+        "imported": {
+          "$ref": "#/definitions/importedV2_9"
+        },
+        "local": {
+          "$ref": "#/definitions/localV2_9"
+        },
+        "abstract": {
+          "$ref": "#/definitions/abstractV2_9"
         },
         "backtrace": {
           "$ref": "#/definitions/backtrace"

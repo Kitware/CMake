@@ -82,6 +82,13 @@ def check_directory(c, major, minor):
                              missing_exception=lambda e: "Target ID: %s" % e,
                              extra_exception=lambda a: "Target ID: %s" % c["targets"][a]["id"])
 
+        if expected["abstractTargetIds"] is not None:
+            expected_keys.append("abstractTargetIndexes")
+            check_list_match(lambda a, e: matches(c["abstractTargets"][a]["id"], e),
+                             actual["abstractTargetIndexes"], expected["abstractTargetIds"],
+                             missing_exception=lambda e: "Abstract target ID: %s" % e,
+                             extra_exception=lambda a: "Abstract target ID: %s" % c["abstractTargets"][a]["id"])
+
         if expected["minimumCMakeVersion"] is not None:
             expected_keys.append("minimumCMakeVersion")
             assert is_dict(actual["minimumCMakeVersion"])
@@ -294,6 +301,18 @@ def check_target(c, major, minor):
         assert matches(obj["id"], expected["id"])
         assert is_string(obj["type"], expected["type"])
         check_backtrace_graph(obj["backtraceGraph"])
+
+        if expected["imported"] is not None:
+            expected_keys.append("imported")
+            assert is_bool(obj["imported"], expected["imported"])
+
+        if expected["local"] is not None:
+            expected_keys.append("local")
+            assert is_bool(obj["local"], expected["local"])
+
+        if expected["abstract"] is not None:
+            expected_keys.append("abstract")
+            assert is_bool(obj["abstract"], expected["abstract"])
 
         assert is_dict(obj["paths"])
         assert sorted(obj["paths"].keys()) == ["build", "source"]
@@ -747,6 +766,13 @@ def check_project(c):
                              missing_exception=lambda e: "Target ID: %s" % e,
                              extra_exception=lambda a: "Target ID: %s" % c["targets"][a]["id"])
 
+        if expected["abstractTargetIds"] is not None:
+            expected_keys.append("abstractTargetIndexes")
+            check_list_match(lambda a, e: matches(c["abstractTargets"][a]["id"], e),
+                             actual["abstractTargetIndexes"], expected["abstractTargetIds"],
+                             missing_exception=lambda e: "Abstract target ID: %s" % e,
+                             extra_exception=lambda a: "Abstract target ID: %s" % c["abstractTargets"][a]["id"])
+
         assert sorted(actual.keys()) == sorted(expected_keys)
 
     return _check
@@ -779,6 +805,7 @@ def gen_check_directories(c, g):
         if ';' in os.environ.get("CMAKE_OSX_ARCHITECTURES", ""):
             for e in expected:
                 e["targetIds"] = filter_list(lambda t: not matches(t, "^\\^(link_imported_object_exe)"), e["targetIds"])
+                e["abstractTargetIds"] = filter_list(lambda t: not matches(t, "^\\^(imported_object_lib)"), e["abstractTargetIds"])
 
     else:
         for e in expected:
@@ -815,7 +842,7 @@ def check_directories(c, g, major, minor):
                      missing_exception=lambda e: "Directory source: %s" % e["source"],
                      extra_exception=lambda a: "Directory source: %s" % a["source"])
 
-def gen_check_targets(c, g, inSource):
+def gen_check_build_system_targets(c, g, inSource):
     expected = [
         read_codemodel_json_data("targets/all_build_top.json"),
         read_codemodel_json_data("targets/zero_check_top.json"),
@@ -1015,13 +1042,54 @@ def gen_check_targets(c, g, inSource):
 
     return expected
 
-def check_targets(c, g, major, minor, inSource):
+def gen_check_abstract_targets(c, g, inSource):
+    expected = [
+        read_codemodel_json_data("targets/interface_lib.json"),
+
+        read_codemodel_json_data("targets/import_framework.json"),
+
+        read_codemodel_json_data("targets/imported_exe.json"),
+        read_codemodel_json_data("targets/imported_lib.json"),
+        read_codemodel_json_data("targets/imported_interface_lib.json"),
+        read_codemodel_json_data("targets/imported_object_lib.json"),
+        read_codemodel_json_data("targets/imported_shared_lib.json"),
+        read_codemodel_json_data("targets/imported_static_lib.json"),
+
+        read_codemodel_json_data("targets/iface_none.json"),
+    ]
+
+    if sys.platform == "darwin":
+        for e in expected:
+            if e["name"] == "import_framework":
+                apple_import_framework = read_codemodel_json_data("targets/apple_import_framework.json")
+                e["artifacts"] = apple_import_framework["artifacts"]
+                e["nameOnDisk"] = apple_import_framework["nameOnDisk"]
+
+    if g["name"] == "Xcode":
+        if ';' in os.environ.get("CMAKE_OSX_ARCHITECTURES", ""):
+            expected = filter_list(lambda e: e["name"] not in ("imported_object_lib"), expected)
+
+    if sys.platform not in ("win32", "cygwin", "msys"):
+        for e in expected:
+            e["artifacts"] = filter_list(lambda a: not a["_dllExtra"], e["artifacts"])
+
+    return expected
+
+def check_build_system_targets(c, g, major, minor, inSource):
     check_list_match(lambda a, e: matches(a["id"], e["id"]),
-                     c["targets"], gen_check_targets(c, g, inSource),
+                     c["targets"], gen_check_build_system_targets(c, g, inSource),
                      check=check_target(c, major, minor),
                      check_exception=lambda a, e: "Target ID: %s" % a["id"],
                      missing_exception=lambda e: "Target ID: %s" % e["id"],
                      extra_exception=lambda a: "Target ID: %s" % a["id"])
+
+def check_abstract_targets(c, g, major, minor, inSource):
+    check_list_match(lambda a, e: matches(a["id"], e["id"]),
+                     c["abstractTargets"], gen_check_abstract_targets(c, g, inSource),
+                     check=check_target(c, major, minor),
+                     check_exception=lambda a, e: "Abstract target ID: %s" % a["id"],
+                     missing_exception=lambda e: "Abstract target ID: %s" % e["id"],
+                     extra_exception=lambda a: "Abstract target ID: %s" % a["id"])
 
 def gen_check_projects(c, g):
     expected = [
@@ -1045,6 +1113,7 @@ def gen_check_projects(c, g):
         if ';' in os.environ.get("CMAKE_OSX_ARCHITECTURES", ""):
             for e in expected:
                 e["targetIds"] = filter_list(lambda t: not matches(t, "^\\^(link_imported_object_exe)"), e["targetIds"])
+                e["abstractTargetIds"] = filter_list(lambda t: not matches(t, "^\\^(imported_object_lib)"), e["abstractTargetIds"])
 
     else:
         for e in expected:
@@ -1060,10 +1129,11 @@ def check_projects(c, g):
                      extra_exception=lambda a: "Project name: %s" % a["name"])
 
 def check_object_codemodel_configuration(c, g, major, minor, inSource):
-    assert sorted(c.keys()) == ["directories", "name", "projects", "targets"]
+    assert sorted(c.keys()) == ["abstractTargets", "directories", "name", "projects", "targets"]
     assert is_string(c["name"])
     check_directories(c, g, major, minor)
-    check_targets(c, g, major, minor, inSource)
+    check_build_system_targets(c, g, major, minor, inSource)
+    check_abstract_targets(c, g, major, minor, inSource)
     check_projects(c, g)
 
 def check_object_codemodel(g, major, minor):

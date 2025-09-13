@@ -12,5 +12,6 @@
         "^c_object_exe::@5ed5358f70faf8d8af7a$",
         "^cxx_object_lib::@5ed5358f70faf8d8af7a$",
         "^cxx_object_exe::@5ed5358f70faf8d8af7a$"
-    ]
+    ],
+    "abstractTargetIds": null
 }

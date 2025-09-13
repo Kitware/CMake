@@ -1,0 +1,43 @@
+{
+    "name": "imported_static_lib",
+    "id": "^imported_static_lib::@ba7eb709d0b48779c6c8$",
+    "directorySource": "^imported$",
+    "projectName": "Imported",
+    "type": "STATIC_LIBRARY",
+    "imported": true,
+    "local": true,
+    "abstract": true,
+    "isGeneratorProvided": null,
+    "fileSets": null,
+    "sources": [],
+    "sourceGroups": null,
+    "compileGroups": null,
+    "backtrace": [
+        {
+            "file": "^imported/CMakeLists\\.txt$",
+            "line": 20,
+            "command": "add_library",
+            "hasParent": true
+        },
+        {
+            "file": "^imported/CMakeLists\\.txt$",
+            "line": null,
+            "command": null,
+            "hasParent": false
+        }
+    ],
+    "folder": null,
+    "nameOnDisk": "^(lib)?imported_static\\.(a|lib|l)$",
+    "artifacts": [
+        {
+            "path": "^((Debug|Release|RelWithDebInfo|MinSizeRel)/)?(lib)?imported_static\\.(a|lib|l)$",
+            "_dllExtra": false
+        }
+    ],
+    "build": "^imported$",
+    "source": "^imported$",
+    "install": null,
+    "link": null,
+    "archive": null,
+    "dependencies": null
+}

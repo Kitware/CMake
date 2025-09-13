@@ -4,6 +4,9 @@
     "directorySource": "^\\.$",
     "projectName": "codemodel-v2",
     "type": "UTILITY",
+    "imported": null,
+    "local": null,
+    "abstract": null,
     "isGeneratorProvided": true,
     "fileSets": null,
     "sources": [

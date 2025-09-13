@@ -507,6 +507,7 @@ Version 1 does not exist to avoid confusion with that from
             "childIndexes": [ 1 ],
             "projectIndex": 0,
             "targetIndexes": [ 0 ],
+            "abstractTargetIndexes": [ 1 ],
             "hasInstallRule": true,
             "minimumCMakeVersion": {
               "string": "3.14"
@@ -519,6 +520,7 @@ Version 1 does not exist to avoid confusion with that from
             "parentIndex": 0,
             "projectIndex": 0,
             "targetIndexes": [ 1 ],
+            "abstractTargetIndexes": [ 0 ],
             "minimumCMakeVersion": {
               "string": "3.14"
             },
@@ -529,7 +531,8 @@ Version 1 does not exist to avoid confusion with that from
           {
             "name": "MyProject",
             "directoryIndexes": [ 0, 1 ],
-            "targetIndexes": [ 0, 1 ]
+            "targetIndexes": [ 0, 1 ],
+            "abstractTargetIndexes": [ 0, 1 ],
           }
         ],
         "targets": [
@@ -542,6 +545,20 @@ Version 1 does not exist to avoid confusion with that from
           {
             "name": "MyLibrary",
             "directoryIndex": 1,
+            "projectIndex": 0,
+            "jsonFile": "<file>"
+          }
+        ]
+        "abstractTargets": [
+          {
+            "name": "MyImportedExecutable",
+            "directoryIndex": 1,
+            "projectIndex": 0,
+            "jsonFile": "<file>"
+          },
+          {
+            "name": "MyPureInterfaceLibrary",
+            "directoryIndex": 0,
             "projectIndex": 0,
             "jsonFile": "<file>"
           }
@@ -612,10 +629,20 @@ The members specific to ``codemodel`` objects are:
       indicating the build system project to which the this directory belongs.
 
     ``targetIndexes``
-      Optional member that is present when the directory itself has targets,
-      excluding those belonging to subdirectories.  The value is a JSON
-      array of entries corresponding to the targets.  Each entry is an
-      unsigned integer 0-based index into the main ``targets`` array.
+      Optional member that is present when the directory itself has
+      build system targets, excluding those belonging to subdirectories.
+      The value is a JSON array of entries corresponding to the build system
+      targets.  Each entry is an unsigned integer 0-based index into the main
+      ``targets`` array.
+
+    ``abstractTargetIndexes``
+      Optional member that is present when the directory itself has abstract
+      targets, excluding those belonging to subdirectories.
+      The value is a JSON array of entries corresponding to the abstract
+      targets.  Each entry is an unsigned integer 0-based index into the main
+      ``abstractTargets`` array.
+
+      This field was added in codemodel version 2.9.
 
     ``minimumCMakeVersion``
       Optional member present when a minimum required version of CMake is
@@ -677,17 +704,27 @@ The members specific to ``codemodel`` objects are:
       integer 0-based index into the main ``directories`` array.
 
     ``targetIndexes``
-      Optional member that is present when the project itself has targets,
-      excluding those belonging to sub-projects.  The value is a JSON
-      array of entries corresponding to the targets.  Each entry is an
-      unsigned integer 0-based index into the main ``targets`` array.
+      Optional member that is present when the project itself has
+      build system targets, excluding those belonging to sub-projects.
+      The value is a JSON array of entries corresponding to the build system
+      targets.  Each entry is an unsigned integer 0-based index into the main
+      ``targets`` array.
+
+    ``abstractTargetIndexes``
+      Optional member that is present when the project itself has
+      abstract targets, excluding those belonging to sub-projects.
+      The value is a JSON array of entries corresponding to the abstract
+      targets.  Each entry is an unsigned integer 0-based index into the main
+      ``abstractTargets`` array.
+
+      This field was added in codemodel version 2.9.
 
   ``targets``
     A JSON array of entries corresponding to the build system targets.
     Such targets are created by calls to :command:`add_executable`,
     :command:`add_library`, and :command:`add_custom_target`, excluding
-    imported targets and interface libraries (which do not generate any
-    build rules).  Each entry is a JSON object containing members:
+    imported targets and interface libraries that do not generate any
+    build rules.  Each entry is a JSON object containing members:
 
     ``name``
       A string specifying the target name.
@@ -708,6 +745,39 @@ The members specific to ``codemodel`` objects are:
       A JSON string specifying a path relative to the codemodel file
       to another JSON file containing a
       `"codemodel" version 2 "target" object`_.
+
+  ``abstractTargets``
+    A JSON array of entries corresponding to targets that are not present
+    in the build system.  These are imported targets or interface libraries
+    created by calls to :command:`add_executable` or :command:`add_library`.
+    In the case of interface libraries, only those that are not part of the
+    build system are included in this array.  Interface libraries that do
+    participate in the build system will be included in the ``targets``
+    array instead.
+
+    Each entry is a JSON object containing members:
+
+    ``name``
+      A string specifying the target name.
+
+    ``id``
+      A string uniquely identifying the target.  This matches the ``id``
+      field in the file referenced by ``jsonFile``.
+
+    ``directoryIndex``
+      An unsigned integer 0-based index into the main ``directories`` array
+      indicating the build system directory in which the target is defined.
+
+    ``projectIndex``
+      An unsigned integer 0-based index into the main ``projects`` array
+      indicating the build system project in which the target is defined.
+
+    ``jsonFile``
+      A JSON string specifying a path relative to the codemodel file
+      to another JSON file containing a
+      `"codemodel" version 2 "target" object`_.
+
+    This field was added in codemodel version 2.9.
 
 "codemodel" version 2 "directory" object
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1039,6 +1109,31 @@ with members:
   ``MODULE_LIBRARY``, ``OBJECT_LIBRARY``, ``INTERFACE_LIBRARY``,
   or ``UTILITY``.
 
+``imported``
+  Optional member that is present with boolean value ``true`` if the
+  target is an imported target.
+
+  This field was added in codemodel version 2.9.
+
+``local``
+  Optional member that is present with boolean value ``true`` if the
+  target is only defined with local scope rather than being a global target.
+  Currently, only imported targets will potentially have this field.
+
+  This field was added in codemodel version 2.9.
+
+``abstract``
+  Optional member that is present with boolean value ``true`` if the
+  target is an abstract target.  Abstract targets are not part of the build
+  system, they only exist to describe dependencies or to provide usage
+  requirements to targets that link to them.  Examples include imported targets
+  and interface libraries that have no generated sources.  Abstract targets
+  cannot be built, so they should not be presented to the user as a buildable
+  target.
+
+  This field was added in codemodel version 2.9.  Abstract targets were not
+  included anywhere in file API replies in codemodel version 2.8 and earlier.
+
 ``backtrace``
   Optional member that is present when a CMake language backtrace to
   the command in the source code that created the target is available.
@@ -1146,8 +1241,8 @@ with members:
   This field was added in codemodel version 2.7.
 
 ``link``
-  Optional member that is present for executables and shared library
-  targets that link into a runtime binary.  The value is a JSON object
+  Optional member that is present for non-imported executables and shared
+  library targets that link into a runtime binary.  The value is a JSON object
   with members describing the link step:
 
   ``language``
@@ -1193,8 +1288,8 @@ with members:
       with forward slashes.
 
 ``archive``
-  Optional member that is present for static library targets.  The value
-  is a JSON object with members describing the archive step:
+  Optional member that is present for non-imported static library targets.
+  The value is a JSON object with members describing the archive step:
 
   ``commandFragments``
     Optional member that is present when fragments of the archiver command
@@ -1233,6 +1328,8 @@ with members:
 
 ``dependencies``
   Optional member that is present when the target depends on other targets.
+  It is not present if the target is not part of the build system (i.e. it is
+  not an imported target or an interface library with no generated sources).
   The value is a JSON array of entries corresponding to the dependencies.
   Each entry is a JSON object with members:
 

@@ -250,7 +250,8 @@ class CodemodelConfig
   {
     cmStateSnapshot Snapshot;
     cmLocalGenerator const* LocalGenerator = nullptr;
-    Json::Value TargetIndexes = Json::arrayValue;
+    Json::Value BuildSystemTargetIndexes = Json::arrayValue;
+    Json::Value AbstractTargetIndexes = Json::arrayValue;
     Json::ArrayIndex ProjectIndex;
     bool HasInstallRule = false;
   };
@@ -266,13 +267,20 @@ class CodemodelConfig
     Json::ArrayIndex ParentIndex = NoParentIndex;
     Json::Value ChildIndexes = Json::arrayValue;
     Json::Value DirectoryIndexes = Json::arrayValue;
-    Json::Value TargetIndexes = Json::arrayValue;
+    Json::Value BuildSystemTargetIndexes = Json::arrayValue;
+    Json::Value AbstractTargetIndexes = Json::arrayValue;
   };
   std::map<cmStateSnapshot, Json::ArrayIndex, cmStateSnapshot::StrictWeakOrder>
     ProjectMap;
   std::vector<Project> Projects;
 
   TargetIndexMapType TargetIndexMap;
+
+  struct DumpedTargets
+  {
+    Json::Value BuildSystemTargets = Json::arrayValue;
+    Json::Value AbstractTargets = Json::arrayValue;
+  };
 
   void ProcessDirectories();
 
@@ -281,7 +289,7 @@ class CodemodelConfig
 
   Json::ArrayIndex AddProject(cmStateSnapshot s);
 
-  Json::Value DumpTargets();
+  DumpedTargets DumpTargets();
   Json::Value DumpTarget(cmGeneratorTarget* gt, Json::ArrayIndex ti);
 
   Json::Value DumpDirectories();
@@ -591,9 +599,14 @@ Json::Value CodemodelConfig::Dump()
   Json::Value configuration = Json::objectValue;
   configuration["name"] = this->Config;
   this->ProcessDirectories();
-  configuration["targets"] = this->DumpTargets();
+
+  DumpedTargets dumpedTargets = this->DumpTargets();
+  configuration["targets"] = dumpedTargets.BuildSystemTargets;
+  configuration["abstractTargets"] = dumpedTargets.AbstractTargets;
+
   configuration["directories"] = this->DumpDirectories();
   configuration["projects"] = this->DumpProjects();
+
   return configuration;
 }
 
@@ -680,15 +693,16 @@ Json::ArrayIndex CodemodelConfig::AddProject(cmStateSnapshot s)
   return projectIndex;
 }
 
-Json::Value CodemodelConfig::DumpTargets()
+CodemodelConfig::DumpedTargets CodemodelConfig::DumpTargets()
 {
-  Json::Value targets = Json::arrayValue;
+  DumpedTargets dumpedTargets;
 
   std::vector<cmGeneratorTarget*> targetList;
   cmGlobalGenerator* gg =
     this->FileAPI.GetCMakeInstance()->GetGlobalGenerator();
   for (auto const& lg : gg->GetLocalGenerators()) {
     cm::append(targetList, lg->GetGeneratorTargets());
+    cm::append(targetList, lg->GetOwnedImportedGeneratorTargets());
   }
   std::sort(targetList.begin(), targetList.end(),
             [](cmGeneratorTarget* l, cmGeneratorTarget* r) {
@@ -696,8 +710,7 @@ Json::Value CodemodelConfig::DumpTargets()
             });
 
   for (cmGeneratorTarget* gt : targetList) {
-    if (gt->GetType() == cmStateEnums::GLOBAL_TARGET ||
-        !gt->IsInBuildSystem()) {
+    if (gt->GetType() == cmStateEnums::GLOBAL_TARGET) {
       continue;
     }
 
@@ -706,17 +719,22 @@ Json::Value CodemodelConfig::DumpTargets()
       continue;
     }
 
+    Json::Value& targets = gt->IsInBuildSystem()
+      ? dumpedTargets.BuildSystemTargets
+      : dumpedTargets.AbstractTargets;
     targets.append(this->DumpTarget(gt, targets.size()));
   }
 
-  return targets;
+  return dumpedTargets;
 }
 
 Json::Value CodemodelConfig::DumpTarget(cmGeneratorTarget* gt,
                                         Json::ArrayIndex ti)
 {
   Target t(gt, this->VersionMajor, this->VersionMinor, this->Config);
-  std::string prefix = "target-" + gt->GetName();
+  std::string safeTargetName = gt->GetName();
+  std::replace(safeTargetName.begin(), safeTargetName.end(), ':', '_');
+  std::string prefix = "target-" + safeTargetName;
   if (!this->Config.empty()) {
     prefix += "-" + this->Config;
   }
@@ -727,12 +745,20 @@ Json::Value CodemodelConfig::DumpTarget(cmGeneratorTarget* gt,
   // Cross-reference directory containing target.
   Json::ArrayIndex di = this->GetDirectoryIndex(gt->GetLocalGenerator());
   target["directoryIndex"] = di;
-  this->Directories[di].TargetIndexes.append(ti);
+  if (gt->IsInBuildSystem()) {
+    this->Directories[di].BuildSystemTargetIndexes.append(ti);
+  } else {
+    this->Directories[di].AbstractTargetIndexes.append(ti);
+  }
 
   // Cross-reference project containing target.
   Json::ArrayIndex pi = this->Directories[di].ProjectIndex;
   target["projectIndex"] = pi;
-  this->Projects[pi].TargetIndexes.append(ti);
+  if (gt->IsInBuildSystem()) {
+    this->Projects[pi].BuildSystemTargetIndexes.append(ti);
+  } else {
+    this->Projects[pi].AbstractTargetIndexes.append(ti);
+  }
 
   this->TargetIndexMap[gt] = ti;
 
@@ -774,8 +800,11 @@ Json::Value CodemodelConfig::DumpDirectory(Directory& d)
 
   directory["projectIndex"] = d.ProjectIndex;
 
-  if (!d.TargetIndexes.empty()) {
-    directory["targetIndexes"] = std::move(d.TargetIndexes);
+  if (!d.BuildSystemTargetIndexes.empty()) {
+    directory["targetIndexes"] = std::move(d.BuildSystemTargetIndexes);
+  }
+  if (!d.AbstractTargetIndexes.empty()) {
+    directory["abstractTargetIndexes"] = std::move(d.AbstractTargetIndexes);
   }
 
   Json::Value minimumCMakeVersion = this->DumpMinimumCMakeVersion(d.Snapshot);
@@ -841,8 +870,11 @@ Json::Value CodemodelConfig::DumpProject(Project& p)
 
   project["directoryIndexes"] = std::move(p.DirectoryIndexes);
 
-  if (!p.TargetIndexes.empty()) {
-    project["targetIndexes"] = std::move(p.TargetIndexes);
+  if (!p.BuildSystemTargetIndexes.empty()) {
+    project["targetIndexes"] = std::move(p.BuildSystemTargetIndexes);
+  }
+  if (!p.AbstractTargetIndexes.empty()) {
+    project["abstractTargetIndexes"] = std::move(p.AbstractTargetIndexes);
   }
 
   return project;
@@ -1231,6 +1263,15 @@ Json::Value Target::Dump()
   target["name"] = this->GT->GetName();
   target["type"] = cmState::GetTargetTypeName(type);
   target["id"] = TargetId(this->GT, this->TopBuild);
+  if (this->GT->IsImported()) {
+    target["imported"] = true;
+    if (!this->GT->IsImportedGloballyVisible()) {
+      target["local"] = true;
+    }
+  }
+  if (!this->GT->IsInBuildSystem()) {
+    target["abstract"] = true;
+  }
   target["paths"] = this->DumpPaths();
   if (this->GT->Target->GetIsGeneratorProvided()) {
     target["isGeneratorProvided"] = true;
@@ -1253,10 +1294,14 @@ Json::Value Target::Dump()
       type == cmStateEnums::SHARED_LIBRARY ||
       type == cmStateEnums::MODULE_LIBRARY) {
     target["nameOnDisk"] = this->GT->GetFullName(this->Config);
-    target["link"] = this->DumpLink();
+    if (!this->GT->IsImported()) {
+      target["link"] = this->DumpLink();
+    }
   } else if (type == cmStateEnums::STATIC_LIBRARY) {
     target["nameOnDisk"] = this->GT->GetFullName(this->Config);
-    target["archive"] = this->DumpArchive();
+    if (!this->GT->IsImported()) {
+      target["archive"] = this->DumpArchive();
+    }
   }
 
   if (type == cmStateEnums::EXECUTABLE) {
@@ -1266,13 +1311,17 @@ Json::Value Target::Dump()
     }
   }
 
-  Json::Value dependencies = this->DumpDependencies();
-  if (!dependencies.empty()) {
-    target["dependencies"] = dependencies;
+  if (!this->GT->IsImported()) {
+    Json::Value dependencies = this->DumpDependencies();
+    if (!dependencies.empty()) {
+      target["dependencies"] = dependencies;
+    }
   }
 
   {
-    this->ProcessLanguages();
+    if (!this->GT->IsImported()) {
+      this->ProcessLanguages();
+    }
 
     auto fileSetInfo = this->DumpFileSets();
 
@@ -1280,6 +1329,8 @@ Json::Value Target::Dump()
       target["fileSets"] = fileSetInfo.first;
     }
 
+    // Even though some types of targets can't have sources, we have to always
+    // output a sources array to preserve backward compatibility
     target["sources"] = this->DumpSources(fileSetInfo.second);
 
     Json::Value folder = this->DumpFolder();
@@ -1287,22 +1338,26 @@ Json::Value Target::Dump()
       target["folder"] = std::move(folder);
     }
 
-    Json::Value sourceGroups = this->DumpSourceGroups();
-    if (!sourceGroups.empty()) {
-      target["sourceGroups"] = std::move(sourceGroups);
-    }
+    if (!this->GT->IsImported()) {
+      Json::Value sourceGroups = this->DumpSourceGroups();
+      if (!sourceGroups.empty()) {
+        target["sourceGroups"] = std::move(sourceGroups);
+      }
 
-    Json::Value compileGroups = this->DumpCompileGroups();
-    if (!compileGroups.empty()) {
-      target["compileGroups"] = std::move(compileGroups);
+      Json::Value compileGroups = this->DumpCompileGroups();
+      if (!compileGroups.empty()) {
+        target["compileGroups"] = std::move(compileGroups);
+      }
     }
   }
 
   target["backtraceGraph"] = this->Backtraces.Dump();
 
-  Json::Value debugger = this->DumpDebugger();
-  if (!debugger.isNull()) {
-    target["debugger"] = std::move(debugger);
+  if (!this->GT->IsImported()) {
+    Json::Value debugger = this->DumpDebugger();
+    if (!debugger.isNull()) {
+      target["debugger"] = std::move(debugger);
+    }
   }
 
   return target;

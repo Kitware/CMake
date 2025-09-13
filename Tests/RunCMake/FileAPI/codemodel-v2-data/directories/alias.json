@@ -9,6 +9,7 @@
         "^c_alias_exe::@53632cba2752272bb008$",
         "^cxx_alias_exe::@53632cba2752272bb008$"
     ],
+    "abstractTargetIds": null,
     "projectName": "Alias",
     "minimumCMakeVersion": "3.13",
     "hasInstallRule": null,
