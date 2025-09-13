@@ -883,10 +883,12 @@ function(add_jar _TARGET_NAME)
             # Create the list of files to compile.
             set(_JAVA_SOURCES_FILE ${CMAKE_JAVA_CLASS_OUTPUT_PATH}/java_sources)
             string(REPLACE ";" "\"\n\"" _JAVA_COMPILE_STRING "\"${_JAVA_COMPILE_FILES}\"")
-            set(CMAKE_CONFIGURABLE_FILE_CONTENT "${_JAVA_COMPILE_STRING}")
-            configure_file("${CMAKE_ROOT}/Modules/CMakeConfigurableFile.in"
-              "${_JAVA_SOURCES_FILE}" @ONLY)
-            unset(CMAKE_CONFIGURABLE_FILE_CONTENT)
+            file(
+              CONFIGURE
+              OUTPUT "${_JAVA_SOURCES_FILE}"
+              CONTENT "${_JAVA_COMPILE_STRING}\n"
+              @ONLY
+            )
             list (APPEND _JAVA_SOURCES_FILELISTS "@${_JAVA_SOURCES_FILE}")
         endif()
         if (_JAVA_COMPILE_FILELISTS)
