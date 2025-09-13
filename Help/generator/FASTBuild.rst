@@ -40,6 +40,23 @@ Then build with the ``-cache`` flag:
 
    cmake --build <path-to-build> -- -cache
 
+Compiler Behavior Variables
+---------------------------
+
+The following variables control how compiler nodes are emitted in the generated
+``fbuild.bff``. These settings may affect build determinism, debug info paths,
+include handling, and compiler argument formatting:
+
+* :variable:`CMAKE_FASTBUILD_ALLOW_RESPONSE_FILE`
+* :variable:`CMAKE_FASTBUILD_CLANG_GCC_UPDATE_XLANG_ARG`
+* :variable:`CMAKE_FASTBUILD_CLANG_REWRITE_INCLUDES`
+* :variable:`CMAKE_FASTBUILD_COMPILER_EXTRA_FILES`
+* :variable:`CMAKE_FASTBUILD_FORCE_RESPONSE_FILE`
+* :variable:`CMAKE_FASTBUILD_SOURCE_MAPPING`
+* :variable:`CMAKE_FASTBUILD_USE_DETERMINISTIC_PATHS`
+* :variable:`CMAKE_FASTBUILD_USE_LIGHTCACHE`
+* :variable:`CMAKE_FASTBUILD_USE_RELATIVE_PATHS`
+
 Configuration Variables
 -----------------------
 
@@ -47,10 +64,8 @@ The following variables can be used to configure this generator:
 
 * :variable:`CMAKE_FASTBUILD_CACHE_PATH`
 * :variable:`CMAKE_FASTBUILD_CAPTURE_SYSTEM_ENV`
-* :variable:`CMAKE_FASTBUILD_COMPILER_EXTRA_FILES`
 * :variable:`CMAKE_FASTBUILD_ENV_OVERRIDES`
 * :variable:`CMAKE_FASTBUILD_TRACK_BYPRODUCTS_AS_OUTPUT`
-* :variable:`CMAKE_FASTBUILD_USE_LIGHTCACHE`
 * :variable:`CMAKE_FASTBUILD_VERBOSE_GENERATOR`
 
 Target Properties

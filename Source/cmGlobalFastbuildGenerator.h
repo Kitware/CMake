@@ -186,10 +186,18 @@ struct FastbuildCompiler
   std::string Name;
   std::string Executable;
   std::string CmakeCompilerID;
+  std::string CompilerFamily = "custom";
   std::string CmakeCompilerVersion;
   std::string Language;
   std::vector<std::string> ExtraFiles;
   bool UseLightCache = false;
+  bool ClangRewriteIncludes = true;
+  bool ClangGCCUpdateXLanguageArg = false;
+  bool AllowResponseFile = false;
+  bool ForceResponseFile = false;
+  bool UseRelativePaths = false;
+  bool UseDeterministicPaths = false;
+  std::string SourceMapping;
   // Only used for launchers.
   std::string Args;
   bool DontUseEnv = false;
