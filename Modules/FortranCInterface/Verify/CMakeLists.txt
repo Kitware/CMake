@@ -5,7 +5,12 @@ cmake_minimum_required(VERSION ${CMAKE_VERSION})
 project(VerifyFortranC C Fortran)
 
 if(CMAKE_Fortran_COMPILER_ID STREQUAL "LFortran")
-  add_compile_options("$<$<COMPILE_LANGUAGE:Fortran>:--generate-object-code>")
+  if(CMAKE_Fortran_COMPILER_VERSION VERSION_GREATER_EQUAL "0.55")
+    set(_LFORTRAN_SC_FLAG --separate-compilation)
+  else()
+    set(_LFORTRAN_SC_FLAG --generate-object-code)
+  endif()
+  add_compile_options("$<$<COMPILE_LANGUAGE:Fortran>:${_LFORTRAN_SC_FLAG}>")
 endif()
 
 option(VERIFY_CXX "Whether to verify C++ and Fortran" OFF)
