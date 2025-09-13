@@ -1078,8 +1078,13 @@ void cmGlobalFastbuildGenerator::WriteExec(FastbuildExecNode const& Exec,
   }
   Indent(indent);
   *BuildFileStream << "}\n";
-  WriteAlias(Exec.OutputsAlias);
-  WriteAlias(Exec.ByproductsAlias);
+  static bool const verbose = GlobalSettingIsOn(FASTBUILD_VERBOSE_GENERATOR) ||
+    cmSystemTools::HasEnv(FASTBUILD_VERBOSE_GENERATOR);
+  // Those aliases are only used for troubleshooting the generated file.
+  if (verbose) {
+    WriteAlias(Exec.OutputsAlias);
+    WriteAlias(Exec.ByproductsAlias);
+  }
 }
 
 void cmGlobalFastbuildGenerator::WriteObjectList(
