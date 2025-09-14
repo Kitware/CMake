@@ -108,9 +108,7 @@ void cmFastbuildUtilityTargetGenerator::Generate()
                  "-all propagating to CC: " + exec.Name);
       // All custom commands from within the target must be executed AFTER all
       // the target's deps.
-      FastbuildTargetDep execDep{ dep->GetName() };
-      execDep.Type = FastbuildTargetDepType::ALL;
-      exec.PreBuildDependencies.emplace(std::move(execDep));
+      exec.PreBuildDependencies.emplace(dep->GetName());
     }
     this->GetGlobalGenerator()->AddTarget(std::move(exec));
   }

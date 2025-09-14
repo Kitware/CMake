@@ -812,8 +812,6 @@ void cmFastbuildNormalTargetGenerator::Generate()
     FastbuildTargetDep targetDep{ tname };
     if (dep->GetType() == cmStateEnums::OBJECT_LIBRARY) {
       targetDep.Type = FastbuildTargetDepType::ORDER_ONLY;
-    } else {
-      targetDep.Type = FastbuildTargetDepType::ALL;
     }
     fastbuildTarget.PreBuildDependencies.emplace(std::move(targetDep));
   }
@@ -908,6 +906,15 @@ void cmFastbuildNormalTargetGenerator::Generate()
 
   AddStampExeIfApplicable(fastbuildTarget);
 
+  // size 1 means that it's not a multi-arch lib (which can only be the case on
+  // Darwin).
+  if (fastbuildTarget.LinkerNode.size() == 1 &&
+      fastbuildTarget.LinkerNode[0].Type ==
+        FastbuildLinkerNode::STATIC_LIBRARY &&
+      !fastbuildTarget.PostBuildExecNodes.Nodes.empty()) {
+    ProcessPostBuildForStaticLib(fastbuildTarget);
+  }
+
   AdditionalCleanFiles();
 
   this->GetGlobalGenerator()->AddTarget(std::move(fastbuildTarget));
@@ -977,6 +984,25 @@ void cmFastbuildNormalTargetGenerator::AddStampExeIfApplicable(
   } else {
     LogMessage("No POST_BUILD steps for target: " + fastbuildTarget.Name);
   }
+}
+
+void cmFastbuildNormalTargetGenerator::ProcessPostBuildForStaticLib(
+  FastbuildTarget& fastbuildTarget) const
+{
+  // "Library" nodes do not have "LinkerStampExe" property, so we need to be
+  // clever here: create an alias that will refer to the binary as well as to
+  // all post-build steps. Also, make sure that post-build steps depend on the
+  // binary itself.
+  LogMessage("ProcessPostBuildForStaticLib(...)");
+  FastbuildAliasNode alias;
+  alias.Name = std::move(fastbuildTarget.LinkerNode[0].Name);
+  for (FastbuildExecNode& postBuildExec :
+       fastbuildTarget.PostBuildExecNodes.Nodes) {
+    postBuildExec.PreBuildDependencies.emplace(
+      fastbuildTarget.LinkerNode[0].LinkerOutput);
+    alias.PreBuildDependencies.emplace(postBuildExec.Name);
+  }
+  fastbuildTarget.AliasNodes.emplace_back(std::move(alias));
 }
 
 void cmFastbuildNormalTargetGenerator::CollapseAllExecsIntoOneScriptfile(
@@ -1202,6 +1228,9 @@ cmFastbuildNormalTargetGenerator::GenerateObjects()
   for (cmSourceFile const* source : objectSources) {
 
     cmSourceFile const& srcFile = *source;
+
+    this->GetGlobalGenerator()->AddFileToClean(cmStrCat(
+      ObjectOutDir, '/', this->GeneratorTarget->GetObjectName(source)));
 
     // Do not generate separate node for PCH source file.
     if (this->GeneratorTarget->GetPchSource(Config, srcFile.GetLanguage()) ==
@@ -1540,8 +1569,10 @@ void cmFastbuildNormalTargetGenerator::AppendPrebuildDeps(
       LogMessage("Adding dep to " + fastbuildTargetName);
       linkerNode.PreBuildDependencies.insert(std::move(fastbuildTargetName));
     } else {
-      LogMessage("Adding dep " + linkDep + " for sorting");
-      linkerNode.PreBuildDependencies.insert(linkDep);
+      if (!cmIsNOTFOUND(linkDep)) {
+        LogMessage("Adding dep " + linkDep + " for sorting");
+        linkerNode.PreBuildDependencies.insert(linkDep);
+      }
     }
   }
 }
@@ -1753,6 +1784,9 @@ void cmFastbuildNormalTargetGenerator::AddLipoCommand(FastbuildTarget& target)
   FastbuildExecNode exec;
   exec.ExecExecutable = lipo;
   exec.ExecOutput = target.RealOutput;
+  if (exec.ExecOutput != target.Name) {
+    exec.Name = target.Name;
+  }
   for (auto const& ArchSpecificTarget : target.LinkerNode) {
     exec.ExecInput.emplace_back(ArchSpecificTarget.LinkerOutput);
   }
