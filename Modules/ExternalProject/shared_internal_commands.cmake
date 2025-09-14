@@ -55,9 +55,9 @@ function(_ep_get_git_remote_url output_variable working_directory)
     endif()
   endif()
 
-  if(GIT_VERSION VERSION_LESS 1.7.5)
+  if(Git_VERSION VERSION_LESS 1.7.5)
     set(_git_remote_url_cmd_args config remote.${git_remote_name}.url)
-  elseif(GIT_VERSION VERSION_LESS 2.7)
+  elseif(Git_VERSION VERSION_LESS 2.7)
     set(_git_remote_url_cmd_args ls-remote --get-url ${git_remote_name})
   else()
     set(_git_remote_url_cmd_args remote get-url ${git_remote_name})
@@ -399,7 +399,7 @@ function(_ep_write_gitclone_script
   tls_verify
 )
 
-  if(NOT GIT_VERSION_STRING VERSION_LESS 1.8.5)
+  if(NOT Git_VERSION VERSION_LESS 1.8.5)
     # Use `git checkout <tree-ish> --` to avoid ambiguity with a local path.
     set(git_checkout_explicit-- "--")
   else()
@@ -412,14 +412,14 @@ function(_ep_write_gitclone_script
     message(FATAL_ERROR "Tag for git checkout should not be empty.")
   endif()
 
-  if(GIT_VERSION_STRING VERSION_LESS 2.20 OR
-    2.21 VERSION_LESS_EQUAL GIT_VERSION_STRING)
+  if(Git_VERSION VERSION_LESS 2.20 OR
+    2.21 VERSION_LESS_EQUAL Git_VERSION)
     set(git_clone_options "--no-checkout")
   else()
     set(git_clone_options)
   endif()
   if(git_shallow)
-    if(NOT GIT_VERSION_STRING VERSION_LESS 1.7.10)
+    if(NOT Git_VERSION VERSION_LESS 1.7.10)
       list(APPEND git_clone_options "--depth 1 --no-single-branch")
     else()
       list(APPEND git_clone_options "--depth 1")
@@ -511,10 +511,10 @@ function(_ep_write_gitupdate_script
     message(FATAL_ERROR "Tag for git checkout should not be empty.")
   endif()
   set(git_stash_save_options --quiet)
-  if(GIT_VERSION_STRING VERSION_GREATER_EQUAL 1.7.7)
+  if(Git_VERSION VERSION_GREATER_EQUAL 1.7.7)
     # This avoids stashing files covered by .gitignore
     list(APPEND git_stash_save_options --include-untracked)
-  elseif(GIT_VERSION_STRING VERSION_GREATER_EQUAL 1.7.6)
+  elseif(Git_VERSION VERSION_GREATER_EQUAL 1.7.6)
     # Untracked files, but also ignored files, so potentially slower
     list(APPEND git_stash_save_options --all)
   endif()
@@ -740,10 +740,10 @@ function(_ep_get_git_submodules_recurse git_submodules_recurse)
   set(${git_submodules_recurse} "${recurseFlag}" PARENT_SCOPE)
 
   # The git submodule update '--recursive' flag requires git >= v1.6.5
-  if(recurseFlag AND GIT_VERSION_STRING VERSION_LESS 1.6.5)
+  if(recurseFlag AND Git_VERSION VERSION_LESS 1.6.5)
     message(FATAL_ERROR
       "git version 1.6.5 or later required for --recursive flag with "
-      "'git submodule ...': GIT_VERSION_STRING='${GIT_VERSION_STRING}'"
+      "'git submodule ...': Git_VERSION='${Git_VERSION}'"
     )
   endif()
 endfunction()
@@ -921,7 +921,7 @@ function(_ep_add_download_command name)
   elseif(git_repository)
     set(method git)
     # FetchContent gives us these directly, so don't try to recompute them
-    if(NOT GIT_EXECUTABLE OR NOT GIT_VERSION_STRING)
+    if(NOT GIT_EXECUTABLE OR NOT Git_VERSION)
       unset(CMAKE_MODULE_PATH) # Use CMake builtin find module
       find_package(Git QUIET)
       if(NOT GIT_EXECUTABLE)
@@ -957,7 +957,7 @@ function(_ep_add_download_command name)
 
     # If git supports it, make checkouts quiet when checking out a git hash.
     # This avoids the very noisy detached head message.
-    if(GIT_VERSION_STRING VERSION_GREATER_EQUAL 1.7.7)
+    if(Git_VERSION VERSION_GREATER_EQUAL 1.7.7)
       list(PREPEND git_config advice.detachedHead=false)
     endif()
 
@@ -1496,7 +1496,7 @@ function(_ep_add_update_command name)
 
   elseif(git_repository)
     # FetchContent gives us these directly, so don't try to recompute them
-    if(NOT GIT_EXECUTABLE OR NOT GIT_VERSION_STRING)
+    if(NOT GIT_EXECUTABLE OR NOT Git_VERSION)
       unset(CMAKE_MODULE_PATH) # Use CMake builtin find module
       find_package(Git QUIET)
       if(NOT GIT_EXECUTABLE)

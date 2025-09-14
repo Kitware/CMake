@@ -120,7 +120,7 @@ foreach(
     DevIL Doxygen DOXYGEN
     EXPAT
     FLEX Freetype
-    Gettext GIF GnuTLS GNUTLS GTK2
+    Gettext GIF Git GnuTLS GNUTLS GTK2
     HDF5 Hg HSPELL
     Icotool
     Jasper JPEG

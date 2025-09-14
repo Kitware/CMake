@@ -35,8 +35,8 @@ if(NOT DEFINED EP_TEST_GIT OR EP_TEST_GIT)
   find_package(Git)
 endif()
 if(NOT DEFINED EP_TEST_GIT AND Git_FOUND)
-  message(STATUS "GIT_VERSION_STRING='${GIT_VERSION_STRING}'")
-  if(NOT "${GIT_VERSION_STRING}" VERSION_LESS 1.6.5)
+  message(STATUS "Git_VERSION='${Git_VERSION}'")
+  if(NOT Git_VERSION VERSION_LESS 1.6.5)
     set(EP_TEST_GIT 1)
   endif()
 endif()
@@ -373,7 +373,7 @@ if(EP_TEST_GIT)
   # Live git / master (no GIT_TAG), but git config flags
   #
   # The `git clone --config` parameter has been introduced in Git 1.7.7
-  if(NOT git_version VERSION_LESS 1.7.7)
+  if(NOT Git_VERSION VERSION_LESS 1.7.7)
     set(proj TutorialStep1-GIT-config)
     ExternalProject_Add(${proj}
       GIT_REPOSITORY "${local_git_repo}"
@@ -658,7 +658,7 @@ if(EP_TEST_GIT)
   add_test(TutorialStep1-GIT-master
     ${CMAKE_COMMAND} -P "${binary_base}/TutorialStep1-GIT-master/example.cmake")
 
-  if(NOT git_version VERSION_LESS 1.7.7)
+  if(NOT Git_VERSION VERSION_LESS 1.7.7)
     add_test(TutorialStep1-GIT-config
       ${CMAKE_COMMAND} -P "${binary_base}/TutorialStep1-GIT-config/example.cmake")
   endif()
