@@ -46,8 +46,5 @@ protected:
     cmValue typeGuid,
     std::set<BT<std::pair<std::string, bool>>> const& depends) const override;
 
-  // Folders are not supported by VS 7.1.
-  bool UseFolderProperty() const override { return false; }
-
   std::string ProjectConfigurationSectionName;
 };

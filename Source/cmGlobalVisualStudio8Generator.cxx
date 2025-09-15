@@ -218,12 +218,6 @@ std::string cmGlobalVisualStudio8Generator::GetGenerateStampList()
   return "generate.stamp.list";
 }
 
-bool cmGlobalVisualStudio8Generator::UseFolderProperty() const
-{
-  // NOLINTNEXTLINE(bugprone-parent-virtual-call)
-  return IsExpressEdition() ? false : cmGlobalGenerator::UseFolderProperty();
-}
-
 bool cmGlobalVisualStudio8Generator::AddCheckTarget()
 {
   // Add a special target on which all other targets depend that

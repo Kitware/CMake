@@ -47,7 +47,6 @@ protected:
   bool IsWindowsPhoneToolsetInstalled() const;
   bool IsWindowsStoreToolsetInstalled() const;
 
-  bool UseFolderProperty() const override;
   static std::set<std::string> GetInstalledWindowsCESDKs();
 
   /** Return true if target system supports debugging deployment. */
