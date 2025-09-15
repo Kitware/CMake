@@ -118,15 +118,10 @@ public:
 protected:
   cmGlobalVisualStudio7Generator(cmake* cm);
 
-  void Generate() override;
-
   std::string const& GetDevEnvCommand();
   virtual std::string FindDevEnvCommand();
 
   static char const* ExternalProjectType(std::string const& location);
-
-  virtual void OutputSLNFile(cmLocalGenerator* root,
-                             std::vector<cmLocalGenerator*>& generators);
 
   bool MarmasmEnabled;
   bool MasmEnabled;

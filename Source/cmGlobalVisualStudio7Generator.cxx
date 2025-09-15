@@ -57,14 +57,6 @@ static cmVS7FlagTable cmVS7ExtraFlagTable[] = {
   { "", "", "", "", 0 }
 };
 
-namespace {
-std::string GetSLNFile(cmLocalGenerator* root)
-{
-  return cmStrCat(root->GetCurrentBinaryDirectory(), '/',
-                  root->GetProjectName(), ".sln");
-}
-}
-
 cmGlobalVisualStudio7Generator::cmGlobalVisualStudio7Generator(cmake* cm)
   : cmGlobalVisualStudioGenerator(cm)
 {
@@ -291,69 +283,6 @@ bool cmGlobalVisualStudio7Generator::SetSystemName(std::string const& s,
   mf->AddDefinition("CMAKE_VS_INTEL_Fortran_PROJECT_VERSION",
                     this->GetIntelProjectVersion());
   return this->cmGlobalVisualStudioGenerator::SetSystemName(s, mf);
-}
-
-void cmGlobalVisualStudio7Generator::Generate()
-{
-  // first do the superclass method
-  this->cmGlobalVisualStudioGenerator::Generate();
-
-  // Now write out the VS Solution files.
-  for (auto& it : this->ProjectMap) {
-    this->OutputSLNFile(it.second[0], it.second);
-  }
-
-  // If any solution or project files changed during the generation,
-  // tell Visual Studio to reload them...
-  if (!cmSystemTools::GetErrorOccurredFlag() &&
-      !this->LocalGenerators.empty()) {
-    this->CallVisualStudioMacro(MacroReload,
-                                GetSLNFile(this->LocalGenerators[0].get()));
-  }
-
-  if (this->Version == VSVersion::VS14 &&
-      !this->CMakeInstance->GetIsInTryCompile()) {
-    std::string cmakeWarnVS14;
-    if (cmValue cached = this->CMakeInstance->GetState()->GetCacheEntryValue(
-          "CMAKE_WARN_VS14")) {
-      this->CMakeInstance->MarkCliAsUsed("CMAKE_WARN_VS14");
-      cmakeWarnVS14 = *cached;
-    } else {
-      cmSystemTools::GetEnv("CMAKE_WARN_VS14", cmakeWarnVS14);
-    }
-    if (cmakeWarnVS14.empty() || !cmIsOff(cmakeWarnVS14)) {
-      this->CMakeInstance->IssueMessage(
-        MessageType::WARNING,
-        "The \"Visual Studio 14 2015\" generator is deprecated "
-        "and will be removed in a future version of CMake."
-        "\n"
-        "Add CMAKE_WARN_VS14=OFF to the cache to disable this warning.");
-    }
-  }
-}
-
-void cmGlobalVisualStudio7Generator::OutputSLNFile(
-  cmLocalGenerator* root, std::vector<cmLocalGenerator*>& generators)
-{
-  if (generators.empty()) {
-    return;
-  }
-
-  // Collect all targets under this root generator and the transitive
-  // closure of their dependencies.
-  TargetDependSet const projectTargets =
-    this->GetTargetsForProject(root, generators);
-
-  std::string fname = GetSLNFile(root);
-  cmGeneratedFileStream fout(fname);
-  fout.SetCopyIfDifferent(true);
-  if (!fout) {
-    return;
-  }
-  this->WriteSLNFile(fout, root, projectTargets);
-  if (fout.Close()) {
-    this->FileReplacedDuringGenerate(fname);
-  }
 }
 
 void cmGlobalVisualStudio7Generator::AppendDirectoryForConfig(

@@ -196,6 +196,11 @@ protected:
   cm::VS::Solution::Folder* CreateSolutionFolder(
     cm::VS::Solution& solution, cm::string_view rawName) const;
 
+  void Generate() override;
+
+  void OutputSLNFile(cmLocalGenerator* root,
+                     std::vector<cmLocalGenerator*>& generators);
+
   void WriteSLNFile(std::ostream& fout, cmLocalGenerator* root,
                     TargetDependSet const& projectTargets) const;
 
