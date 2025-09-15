@@ -1444,6 +1444,7 @@ bool cmGlobalGenerator::Compute()
 
   if (cmValue v = this->CMakeInstance->GetCacheDefinition(
         "CMAKE_INTERMEDIATE_DIR_STRATEGY")) {
+    this->GetCMakeInstance()->MarkCliAsUsed("CMAKE_INTERMEDIATE_DIR_STRATEGY");
     if (*v == "FULL") {
       this->IntDirStrategy = IntermediateDirStrategy::Full;
     } else if (*v == "SHORT") {
@@ -1457,6 +1458,8 @@ bool cmGlobalGenerator::Compute()
   }
   if (cmValue v = this->CMakeInstance->GetCacheDefinition(
         "CMAKE_AUTOGEN_INTERMEDIATE_DIR_STRATEGY")) {
+    this->GetCMakeInstance()->MarkCliAsUsed(
+      "CMAKE_AUTOGEN_INTERMEDIATE_DIR_STRATEGY");
     if (*v == "FULL") {
       this->QtAutogenIntDirStrategy = IntermediateDirStrategy::Full;
     } else if (*v == "SHORT") {
