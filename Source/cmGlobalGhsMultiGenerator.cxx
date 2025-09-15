@@ -439,9 +439,8 @@ void cmGlobalGhsMultiGenerator::OutputTopLevelProject(
 
   // Collect all targets under this root generator and the transitive
   // closure of their dependencies.
-  TargetDependSet projectTargets;
-  TargetDependSet originalTargets;
-  this->GetTargetSets(projectTargets, originalTargets, root, generators);
+  TargetDependSet const projectTargets =
+    this->GetTargetsForProject(root, generators);
   OrderedTargetDependSet sortedProjectTargets(projectTargets, "");
   this->ProjectTargets.clear();
   for (cmGeneratorTarget const* t : sortedProjectTargets) {

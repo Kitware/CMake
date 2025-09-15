@@ -704,14 +704,15 @@ public:
                                   cmXcFrameworkPlist const& content);
 
 protected:
-  // for a project collect all its targets by following depend
-  // information, and also collect all the targets
-  void GetTargetSets(TargetDependSet& projectTargets,
-                     TargetDependSet& originalTargets, cmLocalGenerator* root,
-                     std::vector<cmLocalGenerator*>& generators);
+  /** Get all targets produced under the given root, plus the transitive
+      closure of targets on which they depend, possibly from other dirs.  */
+  TargetDependSet GetTargetsForProject(
+    cmLocalGenerator const* root,
+    std::vector<cmLocalGenerator*> const& generators) const;
+
   bool IsRootOnlyTarget(cmGeneratorTarget* target) const;
   void AddTargetDepends(cmGeneratorTarget const* target,
-                        TargetDependSet& projectTargets);
+                        TargetDependSet& projectTargets) const;
   void SetLanguageEnabledFlag(std::string const& l, cmMakefile* mf);
   void SetLanguageEnabledMaps(std::string const& l, cmMakefile* mf);
   void FillExtensionToLanguageMap(std::string const& l, cmMakefile* mf);
