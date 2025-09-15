@@ -2,6 +2,8 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
+#include <stddef.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -30,7 +32,7 @@ struct cmListFileLexer_Token_s
 {
   cmListFileLexer_Type type;
   char* text;
-  int length;
+  size_t length;
   int line;
   int column;
 };
@@ -55,7 +57,7 @@ typedef struct cmListFileLexer_s cmListFileLexer;
 cmListFileLexer* cmListFileLexer_New(void);
 int cmListFileLexer_SetFileName(cmListFileLexer*, char const*,
                                 cmListFileLexer_BOM* bom);
-int cmListFileLexer_SetString(cmListFileLexer*, char const*);
+int cmListFileLexer_SetString(cmListFileLexer*, char const*, size_t);
 cmListFileLexer_Token* cmListFileLexer_Scan(cmListFileLexer*);
 long cmListFileLexer_GetCurrentLine(cmListFileLexer*);
 long cmListFileLexer_GetCurrentColumn(cmListFileLexer*);

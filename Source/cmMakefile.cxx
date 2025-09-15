@@ -837,7 +837,7 @@ bool cmMakefile::ReadListFileAsString(std::string const& content,
   ListFileScope scope(this, filenametoread);
 
   cmListFile listFile;
-  if (!listFile.ParseString(content.c_str(), virtualFileName.c_str(),
+  if (!listFile.ParseString(content, virtualFileName.c_str(),
                             this->GetMessenger(), this->Backtrace)) {
     return false;
   }

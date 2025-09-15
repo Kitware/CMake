@@ -80,7 +80,7 @@ void FormatLine(std::back_insert_iterator<std::vector<cm::string_view>> outIt,
 }
 } // anonymous namespace
 
-std::string cmDocumentationFormatter::Format(std::string text) const
+std::string cmDocumentationFormatter::Format(cm::string_view text) const
 {
   // Exit early on empty text
   if (text.empty()) {
@@ -107,9 +107,8 @@ std::string cmDocumentationFormatter::Format(std::string text) const
     ) // clang-format on
   {
     auto const isLastLine = end == std::string::npos;
-    auto const line = isLastLine
-      ? cm::string_view{ text.c_str() + start }
-      : cm::string_view{ text.c_str() + start, end - start };
+    auto const line =
+      isLastLine ? text.substr(start) : text.substr(start, end - start);
 
     if (!line.empty() && line.front() == ' ') {
       // Preformatted lines go as is w/ a leading padding

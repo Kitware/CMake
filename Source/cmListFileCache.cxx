@@ -11,6 +11,8 @@
 #  include <cmsys/Encoding.hxx>
 #endif
 
+#include <cm/string_view>
+
 #include "cmList.h"
 #include "cmListFileLexer.h"
 #include "cmMessageType.h"
@@ -51,11 +53,11 @@ public:
   cmListFileParser& operator=(cmListFileParser const&) = delete;
 
   bool ParseFile(char const* filename);
-  bool ParseString(char const* str, char const* virtual_filename);
+  bool ParseString(cm::string_view str, char const* virtual_filename);
 
 private:
   bool Parse();
-  bool ParseFunction(char const* name, long line);
+  bool ParseFunction(cm::string_view name, long line);
   bool AddArgument(cmListFileLexer_Token* token,
                    cmListFileArgument::Delimiter delim);
   void IssueFileOpenError(std::string const& text) const;
@@ -142,12 +144,13 @@ bool cmListFileParser::ParseFile(char const* filename)
   return this->Parse();
 }
 
-bool cmListFileParser::ParseString(char const* str,
+bool cmListFileParser::ParseString(cm::string_view str,
                                    char const* virtual_filename)
 {
   this->FileName = virtual_filename;
 
-  if (!cmListFileLexer_SetString(this->Lexer.get(), str)) {
+  if (!cmListFileLexer_SetString(this->Lexer.get(), str.data(),
+                                 str.length())) {
     this->IssueFileOpenError("cmListFileCache: cannot allocate buffer.");
     return false;
   }
@@ -170,7 +173,8 @@ bool cmListFileParser::Parse()
     } else if (token->type == cmListFileLexer_Token_Identifier) {
       if (haveNewline) {
         haveNewline = false;
-        if (this->ParseFunction(token->text, token->line)) {
+        if (this->ParseFunction(cm::string_view(token->text, token->length),
+                                token->line)) {
           this->ListFile->Functions.emplace_back(
             std::move(this->FunctionName), this->FunctionLine,
             this->FunctionLineEnd, std::move(this->FunctionArguments));
@@ -181,7 +185,7 @@ bool cmListFileParser::Parse()
         auto error = cmStrCat(
           "Parse error.  Expected a newline, got ",
           cmListFileLexer_GetTypeAsString(this->Lexer.get(), token->type),
-          " with text \"", token->text, "\".");
+          " with text \"", cm::string_view(token->text, token->length), "\".");
         this->IssueError(error);
         return false;
       }
@@ -189,7 +193,7 @@ bool cmListFileParser::Parse()
       auto error = cmStrCat(
         "Parse error.  Expected a command name, got ",
         cmListFileLexer_GetTypeAsString(this->Lexer.get(), token->type),
-        " with text \"", token->text, "\".");
+        " with text \"", cm::string_view(token->text, token->length), "\".");
       this->IssueError(error);
       return false;
     }
@@ -208,10 +212,10 @@ bool cmListFileParser::Parse()
   return true;
 }
 
-bool cmListFileParser::ParseFunction(char const* name, long line)
+bool cmListFileParser::ParseFunction(cm::string_view name, long line)
 {
   // Ininitialize a new function call.
-  this->FunctionName = name;
+  this->FunctionName.assign(name.data(), name.size());
   this->FunctionLine = line;
 
   // Command name has already been parsed.  Read the left paren.
@@ -225,10 +229,10 @@ bool cmListFileParser::ParseFunction(char const* name, long line)
     return false;
   }
   if (token->type != cmListFileLexer_Token_ParenLeft) {
-    auto error =
-      cmStrCat("Parse error.  Expected \"(\", got ",
-               cmListFileLexer_GetTypeAsString(this->Lexer.get(), token->type),
-               " with text \"", token->text, "\".");
+    auto error = cmStrCat(
+      "Parse error.  Expected \"(\", got ",
+      cmListFileLexer_GetTypeAsString(this->Lexer.get(), token->type),
+      " with text \"", cm::string_view(token->text, token->length), "\".");
     this->IssueError(error);
     return false;
   }
@@ -283,7 +287,7 @@ bool cmListFileParser::ParseFunction(char const* name, long line)
         "Parse error.  Function missing ending \")\".  "
         "Instead found ",
         cmListFileLexer_GetTypeAsString(this->Lexer.get(), token->type),
-        " with text \"", token->text, "\".");
+        " with text \"", cm::string_view(token->text, token->length), "\".");
       this->IssueError(error);
       return false;
     }
@@ -305,7 +309,8 @@ bool cmListFileParser::ParseFunction(char const* name, long line)
 bool cmListFileParser::AddArgument(cmListFileLexer_Token* token,
                                    cmListFileArgument::Delimiter delim)
 {
-  this->FunctionArguments.emplace_back(token->text, delim, token->line);
+  this->FunctionArguments.emplace_back(
+    cm::string_view(token->text, token->length), delim, token->line);
   if (this->Separation == SeparationOkay) {
     return true;
   }
@@ -442,7 +447,7 @@ bool cmListFile::ParseFile(char const* filename, cmMessenger* messenger,
   return !parseError;
 }
 
-bool cmListFile::ParseString(char const* str, char const* virtual_filename,
+bool cmListFile::ParseString(cm::string_view str, char const* virtual_filename,
                              cmMessenger* messenger,
                              cmListFileBacktrace const& lfbt)
 {
