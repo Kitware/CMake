@@ -70,17 +70,6 @@ protected:
   bool TargetSystemSupportsDeployment() const override;
 
   static cmIDEFlagTable const* GetExtraFlagTableVS8();
-  void WriteSolutionConfigurations(
-    std::ostream& fout,
-    std::vector<std::string> const& configs) const override;
-  void WriteProjectConfigurations(
-    std::ostream& fout, std::string const& name,
-    cmGeneratorTarget const& target, std::vector<std::string> const& configs,
-    std::set<std::string> const& configsPartOfDefaultBuild,
-    std::string const& platformMapping = "") const override;
-  void WriteProjectDepends(std::ostream& fout, std::string const& name,
-                           std::string const& path,
-                           cmGeneratorTarget const* t) const override;
 
   std::string Name;
   std::string WindowsCEVersion;

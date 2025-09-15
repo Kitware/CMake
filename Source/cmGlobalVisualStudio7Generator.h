@@ -25,12 +25,6 @@ class cmake;
 template <typename T>
 class BT;
 
-struct cmVisualStudioFolder
-{
-  std::set<std::string> Projects;
-  std::set<std::string> SolutionItems;
-};
-
 /** \class cmGlobalVisualStudio7Generator
  * \brief Write a Unix makefiles.
  *
@@ -126,12 +120,6 @@ protected:
 
   void Generate() override;
 
-  struct VSFolders
-  {
-    std::map<std::string, cmVisualStudioFolder> Folders;
-    cmVisualStudioFolder* Create(std::string const& path);
-  };
-
   std::string const& GetDevEnvCommand();
   virtual std::string FindDevEnvCommand();
 
@@ -139,49 +127,6 @@ protected:
 
   virtual void OutputSLNFile(cmLocalGenerator* root,
                              std::vector<cmLocalGenerator*>& generators);
-  virtual void WriteSLNFile(
-    std::ostream& fout, cmLocalGenerator* root,
-    OrderedTargetDependSet const& orderedProjectTargets,
-    VSFolders const& vsFolders) const = 0;
-  virtual void WriteProject(std::ostream& fout, std::string const& name,
-                            std::string const& path,
-                            cmGeneratorTarget const* t) const = 0;
-  virtual void WriteProjectDepends(std::ostream& fout, std::string const& name,
-                                   std::string const& path,
-                                   cmGeneratorTarget const* t) const = 0;
-  virtual void WriteProjectConfigurations(
-    std::ostream& fout, std::string const& name,
-    cmGeneratorTarget const& target, std::vector<std::string> const& configs,
-    std::set<std::string> const& configsPartOfDefaultBuild,
-    std::string const& platformMapping = "") const = 0;
-  virtual void WriteSLNGlobalSections(std::ostream& fout,
-                                      cmLocalGenerator* root) const;
-  virtual void WriteSLNFooter(std::ostream& fout) const;
-
-  VSFolders CreateSolutionFolders(
-    OrderedTargetDependSet const& orderedProjectTargets);
-
-  virtual void WriteTargetsToSolution(
-    std::ostream& fout, cmLocalGenerator* root,
-    OrderedTargetDependSet const& projectTargets) const;
-  virtual void WriteTargetConfigurations(
-    std::ostream& fout, std::vector<std::string> const& configs,
-    OrderedTargetDependSet const& projectTargets) const;
-
-  virtual void WriteExternalProject(
-    std::ostream& fout, std::string const& name, std::string const& path,
-    cmValue typeGuid,
-    std::set<BT<std::pair<std::string, bool>>> const& dependencies) const = 0;
-
-  virtual void WriteFolders(std::ostream& fout,
-                            VSFolders const& vsFolders) const;
-  virtual void WriteFoldersContent(std::ostream& fout,
-                                   VSFolders const& vsFolders) const;
-
-  virtual void AddSolutionItems(cmLocalGenerator* root,
-                                VSFolders& vsFolders) = 0;
-  virtual void WriteFolderSolutionItems(
-    std::ostream& fout, cmVisualStudioFolder const& folder) const = 0;
 
   bool MarmasmEnabled;
   bool MasmEnabled;

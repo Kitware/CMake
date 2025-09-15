@@ -2,49 +2,12 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
-#include <iosfwd>
-#include <set>
-#include <string>
-#include <utility>
-#include <vector>
-
 #include "cmGlobalVisualStudio7Generator.h"
-#include "cmValue.h"
 
-class cmGeneratorTarget;
-class cmLocalGenerator;
 class cmake;
-template <typename T>
-class BT;
 
-/** \class cmGlobalVisualStudio71Generator
- * \brief Write a Unix makefiles.
- *
- * cmGlobalVisualStudio71Generator manages UNIX build process for a tree
- */
 class cmGlobalVisualStudio71Generator : public cmGlobalVisualStudio7Generator
 {
 public:
   cmGlobalVisualStudio71Generator(cmake* cm);
-
-protected:
-  void WriteSLNFile(std::ostream& fout, cmLocalGenerator* root,
-                    OrderedTargetDependSet const& orderedProjectTargets,
-                    VSFolders const& vsFolders) const override;
-  virtual void WriteSolutionConfigurations(
-    std::ostream& fout, std::vector<std::string> const& configs) const = 0;
-  void WriteProject(std::ostream& fout, std::string const& name,
-                    std::string const& path,
-                    cmGeneratorTarget const* t) const override;
-  void WriteProjectConfigurations(
-    std::ostream& fout, std::string const& name,
-    cmGeneratorTarget const& target, std::vector<std::string> const& configs,
-    std::set<std::string> const& configsPartOfDefaultBuild,
-    std::string const& platformMapping = "") const override;
-  void WriteExternalProject(
-    std::ostream& fout, std::string const& name, std::string const& path,
-    cmValue typeGuid,
-    std::set<BT<std::pair<std::string, bool>>> const& depends) const override;
-
-  std::string ProjectConfigurationSectionName;
 };

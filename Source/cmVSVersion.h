@@ -15,5 +15,11 @@ enum class Version : std::uint16_t
   VS17 = 170,
   VS18 = 180,
 };
+
+enum class VersionExpress
+{
+  No,
+  Yes,
+};
 }
 }

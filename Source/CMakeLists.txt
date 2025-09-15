@@ -975,6 +975,8 @@ if(WIN32)
         cmVisualStudioWCEPlatformParser.cxx
         cmVSSetupHelper.cxx
         cmVSSetupHelper.h
+        cmVSSolution.cxx
+        cmVSSolution.h
         cmVSVersion.h
       )
 

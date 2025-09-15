@@ -8,6 +8,7 @@
 #include <string>
 
 #include <cm/optional>
+#include <cm/string_view>
 
 #include "cmGlobalVisualStudio10Generator.h"
 #include "cmGlobalVisualStudio14Generator.h"

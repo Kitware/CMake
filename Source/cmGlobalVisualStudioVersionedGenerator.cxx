@@ -8,6 +8,7 @@
 #include <utility>
 #include <vector>
 
+#include <cm/optional>
 #include <cmext/string_view>
 
 #include "cmsys/FStream.hxx"

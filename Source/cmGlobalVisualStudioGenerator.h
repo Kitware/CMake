@@ -14,6 +14,7 @@
 
 #include "cmGlobalGenerator.h"
 #include "cmTargetDepend.h"
+#include "cmVSSolution.h"
 #include "cmVSVersion.h"
 #include "cmValue.h"
 
@@ -169,15 +170,11 @@ protected:
 
   char const* GetIDEVersion() const;
 
-  void WriteSLNHeader(std::ostream& fout) const;
-
   VSVersion Version;
   bool ExpressEdition;
 
   std::string GeneratorPlatform;
   std::string DefaultPlatformName;
-
-  std::string ConvertToSolutionPath(std::string const& path) const;
 
   /** Return true if the configuration needs to be deployed */
   virtual bool NeedsDeploy(cmGeneratorTarget const& target,
@@ -188,11 +185,19 @@ protected:
 
   std::set<std::string> IsPartOfDefaultBuild(
     std::vector<std::string> const& configs,
-    OrderedTargetDependSet const& projectTargets,
+    TargetDependSet const& projectTargets,
     cmGeneratorTarget const* target) const;
-  bool IsDependedOn(OrderedTargetDependSet const& projectTargets,
+  bool IsDependedOn(TargetDependSet const& projectTargets,
                     cmGeneratorTarget const* target) const;
   std::map<std::string, std::string> GUIDMap;
+
+  cm::VS::Solution CreateSolution(cmLocalGenerator const* root,
+                                  TargetDependSet const& projectTargets) const;
+  cm::VS::Solution::Folder* CreateSolutionFolder(
+    cm::VS::Solution& solution, cm::string_view rawName) const;
+
+  void WriteSLNFile(std::ostream& fout, cmLocalGenerator* root,
+                    TargetDependSet const& projectTargets) const;
 
 private:
   virtual std::string GetVSMakeProgram() = 0;
