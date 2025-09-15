@@ -478,6 +478,16 @@ t:hip6.3-radeon:
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
+t:linux-gcc-cxx-modules-reloc-ninja:
+    extends:
+        - .gcc_cxx_modules_reloc_ninja
+        - .cmake_test_linux_release
+        - .linux_x86_64_tags
+        - .run_dependent
+        - .needs_centos7_x86_64
+    variables:
+        CMAKE_CI_JOB_NIGHTLY: "true"
+
 t:linux-gcc-cxx-modules-ninja:
     extends:
         - .gcc_cxx_modules_ninja

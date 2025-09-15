@@ -524,6 +524,13 @@
     variables:
         CMAKE_CONFIGURATION: linux_gcc_cxx_modules_ninja
 
+.gcc_cxx_modules_reloc_ninja:
+    extends: .gcc_cxx_modules_x86_64
+
+    variables:
+        CMAKE_CONFIGURATION: linux_gcc_cxx_modules_reloc_ninja
+        CTEST_LABELS: "CXXModules"
+
 .gcc_cxx_modules_ninja_multi:
     extends: .gcc_cxx_modules_x86_64
 

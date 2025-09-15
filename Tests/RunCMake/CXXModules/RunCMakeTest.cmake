@@ -1,6 +1,12 @@
 include(RunCMake)
 
-run_cmake(Inspect)
+set(stdlib_custom_json)
+if (CMake_TEST_CXX_STDLIB_MODULES_JSON)
+  list(APPEND stdlib_custom_json
+    -DCMAKE_CXX_STDLIB_MODULES_JSON=${CMake_TEST_CXX_STDLIB_MODULES_JSON})
+endif ()
+
+run_cmake(Inspect ${stdlib_custom_json})
 include("${RunCMake_BINARY_DIR}/Inspect-build/info.cmake")
 
 # Test negative cases where C++20 modules do not work.
@@ -148,6 +154,10 @@ function (run_cxx_module_test directory)
     set(RunCMake_TEST_OPTIONS -DCMAKE_CONFIGURATION_TYPES=Debug)
   else ()
     set(RunCMake_TEST_OPTIONS -DCMAKE_BUILD_TYPE=Debug)
+  endif ()
+  if (directory MATCHES "import-std")
+    list(APPEND RunCMake_TEST_OPTIONS
+      ${stdlib_custom_json})
   endif ()
 
   if (RunCMake_CXXModules_INSTALL)
