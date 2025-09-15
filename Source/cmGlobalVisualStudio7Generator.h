@@ -82,9 +82,6 @@ public:
     std::vector<std::string> const& makeOptions =
       std::vector<std::string>()) override;
 
-  //! Lookup a stored GUID or compute one deterministically.
-  std::string GetGUID(std::string const& name) const;
-
   /** Append the subdirectory for the given configuration.  */
   void AppendDirectoryForConfig(std::string const& prefix,
                                 std::string const& config,
@@ -175,16 +172,6 @@ protected:
     std::ostream& fout, std::string const& name, std::string const& path,
     cmValue typeGuid,
     std::set<BT<std::pair<std::string, bool>>> const& dependencies) const = 0;
-
-  std::string ConvertToSolutionPath(std::string const& path) const;
-
-  std::set<std::string> IsPartOfDefaultBuild(
-    std::vector<std::string> const& configs,
-    OrderedTargetDependSet const& projectTargets,
-    cmGeneratorTarget const* target) const;
-  bool IsDependedOn(OrderedTargetDependSet const& projectTargets,
-                    cmGeneratorTarget const* target) const;
-  std::map<std::string, std::string> GUIDMap;
 
   virtual void WriteFolders(std::ostream& fout,
                             VSFolders const& vsFolders) const;

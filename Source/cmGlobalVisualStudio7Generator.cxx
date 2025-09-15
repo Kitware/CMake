@@ -533,20 +533,6 @@ void cmGlobalVisualStudio7Generator::WriteFoldersContent(
   }
 }
 
-std::string cmGlobalVisualStudio7Generator::ConvertToSolutionPath(
-  std::string const& path) const
-{
-  // Convert to backslashes.  Do not use ConvertToOutputPath because
-  // we will add quoting ourselves, and we know these projects always
-  // use windows slashes.
-  std::string d = path;
-  std::string::size_type pos = 0;
-  while ((pos = d.find('/', pos)) != std::string::npos) {
-    d[pos++] = '\\';
-  }
-  return d;
-}
-
 void cmGlobalVisualStudio7Generator::WriteSLNGlobalSections(
   std::ostream& fout, cmLocalGenerator* root) const
 {
@@ -619,29 +605,6 @@ void cmGlobalVisualStudio7Generator::WriteSLNFooter(std::ostream& fout) const
   fout << "EndGlobal\n";
 }
 
-std::string cmGlobalVisualStudio7Generator::GetGUID(
-  std::string const& name) const
-{
-  std::string const& guidStoreName = cmStrCat(name, "_GUID_CMAKE");
-  if (cmValue storedGUID =
-        this->CMakeInstance->GetCacheDefinition(guidStoreName)) {
-    return *storedGUID;
-  }
-  // Compute a GUID that is deterministic but unique to the build tree.
-  std::string input =
-    cmStrCat(this->CMakeInstance->GetState()->GetBinaryDirectory(), '|', name);
-
-  cmUuid uuidGenerator;
-
-  std::vector<unsigned char> uuidNamespace;
-  uuidGenerator.StringToBinary("ee30c4be-5192-4fb0-b335-722a2dffe760",
-                               uuidNamespace);
-
-  std::string guid = uuidGenerator.FromMd5(uuidNamespace, input);
-
-  return cmSystemTools::UpperCase(guid);
-}
-
 void cmGlobalVisualStudio7Generator::AppendDirectoryForConfig(
   std::string const& prefix, std::string const& config,
   std::string const& suffix, std::string& dir)
@@ -649,63 +612,6 @@ void cmGlobalVisualStudio7Generator::AppendDirectoryForConfig(
   if (!config.empty()) {
     dir += cmStrCat(prefix, config, suffix);
   }
-}
-
-std::set<std::string> cmGlobalVisualStudio7Generator::IsPartOfDefaultBuild(
-  std::vector<std::string> const& configs,
-  OrderedTargetDependSet const& projectTargets,
-  cmGeneratorTarget const* target) const
-{
-  std::set<std::string> activeConfigs;
-  // if it is a utility target then only make it part of the
-  // default build if another target depends on it
-  int type = target->GetType();
-  if (type == cmStateEnums::GLOBAL_TARGET) {
-    std::vector<std::string> targetNames;
-    targetNames.push_back("INSTALL");
-    targetNames.push_back("PACKAGE");
-    for (std::string const& t : targetNames) {
-      // check if target <t> is part of default build
-      if (target->GetName() == t) {
-        std::string const propertyName =
-          cmStrCat("CMAKE_VS_INCLUDE_", t, "_TO_DEFAULT_BUILD");
-        // inspect CMAKE_VS_INCLUDE_<t>_TO_DEFAULT_BUILD properties
-        for (std::string const& i : configs) {
-          cmValue propertyValue =
-            target->Target->GetMakefile()->GetDefinition(propertyName);
-          if (propertyValue &&
-              cmIsOn(cmGeneratorExpression::Evaluate(
-                *propertyValue, target->GetLocalGenerator(), i))) {
-            activeConfigs.insert(i);
-          }
-        }
-      }
-    }
-    return activeConfigs;
-  }
-  if (type == cmStateEnums::UTILITY &&
-      !this->IsDependedOn(projectTargets, target)) {
-    return activeConfigs;
-  }
-  // inspect EXCLUDE_FROM_DEFAULT_BUILD[_<CONFIG>] properties
-  for (std::string const& i : configs) {
-    if (target->GetFeature("EXCLUDE_FROM_DEFAULT_BUILD", i).IsOff()) {
-      activeConfigs.insert(i);
-    }
-  }
-  return activeConfigs;
-}
-
-bool cmGlobalVisualStudio7Generator::IsDependedOn(
-  OrderedTargetDependSet const& projectTargets,
-  cmGeneratorTarget const* gtIn) const
-{
-  return std::any_of(projectTargets.begin(), projectTargets.end(),
-                     [this, gtIn](cmTargetDepend const& l) {
-                       TargetDependSet const& tgtdeps =
-                         this->GetTargetDirectDepends(l);
-                       return tgtdeps.count(gtIn);
-                     });
 }
 
 std::string cmGlobalVisualStudio7Generator::Encoding()

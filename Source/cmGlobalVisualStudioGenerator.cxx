@@ -3,6 +3,7 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmGlobalVisualStudioGenerator.h"
 
+#include <algorithm>
 #include <cassert>
 #include <future>
 #include <iostream>
@@ -34,6 +35,7 @@
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
+#include "cmUuid.h"
 #include "cmake.h"
 
 cmGlobalVisualStudioGenerator::cmGlobalVisualStudioGenerator(cmake* cm)
@@ -809,4 +811,98 @@ bool cmGlobalVisualStudioGenerator::Open(std::string const& bindir,
   sln = cmSystemTools::ConvertToOutputPath(sln);
 
   return std::async(std::launch::async, OpenSolution, sln).get();
+}
+
+std::string cmGlobalVisualStudioGenerator::ConvertToSolutionPath(
+  std::string const& path) const
+{
+  // Convert to backslashes.  Do not use ConvertToOutputPath because
+  // we will add quoting ourselves, and we know these projects always
+  // use windows slashes.
+  std::string d = path;
+  std::string::size_type pos = 0;
+  while ((pos = d.find('/', pos)) != std::string::npos) {
+    d[pos++] = '\\';
+  }
+  return d;
+}
+
+bool cmGlobalVisualStudioGenerator::IsDependedOn(
+  OrderedTargetDependSet const& projectTargets,
+  cmGeneratorTarget const* gtIn) const
+{
+  return std::any_of(projectTargets.begin(), projectTargets.end(),
+                     [this, gtIn](cmTargetDepend const& l) {
+                       TargetDependSet const& tgtdeps =
+                         this->GetTargetDirectDepends(l);
+                       return tgtdeps.count(gtIn);
+                     });
+}
+
+std::set<std::string> cmGlobalVisualStudioGenerator::IsPartOfDefaultBuild(
+  std::vector<std::string> const& configs,
+  OrderedTargetDependSet const& projectTargets,
+  cmGeneratorTarget const* target) const
+{
+  std::set<std::string> activeConfigs;
+  // if it is a utility target then only make it part of the
+  // default build if another target depends on it
+  int type = target->GetType();
+  if (type == cmStateEnums::GLOBAL_TARGET) {
+    std::vector<std::string> targetNames;
+    targetNames.push_back("INSTALL");
+    targetNames.push_back("PACKAGE");
+    for (std::string const& t : targetNames) {
+      // check if target <t> is part of default build
+      if (target->GetName() == t) {
+        std::string const propertyName =
+          cmStrCat("CMAKE_VS_INCLUDE_", t, "_TO_DEFAULT_BUILD");
+        // inspect CMAKE_VS_INCLUDE_<t>_TO_DEFAULT_BUILD properties
+        for (std::string const& i : configs) {
+          cmValue propertyValue =
+            target->Target->GetMakefile()->GetDefinition(propertyName);
+          if (propertyValue &&
+              cmIsOn(cmGeneratorExpression::Evaluate(
+                *propertyValue, target->GetLocalGenerator(), i))) {
+            activeConfigs.insert(i);
+          }
+        }
+      }
+    }
+    return activeConfigs;
+  }
+  if (type == cmStateEnums::UTILITY &&
+      !this->IsDependedOn(projectTargets, target)) {
+    return activeConfigs;
+  }
+  // inspect EXCLUDE_FROM_DEFAULT_BUILD[_<CONFIG>] properties
+  for (std::string const& i : configs) {
+    if (target->GetFeature("EXCLUDE_FROM_DEFAULT_BUILD", i).IsOff()) {
+      activeConfigs.insert(i);
+    }
+  }
+  return activeConfigs;
+}
+
+std::string cmGlobalVisualStudioGenerator::GetGUID(
+  std::string const& name) const
+{
+  std::string const& guidStoreName = cmStrCat(name, "_GUID_CMAKE");
+  if (cmValue storedGUID =
+        this->CMakeInstance->GetCacheDefinition(guidStoreName)) {
+    return *storedGUID;
+  }
+  // Compute a GUID that is deterministic but unique to the build tree.
+  std::string input =
+    cmStrCat(this->CMakeInstance->GetState()->GetBinaryDirectory(), '|', name);
+
+  cmUuid uuidGenerator;
+
+  std::vector<unsigned char> uuidNamespace;
+  uuidGenerator.StringToBinary("ee30c4be-5192-4fb0-b335-722a2dffe760",
+                               uuidNamespace);
+
+  std::string guid = uuidGenerator.FromMd5(uuidNamespace, input);
+
+  return cmSystemTools::UpperCase(guid);
 }

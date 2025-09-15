@@ -64,12 +64,10 @@ protected:
 
   bool AddCheckTarget();
 
-  /** Return true if the configuration needs to be deployed */
-  virtual bool NeedsDeploy(cmGeneratorTarget const& target,
-                           char const* config) const;
+  bool NeedsDeploy(cmGeneratorTarget const& target,
+                   char const* config) const override;
 
-  /** Returns true if the target system support debugging deployment. */
-  virtual bool TargetSystemSupportsDeployment() const;
+  bool TargetSystemSupportsDeployment() const override;
 
   static cmIDEFlagTable const* GetExtraFlagTableVS8();
   void WriteSolutionConfigurations(

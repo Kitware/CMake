@@ -159,6 +159,9 @@ public:
 
   bool IsVisualStudio() const override { return true; }
 
+  //! Lookup a stored GUID or compute one deterministically.
+  std::string GetGUID(std::string const& name) const;
+
 protected:
   cmGlobalVisualStudioGenerator(cmake* cm);
 
@@ -180,6 +183,23 @@ protected:
 
   std::string GeneratorPlatform;
   std::string DefaultPlatformName;
+
+  std::string ConvertToSolutionPath(std::string const& path) const;
+
+  /** Return true if the configuration needs to be deployed */
+  virtual bool NeedsDeploy(cmGeneratorTarget const& target,
+                           char const* config) const = 0;
+
+  /** Returns true if the target system support debugging deployment. */
+  virtual bool TargetSystemSupportsDeployment() const = 0;
+
+  std::set<std::string> IsPartOfDefaultBuild(
+    std::vector<std::string> const& configs,
+    OrderedTargetDependSet const& projectTargets,
+    cmGeneratorTarget const* target) const;
+  bool IsDependedOn(OrderedTargetDependSet const& projectTargets,
+                    cmGeneratorTarget const* target) const;
+  std::map<std::string, std::string> GUIDMap;
 
 private:
   virtual std::string GetVSMakeProgram() = 0;
