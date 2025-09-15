@@ -14,7 +14,7 @@ ExternalProject
 This module provides commands to download and build external projects as
 part of CMake build phase.
 
-Load this module in CMake with:
+Load this module in a CMake project with:
 
 .. code-block:: cmake
 
