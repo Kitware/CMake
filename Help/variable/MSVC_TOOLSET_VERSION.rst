@@ -24,6 +24,7 @@ Known toolset version numbers are:
   141   VS 2017 (15.0)
   142   VS 2019 (16.0)
   143   VS 2022 (17.0)
+  145   VS 2026 (18.0)
   ===== ==============
 
 Compiler versions newer than those known to CMake will be reported

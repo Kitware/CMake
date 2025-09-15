@@ -32,7 +32,7 @@ protected:
                     OrderedTargetDependSet const& orderedProjectTargets,
                     VSFolders const& vsFolders) const override;
   virtual void WriteSolutionConfigurations(
-    std::ostream& fout, std::vector<std::string> const& configs) const;
+    std::ostream& fout, std::vector<std::string> const& configs) const = 0;
   void WriteProject(std::ostream& fout, std::string const& name,
                     std::string const& path,
                     cmGeneratorTarget const* t) const override;

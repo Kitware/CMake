@@ -66,16 +66,6 @@ void cmGlobalVisualStudio71Generator::WriteSLNFile(
   this->WriteSLNFooter(fout);
 }
 
-void cmGlobalVisualStudio71Generator::WriteSolutionConfigurations(
-  std::ostream& fout, std::vector<std::string> const& configs) const
-{
-  fout << "\tGlobalSection(SolutionConfiguration) = preSolution\n";
-  for (std::string const& i : configs) {
-    fout << "\t\t" << i << " = " << i << '\n';
-  }
-  fout << "\tEndGlobalSection\n";
-}
-
 // Write a dsp file into the SLN file,
 // Note, that dependencies from executables to
 // the libraries it uses are also done here
