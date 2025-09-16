@@ -975,6 +975,7 @@ if(WIN32)
         cmVisualStudioWCEPlatformParser.cxx
         cmVSSetupHelper.cxx
         cmVSSetupHelper.h
+        cmVSVersion.h
       )
 
     # Add a manifest file to executables on Windows to allow for

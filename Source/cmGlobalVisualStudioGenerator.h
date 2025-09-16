@@ -14,6 +14,7 @@
 
 #include "cmGlobalGenerator.h"
 #include "cmTargetDepend.h"
+#include "cmVSVersion.h"
 #include "cmValue.h"
 
 class cmCustomCommand;
@@ -31,15 +32,7 @@ class cmake;
 class cmGlobalVisualStudioGenerator : public cmGlobalGenerator
 {
 public:
-  /** Known versions of Visual Studio.  */
-  enum class VSVersion : uint16_t
-  {
-    VS14 = 140,
-    VS15 = 150,
-    VS16 = 160,
-    VS17 = 170,
-    VS18 = 180,
-  };
+  using VSVersion = cm::VS::Version;
 
   ~cmGlobalVisualStudioGenerator() override;
 
