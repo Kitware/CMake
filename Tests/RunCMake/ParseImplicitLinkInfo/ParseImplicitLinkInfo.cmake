@@ -48,6 +48,8 @@ set(targets
   linux-Fortran-LFortran-0.35.0-gcc
   linux-Fortran-LFortran-0.41.0-clang
   linux-Fortran-LFortran-0.41.0-gcc
+  linux-Fortran-LFortran-0.55.0-clang
+  linux-Fortran-LFortran-0.55.0-gcc
   linux-custom_clang-C-Clang-13.0.0 linux-custom_clang-CXX-Clang-13.0.0
   mingw.org-C-GNU-4.9.3 mingw.org-CXX-GNU-4.9.3
   netbsd-C-GNU-4.8.5 netbsd-CXX-GNU-4.8.5
