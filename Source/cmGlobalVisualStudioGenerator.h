@@ -37,7 +37,8 @@ public:
     VS14 = 140,
     VS15 = 150,
     VS16 = 160,
-    VS17 = 170
+    VS17 = 170,
+    VS18 = 180,
   };
 
   ~cmGlobalVisualStudioGenerator() override;

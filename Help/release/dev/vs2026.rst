@@ -1,0 +1,6 @@
+vs2026
+------
+
+* The :generator:`Visual Studio 18 2026` generator was added.  This is
+  experimental and based on "Visual Studio 2026 Insiders" because this
+  version of VS has not been released.

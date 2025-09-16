@@ -100,6 +100,7 @@ Visual Studio Generators
    /generator/Visual Studio 15 2017
    /generator/Visual Studio 16 2019
    /generator/Visual Studio 17 2022
+   /generator/Visual Studio 18 2026
 
 Other Generators
 ^^^^^^^^^^^^^^^^
