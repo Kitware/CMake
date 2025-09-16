@@ -39,7 +39,7 @@
 #include "cmake.h"
 
 namespace {
-std::string GetSLNFile(cmLocalGenerator* root)
+std::string GetSLNFile(cmLocalGenerator const* root)
 {
   return cmStrCat(root->GetCurrentBinaryDirectory(), '/',
                   root->GetProjectName(), ".sln");
@@ -1099,7 +1099,7 @@ void cmGlobalVisualStudioGenerator::Generate()
 
   // Now write out the VS Solution files.
   for (auto& it : this->ProjectMap) {
-    this->OutputSLNFile(it.second[0], it.second);
+    this->GenerateSolution(it.second[0], it.second);
   }
 
   // If any solution or project files changed during the generation,
@@ -1131,8 +1131,9 @@ void cmGlobalVisualStudioGenerator::Generate()
   }
 }
 
-void cmGlobalVisualStudioGenerator::OutputSLNFile(
-  cmLocalGenerator* root, std::vector<cmLocalGenerator*>& generators)
+void cmGlobalVisualStudioGenerator::GenerateSolution(
+  cmLocalGenerator const* root,
+  std::vector<cmLocalGenerator*> const& generators)
 {
   if (generators.empty()) {
     return;
@@ -1149,16 +1150,11 @@ void cmGlobalVisualStudioGenerator::OutputSLNFile(
   if (!fout) {
     return;
   }
-  this->WriteSLNFile(fout, root, projectTargets);
+
+  cm::VS::Solution const solution = this->CreateSolution(root, projectTargets);
+  WriteSln(fout, solution);
+
   if (fout.Close()) {
     this->FileReplacedDuringGenerate(fname);
   }
-}
-
-void cmGlobalVisualStudioGenerator::WriteSLNFile(
-  std::ostream& fout, cmLocalGenerator* root,
-  TargetDependSet const& projectTargets) const
-{
-  cm::VS::Solution const solution = this->CreateSolution(root, projectTargets);
-  WriteSln(fout, solution);
 }

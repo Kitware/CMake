@@ -198,11 +198,8 @@ protected:
 
   void Generate() override;
 
-  void OutputSLNFile(cmLocalGenerator* root,
-                     std::vector<cmLocalGenerator*>& generators);
-
-  void WriteSLNFile(std::ostream& fout, cmLocalGenerator* root,
-                    TargetDependSet const& projectTargets) const;
+  void GenerateSolution(cmLocalGenerator const* root,
+                        std::vector<cmLocalGenerator*> const& generators);
 
 private:
   virtual std::string GetVSMakeProgram() = 0;
