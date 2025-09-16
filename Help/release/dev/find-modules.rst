@@ -43,6 +43,10 @@ Find Modules
 * The :module:`FindIcotool` module now provides a ``Icotool_VERSION`` result
   variable.  The ``ICOTOOL_VERSION_STRING`` result variable is deprecated.
 
+* The :module:`FindImageMagick` module now provides an ``ImageMagick_VERSION``
+  result variable.  The ``ImageMagick_VERSION_STRING`` result variable is
+  deprecated.
+
 * The :module:`FindJasper` module now provides a ``Jasper_VERSION`` result
   variable.  The ``JASPER_VERSION_STRING`` result variable is deprecated.
 
