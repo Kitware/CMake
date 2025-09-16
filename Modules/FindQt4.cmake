@@ -130,8 +130,9 @@ This module defines the following variables:
   Boolean indicating whether (the requested version of) Qt4 is found.
 
 ``QT_FOUND``
-  Boolean indicating whether (the requested version of) Qt4 has been found.
-  This variable is available for compatibility with other Qt find modules.
+  Same as ``Qt4_FOUND``.  Boolean indicating whether (the requested version
+  of) Qt4 is found.  This variable is available for compatibility with
+  other Qt find modules.
 
 ``QT_VERSION_MAJOR``
   The major version of Qt found.
