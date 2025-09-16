@@ -157,7 +157,7 @@ select a configuration):
 
 ``wxWidgets_EXCLUDE_COMMON_LIBRARIES``
   Set to TRUE to exclude linking of commonly required libs (e.g., png, tiff,
-  jpeg, zlib, regex, expat, scintilla, lexilla, etc.).
+  jpeg, zlib, webp, regex, expat, scintilla, lexilla, etc.).
 
 For Unix style this module uses the ``wx-config`` utility.  Selecting
 between debug/release, unicode/ansi, universal/non-universal, and
@@ -412,7 +412,8 @@ endif()
 #=====================================================================
 if(wxWidgets_FIND_STYLE STREQUAL "win32")
   # Useful common wx libs needed by almost all components.
-  set(wxWidgets_COMMON_LIBRARIES png tiff jpeg zlib regex expat)
+  set(wxWidgets_WEBP_LIBRARIES webp webpdemux sharpyuv)
+  set(wxWidgets_COMMON_LIBRARIES png tiff jpeg zlib ${wxWidgets_WEBP_LIBRARIES} regex expat)
 
   # Libraries needed by stc component
   set(wxWidgets_STC_LIBRARIES scintilla lexilla)
@@ -607,7 +608,30 @@ if(wxWidgets_FIND_STYLE STREQUAL "win32")
       list(APPEND wxWidgets_LIBRARIES imm32)
     endif()
 
-    list(APPEND wxWidgets_LIBRARIES gdiplus msimg32 winmm comctl32 uuid oleacc uxtheme rpcrt4 shlwapi version wsock32)
+    list(APPEND wxWidgets_LIBRARIES
+      kernel32
+      user32
+      gdi32
+      gdiplus
+      msimg32
+      comdlg32
+      winspool
+      winmm
+      shell32
+      shlwapi
+      comctl32
+      ole32
+      oleaut32
+      uuid
+      rpcrt4
+      advapi32
+      version
+      ws2_32
+      wininet
+      oleacc
+      uxtheme
+      wsock32
+    )
   endmacro()
 
   #-------------------------------------------------------------------
