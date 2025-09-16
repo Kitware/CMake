@@ -9,7 +9,7 @@
 
 #include <cm/optional>
 
-#include "cmGlobalVisualStudio71Generator.h"
+#include "cmGlobalVisualStudio7Generator.h"
 
 class cmGeneratorTarget;
 class cmMakefile;
@@ -21,7 +21,7 @@ struct cmIDEFlagTable;
  *
  * cmGlobalVisualStudio8Generator manages UNIX build process for a tree
  */
-class cmGlobalVisualStudio8Generator : public cmGlobalVisualStudio71Generator
+class cmGlobalVisualStudio8Generator : public cmGlobalVisualStudio7Generator
 {
 public:
   //! Get the name for the generator.

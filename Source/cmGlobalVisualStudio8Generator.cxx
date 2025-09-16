@@ -40,7 +40,7 @@ struct cmIDEFlagTable;
 
 cmGlobalVisualStudio8Generator::cmGlobalVisualStudio8Generator(
   cmake* cm, std::string const& name)
-  : cmGlobalVisualStudio71Generator(cm)
+  : cmGlobalVisualStudio7Generator(cm)
 {
   this->Name = name;
   this->ExtraFlagTable =
@@ -61,7 +61,7 @@ std::string cmGlobalVisualStudio8Generator::FindDevEnvCommand()
     return vsxcmd;
   }
   // Now look for devenv.
-  return this->cmGlobalVisualStudio71Generator::FindDevEnvCommand();
+  return this->cmGlobalVisualStudio7Generator::FindDevEnvCommand();
 }
 
 void cmGlobalVisualStudio8Generator::EnableLanguage(
