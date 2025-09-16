@@ -53,8 +53,6 @@ struct cmDocumentationEntry;
 #define FASTBUILD_OBJECTS_ALIAS_POSTFIX "-objects"
 // Alias to all the dependencies of the target.
 #define FASTBUILD_DEPS_ARTIFACTS_ALIAS_POSTFIX "-deps"
-// Alias to build the target.
-#define FASTBUILD_BUILD_ALIAS_POSTFIX "-build"
 #define FASTBUILD_PRE_BUILD_ALIAS_POSTFIX "-pre-build"
 #define FASTBUILD_PRE_LINK_ALIAS_POSTFIX "-pre-link"
 #define FASTBUILD_POST_BUILD_ALIAS_POSTFIX "-post-build"
@@ -66,8 +64,6 @@ struct cmDocumentationEntry;
 // Alias to byproducts produced by a custom command (since FASTBuild exec node
 // does not support more than 1 output).
 #define FASTBUILD_BYPRODUCTS_ALIAS_POSTFIX "-byproducts"
-// Alias to build & run all the custom commands.
-#define FASTBUILD_ALL_ALIAS_POSTFIX "-all"
 
 #define FASTBUILD_COMPILER_PREFIX "Compiler_"
 #define FASTBUILD_LAUNCHER_PREFIX "Launcher_"
@@ -81,6 +77,7 @@ struct cmDocumentationEntry;
 #define FASTBUILD_CLEAN_TARGET_NAME "clean"
 
 #define FASTBUILD_NOOP_FILE_NAME "fbuild_noop"
+#define FASTBUILD_CLEAN_FILE_NAME "fbuild_clean-out"
 
 #define FASTBUILD_BUILD_FILE "fbuild.bff"
 
@@ -90,23 +87,25 @@ struct cmDocumentationEntry;
 #  define FASTBUILD_SCRIPT_FILE_EXTENSION ".bat"
 #  define FASTBUILD_SCRIPT_FILE_ARG "/C "
 #  define FASTBUILD_SCRIPT_CD "cd /D "
+#  define FASTBUILD_CLEAN_SCRIPT_NAME "clean" FASTBUILD_SCRIPT_FILE_EXTENSION
 #else
 #  define FASTBUILD_SCRIPT_FILE_EXTENSION ".sh"
 #  define FASTBUILD_SCRIPT_FILE_ARG ""
 #  define FASTBUILD_SCRIPT_CD "cd "
+#  define FASTBUILD_CLEAN_SCRIPT_NAME "clean" FASTBUILD_SCRIPT_FILE_EXTENSION
 #endif
 
 enum class FastbuildTargetDepType
 {
-  ALL,
-  BUILD,
+  // Order-only dependency that is not going to appear in the generated file.
   ORDER_ONLY,
-  NONE,
+  // Regular target dep.
+  REGULAR,
 };
 struct FastbuildTargetDep
 {
   std::string Name;
-  FastbuildTargetDepType Type = FastbuildTargetDepType::NONE;
+  FastbuildTargetDepType Type = FastbuildTargetDepType::REGULAR;
   FastbuildTargetDep(std::string n)
     : Name(std::move(n))
   {
@@ -308,9 +307,6 @@ struct FastbuildTarget : public FastbuildTargetBase
   std::vector<FastbuildCopyNode> CopyNodes;
   FastbuildExecNodes PreLinkExecNodes;
   FastbuildExecNodes PostBuildExecNodes;
-  // Must be written after the build, but before custom commands, since post
-  // build commands need to depend on it.
-  FastbuildAliasNode BuildAlias;
   bool IsGlobal = false;
   bool ExcludeFromAll = false;
   bool AllowDistribution = true;
@@ -517,6 +513,7 @@ public:
   void WriteSolution();
   void WriteXCodeTopLevelProject();
   void WriteTargetRebuildBFF();
+  void WriteCleanScript();
   void WriteTargetClean();
 
   void AddTargetAll();

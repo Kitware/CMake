@@ -678,8 +678,6 @@ FastbuildExecNodes cmFastbuildTargetGenerator::GenerateCommands(
     }
 
     if (buildStep == FastbuildBuildStep::POST_BUILD) {
-      execNode.PreBuildDependencies.emplace(GetTargetName() +
-                                            FASTBUILD_BUILD_ALIAS_POSTFIX);
       // Execute POST_BUILD in order in which they are declared.
       // Tested in "complex" test.
       for (auto& exec : execs.Nodes) {

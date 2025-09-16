@@ -92,12 +92,6 @@ void FastbuildTarget::GenerateAliases()
       this->DependenciesAlias.PreBuildDependencies.emplace(dep);
     }
   }
-  // Build.
-  if (!this->LinkerNode.empty() &&
-      this->LinkerNode[0].Type != FastbuildLinkerNode::NONE) {
-    this->BuildAlias = generateAlias(this->Name, FASTBUILD_BUILD_ALIAS_POSTFIX,
-                                     this->LinkerNode);
-  }
 
   // PRE/POST/REST
   if (!this->PreBuildExecNodes.PreBuildDependencies.empty()) {
@@ -117,73 +111,21 @@ void FastbuildTarget::GenerateAliases()
     this->ExecNodes.Name = this->Name + FASTBUILD_CUSTOM_COMMAND_ALIAS_POSTFIX;
   }
 
-  // -all.
-  FastbuildAliasNode allAlias;
-  allAlias.Name = this->Name + FASTBUILD_ALL_ALIAS_POSTFIX;
-
-  auto const addToAll = [&allAlias](FastbuildAliasNode const& node) {
-    if (!node.PreBuildDependencies.empty()) {
-      allAlias.PreBuildDependencies.emplace(node.Name);
-    }
-  };
-  // Add "-pre" nodes first, so we wait for all generations when building
-  // "-all".
-  for (FastbuildAliasNode const& execs : {
-         PreBuildExecNodes,
-         PreLinkExecNodes.Alias,
-       }) {
-    addToAll(execs);
-  }
-
-  // -build.
-  addToAll(this->BuildAlias);
-  for (FastbuildAliasNode const& node : AliasNodes) {
-    addToAll(node);
-  }
-
-  for (FastbuildAliasNode const& execs : { ExecNodes }) {
-    addToAll(execs);
-  }
-
-  bool const hasStampExeProperty = !this->LinkerNode.empty() &&
-    (this->LinkerNode[0].Type == FastbuildLinkerNode::EXECUTABLE ||
-     this->LinkerNode[0].Type == FastbuildLinkerNode::SHARED_LIBRARY);
-  // If we have .LinkerStampExe - we will use it to execute POST_BUILD steps,
-  // so don't add them to "-all".
-  if (!hasStampExeProperty) {
-    addToAll(this->PostBuildExecNodes.Alias);
-  }
-
-  // Tested in "RunCMake.VerifyHeaderSets" test.
-  if (allAlias.PreBuildDependencies.empty()) {
-    addToAll(DependenciesAlias);
-  }
-
-  for (auto const& objectList : this->ObjectListNodes) {
-    allAlias.PreBuildDependencies.emplace(objectList.Name);
-  }
-
-  for (auto const& linkerNode : this->LinkerNode) {
-    allAlias.PreBuildDependencies.emplace(linkerNode.Name);
-  }
-
-  // Absolutely empty target. But we still should be able to "build" it.
-  if (allAlias.PreBuildDependencies.empty()) {
-    allAlias.PreBuildDependencies.emplace(FASTBUILD_NOOP_FILE_NAME);
-  }
-
-  AliasNodes.emplace_back(std::move(allAlias));
-  // In case we want to build the target by name, but we don't have any output.
-  // OR we have two arches and real output does not match target name (it can
-  // match if lipo produces such file).
-  // RunCMake.CMakePackage / RunCMake.XcFramework
-  if ((this->LinkerNode.size() > 1 && this->RealOutput != this->Name) ||
-      this->RealOutput.empty()) {
+  // If we don't have any node that we can build by name (e.g. no static /
+  // dynamic lib or executable) -> create an alias so that we can build this
+  // target by name.
+  if (LinkerNode.empty()) {
     FastbuildAliasNode alias;
     alias.Name = this->Name;
-    FastbuildTargetDep dep{ this->Name };
-    dep.Type = FastbuildTargetDepType::ALL;
-    alias.PreBuildDependencies = { std::move(dep) };
+    if (LinkerNode.empty()) {
+      for (FastbuildObjectListNode const& objListNode : ObjectListNodes) {
+        alias.PreBuildDependencies.emplace(objListNode.Name);
+      }
+    } else {
+      for (FastbuildLinkerNode const& linkerNode : LinkerNode) {
+        alias.PreBuildDependencies.emplace(linkerNode.Name);
+      }
+    }
     AliasNodes.emplace_back(std::move(alias));
   }
 
@@ -197,9 +139,9 @@ void FastbuildTarget::GenerateAliases()
     if (linkerNode.Type == FastbuildLinkerNode::SHARED_LIBRARY ||
         linkerNode.Type == FastbuildLinkerNode::STATIC_LIBRARY ||
         linkerNode.Type == FastbuildLinkerNode::EXECUTABLE) {
-      std::string name = FASTBUILD_LINK_ARTIFACTS_ALIAS_POSTFIX;
+      std::string postfix = FASTBUILD_LINK_ARTIFACTS_ALIAS_POSTFIX;
       if (!linkerNode.Arch.empty()) {
-        name += cmStrCat('-', linkerNode.Arch);
+        postfix += cmStrCat('-', linkerNode.Arch);
       }
 #ifdef _WIN32
       // On Windows DLL and Executables must be linked via Import Lib file
@@ -214,9 +156,10 @@ void FastbuildTarget::GenerateAliases()
         continue;
       }
 #endif
-      AliasNodes.emplace_back(
-        generateAlias(this->Name, name.c_str(),
-                      std::vector<FastbuildLinkerNode>{ linkerNode }));
+      FastbuildAliasNode alias;
+      alias.Name = this->Name + postfix;
+      alias.PreBuildDependencies.emplace(linkerNode.LinkerOutput);
+      AliasNodes.emplace_back(std::move(alias));
     }
   }
 }
@@ -714,14 +657,7 @@ struct WrapHelper
   }
   std::string operator()(FastbuildTargetDep const& in)
   {
-    std::string res = in.Name;
-    if (in.Type == FastbuildTargetDepType::ALL) {
-      res += FASTBUILD_ALL_ALIAS_POSTFIX;
-    } else if (in.Type == FastbuildTargetDepType::BUILD) {
-      res += FASTBUILD_BUILD_ALIAS_POSTFIX;
-    }
-
-    return (*this)(std::move(res));
+    return (*this)(in.Name);
   }
 };
 template <class T>
@@ -916,7 +852,9 @@ void cmGlobalFastbuildGenerator::WriteCompilers()
     if (compilerDef.DontUseEnv) {
       LogMessage("Not using system environment");
     } else {
-      WriteVariable("Environment", "." FASTBUILD_ENV_VAR_NAME, 1);
+      if (!LocalEnvironment.empty()) {
+        WriteVariable("Environment", "." FASTBUILD_ENV_VAR_NAME, 1);
+      }
     }
     if (!compilerDef.ExtraFiles.empty()) {
       // Do not escape '$' sign, CMAKE_${LANG}_FASTBUILD_EXTRA_FILES might
@@ -1196,7 +1134,9 @@ void cmGlobalFastbuildGenerator::WriteLinker(
     LinkerNode.Type == FastbuildLinkerNode::EXECUTABLE         ? "Executable"
       : LinkerNode.Type == FastbuildLinkerNode::SHARED_LIBRARY ? "DLL"
                                                                : "Library",
-    LinkerNode.Name != LinkerNode.LinkerOutput ? Quote(LinkerNode.Name) : "",
+    (!LinkerNode.Name.empty() && LinkerNode.Name != LinkerNode.LinkerOutput)
+      ? Quote(LinkerNode.Name)
+      : "",
     1);
   Indent(1);
   *BuildFileStream << "{\n";
@@ -1347,9 +1287,6 @@ void cmGlobalFastbuildGenerator::WriteTarget(FastbuildTarget const& target)
     }
   }
 
-  // -build.
-  this->WriteAlias(target.BuildAlias);
-
   if (!target.PostBuildExecNodes.Nodes.empty()) {
     for (auto const& exec : target.PostBuildExecNodes.Nodes) {
       this->WriteExec(exec);
@@ -1365,11 +1302,12 @@ void cmGlobalFastbuildGenerator::WriteTarget(FastbuildTarget const& target)
 void cmGlobalFastbuildGenerator::WriteIDEProjects()
 {
   for (auto const& proj : IDEProjects) {
+    (void)proj;
     // VS
+#if defined(_WIN32)
     auto const& VSProj = proj.second.first;
     WriteCommand("VCXProject", Quote(VSProj.Alias));
     *this->BuildFileStream << "{\n";
-
     WriteVariable("ProjectOutput", Quote(VSProj.ProjectOutput), 1);
     WriteIDEProjectConfig(VSProj.ProjectConfigs);
     WriteVSBuildCommands();
@@ -1377,22 +1315,21 @@ void cmGlobalFastbuildGenerator::WriteIDEProjects()
     *this->BuildFileStream << "}\n\n";
 
     // XCode
-    // On Windows Xcode project's nested paths can become too long.
-#if !defined(_WIN32)
+#elif defined(__APPLE__)
     auto const& XCodeProj = proj.second.second;
     WriteCommand("XCodeProject", Quote(XCodeProj.Alias), 0);
     *this->BuildFileStream << "{\n";
     WriteVariable("ProjectOutput", Quote(XCodeProj.ProjectOutput), 1);
     WriteIDEProjectConfig(XCodeProj.ProjectConfigs);
     WriteXCodeBuildCommands();
-
     WriteIDEProjectCommon(XCodeProj);
     *this->BuildFileStream << "}\n\n";
 #endif
   }
 
+#if defined(_WIN32)
   this->WriteSolution();
-#if !defined(_WIN32)
+#elif defined(__APPLE__)
   this->WriteXCodeTopLevelProject();
 #endif
 }
@@ -1459,18 +1396,12 @@ void cmGlobalFastbuildGenerator::AddTargetAll()
   FastbuildAliasNode allAliasNode;
   allAliasNode.Name = FASTBUILD_ALL_TARGET_NAME;
 
-  FastbuildTarget allTarget;
-  allTarget.Name = allTarget.Name = FASTBUILD_ALL_TARGET_NAME;
-  allTarget.IsGlobal = true;
-
   for (auto const& targetBase : FastbuildTargets) {
     if (targetBase->Type == FastbuildTargetType::LINK) {
       auto const& target = static_cast<FastbuildTarget const&>(*targetBase);
       // Add non-global and non-excluded targets to "all"
       if (!target.IsGlobal && !target.ExcludeFromAll) {
-        allAliasNode.PreBuildDependencies.emplace(target.Name +
-                                                  FASTBUILD_ALL_ALIAS_POSTFIX);
-        allTarget.PreBuildDependencies.emplace(target.Name);
+        allAliasNode.PreBuildDependencies.emplace(target.Name);
       }
     } else if (targetBase->Type == FastbuildTargetType::ALIAS) {
       auto const& target = static_cast<FastbuildAliasNode const&>(*targetBase);
@@ -1482,8 +1413,7 @@ void cmGlobalFastbuildGenerator::AddTargetAll()
   if (allAliasNode.PreBuildDependencies.empty()) {
     allAliasNode.PreBuildDependencies.emplace(FASTBUILD_NOOP_FILE_NAME);
   }
-  allTarget.AliasNodes.emplace_back(std::move(allAliasNode));
-  this->AddTarget(std::move(allTarget));
+  this->AddTarget(std::move(allAliasNode));
 }
 
 void cmGlobalFastbuildGenerator::AddGlobCheckExec()
@@ -1639,63 +1569,47 @@ void cmGlobalFastbuildGenerator::WriteTargetRebuildBFF()
   this->WriteExec(rebuildBFF, 0);
 }
 
+void cmGlobalFastbuildGenerator::WriteCleanScript()
+{
+  std::string const path =
+    cmStrCat(this->GetCMakeInstance()->GetHomeOutputDirectory(), '/',
+             FASTBUILD_CLEAN_SCRIPT_NAME);
+  cmsys::ofstream scriptFile(path.c_str(), std::ios::out | std::ios::binary);
+  if (!scriptFile.is_open()) {
+    cmSystemTools::Error("Failed to open: " FASTBUILD_CLEAN_SCRIPT_NAME);
+    return;
+  }
+  for (std::string const& file : AllFilesToClean) {
+#if defined(_WIN32)
+    scriptFile << "del /f /q "
+               << cmSystemTools::ConvertToWindowsOutputPath(file) << "\n";
+#else
+    scriptFile << "rm -f " << file << '\n';
+#endif
+  }
+}
+
 void cmGlobalFastbuildGenerator::WriteTargetClean()
 {
-  WriteCommand("RemoveDir", Quote(FASTBUILD_CLEAN_TARGET_NAME));
-  *BuildFileStream << "{\n";
-
-  WriteVariable("RemoveDirs", "false", 1);
-  WriteVariable("RemovePathsRecurse", "false", 1);
-
-  std::vector<std::string> removePatterns{
-    "*" FASTBUILD_DUMMY_OUTPUT_EXTENSION
-  };
-  std::vector<std::string> langs;
-  this->GetEnabledLanguages(langs);
-  for (auto const& lang : langs) {
-    auto const extension = this->GetSafeGlobalSetting(
-      cmStrCat("CMAKE_", lang, "_OUTPUT_EXTENSION"));
-    if (!extension.empty() &&
-        std::find(removePatterns.begin(), removePatterns.end(),
-                  '*' + extension) == removePatterns.end()) {
-      removePatterns.emplace_back('*' + extension);
-    }
+  if (AllFilesToClean.empty()) {
+    FastbuildAliasNode clean;
+    clean.Name = FASTBUILD_CLEAN_TARGET_NAME;
+    clean.PreBuildDependencies.emplace(FASTBUILD_CLEAN_FILE_NAME);
+    WriteAlias(clean, 0);
+    return;
   }
-  auto const PchExtension = this->GetSafeGlobalSetting("CMAKE_PCH_EXTENSION");
-  if (!PchExtension.empty()) {
-    removePatterns.emplace_back('*' + PchExtension);
-  }
-  auto const buildDir = this->GetCMakeInstance()->GetHomeOutputDirectory();
-  if (!AllFilesToClean.empty()) {
-    for (auto const& file : AllFilesToClean) {
-      auto const path = cmSystemTools::GetFilenamePath(file);
-      // Since we don't recurse (to not delete unrelated .obj), need to add
-      // full path to the file.
-      // Tested in "ExternalOBJ" test.
-      if (!path.empty()) {
-        AllFoldersToClean.emplace(cmStrCat(buildDir, '/', path));
-      }
-      removePatterns.emplace_back('*' + cmSystemTools::GetFilenameName(file));
-    }
-  }
-
-  WriteArray("RemovePatterns", Wrap(removePatterns), 1);
-
-  std::vector<std::string> tmp;
-
-  std::move(AllFilesToKeep.begin(), AllFilesToKeep.end(),
-            std::back_inserter(tmp));
-  if (!tmp.empty()) {
-    WriteArray("RemoveExcludeFiles", Wrap(tmp), 1);
-    tmp.clear();
-  }
-
-  tmp.emplace_back(buildDir);
-  std::move(AllFoldersToClean.begin(), AllFoldersToClean.end(),
-            std::back_inserter(tmp));
-  WriteArray("RemovePaths", Wrap(tmp), 1);
-
-  *BuildFileStream << "}\n";
+  WriteCleanScript();
+  FastbuildExecNode clean;
+  clean.Name = FASTBUILD_CLEAN_TARGET_NAME;
+  clean.ExecExecutable = GetExternalShellExecutable();
+  clean.ExecArguments =
+    FASTBUILD_SCRIPT_FILE_ARG FASTBUILD_1_INPUT_PLACEHOLDER;
+  clean.ExecInput = { FASTBUILD_CLEAN_SCRIPT_NAME };
+  clean.ExecAlways = true;
+  clean.ExecUseStdOutAsOutput = true;
+  clean.ExecOutput = FASTBUILD_CLEAN_FILE_NAME;
+  clean.ExecWorkingDir = this->GetCMakeInstance()->GetHomeOutputDirectory();
+  WriteExec(clean, 0);
 }
 
 void cmGlobalFastbuildGenerator::WriteTargets()
@@ -1707,6 +1621,9 @@ void cmGlobalFastbuildGenerator::WriteTargets()
   // "RunCMake.CMakePresetsPackage" test suite.
   cmSystemTools::Touch(cmStrCat(this->CMakeInstance->GetHomeOutputDirectory(),
                                 '/', FASTBUILD_NOOP_FILE_NAME),
+                       true);
+  cmSystemTools::Touch(cmStrCat(this->CMakeInstance->GetHomeOutputDirectory(),
+                                '/', FASTBUILD_CLEAN_FILE_NAME),
                        true);
   // Add "all" utility target before sorting, so we can correctly sort
   // targets that depend on it
@@ -1724,11 +1641,6 @@ void cmGlobalFastbuildGenerator::WriteTargets()
       this->WriteExec(static_cast<FastbuildExecNode const&>(*targetBase));
     } else if (targetBase->Type == FastbuildTargetType::ALIAS) {
       this->WriteAlias(static_cast<FastbuildAliasNode const&>(*targetBase));
-      // CustomCommandByproducts test.
-      FastbuildAliasNode alias;
-      alias.Name = targetBase->Name + FASTBUILD_ALL_ALIAS_POSTFIX;
-      alias.PreBuildDependencies.emplace(targetBase->Name);
-      this->WriteAlias(alias);
     } else if (targetBase->Type == FastbuildTargetType::LINK) {
       auto const& target = static_cast<FastbuildTarget const&>(*targetBase);
       this->WriteTarget(target);

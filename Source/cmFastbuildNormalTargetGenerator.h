@@ -113,6 +113,7 @@ private:
   std::vector<FastbuildExecNode> GetSymlinkExecs() const;
   void ProcessManifests(FastbuildLinkerNode& linkerNode) const;
   void AddStampExeIfApplicable(FastbuildTarget& fastbuildTarget) const;
+  void ProcessPostBuildForStaticLib(FastbuildTarget& fastbuildTarget) const;
   void CollapseAllExecsIntoOneScriptfile(
     std::string const& scriptFileName,
     std::vector<FastbuildExecNode> const& execs) const;
