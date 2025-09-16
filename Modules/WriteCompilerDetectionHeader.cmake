@@ -831,14 +831,13 @@ template<> struct ${prefix_arg}StaticAssert<true>{};
     foreach(compiler ${_WCD_COMPILERS})
       foreach(_lang ${_langs})
         if(compiler_file_content_${compiler}_${_lang})
-          set(CMAKE_CONFIGURABLE_FILE_CONTENT "${compiler_file_content_}")
-          string(APPEND CMAKE_CONFIGURABLE_FILE_CONTENT "${compiler_file_content_${compiler}_${_lang}}")
-
           set(compile_file_name "${_WCD_OUTPUT_DIR}${prefix_arg}_COMPILER_INFO_${compiler}_${_lang}.h")
           set(full_path "${main_file_dir}/${compile_file_name}")
           list(APPEND ${_WCD_OUTPUT_FILES_VAR} ${full_path})
-          configure_file("${CMAKE_ROOT}/Modules/CMakeConfigurableFile.in"
-            "${full_path}"
+          file(
+            CONFIGURE
+            OUTPUT "${full_path}"
+            CONTENT "${compiler_file_content_}${compiler_file_content_${compiler}_${_lang}}\n"
             @ONLY
           )
         endif()
@@ -852,9 +851,5 @@ template<> struct ${prefix_arg}StaticAssert<true>{};
   endif()
   string(APPEND file_content "\n#endif")
 
-  set(CMAKE_CONFIGURABLE_FILE_CONTENT ${file_content})
-  configure_file("${CMAKE_ROOT}/Modules/CMakeConfigurableFile.in"
-    "${file_arg}"
-    @ONLY
-  )
+  file(CONFIGURE OUTPUT "${file_arg}" CONTENT "${file_content}\n" @ONLY)
 endfunction()
