@@ -10,7 +10,7 @@ default values depend on specified conditions or other options.  This helps
 maintain a clean configuration interface by only displaying options that are
 relevant to the current settings.
 
-Load this module in a CMake project with:
+Load this module in CMake with:
 
 .. code-block:: cmake
 
@@ -81,6 +81,9 @@ This module provides the following command:
   ``<else-value>``
     The value assigned to a local variable named ``<variable>``, when
     ``<condition>`` evaluates to boolean false.
+
+  In CMake project mode, boolean cache variables are created as explained
+  above.  In CMake script mode, boolean variables are set instead.
 
 Examples
 ^^^^^^^^
