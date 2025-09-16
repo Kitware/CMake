@@ -2,6 +2,8 @@ set(CMAKE_INTERMEDIATE_DIR_STRATEGY FULL CACHE STRING "" FORCE)
 
 enable_language(C)
 
+cmake_policy(SET CMP0203 NEW)
+
 set(CMAKE_AIX_SHARED_LIBRARY_ARCHIVE 0)
 
 include("${CMAKE_CURRENT_LIST_DIR}/include_test.cmake")

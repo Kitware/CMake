@@ -768,6 +768,8 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(
   if (std::string const* exportMacro = target->GetExportMacro()) {
     targetOptions.AddDefine(*exportMacro);
   }
+  // No need to add the SharedLibraryCompileDefs define here:
+  // it is added by VisualStudio itself
 
   // The intermediate directory name consists of a directory for the
   // target and a subdirectory for the configuration name.

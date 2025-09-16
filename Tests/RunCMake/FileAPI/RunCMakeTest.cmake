@@ -112,6 +112,7 @@ function(check_python case prefix)
       --build-dir "${RunCMake_TEST_BINARY_DIR}"
       --reply-index "${index}"
       --cxx-compiler-id "${CMAKE_CXX_COMPILER_ID}"
+      --cxx-simulate-id "${CMAKE_CXX_SIMULATE_ID}"
     RESULT_VARIABLE result
     OUTPUT_VARIABLE output
     ERROR_VARIABLE output

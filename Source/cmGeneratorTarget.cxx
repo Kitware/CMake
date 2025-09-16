@@ -1844,6 +1844,36 @@ std::string const* cmGeneratorTarget::GetExportMacro() const
   return nullptr;
 }
 
+cmList const& cmGeneratorTarget::GetSharedLibraryCompileDefs(
+  std::string const& config) const
+{
+  {
+    auto it = this->SharedLibraryCompileDefs.find(config);
+    if (it != this->SharedLibraryCompileDefs.end()) {
+      return it->second;
+    }
+  }
+
+  auto emplaceResult =
+    this->SharedLibraryCompileDefs.emplace(config, cmList{});
+  auto& defs = emplaceResult.first->second;
+  if (this->GetType() != cmStateEnums::SHARED_LIBRARY &&
+      this->GetType() != cmStateEnums::MODULE_LIBRARY) {
+    return defs;
+  }
+
+  if (this->GetPolicyStatusCMP0203() != cmPolicies::NEW) {
+    return defs;
+  }
+
+  auto linkerLang = this->GetLinkerLanguage(config);
+  auto definitionVar =
+    cmStrCat("CMAKE_", linkerLang, "_SHARED_LIBRARY_COMPILE_DEFINITIONS");
+  defs = this->Makefile->GetSafeDefinition(definitionVar);
+
+  return defs;
+}
+
 cmGeneratorTarget::NameComponents const&
 cmGeneratorTarget::GetFullNameComponents(
   std::string const& config, cmStateEnums::ArtifactType artifact) const

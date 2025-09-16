@@ -941,6 +941,18 @@ def gen_check_build_system_targets(c, g, inSource):
                 e["sources"] = precompile_header_data["sources"]
                 e["sourceGroups"] = precompile_header_data["sourceGroups"]
 
+    if args.cxx_compiler_id != 'MSVC' and args.cxx_simulate_id != 'MSVC':
+        for e in expected:
+            if not e["compileGroups"]:
+                continue
+
+            for group in e["compileGroups"]:
+                if not group["defines"]:
+                    continue
+
+                # _WINDLL is expected for compilers targeting the MSVC ABI, but not for others.
+                group["defines"] = [d for d in group["defines"] if d and d["define"] != "_WINDLL"]
+
     if os.path.exists(os.path.join(reply_dir, "..", "..", "..", "..", "cxx", "cxx_std_11.txt")):
         for e in expected:
             if e["name"] == "cxx_standard_compile_feature_exe":

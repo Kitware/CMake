@@ -2604,6 +2604,10 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
     // Add the export symbol definition for shared library objects.
     this->AppendDefines(ppDefs, exportMacro->c_str());
   }
+  for (auto const& sharedLibCompileDef :
+       gtgt->GetSharedLibraryCompileDefs(configName)) {
+    this->AppendDefines(ppDefs, sharedLibCompileDef.c_str());
+  }
   std::vector<std::string> targetDefines;
   if (!langForPreprocessorDefinitions.empty()) {
     gtgt->GetCompileDefinitions(targetDefines, configName,
