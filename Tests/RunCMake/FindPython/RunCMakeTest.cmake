@@ -322,6 +322,7 @@ if(CMake_TEST_FindPython_Various)
     run_python(ArtifactsInteractive VARIANT "OFF"
                                     OPTIONS -DCMake_TEST_FindPython3_NumPy=${CMake_TEST_FindPython3_NumPy}
                                             -DPython3_ARTIFACTS_INTERACTIVE=OFF)
+    run_python(Android OPTIONS "-DCMAKE_TOOLCHAIN_FILE=${RunCMake_SOURCE_DIR}/android_toolchain.cmake")
   endif()
 
   if(CMake_TEST_FindPython2 OR CMake_TEST_FindPython3)
