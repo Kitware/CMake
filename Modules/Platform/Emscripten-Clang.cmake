@@ -15,9 +15,10 @@ macro(__emscripten_clang lang)
   get_property(_TARGET_SUPPORTS_SHARED_LIBS GLOBAL PROPERTY TARGET_SUPPORTS_SHARED_LIBS)
   if(_TARGET_SUPPORTS_SHARED_LIBS)
     # Emscripten requires '-sMAIN_MODULE' and '-sSIDE_MODULE' to distinguish
-    # linking executables from linking shared libraries.
+    # linking executables from linking shared libraries.  Place them early
+    # so that project-specified link flags can override them.
     set(CMAKE_${lang}_LINK_EXECUTABLE
-      "<CMAKE_${lang}_COMPILER> <FLAGS> <LINK_FLAGS> <OBJECTS> -o <TARGET> <LINK_LIBRARIES> -sMAIN_MODULE")
+      "<CMAKE_${lang}_COMPILER> -sMAIN_MODULE <FLAGS> <LINK_FLAGS> <OBJECTS> -o <TARGET> <LINK_LIBRARIES>")
     set(CMAKE_SHARED_LIBRARY_CREATE_${lang}_FLAGS "-sSIDE_MODULE")
   else()
     # Emscripten provides a combined toolchain file and platform module that
