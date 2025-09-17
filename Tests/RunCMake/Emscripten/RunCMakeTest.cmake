@@ -63,6 +63,11 @@ foreach(_emscripten_toolchain IN LISTS _emscripten_toolchains)
     -DCMAKE_C_COMPILER=${c_comp}
   )
 
+  run_toolchain(C-lib-circular
+    -DCMAKE_SYSTEM_NAME=Emscripten
+    -DCMAKE_C_COMPILER=${c_comp}
+  )
+
   run_cmake_with_options(C-WHOLE_ARCHIVE
     -DCMAKE_SYSTEM_NAME=Emscripten
     -DCMAKE_C_COMPILER=${c_comp}
