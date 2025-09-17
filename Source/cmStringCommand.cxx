@@ -47,6 +47,8 @@ bool RegexMatchAll(std::vector<std::string> const& args,
                    cmExecutionStatus& status);
 bool RegexReplace(std::vector<std::string> const& args,
                   cmExecutionStatus& status);
+bool RegexQuote(std::vector<std::string> const& args,
+                cmExecutionStatus& status);
 
 bool joinImpl(std::vector<std::string> const& args, std::string const& glue,
               size_t varIdx, cmMakefile& makefile);
@@ -218,6 +220,14 @@ bool HandleRegexCommand(std::vector<std::string> const& args,
     }
     return RegexReplace(args, status);
   }
+  if (mode == "QUOTE") {
+    if (args.size() < 4) {
+      status.SetError("sub-command REGEX, mode QUOTE needs "
+                      "at least 4 arguments total to command.");
+      return false;
+    }
+    return RegexQuote(args, status);
+  }
 
   std::string e = "sub-command REGEX does not recognize mode " + mode;
   status.SetError(e);
@@ -348,6 +358,28 @@ bool RegexReplace(std::vector<std::string> const& args,
   if (!replaceHelper.Replace(input, output)) {
     status.SetError(
       "sub-command REGEX, mode REPLACE: " + replaceHelper.GetError() + ".");
+    return false;
+  }
+
+  // Store the output in the provided variable.
+  status.GetMakefile().AddDefinition(outvar, output);
+  return true;
+}
+
+bool RegexQuote(std::vector<std::string> const& args,
+                cmExecutionStatus& status)
+{
+  //"STRING(REGEX QUOTE <output variable> <input> [<input>...]\n"
+  std::string const& outvar = args[2];
+  std::string const input =
+    cmJoin(cmMakeRange(args).advance(3), std::string());
+  std::string output;
+
+  // Escape all regex special characters
+  cmStringReplaceHelper replaceHelper("([][()+*^.$?|\\\\])", R"(\\\1)");
+  if (!replaceHelper.Replace(input, output)) {
+    status.SetError(
+      "sub-command REGEX, mode QUOTE: " + replaceHelper.GetError() + ".");
     return false;
   }
 

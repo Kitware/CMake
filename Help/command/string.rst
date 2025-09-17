@@ -27,6 +27,7 @@ Synopsis
     string(`STRIP`_ <string> <out-var>)
     string(`GENEX_STRIP`_ <string> <out-var>)
     string(`REPEAT`_ <string> <count> <out-var>)
+    string(`REGEX QUOTE`_ <out-var> <input>...)
 
   `Comparison`_
     string(`COMPARE`_ <op> <string1> <string2> <out-var>)
@@ -289,6 +290,16 @@ Manipulation
 
   Produce the output string as the input ``<string>``
   repeated ``<count>`` times.
+
+.. signature::
+  string(REGEX QUOTE <out-var> <input>...)
+
+  .. versionadded:: 4.2
+
+  Store in an ``<out-var>`` a regular expression matching the ``<input>``.
+  All characters that have special meaning in a regular expressions are
+  escaped, such that the output string can be used as part of a regular
+  expression to match the input literally.
 
 Comparison
 ^^^^^^^^^^
