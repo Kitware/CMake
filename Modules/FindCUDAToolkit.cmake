@@ -663,22 +663,22 @@ else()
             PATHS ${possible_nvcc_path}
           )
         endif()
-      endif()
+      else()
+        if(NOT CUDAToolkit_SENTINEL_FILE)
+          find_program(CUDAToolkit_NVCC_EXECUTABLE
+            NAMES nvcc nvcc.exe
+            PATHS ${arg_SEARCH_PATHS}
+            ${arg_FIND_FLAGS}
+          )
+        endif()
 
-      if(NOT CUDAToolkit_SENTINEL_FILE)
-        find_program(CUDAToolkit_NVCC_EXECUTABLE
-          NAMES nvcc nvcc.exe
-          PATHS ${arg_SEARCH_PATHS}
-          ${arg_FIND_FLAGS}
-        )
-      endif()
-
-      if(NOT CUDAToolkit_NVCC_EXECUTABLE)
-        find_file(CUDAToolkit_SENTINEL_FILE
-          NAMES version.txt version.json
-          PATHS ${arg_SEARCH_PATHS}
-          NO_DEFAULT_PATH
-        )
+        if(NOT CUDAToolkit_NVCC_EXECUTABLE)
+          find_file(CUDAToolkit_SENTINEL_FILE
+            NAMES version.txt version.json
+            PATHS ${arg_SEARCH_PATHS}
+            NO_DEFAULT_PATH
+          )
+        endif()
       endif()
 
       if(EXISTS "${CUDAToolkit_NVCC_EXECUTABLE}")
@@ -819,11 +819,21 @@ else()
     mark_as_advanced(CUDAToolkit_BIN_DIR)
   endif()
 
+  # Try `CMAKE_CUDA_COMPILER` and `ENV{CUDACXX}`
+  if(NOT CUDAToolkit_ROOT_DIR)
+    _CUDAToolkit_find_root_dir(COMPILER_PATHS)
+  endif()
+
   # Try user provided path
-  _CUDAToolkit_find_root_dir(COMPILER_PATHS)
-  if(NOT CUDAToolkit_ROOT_DIR AND CUDAToolkit_ROOT)
+  if(NOT CUDAToolkit_ROOT_DIR AND DEFINED CUDAToolkit_ROOT)
     _CUDAToolkit_find_root_dir(SEARCH_PATHS "${CUDAToolkit_ROOT}" FIND_FLAGS PATH_SUFFIXES bin NO_DEFAULT_PATH)
   endif()
+
+  if(NOT CUDAToolkit_ROOT_DIR AND DEFINED ENV{CUDAToolkit_ROOT})
+    _CUDAToolkit_find_root_dir(SEARCH_PATHS "$ENV{CUDAToolkit_ROOT}" FIND_FLAGS PATH_SUFFIXES bin NO_DEFAULT_PATH)
+  endif()
+
+  # Try users PATH, and CUDA_PATH env variable
   if(NOT CUDAToolkit_ROOT_DIR)
     _CUDAToolkit_find_root_dir(FIND_FLAGS PATHS ENV CUDA_PATH PATH_SUFFIXES bin)
   endif()
