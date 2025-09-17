@@ -94,10 +94,7 @@ public:
   std::string const& GetPlatformToolsetCudaVSIntegrationSubdirString() const;
 
   /** The fortran toolset name.  */
-  cm::optional<std::string> GetPlatformToolsetFortran() const override
-  {
-    return this->GeneratorToolsetFortran;
-  }
+  cm::optional<std::string> GetPlatformToolsetFortran() const override;
 
   /** Return whether we need to use No/Debug instead of false/true
       for GenerateDebugInformation.  */
@@ -236,6 +233,7 @@ protected:
   std::string GeneratorToolsetCudaNvccSubdir;
   std::string GeneratorToolsetCudaVSIntegrationSubdir;
   cm::optional<std::string> GeneratorToolsetFortran;
+  cm::optional<std::string> DefaultToolsetFortran;
   std::string DefaultPlatformToolset;
   std::string DefaultPlatformToolsetHostArchitecture;
   std::string DefaultAndroidToolset;

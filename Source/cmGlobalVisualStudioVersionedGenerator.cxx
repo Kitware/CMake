@@ -513,6 +513,9 @@ cmGlobalVisualStudioVersionedGenerator::cmGlobalVisualStudioVersionedGenerator(
     // Use a version installed by VS 2022 without a separate component.
     this->DefaultTargetFrameworkVersion = "v4.7.2";
   }
+  if (this->Version >= cmGlobalVisualStudioGenerator::VSVersion::VS18) {
+    this->DefaultToolsetFortran = "ifx";
+  }
 }
 
 bool cmGlobalVisualStudioVersionedGenerator::MatchesGeneratorName(

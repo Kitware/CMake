@@ -797,6 +797,15 @@ std::string const& cmGlobalVisualStudio10Generator::
   return this->GeneratorToolsetCudaVSIntegrationSubdir;
 }
 
+cm::optional<std::string>
+cmGlobalVisualStudio10Generator::GetPlatformToolsetFortran() const
+{
+  if (this->GeneratorToolsetFortran) {
+    return this->GeneratorToolsetFortran;
+  }
+  return this->DefaultToolsetFortran;
+}
+
 cmGlobalVisualStudio10Generator::AuxToolset
 cmGlobalVisualStudio10Generator::FindAuxToolset(std::string&,
                                                 std::string&) const
