@@ -20,6 +20,7 @@ set(targets
   darwin-C-AppleClang-8.0.0.8000042 darwin-CXX-AppleClang-8.0.0.8000042
     darwin_nostdinc-C-AppleClang-8.0.0.8000042
     darwin_nostdinc-CXX-AppleClang-8.0.0.8000042
+  emscripten-C-Clang-21.0.0 emscripten-CXX-Clang-21.0.0
   freebsd-C-Clang-3.3.0 freebsd-CXX-Clang-3.3.0 freebsd-Fortran-GNU-4.6.4
   hand-C-empty hand-CXX-empty
   hand-C-relative hand-CXX-relative
