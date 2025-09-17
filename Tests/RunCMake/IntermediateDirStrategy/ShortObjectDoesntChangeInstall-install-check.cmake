@@ -1,0 +1,11 @@
+set(subdir "subdir/")
+set(ext_suffix ".c")
+if (RunCMake_GENERATOR MATCHES "(Visual Studio|Xcode)")
+  set(ext_suffix "")
+  set(subdir "")
+endif ()
+set(path "${RunCMake_TEST_BINARY_DIR}/real_install/lib/objlib/objects-Debug/objlib/${subdir}obj${ext_suffix}${CMAKE_C_OUTPUT_EXTENSION}")
+if (NOT EXISTS "${path}")
+  list(APPEND RunCMake_TEST_FAILED
+    "Expected install object '${path}' does not exist")
+endif ()
