@@ -57,6 +57,12 @@ foreach(_emscripten_toolchain IN LISTS _emscripten_toolchains)
     -DCMAKE_C_COMPILER=${c_comp}
   )
 
+  # Create a shared library and executable from .c sources.
+  run_toolchain(C-lib-shared
+    -DCMAKE_SYSTEM_NAME=Emscripten
+    -DCMAKE_C_COMPILER=${c_comp}
+  )
+
   run_cmake_with_options(C-WHOLE_ARCHIVE
     -DCMAKE_SYSTEM_NAME=Emscripten
     -DCMAKE_C_COMPILER=${c_comp}
