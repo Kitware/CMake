@@ -1064,19 +1064,22 @@ cm::VS::Solution cmGlobalVisualStudioGenerator::CreateSolution(
     }
   }
 
-  if (!pgExtensibilityGlobals) {
-    pgExtensibilityGlobals =
-      solution.GetPropertyGroup("ExtensibilityGlobals"_s);
-    solution.PropertyGroups.emplace_back(pgExtensibilityGlobals);
-  }
-  std::string const solutionGuid =
-    this->GetGUID(cmStrCat(root->GetProjectName(), ".sln"));
-  pgExtensibilityGlobals->Map.emplace("SolutionGuid",
-                                      cmStrCat('{', solutionGuid, '}'));
+  if (this->Version <= cm::VS::Version::VS17) {
+    if (!pgExtensibilityGlobals) {
+      pgExtensibilityGlobals =
+        solution.GetPropertyGroup("ExtensibilityGlobals"_s);
+      solution.PropertyGroups.emplace_back(pgExtensibilityGlobals);
+    }
+    std::string const solutionGuid =
+      this->GetGUID(cmStrCat(root->GetProjectName(), ".sln"));
+    pgExtensibilityGlobals->Map.emplace("SolutionGuid",
+                                        cmStrCat('{', solutionGuid, '}'));
 
-  if (!pgExtensibilityAddIns) {
-    pgExtensibilityAddIns = solution.GetPropertyGroup("ExtensibilityAddIns"_s);
-    solution.PropertyGroups.emplace_back(pgExtensibilityAddIns);
+    if (!pgExtensibilityAddIns) {
+      pgExtensibilityAddIns =
+        solution.GetPropertyGroup("ExtensibilityAddIns"_s);
+      solution.PropertyGroups.emplace_back(pgExtensibilityAddIns);
+    }
   }
 
   solution.CanonicalizeOrder();
@@ -1099,6 +1102,9 @@ std::string cmGlobalVisualStudioGenerator::GetSLNFile(
     slnFile.push_back('/');
   }
   slnFile = cmStrCat(slnFile, projectName, ".sln");
+  if (this->Version >= cm::VS::Version::VS18) {
+    slnFile += "x";
+  }
   return slnFile;
 }
 
@@ -1162,7 +1168,11 @@ void cmGlobalVisualStudioGenerator::GenerateSolution(
   }
 
   cm::VS::Solution const solution = this->CreateSolution(root, projectTargets);
-  WriteSln(fout, solution);
+  if (this->Version >= cmGlobalVisualStudioGenerator::VSVersion::VS18) {
+    WriteSlnx(fout, solution);
+  } else {
+    WriteSln(fout, solution);
+  }
 
   if (fout.Close()) {
     this->FileReplacedDuringGenerate(fname);

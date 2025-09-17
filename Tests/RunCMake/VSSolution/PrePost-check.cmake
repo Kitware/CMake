@@ -1,1 +1,1 @@
-include(${CMAKE_CURRENT_LIST_DIR}/PrePost-check-sln.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/PrePost-check-${sln_ext}.cmake)

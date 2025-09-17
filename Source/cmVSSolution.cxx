@@ -10,7 +10,9 @@
 #include <cm/string_view>
 #include <cmext/string_view>
 
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmXMLWriter.h"
 
 namespace cm {
 namespace VS {
@@ -277,6 +279,95 @@ void WriteSln(std::ostream& sln, Solution const& solution)
     WriteSlnPropertyGroup(sln, *pg);
   }
   sln << "EndGlobal\n";
+}
+
+namespace {
+void WriteSlnxSolutionConfigurationPlatforms(cmXMLElement& xmlParent,
+                                             Solution const& solution)
+{
+  cmXMLElement xmlConfigurations(xmlParent, "Configurations");
+  for (std::string const& c : solution.Configs) {
+    cmXMLElement(xmlConfigurations, "BuildType").Attribute("Name", c);
+  }
+  cmXMLElement(xmlConfigurations, "Platform")
+    .Attribute("Name", solution.Platform);
+};
+
+void WriteSlnxProject(cmXMLElement& xmlParent, Solution const& solution,
+                      Solution::Project const& project)
+{
+  cmXMLElement xmlProject(xmlParent, "Project");
+  xmlProject.Attribute("Path", project.Path);
+  xmlProject.Attribute("Id", cmSystemTools::LowerCase(project.Id));
+  for (Solution::Project const* d : project.BuildDependencies) {
+    cmXMLElement(xmlProject, "BuildDependency").Attribute("Project", d->Path);
+  }
+  assert(project.Configs.size() == solution.Configs.size());
+  for (std::size_t i = 0; i < solution.Configs.size(); ++i) {
+    if (project.Configs[i].Config != solution.Configs[i]) {
+      cmXMLElement(xmlProject, "BuildType")
+        .Attribute("Project", project.Configs[i].Config);
+    }
+    if (!project.Configs[i].Build) {
+      cmXMLElement(xmlProject, "Build")
+        .Attribute("Solution", cmStrCat(solution.Configs[i], "|*"))
+        .Attribute("Project", "false");
+    }
+    if (project.Configs[i].Deploy) {
+      cmXMLElement(xmlProject, "Deploy")
+        .Attribute("Solution", cmStrCat(solution.Configs[i], "|*"));
+    }
+  }
+  if (project.Platform != solution.Platform) {
+    cmXMLElement(xmlProject, "Platform")
+      .Attribute("Project", project.Platform);
+  }
+};
+
+void WriteSlnxFolder(cmXMLElement& xmlParent, Solution const& solution,
+                     Solution::Folder const& folder)
+{
+  cmXMLElement xmlFolder(xmlParent, "Folder");
+  xmlFolder.Attribute("Name", cmStrCat('/', folder.Name, '/'));
+  for (std::string const& filePath : folder.Files) {
+    cmXMLElement(xmlFolder, "File").Attribute("Path", filePath);
+  }
+  for (Solution::Project const* project : folder.Projects) {
+    WriteSlnxProject(xmlFolder, solution, *project);
+  }
+};
+
+void WriteSlnxPropertyGroup(cmXMLElement& xmlParent,
+                            Solution::PropertyGroup const& pg)
+{
+  cmXMLElement xmlProperties(xmlParent, "Properties");
+  xmlProperties.Attribute("Name", pg.Name);
+  if (pg.Scope == Solution::PropertyGroup::Load::Post) {
+    xmlProperties.Attribute("Scope", "PostLoad");
+  }
+  for (auto const& i : pg.Map) {
+    cmXMLElement(xmlProperties, "Properties")
+      .Attribute("Name", i.first)
+      .Attribute("Value", i.second);
+  }
+}
+}
+
+void WriteSlnx(std::ostream& slnx, Solution const& solution)
+{
+  cmXMLWriter xw(slnx);
+  cmXMLDocument xml(xw);
+  cmXMLElement xmlSolution(xml, "Solution");
+  WriteSlnxSolutionConfigurationPlatforms(xmlSolution, solution);
+  for (Solution::Project const* project : solution.Projects) {
+    WriteSlnxProject(xmlSolution, solution, *project);
+  }
+  for (Solution::Folder const* folder : solution.Folders) {
+    WriteSlnxFolder(xmlSolution, solution, *folder);
+  }
+  for (Solution::PropertyGroup const* pg : solution.PropertyGroups) {
+    WriteSlnxPropertyGroup(xmlSolution, *pg);
+  }
 }
 
 }

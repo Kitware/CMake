@@ -36,8 +36,28 @@
 #include "cmVersion.h"
 #include "cmVisualStudioSlnData.h"
 #include "cmVisualStudioSlnParser.h"
+#include "cmXMLParser.h"
 #include "cmXMLWriter.h"
 #include "cmake.h"
+
+class cmSlnxParser : public cmXMLParser
+{
+public:
+  std::map<std::string, std::string> ProjectToPath;
+  void StartElement(std::string const& name, char const** atts) override
+  {
+    if (name == "Project"_s) {
+      if (char const* rawPath = this->FindAttribute(atts, "Path")) {
+        std::string path = rawPath;
+        cmSystemTools::ConvertToUnixSlashes(path);
+        std::string nameOnly =
+          cmsys::SystemTools::GetFilenameWithoutLastExtension(path);
+        this->ProjectToPath[cmSystemTools::LowerCase(nameOnly)] = path;
+      }
+    }
+  }
+  void EndElement(std::string const&) override {}
+};
 
 static std::map<std::string, std::vector<cmIDEFlagTable>> loadedFlagJsonFiles;
 
@@ -1079,19 +1099,27 @@ cmGlobalVisualStudio10Generator::GenerateBuildCommand(
 
   // MSBuild is preferred (and required for VS Express), but if the .sln has
   // an Intel Fortran .vfproj then we have to use devenv. Parse it to find out.
+  cmSlnxParser slnxParser;
   cmSlnData slnData;
-  {
+  if (this->Version >= VSVersion::VS18) {
+    if (slnxParser.ParseFile(slnFile.c_str())) {
+      for (auto const& i : slnxParser.ProjectToPath) {
+        if (cmHasLiteralSuffix(i.second, ".vfproj")) {
+          useDevEnv = true;
+          break;
+        }
+      }
+    }
+  } else {
     cmVisualStudioSlnParser parser;
     if (parser.ParseFile(slnFile, slnData,
                          cmVisualStudioSlnParser::DataGroupAll)) {
       std::vector<cmSlnProjectEntry> slnProjects = slnData.GetProjects();
       for (cmSlnProjectEntry const& project : slnProjects) {
-        if (useDevEnv) {
-          break;
-        }
         std::string proj = project.GetRelativePath();
-        if (proj.size() > 7 && proj.substr(proj.size() - 7) == ".vfproj"_s) {
+        if (cmHasLiteralSuffix(proj, ".vfproj")) {
           useDevEnv = true;
+          break;
         }
       }
     }
@@ -1127,9 +1155,18 @@ cmGlobalVisualStudio10Generator::GenerateBuildCommand(
       std::string targetProject = cmStrCat(tname, ".vcxproj");
       if (targetProject.find('/') == std::string::npos) {
         // it might be in a subdir
-        if (cmSlnProjectEntry const* proj = slnData.GetProjectByName(tname)) {
-          targetProject = proj->GetRelativePath();
-          cmSystemTools::ConvertToUnixSlashes(targetProject);
+        if (this->Version >= VSVersion::VS18) {
+          auto i =
+            slnxParser.ProjectToPath.find(cmSystemTools::LowerCase(tname));
+          if (i != slnxParser.ProjectToPath.end()) {
+            targetProject = i->second;
+          }
+        } else {
+          if (cmSlnProjectEntry const* proj =
+                slnData.GetProjectByName(tname)) {
+            targetProject = proj->GetRelativePath();
+            cmSystemTools::ConvertToUnixSlashes(targetProject);
+          }
         }
       }
       makeCommand.Add(targetProject);
