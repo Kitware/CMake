@@ -28,6 +28,9 @@ Find Modules
 * The :module:`FindGettext` module now provides a ``Gettext_VERSION`` result
   variable.  The ``GETTEXT_VERSION_STRING`` result variable is deprecated.
 
+* The :module:`FindGit` module now provides a ``Git_VERSION`` result
+  variable.  The ``GIT_VERSION_STRING`` result variable is deprecated.
+
 * The :module:`FindGnuplot` module now provides a ``Gnuplot_VERSION`` result
   variable.  The ``GNUPLOT_VERSION_STRING`` result variable is deprecated.
 

@@ -1886,9 +1886,9 @@ ExternalProject_Add_Step(${contentName}-populate copyfile
 # Pass through things we've already detected in the main project to avoid
 # paying the cost of redetecting them again in ExternalProject_Add()
 set(GIT_EXECUTABLE [==[${GIT_EXECUTABLE}]==])
-set(GIT_VERSION_STRING [==[${GIT_VERSION_STRING}]==])
+set(Git_VERSION [==[${Git_VERSION}]==])
 set_property(GLOBAL PROPERTY _CMAKE_FindGit_GIT_EXECUTABLE_VERSION
-  [==[${GIT_EXECUTABLE};${GIT_VERSION_STRING}]==]
+  [==[${GIT_EXECUTABLE};${Git_VERSION}]==]
 )
 ")
   endif()
