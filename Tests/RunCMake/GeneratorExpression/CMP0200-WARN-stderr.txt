@@ -4,7 +4,7 @@ CMake Warning \(dev\) in CMakeLists\.txt:
   policy details\.  Use the cmake_policy command to set the policy and
   suppress this warning\.
 
-  Configuration selection for imported target "lib_test" selected
+  Configuration selection for imported target "lib_test1" selected
   configuration "CAT", but would select configuration "DOG" under the NEW
   policy\.
 

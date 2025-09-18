@@ -3236,10 +3236,14 @@ bool cmTarget::GetMappedConfig(std::string const& desiredConfig, cmValue& loc,
   bool const newResult =
     this->GetMappedConfigNew(desiredConfig, newLoc, newImp, newSuffix);
 
+  auto configFromSuffix = [](cm::string_view s) -> cm::string_view {
+    return s.empty() ? "(none)"_s : s.substr(1);
+  };
+
   if (!this->GetMappedConfigOld(desiredConfig, loc, imp, suffix)) {
     if (newResult) {
       // NEW policy found a configuration, OLD did not.
-      auto newConfig = cm::string_view{ newSuffix }.substr(1);
+      cm::string_view newConfig = configFromSuffix(newSuffix);
       std::string const err = cmStrCat(
         cmPolicies::GetPolicyWarning(cmPolicies::CMP0200),
         "\nConfiguration selection for imported target \"", this->GetName(),
@@ -3251,7 +3255,7 @@ bool cmTarget::GetMappedConfig(std::string const& desiredConfig, cmValue& loc,
     return false;
   }
 
-  auto oldConfig = cm::string_view{ suffix }.substr(1);
+  cm::string_view oldConfig = configFromSuffix(suffix);
   if (!newResult) {
     // NEW policy did not find a configuration, OLD did.
     std::string const err =
@@ -3262,7 +3266,7 @@ bool cmTarget::GetMappedConfig(std::string const& desiredConfig, cmValue& loc,
     this->GetMakefile()->IssueMessage(MessageType::AUTHOR_WARNING, err);
   } else if (suffix != newSuffix) {
     // OLD and NEW policies found different configurations.
-    auto newConfig = cm::string_view{ newSuffix }.substr(1);
+    cm::string_view newConfig = configFromSuffix(newSuffix);
     std::string const err =
       cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0200),
                "\nConfiguration selection for imported target \"",
