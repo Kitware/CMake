@@ -247,6 +247,7 @@ struct XCodeProject : public IDEProjectCommon
 
 struct VCXProject : public IDEProjectCommon
 {
+  std::string folder;
 };
 
 struct FastbuildLinkerNode

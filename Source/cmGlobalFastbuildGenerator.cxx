@@ -1453,11 +1453,12 @@ void cmGlobalFastbuildGenerator::AddGlobCheckExec()
 void cmGlobalFastbuildGenerator::WriteSolution()
 {
   std::string const solutionName = LocalGenerators[0]->GetProjectName();
-  std::vector<std::string> VSProjects;
+  std::map<std::string /*folder*/, std::vector<std::string>> VSProjects;
+  std::vector<std::string> VSProjectsWithoutFolder;
 
   for (auto const& IDEProj : IDEProjects) {
     auto const VSProj = IDEProj.second.first;
-    VSProjects.emplace_back(VSProj.Alias);
+    VSProjects[VSProj.folder].emplace_back(VSProj.Alias);
   }
 
   WriteCommand("VSSolution", Quote("solution"));
@@ -1469,7 +1470,32 @@ void cmGlobalFastbuildGenerator::WriteSolution()
 
   auto const& configs = IDEProjects.begin()->second.first.ProjectConfigs;
   WriteIDEProjectConfig(configs, "SolutionConfigs");
-  WriteArray("SolutionProjects", Wrap(VSProjects), 1);
+  int folderNumber = 0;
+  std::vector<std::string> folders;
+  for (auto& item : VSProjects) {
+    auto const& pathToFolder = item.first;
+    auto& projectsInFolder = item.second;
+    if (pathToFolder.empty()) {
+      std::move(projectsInFolder.begin(), projectsInFolder.end(),
+                std::back_inserter(VSProjectsWithoutFolder));
+    } else {
+      std::string folderName =
+        cmStrCat("Folder_", std::to_string(++folderNumber));
+      WriteStruct(
+        folderName,
+        { { "Path", Quote(pathToFolder) },
+          { "Projects",
+            cmStrCat("{", cmJoin(Wrap(projectsInFolder), ","), "}") } },
+        1);
+      folders.emplace_back(std::move(folderName));
+    }
+  }
+  if (!folders.empty()) {
+    WriteArray("SolutionFolders ", Wrap(folders, ".", ""), 1);
+  }
+  if (!VSProjectsWithoutFolder.empty()) {
+    WriteArray("SolutionProjects", Wrap(VSProjectsWithoutFolder), 1);
+  }
 
   *this->BuildFileStream << "}\n";
 }
@@ -1697,17 +1723,21 @@ void cmGlobalFastbuildGenerator::AddIDEProject(FastbuildTarget const& target,
     return;
   }
   auto& IDEProject = IDEProjects[target.BaseName];
+  auto const relativeSubdir = cmSystemTools::RelativePath(
+    this->GetCMakeInstance()->GetHomeDirectory(), target.BasePath);
   // VS
   auto& VSProject = IDEProject.first;
   VSProject.Alias = target.BaseName + "-vcxproj";
-  VSProject.ProjectOutput =
-    cmStrCat("VisualStudio/Projects/", target.BaseName + ".vcxproj");
+  VSProject.ProjectOutput = cmStrCat("VisualStudio/Projects/", relativeSubdir,
+                                     '/', target.BaseName + ".vcxproj");
   VSProject.ProjectBasePath = target.BasePath;
+  VSProject.folder = relativeSubdir;
   // XCode
   auto& XCodeProject = IDEProject.second;
   XCodeProject.Alias = target.BaseName + "-xcodeproj";
-  XCodeProject.ProjectOutput = cmStrCat(
-    "XCode/Projects/", target.BaseName + ".xcodeproj/project.pbxproj");
+  XCodeProject.ProjectOutput =
+    cmStrCat("XCode/Projects/", relativeSubdir, '/',
+             target.BaseName + ".xcodeproj/project.pbxproj");
   XCodeProject.ProjectBasePath = target.BasePath;
 
   IDEProjectConfig VSConfig;
