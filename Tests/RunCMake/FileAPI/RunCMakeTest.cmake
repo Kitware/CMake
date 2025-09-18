@@ -108,8 +108,10 @@ function(check_python case prefix)
   endif()
   file(GLOB index ${RunCMake_TEST_BINARY_DIR}/.cmake/api/v1/reply/${prefix}-*.json)
   execute_process(
-    COMMAND ${Python_EXECUTABLE} "${RunCMake_SOURCE_DIR}/${case}-check.py" "${index}" "${CMAKE_CXX_COMPILER_ID}"
-      "${RunCMake_TEST_BINARY_DIR}"
+    COMMAND ${Python_EXECUTABLE} "${RunCMake_SOURCE_DIR}/${case}-check.py"
+      --build-dir "${RunCMake_TEST_BINARY_DIR}"
+      --reply-index "${index}"
+      --cxx-compiler-id "${CMAKE_CXX_COMPILER_ID}"
     RESULT_VARIABLE result
     OUTPUT_VARIABLE output
     ERROR_VARIABLE output
