@@ -795,8 +795,6 @@ void cmFastbuildTargetGenerator::AddObjectDependencies(
   };
 
   for (FastbuildObjectListNode& objList : fastbuildTarget.ObjectListNodes) {
-    objList.PreBuildDependencies.emplace(
-      fastbuildTarget.Name + FASTBUILD_DEPS_ARTIFACTS_ALIAS_POSTFIX);
     for (auto const& objDep : objList.ObjectDepends) {
       // Check if there is another object list which outputs (OBJECT_OUTPUTS)
       // something that this object list needs (OBJECT_DEPENDS).
@@ -820,9 +818,6 @@ void cmFastbuildTargetGenerator::AddLinkerNodeDependnecies(
   FastbuildTarget& fastbuildTarget)
 {
   for (auto& linkerNode : fastbuildTarget.LinkerNode) {
-    linkerNode.PreBuildDependencies.emplace(
-      fastbuildTarget.Name + FASTBUILD_DEPS_ARTIFACTS_ALIAS_POSTFIX);
-
     if (!fastbuildTarget.PreLinkExecNodes.Nodes.empty()) {
       linkerNode.PreBuildDependencies.emplace(
         fastbuildTarget.Name + FASTBUILD_PRE_LINK_ALIAS_POSTFIX);
