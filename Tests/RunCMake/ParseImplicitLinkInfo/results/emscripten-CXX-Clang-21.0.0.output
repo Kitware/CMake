@@ -1,0 +1,4 @@
+libs=GL-getprocaddr;al;html5;stubs-debug;noexit;c-debug;dlmalloc-debug;compiler_rt;c\+\+-noexcept;c\+\+abi-debug-noexcept;sockets
+dirs=/opt/emsdk/upstream/emscripten/cache/sysroot/lib/wasm32-emscripten/pic;/opt/emsdk/upstream/emscripten/src/lib
+library_arch=
+linker_tool=/opt/emsdk/upstream/bin/wasm-ld
