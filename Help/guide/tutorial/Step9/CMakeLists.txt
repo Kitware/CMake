@@ -1,70 +1,57 @@
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.23)
 
-# set the project name and version
-project(Tutorial VERSION 1.0)
+# TODO9: Add a VERSION parameter to the project() command for version 1.0.0
+project(Tutorial)
 
-# specify the C++ standard
-add_library(tutorial_compiler_flags INTERFACE)
-target_compile_features(tutorial_compiler_flags INTERFACE cxx_std_11)
+option(TUTORIAL_BUILD_UTILITIES "Build the Tutorial executable" ON)
+option(TUTORIAL_USE_STD_SQRT "Use std::sqrt" OFF)
+option(TUTORIAL_ENABLE_IPO "Check for and use IPO support" ON)
+option(BUILD_TESTING "Enable testing and build tests" ON)
 
-# add compiler warning flags just when building this project via
-# the BUILD_INTERFACE genex
-set(gcc_like_cxx "$<COMPILE_LANG_AND_ID:CXX,ARMClang,AppleClang,Clang,GNU,LCC>")
-set(msvc_cxx "$<COMPILE_LANG_AND_ID:CXX,MSVC>")
-target_compile_options(tutorial_compiler_flags INTERFACE
-  "$<${gcc_like_cxx}:$<BUILD_INTERFACE:-Wall;-Wextra;-Wshadow;-Wformat=2;-Wunused>>"
-  "$<${msvc_cxx}:$<BUILD_INTERFACE:-W3>>"
-)
+if(TUTORIAL_ENABLE_IPO)
+  include(CheckIPOSupported)
+  check_ipo_supported(RESULT result OUTPUT output)
+  if(result)
+    set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)
+  else()
+    message(WARNING "IPO is not supported ${message}")
+  endif()
+endif()
 
-# configure a header file to pass some of the CMake settings
-# to the source code
-configure_file(TutorialConfig.h.in TutorialConfig.h)
+if(TUTORIAL_BUILD_UTILITIES)
+  add_subdirectory(Tutorial)
+  # TODO1: Install the Tutorial target
 
-# add the MathFunctions library
+  # TODO3: Add the Tutorial target to the TutorialTargets export
+endif()
+
+if(BUILD_TESTING)
+  enable_testing()
+  add_subdirectory(Tests)
+endif()
+
 add_subdirectory(MathFunctions)
 
-# add the executable
-add_executable(Tutorial tutorial.cxx)
+# TODO4: Include the GNUInstallDirs module
 
-target_link_libraries(Tutorial PUBLIC MathFunctions tutorial_compiler_flags)
+# TODO2: Install the MathFunctions, OpAdd, OpMul, OpSub, SqrtTable, and
+#        MathLogger targets. Ensure you name their header file set so the
+#        headers will be installed.
 
-# add the binary tree to the search path for include files
-# so that we will find TutorialConfig.h
-target_include_directories(Tutorial PUBLIC
-                           "${PROJECT_BINARY_DIR}"
-                           )
+# TODO5: Add the targets from TODO2 to the TutorialTargets export
 
-# add the install targets
-install(TARGETS Tutorial DESTINATION bin)
-install(FILES "${PROJECT_BINARY_DIR}/TutorialConfig.h"
-  DESTINATION include
-  )
+# TODO6: Install the TutorialTargets export to:
+#          ${CMAKE_INSTALL_LIBDIR}/cmake/Tutorial
+#        And give them a namespace of "Tutorial::"
 
-# enable testing
-include(CTest)
+# TODO10: Include CMakePackageConfigHelpers
 
-# does the application run
-add_test(NAME Runs COMMAND Tutorial 25)
+# TODO11: Use write_basic_package_version_file to write a
+#         TutorialConfigVersion.cmake file to the CMAKE_CURRENT_BINARY_DIR.
+#         The version compatibility should be ExactVersion.
 
-# does the usage message work?
-add_test(NAME Usage COMMAND Tutorial)
-set_tests_properties(Usage
-  PROPERTIES PASS_REGULAR_EXPRESSION "Usage:.*number"
-  )
+# TODO12: Add the generated TutorialConfigVersion.cmake file to the file list
+#         of the TODO7 install() command.
 
-# define a function to simplify adding tests
-function(do_test target arg result)
-  add_test(NAME Comp${arg} COMMAND ${target} ${arg})
-  set_tests_properties(Comp${arg}
-    PROPERTIES PASS_REGULAR_EXPRESSION ${result}
-    )
-endfunction()
-
-# do a bunch of result based tests
-do_test(Tutorial 4 "4 is 2")
-do_test(Tutorial 9 "9 is 3")
-do_test(Tutorial 5 "5 is 2.236")
-do_test(Tutorial 7 "7 is 2.645")
-do_test(Tutorial 25 "25 is 5")
-do_test(Tutorial -25 "-25 is (-nan|nan|0)")
-do_test(Tutorial 0.0001 "0.0001 is 0.01")
+# TODO7: Install the config file at cmake/TutorialConfig.cmake to the same
+#        destination as the TutorialTargets export.

@@ -1,40 +1,18 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.23)
 
-# set the project name and version
-project(Tutorial VERSION 1.0)
+project(Tutorial)
 
-# TODO 4: Replace the following code by:
-# * Creating an interface library called tutorial_compiler_flags
-#   Hint: use add_library() with the INTERFACE signature
-# * Add compiler feature cxx_std_11 to tutorial_compiler_flags
-#   Hint: Use target_compile_features()
+# TODO1: Add a default ON option for a cache variable named:
+#          TUTORIAL_BUILD_UTILITIES.
+#        option() requires a doc string as its second argument, set this to
+#        something like:
+#          "Build the Tutorial executable"
 
-# specify the C++ standard
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-# configure a header file to pass some of the CMake settings
-# to the source code
-configure_file(TutorialConfig.h.in TutorialConfig.h)
+# TODO2: Add a conditional statement around add_subdirectory(Tutorial). Only
+#        build the Tutorial target if TUTORIAL_BUILD_UTILITIES is ON (or
+#        otherwise truthy).
 
-# TODO 2: Remove EXTRA_INCLUDES list
+add_subdirectory(Tutorial)
 
-# add the MathFunctions library
 add_subdirectory(MathFunctions)
-list(APPEND EXTRA_INCLUDES "${PROJECT_SOURCE_DIR}/MathFunctions")
-
-# add the executable
-add_executable(Tutorial tutorial.cxx)
-
-# TODO 5: Link Tutorial to tutorial_compiler_flags
-
-target_link_libraries(Tutorial PUBLIC MathFunctions)
-
-# TODO 3: Remove use of EXTRA_INCLUDES
-
-# add the binary tree to the search path for include files
-# so that we will find TutorialConfig.h
-target_include_directories(Tutorial PUBLIC
-                           "${PROJECT_BINARY_DIR}"
-                           ${EXTRA_INCLUDES}
-                           )

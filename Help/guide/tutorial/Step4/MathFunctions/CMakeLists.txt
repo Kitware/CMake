@@ -1,27 +1,16 @@
-# create the MathFunctions library
-add_library(MathFunctions MathFunctions.cxx)
+add_library(MathFunctions)
 
-# state that anybody linking to us needs to include the current source dir
-# to find MathFunctions.h, while we don't.
-target_include_directories(MathFunctions
-                           INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}
-                           )
+target_sources(MathFunctions
+  PRIVATE
+    MathFunctions.cxx
 
-# should we use our own math functions
-option(USE_MYMATH "Use tutorial provided math implementation" ON)
-if (USE_MYMATH)
-  target_compile_definitions(MathFunctions PRIVATE "USE_MYMATH")
+  PUBLIC
+    FILE_SET HEADERS
+    FILES
+      MathFunctions.h
+)
 
-  # library that just does sqrt
-  add_library(SqrtLibrary STATIC
-              mysqrt.cxx
-              )
+# TODO2: Add a compile feature for C++20 support to MathFunctions
 
-  # link SqrtLibrary to tutorial_compiler_flags
-  target_link_libraries(SqrtLibrary PUBLIC tutorial_compiler_flags)
-
-  target_link_libraries(MathFunctions PRIVATE SqrtLibrary)
-endif()
-
-# link MathFunctions to tutorial_compiler_flags
-target_link_libraries(MathFunctions PUBLIC tutorial_compiler_flags)
+# TODO3: Add a conditional which checks TUTORIAL_USE_STD_SQRT and if
+#        ON, set a compile definition on MathFunctions of the same name

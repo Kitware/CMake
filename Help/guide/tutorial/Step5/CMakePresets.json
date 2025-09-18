@@ -1,0 +1,14 @@
+{
+  "version": 4,
+  "configurePresets": [
+    {
+      "name": "tutorial",
+      "displayName": "Tutorial Preset",
+      "description": "Preset to use with the tutorial",
+      "binaryDir": "${sourceDir}/build",
+      "cacheVariables": {
+        "TUTORIAL_USE_STD_SQRT": "OFF"
+      }
+    }
+  ]
+}

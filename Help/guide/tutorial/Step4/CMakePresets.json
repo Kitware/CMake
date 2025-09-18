@@ -1,0 +1,16 @@
+{
+  "version": 4,
+  "configurePresets": [
+    {
+      "name": "tutorial",
+      "displayName": "Tutorial Preset",
+      "description": "Preset to use with the tutorial",
+      "binaryDir": "${sourceDir}/build",
+      "cacheVariables": {
+        "TODO7": "Remove the CMAKE_CXX_STANDARD (and this TODO)",
+        "CMAKE_CXX_STANDARD": "20",
+        "TODO8": "Set TUTORIAL_USE_STD_SQRT to ON"
+      }
+    }
+  ]
+}

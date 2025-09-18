@@ -1,0 +1,14 @@
+{
+  "version": 4,
+  "configurePresets": [
+    {
+      "name": "tutorial",
+      "displayName": "Tutorial Preset",
+      "description": "Preset to use with the tutorial",
+      "TODO8": "Set the build directory",
+      "cacheVariables": {
+        "TODO9": "Set the C++ standard version"
+      }
+    }
+  ]
+}

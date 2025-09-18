@@ -1,22 +1,11 @@
-add_library(MathFunctions MathFunctions.cxx)
+add_library(MathFunctions)
 
-# TODO 1: State that anybody linking to MathFunctions needs to include the
-# current source directory, while MathFunctions itself doesn't.
-# Hint: Use target_include_directories with the INTERFACE keyword
+target_sources(MathFunctions
+  PRIVATE
+    MathFunctions.cxx
 
-# should we use our own math functions
-option(USE_MYMATH "Use tutorial provided math implementation" ON)
-if (USE_MYMATH)
-  target_compile_definitions(MathFunctions PRIVATE "USE_MYMATH")
-
-  # library that just does sqrt
-  add_library(SqrtLibrary STATIC
-              mysqrt.cxx
-              )
-
-  # TODO 6: Link SqrtLibrary to tutorial_compiler_flags
-
-  target_link_libraries(MathFunctions PRIVATE SqrtLibrary)
-endif()
-
-# TODO 7: Link MathFunctions to tutorial_compiler_flags
+  PUBLIC
+    FILE_SET HEADERS
+    FILES
+      MathFunctions.h
+)

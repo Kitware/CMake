@@ -1,35 +1,49 @@
-add_library(MathFunctions MathFunctions.cxx)
+add_library(MathFunctions)
 
-# state that anybody linking to us needs to include the current source dir
-# to find MathFunctions.h, while we don't.
-target_include_directories(MathFunctions
-                           INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}
-                           )
+target_sources(MathFunctions
+  PRIVATE
+    MathFunctions.cxx
 
-# should we use our own math functions
-option(USE_MYMATH "Use tutorial provided math implementation" ON)
-if (USE_MYMATH)
-  target_compile_definitions(MathFunctions PRIVATE "USE_MYMATH")
+  PUBLIC
+    FILE_SET HEADERS
+    FILES
+      MathFunctions.h
+)
 
-  # library that just does sqrt
-  add_library(SqrtLibrary STATIC
-              mysqrt.cxx
-              )
+target_link_libraries(MathFunctions
+  PRIVATE
+    MathLogger
 
-  # link SqrtLibrary to tutorial_compiler_flags
-  target_link_libraries(SqrtLibrary PUBLIC tutorial_compiler_flags)
+  PUBLIC
+    OpAdd
+    OpMul
+    OpSub
+)
 
-  target_link_libraries(MathFunctions PRIVATE SqrtLibrary)
+target_compile_features(MathFunctions PRIVATE cxx_std_20)
+
+if(TUTORIAL_USE_STD_SQRT)
+  target_compile_definitions(MathFunctions PRIVATE TUTORIAL_USE_STD_SQRT)
 endif()
 
-# link MathFunctions to tutorial_compiler_flags
-target_link_libraries(MathFunctions PUBLIC tutorial_compiler_flags)
+# TODO1: Include the CheckIncludeFiles module and use it to check for
+#        the emmintrin.h header.
 
-# install libs
-set(installable_libs MathFunctions tutorial_compiler_flags)
-if(TARGET SqrtLibrary)
-  list(APPEND installable_libs SqrtLibrary)
-endif()
-install(TARGETS ${installable_libs} DESTINATION lib)
-# install include headers
-install(FILES MathFunctions.h DESTINATION include)
+# TODO2: If emmintrin.h is available, add a compile definition to MathFunctions
+#        named TUTORIAL_USE_SSE2. This will only be needed by the MathFunctions
+#        implementation file.
+
+# TODO4: Include the CheckSourceCompiles module and use it to check if the
+#        following program compiles:
+#
+#           typedef double v2df __attribute__((vector_size(16)));
+#           int main() {
+#             __builtin_ia32_sqrtsd(v2df{});
+#           }
+
+# TODO5: If the GNU builtins are available, add a compile definition to
+#        MathFunctions named TUTORIAL_USE_GNU_BUILTIN. This will only be needed
+#        by the MathFunctions implementation file.
+
+add_subdirectory(MathLogger)
+add_subdirectory(MathExtensions)

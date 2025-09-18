@@ -1,19 +1,35 @@
-#include "MathFunctions.h"
+#include <iostream>
 
-#include <cmath>
+// TODO6: Include <format>
 
-#ifdef USE_MYMATH
-#  include "mysqrt.h"
-#endif
+namespace {
+// a hack square root calculation using simple operations
+double mysqrt(double x)
+{
+  if (x <= 0) {
+    return 0;
+  }
+
+  double result = x;
+
+  // do ten iterations
+  for (int i = 0; i < 10; ++i) {
+    if (result <= 0) {
+      result = 0.1;
+    }
+    double delta = x - (result * result);
+    result = result + 0.5 * delta / result;
+
+    // TODO7: Convert the print to use std::format
+    std::cout << "Computing sqrt of " << x << " to be " << result << std::endl;
+  }
+  return result;
+}
+}
 
 namespace mathfunctions {
 double sqrt(double x)
 {
-// which square root function should we use?
-#ifdef USE_MYMATH
-  return detail::mysqrt(x);
-#else
-  return std::sqrt(x);
-#endif
+  return mysqrt(x);
 }
 }

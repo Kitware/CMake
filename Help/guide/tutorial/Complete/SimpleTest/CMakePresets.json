@@ -1,0 +1,16 @@
+{
+  "version": 4,
+  "configurePresets": [
+    {
+      "name": "tutorial",
+      "displayName": "SimpleTest Preset",
+      "description": "Preset to use with the tutorial's SimpleTest library",
+      "binaryDir": "${sourceDir}/build",
+      "installDir": "${sourceParentDir}/install",
+      "cacheVariables": {
+        "CMAKE_CXX_STANDARD": "20",
+        "CMAKE_PREFIX_PATH": "${sourceParentDir}/install"
+      }
+    }
+  ]
+}
