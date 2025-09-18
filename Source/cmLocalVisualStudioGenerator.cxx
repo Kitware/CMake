@@ -99,8 +99,9 @@ void cmLocalVisualStudioGenerator::ComputeObjectFilenames(
     if (counts[cmSystemTools::LowerCase(longObjectName)] > 1) {
       const_cast<cmGeneratorTarget*>(gt)->AddExplicitObjectName(sf);
       bool keptSourceExtension;
+      bool forceShortObjectName = false;
       longObjectName = this->GetObjectFileNameWithoutTarget(
-        *sf, dir_max, &keptSourceExtension, custom_ext);
+        *sf, dir_max, &keptSourceExtension, custom_ext, &forceShortObjectName);
     }
     si.second.ShortLoc.emplace(shortObjectName);
     si.second.LongLoc.Update(longObjectName);
