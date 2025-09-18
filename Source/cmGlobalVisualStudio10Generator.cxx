@@ -23,7 +23,6 @@
 #include "cmExperimental.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
-#include "cmGlobalVisualStudio71Generator.h"
 #include "cmGlobalVisualStudio7Generator.h"
 #include "cmGlobalVisualStudioGenerator.h"
 #include "cmIDEFlagTable.h"
@@ -870,7 +869,7 @@ std::string cmGlobalVisualStudio10Generator::FindDevEnvCommand()
   // Skip over the cmGlobalVisualStudio8Generator implementation because
   // we expect a real devenv and do not want to look for VCExpress.
   // NOLINTNEXTLINE(bugprone-parent-virtual-call)
-  return this->cmGlobalVisualStudio71Generator::FindDevEnvCommand();
+  return this->cmGlobalVisualStudio7Generator::FindDevEnvCommand();
 }
 
 bool cmGlobalVisualStudio10Generator::FindVCTargetsPath(cmMakefile* mf)

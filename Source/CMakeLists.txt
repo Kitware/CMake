@@ -935,8 +935,6 @@ if(WIN32)
         cmGlobalNMakeMakefileGenerator.h
         cmGlobalJOMMakefileGenerator.cxx
         cmGlobalJOMMakefileGenerator.h
-        cmGlobalVisualStudio71Generator.cxx
-        cmGlobalVisualStudio71Generator.h
         cmGlobalVisualStudio7Generator.cxx
         cmGlobalVisualStudio7Generator.h
         cmGlobalVisualStudio8Generator.cxx
@@ -975,6 +973,9 @@ if(WIN32)
         cmVisualStudioWCEPlatformParser.cxx
         cmVSSetupHelper.cxx
         cmVSSetupHelper.h
+        cmVSSolution.cxx
+        cmVSSolution.h
+        cmVSVersion.h
       )
 
     # Add a manifest file to executables on Windows to allow for

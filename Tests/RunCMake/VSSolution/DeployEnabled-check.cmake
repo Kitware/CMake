@@ -7,7 +7,7 @@ endif()
 # Test solution file for deployment.
 #
 
-set(vcSlnFile "${RunCMake_TEST_BINARY_DIR}/VsDeployEnabled.sln")
+set(vcSlnFile "${RunCMake_TEST_BINARY_DIR}/DeployEnabled.sln")
 if(NOT EXISTS "${vcSlnFile}")
   set(RunCMake_TEST_FAILED "Solution file ${vcSlnFile} does not exist.")
   return()
