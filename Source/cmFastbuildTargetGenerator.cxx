@@ -665,8 +665,6 @@ FastbuildExecNodes cmFastbuildTargetGenerator::GenerateCommands(
       WriteScriptProlog(scriptFile);
       WriteCmdsToFile(scriptFile, cmdLines);
       WriteScriptEpilog(scriptFile);
-
-      execNode.ExecWorkingDir = GetScriptWorkingDir(ccg);
     }
 
     // Tested in "ObjectLibrary / complexOneConfig" tests.
