@@ -69,6 +69,62 @@ constexpr auto FASTBUILD_CACHE_PATH = "CMAKE_FASTBUILD_CACHE_PATH";
 constexpr auto FASTBUILD_COMPILER_EXTRA_FILES =
   "CMAKE_FASTBUILD_COMPILER_EXTRA_FILES";
 constexpr auto FASTBUILD_USE_LIGHTCACHE = "CMAKE_FASTBUILD_USE_LIGHTCACHE";
+constexpr auto FASTBUILD_USE_RELATIVE_PATHS =
+  "CMAKE_FASTBUILD_USE_RELATIVE_PATHS";
+constexpr auto FASTBUILD_USE_DETERMINISTIC_PATHS =
+  "CMAKE_FASTBUILD_USE_DETERMINISTIC_PATHS";
+constexpr auto FASTBUILD_SOURCE_MAPPING = "CMAKE_FASTBUILD_SOURCE_MAPPING";
+constexpr auto FASTBUILD_CLANG_REWRITE_INCLUDES =
+  "CMAKE_FASTBUILD_CLANG_REWRITE_INCLUDES";
+constexpr auto FASTBUILD_CLANG_GCC_UPDATE_XLANG_ARG =
+  "CMAKE_FASTBUILD_CLANG_GCC_UPDATE_XLANG_ARG";
+constexpr auto FASTBUILD_ALLOW_RESPONSE_FILE =
+  "CMAKE_FASTBUILD_ALLOW_RESPONSE_FILE";
+constexpr auto FASTBUILD_FORCE_RESPONSE_FILE =
+  "CMAKE_FASTBUILD_FORCE_RESPONSE_FILE";
+
+static std::map<std::string, std::string> const compilerIdToFastbuildFamily = {
+  { "MSVC", "msvc" }, { "Clang", "clang" },      { "AppleClang", "clang" },
+  { "GNU", "gcc" },   { "NVIDIA", "cuda-nvcc" }, { "Clang-cl", "clang-cl" },
+};
+
+static std::set<std::string> const supportedLanguages = { "C", "CXX", "CUDA",
+                                                          "OBJC", "OBJCXX" };
+
+static void ReadCompilerOptions(FastbuildCompiler& compiler, cmMakefile* mf)
+{
+  if (compiler.CompilerFamily == "custom") {
+    return;
+  }
+
+  if (cmIsOn(mf->GetSafeDefinition(FASTBUILD_USE_LIGHTCACHE))) {
+    compiler.UseLightCache = true;
+  }
+  if (cmIsOn(mf->GetSafeDefinition(FASTBUILD_USE_RELATIVE_PATHS))) {
+    compiler.UseRelativePaths = true;
+  }
+  if (cmIsOn(mf->GetSafeDefinition(FASTBUILD_USE_DETERMINISTIC_PATHS))) {
+    compiler.UseDeterministicPaths = true;
+  }
+  std::string sourceMapping = mf->GetSafeDefinition(FASTBUILD_SOURCE_MAPPING);
+  if (!sourceMapping.empty()) {
+    compiler.SourceMapping = std::move(sourceMapping);
+  }
+  auto const clangRewriteIncludesDef =
+    mf->GetDefinition(FASTBUILD_CLANG_REWRITE_INCLUDES);
+  if (clangRewriteIncludesDef.IsSet() && clangRewriteIncludesDef.IsOff()) {
+    compiler.ClangRewriteIncludes = false;
+  }
+  if (cmIsOn(mf->GetSafeDefinition(FASTBUILD_CLANG_GCC_UPDATE_XLANG_ARG))) {
+    compiler.ClangGCCUpdateXLanguageArg = true;
+  }
+  if (cmIsOn(mf->GetSafeDefinition(FASTBUILD_ALLOW_RESPONSE_FILE))) {
+    compiler.AllowResponseFile = true;
+  }
+  if (cmIsOn(mf->GetSafeDefinition(FASTBUILD_FORCE_RESPONSE_FILE))) {
+    compiler.ForceResponseFile = true;
+  }
+}
 
 template <class T>
 FastbuildAliasNode generateAlias(std::string const& name, char const* postfix,
@@ -815,21 +871,6 @@ void cmGlobalFastbuildGenerator::WriteCompilers()
   for (auto const& val : Compilers) {
     auto const& compilerDef = val.second;
 
-    std::string fastbuildFamily = "custom";
-
-    if (compilerDef.Language == "C" || compilerDef.Language == "CXX" ||
-        compilerDef.Language == "CUDA") {
-      std::map<std::string, std::string> compilerIdToFastbuildFamily = {
-        { "MSVC", "msvc" },        { "Clang", "clang" },
-        { "AppleClang", "clang" }, { "GNU", "gcc" },
-        { "NVIDIA", "cuda-nvcc" }, { "Clang-cl", "clang-cl" },
-      };
-      auto ft = compilerIdToFastbuildFamily.find(compilerDef.CmakeCompilerID);
-      if (ft != compilerIdToFastbuildFamily.end()) {
-        fastbuildFamily = ft->second;
-      }
-    }
-
     std::string compilerPath = compilerDef.Executable;
 
     // Write out the compiler that has been configured
@@ -841,12 +882,42 @@ void cmGlobalFastbuildGenerator::WriteCompilers()
       WriteVariable(extraKey, Quote(extraVal), 1);
     }
     WriteVariable("Executable", Quote(compilerPath), 1);
-    WriteVariable("CompilerFamily", Quote(fastbuildFamily), 1);
-    if (compilerDef.UseLightCache) {
+    WriteVariable("CompilerFamily", Quote(compilerDef.CompilerFamily), 1);
+
+    if (compilerDef.UseLightCache && compilerDef.CompilerFamily == "msvc") {
       WriteVariable("UseLightCache_Experimental", "true", 1);
     }
-    if (fastbuildFamily == "clang") {
+    if (compilerDef.UseRelativePaths) {
+      WriteVariable("UseRelativePaths_Experimental", "true", 1);
+    }
+    if (compilerDef.UseDeterministicPaths) {
+      WriteVariable("UseDeterministicPaths_Experimental", "true", 1);
+    }
+
+    if (!compilerDef.SourceMapping.empty()) {
+      WriteVariable("SourceMapping_Experimental",
+                    Quote(compilerDef.SourceMapping), 1);
+    }
+
+    auto const isClang = [&compilerDef] {
+      return compilerDef.CompilerFamily == "clang" ||
+        compilerDef.CompilerFamily == "clang-cl";
+    };
+
+    if (!compilerDef.ClangRewriteIncludes && isClang()) {
       WriteVariable("ClangRewriteIncludes", "false", 1);
+    }
+    if (compilerDef.ClangGCCUpdateXLanguageArg &&
+        (isClang() || compilerDef.CompilerFamily == "gcc")) {
+      WriteVariable("ClangGCCUpdateXLanguageArg", "true", 1);
+    }
+
+    if (compilerDef.AllowResponseFile) {
+      WriteVariable("AllowResponseFile", "true", 1);
+    }
+    if (compilerDef.ForceResponseFile) {
+
+      WriteVariable("ForceResponseFile", "true", 1);
     }
 
     if (compilerDef.DontUseEnv) {
@@ -913,13 +984,19 @@ void cmGlobalFastbuildGenerator::AddCompiler(std::string const& language,
     mf->GetSafeDefinition("CMAKE_" + language + "_COMPILER_VERSION");
   compilerDef.Language = language;
 
-  if (compilerDef.CmakeCompilerID == "MSVC" &&
-      cmIsOn(mf->GetSafeDefinition(FASTBUILD_USE_LIGHTCACHE)) &&
-      (language == "C" || language == "CXX")) {
-    compilerDef.UseLightCache = true;
-  }
   cmExpandList(mf->GetSafeDefinition(FASTBUILD_COMPILER_EXTRA_FILES),
                compilerDef.ExtraFiles);
+
+  if (supportedLanguages.find(language) != supportedLanguages.end()) {
+    auto const iter =
+      compilerIdToFastbuildFamily.find(compilerDef.CmakeCompilerID);
+    if (iter != compilerIdToFastbuildFamily.end()) {
+      compilerDef.CompilerFamily = iter->second;
+    }
+  }
+
+  // Has to be called after we determined 'CompilerFamily'.
+  ReadCompilerOptions(compilerDef, mf);
 
   // If FASTBUILD_COMPILER_EXTRA_FILES is not set - automatically add extra
   // files based on compiler (see
