@@ -24,11 +24,14 @@ Result Variables
 This module defines the following variables:
 
 ``Qt3_FOUND``
-  Boolean indicating whether (the requested version of) Qt3 has been found.
+  .. versionadded:: 3.3
+
+  Boolean indicating whether (the requested version of) Qt3 is found.
 
 ``QT_FOUND``
-  Boolean indicating whether Qt3 has been found.  This variable is for
-  compatibility with other Qt find modules.
+  Same as ``Qt3_FOUND``.  Boolean indicating whether (the requested version
+  of) Qt3 is found.  This variable is provided for compatibility with other
+  Qt find modules.
 
 ``Qt3_VERSION``
   .. versionadded:: 4.2
@@ -285,7 +288,7 @@ find_package_handle_standard_args(Qt3
                                   REQUIRED_VARS QT_QT_LIBRARY QT_INCLUDE_DIR QT_MOC_EXECUTABLE
                                   VERSION_VAR Qt3_VERSION)
 unset(FPHSA_NAME_MISMATCHED)
-set(QT_FOUND ${QT3_FOUND} )
+set(QT_FOUND ${Qt3_FOUND})
 
 if(QT_FOUND)
   set( QT_LIBRARIES ${QT_LIBRARIES} ${QT_QT_LIBRARY} )
