@@ -1307,8 +1307,7 @@ cmFastbuildNormalTargetGenerator::GenerateObjects()
                                 objectListNode);
       ComputePCH(*source, objectListNode, createdPCH);
 
-      objectListNode.Name =
-        cmStrCat(language, "_ObjectGroup_", GetTargetName());
+      objectListNode.Name = cmStrCat(this->GetName(), '_', language, "_Objs");
       // TODO: Ask cmake the output objects and group by extension instead
       // of doing this
       if (language == "RC") {
@@ -1325,13 +1324,12 @@ cmFastbuildNormalTargetGenerator::GenerateObjects()
     }
   }
 
-  int groupNameCount = 1;
+  int groupNameCount = 0;
 
   for (auto& val : nodesPermutations) {
     auto& objectListNode = val.second;
     objectListNode.Name =
-      cmStrCat(objectListNode.Name, "-", objectListNode.CompilerOutputPath,
-               "-", std::to_string(groupNameCount++));
+      cmStrCat(objectListNode.Name, "_", std::to_string(++groupNameCount));
     LogMessage(cmStrCat("ObjectList name: ", objectListNode.Name));
   }
 
