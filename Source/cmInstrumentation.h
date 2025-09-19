@@ -98,8 +98,14 @@ private:
                         Json::Value const& snippetData);
   size_t AssignTargetToTraceThread(std::vector<uint64_t>& workers,
                                    uint64_t timeStart, uint64_t duration);
-  std::string GetLatestFile(std::string const& dataSubdir,
-                            std::string const& exclude = "");
+  enum LatestOrOldest
+  {
+    Latest,
+    Oldest
+  };
+  std::string GetFileByTimestamp(LatestOrOldest latestOrOldest,
+                                 std::string const& dataSubdir,
+                                 std::string const& exclude = "");
   std::string binaryDir;
   std::string timingDirv1;
   std::string userTimingDirv1;

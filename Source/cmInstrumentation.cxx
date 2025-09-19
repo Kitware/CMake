@@ -229,49 +229,51 @@ void cmInstrumentation::WriteCustomContent()
   }
 }
 
-std::string cmInstrumentation::GetLatestFile(std::string const& dataSubdir,
-                                             std::string const& exclude)
+std::string cmInstrumentation::GetFileByTimestamp(
+  cmInstrumentation::LatestOrOldest order, std::string const& dataSubdir,
+  std::string const& exclude)
 {
   std::string fullDir = cmStrCat(this->timingDirv1, "/data/", dataSubdir);
-  std::string latestFile;
+  std::string result;
   if (cmSystemTools::FileExists(fullDir)) {
     cmsys::Directory d;
     if (d.Load(fullDir)) {
       for (unsigned int i = 0; i < d.GetNumberOfFiles(); i++) {
         std::string fname = d.GetFileName(i);
         if (fname != "." && fname != ".." && fname != exclude &&
-            fname > latestFile) {
-          latestFile = fname;
+            (result.empty() ||
+             (order == LatestOrOldest::Latest && fname > result) ||
+             (order == LatestOrOldest::Oldest && fname < result))) {
+          result = fname;
         }
       }
     }
   }
-  return latestFile;
+  return result;
 }
 
 void cmInstrumentation::RemoveOldFiles(std::string const& dataSubdir)
 {
   std::string const dataSubdirPath =
     cmStrCat(this->timingDirv1, "/data/", dataSubdir);
+  std::string oldIndex =
+    this->GetFileByTimestamp(LatestOrOldest::Oldest, "index");
+  if (!oldIndex.empty()) {
+    oldIndex = cmStrCat(this->timingDirv1, "/data/index/", oldIndex);
+  }
   if (cmSystemTools::FileExists(dataSubdirPath)) {
-    std::string latestFile = this->GetLatestFile(dataSubdir);
+    std::string latestFile =
+      this->GetFileByTimestamp(LatestOrOldest::Latest, dataSubdir);
     cmsys::Directory d;
     if (d.Load(dataSubdirPath)) {
       for (unsigned int i = 0; i < d.GetNumberOfFiles(); i++) {
         std::string fname = d.GetFileName(i);
         std::string fpath = d.GetFilePath(i);
         if (fname != "." && fname != ".." && fname < latestFile) {
-          if (dataSubdir == "trace") {
-            // Check if this trace file shares a name with any existing index
-            // files, in which case it is listed by that index file and a
-            // callback is running, so we shouldn't delete it yet.
-            std::string index = "index-";
-            std::string json = ".json";
-            std::string timestamp = fname.substr(
-              index.size(), fname.size() - index.size() - json.size() - 1);
-            if (cmSystemTools::FileExists(cmStrCat(this->timingDirv1,
-                                                   "/data/index/index-",
-                                                   timestamp, ".json"))) {
+          if (!oldIndex.empty()) {
+            int compare;
+            cmSystemTools::FileTimeCompare(oldIndex, fpath, &compare);
+            if (compare == 1) {
               continue;
             }
           }
@@ -329,7 +331,8 @@ int cmInstrumentation::CollectTimingData(cmInstrumentationQuery::Hook hook)
   using snippet = std::pair<std::string, std::string>;
   std::vector<snippet> files;
   cmsys::Directory d;
-  std::string last_index_name = this->GetLatestFile("index", index_name);
+  std::string last_index_name =
+    this->GetFileByTimestamp(LatestOrOldest::Latest, "index", index_name);
   if (d.Load(directory)) {
     for (unsigned int i = 0; i < d.GetNumberOfFiles(); i++) {
       std::string fpath = d.GetFilePath(i);
@@ -663,7 +666,8 @@ int cmInstrumentation::InstrumentCommand(
   root["workingDir"] = cmSystemTools::GetLogicalWorkingDirectory();
 
   // Add custom configure content
-  std::string contentFile = this->GetLatestFile("content");
+  std::string contentFile =
+    this->GetFileByTimestamp(LatestOrOldest::Latest, "content");
   if (!contentFile.empty()) {
     root["configureContent"] = cmStrCat("content/", contentFile);
   }

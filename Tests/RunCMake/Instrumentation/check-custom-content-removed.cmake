@@ -6,6 +6,6 @@ endif()
 
 file(GLOB content_files ${v1}/data/content/*)
 list(LENGTH content_files num)
-if (NOT ${num} EQUAL 1)
-  add_error("Found ${num} custom content files, expected 1.")
+if (NOT ${num} EQUAL ${EXPECTED_CONTENT_FILES})
+  add_error("Found ${num} custom content files, expected ${EXPECTED_CONTENT_FILES}.")
 endif()
