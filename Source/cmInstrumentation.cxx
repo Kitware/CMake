@@ -229,7 +229,8 @@ void cmInstrumentation::WriteCustomContent()
   }
 }
 
-std::string cmInstrumentation::GetLatestFile(std::string const& dataSubdir)
+std::string cmInstrumentation::GetLatestFile(std::string const& dataSubdir,
+                                             std::string const& exclude)
 {
   std::string fullDir = cmStrCat(this->timingDirv1, "/data/", dataSubdir);
   std::string latestFile;
@@ -238,7 +239,8 @@ std::string cmInstrumentation::GetLatestFile(std::string const& dataSubdir)
     if (d.Load(fullDir)) {
       for (unsigned int i = 0; i < d.GetNumberOfFiles(); i++) {
         std::string fname = d.GetFileName(i);
-        if (fname != "." && fname != ".." && fname > latestFile) {
+        if (fname != "." && fname != ".." && fname != exclude &&
+            fname > latestFile) {
           latestFile = fname;
         }
       }
@@ -267,8 +269,9 @@ void cmInstrumentation::RemoveOldFiles(std::string const& dataSubdir)
             std::string json = ".json";
             std::string timestamp = fname.substr(
               index.size(), fname.size() - index.size() - json.size() - 1);
-            if (cmSystemTools::FileExists(cmStrCat(
-                  this->timingDirv1, "/data/index-", timestamp, ".json"))) {
+            if (cmSystemTools::FileExists(cmStrCat(this->timingDirv1,
+                                                   "/data/index/index-",
+                                                   timestamp, ".json"))) {
               continue;
             }
           }
@@ -319,32 +322,20 @@ int cmInstrumentation::CollectTimingData(cmInstrumentationQuery::Hook hook)
   std::string const& directory = cmStrCat(this->timingDirv1, "/data");
   std::string suffix_time = ComputeSuffixTime();
   std::string const& index_name = cmStrCat("index-", suffix_time, ".json");
-  std::string index_path = cmStrCat(directory, '/', index_name);
+  std::string index_path = cmStrCat(directory, "/index/", index_name);
   cmSystemTools::Touch(index_path, true);
 
   // Gather Snippets
   using snippet = std::pair<std::string, std::string>;
   std::vector<snippet> files;
   cmsys::Directory d;
-  std::string last_index;
+  std::string last_index_name = this->GetLatestFile("index", index_name);
   if (d.Load(directory)) {
     for (unsigned int i = 0; i < d.GetNumberOfFiles(); i++) {
       std::string fpath = d.GetFilePath(i);
       std::string fname = d.GetFile(i);
-      if (fname.rfind('.', 0) == 0 || fname == index_name ||
-          d.FileIsDirectory(i)) {
+      if (fname.rfind('.', 0) == 0 || d.FileIsDirectory(i)) {
         continue;
-      }
-      if (fname.rfind("index-", 0) == 0) {
-        if (last_index.empty()) {
-          last_index = fpath;
-        } else {
-          int compare;
-          cmSystemTools::FileTimeCompare(fpath, last_index, &compare);
-          if (compare == 1) {
-            last_index = fpath;
-          }
-        }
       }
       files.push_back(snippet(std::move(fname), std::move(fpath)));
     }
@@ -362,11 +353,13 @@ int cmInstrumentation::CollectTimingData(cmInstrumentationQuery::Hook hook)
     this->InsertStaticSystemInformation(index);
   }
   for (auto const& file : files) {
-    if (last_index.empty()) {
+    if (last_index_name.empty()) {
       index["snippets"].append(file.first);
     } else {
       int compare;
-      cmSystemTools::FileTimeCompare(file.second, last_index, &compare);
+      std::string last_index_path =
+        cmStrCat(directory, "/index/", last_index_name);
+      cmSystemTools::FileTimeCompare(file.second, last_index_path, &compare);
       if (compare == 1) {
         index["snippets"].append(file.first);
       }
@@ -381,7 +374,7 @@ int cmInstrumentation::CollectTimingData(cmInstrumentationQuery::Hook hook)
   }
 
   // Write index file
-  this->WriteInstrumentationJson(index, "data", index_name);
+  this->WriteInstrumentationJson(index, "data/index", index_name);
 
   // Execute callbacks
   for (auto& cb : this->callbacks) {
