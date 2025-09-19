@@ -210,6 +210,7 @@ function(run_cmake test)
     "|[^\n]*xcodebuild[^\n]*DVTCoreDeviceEnabledState: DVTCoreDeviceEnabledState_Disabled set via user default"
     "|[^\n]*xcodebuild[^\n]*DVTPlugInManager"
     "|[^\n]*xcodebuild[^\n]*DVTSDK: Warning: SDK path collision for path"
+    "|[^\n]*xcodebuild[^\n]*IDERunDestination: Supported platforms for the buildables in the current scheme is empty"
     "|[^\n]*xcodebuild[^\n]*Requested but did not find extension point with identifier"
     "|[^\n]*xcodebuild[^\n]*nil host used in call to allows.*HTTPSCertificateForHost"
     "|[^\n]*xcodebuild[^\n]*warning: file type[^\n]*is based on missing file type"
