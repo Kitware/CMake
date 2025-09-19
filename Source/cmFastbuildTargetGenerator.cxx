@@ -155,7 +155,7 @@ std::string cmFastbuildTargetGenerator::GetCustomCommandTargetName(
   extras += std::to_string(static_cast<int>(step));
 
   cmCryptoHash hash(cmCryptoHash::AlgoSHA256);
-  targetName += "-" + hash.HashString(extras).substr(0, 7);
+  targetName += "-" + hash.HashString(extras).substr(0, 14);
 
   return targetName;
 }
