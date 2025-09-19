@@ -1,0 +1,14 @@
+!     CMake Fortran parser does not understand the `#if !defined(...)`
+!     syntax, so it does not guard against recursive inclusion. Unless
+!     the parser keeps track of already visited files, this leads to
+!     processing of around 2^N files, where N is the maximal number of
+!     open files. Because N is typically of the order of 1000, without
+!     bookkeeping this test hangs.
+
+#if !defined(test_include_loop_fh)
+#define test_include_loop_fh
+
+#include "test_include_loop.fh"
+#include "test_include_loop.fh"
+
+#endif
