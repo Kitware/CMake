@@ -165,5 +165,8 @@ private:
 /** Write the .sln-format representation.  */
 void WriteSln(std::ostream& sln, Solution const& solution);
 
+/** Write the .slnx-format representation.  */
+void WriteSlnx(std::ostream& slnx, Solution const& solution);
+
 }
 }

@@ -36,8 +36,28 @@
 #include "cmVersion.h"
 #include "cmVisualStudioSlnData.h"
 #include "cmVisualStudioSlnParser.h"
+#include "cmXMLParser.h"
 #include "cmXMLWriter.h"
 #include "cmake.h"
+
+class cmSlnxParser : public cmXMLParser
+{
+public:
+  std::map<std::string, std::string> ProjectToPath;
+  void StartElement(std::string const& name, char const** atts) override
+  {
+    if (name == "Project"_s) {
+      if (char const* rawPath = this->FindAttribute(atts, "Path")) {
+        std::string path = rawPath;
+        cmSystemTools::ConvertToUnixSlashes(path);
+        std::string nameOnly =
+          cmsys::SystemTools::GetFilenameWithoutLastExtension(path);
+        this->ProjectToPath[cmSystemTools::LowerCase(nameOnly)] = path;
+      }
+    }
+  }
+  void EndElement(std::string const&) override {}
+};
 
 static std::map<std::string, std::vector<cmIDEFlagTable>> loadedFlagJsonFiles;
 
@@ -1065,6 +1085,8 @@ cmGlobalVisualStudio10Generator::GenerateBuildCommand(
   std::string makeProgramSelected =
     this->SelectMakeProgram(makeProgram, this->GetMSBuildCommand());
 
+  std::string const slnFile = this->GetSLNFile(projectDir, projectName);
+
   // Check if the caller explicitly requested a devenv tool.
   std::string makeProgramLower = makeProgramSelected;
   cmSystemTools::LowerCase(makeProgramLower);
@@ -1077,25 +1099,27 @@ cmGlobalVisualStudio10Generator::GenerateBuildCommand(
 
   // MSBuild is preferred (and required for VS Express), but if the .sln has
   // an Intel Fortran .vfproj then we have to use devenv. Parse it to find out.
+  cmSlnxParser slnxParser;
   cmSlnData slnData;
-  {
-    std::string slnFile;
-    if (!projectDir.empty()) {
-      slnFile = cmStrCat(projectDir, '/');
+  if (this->Version >= VSVersion::VS18) {
+    if (slnxParser.ParseFile(slnFile.c_str())) {
+      for (auto const& i : slnxParser.ProjectToPath) {
+        if (cmHasLiteralSuffix(i.second, ".vfproj")) {
+          useDevEnv = true;
+          break;
+        }
+      }
     }
-    slnFile += projectName;
-    slnFile += ".sln";
+  } else {
     cmVisualStudioSlnParser parser;
     if (parser.ParseFile(slnFile, slnData,
                          cmVisualStudioSlnParser::DataGroupAll)) {
       std::vector<cmSlnProjectEntry> slnProjects = slnData.GetProjects();
       for (cmSlnProjectEntry const& project : slnProjects) {
-        if (useDevEnv) {
-          break;
-        }
         std::string proj = project.GetRelativePath();
-        if (proj.size() > 7 && proj.substr(proj.size() - 7) == ".vfproj"_s) {
+        if (cmHasLiteralSuffix(proj, ".vfproj")) {
           useDevEnv = true;
+          break;
         }
       }
     }
@@ -1123,19 +1147,26 @@ cmGlobalVisualStudio10Generator::GenerateBuildCommand(
     GeneratedMakeCommand makeCommand;
     makeCommand.RequiresOutputForward = requiresOutputForward;
     makeCommand.Add(makeProgramSelected);
-    cm::optional<cmSlnProjectEntry> proj = cm::nullopt;
 
     if (tname == "clean"_s) {
-      makeCommand.Add(cmStrCat(projectName, ".sln"));
+      makeCommand.Add(slnFile);
       makeCommand.Add("/t:Clean");
     } else {
       std::string targetProject = cmStrCat(tname, ".vcxproj");
-      proj = slnData.GetProjectByName(tname);
       if (targetProject.find('/') == std::string::npos) {
         // it might be in a subdir
-        if (proj) {
-          targetProject = proj->GetRelativePath();
-          cmSystemTools::ConvertToUnixSlashes(targetProject);
+        if (this->Version >= VSVersion::VS18) {
+          auto i =
+            slnxParser.ProjectToPath.find(cmSystemTools::LowerCase(tname));
+          if (i != slnxParser.ProjectToPath.end()) {
+            targetProject = i->second;
+          }
+        } else {
+          if (cmSlnProjectEntry const* proj =
+                slnData.GetProjectByName(tname)) {
+            targetProject = proj->GetRelativePath();
+            cmSystemTools::ConvertToUnixSlashes(targetProject);
+          }
         }
       }
       makeCommand.Add(targetProject);
@@ -1199,25 +1230,9 @@ cmGlobalVisualStudio10Generator::GenerateBuildCommand(
       }
     }
 
-    std::string plainConfig = config;
-    if (config.empty()) {
-      plainConfig = "Debug";
-    }
-
-    std::string platform = GetPlatformName();
-    if (proj) {
-      std::string extension =
-        cmSystemTools::GetFilenameLastExtension(proj->GetRelativePath());
-      extension = cmSystemTools::LowerCase(extension);
-      if (extension == ".csproj"_s) {
-        // Use correct platform name
-        platform =
-          slnData.GetConfigurationTarget(tname, plainConfig, platform);
-      }
-    }
-
-    makeCommand.Add(cmStrCat("/p:Configuration=", plainConfig));
-    makeCommand.Add(cmStrCat("/p:Platform=", platform));
+    makeCommand.Add(
+      cmStrCat("/p:Configuration=", config.empty() ? "Debug" : config));
+    makeCommand.Add(cmStrCat("/p:Platform=", this->GetPlatformName()));
     makeCommand.Add(
       cmStrCat("/p:VisualStudioVersion=", this->GetIDEVersion()));
 

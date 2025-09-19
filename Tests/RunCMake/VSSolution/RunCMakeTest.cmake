@@ -1,5 +1,12 @@
+cmake_minimum_required(VERSION 4.0)
 include(RunCMake)
-include(${CMAKE_CURRENT_LIST_DIR}/solution_parsing.cmake)
+
+if(RunCMake_GENERATOR MATCHES "Visual Studio 1[4-7]")
+  include(${CMAKE_CURRENT_LIST_DIR}/solution_parsing.cmake)
+  set(sln_ext "sln")
+else()
+  set(sln_ext "slnx")
+endif()
 
 run_cmake(DeployEnabled)
 run_cmake(OnePre)

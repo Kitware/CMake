@@ -206,14 +206,15 @@ char const* cmGlobalVisualStudio7Generator::ExternalProjectType(
 std::vector<cmGlobalGenerator::GeneratedMakeCommand>
 cmGlobalVisualStudio7Generator::GenerateBuildCommand(
   std::string const& makeProgram, std::string const& projectName,
-  std::string const& /*projectDir*/,
-  std::vector<std::string> const& targetNames, std::string const& config,
-  int /*jobs*/, bool /*verbose*/, cmBuildOptions /*buildOptions*/,
-  std::vector<std::string> const& makeOptions)
+  std::string const& projectDir, std::vector<std::string> const& targetNames,
+  std::string const& config, int /*jobs*/, bool /*verbose*/,
+  cmBuildOptions /*buildOptions*/, std::vector<std::string> const& makeOptions)
 {
   // Select the caller- or user-preferred make program, else devenv.
   std::string makeProgramSelected =
     this->SelectMakeProgram(makeProgram, this->GetDevEnvCommand());
+
+  std::string const slnFile = this->GetSLNFile(projectDir, projectName);
 
   // Ignore the above preference if it is msbuild.
   // Assume any other value is either a devenv or
@@ -249,7 +250,7 @@ cmGlobalVisualStudio7Generator::GenerateBuildCommand(
     GeneratedMakeCommand makeCommand;
     makeCommand.RequiresOutputForward = requiresOutputForward;
     makeCommand.Add(makeProgramSelected);
-    makeCommand.Add(cmStrCat(projectName, ".sln"));
+    makeCommand.Add(slnFile);
     makeCommand.Add((clean ? "/clean" : "/build"));
     makeCommand.Add((config.empty() ? "Debug" : config));
     makeCommand.Add("/project");

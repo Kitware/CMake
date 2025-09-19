@@ -38,14 +38,6 @@
 #include "cmUuid.h"
 #include "cmake.h"
 
-namespace {
-std::string GetSLNFile(cmLocalGenerator const* root)
-{
-  return cmStrCat(root->GetCurrentBinaryDirectory(), '/',
-                  root->GetProjectName(), ".sln");
-}
-}
-
 cmGlobalVisualStudioGenerator::cmGlobalVisualStudioGenerator(cmake* cm)
   : cmGlobalGenerator(cm)
 {
@@ -771,7 +763,7 @@ bool cmGlobalVisualStudioGenerator::Open(std::string const& bindir,
                                          std::string const& projectName,
                                          bool dryRun)
 {
-  std::string sln = cmStrCat(bindir, '/', projectName, ".sln");
+  std::string sln = this->GetSLNFile(bindir, projectName);
 
   if (dryRun) {
     return cmSystemTools::FileExists(sln, true);
@@ -1072,24 +1064,48 @@ cm::VS::Solution cmGlobalVisualStudioGenerator::CreateSolution(
     }
   }
 
-  if (!pgExtensibilityGlobals) {
-    pgExtensibilityGlobals =
-      solution.GetPropertyGroup("ExtensibilityGlobals"_s);
-    solution.PropertyGroups.emplace_back(pgExtensibilityGlobals);
-  }
-  std::string const solutionGuid =
-    this->GetGUID(cmStrCat(root->GetProjectName(), ".sln"));
-  pgExtensibilityGlobals->Map.emplace("SolutionGuid",
-                                      cmStrCat('{', solutionGuid, '}'));
+  if (this->Version <= cm::VS::Version::VS17) {
+    if (!pgExtensibilityGlobals) {
+      pgExtensibilityGlobals =
+        solution.GetPropertyGroup("ExtensibilityGlobals"_s);
+      solution.PropertyGroups.emplace_back(pgExtensibilityGlobals);
+    }
+    std::string const solutionGuid =
+      this->GetGUID(cmStrCat(root->GetProjectName(), ".sln"));
+    pgExtensibilityGlobals->Map.emplace("SolutionGuid",
+                                        cmStrCat('{', solutionGuid, '}'));
 
-  if (!pgExtensibilityAddIns) {
-    pgExtensibilityAddIns = solution.GetPropertyGroup("ExtensibilityAddIns"_s);
-    solution.PropertyGroups.emplace_back(pgExtensibilityAddIns);
+    if (!pgExtensibilityAddIns) {
+      pgExtensibilityAddIns =
+        solution.GetPropertyGroup("ExtensibilityAddIns"_s);
+      solution.PropertyGroups.emplace_back(pgExtensibilityAddIns);
+    }
   }
 
   solution.CanonicalizeOrder();
 
   return solution;
+}
+
+std::string cmGlobalVisualStudioGenerator::GetSLNFile(
+  cmLocalGenerator const* root) const
+{
+  return this->GetSLNFile(root->GetCurrentBinaryDirectory(),
+                          root->GetProjectName());
+}
+
+std::string cmGlobalVisualStudioGenerator::GetSLNFile(
+  std::string const& projectDir, std::string const& projectName) const
+{
+  std::string slnFile = projectDir;
+  if (!slnFile.empty()) {
+    slnFile.push_back('/');
+  }
+  slnFile = cmStrCat(slnFile, projectName, ".sln");
+  if (this->Version >= cm::VS::Version::VS18) {
+    slnFile += "x";
+  }
+  return slnFile;
 }
 
 void cmGlobalVisualStudioGenerator::Generate()
@@ -1152,7 +1168,11 @@ void cmGlobalVisualStudioGenerator::GenerateSolution(
   }
 
   cm::VS::Solution const solution = this->CreateSolution(root, projectTargets);
-  WriteSln(fout, solution);
+  if (this->Version >= cmGlobalVisualStudioGenerator::VSVersion::VS18) {
+    WriteSlnx(fout, solution);
+  } else {
+    WriteSln(fout, solution);
+  }
 
   if (fout.Close()) {
     this->FileReplacedDuringGenerate(fname);

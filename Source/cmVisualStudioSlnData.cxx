@@ -16,29 +16,32 @@ void cmSlnProjectEntry::AddProjectConfiguration(
 }
 
 std::string cmSlnProjectEntry::GetProjectConfiguration(
-  std::string const& solutionConfiguration)
+  std::string const& solutionConfiguration) const
 {
-  return projectConfigurationMap[solutionConfiguration];
+  auto i = projectConfigurationMap.find(solutionConfiguration);
+  if (i != projectConfigurationMap.end()) {
+    return i->second;
+  }
+  return {};
 }
 
-cm::optional<cmSlnProjectEntry> cmSlnData::GetProjectByGUID(
-  std::string const& projectGUID) const
+cmSlnProjectEntry* cmSlnData::GetProjectByGUID(std::string const& projectGUID)
 {
   auto it(ProjectsByGUID.find(projectGUID));
   if (it != ProjectsByGUID.end()) {
-    return it->second;
+    return &it->second;
   }
-  return cm::nullopt;
+  return nullptr;
 }
 
-cm::optional<cmSlnProjectEntry> cmSlnData::GetProjectByName(
+cmSlnProjectEntry const* cmSlnData::GetProjectByName(
   std::string const& projectName) const
 {
   auto it(ProjectNameIndex.find(projectName));
   if (it != ProjectNameIndex.end()) {
-    return it->second->second;
+    return &it->second->second;
   }
-  return cm::nullopt;
+  return nullptr;
 }
 
 std::vector<cmSlnProjectEntry> cmSlnData::GetProjects() const
@@ -75,7 +78,7 @@ std::string cmSlnData::GetConfigurationTarget(
 {
   std::string solutionTarget =
     cmStrCat(solutionConfiguration, '|', platformName);
-  cm::optional<cmSlnProjectEntry> project = GetProjectByName(projectName);
+  cmSlnProjectEntry const* project = GetProjectByName(projectName);
   if (!project) {
     return platformName;
   }

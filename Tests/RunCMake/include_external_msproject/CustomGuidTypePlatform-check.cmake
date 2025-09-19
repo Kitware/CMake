@@ -1,1 +1,1 @@
-check_project(CustomGuidTypePlatform external "aaa-bbb-ccc-111" "aaa-bbb-ccc-ddd-eee" "Custom Platform" "")
+include(${CMAKE_CURRENT_LIST_DIR}/CustomGuidTypePlatform-check-${sln_ext}.cmake)
