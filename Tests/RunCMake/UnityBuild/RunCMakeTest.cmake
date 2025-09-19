@@ -1,5 +1,11 @@
 include(RunCMake)
 
+# FASTBuild generator does Unity build natively
+# and has its own tests for it in "RunCMake/FASTBuild" folder.
+if(RunCMake_GENERATOR STREQUAL "FASTBuild")
+  return()
+endif()
+
 function(run_build name)
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/${name}-build)
   run_cmake(${name})

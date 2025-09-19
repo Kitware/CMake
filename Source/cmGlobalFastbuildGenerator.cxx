@@ -616,7 +616,8 @@ void cmGlobalFastbuildGenerator::WriteVariable(std::string const& key,
                                                int indent)
 {
   Indent(indent);
-  *this->BuildFileStream << "." << key << " " + op + " " << value << "\n";
+  *this->BuildFileStream << "." << key << " " + op + (value.empty() ? "" : " ")
+                         << value << "\n";
 }
 
 void cmGlobalFastbuildGenerator::WriteCommand(std::string const& command,
@@ -1164,6 +1165,24 @@ void cmGlobalFastbuildGenerator::WriteExec(FastbuildExecNode const& Exec,
   }
 }
 
+void cmGlobalFastbuildGenerator::WriteUnity(FastbuildUnityNode const& Unity)
+{
+  WriteCommand("Unity", Quote(Unity.Name), 1);
+  Indent(1);
+  *BuildFileStream << "{\n";
+  {
+    WriteVariable("UnityOutputPath", Quote(Unity.UnityOutputPath), 2);
+    WriteVariable("UnityOutputPattern", Quote(Unity.UnityOutputPattern), 2);
+    WriteArray("UnityInputFiles", Wrap(Unity.UnityInputFiles), 2);
+    if (!Unity.UnityInputIsolatedFiles.empty()) {
+      WriteArray("UnityInputIsolatedFiles",
+                 Wrap(Unity.UnityInputIsolatedFiles), 2);
+    }
+  }
+  Indent(1);
+  *BuildFileStream << "}\n";
+}
+
 void cmGlobalFastbuildGenerator::WriteObjectList(
   FastbuildObjectListNode const& ObjectList, bool allowDistribution)
 {
@@ -1194,7 +1213,12 @@ void cmGlobalFastbuildGenerator::WriteObjectList(
     WriteVariable("CompilerOutputExtension",
                   Quote(ObjectList.CompilerOutputExtension), 2);
     WriteVariable("CompilerOutputKeepBaseExtension", "true", 2);
-    WriteArray("CompilerInputFiles", Wrap(ObjectList.CompilerInputFiles), 2);
+    if (!ObjectList.CompilerInputUnity.empty()) {
+      WriteArray("CompilerInputUnity", Wrap(ObjectList.CompilerInputUnity), 2);
+    }
+    if (!ObjectList.CompilerInputFiles.empty()) {
+      WriteArray("CompilerInputFiles", Wrap(ObjectList.CompilerInputFiles), 2);
+    }
     if (!ObjectList.AllowCaching) {
       WriteVariable("AllowCaching", "false", 2);
     }
@@ -1348,6 +1372,11 @@ void cmGlobalFastbuildGenerator::WriteTarget(FastbuildTarget const& target)
 
   for (FastbuildCopyNode const& node : target.CopyNodes) {
     this->WriteCopy(node);
+  }
+
+  // Unity.
+  for (FastbuildUnityNode const& unity : target.UnityNodes) {
+    this->WriteUnity(unity);
   }
 
   // Objects.

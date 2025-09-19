@@ -126,6 +126,7 @@ enum class FastbuildTargetType
   EXEC,  // Exec node
   LINK,  // Library, DLL or Executable
   OBJECTLIST,
+  UNITY,
 };
 
 struct FastbuildTargetBase
@@ -209,6 +210,7 @@ struct FastbuildObjectListNode : public FastbuildTargetBase
   std::string CompilerOptions;
   std::string CompilerOutputPath;
   std::string CompilerOutputExtension;
+  std::vector<std::string> CompilerInputUnity;
   std::string PCHInputFile;
   std::string PCHOutputFile;
   std::string PCHOptions;
@@ -224,6 +226,18 @@ struct FastbuildObjectListNode : public FastbuildTargetBase
   std::string arch;
   FastbuildObjectListNode()
     : FastbuildTargetBase(FastbuildTargetType::OBJECTLIST)
+  {
+  }
+};
+
+struct FastbuildUnityNode : public FastbuildTargetBase
+{
+  std::string UnityOutputPath;
+  std::vector<std::string> UnityInputFiles;
+  std::string UnityOutputPattern;
+  std::vector<std::string> UnityInputIsolatedFiles;
+  FastbuildUnityNode()
+    : FastbuildTargetBase(FastbuildTargetType::UNITY)
   {
   }
 };
@@ -305,6 +319,7 @@ struct FastbuildTarget : public FastbuildTargetBase
 {
   std::map<std::string, std::string> Variables;
   std::vector<FastbuildObjectListNode> ObjectListNodes;
+  std::vector<FastbuildUnityNode> UnityNodes;
   // Potentially multiple libs for different archs (apple only);
   std::vector<FastbuildLinkerNode> LinkerNode;
   std::string RealOutput;
@@ -506,6 +521,7 @@ public:
 
   void WriteTarget(FastbuildTarget const& target);
   void WriteExec(FastbuildExecNode const& Exec, int indent = 1);
+  void WriteUnity(FastbuildUnityNode const& Unity);
   void WriteObjectList(FastbuildObjectListNode const& ObjectList,
                        bool allowDistribution);
   void WriteLinker(FastbuildLinkerNode const&, bool);

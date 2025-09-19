@@ -13,13 +13,9 @@
 #include "cmComputeLinkInformation.h"
 #include "cmFastbuildTargetGenerator.h"
 #include "cmGeneratorTarget.h"
+#include "cmGlobalFastbuildGenerator.h"
 #include "cmRulePlaceholderExpander.h"
 class cmSourceFile;
-struct FastbuildExecNode;
-struct FastbuildLinkerNode;
-struct FastbuildObjectListNode;
-struct FastbuildTarget;
-struct FastbuildTargetDep;
 
 class cmFastbuildNormalTargetGenerator : public cmFastbuildTargetGenerator
 {
@@ -74,7 +70,21 @@ private:
 
   std::vector<std::string> GetArches() const;
 
-  std::vector<FastbuildObjectListNode> GenerateObjects();
+  void GenerateObjects(FastbuildTarget& target);
+  FastbuildUnityNode GetOneUnity(std::set<std::string> const& isolatedFiles,
+                                 std::vector<std::string>& files,
+                                 int unitySize) const;
+
+  int GetUnityBatchSize() const;
+  std::vector<FastbuildUnityNode> GenerateUnity(
+    std::vector<FastbuildObjectListNode>& objects,
+    std::set<std::string> const& isolatedSources,
+    std::map<std::string, std::vector<std::string>> const& sourcesWithGroups);
+  FastbuildUnityNode GenerateGroupedUnityNode(
+    std::vector<std::string>& inputFiles,
+    std::map<std::string, std::vector<std::string>> const& sourcesWithGroups,
+    int& groupId);
+
   // Computes .CompilerOptions for the ObjectList node.
   void ComputeCompilerAndOptions(std::string const& compilerOptions,
                                  std::string const& staticCheckOptions,
