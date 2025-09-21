@@ -9,7 +9,7 @@
 #include <cm/string_view>
 #include <cmext/string_view>
 
-#include "cmGeneratorExpressionContext.h"
+#include "cmGenExEvaluation.h"
 #include "cmGeneratorExpressionEvaluator.h"
 #include "cmGeneratorTarget.h"
 #include "cmLocalGenerator.h"
@@ -62,15 +62,15 @@ cmGeneratorExpressionDAGChecker::Check() const
   return this->CheckResult;
 }
 
-void cmGeneratorExpressionDAGChecker::ReportError(
-  cmGeneratorExpressionContext* context, std::string const& expr)
+void cmGeneratorExpressionDAGChecker::ReportError(cm::GenEx::Evaluation* eval,
+                                                  std::string const& expr)
 {
   if (this->CheckResult == DAG) {
     return;
   }
 
-  context->HadError = true;
-  if (context->Quiet) {
+  eval->HadError = true;
+  if (eval->Quiet) {
     return;
   }
 
@@ -80,10 +80,10 @@ void cmGeneratorExpressionDAGChecker::ReportError(
     std::ostringstream e;
     e << "Error evaluating generator expression:\n"
       << "  " << expr << "\n"
-      << "Self reference on target \"" << context->HeadTarget->GetName()
+      << "Self reference on target \"" << eval->HeadTarget->GetName()
       << "\".\n";
-    context->LG->GetCMakeInstance()->IssueMessage(MessageType::FATAL_ERROR,
-                                                  e.str(), parent->Backtrace);
+    eval->LG->GetCMakeInstance()->IssueMessage(MessageType::FATAL_ERROR,
+                                               e.str(), parent->Backtrace);
     return;
   }
 
@@ -94,8 +94,8 @@ void cmGeneratorExpressionDAGChecker::ReportError(
     << "  " << expr << "\n"
     << "Dependency loop found.";
     /* clang-format on */
-    context->LG->GetCMakeInstance()->IssueMessage(MessageType::FATAL_ERROR,
-                                                  e.str(), context->Backtrace);
+    eval->LG->GetCMakeInstance()->IssueMessage(MessageType::FATAL_ERROR,
+                                               e.str(), eval->Backtrace);
   }
 
   int loopStep = 1;
@@ -105,8 +105,8 @@ void cmGeneratorExpressionDAGChecker::ReportError(
       << "  "
       << (parent->Content ? parent->Content->GetOriginalExpression() : expr)
       << "\n";
-    context->LG->GetCMakeInstance()->IssueMessage(MessageType::FATAL_ERROR,
-                                                  e.str(), parent->Backtrace);
+    eval->LG->GetCMakeInstance()->IssueMessage(MessageType::FATAL_ERROR,
+                                               e.str(), parent->Backtrace);
     parent = parent->Parent;
     ++loopStep;
   }

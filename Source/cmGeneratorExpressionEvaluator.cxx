@@ -8,7 +8,7 @@
 #  include <cm3p/json/value.h>
 #endif
 
-#include "cmGeneratorExpressionContext.h"
+#include "cmGenExEvaluation.h"
 #include "cmGeneratorExpressionNode.h"
 #include "cmLocalGenerator.h"
 #include "cmake.h"
@@ -29,8 +29,7 @@ std::string GeneratorExpressionContent::GetOriginalExpression() const
 
 std::string GeneratorExpressionContent::ProcessArbitraryContent(
   cmGeneratorExpressionNode const* node, std::string const& identifier,
-  cmGeneratorExpressionContext* context,
-  cmGeneratorExpressionDAGChecker* dagChecker,
+  cm::GenEx::Evaluation* eval, cmGeneratorExpressionDAGChecker* dagChecker,
   std::vector<cmGeneratorExpressionEvaluatorVector>::const_iterator pit) const
 {
   std::string result;
@@ -40,14 +39,14 @@ std::string GeneratorExpressionContent::ProcessArbitraryContent(
     for (auto const& pExprEval : *pit) {
       if (node->RequiresLiteralInput()) {
         if (pExprEval->GetType() != cmGeneratorExpressionEvaluator::Text) {
-          reportError(context, this->GetOriginalExpression(),
+          reportError(eval, this->GetOriginalExpression(),
                       "$<" + identifier +
                         "> expression requires literal input.");
           return std::string();
         }
       }
-      result += pExprEval->Evaluate(context, dagChecker);
-      if (context->HadError) {
+      result += pExprEval->Evaluate(eval, dagChecker);
+      if (eval->HadError) {
         return std::string();
       }
     }
@@ -58,26 +57,25 @@ std::string GeneratorExpressionContent::ProcessArbitraryContent(
   if (node->RequiresLiteralInput()) {
     std::vector<std::string> parameters;
     parameters.push_back(result);
-    return node->Evaluate(parameters, context, this, dagChecker);
+    return node->Evaluate(parameters, eval, this, dagChecker);
   }
   return result;
 }
 
 std::string GeneratorExpressionContent::Evaluate(
-  cmGeneratorExpressionContext* context,
+  cm::GenEx::Evaluation* eval,
   cmGeneratorExpressionDAGChecker* dagChecker) const
 {
 #ifndef CMAKE_BOOTSTRAP
-  auto evalProfilingRAII =
-    context->LG->GetCMakeInstance()->CreateProfilingEntry(
-      "genex_eval", this->GetOriginalExpression());
+  auto evalProfilingRAII = eval->LG->GetCMakeInstance()->CreateProfilingEntry(
+    "genex_eval", this->GetOriginalExpression());
 #endif
 
   std::string identifier;
   {
     for (auto const& pExprEval : this->IdentifierChildren) {
-      identifier += pExprEval->Evaluate(context, dagChecker);
-      if (context->HadError) {
+      identifier += pExprEval->Evaluate(eval, dagChecker);
+      if (eval->HadError) {
         return std::string();
       }
     }
@@ -87,7 +85,7 @@ std::string GeneratorExpressionContent::Evaluate(
     cmGeneratorExpressionNode::GetNode(identifier);
 
   if (!node) {
-    reportError(context, this->GetOriginalExpression(),
+    reportError(eval, this->GetOriginalExpression(),
                 "Expression did not evaluate to a known generator expression");
     return std::string();
   }
@@ -96,27 +94,26 @@ std::string GeneratorExpressionContent::Evaluate(
     if (node->NumExpectedParameters() == 1 &&
         node->AcceptsArbitraryContentParameter()) {
       if (this->ParamChildren.empty()) {
-        reportError(context, this->GetOriginalExpression(),
+        reportError(eval, this->GetOriginalExpression(),
                     "$<" + identifier + "> expression requires a parameter.");
       }
     } else {
       std::vector<std::string> parameters;
-      this->EvaluateParameters(node, identifier, context, dagChecker,
-                               parameters);
+      this->EvaluateParameters(node, identifier, eval, dagChecker, parameters);
     }
     return std::string();
   }
 
   std::vector<std::string> parameters;
-  this->EvaluateParameters(node, identifier, context, dagChecker, parameters);
-  if (context->HadError) {
+  this->EvaluateParameters(node, identifier, eval, dagChecker, parameters);
+  if (eval->HadError) {
     return std::string();
   }
 
   {
 #ifndef CMAKE_BOOTSTRAP
     auto execProfilingRAII =
-      context->LG->GetCMakeInstance()->CreateProfilingEntry(
+      eval->LG->GetCMakeInstance()->CreateProfilingEntry(
         "genex_exec", identifier, [&parameters]() -> Json::Value {
           Json::Value args = Json::objectValue;
           if (!parameters.empty()) {
@@ -129,14 +126,13 @@ std::string GeneratorExpressionContent::Evaluate(
         });
 #endif
 
-    return node->Evaluate(parameters, context, this, dagChecker);
+    return node->Evaluate(parameters, eval, this, dagChecker);
   }
 }
 
 std::string GeneratorExpressionContent::EvaluateParameters(
   cmGeneratorExpressionNode const* node, std::string const& identifier,
-  cmGeneratorExpressionContext* context,
-  cmGeneratorExpressionDAGChecker* dagChecker,
+  cm::GenEx::Evaluation* eval, cmGeneratorExpressionDAGChecker* dagChecker,
   std::vector<std::string>& parameters) const
 {
   int const numExpected = node->NumExpectedParameters();
@@ -149,14 +145,14 @@ std::string GeneratorExpressionContent::EvaluateParameters(
     for (; pit != pend; ++pit, ++counter) {
       if (acceptsArbitraryContent && counter == numExpected) {
         parameters.push_back(this->ProcessArbitraryContent(
-          node, identifier, context, dagChecker, pit));
+          node, identifier, eval, dagChecker, pit));
         return std::string();
       }
       std::string parameter;
       if (node->ShouldEvaluateNextParameter(parameters, parameter)) {
         for (auto const& pExprEval : *pit) {
-          parameter += pExprEval->Evaluate(context, dagChecker);
-          if (context->HadError) {
+          parameter += pExprEval->Evaluate(eval, dagChecker);
+          if (eval->HadError) {
             return std::string();
           }
         }
@@ -168,10 +164,10 @@ std::string GeneratorExpressionContent::EvaluateParameters(
   if ((numExpected > cmGeneratorExpressionNode::DynamicParameters &&
        static_cast<unsigned int>(numExpected) != parameters.size())) {
     if (numExpected == 0) {
-      reportError(context, this->GetOriginalExpression(),
+      reportError(eval, this->GetOriginalExpression(),
                   "$<" + identifier + "> expression requires no parameters.");
     } else if (numExpected == 1) {
-      reportError(context, this->GetOriginalExpression(),
+      reportError(eval, this->GetOriginalExpression(),
                   "$<" + identifier +
                     "> expression requires "
                     "exactly one parameter.");
@@ -180,24 +176,24 @@ std::string GeneratorExpressionContent::EvaluateParameters(
       e << "$<" + identifier + "> expression requires " << numExpected
         << " comma separated parameters, but got " << parameters.size()
         << " instead.";
-      reportError(context, this->GetOriginalExpression(), e.str());
+      reportError(eval, this->GetOriginalExpression(), e.str());
     }
     return std::string();
   }
 
   if (numExpected == cmGeneratorExpressionNode::OneOrMoreParameters &&
       parameters.empty()) {
-    reportError(context, this->GetOriginalExpression(),
+    reportError(eval, this->GetOriginalExpression(),
                 "$<" + identifier +
                   "> expression requires at least one parameter.");
   } else if (numExpected == cmGeneratorExpressionNode::TwoOrMoreParameters &&
              parameters.size() < 2) {
-    reportError(context, this->GetOriginalExpression(),
+    reportError(eval, this->GetOriginalExpression(),
                 "$<" + identifier +
                   "> expression requires at least two parameters.");
   } else if (numExpected == cmGeneratorExpressionNode::OneOrZeroParameters &&
              parameters.size() > 1) {
-    reportError(context, this->GetOriginalExpression(),
+    reportError(eval, this->GetOriginalExpression(),
                 "$<" + identifier +
                   "> expression requires one or zero parameters.");
   }

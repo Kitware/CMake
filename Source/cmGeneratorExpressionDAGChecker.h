@@ -10,8 +10,13 @@
 
 #include "cmListFileCache.h"
 
+namespace cm {
+namespace GenEx {
+struct Evaluation;
+}
+}
+
 struct GeneratorExpressionContent;
-struct cmGeneratorExpressionContext;
 class cmGeneratorTarget;
 class cmLocalGenerator;
 
@@ -41,8 +46,7 @@ struct cmGeneratorExpressionDAGChecker
 
   Result Check() const;
 
-  void ReportError(cmGeneratorExpressionContext* context,
-                   std::string const& expr);
+  void ReportError(cm::GenEx::Evaluation* eval, std::string const& expr);
 
   bool EvaluatingTransitiveProperty() const;
   bool EvaluatingGenexExpression() const;

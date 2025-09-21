@@ -12,7 +12,7 @@
 
 #include "cmsys/RegularExpression.hxx"
 
-#include "cmGeneratorExpressionContext.h"
+#include "cmGenExEvaluation.h"
 #include "cmGeneratorExpressionDAGChecker.h"
 #include "cmGeneratorExpressionEvaluator.h"
 #include "cmGeneratorExpressionLexer.h"
@@ -68,10 +68,10 @@ std::string const& cmCompiledGeneratorExpression::Evaluate(
   cmGeneratorExpressionDAGChecker* dagChecker,
   cmGeneratorTarget const* currentTarget, std::string const& language) const
 {
-  cmGeneratorExpressionContext context(
-    lg, config, this->Quiet, headTarget,
-    currentTarget ? currentTarget : headTarget, this->EvaluateForBuildsystem,
-    this->Backtrace, language);
+  cm::GenEx::Evaluation eval(lg, config, this->Quiet, headTarget,
+                             currentTarget ? currentTarget : headTarget,
+                             this->EvaluateForBuildsystem, this->Backtrace,
+                             language);
 
   if (!this->NeedsEvaluation) {
     return this->Input;
@@ -80,28 +80,28 @@ std::string const& cmCompiledGeneratorExpression::Evaluate(
   this->Output.clear();
 
   for (auto const& it : this->Evaluators) {
-    this->Output += it->Evaluate(&context, dagChecker);
+    this->Output += it->Evaluate(&eval, dagChecker);
 
-    this->SeenTargetProperties.insert(context.SeenTargetProperties.cbegin(),
-                                      context.SeenTargetProperties.cend());
-    if (context.HadError) {
+    this->SeenTargetProperties.insert(eval.SeenTargetProperties.cbegin(),
+                                      eval.SeenTargetProperties.cend());
+    if (eval.HadError) {
       this->Output.clear();
       break;
     }
   }
 
-  this->MaxLanguageStandard = context.MaxLanguageStandard;
+  this->MaxLanguageStandard = eval.MaxLanguageStandard;
 
-  if (!context.HadError) {
-    this->HadContextSensitiveCondition = context.HadContextSensitiveCondition;
-    this->HadHeadSensitiveCondition = context.HadHeadSensitiveCondition;
+  if (!eval.HadError) {
+    this->HadContextSensitiveCondition = eval.HadContextSensitiveCondition;
+    this->HadHeadSensitiveCondition = eval.HadHeadSensitiveCondition;
     this->HadLinkLanguageSensitiveCondition =
-      context.HadLinkLanguageSensitiveCondition;
-    this->SourceSensitiveTargets = context.SourceSensitiveTargets;
+      eval.HadLinkLanguageSensitiveCondition;
+    this->SourceSensitiveTargets = eval.SourceSensitiveTargets;
   }
 
-  this->DependTargets = context.DependTargets;
-  this->AllTargetsSeen = context.AllTargets;
+  this->DependTargets = eval.DependTargets;
+  this->AllTargetsSeen = eval.AllTargets;
   return this->Output;
 }
 

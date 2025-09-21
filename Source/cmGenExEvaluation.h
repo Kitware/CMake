@@ -11,14 +11,16 @@
 class cmGeneratorTarget;
 class cmLocalGenerator;
 
-struct cmGeneratorExpressionContext
+namespace cm {
+namespace GenEx {
+
+struct Evaluation final
 {
-  cmGeneratorExpressionContext(cmLocalGenerator const* lg, std::string config,
-                               bool quiet, cmGeneratorTarget const* headTarget,
-                               cmGeneratorTarget const* currentTarget,
-                               bool evaluateForBuildsystem,
-                               cmListFileBacktrace backtrace,
-                               std::string language);
+  Evaluation(cmLocalGenerator const* lg, std::string config, bool quiet,
+             cmGeneratorTarget const* headTarget,
+             cmGeneratorTarget const* currentTarget,
+             bool evaluateForBuildsystem, cmListFileBacktrace backtrace,
+             std::string language);
 
   cmListFileBacktrace Backtrace;
   std::set<cmGeneratorTarget*> DependTargets;
@@ -42,3 +44,6 @@ struct cmGeneratorExpressionContext
   bool HadLinkLanguageSensitiveCondition = false;
   bool EvaluateForBuildsystem;
 };
+
+}
+}
