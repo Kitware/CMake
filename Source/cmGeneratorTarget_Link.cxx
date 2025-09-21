@@ -567,8 +567,7 @@ void cmGeneratorTarget::ExpandLinkItems(std::string const& prop,
                              entry.Backtrace);
     std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(entry.Value);
     cge->SetEvaluateForBuildsystem(true);
-    cmList libs{ cge->Evaluate(context.LG, context.Config, headTarget,
-                               &dagChecker, this, context.Language) };
+    cmList libs{ cge->Evaluate(context, &dagChecker, headTarget, this) };
 
     auto linkFeature = cmLinkItem::DEFAULT;
     for (auto const& lib : libs) {
@@ -1170,9 +1169,7 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
     std::unique_ptr<cmCompiledGeneratorExpression> const cge =
       ge.Parse(entry.Value);
     cge->SetEvaluateForBuildsystem(true);
-    std::string const& evaluated =
-      cge->Evaluate(context.LG, context.Config, this, &dagChecker, nullptr,
-                    context.Language);
+    std::string const& evaluated = cge->Evaluate(context, &dagChecker, this);
     cmList llibs(evaluated);
     if (cge->GetHadHeadSensitiveCondition()) {
       impl.HadHeadSensitiveCondition = true;

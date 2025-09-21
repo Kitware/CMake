@@ -1084,14 +1084,12 @@ Json::Value DirectoryObject::DumpInstaller(cmInstallGenerator* gen)
     cm::GenEx::Context context(target->LocalGenerator, this->Config);
 
     auto dirCges = fileSet->CompileDirectoryEntries();
-    auto dirs = fileSet->EvaluateDirectoryEntries(dirCges, context.LG,
-                                                  context.Config, target);
+    auto dirs = fileSet->EvaluateDirectoryEntries(dirCges, context, target);
 
     auto entryCges = fileSet->CompileFileEntries();
     std::map<std::string, std::vector<std::string>> entries;
     for (auto const& entryCge : entryCges) {
-      fileSet->EvaluateFileEntry(dirs, entries, entryCge, context.LG,
-                                 context.Config, target);
+      fileSet->EvaluateFileEntry(dirs, entries, entryCge, context, target);
     }
 
     Json::Value files = Json::arrayValue;
@@ -1615,15 +1613,15 @@ std::pair<Json::Value, Target::FileSetDatabase> Target::DumpFileSets()
       auto fileEntries = fs->CompileFileEntries();
       auto directoryEntries = fs->CompileDirectoryEntries();
 
-      auto directories = fs->EvaluateDirectoryEntries(
-        directoryEntries, context.LG, context.Config, this->GT);
+      auto directories =
+        fs->EvaluateDirectoryEntries(directoryEntries, context, this->GT);
 
       fsJson.append(this->DumpFileSet(fs, directories));
 
       std::map<std::string, std::vector<std::string>> files_per_dirs;
       for (auto const& entry : fileEntries) {
-        fs->EvaluateFileEntry(directories, files_per_dirs, entry, context.LG,
-                              context.Config, this->GT);
+        fs->EvaluateFileEntry(directories, files_per_dirs, entry, context,
+                              this->GT);
       }
 
       for (auto const& files_per_dir : files_per_dirs) {

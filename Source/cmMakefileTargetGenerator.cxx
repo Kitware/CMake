@@ -364,12 +364,12 @@ void cmMakefileTargetGenerator::WriteTargetBuildRules()
     auto fileEntries = file_set->CompileFileEntries();
     auto directoryEntries = file_set->CompileDirectoryEntries();
     auto directories = file_set->EvaluateDirectoryEntries(
-      directoryEntries, context.LG, context.Config, this->GeneratorTarget);
+      directoryEntries, context, this->GeneratorTarget);
 
     std::map<std::string, std::vector<std::string>> files;
     for (auto const& entry : fileEntries) {
-      file_set->EvaluateFileEntry(directories, files, entry, context.LG,
-                                  context.Config, this->GeneratorTarget);
+      file_set->EvaluateFileEntry(directories, files, entry, context,
+                                  this->GeneratorTarget);
     }
 
     for (auto const& it : files) {

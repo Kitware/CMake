@@ -341,13 +341,12 @@ std::string cmExportInstallCMakeConfigGenerator::GetFileSetFiles(
 
   for (auto const& config : configs) {
     cm::GenEx::Context context(gte->LocalGenerator, config);
-    auto directories = fileSet->EvaluateDirectoryEntries(
-      directoryEntries, context.LG, context.Config, gte);
+    auto directories =
+      fileSet->EvaluateDirectoryEntries(directoryEntries, context, gte);
 
     std::map<std::string, std::vector<std::string>> files;
     for (auto const& entry : fileEntries) {
-      fileSet->EvaluateFileEntry(directories, files, entry, context.LG,
-                                 context.Config, gte);
+      fileSet->EvaluateFileEntry(directories, files, entry, context, gte);
     }
     auto unescapedDest = destCge->Evaluate(gte->LocalGenerator, config, gte);
     auto dest =

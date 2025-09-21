@@ -136,13 +136,13 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetLinkDirectories(
   this->DebugLinkDirectoriesDone = true;
 
   EvaluatedTargetPropertyEntries entries = EvaluateTargetPropertyEntries(
-    this, config, language, &dagChecker, this->LinkDirectoriesEntries);
+    this, context, &dagChecker, this->LinkDirectoriesEntries);
 
-  AddInterfaceEntries(
-    this, context.Config, "INTERFACE_LINK_DIRECTORIES", context.Language,
-    &dagChecker, entries, IncludeRuntimeInterface::Yes,
-    this->GetPolicyStatusCMP0099() == cmPolicies::NEW ? UseTo::Link
-                                                      : UseTo::Compile);
+  AddInterfaceEntries(this, "INTERFACE_LINK_DIRECTORIES", context, &dagChecker,
+                      entries, IncludeRuntimeInterface::Yes,
+                      this->GetPolicyStatusCMP0099() == cmPolicies::NEW
+                        ? UseTo::Link
+                        : UseTo::Compile);
 
   processLinkDirectories(this, entries, result, uniqueDirectories,
                          debugDirectories);

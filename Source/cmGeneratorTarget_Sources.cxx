@@ -47,12 +47,13 @@ namespace {
 using UseTo = cmGeneratorTarget::UseTo;
 
 void AddObjectEntries(cmGeneratorTarget const* headTarget,
-                      std::string const& config,
+                      cm::GenEx::Context const& context,
                       cmGeneratorExpressionDAGChecker* dagChecker,
                       EvaluatedTargetPropertyEntries& entries)
 {
   if (cmLinkImplementationLibraries const* impl =
-        headTarget->GetLinkImplementationLibraries(config, UseTo::Link)) {
+        headTarget->GetLinkImplementationLibraries(context.Config,
+                                                   UseTo::Link)) {
     entries.HadContextSensitiveCondition = impl->HadContextSensitiveCondition;
     for (cmLinkImplItem const& lib : impl->Libraries) {
       if (lib.Target &&
@@ -67,8 +68,7 @@ void AddObjectEntries(cmGeneratorTarget const* headTarget,
         cge->SetEvaluateForBuildsystem(true);
 
         EvaluatedTargetPropertyEntry ee(lib, lib.Backtrace);
-        cmExpandList(cge->Evaluate(headTarget->GetLocalGenerator(), config,
-                                   headTarget, dagChecker),
+        cmExpandList(cge->Evaluate(context, dagChecker, headTarget),
                      ee.Values);
         if (cge->GetHadContextSensitiveCondition()) {
           ee.ContextDependent = true;
@@ -80,16 +80,14 @@ void AddObjectEntries(cmGeneratorTarget const* headTarget,
 }
 
 void addFileSetEntry(cmGeneratorTarget const* headTarget,
-                     std::string const& config,
+                     cm::GenEx::Context const& context,
                      cmGeneratorExpressionDAGChecker* dagChecker,
                      cmFileSet const* fileSet,
                      EvaluatedTargetPropertyEntries& entries)
 {
-  cm::GenEx::Context context(headTarget->GetLocalGenerator(), config,
-                             /*language=*/std::string());
   auto dirCges = fileSet->CompileDirectoryEntries();
-  auto dirs = fileSet->EvaluateDirectoryEntries(
-    dirCges, context.LG, context.Config, headTarget, dagChecker);
+  auto dirs = fileSet->EvaluateDirectoryEntries(dirCges, context, headTarget,
+                                                dagChecker);
   bool contextSensitiveDirs = false;
   for (auto const& dirCge : dirCges) {
     if (dirCge->GetHadContextSensitiveCondition()) {
@@ -101,8 +99,8 @@ void addFileSetEntry(cmGeneratorTarget const* headTarget,
   for (auto& entryCge : fileSet->CompileFileEntries()) {
     auto tpe = cmGeneratorTarget::TargetPropertyEntry::CreateFileSet(
       dirs, contextSensitiveDirs, std::move(entryCge), fileSet);
-    entries.Entries.emplace_back(EvaluateTargetPropertyEntry(
-      headTarget, context.Config, context.Language, dagChecker, *tpe));
+    entries.Entries.emplace_back(
+      EvaluateTargetPropertyEntry(headTarget, context, dagChecker, *tpe));
     EvaluatedTargetPropertyEntry const& entry = entries.Entries.back();
     for (auto const& file : entry.Values) {
       auto* sf = headTarget->Makefile->GetOrCreateSource(file);
@@ -142,20 +140,20 @@ void addFileSetEntry(cmGeneratorTarget const* headTarget,
 }
 
 void AddFileSetEntries(cmGeneratorTarget const* headTarget,
-                       std::string const& config,
+                       cm::GenEx::Context const& context,
                        cmGeneratorExpressionDAGChecker* dagChecker,
                        EvaluatedTargetPropertyEntries& entries)
 {
   for (auto const& entry : headTarget->Target->GetHeaderSetsEntries()) {
     for (auto const& name : cmList{ entry.Value }) {
       auto const* headerSet = headTarget->Target->GetFileSet(name);
-      addFileSetEntry(headTarget, config, dagChecker, headerSet, entries);
+      addFileSetEntry(headTarget, context, dagChecker, headerSet, entries);
     }
   }
   for (auto const& entry : headTarget->Target->GetCxxModuleSetsEntries()) {
     for (auto const& name : cmList{ entry.Value }) {
       auto const* cxxModuleSet = headTarget->Target->GetFileSet(name);
-      addFileSetEntry(headTarget, config, dagChecker, cxxModuleSet, entries);
+      addFileSetEntry(headTarget, context, dagChecker, cxxModuleSet, entries);
     }
   }
 }
@@ -251,7 +249,7 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetSourceFilePaths(
   };
 
   EvaluatedTargetPropertyEntries entries = EvaluateTargetPropertyEntries(
-    this, context.Config, context.Language, &dagChecker, this->SourceEntries);
+    this, context, &dagChecker, this->SourceEntries);
 
   std::unordered_set<std::string> uniqueSrcs;
   bool contextDependentDirectSources =
@@ -259,9 +257,9 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetSourceFilePaths(
 
   // Collect INTERFACE_SOURCES of all direct link-dependencies.
   EvaluatedTargetPropertyEntries linkInterfaceSourcesEntries;
-  AddInterfaceEntries(
-    this, context.Config, "INTERFACE_SOURCES", context.Language, &dagChecker,
-    linkInterfaceSourcesEntries, IncludeRuntimeInterface::No, UseTo::Compile);
+  AddInterfaceEntries(this, "INTERFACE_SOURCES", context, &dagChecker,
+                      linkInterfaceSourcesEntries, IncludeRuntimeInterface::No,
+                      UseTo::Compile);
   bool contextDependentInterfaceSources = processSources(
     this, linkInterfaceSourcesEntries, files, uniqueSrcs, debugSources);
 
@@ -269,7 +267,7 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetSourceFilePaths(
   bool contextDependentObjects = false;
   if (this->GetType() != cmStateEnums::OBJECT_LIBRARY) {
     EvaluatedTargetPropertyEntries linkObjectsEntries;
-    AddObjectEntries(this, context.Config, &dagChecker, linkObjectsEntries);
+    AddObjectEntries(this, context, &dagChecker, linkObjectsEntries);
     contextDependentObjects = processSources(this, linkObjectsEntries, files,
                                              uniqueSrcs, debugSources);
     // Note that for imported targets or multi-config generators supporting
@@ -280,7 +278,7 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetSourceFilePaths(
 
   // Collect this target's file sets.
   EvaluatedTargetPropertyEntries fileSetEntries;
-  AddFileSetEntries(this, context.Config, &dagChecker, fileSetEntries);
+  AddFileSetEntries(this, context, &dagChecker, fileSetEntries);
   bool contextDependentFileSets =
     processSources(this, fileSetEntries, files, uniqueSrcs, debugSources);
 

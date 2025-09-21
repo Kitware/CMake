@@ -1971,10 +1971,10 @@ bool cmQtAutoGenInitializer::SetupWriteAutogenInfo()
           cmGeneratorExpressionDAGChecker dagChecker{
             this->GenTarget, "AUTOMOC_MACRO_NAMES", nullptr, nullptr, context,
           };
-          AddInterfaceEntries(
-            this->GenTarget, context.Config, "INTERFACE_AUTOMOC_MACRO_NAMES",
-            context.Language, &dagChecker, InterfaceAutoMocMacroNamesEntries,
-            IncludeRuntimeInterface::Yes);
+          AddInterfaceEntries(this->GenTarget, "INTERFACE_AUTOMOC_MACRO_NAMES",
+                              context, &dagChecker,
+                              InterfaceAutoMocMacroNamesEntries,
+                              IncludeRuntimeInterface::Yes);
         }
       }
     } else {
@@ -1982,10 +1982,9 @@ bool cmQtAutoGenInitializer::SetupWriteAutogenInfo()
       cmGeneratorExpressionDAGChecker dagChecker{
         this->GenTarget, "AUTOMOC_MACRO_NAMES", nullptr, nullptr, context,
       };
-      AddInterfaceEntries(this->GenTarget, context.Config,
-                          "INTERFACE_AUTOMOC_MACRO_NAMES", context.Language,
-                          &dagChecker, InterfaceAutoMocMacroNamesEntries,
-                          IncludeRuntimeInterface::Yes);
+      AddInterfaceEntries(
+        this->GenTarget, "INTERFACE_AUTOMOC_MACRO_NAMES", context, &dagChecker,
+        InterfaceAutoMocMacroNamesEntries, IncludeRuntimeInterface::Yes);
     }
 
     for (auto const& entry : InterfaceAutoMocMacroNamesEntries.Entries) {

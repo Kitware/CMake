@@ -16,6 +16,12 @@
 #include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
 
+namespace cm {
+namespace GenEx {
+struct Context;
+}
+}
+
 class cmake;
 class cmCompiledGeneratorExpression;
 class cmGeneratorTarget;
@@ -104,10 +110,13 @@ public:
 
   std::string const& Evaluate(
     cmLocalGenerator const* lg, std::string const& config,
+    cmGeneratorTarget const* headTarget = nullptr) const;
+
+  std::string const& Evaluate(
+    cm::GenEx::Context const& context,
+    cmGeneratorExpressionDAGChecker* dagChecker,
     cmGeneratorTarget const* headTarget = nullptr,
-    cmGeneratorExpressionDAGChecker* dagChecker = nullptr,
-    cmGeneratorTarget const* currentTarget = nullptr,
-    std::string const& language = std::string()) const;
+    cmGeneratorTarget const* currentTarget = nullptr) const;
 
   /** Get set of targets found during evaluations.  */
   std::set<cmGeneratorTarget*> const& GetTargets() const

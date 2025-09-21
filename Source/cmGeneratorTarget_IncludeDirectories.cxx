@@ -237,8 +237,7 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetIncludeDirectories(
   this->DebugIncludesDone = true;
 
   EvaluatedTargetPropertyEntries entries = EvaluateTargetPropertyEntries(
-    this, context.Config, context.Language, &dagChecker,
-    this->IncludeDirectoriesEntries);
+    this, context, &dagChecker, this->IncludeDirectoriesEntries);
 
   if (lang == "Swift") {
     AddLangSpecificImplicitIncludeDirectories(
@@ -265,9 +264,8 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetIncludeDirectories(
       entries);
   }
 
-  AddInterfaceEntries(this, context.Config, "INTERFACE_INCLUDE_DIRECTORIES",
-                      context.Language, &dagChecker, entries,
-                      IncludeRuntimeInterface::Yes);
+  AddInterfaceEntries(this, "INTERFACE_INCLUDE_DIRECTORIES", context,
+                      &dagChecker, entries, IncludeRuntimeInterface::Yes);
 
   processIncludeDirectories(this, entries, includes, uniqueIncludes,
                             debugIncludes);

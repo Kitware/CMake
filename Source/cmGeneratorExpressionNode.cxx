@@ -64,8 +64,7 @@ std::string cmGeneratorExpressionNode::EvaluateDependentExpression(
   cge->SetEvaluateForBuildsystem(eval->EvaluateForBuildsystem);
   cge->SetQuiet(eval->Quiet);
   std::string result =
-    cge->Evaluate(eval->Context.LG, eval->Context.Config, headTarget,
-                  dagChecker, currentTarget, eval->Context.Language);
+    cge->Evaluate(eval->Context, dagChecker, headTarget, currentTarget);
   if (cge->GetHadContextSensitiveCondition()) {
     eval->HadContextSensitiveCondition = true;
   }

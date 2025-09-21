@@ -27,6 +27,7 @@
 
 namespace cm {
 namespace GenEx {
+struct Context;
 struct Evaluation;
 }
 }
@@ -1543,10 +1544,8 @@ public:
     cmFileSet const* fileSet, cmLinkImplItem const& item = NoLinkImplItem);
 
   virtual std::string const& Evaluate(
-    cmLocalGenerator* lg, std::string const& config,
-    cmGeneratorTarget const* headTarget,
-    cmGeneratorExpressionDAGChecker* dagChecker,
-    std::string const& language) const = 0;
+    cm::GenEx::Context const& context, cmGeneratorTarget const* headTarget,
+    cmGeneratorExpressionDAGChecker* dagChecker) const = 0;
 
   virtual cmListFileBacktrace GetBacktrace() const = 0;
   virtual std::string const& GetInput() const = 0;

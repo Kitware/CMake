@@ -5445,16 +5445,15 @@ bool cmGeneratorTarget::AddHeaderSetVerification()
            cmMakefile::GeneratorConfigQuery::IncludeEmptyConfig)) {
       cm::GenEx::Context context(this->LocalGenerator, config);
       if (first || dirCgesContextSensitive) {
-        dirs = fileSet->EvaluateDirectoryEntries(dirCges, context.LG,
-                                                 context.Config, this);
+        dirs = fileSet->EvaluateDirectoryEntries(dirCges, context, this);
         dirCgesContextSensitive =
           std::any_of(dirCges.begin(), dirCges.end(), contextSensitive);
       }
       if (first || fileCgesContextSensitive) {
         filesPerDir.clear();
         for (auto const& fileCge : fileCges) {
-          fileSet->EvaluateFileEntry(dirs, filesPerDir, fileCge, context.LG,
-                                     context.Config, this);
+          fileSet->EvaluateFileEntry(dirs, filesPerDir, fileCge, context,
+                                     this);
           if (fileCge->GetHadContextSensitiveCondition()) {
             fileCgesContextSensitive = true;
           }
@@ -5989,13 +5988,12 @@ void cmGeneratorTarget::BuildFileSetInfoCache(std::string const& config) const
 
     auto fileEntries = file_set->CompileFileEntries();
     auto directoryEntries = file_set->CompileDirectoryEntries();
-    auto directories = file_set->EvaluateDirectoryEntries(
-      directoryEntries, context.LG, context.Config, this);
+    auto directories =
+      file_set->EvaluateDirectoryEntries(directoryEntries, context, this);
 
     std::map<std::string, std::vector<std::string>> files;
     for (auto const& entry : fileEntries) {
-      file_set->EvaluateFileEntry(directories, files, entry, context.LG,
-                                  context.Config, this);
+      file_set->EvaluateFileEntry(directories, files, entry, context, this);
     }
 
     for (auto const& it : files) {

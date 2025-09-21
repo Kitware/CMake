@@ -126,13 +126,13 @@ cmInstallFileSetGenerator::CalculateFilesPerDir(
   cm::GenEx::Context context(this->LocalGenerator, config);
 
   auto dirCges = this->FileSet->CompileDirectoryEntries();
-  auto dirs = this->FileSet->EvaluateDirectoryEntries(
-    dirCges, context.LG, context.Config, this->Target);
+  auto dirs =
+    this->FileSet->EvaluateDirectoryEntries(dirCges, context, this->Target);
 
   auto fileCges = this->FileSet->CompileFileEntries();
   for (auto const& fileCge : fileCges) {
-    this->FileSet->EvaluateFileEntry(dirs, result, fileCge, context.LG,
-                                     context.Config, this->Target);
+    this->FileSet->EvaluateFileEntry(dirs, result, fileCge, context,
+                                     this->Target);
   }
 
   return result;

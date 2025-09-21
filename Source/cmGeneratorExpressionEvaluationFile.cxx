@@ -44,8 +44,8 @@ void cmGeneratorExpressionEvaluationFile::Generate(
   std::string rawCondition = this->Condition->GetInput();
   cmGeneratorTarget* target = lg->FindGeneratorTargetToUse(this->Target);
   if (!rawCondition.empty()) {
-    std::string condResult = this->Condition->Evaluate(
-      context.LG, context.Config, target, nullptr, nullptr, context.Language);
+    std::string condResult =
+      this->Condition->Evaluate(context, nullptr, target);
     if (condResult == "0") {
       return;
     }
@@ -60,10 +60,9 @@ void cmGeneratorExpressionEvaluationFile::Generate(
     }
   }
 
-  std::string const outputFileName = this->GetOutputFileName(
-    context.LG, target, context.Config, context.Language);
-  std::string const& outputContent = inputExpression->Evaluate(
-    context.LG, context.Config, target, nullptr, nullptr, context.Language);
+  std::string const outputFileName = this->GetOutputFileName(context, target);
+  std::string const& outputContent =
+    inputExpression->Evaluate(context, nullptr, target);
 
   auto it = outputFiles.find(outputFileName);
 
@@ -125,8 +124,9 @@ void cmGeneratorExpressionEvaluationFile::CreateOutputFile(
   cmGeneratorTarget* target = lg->FindGeneratorTargetToUse(this->Target);
   gg->GetEnabledLanguages(enabledLanguages);
 
-  for (std::string const& le : enabledLanguages) {
-    std::string const name = this->GetOutputFileName(lg, target, config, le);
+  for (std::string const& lang : enabledLanguages) {
+    cm::GenEx::Context context(lg, config, lang);
+    std::string const name = this->GetOutputFileName(context, target);
     cmSourceFile* sf = lg->GetMakefile()->GetOrCreateGeneratedSource(name);
 
     // Tell the build system generators that there is no build rule
@@ -206,12 +206,10 @@ std::string cmGeneratorExpressionEvaluationFile::GetInputFileName(
 }
 
 std::string cmGeneratorExpressionEvaluationFile::GetOutputFileName(
-  cmLocalGenerator const* lg, cmGeneratorTarget* target,
-  std::string const& config, std::string const& lang)
+  cm::GenEx::Context const& context, cmGeneratorTarget* target)
 {
-  cm::GenEx::Context context(lg, config, lang);
-  std::string outputFileName = this->OutputFileExpr->Evaluate(
-    context.LG, context.Config, target, nullptr, nullptr, context.Language);
+  std::string outputFileName =
+    this->OutputFileExpr->Evaluate(context, nullptr, target);
 
   if (cmSystemTools::FileIsFullPath(outputFileName)) {
     outputFileName = cmSystemTools::CollapseFullPath(outputFileName);

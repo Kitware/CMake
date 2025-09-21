@@ -244,13 +244,11 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetCompileOptions(
 
   this->DebugCompileOptionsDone = true;
 
-  EvaluatedTargetPropertyEntries entries =
-    EvaluateTargetPropertyEntries(this, context.Config, context.Language,
-                                  &dagChecker, this->CompileOptionsEntries);
+  EvaluatedTargetPropertyEntries entries = EvaluateTargetPropertyEntries(
+    this, context, &dagChecker, this->CompileOptionsEntries);
 
-  AddInterfaceEntries(this, context.Config, "INTERFACE_COMPILE_OPTIONS",
-                      context.Language, &dagChecker, entries,
-                      IncludeRuntimeInterface::Yes);
+  AddInterfaceEntries(this, "INTERFACE_COMPILE_OPTIONS", context, &dagChecker,
+                      entries, IncludeRuntimeInterface::Yes);
 
   processOptions(this, entries, result, uniqueOptions, debugOptions,
                  "compile options", OptionsParse::Shell);
@@ -289,13 +287,11 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetCompileFeatures(
 
   this->DebugCompileFeaturesDone = true;
 
-  EvaluatedTargetPropertyEntries entries =
-    EvaluateTargetPropertyEntries(this, context.Config, context.Language,
-                                  &dagChecker, this->CompileFeaturesEntries);
+  EvaluatedTargetPropertyEntries entries = EvaluateTargetPropertyEntries(
+    this, context, &dagChecker, this->CompileFeaturesEntries);
 
-  AddInterfaceEntries(this, context.Config, "INTERFACE_COMPILE_FEATURES",
-                      context.Language, &dagChecker, entries,
-                      IncludeRuntimeInterface::Yes);
+  AddInterfaceEntries(this, "INTERFACE_COMPILE_FEATURES", context, &dagChecker,
+                      entries, IncludeRuntimeInterface::Yes);
 
   processOptions(this, entries, result, uniqueFeatures, debugFeatures,
                  "compile features", OptionsParse::None);
@@ -342,12 +338,10 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetCompileDefinitions(
   this->DebugCompileDefinitionsDone = true;
 
   EvaluatedTargetPropertyEntries entries = EvaluateTargetPropertyEntries(
-    this, context.Config, context.Language, &dagChecker,
-    this->CompileDefinitionsEntries);
+    this, context, &dagChecker, this->CompileDefinitionsEntries);
 
-  AddInterfaceEntries(this, context.Config, "INTERFACE_COMPILE_DEFINITIONS",
-                      context.Language, &dagChecker, entries,
-                      IncludeRuntimeInterface::Yes);
+  AddInterfaceEntries(this, "INTERFACE_COMPILE_DEFINITIONS", context,
+                      &dagChecker, entries, IncludeRuntimeInterface::Yes);
 
   processOptions(this, entries, list, uniqueOptions, debugDefines,
                  "compile definitions", OptionsParse::None);
@@ -382,13 +376,11 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetPrecompileHeaders(
 
   this->DebugPrecompileHeadersDone = true;
 
-  EvaluatedTargetPropertyEntries entries =
-    EvaluateTargetPropertyEntries(this, context.Config, context.Language,
-                                  &dagChecker, this->PrecompileHeadersEntries);
+  EvaluatedTargetPropertyEntries entries = EvaluateTargetPropertyEntries(
+    this, context, &dagChecker, this->PrecompileHeadersEntries);
 
-  AddInterfaceEntries(this, context.Config, "INTERFACE_PRECOMPILE_HEADERS",
-                      context.Language, &dagChecker, entries,
-                      IncludeRuntimeInterface::Yes);
+  AddInterfaceEntries(this, "INTERFACE_PRECOMPILE_HEADERS", context,
+                      &dagChecker, entries, IncludeRuntimeInterface::Yes);
 
   std::vector<BT<std::string>> list;
   processOptions(this, entries, list, uniqueOptions, debugDefines,
@@ -442,15 +434,14 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetLinkOptions(
 
   this->DebugLinkOptionsDone = true;
 
-  EvaluatedTargetPropertyEntries entries =
-    EvaluateTargetPropertyEntries(this, context.Config, context.Language,
-                                  &dagChecker, this->LinkOptionsEntries);
+  EvaluatedTargetPropertyEntries entries = EvaluateTargetPropertyEntries(
+    this, context, &dagChecker, this->LinkOptionsEntries);
 
-  AddInterfaceEntries(
-    this, context.Config, "INTERFACE_LINK_OPTIONS", context.Language,
-    &dagChecker, entries, IncludeRuntimeInterface::Yes,
-    this->GetPolicyStatusCMP0099() == cmPolicies::NEW ? UseTo::Link
-                                                      : UseTo::Compile);
+  AddInterfaceEntries(this, "INTERFACE_LINK_OPTIONS", context, &dagChecker,
+                      entries, IncludeRuntimeInterface::Yes,
+                      this->GetPolicyStatusCMP0099() == cmPolicies::NEW
+                        ? UseTo::Link
+                        : UseTo::Compile);
 
   processOptions(this, entries, result, uniqueOptions, debugOptions,
                  "link options", OptionsParse::Shell, this->IsDeviceLink());
@@ -624,8 +615,8 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetStaticLibraryLinkOptions(
   if (cmValue linkOptions = this->GetProperty("STATIC_LIBRARY_OPTIONS")) {
     std::unique_ptr<TargetPropertyEntry> entry = TargetPropertyEntry::Create(
       *this->LocalGenerator->GetCMakeInstance(), *linkOptions);
-    entries.Entries.emplace_back(EvaluateTargetPropertyEntry(
-      this, context.Config, context.Language, &dagChecker, *entry));
+    entries.Entries.emplace_back(
+      EvaluateTargetPropertyEntry(this, context, &dagChecker, *entry));
   }
   processOptions(this, entries, result, uniqueOptions, false,
                  "static library link options", OptionsParse::Shell);
@@ -671,15 +662,15 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetLinkDepends(
     for (auto const& depend : depends) {
       std::unique_ptr<TargetPropertyEntry> entry = TargetPropertyEntry::Create(
         *this->LocalGenerator->GetCMakeInstance(), depend);
-      entries.Entries.emplace_back(EvaluateTargetPropertyEntry(
-        this, context.Config, context.Language, &dagChecker, *entry));
+      entries.Entries.emplace_back(
+        EvaluateTargetPropertyEntry(this, context, &dagChecker, *entry));
     }
   }
-  AddInterfaceEntries(
-    this, context.Config, "INTERFACE_LINK_DEPENDS", context.Language,
-    &dagChecker, entries, IncludeRuntimeInterface::Yes,
-    this->GetPolicyStatusCMP0099() == cmPolicies::NEW ? UseTo::Link
-                                                      : UseTo::Compile);
+  AddInterfaceEntries(this, "INTERFACE_LINK_DEPENDS", context, &dagChecker,
+                      entries, IncludeRuntimeInterface::Yes,
+                      this->GetPolicyStatusCMP0099() == cmPolicies::NEW
+                        ? UseTo::Link
+                        : UseTo::Compile);
 
   processOptions(this, entries, result, uniqueOptions, false, "link depends",
                  OptionsParse::None);

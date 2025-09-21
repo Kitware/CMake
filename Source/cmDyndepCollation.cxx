@@ -110,12 +110,12 @@ TdiSourceInfo CollationInformationSources(cmGeneratorTarget const* gt,
     auto fileEntries = file_set->CompileFileEntries();
     auto directoryEntries = file_set->CompileDirectoryEntries();
 
-    auto directories = file_set->EvaluateDirectoryEntries(
-      directoryEntries, context.LG, context.Config, gt);
+    auto directories =
+      file_set->EvaluateDirectoryEntries(directoryEntries, context, gt);
     std::map<std::string, std::vector<std::string>> files_per_dirs;
     for (auto const& entry : fileEntries) {
-      file_set->EvaluateFileEntry(directories, files_per_dirs, entry,
-                                  context.LG, context.Config, gt);
+      file_set->EvaluateFileEntry(directories, files_per_dirs, entry, context,
+                                  gt);
     }
 
     Json::Value fs_dest = Json::nullValue;
