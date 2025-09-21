@@ -160,45 +160,6 @@ std::string cmFastbuildTargetGenerator::GetCustomCommandTargetName(
   return targetName;
 }
 
-std::vector<std::string> cmFastbuildTargetGenerator::GetInputFiles(
-  cmCustomCommandGenerator const& ccg, FastbuildBuildStep step) const
-{
-  std::vector<std::string> result;
-  auto const& cc = ccg.GetCC();
-  LogMessage("CC Name: " + GetCustomCommandTargetName(cc, step));
-  for (std::string const& dep : ccg.GetDepends()) {
-    LogMessage("Custom command dep: " + dep);
-    // Tested in EmptyDepends test.
-    std::string realDep;
-    if (this->LocalCommonGenerator->GetRealDependency(dep, Config, realDep)) {
-      auto list = cmList{ cmGeneratorExpression::Evaluate(
-        this->ConvertToFastbuildPath(realDep), this->LocalGenerator, Config) };
-      if (!realDep.empty()) {
-        LogMessage("Custom command real dep: " + realDep);
-        for (auto const& item : list) {
-          result.emplace_back(item);
-        }
-      }
-    }
-  }
-
-  if (cc.HasMainDependency()) {
-    LogMessage("CC main dep: " + cc.GetMainDependency());
-  }
-  LogMessage("cc Target: " + cc.GetTarget());
-  for (auto const& impDep : cc.GetImplicitDepends()) {
-    LogMessage("CC imp dep: " + impDep.first + ", " + impDep.second);
-  }
-  for (std::string const& dep : cc.GetOutputs()) {
-    LogMessage("Custom command output: " + this->ConvertToFastbuildPath(dep));
-  }
-  for (std::string const& dep : cc.GetByproducts()) {
-    LogMessage("Custom command byproducts: " +
-               this->ConvertToFastbuildPath(dep));
-  }
-  return result;
-}
-
 void cmFastbuildTargetGenerator::WriteScriptProlog(cmsys::ofstream& file) const
 {
 #ifdef _WIN32
@@ -387,15 +348,24 @@ void cmFastbuildTargetGenerator::AddExecArguments(
     cmGlobalFastbuildGenerator::GetExternalShellExecutable();
 }
 
-std::vector<std::string> cmFastbuildTargetGenerator::GetDepends(
-  cmCustomCommandGenerator const& ccg) const
+void cmFastbuildTargetGenerator::GetDepends(
+  cmCustomCommandGenerator const& ccg, std::string const& currentCCName,
+  std::vector<std::string>& fileLevelDeps,
+  std::set<FastbuildTargetDep>& targetDep) const
 {
-  std::vector<std::string> res;
   for (auto dep : ccg.GetDepends()) {
     LogMessage("Dep: " + dep);
     auto orig = dep;
     if (this->LocalCommonGenerator->GetRealDependency(dep, Config, dep)) {
       LogMessage("Real dep: " + dep);
+      if (!dep.empty()) {
+        LogMessage("Custom command real dep: " + dep);
+        for (auto const& item : cmList{ cmGeneratorExpression::Evaluate(
+               this->ConvertToFastbuildPath(dep), this->LocalGenerator,
+               Config) }) {
+          fileLevelDeps.emplace_back(item);
+        }
+      }
     }
     dep = this->ConvertToFastbuildPath(dep);
     LogMessage("Real dep converted: " + dep);
@@ -404,7 +374,7 @@ std::vector<std::string> cmFastbuildTargetGenerator::GetDepends(
     if (targetInfo.Target) {
       LogMessage("dep: " + dep + ", target: " + targetInfo.Target->GetName());
       auto const& target = targetInfo.Target;
-      auto const processCCs = [this, &res,
+      auto const processCCs = [this, &currentCCName, &targetDep,
                                dep](std::vector<cmCustomCommand> const& ccs,
                                     FastbuildBuildStep step) {
         for (auto const& cc : ccs) {
@@ -413,8 +383,10 @@ std::vector<std::string> cmFastbuildTargetGenerator::GetDepends(
                        this->ConvertToFastbuildPath(output));
             if (this->ConvertToFastbuildPath(output) == dep) {
               auto ccName = this->GetCustomCommandTargetName(cc, step);
-              LogMessage("Additional CC dep from target: " + ccName);
-              res.emplace_back(std::move(ccName));
+              if (ccName != currentCCName) {
+                LogMessage("Additional CC dep from target: " + ccName);
+                targetDep.emplace(std::move(ccName));
+              }
             }
           }
           for (auto const& byproduct : cc.GetByproducts()) {
@@ -422,8 +394,10 @@ std::vector<std::string> cmFastbuildTargetGenerator::GetDepends(
                        this->ConvertToFastbuildPath(byproduct));
             if (this->ConvertToFastbuildPath(byproduct) == dep) {
               auto ccName = this->GetCustomCommandTargetName(cc, step);
-              LogMessage("Additional CC dep from target: " + ccName);
-              res.emplace_back(std::move(ccName));
+              if (ccName != currentCCName) {
+                LogMessage("Additional CC dep from target: " + ccName);
+                targetDep.emplace(std::move(ccName));
+              }
             }
           }
         }
@@ -438,7 +412,9 @@ std::vector<std::string> cmFastbuildTargetGenerator::GetDepends(
       LogMessage("dep: " + dep + ", no source, byproduct: " +
                  std::to_string(targetInfo.SourceIsByproduct));
       // Tested in "OutDir" test.
-      res.emplace_back(std::move(orig));
+      if (!cmSystemTools::FileIsFullPath(orig)) {
+        targetDep.emplace(std::move(orig));
+      }
       continue;
     }
     if (!targetInfo.Source->GetCustomCommand()) {
@@ -448,11 +424,12 @@ std::vector<std::string> cmFastbuildTargetGenerator::GetDepends(
     if (targetInfo.Source && targetInfo.Source->GetCustomCommand()) {
       auto ccName = this->GetCustomCommandTargetName(
         *targetInfo.Source->GetCustomCommand(), FastbuildBuildStep::REST);
-      LogMessage("Additional CC dep: " + ccName);
-      res.emplace_back(std::move(ccName));
+      if (ccName != currentCCName) {
+        LogMessage("Additional CC dep: " + ccName);
+        targetDep.emplace(std::move(ccName));
+      }
     }
   }
-  return res;
 }
 
 void cmFastbuildTargetGenerator::ReplaceProblematicMakeVars(
@@ -615,10 +592,12 @@ FastbuildExecNodes cmFastbuildTargetGenerator::GenerateCommands(
 
     FastbuildExecNode execNode;
     execNode.Name = execName;
-    std::vector<std::string> const inputFiles = GetInputFiles(ccg, buildStep);
-    for (std::string const& file : inputFiles) {
-      LogMessage("Input file: " + file);
-    }
+
+    // Add depncencies to "ExecInput" so that FASTBuild will re-run the Exec
+    // when needed, but also add to "PreBuildDependencies" for correct sorting.
+    // Tested in "ObjectLibrary / complexOneConfig" tests.
+    GetDepends(ccg, execName, execNode.ExecInput,
+               execNode.PreBuildDependencies);
     for (auto const& util : ccg.GetUtilities()) {
       auto const& utilTargetName = util.Value.first;
       LogMessage("Util: " + utilTargetName +
@@ -634,9 +613,8 @@ FastbuildExecNodes cmFastbuildTargetGenerator::GenerateCommands(
             this->ConvertToFastbuildPath(target->ImportedGetFullPath(
               Config, cmStateEnums::ArtifactType::ImportLibraryArtifact));
         }
-        LogMessage("adding file level dep on imporated target: " +
-                   importedLoc);
-        execNode.PreBuildDependencies.emplace(std::move(importedLoc));
+        LogMessage("adding file level dep on imported target: " + importedLoc);
+        execNode.ExecInput.emplace_back(std::move(importedLoc));
         continue;
       }
       // This CC uses some executable produced by another target. Add explicit
@@ -649,7 +627,6 @@ FastbuildExecNodes cmFastbuildTargetGenerator::GenerateCommands(
       }
     }
 
-    execNode.ExecInput = inputFiles;
     execs.Alias.PreBuildDependencies.emplace(execNode.Name);
 
     LogMessage(cmStrCat("cmdLines size ", cmdLines.size()));
@@ -665,14 +642,6 @@ FastbuildExecNodes cmFastbuildTargetGenerator::GenerateCommands(
       WriteScriptProlog(scriptFile);
       WriteCmdsToFile(scriptFile, cmdLines);
       WriteScriptEpilog(scriptFile);
-    }
-
-    // Tested in "ObjectLibrary / complexOneConfig" tests.
-    for (std::string& additionalDep : GetDepends(ccg)) {
-      if (additionalDep != execName) {
-        LogMessage("Adding additional dep: " + additionalDep);
-        execNode.PreBuildDependencies.emplace(std::move(additionalDep));
-      }
     }
 
     if (buildStep == FastbuildBuildStep::POST_BUILD) {

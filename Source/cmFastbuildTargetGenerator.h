@@ -84,8 +84,10 @@ protected:
   std::string GetCdCommand(cmCustomCommandGenerator const& ccg) const;
   std::string GetScriptWorkingDir(cmCustomCommandGenerator const& ccg) const;
   std::string GetScriptFilename(std::string const& utilityTargetName) const;
-  std::vector<std::string> GetDepends(
-    cmCustomCommandGenerator const& ccg) const;
+  void GetDepends(cmCustomCommandGenerator const& ccg,
+                  std::string const& currentCCName,
+                  std::vector<std::string>& fileLevelDeps,
+                  std::set<FastbuildTargetDep>& targetDep) const;
 
   void AddCommentPrinting(std::vector<std::string>& cmdLines,
                           cmCustomCommandGenerator const& ccg) const;
@@ -107,9 +109,6 @@ protected:
   std::string MakeCustomLauncher(cmCustomCommandGenerator const& ccg);
 
   std::string GetCustomCommandTargetName(cmCustomCommand const& cc,
-                                         FastbuildBuildStep step) const;
-
-  std::vector<std::string> GetInputFiles(cmCustomCommandGenerator const& ccg,
                                          FastbuildBuildStep step) const;
 
   void WriteScriptProlog(cmsys::ofstream& file) const;
