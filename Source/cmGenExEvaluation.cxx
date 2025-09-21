@@ -1,14 +1,17 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file LICENSE.rst or https://cmake.org/licensing for details.  */
-#include "cmGeneratorExpressionContext.h"
+#include "cmGenExEvaluation.h"
 
 #include <utility>
 
-cmGeneratorExpressionContext::cmGeneratorExpressionContext(
-  cmLocalGenerator const* lg, std::string config, bool quiet,
-  cmGeneratorTarget const* headTarget, cmGeneratorTarget const* currentTarget,
-  bool evaluateForBuildsystem, cmListFileBacktrace backtrace,
-  std::string language)
+namespace cm {
+namespace GenEx {
+
+Evaluation::Evaluation(cmLocalGenerator const* lg, std::string config,
+                       bool quiet, cmGeneratorTarget const* headTarget,
+                       cmGeneratorTarget const* currentTarget,
+                       bool evaluateForBuildsystem,
+                       cmListFileBacktrace backtrace, std::string language)
   : Backtrace(std::move(backtrace))
   , LG(lg)
   , Config(std::move(config))
@@ -18,4 +21,7 @@ cmGeneratorExpressionContext::cmGeneratorExpressionContext(
   , Quiet(quiet)
   , EvaluateForBuildsystem(evaluateForBuildsystem)
 {
+}
+
+}
 }

@@ -272,9 +272,9 @@ add_library(
   cmGccDepfileLexerHelper.h
   cmGccDepfileReader.cxx
   cmGccDepfileReader.h
+  cmGenExEvaluation.cxx
+  cmGenExEvaluation.h
   cmGeneratedFileStream.cxx
-  cmGeneratorExpressionContext.cxx
-  cmGeneratorExpressionContext.h
   cmGeneratorExpressionDAGChecker.cxx
   cmGeneratorExpressionDAGChecker.h
   cmGeneratorExpressionEvaluationFile.cxx

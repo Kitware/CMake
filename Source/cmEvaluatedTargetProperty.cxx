@@ -5,7 +5,7 @@
 #include <unordered_map>
 #include <utility>
 
-#include "cmGeneratorExpressionContext.h"
+#include "cmGenExEvaluation.h"
 #include "cmGeneratorTarget.h"
 #include "cmLinkItem.h"
 #include "cmList.h"
@@ -64,13 +64,13 @@ void addInterfaceEntry(cmGeneratorTarget const* headTarget,
       // Pretend $<TARGET_PROPERTY:lib.Target,prop> appeared in our
       // caller's property and hand-evaluate it as if it were compiled.
       // Create a context as cmCompiledGeneratorExpression::Evaluate does.
-      cmGeneratorExpressionContext context(
-        headTarget->GetLocalGenerator(), config, false, headTarget, headTarget,
-        true, lib.Backtrace, lang);
-      cmExpandList(lib.Target->EvaluateInterfaceProperty(prop, &context,
-                                                         dagChecker, usage),
-                   ee.Values);
-      ee.ContextDependent = context.HadContextSensitiveCondition;
+      cm::GenEx::Evaluation eval(headTarget->GetLocalGenerator(), config,
+                                 false, headTarget, headTarget, true,
+                                 lib.Backtrace, lang);
+      cmExpandList(
+        lib.Target->EvaluateInterfaceProperty(prop, &eval, dagChecker, usage),
+        ee.Values);
+      ee.ContextDependent = eval.HadContextSensitiveCondition;
       entries.Entries.emplace_back(std::move(ee));
     }
   }

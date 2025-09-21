@@ -7,9 +7,14 @@
 #include <string>
 #include <vector>
 
+namespace cm {
+namespace GenEx {
+struct Evaluation;
+}
+}
+
 class cmGeneratorTarget;
 struct GeneratorExpressionContent;
-struct cmGeneratorExpressionContext;
 struct cmGeneratorExpressionDAGChecker;
 
 struct cmGeneratorExpressionNode
@@ -39,13 +44,12 @@ struct cmGeneratorExpressionNode
   }
 
   virtual std::string Evaluate(
-    std::vector<std::string> const& parameters,
-    cmGeneratorExpressionContext* context,
+    std::vector<std::string> const& parameters, cm::GenEx::Evaluation* eval,
     GeneratorExpressionContent const* content,
     cmGeneratorExpressionDAGChecker* dagChecker) const = 0;
 
   static std::string EvaluateDependentExpression(
-    std::string const& prop, cmGeneratorExpressionContext* context,
+    std::string const& prop, cm::GenEx::Evaluation* eval,
     cmGeneratorTarget const* headTarget,
     cmGeneratorExpressionDAGChecker* dagChecker,
     cmGeneratorTarget const* currentTarget);
@@ -54,5 +58,5 @@ struct cmGeneratorExpressionNode
     std::string const& identifier);
 };
 
-void reportError(cmGeneratorExpressionContext* context,
-                 std::string const& expr, std::string const& result);
+void reportError(cm::GenEx::Evaluation* eval, std::string const& expr,
+                 std::string const& result);

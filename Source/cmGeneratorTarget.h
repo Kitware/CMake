@@ -25,6 +25,12 @@
 #include "cmStateTypes.h"
 #include "cmValue.h"
 
+namespace cm {
+namespace GenEx {
+struct Evaluation;
+}
+}
+
 class cmake;
 enum class cmBuildStep;
 class cmCompiledGeneratorExpression;
@@ -38,7 +44,6 @@ class cmSourceFile;
 struct cmSyntheticTargetCache;
 class cmTarget;
 
-struct cmGeneratorExpressionContext;
 struct cmGeneratorExpressionDAGChecker;
 
 class cmGeneratorTarget
@@ -986,7 +991,7 @@ public:
   class TargetPropertyEntry;
 
   std::string EvaluateInterfaceProperty(
-    std::string const& prop, cmGeneratorExpressionContext* context,
+    std::string const& prop, cm::GenEx::Evaluation* eval,
     cmGeneratorExpressionDAGChecker* dagCheckerParent, UseTo usage) const;
 
   struct TransitiveProperty
@@ -1296,7 +1301,7 @@ private:
 
   mutable std::unordered_map<std::string, bool> MaybeInterfacePropertyExists;
   bool MaybeHaveInterfaceProperty(std::string const& prop,
-                                  cmGeneratorExpressionContext* context,
+                                  cm::GenEx::Evaluation* eval,
                                   UseTo usage) const;
 
   using TargetPropertyEntryVector =
