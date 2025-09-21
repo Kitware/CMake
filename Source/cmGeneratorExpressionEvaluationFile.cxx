@@ -190,7 +190,7 @@ void cmGeneratorExpressionEvaluationFile::Generate(cmLocalGenerator* lg)
 }
 
 std::string cmGeneratorExpressionEvaluationFile::GetInputFileName(
-  cmLocalGenerator* lg)
+  cmLocalGenerator const* lg)
 {
   std::string inputFileName = this->Input;
 
@@ -204,8 +204,8 @@ std::string cmGeneratorExpressionEvaluationFile::GetInputFileName(
 }
 
 std::string cmGeneratorExpressionEvaluationFile::GetOutputFileName(
-  cmLocalGenerator* lg, cmGeneratorTarget* target, std::string const& config,
-  std::string const& lang)
+  cmLocalGenerator const* lg, cmGeneratorTarget* target,
+  std::string const& config, std::string const& lang)
 {
   std::string outputFileName =
     this->OutputFileExpr->Evaluate(lg, config, target, nullptr, nullptr, lang);
@@ -220,7 +220,7 @@ std::string cmGeneratorExpressionEvaluationFile::GetOutputFileName(
 }
 
 std::string cmGeneratorExpressionEvaluationFile::FixRelativePath(
-  std::string const& relativePath, PathRole role, cmLocalGenerator* lg)
+  std::string const& relativePath, PathRole role, cmLocalGenerator const* lg)
 {
   std::string resultPath;
   switch (this->PolicyStatusCMP0070) {
