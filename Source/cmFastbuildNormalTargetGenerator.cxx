@@ -925,6 +925,18 @@ void cmFastbuildNormalTargetGenerator::Generate()
 
   AdditionalCleanFiles();
 
+  if (!fastbuildTarget.DependenciesAlias.PreBuildDependencies.empty()) {
+    for (FastbuildObjectListNode& objListNode :
+         fastbuildTarget.ObjectListNodes) {
+      objListNode.PreBuildDependencies.emplace(
+        fastbuildTarget.DependenciesAlias.Name);
+    }
+    for (auto& linkerNode : fastbuildTarget.LinkerNode) {
+      linkerNode.PreBuildDependencies.emplace(
+        fastbuildTarget.DependenciesAlias.Name);
+    }
+  }
+
   this->GetGlobalGenerator()->AddTarget(std::move(fastbuildTarget));
 }
 
