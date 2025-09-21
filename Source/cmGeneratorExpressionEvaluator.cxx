@@ -8,6 +8,7 @@
 #  include <cm3p/json/value.h>
 #endif
 
+#include "cmGenExContext.h"
 #include "cmGenExEvaluation.h"
 #include "cmGeneratorExpressionNode.h"
 #include "cmLocalGenerator.h"
@@ -67,8 +68,9 @@ std::string GeneratorExpressionContent::Evaluate(
   cmGeneratorExpressionDAGChecker* dagChecker) const
 {
 #ifndef CMAKE_BOOTSTRAP
-  auto evalProfilingRAII = eval->LG->GetCMakeInstance()->CreateProfilingEntry(
-    "genex_eval", this->GetOriginalExpression());
+  auto evalProfilingRAII =
+    eval->Context.LG->GetCMakeInstance()->CreateProfilingEntry(
+      "genex_eval", this->GetOriginalExpression());
 #endif
 
   std::string identifier;
@@ -113,7 +115,7 @@ std::string GeneratorExpressionContent::Evaluate(
   {
 #ifndef CMAKE_BOOTSTRAP
     auto execProfilingRAII =
-      eval->LG->GetCMakeInstance()->CreateProfilingEntry(
+      eval->Context.LG->GetCMakeInstance()->CreateProfilingEntry(
         "genex_exec", identifier, [&parameters]() -> Json::Value {
           Json::Value args = Json::objectValue;
           if (!parameters.empty()) {

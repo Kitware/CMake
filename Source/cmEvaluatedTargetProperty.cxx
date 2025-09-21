@@ -5,6 +5,7 @@
 #include <unordered_map>
 #include <utility>
 
+#include "cmGenExContext.h"
 #include "cmGenExEvaluation.h"
 #include "cmGeneratorTarget.h"
 #include "cmLinkItem.h"
@@ -64,9 +65,9 @@ void addInterfaceEntry(cmGeneratorTarget const* headTarget,
       // Pretend $<TARGET_PROPERTY:lib.Target,prop> appeared in our
       // caller's property and hand-evaluate it as if it were compiled.
       // Create a context as cmCompiledGeneratorExpression::Evaluate does.
-      cm::GenEx::Evaluation eval(headTarget->GetLocalGenerator(), config,
-                                 false, headTarget, headTarget, true,
-                                 lib.Backtrace, lang);
+      cm::GenEx::Evaluation eval(
+        cm::GenEx::Context(headTarget->GetLocalGenerator(), config, lang),
+        false, headTarget, headTarget, true, lib.Backtrace);
       cmExpandList(
         lib.Target->EvaluateInterfaceProperty(prop, &eval, dagChecker, usage),
         ee.Values);

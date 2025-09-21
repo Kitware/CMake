@@ -12,6 +12,7 @@
 
 #include "cmsys/RegularExpression.hxx"
 
+#include "cmGenExContext.h"
 #include "cmGenExEvaluation.h"
 #include "cmGeneratorExpressionDAGChecker.h"
 #include "cmGeneratorExpressionEvaluator.h"
@@ -68,10 +69,10 @@ std::string const& cmCompiledGeneratorExpression::Evaluate(
   cmGeneratorExpressionDAGChecker* dagChecker,
   cmGeneratorTarget const* currentTarget, std::string const& language) const
 {
-  cm::GenEx::Evaluation eval(lg, config, this->Quiet, headTarget,
+  cm::GenEx::Evaluation eval(cm::GenEx::Context(lg, config, language),
+                             this->Quiet, headTarget,
                              currentTarget ? currentTarget : headTarget,
-                             this->EvaluateForBuildsystem, this->Backtrace,
-                             language);
+                             this->EvaluateForBuildsystem, this->Backtrace);
 
   if (!this->NeedsEvaluation) {
     return this->Input;
