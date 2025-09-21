@@ -156,7 +156,7 @@ cmFileSet::CompileDirectoryEntries() const
 
 std::vector<std::string> cmFileSet::EvaluateDirectoryEntries(
   std::vector<std::unique_ptr<cmCompiledGeneratorExpression>> const& cges,
-  cmLocalGenerator* lg, std::string const& config,
+  cmLocalGenerator const* lg, std::string const& config,
   cmGeneratorTarget const* target,
   cmGeneratorExpressionDAGChecker* dagChecker) const
 {
@@ -218,7 +218,7 @@ void cmFileSet::EvaluateFileEntry(
   std::vector<std::string> const& dirs,
   std::map<std::string, std::vector<std::string>>& filesPerDir,
   std::unique_ptr<cmCompiledGeneratorExpression> const& cge,
-  cmLocalGenerator* lg, std::string const& config,
+  cmLocalGenerator const* lg, std::string const& config,
   cmGeneratorTarget const* target,
   cmGeneratorExpressionDAGChecker* dagChecker) const
 {
