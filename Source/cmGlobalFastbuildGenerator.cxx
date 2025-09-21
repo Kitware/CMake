@@ -1255,7 +1255,8 @@ void cmGlobalFastbuildGenerator::WriteLinker(
       WriteVariable("AllowDistribution", "false", 2);
     }
 
-    if (!LinkerNode.Compiler.empty()) {
+    if (!LinkerNode.Compiler.empty() &&
+        LinkerNode.Type == FastbuildLinkerNode::STATIC_LIBRARY) {
       WriteVariable("Compiler", LinkerNode.Compiler, 2);
       WriteVariable("CompilerOptions", Quote(LinkerNode.CompilerOptions), 2);
       WriteVariable("CompilerOutputPath", Quote("."), 2);
