@@ -39,6 +39,9 @@ struct cmListFileLexer_s
   size_t size;
   FILE* file;
   size_t cr;
+  char read_buffer[4];
+  size_t read_size;
+  size_t read_position;
   char* string_buffer;
   char* string_position;
   size_t string_left;
@@ -353,9 +356,26 @@ static int cmListFileLexerInput(cmListFileLexer* lexer, char* buffer,
          does not convert newlines on all platforms.  Move any
          trailing CR to the start of the buffer for the next read. */
       size_t cr = lexer->cr;
-      size_t n;
+      size_t n = 0;
       buffer[0] = '\r';
-      n = fread(buffer + cr, 1, bufferSize - cr, lexer->file);
+
+      size_t actualBufferSize = bufferSize - cr;
+      char* p = buffer + cr;
+      size_t readLeft = lexer->read_size - lexer->read_position;
+
+      /* Absorb the bytes that were read during BOM detection, if any. */
+      if (readLeft > 0) {
+        size_t actualReadSize =
+          actualBufferSize >= readLeft ? readLeft : actualBufferSize;
+        memcpy(p, lexer->read_buffer + lexer->read_position, actualReadSize);
+        lexer->read_position += actualReadSize;
+        p += actualReadSize;
+        n += actualReadSize;
+        actualBufferSize -= actualReadSize;
+      }
+
+      n += fread(p, 1, actualBufferSize, lexer->file);
+
       if (n) {
         char* o = buffer;
         const char* i = buffer;
@@ -409,6 +429,11 @@ static void cmListFileLexerDestroy(cmListFileLexer* lexer)
       fclose(lexer->file);
       lexer->file = 0;
     }
+    if (lexer->read_size != 0) {
+      memset(lexer->read_buffer, 0, sizeof(lexer->read_buffer));
+      lexer->read_size = 0;
+      lexer->read_position = 0;
+    }
     if (lexer->string_buffer) {
       free(lexer->string_buffer);
       lexer->string_buffer = 0;
@@ -439,45 +464,66 @@ void cmListFileLexer_Delete(cmListFileLexer* lexer)
 }
 
 /*--------------------------------------------------------------------------*/
-static cmListFileLexer_BOM cmListFileLexer_ReadBOM(FILE* f)
+static cmListFileLexer_BOM cmListFileLexer_ReadBOM(FILE* f,
+                                                   unsigned char readBuffer[4],
+                                                   size_t* readSize)
 {
-  unsigned char b[2];
-  size_t n;
-  if (fread(b, 1, 2, f) == 2) {
+  /* Read the up to four bytes that might correspond to a BOM. In case these
+     bytes turn out not to represent a BOM, save them for later consumption in
+     order to avoid seeking the file (which might not be seekable, e.g., if
+     it's a pipe). */
+  unsigned char* b = readBuffer;
+
+  size_t n = fread(b, 1, 2, f);
+  *readSize = n; /* Initialize first and then accumulate */
+
+  if (n == 2) {
     if (b[0] == 0xEF && b[1] == 0xBB) {
-      if (fread(b, 1, 1, f) == 1 && b[0] == 0xBF) {
-        return cmListFileLexer_BOM_UTF8;
+      n = fread(b + 2, 1, 1, f);
+      *readSize += n;
+
+      if (n == 1) {
+        if (b[2] == 0xBF) {
+          *readSize = 0; /* We consumed the BOM: discard it */
+          return cmListFileLexer_BOM_UTF8;
+        }
       }
     } else if (b[0] == 0xFE && b[1] == 0xFF) {
+      *readSize = 0; /* We consumed the BOM: discard it */
       /* UTF-16 BE */
       return cmListFileLexer_BOM_UTF16BE;
     } else if (b[0] == 0 && b[1] == 0) {
-      if (fread(b, 1, 2, f) == 2 && b[0] == 0xFE && b[1] == 0xFF) {
-        return cmListFileLexer_BOM_UTF32BE;
+      n = fread(b + 2, 1, 2, f);
+      *readSize += n;
+
+      if (n == 2) {
+        if (b[2] == 0xFE && b[3] == 0xFF) {
+          *readSize = 0; /* We consumed the BOM: discard it */
+          return cmListFileLexer_BOM_UTF32BE;
+        }
       }
     } else if (b[0] == 0xFF && b[1] == 0xFE) {
-      fpos_t p;
-      fgetpos(f, &p);
-      n = fread(b, 1, 2, f);
-      if (n == 2 && b[0] == 0 && b[1] == 0) {
+      n = fread(b + 2, 1, 2, f);
+      *readSize += n;
+
+      if (n == 2 && b[2] == 0 && b[3] == 0) {
+        *readSize = 0; /* We consumed the BOM: discard it */
         return cmListFileLexer_BOM_UTF32LE;
       }
-      if (fsetpos(f, &p) != 0) {
-        return cmListFileLexer_BOM_Broken;
-      }
+
       /* In case we were able to subsequently read only a single byte out of two
          (i.e., three in total), the file must be corrupt and the BOM cannot
          represent a UTF-16-LE BOM since each code unit must consist of two
          bytes. This avoids incorrectly detecting an incomplete UTF-32-LE BOM as
          UTF-16-LE input. */
       if (n % 2 == 0) {
+        *readSize = n; /* We consumed the read bytes as BOM only partially */
+        memmove(b, b + 2, n);
         return cmListFileLexer_BOM_UTF16LE;
       }
     }
   }
-  if (fseek(f, 0, SEEK_SET) != 0) {
-    return cmListFileLexer_BOM_Broken;
-  }
+
   return cmListFileLexer_BOM_None;
 }
 
@@ -497,7 +543,13 @@ int cmListFileLexer_SetFileName(cmListFileLexer* lexer, const char* name,
 #endif
     if (lexer->file) {
       if (bom) {
-        *bom = cmListFileLexer_ReadBOM(lexer->file);
+        *bom = cmListFileLexer_ReadBOM(
+          lexer->file, (unsigned char*)lexer->read_buffer, &lexer->read_size);
+        lexer->read_position = 0;
+      } else {
+        memset(lexer->read_buffer, 0, sizeof(lexer->read_buffer));
+        lexer->read_size = 0;
+        lexer->read_position = 0;
       }
     } else {
       result = 0;
@@ -516,10 +568,15 @@ int cmListFileLexer_SetString(cmListFileLexer* lexer, char const* text,
   /* text might be not NULL while length is 0. However, on some platforms
      malloc(0) will return NULL. To avoid signaling an error to the caller in
      such cases, ensure nonzero length. */
-  if (length > 0) {
-    lexer->string_buffer = (char*)malloc(length);
+  size_t read_size = lexer->read_size - lexer->read_position;
+  size_t string_size = read_size + length;
+  if (string_size > 0) {
+    lexer->string_buffer = (char*)malloc(string_size);
     if (lexer->string_buffer) {
-      memcpy(lexer->string_buffer, text, length);
+      memcpy(lexer->string_buffer, lexer->read_buffer + lexer->read_position,
+             read_size);
+      memcpy(lexer->string_buffer + read_size, text, length);
+      lexer->read_position += read_size;
       lexer->string_position = lexer->string_buffer;
       lexer->string_left = length;
     } else {
