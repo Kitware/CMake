@@ -112,13 +112,7 @@ std::string cmGeneratorTarget::EvaluateInterfaceProperty(
   // a subset of TargetPropertyNode::Evaluate without stringify/parse steps
   // but sufficient for transitive interface properties.
   cmGeneratorExpressionDAGChecker dagChecker{
-    this,
-    prop,
-    nullptr,
-    dagCheckerParent,
-    eval->Context.LG,
-    eval->Context.Config,
-    eval->Backtrace,
+    this, prop, nullptr, dagCheckerParent, eval->Context, eval->Backtrace,
   };
   switch (dagChecker.Check()) {
     case cmGeneratorExpressionDAGChecker::SELF_REFERENCE:

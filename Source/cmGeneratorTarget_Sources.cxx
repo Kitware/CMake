@@ -247,7 +247,7 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetSourceFilePaths(
                              /*language=*/std::string());
 
   cmGeneratorExpressionDAGChecker dagChecker{
-    this, "SOURCES", nullptr, nullptr, context.LG, context.Config,
+    this, "SOURCES", nullptr, nullptr, context,
   };
 
   EvaluatedTargetPropertyEntries entries = EvaluateTargetPropertyEntries(

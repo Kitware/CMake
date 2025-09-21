@@ -234,7 +234,7 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetCompileOptions(
   cm::GenEx::Context context(this->LocalGenerator, config, language);
 
   cmGeneratorExpressionDAGChecker dagChecker{
-    this, "COMPILE_OPTIONS", nullptr, nullptr, context.LG, context.Config,
+    this, "COMPILE_OPTIONS", nullptr, nullptr, context,
   };
 
   cmList debugProperties{ this->Makefile->GetDefinition(
@@ -279,7 +279,7 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetCompileFeatures(
                              /*language=*/std::string());
 
   cmGeneratorExpressionDAGChecker dagChecker{
-    this, "COMPILE_FEATURES", nullptr, nullptr, context.LG, context.Config,
+    this, "COMPILE_FEATURES", nullptr, nullptr, context,
   };
 
   cmList debugProperties{ this->Makefile->GetDefinition(
@@ -331,7 +331,7 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetCompileDefinitions(
   cm::GenEx::Context context(this->LocalGenerator, config, language);
 
   cmGeneratorExpressionDAGChecker dagChecker{
-    this, "COMPILE_DEFINITIONS", nullptr, nullptr, context.LG, context.Config,
+    this, "COMPILE_DEFINITIONS", nullptr, nullptr, context,
   };
 
   cmList debugProperties{ this->Makefile->GetDefinition(
@@ -371,7 +371,7 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetPrecompileHeaders(
   cm::GenEx::Context context(this->LocalGenerator, config, language);
 
   cmGeneratorExpressionDAGChecker dagChecker{
-    this, "PRECOMPILE_HEADERS", nullptr, nullptr, context.LG, context.Config,
+    this, "PRECOMPILE_HEADERS", nullptr, nullptr, context,
   };
 
   cmList debugProperties{ this->Makefile->GetDefinition(
@@ -432,7 +432,7 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetLinkOptions(
   cm::GenEx::Context context(this->LocalGenerator, config, language);
 
   cmGeneratorExpressionDAGChecker dagChecker{
-    this, "LINK_OPTIONS", nullptr, nullptr, context.LG, context.Config,
+    this, "LINK_OPTIONS", nullptr, nullptr, context,
   };
 
   cmList debugProperties{ this->Makefile->GetDefinition(
@@ -617,8 +617,7 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetStaticLibraryLinkOptions(
   cm::GenEx::Context context(this->LocalGenerator, config, language);
 
   cmGeneratorExpressionDAGChecker dagChecker{
-    this,       "STATIC_LIBRARY_OPTIONS", nullptr, nullptr,
-    context.LG, context.Config,
+    this, "STATIC_LIBRARY_OPTIONS", nullptr, nullptr, context,
   };
 
   EvaluatedTargetPropertyEntries entries;
@@ -663,7 +662,7 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetLinkDepends(
   std::unordered_set<std::string> uniqueOptions;
   cm::GenEx::Context context(this->LocalGenerator, config, language);
   cmGeneratorExpressionDAGChecker dagChecker{
-    this, "LINK_DEPENDS", nullptr, nullptr, context.LG, context.Config,
+    this, "LINK_DEPENDS", nullptr, nullptr, context,
   };
 
   EvaluatedTargetPropertyEntries entries;

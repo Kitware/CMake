@@ -630,13 +630,8 @@ cmComputeLinkDepends::cmComputeLinkDepends(cmGeneratorTarget const* target,
           if (!feature->empty() && key.length() > lloPrefix.length()) {
             auto item = key.substr(lloPrefix.length());
             cmGeneratorExpressionDAGChecker dagChecker{
-              this->Target,
-              "LINK_LIBRARY_OVERRIDE",
-              nullptr,
-              nullptr,
-              context.LG,
-              context.Config,
-              this->Target->GetBacktrace(),
+              this->Target, "LINK_LIBRARY_OVERRIDE",      nullptr, nullptr,
+              context,      this->Target->GetBacktrace(),
             };
             auto overrideFeature = cmGeneratorExpression::Evaluate(
               *feature, context.LG, context.Config, this->Target, &dagChecker,
@@ -650,13 +645,8 @@ cmComputeLinkDepends::cmComputeLinkDepends(cmGeneratorTarget const* target,
   if (cmValue linkLibraryOverride =
         this->Target->GetProperty("LINK_LIBRARY_OVERRIDE")) {
     cmGeneratorExpressionDAGChecker dagChecker{
-      this->Target,
-      "LINK_LIBRARY_OVERRIDE",
-      nullptr,
-      nullptr,
-      context.LG,
-      context.Config,
-      this->Target->GetBacktrace(),
+      this->Target, "LINK_LIBRARY_OVERRIDE",      nullptr, nullptr,
+      context,      this->Target->GetBacktrace(),
     };
     auto overrideValue = cmGeneratorExpression::Evaluate(
       *linkLibraryOverride, context.LG, context.Config, this->Target,

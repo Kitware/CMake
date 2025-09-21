@@ -1969,8 +1969,7 @@ bool cmQtAutoGenInitializer::SetupWriteAutogenInfo()
         if (!cfg.empty()) {
           cm::GenEx::Context context(this->LocalGen, cfg, "CXX");
           cmGeneratorExpressionDAGChecker dagChecker{
-            this->GenTarget, "AUTOMOC_MACRO_NAMES", nullptr, nullptr,
-            context.LG,      context.Config,
+            this->GenTarget, "AUTOMOC_MACRO_NAMES", nullptr, nullptr, context,
           };
           AddInterfaceEntries(
             this->GenTarget, context.Config, "INTERFACE_AUTOMOC_MACRO_NAMES",
@@ -1981,8 +1980,7 @@ bool cmQtAutoGenInitializer::SetupWriteAutogenInfo()
     } else {
       cm::GenEx::Context context(this->LocalGen, this->ConfigDefault, "CXX");
       cmGeneratorExpressionDAGChecker dagChecker{
-        this->GenTarget, "AUTOMOC_MACRO_NAMES", nullptr, nullptr,
-        context.LG,      context.Config,
+        this->GenTarget, "AUTOMOC_MACRO_NAMES", nullptr, nullptr, context,
       };
       AddInterfaceEntries(this->GenTarget, context.Config,
                           "INTERFACE_AUTOMOC_MACRO_NAMES", context.Language,

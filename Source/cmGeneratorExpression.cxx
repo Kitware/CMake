@@ -463,8 +463,7 @@ std::string const& cmGeneratorExpressionInterpreter::Evaluate(
     property == "COMPILE_FLAGS" ? "COMPILE_OPTIONS" : property,
     nullptr,
     nullptr,
-    context.LG,
-    context.Config,
+    context,
   };
 
   return this->CompiledGeneratorExpression->Evaluate(

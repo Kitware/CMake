@@ -740,7 +740,7 @@ std::string cmGeneratorTarget::GetLinkerTypeProperty(
   if (!linkerType.IsEmpty()) {
     cm::GenEx::Context context(this->LocalGenerator, config, lang);
     cmGeneratorExpressionDAGChecker dagChecker{
-      this, propName, nullptr, nullptr, context.LG, context.Config,
+      this, propName, nullptr, nullptr, context,
     };
     auto ltype = cmGeneratorExpression::Evaluate(
       *linkerType, context.LG, context.Config, this, &dagChecker, this,
@@ -1203,8 +1203,7 @@ void cmGeneratorTarget::AddSystemIncludeCacheKey(
 {
   cm::GenEx::Context context(this->LocalGenerator, config, language);
   cmGeneratorExpressionDAGChecker dagChecker{
-    this,           "SYSTEM_INCLUDE_DIRECTORIES", nullptr, nullptr, context.LG,
-    context.Config,
+    this, "SYSTEM_INCLUDE_DIRECTORIES", nullptr, nullptr, context,
   };
 
   bool excludeImported = this->GetPropertyAsBool("NO_SYSTEM_FROM_IMPORTED");
@@ -1981,7 +1980,7 @@ void cmGeneratorTarget::GetAutoUicOptions(std::vector<std::string>& result,
 
   cm::GenEx::Context context(this->LocalGenerator, config);
   cmGeneratorExpressionDAGChecker dagChecker{
-    this, "AUTOUIC_OPTIONS", nullptr, nullptr, context.LG, context.Config,
+    this, "AUTOUIC_OPTIONS", nullptr, nullptr, context,
   };
   cmExpandList(cmGeneratorExpression::Evaluate(
                  prop, context.LG, context.Config, this, &dagChecker),

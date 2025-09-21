@@ -49,13 +49,8 @@ std::string AddLangSpecificInterfaceIncludeDirectories(
 {
   cm::GenEx::Context context(target->LocalGenerator, config);
   cmGeneratorExpressionDAGChecker dagChecker{
-    target,
-    propertyName,
-    nullptr,
-    dagCheckerParent,
-    context.LG,
-    context.Config,
-    target->GetBacktrace(),
+    target,           propertyName, nullptr,
+    dagCheckerParent, context,      target->GetBacktrace(),
   };
   switch (dagChecker.Check()) {
     case cmGeneratorExpressionDAGChecker::SELF_REFERENCE:
@@ -107,8 +102,7 @@ void AddLangSpecificImplicitIncludeDirectories(
         target->GetLinkImplementationLibraries(config, UseTo::Compile)) {
     cm::GenEx::Context context(target->LocalGenerator, config, lang);
     cmGeneratorExpressionDAGChecker dagChecker{
-      target,         propertyName,           nullptr, nullptr, context.LG,
-      context.Config, target->GetBacktrace(),
+      target, propertyName, nullptr, nullptr, context, target->GetBacktrace(),
     };
 
     for (cmLinkImplItem const& library : libraries->Libraries) {
@@ -232,7 +226,7 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetIncludeDirectories(
   cm::GenEx::Context context(this->LocalGenerator, config, lang);
 
   cmGeneratorExpressionDAGChecker dagChecker{
-    this, "INCLUDE_DIRECTORIES", nullptr, nullptr, context.LG, context.Config,
+    this, "INCLUDE_DIRECTORIES", nullptr, nullptr, context,
   };
 
   cmList debugProperties{ this->Makefile->GetDefinition(
