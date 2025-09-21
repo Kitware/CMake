@@ -27,6 +27,7 @@
 
 #include "cmCMakePath.h"
 #include "cmComputeLinkInformation.h"
+#include "cmGenExContext.h"
 #include "cmGenExEvaluation.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorExpressionDAGChecker.h"
@@ -57,13 +58,14 @@ std::string cmGeneratorExpressionNode::EvaluateDependentExpression(
   cmGeneratorExpressionDAGChecker* dagChecker,
   cmGeneratorTarget const* currentTarget)
 {
-  cmGeneratorExpression ge(*eval->LG->GetCMakeInstance(), eval->Backtrace);
+  cmGeneratorExpression ge(*eval->Context.LG->GetCMakeInstance(),
+                           eval->Backtrace);
   std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(prop);
   cge->SetEvaluateForBuildsystem(eval->EvaluateForBuildsystem);
   cge->SetQuiet(eval->Quiet);
   std::string result =
-    cge->Evaluate(eval->LG, eval->Config, headTarget, dagChecker,
-                  currentTarget, eval->Language);
+    cge->Evaluate(eval->Context.LG, eval->Context.Config, headTarget,
+                  dagChecker, currentTarget, eval->Context.Language);
   if (cge->GetHadContextSensitiveCondition()) {
     eval->HadContextSensitiveCondition = true;
   }
@@ -308,7 +310,7 @@ static const struct InListNode : public cmGeneratorExpressionNode
     cmList values;
     cmList checkValues;
     bool check = false;
-    switch (eval->LG->GetPolicyStatus(cmPolicies::CMP0085)) {
+    switch (eval->Context.LG->GetPolicyStatus(cmPolicies::CMP0085)) {
       case cmPolicies::WARN:
         if (parameters.front().empty()) {
           check = true;
@@ -322,7 +324,7 @@ static const struct InListNode : public cmGeneratorExpressionNode
           e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0085)
             << "\nSearch Item:\n  \"" << parameters.front()
             << "\"\nList:\n  \"" << parameters[1] << "\"\n";
-          eval->LG->GetCMakeInstance()->IssueMessage(
+          eval->Context.LG->GetCMakeInstance()->IssueMessage(
             MessageType ::AUTHOR_WARNING, e.str(), eval->Backtrace);
           return "0";
         }
@@ -427,7 +429,8 @@ static const struct TargetExistsNode : public cmGeneratorExpressionNode
       return std::string();
     }
 
-    return eval->LG->GetMakefile()->FindTargetToUse(targetName) ? "1" : "0";
+    return eval->Context.LG->GetMakefile()->FindTargetToUse(targetName) ? "1"
+                                                                        : "0";
   }
 } targetExistsNode;
 
@@ -458,7 +461,7 @@ static const struct TargetNameIfExistsNode : public cmGeneratorExpressionNode
       return std::string();
     }
 
-    return eval->LG->GetMakefile()->FindTargetToUse(targetName)
+    return eval->Context.LG->GetMakefile()->FindTargetToUse(targetName)
       ? targetName
       : std::string();
   }
@@ -478,7 +481,7 @@ protected:
       cmGeneratorExpressionDAGChecker dagChecker{
         eval->HeadTarget, genexOperator + ":" + expression,
         content,          dagCheckerParent,
-        eval->LG,         eval->Config,
+        eval->Context.LG, eval->Context.Config,
         eval->Backtrace,
       };
       switch (dagChecker.Check()) {
@@ -524,7 +527,8 @@ static const struct TargetGenexEvalNode : public GenexEvaluator
       return std::string();
     }
 
-    auto const* target = eval->LG->FindGeneratorTargetToUse(targetName);
+    auto const* target =
+      eval->Context.LG->FindGeneratorTargetToUse(targetName);
     if (!target) {
       std::ostringstream e;
       e << "$<TARGET_GENEX_EVAL:tgt, ...> target \"" << targetName
@@ -539,9 +543,9 @@ static const struct TargetGenexEvalNode : public GenexEvaluator
     }
 
     // Replace the surrounding context with the named target.
-    cm::GenEx::Evaluation targetEval(
-      eval->LG, eval->Config, eval->Quiet, target, target,
-      eval->EvaluateForBuildsystem, eval->Backtrace, eval->Language);
+    cm::GenEx::Evaluation targetEval(eval->Context, eval->Quiet, target,
+                                     target, eval->EvaluateForBuildsystem,
+                                     eval->Backtrace);
 
     return this->EvaluateExpression("TARGET_GENEX_EVAL", expression,
                                     &targetEval, content, dagCheckerParent);
@@ -1653,7 +1657,7 @@ static const struct ListNode : public cmGeneratorExpressionNode
                   if (!selector) {
                     selector = cmList::TransformSelector::New();
                   }
-                  selector->Makefile = ev->LG->GetMakefile();
+                  selector->Makefile = ev->Context.LG->GetMakefile();
 
                   return list
                     .transform(descriptor->Action, arguments,
@@ -1861,8 +1865,9 @@ struct CompilerIdNode : public cmGeneratorExpressionNode
                                    cmGeneratorExpressionDAGChecker* /*unused*/,
                                    std::string const& lang) const
   {
-    std::string const& compilerId = eval->LG->GetMakefile()->GetSafeDefinition(
-      "CMAKE_" + lang + "_COMPILER_ID");
+    std::string const& compilerId =
+      eval->Context.LG->GetMakefile()->GetSafeDefinition("CMAKE_" + lang +
+                                                         "_COMPILER_ID");
     if (parameters.empty()) {
       return compilerId;
     }
@@ -1926,8 +1931,8 @@ struct CompilerVersionNode : public cmGeneratorExpressionNode
                                    std::string const& lang) const
   {
     std::string const& compilerVersion =
-      eval->LG->GetMakefile()->GetSafeDefinition("CMAKE_" + lang +
-                                                 "_COMPILER_VERSION");
+      eval->Context.LG->GetMakefile()->GetSafeDefinition("CMAKE_" + lang +
+                                                         "_COMPILER_VERSION");
     if (parameters.empty()) {
       return compilerVersion;
     }
@@ -1990,8 +1995,8 @@ struct CompilerFrontendVariantNode : public cmGeneratorExpressionNode
                                    std::string const& lang) const
   {
     std::string const& compilerFrontendVariant =
-      eval->LG->GetMakefile()->GetSafeDefinition("CMAKE_" + lang +
-                                                 "_COMPILER_FRONTEND_VARIANT");
+      eval->Context.LG->GetMakefile()->GetSafeDefinition(
+        "CMAKE_" + lang + "_COMPILER_FRONTEND_VARIANT");
     if (parameters.empty()) {
       return compilerFrontendVariant;
     }
@@ -2038,7 +2043,7 @@ struct PlatformIdNode : public cmGeneratorExpressionNode
     cmGeneratorExpressionDAGChecker* /*dagChecker*/) const override
   {
     std::string const& platformId =
-      eval->LG->GetMakefile()->GetSafeDefinition("CMAKE_SYSTEM_NAME");
+      eval->Context.LG->GetMakefile()->GetSafeDefinition("CMAKE_SYSTEM_NAME");
     if (parameters.empty()) {
       return platformId;
     }
@@ -2136,7 +2141,7 @@ static const struct ConfigurationNode : public cmGeneratorExpressionNode
     cmGeneratorExpressionDAGChecker* /*dagChecker*/) const override
   {
     eval->HadContextSensitiveCondition = true;
-    return eval->Config;
+    return eval->Context.Config;
   }
 } configurationNode;
 
@@ -2175,17 +2180,17 @@ static const struct ConfigurationTestNode : public cmGeneratorExpressionNode
           << "  " << content->GetOriginalExpression() << "\n"
           << "The config name of \"" << param << "\" is invalid";
         /* clang-format on */
-        eval->LG->GetCMakeInstance()->IssueMessage(MessageType::WARNING,
-                                                   e.str(), eval->Backtrace);
+        eval->Context.LG->GetCMakeInstance()->IssueMessage(
+          MessageType::WARNING, e.str(), eval->Backtrace);
       }
 
       firstParam = false;
-      if (eval->Config.empty()) {
+      if (eval->Context.Config.empty()) {
         if (param.empty()) {
           return "1";
         }
-      } else if (cmsysString_strcasecmp(param.c_str(), eval->Config.c_str()) ==
-                 0) {
+      } else if (cmsysString_strcasecmp(param.c_str(),
+                                        eval->Context.Config.c_str()) == 0) {
         return "1";
       }
     }
@@ -2194,14 +2199,15 @@ static const struct ConfigurationTestNode : public cmGeneratorExpressionNode
       cmValue loc = nullptr;
       cmValue imp = nullptr;
       std::string suffix;
-      if (eval->CurrentTarget->Target->GetMappedConfig(eval->Config, loc, imp,
-                                                       suffix)) {
+      if (eval->CurrentTarget->Target->GetMappedConfig(eval->Context.Config,
+                                                       loc, imp, suffix)) {
         // This imported target has an appropriate location
         // for this (possibly mapped) config.
         // Check if there is a proper config mapping for the tested config.
         cmList mappedConfigs;
-        std::string mapProp = cmStrCat("MAP_IMPORTED_CONFIG_",
-                                       cmSystemTools::UpperCase(eval->Config));
+        std::string mapProp =
+          cmStrCat("MAP_IMPORTED_CONFIG_",
+                   cmSystemTools::UpperCase(eval->Context.Config));
         if (cmValue mapValue = eval->CurrentTarget->GetProperty(mapProp)) {
           mappedConfigs.assign(cmSystemTools::UpperCase(*mapValue));
 
@@ -2254,7 +2260,7 @@ static const struct CompileLanguageNode : public cmGeneratorExpressionNode
     GeneratorExpressionContent const* content,
     cmGeneratorExpressionDAGChecker* dagChecker) const override
   {
-    if (eval->Language.empty() &&
+    if (eval->Context.Language.empty() &&
         (!dagChecker || !dagChecker->EvaluatingCompileExpression())) {
       reportError(
         eval, content->GetOriginalExpression(),
@@ -2264,7 +2270,7 @@ static const struct CompileLanguageNode : public cmGeneratorExpressionNode
       return std::string();
     }
 
-    cmGlobalGenerator const* gg = eval->LG->GetGlobalGenerator();
+    cmGlobalGenerator const* gg = eval->Context.LG->GetGlobalGenerator();
     std::string genName = gg->GetName();
     if (genName.find("Makefiles") == std::string::npos &&
         genName.find("Ninja") == std::string::npos &&
@@ -2277,11 +2283,11 @@ static const struct CompileLanguageNode : public cmGeneratorExpressionNode
       return std::string();
     }
     if (parameters.empty()) {
-      return eval->Language;
+      return eval->Context.Language;
     }
 
     for (auto const& param : parameters) {
-      if (eval->Language == param) {
+      if (eval->Context.Language == param) {
         return "1";
       }
     }
@@ -2301,7 +2307,7 @@ static const struct CompileLanguageAndIdNode : public cmGeneratorExpressionNode
     cmGeneratorExpressionDAGChecker* dagChecker) const override
   {
     if (!eval->HeadTarget ||
-        (eval->Language.empty() &&
+        (eval->Context.Language.empty() &&
          (!dagChecker || !dagChecker->EvaluatingCompileExpression()))) {
       // reportError(eval, content->GetOriginalExpression(), "");
       reportError(
@@ -2313,7 +2319,7 @@ static const struct CompileLanguageAndIdNode : public cmGeneratorExpressionNode
         "add_custom_target, or file(GENERATE) commands.");
       return std::string();
     }
-    cmGlobalGenerator const* gg = eval->LG->GetGlobalGenerator();
+    cmGlobalGenerator const* gg = eval->Context.LG->GetGlobalGenerator();
     std::string genName = gg->GetName();
     if (genName.find("Makefiles") == std::string::npos &&
         genName.find("Ninja") == std::string::npos &&
@@ -2327,7 +2333,7 @@ static const struct CompileLanguageAndIdNode : public cmGeneratorExpressionNode
       return std::string();
     }
 
-    std::string const& lang = eval->Language;
+    std::string const& lang = eval->Context.Language;
     if (lang == parameters.front()) {
       std::vector<std::string> idParameter((parameters.cbegin() + 1),
                                            parameters.cend());
@@ -2366,7 +2372,7 @@ static const struct LinkLanguageNode : public cmGeneratorExpressionNode
       return std::string();
     }
 
-    cmGlobalGenerator const* gg = eval->LG->GetGlobalGenerator();
+    cmGlobalGenerator const* gg = eval->Context.LG->GetGlobalGenerator();
     std::string genName = gg->GetName();
     if (genName.find("Makefiles") == std::string::npos &&
         genName.find("Ninja") == std::string::npos &&
@@ -2385,11 +2391,11 @@ static const struct LinkLanguageNode : public cmGeneratorExpressionNode
     }
 
     if (parameters.empty()) {
-      return eval->Language;
+      return eval->Context.Language;
     }
 
     for (auto const& param : parameters) {
-      if (eval->Language == param) {
+      if (eval->Context.Language == param) {
         return "1";
       }
     }
@@ -2405,8 +2411,9 @@ struct LinkerId
                               GeneratorExpressionContent const* content,
                               std::string const& lang)
   {
-    std::string const& linkerId = eval->LG->GetMakefile()->GetSafeDefinition(
-      "CMAKE_" + lang + "_COMPILER_ID");
+    std::string const& linkerId =
+      eval->Context.LG->GetMakefile()->GetSafeDefinition("CMAKE_" + lang +
+                                                         "_COMPILER_ID");
     if (parameters.empty()) {
       return linkerId;
     }
@@ -2455,7 +2462,7 @@ static const struct LinkLanguageAndIdNode : public cmGeneratorExpressionNode
       return std::string();
     }
 
-    cmGlobalGenerator const* gg = eval->LG->GetGlobalGenerator();
+    cmGlobalGenerator const* gg = eval->Context.LG->GetGlobalGenerator();
     std::string genName = gg->GetName();
     if (genName.find("Makefiles") == std::string::npos &&
         genName.find("Ninja") == std::string::npos &&
@@ -2474,7 +2481,7 @@ static const struct LinkLanguageAndIdNode : public cmGeneratorExpressionNode
       eval->HadLinkLanguageSensitiveCondition = true;
     }
 
-    std::string const& lang = eval->Language;
+    std::string const& lang = eval->Context.Language;
     if (lang == parameters.front()) {
       std::vector<std::string> idParameter((parameters.cbegin() + 1),
                                            parameters.cend());
@@ -2705,15 +2712,19 @@ static std::string getLinkedTargetsContent(
   std::string result;
   if (cmLinkImplementationLibraries const* impl =
         target->GetLinkImplementationLibraries(
-          eval->Config, cmGeneratorTarget::UseTo::Compile)) {
+          eval->Context.Config, cmGeneratorTarget::UseTo::Compile)) {
     for (cmLinkImplItem const& lib : impl->Libraries) {
       if (lib.Target) {
         // Pretend $<TARGET_PROPERTY:lib.Target,prop> appeared in our
         // caller's property and hand-evaluate it as if it were compiled.
         // Create a context as cmCompiledGeneratorExpression::Evaluate does.
+        cm::GenEx::Context libContext(eval->Context);
+        // FIXME: Why have we long used the target's local generator
+        // instead of that of the evaluation context?
+        libContext.LG = target->GetLocalGenerator();
         cm::GenEx::Evaluation libEval(
-          target->GetLocalGenerator(), eval->Config, eval->Quiet, target,
-          target, eval->EvaluateForBuildsystem, lib.Backtrace, eval->Language);
+          std::move(libContext), eval->Quiet, target, target,
+          eval->EvaluateForBuildsystem, lib.Backtrace);
         std::string libResult = lib.Target->EvaluateInterfaceProperty(
           prop, &libEval, dagChecker, usage);
         if (!libResult.empty()) {
@@ -2779,24 +2790,25 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
         return std::string();
       }
       if (propertyName == "ALIASED_TARGET"_s) {
-        if (eval->LG->GetMakefile()->IsAlias(targetName)) {
+        if (eval->Context.LG->GetMakefile()->IsAlias(targetName)) {
           if (cmGeneratorTarget* tgt =
-                eval->LG->FindGeneratorTargetToUse(targetName)) {
+                eval->Context.LG->FindGeneratorTargetToUse(targetName)) {
             return tgt->GetName();
           }
         }
         return std::string();
       }
       if (propertyName == "ALIAS_GLOBAL"_s) {
-        if (eval->LG->GetMakefile()->IsAlias(targetName)) {
-          return eval->LG->GetGlobalGenerator()->IsAlias(targetName) ? "TRUE"
-                                                                     : "FALSE";
+        if (eval->Context.LG->GetMakefile()->IsAlias(targetName)) {
+          return eval->Context.LG->GetGlobalGenerator()->IsAlias(targetName)
+            ? "TRUE"
+            : "FALSE";
         }
         return std::string();
       }
       cmLocalGenerator const* lg = eval->CurrentTarget
         ? eval->CurrentTarget->GetLocalGenerator()
-        : eval->LG;
+        : eval->Context.LG;
       target = lg->FindGeneratorTargetToUse(targetName);
 
       if (!target) {
@@ -2866,7 +2878,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
           "link libraries for a static library");
         return std::string();
       }
-      return target->GetLinkerLanguage(eval->Config);
+      return target->GetLinkerLanguage(eval->Context.Config);
     }
 
     bool const evaluatingLinkLibraries =
@@ -2877,7 +2889,8 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
     cmGeneratorTarget::UseTo usage = cmGeneratorTarget::UseTo::Compile;
 
     if (cm::optional<cmGeneratorTarget::TransitiveProperty> transitiveProp =
-          target->IsTransitiveProperty(propertyName, eval->LG, eval->Config,
+          target->IsTransitiveProperty(propertyName, eval->Context.LG,
+                                       eval->Context.Config,
                                        dagCheckerParent)) {
       interfacePropertyName = std::string(transitiveProp->InterfaceName);
       isInterfaceProperty = transitiveProp->InterfaceName == propertyName;
@@ -2913,8 +2926,9 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
     }
 
     cmGeneratorExpressionDAGChecker dagChecker{
-      target,   propertyName, content,         dagCheckerParent,
-      eval->LG, eval->Config, eval->Backtrace,
+      target,           propertyName,     content,
+      dagCheckerParent, eval->Context.LG, eval->Context.Config,
+      eval->Backtrace,
     };
 
     switch (dagChecker.Check()) {
@@ -2955,37 +2969,37 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
     // from this target and the transitive link closure to get the max or min.
     if (!haveProp && !target->IsImported()) {
       if (target->IsLinkInterfaceDependentBoolProperty(propertyName,
-                                                       eval->Config)) {
+                                                       eval->Context.Config)) {
         eval->HadContextSensitiveCondition = true;
-        return target->GetLinkInterfaceDependentBoolProperty(propertyName,
-                                                             eval->Config)
+        return target->GetLinkInterfaceDependentBoolProperty(
+                 propertyName, eval->Context.Config)
           ? "1"
           : "0";
       }
-      if (target->IsLinkInterfaceDependentStringProperty(propertyName,
-                                                         eval->Config)) {
+      if (target->IsLinkInterfaceDependentStringProperty(
+            propertyName, eval->Context.Config)) {
         eval->HadContextSensitiveCondition = true;
         char const* propContent =
-          target->GetLinkInterfaceDependentStringProperty(propertyName,
-                                                          eval->Config);
+          target->GetLinkInterfaceDependentStringProperty(
+            propertyName, eval->Context.Config);
         return propContent ? propContent : "";
       }
     }
     if (!evaluatingLinkLibraries && !target->IsImported()) {
-      if (target->IsLinkInterfaceDependentNumberMinProperty(propertyName,
-                                                            eval->Config)) {
+      if (target->IsLinkInterfaceDependentNumberMinProperty(
+            propertyName, eval->Context.Config)) {
         eval->HadContextSensitiveCondition = true;
         char const* propContent =
-          target->GetLinkInterfaceDependentNumberMinProperty(propertyName,
-                                                             eval->Config);
+          target->GetLinkInterfaceDependentNumberMinProperty(
+            propertyName, eval->Context.Config);
         return propContent ? propContent : "";
       }
-      if (target->IsLinkInterfaceDependentNumberMaxProperty(propertyName,
-                                                            eval->Config)) {
+      if (target->IsLinkInterfaceDependentNumberMaxProperty(
+            propertyName, eval->Context.Config)) {
         eval->HadContextSensitiveCondition = true;
         char const* propContent =
-          target->GetLinkInterfaceDependentNumberMaxProperty(propertyName,
-                                                             eval->Config);
+          target->GetLinkInterfaceDependentNumberMaxProperty(
+            propertyName, eval->Context.Config);
         return propContent ? propContent : "";
       }
     }
@@ -3038,7 +3052,8 @@ static const struct TargetObjectsNode : public cmGeneratorExpressionNode
     cmGeneratorExpressionDAGChecker* /*dagChecker*/) const override
   {
     std::string const& tgtName = parameters.front();
-    cmGeneratorTarget* gt = eval->LG->FindGeneratorTargetToUse(tgtName);
+    cmGeneratorTarget* gt =
+      eval->Context.LG->FindGeneratorTargetToUse(tgtName);
     if (!gt) {
       std::ostringstream e;
       e << "Objects of target \"" << tgtName
@@ -3059,7 +3074,7 @@ static const struct TargetObjectsNode : public cmGeneratorExpressionNode
       reportError(eval, content->GetOriginalExpression(), e.str());
       return std::string();
     }
-    cmGlobalGenerator const* gg = eval->LG->GetGlobalGenerator();
+    cmGlobalGenerator const* gg = eval->Context.LG->GetGlobalGenerator();
     {
       std::string reason;
       if (!eval->EvaluateForBuildsystem &&
@@ -3081,12 +3096,13 @@ static const struct TargetObjectsNode : public cmGeneratorExpressionNode
       cmValue loc = nullptr;
       cmValue imp = nullptr;
       std::string suffix;
-      if (gt->Target->GetMappedConfig(eval->Config, loc, imp, suffix)) {
+      if (gt->Target->GetMappedConfig(eval->Context.Config, loc, imp,
+                                      suffix)) {
         objects.assign(*loc);
       }
       eval->HadContextSensitiveCondition = true;
     } else {
-      gt->GetTargetObjectNames(eval->Config, objects);
+      gt->GetTargetObjectNames(eval->Context.Config, objects);
 
       std::string obj_dir;
       if (eval->EvaluateForBuildsystem && !gg->SupportsCrossConfigs()) {
@@ -3095,7 +3111,7 @@ static const struct TargetObjectsNode : public cmGeneratorExpressionNode
         eval->HadContextSensitiveCondition = gt->HasContextDependentSources();
       } else {
         // Use object file directory with per-config location.
-        obj_dir = gt->GetObjectDirectory(eval->Config);
+        obj_dir = gt->GetObjectDirectory(eval->Context.Config);
         eval->HadContextSensitiveCondition = true;
       }
 
@@ -3105,7 +3121,7 @@ static const struct TargetObjectsNode : public cmGeneratorExpressionNode
     }
 
     // Create the cmSourceFile instances in the referencing directory.
-    cmMakefile* mf = eval->LG->GetMakefile();
+    cmMakefile* mf = eval->Context.LG->GetMakefile();
     for (std::string const& o : objects) {
       mf->AddTargetObject(tgtName, o);
     }
@@ -3121,7 +3137,8 @@ struct TargetRuntimeDllsBaseNode : public cmGeneratorExpressionNode
     GeneratorExpressionContent const* content) const
   {
     std::string const& tgtName = parameters.front();
-    cmGeneratorTarget* gt = eval->LG->FindGeneratorTargetToUse(tgtName);
+    cmGeneratorTarget* gt =
+      eval->Context.LG->FindGeneratorTargetToUse(tgtName);
     if (!gt) {
       std::ostringstream e;
       e << "Objects of target \"" << tgtName
@@ -3141,12 +3158,12 @@ struct TargetRuntimeDllsBaseNode : public cmGeneratorExpressionNode
       return std::vector<std::string>();
     }
 
-    if (auto* cli = gt->GetLinkInformation(eval->Config)) {
+    if (auto* cli = gt->GetLinkInformation(eval->Context.Config)) {
       std::vector<std::string> dllPaths;
       auto const& dlls = cli->GetRuntimeDLLs();
 
       for (auto const& dll : dlls) {
-        if (auto loc = dll->MaybeGetLocation(eval->Config)) {
+        if (auto loc = dll->MaybeGetLocation(eval->Context.Config)) {
           dllPaths.emplace_back(*loc);
         }
       }
@@ -3219,7 +3236,7 @@ static const struct CompileFeaturesNode : public cmGeneratorExpressionNode
     static LangMap availableFeatures;
 
     LangMap testedFeatures;
-    cmStandardLevelResolver standardResolver(eval->LG->GetMakefile());
+    cmStandardLevelResolver standardResolver(eval->Context.LG->GetMakefile());
     for (std::string const& p : parameters) {
       std::string error;
       std::string lang;
@@ -3246,7 +3263,7 @@ static const struct CompileFeaturesNode : public cmGeneratorExpressionNode
     for (auto const& lit : testedFeatures) {
       std::vector<std::string> const& langAvailable =
         availableFeatures[lit.first];
-      cmValue standardDefault = eval->LG->GetMakefile()->GetDefinition(
+      cmValue standardDefault = eval->Context.LG->GetMakefile()->GetDefinition(
         "CMAKE_" + lit.first + "_STANDARD_DEFAULT");
       for (std::string const& it : lit.second) {
         if (!cm::contains(langAvailable, it)) {
@@ -3257,10 +3274,11 @@ static const struct CompileFeaturesNode : public cmGeneratorExpressionNode
           // All features known for the language are always available.
           continue;
         }
-        if (!standardResolver.HaveStandardAvailable(target, lit.first,
-                                                    eval->Config, it)) {
+        if (!standardResolver.HaveStandardAvailable(
+              target, lit.first, eval->Context.Config, it)) {
           if (evalLL) {
-            cmValue l = target->GetLanguageStandard(lit.first, eval->Config);
+            cmValue l =
+              target->GetLanguageStandard(lit.first, eval->Context.Config);
             if (!l) {
               l = standardDefault;
             }
@@ -3425,7 +3443,7 @@ struct TargetFilesystemArtifactDependencyCMP0112
                             cm::GenEx::Evaluation* eval)
   {
     eval->AllTargets.insert(target);
-    cmLocalGenerator const* lg = eval->LG;
+    cmLocalGenerator const* lg = eval->Context.LG;
     switch (target->GetPolicyStatusCMP0112()) {
       case cmPolicies::WARN:
         if (lg->GetMakefile()->PolicyOptionalWarningEnabled(
@@ -3510,8 +3528,9 @@ struct TargetFilesystemArtifactResultCreator<ArtifactSonameTag>
                     "AIX_SHARED_LIBRARY_ARCHIVE libraries.");
       return std::string();
     }
-    std::string result = cmStrCat(target->GetDirectory(eval->Config), '/',
-                                  target->GetSOName(eval->Config));
+    std::string result =
+      cmStrCat(target->GetDirectory(eval->Context.Config), '/',
+               target->GetSOName(eval->Context.Config));
     return result;
   }
 };
@@ -3543,12 +3562,13 @@ struct TargetFilesystemArtifactResultCreator<ArtifactSonameImportTag>
       return std::string();
     }
 
-    if (target->HasImportLibrary(eval->Config)) {
+    if (target->HasImportLibrary(eval->Context.Config)) {
       return cmStrCat(
-        target->GetDirectory(eval->Config,
+        target->GetDirectory(eval->Context.Config,
                              cmStateEnums::ImportLibraryArtifact),
         '/',
-        target->GetSOName(eval->Config, cmStateEnums::ImportLibraryArtifact));
+        target->GetSOName(eval->Context.Config,
+                          cmStateEnums::ImportLibraryArtifact));
     }
     return std::string{};
   }
@@ -3567,11 +3587,11 @@ struct TargetFilesystemArtifactResultCreator<ArtifactPdbTag>
       return std::string();
     }
 
-    std::string language = target->GetLinkerLanguage(eval->Config);
+    std::string language = target->GetLinkerLanguage(eval->Context.Config);
 
     std::string pdbSupportVar = "CMAKE_" + language + "_LINKER_SUPPORTS_PDB";
 
-    if (!eval->LG->GetMakefile()->IsOn(pdbSupportVar)) {
+    if (!eval->Context.LG->GetMakefile()->IsOn(pdbSupportVar)) {
       ::reportError(eval, content->GetOriginalExpression(),
                     "TARGET_PDB_FILE is not supported by the target linker.");
       return std::string();
@@ -3588,8 +3608,9 @@ struct TargetFilesystemArtifactResultCreator<ArtifactPdbTag>
       return std::string();
     }
 
-    std::string result = cmStrCat(target->GetPDBDirectory(eval->Config), '/',
-                                  target->GetPDBName(eval->Config));
+    std::string result =
+      cmStrCat(target->GetPDBDirectory(eval->Context.Config), '/',
+               target->GetPDBName(eval->Context.Config));
     return result;
   }
 };
@@ -3610,10 +3631,10 @@ struct TargetFilesystemArtifactResultCreator<ArtifactLinkerTag>
       return std::string();
     }
     cmStateEnums::ArtifactType artifact =
-      target->HasImportLibrary(eval->Config)
+      target->HasImportLibrary(eval->Context.Config)
       ? cmStateEnums::ImportLibraryArtifact
       : cmStateEnums::RuntimeBinaryArtifact;
-    return target->GetFullPath(eval->Config, artifact);
+    return target->GetFullPath(eval->Context.Config, artifact);
   }
 };
 
@@ -3635,7 +3656,7 @@ struct TargetFilesystemArtifactResultCreator<ArtifactLinkerLibraryTag>
 
     if (!target->IsDLLPlatform() ||
         target->GetType() == cmStateEnums::STATIC_LIBRARY) {
-      return target->GetFullPath(eval->Config,
+      return target->GetFullPath(eval->Context.Config,
                                  cmStateEnums::RuntimeBinaryArtifact);
     }
     return std::string{};
@@ -3658,8 +3679,8 @@ struct TargetFilesystemArtifactResultCreator<ArtifactLinkerImportTag>
       return std::string();
     }
 
-    if (target->HasImportLibrary(eval->Config)) {
-      return target->GetFullPath(eval->Config,
+    if (target->HasImportLibrary(eval->Context.Config)) {
+      return target->GetFullPath(eval->Context.Config,
                                  cmStateEnums::ImportLibraryArtifact);
     }
     return std::string{};
@@ -3684,8 +3705,8 @@ struct TargetFilesystemArtifactResultCreator<ArtifactBundleDirTag>
       return std::string();
     }
 
-    std::string outpath = target->GetDirectory(eval->Config) + '/';
-    return target->BuildBundleDirectory(outpath, eval->Config,
+    std::string outpath = target->GetDirectory(eval->Context.Config) + '/';
+    return target->BuildBundleDirectory(outpath, eval->Context.Config,
                                         cmGeneratorTarget::BundleDirLevel);
   }
 };
@@ -3711,7 +3732,7 @@ struct TargetFilesystemArtifactResultCreator<ArtifactBundleDirNameTag>
     }
 
     auto level = cmGeneratorTarget::BundleDirLevel;
-    auto config = eval->Config;
+    auto config = eval->Context.Config;
     if (target->IsAppBundleOnApple()) {
       return target->GetAppBundleDirectory(config, level);
     }
@@ -3745,8 +3766,8 @@ struct TargetFilesystemArtifactResultCreator<ArtifactBundleContentDirTag>
       return std::string();
     }
 
-    std::string outpath = target->GetDirectory(eval->Config) + '/';
-    return target->BuildBundleDirectory(outpath, eval->Config,
+    std::string outpath = target->GetDirectory(eval->Context.Config) + '/';
+    return target->BuildBundleDirectory(outpath, eval->Context.Config,
                                         cmGeneratorTarget::ContentLevel);
   }
 };
@@ -3758,7 +3779,7 @@ struct TargetFilesystemArtifactResultCreator<ArtifactNameTag>
                             cm::GenEx::Evaluation* eval,
                             GeneratorExpressionContent const* /*unused*/)
   {
-    return target->GetFullPath(eval->Config,
+    return target->GetFullPath(eval->Context.Config,
                                cmStateEnums::RuntimeBinaryArtifact, true);
   }
 };
@@ -3770,8 +3791,8 @@ struct TargetFilesystemArtifactResultCreator<ArtifactImportTag>
                             cm::GenEx::Evaluation* eval,
                             GeneratorExpressionContent const* /*unused*/)
   {
-    if (target->HasImportLibrary(eval->Config)) {
-      return target->GetFullPath(eval->Config,
+    if (target->HasImportLibrary(eval->Context.Config)) {
+      return target->GetFullPath(eval->Context.Config,
                                  cmStateEnums::ImportLibraryArtifact, true);
     }
     return std::string{};
@@ -3826,7 +3847,8 @@ protected:
                     "Expression syntax not recognized.");
       return nullptr;
     }
-    cmGeneratorTarget* target = eval->LG->FindGeneratorTargetToUse(name);
+    cmGeneratorTarget* target =
+      eval->Context.LG->FindGeneratorTargetToUse(name);
     if (!target) {
       ::reportError(eval, content->GetOriginalExpression(),
                     "No target \"" + name + "\"");
@@ -3950,9 +3972,9 @@ struct TargetOutputNameArtifactResultGetter<ArtifactNameTag>
                          cm::GenEx::Evaluation* eval,
                          GeneratorExpressionContent const* /*unused*/)
   {
-    return target->GetOutputName(eval->Config,
+    return target->GetOutputName(eval->Context.Config,
                                  cmStateEnums::RuntimeBinaryArtifact) +
-      target->GetFilePostfix(eval->Config);
+      target->GetFilePostfix(eval->Context.Config);
   }
 };
 
@@ -3963,10 +3985,10 @@ struct TargetOutputNameArtifactResultGetter<ArtifactImportTag>
                          cm::GenEx::Evaluation* eval,
                          GeneratorExpressionContent const* /*unused*/)
   {
-    if (target->HasImportLibrary(eval->Config)) {
-      return target->GetOutputName(eval->Config,
+    if (target->HasImportLibrary(eval->Context.Config)) {
+      return target->GetOutputName(eval->Context.Config,
                                    cmStateEnums::ImportLibraryArtifact) +
-        target->GetFilePostfix(eval->Config);
+        target->GetFilePostfix(eval->Context.Config);
     }
     return std::string{};
   }
@@ -3988,11 +4010,11 @@ struct TargetOutputNameArtifactResultGetter<ArtifactLinkerTag>
       return std::string();
     }
     cmStateEnums::ArtifactType artifact =
-      target->HasImportLibrary(eval->Config)
+      target->HasImportLibrary(eval->Context.Config)
       ? cmStateEnums::ImportLibraryArtifact
       : cmStateEnums::RuntimeBinaryArtifact;
-    return target->GetOutputName(eval->Config, artifact) +
-      target->GetFilePostfix(eval->Config);
+    return target->GetOutputName(eval->Context.Config, artifact) +
+      target->GetFilePostfix(eval->Context.Config);
   }
 };
 
@@ -4014,9 +4036,9 @@ struct TargetOutputNameArtifactResultGetter<ArtifactLinkerLibraryTag>
 
     if (!target->IsDLLPlatform() ||
         target->GetType() == cmStateEnums::STATIC_LIBRARY) {
-      return target->GetOutputName(eval->Config,
+      return target->GetOutputName(eval->Context.Config,
                                    cmStateEnums::ImportLibraryArtifact) +
-        target->GetFilePostfix(eval->Config);
+        target->GetFilePostfix(eval->Context.Config);
     }
     return std::string{};
   }
@@ -4037,10 +4059,10 @@ struct TargetOutputNameArtifactResultGetter<ArtifactLinkerImportTag>
       return std::string();
     }
 
-    if (target->HasImportLibrary(eval->Config)) {
-      return target->GetOutputName(eval->Config,
+    if (target->HasImportLibrary(eval->Context.Config)) {
+      return target->GetOutputName(eval->Context.Config,
                                    cmStateEnums::ImportLibraryArtifact) +
-        target->GetFilePostfix(eval->Config);
+        target->GetFilePostfix(eval->Context.Config);
     }
     return std::string{};
   }
@@ -4060,11 +4082,11 @@ struct TargetOutputNameArtifactResultGetter<ArtifactPdbTag>
       return std::string();
     }
 
-    std::string language = target->GetLinkerLanguage(eval->Config);
+    std::string language = target->GetLinkerLanguage(eval->Context.Config);
 
     std::string pdbSupportVar = "CMAKE_" + language + "_LINKER_SUPPORTS_PDB";
 
-    if (!eval->LG->GetMakefile()->IsOn(pdbSupportVar)) {
+    if (!eval->Context.LG->GetMakefile()->IsOn(pdbSupportVar)) {
       ::reportError(
         eval, content->GetOriginalExpression(),
         "TARGET_PDB_FILE_BASE_NAME is not supported by the target linker.");
@@ -4082,7 +4104,7 @@ struct TargetOutputNameArtifactResultGetter<ArtifactPdbTag>
       return std::string();
     }
 
-    return target->GetPDBOutputName(eval->Config);
+    return target->GetPDBOutputName(eval->Context.Config);
   }
 };
 
@@ -4152,7 +4174,7 @@ struct TargetFileArtifactResultGetter<ArtifactFilePrefixTag>
                          cm::GenEx::Evaluation* eval,
                          GeneratorExpressionContent const*)
   {
-    return target->GetFilePrefix(eval->Config);
+    return target->GetFilePrefix(eval->Context.Config);
   }
 };
 template <>
@@ -4162,8 +4184,8 @@ struct TargetFileArtifactResultGetter<ArtifactImportFilePrefixTag>
                          cm::GenEx::Evaluation* eval,
                          GeneratorExpressionContent const*)
   {
-    if (target->HasImportLibrary(eval->Config)) {
-      return target->GetFilePrefix(eval->Config,
+    if (target->HasImportLibrary(eval->Context.Config)) {
+      return target->GetFilePrefix(eval->Context.Config,
                                    cmStateEnums::ImportLibraryArtifact);
     }
     return std::string{};
@@ -4185,11 +4207,11 @@ struct TargetFileArtifactResultGetter<ArtifactLinkerFilePrefixTag>
     }
 
     cmStateEnums::ArtifactType artifact =
-      target->HasImportLibrary(eval->Config)
+      target->HasImportLibrary(eval->Context.Config)
       ? cmStateEnums::ImportLibraryArtifact
       : cmStateEnums::RuntimeBinaryArtifact;
 
-    return target->GetFilePrefix(eval->Config, artifact);
+    return target->GetFilePrefix(eval->Context.Config, artifact);
   }
 };
 template <>
@@ -4210,7 +4232,7 @@ struct TargetFileArtifactResultGetter<ArtifactLinkerLibraryFilePrefixTag>
 
     if (!target->IsDLLPlatform() ||
         target->GetType() == cmStateEnums::STATIC_LIBRARY) {
-      return target->GetFilePrefix(eval->Config,
+      return target->GetFilePrefix(eval->Context.Config,
                                    cmStateEnums::RuntimeBinaryArtifact);
     }
     return std::string{};
@@ -4231,8 +4253,8 @@ struct TargetFileArtifactResultGetter<ArtifactLinkerImportFilePrefixTag>
       return std::string();
     }
 
-    if (target->HasImportLibrary(eval->Config)) {
-      return target->GetFilePrefix(eval->Config,
+    if (target->HasImportLibrary(eval->Context.Config)) {
+      return target->GetFilePrefix(eval->Context.Config,
                                    cmStateEnums::ImportLibraryArtifact);
     }
     return std::string{};
@@ -4245,7 +4267,7 @@ struct TargetFileArtifactResultGetter<ArtifactFileSuffixTag>
                          cm::GenEx::Evaluation* eval,
                          GeneratorExpressionContent const*)
   {
-    return target->GetFileSuffix(eval->Config);
+    return target->GetFileSuffix(eval->Context.Config);
   }
 };
 template <>
@@ -4255,8 +4277,8 @@ struct TargetFileArtifactResultGetter<ArtifactImportFileSuffixTag>
                          cm::GenEx::Evaluation* eval,
                          GeneratorExpressionContent const*)
   {
-    if (target->HasImportLibrary(eval->Config)) {
-      return target->GetFileSuffix(eval->Config,
+    if (target->HasImportLibrary(eval->Context.Config)) {
+      return target->GetFileSuffix(eval->Context.Config,
                                    cmStateEnums::ImportLibraryArtifact);
     }
     return std::string{};
@@ -4278,11 +4300,11 @@ struct TargetFileArtifactResultGetter<ArtifactLinkerFileSuffixTag>
     }
 
     cmStateEnums::ArtifactType artifact =
-      target->HasImportLibrary(eval->Config)
+      target->HasImportLibrary(eval->Context.Config)
       ? cmStateEnums::ImportLibraryArtifact
       : cmStateEnums::RuntimeBinaryArtifact;
 
-    return target->GetFileSuffix(eval->Config, artifact);
+    return target->GetFileSuffix(eval->Context.Config, artifact);
   }
 };
 template <>
@@ -4302,7 +4324,7 @@ struct TargetFileArtifactResultGetter<ArtifactLinkerLibraryFileSuffixTag>
 
     if (!target->IsDLLPlatform() ||
         target->GetType() == cmStateEnums::STATIC_LIBRARY) {
-      return target->GetFileSuffix(eval->Config,
+      return target->GetFileSuffix(eval->Context.Config,
                                    cmStateEnums::RuntimeBinaryArtifact);
     }
     return std::string{};
@@ -4323,8 +4345,8 @@ struct TargetFileArtifactResultGetter<ArtifactLinkerImportFileSuffixTag>
       return std::string();
     }
 
-    if (target->HasImportLibrary(eval->Config)) {
-      return target->GetFileSuffix(eval->Config,
+    if (target->HasImportLibrary(eval->Context.Config)) {
+      return target->GetFileSuffix(eval->Context.Config,
                                    cmStateEnums::ImportLibraryArtifact);
     }
     return std::string{};
@@ -4392,7 +4414,7 @@ static const struct ShellPathNode : public cmGeneratorExpressionNode
                   "\"\" is not an absolute path.");
       return std::string();
     }
-    cmStateSnapshot snapshot = eval->LG->GetStateSnapshot();
+    cmStateSnapshot snapshot = eval->Context.LG->GetStateSnapshot();
     cmOutputConverter converter(snapshot);
     char const* separator = snapshot.GetState()->UseWindowsShell() ? ";" : ":";
     std::vector<std::string> list_out;
@@ -4568,6 +4590,6 @@ void reportError(cm::GenEx::Evaluation* eval, std::string const& expr,
     << "  " << expr << "\n"
     << result;
   /* clang-format on */
-  eval->LG->GetCMakeInstance()->IssueMessage(MessageType::FATAL_ERROR, e.str(),
-                                             eval->Backtrace);
+  eval->Context.LG->GetCMakeInstance()->IssueMessage(MessageType::FATAL_ERROR,
+                                                     e.str(), eval->Backtrace);
 }

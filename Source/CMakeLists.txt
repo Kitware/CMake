@@ -272,6 +272,8 @@ add_library(
   cmGccDepfileLexerHelper.h
   cmGccDepfileReader.cxx
   cmGccDepfileReader.h
+  cmGenExContext.cxx
+  cmGenExContext.h
   cmGenExEvaluation.cxx
   cmGenExEvaluation.h
   cmGeneratedFileStream.cxx

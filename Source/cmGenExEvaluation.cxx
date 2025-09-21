@@ -4,18 +4,18 @@
 
 #include <utility>
 
+#include "cmGenExContext.h"
+
 namespace cm {
 namespace GenEx {
 
-Evaluation::Evaluation(cmLocalGenerator const* lg, std::string config,
-                       bool quiet, cmGeneratorTarget const* headTarget,
+Evaluation::Evaluation(GenEx::Context context, bool quiet,
+                       cmGeneratorTarget const* headTarget,
                        cmGeneratorTarget const* currentTarget,
                        bool evaluateForBuildsystem,
-                       cmListFileBacktrace backtrace, std::string language)
-  : Backtrace(std::move(backtrace))
-  , LG(lg)
-  , Config(std::move(config))
-  , Language(std::move(language))
+                       cmListFileBacktrace backtrace)
+  : Context(std::move(context))
+  , Backtrace(std::move(backtrace))
   , HeadTarget(headTarget)
   , CurrentTarget(currentTarget)
   , Quiet(quiet)

@@ -9,6 +9,7 @@
 #include <cm/string_view>
 #include <cmext/string_view>
 
+#include "cmGenExContext.h"
 #include "cmGenExEvaluation.h"
 #include "cmGeneratorExpressionEvaluator.h"
 #include "cmGeneratorTarget.h"
@@ -82,8 +83,8 @@ void cmGeneratorExpressionDAGChecker::ReportError(cm::GenEx::Evaluation* eval,
       << "  " << expr << "\n"
       << "Self reference on target \"" << eval->HeadTarget->GetName()
       << "\".\n";
-    eval->LG->GetCMakeInstance()->IssueMessage(MessageType::FATAL_ERROR,
-                                               e.str(), parent->Backtrace);
+    eval->Context.LG->GetCMakeInstance()->IssueMessage(
+      MessageType::FATAL_ERROR, e.str(), parent->Backtrace);
     return;
   }
 
@@ -94,8 +95,8 @@ void cmGeneratorExpressionDAGChecker::ReportError(cm::GenEx::Evaluation* eval,
     << "  " << expr << "\n"
     << "Dependency loop found.";
     /* clang-format on */
-    eval->LG->GetCMakeInstance()->IssueMessage(MessageType::FATAL_ERROR,
-                                               e.str(), eval->Backtrace);
+    eval->Context.LG->GetCMakeInstance()->IssueMessage(
+      MessageType::FATAL_ERROR, e.str(), eval->Backtrace);
   }
 
   int loopStep = 1;
@@ -105,8 +106,8 @@ void cmGeneratorExpressionDAGChecker::ReportError(cm::GenEx::Evaluation* eval,
       << "  "
       << (parent->Content ? parent->Content->GetOriginalExpression() : expr)
       << "\n";
-    eval->LG->GetCMakeInstance()->IssueMessage(MessageType::FATAL_ERROR,
-                                               e.str(), parent->Backtrace);
+    eval->Context.LG->GetCMakeInstance()->IssueMessage(
+      MessageType::FATAL_ERROR, e.str(), parent->Backtrace);
     parent = parent->Parent;
     ++loopStep;
   }

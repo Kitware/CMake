@@ -15,6 +15,7 @@
 #include <cm/string_view>
 #include <cmext/string_view>
 
+#include "cmGenExContext.h"
 #include "cmGenExEvaluation.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorExpressionDAGChecker.h"
@@ -58,7 +59,7 @@ bool cmGeneratorTarget::MaybeHaveInterfaceProperty(std::string const& prop,
                                                    cm::GenEx::Evaluation* eval,
                                                    UseTo usage) const
 {
-  std::string const key = prop + '@' + eval->Config;
+  std::string const key = prop + '@' + eval->Context.Config;
   auto i = this->MaybeInterfacePropertyExists.find(key);
   if (i == this->MaybeInterfacePropertyExists.end()) {
     // Insert an entry now in case there is a cycle.
@@ -73,7 +74,8 @@ bool cmGeneratorTarget::MaybeHaveInterfaceProperty(std::string const& prop,
       cmGeneratorTarget const* headTarget =
         eval->HeadTarget ? eval->HeadTarget : this;
       if (cmLinkInterfaceLibraries const* iface =
-            this->GetLinkInterfaceLibraries(eval->Config, headTarget, usage)) {
+            this->GetLinkInterfaceLibraries(eval->Context.Config, headTarget,
+                                            usage)) {
         if (iface->HadHeadSensitiveCondition) {
           // With a different head target we may get to a library with
           // this interface property.
@@ -110,8 +112,13 @@ std::string cmGeneratorTarget::EvaluateInterfaceProperty(
   // a subset of TargetPropertyNode::Evaluate without stringify/parse steps
   // but sufficient for transitive interface properties.
   cmGeneratorExpressionDAGChecker dagChecker{
-    this,     prop,         nullptr,         dagCheckerParent,
-    eval->LG, eval->Config, eval->Backtrace,
+    this,
+    prop,
+    nullptr,
+    dagCheckerParent,
+    eval->Context.LG,
+    eval->Context.Config,
+    eval->Backtrace,
   };
   switch (dagChecker.Check()) {
     case cmGeneratorExpressionDAGChecker::SELF_REFERENCE:
@@ -135,8 +142,8 @@ std::string cmGeneratorTarget::EvaluateInterfaceProperty(
       *p, eval, headTarget, &dagChecker, this);
   }
 
-  if (cmLinkInterfaceLibraries const* iface =
-        this->GetLinkInterfaceLibraries(eval->Config, headTarget, usage)) {
+  if (cmLinkInterfaceLibraries const* iface = this->GetLinkInterfaceLibraries(
+        eval->Context.Config, headTarget, usage)) {
     eval->HadContextSensitiveCondition = eval->HadContextSensitiveCondition ||
       iface->HadContextSensitiveCondition;
     for (cmLinkItem const& lib : iface->Libraries) {
@@ -147,9 +154,9 @@ std::string cmGeneratorTarget::EvaluateInterfaceProperty(
         // Pretend $<TARGET_PROPERTY:lib.Target,prop> appeared in the
         // above property and hand-evaluate it as if it were compiled.
         // Create a context as cmCompiledGeneratorExpression::Evaluate does.
-        cm::GenEx::Evaluation libEval(
-          eval->LG, eval->Config, eval->Quiet, headTarget, this,
-          eval->EvaluateForBuildsystem, eval->Backtrace, eval->Language);
+        cm::GenEx::Evaluation libEval(eval->Context, eval->Quiet, headTarget,
+                                      this, eval->EvaluateForBuildsystem,
+                                      eval->Backtrace);
         std::string libResult = cmGeneratorExpression::StripEmptyListElements(
           lib.Target->EvaluateInterfaceProperty(prop, &libEval, &dagChecker,
                                                 usage));
