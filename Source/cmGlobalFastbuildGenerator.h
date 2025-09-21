@@ -347,6 +347,7 @@ class cmGlobalFastbuildGenerator : public cmGlobalCommonGenerator
 public:
   cmGlobalFastbuildGenerator(cmake* cm);
 
+  void ReadCompilerOptions(FastbuildCompiler& compiler, cmMakefile* mf);
   void ProcessEnvironment();
 
   static std::unique_ptr<cmGlobalGeneratorFactory> NewFactory();
@@ -614,6 +615,7 @@ public:
   // configuration (like .objs files used to create module definition from
   // objects).
   std::unordered_set<std::string> AllFilesToKeep;
+  bool UsingRelativePaths = false;
 
 private:
   std::unordered_set<std::string> AllFilesToClean;

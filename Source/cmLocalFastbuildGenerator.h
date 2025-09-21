@@ -6,6 +6,7 @@
 #include <string>
 
 #include "cmLocalCommonGenerator.h"
+#include "cmOutputConverter.h"
 
 class cmGeneratorTarget;
 class cmGlobalFastbuildGenerator;
@@ -32,4 +33,8 @@ public:
   cmGlobalFastbuildGenerator* GetGlobalFastbuildGenerator();
 
   void AdditionalCleanFiles(std::string const& config);
+
+private:
+  std::string ConvertToIncludeReference(
+    std::string const& path, cmOutputConverter::OutputFormat format) override;
 };
