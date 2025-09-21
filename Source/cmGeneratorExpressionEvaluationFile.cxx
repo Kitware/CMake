@@ -8,6 +8,7 @@
 
 #include "cmsys/FStream.hxx"
 
+#include "cmGenExContext.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGlobalGenerator.h"
 #include "cmListFileCache.h"
@@ -39,11 +40,12 @@ void cmGeneratorExpressionEvaluationFile::Generate(
   cmCompiledGeneratorExpression* inputExpression,
   std::map<std::string, std::string>& outputFiles, mode_t perm)
 {
+  cm::GenEx::Context context(lg, config, lang);
   std::string rawCondition = this->Condition->GetInput();
   cmGeneratorTarget* target = lg->FindGeneratorTargetToUse(this->Target);
   if (!rawCondition.empty()) {
-    std::string condResult =
-      this->Condition->Evaluate(lg, config, target, nullptr, nullptr, lang);
+    std::string condResult = this->Condition->Evaluate(
+      context.LG, context.Config, target, nullptr, nullptr, context.Language);
     if (condResult == "0") {
       return;
     }
@@ -58,10 +60,10 @@ void cmGeneratorExpressionEvaluationFile::Generate(
     }
   }
 
-  std::string const outputFileName =
-    this->GetOutputFileName(lg, target, config, lang);
-  std::string const& outputContent =
-    inputExpression->Evaluate(lg, config, target, nullptr, nullptr, lang);
+  std::string const outputFileName = this->GetOutputFileName(
+    context.LG, target, context.Config, context.Language);
+  std::string const& outputContent = inputExpression->Evaluate(
+    context.LG, context.Config, target, nullptr, nullptr, context.Language);
 
   auto it = outputFiles.find(outputFileName);
 
@@ -207,13 +209,15 @@ std::string cmGeneratorExpressionEvaluationFile::GetOutputFileName(
   cmLocalGenerator const* lg, cmGeneratorTarget* target,
   std::string const& config, std::string const& lang)
 {
-  std::string outputFileName =
-    this->OutputFileExpr->Evaluate(lg, config, target, nullptr, nullptr, lang);
+  cm::GenEx::Context context(lg, config, lang);
+  std::string outputFileName = this->OutputFileExpr->Evaluate(
+    context.LG, context.Config, target, nullptr, nullptr, context.Language);
 
   if (cmSystemTools::FileIsFullPath(outputFileName)) {
     outputFileName = cmSystemTools::CollapseFullPath(outputFileName);
   } else {
-    outputFileName = this->FixRelativePath(outputFileName, PathForOutput, lg);
+    outputFileName =
+      this->FixRelativePath(outputFileName, PathForOutput, context.LG);
   }
 
   return outputFileName;

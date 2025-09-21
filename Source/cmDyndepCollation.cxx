@@ -20,6 +20,7 @@
 #include "cmExportBuildFileGenerator.h"
 #include "cmExportSet.h"
 #include "cmFileSet.h"
+#include "cmGenExContext.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorExpression.h" // IWYU pragma: keep
 #include "cmGeneratorTarget.h"
@@ -50,6 +51,7 @@ TdiSourceInfo CollationInformationSources(cmGeneratorTarget const* gt,
                                           std::string const& config,
                                           cmDyndepGeneratorCallbacks const& cb)
 {
+  cm::GenEx::Context const context(gt->LocalGenerator, config);
   TdiSourceInfo info;
   cmTarget const* tgt = gt->Target;
   auto all_file_sets = tgt->GetAllFileSetNames();
@@ -109,11 +111,11 @@ TdiSourceInfo CollationInformationSources(cmGeneratorTarget const* gt,
     auto directoryEntries = file_set->CompileDirectoryEntries();
 
     auto directories = file_set->EvaluateDirectoryEntries(
-      directoryEntries, gt->LocalGenerator, config, gt);
+      directoryEntries, context.LG, context.Config, gt);
     std::map<std::string, std::vector<std::string>> files_per_dirs;
     for (auto const& entry : fileEntries) {
       file_set->EvaluateFileEntry(directories, files_per_dirs, entry,
-                                  gt->LocalGenerator, config, gt);
+                                  context.LG, context.Config, gt);
     }
 
     Json::Value fs_dest = Json::nullValue;

@@ -17,6 +17,7 @@
 #include "cmCryptoHash.h"
 #include "cmExportSet.h"
 #include "cmFileSet.h"
+#include "cmGenExContext.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
@@ -176,8 +177,9 @@ std::string cmExportBuildCMakeConfigGenerator::GetFileSetDirectories(
   auto directoryEntries = fileSet->CompileDirectoryEntries();
 
   for (auto const& config : configs) {
+    cm::GenEx::Context context(gte->LocalGenerator, config);
     auto directories = fileSet->EvaluateDirectoryEntries(
-      directoryEntries, gte->LocalGenerator, config, gte);
+      directoryEntries, context.LG, context.Config, gte);
 
     bool const contextSensitive =
       std::any_of(directoryEntries.begin(), directoryEntries.end(),
@@ -226,13 +228,14 @@ std::string cmExportBuildCMakeConfigGenerator::GetFileSetFiles(
   auto directoryEntries = fileSet->CompileDirectoryEntries();
 
   for (auto const& config : configs) {
+    cm::GenEx::Context context(gte->LocalGenerator, config);
     auto directories = fileSet->EvaluateDirectoryEntries(
-      directoryEntries, gte->LocalGenerator, config, gte);
+      directoryEntries, context.LG, context.Config, gte);
 
     std::map<std::string, std::vector<std::string>> files;
     for (auto const& entry : fileEntries) {
-      fileSet->EvaluateFileEntry(directories, files, entry,
-                                 gte->LocalGenerator, config, gte);
+      fileSet->EvaluateFileEntry(directories, files, entry, context.LG,
+                                 context.Config, gte);
     }
 
     bool const contextSensitive =

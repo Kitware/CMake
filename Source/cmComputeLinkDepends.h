@@ -39,9 +39,8 @@ enum class LinkLibrariesStrategy
 class cmComputeLinkDepends
 {
 public:
-  cmComputeLinkDepends(cmGeneratorTarget const* target,
-                       std::string const& config,
-                       std::string const& linkLanguage,
+  cmComputeLinkDepends(cmGeneratorTarget const* target, std::string config,
+                       std::string linkLanguage,
                        LinkLibrariesStrategy strategy);
   ~cmComputeLinkDepends();
 

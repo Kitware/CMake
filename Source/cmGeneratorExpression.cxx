@@ -454,17 +454,20 @@ std::string const& cmGeneratorExpressionInterpreter::Evaluate(
   this->CompiledGeneratorExpression =
     this->GeneratorExpression.Parse(std::move(expression));
 
+  cm::GenEx::Context context(this->LocalGenerator, this->Config,
+                             this->Language);
+
   // Specify COMPILE_OPTIONS to DAGchecker, same semantic as COMPILE_FLAGS
   cmGeneratorExpressionDAGChecker dagChecker{
     this->HeadTarget,
     property == "COMPILE_FLAGS" ? "COMPILE_OPTIONS" : property,
     nullptr,
     nullptr,
-    this->LocalGenerator,
-    this->Config,
+    context.LG,
+    context.Config,
   };
 
   return this->CompiledGeneratorExpression->Evaluate(
-    this->LocalGenerator, this->Config, this->HeadTarget, &dagChecker, nullptr,
-    this->Language);
+    context.LG, context.Config, this->HeadTarget, &dagChecker, nullptr,
+    context.Language);
 }

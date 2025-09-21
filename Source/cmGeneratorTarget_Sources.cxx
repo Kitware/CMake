@@ -24,6 +24,7 @@
 #include "cmAlgorithms.h"
 #include "cmEvaluatedTargetProperty.h"
 #include "cmFileSet.h"
+#include "cmGenExContext.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorExpressionDAGChecker.h"
 #include "cmGlobalGenerator.h"
@@ -84,9 +85,11 @@ void addFileSetEntry(cmGeneratorTarget const* headTarget,
                      cmFileSet const* fileSet,
                      EvaluatedTargetPropertyEntries& entries)
 {
+  cm::GenEx::Context context(headTarget->GetLocalGenerator(), config,
+                             /*language=*/std::string());
   auto dirCges = fileSet->CompileDirectoryEntries();
   auto dirs = fileSet->EvaluateDirectoryEntries(
-    dirCges, headTarget->GetLocalGenerator(), config, headTarget, dagChecker);
+    dirCges, context.LG, context.Config, headTarget, dagChecker);
   bool contextSensitiveDirs = false;
   for (auto const& dirCge : dirCges) {
     if (dirCge->GetHadContextSensitiveCondition()) {
@@ -98,8 +101,8 @@ void addFileSetEntry(cmGeneratorTarget const* headTarget,
   for (auto& entryCge : fileSet->CompileFileEntries()) {
     auto tpe = cmGeneratorTarget::TargetPropertyEntry::CreateFileSet(
       dirs, contextSensitiveDirs, std::move(entryCge), fileSet);
-    entries.Entries.emplace_back(
-      EvaluateTargetPropertyEntry(headTarget, config, "", dagChecker, *tpe));
+    entries.Entries.emplace_back(EvaluateTargetPropertyEntry(
+      headTarget, context.Config, context.Language, dagChecker, *tpe));
     EvaluatedTargetPropertyEntry const& entry = entries.Entries.back();
     for (auto const& file : entry.Values) {
       auto* sf = headTarget->Makefile->GetOrCreateSource(file);
@@ -240,12 +243,15 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetSourceFilePaths(
 
   this->DebugSourcesDone = true;
 
+  cm::GenEx::Context context(this->LocalGenerator, config,
+                             /*language=*/std::string());
+
   cmGeneratorExpressionDAGChecker dagChecker{
-    this, "SOURCES", nullptr, nullptr, this->LocalGenerator, config,
+    this, "SOURCES", nullptr, nullptr, context.LG, context.Config,
   };
 
   EvaluatedTargetPropertyEntries entries = EvaluateTargetPropertyEntries(
-    this, config, std::string(), &dagChecker, this->SourceEntries);
+    this, context.Config, context.Language, &dagChecker, this->SourceEntries);
 
   std::unordered_set<std::string> uniqueSrcs;
   bool contextDependentDirectSources =
@@ -253,9 +259,9 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetSourceFilePaths(
 
   // Collect INTERFACE_SOURCES of all direct link-dependencies.
   EvaluatedTargetPropertyEntries linkInterfaceSourcesEntries;
-  AddInterfaceEntries(this, config, "INTERFACE_SOURCES", std::string(),
-                      &dagChecker, linkInterfaceSourcesEntries,
-                      IncludeRuntimeInterface::No, UseTo::Compile);
+  AddInterfaceEntries(
+    this, context.Config, "INTERFACE_SOURCES", context.Language, &dagChecker,
+    linkInterfaceSourcesEntries, IncludeRuntimeInterface::No, UseTo::Compile);
   bool contextDependentInterfaceSources = processSources(
     this, linkInterfaceSourcesEntries, files, uniqueSrcs, debugSources);
 
@@ -263,7 +269,7 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetSourceFilePaths(
   bool contextDependentObjects = false;
   if (this->GetType() != cmStateEnums::OBJECT_LIBRARY) {
     EvaluatedTargetPropertyEntries linkObjectsEntries;
-    AddObjectEntries(this, config, &dagChecker, linkObjectsEntries);
+    AddObjectEntries(this, context.Config, &dagChecker, linkObjectsEntries);
     contextDependentObjects = processSources(this, linkObjectsEntries, files,
                                              uniqueSrcs, debugSources);
     // Note that for imported targets or multi-config generators supporting
@@ -274,7 +280,7 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetSourceFilePaths(
 
   // Collect this target's file sets.
   EvaluatedTargetPropertyEntries fileSetEntries;
-  AddFileSetEntries(this, config, &dagChecker, fileSetEntries);
+  AddFileSetEntries(this, context.Config, &dagChecker, fileSetEntries);
   bool contextDependentFileSets =
     processSources(this, fileSetEntries, files, uniqueSrcs, debugSources);
 

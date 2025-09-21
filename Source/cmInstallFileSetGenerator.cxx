@@ -12,6 +12,7 @@
 #include <cmext/string_view>
 
 #include "cmFileSet.h"
+#include "cmGenExContext.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
@@ -122,14 +123,16 @@ cmInstallFileSetGenerator::CalculateFilesPerDir(
 {
   std::map<std::string, std::vector<std::string>> result;
 
+  cm::GenEx::Context context(this->LocalGenerator, config);
+
   auto dirCges = this->FileSet->CompileDirectoryEntries();
   auto dirs = this->FileSet->EvaluateDirectoryEntries(
-    dirCges, this->LocalGenerator, config, this->Target);
+    dirCges, context.LG, context.Config, this->Target);
 
   auto fileCges = this->FileSet->CompileFileEntries();
   for (auto const& fileCge : fileCges) {
-    this->FileSet->EvaluateFileEntry(
-      dirs, result, fileCge, this->LocalGenerator, config, this->Target);
+    this->FileSet->EvaluateFileEntry(dirs, result, fileCge, context.LG,
+                                     context.Config, this->Target);
   }
 
   return result;
