@@ -177,7 +177,7 @@ std::string cmGeneratorTarget::EvaluateInterfaceProperty(
 
 cm::optional<cmGeneratorTarget::TransitiveProperty>
 cmGeneratorTarget::IsTransitiveProperty(
-  cm::string_view prop, cmLocalGenerator const* lg, std::string const& config,
+  cm::string_view prop, cm::GenEx::Context const& context,
   cmGeneratorExpressionDAGChecker const* dagChecker) const
 {
   cm::optional<TransitiveProperty> result;
@@ -192,7 +192,7 @@ cmGeneratorTarget::IsTransitiveProperty(
   if (i != BuiltinTransitiveProperties.end() &&
       // Look up CMP0189 in the context where evaluation occurs,
       // not where the target was created.
-      lg->GetPolicyStatus(cmPolicies::CMP0189) != cmPolicies::NEW &&
+      context.LG->GetPolicyStatus(cmPolicies::CMP0189) != cmPolicies::NEW &&
       prop == "LINK_LIBRARIES"_s) {
     i = BuiltinTransitiveProperties.end();
   }
@@ -200,7 +200,7 @@ cmGeneratorTarget::IsTransitiveProperty(
     result = i->second;
     if (result->Usage != cmGeneratorTarget::UseTo::Compile) {
       cmPolicies::PolicyStatus cmp0166 =
-        lg->GetPolicyStatus(cmPolicies::CMP0166);
+        context.LG->GetPolicyStatus(cmPolicies::CMP0166);
       if ((cmp0166 == cmPolicies::WARN || cmp0166 == cmPolicies::OLD) &&
           (prop == "LINK_DIRECTORIES"_s || prop == "LINK_DEPENDS"_s ||
            prop == "LINK_OPTIONS"_s)) {
@@ -211,7 +211,7 @@ cmGeneratorTarget::IsTransitiveProperty(
     // Honor TRANSITIVE_COMPILE_PROPERTIES and TRANSITIVE_LINK_PROPERTIES
     // from the link closure when we are not evaluating the closure itself.
     CustomTransitiveProperties const& ctp =
-      this->GetCustomTransitiveProperties(config, propertyFor);
+      this->GetCustomTransitiveProperties(context.Config, propertyFor);
     auto ci = ctp.find(std::string(prop));
     if (ci != ctp.end()) {
       result = ci->second;

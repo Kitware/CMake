@@ -1012,8 +1012,7 @@ public:
     BuiltinTransitiveProperties;
 
   cm::optional<TransitiveProperty> IsTransitiveProperty(
-    cm::string_view prop, cmLocalGenerator const* lg,
-    std::string const& config,
+    cm::string_view prop, cm::GenEx::Context const& context,
     cmGeneratorExpressionDAGChecker const* dagChecker) const;
 
   bool HaveInstallTreeRPATH(std::string const& config) const;

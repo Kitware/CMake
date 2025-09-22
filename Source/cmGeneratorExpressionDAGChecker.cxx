@@ -35,9 +35,7 @@ cmGeneratorExpressionDAGChecker::cmGeneratorExpressionDAGChecker(
     this->TopIsTransitiveProperty = parent->TopIsTransitiveProperty;
   } else {
     this->TopIsTransitiveProperty =
-      this->Target
-        ->IsTransitiveProperty(this->Property, context.LG, context.Config,
-                               this)
+      this->Target->IsTransitiveProperty(this->Property, context, this)
         .has_value();
   }
 
