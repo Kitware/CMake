@@ -1375,8 +1375,7 @@ void cmFastbuildNormalTargetGenerator::GenerateObjects(FastbuildTarget& target)
 
   for (auto& val : nodesPermutations) {
     auto& objectListNode = val.second;
-    objectListNode.Name =
-      cmStrCat(objectListNode.Name, "_", std::to_string(++groupNameCount));
+    objectListNode.Name = cmStrCat(objectListNode.Name, "_", ++groupNameCount);
     LogMessage(cmStrCat("ObjectList name: ", objectListNode.Name));
   }
   std::vector<FastbuildObjectListNode>& objects = target.ObjectListNodes;
@@ -1476,8 +1475,7 @@ cmFastbuildNormalTargetGenerator::GenerateUnity(
     while (!obj.CompilerInputFiles.empty()) {
       FastbuildUnityNode node =
         GetOneUnity(isolatedSources, obj.CompilerInputFiles, unitySize);
-      node.Name =
-        cmStrCat(this->GetName(), "_Unity_", std::to_string(++unityNumber));
+      node.Name = cmStrCat(this->GetName(), "_Unity_", ++unityNumber);
       node.UnityOutputPath = obj.CompilerOutputPath;
       node.UnityOutputPattern = cmStrCat(node.Name, ext);
 
@@ -1523,8 +1521,8 @@ FastbuildUnityNode cmFastbuildNormalTargetGenerator::GenerateGroupedUnityNode(
       if (iter == inputFiles.end()) {
         continue;
       }
-      node.Name = cmStrCat(this->GetName(), "_Unity_Group_", group, '_',
-                           std::to_string(++groupId));
+      node.Name =
+        cmStrCat(this->GetName(), "_Unity_Group_", group, '_', ++groupId);
       node.UnityInputFiles.emplace_back(source);
 
       // Remove from the general batching.
