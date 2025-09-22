@@ -375,8 +375,9 @@ CMAKE_CXX_SOURCES="\
   cmFunctionCommand \
   cmFSPermissions \
   cmGeneratedFileStream \
+  cmGenExContext \
+  cmGenExEvaluation \
   cmGeneratorExpression \
-  cmGeneratorExpressionContext \
   cmGeneratorExpressionDAGChecker \
   cmGeneratorExpressionEvaluationFile \
   cmGeneratorExpressionEvaluator \

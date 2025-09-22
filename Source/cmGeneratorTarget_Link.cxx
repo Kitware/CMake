@@ -25,6 +25,7 @@
 
 #include "cmAlgorithms.h"
 #include "cmComputeLinkInformation.h"
+#include "cmGenExContext.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorExpressionDAGChecker.h"
 #include "cmGlobalGenerator.h"
@@ -541,13 +542,14 @@ void cmGeneratorTarget::ExpandLinkItems(std::string const& prop,
     return;
   }
   // Keep this logic in sync with ComputeLinkImplementationLibraries.
+  cm::GenEx::Context context(this->LocalGenerator, config,
+                             headTarget->LinkerLanguage);
   cmGeneratorExpressionDAGChecker dagChecker{
     this,
     prop,
     nullptr,
     nullptr,
-    this->LocalGenerator,
-    config,
+    context,
     cmListFileBacktrace(),
     cmGeneratorExpressionDAGChecker::ComputingLinkLibraries::Yes,
   };
@@ -565,9 +567,7 @@ void cmGeneratorTarget::ExpandLinkItems(std::string const& prop,
                              entry.Backtrace);
     std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(entry.Value);
     cge->SetEvaluateForBuildsystem(true);
-    cmList libs{ cge->Evaluate(this->LocalGenerator, config, headTarget,
-                               &dagChecker, this,
-                               headTarget->LinkerLanguage) };
+    cmList libs{ cge->Evaluate(context, &dagChecker, headTarget, this) };
 
     auto linkFeature = cmLinkItem::DEFAULT;
     for (auto const& lib : libs) {
@@ -1133,6 +1133,8 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
   std::string const& config, cmOptionalLinkImplementation& impl,
   UseTo usage) const
 {
+  cm::GenEx::Context context(this->LocalGenerator, config,
+                             this->LinkerLanguage);
   cmLocalGenerator const* lg = this->LocalGenerator;
   cmMakefile const* mf = lg->GetMakefile();
   cmBTStringRange entryRange = this->Target->GetLinkImplementationEntries();
@@ -1145,8 +1147,7 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
       "LINK_LIBRARIES",
       nullptr,
       nullptr,
-      this->LocalGenerator,
-      config,
+      context,
       cmListFileBacktrace(),
       cmGeneratorExpressionDAGChecker::ComputingLinkLibraries::Yes,
     };
@@ -1168,9 +1169,7 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
     std::unique_ptr<cmCompiledGeneratorExpression> const cge =
       ge.Parse(entry.Value);
     cge->SetEvaluateForBuildsystem(true);
-    std::string const& evaluated =
-      cge->Evaluate(this->LocalGenerator, config, this, &dagChecker, nullptr,
-                    this->LinkerLanguage);
+    std::string const& evaluated = cge->Evaluate(context, &dagChecker, this);
     cmList llibs(evaluated);
     if (cge->GetHadHeadSensitiveCondition()) {
       impl.HadHeadSensitiveCondition = true;

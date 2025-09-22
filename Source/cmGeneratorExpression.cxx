@@ -12,7 +12,8 @@
 
 #include "cmsys/RegularExpression.hxx"
 
-#include "cmGeneratorExpressionContext.h"
+#include "cmGenExContext.h"
+#include "cmGenExEvaluation.h"
 #include "cmGeneratorExpressionDAGChecker.h"
 #include "cmGeneratorExpressionEvaluator.h"
 #include "cmGeneratorExpressionLexer.h"
@@ -54,24 +55,31 @@ std::string cmGeneratorExpression::Evaluate(
       "genex_compile_eval", input);
 #endif
 
+    cm::GenEx::Context context(lg, config, language);
     cmCompiledGeneratorExpression cge(*lg->GetCMakeInstance(),
                                       cmListFileBacktrace(), std::move(input));
-    return cge.Evaluate(lg, config, headTarget, dagChecker, currentTarget,
-                        language);
+    return cge.Evaluate(context, dagChecker, headTarget, currentTarget);
   }
   return input;
 }
 
 std::string const& cmCompiledGeneratorExpression::Evaluate(
   cmLocalGenerator const* lg, std::string const& config,
-  cmGeneratorTarget const* headTarget,
-  cmGeneratorExpressionDAGChecker* dagChecker,
-  cmGeneratorTarget const* currentTarget, std::string const& language) const
+  cmGeneratorTarget const* headTarget) const
 {
-  cmGeneratorExpressionContext context(
-    lg, config, this->Quiet, headTarget,
-    currentTarget ? currentTarget : headTarget, this->EvaluateForBuildsystem,
-    this->Backtrace, language);
+  cm::GenEx::Context context(lg, config);
+  return this->Evaluate(context, nullptr, headTarget);
+}
+
+std::string const& cmCompiledGeneratorExpression::Evaluate(
+  cm::GenEx::Context const& context,
+  cmGeneratorExpressionDAGChecker* dagChecker,
+  cmGeneratorTarget const* headTarget,
+  cmGeneratorTarget const* currentTarget) const
+{
+  cm::GenEx::Evaluation eval(context, this->Quiet, headTarget,
+                             currentTarget ? currentTarget : headTarget,
+                             this->EvaluateForBuildsystem, this->Backtrace);
 
   if (!this->NeedsEvaluation) {
     return this->Input;
@@ -80,28 +88,28 @@ std::string const& cmCompiledGeneratorExpression::Evaluate(
   this->Output.clear();
 
   for (auto const& it : this->Evaluators) {
-    this->Output += it->Evaluate(&context, dagChecker);
+    this->Output += it->Evaluate(&eval, dagChecker);
 
-    this->SeenTargetProperties.insert(context.SeenTargetProperties.cbegin(),
-                                      context.SeenTargetProperties.cend());
-    if (context.HadError) {
+    this->SeenTargetProperties.insert(eval.SeenTargetProperties.cbegin(),
+                                      eval.SeenTargetProperties.cend());
+    if (eval.HadError) {
       this->Output.clear();
       break;
     }
   }
 
-  this->MaxLanguageStandard = context.MaxLanguageStandard;
+  this->MaxLanguageStandard = eval.MaxLanguageStandard;
 
-  if (!context.HadError) {
-    this->HadContextSensitiveCondition = context.HadContextSensitiveCondition;
-    this->HadHeadSensitiveCondition = context.HadHeadSensitiveCondition;
+  if (!eval.HadError) {
+    this->HadContextSensitiveCondition = eval.HadContextSensitiveCondition;
+    this->HadHeadSensitiveCondition = eval.HadHeadSensitiveCondition;
     this->HadLinkLanguageSensitiveCondition =
-      context.HadLinkLanguageSensitiveCondition;
-    this->SourceSensitiveTargets = context.SourceSensitiveTargets;
+      eval.HadLinkLanguageSensitiveCondition;
+    this->SourceSensitiveTargets = eval.SourceSensitiveTargets;
   }
 
-  this->DependTargets = context.DependTargets;
-  this->AllTargetsSeen = context.AllTargets;
+  this->DependTargets = eval.DependTargets;
+  this->AllTargetsSeen = eval.AllTargets;
   return this->Output;
 }
 
@@ -452,17 +460,18 @@ std::string const& cmGeneratorExpressionInterpreter::Evaluate(
   this->CompiledGeneratorExpression =
     this->GeneratorExpression.Parse(std::move(expression));
 
+  cm::GenEx::Context context(this->LocalGenerator, this->Config,
+                             this->Language);
+
   // Specify COMPILE_OPTIONS to DAGchecker, same semantic as COMPILE_FLAGS
   cmGeneratorExpressionDAGChecker dagChecker{
     this->HeadTarget,
     property == "COMPILE_FLAGS" ? "COMPILE_OPTIONS" : property,
     nullptr,
     nullptr,
-    this->LocalGenerator,
-    this->Config,
+    context,
   };
 
-  return this->CompiledGeneratorExpression->Evaluate(
-    this->LocalGenerator, this->Config, this->HeadTarget, &dagChecker, nullptr,
-    this->Language);
+  return this->CompiledGeneratorExpression->Evaluate(context, &dagChecker,
+                                                     this->HeadTarget);
 }

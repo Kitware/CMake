@@ -18,6 +18,7 @@
 #include <cmext/string_view>
 
 #include "cmEvaluatedTargetProperty.h"
+#include "cmGenExContext.h"
 #include "cmGeneratorExpressionDAGChecker.h"
 #include "cmList.h"
 #include "cmListFileCache.h"
@@ -230,8 +231,10 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetCompileOptions(
   std::vector<BT<std::string>> result;
   std::unordered_set<std::string> uniqueOptions;
 
+  cm::GenEx::Context context(this->LocalGenerator, config, language);
+
   cmGeneratorExpressionDAGChecker dagChecker{
-    this, "COMPILE_OPTIONS", nullptr, nullptr, this->LocalGenerator, config,
+    this, "COMPILE_OPTIONS", nullptr, nullptr, context,
   };
 
   cmList debugProperties{ this->Makefile->GetDefinition(
@@ -242,10 +245,10 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetCompileOptions(
   this->DebugCompileOptionsDone = true;
 
   EvaluatedTargetPropertyEntries entries = EvaluateTargetPropertyEntries(
-    this, config, language, &dagChecker, this->CompileOptionsEntries);
+    this, context, &dagChecker, this->CompileOptionsEntries);
 
-  AddInterfaceEntries(this, config, "INTERFACE_COMPILE_OPTIONS", language,
-                      &dagChecker, entries, IncludeRuntimeInterface::Yes);
+  AddInterfaceEntries(this, "INTERFACE_COMPILE_OPTIONS", context, &dagChecker,
+                      entries, IncludeRuntimeInterface::Yes);
 
   processOptions(this, entries, result, uniqueOptions, debugOptions,
                  "compile options", OptionsParse::Shell);
@@ -270,8 +273,11 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetCompileFeatures(
   std::vector<BT<std::string>> result;
   std::unordered_set<std::string> uniqueFeatures;
 
+  cm::GenEx::Context context(this->LocalGenerator, config,
+                             /*language=*/std::string());
+
   cmGeneratorExpressionDAGChecker dagChecker{
-    this, "COMPILE_FEATURES", nullptr, nullptr, this->LocalGenerator, config,
+    this, "COMPILE_FEATURES", nullptr, nullptr, context,
   };
 
   cmList debugProperties{ this->Makefile->GetDefinition(
@@ -282,11 +288,10 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetCompileFeatures(
   this->DebugCompileFeaturesDone = true;
 
   EvaluatedTargetPropertyEntries entries = EvaluateTargetPropertyEntries(
-    this, config, std::string(), &dagChecker, this->CompileFeaturesEntries);
+    this, context, &dagChecker, this->CompileFeaturesEntries);
 
-  AddInterfaceEntries(this, config, "INTERFACE_COMPILE_FEATURES",
-                      std::string(), &dagChecker, entries,
-                      IncludeRuntimeInterface::Yes);
+  AddInterfaceEntries(this, "INTERFACE_COMPILE_FEATURES", context, &dagChecker,
+                      entries, IncludeRuntimeInterface::Yes);
 
   processOptions(this, entries, result, uniqueFeatures, debugFeatures,
                  "compile features", OptionsParse::None);
@@ -319,9 +324,10 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetCompileDefinitions(
   std::vector<BT<std::string>> list;
   std::unordered_set<std::string> uniqueOptions;
 
+  cm::GenEx::Context context(this->LocalGenerator, config, language);
+
   cmGeneratorExpressionDAGChecker dagChecker{
-    this,    "COMPILE_DEFINITIONS", nullptr,
-    nullptr, this->LocalGenerator,  config,
+    this, "COMPILE_DEFINITIONS", nullptr, nullptr, context,
   };
 
   cmList debugProperties{ this->Makefile->GetDefinition(
@@ -332,9 +338,9 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetCompileDefinitions(
   this->DebugCompileDefinitionsDone = true;
 
   EvaluatedTargetPropertyEntries entries = EvaluateTargetPropertyEntries(
-    this, config, language, &dagChecker, this->CompileDefinitionsEntries);
+    this, context, &dagChecker, this->CompileDefinitionsEntries);
 
-  AddInterfaceEntries(this, config, "INTERFACE_COMPILE_DEFINITIONS", language,
+  AddInterfaceEntries(this, "INTERFACE_COMPILE_DEFINITIONS", context,
                       &dagChecker, entries, IncludeRuntimeInterface::Yes);
 
   processOptions(this, entries, list, uniqueOptions, debugDefines,
@@ -356,8 +362,10 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetPrecompileHeaders(
   }
   std::unordered_set<std::string> uniqueOptions;
 
+  cm::GenEx::Context context(this->LocalGenerator, config, language);
+
   cmGeneratorExpressionDAGChecker dagChecker{
-    this, "PRECOMPILE_HEADERS", nullptr, nullptr, this->LocalGenerator, config,
+    this, "PRECOMPILE_HEADERS", nullptr, nullptr, context,
   };
 
   cmList debugProperties{ this->Makefile->GetDefinition(
@@ -369,9 +377,9 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetPrecompileHeaders(
   this->DebugPrecompileHeadersDone = true;
 
   EvaluatedTargetPropertyEntries entries = EvaluateTargetPropertyEntries(
-    this, config, language, &dagChecker, this->PrecompileHeadersEntries);
+    this, context, &dagChecker, this->PrecompileHeadersEntries);
 
-  AddInterfaceEntries(this, config, "INTERFACE_PRECOMPILE_HEADERS", language,
+  AddInterfaceEntries(this, "INTERFACE_PRECOMPILE_HEADERS", context,
                       &dagChecker, entries, IncludeRuntimeInterface::Yes);
 
   std::vector<BT<std::string>> list;
@@ -413,8 +421,10 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetLinkOptions(
   std::vector<BT<std::string>> result;
   std::unordered_set<std::string> uniqueOptions;
 
+  cm::GenEx::Context context(this->LocalGenerator, config, language);
+
   cmGeneratorExpressionDAGChecker dagChecker{
-    this, "LINK_OPTIONS", nullptr, nullptr, this->LocalGenerator, config,
+    this, "LINK_OPTIONS", nullptr, nullptr, context,
   };
 
   cmList debugProperties{ this->Makefile->GetDefinition(
@@ -425,10 +435,10 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetLinkOptions(
   this->DebugLinkOptionsDone = true;
 
   EvaluatedTargetPropertyEntries entries = EvaluateTargetPropertyEntries(
-    this, config, language, &dagChecker, this->LinkOptionsEntries);
+    this, context, &dagChecker, this->LinkOptionsEntries);
 
-  AddInterfaceEntries(this, config, "INTERFACE_LINK_OPTIONS", language,
-                      &dagChecker, entries, IncludeRuntimeInterface::Yes,
+  AddInterfaceEntries(this, "INTERFACE_LINK_OPTIONS", context, &dagChecker,
+                      entries, IncludeRuntimeInterface::Yes,
                       this->GetPolicyStatusCMP0099() == cmPolicies::NEW
                         ? UseTo::Link
                         : UseTo::Compile);
@@ -595,17 +605,18 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetStaticLibraryLinkOptions(
   std::vector<BT<std::string>> result;
   std::unordered_set<std::string> uniqueOptions;
 
+  cm::GenEx::Context context(this->LocalGenerator, config, language);
+
   cmGeneratorExpressionDAGChecker dagChecker{
-    this,    "STATIC_LIBRARY_OPTIONS", nullptr,
-    nullptr, this->LocalGenerator,     config,
+    this, "STATIC_LIBRARY_OPTIONS", nullptr, nullptr, context,
   };
 
   EvaluatedTargetPropertyEntries entries;
   if (cmValue linkOptions = this->GetProperty("STATIC_LIBRARY_OPTIONS")) {
     std::unique_ptr<TargetPropertyEntry> entry = TargetPropertyEntry::Create(
       *this->LocalGenerator->GetCMakeInstance(), *linkOptions);
-    entries.Entries.emplace_back(EvaluateTargetPropertyEntry(
-      this, config, language, &dagChecker, *entry));
+    entries.Entries.emplace_back(
+      EvaluateTargetPropertyEntry(this, context, &dagChecker, *entry));
   }
   processOptions(this, entries, result, uniqueOptions, false,
                  "static library link options", OptionsParse::Shell);
@@ -640,8 +651,9 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetLinkDepends(
 {
   std::vector<BT<std::string>> result;
   std::unordered_set<std::string> uniqueOptions;
+  cm::GenEx::Context context(this->LocalGenerator, config, language);
   cmGeneratorExpressionDAGChecker dagChecker{
-    this, "LINK_DEPENDS", nullptr, nullptr, this->LocalGenerator, config,
+    this, "LINK_DEPENDS", nullptr, nullptr, context,
   };
 
   EvaluatedTargetPropertyEntries entries;
@@ -650,12 +662,12 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetLinkDepends(
     for (auto const& depend : depends) {
       std::unique_ptr<TargetPropertyEntry> entry = TargetPropertyEntry::Create(
         *this->LocalGenerator->GetCMakeInstance(), depend);
-      entries.Entries.emplace_back(EvaluateTargetPropertyEntry(
-        this, config, language, &dagChecker, *entry));
+      entries.Entries.emplace_back(
+        EvaluateTargetPropertyEntry(this, context, &dagChecker, *entry));
     }
   }
-  AddInterfaceEntries(this, config, "INTERFACE_LINK_DEPENDS", language,
-                      &dagChecker, entries, IncludeRuntimeInterface::Yes,
+  AddInterfaceEntries(this, "INTERFACE_LINK_DEPENDS", context, &dagChecker,
+                      entries, IncludeRuntimeInterface::Yes,
                       this->GetPolicyStatusCMP0099() == cmPolicies::NEW
                         ? UseTo::Link
                         : UseTo::Compile);
