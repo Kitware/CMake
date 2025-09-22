@@ -1,0 +1,2 @@
+.*/trace_expand\.cmake\(3\):  set\(foo bar \)
+.*/trace_expand\.cmake\(4\):  cmake_language\(TRACE OFF \)

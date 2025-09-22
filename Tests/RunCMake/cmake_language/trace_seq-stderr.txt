@@ -1,0 +1,4 @@
+.*/trace_seq\.cmake\(3\):  set\(foo \${bar} \)
+.*/trace_seq\.cmake\(4\):  cmake_language\(TRACE OFF \)
+.*/trace_seq\.cmake\(7\):  set\(foo \${bar} \)
+.*/trace_seq\.cmake\(8\):  cmake_language\(TRACE OFF \)

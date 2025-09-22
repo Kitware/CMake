@@ -1,0 +1,5 @@
+.*/trace_expand_cli_wins\.cmake\(1\):  set\(bar bar \)
+.*/trace_expand_cli_wins\.cmake\(2\):  cmake_language\(TRACE ON \)
+.*/trace_expand_cli_wins\.cmake\(3\):  set\(foo bar \)
+.*/trace_expand_cli_wins\.cmake\(4\):  cmake_language\(TRACE OFF \)
+.*/trace_expand_cli_wins\.cmake\(5\):  set\(foo bar \)
