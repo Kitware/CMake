@@ -4334,7 +4334,11 @@ struct TargetOutputNameArtifactResultGetter<ArtifactPdbTag>
       return std::string();
     }
 
-    return target->GetPDBOutputName(eval->Context.Config);
+    auto output = target->GetPDBOutputName(eval->Context.Config);
+
+    return target->GetPolicyStatusCMP0202() == cmPolicies::NEW
+      ? cmStrCat(output, target->GetFilePostfix(eval->Context.Config))
+      : output;
   }
 };
 

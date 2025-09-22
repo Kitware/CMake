@@ -604,6 +604,9 @@ class cmMakefile;
   SELECT(POLICY, CMP0201,                                                     \
          "The Python::NumPy target does not depend on the Python::Module "    \
          "target.",                                                           \
+         4, 2, 0, WARN)                                                       \
+  SELECT(POLICY, CMP0202,                                                     \
+         "PDB file names always include their target's per-config POSTFIX.",  \
          4, 2, 0, WARN)
 
 #define CM_SELECT_ID(F, A1, A2, A3, A4, A5, A6) F(A1)
@@ -654,7 +657,8 @@ class cmMakefile;
   F(CMP0182)                                                                  \
   F(CMP0195)                                                                  \
   F(CMP0199)                                                                  \
-  F(CMP0200)
+  F(CMP0200)                                                                  \
+  F(CMP0202)
 
 #define CM_FOR_EACH_CUSTOM_COMMAND_POLICY(F)                                  \
   F(CMP0116)                                                                  \

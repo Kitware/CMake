@@ -92,6 +92,7 @@ else()
 endif()
 string (TOUPPER "${FIRST_CONFIG}" FIRST_CONFIG)
 
+cmake_policy(SET CMP0202 OLD)
 
 add_executable (exec4 empty.c)
 set_property (TARGET exec4 PROPERTY RUNTIME_OUTPUT_NAME exec4_runtime)
@@ -141,6 +142,24 @@ check_value ("TARGET_PDB_FILE_BASE_NAME shared PDB all properties + postfix" "$<
 ]])
 endif()
 
+if (CMAKE_C_LINKER_SUPPORTS_PDB)
+  cmake_policy(SET CMP0202 NEW)
+
+  add_executable (exec5 empty.c)
+  set_property (TARGET exec5 PROPERTY PDB_NAME exec5_pdb)
+  set_property (TARGET exec5 PROPERTY ${FIRST_CONFIG}_POSTFIX _postfix)
+  add_library (shared5 SHARED empty.c)
+  set_property (TARGET shared5 PROPERTY PDB_NAME shared5_pdb)
+  set_property (TARGET shared5 PROPERTY ${FIRST_CONFIG}_POSTFIX _postfix)
+  add_library (static5 STATIC empty.c)
+  set_property (TARGET static5 PROPERTY PDB_NAME static5_pdb)
+  set_property (TARGET static5 PROPERTY ${FIRST_CONFIG}_POSTFIX _postfix)
+
+  string (APPEND GENERATE_CONTENT [[
+check_value ("TARGET_PDB_FILE_BASE_NAME executable PDB all properties + postfix" "$<TARGET_PDB_FILE_BASE_NAME:exec5>" "exec5_pdb_postfix")
+check_value ("TARGET_PDB_FILE_BASE_NAME shared PDB all properties + postfix" "$<TARGET_PDB_FILE_BASE_NAME:shared5>" "shared5_pdb_postfix")
+]])
+endif()
 
 file (GENERATE OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/TARGET_FILE_BASE_NAME-generated.cmake"
   CONTENT "${GENERATE_CONTENT}" ${GENERATE_CONDITION})
