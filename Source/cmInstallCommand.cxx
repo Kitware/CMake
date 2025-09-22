@@ -2120,6 +2120,11 @@ bool HandleExportMode(std::vector<std::string> const& args,
   cmInstallGenerator::MessageLevel message =
     cmInstallGenerator::SelectMessageLevel(helper.Makefile);
 
+  // Tell the global generator about any installation component names
+  // specified
+  helper.Makefile->GetGlobalGenerator()->AddInstallComponent(
+    ica.GetComponent());
+
   // Create the export install generator.
   helper.Makefile->AddInstallGenerator(
     cm::make_unique<cmInstallCMakeConfigExportGenerator>(
