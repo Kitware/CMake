@@ -14,6 +14,7 @@
 #include <cmext/algorithm>
 
 #include "cmEvaluatedTargetProperty.h"
+#include "cmGenExContext.h"
 #include "cmGeneratorExpressionDAGChecker.h"
 #include "cmLinkItem.h"
 #include "cmList.h"
@@ -122,8 +123,9 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetLinkDirectories(
   std::vector<BT<std::string>> result;
   std::unordered_set<std::string> uniqueDirectories;
 
+  cm::GenEx::Context context(this->LocalGenerator, config, language);
   cmGeneratorExpressionDAGChecker dagChecker{
-    this, "LINK_DIRECTORIES", nullptr, nullptr, this->LocalGenerator, config,
+    this, "LINK_DIRECTORIES", nullptr, nullptr, context,
   };
 
   cmList debugProperties{ this->Makefile->GetDefinition(
@@ -134,10 +136,10 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetLinkDirectories(
   this->DebugLinkDirectoriesDone = true;
 
   EvaluatedTargetPropertyEntries entries = EvaluateTargetPropertyEntries(
-    this, config, language, &dagChecker, this->LinkDirectoriesEntries);
+    this, context, &dagChecker, this->LinkDirectoriesEntries);
 
-  AddInterfaceEntries(this, config, "INTERFACE_LINK_DIRECTORIES", language,
-                      &dagChecker, entries, IncludeRuntimeInterface::Yes,
+  AddInterfaceEntries(this, "INTERFACE_LINK_DIRECTORIES", context, &dagChecker,
+                      entries, IncludeRuntimeInterface::Yes,
                       this->GetPolicyStatusCMP0099() == cmPolicies::NEW
                         ? UseTo::Link
                         : UseTo::Compile);

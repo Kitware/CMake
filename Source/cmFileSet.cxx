@@ -14,6 +14,7 @@
 
 #include "cmsys/RegularExpression.hxx"
 
+#include "cmGenExContext.h"
 #include "cmGeneratorExpression.h"
 #include "cmList.h"
 #include "cmListFileCache.h"
@@ -156,8 +157,7 @@ cmFileSet::CompileDirectoryEntries() const
 
 std::vector<std::string> cmFileSet::EvaluateDirectoryEntries(
   std::vector<std::unique_ptr<cmCompiledGeneratorExpression>> const& cges,
-  cmLocalGenerator* lg, std::string const& config,
-  cmGeneratorTarget const* target,
+  cm::GenEx::Context const& context, cmGeneratorTarget const* target,
   cmGeneratorExpressionDAGChecker* dagChecker) const
 {
   struct DirCacheEntry
@@ -169,11 +169,11 @@ std::vector<std::string> cmFileSet::EvaluateDirectoryEntries(
   std::unordered_map<std::string, DirCacheEntry> dirCache;
   std::vector<std::string> result;
   for (auto const& cge : cges) {
-    auto entry = cge->Evaluate(lg, config, target, dagChecker);
+    auto entry = cge->Evaluate(context, dagChecker, target);
     cmList dirs{ entry };
     for (std::string dir : dirs) {
       if (!cmSystemTools::FileIsFullPath(dir)) {
-        dir = cmStrCat(lg->GetCurrentSourceDirectory(), '/', dir);
+        dir = cmStrCat(context.LG->GetCurrentSourceDirectory(), '/', dir);
       }
 
       auto dirCacheResult = dirCache.emplace(dir, DirCacheEntry());
@@ -198,7 +198,7 @@ std::vector<std::string> cmFileSet::EvaluateDirectoryEntries(
                                            priorDirCacheEntry.collapsedDir) ||
              cmSystemTools::IsSubDirectory(priorDirCacheEntry.collapsedDir,
                                            dirCacheEntry.collapsedDir))) {
-          lg->GetCMakeInstance()->IssueMessage(
+          context.LG->GetCMakeInstance()->IssueMessage(
             MessageType::FATAL_ERROR,
             cmStrCat(
               "Base directories in file set cannot be subdirectories of each "
@@ -218,14 +218,13 @@ void cmFileSet::EvaluateFileEntry(
   std::vector<std::string> const& dirs,
   std::map<std::string, std::vector<std::string>>& filesPerDir,
   std::unique_ptr<cmCompiledGeneratorExpression> const& cge,
-  cmLocalGenerator* lg, std::string const& config,
-  cmGeneratorTarget const* target,
+  cm::GenEx::Context const& context, cmGeneratorTarget const* target,
   cmGeneratorExpressionDAGChecker* dagChecker) const
 {
-  auto files = cge->Evaluate(lg, config, target, dagChecker);
+  auto files = cge->Evaluate(context, dagChecker, target);
   for (std::string file : cmList{ files }) {
     if (!cmSystemTools::FileIsFullPath(file)) {
-      file = cmStrCat(lg->GetCurrentSourceDirectory(), '/', file);
+      file = cmStrCat(context.LG->GetCurrentSourceDirectory(), '/', file);
     }
     auto collapsedFile = cmSystemTools::CollapseFullPath(file);
     bool found = false;
@@ -246,8 +245,8 @@ void cmFileSet::EvaluateFileEntry(
       for (auto const& dir : dirs) {
         e << "\n  " << dir;
       }
-      lg->GetCMakeInstance()->IssueMessage(MessageType::FATAL_ERROR, e.str(),
-                                           cge->GetBacktrace());
+      context.LG->GetCMakeInstance()->IssueMessage(
+        MessageType::FATAL_ERROR, e.str(), cge->GetBacktrace());
       return;
     }
 
