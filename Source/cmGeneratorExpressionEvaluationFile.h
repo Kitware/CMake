@@ -39,8 +39,8 @@ private:
                 cmCompiledGeneratorExpression* inputExpression,
                 std::map<std::string, std::string>& outputFiles, mode_t perm);
 
-  std::string GetInputFileName(cmLocalGenerator* lg);
-  std::string GetOutputFileName(cmLocalGenerator* lg,
+  std::string GetInputFileName(cmLocalGenerator const* lg);
+  std::string GetOutputFileName(cmLocalGenerator const* lg,
                                 cmGeneratorTarget* target,
                                 std::string const& config,
                                 std::string const& lang);
@@ -50,7 +50,7 @@ private:
     PathForOutput
   };
   std::string FixRelativePath(std::string const& filePath, PathRole role,
-                              cmLocalGenerator* lg);
+                              cmLocalGenerator const* lg);
 
   std::string const Input;
   std::string const Target;

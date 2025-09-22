@@ -52,18 +52,19 @@
 #include "cmake.h"
 
 std::string cmGeneratorExpressionNode::EvaluateDependentExpression(
-  std::string const& prop, cmLocalGenerator const* lg,
-  cmGeneratorExpressionContext* context, cmGeneratorTarget const* headTarget,
+  std::string const& prop, cmGeneratorExpressionContext* context,
+  cmGeneratorTarget const* headTarget,
   cmGeneratorExpressionDAGChecker* dagChecker,
   cmGeneratorTarget const* currentTarget)
 {
-  cmGeneratorExpression ge(*lg->GetCMakeInstance(), context->Backtrace);
+  cmGeneratorExpression ge(*context->LG->GetCMakeInstance(),
+                           context->Backtrace);
   std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(prop);
   cge->SetEvaluateForBuildsystem(context->EvaluateForBuildsystem);
   cge->SetQuiet(context->Quiet);
   std::string result =
-    cge->Evaluate(lg, context->Config, headTarget, dagChecker, currentTarget,
-                  context->Language);
+    cge->Evaluate(context->LG, context->Config, headTarget, dagChecker,
+                  currentTarget, context->Language);
   if (cge->GetHadContextSensitiveCondition()) {
     context->HadContextSensitiveCondition = true;
   }
@@ -504,12 +505,12 @@ protected:
       }
 
       return this->EvaluateDependentExpression(
-        expression, context->LG, context, context->HeadTarget, &dagChecker,
+        expression, context, context->HeadTarget, &dagChecker,
         context->CurrentTarget);
     }
 
     return this->EvaluateDependentExpression(
-      expression, context->LG, context, context->HeadTarget, dagCheckerParent,
+      expression, context, context->HeadTarget, dagCheckerParent,
       context->CurrentTarget);
   }
 };
@@ -3296,8 +3297,8 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
     // transitive link closure as an ordered list.
     if (!interfacePropertyName.empty()) {
       result = cmGeneratorExpression::StripEmptyListElements(
-        this->EvaluateDependentExpression(result, context->LG, context, target,
-                                          &dagChecker, target));
+        this->EvaluateDependentExpression(result, context, target, &dagChecker,
+                                          target));
       std::string linkedTargetsContent = getLinkedTargetsContent(
         target, interfacePropertyName, context, &dagChecker, usage);
       if (!linkedTargetsContent.empty()) {

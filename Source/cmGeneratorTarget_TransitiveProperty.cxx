@@ -138,7 +138,7 @@ std::string cmGeneratorTarget::EvaluateInterfaceProperty(
 
   if (cmValue p = this->GetProperty(prop)) {
     result = cmGeneratorExpressionNode::EvaluateDependentExpression(
-      *p, context->LG, context, headTarget, &dagChecker, this);
+      *p, context, headTarget, &dagChecker, this);
   }
 
   if (cmLinkInterfaceLibraries const* iface =

@@ -8,7 +8,6 @@
 #include <vector>
 
 class cmGeneratorTarget;
-class cmLocalGenerator;
 struct GeneratorExpressionContent;
 struct cmGeneratorExpressionContext;
 struct cmGeneratorExpressionDAGChecker;
@@ -46,8 +45,8 @@ struct cmGeneratorExpressionNode
     cmGeneratorExpressionDAGChecker* dagChecker) const = 0;
 
   static std::string EvaluateDependentExpression(
-    std::string const& prop, cmLocalGenerator const* lg,
-    cmGeneratorExpressionContext* context, cmGeneratorTarget const* headTarget,
+    std::string const& prop, cmGeneratorExpressionContext* context,
+    cmGeneratorTarget const* headTarget,
     cmGeneratorExpressionDAGChecker* dagChecker,
     cmGeneratorTarget const* currentTarget);
 
