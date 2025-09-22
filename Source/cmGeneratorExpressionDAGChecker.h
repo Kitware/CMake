@@ -12,13 +12,13 @@
 
 namespace cm {
 namespace GenEx {
+struct Context;
 struct Evaluation;
 }
 }
 
 struct GeneratorExpressionContent;
 class cmGeneratorTarget;
-class cmLocalGenerator;
 
 struct cmGeneratorExpressionDAGChecker
 {
@@ -30,8 +30,7 @@ struct cmGeneratorExpressionDAGChecker
   cmGeneratorExpressionDAGChecker(
     cmGeneratorTarget const* target, std::string property,
     GeneratorExpressionContent const* content,
-    cmGeneratorExpressionDAGChecker* parent, cmLocalGenerator const* contextLG,
-    std::string const& contextConfig,
+    cmGeneratorExpressionDAGChecker* parent, cm::GenEx::Context const& context,
     cmListFileBacktrace backtrace = cmListFileBacktrace(),
     ComputingLinkLibraries computingLinkLibraries =
       ComputingLinkLibraries::No);

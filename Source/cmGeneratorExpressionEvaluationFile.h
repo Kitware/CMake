@@ -14,6 +14,12 @@
 #include "cmGeneratorExpression.h"
 #include "cmPolicies.h"
 
+namespace cm {
+namespace GenEx {
+struct Context;
+}
+}
+
 class cmGeneratorTarget;
 class cmLocalGenerator;
 
@@ -40,10 +46,8 @@ private:
                 std::map<std::string, std::string>& outputFiles, mode_t perm);
 
   std::string GetInputFileName(cmLocalGenerator const* lg);
-  std::string GetOutputFileName(cmLocalGenerator const* lg,
-                                cmGeneratorTarget* target,
-                                std::string const& config,
-                                std::string const& lang);
+  std::string GetOutputFileName(cm::GenEx::Context const& context,
+                                cmGeneratorTarget* target);
   enum PathRole
   {
     PathForInput,

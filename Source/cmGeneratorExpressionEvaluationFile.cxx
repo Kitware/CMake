@@ -8,6 +8,7 @@
 
 #include "cmsys/FStream.hxx"
 
+#include "cmGenExContext.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGlobalGenerator.h"
 #include "cmListFileCache.h"
@@ -39,11 +40,12 @@ void cmGeneratorExpressionEvaluationFile::Generate(
   cmCompiledGeneratorExpression* inputExpression,
   std::map<std::string, std::string>& outputFiles, mode_t perm)
 {
+  cm::GenEx::Context context(lg, config, lang);
   std::string rawCondition = this->Condition->GetInput();
   cmGeneratorTarget* target = lg->FindGeneratorTargetToUse(this->Target);
   if (!rawCondition.empty()) {
     std::string condResult =
-      this->Condition->Evaluate(lg, config, target, nullptr, nullptr, lang);
+      this->Condition->Evaluate(context, nullptr, target);
     if (condResult == "0") {
       return;
     }
@@ -58,10 +60,9 @@ void cmGeneratorExpressionEvaluationFile::Generate(
     }
   }
 
-  std::string const outputFileName =
-    this->GetOutputFileName(lg, target, config, lang);
+  std::string const outputFileName = this->GetOutputFileName(context, target);
   std::string const& outputContent =
-    inputExpression->Evaluate(lg, config, target, nullptr, nullptr, lang);
+    inputExpression->Evaluate(context, nullptr, target);
 
   auto it = outputFiles.find(outputFileName);
 
@@ -123,8 +124,9 @@ void cmGeneratorExpressionEvaluationFile::CreateOutputFile(
   cmGeneratorTarget* target = lg->FindGeneratorTargetToUse(this->Target);
   gg->GetEnabledLanguages(enabledLanguages);
 
-  for (std::string const& le : enabledLanguages) {
-    std::string const name = this->GetOutputFileName(lg, target, config, le);
+  for (std::string const& lang : enabledLanguages) {
+    cm::GenEx::Context context(lg, config, lang);
+    std::string const name = this->GetOutputFileName(context, target);
     cmSourceFile* sf = lg->GetMakefile()->GetOrCreateGeneratedSource(name);
 
     // Tell the build system generators that there is no build rule
@@ -204,16 +206,16 @@ std::string cmGeneratorExpressionEvaluationFile::GetInputFileName(
 }
 
 std::string cmGeneratorExpressionEvaluationFile::GetOutputFileName(
-  cmLocalGenerator const* lg, cmGeneratorTarget* target,
-  std::string const& config, std::string const& lang)
+  cm::GenEx::Context const& context, cmGeneratorTarget* target)
 {
   std::string outputFileName =
-    this->OutputFileExpr->Evaluate(lg, config, target, nullptr, nullptr, lang);
+    this->OutputFileExpr->Evaluate(context, nullptr, target);
 
   if (cmSystemTools::FileIsFullPath(outputFileName)) {
     outputFileName = cmSystemTools::CollapseFullPath(outputFileName);
   } else {
-    outputFileName = this->FixRelativePath(outputFileName, PathForOutput, lg);
+    outputFileName =
+      this->FixRelativePath(outputFileName, PathForOutput, context.LG);
   }
 
   return outputFileName;

@@ -21,9 +21,8 @@
 cmGeneratorExpressionDAGChecker::cmGeneratorExpressionDAGChecker(
   cmGeneratorTarget const* target, std::string property,
   GeneratorExpressionContent const* content,
-  cmGeneratorExpressionDAGChecker* parent, cmLocalGenerator const* contextLG,
-  std::string const& contextConfig, cmListFileBacktrace backtrace,
-  ComputingLinkLibraries computingLinkLibraries)
+  cmGeneratorExpressionDAGChecker* parent, cm::GenEx::Context const& context,
+  cmListFileBacktrace backtrace, ComputingLinkLibraries computingLinkLibraries)
   : Parent(parent)
   , Top(parent ? parent->Top : this)
   , Target(target)
@@ -37,7 +36,8 @@ cmGeneratorExpressionDAGChecker::cmGeneratorExpressionDAGChecker(
   } else {
     this->TopIsTransitiveProperty =
       this->Target
-        ->IsTransitiveProperty(this->Property, contextLG, contextConfig, this)
+        ->IsTransitiveProperty(this->Property, context.LG, context.Config,
+                               this)
         .has_value();
   }
 

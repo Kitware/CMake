@@ -27,6 +27,7 @@
 #include "cmExperimental.h"
 #include "cmFileSet.h"
 #include "cmFileTimes.h"
+#include "cmGenExContext.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorExpressionDAGChecker.h"
@@ -632,7 +633,7 @@ std::vector<cmSourceFile*> const* cmGeneratorTarget::GetSourceDepends(
 }
 
 namespace {
-void handleSystemIncludesDep(cmLocalGenerator* lg,
+void handleSystemIncludesDep(cmLocalGenerator const* lg,
                              cmGeneratorTarget const* depTgt,
                              std::string const& config,
                              cmGeneratorTarget const* headTarget,
@@ -739,12 +740,13 @@ std::string cmGeneratorTarget::GetLinkerTypeProperty(
   std::string propName{ "LINKER_TYPE" };
   auto linkerType = this->GetProperty(propName);
   if (!linkerType.IsEmpty()) {
+    cm::GenEx::Context context(this->LocalGenerator, config, lang);
     cmGeneratorExpressionDAGChecker dagChecker{
-      this, propName, nullptr, nullptr, this->LocalGenerator, config,
+      this, propName, nullptr, nullptr, context,
     };
-    auto ltype =
-      cmGeneratorExpression::Evaluate(*linkerType, this->GetLocalGenerator(),
-                                      config, this, &dagChecker, this, lang);
+    auto ltype = cmGeneratorExpression::Evaluate(
+      *linkerType, context.LG, context.Config, this, &dagChecker, this,
+      context.Language);
     if (this->IsDeviceLink()) {
       cmList list{ ltype };
       auto const DL_BEGIN = "<DEVICE_LINK>"_s;
@@ -1208,24 +1210,25 @@ void cmGeneratorTarget::AddSystemIncludeCacheKey(
   std::string const& key, std::string const& config,
   std::string const& language) const
 {
+  cm::GenEx::Context context(this->LocalGenerator, config, language);
   cmGeneratorExpressionDAGChecker dagChecker{
-    this,    "SYSTEM_INCLUDE_DIRECTORIES", nullptr,
-    nullptr, this->LocalGenerator,         config,
+    this, "SYSTEM_INCLUDE_DIRECTORIES", nullptr, nullptr, context,
   };
 
   bool excludeImported = this->GetPropertyAsBool("NO_SYSTEM_FROM_IMPORTED");
 
   cmList result;
   for (std::string const& it : this->Target->GetSystemIncludeDirectories()) {
-    result.append(cmGeneratorExpression::Evaluate(
-      it, this->LocalGenerator, config, this, &dagChecker, nullptr, language));
+    result.append(
+      cmGeneratorExpression::Evaluate(it, context.LG, context.Config, this,
+                                      &dagChecker, nullptr, context.Language));
   }
 
   std::vector<cmGeneratorTarget const*> const& deps =
     this->GetLinkImplementationClosure(config, UseTo::Compile);
   for (cmGeneratorTarget const* dep : deps) {
-    handleSystemIncludesDep(this->LocalGenerator, dep, config, this,
-                            &dagChecker, result, excludeImported, language);
+    handleSystemIncludesDep(context.LG, dep, context.Config, this, &dagChecker,
+                            result, excludeImported, context.Language);
   }
 
   cmLinkImplementation const* impl =
@@ -1235,9 +1238,9 @@ void cmGeneratorTarget::AddSystemIncludeCacheKey(
     if (runtimeEntries != impl->LanguageRuntimeLibraries.end()) {
       for (auto const& lib : runtimeEntries->second) {
         if (lib.Target) {
-          handleSystemIncludesDep(this->LocalGenerator, lib.Target, config,
-                                  this, &dagChecker, result, excludeImported,
-                                  language);
+          handleSystemIncludesDep(context.LG, lib.Target, context.Config, this,
+                                  &dagChecker, result, excludeImported,
+                                  context.Language);
         }
       }
     }
@@ -1998,11 +2001,12 @@ void cmGeneratorTarget::GetAutoUicOptions(std::vector<std::string>& result,
     return;
   }
 
+  cm::GenEx::Context context(this->LocalGenerator, config);
   cmGeneratorExpressionDAGChecker dagChecker{
-    this, "AUTOUIC_OPTIONS", nullptr, nullptr, this->LocalGenerator, config,
+    this, "AUTOUIC_OPTIONS", nullptr, nullptr, context,
   };
-  cmExpandList(cmGeneratorExpression::Evaluate(prop, this->LocalGenerator,
-                                               config, this, &dagChecker),
+  cmExpandList(cmGeneratorExpression::Evaluate(
+                 prop, context.LG, context.Config, this, &dagChecker),
                result);
 }
 
@@ -5665,17 +5669,17 @@ bool cmGeneratorTarget::AddHeaderSetVerification()
     bool first = true;
     for (auto const& config : this->Makefile->GetGeneratorConfigs(
            cmMakefile::GeneratorConfigQuery::IncludeEmptyConfig)) {
+      cm::GenEx::Context context(this->LocalGenerator, config);
       if (first || dirCgesContextSensitive) {
-        dirs = fileSet->EvaluateDirectoryEntries(dirCges, this->LocalGenerator,
-                                                 config, this);
+        dirs = fileSet->EvaluateDirectoryEntries(dirCges, context, this);
         dirCgesContextSensitive =
           std::any_of(dirCges.begin(), dirCges.end(), contextSensitive);
       }
       if (first || fileCgesContextSensitive) {
         filesPerDir.clear();
         for (auto const& fileCge : fileCges) {
-          fileSet->EvaluateFileEntry(dirs, filesPerDir, fileCge,
-                                     this->LocalGenerator, config, this);
+          fileSet->EvaluateFileEntry(dirs, filesPerDir, fileCge, context,
+                                     this);
           if (fileCge->GetHadContextSensitiveCondition()) {
             fileCgesContextSensitive = true;
           }
@@ -6208,15 +6212,16 @@ void cmGeneratorTarget::BuildFileSetInfoCache(std::string const& config) const
       continue;
     }
 
+    cm::GenEx::Context context(this->LocalGenerator, config);
+
     auto fileEntries = file_set->CompileFileEntries();
     auto directoryEntries = file_set->CompileDirectoryEntries();
-    auto directories = file_set->EvaluateDirectoryEntries(
-      directoryEntries, this->LocalGenerator, config, this);
+    auto directories =
+      file_set->EvaluateDirectoryEntries(directoryEntries, context, this);
 
     std::map<std::string, std::vector<std::string>> files;
     for (auto const& entry : fileEntries) {
-      file_set->EvaluateFileEntry(directories, files, entry,
-                                  this->LocalGenerator, config, this);
+      file_set->EvaluateFileEntry(directories, files, entry, context, this);
     }
 
     for (auto const& it : files) {

@@ -12,10 +12,15 @@
 
 #include "cmListFileCache.h"
 
+namespace cm {
+namespace GenEx {
+struct Context;
+}
+}
+
 class cmCompiledGeneratorExpression;
 struct cmGeneratorExpressionDAGChecker;
 class cmGeneratorTarget;
-class cmLocalGenerator;
 class cmMakefile;
 class cmake;
 
@@ -67,16 +72,14 @@ public:
 
   std::vector<std::string> EvaluateDirectoryEntries(
     std::vector<std::unique_ptr<cmCompiledGeneratorExpression>> const& cges,
-    cmLocalGenerator const* lg, std::string const& config,
-    cmGeneratorTarget const* target,
+    cm::GenEx::Context const& context, cmGeneratorTarget const* target,
     cmGeneratorExpressionDAGChecker* dagChecker = nullptr) const;
 
   void EvaluateFileEntry(
     std::vector<std::string> const& dirs,
     std::map<std::string, std::vector<std::string>>& filesPerDir,
     std::unique_ptr<cmCompiledGeneratorExpression> const& cge,
-    cmLocalGenerator const* lg, std::string const& config,
-    cmGeneratorTarget const* target,
+    cm::GenEx::Context const& context, cmGeneratorTarget const* target,
     cmGeneratorExpressionDAGChecker* dagChecker = nullptr) const;
 
   static bool IsValidName(std::string const& name);

@@ -9,6 +9,12 @@
 #include "cmGeneratorTarget.h"
 #include "cmListFileCache.h"
 
+namespace cm {
+namespace GenEx {
+struct Context;
+}
+}
+
 class cmLinkImplItem;
 struct cmGeneratorExpressionDAGChecker;
 
@@ -34,8 +40,8 @@ struct EvaluatedTargetPropertyEntry
 };
 
 EvaluatedTargetPropertyEntry EvaluateTargetPropertyEntry(
-  cmGeneratorTarget const* thisTarget, std::string const& config,
-  std::string const& lang, cmGeneratorExpressionDAGChecker* dagChecker,
+  cmGeneratorTarget const* thisTarget, cm::GenEx::Context const& context,
+  cmGeneratorExpressionDAGChecker* dagChecker,
   cmGeneratorTarget::TargetPropertyEntry& entry);
 
 struct EvaluatedTargetPropertyEntries
@@ -45,8 +51,8 @@ struct EvaluatedTargetPropertyEntries
 };
 
 EvaluatedTargetPropertyEntries EvaluateTargetPropertyEntries(
-  cmGeneratorTarget const* thisTarget, std::string const& config,
-  std::string const& lang, cmGeneratorExpressionDAGChecker* dagChecker,
+  cmGeneratorTarget const* thisTarget, cm::GenEx::Context const& context,
+  cmGeneratorExpressionDAGChecker* dagChecker,
   std::vector<std::unique_ptr<cmGeneratorTarget::TargetPropertyEntry>> const&
     in);
 
@@ -71,8 +77,8 @@ enum class IncludeRuntimeInterface
 };
 
 void AddInterfaceEntries(
-  cmGeneratorTarget const* headTarget, std::string const& config,
-  std::string const& prop, std::string const& lang,
+  cmGeneratorTarget const* headTarget, std::string const& prop,
+  cm::GenEx::Context const& context,
   cmGeneratorExpressionDAGChecker* dagChecker,
   EvaluatedTargetPropertyEntries& entries,
   IncludeRuntimeInterface searchRuntime,

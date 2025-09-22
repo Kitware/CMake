@@ -64,8 +64,7 @@ std::string cmGeneratorExpressionNode::EvaluateDependentExpression(
   cge->SetEvaluateForBuildsystem(eval->EvaluateForBuildsystem);
   cge->SetQuiet(eval->Quiet);
   std::string result =
-    cge->Evaluate(eval->Context.LG, eval->Context.Config, headTarget,
-                  dagChecker, currentTarget, eval->Context.Language);
+    cge->Evaluate(eval->Context, dagChecker, headTarget, currentTarget);
   if (cge->GetHadContextSensitiveCondition()) {
     eval->HadContextSensitiveCondition = true;
   }
@@ -481,8 +480,7 @@ protected:
       cmGeneratorExpressionDAGChecker dagChecker{
         eval->HeadTarget, genexOperator + ":" + expression,
         content,          dagCheckerParent,
-        eval->Context.LG, eval->Context.Config,
-        eval->Backtrace,
+        eval->Context,    eval->Backtrace,
       };
       switch (dagChecker.Check()) {
         case cmGeneratorExpressionDAGChecker::SELF_REFERENCE:
@@ -3136,9 +3134,8 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
     }
 
     cmGeneratorExpressionDAGChecker dagChecker{
-      target,           propertyName,     content,
-      dagCheckerParent, eval->Context.LG, eval->Context.Config,
-      eval->Backtrace,
+      target,           propertyName,  content,
+      dagCheckerParent, eval->Context, eval->Backtrace,
     };
 
     switch (dagChecker.Check()) {
