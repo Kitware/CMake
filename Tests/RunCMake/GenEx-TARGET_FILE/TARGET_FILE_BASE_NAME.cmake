@@ -117,23 +117,23 @@ string (APPEND GENERATE_CONTENT [[
 
 check_value ("TARGET_FILE_BASE_NAME executable all properties + postfix" "$<TARGET_FILE_BASE_NAME:exec4>" "exec4_runtime_postfix")
 check_value ("TARGET_FILE_BASE_NAME executable all properties + postfix" "$<TARGET_FILE_BASE_NAME:exec4,POSTFIX:INCLUDE>" "exec4_runtime_postfix")
-check_value ("TARGET_FILE_BASE_NAME executable all properties without postfix" "$<TARGET_FILE_BASE_NAME:exec4,POSTFIX:EXCLUDE>" "exec4_runtime")
+check_value ("TARGET_FILE_BASE_NAME executable all properties + postfix (excluded)" "$<TARGET_FILE_BASE_NAME:exec4,POSTFIX:EXCLUDE>" "exec4_runtime")
 
 check_value ("TARGET_FILE_BASE_NAME shared all properties + postfix" "$<TARGET_FILE_BASE_NAME:shared4>" "$<IF:$<IN_LIST:$<PLATFORM_ID>,Windows$<SEMICOLON>CYGWIN$<SEMICOLON>MSYS>,shared4_runtime,shared4_library>_postfix")
 check_value ("TARGET_FILE_BASE_NAME shared all properties + postfix" "$<TARGET_FILE_BASE_NAME:shared4,POSTFIX:INCLUDE>" "$<IF:$<IN_LIST:$<PLATFORM_ID>,Windows$<SEMICOLON>CYGWIN$<SEMICOLON>MSYS>,shared4_runtime,shared4_library>_postfix")
-check_value ("TARGET_FILE_BASE_NAME shared all properties without postfix" "$<TARGET_FILE_BASE_NAME:shared4,POSTFIX:EXCLUDE>" "$<IF:$<IN_LIST:$<PLATFORM_ID>,Windows$<SEMICOLON>CYGWIN$<SEMICOLON>MSYS>,shared4_runtime,shared4_library>")
+check_value ("TARGET_FILE_BASE_NAME shared all properties + postfix (excluded)" "$<TARGET_FILE_BASE_NAME:shared4,POSTFIX:EXCLUDE>" "$<IF:$<IN_LIST:$<PLATFORM_ID>,Windows$<SEMICOLON>CYGWIN$<SEMICOLON>MSYS>,shared4_runtime,shared4_library>")
 
 check_value ("TARGET_LINKER_FILE_BASE_NAME shared linker all properties + postfix" "$<TARGET_LINKER_FILE_BASE_NAME:shared4>" "$<IF:$<IN_LIST:$<PLATFORM_ID>,Windows$<SEMICOLON>CYGWIN$<SEMICOLON>MSYS>,shared4_archive,shared4_library>_postfix")
 check_value ("TARGET_LINKER_FILE_BASE_NAME shared linker all properties + postfix" "$<TARGET_LINKER_FILE_BASE_NAME:shared4,POSTFIX:INCLUDE>" "$<IF:$<IN_LIST:$<PLATFORM_ID>,Windows$<SEMICOLON>CYGWIN$<SEMICOLON>MSYS>,shared4_archive,shared4_library>_postfix")
-check_value ("TARGET_LINKER_FILE_BASE_NAME shared linker all properties without postfix" "$<TARGET_LINKER_FILE_BASE_NAME:shared4,POSTFIX:EXCLUDE>" "$<IF:$<IN_LIST:$<PLATFORM_ID>,Windows$<SEMICOLON>CYGWIN$<SEMICOLON>MSYS>,shared4_archive,shared4_library>")
+check_value ("TARGET_LINKER_FILE_BASE_NAME shared linker all properties + postfix (excluded)" "$<TARGET_LINKER_FILE_BASE_NAME:shared4,POSTFIX:EXCLUDE>" "$<IF:$<IN_LIST:$<PLATFORM_ID>,Windows$<SEMICOLON>CYGWIN$<SEMICOLON>MSYS>,shared4_archive,shared4_library>")
 
 check_value ("TARGET_FILE_BASE_NAME static all properties + postfix" "$<TARGET_FILE_BASE_NAME:static4>" "static4_archive_postfix")
 check_value ("TARGET_FILE_BASE_NAME static all properties + postfix" "$<TARGET_FILE_BASE_NAME:static4,POSTFIX:INCLUDE>" "static4_archive_postfix")
-check_value ("TARGET_FILE_BASE_NAME static all properties without postfix" "$<TARGET_FILE_BASE_NAME:static4,POSTFIX:EXCLUDE>" "static4_archive")
+check_value ("TARGET_FILE_BASE_NAME static all properties + postfix (excluded)" "$<TARGET_FILE_BASE_NAME:static4,POSTFIX:EXCLUDE>" "static4_archive")
 
 check_value ("TARGET_LINKER_FILE_BASE_NAME static linker all properties + postfix" "$<TARGET_LINKER_FILE_BASE_NAME:static4>" "static4_archive_postfix")
 check_value ("TARGET_LINKER_FILE_BASE_NAME static linker all properties + postfix" "$<TARGET_LINKER_FILE_BASE_NAME:static4,POSTFIX:INCLUDE>" "static4_archive_postfix")
-check_value ("TARGET_LINKER_FILE_BASE_NAME static linker all properties without postfix" "$<TARGET_LINKER_FILE_BASE_NAME:static4,POSTFIX:EXCLUDE>" "static4_archive")
+check_value ("TARGET_LINKER_FILE_BASE_NAME static linker all properties + postfix (excluded)" "$<TARGET_LINKER_FILE_BASE_NAME:static4,POSTFIX:EXCLUDE>" "static4_archive")
 ]])
 if (CMAKE_C_LINKER_SUPPORTS_PDB)
   string (APPEND GENERATE_CONTENT [[
@@ -158,6 +158,12 @@ if (CMAKE_C_LINKER_SUPPORTS_PDB)
   string (APPEND GENERATE_CONTENT [[
 check_value ("TARGET_PDB_FILE_BASE_NAME executable PDB all properties + postfix" "$<TARGET_PDB_FILE_BASE_NAME:exec5>" "exec5_pdb_postfix")
 check_value ("TARGET_PDB_FILE_BASE_NAME shared PDB all properties + postfix" "$<TARGET_PDB_FILE_BASE_NAME:shared5>" "shared5_pdb_postfix")
+
+check_value ("TARGET_PDB_FILE_BASE_NAME executable PDB all properties + postfix" "$<TARGET_PDB_FILE_BASE_NAME:exec5,POSTFIX:INCLUDE>" "exec5_pdb_postfix")
+check_value ("TARGET_PDB_FILE_BASE_NAME shared PDB all properties + postfix" "$<TARGET_PDB_FILE_BASE_NAME:shared5,POSTFIX:INCLUDE>" "shared5_pdb_postfix")
+
+check_value ("TARGET_PDB_FILE_BASE_NAME executable PDB all properties + postfix (excluded)" "$<TARGET_PDB_FILE_BASE_NAME:exec5,POSTFIX:EXCLUDE>" "exec5_pdb")
+check_value ("TARGET_PDB_FILE_BASE_NAME shared PDB all properties + postfix (excluded)" "$<TARGET_PDB_FILE_BASE_NAME:shared5,POSTFIX:EXCLUDE>" "shared5_pdb")
 ]])
 endif()
 
