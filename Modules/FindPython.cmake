@@ -155,9 +155,9 @@ This module defines the following variables
 (see :ref:`Standard Variable Names <CMake Developer Standard Variable Names>`):
 
 ``Python_FOUND``
-  System has the Python requested components.
+  Boolean indicating whether system has the Python requested components.
 ``Python_Interpreter_FOUND``
-  System has the Python interpreter.
+  Boolean indicating whether system has the Python interpreter.
 ``Python_EXECUTABLE``
   Path to the Python interpreter.
 ``Python_EXECUTABLE_DEBUG``
@@ -219,7 +219,7 @@ This module defines the following variables
   string.
 
 ``Python_Compiler_FOUND``
-  System has the Python compiler.
+  Boolean indicating whether system has the Python compiler.
 ``Python_COMPILER``
   Path to the Python compiler. Only offered by IronPython.
 ``Python_COMPILER_ID``
@@ -232,23 +232,25 @@ This module defines the following variables
   The ``.Net`` interpreter. Only used by ``IronPython`` implementation.
 
 ``Python_Development_FOUND``
-  System has the Python development artifacts.
+  Boolean indicating whether system has the Python development artifacts.
 
 ``Python_Development.Module_FOUND``
   .. versionadded:: 3.18
 
-  System has the Python development artifacts for Python module.
+  Boolean indicating whether system has the Python development artifacts
+  for Python module.
 
 ``Python_Development.SABIModule_FOUND``
   .. versionadded:: 3.26
 
-  System has the Python development artifacts for Python module using the
-  Stable Application Binary Interface.
+  Boolean indicating whether system has the Python development artifacts
+  for Python module using the Stable Application Binary Interface.
 
 ``Python_Development.Embed_FOUND``
   .. versionadded:: 3.18
 
-  System has the Python development artifacts for Python embedding.
+  Boolean indicating whether system has the Python development artifacts
+  for Python embedding.
 
 ``Python_INCLUDE_DIRS``
 
@@ -306,7 +308,7 @@ This module defines the following variables
 ``Python_NumPy_FOUND``
   .. versionadded:: 3.14
 
-  System has the NumPy.
+  Boolean indicating whether system has the NumPy.
 
 ``Python_NumPy_INCLUDE_DIRS``
   .. versionadded:: 3.14

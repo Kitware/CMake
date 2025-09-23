@@ -41,7 +41,7 @@ Result Variables
 This module defines the following variables:
 
 ``ODBC_FOUND``
-  Boolean indicating whether ODBC is found.
+  Boolean indicating whether ODBC was found.
 
 ``ODBC_INCLUDE_DIRS``
   Include directories containing headers needed to use ODBC.

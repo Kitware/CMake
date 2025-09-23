@@ -27,9 +27,10 @@ Result Variables
 This module defines the following variables:
 
 ``SDL_ttf_FOUND``
-  Boolean indicating whether the (requested version of) SDL_ttf library is
-  found.  For backward compatibility, the ``SDL_TTF_FOUND`` variable is also set
-  to the same value.
+  .. versionadded:: 3.3
+
+  Boolean indicating whether the (requested version of) SDL_ttf library was
+  found.
 
 ``SDL_ttf_VERSION``
   .. versionadded:: 4.2
@@ -60,9 +61,13 @@ The following variables are provided for backward compatibility:
 
 ``SDL_TTF_VERSION_STRING``
   .. deprecated:: 4.2
-    Use the ``SDL_ttf_VERSION``.
+    Use ``SDL_ttf_VERSION``, which has the same value.
 
   The human-readable string containing the version of SDL_ttf found.
+
+``SDL_TTF_FOUND``
+  .. deprecated:: 4.2
+    Use ``SDL_ttf_FOUND``, which has the same value.
 
 ``SDLTTF_FOUND``
   .. deprecated:: 2.8.10

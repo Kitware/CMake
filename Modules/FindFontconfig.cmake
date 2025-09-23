@@ -28,7 +28,7 @@ Result Variables
 This module defines the following variables:
 
 ``Fontconfig_FOUND``
-  Boolean indicating whether the (requested version of) Fontconfig is found.
+  Boolean indicating whether (the requested version of) Fontconfig was found.
 ``Fontconfig_VERSION``
   The version of Fontconfig found.
 ``Fontconfig_LIBRARIES``

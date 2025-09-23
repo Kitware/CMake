@@ -18,9 +18,10 @@ Result Variables
 This module defines the following variables:
 
 ``Hg_FOUND``
-  Boolean indicating whether (the requested version of) Mercurial client is
-  found.  For backward compatibility, the ``HG_FOUND`` variable is also set
-  to the same value.
+  .. versionadded:: 3.3
+
+  Boolean indicating whether the (requested version of) Mercurial client was
+  found.
 
 ``Hg_VERSION``
   .. versionadded:: 4.2
@@ -65,9 +66,18 @@ Deprecated Variables
 
 The following variables are provided for backward compatibility:
 
+``HG_FOUND``
+  .. deprecated:: 4.2
+    Use ``Hg_FOUND``, which has the same value.
+
+  Boolean indicating whether the (requested version of) Mercurial client was
+  found.
+
 ``HG_VERSION_STRING``
   .. deprecated:: 4.2
     Use ``Hg_VERSION``, which has the same value.
+
+  The version of Mercurial found.
 
 Examples
 ^^^^^^^^

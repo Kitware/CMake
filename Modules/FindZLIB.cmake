@@ -28,7 +28,7 @@ Result Variables
 This module defines the following variables:
 
 ``ZLIB_FOUND``
-  Boolean indicating whether (the requested version of) zlib is found.
+  Boolean indicating whether (the requested version of) zlib was found.
 
 ``ZLIB_VERSION``
   .. versionadded:: 3.26

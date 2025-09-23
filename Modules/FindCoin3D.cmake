@@ -20,8 +20,9 @@ Result Variables
 This module defines the following variables:
 
 ``Coin3D_FOUND``
-  Boolean indicating whether Coin3D, Open Inventor is found.  For backward
-  compatibility, the ``COIN3D_FOUND`` variable is also set to the same value.
+  .. versionadded:: 3.3
+
+  Boolean indicating whether Coin3D, Open Inventor was found.
 
 Cache Variables
 ^^^^^^^^^^^^^^^
@@ -32,6 +33,17 @@ The following cache variables may also be set:
   Directory containing the Open Inventor header files (``Inventor/So.h``).
 ``COIN3D_LIBRARIES``
   Coin3D libraries required for linking.
+
+Deprecated Variables
+^^^^^^^^^^^^^^^^^^^^
+
+The following variables are provided for backward compatibility:
+
+``COIN3D_FOUND``
+  .. deprecated:: 4.2
+    Use ``Coin3D_FOUND``, which has the same value.
+
+  Boolean indicating whether Coin3D, Open Inventor was found.
 
 Examples
 ^^^^^^^^

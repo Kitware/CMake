@@ -36,9 +36,9 @@ Result Variables
 This module defines the following variables:
 
 ``Gettext_FOUND``
-  Boolean indicating whether (the requested version of) gettext is found.  For
-  backward compatibility, the ``GETTEXT_FOUND`` variable is also set to the same
-  value.
+  .. versionadded:: 3.3
+
+  Boolean indicating whether (the requested version of) gettext was found.
 
 ``Gettext_VERSION``
   .. versionadded:: 4.2
@@ -200,6 +200,12 @@ Deprecated Variables
 ^^^^^^^^^^^^^^^^^^^^
 
 The following variables are provided for backward compatibility:
+
+``GETTEXT_FOUND``
+  .. deprecated:: 4.2
+    Use ``Gettext_FOUND``, which has the same value.
+
+  Boolean indicating whether (the requested version of) gettext was found.
 
 ``GETTEXT_VERSION_STRING``
   .. deprecated:: 4.2

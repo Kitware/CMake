@@ -157,9 +157,9 @@ This module defines the following variables
 (see :ref:`Standard Variable Names <CMake Developer Standard Variable Names>`):
 
 ``Python3_FOUND``
-  System has the Python 3 requested components.
+  Boolean indicating whether system has the Python 3 requested components.
 ``Python3_Interpreter_FOUND``
-  System has the Python 3 interpreter.
+  Boolean indicating whether system has the Python 3 interpreter.
 ``Python3_EXECUTABLE``
   Path to the Python 3 interpreter.
 ``Python3_EXECUTABLE_DEBUG``
@@ -221,7 +221,7 @@ This module defines the following variables
   string.
 
 ``Python3_Compiler_FOUND``
-  System has the Python 3 compiler.
+  Boolean indicating whether system has the Python 3 compiler.
 ``Python3_COMPILER``
   Path to the Python 3 compiler. Only offered by IronPython.
 ``Python3_COMPILER_ID``
@@ -235,23 +235,25 @@ This module defines the following variables
 
 ``Python3_Development_FOUND``
 
-  System has the Python 3 development artifacts.
+  Boolean indicating whether system has the Python 3 development artifacts.
 
 ``Python3_Development.Module_FOUND``
   .. versionadded:: 3.18
 
-  System has the Python 3 development artifacts for Python module.
+  Boolean indicating whether system has the Python 3 development artifacts
+  for Python module.
 
 ``Python3_Development.SABIModule_FOUND``
   .. versionadded:: 3.26
 
-  System has the Python 3 development artifacts for Python module using the
-  Stable Application Binary Interface.
+  Boolean indicating whether system has the Python 3 development artifacts
+  for Python module using the Stable Application Binary Interface.
 
 ``Python3_Development.Embed_FOUND``
   .. versionadded:: 3.18
 
-  System has the Python 3 development artifacts for Python embedding.
+  Boolean indicating whether system has the Python 3 development artifacts
+  for Python embedding.
 
 ``Python3_INCLUDE_DIRS``
 
@@ -309,7 +311,7 @@ This module defines the following variables
 ``Python3_NumPy_FOUND``
   .. versionadded:: 3.14
 
-  System has the NumPy.
+  Boolean indicating whether system has the NumPy.
 
 ``Python3_NumPy_INCLUDE_DIRS``
   .. versionadded:: 3.14

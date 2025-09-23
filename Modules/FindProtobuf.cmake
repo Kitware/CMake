@@ -78,8 +78,11 @@ Result Variables
 This module defines the following variables:
 
 ``Protobuf_FOUND``
-  Boolean indicating whether (the requested version of) Protobuf library is
-  found.
+  .. versionadded:: 3.3
+
+  Boolean indicating whether the (requested version of) Protobuf library
+  was found.
+
 ``Protobuf_VERSION``
   .. versionadded:: 3.6
 

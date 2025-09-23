@@ -31,9 +31,9 @@ Result Variables
 This module defines the following variables:
 
 ``Freetype_FOUND``
-  Boolean indicating whether (the requested version of) Freetype is found.
-  For backward compatibility, the ``FREETYPE_FOUND`` variable is also set
-  to the same value.
+  .. versionadded:: 3.3
+
+  Boolean indicating whether (the requested version of) Freetype was found.
 
 ``Freetype_VERSION``
   .. versionadded:: 4.2
@@ -75,6 +75,12 @@ Deprecated Variables
 ^^^^^^^^^^^^^^^^^^^^
 
 The following variables are provided for backward compatibility:
+
+``FREETYPE_FOUND``
+  .. deprecated:: 4.2
+    Use ``Freetype_FOUND``, which has the same value.
+
+  Boolean indicating whether (the requested version of) Freetype was found.
 
 ``FREETYPE_VERSION_STRING``
   .. deprecated:: 4.2

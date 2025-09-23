@@ -125,38 +125,38 @@ This module defines the following variables:
 ``OpenGL_FOUND``
   .. versionadded:: 3.3
 
-  Boolean indicating whether the OpenGL and all requested components are found.
+  Boolean indicating whether OpenGL and all requested components were found.
 
 ``OPENGL_XMESA_FOUND``
-  Boolean indicating whether OpenGL XMESA is found.
+  Boolean indicating whether OpenGL XMESA was found.
 
 ``OPENGL_GLU_FOUND``
-  Boolean indicating whether GLU is found.
+  Boolean indicating whether GLU was found.
 
 ``OpenGL_OpenGL_FOUND``
   .. versionadded:: 3.10
 
-  Boolean indicating whether GLVND OpenGL library is found.
+  Boolean indicating whether the GLVND OpenGL library was found.
 
 ``OpenGL_GLX_FOUND``
   .. versionadded:: 3.10
 
-  Boolean indicating whether GLVND GLX is found.
+  Boolean indicating whether GLVND GLX was found.
 
 ``OpenGL_EGL_FOUND``
   .. versionadded:: 3.10
 
-  Boolean indicating whether GLVND EGL is found.
+  Boolean indicating whether GLVND EGL was found.
 
 ``OpenGL_GLES2_FOUND``
   .. versionadded:: 3.27
 
-  Boolean indicating whether GLES2 is found.
+  Boolean indicating whether GLES2 was found.
 
 ``OpenGL_GLES3_FOUND``
   .. versionadded:: 3.27
 
-  Boolean indicating whether GLES3 is found.
+  Boolean indicating whether GLES3 was found.
 
 ``OPENGL_INCLUDE_DIRS``
   .. versionadded:: 3.29
@@ -301,8 +301,10 @@ Deprecated Variables
 The following variables are provided for backward compatibility:
 
 ``OPENGL_FOUND``
-  .. deprecated:: 3.3
-    Superseded by the ``OpenGL_FOUND``, which has the same value.
+  .. deprecated:: 4.2
+    Use ``OpenGL_FOUND``, which has the same value.
+
+  Boolean indicating whether OpenGL and all requested components were found.
 
 Examples
 ^^^^^^^^

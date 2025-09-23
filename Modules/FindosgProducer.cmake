@@ -54,9 +54,10 @@ Result Variables
 This module defines the following variables:
 
 ``osgProducer_FOUND``
+  .. versionadded:: 3.3
+
   Boolean indicating whether the osgProducer library of the OpenSceneGraph
-  toolkit is found.  For backward compatibility, the ``OSGPRODUCER_FOUND``
-  variable is also set to the same value.
+  toolkit was found.
 
 ``OSGPRODUCER_LIBRARIES``
   The libraries needed to link against to use osgProducer.
@@ -86,6 +87,18 @@ This module accepts the following variables:
   toolkit, including its osgProducer library, when installed in a custom
   location.  It should point to the OpenSceneGraph installation prefix used when
   it was configured, built, and installed: ``./configure --prefix=$OSGDIR``.
+
+Deprecated Variables
+^^^^^^^^^^^^^^^^^^^^
+
+The following variables are provided for backward compatibility:
+
+``OSGPRODUCER_FOUND``
+  .. deprecated:: 4.2
+    Use ``osgProducer_FOUND``, which has the same value.
+
+  Boolean indicating whether the osgProducer library of the OpenSceneGraph
+  toolkit was found.
 
 Examples
 ^^^^^^^^

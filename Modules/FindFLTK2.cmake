@@ -26,7 +26,7 @@ Result Variables
 This module defines the following variables:
 
 ``FLTK2_FOUND``
-  Boolean indicating whether FLTK 2.x is found.
+  Boolean indicating whether FLTK 2.x was found.
 
 ``FLTK2_LIBRARIES``
   Libraries needed to link against to use FLTK 2.x.

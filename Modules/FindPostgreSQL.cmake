@@ -31,7 +31,7 @@ This module defines the following variables:
 
 ``PostgreSQL_FOUND``
   Boolean indicating whether the minimum required version and components of
-  PostgreSQL have been found.
+  PostgreSQL were found.
 
 ``PostgreSQL_VERSION``
   .. versionadded:: 4.2

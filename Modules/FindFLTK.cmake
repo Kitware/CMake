@@ -31,7 +31,7 @@ Result Variables
 This module defines the following variables:
 
 ``FLTK_FOUND``
-  Boolean indicating whether FLTK is found.
+  Boolean indicating whether FLTK was found.
 
 ``FLTK_LIBRARIES``
   Libraries needed to link against to use FLTK.

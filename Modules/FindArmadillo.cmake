@@ -24,9 +24,10 @@ Result Variables
 This module defines the following variables:
 
 ``Armadillo_FOUND``
-  Boolean indicating whether the (requested version of) Armadillo library is
-  found.  For backward compatibility, the ``ARMADILLO_FOUND`` variable is
-  also set to the same value.
+  .. versionadded:: 3.3
+
+  Boolean indicating whether the (requested version of) Armadillo library
+  was found.
 
 ``Armadillo_VERSION``
   .. versionadded:: 4.2
@@ -48,6 +49,13 @@ Deprecated Variables
 ^^^^^^^^^^^^^^^^^^^^
 
 The following variables are provided for backward compatibility:
+
+``ARMADILLO_FOUND``
+  .. deprecated:: 4.2
+    Use ``Armadillo_FOUND``, which has the same value.
+
+  Boolean indicating whether the (requested version of) Armadillo library
+  was found.
 
 ``ARMADILLO_VERSION_STRING``
   .. deprecated:: 4.2

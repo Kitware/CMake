@@ -23,7 +23,7 @@ Result Variables
 This module defines the following variables:
 
 ``FLEX_FOUND``
-  Boolean indicating whether (the requested version of) Flex is found.
+  Boolean indicating whether (the requested version of) Flex was found.
 
 ``FLEX_VERSION``
   The version of Flex found.

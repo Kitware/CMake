@@ -1,6 +1,10 @@
 Find Modules
 ------------
 
+* The uppercased ``<PACKAGENAME>_FOUND`` result variables of find modules
+  are now deprecated in favor of ``<PackageName>_FOUND`` result variables,
+  where appropriate.  See documentation of each find module for details.
+
 * The :module:`FindALSA` module now provides a ``ALSA_VERSION`` result
   variable.  The ``ALSA_VERSION_STRING`` result variable is deprecated.
 

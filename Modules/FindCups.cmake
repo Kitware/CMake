@@ -28,9 +28,9 @@ Result Variables
 This module defines the following variables:
 
 ``Cups_FOUND``
-  Boolean indicating whether (the requested version of) CUPS is found.  For
-  backward compatibility, the ``CUPS_FOUND`` variable is also set to the
-  same value.
+  .. versionadded:: 3.3
+
+  Boolean indicating whether (the requested version of) CUPS was found.
 
 ``Cups_VERSION``
   .. versionadded:: 4.2
@@ -64,6 +64,12 @@ Deprecated Variables
 ^^^^^^^^^^^^^^^^^^^^
 
 The following variables are provided for backward compatibility:
+
+``CUPS_FOUND``
+  .. deprecated:: 4.2
+    Use ``Cups_FOUND``, which has the same value.
+
+  Boolean indicating whether (the requested version of) CUPS was found.
 
 ``CUPS_VERSION_STRING``
   .. deprecated:: 4.2

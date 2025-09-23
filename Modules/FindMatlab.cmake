@@ -152,8 +152,11 @@ Result variables
 """"""""""""""""
 
 ``Matlab_FOUND``
-  ``TRUE`` if the Matlab installation is found, ``FALSE``
-  otherwise. All variable below are defined if Matlab is found.
+  .. versionadded:: 3.3
+
+  Boolean indicating whether the (requested version of) Matlab installation
+  was found.  All variables below are defined if Matlab is found.
+
 ``Matlab_VERSION``
   .. versionadded:: 3.27
 

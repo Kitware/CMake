@@ -29,7 +29,7 @@ Result Variables
 This module defines the following variables:
 
 ``KDE3_FOUND``
-  Boolean indicating whether KDE 3 is found.
+  Boolean indicating whether KDE 3 was found.
 ``KDE3_DEFINITIONS``
   Compiler definitions required for compiling KDE 3 software.
 ``KDE3_INCLUDE_DIRS``

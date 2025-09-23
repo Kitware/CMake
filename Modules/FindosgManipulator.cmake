@@ -47,9 +47,10 @@ Result Variables
 This module defines the following variables:
 
 ``osgManipulator_FOUND``
+  .. versionadded:: 3.3
+
   Boolean indicating whether the osgManipulator NodeKit of the
-  OpenSceneGraph toolkit is found.  For backward compatibility, the
-  ``OSGMANIPULATOR_FOUND`` variable is also set to the same value.
+  OpenSceneGraph toolkit was found.
 
 ``OSGMANIPULATOR_LIBRARIES``
   The libraries needed to link against to use osgManipulator.
@@ -79,6 +80,18 @@ This module accepts the following variables:
   toolkit, including its osgManipulator NodeKit, when installed in a custom
   location.  It should point to the OpenSceneGraph installation prefix used when
   it was configured, built, and installed: ``./configure --prefix=$OSGDIR``.
+
+Deprecated Variables
+^^^^^^^^^^^^^^^^^^^^
+
+The following variables are provided for backward compatibility:
+
+``OSGMANIPULATOR_FOUND``
+  .. deprecated:: 4.2
+    Use ``osgManipulator_FOUND``, which has the same value.
+
+  Boolean indicating whether the osgManipulator NodeKit of the
+  OpenSceneGraph toolkit was found.
 
 Examples
 ^^^^^^^^

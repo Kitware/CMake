@@ -31,7 +31,7 @@ Result Variables
 This module defines the following variables:
 
 ``SQLite3_FOUND``
-  Boolean indicating whether (the requested version of) SQLite library is
+  Boolean indicating whether the (requested version of) SQLite library was
   found.
 
 ``SQLite3_VERSION``

@@ -31,7 +31,8 @@ Result Variables
 This module defines the following variables:
 
 ``JPEG_FOUND``
-  Boolean indicating whether (the requested version of) JPEG library is found.
+  Boolean indicating whether the (requested version of) JPEG library was
+  found.
 
 ``JPEG_VERSION``
   .. versionadded:: 3.12

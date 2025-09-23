@@ -28,7 +28,8 @@ Result Variables
 This module defines the following variables:
 
 ``ALSA_FOUND``
-  Boolean indicating whether (the requested version of) ALSA library is found.
+  Boolean indicating whether the (requested version of) ALSA library was
+  found.
 
 ``ALSA_VERSION``
   .. versionadded:: 4.2

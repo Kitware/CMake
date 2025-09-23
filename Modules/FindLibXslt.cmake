@@ -40,9 +40,9 @@ Result Variables
 This module defines the following variables:
 
 ``LibXslt_FOUND``
-  Boolean indicating whether (the requested version of) libxslt is found.
-  For backward compatibility, the ``LIBXSLT_FOUND`` variable is also set to
-  the same value.
+  .. versionadded:: 3.3
+
+  Boolean indicating whether (the requested version of) libxslt was found.
 
 ``LibXslt_VERSION``
   .. versionadded:: 4.2
@@ -81,6 +81,12 @@ Deprecated Variables
 ^^^^^^^^^^^^^^^^^^^^
 
 The following variables are provided for backward compatibility:
+
+``LIBXSLT_FOUND``
+  .. deprecated:: 4.2
+    Use ``LibXslt_FOUND``, which has the same value.
+
+  Boolean indicating whether (the requested version of) libxslt was found.
 
 ``LIBXSLT_VERSION_STRING``
   .. deprecated:: 4.2

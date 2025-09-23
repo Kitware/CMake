@@ -99,9 +99,10 @@ Result Variables
 This module defines the following variables:
 
 ``OpenSSL_FOUND``
-  Boolean indicating whether (the requested version of) OpenSSL library has
-  been found.  For backward compatibility, the ``OPENSSL_FOUND`` variableđ
-  is also set to the same value.
+  .. versionadded:: 3.3
+
+  Boolean indicating whether the (requested version of) OpenSSL library was
+  found.
 
 ``OpenSSL_VERSION``
   .. versionadded:: 4.2
@@ -161,6 +162,13 @@ Deprecated Variables
 ^^^^^^^^^^^^^^^^^^^^
 
 The following variables are provided for backward compatibility:
+
+``OPENSSL_FOUND``
+  .. deprecated:: 4.2
+    Use ``OpenSSL_FOUND``, which has the same value.
+
+  Boolean indicating whether the (requested version of) OpenSSL library was
+  found.
 
 ``OPENSSL_VERSION``
   .. deprecated:: 4.2

@@ -23,9 +23,10 @@ Result Variables
 This module defines the following variables:
 
 ``PerlLibs_FOUND``
-  Boolean indicating whether the (requested version of) Perl library
-  (``perl.h`` and ``libperl``) is found.  For backward compatibility, the
-  ``PERLLIBS_FOUND`` variable is also set to the same value.
+  .. versionadded:: 3.3
+
+  Boolean indicating whether (the requested version of) ``<perl.h>`` and
+  ``libperl`` were found.
 
 ``PerlLibs_VERSION``
   .. versionadded:: 4.2
@@ -64,6 +65,18 @@ The following cache variables may also be set:
   Path to the ``libperl``.
 ``PERL_EXECUTABLE``
   Full path to the ``perl`` executable.
+
+Deprecated Variables
+^^^^^^^^^^^^^^^^^^^^
+
+The following variables are provided for backward compatibility:
+
+``PERLLIBS_FOUND``
+  .. deprecated:: 4.2
+    Use ``PerlLibs_FOUND``, which has the same value.
+
+  Boolean indicating whether (the requested version of) ``<perl.h>`` and
+  ``libperl`` were found.
 
 Examples
 ^^^^^^^^

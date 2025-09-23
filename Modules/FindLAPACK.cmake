@@ -34,7 +34,7 @@ This module defines the following variables:
 
 ``LAPACK_FOUND``
   Boolean indicating whether the library implementing the LAPACK interface
-  is found.
+  was found.
 ``LAPACK_LINKER_FLAGS``
   Uncached list of required linker flags (excluding ``-l`` and ``-L``).
 ``LAPACK_LIBRARIES``
@@ -45,7 +45,7 @@ This module defines the following variables:
   LAPACK95.
 ``LAPACK95_FOUND``
   Boolean indicating whether the library implementing the LAPACK95 interface
-  is found.
+  was found.
 
 Input Variables
 ^^^^^^^^^^^^^^^

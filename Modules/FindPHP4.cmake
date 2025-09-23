@@ -19,6 +19,14 @@ Finds PHP version 4, a general-purpose scripting language:
 This module checks if PHP 4 is installed and determines the locations of the
 include directories and the PHP command-line interpreter.
 
+Result Variables
+^^^^^^^^^^^^^^^^
+
+This module defines the following variables:
+
+``PHP4_FOUND``
+  Boolean indicating whether PHP 4 was found.
+
 Cache Variables
 ^^^^^^^^^^^^^^^
 

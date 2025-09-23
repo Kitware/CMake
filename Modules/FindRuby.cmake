@@ -21,7 +21,9 @@ Result Variables
 This module defines the following variables:
 
 ``Ruby_FOUND``
-  Boolean indicating whether (the requested version of) ruby is found.
+  .. versionadded:: 3.3
+
+  Boolean indicating whether (the requested version of) ruby was found.
 
 ``Ruby_VERSION``
   The version of ruby which was found, e.g. ``3.2.6``.

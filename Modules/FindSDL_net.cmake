@@ -26,9 +26,10 @@ Result Variables
 This module defines the following variables:
 
 ``SDL_net_FOUND``
-  Boolean indicating whether the (requested version of) SDL_net library is
-  found.  For backward compatibility, the ``SDL_NET_FOUND`` variable is also set
-  to the same value.
+  .. versionadded:: 3.3
+
+  Boolean indicating whether the (requested version of) SDL_net library was
+  found.
 
 ``SDL_net_VERSION``
   ..versionadded:: 4.2
@@ -59,21 +60,25 @@ The following variables are provided for backward compatibility:
 
 ``SDL_NET_VERSION_STRING``
   .. deprecated:: 4.2
-    Use the ``SDL_net_VERSION``.
+    Use ``SDL_net_VERSION``, which has the same value.
 
   The human-readable string containing the version of SDL_net found.
 
+``SDL_NET_FOUND``
+  .. deprecated:: 4.2
+    Use ``SDL_net_FOUND``, which has the same value.
+
 ``SDLNET_FOUND``
   .. deprecated:: 2.8.10
-    Use the ``SDL_net_FOUND``, which has the same value.
+    Use ``SDL_net_FOUND``, which has the same value.
 
 ``SDLNET_INCLUDE_DIR``
   .. deprecated:: 2.8.10
-    Use the ``SDL_NET_INCLUDE_DIRS``, which has the same value.
+    Use ``SDL_NET_INCLUDE_DIRS``, which has the same value.
 
 ``SDLNET_LIBRARY``
   .. deprecated:: 2.8.10
-    Use the ``SDL_NET_LIBRARIES``, which has the same value.
+    Use ``SDL_NET_LIBRARIES``, which has the same value.
 
 Examples
 ^^^^^^^^

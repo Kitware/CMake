@@ -524,8 +524,10 @@ Target Created:
 
 **Note**: direct usage of this target by consumers should not be necessary.
 
-Result variables
+Result Variables
 ^^^^^^^^^^^^^^^^
+
+This module defines the following variables:
 
 ``CUDAToolkit_FOUND``
     A boolean specifying whether or not the CUDA Toolkit was found.

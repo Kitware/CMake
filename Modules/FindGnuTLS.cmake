@@ -34,9 +34,9 @@ Result Variables
 This module defines the following variables:
 
 ``GnuTLS_FOUND``
-  Boolean indicating whether (the requested version of) GnuTLS is found.  For
-  backward compatibility, the ``GNUTLS_FOUND`` variable is also set to the same
-  value.
+  .. versionadded:: 3.3
+
+  Boolean indicating whether (the requested version of) GnuTLS was found.
 
 ``GnuTLS_VERSION``
   .. versionadded:: 4.2
@@ -67,6 +67,12 @@ Deprecated Variables
 ^^^^^^^^^^^^^^^^^^^^
 
 The following variables are provided for backward compatibility:
+
+``GNUTLS_FOUND``
+  .. deprecated:: 4.2
+    Use ``GnuTLS_FOUND``, which has the same value.
+
+  Boolean indicating whether (the requested version of) GnuTLS was found.
 
 ``GNUTLS_VERSION_STRING``
   .. deprecated:: 3.16

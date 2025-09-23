@@ -24,9 +24,9 @@ Result Variables
 This module defines the following variables:
 
 ``OpenThreads_FOUND``
-  Boolean indicating whether OpenThreads library is found.  For backward
-  compatibility, the ``OPENTHREADS_FOUND`` variable is also set to the same
-  value.
+  .. versionadded:: 3.3
+
+  Boolean indicating whether the OpenThreads library was found.
 
 ``OPENTHREADS_LIBRARY``
   Libraries needed to link against to use OpenThreads.  This provides either
@@ -70,6 +70,17 @@ OpenSceneGraph, this module also honors the following variables for convenience:
 
 ``OSGDIR``
   Environment variable treated the same as ``OPENTHREADS_DIR``.
+
+Deprecated Variables
+^^^^^^^^^^^^^^^^^^^^
+
+The following variables are provided for backward compatibility:
+
+``OPENTHREADS_FOUND``
+  .. deprecated:: 4.2
+    Use ``OpenThreads_FOUND``, which has the same value.
+
+  Boolean indicating whether the OpenThreads library was found.
 
 Examples
 ^^^^^^^^

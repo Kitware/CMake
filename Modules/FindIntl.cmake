@@ -34,7 +34,7 @@ Result Variables
 This module defines the following variables:
 
 ``Intl_FOUND``
-  Boolean indicating whether (the requested version of) Intl is found.
+  Boolean indicating whether (the requested version of) Intl was found.
 
 ``Intl_VERSION``
   .. versionadded:: 3.21

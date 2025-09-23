@@ -83,7 +83,7 @@ This module defines the following variables:
 
 ``ImageMagick_FOUND``
   Boolean indicating whether (the requested version of) ImageMagick and all
-  its requested components are found.
+  its requested components were found.
 
 ``ImageMagick_VERSION``
   .. versionadded:: 4.2

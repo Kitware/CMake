@@ -26,7 +26,7 @@ Result Variables
 This module defines the following variables:
 
 ``MFC_FOUND``
-  Boolean indicating whether MFC support is found.
+  Boolean indicating whether MFC support was found.
 
 Examples
 ^^^^^^^^

@@ -33,7 +33,7 @@ Result Variables
 This module defines the following variables:
 
 ``PNG_FOUND``
-  Boolean indicating whether (the requested version of) PNG library is found.
+  Boolean indicating whether the (requested version of) PNG library was found.
 
 ``PNG_VERSION``
   .. versionadded:: 4.2

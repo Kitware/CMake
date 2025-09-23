@@ -127,11 +127,11 @@ Result Variables
 This module defines the following variables:
 
 ``Qt4_FOUND``
-  Boolean indicating whether (the requested version of) Qt4 is found.
+  Boolean indicating whether (the requested version of) Qt4 was found.
 
 ``QT_FOUND``
   Same as ``Qt4_FOUND``.  Boolean indicating whether (the requested version
-  of) Qt4 is found.  This variable is available for compatibility with
+  of) Qt4 was found.  This variable is available for compatibility with
   other Qt find modules.
 
 ``QT_VERSION_MAJOR``

@@ -19,7 +19,7 @@ Result Variables
 This module defines the following variables:
 
 ``LibRHash_FOUND``
-  True if LibRHash was found, false otherwise.
+  Boolean indicating whether LibRHash was found.
 ``LibRHash_INCLUDE_DIRS``
   Include directories needed to include LibRHash headers.
 ``LibRHash_LIBRARIES``

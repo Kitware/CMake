@@ -22,8 +22,9 @@ Result Variables
 This module defines the following variables:
 
 ``Curses_FOUND``
-  Boolean indicating whether the Curses is found.  For backward compatibility,
-  the ``CURSES_FOUND`` variable is also set to the same value.
+  .. versionadded:: 3.3
+
+  Boolean indicating whether Curses was found.
 
 ``CURSES_INCLUDE_DIRS``
   .. versionadded:: 3.1
@@ -68,7 +69,13 @@ This module accepts the following variables:
 Deprecated Variables
 ^^^^^^^^^^^^^^^^^^^^
 
-The following legacy variables are provided for backward compatibility:
+The following variables are provided for backward compatibility:
+
+``CURSES_FOUND``
+  .. deprecated:: 4.2
+    Use ``Curses_FOUND``, which has the same value.
+
+  Boolean indicating whether Curses was found.
 
 ``CURSES_INCLUDE_DIR``
   .. deprecated:: 3.1

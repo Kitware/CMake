@@ -20,7 +20,7 @@ Result Variables
 This module defines the following variables:
 
 ``CXXTEST_FOUND``
-  Boolean indicating whether the CxxTest framework is found.
+  Boolean indicating whether the CxxTest framework was found.
 
 ``CXXTEST_INCLUDE_DIRS``
   Include directories containing headers needed to use CxxTest.

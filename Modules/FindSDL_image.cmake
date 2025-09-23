@@ -27,9 +27,10 @@ Result Variables
 This module defines the following variables:
 
 ``SDL_image_FOUND``
-  Boolean indicating whether the (requested version of) SDL_image library is
-  found.  For backward compatibility, the ``SDL_IMAGE_FOUND`` variable is also
-  set to the same value.
+  .. versionadded:: 3.3
+
+  Boolean indicating whether the (requested version of) SDL_image library
+  was found.
 
 ``SDL_image_VERSION``
   .. versionadded:: 4.2
@@ -60,21 +61,25 @@ The following variables are provided for backward compatibility:
 
 ``SDL_IMAGE_VERSION_STRING``
   .. deprecated:: 4.2
-    Use the ``SDL_image_VERSION``.
+    Use ``SDL_image_VERSION``, which has the same value.
 
   The human-readable string containing the version of SDL_image found.
 
+``SDL_IMAGE_FOUND``
+  .. deprecated:: 4.2
+    Use ``SDL_image_FOUND``, which has the same value.
+
 ``SDLIMAGE_FOUND``
   .. deprecated:: 2.8.10
-    Use the ``SDL_image_FOUND``, which has the same value.
+    Use ``SDL_image_FOUND``, which has the same value.
 
 ``SDLIMAGE_INCLUDE_DIR``
   .. deprecated:: 2.8.10
-    Use the ``SDL_IMAGE_INCLUDE_DIRS``, which has the same value.
+    Use ``SDL_IMAGE_INCLUDE_DIRS``, which has the same value.
 
 ``SDLIMAGE_LIBRARY``
   .. deprecated:: 2.8.10
-    Use the ``SDL_IMAGE_LIBRARIES``, which has the same value.
+    Use ``SDL_IMAGE_LIBRARIES``, which has the same value.
 
 Examples
 ^^^^^^^^

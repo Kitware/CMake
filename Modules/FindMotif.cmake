@@ -17,8 +17,9 @@ Result Variables
 This module defines the following variables:
 
 ``Motif_FOUND``
-  Boolean indicating whether the Motif was found.  For backward compatibility,
-  the ``MOTIF_FOUND`` variable is also set to the same value.
+  .. versionadded:: 3.3
+
+  Boolean indicating whether Motif was found.
 
 Cache Variables
 ^^^^^^^^^^^^^^^
@@ -30,6 +31,17 @@ The following cache variables may also be set:
 
 ``MOTIF_LIBRARIES``
   Libraries needed to link to Motif.
+
+Deprecated Variables
+^^^^^^^^^^^^^^^^^^^^
+
+The following variables are provided for backward compatibility:
+
+``MOTIF_FOUND``
+  .. deprecated:: 4.2
+    Use ``Motif_FOUND``, which has the same value.
+
+  Boolean indicating whether Motif was found.
 
 Examples
 ^^^^^^^^

@@ -19,7 +19,7 @@ Result Variables
 This module defines the following variables:
 
 ``LibUUID_FOUND``
-  True if LibUUID was found, false otherwise.
+  Boolean indicating whether LibUUID was found.
 ``LibUUID_INCLUDE_DIRS``
   Include directories needed to include LibUUID headers.
 ``LibUUID_LIBRARIES``

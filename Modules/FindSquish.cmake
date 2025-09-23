@@ -21,9 +21,9 @@ Result Variables
 This module defines the following variables:
 
 ``Squish_FOUND``
-  Boolean indicating whether (the requested version of) Squish is found.
-  For backward compatibility, the ``SQUISH_FOUND`` variable is also set to
-  the same value.
+  .. versionadded:: 3.3
+
+  Boolean indicating whether (the requested version of) Squish was found.
 
 ``Squish_VERSION``
   .. versionadded:: 4.2
@@ -31,13 +31,13 @@ This module defines the following variables:
   The full version of the Squish found.
 
 ``SQUISH_INSTALL_DIR_FOUND``
-  Boolean indicating whether the Squish installation directory is found.
+  Boolean indicating whether the Squish installation directory was found.
 
 ``SQUISH_SERVER_EXECUTABLE_FOUND``
-  Boolean indicating whether the Squish server executable is found.
+  Boolean indicating whether the Squish server executable was found.
 
 ``SQUISH_CLIENT_EXECUTABLE_FOUND``
-  Boolean indicating whether the Squish client executable is found.
+  Boolean indicating whether the Squish client executable was found.
 
 Cache Variables
 ^^^^^^^^^^^^^^^
@@ -165,6 +165,12 @@ Deprecated Variables
 ^^^^^^^^^^^^^^^^^^^^
 
 The following variables are provided for backward compatibility:
+
+``SQUISH_FOUND``
+  .. deprecated:: 4.2
+    Use ``Squish_FOUND``, which has the same value.
+
+  Boolean indicating whether (the requested version of) Squish was found.
 
 ``SQUISH_VERSION``
   .. deprecated:: 4.2

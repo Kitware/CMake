@@ -51,7 +51,7 @@ Result Variables
 This module defines the following variables:
 
 ``SDL_FOUND``
-  Boolean indicating whether the (requested version of) SDL is found.
+  Boolean indicating whether (the requested version of) SDL was found.
 
 ``SDL_VERSION``
   .. versionadded:: 3.19

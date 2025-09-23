@@ -34,7 +34,9 @@ Result Variables
 This module defines the following variables:
 
 ``LibXml2_FOUND``
-  Boolean indicating whether (the requested version of) libxml2 library is
+  .. versionadded:: 3.3
+
+  Boolean indicating whether the (requested version of) libxml2 library was
   found.
 
 ``LibXml2_VERSION``
@@ -69,6 +71,13 @@ Deprecated Variables
 ^^^^^^^^^^^^^^^^^^^^
 
 The following variables are provided for backward compatibility:
+
+``LIBXML2_FOUND``
+  .. deprecated:: 4.2
+    Use ``LibXml2_FOUND``, which has the same value.
+
+  Boolean indicating whether the (requested version of) libxml2 library was
+  found.
 
 ``LIBXML2_VERSION_STRING``
   .. deprecated:: 4.2

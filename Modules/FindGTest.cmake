@@ -78,7 +78,9 @@ Result Variables
 This module defines the following variables:
 
 ``GTest_FOUND``
-  Boolean indicating whether GoogleTest is found.
+  .. versionadded:: 3.3
+
+  Boolean indicating whether GoogleTest was found.
 
 Hints
 ^^^^^
@@ -149,6 +151,12 @@ The following variables are provided for backward compatibility:
 
   Result variable providing both ``gtest`` and ``gtest_main`` libraries
   combined.
+
+``GTEST_FOUND``
+  .. deprecated:: 4.2
+    Use ``GTest_FOUND``, which has the same value.
+
+  Boolean indicating whether GoogleTest was found.
 
 Deprecated Imported Targets
 """""""""""""""""""""""""""

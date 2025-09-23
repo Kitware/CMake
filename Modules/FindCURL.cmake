@@ -72,8 +72,8 @@ Result Variables
 This module defines the following variables:
 
 ``CURL_FOUND``
-  Boolean indicating whether the (requested version of) curl and all required
-  components are found.
+  Boolean indicating whether (the requested version of) curl and all required
+  components were found.
 
 ``CURL_VERSION``
   .. versionadded:: 4.0
@@ -84,7 +84,7 @@ This module defines the following variables:
   .. versionadded:: 3.14
 
   Boolean indicating whether the specified component (curl protocol or feature)
-  is found.
+  was found.
 
 ``CURL_INCLUDE_DIRS``
   Include directories containing the ``curl/curl.h`` and other headers needed to

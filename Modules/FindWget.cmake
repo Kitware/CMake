@@ -18,7 +18,9 @@ Result Variables
 This module defines the following variables:
 
 ``Wget_FOUND``
-  Boolean indicating whether ``wget`` has been found.
+  .. versionadded:: 3.3
+
+  Boolean indicating whether ``wget`` was found.
 
 Cache Variables
 ^^^^^^^^^^^^^^^
@@ -27,6 +29,17 @@ The following cache variables may also be set:
 
 ``WGET_EXECUTABLE``
   The full path to the ``wget`` tool.
+
+Deprecated Variables
+^^^^^^^^^^^^^^^^^^^^
+
+The following variables are provided for backward compatibility:
+
+``WGET_FOUND``
+  .. deprecated:: 4.2
+    Use ``Wget_FOUND``, which has the same value.
+
+  Boolean indicating whether ``wget`` was found.
 
 Examples
 ^^^^^^^^

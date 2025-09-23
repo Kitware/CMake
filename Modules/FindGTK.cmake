@@ -32,9 +32,9 @@ Result Variables
 This module defines the following variables:
 
 ``GTK_FOUND``
-  Boolean indicating whether GTK is found.
+  Boolean indicating whether GTK was found.
 ``GTK_GL_FOUND``
-  Boolean indicating whether GTK's GL features are found.
+  Boolean indicating whether GTK's GL features were found.
 ``GTK_INCLUDE_DIR``
   Include directories containing headers needed to use GTK.
 ``GTK_LIBRARIES``

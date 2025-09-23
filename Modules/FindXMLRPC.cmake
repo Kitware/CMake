@@ -66,7 +66,7 @@ This module defines the following variables:
 
 ``XMLRPC_FOUND``
   Boolean indicating whether the XML-RPC library and all its requested
-  components are found.
+  components were found.
 ``XMLRPC_INCLUDE_DIRS``
   Include directories containing ``xmlrpc.h`` and other headers needed to use
   the XML-RPC library.

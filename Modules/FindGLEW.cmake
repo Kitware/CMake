@@ -57,7 +57,7 @@ Result Variables
 This module defines the following variables:
 
 ``GLEW_FOUND``
-  Boolean indicating whether (the requested version of) GLEW is found.
+  Boolean indicating whether (the requested version of) GLEW was found.
 
 ``GLEW_VERSION``
   .. versionadded:: 3.15

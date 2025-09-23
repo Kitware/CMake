@@ -34,7 +34,7 @@ Result Variables
 This module defines the following variables:
 
 ``GDAL_FOUND``
-  Boolean indicating whether (the requested version of) GDAL is found.
+  Boolean indicating whether (the requested version of) GDAL was found.
 
 ``GDAL_VERSION``
   .. versionadded:: 3.14

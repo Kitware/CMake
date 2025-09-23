@@ -28,7 +28,7 @@ Result Variables
 This module defines the following variables:
 
 ``GIF_FOUND``
-  Boolean indicating whether (the requested version of) GIF library was found.
+  Boolean indicating whether the (requested version of) GIF library was found.
 
 ``GIF_VERSION``
   Version string of the GIF library found (for example, ``5.1.4``).  For GIF

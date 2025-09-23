@@ -23,7 +23,7 @@ Result Variables
 This module defines the following variables:
 
 ``MPEG2_FOUND``
-  Boolean indicating whether the libmpeg2 library is found.
+  Boolean indicating whether the libmpeg2 library was found.
 ``MPEG2_LIBRARIES``
   Libraries needed to link against to use libmpeg2.
 

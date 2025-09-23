@@ -23,7 +23,7 @@ Result Variables
 This module defines the following variables:
 
 ``BISON_FOUND``
-  Boolean indicating whether (the requested version of) Bison is found.
+  Boolean indicating whether (the requested version of) Bison was found.
 
 ``BISON_VERSION``
   The version of Bison found.

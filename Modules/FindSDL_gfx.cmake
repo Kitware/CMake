@@ -34,9 +34,8 @@ Result Variables
 This module defines the following variables:
 
 ``SDL_gfx_FOUND``
-  Boolean indicating whether (the requested version of) SDL_gfx library is
-  found.  For backward compatibility, the ``SDL_GFX_FOUND`` variable is also set
-  to the same value.
+  Boolean indicating whether the (requested version of) SDL_gfx library was
+  found.
 
 ``SDL_gfx_VERSION``
   .. versionadded:: 4.2
@@ -69,6 +68,13 @@ Deprecated Variables
 ^^^^^^^^^^^^^^^^^^^^
 
 The following variables are provided for backward compatibility:
+
+``SDL_GFX_FOUND``
+  .. deprecated:: 4.2
+    Use ``SDL_gfx_FOUND``, which has the same value.
+
+  Boolean indicating whether the (requested version of) SDL_gfx library was
+  found.
 
 ``SDL_GFX_VERSION_STRING``
   .. deprecated:: 4.2

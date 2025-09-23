@@ -17,7 +17,7 @@ Result Variables
 This module defines the following variables:
 
 ``HSPELL_FOUND``
-  Boolean indicating whether (the requested version of) Hspell is found.
+  Boolean indicating whether (the requested version of) Hspell was found.
 
 ``HSPELL_VERSION``
   .. versionadded:: 4.2

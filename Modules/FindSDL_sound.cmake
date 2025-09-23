@@ -35,9 +35,10 @@ Result Variables
 This module defines the following variables:
 
 ``SDL_sound_FOUND``
-  Boolean indicating whether the (requested version of) SDL_sound library is
-  found.  For backward compatibility, the ``SDL_SOUND_FOUND`` variable is also
-  set to the same value.
+  .. versionadded:: 3.3
+
+  Boolean indicating whether the (requested version of) SDL_sound library
+  was found.
 
 ``SDL_sound_VERSION``
   .. versionadded:: 4.2
@@ -111,9 +112,16 @@ Deprecated Variables
 
 The following variables are provided for backward compatibility:
 
+``SDL_SOUND_FOUND``
+  .. deprecated:: 4.2
+    Use ``SDL_sound_FOUND``, which has the same value.
+
+  Boolean indicating whether the (requested version of) SDL_sound library
+  was found.
+
 ``SDL_SOUND_VERSION_STRING``
   .. deprecated:: 4.2
-    Use the ``SDL_sound_VERSION``.
+    Use ``SDL_sound_VERSION``, which has the same value.
 
   The human-readable string containing the version of SDL_sound found.
 

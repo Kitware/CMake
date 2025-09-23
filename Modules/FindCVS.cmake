@@ -17,7 +17,7 @@ Result Variables
 This module defines the following variables:
 
 ``CVS_FOUND``
-  Boolean indicating whether the command-line client was found.
+  Boolean indicating whether the ``cvs`` command-line client was found.
 
 Cache Variables
 ^^^^^^^^^^^^^^^

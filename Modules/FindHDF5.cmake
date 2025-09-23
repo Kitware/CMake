@@ -127,7 +127,7 @@ Result Variables
 This module defines the following variables:
 
 ``HDF5_FOUND``
-  Boolean indicating whether (the requested version of) HDF5 is found.
+  Boolean indicating whether (the requested version of) HDF5 was found.
 
 ``HDF5_VERSION``
   .. versionadded:: 3.3

@@ -22,11 +22,11 @@ Result Variables
 This module defines the following variables:
 
 ``TCL_FOUND``
-  Boolean indicating whether the Tcl is found.
+  Boolean indicating whether Tcl was found.
 ``TK_FOUND``
-  Boolean indicating whether the Tk is found.
+  Boolean indicating whether Tk was found.
 ``TCLTK_FOUND``
-  Boolean indicating whether both Tcl and Tk are found.
+  Boolean indicating whether both Tcl and Tk were found.
 
 Cache Variables
 ^^^^^^^^^^^^^^^

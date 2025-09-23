@@ -30,7 +30,7 @@ Result Variables
 This module defines the following variables:
 
 ``WXWINDOWS_FOUND``
-  Boolean indicating whether the wxWidgets is found.
+  Boolean indicating whether the wxWidgets was found.
 ``WXWINDOWS_LIBRARIES``
   Libraries needed to link against to use wxWidgets.  This includes paths to
   the wxWidgets libraries and any additional linker flags, typically derived

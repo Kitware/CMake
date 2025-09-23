@@ -23,7 +23,7 @@ Result Variables
 This module defines the following variables:
 
 ``RTI_FOUND``
-  Boolean indicating whether HLA RTI is found.
+  Boolean indicating whether HLA RTI was found.
 ``RTI_LIBRARIES``
   The libraries to link against to use RTI.
 ``RTI_DEFINITIONS``

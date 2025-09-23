@@ -18,9 +18,10 @@ Result Variables
 This module defines the following variables:
 
 ``Icotool_FOUND``
-  Boolean indicating whether (the requested version of) ``icotool`` has been
-  found.  For backward compatibility, the ``ICOTOOL_FOUND`` variable is also
-  set to the same value.
+  .. versionadded:: 3.3
+
+  Boolean indicating whether (the requested version of) ``icotool`` was
+  found.
 
 ``Icotool_VERSION``
   .. versionadded:: 4.2
@@ -39,6 +40,13 @@ Deprecated Variables
 ^^^^^^^^^^^^^^^^^^^^
 
 The following variables are provided for backward compatibility:
+
+``ICOTOOL_FOUND``
+  .. deprecated:: 4.2
+    Use ``Icotool_FOUND``, which has the same value.
+
+  Boolean indicating whether (the requested version of) ``icotool`` was
+  found.
 
 ``ICOTOOL_VERSION_STRING``
   .. deprecated:: 4.2
