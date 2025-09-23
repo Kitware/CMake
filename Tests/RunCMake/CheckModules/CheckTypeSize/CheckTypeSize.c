@@ -143,7 +143,7 @@ int main(void)
   NODEF(SIZEOF_STRUCTMEMBER_PTR);
 #endif
 
-/* struct somestruct::someint */
+/* struct somestruct::somechar */
 #if defined(SIZEOF_STRUCTMEMBER_CHAR)
   CHECK(x.somechar, SIZEOF_STRUCTMEMBER_CHAR);
   CHECK(x.somechar, SIZEOF_CHAR);

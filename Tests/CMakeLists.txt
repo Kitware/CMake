@@ -673,8 +673,6 @@ if(BUILD_TESTING)
     "${CMake_BINARY_DIR}/Tests/CMakeBuildDoubleProjectTest.cmake")
   list(APPEND TEST_BUILD_DIRS ${CMAKE_BUILD_TEST_BINARY_DIR})
 
-  ADD_TEST_MACRO(Module.CheckTypeSize CheckTypeSize)
-
   set(Module.CheckIPOSupported-C_BUILD_OPTIONS -DCMake_TEST_IPO_WORKS_C=${CMake_TEST_IPO_WORKS_C})
   ADD_TEST_MACRO(Module.CheckIPOSupported-C CheckIPOSupported-C)
 

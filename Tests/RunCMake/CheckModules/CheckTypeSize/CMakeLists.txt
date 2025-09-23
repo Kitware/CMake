@@ -1,4 +1,3 @@
-cmake_minimum_required(VERSION 3.10)
 project(CheckTypeSize)
 
 # Check C types
@@ -37,3 +36,5 @@ include_directories("${CheckTypeSize_BINARY_DIR}")
 
 add_executable(CheckTypeSize CheckTypeSize.c)
 add_executable(CheckTypeSizeCXX CheckTypeSize.cxx)
+
+add_test(NAME CheckTypeSize COMMAND CheckTypeSize)
