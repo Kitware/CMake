@@ -106,6 +106,9 @@ std::string cmLocalFastbuildGenerator::ConvertToIncludeReference(
   if (GG->UsingRelativePaths && cmSystemTools::FileIsFullPath(path)) {
     std::string const& binDir =
       GG->GetCMakeInstance()->GetHomeOutputDirectory();
+    if (binDir == converted) {
+      return ".";
+    }
     return cmSystemTools::RelativePath(binDir, converted);
   }
   return converted;
