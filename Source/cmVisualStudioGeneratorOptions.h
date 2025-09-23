@@ -72,7 +72,7 @@ public:
   cm::optional<bool> UsingDebugRuntime() const;
   bool IsWinRt() const;
   bool IsManaged() const;
-  // Write options to output.
+  // Write options to output.gi
   void OutputPreprocessorDefinitions(std::ostream& fout, int indent,
                                      std::string const& lang, 
                                      std::string const& platform = "");
