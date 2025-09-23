@@ -87,17 +87,22 @@ std::string cmFortranParser_s::SModName(std::string const& mod_name,
 
 bool cmFortranParser_FilePush(cmFortranParser* parser, char const* fname)
 {
-  // Open the new file and push it onto the stack.  Save the old
-  // buffer with it on the stack.
-  if (FILE* file = cmsys::SystemTools::Fopen(fname, "rb")) {
-    YY_BUFFER_STATE current = cmFortranLexer_GetCurrentBuffer(parser->Scanner);
-    std::string dir = cmSystemTools::GetParentDirectory(fname);
-    cmFortranFile f(file, current, dir);
-    YY_BUFFER_STATE buffer =
-      cmFortran_yy_create_buffer(nullptr, 16384, parser->Scanner);
-    cmFortran_yy_switch_to_buffer(buffer, parser->Scanner);
-    parser->FileStack.push(f);
-    return true;
+  // Do not revisit already processed files; treat them as non-existing.
+  // Avoids infinite recursion caused by misinterpreted include guards.
+  if (parser->VisitedFilePaths.insert(fname).second) {
+    // Open the new file and push it onto the stack.  Save the old
+    // buffer with it on the stack.
+    if (FILE* file = cmsys::SystemTools::Fopen(fname, "rb")) {
+      YY_BUFFER_STATE current =
+        cmFortranLexer_GetCurrentBuffer(parser->Scanner);
+      std::string dir = cmSystemTools::GetParentDirectory(fname);
+      cmFortranFile f(file, current, dir);
+      YY_BUFFER_STATE buffer =
+        cmFortran_yy_create_buffer(nullptr, 16384, parser->Scanner);
+      cmFortran_yy_switch_to_buffer(buffer, parser->Scanner);
+      parser->FileStack.push(f);
+      return true;
+    }
   }
   return false;
 }

@@ -198,3 +198,9 @@ if(CMAKE_Fortran_COMPILE_OPTIONS_PREPROCESS_OFF AND
 
   set_property(SOURCE no_preprocess_source_upper.F no_preprocess_source_fpp.fpp PROPERTY Fortran_PREPROCESS OFF)
 endif()
+
+# Test that we are safe from infinite include recursion in dependency scanner
+# (SunPro Fortran compiler does not support recursive inclusion)
+if (NOT CMAKE_Fortran_COMPILER_ID STREQUAL "SunPro")
+  add_executable(test_include_loop test_include_loop.F)
+endif()
