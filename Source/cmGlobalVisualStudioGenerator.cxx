@@ -120,11 +120,13 @@ char const* cmGlobalVisualStudioGenerator::GetIDEVersion() const
       return "16.0";
     case cmGlobalVisualStudioGenerator::VSVersion::VS17:
       return "17.0";
+    case cmGlobalVisualStudioGenerator::VSVersion::VS18:
+      return "18.0";
   }
   return "";
 }
 
-void cmGlobalVisualStudioGenerator::WriteSLNHeader(std::ostream& fout)
+void cmGlobalVisualStudioGenerator::WriteSLNHeader(std::ostream& fout) const
 {
   char utf8bom[] = { char(0xEF), char(0xBB), char(0xBF) };
   fout.write(utf8bom, 3);
@@ -143,29 +145,22 @@ void cmGlobalVisualStudioGenerator::WriteSLNHeader(std::ostream& fout)
     case cmGlobalVisualStudioGenerator::VSVersion::VS15:
       // Visual Studio 15 writes .sln format 12.00
       fout << "Microsoft Visual Studio Solution File, Format Version 12.00\n";
-      if (this->ExpressEdition) {
-        fout << "# Visual Studio Express 15 for Windows Desktop\n";
-      } else {
-        fout << "# Visual Studio 15\n";
-      }
+      fout << "# Visual Studio 15\n";
       break;
     case cmGlobalVisualStudioGenerator::VSVersion::VS16:
       // Visual Studio 16 writes .sln format 12.00
       fout << "Microsoft Visual Studio Solution File, Format Version 12.00\n";
-      if (this->ExpressEdition) {
-        fout << "# Visual Studio Express 16 for Windows Desktop\n";
-      } else {
-        fout << "# Visual Studio Version 16\n";
-      }
+      fout << "# Visual Studio Version 16\n";
       break;
     case cmGlobalVisualStudioGenerator::VSVersion::VS17:
       // Visual Studio 17 writes .sln format 12.00
       fout << "Microsoft Visual Studio Solution File, Format Version 12.00\n";
-      if (this->ExpressEdition) {
-        fout << "# Visual Studio Express 17 for Windows Desktop\n";
-      } else {
-        fout << "# Visual Studio Version 17\n";
-      }
+      fout << "# Visual Studio Version 17\n";
+      break;
+    case cmGlobalVisualStudioGenerator::VSVersion::VS18:
+      // Visual Studio 18 writes .sln format 12.00
+      fout << "Microsoft Visual Studio Solution File, Format Version 12.00\n";
+      fout << "# Visual Studio Version 18\n";
       break;
   }
 }
@@ -326,148 +321,6 @@ std::string cmGlobalVisualStudioGenerator::GetUserMacrosRegKeyBase()
   return "";
 }
 
-void cmGlobalVisualStudioGenerator::FillLinkClosure(
-  cmGeneratorTarget const* target, TargetSet& linked)
-{
-  if (linked.insert(target).second) {
-    TargetDependSet const& depends = this->GetTargetDirectDepends(target);
-    for (cmTargetDepend const& di : depends) {
-      if (di.IsLink()) {
-        this->FillLinkClosure(di, linked);
-      }
-    }
-  }
-}
-
-cmGlobalVisualStudioGenerator::TargetSet const&
-cmGlobalVisualStudioGenerator::GetTargetLinkClosure(cmGeneratorTarget* target)
-{
-  auto i = this->TargetLinkClosure.find(target);
-  if (i == this->TargetLinkClosure.end()) {
-    TargetSetMap::value_type entry(target, TargetSet());
-    i = this->TargetLinkClosure.insert(entry).first;
-    this->FillLinkClosure(target, i->second);
-  }
-  return i->second;
-}
-
-void cmGlobalVisualStudioGenerator::FollowLinkDepends(
-  cmGeneratorTarget const* target, std::set<cmGeneratorTarget const*>& linked)
-{
-  if (!target->IsInBuildSystem()) {
-    return;
-  }
-  if (linked.insert(target).second &&
-      target->GetType() == cmStateEnums::STATIC_LIBRARY) {
-    // Static library targets do not list their link dependencies so
-    // we must follow them transitively now.
-    TargetDependSet const& depends = this->GetTargetDirectDepends(target);
-    for (cmTargetDepend const& di : depends) {
-      if (di.IsLink()) {
-        this->FollowLinkDepends(di, linked);
-      }
-    }
-  }
-}
-
-bool cmGlobalVisualStudioGenerator::ComputeTargetDepends()
-{
-  if (!this->cmGlobalGenerator::ComputeTargetDepends()) {
-    return false;
-  }
-  for (auto const& it : this->ProjectMap) {
-    for (cmLocalGenerator const* i : it.second) {
-      for (auto const& ti : i->GetGeneratorTargets()) {
-        this->ComputeVSTargetDepends(ti.get());
-      }
-    }
-  }
-  return true;
-}
-
-static bool VSLinkable(cmGeneratorTarget const* t)
-{
-  return t->IsLinkable() || t->GetType() == cmStateEnums::OBJECT_LIBRARY;
-}
-
-void cmGlobalVisualStudioGenerator::ComputeVSTargetDepends(
-  cmGeneratorTarget* target)
-{
-  if (this->VSTargetDepends.find(target) != this->VSTargetDepends.end()) {
-    return;
-  }
-  VSDependSet& vsTargetDepend = this->VSTargetDepends[target];
-  // VS <= 7.1 has two behaviors that affect solution dependencies.
-  //
-  // (1) Solution-level dependencies between a linkable target and a
-  // library cause that library to be linked.  We use an intermediate
-  // empty utility target to express the dependency.  (VS 8 and above
-  // provide a project file "LinkLibraryDependencies" setting to
-  // choose whether to activate this behavior.  We disable it except
-  // when linking external project files.)
-  //
-  // (2) We cannot let static libraries depend directly on targets to
-  // which they "link" because the librarian tool will copy the
-  // targets into the static library.  While the work-around for
-  // behavior (1) would also avoid this, it would create a large
-  // number of extra utility targets for little gain.  Instead, use
-  // the above work-around only for dependencies explicitly added by
-  // the add_dependencies() command.  Approximate link dependencies by
-  // leaving them out for the static library itself but following them
-  // transitively for other targets.
-
-  bool allowLinkable = (target->GetType() != cmStateEnums::STATIC_LIBRARY &&
-                        target->GetType() != cmStateEnums::SHARED_LIBRARY &&
-                        target->GetType() != cmStateEnums::MODULE_LIBRARY &&
-                        target->GetType() != cmStateEnums::EXECUTABLE);
-
-  TargetDependSet const& depends = this->GetTargetDirectDepends(target);
-
-  // Collect implicit link dependencies (target_link_libraries).
-  // Static libraries cannot depend on their link implementation
-  // due to behavior (2), but they do not really need to.
-  std::set<cmGeneratorTarget const*> linkDepends;
-  if (target->GetType() != cmStateEnums::STATIC_LIBRARY) {
-    for (cmTargetDepend const& di : depends) {
-      if (di.IsLink()) {
-        this->FollowLinkDepends(di, linkDepends);
-      }
-    }
-  }
-
-  // Collect explicit util dependencies (add_dependencies).
-  std::set<cmGeneratorTarget const*> utilDepends;
-  for (cmTargetDepend const& di : depends) {
-    if (di.IsUtil()) {
-      this->FollowLinkDepends(di, utilDepends);
-    }
-  }
-
-  // Collect all targets linked by this target so we can avoid
-  // intermediate targets below.
-  TargetSet linked;
-  if (target->GetType() != cmStateEnums::STATIC_LIBRARY) {
-    linked = this->GetTargetLinkClosure(target);
-  }
-
-  // Emit link dependencies.
-  for (cmGeneratorTarget const* dep : linkDepends) {
-    vsTargetDepend.insert(dep->GetName());
-  }
-
-  // Emit util dependencies.  Possibly use intermediate targets.
-  for (cmGeneratorTarget const* dgt : utilDepends) {
-    if (allowLinkable || !VSLinkable(dgt) || linked.count(dgt)) {
-      // Direct dependency allowed.
-      vsTargetDepend.insert(dgt->GetName());
-    } else {
-      // Direct dependency on linkable target not allowed.
-      // Use an intermediate utility target.
-      vsTargetDepend.insert(this->GetUtilityDepend(dgt));
-    }
-  }
-}
-
 bool cmGlobalVisualStudioGenerator::FindMakeProgram(cmMakefile* mf)
 {
   // Visual Studio generators know how to lookup their build tool
@@ -477,18 +330,6 @@ bool cmGlobalVisualStudioGenerator::FindMakeProgram(cmMakefile* mf)
     mf->AddDefinition("CMAKE_MAKE_PROGRAM", this->GetVSMakeProgram());
   }
   return true;
-}
-
-std::string cmGlobalVisualStudioGenerator::GetUtilityDepend(
-  cmGeneratorTarget const* target)
-{
-  auto i = this->UtilityDepends.find(target);
-  if (i == this->UtilityDepends.end()) {
-    std::string name = this->WriteUtilityDepend(target);
-    UtilityDependsMap::value_type entry(target, name);
-    i = this->UtilityDepends.insert(entry).first;
-  }
-  return i->second;
 }
 
 std::string cmGlobalVisualStudioGenerator::GetStartupProjectName(
@@ -785,7 +626,7 @@ void RegisterVisualStudioMacros(std::string const& macrosFile,
   }
 }
 bool cmGlobalVisualStudioGenerator::TargetIsFortranOnly(
-  cmGeneratorTarget const* gt)
+  cmGeneratorTarget const* gt) const
 {
   // If there's only one source language, Fortran has to be used
   // in order for the sources to compile.

@@ -29,24 +29,22 @@ public:
 
 protected:
   void WriteSLNFile(std::ostream& fout, cmLocalGenerator* root,
-                    std::vector<cmLocalGenerator*>& generators) override;
+                    OrderedTargetDependSet const& orderedProjectTargets,
+                    VSFolders const& vsFolders) const override;
   virtual void WriteSolutionConfigurations(
-    std::ostream& fout, std::vector<std::string> const& configs);
+    std::ostream& fout, std::vector<std::string> const& configs) const = 0;
   void WriteProject(std::ostream& fout, std::string const& name,
                     std::string const& path,
-                    cmGeneratorTarget const* t) override;
-  void WriteProjectDepends(std::ostream& fout, std::string const& name,
-                           std::string const& path,
-                           cmGeneratorTarget const* t) override;
+                    cmGeneratorTarget const* t) const override;
   void WriteProjectConfigurations(
     std::ostream& fout, std::string const& name,
     cmGeneratorTarget const& target, std::vector<std::string> const& configs,
     std::set<std::string> const& configsPartOfDefaultBuild,
-    std::string const& platformMapping = "") override;
+    std::string const& platformMapping = "") const override;
   void WriteExternalProject(
     std::ostream& fout, std::string const& name, std::string const& path,
     cmValue typeGuid,
-    std::set<BT<std::pair<std::string, bool>>> const& depends) override;
+    std::set<BT<std::pair<std::string, bool>>> const& depends) const override;
 
   // Folders are not supported by VS 7.1.
   bool UseFolderProperty() const override { return false; }

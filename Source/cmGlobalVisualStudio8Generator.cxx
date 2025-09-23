@@ -363,7 +363,7 @@ void cmGlobalVisualStudio8Generator::AddExtraIDETargets()
 }
 
 void cmGlobalVisualStudio8Generator::WriteSolutionConfigurations(
-  std::ostream& fout, std::vector<std::string> const& configs)
+  std::ostream& fout, std::vector<std::string> const& configs) const
 {
   fout << "\tGlobalSection(SolutionConfigurationPlatforms) = preSolution\n";
   std::vector<std::string> platforms = { this->GetPlatformName() };
@@ -383,7 +383,7 @@ void cmGlobalVisualStudio8Generator::WriteProjectConfigurations(
   std::ostream& fout, std::string const& name, cmGeneratorTarget const& target,
   std::vector<std::string> const& configs,
   std::set<std::string> const& configsPartOfDefaultBuild,
-  std::string const& platformMapping)
+  std::string const& platformMapping) const
 {
   std::string guid = this->GetGUID(name);
   std::vector<std::string> platforms = { this->GetPlatformName() };
@@ -463,17 +463,9 @@ bool cmGlobalVisualStudio8Generator::TargetSystemSupportsDeployment() const
   return this->TargetsWindowsCE();
 }
 
-bool cmGlobalVisualStudio8Generator::ComputeTargetDepends()
-{
-  // Skip over the cmGlobalVisualStudioGenerator implementation!
-  // We do not need the support that VS <= 7.1 needs.
-  // NOLINTNEXTLINE(bugprone-parent-virtual-call)
-  return this->cmGlobalGenerator::ComputeTargetDepends();
-}
-
 void cmGlobalVisualStudio8Generator::WriteProjectDepends(
   std::ostream& fout, std::string const&, std::string const&,
-  cmGeneratorTarget const* gt)
+  cmGeneratorTarget const* gt) const
 {
   TargetDependSet const& unordered = this->GetTargetDirectDepends(gt);
   OrderedTargetDependSet depends(unordered, std::string());

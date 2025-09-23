@@ -498,7 +498,7 @@ cm::optional<std::string> GetWindowsValue(cmExecutionStatus& status,
                                           std::string const& key)
 {
   auto* const gg = status.GetMakefile().GetGlobalGenerator();
-  for (auto vs : { 15, 16, 17 }) {
+  for (auto vs : { 15, 16, 17, 18 }) {
     if (key == cmStrCat("VS_"_s, vs, "_DIR"_s)) {
       std::string value;
       // If generating for the VS nn IDE, use the same instance.

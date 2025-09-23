@@ -1276,6 +1276,8 @@ char const* cmGlobalVisualStudio10Generator::GetToolsVersion() const
       return "16.0";
     case cmGlobalVisualStudioGenerator::VSVersion::VS17:
       return "17.0";
+    case cmGlobalVisualStudioGenerator::VSVersion::VS18:
+      return "18.0";
   }
   return "";
 }

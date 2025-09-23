@@ -133,6 +133,8 @@ static unsigned int VSVersionToMajor(
       return 16;
     case cmGlobalVisualStudioGenerator::VSVersion::VS17:
       return 17;
+    case cmGlobalVisualStudioGenerator::VSVersion::VS18:
+      return 18;
   }
   return 0;
 }
@@ -149,6 +151,8 @@ static char const* VSVersionToToolset(
       return "v142";
     case cmGlobalVisualStudioGenerator::VSVersion::VS17:
       return "v143";
+    case cmGlobalVisualStudioGenerator::VSVersion::VS18:
+      return "v145";
   }
   return "";
 }
@@ -165,6 +169,8 @@ static std::string VSVersionToMajorString(
       return "16";
     case cmGlobalVisualStudioGenerator::VSVersion::VS17:
       return "17";
+    case cmGlobalVisualStudioGenerator::VSVersion::VS18:
+      return "18";
   }
   return "";
 }
@@ -178,6 +184,7 @@ static char const* VSVersionToAndroidToolset(
     case cmGlobalVisualStudioGenerator::VSVersion::VS15:
     case cmGlobalVisualStudioGenerator::VSVersion::VS16:
     case cmGlobalVisualStudioGenerator::VSVersion::VS17:
+    case cmGlobalVisualStudioGenerator::VSVersion::VS18:
       return "Clang_5_0";
   }
   return "";
@@ -258,6 +265,7 @@ cmGlobalVisualStudioVersionedGenerator::NewFactory15()
 
 static char const vs16generatorName[] = "Visual Studio 16 2019";
 static char const vs17generatorName[] = "Visual Studio 17 2022";
+static char const vs18generatorName[] = "Visual Studio 18 2026";
 
 // Map generator name without year to name with year.
 static char const* cmVS16GenName(std::string const& name, std::string& genName)
@@ -285,6 +293,20 @@ static char const* cmVS17GenName(std::string const& name, std::string& genName)
     p += 5;
   }
   genName = cmStrCat(vs17generatorName, p);
+  return p;
+}
+
+static char const* cmVS18GenName(std::string const& name, std::string& genName)
+{
+  if (strncmp(name.c_str(), vs18generatorName,
+              sizeof(vs18generatorName) - 6) != 0) {
+    return nullptr;
+  }
+  char const* p = name.c_str() + sizeof(vs18generatorName) - 6;
+  if (cmHasLiteralPrefix(p, " 2026")) {
+    p += 5;
+  }
+  genName = cmStrCat(vs18generatorName, p);
   return p;
 }
 
@@ -408,6 +430,66 @@ cmGlobalVisualStudioVersionedGenerator::NewFactory17()
   return std::unique_ptr<cmGlobalGeneratorFactory>(new Factory17);
 }
 
+class cmGlobalVisualStudioVersionedGenerator::Factory18
+  : public cmGlobalGeneratorFactory
+{
+public:
+  std::unique_ptr<cmGlobalGenerator> CreateGlobalGenerator(
+    std::string const& name, cmake* cm) const override
+  {
+    std::string genName;
+    char const* p = cmVS18GenName(name, genName);
+    if (!p) {
+      return std::unique_ptr<cmGlobalGenerator>();
+    }
+    if (!*p) {
+      return std::unique_ptr<cmGlobalGenerator>(
+        new cmGlobalVisualStudioVersionedGenerator(
+          cmGlobalVisualStudioGenerator::VSVersion::VS18, cm, genName));
+    }
+    return std::unique_ptr<cmGlobalGenerator>();
+  }
+
+  cmDocumentationEntry GetDocumentation() const override
+  {
+    return { std::string(vs18generatorName),
+             "Generates Visual Studio 2026 project files.  "
+             "Use -A option to specify architecture." };
+  }
+
+  std::vector<std::string> GetGeneratorNames() const override
+  {
+    std::vector<std::string> names;
+    names.push_back(vs18generatorName);
+    return names;
+  }
+
+  bool SupportsToolset() const override { return true; }
+  bool SupportsPlatform() const override { return true; }
+
+  std::vector<std::string> GetKnownPlatforms() const override
+  {
+    std::vector<std::string> platforms;
+    platforms.emplace_back("x64");
+    platforms.emplace_back("Win32");
+    platforms.emplace_back("ARM");
+    platforms.emplace_back("ARM64");
+    platforms.emplace_back("ARM64EC");
+    return platforms;
+  }
+
+  std::string GetDefaultPlatformName() const override
+  {
+    return VSHostPlatformName();
+  }
+};
+
+std::unique_ptr<cmGlobalGeneratorFactory>
+cmGlobalVisualStudioVersionedGenerator::NewFactory18()
+{
+  return std::unique_ptr<cmGlobalGeneratorFactory>(new Factory18);
+}
+
 cmGlobalVisualStudioVersionedGenerator::cmGlobalVisualStudioVersionedGenerator(
   VSVersion version, cmake* cm, std::string const& name)
   : cmGlobalVisualStudio14Generator(cm, name)
@@ -452,6 +534,11 @@ bool cmGlobalVisualStudioVersionedGenerator::MatchesGeneratorName(
       break;
     case cmGlobalVisualStudioGenerator::VSVersion::VS17:
       if (cmVS17GenName(name, genName)) {
+        return genName == this->GetName();
+      }
+      break;
+    case cmGlobalVisualStudioGenerator::VSVersion::VS18:
+      if (cmVS18GenName(name, genName)) {
         return genName == this->GetName();
       }
       break;
@@ -712,6 +799,7 @@ cmGlobalVisualStudioVersionedGenerator::GetAndroidApplicationTypeRevision()
     case cmGlobalVisualStudioGenerator::VSVersion::VS15:
     case cmGlobalVisualStudioGenerator::VSVersion::VS16:
     case cmGlobalVisualStudioGenerator::VSVersion::VS17:
+    case cmGlobalVisualStudioGenerator::VSVersion::VS18:
       return "3.0";
   }
   return "";

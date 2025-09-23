@@ -525,7 +525,7 @@ public:
   // what targets does the specified target depend on directly
   // via a target_link_libraries or add_dependencies
   TargetDependSet const& GetTargetDirectDepends(
-    cmGeneratorTarget const* target);
+    cmGeneratorTarget const* target) const;
 
   // Return true if target 'l' occurs before 'r' in a global ordering
   // of targets that respects inter-target dependencies.
