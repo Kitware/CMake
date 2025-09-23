@@ -1519,7 +1519,7 @@ unset (_${_PYTHON_PREFIX}_FIND_DEVELOPMENT_MODULE_ARTIFACTS)
 unset (_${_PYTHON_PREFIX}_FIND_DEVELOPMENT_SABIMODULE_ARTIFACTS)
 unset (_${_PYTHON_PREFIX}_FIND_DEVELOPMENT_EMBED_ARTIFACTS)
 if ("Development.Module" IN_LIST ${_PYTHON_BASE}_FIND_COMPONENTS)
-  if (CMAKE_SYSTEM_NAME MATCHES "^(Windows.*|CYGWIN|MSYS|Android)$")
+  if (CMAKE_SYSTEM_NAME MATCHES "^(Windows.*|CYGWIN|MSYS|Android|AIX)$")
     list (APPEND _${_PYTHON_PREFIX}_FIND_DEVELOPMENT_MODULE_ARTIFACTS "LIBRARY")
   endif()
   list (APPEND _${_PYTHON_PREFIX}_FIND_DEVELOPMENT_MODULE_ARTIFACTS "INCLUDE_DIR")
@@ -4351,7 +4351,7 @@ if(_${_PYTHON_PREFIX}_CMAKE_ROLE STREQUAL "PROJECT")
 
     if (${_PYTHON_PREFIX}_Development.Module_FOUND)
       if ("LIBRARY" IN_LIST _${_PYTHON_PREFIX}_FIND_DEVELOPMENT_MODULE_ARTIFACTS)
-        # On Windows/CYGWIN/MSYS/Android, Python::Module is the same as Python::Python
+        # On Windows/CYGWIN/MSYS/Android/AIX, Python::Module is the same as Python::Python
         # but ALIAS cannot be used because the imported library is not GLOBAL.
         __python_import_library (${_PYTHON_PREFIX}::Module)
       else()
