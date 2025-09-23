@@ -4,6 +4,10 @@
 
 #include <string>
 
+#include <cm/optional>
+
+#include "cmPolicies.h"
+
 class cmLocalGenerator;
 
 namespace cm {
@@ -17,6 +21,12 @@ struct Context final
   cmLocalGenerator const* LG;
   std::string Config;
   std::string Language;
+
+  void SetCMP0189(cmPolicies::PolicyStatus cmp0189);
+  cmPolicies::PolicyStatus GetCMP0189() const;
+
+private:
+  cm::optional<cmPolicies::PolicyStatus> CMP0189;
 };
 
 }

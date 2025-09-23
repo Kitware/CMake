@@ -192,8 +192,7 @@ cmGeneratorTarget::IsTransitiveProperty(
   if (i != BuiltinTransitiveProperties.end() &&
       // Look up CMP0189 in the context where evaluation occurs,
       // not where the target was created.
-      context.LG->GetPolicyStatus(cmPolicies::CMP0189) != cmPolicies::NEW &&
-      prop == "LINK_LIBRARIES"_s) {
+      context.GetCMP0189() != cmPolicies::NEW && prop == "LINK_LIBRARIES"_s) {
     i = BuiltinTransitiveProperties.end();
   }
   if (i != BuiltinTransitiveProperties.end()) {
