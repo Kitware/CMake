@@ -31,7 +31,7 @@ This module defines the following variables:
   to the same value.
 
 ``SDL_net_VERSION``
-  ..versionadded:: 4.2
+  .. versionadded:: 4.2
 
   The human-readable string containing the version of SDL_net found.
 
