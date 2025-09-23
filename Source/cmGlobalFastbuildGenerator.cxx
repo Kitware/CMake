@@ -1596,8 +1596,7 @@ void cmGlobalFastbuildGenerator::WriteSolution()
       std::move(projectsInFolder.begin(), projectsInFolder.end(),
                 std::back_inserter(VSProjectsWithoutFolder));
     } else {
-      std::string folderName =
-        cmStrCat("Folder_", std::to_string(++folderNumber));
+      std::string folderName = cmStrCat("Folder_", ++folderNumber);
       WriteStruct(
         folderName,
         { { "Path", Quote(pathToFolder) },
