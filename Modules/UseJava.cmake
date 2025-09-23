@@ -568,6 +568,9 @@ Creating Java Documentation
     generated docs. Same behavior as option ``-version`` of ``javadoc`` tool.
 #]=======================================================================]
 
+block(SCOPE_FOR POLICIES)
+cmake_policy(SET CMP0140 NEW) # For return(PROPAGATE ...)
+
 function (__java_copy_file src dest comment)
     add_custom_command(
         OUTPUT  ${dest}
@@ -664,6 +667,37 @@ if (CMAKE_HOST_WIN32 AND NOT CYGWIN AND CMAKE_HOST_SYSTEM_NAME MATCHES "Windows"
 else ()
     set(_UseJava_PATH_SEP ":")
 endif()
+
+function(__java_resolve_jar outvar_path path_or_tgt)
+    if (TARGET "${path_or_tgt}")
+        # Check if this is a target created by add_jar
+        get_target_property(jarpath "${path_or_tgt}" JAR_FILE)
+        set("${outvar_path}" "${jarpath}")
+        if (NOT jarpath) # Some other target that we do not know how to use as a JAR
+            message(SEND_ERROR "target ${path_or_tgt} is not a jar")
+        endif ()
+    else () # Interpreted as the path to an external JAR
+        set("${outvar_path}" "${path_or_tgt}")
+    endif ()
+    return(PROPAGATE "${outvar_path}")
+endfunction()
+
+# Helper that processes a list of add_jar-created targets or paths to external
+# JAR files and:
+# - appends each item (target name or JAR path) to the list in outvar_depsraw.
+# - appends the resolved JAR path to the list in outvar_depsresolved.
+# If any item cannot be resolved, because it is a target name that was not
+# created by add_jar, a SEND_ERROR message is raised.
+function(__java_build_deplists outvar_depsraw outvar_depsresolved jars_or_targets_lst)
+    foreach(item IN LISTS "${jars_or_targets_lst}")
+        __java_resolve_jar(res_path "${item}")
+        if (res_path) # We would get a falsy value in the error case
+            list(APPEND "${outvar_depsraw}" "${item}") # Keep the original name (possibly a target) here
+            list(APPEND "${outvar_depsresolved}" "${res_path}")
+        endif ()
+    endforeach()
+    return(PROPAGATE "${outvar_depsraw}" "${outvar_depsresolved}")
+endfunction()
 
 function(add_jar _TARGET_NAME)
 
@@ -838,7 +872,8 @@ function(add_jar _TARGET_NAME)
             # Ignored for backward compatibility
 
         elseif (_JAVA_EXT STREQUAL "")
-            list(APPEND CMAKE_JAVA_INCLUDE_PATH ${JAVA_JAR_TARGET_${_JAVA_SOURCE_FILE}} ${JAVA_JAR_TARGET_${_JAVA_SOURCE_FILE}_CLASSPATH})
+            # XXX: this was not being used after setting!
+            # list(APPEND CMAKE_JAVA_INCLUDE_PATH ${JAVA_JAR_TARGET_${_JAVA_SOURCE_FILE}} ${JAVA_JAR_TARGET_${_JAVA_SOURCE_FILE}_CLASSPATH})
             list(APPEND _JAVA_DEPENDS ${JAVA_JAR_TARGET_${_JAVA_SOURCE_FILE}})
 
         else ()
@@ -857,24 +892,11 @@ function(add_jar _TARGET_NAME)
                                         _JAVA_RESOURCE_FILES_RELATIVE)
     endif()
 
-    foreach(_JAVA_INCLUDE_JAR IN LISTS _add_jar_INCLUDE_JARS)
-        if (TARGET ${_JAVA_INCLUDE_JAR})
-            get_target_property(_JAVA_JAR_PATH ${_JAVA_INCLUDE_JAR} JAR_FILE)
-            if (_JAVA_JAR_PATH)
-                string(APPEND CMAKE_JAVA_INCLUDE_PATH_FINAL "${_UseJava_PATH_SEP}${_JAVA_JAR_PATH}")
-                list(APPEND CMAKE_JAVA_INCLUDE_PATH ${_JAVA_JAR_PATH})
-                list(APPEND _JAVA_DEPENDS ${_JAVA_INCLUDE_JAR})
-                list(APPEND _JAVA_COMPILE_DEPENDS ${_JAVA_JAR_PATH})
-            else ()
-                message(SEND_ERROR "add_jar: INCLUDE_JARS target ${_JAVA_INCLUDE_JAR} is not a jar")
-            endif ()
-        else ()
-            string(APPEND CMAKE_JAVA_INCLUDE_PATH_FINAL "${_UseJava_PATH_SEP}${_JAVA_INCLUDE_JAR}")
-            list(APPEND CMAKE_JAVA_INCLUDE_PATH "${_JAVA_INCLUDE_JAR}")
-            list(APPEND _JAVA_DEPENDS "${_JAVA_INCLUDE_JAR}")
-            list(APPEND _JAVA_COMPILE_DEPENDS "${_JAVA_INCLUDE_JAR}")
-        endif ()
-    endforeach()
+    # Build dependency lists and arguments for JARs in the classpath
+    __java_build_deplists(_JAVA_DEPENDS _JAVA_COMPILE_DEPENDS _add_jar_INCLUDE_JARS)
+    foreach (resolved_cp_item IN LISTS _JAVA_COMPILE_DEPENDS)
+        string(APPEND CMAKE_JAVA_INCLUDE_PATH_FINAL "${_UseJava_PATH_SEP}${resolved_cp_item}")
+    endforeach ()
 
     if (_JAVA_COMPILE_FILES OR _JAVA_COMPILE_FILELISTS)
         set (_JAVA_SOURCES_FILELISTS)
@@ -1725,3 +1747,5 @@ function(install_jar_exports)
             DESTINATION ${_install_jar_exports_DESTINATION}
             ${_COMPONENT})
 endfunction()
+
+endblock()
