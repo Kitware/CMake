@@ -28,6 +28,12 @@
     result = 1;                                                               \
   } while (0)
 
+#define DEF(m)                                                                \
+  do {                                                                        \
+    printf(#m ": expected undefined, got defined (line %d)\n", __LINE__);     \
+    result = 1;                                                               \
+  } while (0)
+
 int main(void)
 {
   int result = 0;
@@ -152,6 +158,20 @@ int main(void)
 #  endif
 #elif defined(HAVE_SIZEOF_STRUCTMEMBER_CHAR)
   NODEF(SIZEOF_STRUCTMEMBER_CHAR);
+#endif
+
+/* struct somestruct::somelong */
+#if defined(SIZEOF_STRUCTMEMBER_LONG)
+  CHECK(x.somelong, SIZEOF_STRUCTMEMBER_LONG);
+  CHECK(x.somelong, SIZEOF_LONG);
+#  if !defined(HAS_SIZEOF_STRUCTMEMBER_LONG)
+  NODEF(HAS_SIZEOF_STRUCTMEMBER_LONG);
+#  endif
+#elif defined(HAS_SIZEOF_STRUCTMEMBER_LONG)
+  NODEF(SIZEOF_STRUCTMEMBER_LONG);
+#endif
+#if defined(HAVE_SIZEOF_STRUCTMEMBER_LONG)
+  DEF(HAVE_SIZEOF_STRUCTMEMBER_LONG);
 #endif
 
   /* to avoid possible warnings about unused or write-only variable */

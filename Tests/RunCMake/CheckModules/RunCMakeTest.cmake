@@ -12,6 +12,7 @@ run_cmake(CheckStructHasMemberWrongKey)
 run_cmake(CheckTypeSizeOk)
 run_cmake(CheckTypeSizeUnknownLanguage)
 run_cmake(CheckTypeSizeMissingLanguage)
+run_cmake(CheckTypeSizeMissingResultVariable)
 run_cmake(CheckTypeSizeUnknownArgument)
 run_cmake(CheckTypeSizeMixedArgs)
 
