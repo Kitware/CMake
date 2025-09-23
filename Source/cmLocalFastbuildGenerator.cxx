@@ -16,6 +16,7 @@
 #include "cmObjectLocation.h"
 #include "cmSystemTools.h"
 #include "cmValue.h"
+#include "cmake.h"
 
 class cmGlobalGenerator;
 
@@ -95,4 +96,17 @@ void cmLocalFastbuildGenerator::AdditionalCleanFiles(std::string const& config)
         cmSystemTools::CollapseFullPath(cleanFile, binaryDir)));
     }
   }
+}
+
+std::string cmLocalFastbuildGenerator::ConvertToIncludeReference(
+  std::string const& path, cmOutputConverter::OutputFormat format)
+{
+  std::string converted = this->ConvertToOutputForExisting(path, format);
+  cmGlobalFastbuildGenerator const* GG = this->GetGlobalFastbuildGenerator();
+  if (GG->UsingRelativePaths && cmSystemTools::FileIsFullPath(path)) {
+    std::string const& binDir =
+      GG->GetCMakeInstance()->GetHomeOutputDirectory();
+    return cmSystemTools::RelativePath(binDir, converted);
+  }
+  return converted;
 }
