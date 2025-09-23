@@ -76,15 +76,15 @@ void processOptions(cmGeneratorTarget const* tgt,
           options.emplace_back(opt, entry.Backtrace);
         }
         if (debugOptions) {
-          usedOptions += " * " + opt + "\n";
+          usedOptions += cmStrCat(" * ", opt, '\n');
         }
       }
     }
     if (!usedOptions.empty()) {
       tgt->GetLocalGenerator()->GetCMakeInstance()->IssueMessage(
         MessageType::LOG,
-        std::string("Used ") + logName + std::string(" for target ") +
-          tgt->GetName() + ":\n" + usedOptions,
+        cmStrCat("Used ", logName, " for target ", tgt->GetName(), ":\n",
+                 usedOptions),
         entry.Backtrace);
     }
   }
@@ -305,7 +305,7 @@ void cmGeneratorTarget::GetCompileDefinitions(
 {
   std::vector<BT<std::string>> tmp =
     this->GetCompileDefinitions(config, language);
-  result.reserve(tmp.size());
+  result.reserve(result.size() + tmp.size());
   for (BT<std::string>& v : tmp) {
     result.emplace_back(std::move(v.Value));
   }
