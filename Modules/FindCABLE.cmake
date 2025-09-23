@@ -1,28 +1,61 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-# file Copyright.txt or https://cmake.org/licensing for details.
+# file LICENSE.rst or https://cmake.org/licensing for details.
 
 #[=======================================================================[.rst:
 FindCABLE
 ---------
 
-Find CABLE
+.. versionchanged:: 4.1
+  This module is available only if policy :policy:`CMP0191` is not set to ``NEW``.
 
-This module finds if CABLE is installed and determines where the
-include files and libraries are.  This code sets the following
-variables:
+Finds the CABLE installation and determines its include paths and libraries.
 
-::
+Package called CABLE (CABLE Automates Bindings for Language Extension) was
+initially developed by Kitware to generate bindings to C++ classes for use in
+interpreted languages, such as Tcl.  It worked in conjunction with packages like
+GCC-XML.  The CABLE package has since been superseded by the ITK CableSwig
+package.
 
-  CABLE             the path to the cable executable
-  CABLE_TCL_LIBRARY the path to the Tcl wrapper library
-  CABLE_INCLUDE_DIR the path to the include directory
+.. note::
 
+  When building wrappers for interpreted languages, these packages are no longer
+  necessary.  The CastXML package now serves as the recommended tool for this
+  purpose and can be found directly using the :command:`find_program` command.
 
+Cache Variables
+^^^^^^^^^^^^^^^
 
-To build Tcl wrappers, you should add shared library and link it to
-${CABLE_TCL_LIBRARY}.  You should also add ${CABLE_INCLUDE_DIR} as an
-include directory.
+The following cache variables may be set when using this module:
+
+``CABLE``
+  Path to the ``cable`` executable.
+``CABLE_INCLUDE_DIR``
+  Path to the include directory.
+``CABLE_TCL_LIBRARY``
+  Path to the Tcl wrapper library.
+
+Examples
+^^^^^^^^
+
+Finding CABLE to build Tcl wrapper, by linking library and adding the include
+directories:
+
+.. code-block:: cmake
+
+  find_package(CABLE)
+  target_link_libraries(tcl_wrapper_target PRIVATE ${CABLE_TCL_LIBRARY})
+  target_include_directories(tcl_wrapper_target PRIVATE ${CABLE_INCLUDE_DIR})
 #]=======================================================================]
+
+cmake_policy(GET CMP0191 _FindCABLE_CMP0191)
+if(_FindCABLE_CMP0191 STREQUAL "NEW")
+  message(FATAL_ERROR "The FindCABLE module has been removed by policy CMP0191.")
+endif()
+
+if(_FindCABLE_testing)
+  set(_FindCABLE_included TRUE)
+  return()
+endif()
 
 if(NOT CABLE)
   find_path(CABLE_BUILD_DIR cableVersion.h)

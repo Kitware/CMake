@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 
 #include <algorithm>
 #include <sstream>
@@ -874,7 +874,7 @@ bool testIterators()
       result = false;
     }
     res.clear();
-    for (const auto& e : p) {
+    for (auto const& e : p) {
       res.push_back(e);
     }
     if (res != ref) {

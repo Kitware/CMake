@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
 #include <utility>
@@ -11,7 +11,7 @@ class cmGccDepfileLexerHelper
 public:
   cmGccDepfileLexerHelper() = default;
 
-  bool readFile(const char* filePath);
+  bool readFile(char const* filePath);
   cmGccDepfileContent extractContent() && { return std::move(this->Content); }
 
   // Functions called by the lexer
@@ -19,7 +19,7 @@ public:
   void newRule();
   void newDependency();
   void newRuleOrDependency();
-  void addToCurrentPath(const char* s);
+  void addToCurrentPath(char const* s);
 
 private:
   void sanitizeContent();

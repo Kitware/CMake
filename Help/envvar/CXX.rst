@@ -1,7 +1,7 @@
 CXX
 ---
 
-.. include:: ENV_VAR.txt
+.. include:: include/ENV_VAR.rst
 
 Preferred executable for compiling ``CXX`` language files. Will only be used by
 CMake on the first configuration to determine ``CXX`` compiler, after which the

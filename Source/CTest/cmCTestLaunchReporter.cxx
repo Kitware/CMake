@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmCTestLaunchReporter.h"
 
 #include <utility>
@@ -25,7 +25,7 @@ cmCTestLaunchReporter::cmCTestLaunchReporter()
   this->Passthru = true;
   this->Status.Finished = true;
   this->ExitCode = 1;
-  this->CWD = cmSystemTools::GetCurrentWorkingDirectory();
+  this->CWD = cmSystemTools::GetLogicalWorkingDirectory();
 
   this->ComputeFileNames();
 
@@ -78,12 +78,12 @@ void cmCTestLaunchReporter::ComputeFileNames()
 
 void cmCTestLaunchReporter::LoadLabels()
 {
-  if (this->OptionBuildDir.empty() || this->OptionTargetName.empty()) {
+  if (this->OptionCurrentBuildDir.empty() || this->OptionTargetName.empty()) {
     return;
   }
 
   // Labels are listed in per-target files.
-  std::string fname = cmStrCat(this->OptionBuildDir, "/CMakeFiles/",
+  std::string fname = cmStrCat(this->OptionCurrentBuildDir, "/CMakeFiles/",
                                this->OptionTargetName, ".dir/Labels.txt");
 
   // We are interested in per-target labels for this source file.
@@ -189,7 +189,7 @@ void cmCTestLaunchReporter::WriteXMLAction(cmXMLElement& e2) const
   }
 
   // OutputType
-  const char* outputType = nullptr;
+  char const* outputType = nullptr;
   if (!this->OptionTargetType.empty()) {
     if (this->OptionTargetType == "EXECUTABLE") {
       outputType = "executable";
@@ -265,13 +265,13 @@ void cmCTestLaunchReporter::WriteXMLLabels(cmXMLElement& e2)
   }
 }
 
-void cmCTestLaunchReporter::DumpFileToXML(cmXMLElement& e3, const char* tag,
+void cmCTestLaunchReporter::DumpFileToXML(cmXMLElement& e3, char const* tag,
                                           std::string const& fname)
 {
   cmsys::ifstream fin(fname.c_str(), std::ios::in | std::ios::binary);
 
   std::string line;
-  const char* sep = "";
+  char const* sep = "";
 
   cmXMLElement e4(e3, tag);
   while (cmSystemTools::GetLineFromStream(fin, line)) {

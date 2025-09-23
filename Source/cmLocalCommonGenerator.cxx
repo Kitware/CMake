@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmLocalCommonGenerator.h"
 
 #include <memory>
@@ -87,6 +87,18 @@ std::string cmLocalCommonGenerator::GetTargetFortranFlags(
   }
 
   return flags;
+}
+
+std::string cmLocalCommonGenerator::GetTargetDirectory(
+  cmGeneratorTarget const* target) const
+{
+  std::string dir = target->GetName();
+#if defined(__VMS)
+  dir += "_dir";
+#else
+  dir += ".dir";
+#endif
+  return dir;
 }
 
 void cmLocalCommonGenerator::ComputeObjectFilenames(

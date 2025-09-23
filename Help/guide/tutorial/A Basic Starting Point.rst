@@ -17,7 +17,7 @@ the ``Build and Run`` section will walk step-by-step through how to build and
 test the exercise. Finally, at the end of each exercise the intended solution
 is discussed.
 
-Also note that each step in the tutorial builds on the next. So, for example,
+Also note that each step in the tutorial builds on the previous. For example,
 the starting code for ``Step2`` is the complete solution to ``Step1``.
 
 Exercise 1 - Building a Basic Project
@@ -319,6 +319,7 @@ Files to Edit
 
 * ``CMakeLists.txt``
 * ``tutorial.cxx``
+* ``TutorialConfig.h.in``
 
 Getting Started
 ---------------
@@ -399,7 +400,7 @@ include files.
 
 **Note:** Throughout this tutorial, we will refer to the project build and
 the project binary directory interchangeably. These are the same and are not
-meant to refer to a `bin/` directory.
+meant to refer to a ``bin/`` directory.
 
 We used :command:`target_include_directories` to specify
 where the executable target should look for include files.

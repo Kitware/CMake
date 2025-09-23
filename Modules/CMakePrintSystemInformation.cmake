@@ -1,14 +1,30 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-# file Copyright.txt or https://cmake.org/licensing for details.
+# file LICENSE.rst or https://cmake.org/licensing for details.
 
 #[=======================================================================[.rst:
 CMakePrintSystemInformation
 ---------------------------
 
-Print system information.
+This module can be used for diagnostics to print system information.
 
-This module serves diagnostic purposes. Just include it in a
-project to see various internal CMake variables.
+Examples
+^^^^^^^^
+
+Including this module in a project:
+
+.. code-block:: cmake
+
+  include(CMakePrintSystemInformation)
+
+prints various internal CMake variables.  For example::
+
+  CMAKE_SYSTEM is Linux-6.11.0-17-generic Linux 6.11.0-17-generic x86_64
+  CMAKE_SYSTEM file is Platform/Linux
+  CMAKE_C_COMPILER is /usr/bin/cc
+  CMAKE_CXX_COMPILER is /usr/bin/c++
+  CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS is -shared
+  CMAKE_SHARED_LIBRARY_CREATE_CXX_FLAGS is -shared
+  ...
 #]=======================================================================]
 
 message("CMAKE_SYSTEM is ${CMAKE_SYSTEM} ${CMAKE_SYSTEM_NAME} ${CMAKE_SYSTEM_VERSION} ${CMAKE_SYSTEM_PROCESSOR}")
@@ -22,8 +38,8 @@ message("CMAKE_SHARED_LIBRARY_CREATE_CXX_FLAGS is ${CMAKE_SHARED_LIBRARY_CREATE_
 message("CMAKE_DL_LIBS is ${CMAKE_DL_LIBS}")
 message("CMAKE_SHARED_LIBRARY_PREFIX is ${CMAKE_SHARED_LIBRARY_PREFIX}")
 message("CMAKE_SHARED_LIBRARY_SUFFIX is ${CMAKE_SHARED_LIBRARY_SUFFIX}")
-message("CMAKE_COMPILER_IS_GNUCC = ${CMAKE_COMPILER_IS_GNUCC}")
-message("CMAKE_COMPILER_IS_GNUCXX = ${CMAKE_COMPILER_IS_GNUCXX}")
+message("CMAKE_C_COMPILER_ID = ${CMAKE_C_COMPILER_ID}")
+message("CMAKE_CXX_COMPILER_ID = ${CMAKE_CXX_COMPILER_ID}")
 
 message("CMAKE_CXX_CREATE_SHARED_LIBRARY is ${CMAKE_CXX_CREATE_SHARED_LIBRARY}")
 message("CMAKE_CXX_CREATE_SHARED_MODULE is ${CMAKE_CXX_CREATE_SHARED_MODULE}")

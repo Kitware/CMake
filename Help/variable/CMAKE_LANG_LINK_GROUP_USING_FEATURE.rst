@@ -13,4 +13,4 @@ must be set to true.
 The :variable:`CMAKE_LINK_GROUP_USING_<FEATURE>` variable should be defined
 instead for features that are independent of the link language.
 
-.. include:: CMAKE_LINK_GROUP_USING_FEATURE.txt
+.. include:: include/CMAKE_LINK_GROUP_USING_FEATURE.rst

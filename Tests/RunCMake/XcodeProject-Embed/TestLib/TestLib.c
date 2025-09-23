@@ -1,0 +1,3 @@
+void TestLib(void)
+{
+}

@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmCryptoHash.h"
 
 #include <cassert>
@@ -131,7 +131,7 @@ bool cmCryptoHash::IntFromHexDigit(char input, char& output)
 }
 
 std::string cmCryptoHash::ByteHashToString(
-  const std::vector<unsigned char>& hash)
+  std::vector<unsigned char> const& hash)
 {
   // Map from 4-bit index to hexadecimal representation.
   static char const hex[16] = { '0', '1', '2', '3', '4', '5', '6', '7',
@@ -153,7 +153,7 @@ std::vector<unsigned char> cmCryptoHash::ByteHashString(cm::string_view input)
   return this->Finalize();
 }
 
-std::vector<unsigned char> cmCryptoHash::ByteHashFile(const std::string& file)
+std::vector<unsigned char> cmCryptoHash::ByteHashFile(std::string const& file)
 {
   cmsys::ifstream fin(file.c_str(), std::ios::in | std::ios::binary);
   if (fin) {
@@ -192,7 +192,7 @@ std::string cmCryptoHash::HashString(cm::string_view input)
   return ByteHashToString(this->ByteHashString(input));
 }
 
-std::string cmCryptoHash::HashFile(const std::string& file)
+std::string cmCryptoHash::HashFile(std::string const& file)
 {
   return ByteHashToString(this->ByteHashFile(file));
 }

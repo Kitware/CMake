@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
@@ -29,6 +29,7 @@ public:
   static cmCPackGenerator* CreateTXZGenerator();
   static cmCPackGenerator* CreateTZGenerator();
   static cmCPackGenerator* CreateTZSTGenerator();
+  static cmCPackGenerator* CreateTarGenerator();
   static cmCPackGenerator* CreateZIPGenerator();
 
   /**
@@ -43,8 +44,9 @@ public:
   bool SupportsComponentInstallation() const override;
 
 private:
+  std::string GetArchiveFileName();
   // get archive component filename
-  std::string GetArchiveComponentFileName(const std::string& component,
+  std::string GetArchiveComponentFileName(std::string const& component,
                                           bool isGroupName);
 
   class Deduplicator;
@@ -82,9 +84,9 @@ protected:
   int PackageComponentsAllInOne();
 
 private:
-  const char* GetNameOfClass() override { return "cmCPackArchiveGenerator"; }
+  char const* GetNameOfClass() override { return "cmCPackArchiveGenerator"; }
 
-  const char* GetOutputExtension() override
+  char const* GetOutputExtension() override
   {
     return this->OutputExtension.c_str();
   }

@@ -28,8 +28,10 @@
  * Prototypes for library-wide functions provided by multi.c
  */
 
-CURLcode Curl_updatesocket(struct Curl_easy *data);
 void Curl_expire(struct Curl_easy *data, timediff_t milli, expire_id);
+void Curl_expire_ex(struct Curl_easy *data,
+                    const struct curltime *nowp,
+                    timediff_t milli, expire_id id);
 bool Curl_expire_clear(struct Curl_easy *data);
 void Curl_expire_done(struct Curl_easy *data, expire_id id);
 CURLMcode Curl_update_timer(struct Curl_multi *multi) WARN_UNUSED_RESULT;
@@ -45,9 +47,11 @@ void Curl_multi_connchanged(struct Curl_multi *multi);
 
 /* Internal version of curl_multi_init() accepts size parameters for the
    socket, connection and dns hashes */
-struct Curl_multi *Curl_multi_handle(size_t hashsize,
+struct Curl_multi *Curl_multi_handle(unsigned int xfer_table_size,
+                                     size_t hashsize,
                                      size_t chashsize,
-                                     size_t dnssize);
+                                     size_t dnssize,
+                                     size_t sesssize);
 
 /* the write bits start at bit 16 for the *getsock() bitmap */
 #define GETSOCK_WRITEBITSTART 16
@@ -63,26 +67,13 @@ struct Curl_multi *Curl_multi_handle(size_t hashsize,
 /* mask for checking if read and/or write is set for index x */
 #define GETSOCK_MASK_RW(x) (GETSOCK_READSOCK(x)|GETSOCK_WRITESOCK(x))
 
-/*
- * Curl_multi_closed()
- *
- * Used by the connect code to tell the multi_socket code that one of the
- * sockets we were using is about to be closed. This function will then
- * remove it from the sockethash for this handle to make the multi_socket API
- * behave properly, especially for the case when libcurl will create another
- * socket again and it gets the same file descriptor number.
+/**
+ * Let the multi handle know that the socket is about to be closed.
+ * The multi will then remove anything it knows about the socket, so
+ * when the OS is using this socket (number) again subsequently,
+ * the internal book keeping will not get confused.
  */
-
-void Curl_multi_closed(struct Curl_easy *data, curl_socket_t s);
-
-/* Compare the two pollsets to notify the multi_socket API of changes
- * in socket polling, e.g calling multi->socket_cb() with the changes if
- * differences are seen.
- */
-CURLMcode Curl_multi_pollset_ev(struct Curl_multi *multi,
-                                struct Curl_easy *data,
-                                struct easy_pollset *ps,
-                                struct easy_pollset *last_ps);
+void Curl_multi_will_close(struct Curl_easy *data, curl_socket_t s);
 
 /*
  * Add a handle and move it into PERFORM state at once. For pushed streams.
@@ -94,6 +85,10 @@ CURLMcode Curl_multi_add_perform(struct Curl_multi *multi,
 
 /* Return the value of the CURLMOPT_MAX_CONCURRENT_STREAMS option */
 unsigned int Curl_multi_max_concurrent_streams(struct Curl_multi *multi);
+
+void Curl_multi_getsock(struct Curl_easy *data,
+                        struct easy_pollset *ps,
+                        const char *caller);
 
 /**
  * Borrow the transfer buffer from the multi, suitable
@@ -145,9 +140,37 @@ CURLcode Curl_multi_xfer_ulbuf_borrow(struct Curl_easy *data,
 void Curl_multi_xfer_ulbuf_release(struct Curl_easy *data, char *buf);
 
 /**
- * Get the transfer handle for the given id. Returns NULL if not found.
+ * Borrow the socket scratch buffer from the multi, suitable
+ * for the given transfer `data`. The buffer may only be used for
+ * direct socket I/O operation by one connection at a time and MUST be
+ * returned to the multi before the I/O call returns.
+ * Pointers into the buffer remain only valid as long as it is borrowed.
+ *
+ * @param data    the easy handle
+ * @param blen    requested length of the buffer
+ * @param pbuf    on return, the buffer to use or NULL on error
+ * @return CURLE_OK when buffer is available and is returned.
+ *         CURLE_OUT_OF_MEMORy on failure to allocate the buffer,
+ *         CURLE_FAILED_INIT if the easy handle is without multi.
+ *         CURLE_AGAIN if the buffer is borrowed already.
  */
-struct Curl_easy *Curl_multi_get_handle(struct Curl_multi *multi,
-                                        curl_off_t id);
+CURLcode Curl_multi_xfer_sockbuf_borrow(struct Curl_easy *data,
+                                        size_t blen, char **pbuf);
+/**
+ * Release the borrowed buffer. All references into the buffer become
+ * invalid after this.
+ * @param buf the buffer pointer borrowed for coding error checks.
+ */
+void Curl_multi_xfer_sockbuf_release(struct Curl_easy *data, char *buf);
+
+/**
+ * Get the easy handle for the given mid.
+ * Returns NULL if not found.
+ */
+struct Curl_easy *Curl_multi_get_easy(struct Curl_multi *multi,
+                                      unsigned int mid);
+
+/* Get the # of transfers current in process/pending. */
+unsigned int Curl_multi_xfers_running(struct Curl_multi *multi);
 
 #endif /* HEADER_CURL_MULTIIF_H */

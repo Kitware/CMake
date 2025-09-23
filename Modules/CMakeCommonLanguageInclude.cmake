@@ -1,5 +1,5 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-# file Copyright.txt or https://cmake.org/licensing for details.
+# file LICENSE.rst or https://cmake.org/licensing for details.
 
 
 # this file has flags that are shared across languages and sets
@@ -13,7 +13,7 @@ string(APPEND CMAKE_MODULE_LINKER_FLAGS_INIT " $ENV{LDFLAGS}")
 cmake_initialize_per_config_variable(CMAKE_EXE_LINKER_FLAGS    "Flags used by the linker")
 cmake_initialize_per_config_variable(CMAKE_SHARED_LINKER_FLAGS "Flags used by the linker during the creation of shared libraries")
 cmake_initialize_per_config_variable(CMAKE_MODULE_LINKER_FLAGS "Flags used by the linker during the creation of modules")
-cmake_initialize_per_config_variable(CMAKE_STATIC_LINKER_FLAGS "Flags used by the linker during the creation of static libraries")
+cmake_initialize_per_config_variable(CMAKE_STATIC_LINKER_FLAGS "Flags used by the archiver during the creation of static libraries")
 
 # Alias the build tool variable for backward compatibility.
 set(CMAKE_BUILD_TOOL ${CMAKE_MAKE_PROGRAM})
@@ -99,15 +99,15 @@ macro(_cmake_common_language_platform_flags lang)
   # so unless the variable CMAKE_MODULE_EXISTS is set just
   # copy the values from the LIBRARY variables
   if(NOT CMAKE_MODULE_EXISTS)
-    set(CMAKE_SHARED_MODULE_${lang}_FLAGS ${CMAKE_SHARED_LIBRARY_${lang}_FLAGS})
-    set(CMAKE_SHARED_MODULE_CREATE_${lang}_FLAGS ${CMAKE_SHARED_LIBRARY_CREATE_${lang}_FLAGS})
+    set(CMAKE_SHARED_MODULE_${lang}_FLAGS "${CMAKE_SHARED_LIBRARY_${lang}_FLAGS}")
+    set(CMAKE_SHARED_MODULE_CREATE_${lang}_FLAGS "${CMAKE_SHARED_LIBRARY_CREATE_${lang}_FLAGS}")
   endif()
 
   if(NOT DEFINED CMAKE_SHARED_MODULE_CREATE_${lang}_FLAGS)
-    set(CMAKE_SHARED_MODULE_CREATE_${lang}_FLAGS ${CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS})
+    set(CMAKE_SHARED_MODULE_CREATE_${lang}_FLAGS "${CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS}")
   endif()
   if(NOT DEFINED CMAKE_SHARED_MODULE_${lang}_FLAGS)
-    set(CMAKE_SHARED_MODULE_${lang}_FLAGS ${CMAKE_SHARED_LIBRARY_C_FLAGS})
+    set(CMAKE_SHARED_MODULE_${lang}_FLAGS "${CMAKE_SHARED_LIBRARY_C_FLAGS}")
   endif()
 
   foreach(type IN ITEMS SHARED_LIBRARY SHARED_MODULE EXE)

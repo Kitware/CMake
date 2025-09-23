@@ -1,5 +1,5 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-# file Copyright.txt or https://cmake.org/licensing for details.
+# file LICENSE.rst or https://cmake.org/licensing for details.
 
 
 include(CMakeLanguageInformation)
@@ -18,7 +18,7 @@ endif()
 set(CMAKE_BASE_NAME)
 get_filename_component(CMAKE_BASE_NAME "${CMAKE_Fortran_COMPILER}" NAME_WE)
 # since the gnu compiler has several names force g++
-if(CMAKE_COMPILER_IS_GNUG77)
+if(CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
   set(CMAKE_BASE_NAME g77)
 endif()
 if(CMAKE_Fortran_COMPILER_ID)
@@ -78,6 +78,11 @@ if(NOT CMAKE_Fortran_COMPILER_LAUNCHER AND DEFINED ENV{CMAKE_Fortran_COMPILER_LA
     CACHE STRING "Compiler launcher for Fortran.")
 endif()
 
+if(NOT CMAKE_Fortran_LINKER_LAUNCHER AND DEFINED ENV{CMAKE_Fortran_LINKER_LAUNCHER})
+  set(CMAKE_Fortran_LINKER_LAUNCHER "$ENV{CMAKE_Fortran_LINKER_LAUNCHER}"
+          CACHE STRING "Linker launcher for Fortran.")
+endif()
+
 include(CMakeCommonLanguageInclude)
 _cmake_common_language_platform_flags(Fortran)
 
@@ -90,7 +95,7 @@ _cmake_common_language_platform_flags(Fortran)
 # create a Fortran shared library
 if(NOT CMAKE_Fortran_CREATE_SHARED_LIBRARY)
   set(CMAKE_Fortran_CREATE_SHARED_LIBRARY
-      "<CMAKE_Fortran_COMPILER> <CMAKE_SHARED_LIBRARY_Fortran_FLAGS> <LANGUAGE_COMPILE_FLAGS> <LINK_FLAGS> <CMAKE_SHARED_LIBRARY_CREATE_Fortran_FLAGS> <SONAME_FLAG><TARGET_SONAME> -o <TARGET> <OBJECTS> <LINK_LIBRARIES>")
+      "<CMAKE_Fortran_COMPILER> <CMAKE_SHARED_LIBRARY_Fortran_FLAGS> <LANGUAGE_COMPILE_FLAGS> <LINK_FLAGS> <SONAME_FLAG><TARGET_SONAME> -o <TARGET> <OBJECTS> <LINK_LIBRARIES>")
 endif()
 
 # create a Fortran shared module just copy the shared library rule
@@ -120,7 +125,7 @@ endif()
 # link a fortran program
 if(NOT CMAKE_Fortran_LINK_EXECUTABLE)
   set(CMAKE_Fortran_LINK_EXECUTABLE
-    "<CMAKE_Fortran_COMPILER> <CMAKE_Fortran_LINK_FLAGS> <LINK_FLAGS> <FLAGS> <OBJECTS> -o <TARGET> <LINK_LIBRARIES>")
+    "<CMAKE_Fortran_COMPILER> <LINK_FLAGS> <FLAGS> <OBJECTS> -o <TARGET> <LINK_LIBRARIES>")
 endif()
 
 if(CMAKE_Fortran_STANDARD_LIBRARIES_INIT)

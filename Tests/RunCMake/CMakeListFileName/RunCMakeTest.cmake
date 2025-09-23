@@ -1,0 +1,17 @@
+include(RunCMake)
+
+block()
+  set(RunCMake_TEST_NO_SOURCE_DIR 1)
+  set(source ${RunCMake_SOURCE_DIR}/project)
+  run_cmake_with_options(dont-set-file -S ${source})
+  run_cmake_with_options(set-file-dne -S ${source} --project-file dne.cmake)
+  run_cmake_with_options(set-file-multi -S ${source} --project-file 1 --project-file 2)
+  run_cmake_with_options(set-file-none -S ${source} --project-file)
+
+  set(RunCMake_TEST_NO_CLEAN 1)
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/other)
+  file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
+  run_cmake_with_options(set-file -S ${source} --project-file other.cmake)
+  run_cmake_with_options(remembers-file -S ${source})
+  run_cmake_with_options(cant-change-file -S ${source} --project-file another.cmake)
+endblock()

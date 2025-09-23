@@ -1,5 +1,7 @@
 enable_language(C)
 
+set(CMAKE_AIX_SHARED_LIBRARY_ARCHIVE 0)
+
 set (GENERATE_CONTENT [[
 macro (CHECK_VALUE test_msg value expected)
   if (NOT "${value}" STREQUAL "${expected}")

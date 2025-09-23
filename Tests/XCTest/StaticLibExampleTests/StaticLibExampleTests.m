@@ -8,9 +8,9 @@
 
 @implementation StaticLibExampleTests
 
-- (void)testFourtyFour {
+- (void)testFortyFour {
     // This is an example of a functional test case.
-    XCTAssertEqual(44, FourtyFour());
+    XCTAssertEqual(44, FortyFour());
 }
 
 @end

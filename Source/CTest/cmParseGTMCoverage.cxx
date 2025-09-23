@@ -42,7 +42,7 @@ bool cmParseGTMCoverage::LoadCoverageData(std::string const& d)
   return true;
 }
 
-bool cmParseGTMCoverage::ReadMCovFile(const char* file)
+bool cmParseGTMCoverage::ReadMCovFile(char const* file)
 {
   cmsys::ifstream in(file);
   if (!in) {

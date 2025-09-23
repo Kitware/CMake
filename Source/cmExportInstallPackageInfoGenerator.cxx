@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmExportInstallPackageInfoGenerator.h"
 
 #include <memory>
@@ -15,6 +15,7 @@
 #include "cmInstallExportGenerator.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
+#include "cmPackageInfoArguments.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
@@ -22,14 +23,8 @@
 #include "cmTargetExport.h"
 
 cmExportInstallPackageInfoGenerator::cmExportInstallPackageInfoGenerator(
-  cmInstallExportGenerator* iegen, std::string packageName,
-  std::string version, std::string versionCompat, std::string versionSchema,
-  std::vector<std::string> defaultTargets,
-  std::vector<std::string> defaultConfigurations)
-  : cmExportPackageInfoGenerator(
-      std::move(packageName), std::move(version), std::move(versionCompat),
-      std::move(versionSchema), std::move(defaultTargets),
-      std::move(defaultConfigurations))
+  cmInstallExportGenerator* iegen, cmPackageInfoArguments arguments)
+  : cmExportPackageInfoGenerator(std::move(arguments))
   , cmExportInstallFileGenerator(iegen)
 {
 }
@@ -71,8 +66,8 @@ bool cmExportInstallPackageInfoGenerator::GenerateMainFile(std::ostream& os)
   }
   root["cps_path"] = packagePath;
 
-  bool requiresConfigFiles = false;
   // Create all the imported targets.
+  bool requiresConfigFiles = false;
   for (cmTargetExport const* te : allTargets) {
     cmGeneratorTarget* gt = te->Target;
     cmStateEnums::TargetType targetType = this->GetExportTargetType(te);
@@ -122,7 +117,7 @@ void cmExportInstallPackageInfoGenerator::GenerateImportTargetsConfig(
 {
   Json::Value root;
   root["name"] = this->GetPackageName();
-  root["configuration"] = config;
+  root["configuration"] = (config.empty() ? "noconfig" : config);
 
   Json::Value& components = root["components"];
 
@@ -139,8 +134,11 @@ void cmExportInstallPackageInfoGenerator::GenerateImportTargetsConfig(
     this->PopulateImportProperties(config, suffix, te.get(), properties,
                                    importedLocations);
 
-    this->GenerateInterfaceConfigProperties(components, te->Target, suffix,
-                                            properties);
+    Json::Value component =
+      this->GenerateInterfaceConfigProperties(suffix, properties);
+    if (!component.empty()) {
+      components[te->Target->GetExportName()] = std::move(component);
+    }
   }
 
   this->WritePackageInfo(root, os);

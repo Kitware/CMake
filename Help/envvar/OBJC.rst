@@ -3,7 +3,7 @@ OBJC
 
 .. versionadded:: 3.16.7
 
-.. include:: ENV_VAR.txt
+.. include:: include/ENV_VAR.rst
 
 Preferred executable for compiling ``OBJC`` language files. Will only be used
 by CMake on the first configuration to determine ``OBJC`` compiler, after

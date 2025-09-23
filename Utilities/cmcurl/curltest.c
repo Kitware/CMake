@@ -4,17 +4,17 @@
 #include <stdlib.h>
 #include <string.h>
 
-int test_curl(const char* url)
+int test_curl(char const* url)
 {
   CURL* curl;
   CURLcode r;
   char proxy[1024];
   int proxy_type = 0;
-  const char* env_HTTP_PROXY = getenv("HTTP_PROXY");
+  char const* env_HTTP_PROXY = getenv("HTTP_PROXY");
 
   if (env_HTTP_PROXY) {
-    const char* env_HTTP_PROXY_PORT = getenv("HTTP_PROXY_PORT");
-    const char* env_HTTP_PROXY_TYPE = getenv("HTTP_PROXY_TYPE");
+    char const* env_HTTP_PROXY_PORT = getenv("HTTP_PROXY_PORT");
+    char const* env_HTTP_PROXY_TYPE = getenv("HTTP_PROXY_TYPE");
     proxy_type = 1;
     if (env_HTTP_PROXY_PORT) {
       sprintf(proxy, "%s:%s", env_HTTP_PROXY, env_HTTP_PROXY_PORT);
@@ -69,7 +69,7 @@ int test_curl(const char* url)
   return 0;
 }
 
-int main(int argc, const char* argv[])
+int main(int argc, char const* argv[])
 {
   int r;
   curl_global_init(CURL_GLOBAL_DEFAULT);

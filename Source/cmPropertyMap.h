@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
@@ -25,21 +25,21 @@ public:
   // -- Properties
 
   //! Set the property value
-  void SetProperty(const std::string& name, cmValue value);
-  void SetProperty(const std::string& name, const std::string& value)
+  void SetProperty(std::string const& name, cmValue value);
+  void SetProperty(std::string const& name, std::string const& value)
   {
     this->SetProperty(name, cmValue(value));
   }
 
   //! Append to the property value
-  void AppendProperty(const std::string& name, const std::string& value,
+  void AppendProperty(std::string const& name, std::string const& value,
                       bool asString = false);
 
   //! Get the property value
-  cmValue GetPropertyValue(const std::string& name) const;
+  cmValue GetPropertyValue(std::string const& name) const;
 
   //! Remove the property @a name from the map
-  void RemoveProperty(const std::string& name);
+  void RemoveProperty(std::string const& name);
 
   // -- Lists
 

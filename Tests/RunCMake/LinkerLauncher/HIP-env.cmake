@@ -1,0 +1,1 @@
+include(HIP-common.cmake)

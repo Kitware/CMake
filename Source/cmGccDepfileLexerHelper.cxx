@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmGccDepfileLexerHelper.h"
 
 #include <algorithm>
@@ -17,7 +17,7 @@
 #  include "cmsys/Encoding.h"
 #endif
 
-bool cmGccDepfileLexerHelper::readFile(const char* filePath)
+bool cmGccDepfileLexerHelper::readFile(char const* filePath)
 {
 #ifdef _WIN32
   wchar_t* wpath = cmsysEncoding_DupToWide(filePath);
@@ -84,7 +84,7 @@ void cmGccDepfileLexerHelper::newRuleOrDependency()
   }
 }
 
-void cmGccDepfileLexerHelper::addToCurrentPath(const char* s)
+void cmGccDepfileLexerHelper::addToCurrentPath(char const* s)
 {
   if (this->Content.empty()) {
     return;

@@ -6,7 +6,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(release_compile_defs DEFREL)
 
 #Goal for this example:
-#build a executable that needs to be passed a complex define through add_defintions
+#build a executable that needs to be passed a complex define through add_definitions
 #this verifies we can pass things such as '_','(' to nvcc
 add_definitions("-DPACKED_DEFINE=__attribute__((packed))")
 

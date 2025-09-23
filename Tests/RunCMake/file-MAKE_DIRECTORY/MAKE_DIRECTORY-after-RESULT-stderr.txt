@@ -1,0 +1,8 @@
+^CMake Error at [^
+]*/Tests/RunCMake/file-MAKE_DIRECTORY/MAKE_DIRECTORY-after-RESULT\.cmake:[0-9]+ \(file\):
+  file MAKE_DIRECTORY called with unexpected
+
+  arguments:
+
+    [^
+]*/Tests/RunCMake/file-MAKE_DIRECTORY/MAKE_DIRECTORY-after-RESULT-build/after$

@@ -1,5 +1,5 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-# file Copyright.txt or https://cmake.org/licensing for details.
+# file LICENSE.rst or https://cmake.org/licensing for details.
 
 cmake_minimum_required(VERSION ${CMAKE_VERSION})
 project(FortranCInterface C Fortran)
@@ -39,12 +39,16 @@ set(module_symbols
   my_module_my_sub_       # PGI
   my_module_MP_my_sub     # NAG
   mymodule$mysub          # HP
+  mysub$mymodule_         # Cray
+  my_sub$my_module_       # Cray
   mymodule_mp_mysub_      # Intel
   MYMODULE_mp_MYSUB       # Intel on Windows
   mymodule_mysub_         # PGI
   mymodule_MP_mysub       # NAG
   _QMmy_modulePmy_sub     # LLVMFlang
   _QMmymodulePmysub       # LLVMFlang
+  __module_my_module_my_sub # LFortran
+  __module_mymodule_mysub   # LFortran
   ${FortranCInterface_MODULE_SYMBOLS}
   )
 list(REMOVE_DUPLICATES module_symbols)
@@ -64,14 +68,13 @@ endif()
 
 # Generate C symbol sources.
 set(symbol_sources)
-if(NOT CMAKE_Fortran_COMPILER_ID MATCHES "^(PathScale|Cray)$")
+if(NOT CMAKE_Fortran_COMPILER_ID MATCHES "^(PathScale)$")
   # Provide mymodule_ and my_module_ init symbols because:
   #  - PGI Fortran uses module init symbols
+  #  - Cray Fortran >= 7.3.2 uses module init symbols
   # but not for:
   #  - PathScale Fortran uses module init symbols but module symbols
   #    use '.in.' so we cannot provide them anyway.
-  #  - Cray Fortran >= 7.3.2 uses module init symbols but module symbols
-  #    use 'mysub$mymodule_' so we cannot provide them anyway.
   list(APPEND symbol_sources mymodule_.c my_module_.c MY_MODULE.c MYMODULE.c)
 endif()
 foreach(symbol IN LISTS global_symbols module_symbols)

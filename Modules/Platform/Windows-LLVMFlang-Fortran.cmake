@@ -13,7 +13,7 @@ elseif("x${CMAKE_Fortran_SIMULATE_ID}" STREQUAL "xMSVC")
     set(CMAKE_Fortran_COMPILE_OPTIONS_MSVC_RUNTIME_LIBRARY_MultiThreadedDebugDLL "-fms-runtime-lib=dll_dbg")
   else()
     # LLVMFlang < 18.0 does not have MSVC runtime library selection flags.
-    # The official distrubtion's `Fortran*.lib` runtime libraries hard-code
+    # The official distribution's `Fortran*.lib` runtime libraries hard-code
     # use of msvcrt (MultiThreadedDLL), so we link to it ourselves.
     set(_LLVMFlang_LINK_RUNTIME "-defaultlib:msvcrt")
     set(CMAKE_Fortran_COMPILE_OPTIONS_MSVC_RUNTIME_LIBRARY_MultiThreaded         "")

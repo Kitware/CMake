@@ -13,6 +13,9 @@ export GIT_AUTHOR_NAME='testauthor'
 export GIT_AUTHOR_EMAIL='testauthor@cmake.org'
 export GIT_COMMITTER_NAME='testauthor'
 export GIT_COMMITTER_EMAIL='testauthor@cmake.org'
+export GIT_CONFIG_NOSYSTEM=1
+export GIT_CONFIG_GLOBAL="$tmpdir/.gitconfig"
+git config --global protocol.file.allow always
 
 (
 cd "$tmpdir"
@@ -23,7 +26,7 @@ rm -f gitrepo.git/hooks/*.sample
 mkdir gitrepo
 cd gitrepo
 git init -b "$defaultBranch"
-echo 'cmake_minimum_required(VERSION 3.19)
+echo 'cmake_minimum_required(VERSION 3.31)
 project(Example NONE)
 add_custom_target(example ALL
   COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/example.cmake.in example.cmake
@@ -43,7 +46,7 @@ rm -f gitrepo-sub.git/hooks/*.sample
 mkdir gitrepo-sub
 cd gitrepo-sub
 git init -b "$defaultBranch"
-echo 'cmake_minimum_required(VERSION 3.19)
+echo 'cmake_minimum_required(VERSION 3.31)
 project(ExampleWithSub NONE)
 file(STRINGS "${CMAKE_SOURCE_DIR}/.git/config" git_config_strings
      REGEX "^\\[submodule")

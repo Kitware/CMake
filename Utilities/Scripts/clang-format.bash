@@ -78,7 +78,7 @@ test "$#" = 0 || die "$usage"
 
 # Find a default tool.
 tools='
-  clang-format-15
+  clang-format-18
   clang-format
 '
 if test "x$clang_format" = "x"; then
@@ -96,8 +96,8 @@ if ! type -p "$clang_format" >/dev/null; then
     exit 1
 fi
 
-if ! "$clang_format" --version | grep 'clang-format version 15' >/dev/null 2>/dev/null; then
-    echo "clang-format version 15 is required (exactly)"
+if ! "$clang_format" --version | grep 'clang-format version 18' >/dev/null 2>/dev/null; then
+    echo "clang-format version 18 is required (exactly)"
     exit 1
 fi
 
@@ -116,7 +116,7 @@ $git_ls |
 
   # Select sources with our attribute.
   git check-attr --stdin format.clang-format |
-    sed -n '/: format\.clang-format: \(set\|15\)$/ {s/:[^:]*:[^:]*$//p}'  |
+    sed -n '/: format\.clang-format: \(set\|18\)$/ {s/:[^:]*:[^:]*$//p}'  |
 
   # Update sources in-place.
   xargs -d '\n' "$clang_format" -i

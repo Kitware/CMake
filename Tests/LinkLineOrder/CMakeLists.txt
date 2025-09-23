@@ -1,3 +1,4 @@
+cmake_minimum_required(VERSION 3.10)
 project( LinkLineOrder )
 
 # This tests ensures that the order of libraries are preserved when

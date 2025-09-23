@@ -13,4 +13,4 @@ set(expect
   )
 check_api("^${expect}$")
 
-check_python(MixedStateless)
+check_python(MixedStateless index)

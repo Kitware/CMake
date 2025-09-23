@@ -9,7 +9,7 @@ See documentation on `CMake Development`_ for more information.
 C++ Code Style
 ==============
 
-We use `clang-format`_ version **15** to define our style for C++ code in
+We use `clang-format`_ version **18** to define our style for C++ code in
 the CMake source tree.  See the `.clang-format`_ configuration file for our
 style settings.  Use the `Utilities/Scripts/clang-format.bash`_ script to
 format source code.  It automatically runs ``clang-format`` on the set of
@@ -19,6 +19,36 @@ format only a subset of files, such as those that are locally modified.
 .. _`clang-format`: https://clang.llvm.org/docs/ClangFormat.html
 .. _`.clang-format`: ../../.clang-format
 .. _`Utilities/Scripts/clang-format.bash`: ../../Utilities/Scripts/clang-format.bash
+
+In addition, we have a few coding conventions that we prefer for new code to
+follow (which are not enforced by other tooling):
+
+* Name local variables using ``camelCase``.
+
+* Name class members and free functions using ``PascalCase``.
+
+* Reference class members using ``this->Member``.
+
+* Use east ``const`` style, e.g., ``int const`` instead of ``const int``.
+
+* Declare variables using a locally-specified type:
+
+  .. code-block:: c++
+
+    T x = f();
+
+  Use ``auto`` only if the real type explicitly appears in the initializer:
+
+  .. code-block:: c++
+
+    auto y = cm::make_unique<T>();
+    auto z = []() -> T {...}();
+
+  Exceptions:
+
+  * Iterators: ``auto i = myMap.find(myKey);``
+
+  * Lambdas: ``auto f = []() {...};``
 
 C++ Subset Permitted
 ====================
@@ -190,6 +220,11 @@ Available features are:
 
   * ``<cm/vector>``:
     ``cm::erase``, ``cm::erase_if``, ``cm::ssize``
+
+* From ``C++23``:
+
+  * ``<cm/type_traits>``:
+    ``cm::is_scoped_enum``
 
 Additionally, some useful non-standard extensions to the C++ standard library
 are available in headers under the directory ``cmext/`` in namespace ``cm``.

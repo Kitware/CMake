@@ -26,12 +26,12 @@
  ***************************************************************************/
 
 #if !defined(CURL_DISABLE_AWS) || !defined(CURL_DISABLE_DIGEST_AUTH) \
-    || defined(USE_LIBSSH2)
+    || defined(USE_LIBSSH2) || defined(USE_SSL)
 
 #include <curl/curl.h>
 #include "curl_hmac.h"
 
-extern const struct HMAC_params Curl_HMAC_SHA256[1];
+extern const struct HMAC_params Curl_HMAC_SHA256;
 
 #ifndef CURL_SHA256_DIGEST_LENGTH
 #define CURL_SHA256_DIGEST_LENGTH 32 /* fixed size */

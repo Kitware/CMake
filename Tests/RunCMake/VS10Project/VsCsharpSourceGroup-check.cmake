@@ -11,7 +11,7 @@ include(${RunCMake_TEST_SOURCE_DIR}/VsCsharpSourceGroupHelpers.cmake)
 set(SOURCE_GROUPS_TO_FIND
   "CSharpSourceGroup\\\\foo\\.cs"
   "CSharpSourceGroup\\\\nested\\\\baz\\.cs"
-  "CSharpSourceGroup\\\\images\\\\empty\\.bmp"
+  "Images\\\\empty\\.bmp"
   "VsCsharpSourceGroup\\.png"
   "AssemblyInfo\\.cs"
 )

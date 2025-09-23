@@ -1,0 +1,6 @@
+^CMake Error at [^
+]*/Modules/FindCABLE.cmake:[0-9]+ \(message\):
+  The FindCABLE module has been removed by policy CMP0191\.
+Call Stack \(most recent call first\):
+  CMP0191-NEW-path\.cmake:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)$

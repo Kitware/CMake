@@ -1,38 +1,63 @@
 #!/usr/bin/env python3
 """
-This script inserts "versionadded" directive into every .rst document
-and every .cmake module with .rst documentation comment.
+This script inserts "versionadded" directives into .rst documents found in the
+Help/ directory and module documentation comments found in the Modules/
+directory. It can be run from any directory within the CMake repository.
+
+Each file is assigned a CMake version in which it first appears,
+according to the git version tags.
+
+Options:
+
+  --overwrite     Replace existing "versionadded" directives.
+                  Default: existing directives are left unchanged.
+
+  --baseline      Files present in this tag don't need a version directive.
+                  Default: v3.0.0
+
+  --since         Files present in this tag will be ignored.
+                  Only newer files will be operated on.
+                  Default: v3.0.0
+
+  --next-version  The next CMake version, which hasn't been tagged yet.
+                  Default: extracted from Source/CMakeVersion.cmake
 """
 import re
 import pathlib
 import subprocess
 import argparse
 
-tag_re = re.compile(r'^v3\.(\d+)\.(\d+)(?:-rc(\d+))?$')
+tag_re = re.compile(r'^v[34]\.(\d+)\.(\d+)(?:-rc(\d+))?$')
 path_re = re.compile(r'Help/(?!dev|guide|manual|cpack_|release).*\.rst|Modules/[^/]*\.cmake$')
 
 def git_root():
+    """Return the root of the .git repository from the current directory."""
     result = subprocess.run(
         ['git', 'rev-parse', '--show-toplevel'], check=True, universal_newlines=True, capture_output=True)
     return pathlib.Path(result.stdout.strip())
 
 def git_tags():
+    """Return a list of CMake version tags from the repository."""
     result = subprocess.run(['git', 'tag'], check=True, universal_newlines=True, capture_output=True)
     return [tag for tag in result.stdout.splitlines() if tag_re.match(tag)]
 
 def git_list_tree(ref):
+    """Return a list of help and module files in a given git reference."""
     result = subprocess.run(
         ['git', 'ls-tree', '-r', '--full-name', '--name-only', ref, ':/'],
         check=True, universal_newlines=True, capture_output=True)
     return [path for path in result.stdout.splitlines() if path_re.match(path)]
 
 def tag_version(tag):
+    """Extract a clean CMake version from a git version tag."""
     return re.sub(r'^v|\.0(-rc\d+)?$', '', tag)
 
 def tag_sortkey(tag):
+    """Sorting key for a git version tag."""
     return tuple(int(part or '1000') for part in tag_re.match(tag).groups())
 
 def make_version_map(baseline, since, next_version):
+    """Map repository file paths to CMake versions in which they first appear."""
     versions = {}
     if next_version:
         for path in git_list_tree('HEAD'):
@@ -53,9 +78,10 @@ cmake_version_re = re.compile(
     rb'set\(CMake_VERSION_MAJOR\s+(\d+)\)\s+set\(CMake_VERSION_MINOR\s+(\d+)\)\s+set\(CMake_VERSION_PATCH\s+(\d+)\)', re.S)
 
 def cmake_version(path):
+    """Extract the current MAJOR.MINOR CMake version from CMakeVersion.cmake found at `path`."""
     match = cmake_version_re.search(path.read_bytes())
     major, minor, patch = map(int, match.groups())
-    minor += patch > 20000000
+    minor += patch > 20000000  # nightly version will become the next minor
     return f'{major}.{minor}'
 
 stamp_re = re.compile(
@@ -96,7 +122,7 @@ def main():
     parser = argparse.ArgumentParser(allow_abbrev=False)
     parser.add_argument('--overwrite', action='store_true', help="overwrite existing version tags")
     parser.add_argument('--baseline', metavar='TAG', default='v3.0.0',
-        help="files present in this tag won't be stamped (default: v3.0.0)")
+        help="files present in this tag don't need a version directive (default: v3.0.0)")
     parser.add_argument('--since', metavar='TAG',
         help="apply changes only to files added after this tag")
     parser.add_argument('--next-version', metavar='VER',

@@ -12,5 +12,5 @@ if(NOT LOAD_CACHE_TEST_CACHE_BOOL)
 endif()
 
 if(NOT LOAD_CACHE_TEST_CACHE_INTERNAL STREQUAL "cache internal")
-  message(FATAL_ERROR "CACHE_INTERNAL: was ${CACHE_INTENRAL}, expected \"cache internal\"")
+  message(FATAL_ERROR "CACHE_INTERNAL: was ${CACHE_INTERNAL}, expected \"cache internal\"")
 endif()

@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmCPackCygwinBinaryGenerator.h"
 
 #include "cmsys/SystemTools.hxx"
@@ -55,7 +55,7 @@ int cmCPackCygwinBinaryGenerator::PackageFiles()
   return this->Superclass::PackageFiles();
 }
 
-const char* cmCPackCygwinBinaryGenerator::GetOutputExtension()
+char const* cmCPackCygwinBinaryGenerator::GetOutputExtension()
 {
   this->OutputExtension = "-";
   cmValue patchNumber = this->GetOption("CPACK_CYGWIN_PATCH_NUMBER");

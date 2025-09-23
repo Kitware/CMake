@@ -1,8 +1,5 @@
 include(RunCMake)
 
-# For `if (IN_LIST)`
-cmake_policy(SET CMP0057 NEW)
-
 run_cmake(Inspect)
 include("${RunCMake_BINARY_DIR}/Inspect-build/info.cmake")
 

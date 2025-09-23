@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 
 #pragma once
 
@@ -15,11 +15,11 @@ public:
     cmRuntimeDependencyArchive* archive);
   virtual ~cmBinUtilsWindowsPEGetRuntimeDependenciesTool() = default;
 
-  virtual bool GetFileInfo(const std::string& file,
+  virtual bool GetFileInfo(std::string const& file,
                            std::vector<std::string>& needed) = 0;
 
 protected:
   cmRuntimeDependencyArchive* Archive;
 
-  void SetError(const std::string& error);
+  void SetError(std::string const& error);
 };

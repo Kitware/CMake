@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmAffinity.h"
 
 #include <cm3p/uv.h>
@@ -8,7 +8,7 @@
 #  ifdef _WIN32
 #    define CM_HAVE_CPU_AFFINITY
 #    include <windows.h>
-#  elif defined(__linux__) || defined(__FreeBSD__)
+#  elif (defined(__linux__) && !defined(__ANDROID__)) || defined(__FreeBSD__)
 #    define CM_HAVE_CPU_AFFINITY
 #    include <pthread.h>
 #    include <sched.h>

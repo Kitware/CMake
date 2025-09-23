@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
 #include <QDialog>
@@ -14,17 +14,17 @@ class EnvironmentItemModel : public QStandardItemModel
 {
   Q_OBJECT
 public:
-  EnvironmentItemModel(const QProcessEnvironment& environment,
+  EnvironmentItemModel(QProcessEnvironment const& environment,
                        QObject* parent = nullptr);
 
   QProcessEnvironment environment() const;
   void clear();
 
-  QModelIndex buddy(const QModelIndex& index) const override;
+  QModelIndex buddy(QModelIndex const& index) const override;
 
 public slots:
-  void appendVariable(const QString& key, const QString& value);
-  void insertVariable(int row, const QString& key, const QString& value);
+  void appendVariable(QString const& key, QString const& value);
+  void insertVariable(int row, QString const& key, QString const& value);
 };
 
 class EnvironmentSearchFilter : public QSortFilterProxyModel
@@ -34,7 +34,7 @@ public:
   EnvironmentSearchFilter(QObject* parent = nullptr);
 
 protected:
-  bool filterAcceptsRow(int row, const QModelIndex& parent) const override;
+  bool filterAcceptsRow(int row, QModelIndex const& parent) const override;
 };
 
 class EnvironmentDialog
@@ -43,7 +43,7 @@ class EnvironmentDialog
 {
   Q_OBJECT
 public:
-  EnvironmentDialog(const QProcessEnvironment& environment,
+  EnvironmentDialog(QProcessEnvironment const& environment,
                     QWidget* parent = nullptr);
 
   QProcessEnvironment environment() const;

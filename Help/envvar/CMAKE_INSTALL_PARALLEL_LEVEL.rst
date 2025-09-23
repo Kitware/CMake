@@ -3,7 +3,7 @@ CMAKE_INSTALL_PARALLEL_LEVEL
 
 .. versionadded:: 3.31
 
-.. include:: ENV_VAR.txt
+.. include:: include/ENV_VAR.rst
 
 Specifies the default maximum number of concurrent processes to use when
 installing using ``cmake --install``.

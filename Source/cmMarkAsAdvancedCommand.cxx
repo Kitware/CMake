@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmMarkAsAdvancedCommand.h"
 
 #include "cmExecutionStatus.h"
@@ -23,7 +23,7 @@ bool cmMarkAsAdvancedCommand(std::vector<std::string> const& args,
   }
 
   unsigned int i = 0;
-  const char* value = "1";
+  char const* value = "1";
   bool overwrite = false;
   if (args[0] == "CLEAR" || args[0] == "FORCE") {
     overwrite = true;
@@ -54,8 +54,6 @@ bool cmMarkAsAdvancedCommand(std::vector<std::string> const& args,
         oldBehavior = true;
         break;
       case cmPolicies::NEW:
-      case cmPolicies::REQUIRED_IF_USED:
-      case cmPolicies::REQUIRED_ALWAYS:
         if (!state->GetCacheEntryValue(variable)) {
           ignoreVariable = true;
         }

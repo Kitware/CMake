@@ -11,7 +11,7 @@ class LObject : public QObject
   Q_OBJECT
 public:
   Q_SLOT
-  void aSlot(){};
+  void aSlot() {};
 };
 
 #endif

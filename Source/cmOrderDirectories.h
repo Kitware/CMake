@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
@@ -24,12 +24,12 @@ class cmOrderDirectories
 {
 public:
   cmOrderDirectories(cmGlobalGenerator* gg, cmGeneratorTarget const* target,
-                     const char* purpose);
+                     char const* purpose);
   ~cmOrderDirectories();
-  cmOrderDirectories(const cmOrderDirectories&) = delete;
-  cmOrderDirectories& operator=(const cmOrderDirectories&) = delete;
+  cmOrderDirectories(cmOrderDirectories const&) = delete;
+  cmOrderDirectories& operator=(cmOrderDirectories const&) = delete;
   void AddRuntimeLibrary(std::string const& fullPath,
-                         const char* soname = nullptr);
+                         char const* soname = nullptr);
   void AddLinkLibrary(std::string const& fullPath);
   void AddUserDirectories(std::vector<std::string> const& extra);
   void AddLanguageDirectories(std::vector<std::string> const& dirs);
@@ -54,8 +54,8 @@ private:
   cmsys::RegularExpression RemoveLibraryExtension;
   std::vector<std::string> LinkExtensions;
   std::set<std::string> ImplicitDirectories;
-  std::set<std::string> EmmittedConstraintSOName;
-  std::set<std::string> EmmittedConstraintLibrary;
+  std::set<std::string> EmittedConstraintSOName;
+  std::set<std::string> EmittedConstraintLibrary;
   std::vector<std::string> OriginalDirectories;
   std::map<std::string, int> DirectoryIndex;
   std::vector<int> DirectoryVisited;

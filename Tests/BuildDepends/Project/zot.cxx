@@ -2,9 +2,9 @@
 #include <zot.hxx>
 #include <zot_custom.hxx>
 
-const char* zot_macro_dir_f();
-const char* zot_macro_tgt_f();
-const char* zot_pch_f();
+char const* zot_macro_dir_f();
+char const* zot_macro_tgt_f();
+char const* zot_pch_f();
 
 int main()
 {

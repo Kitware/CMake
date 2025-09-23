@@ -1,0 +1,169 @@
+^
+---
+events:(
+  -
+    kind: "find-v1"(
+    [^
+]*)+|
++  -
+    kind: "message-v1"
+    backtrace:(
+      - "[^"]+")+
+    message: \|(
++      [^
+]*)*)*
+  -
+    kind: "message-v1"
+    backtrace:
+      - "ConfigureLogTransitions.cmake:[0-9]+ \(message\)"
+      - "CMakeLists.txt:[0-9]+ \(include\)"
+    message: |
+      NotDefined -> NotFound
+  -
+    kind: "find-v1"
+    backtrace:
+      - "ConfigureLogTransitions.cmake:[0-9]+ \(find_path\)"
+      - "CMakeLists.txt:[0-9]+ \(include\)"
+    mode: "path"
+    variable: "NOEXIST_FILE"
+    description: "Path to a file."
+    settings:
+      SearchFramework: "(NEVER|FIRST)"
+      SearchAppBundle: "(NEVER|FIRST)"
+      CMAKE_FIND_USE_CMAKE_PATH: true
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "NoExist.h"
+    candidate_directories:
+      - ".*/Tests/RunCMake/find_path/include/"
+      - ".*/Tests/RunCMake/find_path/"(
+      - "[^"]+")+
+    searched_directories:
+      - ".*/Tests/RunCMake/find_path/include/NoExist.h"
+      - ".*/Tests/RunCMake/find_path/NoExist.h"(
+      - "[^"]+")+
+    found: false
+    search_context:(
+      [^
+]*)+
+  -
+    kind: "message-v1"
+    backtrace:
+      - "ConfigureLogTransitions.cmake:[0-9]+ \(find_path\)"
+      - "CMakeLists.txt:[0-9]+ \(include\)"
+    message: |
+      NotFound -> NotFound
+  -
+    kind: "message-v1"
+    backtrace:
+      - "ConfigureLogTransitions.cmake:[0-9]+ \(find_path\)"
+      - "CMakeLists.txt:[0-9]+ \(include\)"
+    message: |
+      NotDefined -> Found
+  -
+    kind: "find-v1"
+    backtrace:
+      - "ConfigureLogTransitions.cmake:[0-9]+ \(find_path\)"
+      - "CMakeLists.txt:[0-9]+ \(include\)"
+    mode: "path"
+    variable: "PREFIX_IN_PATH"
+    description: "Path to a file."
+    settings:
+      SearchFramework: "(NEVER|FIRST)"
+      SearchAppBundle: "(NEVER|FIRST)"
+      CMAKE_FIND_USE_CMAKE_PATH: true
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "PrefixInPATH.h"
+    candidate_directories:
+      - ".*/Tests/RunCMake/find_path/include/"
+      - ".*/Tests/RunCMake/find_path/"(
+      - "[^"]+")+
+    found: ".*/Tests/RunCMake/find_path/include/PrefixInPATH.h"
+    search_context:(
+      [^
+]*)+
+  -
+    kind: "message-v1"
+    backtrace:
+      - "ConfigureLogTransitions.cmake:[0-9]+ \(find_path\)"
+      - "CMakeLists.txt:[0-9]+ \(include\)"
+    message: |
+      Found -> Found
+  -
+    kind: "message-v1"
+    backtrace:
+      - "ConfigureLogTransitions.cmake:[0-9]+ \(find_path\)"
+      - "CMakeLists.txt:[0-9]+ \(include\)"
+    message: |
+      Found -> NotFound
+  -
+    kind: "find-v1"
+    backtrace:
+      - "ConfigureLogTransitions.cmake:[0-9]+ \(find_path\)"
+      - "CMakeLists.txt:[0-9]+ \(include\)"
+    mode: "path"
+    variable: "PREFIX_IN_PATH"
+    description: "Path to a file."
+    settings:
+      SearchFramework: "(NEVER|FIRST)"
+      SearchAppBundle: "(NEVER|FIRST)"
+      CMAKE_FIND_USE_CMAKE_PATH: true
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "PrefixInPATH.h"
+    candidate_directories:
+      - ".*/Tests/RunCMake/find_path/include/"
+      - ".*/Tests/RunCMake/find_path/"(
+      - "[^"]+")+
+    searched_directories:
+      - ".*/Tests/RunCMake/find_path/include/NoExist.h"
+      - ".*/Tests/RunCMake/find_path/NoExist.h"(
+      - "[^"]+")+
+    found: false
+    search_context:(
+      [^
+]*)+
+  -
+    kind: "message-v1"
+    backtrace:
+      - "ConfigureLogTransitions.cmake:[0-9]+ \(find_path\)"
+      - "CMakeLists.txt:[0-9]+ \(include\)"
+    message: |
+      NotFound -> Found
+  -
+    kind: "find-v1"
+    backtrace:
+      - "ConfigureLogTransitions.cmake:[0-9]+ \(find_path\)"
+      - "CMakeLists.txt:[0-9]+ \(include\)"
+    mode: "path"
+    variable: "PREFIX_IN_PATH"
+    description: "Path to a file."
+    settings:
+      SearchFramework: "(NEVER|FIRST)"
+      SearchAppBundle: "(NEVER|FIRST)"
+      CMAKE_FIND_USE_CMAKE_PATH: true
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "PrefixInPATH.h"
+    candidate_directories:
+      - ".*/Tests/RunCMake/find_path/include/"
+      - ".*/Tests/RunCMake/find_path/"(
+      - "[^"]+")+
+    found: ".*/Tests/RunCMake/find_path/include/PrefixInPATH.h"
+    search_context:(
+      [^
+]*)+
+...

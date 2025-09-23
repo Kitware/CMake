@@ -2,7 +2,7 @@
 // vim: set ft=cpp:
 
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
 #include <bitset>
@@ -15,15 +15,28 @@
 #include <cm/type_traits>
 
 //
-// Class enum_set offers the capability to manage a set of enum values
-// Only 'enum class' with unsigned base type are supported.
+// Class enum_set offers the capability to manage a set of enum values.
+// Only the 'enum class' type with unsigned base type is supported. Moreover,
+// all definitions must be specified without a value.
 //
 // The methods offered by 'enum_set' are close as possible to the 'std::set'
-// container plus some useful methods from 'std::bitset' like 'flip'.
+// container as well as the methods from 'std::bitset'.
 //
 // Internally, this class use 'std::bitset' container to manage the
-// set of enum. The size of the bitset is deduced from the underlying type of
-// the enum.
+// set of enum.
+//
+// The size of the bitset is deduced from the underlying type of
+// the enum or can be set explicitly as template parameter:
+//
+// enum class Example : unsigned { A, B, C, D };
+// using ExampleSet = enum_set<Example, 4>;
+//
+// To facilitate the usage of the enum_set, operators '+' and '|' can be used
+// as alternate to the 'initializer_list':
+//
+//  auto set1 = Example::A | Example::B | Example::C;
+//  auto set2 = Example::A + Example::B;
+//  set2.set(Example::C | Example::D);
 //
 
 namespace cm {
@@ -33,7 +46,7 @@ class enum_set_iterator
 {
 public:
   enum_set_iterator() = default;
-  enum_set_iterator(const enum_set_iterator& other) = default;
+  enum_set_iterator(enum_set_iterator const& other) = default;
 
   using iterator_category = std::bidirectional_iterator_tag;
   using value_type = typename EnumSet::value_type;
@@ -111,32 +124,51 @@ private:
 
 template <
   typename Enum,
+  std::size_t Size =
+    std::numeric_limits<typename std::underlying_type<Enum>::type>::digits,
   typename cm::enable_if_t<
-    std::is_enum<Enum>::value &&
+    cm::is_scoped_enum<Enum>::value &&
       std::is_unsigned<typename std::underlying_type<Enum>::type>::value,
     int> = 0>
 class enum_set
 {
 public:
+  static constexpr std::size_t set_size = Size;
+
   using key_type = Enum;
   using value_type = Enum;
   using size_type = typename std::underlying_type<Enum>::type;
   using difference_type = size_type;
   using reference = Enum;
   using const_reference = Enum;
-  using pointer = const Enum*;
-  using const_pointer = const Enum*;
+  using pointer = Enum const*;
+  using const_pointer = Enum const*;
 
   using iterator = enum_set_iterator<enum_set>;
-  using const_iterator = enum_set_iterator<const enum_set>;
+  using const_iterator = enum_set_iterator<enum_set const>;
   using reverse_iterator = std::reverse_iterator<iterator>;
   using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
-  constexpr enum_set() noexcept = default;
-  enum_set(const enum_set& other) noexcept { this->insert(other); }
+  constexpr enum_set() noexcept {}
+  enum_set(key_type e) { this->insert(e); }
+  enum_set(enum_set const& other) noexcept { this->insert(other); }
+  template <typename E,
+            typename cm::enable_if_t<std::is_same<Enum, E>::value, int> = 0>
+  enum_set(enum_set<E> const& other) noexcept
+  {
+    static_assert(Size < enum_set<E>::set_size, "Incompatible sizes");
+
+    this->insert(other.cbegin(), other.cend());
+  }
   enum_set(std::initializer_list<value_type> list) { this->insert(list); }
 
-  enum_set& operator=(const enum_set& other) noexcept
+  enum_set& operator=(key_type e)
+  {
+    this->Set.reset();
+    this->insert(e);
+    return *this;
+  }
+  enum_set& operator=(enum_set const& other) noexcept
   {
     this->Set.reset();
     this->Set |= other.Set;
@@ -186,41 +218,116 @@ public:
   size_type max_size() const noexcept { return this->Set.size(); }
 
   // Modifiers
-  void clear() noexcept { this->Set.reset(); }
 
-  enum_set& operator+=(key_type e)
+  // set all elements
+  enum_set& set()
+  {
+    this->Set.set();
+    return *this;
+  }
+  enum_set& set(key_type e)
   {
     this->insert(e);
     return *this;
   }
-  enum_set& operator+=(const enum_set& other) noexcept
+  enum_set& set(enum_set const& other) noexcept
   {
-    this->erase(other);
+    this->insert(other);
     return *this;
   }
-  enum_set& operator+=(std::initializer_list<value_type> list)
+  enum_set& set(std::initializer_list<value_type> list)
   {
     this->insert(list);
     return *this;
   }
+  // alternate syntax for bit set
+  enum_set& operator+=(key_type e) { return this->set(e); }
+  enum_set& operator+=(enum_set const& other) noexcept
+  {
+    return this->set(other);
+  }
+  enum_set& operator+=(std::initializer_list<value_type> list)
+  {
+    return this->set(list);
+  }
+  // alternate syntax for bit set
+  enum_set& operator|=(key_type e) { return this->set(e); }
+  enum_set& operator|=(enum_set const& other) noexcept
+  {
+    return this->set(other);
+  }
+  enum_set& operator|=(std::initializer_list<value_type> list)
+  {
+    return this->set(list);
+  }
 
-  enum_set& operator-=(key_type e)
+  // reset all elements
+  void clear() noexcept { this->Set.reset(); }
+  enum_set& reset()
+  {
+    this->Set.reset();
+    return *this;
+  }
+  enum_set& reset(key_type e)
   {
     this->erase(e);
     return *this;
   }
-  enum_set& operator-=(const enum_set& other) noexcept
+  enum_set& reset(enum_set const& other) noexcept
   {
     this->erase(other);
     return *this;
   }
-  enum_set& operator-=(std::initializer_list<value_type> list)
+  enum_set& reset(std::initializer_list<value_type> list)
   {
     this->erase(list);
     return *this;
   }
+  // alternate syntax for bit reset
+  enum_set& operator-=(key_type e) { return this->reset(e); }
+  enum_set& operator-=(enum_set const& other) noexcept
+  {
+    return this->reset(other);
+  }
+  enum_set& operator-=(std::initializer_list<value_type> list)
+  {
+    return this->reset(list);
+  }
 
-  std::pair<iterator, bool> insert(value_type value)
+  // toggle the specified enum
+  enum_set& flip(key_type e)
+  {
+    this->Set.flip(static_cast<size_type>(e));
+    return *this;
+  }
+  // toggle all the enums stored in the other enum_set
+  enum_set& flip(enum_set const& other) noexcept
+  {
+    this->Set ^= other.Set;
+    return *this;
+  }
+  // toggle all the enums specified in the list
+  enum_set& flip(std::initializer_list<value_type> list)
+  {
+    for (auto e : list) {
+      this->Set.flip(static_cast<size_type>(e));
+    }
+    return *this;
+  }
+  // alternate syntax for bit toggle
+  enum_set& operator^=(key_type key) { return this->flip(key); }
+  // toggle all the enums stored in the other enum_set
+  enum_set& operator^=(enum_set const& other) noexcept
+  {
+    return this->flip(other);
+  }
+  // toggle all the enums specified in the list
+  enum_set& operator^=(std::initializer_list<value_type> list)
+  {
+    return this->flip(list);
+  }
+
+  std::pair<iterator, bool> insert(key_type value)
   {
     auto exist = this->contains(value);
     if (!exist) {
@@ -236,7 +343,7 @@ public:
       this->insert(*i);
     }
   }
-  void insert(const enum_set& other) noexcept { this->Set |= other.Set; }
+  void insert(enum_set const& other) noexcept { this->Set |= other.Set; }
   void insert(std::initializer_list<value_type> list)
   {
     for (auto e : list) {
@@ -265,7 +372,7 @@ public:
     return pos == this->cend() ? this->end()
                                : iterator(this, static_cast<size_type>(*pos));
   }
-  void erase(const enum_set& other) noexcept { this->Set &= ~other.Set; }
+  void erase(enum_set const& other) noexcept { this->Set &= ~other.Set; }
   void erase(std::initializer_list<value_type> list)
   {
     for (auto e : list) {
@@ -278,18 +385,6 @@ public:
     auto tmp = this->Set;
     this->Set = other.Set;
     other.Set = tmp;
-  }
-
-  // toggle the specified enum
-  void flip(key_type key) { this->Set.flip(static_cast<size_type>(key)); }
-  // toggle all the enums stored in the other enum_set
-  void flip(const enum_set& other) noexcept { this->Set ^= other.Set; }
-  // toggle all the enums specified in the list
-  void flip(std::initializer_list<value_type> list)
-  {
-    for (auto e : list) {
-      this->Set.flip(static_cast<size_type>(e));
-    }
   }
 
   // Lookup
@@ -310,86 +405,152 @@ public:
     return this->end();
   }
 
+  // Checks
   bool contains(key_type e) const
   {
     return this->Set.test(static_cast<size_type>(e));
   }
 
-private:
-  template <typename E>
-  friend inline bool operator==(const enum_set<E>& lhs,
-                                const enum_set<E>& rhs) noexcept;
+  bool all() const { return this->Set.all(); }
+  bool any() const { return this->Set.any(); }
+  bool none() const { return this->Set.none(); }
+  // alternate syntax to none()
+  bool operator!() const { return this->Set.none(); }
 
-  template <typename E, typename Predicate>
-  friend inline void erase_if(enum_set<E>& set, Predicate pred);
+  bool all_of(enum_set const& set) const
+  {
+    auto result = set;
+    result.Set &= this->Set;
+    return result == set;
+  }
+  bool any_of(enum_set const& set) const
+  {
+    auto result = set;
+    result.Set &= this->Set;
+    return result.any();
+  }
+  bool none_of(enum_set const& set) const
+  {
+    auto result = set;
+    result.Set &= this->Set;
+    return result.none();
+  }
+
+private:
+  template <typename E, std::size_t S>
+  friend inline bool operator==(enum_set<E, S> const& lhs,
+                                enum_set<E, S> const& rhs) noexcept;
+
+  template <typename E, std::size_t S, typename Predicate>
+  friend inline void erase_if(enum_set<E, S>& set, Predicate pred);
 
   friend class enum_set_iterator<enum_set>;
-  friend class enum_set_iterator<const enum_set>;
+  friend class enum_set_iterator<enum_set const>;
 
   bool test(size_type pos) const { return this->Set.test(pos); }
 
-  std::bitset<std::numeric_limits<size_type>::digits> Set;
+  std::bitset<Size> Set;
 };
 
 // non-member functions for enum_set
-template <typename Enum>
-inline enum_set<Enum> operator+(const enum_set<Enum>& lhs, Enum rhs)
+template <typename Enum, std::size_t Size>
+inline enum_set<Enum, Size> operator+(enum_set<Enum, Size> const& lhs,
+                                      Enum rhs)
 {
-  return enum_set<Enum>(lhs) += rhs;
+  return enum_set<Enum, Size>{ lhs } += rhs;
 }
-template <typename Enum>
-inline enum_set<Enum> operator+(const enum_set<Enum>& lhs,
-                                const enum_set<Enum>& rhs) noexcept
+template <typename Enum, std::size_t Size>
+inline enum_set<Enum, Size> operator+(enum_set<Enum, Size> const& lhs,
+                                      enum_set<Enum, Size> const& rhs) noexcept
 {
-  return enum_set<Enum>(lhs) += rhs;
+  return enum_set<Enum, Size>{ lhs } += rhs;
 }
-template <typename Enum>
-inline enum_set<Enum> operator+(const enum_set<Enum>& lhs,
-                                const std::initializer_list<Enum> rhs)
+template <typename Enum, std::size_t Size>
+inline enum_set<Enum, Size> operator+(enum_set<Enum, Size> const& lhs,
+                                      std::initializer_list<Enum> const rhs)
 {
-  return enum_set<Enum>(lhs) += rhs;
-}
-
-template <typename Enum>
-inline enum_set<Enum> operator-(const enum_set<Enum>& lhs, Enum rhs)
-{
-  return enum_set<Enum>(lhs) -= rhs;
-}
-template <typename Enum>
-inline enum_set<Enum> operator-(const enum_set<Enum>& lhs,
-                                const enum_set<Enum>& rhs) noexcept
-{
-  return enum_set<Enum>(lhs) -= rhs;
-}
-template <typename Enum>
-inline enum_set<Enum> operator-(const enum_set<Enum>& lhs,
-                                const std::initializer_list<Enum> rhs)
-{
-  return enum_set<Enum>(lhs) -= rhs;
+  return enum_set<Enum, Size>{ lhs } += rhs;
 }
 
-template <typename Enum>
-inline bool operator==(const enum_set<Enum>& lhs,
-                       const enum_set<Enum>& rhs) noexcept
+template <typename Enum, std::size_t Size>
+inline cm::enum_set<Enum, Size> operator|(cm::enum_set<Enum, Size> const& lhs,
+                                          Enum rhs)
+{
+  return enum_set<Enum, Size>{ lhs } |= rhs;
+}
+template <typename Enum, std::size_t Size>
+inline cm::enum_set<Enum, Size> operator|(Enum lhs,
+                                          cm::enum_set<Enum, Size> const& rhs)
+{
+  return enum_set<Enum, Size>{ lhs } |= rhs;
+}
+template <typename Enum, std::size_t Size>
+inline cm::enum_set<Enum, Size> operator|(cm::enum_set<Enum, Size> const& lhs,
+                                          cm::enum_set<Enum, Size> const& rhs)
+{
+  return enum_set<Enum, Size>{ lhs } |= rhs;
+}
+
+template <typename Enum, std::size_t Size>
+inline enum_set<Enum, Size> operator-(enum_set<Enum, Size> const& lhs,
+                                      Enum rhs)
+{
+  return enum_set<Enum, Size>{ lhs } -= rhs;
+}
+template <typename Enum, std::size_t Size>
+inline enum_set<Enum, Size> operator-(enum_set<Enum, Size> const& lhs,
+                                      enum_set<Enum, Size> const& rhs) noexcept
+{
+  return enum_set<Enum, Size>{ lhs } -= rhs;
+}
+template <typename Enum, std::size_t Size>
+inline enum_set<Enum, Size> operator-(enum_set<Enum, Size> const& lhs,
+                                      std::initializer_list<Enum> const rhs)
+{
+  return enum_set<Enum, Size>{ lhs } -= rhs;
+}
+
+template <typename Enum, std::size_t Size>
+inline enum_set<Enum, Size> operator^(enum_set<Enum, Size> const& lhs,
+                                      Enum rhs)
+{
+  return enum_set<Enum, Size>{ lhs } ^= rhs;
+}
+template <typename Enum, std::size_t Size>
+inline enum_set<Enum, Size> operator^(enum_set<Enum, Size> const& lhs,
+                                      enum_set<Enum, Size> const& rhs) noexcept
+{
+  return enum_set<Enum, Size>{ lhs } ^= rhs;
+}
+template <typename Enum, std::size_t Size>
+inline enum_set<Enum, Size> operator^(enum_set<Enum, Size> const& lhs,
+                                      std::initializer_list<Enum> const rhs)
+{
+  return enum_set<Enum, Size>{ lhs } ^= rhs;
+}
+
+template <typename Enum, std::size_t Size>
+inline bool operator==(enum_set<Enum, Size> const& lhs,
+                       enum_set<Enum, Size> const& rhs) noexcept
 {
   return lhs.Set == rhs.Set;
 }
 
-template <typename Enum>
-inline bool operator!=(const enum_set<Enum>& lhs,
-                       const enum_set<Enum>& rhs) noexcept
+template <typename Enum, std::size_t Size>
+inline bool operator!=(enum_set<Enum, Size> const& lhs,
+                       enum_set<Enum, Size> const& rhs) noexcept
 {
   return !(lhs == rhs);
 }
 
-template <typename Enum>
-inline void erase(enum_set<Enum>& set, Enum value)
+template <typename Enum, std::size_t Size>
+inline void erase(enum_set<Enum, Size>& set, Enum value)
 {
   set.erase(value);
 }
 
-template <typename Enum, typename Predicate>
-inline void erase_if(enum_set<Enum>& set, Predicate pred)
+template <typename Enum, std::size_t Size, typename Predicate>
+inline void erase_if(enum_set<Enum, Size>& set, Predicate pred)
 {
   for (std::size_t index = 0; index < set.Set.size(); ++index) {
     if (set.Set.test(index) && pred(static_cast<Enum>(index))) {
@@ -398,3 +559,81 @@ inline void erase_if(enum_set<Enum>& set, Predicate pred)
   }
 }
 } // namespace cm
+
+//
+// WARNING: the following two operators rely on the enum_set_traits<Enum>
+// struct definition.
+// The macro CM_ENUM_SET_TRAITS(EnumSet) can be used to define this structure.
+//
+// Notes:
+// When CM_ENUM_SET_TRAITS is used, the following restrictions applies:
+//   * Due to language constraints, the enum_set_traits specialization must
+//     occur outside of any namespace or function definition.
+//   * Only one enum_set instantiation is supported per enum class type.
+//
+
+template <typename Enum>
+struct cm_enum_set_traits
+{
+};
+
+namespace cm {
+template <typename Enum, typename = cm::void_t<>>
+struct is_enum_set : std::false_type
+{
+};
+template <typename Enum>
+struct is_enum_set<Enum, cm::void_t<typename cm_enum_set_traits<Enum>::type>>
+  : std::true_type
+{
+};
+}
+
+#if defined(__SUNPRO_CC) && defined(__sparc)
+// Oracle DeveloperStudio C++ compiler on Solaris/Sparc crash on the following
+// template declarations, so declare explicitly the operators.
+
+// Helper macro to define the enum_set_traits struct specialization.
+#  define CM_ENUM_SET_TRAITS(E)                                               \
+    template <>                                                               \
+    struct cm_enum_set_traits<E::value_type>                                  \
+    {                                                                         \
+      using type = E;                                                         \
+      using value_type = E::value_type;                                       \
+    };                                                                        \
+                                                                              \
+    inline E operator+(E::value_type lhs, E::value_type rhs)                  \
+    {                                                                         \
+      return { lhs, rhs };                                                    \
+    }                                                                         \
+                                                                              \
+    inline E operator|(E::value_type lhs, E::value_type rhs)                  \
+    {                                                                         \
+      return { lhs, rhs };                                                    \
+    }
+
+#else
+
+// Helper macro to define the enum_set_traits struct specialization.
+#  define CM_ENUM_SET_TRAITS(E)                                               \
+    template <>                                                               \
+    struct cm_enum_set_traits<E::value_type>                                  \
+    {                                                                         \
+      using type = E;                                                         \
+      using value_type = E::value_type;                                       \
+    };
+
+template <typename Enum,
+          typename cm::enable_if_t<cm::is_enum_set<Enum>::value, int> = 0>
+inline typename cm_enum_set_traits<Enum>::type operator+(Enum lhs, Enum rhs)
+{
+  return { lhs, rhs };
+}
+// Alternate syntax
+template <typename Enum,
+          typename cm::enable_if_t<cm::is_enum_set<Enum>::value, int> = 0>
+inline typename cm_enum_set_traits<Enum>::type operator|(Enum lhs, Enum rhs)
+{
+  return { lhs, rhs };
+}
+#endif

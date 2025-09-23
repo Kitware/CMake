@@ -25,7 +25,7 @@ language syntax may require escapes to specify some values).
   Any leading ``-D`` on an item will be removed.
 
 .. |command_name| replace:: ``add_compile_definitions``
-.. include:: GENEX_NOTE.txt
+.. include:: include/GENEX_NOTE.rst
 
 See Also
 ^^^^^^^^

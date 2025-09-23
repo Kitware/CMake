@@ -1,0 +1,36 @@
+---
+id: cmstrcat-to-char-literal
+language: Cpp
+severity: warning
+message: "`cmStrCat` string literal arguments which can be char literals should be"
+rule:
+  kind: string_literal
+  pattern: $ARG
+  follows:
+    regex: '(,|[(])'
+  precedes:
+    regex: '(,|[)])'
+  inside:
+    matches: cmstrcat-call
+    stopBy:
+      kind: call_expression
+constraints:
+  ARG:
+    regex: '^"(.|\\.)"$'
+transform:
+  ARG_CHANGE_QUOTE:
+    replace:
+      source: $ARG
+      replace: '(^"|"$)'
+      by: "'"
+  ARG_ESCAPE_SINGLE_QUOTE:
+    replace:
+      source: $ARG_CHANGE_QUOTE
+      replace: "'''"
+      by: "'\\''"
+  ARG_OUT:
+    replace:
+      source: $ARG_ESCAPE_SINGLE_QUOTE
+      replace: '\\"'
+      by: '"'
+fix: $ARG_OUT

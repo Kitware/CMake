@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 
 #include <stdexcept>
 #include <string>
@@ -573,7 +573,7 @@ bool testFilter()
       if (list.size() != 1) {
         result = false;
       }
-    } catch (const std::invalid_argument&) {
+    } catch (std::invalid_argument const&) {
     }
   }
 
@@ -740,7 +740,7 @@ bool testTransform()
     cmList list({ "ABC", "BBCB", "BCCCBC", "BCBCDD", "EBCBCEBC" });
 
     list.transform(cmList::TransformAction::REPLACE, "^BC|BC$", "X");
-    if (list.to_string() != "AX;BBCB;XCCX;XXDD;EBCBCEX") {
+    if (list.to_string() != "AX;BBCB;XCCX;XBCDD;EBCBCEX") {
       result = false;
     }
   }

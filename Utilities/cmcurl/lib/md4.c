@@ -30,7 +30,7 @@
 
 #include "strdup.h"
 #include "curl_md4.h"
-#include "warnless.h"
+#include "curlx/warnless.h"
 
 #ifdef USE_OPENSSL
 #include <openssl/opensslv.h>
@@ -115,6 +115,13 @@ static void MD4_Final(unsigned char *result, MD4_CTX *ctx)
 
 #elif defined(USE_WOLFSSL) && !defined(WOLFSSL_NO_MD4)
 
+#ifdef OPENSSL_COEXIST
+  #define MD4_CTX WOLFSSL_MD4_CTX
+  #define MD4_Init wolfSSL_MD4_Init
+  #define MD4_Update wolfSSL_MD4_Update
+  #define MD4_Final wolfSSL_MD4_Final
+#endif
+
 #elif defined(USE_OPENSSL) && !defined(OPENSSL_NO_MD4)
 
 #elif defined(AN_APPLE_OS)
@@ -163,7 +170,12 @@ static int MD4_Init(MD4_CTX *ctx)
 
 static void MD4_Update(MD4_CTX *ctx, const void *data, unsigned long size)
 {
-  CryptHashData(ctx->hHash, (BYTE *)data, (unsigned int) size, 0);
+#ifdef __MINGW32CE__
+  CryptHashData(ctx->hHash, (BYTE *)CURL_UNCONST(data),
+                (unsigned int) size, 0);
+#else
+  CryptHashData(ctx->hHash, (const BYTE *)data, (unsigned int) size, 0);
+#endif
 }
 
 static void MD4_Final(unsigned char *result, MD4_CTX *ctx)
@@ -301,16 +313,16 @@ static void MD4_Final(unsigned char *result, MD4_CTX *ctx);
  */
 #if defined(__i386__) || defined(__x86_64__) || defined(__vax__)
 #define MD4_SET(n) \
-        (*(MD4_u32plus *)(void *)&ptr[(n) * 4])
+        (*(const MD4_u32plus *)(const void *)&ptr[(n) * 4])
 #define MD4_GET(n) \
         MD4_SET(n)
 #else
 #define MD4_SET(n) \
         (ctx->block[(n)] = \
-        (MD4_u32plus)ptr[(n) * 4] | \
-        ((MD4_u32plus)ptr[(n) * 4 + 1] << 8) | \
-        ((MD4_u32plus)ptr[(n) * 4 + 2] << 16) | \
-        ((MD4_u32plus)ptr[(n) * 4 + 3] << 24))
+          (MD4_u32plus)ptr[(n) * 4] | \
+          ((MD4_u32plus)ptr[(n) * 4 + 1] << 8) | \
+          ((MD4_u32plus)ptr[(n) * 4 + 2] << 16) | \
+          ((MD4_u32plus)ptr[(n) * 4 + 3] << 24))
 #define MD4_GET(n) \
         (ctx->block[(n)])
 #endif

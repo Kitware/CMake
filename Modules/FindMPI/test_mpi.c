@@ -7,7 +7,7 @@
 #endif
 
 #if defined(MPI_VERSION) && defined(MPI_SUBVERSION)
-static const char mpiver_str[] = { 'I', 'N',
+static char const mpiver_str[] = { 'I', 'N',
                                    'F', 'O',
                                    ':', 'M',
                                    'P', 'I',

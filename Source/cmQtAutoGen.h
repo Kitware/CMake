@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
@@ -127,10 +127,10 @@ public:
     RccLister(std::string rccExecutable, std::vector<std::string> listOptions);
 
     //! The rcc executable
-    std::string const& RccExcutable() const { return this->RccExcutable_; }
+    std::string const& RccExecutable() const { return this->RccExecutable_; }
     void SetRccExecutable(std::string const& rccExecutable)
     {
-      this->RccExcutable_ = rccExecutable;
+      this->RccExecutable_ = rccExecutable;
     }
 
     //! The rcc executable list options
@@ -152,7 +152,7 @@ public:
               std::string& error, bool verbose = false) const;
 
   private:
-    std::string RccExcutable_;
+    std::string RccExecutable_;
     std::vector<std::string> ListOptions_;
   };
 };

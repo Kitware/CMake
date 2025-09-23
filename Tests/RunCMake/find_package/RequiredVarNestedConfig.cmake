@@ -1,0 +1,8 @@
+if (CMAKE_FIND_REQUIRED)
+  message(FATAL_ERROR "CMAKE_FIND_REQUIRED enabled in Config.cmake")
+endif()
+find_package(DoesNotExist)
+find_library(library DoesNotExist)
+find_program(program DoesNotExist)
+find_path(path DoesNotExist)
+find_file(file DoesNotExist)

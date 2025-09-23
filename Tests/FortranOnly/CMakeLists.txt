@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.10...3.25) # Enable CMP0091 and CMP0141.
+cmake_policy(SET CMP0184 NEW)
 project(FortranOnly Fortran)
 message("CTEST_FULL_OUTPUT ")
 
@@ -62,7 +63,7 @@ add_dependencies(checksayhello sayhello)
 
 include(CheckFortranSourceCompiles)
 unset(HAVE_PRINT CACHE)
-CHECK_Fortran_SOURCE_COMPILES([[
+check_fortran_source_compiles([[
       PROGRAM TEST_HAVE_PRINT
         PRINT *, 'Hello'
       END
@@ -92,7 +93,7 @@ endif()
 
 unset(Fortran_BOGUS_FLAG CACHE)
 include(CheckFortranCompilerFlag)
-CHECK_Fortran_COMPILER_FLAG(-_this_is_not_a_flag_ Fortran_BOGUS_FLAG)
+check_fortran_compiler_flag(-_this_is_not_a_flag_ Fortran_BOGUS_FLAG)
 if (Fortran_BOGUS_FLAG)
   message(SEND_ERROR "CHECK_Fortran_COMPILER_FLAG() succeeded, but should have failed")
 endif()

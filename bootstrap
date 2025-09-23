@@ -1,6 +1,6 @@
 #!/bin/sh
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-# file Copyright.txt or https://cmake.org/licensing for details.
+# file LICENSE.rst or https://cmake.org/licensing for details.
 
 die() {
   echo "$@" 1>&2 ; exit 1
@@ -64,7 +64,8 @@ if test "$cmake_version_rc" != ""; then
   cmake_version="${cmake_version}-rc${cmake_version_rc}"
 fi
 
-cmake_copyright="`grep '^Copyright .* Kitware' "${cmake_source_dir}/Copyright.txt"`"
+cmake_copyright="`grep '^Copyright .* Kitware' "${cmake_source_dir}/LICENSE.rst" |
+                  sed 's/\`Contributors.*\`_/Contributors/'`"
 
 cmake_bin_dir_keyword="OTHER"
 cmake_data_dir_keyword="OTHER"
@@ -315,15 +316,12 @@ CMAKE_CXX_SOURCES="\
   cmCMakePolicyCommand \
   cmCPackPropertiesGenerator \
   cmCacheManager \
-  cmCommand \
-  cmCommandArgumentParserHelper \
   cmCommands \
   cmCommonTargetGenerator \
   cmComputeComponentGraph \
   cmComputeLinkDepends \
   cmComputeLinkInformation \
   cmComputeTargetDepends \
-  cmConsoleBuf \
   cmConditionEvaluator \
   cmConfigureFileCommand \
   cmContinueCommand \
@@ -459,6 +457,7 @@ CMAKE_CXX_SOURCES="\
   cmOutputConverter \
   cmParseArgumentsCommand \
   cmPathLabel \
+  cmPathResolver \
   cmPolicies \
   cmProcessOutput \
   cmProjectCommand \
@@ -468,6 +467,7 @@ CMAKE_CXX_SOURCES="\
   cmGccDepfileLexerHelper \
   cmGccDepfileReader \
   cmReturnCommand \
+  cmPackageInfoReader \
   cmPlaceholderExpander \
   cmPlistParser \
   cmRulePlaceholderExpander \
@@ -488,6 +488,10 @@ CMAKE_CXX_SOURCES="\
   cmState \
   cmStateDirectory \
   cmStateSnapshot \
+  cmStdIoConsole \
+  cmStdIoInit \
+  cmStdIoStream \
+  cmStdIoTerminal \
   cmString \
   cmStringAlgorithms \
   cmStringReplaceHelper \
@@ -542,6 +546,10 @@ if ${cmake_system_mingw}; then
   "
 fi
 
+CMAKE_C_SOURCES="\
+  cm_utf8 \
+"
+
 CMAKE_STD_CXX_HEADERS="\
   filesystem \
   memory \
@@ -556,8 +564,6 @@ CMAKE_STD_CXX_SOURCES="\
 "
 
 LexerParser_CXX_SOURCES="\
-  cmCommandArgumentLexer \
-  cmCommandArgumentParser \
   cmExprLexer \
   cmExprParser \
   cmGccDepfileLexer \
@@ -573,14 +579,14 @@ if ${cmake_system_mingw}; then
     ProcessWin32 \
     String \
     System \
-    Terminal"
+  "
 else
   KWSYS_C_SOURCES="\
     EncodingC \
     ProcessUNIX \
     String \
     System \
-    Terminal"
+  "
 fi
 
 KWSYS_CXX_SOURCES="\
@@ -604,7 +610,7 @@ KWSYS_FILES="\
   String.h \
   System.h \
   SystemTools.hxx \
-  Terminal.h"
+  "
 
 LIBRHASH_C_SOURCES="\
   librhash/algorithms.c \
@@ -842,9 +848,7 @@ cmake_kwsys_config_replace_string ()
               s/@KWSYS_LFS_AVAILABLE@/${KWSYS_LFS_AVAILABLE}/g;
               s/@KWSYS_LFS_REQUESTED@/${KWSYS_LFS_REQUESTED}/g;
               s/@KWSYS_NAME_IS_KWSYS@/${KWSYS_NAME_IS_KWSYS}/g;
-              s/@KWSYS_STL_HAS_WSTRING@/${KWSYS_STL_HAS_WSTRING}/g;
               s/@KWSYS_CXX_HAS_EXT_STDIO_FILEBUF_H@/${KWSYS_CXX_HAS_EXT_STDIO_FILEBUF_H}/g;
-              s/@KWSYS_SYSTEMTOOLS_USE_TRANSLATION_MAP@/${KWSYS_SYSTEMTOOLS_USE_TRANSLATION_MAP}/g;
              }" "${INFILE}" >> "${OUTFILE}${_tmp}"
     if test -f "${OUTFILE}${_tmp}"; then
       if "${_diff}" "${OUTFILE}" "${OUTFILE}${_tmp}" > /dev/null 2> /dev/null ; then
@@ -1493,6 +1497,7 @@ else
   cmake_make_processors="${CMAKE_KNOWN_MAKE_PROCESSORS}"
 fi
 
+tab="`printf '\t'`"
 TMPFILE="`cmake_tmp_file`_dir"
 rm -rf "${cmake_bootstrap_dir}/${TMPFILE}"
 mkdir "${cmake_bootstrap_dir}/${TMPFILE}"
@@ -1506,7 +1511,7 @@ build test: cc test.c
 else
   echo '
 test: test.c
-	'"${cmake_c_compiler}"' '"${cmake_ld_flags} ${cmake_c_flags}"' -o test test.c
+'"${tab}${cmake_c_compiler}"' '"${cmake_ld_flags} ${cmake_c_flags}"' -o test test.c
 '>"Makefile"
 fi
 echo '
@@ -1557,14 +1562,12 @@ KWSYS_NAME_IS_KWSYS=0
 KWSYS_BUILD_SHARED=0
 KWSYS_LFS_AVAILABLE=0
 KWSYS_LFS_REQUESTED=0
-KWSYS_STL_HAS_WSTRING=0
 KWSYS_CXX_HAS_EXT_STDIO_FILEBUF_H=0
 KWSYS_CXX_HAS_SETENV=0
 KWSYS_CXX_HAS_UNSETENV=0
 KWSYS_CXX_HAS_ENVIRON_IN_STDLIB_H=0
 KWSYS_CXX_HAS_UTIMENSAT=0
 KWSYS_CXX_HAS_UTIMES=0
-KWSYS_SYSTEMTOOLS_USE_TRANSLATION_MAP=1
 
 if cmake_try_run "${cmake_cxx_compiler}" \
   "${cmake_cxx_flags} ${cmake_ld_flags} -DTEST_KWSYS_CXX_HAS_SETENV" \
@@ -1591,15 +1594,6 @@ if cmake_try_run "${cmake_cxx_compiler}" \
   echo "${cmake_cxx_compiler} has environ in stdlib.h"
 else
   echo "${cmake_cxx_compiler} does not have environ in stdlib.h"
-fi
-
-if cmake_try_run "${cmake_cxx_compiler}" \
-  "${cmake_cxx_flags} ${cmake_ld_flags} -DTEST_KWSYS_STL_HAS_WSTRING" \
-  "${cmake_source_dir}/Source/kwsys/kwsysPlatformTestsCXX.cxx" >> cmake_bootstrap.log 2>&1; then
-  KWSYS_STL_HAS_WSTRING=1
-  echo "${cmake_cxx_compiler} has stl wstring"
-else
-  echo "${cmake_cxx_compiler} does not have stl wstring"
 fi
 
 if cmake_try_run "${cmake_cxx_compiler}" \
@@ -1672,8 +1666,8 @@ cmake_report cmVersionConfig.h${_tmp} "#define CMake_VERSION \"${cmake_version}\
 cmake_report cmConfigure.h${_tmp} "#define CMAKE_BOOTSTRAP_SOURCE_DIR \"${CMAKE_BOOTSTRAP_SOURCE_DIR}\""
 cmake_report cmConfigure.h${_tmp} "#define CMAKE_BOOTSTRAP_BINARY_DIR \"${CMAKE_BOOTSTRAP_BINARY_DIR}\""
 cmake_report cmConfigure.h${_tmp} "#define CMake_DEFAULT_RECURSION_LIMIT 400"
-cmake_report cmConfigure.h${_tmp} "#define CMAKE_BIN_DIR \"/bootstrap-not-insalled\""
-cmake_report cmConfigure.h${_tmp} "#define CMAKE_DATA_DIR \"/bootstrap-not-insalled\""
+cmake_report cmConfigure.h${_tmp} "#define CMAKE_BIN_DIR \"/bootstrap-not-installed\""
+cmake_report cmConfigure.h${_tmp} "#define CMAKE_DATA_DIR \"/bootstrap-not-installed\""
 cmake_report cmConfigure.h${_tmp} "#define CM_FALLTHROUGH"
 
 if test "${cmake_bootstrap_generator}" = "Ninja"; then
@@ -1786,11 +1780,10 @@ else
       uv_c_flags="${uv_c_flags} -D_GNU_SOURCE"
       libs="${libs} -ldl -lrt"
       ;;
-    *kFreeBSD*)
-      libs="${libs} -lkvm -lfreebsd-glue"
+    *NetBSD*)
+      libs="${libs} -lkvm"
       ;;
     *BSD*)
-      libs="${libs} -lkvm"
       ;;
     *SunOS*)
       uv_c_flags="${uv_c_flags} -D__EXTENSIONS__ -D_XOPEN_SOURCE=600"
@@ -1856,7 +1849,7 @@ fi
 system_flags=''
 case "${cmake_system}" in
   # Ensure filesystem access uses 64-bit offsets even on 32-bit hosts.
-  *Linux*) system_flags='-D_FILE_OFFSET_BITS=64' ;;
+  *Linux*) system_flags='-D_FILE_OFFSET_BITS=64 -D_TIME_BITS=64' ;;
 esac
 if test "x${system_flags}" != "x"; then
   cmake_c_flags="${cmake_c_flags} ${system_flags}"
@@ -1892,7 +1885,7 @@ write_source_rule() {
     echo "  srcflags = ${src_flags}" >> "${cmake_bootstrap_dir}/build.ninja"
   else
     echo "${obj} : ${src} ${dep}" >> "${cmake_bootstrap_dir}/Makefile"
-    echo "	${compiler} ${flags} ${src_flags} -c ${src} -o ${obj}" >> "${cmake_bootstrap_dir}/Makefile"
+    echo "${tab}${compiler} ${flags} ${src_flags} -c ${src} -o ${obj}" >> "${cmake_bootstrap_dir}/Makefile"
   fi
 }
 
@@ -1939,7 +1932,7 @@ if test "${cmake_bootstrap_generator}" = "Ninja"; then
   echo "  libs = ${libs}" >> "${cmake_bootstrap_dir}/build.ninja"
 else
   echo "cmake: ${objs}" > "${cmake_bootstrap_dir}/Makefile"
-  echo "	${cmake_cxx_compiler} ${cmake_ld_flags} ${cmake_cxx_flags} ${objs} ${libs} -o cmake" >> "${cmake_bootstrap_dir}/Makefile"
+  echo "${tab}${cmake_cxx_compiler} ${cmake_ld_flags} ${cmake_cxx_flags} ${objs} ${libs} -o cmake" >> "${cmake_bootstrap_dir}/Makefile"
 fi
 for a in ${CMAKE_CXX_SOURCES}; do
   src=`cmake_escape_artifact "${cmake_source_dir}/Source/${a}.cxx"`
@@ -2002,7 +1995,7 @@ build build.ninja : rebuild_cache
 else
   echo "
 rebuild_cache:
-	cd \"${cmake_binary_dir}\" && \"${cmake_source_dir}/bootstrap\" --generator=\"${cmake_bootstrap_generator}\"
+${tab}cd \"${cmake_binary_dir}\" && \"${cmake_source_dir}/bootstrap\" --generator=\"${cmake_bootstrap_generator}\"
 " >> "${cmake_bootstrap_dir}/Makefile"
 fi
 

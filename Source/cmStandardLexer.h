@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
 #if defined(__linux)
@@ -22,6 +22,12 @@
 /* For isascii */
 // NOLINTNEXTLINE(bugprone-reserved-identifier)
 #  define _XOPEN_SOURCE 700
+#endif
+#if defined(__APPLE__)
+// Restore Darwin APIs removed by _POSIX_C_SOURCE:
+//   aligned_alloc
+// NOLINTNEXTLINE(bugprone-reserved-identifier)
+#  define _DARWIN_C_SOURCE
 #endif
 
 #include "cmsys/Configure.h" // IWYU pragma: keep

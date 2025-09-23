@@ -1,7 +1,3 @@
-if (Test-Path -Path "build/ci_package_info.cmake" -PathType Leaf) {
-    cmake -P .gitlab/ci/package_windows_build.cmake
-} else {
-    cd build
-    cpack -G ZIP
-    cpack -G WIX
-}
+cd build
+. ../Utilities/Release/win/sign-package.ps1 -cpack cpack
+if (-not $?) { Exit $LastExitCode }

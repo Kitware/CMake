@@ -1,0 +1,6 @@
+Name: India
+Description: India
+Version: 1.0.0
+
+Cflags: India
+Requires: alpha = 1.0.0 bravo > 0.5.0

@@ -27,7 +27,7 @@ honored at link time.
 
 .. |INTRODUCED_IN_CMAKE_VERSION| replace:: 3.14
 .. |WARNS_OR_DOES_NOT_WARN| replace:: does *not* warn
-.. include:: STANDARD_ADVICE.txt
+.. include:: include/STANDARD_ADVICE.rst
 
 .. Note::
 
@@ -35,7 +35,7 @@ honored at link time.
    to use the :module:`CheckPIESupported` module to ensure flags are passed to
    the linker.
 
-.. include:: DEPRECATED.txt
+.. include:: include/DEPRECATED.rst
 
 Examples
 ^^^^^^^^

@@ -1,5 +1,3 @@
-cmake_policy(SET CMP0042 NEW)
-
 add_library(foo SHARED empty.cpp)
 add_library(foo-static STATIC empty.cpp)
 add_library(foo2 SHARED empty.cpp)

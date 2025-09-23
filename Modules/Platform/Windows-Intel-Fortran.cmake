@@ -29,6 +29,12 @@ unset(_LIBSDLL)
 unset(_DBGLIBS)
 unset(_THREADS)
 
+# icl accepts -RTC* flags but ignores them.  ifort accepts -RTCu only.
+set(CMAKE_Fortran_COMPILE_OPTIONS_MSVC_RUNTIME_CHECKS_PossibleDataLoss      "")
+set(CMAKE_Fortran_COMPILE_OPTIONS_MSVC_RUNTIME_CHECKS_StackFrameErrorCheck  "")
+set(CMAKE_Fortran_COMPILE_OPTIONS_MSVC_RUNTIME_CHECKS_UninitializedVariable -RTCu)
+set(CMAKE_Fortran_COMPILE_OPTIONS_MSVC_RUNTIME_CHECKS_RTCsu                 "")
+
 set(CMAKE_Fortran_COMPILE_OPTIONS_MSVC_RUNTIME_LIBRARY_MultiThreaded         -threads -libs:static)
 set(CMAKE_Fortran_COMPILE_OPTIONS_MSVC_RUNTIME_LIBRARY_MultiThreadedDLL      -threads -libs:dll)
 set(CMAKE_Fortran_COMPILE_OPTIONS_MSVC_RUNTIME_LIBRARY_MultiThreadedDebug    -threads -libs:static -dbglibs)

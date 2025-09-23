@@ -12,8 +12,8 @@
 // bytes in a matrix element. For the old (R2017b) API, this is 8. For the new
 // (R2018a) API, this is 16.
 
-void mexFunction(const int nlhs, mxArray* plhs[], const int nrhs,
-                 const mxArray* prhs[])
+void mexFunction(int const nlhs, mxArray* plhs[], int const nrhs,
+                 mxArray const* prhs[])
 {
   if (nrhs != 1 || !mxIsComplex(prhs[0])) {
     mexErrMsgTxt("Incorrect arguments");

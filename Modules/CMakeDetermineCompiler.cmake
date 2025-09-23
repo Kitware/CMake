@@ -1,10 +1,14 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-# file Copyright.txt or https://cmake.org/licensing for details.
+# file LICENSE.rst or https://cmake.org/licensing for details.
 
 
 macro(_cmake_find_compiler lang)
   # Use already-enabled languages for reference.
-  get_property(_languages GLOBAL PROPERTY ENABLED_LANGUAGES)
+  if(DEFINED _CMAKE_CHECK_ENABLED_LANGUAGES)
+    set(_languages "${_CMAKE_CHECK_ENABLED_LANGUAGES}")
+  else()
+    get_property(_languages GLOBAL PROPERTY ENABLED_LANGUAGES)
+  endif()
   list(REMOVE_ITEM _languages "${lang}")
 
   if(CMAKE_${lang}_COMPILER_INIT)
@@ -82,34 +86,6 @@ macro(_cmake_find_compiler lang)
   endif()
   unset(_${lang}_COMPILER_HINTS)
   unset(_languages)
-
-  # Look for a make tool provided by Xcode
-  if(CMAKE_HOST_APPLE)
-    macro(_query_xcrun compiler_name result_var_keyword result_var)
-      if(NOT "x${result_var_keyword}" STREQUAL "xRESULT_VAR")
-        message(FATAL_ERROR "Bad arguments to macro")
-      endif()
-      execute_process(COMMAND xcrun --find ${compiler_name}
-        OUTPUT_VARIABLE _xcrun_out OUTPUT_STRIP_TRAILING_WHITESPACE
-        ERROR_VARIABLE _xcrun_err)
-      set("${result_var}" "${_xcrun_out}")
-    endmacro()
-
-    set(xcrun_result)
-    if (CMAKE_${lang}_COMPILER MATCHES "^/usr/bin/(.+)$")
-      _query_xcrun("${CMAKE_MATCH_1}" RESULT_VAR xcrun_result)
-    elseif (CMAKE_${lang}_COMPILER STREQUAL "CMAKE_${lang}_COMPILER-NOTFOUND")
-      foreach(comp IN LISTS CMAKE_${lang}_COMPILER_LIST)
-        _query_xcrun("${comp}" RESULT_VAR xcrun_result)
-        if(xcrun_result)
-          break()
-        endif()
-      endforeach()
-    endif()
-    if (xcrun_result)
-      set_property(CACHE CMAKE_${lang}_COMPILER PROPERTY VALUE "${xcrun_result}")
-    endif()
-  endif()
 endmacro()
 
 macro(_cmake_find_compiler_path lang)

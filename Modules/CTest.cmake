@@ -1,5 +1,5 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-# file Copyright.txt or https://cmake.org/licensing for details.
+# file LICENSE.rst or https://cmake.org/licensing for details.
 
 #[=======================================================================[.rst:
 CTest
@@ -8,15 +8,24 @@ CTest
 Configure a project for testing with CTest/CDash
 
 Include this module in the top CMakeLists.txt file of a project to
-enable testing with CTest and dashboard submissions to CDash::
+enable testing with CTest and dashboard submissions to CDash:
+
+.. code-block:: cmake
 
   project(MyProject)
   ...
   include(CTest)
 
-The module automatically creates a ``BUILD_TESTING`` option that selects
-whether to enable testing support (``ON`` by default).  After including
-the module, use code like::
+The module automatically creates the following variables:
+
+:variable:`BUILD_TESTING`
+
+  Option selecting whether ``include(CTest)`` calls :command:`enable_testing`.
+  The option is ``ON`` by default when created by the module.
+
+After including the module, use code like:
+
+.. code-block:: cmake
 
   if(BUILD_TESTING)
     # ... CMake code to create tests ...
@@ -25,7 +34,9 @@ the module, use code like::
 to creating tests when testing is enabled.
 
 To enable submissions to a CDash server, create a ``CTestConfig.cmake``
-file at the top of the project with content such as::
+file at the top of the project with content such as:
+
+.. code-block:: cmake
 
   set(CTEST_NIGHTLY_START_TIME "01:00:00 UTC")
   set(CTEST_SUBMIT_URL "http://my.cdash.org/submit.php?project=MyProject")
@@ -40,7 +51,9 @@ build output for errors and warnings and reports them with surrounding
 context from the build log.  This generic approach works for all build
 tools, but does not give details about the command invocation that
 produced a given problem.  One may get more detailed reports by setting
-the :variable:`CTEST_USE_LAUNCHERS` variable::
+the :variable:`CTEST_USE_LAUNCHERS` variable:
+
+.. code-block:: cmake
 
   set(CTEST_USE_LAUNCHERS 1)
 
@@ -90,7 +103,7 @@ if(BUILD_TESTING)
     SET_IF_SET_AND_NOT_SET(DROP_METHOD "${CTEST_DROP_METHOD}")
     SET_IF_SET_AND_NOT_SET(DROP_SITE "${CTEST_DROP_SITE}")
     SET_IF_SET_AND_NOT_SET(DROP_SITE_USER "${CTEST_DROP_SITE_USER}")
-    SET_IF_SET_AND_NOT_SET(DROP_SITE_PASSWORD "${CTEST_DROP_SITE_PASWORD}")
+    SET_IF_SET_AND_NOT_SET(DROP_SITE_PASSWORD "${CTEST_DROP_SITE_PASSWORD}")
     SET_IF_SET_AND_NOT_SET(DROP_SITE_MODE "${CTEST_DROP_SITE_MODE}")
     SET_IF_SET_AND_NOT_SET(DROP_LOCATION "${CTEST_DROP_LOCATION}")
     SET_IF_SET_AND_NOT_SET(TRIGGER_SITE "${CTEST_TRIGGER_SITE}")

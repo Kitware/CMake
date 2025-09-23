@@ -1,0 +1,22 @@
+--- crypto/sleep.orig
++++ crypto/sleep.c
+@@ -10,6 +10,8 @@
+ #include <openssl/crypto.h>
+ #include "internal/e_os.h"
+
++#define OPENSSL_USE_USLEEP
++
+ /* system-specific variants defining OSSL_sleep() */
+ #if defined(OPENSSL_SYS_UNIX) || defined(__DJGPP__)
+
+--- providers/implementations/rands/seeding/rand_unix.c.orig
++++ providers/implementations/rands/seeding/rand_unix.c
+@@ -84,8 +84,6 @@
+ #     define OSSL_POSIX_TIMER_OKAY
+ #    endif
+ #   endif
+-#  else
+-#   define OSSL_POSIX_TIMER_OKAY
+ #  endif
+ # endif
+ #endif /* (defined(OPENSSL_SYS_UNIX) && !defined(OPENSSL_SYS_VXWORKS))

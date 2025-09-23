@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
 #include <algorithm>
@@ -69,7 +69,7 @@ protected:
 private:
   uv_stream_t* Stream = nullptr;
   void* OldStreamData = nullptr;
-  const std::size_t PutBack = 0;
+  std::size_t const PutBack = 0;
   std::vector<CharT> InputBuffer;
   bool EndOfFile = false;
 
@@ -172,7 +172,7 @@ void cmBasicUVStreambuf<CharT, Traits>::StreamReadStartStop()
             static_cast<cmBasicUVStreambuf<CharT, Traits>*>(handle->data);
           streambuf->HandleAlloc(buf);
         },
-        [](uv_stream_t* stream2, ssize_t nread, const uv_buf_t* /* unused */) {
+        [](uv_stream_t* stream2, ssize_t nread, uv_buf_t const* /* unused */) {
           auto streambuf =
             static_cast<cmBasicUVStreambuf<CharT, Traits>*>(stream2->data);
           streambuf->StreamRead(nread);

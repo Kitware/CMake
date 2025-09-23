@@ -26,3 +26,12 @@ the :manual:`cmake-generator-expressions(7)` manual for available expressions.
 Only the "Ninja Multi-Config" generator supports a property value that varies by
 configuration.  For all other generators the value of this property must be the
 same for all configurations.
+
+See Also
+^^^^^^^^
+
+* To exclude targets from the whole directory subtree, see the
+  :prop_dir:`EXCLUDE_FROM_ALL` directory property.
+
+* To exclude targets from the Visual Studio solution build, use
+  :prop_tgt:`EXCLUDE_FROM_DEFAULT_BUILD`.

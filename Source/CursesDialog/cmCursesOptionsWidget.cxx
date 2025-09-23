@@ -1,12 +1,12 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmCursesOptionsWidget.h"
 
 #include "cmCursesColor.h"
 #include "cmCursesWidget.h"
 #include "cmStateTypes.h"
 
-#define ctrl(z) ((z)&037)
+#define ctrl(z) ((z) & 037)
 
 cmCursesOptionsWidget::cmCursesOptionsWidget(int width, int height, int left,
                                              int top)
@@ -79,7 +79,7 @@ void cmCursesOptionsWidget::PreviousOption()
   this->SetValue(this->Options[this->CurrentOption]);
 }
 
-void cmCursesOptionsWidget::SetOption(const std::string& value)
+void cmCursesOptionsWidget::SetOption(std::string const& value)
 {
   this->CurrentOption = 0; // default to 0 index
   this->SetValue(value);

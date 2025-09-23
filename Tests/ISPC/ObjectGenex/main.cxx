@@ -81,7 +81,7 @@ int main()
   // is equal to the number of arch's
 
   std::vector<std::string> paths = expandList(obj_paths);
-  const bool correctSize = (paths.size() == ExpectedISPCObjects);
+  bool const correctSize = (paths.size() == ExpectedISPCObjects);
 
   return (correctSize) ? 0 : 1;
 }

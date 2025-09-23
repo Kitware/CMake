@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmBuildCommand.h"
 
 #include "cmExecutionStatus.h"
@@ -60,7 +60,7 @@ bool MainSignature(std::vector<std::string> const& args,
       doing = DoingNone;
       parallel = args[i];
     } else {
-      status.SetError(cmStrCat("unknown argument \"", args[i], "\""));
+      status.SetError(cmStrCat("unknown argument \"", args[i], '"'));
       return false;
     }
   }
@@ -84,7 +84,7 @@ bool MainSignature(std::vector<std::string> const& args,
   }
 
   std::string makecommand = mf.GetGlobalGenerator()->GenerateCMakeBuildCommand(
-    target, configuration, parallel, "", mf.IgnoreErrorsCMP0061());
+    target, configuration, parallel, "", false);
 
   mf.AddDefinition(variable, makecommand);
 
@@ -111,7 +111,7 @@ bool TwoArgsSignature(std::vector<std::string> const& args,
   }
 
   std::string makecommand = mf.GetGlobalGenerator()->GenerateCMakeBuildCommand(
-    "", configType, "", "", mf.IgnoreErrorsCMP0061());
+    "", configType, "", "", false);
 
   if (cacheValue) {
     return true;

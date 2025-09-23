@@ -1,5 +1,5 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-# file Copyright.txt or https://cmake.org/licensing for details.
+# file LICENSE.rst or https://cmake.org/licensing for details.
 
 #[=======================================================================[.rst:
 FindLibRHash
@@ -52,11 +52,9 @@ mark_as_advanced(LibRHash_INCLUDE_DIR)
 
 #-----------------------------------------------------------------------------
 include(${CMAKE_CURRENT_LIST_DIR}/../../Modules/FindPackageHandleStandardArgs.cmake)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(LibRHash
-  FOUND_VAR LibRHash_FOUND
+find_package_handle_standard_args(LibRHash
   REQUIRED_VARS LibRHash_LIBRARY LibRHash_INCLUDE_DIR
   )
-set(LIBRHASH_FOUND ${LibRHash_FOUND})
 
 #-----------------------------------------------------------------------------
 # Provide documented result variables and targets.

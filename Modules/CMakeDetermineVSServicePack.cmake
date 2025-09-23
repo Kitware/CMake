@@ -1,38 +1,77 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-# file Copyright.txt or https://cmake.org/licensing for details.
+# file LICENSE.rst or https://cmake.org/licensing for details.
 
 #[=======================================================================[.rst:
 CMakeDetermineVSServicePack
 ---------------------------
 
+.. versionchanged:: 4.1
+
+  This module is available only if policy :policy:`CMP0196` is not set to ``NEW``.
+
 .. deprecated:: 3.0
 
-  Do not use.
+  This module should no longer be used.  The functionality of this module has
+  been superseded by the :variable:`CMAKE_<LANG>_COMPILER_VERSION` variable that
+  contains the compiler version number.
 
-The functionality of this module has been superseded by the
-:variable:`CMAKE_<LANG>_COMPILER_VERSION` variable that contains
-the compiler version number.
+This module provides a command to determine the installed Visual Studio
+service pack version for Visual Studio 2012 and earlier.
 
-Determine the Visual Studio service pack of the 'cl' in use.
+Load this module in a CMake project with:
 
-Usage::
+.. code-block:: cmake
+
+  include(CMakeDetermineVSServicePack)
+
+Commands
+^^^^^^^^
+
+This module provides the following command:
+
+.. command:: DetermineVSServicePack
+
+  Determines the Visual Studio service pack version of the ``cl`` compiler
+  in use:
+
+  .. code-block:: cmake
+
+    DetermineVSServicePack(<variable>)
+
+  The result is stored in the specified internal cache variable ``<variable>``,
+  which is set to one of the following values, or to an empty string if the
+  service pack cannot be determined:
+
+  * ``vc80``, ``vc80sp1``
+  * ``vc90``, ``vc90sp1``
+  * ``vc100``, ``vc100sp1``
+  * ``vc110``, ``vc110sp1``, ``vc110sp2``, ``vc110sp3``, ``vc110sp4``
+
+Examples
+^^^^^^^^
+
+Determining the Visual Studio service pack version in a project:
+
+.. code-block:: cmake
 
   if(MSVC)
     include(CMakeDetermineVSServicePack)
-    DetermineVSServicePack( my_service_pack )
-    if( my_service_pack )
+    DetermineVSServicePack(my_service_pack)
+    if(my_service_pack)
       message(STATUS "Detected: ${my_service_pack}")
     endif()
   endif()
-
-Function DetermineVSServicePack sets the given variable to one of the
-following values or an empty string if unknown::
-
-  vc80, vc80sp1
-  vc90, vc90sp1
-  vc100, vc100sp1
-  vc110, vc110sp1, vc110sp2, vc110sp3, vc110sp4
 #]=======================================================================]
+
+cmake_policy(GET CMP0196 _CMakeDetermineVSServicePack_CMP0196)
+if(_CMakeDetermineVSServicePack_CMP0196 STREQUAL "NEW")
+  message(FATAL_ERROR "The CMakeDetermineVSServicePack module has been removed by policy CMP0196.")
+endif()
+
+if(_CMakeDetermineVSServicePack_testing)
+  set(_CMakeDetermineVSServicePack_included TRUE)
+  return()
+endif()
 
 if(NOT CMAKE_MINIMUM_REQUIRED_VERSION VERSION_LESS 2.8.8)
   message(DEPRECATION

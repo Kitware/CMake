@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 
 #include "cmLDConfigLDConfigTool.h"
 
@@ -50,7 +50,7 @@ bool cmLDConfigLDConfigTool::GetLDConfigPaths(std::vector<std::string>& paths)
   }
 
   std::string line;
-  static const cmsys::RegularExpression regex("^([^\t:]*):");
+  static cmsys::RegularExpression const regex("^([^\t:]*):");
   cmUVPipeIStream output(process.GetLoop(), process.OutputStream());
   while (std::getline(output, line)) {
     cmsys::RegularExpressionMatch match;

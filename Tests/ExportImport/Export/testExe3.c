@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-int main(int argc, const char* argv[])
+int main(int argc, char const* argv[])
 {
   if (argc < 2) {
     fprintf(stderr, "Must specify output file.\n");

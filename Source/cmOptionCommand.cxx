@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmOptionCommand.h"
 
 #include "cmExecutionStatus.h"
@@ -16,7 +16,7 @@
 bool cmOptionCommand(std::vector<std::string> const& args,
                      cmExecutionStatus& status)
 {
-  const bool argError = (args.size() < 2) || (args.size() > 3);
+  bool const argError = (args.size() < 2) || (args.size() > 3);
   if (argError) {
     std::string m = cmStrCat("called with incorrect number of arguments: ",
                              cmJoin(args, " "));
@@ -29,7 +29,7 @@ bool cmOptionCommand(std::vector<std::string> const& args,
   {
     auto policyStatus =
       status.GetMakefile().GetPolicyStatus(cmPolicies::CMP0077);
-    const auto& existsBeforeSet =
+    auto const& existsBeforeSet =
       status.GetMakefile().GetStateSnapshot().GetDefinition(args[0]);
     switch (policyStatus) {
       case cmPolicies::WARN:
@@ -38,8 +38,6 @@ bool cmOptionCommand(std::vector<std::string> const& args,
       case cmPolicies::OLD:
         // OLD behavior does not warn.
         break;
-      case cmPolicies::REQUIRED_ALWAYS:
-      case cmPolicies::REQUIRED_IF_USED:
       case cmPolicies::NEW: {
         // See if a local variable with this name already exists.
         // If so we ignore the option command.
@@ -77,7 +75,7 @@ bool cmOptionCommand(std::vector<std::string> const& args,
   }
 
   if (checkAndWarn) {
-    const auto& existsAfterSet =
+    auto const& existsAfterSet =
       status.GetMakefile().GetStateSnapshot().GetDefinition(args[0]);
     if (!existsAfterSet) {
       status.GetMakefile().IssueMessage(

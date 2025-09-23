@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include <cerrno> // errno
 #include <cstdio> // SEEK_SET
 
@@ -16,7 +16,7 @@ cmFileLockResult cmFileLock::Release()
   if (this->Filename.empty()) {
     return cmFileLockResult::MakeOk();
   }
-  const int lockResult = this->LockFile(F_SETLK, F_UNLCK);
+  int const lockResult = this->LockFile(F_SETLK, F_UNLCK);
 
   this->Filename = "";
 

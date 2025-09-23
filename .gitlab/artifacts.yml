@@ -39,7 +39,6 @@
             - ${CMAKE_CI_BUILD_DIR}/Tests/CMake*Lib/*LibTests
             - ${CMAKE_CI_BUILD_DIR}/Tests/CMake*Lib/*LibTests.exe
             - ${CMAKE_CI_BUILD_DIR}/Source/kwsys/cmsysTest*
-            - ${CMAKE_CI_BUILD_DIR}/Source/kwsys/testConsoleBufChild.exe
             - ${CMAKE_CI_BUILD_DIR}/Utilities/cmcurl/curltest
             - ${CMAKE_CI_BUILD_DIR}/Utilities/cmcurl/curltest.exe
             - ${CMAKE_CI_BUILD_DIR}/Utilities/KWIML/test/kwiml_test
@@ -60,12 +59,42 @@
 
             # CTest/CDash information.
             - ${CMAKE_CI_BUILD_DIR}/Testing/
-            - ${CMAKE_CI_BUILD_DIR}/DartConfiguation.tcl
+            - ${CMAKE_CI_BUILD_DIR}/DartConfiguration.tcl
             - ${CMAKE_CI_BUILD_DIR}/CTestCustom.cmake
             - ${CMAKE_CI_BUILD_DIR}/cdash-build-id
         reports:
             annotations:
                 - ${CMAKE_CI_BUILD_DIR}/annotations.json
+
+.cmake_build_package_artifacts:
+    artifacts:
+        expire_in: 1d
+        name: "$CMAKE_CI_ARTIFACTS_NAME"
+        paths:
+            # Allow CPack to find CMAKE_ROOT and license text.
+            - build/CMakeFiles/CMakeSourceDir.txt
+            - build/CMakeFiles/LICENSE.txt
+
+            # Install rules.
+            - build/**/cmake_install.cmake
+
+            # We need the main binaries.
+            - build/bin/
+
+            # Pass through the documentation.
+            - build/install-doc/
+
+            # CPack configuration.
+            - build/CPackConfig.cmake
+            - build/CMakeCPackOptions.cmake
+            - build/Source/QtDialog/QtDialogCPack.cmake
+
+            # CPack/IFW packaging files.
+            - build/CMake*.qs
+
+            # CPack/WIX packaging files.
+            - build/Utilities/Release/WiX/custom_action_dll*.wxs
+            - build/Utilities/Release/WiX/CustomAction/CMakeWiXCustomActions.*
 
 .cmake_release_artifacts:
     artifacts:
@@ -78,6 +107,8 @@
             - ${CMAKE_CI_BUILD_DIR}/cmake-*-linux-x86_64.*
             - ${CMAKE_CI_BUILD_DIR}/cmake-*-linux-aarch64.*
             - ${CMAKE_CI_BUILD_DIR}/cmake-*-macos*-universal.*
+            - ${CMAKE_CI_BUILD_DIR}/cmake-*-sunos-x86_64.*
+            - ${CMAKE_CI_BUILD_DIR}/cmake-*-sunos-sparc64.*
             - ${CMAKE_CI_BUILD_DIR}/cmake-*-windows-x86_64.*
             - ${CMAKE_CI_BUILD_DIR}/cmake-*-windows-i386.*
             - ${CMAKE_CI_BUILD_DIR}/cmake-*-windows-arm64.*

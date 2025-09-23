@@ -5,7 +5,7 @@
 int res = 0;
 bool print = false;
 
-void test_expression(int x, int y, const char* text)
+void test_expression(int x, int y, char const* text)
 {
   bool fail = (x) != (y);
   if (fail) {

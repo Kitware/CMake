@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
@@ -28,10 +28,10 @@ public:
 
 protected:
   // Implement writing/checking methods required by superclass.
-  bool WriteDependencies(const std::set<std::string>& sources,
-                         const std::string& file, std::ostream& makeDepends,
+  bool WriteDependencies(std::set<std::string> const& sources,
+                         std::string const& file, std::ostream& makeDepends,
                          std::ostream& internalDepends) override;
   bool CheckDependencies(std::istream& internalDepends,
-                         const std::string& internalDependsFileName,
+                         std::string const& internalDependsFileName,
                          DependencyMap& validDeps) override;
 };

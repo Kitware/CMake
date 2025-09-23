@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 
 #pragma once
 
@@ -14,6 +14,7 @@
 #include "cmStateTypes.h"
 #include "cmValue.h"
 
+class cmPackageState;
 class cmState;
 class cmStateDirectory;
 
@@ -28,7 +29,7 @@ public:
   void SetDefinition(std::string const& name, cm::string_view value);
   void RemoveDefinition(std::string const& name);
   std::vector<std::string> ClosureKeys() const;
-  bool RaiseScope(std::string const& var, const char* varDef);
+  bool RaiseScope(std::string const& var, char const* varDef);
 
   void SetListFile(std::string const& listfile);
 
@@ -46,7 +47,6 @@ public:
   void SetPolicy(cmPolicies::PolicyID id, cmPolicies::PolicyStatus status);
   cmPolicies::PolicyStatus GetPolicy(cmPolicies::PolicyID id,
                                      bool parent_scope = false) const;
-  bool HasDefinedPolicyCMP0011();
   void PushPolicy(cmPolicies::PolicyMap const& entry, bool weak);
   bool PopPolicy();
   bool CanPopPolicyScope();
@@ -57,23 +57,26 @@ public:
 
   void SetProjectName(std::string const& name);
   std::string GetProjectName() const;
+  bool CheckProjectName(std::string const& name) const;
+
+  cmPackageState& GetPackageState(std::string const& packagePath);
 
   void InitializeFromParent_ForSubdirsCommand();
 
   struct StrictWeakOrder
   {
-    bool operator()(const cmStateSnapshot& lhs,
-                    const cmStateSnapshot& rhs) const;
+    bool operator()(cmStateSnapshot const& lhs,
+                    cmStateSnapshot const& rhs) const;
   };
 
   void SetDirectoryDefinitions();
   void SetDefaultDefinitions();
 
 private:
-  friend bool operator==(const cmStateSnapshot& lhs,
-                         const cmStateSnapshot& rhs);
-  friend bool operator!=(const cmStateSnapshot& lhs,
-                         const cmStateSnapshot& rhs);
+  friend bool operator==(cmStateSnapshot const& lhs,
+                         cmStateSnapshot const& rhs);
+  friend bool operator!=(cmStateSnapshot const& lhs,
+                         cmStateSnapshot const& rhs);
   friend class cmState;
   friend class cmStateDirectory;
   friend struct StrictWeakOrder;
@@ -84,5 +87,5 @@ private:
   cmStateDetail::PositionType Position;
 };
 
-bool operator==(const cmStateSnapshot& lhs, const cmStateSnapshot& rhs);
-bool operator!=(const cmStateSnapshot& lhs, const cmStateSnapshot& rhs);
+bool operator==(cmStateSnapshot const& lhs, cmStateSnapshot const& rhs);
+bool operator!=(cmStateSnapshot const& lhs, cmStateSnapshot const& rhs);

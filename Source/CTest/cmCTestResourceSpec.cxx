@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmCTestResourceSpec.h"
 
 #include <functional>
@@ -18,8 +18,8 @@
 
 namespace {
 using JSONHelperBuilder = cmJSONHelperBuilder;
-const cmsys::RegularExpression IdentifierRegex{ "^[a-z_][a-z0-9_]*$" };
-const cmsys::RegularExpression IdRegex{ "^[a-z0-9_]+$" };
+cmsys::RegularExpression const IdentifierRegex{ "^[a-z_][a-z0-9_]*$" };
+cmsys::RegularExpression const IdRegex{ "^[a-z0-9_]+$" };
 
 struct Version
 {
@@ -44,13 +44,22 @@ auto const VersionHelper = JSONHelperBuilder::Required<Version>(
 auto const RootVersionHelper = JSONHelperBuilder::Object<TopVersion>().Bind(
   "version"_s, &TopVersion::Version, VersionHelper, false);
 
-bool ResourceIdHelper(std::string& out, const Json::Value* value,
+bool ResourceIdHelper(std::string& out, Json::Value const* value,
                       cmJSONState* state)
 {
+#if defined(__GNUC__) && __GNUC__ >= 15
+#  define CM_GCC_diagnostic_push_Wmaybe_uninitialized
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+#endif
   if (!JSONHelperBuilder::String(cmCTestResourceSpecErrors::INVALID_RESOURCE)(
         out, value, state)) {
     return false;
   }
+#ifdef CM_GCC_diagnostic_push_Wmaybe_uninitialized
+#  pragma GCC diagnostic pop
+#  undef CM_GCC_diagnostic_push_Wmaybe_uninitialized
+#endif
   cmsys::RegularExpressionMatch match;
   if (!IdRegex.find(out.c_str(), match)) {
     cmCTestResourceSpecErrors::INVALID_RESOURCE(value, state);
@@ -74,7 +83,7 @@ auto const ResourceListHelper =
 auto const ResourceMapHelper =
   JSONHelperBuilder::MapFilter<std::vector<cmCTestResourceSpec::Resource>>(
     cmCTestResourceSpecErrors::INVALID_SOCKET_SPEC, ResourceListHelper,
-    [](const std::string& key) -> bool {
+    [](std::string const& key) -> bool {
       cmsys::RegularExpressionMatch match;
       return IdentifierRegex.find(key.c_str(), match);
     });
@@ -83,7 +92,7 @@ auto const SocketSetHelper = JSONHelperBuilder::Vector<
   std::map<std::string, std::vector<cmCTestResourceSpec::Resource>>>(
   cmCTestResourceSpecErrors::INVALID_SOCKET_SPEC, ResourceMapHelper);
 
-bool SocketHelper(cmCTestResourceSpec::Socket& out, const Json::Value* value,
+bool SocketHelper(cmCTestResourceSpec::Socket& out, Json::Value const* value,
                   cmJSONState* state)
 {
   std::vector<
@@ -112,7 +121,7 @@ auto const RootHelper = JSONHelperBuilder::Object<cmCTestResourceSpec>().Bind(
   "local", &cmCTestResourceSpec::LocalSocket, LocalRequiredHelper, false);
 }
 
-bool cmCTestResourceSpec::ReadFromJSONFile(const std::string& filename)
+bool cmCTestResourceSpec::ReadFromJSONFile(std::string const& filename)
 {
   Json::Value root;
 
@@ -133,36 +142,36 @@ bool cmCTestResourceSpec::ReadFromJSONFile(const std::string& filename)
   return RootHelper(*this, &root, &parseState);
 }
 
-bool cmCTestResourceSpec::operator==(const cmCTestResourceSpec& other) const
+bool cmCTestResourceSpec::operator==(cmCTestResourceSpec const& other) const
 {
   return this->LocalSocket == other.LocalSocket;
 }
 
-bool cmCTestResourceSpec::operator!=(const cmCTestResourceSpec& other) const
+bool cmCTestResourceSpec::operator!=(cmCTestResourceSpec const& other) const
 {
   return !(*this == other);
 }
 
 bool cmCTestResourceSpec::Socket::operator==(
-  const cmCTestResourceSpec::Socket& other) const
+  cmCTestResourceSpec::Socket const& other) const
 {
   return this->Resources == other.Resources;
 }
 
 bool cmCTestResourceSpec::Socket::operator!=(
-  const cmCTestResourceSpec::Socket& other) const
+  cmCTestResourceSpec::Socket const& other) const
 {
   return !(*this == other);
 }
 
 bool cmCTestResourceSpec::Resource::operator==(
-  const cmCTestResourceSpec::Resource& other) const
+  cmCTestResourceSpec::Resource const& other) const
 {
   return this->Id == other.Id && this->Capacity == other.Capacity;
 }
 
 bool cmCTestResourceSpec::Resource::operator!=(
-  const cmCTestResourceSpec::Resource& other) const
+  cmCTestResourceSpec::Resource const& other) const
 {
   return !(*this == other);
 }

@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
 #include <map>
@@ -17,18 +17,18 @@ public:
 
     unsigned int Free() const { return this->Total - this->Locked; }
 
-    bool operator==(const Resource& other) const;
-    bool operator!=(const Resource& other) const;
+    bool operator==(Resource const& other) const;
+    bool operator!=(Resource const& other) const;
   };
 
-  void InitializeFromResourceSpec(const cmCTestResourceSpec& spec);
+  void InitializeFromResourceSpec(cmCTestResourceSpec const& spec);
 
-  const std::map<std::string, std::map<std::string, Resource>>& GetResources()
+  std::map<std::string, std::map<std::string, Resource>> const& GetResources()
     const;
 
-  bool AllocateResource(const std::string& name, const std::string& id,
+  bool AllocateResource(std::string const& name, std::string const& id,
                         unsigned int slots);
-  bool DeallocateResource(const std::string& name, const std::string& id,
+  bool DeallocateResource(std::string const& name, std::string const& id,
                           unsigned int slots);
 
 private:

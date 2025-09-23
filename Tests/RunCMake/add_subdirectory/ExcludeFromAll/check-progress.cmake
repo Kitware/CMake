@@ -1,0 +1,7 @@
+if(EXISTS ${RunCMake_TEST_BINARY_DIR}/CMakeFiles/progress.marks)
+  file(STRINGS ${RunCMake_TEST_BINARY_DIR}/CMakeFiles/progress.marks progress_marks)
+  # 8: (zot.cpp.o + libzot.a) + (foo.cpp.o + libfoo.a) + (subinc.cpp.o + libsubinc.a) + (subsub.cpp.o + libsubsubinc.a)
+  if(NOT progress_marks STREQUAL "8")
+    set(RunCMake_TEST_FAILED "progress.marks should be 8, but got ${progress_marks}")
+  endif()
+endif()

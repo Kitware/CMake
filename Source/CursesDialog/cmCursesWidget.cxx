@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmCursesWidget.h"
 
 cmCursesWidget::cmCursesWidget(int width, int height, int left, int top)
@@ -32,13 +32,13 @@ void cmCursesWidget::Move(int x, int y, bool isNewPage)
   }
 }
 
-void cmCursesWidget::SetValue(const std::string& value)
+void cmCursesWidget::SetValue(std::string const& value)
 {
   this->Value = value;
   set_field_buffer(this->Field, 0, const_cast<char*>(value.c_str()));
 }
 
-const char* cmCursesWidget::GetValue()
+char const* cmCursesWidget::GetValue()
 {
   return this->Value.c_str();
 }

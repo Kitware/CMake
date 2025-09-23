@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
@@ -29,19 +29,19 @@ public:
   bool IsChained() const { return this->Chained; }
 
   /// Get the documentation (short version)
-  const std::string& GetShortDescription() const
+  std::string const& GetShortDescription() const
   {
     return this->ShortDescription;
   }
 
   /// Get the documentation (full version)
-  const std::string& GetFullDescription() const
+  std::string const& GetFullDescription() const
   {
     return this->FullDescription;
   }
 
   /// Get the variable the property is initialized from
-  const std::string& GetInitializeFromVariable() const
+  std::string const& GetInitializeFromVariable() const
   {
     return this->InitializeFromVariable;
   }
@@ -60,17 +60,17 @@ class cmPropertyDefinitionMap
 {
 public:
   // define the property
-  void DefineProperty(const std::string& name, cmProperty::ScopeType scope,
-                      const std::string& ShortDescription,
-                      const std::string& FullDescription, bool chain,
-                      const std::string& initializeFromVariable);
+  void DefineProperty(std::string const& name, cmProperty::ScopeType scope,
+                      std::string const& ShortDescription,
+                      std::string const& FullDescription, bool chain,
+                      std::string const& initializeFromVariable);
 
   // get the property definition if present, otherwise nullptr
   cmPropertyDefinition const* GetPropertyDefinition(
-    const std::string& name, cmProperty::ScopeType scope) const;
+    std::string const& name, cmProperty::ScopeType scope) const;
 
   using KeyType = std::pair<std::string, cmProperty::ScopeType>;
-  const std::map<KeyType, cmPropertyDefinition>& GetMap() const
+  std::map<KeyType, cmPropertyDefinition> const& GetMap() const
   {
     return this->Map_;
   }

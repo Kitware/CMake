@@ -1,5 +1,5 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-# file Copyright.txt or https://cmake.org/licensing for details.
+# file LICENSE.rst or https://cmake.org/licensing for details.
 
 # Setup variables used for Green Hills MULTI generator
 # -- Allow users to override these values.
@@ -72,9 +72,9 @@ if(_ghs_os_dir AND NOT DEFINED GHS_OS_DIR)
   if(EXISTS ${GHS_OS_ROOT})
 
     # Get all directories in root directory
-    FILE(GLOB GHS_CANDIDATE_OS_DIRS
+    file(GLOB GHS_CANDIDATE_OS_DIRS
       LIST_DIRECTORIES true RELATIVE ${GHS_OS_ROOT} ${GHS_OS_ROOT}/*)
-    FILE(GLOB GHS_CANDIDATE_OS_FILES
+    file(GLOB GHS_CANDIDATE_OS_FILES
       LIST_DIRECTORIES false RELATIVE ${GHS_OS_ROOT} ${GHS_OS_ROOT}/*)
     if(GHS_CANDIDATE_OS_FILES)
       list(REMOVE_ITEM GHS_CANDIDATE_OS_DIRS ${GHS_CANDIDATE_OS_FILES})

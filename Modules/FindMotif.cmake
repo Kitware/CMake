@@ -1,22 +1,40 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-# file Copyright.txt or https://cmake.org/licensing for details.
+# file LICENSE.rst or https://cmake.org/licensing for details.
 
 #[=======================================================================[.rst:
 FindMotif
 ---------
 
-Try to find Motif (or lesstif)
+Finds Motif (or LessTif) graphical user interface toolkit.
 
-Once done this will define:
+Result Variables
+^^^^^^^^^^^^^^^^
 
-::
+This module defines the following variables:
 
-  MOTIF_FOUND        - system has MOTIF
-  MOTIF_INCLUDE_DIR  - include paths to use Motif
-  MOTIF_LIBRARIES    - Link these to use Motif
+``Motif_FOUND``
+  Boolean indicating whether the Motif was found.  For backward compatibility,
+  the ``MOTIF_FOUND`` variable is also set to the same value.
+
+Cache Variables
+^^^^^^^^^^^^^^^
+
+The following cache variables may also be set:
+
+``MOTIF_LIBRARIES``
+  Libraries needed to link to Motif.
+``MOTIF_INCLUDE_DIR``
+  Include directories needed to use Motif.
+
+Examples
+^^^^^^^^
+
+Finding Motif:
+
+.. code-block:: cmake
+
+  find_package(Motif)
 #]=======================================================================]
-
-set(MOTIF_FOUND 0)
 
 if(UNIX)
   find_path(MOTIF_INCLUDE_DIR
@@ -31,8 +49,8 @@ if(UNIX)
 
 endif()
 
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(Motif DEFAULT_MSG MOTIF_LIBRARIES MOTIF_INCLUDE_DIR)
+include(FindPackageHandleStandardArgs)
+find_package_handle_standard_args(Motif DEFAULT_MSG MOTIF_LIBRARIES MOTIF_INCLUDE_DIR)
 
 mark_as_advanced(
   MOTIF_INCLUDE_DIR

@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmGlobalVisualStudio71Generator.h"
 
 #include <map>
@@ -17,9 +17,8 @@
 
 class cmake;
 
-cmGlobalVisualStudio71Generator::cmGlobalVisualStudio71Generator(
-  cmake* cm, const std::string& platformName)
-  : cmGlobalVisualStudio7Generator(cm, platformName)
+cmGlobalVisualStudio71Generator::cmGlobalVisualStudio71Generator(cmake* cm)
+  : cmGlobalVisualStudio7Generator(cm)
 {
   this->ProjectConfigurationSectionName = "ProjectConfiguration";
 }
@@ -48,9 +47,10 @@ void cmGlobalVisualStudio71Generator::WriteSLNFile(
   std::ostringstream targetsSlnString;
   this->WriteTargetsToSolution(targetsSlnString, root, orderedProjectTargets);
 
+  this->AddSolutionItems(root);
+
   // Generate folder specification.
-  bool useFolderProperty = this->UseFolderProperty();
-  if (useFolderProperty) {
+  if (!this->VisualStudioFolders.empty()) {
     this->WriteFolders(fout);
   }
 
@@ -67,7 +67,7 @@ void cmGlobalVisualStudio71Generator::WriteSLNFile(
   this->WriteTargetConfigurations(fout, configs, orderedProjectTargets);
   fout << "\tEndGlobalSection\n";
 
-  if (useFolderProperty) {
+  if (!this->VisualStudioFolders.empty()) {
     // Write out project folders
     fout << "\tGlobalSection(NestedProjects) = preSolution\n";
     this->WriteFoldersContent(fout);
@@ -95,13 +95,13 @@ void cmGlobalVisualStudio71Generator::WriteSolutionConfigurations(
 // Note, that dependencies from executables to
 // the libraries it uses are also done here
 void cmGlobalVisualStudio71Generator::WriteProject(std::ostream& fout,
-                                                   const std::string& dspname,
-                                                   const std::string& dir,
+                                                   std::string const& dspname,
+                                                   std::string const& dir,
                                                    cmGeneratorTarget const* t)
 {
   // check to see if this is a fortran build
   std::string ext = ".vcproj";
-  const char* project =
+  char const* project =
     R"(Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = ")";
   if (this->TargetIsFortranOnly(t)) {
     ext = ".vfproj";
@@ -128,7 +128,7 @@ void cmGlobalVisualStudio71Generator::WriteProject(std::ostream& fout,
 
   auto ui = this->UtilityDepends.find(t);
   if (ui != this->UtilityDepends.end()) {
-    const char* uname = ui->second.c_str();
+    char const* uname = ui->second.c_str();
     /* clang-format off */
     fout << R"(Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = ")"
          << uname << "\", \""
@@ -147,7 +147,7 @@ void cmGlobalVisualStudio71Generator::WriteProject(std::ostream& fout,
 // Note, that dependencies from executables to
 // the libraries it uses are also done here
 void cmGlobalVisualStudio71Generator::WriteProjectDepends(
-  std::ostream& fout, const std::string&, const std::string&,
+  std::ostream& fout, std::string const&, std::string const&,
   cmGeneratorTarget const* target)
 {
   VSDependSet const& depends = this->VSTargetDepends[target];
@@ -165,8 +165,8 @@ void cmGlobalVisualStudio71Generator::WriteProjectDepends(
 // Write a dsp file into the SLN file, Note, that dependencies from
 // executables to the libraries it uses are also done here
 void cmGlobalVisualStudio71Generator::WriteExternalProject(
-  std::ostream& fout, const std::string& name, const std::string& location,
-  cmValue typeGuid, const std::set<BT<std::pair<std::string, bool>>>& depends)
+  std::ostream& fout, std::string const& name, std::string const& location,
+  cmValue typeGuid, std::set<BT<std::pair<std::string, bool>>> const& depends)
 {
   fout << "Project(\"{"
        << (typeGuid ? *typeGuid
@@ -197,17 +197,17 @@ void cmGlobalVisualStudio71Generator::WriteExternalProject(
 // Write a dsp file into the SLN file, Note, that dependencies from
 // executables to the libraries it uses are also done here
 void cmGlobalVisualStudio71Generator::WriteProjectConfigurations(
-  std::ostream& fout, const std::string& name, cmGeneratorTarget const& target,
+  std::ostream& fout, std::string const& name, cmGeneratorTarget const& target,
   std::vector<std::string> const& configs,
-  const std::set<std::string>& configsPartOfDefaultBuild,
+  std::set<std::string> const& configsPartOfDefaultBuild,
   std::string const& platformMapping)
 {
-  const std::string& platformName =
+  std::string const& platformName =
     !platformMapping.empty() ? platformMapping : this->GetPlatformName();
   std::string guid = this->GetGUID(name);
   for (std::string const& i : configs) {
     cmList mapConfig;
-    const char* dstConfig = i.c_str();
+    char const* dstConfig = i.c_str();
     if (target.GetProperty("EXTERNAL_MSPROJECT")) {
       if (cmValue m = target.GetProperty(
             cmStrCat("MAP_IMPORTED_CONFIG_", cmSystemTools::UpperCase(i)))) {

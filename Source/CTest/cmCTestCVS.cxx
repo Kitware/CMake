@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmCTestCVS.h"
 
 #include <utility>
@@ -11,12 +11,13 @@
 #include "cmsys/RegularExpression.hxx"
 
 #include "cmCTest.h"
+#include "cmMakefile.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmXMLWriter.h"
 
-cmCTestCVS::cmCTestCVS(cmCTest* ct, std::ostream& log)
-  : cmCTestVC(ct, log)
+cmCTestCVS::cmCTestCVS(cmCTest* ct, cmMakefile* mf, std::ostream& log)
+  : cmCTestVC(ct, mf, log)
 {
 }
 
@@ -25,7 +26,7 @@ cmCTestCVS::~cmCTestCVS() = default;
 class cmCTestCVS::UpdateParser : public cmCTestVC::LineParser
 {
 public:
-  UpdateParser(cmCTestCVS* cvs, const char* prefix)
+  UpdateParser(cmCTestCVS* cvs, char const* prefix)
     : CVS(cvs)
   {
     this->SetLog(&cvs->Log, prefix);
@@ -75,9 +76,9 @@ private:
 bool cmCTestCVS::UpdateImpl()
 {
   // Get user-specified update options.
-  std::string opts = this->CTest->GetCTestConfiguration("UpdateOptions");
+  std::string opts = this->Makefile->GetSafeDefinition("CTEST_UPDATE_OPTIONS");
   if (opts.empty()) {
-    opts = this->CTest->GetCTestConfiguration("CVSUpdateOptions");
+    opts = this->Makefile->GetSafeDefinition("CTEST_CVS_UPDATE_OPTIONS");
     if (opts.empty()) {
       opts = "-dP";
     }
@@ -105,7 +106,7 @@ class cmCTestCVS::LogParser : public cmCTestVC::LineParser
 {
 public:
   using Revision = cmCTestCVS::Revision;
-  LogParser(cmCTestCVS* cvs, const char* prefix, std::vector<Revision>& revs)
+  LogParser(cmCTestCVS* cvs, char const* prefix, std::vector<Revision>& revs)
     : CVS(cvs)
     , Revisions(revs)
   {
@@ -213,7 +214,7 @@ std::string cmCTestCVS::ComputeBranchFlag(std::string const& dir)
   return "-b";
 }
 
-void cmCTestCVS::LoadRevisions(std::string const& file, const char* branchFlag,
+void cmCTestCVS::LoadRevisions(std::string const& file, char const* branchFlag,
                                std::vector<Revision>& revisions)
 {
   cmCTestLog(this->CTest, HANDLER_OUTPUT, "." << std::flush);
@@ -230,7 +231,7 @@ void cmCTestCVS::LoadRevisions(std::string const& file, const char* branchFlag,
 void cmCTestCVS::WriteXMLDirectory(cmXMLWriter& xml, std::string const& path,
                                    Directory const& dir)
 {
-  const char* slash = path.empty() ? "" : "/";
+  char const* slash = path.empty() ? "" : "/";
   xml.StartElement("Directory");
   xml.Element("Name", path);
 

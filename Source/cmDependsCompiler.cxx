@@ -1,10 +1,9 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 
 #include "cmDependsCompiler.h"
 
 #include <algorithm>
-#include <iterator>
 #include <map>
 #include <string>
 #include <unordered_set>
@@ -26,9 +25,9 @@
 #include "cmSystemTools.h"
 
 bool cmDependsCompiler::CheckDependencies(
-  const std::string& internalDepFile, const std::vector<std::string>& depFiles,
+  std::string const& internalDepFile, std::vector<std::string> const& depFiles,
   cmDepends::DependencyMap& dependencies,
-  const std::function<bool(const std::string&)>& isValidPath)
+  std::function<bool(std::string const&)> const& isValidPath)
 {
   bool status = true;
   bool forceReadDeps = true;
@@ -75,10 +74,10 @@ bool cmDependsCompiler::CheckDependencies(
   // dependencies files
   cmFileTime depFileTime;
   for (auto dep = depFiles.begin(); dep != depFiles.end(); dep++) {
-    const auto& source = *dep++;
-    const auto& target = *dep++;
-    const auto& format = *dep++;
-    const auto& depFile = *dep;
+    auto const& source = *dep++;
+    auto const& target = *dep++;
+    auto const& format = *dep++;
+    auto const& depFile = *dep;
 
     if (!cmSystemTools::FileExists(depFile)) {
       continue;
@@ -111,13 +110,9 @@ bool cmDependsCompiler::CheckDependencies(
           // copy depends for each target, except first one, which can be
           // moved
           for (auto index = entry.rules.size() - 1; index > 0; --index) {
-            auto& rule_deps = dependencies[entry.rules[index]];
-            rule_deps.insert(rule_deps.end(), depends.cbegin(),
-                             depends.cend());
+            dependencies[entry.rules[index]] = depends;
           }
-          auto& rule_deps = dependencies[entry.rules.front()];
-          std::move(depends.cbegin(), depends.cend(),
-                    std::back_inserter(rule_deps));
+          dependencies[entry.rules.front()] = std::move(depends);
         }
       } else {
         if (format == "msvc"_s) {
@@ -190,11 +185,11 @@ bool cmDependsCompiler::CheckDependencies(
 }
 
 void cmDependsCompiler::WriteDependencies(
-  const cmDepends::DependencyMap& dependencies, std::ostream& makeDepends,
+  cmDepends::DependencyMap const& dependencies, std::ostream& makeDepends,
   std::ostream& internalDepends)
 {
   // dependencies file consumed by make tool
-  const auto& lineContinue = static_cast<cmGlobalUnixMakefileGenerator3*>(
+  auto const& lineContinue = static_cast<cmGlobalUnixMakefileGenerator3*>(
                                this->LocalGenerator->GetGlobalGenerator())
                                ->LineContinueDirective;
   bool supportLongLineDepend = static_cast<cmGlobalUnixMakefileGenerator3*>(
@@ -209,7 +204,7 @@ void cmDependsCompiler::WriteDependencies(
       this->LocalGenerator->MaybeRelativeToTopBinDir(node.first));
     auto& deps = node.second;
     std::transform(deps.cbegin(), deps.cend(), deps.begin(),
-                   [this](const std::string& dep) {
+                   [this](std::string const& dep) {
                      return this->LocalGenerator->ConvertToMakefilePath(
                        this->LocalGenerator->MaybeRelativeToTopBinDir(dep));
                    });
@@ -218,7 +213,7 @@ void cmDependsCompiler::WriteDependencies(
     if (supportLongLineDepend) {
       makeDepends << target << ": ";
     }
-    for (const auto& dep : deps) {
+    for (auto const& dep : deps) {
       if (supportLongLineDepend) {
         if (first_dep) {
           first_dep = false;
@@ -236,14 +231,14 @@ void cmDependsCompiler::WriteDependencies(
   }
 
   // add phony targets
-  for (const auto& target : phonyTargets) {
+  for (auto const& target : phonyTargets) {
     makeDepends << std::endl << target << ':' << std::endl;
   }
 
   // internal dependencies file
-  for (const auto& node : dependencies) {
+  for (auto const& node : dependencies) {
     internalDepends << node.first << std::endl;
-    for (const auto& dep : node.second) {
+    for (auto const& dep : node.second) {
       internalDepends << ' ' << dep << std::endl;
     }
     internalDepends << std::endl;
@@ -251,7 +246,7 @@ void cmDependsCompiler::WriteDependencies(
 }
 
 void cmDependsCompiler::ClearDependencies(
-  const std::vector<std::string>& depFiles)
+  std::vector<std::string> const& depFiles)
 {
   for (auto dep = depFiles.begin(); dep != depFiles.end(); dep++) {
     dep += 3;

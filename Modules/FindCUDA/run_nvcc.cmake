@@ -50,8 +50,6 @@
 # generated_cubin_file:STRING=<> File to generate.  This argument must be passed
 #                                                   in if build_cubin is true.
 
-cmake_policy(PUSH)
-cmake_policy(SET CMP0007 NEW)
 if(NOT generated_file)
   message(FATAL_ERROR "You must specify generated_file on the command line")
 endif()
@@ -302,5 +300,3 @@ if( build_cubin )
     )
 
 endif()
-
-cmake_policy(POP)

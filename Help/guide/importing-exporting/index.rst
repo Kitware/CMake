@@ -319,7 +319,7 @@ were built in its own tree. For example:
 
    include(GNUInstallDirs)
    include(${INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}/cmake/MathFunctions/MathFunctionTargets.cmake)
-   add_executable(myexe src1.c src2.c )
+   add_executable(myexe src1.c src2.c)
    target_link_libraries(myexe PRIVATE MathFunctions::MathFunctions)
 
 Line 2 loads the target CMake file. Although we only exported a single
@@ -390,7 +390,7 @@ section.
   :start-after: # create config file
   :end-before: # install config files
 
-Install the generated configuration files with the :command:`INSTALL(files)`
+Install the generated configuration files with the :command:`install(FILES)`
 command. Both ``MathFunctionsConfigVersion.cmake`` and
 ``MathFunctionsConfig.cmake`` are installed to the same location, completing
 the package.

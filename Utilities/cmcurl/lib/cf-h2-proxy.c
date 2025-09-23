@@ -32,7 +32,7 @@
 #include "connect.h"
 #include "curl_trc.h"
 #include "bufq.h"
-#include "dynbuf.h"
+#include "curlx/dynbuf.h"
 #include "dynhds.h"
 #include "http1.h"
 #include "http2.h"
@@ -98,7 +98,8 @@ static CURLcode tunnel_stream_init(struct Curl_cfilter *cf,
     return result;
 
   ts->authority = /* host:port with IPv6 support */
-    aprintf("%s%s%s:%d", ipv6_ip?"[":"", hostname, ipv6_ip?"]":"", port);
+    aprintf("%s%s%s:%d", ipv6_ip ? "[":"", hostname,
+            ipv6_ip ? "]" : "", port);
   if(!ts->authority)
     return CURLE_OUT_OF_MEMORY;
 
@@ -276,6 +277,8 @@ static int proxy_h2_client_new(struct Curl_cfilter *cf,
 {
   struct cf_h2_proxy_ctx *ctx = cf->ctx;
   nghttp2_option *o;
+  nghttp2_mem mem = {NULL, Curl_nghttp2_malloc, Curl_nghttp2_free,
+                     Curl_nghttp2_calloc, Curl_nghttp2_realloc};
 
   int rc = nghttp2_option_new(&o);
   if(rc)
@@ -288,7 +291,7 @@ static int proxy_h2_client_new(struct Curl_cfilter *cf,
      HTTP field value. */
   nghttp2_option_set_no_rfc9113_leading_and_trailing_ws_validation(o, 1);
 #endif
-  rc = nghttp2_session_client_new2(&ctx->h2, cbs, cf, o);
+  rc = nghttp2_session_client_new3(&ctx->h2, cbs, cf, o, &mem);
   nghttp2_option_del(o);
   return rc;
 }
@@ -429,7 +432,7 @@ static CURLcode proxy_h2_nw_out_flush(struct Curl_cfilter *cf,
     return result;
   }
   CURL_TRC_CF(data, cf, "[0] nw send buffer flushed");
-  return Curl_bufq_is_empty(&ctx->outbufq)? CURLE_OK: CURLE_AGAIN;
+  return Curl_bufq_is_empty(&ctx->outbufq) ? CURLE_OK : CURLE_AGAIN;
 }
 
 /*
@@ -604,29 +607,27 @@ static int proxy_h2_fr_print(const nghttp2_frame *frame,
       return msnprintf(buffer, blen,
                        "FRAME[SETTINGS, len=%d]", (int)frame->hd.length);
     }
-    case NGHTTP2_PUSH_PROMISE: {
+    case NGHTTP2_PUSH_PROMISE:
       return msnprintf(buffer, blen,
                        "FRAME[PUSH_PROMISE, len=%d, hend=%d]",
                        (int)frame->hd.length,
                        !!(frame->hd.flags & NGHTTP2_FLAG_END_HEADERS));
-    }
-    case NGHTTP2_PING: {
+    case NGHTTP2_PING:
       return msnprintf(buffer, blen,
                        "FRAME[PING, len=%d, ack=%d]",
                        (int)frame->hd.length,
-                       frame->hd.flags&NGHTTP2_FLAG_ACK);
-    }
+                       frame->hd.flags & NGHTTP2_FLAG_ACK);
     case NGHTTP2_GOAWAY: {
       char scratch[128];
-      size_t s_len = sizeof(scratch)/sizeof(scratch[0]);
-        size_t len = (frame->goaway.opaque_data_len < s_len)?
-                      frame->goaway.opaque_data_len : s_len-1;
-        if(len)
-          memcpy(scratch, frame->goaway.opaque_data, len);
-        scratch[len] = '\0';
-        return msnprintf(buffer, blen, "FRAME[GOAWAY, error=%d, reason='%s', "
-                         "last_stream=%d]", frame->goaway.error_code,
-                         scratch, frame->goaway.last_stream_id);
+      size_t s_len = CURL_ARRAYSIZE(scratch);
+      size_t len = (frame->goaway.opaque_data_len < s_len) ?
+        frame->goaway.opaque_data_len : s_len-1;
+      if(len)
+        memcpy(scratch, frame->goaway.opaque_data, len);
+      scratch[len] = '\0';
+      return msnprintf(buffer, blen, "FRAME[GOAWAY, error=%d, reason='%s', "
+                       "last_stream=%d]", frame->goaway.error_code,
+                       scratch, frame->goaway.last_stream_id);
     }
     case NGHTTP2_WINDOW_UPDATE: {
       return msnprintf(buffer, blen,
@@ -864,7 +865,9 @@ static int tunnel_recv_callback(nghttp2_session *session, uint8_t flags,
   if(nwritten < 0) {
     if(result != CURLE_AGAIN)
       return NGHTTP2_ERR_CALLBACK_FAILURE;
+#ifdef DEBUGBUILD
     nwritten = 0;
+#endif
   }
   DEBUGASSERT((size_t)nwritten == len);
   return 0;
@@ -1087,7 +1090,7 @@ out:
 
 static CURLcode cf_h2_proxy_connect(struct Curl_cfilter *cf,
                                     struct Curl_easy *data,
-                                    bool blocking, bool *done)
+                                    bool *done)
 {
   struct cf_h2_proxy_ctx *ctx = cf->ctx;
   CURLcode result = CURLE_OK;
@@ -1102,7 +1105,7 @@ static CURLcode cf_h2_proxy_connect(struct Curl_cfilter *cf,
 
   /* Connect the lower filters first */
   if(!cf->next->connected) {
-    result = Curl_conn_cf_connect(cf->next, data, blocking, done);
+    result = Curl_conn_cf_connect(cf->next, data, done);
     if(result || !*done)
       return result;
   }
@@ -1220,7 +1223,7 @@ static bool cf_h2_proxy_data_pending(struct Curl_cfilter *cf,
      (ctx && ctx->tunnel.state == H2_TUNNEL_ESTABLISHED &&
       !Curl_bufq_is_empty(&ctx->tunnel.recvbuf)))
     return TRUE;
-  return cf->next? cf->next->cft->has_data_pending(cf->next, data) : FALSE;
+  return cf->next ? cf->next->cft->has_data_pending(cf->next, data) : FALSE;
 }
 
 static void cf_h2_proxy_adjust_pollset(struct Curl_cfilter *cf,
@@ -1405,7 +1408,7 @@ static ssize_t cf_h2_proxy_send(struct Curl_cfilter *cf,
   ssize_t nwritten;
   CURLcode result;
 
-  (void)eos; /* TODO, maybe useful for blocks? */
+  (void)eos;
   if(ctx->tunnel.state != H2_TUNNEL_ESTABLISHED) {
     *err = CURLE_SEND_ERROR;
     return -1;
@@ -1586,7 +1589,7 @@ static CURLcode cf_h2_proxy_query(struct Curl_cfilter *cf,
   default:
     break;
   }
-  return cf->next?
+  return cf->next ?
     cf->next->cft->query(cf->next, data, query, pres1, pres2) :
     CURLE_UNKNOWN_OPTION;
 }

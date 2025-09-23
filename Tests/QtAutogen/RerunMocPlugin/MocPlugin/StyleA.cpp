@@ -1,6 +1,6 @@
 #include "StyleA.hpp"
 
-QStyle* StyleA::create(const QString& key)
+QStyle* StyleA::create(QString const& key)
 {
   return 0;
 }

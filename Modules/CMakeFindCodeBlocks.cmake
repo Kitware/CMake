@@ -1,5 +1,5 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-# file Copyright.txt or https://cmake.org/licensing for details.
+# file LICENSE.rst or https://cmake.org/licensing for details.
 
 
 # This file is included in CMakeSystemSpecificInformation.cmake if
@@ -18,7 +18,7 @@ include(${CMAKE_CURRENT_LIST_DIR}/CMakeExtraGeneratorDetermineCompilerMacrosAndI
 set(_CMAKE_CODEBLOCKS_INITIAL_MAKE_ARGS "")
 
 include(ProcessorCount)
-processorcount(_CMAKE_CODEBLOCKS_PROCESSOR_COUNT)
+ProcessorCount(_CMAKE_CODEBLOCKS_PROCESSOR_COUNT)
 
 # Only set -j if we are under UNIX and if the make-tool used actually has "make" in the name
 # (we may also get here in the future e.g. for ninja)

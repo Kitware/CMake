@@ -1,5 +1,5 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-# file Copyright.txt or https://cmake.org/licensing for details.
+# file LICENSE.rst or https://cmake.org/licensing for details.
 
 
 function(_readFile file)
@@ -68,6 +68,7 @@ function(compiler_id_detection outvar lang)
       GHS
       Tasking
       OrangeC
+      Renesas
     )
     if ("x${lang}" STREQUAL "xC")
       list(APPEND ordered_compilers
@@ -89,6 +90,7 @@ function(compiler_id_detection outvar lang)
       MSVC
       ADSP
       IAR
+      Diab
     )
     if ("x${lang}" STREQUAL "xC")
       list(APPEND ordered_compilers

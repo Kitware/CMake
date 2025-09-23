@@ -1,15 +1,11 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmLinkDirectoriesCommand.h"
-
-#include <sstream>
 
 #include "cmExecutionStatus.h"
 #include "cmGeneratorExpression.h"
 #include "cmList.h"
 #include "cmMakefile.h"
-#include "cmMessageType.h"
-#include "cmPolicies.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
@@ -52,34 +48,7 @@ static void AddLinkDir(cmMakefile& mf, std::string const& dir,
   cmSystemTools::ConvertToUnixSlashes(unixPath);
   if (!cmSystemTools::FileIsFullPath(unixPath) &&
       !cmGeneratorExpression::StartsWithGeneratorExpression(unixPath)) {
-    bool convertToAbsolute = false;
-    std::ostringstream e;
-    /* clang-format off */
-    e << "This command specifies the relative path\n"
-      << "  " << unixPath << "\n"
-      << "as a link directory.\n";
-    /* clang-format on */
-    switch (mf.GetPolicyStatus(cmPolicies::CMP0015)) {
-      case cmPolicies::WARN:
-        e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0015);
-        mf.IssueMessage(MessageType::AUTHOR_WARNING, e.str());
-        CM_FALLTHROUGH;
-      case cmPolicies::OLD:
-        // OLD behavior does not convert
-        break;
-      case cmPolicies::REQUIRED_IF_USED:
-      case cmPolicies::REQUIRED_ALWAYS:
-        e << cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0015);
-        mf.IssueMessage(MessageType::FATAL_ERROR, e.str());
-        CM_FALLTHROUGH;
-      case cmPolicies::NEW:
-        // NEW behavior converts
-        convertToAbsolute = true;
-        break;
-    }
-    if (convertToAbsolute) {
-      unixPath = cmStrCat(mf.GetCurrentSourceDirectory(), '/', unixPath);
-    }
+    unixPath = cmStrCat(mf.GetCurrentSourceDirectory(), '/', unixPath);
   }
   directories.push_back(unixPath);
 }

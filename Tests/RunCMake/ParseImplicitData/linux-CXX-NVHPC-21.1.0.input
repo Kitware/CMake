@@ -10,7 +10,7 @@ CMAKE_CXX_COMPILER_LOADED=1
 CMAKE_CXX_COMPILER_RANLIB=
 CMAKE_CXX_COMPILER_TARGET=
 CMAKE_CXX_COMPILER_VERSION=21.1.0
-CMAKE_CXX_COMPILER_VERSION_INTERAL=
+CMAKE_CXX_COMPILER_VERSION_INTERNAL=
 Change Dir: /root/parse_implicit_data/CMakeFiles/CMakeTmp
 
 Run Build Command(s):/usr/bin/make -f Makefile cmTC_79118/fast && /usr/bin/make  -f CMakeFiles/cmTC_79118.dir/build.make CMakeFiles/cmTC_79118.dir/build

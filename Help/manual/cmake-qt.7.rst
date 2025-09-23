@@ -250,7 +250,7 @@ custom command, without forcing the custom command to re-execute.
 Visual Studio Generators
 ========================
 
-When using the :manual:`Visual Studio generators <cmake-generators(7)>`, CMake
+When using the :ref:`Visual Studio Generators`, CMake
 generates a ``PRE_BUILD`` :command:`custom command <add_custom_command>`
 instead of the :ref:`<ORIGIN>_autogen`
 :command:`custom target <add_custom_target>` (for :prop_tgt:`AUTOMOC` and

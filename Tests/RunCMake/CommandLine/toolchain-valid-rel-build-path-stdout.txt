@@ -1,0 +1,1 @@
+CMAKE_TOOLCHAIN_FILE='[^']*/Tests/RunCMake/CommandLine/Toolchain-build/toolchain\.cmake'

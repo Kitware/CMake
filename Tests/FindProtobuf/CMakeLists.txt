@@ -9,3 +9,4 @@ add_test(NAME FindProtobuf.Test COMMAND
   "-DCMake_TEST_FindProtobuf_gRPC=${CMake_TEST_FindProtobuf_gRPC}"
   --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
   )
+set_property(TEST FindProtobuf.Test PROPERTY FAIL_REGULAR_EXPRESSION PROTOC_EXE)

@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
@@ -15,7 +15,7 @@ class cmCursesLabelWidget : public cmCursesWidget
 {
 public:
   cmCursesLabelWidget(int width, int height, int left, int top,
-                      const std::string& name);
+                      std::string const& name);
   ~cmCursesLabelWidget() override;
 
   cmCursesLabelWidget(cmCursesLabelWidget const&) = delete;

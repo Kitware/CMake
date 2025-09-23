@@ -66,7 +66,9 @@ run_test(no_executables GRAPHVIZ_EXECUTABLES FALSE)
 
 run_test(no_static_libs GRAPHVIZ_STATIC_LIBS FALSE)
 run_test(no_shared_libs GRAPHVIZ_SHARED_LIBS FALSE)
-run_test(no_module_libs GRAPHVIZ_MODULE_LIBS FALSE)
+if(NOT RunCMake_TEST_E2K_BROKEN_LIBC)
+  run_test(no_module_libs GRAPHVIZ_MODULE_LIBS FALSE)
+endif()
 
 run_test(no_interface_libs GRAPHVIZ_INTERFACE_LIBS FALSE)
 run_test(no_object_libs GRAPHVIZ_OBJECT_LIBS FALSE)

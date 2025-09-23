@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmIncludeDirectoryCommand.h"
 
 #include <algorithm>
@@ -15,7 +15,7 @@
 #include "cmSystemTools.h"
 #include "cmValue.h"
 
-static void GetIncludes(cmMakefile& mf, const std::string& arg,
+static void GetIncludes(cmMakefile& mf, std::string const& arg,
                         std::vector<std::string>& incs);
 static void NormalizeInclude(cmMakefile& mf, std::string& inc);
 
@@ -89,7 +89,7 @@ bool cmIncludeDirectoryCommand(std::vector<std::string> const& args,
 // output from a program and passing it into a command the cleanup doesn't
 // always happen
 //
-static void GetIncludes(cmMakefile& mf, const std::string& arg,
+static void GetIncludes(cmMakefile& mf, std::string const& arg,
                         std::vector<std::string>& incs)
 {
   // break apart any line feed arguments

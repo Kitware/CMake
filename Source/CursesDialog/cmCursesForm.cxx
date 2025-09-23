@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmCursesForm.h"
 
 #include <cstdlib>
@@ -40,7 +40,7 @@ void cmCursesForm::DebugEnd()
   cmCursesForm::DebugFile.close();
 }
 
-void cmCursesForm::LogMessage(const char* msg)
+void cmCursesForm::LogMessage(char const* msg)
 {
   if (!cmCursesForm::Debug) {
     return;
@@ -53,7 +53,7 @@ void cmCursesForm::HandleResize()
 {
   endwin();
   if (!initscr()) {
-    static const char errmsg[] = "Error: ncurses initialization failed\n";
+    static char const errmsg[] = "Error: ncurses initialization failed\n";
 #ifdef _WIN32
     fprintf(stderr, "%s", errmsg);
 #else

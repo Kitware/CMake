@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmRST.h"
 
 #include <algorithm>
@@ -348,7 +348,7 @@ void cmRST::OutputMarkupLines(bool inlineMarkup)
 {
   for (auto line : this->MarkupLines) {
     if (!line.empty()) {
-      line = cmStrCat(" ", line);
+      line = cmStrCat(' ', line);
     }
     this->OutputLine(line, inlineMarkup);
   }

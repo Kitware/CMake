@@ -1,6 +1,3 @@
-cmake_policy(PUSH)
-cmake_policy(SET CMP0057 NEW)
-
 function (json_placeholders in out)
   string(REPLACE "<CONFIG>" "${CXXModules_config}" in "${in}")
   string(TOLOWER "${CXXModules_config}" config_lower)
@@ -50,8 +47,8 @@ endfunction ()
 
 function (check_json_value path actual_type expect_type actual_value expect_value)
   if (NOT actual_type STREQUAL expect_type)
-    list(APPEND RunCMake_TEST_FAILED
-      "Type mismatch at ${path}: ${actual_type} vs. ${expect_type}")
+    string(APPEND RunCMake_TEST_FAILED
+      "Type mismatch at:\n ${path}\nexpected:\n ${expect_type}\nactual:\n ${actual_type}\n")
     set(RunCMake_TEST_FAILED "${RunCMake_TEST_FAILED}" PARENT_SCOPE)
     return ()
   endif ()
@@ -60,13 +57,13 @@ function (check_json_value path actual_type expect_type actual_value expect_valu
     # Nothing to check
   elseif (actual_type STREQUAL BOOLEAN)
     if (NOT actual_value STREQUAL expect_value)
-      list(APPEND RunCMake_TEST_FAILED
-        "Boolean mismatch at ${path}: ${actual_value} vs. ${expect_value}")
+      string(APPEND RunCMake_TEST_FAILED
+        "Boolean mismatch at:\n ${path}\nexpected:\n ${expect_value}\nactual:\n ${actual_value}\n")
     endif ()
   elseif (actual_type STREQUAL NUMBER)
     if (NOT actual_value EQUAL expect_value)
-      list(APPEND RunCMake_TEST_FAILED
-        "Number mismatch at ${path}: ${actual_value} vs. ${expect_value}")
+      string(APPEND RunCMake_TEST_FAILED
+        "Number mismatch at:\n ${path}\nexpected:\n ${expect_value}\nactual:\n ${actual_value}\n")
     endif ()
   elseif (actual_type STREQUAL STRING)
     # Allow some values to be ignored.
@@ -79,24 +76,24 @@ function (check_json_value path actual_type expect_type actual_value expect_valu
       string(REPLACE "\\" "/" actual_value_check "${actual_value}")
       string(REGEX REPLACE "^\"(.*)\"$" "\\1" actual_value_check "${actual_value_check}")
       if (NOT actual_value_check MATCHES "^${expect_value_expanded}$")
-        list(APPEND RunCMake_TEST_FAILED
-          "String mismatch (path regex) at ${path}: ${actual_value} vs. ^${expect_value_expanded}$")
+        string(APPEND RunCMake_TEST_FAILED
+          "String mismatch (path regex) at:\n ${path}\nexpected:\n ^${expect_value_expanded}$\nactual:\n ${actual_value}\n")
       endif ()
     elseif (expect_value MATCHES "^REGEX:")
       if (NOT actual_value MATCHES "^${expect_value_expanded}$")
-        list(APPEND RunCMake_TEST_FAILED
-          "String mismatch (regex) at ${path}: ${actual_value} vs. ^${expect_value_expanded}$")
+        string(APPEND RunCMake_TEST_FAILED
+          "String mismatch (regex) at:\n ${path}\nexpected:\n ^${expect_value_expanded}$\nactual:\n ${actual_value}\n")
       endif ()
     elseif (expect_value MATCHES "^PATH:")
       string(REPLACE "\\" "/" actual_value_check "${actual_value}")
       string(REGEX REPLACE "^\"(.*)\"$" "\\1" actual_value_check "${actual_value_check}")
       if (NOT actual_value_check STREQUAL "${expect_value_expanded}")
-        list(APPEND RunCMake_TEST_FAILED
-          "String mismatch (path) at ${path}: ${actual_value} vs. ^${expect_value_expanded}$")
+        string(APPEND RunCMake_TEST_FAILED
+          "String mismatch (path) at:\n ${path}\nexpected:\n ${expect_value_expanded}\nactual:\n ${actual_value}\n")
       endif ()
     elseif (NOT actual_value STREQUAL expect_value_expanded)
-      list(APPEND RunCMake_TEST_FAILED
-        "String mismatch at ${path}: ${actual_value} vs. ${expect_value_expanded}")
+      string(APPEND RunCMake_TEST_FAILED
+        "String mismatch at:\n ${path}\nexpected:\n ${expect_value_expanded}\nactual:\n ${actual_value}\n")
     endif ()
   elseif (actual_type STREQUAL ARRAY)
     check_json_array("${path}" "${actual_value}" "${expect_value}")
@@ -130,11 +127,11 @@ function (check_json_array path actual expect)
 
   set(iter_len "${actual_len}")
   if (actual_len LESS expect_len)
-    list(APPEND RunCMake_TEST_FAILED
-      "Missing array items at ${path}")
+    string(APPEND RunCMake_TEST_FAILED
+      "Missing array items at:\n ${path}\n")
   elseif (expect_len LESS actual_len)
-    list(APPEND RunCMake_TEST_FAILED
-      "Extra array items at ${path}")
+    string(APPEND RunCMake_TEST_FAILED
+      "Extra array items at:\n ${path}\n")
     set(iter_len "${expect_len}")
   endif ()
 
@@ -200,13 +197,13 @@ function (check_json_object path actual expect)
 
   if (actual_keys_missed)
     string(REPLACE ";" ", " actual_keys_missed_text "${actual_keys_missed}")
-    list(APPEND RunCMake_TEST_FAILED
-      "Extra unexpected members at ${path}: ${actual_keys_missed_text}")
+    string(APPEND RunCMake_TEST_FAILED
+      "Extra unexpected members at:\n ${path}\nactual:\n ${actual_keys_missed_text}\n")
   endif ()
   if (expect_keys_missed)
     string(REPLACE ";" ", " expect_keys_missed_text "${expect_keys_missed}")
-    list(APPEND RunCMake_TEST_FAILED
-      "Missing expected members at ${path}: ${expect_keys_missed_text}")
+    string(APPEND RunCMake_TEST_FAILED
+      "Missing expected members at\n ${path}\nactual:\n ${expect_keys_missed_text}\n")
   endif ()
 
   foreach (key IN LISTS common_keys)
@@ -228,5 +225,3 @@ function (check_json actual expect)
 
   set(RunCMake_TEST_FAILED "${RunCMake_TEST_FAILED}" PARENT_SCOPE)
 endfunction ()
-
-cmake_policy(POP)

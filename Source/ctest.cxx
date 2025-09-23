@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 
 #include <cstring>
 #include <iostream>
@@ -9,23 +9,24 @@
 #include "cmsys/Encoding.hxx"
 
 #include "cmCTest.h"
-#include "cmConsoleBuf.h"
 #include "cmDocumentation.h"
 #include "cmDocumentationEntry.h"
+#include "cmInstrumentation.h"
+#include "cmInstrumentationQuery.h"
+#include "cmStdIoConsole.h"
 #include "cmSystemTools.h"
 
 #include "CTest/cmCTestLaunch.h"
-#include "CTest/cmCTestScriptHandler.h"
 
 namespace {
-const cmDocumentationEntry cmDocumentationName = {
+cmDocumentationEntry const cmDocumentationName = {
   {},
   "  ctest - Testing driver provided by CMake."
 };
 
-const cmDocumentationEntry cmDocumentationUsage = { {}, "  ctest [options]" };
+cmDocumentationEntry const cmDocumentationUsage = { {}, "  ctest [options]" };
 
-const cmDocumentationEntry cmDocumentationOptions[] = {
+cmDocumentationEntry const cmDocumentationOptions[] = {
   { "--preset <preset>, --preset=<preset>",
     "Read arguments from a test preset." },
   { "--list-presets", "List available test presets." },
@@ -147,9 +148,8 @@ const cmDocumentationEntry cmDocumentationOptions[] = {
   { "--overwrite", "Overwrite CTest configuration option." },
   { "--extra-submit <file>[;<file>]", "Submit extra files to the dashboard." },
   { "--http-header <header>", "Append HTTP header when submitting" },
-  { "--force-new-ctest-process",
-    "Run child CTest instances as new processes" },
   { "--schedule-random", "Use a random order for scheduling tests" },
+  { "--schedule-random-seed", "Override seed for random order of tests" },
   { "--submit-index",
     "Submit individual dashboard tests with specific index" },
   { "--timeout <seconds>", "Set the default test timeout." },
@@ -166,11 +166,7 @@ const cmDocumentationEntry cmDocumentationOptions[] = {
 // this is a test driver program for cmCTest.
 int main(int argc, char const* const* argv)
 {
-  cmSystemTools::EnsureStdPipes();
-
-  // Replace streambuf so we can output Unicode to console
-  cmConsoleBuf consoleBuf;
-  consoleBuf.SetUTF8Pipes();
+  cm::StdIo::Console console;
 
   cmsys::Encoding::CommandLineArguments encoding_args =
     cmsys::Encoding::CommandLineArguments::Main(argc, argv);
@@ -182,14 +178,34 @@ int main(int argc, char const* const* argv)
 
   // Dispatch 'ctest --launch' mode directly.
   if (argc >= 2 && strcmp(argv[1], "--launch") == 0) {
-    return cmCTestLaunch::Main(argc, argv);
+    return cmCTestLaunch::Main(argc, argv, cmCTestLaunch::Op::Normal);
   }
 
-  cmCTest inst;
+  // Dispatch 'ctest --instrument' mode directly.
+  if (argc >= 2 && strcmp(argv[1], "--instrument") == 0) {
+    return cmCTestLaunch::Main(argc, argv, cmCTestLaunch::Op::Instrument);
+  }
 
-  if (cmSystemTools::GetCurrentWorkingDirectory().empty()) {
-    cmCTestLog(&inst, ERROR_MESSAGE,
-               "Current working directory cannot be established.\n");
+  // Dispatch post-build instrumentation daemon for ninja
+  if (argc == 3 && strcmp(argv[1], "--start-instrumentation") == 0) {
+    return cmInstrumentation(argv[2]).SpawnBuildDaemon();
+  }
+
+  // Dispatch 'ctest --collect-instrumentation' once given PID finishes
+  if (argc == 4 &&
+      strcmp(argv[1], "--wait-and-collect-instrumentation") == 0) {
+    return cmInstrumentation(argv[2]).CollectTimingAfterBuild(
+      std::stoi(argv[3]));
+  }
+
+  // Dispatch 'ctest --collect-instrumentation' mode directly.
+  if (argc == 3 && strcmp(argv[1], "--collect-instrumentation") == 0) {
+    return cmInstrumentation(argv[2]).CollectTimingData(
+      cmInstrumentationQuery::Hook::Manual);
+  }
+
+  if (cmSystemTools::GetLogicalWorkingDirectory().empty()) {
+    std::cerr << "Current working directory cannot be established.\n";
     return 1;
   }
 
@@ -200,18 +216,13 @@ int main(int argc, char const* const* argv)
       !(cmSystemTools::FileExists("CTestTestfile.cmake") ||
         cmSystemTools::FileExists("DartTestfile.txt"))) {
     if (argc == 1) {
-      cmCTestLog(&inst, ERROR_MESSAGE,
-                 "*********************************\n"
-                 "No test configuration file found!\n"
-                 "*********************************\n");
+      std::cerr << "*********************************\n"
+                   "No test configuration file found!\n"
+                   "*********************************\n";
     }
     cmDocumentation doc;
     doc.addCTestStandardDocSections();
     if (doc.CheckOptions(argc, argv)) {
-      // Construct and print requested documentation.
-      cmCTestScriptHandler* ch = inst.GetScriptHandler();
-      ch->CreateCMake();
-
       doc.SetShowGenerators(false);
       doc.SetName("ctest");
       doc.SetSection("Name", cmDocumentationName);
@@ -222,15 +233,8 @@ int main(int argc, char const* const* argv)
   }
 
   // copy the args to a vector
-  std::vector<std::string> args;
-  args.reserve(argc);
-  for (int i = 0; i < argc; ++i) {
-    args.emplace_back(argv[i]);
-  }
-  // run ctest
-  std::string output;
-  int res = inst.Run(args, &output);
-  cmCTestLog(&inst, OUTPUT, output);
+  auto args = std::vector<std::string>(argv, argv + argc);
 
-  return res;
+  // run ctest
+  return cmCTest{}.Run(args);
 }

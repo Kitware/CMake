@@ -40,8 +40,8 @@ The command will apply only to targets created after it is called.
   generally be used directly in calls to :command:`target_link_libraries`.
   Situations where a library search path may be needed include:
 
-  - Project generators like Xcode where the user can switch target
-    architecture at build time, but a full path to a library cannot
+  - Project generators like :generator:`Xcode` where the user can switch
+    target architecture at build time, but a full path to a library cannot
     be used because it only provides one architecture (i.e. it is not
     a universal binary).
   - Libraries may themselves have other private library dependencies

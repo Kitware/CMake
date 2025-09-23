@@ -1,5 +1,5 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-# file Copyright.txt or https://cmake.org/licensing for details.
+# file LICENSE.rst or https://cmake.org/licensing for details.
 
 #[=======================================================================[.rst:
 FindPatch
@@ -7,26 +7,67 @@ FindPatch
 
 .. versionadded:: 3.10
 
-The module defines the following variables:
+Finds the ``patch`` command-line executable for applying diff patches to
+original files.
 
-``Patch_EXECUTABLE``
-  Path to patch command-line executable.
-``Patch_FOUND``
-  True if the patch command-line executable was found.
+Imported Targets
+^^^^^^^^^^^^^^^^
 
-The following :prop_tgt:`IMPORTED` targets are also defined:
+This module provides the following :ref:`Imported Targets`:
 
 ``Patch::patch``
-  The command-line executable.
+  Target encapsulating the ``patch`` command-line executable, available only if
+  ``patch`` is found.
 
-Example usage:
+  .. versionchanged:: 4.0
+    This imported target is defined only when :prop_gbl:`CMAKE_ROLE` is
+    ``PROJECT``.
+
+Result Variables
+^^^^^^^^^^^^^^^^
+
+This module defines the following variables:
+
+``Patch_FOUND``
+  Boolean indicating whether the ``patch`` command-line executable is found.
+
+Cache Variables
+^^^^^^^^^^^^^^^
+
+The following cache variables may also be set:
+
+``Patch_EXECUTABLE``
+  The path to the ``patch`` command-line executable.
+
+Examples
+^^^^^^^^
+
+Finding ``patch`` command and executing it in a process:
 
 .. code-block:: cmake
 
-   find_package(Patch)
-   if(Patch_FOUND)
-     message("Patch found: ${Patch_EXECUTABLE}")
-   endif()
+  find_package(Patch)
+  if(Patch_FOUND)
+    execute_process(
+      COMMAND ${Patch_EXECUTABLE} -p1 -i ${CMAKE_CURRENT_SOURCE_DIR}/src.patch
+    )
+  endif()
+
+The imported target can be used, for example, inside the
+:command:`add_custom_command` command, which patches the given file when some
+build rule depends on its output:
+
+.. code-block:: cmake
+
+  find_package(Patch)
+  if(TARGET Patch::patch)
+    # Executed when some build rule depends on the src.c file.
+    add_custom_command(
+      OUTPUT src.c
+      COMMAND Patch::patch -p1 -i ${CMAKE_CURRENT_SOURCE_DIR}/src.patch
+      # ...
+    )
+  endif()
 #]=======================================================================]
 
 set(_doc "Patch command line executable")
@@ -58,14 +99,23 @@ if(CMAKE_HOST_WIN32)
     )
 endif()
 
-if(Patch_EXECUTABLE AND NOT TARGET Patch::patch)
+mark_as_advanced(Patch_EXECUTABLE)
+
+get_property(_patch_role GLOBAL PROPERTY CMAKE_ROLE)
+
+if(
+  _patch_role STREQUAL "PROJECT"
+  AND Patch_EXECUTABLE
+  AND NOT TARGET Patch::patch
+)
   add_executable(Patch::patch IMPORTED)
   set_property(TARGET Patch::patch PROPERTY IMPORTED_LOCATION ${Patch_EXECUTABLE})
 endif()
 
 unset(_patch_path)
+unset(_patch_role)
 unset(_doc)
 
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(Patch
                                   REQUIRED_VARS Patch_EXECUTABLE)

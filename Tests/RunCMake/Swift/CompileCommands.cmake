@@ -1,6 +1,10 @@
 if(POLICY CMP0157)
   cmake_policy(SET CMP0157 NEW)
 endif()
+if(POLICY CMP0195)
+  cmake_policy(SET CMP0195 NEW)
+endif()
+
 set(CMAKE_Swift_COMPILATION_MODE "singlefile")
 
 enable_language(Swift)

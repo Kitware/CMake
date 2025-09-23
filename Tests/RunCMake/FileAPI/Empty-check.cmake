@@ -5,4 +5,4 @@ set(expect
   )
 check_api("^${expect}$")
 
-check_python(Empty)
+check_python(Empty index)

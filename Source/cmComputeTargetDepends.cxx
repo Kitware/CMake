@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmComputeTargetDepends.h"
 
 #include <cassert>
@@ -17,12 +17,12 @@
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
-#include "cmPolicies.h"
 #include "cmRange.h"
 #include "cmSourceFile.h"
 #include "cmSourceFileLocationKind.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmTargetDepend.h"
@@ -177,8 +177,8 @@ void cmComputeTargetDepends::CollectTargets()
 {
   // Collect all targets from all generators.
   auto const& lgens = this->GlobalGenerator->GetLocalGenerators();
-  for (const auto& lgen : lgens) {
-    for (const auto& ti : lgen->GetGeneratorTargets()) {
+  for (auto const& lgen : lgens) {
+    for (auto const& ti : lgen->GetGeneratorTargets()) {
       size_t index = this->Targets.size();
       this->TargetIndex[ti.get()] = index;
       this->Targets.push_back(ti.get());
@@ -262,8 +262,8 @@ void cmComputeTargetDepends::CollectTargetDepends(size_t depender_index)
 }
 
 void cmComputeTargetDepends::AddInterfaceDepends(
-  size_t depender_index, const cmGeneratorTarget* dependee,
-  cmListFileBacktrace const& dependee_backtrace, const std::string& config,
+  size_t depender_index, cmGeneratorTarget const* dependee,
+  cmListFileBacktrace const& dependee_backtrace, std::string const& config,
   std::set<cmLinkItem>& emitted)
 {
   cmGeneratorTarget const* depender = this->Targets[depender_index];
@@ -292,7 +292,7 @@ void cmComputeTargetDepends::AddInterfaceDepends(
 
 void cmComputeTargetDepends::AddInterfaceDepends(
   size_t depender_index, cmLinkItem const& dependee_name,
-  const std::string& config, std::set<cmLinkItem>& emitted)
+  std::string const& config, std::set<cmLinkItem>& emitted)
 {
   cmGeneratorTarget const* depender = this->Targets[depender_index];
   cmGeneratorTarget const* dependee = dependee_name.Target;
@@ -353,31 +353,11 @@ void cmComputeTargetDepends::AddTargetDepend(size_t depender_index,
 
   if (!dependee && !linking &&
       (depender->GetType() != cmStateEnums::GLOBAL_TARGET)) {
-    MessageType messageType = MessageType::AUTHOR_WARNING;
-    bool issueMessage = false;
-    std::ostringstream e;
-    switch (depender->GetPolicyStatusCMP0046()) {
-      case cmPolicies::WARN:
-        e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0046) << "\n";
-        issueMessage = true;
-        CM_FALLTHROUGH;
-      case cmPolicies::OLD:
-        break;
-      case cmPolicies::NEW:
-      case cmPolicies::REQUIRED_IF_USED:
-      case cmPolicies::REQUIRED_ALWAYS:
-        issueMessage = true;
-        messageType = MessageType::FATAL_ERROR;
-        break;
-    }
-    if (issueMessage) {
-      cmake* cm = this->GlobalGenerator->GetCMakeInstance();
-
-      e << "The dependency target \"" << dependee_name << "\" of target \""
-        << depender->GetName() << "\" does not exist.";
-
-      cm->IssueMessage(messageType, e.str(), dependee_name.Backtrace);
-    }
+    this->GlobalGenerator->GetCMakeInstance()->IssueMessage(
+      MessageType::FATAL_ERROR,
+      cmStrCat("The dependency target \"", dependee_name.AsStr(),
+               "\" of target \"", depender->GetName(), "\" does not exist."),
+      dependee_name.Backtrace);
   }
 
   // Skip targets that will not really be linked.  This is probably a
@@ -527,7 +507,7 @@ void cmComputeTargetDepends::OptimizeLinkDependencies(
 }
 
 void cmComputeTargetDepends::DisplayGraph(Graph const& graph,
-                                          const std::string& name)
+                                          std::string const& name)
 {
   fprintf(stderr, "The %s target dependency graph is:\n", name.c_str());
   size_t n = graph.size();
@@ -575,7 +555,7 @@ void cmComputeTargetDepends::DisplaySideEffects()
 }
 
 void cmComputeTargetDepends::DisplayComponents(
-  cmComputeComponentGraph const& ccg, const std::string& name)
+  cmComputeComponentGraph const& ccg, std::string const& name)
 {
   fprintf(stderr, "The strongly connected components for the %s graph are:\n",
           name.c_str());

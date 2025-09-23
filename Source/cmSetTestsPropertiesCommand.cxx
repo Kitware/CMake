@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmSetTestsPropertiesCommand.h"
 
 #include <algorithm>
@@ -58,7 +58,7 @@ bool cmSetTestsPropertiesCommand(std::vector<std::string> const& args,
   }
 
   // loop over all the tests
-  for (const std::string& tname : tests) {
+  for (std::string const& tname : tests) {
     if (cmTest* test = mf->GetTest(tname)) {
       // loop through all the props and set them
       for (auto k = propsIter + 1; k != args.end(); k += 2) {

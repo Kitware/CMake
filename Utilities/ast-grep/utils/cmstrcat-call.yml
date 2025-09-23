@@ -1,0 +1,5 @@
+---
+id: cmstrcat-call
+language: Cpp
+rule:
+  pattern: cmStrCat($$$)

@@ -1,5 +1,5 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-# file Copyright.txt or https://cmake.org/licensing for details.
+# file LICENSE.rst or https://cmake.org/licensing for details.
 
 # Not needed for "modern" VTK.
 if (EXISTS "${VTK_SOURCE_DIR}/CMake/vtkModule.cmake")
@@ -43,4 +43,3 @@ set(TIFF_RIGHT_VERSION 1)
 macro(SOURCE_FILES)
   message (FATAL_ERROR "You are trying to build a very old version of VTK (prior to VTK 4.2). To do this you need to use CMake 2.0 as it was the last version of CMake to support VTK 4.0.")
 endmacro()
-

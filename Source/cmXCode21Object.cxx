@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmXCode21Object.h"
 
 #include <ostream>
@@ -34,7 +34,7 @@ void cmXCode21Object::PrintList(
   PBXType t)
 {
   bool hasOne = false;
-  for (const auto& obj : v) {
+  for (auto const& obj : v) {
     if (obj->GetType() == OBJECT && obj->GetIsA() == t) {
       hasOne = true;
       break;
@@ -44,7 +44,7 @@ void cmXCode21Object::PrintList(
     return;
   }
   out << "\n/* Begin " << PBXTypeNames[t] << " section */\n";
-  for (const auto& obj : v) {
+  for (auto const& obj : v) {
     if (obj->GetType() == OBJECT && obj->GetIsA() == t) {
       obj->Print(out);
     }

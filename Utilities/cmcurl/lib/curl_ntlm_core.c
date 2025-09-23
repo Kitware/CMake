@@ -71,23 +71,7 @@
 #  include <openssl/md5.h>
 #  include <openssl/ssl.h>
 #  include <openssl/rand.h>
-#else
-#  include <wolfssl/openssl/des.h>
-#  include <wolfssl/openssl/md5.h>
-#  include <wolfssl/openssl/ssl.h>
-#  include <wolfssl/openssl/rand.h>
-#endif
-
-#  if (defined(OPENSSL_VERSION_NUMBER) && \
-       (OPENSSL_VERSION_NUMBER < 0x00907001L)) && !defined(USE_WOLFSSL)
-#    define DES_key_schedule des_key_schedule
-#    define DES_cblock des_cblock
-#    define DES_set_odd_parity des_set_odd_parity
-#    define DES_set_key des_set_key
-#    define DES_ecb_encrypt des_ecb_encrypt
-#    define DESKEY(x) x
-#    define DESKEYARG(x) x
-#  elif defined(OPENSSL_IS_AWSLC)
+#  if defined(OPENSSL_IS_AWSLC)
 #    define DES_set_key_unchecked (void)DES_set_key
 #    define DESKEYARG(x) *x
 #    define DESKEY(x) &x
@@ -95,6 +79,25 @@
 #    define DESKEYARG(x) *x
 #    define DESKEY(x) &x
 #  endif
+#else
+#  include <wolfssl/openssl/des.h>
+#  include <wolfssl/openssl/md5.h>
+#  include <wolfssl/openssl/ssl.h>
+#  include <wolfssl/openssl/rand.h>
+#  if defined(OPENSSL_COEXIST)
+#    define DES_key_schedule WOLFSSL_DES_key_schedule
+#    define DES_cblock WOLFSSL_DES_cblock
+#    define DES_set_odd_parity wolfSSL_DES_set_odd_parity
+#    define DES_set_key wolfSSL_DES_set_key
+#    define DES_set_key_unchecked wolfSSL_DES_set_key_unchecked
+#    define DES_ecb_encrypt wolfSSL_DES_ecb_encrypt
+#    define DESKEY(x) ((WOLFSSL_DES_key_schedule *)(x))
+#    define DESKEYARG(x) *x
+#  else
+#    define DESKEYARG(x) *x
+#    define DESKEY(x) &x
+#  endif
+#endif
 
 #elif defined(USE_GNUTLS)
 
@@ -123,7 +126,7 @@
 #include "curl_ntlm_core.h"
 #include "curl_md5.h"
 #include "curl_hmac.h"
-#include "warnless.h"
+#include "curlx/warnless.h"
 #include "curl_endian.h"
 #include "curl_des.h"
 #include "curl_md4.h"
@@ -131,9 +134,6 @@
 #include "curl_printf.h"
 #include "curl_memory.h"
 #include "memdebug.h"
-
-#define NTLMv2_BLOB_SIGNATURE "\x01\x01\x00\x00"
-#define NTLMv2_BLOB_LEN       (44 -16 + ntlm->target_info_len + 4)
 
 #if !defined(CURL_NTLM_NOT_SUPPORTED)
 /*
@@ -321,16 +321,16 @@ void Curl_ntlm_core_lm_resp(const unsigned char *keys,
   DES_key_schedule ks;
 
   setup_des_key(keys, DESKEY(ks));
-  DES_ecb_encrypt((DES_cblock*) plaintext, (DES_cblock*) results,
-                  DESKEY(ks), DES_ENCRYPT);
+  DES_ecb_encrypt((DES_cblock*)CURL_UNCONST(plaintext),
+                  (DES_cblock*)results, DESKEY(ks), DES_ENCRYPT);
 
   setup_des_key(keys + 7, DESKEY(ks));
-  DES_ecb_encrypt((DES_cblock*) plaintext, (DES_cblock*) (results + 8),
-                  DESKEY(ks), DES_ENCRYPT);
+  DES_ecb_encrypt((DES_cblock*)CURL_UNCONST(plaintext),
+                  (DES_cblock*)(results + 8), DESKEY(ks), DES_ENCRYPT);
 
   setup_des_key(keys + 14, DESKEY(ks));
-  DES_ecb_encrypt((DES_cblock*) plaintext, (DES_cblock*) (results + 16),
-                  DESKEY(ks), DES_ENCRYPT);
+  DES_ecb_encrypt((DES_cblock*)CURL_UNCONST(plaintext),
+                  (DES_cblock*)(results + 16), DESKEY(ks), DES_ENCRYPT);
 #elif defined(USE_GNUTLS)
   struct des_ctx des;
   setup_des_key(keys, &des);
@@ -375,12 +375,12 @@ CURLcode Curl_ntlm_core_mk_lm_hash(const char *password,
     DES_key_schedule ks;
 
     setup_des_key(pw, DESKEY(ks));
-    DES_ecb_encrypt((DES_cblock *)magic, (DES_cblock *)lmbuffer,
-                    DESKEY(ks), DES_ENCRYPT);
+    DES_ecb_encrypt((DES_cblock *)CURL_UNCONST(magic),
+                    (DES_cblock *)lmbuffer, DESKEY(ks), DES_ENCRYPT);
 
     setup_des_key(pw + 7, DESKEY(ks));
-    DES_ecb_encrypt((DES_cblock *)magic, (DES_cblock *)(lmbuffer + 8),
-                    DESKEY(ks), DES_ENCRYPT);
+    DES_ecb_encrypt((DES_cblock *)CURL_UNCONST(magic),
+                    (DES_cblock *)(lmbuffer + 8), DESKEY(ks), DES_ENCRYPT);
 #elif defined(USE_GNUTLS)
     struct des_ctx des;
     setup_des_key(pw, &des);
@@ -453,6 +453,9 @@ CURLcode Curl_ntlm_core_mk_nt_hash(const char *password,
 
 #if !defined(USE_WINDOWS_SSPI)
 
+#define NTLMv2_BLOB_SIGNATURE "\x01\x01\x00\x00"
+#define NTLMv2_BLOB_LEN       (44 -16 + ntlm->target_info_len + 4)
+
 /* Timestamp in tenths of a microsecond since January 1, 1601 00:00:00 UTC. */
 struct ms_filetime {
   unsigned int dwLowDateTime;
@@ -483,7 +486,7 @@ static void time2filetime(struct ms_filetime *ft, time_t t)
      134774 days = 11644473600 seconds = 0x2B6109100 */
   r = ft->dwLowDateTime;
   ft->dwLowDateTime = (ft->dwLowDateTime + 0xB6109100U) & 0xFFFFFFFF;
-  ft->dwHighDateTime += ft->dwLowDateTime < r? 0x03: 0x02;
+  ft->dwHighDateTime += ft->dwLowDateTime < r ? 0x03 : 0x02;
 
   /* Convert to tenths of microseconds. */
   ft->dwHighDateTime *= 10000000;
@@ -528,7 +531,7 @@ CURLcode Curl_ntlm_core_mk_ntlmv2_hash(const char *user, size_t userlen,
   ascii_uppercase_to_unicode_le(identity, user, userlen);
   ascii_to_unicode_le(identity + (userlen << 1), domain, domlen);
 
-  result = Curl_hmacit(Curl_HMAC_MD5, ntlmhash, 16, identity, identity_len,
+  result = Curl_hmacit(&Curl_HMAC_MD5, ntlmhash, 16, identity, identity_len,
                        ntlmv2hash);
   free(identity);
 
@@ -613,8 +616,8 @@ CURLcode Curl_ntlm_core_mk_ntlmv2_resp(unsigned char *ntlmv2hash,
 
   /* Concatenate the Type 2 challenge with the BLOB and do HMAC MD5 */
   memcpy(ptr + 8, &ntlm->nonce[0], 8);
-  result = Curl_hmacit(Curl_HMAC_MD5, ntlmv2hash, HMAC_MD5_LENGTH, ptr + 8,
-                    NTLMv2_BLOB_LEN + 8, hmac_output);
+  result = Curl_hmacit(&Curl_HMAC_MD5, ntlmv2hash, HMAC_MD5_LENGTH, ptr + 8,
+                       NTLMv2_BLOB_LEN + 8, hmac_output);
   if(result) {
     free(ptr);
     return result;
@@ -656,7 +659,7 @@ CURLcode  Curl_ntlm_core_mk_lmv2_resp(unsigned char *ntlmv2hash,
   memcpy(&data[0], challenge_server, 8);
   memcpy(&data[8], challenge_client, 8);
 
-  result = Curl_hmacit(Curl_HMAC_MD5, ntlmv2hash, 16, &data[0], 16,
+  result = Curl_hmacit(&Curl_HMAC_MD5, ntlmv2hash, 16, &data[0], 16,
                        hmac_output);
   if(result)
     return result;

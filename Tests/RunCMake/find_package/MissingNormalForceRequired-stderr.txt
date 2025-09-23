@@ -1,5 +1,9 @@
 CMake Error at MissingNormalForceRequired.cmake:2 \(find_package\):
   No "FindNotHere.cmake" found in CMAKE_MODULE_PATH\.
+
+  This package is considered required because the
+  CMAKE_REQUIRE_FIND_PACKAGE_NotHere variable has been enabled.
+
 Call Stack \(most recent call first\):
   CMakeLists.txt:3 \(include\)
 +

@@ -7,7 +7,6 @@ set(CMAKE_C_USING_LINKER_abc123 /path/to/somewhere)
 set(CMAKE_C_USING_LINKER_Hi_There some-tool)
 set(CMAKE_ASM_NASM_USING_LINKER_custom /place/holder)
 set(CMAKE_ASM-ATT_USING_LINKER_custom /more/text)
-set(CMAKE_ASM-ATT_USING_LINKER_MODE TOOL)
 
 try_compile(RESULT
   PROJECT TestProject

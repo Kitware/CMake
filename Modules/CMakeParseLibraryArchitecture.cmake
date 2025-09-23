@@ -1,9 +1,5 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-# file Copyright.txt or https://cmake.org/licensing for details.
-
-cmake_policy(PUSH)
-cmake_policy(SET CMP0053 NEW)
-cmake_policy(SET CMP0054 NEW)
+# file LICENSE.rst or https://cmake.org/licensing for details.
 
 # Function parse implicit linker options.
 # This is used internally by CMake and should not be included by user
@@ -50,5 +46,3 @@ function(cmake_parse_library_architecture lang implicit_dirs implicit_objs outpu
     set(${output_var} "${library_arch}" PARENT_SCOPE)
   endif()
 endfunction()
-
-cmake_policy(POP)

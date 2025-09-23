@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
@@ -30,11 +30,10 @@ public:
 
 private:
   std::string FindHeaderInFramework(std::string const& file,
-                                    std::string const& dir,
-                                    cmFindBaseDebugState& debug) const;
+                                    std::string const& dir) const;
   std::string FindHeader();
-  std::string FindNormalHeader(cmFindBaseDebugState& debug);
-  std::string FindFrameworkHeader(cmFindBaseDebugState& debug);
+  std::string FindNormalHeader();
+  std::string FindFrameworkHeader();
 };
 
 bool cmFindPath(std::vector<std::string> const& args,

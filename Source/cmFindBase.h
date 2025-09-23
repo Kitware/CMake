@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
@@ -11,7 +11,9 @@
 #include "cmFindCommon.h"
 #include "cmStateTypes.h"
 
+class cmConfigureLog;
 class cmExecutionStatus;
+class cmMakefile;
 
 /** \class cmFindBase
  * \brief Base class for most FIND_XXX commands.
@@ -23,7 +25,7 @@ class cmFindBase : public cmFindCommon
 {
 public:
   cmFindBase(std::string findCommandName, cmExecutionStatus& status);
-  virtual ~cmFindBase() = default;
+  ~cmFindBase() override;
 
   /**
    * This is called when the command is first encountered in
@@ -34,19 +36,17 @@ public:
   /**
    * To check validity of a found path using user's validator, if any
    */
-  bool Validate(const std::string& path) const;
+  bool Validate(std::string const& path) const;
 
 protected:
   friend class cmFindBaseDebugState;
   void ExpandPaths();
 
-  // see if the VariableName is already set,
-  // also copy the documentation from the cache to VariableDocumentation
-  // if it has documentation in the cache
-  bool CheckForVariableDefined();
+  bool IsFound() const override;
+  bool IsDefined() const override;
 
   void NormalizeFindResult();
-  void StoreFindResult(const std::string& value);
+  void StoreFindResult(std::string const& value);
 
   // actual find command name
   std::string FindCommandName;
@@ -62,7 +62,6 @@ protected:
   // CMAKE_*_PATH CMAKE_SYSTEM_*_PATH FRAMEWORK|LIBRARY|INCLUDE|PROGRAM
   std::string EnvironmentPath; // LIB,INCLUDE
 
-  bool AlreadyDefined = false;
   bool AlreadyInCacheWithoutMetaInfo = false;
   bool StoreResultInCache = true;
 
@@ -71,6 +70,18 @@ protected:
   std::string ValidatorName;
 
 private:
+  enum class FindState
+  {
+    Undefined,
+    Found,
+    NotFound,
+  };
+  // see if the VariableName is already set,
+  // also copy the documentation from the cache to VariableDocumentation
+  // if it has documentation in the cache
+  FindState GetInitialState();
+  FindState InitialState = FindState::Undefined;
+
   // Add pieces of the search.
   void FillPackageRootPath();
   void FillCMakeVariablePath();
@@ -81,17 +92,16 @@ private:
   void FillUserGuessPath();
 };
 
-class cmFindBaseDebugState
+class cmFindBaseDebugState : public cmFindCommonDebugState
 {
 public:
-  explicit cmFindBaseDebugState(std::string name, cmFindBase const* findBase);
-  ~cmFindBaseDebugState();
-
-  void FoundAt(std::string const& path, std::string regexName = std::string());
-  void FailedAt(std::string const& path,
-                std::string regexName = std::string());
+  explicit cmFindBaseDebugState(cmFindBase const* findBase);
+  ~cmFindBaseDebugState() override;
 
 private:
+  void FoundAtImpl(std::string const& path, std::string regexName) override;
+  void FailedAtImpl(std::string const& path, std::string regexName) override;
+
   struct DebugLibState
   {
     DebugLibState() = default;
@@ -104,8 +114,14 @@ private:
     std::string path;
   };
 
-  cmFindBase const* FindCommand;
-  std::string CommandName;
+  void WriteDebug() const override;
+#ifndef CMAKE_BOOTSTRAP
+  void WriteEvent(cmConfigureLog& log, cmMakefile const& mf) const override;
+  std::vector<std::pair<VariableSource, std::string>> ExtraSearchVariables()
+    const override;
+#endif
+
+  cmFindBase const* const FindBaseCommand;
   std::vector<DebugLibState> FailedSearchLocations;
   DebugLibState FoundSearchLocation;
 };

@@ -5,7 +5,7 @@ VS_DEPLOYMENT_CONTENT
 
 Mark a source file as content for deployment with a Windows Phone or
 Windows Store application when built with a
-:manual:`Visual Studio generators <cmake-generators(7)>`.
+:ref:`Visual Studio Generators`.
 The value must evaluate to either ``1`` or ``0`` and may use
 :manual:`generator expressions <cmake-generator-expressions(7)>`
 to make the choice based on the build configuration.

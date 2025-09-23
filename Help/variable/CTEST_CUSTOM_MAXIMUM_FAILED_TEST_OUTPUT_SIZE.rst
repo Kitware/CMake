@@ -9,7 +9,7 @@ truncation modes.
 If a test's output contains the literal string "CTEST_FULL_OUTPUT",
 the output will not be truncated and may exceed the maximum size.
 
-.. include:: CTEST_CUSTOM_XXX.txt
+.. include:: include/CTEST_CUSTOM_XXX.rst
 
 For controlling the output collection of passing tests, see
 :variable:`CTEST_CUSTOM_MAXIMUM_PASSED_TEST_OUTPUT_SIZE`.

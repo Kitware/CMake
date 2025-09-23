@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
@@ -23,7 +23,7 @@ public:
 
   bool WasQuoted() const;
 
-  bool operator==(const char* value) const;
+  bool operator==(char const* value) const;
   bool operator==(std::string const& value) const;
 
   bool empty() const;

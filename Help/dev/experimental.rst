@@ -56,6 +56,24 @@ When activated, this experimental feature provides the following:
 * The experimental ``install(PACKAGE_INFO)`` command is available to export
   package information in the |CPS|_ format.
 
+Find/Import |CPS| Packages
+==========================
+
+In order to activate support for this experimental feature, set
+
+* variable ``CMAKE_EXPERIMENTAL_FIND_CPS_PACKAGES`` to
+* value ``e82e467b-f997-4464-8ace-b00808fff261``.
+
+This UUID may change in future versions of CMake.  Be sure to use the value
+documented here by the source tree of the version of CMake with which you are
+experimenting.
+
+When activated, this experimental feature provides the following:
+
+* The :command:`find_package` command will also search for packages which are
+  described using |CPS|_. Refer to the :command:`find_package` documentation
+  for details.
+
 C++ ``import std`` support
 ==========================
 
@@ -63,7 +81,7 @@ In order to activate support for ``import std`` in C++23 and newer targets,
 set
 
 * variable ``CMAKE_EXPERIMENTAL_CXX_IMPORT_STD`` to
-* value ``0e5b6991-d74f-4b3d-a41c-cf096e0b2508``.
+* value ``d0edc3af-4c50-42ea-a356-e2862fe7a444``.
 
 This UUID may change in future versions of CMake.  Be sure to use the value
 documented here by the source tree of the version of CMake with which you are
@@ -87,7 +105,7 @@ Build database support
 In order to activate support for exporting build databases, set
 
 * variable ``CMAKE_EXPERIMENTAL_EXPORT_BUILD_DATABASE`` to
-* value ``4bd552e2-b7fb-429a-ab23-c83ef53f3f13``.
+* value ``73194a1d-c0b5-41b9-9190-a4512925e192``.
 
 This UUID may change in future versions of CMake.  Be sure to use the value
 documented here by the source tree of the version of CMake with which you are
@@ -101,3 +119,23 @@ When activated, this experimental feature provides the following:
 
 * Targets with the property set to a true value will have their C++ build
   information exported to the build database.
+
+Instrumentation
+===============
+
+In order to activate support for the :command:`cmake_instrumentation` command,
+set
+
+* variable ``CMAKE_EXPERIMENTAL_INSTRUMENTATION`` to
+* value ``a37d1069-1972-4901-b9c9-f194aaf2b6e0``.
+
+To enable instrumentation at the user-level, files should be placed under
+either
+``<CMAKE_CONFIG_DIR>/instrumentation-a37d1069-1972-4901-b9c9-f194aaf2b6e0`` or
+``<CMAKE_BINARY_DIR>/.cmake/instrumentation-a37d1069-1972-4901-b9c9-f194aaf2b6e0``.
+
+To include instrumentation data in CTest XML files (for submission to CDash),
+you need to set the following environment variables:
+
+* ``CTEST_USE_INSTRUMENTATION=1``
+* ``CTEST_EXPERIMENTAL_INSTRUMENTATION=a37d1069-1972-4901-b9c9-f194aaf2b6e0``

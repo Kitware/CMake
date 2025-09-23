@@ -1,5 +1,5 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-# file Copyright.txt or https://cmake.org/licensing for details.
+# file LICENSE.rst or https://cmake.org/licensing for details.
 
 
 # This file sets the basic flags for the C++ language in CMake.
@@ -28,7 +28,7 @@ endif()
 set(CMAKE_BASE_NAME)
 get_filename_component(CMAKE_BASE_NAME "${CMAKE_CXX_COMPILER}" NAME_WE)
 # since the gnu compiler has several names force g++
-if(CMAKE_COMPILER_IS_GNUCXX)
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   set(CMAKE_BASE_NAME g++)
 endif()
 
@@ -135,9 +135,6 @@ _cmake_common_language_platform_flags(CXX)
 
 # CXX compiler information
 # <CMAKE_CXX_COMPILER>
-# <CMAKE_SHARED_LIBRARY_CREATE_CXX_FLAGS>
-# <CMAKE_CXX_SHARED_MODULE_CREATE_FLAGS>
-# <CMAKE_CXX_LINK_FLAGS>
 
 # Static library tools
 # <CMAKE_AR>
@@ -147,7 +144,7 @@ _cmake_common_language_platform_flags(CXX)
 # create a shared C++ library
 if(NOT CMAKE_CXX_CREATE_SHARED_LIBRARY)
   set(CMAKE_CXX_CREATE_SHARED_LIBRARY
-      "<CMAKE_CXX_COMPILER> <CMAKE_SHARED_LIBRARY_CXX_FLAGS> <LANGUAGE_COMPILE_FLAGS> <LINK_FLAGS> <CMAKE_SHARED_LIBRARY_CREATE_CXX_FLAGS> <SONAME_FLAG><TARGET_SONAME> -o <TARGET> <OBJECTS> <LINK_LIBRARIES>")
+      "<CMAKE_CXX_COMPILER> <CMAKE_SHARED_LIBRARY_CXX_FLAGS> <LANGUAGE_COMPILE_FLAGS> <LINK_FLAGS> <SONAME_FLAG><TARGET_SONAME> -o <TARGET> <OBJECTS> <LINK_LIBRARIES>")
 endif()
 
 # create a c++ shared module copy the shared library rule by default
@@ -176,7 +173,7 @@ endif()
 
 if(NOT CMAKE_CXX_LINK_EXECUTABLE)
   set(CMAKE_CXX_LINK_EXECUTABLE
-    "<CMAKE_CXX_COMPILER> <FLAGS> <CMAKE_CXX_LINK_FLAGS> <LINK_FLAGS> <OBJECTS> -o <TARGET> <LINK_LIBRARIES>")
+    "<CMAKE_CXX_COMPILER> <FLAGS> <LINK_FLAGS> <OBJECTS> -o <TARGET> <LINK_LIBRARIES>")
 endif()
 
 mark_as_advanced(

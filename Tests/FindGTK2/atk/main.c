@@ -2,6 +2,6 @@
 
 int main(int argc, char* argv[])
 {
-  const gchar* name = atk_get_toolkit_name();
+  gchar const* name = atk_get_toolkit_name();
   return 0;
 }

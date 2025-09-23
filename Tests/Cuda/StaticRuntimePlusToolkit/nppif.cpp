@@ -18,24 +18,24 @@ EXPORT int nppif_main()
   /**
    * 8-bit unsigned single-channel 1D row convolution.
    */
-  const int simgrows = 32;
-  const int simgcols = 32;
+  int const simgrows = 32;
+  int const simgcols = 32;
   Npp8u *d_pSrc, *d_pDst;
-  const int nMaskSize = 3;
+  int const nMaskSize = 3;
   NppiSize oROI;
   oROI.width = simgcols - nMaskSize;
   oROI.height = simgrows;
-  const int simgsize = simgrows * simgcols * sizeof(d_pSrc[0]);
-  const int dimgsize = oROI.width * oROI.height * sizeof(d_pSrc[0]);
-  const int simgpix = simgrows * simgcols;
-  const int dimgpix = oROI.width * oROI.height;
-  const int nSrcStep = simgcols * sizeof(d_pSrc[0]);
-  const int nDstStep = oROI.width * sizeof(d_pDst[0]);
-  const int pixval = 1;
-  const int nDivisor = 1;
-  const Npp32s h_pKernel[nMaskSize] = { pixval, pixval, pixval };
+  int const simgsize = simgrows * simgcols * sizeof(d_pSrc[0]);
+  int const dimgsize = oROI.width * oROI.height * sizeof(d_pSrc[0]);
+  int const simgpix = simgrows * simgcols;
+  int const dimgpix = oROI.width * oROI.height;
+  int const nSrcStep = simgcols * sizeof(d_pSrc[0]);
+  int const nDstStep = oROI.width * sizeof(d_pDst[0]);
+  int const pixval = 1;
+  int const nDivisor = 1;
+  Npp32s const h_pKernel[nMaskSize] = { pixval, pixval, pixval };
   Npp32s* d_pKernel;
-  const Npp32s nAnchor = 2;
+  Npp32s const nAnchor = 2;
   cudaError_t err = cudaMalloc((void**)&d_pSrc, simgsize);
   if (err != cudaSuccess) {
     fprintf(stderr, "Cuda error %d\n", __LINE__);

@@ -46,7 +46,8 @@ are executed in order during installation.
   and the order that install rules added in different subdirectories will run is
   not guaranteed.
 
-.. _`common options`:
+Common Options
+""""""""""""""
 
 There are multiple signatures for this command.  Some of them define
 installation options for files and targets.  Options common to
@@ -110,6 +111,11 @@ signatures that specify them.  The common options are:
   If ``COMPONENT`` is not provided a default component "Unspecified" is
   created.  The default component name may be controlled with the
   :variable:`CMAKE_INSTALL_DEFAULT_COMPONENT_NAME` variable.
+
+  Installation components can be then used by the ``cmake --install`` command's
+  :option:`--component <cmake--install --component>` option and the
+  :module:`CPackComponent` module.  Global target ``list_install_components``
+  lists all available components.
 
 ``EXCLUDE_FROM_ALL``
   .. versionadded:: 3.6
@@ -635,7 +641,7 @@ Signatures
 
   .. code-block:: cmake
 
-    install(DIRECTORY dirs...
+    install(DIRECTORY <dir>...
             TYPE <type> | DESTINATION <dir>
             [FILE_PERMISSIONS <permission>...]
             [DIRECTORY_PERMISSIONS <permission>...]
@@ -643,124 +649,164 @@ Signatures
             [CONFIGURATIONS <config>...]
             [COMPONENT <component>] [EXCLUDE_FROM_ALL]
             [FILES_MATCHING]
-            [[PATTERN <pattern> | REGEX <regex>]
-             [EXCLUDE] [PERMISSIONS <permission>...]] [...])
+            [<match-rule> <match-option>...]...
+            )
 
   The ``DIRECTORY`` form installs contents of one or more directories to a
   given destination.  The directory structure is copied verbatim to the
-  destination.  The last component of each directory name is appended to
-  the destination directory but a trailing slash may be used to avoid
-  this because it leaves the last component empty.  Directory names
-  given as relative paths are interpreted with respect to the current
-  source directory.  If no input directory names are given the
-  destination directory will be created but nothing will be installed
-  into it.  The ``FILE_PERMISSIONS`` and ``DIRECTORY_PERMISSIONS`` options
-  specify permissions given to files and directories in the destination.
-  If ``USE_SOURCE_PERMISSIONS`` is specified and ``FILE_PERMISSIONS`` is not,
-  file permissions will be copied from the source directory structure.
-  If no permissions are specified files will be given the default
-  permissions specified in the ``FILES`` form of the command, and the
-  directories will be given the default permissions specified in the
-  ``PROGRAMS`` form of the command.
-
-  .. versionadded:: 3.1
-    The ``MESSAGE_NEVER`` option disables file installation status output.
-
-  Installation of directories may be controlled with fine granularity
-  using the ``PATTERN`` or ``REGEX`` options.  These "match" options specify a
-  globbing pattern or regular expression to match directories or files
-  encountered within input directories.  They may be used to apply
-  certain options (see below) to a subset of the files and directories
-  encountered.  The full path to each input file or directory (with
-  forward slashes) is matched against the expression.  A ``PATTERN`` will
-  match only complete file names: the portion of the full path matching
-  the pattern must occur at the end of the file name and be preceded by
-  a slash.  A ``REGEX`` will match any portion of the full path but it may
-  use ``/`` and ``$`` to simulate the ``PATTERN`` behavior.  By default all
-  files and directories are installed whether or not they are matched.
-  The ``FILES_MATCHING`` option may be given before the first match option
-  to disable installation of files (but not directories) not matched by
-  any expression.  For example, the code
-
-  .. code-block:: cmake
-
-    install(DIRECTORY src/ DESTINATION doc/myproj
-            FILES_MATCHING PATTERN "*.png")
-
-  will extract and install images from a source tree.
-
-  Some options may follow a ``PATTERN`` or ``REGEX`` expression as described
-  under :ref:`string(REGEX) <Regex Specification>` and are applied
-  only to files or directories matching them.  The ``EXCLUDE`` option will
-  skip the matched file or directory.  The ``PERMISSIONS`` option overrides
-  the permissions setting for the matched file or directory.  For
-  example the code
-
-  .. code-block:: cmake
-
-    install(DIRECTORY icons scripts/ DESTINATION share/myproj
-            PATTERN "CVS" EXCLUDE
-            PATTERN "scripts/*"
-            PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ
-                        GROUP_EXECUTE GROUP_READ)
-
-  will install the ``icons`` directory to ``share/myproj/icons`` and the
-  ``scripts`` directory to ``share/myproj``.  The icons will get default
-  file permissions, the scripts will be given specific permissions, and any
-  ``CVS`` directories will be excluded.
+  destination.
 
   Either a ``TYPE`` or a ``DESTINATION`` must be provided, but not both.
-  A ``TYPE`` argument specifies the generic file type of the files within the
-  listed directories being installed.  A destination will then be set
-  automatically by taking the corresponding variable from
-  :module:`GNUInstallDirs`, or by using a built-in default if that variable
-  is not defined.  See the table below for the supported file types and their
-  corresponding variables and built-in defaults.  Projects can provide a
-  ``DESTINATION`` argument instead of a file type if they wish to explicitly
-  define the install destination.
+  If no permissions is given, files will be given the default permissions
+  specified in the `FILES`_ form of the command, and the directories
+  will be given the default permissions specified in the `PROGRAMS`_
+  form of the command.
 
-  ======================= ================================== =========================
-     ``TYPE`` Argument         GNUInstallDirs Variable           Built-In Default
-  ======================= ================================== =========================
-  ``BIN``                 ``${CMAKE_INSTALL_BINDIR}``        ``bin``
-  ``SBIN``                ``${CMAKE_INSTALL_SBINDIR}``       ``sbin``
-  ``LIB``                 ``${CMAKE_INSTALL_LIBDIR}``        ``lib``
-  ``INCLUDE``             ``${CMAKE_INSTALL_INCLUDEDIR}``    ``include``
-  ``SYSCONF``             ``${CMAKE_INSTALL_SYSCONFDIR}``    ``etc``
-  ``SHAREDSTATE``         ``${CMAKE_INSTALL_SHARESTATEDIR}`` ``com``
-  ``LOCALSTATE``          ``${CMAKE_INSTALL_LOCALSTATEDIR}`` ``var``
-  ``RUNSTATE``            ``${CMAKE_INSTALL_RUNSTATEDIR}``   ``<LOCALSTATE dir>/run``
-  ``DATA``                ``${CMAKE_INSTALL_DATADIR}``       ``<DATAROOT dir>``
-  ``INFO``                ``${CMAKE_INSTALL_INFODIR}``       ``<DATAROOT dir>/info``
-  ``LOCALE``              ``${CMAKE_INSTALL_LOCALEDIR}``     ``<DATAROOT dir>/locale``
-  ``MAN``                 ``${CMAKE_INSTALL_MANDIR}``        ``<DATAROOT dir>/man``
-  ``DOC``                 ``${CMAKE_INSTALL_DOCDIR}``        ``<DATAROOT dir>/doc``
-  ``LIBEXEC``             ``${CMAKE_INSTALL_LIBEXECDIR}``    ``libexec``
-  ======================= ================================== =========================
+  The options are:
 
-  Note that some of the types' built-in defaults use the ``DATAROOT`` directory as
-  a prefix. The ``DATAROOT`` prefix is calculated similarly to the types, with
-  ``CMAKE_INSTALL_DATAROOTDIR`` as the variable and ``share`` as the built-in
-  default. You cannot use ``DATAROOT`` as a ``TYPE`` parameter; please use
-  ``DATA`` instead.
+  ``<dir>...``
+    The list of directories to be installed.
 
-  To make packages compliant with distribution filesystem layout policies, if
-  projects must specify a ``DESTINATION``, it is strongly recommended that they use
-  a path that begins with the appropriate relative :module:`GNUInstallDirs` variable.
-  This allows package maintainers to control the install destination by setting
-  the appropriate cache variables.
+    The last component of each directory name is appended to the
+    destination directory but a trailing slash may be used to avoid
+    this because it leaves the last component empty.  Directory names
+    given as relative paths are interpreted with respect to the current
+    source directory.  If no input directory names are given the
+    destination directory will be created but nothing will be installed
+    into it.
 
-  .. versionadded:: 3.4
-    An install destination given as a ``DESTINATION`` argument may
-    use "generator expressions" with the syntax ``$<...>``.  See the
-    :manual:`cmake-generator-expressions(7)` manual for available expressions.
+    .. versionadded:: 3.5
+      The source ``<dir>...`` list may use "generator expressions" with the
+      syntax ``$<...>``.  See the :manual:`cmake-generator-expressions(7)`
+      manual for available expressions.
 
-  .. versionadded:: 3.5
-    The list of ``dirs...`` given to ``DIRECTORY`` may use
-    "generator expressions" too.
+  ``TYPE <type>``
+    Specifies the generic file type of the files within the listed
+    directories being installed.  A destination will then be set
+    automatically by taking the corresponding variable from
+    :module:`GNUInstallDirs`, or by using a built-in default if that
+    variable is not defined.  See the table below for the supported
+    file types and their corresponding variables and built-in defaults.
+    Projects can provide a ``DESTINATION`` argument instead of a file
+    type if they wish to explicitly define the install destination.
 
-  .. versionadded:: 3.31
-    The ``TYPE`` argument now supports type ``LIBEXEC``.
+    ======================= ================================== =========================
+       ``TYPE`` Argument         GNUInstallDirs Variable           Built-In Default
+    ======================= ================================== =========================
+    ``BIN``                 ``${CMAKE_INSTALL_BINDIR}``        ``bin``
+    ``SBIN``                ``${CMAKE_INSTALL_SBINDIR}``       ``sbin``
+    ``LIB``                 ``${CMAKE_INSTALL_LIBDIR}``        ``lib``
+    ``INCLUDE``             ``${CMAKE_INSTALL_INCLUDEDIR}``    ``include``
+    ``SYSCONF``             ``${CMAKE_INSTALL_SYSCONFDIR}``    ``etc``
+    ``SHAREDSTATE``         ``${CMAKE_INSTALL_SHARESTATEDIR}`` ``com``
+    ``LOCALSTATE``          ``${CMAKE_INSTALL_LOCALSTATEDIR}`` ``var``
+    ``RUNSTATE``            ``${CMAKE_INSTALL_RUNSTATEDIR}``   ``<LOCALSTATE dir>/run``
+    ``DATA``                ``${CMAKE_INSTALL_DATADIR}``       ``<DATAROOT dir>``
+    ``INFO``                ``${CMAKE_INSTALL_INFODIR}``       ``<DATAROOT dir>/info``
+    ``LOCALE``              ``${CMAKE_INSTALL_LOCALEDIR}``     ``<DATAROOT dir>/locale``
+    ``MAN``                 ``${CMAKE_INSTALL_MANDIR}``        ``<DATAROOT dir>/man``
+    ``DOC``                 ``${CMAKE_INSTALL_DOCDIR}``        ``<DATAROOT dir>/doc``
+    ``LIBEXEC``             ``${CMAKE_INSTALL_LIBEXECDIR}``    ``libexec``
+    ======================= ================================== =========================
+
+    Note that some of the types' built-in defaults use the ``DATAROOT``
+    directory as a prefix.  The ``DATAROOT`` prefix is calculated similarly
+    to the types, with ``CMAKE_INSTALL_DATAROOTDIR`` as the variable and
+    ``share`` as the built-in default.  You cannot use ``DATAROOT`` as a
+    ``TYPE`` parameter; please use ``DATA`` instead.
+
+    .. versionadded:: 3.31
+      The ``LIBEXEC`` type.
+
+  ``DESTINATION <dir>``
+    The destination directory, as documented among the `common options`_.
+
+    To make packages compliant with distribution filesystem layout
+    policies, if projects must specify a ``DESTINATION``, it is
+    strongly recommended that they use a path that begins with the
+    appropriate relative :module:`GNUInstallDirs` variable.
+    This allows package maintainers to control the install destination
+    by setting the appropriate cache variables.
+
+    .. versionadded:: 3.4
+      The destination ``<dir>`` may use "generator expressions" with the
+      syntax ``$<...>``.  See the :manual:`cmake-generator-expressions(7)`
+      manual for available expressions.
+
+  ``FILE_PERMISSIONS <permission>...``
+    Specify permissions given to files in the destination, where the
+    ``<permission>`` names are documented among the `common options`_.
+
+  ``DIRECTORY_PERMISSIONS <permission>...``
+    Specify permissions given to directories in the destination, where the
+    ``<permission>`` names are documented among the `common options`_.
+
+  ``USE_SOURCE_PERMISSIONS``
+    If specified, and ``FILE_PERMISSIONS`` is not, file permissions will
+    be copied from the source directory structure.
+
+  ``MESSAGE_NEVER``
+    .. versionadded:: 3.1
+
+    Disable file installation status output.
+
+  ``FILES_MATCHING``
+    This option may be given before the first ``<match-rule>`` to
+    disable installation of files (but not directories) not matched
+    by any expression.  For example, the code
+
+    .. code-block:: cmake
+
+      install(DIRECTORY src/ DESTINATION doc/myproj
+              FILES_MATCHING PATTERN "*.png")
+
+    will extract and install images from a source tree.
+
+  ``<match-rule> <match-option>...``
+    Installation of directories may be controlled with fine granularity
+    using rules that match directories or files encountered within input
+    directories.  They may be used to apply certain options (see below)
+    to a subset of the files and directories encountered.  All files
+    and directories are installed whether or not they are matched,
+    unless the above ``FILES_MATCHING`` option is given.
+
+    The full path to each input file or directory, with forward slashes,
+    may be matched by a ``<match-rule>``:
+
+    ``PATTERN <pattern>``
+      Match complete file names using a globbing pattern.  The portion of
+      the full path matching the pattern must occur at the end of the file
+      name and be preceded by a slash (which is not part of the pattern).
+
+    ``REGEX <regex>``
+      Match any portion of the full path of a file with a
+      :ref:`regular expression <Regex Specification>`.
+      One may use ``/`` and ``$`` to limit matching to the end of a path.
+
+    Each ``<match-rule>`` may be followed by ``<match-option>`` arguments.
+    The match options apply to the files or directories matched by the rule.
+    The match options are:
+
+    ``EXCLUDE``
+      Exclude the matched file or directory from installation.
+
+    ``PERMISSIONS <permission>...``
+      Ovrerride the permissions setting for the matched file or directory.
+
+    For example, the code
+
+    .. code-block:: cmake
+
+      install(DIRECTORY icons scripts/ DESTINATION share/myproj
+              PATTERN "CVS" EXCLUDE
+              PATTERN "scripts/*"
+              PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ
+                          GROUP_EXECUTE GROUP_READ)
+
+    will install the ``icons`` directory to ``share/myproj/icons`` and the
+    ``scripts`` directory to ``share/myproj``.  The icons will get default
+    file permissions, the scripts will be given specific permissions, and any
+    ``CVS`` directories will be excluded.
 
 .. signature::
   install(SCRIPT <file> [...])
@@ -783,7 +829,7 @@ Signatures
 
   .. code-block:: cmake
 
-    install(CODE "MESSAGE(\"Sample install message.\")")
+    install(CODE "message(\"Sample install message.\")")
 
   will print a message during installation.
 
@@ -938,6 +984,7 @@ Signatures
   .. code-block:: cmake
 
     install(PACKAGE_INFO <package-name> EXPORT <export-name>
+            [PROJECT <project-name>|NO_PROJECT_METADATA]
             [APPENDIX <appendix-name>]
             [DESTINATION <dir>]
             [LOWER_CASE_FILE]
@@ -946,6 +993,8 @@ Signatures
              [VERSION_SCHEMA <string>]]
             [DEFAULT_TARGETS <target>...]
             [DEFAULT_CONFIGURATIONS <config>...]
+            [DESCRIPTION <project-description-string>]
+            [HOMEPAGE_URL <url-string>]
             [PERMISSIONS <permission>...]
             [CONFIGURATIONS <config>...]
             [COMPONENT <component>]
@@ -965,6 +1014,62 @@ Signatures
 
   If ``DESTINATION`` is not specified, a platform-specific default is used.
 
+  Several options may be used to specify package metadata:
+
+  ``VERSION <version>``
+    Version of the package.  The ``<version>`` shall conform to the specified
+    schema.  Refer to :ref:`Version Selection (CPS) <cps version selection>`
+    for more information on how the package version is used when consumers
+    request a package.
+
+  ``COMPAT_VERSION <version>``
+    Oldest version for which the package provides compatibility.
+
+    If not specified, ``COMPAT_VERSION`` is implicitly taken to equal the
+    package's ``VERSION``, which is to say that no backwards compatibility is
+    provided.
+
+  ``VERSION_SCHEMA <schema>``
+    The schema that the package's version number(s) (both ``VERSION`` and
+    ``COMPAT_VERSION``) follow.  While no schema will be written to the
+    ``.cps`` file if this option is not provided, CPS specifies that the schema
+    is assumed to be ``simple`` in such cases. Refer to |cps-version_schema|_
+    for more details and a list of officially supported schemas, but be aware
+    that the specification may include schemas that are not supported by CMake.
+    See :ref:`Version Selection (CPS) <cps version selection>` for the list of
+    schemas supported by :command:`find_package`.
+
+  ``DEFAULT_TARGETS <target>...``
+
+    Targets to be used if a consumer requests linking to the package name,
+    rather than to specific components.
+
+  ``DEFAULT_CONFIGURATIONS <config>...``
+
+    Ordered list of configurations consumers should prefer if no exact match or
+    mapping of the consumer's configuration to the package's available
+    configurations exists.  If not specified, CMake will fall back to the
+    package's available configurations in an unspecified order.
+
+  ``DESCRIPTION <project-description-string>``
+    .. versionadded:: 4.1
+
+    An informational description of the project.  It is recommended that this
+    description is a relatively short string, usually no more than a few words.
+
+  ``HOMEPAGE_URL <url-string>``
+    .. versionadded:: 4.1
+
+    An informational canonical home URL for the project.
+
+  By default, if the specified ``<package-name>`` matches the current CMake
+  :variable:`PROJECT_NAME`, package metadata will be inherited from the
+  project.  The ``PROJECT <project-name>`` option may be used to specify a
+  different project from which to inherit metadata.  If ``NO_PROJECT_METADATA``
+  is specified, automatic inheritance of package metadata will be disabled.
+  In any case, any metadata values specified in the ``install`` command will
+  take precedence.
+
   If ``APPENDIX`` is specified, rather than generating a top level package
   specification, the specified targets will be exported as an appendix to the
   named package.  Appendices may be used to separate less commonly used targets
@@ -974,7 +1079,7 @@ Signatures
   artifacts produced by multiple build trees.
 
   Appendices are not permitted to change basic package metadata; therefore,
-  none of ``VERSION``, ``COMPAT_VERSION``, ``VERSION_SCHEMA``,
+  none of ``PROJECT``, ``VERSION``, ``COMPAT_VERSION``, ``VERSION_SCHEMA``,
   ``DEFAULT_TARGETS`` or ``DEFAULT_CONFIGURATIONS`` may be specified in
   combination with ``APPENDIX``.  Additionally, it is strongly recommended that
   use of ``LOWER_CASE_FILE`` should be consistent between the main package and
@@ -1175,3 +1280,6 @@ and by CPack. You can also invoke this script manually with
 
 .. _CPS: https://cps-org.github.io/cps/
 .. |CPS| replace:: Common Package Specification
+
+.. _cps-version_schema: https://cps-org.github.io/cps/schema.html#version-schema
+.. |cps-version_schema| replace:: ``version_schema``

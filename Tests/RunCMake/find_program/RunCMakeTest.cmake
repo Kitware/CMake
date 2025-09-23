@@ -1,10 +1,13 @@
 include(RunCMake)
 
+run_cmake(ConfigureLogTransitions)
+run_cmake(ConfigureLogTransitionsSuppressed)
 run_cmake(EnvAndHints)
 run_cmake(DirsPerName)
 run_cmake(NamesPerDir)
 run_cmake(RelAndAbsPath)
 run_cmake(Required)
+run_cmake(Optional)
 run_cmake(NO_CACHE)
 run_cmake(IgnorePrefixPath)
 run_cmake(REGISTRY_VIEW-no-view)

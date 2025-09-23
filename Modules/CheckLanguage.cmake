@@ -1,21 +1,37 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-# file Copyright.txt or https://cmake.org/licensing for details.
+# file LICENSE.rst or https://cmake.org/licensing for details.
 
 #[=======================================================================[.rst:
 CheckLanguage
 -------------
 
-Check whether a language can be enabled by the :command:`enable_language`
-or :command:`project` commands:
+This module provides a command to check whether a language can be enabled
+using the :command:`enable_language` or :command:`project` commands.
+
+Load this module in a CMake project with:
+
+.. code-block:: cmake
+
+  include(CheckLanguage)
+
+This module is useful when a project does not always require a specific
+language but may need to enable it for certain parts.
+
+Commands
+^^^^^^^^
+
+This module provides the following command:
 
 .. command:: check_language
+
+  Checks whether a language can be enabled in a CMake project:
 
   .. code-block:: cmake
 
     check_language(<lang>)
 
-  Try enabling language ``<lang>`` in a test project and record results
-  in the cache:
+  This command attempts to enable the language ``<lang>`` in a test project and
+  records the results in the following cache variables:
 
   :variable:`CMAKE_<LANG>_COMPILER`
     If the language can be enabled, this variable is set to the compiler
@@ -44,13 +60,18 @@ or :command:`project` commands:
   :variable:`CMAKE_<LANG>_PLATFORM <CMAKE_HIP_PLATFORM>`
     This variable is set to the detected GPU platform when ``<lang>`` is ``HIP``.
 
-    If the variable is already set its value is always preserved. Only compatible values
-    will be considered for :variable:`CMAKE_<LANG>_COMPILER`.
+    If this variable is already set, its value is always preserved.  Only
+    compatible values will be considered for :variable:`CMAKE_<LANG>_COMPILER`.
 
-For example:
+Examples
+^^^^^^^^
+
+The following example checks for the availability of the ``Fortran`` language
+and enables it if possible:
 
 .. code-block:: cmake
 
+  include(CheckLanguage)
   check_language(Fortran)
   if(CMAKE_Fortran_COMPILER)
     enable_language(Fortran)
@@ -70,31 +91,34 @@ macro(check_language lang)
     message(CHECK_START "${_desc}")
     file(REMOVE_RECURSE ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/Check${lang})
 
-    set(extra_compiler_variables)
+    set(_input_variables "set(CMAKE_MODULE_PATH \"${CMAKE_MODULE_PATH}\")\n")
+    get_property(_languages GLOBAL PROPERTY ENABLED_LANGUAGES)
+    list(REMOVE_ITEM _languages "NONE")
+    if(NOT _languages STREQUAL "")
+      string(APPEND _input_variables "set(_CMAKE_CHECK_ENABLED_LANGUAGES \"${_languages}\")\n")
+      foreach(l IN LISTS _languages)
+        string(APPEND _input_variables
+          "set(CMAKE_${l}_COMPILER \"${CMAKE_${l}_COMPILER}\")\n"
+          "set(CMAKE_${l}_COMPILER_ID \"${CMAKE_${l}_COMPILER_ID}\")\n"
+          "set(CMAKE_${l}_COMPILER_LOADED ${CMAKE_${l}_COMPILER_LOADED})\n"
+          "set(CMAKE_${l}_COMPILER_VERSION \"${CMAKE_${l}_COMPILER_VERSION}\")\n"
+        )
+      endforeach()
+    endif()
+
+    set(_output_variables "set(CMAKE_${lang}_COMPILER \\\"\${CMAKE_${lang}_COMPILER}\\\")\n")
     if("${lang}" MATCHES "^(CUDA|HIP)$" AND NOT CMAKE_GENERATOR MATCHES "Visual Studio")
-      set(extra_compiler_variables "set(CMAKE_${lang}_HOST_COMPILER \\\"\${CMAKE_${lang}_HOST_COMPILER}\\\")")
+      string(APPEND _output_variables "set(CMAKE_${lang}_HOST_COMPILER \\\"\${CMAKE_${lang}_HOST_COMPILER}\\\")\n")
     endif()
-
     if("${lang}" STREQUAL "HIP")
-      list(APPEND extra_compiler_variables "set(CMAKE_${lang}_PLATFORM \\\"\${CMAKE_${lang}_PLATFORM}\\\")")
+      string(APPEND _output_variables "set(CMAKE_${lang}_PLATFORM \\\"\${CMAKE_${lang}_PLATFORM}\\\")\n")
     endif()
-
-    list(TRANSFORM extra_compiler_variables PREPEND "\"")
-    list(TRANSFORM extra_compiler_variables APPEND "\\n\"")
-    list(JOIN extra_compiler_variables "\n  " extra_compiler_variables)
-
-    set(_cl_content
-      "cmake_minimum_required(VERSION ${CMAKE_VERSION})
-set(CMAKE_MODULE_PATH \"${CMAKE_MODULE_PATH}\")
-project(Check${lang} ${lang})
-file(WRITE \"\${CMAKE_CURRENT_BINARY_DIR}/result.cmake\"
-  \"set(CMAKE_${lang}_COMPILER \\\"\${CMAKE_${lang}_COMPILER}\\\")\\n\"
-  ${extra_compiler_variables}
-  )"
-    )
 
     file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/Check${lang}/CMakeLists.txt"
-      "${_cl_content}")
+      "cmake_minimum_required(VERSION ${CMAKE_VERSION})
+${_input_variables}
+project(Check${lang} LANGUAGES ${lang})
+file(WRITE \"\${CMAKE_CURRENT_BINARY_DIR}/result.cmake\" \"${_output_variables}\")")
     if(CMAKE_GENERATOR_INSTANCE)
       set(_D_CMAKE_GENERATOR_INSTANCE "-DCMAKE_GENERATOR_INSTANCE:INTERNAL=${CMAKE_GENERATOR_INSTANCE}")
     else()

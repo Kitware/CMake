@@ -1,0 +1,6 @@
+{
+  "version": 1,
+  "hooks": ["preCMakeBuild", "postInstall"],
+  "callbacks": ["@GET_HOOK@"],
+  "queries": ["staticSystemInformation"]
+}

@@ -79,6 +79,12 @@ Each ``<os>/<arch>/`` directory contains the following:
 
 .. _`kitware/cmake Docker Hub Repository`: https://hub.docker.com/r/kitware/cmake
 
+SunOS
+-----
+
+The ``sunos/`` directory contains infrastructure to cross-compile
+CMake binaries to SunOS from Linux hosts.
+
 macOS
 -----
 

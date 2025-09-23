@@ -23,9 +23,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#ifdef USE_HYPER
-#define CURL_DISABLE_RTSP 1
-#endif
 
 #ifndef CURL_DISABLE_RTSP
 
@@ -38,33 +35,5 @@ CURLcode Curl_rtsp_parseheader(struct Curl_easy *data, const char *header);
 #define Curl_rtsp_parseheader(x,y) CURLE_NOT_BUILT_IN
 
 #endif /* CURL_DISABLE_RTSP */
-
-typedef enum {
-  RTP_PARSE_SKIP,
-  RTP_PARSE_CHANNEL,
-  RTP_PARSE_LEN,
-  RTP_PARSE_DATA
-} rtp_parse_st;
-/*
- * RTSP Connection data
- *
- * Currently, only used for tracking incomplete RTP data reads
- */
-struct rtsp_conn {
-  struct dynbuf buf;
-  int rtp_channel;
-  size_t rtp_len;
-  rtp_parse_st state;
-  BIT(in_header);
-};
-
-/****************************************************************************
- * RTSP unique setup
- ***************************************************************************/
-struct RTSP {
-  long CSeq_sent; /* CSeq of this request */
-  long CSeq_recv; /* CSeq received */
-};
-
 
 #endif /* HEADER_CURL_RTSP_H */

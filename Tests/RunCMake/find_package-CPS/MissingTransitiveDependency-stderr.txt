@@ -1,0 +1,22 @@
+CMake Error in cps/[Ss]till[Ii]ncomplete\.cps:
+  Could not find a package configuration file provided by "DoesNotExist" with
+  any of the following names:
+
+    DoesNotExist\.cps
+    doesnotexist\.cps
+    DoesNotExistConfig\.cmake
+    doesnotexist-config\.cmake
+
+  Add the installation prefix of "DoesNotExist" to CMAKE_PREFIX_PATH or set
+  "DoesNotExist_DIR" to a directory containing one of the above files\.  If
+  "DoesNotExist" provides a separate development package or SDK, be sure it
+  has been installed\.
+Call Stack \(most recent call first\):
+  cps/[Ii]ncomplete\.cps
+  MissingTransitiveDependency\.cmake:[0-9]+ \(find_package\)
+  CMakeLists\.txt:[0-9]+ \(include\)
++
+CMake Error at MissingTransitiveDependency\.cmake:[0-9]+ \(find_package\):
+  find_package could not find StillIncomplete, required by Incomplete\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)

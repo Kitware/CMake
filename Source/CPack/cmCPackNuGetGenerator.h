@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
 #include "cmCPackGenerator.h"
@@ -20,7 +20,7 @@ protected:
   bool SupportsComponentInstallation() const override;
   int PackageFiles() override;
 
-  const char* GetOutputExtension() override { return ".nupkg"; }
+  char const* GetOutputExtension() override { return ".nupkg"; }
   bool SupportsAbsoluteDestination() const override { return false; }
   /**
    * The method used to prepare variables when component

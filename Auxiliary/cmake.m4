@@ -1,6 +1,10 @@
 dnl Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-dnl file Copyright.txt or https://cmake.org/licensing for details.
+dnl file LICENSE.rst or https://cmake.org/licensing for details.
 
+# CMAKE_FIND_BINARY
+# -----------------
+# Finds the cmake command-line binary and sets its absolute path in the
+# CMAKE_BINARY variable.
 AC_DEFUN([CMAKE_FIND_BINARY],
 [AC_ARG_VAR([CMAKE_BINARY], [path to the cmake binary])dnl
 
@@ -9,13 +13,33 @@ if test "x$ac_cv_env_CMAKE_BINARY_set" != "xset"; then
 fi
 ])dnl
 
-# $1: package name
-# $2: language (e.g. C/CXX/Fortran)
-# $3: The compiler ID, defaults to GNU.
-#     Possible values are: GNU, Intel, Clang, SunPro, HP, XL, VisualAge, PGI,
-#     PathScale, Cray, SCO, MSVC, LCC
-# $4: optional extra arguments to cmake, e.g. "-DCMAKE_SIZEOF_VOID_P=8"
-# $5: optional path to cmake binary
+# CMAKE_FIND_PACKAGE(package, lang, [compiler-id], [cmake-args],
+#   [action-if-found], [action-if-not-found])
+# --------------------------------------------------------------
+# Finds a package with CMake.
+#
+# package:
+#   The name of the package as called in CMake with find_package(package).
+#
+# lang:
+#   The programming language to use (e.g., C, CXX, Fortran).
+#   See https://cmake.org/cmake/help/latest/command/enable_language.html
+#   for a complete list of supported languages.
+#
+# compiler-id:
+#   (Optional) The compiler ID to use. Defaults to GNU.
+#   See https://cmake.org/cmake/help/latest/variable/CMAKE_LANG_COMPILER_ID.html
+#   for possible values.
+#
+# cmake-args:
+#   (Optional) Additional arguments to pass to cmake command, e.g.,
+#   -DCMAKE_SIZEOF_VOID_P=8.
+#
+# action-if-found:
+#   (Optional) Commands to execute if the package is found.
+#
+# action-if-not-found:
+#   (Optional) Commands to execute if the package is not found.
 AC_DEFUN([CMAKE_FIND_PACKAGE], [
 AC_REQUIRE([CMAKE_FIND_BINARY])dnl
 

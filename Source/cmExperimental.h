@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 
 #pragma once
 
@@ -18,10 +18,11 @@ public:
   enum class Feature
   {
     ExportPackageDependencies,
-    WindowsKernelModeDriver,
     CxxImportStd,
+    ImportPackageInfo,
     ExportPackageInfo,
     ExportBuildDatabase,
+    Instrumentation,
 
     Sentinel,
   };
@@ -35,16 +36,15 @@ public:
 
   struct FeatureData
   {
-    std::string const Name;
-    std::string const Uuid;
-    std::string const Variable;
-    std::string const Description;
-    std::vector<std::string> const TryCompileVariables;
-    TryCompileCondition const ForwardThroughTryCompile;
-    bool Warned;
+    std::string Name;
+    std::string Uuid;
+    std::string Variable;
+    std::string Description;
+    std::vector<std::string> TryCompileVariables;
+    TryCompileCondition ForwardThroughTryCompile;
   };
 
-  static const FeatureData& DataForFeature(Feature f);
+  static FeatureData const& DataForFeature(Feature f);
   static cm::optional<Feature> FeatureByName(std::string const& name);
   static bool HasSupportEnabled(cmMakefile const& mf, Feature f);
 };

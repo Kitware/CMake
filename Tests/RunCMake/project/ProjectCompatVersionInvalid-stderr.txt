@@ -1,0 +1,4 @@
+CMake Error at ProjectCompatVersionInvalid.cmake:[0-9]+ \(project\):
+  COMPAT_VERSION "NONE" format invalid.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)$

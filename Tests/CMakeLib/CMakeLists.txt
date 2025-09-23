@@ -16,12 +16,15 @@ set(CMakeLib_TESTS
   testCTestResourceSpec.cxx
   testCTestResourceGroups.cxx
   testDebug.cxx
+  testDocumentationFormatter.cxx
   testGccDepfileReader.cxx
   testGeneratedFileStream.cxx
   testJSONHelpers.cxx
   testRST.cxx
   testRange.cxx
   testOptional.cxx
+  testPathResolver.cxx
+  testStdIo.cxx
   testString.cxx
   testStringAlgorithms.cxx
   testSystemTools.cxx
@@ -31,6 +34,7 @@ set(CMakeLib_TESTS
   testFindPackageCommand.cxx
   testUVHandlePtr.cxx
   testUVJobServerClient.cxx
+  testUVPatches.cxx
   testUVProcessChain.cxx
   testUVRAII.cxx
   testUVStreambuf.cxx
@@ -109,10 +113,20 @@ if(CMake_ENABLE_DEBUGGER)
   add_executable(testDebuggerNamedPipe testDebuggerNamedPipe.cxx)
   target_link_libraries(testDebuggerNamedPipe PRIVATE CMakeLib)
   set(testDebuggerNamedPipe_Project_ARGS
-    "$<TARGET_FILE:cmake>" ${CMAKE_CURRENT_SOURCE_DIR}/DebuggerSample ${CMAKE_CURRENT_BINARY_DIR}/DebuggerSample
+    "$<TARGET_FILE:cmake>" -S ${CMAKE_CURRENT_SOURCE_DIR}/DebuggerSample -B ${CMAKE_CURRENT_BINARY_DIR}/DebuggerSample
+    --fresh -G ${CMAKE_GENERATOR}
     )
+  if(CMAKE_GENERATOR_PLATFORM)
+    list(APPEND testDebuggerNamedPipe_Project_ARGS -A "${CMAKE_GENERATOR_PLATFORM}")
+  endif()
+  if(CMAKE_GENERATOR_TOOLSET)
+    list(APPEND testDebuggerNamedPipe_Project_ARGS -T "${CMAKE_GENERATOR_TOOLSET}")
+  endif()
+  if(CMAKE_GENERATOR_INSTANCE)
+    list(APPEND testDebuggerNamedPipe_Project_ARGS "-DCMAKE_GENERATOR_INSTANCE=${CMAKE_GENERATOR_INSTANCE}")
+  endif()
   set(testDebuggerNamedPipe_Script_ARGS
-    "$<TARGET_FILE:cmake>" ${CMAKE_CURRENT_SOURCE_DIR}/DebuggerSample/script.cmake
+    "$<TARGET_FILE:cmake>" -P ${CMAKE_CURRENT_SOURCE_DIR}/DebuggerSample/script.cmake
     )
   foreach(case Project Script)
     add_test(NAME CMakeLib.testDebuggerNamedPipe-${case} COMMAND testDebuggerNamedPipe ${testDebuggerNamedPipe_${case}_ARGS})

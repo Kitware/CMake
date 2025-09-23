@@ -23,6 +23,6 @@ with whitespace and special characters for tests created by ``add_test``.
 
 .. |INTRODUCED_IN_CMAKE_VERSION| replace:: 3.19
 .. |WARNS_OR_DOES_NOT_WARN| replace:: warns
-.. include:: STANDARD_ADVICE.txt
+.. include:: include/STANDARD_ADVICE.rst
 
-.. include:: DEPRECATED.txt
+.. include:: include/DEPRECATED.rst

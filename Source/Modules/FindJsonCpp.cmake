@@ -1,5 +1,5 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-# file Copyright.txt or https://cmake.org/licensing for details.
+# file LICENSE.rst or https://cmake.org/licensing for details.
 
 #[=======================================================================[.rst:
 FindJsonCpp
@@ -84,12 +84,10 @@ unset(_JsonCpp_H)
 
 #-----------------------------------------------------------------------------
 include(${CMAKE_CURRENT_LIST_DIR}/../../Modules/FindPackageHandleStandardArgs.cmake)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(JsonCpp
-  FOUND_VAR JsonCpp_FOUND
+find_package_handle_standard_args(JsonCpp
   REQUIRED_VARS JsonCpp_LIBRARY JsonCpp_INCLUDE_DIR
   VERSION_VAR JsonCpp_VERSION_STRING
   )
-set(JSONCPP_FOUND ${JsonCpp_FOUND})
 
 #-----------------------------------------------------------------------------
 # Provide documented result variables and targets.

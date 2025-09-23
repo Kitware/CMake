@@ -1,5 +1,5 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-# file Copyright.txt or https://cmake.org/licensing for details.
+# file LICENSE.rst or https://cmake.org/licensing for details.
 
 #[=======================================================================[.rst:
 FindOpenGL
@@ -39,7 +39,7 @@ This module respects several optional COMPONENTS:
 
   A subset of OpenGL API for embedded systems with more capabilities.
 
-IMPORTED Targets
+Imported Targets
 ^^^^^^^^^^^^^^^^
 
 .. versionadded:: 3.8
@@ -569,14 +569,14 @@ if(OPENGL_EGL_INCLUDE_DIR)
   set(OPENGL_EGL_INCLUDE_DIRS ${OPENGL_EGL_INCLUDE_DIR})
 endif()
 
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(FindPackageHandleStandardArgs)
 if (CMAKE_FIND_PACKAGE_NAME STREQUAL "GLU")
   # FindGLU include()'s this module. It's an old pattern, but rather than
   # trying to suppress this from outside the module (which is then sensitive to
   # the contents, detect the case in this module and suppress it explicitly.
   set(FPHSA_NAME_MISMATCHED 1)
 endif ()
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(OpenGL REQUIRED_VARS ${_OpenGL_REQUIRED_VARS}
+find_package_handle_standard_args(OpenGL REQUIRED_VARS ${_OpenGL_REQUIRED_VARS}
                                   HANDLE_COMPONENTS)
 unset(FPHSA_NAME_MISMATCHED)
 unset(_OpenGL_REQUIRED_VARS)

@@ -1,11 +1,10 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmAddCustomCommandCommand.h"
 
 #include <algorithm>
 #include <iterator>
 #include <set>
-#include <sstream>
 #include <unordered_set>
 #include <utility>
 
@@ -46,7 +45,7 @@ bool cmAddCustomCommandCommand(std::vector<std::string> const& args,
   std::string job_pool;
   std::string job_server_aware;
   std::string comment_buffer;
-  const char* comment = nullptr;
+  char const* comment = nullptr;
   std::vector<std::string> depends;
   std::vector<std::string> outputs;
   std::vector<std::string> output;
@@ -590,46 +589,10 @@ bool cmAddCustomCommandCommand(std::vector<std::string> const& args,
     cc->SetImplicitDepends(implicit_depends);
     mf.AddCustomCommandToOutput(std::move(cc));
   } else {
-    if (!byproducts.empty()) {
-      status.SetError(
-        "BYPRODUCTS may not be specified with SOURCE signatures");
-      return false;
-    }
-
-    if (uses_terminal) {
-      status.SetError("USES_TERMINAL may not be used with SOURCE signatures");
-      return false;
-    }
-
-    bool issueMessage = true;
-    std::ostringstream e;
-    MessageType messageType = MessageType::AUTHOR_WARNING;
-    switch (mf.GetPolicyStatus(cmPolicies::CMP0050)) {
-      case cmPolicies::WARN:
-        e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0050) << "\n";
-        break;
-      case cmPolicies::OLD:
-        issueMessage = false;
-        break;
-      case cmPolicies::REQUIRED_ALWAYS:
-      case cmPolicies::REQUIRED_IF_USED:
-      case cmPolicies::NEW:
-        messageType = MessageType::FATAL_ERROR;
-        break;
-    }
-
-    if (issueMessage) {
-      e << "The SOURCE signatures of add_custom_command are no longer "
-           "supported.";
-      mf.IssueMessage(messageType, e.str());
-      if (messageType == MessageType::FATAL_ERROR) {
-        return false;
-      }
-    }
-
-    // Use the old-style mode for backward compatibility.
-    mf.AddCustomCommandOldStyle(target, outputs, depends, source, commandLines,
-                                comment);
+    mf.IssueMessage(
+      MessageType::FATAL_ERROR,
+      "The SOURCE signatures of add_custom_command are no longer supported.");
+    return false;
   }
 
   return true;

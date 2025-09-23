@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmGlobalVisualStudio11Generator.h"
 
 #include <cstring>
@@ -16,9 +16,8 @@
 #include "cmSystemTools.h"
 
 cmGlobalVisualStudio11Generator::cmGlobalVisualStudio11Generator(
-  cmake* cm, const std::string& name,
-  std::string const& platformInGeneratorName)
-  : cmGlobalVisualStudio10Generator(cm, name, platformInGeneratorName)
+  cmake* cm, std::string const& name)
+  : cmGlobalVisualStudio10Generator(cm, name)
 {
 }
 
@@ -116,7 +115,7 @@ bool cmGlobalVisualStudio11Generator::UseFolderProperty() const
 std::set<std::string>
 cmGlobalVisualStudio11Generator::GetInstalledWindowsCESDKs()
 {
-  const char sdksKey[] = "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\"
+  char const sdksKey[] = "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\"
                          "Windows CE Tools\\SDKs";
 
   std::vector<std::string> subkeys;
@@ -149,9 +148,9 @@ bool cmGlobalVisualStudio11Generator::TargetSystemSupportsDeployment() const
 
 bool cmGlobalVisualStudio11Generator::IsWindowsDesktopToolsetInstalled() const
 {
-  const char desktop80Key[] = "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\"
+  char const desktop80Key[] = "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\"
                               "VisualStudio\\11.0\\VC\\Libraries\\Extended";
-  const char VS2012DesktopExpressKey[] =
+  char const VS2012DesktopExpressKey[] =
     "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\"
     "WDExpress\\11.0;InstallDir";
 
@@ -165,7 +164,7 @@ bool cmGlobalVisualStudio11Generator::IsWindowsDesktopToolsetInstalled() const
 
 bool cmGlobalVisualStudio11Generator::IsWindowsPhoneToolsetInstalled() const
 {
-  const char wp80Key[] = "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\"
+  char const wp80Key[] = "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\"
                          "Microsoft SDKs\\WindowsPhone\\v8.0\\"
                          "Install Path;Install Path";
 
@@ -176,7 +175,7 @@ bool cmGlobalVisualStudio11Generator::IsWindowsPhoneToolsetInstalled() const
 
 bool cmGlobalVisualStudio11Generator::IsWindowsStoreToolsetInstalled() const
 {
-  const char win80Key[] = "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\"
+  char const win80Key[] = "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\"
                           "VisualStudio\\11.0\\VC\\Libraries\\Core\\Arm";
 
   std::vector<std::string> subkeys;

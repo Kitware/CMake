@@ -24,7 +24,7 @@
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "../curl_setup.h"
 
 #if defined(USE_LIBSSH2)
 #include <libssh2.h>
@@ -38,6 +38,13 @@
 #include <wolfssh/ssh.h>
 #include <wolfssh/wolfsftp.h>
 #endif
+
+#include "curl_path.h"
+
+/* meta key for storing protocol meta at easy handle */
+#define CURL_META_SSH_EASY   "meta:proto:ssh:easy"
+/* meta key for storing protocol meta at connection */
+#define CURL_META_SSH_CONN   "meta:proto:ssh:conn"
 
 /****************************************************************************
  * SSH unique setup
@@ -109,6 +116,8 @@ typedef enum {
   SSH_LAST  /* never used */
 } sshstate;
 
+#define CURL_PATH_MAX 1024
+
 /* this struct is used in the HandleData struct which is part of the
    Curl_easy, which means this is used on a per-easy handle basis.
    Everything that is strictly related to a connection is banned from this
@@ -118,8 +127,8 @@ struct SSHPROTO {
 #ifdef USE_LIBSSH2
   struct dynbuf readdir_link;
   struct dynbuf readdir;
-  char *readdir_filename;
-  char *readdir_longentry;
+  char readdir_filename[CURL_PATH_MAX + 1];
+  char readdir_longentry[CURL_PATH_MAX + 1];
 
   LIBSSH2_SFTP_ATTRIBUTES quote_attrs; /* used by the SFTP_QUOTE state */
 
@@ -137,12 +146,8 @@ struct ssh_conn {
   const char *passphrase;     /* pass-phrase to use */
   char *rsa_pub;              /* strdup'ed public key file */
   char *rsa;                  /* strdup'ed private key file */
-  bool authed;                /* the connection has been authenticated fine */
-  bool acceptfail;            /* used by the SFTP_QUOTE (continue if
-                                 quote command fails) */
   sshstate state;             /* always use ssh.c:state() to change state! */
   sshstate nextstate;         /* the state to goto after stopping */
-  CURLcode actualcode;        /* the actual error code */
   struct curl_slist *quote_item; /* for the quote option */
   char *quote_path1;          /* two generic pointers for the QUOTE stuff */
   char *quote_path2;
@@ -158,6 +163,7 @@ struct ssh_conn {
   char *slash_pos;              /* used by the SFTP_CREATE_DIRS state */
 
 #if defined(USE_LIBSSH)
+  CURLcode actualcode;        /* the actual error code */
   char *readdir_linkPath;
   size_t readdir_len;
   struct dynbuf readdir_buf;
@@ -173,6 +179,10 @@ struct ssh_conn {
   sftp_dir sftp_dir;
 
   unsigned sftp_recv_state; /* 0 or 1 */
+#if LIBSSH_VERSION_INT > SSH_VERSION_INT(0, 11, 0)
+  sftp_aio sftp_aio;
+  unsigned sftp_send_state; /* 0 or 1 */
+#endif
   int sftp_file_index; /* for async read */
   sftp_attributes readdir_attrs; /* used by the SFTP readdir actions */
   sftp_attributes readdir_link_attrs; /* used by the SFTP readdir actions */
@@ -193,63 +203,38 @@ struct ssh_conn {
   Curl_send *tls_send;
 #endif
 
-#ifdef HAVE_LIBSSH2_AGENT_API
   LIBSSH2_AGENT *ssh_agent;     /* proxy to ssh-agent/pageant */
-  struct libssh2_agent_publickey *sshagent_identity,
-                                 *sshagent_prev_identity;
-#endif
-
-  /* note that HAVE_LIBSSH2_KNOWNHOST_API is a define set in the libssh2.h
-     header */
-#ifdef HAVE_LIBSSH2_KNOWNHOST_API
+  struct libssh2_agent_publickey *sshagent_identity;
+  struct libssh2_agent_publickey *sshagent_prev_identity;
   LIBSSH2_KNOWNHOSTS *kh;
-#endif
 #elif defined(USE_WOLFSSH)
+  CURLcode actualcode;        /* the actual error code */
   WOLFSSH *ssh_session;
   WOLFSSH_CTX *ctx;
   word32 handleSz;
   byte handle[WOLFSSH_MAX_HANDLE];
   curl_off_t offset;
 #endif /* USE_LIBSSH */
+  BIT(initialised);
+  BIT(authed);                /* the connection has been authenticated fine */
+  BIT(acceptfail);            /* used by the SFTP_QUOTE (continue if
+                                 quote command fails) */
 };
+
+#ifdef USE_LIBSSH
+#if LIBSSH_VERSION_INT < SSH_VERSION_INT(0, 9, 0)
+#  error "SCP/SFTP protocols require libssh 0.9.0 or later"
+#endif
+#endif
 
 #if defined(USE_LIBSSH2)
 
 /* Feature detection based on version numbers to better work with
    non-configure platforms */
 
-#if !defined(LIBSSH2_VERSION_NUM) || (LIBSSH2_VERSION_NUM < 0x001000)
-#  error "SCP/SFTP protocols require libssh2 0.16 or later"
-#endif
-
-#if LIBSSH2_VERSION_NUM >= 0x010000
-#define HAVE_LIBSSH2_SFTP_SEEK64 1
-#endif
-
-#if LIBSSH2_VERSION_NUM >= 0x010100
-#define HAVE_LIBSSH2_VERSION 1
-#endif
-
-#if LIBSSH2_VERSION_NUM >= 0x010205
-#define HAVE_LIBSSH2_INIT 1
-#define HAVE_LIBSSH2_EXIT 1
-#endif
-
-#if LIBSSH2_VERSION_NUM >= 0x010206
-#define HAVE_LIBSSH2_KNOWNHOST_CHECKP 1
-#define HAVE_LIBSSH2_SCP_SEND64 1
-#endif
-
-#if LIBSSH2_VERSION_NUM >= 0x010208
-#define HAVE_LIBSSH2_SESSION_HANDSHAKE 1
-#endif
-
-#ifdef HAVE_LIBSSH2_VERSION
-/* get it runtime if possible */
-#define CURL_LIBSSH2_VERSION libssh2_version(0)
-#else
-/* use build-time if runtime not possible */
-#define CURL_LIBSSH2_VERSION LIBSSH2_VERSION
+#if !defined(LIBSSH2_VERSION_NUM) || (LIBSSH2_VERSION_NUM < 0x010208)
+#  error "SCP/SFTP protocols require libssh2 1.2.8 or later"
+/* 1.2.8 was released on April 5 2011 */
 #endif
 
 #endif /* USE_LIBSSH2 */

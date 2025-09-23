@@ -1,0 +1,167 @@
+CMAKE_LANG=CXX
+CMAKE_LINKER=/opt/cray/pe/cce/18.0.1/binutils/x86_64/x86_64-pc-linux-gnu/bin/ld
+CMAKE_CXX_COMPILER_ABI=ELF
+CMAKE_CXX_COMPILER_AR=
+CMAKE_CXX_COMPILER_ARCHITECTURE_ID=
+CMAKE_CXX_COMPILER_EXTERNAL_TOOLCHAIN=
+CMAKE_CXX_COMPILER_ID=CrayClang
+CMAKE_CXX_COMPILER_LAUNCHER=
+CMAKE_CXX_COMPILER_LOADED=1
+CMAKE_CXX_COMPILER_RANLIB=
+CMAKE_CXX_COMPILER_TARGET=
+CMAKE_CXX_COMPILER_VERSION=18.0.0
+CMAKE_CXX_COMPILER_VERSION_INTERAL=
+Change Dir: '/tmp/tmp.EJ2EzeIOpP/CMakeFiles/CMakeTmp'
+
+Run Build Command(s): /usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_8fca6/fast
+/usr/bin/gmake  -f CMakeFiles/cmTC_8fca6.dir/build.make CMakeFiles/cmTC_8fca6.dir/build
+gmake[1]: Entering directory '/tmp/tmp.EJ2EzeIOpP/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_8fca6.dir/CMakeCXXCompilerABI.cpp.o
+/opt/cray/pe/craype/2.7.33/bin/CC   -fopenmp    -v -o CMakeFiles/cmTC_8fca6.dir/CMakeCXXCompilerABI.cpp.o -c /home/generic.user/cmake/Modules/CMakeCXXCompilerABI.cpp
+Cray clang version 18.0.1  (ac9591613de6fa834bf54862b433bbc16834c13d)
+Target: x86_64-unknown-linux-gnu
+Thread model: posix
+InstalledDir: /opt/cray/pe/cce/18.0.1/cce-clang/x86_64/share/../bin
+Found candidate GCC installation: /usr/lib64/gcc/x86_64-suse-linux/11
+Found candidate GCC installation: /usr/lib64/gcc/x86_64-suse-linux/12
+Found candidate GCC installation: /usr/lib64/gcc/x86_64-suse-linux/13
+Found candidate GCC installation: /usr/lib64/gcc/x86_64-suse-linux/14
+Found candidate GCC installation: /usr/lib64/gcc/x86_64-suse-linux/7
+Selected GCC installation: /usr/lib64/gcc/x86_64-suse-linux/14
+Candidate multilib: .@m64
+Selected multilib: .@m64
+Found HIP installation: /opt/rocm-6.3.0, version 6.3.42131
+ "/opt/cray/pe/cce/18.0.1/cce-clang/x86_64/bin/clang-18" -cc1 -triple x86_64-unknown-linux-gnu -mllvm -cray-omp-opt-fork-call -mllvm -cray-omp-parallel-opt-call -mllvm -cray-openmp-rename-outlined -fcray-gpu -flocal-restrict -mllvm -cray-enhanced-asm=1 -fenhanced-asm=1 -mllvm -cray-enhanced-ir=1 -fenhanced-ir=1 -fomp-local-offload-table -ffortran -emit-llvm-bc -emit-llvm-uselists -disable-free -clear-ast-before-backend -main-file-name CMakeCXXCompilerABI.cpp -mrelocation-model static -mframe-pointer=all -fmath-errno -ffp-contract=on -fno-rounding-math -mconstructor-aliases -funwind-tables=2 -target-cpu znver2 -debugger-tuning=gdb -fdebug-compilation-dir=/tmp/tmp.EJ2EzeIOpP/CMakeFiles/CMakeTmp -v -fcoverage-compilation-dir=/tmp/tmp.EJ2EzeIOpP/CMakeFiles/CMakeTmp -resource-dir /opt/cray/pe/cce/18.0.1/cce-clang/x86_64/lib/clang/18 -internal-isystem /opt/cray/pe/cce/18.0.1/cce-clang/x86_64/lib/clang/18/include/llvm_libc_wrappers -isystem /opt/cray/pe/cce/18.0.1/cce-clang/x86_64/lib/clang/18/include -isystem /opt/cray/pe/cce/18.0.1/cce/x86_64/include/craylibs -D __CRAY_X86_ROME -D __CRAY_AMD_GFX908 -D __CRAYXT_COMPUTE_LINUX_TARGET -D __HIP_PLATFORM_AMD__ -I /opt/cray/pe/mpich/8.1.31/ofi/cray/17.0/include -I /opt/cray/pe/dsmml/0.3.0/dsmml//include -I /opt/cray/pe/libsci/24.11.0/CRAY/17.0/x86_64/include -I /opt/rocm-6.3.0/include -I /opt/rocm-6.3.0/include/rocprofiler -I /opt/rocm-6.3.0/include/roctracer -internal-isystem /usr/lib64/gcc/x86_64-suse-linux/14/../../../../include/c++/14 -internal-isystem /usr/lib64/gcc/x86_64-suse-linux/14/../../../../include/c++/14/x86_64-suse-linux -internal-isystem /usr/lib64/gcc/x86_64-suse-linux/14/../../../../include/c++/14/backward -internal-isystem /usr/lib64/gcc/x86_64-suse-linux/14/../../../../include/c++/14 -internal-isystem /usr/lib64/gcc/x86_64-suse-linux/14/../../../../include/c++/14/x86_64-suse-linux -internal-isystem /usr/lib64/gcc/x86_64-suse-linux/14/../../../../include/c++/14/backward -internal-isystem /opt/cray/pe/cce/18.0.1/cce-clang/x86_64/lib/clang/18/include -internal-isystem /usr/local/include -internal-isystem /usr/lib64/gcc/x86_64-suse-linux/14/../../../../x86_64-suse-linux/include -internal-externc-isystem /include -internal-externc-isystem /usr/include -internal-isystem /opt/cray/pe/cce/18.0.1/cce-clang/x86_64/lib/clang/18/include -internal-isystem /usr/local/include -internal-isystem /usr/lib64/gcc/x86_64-suse-linux/14/../../../../x86_64-suse-linux/include -internal-externc-isystem /include -internal-externc-isystem /usr/include -fdeprecated-macro -ferror-limit 19 -fcray-openmp -fcray-omp-opt-fork -fcray-omp-parallel-opt -fcray-openmp-rename-outlined-funcs -fopenmp -fgnuc-version=4.2.1 -fskip-odr-check-in-gmf -fcxx-exceptions -fexceptions -disable-llvm-passes -fopenmp-targets=amdgcn-amd-amdhsa -faddrsig -D__GCC_HAVE_DWARF2_CFI_ASM=1 -o /tmp/CMakeCXXCompilerABI-5443ab.bc -x c++ /home/generic.user/cmake/Modules/CMakeCXXCompilerABI.cpp
+clang -cc1 version 18.1.8 based upon LLVM 18.1.8 default target x86_64-unknown-linux-gnu
+ignoring nonexistent directory "/include"
+ignoring nonexistent directory "/include"
+ignoring duplicate directory "/usr/lib64/gcc/x86_64-suse-linux/14/../../../../include/c++/14"
+ignoring duplicate directory "/usr/lib64/gcc/x86_64-suse-linux/14/../../../../include/c++/14/x86_64-suse-linux"
+ignoring duplicate directory "/usr/lib64/gcc/x86_64-suse-linux/14/../../../../include/c++/14/backward"
+ignoring duplicate directory "/opt/cray/pe/cce/18.0.1/cce-clang/x86_64/lib/clang/18/include"
+ignoring duplicate directory "/opt/cray/pe/cce/18.0.1/cce-clang/x86_64/lib/clang/18/include"
+ignoring duplicate directory "/usr/local/include"
+ignoring duplicate directory "/usr/lib64/gcc/x86_64-suse-linux/14/../../../../x86_64-suse-linux/include"
+ignoring duplicate directory "/usr/include"
+#include "..." search starts here:
+#include <...> search starts here:
+ /opt/cray/pe/mpich/8.1.31/ofi/cray/17.0/include
+ /opt/cray/pe/dsmml/0.3.0/dsmml//include
+ /opt/cray/pe/libsci/24.11.0/CRAY/17.0/x86_64/include
+ /opt/rocm-6.3.0/include
+ /opt/rocm-6.3.0/include/rocprofiler
+ /opt/rocm-6.3.0/include/roctracer
+ /opt/cray/pe/cce/18.0.1/cce-clang/x86_64/lib/clang/18/include
+ /opt/cray/pe/cce/18.0.1/cce/x86_64/include/craylibs
+ /opt/cray/pe/cce/18.0.1/cce-clang/x86_64/lib/clang/18/include/llvm_libc_wrappers
+ /usr/lib64/gcc/x86_64-suse-linux/14/../../../../include/c++/14
+ /usr/lib64/gcc/x86_64-suse-linux/14/../../../../include/c++/14/x86_64-suse-linux
+ /usr/lib64/gcc/x86_64-suse-linux/14/../../../../include/c++/14/backward
+ /usr/local/include
+ /usr/lib64/gcc/x86_64-suse-linux/14/../../../../x86_64-suse-linux/include
+ /usr/include
+End of search list.
+ "/opt/cray/pe/cce/18.0.1/cce-clang/x86_64/bin/clang-18" -cc1 -triple amdgcn-amd-amdhsa -mllvm -cray-omp-opt-fork-call -mllvm -cray-omp-parallel-opt-call -mllvm -cray-openmp-rename-outlined -fcray-gpu -flocal-restrict -mllvm -cray-enhanced-asm=1 -fenhanced-asm=1 -mllvm -cray-enhanced-ir=1 -fenhanced-ir=1 -fomp-local-offload-table -ffortran -aux-triple x86_64-unknown-linux-gnu -emit-llvm-bc -emit-llvm-uselists -disable-free -clear-ast-before-backend -main-file-name CMakeCXXCompilerABI.cpp -mrelocation-model pic -pic-level 2 -fhalf-no-semantic-interposition -mframe-pointer=all -ffp-contract=on -fno-rounding-math -mconstructor-aliases -target-cpu gfx908 -fcuda-is-device -fcuda-allow-variadic-functions -target-cpu gfx908 -debugger-tuning=gdb -fdebug-compilation-dir=/tmp/tmp.EJ2EzeIOpP/CMakeFiles/CMakeTmp -v -resource-dir /opt/cray/pe/cce/18.0.1/cce-clang/x86_64/lib/clang/18 -internal-isystem /opt/cray/pe/cce/18.0.1/cce-clang/x86_64/lib/clang/18/include/llvm_libc_wrappers -internal-isystem /opt/cray/pe/cce/18.0.1/cce-clang/x86_64/lib/clang/18/include/openmp_wrappers -include __clang_openmp_device_functions.h -isystem /opt/cray/pe/cce/18.0.1/cce-clang/x86_64/lib/clang/18/include -isystem /opt/cray/pe/cce/18.0.1/cce/x86_64/include/craylibs -D __CRAY_X86_ROME -D __CRAY_AMD_GFX908 -D __CRAYXT_COMPUTE_LINUX_TARGET -D __HIP_PLATFORM_AMD__ -I /opt/cray/pe/mpich/8.1.31/ofi/cray/17.0/include -I /opt/cray/pe/dsmml/0.3.0/dsmml//include -I /opt/cray/pe/libsci/24.11.0/CRAY/17.0/x86_64/include -I /opt/rocm-6.3.0/include -I /opt/rocm-6.3.0/include/rocprofiler -I /opt/rocm-6.3.0/include/roctracer -internal-isystem /usr/lib64/gcc/x86_64-suse-linux/14/../../../../include/c++/14 -internal-isystem /usr/lib64/gcc/x86_64-suse-linux/14/../../../../include/c++/14/x86_64-suse-linux -internal-isystem /usr/lib64/gcc/x86_64-suse-linux/14/../../../../include/c++/14/backward -internal-isystem /usr/lib64/gcc/x86_64-suse-linux/14/../../../../include/c++/14 -internal-isystem /usr/lib64/gcc/x86_64-suse-linux/14/../../../../include/c++/14/x86_64-suse-linux -internal-isystem /usr/lib64/gcc/x86_64-suse-linux/14/../../../../include/c++/14/backward -internal-isystem /opt/cray/pe/cce/18.0.1/cce-clang/x86_64/lib/clang/18/include -internal-isystem /usr/local/include -internal-isystem /usr/lib64/gcc/x86_64-suse-linux/14/../../../../x86_64-suse-linux/include -internal-externc-isystem /include -internal-externc-isystem /usr/include -internal-isystem /opt/cray/pe/cce/18.0.1/cce-clang/x86_64/lib/clang/18/include -internal-isystem /usr/local/include -internal-isystem /usr/lib64/gcc/x86_64-suse-linux/14/../../../../x86_64-suse-linux/include -internal-externc-isystem /include -internal-externc-isystem /usr/include -fdeprecated-macro -ferror-limit 19 -fvisibility=protected -fcray-openmp -fcray-omp-opt-fork -fcray-omp-parallel-opt -fcray-openmp-rename-outlined-funcs -fopenmp -fgnuc-version=4.2.1 -fskip-odr-check-in-gmf -fcxx-exceptions -fexceptions -fopenmp-is-target-device -mllvm -cray-gpu -mllvm -openmp-opt-disable -mllvm -cray-gpuruntime-bitcode=/opt/cray/pe/cce/18.0.1/cce-clang/x86_64/lib/libcrayomptarget-amdgcn-gfx908.bc/opt/rocm-6.3.0/amdgcn/bitcode/hip.bc/opt/rocm-6.3.0/amdgcn/bitcode/ockl.bc/opt/rocm-6.3.0/amdgcn/bitcode/ocml.bc/opt/rocm-6.3.0/amdgcn/bitcode/ocml.bc/opt/rocm-6.3.0/amdgcn/bitcode/oclc_isa_version_908.bc/opt/rocm-6.3.0/amdgcn/bitcode/oclc_daz_opt_off.bc/opt/rocm-6.3.0/amdgcn/bitcode/oclc_finite_only_off.bc/opt/rocm-6.3.0/amdgcn/bitcode/oclc_correctly_rounded_sqrt_on.bc/opt/rocm-6.3.0/amdgcn/bitcode/oclc_unsafe_math_off.bc -fopenmp-host-ir-file-path /tmp/CMakeCXXCompilerABI-5443ab.bc -faddrsig -D__GCC_HAVE_DWARF2_CFI_ASM=1 -o /tmp/CMakeCXXCompilerABI-0ade57.bc -x c++ /home/generic.user/cmake/Modules/CMakeCXXCompilerABI.cpp
+clang -cc1 version 18.1.8 based upon LLVM 18.1.8 default target x86_64-unknown-linux-gnu
+ignoring nonexistent directory "/include"
+ignoring nonexistent directory "/include"
+ignoring duplicate directory "/usr/lib64/gcc/x86_64-suse-linux/14/../../../../include/c++/14"
+ignoring duplicate directory "/usr/lib64/gcc/x86_64-suse-linux/14/../../../../include/c++/14/x86_64-suse-linux"
+ignoring duplicate directory "/usr/lib64/gcc/x86_64-suse-linux/14/../../../../include/c++/14/backward"
+ignoring duplicate directory "/opt/cray/pe/cce/18.0.1/cce-clang/x86_64/lib/clang/18/include"
+ignoring duplicate directory "/opt/cray/pe/cce/18.0.1/cce-clang/x86_64/lib/clang/18/include"
+ignoring duplicate directory "/usr/local/include"
+ignoring duplicate directory "/usr/lib64/gcc/x86_64-suse-linux/14/../../../../x86_64-suse-linux/include"
+ignoring duplicate directory "/usr/include"
+ignoring duplicate directory "/usr/local/include"
+ignoring duplicate directory "/opt/cray/pe/cce/18.0.1/cce-clang/x86_64/lib/clang/18/include"
+ignoring duplicate directory "/usr/include"
+#include "..." search starts here:
+#include <...> search starts here:
+ /opt/cray/pe/mpich/8.1.31/ofi/cray/17.0/include
+ /opt/cray/pe/dsmml/0.3.0/dsmml//include
+ /opt/cray/pe/libsci/24.11.0/CRAY/17.0/x86_64/include
+ /opt/rocm-6.3.0/include
+ /opt/rocm-6.3.0/include/rocprofiler
+ /opt/rocm-6.3.0/include/roctracer
+ /opt/cray/pe/cce/18.0.1/cce-clang/x86_64/lib/clang/18/include
+ /opt/cray/pe/cce/18.0.1/cce/x86_64/include/craylibs
+ /opt/cray/pe/cce/18.0.1/cce-clang/x86_64/lib/clang/18/include/llvm_libc_wrappers
+ /opt/cray/pe/cce/18.0.1/cce-clang/x86_64/lib/clang/18/include/openmp_wrappers
+ /usr/lib64/gcc/x86_64-suse-linux/14/../../../../include/c++/14
+ /usr/lib64/gcc/x86_64-suse-linux/14/../../../../include/c++/14/x86_64-suse-linux
+ /usr/lib64/gcc/x86_64-suse-linux/14/../../../../include/c++/14/backward
+ /usr/local/include
+ /usr/lib64/gcc/x86_64-suse-linux/14/../../../../x86_64-suse-linux/include
+ /usr/include
+End of search list.
+ "/opt/cray/pe/cce/18.0.1/cce-clang/x86_64/share/../bin/clang-offload-packager" -o /tmp/CMakeCXXCompilerABI-de1f29.out --image=file=/tmp/CMakeCXXCompilerABI-0ade57.bc,triple=amdgcn-amd-amdhsa,arch=gfx908,kind=openmp
+ "/opt/cray/pe/cce/18.0.1/cce-clang/x86_64/bin/clang-18" -cc1 -triple x86_64-unknown-linux-gnu -mllvm -cray-omp-opt-fork-call -mllvm -cray-omp-parallel-opt-call -mllvm -cray-openmp-rename-outlined -fcray-gpu -flocal-restrict -mllvm -cray-enhanced-asm=1 -fenhanced-asm=1 -mllvm -cray-enhanced-ir=1 -fenhanced-ir=1 -fomp-local-offload-table -ffortran -emit-obj -mrelax-all -disable-free -clear-ast-before-backend -main-file-name CMakeCXXCompilerABI.cpp -mrelocation-model static -mframe-pointer=all -fmath-errno -ffp-contract=on -fno-rounding-math -mconstructor-aliases -funwind-tables=2 -target-cpu znver2 -debugger-tuning=gdb -fdebug-compilation-dir=/tmp/tmp.EJ2EzeIOpP/CMakeFiles/CMakeTmp -v -fcoverage-compilation-dir=/tmp/tmp.EJ2EzeIOpP/CMakeFiles/CMakeTmp -resource-dir /opt/cray/pe/cce/18.0.1/cce-clang/x86_64/lib/clang/18 -ferror-limit 19 -fcray-openmp -fcray-omp-opt-fork -fcray-omp-parallel-opt -fcray-openmp-rename-outlined-funcs -fopenmp -fgnuc-version=4.2.1 -fskip-odr-check-in-gmf -fembed-offload-object=/tmp/CMakeCXXCompilerABI-de1f29.out -fopenmp-targets=amdgcn-amd-amdhsa -faddrsig -D__GCC_HAVE_DWARF2_CFI_ASM=1 -o CMakeFiles/cmTC_8fca6.dir/CMakeCXXCompilerABI.cpp.o -x ir /tmp/CMakeCXXCompilerABI-5443ab.bc
+clang -cc1 version 18.1.8 based upon LLVM 18.1.8 default target x86_64-unknown-linux-gnu
+Linking CXX executable cmTC_8fca6
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_8fca6.dir/link.txt --verbose=1
+Cray clang version 18.0.0.x  (bbb3d6951c0329c4d902e7dcd9d677009b67b19a)
+Target: x86_64-unknown-linux-gnu
+Thread model: posix
+InstalledDir: /opt/cray/pe/cce/18.0.1/cce-clang/x86_64/share/../bin
+Found candidate GCC installation: /usr/lib64/gcc/x86_64-suse-linux/11
+Found candidate GCC installation: /usr/lib64/gcc/x86_64-suse-linux/12
+Found candidate GCC installation: /usr/lib64/gcc/x86_64-suse-linux/13
+Found candidate GCC installation: /usr/lib64/gcc/x86_64-suse-linux/14
+Found candidate GCC installation: /usr/lib64/gcc/x86_64-suse-linux/7
+Selected GCC installation: /usr/lib64/gcc/x86_64-suse-linux/14
+Candidate multilib: .@m64
+Selected multilib: .@m64
+Found HIP installation: /opt/rocm-6.3.0, version 6.3.42131
+ "/opt/cray/pe/cce/18.0.1/cce/x86_64/bin/cce_omp_offload_linker" -O0 -mcode-object-version=5 --rocm-path /opt/rocm-6.3.0 --rocm-device-lib-path /opt/rocm-6.3.0/amdgcn/bitcode --verbose --arch gfx908 -- /opt/cray/pe/cce/18.0.1/cce-clang/x86_64/bin/ld.lld --hash-style=gnu --eh-frame-hdr -m elf_x86_64 -dynamic-linker /lib64/ld-linux-x86-64.so.2 -o cmTC_8fca6 /usr/lib64/gcc/x86_64-suse-linux/14/../../../../lib64/crt1.o /usr/lib64/gcc/x86_64-suse-linux/14/../../../../lib64/crti.o /opt/cray/pe/cce/18.0.1/cce-clang/x86_64/lib/clang/18/lib/linux/clang_rt.crtbegin-x86_64.o -L/opt/cray/pe/mpich/8.1.31/ofi/cray/17.0/lib -L/opt/cray/pe/mpich/8.1.31/gtl/lib -L/opt/cray/pe/dsmml/0.3.0/dsmml//lib -L/opt/cray/pe/libsci/24.11.0/CRAY/17.0/x86_64/lib -L/opt/rocm-6.3.0/lib -L/opt/rocm-6.3.0/lib/rocprofiler -L/opt/rocm-6.3.0/lib/roctracer -L/opt/cray/pe/cce/18.0.1/cce/x86_64/lib/pkgconfig/../ -L/usr/lib64/gcc/x86_64-suse-linux/14 -L/usr/lib64/gcc/x86_64-suse-linux/14/../../../../lib64 -L/lib/../lib64 -L/usr/lib/../lib64 -L/usr/lib64/gcc/x86_64-suse-linux/14/../../../../x86_64-suse-linux/lib -L/lib -L/usr/lib -plugin-opt=mcpu=znver2 -plugin-opt=lto=0 -plugin-opt=defaults=cray -plugin-opt=mllvm=-cray-math-precision=none -rpath=/opt/cray/pe/cce/18.0.1/cce/x86_64/lib CMakeFiles/cmTC_8fca6.dir/CMakeCXXCompilerABI.cpp.o -lamdhip64 --as-needed -lsci_cray_mpi_mp --no-as-needed --as-needed -lsci_cray_mp --no-as-needed -ldl --as-needed -lmpi_cray --no-as-needed -lmpi_gtl_hsa --as-needed -ldsmml --no-as-needed -lstdc++ --as-needed -lpgas-shmem --no-as-needed -lquadmath -lmodules -lfi -lcraymath -lf -lu -lcsup --as-needed -lpthread -latomic --no-as-needed --as-needed -lm --no-as-needed --disable-new-dtags /opt/cray/pe/cce/18.0.1/cce/x86_64/lib/no_mmap.o -lstdc++ -lm -lcraymp -lcrayacc_amdgpu -L/opt/cray/pe/cce/18.0.1/cce-clang/x86_64/lib /opt/cray/pe/cce/18.0.1/cce-clang/x86_64/lib/clang/18/lib/linux/libclang_rt.builtins-x86_64.a --as-needed -L/opt/cray/pe/cce/18.0.1/cce-clang/x86_64/lib -rpath=/opt/cray/pe/cce/18.0.1/cce-clang/x86_64/lib /opt/cray/pe/cce/18.0.1/cce-clang/x86_64/lib/libunwind.so -lunwind --no-as-needed -lpthread -lc /opt/cray/pe/cce/18.0.1/cce-clang/x86_64/lib/clang/18/lib/linux/libclang_rt.builtins-x86_64.a --as-needed -L/opt/cray/pe/cce/18.0.1/cce-clang/x86_64/lib -rpath=/opt/cray/pe/cce/18.0.1/cce-clang/x86_64/lib /opt/cray/pe/cce/18.0.1/cce-clang/x86_64/lib/libunwind.so -lunwind --no-as-needed /opt/cray/pe/cce/18.0.1/cce-clang/x86_64/lib/clang/18/lib/linux/clang_rt.crtend-x86_64.o /usr/lib64/gcc/x86_64-suse-linux/14/../../../../lib64/crtn.o
+Offload Version : 1
+Image Kind      : bc
+Offload Kind    : openmp
+Arch name       : gfx908
+Binary Size     : 3304
+Target Triple   : amdgcn-amd-amdhsa
+Image Size      : 3160
+Unbundling: CMakeFiles/cmTC_8fca6.dir/CMakeCXXCompilerABI.cpp.o -> CMakeCXXCompilerABI.cpp-cce-openmp-amdgcn-amd-amdhsa.amdgpu, CMakeFiles/cmTC_8fca6.dir/CMakeCXXCompilerABI.cpp.o
+Skipping unbundling of /opt/cray/pe/cce/18.0.1/cce-clang/x86_64/lib/clang/18/lib/linux/libclang_rt.builtins-x86_64.a (already processed)
+Skipping unbundling of /opt/cray/pe/cce/18.0.1/cce-clang/x86_64/lib/libunwind.so (already processed)
+Skipping unbundling of /usr/lib64/gcc/x86_64-suse-linux/14/libstdc++.a (already processed)
+Skipping unbundling of /usr/lib64/gcc/x86_64-suse-linux/14/../../../../lib64/libm.a (already processed)
+Skipping unbundling of /usr/lib64/gcc/x86_64-suse-linux/14/../../../../lib64/libpthread.a (already processed)
+Skipping unbundling of /opt/cray/pe/cce/18.0.1/cce-clang/x86_64/lib/libunwind.a (already processed)
+/opt/cray/pe/cce/18.0.1/cce-clang/x86_64/bin/llvm-link /tmp/cooltmpdir-232WmJ/CMakeCXXCompilerABI.cpp-cce-openmp-amdgcn-amd-amdhsa.amdgpu -o /tmp/cooltmpdir-232WmJ/cmTC_8fca6-cce-openmp__ll_app.amdgpu
+/opt/cray/pe/cce/18.0.1/cce-clang/x86_64/bin/llvm-link /tmp/cooltmpdir-232WmJ/cmTC_8fca6-cce-openmp__ll_app.amdgpu /opt/cray/pe/cce/18.0.1/cce-clang/x86_64/lib/libcrayomptarget-amdgcn-gfx908.bc --only-needed /opt/rocm-6.3.0/amdgcn/bitcode/hip.bc /opt/rocm-6.3.0/amdgcn/bitcode/ocml.bc /opt/rocm-6.3.0/amdgcn/bitcode/ockl.bc /opt/rocm-6.3.0/amdgcn/bitcode/oclc_finite_only_off.bc /opt/rocm-6.3.0/amdgcn/bitcode/oclc_daz_opt_off.bc /opt/rocm-6.3.0/amdgcn/bitcode/oclc_correctly_rounded_sqrt_on.bc /opt/rocm-6.3.0/amdgcn/bitcode/oclc_unsafe_math_off.bc /opt/rocm-6.3.0/amdgcn/bitcode/oclc_isa_version_908.bc /opt/rocm-6.3.0/amdgcn/bitcode/oclc_wavefrontsize64_on.bc /opt/rocm-6.3.0/amdgcn/bitcode/oclc_abi_version_500.bc -o /tmp/cooltmpdir-232WmJ/cmTC_8fca6-cce-openmp__ll.amdgpu
+/opt/cray/pe/cce/18.0.1/cce-clang/x86_64/bin/opt -mtriple=amdgcn-amd-amdhsa -mcpu=gfx908 -passes=cray-gpu-linkage-munger,always-inline -amdgpu-internalize-symbols /tmp/cooltmpdir-232WmJ/cmTC_8fca6-cce-openmp__ll.amdgpu -o /tmp/cooltmpdir-232WmJ/cmTC_8fca6-cce-openmppost-opt.bc
+/opt/cray/pe/cce/18.0.1/cce-clang/x86_64/bin/llvm-link --only-needed /tmp/cooltmpdir-232WmJ/cmTC_8fca6-cce-openmppost-opt.bc /opt/cray/pe/cce/18.0.1/cce-clang/x86_64/lib/libcrayomptarget-states-amdgcn-gfx908.bc -o /tmp/cooltmpdir-232WmJ/cmTC_8fca6-cce-openmp-pre-llc.bc
+/opt/cray/pe/cce/18.0.1/cce-clang/x86_64/bin/llc -O0 -mtriple=amdgcn-amd-amdhsa -disable-promote-alloca-to-lds -mcpu=gfx908 -amdgpu-dump-hsa-metadata /tmp/cooltmpdir-232WmJ/cmTC_8fca6-cce-openmp-pre-llc.bc -filetype=obj -o /tmp/cooltmpdir-232WmJ/cmTC_8fca6-cce-openmp__llc.amdgpu
+AMDGPU HSA Metadata:
+---
+amdhsa.kernels:  []
+amdhsa.target:   amdgcn-amd-amdhsa--gfx908
+amdhsa.version:
+  - 1
+  - 2
+...
+
+/opt/cray/pe/cce/18.0.1/cce-clang/x86_64/bin/lld -flavor gnu --no-undefined -shared -o /tmp/cooltmpdir-232WmJ/cmTC_8fca6-cce-openmppost_lld.amdgpu /tmp/cooltmpdir-232WmJ/cmTC_8fca6-cce-openmp__llc.amdgpu
+as /tmp/cooltmpdir-232WmJ/cmTC_8fca6-cce-openmp-amdgcn-amd-amdhsa.app.s -o /tmp/cooltmpdir-232WmJ/cmTC_8fca6-cce-openmp-host.o
+as /tmp/cooltmpdir-232WmJ/tmp_offload_linker-cce-openmpacc-targetbegin.s -o /tmp/cooltmpdir-232WmJ/acc-targetbegin-cce-openmp.o
+as /tmp/cooltmpdir-232WmJ/tmp_offload_linker-cce-openmpacc-targetend.s -o /tmp/cooltmpdir-232WmJ/acc-targetend-tmp-cce-openmp.o
+/opt/cray/pe/cce/18.0.1/binutils/x86_64/bin/ld --relocatable /tmp/cooltmpdir-232WmJ/cmTC_8fca6-cce-openmp-host.o /tmp/cooltmpdir-232WmJ/acc-targetend-tmp-cce-openmp.o --whole-archive /opt/cray/pe/cce/18.0.1/cce-clang/x86_64/lib/clang/18/lib/linux/libclang_rt.cray_device_wrapper-x86_64.a --no-whole-archive -o /tmp/cooltmpdir-232WmJ/acc-targetend-cce-openmp.o
+/opt/cray/pe/cce/18.0.1/cce-clang/x86_64/bin/ld.lld /tmp/cooltmpdir-232WmJ/acc-targetbegin-cce-openmp.o --hash-style=gnu --eh-frame-hdr -m elf_x86_64 -dynamic-linker /lib64/ld-linux-x86-64.so.2 -o cmTC_8fca6 /usr/lib64/gcc/x86_64-suse-linux/14/../../../../lib64/crt1.o /usr/lib64/gcc/x86_64-suse-linux/14/../../../../lib64/crti.o /opt/cray/pe/cce/18.0.1/cce-clang/x86_64/lib/clang/18/lib/linux/clang_rt.crtbegin-x86_64.o -L/opt/cray/pe/mpich/8.1.31/ofi/cray/17.0/lib -L/opt/cray/pe/mpich/8.1.31/gtl/lib -L/opt/cray/pe/dsmml/0.3.0/dsmml//lib -L/opt/cray/pe/libsci/24.11.0/CRAY/17.0/x86_64/lib -L/opt/rocm-6.3.0/lib -L/opt/rocm-6.3.0/lib/rocprofiler -L/opt/rocm-6.3.0/lib/roctracer -L/opt/cray/pe/cce/18.0.1/cce/x86_64/lib/pkgconfig/../ -L/usr/lib64/gcc/x86_64-suse-linux/14 -L/usr/lib64/gcc/x86_64-suse-linux/14/../../../../lib64 -L/lib/../lib64 -L/usr/lib/../lib64 -L/usr/lib64/gcc/x86_64-suse-linux/14/../../../../x86_64-suse-linux/lib -L/lib -L/usr/lib -plugin-opt=mcpu=znver2 -plugin-opt=lto=0 -plugin-opt=defaults=cray -plugin-opt=mllvm=-cray-math-precision=none -rpath=/opt/cray/pe/cce/18.0.1/cce/x86_64/lib CMakeFiles/cmTC_8fca6.dir/CMakeCXXCompilerABI.cpp.o -lamdhip64 --as-needed -lsci_cray_mpi_mp --no-as-needed --as-needed -lsci_cray_mp --no-as-needed -ldl --as-needed -lmpi_cray --no-as-needed -lmpi_gtl_hsa --as-needed -ldsmml --no-as-needed -lstdc++ --as-needed -lpgas-shmem --no-as-needed -lquadmath -lmodules -lfi -lcraymath -lf -lu -lcsup --as-needed -lpthread -latomic --no-as-needed --as-needed -lm --no-as-needed --disable-new-dtags /opt/cray/pe/cce/18.0.1/cce/x86_64/lib/no_mmap.o -lstdc++ -lm -lcraymp -lcrayacc_amdgpu -L/opt/cray/pe/cce/18.0.1/cce-clang/x86_64/lib /opt/cray/pe/cce/18.0.1/cce-clang/x86_64/lib/clang/18/lib/linux/libclang_rt.builtins-x86_64.a --as-needed -L/opt/cray/pe/cce/18.0.1/cce-clang/x86_64/lib -rpath=/opt/cray/pe/cce/18.0.1/cce-clang/x86_64/lib /opt/cray/pe/cce/18.0.1/cce-clang/x86_64/lib/libunwind.so -lunwind --no-as-needed -lpthread -lc /opt/cray/pe/cce/18.0.1/cce-clang/x86_64/lib/clang/18/lib/linux/libclang_rt.builtins-x86_64.a --as-needed -L/opt/cray/pe/cce/18.0.1/cce-clang/x86_64/lib -rpath=/opt/cray/pe/cce/18.0.1/cce-clang/x86_64/lib /opt/cray/pe/cce/18.0.1/cce-clang/x86_64/lib/libunwind.so -lunwind --no-as-needed /opt/cray/pe/cce/18.0.1/cce-clang/x86_64/lib/clang/18/lib/linux/clang_rt.crtend-x86_64.o /usr/lib64/gcc/x86_64-suse-linux/14/../../../../lib64/crtn.o /tmp/cooltmpdir-232WmJ/acc-targetend-cce-openmp.o
+rm '/tmp/cooltmpdir-232WmJ/tmp_offload_linker-cce-openmpacc-targetend.s'
+rm '/tmp/cooltmpdir-232WmJ/tmp_offload_linker-cce-openmpacc-targetbegin.s'
+rm '/tmp/cooltmpdir-232WmJ/acc-targetend-cce-openmp.o'
+rm '/tmp/cooltmpdir-232WmJ/acc-targetend-tmp-cce-openmp.o'
+rm '/tmp/cooltmpdir-232WmJ/acc-targetbegin-cce-openmp.o'
+rm '/tmp/cooltmpdir-232WmJ/cmTC_8fca6-cce-openmp-amdgcn-amd-amdhsa.app.s'
+rm '/tmp/cooltmpdir-232WmJ/cmTC_8fca6-cce-openmp-host.o'
+rm '/tmp/cooltmpdir-232WmJ/cmTC_8fca6-cce-openmppost_lld.amdgpu'
+rm '/tmp/cooltmpdir-232WmJ/cmTC_8fca6-cce-openmp__llc.amdgpu'
+rm '/tmp/cooltmpdir-232WmJ/cmTC_8fca6-cce-openmp-pre-llc.bc'
+rm '/tmp/cooltmpdir-232WmJ/cmTC_8fca6-cce-openmppost-opt.bc'
+rm '/tmp/cooltmpdir-232WmJ/cmTC_8fca6-cce-openmp__ll_app.amdgpu'
+rm '/tmp/cooltmpdir-232WmJ/cmTC_8fca6-cce-openmp__ll.amdgpu'
+rm '/tmp/cooltmpdir-232WmJ/CMakeCXXCompilerABI.cpp-cce-openmp-amdgcn-amd-amdhsa.amdgpu'
+rm '/tmp/cooltmpdir-232WmJ/'
+/opt/cray/pe/craype/2.7.33/bin/CC -fopenmp   -v CMakeFiles/cmTC_8fca6.dir/CMakeCXXCompilerABI.cpp.o -o cmTC_8fca6
+gmake[1]: Leaving directory '/tmp/tmp.EJ2EzeIOpP/CMakeFiles/CMakeTmp'

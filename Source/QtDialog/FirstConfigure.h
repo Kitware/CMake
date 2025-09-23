@@ -41,9 +41,9 @@ public:
                      QString defaultGeneratorToolset, QWidget* p);
   ~StartCompilerSetup();
   void setGenerators(std::vector<cmake::GeneratorInfo> const& gens);
-  void setCurrentGenerator(const QString& gen);
-  void setToolset(const QString& toolset);
-  void setPlatform(const QString& platform);
+  void setCurrentGenerator(QString const& gen);
+  void setToolset(QString const& toolset);
+  void setPlatform(QString const& platform);
   void setCompilerOption(CompilerOption option);
   QString getGenerator() const;
   QString getToolset() const;
@@ -94,13 +94,13 @@ public:
   ~NativeCompilerSetup();
 
   QString getCCompiler() const;
-  void setCCompiler(const QString&);
+  void setCCompiler(QString const&);
 
   QString getCXXCompiler() const;
-  void setCXXCompiler(const QString&);
+  void setCXXCompiler(QString const&);
 
   QString getFortranCompiler() const;
-  void setFortranCompiler(const QString&);
+  void setFortranCompiler(QString const&);
 
   int nextId() const { return -1; }
 };
@@ -116,25 +116,25 @@ public:
   ~CrossCompilerSetup();
 
   QString getSystem() const;
-  void setSystem(const QString&);
+  void setSystem(QString const&);
 
   QString getVersion() const;
-  void setVersion(const QString&);
+  void setVersion(QString const&);
 
   QString getProcessor() const;
-  void setProcessor(const QString&);
+  void setProcessor(QString const&);
 
   QString getCCompiler() const;
-  void setCCompiler(const QString&);
+  void setCCompiler(QString const&);
 
   QString getCXXCompiler() const;
-  void setCXXCompiler(const QString&);
+  void setCXXCompiler(QString const&);
 
   QString getFortranCompiler() const;
-  void setFortranCompiler(const QString&);
+  void setFortranCompiler(QString const&);
 
   QString getFindRoot() const;
-  void setFindRoot(const QString&);
+  void setFindRoot(QString const&);
 
   enum CrossMode
   {
@@ -162,7 +162,7 @@ public:
   ~ToolchainCompilerSetup();
 
   QString toolchainFile() const;
-  void setToolchainFile(const QString&);
+  void setToolchainFile(QString const&);
 
   int nextId() const { return -1; }
 
@@ -179,9 +179,9 @@ public:
   ~FirstConfigure();
 
   void setGenerators(std::vector<cmake::GeneratorInfo> const& gens);
-  void setCurrentGenerator(const QString& gen);
-  void setToolset(const QString& toolset);
-  void setPlatform(const QString& platform);
+  void setCurrentGenerator(QString const& gen);
+  void setToolset(QString const& toolset);
+  void setPlatform(QString const& platform);
   void setCompilerOption(CompilerOption option);
   QString getGenerator() const;
   QString getPlatform() const;

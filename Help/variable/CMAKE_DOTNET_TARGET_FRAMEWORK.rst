@@ -3,7 +3,7 @@ CMAKE_DOTNET_TARGET_FRAMEWORK
 
 .. versionadded:: 3.17
 
-Default value for :prop_tgt:`DOTNET_TARGET_FRAMEWORK` property	of
+Default value for :prop_tgt:`DOTNET_TARGET_FRAMEWORK` property of
 targets.
 
 This variable is used to initialize the

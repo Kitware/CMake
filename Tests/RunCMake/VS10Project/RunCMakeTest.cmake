@@ -1,7 +1,4 @@
-cmake_policy(SET CMP0057 NEW)
-
 include(RunCMake)
-cmake_policy(SET CMP0054 NEW)
 
 if(CMAKE_C_COMPILER_ID STREQUAL "MSVC" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 19.27)
   run_cmake(LanguageStandard)
@@ -10,6 +7,7 @@ endif()
 run_cmake(CustomCommandGenex)
 if(NOT RunCMake_GENERATOR MATCHES "^Visual Studio 1[1-5] ")
   run_cmake(CustomCommandParallel)
+  run_cmake(CustomCommandParallelDisable)
 endif()
 run_cmake_with_options(VsCharacterSet -DSET_CHARSET=MultiByte)
 run_cmake_with_options(VsCharacterSet -DSET_CHARSET=Unicode)
@@ -36,6 +34,7 @@ run_cmake(VsCSharpReferenceProps)
 run_cmake(VsCSharpWithoutSources)
 run_cmake(VsCSharpDeployFiles)
 run_cmake(VSCSharpDefines)
+run_cmake(VsDefaultFlags)
 run_cmake(VsSdkDirectories)
 run_cmake(VsGlobals)
 run_cmake(VsProjectImport)
@@ -51,12 +50,14 @@ run_cmake(VsSourceSettingsTool)
 run_cmake(VsPlatformToolset)
 run_cmake(VsControlFlowGuardLinkSetting)
 run_cmake(VsToolOverride)
+run_cmake(VsImageVersion)
 
 run_cmake(VsWinRTByDefault)
 
-set(RunCMake_GENERATOR_TOOLSET "VCTargetsPath=$(VCTargetsPath)")
-run_cmake(VsVCTargetsPath)
-unset(RunCMake_GENERATOR_TOOLSET)
+block()
+  set(RunCMake_GENERATOR_TOOLSET "VCTargetsPath=$(VCTargetsPath)")
+  run_cmake(VsVCTargetsPath)
+endblock()
 
 if(CMAKE_C_COMPILER_ID STREQUAL "MSVC" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 19.05)
   run_cmake(VsJustMyCode)
@@ -67,9 +68,8 @@ if(CMAKE_C_COMPILER_ID STREQUAL "MSVC" AND CMAKE_C_COMPILER_VERSION VERSION_GREA
 endif()
 
 # Visual Studio 2017 has toolset version 141
-string(REPLACE "v" "" generator_toolset "${RunCMake_GENERATOR_TOOLSET}")
 if (RunCMake_GENERATOR MATCHES "Visual Studio 1[0-4] 201[0-5]" OR
-   (RunCMake_GENERATOR_TOOLSET AND generator_toolset VERSION_LESS "141"))
+   (RunCMake_GENERATOR_TOOLSET MATCHES "^v([0-9]+)" AND CMAKE_MATCH_1 LESS 141))
   run_cmake(UnityBuildPre2017)
 else()
   run_cmake(UnityBuildNative)

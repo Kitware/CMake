@@ -24,13 +24,13 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "curl_setup.h"
+#include "../curl_setup.h"
 
 #ifdef USE_SCHANNEL
 
 #ifdef _MSC_VER
 #pragma warning(push)
-#pragma warning(disable: 4201)
+#pragma warning(disable:4201)
 #endif
 #include <subauth.h>
 #ifdef _MSC_VER
@@ -50,10 +50,10 @@
 
 #include <schnlsp.h>
 #include <schannel.h>
-#include "curl_sspi.h"
+#include "../curl_sspi.h"
 
-#include "cfilters.h"
-#include "urldata.h"
+#include "../cfilters.h"
+#include "../urldata.h"
 
 /* <wincrypt.h> has been included via the above <schnlsp.h>.
  * Or in case of ldap.c, it was included via <winldap.h>.

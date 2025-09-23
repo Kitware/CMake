@@ -1,5 +1,5 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-# file Copyright.txt or https://cmake.org/licensing for details.
+# file LICENSE.rst or https://cmake.org/licensing for details.
 
 #[=======================================================================[.rst:
 FindOpenSP
@@ -7,60 +7,73 @@ FindOpenSP
 
 .. versionadded:: 3.25
 
-Try to find the OpenSP library.
+Finds the OpenSP library.  OpenSP is an open-source implementation of the SGML
+(Standard Generalized Markup Language) parser.
+
+Imported Targets
+^^^^^^^^^^^^^^^^
+
+This module provides the following :ref:`Imported Targets`:
+
+``OpenSP::OpenSP``
+  Target encapsulating the OpenSP library usage requirements, available only if
+  the OpenSP is found.
 
 Result Variables
 ^^^^^^^^^^^^^^^^
 
-This will define the following variables:
+This module defines the following variables:
 
 ``OpenSP_FOUND``
-  True if (the requested version of) ``OpenSP`` is available
+  Boolean indicating whether the (requested version of) OpenSP is available.
 
 ``OpenSP_VERSION``
-  The version of ``OpenSP``
+  The version of found OpenSP.
 
 ``OpenSP_VERSION_MAJOR``
-  The major version of ``OpenSP``
+  The major version of OpenSP.
 
 ``OpenSP_VERSION_MINOR``
-  The minor version of ``OpenSP``
+  The minor version of OpenSP.
 
 ``OpenSP_VERSION_PATCH``
-  The patch version of ``OpenSP``
+  The patch version of OpenSP.
 
 ``OpenSP_INCLUDE_DIRS``
-  The include dirs of ``OpenSP`` with its headers
+  The include directories containing headers needed to use the OpenSP library.
 
 ``OpenSP_LIBRARIES``
-  The OpenSP library for use with target_link_libraries().
-  This can be passed to target_link_libraries() instead of
-  the :prop_tgt:`IMPORTED` ``OpenSP::OpenSP`` target
+  Libraries required to link against to use OpenSP.  These can be passed to the
+  :command:`target_link_libraries` command when not using the ``OpenSP::OpenSP``
+  imported target.
 
-``OpenSP_MULTI_BYTE``
-  True if ``SP_MULTI_BYTE`` was found to be defined in OpenSP's ``config.h``
-  header file, which indicates that the ``OpenSP`` library was compiled with
-  support for multi-byte characters. The consuming target needs to define the
-  ``SP_MULTI_BYTE`` to match this value in order to avoid issues with character
-  decoding.
-
-IMPORTED Targets
-^^^^^^^^^^^^^^^^
-
-This module defines the :prop_tgt:`IMPORTED` target ``OpenSP::OpenSP``, if
-OpenSP has been found.
-
-Cache variables
+Cache Variables
 ^^^^^^^^^^^^^^^
 
 The following cache variables may also be set:
 
 ``OpenSP_INCLUDE_DIR``
-  the OpenSP include directory
+  The OpenSP include directory.
 
 ``OpenSP_LIBRARY``
-  the absolute path of the osp library
+  The absolute path of the ``osp`` library.
 
+``OpenSP_MULTI_BYTE``
+  True if ``SP_MULTI_BYTE`` was found to be defined in OpenSP's ``config.h``
+  header file, which indicates that the OpenSP library was compiled with support
+  for multi-byte characters.  The consuming target needs to define the
+  ``SP_MULTI_BYTE`` preprocessor macro to match this value in order to avoid
+  issues with character decoding.
+
+Examples
+^^^^^^^^
+
+Finding the OpenSP library and linking it to a project target:
+
+.. code-block:: cmake
+
+  find_package(OpenSP)
+  target_link_libraries(project_target PRIVATE OpenSP::OpenSP)
 #]=======================================================================]
 
 cmake_policy(PUSH)
@@ -122,7 +135,6 @@ endif ()
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(OpenSP
-  FOUND_VAR OpenSP_FOUND
   REQUIRED_VARS OpenSP_LIBRARY OpenSP_INCLUDE_DIR
   VERSION_VAR OpenSP_VERSION
   )
@@ -158,7 +170,7 @@ endif ()
 
 include(FeatureSummary)
 set_package_properties(OpenSP PROPERTIES
-  URL "http://openjade.sourceforge.net/doc/index.htm"
+  URL "https://openjade.sourceforge.net/doc/index.htm"
   DESCRIPTION "An SGML System Conforming to International Standard ISO 8879"
   )
 

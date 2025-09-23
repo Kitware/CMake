@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
@@ -8,7 +8,6 @@
 #include <map>
 #include <set>
 #include <string>
-#include <utility>
 #include <vector>
 
 #include <cm/string_view>
@@ -133,7 +132,12 @@ protected:
 
   virtual void ReportError(std::string const& errorMessage) const = 0;
 
-  using ExportInfo = std::pair<std::vector<std::string>, std::string>;
+  struct ExportInfo
+  {
+    std::vector<std::string> Files;
+    std::set<std::string> Sets;
+    std::set<std::string> Namespaces;
+  };
 
   /** Find the set of export files and the unique namespace (if any) for a
    *  target. */
@@ -165,6 +169,8 @@ protected:
 
   bool AddTargetNamespace(std::string& input, cmGeneratorTarget const* target,
                           cmLocalGenerator const* lg);
+
+  static std::string PropertyConfigSuffix(std::string const& config);
 
   // The namespace in which the exports are placed in the generated file.
   std::string Namespace;

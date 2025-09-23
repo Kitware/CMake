@@ -1,6 +1,9 @@
 CMP0023
 -------
 
+.. |REMOVED_IN_CMAKE_VERSION| replace:: 4.0
+.. include:: include/REMOVED_PROLOGUE.rst
+
 Plain and keyword :command:`target_link_libraries` signatures cannot be mixed.
 
 CMake 2.8.12 introduced the :command:`target_link_libraries` signature using
@@ -11,7 +14,7 @@ target explicitly, even if empty.  This produces confusing behavior
 when used in combination with the historical behavior of the plain
 :command:`target_link_libraries` signature.  For example, consider the code:
 
-::
+.. code-block:: cmake
 
  target_link_libraries(mylib A)
  target_link_libraries(mylib PRIVATE B)
@@ -29,7 +32,5 @@ this policy is to not to allow mixing of the keyword and plain
 signatures.
 
 .. |INTRODUCED_IN_CMAKE_VERSION| replace:: 2.8.12
-.. |WARNS_OR_DOES_NOT_WARN| replace:: warns
-.. include:: STANDARD_ADVICE.txt
-
-.. include:: DEPRECATED.txt
+.. |WARNED_OR_DID_NOT_WARN| replace:: warned
+.. include:: include/REMOVED_EPILOGUE.rst

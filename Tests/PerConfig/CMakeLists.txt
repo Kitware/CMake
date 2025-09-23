@@ -1,5 +1,7 @@
 project(PerConfig C)
 
+set(CMAKE_AIX_SHARED_LIBRARY_ARCHIVE 0)
+
 # Targets with per-configuration names.
 add_library(pcStatic STATIC pcStatic.c)
 set_property(TARGET pcStatic PROPERTY RELEASE_POSTFIX -opt)

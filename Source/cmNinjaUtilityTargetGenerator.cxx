@@ -1,10 +1,11 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmNinjaUtilityTargetGenerator.h"
 
 #include <algorithm>
 #include <array>
 #include <iterator>
+#include <memory>
 #include <set>
 #include <string>
 #include <utility>
@@ -13,6 +14,7 @@
 #include "cmCustomCommand.h"
 #include "cmCustomCommandGenerator.h"
 #include "cmGeneratedFileStream.h"
+#include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalNinjaGenerator.h"
 #include "cmLocalNinjaGenerator.h"
@@ -33,7 +35,7 @@ cmNinjaUtilityTargetGenerator::cmNinjaUtilityTargetGenerator(
 
 cmNinjaUtilityTargetGenerator::~cmNinjaUtilityTargetGenerator() = default;
 
-void cmNinjaUtilityTargetGenerator::Generate(const std::string& config)
+void cmNinjaUtilityTargetGenerator::Generate(std::string const& config)
 {
   if (!this->GetGeneratorTarget()->Target->IsPerConfig()) {
     this->WriteUtilBuildStatements(config, config);
@@ -66,7 +68,7 @@ void cmNinjaUtilityTargetGenerator::WriteUtilBuildStatements(
     configDir = gg->ConfigDirectory(fileConfig);
   }
   std::string utilCommandName =
-    cmStrCat(lg->GetCurrentBinaryDirectory(), "/CMakeFiles", configDir, "/",
+    cmStrCat(lg->GetCurrentBinaryDirectory(), "/CMakeFiles", configDir, '/',
              this->GetTargetName(), ".util");
   utilCommandName = this->ConvertToNinjaPath(utilCommandName);
 
@@ -76,6 +78,8 @@ void cmNinjaUtilityTargetGenerator::WriteUtilBuildStatements(
   cmGlobalNinjaGenerator::CCOutputs util_outputs(gg);
   util_outputs.ExplicitOuts.emplace_back(utilCommandName);
 
+  std::string commandDesc;
+  cmGeneratorExpression ge(*this->GetLocalGenerator()->GetCMakeInstance());
   bool uses_terminal = false;
   {
     std::array<std::vector<cmCustomCommand> const*, 2> const cmdLists = {
@@ -87,6 +91,13 @@ void cmNinjaUtilityTargetGenerator::WriteUtilBuildStatements(
         cmCustomCommandGenerator ccg(ci, fileConfig, lg);
         lg->AppendCustomCommandDeps(ccg, deps, fileConfig);
         lg->AppendCustomCommandLines(ccg, commands);
+        if (ci.GetComment()) {
+          if (!commandDesc.empty()) {
+            commandDesc += "; ";
+          }
+          auto cge = ge.Parse(ci.GetComment());
+          commandDesc += cge->Evaluate(this->GetLocalGenerator(), config);
+        }
         util_outputs.Add(ccg.GetByproducts());
         if (ci.GetUsesTerminal()) {
           uses_terminal = true;
@@ -104,8 +115,8 @@ void cmNinjaUtilityTargetGenerator::WriteUtilBuildStatements(
         lg->AddCustomCommandTarget(cc, genTarget);
 
         // Depend on all custom command outputs.
-        const std::vector<std::string>& ccOutputs = ccg.GetOutputs();
-        const std::vector<std::string>& ccByproducts = ccg.GetByproducts();
+        std::vector<std::string> const& ccOutputs = ccg.GetOutputs();
+        std::vector<std::string> const& ccByproducts = ccg.GetByproducts();
         std::transform(ccOutputs.begin(), ccOutputs.end(),
                        std::back_inserter(deps), this->MapToNinjaPath());
         std::transform(ccByproducts.begin(), ccByproducts.end(),
@@ -144,6 +155,8 @@ void cmNinjaUtilityTargetGenerator::WriteUtilBuildStatements(
     cmValue echoStr = genTarget->GetProperty("EchoString");
     if (echoStr) {
       desc = *echoStr;
+    } else if (!commandDesc.empty()) {
+      desc = commandDesc;
     } else {
       desc = "Running utility command for " + this->GetTargetName();
     }

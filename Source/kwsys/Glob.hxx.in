@@ -37,13 +37,13 @@ public:
     MessageType type;
     std::string content;
 
-    Message(MessageType t, const std::string& c)
+    Message(MessageType t, std::string const& c)
       : type(t)
       , content(c)
     {
     }
     ~Message() = default;
-    Message(const Message& msg) = default;
+    Message(Message const& msg) = default;
     Message& operator=(Message const& msg) = default;
   };
 
@@ -54,11 +54,11 @@ public:
   Glob();
   ~Glob();
 
-  Glob(const Glob&) = delete;
-  void operator=(const Glob&) = delete;
+  Glob(Glob const&) = delete;
+  void operator=(Glob const&) = delete;
 
   //! Find all files that match the pattern.
-  bool FindFiles(const std::string& inexpr, GlobMessages* messages = nullptr);
+  bool FindFiles(std::string const& inexpr, GlobMessages* messages = nullptr);
 
   //! Return the list of files that matched.
   std::vector<std::string>& GetFiles();
@@ -80,8 +80,8 @@ public:
   unsigned int GetFollowedSymlinkCount() { return this->FollowedSymlinkCount; }
 
   //! Set relative to true to only show relative path to files.
-  void SetRelative(const char* dir);
-  const char* GetRelative();
+  void SetRelative(char const* dir);
+  char const* GetRelative();
 
   /** Convert the given globbing pattern to a regular expression.
       There is no way to quote meta-characters.  The
@@ -90,7 +90,7 @@ public:
       string.  This is on by default because patterns always match
       whole strings, but may be disabled to support concatenating
       expressions more easily (regex1|regex2|etc).  */
-  static std::string PatternToRegex(const std::string& pattern,
+  static std::string PatternToRegex(std::string const& pattern,
                                     bool require_whole_string = true,
                                     bool preserve_case = false);
 
@@ -105,19 +105,19 @@ public:
 
 protected:
   //! Process directory
-  void ProcessDirectory(std::string::size_type start, const std::string& dir,
+  void ProcessDirectory(std::string::size_type start, std::string const& dir,
                         GlobMessages* messages);
 
   //! Process last directory, but only when recurse flags is on. That is
   // effectively like saying: /path/to/file/**/file
-  bool RecurseDirectory(std::string::size_type start, const std::string& dir,
+  bool RecurseDirectory(std::string::size_type start, std::string const& dir,
                         GlobMessages* messages);
 
   //! Add regular expression
-  void AddExpression(const std::string& expr);
+  void AddExpression(std::string const& expr);
 
   //! Add a file to the list
-  void AddFile(std::vector<std::string>& files, const std::string& file);
+  void AddFile(std::vector<std::string>& files, std::string const& file);
 
   GlobInternals* Internals;
   bool Recurse;

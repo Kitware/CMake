@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
@@ -27,9 +27,9 @@ class cmLinkItem
 
 public:
   // default feature: link library without decoration
-  static const std::string DEFAULT;
+  static std::string const DEFAULT;
 
-  cmLinkItem();
+  cmLinkItem() = default;
   cmLinkItem(std::string s, bool c, cmListFileBacktrace bt,
              std::string feature = DEFAULT);
   cmLinkItem(cmGeneratorTarget const* t, bool c, cmListFileBacktrace bt,
@@ -50,9 +50,8 @@ public:
 class cmLinkImplItem : public cmLinkItem
 {
 public:
-  cmLinkImplItem();
-  cmLinkImplItem(cmLinkItem item, bool checkCMP0027);
-  bool CheckCMP0027 = false;
+  cmLinkImplItem() = default;
+  cmLinkImplItem(cmLinkItem item);
 };
 
 /** The link implementation specifies the direct library
@@ -64,10 +63,6 @@ struct cmLinkImplementationLibraries
 
   // Object files linked directly in this configuration.
   std::vector<cmLinkItem> Objects;
-
-  // Libraries linked directly in other configurations.
-  // Needed only for OLD behavior of CMP0003.
-  std::vector<cmLinkItem> WrongConfigLibraries;
 
   // Whether the list depends on a genex referencing the configuration.
   bool HadContextSensitiveCondition = false;
@@ -108,12 +103,6 @@ struct cmLinkInterface : public cmLinkInterfaceLibraries
   // or more static libraries.
   unsigned int Multiplicity = 0;
 
-  // Libraries listed for other configurations.
-  // Needed only for OLD behavior of CMP0003.
-  std::vector<cmLinkItem> WrongConfigLibraries;
-
-  bool ImplementationIsInterface = false;
-
   // Whether the list depends on a link language genex.
   bool HadLinkLanguageSensitiveCondition = false;
 };
@@ -123,7 +112,6 @@ struct cmOptionalLinkInterface : public cmLinkInterface
   bool LibrariesDone = false;
   bool AllDone = false;
   bool Exists = false;
-  bool Explicit = false;
   bool CheckLinkLibraries = false;
 };
 
@@ -153,8 +141,8 @@ struct cmOptionalLinkImplementation : public cmLinkImplementation
 };
 
 /** Compute the link type to use for the given configuration.  */
-inline cmTargetLinkLibraryType CMP0003_ComputeLinkType(
-  const std::string& config, std::vector<std::string> const& debugConfigs)
+inline cmTargetLinkLibraryType ComputeLinkType(
+  std::string const& config, std::vector<std::string> const& debugConfigs)
 {
   // No configuration is always optimized.
   if (config.empty()) {

@@ -11,11 +11,11 @@
 // Return EXIT_FAILURE if 'non_zero_exit'
 // string was found in <arg1>.
 
-int main(int argc, const char* argv[])
+int main(int argc, char const* argv[])
 {
-  const char* substring_failure = "non_zero_exit";
-  const char* substring_success = "zero_exit";
-  const char* str = argv[1];
+  char const* substring_failure = "non_zero_exit";
+  char const* substring_success = "zero_exit";
+  char const* str = argv[1];
   if (argc < 2) {
     return EXIT_FAILURE;
   }

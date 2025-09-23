@@ -1,5 +1,5 @@
 ---
-# This configuration requires clang-format version 15 exactly.
+# This configuration requires clang-format version 18 exactly.
 BasedOnStyle: Mozilla
 AlignOperands: false
 AllowShortFunctionsOnASingleLine: InlineOnly
@@ -16,6 +16,7 @@ BraceWrapping:
 BreakBeforeBraces: Custom
 ColumnLimit: 79
 IndentPPDirectives: AfterHash
+QualifierAlignment: Right
 SortUsingDeclarations: false
 SpaceAfterTemplateKeyword: true
 IncludeBlocks: Regroup

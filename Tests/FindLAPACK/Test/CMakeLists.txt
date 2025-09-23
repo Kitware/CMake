@@ -4,6 +4,9 @@ include(CTest)
 
 find_package(LAPACK REQUIRED)
 
+# Configure the test case to match LAPACK's integer type ABI.
+# FindLAPACK defaults to 32-bit integers if BLA_SIZEOF_INTEGER
+# is not already set in the cache.
 if(NOT BLA_SIZEOF_INTEGER)
   set(BLA_SIZEOF_INTEGER 4)
 endif()

@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
@@ -12,6 +12,10 @@
 
 #include "cmListFileCache.h"
 #include "cmMessageType.h" // IWYU pragma: keep
+
+#ifndef CMAKE_BOOTSTRAP
+#  include "cmSarifLog.h"
+#endif
 
 #ifdef CMake_ENABLE_DEBUGGER
 namespace cmDebugger {
@@ -59,6 +63,10 @@ public:
     return this->DeprecatedWarningsAsErrors;
   }
 
+#ifndef CMAKE_BOOTSTRAP
+  cmSarif::ResultsLog const& GetSarifResultsLog() const { return SarifLog; }
+#endif
+
   // Print the top of a backtrace.
   void PrintBacktraceTitle(std::ostream& out,
                            cmListFileBacktrace const& bt) const;
@@ -75,6 +83,10 @@ private:
   MessageType ConvertMessageType(MessageType t) const;
 
   cm::optional<std::string> TopSource;
+
+#ifndef CMAKE_BOOTSTRAP
+  cmSarif::ResultsLog SarifLog;
+#endif
 
   bool SuppressDevWarnings = false;
   bool SuppressDeprecatedWarnings = false;

@@ -1,5 +1,5 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-# file Copyright.txt or https://cmake.org/licensing for details.
+# file LICENSE.rst or https://cmake.org/licensing for details.
 
 
 # This module is shared by multiple languages; use include blocker.
@@ -25,6 +25,8 @@ macro(__compiler_ti lang)
   set(CMAKE_INCLUDE_FLAG_${lang} "--include_path=")
   set(CMAKE_DEPFILE_FLAGS_${lang} "--preproc_with_compile --preproc_dependency=<DEP_FILE>")
 
+  set(CMAKE_${lang}_LINK_MODE DRIVER)
+
   set(CMAKE_${lang}_CREATE_PREPROCESSED_SOURCE "<CMAKE_${lang}_COMPILER> --preproc_only ${__COMPILER_TI_SOURCE_FLAG_${lang}}=<SOURCE> <DEFINES> <INCLUDES> <FLAGS> --output_file=<PREPROCESSED_SOURCE>")
   set(CMAKE_${lang}_CREATE_ASSEMBLY_SOURCE     "<CMAKE_${lang}_COMPILER> --compile_only --skip_assembler ${__COMPILER_TI_SOURCE_FLAG_${lang}}=<SOURCE> <DEFINES> <INCLUDES> <FLAGS> --output_file=<ASSEMBLY_SOURCE>")
 
@@ -34,7 +36,7 @@ macro(__compiler_ti lang)
   set(CMAKE_${lang}_ARCHIVE_APPEND "<CMAKE_AR> qa <TARGET> <OBJECTS>")
   set(CMAKE_${lang}_ARCHIVE_FINISH "")
 
-  set(CMAKE_${lang}_LINK_EXECUTABLE "<CMAKE_${lang}_COMPILER> <FLAGS> --run_linker --output_file=<TARGET> --map_file=<TARGET_NAME>.map <CMAKE_${lang}_LINK_FLAGS> <LINK_FLAGS> <OBJECTS> <LINK_LIBRARIES>")
+  set(CMAKE_${lang}_LINK_EXECUTABLE "<CMAKE_${lang}_COMPILER> <FLAGS> --run_linker --output_file=<TARGET> --map_file=<TARGET_NAME>.map <LINK_FLAGS> <OBJECTS> <LINK_LIBRARIES>")
 endmacro()
 
 set(CMAKE_LIBRARY_PATH_FLAG "--search_path=")

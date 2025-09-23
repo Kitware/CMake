@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
@@ -24,9 +24,9 @@ class cmParseDelphiCoverage
 public:
   cmParseDelphiCoverage(cmCTestCoverageHandlerContainer& cont, cmCTest* ctest);
   bool LoadCoverageData(std::vector<std::string> const& files);
-  bool ReadDelphiHTML(const char* file);
+  bool ReadDelphiHTML(char const* file);
   // Read a single HTML file from output
-  bool ReadHTMLFile(const char* f);
+  bool ReadHTMLFile(char const* f);
 
 protected:
   class HTMLParser;

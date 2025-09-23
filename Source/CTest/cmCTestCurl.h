@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
@@ -26,8 +26,8 @@ class cmCTestCurl
 public:
   cmCTestCurl(cmCTest*);
   ~cmCTestCurl();
-  cmCTestCurl(const cmCTestCurl&) = delete;
-  cmCTestCurl& operator=(const cmCTestCurl&) = delete;
+  cmCTestCurl(cmCTestCurl const&) = delete;
+  cmCTestCurl& operator=(cmCTestCurl const&) = delete;
   bool UploadFile(std::string const& local_file, std::string const& url,
                   std::string const& fields, std::string& response);
   bool HttpRequest(std::string const& url, std::string const& fields,

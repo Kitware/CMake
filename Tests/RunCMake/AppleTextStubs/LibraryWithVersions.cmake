@@ -25,9 +25,6 @@ set (GENERATE_CONTENT "if (\"${CMAKE_TAPI}\")
 endif()\n\n")
 
 string (APPEND GENERATE_CONTENT [[
-cmake_policy (SET CMP0011 NEW)
-cmake_policy (SET CMP0057 NEW)
-
 macro (CHECK_FILE test_msg path)
   if (NOT EXISTS "${path}")
     string (APPEND RunCMake_TEST_FAILED "${test_msg}: \"${path}\" not found\n")

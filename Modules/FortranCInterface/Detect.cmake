@@ -1,5 +1,5 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-# file Copyright.txt or https://cmake.org/licensing for details.
+# file LICENSE.rst or https://cmake.org/licensing for details.
 
 configure_file(${FortranCInterface_SOURCE_DIR}/Input.cmake.in
                ${FortranCInterface_BINARY_DIR}/Input.cmake @ONLY)
@@ -36,13 +36,7 @@ else()
   set(_FortranCInterface_OSX_ARCH "")
 endif()
 
-cmake_policy(GET CMP0056 _FortranCInterface_CMP0056)
-if(_FortranCInterface_CMP0056 STREQUAL "NEW")
-  set(_FortranCInterface_EXE_LINKER_FLAGS "-DCMAKE_EXE_LINKER_FLAGS:STRING=${CMAKE_EXE_LINKER_FLAGS}")
-else()
-  set(_FortranCInterface_EXE_LINKER_FLAGS "")
-endif()
-unset(_FortranCInterface_CMP0056)
+set(_FortranCInterface_EXE_LINKER_FLAGS "-DCMAKE_EXE_LINKER_FLAGS:STRING=${CMAKE_EXE_LINKER_FLAGS}")
 
 # Build a sample project which reports symbols.
 set(CMAKE_TRY_COMPILE_CONFIGURATION Release)
@@ -98,6 +92,8 @@ set(_global_regex  "^(_*)(mysub|MYSUB)([_$]*)$")
 set(_global__regex "^(_*)(my_sub|MY_SUB)([_$]*)$")
 set(_module_regex "^([A-Za-z_$]*)(mymodule|MYMODULE)([A-Za-z_$]*)(mysub|MYSUB)([_$]*)$")
 set(_module__regex "^([A-Za-z_$]*)(my_module|MY_MODULE)([A-Za-z_$]*)(my_sub|MY_SUB)([_$]*)$")
+set(_module_reverse_regex "^([A-Za-z_$]*)(mysub|MYSUB)([A-Za-z_$]*)(mymodule|MYMODULE)([_$]*)$")
+set(_module_reverse__regex "^([A-Za-z_$]*)(my_sub|MY_SUB)([A-Za-z_$]*)(my_module|MY_MODULE)([_$]*)$")
 
 # Parse the symbol names.
 foreach(symbol ${FortranCInterface_SYMBOLS})
@@ -126,7 +122,24 @@ foreach(symbol ${FortranCInterface_SYMBOLS})
       list(GET pieces 3 name)
       list(GET pieces 4 FortranCInterface_MODULE_${form}SUFFIX)
       set(FortranCInterface_MODULE_${form}CASE "${_case_${name}}")
+      set(FortranCInterface_MODULE_${form}ORDER "MODULE_THEN_SYMBOL")
     endif()
+
+    # Look for module symbols with subroutine name first.
+    string(REGEX REPLACE "${_module_reverse_${form}regex}"
+                         "\\1;\\2;\\3;\\4;\\5" pieces "${symbol}")
+    list(LENGTH pieces len)
+    if(len EQUAL 5)
+      set(FortranCInterface_MODULE_${form}SYMBOL "${symbol}")
+      list(GET pieces 0 FortranCInterface_MODULE_${form}PREFIX)
+      list(GET pieces 1 name)
+      list(GET pieces 2 FortranCInterface_MODULE_${form}MIDDLE)
+      list(GET pieces 3 module)
+      list(GET pieces 4 FortranCInterface_MODULE_${form}SUFFIX)
+      set(FortranCInterface_MODULE_${form}CASE "${_case_${name}}")
+      set(FortranCInterface_MODULE_${form}ORDER "SYMBOL_THEN_MODULE")
+    endif()
+
   endforeach()
 endforeach()
 
@@ -162,8 +175,13 @@ foreach(form "" "_")
     endif()
     set(_name "${_name_${FortranCInterface_MODULE_${form}CASE}}")
     set(_middle "##${FortranCInterface_MODULE_${form}MIDDLE}##")
-    set(FortranCInterface_MODULE${form}_MACRO
-      "(mod_name,name, mod_NAME,NAME) ${_prefix}mod_${_name}${_middle}${_name}${_suffix}")
+    if(FortranCInterface_MODULE_${form}ORDER STREQUAL "SYMBOL_THEN_MODULE")
+      set(FortranCInterface_MODULE${form}_MACRO
+        "(mod_name,name, mod_NAME,NAME) ${_prefix}${_name}${_middle}mod_${_name}${_suffix}")
+    else()
+      set(FortranCInterface_MODULE${form}_MACRO
+        "(mod_name,name, mod_NAME,NAME) ${_prefix}mod_${_name}${_middle}${_name}${_suffix}")
+    endif()
   endif()
 endforeach()
 

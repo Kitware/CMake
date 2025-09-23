@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmCursesCacheEntryComposite.h"
 
 #include <cassert>
@@ -22,20 +22,20 @@
 #include "cmValue.h"
 
 cmCursesCacheEntryComposite::cmCursesCacheEntryComposite(
-  const std::string& key, int labelwidth, int entrywidth)
+  std::string const& key, int labelwidth, int entrywidth)
   : Key(key)
   , LabelWidth(labelwidth)
   , EntryWidth(entrywidth)
 {
   this->Label =
     cm::make_unique<cmCursesLabelWidget>(this->LabelWidth, 1, 1, 1, key);
-  this->IsNewLabel = cm::make_unique<cmCursesLabelWidget>(1, 1, 1, 1, " ");
+  this->IsNewLabel = cm::make_unique<cmCursesLabelWidget>(3, 1, 1, 1, "   ");
   this->Entry =
     cm::make_unique<cmCursesStringWidget>(this->EntryWidth, 1, 1, 1);
 }
 
 cmCursesCacheEntryComposite::cmCursesCacheEntryComposite(
-  const std::string& key, cmState* state, bool isNew, int labelwidth,
+  std::string const& key, cmState* state, bool isNew, int labelwidth,
   int entrywidth)
   : Key(key)
   , LabelWidth(labelwidth)
@@ -44,9 +44,9 @@ cmCursesCacheEntryComposite::cmCursesCacheEntryComposite(
   this->Label =
     cm::make_unique<cmCursesLabelWidget>(this->LabelWidth, 1, 1, 1, key);
   if (isNew) {
-    this->IsNewLabel = cm::make_unique<cmCursesLabelWidget>(1, 1, 1, 1, "*");
+    this->IsNewLabel = cm::make_unique<cmCursesLabelWidget>(3, 1, 1, 1, " * ");
   } else {
-    this->IsNewLabel = cm::make_unique<cmCursesLabelWidget>(1, 1, 1, 1, " ");
+    this->IsNewLabel = cm::make_unique<cmCursesLabelWidget>(3, 1, 1, 1, "   ");
   }
 
   cmValue value = state->GetCacheEntryValue(key);
@@ -100,7 +100,7 @@ cmCursesCacheEntryComposite::cmCursesCacheEntryComposite(
 
 cmCursesCacheEntryComposite::~cmCursesCacheEntryComposite() = default;
 
-const char* cmCursesCacheEntryComposite::GetValue()
+char const* cmCursesCacheEntryComposite::GetValue()
 {
   if (this->Label) {
     return this->Label->GetValue();

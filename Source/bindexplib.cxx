@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 /*-------------------------------------------------------------------------
   Portions of this source have been derived from the 'bindexplib' tool
   provided by the CERN ROOT Data Analysis Framework project (root.cern.ch).
@@ -164,10 +164,10 @@ PIMAGE_SECTION_HEADER GetSectionHeaderOffset(
 /*
 + * Utility func, strstr with size
 + */
-const char* StrNStr(const char* start, const char* find, size_t& size)
+char const* StrNStr(char const* start, char const* find, size_t& size)
 {
   size_t len;
-  const char* hint;
+  char const* hint;
 
   if (!start || !find || !size) {
     size = 0;
@@ -175,7 +175,7 @@ const char* StrNStr(const char* start, const char* find, size_t& size)
   }
   len = strlen(find);
 
-  while ((hint = (const char*)memchr(start, find[0], size - len + 1))) {
+  while ((hint = (char const*)memchr(start, find[0], size - len + 1))) {
     size -= (hint - start);
     if (!strncmp(hint, find, len))
       return hint;
@@ -254,7 +254,8 @@ public:
            */
           if (pSymbolTable->N.Name.Short != 0) {
             symbol.clear();
-            symbol.insert(0, (const char*)pSymbolTable->N.ShortName, 8);
+            symbol.insert(0, (char const*)pSymbolTable->N.ShortName,
+                          strnlen((char const*)pSymbolTable->N.ShortName, 8));
           } else {
             symbol = stringTable + pSymbolTable->N.Name.Long;
           }
@@ -279,9 +280,9 @@ public:
           // deleting destructor"
           // if scalarPrefix and vectorPrefix are not found then print
           // the symbol
-          const char* scalarPrefix = "??_G";
-          const char* vectorPrefix = "??_E";
-          const char* vftablePrefix = "??_7";
+          char const* scalarPrefix = "??_G";
+          char const* vectorPrefix = "??_E";
+          char const* vftablePrefix = "??_7";
           // The original code had a check for
           //     symbol.find("real@") == std::string::npos)
           // but this disallows member functions with the name "real".
@@ -289,9 +290,11 @@ public:
               symbol.compare(0, 4, vectorPrefix)) {
             SectChar = this->SectionHeaders[pSymbolTable->SectionNumber - 1]
                          .Characteristics;
-            // skip symbols containing a dot or are from managed code
+            // Skip symbols containing a dot, are from managed code,
+            // or are C++ operators incorrectly declared extern "C".
             if (symbol.find('.') == std::string::npos &&
-                !SymbolIsFromManagedCode(symbol)) {
+                !SymbolIsFromManagedCode(symbol) &&
+                !SymbolIsOperatorExternC(symbol)) {
               // skip arm64ec thunk symbols
               if (this->SymbolArch != Arch::ARM64EC ||
                   (symbol.find("$ientry_thunk") == std::string::npos &&
@@ -336,6 +339,12 @@ private:
       symbol.find("$$J") != std::string::npos;
   }
 
+  bool SymbolIsOperatorExternC(std::string const& symbol)
+  {
+    return symbol.find_first_not_of("=<>+-*/%,?|~!^&[]()") ==
+      std::string::npos;
+  }
+
   std::set<std::string>& Symbols;
   std::set<std::string>& DataSymbols;
   DWORD_PTR SymbolCount;
@@ -346,7 +355,7 @@ private:
 };
 #endif
 
-static bool DumpFileWithLlvmNm(std::string const& nmPath, const char* filename,
+static bool DumpFileWithLlvmNm(std::string const& nmPath, char const* filename,
                                std::set<std::string>& symbols,
                                std::set<std::string>& dataSymbols)
 {
@@ -386,7 +395,7 @@ static bool DumpFileWithLlvmNm(std::string const& nmPath, const char* filename,
               line.c_str());
       return false;
     }
-    const char sym_type = line[sym_end + 1];
+    char const sym_type = line[sym_end + 1];
     line.resize(sym_end);
     switch (sym_type) {
       case 'D':
@@ -401,7 +410,7 @@ static bool DumpFileWithLlvmNm(std::string const& nmPath, const char* filename,
   return true;
 }
 
-static bool DumpFile(std::string const& nmPath, const char* filename,
+static bool DumpFile(std::string const& nmPath, char const* filename,
                      std::set<std::string>& symbols,
                      std::set<std::string>& dataSymbols)
 {
@@ -469,7 +478,7 @@ static bool DumpFile(std::string const& nmPath, const char* filename,
       // check for /bigobj and llvm LTO format
       cmANON_OBJECT_HEADER_BIGOBJ* h =
         (cmANON_OBJECT_HEADER_BIGOBJ*)lpFileBase;
-      if (h->Sig1 == 0x0 && h->Sig2 == 0xffff) {
+      if (h->Sig1 == 0x0 && h->Sig2 == 0xffff && h->Version >= 2) {
         // bigobj
         DumpSymbols<cmANON_OBJECT_HEADER_BIGOBJ, cmIMAGE_SYMBOL_EX>
           symbolDumper(
@@ -501,12 +510,12 @@ static bool DumpFile(std::string const& nmPath, const char* filename,
 #endif
 }
 
-bool bindexplib::AddObjectFile(const char* filename)
+bool bindexplib::AddObjectFile(char const* filename)
 {
   return DumpFile(this->NmPath, filename, this->Symbols, this->DataSymbols);
 }
 
-bool bindexplib::AddDefinitionFile(const char* filename)
+bool bindexplib::AddDefinitionFile(char const* filename)
 {
   cmsys::ifstream infile(filename);
   if (!infile) {

@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 
 #include "cmLinkLineComputer.h"
 
@@ -131,8 +131,8 @@ void cmLinkLineComputer::ComputeLinkPath(
   if (cli.GetLinkLanguage() == "Swift") {
     std::string linkPathNoBT;
 
-    for (const cmComputeLinkInformation::Item& item : cli.GetItems()) {
-      const cmGeneratorTarget* target = item.Target;
+    for (cmComputeLinkInformation::Item const& item : cli.GetItems()) {
+      cmGeneratorTarget const* target = item.Target;
       if (!target) {
         continue;
       }
@@ -145,10 +145,10 @@ void cmLinkLineComputer::ComputeLinkPath(
         }
 
         linkPathNoBT +=
-          cmStrCat(" ", libPathFlag,
+          cmStrCat(' ', libPathFlag,
                    this->ConvertToOutputForExisting(
                      item.Target->GetDirectory(cli.GetConfig(), type)),
-                   libPathTerminator, " ");
+                   libPathTerminator, ' ');
       }
     }
 
@@ -158,9 +158,9 @@ void cmLinkLineComputer::ComputeLinkPath(
   }
 
   for (BT<std::string> libDir : cli.GetDirectoriesWithBacktraces()) {
-    libDir.Value = cmStrCat(" ", libPathFlag,
+    libDir.Value = cmStrCat(' ', libPathFlag,
                             this->ConvertToOutputForExisting(libDir.Value),
-                            libPathTerminator, " ");
+                            libPathTerminator, ' ');
     linkPath.emplace_back(libDir);
   }
 

@@ -532,6 +532,11 @@ List Transformations
 
         $<LIST:TRANSFORM,list,REPLACE,regular_expression,replace_expression[,SELECTOR]>
 
+      .. versionchanged:: 4.1
+        The ``^`` anchor now matches only at the beginning of the input
+        element instead of the beginning of each repeated search.
+        See policy :policy:`CMP0186`.
+
   ``SELECTOR`` determines which items of the list will be transformed.
   Only one type of selector can be specified at a time. When given,
   ``SELECTOR`` must be one of the following:
@@ -566,7 +571,7 @@ List Transformations
   :ref:`$\<LIST:JOIN,list,glue\> <GenEx LIST-JOIN>`, but the two have
   different behavior with regard to empty items.
   :ref:`$\<LIST:JOIN,list,glue\> <GenEx LIST-JOIN>` preserves all empty items,
-  whereas ``$<JOIN,list,glue>`` drops all empty items from the list.
+  whereas ``$<JOIN:list,glue>`` drops all empty items from the list.
 
 .. genex:: $<REMOVE_DUPLICATES:list>
 
@@ -691,7 +696,7 @@ All paths are expected to be in cmake-style format.
   present, ``0`` otherwise. See :ref:`Path Structure And Terminology` for the
   meaning of each path component.
 
-  ::
+  .. code-block:: cmake
 
     $<PATH:HAS_ROOT_NAME,path>
     $<PATH:HAS_ROOT_DIRECTORY,path>
@@ -753,7 +758,7 @@ command.  All paths are expected to be in cmake-style format.
     All operations now accept a list of paths as argument. When a list of paths
     is specified, the operation will be applied to each path.
 
-  ::
+  .. code-block:: cmake
 
     $<PATH:GET_ROOT_NAME,path...>
     $<PATH:GET_ROOT_DIRECTORY,path...>
@@ -794,6 +799,16 @@ in cmake-style format.
 
   When the ``NORMALIZE`` option is specified, the path is :ref:`normalized
   <Normalization>` after the conversion.
+
+.. genex:: $<PATH:NATIVE_PATH[,NORMALIZE],path...>
+
+  .. versionadded:: 4.0
+
+  Returns ``path`` converted into a native format with platform-specific
+  slashes (``\`` on Windows hosts and ``/`` elsewhere).
+
+  When the ``NORMALIZE`` option is specified, the path is :ref:`normalized
+  <Normalization>` before the conversion.
 
 .. genex:: $<PATH:APPEND,path...,input,...>
 
@@ -1273,14 +1288,12 @@ related to most of the expressions in this sub-section.
   .. versionadded:: 3.3
 
   The compile language of source files when evaluating compile options.
-  See :ref:`the related boolean expression
-  <Boolean COMPILE_LANGUAGE Generator Expression>`
-  ``$<COMPILE_LANGUAGE:language>``
+  See the related boolean expression
+  :genex:`$<COMPILE_LANGUAGE:languages> <COMPILE_LANGUAGE:languages>`
   for notes about the portability of this generator expression.
 
-.. _`Boolean COMPILE_LANGUAGE Generator Expression`:
-
 .. genex:: $<COMPILE_LANGUAGE:languages>
+  :target: COMPILE_LANGUAGE:languages
 
   .. versionadded:: 3.3
 
@@ -1405,7 +1418,7 @@ Compile Context
   linking requirements (e.g., all-``inline`` or C++ template libraries).
 
   Note that for proper evaluation of this expression requires policy :policy:`CMP0099`
-  to be set to `NEW`.
+  to be set to ``NEW``.
 
 Linker Language And ID
 ^^^^^^^^^^^^^^^^^^^^^^
@@ -1558,7 +1571,7 @@ Link Features
   underscores.  Feature names defined in all uppercase are reserved for CMake's
   own built-in features.  The pre-defined built-in library features are:
 
-  .. include:: ../variable/LINK_LIBRARY_PREDEFINED_FEATURES.txt
+  .. include:: ../variable/include/LINK_LIBRARY_PREDEFINED_FEATURES.rst
 
   Built-in and custom library features are defined in terms of the following
   variables:
@@ -1650,7 +1663,7 @@ Link Features
   own built-in features.  Currently, there is only one pre-defined built-in
   group feature:
 
-  .. include:: ../variable/LINK_GROUP_PREDEFINED_FEATURES.txt
+  .. include:: ../variable/include/LINK_GROUP_PREDEFINED_FEATURES.rst
 
   Built-in and custom group features are defined in terms of the following
   variables:
@@ -1904,7 +1917,10 @@ The expressions have special evaluation rules for some properties:
     :prop_tgt:`INTERFACE_LINK_LIBRARIES` *including* entries guarded by the
     :genex:`LINK_ONLY` generator expression.  See policy :policy:`CMP0166`.
 
-  Evaluation of :prop_tgt:`LINK_LIBRARIES` itself is not transitive.
+  .. versionchanged:: 4.1
+
+    Evaluation of :prop_tgt:`LINK_LIBRARIES` itself is now transitive.
+    See policy :policy:`CMP0189`.
 
 :ref:`Target Usage Requirement Properties <Target Usage Requirements>`
   These evaluate as a :ref:`semicolon-separated list <CMake Language Lists>`
@@ -1921,7 +1937,10 @@ The expressions have special evaluation rules for some properties:
     *including* entries guarded by the :genex:`LINK_ONLY` generator expression.
     See policy :policy:`CMP0166`.
 
-  Evaluation of :prop_tgt:`INTERFACE_LINK_LIBRARIES` itself is not transitive.
+  .. versionchanged:: 4.1
+
+    Evaluation of :prop_tgt:`INTERFACE_LINK_LIBRARIES` itself is now
+    transitive.  See policy :policy:`CMP0189`.
 
 :ref:`Custom Transitive Properties`
   .. versionadded:: 3.30
@@ -2023,13 +2042,12 @@ In the following, the phrase "the ``tgt`` filename" means the name of the
 
   See also the :prop_tgt:`OUTPUT_NAME`, :prop_tgt:`ARCHIVE_OUTPUT_NAME`,
   :prop_tgt:`LIBRARY_OUTPUT_NAME` and :prop_tgt:`RUNTIME_OUTPUT_NAME`
-  target properties and their configuration specific variants
+  target properties, their configuration-specific variants
   :prop_tgt:`OUTPUT_NAME_<CONFIG>`, :prop_tgt:`ARCHIVE_OUTPUT_NAME_<CONFIG>`,
   :prop_tgt:`LIBRARY_OUTPUT_NAME_<CONFIG>` and
-  :prop_tgt:`RUNTIME_OUTPUT_NAME_<CONFIG>`.
-
-  The :prop_tgt:`<CONFIG>_POSTFIX` and :prop_tgt:`DEBUG_POSTFIX` target
-  properties can also be considered.
+  :prop_tgt:`RUNTIME_OUTPUT_NAME_<CONFIG>`, and
+  the :prop_tgt:`<CONFIG>_POSTFIX` and :prop_tgt:`DEBUG_POSTFIX` target
+  properties.
 
   Note that ``tgt`` is not added as a dependency of the target this
   expression is evaluated on.
@@ -2091,11 +2109,11 @@ In the following, the phrase "the ``tgt`` filename" means the name of the
   name is ``base``.
 
   See also the :prop_tgt:`OUTPUT_NAME` and :prop_tgt:`ARCHIVE_OUTPUT_NAME`
-  target properties and their configuration specific variants
-  :prop_tgt:`OUTPUT_NAME_<CONFIG>` and :prop_tgt:`ARCHIVE_OUTPUT_NAME_<CONFIG>`.
-
-  The :prop_tgt:`<CONFIG>_POSTFIX` and :prop_tgt:`DEBUG_POSTFIX` target
-  properties can also be considered.
+  target properties, their configuration-specific variants
+  :prop_tgt:`OUTPUT_NAME_<CONFIG>` and
+  :prop_tgt:`ARCHIVE_OUTPUT_NAME_<CONFIG>`, and
+  the :prop_tgt:`<CONFIG>_POSTFIX` and :prop_tgt:`DEBUG_POSTFIX` target
+  properties.
 
   Note that ``tgt`` is not added as a dependency of the target this
   expression is evaluated on.
@@ -2167,13 +2185,12 @@ In the following, the phrase "the ``tgt`` filename" means the name of the
   example, if target file name is ``libbase.a``, the base name is ``base``.
 
   See also the :prop_tgt:`OUTPUT_NAME`, :prop_tgt:`ARCHIVE_OUTPUT_NAME`,
-  and :prop_tgt:`LIBRARY_OUTPUT_NAME` target properties and their configuration
-  specific variants :prop_tgt:`OUTPUT_NAME_<CONFIG>`,
+  and :prop_tgt:`LIBRARY_OUTPUT_NAME` target properties, their
+  configuration-specific variants :prop_tgt:`OUTPUT_NAME_<CONFIG>`,
   :prop_tgt:`ARCHIVE_OUTPUT_NAME_<CONFIG>` and
-  :prop_tgt:`LIBRARY_OUTPUT_NAME_<CONFIG>`.
-
-  The :prop_tgt:`<CONFIG>_POSTFIX` and :prop_tgt:`DEBUG_POSTFIX` target
-  properties can also be considered.
+  :prop_tgt:`LIBRARY_OUTPUT_NAME_<CONFIG>`, and
+  the :prop_tgt:`<CONFIG>_POSTFIX` and :prop_tgt:`DEBUG_POSTFIX` target
+  properties.
 
   Note that ``tgt`` is not added as a dependency of the target this
   expression is evaluated on.
@@ -2236,13 +2253,12 @@ In the following, the phrase "the ``tgt`` filename" means the name of the
   For example, if target file name is ``libbase.a``, the base name is ``base``.
 
   See also the :prop_tgt:`OUTPUT_NAME`, :prop_tgt:`ARCHIVE_OUTPUT_NAME`,
-  and :prop_tgt:`LIBRARY_OUTPUT_NAME` target properties and their configuration
-  specific variants :prop_tgt:`OUTPUT_NAME_<CONFIG>`,
+  and :prop_tgt:`LIBRARY_OUTPUT_NAME` target properties, their
+  configuration-specific variants :prop_tgt:`OUTPUT_NAME_<CONFIG>`,
   :prop_tgt:`ARCHIVE_OUTPUT_NAME_<CONFIG>` and
-  :prop_tgt:`LIBRARY_OUTPUT_NAME_<CONFIG>`.
-
-  The :prop_tgt:`<CONFIG>_POSTFIX` and :prop_tgt:`DEBUG_POSTFIX` target
-  properties can also be considered.
+  :prop_tgt:`LIBRARY_OUTPUT_NAME_<CONFIG>`, and
+  the :prop_tgt:`<CONFIG>_POSTFIX` and :prop_tgt:`DEBUG_POSTFIX` target
+  properties.
 
   Note that ``tgt`` is not added as a dependency of the target this
   expression is evaluated on.
@@ -2307,12 +2323,11 @@ In the following, the phrase "the ``tgt`` filename" means the name of the
   For example, if target file name is ``libbase.tbd``, the base name is ``base``.
 
   See also the :prop_tgt:`OUTPUT_NAME` and :prop_tgt:`ARCHIVE_OUTPUT_NAME`,
-  target properties and their configuration
-  specific variants :prop_tgt:`OUTPUT_NAME_<CONFIG>` and
-  :prop_tgt:`ARCHIVE_OUTPUT_NAME_<CONFIG>`.
-
-  The :prop_tgt:`<CONFIG>_POSTFIX` and :prop_tgt:`DEBUG_POSTFIX` target
-  properties can also be considered.
+  target properties, their configuration-specific variants
+  :prop_tgt:`OUTPUT_NAME_<CONFIG>` and
+  :prop_tgt:`ARCHIVE_OUTPUT_NAME_<CONFIG>`, and
+  the :prop_tgt:`<CONFIG>_POSTFIX` and :prop_tgt:`DEBUG_POSTFIX` target
+  properties.
 
   Note that ``tgt`` is not added as a dependency of the target this
   expression is evaluated on.
@@ -2423,11 +2438,8 @@ In the following, the phrase "the ``tgt`` filename" means the name of the
   ``$<TARGET_PDB_FILE_NAME:tgt>``) without prefix and suffix. For example,
   if target file name is ``base.pdb``, the base name is ``base``.
 
-  See also the :prop_tgt:`PDB_NAME` target property and its configuration
-  specific variant :prop_tgt:`PDB_NAME_<CONFIG>`.
-
-  The :prop_tgt:`<CONFIG>_POSTFIX` and :prop_tgt:`DEBUG_POSTFIX` target
-  properties can also be considered.
+  See also the :prop_tgt:`PDB_NAME` target property, and its
+  configuration-specific variant :prop_tgt:`PDB_NAME_<CONFIG>`.
 
   Note that ``tgt`` is not added as a dependency of the target this
   expression is evaluated on.

@@ -1,0 +1,5 @@
+.*\-\- Configuring done[^
+]*
+\-\- Generating done[^
+]*
+\-\- postGenerate.*

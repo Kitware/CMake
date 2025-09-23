@@ -1,66 +1,133 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-# file Copyright.txt or https://cmake.org/licensing for details.
+# file LICENSE.rst or https://cmake.org/licensing for details.
 
 #[=======================================================================[.rst:
 FindSubversion
 --------------
 
-Extract information from a subversion working copy
+Finds a Subversion command-line client executable (``svn``) and provides
+commands for extracting information from a Subversion working copy:
 
-The module defines the following variables:
+.. code-block:: cmake
 
-::
+  find_package(Subversion [<version>] [...])
 
-  Subversion_SVN_EXECUTABLE - path to svn command line client
-  Subversion_VERSION_SVN - version of svn command line client
-  Subversion_FOUND - true if the command line client was found
-  SUBVERSION_FOUND - same as Subversion_FOUND, set for compatibility reasons
+Result Variables
+^^^^^^^^^^^^^^^^
 
+This module defines the following variables:
 
+``Subversion_FOUND``
+  Boolean indicating whether (the requested version of) Subversion command-line
+  client is found.  For backward compatibility, the ``SUBVERSION_FOUND``
+  variable is also set to the same value.
 
-The minimum required version of Subversion can be specified using the
-standard syntax, e.g. ``find_package(Subversion 1.4)``.
+``Subversion_VERSION_SVN``
+  Version of the ``svn`` command-line client found.
 
-If the command line client executable is found two macros are defined:
+Cache Variables
+^^^^^^^^^^^^^^^
 
-::
+The following cache variables may also be set:
 
-  Subversion_WC_INFO(<dir> <var-prefix> [IGNORE_SVN_FAILURE])
-  Subversion_WC_LOG(<dir> <var-prefix>)
+``Subversion_SVN_EXECUTABLE``
+  Path to the ``svn`` command-line client.
 
-``Subversion_WC_INFO`` extracts information of a subversion working copy at a
-given location.  This macro defines the following variables if running
-Subversion's ``info`` command on ``<dir>`` succeeds; otherwise a
-``SEND_ERROR`` message is generated.
+Commands
+^^^^^^^^
 
-.. versionadded:: 3.13
-  The error can be ignored by providing the
-  ``IGNORE_SVN_FAILURE`` option, which causes these variables to remain
-  undefined.
+This module provides the following commands if the Subversion command-line
+client is found:
 
-::
+.. command:: Subversion_WC_INFO
 
-  <var-prefix>_WC_URL - url of the repository (at <dir>)
-  <var-prefix>_WC_ROOT - root url of the repository
-  <var-prefix>_WC_REVISION - current revision
-  <var-prefix>_WC_LAST_CHANGED_AUTHOR - author of last commit
-  <var-prefix>_WC_LAST_CHANGED_DATE - date of last commit
-  <var-prefix>_WC_LAST_CHANGED_REV - revision of last commit
-  <var-prefix>_WC_INFO - output of command `svn info <dir>'
+  Extracts information from a Subversion working copy located at a specified
+  directory:
 
-``Subversion_WC_LOG`` retrieves the log message of the base revision of a
-subversion working copy at a given location.  This macro defines the variable:
+  .. code-block:: cmake
 
-::
+    Subversion_WC_INFO(<dir> <var-prefix> [IGNORE_SVN_FAILURE])
 
-  <var-prefix>_LAST_CHANGED_LOG - last log of base revision
+  This command defines the following variables if running Subversion's ``info``
+  subcommand on ``<dir>`` succeeds; otherwise a ``SEND_ERROR`` message is
+  generated:
 
-Example usage:
+  ``<var-prefix>_WC_URL``
+    URL of the repository (at ``<dir>``).
+  ``<var-prefix>_WC_ROOT``
+    Root URL of the repository.
+  ``<var-prefix>_WC_REVISION``
+    Current revision.
+  ``<var-prefix>_WC_LAST_CHANGED_AUTHOR``
+    Author of last commit.
+  ``<var-prefix>_WC_LAST_CHANGED_DATE``
+    Date of last commit.
+  ``<var-prefix>_WC_LAST_CHANGED_REV``
+    Revision of last commit.
+  ``<var-prefix>_WC_INFO``
+    Output of the command ``svn info <dir>``
 
-::
+  The options are:
+
+  ``IGNORE_SVN_FAILURE``
+    .. versionadded:: 3.13
+
+    When specified, errors from Subversion operation will not trigger a
+    ``SEND_ERROR`` message.  In case of an error, the ``<var-prefix>_*``
+    variables remain undefined.
+
+.. command:: Subversion_WC_LOG
+
+  Retrieves the log message of the base revision of a Subversion working copy at
+  a given location:
+
+  .. code-block:: cmake
+
+    Subversion_WC_LOG(<dir> <var-prefix>)
+
+  This command defines the following variable if running Subversion's ``log``
+  subcommand on ``<dir>`` succeeds; otherwise a ``SEND_ERROR`` message is
+  generated:
+
+  ``<var-prefix>_LAST_CHANGED_LOG``
+    Last log of the base revision of a Subversion working copy located at
+    ``<dir>``.
+
+Examples
+^^^^^^^^
+
+Examples: Finding Subversion
+""""""""""""""""""""""""""""
+
+Finding Subversion:
+
+.. code-block:: cmake
 
   find_package(Subversion)
-  if(SUBVERSION_FOUND)
+
+Or, finding Subversion and specifying a minimum required version:
+
+.. code-block:: cmake
+
+  find_package(Subversion 1.4)
+
+Or, finding Subversion and making it required (if not found, processing stops
+with an error message):
+
+.. code-block:: cmake
+
+  find_package(Subversion REQUIRED)
+
+Example: Using Subversion
+"""""""""""""""""""""""""
+
+Finding Subversion and retrieving information about the current project's
+working copy:
+
+.. code-block:: cmake
+
+  find_package(Subversion)
+  if(Subversion_FOUND)
     Subversion_WC_INFO(${PROJECT_SOURCE_DIR} Project)
     message("Current revision is ${Project_WC_REVISION}")
     Subversion_WC_LOG(${PROJECT_SOURCE_DIR} Project)
@@ -160,10 +227,9 @@ if(Subversion_SVN_EXECUTABLE)
 
 endif()
 
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(Subversion REQUIRED_VARS Subversion_SVN_EXECUTABLE
+include(FindPackageHandleStandardArgs)
+find_package_handle_standard_args(Subversion REQUIRED_VARS Subversion_SVN_EXECUTABLE
                                              VERSION_VAR Subversion_VERSION_SVN )
 
 # for compatibility
-set(Subversion_FOUND ${SUBVERSION_FOUND})
-set(Subversion_SVN_FOUND ${SUBVERSION_FOUND})
+set(Subversion_SVN_FOUND ${Subversion_FOUND})

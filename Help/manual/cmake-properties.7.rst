@@ -97,6 +97,7 @@ Properties on Directories
    /prop_dir/VARIABLES
    /prop_dir/VS_GLOBAL_SECTION_POST_section
    /prop_dir/VS_GLOBAL_SECTION_PRE_section
+   /prop_dir/VS_SOLUTION_ITEMS
    /prop_dir/VS_STARTUP_PROJECT
 
 .. _`Target Properties`:
@@ -144,6 +145,7 @@ Properties on Targets
    /prop_tgt/AUTOMOC_COMPILER_PREDEFINES
    /prop_tgt/AUTOMOC_DEPEND_FILTERS
    /prop_tgt/AUTOMOC_EXECUTABLE
+   /prop_tgt/AUTOMOC_INCLUDE_DIRECTORIES
    /prop_tgt/AUTOMOC_MACRO_NAMES
    /prop_tgt/AUTOMOC_MOC_OPTIONS
    /prop_tgt/AUTOMOC_PATH_PREFIX
@@ -225,7 +227,7 @@ Properties on Targets
    /prop_tgt/EXPORT_NO_SYSTEM
    /prop_tgt/EXPORT_PROPERTIES
    /prop_tgt/FOLDER
-   /prop_tgt/Fortran_BUILDING_INSTRINSIC_MODULES
+   /prop_tgt/Fortran_BUILDING_INTRINSIC_MODULES
    /prop_tgt/Fortran_FORMAT
    /prop_tgt/Fortran_MODULE_DIRECTORY
    /prop_tgt/Fortran_PREPROCESS
@@ -317,6 +319,7 @@ Properties on Targets
    /prop_tgt/LANG_CPPCHECK
    /prop_tgt/LANG_CPPLINT
    /prop_tgt/LANG_EXTENSIONS
+   /prop_tgt/LANG_ICSTAT
    /prop_tgt/LANG_INCLUDE_WHAT_YOU_USE
    /prop_tgt/LANG_LINKER_LAUNCHER
    /prop_tgt/LANG_STANDARD
@@ -326,6 +329,7 @@ Properties on Targets
    /prop_tgt/LIBRARY_OUTPUT_DIRECTORY_CONFIG
    /prop_tgt/LIBRARY_OUTPUT_NAME
    /prop_tgt/LIBRARY_OUTPUT_NAME_CONFIG
+   /prop_tgt/SPDX_LICENSE
    /prop_tgt/LINK_DEPENDS
    /prop_tgt/LINK_DEPENDS_NO_SHARED
    /prop_tgt/LINK_DIRECTORIES
@@ -343,6 +347,7 @@ Properties on Targets
    /prop_tgt/LINK_OPTIONS
    /prop_tgt/LINK_SEARCH_END_STATIC
    /prop_tgt/LINK_SEARCH_START_STATIC
+   /prop_tgt/LINK_WARNING_AS_ERROR
    /prop_tgt/LINK_WHAT_YOU_USE
    /prop_tgt/LINKER_LANGUAGE
    /prop_tgt/LINKER_TYPE
@@ -357,6 +362,7 @@ Properties on Targets
    /prop_tgt/MANUALLY_ADDED_DEPENDENCIES
    /prop_tgt/MAP_IMPORTED_CONFIG_CONFIG
    /prop_tgt/MSVC_DEBUG_INFORMATION_FORMAT
+   /prop_tgt/MSVC_RUNTIME_CHECKS
    /prop_tgt/MSVC_RUNTIME_LIBRARY
    /prop_tgt/NAME
    /prop_tgt/NO_SONAME
@@ -416,6 +422,7 @@ Properties on Targets
    /prop_tgt/UNITY_BUILD_CODE_AFTER_INCLUDE
    /prop_tgt/UNITY_BUILD_CODE_BEFORE_INCLUDE
    /prop_tgt/UNITY_BUILD_MODE
+   /prop_tgt/UNITY_BUILD_RELOCATABLE
    /prop_tgt/UNITY_BUILD_UNIQUE_ID
    /prop_tgt/VERIFY_INTERFACE_HEADER_SETS
    /prop_tgt/VERSION
@@ -491,7 +498,9 @@ Properties on Targets
    /prop_tgt/XCODE_SCHEME_EXECUTABLE
    /prop_tgt/XCODE_SCHEME_GUARD_MALLOC
    /prop_tgt/XCODE_SCHEME_LAUNCH_CONFIGURATION
+   /prop_tgt/XCODE_SCHEME_TEST_CONFIGURATION
    /prop_tgt/XCODE_SCHEME_LAUNCH_MODE
+   /prop_tgt/XCODE_SCHEME_LLDB_INIT_FILE
    /prop_tgt/XCODE_SCHEME_MAIN_THREAD_CHECKER_STOP
    /prop_tgt/XCODE_SCHEME_MALLOC_GUARD_EDGES
    /prop_tgt/XCODE_SCHEME_MALLOC_SCRIBBLE
@@ -584,6 +593,7 @@ Properties on Source Files
    /prop_sf/UNITY_GROUP
    /prop_sf/VS_COPY_TO_OUT_DIR
    /prop_sf/VS_CSHARP_tagname
+   /prop_sf/VS_CUSTOM_COMMAND_DISABLE_PARALLEL_BUILD
    /prop_sf/VS_DEPLOYMENT_CONTENT
    /prop_sf/VS_DEPLOYMENT_LOCATION
    /prop_sf/VS_INCLUDE_IN_VSIX
@@ -656,6 +666,7 @@ Deprecated Properties on Targets
    :maxdepth: 1
 
    /prop_tgt/COMPILE_DEFINITIONS_CONFIG
+   /prop_tgt/Fortran_BUILDING_INSTRINSIC_MODULES
    /prop_tgt/IMPORTED_NO_SYSTEM
    /prop_tgt/IOS_INSTALL_COMBINED
    /prop_tgt/POST_INSTALL_SCRIPT

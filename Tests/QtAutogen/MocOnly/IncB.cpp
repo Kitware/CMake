@@ -6,7 +6,7 @@ class IncBPrivate : public QObject
 {
   Q_OBJECT
 public:
-  IncBPrivate(){};
+  IncBPrivate() {};
 };
 
 IncB::IncB()

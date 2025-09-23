@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
 #include <string>
@@ -22,10 +22,10 @@ public:
   bool CheckForUnappliedFragments();
 
 private:
-  void ApplyElementChildren(const cmWIXPatchElement& element,
+  void ApplyElementChildren(cmWIXPatchElement const& element,
                             cmWIXSourceWriter& writer);
 
-  void ApplyElement(const cmWIXPatchElement& element,
+  void ApplyElement(cmWIXPatchElement const& element,
                     cmWIXSourceWriter& writer);
 
   cmCPackLog* Logger;

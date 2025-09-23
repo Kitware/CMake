@@ -1,5 +1,5 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-# file Copyright.txt or https://cmake.org/licensing for details.
+# file LICENSE.rst or https://cmake.org/licensing for details.
 
 
 #[=======================================================================[.rst:
@@ -8,78 +8,194 @@ CheckSourceCompiles
 
 .. versionadded:: 3.19
 
-Check once if source code can be built for a given language.
+This module provides a command that checks whether a source code can be
+built for a given language.
+
+Load this module in a CMake project with:
+
+.. code-block:: cmake
+
+  include(CheckSourceCompiles)
+
+Commands
+^^^^^^^^
+
+This module provides the following command:
 
 .. command:: check_source_compiles
 
-  .. code-block:: cmake
-
-    check_source_compiles(<lang> <code> <resultVar>
-                          [FAIL_REGEX <regex1> [<regex2>...]]
-                          [SRC_EXT <extension>])
-
-  Check once that the source supplied in ``<code>`` can be built for code
-  language ``<lang>``. The result is stored in the internal cache variable
-  specified by ``<resultVar>``, with boolean ``true`` for success and
-  boolean ``false`` for failure.
-
-  If ``FAIL_REGEX`` is provided, then failure is determined by checking
-  if anything in the compiler output matches any of the specified regular
-  expressions.
-
-  By default, the test source file will be given a file extension that matches
-  the requested language. The ``SRC_EXT`` option can be used to override this
-  with ``.<extension>`` instead.
-
-  The C example checks if the compiler supports the ``noreturn`` attribute:
+  Checks once whether the given source code can be built for the given
+  language:
 
   .. code-block:: cmake
 
+    check_source_compiles(
+      <lang>
+      <code>
+      <variable>
+      [FAIL_REGEX <regexes>...]
+      [SRC_EXT <extension>]
+    )
+
+  This command checks once that the source supplied in ``<code>`` can be
+  compiled (and linked into an executable) for code language ``<lang>``.
+  The result of the check is stored in the internal cache variable specified
+  by ``<variable>``.
+
+  The arguments are:
+
+  ``<lang>``
+    Language of the source code to check.  Supported languages are:
+    ``C``, ``CXX``, ``CUDA``, ``Fortran``, ``HIP``, ``ISPC``, ``OBJC``,
+    ``OBJCXX``, and ``Swift``.
+
+    .. versionadded:: 3.21
+      Support for ``HIP`` language.
+
+    .. versionadded:: 3.26
+      Support for ``Swift`` language.
+
+  ``<code>``
+    The source code to check.  This must be an entire program, as written
+    in a file containing the body block.  All symbols used in the source code
+    are expected to be declared as usual in their corresponding headers.
+
+  ``<variable>``
+    Variable name of an internal cache variable to store the result of the
+    check, with boolean true for success and boolean false for failure.
+
+  ``FAIL_REGEX <regexes>...``
+    If one or more regular expression patterns are provided, then failure is
+    determined by checking if anything in the compiler output matches any of
+    the specified regular expressions.
+
+  ``SRC_EXT <extension>``
+    By default, the internal test source file used for the check will be
+    given a file extension that matches the requested language (e.g., ``.c``
+    for C, ``.cxx`` for C++, ``.F90`` for Fortran, etc.).  This option can
+    be used to override this with the ``.<extension>`` instead.
+
+  .. rubric:: Variables Affecting the Check
+
+  The following variables may be set before calling this command to modify
+  the way the check is run:
+
+  .. include:: /module/include/CMAKE_REQUIRED_FLAGS.rst
+
+  .. include:: /module/include/CMAKE_REQUIRED_DEFINITIONS.rst
+
+  .. include:: /module/include/CMAKE_REQUIRED_INCLUDES.rst
+
+  .. include:: /module/include/CMAKE_REQUIRED_LINK_OPTIONS.rst
+
+  .. include:: /module/include/CMAKE_REQUIRED_LIBRARIES.rst
+
+  .. include:: /module/include/CMAKE_REQUIRED_LINK_DIRECTORIES.rst
+
+  .. include:: /module/include/CMAKE_REQUIRED_QUIET.rst
+
+  .. include:: /module/include/CMAKE_TRY_COMPILE_TARGET_TYPE.rst
+
+Examples
+^^^^^^^^
+
+Example: Basic Usage
+""""""""""""""""""""
+
+The following example demonstrates how to check whether the C++ compiler
+supports a specific language feature using this module.  In this case, the
+check verifies if the compiler supports ``C++11`` lambda expressions.  The
+result is stored in the internal cache variable ``HAVE_CXX11_LAMBDAS``:
+
+.. code-block:: cmake
+
+  include(CheckSourceCompiles)
+
+  check_source_compiles(CXX "
+    int main()
+    {
+      auto lambda = []() { return 42; };
+      return lambda();
+    }
+  " HAVE_CXX11_LAMBDAS)
+
+Example: Checking Code With Bracket Argument
+""""""""""""""""""""""""""""""""""""""""""""
+
+The following example shows how to check whether the C compiler supports the
+``noreturn`` attribute.  Code is supplied using the :ref:`Bracket Argument`
+for easier embedded quotes handling:
+
+.. code-block:: cmake
+  :force:
+
+  include(CheckSourceCompiles)
+
+  check_source_compiles(C [[
+    #if !__has_c_attribute(noreturn)
+    #  error "No noreturn attribute"
+    #endif
+    int main(void) { return 0; }
+  ]] HAVE_NORETURN)
+
+Example: Performing a Check Without Linking
+"""""""""""""""""""""""""""""""""""""""""""
+
+In the following example, this module is used to perform a compile-only
+check of Fortran source code, whether the compiler supports the ``pure``
+procedure attribute:
+
+.. code-block:: cmake
+
+  include(CheckSourceCompiles)
+
+  block()
     set(CMAKE_TRY_COMPILE_TARGET_TYPE "STATIC_LIBRARY")
 
-    check_source_compiles(C
-    "#if !__has_c_attribute(noreturn)
-    #error \"No noreturn attribute\"
-    #endif"
-    HAVE_NORETURN)
+    check_source_compiles(
+      Fortran
+      "pure subroutine foo()
+      end subroutine"
+      HAVE_PURE
+    )
+  endblock()
 
-  The Fortran example checks if the compiler supports the ``pure`` procedure
-  attribute:
+Example: Isolated Check
+"""""""""""""""""""""""
 
-  .. code-block:: cmake
+In the following example, this module is used in combination with the
+:module:`CMakePushCheckState` module to modify required libraries when
+checking whether the PostgreSQL ``PGVerbosity`` enum contains
+``PQERRORS_SQLSTATE`` (available as of PostgreSQL version 12):
 
-    set(CMAKE_TRY_COMPILE_TARGET_TYPE "STATIC_LIBRARY")
+.. code-block:: cmake
 
-    check_source_compiles(Fortran
-    "pure subroutine foo()
-    end subroutine"
-    HAVE_PURE)
+  include(CheckSourceCompiles)
+  include(CMakePushCheckState)
 
-  Internally, :command:`try_compile` is used to compile the source. If
-  :variable:`CMAKE_TRY_COMPILE_TARGET_TYPE` is set to ``EXECUTABLE`` (default),
-  the source is compiled and linked as an executable program. If set to
-  ``STATIC_LIBRARY``, the source is compiled but not linked. In any case, all
-  functions must be declared as usual.
+  find_package(PostgreSQL)
 
-  See also :command:`check_source_runs` to run compiled source.
+  if(TARGET PostgreSQL::PostgreSQL)
+    cmake_push_check_state(RESET)
+      set(CMAKE_REQUIRED_LIBRARIES PostgreSQL::PostgreSQL)
 
-  The compile and link commands can be influenced by setting any of the
-  following variables prior to calling ``check_source_compiles()``:
+      check_source_compiles(C "
+        #include <libpq-fe.h>
+        int main(void)
+        {
+          PGVerbosity e = PQERRORS_SQLSTATE;
+          (void)e;
+          return 0;
+        }
+      " HAVE_PQERRORS_SQLSTATE)
+    cmake_pop_check_state()
+  endif()
 
-.. include:: /module/CMAKE_REQUIRED_FLAGS.txt
+See Also
+^^^^^^^^
 
-.. include:: /module/CMAKE_REQUIRED_DEFINITIONS.txt
-
-.. include:: /module/CMAKE_REQUIRED_INCLUDES.txt
-
-.. include:: /module/CMAKE_REQUIRED_LINK_OPTIONS.txt
-
-.. include:: /module/CMAKE_REQUIRED_LIBRARIES.txt
-
-.. include:: /module/CMAKE_REQUIRED_LINK_DIRECTORIES.txt
-
-.. include:: /module/CMAKE_REQUIRED_QUIET.txt
-
+* The :module:`CheckSourceRuns` module to check whether the source code can
+  be built and also run.
 #]=======================================================================]
 
 include_guard(GLOBAL)

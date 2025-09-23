@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmCMakeLanguageCommand.h"
 
 #include <algorithm>
@@ -217,10 +217,10 @@ bool cmCMakeLanguageCommandEVAL(std::vector<cmListFileArgument> const& args,
       "called with unsupported arguments between EVAL and CODE arguments");
   }
 
-  const std::string code =
+  std::string const code =
     cmJoin(cmMakeRange(expandedArgs.begin() + 2, expandedArgs.end()), " ");
   return makefile.ReadListFileAsString(
-    code, cmStrCat(context.FilePath, ":", context.Line, ":EVAL"));
+    code, cmStrCat(context.FilePath, ':', context.Line, ":EVAL"));
 }
 
 bool cmCMakeLanguageCommandSET_DEPENDENCY_PROVIDER(
@@ -252,7 +252,7 @@ bool cmCMakeLanguageCommandSET_DEPENDENCY_PROVIDER(
 
   if (!unparsed.empty()) {
     return FatalError(
-      status, cmStrCat("Unrecognized keyword: \"", unparsed.front(), "\""));
+      status, cmStrCat("Unrecognized keyword: \"", unparsed.front(), '"'));
   }
 
   // We store the command that FetchContent_MakeAvailable() can call in a
@@ -296,7 +296,7 @@ bool cmCMakeLanguageCommandSET_DEPENDENCY_PROVIDER(
     } else {
       return FatalError(
         status,
-        cmStrCat("Unknown dependency provider method \"", method, "\""));
+        cmStrCat("Unknown dependency provider method \"", method, '"'));
     }
   }
 
@@ -324,7 +324,7 @@ bool cmCMakeLanguageCommandGET_MESSAGE_LOG_LEVEL(
   Message::LogLevel logLevel = makefile.GetCurrentLogLevel();
   std::string outputValue = cmake::LogLevelToString(logLevel);
 
-  const std::string& outputVariable = expandedArgs[1];
+  std::string const& outputVariable = expandedArgs[1];
   makefile.AddDefinition(outputVariable, outputValue);
   return true;
 }
@@ -467,7 +467,7 @@ bool cmCMakeLanguageCommand(std::vector<cmListFileArgument> const& args,
         if (!defer.Directory) {
           return FatalError(status,
                             cmStrCat("DEFER DIRECTORY:\n  "_s, dir,
-                                     "\nis not known.  "_s,
+                                     "\nis not known.  "
                                      "It may not have been processed yet."_s));
         }
       } else if (expArgs[expArg] == "ID"_s) {

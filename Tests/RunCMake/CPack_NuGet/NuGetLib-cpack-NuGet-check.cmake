@@ -3,9 +3,9 @@ if(NOT generated_nuspec)
   set(RunCMake_TEST_FAILED "No nuspec file generated under ${RunCMake_TEST_BINARY_DIR}")
 else()
   # Read in the generated nuspec file content
-  file(READ "${generated_nuspec}" actual_nuspec)
+  file(STRINGS "${generated_nuspec}" actual_nuspec REGEX "^.*[^ ]+$")
   # Read in the expected file content
-  file(READ "${CMAKE_CURRENT_LIST_DIR}/expected.nuspec" expected_nuspec)
+  file(STRINGS "${CMAKE_CURRENT_LIST_DIR}/expected.nuspec" expected_nuspec REGEX "^.*[^ ]+$")
 
   # Compare the file contents
   string(COMPARE EQUAL "${actual_nuspec}" "${expected_nuspec}" nuspec_matches)

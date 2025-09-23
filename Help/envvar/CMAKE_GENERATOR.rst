@@ -3,7 +3,7 @@ CMAKE_GENERATOR
 
 .. versionadded:: 3.15
 
-.. include:: ENV_VAR.txt
+.. include:: include/ENV_VAR.rst
 
 Specifies the CMake default generator to use when no generator is supplied
 with :option:`-G <cmake -G>`. If the provided value doesn't name a generator

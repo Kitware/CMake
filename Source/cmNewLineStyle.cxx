@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmNewLineStyle.h"
 
 #include <cstddef>
@@ -11,7 +11,7 @@ bool cmNewLineStyle::IsValid() const
   return this->NewLineStyle != Invalid;
 }
 
-bool cmNewLineStyle::ReadFromArguments(const std::vector<std::string>& args,
+bool cmNewLineStyle::ReadFromArguments(std::vector<std::string> const& args,
                                        std::string& errorString)
 {
   this->NewLineStyle = Invalid;

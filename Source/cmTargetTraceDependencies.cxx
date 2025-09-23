@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmTargetTraceDependencies.h"
 
 #include <sstream>
@@ -39,7 +39,7 @@ cmTargetTraceDependencies::cmTargetTraceDependencies(cmGeneratorTarget* target)
     std::vector<cmSourceFile*> sources;
     this->GeneratorTarget->GetSourceFiles(sources, c);
     for (cmSourceFile* sf : sources) {
-      const std::set<cmGeneratorTarget const*> tgts =
+      std::set<cmGeneratorTarget const*> const tgts =
         this->GlobalGenerator->GetFilenameTargetDepends(sf);
       if (cm::contains(tgts, this->GeneratorTarget)) {
         std::ostringstream e;
@@ -242,7 +242,7 @@ void cmTargetTraceDependencies::CheckCustomCommand(cmCustomCommand const& cc)
 }
 
 void cmTargetTraceDependencies::CheckCustomCommands(
-  const std::vector<cmCustomCommand>& commands)
+  std::vector<cmCustomCommand> const& commands)
 {
   for (cmCustomCommand const& command : commands) {
     this->CheckCustomCommand(command);

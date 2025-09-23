@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
@@ -68,7 +68,7 @@ cmCMakePath cmCMakePath::GetNarrowStem() const
   return stem;
 }
 
-cmCMakePath cmCMakePath::Absolute(const cm::filesystem::path& base) const
+cmCMakePath cmCMakePath::Absolute(cm::filesystem::path const& base) const
 {
   if (this->Path.is_relative()) {
     auto path = base;
@@ -80,7 +80,7 @@ cmCMakePath cmCMakePath::Absolute(const cm::filesystem::path& base) const
   return *this;
 }
 
-bool cmCMakePath::IsPrefix(const cmCMakePath& path) const
+bool cmCMakePath::IsPrefix(cmCMakePath const& path) const
 {
   auto prefix_it = this->Path.begin();
   auto prefix_end = this->Path.end();

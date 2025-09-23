@@ -51,7 +51,7 @@ but it does not necessarily imply complete conformance to that standard.
 
   Compiler mode is at least C++ 26.
 
-.. include:: CMAKE_LANG_STD_FLAGS.txt
+.. include:: include/CMAKE_LANG_STD_FLAGS.rst
 
 Low level individual compile features
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

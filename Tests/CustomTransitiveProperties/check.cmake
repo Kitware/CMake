@@ -51,16 +51,15 @@ static11 LINK_LIBRARIES: 'static10;iface11;iface11;iface10'
 static11 INTERFACE_LINK_LIBRARIES: 'static10;iface11;iface11;iface10'
 main10 LINK_LIBRARIES: 'static11;static10;static10;iface11;iface11;iface10'
 main10 INTERFACE_LINK_LIBRARIES: ''
+iface20 LINK_LIBRARIES: ''
+iface20 INTERFACE_LINK_LIBRARIES: ''
+iface21 LINK_LIBRARIES: ''
+iface21 INTERFACE_LINK_LIBRARIES: 'iface20'
+static20 LINK_LIBRARIES: 'iface21'
+static20 INTERFACE_LINK_LIBRARIES: '\$<LINK_ONLY:iface21>'
+static21 LINK_LIBRARIES: 'static20;iface21'
+static21 INTERFACE_LINK_LIBRARIES: '\$<LINK_ONLY:static20>;\$<LINK_ONLY:iface21>'
+main20 LINK_LIBRARIES: 'static21;static20'
+main20 INTERFACE_LINK_LIBRARIES: ''
 ]])
-string(REGEX REPLACE "\r\n" "\n" expect "${expect}")
-string(REGEX REPLACE "\n+$" "" expect "${expect}")
-
-file(READ "${out}" actual)
-string(REGEX REPLACE "\r\n" "\n" actual "${actual}")
-string(REGEX REPLACE "\n+$" "" actual "${actual}")
-
-if(NOT actual MATCHES "^${expect}$")
-  string(REPLACE "\n" "\n expect> " expect " expect> ${expect}")
-  string(REPLACE "\n" "\n actual> " actual " actual> ${actual}")
-  message(FATAL_ERROR "Expected file(GENERATE) output:\n${expect}\ndoes not match actual output:\n${actual}")
-endif()
+include(${CMAKE_CURRENT_LIST_DIR}/check-common.cmake)

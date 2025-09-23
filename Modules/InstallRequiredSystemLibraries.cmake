@@ -1,5 +1,5 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-# file Copyright.txt or https://cmake.org/licensing for details.
+# file LICENSE.rst or https://cmake.org/licensing for details.
 
 #[=======================================================================[.rst:
 InstallRequiredSystemLibraries
@@ -64,9 +64,6 @@ may be set prior to including the module to adjust behavior:
 .. versionadded:: 3.10
   Support for installing Intel compiler runtimes.
 #]=======================================================================]
-
-cmake_policy(PUSH)
-cmake_policy(SET CMP0054 NEW) # if() quoted variables not dereferenced
 
 set(_IRSL_HAVE_Intel FALSE)
 set(_IRSL_HAVE_MSVC FALSE)
@@ -806,5 +803,3 @@ if(CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS)
       )
   endif()
 endif()
-
-cmake_policy(POP)

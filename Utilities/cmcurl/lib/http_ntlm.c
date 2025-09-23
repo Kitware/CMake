@@ -33,16 +33,15 @@
  * https://www.innovation.ch/java/ntlm.html
  */
 
-#define DEBUG_ME 0
-
 #include "urldata.h"
 #include "sendf.h"
 #include "strcase.h"
 #include "http_ntlm.h"
 #include "curl_ntlm_core.h"
-#include "curl_base64.h"
+#include "curlx/base64.h"
 #include "vauth/vauth.h"
 #include "url.h"
+#include "curlx/strparse.h"
 
 /* SSL backend-specific #if branches in this file must be kept in the order
    documented in curl_ntlm_core. */
@@ -54,12 +53,6 @@
 #include "curl_printf.h"
 #include "curl_memory.h"
 #include "memdebug.h"
-
-#if DEBUG_ME
-# define DEBUG_OUT(x) x
-#else
-# define DEBUG_OUT(x) Curl_nop_stmt
-#endif
 
 CURLcode Curl_input_ntlm(struct Curl_easy *data,
                          bool proxy,         /* if proxy or not */
@@ -78,14 +71,12 @@ CURLcode Curl_input_ntlm(struct Curl_easy *data,
   if(checkprefix("NTLM", header)) {
     header += strlen("NTLM");
 
-    while(*header && ISSPACE(*header))
-      header++;
-
+    curlx_str_passblanks(&header);
     if(*header) {
       unsigned char *hdr;
       size_t hdrlen;
 
-      result = Curl_base64_decode(header, &hdr, &hdrlen);
+      result = curlx_base64_decode(header, &hdr, &hdrlen);
       if(!result) {
         struct bufref hdrbuf;
 
@@ -214,7 +205,7 @@ CURLcode Curl_output_ntlm(struct Curl_easy *data, bool proxy)
                                                  ntlm, &ntlmmsg);
     if(!result) {
       DEBUGASSERT(Curl_bufref_len(&ntlmmsg) != 0);
-      result = Curl_base64_encode((const char *) Curl_bufref_ptr(&ntlmmsg),
+      result = curlx_base64_encode((const char *) Curl_bufref_ptr(&ntlmmsg),
                                   Curl_bufref_len(&ntlmmsg), &base64, &len);
       if(!result) {
         free(*allocuserpwd);
@@ -233,8 +224,8 @@ CURLcode Curl_output_ntlm(struct Curl_easy *data, bool proxy)
     result = Curl_auth_create_ntlm_type3_message(data, userp, passwdp,
                                                  ntlm, &ntlmmsg);
     if(!result && Curl_bufref_len(&ntlmmsg)) {
-      result = Curl_base64_encode((const char *) Curl_bufref_ptr(&ntlmmsg),
-                                  Curl_bufref_len(&ntlmmsg), &base64, &len);
+      result = curlx_base64_encode((const char *) Curl_bufref_ptr(&ntlmmsg),
+                                   Curl_bufref_len(&ntlmmsg), &base64, &len);
       if(!result) {
         free(*allocuserpwd);
         *allocuserpwd = aprintf("%sAuthorization: NTLM %s\r\n",
@@ -252,6 +243,12 @@ CURLcode Curl_output_ntlm(struct Curl_easy *data, bool proxy)
     break;
 
   case NTLMSTATE_LAST:
+    /* since this is a little artificial in that this is used without any
+       outgoing auth headers being set, we need to set the bit by force */
+    if(proxy)
+      data->info.proxyauthpicked = CURLAUTH_NTLM;
+    else
+      data->info.httpauthpicked = CURLAUTH_NTLM;
     Curl_safefree(*allocuserpwd);
     authp->done = TRUE;
     break;

@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
@@ -30,10 +30,10 @@ public:
                            std::string targetNamespace,
                            std::string cxxModulesDirectory,
                            cmListFileBacktrace backtrace);
-  cmInstallExportGenerator(const cmInstallExportGenerator&) = delete;
+  cmInstallExportGenerator(cmInstallExportGenerator const&) = delete;
   ~cmInstallExportGenerator() override;
 
-  cmInstallExportGenerator& operator=(const cmInstallExportGenerator&) =
+  cmInstallExportGenerator& operator=(cmInstallExportGenerator const&) =
     delete;
 
   virtual char const* InstallSubcommand() const = 0;
@@ -44,7 +44,7 @@ public:
 
   cmLocalGenerator* GetLocalGenerator() const { return this->LocalGenerator; }
 
-  const std::string& GetNamespace() const { return this->Namespace; }
+  std::string const& GetNamespace() const { return this->Namespace; }
 
   std::string const& GetMainImportFile() const { return this->MainImportFile; }
 

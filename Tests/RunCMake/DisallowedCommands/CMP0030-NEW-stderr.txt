@@ -1,4 +1,4 @@
-CMake Error at CMP0030-NEW.cmake:2 \(use_mangled_mesa\):
-  The use_mangled_mesa command should not be called; see CMP0030.
+CMake Error at CMP0030-NEW.cmake:1 \(use_mangled_mesa\):
+  The use_mangled_mesa command has been removed; see CMP0030.
 Call Stack \(most recent call first\):
   CMakeLists.txt:3 \(include\)

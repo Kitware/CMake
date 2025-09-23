@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
 #include "cmCPackArchiveGenerator.h"
@@ -19,10 +19,10 @@ public:
   ~cmCPackCygwinSourceGenerator() override;
 
 protected:
-  const char* GetPackagingInstallPrefix() override;
+  char const* GetPackagingInstallPrefix() override;
   int InitializeInternal() override;
   int PackageFiles() override;
-  const char* GetOutputExtension() override;
+  char const* GetOutputExtension() override;
   std::string InstallPrefix;
   std::string OutputExtension;
 };

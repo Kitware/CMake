@@ -9,3 +9,5 @@ cmake.
 If CMake is currently processing deferred calls scheduled by
 the :command:`cmake_language(DEFER)` command, this variable
 evaluates to ``DEFERRED`` instead of a specific line number.
+
+See also :variable:`CMAKE_CURRENT_FUNCTION_LIST_LINE`.

@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
 #include <iosfwd>
@@ -24,6 +24,12 @@ class cmMakefile;
 class cmake;
 template <typename T>
 class BT;
+
+struct cmVisualStudioFolder
+{
+  std::set<std::string> Projects;
+  std::set<std::string> SolutionItems;
+};
 
 /** \class cmGlobalVisualStudio7Generator
  * \brief Write a Unix makefiles.
@@ -69,10 +75,10 @@ public:
    * loaded commands, not as part of the usual build process.
    */
   std::vector<GeneratedMakeCommand> GenerateBuildCommand(
-    const std::string& makeProgram, const std::string& projectName,
-    const std::string& projectDir, std::vector<std::string> const& targetNames,
-    const std::string& config, int jobs, bool verbose,
-    const cmBuildOptions& buildOptions = cmBuildOptions(),
+    std::string const& makeProgram, std::string const& projectName,
+    std::string const& projectDir, std::vector<std::string> const& targetNames,
+    std::string const& config, int jobs, bool verbose,
+    cmBuildOptions const& buildOptions = cmBuildOptions(),
     std::vector<std::string> const& makeOptions =
       std::vector<std::string>()) override;
 
@@ -85,13 +91,13 @@ public:
   std::string GetGUID(std::string const& name);
 
   /** Append the subdirectory for the given configuration.  */
-  void AppendDirectoryForConfig(const std::string& prefix,
-                                const std::string& config,
-                                const std::string& suffix,
+  void AppendDirectoryForConfig(std::string const& prefix,
+                                std::string const& config,
+                                std::string const& suffix,
                                 std::string& dir) override;
 
   //! What is the configurations directory variable called?
-  const char* GetCMakeCFGIntDir() const override
+  char const* GetCMakeCFGIntDir() const override
   {
     return "$(ConfigurationName)";
   }
@@ -103,7 +109,7 @@ public:
     return false;
   }
 
-  const std::string& GetIntelProjectVersion();
+  std::string const& GetIntelProjectVersion();
   virtual cm::optional<std::string> GetPlatformToolsetFortran() const
   {
     return cm::nullopt;
@@ -124,35 +130,36 @@ public:
   virtual bool SupportsCxxModuleDyndep() const { return false; }
 
 protected:
-  cmGlobalVisualStudio7Generator(cmake* cm,
-                                 std::string const& platformInGeneratorName);
+  cmGlobalVisualStudio7Generator(cmake* cm);
 
   void Generate() override;
 
   std::string const& GetDevEnvCommand();
   virtual std::string FindDevEnvCommand();
 
-  static const char* ExternalProjectType(const std::string& location);
+  static char const* ExternalProjectType(std::string const& location);
 
   virtual void OutputSLNFile(cmLocalGenerator* root,
                              std::vector<cmLocalGenerator*>& generators);
   virtual void WriteSLNFile(std::ostream& fout, cmLocalGenerator* root,
                             std::vector<cmLocalGenerator*>& generators) = 0;
-  virtual void WriteProject(std::ostream& fout, const std::string& name,
-                            const std::string& path,
-                            const cmGeneratorTarget* t) = 0;
-  virtual void WriteProjectDepends(std::ostream& fout, const std::string& name,
-                                   const std::string& path,
+  virtual void WriteProject(std::ostream& fout, std::string const& name,
+                            std::string const& path,
+                            cmGeneratorTarget const* t) = 0;
+  virtual void WriteProjectDepends(std::ostream& fout, std::string const& name,
+                                   std::string const& path,
                                    cmGeneratorTarget const* t) = 0;
   virtual void WriteProjectConfigurations(
-    std::ostream& fout, const std::string& name,
+    std::ostream& fout, std::string const& name,
     cmGeneratorTarget const& target, std::vector<std::string> const& configs,
-    const std::set<std::string>& configsPartOfDefaultBuild,
-    const std::string& platformMapping = "") = 0;
+    std::set<std::string> const& configsPartOfDefaultBuild,
+    std::string const& platformMapping = "") = 0;
   virtual void WriteSLNGlobalSections(std::ostream& fout,
                                       cmLocalGenerator* root);
   virtual void WriteSLNFooter(std::ostream& fout);
-  std::string WriteUtilityDepend(const cmGeneratorTarget* target) override;
+  std::string WriteUtilityDepend(cmGeneratorTarget const* target) override;
+
+  cmVisualStudioFolder* CreateSolutionFolders(std::string const& path);
 
   virtual void WriteTargetsToSolution(
     std::ostream& fout, cmLocalGenerator* root,
@@ -162,11 +169,11 @@ protected:
     OrderedTargetDependSet const& projectTargets);
 
   virtual void WriteExternalProject(
-    std::ostream& fout, const std::string& name, const std::string& path,
+    std::ostream& fout, std::string const& name, std::string const& path,
     cmValue typeGuid,
-    const std::set<BT<std::pair<std::string, bool>>>& dependencies) = 0;
+    std::set<BT<std::pair<std::string, bool>>> const& dependencies) = 0;
 
-  std::string ConvertToSolutionPath(const std::string& path);
+  std::string ConvertToSolutionPath(std::string const& path);
 
   std::set<std::string> IsPartOfDefaultBuild(
     std::vector<std::string> const& configs,
@@ -178,7 +185,12 @@ protected:
 
   virtual void WriteFolders(std::ostream& fout);
   virtual void WriteFoldersContent(std::ostream& fout);
-  std::map<std::string, std::set<std::string>> VisualStudioFolders;
+
+  virtual void AddSolutionItems(cmLocalGenerator* root) = 0;
+  virtual void WriteFolderSolutionItems(
+    std::ostream& fout, cmVisualStudioFolder const& folder) = 0;
+
+  std::map<std::string, cmVisualStudioFolder> VisualStudioFolders;
 
   // Set during OutputSLNFile with the name of the current project.
   // There is one SLN file per project.

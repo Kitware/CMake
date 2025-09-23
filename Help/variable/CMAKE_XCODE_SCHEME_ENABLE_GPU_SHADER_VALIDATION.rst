@@ -3,7 +3,7 @@ CMAKE_XCODE_SCHEME_ENABLE_GPU_SHADER_VALIDATION
 
 .. versionadded:: 3.25
 
-Property value for ``Metal: Shader Validation`` in the Options section of
+Populate ``Metal: Shader Validation`` in the Options section of
 the generated Xcode scheme.
 
 This variable initializes the

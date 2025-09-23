@@ -110,13 +110,13 @@ void Window::selectedDateChanged()
   currentDateEdit->setDate(calendar->selectedDate());
 }
 
-void Window::minimumDateChanged(const QDate& date)
+void Window::minimumDateChanged(QDate const& date)
 {
   calendar->setMinimumDate(date);
   maximumDateEdit->setDate(calendar->maximumDate());
 }
 
-void Window::maximumDateChanged(const QDate& date)
+void Window::maximumDateChanged(QDate const& date)
 {
   calendar->setMaximumDate(date);
   minimumDateEdit->setDate(calendar->minimumDate());
@@ -173,7 +173,7 @@ void Window::reformatCalendarPage()
 
   // May First in Red takes precedence
   if (mayFirstCheckBox->isChecked()) {
-    const QDate mayFirst(calendar->yearShown(), 5, 1);
+    QDate const mayFirst(calendar->yearShown(), 5, 1);
     QTextCharFormat mayFirstFormat;
     mayFirstFormat.setForeground(Qt::red);
     calendar->setDateTextFormat(mayFirst, mayFirstFormat);

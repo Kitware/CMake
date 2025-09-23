@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
@@ -21,24 +21,16 @@ public:
   cmWorkingDirectory(std::string const& newdir);
   ~cmWorkingDirectory();
 
-  cmWorkingDirectory(const cmWorkingDirectory&) = delete;
-  cmWorkingDirectory& operator=(const cmWorkingDirectory&) = delete;
+  cmWorkingDirectory(cmWorkingDirectory const&) = delete;
+  cmWorkingDirectory& operator=(cmWorkingDirectory const&) = delete;
 
   bool SetDirectory(std::string const& newdir);
   void Pop();
-  bool Failed() const { return this->ResultCode != 0; }
-
-  /** \return 0 if the last attempt to set the working directory was
-   *          successful. If it failed, the value returned will be the
-   *          \c errno value associated with the failure. A description
-   *          of the error code can be obtained by passing the result
-   *          to \c std::strerror().
-   */
-  int GetLastResult() const { return this->ResultCode; }
-
+  bool Failed() const { return !this->Error.empty(); }
+  std::string const& GetError() const { return this->Error; }
   std::string const& GetOldDirectory() const { return this->OldDir; }
 
 private:
   std::string OldDir;
-  int ResultCode;
+  std::string Error;
 };

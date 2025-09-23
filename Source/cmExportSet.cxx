@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmExportSet.h" // IWYU pragma: associated
 
 #include <algorithm>
@@ -21,7 +21,7 @@ cmExportSet::cmExportSet(std::string name)
 cmExportSet::~cmExportSet() = default;
 
 cmExportSet::PackageDependency& cmExportSet::GetPackageDependencyForSetup(
-  const std::string& name)
+  std::string const& name)
 {
   auto& dep = this->PackageDependencies[name];
   if (!dep.SpecifiedIndex) {
@@ -39,10 +39,9 @@ bool cmExportSet::Compute(cmLocalGenerator* lg)
     auto const interfaceFileSets =
       tgtExport->Target->Target->GetAllInterfaceFileSets();
     auto const fileSetInTargetExport =
-      [&tgtExport, lg](const std::string& fileSetName) -> bool {
-      auto* fileSet = tgtExport->Target->Target->GetFileSet(fileSetName);
-
-      if (!tgtExport->FileSetGenerators.count(fileSet)) {
+      [&tgtExport, lg](std::string const& fileSetName) -> bool {
+      if (tgtExport->FileSetGenerators.find(fileSetName) ==
+          tgtExport->FileSetGenerators.end()) {
         lg->IssueMessage(MessageType::FATAL_ERROR,
                          cmStrCat("File set \"", fileSetName,
                                   "\" is listed in interface file sets of ",
@@ -72,8 +71,8 @@ void cmExportSet::AddInstallation(cmInstallExportGenerator const* installation)
   this->Installations.push_back(installation);
 }
 
-void cmExportSet::SetXcFrameworkLocation(const std::string& name,
-                                         const std::string& location)
+void cmExportSet::SetXcFrameworkLocation(std::string const& name,
+                                         std::string const& location)
 {
   for (auto& te : this->TargetExports) {
     if (name == te->TargetName) {
@@ -82,7 +81,7 @@ void cmExportSet::SetXcFrameworkLocation(const std::string& name,
   }
 }
 
-cmExportSet& cmExportSetMap::operator[](const std::string& name)
+cmExportSet& cmExportSetMap::operator[](std::string const& name)
 {
   auto it = this->find(name);
   if (it == this->end()) // Export set not found

@@ -10,7 +10,7 @@ Add a list of subdirectories to the build.
 .. code-block:: cmake
 
   subdirs(dir1 dir2 ...[EXCLUDE_FROM_ALL exclude_dir1 exclude_dir2 ...]
-          [PREORDER] )
+          [PREORDER])
 
 Add a list of subdirectories to the build.  The :command:`add_subdirectory`
 command should be used instead of ``subdirs`` although ``subdirs`` will still

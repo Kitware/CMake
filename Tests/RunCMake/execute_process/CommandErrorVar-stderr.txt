@@ -1,0 +1,4 @@
+CMake Error at [^
+]*CommandErrorVar.cmake:23 \(execute_process\):
+  execute_process Using CMAKE_EXECUTE_PROCESS_COMMAND_ERROR_IS_FATAL with
+  invalid value \"BAD_VALUE\".  This variable can be ANY, LAST or NONE

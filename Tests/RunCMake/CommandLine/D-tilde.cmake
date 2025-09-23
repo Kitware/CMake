@@ -1,0 +1,21 @@
+if(NOT "$ENV{HOME}" STREQUAL "")
+  if(TILDE_PATH MATCHES "~" OR NOT IS_ABSOLUTE "${TILDE_PATH}")
+    message(SEND_ERROR "~ not expanded as expected:\n ${TILDE_PATH}")
+  endif()
+
+  if(TILDE_SLASH_PATH MATCHES "~" OR NOT IS_ABSOLUTE "${TILDE_SLASH_PATH}" OR NOT TILDE_SLASH_PATH MATCHES "/InHome$")
+    message(SEND_ERROR "~/ not expanded as expected:\n ${TILDE_SLASH_PATH}")
+  endif()
+else()
+  set(ENV{HOME} "${CMAKE_CURRENT_LIST_DIR}")
+endif()
+
+set(TILDE "" CACHE PATH "")
+if(TILDE MATCHES "~" OR NOT IS_ABSOLUTE "${TILDE}")
+  message(SEND_ERROR "~ not expanded as expected:\n ${TILDE}")
+endif()
+
+set(TILDE_SLASH "" CACHE PATH "")
+if(TILDE_SLASH MATCHES "~" OR NOT IS_ABSOLUTE "${TILDE_SLASH}" OR NOT TILDE_SLASH MATCHES "/InHome$")
+  message(SEND_ERROR "~/ not expanded as expected:\n ${TILDE_SLASH}")
+endif()

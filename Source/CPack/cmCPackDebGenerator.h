@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
@@ -55,14 +55,14 @@ protected:
    * Special case of component install where all
    * components will be put in a single installer.
    */
-  int PackageComponentsAllInOne(const std::string& compInstDirName);
+  int PackageComponentsAllInOne(std::string const& compInstDirName);
   int PackageFiles() override;
-  const char* GetOutputExtension() override { return ".deb"; }
+  char const* GetOutputExtension() override { return ".deb"; }
   bool SupportsComponentInstallation() const override;
   std::string GetComponentInstallSuffix(
-    const std::string& componentName) override;
+    std::string const& componentName) override;
   std::string GetComponentInstallDirNameSuffix(
-    const std::string& componentName) override;
+    std::string const& componentName) override;
 
 private:
   bool createDebPackages();

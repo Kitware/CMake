@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmCPackWIXGenerator.h"
 
 #include <algorithm>
@@ -113,7 +113,7 @@ bool cmCPackWIXGenerator::RunCandleCommand(std::string const& sourceFile,
     command << " -ext " << QuotePath(ext);
   }
 
-  if (!cmHasSuffix(sourceFile, this->CPackTopLevel)) {
+  if (!cmHasPrefix(sourceFile, this->CPackTopLevel)) {
     command << ' ' << QuotePath(cmStrCat("-I", this->CPackTopLevel));
   }
 
@@ -334,8 +334,13 @@ bool cmCPackWIXGenerator::PackageWithWix()
 
   AddCustomFlags("CPACK_WIX_BUILD_EXTRA_FLAGS", command);
 
+  bool includeCPackTopLevel = false;
   for (std::string const& sourceFilename : this->WixSources) {
     command << " -src " << QuotePath(CMakeToWixPath(sourceFilename));
+    includeCPackTopLevel |= !cmHasPrefix(sourceFilename, this->CPackTopLevel);
+  }
+  if (includeCPackTopLevel) {
+    command << " -i " << QuotePath(this->CPackTopLevel);
   }
 
   return RunWiXCommand(command.str());
@@ -1224,7 +1229,7 @@ std::string cmCPackWIXGenerator::CreateHashedId(
   cmCryptoHash sha1(cmCryptoHash::AlgoSHA1);
   std::string const hash = sha1.HashString(path);
 
-  const size_t maxFileNameLength = 52;
+  size_t const maxFileNameLength = 52;
   std::string identifier =
     cmStrCat(cm::string_view(hash).substr(0, 7), '_',
              cm::string_view(normalizedFilename).substr(0, maxFileNameLength));

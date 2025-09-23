@@ -1,25 +1,46 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-# file Copyright.txt or https://cmake.org/licensing for details.
+# file LICENSE.rst or https://cmake.org/licensing for details.
 
 #[=======================================================================[.rst:
 FindGnuplot
 -----------
 
-this module looks for gnuplot
+Finds the Gnuplot command-line graphing utility for generating two- and
+three-dimensional plots (``gnuplot``).
 
+Result Variables
+^^^^^^^^^^^^^^^^
 
+This module sets the following variables:
 
-Once done this will define
+``Gnuplot_FOUND``
+  Boolean indicating whether Gnuplot has been found.  For backward
+  compatibility, the ``GNUPLOT_FOUND`` variable is also set to the same value.
 
-::
+``GNUPLOT_VERSION_STRING``
+  The version of Gnuplot found.
 
-  GNUPLOT_FOUND - system has Gnuplot
-  GNUPLOT_EXECUTABLE - the Gnuplot executable
-  GNUPLOT_VERSION_STRING - the version of Gnuplot found (since CMake 2.8.8)
+  .. note::
 
+    Version detection is available only for Gnuplot 4 and later.  Earlier
+    versions did not provide version output.
 
+Cache Variables
+^^^^^^^^^^^^^^^
 
-GNUPLOT_VERSION_STRING will not work for old versions like 3.7.1.
+The following cache variables may also be set:
+
+``GNUPLOT_EXECUTABLE``
+  Absolute path to the ``gnuplot`` executable.
+
+Examples
+^^^^^^^^
+
+Finding Gnuplot:
+
+.. code-block:: cmake
+
+  find_package(Gnuplot)
 #]=======================================================================]
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindCygwin.cmake)
@@ -49,8 +70,8 @@ endif()
 # for compatibility
 set(GNUPLOT ${GNUPLOT_EXECUTABLE})
 
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(Gnuplot
+include(FindPackageHandleStandardArgs)
+find_package_handle_standard_args(Gnuplot
                                   REQUIRED_VARS GNUPLOT_EXECUTABLE
                                   VERSION_VAR GNUPLOT_VERSION_STRING)
 

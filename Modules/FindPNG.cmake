@@ -1,51 +1,64 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-# file Copyright.txt or https://cmake.org/licensing for details.
+# file LICENSE.rst or https://cmake.org/licensing for details.
 
 #[=======================================================================[.rst:
 FindPNG
 -------
 
-Find libpng, the official reference library for the PNG image format.
+Finds libpng, the official reference library for the PNG image format.
 
-Imported targets
+.. note::
+
+  The PNG library depends on the ZLib compression library, which must be found
+  for this module to succeed.
+
+Imported Targets
 ^^^^^^^^^^^^^^^^
 
 .. versionadded:: 3.5
 
-This module defines the following :prop_tgt:`IMPORTED` target:
+This module defines the following :ref:`Imported Targets`:
 
 ``PNG::PNG``
   The libpng library, if found.
 
-Result variables
+Result Variables
 ^^^^^^^^^^^^^^^^
 
-This module will set the following variables in your project:
+This module sets the following variables:
 
 ``PNG_INCLUDE_DIRS``
-  where to find png.h, etc.
+  Directory containing the PNG headers (e.g., ``png.h``).
 ``PNG_LIBRARIES``
-  the libraries to link against to use PNG.
+  PNG libraries required for linking.
 ``PNG_DEFINITIONS``
-  You should add_definitions(${PNG_DEFINITIONS}) before compiling code
-  that includes png library files.
+  Compile definitions for using PNG, if any.  They can be added with
+  :command:`target_compile_definitions` command when not using the ``PNG::PNG``
+  imported target.
 ``PNG_FOUND``
-  If false, do not try to use PNG.
+  True if PNG library is found.
 ``PNG_VERSION_STRING``
-  the version of the PNG library found (since CMake 2.8.8)
+  The version of the PNG library found.
 
-Obsolete variables
+Obsolete Variables
 ^^^^^^^^^^^^^^^^^^
 
-The following variables may also be set, for backwards compatibility:
+The following variables may also be set for backward compatibility:
 
 ``PNG_LIBRARY``
-  where to find the PNG library.
+  Path to the PNG library.
 ``PNG_INCLUDE_DIR``
-  where to find the PNG headers (same as PNG_INCLUDE_DIRS)
+  Directory containing the PNG headers (same as ``PNG_INCLUDE_DIRS``).
 
-Since PNG depends on the ZLib compression library, none of the above
-will be defined unless ZLib can be found.
+Examples
+^^^^^^^^
+
+Finding PNG library and using it in a project:
+
+.. code-block:: cmake
+
+  find_package(PNG)
+  target_link_libraries(project_target PRIVATE PNG::PNG)
 #]=======================================================================]
 
 cmake_policy(PUSH)
@@ -176,7 +189,7 @@ if(ZLIB_FOUND)
   endif ()
 endif()
 
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(PNG
                                   REQUIRED_VARS PNG_LIBRARY PNG_PNG_INCLUDE_DIR
                                   VERSION_VAR PNG_VERSION_STRING)

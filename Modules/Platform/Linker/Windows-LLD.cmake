@@ -1,12 +1,9 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-# file Copyright.txt or https://cmake.org/licensing for details.
+# file LICENSE.rst or https://cmake.org/licensing for details.
 
 
 # This module is shared by multiple languages; use include blocker.
 include_guard()
-
-block(SCOPE_FOR POLICIES)
-cmake_policy(SET CMP0054 NEW)
 
 macro(__windows_linker_lld lang)
   set(CMAKE_${lang}_PLATFORM_LINKER_ID LLD)
@@ -21,5 +18,3 @@ macro(__windows_linker_lld lang)
     __windows_linker_msvc(${lang})
   endif()
 endmacro()
-
-endblock()

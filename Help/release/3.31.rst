@@ -96,6 +96,10 @@ Variables
   property were added to optionally specify the strategy
   CMake uses to generate link lines.
 
+* The :envvar:`CMAKE_CONFIG_DIR` environment variable was added to specify a
+  CMake user-wide configuration directory for :manual:`cmake-file-api(7)`
+  queries.
+
 Properties
 ----------
 
@@ -263,8 +267,8 @@ Updates
 
 Changes made since CMake 3.31.0 include the following.
 
-3.31.1, 3.31.2, 3.31.3, 3.31.4, 3.31.5, 3.31.6
-----------------------------------------------
+3.31.1, 3.31.2, 3.31.3, 3.31.4, 3.31.5, 3.31.6, 3.31.7, 3.31.8
+--------------------------------------------------------------
 
 * These versions made no changes to documented features or interfaces.
   Some implementation updates were made to support ecosystem changes

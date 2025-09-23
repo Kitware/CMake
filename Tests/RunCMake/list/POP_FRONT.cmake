@@ -1,5 +1,3 @@
-cmake_policy(SET CMP0054 NEW)
-
 function(assert_expected_list_len list_var expected_size)
     list(LENGTH ${list_var} _size)
     if(NOT _size EQUAL ${expected_size})

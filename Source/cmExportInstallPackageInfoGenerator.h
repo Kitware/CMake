@@ -1,18 +1,18 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <iosfwd>
 #include <string>
-#include <vector>
 
 #include "cmExportInstallFileGenerator.h"
 #include "cmExportPackageInfoGenerator.h"
 
 class cmGeneratorTarget;
 class cmInstallExportGenerator;
+class cmPackageInfoArguments;
 
 /** \class cmExportInstallPackageInfoGenerator
  * \brief Generate files exporting targets from an install tree.
@@ -35,11 +35,8 @@ class cmExportInstallPackageInfoGenerator
 public:
   /** Construct with the export installer that will install the
       files.  */
-  cmExportInstallPackageInfoGenerator(
-    cmInstallExportGenerator* iegen, std::string packageName,
-    std::string version, std::string versionCompat, std::string versionSchema,
-    std::vector<std::string> defaultTargets,
-    std::vector<std::string> defaultConfigurations);
+  cmExportInstallPackageInfoGenerator(cmInstallExportGenerator* iegen,
+                                      cmPackageInfoArguments arguments);
 
   /** Compute the globbing expression used to load per-config import
       files from the main file.  */

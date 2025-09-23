@@ -36,10 +36,10 @@ before each custom command.
 .. |INTRODUCED_IN_CMAKE_VERSION| replace:: 3.20
 .. |WARNS_OR_DOES_NOT_WARN| replace::
    does *not* warn by default (unless ``DEPFILE`` is used in a subdirectory)
-.. include:: STANDARD_ADVICE.txt
+.. include:: include/STANDARD_ADVICE.rst
 
 See documentation of the
 :variable:`CMAKE_POLICY_WARNING_CMP0116 <CMAKE_POLICY_WARNING_CMP<NNNN>>`
 variable to control the warning.
 
-.. include:: DEPRECATED.txt
+.. include:: include/DEPRECATED.rst

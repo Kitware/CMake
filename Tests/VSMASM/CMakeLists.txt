@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.25) # Enable CMP0141
+cmake_policy(SET CMP0184 NEW)
 project(VSMASM C ASM_MASM)
 if(CMAKE_SIZEOF_VOID_P EQUAL 8)
   add_definitions(-DTESTx64)

@@ -1,0 +1,3 @@
+-- The ASM compiler identification is MSVC
+-- Found assembler: [^
+]*/cl\.exe

@@ -1,6 +1,6 @@
 # Regex to match license notices at the top of module files.
 set(notice_regex [[^# Distributed under the OSI-approved BSD 3-Clause License\.  See accompanying
-# file Copyright\.txt or https://cmake\.org/licensing for details\.
+# file LICENSE\.rst or https://cmake\.org/licensing for details\.
 
 ]])
 string(REPLACE "\n" "\r?\n" notice_regex "${notice_regex}")

@@ -1,41 +1,107 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-# file Copyright.txt or https://cmake.org/licensing for details.
+# file LICENSE.rst or https://cmake.org/licensing for details.
 
 #[=======================================================================[.rst:
 CheckVariableExists
 -------------------
 
-Check if the variable exists.
+This module provides a command to check whether a C variable exists.
 
-.. command:: CHECK_VARIABLE_EXISTS
+Load this module in a CMake project with:
+
+.. code-block:: cmake
+
+  include(CheckVariableExists)
+
+Commands
+^^^^^^^^
+
+This module provides the following command:
+
+.. command:: check_variable_exists
+
+  Checks once if a C variable exists:
 
   .. code-block:: cmake
 
-    CHECK_VARIABLE_EXISTS(VAR VARIABLE)
+    check_variable_exists(<var> <variable>)
 
+  This command attempts to compile and link a test C program that references
+  the specified C variable ``<var>``.  A boolean result of whether
+  the check was successful is stored in an internal cache variable
+  ``<variable>``.
 
-  ::
+  .. note::
 
-    VAR      - the name of the variable
-    VARIABLE - variable to store the result
-               Will be created as an internal cache variable.
+    Prefer using :module:`CheckSymbolExists` or :module:`CheckSourceCompiles`
+    instead of this command for more robust detection.  This command performs
+    a link-only check and doesn't detect whether a variable is also declared
+    in system or library headers.  Neither can it detect variables that might
+    be defined as preprocessor macros.
 
+  .. rubric:: Variables Affecting the Check
 
-  This macro is only for ``C`` variables.
+  The following variables may be set before calling this command to modify
+  the way the check is run:
 
-The following variables may be set before calling this macro to modify
-the way the check is run:
+  .. include:: /module/include/CMAKE_REQUIRED_FLAGS.rst
 
-.. include:: /module/CMAKE_REQUIRED_FLAGS.txt
+  .. include:: /module/include/CMAKE_REQUIRED_DEFINITIONS.rst
 
-.. include:: /module/CMAKE_REQUIRED_DEFINITIONS.txt
+  .. include:: /module/include/CMAKE_REQUIRED_LINK_OPTIONS.rst
 
-.. include:: /module/CMAKE_REQUIRED_LINK_OPTIONS.txt
+  .. include:: /module/include/CMAKE_REQUIRED_LIBRARIES.rst
 
-.. include:: /module/CMAKE_REQUIRED_LIBRARIES.txt
+  .. include:: /module/include/CMAKE_REQUIRED_LINK_DIRECTORIES.rst
 
-.. include:: /module/CMAKE_REQUIRED_QUIET.txt
+  .. include:: /module/include/CMAKE_REQUIRED_QUIET.rst
 
+Examples
+^^^^^^^^
+
+Example: Basic Usage
+""""""""""""""""""""
+
+In the following example, a check is performed whether the linker sees the
+C variable ``tzname`` and stores the check result in the
+``PROJECT_HAVE_TZNAME`` internal cache variable:
+
+.. code-block:: cmake
+
+  include(CheckVariableExists)
+
+  check_variable_exists(tzname PROJECT_HAVE_TZNAME)
+
+Example: Isolated Check With Linked Libraries
+"""""""""""""""""""""""""""""""""""""""""""""
+
+In the following example, this module is used in combination with the
+:module:`CMakePushCheckState` module to link additional required library
+using the ``CMAKE_REQUIRED_LIBRARIES`` variable.  For example, in a find
+module, to check whether the Net-SNMP library has the
+``usmHMAC192SHA256AuthProtocol`` array:
+
+.. code-block:: cmake
+
+  include(CheckVariableExists)
+  include(CMakePushCheckState)
+
+  find_library(SNMP_LIBRARY NAMES netsnmp)
+
+  if(SNMP_LIBRARY)
+    cmake_push_check_state(RESET)
+
+    set(CMAKE_REQUIRED_LIBRARIES ${SNMP_LIBRARY})
+
+    check_variable_exists(usmHMAC192SHA256AuthProtocol SNMP_HAVE_SHA256)
+
+    cmake_pop_check_state()
+  endif()
+
+See Also
+^^^^^^^^
+
+* The :module:`CheckSymbolExists` module to check whether a C symbol exists.
 #]=======================================================================]
 
 include_guard(GLOBAL)

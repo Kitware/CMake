@@ -26,7 +26,7 @@ already exists and :policy:`CMP0077` is set to ``NEW``.
 
 .. |INTRODUCED_IN_CMAKE_VERSION| replace:: 3.21
 .. |WARNS_OR_DOES_NOT_WARN| replace:: does *not* warn by default
-.. include:: STANDARD_ADVICE.txt
+.. include:: include/STANDARD_ADVICE.rst
 
 See documentation of the
 :variable:`CMAKE_POLICY_WARNING_CMP0126 <CMAKE_POLICY_WARNING_CMP<NNNN>>`
@@ -36,4 +36,4 @@ The :variable:`CMAKE_POLICY_DEFAULT_CMP0126 <CMAKE_POLICY_DEFAULT_CMP\<NNNN\>>`
 variable may be used to set the policy for a third-party project in a
 subdirectory without modifying it.
 
-.. include:: DEPRECATED.txt
+.. include:: include/DEPRECATED.rst

@@ -91,13 +91,7 @@
     "link": {
         "language": "CXX",
         "lto": null,
-        "commandFragments": [
-            {
-                "fragment" : ".*",
-                "role" : "flags",
-                "backtrace": null
-            }
-        ]
+        "commandFragments": null
     },
     "archive": null,
     "dependencies": [

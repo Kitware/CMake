@@ -1,5 +1,4 @@
 cmake_minimum_required(VERSION 3.10)
-cmake_policy(SET CMP0058 OLD)
 project(CustomCommandByproducts C)
 
 # Generate a byproduct in a rule that runs in the target consuming it.
@@ -203,10 +202,3 @@ target_link_libraries(
   ExternalLibraryByproducts_WithInstallDirSubstitution
   ExternalLibraryWithInstallDirSubstitution
 )
-
-if(CMAKE_GENERATOR STREQUAL "Ninja")
-  add_custom_target(CheckNinja ALL
-    COMMENT "Checking build.ninja"
-    COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_SOURCE_DIR}/ninja-check.cmake
-    )
-endif()

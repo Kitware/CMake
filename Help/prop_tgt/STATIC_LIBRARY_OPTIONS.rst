@@ -21,4 +21,6 @@ for more on defining buildsystem properties.
   This property must be used in preference to :prop_tgt:`STATIC_LIBRARY_FLAGS`
   property.
 
-.. include:: ../command/OPTIONS_SHELL.txt
+.. include:: ../command/include/OPTIONS_SHELL.rst
+
+.. include:: ../prop_tgt/include/STATIC_LIBRARY_OPTIONS_ARCHIVER.rst

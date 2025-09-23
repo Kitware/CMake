@@ -1,0 +1,6 @@
+Name: Import Simple
+Description: A simple import with no dependencies
+Version: 1.0.0
+
+Cflags: -I/TestDirectories/Include TestCflag
+Libs: -L/TestDirectories/Library -ldummy TestLinkOption

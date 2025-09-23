@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmCMakeToWixPath.h"
 
 #include <string>
@@ -9,7 +9,7 @@
 
 #ifdef __CYGWIN__
 #  include <sys/cygwin.h>
-std::string CMakeToWixPath(const std::string& cygpath)
+std::string CMakeToWixPath(std::string const& cygpath)
 {
   std::vector<char> winpath_chars;
   ssize_t winpath_size;
@@ -32,7 +32,7 @@ std::string CMakeToWixPath(const std::string& cygpath)
   return cmTrimWhitespace(winpath_chars.data());
 }
 #else
-std::string CMakeToWixPath(const std::string& path)
+std::string CMakeToWixPath(std::string const& path)
 {
   return path;
 }

@@ -1,6 +1,5 @@
 # Support for framework-specific dependencies were introduced in 3.30
-# TODO: update this version req to 3.30
-cmake_minimum_required(VERSION 3.29.20240531)
+cmake_minimum_required(VERSION 3.30)
 project(CPackNugetGenerator)
 
 install(FILES notactuallyalib.dll DESTINATION lib/net4)

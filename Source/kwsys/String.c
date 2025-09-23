@@ -61,14 +61,14 @@ static char kwsysString_strcasecmp_tolower[] = {
 #  endif
 
 /*--------------------------------------------------------------------------*/
-int kwsysString_strcasecmp(const char* lhs, const char* rhs)
+int kwsysString_strcasecmp(char const* lhs, char const* rhs)
 {
 #  if defined(KWSYS_STRING_USE_STRICMP)
   return _stricmp(lhs, rhs);
 #  elif defined(KWSYS_STRING_USE_STRCASECMP)
   return strcasecmp(lhs, rhs);
 #  else
-  const char* const lower = kwsysString_strcasecmp_tolower;
+  char const* const lower = kwsysString_strcasecmp_tolower;
   unsigned char const* us1 = (unsigned char const*)lhs;
   unsigned char const* us2 = (unsigned char const*)rhs;
   int result;
@@ -79,14 +79,14 @@ int kwsysString_strcasecmp(const char* lhs, const char* rhs)
 }
 
 /*--------------------------------------------------------------------------*/
-int kwsysString_strncasecmp(const char* lhs, const char* rhs, size_t n)
+int kwsysString_strncasecmp(char const* lhs, char const* rhs, size_t n)
 {
 #  if defined(KWSYS_STRING_USE_STRICMP)
   return _strnicmp(lhs, rhs, n);
 #  elif defined(KWSYS_STRING_USE_STRCASECMP)
   return strncasecmp(lhs, rhs, n);
 #  else
-  const char* const lower = kwsysString_strcasecmp_tolower;
+  char const* const lower = kwsysString_strcasecmp_tolower;
   unsigned char const* us1 = (unsigned char const*)lhs;
   unsigned char const* us2 = (unsigned char const*)rhs;
   int result = 0;

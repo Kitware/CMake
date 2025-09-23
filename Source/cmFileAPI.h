@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
@@ -27,8 +27,17 @@ public:
   /** Get the list of configureLog object kind versions requested.  */
   std::vector<unsigned long> GetConfigureLogVersions();
 
+  /** Identify the situation in which WriteReplies is called.  */
+  enum class IndexFor
+  {
+    Success,
+    FailedConfigure,
+    FailedCompute,
+    FailedGenerate,
+  };
+
   /** Write fileapi replies to disk.  */
-  void WriteReplies();
+  void WriteReplies(IndexFor indexFor);
 
   /** Get the "cmake" instance with which this was constructed.  */
   cmake* GetCMakeInstance() const { return this->CMakeInstance; }
@@ -157,6 +166,9 @@ private:
       This populates the "objects" field of the reply index.  */
   std::map<Object, Json::Value> ReplyIndexObjects;
 
+  /** Identify the situation in which WriteReplies was called.  */
+  IndexFor ReplyIndexFor = IndexFor::Success;
+
   std::unique_ptr<Json::CharReader> JsonReader;
   std::unique_ptr<Json::StreamWriter> JsonWriter;
 
@@ -177,10 +189,11 @@ private:
   Json::Value BuildReplyIndex();
   Json::Value BuildCMake();
   Json::Value BuildReply(Query const& q);
+  Json::Value BuildReplyEntry(Object const& object);
   static Json::Value BuildReplyError(std::string const& error);
   Json::Value const& AddReplyIndexObject(Object const& o);
 
-  static const char* ObjectKindName(ObjectKind kind);
+  static char const* ObjectKindName(ObjectKind kind);
   static std::string ObjectName(Object const& o);
 
   static Json::Value BuildVersion(unsigned int major, unsigned int minor);

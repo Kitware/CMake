@@ -1,0 +1,23 @@
+cmake_minimum_required(VERSION 3.10)
+
+ctest_run_script(
+  "@RunCMake_SOURCE_DIR@/exit1.cmake"
+  "@RunCMake_SOURCE_DIR@/exit4.cmake"
+  RETURN_VALUE ret
+  )
+
+if(NOT ret EQUAL 4)
+  message(FATAL_ERROR "Expected ret == 4, got ${ret}")
+endif()
+
+unset(ret)
+
+ctest_run_script(NEW_PROCESS
+  "@RunCMake_SOURCE_DIR@/exit1.cmake"
+  "@RunCMake_SOURCE_DIR@/exit4.cmake"
+  RETURN_VALUE ret
+  )
+
+if(NOT ret EQUAL 4)
+  message(FATAL_ERROR "Expected ret == 4, got ${ret}")
+endif()

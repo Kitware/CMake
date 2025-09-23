@@ -1,6 +1,8 @@
 include(CMakeParseArguments)
 
-find_package(Qt5Test REQUIRED)
+get_property(CMake_QT_MAJOR_VERSION TARGET cmake-gui PROPERTY CMake_QT_MAJOR_VERSION)
+
+find_package(Qt${CMake_QT_MAJOR_VERSION}Test REQUIRED)
 
 if(MSVC)
   # QTBUG-118993: Qt uses deprecated stdext::checked_array_iterator
@@ -14,21 +16,40 @@ include_directories(
   )
 
 set(MOC_SRCS)
-qt5_wrap_cpp(MOC_SRCS
-  CatchShow.h
-  )
+if(CMake_QT_MAJOR_VERSION VERSION_LESS 6)
+  qt5_wrap_cpp(MOC_SRCS
+    CatchShow.h
+    )
+else()
+  qt_wrap_cpp(MOC_SRCS
+    CatchShow.h
+    )
+endif()
 add_library(CMakeGUITestLib STATIC ${MOC_SRCS}
   CatchShow.cxx
   CatchShow.h
   )
-target_link_libraries(CMakeGUITestLib Qt5::Core Qt5::Gui Qt5::Widgets)
+target_link_libraries(CMakeGUITestLib
+  Qt${CMake_QT_MAJOR_VERSION}::Core
+  Qt${CMake_QT_MAJOR_VERSION}::Gui
+  Qt${CMake_QT_MAJOR_VERSION}::Widgets)
 
 set(MOC_SRCS)
-qt5_wrap_cpp(MOC_SRCS
-  CMakeGUITest.h
-  )
+if(CMake_QT_MAJOR_VERSION VERSION_LESS 6)
+  qt5_wrap_cpp(MOC_SRCS
+    CMakeGUITest.h
+    )
+else()
+  qt_wrap_cpp(MOC_SRCS
+    CMakeGUITest.h
+    )
+endif()
 add_executable(CMakeGUITest CMakeGUITest.cxx ${MOC_SRCS})
-target_link_libraries(CMakeGUITest CMakeGUIMainLib CMakeGUITestLib Qt5::Core Qt5::Test Qt5::Widgets)
+target_link_libraries(CMakeGUITest CMakeGUIMainLib CMakeGUITestLib
+  Qt${CMake_QT_MAJOR_VERSION}::Core
+  Qt${CMake_QT_MAJOR_VERSION}::Test
+  Qt${CMake_QT_MAJOR_VERSION}::Widgets
+)
 target_compile_definitions(CMakeGUITest PRIVATE
   "CMakeGUITest_SOURCE_DIR=\"${CMAKE_CURRENT_SOURCE_DIR}\""
   "CMakeGUITest_BINARY_DIR=\"${CMAKE_CURRENT_BINARY_DIR}\""
@@ -47,11 +68,20 @@ function(add_cmake_gui_lib_test name)
   cmake_parse_arguments(_t "" "" "SOURCES;MOC_SOURCES" ${ARGN})
 
   set(MOC_SRCS)
-  qt5_wrap_cpp(MOC_SRCS
-    ${_t_MOC_SOURCES}
-    )
+  if(CMake_QT_MAJOR_VERSION VERSION_LESS 6)
+    qt5_wrap_cpp(MOC_SRCS
+      ${_t_MOC_SOURCES}
+      )
+  else()
+    qt_wrap_cpp(MOC_SRCS
+      ${_t_MOC_SOURCES}
+      )
+  endif()
   add_executable(${name} ${_t_SOURCES} ${MOC_SRCS})
-  target_link_libraries(${name} CMakeGUILib CMakeGUITestLib Qt5::Core Qt5::Test Qt5::Widgets)
+  target_link_libraries(${name} CMakeGUILib CMakeGUITestLib
+    Qt${CMake_QT_MAJOR_VERSION}::Core
+    Qt${CMake_QT_MAJOR_VERSION}::Test
+    Qt${CMake_QT_MAJOR_VERSION}::Widgets)
 
   add_test(NAME "CMakeGUILib.${name}" COMMAND ${name})
 endfunction()

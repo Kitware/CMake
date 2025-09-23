@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmExportInstallFileGenerator.h"
 
 #include <algorithm>
@@ -19,12 +19,12 @@
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
-#include "cmPolicies.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmTargetExport.h"
 #include "cmValue.h"
+#include "cmake.h"
 
 cmExportInstallFileGenerator::cmExportInstallFileGenerator(
   cmInstallExportGenerator* iegen)
@@ -247,10 +247,9 @@ void cmExportInstallFileGenerator::HandleMissingTarget(
   cmGeneratorTarget* dependee)
 {
   auto const& exportInfo = this->FindExportInfo(dependee);
-  auto const& exportFiles = exportInfo.first;
 
-  if (exportFiles.size() == 1) {
-    std::string missingTarget = exportInfo.second;
+  if (exportInfo.Namespaces.size() == 1 && exportInfo.Sets.size() == 1) {
+    std::string missingTarget = *exportInfo.Namespaces.begin();
 
     missingTarget += dependee->GetExportName();
     link_libs += missingTarget;
@@ -258,7 +257,7 @@ void cmExportInstallFileGenerator::HandleMissingTarget(
   } else {
     // All exported targets should be known here and should be unique.
     // This is probably user-error.
-    this->ComplainAboutMissingTarget(depender, dependee, exportFiles);
+    this->ComplainAboutMissingTarget(depender, dependee, exportInfo);
   }
 }
 
@@ -266,13 +265,14 @@ cmExportFileGenerator::ExportInfo cmExportInstallFileGenerator::FindExportInfo(
   cmGeneratorTarget const* target) const
 {
   std::vector<std::string> exportFiles;
-  std::string ns;
+  std::set<std::string> exportSets;
+  std::set<std::string> namespaces;
 
   auto const& name = target->GetName();
-  auto& exportSets =
+  auto& allExportSets =
     target->GetLocalGenerator()->GetGlobalGenerator()->GetExportSets();
 
-  for (auto const& exp : exportSets) {
+  for (auto const& exp : allExportSets) {
     auto const& exportSet = exp.second;
     auto const& targets = exportSet.GetTargetExports();
 
@@ -282,33 +282,43 @@ cmExportFileGenerator::ExportInfo cmExportInstallFileGenerator::FindExportInfo(
                     })) {
       std::vector<cmInstallExportGenerator const*> const* installs =
         exportSet.GetInstallations();
-      for (cmInstallExportGenerator const* install : *installs) {
-        exportFiles.push_back(install->GetDestinationFile());
-        ns = install->GetNamespace();
+      if (!installs->empty()) {
+        exportSets.insert(exp.first);
+        for (cmInstallExportGenerator const* install : *installs) {
+          exportFiles.push_back(install->GetDestinationFile());
+          namespaces.insert(install->GetNamespace());
+        }
       }
     }
   }
-
-  return { exportFiles, exportFiles.size() == 1 ? ns : std::string{} };
+  return { exportFiles, exportSets, namespaces };
 }
 
 void cmExportInstallFileGenerator::ComplainAboutMissingTarget(
   cmGeneratorTarget const* depender, cmGeneratorTarget const* dependee,
-  std::vector<std::string> const& exportFiles) const
+  ExportInfo const& exportInfo) const
 {
   std::ostringstream e;
   e << "install(" << this->IEGen->InstallSubcommand() << " \""
     << this->GetExportName() << "\" ...) "
     << "includes target \"" << depender->GetName()
     << "\" which requires target \"" << dependee->GetName() << "\" ";
-  if (exportFiles.empty()) {
+  if (exportInfo.Sets.empty()) {
     e << "that is not in any export set.";
   } else {
-    e << "that is not in this export set, but in multiple other export sets: "
-      << cmJoin(exportFiles, ", ") << ".\n";
-    e << "An exported target cannot depend upon another target which is "
-         "exported multiple times. Consider consolidating the exports of the "
-         "\""
+    if (exportInfo.Sets.size() == 1) {
+      e << "that is not in this export set, but in another export set which "
+           "is "
+           "exported multiple times with different namespaces: ";
+    } else {
+      e << "that is not in this export set, but in multiple other export "
+           "sets: ";
+    }
+    e << cmJoin(exportInfo.Files, ", ") << ".\n"
+      << "An exported target cannot depend upon another target which is "
+         "exported in more than one export set or with more than one "
+         "namespace. "
+         "Consider consolidating the exports of the \""
       << dependee->GetName() << "\" target to a single export.";
   }
   this->ReportError(e.str());
@@ -328,7 +338,9 @@ void cmExportInstallFileGenerator::ComplainAboutDuplicateTarget(
 void cmExportInstallFileGenerator::ReportError(
   std::string const& errorMessage) const
 {
-  cmSystemTools::Error(errorMessage);
+  this->IEGen->GetLocalGenerator()->GetCMakeInstance()->IssueMessage(
+    MessageType::FATAL_ERROR, errorMessage,
+    this->IEGen->GetLocalGenerator()->GetMakefile()->GetBacktrace());
 }
 
 std::string cmExportInstallFileGenerator::InstallNameDir(
@@ -428,26 +440,9 @@ bool cmExportInstallFileGenerator::CheckInterfaceDirs(
     if (cmHasPrefix(li, this->GetImportPrefixWithSlash())) {
       continue;
     }
-    MessageType messageType = MessageType::FATAL_ERROR;
     std::ostringstream e;
     if (genexPos != std::string::npos) {
-      if (prop == "INTERFACE_INCLUDE_DIRECTORIES") {
-        switch (target->GetPolicyStatusCMP0041()) {
-          case cmPolicies::WARN:
-            messageType = MessageType::WARNING;
-            e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0041) << "\n";
-            break;
-          case cmPolicies::OLD:
-            continue;
-          case cmPolicies::REQUIRED_IF_USED:
-          case cmPolicies::REQUIRED_ALWAYS:
-          case cmPolicies::NEW:
-            hadFatalError = true;
-            break; // Issue fatal message.
-        }
-      } else {
-        hadFatalError = true;
-      }
+      hadFatalError = true;
     }
     if (!cmSystemTools::FileIsFullPath(li)) {
       /* clang-format off */
@@ -455,51 +450,18 @@ bool cmExportInstallFileGenerator::CheckInterfaceDirs(
            " property contains relative path:\n"
            "  \"" << li << "\"";
       /* clang-format on */
-      target->GetLocalGenerator()->IssueMessage(messageType, e.str());
+      target->GetLocalGenerator()->IssueMessage(MessageType::FATAL_ERROR,
+                                                e.str());
     }
     bool inBinary = isSubDirectory(li, topBinaryDir);
     bool inSource = isSubDirectory(li, topSourceDir);
     if (isSubDirectory(li, installDir)) {
       // The include directory is inside the install tree.  If the
-      // install tree is not inside the source tree or build tree then
+      // install tree is inside the source tree or build tree then do not
       // fall through to the checks below that the include directory is not
       // also inside the source tree or build tree.
-      bool shouldContinue =
-        (!inBinary || isSubDirectory(installDir, topBinaryDir)) &&
-        (!inSource || isSubDirectory(installDir, topSourceDir));
-
-      if (prop == "INTERFACE_INCLUDE_DIRECTORIES") {
-        if (!shouldContinue) {
-          switch (target->GetPolicyStatusCMP0052()) {
-            case cmPolicies::WARN: {
-              std::ostringstream s;
-              s << cmPolicies::GetPolicyWarning(cmPolicies::CMP0052) << "\n";
-              s << "Directory:\n    \"" << li
-                << "\"\nin "
-                   "INTERFACE_INCLUDE_DIRECTORIES of target \""
-                << target->GetName()
-                << "\" is a subdirectory of the install "
-                   "directory:\n    \""
-                << installDir
-                << "\"\nhowever it is also "
-                   "a subdirectory of the "
-                << (inBinary ? "build" : "source") << " tree:\n    \""
-                << (inBinary ? topBinaryDir : topSourceDir) << "\"\n";
-              target->GetLocalGenerator()->IssueMessage(
-                MessageType::AUTHOR_WARNING, s.str());
-              CM_FALLTHROUGH;
-            }
-            case cmPolicies::OLD:
-              shouldContinue = true;
-              break;
-            case cmPolicies::REQUIRED_ALWAYS:
-            case cmPolicies::REQUIRED_IF_USED:
-            case cmPolicies::NEW:
-              break;
-          }
-        }
-      }
-      if (shouldContinue) {
+      if ((!inBinary || isSubDirectory(installDir, topBinaryDir)) &&
+          (!inSource || isSubDirectory(installDir, topSourceDir))) {
         continue;
       }
     }
@@ -509,7 +471,8 @@ bool cmExportInstallFileGenerator::CheckInterfaceDirs(
            " property contains path:\n"
            "  \"" << li << "\"\nwhich is prefixed in the build directory.";
       /* clang-format on */
-      target->GetLocalGenerator()->IssueMessage(messageType, e.str());
+      target->GetLocalGenerator()->IssueMessage(MessageType::FATAL_ERROR,
+                                                e.str());
     }
     if (!inSourceBuild) {
       if (inSource) {
@@ -517,7 +480,8 @@ bool cmExportInstallFileGenerator::CheckInterfaceDirs(
           << " property contains path:\n"
              "  \""
           << li << "\"\nwhich is prefixed in the source directory.";
-        target->GetLocalGenerator()->IssueMessage(messageType, e.str());
+        target->GetLocalGenerator()->IssueMessage(MessageType::FATAL_ERROR,
+                                                  e.str());
       }
     }
   }

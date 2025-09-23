@@ -3,7 +3,7 @@ CUDACXX
 
 .. versionadded:: 3.8
 
-.. include:: ENV_VAR.txt
+.. include:: include/ENV_VAR.rst
 
 Preferred executable for compiling ``CUDA`` language files. Will only be used by
 CMake on the first configuration to determine ``CUDA`` compiler, after which the

@@ -1,0 +1,57 @@
+^
+---
+events:(
+  -
+    kind: "find-v1"(
+    [^
+]*)+|
++  -
+    kind: "message-v1"
+    backtrace:(
+      - "[^"]+")+
+    message: \|(
++      [^
+]*)*)*
+  -
+    kind: "message-v1"
+    backtrace:
+      - "ConfigureLogTransitionsSuppressed.cmake:[0-9]+ \(message\)"
+      - "CMakeLists.txt:[0-9]+ \(include\)"
+    message: |
+      NotDefined -> NotFound
+  -
+    kind: "message-v1"
+    backtrace:
+      - "ConfigureLogTransitionsSuppressed.cmake:[0-9]+ \(find_path\)"
+      - "CMakeLists.txt:[0-9]+ \(include\)"
+    message: |
+      NotFound -> NotFound
+  -
+    kind: "message-v1"
+    backtrace:
+      - "ConfigureLogTransitionsSuppressed.cmake:[0-9]+ \(find_path\)"
+      - "CMakeLists.txt:[0-9]+ \(include\)"
+    message: |
+      NotDefined -> Found
+  -
+    kind: "message-v1"
+    backtrace:
+      - "ConfigureLogTransitionsSuppressed.cmake:[0-9]+ \(find_path\)"
+      - "CMakeLists.txt:[0-9]+ \(include\)"
+    message: |
+      Found -> Found
+  -
+    kind: "message-v1"
+    backtrace:
+      - "ConfigureLogTransitionsSuppressed.cmake:[0-9]+ \(find_path\)"
+      - "CMakeLists.txt:[0-9]+ \(include\)"
+    message: |
+      Found -> NotFound
+  -
+    kind: "message-v1"
+    backtrace:
+      - "ConfigureLogTransitionsSuppressed.cmake:[0-9]+ \(find_path\)"
+      - "CMakeLists.txt:[0-9]+ \(include\)"
+    message: |
+      NotFound -> Found
+...

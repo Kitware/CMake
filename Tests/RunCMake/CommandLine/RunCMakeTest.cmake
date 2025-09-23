@@ -18,6 +18,7 @@ run_cmake_command(lists-no-file ${CMAKE_COMMAND} nosuchsubdir/CMakeLists.txt)
 run_cmake_command(D-no-arg ${CMAKE_COMMAND} -B DummyBuildDir -D)
 run_cmake_command(D-no-src ${CMAKE_COMMAND} -B DummyBuildDir -D VAR=VALUE)
 run_cmake_command(Dno-src ${CMAKE_COMMAND} -B DummyBuildDir -DVAR=VALUE)
+run_cmake_script(D-tilde -DTILDE=~ -DTILDE_PATH:PATH=~ -DTILDE_SLASH=~/InHome -DTILDE_SLASH_PATH:PATH=~/InHome)
 run_cmake_command(U-no-arg ${CMAKE_COMMAND} -B DummyBuildDir -U)
 run_cmake_command(U-no-src ${CMAKE_COMMAND} -B DummyBuildDir -U VAR)
 run_cmake_command(Uno-src ${CMAKE_COMMAND} -B DummyBuildDir -UVAR)
@@ -263,6 +264,10 @@ function(run_Toolchain)
   run_cmake_with_options(toolchain-no-arg -S ${source_dir} --toolchain=)
   run_cmake_with_options(toolchain-valid-abs-path -S ${source_dir} --toolchain "${source_dir}/toolchain.cmake")
   run_cmake_with_options(toolchain-valid-rel-src-path -S ${source_dir} --toolchain=toolchain.cmake)
+  run_cmake_with_options(toolchain-D-abs-path -S ${source_dir} -DCMAKE_TOOLCHAIN_FILE=${source_dir}/toolchain.cmake)
+  if(CMAKE_HOST_UNIX AND NOT CMAKE_SYSTEM_NAME STREQUAL "CYGWIN" AND NOT CMAKE_SYSTEM_NAME STREQUAL "MSYS")
+    run_cmake_with_options(toolchain-D-slash-abs-path -S ${source_dir} -DCMAKE_TOOLCHAIN_FILE=/${source_dir}/toolchain.cmake)
+  endif()
 
   set(RunCMake_TEST_NO_CLEAN 1)
   set(binary_dir ${RunCMake_BINARY_DIR}/Toolchain-build)
@@ -273,7 +278,6 @@ function(run_Toolchain)
   # precedence over source dir
   file(WRITE ${binary_dir}/toolchain.cmake [=[
 set(CMAKE_SYSTEM_NAME Linux)
-set(toolchain_file binary_dir)
 ]=])
   run_cmake_with_options(toolchain-valid-rel-build-path -S ${source_dir} -B ${binary_dir} --toolchain toolchain.cmake)
 endfunction()
@@ -434,7 +438,7 @@ function(run_EnvironmentExportCompileCommands)
   run_cmake(env-export-compile-commands-override)
 
   unset(ENV{CMAKE_EXPORT_COMPILE_COMMANDS})
-endfunction(run_EnvironmentExportCompileCommands)
+endfunction()
 
 if(RunCMake_GENERATOR MATCHES "Unix Makefiles" OR RunCMake_GENERATOR MATCHES "Ninja")
   run_EnvironmentExportCompileCommands()
@@ -895,10 +899,31 @@ run_cmake_command(E_sleep-bad-arg2 ${CMAKE_COMMAND} -E sleep 1 -1)
 run_cmake_command(E_sleep-one-tenth ${CMAKE_COMMAND} -E sleep 0.1)
 
 run_cmake_command(P_directory ${CMAKE_COMMAND} -P ${RunCMake_SOURCE_DIR})
-run_cmake_command(P_working-dir ${CMAKE_COMMAND} -DEXPECTED_WORKING_DIR=${RunCMake_BINARY_DIR}/P_working-dir-build -P ${RunCMake_SOURCE_DIR}/P_working-dir.cmake)
-# Documented to return the same result as above even if -S and -B are set to something else.
-# Tests the values of CMAKE_BINARY_DIR CMAKE_CURRENT_BINARY_DIR CMAKE_SOURCE_DIR CMAKE_CURRENT_SOURCE_DIR.
-run_cmake_command(P_working-dir ${CMAKE_COMMAND} -DEXPECTED_WORKING_DIR=${RunCMake_BINARY_DIR}/P_working-dir-build -P ${RunCMake_SOURCE_DIR}/P_working-dir.cmake -S something_else -B something_else_1)
+
+block()
+  set(expect ${RunCMake_BINARY_DIR}/P_working-dir-build)
+  run_cmake_script(P_working-dir -DEXPECTED_WORKING_DIR=${expect})
+
+  # -S and -B have no effect on script mode variables.
+  set(RunCMake_TEST_VARIANT_DESCRIPTION "-S-B")
+  run_cmake_script(P_working-dir -DEXPECTED_WORKING_DIR=${expect} -S something_else -B something_else_1)
+
+  # Relative PWD is ignored.
+  set(RunCMake_TEST_VARIANT_DESCRIPTION "-PWD-.")
+  set(RunCMake_TEST_COMMAND_PWD .)
+  run_cmake_script(P_working-dir -DEXPECTED_WORKING_DIR=${expect})
+
+  # Lower-case PWD is ignored on case-sensitive filesystems
+  # and case-normalized on case-insensitive filesystems.
+  set(RunCMake_TEST_VARIANT_DESCRIPTION "-PWD-case")
+  string(TOLOWER "${expect}" RunCMake_TEST_COMMAND_PWD)
+  run_cmake_script(P_working-dir -DEXPECTED_WORKING_DIR=${expect})
+
+  # Backslashed PWD is normalized on Windows and ignored elsewhere.
+  set(RunCMake_TEST_VARIANT_DESCRIPTION "-PWD-backslash")
+  string(REPLACE "/" "\\" RunCMake_TEST_COMMAND_PWD "${expect}")
+  run_cmake_script(P_working-dir -DEXPECTED_WORKING_DIR=${expect})
+endblock()
 
 # Place an initial cache where C_basic will find it when passed the relative path "..".
 file(COPY ${RunCMake_SOURCE_DIR}/C_basic_initial-cache.txt DESTINATION ${RunCMake_BINARY_DIR})

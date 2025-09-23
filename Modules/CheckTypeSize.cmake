@@ -1,88 +1,170 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-# file Copyright.txt or https://cmake.org/licensing for details.
+# file LICENSE.rst or https://cmake.org/licensing for details.
 
 #[=======================================================================[.rst:
 CheckTypeSize
 -------------
 
-Check sizeof a type
+This module provides a command to check the size of a C/C++ type or expression.
 
-.. command:: check_type_size
-
-  .. code-block:: cmake
-
-    check_type_size(<type> <variable> [BUILTIN_TYPES_ONLY]
-                                      [LANGUAGE <language>])
-
-  Check if the type exists and determine its size.  Results are reported
-  in the following variables:
-
-  ``HAVE_<variable>``
-    Holds a true or false value indicating whether the type exists.
-
-  ``<variable>``
-    Holds one of the following values:
-
-    ``<size>``
-       Type has non-zero size ``<size>``.
-
-    ``0``
-       Type has architecture-dependent size.  This may occur when
-       :variable:`CMAKE_OSX_ARCHITECTURES` has multiple architectures.
-       In this case ``<variable>_CODE`` contains C preprocessor tests
-       mapping from each architecture macro to the corresponding type size.
-       The list of architecture macros is stored in ``<variable>_KEYS``,
-       and the value for each key is stored in ``<variable>-<key>``.
-
-    "" (empty string)
-       Type does not exist.
-
-  ``<variable>_CODE``
-    Holds C preprocessor code to define the macro ``<variable>`` to the size
-    of the type, or to leave the macro undefined if the type does not exist.
-
-  The options are:
-
-  ``BUILTIN_TYPES_ONLY``
-
-    Support only compiler-builtin types.  If *not* given, the macro checks
-    for headers ``<sys/types.h>``, ``<stdint.h>``, and ``<stddef.h>``, and
-    saves results in ``HAVE_SYS_TYPES_H``, ``HAVE_STDINT_H``, and
-    ``HAVE_STDDEF_H``.  The type size check automatically includes the
-    available headers, thus supporting checks of types defined in the headers.
-
-  ``LANGUAGE <language>``
-    Use the ``<language>`` compiler to perform the check.
-    Acceptable values are ``C`` and ``CXX``.
-
-Despite the name of the macro you may use it to check the size of more
-complex expressions, too.  To check e.g.  for the size of a struct
-member you can do something like this:
+Load this module in a CMake project with:
 
 .. code-block:: cmake
 
-  check_type_size("((struct something*)0)->member" SIZEOF_MEMBER)
+  include(CheckTypeSize)
 
+Commands
+^^^^^^^^
 
-The following variables may be set before calling this macro to modify
-the way the check is run:
+This module provides the following command:
 
-.. include:: /module/CMAKE_REQUIRED_FLAGS.txt
+.. command:: check_type_size
 
-.. include:: /module/CMAKE_REQUIRED_DEFINITIONS.txt
+  Checks once whether the C/C++ type or expression exists and determines its
+  size:
 
-.. include:: /module/CMAKE_REQUIRED_INCLUDES.txt
+  .. code-block:: cmake
 
-.. include:: /module/CMAKE_REQUIRED_LINK_OPTIONS.txt
+    check_type_size(<type> <variable> [BUILTIN_TYPES_ONLY] [LANGUAGE <language>])
 
-.. include:: /module/CMAKE_REQUIRED_LIBRARIES.txt
+  The arguments are:
 
-.. include:: /module/CMAKE_REQUIRED_LINK_DIRECTORIES.txt
+  ``<type>``
+    The type or expression being checked.
 
-.. include:: /module/CMAKE_REQUIRED_QUIET.txt
+  ``<variable>``
+    The name of the variable and a prefix used for storing the check results.
 
-``CMAKE_EXTRA_INCLUDE_FILES``
-  list of extra headers to include.
+  ``BUILTIN_TYPES_ONLY``
+    If given, only compiler-builtin types will be supported in the check.
+    If *not* given, the command checks for common headers ``<sys/types.h>``,
+    ``<stdint.h>``, and ``<stddef.h>``, and saves results in
+    ``HAVE_SYS_TYPES_H``, ``HAVE_STDINT_H``, and ``HAVE_STDDEF_H`` internal
+    cache variables.  The type size check automatically includes the available
+    headers, thus supporting checks of types defined in the headers.
+
+  ``LANGUAGE <language>``
+    Uses the ``<language>`` compiler to perform the check.
+    Acceptable values are ``C`` and ``CXX``.
+    If not specified, it defaults to ``C``.
+
+  .. rubric:: Result Variables
+
+  Results are reported in the following variables:
+
+  ``HAVE_<variable>``
+    Internal cache variable that holds a boolean true or false value
+    indicating whether the type or expression ``<type>`` exists.
+
+  ``<variable>``
+    Internal cache variable that holds one of the following values:
+
+    ``<size>``
+      If the type or expression exists, it will have a non-zero size
+      ``<size>`` in bytes.
+
+    ``0``
+      When type has architecture-dependent size;  This may occur when
+      :variable:`CMAKE_OSX_ARCHITECTURES` has multiple architectures.
+      In this case ``<variable>_CODE`` contains preprocessor tests
+      mapping from each architecture macro to the corresponding type size.
+      The list of architecture macros is stored in ``<variable>_KEYS``,
+      and the value for each key is stored in ``<variable>-<key>``.
+
+    "" (empty string)
+      When type or expression does not exist.
+
+  ``<variable>_CODE``
+    CMake variable that holds preprocessor code to define the macro
+    ``<variable>`` to the size of the type, or to leave the macro undefined
+    if the type does not exist.
+
+  Despite the name of this command, it may also be used to determine the size
+  of more complex expressions.  For example, to check the size of a struct
+  member:
+
+  .. code-block:: cmake
+
+    check_type_size("((struct something*)0)->member" SIZEOF_MEMBER)
+
+  .. rubric:: Variables Affecting the Check
+
+  The following variables may be set before calling this command to modify
+  the way the check is run:
+
+  .. include:: /module/include/CMAKE_REQUIRED_FLAGS.rst
+
+  .. include:: /module/include/CMAKE_REQUIRED_DEFINITIONS.rst
+
+  .. include:: /module/include/CMAKE_REQUIRED_INCLUDES.rst
+
+  .. include:: /module/include/CMAKE_REQUIRED_LINK_OPTIONS.rst
+
+  .. include:: /module/include/CMAKE_REQUIRED_LIBRARIES.rst
+
+  .. include:: /module/include/CMAKE_REQUIRED_LINK_DIRECTORIES.rst
+
+  .. include:: /module/include/CMAKE_REQUIRED_QUIET.rst
+
+  ``CMAKE_EXTRA_INCLUDE_FILES``
+    A :ref:`semicolon-separated list <CMake Language Lists>` of extra header
+    files to include when performing the check.
+
+Examples
+^^^^^^^^
+
+Consider the code:
+
+.. code-block:: cmake
+
+  include(CheckTypeSize)
+
+  # Check for size of long.
+  check_type_size(long SIZEOF_LONG)
+  message("HAVE_SIZEOF_LONG: ${HAVE_SIZEOF_LONG}")
+  message("SIZEOF_LONG: ${SIZEOF_LONG}")
+  message("SIZEOF_LONG_CODE: ${SIZEOF_LONG_CODE}")
+
+On a 64-bit architecture, the output may look something like this::
+
+  HAVE_SIZEOF_LONG: TRUE
+  SIZEOF_LONG: 8
+  SIZEOF_LONG_CODE: #define SIZEOF_LONG 8
+
+On Apple platforms, when :variable:`CMAKE_OSX_ARCHITECTURES` has multiple
+architectures, types may have architecture-dependent sizes.
+For example, with the code
+
+.. code-block:: cmake
+
+  include(CheckTypeSize)
+
+  check_type_size(long SIZEOF_LONG)
+  message("HAVE_SIZEOF_LONG: ${HAVE_SIZEOF_LONG}")
+  message("SIZEOF_LONG: ${SIZEOF_LONG}")
+  foreach(key IN LISTS SIZE_OF_LONG_KEYS)
+    message("key: ${key}")
+    message("value: ${SIZE_OF_LONG-${key}}")
+  endforeach()
+  message("SIZEOF_LONG_CODE:
+  ${SIZEOF_LONG_CODE}")
+
+the result may be::
+
+  HAVE_SIZEOF_LONG: TRUE
+  SIZEOF_LONG: 0
+  key: __i386
+  value: 4
+  key: __x86_64
+  value: 8
+  SIZEOF_LONG_CODE:
+  #if defined(__i386)
+  # define SIZE_OF_LONG 4
+  #elif defined(__x86_64)
+  # define SIZE_OF_LONG 8
+  #else
+  # error SIZE_OF_LONG unknown
+  #endif
 #]=======================================================================]
 
 include(CheckIncludeFile)
@@ -93,7 +175,6 @@ get_filename_component(__check_type_size_dir "${CMAKE_CURRENT_LIST_FILE}" PATH)
 include_guard(GLOBAL)
 
 block(SCOPE_FOR POLICIES)
-cmake_policy(SET CMP0054 NEW)
 cmake_policy(SET CMP0159 NEW) # file(STRINGS) with REGEX updates CMAKE_MATCH_<n>
 
 #-----------------------------------------------------------------------------

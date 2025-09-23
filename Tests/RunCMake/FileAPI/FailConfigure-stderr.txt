@@ -1,0 +1,4 @@
+^CMake Error at FailConfigure.cmake:1 \(message\):
+  Intentionally fail to configure
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)$

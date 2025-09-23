@@ -1,1 +1,1 @@
-((Clang)?module 'std' not found|(MSVC)?could not find module 'std')
+((GNU)?fatal error: unknown compiled module interface: no such module|(Clang)?module 'std' not found|(MSVC)?could not find module 'std')

@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
@@ -42,12 +42,12 @@ public:
   using ValueTypeSet = cm::enum_set<ValueType>;
 
   // All types as defined by enum ValueType
-  static const ValueTypeSet AllTypes;
-  // same as AllTYpes but without type REG_MULTI_SZ
-  static const ValueTypeSet SimpleTypes;
+  static ValueTypeSet const AllTypes;
+  // same as AllTypes but without type REG_MULTI_SZ
+  static ValueTypeSet const SimpleTypes;
 
   cmWindowsRegistry(cmMakefile&,
-                    const ValueTypeSet& supportedTypes = AllTypes);
+                    ValueTypeSet const& supportedTypes = AllTypes);
 
   // Helper routine to convert string to enum value
   static cm::optional<View> ToView(cm::string_view name);

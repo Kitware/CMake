@@ -1,5 +1,7 @@
 enable_language(C)
 
+set(CMAKE_AIX_SHARED_LIBRARY_ARCHIVE 0)
+
 # ensure command line is always displayed and do not use any response file
 set(CMAKE_VERBOSE_MAKEFILE TRUE)
 set(CMAKE_C_USE_RESPONSE_FILE_FOR_LIBRARIES FALSE)

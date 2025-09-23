@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
@@ -94,11 +94,11 @@ public:
   /// Get the total installed size of all of the files in this
   /// component, in bytes. installDir is the directory into which the
   /// component was installed.
-  unsigned long GetInstalledSize(const std::string& installDir) const;
+  unsigned long GetInstalledSize(std::string const& installDir) const;
 
   /// Identical to GetInstalledSize, but returns the result in
   /// kilobytes.
-  unsigned long GetInstalledSizeInKbytes(const std::string& installDir) const;
+  unsigned long GetInstalledSizeInKbytes(std::string const& installDir) const;
 
 private:
   mutable unsigned long TotalSize = 0;

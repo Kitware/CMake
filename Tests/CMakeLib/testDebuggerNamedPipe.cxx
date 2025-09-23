@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 
 #include <chrono>
 #include <cstdio>
@@ -11,6 +11,9 @@
 #include <string>
 #include <thread>
 #include <vector>
+
+#include <cm/string_view>
+#include <cmext/string_view>
 
 #include <cm3p/cppdap/io.h>
 
@@ -32,7 +35,7 @@ static void sendCommands(std::shared_ptr<dap::ReaderWriter> const& debugger,
                          int delayMs,
                          std::vector<std::string> const& initCommands)
 {
-  for (const auto& command : initCommands) {
+  for (auto const& command : initCommands) {
     std::string contentLength = "Content-Length:";
     contentLength += std::to_string(command.size()) + "\r\n\r\n";
     debugger->write(contentLength.c_str(), contentLength.size());
@@ -60,22 +63,20 @@ static void sendCommands(std::shared_ptr<dap::ReaderWriter> const& debugger,
  */
 int runTest(int argc, char* argv[])
 {
-  if (argc < 3) {
+  if (argc < 4) {
     std::cout << "Usage:\n";
-    std::cout << "\t(project mode) TestDebuggerNamedPipe <CMakePath> "
-                 "<SourceFolder> <OutputFolder>\n";
-    std::cout << "\t(script mode) TestDebuggerNamedPipe <CMakePath> "
+    std::cout << "\t(project mode) TestDebuggerNamedPipe <CMakePath> -S "
+                 "<SourceFolder> -B <OutputFolder> ...\n";
+    std::cout << "\t(script mode) TestDebuggerNamedPipe <CMakePath> -P "
                  "<ScriptPath>\n";
     return 1;
   }
 
-  bool scriptMode = argc == 3;
-
 #ifdef _WIN32
   std::string namedPipe = R"(\\.\pipe\LOCAL\CMakeDebuggerPipe_)" +
-    cmCryptoHash(cmCryptoHash::AlgoSHA256)
-      .HashString(scriptMode ? argv[2] : argv[3]);
+    cmCryptoHash(cmCryptoHash::AlgoSHA256).HashString(argv[2]);
 #else
+  bool const scriptMode = argv[2] == "-P"_s;
   std::string namedPipe =
     std::string("CMakeDebuggerPipe") + (scriptMode ? "Script" : "Project");
 #endif
@@ -85,16 +86,7 @@ int runTest(int argc, char* argv[])
   cmakeCommand.emplace_back("--debugger");
   cmakeCommand.emplace_back("--debugger-pipe");
   cmakeCommand.emplace_back(namedPipe);
-
-  if (scriptMode) {
-    cmakeCommand.emplace_back("-P");
-    cmakeCommand.emplace_back(argv[2]);
-  } else {
-    cmakeCommand.emplace_back("-S");
-    cmakeCommand.emplace_back(argv[2]);
-    cmakeCommand.emplace_back("-B");
-    cmakeCommand.emplace_back(argv[3]);
-  }
+  cmakeCommand.insert(cmakeCommand.end(), argv + 2, argv + argc);
 
   // Capture debugger response stream.
   std::stringstream debuggerResponseStream;
@@ -194,7 +186,7 @@ int runTest(int argc, char* argv[])
     R"("command" *: *"disconnect".*"success" *: *true.*"type" *: *"response")"
   };
 
-  for (const auto& regexString : expectedResponses) {
+  for (auto const& regexString : expectedResponses) {
     cmsys::RegularExpression regex(regexString);
     if (!regex.find(debuggerResponse)) {
       std::cout << "Expected response not found: " << regexString << std::endl;
@@ -210,10 +202,10 @@ int main(int argc, char* argv[])
 {
   try {
     return runTest(argc, argv);
-  } catch (const std::exception& ex) {
+  } catch (std::exception const& ex) {
     std::cout << "An exception occurred: " << ex.what() << std::endl;
     return -1;
-  } catch (const std::string& ex) {
+  } catch (std::string const& ex) {
     std::cout << "An exception occurred: " << ex << std::endl;
     return -1;
   } catch (...) {

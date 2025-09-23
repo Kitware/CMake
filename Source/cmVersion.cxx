@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmVersion.h"
 
 #include "cmVersionConfig.h"
@@ -21,7 +21,7 @@ unsigned int cmVersion::GetTweakVersion()
   return 0;
 }
 
-const char* cmVersion::GetCMakeVersion()
+char const* cmVersion::GetCMakeVersion()
 {
   return CMake_VERSION;
 }

@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
@@ -24,8 +24,8 @@ public:
 #endif
   cmFileTime() = default;
   ~cmFileTime() = default;
-  cmFileTime(const cmFileTime&) = default;
-  cmFileTime& operator=(const cmFileTime&) = default;
+  cmFileTime(cmFileTime const&) = default;
+  cmFileTime& operator=(cmFileTime const&) = default;
 
   /**
    * @brief Loads the file time of fileName from the file system

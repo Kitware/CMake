@@ -81,7 +81,7 @@ public:
     }
     return true;
   }
-  bool ParseFile(const char* file)
+  bool ParseFile(char const* file)
   {
     std::string line = file;
     std::string lineresult;
@@ -224,7 +224,7 @@ bool cmParseDelphiCoverage::LoadCoverageData(
   return true;
 }
 
-bool cmParseDelphiCoverage::ReadDelphiHTML(const char* file)
+bool cmParseDelphiCoverage::ReadDelphiHTML(char const* file)
 {
   cmParseDelphiCoverage::HTMLParser parser(this->CTest, this->Coverage);
   parser.ParseFile(file);

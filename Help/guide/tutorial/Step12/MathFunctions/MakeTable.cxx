@@ -11,7 +11,7 @@ int main(int argc, char* argv[])
   }
 
   std::ofstream fout(argv[1], std::ios_base::out);
-  const bool fileOpen = fout.is_open();
+  bool const fileOpen = fout.is_open();
   if (fileOpen) {
     fout << "double sqrtTable[] = {" << std::endl;
     for (int i = 0; i < 10; ++i) {

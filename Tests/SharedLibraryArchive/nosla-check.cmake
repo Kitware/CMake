@@ -1,0 +1,6 @@
+if(CMAKE_SYSTEM_NAME STREQUAL "AIX")
+  set(nosla_regex "/lib${name}\\.so$")
+  if(NOT nosla MATCHES "${nosla_regex}")
+    message(FATAL_ERROR "nosla library does not look like a shared object:\n ${nosla}")
+  endif()
+endif()

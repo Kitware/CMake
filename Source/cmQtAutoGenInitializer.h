@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
@@ -139,7 +139,7 @@ private:
 
   std::string GetMocBuildPath(MUFile const& muf);
 
-  bool GetQtExecutable(GenVarsT& genVars, const std::string& executable,
+  bool GetQtExecutable(GenVarsT& genVars, std::string const& executable,
                        bool ignoreMissingTarget) const;
 
   void handleSkipPch(cmSourceFile* sf);

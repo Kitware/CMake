@@ -1,49 +1,69 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-# file Copyright.txt or https://cmake.org/licensing for details.
+# file LICENSE.rst or https://cmake.org/licensing for details.
 
 #[=======================================================================[.rst:
 FindGIF
 -------
 
-This finds the Graphics Interchange Format (GIF) library (``giflib``)
+Finds the Graphics Interchange Format (GIF) library (``giflib``).
 
-Imported targets
+Imported Targets
 ^^^^^^^^^^^^^^^^
 
-This module defines the following :prop_tgt:`IMPORTED` target:
+This module provides the following :ref:`Imported Targets`:
 
 ``GIF::GIF``
-  The ``giflib`` library, if found.
+  .. versionadded:: 3.14
 
-Result variables
+  Target that encapsulates the usage requirements of the GIF library, available
+  when the library is found.
+
+Result Variables
 ^^^^^^^^^^^^^^^^
 
-This module will set the following variables in your project:
+This module sets the following variables:
 
 ``GIF_FOUND``
-  If false, do not try to use GIF.
+  Boolean indicating whether the GIF library was found.
 ``GIF_INCLUDE_DIRS``
-  where to find gif_lib.h, etc.
+  Include directories needed to use the GIF library.
 ``GIF_LIBRARIES``
-  the libraries needed to use GIF.
+  Libraries needed to link to the GIF library.
 ``GIF_VERSION``
-  3, 4 or a full version string (eg 5.1.4) for versions >= 4.1.6.
+  Version string of the GIF library found (for example, ``5.1.4``).  For GIF
+  library versions prior to 4.1.6, version string will be set only to ``3`` or
+  ``4`` as these versions did not provide version information in their headers.
 
-Cache variables
+Cache Variables
 ^^^^^^^^^^^^^^^
 
 The following cache variables may also be set:
 
 ``GIF_INCLUDE_DIR``
-  where to find the GIF headers.
+  Directory containing the ``gif_lib.h`` and other GIF library headers.
 ``GIF_LIBRARY``
-  where to find the GIF library.
+  Path to the GIF library.
 
 Hints
 ^^^^^
 
-``GIF_DIR`` is an environment variable that would correspond to the
-``./configure --prefix=$GIF_DIR``.
+This module accepts the following variables:
+
+``GIF_DIR``
+  Environment variable that can be set to help locate a GIF library installed in
+  a custom location.  It should point to the installation destination that was
+  used when configuring, building, and installing GIF library:
+  ``./configure --prefix=$GIF_DIR``.
+
+Examples
+^^^^^^^^
+
+Finding GIF library and linking it to a project target:
+
+.. code-block:: cmake
+
+  find_package(GIF)
+  target_link_libraries(project_target PRIVATE GIF::GIF)
 #]=======================================================================]
 
 cmake_policy(PUSH)
@@ -79,7 +99,7 @@ find_library(GIF_LIBRARY
 if(GIF_INCLUDE_DIR)
   include(${CMAKE_CURRENT_LIST_DIR}/CMakePushCheckState.cmake)
   include(${CMAKE_CURRENT_LIST_DIR}/CheckStructHasMember.cmake)
-  CMAKE_PUSH_CHECK_STATE()
+  cmake_push_check_state()
   set(CMAKE_REQUIRED_QUIET ${GIF_FIND_QUIETLY})
   set(CMAKE_REQUIRED_INCLUDES "${GIF_INCLUDE_DIR}")
 
@@ -93,7 +113,7 @@ if(GIF_INCLUDE_DIR)
     set(GIF_VERSION "${_GIF_MAJ}.${_GIF_MIN}.${_GIF_REL}")
   else()
     # use UserData field to sniff version instead
-    CHECK_STRUCT_HAS_MEMBER(GifFileType UserData gif_lib.h GIF_GifFileType_UserData )
+    check_struct_has_member(GifFileType UserData gif_lib.h GIF_GifFileType_UserData )
     if(GIF_GifFileType_UserData)
       set(GIF_VERSION 4)
     else()
@@ -105,11 +125,11 @@ if(GIF_INCLUDE_DIR)
   unset(_GIF_MIN)
   unset(_GIF_REL)
   unset(_GIF_DEFS)
-  CMAKE_POP_CHECK_STATE()
+  cmake_pop_check_state()
 endif()
 
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(GIF  REQUIRED_VARS  GIF_LIBRARY  GIF_INCLUDE_DIR
+include(FindPackageHandleStandardArgs)
+find_package_handle_standard_args(GIF  REQUIRED_VARS  GIF_LIBRARY  GIF_INCLUDE_DIR
                                        VERSION_VAR GIF_VERSION )
 
 if(GIF_FOUND)

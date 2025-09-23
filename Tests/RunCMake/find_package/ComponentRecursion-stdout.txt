@@ -1,0 +1,3 @@
+-- ComponentTest_FIND_REQUIRED_A '1'
+-- ComponentTest_FIND_REQUIRED_B '0'
+-- ComponentTest_FIND_REQUIRED_C '0'

@@ -22,24 +22,24 @@
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "../curl_setup.h"
 
 #include <curl/curl.h>
 
 #include "vauth.h"
-#include "urldata.h"
-#include "strcase.h"
-#include "curl_multibyte.h"
-#include "curl_printf.h"
+#include "../urldata.h"
+#include "../strcase.h"
+#include "../curlx/multibyte.h"
+#include "../curl_printf.h"
 
 /* The last #include files should be: */
-#include "curl_memory.h"
-#include "memdebug.h"
+#include "../curl_memory.h"
+#include "../memdebug.h"
 
 /*
  * Curl_auth_build_spn()
  *
- * This is used to build a SPN string in the following formats:
+ * This is used to build an SPN string in the following formats:
  *
  * service/host@realm (Not currently used)
  * service/host       (Not used by GSS-API)
@@ -134,8 +134,7 @@ bool Curl_auth_user_contains_domain(const char *user)
     /* Check we have a domain name or UPN present */
     char *p = strpbrk(user, "\\/@");
 
-    valid = (p != NULL && p > user && p < user + strlen(user) - 1 ? TRUE :
-                                                                    FALSE);
+    valid = (p != NULL && p > user && p < user + strlen(user) - 1);
   }
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
   else
@@ -154,10 +153,10 @@ bool Curl_auth_user_contains_domain(const char *user)
 bool Curl_auth_allowed_to_host(struct Curl_easy *data)
 {
   struct connectdata *conn = data->conn;
-  return (!data->state.this_is_a_follow ||
-          data->set.allow_auth_to_other_hosts ||
-          (data->state.first_host &&
-           strcasecompare(data->state.first_host, conn->host.name) &&
-           (data->state.first_remote_port == conn->remote_port) &&
-           (data->state.first_remote_protocol == conn->handler->protocol)));
+  return !data->state.this_is_a_follow ||
+         data->set.allow_auth_to_other_hosts ||
+         (data->state.first_host &&
+          strcasecompare(data->state.first_host, conn->host.name) &&
+          (data->state.first_remote_port == conn->remote_port) &&
+          (data->state.first_remote_protocol == conn->handler->protocol));
 }

@@ -1,5 +1,5 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-# file Copyright.txt or https://cmake.org/licensing for details.
+# file LICENSE.rst or https://cmake.org/licensing for details.
 
 #[=======================================================================[.rst:
 FindCUDAToolkit
@@ -102,7 +102,7 @@ Options
     If specified, the CUDA Toolkit is considered found only if the exact
     ``VERSION`` specified is recovered.
 
-Imported targets
+Imported Targets
 ^^^^^^^^^^^^^^^^
 
 An :ref:`imported target <Imported targets>` named ``CUDA::toolkit`` is provided.
@@ -110,31 +110,29 @@ An :ref:`imported target <Imported targets>` named ``CUDA::toolkit`` is provided
 This module defines :prop_tgt:`IMPORTED` targets for each
 of the following libraries that are part of the CUDAToolkit:
 
-- :ref:`CUDA Runtime Library<cuda_toolkit_rt_lib>`
-- :ref:`CUDA Driver Library<cuda_toolkit_driver_lib>`
-- :ref:`cuBLAS<cuda_toolkit_cuBLAS>`
-- :ref:`cuDLA<cuda_toolkit_cuDLA>`
-- :ref:`cuFile<cuda_toolkit_cuFile>`
-- :ref:`cuFFT<cuda_toolkit_cuFFT>`
-- :ref:`cuRAND<cuda_toolkit_cuRAND>`
-- :ref:`cuSOLVER<cuda_toolkit_cuSOLVER>`
-- :ref:`cuSPARSE<cuda_toolkit_cuSPARSE>`
-- :ref:`cuPTI<cuda_toolkit_cupti>`
-- :ref:`NPP<cuda_toolkit_NPP>`
-- :ref:`nvBLAS<cuda_toolkit_nvBLAS>`
-- :ref:`nvGRAPH<cuda_toolkit_nvGRAPH>`
-- :ref:`nvJPEG<cuda_toolkit_nvJPEG>`
-- :ref:`nvidia-ML<cuda_toolkit_nvML>`
-- :ref:`nvPTX Compiler<cuda_toolkit_nvptx>`
-- :ref:`nvRTC<cuda_toolkit_nvRTC>`
-- :ref:`nvJitLink<cuda_toolkit_nvJitLink>`
-- :ref:`nvFatBin<cuda_toolkit_nvfatbin>`
-- :ref:`nvToolsExt<cuda_toolkit_nvToolsExt>`
-- :ref:`nvtx3<cuda_toolkit_nvtx3>`
-- :ref:`OpenCL<cuda_toolkit_opencl>`
-- :ref:`cuLIBOS<cuda_toolkit_cuLIBOS>`
-
-.. _`cuda_toolkit_rt_lib`:
+- `CUDA Runtime Library`_
+- `CUDA Driver Library`_
+- `cuBLAS`_
+- `cuDLA`_
+- `cuFile`_
+- `cuFFT`_
+- `cuRAND`_
+- `cuSOLVER`_
+- `cuSPARSE`_
+- `cuPTI`_
+- `NPP`_
+- `nvBLAS`_
+- `nvGRAPH`_
+- `nvJPEG`_
+- `nvidia-ML`_
+- `nvPTX Compiler`_
+- `nvRTC`_
+- `nvJitLink`_
+- `nvFatBin`_
+- `nvToolsExt`_
+- `nvtx3`_
+- `OpenCL`_
+- `cuLIBOS`_
 
 CUDA Runtime Library
 """"""""""""""""""""
@@ -147,8 +145,6 @@ Targets Created:
 - ``CUDA::cudart``
 - ``CUDA::cudart_static``
 
-.. _`cuda_toolkit_driver_lib`:
-
 CUDA Driver Library
 """"""""""""""""""""
 
@@ -159,12 +155,10 @@ Targets Created:
 
 - ``CUDA::cuda_driver``
 
-.. _`cuda_toolkit_cuBLAS`:
-
 cuBLAS
 """"""
 
-The `cuBLAS <https://docs.nvidia.com/cuda/cublas>`_ library.
+The `CUDA Basic Linear Algebra Subroutine`_ library.
 
 Targets Created:
 
@@ -173,27 +167,27 @@ Targets Created:
 - ``CUDA::cublasLt`` starting in CUDA 10.1
 - ``CUDA::cublasLt_static`` starting in CUDA 10.1
 
-.. _`cuda_toolkit_cuDLA`:
+.. _`CUDA Basic Linear Algebra Subroutine`: https://docs.nvidia.com/cuda/cublas
 
 cuDLA
 """"""
 
 .. versionadded:: 3.27
 
-The NVIDIA Tegra Deep Learning Accelerator `cuDLA <https://docs.nvidia.com/cuda/cublas>`_ library.
+The `NVIDIA Tegra Deep Learning Accelerator`_ library.
 
 Targets Created:
 
 - ``CUDA::cudla`` starting in CUDA 11.6
 
-.. _`cuda_toolkit_cuFile`:
+.. _`NVIDIA Tegra Deep Learning Accelerator`: https://docs.nvidia.com/cuda/cuda-for-tegra-appnote#cudla
 
 cuFile
 """"""
 
 .. versionadded:: 3.25
 
-The NVIDIA GPUDirect Storage `cuFile <https://docs.nvidia.com/gpudirect-storage/api-reference-guide>`_ library.
+The `NVIDIA GPUDirect Storage cuFile`_ library.
 
 Targets Created:
 
@@ -202,12 +196,12 @@ Targets Created:
 - ``CUDA::cuFile_rdma`` starting in CUDA 11.4
 - ``CUDA::cuFile_rdma_static`` starting in CUDA 11.4
 
-.. _`cuda_toolkit_cuFFT`:
+.. _`NVIDIA GPUDirect Storage cuFile`: https://docs.nvidia.com/gpudirect-storage/api-reference-guide
 
 cuFFT
 """""
 
-The `cuFFT <https://docs.nvidia.com/cuda/cufft>`_ library.
+The `CUDA Fast Fourier Transform`_ library.
 
 Targets Created:
 
@@ -217,46 +211,48 @@ Targets Created:
 - ``CUDA::cufft_static_nocallback`` starting in CUDA 9.2, requires CMake 3.23+
 - ``CUDA::cufftw_static``
 
+.. _`CUDA Fast Fourier Transform`: https://docs.nvidia.com/cuda/cufft
+
 cuRAND
 """"""
 
-The `cuRAND <https://docs.nvidia.com/cuda/curand>`_ library.
+The `CUDA random number generation`_ library.
 
 Targets Created:
 
 - ``CUDA::curand``
 - ``CUDA::curand_static``
 
-.. _`cuda_toolkit_cuSOLVER`:
+.. _`CUDA random number generation`: https://docs.nvidia.com/cuda/curand
 
 cuSOLVER
 """"""""
 
-The `cuSOLVER <https://docs.nvidia.com/cuda/cusolver>`_ library.
+A `GPU accelerated linear system solver`_ library.
 
 Targets Created:
 
 - ``CUDA::cusolver``
 - ``CUDA::cusolver_static``
 
-.. _`cuda_toolkit_cuSPARSE`:
+.. _`GPU accelerated linear system solver`: https://docs.nvidia.com/cuda/cusolver
 
 cuSPARSE
 """"""""
 
-The `cuSPARSE <https://docs.nvidia.com/cuda/cusparse>`_ library.
+The `CUDA sparse matrix`_ library.
 
 Targets Created:
 
 - ``CUDA::cusparse``
 - ``CUDA::cusparse_static``
 
-.. _`cuda_toolkit_cupti`:
+.. _`CUDA sparse matrix`: https://docs.nvidia.com/cuda/cusparse
 
 cupti
 """""
 
-The `NVIDIA CUDA Profiling Tools Interface <https://developer.nvidia.com/cupti>`_.
+The `NVIDIA CUDA Profiling Tools Interface`_.
 
 Targets Created:
 
@@ -270,12 +266,12 @@ Targets Created:
   - ``CUDA::nvperf_target``       starting in CUDA 10.2
   - ``CUDA::pcsamplingutil``      starting in CUDA 11.3
 
-.. _`cuda_toolkit_NPP`:
+.. _`NVIDIA CUDA Profiling Tools Interface`: https://developer.nvidia.com/cupti
 
 NPP
 """
 
-The `NPP <https://docs.nvidia.com/cuda/npp>`_ libraries.
+The `NVIDIA 2D Image and Signal Processing Performance Primitives`_ libraries.
 
 Targets Created:
 
@@ -295,7 +291,7 @@ Targets Created:
   - ``CUDA::nppicc_static``
 
 - `nppicom`: JPEG compression and decompression functions in `nppi_compression_functions.h`
-  Removed starting in CUDA 11.0, use :ref:`nvJPEG<cuda_toolkit_nvJPEG>` instead.
+  Removed starting in CUDA 11.0, use `nvJPEG`_ instead.
 
   - ``CUDA::nppicom``
   - ``CUDA::nppicom_static``
@@ -340,24 +336,24 @@ Targets Created:
   - ``CUDA::npps``
   - ``CUDA::npps_static``
 
-.. _`cuda_toolkit_nvBLAS`:
+.. _`NVIDIA 2D Image and Signal Processing Performance Primitives`: https://docs.nvidia.com/cuda/npp
 
 nvBLAS
 """"""
 
-The `nvBLAS <https://docs.nvidia.com/cuda/nvblas>`_ libraries.
+The `GPU-accelerated drop-in BLAS`_ library.
 This is a shared library only.
 
 Targets Created:
 
 - ``CUDA::nvblas``
 
-.. _`cuda_toolkit_nvGRAPH`:
+.. _`GPU-accelerated drop-in BLAS`: https://docs.nvidia.com/cuda/nvblas
 
 nvGRAPH
 """""""
 
-The `nvGRAPH <https://web.archive.org/web/20201111171403/https://docs.nvidia.com/cuda/nvgraph/index.html>`_ library.
+A `GPU-accelerated graph analytics`_ library.
 Removed starting in CUDA 11.0
 
 Targets Created:
@@ -365,13 +361,12 @@ Targets Created:
 - ``CUDA::nvgraph``
 - ``CUDA::nvgraph_static``
 
-
-.. _`cuda_toolkit_nvJPEG`:
+.. _`GPU-accelerated graph analytics`: https://docs.nvidia.com/cuda/archive/10.0/nvgraph
 
 nvJPEG
 """"""
 
-The `nvJPEG <https://docs.nvidia.com/cuda/nvjpeg>`_ library.
+A `GPU-accelerated JPEG codec`_ library.
 Introduced in CUDA 10.
 
 Targets Created:
@@ -379,15 +374,15 @@ Targets Created:
 - ``CUDA::nvjpeg``
 - ``CUDA::nvjpeg_static``
 
-.. _`cuda_toolkit_nvPTX`:
+.. _`GPU-accelerated JPEG codec`: https://docs.nvidia.com/cuda/nvjpeg
 
 nvPTX Compiler
 """"""""""""""
 
 .. versionadded:: 3.25
 
-The `nvPTX <https://docs.nvidia.com/cuda/ptx-compiler-api>`_ (PTX Compilation) library.
-The PTX Compiler APIs are a set of APIs which can be used to compile a PTX program into GPU assembly code.
+The `PTX Compiler APIs`_.
+These are a set of APIs which can be used to compile a PTX program into GPU assembly code.
 Introduced in CUDA 11.1
 This is a static library only.
 
@@ -395,12 +390,12 @@ Targets Created:
 
 - ``CUDA::nvptxcompiler_static`` starting in CUDA 11.1
 
-.. _`cuda_toolkit_nvRTC`:
+.. _`PTX Compiler APIs`: https://docs.nvidia.com/cuda/ptx-compiler-api
 
 nvRTC
 """""
 
-The `nvRTC <https://docs.nvidia.com/cuda/nvrtc>`_ (Runtime Compilation) library.
+A `runtime compilation library for CUDA`_.
 
 Targets Created:
 
@@ -412,38 +407,38 @@ Targets Created:
   - ``CUDA::nvrtc_static`` starting in CUDA 11.5
   - ``CUDA::nvrtc_builtins_static`` starting in CUDA 11.5
 
-.. _`cuda_toolkit_nvjitlink`:
+.. _`runtime compilation library for CUDA`: https://docs.nvidia.com/cuda/nvrtc
 
 nvJitLink
 """""""""
 
-The `nvJItLink <https://docs.nvidia.com/cuda/>`_ (Runtime LTO Linking) library.
+The `JIT Link APIs`_.
 
 Targets Created:
 
 - ``CUDA::nvJitLink`` starting in CUDA 12.0
 - ``CUDA::nvJitLink_static``  starting in CUDA 12.0
 
-.. _`cuda_toolkit_nvfatbin`:
+.. _`JIT Link APIs`: https://docs.nvidia.com/cuda/nvjitlink
 
 nvFatBin
 """""""""
 
 .. versionadded:: 3.30
 
-The `nvFatBin <https://docs.nvidia.com/cuda/>`_ (Runtime fatbin creation) library.
+The `Fatbin Creator APIs`_.
 
 Targets Created:
 
 - ``CUDA::nvfatbin`` starting in CUDA 12.4
 - ``CUDA::nvfatbin_static``  starting in CUDA 12.4
 
-.. _`cuda_toolkit_nvml`:
+.. _`Fatbin Creator APIs`: https://docs.nvidia.com/cuda/nvfatbin
 
 nvidia-ML
 """""""""
 
-The `NVIDIA Management Library <https://developer.nvidia.com/management-library-nvml>`_.
+The `NVIDIA Management Library`_.
 
 Targets Created:
 
@@ -453,47 +448,62 @@ Targets Created:
 .. versionadded:: 3.31
   Added ``CUDA::nvml_static``.
 
-.. _`cuda_toolkit_nvToolsExt`:
+.. _`NVIDIA Management Library`: https://developer.nvidia.com/management-library-nvml
+
+.. _`FindCUDAToolkit_nvToolsExt`:
 
 nvToolsExt
 """"""""""
 
-.. deprecated:: 3.25 With CUDA 10.0+, use :ref:`nvtx3 <cuda_toolkit_nvtx3>`.
+.. deprecated:: 3.25
 
-The `NVIDIA Tools Extension <https://docs.nvidia.com/nvtx/>`_.
+  With CUDA 10.0+, use `nvtx3`_.
+  Starting in CUDA 12.9 the `nvToolsExt` library no longer exists
+
+The `legacy NVIDIA Tools Extension`_.
 This is a shared library only.
 
 Targets Created:
 
 - ``CUDA::nvToolsExt``
 
-.. _`cuda_toolkit_nvtx3`:
+.. _`legacy NVIDIA Tools Extension`: https://docs.nvidia.com/cuda/archive/9.0/profiler-users-guide#nvtx
+
+.. _`FindCUDAToolkit_nvtx3`:
 
 nvtx3
 """""
 
 .. versionadded:: 3.25
 
-The header-only `NVIDIA Tools Extension Library <https://nvidia.github.io/NVTX/doxygen>`_.
+The header-only `NVIDIA Tools Extension`_ library.
 Introduced in CUDA 10.0.
 
 Targets created:
 
 - ``CUDA::nvtx3``
 
-.. _`cuda_toolkit_opencl`:
+
+- ``CUDA::nvtx3_interop``
+
+  .. versionadded:: 4.1
+
+  This is provided by CUDA 12.9 and above for use by languages that
+  cannot consume C++ header-only libraries, such as ``Fortran``.
+
+.. _`NVIDIA Tools Extension`: https://nvidia.github.io/NVTX/doxygen
 
 OpenCL
 """"""
 
-The `NVIDIA OpenCL Library <https://developer.nvidia.com/opencl>`_.
+The `NVIDIA Open Computing Language`_ library.
 This is a shared library only.
 
 Targets Created:
 
 - ``CUDA::OpenCL``
 
-.. _`cuda_toolkit_cuLIBOS`:
+.. _`NVIDIA Open Computing Language`: https://developer.nvidia.com/opencl
 
 cuLIBOS
 """""""
@@ -508,10 +518,6 @@ Target Created:
 - ``CUDA::culibos``
 
 **Note**: direct usage of this target by consumers should not be necessary.
-
-.. _`cuda_toolkit_cuRAND`:
-
-
 
 Result variables
 ^^^^^^^^^^^^^^^^
@@ -694,9 +700,21 @@ else()
             get_filename_component(line "${line}" ABSOLUTE)
             list(APPEND _cmake_CUDAToolkit_include_directories "${line}")
           endforeach()
+        endif()
+        if(_CUDA_NVCC_OUT MATCHES "\\#\\$ SYSTEM_INCLUDES=([^\r\n]*)")
+          unset(_nvcc_output)
+          separate_arguments(_nvcc_output NATIVE_COMMAND "${CMAKE_MATCH_1}")
+          foreach(line IN LISTS _nvcc_output)
+            string(REGEX REPLACE "^-isystem" "" line "${line}")
+            if(line)
+              get_filename_component(line "${line}" ABSOLUTE)
+              list(APPEND _cmake_CUDAToolkit_include_directories "${line}")
+            endif()
+          endforeach()
+        endif()
+        if(DEFINED _cmake_CUDAToolkit_include_directories)
           message(CONFIGURE_LOG
             "Parsed CUDAToolkit nvcc implicit include information:\n${_cmake_CUDAToolkit_include_directories}\n\n")
-
           set(_cmake_CUDAToolkit_include_directories "${_cmake_CUDAToolkit_include_directories}" CACHE INTERNAL "CUDAToolkit internal list of include directories")
         endif()
         if(_CUDA_NVCC_OUT MATCHES "\\#\\$ LIBRARIES=([^\r\n]*)")
@@ -770,13 +788,13 @@ else()
 
   function(_CUDAToolkit_parse_version_file version_file)
     if(version_file)
-      file(READ "${version_file}" file_conents)
+      file(READ "${version_file}" file_contents)
       cmake_path(GET version_file EXTENSION LAST_ONLY version_ext)
       if(version_ext STREQUAL ".json")
-        string(JSON cuda_version_info GET "${file_conents}" "cuda" "version")
+        string(JSON cuda_version_info GET "${file_contents}" "cuda" "version")
         set(cuda_version_match_regex [=[([0-9]+)\.([0-9]+)\.([0-9]+)]=])
       elseif(version_ext STREQUAL ".txt")
-        set(cuda_version_info "${file_conents}")
+        set(cuda_version_info "${file_contents}")
         set(cuda_version_match_regex [=[CUDA Version ([0-9]+)\.([0-9]+)\.([0-9]+)]=])
       endif()
 
@@ -939,12 +957,25 @@ endif()
 
 # Find target directory when crosscompiling.
 if(CMAKE_CROSSCOMPILING)
-  if(CMAKE_SYSTEM_PROCESSOR STREQUAL "armv7-a")
+  # When a language is enabled we can use its compiler's target architecture.
+  if(CMAKE_CUDA_COMPILER_LOADED AND CMAKE_CUDA_COMPILER_ARCHITECTURE_ID)
+    set(_CUDA_TARGET_PROCESSOR "${CMAKE_CUDA_COMPILER_ARCHITECTURE_ID}")
+  elseif(CMAKE_CXX_COMPILER_LOADED AND CMAKE_CXX_COMPILER_ARCHITECTURE_ID)
+    set(_CUDA_TARGET_PROCESSOR "${CMAKE_CXX_COMPILER_ARCHITECTURE_ID}")
+  elseif(CMAKE_C_COMPILER_LOADED AND CMAKE_C_COMPILER_ARCHITECTURE_ID)
+    set(_CUDA_TARGET_PROCESSOR "${CMAKE_C_COMPILER_ARCHITECTURE_ID}")
+  elseif(CMAKE_SYSTEM_PROCESSOR)
+    set(_CUDA_TARGET_PROCESSOR "${CMAKE_SYSTEM_PROCESSOR}")
+  else()
+    message(FATAL_ERROR "Cross-compiling with the CUDA toolkit requires CMAKE_SYSTEM_PROCESSOR to be set.")
+  endif()
+  # Keep in sync with equivalent table in CMakeDetermineCUDACompiler and FindCUDA!
+  if(_CUDA_TARGET_PROCESSOR STREQUAL "armv7-a")
     # Support for NVPACK
     set(CUDAToolkit_TARGET_NAMES "armv7-linux-androideabi")
-  elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "arm")
+  elseif(_CUDA_TARGET_PROCESSOR MATCHES "arm")
     set(CUDAToolkit_TARGET_NAMES "armv7-linux-gnueabihf")
-  elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64")
+  elseif(_CUDA_TARGET_PROCESSOR MATCHES "aarch64")
     if(ANDROID_ARCH_NAME STREQUAL "arm64")
       set(CUDAToolkit_TARGET_NAMES "aarch64-linux-androideabi")
     elseif (CMAKE_SYSTEM_NAME STREQUAL "QNX")
@@ -952,9 +983,10 @@ if(CMAKE_CROSSCOMPILING)
     else()
       set(CUDAToolkit_TARGET_NAMES "aarch64-linux" "sbsa-linux")
     endif()
-  elseif(CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64")
+  elseif(_CUDA_TARGET_PROCESSOR STREQUAL "x86_64")
     set(CUDAToolkit_TARGET_NAMES "x86_64-linux")
   endif()
+  unset(_CUDA_TARGET_PROCESSOR)
 
   foreach(CUDAToolkit_TARGET_NAME IN LISTS CUDAToolkit_TARGET_NAMES)
     if(EXISTS "${CUDAToolkit_ROOT_DIR}/targets/${CUDAToolkit_TARGET_NAME}")
@@ -1054,7 +1086,7 @@ endif()
 
 #-----------------------------------------------------------------------------
 # Perform version comparison and validate all required variables are set.
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(CUDAToolkit
   REQUIRED_VARS
     CUDAToolkit_INCLUDE_DIRECTORIES
@@ -1203,7 +1235,7 @@ if(CUDAToolkit_FOUND)
   # when CUDA language is disabled
   if(NOT TARGET CUDA::cudart_static_deps)
     add_library(CUDA::cudart_static_deps IMPORTED INTERFACE)
-    if(UNIX AND (CMAKE_C_COMPILER OR CMAKE_CXX_COMPILER))
+    if(UNIX AND (CMAKE_C_COMPILER_LOADED OR CMAKE_CXX_COMPILER_LOADED))
       find_package(Threads REQUIRED)
       target_link_libraries(CUDA::cudart_static_deps INTERFACE Threads::Threads ${CMAKE_DL_LIBS})
     endif()
@@ -1320,7 +1352,9 @@ if(CUDAToolkit_FOUND)
     set(_cmake_cupti_extra_paths extras/CUPTI/lib64/
                                  extras/CUPTI/lib/
                                  ../extras/CUPTI/lib64/
-                                 ../extras/CUPTI/lib/)
+                                 ../extras/CUPTI/lib/
+                                 ../../../extras/CUPTI/lib64/
+                                 ../../../extras/CUPTI/lib/)
     _CUDAToolkit_find_and_add_import_lib(cupti
                                         EXTRA_PATH_SUFFIXES ${_cmake_cupti_extra_paths}
                                         EXTRA_INCLUDE_DIRS "${CUDAToolkit_CUPTI_INCLUDE_DIR}")
@@ -1369,31 +1403,41 @@ if(CUDAToolkit_FOUND)
   _CUDAToolkit_find_and_add_import_lib(nvml ALT nvidia-ml nvml)
   _CUDAToolkit_find_and_add_import_lib(nvml_static ONLY_SEARCH_FOR libnvidia-ml.a libnvml.a)
 
-  if(WIN32)
-    # nvtools can be installed outside the CUDA toolkit directory
-    # so prefer the NVTOOLSEXT_PATH windows only environment variable
-    # In addition on windows the most common name is nvToolsExt64_1
-    find_library(CUDA_nvToolsExt_LIBRARY
-      NAMES nvToolsExt64_1 nvToolsExt64 nvToolsExt
-      PATHS ENV NVTOOLSEXT_PATH
-            ENV CUDA_PATH
-      PATH_SUFFIXES lib/x64 lib
-    )
-  endif()
-  _CUDAToolkit_find_and_add_import_lib(nvToolsExt ALT nvToolsExt64)
-
   if(CUDAToolkit_VERSION VERSION_GREATER_EQUAL 10.0)
-    # nvToolsExt is deprecated since nvtx3 introduction.
-    # Warn only if the project requires a sufficiently new CMake to make migration possible.
-    if(TARGET CUDA::nvToolsExt AND CMAKE_MINIMUM_REQUIRED_VERSION VERSION_GREATER_EQUAL 3.25)
-      set_property(TARGET CUDA::nvToolsExt PROPERTY DEPRECATION "nvToolsExt has been superseded by nvtx3 since CUDA 10.0 and CMake 3.25. Use CUDA::nvtx3 and include <nvtx3/nvToolsExt.h> instead.")
-    endif()
-
     # Header-only variant. Uses dlopen().
     if(NOT TARGET CUDA::nvtx3)
       add_library(CUDA::nvtx3 INTERFACE IMPORTED)
       target_include_directories(CUDA::nvtx3 SYSTEM INTERFACE "${CUDAToolkit_INCLUDE_DIRS}")
       target_link_libraries(CUDA::nvtx3 INTERFACE ${CMAKE_DL_LIBS})
+    endif()
+  endif()
+  if(CUDAToolkit_VERSION VERSION_GREATER_EQUAL 12.9)
+    if(NOT TARGET CUDA::nvtx3_interop)
+      _CUDAToolkit_find_and_add_import_lib(nvtx3_interop ALT nvtx3interop)
+    endif()
+  endif()
+
+  # nvToolsExt is removed starting in 12.9
+  if(CUDAToolkit_VERSION VERSION_LESS 12.9)
+    if(WIN32)
+      # nvtools can be installed outside the CUDA toolkit directory
+      # so prefer the NVTOOLSEXT_PATH windows only environment variable
+      # In addition on windows the most common name is nvToolsExt64_1
+      find_library(CUDA_nvToolsExt_LIBRARY
+        NAMES nvToolsExt64_1 nvToolsExt64 nvToolsExt
+        PATHS ENV NVTOOLSEXT_PATH
+              ENV CUDA_PATH
+        PATH_SUFFIXES lib/x64 lib
+      )
+    endif()
+    _CUDAToolkit_find_and_add_import_lib(nvToolsExt ALT nvToolsExt64)
+
+    if(CUDAToolkit_VERSION VERSION_GREATER_EQUAL 10.0)
+      # nvToolsExt is deprecated since nvtx3 introduction.
+      # Warn only if the project requires a sufficiently new CMake to make migration possible.
+      if(TARGET CUDA::nvToolsExt AND CMAKE_MINIMUM_REQUIRED_VERSION VERSION_GREATER_EQUAL 3.25)
+        set_property(TARGET CUDA::nvToolsExt PROPERTY DEPRECATION "nvToolsExt has been superseded by nvtx3 since CUDA 10.0 and CMake 3.25. Use CUDA::nvtx3 and include <nvtx3/nvToolsExt.h> instead.")
+      endif()
     endif()
   endif()
 

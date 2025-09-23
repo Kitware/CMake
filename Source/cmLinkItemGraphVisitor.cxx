@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmLinkItemGraphVisitor.h"
 
 #include <map>
@@ -98,7 +98,7 @@ void cmLinkItemGraphVisitor::GetDependencies(cmGeneratorTarget const& target,
                                              std::string const& config,
                                              DependencyMap& dependencies)
 {
-  const auto* implementationLibraries = target.GetLinkImplementationLibraries(
+  auto const* implementationLibraries = target.GetLinkImplementationLibraries(
     config, cmGeneratorTarget::UseTo::Link);
   if (implementationLibraries) {
     for (auto const& lib : implementationLibraries->Libraries) {
@@ -107,7 +107,7 @@ void cmLinkItemGraphVisitor::GetDependencies(cmGeneratorTarget const& target,
     }
   }
 
-  const auto* interfaceLibraries = target.GetLinkInterfaceLibraries(
+  auto const* interfaceLibraries = target.GetLinkInterfaceLibraries(
     config, &target, cmGeneratorTarget::UseTo::Compile);
   if (interfaceLibraries) {
     for (auto const& lib : interfaceLibraries->Libraries) {
@@ -121,7 +121,7 @@ void cmLinkItemGraphVisitor::GetDependencies(cmGeneratorTarget const& target,
   }
 
   std::vector<cmGeneratorTarget*> objectLibraries;
-  target.GetObjectLibrariesCMP0026(objectLibraries);
+  target.GetObjectLibrariesInSources(objectLibraries);
   for (auto const& lib : objectLibraries) {
     auto const& name = lib->GetName();
     if (dependencies.find(name) == dependencies.cend()) {

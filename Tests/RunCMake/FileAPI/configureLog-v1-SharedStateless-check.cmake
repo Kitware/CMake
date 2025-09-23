@@ -7,4 +7,4 @@ set(expect
   )
 check_api("^${expect}$")
 
-check_python(configureLog-v1)
+check_python(configureLog-v1 index)

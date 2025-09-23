@@ -6,4 +6,4 @@ set(expect
   )
 check_api("^${expect}$")
 
-check_python(EmptyClient)
+check_python(EmptyClient index)

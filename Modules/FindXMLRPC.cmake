@@ -1,35 +1,78 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-# file Copyright.txt or https://cmake.org/licensing for details.
+# file LICENSE.rst or https://cmake.org/licensing for details.
 
 #[=======================================================================[.rst:
 FindXMLRPC
 ----------
 
-Find xmlrpc
+Finds the native XML-RPC library for C and C++.  XML-RPC is a standard network
+protocol that enables remote procedure calls (RPC) between systems.  It encodes
+requests and responses in XML and uses HTTP as the transport mechanism.
 
-Find the native XMLRPC headers and libraries.
+Components
+^^^^^^^^^^
 
-::
+The XML-RPC C/C++ library consists of various features (modules) that provide
+specific functionality.  The availability of these features depends on the
+installed XML-RPC library version and system configuration.  Some features also
+have dependencies on others.
 
-  XMLRPC_INCLUDE_DIRS      - where to find xmlrpc.h, etc.
-  XMLRPC_LIBRARIES         - List of libraries when using xmlrpc.
-  XMLRPC_FOUND             - True if xmlrpc found.
+To list the available features on a system, the ``xmlrpc-c-config`` command-line
+utility can be used.
 
-XMLRPC modules may be specified as components for this find module.
-Modules may be listed by running "xmlrpc-c-config".  Modules include:
+In CMake, these features can be specified as components with the
+``find_package()`` command:
 
-::
+.. code-block:: cmake
 
-  c++            C++ wrapper code
-  libwww-client  libwww-based client
-  cgi-server     CGI-based server
-  abyss-server   ABYSS-based server
+  find_package(XMLRPC [COMPONENTS <components>...])
 
-Typical usage:
+Components may be:
 
-::
+``c++2``
+  C++ wrapper API, replacing the legacy ``c++`` feature.
+``c++``
+  The legacy C++ wrapper API (superseded by ``c++2``).
+``client``
+  XML-RPC client functions (also available as the legacy libwww-based feature
+  named ``libwww-client``).
+``cgi-server``
+  CGI-based server functions.
+``abyss-server``
+  Abyss-based server functions.
+``pstream-server``
+  The pstream-based server functions.
+``server-util``
+  Basic server functions (they are automatically included with ``*-server``
+  features).
+``abyss``
+  Abyss HTTP server (not needed with ``abyss-server``).
+``openssl``
+  OpenSSL convenience functions.
 
-  find_package(XMLRPC REQUIRED libwww-client)
+Result Variables
+^^^^^^^^^^^^^^^^
+
+This module defines the following variables:
+
+``XMLRPC_INCLUDE_DIRS``
+  Include directories containing ``xmlrpc.h`` and other headers needed to use
+  the XML-RPC library.
+``XMLRPC_LIBRARIES``
+  List of libraries needed for linking to XML-RPC library and its requested
+  features.
+``XMLRPC_FOUND``
+  Boolean indicating whether the XML-RPC library and all its requested
+  components are found.
+
+Examples
+^^^^^^^^
+
+Finding XML-RPC library and its ``client`` feature to use in the project:
+
+.. code-block:: cmake
+
+  find_package(XMLRPC REQUIRED COMPONENTS client)
 #]=======================================================================]
 
 # First find the config script from which to obtain other values.
@@ -122,8 +165,8 @@ if(XMLRPC_C_FOUND)
 endif()
 
 # Report the results.
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(
+include(FindPackageHandleStandardArgs)
+find_package_handle_standard_args(
     XMLRPC
     REQUIRED_VARS XMLRPC_C_FOUND XMLRPC_LIBRARIES
     FAIL_MESSAGE "XMLRPC was not found. Make sure the entries XMLRPC_* are set.")

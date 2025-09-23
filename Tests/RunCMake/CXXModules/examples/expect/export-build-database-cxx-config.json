@@ -138,7 +138,7 @@
             "-Dfrom_source_option"
           ],
           "object": "PATH:CMakeFiles/export_build_database.dir<CONFIG_DIR>/importable.cxx<OBJEXT>",
-          "private": true,
+          "private": false,
           "provides": {
             "importable": "PATH:<BINARY_DIR>/CMakeFiles/export_build_database.dir<CONFIG_DIR>/importable<BMIEXT>"
           },

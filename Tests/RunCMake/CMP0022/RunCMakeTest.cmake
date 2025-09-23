@@ -1,11 +1,5 @@
 include(RunCMake)
-set(RunCMake_IGNORE_POLICY_VERSION_DEPRECATION ON)
 
-run_cmake(CMP0022-WARN)
-run_cmake(CMP0022-WARN-tll)
-run_cmake(CMP0022-WARN-static)
-run_cmake(CMP0022-WARN-empty-old)
-run_cmake(CMP0022-NOWARN-exe)
 run_cmake(CMP0022-NOWARN-shared)
 run_cmake(CMP0022-NOWARN-static)
 run_cmake(CMP0022-NOWARN-static-NEW)

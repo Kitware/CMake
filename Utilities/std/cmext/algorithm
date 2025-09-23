@@ -2,7 +2,7 @@
 // vim: set ft=cpp:
 
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
 #include <algorithm>
@@ -118,7 +118,7 @@ void append(Container1& v, Container2 const& r)
 {
   std::transform(
     r.begin(), r.end(), std::back_inserter(v),
-    [](const typename Container2::value_type& item) { return item.get(); });
+    [](typename Container2::value_type const& item) { return item.get(); });
 }
 
 template <
@@ -212,8 +212,9 @@ bool contains(Iterator first, Iterator last, Key const& key)
 
 #if defined(__SUNPRO_CC)
 template <typename Range, typename Key>
-auto contains(Range const& range, Key const& key, detail::overload_selector<1>)
-  -> decltype(range.find(key) != range.end())
+auto contains(Range const& range, Key const& key,
+              detail::overload_selector<1>) -> decltype(range.find(key) !=
+                                                        range.end())
 #else
 template <
   typename Range, typename Key,

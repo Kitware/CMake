@@ -39,5 +39,6 @@ The above example can be written in the more concise and more robust form:
   endfunction()
 
 See also :variable:`CMAKE_CURRENT_FUNCTION`,
-:variable:`CMAKE_CURRENT_FUNCTION_LIST_FILE` and
-:variable:`CMAKE_CURRENT_FUNCTION_LIST_LINE`.
+:variable:`CMAKE_CURRENT_FUNCTION_LIST_FILE`,
+:variable:`CMAKE_CURRENT_FUNCTION_LIST_LINE` and
+:variable:`CMAKE_CURRENT_LIST_DIR`.

@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
 #include <memory>
@@ -72,8 +72,8 @@ public:
     Client->bind(server2client, client2server);
     Debugger->bind(client2server, server2client);
   }
-  std::vector<cmListFileFunction> CreateListFileFunctions(const char* str,
-                                                          const char* filename)
+  std::vector<cmListFileFunction> CreateListFileFunctions(char const* str,
+                                                          char const* filename)
   {
     cmMessenger messenger;
     cmListFileBacktrace backtrace;

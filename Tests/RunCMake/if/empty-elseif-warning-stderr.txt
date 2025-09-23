@@ -1,0 +1,5 @@
+CMake Warning \(dev\) at empty-elseif-warning.cmake:3 \(elseif\):
+  ELSEIF called with no arguments, it will be skipped.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:3 \(include\)
+This warning is for project developers.  Use -Wno-dev to suppress it.

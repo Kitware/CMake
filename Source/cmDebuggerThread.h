@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
@@ -46,7 +46,7 @@ class cmDebuggerThread
 public:
   cmDebuggerThread(int64_t id, std::string name);
   int64_t GetId() const { return this->Id; }
-  const std::string& GetName() const { return this->Name; }
+  std::string const& GetName() const { return this->Name; }
   void PushStackFrame(cmMakefile* mf, std::string const& sourcePath,
                       cmListFileFunction const& lff);
   void PopStackFrame();

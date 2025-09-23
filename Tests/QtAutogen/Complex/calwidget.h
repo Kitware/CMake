@@ -70,8 +70,8 @@ private slots:
   void horizontalHeaderChanged(int index);
   void verticalHeaderChanged(int index);
   void selectedDateChanged();
-  void minimumDateChanged(const QDate& date);
-  void maximumDateChanged(const QDate& date);
+  void minimumDateChanged(QDate const& date);
+  void maximumDateChanged(QDate const& date);
   void weekdayFormatChanged();
   void weekendFormatChanged();
   void reformatHeaders();

@@ -1,0 +1,27 @@
+CMake Warning \(dev\) at ExperimentalWarning\.cmake:[0-9]+ \(find_package\):
+  CMake's support for importing package information in the Common Package
+  Specification format \(via find_package\) is experimental\.  It is meant only
+  for experimentation and feedback to CMake developers\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:3 \(include\)
+This warning is for project developers\.  Use -Wno-dev to suppress it\.
+
+CMake Warning at ExperimentalWarning\.cmake:[0-9]+ \(find_package\):
+  By not providing "FindDoesNotExist\.cmake" in CMAKE_MODULE_PATH this project
+  has asked CMake to find a package configuration file provided by
+  "DoesNotExist", but CMake did not find one\.
+
+  Could not find a package configuration file provided by "DoesNotExist" with
+  any of the following names:
+
+    DoesNotExist\.cps
+    doesnotexist\.cps
+    DoesNotExistConfig\.cmake
+    doesnotexist-config\.cmake
+
+  Add the installation prefix of "DoesNotExist" to CMAKE_PREFIX_PATH or set
+  "DoesNotExist_DIR" to a directory containing one of the above files\.  If
+  "DoesNotExist" provides a separate development package or SDK, be sure it
+  has been installed\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:3 \(include\)

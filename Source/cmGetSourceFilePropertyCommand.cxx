@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmGetSourceFilePropertyCommand.h"
 
 #include <functional>
@@ -16,8 +16,8 @@
 
 namespace GetPropertyCommand {
 bool GetSourceFilePropertyGENERATED(
-  const std::string& name, cmMakefile& mf,
-  const std::function<bool(bool)>& storeResult);
+  std::string const& name, cmMakefile& mf,
+  std::function<bool(bool)> const& storeResult);
 }
 
 bool cmGetSourceFilePropertyCommand(std::vector<std::string> const& args,

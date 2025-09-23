@@ -1,5 +1,5 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-# file Copyright.txt or https://cmake.org/licensing for details.
+# file LICENSE.rst or https://cmake.org/licensing for details.
 
 
 # This module is shared by multiple languages; use include blocker.
@@ -33,10 +33,13 @@ macro(__windows_compiler_clang_gnu lang)
   set(CMAKE_FIND_LIBRARY_PREFIXES "lib" "")
   set(CMAKE_FIND_LIBRARY_SUFFIXES ".dll.a" ".a" ".lib")
   set(CMAKE_SUPPORT_WINDOWS_EXPORT_ALL_SYMBOLS 1)
-  set (CMAKE_LINK_DEF_FILE_FLAG "-Xlinker /DEF:")
+  set(CMAKE_${lang}_LINK_DEF_FILE_FLAG "-Xlinker /DEF:")
+  set(CMAKE_LINK_DEF_FILE_FLAG "${CMAKE_${lang}_LINK_DEF_FILE_FLAG}")
 
   set(CMAKE_${lang}_LINKER_WRAPPER_FLAG "-Xlinker" " ")
   set(CMAKE_${lang}_LINKER_WRAPPER_FLAG_SEP)
+
+  set(CMAKE_${lang}_LINK_MODE DRIVER)
 
   set(CMAKE_${lang}_LINKER_MANIFEST_FLAG " -Xlinker /MANIFESTINPUT:")
   set(CMAKE_${lang}_COMPILE_OPTIONS_WARNING_AS_ERROR "-Werror")
@@ -82,10 +85,10 @@ macro(__windows_compiler_clang_gnu lang)
   set(CMAKE_${lang}_ARCHIVE_APPEND "<CMAKE_AR> q <TARGET> <LINK_FLAGS> <OBJECTS>")
   set(CMAKE_${lang}_ARCHIVE_FINISH "<CMAKE_RANLIB> <TARGET>")
   set(CMAKE_${lang}_CREATE_SHARED_LIBRARY
-    "<CMAKE_${lang}_COMPILER> -nostartfiles -nostdlib <CMAKE_SHARED_LIBRARY_${lang}_FLAGS> <LANGUAGE_COMPILE_FLAGS> <LINK_FLAGS> <CMAKE_SHARED_LIBRARY_CREATE_${lang}_FLAGS> -o <TARGET> ${CMAKE_GNULD_IMAGE_VERSION} -Xlinker /MANIFEST:EMBED -Xlinker /implib:<TARGET_IMPLIB> -Xlinker /pdb:<TARGET_PDB> -Xlinker /version:<TARGET_VERSION_MAJOR>.<TARGET_VERSION_MINOR> <OBJECTS> <LINK_LIBRARIES> <MANIFESTS>")
+    "<CMAKE_${lang}_COMPILER> -nostartfiles -nostdlib <CMAKE_SHARED_LIBRARY_${lang}_FLAGS> <LANGUAGE_COMPILE_FLAGS> <LINK_FLAGS> -o <TARGET> ${CMAKE_GNULD_IMAGE_VERSION} -Xlinker /MANIFEST:EMBED -Xlinker /implib:<TARGET_IMPLIB> -Xlinker /pdb:<TARGET_PDB> -Xlinker /version:<TARGET_VERSION_MAJOR>.<TARGET_VERSION_MINOR> <OBJECTS> <LINK_LIBRARIES> <MANIFESTS>")
   set(CMAKE_${lang}_CREATE_SHARED_MODULE ${CMAKE_${lang}_CREATE_SHARED_LIBRARY})
   set(CMAKE_${lang}_LINK_EXECUTABLE
-    "<CMAKE_${lang}_COMPILER> -nostartfiles -nostdlib <FLAGS> <CMAKE_${lang}_LINK_FLAGS> <LINK_FLAGS> <OBJECTS> -o <TARGET> -Xlinker /MANIFEST:EMBED -Xlinker /implib:<TARGET_IMPLIB> -Xlinker /pdb:<TARGET_PDB> -Xlinker /version:<TARGET_VERSION_MAJOR>.<TARGET_VERSION_MINOR> ${CMAKE_GNULD_IMAGE_VERSION} <LINK_LIBRARIES> <MANIFESTS>")
+    "<CMAKE_${lang}_COMPILER> -nostartfiles -nostdlib <FLAGS> <LINK_FLAGS> <OBJECTS> -o <TARGET> -Xlinker /MANIFEST:EMBED -Xlinker /implib:<TARGET_IMPLIB> -Xlinker /pdb:<TARGET_PDB> -Xlinker /version:<TARGET_VERSION_MAJOR>.<TARGET_VERSION_MINOR> ${CMAKE_GNULD_IMAGE_VERSION} <LINK_LIBRARIES> <MANIFESTS>")
 
   set(CMAKE_${lang}_CREATE_WIN32_EXE "-Xlinker /subsystem:windows")
   set(CMAKE_${lang}_CREATE_CONSOLE_EXE "-Xlinker /subsystem:console")
@@ -114,6 +117,13 @@ macro(__windows_compiler_clang_gnu lang)
     string(APPEND CMAKE_${lang}_FLAGS_MINSIZEREL_INIT " -Os -DNDEBUG${_RTL_FLAGS}")
     string(APPEND CMAKE_${lang}_FLAGS_RELEASE_INIT " -O3 -DNDEBUG${_RTL_FLAGS}")
     string(APPEND CMAKE_${lang}_FLAGS_RELWITHDEBINFO_INIT " -O2 -DNDEBUG${_DBG_FLAGS}${_RTL_FLAGS}")
+
+    # clang-cl accepts -RTC* flags but ignores them.  Simulate this
+    # with the GNU-like drivers by simply passing no flags at all.
+    set(CMAKE_${lang}_COMPILE_OPTIONS_MSVC_RUNTIME_CHECKS_PossibleDataLoss      "")
+    set(CMAKE_${lang}_COMPILE_OPTIONS_MSVC_RUNTIME_CHECKS_StackFrameErrorCheck  "")
+    set(CMAKE_${lang}_COMPILE_OPTIONS_MSVC_RUNTIME_CHECKS_UninitializedVariable "")
+    set(CMAKE_${lang}_COMPILE_OPTIONS_MSVC_RUNTIME_CHECKS_RTCsu                 "")
 
     set(CMAKE_${lang}_COMPILE_OPTIONS_MSVC_DEBUG_INFORMATION_FORMAT_Embedded        -g -Xclang -gcodeview)
     #set(CMAKE_${lang}_COMPILE_OPTIONS_MSVC_DEBUG_INFORMATION_FORMAT_ProgramDatabase) # not supported by Clang
@@ -217,6 +227,8 @@ if("x${CMAKE_C_SIMULATE_ID}" STREQUAL "xMSVC"
       unset(CMAKE_${lang}_COMPILE_OPTIONS_MSVC_DEBUG_INFORMATION_FORMAT_EditAndContinue) # -ZI not supported by Clang
       set(CMAKE_${lang}_COMPILE_OPTIONS_WARNING_AS_ERROR "-WX")
       set(CMAKE_INCLUDE_SYSTEM_FLAG_${lang} "-imsvc")
+
+      set(CMAKE_${lang}_LINK_MODE LINKER)
     endmacro()
   else()
     cmake_policy(GET CMP0091 __WINDOWS_CLANG_CMP0091)
@@ -235,6 +247,14 @@ if("x${CMAKE_C_SIMULATE_ID}" STREQUAL "xMSVC"
     endif()
     unset(__WINDOWS_MSVC_CMP0141)
 
+    cmake_policy(GET CMP0184 __WINDOWS_MSVC_CMP0184)
+    if(__WINDOWS_MSVC_CMP0184 STREQUAL "NEW")
+      set(CMAKE_MSVC_RUNTIME_CHECKS_DEFAULT "$<$<CONFIG:Debug>:StackFrameErrorCheck;UninitializedVariable>")
+    else()
+      set(CMAKE_MSVC_RUNTIME_CHECKS_DEFAULT "")
+    endif()
+    unset(__WINDOWS_MSVC_CMP0184)
+
     set(CMAKE_BUILD_TYPE_INIT Debug)
 
     __enable_llvm_rc_preprocessing("" "-x c")
@@ -248,6 +268,8 @@ else()
   __enable_llvm_rc_preprocessing("" "-x c")
   macro(__windows_compiler_clang_base lang)
     __windows_compiler_gnu(${lang})
+
+    set(CMAKE_${lang}_LINK_MODE DRIVER)
   endmacro()
 endif()
 

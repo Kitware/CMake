@@ -145,7 +145,7 @@ Properties
 
 * Target properties :prop_tgt:`MACHO_COMPATIBILITY_VERSION` and
   :prop_tgt:`MACHO_CURRENT_VERSION` were added to set the
-  ``compatibility_version`` and ``curent_version``, respectively,
+  ``compatibility_version`` and ``current_version``, respectively,
   for Mach-O binaries.  For backwards compatibility, if these properties
   are not set, :prop_tgt:`SOVERSION` and :prop_tgt:`VERSION`
   are used respectively as fallbacks.
@@ -170,7 +170,7 @@ Modules
   CURL's cmake buildsystem.  It also gained a new ``CURL_NO_CURL_CMAKE``
   option to disable this behavior.
 
-* The :module:`FindFLEX` module's ``FLEX_TARGET`` command now runs ``flex``
+* The :module:`FindFLEX` module's ``flex_target()`` command now runs ``flex``
   with :variable:`CMAKE_CURRENT_BINARY_DIR` as the working directory.
   See policy :policy:`CMP0098`.
 

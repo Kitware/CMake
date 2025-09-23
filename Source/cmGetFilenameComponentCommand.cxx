@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmGetFilenameComponentCommand.h"
 
 #include "cmExecutionStatus.h"
@@ -113,6 +113,7 @@ bool cmGetFilenameComponentCommand(std::vector<std::string> const& args,
       // Resolve symlinks if possible
       result = cmSystemTools::GetRealPath(result);
     }
+    result = cmSystemTools::GetActualCaseForPath(result);
   } else {
     std::string err = "unknown component " + args[2];
     status.SetError(err);

@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmLocalGhsMultiGenerator.h"
 
 #include <utility>
@@ -44,8 +44,7 @@ void cmLocalGhsMultiGenerator::ComputeObjectFilenames(
   std::map<cmSourceFile const*, std::string>& mapping,
   cmGeneratorTarget const* gt)
 {
-  std::string dir_max = cmStrCat(this->GetCurrentBinaryDirectory(), '/',
-                                 this->GetTargetDirectory(gt), '/');
+  std::string dir_max = cmStrCat(gt->GetSupportDirectory(), '/');
 
   // Count the number of object files with each name.  Note that
   // filesystem may not be case sensitive.

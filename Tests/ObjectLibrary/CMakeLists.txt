@@ -32,7 +32,7 @@ target_link_libraries(UseABstatic ABstatic)
 # Test module definition file to export object library symbols in the test
 # below if the platform needs and supports it.
 set(ABshared_SRCS $<TARGET_OBJECTS:A>)
-if(CMAKE_LINK_DEF_FILE_FLAG OR NOT WIN32)
+if(CMAKE_C_LINK_DEF_FILE_FLAG OR NOT WIN32)
   list(APPEND ABshared_SRCS $<TARGET_OBJECTS:B> AB.def)
 else()
   set(NO_A NO_A)

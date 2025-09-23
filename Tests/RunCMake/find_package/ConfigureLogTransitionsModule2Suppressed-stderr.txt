@@ -1,0 +1,63 @@
+^NotDefined -> NotFound
+CMake Warning at ConfigureLogTransitionsModule2Suppressed.cmake:[0-9]+ \(find_package\):
+  By not providing "FindViaModule.cmake" in CMAKE_MODULE_PATH this project
+  has asked CMake to find a package configuration file provided by
+  "ViaModule", but CMake did not find one.
+
+  Could not find a package configuration file provided by "ViaModule" with
+  any of the following names:
+
+    ViaModuleConfig.cmake
+    viamodule-config.cmake
+
+  Add the installation prefix of "ViaModule" to CMAKE_PREFIX_PATH or set
+  "ViaModule_DIR" to a directory containing one of the above files.  If
+  "ViaModule" provides a separate development package or SDK, be sure it has
+  been installed.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)
+
+
+NotFound -> NotFound
+CMake Warning at ConfigureLogTransitionsModule2Suppressed.cmake:[0-9]+ \(find_package\):
+  By not providing "FindViaModule.cmake" in CMAKE_MODULE_PATH this project
+  has asked CMake to find a package configuration file provided by
+  "ViaModule", but CMake did not find one.
+
+  Could not find a package configuration file provided by "ViaModule" with
+  any of the following names:
+
+    ViaModuleConfig.cmake
+    viamodule-config.cmake
+
+  Add the installation prefix of "ViaModule" to CMAKE_PREFIX_PATH or set
+  "ViaModule_DIR" to a directory containing one of the above files.  If
+  "ViaModule" provides a separate development package or SDK, be sure it has
+  been installed.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)
+
+
+NotFound -> Found
+Found -> Found
+Found -> NotFound
+CMake Warning at ConfigureLogTransitionsModule2Suppressed.cmake:[0-9]+ \(find_package\):
+  By not providing "FindViaModule.cmake" in CMAKE_MODULE_PATH this project
+  has asked CMake to find a package configuration file provided by
+  "ViaModule", but CMake did not find one.
+
+  Could not find a package configuration file provided by "ViaModule" with
+  any of the following names:
+
+    ViaModuleConfig.cmake
+    viamodule-config.cmake
+
+  Add the installation prefix of "ViaModule" to CMAKE_PREFIX_PATH or set
+  "ViaModule_DIR" to a directory containing one of the above files.  If
+  "ViaModule" provides a separate development package or SDK, be sure it has
+  been installed.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)
+
+
+END$

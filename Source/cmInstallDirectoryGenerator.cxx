@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmInstallDirectoryGenerator.h"
 
 #include <utility>
@@ -77,7 +77,7 @@ void cmInstallDirectoryGenerator::GenerateScriptActions(std::ostream& os,
 }
 
 void cmInstallDirectoryGenerator::GenerateScriptForConfig(
-  std::ostream& os, const std::string& config, Indent indent)
+  std::ostream& os, std::string const& config, Indent indent)
 {
   std::vector<std::string> dirs = this->GetDirectories(config);
 
@@ -85,7 +85,7 @@ void cmInstallDirectoryGenerator::GenerateScriptForConfig(
   cmMakefile const& mf = *this->LocalGenerator->GetMakefile();
   for (std::string& d : dirs) {
     if (!cmSystemTools::FileIsFullPath(d)) {
-      d = cmStrCat(mf.GetCurrentSourceDirectory(), "/", d);
+      d = cmStrCat(mf.GetCurrentSourceDirectory(), '/', d);
     }
   }
 
@@ -93,11 +93,11 @@ void cmInstallDirectoryGenerator::GenerateScriptForConfig(
 }
 
 void cmInstallDirectoryGenerator::AddDirectoryInstallRule(
-  std::ostream& os, const std::string& config, Indent indent,
+  std::ostream& os, std::string const& config, Indent indent,
   std::vector<std::string> const& dirs)
 {
   // Write code to install the directories.
-  const char* no_rename = nullptr;
+  char const* no_rename = nullptr;
   this->AddInstallRule(os, this->GetDestination(config),
                        cmInstallType_DIRECTORY, dirs, this->Optional,
                        this->FilePermissions.c_str(),

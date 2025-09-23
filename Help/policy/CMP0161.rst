@@ -28,9 +28,9 @@ The ``NEW`` behavior for this policy is to use a default value of true for
 
 .. |INTRODUCED_IN_CMAKE_VERSION| replace:: 3.29
 .. |WARNS_OR_DOES_NOT_WARN| replace:: warns
-.. include:: STANDARD_ADVICE.txt
+.. include:: include/STANDARD_ADVICE.rst
 Note that a warning will only be emitted if the
 :variable:`CPACK_BINARY_PRODUCTBUILD <CPACK_BINARY_<GENNAME>>` variable is
 set to true and the project is being built for an Apple platform.
 
-.. include:: DEPRECATED.txt
+.. include:: include/DEPRECATED.rst

@@ -1,4 +1,3 @@
-cmake_policy(SET CMP0048 NEW)
 project(ProjectTwiceTestFirst
   VERSION 1.2.3.4
   DESCRIPTION "Test Project"

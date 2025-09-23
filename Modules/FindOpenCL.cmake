@@ -1,5 +1,5 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-# file Copyright.txt or https://cmake.org/licensing for details.
+# file LICENSE.rst or https://cmake.org/licensing for details.
 
 #[=======================================================================[.rst:
 FindOpenCL
@@ -7,36 +7,59 @@ FindOpenCL
 
 .. versionadded:: 3.1
 
-Finds Open Computing Language (OpenCL)
+Finds Open Computing Language (OpenCL).
 
 .. versionadded:: 3.10
   Detection of OpenCL 2.1 and 2.2.
 
-IMPORTED Targets
+Imported Targets
 ^^^^^^^^^^^^^^^^
 
 .. versionadded:: 3.7
 
-This module defines :prop_tgt:`IMPORTED` target ``OpenCL::OpenCL``, if
-OpenCL has been found.
+This module provides the following :ref:`Imported Targets`, if OpenCL has been
+found:
+
+``OpenCL::OpenCL``
+  Target providing OpenCL usage requirements.
 
 Result Variables
 ^^^^^^^^^^^^^^^^
 
-This module defines the following variables::
+This module defines the following variables:
 
-  OpenCL_FOUND          - True if OpenCL was found
-  OpenCL_INCLUDE_DIRS   - include directories for OpenCL
-  OpenCL_LIBRARIES      - link against this library to use OpenCL
-  OpenCL_VERSION_STRING - Highest supported OpenCL version (eg. 1.2)
-  OpenCL_VERSION_MAJOR  - The major version of the OpenCL implementation
-  OpenCL_VERSION_MINOR  - The minor version of the OpenCL implementation
+``OpenCL_FOUND``
+  True if OpenCL was found.
+``OpenCL_INCLUDE_DIRS``
+  Include directories needed to use OpenCL.
+``OpenCL_LIBRARIES``
+  Libraries needed to link to OpenCL.
+``OpenCL_VERSION_STRING``
+  Highest supported OpenCL version (e.g., ``1.2``).
+``OpenCL_VERSION_MAJOR``
+  The major version of the OpenCL implementation.
+``OpenCL_VERSION_MINOR``
+  The minor version of the OpenCL implementation.
 
-The module will also define two cache variables::
+Cache Variables
+^^^^^^^^^^^^^^^
 
-  OpenCL_INCLUDE_DIR    - the OpenCL include directory
-  OpenCL_LIBRARY        - the path to the OpenCL library
+The following cache variables may also be set:
 
+``OpenCL_INCLUDE_DIR``
+  The OpenCL include directory.
+``OpenCL_LIBRARY``
+  The path to the OpenCL library.
+
+Examples
+^^^^^^^^
+
+Finding OpenCL and linking it to a project target:
+
+.. code-block:: cmake
+
+  find_package(OpenCL)
+  target_link_libraries(project_target PRIVATE OpenCL::OpenCL)
 #]=======================================================================]
 
 set(_OPENCL_x86 "(x86)")
@@ -46,19 +69,19 @@ function(_FIND_OPENCL_VERSION)
   include(CMakePushCheckState)
   set(CMAKE_REQUIRED_QUIET ${OpenCL_FIND_QUIETLY})
 
-  CMAKE_PUSH_CHECK_STATE()
+  cmake_push_check_state()
   foreach(VERSION "3_0" "2_2" "2_1" "2_0" "1_2" "1_1" "1_0")
     set(CMAKE_REQUIRED_INCLUDES "${OpenCL_INCLUDE_DIR}")
 
     if(EXISTS ${OpenCL_INCLUDE_DIR}/Headers/cl.h)
-      CHECK_SYMBOL_EXISTS(
+      check_symbol_exists(
         CL_VERSION_${VERSION}
-        "${OpenCL_INCLUDE_DIR}/Headers/cl.h"
+        "Headers/cl.h"
         OPENCL_VERSION_${VERSION})
     else()
-      CHECK_SYMBOL_EXISTS(
+      check_symbol_exists(
         CL_VERSION_${VERSION}
-        "${OpenCL_INCLUDE_DIR}/CL/cl.h"
+        "CL/cl.h"
         OPENCL_VERSION_${VERSION})
     endif()
 
@@ -73,7 +96,7 @@ function(_FIND_OPENCL_VERSION)
       break()
     endif()
   endforeach()
-  CMAKE_POP_CHECK_STATE()
+  cmake_pop_check_state()
 endfunction()
 
 find_path(OpenCL_INCLUDE_DIR
@@ -173,10 +196,9 @@ unset(_OPENCL_x86)
 set(OpenCL_LIBRARIES ${OpenCL_LIBRARY})
 set(OpenCL_INCLUDE_DIRS ${OpenCL_INCLUDE_DIR})
 
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(
   OpenCL
-  FOUND_VAR OpenCL_FOUND
   REQUIRED_VARS OpenCL_LIBRARY OpenCL_INCLUDE_DIR
   VERSION_VAR OpenCL_VERSION_STRING)
 

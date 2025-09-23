@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "QCMakePresetItemModelTest.h"
 
 #include <utility>
@@ -17,7 +17,9 @@ using QItemDataHash = QHash<Qt::ItemDataRole, QVariant>;
 
 void QCMakePresetItemModelTest::initTestCase()
 {
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
   QMetaType::registerComparators<QCMakePreset>();
+#endif
 }
 
 void QCMakePresetItemModelTest::initTestCase_data()

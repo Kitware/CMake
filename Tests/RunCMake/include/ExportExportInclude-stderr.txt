@@ -4,4 +4,4 @@
     [^
 ]*/Tests/RunCMake/include/ExportExportInclude-build/theTargets\.cmake
 Call Stack \(most recent call first\):
-  CMakeLists\.txt:3 \(include\)$
+  CMakeLists\.txt:[0-9]+ \(include\)$

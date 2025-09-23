@@ -155,7 +155,7 @@ void CubeRenderer::Update(float timeTotal, float timeDelta)
 
 void CubeRenderer::Render()
 {
-  const float midnightBlue[] = { 0.098f, 0.098f, 0.439f, 1.000f };
+  float const midnightBlue[] = { 0.098f, 0.098f, 0.439f, 1.000f };
   m_d3dContext->ClearRenderTargetView(m_renderTargetView.Get(), midnightBlue);
 
   m_d3dContext->ClearDepthStencilView(m_depthStencilView.Get(),

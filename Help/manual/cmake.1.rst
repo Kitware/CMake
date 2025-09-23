@@ -167,12 +167,12 @@ the current working directory (cwd) is used for the other.  For example:
 ============================== ============ ===========
  Command Line                   Source Dir   Build Dir
 ============================== ============ ===========
- ``cmake -B build``             `cwd`        ``build``
+ ``cmake -B build``             *cwd*        ``build``
  ``cmake -B build src``         ``src``      ``build``
  ``cmake -B build -S src``      ``src``      ``build``
- ``cmake src``                  ``src``      `cwd`
- ``cmake build`` (existing)     `loaded`     ``build``
- ``cmake -S src``               ``src``      `cwd`
+ ``cmake src``                  ``src``      *cwd*
+ ``cmake build`` (existing)     *loaded*     ``build``
+ ``cmake -S src``               ``src``      *cwd*
  ``cmake -S src build``         ``src``      ``build``
  ``cmake -S src -B build``      ``src``      ``build``
 ============================== ============ ===========
@@ -203,7 +203,7 @@ Options
 
 .. program:: cmake
 
-.. include:: OPTIONS_BUILD.txt
+.. include:: include/OPTIONS_BUILD.rst
 
 .. option:: --fresh
 
@@ -307,6 +307,16 @@ Options
  When this command line option is given, :variable:`CMAKE_MESSAGE_CONTEXT_SHOW`
  is ignored.
 
+.. option:: --sarif-output=<path>
+
+ .. versionadded:: 4.0
+
+ Enable logging of diagnostic messages produced by CMake in the SARIF format.
+
+ Write diagnostic messages to a SARIF file at the path specified. Projects can
+ also set :variable:`CMAKE_EXPORT_SARIF` to ``ON`` to enable this feature for a
+ build tree.
+
 .. option:: --debug-trycompile
 
  Do not delete the files and directories created for
@@ -395,7 +405,7 @@ Options
 
    ``json-v1``
      Prints each line as a separate JSON document. Each document is
-     separated by a newline ( ``\n`` ). It is guaranteed that no
+     separated by a newline (``\n``). It is guaranteed that no
      newline characters will be present inside a JSON document.
 
      .. code-block:: json
@@ -512,6 +522,14 @@ Options
  Ignore target property :prop_tgt:`COMPILE_WARNING_AS_ERROR` and variable
  :variable:`CMAKE_COMPILE_WARNING_AS_ERROR`, preventing warnings from being
  treated as errors on compile.
+
+.. option:: --link-no-warning-as-error
+
+ .. versionadded:: 4.0
+
+ Ignore target property :prop_tgt:`LINK_WARNING_AS_ERROR` and variable
+ :variable:`CMAKE_LINK_WARNING_AS_ERROR`, preventing warnings from being
+ treated as errors on link.
 
 .. option:: --profiling-output=<path>
 
@@ -694,7 +712,7 @@ following options:
   specific cache variable will be evaluated to decide, if package restoration
   should be performed.
 
-  When using the Visual Studio generator, package references are defined
+  When using :ref:`Visual Studio Generators`, package references are defined
   using the :prop_tgt:`VS_PACKAGE_REFERENCES` property. Package references
   are restored using NuGet. It can be disabled by setting the
   ``CMAKE_VS_NUGET_PACKAGE_RESTORE`` variable to ``OFF``.
@@ -717,6 +735,19 @@ following options:
   Pass remaining options to the native tool.
 
 Run :option:`cmake --build` with no options for quick help.
+
+Generator-Specific Build Tool Behavior
+--------------------------------------
+
+``cmake --build`` has special behavior with some generators:
+
+:generator:`Xcode`
+
+  .. versionadded:: 4.1
+
+    If a third-party tool has written a ``.xcworkspace`` next to
+    the CMake-generated ``.xcodeproj``, ``cmake --build`` drives
+    the build through the workspace instead.
 
 Install a Project
 =================
@@ -1371,14 +1402,51 @@ CMake provides a pkg-config like helper for Makefile-based projects:
 
   cmake --find-package [<options>]
 
-It searches a package using :command:`find_package()` and prints the
-resulting flags to stdout.  This can be used instead of pkg-config
-to find installed libraries in plain Makefile-based projects or in
-autoconf-based projects (via ``share/aclocal/cmake.m4``).
-
 .. note::
   This mode is not well-supported due to some technical limitations.
   It is kept for compatibility but should not be used in new projects.
+
+.. option:: --find-package
+
+  It searches a package using the :command:`find_package` command and prints the
+  resulting flags to stdout.  This can be used instead of pkg-config to find
+  installed libraries in plain Makefile-based projects or in Autoconf-based
+  projects, using auxiliary macros installed in ``share/aclocal/cmake.m4`` on
+  the system.
+
+  When using this option, the following variables are expected:
+
+  ``NAME``
+    Name of the package as called in ``find_package(<PackageName>)``.
+
+  ``COMPILER_ID``
+    :variable:`Compiler ID <CMAKE_<LANG>_COMPILER_ID>` used for searching the
+    package, i.e. GNU/Intel/Clang/MSVC, etc.
+
+  ``LANGUAGE``
+    Language used for searching the package, i.e. C/CXX/Fortran/ASM, etc.
+
+  ``MODE``
+    The package search mode.  Value can be one of:
+
+    ``EXIST``
+      Only checks for existence of the given package.
+
+    ``COMPILE``
+      Prints the flags needed for compiling an object file which uses the given
+      package.
+
+    ``LINK``
+      Prints the flags needed for linking when using the given package.
+
+  ``SILENT``
+    (Optional) If TRUE, find result message is not printed.
+
+  For example:
+
+  .. code-block:: shell
+
+    cmake --find-package -DNAME=CURL -DCOMPILER_ID=GNU -DLANGUAGE=C -DMODE=LINK
 
 .. _`Workflow Mode`:
 
@@ -1443,7 +1511,7 @@ To print selected pages from the CMake documentation, use
 
 with one of the following options:
 
-.. include:: OPTIONS_HELP.txt
+.. include:: include/OPTIONS_HELP.rst
 
 To view the presets available for a project, use
 
@@ -1466,4 +1534,4 @@ or another error condition, then a non-zero exit code is returned.
 See Also
 ========
 
-.. include:: LINKS.txt
+.. include:: include/LINKS.rst

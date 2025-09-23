@@ -1,0 +1,3 @@
+Error: C-STAT static analysis reported failure:
+stdout from bad command line arg '-bad'
+stderr from bad command line arg '-bad'

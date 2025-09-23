@@ -1,0 +1,11 @@
+CMake Error in cps/[Tt]ransitive[Mm]issing[Cc][Mm]ake\.cps:
+  Found package configuration file:
+(
+    [^
+]*/Tests/RunCMake/find_package-CPS/cmake/cmaketestpackage-config.cmake)+
+
+  but the following required targets were not found:[
+ ]+CMakeTestPackage::DoesNotExist
+Call Stack \(most recent call first\):
+  MissingTransitiveComponentCMake\.cmake:[0-9]+ \(find_package\)
+  CMakeLists\.txt:[0-9]+ \(include\)

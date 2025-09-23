@@ -3,7 +3,7 @@ class
 #ifdef _WIN32
   __declspec(dllexport)
 #endif
-    Foo
+  Foo
 {
 public:
   int foo();

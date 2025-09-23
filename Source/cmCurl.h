@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
@@ -11,12 +11,17 @@
 
 #include <cm3p/curl/curl.h>
 
-void cmCurlInitOnce();
+// curl versions before 7.87.0 did not provide CURL_WRITEFUNC_ERROR
+#if defined(LIBCURL_VERSION_NUM) && LIBCURL_VERSION_NUM < 0x075700
+#  define CURL_WRITEFUNC_ERROR 0xFFFFFFFF
+#endif
+
 cm::optional<int> cmCurlParseTLSVersion(cm::string_view tls_version);
 cm::optional<std::string> cmCurlPrintTLSVersion(int curl_tls_version);
-std::string cmCurlSetCAInfo(::CURL* curl, const std::string& cafile = {});
-std::string cmCurlSetNETRCOption(::CURL* curl, const std::string& netrc_level,
-                                 const std::string& netrc_file);
+std::string cmCurlSetCAInfo(::CURL* curl, std::string const& cafile = {});
+std::string cmCurlSetNETRCOption(::CURL* curl, std::string const& netrc_level,
+                                 std::string const& netrc_file);
 std::string cmCurlFixFileURL(std::string url);
 
+::CURLcode cm_curl_global_init(long flags);
 ::CURL* cm_curl_easy_init();

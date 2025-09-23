@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmMakefileProfilingData.h"
 
 #include <chrono>
@@ -16,7 +16,7 @@
 #include "cmSystemTools.h"
 
 cmMakefileProfilingData::cmMakefileProfilingData(
-  const std::string& profileStream)
+  std::string const& profileStream)
 {
   std::ios::openmode omode = std::ios::out | std::ios::trunc;
   this->ProfileStream.open(profileStream.c_str(), omode);
@@ -42,8 +42,8 @@ cmMakefileProfilingData::~cmMakefileProfilingData() noexcept
   }
 }
 
-void cmMakefileProfilingData::StartEntry(const std::string& category,
-                                         const std::string& name,
+void cmMakefileProfilingData::StartEntry(std::string const& category,
+                                         std::string const& name,
                                          cm::optional<Json::Value> args)
 {
   /* Do not try again if we previously failed to write to output. */
@@ -107,8 +107,8 @@ void cmMakefileProfilingData::StopEntry()
 }
 
 cmMakefileProfilingData::RAII::RAII(cmMakefileProfilingData& data,
-                                    const std::string& category,
-                                    const std::string& name,
+                                    std::string const& category,
+                                    std::string const& name,
                                     cm::optional<Json::Value> args)
   : Data(&data)
 {

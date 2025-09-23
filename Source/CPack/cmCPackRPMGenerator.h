@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
@@ -59,15 +59,15 @@ protected:
    * Special case of component install where all
    * components will be put in a single installer.
    */
-  int PackageComponentsAllInOne(const std::string& compInstDirName);
-  const char* GetOutputExtension() override { return ".rpm"; }
-  std::string GetSanitizedDirOrFileName(const std::string& name,
+  int PackageComponentsAllInOne(std::string const& compInstDirName);
+  char const* GetOutputExtension() override { return ".rpm"; }
+  std::string GetSanitizedDirOrFileName(std::string const& name,
                                         bool isFullName = true) const override;
   bool SupportsComponentInstallation() const override;
   std::string GetComponentInstallSuffix(
-    const std::string& componentName) override;
+    std::string const& componentName) override;
   std::string GetComponentInstallDirNameSuffix(
-    const std::string& componentName) override;
+    std::string const& componentName) override;
 
   void AddGeneratedPackageNames();
 };

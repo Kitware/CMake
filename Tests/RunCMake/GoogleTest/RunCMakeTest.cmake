@@ -401,3 +401,30 @@ if(RunCMake_GENERATOR_IS_MULTI_CONFIG)
   message(STATUS "Testing PRE_TEST discovery multi configuration...")
   run_GoogleTest_discovery_multi_config()
 endif()
+
+block(SCOPE_FOR VARIABLES)
+  # Use a single build tree for a few tests without cleaning.
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/WorkDirWithSpaces-build)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  if(NOT RunCMake_GENERATOR_IS_MULTI_CONFIG)
+    set(RunCMake_TEST_OPTIONS -DCMAKE_BUILD_TYPE=Debug)
+  endif()
+  file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
+  file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
+
+  run_cmake(WorkDirWithSpaces)
+
+  run_cmake_command(WorkDirWithSpaces-build
+    ${CMAKE_COMMAND}
+    --build .
+    --config Debug
+    --target test_workdir
+  )
+
+  run_cmake_command(WorkDirWithSpaces-test
+    ${CMAKE_CTEST_COMMAND}
+    -C Debug
+    --no-label-summary
+    --output-on-failure
+  )
+endblock()

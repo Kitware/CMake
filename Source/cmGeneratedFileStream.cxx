@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmGeneratedFileStream.h"
 
 #include <cstdio>
@@ -139,7 +139,7 @@ void cmGeneratedFileStreamBase::Open(std::string const& name)
   } else {
     char buf[64];
     snprintf(buf, sizeof(buf), "tmp%05x",
-             cmSystemTools::RandomSeed() & 0xFFFFF);
+             cmSystemTools::RandomNumber() & 0xFFFFF);
     this->TempName += buf;
   }
 
@@ -203,7 +203,7 @@ int cmGeneratedFileStreamBase::CompressFile(std::string const& oldname,
     return 0;
   }
   size_t res;
-  const size_t BUFFER_SIZE = 1024;
+  size_t const BUFFER_SIZE = 1024;
   char buffer[BUFFER_SIZE];
   while ((res = fread(buffer, 1, BUFFER_SIZE, ifs)) > 0) {
     if (!gzwrite(gf, buffer, static_cast<int>(res))) {
@@ -230,7 +230,7 @@ int cmGeneratedFileStreamBase::RenameFile(std::string const& oldname,
   return cmSystemTools::RenameFile(oldname, newname);
 }
 
-void cmGeneratedFileStream::SetName(const std::string& fname)
+void cmGeneratedFileStream::SetName(std::string const& fname)
 {
   this->Name = cmSystemTools::CollapseFullPath(fname);
 }

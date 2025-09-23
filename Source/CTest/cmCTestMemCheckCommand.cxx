@@ -1,50 +1,66 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmCTestMemCheckCommand.h"
 
+#include <utility>
+
+#include <cm/memory>
 #include <cmext/string_view>
 
+#include "cmArgumentParser.h"
 #include "cmCTest.h"
 #include "cmCTestMemCheckHandler.h"
+#include "cmCTestTestHandler.h"
+#include "cmExecutionStatus.h"
 #include "cmMakefile.h"
 
-void cmCTestMemCheckCommand::BindArguments()
+std::unique_ptr<cmCTestTestHandler>
+cmCTestMemCheckCommand::InitializeActualHandler(
+  HandlerArguments& args, cmExecutionStatus& status) const
 {
-  this->cmCTestTestCommand::BindArguments();
-  this->Bind("DEFECT_COUNT"_s, this->DefectCount);
-}
-
-cmCTestTestHandler* cmCTestMemCheckCommand::InitializeActualHandler()
-{
-  cmCTestMemCheckHandler* handler = this->CTest->GetMemCheckHandler();
-  handler->Initialize();
+  cmMakefile& mf = status.GetMakefile();
+  auto handler = cm::make_unique<cmCTestMemCheckHandler>(this->CTest);
 
   this->CTest->SetCTestConfigurationFromCMakeVariable(
-    this->Makefile, "MemoryCheckType", "CTEST_MEMORYCHECK_TYPE", this->Quiet);
+    &mf, "MemoryCheckType", "CTEST_MEMORYCHECK_TYPE", args.Quiet);
   this->CTest->SetCTestConfigurationFromCMakeVariable(
-    this->Makefile, "MemoryCheckSanitizerOptions",
-    "CTEST_MEMORYCHECK_SANITIZER_OPTIONS", this->Quiet);
+    &mf, "MemoryCheckSanitizerOptions", "CTEST_MEMORYCHECK_SANITIZER_OPTIONS",
+    args.Quiet);
   this->CTest->SetCTestConfigurationFromCMakeVariable(
-    this->Makefile, "MemoryCheckCommand", "CTEST_MEMORYCHECK_COMMAND",
-    this->Quiet);
+    &mf, "MemoryCheckCommand", "CTEST_MEMORYCHECK_COMMAND", args.Quiet);
   this->CTest->SetCTestConfigurationFromCMakeVariable(
-    this->Makefile, "MemoryCheckCommandOptions",
-    "CTEST_MEMORYCHECK_COMMAND_OPTIONS", this->Quiet);
+    &mf, "MemoryCheckCommandOptions", "CTEST_MEMORYCHECK_COMMAND_OPTIONS",
+    args.Quiet);
   this->CTest->SetCTestConfigurationFromCMakeVariable(
-    this->Makefile, "MemoryCheckSuppressionFile",
-    "CTEST_MEMORYCHECK_SUPPRESSIONS_FILE", this->Quiet);
+    &mf, "MemoryCheckSuppressionFile", "CTEST_MEMORYCHECK_SUPPRESSIONS_FILE",
+    args.Quiet);
 
-  handler->SetQuiet(this->Quiet);
-  return handler;
+  handler->SetQuiet(args.Quiet);
+  return std::unique_ptr<cmCTestTestHandler>(std::move(handler));
 }
 
 void cmCTestMemCheckCommand::ProcessAdditionalValues(
-  cmCTestGenericHandler* handler)
+  cmCTestGenericHandler* handler, HandlerArguments const& arguments,
+  cmExecutionStatus& status) const
 {
-  if (!this->DefectCount.empty()) {
-    this->Makefile->AddDefinition(
-      this->DefectCount,
+  cmMakefile& mf = status.GetMakefile();
+  auto const& args = static_cast<MemCheckArguments const&>(arguments);
+  if (!args.DefectCount.empty()) {
+    mf.AddDefinition(
+      args.DefectCount,
       std::to_string(
         static_cast<cmCTestMemCheckHandler*>(handler)->GetDefectCount()));
   }
+}
+
+bool cmCTestMemCheckCommand::InitialPass(std::vector<std::string> const& args,
+                                         cmExecutionStatus& status) const
+{
+  static auto const parser =
+    cmArgumentParser<MemCheckArguments>{ MakeTestParser<MemCheckArguments>() }
+      .Bind("DEFECT_COUNT"_s, &MemCheckArguments::DefectCount);
+
+  return this->Invoke(parser, args, status, [&](MemCheckArguments& a) {
+    return this->ExecuteHandlerCommand(a, status);
+  });
 }

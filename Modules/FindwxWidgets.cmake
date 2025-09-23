@@ -1,5 +1,5 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-# file Copyright.txt or https://cmake.org/licensing for details.
+# file LICENSE.rst or https://cmake.org/licensing for details.
 
 #[=======================================================================[.rst:
 FindwxWidgets
@@ -58,7 +58,7 @@ options that need to be passed to the wx-config utility.  For example,
 to use the base toolkit found in the /usr/local path, set the variable
 (before calling the FIND_PACKAGE command) as such:
 
-::
+.. code-block:: cmake
 
   set(wxWidgets_CONFIG_OPTIONS --toolkit=base --prefix=/usr)
 
@@ -93,7 +93,7 @@ and unix style:
 
 Sample usage:
 
-::
+.. code-block:: cmake
 
    # Note that for MinGW users the order of libs is important!
    find_package(wxWidgets COMPONENTS gl core base OPTIONAL_COMPONENTS net)
@@ -107,14 +107,14 @@ Sample usage:
 
 If wxWidgets is required (i.e., not an optional part):
 
-::
+.. code-block:: cmake
 
    find_package(wxWidgets REQUIRED gl core base OPTIONAL_COMPONENTS net)
    include(${wxWidgets_USE_FILE})
    # and for each of your dependent executable/library targets:
    target_link_libraries(<YourTarget> ${wxWidgets_LIBRARIES})
 
-Imported targets
+Imported Targets
 ^^^^^^^^^^^^^^^^
 
 .. versionadded:: 3.27
@@ -187,9 +187,6 @@ macro(DBG_MSG_V _MSG)
 #  message(STATUS
 #    "${CMAKE_CURRENT_LIST_FILE}(${CMAKE_CURRENT_LIST_LINE}): ${_MSG}")
 endmacro()
-
-cmake_policy(PUSH)
-cmake_policy(SET CMP0057 NEW) # if IN_LIST
 
 # Clear return values in case the module is loaded more than once.
 set(wxWidgets_FOUND FALSE)
@@ -966,6 +963,10 @@ if(wxWidgets_FIND_STYLE STREQUAL "unix")
     foreach(_wx_lib_ ${wxWidgets_LIBRARIES})
       if("${_wx_lib_}" MATCHES "^-l(.*)")
         set(_wx_lib_name "${CMAKE_MATCH_1}")
+        if(_wx_lib_name STREQUAL "atomic")
+          continue()
+        endif()
+
         unset(_wx_lib_found CACHE)
         find_library(_wx_lib_found NAMES ${_wx_lib_name} HINTS ${wxWidgets_LIBRARY_DIRS})
         if(_wx_lib_found STREQUAL _wx_lib_found-NOTFOUND)
@@ -1003,7 +1004,7 @@ DBG_MSG("wxWidgets_USE_FILE        : ${wxWidgets_USE_FILE}")
 #=====================================================================
 #=====================================================================
 
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(FindPackageHandleStandardArgs)
 
 # FIXME: set wxWidgets_<comp>_FOUND for wx-config branch
 #        and use HANDLE_COMPONENTS on Unix too
@@ -1060,8 +1061,8 @@ find_program(wxWidgets_wxrc_EXECUTABLE
 #
 # NOTE: This is a generic piece of code that should be renamed to
 # SPLIT_ARGUMENTS_ON and put in a file serving the same purpose as
-# FindPackageStandardArgs.cmake. At the time of this writing
-# FindQt4.cmake has a QT4_EXTRACT_OPTIONS, which I basically copied
+# FindPackageHandleStandardArgs.cmake. At the time of this writing
+# FindQt4.cmake has a qt4_extract_options(), which I basically copied
 # here a bit more generalized. So, there are already two find modules
 # using this approach.
 #
@@ -1241,5 +1242,3 @@ function(WXWIDGETS_ADD_RESOURCES _outfiles)
 
   set(${_outfiles} ${${_outfiles}} PARENT_SCOPE)
 endfunction()
-
-cmake_policy(POP)

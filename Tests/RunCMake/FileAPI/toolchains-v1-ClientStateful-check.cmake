@@ -8,4 +8,4 @@ set(expect
   )
 check_api("^${expect}$")
 
-check_python(toolchains-v1)
+check_python(toolchains-v1 index)

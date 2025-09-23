@@ -37,7 +37,7 @@ Synopsis
 
   `Filesystem`_
     file({`GLOB`_ | `GLOB_RECURSE`_} <out-var> [...] <globbing-expr>...)
-    file(`MAKE_DIRECTORY`_ <directories>...)
+    file(`MAKE_DIRECTORY`_ <directories>... [...])
     file({`REMOVE`_ | `REMOVE_RECURSE`_ } <files>...)
     file(`RENAME`_ <oldname> <newname> [...])
     file(`COPY_FILE`_ <oldname> <newname> [...])
@@ -211,7 +211,7 @@ Writing
          [CONDITION <expression>] [TARGET <target>]
          [NO_SOURCE_PERMISSIONS | USE_SOURCE_PERMISSIONS |
           FILE_PERMISSIONS <permissions>...]
-         [NEWLINE_STYLE [UNIX|DOS|WIN32|LF|CRLF] ])
+         [NEWLINE_STYLE [UNIX|DOS|WIN32|LF|CRLF]])
 
   The options are:
 
@@ -293,7 +293,7 @@ Writing
   file(CONFIGURE OUTPUT <output-file>
        CONTENT <content>
        [ESCAPE_QUOTES] [@ONLY]
-       [NEWLINE_STYLE [UNIX|DOS|WIN32|LF|CRLF] ])
+       [NEWLINE_STYLE [UNIX|DOS|WIN32|LF|CRLF]])
   :target: CONFIGURE
 
   .. versionadded:: 3.18
@@ -402,7 +402,8 @@ Filesystem
 .. signature::
   file(MAKE_DIRECTORY <directories>... [RESULT <result>])
 
-  Create the given directories and their parents as needed.
+  Create the given directories and their parents as needed.  Relative input
+  paths are evaluated with respect to the current source directory.
 
   The options are:
 
@@ -1336,7 +1337,7 @@ Handling Runtime Binaries
     the actual path to ``objdump``, ``dumpbin``, or ``otool``.
 
     If this variable is not specified, it is determined by the value of
-    ``CMAKE_OBJDUMP`` if set, else by system introspection.
+    :variable:`CMAKE_OBJDUMP` variable if set, else by system introspection.
 
     .. versionadded:: 3.18
-      Use ``CMAKE_OBJDUMP`` if set.
+      Uses :variable:`CMAKE_OBJDUMP` if set.

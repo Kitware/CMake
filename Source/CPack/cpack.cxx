@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 
 #include <algorithm>
 #include <cstddef>
@@ -24,7 +24,6 @@
 #include "cmCPackGeneratorFactory.h"
 #include "cmCPackLog.h"
 #include "cmCommandLineArgument.h"
-#include "cmConsoleBuf.h"
 #include "cmDocumentation.h"
 #include "cmDocumentationEntry.h"
 #include "cmGlobalGenerator.h"
@@ -33,22 +32,23 @@
 #include "cmMakefile.h"
 #include "cmState.h"
 #include "cmStateSnapshot.h"
+#include "cmStdIoConsole.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmValue.h"
 #include "cmake.h"
 
 namespace {
-const cmDocumentationEntry cmDocumentationName = {
+cmDocumentationEntry const cmDocumentationName = {
   {},
   "  cpack - Packaging driver provided by CMake."
 };
 
-const cmDocumentationEntry cmDocumentationUsage = { {}, "  cpack [options]" };
+cmDocumentationEntry const cmDocumentationUsage = { {}, "  cpack [options]" };
 
-const cmDocumentationEntry cmDocumentationOptions[14] = {
+cmDocumentationEntry const cmDocumentationOptions[14] = {
   { "-G <generators>", "Override/define CPACK_GENERATOR" },
-  { "-C <Configuration>", "Specify the project configuration" },
+  { "-C <Configurations>", "Specify the project configuration(s)" },
   { "-D <var>=<value>", "Set a CPack variable." },
   { "--config <configFile>", "Specify the config file." },
   { "-V,--verbose", "Enable verbose output" },
@@ -63,22 +63,22 @@ const cmDocumentationEntry cmDocumentationOptions[14] = {
   { "--list-presets", "List available package presets" }
 };
 
-void cpackProgressCallback(const std::string& message, float /*unused*/)
+void cpackProgressCallback(std::string const& message, float /*unused*/)
 {
   std::cout << "-- " << message << '\n';
 }
 
 std::vector<cmDocumentationEntry> makeGeneratorDocs(
-  const cmCPackGeneratorFactory& gf)
+  cmCPackGeneratorFactory const& gf)
 {
-  const auto& generators = gf.GetGeneratorsList();
+  auto const& generators = gf.GetGeneratorsList();
 
   std::vector<cmDocumentationEntry> docs;
   docs.reserve(generators.size());
 
   std::transform(
     generators.cbegin(), generators.cend(), std::back_inserter(docs),
-    [](const std::decay<decltype(generators)>::type::value_type& gen) {
+    [](std::decay<decltype(generators)>::type::value_type const& gen) {
       return cmDocumentationEntry{ gen.first, gen.second };
     });
   return docs;
@@ -89,11 +89,7 @@ std::vector<cmDocumentationEntry> makeGeneratorDocs(
 // this is CPack.
 int main(int argc, char const* const* argv)
 {
-  cmSystemTools::EnsureStdPipes();
-
-  // Replace streambuf so we can output Unicode to console
-  cmConsoleBuf consoleBuf;
-  consoleBuf.SetUTF8Pipes();
+  cm::StdIo::Console console;
 
   cmsys::Encoding::CommandLineArguments args =
     cmsys::Encoding::CommandLineArguments::Main(argc, argv);
@@ -113,7 +109,7 @@ int main(int argc, char const* const* argv)
   log.SetOutputPrefix("CPack: ");
   log.SetVerbosePrefix("CPack Verbose: ");
 
-  if (cmSystemTools::GetCurrentWorkingDirectory().empty()) {
+  if (cmSystemTools::GetLogicalWorkingDirectory().empty()) {
     cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
                 "Current working directory cannot be established.\n");
     return 1;
@@ -139,27 +135,27 @@ int main(int argc, char const* const* argv)
 
   std::map<std::string, std::string> definitions;
 
-  auto const verboseLambda = [&log](const std::string&, cmake*,
+  auto const verboseLambda = [&log](std::string const&, cmake*,
                                     cmMakefile*) -> bool {
     log.SetVerbose(true);
     cmCPack_Log(&log, cmCPackLog::LOG_OUTPUT, "Enable Verbose\n");
     return true;
   };
 
-  auto const debugLambda = [&log](const std::string&, cmake*,
+  auto const debugLambda = [&log](std::string const&, cmake*,
                                   cmMakefile*) -> bool {
     log.SetDebug(true);
     cmCPack_Log(&log, cmCPackLog::LOG_OUTPUT, "Enable Debug\n");
     return true;
   };
 
-  auto const traceLambda = [](const std::string&, cmake* state,
+  auto const traceLambda = [](std::string const&, cmake* state,
                               cmMakefile*) -> bool {
     state->SetTrace(true);
     return true;
   };
 
-  auto const traceExpandLambda = [](const std::string&, cmake* state,
+  auto const traceExpandLambda = [](std::string const&, cmake* state,
                                     cmMakefile*) -> bool {
     state->SetTrace(true);
     state->SetTraceExpand(true);
@@ -208,7 +204,8 @@ int main(int argc, char const* const* argv)
     CommandArgument{ "--list-presets", CommandArgument::Values::Zero,
                      CommandArgument::setToTrue(listPresets) },
     CommandArgument{ "-D", CommandArgument::Values::One,
-                     [&log, &definitions](const std::string& arg, cmake*,
+                     CommandArgument::RequiresSeparator::No,
+                     [&log, &definitions](std::string const& arg, cmake*,
                                           cmMakefile*) -> bool {
                        std::string value = arg;
                        size_t pos = value.find_first_of('=');
@@ -254,12 +251,12 @@ int main(int argc, char const* const* argv)
 
   // Set up presets
   if (!preset.empty() || listPresets) {
-    const auto workingDirectory = cmSystemTools::GetCurrentWorkingDirectory();
+    auto const workingDirectory = cmSystemTools::GetLogicalWorkingDirectory();
 
     auto const presetGeneratorsPresent =
-      [&generators](const cmCMakePresetsGraph::PackagePreset& p) {
+      [&generators](cmCMakePresetsGraph::PackagePreset const& p) {
         return std::all_of(p.Generators.begin(), p.Generators.end(),
-                           [&generators](const std::string& gen) {
+                           [&generators](std::string const& gen) {
                              return generators.GetGeneratorsList().count(
                                       gen) != 0;
                            });
@@ -349,7 +346,8 @@ int main(int argc, char const* const* argv)
       return 1;
     }
 
-    cmSystemTools::ChangeDirectory(expandedConfigurePreset->BinaryDir);
+    cmSystemTools::SetLogicalWorkingDirectory(
+      expandedConfigurePreset->BinaryDir);
 
     auto presetEnvironment = expandedPreset->Environment;
     for (auto const& var : presetEnvironment) {
@@ -405,9 +403,9 @@ int main(int argc, char const* const* argv)
 
   bool cpackConfigFileSpecified = true;
   if (!cpackConfigFile.empty()) {
-    cpackConfigFile = cmSystemTools::CollapseFullPath(cpackConfigFile);
+    cpackConfigFile = cmSystemTools::ToNormalizedPathOnDisk(cpackConfigFile);
   } else {
-    cpackConfigFile = cmStrCat(cmSystemTools::GetCurrentWorkingDirectory(),
+    cpackConfigFile = cmStrCat(cmSystemTools::GetLogicalWorkingDirectory(),
                                "/CPackConfig.cmake");
     cpackConfigFileSpecified = false;
   }
@@ -479,7 +477,7 @@ int main(int argc, char const* const* argv)
     if (!cpackProjectDirectory.empty()) {
       // The value has been set on the command line.  Ensure it is absolute.
       cpackProjectDirectory =
-        cmSystemTools::CollapseFullPath(cpackProjectDirectory);
+        cmSystemTools::ToNormalizedPathOnDisk(cpackProjectDirectory);
     } else {
       // The value has not been set on the command line.  Check config file.
       if (cmValue pd = globalMF.GetDefinition("CPACK_PACKAGE_DIRECTORY")) {
@@ -487,7 +485,7 @@ int main(int argc, char const* const* argv)
         cpackProjectDirectory = cmSystemTools::CollapseFullPath(*pd);
       } else {
         // Default to the current working directory.
-        cpackProjectDirectory = cmSystemTools::GetCurrentWorkingDirectory();
+        cpackProjectDirectory = cmSystemTools::GetLogicalWorkingDirectory();
       }
     }
     globalMF.AddDefinition("CPACK_PACKAGE_DIRECTORY", cpackProjectDirectory);

@@ -14,7 +14,7 @@
 
 namespace {
 
-cmGccDepfileContent readPlainDepfile(const char* filePath)
+cmGccDepfileContent readPlainDepfile(char const* filePath)
 {
   cmGccDepfileContent result;
   cmsys::ifstream is(filePath);
@@ -47,8 +47,8 @@ cmGccDepfileContent readPlainDepfile(const char* filePath)
   return result;
 }
 
-bool compare(const std::vector<std::string>& actual,
-             const std::vector<std::string>& expected, const char* msg)
+bool compare(std::vector<std::string> const& actual,
+             std::vector<std::string> const& expected, char const* msg)
 {
   if (actual.size() != expected.size()) {
     std::cerr << msg << "expected " << expected.size() << " entries."
@@ -67,8 +67,8 @@ bool compare(const std::vector<std::string>& actual,
   return true;
 }
 
-bool compare(const cmGccDepfileContent& actual,
-             const cmGccDepfileContent& expected)
+bool compare(cmGccDepfileContent const& actual,
+             cmGccDepfileContent const& expected)
 {
   if (actual.size() != expected.size()) {
     std::cerr << "Expected " << expected.size() << " entries." << std::endl
@@ -84,10 +84,10 @@ bool compare(const cmGccDepfileContent& actual,
   return true;
 }
 
-void dump(const char* label, const cmGccDepfileContent& dfc)
+void dump(char const* label, cmGccDepfileContent const& dfc)
 {
   std::cerr << label << std::endl;
-  for (const auto& entry : dfc) {
+  for (auto const& entry : dfc) {
     auto rit = entry.rules.cbegin();
     if (rit != entry.rules.cend()) {
       std::cerr << *rit;
@@ -96,7 +96,7 @@ void dump(const char* label, const cmGccDepfileContent& dfc)
       }
       std::cerr << ": " << std::endl;
     }
-    for (const auto& path : entry.paths) {
+    for (auto const& path : entry.paths) {
       std::cerr << "    " << path << std::endl;
     }
   }
@@ -113,19 +113,19 @@ int testGccDepfileReader(int argc, char* argv[])
 
   std::string dataDirPath = argv[1];
   dataDirPath += "/testGccDepfileReader_data";
-  const int numberOfTestFiles = 7; // 6th file doesn't exist
+  int const numberOfTestFiles = 7; // 6th file doesn't exist
   for (int i = 1; i <= numberOfTestFiles; ++i) {
-    const std::string base = dataDirPath + "/deps" + std::to_string(i);
-    const std::string depfile = base + ".d";
-    const std::string plainDepfile = base + ".txt";
+    std::string const base = dataDirPath + "/deps" + std::to_string(i);
+    std::string const depfile = base + ".d";
+    std::string const plainDepfile = base + ".txt";
     std::cout << "Comparing " << base << " with " << plainDepfile << std::endl;
-    const auto actual = cmReadGccDepfile(depfile.c_str());
+    auto const actual = cmReadGccDepfile(depfile.c_str());
     if (cmSystemTools::FileExists(plainDepfile)) {
       if (!actual) {
         std::cerr << "Reading " << depfile << " should have succeeded\n";
         return 1;
       }
-      const auto expected = readPlainDepfile(plainDepfile.c_str());
+      auto const expected = readPlainDepfile(plainDepfile.c_str());
       if (!compare(*actual, expected)) {
         dump("actual", *actual);
         dump("expected", expected);

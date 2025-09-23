@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "QCMakePresetComboBox.h"
 
 #include "QCMakePresetItemModel.h"
@@ -28,7 +28,7 @@ QCMakePresetComboBox::QCMakePresetComboBox(QWidget* parent)
     });
 }
 
-const QVector<QCMakePreset>& QCMakePresetComboBox::presets() const
+QVector<QCMakePreset> const& QCMakePresetComboBox::presets() const
 {
   return this->m_model->presets();
 }
@@ -42,12 +42,12 @@ QString QCMakePresetComboBox::presetName() const
   return QString{};
 }
 
-void QCMakePresetComboBox::setPresets(const QVector<QCMakePreset>& presets)
+void QCMakePresetComboBox::setPresets(QVector<QCMakePreset> const& presets)
 {
   this->m_model->setPresets(presets);
 }
 
-void QCMakePresetComboBox::setPresetName(const QString& name)
+void QCMakePresetComboBox::setPresetName(QString const& name)
 {
   this->setCurrentIndex(this->m_model->presetNameToRow(name));
   if (this->signalsBlocked()) {

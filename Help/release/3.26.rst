@@ -42,6 +42,10 @@ File-Based API
   gained a new ``fileSets`` field and associated ``fileSetIndex``
   field to ``sources`` objects.
 
+* The :manual:`cmake-file-api(7)` "codemodel" version 2 "directory"
+  object ``installers`` field gained a new ``cxxModuleBmi`` installer type
+  and an associated ``cxxModuleBmiTarget`` field.
+
 * The :manual:`cmake-file-api(7)` gained a new "configureLog" object kind
   that enables stable access to the :manual:`cmake-configure-log(7)`.
 

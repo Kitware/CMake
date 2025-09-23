@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
@@ -42,7 +42,7 @@ struct cmGeneratorExpressionDAGChecker
   Result Check() const;
 
   void ReportError(cmGeneratorExpressionContext* context,
-                   const std::string& expr);
+                   std::string const& expr);
 
   bool EvaluatingTransitiveProperty() const;
   bool EvaluatingGenexExpression() const;
@@ -79,13 +79,13 @@ struct cmGeneratorExpressionDAGChecker
 private:
   Result CheckGraph() const;
 
-  const cmGeneratorExpressionDAGChecker* const Parent;
-  const cmGeneratorExpressionDAGChecker* const Top;
+  cmGeneratorExpressionDAGChecker const* const Parent;
+  cmGeneratorExpressionDAGChecker const* const Top;
   cmGeneratorTarget const* Target;
-  const std::string Property;
+  std::string const Property;
   mutable std::map<cmGeneratorTarget const*, std::set<std::string>> Seen;
-  const GeneratorExpressionContent* const Content;
-  const cmListFileBacktrace Backtrace;
+  GeneratorExpressionContent const* const Content;
+  cmListFileBacktrace const Backtrace;
   Result CheckResult;
   bool TransitivePropertiesOnly = false;
   bool CMP0131 = false;

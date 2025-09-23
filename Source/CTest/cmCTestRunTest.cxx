@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmCTestRunTest.h"
 
 #include <algorithm>
@@ -7,7 +7,6 @@
 #include <cstddef> // IWYU pragma: keep
 #include <cstdint>
 #include <cstdio>
-#include <cstring>
 #include <iomanip>
 #include <ratio>
 #include <sstream>
@@ -22,6 +21,7 @@
 #include "cmCTestMemCheckHandler.h"
 #include "cmCTestMultiProcessHandler.h"
 #include "cmDuration.h"
+#include "cmInstrumentation.h"
 #include "cmProcess.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
@@ -252,7 +252,7 @@ cmCTestRunTest::EndTestResult cmCTestRunTest::EndTest(size_t completed,
       // If the test did not pass, reprint test name and error
       std::string output = this->GetTestPrefix(completed, total);
       std::string testName = this->TestProperties->Name;
-      const int maxTestNameWidth = this->CTest->GetMaxTestNameWidth();
+      int const maxTestNameWidth = this->CTest->GetMaxTestNameWidth();
       testName.resize(maxTestNameWidth + 4, '.');
 
       output += testName;
@@ -297,16 +297,16 @@ cmCTestRunTest::EndTestResult cmCTestRunTest::EndTest(size_t completed,
   if (!this->TestHandler->MemCheck && started) {
     this->TestHandler->CleanTestOutput(
       this->ProcessOutput,
-      static_cast<size_t>(
-        this->TestResult.Status == cmCTestTestHandler::COMPLETED
-          ? this->TestHandler->CustomMaximumPassedTestOutputSize
-          : this->TestHandler->CustomMaximumFailedTestOutputSize),
-      this->TestHandler->TestOutputTruncation);
+      static_cast<size_t>(this->TestResult.Status ==
+                              cmCTestTestHandler::COMPLETED
+                            ? this->TestHandler->TestOptions.OutputSizePassed
+                            : this->TestHandler->TestOptions.OutputSizeFailed),
+      this->TestHandler->TestOptions.OutputTruncation);
   }
   this->TestResult.Reason = reason;
   if (this->TestHandler->LogFile) {
     bool pass = true;
-    const char* reasonType = "Test Pass Reason";
+    char const* reasonType = "Test Pass Reason";
     if (this->TestResult.Status != cmCTestTestHandler::COMPLETED &&
         this->TestResult.Status != cmCTestTestHandler::NOT_RUN) {
       reasonType = "Test Fail Reason";
@@ -319,7 +319,7 @@ cmCTestRunTest::EndTestResult cmCTestRunTest::EndTest(size_t completed,
     ttime -= minutes;
     auto seconds = std::chrono::duration_cast<std::chrono::seconds>(ttime);
     char buffer[100];
-    snprintf(buffer, sizeof(buffer), "%02d:%02d:%02d",
+    snprintf(buffer, sizeof(buffer), "%02u:%02u:%02u",
              static_cast<unsigned>(hours.count()),
              static_cast<unsigned>(minutes.count()),
              static_cast<unsigned>(seconds.count()));
@@ -398,10 +398,7 @@ bool cmCTestRunTest::StartAgain(std::unique_ptr<cmCTestRunTest> runner,
   // change to tests directory
   cmWorkingDirectory workdir(testRun->TestProperties->Directory);
   if (workdir.Failed()) {
-    testRun->StartFailure(testRun->TotalNumberOfTests,
-                          "Failed to change working directory to " +
-                            testRun->TestProperties->Directory + " : " +
-                            std::strerror(workdir.GetLastResult()),
+    testRun->StartFailure(testRun->TotalNumberOfTests, workdir.GetError(),
                           "Failed to change working directory");
     return true;
   }
@@ -667,6 +664,9 @@ bool cmCTestRunTest::StartTest(size_t completed, size_t total)
     return false;
   }
   this->StartTime = this->CTest->CurrentTime();
+  if (this->CTest->GetInstrumentation().HasQuery()) {
+    this->CTest->GetInstrumentation().GetPreTestStats();
+  }
 
   return this->ForkProcess();
 }
@@ -894,18 +894,17 @@ bool cmCTestRunTest::ForkProcess()
 
 void cmCTestRunTest::SetupResourcesEnvironment(std::vector<std::string>* log)
 {
-  std::string processCount = "CTEST_RESOURCE_GROUP_COUNT=";
-  processCount += std::to_string(this->AllocatedResources.size());
+  std::string processCount =
+    cmStrCat("CTEST_RESOURCE_GROUP_COUNT=", this->AllocatedResources.size());
   cmSystemTools::PutEnv(processCount);
   if (log) {
-    log->push_back(processCount);
+    log->emplace_back(std::move(processCount));
   }
 
   std::size_t i = 0;
   for (auto const& process : this->AllocatedResources) {
-    std::string prefix = "CTEST_RESOURCE_GROUP_";
-    prefix += std::to_string(i);
-    std::string resourceList = prefix + '=';
+    std::string prefix = cmStrCat("CTEST_RESOURCE_GROUP_", i);
+    std::string resourceList = cmStrCat(prefix, '=');
     prefix += '_';
     bool firstType = true;
     for (auto const& it : process) {
@@ -915,14 +914,15 @@ void cmCTestRunTest::SetupResourcesEnvironment(std::vector<std::string>* log)
       firstType = false;
       auto resourceType = it.first;
       resourceList += resourceType;
-      std::string var = prefix + cmSystemTools::UpperCase(resourceType) + '=';
+      std::string var =
+        cmStrCat(prefix, cmSystemTools::UpperCase(resourceType), '=');
       bool firstName = true;
       for (auto const& it2 : it.second) {
         if (!firstName) {
           var += ';';
         }
         firstName = false;
-        var += "id:" + it2.Id + ",slots:" + std::to_string(it2.Slots);
+        var += cmStrCat("id:", it2.Id, ",slots:", it2.Slots);
       }
       cmSystemTools::PutEnv(var);
       if (log) {
@@ -975,7 +975,7 @@ void cmCTestRunTest::WriteLogOutputTop(size_t completed, size_t total)
                << indexStr.str();
   outputStream << " ";
 
-  const int maxTestNameWidth = this->CTest->GetMaxTestNameWidth();
+  int const maxTestNameWidth = this->CTest->GetMaxTestNameWidth();
   std::string outname = this->TestProperties->Name + " ";
   outname.resize(maxTestNameWidth + 4, '.');
   outputStream << outname;
@@ -1016,6 +1016,14 @@ void cmCTestRunTest::WriteLogOutputTop(size_t completed, size_t total)
 
 void cmCTestRunTest::FinalizeTest(bool started)
 {
+  if (this->CTest->GetInstrumentation().HasQuery()) {
+    std::string data_file = this->CTest->GetInstrumentation().InstrumentTest(
+      this->TestProperties->Name, this->ActualCommand, this->Arguments,
+      this->TestProcess->GetExitValue(), this->TestProcess->GetStartTime(),
+      this->TestProcess->GetSystemStartTime(),
+      this->GetCTest()->GetConfigType());
+    this->TestResult.InstrumentationFile = data_file;
+  }
   this->MultiTestHandler.FinishTestProcess(this->TestProcess->GetRunner(),
                                            started);
 }

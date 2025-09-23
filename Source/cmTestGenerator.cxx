@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmTestGenerator.h"
 
 #include <algorithm>
@@ -31,7 +31,7 @@
 namespace /* anonymous */
 {
 
-bool needToQuoteTestName(const cmMakefile& mf, const std::string& name)
+bool needToQuoteTestName(cmMakefile const& mf, std::string const& name)
 {
   // Determine if policy CMP0110 is set to NEW.
   switch (mf.GetPolicyStatus(cmPolicies::CMP0110)) {
@@ -49,8 +49,6 @@ bool needToQuoteTestName(const cmMakefile& mf, const std::string& name)
     case cmPolicies::OLD:
       // OLD behavior is to not quote the test's name.
       return false;
-    case cmPolicies::REQUIRED_IF_USED:
-    case cmPolicies::REQUIRED_ALWAYS:
     case cmPolicies::NEW:
     default:
       // NEW behavior is to quote the test's name.
@@ -58,7 +56,7 @@ bool needToQuoteTestName(const cmMakefile& mf, const std::string& name)
   }
 }
 
-std::size_t countMaxConsecutiveEqualSigns(const std::string& name)
+std::size_t countMaxConsecutiveEqualSigns(std::string const& name)
 {
   std::size_t max = 0;
   auto startIt = find(name.begin(), name.end(), '=');
@@ -91,7 +89,7 @@ void cmTestGenerator::Compute(cmLocalGenerator* lg)
   this->LG = lg;
 }
 
-bool cmTestGenerator::TestsForConfig(const std::string& config)
+bool cmTestGenerator::TestsForConfig(std::string const& config)
 {
   return this->GeneratesForConfig(config);
 }
@@ -122,7 +120,7 @@ void cmTestGenerator::GenerateScriptActions(std::ostream& os, Indent indent)
 }
 
 void cmTestGenerator::GenerateScriptForConfig(std::ostream& os,
-                                              const std::string& config,
+                                              std::string const& config,
                                               Indent indent)
 {
   this->TestGenerated = true;
@@ -132,11 +130,11 @@ void cmTestGenerator::GenerateScriptForConfig(std::ostream& os,
                            this->Test->GetBacktrace());
 
   // Determine if policy CMP0110 is set to NEW.
-  const bool quote_test_name =
+  bool const quote_test_name =
     needToQuoteTestName(*this->Test->GetMakefile(), this->Test->GetName());
   // Determine the number of equal-signs needed for quoting test name with
   // [==[...]==] syntax.
-  const std::string equalSigns(
+  std::string const equalSigns(
     1 + countMaxConsecutiveEqualSigns(this->Test->GetName()), '=');
 
   // Start the test command.
@@ -174,7 +172,7 @@ void cmTestGenerator::GenerateScriptForConfig(std::ostream& os,
       if (!cmNonempty(launcher)) {
         return;
       }
-      const auto propVal = ge.Parse(*launcher)->Evaluate(this->LG, config);
+      auto const propVal = ge.Parse(*launcher)->Evaluate(this->LG, config);
       cmList launcherWithArgs(propVal, cmList::ExpandElements::Yes,
                               this->Test->GetCMP0178() == cmPolicies::NEW
                                 ? cmList::EmptyElements::Yes
@@ -251,11 +249,11 @@ void cmTestGenerator::GenerateScriptForConfig(std::ostream& os,
 void cmTestGenerator::GenerateScriptNoConfig(std::ostream& os, Indent indent)
 {
   // Determine if policy CMP0110 is set to NEW.
-  const bool quote_test_name =
+  bool const quote_test_name =
     needToQuoteTestName(*this->Test->GetMakefile(), this->Test->GetName());
   // Determine the number of equal-signs needed for quoting test name with
   // [==[...]==] syntax.
-  const std::string equalSigns(
+  std::string const equalSigns(
     1 + countMaxConsecutiveEqualSigns(this->Test->GetName()), '=');
 
   if (quote_test_name) {
@@ -280,11 +278,11 @@ void cmTestGenerator::GenerateOldStyle(std::ostream& fout, Indent indent)
   this->TestGenerated = true;
 
   // Determine if policy CMP0110 is set to NEW.
-  const bool quote_test_name =
+  bool const quote_test_name =
     needToQuoteTestName(*this->Test->GetMakefile(), this->Test->GetName());
   // Determine the number of equal-signs needed for quoting test name with
   // [==[...]==] syntax.
-  const std::string equalSigns(
+  std::string const equalSigns(
     1 + countMaxConsecutiveEqualSigns(this->Test->GetName()), '=');
 
   // Get the test command line to be executed.
@@ -347,7 +345,7 @@ void cmTestGenerator::GenerateInternalProperties(std::ostream& os)
 
   bool prependTripleSeparator = false;
   while (!bt.Empty()) {
-    const auto& entry = bt.Top();
+    auto const& entry = bt.Top();
     if (prependTripleSeparator) {
       os << ";";
     }
@@ -360,12 +358,12 @@ void cmTestGenerator::GenerateInternalProperties(std::ostream& os)
 }
 
 std::vector<std::string> cmTestGenerator::EvaluateCommandLineArguments(
-  const std::vector<std::string>& argv, cmGeneratorExpression& ge,
-  const std::string& config) const
+  std::vector<std::string> const& argv, cmGeneratorExpression& ge,
+  std::string const& config) const
 {
   // Evaluate executable name and arguments
   auto evaluatedRange =
-    cmMakeRange(argv).transform([&](const std::string& arg) {
+    cmMakeRange(argv).transform([&](std::string const& arg) {
       return ge.Parse(arg)->Evaluate(this->LG, config);
     });
 

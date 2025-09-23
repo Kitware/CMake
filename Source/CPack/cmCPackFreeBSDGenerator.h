@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
@@ -29,6 +29,6 @@ public:
   int PackageFiles() override;
 
 protected:
-  std::string var_lookup(const char* var_name);
+  std::string var_lookup(char const* var_name);
   void write_manifest_fields(cmGeneratedFileStream&);
 };

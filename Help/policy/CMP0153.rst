@@ -9,6 +9,6 @@ This command has long been superseded by the :command:`execute_process`
 command and has been deprecated since CMake 3.0.
 
 .. |disallowed_version| replace:: 3.28
-.. include:: DISALLOWED_COMMAND.txt
+.. include:: include/DISALLOWED_COMMAND.rst
 
-.. include:: DEPRECATED.txt
+.. include:: include/DEPRECATED.rst

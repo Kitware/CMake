@@ -79,9 +79,9 @@
 
 
 - (void)dealloc {
-	[navigationController release];
-	[window release];
-	[super dealloc];
+    [navigationController release];
+    [window release];
+    [super dealloc];
 }
 
 

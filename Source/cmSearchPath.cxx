@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmSearchPath.h"
 
 #include <algorithm>
@@ -23,28 +23,24 @@ cmSearchPath::cmSearchPath(cmFindCommon* findCmd)
 
 cmSearchPath::~cmSearchPath() = default;
 
-void cmSearchPath::ExtractWithout(const std::set<std::string>& ignorePaths,
-                                  const std::set<std::string>& ignorePrefixes,
-                                  std::vector<std::string>& outPaths,
-                                  bool clear) const
+void cmSearchPath::ExtractWithout(std::set<std::string> const& ignorePaths,
+                                  std::set<std::string> const& ignorePrefixes,
+                                  std::vector<std::string>& outPaths) const
 {
-  if (clear) {
-    outPaths.clear();
-  }
   for (auto const& path : this->Paths) {
-    if (ignorePaths.count(path.Path) == 0 &&
-        ignorePrefixes.count(path.Prefix) == 0) {
+    if (ignorePaths.find(path.Path) == ignorePaths.end() &&
+        ignorePrefixes.find(path.Prefix) == ignorePrefixes.end()) {
       outPaths.push_back(path.Path);
     }
   }
 }
 
-void cmSearchPath::AddPath(const std::string& path)
+void cmSearchPath::AddPath(std::string const& path)
 {
   this->AddPathInternal(path, "");
 }
 
-void cmSearchPath::AddUserPath(const std::string& path)
+void cmSearchPath::AddUserPath(std::string const& path)
 {
   assert(this->FC);
 
@@ -54,7 +50,7 @@ void cmSearchPath::AddUserPath(const std::string& path)
                              cmWindowsRegistry::SimpleTypes);
   auto expandedPaths = registry.ExpandExpression(path, this->FC->RegistryView);
   if (expandedPaths) {
-    for (const auto& expandedPath : expandedPaths.value()) {
+    for (auto const& expandedPath : expandedPaths.value()) {
       cmSystemTools::GlobDirs(expandedPath, outPaths);
     }
   }
@@ -62,11 +58,13 @@ void cmSearchPath::AddUserPath(const std::string& path)
   // Process them all from the current directory
   for (std::string const& p : outPaths) {
     this->AddPathInternal(
-      p, "", this->FC->Makefile->GetCurrentSourceDirectory().c_str());
+      cmSystemTools::CollapseFullPath(
+        p, this->FC->Makefile->GetCurrentSourceDirectory()),
+      "");
   }
 }
 
-void cmSearchPath::AddCMakePath(const std::string& variable)
+void cmSearchPath::AddCMakePath(std::string const& variable)
 {
   assert(this->FC);
 
@@ -76,30 +74,34 @@ void cmSearchPath::AddCMakePath(const std::string& variable)
 
     for (std::string const& p : expanded) {
       this->AddPathInternal(
-        p, "", this->FC->Makefile->GetCurrentSourceDirectory().c_str());
+        cmSystemTools::CollapseFullPath(
+          p, this->FC->Makefile->GetCurrentSourceDirectory()),
+        "");
     }
   }
 }
 
-void cmSearchPath::AddEnvPath(const std::string& variable)
+void cmSearchPath::AddEnvPath(std::string const& variable)
 {
-  std::vector<std::string> expanded;
-  cmSystemTools::GetPath(expanded, variable.c_str());
+  std::vector<std::string> expanded =
+    cmSystemTools::GetEnvPathNormalized(variable);
   for (std::string const& p : expanded) {
     this->AddPathInternal(p, "");
   }
 }
 
-void cmSearchPath::AddCMakePrefixPath(const std::string& variable)
+void cmSearchPath::AddCMakePrefixPath(std::string const& variable)
 {
   assert(this->FC);
 
   // Get a path from a CMake variable.
   if (cmValue value = this->FC->Makefile->GetDefinition(variable)) {
     cmList expanded{ *value };
-
-    this->AddPrefixPaths(
-      expanded, this->FC->Makefile->GetCurrentSourceDirectory().c_str());
+    for (std::string& p : expanded) {
+      p = cmSystemTools::CollapseFullPath(
+        p, this->FC->Makefile->GetCurrentSourceDirectory());
+    }
+    this->AddPrefixPaths(expanded);
   }
 }
 
@@ -112,10 +114,10 @@ static std::string cmSearchPathStripBin(std::string const& s)
   return s;
 }
 
-void cmSearchPath::AddEnvPrefixPath(const std::string& variable, bool stripBin)
+void cmSearchPath::AddEnvPrefixPath(std::string const& variable, bool stripBin)
 {
-  std::vector<std::string> expanded;
-  cmSystemTools::GetPath(expanded, variable.c_str());
+  std::vector<std::string> expanded =
+    cmSystemTools::GetEnvPathNormalized(variable);
   if (stripBin) {
     std::transform(expanded.begin(), expanded.end(), expanded.begin(),
                    cmSearchPathStripBin);
@@ -123,7 +125,7 @@ void cmSearchPath::AddEnvPrefixPath(const std::string& variable, bool stripBin)
   this->AddPrefixPaths(expanded);
 }
 
-void cmSearchPath::AddSuffixes(const std::vector<std::string>& suffixes)
+void cmSearchPath::AddSuffixes(std::vector<std::string> const& suffixes)
 {
   std::vector<PathWithPrefix> inPaths;
   inPaths.swap(this->Paths);
@@ -138,21 +140,20 @@ void cmSearchPath::AddSuffixes(const std::vector<std::string>& suffixes)
     // path on windows and cause huge delays.
     std::string p = inPath.Path;
     if (!p.empty() && p.back() != '/') {
-      p += "/";
+      p += '/';
     }
 
     // Combine with all the suffixes
     for (std::string const& suffix : suffixes) {
-      this->Paths.push_back(PathWithPrefix{ p + suffix, inPath.Prefix });
+      this->Paths.emplace_back(PathWithPrefix{ p + suffix, inPath.Prefix });
     }
 
     // And now the original w/o any suffix
-    this->Paths.push_back(std::move(inPath));
+    this->Paths.emplace_back(std::move(inPath));
   }
 }
 
-void cmSearchPath::AddPrefixPaths(const std::vector<std::string>& paths,
-                                  const char* base)
+void cmSearchPath::AddPrefixPaths(std::vector<std::string> const& paths)
 {
   assert(this->FC);
 
@@ -192,52 +193,43 @@ void cmSearchPath::AddPrefixPaths(const std::vector<std::string>& paths,
               "CMAKE_PREFIX_LIBRARY_ARCHITECTURE")) {
           if (foundUnknown) {
             this->AddPathInternal(cmStrCat('/', archNoUnknown, dir, subdir),
-                                  cmStrCat('/', archNoUnknown, prefix), base);
+                                  cmStrCat('/', archNoUnknown, prefix));
           }
           this->AddPathInternal(cmStrCat('/', *arch, dir, subdir),
-                                cmStrCat('/', *arch, prefix), base);
+                                cmStrCat('/', *arch, prefix));
         } else {
           if (foundUnknown) {
             this->AddPathInternal(cmStrCat(dir, subdir, '/', archNoUnknown),
-                                  prefix, base);
+                                  prefix);
           }
-          this->AddPathInternal(cmStrCat(dir, subdir, '/', *arch), prefix,
-                                base);
+          this->AddPathInternal(cmStrCat(dir, subdir, '/', *arch), prefix);
         }
       }
     }
     std::string add = dir + subdir;
     if (add != "/") {
-      this->AddPathInternal(add, prefix, base);
+      this->AddPathInternal(add, prefix);
     }
     if (subdir == "bin") {
-      this->AddPathInternal(dir + "sbin", prefix, base);
+      this->AddPathInternal(dir + "sbin", prefix);
     }
     if (!subdir.empty() && path != "/") {
-      this->AddPathInternal(path, prefix, base);
+      this->AddPathInternal(path, prefix);
     }
   }
 }
 
-void cmSearchPath::AddPathInternal(const std::string& path,
-                                   const std::string& prefix, const char* base)
+void cmSearchPath::AddPathInternal(std::string const& path,
+                                   std::string const& prefix)
 {
   assert(this->FC);
 
-  std::string collapsedPath = cmSystemTools::CollapseFullPath(path, base);
-
-  if (collapsedPath.empty()) {
+  if (path.empty()) {
     return;
   }
 
-  std::string collapsedPrefix;
-  if (!prefix.empty()) {
-    collapsedPrefix = cmSystemTools::CollapseFullPath(prefix, base);
-  }
-
   // Insert the path if has not already been emitted.
-  PathWithPrefix pathWithPrefix{ std::move(collapsedPath),
-                                 std::move(collapsedPrefix) };
+  PathWithPrefix pathWithPrefix{ path, prefix };
   if (this->FC->SearchPathsEmitted.insert(pathWithPrefix).second) {
     this->Paths.emplace_back(std::move(pathWithPrefix));
   }

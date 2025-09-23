@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
@@ -10,6 +10,7 @@
 #include <vector>
 
 #include <cm/string_view>
+#include <cmext/string_view>
 
 #include "cmStringAlgorithms.h"
 
@@ -103,7 +104,9 @@ int testStringAlgorithms(int /*unused*/, char* /*unused*/[])
   {
     typedef std::vector<std::string> VT;
     assert_ok(cmTokenize("", ";") == VT{ "" }, "cmTokenize empty");
-    assert_ok(cmTokenize(";", ";") == VT{ "" }, "cmTokenize sep");
+    assert_ok(cmTokenize(";", ";") == VT{ "" }, "cmTokenize sep (char*)");
+    assert_ok(cmTokenize(";", ";"_s) == VT{ "" },
+              "cmTokenize sep (string_view)");
     assert_ok(cmTokenize("abc", ";") == VT{ "abc" }, "cmTokenize item");
     assert_ok(cmTokenize("abc;", ";") == VT{ "abc" }, "cmTokenize item sep");
     assert_ok(cmTokenize(";abc", ";") == VT{ "abc" }, "cmTokenize sep item");
@@ -111,6 +114,22 @@ int testStringAlgorithms(int /*unused*/, char* /*unused*/[])
               "cmTokenize item sep sep item");
     assert_ok(cmTokenize("a1;a2;a3;a4", ";") == VT{ "a1", "a2", "a3", "a4" },
               "cmTokenize multiple items");
+  }
+  {
+    typedef std::vector<cm::string_view> VT;
+    assert_ok(cmTokenizedView("", ';') == VT{ "" }, "cmTokenizedView empty");
+    assert_ok(cmTokenizedView(";", ';') == VT{ "" }, "cmTokenizedView sep");
+    assert_ok(cmTokenizedView("abc", ';') == VT{ "abc" },
+              "cmTokenizedView item");
+    assert_ok(cmTokenizedView("abc;", ';') == VT{ "abc" },
+              "cmTokenizedView item sep");
+    assert_ok(cmTokenizedView(";abc", ';') == VT{ "abc" },
+              "cmTokenizedView sep item");
+    assert_ok(cmTokenizedView("abc;;efg", ';') == VT{ "abc", "efg" },
+              "cmTokenizedView item sep sep item");
+    assert_ok(cmTokenizedView("a1;a2;a3;a4", ';') ==
+                VT{ "a1", "a2", "a3", "a4" },
+              "cmTokenizedView multiple items");
   }
 
   // ----------------------------------------------------------------------
@@ -123,7 +142,7 @@ int testStringAlgorithms(int /*unused*/, char* /*unused*/[])
     long long int nlli = -130000ll;
     unsigned long long int nulli = 130000ull;
     std::string val =
-      cmStrCat("<test>", ni, ',', nui, ',', nli, ",", nuli, ", ", nlli,
+      cmStrCat("<test>", ni, ',', nui, ',', nli, ',', nuli, ", ", nlli,
                std::string(", "), nulli, cm::string_view("</test>"));
     std::string expect =
       "<test>-1100,1100,-12000,12000, -130000, 130000</test>";

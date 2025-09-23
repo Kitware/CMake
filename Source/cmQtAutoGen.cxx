@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmQtAutoGen.h"
 
 #include <algorithm>
@@ -56,8 +56,8 @@ static void MergeOptions(std::vector<std::string>& baseOpts,
         }
         // Test if this is a value option and change the existing value
         if (!optName.empty() && cm::contains(valueOpts, optName)) {
-          const auto existItNext(existIt + 1);
-          const auto fitNext(fit + 1);
+          auto const existItNext(existIt + 1);
+          auto const fitNext(fit + 1);
           if ((existItNext != baseOpts.end()) && (fitNext != fitEnd)) {
             *existItNext = *fitNext;
             ++fit;
@@ -134,7 +134,7 @@ std::string cmQtAutoGen::Tools(bool moc, bool uic, bool rcc)
 
 std::string cmQtAutoGen::Quoted(cm::string_view text)
 {
-  static std::initializer_list<std::pair<const char*, const char*>> const
+  static std::initializer_list<std::pair<char const*, char const*>> const
     replacements = { { "\\", "\\\\" }, { "\"", "\\\"" }, { "\a", "\\a" },
                      { "\b", "\\b" },  { "\f", "\\f" },  { "\n", "\\n" },
                      { "\r", "\\r" },  { "\t", "\\t" },  { "\v", "\\v" } };
@@ -231,7 +231,7 @@ static void RccListParseContent(std::string const& content,
   cmsys::RegularExpression fileMatchRegex("(<file[^<]+)");
   cmsys::RegularExpression fileReplaceRegex("(^<file[^>]*>)");
 
-  const char* contentChars = content.c_str();
+  char const* contentChars = content.c_str();
   while (fileMatchRegex.find(contentChars)) {
     std::string const qrcEntry = fileMatchRegex.match(1);
     contentChars += qrcEntry.size();
@@ -296,7 +296,7 @@ cmQtAutoGen::RccLister::RccLister() = default;
 
 cmQtAutoGen::RccLister::RccLister(std::string rccExecutable,
                                   std::vector<std::string> listOptions)
-  : RccExcutable_(std::move(rccExecutable))
+  : RccExecutable_(std::move(rccExecutable))
   , ListOptions_(std::move(listOptions))
 {
 }
@@ -319,8 +319,8 @@ bool cmQtAutoGen::RccLister::list(std::string const& qrcFile,
   // contains non-ASCII characters.
   std::string const fileDir = cmSystemTools::GetFilenamePath(qrcFile);
 
-  if (!this->RccExcutable_.empty() &&
-      cmSystemTools::FileExists(this->RccExcutable_, true) &&
+  if (!this->RccExecutable_.empty() &&
+      cmSystemTools::FileExists(this->RccExecutable_, true) &&
       !this->ListOptions_.empty()) {
 
     bool result = false;
@@ -329,7 +329,7 @@ bool cmQtAutoGen::RccLister::list(std::string const& qrcFile,
     std::string rccStdErr;
     {
       std::vector<std::string> cmd;
-      cmd.emplace_back(this->RccExcutable_);
+      cmd.emplace_back(this->RccExecutable_);
       cm::append(cmd, this->ListOptions_);
       cmd.emplace_back(cmSystemTools::GetFilenameName(qrcFile));
 

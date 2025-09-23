@@ -22,9 +22,9 @@ License
 =======
 
 CMake is distributed under the OSI-approved BSD 3-clause License.
-See `Copyright.txt`_ for details.
+See `LICENSE.rst`_ for details.
 
-.. _`Copyright.txt`: Copyright.txt
+.. _`LICENSE.rst`: LICENSE.rst
 
 Building CMake
 ==============

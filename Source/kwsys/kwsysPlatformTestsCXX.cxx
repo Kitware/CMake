@@ -147,21 +147,10 @@ int main()
   int status = 0;
   size_t bufferLen = 512;
   char buffer[512] = { '\0' };
-  const char* function = "_ZN5kwsys17SystemInformation15GetProgramStackEii";
+  char const* function = "_ZN5kwsys17SystemInformation15GetProgramStackEii";
   char* demangledFunction =
     abi::__cxa_demangle(function, buffer, &bufferLen, &status);
   return status;
-}
-#endif
-
-#ifdef TEST_KWSYS_STL_HAS_WSTRING
-#  include <string>
-void f(std::wstring*)
-{
-}
-int main()
-{
-  return 0;
 }
 #endif
 

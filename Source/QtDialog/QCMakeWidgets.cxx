@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 
 #define QT_DEPRECATED_WARNINGS_SINCE QT_VERSION_CHECK(5, 14, 0)
 
@@ -34,13 +34,13 @@ QCMakeFileEditor::QCMakeFileEditor(QWidget* p, QString var)
                    &QCMakeFileEditor::chooseFile);
 }
 
-QCMakeFilePathEditor::QCMakeFilePathEditor(QWidget* p, const QString& var)
+QCMakeFilePathEditor::QCMakeFilePathEditor(QWidget* p, QString const& var)
   : QCMakeFileEditor(p, var)
 {
   this->setCompleter(new QCMakeFileCompleter(this, false));
 }
 
-QCMakePathEditor::QCMakePathEditor(QWidget* p, const QString& var)
+QCMakePathEditor::QCMakePathEditor(QWidget* p, QString const& var)
   : QCMakeFileEditor(p, var)
 {
   this->setCompleter(new QCMakeFileCompleter(this, true));
@@ -156,13 +156,13 @@ QCMakeFileCompleter::QCMakeFileCompleter(QObject* o, bool dirs)
 #endif
 }
 
-QString QCMakeFileCompleter::pathFromIndex(const QModelIndex& idx) const
+QString QCMakeFileCompleter::pathFromIndex(QModelIndex const& idx) const
 {
   return QDir::fromNativeSeparators(QCompleter::pathFromIndex(idx));
 }
 
 namespace QtCMake {
-bool setSearchFilter(QSortFilterProxyModel* model, const QString& searchString)
+bool setSearchFilter(QSortFilterProxyModel* model, QString const& searchString)
 {
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 15, 0))
   QRegularExpression const regex(searchString,

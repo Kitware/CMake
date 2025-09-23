@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
@@ -25,39 +25,30 @@ public:
   // this is a shared function for both If and Else to determine if the
   // arguments were valid, and if so, was the response true. If there is
   // an error, the errorString will be set.
-  bool IsTrue(const std::vector<cmExpandedCommandArgument>& args,
+  bool IsTrue(std::vector<cmExpandedCommandArgument> const& args,
               std::string& errorString, MessageType& status);
 
 private:
   class cmArgumentList;
 
-  // Filter the given variable definition based on policy CMP0054.
   cmValue GetDefinitionIfUnquoted(
-    const cmExpandedCommandArgument& argument) const;
+    cmExpandedCommandArgument const& argument) const;
 
-  cmValue GetVariableOrString(const cmExpandedCommandArgument& argument) const;
+  cmValue GetVariableOrString(cmExpandedCommandArgument const& argument) const;
 
   bool IsKeyword(cm::static_string_view keyword,
-                 const cmExpandedCommandArgument& argument) const;
+                 cmExpandedCommandArgument const& argument) const;
 
   bool GetBooleanValue(cmExpandedCommandArgument& arg) const;
 
-  bool GetBooleanValueOld(cmExpandedCommandArgument const& arg,
-                          bool one) const;
-
-  bool GetBooleanValueWithAutoDereference(cmExpandedCommandArgument& newArg,
-                                          std::string& errorString,
-                                          MessageType& status,
-                                          bool oneArg = false) const;
-
   template <int N>
-  int matchKeysImpl(const cmExpandedCommandArgument&);
+  int matchKeysImpl(cmExpandedCommandArgument const&);
 
   template <int N, typename T, typename... Keys>
-  int matchKeysImpl(const cmExpandedCommandArgument&, T, Keys...);
+  int matchKeysImpl(cmExpandedCommandArgument const&, T, Keys...);
 
   template <typename... Keys>
-  int matchKeys(const cmExpandedCommandArgument&, Keys...);
+  int matchKeys(cmExpandedCommandArgument const&, Keys...);
 
   bool HandleLevel0(cmArgumentList& newArgs, std::string& errorString,
                     MessageType& status);
@@ -75,9 +66,5 @@ private:
 
   cmMakefile& Makefile;
   cmListFileBacktrace Backtrace;
-  cmPolicies::PolicyStatus Policy12Status;
-  cmPolicies::PolicyStatus Policy54Status;
-  cmPolicies::PolicyStatus Policy57Status;
-  cmPolicies::PolicyStatus Policy64Status;
   cmPolicies::PolicyStatus Policy139Status;
 };

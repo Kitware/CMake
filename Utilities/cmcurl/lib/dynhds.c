@@ -141,7 +141,7 @@ void Curl_dynhds_set_opts(struct dynhds *dynhds, int opts)
 struct dynhds_entry *Curl_dynhds_getn(struct dynhds *dynhds, size_t n)
 {
   DEBUGASSERT(dynhds);
-  return (n < dynhds->hds_len)? dynhds->hds[n] : NULL;
+  return (n < dynhds->hds_len) ? dynhds->hds[n] : NULL;
 }
 
 struct dynhds_entry *Curl_dynhds_get(struct dynhds *dynhds, const char *name,
@@ -272,7 +272,7 @@ CURLcode Curl_dynhds_h1_add_line(struct dynhds *dynhds,
 
 CURLcode Curl_dynhds_h1_cadd_line(struct dynhds *dynhds, const char *line)
 {
-  return Curl_dynhds_h1_add_line(dynhds, line, line? strlen(line) : 0);
+  return Curl_dynhds_h1_add_line(dynhds, line, line ? strlen(line) : 0);
 }
 
 #ifdef UNITTESTS
@@ -359,9 +359,10 @@ CURLcode Curl_dynhds_h1_dprint(struct dynhds *dynhds, struct dynbuf *dbuf)
     return result;
 
   for(i = 0; i < dynhds->hds_len; ++i) {
-    result = Curl_dyn_addf(dbuf, "%.*s: %.*s\r\n",
-               (int)dynhds->hds[i]->namelen, dynhds->hds[i]->name,
-               (int)dynhds->hds[i]->valuelen, dynhds->hds[i]->value);
+    result = curlx_dyn_addf(dbuf, "%.*s: %.*s\r\n",
+                            (int)dynhds->hds[i]->namelen, dynhds->hds[i]->name,
+                            (int)dynhds->hds[i]->valuelen,
+                            dynhds->hds[i]->value);
     if(result)
       break;
   }

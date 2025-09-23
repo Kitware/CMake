@@ -32,11 +32,11 @@
 #include "cfilters.h"
 #include "connect.h"
 #include "strerror.h"
-#include "timeval.h"
+#include "curlx/timeval.h"
 #include "socks.h"
 #include "curl_sspi.h"
-#include "curl_multibyte.h"
-#include "warnless.h"
+#include "curlx/multibyte.h"
+#include "curlx/warnless.h"
 #include "strdup.h"
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -140,14 +140,14 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
   cred_handle.dwUpper = 0;
 
   status = Curl_pSecFn->AcquireCredentialsHandle(NULL,
-                                              (TCHAR *) TEXT("Kerberos"),
-                                              SECPKG_CRED_OUTBOUND,
-                                              NULL,
-                                              NULL,
-                                              NULL,
-                                              NULL,
-                                              &cred_handle,
-                                              &expiry);
+                                       (TCHAR *)CURL_UNCONST(TEXT("Kerberos")),
+                                       SECPKG_CRED_OUTBOUND,
+                                       NULL,
+                                       NULL,
+                                       NULL,
+                                       NULL,
+                                       &cred_handle,
+                                       &expiry);
 
   if(check_sspi_err(data, status, "AcquireCredentialsHandle")) {
     failf(data, "Failed to acquire credentials.");
@@ -355,7 +355,8 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
     gss_enc = 1;
 
   infof(data, "SOCKS5 server supports GSS-API %s data protection.",
-        (gss_enc == 0)?"no":((gss_enc == 1)?"integrity":"confidentiality") );
+        (gss_enc == 0) ? "no" :
+        ((gss_enc == 1) ? "integrity":"confidentiality") );
   /* force to no data protection, avoid encryption/decryption for now */
   gss_enc = 0;
   /*
@@ -606,8 +607,9 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
   (void)curlx_nonblock(sock, TRUE);
 
   infof(data, "SOCKS5 access with%s protection granted.",
-        (socksreq[0] == 0)?"out GSS-API data":
-        ((socksreq[0] == 1)?" GSS-API integrity":" GSS-API confidentiality"));
+        (socksreq[0] == 0) ? "out GSS-API data":
+        ((socksreq[0] == 1) ? " GSS-API integrity" :
+         " GSS-API confidentiality"));
 
   /* For later use if encryption is required
      conn->socks5_gssapi_enctype = socksreq[0];

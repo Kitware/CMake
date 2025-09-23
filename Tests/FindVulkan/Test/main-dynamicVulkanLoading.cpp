@@ -15,7 +15,7 @@ int main()
   try {
 
     // initialize dynamic dispatcher
-    vk::DynamicLoader dl;
+    vk::detail::DynamicLoader dl;
     PFN_vkGetInstanceProcAddr vkGetInstanceProcAddr =
       dl.getProcAddress<PFN_vkGetInstanceProcAddr>("vkGetInstanceProcAddr");
     VULKAN_HPP_DEFAULT_DISPATCHER.init(vkGetInstanceProcAddr);
@@ -24,7 +24,7 @@ int main()
     vk::UniqueInstance instance =
       vk::createInstanceUnique(vk::InstanceCreateInfo{
         vk::InstanceCreateFlags(), // flags
-        &(const vk::ApplicationInfo&)vk::ApplicationInfo{
+        &(vk::ApplicationInfo const&)vk::ApplicationInfo{
           "CMake Test application", // application name
           VK_MAKE_VERSION(0, 0, 0), // application version
           "CMake Test Engine",      // engine name

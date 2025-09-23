@@ -1,0 +1,4 @@
+^CMake Warning at DefaultSarifOutput\.cmake:1 \(message\):
+  Example warning message
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)$

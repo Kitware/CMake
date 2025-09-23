@@ -17,7 +17,7 @@ static int verify_linking_to_pthread()
 // static libraries that have separable compilation device symbols
 #if __CUDACC_VER_MAJOR__ <= 9
 __global__ void deviceCublasSgemm(int n, float alpha, float beta,
-                                  const float* d_A, const float* d_B,
+                                  float const* d_A, float const* d_B,
                                   float* d_C)
 {
   cublasHandle_t cnpHandle;

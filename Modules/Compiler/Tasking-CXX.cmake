@@ -1,15 +1,15 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-# file Copyright.txt or https://cmake.org/licensing for details.
+# file LICENSE.rst or https://cmake.org/licensing for details.
 include(Compiler/Tasking)
 __compiler_tasking(CXX)
 
-set(CMAKE_CXX98_STANDARD_COMPILE_OPTION "--c++=03" "--strict")
+# Extension flags are not tied to the standard level flags.
+# Avoid passing them here so users/projects can control them independently.
+set(CMAKE_CXX98_STANDARD_COMPILE_OPTION "--c++=03")
 set(CMAKE_CXX98_EXTENSION_COMPILE_OPTION "--c++=03")
-
-set(CMAKE_CXX11_STANDARD_COMPILE_OPTION "--c++=11" "--strict")
+set(CMAKE_CXX11_STANDARD_COMPILE_OPTION "--c++=11")
 set(CMAKE_CXX11_EXTENSION_COMPILE_OPTION "--c++=11")
-
-set(CMAKE_CXX14_STANDARD_COMPILE_OPTION "--c++=14" "--strict")
+set(CMAKE_CXX14_STANDARD_COMPILE_OPTION "--c++=14")
 set(CMAKE_CXX14_EXTENSION_COMPILE_OPTION "--c++=14")
 
 set(CMAKE_CXX_STANDARD_LATEST 14)

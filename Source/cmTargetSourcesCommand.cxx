@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmTargetSourcesCommand.h"
 
 #include <sstream>
@@ -54,7 +54,7 @@ public:
 
 protected:
   void HandleInterfaceContent(cmTarget* tgt,
-                              const std::vector<std::string>& content,
+                              std::vector<std::string> const& content,
                               bool prepend, bool system) override
   {
     this->cmTargetPropCommandBase::HandleInterfaceContent(
@@ -65,7 +65,7 @@ protected:
   }
 
 private:
-  void HandleMissingTarget(const std::string& name) override
+  void HandleMissingTarget(std::string const& name) override
   {
     this->Makefile->IssueMessage(
       MessageType::FATAL_ERROR,
@@ -74,7 +74,7 @@ private:
   }
 
   bool HandleDirectContent(cmTarget* tgt,
-                           const std::vector<std::string>& content,
+                           std::vector<std::string> const& content,
                            bool /*prepend*/, bool /*system*/) override
   {
     tgt->AppendProperty("SOURCES",
@@ -84,8 +84,8 @@ private:
     return true; // Successfully handled.
   }
 
-  bool PopulateTargetProperties(const std::string& scope,
-                                const std::vector<std::string>& content,
+  bool PopulateTargetProperties(std::string const& scope,
+                                std::vector<std::string> const& content,
                                 bool prepend, bool system) override
   {
     if (!content.empty() && content.front() == "FILE_SET"_s) {
@@ -95,7 +95,7 @@ private:
       scope, content, prepend, system);
   }
 
-  std::string Join(const std::vector<std::string>& content) override
+  std::string Join(std::vector<std::string> const& content) override
   {
     return cmList::to_string(content);
   }
@@ -111,17 +111,17 @@ private:
     No,
   };
   std::vector<std::string> ConvertToAbsoluteContent(
-    cmTarget* tgt, const std::vector<std::string>& content,
+    cmTarget* tgt, std::vector<std::string> const& content,
     IsInterface isInterfaceContent, CheckCMP0076 checkCmp0076);
 
-  bool HandleFileSetMode(const std::string& scope,
-                         const std::vector<std::string>& content);
-  bool HandleOneFileSet(const std::string& scope,
-                        const std::vector<std::string>& content);
+  bool HandleFileSetMode(std::string const& scope,
+                         std::vector<std::string> const& content);
+  bool HandleOneFileSet(std::string const& scope,
+                        std::vector<std::string> const& content);
 };
 
 std::vector<std::string> TargetSourcesImpl::ConvertToAbsoluteContent(
-  cmTarget* tgt, const std::vector<std::string>& content,
+  cmTarget* tgt, std::vector<std::string> const& content,
   IsInterface isInterfaceContent, CheckCMP0076 checkCmp0076)
 {
   // Skip conversion in case old behavior has been explicitly requested
@@ -165,12 +165,6 @@ std::vector<std::string> TargetSourcesImpl::ConvertToAbsoluteContent(
       case cmPolicies::OLD:
         issueMessage = false;
         break;
-      case cmPolicies::REQUIRED_ALWAYS:
-      case cmPolicies::REQUIRED_IF_USED:
-        this->Makefile->IssueMessage(
-          MessageType::FATAL_ERROR,
-          cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0076));
-        break;
       case cmPolicies::NEW: {
         issueMessage = false;
         useAbsoluteContent = true;
@@ -197,7 +191,7 @@ std::vector<std::string> TargetSourcesImpl::ConvertToAbsoluteContent(
 }
 
 bool TargetSourcesImpl::HandleFileSetMode(
-  const std::string& scope, const std::vector<std::string>& content)
+  std::string const& scope, std::vector<std::string> const& content)
 {
   auto args = FileSetsArgsParser.Parse(content, /*unparsedArguments=*/nullptr);
 
@@ -212,14 +206,14 @@ bool TargetSourcesImpl::HandleFileSetMode(
 }
 
 bool TargetSourcesImpl::HandleOneFileSet(
-  const std::string& scope, const std::vector<std::string>& content)
+  std::string const& scope, std::vector<std::string> const& content)
 {
   std::vector<std::string> unparsed;
   auto args = FileSetArgsParser.Parse(content, &unparsed);
 
   if (!unparsed.empty()) {
     this->SetError(
-      cmStrCat("Unrecognized keyword: \"", unparsed.front(), "\""));
+      cmStrCat("Unrecognized keyword: \"", unparsed.front(), '"'));
     return false;
   }
 
@@ -295,7 +289,7 @@ bool TargetSourcesImpl::HandleOneFileSet(
     if (!args.Type.empty() && args.Type != type) {
       this->SetError(cmStrCat(
         "Type \"", args.Type, "\" for file set \"", fileSet.first->GetName(),
-        "\" does not match original type \"", type, "\""));
+        "\" does not match original type \"", type, '"'));
       return false;
     }
 
@@ -323,7 +317,7 @@ bool TargetSourcesImpl::HandleOneFileSet(
     if (type == "HEADERS"_s) {
       for (auto const& dir : cmList{ baseDirectories }) {
         auto interfaceDirectoriesGenex =
-          cmStrCat("$<BUILD_INTERFACE:", dir, ">");
+          cmStrCat("$<BUILD_INTERFACE:", dir, '>');
         if (cmFileSetVisibilityIsForSelf(visibility)) {
           this->Target->AppendProperty("INCLUDE_DIRECTORIES",
                                        interfaceDirectoriesGenex,

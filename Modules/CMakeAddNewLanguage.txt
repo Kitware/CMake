@@ -30,7 +30,7 @@ CMake(LANG)Information.cmake => set compiler configuration:
   CMAKE_(LANG)_USE_LINKER_INFORMATION
 
 CMakeTest(LANG)Compiler.cmake -> test the compiler and set:
-  SET(CMAKE_(LANG)_COMPILER_WORKS 1 CACHE INTERNAL "")
+  set(CMAKE_(LANG)_COMPILER_WORKS 1 CACHE INTERNAL "")
 
 
 If the variable CMAKE_(LANG)_USE_LINKER_INFORMATION has value TRUE, the file CMake(LANG)LinkerInformation.cmake

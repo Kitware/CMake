@@ -32,19 +32,19 @@ extern "C" {
 /**
  * Encode 3 bytes into a 4 byte string.
  */
-kwsysEXPORT void kwsysBase64_Encode3(const unsigned char* src,
+kwsysEXPORT void kwsysBase64_Encode3(unsigned char const* src,
                                      unsigned char* dest);
 
 /**
  * Encode 2 bytes into a 4 byte string.
  */
-kwsysEXPORT void kwsysBase64_Encode2(const unsigned char* src,
+kwsysEXPORT void kwsysBase64_Encode2(unsigned char const* src,
                                      unsigned char* dest);
 
 /**
  * Encode 1 bytes into a 4 byte string.
  */
-kwsysEXPORT void kwsysBase64_Encode1(const unsigned char* src,
+kwsysEXPORT void kwsysBase64_Encode1(unsigned char const* src,
                                      unsigned char* dest);
 
 /**
@@ -60,7 +60,7 @@ kwsysEXPORT void kwsysBase64_Encode1(const unsigned char* src,
  * the extra padding needed to complete the encode 4 bytes will stop
  * the decoding anyway).
  */
-kwsysEXPORT size_t kwsysBase64_Encode(const unsigned char* input,
+kwsysEXPORT size_t kwsysBase64_Encode(unsigned char const* input,
                                       size_t length, unsigned char* output,
                                       int mark_end);
 
@@ -68,7 +68,7 @@ kwsysEXPORT size_t kwsysBase64_Encode(const unsigned char* input,
  * Decode 4 bytes into a 3 byte string.  Returns the number of bytes
  * actually decoded.
  */
-kwsysEXPORT int kwsysBase64_Decode3(const unsigned char* src,
+kwsysEXPORT int kwsysBase64_Decode3(unsigned char const* src,
                                     unsigned char* dest);
 
 /**
@@ -83,7 +83,7 @@ kwsysEXPORT int kwsysBase64_Decode3(const unsigned char* src,
  * much decoded data to expect (of course, the buffer must be large
  * enough).
  */
-kwsysEXPORT size_t kwsysBase64_Decode(const unsigned char* input,
+kwsysEXPORT size_t kwsysBase64_Decode(unsigned char const* input,
                                       size_t length, unsigned char* output,
                                       size_t max_input_length);
 

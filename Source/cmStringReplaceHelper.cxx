@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 
 #include "cmStringReplaceHelper.h"
 
@@ -7,8 +7,9 @@
 #include <utility>
 
 #include "cmMakefile.h"
+#include "cmPolicies.h"
 
-cmStringReplaceHelper::cmStringReplaceHelper(const std::string& regex,
+cmStringReplaceHelper::cmStringReplaceHelper(std::string const& regex,
                                              std::string replace_expr,
                                              cmMakefile* makefile)
   : RegExString(regex)
@@ -19,47 +20,40 @@ cmStringReplaceHelper::cmStringReplaceHelper(const std::string& regex,
   this->ParseReplaceExpression();
 }
 
-bool cmStringReplaceHelper::Replace(const std::string& input,
+bool cmStringReplaceHelper::Replace(std::string const& input,
                                     std::string& output)
 {
   output.clear();
 
+  unsigned optAnchor = 0;
+  if (this->Makefile &&
+      this->Makefile->GetPolicyStatus(cmPolicies::CMP0186) !=
+        cmPolicies::NEW) {
+    optAnchor = cmsys::RegularExpression::BOL_AT_OFFSET;
+  }
+
   // Scan through the input for all matches.
+  auto& re = this->RegularExpression;
   std::string::size_type base = 0;
-  while (this->RegularExpression.find(input.c_str() + base)) {
+  unsigned optNonEmpty = 0;
+  while (re.find(input, base, optAnchor | optNonEmpty)) {
     if (this->Makefile) {
       this->Makefile->ClearMatches();
-      this->Makefile->StoreMatches(this->RegularExpression);
+      this->Makefile->StoreMatches(re);
     }
-    auto l2 = this->RegularExpression.start();
-    auto r = this->RegularExpression.end();
 
     // Concatenate the part of the input that was not matched.
-    output += input.substr(base, l2);
-
-    // Make sure the match had some text.
-    if (r - l2 == 0) {
-      std::ostringstream error;
-      error << "regex \"" << this->RegExString << "\" matched an empty string";
-      this->ErrorString = error.str();
-      return false;
-    }
+    output += input.substr(base, re.start() - base);
 
     // Concatenate the replacement for the match.
-    for (const auto& replacement : this->Replacements) {
+    for (auto const& replacement : this->Replacements) {
       if (replacement.Number < 0) {
         // This is just a plain-text part of the replacement.
         output += replacement.Value;
       } else {
         // Replace with part of the match.
         auto n = replacement.Number;
-        auto start = this->RegularExpression.start(n);
-        auto end = this->RegularExpression.end(n);
-        auto len = input.length() - base;
-        if ((start != std::string::npos) && (end != std::string::npos) &&
-            (start <= len) && (end <= len)) {
-          output += input.substr(base + start, end - start);
-        } else {
+        if (n > re.num_groups()) {
           std::ostringstream error;
           error << "replace expression \"" << this->ReplaceExpression
                 << "\" contains an out-of-range escape for regex \""
@@ -67,15 +61,25 @@ bool cmStringReplaceHelper::Replace(const std::string& input,
           this->ErrorString = error.str();
           return false;
         }
+        output += re.match(n);
       }
     }
 
     // Move past the match.
-    base += r;
+    base = re.end();
+
+    if (re.start() == input.length()) {
+      break;
+    }
+    if (re.start() == re.end()) {
+      optNonEmpty = cmsys::RegularExpression::NONEMPTY_AT_OFFSET;
+    } else {
+      optNonEmpty = 0;
+    }
   }
 
   // Concatenate the text after the last match.
-  output += input.substr(base, input.length() - base);
+  output += input.substr(base);
 
   return true;
 }

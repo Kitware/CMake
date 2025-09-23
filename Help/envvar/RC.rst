@@ -1,7 +1,7 @@
 RC
 --
 
-.. include:: ENV_VAR.txt
+.. include:: include/ENV_VAR.rst
 
 Preferred executable for compiling ``resource`` files. Will only be used by CMake
 on the first configuration to determine ``resource`` compiler, after which the

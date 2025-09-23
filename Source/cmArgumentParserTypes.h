@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
@@ -17,14 +17,24 @@ template <>
 struct Maybe<std::string> : public std::string
 {
   using std::string::basic_string;
+  using std::string::operator=;
 };
 
 template <typename T>
 struct MaybeEmpty;
+#  if defined(__LCC__) && (__EDG_VERSION__ >= 603)
+template <>
+struct MaybeEmpty<std::vector<std::string>> : public std::vector<std::string>
+{
+  using std::vector<std::string>::vector;
+  using std::vector<std::string>::operator=;
+};
+#  endif
 template <typename T>
 struct MaybeEmpty<std::vector<T>> : public std::vector<T>
 {
   using std::vector<T>::vector;
+  using std::vector<T>::operator=;
 };
 
 template <typename T>
@@ -33,11 +43,13 @@ template <typename T>
 struct NonEmpty<std::vector<T>> : public std::vector<T>
 {
   using std::vector<T>::vector;
+  using std::vector<T>::operator=;
 };
 template <>
 struct NonEmpty<std::string> : public std::string
 {
   using std::string::basic_string;
+  using std::string::operator=;
 };
 
 } // namespace ArgumentParser
@@ -50,18 +62,21 @@ template <typename T>
 struct Maybe : public T
 {
   using T::T;
+  using T::operator=;
 };
 
 template <typename T>
 struct MaybeEmpty : public T
 {
   using T::T;
+  using T::operator=;
 };
 
 template <typename T>
 struct NonEmpty : public T
 {
   using T::T;
+  using T::operator=;
 };
 
 } // namespace ArgumentParser

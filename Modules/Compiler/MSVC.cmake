@@ -1,5 +1,5 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-# file Copyright.txt or https://cmake.org/licensing for details.
+# file LICENSE.rst or https://cmake.org/licensing for details.
 
 # This module is shared by multiple languages; use include blocker.
 if(__COMPILER_MSVC)
@@ -22,4 +22,6 @@ macro(__compiler_msvc lang)
     set(CMAKE_INCLUDE_SYSTEM_FLAG_${lang} "-external:I")
     set(CMAKE_INCLUDE_SYSTEM_FLAG_${lang}_WARNING "-external:W0 ")
   endif ()
+
+  set(CMAKE_${lang}_LINK_MODE LINKER)
 endmacro()

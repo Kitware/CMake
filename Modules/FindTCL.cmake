@@ -1,48 +1,73 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-# file Copyright.txt or https://cmake.org/licensing for details.
+# file LICENSE.rst or https://cmake.org/licensing for details.
 
 #[=======================================================================[.rst:
 FindTCL
 -------
 
-TK_INTERNAL_PATH was removed.
+Finds the Tcl (Tool Command Language), dynamic programming language.
 
-This module finds if Tcl is installed and determines where the include
-files and libraries are.  It also determines what the name of the
-library is.  This code sets the following variables:
+This module locates a Tcl installation, including its include directories and
+libraries, and determines the appropriate Tcl library name for linking.  As part
+of the Tcl ecosystem, it also finds Tk, a GUI toolkit that provides a library of
+basic widgets for building graphical user interfaces.
 
-::
+Result Variables
+^^^^^^^^^^^^^^^^
 
-  TCL_FOUND              = Tcl was found
-  TK_FOUND               = Tk was found
-  TCLTK_FOUND            = Tcl and Tk were found
-  TCL_LIBRARY            = path to Tcl library (tcl tcl80)
-  TCL_INCLUDE_PATH       = path to where tcl.h can be found
-  TCL_TCLSH              = path to tclsh binary (tcl tcl80)
-  TK_LIBRARY             = path to Tk library (tk tk80 etc)
-  TK_INCLUDE_PATH        = path to where tk.h can be found
-  TK_WISH                = full path to the wish executable
+This module defines the following variables:
+
+``TCL_FOUND``
+  Boolean indicating whether the Tcl is found.
+``TK_FOUND``
+  Boolean indicating whether the Tk is found.
+``TCLTK_FOUND``
+  Boolean indicating whether both Tcl and Tk are found.
+
+Cache Variables
+^^^^^^^^^^^^^^^
+
+The following cache variables may also be set:
+
+``TCL_LIBRARY``
+  The path to the Tcl library (e.g., ``tcl``, etc.).
+``TCL_INCLUDE_PATH``
+  The directory containing ``tcl.h`` and other Tcl-related headers needed to use
+  Tcl.
+``TCL_TCLSH``
+  The path to the ``tclsh`` command-line executable.
+``TK_LIBRARY``
+  The path to the Tk library (e.g., ``tk``, etc.).
+``TK_INCLUDE_PATH``
+  The directory containing ``tk.h`` and other Tk-related headers needed to use
+  Tk.
+``TK_WISH``
+  The path to the ``wish`` windowing shell command-line executable.
 
 
+Other Libraries
+^^^^^^^^^^^^^^^
 
-In an effort to remove some clutter and clear up some issues for
-people who are not necessarily Tcl/Tk gurus/developers, some
-variables were moved or removed.  Changes compared to CMake 2.4 are:
+The Tcl Stub Library can be found using the separate :module:`FindTclStub`
+module.
 
-::
 
-   => they were only useful for people writing Tcl/Tk extensions.
-   => these libs are not packaged by default with Tcl/Tk distributions.
-      Even when Tcl/Tk is built from source, several flavors of debug libs
-      are created and there is no real reason to pick a single one
-      specifically (say, amongst tcl84g, tcl84gs, or tcl84sgx).
-      Let's leave that choice to the user by allowing him to assign
-      TCL_LIBRARY to any Tcl library, debug or not.
-   => this ended up being only a Win32 variable, and there is a lot of
-      confusion regarding the location of this file in an installed Tcl/Tk
-      tree anyway (see 8.5 for example). If you need the internal path at
-      this point it is safer you ask directly where the *source* tree is
-      and dig from there.
+Examples
+^^^^^^^^
+
+Finding Tcl:
+
+.. code-block:: cmake
+
+  find_package(TCL)
+
+See Also
+^^^^^^^^
+
+* The :module:`FindTclsh` module to find the Tcl shell command-line executable.
+* The :module:`FindTclStub` module to find the Tcl Stubs Library.
+* The :module:`FindWish` module to find the ``wish`` windowing shell
+  command-line executable .
 #]=======================================================================]
 
 block(SCOPE_FOR POLICIES)
@@ -224,7 +249,7 @@ find_path(TK_INCLUDE_PATH
   PATH_SUFFIXES ${TCLTK_POSSIBLE_INCLUDE_PATH_SUFFIXES}
   )
 
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(FindPackageHandleStandardArgs)
 
 if (CMAKE_FIND_PACKAGE_NAME STREQUAL "TclStub")
   # FindTclStub include()'s this module. It's an old pattern, but rather than
@@ -232,14 +257,14 @@ if (CMAKE_FIND_PACKAGE_NAME STREQUAL "TclStub")
   # the contents, detect the case in this module and suppress it explicitly.
   set(FPHSA_NAME_MISMATCHED 1)
 endif ()
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(TCL DEFAULT_MSG TCL_LIBRARY TCL_INCLUDE_PATH)
+find_package_handle_standard_args(TCL DEFAULT_MSG TCL_LIBRARY TCL_INCLUDE_PATH)
 set(FPHSA_NAME_MISMATCHED 1)
 set(TCLTK_FIND_REQUIRED ${TCL_FIND_REQUIRED})
 set(TCLTK_FIND_QUIETLY  ${TCL_FIND_QUIETLY})
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(TCLTK DEFAULT_MSG TCL_LIBRARY TCL_INCLUDE_PATH TK_LIBRARY TK_INCLUDE_PATH)
+find_package_handle_standard_args(TCLTK DEFAULT_MSG TCL_LIBRARY TCL_INCLUDE_PATH TK_LIBRARY TK_INCLUDE_PATH)
 set(TK_FIND_REQUIRED ${TCL_FIND_REQUIRED})
 set(TK_FIND_QUIETLY  ${TCL_FIND_QUIETLY})
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(TK DEFAULT_MSG TK_LIBRARY TK_INCLUDE_PATH)
+find_package_handle_standard_args(TK DEFAULT_MSG TK_LIBRARY TK_INCLUDE_PATH)
 unset(FPHSA_NAME_MISMATCHED)
 
 mark_as_advanced(

@@ -158,8 +158,8 @@ Modules
 * An :module:`AndroidTestUtilities` module was added to manage transfer
   of test data to an Android device.
 
-* The :module:`CheckFortranSourceCompiles` module macro
-  ``CHECK_Fortran_SOURCE_COMPILES`` gained a ``SRC_EXT`` option
+* The :module:`CheckFortranSourceCompiles` module command
+  ``check_fortran_source_compiles()`` gained a ``SRC_EXT`` option
   to specify a custom test Fortran source file extension.
 
 * The :module:`ExternalProject` module gained ``HTTP_USERNAME`` and
@@ -168,7 +168,7 @@ Modules
 * The :module:`ExternalProject` module gained a ``HTTP_HEADER``
   option to add http download headers.
 
-* The :module:`FindBISON` module ``BISON_TARGET`` macro learned a new
+* The :module:`FindBISON` module ``bison_target()`` command learned a new
   ``REPORT_FILE`` option to specify the bison ``--report-file=`` option.
 
 * The :module:`FindBZip2` module now provides imported targets.

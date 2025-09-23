@@ -1,42 +1,78 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-# file Copyright.txt or https://cmake.org/licensing for details.
+# file LICENSE.rst or https://cmake.org/licensing for details.
 
 #[=======================================================================[.rst:
 CheckIncludeFileCXX
 -------------------
 
-Provides a macro to check if a header file can be included in ``CXX``.
+This module provides a command to check a C++ header file.
 
-.. command:: CHECK_INCLUDE_FILE_CXX
+Load this module in a CMake project with:
+
+.. code-block:: cmake
+
+  include(CheckIncludeFileCXX)
+
+Commands
+^^^^^^^^
+
+This module provides the following command:
+
+.. command:: check_include_file_cxx
+
+  Checks once whether a header file can be included in C++ code:
 
   .. code-block:: cmake
 
-    CHECK_INCLUDE_FILE_CXX(<include> <variable> [<flags>])
+    check_include_file_cxx(<include> <variable> [<flags>])
 
-  Check if the given ``<include>`` file may be included in a ``CXX``
-  source file and store the result in an internal cache entry named
-  ``<variable>``.  The optional third argument may be used to add
-  compilation flags to the check (or use ``CMAKE_REQUIRED_FLAGS`` below).
+  This command checks once whether the given ``<include>`` header file
+  exists and can be included in a ``CXX`` source file.  The result of the
+  check is stored in an internal cache variable named ``<variable>``.  The
+  optional third argument may be used to add additional compilation flags
+  to the check (or use the ``CMAKE_REQUIRED_FLAGS`` variable below).
 
-The following variables may be set before calling this macro to modify
-the way the check is run:
+  .. rubric:: Variables Affecting the Check
 
-.. include:: /module/CMAKE_REQUIRED_FLAGS.txt
+  The following variables may be set before calling this command to modify
+  the way the check is run:
 
-.. include:: /module/CMAKE_REQUIRED_DEFINITIONS.txt
+  .. include:: /module/include/CMAKE_REQUIRED_FLAGS.rst
 
-.. include:: /module/CMAKE_REQUIRED_INCLUDES.txt
+  .. include:: /module/include/CMAKE_REQUIRED_DEFINITIONS.rst
 
-.. include:: /module/CMAKE_REQUIRED_LINK_OPTIONS.txt
+  .. include:: /module/include/CMAKE_REQUIRED_INCLUDES.rst
 
-.. include:: /module/CMAKE_REQUIRED_LIBRARIES.txt
+  .. include:: /module/include/CMAKE_REQUIRED_LINK_OPTIONS.rst
 
-.. include:: /module/CMAKE_REQUIRED_LINK_DIRECTORIES.txt
+  .. include:: /module/include/CMAKE_REQUIRED_LIBRARIES.rst
 
-.. include:: /module/CMAKE_REQUIRED_QUIET.txt
+  .. include:: /module/include/CMAKE_REQUIRED_LINK_DIRECTORIES.rst
 
-See modules :module:`CheckIncludeFile` and :module:`CheckIncludeFiles`
-to check for one or more ``C`` headers.
+  .. include:: /module/include/CMAKE_REQUIRED_QUIET.rst
+
+  .. versionadded:: 3.12
+    The ``CMAKE_REQUIRED_LIBRARIES`` variable, if policy :policy:`CMP0075` is
+    set to ``NEW``.
+
+Examples
+^^^^^^^^
+
+Checking whether the ``C++23`` header ``<stdfloat>`` exists and storing the
+check result in the ``HAVE_STDFLOAT_HEADER`` cache variable:
+
+.. code-block:: cmake
+
+  include(CheckIncludeFileCXX)
+
+  check_include_file_cxx(stdfloat HAVE_STDFLOAT_HEADER)
+
+See Also
+^^^^^^^^
+
+* The :module:`CheckIncludeFile` module to check for single C header.
+* The :module:`CheckIncludeFiles` module to check for one or more C or
+  C++ headers at once.
 #]=======================================================================]
 
 include_guard(GLOBAL)

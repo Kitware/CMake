@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
 #include <iosfwd>
@@ -14,11 +14,17 @@ class cmFileSet;
 class cmListFileBacktrace;
 class cmLocalGenerator;
 
+struct cmFileSetDestinations
+{
+  std::string Headers;
+  std::string CXXModules;
+};
+
 class cmInstallFileSetGenerator : public cmInstallGenerator
 {
 public:
-  cmInstallFileSetGenerator(std::string targetName, cmFileSet* fileSet,
-                            std::string const& dest,
+  cmInstallFileSetGenerator(std::string targetName, std::string fileSetName,
+                            cmFileSetDestinations dests,
                             std::string file_permissions,
                             std::vector<std::string> const& configurations,
                             std::string const& component, MessageLevel message,
@@ -31,21 +37,24 @@ public:
   std::string GetDestination(std::string const& config) const;
   std::string GetDestination() const { return this->Destination; }
   bool GetOptional() const { return this->Optional; }
-  cmFileSet* GetFileSet() const { return this->FileSet; }
+  std::string GetFileSetName() const { return this->FileSetName; }
+  cmFileSet const* GetFileSet() const { return this->FileSet; };
   cmGeneratorTarget* GetTarget() const { return this->Target; }
 
 protected:
-  void GenerateScriptForConfig(std::ostream& os, const std::string& config,
+  void GenerateScriptForConfig(std::ostream& os, std::string const& config,
                                Indent indent) override;
 
 private:
   std::string TargetName;
   cmLocalGenerator* LocalGenerator;
-  cmFileSet* const FileSet;
+  cmFileSet const* FileSet;
+  std::string const FileSetName;
   std::string const FilePermissions;
+  cmFileSetDestinations FileSetDestinations;
   bool const Optional;
   cmGeneratorTarget* Target;
 
   std::map<std::string, std::vector<std::string>> CalculateFilesPerDir(
-    const std::string& config) const;
+    std::string const& config) const;
 };
