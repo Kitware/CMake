@@ -1538,6 +1538,17 @@ public:
   std::string BuildDatabasePath(std::string const& lang,
                                 std::string const& config) const;
 
+  enum class MsvcCharSet
+  {
+    None,
+    Unicode,
+    MultiByte,
+    SingleByte,
+  };
+
+  // Detect if the current define selects any known charset entry or not
+  static MsvcCharSet GetMsvcCharSet(std::string const& singleDefine);
+
 private:
   void BuildFileSetInfoCache(std::string const& config) const;
   struct InfoByConfig

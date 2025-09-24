@@ -32,7 +32,7 @@
                 },
                 {
                     "file": "^codemodel-v2\\.cmake$",
-                    "line": 9,
+                    "line": 10,
                     "command": "include",
                     "hasParent": true
                 },
@@ -75,6 +75,10 @@
             "frameworks": null,
             "defines": [
                 {
+                    "define": "_MBCS",
+                    "backtrace": null
+                },
+                {
                     "define": "interface_exe_EXPORTS",
                     "backtrace": null
                 },
@@ -95,7 +99,7 @@
                         },
                         {
                             "file": "^codemodel-v2\\.cmake$",
-                            "line": 9,
+                            "line": 10,
                             "command": "include",
                             "hasParent": true
                         },
@@ -138,7 +142,7 @@
         },
         {
             "file": "^codemodel-v2\\.cmake$",
-            "line": 9,
+            "line": 10,
             "command": "include",
             "hasParent": true
         },

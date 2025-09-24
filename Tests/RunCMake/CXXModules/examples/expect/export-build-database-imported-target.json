@@ -9,6 +9,7 @@
         {
           "arguments": [
             "<IGNORE>",
+            "-D_MBCS",
             "-Dtarget_interface_define",
             "-Dtarget_public_define",
             "PATH:-I<SOURCE_DIR>/examples/export-build-database/target_interface_include",
@@ -24,6 +25,7 @@
             "PATH:<SOURCE_DIR>/examples/import-modules/use.cxx"
           ],
           "baseline-arguments": [
+            "-D_MBCS",
             "-Dtarget_interface_define",
             "-Dtarget_public_define",
             "PATH:-I<SOURCE_DIR>/examples/export-build-database/target_interface_include",
@@ -35,6 +37,7 @@
             "-Dtarget_public_option"
           ],
           "local-arguments": [
+            "-D_MBCS",
             "-Dtarget_interface_define",
             "-Dtarget_public_define",
             "PATH:-I<SOURCE_DIR>/examples/export-build-database/target_interface_include",

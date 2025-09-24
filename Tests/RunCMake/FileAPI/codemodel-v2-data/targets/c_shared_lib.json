@@ -20,7 +20,7 @@
             "backtrace": [
                 {
                     "file": "^codemodel-v2\\.cmake$",
-                    "line": 16,
+                    "line": 17,
                     "command": "add_library",
                     "hasParent": true
                 },
@@ -63,6 +63,10 @@
             "frameworks": null,
             "defines": [
                 {
+                    "define": "_MBCS",
+                    "backtrace": null
+                },
+                {
                     "define": "_WINDLL",
                     "backtrace": null
                 },
@@ -77,7 +81,7 @@
     "backtrace": [
         {
             "file": "^codemodel-v2\\.cmake$",
-            "line": 16,
+            "line": 17,
             "command": "add_library",
             "hasParent": true
         },
@@ -126,7 +130,7 @@
                 "backtrace": [
                     {
                         "file": "^codemodel-v2\\.cmake$",
-                        "line": 53,
+                        "line": 54,
                         "command": "install",
                         "hasParent": true
                     },
@@ -156,7 +160,7 @@
                 "backtrace": [
                     {
                         "file": "^codemodel-v2\\.cmake$",
-                        "line": 53,
+                        "line": 54,
                         "command": "install",
                         "hasParent": true
                     },
@@ -186,7 +190,7 @@
                 "backtrace": [
                     {
                         "file": "^codemodel-v2\\.cmake$",
-                        "line": 58,
+                        "line": 59,
                         "command": "install",
                         "hasParent": true
                     },

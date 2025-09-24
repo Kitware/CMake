@@ -4193,6 +4193,11 @@ bool cmLocalGenerator::IsNinjaMulti() const
   return this->GetState()->UseNinjaMulti();
 }
 
+bool cmLocalGenerator::IsWindowsVSIDE() const
+{
+  return this->GetState()->UseWindowsVSIDE();
+}
+
 namespace {
 std::string relativeIfUnder(std::string const& top, std::string const& cur,
                             std::string const& path)

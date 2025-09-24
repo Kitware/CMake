@@ -14,25 +14,33 @@
       "name": "HEADERS",
       "type": "HEADERS",
       "visibility": "PUBLIC",
-      "baseDirectories": ["^fileset$"]
+      "baseDirectories": [
+        "^fileset$"
+      ]
     },
     {
       "name": "a",
       "type": "HEADERS",
       "visibility": "PRIVATE",
-      "baseDirectories": ["^fileset$"]
+      "baseDirectories": [
+        "^fileset$"
+      ]
     },
     {
       "name": "b",
       "type": "HEADERS",
       "visibility": "PUBLIC",
-      "baseDirectories": ["^fileset/dir$"]
+      "baseDirectories": [
+        "^fileset/dir$"
+      ]
     },
     {
       "name": "c",
       "type": "HEADERS",
       "visibility": "INTERFACE",
-      "baseDirectories": ["^fileset$"]
+      "baseDirectories": [
+        "^fileset$"
+      ]
     }
   ],
   "sources": [
@@ -204,7 +212,12 @@
         }
       ],
       "frameworks": null,
-      "defines": null,
+      "defines": [
+        {
+          "define": "_MBCS",
+          "backtrace": null
+        }
+      ],
       "compileCommandFragments": null
     }
   ],

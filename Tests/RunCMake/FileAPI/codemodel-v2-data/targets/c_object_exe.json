@@ -20,7 +20,7 @@
             "backtrace": [
                 {
                     "file": "^object/CMakeLists\\.txt$",
-                    "line": 6,
+                    "line": 9,
                     "command": "add_executable",
                     "hasParent": true
                 },
@@ -41,7 +41,7 @@
             "backtrace": [
                 {
                     "file": "^object/CMakeLists\\.txt$",
-                    "line": 7,
+                    "line": 10,
                     "command": "target_link_libraries",
                     "hasParent": true
                 },
@@ -76,14 +76,19 @@
             ],
             "includes": null,
             "frameworks": null,
-            "defines": null,
+            "defines": [
+                {
+                    "define": "_MBCS",
+                    "backtrace": null
+                }
+            ],
             "compileCommandFragments": null
         }
     ],
     "backtrace": [
         {
             "file": "^object/CMakeLists\\.txt$",
-            "line": 6,
+            "line": 9,
             "command": "add_executable",
             "hasParent": true
         },
@@ -116,7 +121,7 @@
                 "backtrace": [
                     {
                         "file": "^object/CMakeLists\\.txt$",
-                        "line": 13,
+                        "line": 16,
                         "command": "install",
                         "hasParent": true
                     },
@@ -142,7 +147,7 @@
             "backtrace": [
                 {
                     "file": "^object/CMakeLists\\.txt$",
-                    "line": 7,
+                    "line": 10,
                     "command": "target_link_libraries",
                     "hasParent": true
                 },

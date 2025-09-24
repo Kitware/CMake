@@ -9,6 +9,7 @@
         {
           "arguments": [
             "<IGNORE>",
+            "-D_MBCS",
             "-Ddep_interface_define",
             "-Dfrom_compile_definitions",
             "-Dtarget_private_define",
@@ -31,6 +32,7 @@
             "PATH:<SOURCE_DIR>/examples/export-build-database/lib.cxx"
           ],
           "baseline-arguments": [
+            "-D_MBCS",
             "-Ddep_interface_define",
             "-Dfrom_compile_definitions",
             "-Dtarget_private_define",
@@ -49,6 +51,7 @@
             "-Ddep_interface_option"
           ],
           "local-arguments": [
+            "-D_MBCS",
             "-Ddep_interface_define",
             "-Dfrom_compile_definitions",
             "-Dtarget_private_define",
@@ -76,6 +79,7 @@
         {
           "arguments": [
             "<IGNORE>",
+            "-D_MBCS",
             "-Ddep_interface_define",
             "-Dfrom_compile_definitions",
             "-Dtarget_private_define",
@@ -100,6 +104,7 @@
             "PATH:<SOURCE_DIR>/examples/export-build-database/importable.cxx"
           ],
           "baseline-arguments": [
+            "-D_MBCS",
             "-Ddep_interface_define",
             "-Dfrom_compile_definitions",
             "-Dtarget_private_define",
@@ -118,6 +123,7 @@
             "-Ddep_interface_option"
           ],
           "local-arguments": [
+            "-D_MBCS",
             "-Ddep_interface_define",
             "-Dfrom_compile_definitions",
             "-Dtarget_private_define",

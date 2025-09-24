@@ -49,7 +49,12 @@
             ],
             "includes": null,
             "frameworks": null,
-            "defines": null,
+            "defines": [
+                {
+                    "define": "_MBCS",
+                    "backtrace": null
+                }
+            ],
             "compileCommandFragments": null
         }
     ],
@@ -82,14 +87,14 @@
     "build": "^cxx/cross$",
     "source": "^cxx/cross$",
     "install": null,
-    "launchers" : [
+    "launchers": [
         {
-            "arguments" : [
-                    "arg1",
-                    "arg2 with space"
+            "arguments": [
+                "arg1",
+                "arg2 with space"
             ],
             "command": "^no-such-emulator(\\.exe)?$",
-            "type" : "emulator"
+            "type": "emulator"
         }
     ],
     "link": {

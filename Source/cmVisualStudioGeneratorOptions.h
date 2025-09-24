@@ -9,6 +9,7 @@
 
 #include <cm/optional>
 
+#include "cmGeneratorTarget.h"
 #include "cmGlobalVisualStudioGenerator.h"
 #include "cmIDEFlagTable.h"
 #include "cmIDEOptions.h"
@@ -97,7 +98,11 @@ private:
 
   std::string UnknownFlagField;
 
+  mutable cm::optional<cmGeneratorTarget::MsvcCharSet> CachedCharset;
+
   void StoreUnknownFlag(std::string const& flag) override;
 
   FlagValue TakeFlag(std::string const& key);
+
+  void CacheCharsetValue() const;
 };

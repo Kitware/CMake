@@ -44,8 +44,7 @@
     "compileGroups": [
         {
             "language": "CXX",
-            "languageStandard" :
-            {
+            "languageStandard": {
                 "backtraces": [
                     [
                         {
@@ -62,14 +61,19 @@
                         }
                     ]
                 ],
-                "standard" : "98"
+                "standard": "98"
             },
             "sourcePaths": [
                 "^empty\\.cxx$"
             ],
             "includes": null,
             "frameworks": null,
-            "defines": null,
+            "defines": [
+                {
+                    "define": "_MBCS",
+                    "backtrace": null
+                }
+            ],
             "compileCommandFragments": null
         }
     ],

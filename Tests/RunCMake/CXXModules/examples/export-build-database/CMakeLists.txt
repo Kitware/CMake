@@ -5,6 +5,11 @@ include("${CMAKE_SOURCE_DIR}/../cxx-modules-rules.cmake")
 
 include("${CMAKE_SOURCE_DIR}/../export-build-database-setup.cmake")
 
+# _MBCS default append for MSVC ABI workaround: see CMP0204
+# So, force add the default value for all platforms to be consistent.
+cmake_policy(SET CMP0204 NEW)
+add_compile_definitions(_MBCS)
+
 add_compile_options(-Dfrom_compile_options)
 add_compile_definitions(-Dfrom_compile_definitions)
 include_directories(from_include_directories)

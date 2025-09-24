@@ -544,6 +544,7 @@ public:
   bool IsMinGWMake() const;
   bool IsNMake() const;
   bool IsNinjaMulti() const;
+  bool IsWindowsVSIDE() const;
 
   void IssueMessage(MessageType t, std::string const& text) const;
 
