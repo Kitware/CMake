@@ -46,18 +46,26 @@ else(WORDS_BIGENDIAN)
 endif(WORDS_BIGENDIAN)
 
 if(HAVE_SYS_TYPES_H)
-    check_symbol_exists("off_t" "sys/types.h" off_t)
-    check_symbol_exists("size_t" "sys/types.h" size_t)
-else(HAVE_SYS_TYPES_H)
+    check_c_source_compiles("
+        #include <sys/types.h>
+        int main(void) {
+            const off_t offset = -123;
+            (void)offset;
+            return 0;
+        }"
+        HAVE_OFF_T)
+endif()
+
+if(NOT HAVE_OFF_T)
     set(off_t "long")
-    set(size_t "unsigned")
-endif(HAVE_SYS_TYPES_H)
+endif()
 
 check_c_source_compiles("
+        #define _GNU_SOURCE
         #include <stdlib.h>  /* for NULL */
         #include <unistd.h>  /* for syscall */
         #include <sys/syscall.h>  /* for SYS_getrandom */
-        int main() {
+        int main(void) {
             syscall(SYS_getrandom, NULL, 0, 0);
             return 0;
         }"
