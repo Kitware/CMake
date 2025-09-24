@@ -38,6 +38,7 @@ run_cmake(DependsMultipleDifferentSets)
 
 # Test functionality
 run_cmake(Appendix)
+run_cmake(Component)
 run_cmake(InterfaceProperties)
 run_cmake(Metadata)
 run_cmake(ProjectMetadata)
