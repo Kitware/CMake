@@ -23,7 +23,8 @@ cmGeneratorExpressionEvaluationFile::cmGeneratorExpressionEvaluationFile(
   std::unique_ptr<cmCompiledGeneratorExpression> outputFileExpr,
   std::unique_ptr<cmCompiledGeneratorExpression> condition,
   bool inputIsContent, std::string newLineCharacter, mode_t permissions,
-  cmPolicies::PolicyStatus policyStatusCMP0070)
+  cmPolicies::PolicyStatus policyStatusCMP0070,
+  cmPolicies::PolicyStatus policyStatusCMP0189)
   : Input(std::move(input))
   , Target(std::move(target))
   , OutputFileExpr(std::move(outputFileExpr))
@@ -31,6 +32,7 @@ cmGeneratorExpressionEvaluationFile::cmGeneratorExpressionEvaluationFile(
   , InputIsContent(inputIsContent)
   , NewLineCharacter(std::move(newLineCharacter))
   , PolicyStatusCMP0070(policyStatusCMP0070)
+  , PolicyStatusCMP0189(policyStatusCMP0189)
   , Permissions(permissions)
 {
 }
@@ -41,6 +43,7 @@ void cmGeneratorExpressionEvaluationFile::Generate(
   std::map<std::string, std::string>& outputFiles, mode_t perm)
 {
   cm::GenEx::Context context(lg, config, lang);
+  context.SetCMP0189(this->PolicyStatusCMP0189);
   std::string rawCondition = this->Condition->GetInput();
   cmGeneratorTarget* target = lg->FindGeneratorTargetToUse(this->Target);
   if (!rawCondition.empty()) {
@@ -126,6 +129,7 @@ void cmGeneratorExpressionEvaluationFile::CreateOutputFile(
 
   for (std::string const& lang : enabledLanguages) {
     cm::GenEx::Context context(lg, config, lang);
+    context.SetCMP0189(this->PolicyStatusCMP0189);
     std::string const name = this->GetOutputFileName(context, target);
     cmSourceFile* sf = lg->GetMakefile()->GetOrCreateGeneratedSource(name);
 

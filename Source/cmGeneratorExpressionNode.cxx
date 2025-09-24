@@ -2887,8 +2887,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
     cmGeneratorTarget::UseTo usage = cmGeneratorTarget::UseTo::Compile;
 
     if (cm::optional<cmGeneratorTarget::TransitiveProperty> transitiveProp =
-          target->IsTransitiveProperty(propertyName, eval->Context.LG,
-                                       eval->Context.Config,
+          target->IsTransitiveProperty(propertyName, eval->Context,
                                        dagCheckerParent)) {
       interfacePropertyName = std::string(transitiveProp->InterfaceName);
       isInterfaceProperty = transitiveProp->InterfaceName == propertyName;
