@@ -2750,19 +2750,18 @@ int cmake::ActualConfigure()
         cmStrCat('"', cmSystemTools::GetCTestCommand(), "\" --instrument ");
     }
     std::string common_args =
-      cmStrCat(" --target-name <TARGET_NAME> --build-dir \"",
+      cmStrCat(" --target-name <TARGET_NAME> --config <CONFIG> --build-dir \"",
                this->State->GetBinaryDirectory(), "\" ");
     this->State->SetGlobalProperty(
       "RULE_LAUNCH_COMPILE",
       cmStrCat(
         launcher, "--command-type compile", common_args,
-        "--config <CONFIG> "
         "--output <OBJECT> --source <SOURCE> --language <LANGUAGE> -- "));
     this->State->SetGlobalProperty(
       "RULE_LAUNCH_LINK",
       cmStrCat(
         launcher, "--command-type link", common_args,
-        "--output <TARGET> --target-type <TARGET_TYPE> --config <CONFIG> "
+        "--output <TARGET> --target-type <TARGET_TYPE> "
         "--language <LANGUAGE> --target-labels \"<TARGET_LABELS>\" -- "));
     this->State->SetGlobalProperty(
       "RULE_LAUNCH_CUSTOM",

@@ -87,8 +87,21 @@ foreach(snippet IN LISTS snippets)
   # Verify contents of custom-* Snippets
   if (filename MATCHES "^custom-")
     string(JSON outputs GET "${contents}" outputs)
-    if (NOT output1 MATCHES "output1" OR NOT output2 MATCHES "output2")
-      json_error("${snippet}" "Custom command missing outputs")
+    # if "outputs" is CMakeFiles/customTarget, should not have a "target"
+    if (outputs MATCHES "customTarget")
+      json_missing_key("${snippet}" "${contents}" target)
+    # if "outputs" is empty list, should have "target" main
+    elseif (outputs MATCHES "\\[\\]")
+      json_assert_key("${snippet}" "${contents}" target main)
+    # if "outputs" is includes output1, should also include output2, and no target
+    elseif (outputs MATCHES "output1")
+      if (NOT outputs MATCHES "output2")
+        json_error("${snippet}" "Custom command missing outputs")
+      endif()
+      json_missing_key("${snippet}" "${contents}" target)
+    # unrecognized outputs
+    else()
+      json_error("${snippet}" "Custom command has unexpected outputs\n${outputs}")
     endif()
   endif()
 
@@ -101,7 +114,7 @@ foreach(snippet IN LISTS snippets)
   endif()
 
   # Verify that Config is Debug
-  if (filename MATCHES "^test|^compile|^link")
+  if (filename MATCHES "^test|^compile|^link|^custom|^install")
     string(JSON config GET "${contents}" config)
     if (NOT config STREQUAL "Debug")
       json_error(${snippet} "Unexpected config: ${config}")

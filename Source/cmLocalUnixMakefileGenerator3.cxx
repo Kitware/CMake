@@ -1073,6 +1073,8 @@ void cmLocalUnixMakefileGenerator3::AppendCustomCommand(
         }
         vars.Output = output.c_str();
         vars.Role = ccg.GetCC().GetRole().c_str();
+        vars.CMTargetName = ccg.GetCC().GetTarget().c_str();
+        vars.Config = ccg.GetOutputConfig().c_str();
 
         launcher = val;
         rulePlaceholderExpander->ExpandRuleVariables(this, launcher, vars);

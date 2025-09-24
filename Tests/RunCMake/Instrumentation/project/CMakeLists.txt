@@ -9,12 +9,16 @@ endif()
 add_executable(main main.cxx)
 add_library(lib lib.cxx)
 target_link_libraries(main lib)
+add_custom_command(TARGET main POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E true
+)
 add_custom_command(
   COMMAND ${CMAKE_COMMAND} -E true
   OUTPUT output1 output2
 )
 set_property(SOURCE output1 output2 PROPERTY SYMBOLIC 1)
 add_custom_target(customTarget ALL
+  COMMAND ${CMAKE_COMMAND} -E true
   DEPENDS output1
 )
 add_test(NAME test COMMAND $<TARGET_FILE:main>)

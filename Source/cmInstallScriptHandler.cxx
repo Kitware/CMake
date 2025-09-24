@@ -119,10 +119,15 @@ int cmInstallScriptHandler::Install(unsigned int j,
                        "install",
                        "--build-dir",
                        this->binaryDir,
+                       "--config",
+                       "",
                        "--" };
   }
 
   for (auto& script : this->scripts) {
+    if (!instrument_arg.empty()) {
+      instrument_arg[7] = script.config; // --config <script.config>
+    }
     script.command.insert(script.command.begin(), instrument_arg.begin(),
                           instrument_arg.end());
     runners.emplace_back(script);
