@@ -43,7 +43,7 @@
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmValue.h"
-#include "cmVersion.h"
+#include "cmVersionMacros.h"
 #include "cmWindowsRegistry.h"
 
 #if defined(__HAIKU__)
