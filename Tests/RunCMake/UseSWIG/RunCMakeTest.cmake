@@ -22,6 +22,13 @@ if (CMake_TEST_FindPython2 OR CMake_TEST_FindPython3)
   run_cmake(CMP0086-NEW)
   run_cmake_target(CMP0086-NEW build example)
 
+  block()
+    run_cmake(SetPOSTFIX)
+    set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/SetPOSTFIX-build)
+    set(RunCMake_TEST_NO_CLEAN 1)
+    run_cmake_command(SetPOSTFIX-build ${CMAKE_COMMAND} --build . --config $<CONFIG>)
+    run_cmake_command(SetPOSTFIX-run ${CMAKE_CTEST_COMMAND} -C $<CONFIG> -V)
+  endblock()
 endif()
 
 run_cmake(CMP0122-WARN)
