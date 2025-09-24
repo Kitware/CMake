@@ -240,3 +240,12 @@ on Windows Nullsoft Scriptable Install System.
 
  where ``<preArgs>...`` is constructed from ``CPACK_NSIS_EXECUTABLE_PRE_ARGUMENTS``
  and ``<postArgs>...``  is constructed from ``CPACK_NSIS_EXECUTABLE_POST_ARGUMENTS``.
+
+.. variable:: CPACK_NSIS_CRC_CHECK
+
+ .. versionadded:: 4.2
+
+ Specifies whether or not the installer will perform a CRC on itself before
+ allowing an install.
+ Allowed values for this variable are ``on``, ``off``, and ``force``.
+ If not specified, the default behavior is ``on``.
