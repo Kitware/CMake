@@ -1502,10 +1502,10 @@ void cmVisualStudio10TargetGenerator::WriteProjectConfigurationValues(Elem& e0)
       } else if (this->Android) {
         this->WriteAndroidConfigurationValues(e1, c);
       }
-    }
 
-    if (this->WindowsKernelMode) {
-      this->WriteMSDriverConfigurationValues(e1, c);
+      if (this->WindowsKernelMode) {
+        this->WriteMSDriverConfigurationValues(e1, c);
+      }
     }
   }
 }
