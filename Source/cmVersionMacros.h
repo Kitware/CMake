@@ -18,3 +18,13 @@
   ((((major) * 1000u) * CMake_VERSION_ENCODE_BASE) +                          \
    (((minor) % 1000u) * CMake_VERSION_ENCODE_BASE) +                          \
    (((patch) % CMake_VERSION_ENCODE_BASE)))
+
+#define CMV_STRINGIFY(X) CMV_STRINGIFY_DELAY(X)
+#define CMV_STRINGIFY_DELAY(X) #X
+
+#define CMake_VERSION_DEVEL(major, minor)                                     \
+  (CMake_VERSION_ENCODE(major, minor, 0) >                                    \
+       CMake_VERSION_ENCODE(CMake_VERSION_MAJOR, CMake_VERSION_MINOR, 0)      \
+     ? CMV_STRINGIFY(CMake_VERSION_MAJOR) "." CMV_STRINGIFY(                  \
+         CMake_VERSION_MINOR) "." CMV_STRINGIFY(CMake_VERSION_PATCH)          \
+     : #major "." #minor ".0")

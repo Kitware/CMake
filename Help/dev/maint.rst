@@ -263,12 +263,12 @@ Update ``Source/CMakeVersion.cmake`` to set the version to
   set(CMake_VERSION_PATCH 0)
   set(CMake_VERSION_RC 0)
 
-Replace uses of ``DEVEL_CMAKE_VERSION`` in the source tree with
+Replace uses of ``CMake_VERSION_DEVEL`` in the source tree with
 the literal release version number string ``"$major.$minor.0"``:
 
 .. code-block:: shell
 
-  $EDITOR $(git grep -l DEVEL_CMAKE_VERSION)
+  $EDITOR $(git grep -l CMake_VERSION_DEVEL)
 
 Commit with a message such as::
 

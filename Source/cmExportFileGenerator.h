@@ -18,16 +18,6 @@ class cmExportSet;
 class cmGeneratorTarget;
 class cmLocalGenerator;
 
-#define STRINGIFY_HELPER(X) #X
-#define STRINGIFY(X) STRINGIFY_HELPER(X)
-
-#define DEVEL_CMAKE_VERSION(major, minor)                                     \
-  (CMake_VERSION_ENCODE(major, minor, 0) >                                    \
-       CMake_VERSION_ENCODE(CMake_VERSION_MAJOR, CMake_VERSION_MINOR, 0)      \
-     ? STRINGIFY(CMake_VERSION_MAJOR) "." STRINGIFY(                          \
-         CMake_VERSION_MINOR) "." STRINGIFY(CMake_VERSION_PATCH)              \
-     : #major "." #minor ".0")
-
 /** \class cmExportFileGenerator
  * \brief Generate files exporting targets from a build or install tree.
  *
