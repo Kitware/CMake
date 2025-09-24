@@ -23,8 +23,9 @@ function(instrument test)
   )
   cmake_parse_arguments(ARGS "${OPTIONS}" "CHECK_SCRIPT;CONFIGURE_ARG" "" ${ARGN})
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/${test})
-  set(uuid "2555e60c-9119-46fb-af73-8c54e9b6b326")
+  set(uuid "ec7aa2dc-b87f-45a3-8022-fe01c5f59984")
   set(v1 ${RunCMake_TEST_BINARY_DIR}/.cmake/instrumentation-${uuid}/v1)
+  set(v1 ${v1} PARENT_SCOPE)
   set(query_dir ${CMAKE_CURRENT_LIST_DIR}/query)
 
   # Clear previous instrumentation data
@@ -177,6 +178,19 @@ instrument(cmake-command-custom-content
   CONFIGURE_ARG "-DN=2"
   CHECK_SCRIPT check-custom-content.cmake
 )
+set(indexDir ${v1}/data/index)
+set(fakeIndex ${indexDir}/index-0.json)
+file(MAKE_DIRECTORY ${indexDir})
+file(TOUCH ${fakeIndex})
+# fakeIndex newer than all content files prevents their deletion
+set(EXPECTED_CONTENT_FILES 2)
+instrument(cmake-command-custom-content
+  NO_WARN NO_CONFIGURE MANUAL_HOOK PRESERVE_DATA
+  CHECK_SCRIPT check-custom-content-removed.cmake
+)
+file(REMOVE ${fakeIndex})
+# old content files will be removed if no index file exists
+set(EXPECTED_CONTENT_FILES 1)
 instrument(cmake-command-custom-content
   NO_WARN NO_CONFIGURE MANUAL_HOOK PRESERVE_DATA
   CHECK_SCRIPT check-custom-content-removed.cmake

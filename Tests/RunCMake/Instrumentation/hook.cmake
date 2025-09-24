@@ -110,7 +110,6 @@ if (NOT hasStaticInfo STREQUAL UNEXPECTED)
   json_has_key("${index}" "${staticSystemInformation}" vendorString ${hasStaticInfo})
 endif()
 
-get_filename_component(dataDir ${index} DIRECTORY)
 get_filename_component(v1 ${dataDir} DIRECTORY)
 if (EXISTS ${v1}/${hook}.hook)
   add_error("Received multiple triggers of the same hook: ${hook}")

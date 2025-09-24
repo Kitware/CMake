@@ -158,6 +158,10 @@ subdirectories:
   files, they should never be removed by other processes. Data collected here
   remains until after `Indexing`_ occurs and all `Callbacks`_ are executed.
 
+``data/index/``
+  A subset of the collected data, containing any
+  `v1 Index Files <v1 Index File_>`_.
+
 ``data/content/``
   A subset of the collected data, containing any
   :ref:`cmake_instrumentation Configure Content` files.
@@ -276,8 +280,8 @@ Example:
 
 In this example, after every ``cmake --build`` or ``cmake --install``
 invocation, an index file ``index-<timestamp>.json`` will be generated in
-``<build>/.cmake/instrumentation/v1/data`` containing a list of data snippet
-files created since the previous indexing. The commands
+``<build>/.cmake/instrumentation/v1/data/index`` containing a list of data
+snippet files created since the previous indexing. The commands
 ``/usr/bin/python callback.py index-<timestamp>.json`` and
 ``/usr/bin/cmake -P callback.cmake arg index-<timestamp>.json`` will be executed
 in that order. The index file will contain the ``staticSystemInformation`` data

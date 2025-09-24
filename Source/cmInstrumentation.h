@@ -63,7 +63,6 @@ public:
                       std::vector<std::vector<std::string>> const& callback);
   void AddCustomContent(std::string const& name, Json::Value const& contents);
   void WriteCustomContent();
-  std::string GetLatestFile(std::string const& dataSubdir);
   void ClearGeneratedQueries();
   int CollectTimingData(cmInstrumentationQuery::Hook hook);
   int SpawnBuildDaemon();
@@ -99,6 +98,14 @@ private:
                         Json::Value const& snippetData);
   size_t AssignTargetToTraceThread(std::vector<uint64_t>& workers,
                                    uint64_t timeStart, uint64_t duration);
+  enum LatestOrOldest
+  {
+    Latest,
+    Oldest
+  };
+  std::string GetFileByTimestamp(LatestOrOldest latestOrOldest,
+                                 std::string const& dataSubdir,
+                                 std::string const& exclude = "");
   std::string binaryDir;
   std::string timingDirv1;
   std::string userTimingDirv1;
