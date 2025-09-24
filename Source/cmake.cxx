@@ -1764,6 +1764,16 @@ cmake::TraceFormat cmake::StringToTraceFormat(std::string const& traceStr)
   return (it != levels.cend()) ? it->second : TraceFormat::Undefined;
 }
 
+bool cmake::PopTraceCmd()
+{
+  if (this->cmakeLangTraceCmdStack.empty()) {
+    // Nothing to pop! A caller should report an error.
+    return false;
+  }
+  this->cmakeLangTraceCmdStack.pop();
+  return true;
+}
+
 void cmake::SetTraceFile(std::string const& file)
 {
   this->TraceFile.close();

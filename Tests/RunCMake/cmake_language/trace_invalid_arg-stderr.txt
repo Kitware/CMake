@@ -1,0 +1,4 @@
+CMake Error at trace_invalid_arg\.cmake:1 \(cmake_language\):
+  cmake_language TRACE ON given an invalid argument XPAND
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)

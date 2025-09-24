@@ -25,6 +25,7 @@
 #include "cmState.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmValue.h"
 #include "cmake.h"
 
 namespace {
@@ -540,6 +541,41 @@ bool cmCMakeLanguageCommand(std::vector<cmListFileArgument> const& args,
   if (expArgs[expArg] == "GET_EXPERIMENTAL_FEATURE_ENABLED") {
     return cmCMakeLanguageCommandGET_EXPERIMENTAL_FEATURE_ENABLED(args,
                                                                   status);
+  }
+
+  if (expArgs[expArg] == "TRACE") {
+    ++expArg; // Consume "TRACE".
+
+    if (!moreArgs()) {
+      return FatalError(status, "TRACE missing a boolean value");
+    }
+
+    bool const value = cmValue::IsOn(expArgs[expArg++]);
+    bool expand = false;
+
+    if (value && moreArgs()) {
+      expand = (expArgs[expArg] == "EXPAND");
+      if (!expand) {
+        return FatalError(
+          status,
+          cmStrCat("TRACE ON given an invalid argument ", expArgs[expArg]));
+      }
+      ++expArg;
+    }
+
+    if (moreArgs()) {
+      return FatalError(
+        status,
+        cmStrCat("TRACE O", value ? "N" : "FF", " given too many arguments"));
+    }
+
+    cmMakefile& makefile = status.GetMakefile();
+    if (value) {
+      makefile.GetCMakeInstance()->PushTraceCmd(expand);
+      return true;
+    }
+    return makefile.GetCMakeInstance()->PopTraceCmd() ||
+      FatalError(status, "TRACE OFF request without a corresponding TRACE ON");
   }
 
   return FatalError(status, "called with unknown meta-operation");
