@@ -942,7 +942,8 @@ void cmMakefile::AddEvaluationFile(
     cm::make_unique<cmGeneratorExpressionEvaluationFile>(
       inputFile, targetName, std::move(outputName), std::move(condition),
       inputIsContent, newLineCharacter, permissions,
-      this->GetPolicyStatus(cmPolicies::CMP0070)));
+      this->GetPolicyStatus(cmPolicies::CMP0070),
+      this->GetPolicyStatus(cmPolicies::CMP0189)));
 }
 
 std::vector<std::unique_ptr<cmGeneratorExpressionEvaluationFile>> const&
