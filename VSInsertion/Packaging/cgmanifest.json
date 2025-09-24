@@ -5,7 +5,7 @@
                 "Type": "git",
                 "Git": {
                     "RepositoryUrl": "https://github.com/microsoft/CMake.git",
-                    "CommitHash": "d9e32591fe2429a94870d951ebaa80a6d8aaf1f5"
+                    "CommitHash": "15c3574d778385923560692c16d1f5fbdfe88709"
                 }
             }
         }
