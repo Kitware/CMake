@@ -40,6 +40,7 @@ variables:
 ################################################################################
 
 # Job prefixes:
+#   - `a:` analysis
 #   - `b:` build
 #   - `k:` package
 #   - `l:` lint
@@ -146,6 +147,44 @@ l:clazy-fedora42:
         - .cmake_build_linux
         - .linux_x86_64_tags
         - .run_automatically
+
+# Coverage builds
+
+b:fedora42-gcc-gcov:
+    extends:
+        - .fedora42_gcc_gcov
+        - .cmake_build_linux
+        - .cmake_build_artifacts
+        - .linux_x86_64_tags
+        - .run_manually
+    variables:
+        CMAKE_CI_JOB_NIGHTLY: "true"
+
+t:fedora42-gcc-gcov:
+    extends:
+        - .fedora42_gcc_gcov
+        - .cmake_test_linux
+        - .cmake_coverage_artifacts
+        - .linux_x86_64_tags_x11
+        - .run_dependent
+    # Run coverage analysis even if the tests fail.
+    allow_failure: true
+    needs:
+        - b:fedora42-gcc-gcov
+    variables:
+        CMAKE_CI_JOB_NIGHTLY: "true"
+
+a:fedora42-gcc-gcov:
+    extends:
+        - .fedora42_gcc_gcov
+        - .cmake_coverage_linux
+        - .cmake_cdash_artifacts
+        - .linux_x86_64_tags
+        - .run_dependent
+    needs:
+        - t:fedora42-gcc-gcov
+    variables:
+        CMAKE_CI_JOB_NIGHTLY: "true"
 
 # Linux builds
 

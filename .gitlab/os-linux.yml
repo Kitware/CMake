@@ -97,6 +97,20 @@
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake-ci"
         CMAKE_ARCH: x86_64
 
+#### Coverage builds
+
+.fedora42_gcc_gcov:
+    extends: .fedora42
+
+    variables:
+        # See issue #20001
+        CMAKE_GENERATOR: "Unix Makefiles"
+        CMAKE_CONFIGURATION: fedora42_gcc_gcov
+        CTEST_NO_WARNINGS_ALLOWED: 1
+        CMAKE_CI_BUILD_TYPE: Debug
+        CMAKE_CI_TEST_TIMEOUT: "1500"
+        CMAKE_CI_NO_INSTALL: 1
+
 #### Lint builds
 
 .fedora42_tidy:
