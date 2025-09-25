@@ -104,15 +104,15 @@ cmInstrumentation::cmInstrumentation(std::string const& binary_dir,
 
 void cmInstrumentation::LoadQueries()
 {
-  if (cmSystemTools::FileExists(cmStrCat(this->timingDirv1, "/query"))) {
-    this->hasQuery =
-      this->ReadJSONQueries(cmStrCat(this->timingDirv1, "/query")) ||
-      this->ReadJSONQueries(cmStrCat(this->timingDirv1, "/query/generated"));
-  }
-  if (!this->userTimingDirv1.empty() &&
-      cmSystemTools::FileExists(cmStrCat(this->userTimingDirv1, "/query"))) {
-    this->hasQuery = this->hasQuery ||
-      this->ReadJSONQueries(cmStrCat(this->userTimingDirv1, "/query"));
+  auto const readJSONQueries = [this](std::string const& dir) {
+    if (cmSystemTools::FileIsDirectory(dir) && this->ReadJSONQueries(dir)) {
+      this->hasQuery = true;
+    }
+  };
+  readJSONQueries(cmStrCat(this->timingDirv1, "/query"));
+  readJSONQueries(cmStrCat(this->timingDirv1, "/query/generated"));
+  if (!this->userTimingDirv1.empty()) {
+    readJSONQueries(cmStrCat(this->userTimingDirv1, "/query"));
   }
 }
 
