@@ -9,6 +9,7 @@ public:
   void* someptr;
   char somechar;
   bool somebool;
+  long somelong;
 };
 }
 

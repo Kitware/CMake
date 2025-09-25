@@ -49,3 +49,8 @@
 /* struct somestruct::somechar */
 #cmakedefine HAVE_SIZEOF_STRUCTMEMBER_CHAR
 @SIZEOF_STRUCTMEMBER_CHAR_CODE@
+
+/* struct somestruct::somelong */
+#cmakedefine HAS_SIZEOF_STRUCTMEMBER_LONG
+#cmakedefine HAVE_SIZEOF_STRUCTMEMBER_LONG
+@SIZEOF_STRUCTMEMBER_LONG_CODE@

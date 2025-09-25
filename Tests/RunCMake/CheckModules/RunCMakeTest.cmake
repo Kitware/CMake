@@ -12,10 +12,22 @@ run_cmake(CheckStructHasMemberWrongKey)
 run_cmake(CheckTypeSizeOk)
 run_cmake(CheckTypeSizeUnknownLanguage)
 run_cmake(CheckTypeSizeMissingLanguage)
+run_cmake(CheckTypeSizeMissingResultVariable)
 run_cmake(CheckTypeSizeUnknownArgument)
 run_cmake(CheckTypeSizeMixedArgs)
 
 run_cmake(CheckTypeSizeOkNoC)
+
+block()
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/CheckTypeSize-build)
+  run_cmake(CheckTypeSize)
+
+  set(RunCMake_TEST_NO_CLEAN 1)
+  set(RunCMake_TEST_OUTPUT_MERGE 1)
+
+  run_cmake_command(CheckTypeSize-build ${CMAKE_COMMAND} --build .)
+  run_cmake_command(CheckTypeSize-build ${CMAKE_CTEST_COMMAND} -C Debug)
+endblock()
 
 run_cmake(CheckIncludeFilesOk)
 run_cmake(CheckIncludeFilesOkNoC)
