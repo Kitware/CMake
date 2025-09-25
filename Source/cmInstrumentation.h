@@ -94,8 +94,8 @@ private:
                            std::string const& index_path);
   void RemoveOldFiles(std::string const& dataSubdir);
   void WriteTraceFile(Json::Value const& index, std::string const& trace_name);
-  void AppendTraceEvent(Json::Value& trace, std::vector<uint64_t>& workers,
-                        Json::Value const& snippetData);
+  Json::Value BuildTraceEvent(std::vector<uint64_t>& workers,
+                              Json::Value const& snippetData);
   size_t AssignTargetToTraceThread(std::vector<uint64_t>& workers,
                                    uint64_t timeStart, uint64_t duration);
   enum LatestOrOldest

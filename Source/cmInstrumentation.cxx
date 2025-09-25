@@ -6,6 +6,7 @@
 #include <iomanip>
 #include <set>
 #include <sstream>
+#include <stdexcept>
 #include <utility>
 
 #include <cm/memory>
@@ -373,7 +374,7 @@ int cmInstrumentation::CollectTimingData(cmInstrumentationQuery::Hook hook)
   if (this->HasOption(cmInstrumentationQuery::Option::Trace)) {
     std::string trace_name = cmStrCat("trace-", suffix_time, ".json");
     this->WriteTraceFile(index, trace_name);
-    index["trace"] = "trace/" + trace_name;
+    index["trace"] = cmStrCat("trace/", trace_name);
   }
 
   // Write index file
@@ -509,10 +510,21 @@ void cmInstrumentation::WriteInstrumentationJson(Json::Value& root,
     std::unique_ptr<Json::StreamWriter>(wbuilder.newStreamWriter());
   std::string const& directory = cmStrCat(this->timingDirv1, '/', subdir);
   cmSystemTools::MakeDirectory(directory);
+
   cmsys::ofstream ftmp(cmStrCat(directory, '/', file_name).c_str());
-  JsonWriter->write(root, &ftmp);
-  ftmp << "\n";
-  ftmp.close();
+  if (!ftmp.good()) {
+    throw std::runtime_error(std::string("Unable to open: ") + file_name);
+  }
+
+  try {
+    JsonWriter->write(root, &ftmp);
+    ftmp << "\n";
+    ftmp.close();
+  } catch (std::ios_base::failure& fail) {
+    cmSystemTools::Error(cmStrCat("Failed to write JSON: ", fail.what()));
+  } catch (...) {
+    cmSystemTools::Error("Error writing JSON output for instrumentation.");
+  }
 }
 
 std::string cmInstrumentation::InstrumentTest(
@@ -939,20 +951,56 @@ void cmInstrumentation::WriteTraceFile(Json::Value const& index,
         extractSnippetTimestamp(snippetB);
     });
 
-  Json::Value trace = Json::arrayValue;
-  Json::Value snippetData;
+  std::string traceDir = cmStrCat(this->timingDirv1, "/data/trace/");
+  std::string traceFile = cmStrCat(traceDir, trace_name);
+  cmSystemTools::MakeDirectory(traceDir);
+  cmsys::ofstream traceStream;
+  Json::StreamWriterBuilder wbuilder;
+  wbuilder["indentation"] = "\t";
+  std::unique_ptr<Json::StreamWriter> jsonWriter =
+    std::unique_ptr<Json::StreamWriter>(wbuilder.newStreamWriter());
+  traceStream.open(traceFile.c_str(), std::ios::out | std::ios::trunc);
+  if (!traceStream.good()) {
+    throw std::runtime_error(std::string("Unable to open: ") + traceFile);
+  }
+  traceStream << "[";
+
+  // Append trace events from single snippets. Prefer writing to the output
+  // stream incrementally over building up a Json::arrayValue in memory for
+  // large traces.
   std::vector<uint64_t> workers = std::vector<uint64_t>();
-  for (auto const& snippetFile : snippets) {
-    snippetData = this->ReadJsonSnippet(snippetFile);
-    this->AppendTraceEvent(trace, workers, snippetData);
+  Json::Value traceEvent;
+  Json::Value snippetData;
+  for (size_t i = 0; i < snippets.size(); i++) {
+    snippetData = this->ReadJsonSnippet(snippets[i]);
+    traceEvent = this->BuildTraceEvent(workers, snippetData);
+    try {
+      if (i > 0) {
+        traceStream << ",";
+      }
+      jsonWriter->write(traceEvent, &traceStream);
+      if (i % 50 == 0 || i == snippets.size() - 1) {
+        traceStream.flush();
+        traceStream.clear();
+      }
+    } catch (std::ios_base::failure& fail) {
+      cmSystemTools::Error(
+        cmStrCat("Failed to write to Google trace file: ", fail.what()));
+    } catch (...) {
+      cmSystemTools::Error("Error writing Google trace output.");
+    }
   }
 
-  this->WriteInstrumentationJson(trace, "data/trace", trace_name);
+  try {
+    traceStream << "]\n";
+    traceStream.close();
+  } catch (...) {
+    cmSystemTools::Error("Error writing Google trace output.");
+  }
 }
 
-void cmInstrumentation::AppendTraceEvent(Json::Value& trace,
-                                         std::vector<uint64_t>& workers,
-                                         Json::Value const& snippetData)
+Json::Value cmInstrumentation::BuildTraceEvent(std::vector<uint64_t>& workers,
+                                               Json::Value const& snippetData)
 {
   Json::Value snippetTraceEvent;
 
@@ -1002,7 +1050,7 @@ void cmInstrumentation::AppendTraceEvent(Json::Value& trace,
                                 snippetData["duration"].asUInt64()));
   }
 
-  trace.append(snippetTraceEvent);
+  return snippetTraceEvent;
 }
 
 size_t cmInstrumentation::AssignTargetToTraceThread(
