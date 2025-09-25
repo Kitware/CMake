@@ -11,6 +11,7 @@
 
 #include <cm/memory>
 #include <cm/optional>
+#include <cmext/algorithm>
 
 #include <cm3p/json/reader.h>
 #include <cm3p/json/version.h>
@@ -27,8 +28,13 @@
 #include "cmExperimental.h"
 #include "cmFileLock.h"
 #include "cmFileLockResult.h"
+#include "cmGeneratorTarget.h"
+#include "cmGlobalGenerator.h"
 #include "cmInstrumentationQuery.h"
 #include "cmJSONState.h"
+#include "cmList.h"
+#include "cmLocalGenerator.h"
+#include "cmState.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTimestamp.h"
@@ -94,6 +100,7 @@ cmInstrumentation::cmInstrumentation(std::string const& binary_dir,
   this->timingDirv1 =
     cmStrCat(this->binaryDir, "/.cmake/instrumentation-", uuid, "/v1");
   this->cdashDir = cmStrCat(this->timingDirv1, "/cdash");
+  this->dataDir = cmStrCat(this->timingDirv1, "/data");
   if (cm::optional<std::string> configDir =
         cmSystemTools::GetCMakeConfigDirectory()) {
     this->userTimingDirv1 =
@@ -221,20 +228,45 @@ void cmInstrumentation::AddCustomContent(std::string const& name,
   this->customContent[name] = contents;
 }
 
-void cmInstrumentation::WriteCustomContent()
+void cmInstrumentation::WriteCMakeContent(
+  std::unique_ptr<cmGlobalGenerator> const& gg)
 {
-  if (!this->customContent.isNull()) {
-    this->WriteInstrumentationJson(
-      this->customContent, "data/content",
-      cmStrCat("configure-", this->ComputeSuffixTime(), ".json"));
+  Json::Value root;
+  root["targets"] = this->DumpTargets(gg);
+  root["custom"] = this->customContent;
+  this->WriteInstrumentationJson(
+    root, "data/content",
+    cmStrCat("cmake-", this->ComputeSuffixTime(), ".json"));
+}
+
+Json::Value cmInstrumentation::DumpTargets(
+  std::unique_ptr<cmGlobalGenerator> const& gg)
+{
+  Json::Value targets = Json::objectValue;
+  std::vector<cmGeneratorTarget*> targetList;
+  for (auto const& lg : gg->GetLocalGenerators()) {
+    cm::append(targetList, lg->GetGeneratorTargets());
   }
+  for (cmGeneratorTarget* gt : targetList) {
+    if (this->IsInstrumentableTargetType(gt->GetType())) {
+      Json::Value target = Json::objectValue;
+      auto labels = gt->GetSafeProperty("LABELS");
+      target["labels"] = Json::arrayValue;
+      for (auto const& item : cmList(labels)) {
+        target["labels"].append(item);
+      }
+      target["type"] = cmState::GetTargetTypeName(gt->GetType()).c_str();
+      targets[gt->GetName()] = target;
+    }
+  }
+  return targets;
 }
 
 std::string cmInstrumentation::GetFileByTimestamp(
   cmInstrumentation::LatestOrOldest order, std::string const& dataSubdir,
   std::string const& exclude)
 {
-  std::string fullDir = cmStrCat(this->timingDirv1, "/data/", dataSubdir);
+  std::string fullDir = cmStrCat(this->dataDir, '/', dataSubdir);
   std::string result;
   if (cmSystemTools::FileExists(fullDir)) {
     cmsys::Directory d;
@@ -255,12 +287,11 @@ std::string cmInstrumentation::GetFileByTimestamp(
 
 void cmInstrumentation::RemoveOldFiles(std::string const& dataSubdir)
 {
-  std::string const dataSubdirPath =
-    cmStrCat(this->timingDirv1, "/data/", dataSubdir);
+  std::string const dataSubdirPath = cmStrCat(this->dataDir, '/', dataSubdir);
   std::string oldIndex =
     this->GetFileByTimestamp(LatestOrOldest::Oldest, "index");
   if (!oldIndex.empty()) {
-    oldIndex = cmStrCat(this->timingDirv1, "/data/index/", oldIndex);
+    oldIndex = cmStrCat(this->dataDir, "/index/", oldIndex);
   }
   if (cmSystemTools::FileExists(dataSubdirPath)) {
     std::string latestFile =
@@ -316,10 +347,9 @@ int cmInstrumentation::CollectTimingData(cmInstrumentationQuery::Hook hook)
   }
 
   // Touch index file immediately to claim snippets
-  std::string const& directory = cmStrCat(this->timingDirv1, "/data");
   std::string suffix_time = ComputeSuffixTime();
   std::string const& index_name = cmStrCat("index-", suffix_time, ".json");
-  std::string index_path = cmStrCat(directory, "/index/", index_name);
+  std::string index_path = cmStrCat(this->dataDir, "/index/", index_name);
   cmSystemTools::Touch(index_path, true);
 
   // Gather Snippets
@@ -328,7 +358,7 @@ int cmInstrumentation::CollectTimingData(cmInstrumentationQuery::Hook hook)
   cmsys::Directory d;
   std::string last_index_name =
     this->GetFileByTimestamp(LatestOrOldest::Latest, "index", index_name);
-  if (d.Load(directory)) {
+  if (d.Load(this->dataDir)) {
     for (unsigned int i = 0; i < d.GetNumberOfFiles(); i++) {
       std::string fpath = d.GetFilePath(i);
       std::string fname = d.GetFile(i);
@@ -343,7 +373,7 @@ int cmInstrumentation::CollectTimingData(cmInstrumentationQuery::Hook hook)
   Json::Value index(Json::objectValue);
   index["snippets"] = Json::arrayValue;
   index["hook"] = cmInstrumentationQuery::HookString[hook];
-  index["dataDir"] = directory;
+  index["dataDir"] = this->dataDir;
   index["buildDir"] = this->binaryDir;
   index["version"] = 1;
   if (this->HasOption(
@@ -356,7 +386,7 @@ int cmInstrumentation::CollectTimingData(cmInstrumentationQuery::Hook hook)
     } else {
       int compare;
       std::string last_index_path =
-        cmStrCat(directory, "/index/", last_index_name);
+        cmStrCat(this->dataDir, "/index/", last_index_name);
       cmSystemTools::FileTimeCompare(file.second, last_index_path, &compare);
       if (compare == 1) {
         index["snippets"].append(file.first);
@@ -383,12 +413,12 @@ int cmInstrumentation::CollectTimingData(cmInstrumentationQuery::Hook hook)
 
   // Special case for CDash collation
   if (this->HasOption(cmInstrumentationQuery::Option::CDashSubmit)) {
-    this->PrepareDataForCDash(directory, index_path);
+    this->PrepareDataForCDash(this->dataDir, index_path);
   }
 
   // Delete files
   for (auto const& f : index["snippets"]) {
-    cmSystemTools::RemoveFile(cmStrCat(directory, '/', f.asString()));
+    cmSystemTools::RemoveFile(cmStrCat(this->dataDir, '/', f.asString()));
   }
   cmSystemTools::RemoveFile(index_path);
 
@@ -605,11 +635,6 @@ int cmInstrumentation::InstrumentCommand(
   int ret = callback();
   root["result"] = ret;
 
-  // Write configure content if command was configure
-  if (command_type == "configure") {
-    this->WriteCustomContent();
-  }
-
   // Exit early if configure didn't generate a query
   if (reloadQueriesAfterCommand == LoadQueriesAfter::Yes) {
     this->LoadQueries();
@@ -675,11 +700,16 @@ int cmInstrumentation::InstrumentCommand(
   root["role"] = command_type;
   root["workingDir"] = cmSystemTools::GetLogicalWorkingDirectory();
 
-  // Add custom configure content
-  std::string contentFile =
-    this->GetFileByTimestamp(LatestOrOldest::Latest, "content");
-  if (!contentFile.empty()) {
-    root["configureContent"] = cmStrCat("content/", contentFile);
+  auto addCMakeContent = [this](Json::Value& root_) -> void {
+    std::string contentFile =
+      this->GetFileByTimestamp(LatestOrOldest::Latest, "content");
+    if (!contentFile.empty()) {
+      root_["cmakeContent"] = cmStrCat("content/", contentFile);
+    }
+  };
+  // Don't insert path to CMake content until generate time
+  if (command_type != "configure") {
+    addCMakeContent(root);
   }
 
   // Write Json
@@ -690,7 +720,21 @@ int cmInstrumentation::InstrumentCommand(
     command_type, '-',
     this->ComputeSuffixHash(cmStrCat(command_str, info.GetProcessId())), '-',
     this->ComputeSuffixTime(endTime), ".json");
-  this->WriteInstrumentationJson(root, "data", file_name);
+
+  // Don't write configure snippet until generate time
+  if (command_type == "configure") {
+    this->configureSnippetData = root;
+    this->configureSnippetName = file_name;
+  } else {
+    // Add reference to CMake content and write out configure snippet after
+    // generate
+    if (command_type == "generate") {
+      addCMakeContent(this->configureSnippetData);
+      this->WriteInstrumentationJson(this->configureSnippetData, "data",
+                                     this->configureSnippetName);
+    }
+    this->WriteInstrumentationJson(root, "data", file_name);
+  }
   return ret;
 }
 
@@ -734,6 +778,15 @@ std::string cmInstrumentation::ComputeSuffixTime(
   ss << cmts.CreateTimestampFromTimeT(ts, "%Y-%m-%dT%H-%M-%S", true) << '-'
      << std::setfill('0') << std::setw(4) << tms;
   return ss.str();
+}
+
+bool cmInstrumentation::IsInstrumentableTargetType(
+  cmStateEnums::TargetType type)
+{
+  return type == cmStateEnums::TargetType::EXECUTABLE ||
+    type == cmStateEnums::TargetType::SHARED_LIBRARY ||
+    type == cmStateEnums::TargetType::STATIC_LIBRARY ||
+    type == cmStateEnums::TargetType::OBJECT_LIBRARY;
 }
 
 /*
@@ -818,9 +871,14 @@ void cmInstrumentation::AddOption(cmInstrumentationQuery::Option option)
   this->options.insert(option);
 }
 
-std::string const& cmInstrumentation::GetCDashDir()
+std::string const& cmInstrumentation::GetCDashDir() const
 {
   return this->cdashDir;
+}
+
+std::string const& cmInstrumentation::GetDataDir() const
+{
+  return this->dataDir;
 }
 
 /** Copy the snippets referred to by an index file to a separate

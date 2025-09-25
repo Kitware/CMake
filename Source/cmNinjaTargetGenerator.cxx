@@ -596,7 +596,6 @@ cmNinjaRule GetScanRule(
   cmRulePlaceholderExpander::RuleVariables scanVars;
   scanVars.CMTargetName = vars.CMTargetName;
   scanVars.CMTargetType = vars.CMTargetType;
-  scanVars.CMTargetLabels = vars.CMTargetLabels;
   scanVars.Language = vars.Language;
   scanVars.Object = "$OBJ_FILE";
   scanVars.PreprocessedSource = ppFileName.c_str();
@@ -656,8 +655,6 @@ void cmNinjaTargetGenerator::WriteCompileRule(std::string const& lang,
   vars.CMTargetName = this->GetGeneratorTarget()->GetName().c_str();
   vars.CMTargetType =
     cmState::GetTargetTypeName(this->GetGeneratorTarget()->GetType()).c_str();
-  vars.CMTargetLabels =
-    this->GetGeneratorTarget()->GetTargetLabelsString().c_str();
   vars.Language = lang.c_str();
   vars.Source = "$in";
   vars.Object = "$out";

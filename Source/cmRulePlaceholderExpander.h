@@ -32,7 +32,6 @@ public:
   {
     char const* CMTargetName = nullptr;
     char const* CMTargetType = nullptr;
-    char const* CMTargetLabels = nullptr;
     char const* TargetPDB = nullptr;
     char const* TargetCompilePDB = nullptr;
     char const* TargetVersionMajor = nullptr;

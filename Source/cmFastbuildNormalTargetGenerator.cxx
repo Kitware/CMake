@@ -257,8 +257,6 @@ bool cmFastbuildNormalTargetGenerator::DetectBaseLinkerCommand(
   cmRulePlaceholderExpander::RuleVariables vars;
   vars.CMTargetName = this->GeneratorTarget->GetName().c_str();
   vars.CMTargetType = cmState::GetTargetTypeName(targetType).c_str();
-  vars.CMTargetLabels =
-    this->GetGeneratorTarget()->GetTargetLabelsString().c_str();
   vars.Config = Config.c_str();
   vars.Language = linkLanguage.c_str();
   std::string const manifests =
@@ -1133,8 +1131,6 @@ cmFastbuildNormalTargetGenerator::ComputeRuleVariables() const
   compileObjectVars.CMTargetName = GeneratorTarget->GetName().c_str();
   compileObjectVars.CMTargetType =
     cmState::GetTargetTypeName(GeneratorTarget->GetType()).c_str();
-  compileObjectVars.CMTargetLabels =
-    this->GetGeneratorTarget()->GetTargetLabelsString().c_str();
   compileObjectVars.Source = FASTBUILD_1_INPUT_PLACEHOLDER;
   compileObjectVars.Object = FASTBUILD_2_INPUT_PLACEHOLDER;
   compileObjectVars.ObjectDir =
