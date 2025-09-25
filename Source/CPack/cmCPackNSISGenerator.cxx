@@ -236,6 +236,10 @@ int cmCPackNSISGenerator::PackageFiles()
     this->SetOptionIfNotSet("CPACK_NSIS_BRANDING_TEXT_CODE", brandingTextCode);
   }
 
+  if (cmValue v = this->GetOptionIfSet("CPACK_NSIS_CRC_CHECK")) {
+    this->SetOption("CPACK_NSIS_CRC_CHECK_CODE", "CRCCheck " + *v);
+  }
+
   if (!this->IsSet("CPACK_NSIS_IGNORE_LICENSE_PAGE")) {
     cmValue v = this->GetOption("CPACK_RESOURCE_FILE_LICENSE");
     std::string licenseFile = cmSystemTools::ConvertToWindowsOutputPath(*v);
