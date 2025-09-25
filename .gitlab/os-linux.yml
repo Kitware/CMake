@@ -727,6 +727,16 @@
 
     interruptible: true
 
+.cmake_coverage_linux:
+    stage: test
+
+    script:
+        - *before_script_linux
+        - "$LAUNCHER ctest --output-on-failure -V -S .gitlab/ci/ctest_coverage.cmake"
+    coverage: '/Percentage Coverage: \d+.\d+%/'
+
+    interruptible: true
+
 .cmake_build_linux_release:
     stage: build
 
