@@ -133,12 +133,12 @@
 #  include "cmExtraEclipseCDT4Generator.h"
 #  include "cmExtraKateGenerator.h"
 #  include "cmExtraSublimeTextGenerator.h"
-#endif
 
 // NOTE: the __linux__ macro is predefined on Android host too, but
 // main CMakeLists.txt filters out this generator by host name.
-#if (defined(__linux__) && !defined(__ANDROID__)) || defined(_WIN32)
-#  include "cmGlobalGhsMultiGenerator.h"
+#  if (defined(__linux__) && !defined(__ANDROID__)) || defined(_WIN32)
+#    include "cmGlobalGhsMultiGenerator.h"
+#  endif
 #endif
 
 #if defined(__APPLE__)
