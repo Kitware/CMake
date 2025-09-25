@@ -1,4 +1,11 @@
+cmake_minimum_required(VERSION 4.0)
 include(RunCMake)
+
+if(RunCMake_GENERATOR MATCHES "Visual Studio 1[4-7]")
+  set(sln_ext "sln")
+else()
+  set(sln_ext "slnx")
+endif()
 
 run_cmake(VsDotnetSdkStartupObject)
 run_cmake(VsDotnetSdkDefines)
@@ -6,6 +13,7 @@ run_cmake(DotnetSdkVariables)
 run_cmake(VsDotnetSdkXamlFiles)
 run_cmake(VsDotnetSdkAssemblyName)
 run_cmake(VsDotnetSdkConfigurations)
+run_cmake(VsDotnetSdkTargetPlatform)
 
 function(run_VsDotnetSdk)
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/VsDotnetSdk-build)
