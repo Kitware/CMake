@@ -664,7 +664,7 @@ overridden if required.
   configure step needs to be rerun.
 
 ``CONFIGURE_ENVIRONMENT_MODIFICATION <modification>...``
-  .. versionadded: 4.2
+  .. versionadded:: 4.2
 
   Specify environment variables that should be modified for the configure step.
 
@@ -771,7 +771,7 @@ pass ``-v`` to the external project's build step, even if it also uses
   only when an explicit ``BUILD_COMMAND`` is specified.
 
 ``BUILD_ENVIRONMENT_MODIFICATION <modification>...``
-  .. versionadded: 4.2
+  .. versionadded:: 4.2
 
   Specify environment variables that should be modified for the build step.
 
@@ -842,7 +842,7 @@ step. This can be overridden with custom install commands if required.
   to another.
 
 ``INSTALL_ENVIRONMENT_MODIFICATION <modification>...``
-  .. versionadded: 4.2
+  .. versionadded:: 4.2
 
   Specify environment variables that should be modified for the install step.
 
@@ -893,7 +893,7 @@ options are provided.
   the ``install`` or ``build`` step.  See policy :policy:`CMP0114`.
 
 ``TEST_ENVIRONMENT_MODIFICATION <modification>...``
-  .. versionadded: 4.2
+  .. versionadded:: 4.2
 
   Specify environment variables that should be modified for the test step.
 
@@ -1135,7 +1135,7 @@ control needed to implement such step-level capabilities.
     Files on which this custom step depends.
 
   ``ENVIRONMENT_MODIFICATION <modification>...``
-    .. versionadded: 4.2
+    .. versionadded:: 4.2
 
     Specify environment variables that should be modified while running the
     commands in the external project step.

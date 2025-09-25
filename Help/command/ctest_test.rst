@@ -213,7 +213,7 @@ Check the `CDash test measurement documentation
 <https://github.com/Kitware/CDash/blob/master/docs/test_measurements.md>`_
 for more information on the types of test measurements that CDash recognizes.
 
-.. versionadded: 3.22
+.. versionadded:: 3.22
   CTest can parse custom measurements from tags named
   ``<CTestMeasurement>`` or ``<CTestMeasurementFile>``. The older names
   ``<DartMeasurement>`` and ``<DartMeasurementFile>`` are still supported.

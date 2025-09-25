@@ -90,12 +90,12 @@ The following cache variables may also be set:
   The path to the PdfLaTeX compiler.
 
 ``XELATEX_COMPILER``
-  .. versionadded: 3.2
+  .. versionadded:: 3.2
 
   The path to the XeLaTeX compiler.
 
 ``LUALATEX_COMPILER``
-  .. versionadded: 3.2
+  .. versionadded:: 3.2
 
   The path to the LuaLaTeX compiler.
 
@@ -103,7 +103,7 @@ The following cache variables may also be set:
   The path to the BibTeX compiler.
 
 ``BIBER_COMPILER``
-  .. versionadded: 3.2
+  .. versionadded:: 3.2
 
   The path to the Biber compiler.
 
@@ -111,7 +111,7 @@ The following cache variables may also be set:
   The path to the MakeIndex compiler.
 
 ``XINDY_COMPILER``
-  .. versionadded: 3.2
+  .. versionadded:: 3.2
 
   The path to the xindy compiler.
 
@@ -125,7 +125,7 @@ The following cache variables may also be set:
   The path to the PS2PDF converter.
 
 ``PDFTOPS_CONVERTER``
-  .. versionadded: 3.2
+  .. versionadded:: 3.2
 
   The path to the pdftops converter.
 
@@ -133,7 +133,7 @@ The following cache variables may also be set:
   The path to the LaTeX2Html converter.
 
 ``HTLATEX_COMPILER``
-  .. versionadded: 3.2
+  .. versionadded:: 3.2
 
   The path to the htlatex compiler.
 
