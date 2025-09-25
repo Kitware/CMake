@@ -790,7 +790,7 @@ int cmInstrumentation::CollectTimingAfterBuild(int ppid)
   };
   int ret = this->InstrumentCommand(
     "build", {}, [waitForBuild]() { return waitForBuild(); }, cm::nullopt,
-    cm::nullopt, LoadQueriesAfter::No);
+    cm::nullopt, LoadQueriesAfter::Yes);
   this->CollectTimingData(cmInstrumentationQuery::Hook::PostBuild);
   return ret;
 }
