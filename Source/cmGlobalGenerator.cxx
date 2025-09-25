@@ -2870,7 +2870,6 @@ void cmGlobalGenerator::AddGlobalTarget_PackageSource(
   singleLine.push_back(cmSystemTools::GetCPackCommand());
   singleLine.push_back("--config");
   singleLine.push_back("./CPackSourceConfig.cmake");
-  singleLine.push_back(std::move(configFile));
   gti.CommandLines.push_back(std::move(singleLine));
   targets.push_back(std::move(gti));
 }
