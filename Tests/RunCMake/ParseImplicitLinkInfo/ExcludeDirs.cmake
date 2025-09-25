@@ -1,4 +1,7 @@
-include("${info}")
+block()
+  include("${info}")
+  set(INFO_CMAKE_C_IMPLICIT_LINK_DIRECTORIES "${CMAKE_C_IMPLICIT_LINK_DIRECTORIES}" PARENT_SCOPE)
+endblock()
 list(GET INFO_CMAKE_C_IMPLICIT_LINK_DIRECTORIES -1 last_dir)
 set(ENV{CMAKE_C_IMPLICIT_LINK_DIRECTORIES_EXCLUDE} "${last_dir}")
 enable_language(C)

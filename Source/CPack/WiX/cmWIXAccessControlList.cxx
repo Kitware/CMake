@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmWIXAccessControlList.h"
 
 #include <cm/string_view>
@@ -50,14 +50,13 @@ void cmWIXAccessControlList::CreatePermissionElement(std::string const& entry)
     user = user_and_domain;
   }
 
-  std::vector<std::string> permissions = cmTokenize(permission_string, ",");
-
   this->SourceWriter.BeginElement("Permission");
   this->SourceWriter.AddAttribute("User", std::string(user));
   if (!domain.empty()) {
     this->SourceWriter.AddAttribute("Domain", std::string(domain));
   }
-  for (std::string const& permission : permissions) {
+  for (auto permission :
+       cmTokenizedView(permission_string, ',', cmTokenizerMode::New)) {
     this->EmitBooleanAttribute(entry, cmTrimWhitespace(permission));
   }
   this->SourceWriter.EndElement("Permission");
@@ -73,7 +72,7 @@ void cmWIXAccessControlList::ReportError(std::string const& entry,
 
 bool cmWIXAccessControlList::IsBooleanAttribute(std::string const& name)
 {
-  static const char* validAttributes[] = {
+  static char const* validAttributes[] = {
     /* clang-format needs this comment to break after the opening brace */
     "Append",
     "ChangePermission",

@@ -21,5 +21,8 @@ install(TARGETS c_headers_1
   FILE_SET HEADERS DESTINATION include COMPONENT Headers
   FILE_SET b DESTINATION include/dir
   FILE_SET c
+
+  # Non-extant FILE_SET should be ignored
+  FILE_SET d
   )
 install(TARGETS c_headers_2)

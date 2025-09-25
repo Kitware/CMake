@@ -8,5 +8,6 @@ contains the line number in the listfile where the current function
 was defined.
 
 See also :variable:`CMAKE_CURRENT_FUNCTION`,
-:variable:`CMAKE_CURRENT_FUNCTION_LIST_DIR` and
-:variable:`CMAKE_CURRENT_FUNCTION_LIST_FILE`.
+:variable:`CMAKE_CURRENT_FUNCTION_LIST_DIR`,
+:variable:`CMAKE_CURRENT_FUNCTION_LIST_FILE` and
+:variable:`CMAKE_CURRENT_LIST_LINE`.

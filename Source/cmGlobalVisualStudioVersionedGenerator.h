@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
@@ -26,8 +26,9 @@ public:
   static std::unique_ptr<cmGlobalGeneratorFactory> NewFactory15();
   static std::unique_ptr<cmGlobalGeneratorFactory> NewFactory16();
   static std::unique_ptr<cmGlobalGeneratorFactory> NewFactory17();
+  static std::unique_ptr<cmGlobalGeneratorFactory> NewFactory18();
 
-  bool MatchesGeneratorName(const std::string& name) const override;
+  bool MatchesGeneratorName(std::string const& name) const override;
 
   bool SetGeneratorInstance(std::string const& i, cmMakefile* mf) override;
 
@@ -46,7 +47,7 @@ public:
 
   bool IsScanDependenciesSupported() const override;
 
-  const char* GetAndroidApplicationTypeRevision() const override;
+  char const* GetAndroidApplicationTypeRevision() const override;
 
   bool CheckCxxModuleSupport(CxxModuleSupportQuery /*query*/) override
   {
@@ -58,9 +59,8 @@ public:
   }
 
 protected:
-  cmGlobalVisualStudioVersionedGenerator(
-    VSVersion version, cmake* cm, const std::string& name,
-    std::string const& platformInGeneratorName);
+  cmGlobalVisualStudioVersionedGenerator(VSVersion version, cmake* cm,
+                                         std::string const& name);
 
   bool SelectWindowsStoreToolset(std::string& toolset) const override;
 
@@ -90,6 +90,8 @@ private:
   friend class Factory16;
   class Factory17;
   friend class Factory17;
+  class Factory18;
+  friend class Factory18;
   mutable cmVSSetupAPIHelper vsSetupAPIHelper;
 
   bool ParseGeneratorInstance(std::string const& is, cmMakefile* mf);

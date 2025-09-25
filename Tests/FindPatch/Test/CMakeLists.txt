@@ -6,8 +6,8 @@ macro(_check)
     message(FATAL_ERROR "Failed to lookup Patch_EXECUTABLE [${Patch_EXECUTABLE}]")
   endif()
 
-  if(NOT DEFINED PATCH_FOUND)
-    message(FATAL_ERROR "Variable PATCH_FOUND is not defined")
+  if(NOT DEFINED Patch_FOUND)
+    message(FATAL_ERROR "Variable Patch_FOUND is not defined")
   endif()
 
   # Is import target available ?

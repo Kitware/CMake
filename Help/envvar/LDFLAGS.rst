@@ -1,7 +1,7 @@
 LDFLAGS
 -------
 
-.. include:: ENV_VAR.txt
+.. include:: include/ENV_VAR.rst
 
 Will only be used by CMake on the first configuration to determine the default
 linker flags, after which the value for ``LDFLAGS`` is stored in the cache

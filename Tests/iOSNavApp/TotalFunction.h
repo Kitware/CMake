@@ -9,6 +9,6 @@
 #ifndef NavApp3_TotalFunction_h
 #define NavApp3_TotalFunction_h
 
-int Total(const char* context);
+int Total(char const* context);
 
 #endif

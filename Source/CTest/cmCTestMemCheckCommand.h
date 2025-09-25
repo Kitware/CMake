@@ -1,45 +1,40 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <memory>
 #include <string>
-#include <utility>
-
-#include <cm/memory>
+#include <vector>
 
 #include "cmCTestTestCommand.h"
-#include "cmCommand.h"
 
+class cmExecutionStatus;
 class cmCTestGenericHandler;
 class cmCTestTestHandler;
 
-/** \class cmCTestMemCheck
- * \brief Run a ctest script
- *
- * cmCTestMemCheckCommand defineds the command to test the project.
- */
 class cmCTestMemCheckCommand : public cmCTestTestCommand
 {
 public:
-  /**
-   * This is a virtual constructor for the command.
-   */
-  std::unique_ptr<cmCommand> Clone() override
-  {
-    auto ni = cm::make_unique<cmCTestMemCheckCommand>();
-    ni->CTest = this->CTest;
-    ni->CTestScriptHandler = this->CTestScriptHandler;
-    return std::unique_ptr<cmCommand>(std::move(ni));
-  }
+  using cmCTestTestCommand::cmCTestTestCommand;
 
 protected:
-  void BindArguments() override;
+  struct MemCheckArguments : TestArguments
+  {
+    std::string DefectCount;
+  };
 
-  cmCTestTestHandler* InitializeActualHandler() override;
+private:
+  std::string GetName() const override { return "ctest_memcheck"; }
 
-  void ProcessAdditionalValues(cmCTestGenericHandler* handler) override;
+  std::unique_ptr<cmCTestTestHandler> InitializeActualHandler(
+    HandlerArguments& arguments, cmExecutionStatus& status) const override;
 
-  std::string DefectCount;
+  void ProcessAdditionalValues(cmCTestGenericHandler* handler,
+                               HandlerArguments const& arguments,
+                               cmExecutionStatus& status) const override;
+
+  bool InitialPass(std::vector<std::string> const& args,
+                   cmExecutionStatus& status) const override;
 };

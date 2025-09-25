@@ -1,5 +1,5 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-# file Copyright.txt or https://cmake.org/licensing for details.
+# file LICENSE.rst or https://cmake.org/licensing for details.
 
 if(UNIX)
   set(CMAKE_CUDA_OUTPUT_EXTENSION .o)
@@ -75,6 +75,11 @@ if(NOT CMAKE_CUDA_COMPILER_LAUNCHER AND DEFINED ENV{CMAKE_CUDA_COMPILER_LAUNCHER
     CACHE STRING "Compiler launcher for CUDA.")
 endif()
 
+if(NOT CMAKE_CUDA_LINKER_LAUNCHER AND DEFINED ENV{CMAKE_CUDA_LINKER_LAUNCHER})
+  set(CMAKE_CUDA_LINKER_LAUNCHER "$ENV{CMAKE_CUDA_LINKER_LAUNCHER}"
+          CACHE STRING "Linker launcher for CUDA.")
+endif()
+
 include(CMakeCommonLanguageInclude)
 _cmake_common_language_platform_flags(CUDA)
 
@@ -88,7 +93,7 @@ _cmake_common_language_platform_flags(CUDA)
 # create a shared library
 if(NOT CMAKE_CUDA_CREATE_SHARED_LIBRARY)
   set(CMAKE_CUDA_CREATE_SHARED_LIBRARY
-      "<CMAKE_CUDA_HOST_LINK_LAUNCHER> <CMAKE_SHARED_LIBRARY_CUDA_FLAGS> <LINK_FLAGS> <CMAKE_SHARED_LIBRARY_CREATE_CUDA_FLAGS> <SONAME_FLAG><TARGET_SONAME> -o <TARGET> <OBJECTS> <LINK_LIBRARIES>${__IMPLICIT_LINKS}")
+      "<CMAKE_CUDA_HOST_LINK_LAUNCHER> <CMAKE_SHARED_LIBRARY_CUDA_FLAGS> <LINK_FLAGS> <SONAME_FLAG><TARGET_SONAME> -o <TARGET> <OBJECTS> <LINK_LIBRARIES>${__IMPLICIT_LINKS}")
 endif()
 
 # create a shared module copy the shared library rule by default

@@ -1,7 +1,7 @@
 CTEST_OUTPUT_ON_FAILURE
 -----------------------
 
-.. include:: ENV_VAR.txt
+.. include:: include/ENV_VAR.rst
 
 Boolean environment variable that controls if the output should be logged for
 failed tests. Set the value to ``1``, ``True``, or ``ON`` to enable output on failure.

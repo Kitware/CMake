@@ -1,0 +1,5 @@
+message(STATUS "ParentVariableSubDir/include1.cmake: '${CMAKE_PARENT_LIST_FILE}'")
+include("Inc/include2.cmake")
+message(STATUS "ParentVariableSubDir/include1.cmake: '${CMAKE_PARENT_LIST_FILE}'")
+include("Inc/CMakeLists.txt")
+message(STATUS "ParentVariableSubDir/include1.cmake: '${CMAKE_PARENT_LIST_FILE}'")

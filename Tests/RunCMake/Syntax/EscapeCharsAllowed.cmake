@@ -1,5 +1,3 @@
-cmake_policy(SET CMP0053 NEW)
-
 set("semicolon;in;name" semicolon)
 set("dollar$in$name" dollar)
 set("brace{in}name" brace)

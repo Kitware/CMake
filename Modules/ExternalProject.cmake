@@ -1,5 +1,5 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-# file Copyright.txt or https://cmake.org/licensing for details.
+# file LICENSE.rst or https://cmake.org/licensing for details.
 
 include_guard(GLOBAL)
 
@@ -300,6 +300,10 @@ URL
 
 .. versionadded:: 3.1
   Added support for `tbz2`, `.tar.xz`, `.txz`, and `.7z` extensions.
+
+.. versionadded:: 4.1
+  All archive types that :option:`cmake -E tar <cmake-E tar>` can extract
+  are supported regardless of file extension.
 
 Git
 ~~~
@@ -748,6 +752,14 @@ step. This can be overridden with custom install commands if required.
   These ultimately get passed through as ``BYPRODUCTS`` to the
   install step's own underlying call to :command:`add_custom_command`, which
   has additional documentation.
+
+``INSTALL_JOB_SERVER_AWARE <bool>``
+  .. versionadded:: 4.0
+
+  Specifies that the install step is aware of the GNU Make job server.
+  See the :command:`add_custom_command` documentation of its
+  ``JOB_SERVER_AWARE`` option for details.  This option is relevant
+  only when an explicit ``INSTALL_COMMAND`` is specified.
 
 .. note::
   If the :envvar:`CMAKE_INSTALL_MODE` environment variable is set when the
@@ -1292,15 +1304,31 @@ The custom step could then be triggered from the main build like so::
 
 include(${CMAKE_CURRENT_LIST_DIR}/ExternalProject/shared_internal_commands.cmake)
 
-cmake_policy(PUSH)
-cmake_policy(SET CMP0054 NEW) # if() quoted variables not dereferenced
-cmake_policy(SET CMP0057 NEW) # if() supports IN_LIST
-
 define_property(DIRECTORY PROPERTY "EP_BASE" INHERITED)
 define_property(DIRECTORY PROPERTY "EP_PREFIX" INHERITED)
 define_property(DIRECTORY PROPERTY "EP_STEP_TARGETS" INHERITED)
 define_property(DIRECTORY PROPERTY "EP_INDEPENDENT_STEP_TARGETS" INHERITED)
 define_property(DIRECTORY PROPERTY "EP_UPDATE_DISCONNECTED" INHERITED)
+
+# file(TO_CMAKE_PATH) will interpret a platform-specific character as a path
+# separator, and if its input contains that character, it will treat the input
+# as a list. Sometimes we have a string that we know is always a single path,
+# but it may contain the separator character. To prevent it being treated as a
+# list of paths, this function masks the separator character while calling
+# file(TO_CMAKE_PATH).
+function(_ep_to_single_cmake_path out_var input)
+  if(WIN32)
+    set(unsafe_char ";")
+  else()
+    set(unsafe_char ":")
+  endif()
+
+  string(REPLACE "${unsafe_char}" "__EP_MARKER__" safe_input "${input}")
+  file(TO_CMAKE_PATH "${safe_input}" converted_input)
+  string(REPLACE "__EP_MARKER__" "${unsafe_char}" output "${converted_input}")
+
+  set(${out_var} "${output}" PARENT_SCOPE)
+endfunction()
 
 function(_ep_set_directories name)
   get_property(prefix TARGET ${name} PROPERTY _EP_PREFIX)
@@ -1314,7 +1342,7 @@ function(_ep_set_directories name)
     endif()
   endif()
   if(prefix)
-    file(TO_CMAKE_PATH "${prefix}" prefix)
+    _ep_to_single_cmake_path(prefix "${prefix}")
     set(tmp_default "${prefix}/tmp")
     set(download_default "${prefix}/src")
     set(source_default "${prefix}/src/${name}")
@@ -1322,7 +1350,7 @@ function(_ep_set_directories name)
     set(stamp_default "${prefix}/src/${name}-stamp")
     set(install_default "${prefix}")
   else()
-    file(TO_CMAKE_PATH "${base}" base)
+    _ep_to_single_cmake_path(base "${base}")
     set(tmp_default "${base}/tmp/${name}")
     set(download_default "${base}/Download/${name}")
     set(source_default "${base}/Source/${name}")
@@ -1352,7 +1380,7 @@ function(_ep_set_directories name)
     if(NOT IS_ABSOLUTE "${${var}_dir}")
       get_filename_component(${var}_dir "${top}/${${var}_dir}" ABSOLUTE)
     endif()
-    file(TO_CMAKE_PATH "${${var}_dir}" ${var}_dir)
+    _ep_to_single_cmake_path(${var}_dir "${${var}_dir}")
     set_property(TARGET ${name} PROPERTY _EP_${VAR}_DIR "${${var}_dir}")
     set(_EP_${VAR}_DIR "${${var}_dir}" PARENT_SCOPE)
   endforeach()
@@ -1365,7 +1393,7 @@ function(_ep_set_directories name)
   if(NOT IS_ABSOLUTE "${log_dir}")
     get_filename_component(log_dir "${top}/${log_dir}" ABSOLUTE)
   endif()
-  file(TO_CMAKE_PATH "${log_dir}" log_dir)
+  _ep_to_single_cmake_path(log_dir "${log_dir}")
   set_property(TARGET ${name} PROPERTY _EP_LOG_DIR "${log_dir}")
   set(_EP_LOG_DIR "${log_dir}" PARENT_SCOPE)
 
@@ -1380,7 +1408,7 @@ function(_ep_set_directories name)
   else()
     # Prefix with a slash so that when appended to the source directory, it
     # behaves as expected.
-    file(TO_CMAKE_PATH "${source_subdir}" source_subdir)
+    _ep_to_single_cmake_path(source_subdir "${source_subdir}")
     set_property(TARGET ${name} PROPERTY _EP_SOURCE_SUBDIR "/${source_subdir}")
     set(_EP_SOURCE_SUBDIR "/${source_subdir}" PARENT_SCOPE)
   endif()
@@ -2819,6 +2847,16 @@ function(_ep_add_install_command name)
     PROPERTY _EP_INSTALL_BYPRODUCTS
   )
 
+  get_property(install_job_server_aware
+    TARGET ${name}
+    PROPERTY _EP_INSTALL_JOB_SERVER_AWARE
+  )
+  if(install_job_server_aware)
+    set(maybe_JOB_SERVER_AWARE "JOB_SERVER_AWARE 1")
+  else()
+    set(maybe_JOB_SERVER_AWARE "")
+  endif()
+
   set(__cmdQuoted)
   foreach(__item IN LISTS cmd)
     string(APPEND __cmdQuoted " [==[${__item}]==]")
@@ -2831,6 +2869,7 @@ function(_ep_add_install_command name)
       WORKING_DIRECTORY \${binary_dir}
       DEPENDEES build
       ALWAYS \${always}
+      ${maybe_JOB_SERVER_AWARE}
       ${log}
       ${uses_terminal}
     )"
@@ -3050,5 +3089,3 @@ function(ExternalProject_Add name)
   #
   _ep_add_test_command(${name})
 endfunction()
-
-cmake_policy(POP)

@@ -3,7 +3,7 @@ ADSP_ROOT
 
 .. versionadded:: 3.24
 
-.. include:: ENV_VAR.txt
+.. include:: include/ENV_VAR.rst
 
 The ``ADSP_ROOT`` environment variable specifies a default value
 for the :variable:`CMAKE_ADSP_ROOT` variable when there is no explicit

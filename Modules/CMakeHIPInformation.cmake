@@ -1,5 +1,5 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-# file Copyright.txt or https://cmake.org/licensing for details.
+# file LICENSE.rst or https://cmake.org/licensing for details.
 
 if(UNIX)
   set(CMAKE_HIP_OUTPUT_EXTENSION .o)
@@ -55,6 +55,11 @@ if(NOT CMAKE_HIP_COMPILER_LAUNCHER AND DEFINED ENV{CMAKE_HIP_COMPILER_LAUNCHER})
     CACHE STRING "Compiler launcher for HIP.")
 endif()
 
+if(NOT CMAKE_HIP_LINKER_LAUNCHER AND DEFINED ENV{CMAKE_HIP_LINKER_LAUNCHER})
+  set(CMAKE_HIP_LINKER_LAUNCHER "$ENV{CMAKE_HIP_LINKER_LAUNCHER}"
+          CACHE STRING "Linker launcher for HIP.")
+endif()
+
 include(CMakeCommonLanguageInclude)
 _cmake_common_language_platform_flags(HIP)
 
@@ -67,7 +72,7 @@ _cmake_common_language_platform_flags(HIP)
 # create a shared library
 if(NOT CMAKE_HIP_CREATE_SHARED_LIBRARY)
   set(CMAKE_HIP_CREATE_SHARED_LIBRARY
-      "<CMAKE_HIP_COMPILER> <CMAKE_SHARED_LIBRARY_HIP_FLAGS> <LANGUAGE_COMPILE_FLAGS> <LINK_FLAGS> <CMAKE_SHARED_LIBRARY_CREATE_HIP_FLAGS> <SONAME_FLAG><TARGET_SONAME> -o <TARGET> <OBJECTS> <LINK_LIBRARIES>")
+      "<CMAKE_HIP_COMPILER> <CMAKE_SHARED_LIBRARY_HIP_FLAGS> <LANGUAGE_COMPILE_FLAGS> <LINK_FLAGS> <SONAME_FLAG><TARGET_SONAME> -o <TARGET> <OBJECTS> <LINK_LIBRARIES>")
 endif()
 
 # create a shared module copy the shared library rule by default
@@ -95,7 +100,7 @@ endif()
 # compile a cu file into an executable
 if(NOT CMAKE_HIP_LINK_EXECUTABLE)
   set(CMAKE_HIP_LINK_EXECUTABLE
-    "<CMAKE_HIP_COMPILER> <FLAGS> <CMAKE_HIP_LINK_FLAGS> <LINK_FLAGS> <OBJECTS> -o <TARGET> <LINK_LIBRARIES>")
+    "<CMAKE_HIP_COMPILER> <FLAGS> <LINK_FLAGS> <OBJECTS> -o <TARGET> <LINK_LIBRARIES>")
 endif()
 
 set(CMAKE_HIP_USE_LINKER_INFORMATION TRUE)

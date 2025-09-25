@@ -26,9 +26,9 @@ using `ctest(1)`_:
     $ ctest
 
 * With a multi-configuration CMake generator, such as
-  ``Ninja Multi-Config``, ``Visual Studio``, or ``Xcode``,
-  one must tell ``ctest`` which configuration to test
-  by passing the ``-C <config>`` option:
+  :generator:`Ninja Multi-Config`, :generator:`Visual Studio <Visual Studio
+  Generators>`, or :generator:`Xcode`, one must tell ``ctest`` which
+  configuration to test by passing the ``-C <config>`` option:
 
   .. code-block:: console
 

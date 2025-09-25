@@ -1,5 +1,7 @@
 enable_language(C)
 
+set(CMAKE_AIX_SHARED_LIBRARY_ARCHIVE 0)
+
 include("${CMAKE_CURRENT_LIST_DIR}/include_test.cmake")
 
 add_library(c_lib empty.c)
@@ -58,3 +60,7 @@ install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/dir
 install(EXPORT FooTargets DESTINATION lib/cmake/foo)
 install(SCRIPT InstallScript.cmake)
 install(CODE "message(foo)" ALL_COMPONENTS)
+
+if(FAIL)
+  message(FATAL_ERROR "Intentionally fail to configure")
+endif()

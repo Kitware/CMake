@@ -7,7 +7,7 @@ Select debug information format when targeting the MSVC ABI.
 
 The allowed values are:
 
-.. include:: MSVC_DEBUG_INFORMATION_FORMAT-VALUES.txt
+.. include:: include/MSVC_DEBUG_INFORMATION_FORMAT-VALUES.rst
 
 Use :manual:`generator expressions <cmake-generator-expressions(7)>` to
 support per-configuration specification.  For example, the code:
@@ -19,7 +19,7 @@ support per-configuration specification.  For example, the code:
     MSVC_DEBUG_INFORMATION_FORMAT "$<$<CONFIG:Debug,RelWithDebInfo>:ProgramDatabase>")
 
 selects for the target ``foo`` the program database debug information format
-for the Debug configuration.
+for the ``Debug`` and ``RelWithDebInfo`` configurations.
 
 This property is initialized from the value of the
 :variable:`CMAKE_MSVC_DEBUG_INFORMATION_FORMAT` variable, if it is set.

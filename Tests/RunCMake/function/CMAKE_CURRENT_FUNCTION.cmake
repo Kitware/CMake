@@ -80,8 +80,6 @@ endfunction()
 
 calling_macro()
 
-cmake_policy(SET CMP0007 NEW)
-
 # ATTENTION `CMAKE_CURRENT_LIST_LINE` can't be used in `math()'
 function(print_self)
     file(STRINGS "${CMAKE_CURRENT_FUNCTION_LIST_FILE}" _lines)

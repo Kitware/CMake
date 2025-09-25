@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmGlobalVisualStudio12Generator.h"
 
 #include <cstring>
@@ -16,9 +16,8 @@
 #include "cmSystemTools.h"
 
 cmGlobalVisualStudio12Generator::cmGlobalVisualStudio12Generator(
-  cmake* cm, const std::string& name,
-  std::string const& platformInGeneratorName)
-  : cmGlobalVisualStudio11Generator(cm, name, platformInGeneratorName)
+  cmake* cm, std::string const& name)
+  : cmGlobalVisualStudio11Generator(cm, name)
 {
 }
 
@@ -110,7 +109,7 @@ bool cmGlobalVisualStudio12Generator::SelectWindowsStoreToolset(
 
 bool cmGlobalVisualStudio12Generator::IsWindowsDesktopToolsetInstalled() const
 {
-  const char desktop81Key[] = "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\"
+  char const desktop81Key[] = "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\"
                               "VisualStudio\\12.0\\VC\\LibraryDesktop";
 
   std::vector<std::string> subkeys;
@@ -120,7 +119,7 @@ bool cmGlobalVisualStudio12Generator::IsWindowsDesktopToolsetInstalled() const
 
 bool cmGlobalVisualStudio12Generator::IsWindowsPhoneToolsetInstalled() const
 {
-  const char wp81Key[] =
+  char const wp81Key[] =
     "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\"
     "Microsoft SDKs\\WindowsPhone\\v8.1\\Install Path;Install Path";
 
@@ -131,7 +130,7 @@ bool cmGlobalVisualStudio12Generator::IsWindowsPhoneToolsetInstalled() const
 
 bool cmGlobalVisualStudio12Generator::IsWindowsStoreToolsetInstalled() const
 {
-  const char win81Key[] = "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\"
+  char const win81Key[] = "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\"
                           "VisualStudio\\12.0\\VC\\Libraries\\Core\\Arm";
 
   std::vector<std::string> subkeys;

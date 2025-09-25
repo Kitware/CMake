@@ -1,7 +1,7 @@
-CMake Error at Escape2.cmake:4 \(message\):
+CMake Error at Escape2.cmake:2 \(message\):
   Syntax error in cmake code at
 
-    .*/Tests/RunCMake/Syntax/Escape2.cmake:4
+    .*/Tests/RunCMake/Syntax/Escape2.cmake:2
 
   when parsing string
 
@@ -9,5 +9,5 @@ CMake Error at Escape2.cmake:4 \(message\):
 
   Invalid character escape '\\' \(at end of input\).
 Call Stack \(most recent call first\):
-  Escape2.cmake:7 \(escape\)
+  Escape2.cmake:5 \(escape\)
   CMakeLists.txt:3 \(include\)

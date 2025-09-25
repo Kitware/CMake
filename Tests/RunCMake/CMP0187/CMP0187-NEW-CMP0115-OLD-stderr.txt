@@ -1,0 +1,3 @@
+^CMake Deprecation Warning at CMP0187-NEW-CMP0115-OLD\.cmake:[0-9]+ \(cmake_policy\):
+  The OLD behavior for policy CMP0115 will be removed from a future version
+  of CMake\.

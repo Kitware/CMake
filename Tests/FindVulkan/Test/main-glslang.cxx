@@ -5,10 +5,10 @@
 
 int main()
 {
-  const glslang::Version glslang_version = glslang::GetVersion();
-  const char* glslang_essl_version = glslang::GetEsslVersionString();
-  const char* glslang_glsl_version = glslang::GetGlslVersionString();
-  const int glslang_khronos_tool_id = glslang::GetKhronosToolId();
+  glslang::Version const glslang_version = glslang::GetVersion();
+  char const* glslang_essl_version = glslang::GetEsslVersionString();
+  char const* glslang_glsl_version = glslang::GetGlslVersionString();
+  int const glslang_khronos_tool_id = glslang::GetKhronosToolId();
 
   std::cout << "glslang Version: " << glslang_version.major << '.'
             << glslang_version.minor << '.' << glslang_version.patch

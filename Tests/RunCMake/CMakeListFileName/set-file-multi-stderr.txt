@@ -1,0 +1,2 @@
+CMake Error: Multiple --project-file options not allowed
+CMake Error: Run 'cmake --help' for all supported options

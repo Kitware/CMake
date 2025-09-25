@@ -1,5 +1,5 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-# file Copyright.txt or https://cmake.org/licensing for details.
+# file LICENSE.rst or https://cmake.org/licensing for details.
 
 #[========================================[.rst:
 FindPkgConfig
@@ -15,8 +15,6 @@ following variables will also be set:
   True if a pkg-config executable was found.
 
 ``PKG_CONFIG_VERSION_STRING``
-  .. versionadded:: 2.8.8
-
   The version of pkg-config that was found.
 
 ``PKG_CONFIG_EXECUTABLE``
@@ -32,10 +30,6 @@ module, but may be overridden by the user.  See `Variables Affecting Behavior`_
 for how these variables are initialized.
 
 #]========================================]
-
-cmake_policy(PUSH)
-cmake_policy(SET CMP0054 NEW) # if() quoted variables not dereferenced
-cmake_policy(SET CMP0057 NEW) # if IN_LIST
 
 ### Common stuff ####
 set(PKG_CONFIG_VERSION 1)
@@ -110,7 +104,7 @@ if (PKG_CONFIG_EXECUTABLE)
   unset(_PKG_CONFIG_VERSION_RESULT)
 endif ()
 
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(PkgConfig
                                   REQUIRED_VARS PKG_CONFIG_EXECUTABLE
                                   REASON_FAILURE_MESSAGE "${_PKG_CONFIG_FAILURE_MESSAGE}"
@@ -395,7 +389,7 @@ macro(_pkg_set_path_internal)
     # the system
     set(_lib_dirs)
     if(NOT DEFINED CMAKE_SYSTEM_NAME
-        OR (CMAKE_SYSTEM_NAME MATCHES "^(Linux|kFreeBSD|GNU)$"
+        OR (CMAKE_SYSTEM_NAME MATCHES "^(Linux|GNU)$"
             AND NOT CMAKE_CROSSCOMPILING))
       if(EXISTS "/etc/debian_version") # is this a debian system ?
         if(CMAKE_LIBRARY_ARCHITECTURE)
@@ -730,7 +724,7 @@ endmacro()
 
   When the ``QUIET`` argument is given, no status messages will be printed.
 
-  .. versionadded:: 3.1
+  .. versionadded:: 3.3
     The :variable:`CMAKE_PREFIX_PATH`,
     :variable:`CMAKE_FRAMEWORK_PATH`, and :variable:`CMAKE_APPBUNDLE_PATH` cache
     and environment variables will be added to the ``pkg-config`` search path.
@@ -740,14 +734,14 @@ endmacro()
     The :variable:`PKG_CONFIG_USE_CMAKE_PREFIX_PATH` variable set to ``FALSE``
     disables this behavior globally.
 
-    .. This didn't actually work until 3.3.
+    .. This was actually added in 3.1, but didn't work until 3.3.
 
-  .. versionadded:: 3.6
+  .. versionadded:: 3.7
     The ``IMPORTED_TARGET`` argument will create an imported target named
     ``PkgConfig::<prefix>`` that can be passed directly as an argument to
     :command:`target_link_libraries`.
 
-    .. This didn't actually work until 3.7.
+    .. This was actually added in 3.6, but didn't work until 3.7.
 
   .. versionadded:: 3.13
     The ``GLOBAL`` argument will make the
@@ -978,7 +972,7 @@ endmacro()
 function (pkg_get_variable result pkg variable)
   set(_multiValueArgs DEFINE_VARIABLES)
 
-  CMAKE_PARSE_ARGUMENTS(_parsedArguments "" "" "${_multiValueArgs}" ${ARGN})
+  cmake_parse_arguments(_parsedArguments "" "" "${_multiValueArgs}" ${ARGN})
   set(defined_variables )
   foreach(_def_var ${_parsedArguments_DEFINE_VARIABLES})
     if(NOT _def_var MATCHES "^.+=.*$")
@@ -1047,5 +1041,3 @@ Variables Affecting Behavior
 ### Local Variables:
 ### mode: cmake
 ### End:
-
-cmake_policy(POP)

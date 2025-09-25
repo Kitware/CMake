@@ -10,7 +10,7 @@ CMAKE_Fortran_COMPILER_LOADED=1
 CMAKE_Fortran_COMPILER_RANLIB=/opt/csw/bin/gcc-ranlib-5.5
 CMAKE_Fortran_COMPILER_TARGET=
 CMAKE_Fortran_COMPILER_VERSION=5.5.0
-CMAKE_Fortran_COMPILER_VERSION_INTERAL=
+CMAKE_Fortran_COMPILER_VERSION_INTERNAL=
 Change Dir: '/tmp/ii/CMakeFiles/CMakeTmp'
 
 Run Build Command(s): /tmp/cmake/build/bin/cmake -E env VERBOSE=1 /opt/csw/bin/gmake -f Makefile cmTC_955e5/fast

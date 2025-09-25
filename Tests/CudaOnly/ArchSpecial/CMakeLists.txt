@@ -25,7 +25,9 @@ function(verify_output flag)
     list(APPEND command_archs "${CMAKE_MATCH_1}")
   endforeach()
 
-  list(SORT command_archs)
+  # We need to use a NATURAL comparison so that architecture values like `100`
+  # get placed at the end instead of the front
+  list(SORT command_archs COMPARE NATURAL)
   list(REMOVE_DUPLICATES command_archs)
   if(NOT "${command_archs}" STREQUAL "${architectures}")
     message(FATAL_ERROR "Architectures used for \"${flag}\" don't match the reference (\"${command_archs}\" != \"${architectures}\").")

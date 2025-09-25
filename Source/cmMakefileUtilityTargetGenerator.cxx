@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmMakefileUtilityTargetGenerator.h"
 
 #include <ostream>
@@ -37,7 +37,7 @@ void cmMakefileUtilityTargetGenerator::WriteRuleFiles()
   *this->BuildFileStream << "# Utility rule file for "
                          << this->GeneratorTarget->GetName() << ".\n\n";
 
-  const char* root = (this->Makefile->IsOn("CMAKE_MAKE_INCLUDE_FROM_ROOT")
+  char const* root = (this->Makefile->IsOn("CMAKE_MAKE_INCLUDE_FROM_ROOT")
                         ? "$(CMAKE_BINARY_DIR)/"
                         : "");
 
@@ -55,8 +55,9 @@ void cmMakefileUtilityTargetGenerator::WriteRuleFiles()
     cmGeneratedFileStream depFileStream(
       dependFile, false, this->GlobalGenerator->GetMakefileEncoding());
     depFileStream << "# Empty custom commands generated dependencies file for "
-                  << this->GeneratorTarget->GetName() << ".\n"
-                  << "# This may be replaced when dependencies are built.\n";
+                  << this->GeneratorTarget->GetName()
+                  << ".\n"
+                     "# This may be replaced when dependencies are built.\n";
   }
 
   std::string dependTimestamp =
@@ -66,7 +67,7 @@ void cmMakefileUtilityTargetGenerator::WriteRuleFiles()
     cmGeneratedFileStream depFileStream(
       dependTimestamp, false, this->GlobalGenerator->GetMakefileEncoding());
     depFileStream << "# CMAKE generated file: DO NOT EDIT!\n"
-                  << "# Timestamp file for custom commands dependencies "
+                     "# Timestamp file for custom commands dependencies "
                      "management for "
                   << this->GeneratorTarget->GetName() << ".\n";
   }

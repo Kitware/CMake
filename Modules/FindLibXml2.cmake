@@ -1,55 +1,66 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-# file Copyright.txt or https://cmake.org/licensing for details.
+# file LICENSE.rst or https://cmake.org/licensing for details.
 
 #[=======================================================================[.rst:
 FindLibXml2
 -----------
 
-Find the XML processing library (libxml2).
+Finds the XML processing library (libxml2).
 
-IMPORTED Targets
+Imported Targets
 ^^^^^^^^^^^^^^^^
 
-.. versionadded:: 3.12
-
-The following :prop_tgt:`IMPORTED` targets may be defined:
+This module provides the following :ref:`Imported Targets`:
 
 ``LibXml2::LibXml2``
-  libxml2 library.
+  .. versionadded:: 3.12
+
+  Target encapsulating the libxml2 library usage requirements, available only if
+  library is found.
+
 ``LibXml2::xmllint``
   .. versionadded:: 3.17
 
-  xmllint command-line executable.
+  Target encapsulating the xmllint command-line executable, available only if
+  xmllint executable is found.
 
-Result variables
+Result Variables
 ^^^^^^^^^^^^^^^^
 
-This module will set the following variables in your project:
+This module defines the following variables:
 
 ``LibXml2_FOUND``
-  true if libxml2 headers and libraries were found
-``LIBXML2_INCLUDE_DIR``
-  the directory containing LibXml2 headers
+  Boolean indicating whether the libxml2 library is found.
 ``LIBXML2_INCLUDE_DIRS``
-  list of the include directories needed to use LibXml2
+  Include directories needed to use the libxml2 library.
 ``LIBXML2_LIBRARIES``
-  LibXml2 libraries to be linked
+  Libraries needed to link against to use the libxml2 library.
 ``LIBXML2_DEFINITIONS``
-  the compiler switches required for using LibXml2
-``LIBXML2_XMLLINT_EXECUTABLE``
-  path to the XML checking tool xmllint coming with LibXml2
+  The compiler switches required for using libxml2.
 ``LIBXML2_VERSION_STRING``
-  the version of LibXml2 found (since CMake 2.8.8)
+  The version of the libxml2 found.
 
-Cache variables
+Cache Variables
 ^^^^^^^^^^^^^^^
 
 The following cache variables may also be set:
 
 ``LIBXML2_INCLUDE_DIR``
-  the directory containing LibXml2 headers
+  The include directory containing libxml2 headers.
 ``LIBXML2_LIBRARY``
-  path to the LibXml2 library
+  The path to the libxml2 library.
+``LIBXML2_XMLLINT_EXECUTABLE``
+  The path to the XML checking tool ``xmllint`` coming with libxml2.
+
+Examples
+^^^^^^^^
+
+Finding the libxml2 library and linking it to a project target:
+
+.. code-block:: cmake
+
+  find_package(LibXml2)
+  target_link_libraries(project_target PRIVATE LibXml2::LibXml2)
 #]=======================================================================]
 
 cmake_policy(PUSH)
@@ -59,7 +70,7 @@ cmake_policy(SET CMP0159 NEW) # file(STRINGS) with REGEX updates CMAKE_MATCH_<n>
 # in the find_path() and find_library() calls
 find_package(PkgConfig QUIET)
 if(PKG_CONFIG_FOUND)
-  PKG_CHECK_MODULES(PC_LIBXML QUIET libxml-2.0)
+  pkg_check_modules(PC_LIBXML QUIET libxml-2.0)
 endif()
 
 find_path(LIBXML2_INCLUDE_DIR NAMES libxml/xpath.h
@@ -109,8 +120,8 @@ foreach(libxml2_pc_lib_dir IN LISTS PC_LIBXML_LIBDIR PC_LIBXML_LIBRARY_DIRS)
   endif()
 endforeach()
 
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(LibXml2
+include(FindPackageHandleStandardArgs)
+find_package_handle_standard_args(LibXml2
                                   REQUIRED_VARS LIBXML2_LIBRARY LIBXML2_INCLUDE_DIR
                                   VERSION_VAR LIBXML2_VERSION_STRING)
 

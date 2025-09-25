@@ -24,7 +24,7 @@ Execute one or more child processes.
                   [ENCODING <name>]
                   [ECHO_OUTPUT_VARIABLE]
                   [ECHO_ERROR_VARIABLE]
-                  [COMMAND_ERROR_IS_FATAL <ANY|LAST>])
+                  [COMMAND_ERROR_IS_FATAL <ANY|LAST|NONE>])
 
 Runs the given sequence of one or more commands.
 
@@ -44,17 +44,31 @@ Options:
 
  CMake executes the child process using operating system APIs directly:
 
- * On POSIX platforms, the command line is passed to the
-   child process in an ``argv[]`` style array.
+ * On POSIX platforms, the command line is passed to the child process
+   in an ``argv[]`` style array.  No intermediate shell is executed,
+   so shell operators such as ``>`` are treated as normal arguments.
 
  * On Windows platforms, the command line is encoded as a string such
-   that child processes using ``CommandLineToArgvW`` will decode the
+   that child processes using `CommandLineToArgvW`_ will decode the
    original arguments.
 
- No intermediate shell is used, so shell operators such as ``>``
- are treated as normal arguments.
- (Use the ``INPUT_*``, ``OUTPUT_*``, and ``ERROR_*`` options to
- redirect stdin, stdout, and stderr.)
+   If the command runs a ``.exe``, ``.com``, or other executable,
+   no intermediate command interpreter is executed, so shell operators
+   such as ``>`` are treated as normal arguments.
+
+   If the command runs a ``.bat`` or ``.cmd`` script, it is executed
+   through the ``cmd`` command interpreter.  The command interpreter
+   does not use `CommandLineToArgvW`_, so some arguments may be received
+   by the script with extra quoting.
+
+   .. versionchanged:: 4.0
+     ``.bat`` and ``.cmd`` scripts are now explicitly executed through the
+     command interpreter by prepending ``cmd /c call`` to the command line.
+     Previously, they were implicitly executed through ``cmd /c``, without
+     ``call``, by undocumented behavior of `CreateProcessW`_.
+
+ Use the ``INPUT_*``, ``OUTPUT_*``, and ``ERROR_*`` options to
+ redirect stdin, stdout, and stderr.
 
  For **sequential execution** of multiple commands use multiple
  ``execute_process`` calls each with a single ``COMMAND`` argument.
@@ -106,6 +120,10 @@ Options:
  The variable named will be set with the contents of the standard output
  and standard error pipes, respectively.  If the same variable is named
  for both pipes their output will be merged in the order produced.
+
+``OUTPUT_STRIP_TRAILING_WHITESPACE``, ``ERROR_STRIP_TRAILING_WHITESPACE``
+  Removes whitespace characters from the end of the values stored in the
+  corresponding ``OUTPUT_VARIABLE`` and ``ERROR_VARIABLE`` variables.
 
 ``ECHO_OUTPUT_VARIABLE``, ``ECHO_ERROR_VARIABLE``
   .. versionadded:: 3.18
@@ -168,17 +186,35 @@ Options:
    `UTF-8 RFC <https://datatracker.ietf.org/doc/html/rfc3629>`_
    naming convention.
 
-``COMMAND_ERROR_IS_FATAL <ANY|LAST>``
+``COMMAND_ERROR_IS_FATAL <ANY|LAST|NONE>``
   .. versionadded:: 3.19
 
   The option following ``COMMAND_ERROR_IS_FATAL`` determines the behavior when
   an error is encountered:
 
-    ``ANY``
+  ``ANY``
     If any of the commands in the list of commands fail, the
     ``execute_process()`` command halts with an error.
 
-    ``LAST``
+  ``LAST``
     If the last command in the list of commands fails, the
-    ``execute_process()`` command halts with an error.  Commands earlier in the
-    list will not cause a fatal error.
+    ``execute_process()`` command halts with an error.
+    Commands earlier in the list will not cause a fatal error.
+
+
+  ``NONE``
+    .. versionadded:: 4.0
+
+    Regardless of any of the commands failing, the ``execute_process()``
+    command will not halt with an error.
+
+  .. versionadded:: 4.0
+
+    If not provided, the
+    :variable:`CMAKE_EXECUTE_PROCESS_COMMAND_ERROR_IS_FATAL` variable
+    is checked.  If the variable is not set, the default is ``NONE``.
+    If ``RESULT_VARIABLE`` or ``RESULTS_VARIABLE`` is supplied,
+    :variable:`CMAKE_EXECUTE_PROCESS_COMMAND_ERROR_IS_FATAL` is ignored.
+
+.. _`CommandLineToArgvW`: https://learn.microsoft.com/en-us/windows/win32/api/shellapi/nf-shellapi-commandlinetoargvw
+.. _`CreateProcessW`: https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-createprocessw

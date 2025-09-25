@@ -1,5 +1,5 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-# file Copyright.txt or https://cmake.org/licensing for details.
+# file LICENSE.rst or https://cmake.org/licensing for details.
 
 macro(cmake_cuda_find_toolkit lang lang_var_)
   # This is very similar to FindCUDAToolkit, but somewhat simplified since we can issue fatal errors

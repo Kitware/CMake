@@ -1,5 +1,3 @@
-set(CTEST_RUN_CURRENT_SCRIPT 0)
-
 if(NOT DEFINED basefilename)
   message(FATAL_ERROR "pass -Dbasefilename=f1")
 endif()

@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmGlobalGhsMultiGenerator.h"
 
 #include <algorithm>
@@ -33,13 +33,13 @@
 #include "cmVersion.h"
 #include "cmake.h"
 
-const char* cmGlobalGhsMultiGenerator::FILE_EXTENSION = ".gpj";
+char const* cmGlobalGhsMultiGenerator::FILE_EXTENSION = ".gpj";
 #ifdef __linux__
-const char* cmGlobalGhsMultiGenerator::DEFAULT_BUILD_PROGRAM = "gbuild";
+char const* cmGlobalGhsMultiGenerator::DEFAULT_BUILD_PROGRAM = "gbuild";
 #elif defined(_WIN32)
-const char* cmGlobalGhsMultiGenerator::DEFAULT_BUILD_PROGRAM = "gbuild.exe";
+char const* cmGlobalGhsMultiGenerator::DEFAULT_BUILD_PROGRAM = "gbuild.exe";
 #endif
-const char* cmGlobalGhsMultiGenerator::CHECK_BUILD_SYSTEM_TARGET =
+char const* cmGlobalGhsMultiGenerator::CHECK_BUILD_SYSTEM_TARGET =
   "RERUN_CMAKE";
 
 cmGlobalGhsMultiGenerator::cmGlobalGhsMultiGenerator(cmake* cm)
@@ -69,9 +69,7 @@ void cmGlobalGhsMultiGenerator::ComputeTargetObjectDirectory(
   cmGeneratorTarget* gt) const
 {
   // Compute full path to object file directory for this target.
-  std::string dir =
-    cmStrCat(gt->LocalGenerator->GetCurrentBinaryDirectory(), '/',
-             gt->LocalGenerator->GetTargetDirectory(gt), '/');
+  std::string dir = cmStrCat(gt->GetSupportDirectory(), '/');
   gt->ObjectDirectory = dir;
 }
 
@@ -101,11 +99,14 @@ bool cmGlobalGhsMultiGenerator::SetGeneratorToolset(std::string const& ts,
 
   /* check if the toolset changed from last generate */
   if (cmNonempty(prevTool) && !cmSystemTools::ComparePath(gbuild, *prevTool)) {
-    std::string const& e = cmStrCat(
-      "toolset build tool: ", gbuild, '\n',
-      "Does not match the previously used build tool: ", *prevTool, '\n',
-      "Either remove the CMakeCache.txt file and CMakeFiles "
-      "directory or choose a different binary directory.");
+    std::string const& e =
+      cmStrCat("toolset build tool: ", gbuild,
+               "\n"
+               "Does not match the previously used build tool: ",
+               *prevTool,
+               "\n"
+               "Either remove the CMakeCache.txt file and CMakeFiles "
+               "directory or choose a different binary directory.");
     mf->IssueMessage(MessageType::FATAL_ERROR, e);
     return false;
   }
@@ -159,7 +160,7 @@ bool cmGlobalGhsMultiGenerator::FindMakeProgram(cmMakefile* /*mf*/)
 }
 
 void cmGlobalGhsMultiGenerator::GetToolset(cmMakefile* mf, std::string& tsp,
-                                           const std::string& ts)
+                                           std::string const& ts)
 {
   /* Determine tsp - full path of the toolset from ts (toolset hint via -T) */
 
@@ -377,7 +378,7 @@ void cmGlobalGhsMultiGenerator::WriteTargets(cmLocalGenerator* root)
 
     // create target build file
     std::string name = cmStrCat(target->GetName(), ".tgt", FILE_EXTENSION);
-    std::string fname = cmStrCat(rootBinaryDir, "/", name);
+    std::string fname = cmStrCat(rootBinaryDir, '/', name);
     cmGeneratedFileStream fbld(fname);
     fbld.SetCopyIfDifferent(true);
     this->WriteFileHeader(fbld);
@@ -466,10 +467,10 @@ void cmGlobalGhsMultiGenerator::OutputTopLevelProject(
 
 std::vector<cmGlobalGenerator::GeneratedMakeCommand>
 cmGlobalGhsMultiGenerator::GenerateBuildCommand(
-  const std::string& makeProgram, const std::string& projectName,
-  const std::string& projectDir, std::vector<std::string> const& targetNames,
-  const std::string& /*config*/, int jobs, bool verbose,
-  const cmBuildOptions& /*buildOptions*/,
+  std::string const& makeProgram, std::string const& projectName,
+  std::string const& projectDir, std::vector<std::string> const& targetNames,
+  std::string const& /*config*/, int jobs, bool verbose,
+  cmBuildOptions const& /*buildOptions*/,
   std::vector<std::string> const& makeOptions)
 {
   GeneratedMakeCommand makeCommand;
@@ -497,7 +498,7 @@ cmGlobalGhsMultiGenerator::GenerateBuildCommand(
   /* determine targets to build */
   bool build_all = false;
   if (!targetNames.empty()) {
-    for (const auto& tname : targetNames) {
+    for (auto const& tname : targetNames) {
       if (!tname.empty()) {
         if (tname == "clean") {
           makeCommand.Add("-clean");
@@ -604,7 +605,7 @@ bool cmGlobalGhsMultiGenerator::ComputeTargetBuildOrder(
   std::set<cmGeneratorTarget const*> temp;
   std::set<cmGeneratorTarget const*> perm;
 
-  for (const auto* const ti : tgt) {
+  for (auto const* const ti : tgt) {
     bool r = this->VisitTarget(temp, perm, build, ti);
     if (r) {
       return r;
@@ -665,7 +666,7 @@ bool cmGlobalGhsMultiGenerator::AddCheckTarget()
     // Collect the input files used to generate all targets in this
     // project.
     std::vector<std::string> listFiles;
-    for (const auto& gen : generators) {
+    for (auto const& gen : generators) {
       cm::append(listFiles, gen->GetMakefile()->GetListFiles());
     }
 
@@ -761,7 +762,7 @@ void cmGlobalGhsMultiGenerator::AddAllTarget()
 
       // Now make all targets depend on the ALL_BUILD target
       for (cmLocalGenerator const* i : gen) {
-        for (const auto& tgt : i->GetGeneratorTargets()) {
+        for (auto const& tgt : i->GetGeneratorTargets()) {
           // Skip global or imported targets
           if (tgt->GetType() == cmStateEnums::GLOBAL_TARGET ||
               tgt->IsImported()) {

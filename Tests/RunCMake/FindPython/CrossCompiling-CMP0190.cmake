@@ -1,0 +1,6 @@
+set(CMAKE_CROSSCOMPILING TRUE)
+unset(CMAKE_CROSSCOMPILING_EMULATOR)
+
+enable_language(C)
+
+find_package(${PYTHON} ${Python_REQUESTED_VERSION} REQUIRED COMPONENTS Interpreter Development)

@@ -1,5 +1,5 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-# file Copyright.txt or https://cmake.org/licensing for details.
+# file LICENSE.rst or https://cmake.org/licensing for details.
 
 #[=======================================================================[.rst:
 Dart
@@ -18,7 +18,7 @@ submissions as well as testing with CTest.  This module should be
 included in the CMakeLists.txt file at the top of a project.  Typical
 usage:
 
-::
+.. code-block:: cmake
 
   include(Dart)
   if(BUILD_TESTING)
@@ -141,4 +141,3 @@ endif()
 #
 # End of Dart.cmake
 #
-

@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
@@ -15,10 +15,12 @@
 #include "cmExportFileGenerator.h"
 #include "cmStateTypes.h"
 
-class cmGeneratorTarget;
 namespace Json {
 class Value;
 }
+
+class cmGeneratorTarget;
+class cmPackageInfoArguments;
 
 /** \class cmExportPackageInfoGenerator
  * \brief Generate Common Package Specification package information files
@@ -32,11 +34,7 @@ class Value;
 class cmExportPackageInfoGenerator : virtual public cmExportFileGenerator
 {
 public:
-  cmExportPackageInfoGenerator(std::string packageName, std::string version,
-                               std::string versionCompat,
-                               std::string versionSchema,
-                               std::vector<std::string> defaultTargets,
-                               std::vector<std::string> defaultConfigurations);
+  cmExportPackageInfoGenerator(cmPackageInfoArguments arguments);
 
   using cmExportFileGenerator::GenerateImportFile;
 
@@ -62,8 +60,7 @@ protected:
   bool GenerateInterfaceProperties(Json::Value& component,
                                    cmGeneratorTarget const* target,
                                    ImportPropertyMap const& properties) const;
-  void GenerateInterfaceConfigProperties(
-    Json::Value& components, cmGeneratorTarget const* target,
+  Json::Value GenerateInterfaceConfigProperties(
     std::string const& suffix, ImportPropertyMap const& properties) const;
 
   cm::string_view GetImportPrefixWithSlash() const override;
@@ -102,13 +99,20 @@ private:
     std::string const& outName, cm::string_view inName,
     ImportPropertyMap const& properties) const;
 
+  void GenerateProperty(bool& result, Json::Value& component,
+                        cmGeneratorTarget const* target,
+                        std::string const& outName, std::string const& inName,
+                        ImportPropertyMap const& properties) const;
+
   std::string const PackageName;
   std::string const PackageVersion;
   std::string const PackageVersionCompat;
   std::string const PackageVersionSchema;
+  std::string const PackageDescription;
+  std::string const PackageWebsite;
   std::vector<std::string> DefaultTargets;
   std::vector<std::string> DefaultConfigurations;
 
   std::map<std::string, std::string> LinkTargets;
-  std::set<std::string> Requirements;
+  std::map<std::string, std::set<std::string>> Requirements;
 };

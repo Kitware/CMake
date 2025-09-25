@@ -1,4 +1,4 @@
-extern void print_message(const char* const Message);
+extern void print_message(char const* const Message);
 
 int main(int argc, char* argv[])
 {

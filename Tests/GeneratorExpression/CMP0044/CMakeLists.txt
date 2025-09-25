@@ -7,13 +7,8 @@ if (lc_test STREQUAL CMAKE_C_COMPILER_ID)
   endif()
 endif()
 
-if (CMP0044_TYPE)
-  cmake_policy(SET CMP0044 ${CMP0044_TYPE})
-endif()
-
-add_library(cmp0044-check-${CMP0044_TYPE} cmp0044-check.cpp)
-target_compile_definitions(cmp0044-check-${CMP0044_TYPE}
+add_library(cmp0044-check cmp0044-check.cpp)
+target_compile_definitions(cmp0044-check
   PRIVATE
     Result=$<C_COMPILER_ID:${lc_test}>
-    Type_Is_${CMP0044_TYPE}
 )

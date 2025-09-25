@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmArgumentParser.h"
 
 #include <algorithm>
@@ -84,7 +84,7 @@ void Instance::Bind(NonEmpty<std::string>& val)
         this->ParseResults->AddKeywordError(this->Keyword,
                                             "  empty string not allowed\n");
       }
-      val.assign(std::string(arg));
+      val = std::string(arg);
       return Continue::No;
     },
     ExpectAtLeast{ 1 });
@@ -94,7 +94,7 @@ void Instance::Bind(Maybe<std::string>& val)
 {
   this->Bind(
     [&val](cm::string_view arg) -> Continue {
-      static_cast<std::string&>(val) = std::string(arg);
+      val = std::string(arg);
       return Continue::No;
     },
     ExpectAtLeast{ 0 });
@@ -147,6 +147,24 @@ void Instance::Consume(std::size_t pos, cm::string_view arg)
     return;
   }
 
+  if (!this->DoneWithPositional) {
+    auto const pit = this->Bindings.Positions.Find(pos);
+    if (pit != this->Bindings.Positions.end()) {
+      pit->second(*this, pos, arg);
+      return;
+    }
+
+    if (this->Bindings.TrailingArgs) {
+      this->Keyword = ""_s;
+      this->KeywordValuesSeen = 0;
+      this->DoneWithPositional = true;
+      this->Bindings.TrailingArgs(*this);
+      if (!this->KeywordValueFunc) {
+        return;
+      }
+    }
+  }
+
   if (this->KeywordValueFunc) {
     switch (this->KeywordValueFunc(arg)) {
       case Continue::Yes:
@@ -159,14 +177,6 @@ void Instance::Consume(std::size_t pos, cm::string_view arg)
     return;
   }
 
-  if (!this->DoneWithPositional) {
-    auto const pit = this->Bindings.Positions.Find(pos);
-    if (pit != this->Bindings.Positions.end()) {
-      pit->second(*this, pos, arg);
-      return;
-    }
-  }
-
   if (this->UnparsedArguments) {
     this->UnparsedArguments->emplace_back(arg);
   }
@@ -174,7 +184,7 @@ void Instance::Consume(std::size_t pos, cm::string_view arg)
 
 void Instance::FinishKeyword()
 {
-  if (this->Keyword.empty()) {
+  if (!this->DoneWithPositional) {
     return;
   }
   if (this->KeywordValuesSeen < this->KeywordValuesExpected) {

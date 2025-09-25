@@ -1,5 +1,5 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-# file Copyright.txt or https://cmake.org/licensing for details.
+# file LICENSE.rst or https://cmake.org/licensing for details.
 
 # When CMAKE_SYSTEM_NAME is "Android", CMakeDetermineSystem loads this module.
 # This module detects platform-wide information about the Android target
@@ -31,7 +31,6 @@ if(CMAKE_HOST_SYSTEM_NAME STREQUAL "Android")
 endif()
 
 cmake_policy(PUSH)
-cmake_policy(SET CMP0057 NEW) # if IN_LIST
 cmake_policy(SET CMP0159 NEW) # file(STRINGS) with REGEX updates CMAKE_MATCH_<n>
 
 # If using Android tools for Visual Studio, compile a sample project to get the
@@ -353,6 +352,10 @@ if(NOT DEFINED NDK_KNOWN_DEVICE_ABIS)
   set(NDK_ABI_x86_64_ARCH              "x86_64")
   set(NDK_ABI_x86_64_TRIPLE            "x86_64-linux-android")
   set(NDK_ABI_x86_64_LLVM_TRIPLE       "x86_64-none-linux-android")
+  set(NDK_ABI_riscv64_PROC             "riscv64")
+  set(NDK_ABI_riscv64_ARCH             "riscv64")
+  set(NDK_ABI_riscv64_TRIPLE           "riscv64-linux-android")
+  set(NDK_ABI_riscv64_LLVM_TRIPLE      "riscv64-none-linux-android")
 
   set(NDK_PROC_aarch64_ABI "arm64-v8a")
   set(NDK_PROC_armv7-a_ABI "armeabi-v7a")
@@ -362,13 +365,15 @@ if(NOT DEFINED NDK_KNOWN_DEVICE_ABIS)
   set(NDK_PROC_mips_ABI    "mips")
   set(NDK_PROC_mips64_ABI  "mips64")
   set(NDK_PROC_x86_64_ABI  "x86_64")
+  set(NDK_PROC_riscv64_ABI "riscv64")
 
-  set(NDK_ARCH_arm64_ABI  "arm64-v8a")
-  set(NDK_ARCH_arm_ABI    "armeabi")
-  set(NDK_ARCH_mips_ABI   "mips")
-  set(NDK_ARCH_mips64_ABI "mips64")
-  set(NDK_ARCH_x86_ABI    "x86")
-  set(NDK_ARCH_x86_64_ABI "x86_64")
+  set(NDK_ARCH_arm64_ABI   "arm64-v8a")
+  set(NDK_ARCH_arm_ABI     "armeabi")
+  set(NDK_ARCH_mips_ABI    "mips")
+  set(NDK_ARCH_mips64_ABI  "mips64")
+  set(NDK_ARCH_x86_ABI     "x86")
+  set(NDK_ARCH_x86_64_ABI  "x86_64")
+  set(NDK_ARCH_riscv64_ABI "riscv64")
 endif()
 
 # Validate inputs.
@@ -524,6 +529,9 @@ elseif(CMAKE_ANDROID_NDK)
     # ABI.
     if(CMAKE_ANDROID_ARCH_ABI MATCHES "64(-v8a)?$" AND CMAKE_SYSTEM_VERSION LESS 21)
       set(CMAKE_SYSTEM_VERSION 21)
+    endif()
+    if(CMAKE_ANDROID_ARCH_ABI MATCHES "^riscv64$" AND CMAKE_SYSTEM_VERSION LESS 35)
+      set(CMAKE_SYSTEM_VERSION 35)
     endif()
   else()
     file(GLOB _ANDROID_APIS_1 RELATIVE "${CMAKE_ANDROID_NDK}/platforms" "${CMAKE_ANDROID_NDK}/platforms/android-[0-9]")

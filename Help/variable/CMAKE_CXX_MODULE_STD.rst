@@ -6,7 +6,7 @@ CMAKE_CXX_MODULE_STD
 Whether to add utility targets as dependencies to targets with at least
 ``cxx_std_23`` or not.
 
-.. note ::
+.. note::
 
    This setting is meaningful only when experimental support for ``import
    std;`` has been enabled by the ``CMAKE_EXPERIMENTAL_CXX_IMPORT_STD`` gate.

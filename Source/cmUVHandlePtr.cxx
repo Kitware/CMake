@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #define cmUVHandlePtr_cxx
 #include "cmUVHandlePtr.h"
 
@@ -332,7 +332,7 @@ void write_req_cb(uv_write_t* req, int status)
 }
 }
 
-int uv_write(uv_stream_t* handle, const uv_buf_t bufs[], unsigned int nbufs,
+int uv_write(uv_stream_t* handle, uv_buf_t const bufs[], unsigned int nbufs,
              std::weak_ptr<std::function<void(int)>> cb)
 {
   auto req = cm::make_unique<write_req>(std::move(cb));

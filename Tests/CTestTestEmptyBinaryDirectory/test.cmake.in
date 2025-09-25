@@ -1,7 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
 
-set(CTEST_RUN_CURRENT_SCRIPT 0)
-
 set(CTEST_SOURCE_DIRECTORY "@CMake_SOURCE_DIR@/Tests/CTestTestEmptyBinaryDirectory")
 set(CTEST_BINARY_DIRECTORY "@CMake_BINARY_DIR@/Tests/CTestTestEmptyBinaryDirectory")
 

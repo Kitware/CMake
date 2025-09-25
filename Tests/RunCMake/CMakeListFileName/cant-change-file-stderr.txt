@@ -1,0 +1,3 @@
+CMake Error: CMakeLists filename : \"another.cmake\"
+Does not match the previous: \"other.cmake\"
+Either remove the CMakeCache.txt file and CMakeFiles directory or choose a different binary directory.

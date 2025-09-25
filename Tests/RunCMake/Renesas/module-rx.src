@@ -1,0 +1,7 @@
+.SECTION P,CODE
+
+_main:
+    MOV.L #0, R1
+    RTS
+
+.END

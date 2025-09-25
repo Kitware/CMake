@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
@@ -26,10 +26,10 @@ public:
   bool InitialPass(std::vector<std::string> const& args);
 
 protected:
-  void AddArchitecturePaths(const char* suffix);
+  void AddArchitecturePaths(char const* suffix);
   void AddArchitecturePath(std::string const& dir,
                            std::string::size_type start_pos,
-                           const char* suffix, bool fresh = true);
+                           char const* suffix, bool fresh = true);
   std::string FindLibrary();
 
 private:

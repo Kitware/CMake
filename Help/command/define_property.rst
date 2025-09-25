@@ -21,15 +21,13 @@ primary use case.
 The first argument determines the kind of scope in which the property should
 be used.  It must be one of the following:
 
-::
-
-  GLOBAL    = associated with the global namespace
-  DIRECTORY = associated with one directory
-  TARGET    = associated with one target
-  SOURCE    = associated with one source file
-  TEST      = associated with a test named with add_test
-  VARIABLE  = documents a CMake language variable
-  CACHED_VARIABLE = documents a CMake cache variable
+* ``GLOBAL``          - associated with the global namespace.
+* ``DIRECTORY``       - associated with one directory.
+* ``TARGET``          - associated with one target.
+* ``SOURCE``          - associated with one source file.
+* ``TEST``            - associated with a test named with :command:`add_test`.
+* ``VARIABLE``        - documents a CMake language variable.
+* ``CACHED_VARIABLE`` - documents a CMake cache variable.
 
 Note that unlike :command:`set_property` and :command:`get_property` no
 actual scope needs to be given; only the kind of scope is important.

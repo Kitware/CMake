@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
@@ -23,7 +23,7 @@ public:
   virtual ~cmParseMumpsCoverage();
   // This is the toplevel coverage file locating the coverage files
   // and the mumps source code package tree.
-  bool ReadCoverageFile(const char* file);
+  bool ReadCoverageFile(char const* file);
 
 protected:
   // sub classes will use this to

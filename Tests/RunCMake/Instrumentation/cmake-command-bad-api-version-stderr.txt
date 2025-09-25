@@ -1,0 +1,6 @@
+CMake Error at [^
+]*\(cmake_instrumentation\):
+  cmake_instrumentation QUERY subcommand given an unsupported API_VERSION "0"
+  \(the only currently supported version is 1\).
+Call Stack \(most recent call first\):
+  CMakeLists.txt:6 \(include\)

@@ -1,0 +1,23 @@
+# Install development tools.
+g++
+curl
+git
+
+# NVIDIA CUDA Compiler
+cuda-keyring
+cuda-nvcc-12-6
+cuda-profiler-api-12-6
+
+# NVIDIA CUDA Toolkit
+# These are not needed for HIP, but having them in
+# the environment allows us to run CUDA tests too.
+cuda-nvrtc-dev-12-6
+cuda-nvtx-12-6
+cuda-opencl-dev-12-6
+libcublas-dev-12-6
+libcufft-dev-12-6
+libcurand-dev-12-6
+libcusolver-dev-12-6
+libcusparse-dev-12-6
+libnpp-dev-12-6
+libnvjitlink-dev-12-6

@@ -1,3 +1,8 @@
+if(CYGWIN)
+  set(maybe_exe_readable OWNER_READ)
+else()
+  set(maybe_exe_readable "")
+endif()
 
 file(REMOVE "${CMAKE_CURRENT_BINARY_DIR}/readable.txt"
             "${CMAKE_CURRENT_BINARY_DIR}/writable.txt"
@@ -10,7 +15,7 @@ file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/writable.txt" "foo")
 file(CHMOD "${CMAKE_CURRENT_BINARY_DIR}/writable.txt" PERMISSIONS OWNER_WRITE GROUP_WRITE)
 
 file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/executable.txt" "foo")
-file(CHMOD "${CMAKE_CURRENT_BINARY_DIR}/executable.txt" PERMISSIONS OWNER_EXECUTE GROUP_EXECUTE WORLD_EXECUTE)
+file(CHMOD "${CMAKE_CURRENT_BINARY_DIR}/executable.txt" PERMISSIONS OWNER_EXECUTE GROUP_EXECUTE WORLD_EXECUTE ${maybe_exe_readable})
 
 if(NOT WIN32)
   file(REMOVE_RECURSE
@@ -67,7 +72,7 @@ else()
   endif()
 
   if(NOT IS_EXECUTABLE "${CMAKE_CURRENT_BINARY_DIR}/executable.txt"
-      OR IS_READABLE "${CMAKE_CURRENT_BINARY_DIR}/executable.txt"
+      OR (IS_READABLE "${CMAKE_CURRENT_BINARY_DIR}/executable.txt" AND NOT maybe_exe_readable)
       OR IS_WRITABLE "${CMAKE_CURRENT_BINARY_DIR}/executable.txt")
     cleanup()
     message(FATAL_ERROR "checks on \"${CMAKE_CURRENT_BINARY_DIR}/executable.txt\" failed")
@@ -81,18 +86,20 @@ else()
     message(FATAL_ERROR "checks on \"${CMAKE_CURRENT_BINARY_DIR}/readable-dir\" failed")
   endif()
 
-  if(NOT IS_WRITABLE "${CMAKE_CURRENT_BINARY_DIR}/writable-dir"
-      OR IS_READABLE "${CMAKE_CURRENT_BINARY_DIR}/writable-dir"
-      OR IS_EXECUTABLE "${CMAKE_CURRENT_BINARY_DIR}/writable-dir")
-    cleanup()
-    message(FATAL_ERROR "checks on \"${CMAKE_CURRENT_BINARY_DIR}/writable-dir\" failed")
+  if(NOT NO_WRITABLE_DIR)
+    if(NOT IS_WRITABLE "${CMAKE_CURRENT_BINARY_DIR}/writable-dir"
+        OR IS_READABLE "${CMAKE_CURRENT_BINARY_DIR}/writable-dir"
+        OR IS_EXECUTABLE "${CMAKE_CURRENT_BINARY_DIR}/writable-dir")
+      cleanup()
+      message(FATAL_ERROR "checks on \"${CMAKE_CURRENT_BINARY_DIR}/writable-dir\" failed")
+    endif()
   endif()
 
   if(NOT IS_EXECUTABLE "${CMAKE_CURRENT_BINARY_DIR}/executable-dir"
       OR IS_READABLE "${CMAKE_CURRENT_BINARY_DIR}/executable-dir"
       OR IS_WRITABLE "${CMAKE_CURRENT_BINARY_DIR}/executable-dir")
     cleanup()
-    message(FATAL_ERROR "checks on \"${CMAKE_CURRENT_BINARY_DIR}/executable.txt\" failed")
+    message(FATAL_ERROR "checks on \"${CMAKE_CURRENT_BINARY_DIR}/executable-dir\" failed")
   endif()
 endif()
 
@@ -147,7 +154,7 @@ if(UNIX)
   endif()
 
   if(NOT IS_EXECUTABLE "${CMAKE_CURRENT_BINARY_DIR}/link-to-executable.txt"
-     OR IS_READABLE "${CMAKE_CURRENT_BINARY_DIR}/link-to-executable.txt"
+     OR (IS_READABLE "${CMAKE_CURRENT_BINARY_DIR}/link-to-executable.txt" AND NOT maybe_exe_readable)
      OR IS_WRITABLE "${CMAKE_CURRENT_BINARY_DIR}/link-to-executable.txt")
     cleanup()
     message(FATAL_ERROR "checks on \"${CMAKE_CURRENT_BINARY_DIR}/link-to-executable.txt\" failed")
@@ -161,11 +168,13 @@ if(UNIX)
     message(FATAL_ERROR "checks on \"${CMAKE_CURRENT_BINARY_DIR}/link-to-readable-dir\" failed")
   endif()
 
-  if(NOT IS_WRITABLE "${CMAKE_CURRENT_BINARY_DIR}/link-to-writable-dir"
-     OR IS_READABLE "${CMAKE_CURRENT_BINARY_DIR}/link-to-writable-dir"
-     OR IS_EXECUTABLE "${CMAKE_CURRENT_BINARY_DIR}/link-to-writable-dir")
-    cleanup()
-    message(FATAL_ERROR "checks on \"${CMAKE_CURRENT_BINARY_DIR}/link-to-writable-dir\" failed")
+  if(NOT NO_WRITABLE_DIR)
+    if(NOT IS_WRITABLE "${CMAKE_CURRENT_BINARY_DIR}/link-to-writable-dir"
+       OR IS_READABLE "${CMAKE_CURRENT_BINARY_DIR}/link-to-writable-dir"
+       OR IS_EXECUTABLE "${CMAKE_CURRENT_BINARY_DIR}/link-to-writable-dir")
+      cleanup()
+      message(FATAL_ERROR "checks on \"${CMAKE_CURRENT_BINARY_DIR}/link-to-writable-dir\" failed")
+    endif()
   endif()
 
   if(NOT IS_EXECUTABLE "${CMAKE_CURRENT_BINARY_DIR}/link-to-executable-dir"

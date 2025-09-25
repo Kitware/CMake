@@ -1,5 +1,5 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-# file Copyright.txt or https://cmake.org/licensing for details.
+# file LICENSE.rst or https://cmake.org/licensing for details.
 
 # Produce an image with custom-built dependencies for portable CMake binaries.
 # Build using the directory containing this file as its own build context.

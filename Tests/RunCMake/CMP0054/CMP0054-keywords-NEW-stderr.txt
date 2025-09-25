@@ -1,4 +1,4 @@
-CMake Error at CMP0054-keywords-NEW.cmake:23 \(if\):
+CMake Error at CMP0054-keywords-NEW.cmake:21 \(if\):
   if given arguments:
 
     "NOT" "1"

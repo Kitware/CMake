@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmQtAutoGenGlobalInitializer.h"
 
 #include <set>
@@ -44,7 +44,7 @@ cmQtAutoGenGlobalInitializer::Keywords::Keywords()
 cmQtAutoGenGlobalInitializer::cmQtAutoGenGlobalInitializer(
   std::vector<std::unique_ptr<cmLocalGenerator>> const& localGenerators)
 {
-  for (const auto& localGen : localGenerators) {
+  for (auto const& localGen : localGenerators) {
     // Detect global autogen and autorcc target names
     bool globalAutoGenTarget = false;
     bool globalAutoRccTarget = false;
@@ -76,7 +76,7 @@ cmQtAutoGenGlobalInitializer::cmQtAutoGenGlobalInitializer(
     }
 
     // Find targets that require AUTOMOC/UIC/RCC processing
-    for (const auto& target : localGen->GetGeneratorTargets()) {
+    for (auto const& target : localGen->GetGeneratorTargets()) {
       // Process only certain target types
       switch (target->GetType()) {
         case cmStateEnums::EXECUTABLE:
@@ -143,8 +143,8 @@ cmQtAutoGenGlobalInitializer::cmQtAutoGenGlobalInitializer(
             "AUTOGEN: No valid Qt version found for target ",
             target->GetName(), ".  ",
             cmQtAutoGen::Tools(mocDisabled, uicDisabled, rccDisabled),
-            " disabled.  Consider adding:\n", "  find_package(Qt", version,
-            " COMPONENTS ", component, ")\n", "to your CMakeLists.txt file.");
+            " disabled.  Consider adding:\n  find_package(Qt", version,
+            " COMPONENTS ", component, ")\nto your CMakeLists.txt file.");
           target->Makefile->IssueMessage(MessageType::AUTHOR_WARNING, msg);
         }
         if (mocIsValid || uicIsValid || rccIsValid) {
@@ -249,7 +249,7 @@ cmQtAutoGenGlobalInitializer::GetCompilerFeatures(
         command.emplace_back(exe);
         command.emplace_back("-h");
         int retVal = 0;
-        const bool runResult = cmSystemTools::RunSingleCommand(
+        bool const runResult = cmSystemTools::RunSingleCommand(
           command, &stdOut, &stdErr, &retVal, nullptr,
           cmSystemTools::OUTPUT_NONE, cmDuration::zero(),
           cmProcessOutput::Auto);
@@ -300,7 +300,7 @@ cmQtAutoGenGlobalInitializer::GetCompilerFeatures(
     command.emplace_back(executable.Default);
     command.emplace_back("-h");
     int retVal = 0;
-    const bool runResult = cmSystemTools::RunSingleCommand(
+    bool const runResult = cmSystemTools::RunSingleCommand(
       command, &stdOut, &stdErr, &retVal, nullptr, cmSystemTools::OUTPUT_NONE,
       cmDuration::zero(), cmProcessOutput::Auto);
     if (!runResult) {

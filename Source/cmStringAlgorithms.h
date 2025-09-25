@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
@@ -24,7 +24,7 @@ using cmStringRange = cmRange<std::vector<std::string>::const_iterator>;
 
 /** Returns length of a literal string.  */
 template <size_t N>
-constexpr size_t cmStrLen(const char (&/*str*/)[N])
+constexpr size_t cmStrLen(char const (&)[N])
 {
   return N - 1;
 }
@@ -42,6 +42,13 @@ struct cmStrCmp
 private:
   std::string const Test_;
 };
+
+/**
+ * Test if two strings are identical, ignoring case.
+ *
+ * Note that this is not guaranteed to work correctly on non-ASCII strings.
+ */
+bool cmStrCaseEq(cm::string_view a, cm::string_view b);
 
 /** Returns true if the character @a ch is a whitespace character.  **/
 inline bool cmIsSpace(char ch)
@@ -91,12 +98,12 @@ std::string cmJoinStrings(Range const& rng, cm::string_view separator,
   }
 
   std::string result;
-  result.reserve(
-    std::accumulate(std::begin(rng), std::end(rng),
-                    initial.size() + (rng.size() - 1) * separator.size(),
-                    [](std::size_t sum, const std::string& item) {
-                      return sum + item.size();
-                    }));
+  result.reserve(std::accumulate(
+    std::begin(rng), std::end(rng),
+    initial.size() + (rng.size() - 1) * separator.size(),
+    [](std::size_t sum, typename Range::value_type const& item) {
+      return sum + item.size();
+    }));
   result.append(std::begin(initial), std::end(initial));
 
   auto begin = std::begin(rng);
@@ -122,8 +129,81 @@ std::string cmJoin(std::vector<std::string> const& rng,
 std::string cmJoin(cmStringRange const& rng, cm::string_view separator,
                    cm::string_view initial = {});
 
-/** Extract tokens that are separated by any of the characters in @a sep.  */
-std::vector<std::string> cmTokenize(cm::string_view str, cm::string_view sep);
+enum class cmTokenizerMode
+{
+  /// A backward-compatible behavior when in the case of no
+  /// tokens have found in an input text it'll return one empty
+  /// token in the result container (vector).
+  Legacy,
+  /// The new behavior is to return an empty vector.
+  New
+};
+
+/**
+ * \brief A generic version of a tokenizer.
+ *
+ * Extract tokens from the input string separated by any
+ * of the characters in `sep` and assign them to the
+ * given output iterator.
+ *
+ * The `mode` parameter defines the behavior in the case when
+ * no tokens have found in the input text.
+ *
+ */
+template <typename StringT, typename OutIt, typename Sep = char>
+void cmTokenize(OutIt outIt, cm::string_view str, Sep sep,
+                cmTokenizerMode mode)
+{
+  auto hasTokens = false;
+  // clang-format off
+  for (auto start = str.find_first_not_of(sep)
+    , end = str.find_first_of(sep, start)
+    ; start != cm::string_view::npos
+    ; start = str.find_first_not_of(sep, end)
+    , end = str.find_first_of(sep, start)
+    , hasTokens = true
+    ) {
+    *outIt++ = StringT{ str.substr(start, end - start) };
+  }
+  // clang-format on
+  if (!hasTokens && mode == cmTokenizerMode::Legacy) {
+    *outIt = {};
+  }
+}
+
+/**
+ * \brief Extract tokens that are separated by any of the
+ * characters in `sep`.
+ *
+ * Backward compatible signature.
+ *
+ * \return A vector of strings.
+ */
+template <typename Sep = char>
+std::vector<std::string> cmTokenize(
+  cm::string_view str, Sep sep, cmTokenizerMode mode = cmTokenizerMode::Legacy)
+{
+  using StringType = std::string;
+  std::vector<StringType> tokens;
+  cmTokenize<StringType>(std::back_inserter(tokens), str, sep, mode);
+  return tokens;
+}
+
+/**
+ * \brief Extract tokens that are separated by any of the
+ * characters in `sep`.
+ *
+ * \return A vector of string views.
+ */
+template <typename Sep = char>
+std::vector<cm::string_view> cmTokenizedView(
+  cm::string_view str, Sep sep, cmTokenizerMode mode = cmTokenizerMode::Legacy)
+{
+  using StringType = cm::string_view;
+  std::vector<StringType> tokens;
+  cmTokenize<StringType>(std::back_inserter(tokens), str, sep, mode);
+  return tokens;
+}
 
 /** Concatenate string pieces into a single string.  */
 std::string cmCatViews(
@@ -145,7 +225,7 @@ public:
     : RValueString_(&str)
   {
   }
-  cmAlphaNum(const char* str)
+  cmAlphaNum(char const* str)
     : View_(str ? cm::string_view(str) : cm::string_view())
   {
   }
@@ -188,7 +268,7 @@ template <typename A, typename B, typename... AV>
 inline std::string cmStrCat(A&& a, B&& b, AV&&... args)
 {
   static auto const makePair =
-    [](const cmAlphaNum& arg) -> std::pair<cm::string_view, std::string*> {
+    [](cmAlphaNum const& arg) -> std::pair<cm::string_view, std::string*> {
     return { arg.View(), arg.RValueString() };
   };
 
@@ -247,7 +327,7 @@ inline bool cmHasPrefix(cm::string_view str, cmValue prefix)
 
 /** Returns true if string @a str starts with string @a prefix.  */
 template <size_t N>
-inline bool cmHasLiteralPrefix(cm::string_view str, const char (&prefix)[N])
+inline bool cmHasLiteralPrefix(cm::string_view str, char const (&prefix)[N])
 {
   return cmHasPrefix(str, cm::string_view(prefix, N - 1));
 }
@@ -278,7 +358,7 @@ inline bool cmHasSuffix(cm::string_view str, cmValue suffix)
 
 /** Returns true if string @a str ends with string @a suffix.  */
 template <size_t N>
-inline bool cmHasLiteralSuffix(cm::string_view str, const char (&suffix)[N])
+inline bool cmHasLiteralSuffix(cm::string_view str, char const (&suffix)[N])
 {
   return cmHasSuffix(str, cm::string_view(suffix, N - 1));
 }
@@ -300,20 +380,20 @@ inline void cmStripSuffixIfExists(std::string& str, cm::string_view suffix)
 }
 
 /** Converts a string to long. Expects that the whole string is an integer.  */
-bool cmStrToLong(const char* str, long* value);
+bool cmStrToLong(char const* str, long* value);
 bool cmStrToLong(std::string const& str, long* value);
 
 /** Converts a string to unsigned long. Expects that the whole string is an
  * integer */
-bool cmStrToULong(const char* str, unsigned long* value);
+bool cmStrToULong(char const* str, unsigned long* value);
 bool cmStrToULong(std::string const& str, unsigned long* value);
 
 /** Converts a string to long long. Expects that the whole string
  * is an integer */
-bool cmStrToLongLong(const char* str, long long* value);
+bool cmStrToLongLong(char const* str, long long* value);
 bool cmStrToLongLong(std::string const& str, long long* value);
 
 /** Converts a string to unsigned long long. Expects that the whole string
  * is an integer */
-bool cmStrToULongLong(const char* str, unsigned long long* value);
+bool cmStrToULongLong(char const* str, unsigned long long* value);
 bool cmStrToULongLong(std::string const& str, unsigned long long* value);

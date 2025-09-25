@@ -1,12 +1,9 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-# file Copyright.txt or https://cmake.org/licensing for details.
+# file LICENSE.rst or https://cmake.org/licensing for details.
 
 
 # This module is shared by multiple languages; use include blocker.
 include_guard()
-
-block(SCOPE_FOR POLICIES)
-cmake_policy(SET CMP0054 NEW)
 
 # WHOLE_ARCHIVE Feature for LINK_LIBRARY generator expression
 ## check linker capabilities
@@ -17,21 +14,23 @@ function(__cmake_set_whole_archive_feature __linker)
   endif()
 
   if(NOT __linker)
-    set(_CMAKE_${__lang}LINKER_PUSHPOP_STATE_SUPPORTED FALSE CACHE INTERNAL "linker supports push/pop state")
+    set(CMAKE_${__lang}LINKER_PUSHPOP_STATE_SUPPORTED FALSE)
   endif()
 
-  if(NOT DEFINED _CMAKE_${__lang}LINKER_PUSHPOP_STATE_SUPPORTED)
-    execute_process(COMMAND "${__linker}" --help
-                    OUTPUT_VARIABLE __linker_help
-                    ERROR_VARIABLE __linker_help)
-    if(__linker_help MATCHES "--push-state" AND __linker_help MATCHES "--pop-state")
-      set(_CMAKE_${__lang}LINKER_PUSHPOP_STATE_SUPPORTED TRUE CACHE INTERNAL "linker supports push/pop state")
+  if(NOT DEFINED CMAKE_${__lang}LINKER_PUSHPOP_STATE_SUPPORTED)
+    # launch linker to check if push_state/pop_state options are supported
+    execute_process(COMMAND "${__linker}" --push-state --pop-state
+                    OUTPUT_VARIABLE __linker_log
+                    ERROR_VARIABLE __linker_log)
+    if(__linker_log MATCHES "--push-state" OR __linker_log MATCHES "--pop-state")
+      set(CMAKE_${__lang}LINKER_PUSHPOP_STATE_SUPPORTED FALSE)
     else()
-      set(_CMAKE_${__lang}LINKER_PUSHPOP_STATE_SUPPORTED FALSE CACHE INTERNAL "linker supports push/pop state")
+      set(CMAKE_${__lang}LINKER_PUSHPOP_STATE_SUPPORTED TRUE)
     endif()
+    set(CMAKE_${__lang}LINKER_PUSHPOP_STATE_SUPPORTED ${CMAKE_${__lang}LINKER_PUSHPOP_STATE_SUPPORTED} PARENT_SCOPE)
   endif()
   ## WHOLE_ARCHIVE: Force loading all members of an archive
-  if(_CMAKE_${__lang}LINKER_PUSHPOP_STATE_SUPPORTED)
+  if(CMAKE_${__lang}LINKER_PUSHPOP_STATE_SUPPORTED)
     set(CMAKE_${__lang}LINK_LIBRARY_USING_WHOLE_ARCHIVE "LINKER:--push-state,--whole-archive"
                                                         "<LINK_ITEM>"
                                                         "LINKER:--pop-state" PARENT_SCOPE)
@@ -47,5 +46,3 @@ endfunction()
 
 ## Configure system linker
 __cmake_set_whole_archive_feature("${CMAKE_LINKER}")
-
-endblock()

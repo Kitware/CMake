@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 
 /* This code was originally taken from part of the Clang-Tidy LLVM project and
  * modified for use with CMake under the following original license: */
@@ -53,7 +53,7 @@ public:
                                utils::defaultFileExtensionDelimiters());
   }
   void storeOptions(ClangTidyOptions::OptionMap& Opts) override;
-  void registerPPCallbacks(const SourceManager& SM, Preprocessor* PP,
+  void registerPPCallbacks(SourceManager const& SM, Preprocessor* PP,
                            Preprocessor* ModuleExpanderPP) override;
 
   /// Returns ``true`` if the check should add pragma once to the file

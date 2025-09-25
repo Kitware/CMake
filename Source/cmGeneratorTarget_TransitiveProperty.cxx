@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 /* clang-format off */
 #include "cmGeneratorTarget.h"
 /* clang-format on */
@@ -31,7 +31,7 @@ using UseTo = cmGeneratorTarget::UseTo;
 using TransitiveProperty = cmGeneratorTarget::TransitiveProperty;
 }
 
-const std::map<cm::string_view, TransitiveProperty>
+std::map<cm::string_view, TransitiveProperty> const
   cmGeneratorTarget::BuiltinTransitiveProperties = {
     { "AUTOMOC_MACRO_NAMES"_s,
       { "INTERFACE_AUTOMOC_MACRO_NAMES"_s, UseTo::Compile } },
@@ -45,6 +45,7 @@ const std::map<cm::string_view, TransitiveProperty>
       { "INTERFACE_INCLUDE_DIRECTORIES"_s, UseTo::Compile } },
     { "LINK_DEPENDS"_s, { "INTERFACE_LINK_DEPENDS"_s, UseTo::Link } },
     { "LINK_DIRECTORIES"_s, { "INTERFACE_LINK_DIRECTORIES"_s, UseTo::Link } },
+    { "LINK_LIBRARIES"_s, { "INTERFACE_LINK_LIBRARIES"_s, UseTo::Link } },
     { "LINK_OPTIONS"_s, { "INTERFACE_LINK_OPTIONS"_s, UseTo::Link } },
     { "PRECOMPILE_HEADERS"_s,
       { "INTERFACE_PRECOMPILE_HEADERS"_s, UseTo::Compile } },
@@ -188,7 +189,7 @@ cmGeneratorTarget::IsTransitiveProperty(
   cmGeneratorExpressionDAGChecker const* dagChecker) const
 {
   cm::optional<TransitiveProperty> result;
-  static const cm::string_view kINTERFACE_ = "INTERFACE_"_s;
+  static cm::string_view const kINTERFACE_ = "INTERFACE_"_s;
   PropertyFor const propertyFor = cmHasPrefix(prop, kINTERFACE_)
     ? PropertyFor::Interface
     : PropertyFor::Build;
@@ -196,6 +197,13 @@ cmGeneratorTarget::IsTransitiveProperty(
     prop = prop.substr(kINTERFACE_.length());
   }
   auto i = BuiltinTransitiveProperties.find(prop);
+  if (i != BuiltinTransitiveProperties.end() &&
+      // Look up CMP0189 in the context where evaluation occurs,
+      // not where the target was created.
+      lg->GetPolicyStatus(cmPolicies::CMP0189) != cmPolicies::NEW &&
+      prop == "LINK_LIBRARIES"_s) {
+    i = BuiltinTransitiveProperties.end();
+  }
   if (i != BuiltinTransitiveProperties.end()) {
     result = i->second;
     if (result->Usage != cmGeneratorTarget::UseTo::Compile) {
@@ -206,13 +214,6 @@ cmGeneratorTarget::IsTransitiveProperty(
            prop == "LINK_OPTIONS"_s)) {
         result->Usage = cmGeneratorTarget::UseTo::Compile;
       }
-    }
-  } else if (cmHasLiteralPrefix(prop, "COMPILE_DEFINITIONS_")) {
-    cmPolicies::PolicyStatus cmp0043 =
-      lg->GetPolicyStatus(cmPolicies::CMP0043);
-    if (cmp0043 == cmPolicies::WARN || cmp0043 == cmPolicies::OLD) {
-      result = TransitiveProperty{ "INTERFACE_COMPILE_DEFINITIONS"_s,
-                                   UseTo::Compile };
     }
   } else if (!dagChecker || !dagChecker->IsComputingLinkLibraries()) {
     // Honor TRANSITIVE_COMPILE_PROPERTIES and TRANSITIVE_LINK_PROPERTIES
@@ -247,7 +248,7 @@ void cmGeneratorTarget::CustomTransitiveProperties::Add(cmValue props,
     cmList propsList(*props);
     for (std::string p : propsList) {
       std::string ip;
-      static const cm::string_view kINTERFACE_ = "INTERFACE_"_s;
+      static cm::string_view const kINTERFACE_ = "INTERFACE_"_s;
       if (cmHasPrefix(p, kINTERFACE_)) {
         ip = std::move(p);
         p = ip.substr(kINTERFACE_.length());

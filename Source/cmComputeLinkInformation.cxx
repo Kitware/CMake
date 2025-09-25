@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmComputeLinkInformation.h"
 
 #include <algorithm>
@@ -24,7 +24,6 @@
 #include "cmMessageType.h"
 #include "cmOrderDirectories.h"
 #include "cmPlaceholderExpander.h"
-#include "cmPolicies.h"
 #include "cmSourceFile.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
@@ -251,7 +250,7 @@ because this need be done only for shared libraries without soname-s.
 */
 
 cmComputeLinkInformation::cmComputeLinkInformation(
-  const cmGeneratorTarget* target, const std::string& config)
+  cmGeneratorTarget const* target, std::string const& config)
   // Store context information.
   : Target(target)
   , Makefile(target->Target->GetMakefile())
@@ -325,7 +324,7 @@ cmComputeLinkInformation::cmComputeLinkInformation(
   // Get options needed to specify RPATHs.
   this->RuntimeUseChrpath = false;
   if (this->Target->GetType() != cmStateEnums::STATIC_LIBRARY) {
-    const char* tType = ((this->Target->GetType() == cmStateEnums::EXECUTABLE)
+    char const* tType = ((this->Target->GetType() == cmStateEnums::EXECUTABLE)
                            ? "EXECUTABLE"
                            : "SHARED_LIBRARY");
     std::string rtVar =
@@ -421,34 +420,12 @@ cmComputeLinkInformation::cmComputeLinkInformation(
     this->OrderDependentRPath->SetImplicitDirectories(this->ImplicitLinkDirs);
     this->OrderDependentRPath->AddLanguageDirectories(this->RuntimeLinkDirs);
   }
-
-  // Decide whether to enable compatible library search path mode.
-  // There exists code that effectively does
-  //
-  //    /path/to/libA.so -lB
-  //
-  // where -lB is meant to link to /path/to/libB.so.  This is broken
-  // because it specified -lB without specifying a link directory (-L)
-  // in which to search for B.  This worked in CMake 2.4 and below
-  // because -L/path/to would be added by the -L/-l split for A.  In
-  // order to support such projects we need to add the directories
-  // containing libraries linked with a full path to the -L path.
-  this->OldLinkDirMode =
-    this->Target->GetPolicyStatusCMP0003() != cmPolicies::NEW;
-  if (this->OldLinkDirMode) {
-    // Construct a mask to not bother with this behavior for link
-    // directories already specified by the user.
-    this->OldLinkDirMask.insert(directories.begin(), directories.end());
-  }
-
-  this->CMP0060Warn = this->Makefile->PolicyOptionalWarningEnabled(
-    "CMAKE_POLICY_WARNING_CMP0060");
 }
 
 cmComputeLinkInformation::~cmComputeLinkInformation() = default;
 
 namespace {
-const std::string& DEFAULT = cmComputeLinkDepends::LinkEntry::DEFAULT;
+std::string const& DEFAULT = cmComputeLinkDepends::LinkEntry::DEFAULT;
 }
 
 void cmComputeLinkInformation::AppendValues(
@@ -480,14 +457,14 @@ cmComputeLinkInformation::GetDirectoriesWithBacktraces()
 {
   std::vector<BT<std::string>> directoriesWithBacktraces;
 
-  std::vector<BT<std::string>> targetLinkDirectores =
+  std::vector<BT<std::string>> targetLinkDirectories =
     this->Target->GetLinkDirectories(this->Config, this->LinkLanguage);
 
-  const std::vector<std::string>& orderedDirectories = this->GetDirectories();
-  for (const std::string& dir : orderedDirectories) {
-    auto result =
-      std::find(targetLinkDirectores.begin(), targetLinkDirectores.end(), dir);
-    if (result != targetLinkDirectores.end()) {
+  std::vector<std::string> const& orderedDirectories = this->GetDirectories();
+  for (std::string const& dir : orderedDirectories) {
+    auto result = std::find(targetLinkDirectories.begin(),
+                            targetLinkDirectories.end(), dir);
+    if (result != targetLinkDirectories.end()) {
       directoriesWithBacktraces.emplace_back(std::move(*result));
     } else {
       directoriesWithBacktraces.emplace_back(dir);
@@ -533,13 +510,13 @@ cmComputeLinkInformation::GetXcFrameworkHeaderPaths() const
   return this->XcFrameworkHeaderPaths;
 }
 
-const std::set<const cmGeneratorTarget*>&
+std::set<cmGeneratorTarget const*> const&
 cmComputeLinkInformation::GetSharedLibrariesLinked() const
 {
   return this->SharedLibrariesLinked;
 }
 
-const std::vector<const cmGeneratorTarget*>&
+std::vector<cmGeneratorTarget const*> const&
 cmComputeLinkInformation::GetExternalObjectTargets() const
 {
   return this->ExternalObjectTargets;
@@ -587,14 +564,13 @@ bool cmComputeLinkInformation::Compute()
   // Compute the ordered link line items.
   cmComputeLinkDepends cld(this->Target, this->Config, this->LinkLanguage,
                            strategy);
-  cld.SetOldLinkDirMode(this->OldLinkDirMode);
   cmComputeLinkDepends::EntryVector const& linkEntries = cld.Compute();
   FeatureDescriptor const* currentFeature = nullptr;
 
   // Add the link line items.
   for (cmComputeLinkDepends::LinkEntry const& linkEntry : linkEntries) {
     if (linkEntry.Kind == cmComputeLinkDepends::LinkEntry::Group) {
-      const auto& groupFeature = this->GetGroupFeature(linkEntry.Feature);
+      auto const& groupFeature = this->GetGroupFeature(linkEntry.Feature);
       if (groupFeature.Supported) {
         if (linkEntry.Item.Value == "</LINK_GROUP>" && currentFeature) {
           // emit feature suffix, if any
@@ -667,45 +643,8 @@ bool cmComputeLinkInformation::Compute()
     this->SetCurrentLinkType(this->StartLinkType);
   }
 
-  // Finish listing compatibility paths.
-  if (this->OldLinkDirMode) {
-    // For CMake 2.4 bug-compatibility we need to consider the output
-    // directories of targets linked in another configuration as link
-    // directories.
-    std::set<cmGeneratorTarget const*> const& wrongItems =
-      cld.GetOldWrongConfigItems();
-    for (cmGeneratorTarget const* tgt : wrongItems) {
-      cmStateEnums::ArtifactType artifact = tgt->HasImportLibrary(this->Config)
-        ? cmStateEnums::ImportLibraryArtifact
-        : cmStateEnums::RuntimeBinaryArtifact;
-      this->OldLinkDirItems.push_back(
-        tgt->GetFullPath(this->Config, artifact, true));
-    }
-  }
-
-  // Finish setting up linker search directories.
-  if (!this->FinishLinkerSearchDirectories()) {
-    return false;
-  }
-
   // Add implicit language runtime libraries and directories.
   this->AddImplicitLinkInfo();
-
-  if (!this->CMP0060WarnItems.empty()) {
-    std::ostringstream w;
-    /* clang-format off */
-    w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0060) << "\n"
-      "Some library files are in directories implicitly searched by "
-      "the linker when invoked for " << this->LinkLanguage << ":\n"
-      " " << cmJoin(this->CMP0060WarnItems, "\n ") << "\n"
-      "For compatibility with older versions of CMake, the generated "
-      "link line will ask the linker to search for these by library "
-      "name."
-      ;
-    /* clang-format on */
-    this->CMakeInstance->IssueMessage(MessageType::AUTHOR_WARNING, w.str(),
-                                      this->Target->GetBacktrace());
-  }
 
   // Record targets referenced by $<TARGET_OBJECTS:...> sources.
   this->AddExternalObjectTargets();
@@ -714,8 +653,8 @@ bool cmComputeLinkInformation::Compute()
 }
 
 namespace {
-void FinalizeFeatureFormat(std::string& format, const std::string& activeTag,
-                           const std::string& otherTag)
+void FinalizeFeatureFormat(std::string& format, std::string const& activeTag,
+                           std::string const& otherTag)
 {
   auto pos = format.find(otherTag);
   if (pos != std::string::npos) {
@@ -731,7 +670,7 @@ void FinalizeFeatureFormat(std::string& format, const std::string& activeTag,
   }
 }
 
-bool IsValidFeatureFormat(const std::string& format)
+bool IsValidFeatureFormat(std::string const& format)
 {
   return format.find("<LIBRARY>") != std::string::npos ||
     format.find("<LIB_ITEM>") != std::string::npos ||
@@ -741,9 +680,9 @@ bool IsValidFeatureFormat(const std::string& format)
 class FeaturePlaceHolderExpander : public cmPlaceholderExpander
 {
 public:
-  FeaturePlaceHolderExpander(const std::string* library,
-                             const std::string* libItem = nullptr,
-                             const std::string* linkItem = nullptr)
+  FeaturePlaceHolderExpander(std::string const* library,
+                             std::string const* libItem = nullptr,
+                             std::string const* linkItem = nullptr)
     : Library(library)
     , LibItem(libItem)
     , LinkItem(linkItem)
@@ -766,9 +705,9 @@ private:
     return variable;
   }
 
-  const std::string* Library = nullptr;
-  const std::string* LibItem = nullptr;
-  const std::string* LinkItem = nullptr;
+  std::string const* Library = nullptr;
+  std::string const* LibItem = nullptr;
+  std::string const* LinkItem = nullptr;
 };
 }
 
@@ -1173,7 +1112,7 @@ void cmComputeLinkInformation::AddItem(LinkEntry const& entry)
   BT<std::string> const& item = entry.Item;
 
   // Compute the proper name to use to link this library.
-  const std::string& config = this->Config;
+  std::string const& config = this->Config;
   bool impexe = (tgt && tgt->IsExecutableWithExports());
   if (impexe && !tgt->HasImportLibrary(config) && !this->LoaderFlag) {
     // Skip linking to executables on platforms with no import
@@ -1301,7 +1240,7 @@ void cmComputeLinkInformation::AddItem(LinkEntry const& entry)
       }
     } else if (entry.Kind != cmComputeLinkDepends::LinkEntry::Object) {
       // This is a library or option specified by the user.
-      this->AddUserItem(entry, true);
+      this->AddUserItem(entry);
     }
   }
 }
@@ -1309,7 +1248,7 @@ void cmComputeLinkInformation::AddItem(LinkEntry const& entry)
 void cmComputeLinkInformation::AddSharedDepItem(LinkEntry const& entry)
 {
   BT<std::string> const& item = entry.Item;
-  const cmGeneratorTarget* tgt = entry.Target;
+  cmGeneratorTarget const* tgt = entry.Target;
 
   // Record dependencies on DLLs.
   if (tgt && tgt->GetType() == cmStateEnums::SHARED_LIBRARY &&
@@ -1399,7 +1338,7 @@ void cmComputeLinkInformation::AddSharedDepItem(LinkEntry const& entry)
   if (order) {
     if (tgt) {
       std::string soName = tgt->GetSOName(this->Config);
-      const char* soname = soName.empty() ? nullptr : soName.c_str();
+      char const* soname = soName.empty() ? nullptr : soName.c_str();
       order->AddRuntimeLibrary(lib, soname);
     } else {
       order->AddRuntimeLibrary(lib);
@@ -1428,7 +1367,7 @@ void cmComputeLinkInformation::ComputeLinkTypeInfo()
   // Lookup link type selection flags.
   cmValue static_link_type_flag = nullptr;
   cmValue shared_link_type_flag = nullptr;
-  const char* target_type_str = nullptr;
+  char const* target_type_str = nullptr;
   switch (this->Target->GetType()) {
     case cmStateEnums::EXECUTABLE:
       target_type_str = "EXE";
@@ -1581,7 +1520,7 @@ std::string cmComputeLinkInformation::CreateExtensionRegex(
 {
   // Build a list of extension choices.
   std::string libext = "(";
-  const char* sep = "";
+  char const* sep = "";
   for (std::string const& i : exts) {
     // Separate this choice from the previous one.
     libext += sep;
@@ -1674,15 +1613,7 @@ void cmComputeLinkInformation::AddTargetItem(LinkEntry const& entry)
     return;
   }
 
-  // For compatibility with CMake 2.4 include the item's directory in
-  // the linker search path.
-  if (this->OldLinkDirMode && !target->IsFrameworkOnApple() &&
-      !cm::contains(this->OldLinkDirMask,
-                    cmSystemTools::GetFilenamePath(item.Value))) {
-    this->OldLinkDirItems.push_back(item.Value);
-  }
-
-  const bool isImportedFrameworkFolderOnApple =
+  bool const isImportedFrameworkFolderOnApple =
     target->IsImportedFrameworkFolderOnApple(this->Config);
   if (target->IsFrameworkOnApple() || isImportedFrameworkFolderOnApple) {
     // Add the framework directory and the framework item itself
@@ -1760,19 +1691,6 @@ void cmComputeLinkInformation::AddFullItem(LinkEntry const& entry)
     return;
   }
 
-  // Full path libraries should specify a valid library file name.
-  // See documentation of CMP0008.
-  std::string generator = this->GlobalGenerator->GetName();
-  if (this->Target->GetPolicyStatusCMP0008() != cmPolicies::NEW &&
-      (generator.find("Visual Studio") != std::string::npos ||
-       generator.find("Xcode") != std::string::npos)) {
-    std::string file = cmSystemTools::GetFilenameName(item.Value);
-    if (!this->ExtractAnyLibraryName.find(file)) {
-      this->HandleBadFullItem(entry, file);
-      return;
-    }
-  }
-
   // This is called to handle a link item that is a full path.
   // If the target is not a static library make sure the link type is
   // shared.  This is because dynamic-mode linking can handle both
@@ -1788,14 +1706,6 @@ void cmComputeLinkInformation::AddFullItem(LinkEntry const& entry)
       // default type.
       this->SetCurrentLinkType(this->StartLinkType);
     }
-  }
-
-  // For compatibility with CMake 2.4 include the item's directory in
-  // the linker search path.
-  if (this->OldLinkDirMode &&
-      !cm::contains(this->OldLinkDirMask,
-                    cmSystemTools::GetFilenamePath(item.Value))) {
-    this->OldLinkDirItems.push_back(item.Value);
   }
 
   // Now add the full path to the library.
@@ -1835,45 +1745,10 @@ bool cmComputeLinkInformation::CheckImplicitDirItem(LinkEntry const& entry)
     return false;
   }
 
-  // Check the policy for whether we should use the approach below.
-  switch (this->Target->GetPolicyStatusCMP0060()) {
-    case cmPolicies::WARN:
-      if (this->CMP0060Warn) {
-        // Print the warning at most once for this item.
-        std::string const& wid =
-          cmStrCat("CMP0060-WARNING-GIVEN-", item.Value);
-        if (!this->CMakeInstance->GetPropertyAsBool(wid)) {
-          this->CMakeInstance->SetProperty(wid, "1");
-          this->CMP0060WarnItems.insert(item.Value);
-        }
-      }
-      CM_FALLTHROUGH;
-    case cmPolicies::OLD:
-      break;
-    case cmPolicies::REQUIRED_ALWAYS:
-    case cmPolicies::REQUIRED_IF_USED:
-    case cmPolicies::NEW:
-      return false;
-  }
-
-  // Many system linkers support multiple architectures by
-  // automatically selecting the implicit linker search path for the
-  // current architecture.  If the library appears in an implicit link
-  // directory then just report the file name without the directory
-  // portion.  This will allow the system linker to locate the proper
-  // library for the architecture at link time.
-  LinkEntry fileEntry{ entry };
-  fileEntry.Item = file;
-  this->AddUserItem(fileEntry, false);
-
-  // Make sure the link directory ordering will find the library.
-  this->OrderLinkerSearchPath->AddLinkLibrary(item.Value);
-
-  return true;
+  return false;
 }
 
-void cmComputeLinkInformation::AddUserItem(LinkEntry const& entry,
-                                           bool pathNotKnown)
+void cmComputeLinkInformation::AddUserItem(LinkEntry const& entry)
 {
   // This is called to handle a link item that does not match a CMake
   // target and is not a full path.  We check here if it looks like a
@@ -1883,19 +1758,11 @@ void cmComputeLinkInformation::AddUserItem(LinkEntry const& entry,
   //   foo       ==>  -lfoo
   //   libfoo.a  ==>  -Wl,-Bstatic -lfoo
 
+  cm::string_view const LINKER{ "LINKER:" };
   BT<std::string> const& item = entry.Item;
 
   if (item.Value[0] == '-' || item.Value[0] == '$' || item.Value[0] == '`') {
     // Pass flags through untouched.
-    // if this is a -l option then we might need to warn about
-    // CMP0003 so put it in OldUserFlagItems, if it is not a -l
-    // or -Wl,-l (-framework -pthread), then allow it without a
-    // CMP0003 as -L will not affect those other linker flags
-    if (cmHasLiteralPrefix(item.Value, "-l") ||
-        cmHasLiteralPrefix(item.Value, "-Wl,-l")) {
-      // This is a linker option provided by the user.
-      this->OldUserFlagItems.push_back(item.Value);
-    }
 
     // Restore the target link type since this item does not specify
     // one.
@@ -1903,6 +1770,16 @@ void cmComputeLinkInformation::AddUserItem(LinkEntry const& entry,
 
     // Use the item verbatim.
     this->Items.emplace_back(item, ItemIsPath::No);
+    return;
+  }
+
+  if (cmHasPrefix(item.Value, LINKER)) {
+    std::vector<BT<std::string>> linkerFlag{ 1, item };
+    this->Target->ResolveLinkerWrapper(linkerFlag, this->GetLinkLanguage(),
+                                       /* joinItems = */ true);
+    if (!linkerFlag.empty()) {
+      this->Items.emplace_back(linkerFlag.front(), ItemIsPath::No);
+    }
     return;
   }
 
@@ -1958,11 +1835,6 @@ void cmComputeLinkInformation::AddUserItem(LinkEntry const& entry,
     // Use just the library name so the linker will search.
     lib = this->ExtractAnyLibraryName.match(2);
   } else {
-    // This is a name specified by the user.
-    if (pathNotKnown) {
-      this->OldUserFlagItems.push_back(item.Value);
-    }
-
     // We must ask the linker to search for a library with this name.
     // Restore the target link type since this item does not specify
     // one.
@@ -2009,7 +1881,7 @@ void cmComputeLinkInformation::AddFrameworkItem(LinkEntry const& entry)
     return;
   }
 
-  const std::string& fw_path = fwDescriptor->Directory;
+  std::string const& fw_path = fwDescriptor->Directory;
   if (!fw_path.empty()) {
     // Add the directory portion to the framework search path.
     this->AddFrameworkPath(fw_path);
@@ -2148,174 +2020,10 @@ void cmComputeLinkInformation::AddSharedLibNoSOName(LinkEntry const& entry)
   // path instead of just the name.
   LinkEntry fileEntry{ entry };
   fileEntry.Item = cmSystemTools::GetFilenameName(entry.Item.Value);
-  this->AddUserItem(fileEntry, false);
+  this->AddUserItem(fileEntry);
 
   // Make sure the link directory ordering will find the library.
   this->OrderLinkerSearchPath->AddLinkLibrary(entry.Item.Value);
-}
-
-void cmComputeLinkInformation::HandleBadFullItem(LinkEntry const& entry,
-                                                 std::string const& file)
-{
-  std::string const& item = entry.Item.Value;
-  // Do not depend on things that do not exist.
-  auto i = std::find(this->Depends.begin(), this->Depends.end(), item);
-  if (i != this->Depends.end()) {
-    this->Depends.erase(i);
-  }
-
-  // Tell the linker to search for the item and provide the proper
-  // path for it.  Do not contribute to any CMP0003 warning (do not
-  // put in OldLinkDirItems or OldUserFlagItems).
-  LinkEntry fileEntry{ entry };
-  fileEntry.Item = file;
-  this->AddUserItem(fileEntry, false);
-  this->OrderLinkerSearchPath->AddLinkLibrary(item);
-
-  // Produce any needed message.
-  switch (this->Target->GetPolicyStatusCMP0008()) {
-    case cmPolicies::WARN: {
-      // Print the warning at most once for this item.
-      std::string wid = cmStrCat("CMP0008-WARNING-GIVEN-", item);
-      if (!this->CMakeInstance->GetState()->GetGlobalPropertyAsBool(wid)) {
-        this->CMakeInstance->GetState()->SetGlobalProperty(wid, "1");
-        std::ostringstream w;
-        /* clang-format off */
-        w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0008) << "\n"
-             "Target \"" << this->Target->GetName() << "\" links to item\n"
-             "  " << item << "\n"
-             "which is a full-path but not a valid library file name.";
-        /* clang-format on */
-        this->CMakeInstance->IssueMessage(MessageType::AUTHOR_WARNING, w.str(),
-                                          this->Target->GetBacktrace());
-      }
-    }
-      CM_FALLTHROUGH;
-    case cmPolicies::OLD: // NOLINT(bugprone-branch-clone)
-      // OLD behavior does not warn.
-      break;
-    case cmPolicies::NEW:
-      // NEW behavior will not get here.
-      break;
-    case cmPolicies::REQUIRED_IF_USED:
-    case cmPolicies::REQUIRED_ALWAYS: {
-      std::ostringstream e;
-      /* clang-format off */
-      e << cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0008) << "\n"
-             "Target \"" << this->Target->GetName() << "\" links to item\n"
-             "  " << item << "\n"
-             "which is a full-path but not a valid library file name.";
-      /* clang-format on */
-      this->CMakeInstance->IssueMessage(MessageType::FATAL_ERROR, e.str(),
-                                        this->Target->GetBacktrace());
-    } break;
-  }
-}
-
-bool cmComputeLinkInformation::FinishLinkerSearchDirectories()
-{
-  // Support broken projects if necessary.
-  if (this->OldLinkDirItems.empty() || this->OldUserFlagItems.empty() ||
-      !this->OldLinkDirMode) {
-    return true;
-  }
-
-  // Enforce policy constraints.
-  switch (this->Target->GetPolicyStatusCMP0003()) {
-    case cmPolicies::WARN:
-      if (!this->CMakeInstance->GetState()->GetGlobalPropertyAsBool(
-            "CMP0003-WARNING-GIVEN")) {
-        this->CMakeInstance->GetState()->SetGlobalProperty(
-          "CMP0003-WARNING-GIVEN", "1");
-        std::ostringstream w;
-        this->PrintLinkPolicyDiagnosis(w);
-        this->CMakeInstance->IssueMessage(MessageType::AUTHOR_WARNING, w.str(),
-                                          this->Target->GetBacktrace());
-      }
-      CM_FALLTHROUGH;
-    case cmPolicies::OLD:
-      // OLD behavior is to add the paths containing libraries with
-      // known full paths as link directories.
-      break;
-    case cmPolicies::NEW:
-      // Should never happen due to assignment of OldLinkDirMode
-      return true;
-    case cmPolicies::REQUIRED_IF_USED:
-    case cmPolicies::REQUIRED_ALWAYS: {
-      std::ostringstream e;
-      e << cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0003) << '\n';
-      this->PrintLinkPolicyDiagnosis(e);
-      this->CMakeInstance->IssueMessage(MessageType::FATAL_ERROR, e.str(),
-                                        this->Target->GetBacktrace());
-      return false;
-    }
-  }
-
-  // Add the link directories for full path items.
-  for (std::string const& i : this->OldLinkDirItems) {
-    this->OrderLinkerSearchPath->AddLinkLibrary(i);
-  }
-  return true;
-}
-
-void cmComputeLinkInformation::PrintLinkPolicyDiagnosis(std::ostream& os)
-{
-  // Tell the user what to do.
-  /* clang-format off */
-  os << "Policy CMP0003 should be set before this line.  "
-        "Add code such as\n"
-        "  if(COMMAND cmake_policy)\n"
-        "    cmake_policy(SET CMP0003 NEW)\n"
-        "  endif(COMMAND cmake_policy)\n"
-        "as early as possible but after the most recent call to "
-        "cmake_minimum_required or cmake_policy(VERSION).  ";
-  /* clang-format on */
-
-  // List the items that might need the old-style paths.
-  os << "This warning appears because target \"" << this->Target->GetName()
-     << "\" links to some libraries for which the linker must search:\n";
-  {
-    // Format the list of unknown items to be as short as possible while
-    // still fitting in the allowed width (a true solution would be the
-    // bin packing problem if we were allowed to change the order).
-    std::string::size_type max_size = 76;
-    std::string line;
-    const char* sep = "  ";
-    for (std::string const& i : this->OldUserFlagItems) {
-      // If the addition of another item will exceed the limit then
-      // output the current line and reset it.  Note that the separator
-      // is either " " or ", " which is always 2 characters.
-      if (!line.empty() && (line.size() + i.size() + 2) > max_size) {
-        os << line << '\n';
-        sep = "  ";
-        line.clear();
-      }
-      line += sep;
-      line += i;
-      // Convert to the other separator.
-      sep = ", ";
-    }
-    if (!line.empty()) {
-      os << line << '\n';
-    }
-  }
-
-  // List the paths old behavior is adding.
-  os << "and other libraries with known full path:\n";
-  std::set<std::string> emitted;
-  for (std::string const& i : this->OldLinkDirItems) {
-    if (emitted.insert(cmSystemTools::GetFilenamePath(i)).second) {
-      os << "  " << i << '\n';
-    }
-  }
-
-  // Explain.
-  os << "CMake is adding directories in the second list to the linker "
-        "search path in case they are needed to find libraries from the "
-        "first list (for backwards compatibility with CMake 2.4).  "
-        "Set policy CMP0003 to OLD or NEW to enable or disable this "
-        "behavior explicitly.  "
-        "Run \"cmake --help-policy CMP0003\" for more information.";
 }
 
 void cmComputeLinkInformation::LoadImplicitLinkInfo()
@@ -2398,7 +2106,7 @@ void cmComputeLinkInformation::AddLibraryRuntimeInfo(
   // Try to get the soname of the library.  Only files with this name
   // could possibly conflict.
   std::string soName = target->GetSOName(this->Config);
-  const char* soname = soName.empty() ? nullptr : soName.c_str();
+  char const* soname = soName.empty() ? nullptr : soName.c_str();
 
   // Include this library in the runtime path ordering.
   this->OrderRuntimeSearchPath->AddRuntimeLibrary(fullPath, soname);
@@ -2550,7 +2258,7 @@ void cmComputeLinkInformation::GetRPath(std::vector<std::string>& runtimeDirs,
               cmSystemTools::IsSubDirectory(d, topBinaryDir)) {
             d = cmSystemTools::RelativePath(targetOutputDir, d);
             if (!d.empty()) {
-              d = cmStrCat(originToken, "/", d);
+              d = cmStrCat(originToken, '/', d);
             } else {
               d = originToken;
             }

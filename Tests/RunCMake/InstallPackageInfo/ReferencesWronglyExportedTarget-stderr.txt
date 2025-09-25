@@ -1,0 +1,7 @@
+CMake Error in CMakeLists.txt:
+  Target "test" references target "foo", which does not use the standard
+  namespace separator.  This is not allowed.
+.*
+CMake Error in CMakeLists.txt:
+  Target "test" references target "bar_bar", which does not use the standard
+  namespace separator.  This is not allowed.

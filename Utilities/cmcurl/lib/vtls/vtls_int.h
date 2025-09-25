@@ -23,11 +23,15 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "curl_setup.h"
-#include "cfilters.h"
-#include "urldata.h"
+#include "../curl_setup.h"
+#include "../cfilters.h"
+#include "../urldata.h"
+#include "vtls.h"
 
 #ifdef USE_SSL
+
+struct Curl_ssl;
+struct ssl_connect_data;
 
 /* see https://www.iana.org/assignments/tls-extensiontype-values/ */
 #define ALPN_HTTP_1_1_LENGTH 8
@@ -45,7 +49,7 @@
 #define ALPN_PROTO_BUF_MAX   (ALPN_ENTRIES_MAX * (ALPN_NAME_MAX + 1))
 
 struct alpn_spec {
-  const char entries[ALPN_ENTRIES_MAX][ALPN_NAME_MAX];
+  char entries[ALPN_ENTRIES_MAX][ALPN_NAME_MAX];
   size_t count; /* number of entries */
 };
 
@@ -58,11 +62,17 @@ CURLcode Curl_alpn_to_proto_buf(struct alpn_proto_buf *buf,
                                 const struct alpn_spec *spec);
 CURLcode Curl_alpn_to_proto_str(struct alpn_proto_buf *buf,
                                 const struct alpn_spec *spec);
+void Curl_alpn_restrict_to(struct alpn_spec *spec, const char *proto);
+void Curl_alpn_copy(struct alpn_spec *dest, const struct alpn_spec *src);
 
 CURLcode Curl_alpn_set_negotiated(struct Curl_cfilter *cf,
                                   struct Curl_easy *data,
+                                  struct ssl_connect_data *connssl,
                                   const unsigned char *proto,
                                   size_t proto_len);
+
+bool Curl_alpn_contains_proto(const struct alpn_spec *spec,
+                              const char *proto);
 
 /* enum for the nonblocking SSL connection state machine */
 typedef enum {
@@ -74,26 +84,49 @@ typedef enum {
 
 typedef enum {
   ssl_connection_none,
+  ssl_connection_deferred,
   ssl_connection_negotiating,
   ssl_connection_complete
 } ssl_connection_state;
+
+typedef enum {
+  ssl_earlydata_none,
+  ssl_earlydata_await,
+  ssl_earlydata_sending,
+  ssl_earlydata_sent,
+  ssl_earlydata_accepted,
+  ssl_earlydata_rejected
+} ssl_earlydata_state;
 
 #define CURL_SSL_IO_NEED_NONE   (0)
 #define CURL_SSL_IO_NEED_RECV   (1<<0)
 #define CURL_SSL_IO_NEED_SEND   (1<<1)
 
+/* Max earlydata payload we want to send */
+#define CURL_SSL_EARLY_MAX       (64*1024)
+
 /* Information in each SSL cfilter context: cf->ctx */
 struct ssl_connect_data {
-  struct ssl_peer peer;
+  const struct Curl_ssl *ssl_impl;  /* TLS backend for this filter */
+  struct ssl_peer peer;             /* peer the filter talks to */
   const struct alpn_spec *alpn;     /* ALPN to use or NULL for none */
   void *backend;                    /* vtls backend specific props */
   struct cf_call_data call_data;    /* data handle used in current call */
   struct curltime handshake_done;   /* time when handshake finished */
+  struct {
+    char *alpn;                     /* ALPN value or NULL */
+  } negotiated;
+  struct bufq earlydata;            /* earlydata to be send to peer */
+  size_t earlydata_max;             /* max earlydata allowed by peer */
+  size_t earlydata_skip;            /* sending bytes to skip when earlydata
+                                     * is accepted by peer */
   ssl_connection_state state;
   ssl_connect_state connecting_state;
+  ssl_earlydata_state earlydata_state;
   int io_need;                      /* TLS signals special SEND/RECV needs */
   BIT(use_alpn);                    /* if ALPN shall be used in handshake */
   BIT(peer_closed);                 /* peer has closed connection */
+  BIT(prefs_checked);               /* SSL preferences have been checked */
 };
 
 
@@ -117,7 +150,6 @@ struct Curl_ssl {
   void (*cleanup)(void);
 
   size_t (*version)(char *buffer, size_t size);
-  int (*check_cxn)(struct Curl_cfilter *cf, struct Curl_easy *data);
   CURLcode (*shut_down)(struct Curl_cfilter *cf, struct Curl_easy *data,
                         bool send_shutdown, bool *done);
   bool (*data_pending)(struct Curl_cfilter *cf,
@@ -128,11 +160,8 @@ struct Curl_ssl {
                      size_t length);
   bool (*cert_status_request)(void);
 
-  CURLcode (*connect_blocking)(struct Curl_cfilter *cf,
-                               struct Curl_easy *data);
-  CURLcode (*connect_nonblocking)(struct Curl_cfilter *cf,
-                                  struct Curl_easy *data,
-                                  bool *done);
+  CURLcode (*do_connect)(struct Curl_cfilter *cf, struct Curl_easy *data,
+                         bool *done);
 
   /* During handshake/shutdown, adjust the pollset to include the socket
    * for POLLOUT or POLLIN as needed. Mandatory. */
@@ -149,10 +178,6 @@ struct Curl_ssl {
   bool (*false_start)(void);
   CURLcode (*sha256sum)(const unsigned char *input, size_t inputlen,
                     unsigned char *sha256sum, size_t sha256sumlen);
-
-  bool (*attach_data)(struct Curl_cfilter *cf, struct Curl_easy *data);
-  void (*detach_data)(struct Curl_cfilter *cf, struct Curl_easy *data);
-
   ssize_t (*recv_plain)(struct Curl_cfilter *cf, struct Curl_easy *data,
                         char *buf, size_t len, CURLcode *code);
   ssize_t (*send_plain)(struct Curl_cfilter *cf, struct Curl_easy *data,
@@ -165,65 +190,13 @@ struct Curl_ssl {
 
 extern const struct Curl_ssl *Curl_ssl;
 
-
-int Curl_none_init(void);
-void Curl_none_cleanup(void);
-CURLcode Curl_none_shutdown(struct Curl_cfilter *cf, struct Curl_easy *data,
-                            bool send_shutdown, bool *done);
-int Curl_none_check_cxn(struct Curl_cfilter *cf, struct Curl_easy *data);
-void Curl_none_close_all(struct Curl_easy *data);
-void Curl_none_session_free(void *ptr);
-bool Curl_none_data_pending(struct Curl_cfilter *cf,
-                            const struct Curl_easy *data);
-bool Curl_none_cert_status_request(void);
-CURLcode Curl_none_set_engine(struct Curl_easy *data, const char *engine);
-CURLcode Curl_none_set_engine_default(struct Curl_easy *data);
-struct curl_slist *Curl_none_engines_list(struct Curl_easy *data);
-bool Curl_none_false_start(void);
 void Curl_ssl_adjust_pollset(struct Curl_cfilter *cf, struct Curl_easy *data,
-                              struct easy_pollset *ps);
+                             struct easy_pollset *ps);
 
 /**
  * Get the SSL filter below the given one or NULL if there is none.
  */
 bool Curl_ssl_cf_is_proxy(struct Curl_cfilter *cf);
-
-/* extract a session ID
- * Sessionid mutex must be locked (see Curl_ssl_sessionid_lock).
- * Caller must make sure that the ownership of returned sessionid object
- * is properly taken (e.g. its refcount is incremented
- * under sessionid mutex).
- */
-bool Curl_ssl_getsessionid(struct Curl_cfilter *cf,
-                           struct Curl_easy *data,
-                           const struct ssl_peer *peer,
-                           void **ssl_sessionid,
-                           size_t *idsize); /* set 0 if unknown */
-
-/* Set a TLS session ID for `peer`. Replaces an existing session ID if
- * not already the very same.
- * Sessionid mutex must be locked (see Curl_ssl_sessionid_lock).
- * Call takes ownership of `ssl_sessionid`, using `sessionid_free_cb`
- * to deallocate it. Is called in all outcomes, either right away or
- * later when the session cache is cleaned up.
- * Caller must ensure that it has properly shared ownership of this sessionid
- * object with cache (e.g. incrementing refcount on success)
- */
-CURLcode Curl_ssl_set_sessionid(struct Curl_cfilter *cf,
-                                struct Curl_easy *data,
-                                const struct ssl_peer *peer,
-                                void *sessionid,
-                                size_t sessionid_size,
-                                Curl_ssl_sessionid_dtor *sessionid_free_cb);
-
-#include "openssl.h"        /* OpenSSL versions */
-#include "gtls.h"           /* GnuTLS versions */
-#include "wolfssl.h"        /* wolfSSL versions */
-#include "schannel.h"       /* Schannel SSPI version */
-#include "sectransp.h"      /* SecureTransport (Darwin) version */
-#include "mbedtls.h"        /* mbedTLS versions */
-#include "bearssl.h"        /* BearSSL versions */
-#include "rustls.h"         /* Rustls versions */
 
 #endif /* USE_SSL */
 

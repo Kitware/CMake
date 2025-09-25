@@ -119,7 +119,7 @@ bool cmVisualStudioGeneratorOptions::UsingDebugInfo() const
 cm::optional<bool> cmVisualStudioGeneratorOptions::UsingDebugRuntime() const
 {
   cm::optional<bool> result;
-  if (const char* rtl = this->GetFlag("RuntimeLibrary")) {
+  if (char const* rtl = this->GetFlag("RuntimeLibrary")) {
     result = strstr(rtl, "Debug") != nullptr;
   }
   return result;
@@ -169,7 +169,7 @@ void cmVisualStudioGeneratorOptions::FixManifestUACFlags()
     return;
   }
 
-  const std::string uacFlag = GetFlag(ENABLE_UAC);
+  std::string const uacFlag = GetFlag(ENABLE_UAC);
   std::vector<std::string> subOptions;
   cmsys::SystemTools::Split(uacFlag, subOptions, ' ');
   if (subOptions.empty()) {
@@ -229,7 +229,7 @@ void cmVisualStudioGeneratorOptions::FixManifestUACFlags()
   AddFlag(ENABLE_UAC, "true");
 }
 
-void cmVisualStudioGeneratorOptions::Parse(const std::string& flags)
+void cmVisualStudioGeneratorOptions::Parse(std::string const& flags)
 {
   // Parse the input string as a windows command line since the string
   // is intended for writing directly into the build files.
@@ -347,18 +347,18 @@ cmIDEOptions::FlagValue cmVisualStudioGeneratorOptions::TakeFlag(
 }
 
 void cmVisualStudioGeneratorOptions::SetConfiguration(
-  const std::string& config)
+  std::string const& config)
 {
   this->Configuration = config;
 }
 
-const std::string& cmVisualStudioGeneratorOptions::GetConfiguration() const
+std::string const& cmVisualStudioGeneratorOptions::GetConfiguration() const
 {
   return this->Configuration;
 }
 
 void cmVisualStudioGeneratorOptions::OutputPreprocessorDefinitions(
-  std::ostream& fout, int indent, const std::string& lang, std::string const& platform)
+  std::ostream& fout, int indent, std::string const& lang, std::string const& platform)
 {
   if (this->Defines.empty()) {
     return;
@@ -399,7 +399,7 @@ void cmVisualStudioGeneratorOptions::OutputPreprocessorDefinitions(
 }
 
 void cmVisualStudioGeneratorOptions::OutputAdditionalIncludeDirectories(
-  std::ostream& fout, int indent, const std::string& lang)
+  std::ostream& fout, int indent, std::string const& lang)
 {
   if (this->Includes.empty()) {
     return;
@@ -413,7 +413,7 @@ void cmVisualStudioGeneratorOptions::OutputAdditionalIncludeDirectories(
   }
 
   std::ostringstream oss;
-  const char* sep = "";
+  char const* sep = "";
   for (std::string include : this->Includes) {
     // first convert all of the slashes
     std::string::size_type pos = 0;
@@ -451,7 +451,7 @@ void cmVisualStudioGeneratorOptions::OutputFlagMap(std::ostream& fout,
 {
   for (auto const& m : this->FlagMap) {
     std::ostringstream oss;
-    const char* sep = "";
+    char const* sep = "";
     for (std::string i : m.second) {
       if (!this->LocalGenerator->IsVFProj()) {
         cmVS10EscapeForMSBuild(i);

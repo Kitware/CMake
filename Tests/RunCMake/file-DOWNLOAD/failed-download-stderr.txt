@@ -1,0 +1,8 @@
+CMake Error at failed-download.cmake:[0-9]+ \(file\):
+  file DOWNLOAD cannot compute hash on failed download
+
+    from url: "[^
+]*input.png_invalid"
+    status: \[37;"(Could not|Couldn't) read a file:// file"\]
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)

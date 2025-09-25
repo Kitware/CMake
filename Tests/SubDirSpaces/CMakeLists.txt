@@ -74,4 +74,3 @@ add_executable(TestWithAuxSourceDir ${SOURCES})
 if(CMAKE_PAREN)
   target_link_libraries(TestWithAuxSourceDir testOddPath)
 endif()
-

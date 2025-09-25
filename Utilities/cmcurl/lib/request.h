@@ -32,9 +32,6 @@
 
 /* forward declarations */
 struct UserDefined;
-#ifndef CURL_DISABLE_DOH
-struct doh_probes;
-#endif
 
 enum expect100 {
   EXP100_SEND_DATA,           /* enough waiting, just send the body now */
@@ -81,10 +78,11 @@ struct SingleRequest {
                                    first one */
   curl_off_t offset;            /* possible resume offset read from the
                                    Content-Range: header */
-  int httpversion;              /* Version in response (09, 10, 11, etc.) */
   int httpcode;                 /* error code from the 'HTTP/1.? XXX' or
                                    'RTSP/1.? XXX' line */
   int keepon;
+  unsigned char httpversion_sent; /* Version in request (09, 10, 11, etc.) */
+  unsigned char httpversion;    /* Version in response (09, 10, 11, etc.) */
   enum upgrade101 upgr101;      /* 101 upgrade state */
 
   /* Client Writer stack, handles transfer- and content-encodings, protocol
@@ -101,24 +99,6 @@ struct SingleRequest {
   char *newurl;     /* Set to the new URL to use when a redirect or a retry is
                        wanted */
 
-  /* Allocated protocol-specific data. Each protocol handler makes sure this
-     points to data it needs. */
-  union {
-    struct FILEPROTO *file;
-    struct FTP *ftp;
-    struct IMAP *imap;
-    struct ldapreqinfo *ldap;
-    struct MQTT *mqtt;
-    struct POP3 *pop3;
-    struct RTSP *rtsp;
-    struct smb_request *smb;
-    struct SMTP *smtp;
-    struct SSHPROTO *ssh;
-    struct TELNET *telnet;
-  } p;
-#ifndef CURL_DISABLE_DOH
-  struct doh_probes *doh; /* DoH specific data for this request */
-#endif
 #ifndef CURL_DISABLE_COOKIES
   unsigned char setcookies;
 #endif
@@ -151,9 +131,7 @@ struct SingleRequest {
                         negotiation. */
   BIT(sendbuf_init); /* sendbuf is initialized */
   BIT(shutdown);     /* request end will shutdown connection */
-#ifdef USE_HYPER
-  BIT(bodywritten);
-#endif
+  BIT(shutdown_err_ignore); /* errors in shutdown will not fail request */
 };
 
 /**
@@ -195,18 +173,17 @@ void Curl_req_free(struct SingleRequest *req, struct Curl_easy *data);
  */
 void Curl_req_hard_reset(struct SingleRequest *req, struct Curl_easy *data);
 
-#ifndef USE_HYPER
 /**
  * Send request headers. If not all could be sent
  * they will be buffered. Use `Curl_req_flush()` to make sure
  * bytes are really send.
  * @param data      the transfer making the request
  * @param buf       the complete header bytes, no body
+ * @param httpversion version used in request (09, 10, 11, etc.)
  * @return CURLE_OK (on blocking with *pnwritten == 0) or error.
  */
-CURLcode Curl_req_send(struct Curl_easy *data, struct dynbuf *buf);
-
-#endif /* !USE_HYPER */
+CURLcode Curl_req_send(struct Curl_easy *data, struct dynbuf *buf,
+                       unsigned char httpversion);
 
 /**
  * TRUE iff the request has sent all request headers and data.

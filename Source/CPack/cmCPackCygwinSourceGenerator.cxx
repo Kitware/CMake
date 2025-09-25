@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmCPackCygwinSourceGenerator.h"
 
 #include "cmsys/SystemTools.hxx"
@@ -48,7 +48,7 @@ int cmCPackCygwinSourceGenerator::PackageFiles()
   // Now create a tar file that contains the above .tar.bz2 file
   // and the CPACK_CYGWIN_PATCH_FILE and CPACK_TOPLEVEL_DIRECTORY
   // files
-  const std::string& compressOutFile = packageDirFileName;
+  std::string const& compressOutFile = packageDirFileName;
   // at this point compressOutFile is the full path to
   // _CPack_Package/.../package-2.5.0.tar.bz2
   // we want to create a tar _CPack_Package/.../package-2.5.0-1-src.tar.bz2
@@ -120,7 +120,7 @@ int cmCPackCygwinSourceGenerator::PackageFiles()
   files.clear();
   // a source release in cygwin should have the build script used
   // to build the package, the patch file that is different from the
-  // regular upstream version of the sources, and a bziped tar file
+  // regular upstream version of the sources, and a bzipped tar file
   // of the original sources
   files.push_back(buildScript);
   files.push_back(patchFile);
@@ -135,14 +135,14 @@ int cmCPackCygwinSourceGenerator::PackageFiles()
   return 1;
 }
 
-const char* cmCPackCygwinSourceGenerator::GetPackagingInstallPrefix()
+char const* cmCPackCygwinSourceGenerator::GetPackagingInstallPrefix()
 {
   this->InstallPrefix =
     cmStrCat('/', this->GetOption("CPACK_PACKAGE_FILE_NAME"));
   return this->InstallPrefix.c_str();
 }
 
-const char* cmCPackCygwinSourceGenerator::GetOutputExtension()
+char const* cmCPackCygwinSourceGenerator::GetOutputExtension()
 {
   this->OutputExtension = "-";
   cmValue patch = this->GetOption("CPACK_CYGWIN_PATCH_NUMBER");

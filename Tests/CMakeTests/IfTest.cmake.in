@@ -40,60 +40,6 @@ macro(test_vars _old)
 endmacro()
 
 #-----------------------------------------------------------------------------
-# Test the OLD behavior of CMP0012.
-cmake_policy(SET CMP0012 OLD)
-
-# False constants not recognized (still false).
-foreach(_false "" ${FALSE_NAMES})
-  if("${_false}")
-    message(FATAL_ERROR "OLD if(${_false}) is true!")
-  else()
-    message(STATUS "OLD if(${_false}) is false")
-  endif()
-
-  if(NOT "${_false}")
-    message(STATUS "OLD if(NOT ${_false}) is true")
-  else()
-    message(FATAL_ERROR "OLD if(NOT ${_false}) is false!")
-  endif()
-endforeach()
-
-# True constants not recognized.
-foreach(_false ${TRUE_NAMES})
-  if(${_false})
-    message(FATAL_ERROR "OLD if(${_false}) is true!")
-  else()
-    message(STATUS "OLD if(${_false}) is false")
-  endif()
-
-  if(NOT ${_false})
-    message(STATUS "OLD if(NOT ${_false}) is true")
-  else()
-    message(FATAL_ERROR "OLD if(NOT ${_false}) is false!")
-  endif()
-endforeach()
-
-# Numbers not recognized properly.
-foreach(_num 2 -2 2.0 -2.0 2x -2x)
-  if(${_num})
-    message(FATAL_ERROR "OLD if(${_num}) is true!")
-  else()
-    message(STATUS "OLD if(${_num}) is false")
-  endif()
-
-  if(NOT ${_num})
-    message(FATAL_ERROR "OLD if(NOT ${_num}) is true!")
-  else()
-    message(STATUS "OLD if(NOT ${_num}) is false")
-  endif()
-endforeach()
-
-test_vars("OLD ")
-
-#-----------------------------------------------------------------------------
-
-# Test the NEW behavior of CMP0012.
-cmake_policy(SET CMP0012 NEW)
 
 # Test false constants.
 foreach(_false "" 0 ${FALSE_NAMES})

@@ -1,3 +1,5 @@
+/* SPDX-License-Identifier: 0BSD */
+
 /*
  * Speed-optimized CRC32 using slicing-by-eight algorithm
  *
@@ -10,9 +12,6 @@
  *
  * Authors: Igor Pavlov (original version)
  *          Lasse Collin (AT&T syntax, PIC support, better portability)
- *
- * This file has been put into the public domain.
- * You can do whatever you want with this file.
  *
  * This code needs lzma_crc32_table, which can be created using the
  * following C code:
@@ -51,6 +50,14 @@ init_table(void)
  * extern uint32_t lzma_crc32(const uint8_t *buf, size_t size, uint32_t crc);
  */
 
+/* When Intel CET is enabled, include <cet.h> in assembly code to mark
+   Intel CET support.  */
+#ifdef __CET__
+# include <cet.h>
+#else
+# define _CET_ENDBR
+#endif
+
 /*
  * On some systems, the functions need to be prefixed. The prefix is
  * usually an underscore.
@@ -83,6 +90,7 @@ init_table(void)
 
 	ALIGN(4, 16)
 LZMA_CRC32:
+	_CET_ENDBR
 	/*
 	 * Register usage:
 	 * %eax crc
@@ -195,7 +203,7 @@ LZMA_CRC32:
 
 	/*
 	 * Read the next four bytes, for which the CRC is calculated
-	 * on the next interation of the loop.
+	 * on the next iteration of the loop.
 	 */
 	movl	12(%esi), %ecx
 
@@ -296,9 +304,9 @@ LZMA_CRC32:
 
 /*
  * This is needed to support non-executable stack. It's ugly to
- * use __linux__ here, but I don't know a way to detect when
+ * use __FreeBSD__ and __linux__ here, but I don't know a way to detect when
  * we are using GNU assembler.
  */
-#if defined(__ELF__) && defined(__linux__)
+#if defined(__ELF__) && (defined(__FreeBSD__) || defined(__linux__))
 	.section	.note.GNU-stack,"",@progbits
 #endif

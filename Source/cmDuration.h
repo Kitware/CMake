@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
 #include <chrono>
@@ -16,9 +16,9 @@ using cmDuration = std::chrono::duration<double, std::ratio<1>>;
  * the permissible valid values for T.
  */
 template <typename T>
-T cmDurationTo(const cmDuration& duration);
+T cmDurationTo(cmDuration const& duration);
 
 #ifndef CMDURATION_CPP
-extern template int cmDurationTo<int>(const cmDuration&);
-extern template unsigned int cmDurationTo<unsigned int>(const cmDuration&);
+extern template int cmDurationTo<int>(cmDuration const&);
+extern template unsigned int cmDurationTo<unsigned int>(cmDuration const&);
 #endif

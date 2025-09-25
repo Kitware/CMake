@@ -10,3 +10,5 @@ is typically ``.lib`` and, depending on the compiler, ``.dll.lib``, ``.dll.a``,
 library, it will look for ``[<prefix>]foo[.dll].lib`` and/or
 ``[<prefix>]foo[.dll].a``, depending on the compiler used and the ``<prefix>``
 specified in the :variable:`CMAKE_FIND_LIBRARY_PREFIXES`.
+
+.. include:: include/CMAKE_FIND_LIBRARY_VAR.rst

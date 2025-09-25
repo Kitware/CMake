@@ -33,17 +33,6 @@ else()
 endif()
 ]])
   run_ctest(BuildFailure)
-
-  if (RunCMake_GENERATOR MATCHES "Makefiles")
-    set(LANG NONE)
-    set(CASE_TEST_PREFIX_CODE [[
-cmake_policy(VERSION 3.2)
-]])
-    set(CASE_CMAKELISTS_SUFFIX_CODE [[
-add_custom_target(BuildFailure ALL COMMAND command-does-not-exist)
-]])
-    run_ctest(BuildFailure-CMP0061-OLD)
-  endif()
 endblock()
 
 function(run_BuildChangeId)

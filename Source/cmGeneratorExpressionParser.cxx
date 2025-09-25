@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmGeneratorExpressionParser.h"
 
 #include <cassert>
@@ -174,7 +174,7 @@ void cmGeneratorExpressionParser::ParseGeneratorExpression(
       extendText(result, colonToken);
 
       auto pit = parameters.begin();
-      const auto pend = parameters.end();
+      auto const pend = parameters.end();
       auto commaIt = commaTokens.begin();
       assert(parameters.size() > commaTokens.size());
       for (; pit != pend; ++pit, ++commaIt) {

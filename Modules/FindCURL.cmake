@@ -1,30 +1,66 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-# file Copyright.txt or https://cmake.org/licensing for details.
+# file LICENSE.rst or https://cmake.org/licensing for details.
 
 #[=======================================================================[.rst:
 FindCURL
 --------
 
-Find the native CURL headers and libraries.
+Finds the native curl installation (include directories and libraries) for
+transferring data with URLS.
+
+.. versionadded:: 3.17
+  If curl is built using its CMake-based build system, it will provide its own
+  CMake Package Configuration file (``CURLConfig.cmake``) for use with the
+  :command:`find_package` command in *config mode*.  By default, this module
+  searches for this file and, if found, returns the results without further
+  action.  If the upstream configuration file is not found, this module falls
+  back to *module mode* and searches standard locations.
+
+.. versionadded:: 3.13
+  Debug and Release library variants are found separately.
+
+Components
+^^^^^^^^^^
 
 .. versionadded:: 3.14
-  This module accept optional COMPONENTS to check supported features and
-  protocols:
 
-::
+This module supports optional components to detect the protocols and features
+available in the installed curl (these can vary based on the curl version)::
 
-  PROTOCOLS: ICT FILE FTP FTPS GOPHER HTTP HTTPS IMAP IMAPS LDAP LDAPS POP3
-             POP3S RTMP RTSP SCP SFTP SMB SMBS SMTP SMTPS TELNET TFTP
-  FEATURES:  SSL IPv6 UnixSockets libz AsynchDNS IDN GSS-API PSL SPNEGO
-             Kerberos NTLM NTLM_WB TLS-SRP HTTP2 HTTPS-proxy
+  Protocols: DICT FILE FTP FTPS GOPHER GOPHERS HTTP HTTPS IMAP IMAPS IPFS IPNS
+             LDAP LDAPS MQTT POP3 POP3S RTMP RTMPS RTSP SCP SFTP SMB SMBS SMTP
+             SMTPS TELNET TFTP WS WSS
+  Features:  alt-svc asyn-rr AsynchDNS brotli CAcert Debug ECH gsasl GSS-API
+             HSTS HTTP2 HTTP3 HTTPS-proxy HTTPSRR IDN IPv6 Kerberos Largefile
+             libz MultiSSL NTLM NTLM_WB PSL SPNEGO SSL SSLS-EXPORT SSPI
+             threadsafe TLS-SRP TrackMemory Unicode UnixSockets zstd
 
-IMPORTED Targets
+Components can be specified with the :command:`find_package` command as required
+for curl to be considered found:
+
+.. code-block:: cmake
+
+  find_package(CURL [COMPONENTS <protocols>... <features>...])
+
+Or to check for them optionally, allowing conditional handling in the code:
+
+.. code-block:: cmake
+
+  find_package(CURL [OPTIONAL_COMPONENTS <protocols>... <features>...])
+
+Refer to the curl documentation for more information on supported protocols and
+features.  Component names are case-sensitive and follow the upstream curl
+naming conventions.
+
+Imported Targets
 ^^^^^^^^^^^^^^^^
 
-.. versionadded:: 3.12
+This module provides the following :ref:`Imported Targets`:
 
-This module defines :prop_tgt:`IMPORTED` target ``CURL::libcurl``, if
-curl has been found.
+``CURL::libcurl``
+  .. versionadded:: 3.12
+
+  Target encapsulating the curl usage requirements, available if curl is found.
 
 Result Variables
 ^^^^^^^^^^^^^^^^
@@ -32,50 +68,101 @@ Result Variables
 This module defines the following variables:
 
 ``CURL_FOUND``
-  "True" if ``curl`` found.
+  Boolean indicating whether the (requested version of) curl and all required
+  components are found.
+
+``CURL_VERSION``
+  .. versionadded:: 4.0
+
+  The version of curl found.  This supersedes ``CURL_VERSION_STRING``.
+
+``CURL_<component>_FOUND``
+  .. versionadded:: 3.14
+
+  Boolean indicating whether the specified component (curl protocol or feature)
+  is found.
 
 ``CURL_INCLUDE_DIRS``
-  where to find ``curl``/``curl.h``, etc.
+  Include directories containing the ``curl/curl.h`` and other headers needed to
+  use curl.
+
+  .. note::
+
+    When curl is found via *config mode*, this variable is available only with
+    curl version 8.9 or newer.
 
 ``CURL_LIBRARIES``
-  List of libraries when using ``curl``.
+  List of libraries needed to link against to use curl.
 
-``CURL_VERSION_STRING``
-  The version of ``curl`` found.
+  .. note::
 
-.. versionadded:: 3.13
-  Debug and Release variants are found separately.
-
-CURL CMake
-^^^^^^^^^^
-
-.. versionadded:: 3.17
-
-If CURL was built using the CMake buildsystem then it provides its own
-``CURLConfig.cmake`` file for use with the :command:`find_package` command's
-config mode. This module looks for this file and, if found,
-returns its results with no further action.
-
-Set ``CURL_NO_CURL_CMAKE`` to ``ON`` to disable this search.
+    When curl is found via *module mode*, this is a list of library file paths.
+    In *config mode*, this variable is available only with curl version 8.9 or
+    newer and contains a list of imported targets.
 
 Hints
 ^^^^^
 
-``CURL_USE_STATIC_LIBS``
+This module accepts the following variables:
 
+``CURL_NO_CURL_CMAKE``
+  .. versionadded:: 3.17
+
+  Set this variable to ``TRUE`` to disable searching for curl via *config mode*.
+
+``CURL_USE_STATIC_LIBS``
   .. versionadded:: 3.28
 
-  Set to ``TRUE`` to use static libraries.
+  Set this variable to ``TRUE`` to use static libraries.  This is meaningful
+  only when curl is not found via *config mode*.
 
-  This is meaningful only when CURL is not found via its
-  CMake Package Configuration file.
+Deprecated Variables
+^^^^^^^^^^^^^^^^^^^^
 
+The following variables are provided for backward compatibility:
+
+``CURL_VERSION_STRING``
+  .. deprecated:: 4.0
+    Superseded by ``CURL_VERSION``.
+
+  The version of curl found.
+
+Examples
+^^^^^^^^
+
+Finding the curl library and specifying the required minimum version:
+
+.. code-block:: cmake
+
+  find_package(CURL 7.61.0)
+
+Finding the curl library and linking it to a project target:
+
+.. code-block:: cmake
+
+  find_package(CURL)
+  target_link_libraries(project_target PRIVATE CURL::libcurl)
+
+Using components to check if the found curl supports specific protocols or
+features:
+
+.. code-block:: cmake
+
+  find_package(CURL OPTIONAL_COMPONENTS HTTPS SSL)
+
+  if(CURL_HTTPS_FOUND)
+    # curl supports the HTTPS protocol
+  endif()
+
+  if(CURL_SSL_FOUND)
+    # curl has SSL feature enabled
+  endif()
 #]=======================================================================]
 
 cmake_policy(PUSH)
 cmake_policy(SET CMP0159 NEW) # file(STRINGS) with REGEX updates CMAKE_MATCH_<n>
 
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(FindPackageHandleStandardArgs)
 
 if(NOT CURL_NO_CURL_CMAKE)
   # do a find package call to specifically look for the CMake version
@@ -147,7 +234,8 @@ if(CURL_INCLUDE_DIR)
     if(EXISTS "${CURL_INCLUDE_DIR}/curl/${_curl_version_header}")
       file(STRINGS "${CURL_INCLUDE_DIR}/curl/${_curl_version_header}" curl_version_str REGEX "^#define[\t ]+LIBCURL_VERSION[\t ]+\".*\"")
 
-      string(REGEX REPLACE "^#define[\t ]+LIBCURL_VERSION[\t ]+\"([^\"]*)\".*" "\\1" CURL_VERSION_STRING "${curl_version_str}")
+      string(REGEX REPLACE "^#define[\t ]+LIBCURL_VERSION[\t ]+\"([^\"]*)\".*" "\\1" CURL_VERSION "${curl_version_str}")
+      set(CURL_VERSION_STRING "${CURL_VERSION}")
       unset(curl_version_str)
       break()
     endif()
@@ -155,11 +243,10 @@ if(CURL_INCLUDE_DIR)
 endif()
 
 if(CURL_FIND_COMPONENTS)
-  set(CURL_KNOWN_PROTOCOLS ICT FILE FTP FTPS GOPHER HTTP HTTPS IMAP IMAPS LDAP LDAPS POP3 POP3S RTMP RTSP SCP SFTP SMB SMBS SMTP SMTPS TELNET TFTP)
-  set(CURL_KNOWN_FEATURES  SSL IPv6 UnixSockets libz AsynchDNS IDN GSS-API PSL SPNEGO Kerberos NTLM NTLM_WB TLS-SRP HTTP2 HTTPS-proxy)
-  foreach(component IN LISTS CURL_KNOWN_PROTOCOLS CURL_KNOWN_FEATURES)
+  foreach(component IN LISTS CURL_FIND_COMPONENTS)
     set(CURL_${component}_FOUND FALSE)
   endforeach()
+
   if(NOT PC_CURL_FOUND)
     find_program(CURL_CONFIG_EXECUTABLE NAMES curl-config)
     if(CURL_CONFIG_EXECUTABLE)
@@ -178,23 +265,17 @@ if(CURL_FIND_COMPONENTS)
                       OUTPUT_STRIP_TRAILING_WHITESPACE)
       string(REPLACE "\n" ";" CURL_SUPPORTED_PROTOCOLS "${CURL_CONFIG_PROTOCOLS_STRING}")
     endif()
-
   endif()
+
   foreach(component IN LISTS CURL_FIND_COMPONENTS)
-    list(FIND CURL_KNOWN_PROTOCOLS ${component} _found)
+    list(FIND CURL_SUPPORTED_PROTOCOLS ${component} _found)
+
     if(NOT _found EQUAL -1)
-      list(FIND CURL_SUPPORTED_PROTOCOLS ${component} _found)
-      if(NOT _found EQUAL -1)
-        set(CURL_${component}_FOUND TRUE)
-      elseif(CURL_FIND_REQUIRED)
-        message(FATAL_ERROR "CURL: Required protocol ${component} is not found")
-      endif()
+      set(CURL_${component}_FOUND TRUE)
     else()
       list(FIND CURL_SUPPORTED_FEATURES ${component} _found)
       if(NOT _found EQUAL -1)
         set(CURL_${component}_FOUND TRUE)
-      elseif(CURL_FIND_REQUIRED)
-        message(FATAL_ERROR "CURL: Required feature ${component} is not found")
       endif()
     endif()
   endforeach()
@@ -202,7 +283,7 @@ endif()
 
 find_package_handle_standard_args(CURL
                                   REQUIRED_VARS CURL_LIBRARY CURL_INCLUDE_DIR
-                                  VERSION_VAR CURL_VERSION_STRING
+                                  VERSION_VAR CURL_VERSION
                                   HANDLE_COMPONENTS)
 
 if(CURL_FOUND)
@@ -239,9 +320,24 @@ if(CURL_FOUND)
         IMPORTED_LOCATION_DEBUG "${CURL_LIBRARY_DEBUG}")
     endif()
 
-    if(CURL_USE_STATIC_LIBS AND MSVC)
-       set_target_properties(CURL::libcurl PROPERTIES
-           INTERFACE_LINK_LIBRARIES "normaliz.lib;ws2_32.lib;wldap32.lib")
+    if(PC_CURL_FOUND)
+      if(PC_CURL_LINK_LIBRARIES)
+        set_property(TARGET CURL::libcurl PROPERTY
+                     INTERFACE_LINK_LIBRARIES "${PC_CURL_LINK_LIBRARIES}")
+      endif()
+      if(PC_CURL_LDFLAGS_OTHER)
+        set_property(TARGET CURL::libcurl PROPERTY
+                     INTERFACE_LINK_OPTIONS "${PC_CURL_LDFLAGS_OTHER}")
+      endif()
+      if(PC_CURL_CFLAGS_OTHER)
+        set_property(TARGET CURL::libcurl PROPERTY
+                     INTERFACE_COMPILE_OPTIONS "${PC_CURL_CFLAGS_OTHER}")
+      endif()
+    else()
+      if(CURL_USE_STATIC_LIBS AND MSVC)
+         set_target_properties(CURL::libcurl PROPERTIES
+             INTERFACE_LINK_LIBRARIES "normaliz.lib;ws2_32.lib;wldap32.lib")
+      endif()
     endif()
 
   endif()

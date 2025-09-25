@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmProcess.h"
 
 #include <csignal>
@@ -57,6 +57,7 @@ bool cmProcess::StartProcess(uv_loop_t& loop, std::vector<size_t>* affinity)
     return false;
   }
   this->StartTime = std::chrono::steady_clock::now();
+  this->SystemStartTime = std::chrono::system_clock::now();
   this->ProcessArgs.clear();
   // put the command as arg0
   this->ProcessArgs.push_back(this->Command.c_str());
@@ -106,6 +107,11 @@ bool cmProcess::StartProcess(uv_loop_t& loop, std::vector<size_t>* affinity)
   options.stdio_count = 3; // in, out and err
   options.exit_cb = &cmProcess::OnExitCB;
   options.stdio = stdio;
+#if UV_VERSION_MAJOR > 1 || !defined(CMAKE_USE_SYSTEM_LIBUV)
+  if (!this->Runner->GetCTest()->GetInteractiveDebugMode()) {
+    options.flags = UV_PROCESS_WINDOWS_USE_PARENT_ERROR_MODE;
+  }
+#endif
 #if !defined(CMAKE_USE_SYSTEM_LIBUV)
   std::vector<char> cpumask;
   if (affinity && !affinity->empty()) {
@@ -166,7 +172,7 @@ bool cmProcess::Buffer::GetLine(std::string& line)
   for (size_type sz = this->size(); this->Last != sz; ++this->Last) {
     if ((*this)[this->Last] == '\n' || (*this)[this->Last] == '\0') {
       // Extract the range first..last as a line.
-      const char* text = this->data() + this->First;
+      char const* text = this->data() + this->First;
       size_type length = this->Last - this->First;
       while (length && text[length - 1] == '\r') {
         length--;
@@ -205,13 +211,13 @@ bool cmProcess::Buffer::GetLast(std::string& line)
 }
 
 void cmProcess::OnReadCB(uv_stream_t* stream, ssize_t nread,
-                         const uv_buf_t* buf)
+                         uv_buf_t const* buf)
 {
   auto* self = static_cast<cmProcess*>(stream->data);
   self->OnRead(nread, buf);
 }
 
-void cmProcess::OnRead(ssize_t nread, const uv_buf_t* buf)
+void cmProcess::OnRead(ssize_t nread, uv_buf_t const* buf)
 {
   std::string line;
   if (nread > 0) {
@@ -290,7 +296,7 @@ void cmProcess::OnTimeout()
       if (p->TimeoutGracePeriod) {
         this->Timeout = *p->TimeoutGracePeriod;
       } else {
-        static const cmDuration defaultGracePeriod{ 1.0 };
+        static cmDuration const defaultGracePeriod{ 1.0 };
         this->Timeout = defaultGracePeriod;
       }
       this->StartTimer();
@@ -530,7 +536,7 @@ std::string cmProcess::GetExitExceptionString() const
     case STATUS_NO_MEMORY:
     default:
       char buf[1024];
-      const char* fmt = "Exit code 0x%" KWIML_INT_PRIx64 "\n";
+      char const* fmt = "Exit code 0x%" KWIML_INT_PRIx64 "\n";
       snprintf(buf, sizeof(buf), fmt, this->ExitValue);
       exception_str.assign(buf);
   }

@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmExpandedCommandArgument.h"
 
 #include <utility>
@@ -23,7 +23,7 @@ bool cmExpandedCommandArgument::WasQuoted() const
   return this->Quoted;
 }
 
-bool cmExpandedCommandArgument::operator==(const char* value) const
+bool cmExpandedCommandArgument::operator==(char const* value) const
 {
   return this->Value == value;
 }

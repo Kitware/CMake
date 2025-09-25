@@ -1,0 +1,8 @@
+Cflags: -I/Alpha/sub Beta -I/Gamma
+Includes: -I/Alpha/sub;-I/Gamma
+Libs: -L/Delta/sub Epsilon -L/Zeta
+LibDirs: -L/Delta/sub;-L/Zeta
+Cflags: -I/Alpha -I/Alpha/sub Beta -I/Gamma
+Includes: -I/Alpha;-I/Alpha/sub;-I/Gamma
+Libs: -L/Delta -L/Delta/sub Epsilon -L/Zeta
+LibDirs: -L/Delta;-L/Delta/sub;-L/Zeta

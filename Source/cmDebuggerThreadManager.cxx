@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 
 #include "cmDebuggerThreadManager.h"
 
@@ -32,10 +32,10 @@ void cmDebuggerThreadManager::EndThread(
 
 cm::optional<dap::StackTraceResponse>
 cmDebuggerThreadManager::GetThreadStackTraceResponse(
-  const dap::StackTraceRequest& request)
+  dap::StackTraceRequest const& request)
 {
   auto it = find_if(Threads.begin(), Threads.end(),
-                    [&](const std::shared_ptr<cmDebuggerThread>& t) {
+                    [&](std::shared_ptr<cmDebuggerThread> const& t) {
                       return t->GetId() == request.threadId;
                     });
 

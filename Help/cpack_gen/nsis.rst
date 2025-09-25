@@ -61,7 +61,7 @@ on Windows Nullsoft Scriptable Install System.
 
 .. variable:: CPACK_NSIS_COMPRESSOR
 
- The arguments that will be passed to the NSIS `SetCompressor` command.
+ The arguments that will be passed to the NSIS ``SetCompressor`` command.
 
 .. variable:: CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL
 
@@ -78,8 +78,8 @@ on Windows Nullsoft Scriptable Install System.
 
 .. variable:: CPACK_NSIS_DISPLAY_NAME
 
- The display name string that appears in the Windows `Apps & features`
- in `Control Panel`
+ The display name string that appears in the Windows *Apps & features*
+ in *Control Panel*
 
 .. variable:: CPACK_NSIS_PACKAGE_NAME
 
@@ -111,15 +111,15 @@ on Windows Nullsoft Scriptable Install System.
 
 .. variable:: CPACK_NSIS_CREATE_ICONS_EXTRA
 
- Additional NSIS commands for creating `Start Menu` shortcuts.
+ Additional NSIS commands for creating *Start Menu* shortcuts.
 
 .. variable:: CPACK_NSIS_DELETE_ICONS_EXTRA
 
- Additional NSIS commands to uninstall `Start Menu` shortcuts.
+ Additional NSIS commands to uninstall *Start Menu* shortcuts.
 
 .. variable:: CPACK_NSIS_EXECUTABLES_DIRECTORY
 
- Creating NSIS `Start Menu` links assumes that they are in ``bin`` unless this
+ Creating NSIS *Start Menu* links assumes that they are in ``bin`` unless this
  variable is set.  For example, you would set this to ``exec`` if your
  executables are in an exec directory.
 
@@ -132,9 +132,11 @@ on Windows Nullsoft Scriptable Install System.
 
  Specify links in ``[application]`` menu.  This should contain a list of pair
  ``link`` ``link name``. The link may be a URL or a path relative to
- installation prefix.  Like::
+ installation prefix.  Like:
 
-  set(CPACK_NSIS_MENU_LINKS
+ .. code-block:: cmake
+
+    set(CPACK_NSIS_MENU_LINKS
       "doc/cmake-@CMake_VERSION_MAJOR@.@CMake_VERSION_MINOR@/cmake.html"
       "CMake Help" "https://cmake.org" "CMake Web Site")
 

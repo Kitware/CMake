@@ -25,32 +25,37 @@
 #
 # Input variables:
 #
-# LIBIDN2_INCLUDE_DIR   The libidn2 include directory
-# LIBIDN2_LIBRARY       Path to libidn2 library
+# - `LIBIDN2_INCLUDE_DIR`:   The libidn2 include directory.
+# - `LIBIDN2_LIBRARY`:       Path to `libidn2` library.
 #
 # Result variables:
 #
-# LIBIDN2_FOUND         System has libidn2
-# LIBIDN2_INCLUDE_DIRS  The libidn2 include directories
-# LIBIDN2_LIBRARIES     The libidn2 library names
-# LIBIDN2_LIBRARY_DIRS  The libidn2 library directories
-# LIBIDN2_CFLAGS        Required compiler flags
-# LIBIDN2_VERSION       Version of libidn2
+# - `LIBIDN2_FOUND`:         System has libidn2.
+# - `LIBIDN2_INCLUDE_DIRS`:  The libidn2 include directories.
+# - `LIBIDN2_LIBRARIES`:     The libidn2 library names.
+# - `LIBIDN2_LIBRARY_DIRS`:  The libidn2 library directories.
+# - `LIBIDN2_PC_REQUIRES`:   The libidn2 pkg-config packages.
+# - `LIBIDN2_CFLAGS`:        Required compiler flags.
+# - `LIBIDN2_VERSION`:       Version of libidn2.
+
+set(LIBIDN2_PC_REQUIRES "libidn2")
 
 if(CURL_USE_PKGCONFIG AND
    NOT DEFINED LIBIDN2_INCLUDE_DIR AND
    NOT DEFINED LIBIDN2_LIBRARY)
   find_package(PkgConfig QUIET)
-  pkg_check_modules(LIBIDN2 "libidn2")
+  pkg_check_modules(LIBIDN2 ${LIBIDN2_PC_REQUIRES})
 endif()
 
 if(LIBIDN2_FOUND)
+  set(Libidn2_FOUND TRUE)
   string(REPLACE ";" " " LIBIDN2_CFLAGS "${LIBIDN2_CFLAGS}")
   message(STATUS "Found Libidn2 (via pkg-config): ${LIBIDN2_INCLUDE_DIRS} (found version \"${LIBIDN2_VERSION}\")")
 else()
   find_path(LIBIDN2_INCLUDE_DIR NAMES "idn2.h")
   find_library(LIBIDN2_LIBRARY NAMES "idn2" "libidn2")
 
+  unset(LIBIDN2_VERSION CACHE)
   if(LIBIDN2_INCLUDE_DIR AND EXISTS "${LIBIDN2_INCLUDE_DIR}/idn2.h")
     set(_version_regex "#[\t ]*define[\t ]+IDN2_VERSION[\t ]+\"([^\"]*)\"")
     file(STRINGS "${LIBIDN2_INCLUDE_DIR}/idn2.h" _version_str REGEX "${_version_regex}")

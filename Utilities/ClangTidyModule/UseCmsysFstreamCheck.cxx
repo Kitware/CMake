@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "UseCmsysFstreamCheck.h"
 
 #include <clang/ASTMatchers/ASTMatchFinder.h>
@@ -25,13 +25,13 @@ void UseCmsysFstreamCheck::registerMatchers(MatchFinder* Finder)
                       "fstream");
 }
 
-void UseCmsysFstreamCheck::check(const MatchFinder::MatchResult& Result)
+void UseCmsysFstreamCheck::check(MatchFinder::MatchResult const& Result)
 {
-  const TypeLoc* ParentTypeNode =
+  TypeLoc const* ParentTypeNode =
     Result.Nodes.getNodeAs<TypeLoc>("parentType");
-  const NestedNameSpecifierLoc* ParentNameNode =
+  NestedNameSpecifierLoc const* ParentNameNode =
     Result.Nodes.getNodeAs<NestedNameSpecifierLoc>("parentName");
-  const TypeLoc* RootNode = nullptr;
+  TypeLoc const* RootNode = nullptr;
   StringRef BindName;
   StringRef Warning;
 

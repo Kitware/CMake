@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 
 #include <string>
 
@@ -35,12 +35,12 @@ bool testASSERT_EQUALFail()
   WrapFailureInBlockFixture fx;
   static_cast<void>(fx);
 
-  auto fail_int = [](const int unexpected) -> bool {
+  auto fail_int = [](int const unexpected) -> bool {
     ASSERT_EQUAL(unexpected, 42);
     return true;
   };
 
-  auto fail_string = [](const std::string& unexpected) -> bool {
+  auto fail_string = [](std::string const& unexpected) -> bool {
     ASSERT_EQUAL(unexpected, "Hello Africa!");
     return true;
   };

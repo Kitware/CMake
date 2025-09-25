@@ -10,8 +10,9 @@ endif()
 
 function(run_toolchain case)
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/${case}-build)
-  run_cmake_with_options(${case} ${ARGN})
+  run_cmake_with_options(${case} "-DPSEUDO_ICSTAT=${PSEUDO_ICSTAT}" ${ARGN})
   set(RunCMake_TEST_NO_CLEAN 1)
+  set(RunCMake_TEST_OUTPUT_MERGE 1)
   run_cmake_command(${case}-build ${CMAKE_COMMAND} --build .)
 endfunction()
 
@@ -61,7 +62,19 @@ foreach(_iar_toolchain IN LISTS _iar_toolchains)
     -DCMAKE_EXE_LINKER_FLAGS=${LINK_OPTS}
   )
 
+  run_toolchain(iar-c-bad
+    -DCMAKE_SYSTEM_NAME=Generic
+    -DCMAKE_C_COMPILER=${_iar_toolchain}
+    -DCMAKE_EXE_LINKER_FLAGS=${LINK_OPTS}
+  )
+
   run_toolchain(iar-cxx
+    -DCMAKE_SYSTEM_NAME=Generic
+    -DCMAKE_CXX_COMPILER=${_iar_toolchain}
+    -DCMAKE_EXE_LINKER_FLAGS=${LINK_OPTS}
+  )
+
+  run_toolchain(iar-cxx-bad
     -DCMAKE_SYSTEM_NAME=Generic
     -DCMAKE_CXX_COMPILER=${_iar_toolchain}
     -DCMAKE_EXE_LINKER_FLAGS=${LINK_OPTS}

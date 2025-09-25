@@ -22,7 +22,7 @@ by any dependency's :prop_tgt:`INTERFACE_LINK_LIBRARIES_DIRECT_EXCLUDE`
 target property.
 
 .. |INTERFACE_PROPERTY_LINK_DIRECT| replace:: ``INTERFACE_LINK_LIBRARIES_DIRECT``
-.. include:: INTERFACE_LINK_LIBRARIES_DIRECT.txt
+.. include:: include/INTERFACE_LINK_LIBRARIES_DIRECT.rst
 
 Direct Link Dependencies as Usage Requirements
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -95,12 +95,16 @@ One may limit the effects of ``INTERFACE_LINK_LIBRARIES_DIRECT`` and
 ``INTERFACE_LINK_LIBRARIES_DIRECT_EXCLUDE`` to a subset of dependent
 targets by using the :genex:`TARGET_PROPERTY` generator expression.
 For example, to limit the effects to executable targets, use an
-entry of the form::
+entry of the form:
+
+.. code-block:: cmake
 
   "$<$<STREQUAL:$<TARGET_PROPERTY:TYPE>,EXECUTABLE>:...>"
 
 Similarly, to limit the effects to specific targets, use an entry
-of the form::
+of the form:
+
+.. code-block:: cmake
 
   "$<$<BOOL:$<TARGET_PROPERTY:USE_IT>>:...>"
 

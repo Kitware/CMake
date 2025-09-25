@@ -1,7 +1,7 @@
 # CMake version number components.
-set(CMake_VERSION_MAJOR 3)
-set(CMake_VERSION_MINOR 31)
-set(CMake_VERSION_PATCH 6)
+set(CMake_VERSION_MAJOR 4)
+set(CMake_VERSION_MINOR 1)
+set(CMake_VERSION_PATCH 1)
 #set(CMake_VERSION_RC 0)
 set(CMake_VERSION_IS_DIRTY 0)
 
@@ -61,14 +61,15 @@ if(NOT CMake_VERSION_NO_GIT)
   set(git_info [==[$Format:%h %s$]==])
 
   # Otherwise, try to identify the current development source version.
+  get_filename_component(git_toplevel "${CMAKE_CURRENT_LIST_DIR}" PATH)
   if(NOT git_info MATCHES "^([0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]?[0-9a-f]?)[0-9a-f]* "
-      AND EXISTS ${CMake_SOURCE_DIR}/.git)
+      AND EXISTS "${git_toplevel}/.git")
     find_package(Git QUIET)
-    if(GIT_FOUND)
+    if(Git_FOUND)
       macro(_git)
         execute_process(
           COMMAND ${GIT_EXECUTABLE} ${ARGN}
-          WORKING_DIRECTORY ${CMake_SOURCE_DIR}
+          WORKING_DIRECTORY "${git_toplevel}"
           RESULT_VARIABLE _git_res
           OUTPUT_VARIABLE _git_out OUTPUT_STRIP_TRAILING_WHITESPACE
           ERROR_VARIABLE _git_err ERROR_STRIP_TRAILING_WHITESPACE
@@ -89,9 +90,11 @@ if(NOT CMake_VERSION_NO_GIT)
     set(git_subject "${CMAKE_MATCH_2}")
 
     # If this is not the exact commit of a release, add dev info.
+    # noqa: spellcheck off
     if(NOT "${git_subject}" MATCHES "^[Cc][Mm]ake ${CMake_VERSION}$")
       string(APPEND CMake_VERSION "-g${git_hash}")
     endif()
+    # noqa: spellcheck on
 
     # If this is a work tree, check whether it is dirty.
     if(COMMAND _git)

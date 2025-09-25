@@ -1,0 +1,23 @@
+---
+id: cmstrcat-arg
+language: Cpp
+rule:
+  any:
+    - kind: binary_expression
+    - kind: call_expression
+    - kind: char_literal
+    - kind: concatenated_string
+    - kind: conditional_expression
+    - kind: field_expression
+    - kind: identifier
+    - kind: lambda_expression
+    - kind: number_literal
+    - kind: parenthesized_expression
+    - kind: pointer_expression
+    - kind: qualified_identifier
+    - kind: raw_string_literal
+    - kind: string_literal
+    - kind: subscript_expression
+    - kind: unary_expression
+    - kind: update_expression
+    - kind: user_defined_literal

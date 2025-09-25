@@ -11,4 +11,4 @@ on each target created by a call to :command:`add_library` or
 link step.  If set, its value is also used by the :command:`try_compile`
 command.
 
-.. include:: LINKER_PREDEFINED_TYPES.txt
+.. include:: include/LINKER_PREDEFINED_TYPES.rst

@@ -1,10 +1,9 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include <iosfwd>
 #include <map>
 #include <memory>
 #include <set>
@@ -35,9 +34,9 @@ private:
 
 public:
   cmComputeLinkInformation(cmGeneratorTarget const* target,
-                           const std::string& config);
-  cmComputeLinkInformation(const cmComputeLinkInformation&) = delete;
-  cmComputeLinkInformation& operator=(const cmComputeLinkInformation&) =
+                           std::string const& config);
+  cmComputeLinkInformation(cmComputeLinkInformation const&) = delete;
+  cmComputeLinkInformation& operator=(cmComputeLinkInformation const&) =
     delete;
   ~cmComputeLinkInformation();
   bool Compute();
@@ -69,7 +68,7 @@ public:
     cmSourceFile const* ObjectSource = nullptr;
 
     bool HasFeature() const { return this->Feature != nullptr; }
-    const std::string& GetFeatureName() const
+    std::string const& GetFeatureName() const
     {
       return HasFeature() ? this->Feature->Name
                           : cmComputeLinkDepends::LinkEntry::DEFAULT;
@@ -125,7 +124,7 @@ public:
 
   std::string GetConfig() const { return this->Config; }
 
-  const cmGeneratorTarget* GetTarget() { return this->Target; }
+  cmGeneratorTarget const* GetTarget() { return this->Target; }
 
 private:
   using LinkEntry = cmComputeLinkDepends::LinkEntry;
@@ -210,13 +209,12 @@ private:
   void AddTargetItem(LinkEntry const& entry);
   void AddFullItem(LinkEntry const& entry);
   bool CheckImplicitDirItem(LinkEntry const& entry);
-  void AddUserItem(LinkEntry const& entry, bool pathNotKnown);
+  void AddUserItem(LinkEntry const& entry);
   void AddFrameworkItem(LinkEntry const& entry);
   void AddXcFrameworkItem(LinkEntry const& entry);
   void DropDirectoryItem(BT<std::string> const& item);
   bool CheckSharedLibNoSOName(LinkEntry const& entry);
   void AddSharedLibNoSOName(LinkEntry const& entry);
-  void HandleBadFullItem(LinkEntry const& entry, std::string const& file);
 
   // Framework info.
   void ComputeFrameworkInfo();
@@ -227,8 +225,6 @@ private:
 
   // Linker search path computation.
   std::unique_ptr<cmOrderDirectories> OrderLinkerSearchPath;
-  bool FinishLinkerSearchDirectories();
-  void PrintLinkPolicyDiagnosis(std::ostream&);
 
   void AddExternalObjectTargets();
 
@@ -243,17 +239,11 @@ private:
   // Additional paths configured by the runtime linker
   std::vector<std::string> RuntimeLinkDirs;
 
-  // Linker search path compatibility mode.
-  std::set<std::string> OldLinkDirMask;
-  std::vector<std::string> OldLinkDirItems;
-  std::vector<std::string> OldUserFlagItems;
-  std::set<std::string> CMP0060WarnItems;
   // Dependent library path computation.
   std::unique_ptr<cmOrderDirectories> OrderDependentRPath;
   // Runtime path computation.
   std::unique_ptr<cmOrderDirectories> OrderRuntimeSearchPath;
 
-  bool OldLinkDirMode;
   bool IsOpenBSD;
   bool LinkDependsNoShared;
   bool RuntimeUseChrpath;
@@ -261,10 +251,9 @@ private:
   bool LinkWithRuntimePath;
   bool LinkTypeEnabled;
   bool ArchivesMayBeShared;
-  bool CMP0060Warn;
 
   void AddLibraryRuntimeInfo(std::string const& fullPath,
-                             const cmGeneratorTarget* target);
+                             cmGeneratorTarget const* target);
   void AddLibraryRuntimeInfo(std::string const& fullPath);
 
   class FeatureDescriptor
@@ -272,10 +261,10 @@ private:
   public:
     FeatureDescriptor() = default;
 
-    const std::string Name;
-    const bool Supported = false;
-    const std::string Prefix;
-    const std::string Suffix;
+    std::string const Name;
+    bool const Supported = false;
+    std::string const Prefix;
+    std::string const Suffix;
     std::string GetDecoratedItem(std::string const& library,
                                  ItemIsPath isPath) const;
     std::string GetDecoratedItem(std::string const& library,

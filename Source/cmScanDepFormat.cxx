@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 
 #include "cmScanDepFormat.h"
 
@@ -343,7 +343,7 @@ bool cmScanDepFormat_P1689_Write(std::string const& path,
       require_obj["source-path"] = EncodeFilename(require.SourcePath);
     }
 
-    const char* lookup_method = nullptr;
+    char const* lookup_method = nullptr;
     switch (require.Method) {
       case LookupMethod::ByName:
         // No explicit value needed for the default.

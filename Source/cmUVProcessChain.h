@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
@@ -29,8 +29,7 @@ public:
 
   cmUVProcessChainBuilder();
 
-  cmUVProcessChainBuilder& AddCommand(
-    const std::vector<std::string>& arguments);
+  cmUVProcessChainBuilder& AddCommand(std::vector<std::string> arguments);
   cmUVProcessChainBuilder& SetBuiltinLoop();
   cmUVProcessChainBuilder& SetExternalLoop(uv_loop_t& loop);
   cmUVProcessChainBuilder& SetNoStream(Stream stdio);
@@ -39,6 +38,7 @@ public:
   cmUVProcessChainBuilder& SetExternalStream(Stream stdio, int fd);
   cmUVProcessChainBuilder& SetExternalStream(Stream stdio, FILE* stream);
   cmUVProcessChainBuilder& SetWorkingDirectory(std::string dir);
+  cmUVProcessChainBuilder& SetDetached();
 
   uv_loop_t* GetLoop() const;
 
@@ -69,6 +69,7 @@ private:
   std::vector<ProcessConfiguration> Processes;
   std::string WorkingDirectory;
   bool MergedBuiltinStreams = false;
+  bool Detached = false;
   uv_loop_t* Loop = nullptr;
 };
 
@@ -96,12 +97,12 @@ public:
     std::pair<ExceptionCode, std::string> GetException() const;
   };
 
-  cmUVProcessChain(const cmUVProcessChain& other) = delete;
+  cmUVProcessChain(cmUVProcessChain const& other) = delete;
   cmUVProcessChain(cmUVProcessChain&& other) noexcept;
 
   ~cmUVProcessChain();
 
-  cmUVProcessChain& operator=(const cmUVProcessChain& other) = delete;
+  cmUVProcessChain& operator=(cmUVProcessChain const& other) = delete;
   cmUVProcessChain& operator=(cmUVProcessChain&& other) noexcept;
 
   uv_loop_t& GetLoop();
@@ -112,8 +113,8 @@ public:
 
   bool Valid() const;
   bool Wait(uint64_t milliseconds = 0);
-  std::vector<const Status*> GetStatus() const;
-  const Status& GetStatus(std::size_t index) const;
+  std::vector<Status const*> GetStatus() const;
+  Status const& GetStatus(std::size_t index) const;
   bool Finished() const;
 
 private:

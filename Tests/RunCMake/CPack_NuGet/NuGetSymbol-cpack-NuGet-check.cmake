@@ -1,0 +1,31 @@
+file(GLOB generated_nuspec "${RunCMake_TEST_BINARY_DIR}/_CPack_Packages/*/NuGet/GeneratorTest-1.2.3-*/CPack.NuGet.nuspec")
+if(NOT generated_nuspec)
+  set(RunCMake_TEST_FAILED "No nuspec file generated under ${RunCMake_TEST_BINARY_DIR}")
+else()
+  # Read in the generated nuspec file content
+  file(STRINGS "${generated_nuspec}" actual_nuspec REGEX "^.*[^ ]+$")
+  # Read in the expected file content
+  file(STRINGS "${CMAKE_CURRENT_LIST_DIR}/expected.nuspec" expected_nuspec REGEX "^.*[^ ]+$")
+
+  # Compare the file contents
+  string(COMPARE EQUAL "${actual_nuspec}" "${expected_nuspec}" nuspec_matches)
+
+  if(NOT nuspec_matches)
+    set(RunCMake_TEST_FAILED "generated nuspec file incorrect")
+    set(failure_msg "")
+    # This would be nicer with a `diff` output, but it needs to be portable
+    string(APPEND failure_msg "\nExpected file:\n")
+    string(APPEND failure_msg "${expected_nuspec}")
+    string(APPEND failure_msg "Actual file:\n")
+    string(APPEND failure_msg "${actual_nuspec}")
+    set(RunCMake_TEST_FAILURE_MESSAGE "${failure_msg}")
+  endif()
+endif()
+
+if(NOT EXISTS "${RunCMake_TEST_BINARY_DIR}/GeneratorTest.1.2.3.nupkg")
+  set(RunCMake_TEST_FAILED "NuGet standard package not generated")
+endif()
+
+if(NOT EXISTS "${RunCMake_TEST_BINARY_DIR}/GeneratorTest.1.2.3.snupkg")
+  set(RunCMake_TEST_FAILED "NuGet symbol package not generated")
+endif()

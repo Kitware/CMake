@@ -1,5 +1,5 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-# file Copyright.txt or https://cmake.org/licensing for details.
+# file LICENSE.rst or https://cmake.org/licensing for details.
 
 include(${CMAKE_ROOT}/Modules/CMakeDetermineCompiler.cmake)
 include(${CMAKE_ROOT}/Modules/CMakeParseImplicitLinkInfo.cmake)
@@ -90,7 +90,7 @@ if(NOT CMAKE_HIP_COMPILER_ID_RUN)
   # We determine the vendor to use the right flags for detection right away.
   # The main compiler identification is still needed below to extract other information.
   list(APPEND CMAKE_HIP_COMPILER_ID_VENDORS NVIDIA Clang)
-  set(CMAKE_HIP_COMPILER_ID_VENDOR_REGEX_NVIDIA "nvcc: NVIDIA \\(R\\) Cuda compiler driver")
+  set(CMAKE_HIP_COMPILER_ID_VENDOR_REGEX_NVIDIA "nvcc: [^\n]+ Cuda compiler driver")
   set(CMAKE_HIP_COMPILER_ID_VENDOR_REGEX_Clang "(clang version)")
   CMAKE_DETERMINE_COMPILER_ID_VENDOR(HIP "--version")
 
@@ -113,6 +113,29 @@ if(NOT CMAKE_HIP_COMPILER_ID_RUN)
       if(NOT EXISTS "${CMAKE_HIP_HOST_COMPILER}")
         message(FATAL_ERROR "Could not find compiler set in environment variable HIPHOSTCXX:\n$ENV{HIPHOSTCXX}.\n${CMAKE_HIP_HOST_COMPILER}")
       endif()
+    elseif(CMAKE_HIP_HOST_COMPILER)
+      # We get here if CMAKE_HIP_HOST_COMPILER was specified by the user or toolchain file.
+      if(IS_ABSOLUTE "${CMAKE_HIP_HOST_COMPILER}")
+        # Convert to forward slashes.
+        cmake_path(CONVERT "${CMAKE_HIP_HOST_COMPILER}" TO_CMAKE_PATH_LIST CMAKE_HIP_HOST_COMPILER NORMALIZE)
+      else()
+        # Convert to absolute path so changes in `PATH` do not impact HIP compilation.
+        find_program(_CMAKE_HIP_HOST_COMPILER_PATH NO_CACHE NAMES "${CMAKE_HIP_HOST_COMPILER}")
+        if(_CMAKE_HIP_HOST_COMPILER_PATH)
+          set(CMAKE_HIP_HOST_COMPILER "${_CMAKE_HIP_HOST_COMPILER_PATH}")
+        endif()
+        unset(_CMAKE_HIP_HOST_COMPILER_PATH)
+      endif()
+      if(NOT EXISTS "${CMAKE_HIP_HOST_COMPILER}")
+        message(FATAL_ERROR "Could not find compiler set in variable CMAKE_HIP_HOST_COMPILER:\n  ${CMAKE_HIP_HOST_COMPILER}")
+      endif()
+      # If the value was cached, update the cache entry with our modifications.
+      get_property(_CMAKE_HIP_HOST_COMPILER_CACHED CACHE CMAKE_HIP_HOST_COMPILER PROPERTY TYPE)
+      if(_CMAKE_HIP_HOST_COMPILER_CACHED)
+        set_property(CACHE CMAKE_HIP_HOST_COMPILER PROPERTY VALUE "${CMAKE_HIP_HOST_COMPILER}")
+        mark_as_advanced(CMAKE_HIP_HOST_COMPILER)
+      endif()
+      unset(_CMAKE_HIP_HOST_COMPILER_CACHED)
     endif()
   endif()
 
@@ -266,13 +289,6 @@ if(CMAKE_HIP_COMPILER_SYSROOT)
     "set(CMAKE_COMPILER_SYSROOT \"${CMAKE_HIP_COMPILER_SYSROOT}\")")
 else()
   set(_SET_CMAKE_HIP_COMPILER_SYSROOT "")
-endif()
-
-if(CMAKE_HIP_COMPILER_ARCHITECTURE_ID)
-  set(_SET_CMAKE_HIP_COMPILER_ARCHITECTURE_ID
-    "set(CMAKE_HIP_COMPILER_ARCHITECTURE_ID ${CMAKE_HIP_COMPILER_ARCHITECTURE_ID})")
-else()
-  set(_SET_CMAKE_HIP_COMPILER_ARCHITECTURE_ID "")
 endif()
 
 if(MSVC_HIP_ARCHITECTURE_ID)

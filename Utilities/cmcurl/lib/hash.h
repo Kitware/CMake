@@ -45,14 +45,24 @@ typedef size_t (*comp_function) (void *key1,
 
 typedef void (*Curl_hash_dtor)(void *);
 
+typedef void (*Curl_hash_elem_dtor)(void *key, size_t key_len, void *p);
+
+struct Curl_hash_element {
+  struct Curl_hash_element *next;
+  void   *ptr;
+  Curl_hash_elem_dtor dtor;
+  size_t key_len;
+  char   key[1]; /* allocated memory following the struct */
+};
+
 struct Curl_hash {
-  struct Curl_llist *table;
+  struct Curl_hash_element **table;
 
   /* Hash function to be used for this hash table */
   hash_function hash_func;
-
   /* Comparator function to compare keys */
   comp_function comp_func;
+  /* General element construct, unless element itself carries one */
   Curl_hash_dtor   dtor;
   size_t slots;
   size_t size;
@@ -61,23 +71,10 @@ struct Curl_hash {
 #endif
 };
 
-typedef void (*Curl_hash_elem_dtor)(void *key, size_t key_len, void *p);
-
-struct Curl_hash_element {
-  struct Curl_llist_node list;
-  void   *ptr;
-  Curl_hash_elem_dtor dtor;
-  size_t key_len;
-#ifdef DEBUGBUILD
-  int init;
-#endif
-  char   key[1]; /* allocated memory following the struct */
-};
-
 struct Curl_hash_iterator {
   struct Curl_hash *hash;
   size_t slot_index;
-  struct Curl_llist_node *current_element;
+  struct Curl_hash_element *current;
 #ifdef DEBUGBUILD
   int init;
 #endif
@@ -101,7 +98,7 @@ void Curl_hash_clean(struct Curl_hash *h);
 void Curl_hash_clean_with_criterium(struct Curl_hash *h, void *user,
                                     int (*comp)(void *, void *));
 size_t Curl_hash_str(void *key, size_t key_length, size_t slots_num);
-size_t Curl_str_key_compare(void *k1, size_t key1_len, void *k2,
+size_t curlx_str_key_compare(void *k1, size_t key1_len, void *k2,
                             size_t key2_len);
 void Curl_hash_start_iterate(struct Curl_hash *hash,
                              struct Curl_hash_iterator *iter);
@@ -110,14 +107,5 @@ Curl_hash_next_element(struct Curl_hash_iterator *iter);
 
 void Curl_hash_print(struct Curl_hash *h,
                      void (*func)(void *));
-
-/* Hash for `curl_off_t` as key */
-void Curl_hash_offt_init(struct Curl_hash *h, size_t slots,
-                         Curl_hash_dtor dtor);
-
-void *Curl_hash_offt_set(struct Curl_hash *h, curl_off_t id, void *elem);
-int Curl_hash_offt_remove(struct Curl_hash *h, curl_off_t id);
-void *Curl_hash_offt_get(struct Curl_hash *h, curl_off_t id);
-
 
 #endif /* HEADER_CURL_HASH_H */

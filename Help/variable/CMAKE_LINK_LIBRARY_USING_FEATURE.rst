@@ -16,4 +16,4 @@ effect:
   cannot be true for the link language used by the target for which the
   :genex:`LINK_LIBRARY` generator expression is evaluated.
 
-.. include:: CMAKE_LINK_LIBRARY_USING_FEATURE.txt
+.. include:: include/CMAKE_LINK_LIBRARY_USING_FEATURE.rst

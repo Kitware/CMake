@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
@@ -15,10 +15,10 @@
 class cmTimestamp
 {
 public:
-  std::string CurrentTime(const std::string& formatString, bool utcFlag) const;
+  std::string CurrentTime(std::string const& formatString, bool utcFlag) const;
 
-  std::string FileModificationTime(const char* path,
-                                   const std::string& formatString,
+  std::string FileModificationTime(char const* path,
+                                   std::string const& formatString,
                                    bool utcFlag) const;
 
   std::string CreateTimestampFromTimeT(time_t timeT, std::string formatString,

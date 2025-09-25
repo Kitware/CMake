@@ -1,12 +1,11 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmCTestCoverageHandler.h"
 
 #include <algorithm>
 #include <chrono>
 #include <cstdio>
 #include <cstdlib>
-#include <cstring>
 #include <iomanip>
 #include <iterator>
 #include <memory>
@@ -41,17 +40,9 @@ class cmMakefile;
 
 #define SAFEDIV(x, y) (((y) != 0) ? ((x) / (y)) : (0))
 
-cmCTestCoverageHandler::cmCTestCoverageHandler() = default;
-
-void cmCTestCoverageHandler::Initialize()
+cmCTestCoverageHandler::cmCTestCoverageHandler(cmCTest* ctest)
+  : Superclass(ctest)
 {
-  this->Superclass::Initialize();
-  this->CustomCoverageExclude.clear();
-  this->SourceLabels.clear();
-  this->TargetDirs.clear();
-  this->LabelIdMap.clear();
-  this->Labels.clear();
-  this->LabelFilter.clear();
 }
 
 void cmCTestCoverageHandler::CleanCoverageLogFiles(std::ostream& log)
@@ -100,7 +91,7 @@ void cmCTestCoverageHandler::EndCoverageLogFile(cmGeneratedFileStream& ostr,
 
 void cmCTestCoverageHandler::StartCoverageLogXML(cmXMLWriter& xml)
 {
-  this->CTest->StartXML(xml, this->AppendXML);
+  this->CTest->StartXML(xml, this->CMake, this->AppendXML);
   xml.StartElement("CoverageLog");
   xml.Element("StartDateTime", this->CTest->CurrentTime());
   xml.Element("StartTime", std::chrono::system_clock::now());
@@ -331,7 +322,7 @@ int cmCTestCoverageHandler::ProcessHandler()
   covSumFile.setf(std::ios::fixed, std::ios::floatfield);
   covSumFile.precision(2);
 
-  this->CTest->StartXML(covSumXML, this->AppendXML);
+  this->CTest->StartXML(covSumXML, this->CMake, this->AppendXML);
   // Produce output xml files
 
   covSumXML.StartElement("Coverage");
@@ -370,7 +361,7 @@ int cmCTestCoverageHandler::ProcessHandler()
       cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, "    ", this->Quiet);
     }
 
-    const std::string fullFileName = file.first;
+    std::string const fullFileName = file.first;
     bool shouldIDoCoverage =
       this->ShouldIDoCoverage(fullFileName, sourceDir, binaryDir);
     if (!shouldIDoCoverage) {
@@ -401,10 +392,10 @@ int cmCTestCoverageHandler::ProcessHandler()
       this->StartCoverageLogXML(covLogXML);
     }
 
-    const std::string fileName = cmSystemTools::GetFilenameName(fullFileName);
-    const std::string shortFileName =
+    std::string const fileName = cmSystemTools::GetFilenameName(fullFileName);
+    std::string const shortFileName =
       this->CTest->GetShortPathToFile(fullFileName);
-    const cmCTestCoverageHandlerContainer::SingleFileCoverageVector& fcov =
+    cmCTestCoverageHandlerContainer::SingleFileCoverageVector const& fcov =
       file.second;
     covLogXML.StartElement("File");
     covLogXML.Attribute("Name", fileName);
@@ -618,7 +609,7 @@ void cmCTestCoverageHandler::PopulateCustomVectors(cmMakefile* mf)
 #  define fnc_prefix(s, t) cmHasPrefix(s, t)
 #endif
 
-static bool IsFileInDir(const std::string& infile, const std::string& indir)
+static bool IsFileInDir(std::string const& infile, std::string const& indir)
 {
   std::string file = cmSystemTools::CollapseFullPath(infile);
   std::string dir = cmSystemTools::CollapseFullPath(indir);
@@ -725,9 +716,9 @@ struct cmCTestCoverageHandlerLocale
       cmSystemTools::UnsetEnv("LC_ALL");
     }
   }
-  cmCTestCoverageHandlerLocale(const cmCTestCoverageHandlerLocale&) = delete;
+  cmCTestCoverageHandlerLocale(cmCTestCoverageHandlerLocale const&) = delete;
   cmCTestCoverageHandlerLocale& operator=(
-    const cmCTestCoverageHandlerLocale&) = delete;
+    cmCTestCoverageHandlerLocale const&) = delete;
   std::string lc_all;
 };
 
@@ -798,7 +789,7 @@ int cmCTestCoverageHandler::HandleDelphiCoverage(
   return static_cast<int>(cont->TotalCoverage.size());
 }
 
-static std::string joinCommandLine(const std::vector<std::string>& args)
+static std::string joinCommandLine(std::vector<std::string> const& args)
 {
   std::string ret;
 
@@ -955,7 +946,7 @@ int cmCTestCoverageHandler::HandleGCovCoverage(
     std::vector<std::string> covargs = basecovargs;
     covargs.push_back(fileDir);
     covargs.push_back(f);
-    const std::string command = joinCommandLine(covargs);
+    std::string const command = joinCommandLine(covargs);
 
     cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                        command << std::endl, this->Quiet);
@@ -1315,7 +1306,7 @@ int cmCTestCoverageHandler::HandleLCovCoverage(
   std::vector<std::string> covargs =
     cmSystemTools::ParseArguments(lcovExtraFlags);
   covargs.insert(covargs.begin(), lcovCommand);
-  const std::string command = joinCommandLine(covargs);
+  std::string const command = joinCommandLine(covargs);
 
   // In intel compiler we have to call codecov only once in each executable
   // directory. It collects all *.dyn files to generate .dpi file.
@@ -1325,10 +1316,7 @@ int cmCTestCoverageHandler::HandleLCovCoverage(
     std::string fileDir = cmSystemTools::GetFilenamePath(f);
     cmWorkingDirectory workdir(fileDir);
     if (workdir.Failed()) {
-      cmCTestLog(this->CTest, ERROR_MESSAGE,
-                 "Unable to change working directory to "
-                   << fileDir << " : "
-                   << std::strerror(workdir.GetLastResult()) << std::endl);
+      cmCTestLog(this->CTest, ERROR_MESSAGE, workdir.GetError() << std::endl);
       cont->Error++;
       continue;
     }
@@ -1550,9 +1538,7 @@ bool cmCTestCoverageHandler::FindLCovFiles(std::vector<std::string>& files)
   std::string buildDir = this->CTest->GetCTestConfiguration("BuildDirectory");
   cmWorkingDirectory workdir(buildDir);
   if (workdir.Failed()) {
-    cmCTestLog(this->CTest, ERROR_MESSAGE,
-               "Unable to change working directory to " << buildDir
-                                                        << std::endl);
+    cmCTestLog(this->CTest, ERROR_MESSAGE, workdir.GetError() << std::endl);
     return false;
   }
 
@@ -1705,7 +1691,7 @@ std::string cmCTestCoverageHandler::FindFile(
 
 // This is a header put on each marked up source file
 namespace {
-const char* bullseyeHelp[] = {
+char const* bullseyeHelp[] = {
   "    Coverage produced by bullseye covbr tool: ",
   "      www.bullseye.com/help/ref_covbr.html",
   "    * An arrow --> indicates incomplete coverage.",
@@ -1747,9 +1733,7 @@ int cmCTestCoverageHandler::RunBullseyeCoverageBranch(
                      "run covbr: " << std::endl, this->Quiet);
 
   if (!this->RunBullseyeCommand(cont, "covbr", nullptr, outputFile)) {
-    cmCTestLog(this->CTest, ERROR_MESSAGE,
-               "error running covbr for."
-                 << "\n");
+    cmCTestLog(this->CTest, ERROR_MESSAGE, "error running covbr for." << "\n");
     return -1;
   }
   cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
@@ -1854,7 +1838,7 @@ int cmCTestCoverageHandler::RunBullseyeCoverageBranch(
 }
 
 int cmCTestCoverageHandler::RunBullseyeCommand(
-  cmCTestCoverageHandlerContainer* cont, const char* cmd, const char* arg,
+  cmCTestCoverageHandlerContainer* cont, char const* cmd, char const* arg,
   std::string& outputFile)
 {
   std::string program = cmSystemTools::FindProgram(cmd);
@@ -1915,7 +1899,7 @@ int cmCTestCoverageHandler::RunBullseyeSourceSummary(
                "Cannot open coverage summary file." << std::endl);
     return 0;
   }
-  this->CTest->StartXML(xml, this->AppendXML);
+  this->CTest->StartXML(xml, this->CMake, this->AppendXML);
   auto elapsed_time_start = std::chrono::steady_clock::now();
   std::string coverage_start_time = this->CTest->CurrentTime();
   xml.StartElement("Coverage");
@@ -2158,7 +2142,7 @@ void cmCTestCoverageHandler::LoadLabels()
   }
 }
 
-void cmCTestCoverageHandler::LoadLabels(const char* dir)
+void cmCTestCoverageHandler::LoadLabels(char const* dir)
 {
   LabelSet& dirLabels = this->TargetDirs[dir];
   std::string fname = cmStrCat(dir, "/Labels.txt");

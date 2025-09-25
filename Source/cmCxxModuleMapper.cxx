@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmCxxModuleMapper.h"
 
 #include <cassert>
@@ -275,7 +275,7 @@ bool CxxModuleUsage::AddReference(std::string const& logical,
                                   ref.Path, "' via ", method_name(ref.Method),
                                   "; "
                                   "Location B: '",
-                                  loc, "' via ", method_name(method), "."));
+                                  loc, "' via ", method_name(method), '.'));
     return false;
   }
 

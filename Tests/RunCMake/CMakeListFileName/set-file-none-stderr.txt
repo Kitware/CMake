@@ -1,0 +1,2 @@
+CMake Error: No filename specified for --project-file
+CMake Error: Run 'cmake --help' for all supported options.

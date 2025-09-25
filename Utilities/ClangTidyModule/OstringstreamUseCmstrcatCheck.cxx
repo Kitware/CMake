@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "OstringstreamUseCmstrcatCheck.h"
 
 #include <clang/AST/Type.h>
@@ -28,11 +28,11 @@ void OstringstreamUseCmstrcatCheck::registerMatchers(MatchFinder* Finder)
 }
 
 void OstringstreamUseCmstrcatCheck::check(
-  const MatchFinder::MatchResult& Result)
+  MatchFinder::MatchResult const& Result)
 {
-  const TypeLoc* ParentTypeNode =
+  TypeLoc const* ParentTypeNode =
     Result.Nodes.getNodeAs<TypeLoc>("parentType");
-  const TypeLoc* RootNode = Result.Nodes.getNodeAs<TypeLoc>("ostringstream");
+  TypeLoc const* RootNode = Result.Nodes.getNodeAs<TypeLoc>("ostringstream");
 
   if (ParentTypeNode != nullptr) {
     if (ParentTypeNode->getBeginLoc().isValid()) {

@@ -22,7 +22,7 @@
 #  include "Encoding.hxx.in"
 #endif
 
-static const unsigned char helloWorldStrings[][32] = {
+static unsigned char const helloWorldStrings[][32] = {
   // English
   { 'H', 'e', 'l', 'l', 'o', ' ', 'W', 'o', 'r', 'l', 'd', 0 },
   // Japanese
@@ -53,7 +53,7 @@ static int testHelloWorldEncoding()
 {
   int ret = 0;
   for (int i = 0; helloWorldStrings[i][0] != 0; i++) {
-    std::string str = reinterpret_cast<const char*>(helloWorldStrings[i]);
+    std::string str = reinterpret_cast<char const*>(helloWorldStrings[i]);
     std::cout << str << std::endl;
     std::wstring wstr = kwsys::Encoding::ToWide(str);
     std::string str2 = kwsys::Encoding::ToNarrow(wstr);
@@ -86,7 +86,7 @@ static int testRobustEncoding()
 
   wstr = kwsys::Encoding::ToWide(nullptr);
   if (!wstr.empty()) {
-    const wchar_t* wcstr = wstr.c_str();
+    wchar_t const* wcstr = wstr.c_str();
     std::cout << "ToWide(NULL) returned";
     for (size_t i = 0; i < wstr.size(); i++) {
       std::cout << " " << std::hex << static_cast<int>(wcstr[i]);
@@ -96,7 +96,7 @@ static int testRobustEncoding()
   }
   wstr = kwsys::Encoding::ToWide("");
   if (!wstr.empty()) {
-    const wchar_t* wcstr = wstr.c_str();
+    wchar_t const* wcstr = wstr.c_str();
     std::cout << "ToWide(\"\") returned";
     for (size_t i = 0; i < wstr.size(); i++) {
       std::cout << " " << std::hex << static_cast<int>(wcstr[i]);
@@ -268,7 +268,7 @@ static int testToWindowsExtendedPath()
 
 int testEncoding(int, char*[])
 {
-  const char* loc = setlocale(LC_ALL, "");
+  char const* loc = setlocale(LC_ALL, "");
   if (loc) {
     std::cout << "Locale: " << loc << std::endl;
   } else {

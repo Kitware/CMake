@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
@@ -30,13 +30,13 @@ private:
                        std::string const& name,
                        std::vector<unsigned char>& output) const;
 
-  std::string FromDigest(const unsigned char* digest,
+  std::string FromDigest(unsigned char const* digest,
                          unsigned char version) const;
 
   bool StringToBinaryImpl(std::string const& input,
                           std::vector<unsigned char>& output) const;
 
-  std::string BinaryToString(const unsigned char* input) const;
+  std::string BinaryToString(unsigned char const* input) const;
 
   bool IntFromHexDigit(char input, char& output) const;
 };

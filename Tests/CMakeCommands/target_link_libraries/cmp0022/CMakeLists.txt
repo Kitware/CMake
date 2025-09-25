@@ -1,5 +1,3 @@
-cmake_policy(SET CMP0028 NEW)
-
 include(GenerateExportHeader)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 

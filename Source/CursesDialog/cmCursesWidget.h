@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
@@ -37,8 +37,8 @@ public:
    * Set/Get the value (setting the value also changes the contents
    * of the field buffer).
    */
-  virtual void SetValue(const std::string& value);
-  virtual const char* GetValue();
+  virtual void SetValue(std::string const& value);
+  virtual char const* GetValue();
 
   /**
    * Get the type of the widget (STRING, PATH etc...)

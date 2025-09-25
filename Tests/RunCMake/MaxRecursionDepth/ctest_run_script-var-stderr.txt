@@ -11,41 +11,41 @@ CMake Error at .*/Tests/RunCMake/MaxRecursionDepth/ctest_run_script_11\.cmake:1 
   Maximum recursion depth of 10 exceeded
 
 
-CMake Error at .*/Tests/RunCMake/MaxRecursionDepth/ctest_run_script_10\.cmake:13 \(message\):
+CMake Error at .*/Tests/RunCMake/MaxRecursionDepth/ctest_run_script_10\.cmake:8 \(message\):
   Nested script failed
 
 
-CMake Error at .*/Tests/RunCMake/MaxRecursionDepth/ctest_run_script_9\.cmake:13 \(message\):
+CMake Error at .*/Tests/RunCMake/MaxRecursionDepth/ctest_run_script_9\.cmake:8 \(message\):
   Nested script failed
 
 
-CMake Error at .*/Tests/RunCMake/MaxRecursionDepth/ctest_run_script_8\.cmake:13 \(message\):
+CMake Error at .*/Tests/RunCMake/MaxRecursionDepth/ctest_run_script_8\.cmake:8 \(message\):
   Nested script failed
 
 
-CMake Error at .*/Tests/RunCMake/MaxRecursionDepth/ctest_run_script_7\.cmake:13 \(message\):
+CMake Error at .*/Tests/RunCMake/MaxRecursionDepth/ctest_run_script_7\.cmake:8 \(message\):
   Nested script failed
 
 
-CMake Error at .*/Tests/RunCMake/MaxRecursionDepth/ctest_run_script_6\.cmake:13 \(message\):
+CMake Error at .*/Tests/RunCMake/MaxRecursionDepth/ctest_run_script_6\.cmake:8 \(message\):
   Nested script failed
 
 
-CMake Error at .*/Tests/RunCMake/MaxRecursionDepth/ctest_run_script_5\.cmake:13 \(message\):
+CMake Error at .*/Tests/RunCMake/MaxRecursionDepth/ctest_run_script_5\.cmake:8 \(message\):
   Nested script failed
 
 
-CMake Error at .*/Tests/RunCMake/MaxRecursionDepth/ctest_run_script_4\.cmake:13 \(message\):
+CMake Error at .*/Tests/RunCMake/MaxRecursionDepth/ctest_run_script_4\.cmake:8 \(message\):
   Nested script failed
 
 
-CMake Error at .*/Tests/RunCMake/MaxRecursionDepth/ctest_run_script_3\.cmake:13 \(message\):
+CMake Error at .*/Tests/RunCMake/MaxRecursionDepth/ctest_run_script_3\.cmake:8 \(message\):
   Nested script failed
 
 
-CMake Error at .*/Tests/RunCMake/MaxRecursionDepth/ctest_run_script_2\.cmake:13 \(message\):
+CMake Error at .*/Tests/RunCMake/MaxRecursionDepth/ctest_run_script_2\.cmake:8 \(message\):
   Nested script failed
 
 
-CMake Error at .*/Tests/RunCMake/MaxRecursionDepth/ctest_run_script-var/test\.cmake:19 \(message\):
+CMake Error at .*/Tests/RunCMake/MaxRecursionDepth/ctest_run_script-var/test\.cmake:14 \(message\):
   Nested script failed$

@@ -4,4 +4,3 @@
 link_libraries( NoDepB NoDepC NoDepA SixB SixA )
 
 add_executable( exec ExecMain.c )
-

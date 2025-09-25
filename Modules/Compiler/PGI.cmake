@@ -1,5 +1,5 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-# file Copyright.txt or https://cmake.org/licensing for details.
+# file LICENSE.rst or https://cmake.org/licensing for details.
 
 
 # This module is shared by multiple languages; use include blocker.
@@ -27,6 +27,8 @@ macro(__compiler_pgi lang)
 
   set(CMAKE_${lang}_LINKER_WRAPPER_FLAG "-Wl,")
   set(CMAKE_${lang}_LINKER_WRAPPER_FLAG_SEP ",")
+
+  set(CMAKE_${lang}_LINK_MODE DRIVER)
 
   set(_CMAKE_${lang}_IPO_SUPPORTED_BY_CMAKE YES)
   if(NOT CMAKE_SYSTEM_PROCESSOR STREQUAL ppc64le AND (NOT CMAKE_HOST_WIN32 OR CMAKE_${lang}_COMPILER_VERSION VERSION_LESS 16.3) AND CMAKE_${lang}_COMPILER_VERSION VERSION_LESS 23.3)

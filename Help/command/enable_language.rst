@@ -11,7 +11,7 @@ Enables support for the named languages in CMake.  This is the same as
 the :command:`project` command but does not create any of the extra
 variables that are created by the :command:`project` command.
 
-.. include:: SUPPORTED_LANGUAGES.txt
+.. include:: include/SUPPORTED_LANGUAGES.rst
 
 The following restrictions apply to where ``enable_language()`` may be called:
 

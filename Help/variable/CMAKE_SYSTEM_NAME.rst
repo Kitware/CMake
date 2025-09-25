@@ -61,7 +61,6 @@ Value                     Name
 ``Haiku``                 Unix operating system inspired by BeOS
 ``HP-UX``                 Hewlett Packard Unix
 ``iOS``                   Apple mobile phone operating system
-``kFreeBSD``              FreeBSD kernel with a GNU userland
 ``Linux``                 All Linux-based distributions
 ``Midipix``               POSIX-compatible layer for Windows
 ``MirBSD``                MirOS BSD operating system

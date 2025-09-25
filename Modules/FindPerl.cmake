@@ -1,24 +1,41 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-# file Copyright.txt or https://cmake.org/licensing for details.
+# file LICENSE.rst or https://cmake.org/licensing for details.
 
 #[=======================================================================[.rst:
 FindPerl
 --------
 
-Find a Perl interpreter.
+Finds a Perl interpreter.  Perl is a general-purpose, interpreted, dynamic
+programming language.
+
+Result Variables
+^^^^^^^^^^^^^^^^
 
 This module defines the following variables:
 
-``PERL_EXECUTABLE``
-  The full path to Perl.
-
-``PERL_FOUND``
-  True if the Perl executable was found.
+``Perl_FOUND``
+  True if the Perl executable was found.  For backward compatibility, the
+  ``PERL_FOUND`` variable is also set to the same value.
 
 ``PERL_VERSION_STRING``
-  .. versionadded:: 2.8.8
-
   The version of Perl found.
+
+Cache Variables
+^^^^^^^^^^^^^^^
+
+The following cache variables may also be set:
+
+``PERL_EXECUTABLE``
+  Full path to the ``perl`` executable.
+
+Examples
+^^^^^^^^
+
+Finding the Perl interpreter:
+
+.. code-block:: cmake
+
+  find_package(Perl)
 #]=======================================================================]
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindCygwin.cmake)
@@ -79,14 +96,14 @@ endif()
 # Deprecated settings for compatibility with CMake1.4
 set(PERL ${PERL_EXECUTABLE})
 
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(FindPackageHandleStandardArgs)
 if (CMAKE_FIND_PACKAGE_NAME STREQUAL "PerlLibs")
   # FindPerlLibs include()'s this module. It's an old pattern, but rather than
   # trying to suppress this from outside the module (which is then sensitive to
   # the contents, detect the case in this module and suppress it explicitly.
   set(FPHSA_NAME_MISMATCHED 1)
 endif ()
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(Perl
+find_package_handle_standard_args(Perl
                                   REQUIRED_VARS PERL_EXECUTABLE
                                   VERSION_VAR PERL_VERSION_STRING)
 unset(FPHSA_NAME_MISMATCHED)

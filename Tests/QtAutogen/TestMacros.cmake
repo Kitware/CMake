@@ -48,7 +48,6 @@ macro(ADD_AUTOGEN_TEST NAME)
     --build-project ${NAME}
     ${Autogen_CTEST_OPTIONS}
     --build-exe-dir "${_BuildDir}"
-    --force-new-ctest-process
     --build-options ${build_options} ${Autogen_BUILD_OPTIONS}
     ${_TestCommand}
   )

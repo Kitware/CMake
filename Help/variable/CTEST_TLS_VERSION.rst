@@ -10,7 +10,7 @@ TLS version allowed when submitting to a dashboard via ``https://`` URLs.
 
 The value may be one of:
 
-.. include:: CMAKE_TLS_VERSION-VALUES.txt
+.. include:: include/CMAKE_TLS_VERSION-VALUES.rst
 
 If ``CTEST_TLS_VERSION`` is not set, the :variable:`CMAKE_TLS_VERSION` variable
 or :envvar:`CMAKE_TLS_VERSION` environment variable is used instead.

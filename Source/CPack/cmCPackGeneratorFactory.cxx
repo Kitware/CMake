@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmCPackGeneratorFactory.h"
 
 #include <ostream>
@@ -54,6 +54,8 @@ cmCPackGeneratorFactory::cmCPackGeneratorFactory()
                             cmCPackArchiveGenerator::CreateTZGenerator);
     this->RegisterGenerator("TZST", "Tar Zstandard compression",
                             cmCPackArchiveGenerator::CreateTZSTGenerator);
+    this->RegisterGenerator("TAR", "Tar no compression",
+                            cmCPackArchiveGenerator::CreateTarGenerator);
     this->RegisterGenerator("ZIP", "ZIP file format",
                             cmCPackArchiveGenerator::CreateZIPGenerator);
   }
@@ -133,7 +135,7 @@ cmCPackGeneratorFactory::cmCPackGeneratorFactory()
 }
 
 std::unique_ptr<cmCPackGenerator> cmCPackGeneratorFactory::NewGenerator(
-  const std::string& name)
+  std::string const& name)
 {
   auto it = this->GeneratorCreators.find(name);
   if (it == this->GeneratorCreators.end()) {
@@ -148,7 +150,7 @@ std::unique_ptr<cmCPackGenerator> cmCPackGeneratorFactory::NewGenerator(
 }
 
 void cmCPackGeneratorFactory::RegisterGenerator(
-  const std::string& name, const char* generatorDescription,
+  std::string const& name, char const* generatorDescription,
   CreateGeneratorCall* createGenerator)
 {
   if (!createGenerator) {

@@ -1,5 +1,5 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-# file Copyright.txt or https://cmake.org/licensing for details.
+# file LICENSE.rst or https://cmake.org/licensing for details.
 
 
 # This module is shared by multiple languages; use include blocker.
@@ -18,4 +18,6 @@ macro(__compiler_sco lang)
 
   set(CMAKE_${lang}_LINKER_WRAPPER_FLAG "-Wl,")
   set(CMAKE_${lang}_LINKER_WRAPPER_FLAG_SEP ",")
+
+  set(CMAKE_${lang}_LINK_MODE DRIVER)
 endmacro()

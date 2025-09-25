@@ -17,7 +17,7 @@
 
 static void* random_ptr = reinterpret_cast<void*>(0x123);
 
-static int argument(const char* arg, const char* value, void* call_data)
+static int argument(char const* arg, char const* value, void* call_data)
 {
   std::cout << "Got argument: \"" << arg << "\" value: \""
             << (value ? value : "(null)") << "\"" << std::endl;
@@ -28,7 +28,7 @@ static int argument(const char* arg, const char* value, void* call_data)
   return 1;
 }
 
-static int unknown_argument(const char* argument, void* call_data)
+static int unknown_argument(char const* argument, void* call_data)
 {
   std::cout << "Got unknown argument: \"" << argument << "\"" << std::endl;
   if (call_data != random_ptr) {
@@ -50,11 +50,11 @@ static bool CompareTwoItemsOnList(double i1, double i2)
 {
   return i1 == i2;
 }
-static bool CompareTwoItemsOnList(const char* i1, const char* i2)
+static bool CompareTwoItemsOnList(char const* i1, char const* i2)
 {
   return strcmp(i1, i2) == 0;
 }
-static bool CompareTwoItemsOnList(const std::string& i1, const std::string& i2)
+static bool CompareTwoItemsOnList(std::string const& i1, std::string const& i2)
 {
   return i1 == i2;
 }
@@ -93,7 +93,7 @@ int testCommandLineArguments(int argc, char* argv[])
   bool valid_bools[] = { true, true, false };
 
   std::vector<char*> strings_argument;
-  const char* valid_strings[] = { "andy", "bill", "brad", "ken" };
+  char const* valid_strings[] = { "andy", "bill", "brad", "ken" };
 
   std::vector<std::string> stl_strings_argument;
   std::string valid_stl_strings[] = { "ken", "brad", "bill", "andy" };

@@ -4,19 +4,29 @@ CPack Archive Generator
 CPack generator for packaging files into an archive, which can have
 any of the following formats:
 
-  - 7Z - 7zip - (``.7z``)
-  - TBZ2 (``.tar.bz2``)
-  - TGZ (``.tar.gz``)
-  - TXZ (``.tar.xz``)
-  - TZ (``.tar.Z``)
-  - TZST (``.tar.zst``)
-  - ZIP (``.zip``)
+- 7Z - 7zip - (``.7z``)
 
-.. versionadded:: 3.1
-  7Z and TXZ formats support.
+  .. versionadded:: 3.1
 
-.. versionadded:: 3.16
-  TZST format support.
+- TAR (``.tar``)
+
+  .. versionadded:: 4.0
+
+- TBZ2 (``.tar.bz2``)
+
+- TGZ (``.tar.gz``)
+
+- TXZ (``.tar.xz``)
+
+  .. versionadded:: 3.1
+
+- TZ (``.tar.Z``)
+
+- TZST (``.tar.zst``)
+
+  .. versionadded:: 3.16
+
+- ZIP (``.zip``)
 
 When this generator is called from ``CPackSourceConfig.cmake`` (or through
 the ``package_source`` target), then the generated archive will contain all
@@ -45,25 +55,39 @@ Variables specific to CPack Archive generator
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. variable:: CPACK_ARCHIVE_FILE_NAME
-              CPACK_ARCHIVE_<component>_FILE_NAME
-
-  Package file name without extension.
-
-  :Default: The default is ``<CPACK_PACKAGE_FILE_NAME>[-<component>]``, with spaces
-   replaced by '-'.
-
-  The extension is determined from the archive format (see list above) and
-  automatically appended to the file name. Note that ``<component>`` is all
-  uppercase in the variable name.
 
   .. versionadded:: 3.9
-    Per-component :variable:`!CPACK_ARCHIVE_<component>_FILE_NAME` variables.
+
+  Archive name for component-based packages, without extension.
+
+  :Default: :variable:`CPACK_PACKAGE_FILE_NAME`
+
+  The extension is appended automatically.
+
+  If :variable:`CPACK_COMPONENTS_GROUPING` is set to ``ALL_COMPONENTS_IN_ONE``,
+  this will be the name of the one output archive.
+
+  .. versionchanged:: 4.0
+
+    This variable also works for non-component packages.
+
+.. variable:: CPACK_ARCHIVE_<component>_FILE_NAME
+
+  .. versionadded:: 3.9
+
+  Component archive name without extension.
+
+  :Default: ``<CPACK_ARCHIVE_FILE_NAME>-<component>``, with spaces replaced
+    by ``'-'``.
+
+  The extension is appended automatically. Note that ``<component>`` is all
+  uppercase in the variable name.
 
 .. variable:: CPACK_ARCHIVE_FILE_EXTENSION
 
   .. versionadded:: 3.25
 
-  Package file extension.
+  Archive file extension.
 
   :Default: Default values are given in the list above.
 
@@ -87,9 +111,9 @@ CPack generators which are essentially archives at their core. These include:
 
 .. variable:: CPACK_ARCHIVE_THREADS
 
-  The number of threads to use when performing the compression.
-
   .. versionadded:: 3.18
+
+  The number of threads to use when performing the compression.
 
   :Default: value of :variable:`CPACK_THREADS`
 

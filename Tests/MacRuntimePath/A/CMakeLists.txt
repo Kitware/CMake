@@ -10,8 +10,6 @@ add_library(shared2 SHARED shared.cpp shared.h)
 set_target_properties(shared2 PROPERTIES
   BUILD_WITH_INSTALL_RPATH 1 INSTALL_NAME_DIR "@rpath")
 
-cmake_policy(SET CMP0042 NEW)
-
 # a framework library
 add_library(framework SHARED framework.cpp framework.h)
 set_target_properties(framework PROPERTIES FRAMEWORK 1)

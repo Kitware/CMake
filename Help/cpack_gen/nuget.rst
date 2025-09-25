@@ -41,6 +41,14 @@ List of CPack NuGet generator specific variables:
  :Mandatory: No
  :Default: ``OFF``
 
+.. variable:: CPACK_NUGET_SYMBOL_PACKAGE
+
+ .. versionadded:: 4.1
+
+ Generate a Nuget symbol package (.snupkg).
+
+ :Mandatory: No
+ :Default: ``OFF``
 
 Required metadata variables
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~

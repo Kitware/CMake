@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmAddDependenciesCommand.h"
 
 #include "cmExecutionStatus.h"
@@ -12,7 +12,7 @@
 bool cmAddDependenciesCommand(std::vector<std::string> const& args,
                               cmExecutionStatus& status)
 {
-  if (args.size() < 2) {
+  if (args.empty()) {
     status.SetError("called with incorrect number of arguments");
     return false;
   }

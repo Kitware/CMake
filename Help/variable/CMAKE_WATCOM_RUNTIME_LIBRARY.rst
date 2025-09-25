@@ -10,7 +10,7 @@ calls to the :command:`try_compile` command into the test project.
 
 The allowed values are:
 
-.. include:: ../prop_tgt/WATCOM_RUNTIME_LIBRARY-VALUES.txt
+.. include:: ../prop_tgt/include/WATCOM_RUNTIME_LIBRARY-VALUES.rst
 
 Use :manual:`generator expressions <cmake-generator-expressions(7)>` to
 support per-configuration specification.

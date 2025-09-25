@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
@@ -41,7 +41,7 @@ public:
 
   int GetIndex() { return this->Index; }
 
-  void AddFailedDependency(const std::string& failedTest)
+  void AddFailedDependency(std::string const& failedTest)
   {
     this->FailedDependencies.insert(failedTest);
   }
@@ -87,7 +87,7 @@ public:
 
   std::string& GetActualCommand() { return this->ActualCommand; }
 
-  const std::vector<std::string>& GetArguments() { return this->Arguments; }
+  std::vector<std::string> const& GetArguments() { return this->Arguments; }
 
   void FinalizeTest(bool started = true);
 
@@ -96,9 +96,9 @@ public:
     this->UseAllocatedResources = use;
   }
   void SetAllocatedResources(
-    const std::vector<
-      std::map<std::string,
-               std::vector<cmCTestMultiProcessHandler::ResourceAllocation>>>&
+    std::vector<std::map<
+      std::string,
+      std::vector<cmCTestMultiProcessHandler::ResourceAllocation>>> const&
       resources)
   {
     this->AllocatedResources = resources;

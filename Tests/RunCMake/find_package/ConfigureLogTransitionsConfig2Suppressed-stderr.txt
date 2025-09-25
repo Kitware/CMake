@@ -1,0 +1,63 @@
+^NotDefined -> NotFound
+CMake Warning at ConfigureLogTransitionsConfig2Suppressed.cmake:[0-9]+ \(find_package\):
+  By not providing "FindViaConfig.cmake" in CMAKE_MODULE_PATH this project
+  has asked CMake to find a package configuration file provided by
+  "ViaConfig", but CMake did not find one.
+
+  Could not find a package configuration file provided by "ViaConfig" with
+  any of the following names:
+
+    ViaConfigConfig.cmake
+    viaconfig-config.cmake
+
+  Add the installation prefix of "ViaConfig" to CMAKE_PREFIX_PATH or set
+  "ViaConfig_DIR" to a directory containing one of the above files.  If
+  "ViaConfig" provides a separate development package or SDK, be sure it has
+  been installed.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)
+
+
+NotFound -> NotFound
+CMake Warning at ConfigureLogTransitionsConfig2Suppressed.cmake:[0-9]+ \(find_package\):
+  By not providing "FindViaConfig.cmake" in CMAKE_MODULE_PATH this project
+  has asked CMake to find a package configuration file provided by
+  "ViaConfig", but CMake did not find one.
+
+  Could not find a package configuration file provided by "ViaConfig" with
+  any of the following names:
+
+    ViaConfigConfig.cmake
+    viaconfig-config.cmake
+
+  Add the installation prefix of "ViaConfig" to CMAKE_PREFIX_PATH or set
+  "ViaConfig_DIR" to a directory containing one of the above files.  If
+  "ViaConfig" provides a separate development package or SDK, be sure it has
+  been installed.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)
+
+
+NotFound -> Found
+Found -> Found
+Found -> NotFound
+CMake Warning at ConfigureLogTransitionsConfig2Suppressed.cmake:[0-9]+ \(find_package\):
+  By not providing "FindViaConfig.cmake" in CMAKE_MODULE_PATH this project
+  has asked CMake to find a package configuration file provided by
+  "ViaConfig", but CMake did not find one.
+
+  Could not find a package configuration file provided by "ViaConfig" with
+  any of the following names:
+
+    ViaConfigConfig.cmake
+    viaconfig-config.cmake
+
+  Add the installation prefix of "ViaConfig" to CMAKE_PREFIX_PATH or set
+  "ViaConfig_DIR" to a directory containing one of the above files.  If
+  "ViaConfig" provides a separate development package or SDK, be sure it has
+  been installed.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)
+
+
+END

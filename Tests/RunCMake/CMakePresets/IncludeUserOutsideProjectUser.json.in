@@ -5,7 +5,8 @@
   ],
   "configurePresets": [
     {
-      "name": "IncludeUserOutsideProject"
+      "name": "IncludeUserOutsideProject",
+      "generator": "@RunCMake_GENERATOR@"
     }
   ]
 }

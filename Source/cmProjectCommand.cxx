@@ -1,41 +1,102 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmProjectCommand.h"
 
 #include <array>
 #include <cstdio>
-#include <functional>
 #include <limits>
+#include <set>
 #include <utility>
 
+#include <cm/optional>
+#include <cm/string_view>
 #include <cmext/string_view>
 
 #include "cmsys/RegularExpression.hxx"
 
+#include "cmArgumentParser.h"
+#include "cmArgumentParserTypes.h"
 #include "cmExecutionStatus.h"
+#include "cmExperimental.h"
 #include "cmList.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmPolicies.h"
+#include "cmRange.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmValue.h"
 
-static bool IncludeByVariable(cmExecutionStatus& status,
-                              const std::string& variable);
-static void TopLevelCMakeVarCondSet(cmMakefile& mf, std::string const& name,
-                                    std::string const& value);
+namespace {
+
+bool IncludeByVariable(cmExecutionStatus& status, std::string const& variable);
+void TopLevelCMakeVarCondSet(cmMakefile& mf, std::string const& name,
+                             std::string const& value);
+
+struct ProjectArguments : ArgumentParser::ParseResult
+{
+  cm::optional<std::string> Version;
+  cm::optional<std::string> CompatVersion;
+  cm::optional<std::string> Description;
+  cm::optional<std::string> HomepageURL;
+  cm::optional<ArgumentParser::MaybeEmpty<std::vector<std::string>>> Languages;
+};
+
+struct ProjectArgumentParser : public cmArgumentParser<void>
+{
+  ProjectArgumentParser& BindKeywordMissingValue(
+    std::vector<cm::string_view>& ref)
+  {
+    this->cmArgumentParser<void>::BindKeywordMissingValue(
+      [&ref](Instance&, cm::string_view arg) { ref.emplace_back(arg); });
+    return *this;
+  }
+};
+
+} // namespace
 
 bool cmProjectCommand(std::vector<std::string> const& args,
                       cmExecutionStatus& status)
 {
+  std::vector<std::string> unparsedArgs;
+  std::vector<cm::string_view> missingValueKeywords;
+  std::vector<cm::string_view> parsedKeywords;
+  ProjectArguments prArgs;
+  ProjectArgumentParser parser;
+  parser.BindKeywordMissingValue(missingValueKeywords)
+    .BindParsedKeywords(parsedKeywords)
+    .Bind("VERSION"_s, prArgs.Version)
+    .Bind("DESCRIPTION"_s, prArgs.Description)
+    .Bind("HOMEPAGE_URL"_s, prArgs.HomepageURL)
+    .Bind("LANGUAGES"_s, prArgs.Languages);
+
+  cmMakefile& mf = status.GetMakefile();
+  bool enableCompatVersion = cmExperimental::HasSupportEnabled(
+    mf, cmExperimental::Feature::ExportPackageInfo);
+
+  if (enableCompatVersion) {
+    parser.Bind("COMPAT_VERSION"_s, prArgs.CompatVersion);
+  }
+
   if (args.empty()) {
     status.SetError("PROJECT called with incorrect number of arguments");
     return false;
   }
 
-  cmMakefile& mf = status.GetMakefile();
+  std::string const& projectName = args[0];
+  if (parser.HasKeyword(projectName)) {
+    mf.IssueMessage(
+      MessageType::AUTHOR_WARNING,
+      cmStrCat(
+        "project() called with '", projectName,
+        "' as first argument. The first parameter should be the project name, "
+        "not a keyword argument. See the cmake-commands(7) manual for correct "
+        "usage of the project() command."));
+  }
+
+  parser.Parse(cmMakeRange(args).advance(1), &unparsedArgs, 1);
+
   if (mf.IsRootMakefile() &&
       !mf.GetDefinition("CMAKE_MINIMUM_REQUIRED_VERSION")) {
     mf.IssueMessage(
@@ -48,8 +109,6 @@ bool cmProjectCommand(std::vector<std::string> const& args,
   if (!IncludeByVariable(status, "CMAKE_PROJECT_INCLUDE_BEFORE")) {
     return false;
   }
-
-  std::string const& projectName = args[0];
 
   if (!IncludeByVariable(status,
                          "CMAKE_PROJECT_" + projectName + "_INCLUDE_BEFORE")) {
@@ -91,164 +150,62 @@ bool cmProjectCommand(std::vector<std::string> const& args,
     mf.AddDefinition(varName, mf.IsRootMakefile() ? "ON" : "OFF");
   }
 
-  // Set the CMAKE_PROJECT_NAME variable to be the highest-level
-  // project name in the tree. If there are two project commands
-  // in the same CMakeLists.txt file, and it is the top level
-  // CMakeLists.txt file, then go with the last one, so that
-  // CMAKE_PROJECT_NAME will match PROJECT_NAME, and cmake --build
-  // will work.
-  if (!mf.GetDefinition("CMAKE_PROJECT_NAME") || mf.IsRootMakefile()) {
-    mf.RemoveDefinition("CMAKE_PROJECT_NAME");
-    mf.AddCacheDefinition("CMAKE_PROJECT_NAME", projectName,
-                          "Value Computed by CMake", cmStateEnums::STATIC);
-  }
+  TopLevelCMakeVarCondSet(mf, "CMAKE_PROJECT_NAME", projectName);
 
-  bool haveVersion = false;
-  bool haveLanguages = false;
-  bool haveDescription = false;
-  bool haveHomepage = false;
-  bool injectedProjectCommand = false;
-  std::string version;
-  std::string description;
-  std::string homepage;
-  std::vector<std::string> languages;
-  std::function<void()> missedValueReporter;
-  auto resetReporter = [&missedValueReporter]() {
-    missedValueReporter = std::function<void()>();
-  };
-  enum Doing
-  {
-    DoingDescription,
-    DoingHomepage,
-    DoingLanguages,
-    DoingVersion
-  };
-  Doing doing = DoingLanguages;
-  for (size_t i = 1; i < args.size(); ++i) {
-    if (args[i] == "LANGUAGES") {
-      if (haveLanguages) {
-        mf.IssueMessage(MessageType::FATAL_ERROR,
-                        "LANGUAGES may be specified at most once.");
-        cmSystemTools::SetFatalErrorOccurred();
-        return true;
-      }
-      haveLanguages = true;
-      if (missedValueReporter) {
-        missedValueReporter();
-      }
-      doing = DoingLanguages;
-      if (!languages.empty()) {
-        std::string msg = cmStrCat(
-          "the following parameters must be specified after LANGUAGES "
-          "keyword: ",
-          cmJoin(languages, ", "), '.');
-        mf.IssueMessage(MessageType::WARNING, msg);
-      }
-    } else if (args[i] == "VERSION") {
-      if (haveVersion) {
-        mf.IssueMessage(MessageType::FATAL_ERROR,
-                        "VERSION may be specified at most once.");
-        cmSystemTools::SetFatalErrorOccurred();
-        return true;
-      }
-      haveVersion = true;
-      if (missedValueReporter) {
-        missedValueReporter();
-      }
-      doing = DoingVersion;
-      missedValueReporter = [&mf, &resetReporter]() {
-        mf.IssueMessage(
-          MessageType::WARNING,
-          "VERSION keyword not followed by a value or was followed by a "
-          "value that expanded to nothing.");
-        resetReporter();
-      };
-    } else if (args[i] == "DESCRIPTION") {
-      if (haveDescription) {
-        mf.IssueMessage(MessageType::FATAL_ERROR,
-                        "DESCRIPTION may be specified at most once.");
-        cmSystemTools::SetFatalErrorOccurred();
-        return true;
-      }
-      haveDescription = true;
-      if (missedValueReporter) {
-        missedValueReporter();
-      }
-      doing = DoingDescription;
-      missedValueReporter = [&mf, &resetReporter]() {
-        mf.IssueMessage(
-          MessageType::WARNING,
-          "DESCRIPTION keyword not followed by a value or was followed "
-          "by a value that expanded to nothing.");
-        resetReporter();
-      };
-    } else if (args[i] == "HOMEPAGE_URL") {
-      if (haveHomepage) {
-        mf.IssueMessage(MessageType::FATAL_ERROR,
-                        "HOMEPAGE_URL may be specified at most once.");
-        cmSystemTools::SetFatalErrorOccurred();
-        return true;
-      }
-      haveHomepage = true;
-      doing = DoingHomepage;
-      missedValueReporter = [&mf, &resetReporter]() {
-        mf.IssueMessage(
-          MessageType::WARNING,
-          "HOMEPAGE_URL keyword not followed by a value or was followed "
-          "by a value that expanded to nothing.");
-        resetReporter();
-      };
-    } else if (i == 1 && args[i] == "__CMAKE_INJECTED_PROJECT_COMMAND__") {
-      injectedProjectCommand = true;
-    } else if (doing == DoingVersion) {
-      doing = DoingLanguages;
-      version = args[i];
-      resetReporter();
-    } else if (doing == DoingDescription) {
-      doing = DoingLanguages;
-      description = args[i];
-      resetReporter();
-    } else if (doing == DoingHomepage) {
-      doing = DoingLanguages;
-      homepage = args[i];
-      resetReporter();
-    } else // doing == DoingLanguages
-    {
-      languages.push_back(args[i]);
-    }
-  }
-
-  if (missedValueReporter) {
-    missedValueReporter();
-  }
-
-  if ((haveVersion || haveDescription || haveHomepage) && !haveLanguages &&
-      !languages.empty()) {
-    mf.IssueMessage(MessageType::FATAL_ERROR,
-                    "project with VERSION, DESCRIPTION or HOMEPAGE_URL must "
-                    "use LANGUAGES before language names.");
-    cmSystemTools::SetFatalErrorOccurred();
-    return true;
-  }
-  if (haveLanguages && languages.empty()) {
-    languages.emplace_back("NONE");
-  }
-
-  cmPolicies::PolicyStatus const cmp0048 =
-    mf.GetPolicyStatus(cmPolicies::CMP0048);
-  if (haveVersion) {
-    // Set project VERSION variables to given values
-    if (cmp0048 == cmPolicies::OLD || cmp0048 == cmPolicies::WARN) {
+  std::set<cm::string_view> seenKeywords;
+  for (cm::string_view keyword : parsedKeywords) {
+    if (seenKeywords.find(keyword) != seenKeywords.end()) {
       mf.IssueMessage(MessageType::FATAL_ERROR,
-                      "VERSION not allowed unless CMP0048 is set to NEW");
+                      cmStrCat(keyword, " may be specified at most once."));
       cmSystemTools::SetFatalErrorOccurred();
       return true;
     }
+    seenKeywords.insert(keyword);
+  }
 
-    cmsys::RegularExpression vx(
-      R"(^([0-9]+(\.[0-9]+(\.[0-9]+(\.[0-9]+)?)?)?)?$)");
-    if (!vx.find(version)) {
-      std::string e = R"(VERSION ")" + version + R"(" format invalid.)";
+  for (cm::string_view keyword : missingValueKeywords) {
+    mf.IssueMessage(MessageType::WARNING,
+                    cmStrCat(keyword,
+                             " keyword not followed by a value or was "
+                             "followed by a value that expanded to nothing."));
+  }
+
+  if (!unparsedArgs.empty()) {
+    if (prArgs.Languages) {
+      mf.IssueMessage(
+        MessageType::WARNING,
+        cmStrCat("the following parameters must be specified after LANGUAGES "
+                 "keyword: ",
+                 cmJoin(unparsedArgs, ", "), '.'));
+    } else if (prArgs.Version || prArgs.Description || prArgs.HomepageURL) {
+      mf.IssueMessage(MessageType::FATAL_ERROR,
+                      "project with VERSION, DESCRIPTION or HOMEPAGE_URL must "
+                      "use LANGUAGES before language names.");
+      cmSystemTools::SetFatalErrorOccurred();
+      return true;
+    }
+  } else if (prArgs.Languages && prArgs.Languages->empty()) {
+    prArgs.Languages->emplace_back("NONE");
+  }
+
+  if (prArgs.CompatVersion && !prArgs.Version) {
+    mf.IssueMessage(MessageType::FATAL_ERROR,
+                    "project with COMPAT_VERSION must also provide VERSION.");
+    cmSystemTools::SetFatalErrorOccurred();
+    return true;
+  }
+
+  cmsys::RegularExpression vx(
+    R"(^([0-9]+(\.[0-9]+(\.[0-9]+(\.[0-9]+)?)?)?)?$)");
+
+  constexpr std::size_t MAX_VERSION_COMPONENTS = 4u;
+  std::string version_string;
+  std::array<std::string, MAX_VERSION_COMPONENTS> version_components;
+
+  if (prArgs.Version) {
+    if (!vx.find(*prArgs.Version)) {
+      std::string e =
+        R"(VERSION ")" + *prArgs.Version + R"(" format invalid.)";
       mf.IssueMessage(MessageType::FATAL_ERROR, e);
       cmSystemTools::SetFatalErrorOccurred();
       return true;
@@ -257,17 +214,13 @@ bool cmProjectCommand(std::vector<std::string> const& args,
     cmPolicies::PolicyStatus const cmp0096 =
       mf.GetPolicyStatus(cmPolicies::CMP0096);
 
-    constexpr std::size_t MAX_VERSION_COMPONENTS = 4u;
-    std::string version_string;
-    std::array<std::string, MAX_VERSION_COMPONENTS> version_components;
-
     if (cmp0096 == cmPolicies::OLD || cmp0096 == cmPolicies::WARN) {
       constexpr size_t maxIntLength =
         std::numeric_limits<unsigned>::digits10 + 2;
       char vb[MAX_VERSION_COMPONENTS][maxIntLength];
       unsigned v[MAX_VERSION_COMPONENTS] = { 0, 0, 0, 0 };
-      const int vc = std::sscanf(version.c_str(), "%u.%u.%u.%u", &v[0], &v[1],
-                                 &v[2], &v[3]);
+      int const vc = std::sscanf(prArgs.Version->c_str(), "%u.%u.%u.%u", &v[0],
+                                 &v[1], &v[2], &v[3]);
       for (auto i = 0u; i < MAX_VERSION_COMPONENTS; ++i) {
         if (static_cast<int>(i) < vc) {
           std::snprintf(vb[i], maxIntLength, "%u", v[i]);
@@ -281,94 +234,59 @@ bool cmProjectCommand(std::vector<std::string> const& args,
     } else {
       // The regex above verified that we have a .-separated string of
       // non-negative integer components.  Keep the original string.
-      version_string = std::move(version);
+      version_string = std::move(*prArgs.Version);
       // Split the integer components.
       auto components = cmSystemTools::SplitString(version_string, '.');
       for (auto i = 0u; i < components.size(); ++i) {
         version_components[i] = std::move(components[i]);
       }
     }
+  }
 
-    std::string vv;
-    vv = projectName + "_VERSION";
-    mf.AddDefinition("PROJECT_VERSION", version_string);
-    mf.AddDefinition(vv, version_string);
-    vv = projectName + "_VERSION_MAJOR";
-    mf.AddDefinition("PROJECT_VERSION_MAJOR", version_components[0]);
-    mf.AddDefinition(vv, version_components[0]);
-    vv = projectName + "_VERSION_MINOR";
-    mf.AddDefinition("PROJECT_VERSION_MINOR", version_components[1]);
-    mf.AddDefinition(vv, version_components[1]);
-    vv = projectName + "_VERSION_PATCH";
-    mf.AddDefinition("PROJECT_VERSION_PATCH", version_components[2]);
-    mf.AddDefinition(vv, version_components[2]);
-    vv = projectName + "_VERSION_TWEAK";
-    mf.AddDefinition("PROJECT_VERSION_TWEAK", version_components[3]);
-    mf.AddDefinition(vv, version_components[3]);
-    // Also, try set top level variables
-    TopLevelCMakeVarCondSet(mf, "CMAKE_PROJECT_VERSION", version_string);
-    TopLevelCMakeVarCondSet(mf, "CMAKE_PROJECT_VERSION_MAJOR",
-                            version_components[0]);
-    TopLevelCMakeVarCondSet(mf, "CMAKE_PROJECT_VERSION_MINOR",
-                            version_components[1]);
-    TopLevelCMakeVarCondSet(mf, "CMAKE_PROJECT_VERSION_PATCH",
-                            version_components[2]);
-    TopLevelCMakeVarCondSet(mf, "CMAKE_PROJECT_VERSION_TWEAK",
-                            version_components[3]);
-  } else if (cmp0048 != cmPolicies::OLD) {
-    // Set project VERSION variables to empty
-    std::vector<std::string> vv = { "PROJECT_VERSION",
-                                    "PROJECT_VERSION_MAJOR",
-                                    "PROJECT_VERSION_MINOR",
-                                    "PROJECT_VERSION_PATCH",
-                                    "PROJECT_VERSION_TWEAK",
-                                    projectName + "_VERSION",
-                                    projectName + "_VERSION_MAJOR",
-                                    projectName + "_VERSION_MINOR",
-                                    projectName + "_VERSION_PATCH",
-                                    projectName + "_VERSION_TWEAK" };
-    if (mf.IsRootMakefile()) {
-      vv.emplace_back("CMAKE_PROJECT_VERSION");
-      vv.emplace_back("CMAKE_PROJECT_VERSION_MAJOR");
-      vv.emplace_back("CMAKE_PROJECT_VERSION_MINOR");
-      vv.emplace_back("CMAKE_PROJECT_VERSION_PATCH");
-      vv.emplace_back("CMAKE_PROJECT_VERSION_TWEAK");
+  if (prArgs.CompatVersion) {
+    if (!vx.find(*prArgs.CompatVersion)) {
+      std::string e =
+        R"(COMPAT_VERSION ")" + *prArgs.CompatVersion + R"(" format invalid.)";
+      mf.IssueMessage(MessageType::FATAL_ERROR, e);
+      cmSystemTools::SetFatalErrorOccurred();
+      return true;
     }
-    std::string vw;
-    for (std::string const& i : vv) {
-      cmValue v = mf.GetDefinition(i);
-      if (cmNonempty(v)) {
-        if (cmp0048 == cmPolicies::WARN) {
-          if (!injectedProjectCommand) {
-            vw += "\n  ";
-            vw += i;
-          }
-        } else {
-          mf.AddDefinition(i, "");
-        }
-      }
-    }
-    if (!vw.empty()) {
-      mf.IssueMessage(
-        MessageType::AUTHOR_WARNING,
-        cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0048),
-                 "\nThe following variable(s) would be set to empty:", vw));
+
+    if (cmSystemTools::VersionCompareGreater(*prArgs.CompatVersion,
+                                             version_string)) {
+      mf.IssueMessage(MessageType::FATAL_ERROR,
+                      "COMPAT_VERSION must be less than or equal to VERSION");
+      cmSystemTools::SetFatalErrorOccurred();
+      return true;
     }
   }
 
-  mf.AddDefinition("PROJECT_DESCRIPTION", description);
-  mf.AddDefinition(projectName + "_DESCRIPTION", description);
-  TopLevelCMakeVarCondSet(mf, "CMAKE_PROJECT_DESCRIPTION", description);
+  auto createVariables = [&](cm::string_view var, std::string const& val) {
+    mf.AddDefinition(cmStrCat("PROJECT_"_s, var), val);
+    mf.AddDefinition(cmStrCat(projectName, "_"_s, var), val);
+    TopLevelCMakeVarCondSet(mf, cmStrCat("CMAKE_PROJECT_"_s, var), val);
+  };
 
-  mf.AddDefinition("PROJECT_HOMEPAGE_URL", homepage);
-  mf.AddDefinition(projectName + "_HOMEPAGE_URL", homepage);
-  TopLevelCMakeVarCondSet(mf, "CMAKE_PROJECT_HOMEPAGE_URL", homepage);
+  createVariables("VERSION"_s, version_string);
+  createVariables("VERSION_MAJOR"_s, version_components[0]);
+  createVariables("VERSION_MINOR"_s, version_components[1]);
+  createVariables("VERSION_PATCH"_s, version_components[2]);
+  createVariables("VERSION_TWEAK"_s, version_components[3]);
+  createVariables("COMPAT_VERSION"_s, prArgs.CompatVersion.value_or(""));
+  createVariables("DESCRIPTION"_s, prArgs.Description.value_or(""));
+  createVariables("HOMEPAGE_URL"_s, prArgs.HomepageURL.value_or(""));
 
-  if (languages.empty()) {
+  if (unparsedArgs.empty() && !prArgs.Languages) {
     // if no language is specified do c and c++
-    languages = { "C", "CXX" };
+    mf.EnableLanguage({ "C", "CXX" }, false);
+  } else {
+    if (!unparsedArgs.empty()) {
+      mf.EnableLanguage(unparsedArgs, false);
+    }
+    if (prArgs.Languages) {
+      mf.EnableLanguage(*prArgs.Languages, false);
+    }
   }
-  mf.EnableLanguage(languages, false);
 
   if (!IncludeByVariable(status, "CMAKE_PROJECT_INCLUDE")) {
     return false;
@@ -382,8 +300,8 @@ bool cmProjectCommand(std::vector<std::string> const& args,
   return true;
 }
 
-static bool IncludeByVariable(cmExecutionStatus& status,
-                              const std::string& variable)
+namespace {
+bool IncludeByVariable(cmExecutionStatus& status, std::string const& variable)
 {
   cmMakefile& mf = status.GetMakefile();
   cmValue include = mf.GetDefinition(variable);
@@ -423,7 +341,7 @@ static bool IncludeByVariable(cmExecutionStatus& status,
       continue;
     }
 
-    const bool readit = mf.ReadDependentFile(filePath);
+    bool const readit = mf.ReadDependentFile(filePath);
     if (readit) {
       // If the included file ran successfully, continue to the next file
       continue;
@@ -441,8 +359,8 @@ static bool IncludeByVariable(cmExecutionStatus& status,
   return !failed;
 }
 
-static void TopLevelCMakeVarCondSet(cmMakefile& mf, std::string const& name,
-                                    std::string const& value)
+void TopLevelCMakeVarCondSet(cmMakefile& mf, std::string const& name,
+                             std::string const& value)
 {
   // Set the CMAKE_PROJECT_XXX variable to be the highest-level
   // project name in the tree. If there are two project commands
@@ -453,4 +371,5 @@ static void TopLevelCMakeVarCondSet(cmMakefile& mf, std::string const& name,
     mf.AddCacheDefinition(name, value, "Value Computed by CMake",
                           cmStateEnums::STATIC);
   }
+}
 }

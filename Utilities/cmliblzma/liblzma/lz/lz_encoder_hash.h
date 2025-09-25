@@ -1,12 +1,11 @@
+// SPDX-License-Identifier: 0BSD
+
 ///////////////////////////////////////////////////////////////////////////////
 //
 /// \file       lz_encoder_hash.h
 /// \brief      Hash macros for match finders
 //
 //  Author:     Igor Pavlov
-//
-//  This file has been put into the public domain.
-//  You can do whatever you want with this file.
 //
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -17,6 +16,7 @@
 	// This is to make liblzma produce the same output on big endian
 	// systems that it does on little endian systems. lz_encoder.c
 	// takes care of including the actual table.
+	lzma_attr_visibility_hidden
 	extern const uint32_t lzma_lz_hash_table[256];
 #	define hash_table lzma_lz_hash_table
 #else

@@ -1,106 +1,153 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-# file Copyright.txt or https://cmake.org/licensing for details.
+# file LICENSE.rst or https://cmake.org/licensing for details.
 
 #[=======================================================================[.rst:
 DeployQt4
 ---------
 
-Functions to help assemble a standalone Qt4 executable.
+.. note::
 
-A collection of CMake utility functions useful for deploying Qt4
-executables.
+  This module is for Qt version 4.  New code should follow the
+  :manual:`cmake-qt(7)` instead of using this module.
 
-The following functions are provided by this module:
+This module provides a collection of CMake utility commands useful for
+assembling and deploying standalone Qt4 executables.
 
-::
+Load this module in a CMake project with:
 
-   write_qt4_conf
-   resolve_qt4_paths
-   fixup_qt4_executable
-   install_qt4_plugin_path
-   install_qt4_plugin
-   install_qt4_executable
+.. code-block:: cmake
 
-Requires CMake 2.6 or greater because it uses function and
-PARENT_SCOPE.  Also depends on BundleUtilities.cmake.
+  include(DeployQt4)
 
-::
+Commands
+^^^^^^^^
 
-  write_qt4_conf(<qt_conf_dir> <qt_conf_contents>)
+This module provides the following commands:
 
-Writes a qt.conf file with the <qt_conf_contents> into <qt_conf_dir>.
+* :command:`write_qt4_conf`
+* :command:`resolve_qt4_paths`
+* :command:`fixup_qt4_executable`
+* :command:`install_qt4_plugin_path`
+* :command:`install_qt4_plugin`
+* :command:`install_qt4_executable`
 
-::
+.. command:: write_qt4_conf
 
-  resolve_qt4_paths(<paths_var> [<executable_path>])
+  Creates a Qt configuration file:
 
-Loop through <paths_var> list and if any don't exist resolve them
-relative to the <executable_path> (if supplied) or the
-CMAKE_INSTALL_PREFIX.
+  .. code-block:: cmake
 
-::
+    write_qt4_conf(<qt-conf-dir> <qt-conf-contents>)
 
-  fixup_qt4_executable(<executable>
-    [<qtplugins> <libs> <dirs> <plugins_dir> <request_qt_conf>])
+  This command writes a ``qt.conf`` file with the ``<qt-conf-contents>`` into
+  the ``<qt-conf-dir>`` directory.
 
-Copies Qt plugins, writes a Qt configuration file (if needed) and
-fixes up a Qt4 executable using BundleUtilities so it is standalone
-and can be drag-and-drop copied to another machine as long as all of
-the system libraries are compatible.
+.. command:: resolve_qt4_paths
 
-<executable> should point to the executable to be fixed-up.
+  Resolves relative paths to absolute:
 
-<qtplugins> should contain a list of the names or paths of any Qt
-plugins to be installed.
+  .. code-block:: cmake
 
-<libs> will be passed to BundleUtilities and should be a list of any
-already installed plugins, libraries or executables to also be
-fixed-up.
+    resolve_qt4_paths(<paths-var> [<executable-path>])
 
-<dirs> will be passed to BundleUtilities and should contain and
-directories to be searched to find library dependencies.
+  This command loops through the ``<paths-var>`` list and if any path doesn't
+  exist, it resolves them relative to the ``<executable-path>`` (if supplied)
+  or the :variable:`CMAKE_INSTALL_PREFIX`.
 
-<plugins_dir> allows an custom plugins directory to be used.
+.. command:: fixup_qt4_executable
 
-<request_qt_conf> will force a qt.conf file to be written even if not
-needed.
+  Fixes up a Qt4 executable:
 
-::
+  .. code-block:: cmake
 
-  install_qt4_plugin_path(plugin executable copy installed_plugin_path_var
-                          <plugins_dir> <component> <configurations>)
+    fixup_qt4_executable(
+      <executable>
+      [<qtplugins> <libs> <dirs> <plugins-dir> <request-qt-conf>]
+    )
 
-Install (or copy) a resolved <plugin> to the default plugins directory
-(or <plugins_dir>) relative to <executable> and store the result in
-<installed_plugin_path_var>.
+  This command copies Qt plugins, writes a Qt configuration file (if needed)
+  and fixes up a Qt4 executable using the :module:`BundleUtilities` module
+  so it is standalone and can be drag-and-drop copied to another machine as
+  long as all of the system libraries are compatible.
 
-If <copy> is set to TRUE then the plugins will be copied rather than
-installed.  This is to allow this module to be used at CMake time
-rather than install time.
+  ``<executable>`` should point to the executable to be fixed-up.
 
-If <component> is set then anything installed will use this COMPONENT.
+  ``<qtplugins>`` should contain a list of the names or paths of any Qt plugins
+  to be installed.
 
-::
+  ``<libs>`` will be passed to the :module:`BundleUtilities` module and should
+  be a list of any already installed plugins, libraries or executables to also
+  be fixed-up.
 
-  install_qt4_plugin(plugin executable copy installed_plugin_path_var
-                     <plugins_dir> <component>)
+  ``<dirs>`` will be passed to the :module:`BundleUtilities` module and should
+  contain directories to be searched to find library dependencies.
 
-Install (or copy) an unresolved <plugin> to the default plugins
-directory (or <plugins_dir>) relative to <executable> and store the
-result in <installed_plugin_path_var>.  See documentation of
-INSTALL_QT4_PLUGIN_PATH.
+  ``<plugins-dir>`` allows a custom plugins directory to be used.
 
-::
+  ``<request-qt-conf>`` will force a ``qt.conf`` file to be written even if not
+  needed.
 
-  install_qt4_executable(<executable>
-    [<qtplugins> <libs> <dirs> <plugins_dir> <request_qt_conf> <component>])
+.. command:: install_qt4_plugin_path
 
-Installs Qt plugins, writes a Qt configuration file (if needed) and
-fixes up a Qt4 executable using BundleUtilities so it is standalone
-and can be drag-and-drop copied to another machine as long as all of
-the system libraries are compatible.  The executable will be fixed-up
-at install time.  <component> is the COMPONENT used for bundle fixup
-and plugin installation.  See documentation of FIXUP_QT4_BUNDLE.
+  Installs a resolved Qt4 plugin:
+
+  .. code-block:: cmake
+
+    install_qt4_plugin_path(
+      <plugin>
+      <executable>
+      <copy>
+      <installed-plugin-path-var>
+      [<plugins-dir> <component> <configurations>]
+    )
+
+  This command installs (or copies) a resolved ``<plugin>`` to the default
+  plugins directory (or ``<plugins-dir>``) relative to ``<executable>`` and
+  stores the result in a variable ``<installed-plugin-path-var>``.
+
+  If ``<copy>`` is set to ``TRUE`` then the plugins will be copied rather than
+  installed.  This is to allow this module to be used at CMake time rather than
+  install time.
+
+  If ``<component>`` is set then anything installed will use this COMPONENT.
+
+.. command:: install_qt4_plugin
+
+  Installs an unresolved Qt4 plugin:
+
+  .. code-block:: cmake
+
+    install_qt4_plugin(
+      <plugin>
+      <executable>
+      <copy>
+      <installed-plugin-path-var>
+      [<plugins-dir> <component>]
+    )
+
+  This command installs (or copies) an unresolved ``<plugin>`` to the default
+  plugins directory (or ``<plugins-dir>``) relative to ``<executable>`` and
+  stores the result in a variable ``<installed-plugin-path-var>``.  For other
+  arguments, see also :command:`install_qt4_plugin_path`.
+
+.. command:: install_qt4_executable
+
+  Installs Qt plugins, writes a Qt configuration file (if needed) and fixes
+  up a Qt4 executable:
+
+  .. code-block:: cmake
+
+    install_qt4_executable(
+      <executable>
+      [<qtplugins> <libs> <dirs> <plugins-dir> <request-qt-conf> <component>]
+    )
+
+  This command uses the :module:`BundleUtilities` module so executable is
+  standalone and can be drag-and-drop copied to another machine as long as
+  all of the system libraries are compatible.  The executable will be fixed-up
+  at install time.  The ``<component>`` is the COMPONENT used for bundle fixup
+  and plugin installation.  For other arguments, see also
+  :command:`fixup_qt4_executable`.
 #]=======================================================================]
 
 # The functions defined in this file depend on the fixup_bundle function
@@ -393,7 +440,7 @@ function(install_qt4_executable executable)
   install(CODE
 "include(\"${CMAKE_CURRENT_FUNCTION_LIST_DIR}/DeployQt4.cmake\")
 set(BU_CHMOD_BUNDLE_ITEMS TRUE)
-FIXUP_QT4_EXECUTABLE(\"\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/${executable}\" \"\" \"${libs}\" \"${dirs}\" \"${plugins_dir}\" \"${request_qt_conf}\")"
+fixup_qt4_executable(\"\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/${executable}\" \"\" \"${libs}\" \"${dirs}\" \"${plugins_dir}\" \"${request_qt_conf}\")"
           ${component}
   )
 endfunction()

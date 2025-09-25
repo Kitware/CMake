@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmDefinePropertyCommand.h"
 
 #include <algorithm>
@@ -89,7 +89,7 @@ bool cmDefinePropertyCommand(std::vector<std::string> const& args,
     if (!cmHasSuffix(initializeFromVariable, PropertyName)) {
       status.SetError(cmStrCat("Variable name \"", initializeFromVariable,
                                "\" does not end with property name \"",
-                               PropertyName, "\""));
+                               PropertyName, '"'));
       return false;
     }
     if (PropertyName.find('_') == std::string::npos) {
@@ -100,12 +100,12 @@ bool cmDefinePropertyCommand(std::vector<std::string> const& args,
     }
 
     // Make sure the variable is not reserved.
-    static constexpr const char* reservedPrefixes[] = {
+    static constexpr char const* reservedPrefixes[] = {
       "CMAKE_",
       "_CMAKE_",
     };
     if (std::any_of(std::begin(reservedPrefixes), std::end(reservedPrefixes),
-                    [&initializeFromVariable](const char* prefix) {
+                    [&initializeFromVariable](char const* prefix) {
                       return cmHasPrefix(initializeFromVariable, prefix);
                     })) {
       status.SetError(cmStrCat("variable name \"", initializeFromVariable,

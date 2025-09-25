@@ -34,15 +34,18 @@ name (architecture).  For example:
 * ``cmake -G "Visual Studio 15 2017" -A ARM``
 * ``cmake -G "Visual Studio 15 2017" -A ARM64``
 
-For compatibility with CMake versions prior to 3.1, one may specify
-a target platform name optionally at the end of the generator name.
-This is supported only for:
+.. versionchanged:: 4.0
 
-``Visual Studio 15 2017 Win64``
-  Specify target platform ``x64``.
+  Previously, for compatibility with CMake versions prior to 3.1,
+  one could specify a target platform name optionally at the
+  end of the generator name.  This has been removed.
+  This was supported only for:
 
-``Visual Studio 15 2017 ARM``
-  Specify target platform ``ARM``.
+  ``Visual Studio 15 2017 Win64``
+    Specify target platform ``x64``.
+
+  ``Visual Studio 15 2017 ARM``
+    Specify target platform ``ARM``.
 
 Toolset Selection
 ^^^^^^^^^^^^^^^^^
@@ -54,4 +57,4 @@ via the :option:`cmake -T` option, to specify another toolset.
 .. |VS_TOOLSET_HOST_ARCH_DEFAULT| replace::
    By default this generator uses the 32-bit variant even on a 64-bit host.
 
-.. include:: VS_TOOLSET_HOST_ARCH_LEGACY.txt
+.. include:: include/VS_TOOLSET_HOST_ARCH_LEGACY.rst

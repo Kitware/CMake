@@ -170,7 +170,7 @@ typedef struct md5_state_s
 #define T63 0x2ad7d2bb
 #define T64 /* 0xeb86d391 */ (T_MASK ^ 0x14792c6e)
 
-static void md5_process(md5_state_t* pms, const md5_byte_t* data /*[64]*/)
+static void md5_process(md5_state_t* pms, md5_byte_t const* data /*[64]*/)
 {
   md5_word_t a = pms->abcd[0];
   md5_word_t b = pms->abcd[1];
@@ -183,7 +183,7 @@ static void md5_process(md5_state_t* pms, const md5_byte_t* data /*[64]*/)
 #else
   /* Define storage for little-endian or both types of CPUs. */
   md5_word_t xbuf[16];
-  const md5_word_t* X;
+  md5_word_t const* X;
 #endif
 
   {
@@ -193,9 +193,9 @@ static void md5_process(md5_state_t* pms, const md5_byte_t* data /*[64]*/)
      * little-endian machine, since we can use a more efficient
      * algorithm on the latter.
      */
-    static const int w = 1;
+    static int const w = 1;
 
-    if (*((const md5_byte_t*)&w)) /* dynamic little-endian */
+    if (*((md5_byte_t const*)&w)) /* dynamic little-endian */
 #endif
 #if BYTE_ORDER <= 0 /* little-endian */
     {
@@ -205,7 +205,7 @@ static void md5_process(md5_state_t* pms, const md5_byte_t* data /*[64]*/)
        */
       if (!((uintptr_t)data & 3)) {
         /* data are properly aligned */
-        X = (const md5_word_t*)data;
+        X = (md5_word_t const*)data;
       } else {
         /* not aligned */
         memcpy(xbuf, data, 64);
@@ -222,7 +222,7 @@ static void md5_process(md5_state_t* pms, const md5_byte_t* data /*[64]*/)
        * On big-endian machines, we must arrange the bytes in the
        * right order.
        */
-      const md5_byte_t* xp = data;
+      md5_byte_t const* xp = data;
       int i;
 
 #  if BYTE_ORDER == 0
@@ -364,9 +364,9 @@ static void md5_init(md5_state_t* pms)
 }
 
 /* Append a string to the message. */
-static void md5_append(md5_state_t* pms, const md5_byte_t* data, size_t nbytes)
+static void md5_append(md5_state_t* pms, md5_byte_t const* data, size_t nbytes)
 {
-  const md5_byte_t* p = data;
+  md5_byte_t const* p = data;
   size_t left = nbytes;
   size_t offset = (pms->count[0] >> 3) & 63;
   md5_word_t nbits = (md5_word_t)(nbytes << 3);
@@ -409,7 +409,7 @@ static void md5_append(md5_state_t* pms, const md5_byte_t* data, size_t nbytes)
 /* Finish the message and return the digest. */
 static void md5_finish(md5_state_t* pms, md5_byte_t digest[16])
 {
-  static const md5_byte_t pad[64] = { 0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  static md5_byte_t const pad[64] = { 0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                                       0,    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                                       0,    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                                       0,    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,

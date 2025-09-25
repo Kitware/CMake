@@ -1,0 +1,6 @@
+Name: Echo
+Description: Echo
+Version: 1.0.0
+
+Cflags: Echo
+Requires: bravo delta

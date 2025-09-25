@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #if !defined(_POSIX_C_SOURCE) && !defined(_WIN32) && !defined(__sun) &&       \
   !defined(__OpenBSD__)
 /* POSIX APIs are needed */

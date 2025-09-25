@@ -30,7 +30,9 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
+#ifdef DEBUGBUILD
 #define SIGNATURE 0x5c48e9b2    /* Random pattern. */
+#endif
 
 /*
  * Init a bufref struct.
@@ -59,7 +61,7 @@ void Curl_bufref_free(struct bufref *br)
   DEBUGASSERT(br->ptr || !br->len);
 
   if(br->ptr && br->dtor)
-    br->dtor((void *) br->ptr);
+    br->dtor(CURL_UNCONST(br->ptr));
 
   br->dtor = NULL;
   br->ptr = NULL;

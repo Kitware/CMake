@@ -1,0 +1,12 @@
+---
+id: rm-cmdbg-macros
+language: Cpp
+severity: 'off'
+message: "Remove `CM_DBG` usage before submission"
+ignores:
+  # Unit tests for the header.
+  - Tests/CMakeLib/testDebug.cxx
+rule:
+  pattern: CM_DBG($EXPR)
+  kind: call_expression
+fix: $EXPR

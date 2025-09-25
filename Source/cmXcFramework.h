@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
 #include <string>
@@ -42,11 +42,11 @@ struct cmXcFrameworkPlist
   std::string Path;
   std::vector<cmXcFrameworkPlistLibrary> AvailableLibraries;
 
-  const cmXcFrameworkPlistLibrary* SelectSuitableLibrary(
-    const cmMakefile& mf,
-    const cmListFileBacktrace& bt = cmListFileBacktrace{}) const;
+  cmXcFrameworkPlistLibrary const* SelectSuitableLibrary(
+    cmMakefile const& mf,
+    cmListFileBacktrace const& bt = cmListFileBacktrace{}) const;
 };
 
 cm::optional<cmXcFrameworkPlist> cmParseXcFrameworkPlist(
-  const std::string& xcframeworkPath, const cmMakefile& mf,
-  const cmListFileBacktrace& bt = cmListFileBacktrace{});
+  std::string const& xcframeworkPath, cmMakefile const& mf,
+  cmListFileBacktrace const& bt = cmListFileBacktrace{});

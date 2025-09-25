@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 #include "cmConfigure.h" // IWYU pragma: keep
 
@@ -158,10 +158,10 @@ public:
 };
 
 template <typename T>
-inline uv_handle_ptr_base_<T>::uv_handle_ptr_base_(
+uv_handle_ptr_base_<T>::uv_handle_ptr_base_(
   uv_handle_ptr_base_<T>&&) noexcept = default;
 template <typename T>
-inline uv_handle_ptr_base_<T>& uv_handle_ptr_base_<T>::operator=(
+uv_handle_ptr_base_<T>& uv_handle_ptr_base_<T>::operator=(
   uv_handle_ptr_base_<T>&&) noexcept = default;
 
 /**
@@ -316,6 +316,6 @@ UV_HANDLE_PTR_INSTANTIATE_EXTERN(tty)
  * referenced by the uv_buf_t values must remain alive until the callback
  * is made or the stream is closed.
  */
-int uv_write(uv_stream_t* handle, const uv_buf_t bufs[], unsigned int nbufs,
+int uv_write(uv_stream_t* handle, uv_buf_t const bufs[], unsigned int nbufs,
              std::weak_ptr<std::function<void(int)>> cb);
 }

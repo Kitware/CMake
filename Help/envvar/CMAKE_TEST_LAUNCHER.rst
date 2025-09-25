@@ -3,7 +3,7 @@ CMAKE_TEST_LAUNCHER
 
 .. versionadded:: 3.29
 
-.. include:: ENV_VAR.txt
+.. include:: include/ENV_VAR.rst
 
 The default value for the :variable:`CMAKE_TEST_LAUNCHER` variable when there
 is no explicit configuration given on the first run while creating a new

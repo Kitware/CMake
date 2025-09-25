@@ -56,10 +56,3 @@ endif()
 
 set_property(TARGET VSResource
   PROPERTY VS_GLOBAL_CMakeTestVsGlobalVariable "test val")
-
-if(CMAKE_GENERATOR MATCHES "Ninja|Visual Studio")
-  cmake_policy(PUSH)
-  cmake_policy(SET CMP0037 OLD)
-  add_library("My ResourceLib" lib.cpp lib.rc)
-  cmake_policy(POP)
-endif()

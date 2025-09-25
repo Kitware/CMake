@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmCTestCurl.h"
 
 #include <cstdio>
@@ -15,8 +15,8 @@
 #include "cmValue.h"
 
 namespace {
-const bool TLS_VERIFY_DEFAULT = true;
-const int TLS_VERSION_DEFAULT = CURL_SSLVERSION_TLSv1_2;
+bool const TLS_VERIFY_DEFAULT = true;
+int const TLS_VERSION_DEFAULT = CURL_SSLVERSION_TLSv1_2;
 }
 
 cmCTestCurl::cmCTestCurl(cmCTest* ctest)
@@ -24,9 +24,8 @@ cmCTestCurl::cmCTestCurl(cmCTest* ctest)
   , CurlOpts(ctest)
 {
   this->SetProxyType();
-  cmCurlInitOnce();
   // In windows, this will init the winsock stuff
-  ::curl_global_init(CURL_GLOBAL_ALL);
+  cm_curl_global_init(CURL_GLOBAL_ALL);
   this->Curl = cm_curl_easy_init();
 }
 
@@ -49,7 +48,7 @@ size_t curlWriteMemoryCallback(void* ptr, size_t size, size_t nmemb,
                                void* data)
 {
   int realsize = static_cast<int>(size * nmemb);
-  const char* chPtr = static_cast<char*>(ptr);
+  char const* chPtr = static_cast<char*>(ptr);
   cm::append(*static_cast<std::vector<char>*>(data), chPtr, chPtr + realsize);
   return realsize;
 }

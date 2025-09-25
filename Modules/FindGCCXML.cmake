@@ -1,20 +1,31 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-# file Copyright.txt or https://cmake.org/licensing for details.
+# file LICENSE.rst or https://cmake.org/licensing for details.
 
 #[=======================================================================[.rst:
 FindGCCXML
 ----------
 
+.. versionchanged:: 4.1
+  This module is available only if policy :policy:`CMP0188` is not set to ``NEW``.
+  Port projects to search for CastXML by calling ``find_program`` directly.
+
 Find the GCC-XML front-end executable.
-
-
 
 This module will define the following variables:
 
-::
-
-  GCCXML - the GCC-XML front-end executable.
+``GCCXML``
+  The GCC-XML front-end executable.
 #]=======================================================================]
+
+cmake_policy(GET CMP0188 _FindGCCXML_CMP0188)
+if(_FindGCCXML_CMP0188 STREQUAL "NEW")
+  message(FATAL_ERROR "The FindGCCXML module has been removed by policy CMP0188.")
+endif()
+
+if(_FindGCCXML_testing)
+  set(_FindGCCXML_included TRUE)
+  return()
+endif()
 
 find_program(GCCXML
   NAMES gccxml

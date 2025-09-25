@@ -1,0 +1,6 @@
+CMake Error at [^
+]*\(cmake_instrumentation\):
+  cmake_instrumentation QUERY subcommand given an unsupported DATA_VERSION ""
+  \(the only currently supported version is 1\).
+Call Stack \(most recent call first\):
+  CMakeLists.txt:6 \(include\)

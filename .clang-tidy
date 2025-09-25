@@ -8,7 +8,6 @@ bugprone-*,\
 -bugprone-implicit-widening-of-multiplication-result,\
 -bugprone-inc-dec-in-conditions,\
 -bugprone-macro-parentheses,\
--bugprone-misplaced-widening-cast,\
 -bugprone-multi-level-implicit-pointer-conversion,\
 -bugprone-narrowing-conversions,\
 -bugprone-return-const-ref-from-parameter,\
@@ -30,6 +29,7 @@ misc-*,\
 -misc-use-internal-linkage,\
 modernize-*,\
 -modernize-avoid-c-arrays,\
+-modernize-concat-nested-namespaces,\
 -modernize-macro-to-enum,\
 -modernize-return-braced-init-list,\
 -modernize-type-traits,\
@@ -45,7 +45,6 @@ performance-*,\
 -performance-unnecessary-value-param,\
 readability-*,\
 -readability-avoid-nested-conditional-operator,\
--readability-avoid-return-with-void-value,\
 -readability-avoid-unconditional-preprocessor-if,\
 -readability-convert-member-functions-to-static,\
 -readability-enum-initial-value,\
@@ -59,11 +58,6 @@ readability-*,\
 -readability-make-member-function-const,\
 -readability-math-missing-parentheses,\
 -readability-named-parameter,\
--readability-redundant-casting,\
--readability-redundant-declaration,\
--readability-redundant-inline-specifier,\
--readability-redundant-member-init,\
--readability-reference-to-constructed-temporary,\
 -readability-simplify-boolean-expr,\
 -readability-static-accessed-through-instance,\
 -readability-suspicious-call-argument,\

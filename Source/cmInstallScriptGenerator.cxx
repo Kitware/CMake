@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmInstallScriptGenerator.h"
 
 #include <ostream>
@@ -43,8 +43,6 @@ bool cmInstallScriptGenerator::Compute(cmLocalGenerator* lg)
       case cmPolicies::OLD:
         break;
       case cmPolicies::NEW:
-      case cmPolicies::REQUIRED_ALWAYS:
-      case cmPolicies::REQUIRED_IF_USED:
         this->AllowGenex = true;
         break;
     }
@@ -87,7 +85,7 @@ void cmInstallScriptGenerator::GenerateScriptActions(std::ostream& os,
 }
 
 void cmInstallScriptGenerator::GenerateScriptForConfig(
-  std::ostream& os, const std::string& config, Indent indent)
+  std::ostream& os, std::string const& config, Indent indent)
 {
   this->AddScriptInstallRule(os, indent, this->GetScript(config));
 }

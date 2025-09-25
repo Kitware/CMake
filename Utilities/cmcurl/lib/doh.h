@@ -28,6 +28,7 @@
 #include "curl_addrinfo.h"
 #ifdef USE_HTTPSRR
 # include <stdint.h>
+# include "httpsrr.h"
 #endif
 
 #ifndef CURL_DISABLE_DOH
@@ -58,15 +59,6 @@ typedef enum {
   DNS_TYPE_HTTPS = 65
 } DNStype;
 
-/* one of these for each DoH request */
-struct doh_probe {
-  curl_off_t easy_mid; /* multi id of easy handle doing the lookup */
-  DNStype dnstype;
-  unsigned char req_body[512];
-  size_t req_body_len;
-  struct dynbuf resp_body;
-};
-
 enum doh_slot_num {
   /* Explicit values for first two symbols so as to match hard-coded
    * constants in existing code
@@ -88,9 +80,32 @@ enum doh_slot_num {
   DOH_SLOT_COUNT
 };
 
-struct doh_probes {
+#define CURL_EZM_DOH_PROBE   "ezm:doh-p"
+
+/* the largest one we can make, based on RFCs 1034, 1035 */
+#define DOH_MAX_DNSREQ_SIZE (256 + 16)
+
+/* each DoH probe request has this
+ * as easy meta for CURL_EZM_DOH_PROBE */
+struct doh_request {
+  unsigned char req_body[DOH_MAX_DNSREQ_SIZE];
   struct curl_slist *req_hds;
-  struct doh_probe probe[DOH_SLOT_COUNT];
+  struct dynbuf resp_body;
+  size_t req_body_len;
+  DNStype dnstype;
+};
+
+struct doh_response {
+  unsigned int probe_mid;
+  struct dynbuf body;
+  DNStype dnstype;
+  CURLcode result;
+};
+
+/* each transfer firing off DoH requests has this
+ * as easy meta for CURL_EZM_DOH_MASTER */
+struct doh_probes {
+  struct doh_response probe_resp[DOH_SLOT_COUNT];
   unsigned int pending; /* still outstanding probes */
   int port;
   const char *host;
@@ -104,6 +119,7 @@ struct doh_probes {
 struct Curl_addrinfo *Curl_doh(struct Curl_easy *data,
                                const char *hostname,
                                int port,
+                               int ip_version,
                                int *waitp);
 
 CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
@@ -122,19 +138,6 @@ struct dohaddr {
 };
 
 #ifdef USE_HTTPSRR
-
-/*
- * These are the code points for DNS wire format SvcParams as
- * per draft-ietf-dnsop-svcb-https
- * Not all are supported now, and even those that are may need
- * more work in future to fully support the spec.
- */
-#define HTTPS_RR_CODE_ALPN            0x01
-#define HTTPS_RR_CODE_NO_DEF_ALPN     0x02
-#define HTTPS_RR_CODE_PORT            0x03
-#define HTTPS_RR_CODE_IPV4            0x04
-#define HTTPS_RR_CODE_ECH             0x05
-#define HTTPS_RR_CODE_IPV6            0x06
 
 /*
  * These may need escaping when found within an ALPN string
@@ -179,10 +182,8 @@ UNITTEST void de_init(struct dohentry *d);
 UNITTEST void de_cleanup(struct dohentry *d);
 #endif
 
-extern struct curl_trc_feat Curl_doh_trc;
-
 #else /* if DoH is disabled */
-#define Curl_doh(a,b,c,d) NULL
+#define Curl_doh(a,b,c,d,e) NULL
 #define Curl_doh_is_resolved(x,y) CURLE_COULDNT_RESOLVE_HOST
 #endif
 

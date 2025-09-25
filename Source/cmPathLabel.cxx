@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmPathLabel.h"
 
 #include <utility>
@@ -19,12 +19,12 @@ cmPathLabel::cmPathLabel(std::string label)
   this->Hash += ((this->Hash & 0x0001FFFF) << 15);
 }
 
-bool cmPathLabel::operator<(const cmPathLabel& l) const
+bool cmPathLabel::operator<(cmPathLabel const& l) const
 {
   return this->Hash < l.Hash;
 }
 
-bool cmPathLabel::operator==(const cmPathLabel& l) const
+bool cmPathLabel::operator==(cmPathLabel const& l) const
 {
   return this->Hash == l.Hash;
 }

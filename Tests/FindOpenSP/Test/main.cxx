@@ -3,7 +3,7 @@
 
 #include "ParserEventGeneratorKit.h"
 
-std::string CharStringtostring(const SGMLApplication::CharString source)
+std::string CharStringtostring(SGMLApplication::CharString const source)
 {
   // The CharString type might have multi-byte characters if SP_MULTI_BYTE was
   // defined
@@ -22,14 +22,14 @@ public:
     : depth_(0)
   {
   }
-  void startElement(const StartElementEvent& event)
+  void startElement(StartElementEvent const& event)
   {
     for (unsigned i = 0; i < depth_; i++)
       parsedOutput += "\t";
     parsedOutput += CharStringtostring(event.gi);
     depth_++;
   }
-  void endElement(const EndElementEvent&) { depth_--; }
+  void endElement(EndElementEvent const&) { depth_--; }
   std::string parsedOutput;
 
 private:

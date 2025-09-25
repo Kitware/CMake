@@ -1,0 +1,11 @@
+{
+    "source": "^dir/very-long",
+    "build": "^dir/very-long-directory-name-in-order-to-test-that-the-fileapi-codemodel-v2-directory-object-is-placed-in-a-json-file-on-disk-with-a-shortened-name$",
+    "parentSource": "^dir$",
+    "childSources": null,
+    "targetIds": null,
+    "projectName": "codemodel-v2",
+    "minimumCMakeVersion": "3.13",
+    "hasInstallRule": null,
+    "installers": []
+}

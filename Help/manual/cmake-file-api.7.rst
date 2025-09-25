@@ -41,14 +41,22 @@ It has the following subdirectories:
   `v1 Client Stateless Query Files`_, or `v1 Client Stateful Query Files`_.
 
 ``reply/``
-  Holds reply files written by CMake whenever it runs to generate a build
-  system.  These are indexed by a `v1 Reply Index File`_ file that may
-  reference additional `v1 Reply Files`_.  CMake owns all reply files.
-  Clients must never remove them.
+  Holds reply files written by CMake when it runs to generate a build system.
+  Clients may read reply files only when referenced by a reply index:
 
-  Clients may look for and read a reply index file at any time.
+  ``index-*.json``
+    A `v1 Reply Index File`_ written when CMake generates a build system.
+
+  ``error-*.json``
+    .. versionadded:: 4.1
+
+    A `v1 Reply Error Index`_ written when CMake fails to generate a build
+    system due to an error.
+
+  Clients may look for and read a reply index at any time.
   Clients may optionally create the ``reply/`` directory at any time
-  and monitor it for the appearance of a new reply index file.
+  and monitor it for the appearance of a new reply index.
+  CMake owns all reply files.  Clients must never remove them.
 
 .. versionadded:: 3.31
   Users can add query files to ``api/v1/query`` inside the
@@ -179,7 +187,7 @@ v1 Reply Index File
 -------------------
 
 CMake writes an ``index-*.json`` file to the ``v1/reply/`` directory
-whenever it runs to generate a build system.  Clients must read the
+when it successfully generates a build system.  Clients must read the
 reply index file first and may read other `v1 Reply Files`_ only by
 following references.  The form of the reply index file name is::
 
@@ -300,8 +308,12 @@ The members are:
     A member of this form appears for each of the
     `v1 Shared Stateless Query Files`_ that CMake recognized as a
     request for object kind ``<kind>`` with major version ``<major>``.
-    The value is a `v1 Reply File Reference`_ to the corresponding
-    reply file for that object kind and version.
+    The value is
+
+    * a `v1 Reply File Reference`_ to the corresponding reply file for
+      that object kind and version, or
+    * in a `v1 Reply Error Index`_, a JSON object with a single ``error``
+      member containing a string with an error message.
 
   ``<unknown>``
     A member of this form appears for each of the
@@ -320,8 +332,12 @@ The members are:
       A member of this form appears for each of the
       `v1 Client Stateless Query Files`_ that CMake recognized as a
       request for object kind ``<kind>`` with major version ``<major>``.
-      The value is a `v1 Reply File Reference`_ to the corresponding
-      reply file for that object kind and version.
+      The value is
+
+      * a `v1 Reply File Reference`_ to the corresponding reply file for
+        that object kind and version, or
+      * in a `v1 Reply Error Index`_, a JSON object with a single ``error``
+        member containing a string with an error message.
 
     ``<unknown>``
       A member of this form appears for each of the
@@ -352,10 +368,10 @@ The members are:
         contains a JSON array with a response for each entry of the
         ``requests`` array, in the same order.  Each response is
 
-        * a JSON object with a single ``error`` member containing a string
-          with an error message, or
         * a `v1 Reply File Reference`_ to the corresponding reply file for
-          the requested object kind and selected version.
+          the requested object kind and selected version, or
+        * a JSON object with a single ``error`` member containing a string
+          with an error message.
 
 After reading the reply index file, clients may read the other
 `v1 Reply Files`_ it references.
@@ -374,6 +390,35 @@ using a JSON object with members:
 ``jsonFile``
   A JSON string specifying a path relative to the reply index file
   to another JSON file containing the object.
+
+.. _`file-api reply error index`:
+
+v1 Reply Error Index
+^^^^^^^^^^^^^^^^^^^^
+
+.. versionadded:: 4.1
+
+CMake writes an ``error-*.json`` file to the ``v1/reply/`` directory
+when it fails to generate a build system.  This reply error index
+follows the same naming pattern, syntax, and semantics of a
+`v1 Reply Index File`_, with the following exceptions:
+
+* The ``index-`` prefix is replaced by an ``error-`` prefix.
+
+* When a new error index is generated, old index files are *not*
+  deleted.  If a `v1 Reply Index File`_ exists, it indexes replies
+  from the most recent successful run.  If multiple ``index-*.json``
+  and/or ``error-*.json`` files are present, the one with the largest
+  name in lexicographic order, excluding the ``index-`` or ``error-``
+  prefix, is the current index.
+
+* Only a subset of `Object Kinds`_ are provided:
+
+  `configureLog <file-api configureLog_>`_
+    .. versionadded:: 4.1
+
+  Index entries for other object kinds contain an ``error`` message
+  instead of a `v1 Reply File Reference`_.
 
 v1 Reply Files
 --------------
@@ -777,6 +822,13 @@ with members:
 
       This type was added in codemodel version 2.4.
 
+    ``cxxModuleBmi``
+      An :command:`install(TARGETS)` call with ``CXX_MODULES_BMI``.
+      The ``destination`` member is populated and the ``isOptional`` member
+      may exist.  This type has an additional ``cxxModuleBmiTarget`` member.
+
+      This type was added in codemodel version 2.5.
+
   ``isExcludeFromAll``
     Optional member that is present with boolean value ``true`` when
     :command:`install` is called with the ``EXCLUDE_FROM_ALL`` option.
@@ -888,6 +940,21 @@ with members:
       object's ``targets`` array for the target.
 
     This field was added in codemodel version 2.4.
+
+  ``cxxModuleBmiTarget``
+    Optional member that is present when ``type`` is ``cxxModuleBmi``.
+    The value is a JSON object with members:
+
+    ``id``
+      A string uniquely identifying the target.  This matches
+      the ``id`` member of the target in the main "codemodel"
+      object's ``targets`` array.
+
+    ``index``
+      An unsigned integer 0-based index into the main "codemodel"
+      object's ``targets`` array for the target.
+
+    This field was added in codemodel version 2.5.
 
   ``scriptFile``
     Optional member that is present when ``type`` is ``script``.
@@ -1058,6 +1125,13 @@ with members:
       * ``libraryPath``: library search path flags.
       * ``frameworkPath``: macOS framework search path flags.
 
+    ``backtrace``
+      Optional member that is present when a CMake language backtrace to
+      the :command:`target_link_libraries`, :command:`target_link_options`,
+      or other command invocation that added this link fragment is available.
+      The value is an unsigned integer 0-based index into the ``backtraceGraph``
+      member's ``nodes`` array.
+
   ``lto``
     Optional member that is present with boolean value ``true``
     when link-time optimization (a.k.a. interprocedural optimization
@@ -1104,10 +1178,10 @@ with members:
   This field was added in codemodel version 2.8.
 
   ``workingDirectory``
-    Optional member that is present when the DEBUGGER_WORKING_DIRECTORY
-    target property is set.
-    The member will also be present in Visual Studio Generator
-    scenarios when VS_DEBUGGER_WORKING_DIRECTORY is set.
+    Optional member that is present when the
+    :prop_tgt:`DEBUGGER_WORKING_DIRECTORY` target property is set.
+    The member will also be present in :ref:`Visual Studio Generators`
+    when :prop_tgt:`VS_DEBUGGER_WORKING_DIRECTORY` is set.
 
     This field was added in codemodel version 2.8.
 
@@ -1128,8 +1202,9 @@ with members:
     the ``backtraceGraph`` member's ``nodes`` array.
 
 ``fileSets``
-  A JSON array of entries corresponding to the target's file sets. Each entry
-  is a JSON object with members:
+  An optional member that is present when a target defines one or more
+  file sets.  The value is a JSON array of entries corresponding to the
+  target's file sets.  Each entry is a JSON object with members:
 
   ``name``
     A string specifying the name of the file set.
@@ -1248,6 +1323,12 @@ with members:
     ``fragment``
       A string specifying a fragment of the compile command line invocation.
       The value is encoded in the build system's native shell format.
+
+    ``backtrace``
+      Optional member that is present when a CMake language backtrace to
+      the command invocation that added this fragment is available.
+      The value is an unsigned integer 0-based index into the
+      ``backtraceGraph`` member's ``nodes`` array.
 
   ``includes``
     Optional member that is present when there are include directories.
@@ -1382,6 +1463,8 @@ elsewhere in the containing object.  The backtrace graph object members are:
 
 Object Kind "configureLog"
 --------------------------
+
+.. versionadded:: 3.26
 
 The ``configureLog`` object kind describes the location and contents of
 a :manual:`cmake-configure-log(7)` file.
@@ -1774,6 +1857,6 @@ The members specific to ``toolchains`` objects are:
   ``sourceFileExtensions``
     Optional member that is present when the
     :variable:`CMAKE_<LANG>_SOURCE_FILE_EXTENSIONS` variable is defined for
-    the current language. Its value is a JSON array of JSON strings where each
+    the current language. Its value is a JSON array of JSON strings where
     each string holds a file extension (without the leading dot) for the
     language.

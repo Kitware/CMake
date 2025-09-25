@@ -1,0 +1,6 @@
+  Could NOT find Python3 \(missing: .*Interpreter
+  Development.*\).*
+
+      Reason given by package: *
+          Interpreter: Cannot run the interpreter "/not/found/interpreter"
+          Development: Cannot find the library "/not/found/library"

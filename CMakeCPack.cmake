@@ -1,5 +1,5 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-# file Copyright.txt or https://cmake.org/licensing for details.
+# file LICENSE.rst or https://cmake.org/licensing for details.
 
 option(CMAKE_INSTALL_DEBUG_LIBRARIES
   "Install Microsoft runtime debug libraries with CMake." FALSE)
@@ -14,10 +14,14 @@ if(CMake_INSTALL_DEPENDENCIES)
   include(${CMake_SOURCE_DIR}/Modules/InstallRequiredSystemLibraries.cmake)
 endif()
 
+set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/LICENSE.txt")
+file(READ "${CMake_LICENSE_FILE}" license_text)
+string(REPLACE "`Contributors <CONTRIBUTORS.rst>`_" "Contributors" license_text "${license_text}")
+file(WRITE "${CPACK_RESOURCE_FILE_LICENSE}" "${license_text}")
+
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "CMake is a build tool")
 set(CPACK_PACKAGE_VENDOR "Kitware")
-set(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/Copyright.txt")
-set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/Copyright.txt")
+set(CPACK_PACKAGE_DESCRIPTION_FILE "${CPACK_RESOURCE_FILE_LICENSE}")
 set(CPACK_PACKAGE_NAME "${CMAKE_PROJECT_NAME}")
 set(CPACK_PACKAGE_VERSION "${CMake_VERSION}")
 set(CPACK_PACKAGE_INSTALL_DIRECTORY "${CPACK_PACKAGE_NAME}")
@@ -28,7 +32,7 @@ set(CPACK_DMG_SLA_USE_RESOURCE_FILE_LICENSE OFF)
 #  - Root install directory (displayed to end user at installer-run time)
 #  - "NSIS package/display name" (text used in the installer GUI)
 #  - Registry key used to store info about the installation
-if(CMAKE_CL_64)
+if(CMAKE_SIZEOF_VOID_P EQUAL 8)
   set(CPACK_NSIS_INSTALL_ROOT "$PROGRAMFILES64")
   set(CPACK_NSIS_PACKAGE_NAME "${CPACK_PACKAGE_NAME} ${CPACK_PACKAGE_VERSION} (Win64)")
 else()
@@ -40,18 +44,10 @@ set(CPACK_PACKAGE_INSTALL_REGISTRY_KEY "${CPACK_NSIS_PACKAGE_NAME}")
 if(NOT DEFINED CPACK_SYSTEM_NAME)
   # make sure package is not Cygwin-unknown, for Cygwin just
   # cygwin is good for the system name
-  if("x${CMAKE_SYSTEM_NAME}" STREQUAL "xCYGWIN")
-    set(CPACK_SYSTEM_NAME Cygwin)
+  if(CMAKE_SYSTEM_NAME STREQUAL "CYGWIN")
+    set(CPACK_SYSTEM_NAME cygwin)
   else()
-    set(CPACK_SYSTEM_NAME ${CMAKE_SYSTEM_NAME}-${CMAKE_SYSTEM_PROCESSOR})
-  endif()
-endif()
-if(${CPACK_SYSTEM_NAME} MATCHES Windows)
-  if(CMAKE_CL_64)
-    set(CPACK_SYSTEM_NAME win64-x64)
-    set(CPACK_IFW_TARGET_DIRECTORY "@RootDir@/Program Files/${CMAKE_PROJECT_NAME}")
-  else()
-    set(CPACK_SYSTEM_NAME win32-x86)
+    string(TOLOWER "${CMAKE_SYSTEM_NAME}-${CMAKE_SYSTEM_PROCESSOR}" CPACK_SYSTEM_NAME)
   endif()
 endif()
 
@@ -166,7 +162,7 @@ _cmifwarg("Package <Script> generated"
 _cmifwarg("Package <Licenses> tag (pairs of <display_name> <file_path>)"
   STRING LICENSES "${${_cpifwrc}LICENSES_DEFAULT}")
 
-if(${CMAKE_SYSTEM_NAME} MATCHES Windows)
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
   set(_CPACK_IFW_PACKAGE_ICON
       "set(CPACK_IFW_PACKAGE_ICON \"${CMake_SOURCE_DIR}/Source/QtDialog/CMakeSetup.ico\")")
   if(BUILD_QtDialog)
@@ -185,9 +181,11 @@ if(${CMAKE_SYSTEM_NAME} MATCHES Windows)
   )
 endif()
 
-if(${CMAKE_SYSTEM_NAME} MATCHES Linux)
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
   set(CPACK_IFW_TARGET_DIRECTORY "@HomeDir@/${CMAKE_PROJECT_NAME}")
   set(CPACK_IFW_ADMIN_TARGET_DIRECTORY "@ApplicationsDir@/${CMAKE_PROJECT_NAME}")
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+  set(CPACK_IFW_TARGET_DIRECTORY "@RootDir@/Program Files/${CMAKE_PROJECT_NAME}")
 endif()
 
 # Components scripts configuration
@@ -260,10 +258,6 @@ set(CPACK_SOURCE_IGNORE_FILES
   "/#"
   "~$"
   )
-
-if(CMake_CPACK_CUSTOM_SCRIPT)
-  include(${CMake_CPACK_CUSTOM_SCRIPT})
-endif()
 
 # include CPack model once all variables are set
 include(CPack)

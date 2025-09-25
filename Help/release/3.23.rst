@@ -78,7 +78,9 @@ File-Based API
   has been updated to ``2.4``.
 
 * The :manual:`cmake-file-api(7)` "codemodel" version 2 ``directory``
-  object ``installers`` field gained a new ``fileSet`` installer type.
+  object ``installers`` field gained a new ``fileSet`` installer type
+  and associated ``fileSetName``, ``fileSetType``, ``fileSetDirectories``,
+  and ``fileSetTarget`` fields.
 
 Commands
 --------

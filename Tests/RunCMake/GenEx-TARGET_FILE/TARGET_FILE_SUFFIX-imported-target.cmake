@@ -1,5 +1,7 @@
 enable_language (C)
 
+set(CMAKE_AIX_SHARED_LIBRARY_ARCHIVE 0)
+
 set (win_platforms Windows CYGWIN MSYS)
 
 set (GENERATE_CONTENT [[

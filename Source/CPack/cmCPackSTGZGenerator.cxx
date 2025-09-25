@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmCPackSTGZGenerator.h"
 
 #include <cstdio>
@@ -81,7 +81,7 @@ int cmCPackSTGZGenerator::GenerateHeader(std::ostream* os)
   }
   this->SetOptionIfNotSet("CPACK_RESOURCE_FILE_LICENSE_CONTENT", licenseText);
 
-  const char headerLengthTag[] = "###CPACK_HEADER_LENGTH###";
+  char const headerLengthTag[] = "###CPACK_HEADER_LENGTH###";
 
   // Create the header
   std::string inFile = this->GetOption("CPACK_STGZ_HEADER_FILE");
@@ -96,7 +96,7 @@ int cmCPackSTGZGenerator::GenerateHeader(std::ostream* os)
   this->ConfigureString(packageHeaderText, res);
 
   // Count the lines
-  const char* ptr = res.c_str();
+  char const* ptr = res.c_str();
   while (*ptr) {
     if (*ptr == '\n') {
       counter++;

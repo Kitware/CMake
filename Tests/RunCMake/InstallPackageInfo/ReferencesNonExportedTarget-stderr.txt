@@ -1,0 +1,3 @@
+CMake Error in CMakeLists.txt:
+  install\(PACKAGE_INFO "dog" \.\.\.\) includes target "canine" which requires
+  target "mammal" that is not in any export set.

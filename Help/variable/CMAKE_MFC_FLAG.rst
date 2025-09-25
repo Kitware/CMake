@@ -8,13 +8,25 @@ It should be set to ``1`` for the static MFC library, and
 ``2`` for the shared MFC library.  This is used in Visual Studio
 project files.
 
+Contents of ``CMAKE_MFC_FLAG`` may use
+:manual:`generator expressions <cmake-generator-expressions(7)>`.
+
+Examples
+^^^^^^^^
+
 Usage example:
 
 .. code-block:: cmake
 
-  add_definitions(-D_AFXDLL)
   set(CMAKE_MFC_FLAG 2)
+
   add_executable(CMakeSetup WIN32 ${SRCS})
 
-Contents of ``CMAKE_MFC_FLAG`` may use
-:manual:`generator expressions <cmake-generator-expressions(7)>`.
+  # Visual Studio generators add this flag automatically based on the
+  # CMAKE_MFC_FLAG value, but generators matching "Make" require it:
+  target_compile_definitions(CMakeSetup PRIVATE _AFXDLL)
+
+See Also
+^^^^^^^^
+
+* The :module:`FindMFC` module to check whether MFC is installed and available.

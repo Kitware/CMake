@@ -1,44 +1,120 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-# file Copyright.txt or https://cmake.org/licensing for details.
+# file LICENSE.rst or https://cmake.org/licensing for details.
 
 #[=======================================================================[.rst:
 CheckLibraryExists
 ------------------
 
-Check once if the function exists in system or specified library.
+This module provides a command to check whether a C library exists.
 
-.. command:: CHECK_LIBRARY_EXISTS
+Load this module in a CMake project with:
+
+.. code-block:: cmake
+
+  include(CheckLibraryExists)
+
+Commands
+^^^^^^^^
+
+This module provides the following command:
+
+.. command:: check_library_exists
+
+  Checks once whether a specified library exists and a given C function is
+  available:
 
   .. code-block:: cmake
 
-    CHECK_LIBRARY_EXISTS(LIBRARY FUNCTION LOCATION VARIABLE)
+    check_library_exists(<library> <function> <location> <variable>)
 
-  ::
+  This command attempts to link a test executable that uses the specified
+  C ``<function>`` to verify that it is provided by either a system or
+  user-provided ``<library>``.
 
-    LIBRARY  - the name of the library you are looking for
-    FUNCTION - the name of the function
-    LOCATION - location where the library should be found
-    VARIABLE - internal cache variable to store the result
+  The arguments are:
 
-Prefer using :module:`CheckSymbolExists` or :module:`CheckSourceCompiles`
-instead of this module for more robust detection if a function is available in
-a library.
+  ``<library>``
+    The name of the library, a full path to a library file, or an
+    :ref:`Imported Target <Imported Targets>`.
 
-The following variables may be set before calling this macro to modify
-the way the check is run:
+  ``<function>``
+    The name of a function that should be available in the system or
+    user-provided library ``<library>``.
 
-.. include:: /module/CMAKE_REQUIRED_FLAGS.txt
+  ``<location>``
+    The directory containing the library file.  It is added to the link
+    search path during the check.  If this is an empty string, only the
+    default library search paths are used.
 
-.. include:: /module/CMAKE_REQUIRED_DEFINITIONS.txt
+  ``<variable>``
+    The name of the variable in which to store the check result.  This
+    variable will be created as an internal cache variable.
 
-.. include:: /module/CMAKE_REQUIRED_LINK_OPTIONS.txt
+  .. note::
 
-.. include:: /module/CMAKE_REQUIRED_LIBRARIES.txt
+    This command is intended for performing basic sanity checks to verify
+    that a library provides the expected functionality, or that the correct
+    library is being located.  However, it only verifies that a function
+    symbol can be linked successfully - it does not ensure that the function
+    is declared in library headers, nor can it detect functions that are
+    inlined or defined as preprocessor macros.  For more robust detection
+    of function availability, prefer using :module:`CheckSymbolExists` or
+    :module:`CheckSourceCompiles`.
 
-.. include:: /module/CMAKE_REQUIRED_LINK_DIRECTORIES.txt
+  .. rubric:: Variables Affecting the Check
 
-.. include:: /module/CMAKE_REQUIRED_QUIET.txt
+  The following variables may be set before calling this command to modify
+  the way the check is run:
 
+  .. include:: /module/include/CMAKE_REQUIRED_FLAGS.rst
+
+  .. include:: /module/include/CMAKE_REQUIRED_DEFINITIONS.rst
+
+  .. include:: /module/include/CMAKE_REQUIRED_LINK_OPTIONS.rst
+
+  .. include:: /module/include/CMAKE_REQUIRED_LIBRARIES.rst
+
+  .. include:: /module/include/CMAKE_REQUIRED_LINK_DIRECTORIES.rst
+
+  .. include:: /module/include/CMAKE_REQUIRED_QUIET.rst
+
+Examples
+^^^^^^^^
+
+Checking if the ``curl`` library exists in the default paths and has the
+``curl_easy_perform()`` function:
+
+.. code-block:: cmake
+
+  include(CheckLibraryExists)
+  check_library_exists(curl curl_easy_perform "" HAVE_LIBRARY_CURL)
+
+To check if library exists in specific non-standard location and has a specified
+function:
+
+.. code-block:: cmake
+
+  include(CheckLibraryExists)
+  check_library_exists(curl curl_easy_perform "/opt/curl/lib" HAVE_LIBRARY_CURL)
+
+Also :ref:`Imported Targets` (for example, from the ``find_package()`` call)
+can be used:
+
+.. code-block:: cmake
+
+  find_package(CURL)
+
+  # ...
+
+  if(TARGET CURL::libcurl)
+    include(CheckLibraryExists)
+    check_library_exists(CURL::libcurl curl_easy_perform "" HAVE_LIBRARY_CURL)
+  endif()
+
+See Also
+^^^^^^^^
+
+* The :module:`CheckSymbolExists` module to check whether a C symbol exists.
 #]=======================================================================]
 
 include_guard(GLOBAL)

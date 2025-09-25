@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.30)
+cmake_minimum_required(VERSION 4.0)
 project(TestFindOpenMP NONE)
 include(CTest)
 
@@ -43,6 +43,19 @@ if(test_msvc_runtime)
     message(FATAL_ERROR "OpenMP_RUNTIME_MSVC='${OpenMP_RUNTIME_MSVC}' not honored: '${OpenMP_C_FLAGS}'")
   endif()
 endif()
+
+# FIXME(#26701) Needed to check target offload conditions
+foreach(c C CXX Fortran)
+  if(NOT "${OpenMP_TEST_${c}}")
+    continue()
+  endif()
+  if(CMAKE_${c}_COMPILER_ID MATCHES "^(Cray|CrayClang)$")
+    get_target_property(link_options OpenMP::OpenMP_${c} INTERFACE_LINK_OPTIONS)
+    if(NOT link_options)
+      message(FATAL_ERROR "OpenMP_${c} Interface Link Options not set for Cray Compiler")
+    endif()
+  endif()
+endforeach()
 
 foreach(c C CXX CUDA Fortran)
   if(NOT "${OpenMP_TEST_${c}}")

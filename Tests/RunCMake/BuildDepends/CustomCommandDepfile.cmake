@@ -77,5 +77,14 @@ if(check_step EQUAL 3)
     \"${CMAKE_BINARY_DIR}/step3.timestamp|$<TARGET_FILE:subexe>\"
     \"${CMAKE_BINARY_DIR}/step3.timestamp|$<TARGET_FILE:sublib>\"
     )
+
+  if (RunCMake_GENERATOR MATCHES \"Make\")
+    file(STRINGS \"${CMAKE_BINARY_DIR}/CMakeFiles/topcc.dir/compiler_depend.internal\" deps REGEX \"^.*topccdep\\\\.txt$\")
+    list(LENGTH deps count)
+    if (NOT count EQUAL 1)
+       string(APPEND RunCMake_TEST_FAILED \"dependencies are duplicated\\n\")
+       set(RunCMake_TEST_FAILED \"\${RunCMake_TEST_FAILED}\" PARENT_SCOPE)
+    endif()
+  endif()
 endif()
 ")

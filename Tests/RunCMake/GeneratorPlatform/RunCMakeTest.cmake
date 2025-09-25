@@ -27,7 +27,7 @@ else()
   unset(RunCMake_TEST_OPTIONS)
 endif()
 
-if("${RunCMake_GENERATOR}" MATCHES "^Visual Studio (1[4567])( 20[0-9][0-9])?$")
+if("${RunCMake_GENERATOR}" MATCHES "^Visual Studio (1[45678])( 20[0-9][0-9])?$")
   unset(ENV{WindowsSDKVersion})
 
   set(RunCMake_GENERATOR_PLATFORM "Test Platform,nocomma")

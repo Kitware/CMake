@@ -5,7 +5,7 @@ Add a dependency between top-level targets.
 
 .. code-block:: cmake
 
-  add_dependencies(<target> [<target-dependency>]...)
+  add_dependencies(<target> <target-dependency>...)
 
 Makes a top-level ``<target>`` depend on other top-level targets to
 ensure that they build before ``<target>`` does.  A top-level target
@@ -30,6 +30,10 @@ transitively in its place since the target itself does not build.
   They only guarantee that the dependencies' custom commands are
   finished before sources in ``<target>`` start compiling; this
   ensures generated sources are available.
+
+.. versionchanged:: 4.1
+  The command may be called with no dependencies.
+  Previously, at least one dependency was required.
 
 See Also
 ^^^^^^^^

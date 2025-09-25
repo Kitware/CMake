@@ -45,6 +45,7 @@ endforeach()
 
 file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/ExternalFrameworks/CMakeLists.txt
 [[
+cmake_minimum_required(VERSION 3.31)
 project(ExternalFrameworks)
 add_library(staticFrameworkExt STATIC func6.c)
 add_library(sharedFrameworkExt SHARED func7.c)

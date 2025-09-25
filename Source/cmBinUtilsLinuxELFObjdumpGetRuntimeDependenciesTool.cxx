@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 
 #include "cmBinUtilsLinuxELFObjdumpGetRuntimeDependenciesTool.h"
 
@@ -44,9 +44,9 @@ bool cmBinUtilsLinuxELFObjdumpGetRuntimeDependenciesTool::GetFileInfo(
   }
 
   std::string line;
-  static const cmsys::RegularExpression neededRegex("^ *NEEDED *([^\n]*)$");
-  static const cmsys::RegularExpression rpathRegex("^ *RPATH *([^\n]*)$");
-  static const cmsys::RegularExpression runpathRegex("^ *RUNPATH *([^\n]*)$");
+  static cmsys::RegularExpression const neededRegex("^ *NEEDED *([^\n]*)$");
+  static cmsys::RegularExpression const rpathRegex("^ *RPATH *([^\n]*)$");
+  static cmsys::RegularExpression const runpathRegex("^ *RUNPATH *([^\n]*)$");
   cmUVPipeIStream output(process.GetLoop(), process.OutputStream());
   while (std::getline(output, line)) {
     cmsys::RegularExpressionMatch match;

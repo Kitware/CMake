@@ -25,32 +25,37 @@
 #
 # Input variables:
 #
-# LIBUV_INCLUDE_DIR   The libuv include directory
-# LIBUV_LIBRARY       Path to libuv library
+# - `LIBUV_INCLUDE_DIR`:   The libuv include directory.
+# - `LIBUV_LIBRARY`:       Path to `libuv` library.
 #
 # Result variables:
 #
-# LIBUV_FOUND         System has libuv
-# LIBUV_INCLUDE_DIRS  The libuv include directories
-# LIBUV_LIBRARIES     The libuv library names
-# LIBUV_LIBRARY_DIRS  The libuv library directories
-# LIBUV_CFLAGS        Required compiler flags
-# LIBUV_VERSION       Version of libuv
+# - `LIBUV_FOUND`:         System has libuv.
+# - `LIBUV_INCLUDE_DIRS`:  The libuv include directories.
+# - `LIBUV_LIBRARIES`:     The libuv library names.
+# - `LIBUV_LIBRARY_DIRS`:  The libuv library directories.
+# - `LIBUV_PC_REQUIRES`:   The libuv pkg-config packages.
+# - `LIBUV_CFLAGS`:        Required compiler flags.
+# - `LIBUV_VERSION`:       Version of libuv.
+
+set(LIBUV_PC_REQUIRES "libuv")
 
 if(CURL_USE_PKGCONFIG AND
    NOT DEFINED LIBUV_INCLUDE_DIR AND
    NOT DEFINED LIBUV_LIBRARY)
   find_package(PkgConfig QUIET)
-  pkg_check_modules(LIBUV "libuv")
+  pkg_check_modules(LIBUV ${LIBUV_PC_REQUIRES})
 endif()
 
 if(LIBUV_FOUND)
+  set(Libuv_FOUND TRUE)
   string(REPLACE ";" " " LIBUV_CFLAGS "${LIBUV_CFLAGS}")
   message(STATUS "Found Libuv (via pkg-config): ${LIBUV_INCLUDE_DIRS} (found version \"${LIBUV_VERSION}\")")
 else()
   find_path(LIBUV_INCLUDE_DIR NAMES "uv.h")
   find_library(LIBUV_LIBRARY NAMES "uv" "libuv")
 
+  unset(LIBUV_VERSION CACHE)
   if(LIBUV_INCLUDE_DIR AND EXISTS "${LIBUV_INCLUDE_DIR}/uv/version.h")
     set(_version_regex1 "#[\t ]*define[\t ]+UV_VERSION_MAJOR[\t ]+([0-9]+).*")
     set(_version_regex2 "#[\t ]*define[\t ]+UV_VERSION_MINOR[\t ]+([0-9]+).*")

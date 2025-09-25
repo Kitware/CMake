@@ -1,15 +1,11 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmCMakePolicyCommand.h"
 
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
-#include "cmMessageType.h"
 #include "cmPolicies.h"
-#include "cmState.h"
-#include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
-#include "cmValue.h"
 
 namespace {
 bool HandleSetMode(std::vector<std::string> const& args,
@@ -60,7 +56,7 @@ bool cmCMakePolicyCommand(std::vector<std::string> const& args,
     return HandleGetWarningMode(args, status);
   }
 
-  status.SetError(cmStrCat("given unknown first argument \"", args[0], "\""));
+  status.SetError(cmStrCat("given unknown first argument \"", args[0], '"'));
   return false;
 }
 
@@ -81,27 +77,13 @@ bool HandleSetMode(std::vector<std::string> const& args,
     policyStatus = cmPolicies::NEW;
   } else {
     status.SetError(
-      cmStrCat("SET given unrecognized policy status \"", args[2], "\""));
+      cmStrCat("SET given unrecognized policy status \"", args[2], '"'));
     return false;
   }
 
   if (!status.GetMakefile().SetPolicy(args[1].c_str(), policyStatus)) {
     status.SetError("SET failed to set policy.");
     return false;
-  }
-  if (args[1] == "CMP0001" &&
-      (policyStatus == cmPolicies::WARN || policyStatus == cmPolicies::OLD)) {
-    if (!(status.GetMakefile().GetState()->GetInitializedCacheValue(
-          "CMAKE_BACKWARDS_COMPATIBILITY"))) {
-      // Set it to 2.4 because that is the last version where the
-      // variable had meaning.
-      status.GetMakefile().AddCacheDefinition(
-        "CMAKE_BACKWARDS_COMPATIBILITY", "2.4",
-        "For backwards compatibility, what version of CMake "
-        "commands and "
-        "syntax should this version of CMake try to support.",
-        cmStateEnums::STRING);
-    }
   }
   return true;
 }
@@ -147,19 +129,6 @@ bool HandleGetMode(std::vector<std::string> const& args,
       // Report that the policy is set to NEW.
       status.GetMakefile().AddDefinition(var, "NEW");
       break;
-    case cmPolicies::REQUIRED_IF_USED:
-    case cmPolicies::REQUIRED_ALWAYS:
-      // The policy is required to be set before anything needs it.
-      {
-        status.GetMakefile().IssueMessage(
-          MessageType::FATAL_ERROR,
-          cmStrCat(
-            cmPolicies::GetRequiredPolicyError(pid), "\n",
-            "The call to cmake_policy(GET ", id,
-            " ...) at which this "
-            "error appears requests the policy, and this version of CMake ",
-            "requires that the policy be set to NEW before it is checked."));
-      }
   }
 
   return true;

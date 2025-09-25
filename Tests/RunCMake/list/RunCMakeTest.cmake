@@ -7,7 +7,6 @@ run_cmake(EmptyInsert-1)
 
 run_cmake(NoArguments)
 run_cmake(InvalidSubcommand)
-run_cmake(GET-CMP0007-WARN)
 
 run_cmake(FILTER-REGEX-InvalidRegex)
 run_cmake(GET-InvalidIndex)
@@ -91,6 +90,7 @@ run_cmake(TRANSFORM-GENEX_STRIP)
 run_cmake(TRANSFORM-APPEND)
 run_cmake(TRANSFORM-PREPEND)
 run_cmake(TRANSFORM-REPLACE)
+run_cmake(CMP0186)
 
 # argument tests
 run_cmake(SORT-WrongOption)

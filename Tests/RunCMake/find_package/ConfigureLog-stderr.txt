@@ -1,0 +1,284 @@
+^CMake Debug Log at ConfigureLog.cmake:[0-9]+ \(find_package\):
+  find_package considered the following paths for FindViaConfig.cmake:
+
+    .*/Tests/RunCMake/find_package/ConfigureLog/cmake/FindViaConfig.cmake
+    .*/Modules/FindViaConfig.cmake
+
+  The file was not found.
+
+  The internally managed CMAKE_FIND_PACKAGE_REDIRECTS_DIR.
+
+    .*/Tests/RunCMake/find_package/ConfigureLog-build/CMakeFiles/pkgRedirects
+
+  <PackageName>_ROOT CMake variable \[CMAKE_FIND_USE_PACKAGE_ROOT_PATH\].
+
+    none
+
+  CMAKE_PREFIX_PATH variable \[CMAKE_FIND_USE_CMAKE_PATH\].
+
+    .*/Tests/RunCMake/find_package/ConfigureLog
+
+  CMAKE_FRAMEWORK_PATH and CMAKE_APPBUNDLE_PATH variables
+  \[CMAKE_FIND_USE_CMAKE_PATH\].
+
+  Env variable ViaConfig_DIR \[CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH\].
+
+    none
+
+  CMAKE_PREFIX_PATH env variable \[CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH\].
+
+(    [^
+]*
+)*
+  CMAKE_FRAMEWORK_PATH and CMAKE_APPBUNDLE_PATH env variables
+  \[CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH\].
+(
+    none
+)?
+  Paths specified by the find_package HINTS option.
+
+    none
+
+  Standard system environment variables
+  \[CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH\].
+
+(    [^
+]*
+)*
+  CMake User Package Registry \[CMAKE_FIND_USE_PACKAGE_REGISTRY\].
+
+    none
+
+  CMake variables defined in the Platform file
+  \[CMAKE_FIND_USE_CMAKE_SYSTEM_PATH\].
+
+(    [^
+]*
+)*
+  CMake System Package Registry
+  \[CMAKE_FIND_PACKAGE_NO_SYSTEM_PACKAGE_REGISTRY\].
+
+    none
+
+  Paths specified by the find_package PATHS option.
+
+    none
+
+  find_package considered the following locations for ViaConfig's Config
+  module:
+
+    .*/Tests/RunCMake/find_package/ConfigureLog-build/CMakeFiles/pkgRedirects/ViaConfigConfig.cmake
+    .*/Tests/RunCMake/find_package/ConfigureLog-build/CMakeFiles/pkgRedirects/viaconfig-config.cmake
+    .*/Tests/RunCMake/find_package/ConfigureLog/ViaConfigConfig.cmake
+    .*/Tests/RunCMake/find_package/ConfigureLog/viaconfig-config.cmake
+    .*/Tests/RunCMake/find_package/ConfigureLog/cmake/ViaConfigConfig.cmake
+    .*/Tests/RunCMake/find_package/ConfigureLog/cmake/viaconfig-config.cmake
+    .*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/ViaConfig/ViaConfigConfig.cmake
+
+  The file was found at
+
+    .*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/ViaConfig/ViaConfigConfig.cmake
+
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)
+
+
+CMake Debug Log at ConfigureLog.cmake:[0-9]+ \(find_package\):
+  find_package considered the following paths for FindViaModule.cmake:
+
+(    [^
+]*
+)*
+  The file was found at
+
+    .*/Tests/RunCMake/find_package/ConfigureLog/cmake/FindViaModule.cmake
+
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)
+
+
+CMake Debug Log at ConfigureLog/cmake/FindWithInner.cmake:[0-9]+ \(find_package\):
+  find_package considered the following paths for FindInner.cmake:
+
+    .*/Tests/RunCMake/find_package/ConfigureLog/cmake/FindInner.cmake
+    .*/Modules/FindInner.cmake
+
+  The file was not found.
+
+  The internally managed CMAKE_FIND_PACKAGE_REDIRECTS_DIR.
+
+    .*/CMakeFiles/pkgRedirects
+
+  <PackageName>_ROOT CMake variable \[CMAKE_FIND_USE_PACKAGE_ROOT_PATH\].
+
+    none
+
+  CMAKE_PREFIX_PATH variable \[CMAKE_FIND_USE_CMAKE_PATH\].
+
+    .*/Tests/RunCMake/find_package/ConfigureLog
+
+  CMAKE_FRAMEWORK_PATH and CMAKE_APPBUNDLE_PATH variables
+  \[CMAKE_FIND_USE_CMAKE_PATH\].
+
+  Env variable Inner_DIR \[CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH\].
+
+    none
+
+  CMAKE_PREFIX_PATH env variable \[CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH\].
+
+(    [^
+]*
+)*
+  CMAKE_FRAMEWORK_PATH and CMAKE_APPBUNDLE_PATH env variables
+  \[CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH\].
+(
+    none
+)?
+  Paths specified by the find_package HINTS option.
+
+    none
+
+  Standard system environment variables
+  \[CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH\].
+
+(    [^
+]*
+)*
+  CMake User Package Registry \[CMAKE_FIND_USE_PACKAGE_REGISTRY\].
+
+    none
+
+  CMake variables defined in the Platform file
+  \[CMAKE_FIND_USE_CMAKE_SYSTEM_PATH\].
+
+(    [^
+]*
+)*
+  CMake System Package Registry
+  \[CMAKE_FIND_PACKAGE_NO_SYSTEM_PACKAGE_REGISTRY\].
+
+    none
+
+  Paths specified by the find_package PATHS option.
+
+    none
+
+  find_package considered the following locations for Inner's Config module:
+
+    .*/CMakeFiles/pkgRedirects/InnerConfig.cmake
+    .*/CMakeFiles/pkgRedirects/inner-config.cmake
+    .*/Tests/RunCMake/find_package/ConfigureLog/InnerConfig.cmake
+    .*/Tests/RunCMake/find_package/ConfigureLog/inner-config.cmake
+    .*/Tests/RunCMake/find_package/ConfigureLog/cmake/InnerConfig.cmake
+    .*/Tests/RunCMake/find_package/ConfigureLog/cmake/inner-config.cmake
+    .*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/Inner/InnerConfig.cmake
+
+  The file was found at
+
+    .*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/Inner/InnerConfig.cmake
+
+Call Stack \(most recent call first\):
+  ConfigureLog.cmake:[0-9]+ \(find_package\)
+  CMakeLists.txt:[0-9]+ \(include\)
+
+
+CMake Debug Log at ConfigureLog.cmake:[0-9]+ \(find_package\):
+  find_package considered the following paths for FindWithInner.cmake:
+
+    .*/Modules/FindWithInner.cmake
+
+  The file was found at
+
+    .*/Tests/RunCMake/find_package/ConfigureLog/cmake/FindWithInner.cmake
+
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)
+
+
+CMake Debug Log at ConfigureLog.cmake:[0-9]+ \(find_package\):
+  find_package considered the following paths for FindVersionCheck.cmake:
+
+    .*/Tests/RunCMake/find_package/ConfigureLog/cmake/FindVersionCheck.cmake
+    .*/Modules/FindVersionCheck.cmake
+(    [^
+]*
+)*
+  The file was not found.
+
+  The internally managed CMAKE_FIND_PACKAGE_REDIRECTS_DIR.
+
+    .*/CMakeFiles/pkgRedirects
+
+  <PackageName>_ROOT CMake variable \[CMAKE_FIND_USE_PACKAGE_ROOT_PATH\].
+
+    none
+
+  CMAKE_PREFIX_PATH variable \[CMAKE_FIND_USE_CMAKE_PATH\].
+
+    .*/Tests/RunCMake/find_package/ConfigureLog
+
+  CMAKE_FRAMEWORK_PATH and CMAKE_APPBUNDLE_PATH variables
+  \[CMAKE_FIND_USE_CMAKE_PATH\].
+
+  Env variable VersionCheck_DIR \[CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH\].
+
+    none
+
+  CMAKE_PREFIX_PATH env variable \[CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH\].
+
+(    [^
+]*
+)*
+  CMAKE_FRAMEWORK_PATH and CMAKE_APPBUNDLE_PATH env variables
+  \[CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH\].
+(
+    none
+)?
+  Paths specified by the find_package HINTS option.
+
+    none
+
+  Standard system environment variables
+  \[CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH\].
+
+(    [^
+]*
+)*
+  CMake User Package Registry \[CMAKE_FIND_USE_PACKAGE_REGISTRY\].
+
+    none
+
+  CMake variables defined in the Platform file
+  \[CMAKE_FIND_USE_CMAKE_SYSTEM_PATH\].
+
+(    [^
+]*
+)*
+  CMake System Package Registry
+  \[CMAKE_FIND_PACKAGE_NO_SYSTEM_PACKAGE_REGISTRY\].
+
+    none
+
+  Paths specified by the find_package PATHS option.
+
+    none
+
+  find_package considered the following locations for VersionCheck's Config
+  module:
+
+    .*/CMakeFiles/pkgRedirects/VersionCheckConfig.cmake
+    .*/CMakeFiles/pkgRedirects/versioncheck-config.cmake
+    .*/Tests/RunCMake/find_package/ConfigureLog/VersionCheckConfig.cmake
+    .*/Tests/RunCMake/find_package/ConfigureLog/versioncheck-config.cmake
+    .*/Tests/RunCMake/find_package/ConfigureLog/cmake/VersionCheckConfig.cmake
+    .*/Tests/RunCMake/find_package/ConfigureLog/cmake/versioncheck-config.cmake(
+    .*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/VersionCheck-1.5/VersionCheckConfig.cmake
+    .*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/VersionCheck-1.5/versioncheck-config.cmake)?
+    .*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/VersionCheck-2.5/VersionCheckConfig.cmake
+
+  The file was found at
+
+    .*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/VersionCheck-2.5/VersionCheckConfig.cmake
+
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)$

@@ -25,32 +25,37 @@
 #
 # Input variables:
 #
-# LIBSSH_INCLUDE_DIR   The libssh include directory
-# LIBSSH_LIBRARY       Path to libssh library
+# - `LIBSSH_INCLUDE_DIR`:   The libssh include directory.
+# - `LIBSSH_LIBRARY`:       Path to libssh library.
 #
 # Result variables:
 #
-# LIBSSH_FOUND         System has libssh
-# LIBSSH_INCLUDE_DIRS  The libssh include directories
-# LIBSSH_LIBRARIES     The libssh library names
-# LIBSSH_LIBRARY_DIRS  The libssh library directories
-# LIBSSH_CFLAGS        Required compiler flags
-# LIBSSH_VERSION       Version of libssh
+# - `LIBSSH_FOUND`:         System has libssh.
+# - `LIBSSH_INCLUDE_DIRS`:  The libssh include directories.
+# - `LIBSSH_LIBRARIES`:     The libssh library names.
+# - `LIBSSH_LIBRARY_DIRS`:  The libssh library directories.
+# - `LIBSSH_PC_REQUIRES`:   The libssh pkg-config packages.
+# - `LIBSSH_CFLAGS`:        Required compiler flags.
+# - `LIBSSH_VERSION`:       Version of libssh.
+
+set(LIBSSH_PC_REQUIRES "libssh")
 
 if(CURL_USE_PKGCONFIG AND
    NOT DEFINED LIBSSH_INCLUDE_DIR AND
    NOT DEFINED LIBSSH_LIBRARY)
   find_package(PkgConfig QUIET)
-  pkg_check_modules(LIBSSH "libssh")
+  pkg_check_modules(LIBSSH ${LIBSSH_PC_REQUIRES})
 endif()
 
 if(LIBSSH_FOUND)
+  set(Libssh_FOUND TRUE)
   string(REPLACE ";" " " LIBSSH_CFLAGS "${LIBSSH_CFLAGS}")
   message(STATUS "Found Libssh (via pkg-config): ${LIBSSH_INCLUDE_DIRS} (found version \"${LIBSSH_VERSION}\")")
 else()
   find_path(LIBSSH_INCLUDE_DIR NAMES "libssh/libssh.h")
   find_library(LIBSSH_LIBRARY NAMES "ssh" "libssh")
 
+  unset(LIBSSH_VERSION CACHE)
   if(LIBSSH_INCLUDE_DIR AND EXISTS "${LIBSSH_INCLUDE_DIR}/libssh/libssh_version.h")
     set(_version_regex1 "#[\t ]*define[\t ]+LIBSSH_VERSION_MAJOR[\t ]+([0-9]+).*")
     set(_version_regex2 "#[\t ]*define[\t ]+LIBSSH_VERSION_MINOR[\t ]+([0-9]+).*")

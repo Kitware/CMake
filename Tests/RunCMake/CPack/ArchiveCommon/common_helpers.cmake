@@ -60,7 +60,7 @@ function(toExpectedContentList FILE_NO CONTENT_VAR)
 
   unset(filtered_)
   foreach(part_ IN LISTS prepared_)
-    string(REGEX REPLACE "^/" "" part_ "${part_}")
+    string(REGEX REPLACE "^/+" "" part_ "${part_}")
 
     if(part_)
       list(APPEND filtered_ "${prefix_}${part_}")

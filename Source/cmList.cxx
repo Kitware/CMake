@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
@@ -68,14 +68,14 @@ public:
   {
   }
 
-  bool operator()(const std::string& target)
+  bool operator()(std::string const& target)
   {
     return this->Regex.find(target) ^ this->IncludeMatches;
   }
 
 private:
   cmsys::RegularExpression& Regex;
-  const bool IncludeMatches;
+  bool const IncludeMatches;
 };
 }
 
@@ -99,7 +99,7 @@ namespace {
 class StringSorter
 {
 protected:
-  using StringFilter = std::function<std::string(const std::string&)>;
+  using StringFilter = std::function<std::string(std::string const&)>;
 
   using OrderMode = cmList::SortConfiguration::OrderMode;
   using CompareMethod = cmList::SortConfiguration::CompareMethod;
@@ -114,23 +114,23 @@ protected:
 
   StringFilter GetCaseFilter(CaseSensitivity sensitivity)
   {
-    return (sensitivity == CaseSensitivity::INSENSITIVE)
-      ? cmSystemTools::LowerCase
-      : nullptr;
+    constexpr std::string (*filter)(std::string const&) =
+      cmSystemTools::LowerCase;
+    return (sensitivity == CaseSensitivity::INSENSITIVE) ? filter : nullptr;
   }
 
   using ComparisonFunction =
-    std::function<bool(const std::string&, const std::string&)>;
+    std::function<bool(std::string const&, std::string const&)>;
   ComparisonFunction GetComparisonFunction(CompareMethod compare)
   {
     if (compare == CompareMethod::NATURAL) {
-      return std::function<bool(const std::string&, const std::string&)>(
-        [](const std::string& x, const std::string& y) {
+      return std::function<bool(std::string const&, std::string const&)>(
+        [](std::string const& x, std::string const& y) {
           return cmSystemTools::strverscmp(x, y) < 0;
         });
     }
-    return std::function<bool(const std::string&, const std::string&)>(
-      [](const std::string& x, const std::string& y) { return x < y; });
+    return std::function<bool(std::string const&, std::string const&)>(
+      [](std::string const& x, std::string const& y) { return x < y; });
   }
 
 public:
@@ -142,7 +142,7 @@ public:
   {
   }
 
-  std::string ApplyFilter(const std::string& argument)
+  std::string ApplyFilter(std::string const& argument)
   {
     std::string result = argument;
     for (auto const& filter : this->Filters) {
@@ -153,7 +153,7 @@ public:
     return result;
   }
 
-  bool operator()(const std::string& a, const std::string& b)
+  bool operator()(std::string const& a, std::string const& b)
   {
     std::string af = this->ApplyFilter(a);
     std::string bf = this->ApplyFilter(b);
@@ -175,7 +175,7 @@ private:
 
 cmList::SortConfiguration::SortConfiguration() = default;
 
-cmList& cmList::sort(const SortConfiguration& cfg)
+cmList& cmList::sort(SortConfiguration const& cfg)
 {
   SortConfiguration config{ cfg };
 
@@ -202,7 +202,7 @@ cmList& cmList::sort(const SortConfiguration& cfg)
 }
 
 namespace {
-using transform_type = std::function<std::string(const std::string&)>;
+using transform_type = std::function<std::string(std::string const&)>;
 using transform_error = cmList::transform_error;
 
 class TransformSelector : public cmList::TransformSelector
@@ -212,14 +212,14 @@ public:
 
   std::string Tag;
 
-  const std::string& GetTag() override { return this->Tag; }
+  std::string const& GetTag() override { return this->Tag; }
 
   virtual bool Validate(std::size_t count = 0) = 0;
 
-  virtual bool InSelection(const std::string&) = 0;
+  virtual bool InSelection(std::string const&) = 0;
 
   virtual void Transform(cmList::container_type& list,
-                         const transform_type& transform)
+                         transform_type const& transform)
   {
     std::transform(list.begin(), list.end(), list.begin(), transform);
   }
@@ -241,12 +241,12 @@ public:
 
   bool Validate(std::size_t) override { return true; }
 
-  bool InSelection(const std::string&) override { return true; }
+  bool InSelection(std::string const&) override { return true; }
 };
 class TransformSelectorRegex : public TransformSelector
 {
 public:
-  TransformSelectorRegex(const std::string& regex)
+  TransformSelectorRegex(std::string const& regex)
     : TransformSelector("REGEX")
     , Regex(regex)
   {
@@ -259,7 +259,7 @@ public:
 
   bool Validate(std::size_t) override { return this->Regex.is_valid(); }
 
-  bool InSelection(const std::string& value) override
+  bool InSelection(std::string const& value) override
   {
     return this->Regex.find(value);
   }
@@ -271,10 +271,10 @@ class TransformSelectorIndexes : public TransformSelector
 public:
   std::vector<index_type> Indexes;
 
-  bool InSelection(const std::string&) override { return true; }
+  bool InSelection(std::string const&) override { return true; }
 
   void Transform(std::vector<std::string>& list,
-                 const transform_type& transform) override
+                 transform_type const& transform) override
   {
     this->Validate(list.size());
 
@@ -359,7 +359,7 @@ public:
       throw transform_error(
         cmStrCat("sub-command TRANSFORM, selector FOR "
                  "expects <start> to be no greater than <stop> (",
-                 this->Start, " > ", this->Stop, ")"));
+                 this->Start, " > ", this->Stop, ')'));
     }
 
     // compute indexes
@@ -391,18 +391,18 @@ public:
   virtual ~TransformAction() = default;
 
   void Initialize(TransformSelector* selector) { this->Selector = selector; }
-  virtual void Initialize(TransformSelector*, const std::string&) {}
-  virtual void Initialize(TransformSelector*, const std::string&,
-                          const std::string&)
+  virtual void Initialize(TransformSelector*, std::string const&) {}
+  virtual void Initialize(TransformSelector*, std::string const&,
+                          std::string const&)
   {
   }
   virtual void Initialize(TransformSelector* selector,
-                          const std::vector<std::string>&)
+                          std::vector<std::string> const&)
   {
     this->Initialize(selector);
   }
 
-  virtual std::string operator()(const std::string& s) = 0;
+  virtual std::string operator()(std::string const& s) = 0;
 
 protected:
   TransformSelector* Selector;
@@ -413,18 +413,18 @@ public:
   using TransformAction::Initialize;
 
   void Initialize(TransformSelector* selector,
-                  const std::string& append) override
+                  std::string const& append) override
   {
     TransformAction::Initialize(selector);
     this->Append = append;
   }
   void Initialize(TransformSelector* selector,
-                  const std::vector<std::string>& append) override
+                  std::vector<std::string> const& append) override
   {
     this->Initialize(selector, append.front());
   }
 
-  std::string operator()(const std::string& s) override
+  std::string operator()(std::string const& s) override
   {
     if (this->Selector->InSelection(s)) {
       return cmStrCat(s, this->Append);
@@ -442,18 +442,18 @@ public:
   using TransformAction::Initialize;
 
   void Initialize(TransformSelector* selector,
-                  const std::string& prepend) override
+                  std::string const& prepend) override
   {
     TransformAction::Initialize(selector);
     this->Prepend = prepend;
   }
   void Initialize(TransformSelector* selector,
-                  const std::vector<std::string>& prepend) override
+                  std::vector<std::string> const& prepend) override
   {
     this->Initialize(selector, prepend.front());
   }
 
-  std::string operator()(const std::string& s) override
+  std::string operator()(std::string const& s) override
   {
     if (this->Selector->InSelection(s)) {
       return cmStrCat(this->Prepend, s);
@@ -468,7 +468,7 @@ private:
 class TransformActionToUpper : public TransformAction
 {
 public:
-  std::string operator()(const std::string& s) override
+  std::string operator()(std::string const& s) override
   {
     if (this->Selector->InSelection(s)) {
       return cmSystemTools::UpperCase(s);
@@ -480,7 +480,7 @@ public:
 class TransformActionToLower : public TransformAction
 {
 public:
-  std::string operator()(const std::string& s) override
+  std::string operator()(std::string const& s) override
   {
     if (this->Selector->InSelection(s)) {
       return cmSystemTools::LowerCase(s);
@@ -492,7 +492,7 @@ public:
 class TransformActionStrip : public TransformAction
 {
 public:
-  std::string operator()(const std::string& s) override
+  std::string operator()(std::string const& s) override
   {
     if (this->Selector->InSelection(s)) {
       return cmTrimWhitespace(s);
@@ -504,7 +504,7 @@ public:
 class TransformActionGenexStrip : public TransformAction
 {
 public:
-  std::string operator()(const std::string& s) override
+  std::string operator()(std::string const& s) override
   {
     if (this->Selector->InSelection(s)) {
       return cmGeneratorExpression::Preprocess(
@@ -519,12 +519,12 @@ class TransformActionReplace : public TransformAction
 public:
   using TransformAction::Initialize;
 
-  void Initialize(TransformSelector* selector, const std::string& regex,
-                  const std::string& replace) override
+  void Initialize(TransformSelector* selector, std::string const& regex,
+                  std::string const& replace) override
   {
     TransformAction::Initialize(selector);
-    this->ReplaceHelper =
-      cm::make_unique<cmStringReplaceHelper>(regex, replace);
+    this->ReplaceHelper = cm::make_unique<cmStringReplaceHelper>(
+      regex, replace, selector->Makefile);
 
     if (!this->ReplaceHelper->IsRegularExpressionValid()) {
       throw transform_error(
@@ -534,16 +534,16 @@ public:
     }
     if (!this->ReplaceHelper->IsReplaceExpressionValid()) {
       throw transform_error(cmStrCat("sub-command TRANSFORM, action REPLACE: ",
-                                     this->ReplaceHelper->GetError(), "."));
+                                     this->ReplaceHelper->GetError(), '.'));
     }
   }
   void Initialize(TransformSelector* selector,
-                  const std::vector<std::string>& args) override
+                  std::vector<std::string> const& args) override
   {
     this->Initialize(selector, args[0], args[1]);
   }
 
-  std::string operator()(const std::string& s) override
+  std::string operator()(std::string const& s) override
   {
     if (this->Selector->InSelection(s)) {
       // Scan through the input for all matches.
@@ -552,7 +552,7 @@ public:
       if (!this->ReplaceHelper->Replace(s, output)) {
         throw transform_error(
           cmStrCat("sub-command TRANSFORM, action REPLACE: ",
-                   this->ReplaceHelper->GetError(), "."));
+                   this->ReplaceHelper->GetError(), '.'));
       }
 
       return output;
@@ -626,7 +626,7 @@ ActionDescriptorSet::iterator TransformConfigure(
   auto descriptor = Descriptors.find(action);
   if (descriptor == Descriptors.end()) {
     throw transform_error(cmStrCat(" sub-command TRANSFORM, ",
-                                   std::to_string(static_cast<int>(action)),
+                                   static_cast<int>(action),
                                    " invalid action."));
   }
 
@@ -641,6 +641,11 @@ ActionDescriptorSet::iterator TransformConfigure(
 
   return descriptor;
 }
+}
+
+std::unique_ptr<cmList::TransformSelector> cmList::TransformSelector::New()
+{
+  return cm::make_unique<TransformNoSelector>();
 }
 
 std::unique_ptr<cmList::TransformSelector> cmList::TransformSelector::NewAT(
@@ -746,7 +751,7 @@ cmList& cmList::transform(TransformAction action,
     static_cast<::TransformSelector*>(selector.get()));
 
   static_cast<::TransformSelector&>(*selector).Transform(
-    this->Values, [&descriptor](const std::string& s) -> std::string {
+    this->Values, [&descriptor](std::string const& s) -> std::string {
       return (*descriptor->Transform)(s);
     });
 
@@ -762,7 +767,7 @@ cmList& cmList::transform(TransformAction action, std::string const& arg,
     static_cast<::TransformSelector*>(selector.get()), arg);
 
   static_cast<::TransformSelector&>(*selector).Transform(
-    this->Values, [&descriptor](const std::string& s) -> std::string {
+    this->Values, [&descriptor](std::string const& s) -> std::string {
       return (*descriptor->Transform)(s);
     });
 
@@ -779,7 +784,7 @@ cmList& cmList::transform(TransformAction action, std::string const& arg1,
     static_cast<::TransformSelector*>(selector.get()), arg1, arg2);
 
   static_cast<::TransformSelector&>(*selector).Transform(
-    this->Values, [&descriptor](const std::string& s) -> std::string {
+    this->Values, [&descriptor](std::string const& s) -> std::string {
       return (*descriptor->Transform)(s);
     });
 
@@ -796,7 +801,7 @@ cmList& cmList::transform(TransformAction action,
     static_cast<::TransformSelector*>(selector.get()), args);
 
   static_cast<::TransformSelector&>(*selector).Transform(
-    this->Values, [&descriptor](const std::string& s) -> std::string {
+    this->Values, [&descriptor](std::string const& s) -> std::string {
       return (*descriptor->Transform)(s);
     });
 
@@ -850,7 +855,7 @@ cmList::size_type cmList::ComputeIndex(index_type pos, bool boundCheck) const
       if (index < 0 || length <= static_cast<size_type>(index)) {
         throw std::out_of_range(cmStrCat("index: ", pos, " out of range (-",
                                          this->Values.size(), ", ",
-                                         this->Values.size() - 1, ")"));
+                                         this->Values.size() - 1, ')'));
       }
     }
     return index;
@@ -876,7 +881,7 @@ cmList::size_type cmList::ComputeInsertIndex(index_type pos,
       if (index < 0 || length < static_cast<size_type>(index)) {
         throw std::out_of_range(cmStrCat("index: ", pos, " out of range (-",
                                          this->Values.size(), ", ",
-                                         this->Values.size(), ")"));
+                                         this->Values.size(), ')'));
       }
     }
     return index;
@@ -905,7 +910,7 @@ cmList& cmList::RemoveItems(std::vector<index_type>&& indexes)
   // compute all indexes
   std::vector<size_type> idx(indexes.size());
   std::transform(indexes.cbegin(), indexes.cend(), idx.begin(),
-                 [this](const index_type& index) -> size_type {
+                 [this](index_type const& index) -> size_type {
                    return this->ComputeIndex(index);
                  });
 

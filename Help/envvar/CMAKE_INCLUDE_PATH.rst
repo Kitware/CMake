@@ -1,7 +1,7 @@
 CMAKE_INCLUDE_PATH
 ------------------
 
-.. include:: ENV_VAR.txt
+.. include:: include/ENV_VAR.rst
 
 The ``CMAKE_INCLUDE_PATH`` environment variable may be set to a list of
 directories to be searched by the :command:`find_file` and :command:`find_path` commands.

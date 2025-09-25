@@ -5,12 +5,6 @@ project (TryCompile HIP)
 # Verify try_compile with HIP language works
 set(CMAKE_HIP_STANDARD 14)
 
-if(CMAKE_HIP_PLATFORM STREQUAL "amd")
-  set(CMAKE_HIP_ARCHITECTURES gfx803 gfx900)
-elseif(CMAKE_HIP_PLATFORM STREQUAL "nvidia")
-  set(CMAKE_HIP_ARCHITECTURES 52)
-endif()
-
 set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
 try_compile(result "${CMAKE_CURRENT_BINARY_DIR}"
         SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/device_function.hip"

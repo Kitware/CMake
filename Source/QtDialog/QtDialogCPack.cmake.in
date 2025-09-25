@@ -11,5 +11,3 @@ if(CMAKE_PACKAGE_QTGUI)
     set(CPACK_SET_DESTDIR TRUE)
   endif()
 endif()
-
-

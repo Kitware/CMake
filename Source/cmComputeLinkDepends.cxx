@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmComputeLinkDepends.h"
 
 #include <algorithm>
@@ -193,8 +193,8 @@ bool IsFeatureSupported(cmMakefile* makefile, std::string const& linkLanguage,
 {
   auto featureSupported = cmStrCat(
     "CMAKE_", linkLanguage, "_LINK_LIBRARY_USING_", feature, "_SUPPORTED");
-  if (makefile->GetDefinition(featureSupported).IsOn()) {
-    return true;
+  if (cmValue perLangVar = makefile->GetDefinition(featureSupported)) {
+    return perLangVar.IsOn();
   }
 
   featureSupported =
@@ -222,9 +222,9 @@ struct LinkLibraryFeatureAttributeSet
 };
 std::map<std::string, LinkLibraryFeatureAttributeSet>
   LinkLibraryFeatureAttributes;
-const LinkLibraryFeatureAttributeSet& GetLinkLibraryFeatureAttributes(
+LinkLibraryFeatureAttributeSet const& GetLinkLibraryFeatureAttributes(
   cmMakefile* makefile, std::string const& linkLanguage,
-  const std::string& feature)
+  std::string const& feature)
 {
   auto it = LinkLibraryFeatureAttributes.find(feature);
   if (it != LinkLibraryFeatureAttributes.end()) {
@@ -257,7 +257,7 @@ const LinkLibraryFeatureAttributeSet& GetLinkLibraryFeatureAttributes(
         if (processingOption.match(1) == "LIBRARY_TYPE") {
           featureAttributes.LibraryTypes.clear();
           for (auto const& value :
-               cmTokenize(processingOption.match(2), ","_s)) {
+               cmTokenize(processingOption.match(2), ',')) {
             if (value == "STATIC") {
               featureAttributes.LibraryTypes.emplace(
                 cmStateEnums::STATIC_LIBRARY);
@@ -292,7 +292,8 @@ const LinkLibraryFeatureAttributeSet& GetLinkLibraryFeatureAttributes(
           }
         } else if (processingOption.match(1) == "OVERRIDE") {
           featureAttributes.Override.clear();
-          auto values = cmTokenize(processingOption.match(2), ","_s);
+          std::vector<std::string> values =
+            cmTokenize(processingOption.match(2), ',');
           featureAttributes.Override.insert(values.begin(), values.end());
         }
       } else {
@@ -314,10 +315,10 @@ const LinkLibraryFeatureAttributeSet& GetLinkLibraryFeatureAttributes(
 }
 
 // LINK_GROUP helpers
-const cm::string_view LG_BEGIN = "<LINK_GROUP:"_s;
-const cm::string_view LG_END = "</LINK_GROUP:"_s;
-const cm::string_view LG_ITEM_BEGIN = "<LINK_GROUP>"_s;
-const cm::string_view LG_ITEM_END = "</LINK_GROUP>"_s;
+cm::string_view const LG_BEGIN = "<LINK_GROUP:"_s;
+cm::string_view const LG_END = "</LINK_GROUP:"_s;
+cm::string_view const LG_ITEM_BEGIN = "<LINK_GROUP>"_s;
+cm::string_view const LG_ITEM_END = "</LINK_GROUP>"_s;
 
 inline std::string ExtractGroupFeature(std::string const& item)
 {
@@ -346,15 +347,15 @@ public:
   using LinkEntry = cmComputeLinkDepends::LinkEntry;
   using EntryVector = cmComputeLinkDepends::EntryVector;
 
-  EntriesProcessing(const cmGeneratorTarget* target,
-                    const std::string& linkLanguage, EntryVector& entries,
+  EntriesProcessing(cmGeneratorTarget const* target,
+                    std::string const& linkLanguage, EntryVector& entries,
                     EntryVector& finalEntries)
     : Target(target)
     , LinkLanguage(linkLanguage)
     , Entries(entries)
     , FinalEntries(finalEntries)
   {
-    const auto* makefile = target->Makefile;
+    auto const* makefile = target->Makefile;
 
     switch (target->GetPolicyStatusCMP0156()) {
       case cmPolicies::WARN:
@@ -372,40 +373,19 @@ public:
       case cmPolicies::OLD:
         // rely on default initialization of the class
         break;
-      case cmPolicies::REQUIRED_IF_USED:
-      case cmPolicies::REQUIRED_ALWAYS:
-        makefile->GetCMakeInstance()->IssueMessage(
-          MessageType::FATAL_ERROR,
-          cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0156),
-          target->GetBacktrace());
-        CM_FALLTHROUGH;
       case cmPolicies::NEW: {
         // Policy 0179 applies only when policy 0156 is new
-        switch (target->GetPolicyStatusCMP0179()) {
-          case cmPolicies::WARN:
-            if (!makefile->GetCMakeInstance()->GetIsInTryCompile() &&
-                makefile->PolicyOptionalWarningEnabled(
-                  "CMAKE_POLICY_WARNING_CMP0179")) {
-              makefile->GetCMakeInstance()->IssueMessage(
-                MessageType::AUTHOR_WARNING,
-                cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0179),
-                         "\nSince the policy is not set, static libraries "
-                         "de-duplication will keep the last occurrence of the "
-                         "static libraries."),
-                target->GetBacktrace());
-            }
-            CM_FALLTHROUGH;
-          case cmPolicies::OLD:
-            break;
-          case cmPolicies::REQUIRED_IF_USED:
-          case cmPolicies::REQUIRED_ALWAYS:
-            makefile->GetCMakeInstance()->IssueMessage(
-              MessageType::FATAL_ERROR,
-              cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0179),
-              target->GetBacktrace());
-            CM_FALLTHROUGH;
-          case cmPolicies::NEW:
-            break;
+        if (target->GetPolicyStatusCMP0179() == cmPolicies::WARN &&
+            !makefile->GetCMakeInstance()->GetIsInTryCompile() &&
+            makefile->PolicyOptionalWarningEnabled(
+              "CMAKE_POLICY_WARNING_CMP0179")) {
+          makefile->GetCMakeInstance()->IssueMessage(
+            MessageType::AUTHOR_WARNING,
+            cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0179),
+                     "\nSince the policy is not set, static libraries "
+                     "de-duplication will keep the last occurrence of the "
+                     "static libraries."),
+            target->GetBacktrace());
         }
 
         if (auto libProcessing = makefile->GetDefinition(cmStrCat(
@@ -463,13 +443,13 @@ public:
     }
   }
 
-  void AddGroups(const std::map<size_t, std::vector<size_t>>& groups)
+  void AddGroups(std::map<size_t, std::vector<size_t>> const& groups)
   {
     if (!groups.empty()) {
       this->Groups = &groups;
       // record all libraries as part of groups to ensure correct
       // deduplication: libraries as part of groups are always kept.
-      for (const auto& g : groups) {
+      for (auto const& g : groups) {
         for (auto index : g.second) {
           this->Emitted.insert(index);
         }
@@ -477,7 +457,7 @@ public:
     }
   }
 
-  void AddLibraries(const std::vector<size_t>& libEntries)
+  void AddLibraries(std::vector<size_t> const& libEntries)
   {
     if (this->Order == Reverse) {
       std::vector<size_t> entries;
@@ -507,7 +487,7 @@ public:
     }
   }
 
-  void AddObjects(const std::vector<size_t>& objectEntries)
+  void AddObjects(std::vector<size_t> const& objectEntries)
   {
     // Place explicitly linked object files in the front.  The linker will
     // always use them anyway, and they may depend on symbols from libraries.
@@ -534,12 +514,12 @@ public:
 
     // expand groups
     if (this->Groups) {
-      for (const auto& g : *this->Groups) {
-        const LinkEntry& groupEntry = this->Entries[g.first];
+      for (auto const& g : *this->Groups) {
+        LinkEntry const& groupEntry = this->Entries[g.first];
         auto it = this->FinalEntries.begin();
         while (true) {
           it = std::find_if(it, this->FinalEntries.end(),
-                            [&groupEntry](const LinkEntry& entry) -> bool {
+                            [&groupEntry](LinkEntry const& entry) -> bool {
                               return groupEntry.Item == entry.Item;
                             });
           if (it == this->FinalEntries.end()) {
@@ -594,7 +574,7 @@ private:
   }
 
   template <typename Range>
-  void AddLibraries(const Range& libEntries)
+  void AddLibraries(Range const& libEntries)
   {
     for (auto index : libEntries) {
       LinkEntry const& entry = this->Entries[index];
@@ -606,21 +586,21 @@ private:
 
   OrderKind Order = Reverse;
   DeduplicationKind Deduplication = Shared;
-  const cmGeneratorTarget* Target;
-  const std::string& LinkLanguage;
+  cmGeneratorTarget const* Target;
+  std::string const& LinkLanguage;
   EntryVector& Entries;
   EntryVector& FinalEntries;
   std::set<size_t> Emitted;
-  const std::map<size_t, std::vector<size_t>>* Groups = nullptr;
+  std::map<size_t, std::vector<size_t>> const* Groups = nullptr;
 };
 }
 
 std::string const& cmComputeLinkDepends::LinkEntry::DEFAULT =
   cmLinkItem::DEFAULT;
 
-cmComputeLinkDepends::cmComputeLinkDepends(const cmGeneratorTarget* target,
-                                           const std::string& config,
-                                           const std::string& linkLanguage,
+cmComputeLinkDepends::cmComputeLinkDepends(cmGeneratorTarget const* target,
+                                           std::string const& config,
+                                           std::string const& linkLanguage,
                                            LinkLibrariesStrategy strategy)
   : Target(target)
   , Makefile(this->Target->Target->GetMakefile())
@@ -630,7 +610,7 @@ cmComputeLinkDepends::cmComputeLinkDepends(const cmGeneratorTarget* target,
   , DebugMode(this->Makefile->IsOn("CMAKE_LINK_DEPENDS_DEBUG_MODE") ||
               this->Target->GetProperty("LINK_DEPENDS_DEBUG_MODE").IsOn())
   , LinkLanguage(linkLanguage)
-  , LinkType(CMP0003_ComputeLinkType(
+  , LinkType(ComputeLinkType(
       this->Config, this->Makefile->GetCMakeInstance()->GetDebugConfigs()))
   , Strategy(strategy)
 
@@ -679,23 +659,19 @@ cmComputeLinkDepends::cmComputeLinkDepends(const cmGeneratorTarget* target,
       *linkLibraryOverride, target->GetLocalGenerator(), config, target,
       &dagChecker, target, linkLanguage);
 
-    auto overrideList = cmTokenize(overrideValue, ","_s);
+    std::vector<std::string> overrideList =
+      cmTokenize(overrideValue, ',', cmTokenizerMode::New);
     if (overrideList.size() >= 2) {
       auto const& feature = overrideList.front();
-      for_each(overrideList.cbegin() + 1, overrideList.cend(),
-               [this, &feature](std::string const& item) {
-                 this->LinkLibraryOverride.emplace(item, feature);
-               });
+      std::for_each(overrideList.cbegin() + 1, overrideList.cend(),
+                    [this, &feature](std::string const& item) {
+                      this->LinkLibraryOverride.emplace(item, feature);
+                    });
     }
   }
 }
 
 cmComputeLinkDepends::~cmComputeLinkDepends() = default;
-
-void cmComputeLinkDepends::SetOldLinkDirMode(bool b)
-{
-  this->OldLinkDirMode = b;
-}
 
 std::vector<cmComputeLinkDepends::LinkEntry> const&
 cmComputeLinkDepends::Compute()
@@ -887,7 +863,7 @@ void cmComputeLinkDepends::FollowLinkEntry(BFSEntry qe)
     // Follow the target dependencies.
     if (cmLinkInterface const* iface =
           entry.Target->GetLinkInterface(this->Config, this->Target)) {
-      const bool isIface =
+      bool const isIface =
         entry.Target->GetType() == cmStateEnums::INTERFACE_LIBRARY;
       // This target provides its own link interface information.
       this->AddLinkEntries(depender_index, iface->Libraries);
@@ -905,11 +881,6 @@ void cmComputeLinkDepends::FollowLinkEntry(BFSEntry qe)
 
       // Handle dependent shared libraries.
       this->FollowSharedDeps(depender_index, iface);
-
-      // Support for CMP0003.
-      for (cmLinkItem const& oi : iface->WrongConfigLibraries) {
-        this->CheckWrongConfigItem(oi);
-      }
     }
   } else {
     // Follow the old-style dependency list.
@@ -979,7 +950,7 @@ void cmComputeLinkDepends::HandleSharedDependency(SharedDepEntry const& dep)
 }
 
 void cmComputeLinkDepends::AddVarLinkEntries(
-  cm::optional<size_t> const& depender_index, const char* value)
+  cm::optional<size_t> const& depender_index, char const* value)
 {
   // This is called to add the dependencies named by
   // <item>_LIB_DEPENDS.  The variable contains a semicolon-separated
@@ -1020,9 +991,6 @@ void cmComputeLinkDepends::AddVarLinkEntries(
       // If the library is meant for this link type then use it.
       if (llt == GENERAL_LibraryType || llt == this->LinkType) {
         actual_libs.emplace_back(this->ResolveLinkItem(depender_index, d));
-      } else if (this->OldLinkDirMode) {
-        cmLinkItem item = this->ResolveLinkItem(depender_index, d);
-        this->CheckWrongConfigItem(item);
       }
 
       // Reset the link type until another explicit type is given.
@@ -1049,9 +1017,6 @@ void cmComputeLinkDepends::AddDirectLinkEntries()
       this->AddLinkEntries(cm::nullopt, runtimeEntries->second);
     }
   }
-  for (cmLinkItem const& wi : impl->WrongConfigLibraries) {
-    this->CheckWrongConfigItem(wi);
-  }
 }
 
 template <typename T>
@@ -1076,7 +1041,7 @@ void cmComputeLinkDepends::AddLinkEntries(
     // emit a warning if an undefined feature is used as part of
     // an imported target
     if (item.Feature != LinkEntry::DEFAULT && depender_index) {
-      const auto& depender = this->EntryList[*depender_index];
+      auto const& depender = this->EntryList[*depender_index];
       if (depender.Target && depender.Target->IsImported() &&
           !IsFeatureSupported(this->Makefile, this->LinkLanguage,
                               item.Feature)) {
@@ -1126,8 +1091,8 @@ void cmComputeLinkDepends::AddLinkEntries(
     }
 
     if (depender_index && group) {
-      const auto& depender = this->EntryList[*depender_index];
-      const auto& groupFeature = this->EntryList[group->first].Feature;
+      auto const& depender = this->EntryList[*depender_index];
+      auto const& groupFeature = this->EntryList[group->first].Feature;
       if (depender.Target && depender.Target->IsImported() &&
           !IsGroupFeatureSupported(this->Makefile, this->LinkLanguage,
                                    groupFeature)) {
@@ -1159,7 +1124,7 @@ void cmComputeLinkDepends::AddLinkEntries(
          entry.Target->GetType() ==
            cmStateEnums::TargetType::INTERFACE_LIBRARY)) {
       supportedItem = false;
-      const auto& groupFeature = this->EntryList[group->first].Feature;
+      auto const& groupFeature = this->EntryList[group->first].Feature;
       this->CMakeInstance->IssueMessage(
         MessageType::AUTHOR_WARNING,
         cmStrCat(
@@ -1201,9 +1166,9 @@ void cmComputeLinkDepends::AddLinkEntries(
 
     if (supportedItem) {
       if (group) {
-        const auto& currentFeature = this->EntryList[group->first].Feature;
-        for (const auto& g : this->GroupItems) {
-          const auto& groupFeature = this->EntryList[g.first].Feature;
+        auto const& currentFeature = this->EntryList[group->first].Feature;
+        for (auto const& g : this->GroupItems) {
+          auto const& groupFeature = this->EntryList[g.first].Feature;
           if (groupFeature == currentFeature) {
             continue;
           }
@@ -1214,8 +1179,8 @@ void cmComputeLinkDepends::AddLinkEntries(
               cmStrCat("Impossible to link target '", this->Target->GetName(),
                        "' because the link item '", entry.Item.Value,
                        "', specified with the group feature '", currentFeature,
-                       '\'', ", has already occurred with the feature '",
-                       groupFeature, '\'', ", which is not allowed."),
+                       "', has already occurred with the feature '",
+                       groupFeature, "', which is not allowed."),
               this->Target->GetBacktrace());
             continue;
           }
@@ -1238,7 +1203,8 @@ void cmComputeLinkDepends::AddLinkEntries(
             cmStrCat("Impossible to link target '", this->Target->GetName(),
                      "' because the link item '", entry.Item.Value,
                      "' is specified with the features '", itemFeature,
-                     "' and '", entry.Feature, "'",
+                     "' and '", entry.Feature,
+                     "'"
                      ", and both have an 'OVERRIDE' attribute that overrides "
                      "the other. Such cycles are not allowed."),
             this->Target->GetBacktrace());
@@ -1279,7 +1245,7 @@ void cmComputeLinkDepends::AddLinkEntries(
       std::vector<size_t> indexes;
       bool entryHandled = false;
       // search any occurrence of the library in already defined groups
-      for (const auto& g : this->GroupItems) {
+      for (auto const& g : this->GroupItems) {
         for (auto index : g.second) {
           if (entry.Item.Value == this->EntryList[index].Item.Value) {
             indexes.push_back(g.first);
@@ -1339,7 +1305,7 @@ void cmComputeLinkDepends::AddLinkObjects(std::vector<cmLinkItem> const& objs)
 }
 
 cmLinkItem cmComputeLinkDepends::ResolveLinkItem(
-  cm::optional<size_t> const& depender_index, const std::string& name)
+  cm::optional<size_t> const& depender_index, std::string const& name)
 {
   // Look for a target in the scope of the depender.
   cmGeneratorTarget const* from = this->Target;
@@ -1401,7 +1367,7 @@ void cmComputeLinkDepends::UpdateGroupDependencies()
         continue;
       }
       // search the item in the defined groups
-      for (const auto& groupItems : this->GroupItems) {
+      for (auto const& groupItems : this->GroupItems) {
         auto pos = std::find(groupItems.second.cbegin(),
                              groupItems.second.cend(), index);
         if (pos != groupItems.second.cend()) {
@@ -1756,18 +1722,4 @@ void cmComputeLinkDepends::DisplayFinalEntries()
     DisplayLinkEntry(count, entry);
   }
   fprintf(stderr, "\n");
-}
-
-void cmComputeLinkDepends::CheckWrongConfigItem(cmLinkItem const& item)
-{
-  if (!this->OldLinkDirMode) {
-    return;
-  }
-
-  // For CMake 2.4 bug-compatibility we need to consider the output
-  // directories of targets linked in another configuration as link
-  // directories.
-  if (item.Target && !item.Target->IsImported()) {
-    this->OldWrongConfigItems.insert(item.Target);
-  }
 }

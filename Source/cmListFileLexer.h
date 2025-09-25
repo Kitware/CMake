@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
 #ifdef __cplusplus
@@ -53,13 +53,13 @@ typedef enum cmListFileLexer_BOM_e cmListFileLexer_BOM;
 typedef struct cmListFileLexer_s cmListFileLexer;
 
 cmListFileLexer* cmListFileLexer_New(void);
-int cmListFileLexer_SetFileName(cmListFileLexer*, const char*,
+int cmListFileLexer_SetFileName(cmListFileLexer*, char const*,
                                 cmListFileLexer_BOM* bom);
-int cmListFileLexer_SetString(cmListFileLexer*, const char*);
+int cmListFileLexer_SetString(cmListFileLexer*, char const*);
 cmListFileLexer_Token* cmListFileLexer_Scan(cmListFileLexer*);
 long cmListFileLexer_GetCurrentLine(cmListFileLexer*);
 long cmListFileLexer_GetCurrentColumn(cmListFileLexer*);
-const char* cmListFileLexer_GetTypeAsString(cmListFileLexer*,
+char const* cmListFileLexer_GetTypeAsString(cmListFileLexer*,
                                             cmListFileLexer_Type);
 void cmListFileLexer_Delete(cmListFileLexer*);
 

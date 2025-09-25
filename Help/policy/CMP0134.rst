@@ -30,6 +30,6 @@ The ``NEW`` behavior for this policy is to use registry views ``TARGET`` and
 
 .. |INTRODUCED_IN_CMAKE_VERSION| replace:: 3.24
 .. |WARNS_OR_DOES_NOT_WARN| replace:: does *not* warn
-.. include:: STANDARD_ADVICE.txt
+.. include:: include/STANDARD_ADVICE.rst
 
-.. include:: DEPRECATED.txt
+.. include:: include/DEPRECATED.rst

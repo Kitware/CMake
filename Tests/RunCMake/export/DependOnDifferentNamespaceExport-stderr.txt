@@ -1,0 +1,13 @@
+CMake Error in CMakeLists.txt:
+  export called with target "exported" which requires target "doubleexported"
+  that is not in this export set, but in another export set which is exported
+  multiple times with different namespaces:.*
+  .*/Tests/RunCMake/export/DependOnDifferentNamespaceExport-build/export1.cmake,.*
+  .*/Tests/RunCMake/export/DependOnDifferentNamespaceExport-build/export2.cmake.
++
+  An exported target cannot depend upon another target which is exported in
+  more than one export set or with more than one namespace.  Consider
+  consolidating the exports of the "doubleexported" target to a single
+  export.
++
+CMake Generate step failed.  Build files cannot be regenerated correctly.

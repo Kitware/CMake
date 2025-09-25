@@ -38,20 +38,20 @@
 */
 /*
 - (void)viewWillDisappear:(BOOL)animated {
-	[super viewWillDisappear:animated];
+    [super viewWillDisappear:animated];
 }
 */
 /*
 - (void)viewDidDisappear:(BOOL)animated {
-	[super viewDidDisappear:animated];
+    [super viewDidDisappear:animated];
 }
 */
 
 /*
  // Override to allow orientations other than the default portrait orientation.
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
-	// Return YES for supported orientations.
-	return (interfaceOrientation == UIInterfaceOrientationPortrait);
+    // Return YES for supported orientations.
+    return (interfaceOrientation == UIInterfaceOrientationPortrait);
 }
  */
 
@@ -82,7 +82,7 @@
         cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier] autorelease];
     }
 
-	// Configure the cell.
+    // Configure the cell.
     cell.textLabel.text = [NSString stringWithFormat:@"%d", [indexPath row]];
 
     return cell;
@@ -134,13 +134,13 @@
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
 
-	/*
-	 <#DetailViewController#> *detailViewController = [[<#DetailViewController#> alloc] initWithNibName:@"<#Nib name#>" bundle:nil];
+    /*
+    <#DetailViewController#> *detailViewController = [[<#DetailViewController#> alloc] initWithNibName:@"<#Nib name#>" bundle:nil];
      // ...
      // Pass the selected object to the new view controller.
-	 [self.navigationController pushViewController:detailViewController animated:YES];
-	 [detailViewController release];
-	 */
+    [self.navigationController pushViewController:detailViewController animated:YES];
+    [detailViewController release];
+    */
 }
 
 

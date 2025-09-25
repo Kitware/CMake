@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
@@ -41,10 +41,10 @@ protected:
   int InitializeInternal() override;
   void CreateMenuLinks(std::ostream& str, std::ostream& deleteStr);
   int PackageFiles() override;
-  const char* GetOutputExtension() override { return ".exe"; }
-  const char* GetOutputPostfix() override { return "win32"; }
+  char const* GetOutputExtension() override { return ".exe"; }
+  char const* GetOutputPostfix() override { return "win32"; }
 
-  bool GetListOfSubdirectories(const char* dir,
+  bool GetListOfSubdirectories(char const* dir,
                                std::vector<std::string>& dirs);
 
   enum cmCPackGenerator::CPackSetDestdirSupport SupportsSetDestdir()

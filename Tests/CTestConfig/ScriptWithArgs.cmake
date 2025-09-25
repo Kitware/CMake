@@ -1,5 +1,3 @@
-set(CTEST_RUN_CURRENT_SCRIPT 0)
-
 macro(check_arg name expected_value)
   message("${name}='${${name}}'")
   if(NOT "${${name}}" STREQUAL "${expected_value}")

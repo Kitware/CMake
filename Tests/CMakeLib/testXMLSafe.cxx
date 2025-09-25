@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
@@ -12,8 +12,8 @@
 
 struct test_pair
 {
-  const char* in;
-  const char* out;
+  char const* in;
+  char const* out;
 };
 
 static test_pair const pairs[] = {

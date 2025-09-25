@@ -1,3 +1,4 @@
+cmake_minimum_required(VERSION 3.10)
 # a simple test case
 project (PreOrder)
 set(CMAKE_IGNORE_DEPENDENCIES_ORDERING 1)

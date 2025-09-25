@@ -1,4 +1,4 @@
-^CMake Error at CMP0079-link-NEW-bogus\.cmake:6 \(set_property\):
+^CMake Error at CMP0079-link-NEW-bogus\.cmake:[0-9]+ \(set_property\):
   Target "top" links to:
 
     ::@\(0xdeadbeef\)

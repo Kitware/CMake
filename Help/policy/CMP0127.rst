@@ -5,7 +5,7 @@ CMP0127
 
 :command:`cmake_dependent_option` supports full :ref:`Condition Syntax`.
 
-The ``<depends>`` parameter accepts a :ref:`semicolon-separated list <CMake
+The ``<condition>`` parameter accepts a :ref:`semicolon-separated list <CMake
 Language Lists>` of conditions.  CMake 3.21 and lower evaluates each
 ``condition`` as ``if(${condition})``, which does not properly handle
 conditions with nested paren groups.  CMake 3.22 and above instead prefer
@@ -28,6 +28,6 @@ been updated to expect the new behavior.
 
 .. |INTRODUCED_IN_CMAKE_VERSION| replace:: 3.22
 .. |WARNS_OR_DOES_NOT_WARN| replace:: warns
-.. include:: STANDARD_ADVICE.txt
+.. include:: include/STANDARD_ADVICE.rst
 
-.. include:: DEPRECATED.txt
+.. include:: include/DEPRECATED.rst

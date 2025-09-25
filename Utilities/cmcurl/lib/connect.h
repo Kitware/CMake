@@ -25,12 +25,14 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-#include "nonblock.h" /* for curlx_nonblock(), formerly Curl_nonblock() */
+#include "curlx/nonblock.h" /* for curlx_nonblock() */
 #include "sockaddr.h"
-#include "timeval.h"
+#include "curlx/timeval.h"
 
 struct Curl_dns_entry;
 struct ip_quadruple;
+
+enum alpnid Curl_alpn2alpnid(const char *name, size_t len);
 
 /* generic function that returns how much time there is left to run, according
    to the timeouts set */
@@ -43,7 +45,7 @@ timediff_t Curl_timeleft(struct Curl_easy *data,
 #define DEFAULT_SHUTDOWN_TIMEOUT_MS   (2 * 1000)
 
 void Curl_shutdown_start(struct Curl_easy *data, int sockindex,
-                         struct curltime *nowp);
+                         int timeout_ms, struct curltime *nowp);
 
 /* return how much time there is left to shutdown the connection at
  * sockindex. Returns 0 if there is no limit or shutdown has not started. */
@@ -124,7 +126,6 @@ typedef CURLcode cf_ip_connect_create(struct Curl_cfilter **pcf,
 
 CURLcode Curl_cf_setup_insert_after(struct Curl_cfilter *cf_at,
                                     struct Curl_easy *data,
-                                    const struct Curl_dns_entry *remotehost,
                                     int transport,
                                     int ssl_mode);
 
@@ -136,7 +137,7 @@ CURLcode Curl_cf_setup_insert_after(struct Curl_cfilter *cf_at,
 CURLcode Curl_conn_setup(struct Curl_easy *data,
                          struct connectdata *conn,
                          int sockindex,
-                         const struct Curl_dns_entry *remotehost,
+                         struct Curl_dns_entry *dns,
                          int ssl_mode);
 
 extern struct Curl_cftype Curl_cft_happy_eyeballs;

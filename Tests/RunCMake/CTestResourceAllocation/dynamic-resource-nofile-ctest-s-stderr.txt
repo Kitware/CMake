@@ -1,5 +1,5 @@
 ^Could not read/parse resource spec file [^
-]*/Tests/RunCMake/CTestResourceAllocation/dynamic-resource-nofile-ctest-s-build/dynamic-resspec\.json:[ ]
+]*/Tests/RunCMake/CTestResourceAllocation/dynamic-resource-nofile-ctest-s-build/dynamic-resspec\.json:
 File not found: [^
 ]*/Tests/RunCMake/CTestResourceAllocation/dynamic-resource-nofile-ctest-s-build/dynamic-resspec\.json
 CMake Error at [^

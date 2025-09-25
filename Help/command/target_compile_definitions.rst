@@ -26,7 +26,7 @@ same ``<target>`` append items in the order called.
   Allow setting ``INTERFACE`` items on :ref:`IMPORTED targets <Imported Targets>`.
 
 .. |command_name| replace:: ``target_compile_definitions``
-.. include:: GENEX_NOTE.txt
+.. include:: include/GENEX_NOTE.rst
 
 Any leading ``-D`` on an item will be removed.  Empty items are ignored.
 For example, the following are all equivalent:

@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmInstallCxxModuleBmiGenerator.h"
 
 #include <ostream>
@@ -51,7 +51,7 @@ std::string cmInstallCxxModuleBmiGenerator::GetScriptLocation(
   if (config.empty()) {
     config_name = "noconfig";
   }
-  return cmStrCat(this->Target->GetSupportDirectory(),
+  return cmStrCat(this->Target->GetCMFSupportDirectory(),
                   "/install-cxx-module-bmi-", config_name, ".cmake");
 }
 
@@ -63,7 +63,7 @@ std::string cmInstallCxxModuleBmiGenerator::GetDestination(
 }
 
 void cmInstallCxxModuleBmiGenerator::GenerateScriptForConfig(
-  std::ostream& os, const std::string& config, Indent indent)
+  std::ostream& os, std::string const& config, Indent indent)
 {
   auto const& loc = this->GetScriptLocation(config);
   if (loc.empty()) {

@@ -1,6 +1,9 @@
 CMP0054
 -------
 
+.. |REMOVED_IN_CMAKE_VERSION| replace:: 4.0
+.. include:: include/REMOVED_PROLOGUE.rst
+
 .. versionadded:: 3.1
 
 Only interpret :command:`if` arguments as variables or keywords when unquoted.
@@ -16,7 +19,7 @@ that have been quoted or bracketed.
 
 Given the following partial example:
 
-::
+.. code-block:: cmake
 
   set(A E)
   set(E "")
@@ -29,25 +32,23 @@ Given the following partial example:
 
 After explicit expansion of variables this gives:
 
-::
+.. code-block:: cmake
 
   if("E" STREQUAL "")
 
 With the policy set to ``OLD`` implicit expansion reduces this semantically to:
 
-::
+.. code-block:: cmake
 
   if("" STREQUAL "")
 
 With the policy set to ``NEW`` the quoted arguments will not be
 further dereferenced:
 
-::
+.. code-block:: cmake
 
   if("E" STREQUAL "")
 
 .. |INTRODUCED_IN_CMAKE_VERSION| replace:: 3.1
-.. |WARNS_OR_DOES_NOT_WARN| replace:: warns
-.. include:: STANDARD_ADVICE.txt
-
-.. include:: DEPRECATED.txt
+.. |WARNED_OR_DID_NOT_WARN| replace:: warned
+.. include:: include/REMOVED_EPILOGUE.rst

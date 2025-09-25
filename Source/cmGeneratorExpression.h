@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
@@ -46,7 +46,7 @@ public:
     std::string input) const;
 
   static std::string Evaluate(
-    std::string input, cmLocalGenerator* lg, const std::string& config,
+    std::string input, cmLocalGenerator const* lg, std::string const& config,
     cmGeneratorTarget const* headTarget = nullptr,
     cmGeneratorExpressionDAGChecker* dagChecker = nullptr,
     cmGeneratorTarget const* currentTarget = nullptr,
@@ -59,30 +59,34 @@ public:
     InstallInterface
   };
 
-  static std::string Preprocess(const std::string& input,
+  static std::string Preprocess(std::string const& input,
                                 PreprocessContext context,
                                 cm::string_view importPrefix = {});
 
-  static void Split(const std::string& input,
+  static std::string Collect(
+    std::string const& input,
+    std::map<std::string, std::vector<std::string>>& collected);
+
+  static void Split(std::string const& input,
                     std::vector<std::string>& output);
 
-  static cm::string_view::size_type Find(const cm::string_view& input);
+  static cm::string_view::size_type Find(cm::string_view const& input);
 
-  static bool IsValidTargetName(const std::string& input);
+  static bool IsValidTargetName(std::string const& input);
 
-  static std::string StripEmptyListElements(const std::string& input);
+  static std::string StripEmptyListElements(std::string const& input);
 
-  static inline bool StartsWithGeneratorExpression(const std::string& input)
+  static bool StartsWithGeneratorExpression(std::string const& input)
   {
     return input.length() >= 2 && input[0] == '$' && input[1] == '<';
   }
-  static inline bool StartsWithGeneratorExpression(const char* input)
+  static bool StartsWithGeneratorExpression(char const* input)
   {
     return input && input[0] == '$' && input[1] == '<';
   }
 
   static void ReplaceInstallPrefix(std::string& input,
-                                   const std::string& replacement);
+                                   std::string const& replacement);
 
 private:
   cmake& CMakeInstance;
@@ -98,8 +102,8 @@ public:
   cmCompiledGeneratorExpression& operator=(
     cmCompiledGeneratorExpression const&) = delete;
 
-  const std::string& Evaluate(
-    cmLocalGenerator* lg, const std::string& config,
+  std::string const& Evaluate(
+    cmLocalGenerator const* lg, std::string const& config,
     cmGeneratorTarget const* headTarget = nullptr,
     cmGeneratorExpressionDAGChecker* dagChecker = nullptr,
     cmGeneratorTarget const* currentTarget = nullptr,
@@ -160,7 +164,7 @@ private:
 
   cmListFileBacktrace Backtrace;
   std::vector<std::unique_ptr<cmGeneratorExpressionEvaluator>> Evaluators;
-  const std::string Input;
+  std::string const Input;
   bool NeedsEvaluation;
   bool EvaluateForBuildsystem = false;
   bool Quiet = false;
@@ -181,7 +185,7 @@ private:
 class cmGeneratorExpressionInterpreter
 {
 public:
-  cmGeneratorExpressionInterpreter(cmLocalGenerator* localGenerator,
+  cmGeneratorExpressionInterpreter(cmLocalGenerator const* localGenerator,
                                    std::string config,
                                    cmGeneratorTarget const* headTarget,
                                    std::string language = std::string())
@@ -198,13 +202,13 @@ public:
   cmGeneratorExpressionInterpreter& operator=(
     cmGeneratorExpressionInterpreter const&) = delete;
 
-  const std::string& Evaluate(std::string expression,
-                              const std::string& property);
+  std::string const& Evaluate(std::string expression,
+                              std::string const& property);
 
 protected:
   cmGeneratorExpression GeneratorExpression;
   std::unique_ptr<cmCompiledGeneratorExpression> CompiledGeneratorExpression;
-  cmLocalGenerator* LocalGenerator = nullptr;
+  cmLocalGenerator const* LocalGenerator = nullptr;
   std::string Config;
   cmGeneratorTarget const* HeadTarget = nullptr;
   std::string Language;

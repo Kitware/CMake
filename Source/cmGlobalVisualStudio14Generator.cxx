@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmGlobalVisualStudio14Generator.h"
 
 #include <cstring>
@@ -18,16 +18,16 @@
 #include "cmSystemTools.h"
 #include "cmValue.h"
 
-static const char vs14generatorName[] = "Visual Studio 14 2015";
+static char const vs14generatorName[] = "Visual Studio 14 2015";
 
 // Map generator name without year to name with year.
-static const char* cmVS14GenName(const std::string& name, std::string& genName)
+static char const* cmVS14GenName(std::string const& name, std::string& genName)
 {
   if (strncmp(name.c_str(), vs14generatorName,
               sizeof(vs14generatorName) - 6) != 0) {
     return nullptr;
   }
-  const char* p = name.c_str() + sizeof(vs14generatorName) - 6;
+  char const* p = name.c_str() + sizeof(vs14generatorName) - 6;
   if (cmHasLiteralPrefix(p, " 2015")) {
     p += 5;
   }
@@ -40,50 +40,31 @@ class cmGlobalVisualStudio14Generator::Factory
 {
 public:
   std::unique_ptr<cmGlobalGenerator> CreateGlobalGenerator(
-    const std::string& name, bool allowArch, cmake* cm) const override
+    std::string const& name, cmake* cm) const override
   {
     std::string genName;
-    const char* p = cmVS14GenName(name, genName);
+    char const* p = cmVS14GenName(name, genName);
     if (!p) {
       return std::unique_ptr<cmGlobalGenerator>();
     }
     if (!*p) {
       return std::unique_ptr<cmGlobalGenerator>(
-        new cmGlobalVisualStudio14Generator(cm, genName, ""));
-    }
-    if (!allowArch || *p++ != ' ') {
-      return std::unique_ptr<cmGlobalGenerator>();
-    }
-    if (strcmp(p, "Win64") == 0) {
-      return std::unique_ptr<cmGlobalGenerator>(
-        new cmGlobalVisualStudio14Generator(cm, genName, "x64"));
-    }
-    if (strcmp(p, "ARM") == 0) {
-      return std::unique_ptr<cmGlobalGenerator>(
-        new cmGlobalVisualStudio14Generator(cm, genName, "ARM"));
+        new cmGlobalVisualStudio14Generator(cm, genName));
     }
     return std::unique_ptr<cmGlobalGenerator>();
   }
 
   cmDocumentationEntry GetDocumentation() const override
   {
-    return { cmStrCat(vs14generatorName, " [arch]"),
+    return { std::string(vs14generatorName),
              "Generates Visual Studio 2015 project files.  "
-             "Optional [arch] can be \"Win64\" or \"ARM\"." };
+             "Use -A option to specify architecture." };
   }
 
   std::vector<std::string> GetGeneratorNames() const override
   {
     std::vector<std::string> names;
     names.push_back(vs14generatorName);
-    return names;
-  }
-
-  std::vector<std::string> GetGeneratorNamesWithPlatform() const override
-  {
-    std::vector<std::string> names;
-    names.emplace_back(cmStrCat(vs14generatorName, " ARM"));
-    names.emplace_back(cmStrCat(vs14generatorName, " Win64"));
     return names;
   }
 
@@ -109,9 +90,8 @@ cmGlobalVisualStudio14Generator::NewFactory()
 }
 
 cmGlobalVisualStudio14Generator::cmGlobalVisualStudio14Generator(
-  cmake* cm, const std::string& name,
-  std::string const& platformInGeneratorName)
-  : cmGlobalVisualStudio12Generator(cm, name, platformInGeneratorName)
+  cmake* cm, std::string const& name)
+  : cmGlobalVisualStudio12Generator(cm, name)
 {
   std::string vc14Express;
   this->ExpressEdition = cmSystemTools::ReadRegistryValue(
@@ -130,7 +110,7 @@ cmGlobalVisualStudio14Generator::cmGlobalVisualStudio14Generator(
 }
 
 bool cmGlobalVisualStudio14Generator::MatchesGeneratorName(
-  const std::string& name) const
+  std::string const& name) const
 {
   std::string genName;
   if (cmVS14GenName(name, genName)) {
@@ -357,7 +337,7 @@ bool cmGlobalVisualStudio14Generator::SelectWindowsStoreToolset(
 
 bool cmGlobalVisualStudio14Generator::IsWindowsDesktopToolsetInstalled() const
 {
-  const char desktop10Key[] = "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\"
+  char const desktop10Key[] = "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\"
                               "VisualStudio\\14.0\\VC\\Runtimes";
 
   std::vector<std::string> vc14;
@@ -367,7 +347,7 @@ bool cmGlobalVisualStudio14Generator::IsWindowsDesktopToolsetInstalled() const
 
 bool cmGlobalVisualStudio14Generator::IsWindowsStoreToolsetInstalled() const
 {
-  const char universal10Key[] =
+  char const universal10Key[] =
     "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\"
     "VisualStudio\\14.0\\Setup\\Build Tools for Windows 10;SrcPath";
 
@@ -540,4 +520,61 @@ std::string cmGlobalVisualStudio14Generator::GetWindows10SDKVersion(
   (void)mf;
   // Return an empty string
   return std::string();
+}
+
+void cmGlobalVisualStudio14Generator::AddSolutionItems(cmLocalGenerator* root,
+                                                       VSFolders& vsFolders)
+{
+  cmValue n = root->GetMakefile()->GetProperty("VS_SOLUTION_ITEMS");
+  if (cmNonempty(n)) {
+    cmMakefile* makefile = root->GetMakefile();
+
+    std::vector<cmSourceGroup> sourceGroups = makefile->GetSourceGroups();
+
+    cmVisualStudioFolder* defaultFolder = nullptr;
+
+    std::vector<std::string> pathComponents = {
+      makefile->GetCurrentSourceDirectory(),
+      "",
+      "",
+    };
+
+    for (std::string const& relativePath : cmList(n)) {
+      pathComponents[2] = relativePath;
+
+      std::string fullPath = cmSystemTools::FileIsFullPath(relativePath)
+        ? relativePath
+        : cmSystemTools::JoinPath(pathComponents);
+
+      cmSourceGroup* sg = makefile->FindSourceGroup(fullPath, sourceGroups);
+
+      cmVisualStudioFolder* folder = nullptr;
+      if (!sg->GetFullName().empty()) {
+        std::string folderPath = sg->GetFullName();
+        // Source groups use '\' while solution folders use '/'.
+        cmSystemTools::ReplaceString(folderPath, "\\", "/");
+        folder = vsFolders.Create(folderPath);
+      } else {
+        // Lazily initialize the default solution items folder.
+        if (defaultFolder == nullptr) {
+          defaultFolder = vsFolders.Create("Solution Items");
+        }
+        folder = defaultFolder;
+      }
+
+      folder->SolutionItems.insert(fullPath);
+    }
+  }
+}
+
+void cmGlobalVisualStudio14Generator::WriteFolderSolutionItems(
+  std::ostream& fout, cmVisualStudioFolder const& folder) const
+{
+  fout << "\tProjectSection(SolutionItems) = preProject\n";
+
+  for (std::string const& item : folder.SolutionItems) {
+    fout << "\t\t" << item << " = " << item << "\n";
+  }
+
+  fout << "\tEndProjectSection\n";
 }

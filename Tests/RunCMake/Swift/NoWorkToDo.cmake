@@ -1,4 +1,7 @@
 cmake_policy(SET CMP0157 NEW)
+if(POLICY CMP0195)
+  cmake_policy(SET CMP0195 NEW)
+endif()
 enable_language(Swift)
 
 file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/hello.swift "")

@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
@@ -13,6 +13,7 @@
 #include "cmCTestVC.h"
 
 class cmCTest;
+class cmMakefile;
 class cmXMLWriter;
 
 /** \class cmCTestGlobalVC
@@ -23,7 +24,7 @@ class cmCTestGlobalVC : public cmCTestVC
 {
 public:
   /** Construct with a CTest instance and update log stream.  */
-  cmCTestGlobalVC(cmCTest* ctest, std::ostream& log);
+  cmCTestGlobalVC(cmCTest* ctest, cmMakefile* mf, std::ostream& log);
 
   ~cmCTestGlobalVC() override;
 
@@ -60,7 +61,7 @@ protected:
   // Information about revisions from a svn log.
   std::list<Revision> Revisions;
 
-  virtual const char* LocalPath(std::string const& path);
+  virtual char const* LocalPath(std::string const& path);
 
   virtual void DoRevision(Revision const& revision,
                           std::vector<Change> const& changes);

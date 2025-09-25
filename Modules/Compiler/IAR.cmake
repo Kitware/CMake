@@ -21,6 +21,8 @@ macro(__compiler_iar_common lang)
     string(APPEND CMAKE_${lang}_FLAGS_RELEASE_INIT " -Oh -DNDEBUG")
     string(APPEND CMAKE_${lang}_FLAGS_MINSIZEREL_INIT " -Ohz -DNDEBUG")
     string(APPEND CMAKE_${lang}_FLAGS_RELWITHDEBINFO_INIT " -Oh -r -DNDEBUG")
+
+    set(CMAKE_${lang}_LINK_MODE LINKER)
   endif()
 
   set(CMAKE_${lang}_OUTPUT_EXTENSION_REPLACE 1)
@@ -37,7 +39,7 @@ macro(__compiler_iar_ilink lang)
   __compiler_iar_common(${lang})
 
   string(APPEND CMAKE_EXE_LINKER_FLAGS_INIT " --silent")
-  set(CMAKE_${lang}_LINK_EXECUTABLE "<CMAKE_LINKER> <OBJECTS> <CMAKE_${lang}_LINK_FLAGS> <LINK_FLAGS> <LINK_LIBRARIES> -o <TARGET>")
+  set(CMAKE_${lang}_LINK_EXECUTABLE "<CMAKE_LINKER> <OBJECTS> <LINK_FLAGS> <LINK_LIBRARIES> -o <TARGET>")
 
   set(CMAKE_${lang}_CREATE_STATIC_LIBRARY "<CMAKE_AR> <TARGET> --create <LINK_FLAGS> <OBJECTS>")
   set(CMAKE_${lang}_ARCHIVE_CREATE "<CMAKE_AR> <TARGET> --create <LINK_FLAGS> <OBJECTS>")
@@ -50,7 +52,7 @@ macro(__compiler_iar_xlink lang)
   __compiler_iar_common(${lang})
 
   string(APPEND CMAKE_EXE_LINKER_FLAGS_INIT " -S")
-  set(CMAKE_${lang}_LINK_EXECUTABLE "<CMAKE_LINKER> <OBJECTS> <CMAKE_${lang}_LINK_FLAGS> <LINK_FLAGS> <LINK_LIBRARIES> -o <TARGET>")
+  set(CMAKE_${lang}_LINK_EXECUTABLE "<CMAKE_LINKER> <OBJECTS> <LINK_FLAGS> <LINK_LIBRARIES> -o <TARGET>")
 
   set(CMAKE_${lang}_CREATE_STATIC_LIBRARY "<CMAKE_AR> <TARGET> <LINK_FLAGS> <OBJECTS>")
   set(CMAKE_${lang}_ARCHIVE_CREATE "<CMAKE_AR> <TARGET> <LINK_FLAGS> <OBJECTS>")

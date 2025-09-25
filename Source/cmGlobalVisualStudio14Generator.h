@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
@@ -21,16 +21,15 @@ class cmGlobalVisualStudio14Generator : public cmGlobalVisualStudio12Generator
 public:
   static std::unique_ptr<cmGlobalGeneratorFactory> NewFactory();
 
-  bool MatchesGeneratorName(const std::string& name) const override;
+  bool MatchesGeneratorName(std::string const& name) const override;
 
-  const char* GetAndroidApplicationTypeRevision() const override
+  char const* GetAndroidApplicationTypeRevision() const override
   {
     return "2.0";
   }
 
 protected:
-  cmGlobalVisualStudio14Generator(cmake* cm, const std::string& name,
-                                  std::string const& platformInGeneratorName);
+  cmGlobalVisualStudio14Generator(cmake* cm, std::string const& name);
 
   bool InitializeWindowsStore(cmMakefile* mf) override;
   bool InitializeAndroid(cmMakefile* mf) override;
@@ -66,6 +65,11 @@ protected:
   bool IsWindowsDesktopToolsetInstalled() const override;
 
   std::string GetWindows10SDKVersion(cmMakefile* mf);
+
+  void AddSolutionItems(cmLocalGenerator* root, VSFolders& vsFolders) override;
+
+  void WriteFolderSolutionItems(
+    std::ostream& fout, cmVisualStudioFolder const& folder) const override;
 
 private:
   class Factory;

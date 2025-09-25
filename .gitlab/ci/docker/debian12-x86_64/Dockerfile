@@ -44,6 +44,8 @@ RUN --mount=type=bind,source=install_rvm.sh,target=/root/install_rvm.sh \
 FROM ${BASE_IMAGE}
 LABEL maintainer="Ben Boeckel <ben.boeckel@kitware.com>"
 
+ENV RBENV_ROOT=/opt/rbenv
+
 RUN --mount=type=bind,source=install_deps.sh,target=/root/install_deps.sh \
     --mount=type=bind,source=deps_packages.lst,target=/root/deps_packages.lst \
     --mount=type=bind,source=dpkg-exclude,target=/etc/dpkg/dpkg.cfg.d/exclude \

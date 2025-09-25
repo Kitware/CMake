@@ -26,4 +26,4 @@
 
   find_path considered the following locations:.*
   The item was found at.*
-.*include/PrefixInPATH.*
+.*find_path/include/

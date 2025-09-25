@@ -14,8 +14,8 @@ Normal Executables
   add_executable(<name> <options>... <sources>...)
   :target: normal
 
-  Add an executable target called ``<name>`` to be built from the source
-  files listed in the command invocation.
+  Add an :ref:`executable <Executables>` target called ``<name>`` to
+  be built from the source files listed in the command invocation.
 
   The options are:
 

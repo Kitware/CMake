@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmFLTKWrapUICommand.h"
 
 #include <cstddef>
@@ -23,7 +23,7 @@ class cmListFileBacktrace;
 class cmTarget;
 
 static void FinalAction(cmMakefile& makefile, std::string const& name,
-                        const cmListFileBacktrace& lfbt)
+                        cmListFileBacktrace const& lfbt)
 {
   // people should add the srcs to the target themselves, but the old command
   // didn't support that, so check and see if they added the files in and if
@@ -78,9 +78,9 @@ bool cmFLTKWrapUICommand(std::vector<std::string> const& args,
     // to generate .cxx and .h files
     if (!curr || !curr->GetPropertyAsBool("WRAP_EXCLUDE")) {
       std::string outName = cmStrCat(
-        outputDirectory, "/", cmSystemTools::GetFilenameWithoutExtension(arg));
+        outputDirectory, '/', cmSystemTools::GetFilenameWithoutExtension(arg));
       std::string hname = cmStrCat(outName, ".h");
-      std::string origname = cmStrCat(cdir, "/", arg);
+      std::string origname = cmStrCat(cdir, '/', arg);
       // add starting depends
       std::vector<std::string> depends;
       depends.push_back(origname);
@@ -131,7 +131,7 @@ bool cmFLTKWrapUICommand(std::vector<std::string> const& args,
   mf.AddDefinition(varName, sourceListValue);
 
   mf.AddGeneratorAction(
-    [target](cmLocalGenerator& lg, const cmListFileBacktrace& lfbt) {
+    [target](cmLocalGenerator& lg, cmListFileBacktrace const& lfbt) {
       FinalAction(*lg.GetMakefile(), target, lfbt);
     });
   return true;

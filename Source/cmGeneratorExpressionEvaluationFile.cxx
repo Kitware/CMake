@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmGeneratorExpressionEvaluationFile.h"
 
 #include <memory>
@@ -35,7 +35,7 @@ cmGeneratorExpressionEvaluationFile::cmGeneratorExpressionEvaluationFile(
 }
 
 void cmGeneratorExpressionEvaluationFile::Generate(
-  cmLocalGenerator* lg, const std::string& config, const std::string& lang,
+  cmLocalGenerator* lg, std::string const& config, std::string const& lang,
   cmCompiledGeneratorExpression* inputExpression,
   std::map<std::string, std::string>& outputFiles, mode_t perm)
 {
@@ -58,9 +58,9 @@ void cmGeneratorExpressionEvaluationFile::Generate(
     }
   }
 
-  const std::string outputFileName =
+  std::string const outputFileName =
     this->GetOutputFileName(lg, target, config, lang);
-  const std::string& outputContent =
+  std::string const& outputContent =
     inputExpression->Evaluate(lg, config, target, nullptr, nullptr, lang);
 
   auto it = outputFiles.find(outputFileName);
@@ -142,7 +142,7 @@ void cmGeneratorExpressionEvaluationFile::Generate(cmLocalGenerator* lg)
   if (this->InputIsContent) {
     inputContent = this->Input;
   } else {
-    const std::string inputFileName = this->GetInputFileName(lg);
+    std::string const inputFileName = this->GetInputFileName(lg);
     lg->GetMakefile()->AddCMakeDependFile(inputFileName);
     if (!this->Permissions) {
       cmSystemTools::GetPermissions(inputFileName.c_str(), this->Permissions);
@@ -204,8 +204,8 @@ std::string cmGeneratorExpressionEvaluationFile::GetInputFileName(
 }
 
 std::string cmGeneratorExpressionEvaluationFile::GetOutputFileName(
-  cmLocalGenerator* lg, cmGeneratorTarget* target, const std::string& config,
-  const std::string& lang)
+  cmLocalGenerator* lg, cmGeneratorTarget* target, std::string const& config,
+  std::string const& lang)
 {
   std::string outputFileName =
     this->OutputFileExpr->Evaluate(lg, config, target, nullptr, nullptr, lang);
@@ -253,8 +253,6 @@ std::string cmGeneratorExpressionEvaluationFile::FixRelativePath(
       // which ends up being used relative to the working dir.
       resultPath = relativePath;
       break;
-    case cmPolicies::REQUIRED_IF_USED:
-    case cmPolicies::REQUIRED_ALWAYS:
     case cmPolicies::NEW:
       // NEW behavior is to interpret the relative path with respect
       // to the current source or binary directory.

@@ -1,0 +1,5 @@
+CMake Error at [^
+]*\(cmake_instrumentation\):
+  cmake_instrumentation given a non-integer DATA_VERSION.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:6 \(include\)

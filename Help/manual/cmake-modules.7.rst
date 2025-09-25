@@ -8,7 +8,7 @@ Projects may provide further modules; their location(s)
 can be specified in the :variable:`CMAKE_MODULE_PATH` variable.
 
 Utility Modules
-^^^^^^^^^^^^^^^
+===============
 
 These modules are loaded using the :command:`include` command.
 
@@ -85,7 +85,6 @@ These modules are loaded using the :command:`include` command.
    /module/InstallRequiredSystemLibraries
    /module/ProcessorCount
    /module/SelectLibraryConfigurations
-   /module/SquishTestScript
    /module/TestForANSIForScope
    /module/TestForANSIStreamHeaders
    /module/TestForSSTREAM
@@ -96,7 +95,7 @@ These modules are loaded using the :command:`include` command.
    /module/UsewxWidgets
 
 Find Modules
-^^^^^^^^^^^^
+============
 
 These modules search for third-party software.
 They are normally called through the :command:`find_package` command.
@@ -113,7 +112,6 @@ They are normally called through the :command:`find_package` command.
    /module/FindBLAS
    /module/FindBullet
    /module/FindBZip2
-   /module/FindCABLE
    /module/FindCoin3D
    /module/FindCUDAToolkit
    /module/FindCups
@@ -132,8 +130,6 @@ They are normally called through the :command:`find_package` command.
    /module/FindFLTK2
    /module/FindFontconfig
    /module/FindFreetype
-   /module/FindGCCXML
-   /module/FindGDAL
    /module/FindGettext
    /module/FindGIF
    /module/FindGit
@@ -229,8 +225,8 @@ They are normally called through the :command:`find_package` command.
    /module/FindRTI
    /module/FindRuby
    /module/FindSDL
-   /module/FindSDL_image
    /module/FindSDL_gfx
+   /module/FindSDL_image
    /module/FindSDL_mixer
    /module/FindSDL_net
    /module/FindSDL_sound
@@ -257,10 +253,10 @@ They are normally called through the :command:`find_package` command.
    /module/FindZLIB
 
 Deprecated Modules
-^^^^^^^^^^^^^^^^^^^
+==================
 
 Deprecated Utility Modules
-==========================
+--------------------------
 
 .. toctree::
    :maxdepth: 1
@@ -275,24 +271,28 @@ Deprecated Utility Modules
    /module/Documentation
    /module/GetPrerequisites
    /module/MacroAddFileDependencies
+   /module/SquishTestScript
    /module/TestBigEndian
    /module/TestCXXAcceptsFlag
+   /module/Use_wxWindows
    /module/UseJavaClassFilelist
    /module/UseJavaSymlinks
    /module/UsePkgConfig
-   /module/Use_wxWindows
    /module/WriteBasicConfigVersionFile
    /module/WriteCompilerDetectionHeader
 
 Deprecated Find Modules
-=======================
+-----------------------
 
 .. toctree::
    :maxdepth: 1
 
    /module/FindBoost
+   /module/FindCABLE
    /module/FindCUDA
    /module/FindDart
+   /module/FindGCCXML
+   /module/FindGDAL
    /module/FindITK
    /module/FindPythonInterp
    /module/FindPythonLibs
@@ -302,7 +302,7 @@ Deprecated Find Modules
    /module/FindwxWindows
 
 Legacy CPack Modules
-====================
+--------------------
 
 These modules used to be mistakenly exposed to the user, and have been moved
 out of user visibility. They are for CPack internal use, and should never be

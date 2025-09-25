@@ -1,5 +1,5 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-# file Copyright.txt or https://cmake.org/licensing for details.
+# file LICENSE.rst or https://cmake.org/licensing for details.
 
 
 # This module is shared by multiple languages; use include blocker.
@@ -25,6 +25,10 @@ macro(__apple_compiler_clang lang)
   set(CMAKE_${lang}_USING_LINKER_LLD "-fuse-ld=lld")
   set(CMAKE_${lang}_USING_LINKER_MOLD "-fuse-ld=mold")
   set(CMAKE_${lang}_USING_LINKER_SOLD "-fuse-ld=sold")
+
+  if(NOT CMAKE_${lang}_COMPILER_APPLE_SYSROOT)
+    set(CMAKE_${lang}_COMPILER_APPLE_SYSROOT_REQUIRED 1)
+  endif()
 
   if(_CMAKE_OSX_SYSROOT_PATH MATCHES "/iPhoneOS")
     set(CMAKE_${lang}_OSX_DEPLOYMENT_TARGET_FLAG "-miphoneos-version-min=")

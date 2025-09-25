@@ -1,6 +1,9 @@
+/* SPDX-License-Identifier: 0BSD */
+
 /**
  * \file        lzma/hardware.h
  * \brief       Hardware information
+ * \note        Never include this file directly. Use <lzma.h> instead.
  *
  * Since liblzma can consume a lot of system resources, it also provides
  * ways to limit the resource usage. Applications linking against liblzma
@@ -22,11 +25,6 @@
 
 /*
  * Author: Lasse Collin
- *
- * This file has been put into the public domain.
- * You can do whatever you want with this file.
- *
- * See ../lzma.h for information about liblzma as a whole.
  */
 
 #ifndef LZMA_H_INTERNAL
@@ -57,7 +55,7 @@ extern LZMA_API(uint64_t) lzma_physmem(void) lzma_nothrow;
  * If the hardware supports more than one thread per CPU core, the number
  * of hardware threads is returned if that information is available.
  *
- * \brief       On success, the number of available CPU threads or cores is
+ * \return      On success, the number of available CPU threads or cores is
  *              returned. If this information isn't available or an error
  *              occurs, zero is returned.
  */

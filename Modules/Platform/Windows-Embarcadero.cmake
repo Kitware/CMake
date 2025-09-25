@@ -1,5 +1,5 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-# file Copyright.txt or https://cmake.org/licensing for details.
+# file LICENSE.rst or https://cmake.org/licensing for details.
 
 
 # This module is shared by multiple languages; use include blocker.
@@ -74,6 +74,8 @@ endif()
 macro(__embarcadero_language lang)
   set(CMAKE_${lang}_COMPILE_OPTIONS_DLL "${_tD}") # Note: This variable is a ';' separated list
   set(CMAKE_SHARED_LIBRARY_${lang}_FLAGS "${_tD}") # ... while this is a space separated string.
+  set(CMAKE_SHARED_LIBRARY_CREATE_${lang}_FLAGS "")
+  set(CMAKE_SHARED_MODULE_CREATE_${lang}_FLAGS "")
   set(CMAKE_${lang}_USE_RESPONSE_FILE_FOR_INCLUDES 1)
 
   set (CMAKE_${lang}_LINKER_WRAPPER_FLAG "-l")

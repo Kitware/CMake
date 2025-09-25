@@ -1,8 +1,6 @@
 message(STATUS "testname='${testname}'")
 
-function(test_configure_line_number EXPRESSION POLICY)
-  cmake_policy(PUSH)
-  cmake_policy(SET CMP0053 ${POLICY})
+function(test_configure_line_number EXPRESSION)
   string(CONFIGURE
   "${EXPRESSION}" v) # line should indicate string() call
   math(EXPR vplus3 "${v} + 3")
@@ -10,7 +8,6 @@ function(test_configure_line_number EXPRESSION POLICY)
     message(SEND_ERROR "Couldn't configure CMAKE_CURRENT_LIST_LINE, evaluated into '${v}'")
   endif()
   message(STATUS "v='${v}'")
-  cmake_policy(POP)
 endfunction()
 
 if(testname STREQUAL empty) # fail
@@ -45,16 +42,10 @@ elseif(testname STREQUAL configure_escape_quotes) # pass
   string(CONFIGURE "this is @testname@" v ESCAPE_QUOTES)
   message(STATUS "v='${v}'")
 
-elseif(testname STREQUAL configure_line_number_CMP0053_old) # pass
-  test_configure_line_number("\${CMAKE_CURRENT_LIST_LINE}" OLD)
-
-elseif(testname STREQUAL configure_line_number_CMP0053_new) # pass
+elseif(testname STREQUAL configure_line_number_curly) # pass
   test_configure_line_number("\${CMAKE_CURRENT_LIST_LINE}" NEW)
 
-elseif(testname STREQUAL configure_line_number_CMP0053_old_use_at) # pass
-  test_configure_line_number("\@CMAKE_CURRENT_LIST_LINE\@" OLD)
-
-elseif(testname STREQUAL configure_line_number_CMP0053_new_use_at) # pass
+elseif(testname STREQUAL configure_line_number_at) # pass
   test_configure_line_number("\@CMAKE_CURRENT_LIST_LINE\@" NEW)
 
 elseif(testname STREQUAL configure_bogus) # fail
@@ -82,9 +73,6 @@ elseif(testname STREQUAL regex_match_multiple_inputs) # pass
 elseif(testname STREQUAL regex_match_bad_regex) # fail
   string(REGEX MATCH "(.*" v input)
 
-elseif(testname STREQUAL regex_match_empty_string) # fail
-  string(REGEX MATCH "x*" v "")
-
 elseif(testname STREQUAL regex_match_no_match) # pass
   string(REGEX MATCH "xyz" v "abc")
   message(STATUS "v='${v}'")
@@ -95,9 +83,6 @@ elseif(testname STREQUAL regex_matchall_multiple_inputs) # pass
 
 elseif(testname STREQUAL regex_matchall_bad_regex) # fail
   string(REGEX MATCHALL "(.*" v input)
-
-elseif(testname STREQUAL regex_matchall_empty_string) # fail
-  string(REGEX MATCHALL "x*" v "")
 
 elseif(testname STREQUAL regex_replace_ends_with_backslash) # fail
   string(REGEX REPLACE "input" "output\\" v input1 input2 input3 input4)
@@ -116,14 +101,15 @@ elseif(testname STREQUAL regex_replace_has_bogus_escape) # fail
 elseif(testname STREQUAL regex_replace_bad_regex) # fail
   string(REGEX REPLACE "this (.*" "with that" v input)
 
-elseif(testname STREQUAL regex_replace_empty_string) # fail
-  string(REGEX REPLACE "x*" "that" v "")
-
 elseif(testname STREQUAL regex_replace_index_too_small) # fail
   string(REGEX REPLACE "^this (.*)$" "with \\1 \\-1" v "this input")
 
 elseif(testname STREQUAL regex_replace_index_too_large) # fail
   string(REGEX REPLACE "^this (.*)$" "with \\1 \\2" v "this input")
+
+elseif(testname STREQUAL regex_replace_index_no_match) # pass
+  string(REGEX REPLACE "^(this (.*)|(that .*))$" "with \\1 \\2 \\3" v "this input")
+  message(STATUS "v='${v}'")
 
 elseif(testname STREQUAL compare_no_mode) # fail
   string(COMPARE)

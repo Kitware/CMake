@@ -180,7 +180,7 @@
             "-Dtarget_interface_option"
           ],
           "object": "PATH:CMakeFiles/use_import_interfaces.dir<CONFIG_DIR>/use.cxx<OBJEXT>",
-          "private": true,
+          "private": false,
           "provides": {
             "importable": "<IGNORE>"
           },
@@ -263,7 +263,7 @@
             "-Dtarget_interface_option"
           ],
           "object": "PATH:CMakeFiles/use_import_interfaces.dir<CONFIG_OTHER_DIR>/use.cxx<OBJEXT>",
-          "private": true,
+          "private": false,
           "provides": {
             "importable": "<IGNORE>"
           },

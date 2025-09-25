@@ -2,7 +2,7 @@
 
 .run_manually:
     rules:
-        - if: '$CMAKE_CI_PACKAGE != null'
+        - if: '$CMAKE_CI_PACKAGE != null || $CMAKE_CI_VERSION_UPDATE != null'
           when: never
         - if: '($CMAKE_CI_NIGHTLY == "true" && $CMAKE_CI_JOB_NIGHTLY == "false")'
           when: never
@@ -25,7 +25,7 @@
 
 .run_automatically:
     rules:
-        - if: '$CMAKE_CI_PACKAGE != null'
+        - if: '$CMAKE_CI_PACKAGE != null || $CMAKE_CI_VERSION_UPDATE != null'
           when: never
         - if: '($CMAKE_CI_NIGHTLY == "true" && $CMAKE_CI_JOB_NIGHTLY == "false")'
           when: never
@@ -48,7 +48,7 @@
 
 .run_dependent:
     rules:
-        - if: '$CMAKE_CI_PACKAGE != null'
+        - if: '$CMAKE_CI_PACKAGE != null || $CMAKE_CI_VERSION_UPDATE != null'
           when: never
         - if: '($CMAKE_CI_NIGHTLY == "true" && $CMAKE_CI_JOB_NIGHTLY == "false")'
           when: never
@@ -70,7 +70,9 @@
 
 .run_only_for_package:
     rules:
-        - if: '$CMAKE_CI_PACKAGE == "dev"'
+        - if: '$CMAKE_CI_PACKAGE == "dev" && $CI_JOB_STAGE != "upload"'
+          when: on_success
+        - if: '$CMAKE_CI_PACKAGE == "dev" && $CI_JOB_STAGE == "upload"'
           variables:
               RSYNC_DESTINATION: "kitware@cmake.org:dev/"
           when: on_success
@@ -86,6 +88,8 @@
 
 .run_cmake_org_help:
     rules:
+        - if: '$CMAKE_CI_VERSION_UPDATE != null'
+          when: never
         - if: '$CMAKE_CI_PACKAGE =~ /v[0-9]+\.[0-9]+/'
           variables:
               RSYNC_DESTINATION: "kitware@cmake.org:$CMAKE_CI_PACKAGE/"
@@ -103,5 +107,11 @@
               RSYNC_DESTINATION: "kitware@cmake.org:git-stage/"
               CMAKE_CI_SPHINX_QTHELP: "OFF"
               CMAKE_CI_VERSION_NO_GIT: "OFF"
+          when: on_success
+        - when: never
+
+.run_version_update:
+    rules:
+        - if: '$CMAKE_CI_VERSION_UPDATE != null'
           when: on_success
         - when: never

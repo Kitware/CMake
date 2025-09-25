@@ -1,0 +1,2 @@
+CMake Error at .+/FindPackageHandleStandardArgs.cmake:[0-9]+ \(message\):
+  Could NOT find Python2 \(missing: foobar\) \(found version "[0-9.]+"\)

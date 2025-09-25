@@ -1,0 +1,13 @@
+---
+id: string-literal
+language: Cpp
+rule:
+  any:
+    - kind: char_literal
+    - kind: concatenated_string
+    - kind: raw_string_literal
+    - kind: string_literal
+    - kind: user_defined_literal
+      has:
+        kind: literal_suffix
+        regex: '^_s$'

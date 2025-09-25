@@ -25,32 +25,37 @@
 #
 # Input variables:
 #
-# LIBGSASL_INCLUDE_DIR   The libgsasl include directory
-# LIBGSASL_LIBRARY       Path to libgsasl library
+# - `LIBGSASL_INCLUDE_DIR`:   The libgsasl include directory.
+# - `LIBGSASL_LIBRARY`:       Path to `libgsasl` library.
 #
 # Result variables:
 #
-# LIBGSASL_FOUND         System has libgsasl
-# LIBGSASL_INCLUDE_DIRS  The libgsasl include directories
-# LIBGSASL_LIBRARIES     The libgsasl library names
-# LIBGSASL_LIBRARY_DIRS  The libgsasl library directories
-# LIBGSASL_CFLAGS        Required compiler flags
-# LIBGSASL_VERSION       Version of libgsasl
+# - `LIBGSASL_FOUND`:         System has libgsasl.
+# - `LIBGSASL_INCLUDE_DIRS`:  The libgsasl include directories.
+# - `LIBGSASL_LIBRARIES`:     The libgsasl library names.
+# - `LIBGSASL_LIBRARY_DIRS`:  The libgsasl library directories.
+# - `LIBGSASL_PC_REQUIRES`:   The libgsasl pkg-config packages.
+# - `LIBGSASL_CFLAGS`:        Required compiler flags.
+# - `LIBGSASL_VERSION`:       Version of libgsasl.
+
+set(LIBGSASL_PC_REQUIRES "libgsasl")
 
 if(CURL_USE_PKGCONFIG AND
    NOT DEFINED LIBGSASL_INCLUDE_DIR AND
    NOT DEFINED LIBGSASL_LIBRARY)
   find_package(PkgConfig QUIET)
-  pkg_check_modules(LIBGSASL "libgsasl")
+  pkg_check_modules(LIBGSASL ${LIBGSASL_PC_REQUIRES})
 endif()
 
 if(LIBGSASL_FOUND)
+  set(Libgsasl_FOUND TRUE)
   string(REPLACE ";" " " LIBGSASL_CFLAGS "${LIBGSASL_CFLAGS}")
   message(STATUS "Found Libgsasl (via pkg-config): ${LIBGSASL_INCLUDE_DIRS} (found version \"${LIBGSASL_VERSION}\")")
 else()
   find_path(LIBGSASL_INCLUDE_DIR NAMES "gsasl.h")
   find_library(LIBGSASL_LIBRARY NAMES "gsasl" "libgsasl")
 
+  unset(LIBGSASL_VERSION CACHE)
   if(LIBGSASL_INCLUDE_DIR AND EXISTS "${LIBGSASL_INCLUDE_DIR}/gsasl-version.h")
     set(_version_regex "#[\t ]*define[\t ]+GSASL_VERSION[\t ]+\"([^\"]*)\"")
     file(STRINGS "${LIBGSASL_INCLUDE_DIR}/gsasl-version.h" _version_str REGEX "${_version_regex}")

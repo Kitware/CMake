@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
@@ -20,6 +20,7 @@
 class cmMakefile;
 class cmStringReplaceHelper;
 class cmXMLWriter;
+class cmCTest;
 
 /** \class cmCTestBuildHandler
  * \brief A class that handles ctest -S invocations
@@ -36,24 +37,19 @@ public:
    */
   int ProcessHandler() override;
 
-  cmCTestBuildHandler();
+  cmCTestBuildHandler(cmCTest* ctest);
 
   void PopulateCustomVectors(cmMakefile* mf) override;
 
-  /**
-   * Initialize handler
-   */
-  void Initialize() override;
-
-  int GetTotalErrors() { return this->TotalErrors; }
-  int GetTotalWarnings() { return this->TotalWarnings; }
+  int GetTotalErrors() const { return this->TotalErrors; }
+  int GetTotalWarnings() const { return this->TotalWarnings; }
 
 private:
   std::string GetMakeCommand();
 
   //! Run command specialized for make and configure. Returns process status
   // and retVal is return value or exception.
-  bool RunMakeCommand(const std::string& command, int* retVal, const char* dir,
+  bool RunMakeCommand(std::string const& command, int* retVal, char const* dir,
                       int timeout, std::ostream& ofs,
                       Encoding encoding = cmProcessOutput::Auto);
 
@@ -89,9 +85,10 @@ private:
   void GenerateXMLHeader(cmXMLWriter& xml);
   void GenerateXMLLaunched(cmXMLWriter& xml);
   void GenerateXMLLogScraped(cmXMLWriter& xml);
+  void GenerateInstrumentationXML(cmXMLWriter& xml);
   void GenerateXMLFooter(cmXMLWriter& xml, cmDuration elapsed_build_time);
-  bool IsLaunchedErrorFile(const char* fname);
-  bool IsLaunchedWarningFile(const char* fname);
+  bool IsLaunchedErrorFile(char const* fname);
+  bool IsLaunchedWarningFile(char const* fname);
 
   std::string StartBuild;
   std::string EndBuild;
@@ -113,42 +110,43 @@ private:
 
   using t_BuildProcessingQueueType = std::deque<char>;
 
-  void ProcessBuffer(const char* data, size_t length, size_t& tick,
+  void ProcessBuffer(char const* data, size_t length, size_t& tick,
                      size_t tick_len, std::ostream& ofs,
                      t_BuildProcessingQueueType* queue);
-  int ProcessSingleLine(const char* data);
+  int ProcessSingleLine(char const* data);
 
   t_BuildProcessingQueueType BuildProcessingQueue;
   t_BuildProcessingQueueType BuildProcessingErrorQueue;
-  size_t BuildOutputLogSize;
+  size_t BuildOutputLogSize = 0;
   std::vector<char> CurrentProcessingLine;
 
   std::string SimplifySourceDir;
   std::string SimplifyBuildDir;
-  size_t OutputLineCounter;
+  size_t OutputLineCounter = 0;
   using t_ErrorsAndWarningsVector = std::vector<cmCTestBuildErrorWarning>;
   t_ErrorsAndWarningsVector ErrorsAndWarnings;
   t_ErrorsAndWarningsVector::iterator LastErrorOrWarning;
-  size_t PostContextCount;
-  size_t MaxPreContext;
-  size_t MaxPostContext;
+  size_t PostContextCount = 0;
+  size_t MaxPreContext = 10;
+  size_t MaxPostContext = 10;
   std::deque<std::string> PreContext;
 
-  int TotalErrors;
-  int TotalWarnings;
-  char LastTickChar;
+  int TotalErrors = 0;
+  int TotalWarnings = 0;
+  char LastTickChar = '\0';
 
-  bool ErrorQuotaReached;
-  bool WarningQuotaReached;
+  bool ErrorQuotaReached = false;
+  bool WarningQuotaReached = false;
 
-  int MaxErrors;
-  int MaxWarnings;
+  int MaxErrors = 50;
+  int MaxWarnings = 50;
 
   // Used to remove ANSI color codes before checking for errors and warnings.
   cmStringReplaceHelper* ColorRemover;
 
-  bool UseCTestLaunch;
+  bool UseCTestLaunch = false;
   std::string CTestLaunchDir;
+  std::string LogFileName;
   class LaunchHelper;
 
   friend class LaunchHelper;

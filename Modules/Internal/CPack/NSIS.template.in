@@ -923,8 +923,9 @@ Function .onInit
   ReadRegStr $0 HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\@CPACK_PACKAGE_INSTALL_REGISTRY_KEY@" "UninstallString"
   StrCmp $0 "" inst
 
+  ReadRegStr $1 HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\@CPACK_PACKAGE_INSTALL_REGISTRY_KEY@" "DisplayName"
   MessageBox MB_YESNOCANCEL|MB_ICONEXCLAMATION \
-  "@CPACK_NSIS_PACKAGE_NAME@ is already installed. $\n$\nDo you want to uninstall the old version before installing the new one?" \
+  "$1 is already installed. $\n$\nDo you want to uninstall the old version before installing the new one?" \
   /SD IDYES IDYES uninst IDNO inst
   Abort
 

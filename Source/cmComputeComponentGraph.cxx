@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmComputeComponentGraph.h"
 
 #include <algorithm>
@@ -7,7 +7,7 @@
 #include <cstddef>
 #include <limits>
 
-const size_t cmComputeComponentGraph::INVALID_COMPONENT =
+size_t const cmComputeComponentGraph::INVALID_COMPONENT =
   std::numeric_limits<size_t>::max();
 
 cmComputeComponentGraph::cmComputeComponentGraph(Graph const& input)

@@ -1,5 +1,5 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-# file Copyright.txt or https://cmake.org/licensing for details.
+# file LICENSE.rst or https://cmake.org/licensing for details.
 
 
 # support for the nasm assembler
@@ -46,7 +46,7 @@ endif()
 
 if(NOT CMAKE_ASM_NASM_LINK_EXECUTABLE)
   set(CMAKE_ASM_NASM_LINK_EXECUTABLE
-    "<CMAKE_LINKER> <CMAKE_ASM_NASM_LINK_FLAGS> <LINK_FLAGS> <OBJECTS> -o <TARGET> <LINK_LIBRARIES>")
+    "<CMAKE_LINKER> <LINK_FLAGS> <OBJECTS> -o <TARGET> <LINK_LIBRARIES>")
 endif()
 
 if(CMAKE_ASM_NASM_COMPILER_ID STREQUAL "NASM")

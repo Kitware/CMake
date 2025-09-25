@@ -3,12 +3,12 @@
 /* FIXME Get this working */
 /*#include <intdir_config.h>*/
 
-const char* generatorlib_genex_config_definition(void);
-const char* generatorlib_genex_config_include_dir(void);
-const char* generatorobj_genex_config_definition(void);
-const char* generatorobj_genex_config_include_dir(void);
+char const* generatorlib_genex_config_definition(void);
+char const* generatorlib_genex_config_include_dir(void);
+char const* generatorobj_genex_config_definition(void);
+char const* generatorobj_genex_config_include_dir(void);
 
-static const char contents[] =
+static char const contents[] =
   /* clang-format off */
 "#include <stdio.h>\n"
 "\n"
@@ -78,7 +78,7 @@ static const char contents[] =
 
 int main(int argc, char** argv)
 {
-  const char* filename;
+  char const* filename;
   FILE* fout;
 
   if (argc < 2) {

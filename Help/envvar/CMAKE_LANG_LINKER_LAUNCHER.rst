@@ -3,7 +3,7 @@ CMAKE_<LANG>_LINKER_LAUNCHER
 
 .. versionadded:: 3.21
 
-.. include:: ENV_VAR.txt
+.. include:: include/ENV_VAR.rst
 
 Default launcher to use when linking a target of the specified language. Will
 only be used by CMake to initialize the variable on the first configuration.

@@ -1,5 +1,5 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-# file Copyright.txt or https://cmake.org/licensing for details.
+# file LICENSE.rst or https://cmake.org/licensing for details.
 
 
 # Do NOT include this module directly into any of your code. It is used by
@@ -8,9 +8,6 @@
 if(NOT APPLE)
   return()
 endif()
-
-block(SCOPE_FOR POLICIES)
-cmake_policy(SET CMP0054 NEW) # if() quoted variables not dereferenced
 
 function(__cmake_internal_workaround_headerpad_flag_conflict _LANG)
 
@@ -65,5 +62,3 @@ foreach(__lang IN LISTS __enabled_languages)
 endforeach()
 unset(__lang)
 unset(__enabled_languages)
-
-endblock()

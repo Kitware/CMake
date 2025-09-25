@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
@@ -86,9 +86,9 @@ protected:
 
   void ReplaceInstallPrefix(std::string& input) const override;
 
-  void ComplainAboutMissingTarget(
-    cmGeneratorTarget const* depender, cmGeneratorTarget const* dependee,
-    std::vector<std::string> const& exportFiles) const;
+  void ComplainAboutMissingTarget(cmGeneratorTarget const* depender,
+                                  cmGeneratorTarget const* dependee,
+                                  ExportInfo const& exportInfo) const;
 
   void ComplainAboutDuplicateTarget(
     std::string const& targetName) const override;

@@ -1,5 +1,5 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-# file Copyright.txt or https://cmake.org/licensing for details.
+# file LICENSE.rst or https://cmake.org/licensing for details.
 
 
 # This module is shared by multiple languages; use include blocker.
@@ -262,7 +262,9 @@ macro(__compiler_clang_cxx_standards lang)
       # files that also have C sources.
       set(CMAKE_${lang}23_STANDARD_COMPILE_OPTION "-clang:-std=c++23")
       set(CMAKE_${lang}23_EXTENSION_COMPILE_OPTION "-clang:-std=c++23")
-      set(CMAKE_${lang}_STANDARD_LATEST 23)
+      set(CMAKE_${lang}26_STANDARD_COMPILE_OPTION "-std:c++latest")
+      set(CMAKE_${lang}26_EXTENSION_COMPILE_OPTION "-std:c++latest")
+      set(CMAKE_${lang}_STANDARD_LATEST 26)
     elseif(CMAKE_${lang}_COMPILER_VERSION VERSION_GREATER_EQUAL 13.0)
       set(CMAKE_${lang}23_STANDARD_COMPILE_OPTION "-std:c++latest")
       set(CMAKE_${lang}23_EXTENSION_COMPILE_OPTION "-std:c++latest")

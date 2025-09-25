@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 
 #include "cmDebuggerVariablesHelper.h"
 
@@ -23,6 +23,7 @@
 #include "cmPropertyMap.h"
 #include "cmState.h"
 #include "cmStateSnapshot.h"
+#include "cmStringAlgorithms.h"
 #include "cmTarget.h"
 #include "cmTest.h"
 #include "cmValue.h"
@@ -39,8 +40,6 @@ std::shared_ptr<cmDebuggerVariables> cmDebuggerVariablesHelper::Create(
     { cmPolicies::PolicyStatus::OLD, "OLD" },
     { cmPolicies::PolicyStatus::WARN, "WARN" },
     { cmPolicies::PolicyStatus::NEW, "NEW" },
-    { cmPolicies::PolicyStatus::REQUIRED_IF_USED, "REQUIRED_IF_USED" },
-    { cmPolicies::PolicyStatus::REQUIRED_ALWAYS, "REQUIRED_ALWAYS" }
   };
 
   return std::make_shared<cmDebuggerVariables>(
@@ -102,7 +101,7 @@ std::shared_ptr<cmDebuggerVariables> cmDebuggerVariablesHelper::CreateIfAny(
         ret.reserve(items.size());
         int i = 0;
         for (std::string const& item : items) {
-          ret.emplace_back("[" + std::to_string(i++) + "]", item);
+          ret.emplace_back(cmStrCat('[', i++, ']'), item);
         }
         return ret;
       });
@@ -624,7 +623,7 @@ std::shared_ptr<cmDebuggerVariables> cmDebuggerVariablesHelper::CreateIfAny(
       return ret;
     });
 
-  if (const auto* ic = gen->GetInstallComponents()) {
+  if (auto const* ic = gen->GetInstallComponents()) {
     variables->AddSubVariables(CreateIfAny(
       variablesManager, "InstallComponents", supportsVariableType, *ic));
   }

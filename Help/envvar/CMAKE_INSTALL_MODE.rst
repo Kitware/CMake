@@ -3,7 +3,7 @@ CMAKE_INSTALL_MODE
 
 .. versionadded:: 3.22
 
-.. include:: ENV_VAR.txt
+.. include:: include/ENV_VAR.rst
 
 The ``CMAKE_INSTALL_MODE`` environment variable allows users to operate
 CMake in an alternate mode of :command:`file(INSTALL)` and :command:`install()`.

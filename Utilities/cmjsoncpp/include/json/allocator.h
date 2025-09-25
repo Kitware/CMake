@@ -71,7 +71,9 @@ public:
   // Boilerplate
   SecureAllocator() {}
   template <typename U> SecureAllocator(const SecureAllocator<U>&) {}
-  template <typename U> struct rebind { using other = SecureAllocator<U>; };
+  template <typename U> struct rebind {
+    using other = SecureAllocator<U>;
+  };
 };
 
 template <typename T, typename U>

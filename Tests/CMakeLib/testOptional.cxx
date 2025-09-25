@@ -39,21 +39,21 @@ public:
   };
 
   EventType Type;
-  const EventLogger* Logger1;
-  const EventLogger* Logger2;
+  EventLogger const* Logger1;
+  EventLogger const* Logger2;
   int Value;
 
-  bool operator==(const Event& other) const;
-  bool operator!=(const Event& other) const;
+  bool operator==(Event const& other) const;
+  bool operator!=(Event const& other) const;
 };
 
-bool Event::operator==(const Event& other) const
+bool Event::operator==(Event const& other) const
 {
   return this->Type == other.Type && this->Logger1 == other.Logger1 &&
     this->Logger2 == other.Logger2 && this->Value == other.Value;
 }
 
-bool Event::operator!=(const Event& other) const
+bool Event::operator!=(Event const& other) const
 {
   return !(*this == other);
 }
@@ -64,13 +64,13 @@ class EventLogger
 {
 public:
   EventLogger();
-  EventLogger(const EventLogger& other);
+  EventLogger(EventLogger const& other);
   EventLogger(EventLogger&& other);
   EventLogger(int value);
 
   ~EventLogger();
 
-  EventLogger& operator=(const EventLogger& other);
+  EventLogger& operator=(EventLogger const& other);
   EventLogger& operator=(EventLogger&& other);
   EventLogger& operator=(int value);
 
@@ -87,10 +87,10 @@ class NoMoveAssignEventLogger : public EventLogger
 public:
   using EventLogger::EventLogger;
 
-  NoMoveAssignEventLogger(const NoMoveAssignEventLogger&) = default;
+  NoMoveAssignEventLogger(NoMoveAssignEventLogger const&) = default;
   NoMoveAssignEventLogger(NoMoveAssignEventLogger&&) = default;
 
-  NoMoveAssignEventLogger& operator=(const NoMoveAssignEventLogger&) = default;
+  NoMoveAssignEventLogger& operator=(NoMoveAssignEventLogger const&) = default;
   NoMoveAssignEventLogger& operator=(NoMoveAssignEventLogger&&) = delete;
 };
 
@@ -124,7 +124,7 @@ EventLogger::EventLogger()
   events.push_back({ Event::DEFAULT_CONSTRUCT, this, nullptr, 0 });
 }
 
-EventLogger::EventLogger(const EventLogger& other)
+EventLogger::EventLogger(EventLogger const& other)
   : Value(other.Value)
 {
   events.push_back({ Event::COPY_CONSTRUCT, this, &other, other.Value });
@@ -151,7 +151,7 @@ EventLogger::~EventLogger()
   END_IGNORE_UNINITIALIZED
 }
 
-EventLogger& EventLogger::operator=(const EventLogger& other)
+EventLogger& EventLogger::operator=(EventLogger const& other)
 {
   events.push_back({ Event::COPY_ASSIGN, this, &other, other.Value });
   this->Value = other.Value;
@@ -172,37 +172,37 @@ EventLogger& EventLogger::operator=(int value)
   return *this;
 }
 
-static bool operator==(const EventLogger& lhs, const EventLogger& rhs)
+static bool operator==(EventLogger const& lhs, EventLogger const& rhs)
 {
   events.push_back({ Event::COMPARE_EE_EQ, &lhs, &rhs, lhs.Value });
   return lhs.Value == rhs.Value;
 }
 
-static bool operator!=(const EventLogger& lhs, const EventLogger& rhs)
+static bool operator!=(EventLogger const& lhs, EventLogger const& rhs)
 {
   events.push_back({ Event::COMPARE_EE_NE, &lhs, &rhs, lhs.Value });
   return lhs.Value != rhs.Value;
 }
 
-static bool operator<(const EventLogger& lhs, const EventLogger& rhs)
+static bool operator<(EventLogger const& lhs, EventLogger const& rhs)
 {
   events.push_back({ Event::COMPARE_EE_LT, &lhs, &rhs, lhs.Value });
   return lhs.Value < rhs.Value;
 }
 
-static bool operator<=(const EventLogger& lhs, const EventLogger& rhs)
+static bool operator<=(EventLogger const& lhs, EventLogger const& rhs)
 {
   events.push_back({ Event::COMPARE_EE_LE, &lhs, &rhs, lhs.Value });
   return lhs.Value <= rhs.Value;
 }
 
-static bool operator>(const EventLogger& lhs, const EventLogger& rhs)
+static bool operator>(EventLogger const& lhs, EventLogger const& rhs)
 {
   events.push_back({ Event::COMPARE_EE_GT, &lhs, &rhs, lhs.Value });
   return lhs.Value > rhs.Value;
 }
 
-static bool operator>=(const EventLogger& lhs, const EventLogger& rhs)
+static bool operator>=(EventLogger const& lhs, EventLogger const& rhs)
 {
   events.push_back({ Event::COMPARE_EE_GE, &lhs, &rhs, lhs.Value });
   return lhs.Value >= rhs.Value;
@@ -231,7 +231,7 @@ void EventLogger::Reference() const&&
 
 static bool testDefaultConstruct(std::vector<Event>& expected)
 {
-  const cm::optional<EventLogger> o{};
+  cm::optional<EventLogger> const o{};
 
   expected = {};
   return true;
@@ -239,7 +239,7 @@ static bool testDefaultConstruct(std::vector<Event>& expected)
 
 static bool testNulloptConstruct(std::vector<Event>& expected)
 {
-  const cm::optional<EventLogger> o{ cm::nullopt };
+  cm::optional<EventLogger> const o{ cm::nullopt };
 
   expected = {};
   return true;
@@ -247,7 +247,7 @@ static bool testNulloptConstruct(std::vector<Event>& expected)
 
 static bool testValueConstruct(std::vector<Event>& expected)
 {
-  const cm::optional<EventLogger> o{ 4 };
+  cm::optional<EventLogger> const o{ 4 };
 
   expected = {
     { Event::VALUE_CONSTRUCT, &*o, nullptr, 4 },
@@ -258,8 +258,8 @@ static bool testValueConstruct(std::vector<Event>& expected)
 
 static bool testInPlaceConstruct(std::vector<Event>& expected)
 {
-  const cm::optional<EventLogger> o1{ cm::in_place, 4 };
-  const cm::optional<EventLogger> o2{ cm::in_place_t{}, 4 };
+  cm::optional<EventLogger> const o1{ cm::in_place, 4 };
+  cm::optional<EventLogger> const o2{ cm::in_place_t{}, 4 };
 
   expected = {
     { Event::VALUE_CONSTRUCT, &*o1, nullptr, 4 },
@@ -272,10 +272,10 @@ static bool testInPlaceConstruct(std::vector<Event>& expected)
 
 static bool testCopyConstruct(std::vector<Event>& expected)
 {
-  const cm::optional<EventLogger> o1{ 4 };
-  const cm::optional<EventLogger> o2{ o1 };
-  const cm::optional<EventLogger> o3{};
-  const cm::optional<EventLogger> o4{ o3 };
+  cm::optional<EventLogger> const o1{ 4 };
+  cm::optional<EventLogger> const o2{ o1 };
+  cm::optional<EventLogger> const o3{};
+  cm::optional<EventLogger> const o4{ o3 };
 
   expected = {
     { Event::VALUE_CONSTRUCT, &*o1, nullptr, 4 },
@@ -289,9 +289,9 @@ static bool testCopyConstruct(std::vector<Event>& expected)
 static bool testMoveConstruct(std::vector<Event>& expected)
 {
   cm::optional<EventLogger> o1{ 4 };
-  const cm::optional<EventLogger> o2{ std::move(o1) };
+  cm::optional<EventLogger> const o2{ std::move(o1) };
   cm::optional<EventLogger> o3{};
-  const cm::optional<EventLogger> o4{ std::move(o3) };
+  cm::optional<EventLogger> const o4{ std::move(o3) };
 
 #ifndef __clang_analyzer__ /* cplusplus.Move */
   expected = {
@@ -322,24 +322,24 @@ static bool testNulloptAssign(std::vector<Event>& expected)
 static bool testCopyAssign(std::vector<Event>& expected)
 {
   cm::optional<EventLogger> o1{};
-  const cm::optional<EventLogger> o2{ 4 };
+  cm::optional<EventLogger> const o2{ 4 };
   auto const* v2 = &*o2;
   o1 = o2;
   auto const* v1 = &*o1;
-  const cm::optional<EventLogger> o3{ 5 };
+  cm::optional<EventLogger> const o3{ 5 };
   auto const* v3 = &*o3;
   o1 = o3;
-  const cm::optional<EventLogger> o4{};
+  cm::optional<EventLogger> const o4{};
   o1 = o4;
   o1 = o4; // Intentionally duplicated to test assigning an empty optional to
   // an empty optional
 
   cm::optional<NoMoveAssignEventLogger> o5{ 1 };
   auto const* v5 = &*o5;
-  const cm::optional<NoMoveAssignEventLogger> o6{ 2 };
+  cm::optional<NoMoveAssignEventLogger> const o6{ 2 };
   auto const* v6 = &*o6;
   o5 = std::move(o6);
-  const NoMoveAssignEventLogger e7{ 3 };
+  NoMoveAssignEventLogger const e7{ 3 };
   o5 = std::move(e7);
 
   expected = {
@@ -390,7 +390,7 @@ static bool testMoveAssign(std::vector<Event>& expected)
 static bool testPointer(std::vector<Event>& expected)
 {
   cm::optional<EventLogger> o1{ 4 };
-  const cm::optional<EventLogger> o2{ 5 };
+  cm::optional<EventLogger> const o2{ 5 };
 
   o1->Reference();
   o2->Reference();
@@ -414,7 +414,7 @@ static bool testDereference(std::vector<Event>& expected)
 {
   cm::optional<EventLogger> o1{ 4 };
   auto const* v1 = &*o1;
-  const cm::optional<EventLogger> o2{ 5 };
+  cm::optional<EventLogger> const o2{ 5 };
   auto const* v2 = &*o2;
 
   (*o1).Reference();
@@ -441,8 +441,8 @@ static bool testDereference(std::vector<Event>& expected)
 
 static bool testHasValue(std::vector<Event>& expected)
 {
-  const cm::optional<EventLogger> o1{ 4 };
-  const cm::optional<EventLogger> o2{};
+  cm::optional<EventLogger> const o1{ 4 };
+  cm::optional<EventLogger> const o2{};
 
   ASSERT_TRUE(o1.has_value());
   ASSERT_TRUE(o1);
@@ -459,9 +459,9 @@ static bool testHasValue(std::vector<Event>& expected)
 static bool testValue(std::vector<Event>& expected)
 {
   cm::optional<EventLogger> o1{ 4 };
-  const cm::optional<EventLogger> o2{ 5 };
+  cm::optional<EventLogger> const o2{ 5 };
   cm::optional<EventLogger> o3{};
-  const cm::optional<EventLogger> o4{};
+  cm::optional<EventLogger> const o4{};
 
   o1.value().Reference();
   o2.value().Reference();
@@ -495,9 +495,9 @@ static bool testValue(std::vector<Event>& expected)
 
 static bool testValueOr()
 {
-  const cm::optional<EventLogger> o1{ 4 };
+  cm::optional<EventLogger> const o1{ 4 };
   cm::optional<EventLogger> o2{ 5 };
-  const cm::optional<EventLogger> o3{};
+  cm::optional<EventLogger> const o3{};
   cm::optional<EventLogger> o4{};
 
   EventLogger e1{ 6 };
@@ -519,12 +519,12 @@ static bool testValueOr()
 
 static bool testComparison(std::vector<Event>& expected)
 {
-  const cm::optional<EventLogger> o1{ 1 };
-  const cm::optional<EventLogger> o2{ 2 };
-  const cm::optional<EventLogger> o3{ 2 };
-  const cm::optional<EventLogger> o4{};
-  const cm::optional<EventLogger> o5{};
-  const EventLogger e1{ 2 };
+  cm::optional<EventLogger> const o1{ 1 };
+  cm::optional<EventLogger> const o2{ 2 };
+  cm::optional<EventLogger> const o3{ 2 };
+  cm::optional<EventLogger> const o4{};
+  cm::optional<EventLogger> const o5{};
+  EventLogger const e1{ 2 };
 
   ASSERT_TRUE(!(o1 == o2) && o1 != o2);
   ASSERT_TRUE(o1 < o2 && !(o1 >= o2));

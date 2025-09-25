@@ -1,5 +1,3 @@
-cmake_policy(SET CMP0011 NEW)
-
 set(vcFiltersFile "${RunCMake_TEST_BINARY_DIR}/SourceGroupFileSet.vcxproj.filters")
 if(NOT EXISTS "${vcFiltersFile}")
   set(RunCMake_TEST_FAILED "Filters file ${vcFiltersFile} does not exist.")

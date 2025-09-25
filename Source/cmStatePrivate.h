@@ -1,16 +1,19 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 
 #pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <set>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include "cmDefinitions.h"
 #include "cmLinkedTree.h"
 #include "cmListFileCache.h"
+#include "cmPackageState.h"
 #include "cmPolicies.h"
 #include "cmPropertyMap.h"
 #include "cmStateSnapshot.h"
@@ -21,7 +24,7 @@ struct BuildsystemDirectoryStateType;
 struct PolicyStackEntry;
 } // namespace cmStateDetail
 
-static const std::string cmPropertySentinal = std::string();
+static std::string const cmPropertySentinel = std::string();
 
 struct cmStateDetail::SnapshotDataType
 {
@@ -80,9 +83,13 @@ struct cmStateDetail::BuildsystemDirectoryStateType
   std::vector<std::string> NormalTargetNames;
   std::vector<std::string> ImportedTargetNames;
 
+  std::set<std::string> Projects;
+
   std::string ProjectName;
 
   cmPropertyMap Properties;
+
+  std::unordered_map<std::string, cmPackageState> Packages;
 
   std::vector<cmStateSnapshot> Children;
 };

@@ -3,7 +3,7 @@ CMAKE_CONFIGURATION_TYPES
 
 .. versionadded:: 3.22
 
-.. include:: ENV_VAR.txt
+.. include:: include/ENV_VAR.rst
 
 The ``CMAKE_CONFIGURATION_TYPES`` environment variable specifies a
 default value for the :variable:`CMAKE_CONFIGURATION_TYPES` variable

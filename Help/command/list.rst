@@ -134,8 +134,8 @@ For more information on regular expressions look under
   list(INSERT <list> <element_index> <element> [<element> ...])
 
   Inserts elements to the list to the specified index. It is an
-  error to specify an out-of-range index. Valid indexes are 0 to `N`
-  where `N` is the length of the list, inclusive. An empty list
+  error to specify an out-of-range index. Valid indexes are *0* to *N*
+  where *N* is the length of the list, inclusive. An empty list
   has length 0. If no variable named ``<list>`` exists in the
   current scope its value is treated as empty and the elements are
   inserted in that empty list.
@@ -146,8 +146,8 @@ For more information on regular expressions look under
   .. versionadded:: 3.15
 
   If no variable name is given, removes exactly one element. Otherwise,
-  with `N` variable names provided, assign the last `N` elements' values
-  to the given variables and then remove the last `N` values from
+  with *N* variable names provided, assign the last *N* elements' values
+  to the given variables and then remove the last *N* values from
   ``<list>``.
 
 .. signature::
@@ -156,8 +156,8 @@ For more information on regular expressions look under
   .. versionadded:: 3.15
 
   If no variable name is given, removes exactly one element. Otherwise,
-  with `N` variable names provided, assign the first `N` elements' values
-  to the given variables and then remove the first `N` values from
+  with *N* variable names provided, assign the first *N* elements' values
+  to the given variables and then remove the first *N* values from
   ``<list>``.
 
 .. signature::
@@ -236,7 +236,7 @@ For more information on regular expressions look under
         list(TRANSFORM <list> GENEX_STRIP ...)
         :target: TRANSFORM_GENEX_STRIP
 
-    :command:`REPLACE <string(REGEX REPLACE)>`:
+    :command:`REPLACE <string(REGEX REPLACE)>`
       Match the regular expression as many times as possible and substitute
       the replacement expression for the match for each element of the list
       (same semantic as :command:`string(REGEX REPLACE)`).
@@ -245,6 +245,11 @@ For more information on regular expressions look under
         list(TRANSFORM <list> REPLACE <regular_expression>
                                       <replace_expression> ...)
         :target: TRANSFORM_REPLACE
+
+      .. versionchanged:: 4.1
+        The ``^`` anchor now matches only at the beginning of the input
+        element instead of the beginning of each repeated search.
+        See policy :policy:`CMP0186`.
 
   ``<SELECTOR>`` determines which elements of the list will be transformed.
   Only one type of selector can be specified at a time.
@@ -307,10 +312,10 @@ Ordering
       Sorts a list of strings using natural order
       (see ``strverscmp(3)`` manual), i.e. such that contiguous digits
       are compared as whole numbers.
-      For example: the following list `10.0 1.1 2.1 8.0 2.0 3.1`
-      will be sorted as `1.1 2.0 2.1 3.1 8.0 10.0` if the ``NATURAL``
+      For example: the following list *10.0 1.1 2.1 8.0 2.0 3.1*
+      will be sorted as *1.1 2.0 2.1 3.1 8.0 10.0* if the ``NATURAL``
       comparison is selected where it will be sorted as
-      `1.1 10.0 2.0 2.1 3.1 8.0` with the ``STRING`` comparison.
+      *1.1 10.0 2.0 2.1 3.1 8.0* with the ``STRING`` comparison.
 
   Use the ``CASE`` keyword to select a case sensitive or case insensitive
   sort mode.  The ``<case>`` option should be one of:

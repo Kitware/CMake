@@ -1,20 +1,45 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-# file Copyright.txt or https://cmake.org/licensing for details.
+# file LICENSE.rst or https://cmake.org/licensing for details.
 
 #[=======================================================================[.rst:
 FindTclsh
 ---------
 
-Find tclsh
+Finds the Tcl shell command-line executable (``tclsh``), which includes the Tcl
+(Tool Command Language) interpreter.
 
-This module finds if TCL is installed and determines where the include
-files and libraries are.  It also determines what the name of the
-library is.  This code sets the following variables:
+Result Variables
+^^^^^^^^^^^^^^^^
 
-::
+This module defines the following variables:
 
-  TCLSH_FOUND = TRUE if tclsh has been found
-  TCL_TCLSH = the path to the tclsh executable
+``Tclsh_FOUND``
+  Boolean indicating whether the ``tclsh`` executable (and the requested
+  version, if specified) is found.  For backward compatibility, the
+  ``TCLSH_FOUND`` variable is also set to the same value.
+
+Cache Variables
+^^^^^^^^^^^^^^^
+
+The following cache variables may also be set:
+
+``TCL_TCLSH``
+  The path to the ``tclsh`` executable.
+
+Examples
+^^^^^^^^
+
+Finding the ``tclsh`` command-line executable:
+
+.. code-block:: cmake
+
+  find_package(Tclsh)
+
+See Also
+^^^^^^^^
+
+* The :module:`FindTCL` module to find the Tcl installation.
+* The :module:`FindTclStub` module to find the Tcl Stubs Library.
 #]=======================================================================]
 
 get_filename_component(TK_WISH_PATH "${TK_WISH}" PATH)
@@ -84,7 +109,7 @@ if(TCL_TCLSH)
                   OUTPUT_STRIP_TRAILING_WHITESPACE)
 endif()
 
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(FindPackageHandleStandardArgs)
 if (CMAKE_FIND_PACKAGE_NAME STREQUAL "TCL" OR
     CMAKE_FIND_PACKAGE_NAME STREQUAL "TclStub")
   # FindTCL include()'s this module. It's an old pattern, but rather than
@@ -93,7 +118,7 @@ if (CMAKE_FIND_PACKAGE_NAME STREQUAL "TCL" OR
   # Transitively, FindTclStub includes FindTCL.
   set(FPHSA_NAME_MISMATCHED 1)
 endif ()
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(Tclsh
+find_package_handle_standard_args(Tclsh
                                   REQUIRED_VARS TCL_TCLSH
                                   VERSION_VAR TCLSH_VERSION_STRING)
 unset(FPHSA_NAME_MISMATCHED)

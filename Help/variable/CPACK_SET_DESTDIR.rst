@@ -9,7 +9,7 @@ basic relocation mechanism that should not be used on Windows (see
 :variable:`CMAKE_INSTALL_PREFIX` documentation).  It is usually invoked like
 this:
 
-::
+.. code-block:: sh
 
  make DESTDIR=/home/john install
 

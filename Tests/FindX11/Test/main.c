@@ -201,6 +201,15 @@ static int test_Xpm(void)
 }
 #endif
 
+#ifdef HAVE_X11_Xpresent
+#  include <X11/extensions/Xpresent.h>
+
+static int test_Xpresent(void)
+{
+  return XPresentVersion();
+}
+#endif
+
 #ifdef HAVE_X11_Xtst
 #  include <X11/extensions/XTest.h>
 
@@ -596,7 +605,7 @@ static void test_xcb_render_util(void)
 {
   int screen_nbr;
   xcb_connection_t* connection = xcb_connect(NULL, &screen_nbr);
-  const xcb_render_query_version_reply_t* cookie =
+  xcb_render_query_version_reply_t const* cookie =
     xcb_render_util_query_version(connection);
   xcb_disconnect(connection);
 }
@@ -880,6 +889,9 @@ int main(int argc, char* argv[])
 #endif
 #ifdef HAVE_X11_Xpm
     test_Xpm,
+#endif
+#ifdef HAVE_X11_Xpresent
+    test_Xpresent,
 #endif
 #ifdef HAVE_X11_Xtst
     test_Xtst,

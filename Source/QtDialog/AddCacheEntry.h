@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
 #include "QCMake.h"
@@ -15,8 +15,8 @@ class AddCacheEntry
 {
   Q_OBJECT
 public:
-  AddCacheEntry(QWidget* p, const QStringList& varNames,
-                const QStringList& varTypes);
+  AddCacheEntry(QWidget* p, QStringList const& varNames,
+                QStringList const& varTypes);
 
   QString name() const;
   QVariant value() const;
@@ -25,9 +25,9 @@ public:
   QString typeString() const;
 
 private slots:
-  void onCompletionActivated(const QString& text);
+  void onCompletionActivated(QString const& text);
 
 private:
-  const QStringList& VarNames;
-  const QStringList& VarTypes;
+  QStringList const& VarNames;
+  QStringList const& VarTypes;
 };

@@ -22,7 +22,7 @@ find_package(PkgConfig)
 
 
 if(NOT DEFINED CMAKE_SYSTEM_NAME
-    OR (CMAKE_SYSTEM_NAME MATCHES "^(Linux|kFreeBSD|GNU)$"
+    OR (CMAKE_SYSTEM_NAME MATCHES "^(Linux|GNU)$"
     AND NOT CMAKE_CROSSCOMPILING))
   if(EXISTS "/etc/debian_version") # is this a debian system ?
     if(CMAKE_LIBRARY_ARCHITECTURE MATCHES "^(i386-linux-gnu|x86_64-linux-gnu)$")

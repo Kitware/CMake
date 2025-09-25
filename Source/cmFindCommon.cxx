@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmFindCommon.h"
 
 #include <algorithm>
@@ -18,6 +18,18 @@
 #include "cmValue.h"
 #include "cmake.h"
 
+#ifndef CMAKE_BOOTSTRAP
+#  include <deque>
+#  include <iterator>
+
+#  include <cm/optional>
+#  include <cm/string_view>
+#  include <cmext/string_view>
+
+#  include "cmConfigureLog.h"
+#  include "cmRange.h"
+#endif
+
 cmFindCommon::PathGroup cmFindCommon::PathGroup::All("ALL");
 cmFindCommon::PathLabel cmFindCommon::PathLabel::PackageRoot(
   "PackageName_ROOT");
@@ -35,6 +47,7 @@ cmFindCommon::cmFindCommon(cmExecutionStatus& status)
   , Status(status)
 {
   this->FindRootPathMode = RootPathModeBoth;
+  this->FullDebugMode = false;
   this->NoDefaultPath = false;
   this->NoPackageRootPath = false;
   this->NoCMakePath = false;
@@ -59,8 +72,6 @@ cmFindCommon::cmFindCommon(cmExecutionStatus& status)
 
   this->InitializeSearchPathGroups();
 
-  this->DebugMode = false;
-
   // Windows Registry views
   // When policy CMP0134 is not NEW, rely on previous behavior:
   if (this->Makefile->GetPolicyStatus(cmPolicies::CMP0134) !=
@@ -73,9 +84,16 @@ cmFindCommon::cmFindCommon(cmExecutionStatus& status)
   }
 }
 
+cmFindCommon::~cmFindCommon() = default;
+
 void cmFindCommon::SetError(std::string const& e)
 {
   this->Status.SetError(e);
+}
+
+bool cmFindCommon::DebugModeEnabled() const
+{
+  return this->FullDebugMode;
 }
 
 void cmFindCommon::DebugMessage(std::string const& msg) const
@@ -98,6 +116,14 @@ bool cmFindCommon::ComputeIfDebugModeWanted(std::string const& var)
     this->Makefile->GetCMakeInstance()->GetDebugFindOutput(var);
 }
 
+bool cmFindCommon::ComputeIfImplicitDebugModeSuppressed()
+{
+  // XXX(find-events): In the future, mirror the `ComputeIfDebugModeWanted`
+  // methods if more control is desired.
+  return this->Makefile->IsOn(
+    "CMAKE_FIND_DEBUG_MODE_NO_IMPLICIT_CONFIGURE_LOG");
+}
+
 void cmFindCommon::InitializeSearchPathGroups()
 {
   std::vector<PathLabel>* labels;
@@ -118,20 +144,13 @@ void cmFindCommon::InitializeSearchPathGroups()
   this->PathGroupOrder.push_back(PathGroup::All);
 
   // Create the individual labeled search paths
-  this->LabeledPaths.insert(
-    std::make_pair(PathLabel::PackageRoot, cmSearchPath(this)));
-  this->LabeledPaths.insert(
-    std::make_pair(PathLabel::CMake, cmSearchPath(this)));
-  this->LabeledPaths.insert(
-    std::make_pair(PathLabel::CMakeEnvironment, cmSearchPath(this)));
-  this->LabeledPaths.insert(
-    std::make_pair(PathLabel::Hints, cmSearchPath(this)));
-  this->LabeledPaths.insert(
-    std::make_pair(PathLabel::SystemEnvironment, cmSearchPath(this)));
-  this->LabeledPaths.insert(
-    std::make_pair(PathLabel::CMakeSystem, cmSearchPath(this)));
-  this->LabeledPaths.insert(
-    std::make_pair(PathLabel::Guess, cmSearchPath(this)));
+  this->LabeledPaths.emplace(PathLabel::PackageRoot, cmSearchPath(this));
+  this->LabeledPaths.emplace(PathLabel::CMake, cmSearchPath(this));
+  this->LabeledPaths.emplace(PathLabel::CMakeEnvironment, cmSearchPath(this));
+  this->LabeledPaths.emplace(PathLabel::Hints, cmSearchPath(this));
+  this->LabeledPaths.emplace(PathLabel::SystemEnvironment, cmSearchPath(this));
+  this->LabeledPaths.emplace(PathLabel::CMakeSystem, cmSearchPath(this));
+  this->LabeledPaths.emplace(PathLabel::Guess, cmSearchPath(this));
 }
 
 void cmFindCommon::SelectDefaultRootPathMode()
@@ -193,7 +212,7 @@ void cmFindCommon::SelectDefaultMacMode()
 
 void cmFindCommon::SelectDefaultSearchModes()
 {
-  const std::array<std::pair<bool&, std::string>, 6> search_paths = {
+  std::array<std::pair<bool&, std::string>, 6> const search_paths = {
     { { this->NoPackageRootPath, "CMAKE_FIND_USE_PACKAGE_ROOT_PATH" },
       { this->NoCMakePath, "CMAKE_FIND_USE_CMAKE_PATH" },
       { this->NoCMakeEnvironmentPath,
@@ -215,12 +234,6 @@ void cmFindCommon::SelectDefaultSearchModes()
 void cmFindCommon::RerootPaths(std::vector<std::string>& paths,
                                std::string* debugBuffer)
 {
-#if 0
-  for(std::string const& p : paths)
-    {
-    fprintf(stderr, "[%s]\n", p.c_str());
-    }
-#endif
   // Short-circuit if there is nothing to do.
   if (this->FindRootPathMode == RootPathModeNever) {
     return;
@@ -231,29 +244,29 @@ void cmFindCommon::RerootPaths(std::vector<std::string>& paths,
     this->Makefile->GetDefinition("CMAKE_SYSROOT_COMPILE");
   cmValue sysrootLink = this->Makefile->GetDefinition("CMAKE_SYSROOT_LINK");
   cmValue rootPath = this->Makefile->GetDefinition("CMAKE_FIND_ROOT_PATH");
-  const bool noSysroot = !cmNonempty(sysroot);
-  const bool noCompileSysroot = !cmNonempty(sysrootCompile);
-  const bool noLinkSysroot = !cmNonempty(sysrootLink);
-  const bool noRootPath = !cmNonempty(rootPath);
+  bool const noSysroot = !cmNonempty(sysroot);
+  bool const noCompileSysroot = !cmNonempty(sysrootCompile);
+  bool const noLinkSysroot = !cmNonempty(sysrootLink);
+  bool const noRootPath = !cmNonempty(rootPath);
   if (noSysroot && noCompileSysroot && noLinkSysroot && noRootPath) {
     return;
   }
 
-  if (this->DebugMode && debugBuffer) {
+  if (this->DebugModeEnabled() && debugBuffer) {
     *debugBuffer = cmStrCat(
       *debugBuffer, "Prepending the following roots to each prefix:\n");
   }
 
-  auto debugRoot = [this, debugBuffer](const std::string& name,
+  auto debugRoot = [this, debugBuffer](std::string const& name,
                                        cmValue value) {
-    if (this->DebugMode && debugBuffer) {
-      *debugBuffer = cmStrCat(*debugBuffer, name, "\n");
+    if (this->DebugModeEnabled() && debugBuffer) {
+      *debugBuffer = cmStrCat(*debugBuffer, name, '\n');
       cmList roots{ value };
       if (roots.empty()) {
         *debugBuffer = cmStrCat(*debugBuffer, "  none\n");
       }
       for (auto const& root : roots) {
-        *debugBuffer = cmStrCat(*debugBuffer, "  ", root, "\n");
+        *debugBuffer = cmStrCat(*debugBuffer, "  ", root, '\n');
       }
     }
   };
@@ -261,19 +274,19 @@ void cmFindCommon::RerootPaths(std::vector<std::string>& paths,
   // Construct the list of path roots with no trailing slashes.
   cmList roots;
   debugRoot("CMAKE_FIND_ROOT_PATH", rootPath);
-  if (rootPath) {
+  if (cmNonempty(rootPath)) {
     roots.assign(*rootPath);
   }
   debugRoot("CMAKE_SYSROOT_COMPILE", sysrootCompile);
-  if (sysrootCompile) {
+  if (cmNonempty(sysrootCompile)) {
     roots.emplace_back(*sysrootCompile);
   }
   debugRoot("CMAKE_SYSROOT_LINK", sysrootLink);
-  if (sysrootLink) {
+  if (cmNonempty(sysrootLink)) {
     roots.emplace_back(*sysrootLink);
   }
   debugRoot("CMAKE_SYSROOT", sysroot);
-  if (sysroot) {
+  if (cmNonempty(sysroot)) {
     roots.emplace_back(*sysroot);
   }
   for (auto& r : roots) {
@@ -325,13 +338,11 @@ void cmFindCommon::RerootPaths(std::vector<std::string>& paths,
 
 void cmFindCommon::GetIgnoredPaths(std::vector<std::string>& ignore)
 {
-  static constexpr const char* paths[] = {
-    "CMAKE_SYSTEM_IGNORE_PATH",
-    "CMAKE_IGNORE_PATH",
-  };
+  std::array<char const*, 2> const paths = { { "CMAKE_SYSTEM_IGNORE_PATH",
+                                               "CMAKE_IGNORE_PATH" } };
 
   // Construct the list of path roots with no trailing slashes.
-  for (const char* pathName : paths) {
+  for (char const* pathName : paths) {
     // Get the list of paths to ignore from the variable.
     cmList::append(ignore, this->Makefile->GetDefinition(pathName));
   }
@@ -350,13 +361,11 @@ void cmFindCommon::GetIgnoredPaths(std::set<std::string>& ignore)
 
 void cmFindCommon::GetIgnoredPrefixPaths(std::vector<std::string>& ignore)
 {
-  static constexpr const char* paths[] = {
-    "CMAKE_SYSTEM_IGNORE_PREFIX_PATH",
-    "CMAKE_IGNORE_PREFIX_PATH",
+  std::array<char const*, 2> const paths = {
+    { "CMAKE_SYSTEM_IGNORE_PREFIX_PATH", "CMAKE_IGNORE_PREFIX_PATH" }
   };
-
   // Construct the list of path roots with no trailing slashes.
-  for (const char* pathName : paths) {
+  for (char const* pathName : paths) {
     // Get the list of paths to ignore from the variable.
     cmList::append(ignore, this->Makefile->GetDefinition(pathName));
   }
@@ -377,31 +386,46 @@ bool cmFindCommon::CheckCommonArgument(std::string const& arg)
 {
   if (arg == "NO_DEFAULT_PATH") {
     this->NoDefaultPath = true;
-  } else if (arg == "NO_PACKAGE_ROOT_PATH") {
-    this->NoPackageRootPath = true;
-  } else if (arg == "NO_CMAKE_PATH") {
-    this->NoCMakePath = true;
-  } else if (arg == "NO_CMAKE_ENVIRONMENT_PATH") {
-    this->NoCMakeEnvironmentPath = true;
-  } else if (arg == "NO_SYSTEM_ENVIRONMENT_PATH") {
-    this->NoSystemEnvironmentPath = true;
-  } else if (arg == "NO_CMAKE_SYSTEM_PATH") {
-    this->NoCMakeSystemPath = true;
-  } else if (arg == "NO_CMAKE_INSTALL_PREFIX") {
-    this->NoCMakeInstallPath = true;
-  } else if (arg == "NO_CMAKE_FIND_ROOT_PATH") {
-    this->FindRootPathMode = RootPathModeNever;
-  } else if (arg == "ONLY_CMAKE_FIND_ROOT_PATH") {
-    this->FindRootPathMode = RootPathModeOnly;
-  } else if (arg == "CMAKE_FIND_ROOT_PATH_BOTH") {
-    this->FindRootPathMode = RootPathModeBoth;
-  } else {
-    // The argument is not one of the above.
-    return false;
+    return true;
   }
-
-  // The argument is one of the above.
-  return true;
+  if (arg == "NO_PACKAGE_ROOT_PATH") {
+    this->NoPackageRootPath = true;
+    return true;
+  }
+  if (arg == "NO_CMAKE_PATH") {
+    this->NoCMakePath = true;
+    return true;
+  }
+  if (arg == "NO_CMAKE_ENVIRONMENT_PATH") {
+    this->NoCMakeEnvironmentPath = true;
+    return true;
+  }
+  if (arg == "NO_SYSTEM_ENVIRONMENT_PATH") {
+    this->NoSystemEnvironmentPath = true;
+    return true;
+  }
+  if (arg == "NO_CMAKE_SYSTEM_PATH") {
+    this->NoCMakeSystemPath = true;
+    return true;
+  }
+  if (arg == "NO_CMAKE_INSTALL_PREFIX") {
+    this->NoCMakeInstallPath = true;
+    return true;
+  }
+  if (arg == "NO_CMAKE_FIND_ROOT_PATH") {
+    this->FindRootPathMode = RootPathModeNever;
+    return true;
+  }
+  if (arg == "ONLY_CMAKE_FIND_ROOT_PATH") {
+    this->FindRootPathMode = RootPathModeOnly;
+    return true;
+  }
+  if (arg == "CMAKE_FIND_ROOT_PATH_BOTH") {
+    this->FindRootPathMode = RootPathModeBoth;
+    return true;
+  }
+  // The argument is not one of the above.
+  return false;
 }
 
 void cmFindCommon::AddPathSuffix(std::string const& arg)
@@ -429,12 +453,6 @@ void cmFindCommon::AddPathSuffix(std::string const& arg)
   this->SearchPathSuffixes.push_back(std::move(suffix));
 }
 
-static void AddTrailingSlash(std::string& s)
-{
-  if (!s.empty() && s.back() != '/') {
-    s += '/';
-  }
-}
 void cmFindCommon::ComputeFinalPaths(IgnorePaths ignorePaths,
                                      std::string* debugBuffer)
 {
@@ -459,5 +477,190 @@ void cmFindCommon::ComputeFinalPaths(IgnorePaths ignorePaths,
 
   // Add a trailing slash to all paths to aid the search process.
   std::for_each(this->SearchPaths.begin(), this->SearchPaths.end(),
-                &AddTrailingSlash);
+                [](std::string& s) {
+                  if (!s.empty() && s.back() != '/') {
+                    s += '/';
+                  }
+                });
+}
+
+cmFindCommonDebugState::cmFindCommonDebugState(std::string name,
+                                               cmFindCommon const* findCommand)
+  : FindCommand(findCommand)
+  , CommandName(std::move(name))
+  // Strip the `find_` prefix.
+  , Mode(this->CommandName.substr(5))
+{
+}
+
+void cmFindCommonDebugState::FoundAt(std::string const& path,
+                                     std::string regexName)
+{
+  this->IsFound = true;
+
+  if (!this->TrackSearchProgress()) {
+    return;
+  }
+
+  this->FoundAtImpl(path, regexName);
+}
+
+void cmFindCommonDebugState::FailedAt(std::string const& path,
+                                      std::string regexName)
+{
+  if (!this->TrackSearchProgress()) {
+    return;
+  }
+
+  this->FailedAtImpl(path, regexName);
+}
+
+bool cmFindCommonDebugState::ShouldImplicitlyLogEvents() const
+{
+  return true;
+}
+
+void cmFindCommonDebugState::Write()
+{
+  auto const* const fc = this->FindCommand;
+
+#ifndef CMAKE_BOOTSTRAP
+  // Write find event to the configure log if the log exists
+  if (cmConfigureLog* log =
+        fc->Makefile->GetCMakeInstance()->GetConfigureLog()) {
+    // Write event if any of:
+    //   - debug mode is enabled
+    //   - implicit logging should happen and:
+    //     - the variable was not defined (first run)
+    //     - the variable found state does not match the new found state (state
+    //       transition)
+    if (fc->DebugModeEnabled() ||
+        (this->ShouldImplicitlyLogEvents() &&
+         (!fc->IsDefined() || fc->IsFound() != this->IsFound))) {
+      this->WriteEvent(*log, *fc->Makefile);
+    }
+  }
+#endif
+
+  if (fc->DebugModeEnabled()) {
+    this->WriteDebug();
+  }
+}
+
+#ifndef CMAKE_BOOTSTRAP
+void cmFindCommonDebugState::WriteSearchVariables(cmConfigureLog& log,
+                                                  cmMakefile const& mf) const
+{
+  auto WriteString = [&log, &mf](std::string const& name) {
+    if (cmValue value = mf.GetDefinition(name)) {
+      log.WriteValue(name, *value);
+    }
+  };
+  auto WriteCMakeList = [&log, &mf](std::string const& name) {
+    if (cmValue value = mf.GetDefinition(name)) {
+      cmList values{ *value };
+      if (!values.empty()) {
+        log.WriteValue(name, values);
+      }
+    }
+  };
+  auto WriteEnvList = [&log](std::string const& name) {
+    if (auto value = cmSystemTools::GetEnvVar(name)) {
+      auto values = cmSystemTools::SplitEnvPath(*value);
+      if (!values.empty()) {
+        log.WriteValue(cmStrCat("ENV{", name, '}'), values);
+      }
+    }
+  };
+
+  auto const* fc = this->FindCommand;
+  log.BeginObject("search_context"_s);
+  auto const& packageRootStack = mf.FindPackageRootPathStack;
+  if (!packageRootStack.empty()) {
+    bool havePaths =
+      std::any_of(packageRootStack.begin(), packageRootStack.end(),
+                  [](std::vector<std::string> const& entry) -> bool {
+                    return !entry.empty();
+                  });
+    if (havePaths) {
+      log.BeginObject("package_stack");
+      log.BeginArray();
+      for (auto const& pkgPaths : cmReverseRange(packageRootStack)) {
+        if (!pkgPaths.empty()) {
+          log.NextArrayElement();
+          log.WriteValue("package_paths", pkgPaths);
+        }
+      }
+      log.EndArray();
+      log.EndObject();
+    }
+  }
+  auto cmakePathVar = cmStrCat("CMAKE_", fc->CMakePathName, "_PATH");
+  WriteCMakeList(cmakePathVar);
+  WriteCMakeList("CMAKE_PREFIX_PATH");
+  if (fc->CMakePathName == "PROGRAM"_s) {
+    WriteCMakeList("CMAKE_APPBUNDLE_PATH");
+  } else {
+    WriteCMakeList("CMAKE_FRAMEWORK_PATH");
+  }
+  // Same as above, but ask the environment instead.
+  WriteEnvList(cmakePathVar);
+  WriteEnvList("CMAKE_PREFIX_PATH");
+  if (fc->CMakePathName == "PROGRAM"_s) {
+    WriteEnvList("CMAKE_APPBUNDLE_PATH");
+  } else {
+    WriteEnvList("CMAKE_FRAMEWORK_PATH");
+  }
+  WriteEnvList("PATH");
+  WriteString("CMAKE_INSTALL_PREFIX");
+  WriteString("CMAKE_STAGING_PREFIX");
+  WriteCMakeList("CMAKE_SYSTEM_PREFIX_PATH");
+  auto systemPathVar = cmStrCat("CMAKE_SYSTEM_", fc->CMakePathName, "_PATH");
+  WriteCMakeList(systemPathVar);
+  // Sysroot paths.
+  WriteString("CMAKE_SYSROOT");
+  WriteString("CMAKE_SYSROOT_COMPILE");
+  WriteString("CMAKE_SYSROOT_LINK");
+  WriteString("CMAKE_FIND_ROOT_PATH");
+  // Write out paths which are ignored.
+  WriteCMakeList("CMAKE_IGNORE_PATH");
+  WriteCMakeList("CMAKE_IGNORE_PREFIX_PATH");
+  WriteCMakeList("CMAKE_SYSTEM_IGNORE_PATH");
+  WriteCMakeList("CMAKE_SYSTEM_IGNORE_PREFIX_PATH");
+  if (fc->CMakePathName == "PROGRAM"_s) {
+    WriteCMakeList("CMAKE_SYSTEM_APPBUNDLE_PATH");
+  } else {
+    WriteCMakeList("CMAKE_SYSTEM_FRAMEWORK_PATH");
+  }
+  for (auto const& extraVar : this->ExtraSearchVariables()) {
+    switch (extraVar.first) {
+      case VariableSource::String:
+        WriteString(extraVar.second);
+        break;
+      case VariableSource::PathList:
+        WriteCMakeList(extraVar.second);
+        break;
+      case VariableSource::EnvironmentList:
+        WriteEnvList(extraVar.second);
+        break;
+    }
+  }
+  log.EndObject();
+}
+
+std::vector<std::pair<cmFindCommonDebugState::VariableSource, std::string>>
+cmFindCommonDebugState::ExtraSearchVariables() const
+{
+  return {};
+}
+#endif
+
+bool cmFindCommonDebugState::TrackSearchProgress() const
+{
+  // Track search progress if debugging or logging the configure.
+  return this->FindCommand->DebugModeEnabled()
+#ifndef CMAKE_BOOTSTRAP
+    || this->FindCommand->Makefile->GetCMakeInstance()->GetConfigureLog()
+#endif
+    ;
 }

@@ -23,9 +23,9 @@ public:
   }
 
 protected:
-  void EndElement(const std::string& /*name*/) override {}
+  void EndElement(std::string const& /*name*/) override {}
 
-  void StartElement(const std::string& name, const char** atts) override
+  void StartElement(std::string const& name, char const** atts) override
   {
     if (name == "package") {
       this->PackageName = atts[1];
@@ -170,7 +170,7 @@ bool cmParseJacocoCoverage::LoadCoverageData(
   return true;
 }
 
-bool cmParseJacocoCoverage::ReadJacocoXML(const char* file)
+bool cmParseJacocoCoverage::ReadJacocoXML(char const* file)
 {
   cmParseJacocoCoverage::XMLParser parser(this->CTest, this->Coverage);
   parser.ParseFile(file);

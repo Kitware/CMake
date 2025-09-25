@@ -17,4 +17,4 @@ Creating Relocatable Packages
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. |INTERFACE_PROPERTY_LINK| replace:: ``LINK_INTERFACE_LIBRARIES_<CONFIG>``
-.. include:: /include/INTERFACE_LINK_LIBRARIES_WARNING.txt
+.. include:: /include/INTERFACE_LINK_LIBRARIES_WARNING.rst

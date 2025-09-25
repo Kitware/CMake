@@ -3,7 +3,7 @@ CMAKE_CONFIG_DIR
 
 .. versionadded:: 3.31
 
-.. include:: ENV_VAR.txt
+.. include:: include/ENV_VAR.rst
 
 Specify a CMake user-wide configuration directory for
 :manual:`cmake-file-api(7)` queries.

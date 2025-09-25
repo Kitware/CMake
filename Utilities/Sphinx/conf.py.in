@@ -1,5 +1,5 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-# file Copyright.txt or https://cmake.org/licensing for details.
+# file LICENSE.rst or https://cmake.org/licensing for details.
 
 import sys
 import os
@@ -22,7 +22,11 @@ primary_domain = 'cmake'
 highlight_language = 'none'
 
 exclude_patterns = [
-    'dev', # ignore developer-only documentation
+    # Ignore developer-only documentation
+    'dev',
+    # NOTE Ignore shared RST files used in `.. include::` directives
+    'include/*.rst',
+    '**/include/*.rst'
     ]
 
 extensions = ['cmake']
@@ -91,16 +95,21 @@ html_favicon = '@conf_path@/static/cmake-favicon.ico'
 linkcheck_ignore = [
     r'about:',
     r'https://gitlab\.kitware\.com/cmake/community/-/wikis/doc/cpack',
-    r'https://www.intel.com/',
+    r'https://web\.archive\.org/',
+    r'https://www\.gnu\.org/',
+    r'https://www\.intel\.com/',
+    r'https://www\.tasking\.com($|/)',
 ]
 
 linkcheck_allowed_redirects = {
     r'https://cdash\.org': r'https://www\.cdash\.org/',
     r'https://cmake.org/get-involved/': r'https://cmake.org/documentation/',
     r'https://docs\.nvidia\.com/cuda/': r'https://docs\.nvidia\.com/cuda/index\.html',
+    r'https://learn\.microsoft\.com/en-us/cpp/build/reference/export-exports-a-function': r'https://learn\.microsoft\.com/en-us/cpp/build/reference/export-exports-a-function\?.*',
     r'https://learn\.microsoft\.com/en-us/cpp/build/reference/openmp-enable-openmp-2-0-support': r'https://learn\.microsoft\.com/en-us/cpp/build/reference/openmp-enable-openmp-2-0-support\?.*',
     r'https://learn\.microsoft\.com/en-us/cpp/c-language/parsing-c-command-line-arguments': r'https://learn\.microsoft\.com/en-us/cpp/c-language/parsing-c-command-line-arguments\?.*',
     r'https://openjdk\.java\.net/jeps/313': r'https://openjdk\.org:443/jeps/313',
+    r'https://www\.renesas\.com': r'https://www\.renesas\.com/en',
     r'https://www\.sphinx-doc\.org': r'https://www\.sphinx-doc\.org/en/master/',
 }
 

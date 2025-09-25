@@ -1,0 +1,4 @@
+Cflags: -I/NewRoot/Alpha -I/NewRoot/Alpha/sub Beta -I/NewRoot/Gamma
+Includes: -I/NewRoot/Alpha;-I/NewRoot/Alpha/sub;-I/NewRoot/Gamma
+Libs: -L/NewRoot/Delta -L/NewRoot/Delta/sub Epsilon -L/NewRoot/Zeta
+LibDirs: -L/NewRoot/Delta;-L/NewRoot/Delta/sub;-L/NewRoot/Zeta

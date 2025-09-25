@@ -83,7 +83,7 @@ with the :prop_tgt:`LINKER_LANGUAGE` target property.
 Toolchain Features
 ==================
 
-CMake provides the :command:`try_compile` command and wrapper macros such as
+CMake provides the :command:`try_compile` command and modules such as
 :module:`CheckSourceCompiles`, :module:`CheckCXXSymbolExists` and
 :module:`CheckIncludeFile` to test capability and availability of various
 toolchain features. These APIs test the toolchain in some way and cache the
@@ -251,7 +251,7 @@ Cross compiling for Windows CE requires the corresponding SDK being
 installed on your system.  These SDKs are usually installed under
 ``C:/Program Files (x86)/Windows CE Tools/SDKs``.
 
-A toolchain file to configure a Visual Studio generator for
+A toolchain file to configure :ref:`Visual Studio Generators` for
 Windows CE may look like this:
 
 .. code-block:: cmake
@@ -291,7 +291,7 @@ CMake selects a Windows SDK as described by documentation of the
 Cross Compiling for Windows Phone
 ---------------------------------
 
-A toolchain file to configure a Visual Studio generator for
+A toolchain file to configure :ref:`Visual Studio Generators` for
 Windows Phone may look like this:
 
 .. code-block:: cmake
@@ -302,7 +302,7 @@ Windows Phone may look like this:
 Cross Compiling for Windows Store
 ---------------------------------
 
-A toolchain file to configure a Visual Studio generator for
+A toolchain file to configure a :ref:`Visual Studio Generators` for
 Windows Store may look like this:
 
 .. code-block:: cmake

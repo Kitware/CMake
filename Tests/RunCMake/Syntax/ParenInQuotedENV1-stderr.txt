@@ -1,0 +1,13 @@
+^CMake Error at ParenInQuotedENV1\.cmake:2 \(message\):
+  Syntax error in cmake code at
+
+    [^
+]*/Tests/RunCMake/Syntax/ParenInQuotedENV1\.cmake:2
+
+  when parsing string
+
+    -->\$ENV{e\(x\)}<--
+
+  Invalid character \('\('\) in a variable name: 'e'
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:3 \(include\)$

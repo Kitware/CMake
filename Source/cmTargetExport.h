@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
@@ -7,7 +7,6 @@
 #include <map>
 #include <string>
 
-class cmFileSet;
 class cmGeneratorTarget;
 class cmInstallCxxModuleBmiGenerator;
 class cmInstallFileSetGenerator;
@@ -33,7 +32,7 @@ public:
   cmInstallTargetGenerator* FrameworkGenerator;
   cmInstallTargetGenerator* BundleGenerator;
   cmInstallFilesGenerator* HeaderGenerator;
-  std::map<cmFileSet*, cmInstallFileSetGenerator*> FileSetGenerators;
+  std::map<std::string, cmInstallFileSetGenerator*> FileSetGenerators;
   cmInstallCxxModuleBmiGenerator* CxxModuleBmiGenerator;
   ///@}
 

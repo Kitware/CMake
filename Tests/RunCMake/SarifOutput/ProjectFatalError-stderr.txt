@@ -1,0 +1,4 @@
+^CMake Error at ProjectFatalError\.cmake:1 \(message\):
+  Example error
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)$

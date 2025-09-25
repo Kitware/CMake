@@ -1,5 +1,5 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-# file Copyright.txt or https://cmake.org/licensing for details.
+# file LICENSE.rst or https://cmake.org/licensing for details.
 
 #[=======================================================================[.rst:
 FindMPI
@@ -207,7 +207,7 @@ Usage of mpiexec
 When using ``MPIEXEC_EXECUTABLE`` to execute MPI applications, you should typically
 use all of the ``MPIEXEC_EXECUTABLE`` flags as follows:
 
-::
+.. code-block:: cmake
 
    ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS}
      ${MPIEXEC_PREFLAGS} EXECUTABLE ${MPIEXEC_POSTFLAGS} ARGS
@@ -264,10 +264,9 @@ Additionally, the following variables are deprecated:
 #]=======================================================================]
 
 cmake_policy(PUSH)
-cmake_policy(SET CMP0057 NEW) # if IN_LIST
 cmake_policy(SET CMP0159 NEW) # file(STRINGS) with REGEX updates CMAKE_MATCH_<n>
 
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(FindPackageHandleStandardArgs)
 find_package(PkgConfig QUIET)
 
 # Generic compiler names
@@ -439,25 +438,25 @@ function (_MPI_interrogate_compiler LANG)
   # It's possible to have a per-compiler configuration in these MPI implementations and
   # a particular MPICH derivate might check compiler interoperability.
   # Intel MPI in particular does this with I_MPI_CHECK_COMPILER.
-  file(TO_NATIVE_PATH "${CMAKE_${LANG}_COMPILER}" _MPI_UNDERLAYING_COMPILER)
+  file(TO_NATIVE_PATH "${CMAKE_${LANG}_COMPILER}" _MPI_UNDERLYING_COMPILER)
   # On Windows, the Intel MPI batch scripts can only work with filenames - Full paths will break them.
   # Due to the lack of other MPICH-based wrappers for Visual C++, we may treat this as default.
   if(MSVC)
-    get_filename_component(_MPI_UNDERLAYING_COMPILER "${_MPI_UNDERLAYING_COMPILER}" NAME)
+    get_filename_component(_MPI_UNDERLYING_COMPILER "${_MPI_UNDERLYING_COMPILER}" NAME)
   endif()
   if(LANG STREQUAL "C")
-    _MPI_env_set_ifnot(I_MPI_CC _MPI_UNDERLAYING_COMPILER)
-    _MPI_env_set_ifnot(MPICH_CC _MPI_UNDERLAYING_COMPILER)
+    _MPI_env_set_ifnot(I_MPI_CC _MPI_UNDERLYING_COMPILER)
+    _MPI_env_set_ifnot(MPICH_CC _MPI_UNDERLYING_COMPILER)
   elseif(LANG STREQUAL "CXX")
-    _MPI_env_set_ifnot(I_MPI_CXX _MPI_UNDERLAYING_COMPILER)
-    _MPI_env_set_ifnot(MPICH_CXX _MPI_UNDERLAYING_COMPILER)
+    _MPI_env_set_ifnot(I_MPI_CXX _MPI_UNDERLYING_COMPILER)
+    _MPI_env_set_ifnot(MPICH_CXX _MPI_UNDERLYING_COMPILER)
   elseif(LANG STREQUAL "Fortran")
-    _MPI_env_set_ifnot(I_MPI_FC _MPI_UNDERLAYING_COMPILER)
-    _MPI_env_set_ifnot(MPICH_FC _MPI_UNDERLAYING_COMPILER)
-    _MPI_env_set_ifnot(I_MPI_F77 _MPI_UNDERLAYING_COMPILER)
-    _MPI_env_set_ifnot(MPICH_F77 _MPI_UNDERLAYING_COMPILER)
-    _MPI_env_set_ifnot(I_MPI_F90 _MPI_UNDERLAYING_COMPILER)
-    _MPI_env_set_ifnot(MPICH_F90 _MPI_UNDERLAYING_COMPILER)
+    _MPI_env_set_ifnot(I_MPI_FC _MPI_UNDERLYING_COMPILER)
+    _MPI_env_set_ifnot(MPICH_FC _MPI_UNDERLYING_COMPILER)
+    _MPI_env_set_ifnot(I_MPI_F77 _MPI_UNDERLYING_COMPILER)
+    _MPI_env_set_ifnot(MPICH_F77 _MPI_UNDERLYING_COMPILER)
+    _MPI_env_set_ifnot(I_MPI_F90 _MPI_UNDERLYING_COMPILER)
+    _MPI_env_set_ifnot(MPICH_F90 _MPI_UNDERLYING_COMPILER)
   endif()
 
   # Set these two variables for Intel MPI:
@@ -537,7 +536,7 @@ function (_MPI_interrogate_compiler LANG)
     # It has to be called as "compchk.sh <arch> <compiler>". Here, <arch> is one out of 32 (i686), 64 (ia64) or 32e (x86_64).
     # The compiler is identified by filename, and can be either the MPI compiler or the underlying compiler.
     # NOTE: It is vital to run this script while the environment variables are set up, otherwise it can check the wrong compiler.
-    if(MPI_COMPILE_CMDLINE MATCHES "^([^\" ]+/compchk.sh|\"[^\"]+/compchk.sh\") +([^ ]+)")
+    if(MPI_COMPILE_CMDLINE MATCHES "^([^\"\n ]+/compchk.sh|\"[^\"]+/compchk.sh\") +([^ ]+)")
       # Now CMAKE_MATCH_1 contains the path to the compchk.sh file and CMAKE_MATCH_2 the architecture flag.
       unset(COMPILER_CHECKER_OUTPUT)
       execute_process(
@@ -552,7 +551,7 @@ function (_MPI_interrogate_compiler LANG)
         endif()
       else()
         # Since the check passed, we can remove the compchk.sh script.
-        string(REGEX REPLACE "^([^\" ]+|\"[^\"]+\")/compchk.sh.*\n" "" MPI_COMPILE_CMDLINE "${MPI_COMPILE_CMDLINE}")
+        string(REGEX REPLACE "^([^\"\n ]+|\"[^\"]+\")/compchk.sh.*\n" "" MPI_COMPILE_CMDLINE "${MPI_COMPILE_CMDLINE}")
       endif()
     endif()
   endif()
@@ -618,15 +617,17 @@ function (_MPI_interrogate_compiler LANG)
     # At this point, we obtained some output from a compiler wrapper that works.
     # We'll now try to parse it into variables with meaning to us.
     if(LANG STREQUAL "Fortran")
+      # noqa: spellcheck off
       # If MPICH (and derivates) didn't recognize the Fortran compiler include flag during configuration,
       # they'll return a set of three commands, consisting out of a symlink command for mpif.h,
       # the actual compiler command and deletion of the created symlink.
       # Especially with M(VA)PICH-1, this appears to happen erroneously, and therefore we should translate
       # this output into an additional include directory and then drop it from the output.
-      if(MPI_COMPILE_CMDLINE MATCHES "^ln -s ([^\" ]+|\"[^\"]+\") mpif.h")
+      # noqa: spellcheck on
+      if(MPI_COMPILE_CMDLINE MATCHES "^ln -s ([^\"\n ]+|\"[^\"]+\") mpif.h")
         get_filename_component(MPI_INCLUDE_DIRS_WORK "${CMAKE_MATCH_1}" DIRECTORY)
-        string(REGEX REPLACE "^ln -s ([^\" ]+|\"[^\"]+\") mpif.h\n" "" MPI_COMPILE_CMDLINE "${MPI_COMPILE_CMDLINE}")
-        string(REGEX REPLACE "^ln -s ([^\" ]+|\"[^\"]+\") mpif.h\n" "" MPI_LINK_CMDLINE "${MPI_LINK_CMDLINE}")
+        string(REGEX REPLACE "^ln -s ([^\"\n ]+|\"[^\"]+\") mpif.h\n" "" MPI_COMPILE_CMDLINE "${MPI_COMPILE_CMDLINE}")
+        string(REGEX REPLACE "^ln -s ([^\"\n ]+|\"[^\"]+\") mpif.h\n" "" MPI_LINK_CMDLINE "${MPI_LINK_CMDLINE}")
         string(REGEX REPLACE "\nrm -f mpif.h$" "" MPI_COMPILE_CMDLINE "${MPI_COMPILE_CMDLINE}")
         string(REGEX REPLACE "\nrm -f mpif.h$" "" MPI_LINK_CMDLINE "${MPI_LINK_CMDLINE}")
       endif()
@@ -644,7 +645,7 @@ function (_MPI_interrogate_compiler LANG)
   # on Windows seems to require any specific ones, either.
   if(NOT MSVC)
     # Extract compile options from the compile command line.
-    string(REGEX MATCHALL "(^| )-f([^\" ]+|\"[^\"]+\")" MPI_ALL_COMPILE_OPTIONS "${MPI_COMPILE_CMDLINE}")
+    string(REGEX MATCHALL "(^| )-f([^\"\n ]+|\"[^\"]+\")" MPI_ALL_COMPILE_OPTIONS "${MPI_COMPILE_CMDLINE}")
 
     foreach(_MPI_COMPILE_OPTION IN LISTS MPI_ALL_COMPILE_OPTIONS)
       string(REGEX REPLACE "^ " "" _MPI_COMPILE_OPTION "${_MPI_COMPILE_OPTION}")
@@ -672,7 +673,7 @@ function (_MPI_interrogate_compiler LANG)
   endif()
 
   # Same deal as above, for the definitions.
-  string(REGEX MATCHALL "(^| )${_MPI_PREPROCESSOR_FLAG_REGEX}-D *([^\" ]+|\"[^\"]+\")" MPI_ALL_COMPILE_DEFINITIONS "${MPI_COMPILE_CMDLINE}")
+  string(REGEX MATCHALL "(^| )${_MPI_PREPROCESSOR_FLAG_REGEX}-D *([^\"\n ]+|\"[^\"]+\")" MPI_ALL_COMPILE_DEFINITIONS "${MPI_COMPILE_CMDLINE}")
 
   foreach(_MPI_COMPILE_DEFINITION IN LISTS MPI_ALL_COMPILE_DEFINITIONS)
     string(REGEX REPLACE "^ ?${_MPI_PREPROCESSOR_FLAG_REGEX}-D *" "" _MPI_COMPILE_DEFINITION "${_MPI_COMPILE_DEFINITION}")
@@ -683,11 +684,11 @@ function (_MPI_interrogate_compiler LANG)
   endforeach()
 
   # Extract include paths from compile command line
-  string(REGEX MATCHALL "(^|\n| )${_MPI_PREPROCESSOR_FLAG_REGEX}${CMAKE_INCLUDE_FLAG_${LANG}} *([^\" ]+|\"[^\"]+\")"
+  string(REGEX MATCHALL "(^|\n| )${_MPI_PREPROCESSOR_FLAG_REGEX}${CMAKE_INCLUDE_FLAG_${LANG}} *([^\"\n ]+|\"[^\"]+\")"
     MPI_ALL_INCLUDE_PATHS "${MPI_COMPILE_CMDLINE}")
 
   # If extracting failed to work, we'll try using -showme:incdirs.
-  # Unlike before, we do this without the environment variables set up, but since only MPICH derivates are affected by any of them, and
+  # Unlike before, we do this without the environment variables set up, but since only MPICH derivatives are affected by any of them, and
   # -showme:... is only supported by Open MPI and LAM/MPI, this isn't a concern.
   if (NOT MPI_ALL_INCLUDE_PATHS)
     _MPI_check_compiler(${LANG} "-showme:incdirs" MPI_INCDIRS_CMDLINE MPI_INCDIRS_COMPILER_RETURN)
@@ -706,7 +707,7 @@ function (_MPI_interrogate_compiler LANG)
   endforeach()
 
   # The next step are linker flags and library directories. Here, we first take the flags given in raw -L or -LIBPATH: syntax.
-  string(REGEX MATCHALL "(^| )${CMAKE_LIBRARY_PATH_FLAG} *([^\" ]+|\"[^\"]+\")" MPI_DIRECT_LINK_PATHS "${MPI_LINK_CMDLINE}")
+  string(REGEX MATCHALL "(^| )${CMAKE_LIBRARY_PATH_FLAG} *([^\"\n ]+|\"[^\"]+\")" MPI_DIRECT_LINK_PATHS "${MPI_LINK_CMDLINE}")
   foreach(_MPI_LPATH IN LISTS MPI_DIRECT_LINK_PATHS)
     string(REGEX REPLACE "(^| )${CMAKE_LIBRARY_PATH_FLAG} *" "" _MPI_LPATH "${_MPI_LPATH}")
     list(APPEND MPI_ALL_LINK_PATHS "${_MPI_LPATH}")
@@ -714,7 +715,7 @@ function (_MPI_interrogate_compiler LANG)
 
   # If the link commandline hasn't been filtered (e.g. when using MSVC and /link), we need to extract the relevant parts first.
   if(NOT _MPI_FILTERED_LINK_INFORMATION)
-    string(REGEX MATCHALL "(^| )(-Wl,|-Xlinker +)([^\" ]+|\"[^\"]+\")" MPI_LINK_FLAGS "${MPI_LINK_CMDLINE}")
+    string(REGEX MATCHALL "(^| )(-Wl,|-Xlinker +)([^\"\n ]+|\"[^\"]+\")" MPI_LINK_FLAGS "${MPI_LINK_CMDLINE}")
 
     # In this case, we could also find some indirectly given linker paths, e.g. prefixed by -Xlinker or -Wl,
     # Since syntaxes like -Wl,-L -Wl,/my/path/to/lib are also valid, we parse these paths by first removing -Wl, and -Xlinker
@@ -723,7 +724,7 @@ function (_MPI_interrogate_compiler LANG)
 
     # Now we can parse the leftover output. Note that spaces can now be handled since the above example would reduce to
     # -L /my/path/to/lib and can be extracted correctly.
-    string(REGEX MATCHALL "^(${CMAKE_LIBRARY_PATH_FLAG},? *|--library-path=)([^\" ]+|\"[^\"]+\")"
+    string(REGEX MATCHALL "^(${CMAKE_LIBRARY_PATH_FLAG},? *|--library-path=)([^\"\n ]+|\"[^\"]+\")"
       MPI_INDIRECT_LINK_PATHS "${MPI_LINK_FLAGS_RAW}")
 
     foreach(_MPI_LPATH IN LISTS MPI_INDIRECT_LINK_PATHS)
@@ -732,7 +733,7 @@ function (_MPI_interrogate_compiler LANG)
     endforeach()
 
     # We need to remove the flags we extracted from the linker flag list now.
-    string(REGEX REPLACE "(^| )(-Wl,|-Xlinker +)(${CMAKE_LIBRARY_PATH_FLAG},? *(-Wl,|-Xlinker +)?|--library-path=)([^\" ]+|\"[^\"]+\")" ""
+    string(REGEX REPLACE "(^| )(-Wl,|-Xlinker +)(${CMAKE_LIBRARY_PATH_FLAG},? *(-Wl,|-Xlinker +)?|--library-path=)([^\"\n ]+|\"[^\"]+\")" ""
       MPI_LINK_CMDLINE_FILTERED "${MPI_LINK_CMDLINE}")
 
     # Some MPI implementations pass on options they themselves were built with. Since -z,noexecstack is a common
@@ -741,7 +742,7 @@ function (_MPI_interrogate_compiler LANG)
     string(REGEX REPLACE "(^| )-Xlinker +-z +-Xlinker +[^ ]+" "" MPI_LINK_CMDLINE_FILTERED "${MPI_LINK_CMDLINE_FILTERED}")
 
     # We only consider options of the form -Wl or -Xlinker:
-    string(REGEX MATCHALL "(^| )(-Wl,|-Xlinker +)([^\" ]+|\"[^\"]+\")" MPI_ALL_LINK_FLAGS "${MPI_LINK_CMDLINE_FILTERED}")
+    string(REGEX MATCHALL "(^| )(-Wl,|-Xlinker +)([^\"\n ]+|\"[^\"]+\")" MPI_ALL_LINK_FLAGS "${MPI_LINK_CMDLINE_FILTERED}")
 
     # As a next step, we assemble the linker flags extracted in a preliminary flags string
     foreach(_MPI_LINK_FLAG IN LISTS MPI_ALL_LINK_FLAGS)
@@ -754,7 +755,7 @@ function (_MPI_interrogate_compiler LANG)
     endforeach()
   else()
     # In the filtered case, we obtain the link time flags by just stripping the library paths.
-    string(REGEX REPLACE "(^| )${CMAKE_LIBRARY_PATH_FLAG} *([^\" ]+|\"[^\"]+\")" "" MPI_LINK_CMDLINE_FILTERED "${MPI_LINK_CMDLINE}")
+    string(REGEX REPLACE "(^| )${CMAKE_LIBRARY_PATH_FLAG} *([^\"\n ]+|\"[^\"]+\")" "" MPI_LINK_CMDLINE_FILTERED "${MPI_LINK_CMDLINE}")
   endif()
 
   # If we failed to extract any linker paths, we'll try using the -showme:libdirs option with the MPI compiler.
@@ -776,7 +777,7 @@ function (_MPI_interrogate_compiler LANG)
   # Extract the set of libraries to link against from the link command line
   # This only makes sense if CMAKE_LINK_LIBRARY_FLAG is defined, i.e. a -lxxxx syntax is supported by the compiler.
   if(CMAKE_LINK_LIBRARY_FLAG)
-    string(REGEX MATCHALL "(^| )${CMAKE_LINK_LIBRARY_FLAG}([^\" ]+|\"[^\"]+\")"
+    string(REGEX MATCHALL "(^| )${CMAKE_LINK_LIBRARY_FLAG}([^\"\n ]+|\"[^\"]+\")"
       MPI_LIBNAMES "${MPI_LINK_CMDLINE}")
 
     foreach(_MPI_LIB_NAME IN LISTS MPI_LIBNAMES)
@@ -799,7 +800,7 @@ function (_MPI_interrogate_compiler LANG)
   else()
     string(APPEND _MPI_LIB_SUFFIX_REGEX "|${CMAKE_SHARED_LIBRARY_SUFFIX}")
   endif()
-  set(_MPI_LIB_NAME_REGEX "(([^\" ]+(${_MPI_LIB_SUFFIX_REGEX}))|(\"[^\"]+(${_MPI_LIB_SUFFIX_REGEX})\"))( +|$)")
+  set(_MPI_LIB_NAME_REGEX "(([^\"\n ]+(${_MPI_LIB_SUFFIX_REGEX}))|(\"[^\"]+(${_MPI_LIB_SUFFIX_REGEX})\"))( +|$)")
   string(REPLACE "." "\\." _MPI_LIB_NAME_REGEX "${_MPI_LIB_NAME_REGEX}")
 
   string(REGEX MATCHALL "${_MPI_LIB_NAME_REGEX}" MPI_LIBNAMES "${MPI_LINK_CMDLINE}")
@@ -955,6 +956,7 @@ function(_MPI_guess_settings LANG)
         # Should a user be employing PGI or have built its own set and provided it via cache variables, the
         # splitting routine would have located the module files.
 
+        # noqa: spellcheck off
         # For C and C++, we're done here (MSMPI does not ship the MPI-2 C++ bindings) - however, for Fortran
         # we need some extra library to glue Fortran support together:
         # MSMPI ships 2-4 Fortran libraries, each for different Fortran compiler behaviors. The library names
@@ -964,6 +966,7 @@ function(_MPI_guess_settings LANG)
         # The second difference is the last but one letter, if it's an e(nd), the length of a string argument is
         # passed by the Fortran compiler after all other arguments on the parameter list, if it's an m(ixed),
         # it's passed immediately after the string address.
+        # noqa: spellcheck on
 
         # To summarize:
         #   - msmpifec: CHARACTER length passed after the parameter list and using cdecl calling convention
@@ -1313,7 +1316,7 @@ macro(_MPI_check_lang_works LANG SUPPRESS_ERRORS)
           set(MPI_${LANG}_HAVE_${mpimethod} FALSE)
         endif()
       endforeach()
-      # MPI-1 versions had no MPI_INTGER_KIND defined, so we need to try without it.
+      # MPI-1 versions had no MPI_INTEGER_KIND defined, so we need to try without it.
       # However, MPI-1 also did not define the Fortran 90 and 08 modules, so we only try the F77 header.
       unset(MPI_Fortran_INTEGER_LINE)
       if(NOT MPI_${LANG}_WORKS)

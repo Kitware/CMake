@@ -1,0 +1,10 @@
+CMake Error at BadArgs3\.cmake:3 \(export\):
+  export PACKAGE_INFO and FILE are mutually exclusive\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:3 \(include\)
+
+
+CMake Error at BadArgs3\.cmake:4 \(export\):
+  export PACKAGE_INFO and NAMESPACE are mutually exclusive\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:3 \(include\)

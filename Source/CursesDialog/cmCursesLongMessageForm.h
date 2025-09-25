@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
@@ -20,7 +20,7 @@ public:
   };
 
   cmCursesLongMessageForm(std::vector<std::string> const& messages,
-                          const char* title, ScrollBehavior scrollBehavior);
+                          char const* title, ScrollBehavior scrollBehavior);
   ~cmCursesLongMessageForm() override;
 
   cmCursesLongMessageForm(cmCursesLongMessageForm const&) = delete;
@@ -50,7 +50,7 @@ public:
 protected:
   static constexpr int MAX_CONTENT_SIZE = 60000;
 
-  void DrawMessage(const char* msg) const;
+  void DrawMessage(char const* msg) const;
 
   std::string Messages;
   std::string Title;

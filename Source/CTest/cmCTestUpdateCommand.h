@@ -1,43 +1,34 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <string>
-#include <utility>
-
-#include <cm/memory>
+#include <vector>
 
 #include "cmCTestHandlerCommand.h"
-#include "cmCommand.h"
 
-class cmCTestGenericHandler;
+class cmExecutionStatus;
 
-/** \class cmCTestUpdate
- * \brief Run a ctest script
- *
- * cmCTestUpdateCommand defineds the command to updates the repository.
- */
 class cmCTestUpdateCommand : public cmCTestHandlerCommand
 {
 public:
-  /**
-   * This is a virtual constructor for the command.
-   */
-  std::unique_ptr<cmCommand> Clone() override
-  {
-    auto ni = cm::make_unique<cmCTestUpdateCommand>();
-    ni->CTest = this->CTest;
-    ni->CTestScriptHandler = this->CTestScriptHandler;
-    return std::unique_ptr<cmCommand>(std::move(ni));
-  }
-
-  /**
-   * The name of the command as specified in CMakeList.txt.
-   */
-  std::string GetName() const override { return "ctest_update"; }
+  using cmCTestHandlerCommand::cmCTestHandlerCommand;
 
 protected:
-  cmCTestGenericHandler* InitializeHandler() override;
+  struct UpdateArguments : BasicArguments
+  {
+    std::string Source;
+    std::string ReturnValue;
+    bool Quiet = false;
+  };
+
+private:
+  std::string GetName() const override { return "ctest_update"; }
+
+  bool ExecuteUpdate(UpdateArguments& args, cmExecutionStatus& status) const;
+
+  bool InitialPass(std::vector<std::string> const& args,
+                   cmExecutionStatus& status) const override;
 };

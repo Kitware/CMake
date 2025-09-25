@@ -84,7 +84,7 @@ void CodeEditor::updateLineNumberAreaWidth(int /* newBlockCount */)
   setViewportMargins(lineNumberAreaWidth(), 0, 0, 0);
 }
 
-void CodeEditor::updateLineNumberArea(const QRect& rect, int dy)
+void CodeEditor::updateLineNumberArea(QRect const& rect, int dy)
 {
   if (dy)
     lineNumberArea->scroll(0, dy);

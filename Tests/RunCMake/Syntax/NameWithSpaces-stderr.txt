@@ -7,6 +7,6 @@
 
     \${var
 
-  syntax error, unexpected end of file, expecting } \(6\)
+  There is an unterminated variable reference.
 Call Stack \(most recent call first\):
   CMakeLists.txt:3 \(include\)$

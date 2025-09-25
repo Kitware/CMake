@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
@@ -43,11 +43,11 @@ struct QCMakeProperty
   QString Help;
   PropertyType Type;
   bool Advanced;
-  bool operator==(const QCMakeProperty& other) const
+  bool operator==(QCMakeProperty const& other) const
   {
     return this->Key == other.Key;
   }
-  bool operator<(const QCMakeProperty& other) const
+  bool operator<(QCMakeProperty const& other) const
   {
     return this->Key < other.Key;
   }
@@ -72,21 +72,21 @@ public:
   ~QCMake();
 public slots:
   /// load the cache file in a directory
-  void loadCache(const QString& dir);
+  void loadCache(QString const& dir);
   /// set the source directory containing the source
-  void setSourceDirectory(const QString& dir);
+  void setSourceDirectory(QString const& dir);
   /// set the binary directory to build in
-  void setBinaryDirectory(const QString& dir);
+  void setBinaryDirectory(QString const& dir);
   /// set the preset name to use
-  void setPreset(const QString& name, bool setBinary = true);
+  void setPreset(QString const& name, bool setBinary = true);
   /// set the desired generator to use
-  void setGenerator(const QString& generator);
+  void setGenerator(QString const& generator);
   /// set the desired generator to use
-  void setPlatform(const QString& platform);
+  void setPlatform(QString const& platform);
   /// set the desired generator to use
-  void setToolset(const QString& toolset);
+  void setToolset(QString const& toolset);
   /// set the configure and generate environment
-  void setEnvironment(const QProcessEnvironment& environment);
+  void setEnvironment(QProcessEnvironment const& environment);
   /// do the configure step
   void configure();
   /// generate the files
@@ -94,7 +94,7 @@ public slots:
   /// open the project
   void open();
   /// set the property values
-  void setProperties(const QCMakePropertyList&);
+  void setProperties(QCMakePropertyList const&);
   /// interrupt the configure or generate process (if connecting, make a direct
   /// connection)
   void interrupt();
@@ -124,6 +124,8 @@ public slots:
   void setWarnUninitializedMode(bool value);
   /// check if project IDE open is possible and emit openPossible signal
   void checkOpenPossible();
+  /// Reload the preset files and tree
+  void loadPresets();
 
 public:
   /// get the list of cache properties
@@ -146,38 +148,38 @@ public:
 signals:
   /// signal when properties change (during read from disk or configure
   /// process)
-  void propertiesChanged(const QCMakePropertyList& vars);
+  void propertiesChanged(QCMakePropertyList const& vars);
   /// signal when the generator changes
-  void generatorChanged(const QString& gen);
+  void generatorChanged(QString const& gen);
   /// signal when the source directory changes (binary directory already
   /// containing a CMakeCache.txt file)
-  void sourceDirChanged(const QString& dir);
+  void sourceDirChanged(QString const& dir);
   /// signal when the binary directory changes
-  void binaryDirChanged(const QString& dir);
+  void binaryDirChanged(QString const& dir);
   /// signal when the preset list changes
-  void presetsChanged(const QVector<QCMakePreset>& presets);
+  void presetsChanged(QVector<QCMakePreset> const& presets);
   /// signal when the selected preset changes
-  void presetChanged(const QString& name);
+  void presetChanged(QString const& name);
   /// signal when there's an error reading the presets files
-  void presetLoadError(const QString& dir, const QString& error);
+  void presetLoadError(QString const& dir, QString const& error);
   /// signal when uninitialized warning changes
   void warnUninitializedModeChanged(bool value);
   /// signal for progress events
-  void progressChanged(const QString& msg, float percent);
+  void progressChanged(QString const& msg, float percent);
   /// signal when configure is done
   void configureDone(int error);
   /// signal when generate is done
   void generateDone(int error);
   /// signal when there is an output message
-  void outputMessage(const QString& msg);
+  void outputMessage(QString const& msg);
   /// signal when there is an error message
-  void errorMessage(const QString& msg);
+  void errorMessage(QString const& msg);
   /// signal when debug output changes
   void debugOutputChanged(bool);
   /// signal when the toolset changes
-  void toolsetChanged(const QString& toolset);
+  void toolsetChanged(QString const& toolset);
   /// signal when the platform changes
-  void platformChanged(const QString& platform);
+  void platformChanged(QString const& platform);
   /// signal when open is done
   void openDone(bool successful);
   /// signal when open is done
@@ -188,12 +190,10 @@ protected:
 
   bool interruptCallback();
   void progressCallback(std::string const& msg, float percent);
-  void messageCallback(std::string const& msg, const char* title);
+  void messageCallback(std::string const& msg, char const* title);
   void stdoutCallback(std::string const& msg);
   void stderrCallback(std::string const& msg);
   void setUpEnvironment() const;
-
-  void loadPresets();
 
   bool WarnUninitializedMode;
   QString SourceDirectory;
@@ -204,11 +204,9 @@ protected:
   QString Toolset;
   std::vector<cmake::GeneratorInfo> AvailableGenerators;
   cmCMakePresetsGraph CMakePresetsGraph;
-  bool LastLoadPresetsResult = true;
   QString PresetName;
   QString CMakeExecutable;
   QAtomicInt InterruptFlag;
   QProcessEnvironment StartEnvironment;
   QProcessEnvironment Environment;
-  QTimer LoadPresetsTimer;
 };

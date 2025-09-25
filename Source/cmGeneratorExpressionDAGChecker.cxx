@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmGeneratorExpressionDAGChecker.h"
 
 #include <sstream>
@@ -43,10 +43,10 @@ cmGeneratorExpressionDAGChecker::cmGeneratorExpressionDAGChecker(
   this->CheckResult = this->CheckGraph();
 
   if (this->CheckResult == DAG && this->EvaluatingTransitiveProperty()) {
-    const auto* top = this->Top;
+    auto const* top = this->Top;
     auto it = top->Seen.find(this->Target);
     if (it != top->Seen.end()) {
-      const std::set<std::string>& propSet = it->second;
+      std::set<std::string> const& propSet = it->second;
       if (propSet.find(this->Property) != propSet.end()) {
         this->CheckResult = ALREADY_SEEN;
         return;
@@ -63,7 +63,7 @@ cmGeneratorExpressionDAGChecker::Check() const
 }
 
 void cmGeneratorExpressionDAGChecker::ReportError(
-  cmGeneratorExpressionContext* context, const std::string& expr)
+  cmGeneratorExpressionContext* context, std::string const& expr)
 {
   if (this->CheckResult == DAG) {
     return;
@@ -74,7 +74,7 @@ void cmGeneratorExpressionDAGChecker::ReportError(
     return;
   }
 
-  const cmGeneratorExpressionDAGChecker* parent = this->Parent;
+  cmGeneratorExpressionDAGChecker const* parent = this->Parent;
 
   if (parent && !parent->Parent) {
     std::ostringstream e;
@@ -115,7 +115,7 @@ void cmGeneratorExpressionDAGChecker::ReportError(
 cmGeneratorExpressionDAGChecker::Result
 cmGeneratorExpressionDAGChecker::CheckGraph() const
 {
-  const cmGeneratorExpressionDAGChecker* parent = this->Parent;
+  cmGeneratorExpressionDAGChecker const* parent = this->Parent;
   while (parent) {
     if (this->Target == parent->Target && this->Property == parent->Property) {
       return (parent == this->Parent) ? SELF_REFERENCE : CYCLIC_REFERENCE;
@@ -202,7 +202,7 @@ bool cmGeneratorExpressionDAGChecker::IsComputingLinkLibraries() const
 bool cmGeneratorExpressionDAGChecker::EvaluatingLinkLibraries(
   cmGeneratorTarget const* tgt, ForGenex genex) const
 {
-  const auto* top = this->Top;
+  auto const* top = this->Top;
 
   cm::string_view prop(top->Property);
 

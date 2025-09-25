@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 
 #include <csignal>
 #include <cstdio>
@@ -19,17 +19,18 @@
 #include "cmDocumentationEntry.h"
 #include "cmMessageMetadata.h"
 #include "cmState.h"
+#include "cmStdIoInit.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmake.h"
 
 namespace {
-const cmDocumentationEntry cmDocumentationName = {
+cmDocumentationEntry const cmDocumentationName = {
   {},
   "  ccmake - Curses Interface for CMake."
 };
 
-const cmDocumentationEntry cmDocumentationUsage[2] = {
+cmDocumentationEntry const cmDocumentationUsage[2] = {
   { {},
     "  ccmake <path-to-source>\n"
     "  ccmake <path-to-existing-build>" },
@@ -39,7 +40,7 @@ const cmDocumentationEntry cmDocumentationUsage[2] = {
     "directory to re-generate its build system." },
 };
 
-const cmDocumentationEntry cmDocumentationUsageNote = {
+cmDocumentationEntry const cmDocumentationUsageNote = {
   {},
   "Run 'ccmake --help' for more information."
 };
@@ -62,7 +63,8 @@ cmCursesForm* cmCursesForm::CurrentForm = nullptr;
 
 int main(int argc, char const* const* argv)
 {
-  cmSystemTools::EnsureStdPipes();
+  cm::StdIo::Init();
+
   cmsys::Encoding::CommandLineArguments encoding_args =
     cmsys::Encoding::CommandLineArguments::Main(argc, argv);
   argc = encoding_args.argc();
@@ -101,7 +103,7 @@ int main(int argc, char const* const* argv)
     }
   }
 
-  std::string cacheDir = cmSystemTools::GetCurrentWorkingDirectory();
+  std::string cacheDir = cmSystemTools::GetLogicalWorkingDirectory();
   for (i = 1; i < args.size(); ++i) {
     std::string const& arg = args[i];
     if (cmHasPrefix(arg, "-B")) {
@@ -157,7 +159,7 @@ int main(int argc, char const* const* argv)
    * joined by '\n' before display.
    * Removing any trailing '\n' avoid extra empty lines in the final results
    */
-  auto cleanMessage = [](const std::string& message) -> std::string {
+  auto cleanMessage = [](std::string const& message) -> std::string {
     auto msg = message;
     if (!msg.empty() && msg.back() == '\n') {
       msg.pop_back();
@@ -165,13 +167,13 @@ int main(int argc, char const* const* argv)
     return msg;
   };
   cmSystemTools::SetMessageCallback(
-    [&](const std::string& message, const cmMessageMetadata& md) {
+    [&](std::string const& message, cmMessageMetadata const& md) {
       myform->AddError(cleanMessage(message), md.title);
     });
-  cmSystemTools::SetStderrCallback([&](const std::string& message) {
+  cmSystemTools::SetStderrCallback([&](std::string const& message) {
     myform->AddError(cleanMessage(message), "");
   });
-  cmSystemTools::SetStdoutCallback([&](const std::string& message) {
+  cmSystemTools::SetStdoutCallback([&](std::string const& message) {
     myform->UpdateProgress(cleanMessage(message), -1);
   });
 

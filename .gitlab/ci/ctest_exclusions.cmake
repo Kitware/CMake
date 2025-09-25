@@ -13,13 +13,6 @@ if (CTEST_CMAKE_GENERATOR MATCHES "Visual Studio")
     "^ExternalProjectUpdateSetup$")
 endif ()
 
-if (CTEST_CMAKE_GENERATOR MATCHES "Xcode")
-  list(APPEND test_exclusions
-    # FIXME(#26301): The XCTest fails with Xcode 16.0.
-    "^XCTest$"
-    )
-endif ()
-
 if ("$ENV{CMAKE_CONFIGURATION}" MATCHES "_asan")
   list(APPEND test_exclusions
     CTestTest2 # crashes on purpose
@@ -31,13 +24,6 @@ if ("$ENV{CMAKE_CONFIGURATION}" MATCHES "_jom")
   list(APPEND test_exclusions
     # JOM often fails with "Couldn't change working directory to ...".
     "^ExternalProject$"
-    )
-endif()
-
-if ("$ENV{CMAKE_CONFIGURATION}" MATCHES "nvhpc_")
-  list(APPEND test_exclusions
-    # FIXME(#24187): This test fails with NVHPC as the CUDA host compiler.
-    "^CudaOnly.SeparateCompilationPTX$"
     )
 endif()
 

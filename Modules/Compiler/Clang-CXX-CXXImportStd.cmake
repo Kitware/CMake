@@ -1,7 +1,11 @@
 function (_cmake_cxx_import_std std variable)
-  if (NOT CMAKE_CXX_STANDARD_LIBRARY STREQUAL "libc++")
+  if (CMAKE_CXX_STANDARD_LIBRARY STREQUAL "libc++")
+    set(_clang_modules_json_impl "libc++")
+  elseif (CMAKE_CXX_STANDARD_LIBRARY STREQUAL "libstdc++")
+    set(_clang_modules_json_impl "libstdc++")
+  else ()
     set("${variable}"
-      "set(CMAKE_CXX${std}_COMPILER_IMPORT_STD_NOT_FOUND_MESSAGE \"Only `libc++` is supported\")\n"
+      "set(CMAKE_CXX${std}_COMPILER_IMPORT_STD_NOT_FOUND_MESSAGE \"Only `libc++` and `libstdc++` are supported\")\n"
       PARENT_SCOPE)
     return ()
   endif ()
@@ -10,7 +14,7 @@ function (_cmake_cxx_import_std std variable)
     COMMAND
       "${CMAKE_CXX_COMPILER}"
       ${CMAKE_CXX_COMPILER_ID_ARG1}
-      -print-file-name=libc++.modules.json
+      "-print-file-name=${_clang_modules_json_impl}.modules.json"
     OUTPUT_VARIABLE _clang_libcxx_modules_json_file
     ERROR_VARIABLE _clang_libcxx_modules_json_file_err
     RESULT_VARIABLE _clang_libcxx_modules_json_file_res
@@ -18,7 +22,7 @@ function (_cmake_cxx_import_std std variable)
     ERROR_STRIP_TRAILING_WHITESPACE)
   if (_clang_libcxx_modules_json_file_res)
     set("${variable}"
-      "set(CMAKE_CXX${std}_COMPILER_IMPORT_STD_NOT_FOUND_MESSAGE \"Could not find `libc++.modules.json` resource\")\n"
+      "set(CMAKE_CXX${std}_COMPILER_IMPORT_STD_NOT_FOUND_MESSAGE \"Could not find `${_clang_modules_json_impl}.modules.json` resource\")\n"
       PARENT_SCOPE)
     return ()
   endif ()
@@ -26,17 +30,18 @@ function (_cmake_cxx_import_std std variable)
   # Without this file, we do not have modules installed.
   if (NOT EXISTS "${_clang_libcxx_modules_json_file}")
     set("${variable}"
-      "set(CMAKE_CXX${std}_COMPILER_IMPORT_STD_NOT_FOUND_MESSAGE \"`libc++.modules.json` resource does not exist\")\n"
+      "set(CMAKE_CXX${std}_COMPILER_IMPORT_STD_NOT_FOUND_MESSAGE \"`${_clang_modules_json_impl}.modules.json` resource does not exist\")\n"
       PARENT_SCOPE)
     return ()
   endif ()
 
-  if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS "18.1.2")
+  if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS "18.1.2" AND
+      CMAKE_CXX_STANDARD_LIBRARY STREQUAL "libc++")
     # The original PR had a key spelling mismatch internally. Do not support it
     # and instead require a release known to have the fix.
     # https://github.com/llvm/llvm-project/pull/83036
     set("${variable}"
-      "set(CMAKE_CXX${std}_COMPILER_IMPORT_STD_NOT_FOUND_MESSAGE \"LLVM 18.1.2 is required for `libc++.modules.json` format fix\")\n"
+      "set(CMAKE_CXX${std}_COMPILER_IMPORT_STD_NOT_FOUND_MESSAGE \"LLVM 18.1.2 is required for `${_clang_modules_json_impl}.modules.json` format fix\")\n"
       PARENT_SCOPE)
     return ()
   endif ()
@@ -91,9 +96,15 @@ function (_cmake_cxx_import_std std variable)
 
     string(JSON _clang_modules_json_module_source GET "${_clang_modules_json_module}" "source-path")
     string(JSON _clang_modules_json_module_is_stdlib GET "${_clang_modules_json_module}" "is-std-library")
-    string(JSON _clang_modules_json_module_local_arguments GET "${_clang_modules_json_module}" "local-arguments")
-    string(JSON _clang_modules_json_module_nsystem_include_directories LENGTH "${_clang_modules_json_module_local_arguments}" "system-include-directories")
+    string(JSON _clang_modules_json_module_local_arguments ERROR_VARIABLE _clang_modules_json_module_local_arguments_error GET "${_clang_modules_json_module}" "local-arguments")
+    string(JSON _clang_modules_json_module_nsystem_include_directories ERROR_VARIABLE _clang_modules_json_module_nsystem_include_directories_error LENGTH "${_clang_modules_json_module_local_arguments}" "system-include-directories")
 
+    if (_clang_modules_json_module_local_arguments_error)
+      set(_clang_modules_json_module_local_arguments "")
+    endif ()
+    if (_clang_modules_json_module_nsystem_include_directories_error)
+      set(_clang_modules_json_module_nsystem_include_directories 0)
+    endif ()
     if (NOT IS_ABSOLUTE "${_clang_modules_json_module_source}")
       string(PREPEND _clang_modules_json_module_source "${_clang_modules_dir}/")
     endif ()
@@ -104,16 +115,18 @@ function (_cmake_cxx_import_std std variable)
       set(_clang_modules_is_stdlib 1)
     endif ()
 
-    math(EXPR _clang_modules_json_module_nsystem_include_directories_range "${_clang_modules_json_module_nsystem_include_directories} - 1")
-    foreach (_clang_modules_json_modules_system_include_directories_idx RANGE 0 "${_clang_modules_json_module_nsystem_include_directories_range}")
-      string(JSON _clang_modules_json_module_system_include_directory GET "${_clang_modules_json_module_local_arguments}" "system-include-directories" "${_clang_modules_json_modules_system_include_directories_idx}")
+    if (_clang_modules_json_module_nsystem_include_directories)
+      math(EXPR _clang_modules_json_module_nsystem_include_directories_range "${_clang_modules_json_module_nsystem_include_directories} - 1")
+      foreach (_clang_modules_json_modules_system_include_directories_idx RANGE 0 "${_clang_modules_json_module_nsystem_include_directories_range}")
+        string(JSON _clang_modules_json_module_system_include_directory GET "${_clang_modules_json_module_local_arguments}" "system-include-directories" "${_clang_modules_json_modules_system_include_directories_idx}")
 
-      if (NOT IS_ABSOLUTE "${_clang_modules_json_module_system_include_directory}")
-        string(PREPEND _clang_modules_json_module_system_include_directory "${_clang_modules_dir}/")
-      endif ()
-      list(APPEND _clang_modules_include_dirs_list
-        "${_clang_modules_json_module_system_include_directory}")
-    endforeach ()
+        if (NOT IS_ABSOLUTE "${_clang_modules_json_module_system_include_directory}")
+          string(PREPEND _clang_modules_json_module_system_include_directory "${_clang_modules_dir}/")
+        endif ()
+        list(APPEND _clang_modules_include_dirs_list
+          "${_clang_modules_json_module_system_include_directory}")
+      endforeach ()
+    endif ()
   endforeach ()
 
   # Split the paths into basedirs and module paths.

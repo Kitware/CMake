@@ -2,7 +2,7 @@
 // vim: set ft=cpp:
 
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
 #include <algorithm>
@@ -24,7 +24,7 @@ using std::erase_if;
 
 template <typename T, typename Traits, typename Allocator, typename V>
 inline void erase(std::basic_string<T, Traits, Allocator>& cont,
-                  const V& value)
+                  V const& value)
 {
   cont.erase(std::remove(cont.begin(), cont.end(), value), cont.end());
 }

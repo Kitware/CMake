@@ -1,0 +1,4 @@
+.*xcodebuild -workspace XcodeWorkspace\.xcworkspace build -configuration Debug -destination generic/platform=MacOS -parallelizeTargets -hideShellScriptEnvironment -scheme custom1[^
+]*
+.*xcodebuild -workspace XcodeWorkspace\.xcworkspace build -configuration Debug -destination generic/platform=MacOS -parallelizeTargets -hideShellScriptEnvironment -scheme custom2[^
+]*

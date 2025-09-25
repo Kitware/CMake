@@ -92,10 +92,11 @@ Try Compiling Source Files
 
 .. versionadded:: 3.25
 
-Try building an executable or static library from one or more source files
-(which one is determined by the :variable:`CMAKE_TRY_COMPILE_TARGET_TYPE`
-variable). Build success returns ``TRUE`` and build failure returns ``FALSE``
-in ``<compileResultVar>``.
+Try building an executable or static library from one or more source files.
+The binary type is determined by variable
+:variable:`CMAKE_TRY_COMPILE_TARGET_TYPE`.
+Build success returns boolean ``true`` and build failure returns boolean
+``false`` in ``<compileResultVar>`` (cached unless ``NO_CACHE`` is specified).
 
 In this form, one or more source files must be provided. Additionally, one of
 ``SOURCES`` and/or ``SOURCE_FROM_*`` must precede other keywords.
@@ -163,7 +164,7 @@ The options for the above signatures are:
   The above example shows how values for variables
   ``COMPILE_DEFINITIONS``, ``INCLUDE_DIRECTORIES``, ``LINK_DIRECTORIES``,
   ``LINK_LIBRARIES``, and ``LINK_OPTIONS`` are used. Compiler options
-  can be passed in like `CMAKE_FLAGS -DCOMPILE_DEFINITIONS=-Werror`.
+  can be passed in like ``CMAKE_FLAGS -DCOMPILE_DEFINITIONS=-Werror``.
 
 ``COMPILE_DEFINITIONS <defs>...``
   Specify ``-Ddefinition`` arguments to pass to :command:`add_definitions`
@@ -211,9 +212,10 @@ The options for the above signatures are:
 ``NO_CACHE``
   .. versionadded:: 3.25
 
-  The result will be stored in a normal variable rather than a cache entry.
+  ``<compileResultVar>`` will be stored in a normal variable rather than a
+  cache entry.
 
-  The result variable is normally cached so that a simple pattern can be used
+  ``<compileResultVar>`` is normally cached so that a simple pattern can be used
   to avoid repeating the test on subsequent executions of CMake:
 
   .. code-block:: cmake
@@ -318,14 +320,13 @@ Other Behavior Settings
 
   * :variable:`CMAKE_CUDA_RUNTIME_LIBRARY`
   * :variable:`CMAKE_ENABLE_EXPORTS`
+  * :variable:`CMAKE_EXE_LINKER_FLAGS`, unless using CMake versions
+    prior to 4.0 without policy :policy:`CMP0056` set to ``NEW``
   * :variable:`CMAKE_LINK_SEARCH_START_STATIC`
   * :variable:`CMAKE_LINK_SEARCH_END_STATIC`
   * :variable:`CMAKE_MSVC_RUNTIME_LIBRARY`
   * :variable:`CMAKE_POSITION_INDEPENDENT_CODE`
   * :variable:`CMAKE_WATCOM_RUNTIME_LIBRARY`
-
-  If :policy:`CMP0056` is set to ``NEW``, then
-  :variable:`CMAKE_EXE_LINKER_FLAGS` is passed in as well.
 
 .. versionchanged:: 3.14
   If :policy:`CMP0083` is set to ``NEW``, then in order to obtain correct
@@ -333,8 +334,26 @@ Other Behavior Settings
   :module:`CheckPIESupported` module must be called before using the
   ``try_compile`` command.
 
-The current settings of :policy:`CMP0065` and :policy:`CMP0083` are propagated
-through to the generated test project.
+Some policies are set automatically in the generated test project
+as needed to honor the state of the calling project:
+
+* :policy:`CMP0065` (in CMake versions prior to 4.0)
+* :policy:`CMP0083`
+* :policy:`CMP0091`
+* :policy:`CMP0104`
+* :policy:`CMP0123`
+* :policy:`CMP0126`
+* :policy:`CMP0128`
+* :policy:`CMP0136`
+* :policy:`CMP0141`
+* :policy:`CMP0155`
+* :policy:`CMP0157`
+* :policy:`CMP0181`
+* :policy:`CMP0184`
+
+.. versionadded:: 4.0
+  The current setting of :policy:`CMP0181` policy is propagated through to the
+  generated test project.
 
 Set variable :variable:`CMAKE_TRY_COMPILE_CONFIGURATION` to choose a build
 configuration:
@@ -398,6 +417,11 @@ configuration:
   property is set to true, :variable:`CMAKE_PROJECT_TOP_LEVEL_INCLUDES` is
   propagated into the test project's build configuration when using the
   :ref:`whole-project signature <Try Compiling Whole Projects>`.
+
+.. versionadded:: 4.0
+  If :policy:`CMP0184` is set to ``NEW``, one can use
+  :variable:`CMAKE_MSVC_RUNTIME_CHECKS` to specify the enabled MSVC runtime
+  checks.
 
 See Also
 ^^^^^^^^

@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmDebuggerExceptionManager.h"
 
 #include <utility>
@@ -20,12 +20,12 @@ cmDebuggerExceptionManager::cmDebuggerExceptionManager(
 {
   // https://microsoft.github.io/debug-adapter-protocol/specification#Requests_SetExceptionBreakpoints
   DapSession->registerHandler(
-    [&](const dap::SetExceptionBreakpointsRequest& request) {
+    [&](dap::SetExceptionBreakpointsRequest const& request) {
       return HandleSetExceptionBreakpointsRequest(request);
     });
 
   // https://microsoft.github.io/debug-adapter-protocol/specification#Requests_ExceptionInfo
-  DapSession->registerHandler([&](const dap::ExceptionInfoRequest& request) {
+  DapSession->registerHandler([&](dap::ExceptionInfoRequest const& request) {
     (void)request;
     return HandleExceptionInfoRequest();
   });
@@ -61,7 +61,7 @@ cmDebuggerExceptionManager::HandleSetExceptionBreakpointsRequest(
   std::unique_lock<std::mutex> lock(Mutex);
   dap::SetExceptionBreakpointsResponse response;
   RaiseExceptions.clear();
-  for (const auto& filter : request.filters) {
+  for (auto const& filter : request.filters) {
     RaiseExceptions[filter] = true;
   }
 

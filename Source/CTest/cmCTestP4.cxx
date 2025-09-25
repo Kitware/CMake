@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmCTestP4.h"
 
 #include <algorithm>
@@ -14,11 +14,12 @@
 #include "cmCTest.h"
 #include "cmCTestVC.h"
 #include "cmList.h"
+#include "cmMakefile.h"
 #include "cmRange.h"
 #include "cmSystemTools.h"
 
-cmCTestP4::cmCTestP4(cmCTest* ct, std::ostream& log)
-  : cmCTestGlobalVC(ct, log)
+cmCTestP4::cmCTestP4(cmCTest* ct, cmMakefile* mf, std::ostream& log)
+  : cmCTestGlobalVC(ct, mf, log)
 {
   this->PriorRev = this->Unknown;
 }
@@ -28,7 +29,7 @@ cmCTestP4::~cmCTestP4() = default;
 class cmCTestP4::IdentifyParser : public cmCTestVC::LineParser
 {
 public:
-  IdentifyParser(cmCTestP4* p4, const char* prefix, std::string& rev)
+  IdentifyParser(cmCTestP4* p4, char const* prefix, std::string& rev)
     : Rev(rev)
   {
     this->SetLog(&p4->Log, prefix);
@@ -52,7 +53,7 @@ private:
 class cmCTestP4::ChangesParser : public cmCTestVC::LineParser
 {
 public:
-  ChangesParser(cmCTestP4* p4, const char* prefix)
+  ChangesParser(cmCTestP4* p4, char const* prefix)
     : P4(p4)
   {
     this->SetLog(&this->P4->Log, prefix);
@@ -75,7 +76,7 @@ private:
 class cmCTestP4::UserParser : public cmCTestVC::LineParser
 {
 public:
-  UserParser(cmCTestP4* p4, const char* prefix)
+  UserParser(cmCTestP4* p4, char const* prefix)
     : P4(p4)
   {
     this->SetLog(&this->P4->Log, prefix);
@@ -115,7 +116,7 @@ private:
 class cmCTestP4::DiffParser : public cmCTestVC::LineParser
 {
 public:
-  DiffParser(cmCTestP4* p4, const char* prefix)
+  DiffParser(cmCTestP4* p4, char const* prefix)
     : P4(p4)
   {
     this->SetLog(&this->P4->Log, prefix);
@@ -144,7 +145,7 @@ private:
   }
 };
 
-cmCTestP4::User cmCTestP4::GetUserData(const std::string& username)
+cmCTestP4::User cmCTestP4::GetUserData(std::string const& username)
 {
   auto it = this->Users.find(username);
 
@@ -187,7 +188,7 @@ Affected files ...
 class cmCTestP4::DescribeParser : public cmCTestVC::LineParser
 {
 public:
-  DescribeParser(cmCTestP4* p4, const char* prefix)
+  DescribeParser(cmCTestP4* p4, char const* prefix)
     : LineParser('\n', false)
     , P4(p4)
   {
@@ -310,7 +311,7 @@ void cmCTestP4::SetP4Options(std::vector<std::string>& CommandOptions)
 
     // The CTEST_P4_CLIENT variable sets the P4 client used when issuing
     // Perforce commands, if it's different from the default one.
-    std::string client = this->CTest->GetCTestConfiguration("P4Client");
+    std::string client = this->Makefile->GetSafeDefinition("CTEST_P4_CLIENT");
     if (!client.empty()) {
       this->P4Options.emplace_back("-c");
       this->P4Options.push_back(client);
@@ -323,7 +324,7 @@ void cmCTestP4::SetP4Options(std::vector<std::string>& CommandOptions)
 
     // The CTEST_P4_OPTIONS variable adds additional Perforce command line
     // options before the main command
-    std::string opts = this->CTest->GetCTestConfiguration("P4Options");
+    std::string opts = this->Makefile->GetSafeDefinition("CTEST_P4_OPTIONS");
     cm::append(this->P4Options, cmSystemTools::ParseArguments(opts));
   }
 
@@ -449,7 +450,7 @@ bool cmCTestP4::LoadModifications()
   return true;
 }
 
-bool cmCTestP4::UpdateCustom(const std::string& custom)
+bool cmCTestP4::UpdateCustom(std::string const& custom)
 {
   cmList p4_custom_command{ custom, cmList::EmptyElements::Yes };
 
@@ -465,7 +466,8 @@ bool cmCTestP4::UpdateCustom(const std::string& custom)
 
 bool cmCTestP4::UpdateImpl()
 {
-  std::string custom = this->CTest->GetCTestConfiguration("P4UpdateCustom");
+  std::string custom =
+    this->Makefile->GetSafeDefinition("CTEST_P4_UPDATE_CUSTOM");
   if (!custom.empty()) {
     return this->UpdateCustom(custom);
   }
@@ -483,9 +485,9 @@ bool cmCTestP4::UpdateImpl()
   p4_sync.emplace_back("sync");
 
   // Get user-specified update options.
-  std::string opts = this->CTest->GetCTestConfiguration("UpdateOptions");
+  std::string opts = this->Makefile->GetSafeDefinition("CTEST_UPDATE_OPTIONS");
   if (opts.empty()) {
-    opts = this->CTest->GetCTestConfiguration("P4UpdateOptions");
+    opts = this->Makefile->GetSafeDefinition("CTEST_P4_UPDATE_OPTIONS");
   }
   std::vector<std::string> args = cmSystemTools::ParseArguments(opts);
   cm::append(p4_sync, args);

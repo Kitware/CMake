@@ -18,7 +18,7 @@ int main(int argc, char** argv)
 
   if (argc > 1 && std::string(argv[1]) == "--gtest_list_tests") {
     if (!is_typed_only) {
-      const char* basic_suite_names[] = { "basic.", "ns.basic." };
+      char const* basic_suite_names[] = { "basic.", "ns.basic." };
       for (size_t i = 0; i < ARRAY_SIZE(basic_suite_names); i++) {
         std::cout << basic_suite_names[i] << std::endl;
         std::cout << "  case_foo" << std::endl;
@@ -34,7 +34,7 @@ int main(int argc, char** argv)
       std::cout << "  case" << std::endl;
     }
     if (!is_basic_only) {
-      const char* typed_suite_names[] = { "typed", "ns.typed",
+      char const* typed_suite_names[] = { "typed", "ns.typed",
                                           "prefix/typed" };
       for (size_t i = 0; i < ARRAY_SIZE(typed_suite_names); i++) {
         std::cout << typed_suite_names[i] << "/0.  # TypeParam = short\n";
@@ -46,14 +46,14 @@ int main(int argc, char** argv)
       }
     }
     if (!is_basic_only && !is_typed_only) {
-      const char* value_suite_names[] = { "value", "ns.value",
+      char const* value_suite_names[] = { "value", "ns.value",
                                           "prefix/value" };
       for (size_t i = 0; i < ARRAY_SIZE(value_suite_names); i++) {
         std::cout << value_suite_names[i] << "/test." << std::endl;
         std::cout << "  case/0  # GetParam() = 1" << std::endl;
         std::cout << "  case/1  # GetParam() = \"foo\"" << std::endl;
       }
-      const char* param_suite_names[] = { "param", "ns.param",
+      char const* param_suite_names[] = { "param", "ns.param",
                                           "prefix/param" };
       for (size_t j = 0; j < ARRAY_SIZE(param_suite_names); j++) {
         std::cout << param_suite_names[j] << "/special." << std::endl;

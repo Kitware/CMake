@@ -1,53 +1,74 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-# file Copyright.txt or https://cmake.org/licensing for details.
+# file LICENSE.rst or https://cmake.org/licensing for details.
 
 #[=======================================================================[.rst:
 ProcessorCount
 --------------
 
-ProcessorCount(var)
+This module provides a command to determine the number of processors/cores.
 
-Determine the number of processors/cores and save value in ${var}
-
-Sets the variable named ${var} to the number of physical cores
-available on the machine if the information can be determined.
-Otherwise it is set to 0.  Currently this functionality is implemented
-for AIX, cygwin, FreeBSD, HPUX, Linux, macOS, QNX, Sun and
-Windows.
-
-.. versionchanged:: 3.15
-  On Linux, returns the container CPU count instead of the host CPU count.
-
-This function is guaranteed to return a positive integer (>=1) if it
-succeeds.  It returns 0 if there's a problem determining the processor
-count.
-
-More generally accurate physical CPU count can be obtained via
-:command:`cmake_host_system_information`:
+Load this module in CMake with:
 
 .. code-block:: cmake
 
-  cmake_host_system_information(RESULT N
-                                QUERY NUMBER_OF_PHYSICAL_CORES)
+  include(ProcessorCount)
 
-Example use, in a ctest -S dashboard script:
+Commands
+^^^^^^^^
+
+This module provides the following command:
+
+.. command:: ProcessorCount
+
+  Determines the number of logical CPU cores available on the machine:
+
+  .. code-block:: cmake
+
+    ProcessorCount(<variable>)
+
+  This command sets a variable named ``<variable>`` to the number of logical
+  CPU cores available on the machine, if the information can be determined.
+  If successful, the variable is guaranteed to be set to a positive integer
+  (>=1).  If the processor count cannot be determined, it is set to 0.
+
+  Currently, this functionality is implemented for AIX, Cygwin, FreeBSD, Haiku,
+  HPUX, Linux, macOS, QNX, Sun and Windows.
+
+  This command provides an approximation of the number of compute cores
+  available on the current machine, making it useful for parallel building and
+  testing.  It is meant to help utilize as much of the machine as seems
+  reasonable, though users should consider other workloads running on the
+  machine before using its full capacity for parallel tasks.
+
+  .. versionchanged:: 3.15
+    On Linux, returns the container CPU count instead of the host CPU count.
+
+.. note::
+
+  This module relies on system-dependent commands to determine the number of
+  processors, which may not always provide accurate information in certain
+  environments.  A more generally accurate logical CPU count can be also
+  obtained with the :command:`cmake_host_system_information`:
+
+  .. code-block:: cmake
+
+    cmake_host_system_information(RESULT n QUERY NUMBER_OF_LOGICAL_CORES)
+
+Examples
+^^^^^^^^
+
+In the following example this module is used in a :option:`ctest -S`
+dashboard script to determine number of cores to use for a parallel
+:ref:`CTest Build Step`:
 
 .. code-block:: cmake
 
-   include(ProcessorCount)
-   ProcessorCount(N)
-   if(NOT N EQUAL 0)
-     set(CTEST_BUILD_FLAGS -j${N})
-     set(ctest_test_args ${ctest_test_args} PARALLEL_LEVEL ${N})
-   endif()
-
-This function is intended to offer an approximation of the value of
-the number of compute cores available on the current machine, such
-that you may use that value for parallel building and parallel
-testing.  It is meant to help utilize as much of the machine as seems
-reasonable.  Of course, knowledge of what else might be running on the
-machine simultaneously should be used when deciding whether to request
-a machine's full capacity all for yourself.
+  include(ProcessorCount)
+  ProcessorCount(n)
+  if(NOT n EQUAL 0)
+    set(CTEST_BUILD_FLAGS -j${n})
+    set(ctest_test_args ${ctest_test_args} PARALLEL_LEVEL ${n})
+  endif()
 #]=======================================================================]
 
 # A more reliable way might be to compile a small C program that uses the CPUID
@@ -219,6 +240,7 @@ function(ProcessorCount var)
   if(NOT count)
     # Haiku
     find_program(ProcessorCount_cmd_sysinfo sysinfo)
+    mark_as_advanced(ProcessorCount_cmd_sysinfo)
     if(ProcessorCount_cmd_sysinfo)
       execute_process(COMMAND ${ProcessorCount_cmd_sysinfo}
         ERROR_QUIET

@@ -137,7 +137,7 @@ void StartCompilerSetup::setGenerators(
   this->GeneratorOptions->addItems(generator_list);
 }
 
-void StartCompilerSetup::setCurrentGenerator(const QString& gen)
+void StartCompilerSetup::setCurrentGenerator(QString const& gen)
 {
   int idx = this->GeneratorOptions->findText(gen);
   if (idx != -1) {
@@ -145,12 +145,12 @@ void StartCompilerSetup::setCurrentGenerator(const QString& gen)
   }
 }
 
-void StartCompilerSetup::setPlatform(const QString& platform)
+void StartCompilerSetup::setPlatform(QString const& platform)
 {
   this->PlatformOptions->setCurrentText(platform);
 }
 
-void StartCompilerSetup::setToolset(const QString& toolset)
+void StartCompilerSetup::setToolset(QString const& toolset)
 {
   this->Toolset->setText(toolset);
 }
@@ -297,7 +297,7 @@ QString NativeCompilerSetup::getCCompiler() const
   return this->CCompiler->text();
 }
 
-void NativeCompilerSetup::setCCompiler(const QString& s)
+void NativeCompilerSetup::setCCompiler(QString const& s)
 {
   this->CCompiler->setText(s);
 }
@@ -307,7 +307,7 @@ QString NativeCompilerSetup::getCXXCompiler() const
   return this->CXXCompiler->text();
 }
 
-void NativeCompilerSetup::setCXXCompiler(const QString& s)
+void NativeCompilerSetup::setCXXCompiler(QString const& s)
 {
   this->CXXCompiler->setText(s);
 }
@@ -317,7 +317,7 @@ QString NativeCompilerSetup::getFortranCompiler() const
   return this->FortranCompiler->text();
 }
 
-void NativeCompilerSetup::setFortranCompiler(const QString& s)
+void NativeCompilerSetup::setFortranCompiler(QString const& s)
 {
   this->FortranCompiler->setText(s);
 }
@@ -359,7 +359,7 @@ QString CrossCompilerSetup::getCCompiler() const
   return this->CrossCompilers->CCompiler->text();
 }
 
-void CrossCompilerSetup::setCCompiler(const QString& s)
+void CrossCompilerSetup::setCCompiler(QString const& s)
 {
   this->CrossCompilers->CCompiler->setText(s);
 }
@@ -369,7 +369,7 @@ QString CrossCompilerSetup::getCXXCompiler() const
   return this->CrossCompilers->CXXCompiler->text();
 }
 
-void CrossCompilerSetup::setCXXCompiler(const QString& s)
+void CrossCompilerSetup::setCXXCompiler(QString const& s)
 {
   this->CrossCompilers->CXXCompiler->setText(s);
 }
@@ -379,7 +379,7 @@ QString CrossCompilerSetup::getFortranCompiler() const
   return this->CrossCompilers->FortranCompiler->text();
 }
 
-void CrossCompilerSetup::setFortranCompiler(const QString& s)
+void CrossCompilerSetup::setFortranCompiler(QString const& s)
 {
   this->CrossCompilers->FortranCompiler->setText(s);
 }
@@ -389,7 +389,7 @@ QString CrossCompilerSetup::getSystem() const
   return this->systemName->text();
 }
 
-void CrossCompilerSetup::setSystem(const QString& t)
+void CrossCompilerSetup::setSystem(QString const& t)
 {
   this->systemName->setText(t);
 }
@@ -399,7 +399,7 @@ QString CrossCompilerSetup::getVersion() const
   return this->systemVersion->text();
 }
 
-void CrossCompilerSetup::setVersion(const QString& t)
+void CrossCompilerSetup::setVersion(QString const& t)
 {
   this->systemVersion->setText(t);
 }
@@ -409,7 +409,7 @@ QString CrossCompilerSetup::getProcessor() const
   return this->systemProcessor->text();
 }
 
-void CrossCompilerSetup::setProcessor(const QString& t)
+void CrossCompilerSetup::setProcessor(QString const& t)
 {
   this->systemProcessor->setText(t);
 }
@@ -419,7 +419,7 @@ QString CrossCompilerSetup::getFindRoot() const
   return this->crossFindRoot->text();
 }
 
-void CrossCompilerSetup::setFindRoot(const QString& t)
+void CrossCompilerSetup::setFindRoot(QString const& t)
 {
   this->crossFindRoot->setText(t);
 }
@@ -470,16 +470,16 @@ QString ToolchainCompilerSetup::toolchainFile() const
   return this->ToolchainFile->text();
 }
 
-void ToolchainCompilerSetup::setToolchainFile(const QString& t)
+void ToolchainCompilerSetup::setToolchainFile(QString const& t)
 {
   this->ToolchainFile->setText(t);
 }
 
 FirstConfigure::FirstConfigure()
 {
-  const char* env_generator = std::getenv("CMAKE_GENERATOR");
-  const char* env_generator_platform = nullptr;
-  const char* env_generator_toolset = nullptr;
+  char const* env_generator = std::getenv("CMAKE_GENERATOR");
+  char const* env_generator_platform = nullptr;
+  char const* env_generator_toolset = nullptr;
   if (env_generator && std::strlen(env_generator)) {
     mDefaultGenerator = env_generator;
     env_generator_platform = std::getenv("CMAKE_GENERATOR_PLATFORM");
@@ -519,17 +519,17 @@ void FirstConfigure::setGenerators(
   this->mStartCompilerSetupPage->setGenerators(gens);
 }
 
-void FirstConfigure::setCurrentGenerator(const QString& gen)
+void FirstConfigure::setCurrentGenerator(QString const& gen)
 {
   this->mStartCompilerSetupPage->setCurrentGenerator(gen);
 }
 
-void FirstConfigure::setPlatform(const QString& platform)
+void FirstConfigure::setPlatform(QString const& platform)
 {
   this->mStartCompilerSetupPage->setPlatform(platform);
 }
 
-void FirstConfigure::setToolset(const QString& toolset)
+void FirstConfigure::setToolset(QString const& toolset)
 {
   this->mStartCompilerSetupPage->setToolset(toolset);
 }
@@ -733,7 +733,7 @@ QString FirstConfigure::getCrossRoot() const
   return this->mCrossCompilerSetupPage->getFindRoot();
 }
 
-const QString CrossModes[] = { "BOTH", "ONLY", "NEVER" };
+QString const CrossModes[] = { "BOTH", "ONLY", "NEVER" };
 
 QString FirstConfigure::getCrossProgramMode() const
 {

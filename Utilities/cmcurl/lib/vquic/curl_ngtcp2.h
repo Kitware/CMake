@@ -24,7 +24,7 @@
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "../curl_setup.h"
 
 #if defined(USE_NGTCP2) && defined(USE_NGHTTP3)
 
@@ -33,6 +33,9 @@
 #endif
 
 #include <ngtcp2/ngtcp2_crypto.h>
+#ifdef OPENSSL_QUIC_API2
+#include <ngtcp2/ngtcp2_crypto_ossl.h>
+#endif
 #include <nghttp3/nghttp3.h>
 #ifdef USE_OPENSSL
 #include <openssl/ssl.h>
@@ -44,7 +47,7 @@
 
 struct Curl_cfilter;
 
-#include "urldata.h"
+#include "../urldata.h"
 
 void Curl_ngtcp2_ver(char *p, size_t len);
 

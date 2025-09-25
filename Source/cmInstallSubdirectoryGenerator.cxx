@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmInstallSubdirectoryGenerator.h"
 
 #include <memory>
@@ -28,7 +28,7 @@ cmInstallSubdirectoryGenerator::~cmInstallSubdirectoryGenerator() = default;
 
 bool cmInstallSubdirectoryGenerator::HaveInstall()
 {
-  for (const auto& generator : this->Makefile->GetInstallGenerators()) {
+  for (auto const& generator : this->Makefile->GetInstallGenerators()) {
     if (generator->HaveInstall()) {
       return true;
     }
@@ -63,9 +63,7 @@ void cmInstallSubdirectoryGenerator::GenerateScript(std::ostream& os)
         // OLD behavior is handled in cmLocalGenerator::GenerateInstallRules()
         break;
 
-      case cmPolicies::NEW:
-      case cmPolicies::REQUIRED_IF_USED:
-      case cmPolicies::REQUIRED_ALWAYS: {
+      case cmPolicies::NEW: {
         Indent indent;
         std::string odir = this->BinaryDirectory;
         cmSystemTools::ConvertToUnixSlashes(odir);

@@ -1,0 +1,9 @@
+^CMake Warning \(dev\) at [^
+]*/Modules/FeatureSummary\.cmake:[0-9]+ \(message\):
+  Policy CMP0183 is not set: add_feature_info\(\) supports full Condition
+  Syntax\.  Run "cmake --help-policy CMP0183" for policy details.  Use the
+  cmake_policy command to set the policy and suppress this warning\.
+Call Stack \(most recent call first\):
+  FeatureSummaryParentheses-CMP0183-WARN\.cmake:[0-9]+ \(add_feature_info\)
+  CMakeLists\.txt:[0-9]+ \(include\)
+This warning is for project developers.  Use -Wno-dev to suppress it.$

@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmCTestMultiProcessHandler.h"
 
 #include <algorithm>
@@ -8,7 +8,6 @@
 #include <cmath>
 #include <cstddef> // IWYU pragma: keep
 #include <cstdlib>
-#include <cstring>
 #include <iomanip>
 #include <iostream>
 #include <list>
@@ -20,6 +19,7 @@
 
 #include <cm/memory>
 #include <cm/optional>
+#include <cm/string_view>
 #include <cmext/algorithm>
 
 #include <cm3p/json/value.h>
@@ -52,6 +52,48 @@ constexpr unsigned long kParallelLevelMinimum = 2u;
 // Under a job server, parallelism is effectively limited
 // only by available job server tokens.
 constexpr unsigned long kParallelLevelUnbounded = 0x10000u;
+
+struct CostEntry
+{
+  cm::string_view name;
+  int prevRuns;
+  float cost;
+};
+
+cm::optional<CostEntry> splitCostLine(cm::string_view line)
+{
+  std::string part;
+  cm::string_view::size_type pos1 = line.size();
+  cm::string_view::size_type pos2 = line.find_last_of(' ', pos1);
+  auto findNext = [line, &part, &pos1, &pos2]() -> bool {
+    if (pos2 != cm::string_view::npos) {
+      cm::string_view sub = line.substr(pos2 + 1, pos1 - pos2 - 1);
+      part.assign(sub.begin(), sub.end());
+      pos1 = pos2;
+      if (pos1 > 0) {
+        pos2 = line.find_last_of(' ', pos1 - 1);
+      }
+      return true;
+    }
+    return false;
+  };
+
+  // parse the cost
+  if (!findNext()) {
+    return cm::nullopt;
+  }
+  float cost = static_cast<float>(atof(part.c_str()));
+
+  // parse the previous runs
+  if (!findNext()) {
+    return cm::nullopt;
+  }
+  int prev = atoi(part.c_str());
+
+  // from start to the last found space is the name
+  return CostEntry{ line.substr(0, pos1), prev, cost };
+}
+
 }
 
 namespace cmsys {
@@ -279,9 +321,7 @@ void cmCTestMultiProcessHandler::StartTestProcess(int test)
   cmWorkingDirectory workdir(this->Properties[test]->Directory);
   if (workdir.Failed()) {
     cmCTestRunTest::StartFailure(std::move(testRun), this->Total,
-                                 "Failed to change working directory to " +
-                                   this->Properties[test]->Directory + " : " +
-                                   std::strerror(workdir.GetLastResult()),
+                                 workdir.GetError(),
                                  "Failed to change working directory");
     return;
   }
@@ -501,7 +541,7 @@ void cmCTestMultiProcessHandler::UnlockResources(int index)
 
 inline size_t cmCTestMultiProcessHandler::GetProcessorsUsed(int test)
 {
-  size_t processors = static_cast<int>(this->Properties[test]->Processors);
+  size_t processors = this->Properties[test]->Processors;
   size_t const parallelLevel = this->GetParallelLevel();
   // If processors setting is set higher than the -j
   // setting, we default to using all of the process slots.
@@ -726,7 +766,7 @@ void cmCTestMultiProcessHandler::StartNextTestsOnTimer()
   // Wait between 1 and 5 seconds before trying again.
   unsigned int const milliseconds = this->FakeLoadForTesting
     ? 10
-    : (cmSystemTools::RandomSeed() % 5 + 1) * 1000;
+    : (cmSystemTools::RandomNumber() % 5 + 1) * 1000;
   this->StartNextTestsOnTimer_.start(
     [](uv_timer_t* timer) {
       uv_timer_stop(timer);
@@ -797,24 +837,21 @@ void cmCTestMultiProcessHandler::UpdateCostData()
       if (line == "---") {
         break;
       }
-      std::vector<std::string> parts = cmSystemTools::SplitString(line, ' ');
       // Format: <name> <previous_runs> <avg_cost>
-      if (parts.size() < 3) {
+      cm::optional<CostEntry> entry = splitCostLine(line);
+      if (!entry) {
         break;
       }
 
-      std::string name = parts[0];
-      int prev = atoi(parts[1].c_str());
-      float cost = static_cast<float>(atof(parts[2].c_str()));
-
-      int index = this->SearchByName(name);
+      int index = this->SearchByName(entry->name);
       if (index == -1) {
         // This test is not in memory. We just rewrite the entry
-        fout << name << " " << prev << " " << cost << "\n";
+        fout << entry->name << " " << entry->prevRuns << " " << entry->cost
+             << "\n";
       } else {
         // Update with our new average cost
-        fout << name << " " << this->Properties[index]->PreviousRuns << " "
-             << this->Properties[index]->Cost << "\n";
+        fout << entry->name << " " << this->Properties[index]->PreviousRuns
+             << " " << this->Properties[index]->Cost << "\n";
         temp.erase(index);
       }
     }
@@ -850,28 +887,25 @@ void cmCTestMultiProcessHandler::ReadCostData()
         break;
       }
 
-      std::vector<std::string> parts = cmSystemTools::SplitString(line, ' ');
+      // Format: <name> <previous_runs> <avg_cost>
+      cm::optional<CostEntry> entry = splitCostLine(line);
 
       // Probably an older version of the file, will be fixed next run
-      if (parts.size() < 3) {
+      if (!entry) {
         fin.close();
         return;
       }
 
-      std::string name = parts[0];
-      int prev = atoi(parts[1].c_str());
-      float cost = static_cast<float>(atof(parts[2].c_str()));
-
-      int index = this->SearchByName(name);
+      int index = this->SearchByName(entry->name);
       if (index == -1) {
         continue;
       }
 
-      this->Properties[index]->PreviousRuns = prev;
+      this->Properties[index]->PreviousRuns = entry->prevRuns;
       // When not running in parallel mode, don't use cost data
       if (this->GetParallelLevel() > 1 && this->Properties[index] &&
           this->Properties[index]->Cost == 0) {
-        this->Properties[index]->Cost = cost;
+        this->Properties[index]->Cost = entry->cost;
       }
     }
     // Next part of the file is the failed tests
@@ -884,7 +918,7 @@ void cmCTestMultiProcessHandler::ReadCostData()
   }
 }
 
-int cmCTestMultiProcessHandler::SearchByName(std::string const& name)
+int cmCTestMultiProcessHandler::SearchByName(cm::string_view name)
 {
   int index = -1;
 
@@ -1023,39 +1057,39 @@ void cmCTestMultiProcessHandler::MarkFinished()
   cmSystemTools::RemoveFile(fname);
 }
 
-static Json::Value DumpToJsonArray(const std::set<std::string>& values)
+static Json::Value DumpToJsonArray(std::set<std::string> const& values)
 {
   Json::Value jsonArray = Json::arrayValue;
-  for (const auto& it : values) {
+  for (auto const& it : values) {
     jsonArray.append(it);
   }
   return jsonArray;
 }
 
-static Json::Value DumpToJsonArray(const std::vector<std::string>& values)
+static Json::Value DumpToJsonArray(std::vector<std::string> const& values)
 {
   Json::Value jsonArray = Json::arrayValue;
-  for (const auto& it : values) {
+  for (auto const& it : values) {
     jsonArray.append(it);
   }
   return jsonArray;
 }
 
 static Json::Value DumpRegExToJsonArray(
-  const std::vector<std::pair<cmsys::RegularExpression, std::string>>& values)
+  std::vector<std::pair<cmsys::RegularExpression, std::string>> const& values)
 {
   Json::Value jsonArray = Json::arrayValue;
-  for (const auto& it : values) {
+  for (auto const& it : values) {
     jsonArray.append(it.second);
   }
   return jsonArray;
 }
 
 static Json::Value DumpMeasurementToJsonArray(
-  const std::map<std::string, std::string>& values)
+  std::map<std::string, std::string> const& values)
 {
   Json::Value jsonArray = Json::arrayValue;
-  for (const auto& it : values) {
+  for (auto const& it : values) {
     Json::Value measurement = Json::objectValue;
     measurement["measurement"] = it.first;
     measurement["value"] = it.second;
@@ -1075,8 +1109,8 @@ static Json::Value DumpTimeoutAfterMatch(
 }
 
 static Json::Value DumpResourceGroupsToJsonArray(
-  const std::vector<
-    std::vector<cmCTestTestHandler::cmCTestTestResourceRequirement>>&
+  std::vector<
+    std::vector<cmCTestTestHandler::cmCTestTestResourceRequirement>> const&
     resourceGroups)
 {
   Json::Value jsonResourceGroups = Json::arrayValue;
@@ -1159,6 +1193,11 @@ static Json::Value DumpCTestProperties(
     properties.append(DumpCTestProperty(
       "FIXTURES_SETUP", DumpToJsonArray(testProperties.FixturesSetup)));
   }
+  if (!testProperties.GeneratedResourceSpecFile.empty()) {
+    properties.append(
+      DumpCTestProperty("GENERATED_RESOURCE_SPEC_FILE",
+                        testProperties.GeneratedResourceSpecFile));
+  }
   if (!testProperties.Labels.empty()) {
     properties.append(
       DumpCTestProperty("LABELS", DumpToJsonArray(testProperties.Labels)));
@@ -1204,6 +1243,15 @@ static Json::Value DumpCTestProperties(
   if (testProperties.Timeout) {
     properties.append(
       DumpCTestProperty("TIMEOUT", testProperties.Timeout->count()));
+  }
+  if (testProperties.TimeoutSignal) {
+    properties.append(DumpCTestProperty("TIMEOUT_SIGNAL_NAME",
+                                        testProperties.TimeoutSignal->Name));
+  }
+  if (testProperties.TimeoutGracePeriod) {
+    properties.append(
+      DumpCTestProperty("TIMEOUT_SIGNAL_GRACE_PERIOD",
+                        testProperties.TimeoutGracePeriod->count()));
   }
   if (!testProperties.TimeoutRegularExpressions.empty()) {
     properties.append(DumpCTestProperty(
@@ -1323,7 +1371,7 @@ static Json::Value DumpCTestInfo(
   if (!command.empty()) {
     std::vector<std::string> commandAndArgs;
     commandAndArgs.push_back(command);
-    const std::vector<std::string>& args = testRun.GetArguments();
+    std::vector<std::string> const& args = testRun.GetArguments();
     if (!args.empty()) {
       commandAndArgs.reserve(args.size() + 1);
       cm::append(commandAndArgs, args);
@@ -1620,7 +1668,7 @@ bool cmCTestMultiProcessHandler::InitResourceAllocator(std::string& error)
 {
   if (!this->ResourceSpec.ReadFromJSONFile(this->ResourceSpecFile)) {
     error = cmStrCat("Could not read/parse resource spec file ",
-                     this->ResourceSpecFile, ": ",
+                     this->ResourceSpecFile, ":\n",
                      this->ResourceSpec.parseState.GetErrorMessage());
     return false;
   }

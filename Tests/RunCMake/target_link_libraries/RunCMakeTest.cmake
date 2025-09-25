@@ -1,5 +1,4 @@
 include(RunCMake)
-set(RunCMake_IGNORE_POLICY_VERSION_DEPRECATION ON)
 
 if(RunCMake_GENERATOR_IS_MULTI_CONFIG)
   set(RunCMake_TEST_OPTIONS -DCMAKE_CONFIGURATION_TYPES=Debug)
@@ -9,9 +8,7 @@ endif()
 run_cmake(ConfigCase)
 unset(RunCMake_TEST_OPTIONS)
 
-run_cmake(CMP0023-WARN)
 run_cmake(CMP0023-NEW)
-run_cmake(CMP0023-WARN-2)
 run_cmake(CMP0023-NEW-2)
 run_cmake(CMP0079-iface-WARN)
 run_cmake(CMP0079-iface-OLD)

@@ -1,0 +1,2 @@
+[ ,][/-][Mm][Aa][Cc][Hh][Ii][Nn][Ee]:[A-Za-z0-9_]+[ ]|[Vv][Cc](98|7)\\\\[Bb][Ii][Nn]\\\\[Ll][Ii][Nn][Kk]\.[Ee][Xx][Ee] [^
+]*@[^ ]+\\\\nm

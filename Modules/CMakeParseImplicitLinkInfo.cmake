@@ -1,9 +1,5 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-# file Copyright.txt or https://cmake.org/licensing for details.
-
-cmake_policy(PUSH)
-cmake_policy(SET CMP0053 NEW)
-cmake_policy(SET CMP0054 NEW)
+# file LICENSE.rst or https://cmake.org/licensing for details.
 
 # Function to parse implicit linker options.
 #
@@ -51,6 +47,7 @@ function(cmake_parse_implicit_link_info2 text log_var obj_regex)
 
   set(is_lfortran_less_0_40 0)
   set(is_msvc 0)
+  set(is_cray 0)
   if(EXTRA_PARSE_LANGUAGE)
     if("x${CMAKE_${EXTRA_PARSE_LANGUAGE}_COMPILER_ID}" STREQUAL "xMSVC" OR
         "x${CMAKE_${EXTRA_PARSE_LANGUAGE}_SIMULATE_ID}" STREQUAL "xMSVC")
@@ -58,16 +55,21 @@ function(cmake_parse_implicit_link_info2 text log_var obj_regex)
     elseif("x${CMAKE_${EXTRA_PARSE_LANGUAGE}_COMPILER_ID}" STREQUAL "xLFortran"
         AND CMAKE_${EXTRA_PARSE_LANGUAGE}_COMPILER_VERSION VERSION_LESS "0.40")
       set(is_lfortran_less_0_40 1)
+    elseif("${CMAKE_${EXTRA_PARSE_LANGUAGE}_COMPILER_ID}" MATCHES "^(Cray|CrayClang)$")
+      set(is_cray 1)
     endif()
   endif()
   # Parse implicit linker arguments.
-  set(linker "ld[0-9]*(\\.[a-z]+)?")
+  set(linker "ld[0-9]*(|\\.[a-rt-z][a-z]*|\\.s[a-np-z][a-z]*|\\.so[a-z]+)")
   if(is_lfortran_less_0_40)
     # lfortran < 0.40 has no way to pass -v to clang/gcc driver.
     string(APPEND linker "|clang|gcc")
   endif()
   if(is_msvc)
     string(APPEND linker "|link\\.exe|lld-link(\\.exe)?")
+  endif()
+  if(is_cray)
+    string(APPEND linker "|cce_omp_offload_linker")
   endif()
   if(CMAKE_LINKER)
     get_filename_component(default_linker ${CMAKE_LINKER} NAME)
@@ -401,5 +403,3 @@ function(cmake_parse_implicit_link_info2 text log_var obj_regex)
     set(${EXTRA_PARSE_COMPUTE_IMPLICIT_OBJECTS} "${implicit_objs}" PARENT_SCOPE)
   endif()
 endfunction()
-
-cmake_policy(POP)

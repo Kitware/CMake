@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
@@ -11,6 +11,7 @@
 
 class cmMakefile;
 class cmXMLWriter;
+class cmCTest;
 
 /** \class cmCTestMemCheckHandler
  * \brief A class that handles ctest -S invocations
@@ -25,9 +26,7 @@ public:
 
   void PopulateCustomVectors(cmMakefile* mf) override;
 
-  cmCTestMemCheckHandler();
-
-  void Initialize() override;
+  cmCTestMemCheckHandler(cmCTest* ctest);
 
   int GetDefectCount() const;
 
@@ -100,17 +99,17 @@ private:
   std::string MemoryTester;
   std::vector<std::string> MemoryTesterDynamicOptions;
   std::vector<std::string> MemoryTesterOptions;
-  int MemoryTesterStyle;
+  int MemoryTesterStyle = UNKNOWN;
   std::string MemoryTesterOutputFile;
   std::string MemoryTesterEnvironmentVariable;
   // these are used to store the types of errors that can show up
   std::vector<std::string> ResultStrings;
   std::vector<std::string> ResultStringsLong;
   std::vector<int> GlobalResults;
-  bool LogWithPID; // does log file add pid
-  int DefectCount;
+  bool LogWithPID = false; // does log file add pid
+  int DefectCount = 0;
 
-  std::vector<int>::size_type FindOrAddWarning(const std::string& warning);
+  std::vector<int>::size_type FindOrAddWarning(std::string const& warning);
   // initialize the ResultStrings and ResultStringsLong for
   // this type of checker
   void InitializeResultsVectors();
@@ -129,19 +128,19 @@ private:
   //! Parse Valgrind/Purify/Bounds Checker result out of the output
   // string. After running, log holds the output and results hold the
   // different memory errors.
-  bool ProcessMemCheckOutput(const std::string& str, std::string& log,
+  bool ProcessMemCheckOutput(std::string const& str, std::string& log,
                              std::vector<int>& results);
-  bool ProcessMemCheckValgrindOutput(const std::string& str, std::string& log,
+  bool ProcessMemCheckValgrindOutput(std::string const& str, std::string& log,
                                      std::vector<int>& results);
-  bool ProcessMemCheckDrMemoryOutput(const std::string& str, std::string& log,
+  bool ProcessMemCheckDrMemoryOutput(std::string const& str, std::string& log,
                                      std::vector<int>& results);
-  bool ProcessMemCheckPurifyOutput(const std::string& str, std::string& log,
+  bool ProcessMemCheckPurifyOutput(std::string const& str, std::string& log,
                                    std::vector<int>& results);
-  bool ProcessMemCheckCudaOutput(const std::string& str, std::string& log,
+  bool ProcessMemCheckCudaOutput(std::string const& str, std::string& log,
                                  std::vector<int>& results);
-  bool ProcessMemCheckSanitizerOutput(const std::string& str, std::string& log,
+  bool ProcessMemCheckSanitizerOutput(std::string const& str, std::string& log,
                                       std::vector<int>& results);
-  bool ProcessMemCheckBoundsCheckerOutput(const std::string& str,
+  bool ProcessMemCheckBoundsCheckerOutput(std::string const& str,
                                           std::string& log,
                                           std::vector<int>& results);
 

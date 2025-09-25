@@ -1,23 +1,27 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 
 #include "cmJSONState.h"
 
 #include <iterator>
+#include <memory>
 #include <sstream>
 
 #include <cm3p/json/reader.h>
 #include <cm3p/json/value.h>
+#include <cm3p/json/version.h>
 
 #include "cmsys/FStream.hxx"
 
 #include "cmStringAlgorithms.h"
+#include "cmSystemTools.h"
 
-cmJSONState::cmJSONState(const std::string& filename, Json::Value* root)
+cmJSONState::cmJSONState(std::string jsonFile, Json::Value* root)
+  : Filename(std::move(jsonFile))
 {
-  cmsys::ifstream fin(filename.c_str(), std::ios::in | std::ios::binary);
+  cmsys::ifstream fin(this->Filename.c_str(), std::ios::in | std::ios::binary);
   if (!fin) {
-    this->AddError(cmStrCat("File not found: ", filename));
+    this->AddError(cmStrCat("File not found: ", this->Filename));
     return;
   }
   // If there's a BOM, toss it.
@@ -33,14 +37,27 @@ cmJSONState::cmJSONState(const std::string& filename, Json::Value* root)
   }
   fin.seekg(finBegin);
 
-  // Parse the document.
   Json::CharReaderBuilder builder;
   Json::CharReaderBuilder::strictMode(&builder.settings_);
   std::string errMsg;
+
+#if JSONCPP_VERSION_HEXA >= 0x01090600
+  // Has StructuredError
+  std::unique_ptr<Json::CharReader> const reader(builder.newCharReader());
+  reader->parse(doc.data(), doc.data() + doc.size(), root, &errMsg);
+  std::vector<Json::CharReader::StructuredError> structuredErrors =
+    reader->getStructuredErrors();
+  for (auto const& structuredError : structuredErrors) {
+    this->AddErrorAtOffset(structuredError.message,
+                           structuredError.offset_start);
+  }
+#else
+  // No StructuredError Available, Use error string from jsonCpp
   if (!Json::parseFromStream(builder, fin, root, &errMsg)) {
-    errMsg = cmStrCat("JSON Parse Error: ", filename, ":\n", errMsg);
+    errMsg = cmStrCat("JSON Parse Error: ", this->Filename, ":\n", errMsg);
     this->AddError(errMsg);
   }
+#endif
 }
 
 void cmJSONState::AddError(std::string const& errMsg)
@@ -49,7 +66,7 @@ void cmJSONState::AddError(std::string const& errMsg)
 }
 
 void cmJSONState::AddErrorAtValue(std::string const& errMsg,
-                                  const Json::Value* value)
+                                  Json::Value const* value)
 {
   if (value && !value->isNull()) {
     this->AddErrorAtOffset(errMsg, value->getOffsetStart());
@@ -72,16 +89,17 @@ void cmJSONState::AddErrorAtOffset(std::string const& errMsg,
 std::string cmJSONState::GetErrorMessage(bool showContext)
 {
   std::string message;
+  std::string filenameName = cmSystemTools::GetFilenameName(this->Filename);
   for (auto const& error : this->errors) {
-    message = cmStrCat(message, error.GetErrorMessage(), "\n");
-    if (showContext) {
-      Location loc = error.GetLocation();
-      if (loc.column > 0) {
-        message = cmStrCat(message, GetJsonContext(loc), "\n");
-      }
+    Location loc = error.GetLocation();
+    if (!filenameName.empty() && loc.line > 0) {
+      message = cmStrCat(message, filenameName, ':', loc.line, ": ");
+    }
+    message = cmStrCat(message, error.GetErrorMessage(), '\n');
+    if (showContext && loc.line > 0) {
+      message = cmStrCat(message, GetJsonContext(loc), '\n');
     }
   }
-  message = cmStrCat("\n", message);
   message.pop_back();
   return message;
 }
@@ -105,7 +123,7 @@ std::string cmJSONState::key_after(std::string const& k)
   return "";
 }
 
-const Json::Value* cmJSONState::value_after(std::string const& k)
+Json::Value const* cmJSONState::value_after(std::string const& k)
 {
   for (auto it = this->parseStack.begin(); it != this->parseStack.end();
        ++it) {
@@ -116,7 +134,7 @@ const Json::Value* cmJSONState::value_after(std::string const& k)
   return nullptr;
 }
 
-void cmJSONState::push_stack(std::string const& k, const Json::Value* value)
+void cmJSONState::push_stack(std::string const& k, Json::Value const* value)
 {
   this->parseStack.emplace_back(k, value);
 }
@@ -140,8 +158,8 @@ cmJSONState::Location cmJSONState::LocateInDocument(ptrdiff_t offset)
 {
   int line = 1;
   int col = 1;
-  const char* beginDoc = doc.data();
-  const char* last = beginDoc + offset;
+  char const* beginDoc = doc.data();
+  char const* last = beginDoc + offset;
   for (; beginDoc != last; ++beginDoc) {
     switch (*beginDoc) {
       case '\r':

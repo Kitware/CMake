@@ -45,11 +45,6 @@ static size_t chunk_len(const struct buf_chunk *chunk)
   return chunk->w_offset - chunk->r_offset;
 }
 
-static size_t chunk_space(const struct buf_chunk *chunk)
-{
-  return chunk->dlen - chunk->w_offset;
-}
-
 static void chunk_reset(struct buf_chunk *chunk)
 {
   chunk->next = NULL;
@@ -287,24 +282,6 @@ size_t Curl_bufq_len(const struct bufq *q)
   return len;
 }
 
-size_t Curl_bufq_space(const struct bufq *q)
-{
-  size_t space = 0;
-  if(q->tail)
-    space += chunk_space(q->tail);
-  if(q->spare) {
-    struct buf_chunk *chunk = q->spare;
-    while(chunk) {
-      space += chunk->dlen;
-      chunk = chunk->next;
-    }
-  }
-  if(q->chunk_count < q->max_chunks) {
-    space += (q->max_chunks - q->chunk_count) * q->chunk_size;
-  }
-  return space;
-}
-
 bool Curl_bufq_is_empty(const struct bufq *q)
 {
   return !q->head || chunk_is_empty(q->head);
@@ -484,17 +461,17 @@ CURLcode Curl_bufq_cwrite(struct bufq *q,
   ssize_t n;
   CURLcode result;
   n = Curl_bufq_write(q, (const unsigned char *)buf, len, &result);
-  *pnwritten = (n < 0)? 0 : (size_t)n;
+  *pnwritten = (n < 0) ? 0 : (size_t)n;
   return result;
 }
 
 CURLcode Curl_bufq_unwrite(struct bufq *q, size_t len)
 {
   while(len && q->tail) {
-    len -= chunk_unwrite(q->head, len);
+    len -= chunk_unwrite(q->tail, len);
     prune_tail(q);
   }
-  return len? CURLE_AGAIN : CURLE_OK;
+  return len ? CURLE_AGAIN : CURLE_OK;
 }
 
 ssize_t Curl_bufq_read(struct bufq *q, unsigned char *buf, size_t len,
@@ -526,7 +503,7 @@ CURLcode Curl_bufq_cread(struct bufq *q, char *buf, size_t len,
   ssize_t n;
   CURLcode result;
   n = Curl_bufq_read(q, (unsigned char *)buf, len, &result);
-  *pnread = (n < 0)? 0 : (size_t)n;
+  *pnread = (n < 0) ? 0 : (size_t)n;
   return result;
 }
 

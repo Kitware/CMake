@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmDefinitions.h"
 
 #include <cassert>
@@ -10,7 +10,7 @@
 
 cmDefinitions::Def cmDefinitions::NoDef;
 
-cmDefinitions::Def const& cmDefinitions::GetInternal(const std::string& key,
+cmDefinitions::Def const& cmDefinitions::GetInternal(std::string const& key,
                                                      StackIter begin,
                                                      StackIter end, bool raise)
 {
@@ -33,20 +33,20 @@ cmDefinitions::Def const& cmDefinitions::GetInternal(const std::string& key,
   return begin->Map.emplace(key, def).first->second;
 }
 
-cmValue cmDefinitions::Get(const std::string& key, StackIter begin,
+cmValue cmDefinitions::Get(std::string const& key, StackIter begin,
                            StackIter end)
 {
   Def const& def = cmDefinitions::GetInternal(key, begin, end, false);
   return def.Value ? cmValue(def.Value.str_if_stable()) : nullptr;
 }
 
-void cmDefinitions::Raise(const std::string& key, StackIter begin,
+void cmDefinitions::Raise(std::string const& key, StackIter begin,
                           StackIter end)
 {
   cmDefinitions::GetInternal(key, begin, end, true);
 }
 
-bool cmDefinitions::HasKey(const std::string& key, StackIter begin,
+bool cmDefinitions::HasKey(std::string const& key, StackIter begin,
                            StackIter end)
 {
   for (StackIter it = begin; it != end; ++it) {
@@ -97,12 +97,12 @@ std::vector<std::string> cmDefinitions::ClosureKeys(StackIter begin,
   return defined;
 }
 
-void cmDefinitions::Set(const std::string& key, cm::string_view value)
+void cmDefinitions::Set(std::string const& key, cm::string_view value)
 {
   this->Map[key] = Def(value);
 }
 
-void cmDefinitions::Unset(const std::string& key)
+void cmDefinitions::Unset(std::string const& key)
 {
   this->Map[key] = Def();
 }

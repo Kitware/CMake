@@ -1,1 +1,1 @@
-Failed to change working directory to .*[/\\]dirNotExist-build[/\\]thisDirWillNotExist :
+Failed to change working directory to ".*[/\\]dirNotExist-build[/\\]thisDirWillNotExist": No such file or directory

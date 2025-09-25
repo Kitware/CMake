@@ -5,10 +5,10 @@ Should the target be processed with auto-moc (for Qt projects).
 
 ``AUTOMOC`` is a boolean specifying whether CMake will handle the Qt ``moc``
 preprocessor automatically, i.e.  without having to use commands like
-:module:`QT4_WRAP_CPP() <FindQt4>`, `qt5_wrap_cpp()`_, etc.
+:module:`qt4_wrap_cpp() <FindQt4>`, `qt5_wrap_cpp()`_, etc.
 Currently, Qt versions 4 to 6 are supported.
 
-.. _qt5_wrap_cpp(): https://doc.qt.io/qt-5/qtcore-cmake-qt5-wrap-cpp.html
+.. _qt5_wrap_cpp(): https://doc.qt.io/archives/qt-5.15/qtcore-cmake-qt5-wrap-cpp.html
 
 This property is initialized by the value of the :variable:`CMAKE_AUTOMOC`
 variable if it is set when a target is created.
@@ -28,11 +28,16 @@ At configuration time, a list of header files that should be scanned by
   target's sources, CMake searches for
 
   - a regular header with the same base name
-    (``<source_base>.<header_extention>``) and
+    (``<source_base>.<header_extension>``) and
   - a private header with the same base name and a ``_p`` suffix
-    (``<source_base>_p.<header_extention>``)
+    (``<source_base>_p.<header_extension>``)
 
   and adds these to the scan list.
+
+- The :prop_tgt:`AUTOMOC_INCLUDE_DIRECTORIES` target property may be set
+  to explicitly tell ``moc`` what include directories to search.  If not
+  set, the default is to use the include directories from the target and
+  its transitive closure of dependencies.
 
 At build time, CMake scans each unknown or modified header file from the
 list and searches for
@@ -221,6 +226,10 @@ defining file name filters in this target property.
 :prop_tgt:`AUTOMOC_COMPILER_PREDEFINES`:
 Compiler pre definitions for ``moc`` are written to the ``moc_predefs.h`` file.
 The generation of this file can be enabled or disabled in this target property.
+
+:prop_tgt:`AUTOMOC_INCLUDE_DIRECTORIES`:
+Specifies one or more include directories for ``AUTOMOC`` to pass explicitly to ``moc``
+instead of automatically discovering a target’s include directories.
 
 :prop_sf:`SKIP_AUTOMOC`:
 Sources and headers can be excluded from ``AUTOMOC`` processing by

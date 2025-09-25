@@ -1,66 +1,121 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-# file Copyright.txt or https://cmake.org/licensing for details.
+# file LICENSE.rst or https://cmake.org/licensing for details.
 
 #[=======================================================================[.rst:
 FindBacktrace
 -------------
 
-Find provider for `backtrace(3) <https://man7.org/linux/man-pages/man3/backtrace.3.html>`__.
+Finds `backtrace(3) <https://man7.org/linux/man-pages/man3/backtrace.3.html>`_,
+a library that provides functions for application self-debugging.
 
-Checks if OS supports ``backtrace(3)`` via either ``libc`` or custom library.
-This module defines the following variables:
-
-``Backtrace_HEADER``
-  The header file needed for ``backtrace(3)``. Cached.
-  Could be forcibly set by user.
-``Backtrace_INCLUDE_DIRS``
-  The include directories needed to use ``backtrace(3)`` header.
-``Backtrace_LIBRARIES``
-  The libraries (linker flags) needed to use ``backtrace(3)``, if any.
-``Backtrace_FOUND``
-  Is set if and only if ``backtrace(3)`` support detected.
-
-The following cache variables are also available to set or use:
-
-``Backtrace_LIBRARY``
-  The external library providing backtrace, if any.
-``Backtrace_INCLUDE_DIR``
-  The directory holding the ``backtrace(3)`` header.
-
-Typical usage is to generate of header file using :command:`configure_file`
-with the contents like the following::
-
- #cmakedefine01 Backtrace_FOUND
- #if Backtrace_FOUND
- # include <${Backtrace_HEADER}>
- #endif
-
-And then reference that generated header file in actual source.
+This module checks whether ``backtrace(3)`` is supported, either through the
+standard C library (``libc``), or a separate library.
 
 Imported Targets
 ^^^^^^^^^^^^^^^^
 
 .. versionadded:: 3.30
 
-This module defines the following :prop_tgt:`IMPORTED` targets:
+This module provides the following :ref:`Imported Targets`:
 
 ``Backtrace::Backtrace``
-  An interface library providing usage requirements for the found components.
+  An interface library encapsulating the usage requirements of Backtrace.  This
+  target is available only when Backtrace is found.
 
+Result Variables
+^^^^^^^^^^^^^^^^
+
+This module defines the following variables:
+
+``Backtrace_INCLUDE_DIRS``
+  The include directories needed to use ``backtrace(3)`` header.
+``Backtrace_LIBRARIES``
+  The libraries (linker flags) needed to use ``backtrace(3)``, if any.
+``Backtrace_FOUND``
+  Boolean indicating whether the ``backtrace(3)`` support is available.
+
+Cache Variables
+^^^^^^^^^^^^^^^
+
+The following cache variables are also available to set or use:
+
+``Backtrace_HEADER``
+  The header file needed for ``backtrace(3)``.  This variable allows dynamic
+  usage of the header in the project code.  It can also be overridden by the
+  user.
+``Backtrace_LIBRARY``
+  The external library providing backtrace, if any.
+``Backtrace_INCLUDE_DIR``
+  The directory holding the ``backtrace(3)`` header.
+
+Examples
+^^^^^^^^
+
+Finding Backtrace and linking it to a project target as of CMake 3.30:
+
+.. code-block:: cmake
+  :caption: CMakeLists.txt
+
+  find_package(Backtrace)
+  target_link_libraries(app PRIVATE Backtrace::Backtrace)
+
+The ``Backtrace_HEADER`` variable can be used, for example, in a configuration
+header file created by :command:`configure_file`:
+
+.. code-block:: cmake
+  :caption: CMakeLists.txt
+
+  add_library(app app.c)
+
+  find_package(Backtrace)
+  target_link_libraries(app PRIVATE Backtrace::Backtrace)
+
+  configure_file(config.h.in config.h)
+
+.. code-block:: c
+  :caption: config.h.in
+
+  #cmakedefine01 Backtrace_FOUND
+  #if Backtrace_FOUND
+  #  include <@Backtrace_HEADER@>
+  #endif
+
+.. code-block:: c
+  :caption: app.c
+
+  #include "config.h"
+
+If the project needs to support CMake 3.29 or earlier, the imported target can
+be defined manually:
+
+.. code-block:: cmake
+  :caption: CMakeLists.txt
+
+  find_package(Backtrace)
+  if(Backtrace_FOUND AND NOT TARGET Backtrace::Backtrace)
+    add_library(Backtrace::Backtrace INTERFACE IMPORTED)
+    set_target_properties(
+      Backtrace::Backtrace
+      PROPERTIES
+        INTERFACE_LINK_LIBRARIES "${Backtrace_LIBRARIES}"
+        INTERFACE_INCLUDE_DIRECTORIES "${Backtrace_INCLUDE_DIRS}"
+    )
+  endif()
+  target_link_libraries(app PRIVATE Backtrace::Backtrace)
 #]=======================================================================]
 
 include(CMakePushCheckState)
 include(CheckSymbolExists)
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(FindPackageHandleStandardArgs)
 
 # List of variables to be provided to find_package_handle_standard_args()
 set(_Backtrace_STD_ARGS Backtrace_INCLUDE_DIR)
 
 if(Backtrace_HEADER)
   set(_Backtrace_HEADER_TRY "${Backtrace_HEADER}")
-else(Backtrace_HEADER)
+else()
   set(_Backtrace_HEADER_TRY "execinfo.h")
-endif(Backtrace_HEADER)
+endif()
 
 find_path(Backtrace_INCLUDE_DIR "${_Backtrace_HEADER_TRY}")
 set(Backtrace_INCLUDE_DIRS ${Backtrace_INCLUDE_DIR})
@@ -98,7 +153,7 @@ endif()
 set(Backtrace_LIBRARIES ${Backtrace_LIBRARY})
 set(Backtrace_HEADER "${_Backtrace_HEADER_TRY}" CACHE STRING "Header providing backtrace(3) facility")
 
-find_package_handle_standard_args(Backtrace FOUND_VAR Backtrace_FOUND REQUIRED_VARS ${_Backtrace_STD_ARGS})
+find_package_handle_standard_args(Backtrace REQUIRED_VARS ${_Backtrace_STD_ARGS})
 mark_as_advanced(Backtrace_HEADER Backtrace_INCLUDE_DIR Backtrace_LIBRARY)
 
 if(Backtrace_FOUND AND NOT TARGET Backtrace::Backtrace)

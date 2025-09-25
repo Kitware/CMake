@@ -25,31 +25,32 @@
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "../curl_setup.h"
 
 #ifndef CURL_DISABLE_DIGEST_AUTH
 
 #include <curl/curl.h>
 
-#include "vauth/vauth.h"
-#include "vauth/digest.h"
-#include "urldata.h"
-#include "curl_base64.h"
-#include "curl_hmac.h"
-#include "curl_md5.h"
-#include "curl_sha256.h"
-#include "curl_sha512_256.h"
-#include "vtls/vtls.h"
-#include "warnless.h"
-#include "strtok.h"
-#include "strcase.h"
-#include "curl_printf.h"
-#include "rand.h"
+#include "vauth.h"
+#include "digest.h"
+#include "../urldata.h"
+#include "../curlx/base64.h"
+#include "../curl_hmac.h"
+#include "../curl_md5.h"
+#include "../curl_sha256.h"
+#include "../curl_sha512_256.h"
+#include "../vtls/vtls.h"
+#include "../curlx/warnless.h"
+#include "../curlx/strparse.h"
+#include "../strcase.h"
+#include "../curl_printf.h"
+#include "../rand.h"
 
 /* The last #include files should be: */
-#include "curl_memory.h"
-#include "memdebug.h"
+#include "../curl_memory.h"
+#include "../memdebug.h"
 
+#ifndef USE_WINDOWS_SSPI
 #define SESSION_ALGO 1 /* for algos with this bit set */
 
 #define ALGO_MD5 0
@@ -59,7 +60,6 @@
 #define ALGO_SHA512_256 4
 #define ALGO_SHA512_256SESS (ALGO_SHA512_256 | SESSION_ALGO)
 
-#if !defined(USE_WINDOWS_SSPI)
 #define DIGEST_QOP_VALUE_AUTH             (1 << 0)
 #define DIGEST_QOP_VALUE_AUTH_INT         (1 << 1)
 #define DIGEST_QOP_VALUE_AUTH_CONF        (1 << 2)
@@ -141,8 +141,8 @@ bool Curl_auth_digest_get_pair(const char *str, char *value, char *content,
   return TRUE;
 }
 
-#if !defined(USE_WINDOWS_SSPI)
-/* Convert md5 chunk to RFC2617 (section 3.1.3) -suitable ASCII string */
+#ifndef USE_WINDOWS_SSPI
+/* Convert MD5 chunk to RFC2617 (section 3.1.3) -suitable ASCII string */
 static void auth_digest_md5_to_ascii(unsigned char *source, /* 16 bytes */
                                      unsigned char *dest) /* 33 bytes */
 {
@@ -165,7 +165,7 @@ static char *auth_digest_string_quoted(const char *source)
 {
   char *dest;
   const char *s = source;
-  size_t n = 1; /* null terminator */
+  size_t n = 1; /* null-terminator */
 
   /* Calculate size needed */
   while(*s) {
@@ -219,32 +219,20 @@ static bool auth_digest_get_key_value(const char *chlg,
 
 static CURLcode auth_digest_get_qop_values(const char *options, int *value)
 {
-  char *tmp;
-  char *token;
-  char *tok_buf = NULL;
-
+  struct Curl_str out;
   /* Initialise the output */
   *value = 0;
 
-  /* Tokenise the list of qop values. Use a temporary clone of the buffer since
-     strtok_r() ruins it. */
-  tmp = strdup(options);
-  if(!tmp)
-    return CURLE_OUT_OF_MEMORY;
-
-  token = strtok_r(tmp, ",", &tok_buf);
-  while(token) {
-    if(strcasecompare(token, DIGEST_QOP_VALUE_STRING_AUTH))
+  while(!curlx_str_until(&options, &out, 32, ',')) {
+    if(curlx_str_casecompare(&out, DIGEST_QOP_VALUE_STRING_AUTH))
       *value |= DIGEST_QOP_VALUE_AUTH;
-    else if(strcasecompare(token, DIGEST_QOP_VALUE_STRING_AUTH_INT))
+    else if(curlx_str_casecompare(&out, DIGEST_QOP_VALUE_STRING_AUTH_INT))
       *value |= DIGEST_QOP_VALUE_AUTH_INT;
-    else if(strcasecompare(token, DIGEST_QOP_VALUE_STRING_AUTH_CONF))
+    else if(curlx_str_casecompare(&out, DIGEST_QOP_VALUE_STRING_AUTH_CONF))
       *value |= DIGEST_QOP_VALUE_AUTH_CONF;
-
-    token = strtok_r(NULL, ",", &tok_buf);
+    if(curlx_str_single(&options, ','))
+      break;
   }
-
-  free(tmp);
 
   return CURLE_OK;
 }
@@ -388,7 +376,7 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
     return result;
 
   /* So far so good, now calculate A1 and H(A1) according to RFC 2831 */
-  ctxt = Curl_MD5_init(Curl_DIGEST_MD5);
+  ctxt = Curl_MD5_init(&Curl_DIGEST_MD5);
   if(!ctxt)
     return CURLE_OUT_OF_MEMORY;
 
@@ -402,7 +390,7 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
                   curlx_uztoui(strlen(passwdp)));
   Curl_MD5_final(ctxt, digest);
 
-  ctxt = Curl_MD5_init(Curl_DIGEST_MD5);
+  ctxt = Curl_MD5_init(&Curl_DIGEST_MD5);
   if(!ctxt)
     return CURLE_OUT_OF_MEMORY;
 
@@ -425,7 +413,7 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
     return CURLE_OUT_OF_MEMORY;
 
   /* Calculate H(A2) */
-  ctxt = Curl_MD5_init(Curl_DIGEST_MD5);
+  ctxt = Curl_MD5_init(&Curl_DIGEST_MD5);
   if(!ctxt) {
     free(spn);
 
@@ -443,7 +431,7 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
     msnprintf(&HA2_hex[2 * i], 3, "%02x", digest[i]);
 
   /* Now calculate the response hash */
-  ctxt = Curl_MD5_init(Curl_DIGEST_MD5);
+  ctxt = Curl_MD5_init(&Curl_DIGEST_MD5);
   if(!ctxt) {
     free(spn);
 
@@ -504,10 +492,6 @@ CURLcode Curl_auth_decode_digest_http_message(const char *chlg,
                                               struct digestdata *digest)
 {
   bool before = FALSE; /* got a nonce before */
-  bool foundAuth = FALSE;
-  bool foundAuthInt = FALSE;
-  char *token = NULL;
-  char *tmp = NULL;
 
   /* If we already have received a nonce, keep that in mind */
   if(digest->nonce)
@@ -551,28 +535,24 @@ CURLcode Curl_auth_decode_digest_http_message(const char *chlg,
           return CURLE_OUT_OF_MEMORY;
       }
       else if(strcasecompare(value, "qop")) {
-        char *tok_buf = NULL;
-        /* Tokenize the list and choose auth if possible, use a temporary
-           clone of the buffer since strtok_r() ruins it */
-        tmp = strdup(content);
-        if(!tmp)
-          return CURLE_OUT_OF_MEMORY;
-
-        token = strtok_r(tmp, ",", &tok_buf);
-        while(token) {
-          /* Pass additional spaces here */
+        const char *token = content;
+        struct Curl_str out;
+        bool foundAuth = FALSE;
+        bool foundAuthInt = FALSE;
+        /* Pass leading spaces */
+        while(*token && ISBLANK(*token))
+          token++;
+        while(!curlx_str_until(&token, &out, 32, ',')) {
+          if(curlx_str_casecompare(&out, DIGEST_QOP_VALUE_STRING_AUTH))
+            foundAuth = TRUE;
+          else if(curlx_str_casecompare(&out,
+                                       DIGEST_QOP_VALUE_STRING_AUTH_INT))
+            foundAuthInt = TRUE;
+          if(curlx_str_single(&token, ','))
+            break;
           while(*token && ISBLANK(*token))
             token++;
-          if(strcasecompare(token, DIGEST_QOP_VALUE_STRING_AUTH)) {
-            foundAuth = TRUE;
-          }
-          else if(strcasecompare(token, DIGEST_QOP_VALUE_STRING_AUTH_INT)) {
-            foundAuthInt = TRUE;
-          }
-          token = strtok_r(NULL, ",", &tok_buf);
         }
-
-        free(tmp);
 
         /* Select only auth or auth-int. Otherwise, ignore */
         if(foundAuth) {
@@ -709,14 +689,18 @@ static CURLcode auth_create_digest_http_message(
     digest->nc = 1;
 
   if(!digest->cnonce) {
-    char cnoncebuf[33];
-    result = Curl_rand_hex(data, (unsigned char *)cnoncebuf,
-                           sizeof(cnoncebuf));
+    char cnoncebuf[12];
+    result = Curl_rand_bytes(data,
+#ifdef DEBUGBUILD
+                             TRUE,
+#endif
+                             (unsigned char *)cnoncebuf,
+                             sizeof(cnoncebuf));
     if(result)
       return result;
 
-    result = Curl_base64_encode(cnoncebuf, strlen(cnoncebuf),
-                                &cnonce, &cnonce_sz);
+    result = curlx_base64_encode(cnoncebuf, sizeof(cnoncebuf),
+                                 &cnonce, &cnonce_sz);
     if(result)
       return result;
 

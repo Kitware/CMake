@@ -10,7 +10,7 @@ CMAKE_CUDA_COMPILER_LOADED=1
 CMAKE_CUDA_COMPILER_RANLIB=
 CMAKE_CUDA_COMPILER_TARGET=
 CMAKE_CUDA_COMPILER_VERSION=10.1.168
-CMAKE_CUDA_COMPILER_VERSION_INTERAL=
+CMAKE_CUDA_COMPILER_VERSION_INTERNAL=
 Change Dir: /ccs/home/rmaynard/cmake/extract_xlc_info/CMakeFiles/CMakeTmp
 
 Run Build Command(s):/usr/bin/gmake cmTC_e9f3e/fast && /usr/bin/gmake -f CMakeFiles/cmTC_e9f3e.dir/build.make CMakeFiles/cmTC_e9f3e.dir/build

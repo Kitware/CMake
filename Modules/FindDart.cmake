@@ -1,5 +1,5 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-# file Copyright.txt or https://cmake.org/licensing for details.
+# file LICENSE.rst or https://cmake.org/licensing for details.
 
 #[=======================================================================[.rst:
 FindDart
@@ -35,7 +35,7 @@ find_path(DART_ROOT README.INSTALL
     DOC "If you have Dart installed, where is it located?"
     )
 
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(Dart DEFAULT_MSG DART_ROOT)
+include(FindPackageHandleStandardArgs)
+find_package_handle_standard_args(Dart DEFAULT_MSG DART_ROOT)
 
 mark_as_advanced(DART_ROOT)

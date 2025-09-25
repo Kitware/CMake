@@ -20,3 +20,7 @@ foreach(variable_suffix ${variable_suffixes})
 endforeach()
 
 file(WRITE ${CMAKE_BINARY_DIR}/toolchain_variables.json "${json}")
+
+if(FAIL)
+  message(FATAL_ERROR "Intentionally fail to configure")
+endif()

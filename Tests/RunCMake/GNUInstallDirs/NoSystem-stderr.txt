@@ -3,6 +3,9 @@
   target architecture is known.  Please enable at least one language before
   including GNUInstallDirs.
 Call Stack \(most recent call first\):
+  .*GNUInstallDirs.cmake:[0-9]+ \(_GNUInstallDirs_LIBDIR_get_default\)
+  .*GNUInstallDirs.cmake:[0-9]+ \(cmake_language\)
+  .*GNUInstallDirs.cmake:[0-9]+ \(_GNUInstallDirs_cache_path\)
   NoSystem.cmake:[0-9]+ \(include\)
   CMakeLists.txt:[0-9]+ \(include\)
 This warning is for project developers.  Use -Wno-dev to suppress it.$

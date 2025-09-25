@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmCPackIFWRepository.h"
 
 #include <cstddef>
@@ -107,13 +107,13 @@ bool cmCPackIFWRepository::ConfigureFromOptions()
   return this->IsValid();
 }
 
-/** \class cmCPackeIFWUpdatesPatcher
+/** \class cmCPackIFWUpdatesPatcher
  * \brief Helper class that parses and patch Updates.xml file (QtIFW)
  */
-class cmCPackeIFWUpdatesPatcher : public cmXMLParser
+class cmCPackIFWUpdatesPatcher : public cmXMLParser
 {
 public:
-  cmCPackeIFWUpdatesPatcher(cmCPackIFWRepository* r, cmXMLWriter& x)
+  cmCPackIFWUpdatesPatcher(cmCPackIFWRepository* r, cmXMLWriter& x)
     : repository(r)
     , xout(x)
   {
@@ -124,22 +124,22 @@ public:
   bool patched = false;
 
 protected:
-  void StartElement(const std::string& name, const char** atts) override
+  void StartElement(std::string const& name, char const** atts) override
   {
     this->xout.StartElement(name);
     this->StartFragment(atts);
   }
 
-  void StartFragment(const char** atts)
+  void StartFragment(char const** atts)
   {
     for (size_t i = 0; atts[i]; i += 2) {
-      const char* key = atts[i];
-      const char* value = atts[i + 1];
+      char const* key = atts[i];
+      char const* value = atts[i + 1];
       this->xout.Attribute(key, value);
     }
   }
 
-  void EndElement(const std::string& name) override
+  void EndElement(std::string const& name) override
   {
     if (name == "Updates" && !this->patched) {
       this->repository->WriteRepositoryUpdates(this->xout);
@@ -155,7 +155,7 @@ protected:
     }
   }
 
-  void CharacterDataHandler(const char* data, int length) override
+  void CharacterDataHandler(char const* data, int length) override
   {
     std::string content(data, data + length);
     if (content.empty() || content == " " || content == "  " ||
@@ -188,7 +188,7 @@ bool cmCPackIFWRepository::PatchUpdatesXml()
 
   // Patch
   {
-    cmCPackeIFWUpdatesPatcher patcher(this, xout);
+    cmCPackIFWUpdatesPatcher patcher(this, xout);
     patcher.ParseFile(updatesXml.data());
   }
 

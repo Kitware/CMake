@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmWhileCommand.h"
 
 #include <string>
@@ -126,8 +126,6 @@ bool cmWhileFunctionBlocker::Replay(std::vector<cmListFileFunction> functions,
       case cmPolicies::OLD:
         // OLD behavior is to silently ignore the error.
         break;
-      case cmPolicies::REQUIRED_ALWAYS:
-      case cmPolicies::REQUIRED_IF_USED:
       case cmPolicies::NEW:
         // NEW behavior is to enforce the error.
         enforceError = true;

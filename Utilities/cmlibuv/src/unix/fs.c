@@ -282,12 +282,29 @@ static ssize_t uv__fs_futime(uv_fs_t* req) {
 #endif
 }
 
-#if (defined(__sun) || defined(__hpux)) && (_XOPEN_SOURCE < 600 || defined(CMAKE_BOOTSTRAP))
-static char* uv__mkdtemp(char *template)
-{
+#if defined(CMAKE_BOOTSTRAP) && defined(__sun) && defined(__i386)
+#  define CMAKE_NO_MKDTEMP
+#endif
+
+#if defined(CMAKE_NO_MKDTEMP)
+static char* uv__mkdtemp_fallback(char *template) {
   if (!mktemp(template) || mkdir(template, 0700))
     return NULL;
   return template;
+}
+static char* (*uv__mkdtemp_f)(char*);
+static void uv__mkdtemp_initonce(void) {
+  uv__mkdtemp_f = (char* (*)(char*)) dlsym(RTLD_DEFAULT, "mkdtemp");
+  dlerror(); /* Ignore/cleanup dlsym errors.  */
+  if (uv__mkdtemp_f == NULL) {
+    uv__mkdtemp_f = uv__mkdtemp_fallback;
+  }
+}
+static char* uv__mkdtemp(char *template)
+{
+  static uv_once_t once = UV_ONCE_INIT;
+  uv_once(&once, uv__mkdtemp_initonce);
+  return uv__mkdtemp_f(template);
 }
 #else
 #define uv__mkdtemp mkdtemp

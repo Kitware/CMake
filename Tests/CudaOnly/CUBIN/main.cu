@@ -11,7 +11,7 @@ static std::string input_paths = { CUBIN_FILE_PATHS };
 
 int main()
 {
-  const std::string delimiter = "~_~";
+  std::string const delimiter = "~_~";
   input_paths += delimiter;
 
   size_t end = 0;
@@ -36,7 +36,14 @@ int main()
   cuDeviceGet(&device, 0);
 
   CUcontext context;
+#if defined(__CUDACC_VER_MAJOR__) && __CUDACC_VER_MAJOR__ >= 13
+  CUctxCreateParams params;
+  params.execAffinityParams = nullptr;
+  params.numExecAffinityParams = 0;
+  cuCtxCreate(&context, &params, 0, device);
+#else
   cuCtxCreate(&context, 0, device);
+#endif
 
   CUmodule module;
   for (auto p : actual_paths) {

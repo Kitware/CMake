@@ -1,7 +1,7 @@
 # Assertion macro
 macro(check desc actual expect)
   if(NOT "x${actual}" STREQUAL "x${expect}")
-    message(SEND_ERROR "${desc}: got \"${actual}\", not \"${expect}\"")
+    message(SEND_ERROR "${desc}: got\n  \"${actual}\"\nnot\n  \"${expect}\"")
   endif()
 endmacro()
 

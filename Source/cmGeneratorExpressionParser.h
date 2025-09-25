@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
@@ -24,6 +24,6 @@ private:
   void ParseGeneratorExpression(cmGeneratorExpressionEvaluatorVector&);
 
   std::vector<cmGeneratorExpressionToken>::const_iterator it;
-  const std::vector<cmGeneratorExpressionToken> Tokens;
+  std::vector<cmGeneratorExpressionToken> const Tokens;
   unsigned int NestingLevel = 0;
 };

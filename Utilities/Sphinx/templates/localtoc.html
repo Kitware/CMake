@@ -1,0 +1,8 @@
+{# Sphinx sidebar template: local table of contents.
+   Overridden to remove the "#" link from the "Table of Contents". #}
+{%- if display_toc %}
+  <div>
+    <h3>{{ _('Table of Contents') }}</h3>
+    {{ toc }}
+  </div>
+{%- endif %}

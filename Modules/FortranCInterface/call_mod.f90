@@ -1,4 +1,5 @@
 subroutine call_mod
+  !DIR$ NOINLINE
   use mymodule
   use my_module
   call mysub()

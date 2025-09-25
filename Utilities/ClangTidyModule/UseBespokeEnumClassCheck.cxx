@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "UseBespokeEnumClassCheck.h"
 
 #include <clang/AST/Type.h>
@@ -24,9 +24,9 @@ void UseBespokeEnumClassCheck::registerMatchers(MatchFinder* Finder)
     this);
 }
 
-void UseBespokeEnumClassCheck::check(const MatchFinder::MatchResult& Result)
+void UseBespokeEnumClassCheck::check(MatchFinder::MatchResult const& Result)
 {
-  const TypeLoc* Node = Result.Nodes.getNodeAs<TypeLoc>("type");
+  TypeLoc const* Node = Result.Nodes.getNodeAs<TypeLoc>("type");
   this->diag(Node->getBeginLoc(),
              "use a bespoke enum class instead of booleans as parameters");
 }

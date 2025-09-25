@@ -39,9 +39,9 @@ The following arguments specify compile options.  Repeated calls for the same
   Allow setting ``INTERFACE`` items on :ref:`IMPORTED targets <Imported Targets>`.
 
 .. |command_name| replace:: ``target_compile_options``
-.. include:: GENEX_NOTE.txt
+.. include:: include/GENEX_NOTE.rst
 
-.. include:: OPTIONS_SHELL.txt
+.. include:: include/OPTIONS_SHELL.rst
 
 See Also
 ^^^^^^^^
@@ -69,3 +69,6 @@ See Also
 * :variable:`CMAKE_<LANG>_FLAGS` and :variable:`CMAKE_<LANG>_FLAGS_<CONFIG>`
   add language-wide flags passed to all invocations of the compiler.
   This includes invocations that drive compiling and those that drive linking.
+
+* The :module:`CheckCompilerFlag` module to check whether the compiler
+  supports a given flag.

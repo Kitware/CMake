@@ -1,5 +1,5 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-# file Copyright.txt or https://cmake.org/licensing for details.
+# file LICENSE.rst or https://cmake.org/licensing for details.
 
 #[=======================================================================[.rst:
 CPackIFWConfigureFile
@@ -20,7 +20,7 @@ The module defines the following commands:
 
   Copy a file to another location and modify its contents.
 
-  ::
+  .. code-block:: cmake
 
     cpack_ifw_configure_file(<input> <output>)
 

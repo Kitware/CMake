@@ -1,7 +1,7 @@
 CMAKE_MSVCIDE_RUN_PATH
 ----------------------
 
-.. include:: ENV_VAR.txt
+.. include:: include/ENV_VAR.rst
 
 Extra PATH locations for custom commands when using
 :ref:`Visual Studio Generators`.

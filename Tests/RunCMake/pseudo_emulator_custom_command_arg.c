@@ -13,11 +13,11 @@
 // found in <arg1> or 'generated_exe_emulator_expected'
 // string was not found in <arg2>.
 
-int main(int argc, const char* argv[])
+int main(int argc, char const* argv[])
 {
   // Require a slash to make sure it is a path and not a target name.
-  const char* substring_success = "/generated_exe_emulator_expected";
-  const char* substring_custom_argument = "custom_argument";
+  char const* substring_success = "/generated_exe_emulator_expected";
+  char const* substring_custom_argument = "custom_argument";
 
   if (argc < 2) {
     return EXIT_FAILURE;

@@ -1,0 +1,4 @@
+CMake Error in CMakeLists.txt:
+  Target "foo" references target "wrong::lib", which comes from the "broken"
+  package, but does not belong to the package's canonical namespace.  This is
+  not allowed.

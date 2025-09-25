@@ -24,7 +24,6 @@
  *
  ***************************************************************************/
 
-
 /*
  * Inclusion of common header files.
  */
@@ -34,18 +33,12 @@
 #include <string.h>
 #include <stdarg.h>
 #include <time.h>
+#ifndef UNDER_CE
 #include <errno.h>
+#endif
 
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
-#endif
-
-#ifdef NEED_MALLOC_H
-#include <malloc.h>
-#endif
-
-#ifdef NEED_MEMORY_H
-#include <memory.h>
 #endif
 
 #ifdef HAVE_SYS_STAT_H
@@ -56,8 +49,11 @@
 #include <sys/time.h>
 #endif
 
-#ifdef _WIN32
+#ifdef HAVE_IO_H
 #include <io.h>
+#endif
+
+#ifdef HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
 
@@ -69,8 +65,18 @@
 #include <unistd.h>
 #endif
 
-#ifdef USE_WOLFSSL
+#if defined(HAVE_STDINT_H) || defined(USE_WOLFSSL)
 #include <stdint.h>
+#endif
+
+/* Macro to strip 'const' without triggering a compiler warning.
+   Use it for APIs that do not or cannot support the const qualifier. */
+#ifdef HAVE_STDINT_H
+#  define CURL_UNCONST(p) ((void *)(uintptr_t)(const void *)(p))
+#elif defined(_WIN32)  /* for VS2008 */
+#  define CURL_UNCONST(p) ((void *)(ULONG_PTR)(const void *)(p))
+#else
+#  define CURL_UNCONST(p) ((void *)(p))  /* Fall back to simple cast */
 #endif
 
 #ifdef USE_SCHANNEL
@@ -111,8 +117,8 @@
 
 #ifndef HAVE_STRUCT_TIMEVAL
 struct timeval {
- long tv_sec;
- long tv_usec;
+  long tv_sec;
+  long tv_usec;
 };
 #endif
 
@@ -129,7 +135,7 @@ struct timeval {
 #endif
 
 
-#if defined(__minix)
+#ifdef __minix
 /* Minix does not support recv on TCP sockets */
 #define sread(x,y,z) (ssize_t)read((RECV_TYPE_ARG1)(x), \
                                    (RECV_TYPE_ARG2)(y), \
@@ -169,15 +175,14 @@ struct timeval {
 #endif /* HAVE_RECV */
 
 
-#if defined(__minix)
+#ifdef __minix
 /* Minix does not support send on TCP sockets */
 #define swrite(x,y,z) (ssize_t)write((SEND_TYPE_ARG1)(x), \
-                                    (SEND_TYPE_ARG2)(y), \
-                                    (SEND_TYPE_ARG3)(z))
-
+                                     (SEND_TYPE_ARG2)CURL_UNCONST(y), \
+                                     (SEND_TYPE_ARG3)(z))
 #elif defined(HAVE_SEND)
 #define swrite(x,y,z) (ssize_t)send((SEND_TYPE_ARG1)(x), \
-                                    (SEND_QUAL_ARG2 SEND_TYPE_ARG2)(y), \
+                              (SEND_QUAL_ARG2 SEND_TYPE_ARG2)CURL_UNCONST(y), \
                                     (SEND_TYPE_ARG3)(z), \
                                     (SEND_TYPE_ARG4)(SEND_4TH_ARG))
 #else /* HAVE_SEND */
@@ -191,11 +196,11 @@ struct timeval {
  * Function-like macro definition used to close a socket.
  */
 
-#if defined(HAVE_CLOSESOCKET)
+#ifdef HAVE_CLOSESOCKET
 #  define sclose(x)  closesocket((x))
 #elif defined(HAVE_CLOSESOCKET_CAMEL)
 #  define sclose(x)  CloseSocket((x))
-#elif defined(HAVE_CLOSE_S)
+#elif defined(MSDOS)  /* Watt-32 */
 #  define sclose(x)  close_s((x))
 #elif defined(USE_LWIPSOCK)
 #  define sclose(x)  lwip_close((x))
@@ -206,7 +211,7 @@ struct timeval {
 /*
  * Stack-independent version of fcntl() on sockets:
  */
-#if defined(USE_LWIPSOCK)
+#ifdef USE_LWIPSOCK
 #  define sfcntl  lwip_fcntl
 #else
 #  define sfcntl  fcntl
@@ -233,8 +238,8 @@ struct timeval {
 
 #ifndef HAVE_BOOL_T
   typedef enum {
-      bool_false = 0,
-      bool_true  = 1
+    bool_false = 0,
+    bool_true  = 1
   } bool;
 
 /*
@@ -290,7 +295,7 @@ typedef unsigned int bit;
  */
 
 #undef DEBUGASSERT
-#if defined(DEBUGBUILD)
+#ifdef DEBUGBUILD
 #define DEBUGASSERT(x) assert(x)
 #else
 #define DEBUGASSERT(x) do { } while(0)
@@ -316,78 +321,39 @@ typedef unsigned int bit;
  */
 
 #ifdef USE_WINSOCK
-#undef  EBADF            /* override definition in errno.h */
-#define EBADF            WSAEBADF
-#undef  EINTR            /* override definition in errno.h */
-#define EINTR            WSAEINTR
-#undef  EINVAL           /* override definition in errno.h */
-#define EINVAL           WSAEINVAL
-#undef  EWOULDBLOCK      /* override definition in errno.h */
-#define EWOULDBLOCK      WSAEWOULDBLOCK
-#undef  EINPROGRESS      /* override definition in errno.h */
-#define EINPROGRESS      WSAEINPROGRESS
-#undef  EALREADY         /* override definition in errno.h */
-#define EALREADY         WSAEALREADY
-#undef  ENOTSOCK         /* override definition in errno.h */
-#define ENOTSOCK         WSAENOTSOCK
-#undef  EDESTADDRREQ     /* override definition in errno.h */
-#define EDESTADDRREQ     WSAEDESTADDRREQ
-#undef  EMSGSIZE         /* override definition in errno.h */
-#define EMSGSIZE         WSAEMSGSIZE
-#undef  EPROTOTYPE       /* override definition in errno.h */
-#define EPROTOTYPE       WSAEPROTOTYPE
-#undef  ENOPROTOOPT      /* override definition in errno.h */
-#define ENOPROTOOPT      WSAENOPROTOOPT
-#undef  EPROTONOSUPPORT  /* override definition in errno.h */
-#define EPROTONOSUPPORT  WSAEPROTONOSUPPORT
-#define ESOCKTNOSUPPORT  WSAESOCKTNOSUPPORT
-#undef  EOPNOTSUPP       /* override definition in errno.h */
-#define EOPNOTSUPP       WSAEOPNOTSUPP
-#define EPFNOSUPPORT     WSAEPFNOSUPPORT
-#undef  EAFNOSUPPORT     /* override definition in errno.h */
-#define EAFNOSUPPORT     WSAEAFNOSUPPORT
-#undef  EADDRINUSE       /* override definition in errno.h */
-#define EADDRINUSE       WSAEADDRINUSE
-#undef  EADDRNOTAVAIL    /* override definition in errno.h */
-#define EADDRNOTAVAIL    WSAEADDRNOTAVAIL
-#undef  ENETDOWN         /* override definition in errno.h */
-#define ENETDOWN         WSAENETDOWN
-#undef  ENETUNREACH      /* override definition in errno.h */
-#define ENETUNREACH      WSAENETUNREACH
-#undef  ENETRESET        /* override definition in errno.h */
-#define ENETRESET        WSAENETRESET
-#undef  ECONNABORTED     /* override definition in errno.h */
-#define ECONNABORTED     WSAECONNABORTED
-#undef  ECONNRESET       /* override definition in errno.h */
-#define ECONNRESET       WSAECONNRESET
-#undef  ENOBUFS          /* override definition in errno.h */
-#define ENOBUFS          WSAENOBUFS
-#undef  EISCONN          /* override definition in errno.h */
-#define EISCONN          WSAEISCONN
-#undef  ENOTCONN         /* override definition in errno.h */
-#define ENOTCONN         WSAENOTCONN
-#define ESHUTDOWN        WSAESHUTDOWN
-#define ETOOMANYREFS     WSAETOOMANYREFS
-#undef  ETIMEDOUT        /* override definition in errno.h */
-#define ETIMEDOUT        WSAETIMEDOUT
-#undef  ECONNREFUSED     /* override definition in errno.h */
-#define ECONNREFUSED     WSAECONNREFUSED
-#undef  ELOOP            /* override definition in errno.h */
-#define ELOOP            WSAELOOP
-#ifndef ENAMETOOLONG     /* possible previous definition in errno.h */
-#define ENAMETOOLONG     WSAENAMETOOLONG
+#define SOCKEACCES        WSAEACCES
+#define SOCKEADDRINUSE    WSAEADDRINUSE
+#define SOCKEADDRNOTAVAIL WSAEADDRNOTAVAIL
+#define SOCKEAFNOSUPPORT  WSAEAFNOSUPPORT
+#define SOCKEBADF         WSAEBADF
+#define SOCKECONNREFUSED  WSAECONNREFUSED
+#define SOCKECONNRESET    WSAECONNRESET
+#define SOCKEINPROGRESS   WSAEINPROGRESS
+#define SOCKEINTR         WSAEINTR
+#define SOCKEINVAL        WSAEINVAL
+#define SOCKEISCONN       WSAEISCONN
+#define SOCKEMSGSIZE      WSAEMSGSIZE
+#define SOCKENOMEM        WSA_NOT_ENOUGH_MEMORY
+#define SOCKETIMEDOUT     WSAETIMEDOUT
+#define SOCKEWOULDBLOCK   WSAEWOULDBLOCK
+#else
+#define SOCKEACCES        EACCES
+#define SOCKEADDRINUSE    EADDRINUSE
+#define SOCKEADDRNOTAVAIL EADDRNOTAVAIL
+#define SOCKEAFNOSUPPORT  EAFNOSUPPORT
+#define SOCKEBADF         EBADF
+#define SOCKECONNREFUSED  ECONNREFUSED
+#define SOCKECONNRESET    ECONNRESET
+#define SOCKEINPROGRESS   EINPROGRESS
+#define SOCKEINTR         EINTR
+#define SOCKEINVAL        EINVAL
+#define SOCKEISCONN       EISCONN
+#define SOCKEMSGSIZE      EMSGSIZE
+#define SOCKENOMEM        ENOMEM
+#ifdef ETIMEDOUT
+#define SOCKETIMEDOUT     ETIMEDOUT
 #endif
-#define EHOSTDOWN        WSAEHOSTDOWN
-#undef  EHOSTUNREACH     /* override definition in errno.h */
-#define EHOSTUNREACH     WSAEHOSTUNREACH
-#ifndef ENOTEMPTY        /* possible previous definition in errno.h */
-#define ENOTEMPTY        WSAENOTEMPTY
-#endif
-#define EPROCLIM         WSAEPROCLIM
-#define EUSERS           WSAEUSERS
-#define EDQUOT           WSAEDQUOT
-#define ESTALE           WSAESTALE
-#define EREMOTE          WSAEREMOTE
+#define SOCKEWOULDBLOCK   EWOULDBLOCK
 #endif
 
 /*
@@ -396,8 +362,8 @@ typedef unsigned int bit;
 
 #ifdef __VMS
 #define argv_item_t  __char_ptr32
-#elif defined(_UNICODE)
-#define argv_item_t wchar_t *
+#elif defined(_UNICODE) && !defined(UNDER_CE)
+#define argv_item_t  wchar_t *
 #else
 #define argv_item_t  char *
 #endif

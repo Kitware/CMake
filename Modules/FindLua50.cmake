@@ -1,34 +1,89 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-# file Copyright.txt or https://cmake.org/licensing for details.
+# file LICENSE.rst or https://cmake.org/licensing for details.
 
 #[=======================================================================[.rst:
 FindLua50
 ---------
 
-Locate Lua library.
+.. note::
 
-This module defines::
+  This module is specifically for Lua version branch 5.0, which is obsolete and
+  not maintained anymore.  In new code use the latest supported Lua version and
+  the version-agnostic module :module:`FindLua` instead.
 
-  LUA50_FOUND, if false, do not try to link to Lua
-  LUA_LIBRARIES, both lua and lualib
-  LUA_INCLUDE_DIR, where to find lua.h and lualib.h (and probably lauxlib.h)
+Finds the Lua library.  Lua is a embeddable scripting language.
 
-Note that the expected include convention is::
+When working with Lua, its library headers are intended to be included in
+project source code as:
 
-  #include "lua.h"
+.. code-block:: c
 
-and not::
+  #include <lua.h>
+
+and not:
+
+.. code-block:: c
 
   #include <lua/lua.h>
 
-This is because, the lua location is not standardized and may exist in
-locations other than lua/
+This is because, the location of Lua headers may differ across platforms and may
+exist in locations other than ``lua/``.
+
+Result Variables
+^^^^^^^^^^^^^^^^
+
+This module defines the following variables:
+
+``Lua50_FOUND``
+  Boolean indicating whether Lua is found.  For backward compatibility, the
+  ``LUA50_FOUND`` variable is also set to the same value.
+
+Cache Variables
+^^^^^^^^^^^^^^^
+
+The following cache variables may also be set:
+
+``LUA_INCLUDE_DIR``
+  The directory containing the Lua header files, such as ``lua.h``,
+  ``lualib.h``, and ``lauxlib.h``, needed to use Lua.
+
+``LUA_LIBRARIES``
+  Libraries needed to link against to use Lua.  This list includes both ``lua``
+  and ``lualib`` libraries.
+
+Examples
+^^^^^^^^
+
+Finding the Lua 5.0 library and creating an interface :ref:`imported target
+<Imported Targets>` that encapsulates its usage requirements for linking to a
+project target:
+
+.. code-block:: cmake
+
+  find_package(Lua50)
+
+  if(Lua50_FOUND AND NOT TARGET Lua50::Lua50)
+    add_library(Lua50::Lua50 INTERFACE IMPORTED)
+    set_target_properties(
+      Lua50::Lua50
+      PROPERTIES
+        INTERFACE_INCLUDE_DIRECTORIES "${LUA_INCLUDE_DIR}"
+        INTERFACE_LINK_LIBRARIES "${LUA_LIBRARIES}"
+    )
+  endif()
+
+  target_link_libraries(project_target PRIVATE Lua50::Lua50)
+
+See Also
+^^^^^^^^
+
+* The :module:`FindLua` module to find Lua in version-agnostic way.
 #]=======================================================================]
 
 find_path(LUA_INCLUDE_DIR lua.h
   HINTS
     ENV LUA_DIR
-  PATH_SUFFIXES include/lua50 include/lua5.0 include/lua5 include/lua include
+  PATH_SUFFIXES lua50 lua5.0 lua5 lua
   PATHS
   ~/Library/Frameworks
   /Library/Frameworks
@@ -72,10 +127,7 @@ else()
   endif()
 endif()
 
-
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
-# handle the QUIETLY and REQUIRED arguments and set LUA_FOUND to TRUE if
-# all listed variables are TRUE
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(Lua50  DEFAULT_MSG  LUA_LIBRARIES LUA_INCLUDE_DIR)
+include(FindPackageHandleStandardArgs)
+find_package_handle_standard_args(Lua50  DEFAULT_MSG  LUA_LIBRARIES LUA_INCLUDE_DIR)
 
 mark_as_advanced(LUA_INCLUDE_DIR LUA_LIBRARIES)

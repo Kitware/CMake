@@ -11,12 +11,12 @@
 // Return EXIT_FAILURE if 'generated_exe_emulator_unexpected'
 // string was found in <arg1>.
 
-int main(int argc, const char* argv[])
+int main(int argc, char const* argv[])
 {
-  const char* substring_failure = "generated_exe_emulator_unexpected";
+  char const* substring_failure = "generated_exe_emulator_unexpected";
   // Require a slash to make sure it is a path and not a target name.
-  const char* substring_success = "/generated_exe_emulator_expected";
-  const char* str = argv[1];
+  char const* substring_success = "/generated_exe_emulator_expected";
+  char const* str = argv[1];
   if (argc < 2) {
     return EXIT_FAILURE;
   }

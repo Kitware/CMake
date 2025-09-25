@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "QCMakeCacheModelTest.h"
 
 #include <algorithm>
@@ -10,7 +10,7 @@
 
 namespace {
 QCMakeProperty makeProperty(
-  const QString& name, const QString& value,
+  QString const& name, QString const& value,
   QCMakeProperty::PropertyType type = QCMakeProperty::STRING,
   bool advanced = false)
 {

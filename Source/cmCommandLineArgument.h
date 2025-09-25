@@ -1,8 +1,11 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
+#include <cctype>
+
 #include <cm/optional>
+#include <cm/string_view>
 
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
@@ -126,7 +129,7 @@ struct cmCommandLineArgument
       if (input.size() == this->Name.size()) {
         auto nextValueIndex = index + 1;
         if (nextValueIndex >= allArgs.size() ||
-            allArgs[nextValueIndex][0] == '-') {
+            IsFlag(allArgs[nextValueIndex])) {
           if (this->Type == Values::ZeroOrOne) {
             parseState =
               this->StoreCall(std::string{}, std::forward<CallState>(state)...)
@@ -153,8 +156,8 @@ struct cmCommandLineArgument
       }
     } else if (this->Type == Values::Two) {
       if (input.size() == this->Name.size()) {
-        if (index + 2 >= allArgs.size() || allArgs[index + 1][0] == '-' ||
-            allArgs[index + 2][0] == '-') {
+        if (index + 2 >= allArgs.size() || IsFlag(allArgs[index + 1]) ||
+            IsFlag(allArgs[index + 2])) {
           parseState = ParseMode::ValueError;
         } else {
           index += 2;
@@ -169,12 +172,12 @@ struct cmCommandLineArgument
       if (input.size() == this->Name.size()) {
         auto nextValueIndex = index + 1;
         if (nextValueIndex >= allArgs.size() ||
-            allArgs[nextValueIndex][0] == '-') {
+            IsFlag(allArgs[nextValueIndex])) {
           parseState = ParseMode::ValueError;
         } else {
           std::string buffer = allArgs[nextValueIndex++];
           while (nextValueIndex < allArgs.size() &&
-                 allArgs[nextValueIndex][0] != '-') {
+                 !IsFlag(allArgs[nextValueIndex])) {
             buffer = cmStrCat(buffer, ";", allArgs[nextValueIndex++]);
           }
           parseState =
@@ -222,41 +225,41 @@ private:
   class ArgumentLambdaHelper;
 
   template <typename... CallState>
-  class ArgumentLambdaHelper<bool(const std::string&, CallState...)>
+  class ArgumentLambdaHelper<bool(std::string const&, CallState...)>
   {
   public:
-    static std::function<bool(const std::string&, CallState...)>
+    static std::function<bool(std::string const&, CallState...)>
     generateSetToTrue(bool& value1)
     {
-      return [&value1](const std::string&, CallState&&...) -> bool {
+      return [&value1](std::string const&, CallState&&...) -> bool {
         value1 = true;
         return true;
       };
     }
 
-    static std::function<bool(const std::string&, CallState...)>
+    static std::function<bool(std::string const&, CallState...)>
     generateSetToTrue(bool& value1, bool& value2)
     {
-      return [&value1, &value2](const std::string&, CallState&&...) -> bool {
+      return [&value1, &value2](std::string const&, CallState&&...) -> bool {
         value1 = true;
         value2 = true;
         return true;
       };
     }
 
-    static std::function<bool(const std::string&, CallState...)>
+    static std::function<bool(std::string const&, CallState...)>
     generateSetToValue(std::string& value1)
     {
-      return [&value1](const std::string& arg, CallState&&...) -> bool {
+      return [&value1](std::string const& arg, CallState&&...) -> bool {
         value1 = arg;
         return true;
       };
     }
 
-    static std::function<bool(const std::string&, CallState...)>
+    static std::function<bool(std::string const&, CallState...)>
     generateSetToValue(cm::optional<std::string>& value1)
     {
-      return [&value1](const std::string& arg, CallState&&...) -> bool {
+      return [&value1](std::string const& arg, CallState&&...) -> bool {
         value1 = arg;
         return true;
       };
@@ -280,5 +283,11 @@ private:
       possible_value.remove_prefix(1);
     }
     return std::string(possible_value);
+  }
+
+  static bool IsFlag(cm::string_view arg)
+  {
+    return !arg.empty() && arg[0] == '-' &&
+      !(arg.size() >= 2 && std::isdigit(arg[1]));
   }
 };

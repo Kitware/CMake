@@ -9,5 +9,5 @@ if(NOT CACHE_BOOL)
 endif()
 
 if(NOT CACHE_INTERNAL STREQUAL "cache internal")
-  message(FATAL_ERROR "CACHE_INTERNAL: was ${CACHE_INTENRAL}, expected \"cache internal\"")
+  message(FATAL_ERROR "CACHE_INTERNAL: was ${CACHE_INTERNAL}, expected \"cache internal\"")
 endif()

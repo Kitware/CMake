@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmAddLibraryCommand.h"
 
 #include "cmExecutionStatus.h"
@@ -150,7 +150,8 @@ bool cmAddLibraryCommand(std::vector<std::string> const& args,
   if (nameOk && !importTarget && !isAlias) {
     nameOk = libName.find(':') == std::string::npos;
   }
-  if (!nameOk && !mf.CheckCMP0037(libName, type)) {
+  if (!nameOk) {
+    mf.IssueInvalidTargetNameError(libName);
     return false;
   }
 
@@ -189,7 +190,8 @@ bool cmAddLibraryCommand(std::vector<std::string> const& args,
                                "\" is itself an ALIAS."));
       return false;
     }
-    cmTarget* aliasedTarget = mf.FindTargetToUse(aliasedName, true);
+    cmTarget* aliasedTarget =
+      mf.FindTargetToUse(aliasedName, { cmStateEnums::TargetDomain::NATIVE });
     if (!aliasedTarget) {
       status.SetError(cmStrCat("cannot create ALIAS target \"", libName,
                                "\" because target \"", aliasedName,
@@ -235,15 +237,13 @@ bool cmAddLibraryCommand(std::vector<std::string> const& args,
             "ADD_LIBRARY called with ",
             (type == cmStateEnums::SHARED_LIBRARY ? "SHARED" : "MODULE"),
             " option but the target platform does not support dynamic "
-            "linking. ",
+            "linking. "
             "Building a STATIC library instead. This may lead to problems."));
         CM_FALLTHROUGH;
       case cmPolicies::OLD:
         type = cmStateEnums::STATIC_LIBRARY;
         break;
       case cmPolicies::NEW:
-      case cmPolicies::REQUIRED_IF_USED:
-      case cmPolicies::REQUIRED_ALWAYS:
         mf.IssueMessage(
           MessageType::FATAL_ERROR,
           cmStrCat(

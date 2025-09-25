@@ -1,7 +1,4 @@
-# Using 2.8 will trigger a deprecation warning.  In this case it's explicitly
-# intentional since the tests checks various policy implementations prior to
-# 3.10
-cmake_minimum_required(VERSION 2.8.10) # old enough to not set CMP0022
+cmake_minimum_required(VERSION 3.10)
 
 if(POLICY CMP0129)
   cmake_policy(SET CMP0129 NEW)
@@ -53,38 +50,38 @@ generate_export_header(depC)
 
 target_link_libraries(depC LINK_PUBLIC depA LINK_PUBLIC depA)
 
-assert_property(depA LINK_INTERFACE_LIBRARIES "")
-assert_property(depB LINK_INTERFACE_LIBRARIES "")
-assert_property(depC LINK_INTERFACE_LIBRARIES "depA;depA")
+assert_property(depA INTERFACE_LINK_LIBRARIES "")
+assert_property(depB INTERFACE_LINK_LIBRARIES "")
+assert_property(depC INTERFACE_LINK_LIBRARIES "depA;depA")
 
 add_executable(targetA targetA.cpp)
 
 target_link_libraries(targetA LINK_INTERFACE_LIBRARIES depA depB)
 
-assert_property(targetA LINK_INTERFACE_LIBRARIES "depA;depB")
+assert_property(targetA INTERFACE_LINK_LIBRARIES "depA;depB")
 
-set_target_properties(targetA PROPERTIES LINK_INTERFACE_LIBRARIES "")
+set_target_properties(targetA PROPERTIES INTERFACE_LINK_LIBRARIES "")
 
-assert_property(targetA LINK_INTERFACE_LIBRARIES "")
+assert_property(targetA INTERFACE_LINK_LIBRARIES "")
 
 add_subdirectory(subdir)
 target_link_libraries(targetA subdirlib)
 
 target_link_libraries(targetA depB depC)
 
-assert_property(targetA LINK_INTERFACE_LIBRARIES "")
+assert_property(targetA INTERFACE_LINK_LIBRARIES ";subdirlib;depB;depC")
 
 # Exclude depIfaceOnly from ALL so that it will only be built if something
 # depends on it. As it is in the link interface of depB, targetA
 # will depend on it. That dependency is what is being tested here.
 add_library(depIfaceOnly SHARED EXCLUDE_FROM_ALL depIfaceOnly.cpp)
 generate_export_header(depIfaceOnly)
-set_property(TARGET depB APPEND PROPERTY LINK_INTERFACE_LIBRARIES depIfaceOnly)
+set_property(TARGET depB APPEND PROPERTY INTERFACE_LINK_LIBRARIES depIfaceOnly)
 
 add_library(depD SHARED depD.cpp)
 generate_export_header(depD)
 set_property(TARGET depD APPEND PROPERTY
-  LINK_INTERFACE_LIBRARIES
+  INTERFACE_LINK_LIBRARIES
     $<$<STREQUAL:$<TARGET_PROPERTY:TYPE>,EXECUTABLE>:depA>
 )
 
@@ -151,7 +148,7 @@ add_subdirectory(SubDirB)
 target_link_libraries(SubDirB TopDirImported)
 add_subdirectory(SubDirC)
 target_link_libraries(SubDirC PRIVATE SubDirC2)
-target_link_libraries(TopDir SubDirC)
+target_link_libraries(TopDir PRIVATE SubDirC)
 add_library(TopDirImported IMPORTED INTERFACE)
 target_compile_definitions(TopDirImported INTERFACE DEF_TopDirImported)
 cmake_policy(POP)
@@ -160,7 +157,7 @@ cmake_policy(POP)
 # Test $<COMPILE_ONLY:> genex.
 cmake_policy(SET CMP0099 NEW)
 add_library(dont_link_too SHARED compile_only.cpp)
-target_compile_definitions(dont_link_too PUBLIC USE_EXAMPLE)
+target_compile_definitions(dont_link_too PUBLIC USE_EXAMPLE PRIVATE HAVE_FUNCTION)
 target_link_options(dont_link_too INTERFACE invalid_link_option)
 target_link_libraries(dont_link_too INTERFACE invalid_link_library)
 
@@ -171,3 +168,15 @@ add_library(uses_compile_only_genex_static STATIC compile_only.cpp)
 target_link_libraries(uses_compile_only_genex_static PRIVATE $<COMPILE_ONLY:dont_link_too>)
 add_executable(uses_via_static_linking main.cxx)
 target_link_libraries(uses_via_static_linking PRIVATE uses_compile_only_genex_static)
+
+add_library(uses_compile_only_genex_obj SHARED compile_only.cpp)
+target_compile_definitions(uses_compile_only_genex_obj PRIVATE HAVE_FUNCTION)
+target_link_libraries(uses_compile_only_genex_obj PRIVATE $<COMPILE_ONLY:dont_link_too>)
+
+cmake_policy(SET CMP0131 NEW)
+add_library(only_link_too OBJECT link_only.cpp)
+target_compile_options(only_link_too INTERFACE INVALID_COMPILER_FLAG_ARRRRGH)
+
+add_executable(uses_link_only_genex_obj compile_only.cpp)
+target_compile_definitions(uses_link_only_genex_obj PUBLIC USE_EXAMPLE)
+target_link_libraries(uses_link_only_genex_obj PRIVATE $<LINK_ONLY:only_link_too>)

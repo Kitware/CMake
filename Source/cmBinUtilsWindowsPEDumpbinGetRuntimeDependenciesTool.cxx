@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 
 #include "cmBinUtilsWindowsPEDumpbinGetRuntimeDependenciesTool.h"
 
@@ -19,7 +19,7 @@ cmBinUtilsWindowsPEDumpbinGetRuntimeDependenciesTool::
 }
 
 bool cmBinUtilsWindowsPEDumpbinGetRuntimeDependenciesTool::GetFileInfo(
-  const std::string& file, std::vector<std::string>& needed)
+  std::string const& file, std::vector<std::string>& needed)
 {
   cmUVProcessChainBuilder builder;
   builder.SetBuiltinStream(cmUVProcessChainBuilder::Stream_OUTPUT);
@@ -42,7 +42,7 @@ bool cmBinUtilsWindowsPEDumpbinGetRuntimeDependenciesTool::GetFileInfo(
   }
 
   std::string line;
-  static const cmsys::RegularExpression regex(
+  static cmsys::RegularExpression const regex(
     "^    ([^\n]*\\.[Dd][Ll][Ll])\r$");
   cmUVPipeIStream output(process.GetLoop(), process.OutputStream());
   while (std::getline(output, line)) {

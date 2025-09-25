@@ -24,23 +24,28 @@
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "../curl_setup.h"
 
 #if defined(HAVE_GSSAPI) && defined(USE_SPNEGO)
 
 #include <curl/curl.h>
 
-#include "vauth/vauth.h"
-#include "urldata.h"
-#include "curl_base64.h"
-#include "curl_gssapi.h"
-#include "warnless.h"
-#include "curl_multibyte.h"
-#include "sendf.h"
+#include "vauth.h"
+#include "../urldata.h"
+#include "../curlx/base64.h"
+#include "../curl_gssapi.h"
+#include "../curlx/warnless.h"
+#include "../curlx/multibyte.h"
+#include "../sendf.h"
 
 /* The last #include files should be: */
-#include "curl_memory.h"
-#include "memdebug.h"
+#include "../curl_memory.h"
+#include "../memdebug.h"
+
+#if defined(__GNUC__) && defined(__APPLE__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif
 
 /*
  * Curl_auth_is_spnego_supported()
@@ -134,7 +139,7 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
   if(chlg64 && *chlg64) {
     /* Decode the base-64 encoded challenge message */
     if(*chlg64 != '=') {
-      result = Curl_base64_decode(chlg64, &chlg, &chlglen);
+      result = curlx_base64_decode(chlg64, &chlg, &chlglen);
       if(result)
         return result;
     }
@@ -151,10 +156,10 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
   }
 
   /* Set channel binding data if available */
-  if(nego->channel_binding_data.leng > 0) {
+  if(curlx_dyn_len(&nego->channel_binding_data)) {
     memset(&chan, 0, sizeof(struct gss_channel_bindings_struct));
-    chan.application_data.length = nego->channel_binding_data.leng;
-    chan.application_data.value = nego->channel_binding_data.bufr;
+    chan.application_data.length = curlx_dyn_len(&nego->channel_binding_data);
+    chan.application_data.value = curlx_dyn_ptr(&nego->channel_binding_data);
     chan_bindings = &chan;
   }
 
@@ -223,9 +228,9 @@ CURLcode Curl_auth_create_spnego_message(struct negotiatedata *nego,
   OM_uint32 minor_status;
 
   /* Base64 encode the already generated response */
-  result = Curl_base64_encode(nego->output_token.value,
-                              nego->output_token.length,
-                              outptr, outlen);
+  result = curlx_base64_encode(nego->output_token.value,
+                               nego->output_token.length,
+                               outptr, outlen);
 
   if(result) {
     gss_release_buffer(&minor_status, &nego->output_token);
@@ -287,5 +292,9 @@ void Curl_auth_cleanup_spnego(struct negotiatedata *nego)
   nego->havenegdata = FALSE;
   nego->havemultiplerequests = FALSE;
 }
+
+#if defined(__GNUC__) && defined(__APPLE__)
+#pragma GCC diagnostic pop
+#endif
 
 #endif /* HAVE_GSSAPI && USE_SPNEGO */

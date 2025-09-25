@@ -21,6 +21,6 @@ version ``1.07.06`` remains unchanged.
 
 .. |INTRODUCED_IN_CMAKE_VERSION| replace:: 3.16
 .. |WARNS_OR_DOES_NOT_WARN| replace:: does *not* warn
-.. include:: STANDARD_ADVICE.txt
+.. include:: include/STANDARD_ADVICE.rst
 
-.. include:: DEPRECATED.txt
+.. include:: include/DEPRECATED.rst

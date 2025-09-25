@@ -1,5 +1,5 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-# file Copyright.txt or https://cmake.org/licensing for details.
+# file LICENSE.rst or https://cmake.org/licensing for details.
 
 
 # search for additional tools required for C/C++ (and other languages ?)
@@ -15,13 +15,11 @@
 #   CMAKE_RANLIB
 #   CMAKE_LINKER
 #   CMAKE_MT
+#   CMAKE_OBJDUMP
 #   CMAKE_STRIP
 #   CMAKE_INSTALL_NAME_TOOL
 
 # on UNIX, cygwin and mingw
-
-cmake_policy(PUSH)
-cmake_policy(SET CMP0057 NEW) # if IN_LIST
 
 # Resolve full path of CMAKE_TOOL from user-defined name and SEARCH_PATH.
 function(__resolve_tool_path CMAKE_TOOL SEARCH_PATH DOCSTRING)
@@ -147,7 +145,22 @@ elseif("x${CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_ID}" MATCHES "^xIAR$")
   set(_CMAKE_IAR_SYMEXPORT_NAMES
     "isymexport" "isymexport.exe"
   )
-  list(APPEND _CMAKE_TOOL_VARS AR LINKER IAR_ELFDUMP IAR_ELFTOOL IAR_EXE2OBJ IAR_OBJMANIP IAR_SYMEXPORT)
+  # IAR C-STAT Command Line Interface
+  set(_CMAKE_IAR_CSTAT_NAMES
+    "icstat" "icstat.exe"
+  )
+  # IAR C-STAT Checks Manifest Handler
+  set(_CMAKE_IAR_CHECKS_NAMES
+    "ichecks" "ichecks.exe"
+  )
+  # IAR C-STAT Report Generator
+  set(_CMAKE_IAR_REPORT_NAMES
+    "ireport" "ireport.exe"
+  )
+  list(APPEND _CMAKE_TOOL_VARS
+    AR LINKER IAR_ELFDUMP IAR_ELFTOOL IAR_EXE2OBJ IAR_OBJMANIP IAR_SYMEXPORT
+    IAR_CSTAT IAR_CHECKS IAR_REPORT
+  )
   unset(__iar_selected_compiler)
   unset(__iar_arch_id)
 
@@ -174,7 +187,7 @@ else()
   set(_CMAKE_TAPI_NAMES "tapi")
 
   # Prepend toolchain-specific names.
-  if("${CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_ID}" STREQUAL Clang)
+  if("x${CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_ID}" MATCHES "^x(Clang|IntelLLVM|LLVMFlang)$")
     if("x${CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_SIMULATE_ID}" STREQUAL "xMSVC")
       list(PREPEND _CMAKE_LINKER_NAMES "lld-link")
     elseif(NOT APPLE)
@@ -274,5 +287,3 @@ if("x${CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_ID}" MATCHES "^xIAR$")
   set(CMAKE_IAR_LINKER "${CMAKE_LINKER}" CACHE FILEPATH "The IAR ILINK linker")
   mark_as_advanced(CMAKE_IAR_LINKER CMAKE_IAR_AR)
 endif()
-
-cmake_policy(POP)

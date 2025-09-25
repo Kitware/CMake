@@ -1,7 +1,7 @@
 CTEST_PARALLEL_LEVEL
 --------------------
 
-.. include:: ENV_VAR.txt
+.. include:: include/ENV_VAR.rst
 
 Specify the number of tests for CTest to run in parallel.
 For example, if ``CTEST_PARALLEL_LEVEL`` is set to 8, CTest will run

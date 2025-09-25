@@ -44,4 +44,3 @@ foreach(type SHARED_LIBRARY SHARED_MODULE EXE)
     set(CMAKE_${type}_LINK_DYNAMIC_${lang}_FLAGS "-Wl,-a,default")
   endforeach()
 endforeach()
-

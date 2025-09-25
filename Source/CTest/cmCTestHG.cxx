@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmCTestHG.h"
 
 #include <ostream>
@@ -11,11 +11,12 @@
 
 #include "cmCTest.h"
 #include "cmCTestVC.h"
+#include "cmMakefile.h"
 #include "cmSystemTools.h"
 #include "cmXMLParser.h"
 
-cmCTestHG::cmCTestHG(cmCTest* ct, std::ostream& log)
-  : cmCTestGlobalVC(ct, log)
+cmCTestHG::cmCTestHG(cmCTest* ct, cmMakefile* mf, std::ostream& log)
+  : cmCTestGlobalVC(ct, mf, log)
 {
   this->PriorRev = this->Unknown;
 }
@@ -25,7 +26,7 @@ cmCTestHG::~cmCTestHG() = default;
 class cmCTestHG::IdentifyParser : public cmCTestVC::LineParser
 {
 public:
-  IdentifyParser(cmCTestHG* hg, const char* prefix, std::string& rev)
+  IdentifyParser(cmCTestHG* hg, char const* prefix, std::string& rev)
     : Rev(rev)
   {
     this->SetLog(&hg->Log, prefix);
@@ -49,7 +50,7 @@ private:
 class cmCTestHG::StatusParser : public cmCTestVC::LineParser
 {
 public:
-  StatusParser(cmCTestHG* hg, const char* prefix)
+  StatusParser(cmCTestHG* hg, char const* prefix)
     : HG(hg)
   {
     this->SetLog(&hg->Log, prefix);
@@ -142,9 +143,9 @@ bool cmCTestHG::UpdateImpl()
   hg_update.emplace_back("-v");
 
   // Add user-specified update options.
-  std::string opts = this->CTest->GetCTestConfiguration("UpdateOptions");
+  std::string opts = this->Makefile->GetSafeDefinition("CTEST_UPDATE_OPTIONS");
   if (opts.empty()) {
-    opts = this->CTest->GetCTestConfiguration("HGUpdateOptions");
+    opts = this->Makefile->GetSafeDefinition("CTEST_HG_UPDATE_OPTIONS");
   }
   std::vector<std::string> args = cmSystemTools::ParseArguments(opts);
   cm::append(hg_update, args);
@@ -159,7 +160,7 @@ class cmCTestHG::LogParser
   , private cmXMLParser
 {
 public:
-  LogParser(cmCTestHG* hg, const char* prefix)
+  LogParser(cmCTestHG* hg, char const* prefix)
     : OutputLogger(hg->Log, prefix)
     , HG(hg)
   {
@@ -177,19 +178,19 @@ private:
   Change CurChange;
   std::vector<char> CData;
 
-  bool ProcessChunk(const char* data, int length) override
+  bool ProcessChunk(char const* data, int length) override
   {
     this->OutputLogger::ProcessChunk(data, length);
     this->ParseChunk(data, length);
     return true;
   }
 
-  void StartElement(const std::string& name, const char** atts) override
+  void StartElement(std::string const& name, char const** atts) override
   {
     this->CData.clear();
     if (name == "logentry") {
       this->Rev = Revision();
-      if (const char* rev =
+      if (char const* rev =
             cmCTestHG::LogParser::FindAttribute(atts, "revision")) {
         this->Rev.Rev = rev;
       }
@@ -197,12 +198,12 @@ private:
     }
   }
 
-  void CharacterDataHandler(const char* data, int length) override
+  void CharacterDataHandler(char const* data, int length) override
   {
     cm::append(this->CData, data, data + length);
   }
 
-  void EndElement(const std::string& name) override
+  void EndElement(std::string const& name) override
   {
     if (name == "logentry") {
       this->HG->DoRevision(this->Rev, this->Changes);
@@ -257,7 +258,7 @@ private:
     return output;
   }
 
-  void ReportError(int /*line*/, int /*column*/, const char* msg) override
+  void ReportError(int /*line*/, int /*column*/, char const* msg) override
   {
     this->HG->Log << "Error parsing hg log xml: " << msg << "\n";
   }

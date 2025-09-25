@@ -1,12 +1,11 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-# file Copyright.txt or https://cmake.org/licensing for details.
+# file LICENSE.rst or https://cmake.org/licensing for details.
 
 
 # This module is shared by multiple linkers; use include blocker.
 include_guard()
 
 block(SCOPE_FOR POLICIES)
-cmake_policy(SET CMP0054 NEW)
 cmake_policy(SET CMP0140 NEW)
 
 function(__linker_gnu lang)
@@ -65,10 +64,14 @@ function(__linker_gnu lang)
     set(CMAKE_${lang}_LINK_DEPENDS_USE_LINKER FALSE)
   endif()
 
+  # Linker warning as error
+  set(CMAKE_${lang}_LINK_OPTIONS_WARNING_AS_ERROR "LINKER:--fatal-warnings")
+
   return(PROPAGATE CMAKE_${lang}_LINKER_DEPFILE_FLAGS
     CMAKE_${lang}_LINKER_DEPFILE_FORMAT
     CMAKE_${lang}_LINKER_DEPFILE_SUPPORTED
-    CMAKE_${lang}_LINK_DEPENDS_USE_LINKER)
+    CMAKE_${lang}_LINK_DEPENDS_USE_LINKER
+    CMAKE_${lang}_LINK_OPTIONS_WARNING_AS_ERROR)
 endfunction()
 
 endblock()

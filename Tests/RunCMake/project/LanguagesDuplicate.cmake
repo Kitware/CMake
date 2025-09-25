@@ -1,5 +1,3 @@
-cmake_policy(SET CMP0057 NEW)
-
 project(ProjectA C C C)
 project(ProjectB C C CXX CXX)
 

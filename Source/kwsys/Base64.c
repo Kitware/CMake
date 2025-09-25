@@ -9,12 +9,12 @@
 #  include "Base64.h.in"
 #endif
 
-static const unsigned char kwsysBase64EncodeTable[65] =
+static unsigned char const kwsysBase64EncodeTable[65] =
   "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
   "abcdefghijklmnopqrstuvwxyz"
   "0123456789+/";
 
-static const unsigned char kwsysBase64DecodeTable[256] = {
+static unsigned char const kwsysBase64DecodeTable[256] = {
   0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
   0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
   0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
@@ -49,7 +49,7 @@ static unsigned char kwsysBase64DecodeChar(unsigned char c)
 }
 
 /* Encode 3 bytes into a 4 byte string. */
-void kwsysBase64_Encode3(const unsigned char* src, unsigned char* dest)
+void kwsysBase64_Encode3(unsigned char const* src, unsigned char* dest)
 {
   dest[0] = kwsysBase64EncodeChar((src[0] >> 2) & 0x3F);
   dest[1] =
@@ -60,7 +60,7 @@ void kwsysBase64_Encode3(const unsigned char* src, unsigned char* dest)
 }
 
 /* Encode 2 bytes into a 4 byte string. */
-void kwsysBase64_Encode2(const unsigned char* src, unsigned char* dest)
+void kwsysBase64_Encode2(unsigned char const* src, unsigned char* dest)
 {
   dest[0] = kwsysBase64EncodeChar((src[0] >> 2) & 0x3F);
   dest[1] =
@@ -70,7 +70,7 @@ void kwsysBase64_Encode2(const unsigned char* src, unsigned char* dest)
 }
 
 /* Encode 1 bytes into a 4 byte string. */
-void kwsysBase64_Encode1(const unsigned char* src, unsigned char* dest)
+void kwsysBase64_Encode1(unsigned char const* src, unsigned char* dest)
 {
   dest[0] = kwsysBase64EncodeChar((src[0] >> 2) & 0x3F);
   dest[1] = kwsysBase64EncodeChar(((src[0] << 4) & 0x30));
@@ -88,11 +88,11 @@ void kwsysBase64_Encode1(const unsigned char* src, unsigned char* dest)
    actually knowing how much data to expect (if the input is not a multiple of
    3 bytes then the extra padding needed to complete the encode 4 bytes will
    stop the decoding anyway).  */
-size_t kwsysBase64_Encode(const unsigned char* input, size_t length,
+size_t kwsysBase64_Encode(unsigned char const* input, size_t length,
                           unsigned char* output, int mark_end)
 {
-  const unsigned char* ptr = input;
-  const unsigned char* end = input + length;
+  unsigned char const* ptr = input;
+  unsigned char const* end = input + length;
   unsigned char* optr = output;
 
   /* Encode complete triplet */
@@ -128,7 +128,7 @@ size_t kwsysBase64_Encode(const unsigned char* input, size_t length,
 }
 
 /* Decode 4 bytes into a 3 byte string. */
-int kwsysBase64_Decode3(const unsigned char* src, unsigned char* dest)
+int kwsysBase64_Decode3(unsigned char const* src, unsigned char* dest)
 {
   unsigned char d0;
   unsigned char d1;
@@ -172,16 +172,16 @@ int kwsysBase64_Decode3(const unsigned char* src, unsigned char* dest)
    'length' parameter is ignored. This enables the caller to decode a stream
    without actually knowing how much decoded data to expect (of course, the
    buffer must be large enough). */
-size_t kwsysBase64_Decode(const unsigned char* input, size_t length,
+size_t kwsysBase64_Decode(unsigned char const* input, size_t length,
                           unsigned char* output, size_t max_input_length)
 {
-  const unsigned char* ptr = input;
+  unsigned char const* ptr = input;
   unsigned char* optr = output;
 
   /* Decode complete triplet */
 
   if (max_input_length) {
-    const unsigned char* end = input + max_input_length;
+    unsigned char const* end = input + max_input_length;
     while (ptr < end) {
       int len = kwsysBase64_Decode3(ptr, optr);
       optr += len;

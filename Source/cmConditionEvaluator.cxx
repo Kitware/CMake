@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmConditionEvaluator.h"
 
 #include <array>
@@ -25,7 +25,6 @@
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmValue.h"
-#include "cmake.h"
 
 namespace {
 auto const keyAND = "AND"_s;
@@ -105,9 +104,9 @@ std::string bool2string(bool const value)
                      static_cast<char>('0' + static_cast<int>(value)));
 }
 
-bool looksLikeSpecialVariable(const std::string& var,
+bool looksLikeSpecialVariable(std::string const& var,
                               cm::static_string_view prefix,
-                              const std::size_t varNameLen)
+                              std::size_t const varNameLen)
 {
   // NOTE Expecting a variable name at least 1 char length:
   // <prefix> + `{` + <varname> + `}`
@@ -199,13 +198,13 @@ public:
   CurrentAndTwoMoreIter make3ArgsIterator() { return *this; }
 
   template <typename Iter>
-  void ReduceOneArg(const bool value, Iter args)
+  void ReduceOneArg(bool const value, Iter args)
   {
     *args.current = cmExpandedCommandArgument(bool2string(value), true);
     this->erase(args.next);
   }
 
-  void ReduceTwoArgs(const bool value, CurrentAndTwoMoreIter args)
+  void ReduceTwoArgs(bool const value, CurrentAndTwoMoreIter args)
   {
     *args.current = cmExpandedCommandArgument(bool2string(value), true);
     this->erase(args.nextnext);
@@ -219,10 +218,6 @@ cmConditionEvaluator::cmConditionEvaluator(cmMakefile& makefile,
                                            cmListFileBacktrace bt)
   : Makefile(makefile)
   , Backtrace(std::move(bt))
-  , Policy12Status(makefile.GetPolicyStatus(cmPolicies::CMP0012))
-  , Policy54Status(makefile.GetPolicyStatus(cmPolicies::CMP0054))
-  , Policy57Status(makefile.GetPolicyStatus(cmPolicies::CMP0057))
-  , Policy64Status(makefile.GetPolicyStatus(cmPolicies::CMP0064))
   , Policy139Status(makefile.GetPolicyStatus(cmPolicies::CMP0139))
 {
 }
@@ -244,7 +239,7 @@ cmConditionEvaluator::cmConditionEvaluator(cmMakefile& makefile,
 // directly. AND OR take variables or the values 0 or 1.
 
 bool cmConditionEvaluator::IsTrue(
-  const std::vector<cmExpandedCommandArgument>& args, std::string& errorString,
+  std::vector<cmExpandedCommandArgument> const& args, std::string& errorString,
   MessageType& status)
 {
   errorString.clear();
@@ -262,7 +257,7 @@ bool cmConditionEvaluator::IsTrue(
   // parens
   using handlerFn_t = bool (cmConditionEvaluator::*)(
     cmArgumentList&, std::string&, MessageType&);
-  const std::array<handlerFn_t, 5> handlers = { {
+  std::array<handlerFn_t, 5> const handlers = { {
     &cmConditionEvaluator::HandleLevel0, // parenthesis
     &cmConditionEvaluator::HandleLevel1, // predicates
     &cmConditionEvaluator::HandleLevel2, // binary ops
@@ -292,45 +287,23 @@ bool cmConditionEvaluator::IsTrue(
     return false;
   }
 
-  return this->GetBooleanValueWithAutoDereference(newArgs.front(), errorString,
-                                                  status, true);
+  return this->GetBooleanValue(newArgs.front());
 }
 
 //=========================================================================
 cmValue cmConditionEvaluator::GetDefinitionIfUnquoted(
   cmExpandedCommandArgument const& argument) const
 {
-  if ((this->Policy54Status != cmPolicies::WARN &&
-       this->Policy54Status != cmPolicies::OLD) &&
-      argument.WasQuoted()) {
+  if (argument.WasQuoted()) {
     return nullptr;
   }
 
-  cmValue def = this->Makefile.GetDefinition(argument.GetValue());
-
-  if (def && argument.WasQuoted() &&
-      this->Policy54Status == cmPolicies::WARN) {
-    if (!this->Makefile.HasCMP0054AlreadyBeenReported(this->Backtrace.Top())) {
-      std::ostringstream e;
-      // clang-format off
-      e << (cmPolicies::GetPolicyWarning(cmPolicies::CMP0054))
-        << "\n"
-           "Quoted variables like \"" << argument.GetValue() << "\" "
-           "will no longer be dereferenced when the policy is set to NEW.  "
-           "Since the policy is not set the OLD behavior will be used.";
-      // clang-format on
-
-      this->Makefile.GetCMakeInstance()->IssueMessage(
-        MessageType::AUTHOR_WARNING, e.str(), this->Backtrace);
-    }
-  }
-
-  return def;
+  return this->Makefile.GetDefinition(argument.GetValue());
 }
 
 //=========================================================================
 cmValue cmConditionEvaluator::GetVariableOrString(
-  const cmExpandedCommandArgument& argument) const
+  cmExpandedCommandArgument const& argument) const
 {
   cmValue def = this->GetDefinitionIfUnquoted(argument);
 
@@ -344,35 +317,13 @@ cmValue cmConditionEvaluator::GetVariableOrString(
 //=========================================================================
 bool cmConditionEvaluator::IsKeyword(
   cm::static_string_view keyword,
-  const cmExpandedCommandArgument& argument) const
+  cmExpandedCommandArgument const& argument) const
 {
-  if ((this->Policy54Status != cmPolicies::WARN &&
-       this->Policy54Status != cmPolicies::OLD) &&
-      argument.WasQuoted()) {
+  if (argument.WasQuoted()) {
     return false;
   }
 
-  const auto isKeyword = argument.GetValue() == keyword;
-
-  if (isKeyword && argument.WasQuoted() &&
-      this->Policy54Status == cmPolicies::WARN) {
-    if (!this->Makefile.HasCMP0054AlreadyBeenReported(this->Backtrace.Top())) {
-      std::ostringstream e;
-      // clang-format off
-      e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0054)
-        << "\n"
-           "Quoted keywords like \"" << argument.GetValue() << "\" "
-           "will no longer be interpreted as keywords "
-           "when the policy is set to NEW.  "
-           "Since the policy is not set the OLD behavior will be used.";
-      // clang-format on
-
-      this->Makefile.GetCMakeInstance()->IssueMessage(
-        MessageType::AUTHOR_WARNING, e.str(), this->Backtrace);
-    }
-  }
-
-  return isKeyword;
+  return argument.GetValue() == keyword;
 }
 
 //=========================================================================
@@ -390,7 +341,7 @@ bool cmConditionEvaluator::GetBooleanValue(
   // Check for numbers.
   if (!arg.empty()) {
     char* end;
-    const double d = std::strtod(arg.GetValue().c_str(), &end);
+    double const d = std::strtod(arg.GetValue().c_str(), &end);
     if (*end == '\0') {
       // The whole string is a number.  Use C conversion to bool.
       return static_cast<bool>(d);
@@ -402,75 +353,9 @@ bool cmConditionEvaluator::GetBooleanValue(
   return !def.IsOff();
 }
 
-//=========================================================================
-// Boolean value behavior from CMake 2.6.4 and below.
-bool cmConditionEvaluator::GetBooleanValueOld(
-  cmExpandedCommandArgument const& arg, bool const one) const
-{
-  if (one) {
-    // Old IsTrue behavior for single argument.
-    if (arg == "0") {
-      return false;
-    }
-    if (arg == "1") {
-      return true;
-    }
-    cmValue def = this->GetDefinitionIfUnquoted(arg);
-    return !def.IsOff();
-  }
-  // Old GetVariableOrNumber behavior.
-  cmValue def = this->GetDefinitionIfUnquoted(arg);
-  if (!def && std::atoi(arg.GetValue().c_str())) {
-    def = cmValue(arg.GetValue());
-  }
-  return !def.IsOff();
-}
-
-//=========================================================================
-// returns the resulting boolean value
-bool cmConditionEvaluator::GetBooleanValueWithAutoDereference(
-  cmExpandedCommandArgument& newArg, std::string& errorString,
-  MessageType& status, bool const oneArg) const
-{
-  // Use the policy if it is set.
-  if (this->Policy12Status == cmPolicies::NEW) {
-    return this->GetBooleanValue(newArg);
-  }
-  if (this->Policy12Status == cmPolicies::OLD) {
-    return this->GetBooleanValueOld(newArg, oneArg);
-  }
-
-  // Check policy only if old and new results differ.
-  const auto newResult = this->GetBooleanValue(newArg);
-  const auto oldResult = this->GetBooleanValueOld(newArg, oneArg);
-  if (newResult != oldResult) {
-    switch (this->Policy12Status) {
-      case cmPolicies::WARN:
-        errorString = "An argument named \"" + newArg.GetValue() +
-          "\" appears in a conditional statement.  " +
-          cmPolicies::GetPolicyWarning(cmPolicies::CMP0012);
-        status = MessageType::AUTHOR_WARNING;
-        CM_FALLTHROUGH;
-      case cmPolicies::OLD:
-        return oldResult;
-      case cmPolicies::REQUIRED_IF_USED:
-      case cmPolicies::REQUIRED_ALWAYS: {
-        errorString = "An argument named \"" + newArg.GetValue() +
-          "\" appears in a conditional statement.  " +
-          cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0012);
-        status = MessageType::FATAL_ERROR;
-        break;
-      }
-      case cmPolicies::NEW:
-        break;
-    }
-  }
-  return newResult;
-}
-
 template <int N>
 inline int cmConditionEvaluator::matchKeysImpl(
-  const cmExpandedCommandArgument&)
+  cmExpandedCommandArgument const&)
 {
   // Zero means "not found"
   return 0;
@@ -478,7 +363,7 @@ inline int cmConditionEvaluator::matchKeysImpl(
 
 template <int N, typename T, typename... Keys>
 inline int cmConditionEvaluator::matchKeysImpl(
-  const cmExpandedCommandArgument& arg, T current, Keys... key)
+  cmExpandedCommandArgument const& arg, T current, Keys... key)
 {
   if (this->IsKeyword(current, arg)) {
     // Stop searching as soon as smth has found
@@ -489,7 +374,7 @@ inline int cmConditionEvaluator::matchKeysImpl(
 
 template <typename... Keys>
 inline int cmConditionEvaluator::matchKeys(
-  const cmExpandedCommandArgument& arg, Keys... key)
+  cmExpandedCommandArgument const& arg, Keys... key)
 {
   // Get index of the matched key (1-based)
   return matchKeysImpl<1>(arg, key...);
@@ -518,12 +403,12 @@ bool cmConditionEvaluator::HandleLevel0(cmArgumentList& newArgs,
 
       // store the reduced args in this vector
       auto argOpen = std::next(arg);
-      const std::vector<cmExpandedCommandArgument> subExpr(
+      std::vector<cmExpandedCommandArgument> const subExpr(
         argOpen, std::prev(argClose));
 
       // now recursively invoke IsTrue to handle the values inside the
       // parenthetical expression
-      const auto value = this->IsTrue(subExpr, errorString, status);
+      auto const value = this->IsTrue(subExpr, errorString, status);
       *arg = cmExpandedCommandArgument(bool2string(value), true);
       argOpen = std::next(arg);
       // remove the now evaluated parenthetical expression
@@ -540,26 +425,6 @@ bool cmConditionEvaluator::HandleLevel1(cmArgumentList& newArgs, std::string&,
 {
   for (auto args = newArgs.make2ArgsIterator(); args.current != newArgs.end();
        args.advance(newArgs)) {
-
-    auto policyCheck = [&, this](const cmPolicies::PolicyID id,
-                                 const cmPolicies::PolicyStatus status,
-                                 const cm::static_string_view kw) {
-      if (status == cmPolicies::WARN && this->IsKeyword(kw, *args.current)) {
-        std::ostringstream e;
-        e << cmPolicies::GetPolicyWarning(id) << "\n"
-          << kw
-          << " will be interpreted as an operator "
-             "when the policy is set to NEW.  "
-             "Since the policy is not set the OLD behavior will be used.";
-
-        this->Makefile.IssueMessage(MessageType::AUTHOR_WARNING, e.str());
-      }
-    };
-
-    // NOTE Checking policies for warnings are not require an access to the
-    // next arg. Check them first!
-    policyCheck(cmPolicies::CMP0064, this->Policy64Status, keyTEST);
-
     // NOTE Fail fast: All the predicates below require the next arg to be
     // valid
     if (args.next == newArgs.end()) {
@@ -625,17 +490,17 @@ bool cmConditionEvaluator::HandleLevel1(cmArgumentList& newArgs, std::string&,
     }
     // is a variable defined
     else if (this->IsKeyword(keyDEFINED, *args.current)) {
-      const auto& var = args.next->GetValue();
-      const auto varNameLen = var.size();
+      auto const& var = args.next->GetValue();
+      auto const varNameLen = var.size();
 
       auto result = false;
       if (looksLikeSpecialVariable(var, "ENV"_s, varNameLen)) {
-        const auto env = args.next->GetValue().substr(4, varNameLen - 5);
+        auto const env = args.next->GetValue().substr(4, varNameLen - 5);
         result = cmSystemTools::HasEnv(env);
       }
 
       else if (looksLikeSpecialVariable(var, "CACHE"_s, varNameLen)) {
-        const auto cache = args.next->GetValue().substr(6, varNameLen - 7);
+        auto const cache = args.next->GetValue().substr(6, varNameLen - 7);
         result = static_cast<bool>(
           this->Makefile.GetState()->GetCacheEntryValue(cache));
       }
@@ -647,10 +512,6 @@ bool cmConditionEvaluator::HandleLevel1(cmArgumentList& newArgs, std::string&,
     }
     // does a test exist
     else if (this->IsKeyword(keyTEST, *args.current)) {
-      if (this->Policy64Status == cmPolicies::OLD ||
-          this->Policy64Status == cmPolicies::WARN) {
-        continue;
-      }
       newArgs.ReduceOneArg(
         static_cast<bool>(this->Makefile.GetTest(args.next->GetValue())),
         args);
@@ -699,7 +560,7 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
 
       this->Makefile.ClearMatches();
 
-      const auto& rex = args.nextnext->GetValue();
+      auto const& rex = args.nextnext->GetValue();
       cmsys::RegularExpression regEntry;
       if (!regEntry.compile(rex)) {
         std::ostringstream error;
@@ -709,7 +570,7 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
         return false;
       }
 
-      const auto match = regEntry.find(*def);
+      auto const match = regEntry.find(*def);
       if (match) {
         this->Makefile.StoreMatches(regEntry);
       }
@@ -744,9 +605,9 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
                                         keySTRLESS_EQUAL, keySTRGREATER,
                                         keySTRGREATER_EQUAL, keySTREQUAL))) {
 
-      const cmValue lhs = this->GetVariableOrString(*args.current);
-      const cmValue rhs = this->GetVariableOrString(*args.nextnext);
-      const auto val = (*lhs).compare(*rhs);
+      cmValue const lhs = this->GetVariableOrString(*args.current);
+      cmValue const rhs = this->GetVariableOrString(*args.nextnext);
+      auto const val = (*lhs).compare(*rhs);
       // clang-format off
       const auto result = cmRt2CtSelector<
             std::less, std::less_equal,
@@ -761,10 +622,10 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
                 this->matchKeys(*args.next, keyVERSION_LESS,
                                 keyVERSION_LESS_EQUAL, keyVERSION_GREATER,
                                 keyVERSION_GREATER_EQUAL, keyVERSION_EQUAL))) {
-      const auto op = MATCH2CMPOP[matchNo - 1];
-      const cmValue lhs = this->GetVariableOrString(*args.current);
-      const cmValue rhs = this->GetVariableOrString(*args.nextnext);
-      const auto result = cmSystemTools::VersionCompare(op, lhs, rhs);
+      auto const op = MATCH2CMPOP[matchNo - 1];
+      cmValue const lhs = this->GetVariableOrString(*args.current);
+      cmValue const rhs = this->GetVariableOrString(*args.nextnext);
+      auto const result = cmSystemTools::VersionCompare(op, lhs, rhs);
       newArgs.ReduceTwoArgs(result, args);
     }
 
@@ -778,29 +639,12 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
     }
 
     else if (this->IsKeyword(keyIN_LIST, *args.next)) {
+      cmValue lhs = this->GetVariableOrString(*args.current);
+      cmValue rhs = this->Makefile.GetDefinition(args.nextnext->GetValue());
 
-      if (this->Policy57Status != cmPolicies::OLD &&
-          this->Policy57Status != cmPolicies::WARN) {
-
-        cmValue lhs = this->GetVariableOrString(*args.current);
-        cmValue rhs = this->Makefile.GetDefinition(args.nextnext->GetValue());
-
-        newArgs.ReduceTwoArgs(
-          rhs &&
-            cm::contains(cmList{ *rhs, cmList::EmptyElements::Yes }, *lhs),
-          args);
-      }
-
-      else if (this->Policy57Status == cmPolicies::WARN) {
-        std::ostringstream e;
-        e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0057)
-          << "\n"
-             "IN_LIST will be interpreted as an operator "
-             "when the policy is set to NEW.  "
-             "Since the policy is not set the OLD behavior will be used.";
-
-        this->Makefile.IssueMessage(MessageType::AUTHOR_WARNING, e.str());
-      }
+      newArgs.ReduceTwoArgs(
+        rhs && cm::contains(cmList{ *rhs, cmList::EmptyElements::Yes }, *lhs),
+        args);
     }
 
     else if (this->IsKeyword(keyPATH_EQUAL, *args.next)) {
@@ -810,7 +654,7 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
 
         cmValue lhs = this->GetVariableOrString(*args.current);
         cmValue rhs = this->GetVariableOrString(*args.nextnext);
-        const auto result = cmCMakePath{ *lhs } == cmCMakePath{ *rhs };
+        auto const result = cmCMakePath{ *lhs } == cmCMakePath{ *rhs };
         newArgs.ReduceTwoArgs(result, args);
       }
 
@@ -831,15 +675,13 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
 
 //=========================================================================
 // level 3 handles NOT
-bool cmConditionEvaluator::HandleLevel3(cmArgumentList& newArgs,
-                                        std::string& errorString,
-                                        MessageType& status)
+bool cmConditionEvaluator::HandleLevel3(cmArgumentList& newArgs, std::string&,
+                                        MessageType&)
 {
   for (auto args = newArgs.make2ArgsIterator(); args.next != newArgs.end();
        args.advance(newArgs)) {
     if (this->IsKeyword(keyNOT, *args.current)) {
-      const auto rhs = this->GetBooleanValueWithAutoDereference(
-        *args.next, errorString, status);
+      auto const rhs = this->GetBooleanValue(*args.next);
       newArgs.ReduceOneArg(!rhs, args);
     }
   }
@@ -848,9 +690,8 @@ bool cmConditionEvaluator::HandleLevel3(cmArgumentList& newArgs,
 
 //=========================================================================
 // level 4 handles AND OR
-bool cmConditionEvaluator::HandleLevel4(cmArgumentList& newArgs,
-                                        std::string& errorString,
-                                        MessageType& status)
+bool cmConditionEvaluator::HandleLevel4(cmArgumentList& newArgs, std::string&,
+                                        MessageType&)
 {
   for (auto args = newArgs.make3ArgsIterator(); args.nextnext != newArgs.end();
        args.advance(newArgs)) {
@@ -858,10 +699,8 @@ bool cmConditionEvaluator::HandleLevel4(cmArgumentList& newArgs,
     int matchNo;
 
     if ((matchNo = this->matchKeys(*args.next, keyAND, keyOR))) {
-      const auto lhs = this->GetBooleanValueWithAutoDereference(
-        *args.current, errorString, status);
-      const auto rhs = this->GetBooleanValueWithAutoDereference(
-        *args.nextnext, errorString, status);
+      auto const lhs = this->GetBooleanValue(*args.current);
+      auto const rhs = this->GetBooleanValue(*args.nextnext);
       // clang-format off
       const auto result =
         cmRt2CtSelector<

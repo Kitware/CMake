@@ -1,5 +1,5 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-# file Copyright.txt or https://cmake.org/licensing for details.
+# file LICENSE.rst or https://cmake.org/licensing for details.
 
 #[=======================================================================[.rst:
 CMakeFindDependencyMacro
@@ -8,7 +8,9 @@ CMakeFindDependencyMacro
 .. command:: find_dependency
 
   The ``find_dependency()`` macro wraps a :command:`find_package` call for
-  a package dependency::
+  a package dependency:
+
+  .. code-block:: cmake
 
     find_dependency(<dep> [...])
 

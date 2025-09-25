@@ -20,7 +20,9 @@ detailed information about specific events, such as toolchain inspection
 by :command:`try_compile`, meant for use in debugging the configuration
 of a build tree.
 
-For human use, this version of CMake writes the configure log to the file::
+For human use, this version of CMake writes the configure log to the file:
+
+.. code-block:: cmake
 
   ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeConfigureLog.yaml
 
@@ -332,3 +334,381 @@ documented by the `try_compile-v1 event`_, plus:
     An optional key that is present when the test project built successfully.
     Its value is an integer specifying the exit code, or a string containing
     an error message, from trying to run the test executable.
+
+.. _`find configure-log event`:
+
+Event Kind ``find``
+-------------------
+
+The :command:`find_file`, :command:`find_path`, :command:`find_library`, and
+:command:`find_program` commands log ``find`` events.
+
+There is only one ``find`` event major version, version 1.
+
+.. _`find-v1 event`:
+
+``find-v1`` Event
+^^^^^^^^^^^^^^^^^
+
+.. versionadded:: 4.1
+
+A ``find-v1`` event is a YAML mapping:
+
+.. code-block:: yaml
+
+  kind: "find-v1"
+  backtrace:
+    - "CMakeLists.txt:456 (find_program)"
+  mode: "program"
+  variable: "PROGRAM_PATH"
+  description: "Docstring for variable"
+  settings:
+    SearchFramework: "NEVER"
+    SearchAppBundle: "NEVER"
+    CMAKE_FIND_USE_CMAKE_PATH: true
+    CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: true
+    CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+    CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+    CMAKE_FIND_USE_INSTALL_PREFIX: true
+  names:
+    - "name1"
+    - "name2"
+  candidate_directories:
+    - "/path/to/search"
+    - "/other/path/to/search"
+    - "/path/to/found"
+    - "/further/path/to/search"
+  searched_directories:
+    - "/path/to/search"
+    - "/other/path/to/search"
+  found: "/path/to/found/program"
+
+The keys specific to ``find-v1`` mappings are:
+
+``mode``
+  A string describing the command using the search performed. One of ``file``,
+  ``path``, ``program``, or ``library``.
+
+``variable``
+  The variable to which the search stored its result.
+
+``description``
+  The documentation string of the variable.
+
+``settings``
+  Search settings active for the search.
+
+  ``SearchFramework``
+    A string describing how framework search is performed. One of ``FIRST``,
+    ``LAST``, ``ONLY``, or ``NEVER``. See :variable:`CMAKE_FIND_FRAMEWORK`.
+
+  ``SearchAppBundle``
+    A string describing how application bundle search is performed. One of
+    ``FIRST``, ``LAST``, ``ONLY``, or ``NEVER``. See
+    :variable:`CMAKE_FIND_APPBUNDLE`.
+
+  ``CMAKE_FIND_USE_CMAKE_PATH``
+    A boolean indicating whether or not CMake-specific cache variables are
+    used when searching. See :variable:`CMAKE_FIND_USE_CMAKE_PATH`.
+
+  ``CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH``
+    A boolean indicating whether or not CMake-specific environment variables
+    are used when searching. See
+    :variable:`CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH`.
+
+  ``CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH``
+    A boolean indicating whether or not platform-specific environment
+    variables are used when searching. See
+    :variable:`CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH`.
+
+  ``CMAKE_FIND_USE_CMAKE_SYSTEM_PATH``
+    A boolean indicating whether or not platform-specific CMake variables are
+    used when searching. See :variable:`CMAKE_FIND_USE_CMAKE_SYSTEM_PATH`.
+
+  ``CMAKE_FIND_USE_INSTALL_PREFIX``
+    A boolean indicating whether or not the install prefix is used when
+    searching. See :variable:`CMAKE_FIND_USE_INSTALL_PREFIX`.
+
+``names``
+  The names to look for the queries.
+
+``candidate_directories``
+  Candidate directories, in order, to look in during the search.
+
+``searched_directories``
+  Directories, in order, looked at during the search process.
+
+``found``
+  Either a string representing the found value or ``false`` if it was not
+  found.
+
+``search_context``
+  A mapping of variable names to search paths specified by them (either a
+  string or an array of strings depending on the variable). Environment
+  variables are wrapped with ``ENV{`` and ``}``, otherwise CMake variables are
+  used. Only variables with any paths specified are used.
+
+  ``package_stack``
+    An array of objects with paths which come from the stack of paths made
+    available by :command:`find_package` calls.
+
+    ``package_paths``
+      The paths made available by :command:`find_package` commands in the call
+      stack.
+
+.. _`find_package configure-log event`:
+
+Event Kind ``find_package``
+---------------------------
+
+.. versionadded:: 4.1
+
+The :command:`find_package` command logs ``find_package`` events.
+
+There is only one ``find_package`` event major version, version 1.
+
+.. _`find_package-v1 event`:
+
+``find_package-v1`` Event
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+A ``find_package-v1`` event is a YAML mapping:
+
+.. code-block:: yaml
+
+  kind: "find_package-v1"
+  backtrace:
+    - "CMakeLists.txt:456 (find_program)"
+  name: "PackageName"
+  components:
+    -
+      name: "Component"
+      required: true
+      found: true
+  configs:
+    -
+      filename: PackageNameConfig.cmake
+      kind: "cmake"
+    -
+      filename: packagename-config.cmake
+      kind: "cmake"
+  version_request:
+    version: "1.0"
+    version_complete: "1.0...1.5"
+    min: "INCLUDE"
+    max: "INCLUDE"
+    exact: false
+  settings:
+    required: "optional"
+    quiet: false
+    global: false
+    policy_scope: true
+    bypass_provider: false
+    hints:
+      - "/hint/path"
+    names:
+      - "name1"
+      - "name2"
+    search_paths:
+      - "/search/path"
+    path_suffixes:
+      - ""
+      - "suffix"
+    registry_view: "HOST"
+    paths:
+      CMAKE_FIND_USE_CMAKE_PATH: true
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+      CMAKE_FIND_USE_PACKAGE_ROOT_PATH: true
+      CMAKE_FIND_USE_CMAKE_PACKAGE_REGISTRY: true
+      CMAKE_FIND_USE_SYSTEM_PACKAGE_REGISTRY: true
+      CMAKE_FIND_ROOT_PATH_MODE: "BOTH"
+    candidates:
+      -
+        path: "/path/to/config/PackageName/PackageNameConfig.cmake"
+        mode: "config"
+        reason: "insufficient_version"
+      -
+        path: "/path/to/config/PackageName/packagename-config.cmake"
+        mode: "config"
+        reason: "no_exist"
+    found:
+      path: "/path/to/config/PackageName-2.5/PackageNameConfig.cmake"
+      mode: "config"
+      version: "2.5"
+
+The keys specific to ``find_package-v1`` mappings are:
+
+``name``
+  The name of the requested package.
+
+``components``
+  If present, an array of objects containing the fields:
+
+  ``name``
+    The name of the component.
+
+  ``required``
+    A boolean indicating whether the component is required or optional.
+
+  ``found``
+    A boolean indicating whether the component was found or not.
+
+``configs``
+  If present, an array of objects indicating the configuration files to search
+  for.
+
+  ``filename``
+    The filename of the configuration file.
+
+  ``kind``
+    The kind of file. Either ``cmake`` or ``cps``.
+
+``version_request``
+  An object indicating the version constraints on the search.
+
+  ``version``
+    The minimum version required.
+
+  ``version_complete``
+    The user-provided version range.
+
+  ``min``
+    Whether to ``INCLUDE`` or ``EXCLUDE`` the lower bound on the version
+    range.
+
+  ``max``
+    Whether to ``INCLUDE`` or ``EXCLUDE`` the upper bound on the version
+    range.
+
+  ``exact``
+    A boolean indicating whether an ``EXACT`` version match was requested.
+
+``settings``
+  Search settings active for the search.
+
+  ``required``
+    The requirement request of the search. One of ``optional``,
+    ``optional_explicit``, ``required_explicit``,
+    ``required_from_package_variable``, or ``required_from_find_variable``.
+
+  ``quiet``
+    A boolean indicating whether the search is ``QUIET`` or not.
+
+  ``global``
+    A boolean indicating whether the ``GLOBAL`` keyword has been provided or
+    not.
+
+  ``policy_scope``
+    A boolean indicating whether the ``NO_POLICY_SCOPE`` keyword has been
+    provided or not.
+
+  ``bypass_provider``
+    A boolean indicating whether the ``BYPASS_PROVIDER`` keyword has been
+    provided or not.
+
+  ``hints``
+    An array of paths provided as ``HINTS``.
+
+  ``names``
+    An array of package names to use when searching, provided by ``NAMES``.
+
+  ``search_paths``
+    An array of paths to search, provided by ``PATHS``.
+
+  ``path_suffixes``
+    An array of suffixes to use when searching, provided by ``PATH_SUFFIXES``.
+
+  ``registry_view``
+    The ``REGISTRY_VIEW`` requested for the search.
+
+  ``paths``
+    Path settings active for the search.
+
+    ``CMAKE_FIND_USE_CMAKE_PATH``
+      A boolean indicating whether or not CMake-specific cache variables are
+      used when searching. See :variable:`CMAKE_FIND_USE_CMAKE_PATH`.
+
+    ``CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH``
+      A boolean indicating whether or not CMake-specific environment variables
+      are used when searching. See
+      :variable:`CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH`.
+
+    ``CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH``
+      A boolean indicating whether or not platform-specific environment
+      variables are used when searching. See
+      :variable:`CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH`.
+
+    ``CMAKE_FIND_USE_CMAKE_SYSTEM_PATH``
+      A boolean indicating whether or not platform-specific CMake variables are
+      used when searching. See :variable:`CMAKE_FIND_USE_CMAKE_SYSTEM_PATH`.
+
+    ``CMAKE_FIND_USE_INSTALL_PREFIX``
+      A boolean indicating whether or not the install prefix is used when
+      searching. See :variable:`CMAKE_FIND_USE_INSTALL_PREFIX`.
+
+    ``CMAKE_FIND_USE_CMAKE_PACKAGE_REGISTRY``
+      A boolean indicating whether or not to search the CMake package registry
+      for the package. See :variable:`CMAKE_FIND_USE_PACKAGE_REGISTRY`.
+
+    ``CMAKE_FIND_USE_SYSTEM_PACKAGE_REGISTRY``
+      A boolean indicating whether or not to search the system CMake package
+      registry for the package. See
+      :variable:`CMAKE_FIND_USE_SYSTEM_PACKAGE_REGISTRY`.
+
+    ``CMAKE_FIND_ROOT_PATH_MODE``
+      A string indicating the root path mode in effect as selected by the
+      ``CMAKE_FIND_ROOT_PATH_BOTH``, ``ONLY_CMAKE_FIND_ROOT_PATH``, and
+      ``NO_CMAKE_FIND_ROOT_PATH`` arguments.
+
+``candidates``
+  An array of rejected candidate paths. Each element contains the following
+  keys:
+
+  ``path``
+    The path to the considered file. In the case of a dependency provider, the
+    value is in the form of ``dependency_provider::<COMMAND_NAME>``.
+
+  ``mode``
+    The mode which found the file. One of ``module``, ``cps``, ``cmake``, or
+    ``provider``.
+
+  ``reason``
+    The reason the path was rejected. One of ``insufficient_version``,
+    ``no_exist``, ``ignored``, ``no_config_file``, or ``not_found``.
+
+  ``message``
+    If present, a string describing why the package is considered as not
+    found.
+
+``found``
+  If the package has been found, information on the found file. If it is not
+  found, this is ``null``. Keys available:
+
+  ``path``
+    The path to the module or configuration that found the package. In the
+    case of a dependency provider, the value is in the form of
+    ``dependency_provider::<COMMAND_NAME>``.
+
+  ``mode``
+    The mode that considered the path. One of ``module``, ``cps``, ``cmake``,
+    or ``provider``.
+
+  ``version``
+    The reported version of the package.
+
+``search_context``
+  A mapping of variable names to search paths specified by them (either a
+  string or an array of strings depending on the variable). Environment
+  variables are wrapped with ``ENV{`` and ``}``, otherwise CMake variables are
+  used. Only variables with any paths specified are used.
+
+  ``package_stack``
+    An array of objects with paths which come from the stack of paths made
+    available by :command:`find_package` calls.
+
+    ``package_paths``
+      The paths made available by :command:`find_package` commands in the call
+      stack.

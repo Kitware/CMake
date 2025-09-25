@@ -1,10 +1,10 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmGhsMultiGpj.h"
 
 #include <ostream>
 
-static const char* GHS_TAG[] = { "[INTEGRITY Application]",
+static char const* GHS_TAG[] = { "[INTEGRITY Application]",
                                  "[Library]",
                                  "[Project]",
                                  "[Program]",
@@ -12,11 +12,11 @@ static const char* GHS_TAG[] = { "[INTEGRITY Application]",
                                  "[Subproject]",
                                  "[Custom Target]" };
 
-const char* GhsMultiGpj::GetGpjTag(Types gpjType)
+char const* GhsMultiGpj::GetGpjTag(Types gpjType)
 {
   char const* tag;
   switch (gpjType) {
-    case INTERGRITY_APPLICATION:
+    case INTEGRITY_APPLICATION:
     case LIBRARY:
     case PROJECT:
     case PROGRAM:

@@ -84,18 +84,6 @@
 #undef socketpair
 #endif
 
-#ifdef HAVE_GETADDRINFO
-#if defined(getaddrinfo) && defined(__osf__)
-#undef ogetaddrinfo
-#else
-#undef getaddrinfo
-#endif
-#endif /* HAVE_GETADDRINFO */
-
-#ifdef HAVE_FREEADDRINFO
-#undef freeaddrinfo
-#endif /* HAVE_FREEADDRINFO */
-
 /* sclose is probably already defined, redefine it! */
 #undef sclose
 #undef fopen

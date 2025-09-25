@@ -86,24 +86,24 @@ public:
    * library. The optional second argument is a set of flags to use when
    * opening the library. If unrecognized or unsupported flags are specified,
    * the library is not opened. */
-  static LibraryHandle OpenLibrary(const std::string&);
-  static LibraryHandle OpenLibrary(const std::string&, int);
+  static LibraryHandle OpenLibrary(std::string const&);
+  static LibraryHandle OpenLibrary(std::string const&, int);
 
   /** Attempt to detach a dynamic library from the
    * process.  A value of true is returned if it is successful. */
   static int CloseLibrary(LibraryHandle);
 
   /** Find the address of the symbol in the given library. */
-  static SymbolPointer GetSymbolAddress(LibraryHandle, const std::string&);
+  static SymbolPointer GetSymbolAddress(LibraryHandle, std::string const&);
 
   /** Return the default module prefix for the current platform.  */
-  static const char* LibPrefix() { return "@KWSYS_DynamicLoader_PREFIX@"; }
+  static char const* LibPrefix() { return "@KWSYS_DynamicLoader_PREFIX@"; }
 
   /** Return the default module suffix for the current platform.  */
-  static const char* LibExtension() { return "@KWSYS_DynamicLoader_SUFFIX@"; }
+  static char const* LibExtension() { return "@KWSYS_DynamicLoader_SUFFIX@"; }
 
   /** Return the last error produced from a calls made on this class. */
-  static const char* LastError();
+  static char const* LastError();
 }; // End Class: DynamicLoader
 
 } // namespace @KWSYS_NAMESPACE@

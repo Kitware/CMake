@@ -24,7 +24,7 @@
 
 #include "curl_setup.h"
 
-#include "timeval.h"
+#include "curlx/timeval.h"
 #include "splay.h"
 
 /*
@@ -34,7 +34,7 @@
  *  zero          : when i is equal   to   j
  *  positive when : when i is larger  than j
  */
-#define compare(i,j) Curl_timediff_us(i,j)
+#define compare(i,j) curlx_timediff_us(i,j)
 
 /*
  * Splay using the key i (which may or may not be in the tree.) The starting
@@ -113,9 +113,9 @@ struct Curl_tree *Curl_splayinsert(struct curltime i,
     t = Curl_splay(i, t);
     DEBUGASSERT(t);
     if(compare(i, t->key) == 0) {
-      /* There already exists a node in the tree with the very same key. Build
-         a doubly-linked circular list of nodes. We add the new 'node' struct
-         to the end of this list. */
+      /* There already exists a node in the tree with the same key. Build a
+         doubly-linked circular list of nodes. We add the new 'node' struct to
+         the end of this list. */
 
       node->key = KEY_NOTUSED; /* we set the key in the sub node to NOTUSED
                                   to quickly identify this node as a subnode */
@@ -199,7 +199,7 @@ struct Curl_tree *Curl_splaygetbest(struct curltime i,
 }
 
 
-/* Deletes the very node we point out from the tree if it is there. Stores a
+/* Deletes the node we point out from the tree if it is there. Stores a
  * pointer to the new resulting tree in 'newroot'.
  *
  * Returns zero on success and non-zero on errors!

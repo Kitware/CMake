@@ -115,8 +115,9 @@ recommended that the IDE invoke :manual:`cmake(1)` with the
 appropriate build tool.
 
 If an IDE project generator is used, such as :generator:`Xcode` or one of the
-Visual Studio generators, and the IDE understands the project format used, the
-IDE should read the project file and build it the same way it would otherwise.
+:ref:`Visual Studio Generators`, and the IDE understands the project format
+used, the IDE should read the project file and build it the same way it would
+otherwise.
 
 The :manual:`File API <cmake-file-api(7)>` can be used to obtain a list of
 build configurations from the build tree, and the IDE should present this list
@@ -154,7 +155,8 @@ The following IDEs support CMake natively:
 Additionally, CMake has builtin support for some IDEs:
 
 * :ref:`IDE Build Tool Generators`:
-  Generate IDE native build systems such as Visual Studio or Xcode.
+  Generate IDE native build systems such as
+  :ref:`Visual Studio <Visual Studio Generators>` or :generator:`Xcode`.
 * :ref:`Extra Generators`:
   Extend :ref:`Command-Line Build Tool Generators` to generate IDE
   project files that hook into the command-line build system.

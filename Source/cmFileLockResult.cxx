@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmFileLockResult.h"
 
 #include <cerrno>
@@ -17,9 +17,9 @@ cmFileLockResult cmFileLockResult::MakeOk()
 cmFileLockResult cmFileLockResult::MakeSystem()
 {
 #if defined(_WIN32)
-  const Error lastError = GetLastError();
+  Error const lastError = GetLastError();
 #else
-  const Error lastError = errno;
+  Error const lastError = errno;
 #endif
   return { SYSTEM, lastError };
 }
@@ -63,7 +63,7 @@ std::string cmFileLockResult::GetOutputMessage() const
       if (FormatMessageA(flags, nullptr, this->ErrorValue,
                          MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
                          (LPSTR)winmsg, WINMSG_BUF_LEN, nullptr)) {
-        const std::string message = winmsg;
+        std::string const message = winmsg;
         return message;
       } else {
         return "Internal error (FormatMessageA failed)";

@@ -94,6 +94,8 @@ def check_directory(c):
 
         assert is_string(actual["jsonFile"])
         filepath = os.path.join(reply_dir, actual["jsonFile"])
+        maximum_filename_length = 140
+        assert len(actual["jsonFile"]) <= maximum_filename_length
         with open(filepath) as f:
             d = json.load(f)
 
@@ -747,6 +749,7 @@ def gen_check_directories(c, g):
         read_codemodel_json_data("directories/object.json"),
         read_codemodel_json_data("directories/dir.json"),
         read_codemodel_json_data("directories/dir_dir.json"),
+        read_codemodel_json_data("directories/dir_very-long.json"),
         read_codemodel_json_data("directories/external.json"),
         read_codemodel_json_data("directories/fileset.json"),
         read_codemodel_json_data("directories/subdir.json"),

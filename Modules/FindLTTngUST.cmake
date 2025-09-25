@@ -1,5 +1,5 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-# file Copyright.txt or https://cmake.org/licensing for details.
+# file LICENSE.rst or https://cmake.org/licensing for details.
 
 #[=======================================================================[.rst:
 FindLTTngUST
@@ -7,34 +7,52 @@ FindLTTngUST
 
 .. versionadded:: 3.6
 
-Find
-`Linux Trace Toolkit Next Generation (LTTng-UST) <https://lttng.org/>`__ library.
+Finds the `LTTng <https://lttng.org/>`_ (Linux Trace Toolkit: next generation)
+user space tracing library (LTTng-UST).
 
-Imported target
-^^^^^^^^^^^^^^^
-
-This module defines the following :prop_tgt:`IMPORTED` target:
-
-``LTTng::UST``
-  The LTTng-UST library, if found
-
-Result variables
+Imported Targets
 ^^^^^^^^^^^^^^^^
 
-This module sets the following
+This module defines the following :ref:`Imported Targets`:
 
-``LTTNGUST_FOUND``
-  ``TRUE`` if system has LTTng-UST
-``LTTNGUST_INCLUDE_DIRS``
-  The LTTng-UST include directories
-``LTTNGUST_LIBRARIES``
-  The libraries needed to use LTTng-UST
+``LTTng::UST``
+  Target providing the LTTng-UST library usage requirements.  This target is
+  available only when LTTng-UST is found.
+
+Result Variables
+^^^^^^^^^^^^^^^^
+
+This module sets the following variables:
+
+``LTTngUST_FOUND``
+  Boolean indicating whether the LTTng-UST library is found.  For backward
+  compatibility, the ``LTTNGUST_FOUND`` variable is also set to the same value.
 ``LTTNGUST_VERSION_STRING``
-  The LTTng-UST version
+  The LTTng-UST version.
 ``LTTNGUST_HAS_TRACEF``
-  ``TRUE`` if the ``tracef()`` API is available in the system's LTTng-UST
+  ``TRUE`` if the ``tracef()`` API is available in the system's LTTng-UST.
 ``LTTNGUST_HAS_TRACELOG``
-  ``TRUE`` if the ``tracelog()`` API is available in the system's LTTng-UST
+  ``TRUE`` if the ``tracelog()`` API is available in the system's LTTng-UST.
+
+Cache Variables
+^^^^^^^^^^^^^^^
+
+The following cache variables may also be set:
+
+``LTTNGUST_INCLUDE_DIRS``
+  The LTTng-UST include directories.
+``LTTNGUST_LIBRARIES``
+  The libraries needed to use LTTng-UST.
+
+Examples
+^^^^^^^^
+
+Finding the LTTng-UST library and linking it to a project target:
+
+.. code-block:: cmake
+
+  find_package(LTTugNST)
+  target_link_libraries(project_target PRIVATE LTTng::UST)
 #]=======================================================================]
 
 cmake_policy(PUSH)
@@ -97,8 +115,8 @@ if(LTTNGUST_INCLUDE_DIRS AND LTTNGUST_LIBRARIES)
   set(LTTNGUST_LIBRARIES ${LTTNGUST_LIBRARIES} ${CMAKE_DL_LIBS})
 endif()
 
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
-find_package_handle_standard_args(LTTngUST FOUND_VAR LTTNGUST_FOUND
+include(FindPackageHandleStandardArgs)
+find_package_handle_standard_args(LTTngUST
                                   REQUIRED_VARS LTTNGUST_LIBRARIES
                                                 LTTNGUST_INCLUDE_DIRS
                                   VERSION_VAR LTTNGUST_VERSION_STRING)

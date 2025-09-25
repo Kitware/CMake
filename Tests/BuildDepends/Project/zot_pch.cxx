@@ -1,6 +1,6 @@
 #include <zot_pch.hxx>
 
-const char* zot_pch_f()
+char const* zot_pch_f()
 {
   return zot_pch;
 }

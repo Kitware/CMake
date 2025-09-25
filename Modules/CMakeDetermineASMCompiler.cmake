@@ -1,10 +1,12 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-# file Copyright.txt or https://cmake.org/licensing for details.
+# file LICENSE.rst or https://cmake.org/licensing for details.
 
 
 # determine the compiler to use for ASM programs
 
 include(${CMAKE_ROOT}/Modules/CMakeDetermineCompiler.cmake)
+
+cmake_policy(GET CMP0194 _CMAKE_ASM_CMP0194)
 
 if(NOT CMAKE_ASM${ASM_DIALECT}_COMPILER)
   # prefer the environment variable ASM
@@ -21,15 +23,32 @@ if(NOT CMAKE_ASM${ASM_DIALECT}_COMPILER)
   # finally list compilers to try
   if("ASM${ASM_DIALECT}" STREQUAL "ASM") # the generic assembler support
     if(NOT CMAKE_ASM_COMPILER_INIT)
-      if(CMAKE_C_COMPILER)
-        set(CMAKE_ASM${ASM_DIALECT}_COMPILER_LIST ${CMAKE_C_COMPILER})
-      elseif(CMAKE_CXX_COMPILER)
-        set(CMAKE_ASM${ASM_DIALECT}_COMPILER_LIST ${CMAKE_CXX_COMPILER})
+      if(_CMAKE_ASM_CMP0194 STREQUAL "NEW")
+        set(_CMAKE_ASM_REGEX_MSVC "^(MSVC)$")
+        set(_CMAKE_ASM_REGEX_CL "(^|/)[Cc][Ll](\\.|$)")
+        set(_CMAKE_ASM_MAYBE_CL "")
+      else()
+        set(_CMAKE_ASM_REGEX_MSVC "CMP0194_OLD_MSVC_NOT_EXCLUDED")
+        set(_CMAKE_ASM_REGEX_CL "CMP0194_OLD_MSVC_NOT_EXCLUDED")
+        set(_CMAKE_ASM_MAYBE_CL "cl")
+      endif()
+      if(CMAKE_C_COMPILER_LOADED AND NOT CMAKE_C_COMPILER_ID MATCHES "${_CMAKE_ASM_REGEX_MSVC}")
+        set(CMAKE_ASM_COMPILER_LIST ${CMAKE_C_COMPILER})
+      elseif(NOT CMAKE_C_COMPILER_LOADED AND CMAKE_C_COMPILER AND NOT CMAKE_C_COMPILER MATCHES "${_CMAKE_ASM_REGEX_CL}")
+        set(CMAKE_ASM_COMPILER_LIST ${CMAKE_C_COMPILER})
+      elseif(CMAKE_CXX_COMPILER_LOADED AND NOT CMAKE_CXX_COMPILER_ID MATCHES "${_CMAKE_ASM_REGEX_MSVC}")
+        set(CMAKE_ASM_COMPILER_LIST ${CMAKE_CXX_COMPILER})
+      elseif(NOT CMAKE_CXX_COMPILER_LOADED AND CMAKE_CXX_COMPILER AND NOT CMAKE_CXX_COMPILER MATCHES "${_CMAKE_ASM_REGEX_CL}")
+        set(CMAKE_ASM_COMPILER_LIST ${CMAKE_CXX_COMPILER})
       else()
         # List all default C and CXX compilers
-        set(CMAKE_ASM${ASM_DIALECT}_COMPILER_LIST
-             ${_CMAKE_TOOLCHAIN_PREFIX}cc  ${_CMAKE_TOOLCHAIN_PREFIX}gcc cl bcc xlc
-          CC ${_CMAKE_TOOLCHAIN_PREFIX}c++ ${_CMAKE_TOOLCHAIN_PREFIX}g++ aCC cl bcc xlC)
+        set(CMAKE_ASM_COMPILER_LIST
+             ${_CMAKE_TOOLCHAIN_PREFIX}cc  ${_CMAKE_TOOLCHAIN_PREFIX}gcc xlc
+             ${_CMAKE_ASM_MAYBE_CL}
+          CC ${_CMAKE_TOOLCHAIN_PREFIX}c++ ${_CMAKE_TOOLCHAIN_PREFIX}g++ xlC)
+        unset(_CMAKE_ASM_MAYBE_CL)
+        unset(_CMAKE_ASM_REGEX_CL)
+        unset(_CMAKE_ASM_REGEX_MSVC)
       endif()
     endif()
   else() # some specific assembler "dialect"
@@ -96,7 +115,11 @@ if(NOT CMAKE_ASM${ASM_DIALECT}_COMPILER_ID)
 
   list(APPEND CMAKE_ASM${ASM_DIALECT}_COMPILER_ID_VENDORS MSVC )
   set(CMAKE_ASM${ASM_DIALECT}_COMPILER_ID_VENDOR_FLAGS_MSVC "-?")
-  set(CMAKE_ASM${ASM_DIALECT}_COMPILER_ID_VENDOR_REGEX_MSVC "Microsoft")
+  if(_CMAKE_ASM_CMP0194 STREQUAL "NEW")
+    set(CMAKE_ASM${ASM_DIALECT}_COMPILER_ID_VENDOR_REGEX_MSVC "Microsoft.*Macro Assembler")
+  else()
+    set(CMAKE_ASM${ASM_DIALECT}_COMPILER_ID_VENDOR_REGEX_MSVC "Microsoft")
+  endif()
 
   list(APPEND CMAKE_ASM${ASM_DIALECT}_COMPILER_ID_VENDORS TI )
   set(CMAKE_ASM${ASM_DIALECT}_COMPILER_ID_VENDOR_FLAGS_TI "-h")
@@ -109,6 +132,10 @@ if(NOT CMAKE_ASM${ASM_DIALECT}_COMPILER_ID)
   list(APPEND CMAKE_ASM${ASM_DIALECT}_COMPILER_ID_VENDORS IAR)
   set(CMAKE_ASM${ASM_DIALECT}_COMPILER_ID_VENDOR_FLAGS_IAR )
   set(CMAKE_ASM${ASM_DIALECT}_COMPILER_ID_VENDOR_REGEX_IAR "IAR Assembler")
+
+  list(APPEND CMAKE_ASM${ASM_DIALECT}_COMPILER_ID_VENDORS Diab)
+  set(CMAKE_ASM${ASM_DIALECT}_COMPILER_ID_VENDOR_FLAGS_Diab "-V" )
+  set(CMAKE_ASM${ASM_DIALECT}_COMPILER_ID_VENDOR_REGEX_Diab "Wind River Systems")
 
   list(APPEND CMAKE_ASM${ASM_DIALECT}_COMPILER_ID_VENDORS ARMCC)
   set(CMAKE_ASM${ASM_DIALECT}_COMPILER_ID_VENDOR_FLAGS_ARMCC )
@@ -129,6 +156,14 @@ if(NOT CMAKE_ASM${ASM_DIALECT}_COMPILER_ID)
   list(APPEND CMAKE_ASM${ASM_DIALECT}_COMPILER_ID_VENDORS QCC)
   set(CMAKE_ASM${ASM_DIALECT}_COMPILER_ID_VENDOR_FLAGS_QCC "-V")
   set(CMAKE_ASM${ASM_DIALECT}_COMPILER_ID_VENDOR_REGEX_QCC "gcc_nto")
+
+  list(APPEND CMAKE_ASM${ASM_DIALECT}_COMPILER_ID_VENDORS Tasking)
+  set(CMAKE_ASM${ASM_DIALECT}_COMPILER_ID_VENDOR_FLAGS_Tasking "--version")
+  set(CMAKE_ASM${ASM_DIALECT}_COMPILER_ID_VENDOR_REGEX_Tasking "TASKING")
+
+  list(APPEND CMAKE_ASM${ASM_DIALECT}_COMPILER_ID_VENDORS Renesas)
+  set(CMAKE_ASM${ASM_DIALECT}_COMPILER_ID_VENDOR_FLAGS_Renesas "-v")
+  set(CMAKE_ASM${ASM_DIALECT}_COMPILER_ID_VENDOR_REGEX_Renesas "(RX Family C/C\\+\\+ Compiler)|(RL78 Family Compiler)|(RH850 Family Compiler)")
 
   include(CMakeDetermineCompilerId)
   set(userflags)
@@ -158,6 +193,10 @@ if(NOT CMAKE_ASM${ASM_DIALECT}_COMPILER_ID)
         set(CMAKE_ASM${ASM_DIALECT}_COMPILER_FRONTEND_VARIANT "GNU")
       endif()
       set(_variant " with ${CMAKE_ASM${ASM_DIALECT}_COMPILER_FRONTEND_VARIANT}-like command-line")
+  elseif("x${CMAKE_ASM${ASM_DIALECT}_COMPILER_ID}" STREQUAL "xRenesas")
+    string(REGEX MATCH "[A-Za-z0-9]+ Family (C/C\\+\\+ )*Compiler [V|E][0-9|.]+" _compiler_id "${CMAKE_ASM${ASM_DIALECT}_COMPILER_ID_OUTPUT}")
+    string(REGEX MATCH "R[A-Za-z0-9]+" CMAKE_ASM${ASM_DIALECT}_COMPILER_ARCHITECTURE_ID "${_compiler_id}")
+    string(REGEX MATCH "V[0-9|.]+" CMAKE_ASM${ASM_DIALECT}_COMPILER_VERSION "${_compiler_id}")
   endif()
 
   _cmake_find_compiler_sysroot(ASM${ASM_DIALECT})
@@ -177,6 +216,8 @@ if(CMAKE_ASM${ASM_DIALECT}_COMPILER_ID)
   endif()
   if(CMAKE_ASM${ASM_DIALECT}_COMPILER_ARCHITECTURE_ID AND "x${CMAKE_ASM${ASM_DIALECT}_COMPILER_ID}" STREQUAL "xIAR")
     set(_archid " ${CMAKE_ASM${ASM_DIALECT}_COMPILER_ARCHITECTURE_ID}")
+  elseif(CMAKE_ASM${ASM_DIALECT}_COMPILER_ARCHITECTURE_ID AND "x${CMAKE_ASM${ASM_DIALECT}_COMPILER_ID}" STREQUAL "xRenesas")
+    set(_archid " ${CMAKE_ASM${ASM_DIALECT}_COMPILER_ARCHITECTURE_ID} Family Assembler")
   else()
     set(_archid "")
   endif()
@@ -186,6 +227,11 @@ if(CMAKE_ASM${ASM_DIALECT}_COMPILER_ID)
   unset(_variant)
 else()
   message(STATUS "The ASM${ASM_DIALECT} compiler identification is unknown")
+endif()
+
+if("ASM${ASM_DIALECT}" STREQUAL "ASM" AND CMAKE_ASM_COMPILER_ID STREQUAL "MSVC" AND _CMAKE_ASM_CMP0194 STREQUAL "")
+  cmake_policy(GET_WARNING CMP0194 _CMAKE_ASM_CMP0194_WARNING)
+  message(AUTHOR_WARNING "${_CMAKE_ASM_CMP0194_WARNING}")
 endif()
 
 # If we have a gas/as cross compiler, they have usually some prefix, like
@@ -230,18 +276,6 @@ else()
   message(STATUS "Didn't find assembler")
 endif()
 
-foreach(_var
-    COMPILER
-    COMPILER_ID
-    COMPILER_ARG1
-    COMPILER_ENV_VAR
-    COMPILER_AR
-    COMPILER_RANLIB
-    COMPILER_VERSION
-    )
-  set(_CMAKE_ASM_${_var} "${CMAKE_ASM${ASM_DIALECT}_${_var}}")
-endforeach()
-
 if(CMAKE_ASM${ASM_DIALECT}_COMPILER_SYSROOT)
   string(CONCAT _SET_CMAKE_ASM_COMPILER_SYSROOT
     "set(CMAKE_ASM${ASM_DIALECT}_COMPILER_SYSROOT \"${CMAKE_ASM${ASM_DIALECT}_COMPILER_SYSROOT}\")\n"
@@ -257,25 +291,21 @@ else()
   set(_SET_CMAKE_ASM_COMPILER_ID_VENDOR_MATCH "")
 endif()
 
-if(CMAKE_ASM${ASM_DIALECT}_COMPILER_ARCHITECTURE_ID)
-  set(_SET_CMAKE_ASM_COMPILER_ARCHITECTURE_ID
-    "set(CMAKE_ASM${ASM_DIALECT}_COMPILER_ARCHITECTURE_ID ${CMAKE_ASM${ASM_DIALECT}_COMPILER_ARCHITECTURE_ID})")
-else()
-  set(_SET_CMAKE_ASM_COMPILER_ARCHITECTURE_ID "")
-endif()
-
 # configure variables set in this file for fast reload later on
-configure_file(${CMAKE_ROOT}/Modules/CMakeASMCompiler.cmake.in
-  ${CMAKE_PLATFORM_INFO_DIR}/CMakeASM${ASM_DIALECT}Compiler.cmake @ONLY)
-
-foreach(_var
-    COMPILER
-    COMPILER_ID
-    COMPILER_ARG1
-    COMPILER_ENV_VAR
-    COMPILER_AR
-    COMPILER_RANLIB
-    COMPILER_VERSION
-    )
-  unset(_CMAKE_ASM_${_var})
-endforeach()
+block()
+  foreach(_var IN ITEMS
+      # Keep in sync with Internal/CMakeTestASMLinker.
+      COMPILER
+      COMPILER_ID
+      COMPILER_ARG1
+      COMPILER_ENV_VAR
+      COMPILER_AR
+      COMPILER_RANLIB
+      COMPILER_VERSION
+      COMPILER_ARCHITECTURE_ID
+      )
+    set(_CMAKE_ASM_${_var} "${CMAKE_ASM${ASM_DIALECT}_${_var}}")
+  endforeach()
+  configure_file(${CMAKE_ROOT}/Modules/CMakeASMCompiler.cmake.in
+    ${CMAKE_PLATFORM_INFO_DIR}/CMakeASM${ASM_DIALECT}Compiler.cmake @ONLY)
+endblock()

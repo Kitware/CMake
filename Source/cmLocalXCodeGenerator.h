@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
@@ -31,7 +31,7 @@ public:
   std::string GetTargetDirectory(
     cmGeneratorTarget const* target) const override;
   void AppendFlagEscape(std::string& flags,
-                        const std::string& rawFlag) const override;
+                        std::string const& rawFlag) const override;
   void Generate() override;
   void AddGeneratorSpecificInstallSetup(std::ostream& os) override;
   void ComputeObjectFilenames(

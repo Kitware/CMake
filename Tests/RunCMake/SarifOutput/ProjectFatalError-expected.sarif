@@ -1,0 +1,47 @@
+{
+  "$schema": "https://schemastore.azurewebsites.net/schemas/json/sarif-2.1.0-rtm.4.json",
+  "runs": [
+    {
+      "results": [
+        {
+          "level": "error",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "PATH:<SOURCE_DIR>/ProjectFatalError.cmake"
+                },
+                "region": {
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Example error"
+          },
+          "ruleId": "CMake.FatalError",
+          "ruleIndex": 0
+        }
+      ],
+      "tool": {
+        "driver": {
+          "name": "CMake",
+          "rules": [
+            {
+              "id": "CMake.FatalError",
+              "messageStrings": {
+                "default": {
+                  "text": "CMake Error: {0}"
+                }
+              },
+              "name": "CMake Error"
+            }
+          ],
+          "version": "<IGNORE>"
+        }
+      }
+    }
+  ],
+  "version": "2.1.0"
+}

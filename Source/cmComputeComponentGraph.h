@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
@@ -54,7 +54,7 @@ public:
     return this->TarjanComponents;
   }
 
-  static const size_t INVALID_COMPONENT;
+  static size_t const INVALID_COMPONENT;
 
 private:
   void TransferEdges();

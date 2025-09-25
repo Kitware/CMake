@@ -1,28 +1,44 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-# file Copyright.txt or https://cmake.org/licensing for details.
+# file LICENSE.rst or https://cmake.org/licensing for details.
 
 #[=======================================================================[.rst:
 FindHSPELL
 ----------
 
-Try to find Hebrew spell-checker (Hspell) and morphology engine.
+Finds Hebrew spell-checker (Hspell) and morphology engine.
 
-Once done this will define
+Result Variables
+^^^^^^^^^^^^^^^^
 
-::
+This module defines the following variables:
 
-  HSPELL_FOUND - system has Hspell
-  HSPELL_INCLUDE_DIR - the Hspell include directory
-  HSPELL_LIBRARIES - The libraries needed to use Hspell
-  HSPELL_DEFINITIONS - Compiler switches required for using Hspell
+``HSPELL_FOUND``
+  Boolean indicating whether the Hspell is found.
+``HSPELL_VERSION_STRING``
+  The version of Hspell found (x.y).
+``HSPELL_MAJOR_VERSION``
+  The major version of Hspell.
+``HSPELL_MINOR_VERSION``
+  The minor version of Hspell.
 
+Cache Variables
+^^^^^^^^^^^^^^^
 
+The following cache variables may also be set:
 
-::
+``HSPELL_INCLUDE_DIR``
+  The Hspell include directory.
+``HSPELL_LIBRARIES``
+  The libraries needed to use Hspell.
 
-  HSPELL_VERSION_STRING - The version of Hspell found (x.y)
-  HSPELL_MAJOR_VERSION  - the major version of Hspell
-  HSPELL_MINOR_VERSION  - The minor version of Hspell
+Examples
+^^^^^^^^
+
+Finding Hspell:
+
+.. code-block:: cmake
+
+  find_package(HSPELL)
 #]=======================================================================]
 
 cmake_policy(PUSH)
@@ -40,8 +56,8 @@ if (HSPELL_INCLUDE_DIR)
     unset(HSPELL_H)
 endif()
 
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(HSPELL
+include(FindPackageHandleStandardArgs)
+find_package_handle_standard_args(HSPELL
                                   REQUIRED_VARS HSPELL_LIBRARIES HSPELL_INCLUDE_DIR
                                   VERSION_VAR HSPELL_VERSION_STRING)
 

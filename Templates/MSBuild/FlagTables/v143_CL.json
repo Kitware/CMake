@@ -498,6 +498,13 @@
   },
   {
     "name": "LanguageStandard",
+    "switch": "std:c++23preview",
+    "comment": "Preview - ISO C++23 Standard",
+    "value": "stdcpp23",
+    "flags": []
+  },
+  {
+    "name": "LanguageStandard",
     "switch": "std:c++latest",
     "comment": "Preview - Features from the Latest C++ Working Draft",
     "value": "stdcpplatest",
@@ -515,6 +522,13 @@
     "switch": "std:c17",
     "comment": "ISO C17 (2018) Standard",
     "value": "stdc17",
+    "flags": []
+  },
+  {
+    "name": "LanguageStandard_C",
+    "switch": "std:clatest",
+    "comment": "Preview - Features from the Latest C Working Draft",
+    "value": "stdclatest",
     "flags": []
   },
   {

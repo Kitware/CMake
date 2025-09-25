@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmCTestVC.h"
 
 #include <cstdio>
@@ -8,13 +8,14 @@
 #include <vector>
 
 #include "cmCTest.h"
+#include "cmMakefile.h"
 #include "cmSystemTools.h"
 #include "cmUVProcessChain.h"
-#include "cmValue.h"
 #include "cmXMLWriter.h"
 
-cmCTestVC::cmCTestVC(cmCTest* ct, std::ostream& log)
+cmCTestVC::cmCTestVC(cmCTest* ct, cmMakefile* mf, std::ostream& log)
   : CTest(ct)
+  , Makefile(mf)
   , Log(log)
 {
   this->PathCount[PathUpdated] = 0;
@@ -37,7 +38,7 @@ void cmCTestVC::SetSourceDirectory(std::string const& dir)
   this->SourceDirectory = dir;
 }
 
-bool cmCTestVC::InitialCheckout(const std::string& command)
+bool cmCTestVC::InitialCheckout(std::string const& command)
 {
   cmCTestLog(this->CTest, HANDLER_OUTPUT,
              "   First perform the initial checkout: " << command << "\n");
@@ -68,7 +69,7 @@ bool cmCTestVC::InitialCheckout(const std::string& command)
   return result;
 }
 
-bool cmCTestVC::RunChild(const std::vector<std::string>& cmd,
+bool cmCTestVC::RunChild(std::vector<std::string> const& cmd,
                          OutputParser* out, OutputParser* err,
                          std::string workDir, Encoding encoding)
 {
@@ -83,10 +84,10 @@ bool cmCTestVC::RunChild(const std::vector<std::string>& cmd,
   return status.front().SpawnResult == 0 && status.front().ExitStatus == 0;
 }
 
-std::string cmCTestVC::ComputeCommandLine(const std::vector<std::string>& cmd)
+std::string cmCTestVC::ComputeCommandLine(std::vector<std::string> const& cmd)
 {
   std::ostringstream line;
-  const char* sep = "";
+  char const* sep = "";
   for (auto const& arg : cmd) {
     line << sep << "\"" << arg << "\"";
     sep = " ";
@@ -94,7 +95,7 @@ std::string cmCTestVC::ComputeCommandLine(const std::vector<std::string>& cmd)
   return line.str();
 }
 
-bool cmCTestVC::RunUpdateCommand(const std::vector<std::string>& cmd,
+bool cmCTestVC::RunUpdateCommand(std::vector<std::string> const& cmd,
                                  OutputParser* out, OutputParser* err,
                                  Encoding encoding)
 {
@@ -113,7 +114,7 @@ std::string cmCTestVC::GetNightlyTime()
 {
   // Get the nightly start time corresponding to the current dau.
   struct tm* t = this->CTest->GetNightlyTime(
-    this->CTest->GetCTestConfiguration("NightlyStartTime"),
+    this->Makefile->GetSafeDefinition("CTEST_NIGHTLY_START_TIME"),
     this->CTest->GetTomorrowTag());
   char current_time[1024];
   snprintf(current_time, sizeof(current_time), "%04d-%02d-%02d %02d:%02d:%02d",
@@ -140,7 +141,7 @@ bool cmCTestVC::Update()
 
   // Use the explicitly specified version.
   std::string versionOverride =
-    this->CTest->GetCTestConfiguration("UpdateVersionOverride");
+    this->Makefile->GetSafeDefinition("CTEST_UPDATE_VERSION_OVERRIDE");
   if (!versionOverride.empty()) {
     this->SetNewRevision(versionOverride);
     return true;
@@ -148,7 +149,7 @@ bool cmCTestVC::Update()
 
   // if update version only is on then do not actually update,
   // just note the current version and finish
-  if (!cmIsOn(this->CTest->GetCTestConfiguration("UpdateVersionOnly"))) {
+  if (!this->Makefile->IsOn("CTEST_UPDATE_VERSION_ONLY")) {
     result = this->NoteOldRevision() && result;
     this->Log << "--- Begin Update ---\n";
     result = this->UpdateImpl() && result;
@@ -201,7 +202,7 @@ void cmCTestVC::WriteXMLEntry(cmXMLWriter& xml, std::string const& path,
                               std::string const& name, std::string const& full,
                               File const& f)
 {
-  static const char* desc[3] = { "Updated", "Modified", "Conflicting" };
+  static char const* desc[3] = { "Updated", "Modified", "Conflicting" };
   Revision const& rev = f.Rev ? *f.Rev : this->Unknown;
   std::string prior = f.PriorRev ? f.PriorRev->Rev : std::string("Unknown");
   xml.StartElement(desc[f.Status]);

@@ -1,5 +1,5 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-# file Copyright.txt or https://cmake.org/licensing for details.
+# file LICENSE.rst or https://cmake.org/licensing for details.
 
 #[=======================================================================[.rst:
 UseSWIG
@@ -21,7 +21,9 @@ The following command is defined for use with ``SWIG``:
 
   .. versionadded:: 3.8
 
-  Define swig module with given name and specified language::
+  Define swig module with given name and specified language:
+
+  .. code-block:: cmake
 
     swig_add_library(<name>
                      [TYPE <SHARED|MODULE|STATIC|USE_BUILD_SHARED_LIBS>]
@@ -372,7 +374,9 @@ Deprecated Commands
     Use :command:`target_link_libraries` with the standard target name,
     or with ``${SWIG_MODULE_<name>_REAL_NAME}`` for legacy target naming.
 
-  Link libraries to swig module::
+  Link libraries to swig module:
+
+  .. code-block:: cmake
 
     swig_link_libraries(<name> <item>...)
 
@@ -394,10 +398,6 @@ Deprecated Commands
 #]=======================================================================]
 
 cmake_policy(PUSH)
-# numbers and boolean constants
-cmake_policy (SET CMP0012 NEW)
-# IN_LIST operator
-cmake_policy (SET CMP0057 NEW)
 # Ninja generator normalizes custom command depfile paths
 cmake_policy (SET CMP0116 NEW)
 

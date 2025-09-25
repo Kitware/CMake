@@ -29,11 +29,15 @@ if(NOT CTEST_CONFIGURATION_TYPE)
 endif()
 
 # Isolate tests from user configuration in the environment.
+unset(ENV{NO_COLOR})
+unset(ENV{CLICOLOR})
+unset(ENV{CLICOLOR_FORCE})
 unset(ENV{CMAKE_GENERATOR})
 unset(ENV{CMAKE_GENERATOR_INSTANCE})
 unset(ENV{CMAKE_GENERATOR_PLATFORM})
 unset(ENV{CMAKE_GENERATOR_TOOLSET})
 unset(ENV{CMAKE_EXPORT_COMPILE_COMMANDS})
+unset(ENV{CMAKE_POLICY_VERSION_MINIMUM})
 
 # Verify that our module implementations do not recurse too much.
 set(ENV{CMAKE_MAXIMUM_RECURSION_DEPTH} 100)

@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmVSSetupHelper.h"
 
 #include <utility>
@@ -306,8 +306,8 @@ namespace {
 std::string FindVsWhereCommand()
 {
   std::string vswhere;
-  static const char* programFiles[] = { "ProgramFiles(x86)", "ProgramFiles" };
-  for (const char* pf : programFiles) {
+  static char const* programFiles[] = { "ProgramFiles(x86)", "ProgramFiles" };
+  for (char const* pf : programFiles) {
     if (cmSystemTools::GetEnv(pf, vswhere)) {
       vswhere += "/Microsoft Visual Studio/Installer/vswhere.exe";
       if (cmSystemTools::FileExists(vswhere)) {
@@ -350,7 +350,7 @@ bool cmVSSetupAPIHelper::EnumerateVSInstancesWithVswhere(
     return false;
   }
 
-  for (const auto& item : json) {
+  for (auto const& item : json) {
     VSInstanceInfo instance;
     instance.Version = item["installationVersion"].asString();
     instance.VSInstallLocation = item["installationPath"].asString();
@@ -433,14 +433,11 @@ bool cmVSSetupAPIHelper::EnumerateAndChooseVSInstance()
 
   std::string envVSCommonToolsDir;
   std::string envVSCommonToolsDirEnvName =
-    cmStrCat("VS", std::to_string(this->Version), "0COMNTOOLS");
+    cmStrCat("VS", this->Version, "0COMNTOOLS");
 
-  if (cmSystemTools::GetEnv(envVSCommonToolsDirEnvName.c_str(),
-                            envVSCommonToolsDir)) {
+  if (cmSystemTools::GetEnv(envVSCommonToolsDirEnvName, envVSCommonToolsDir)) {
     cmSystemTools::ConvertToUnixSlashes(envVSCommonToolsDir);
   }
-
-  std::string const wantVersion = cmStrCat(std::to_string(this->Version), '.');
 
   bool specifiedLocationNotSpecifiedVersion = false;
 
@@ -455,8 +452,10 @@ bool cmVSSetupAPIHelper::EnumerateAndChooseVSInstance()
     return false;
   }
 
+  std::string const wantVersion = cmStrCat(this->Version, '.');
+
   std::vector<VSInstanceInfo> vecVSInstances;
-  for (const auto& instanceInfo : vecVSInstancesAll) {
+  for (auto const& instanceInfo : vecVSInstancesAll) {
     // We are looking for a specific major version.
     if (instanceInfo.Version.size() < wantVersion.size() ||
         (instanceInfo.Version.substr(0, wantVersion.size()) != wantVersion &&
@@ -516,7 +515,7 @@ bool cmVSSetupAPIHelper::EnumerateAndChooseVSInstance()
 }
 
 int cmVSSetupAPIHelper::ChooseVSInstance(
-  const std::vector<VSInstanceInfo>& vecVSInstances)
+  std::vector<VSInstanceInfo> const& vecVSInstances)
 {
   if (vecVSInstances.empty()) {
     return -1;

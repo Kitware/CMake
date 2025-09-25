@@ -194,9 +194,12 @@ if(BUILD_TESTING)
       set(info_vs15 "VS_15_DIR")
       set(info_vs16 "VS_16_DIR")
       set(info_vs17 "VS_17_DIR")
+      set(info_vs18 "VS_18_DIR")
       set(vs_versions)
       if(WIN32)
-        if(NOT CMAKE_VERSION VERSION_LESS 3.21.20210624)
+        if(NOT CMAKE_VERSION VERSION_LESS 4.2)
+          set(vs_versions vs15 vs16 vs17 vs18)
+        elseif(NOT CMAKE_VERSION VERSION_LESS 3.21)
           set(vs_versions vs15 vs16 vs17)
         elseif(NOT CMAKE_VERSION VERSION_LESS 3.14)
           set(vs_versions vs15 vs16)
@@ -328,6 +331,36 @@ if(BUILD_TESTING)
     endif()
   endif()
 
+  if(CMake_TEST_FindPython)
+    set(CMake_TEST_FindPython2 TRUE)
+    set(CMake_TEST_FindPython3 TRUE)
+  endif()
+  if(CMake_TEST_FindPython_SABIModule)
+    set(CMake_TEST_FindPython2_SABIModule TRUE)
+    set(CMake_TEST_FindPython3_SABIModule TRUE)
+  endif()
+  if(CMake_TEST_FindPython_NumPy)
+    set(CMake_TEST_FindPython2_NumPy TRUE)
+    set(CMake_TEST_FindPython3_NumPy TRUE)
+  endif()
+  if(CMake_TEST_FindPython_Conda)
+    set(CMake_TEST_FindPython3_Conda TRUE)
+  endif()
+  if(CMake_TEST_FindPython_IronPython)
+    set(CMake_TEST_FindPython2_IronPython TRUE)
+    set(CMake_TEST_FindPython3_IronPython TRUE)
+  endif()
+  if(CMake_TEST_FindPython_PyPy)
+    set(CMake_TEST_FindPython2_PyPy TRUE)
+    set(CMake_TEST_FindPython3_PyPy TRUE)
+  endif()
+  if (CMake_TEST_FindPython2 AND CMAKE_SYSTEM_NAME MATCHES "Linux|Darwin")
+    set(CMake_TEST_FindPython2_SABIModule TRUE)
+  endif()
+  if (CMake_TEST_FindPython3 AND CMAKE_SYSTEM_NAME MATCHES "Linux|Darwin")
+    set(CMake_TEST_FindPython3_SABIModule TRUE)
+  endif()
+
   # Use 1500 or CTEST_TEST_TIMEOUT for long test timeout value,
   # whichever is greater.
   set(CMAKE_LONG_TEST_TIMEOUT 1500)
@@ -351,7 +384,8 @@ if(BUILD_TESTING)
 
   # add a bunch of standard build-and-test style tests
   ADD_TEST_MACRO(CommandLineTest CommandLineTest)
-  ADD_TEST_MACRO(FindPackageTest FindPackageTest)
+  ADD_TEST_MACRO(FindPackageCMakeTest FindPackageCMakeTest)
+  ADD_TEST_MACRO(FindPackageCpsTest FindPackageCpsTest)
   ADD_TEST_MACRO(StringFileTest StringFileTest)
   ADD_TEST_MACRO(TryCompile TryCompile)
   ADD_TEST_MACRO(SystemInformation SystemInformation)
@@ -467,9 +501,6 @@ if(BUILD_TESTING)
   ADD_TEST_MACRO(SetLang SetLangX)
   ADD_TEST_MACRO(EmptyProperty EmptyProperty)
   ADD_TEST_MACRO(ExternalOBJ ExternalOBJ)
-  if(NOT CMake_TEST_EXTERNAL_CMAKE)
-    ADD_TEST_MACRO(LoadCommand LoadedCommand)
-  endif()
   ADD_TEST_MACRO(LinkDirectory bin/LinkDirectory)
   ADD_TEST_MACRO(LinkLanguage LinkLanguage)
   ADD_TEST_MACRO(LinkLine LinkLine)
@@ -544,9 +575,6 @@ if(BUILD_TESTING)
   ADD_TEST_MACRO(CrossCompile CrossCompile)
   set_tests_properties(CrossCompile PROPERTIES
     PASS_REGULAR_EXPRESSION "try_run.. invoked in cross-compiling mode")
-  if("${CMAKE_GENERATOR}" MATCHES "Make")
-    ADD_TEST_MACRO(Policy0002 Policy0002)
-  endif()
   if(CMake_TEST_XCODE_VERSION)
     set(Architecture_BUILD_OPTIONS -DCMake_TEST_XCODE_VERSION=${CMake_TEST_XCODE_VERSION})
     ADD_TEST_MACRO(Architecture Architecture)
@@ -577,7 +605,7 @@ if(BUILD_TESTING)
     set(CMAKE_REQUIRED_INCLUDES ${QT_INCLUDES})
     set(CMAKE_REQUIRED_LIBRARIES ${QT_QTCORE_LIBRARIES})
 
-    CHECK_CXX_SOURCE_COMPILES("#include <QCoreApplication>\n int main() {return (qApp == 0 ? 0 : 1); }\n"
+    check_cxx_source_compiles("#include <QCoreApplication>\n int main() {return (qApp == 0 ? 0 : 1); }\n"
                               QT4_WORKS)
 
     set(CMAKE_REQUIRED_INCLUDES "${_save_CMAKE_REQUIRED_INCLUDES}")
@@ -585,11 +613,11 @@ if(BUILD_TESTING)
   endif()
 
   # run test for BundleUtilities on supported platforms/compilers
-  if(MSVC OR
-     MINGW OR
-     CMAKE_SYSTEM_NAME MATCHES "Linux" OR
-     CMAKE_SYSTEM_NAME MATCHES "Darwin")
-  if(NOT "${CMAKE_GENERATOR}" STREQUAL "Watcom WMake")
+  if((MSVC OR
+      MINGW OR
+      CMAKE_SYSTEM_NAME MATCHES "Linux" OR
+      CMAKE_SYSTEM_NAME MATCHES "Darwin")
+    AND NOT CMAKE_GENERATOR STREQUAL "Watcom WMake")
 
     add_test(BundleUtilities ${CMAKE_CTEST_COMMAND}
       --build-and-test
@@ -616,7 +644,6 @@ if(BUILD_TESTING)
       list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Qt4Deploy")
     endif()
 
-  endif()
   endif()
 
   set(CMAKE_BUILD_TEST_SOURCE_DIR "${CMake_SOURCE_DIR}/Tests/COnly")
@@ -663,7 +690,6 @@ if(BUILD_TESTING)
     ${build_generator_args}
     --build-project ExternalDataTest
     --build-noclean
-    --force-new-ctest-process
     --build-options
       -DMAKE_SUPPORTS_SPACES=${MAKE_SUPPORTS_SPACES}
     --test-command ${CMAKE_CTEST_COMMAND} -C \${CTEST_CONFIGURATION_TYPE} -V
@@ -1337,18 +1363,6 @@ if(BUILD_TESTING)
     set_property(TEST CMakeTestAllGenerators PROPERTY RUN_SERIAL 1)
   endif()
 
-  if(NOT CMake_TEST_EXTERNAL_CMAKE)
-    add_test(LoadedCommandOneConfig  ${CMAKE_CTEST_COMMAND}
-      --build-and-test
-      "${CMake_SOURCE_DIR}/Tests/LoadCommandOneConfig"
-      "${CMake_BINARY_DIR}/Tests/LoadCommandOneConfig"
-      ${build_generator_args}
-      --build-project LoadCommand
-      --test-command  LoadedCommand
-      )
-    list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/LoadCommandOneConfig")
-  endif()
-
   add_test(complex  ${CMAKE_CTEST_COMMAND}
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/Complex"
@@ -1383,7 +1397,6 @@ if(BUILD_TESTING)
     ${build_generator_args}
     --build-project EnvironmentProj
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/Environment"
-    --force-new-ctest-process
     --test-command ${CMAKE_CTEST_COMMAND} -V
     )
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Environment")
@@ -1422,7 +1435,6 @@ if(BUILD_TESTING)
       ${build_generator_args}
       --build-project Qt4Targets
       --build-exe-dir "${CMake_BINARY_DIR}/Tests/Qt4Targets"
-      --force-new-ctest-process
       --build-options
         -DQT_QMAKE_EXECUTABLE:FILEPATH=${QT_QMAKE_EXECUTABLE}
       --test-command ${CMAKE_CTEST_COMMAND} -V
@@ -1437,7 +1449,6 @@ if(BUILD_TESTING)
         ${build_generator_args}
         --build-project Qt4And5Automoc
         --build-exe-dir "${CMake_BINARY_DIR}/Tests/Qt4And5AutomocForward"
-        --force-new-ctest-process
         --test-command ${CMAKE_CTEST_COMMAND} -V
         )
       list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Qt4And5AutomocForward")
@@ -1448,7 +1459,6 @@ if(BUILD_TESTING)
         ${build_generator_args}
         --build-project Qt4And5Automoc
         --build-exe-dir "${CMake_BINARY_DIR}/Tests/Qt4And5AutomocReverse"
-        --force-new-ctest-process
         --build-options -DQT_REVERSE_FIND_ORDER=1
         --test-command ${CMAKE_CTEST_COMMAND} -V
         )
@@ -1461,6 +1471,7 @@ if(BUILD_TESTING)
   _mod
   IN ITEMS
       ALSA
+      ASPELL
       Backtrace
       BLAS
       Boost
@@ -1544,44 +1555,6 @@ if(BUILD_TESTING)
     add_subdirectory(GoogleTest)
   endif()
 
-  if(CMake_TEST_FindPython)
-    set(CMake_TEST_FindPython2 TRUE)
-    set(CMake_TEST_FindPython3 TRUE)
-  endif()
-  if(CMake_TEST_FindPython_SABIModule)
-    set(CMake_TEST_FindPython2_SABIModule TRUE)
-    set(CMake_TEST_FindPython3_SABIModule TRUE)
-  endif()
-  if(CMake_TEST_FindPython_NumPy)
-    set(CMake_TEST_FindPython2_NumPyy TRUE)
-    set(CMake_TEST_FindPython3_NumPy TRUE)
-  endif()
-  if(CMake_TEST_FindPython_Conda)
-    set(CMake_TEST_FindPython3_Conda TRUE)
-  endif()
-  if(CMake_TEST_FindPython_IronPython)
-    set(CMake_TEST_FindPython2_IronPython TRUE)
-    set(CMake_TEST_FindPython3_IronPython TRUE)
-  endif()
-  if(CMake_TEST_FindPython_PyPy)
-    set(CMake_TEST_FindPython2_PyPy TRUE)
-    set(CMake_TEST_FindPython3_PyPy TRUE)
-  endif()
-  if(CMake_TEST_FindPython2 OR CMake_TEST_FindPython3
-      OR CMake_TEST_FindPython2_SABIModule OR CMake_TEST_FindPython3_SABIModule
-      OR CMake_TEST_FindPython2_NumPy OR CMake_TEST_FindPython3_NumPy
-      OR CMake_TEST_FindPython3_Conda
-      OR CMake_TEST_FindPython2_IronPython OR CMake_TEST_FindPython3_IronPython
-      OR CMake_TEST_FindPython2_PyPy OR CMake_TEST_FindPython3_PyPy)
-    if (CMake_TEST_FindPython2 AND CMAKE_SYSTEM_NAME MATCHES "Linux|Darwin")
-      set(CMake_TEST_FindPython2_SABIModule TRUE)
-    endif()
-    if (CMake_TEST_FindPython3 AND CMAKE_SYSTEM_NAME MATCHES "Linux|Darwin")
-      set(CMake_TEST_FindPython3_SABIModule TRUE)
-    endif()
-    add_subdirectory(FindPython)
-  endif()
-
   if(CMake_TEST_UseSWIG)
     add_subdirectory(UseSWIG)
   endif()
@@ -1645,7 +1618,6 @@ if(BUILD_TESTING)
     ${build_generator_args}
     --build-project ExternalProjectTest
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/ExternalProject"
-    --force-new-ctest-process
     --build-options ${ExternalProject_BUILD_OPTIONS}
     --test-command ${CMAKE_CTEST_COMMAND} -V
     )
@@ -1662,7 +1634,6 @@ if(BUILD_TESTING)
     "${CMake_BINARY_DIR}/Tests/ExternalProjectSubdir"
     ${build_generator_args}
     --build-project ExternalProjectSubdir
-    --force-new-ctest-process
     )
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/ExternalProjectSubdir")
 
@@ -1673,7 +1644,6 @@ if(BUILD_TESTING)
     "${CMake_BINARY_DIR}/Tests/ExternalProjectSourceSubdir"
     ${build_generator_args}
     --build-project ExternalProjectSourceSubdir
-    --force-new-ctest-process
     )
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/ExternalProjectSourceSubdir")
 
@@ -1684,7 +1654,6 @@ if(BUILD_TESTING)
     "${CMake_BINARY_DIR}/Tests/ExternalProjectSourceSubdirNotCMake"
     ${build_generator_args}
     --build-project ExternalProjectSourceSubdirNotCMake
-    --force-new-ctest-process
     )
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/ExternalProjectSourceSubdirNotCMake")
 
@@ -1695,7 +1664,6 @@ if(BUILD_TESTING)
     ${build_generator_args}
     --build-project ExternalProjectLocalTest
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/ExternalProjectLocal"
-    --force-new-ctest-process
     --test-command ${CMAKE_CTEST_COMMAND} -V
     )
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/ExternalProjectLocal")
@@ -1710,7 +1678,6 @@ if(BUILD_TESTING)
     ${build_generator_args}
     --build-project ExternalProjectUpdateTest
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/ExternalProjectUpdate"
-    --force-new-ctest-process
     --test-command ${CMAKE_CTEST_COMMAND} -V
     )
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/ExternalProjectUpdate")
@@ -1766,7 +1733,6 @@ if(BUILD_TESTING)
         ${build_generator_args}
         --build-project superpro
         --build-exe-dir "${CMake_BINARY_DIR}/Tests/InstallMode-${_mode}"
-        --force-new-ctest-process
         --build-options
           ${_maybe_BUILD_OPTIONS}
           "-DCMAKE_INSTALL_PREFIX:PATH=${CMake_BINARY_DIR}/Tests/InstallMode-${_mode}/install"
@@ -1782,50 +1748,6 @@ if(BUILD_TESTING)
     add_installmode_test(ABS_SYMLINK_OR_COPY)
     add_installmode_test(SYMLINK)
     add_installmode_test(SYMLINK_OR_COPY)
-  endif()
-
-
-  # do each of the tutorial steps
-  function(add_tutorial_test step_name use_mymath tutorial_arg pass_regex)
-    set(tutorial_test_name Tutorial${step_name})
-    set(tutorial_build_dir "${CMake_BINARY_DIR}/Tests/Tutorial/${step_name}")
-    if(use_mymath)
-      set(tutorial_build_options "")
-    else()
-      set(tutorial_test_name ${tutorial_test_name}_MYMATH)
-      set(tutorial_build_dir "${tutorial_build_dir}_MYMATH")
-      set(tutorial_build_options -DUSE_MYMATH:BOOL=OFF)
-    endif()
-    add_test(${tutorial_test_name} ${CMAKE_CTEST_COMMAND}
-      -C "Release"
-      --build-and-test
-      "${CMake_SOURCE_DIR}/Help/guide/tutorial/${step_name}"
-      ${tutorial_build_dir}_Build
-      ${build_generator_args}
-      --build-project Tutorial
-      --build-options ${tutorial_build_options}
-      --test-command Tutorial ${tutorial_arg})
-    set_tests_properties(${tutorial_test_name} PROPERTIES
-      PASS_REGULAR_EXPRESSION ${pass_regex})
-
-    list(APPEND TEST_BUILD_DIRS "${tutorial_build_dir}_Build")
-  endfunction()
-
-  if(NOT CMake_TEST_EXTERNAL_CMAKE)
-    foreach(STP RANGE 2 12)
-      if(STP EQUAL 8)
-        set(pass_regex ".*using log and exp")
-      else()
-        set(pass_regex "The square root of 25 is 5")
-      endif()
-      add_tutorial_test(Step${STP} TRUE 25 ${pass_regex})
-    endforeach()
-    set(pass_regex "The square root of 25 is 5")
-    add_tutorial_test(Complete TRUE 25 ${pass_regex})
-    foreach(STP RANGE 3 12)
-      add_tutorial_test(Step${STP} FALSE 25 ${pass_regex})
-    endforeach()
-    add_tutorial_test(Complete FALSE 25 ${pass_regex})
   endif()
 
   function(add_importexport_test export_name import_name)
@@ -2157,6 +2079,14 @@ if(BUILD_TESTING)
     set_property(TEST MSVCDebugInformationFormat APPEND
       PROPERTY LABELS "CUDA" "Fortran")
 
+    set(MSVCRuntimeChecks_BUILD_OPTIONS -DCMake_TEST_CUDA=${CMake_TEST_CUDA})
+    if(CMAKE_Fortran_COMPILER)
+      list(APPEND MSVCRuntimeChecks_BUILD_OPTIONS -DCMake_TEST_Fortran=1)
+    endif()
+    ADD_TEST_MACRO(MSVCRuntimeChecks)
+    set_property(TEST MSVCRuntimeChecks APPEND
+      PROPERTY LABELS "CUDA" "Fortran")
+
     set(MSVCRuntimeLibrary_BUILD_OPTIONS -DCMake_TEST_CUDA=${CMake_TEST_CUDA})
     ADD_TEST_MACRO(MSVCRuntimeLibrary)
     set_property(TEST MSVCRuntimeLibrary APPEND
@@ -2363,7 +2293,6 @@ if(BUILD_TESTING)
         --build-generator "Green Hills MULTI"
         --build-project test
         --build-config $<CONFIGURATION>
-        --force-new-ctest-process
         --build-options ${ghs_target_arch} ${ghs_toolset_name} ${ghs_toolset_root} ${ghs_target_platform}
           ${ghs_os_root} ${ghs_os_dir} ${ghs_bsp_name} ${_ghs_build_opts} ${_ghs_toolset_extra}
           ${_ghs_test_command}
@@ -2476,9 +2405,12 @@ if(BUILD_TESTING)
   if(vs17 AND CMake_TEST_ANDROID_VS17)
     add_test_VSAndroid(vs17 "Visual Studio 17 2022" "ARM")
   endif()
+  if(vs18 AND CMake_TEST_ANDROID_VS18)
+    add_test_VSAndroid(vs18 "Visual Studio 18 2026" "ARM")
+  endif()
 
   if(APPLE)
-    if(CMAKE_COMPILER_IS_GNUCXX OR "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
       set(BundleTestInstallDir
         "${CMake_BINARY_DIR}/Tests/BundleTest/InstallDirectory")
       add_test(BundleTest ${CMAKE_CTEST_COMMAND}
@@ -2577,7 +2509,6 @@ if(BUILD_TESTING)
     ${build_generator_args}
     --build-project TestsWorkingDirectoryProj
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/TestsWorkingDirectory"
-    --force-new-ctest-process
     --test-command ${CMAKE_CTEST_COMMAND} -V -C \${CTEST_CONFIGURATION_TYPE}
     )
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/TestsWorkingDirectory")
@@ -2589,9 +2520,9 @@ if(BUILD_TESTING)
   # A simple test for ctest in script mode
   configure_file("${CMake_SOURCE_DIR}/Tests/CTestScriptMode/CTestTestScriptMode.cmake.in"
           "${CMake_BINARY_DIR}/Tests/CTestScriptMode/CTestTestScriptMode.cmake" @ONLY)
-#  add_test(CTest.ScriptMode ${CMAKE_CTEST_COMMAND}
-#        -S "${CMake_BINARY_DIR}/Tests/CTestScriptMode/CTestTestScriptMode.cmake"
-#        )
+  add_test(CTest.ScriptMode ${CMAKE_CTEST_COMMAND}
+    -S "${CMake_BINARY_DIR}/Tests/CTestScriptMode/CTestTestScriptMode.cmake"
+    )
 
   # Test CTest Update with Subversion
   if(NOT DEFINED CMake_TEST_CTestUpdate_SVN OR CMake_TEST_CTestUpdate_SVN)
@@ -3032,7 +2963,6 @@ if(BUILD_TESTING)
   )
 
   if(NOT BORLAND)
-    set(CTestLimitDashJ_CTEST_OPTIONS --force-new-ctest-process)
     add_test_macro(CTestLimitDashJ ${CMAKE_CTEST_COMMAND} -j 4
       --output-on-failure -C "\${CTestTest_CONFIG}")
   endif()
@@ -3293,6 +3223,9 @@ if(BUILD_TESTING)
         # FIXME(lfortran): The compiler fails on the test's modules.
         AND NOT CMAKE_Fortran_COMPILER_ID STREQUAL "LFortran"
         )
+      if(DEFINED CMake_TEST_Fortran_SUBMODULES)
+        list(PREPEND CMake_TEST_FortranModules_BUILD_OPTIONS -DCMake_TEST_Fortran_SUBMODULES:BOOL=${CMake_TEST_Fortran_SUBMODULES})
+      endif()
       add_test(FortranModules ${CMAKE_CTEST_COMMAND}
         --build-and-test
         "${CMake_SOURCE_DIR}/Tests/FortranModules"
@@ -3301,7 +3234,6 @@ if(BUILD_TESTING)
         --build-project FortranModules
         --build-options
           -DCMake_TEST_NESTED_MAKE_PROGRAM:FILEPATH=${CMake_TEST_EXPLICIT_MAKE_PROGRAM}
-          -DCMake_TEST_Fortran_SUBMODULES:BOOL=${CMake_TEST_Fortran_SUBMODULES}
           ${CMake_TEST_FortranModules_BUILD_OPTIONS}
         )
       list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/FortranModules")

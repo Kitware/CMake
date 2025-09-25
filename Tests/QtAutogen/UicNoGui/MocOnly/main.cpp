@@ -4,7 +4,7 @@ class LocalObject : public QObject
 {
   Q_OBJECT
 public:
-  LocalObject(){};
+  LocalObject() {};
 };
 
 void mocOnly()

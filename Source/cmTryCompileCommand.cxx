@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmTryCompileCommand.h"
 
 #include <cm/optional>
@@ -22,7 +22,7 @@ void WriteTryCompileEvent(cmConfigureLog& log, cmMakefile const& mf,
                           cmTryCompileResult const& compileResult)
 {
   // Keep in sync with cmFileAPIConfigureLog's DumpEventKindNames.
-  static const std::vector<unsigned long> LogVersionsWithTryCompileV1{ 1 };
+  static std::vector<unsigned long> const LogVersionsWithTryCompileV1{ 1 };
 
   if (log.IsAnyLogVersionEnabled(LogVersionsWithTryCompileV1)) {
     log.BeginEvent("try_compile-v1", mf);

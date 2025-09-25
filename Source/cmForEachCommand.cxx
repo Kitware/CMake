@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmForEachCommand.h"
 
 #include <algorithm>
@@ -12,7 +12,6 @@
 #include <cstdlib>
 #include <iterator>
 #include <map>
-#include <sstream>
 #include <stdexcept>
 #include <utility>
 
@@ -49,7 +48,7 @@ public:
   bool Replay(std::vector<cmListFileFunction> functions,
               cmExecutionStatus& inStatus) override;
 
-  void SetIterationVarsCount(const std::size_t varsCount)
+  void SetIterationVarsCount(std::size_t const varsCount)
   {
     this->IterationVarsCount = varsCount;
   }
@@ -186,18 +185,18 @@ bool cmForEachFunctionBlocker::ReplayZipLists(
     // generate names as `var_name_N`,
     // where `N` is the count of lists to zip
     iterationVars.resize(values.size());
-    const auto iter_var_prefix = this->Args.front() + "_";
+    auto const iter_var_prefix = cmStrCat(this->Args.front(), '_');
     auto i = 0u;
     std::generate(
       iterationVars.begin(), iterationVars.end(),
-      [&]() -> std::string { return iter_var_prefix + std::to_string(i++); });
+      [&]() -> std::string { return cmStrCat(iter_var_prefix, i++); });
   }
   assert("Sanity check" && iterationVars.size() == values.size());
 
   // Store old values for iteration variables
   std::map<std::string, cm::optional<std::string>> oldDefs;
   for (auto i = 0u; i < values.size(); ++i) {
-    const auto& varName = iterationVars[i];
+    auto const& varName = iterationVars[i];
     if (mf.GetPolicyStatus(cmPolicies::CMP0124) != cmPolicies::NEW) {
       oldDefs.emplace(varName, mf.GetSafeDefinition(varName));
     } else if (mf.IsNormalDefinitionSet(varName)) {
@@ -297,7 +296,7 @@ bool HandleInMode(std::vector<std::string> const& args,
   // Copy iteration variable names first
   std::copy(args.begin(), kwInIter, std::back_inserter(fb->Args));
   // Remember the count of given iteration variable names
-  const auto varsCount = fb->Args.size();
+  auto const varsCount = fb->Args.size();
   fb->SetIterationVarsCount(varsCount);
 
   enum Doing
@@ -358,7 +357,7 @@ bool HandleInMode(std::vector<std::string> const& args,
 
     } else {
       makefile.IssueMessage(MessageType::FATAL_ERROR,
-                            cmStrCat("Unknown argument:\n", "  ", arg, "\n"));
+                            cmStrCat("Unknown argument:\n  ", arg, '\n'));
       return true;
     }
   }
@@ -367,11 +366,10 @@ bool HandleInMode(std::vector<std::string> const& args,
   // make sure the given lists count matches variables...
   if (doing == DoingZipLists && varsCount > 1u &&
       (2u * varsCount) != fb->Args.size()) {
-    makefile.IssueMessage(
-      MessageType::FATAL_ERROR,
-      cmStrCat("Expected ", std::to_string(varsCount),
-               " list variables, but given ",
-               std::to_string(fb->Args.size() - varsCount)));
+    makefile.IssueMessage(MessageType::FATAL_ERROR,
+                          cmStrCat("Expected ", varsCount,
+                                   " list variables, but given ",
+                                   fb->Args.size() - varsCount));
     return true;
   }
 
@@ -380,20 +378,16 @@ bool HandleInMode(std::vector<std::string> const& args,
   return true;
 }
 
-bool TryParseInteger(cmExecutionStatus& status, const std::string& str, int& i)
+bool TryParseInteger(cmExecutionStatus& status, std::string const& str, int& i)
 {
   try {
     i = std::stoi(str);
-  } catch (std::invalid_argument&) {
-    std::ostringstream e;
-    e << "Invalid integer: '" << str << "'";
-    status.SetError(e.str());
+  } catch (std::invalid_argument const&) {
+    status.SetError(cmStrCat("Invalid integer: '", str, '\''));
     cmSystemTools::SetFatalErrorOccurred();
     return false;
-  } catch (std::out_of_range&) {
-    std::ostringstream e;
-    e << "Integer out of range: '" << str << "'";
-    status.SetError(e.str());
+  } catch (std::out_of_range const&) {
+    status.SetError(cmStrCat("Integer out of range: '", str, '\''));
     cmSystemTools::SetFatalErrorOccurred();
     return false;
   }
@@ -465,7 +459,7 @@ bool cmForEachCommand(std::vector<std::string> const& args,
       // Calculate expected iterations count and reserve enough space
       // in the `fb->Args` vector. The first item is the iteration variable
       // name...
-      const std::size_t iter_cnt = 2u +
+      std::size_t const iter_cnt = 2u +
         static_cast<int>(start < stop) * (stop - start) / std::abs(step) +
         static_cast<int>(start > stop) * (start - stop) / std::abs(step);
       fb->Args.resize(iter_cnt);

@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmFileAPICMakeFiles.h"
 
 #include <memory>
@@ -76,7 +76,7 @@ Json::Value CMakeFiles::DumpInputs()
 
   cmGlobalGenerator* gg =
     this->FileAPI.GetCMakeInstance()->GetGlobalGenerator();
-  for (const auto& lg : gg->GetLocalGenerators()) {
+  for (auto const& lg : gg->GetLocalGenerators()) {
     cmMakefile const* mf = lg->GetMakefile();
     for (std::string const& file : mf->GetListFiles()) {
       inputs.append(this->DumpInput(file));

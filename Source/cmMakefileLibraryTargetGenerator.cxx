@@ -1,5 +1,5 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmMakefileLibraryTargetGenerator.h"
 
 #include <cstddef>
@@ -12,6 +12,7 @@
 #include <cmext/algorithm>
 
 #include "cmGeneratedFileStream.h"
+#include "cmGeneratorOptions.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalUnixMakefileGenerator3.h"
 #include "cmLinkLineComputer.h"
@@ -131,7 +132,7 @@ void cmMakefileLibraryTargetGenerator::WriteObjectLibraryRules()
 
 void cmMakefileLibraryTargetGenerator::WriteStaticLibraryRules()
 {
-  const bool requiresDeviceLinking = requireDeviceLinking(
+  bool const requiresDeviceLinking = requireDeviceLinking(
     *this->GeneratorTarget, *this->LocalGenerator, this->GetConfigName());
   if (requiresDeviceLinking) {
     this->WriteDeviceLibraryRules("CMAKE_CUDA_DEVICE_LINK_LIBRARY", false);
@@ -157,7 +158,7 @@ void cmMakefileLibraryTargetGenerator::WriteSharedLibraryRules(bool relink)
   }
 
   if (!relink) {
-    const bool requiresDeviceLinking = requireDeviceLinking(
+    bool const requiresDeviceLinking = requireDeviceLinking(
       *this->GeneratorTarget, *this->LocalGenerator, this->GetConfigName());
     if (requiresDeviceLinking) {
       this->WriteDeviceLibraryRules("CMAKE_CUDA_DEVICE_LINK_LIBRARY", relink);
@@ -176,8 +177,11 @@ void cmMakefileLibraryTargetGenerator::WriteSharedLibraryRules(bool relink)
 
   std::string extraFlags;
   this->GetTargetLinkFlags(extraFlags, linkLanguage);
+  this->LocalGenerator->AppendTargetCreationLinkFlags(
+    extraFlags, this->GeneratorTarget, linkLanguage);
   this->LocalGenerator->AddConfigVariableFlags(
-    extraFlags, "CMAKE_SHARED_LINKER_FLAGS", this->GetConfigName());
+    extraFlags, "CMAKE_SHARED_LINKER_FLAGS", this->GeneratorTarget,
+    cmBuildStep::Link, linkLanguage, this->GetConfigName());
 
   std::unique_ptr<cmLinkLineComputer> linkLineComputer =
     this->CreateLinkLineComputer(
@@ -186,7 +190,7 @@ void cmMakefileLibraryTargetGenerator::WriteSharedLibraryRules(bool relink)
 
   this->LocalGenerator->AppendModuleDefinitionFlag(
     extraFlags, this->GeneratorTarget, linkLineComputer.get(),
-    this->GetConfigName());
+    this->GetConfigName(), linkLanguage);
 
   this->UseLWYU = this->LocalGenerator->AppendLWYUFlags(
     extraFlags, this->GeneratorTarget, linkLanguage);
@@ -197,7 +201,7 @@ void cmMakefileLibraryTargetGenerator::WriteSharedLibraryRules(bool relink)
 void cmMakefileLibraryTargetGenerator::WriteModuleLibraryRules(bool relink)
 {
   if (!relink) {
-    const bool requiresDeviceLinking = requireDeviceLinking(
+    bool const requiresDeviceLinking = requireDeviceLinking(
       *this->GeneratorTarget, *this->LocalGenerator, this->GetConfigName());
     if (requiresDeviceLinking) {
       this->WriteDeviceLibraryRules("CMAKE_CUDA_DEVICE_LINK_LIBRARY", relink);
@@ -211,8 +215,11 @@ void cmMakefileLibraryTargetGenerator::WriteModuleLibraryRules(bool relink)
 
   std::string extraFlags;
   this->GetTargetLinkFlags(extraFlags, linkLanguage);
+  this->LocalGenerator->AppendTargetCreationLinkFlags(
+    extraFlags, this->GeneratorTarget, linkLanguage);
   this->LocalGenerator->AddConfigVariableFlags(
-    extraFlags, "CMAKE_MODULE_LINKER_FLAGS", this->GetConfigName());
+    extraFlags, "CMAKE_MODULE_LINKER_FLAGS", this->GeneratorTarget,
+    cmBuildStep::Link, linkLanguage, this->GetConfigName());
 
   std::unique_ptr<cmLinkLineComputer> linkLineComputer =
     this->CreateLinkLineComputer(
@@ -221,7 +228,7 @@ void cmMakefileLibraryTargetGenerator::WriteModuleLibraryRules(bool relink)
 
   this->LocalGenerator->AppendModuleDefinitionFlag(
     extraFlags, this->GeneratorTarget, linkLineComputer.get(),
-    this->GetConfigName());
+    this->GetConfigName(), linkLanguage);
 
   this->UseLWYU = this->LocalGenerator->AppendLWYUFlags(
     extraFlags, this->GeneratorTarget, linkLanguage);
@@ -238,14 +245,17 @@ void cmMakefileLibraryTargetGenerator::WriteFrameworkRules(bool relink)
 
   std::string extraFlags;
   this->GetTargetLinkFlags(extraFlags, linkLanguage);
+  this->LocalGenerator->AppendTargetCreationLinkFlags(
+    extraFlags, this->GeneratorTarget, linkLanguage);
   this->LocalGenerator->AddConfigVariableFlags(
-    extraFlags, "CMAKE_MACOSX_FRAMEWORK_LINKER_FLAGS", this->GetConfigName());
+    extraFlags, "CMAKE_MACOSX_FRAMEWORK_LINKER_FLAGS", this->GeneratorTarget,
+    cmBuildStep::Link, linkLanguage, this->GetConfigName());
 
   this->WriteLibraryRules(linkRuleVar, extraFlags, relink);
 }
 
 void cmMakefileLibraryTargetGenerator::WriteDeviceLibraryRules(
-  const std::string& linkRuleVar, bool relink)
+  std::string const& linkRuleVar, bool relink)
 {
 #ifndef CMAKE_BOOTSTRAP
   // TODO: Merge the methods that call this method to avoid
@@ -285,8 +295,8 @@ void cmMakefileLibraryTargetGenerator::WriteDeviceLibraryRules(
 }
 
 void cmMakefileLibraryTargetGenerator::WriteNvidiaDeviceLibraryRules(
-  const std::string& linkRuleVar, bool relink,
-  std::vector<std::string>& commands, const std::string& targetOutput)
+  std::string const& linkRuleVar, bool relink,
+  std::vector<std::string>& commands, std::string const& targetOutput)
 {
   std::string linkLanguage = "CUDA";
 
@@ -382,7 +392,7 @@ void cmMakefileLibraryTargetGenerator::WriteNvidiaDeviceLibraryRules(
     }
 
     auto rulePlaceholderExpander =
-      this->LocalGenerator->CreateRulePlaceholderExpander();
+      this->LocalGenerator->CreateRulePlaceholderExpander(cmBuildStep::Link);
 
     // Construct the main link rule and expand placeholders.
     rulePlaceholderExpander->SetTargetImpLib(targetOutput);
@@ -407,7 +417,7 @@ void cmMakefileLibraryTargetGenerator::WriteNvidiaDeviceLibraryRules(
   // command lines in the make shell.
   if (useLinkScript) {
     // Use a link script.
-    const char* name = (relink ? "drelink.txt" : "dlink.txt");
+    char const* name = (relink ? "drelink.txt" : "dlink.txt");
     this->CreateLinkScript(name, real_link_commands, commands1, depends);
   } else {
     // No link script.  Just use the link rule directly.
@@ -432,7 +442,7 @@ void cmMakefileLibraryTargetGenerator::WriteNvidiaDeviceLibraryRules(
 }
 
 void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
-  const std::string& linkRuleVar, const std::string& extraFlags, bool relink)
+  std::string const& linkRuleVar, std::string const& extraFlags, bool relink)
 {
   // TODO: Merge the methods that call this method to avoid
   // code duplication.
@@ -707,7 +717,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
 
   // Expand the rule variables.
   auto rulePlaceholderExpander =
-    this->LocalGenerator->CreateRulePlaceholderExpander();
+    this->LocalGenerator->CreateRulePlaceholderExpander(cmBuildStep::Link);
   bool useWatcomQuote =
     this->Makefile->IsOn(linkRuleVar + "_USE_WATCOM_QUOTE");
   cmList real_link_commands;
@@ -775,6 +785,8 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
     vars.CMTargetName = this->GeneratorTarget->GetName().c_str();
     vars.CMTargetType =
       cmState::GetTargetTypeName(this->GeneratorTarget->GetType()).c_str();
+    vars.CMTargetLabels =
+      this->GeneratorTarget->GetTargetLabelsString().c_str();
     vars.Language = linkLanguage.c_str();
     vars.Linker = linker.c_str();
     vars.AIXExports = aixExports.c_str();
@@ -801,8 +813,8 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
       vars.TargetSOName = targetOutSOName.c_str();
     }
     vars.LinkFlags = linkFlags.c_str();
-
     vars.Manifests = manifests.c_str();
+    vars.Config = this->GetConfigName().c_str();
 
     // Compute the directory portion of the install_name setting.
     std::string install_name_dir;
@@ -928,7 +940,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
   // command lines in the make shell.
   if (useLinkScript) {
     // Use a link script.
-    const char* name = (relink ? "relink.txt" : "link.txt");
+    char const* name = (relink ? "relink.txt" : "link.txt");
     this->CreateLinkScript(name, real_link_commands, commands1, depends);
   } else {
     // No link script.  Just use the link rule directly.

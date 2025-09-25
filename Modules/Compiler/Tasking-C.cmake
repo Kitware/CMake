@@ -1,13 +1,13 @@
 include(Compiler/Tasking)
 __compiler_tasking(C)
 
-set(CMAKE_C90_STANDARD_COMPILE_OPTION "--iso=90" "--strict")
+# Extension flags are not tied to the standard level flags.
+# Avoid passing them here so users/projects can control them independently.
+set(CMAKE_C90_STANDARD_COMPILE_OPTION "--iso=90")
 set(CMAKE_C90_EXTENSION_COMPILE_OPTION "--iso=90")
-
-set(CMAKE_C99_STANDARD_COMPILE_OPTION "--iso=99" "--strict")
+set(CMAKE_C99_STANDARD_COMPILE_OPTION "--iso=99")
 set(CMAKE_C99_EXTENSION_COMPILE_OPTION "--iso=99")
-
-set(CMAKE_C11_STANDARD_COMPILE_OPTION "--iso=11" "--strict")
+set(CMAKE_C11_STANDARD_COMPILE_OPTION "--iso=11")
 set(CMAKE_C11_EXTENSION_COMPILE_OPTION "--iso=11")
 
 set(CMAKE_C_STANDARD_LATEST 11)

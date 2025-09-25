@@ -1,18 +1,22 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-   file Copyright.txt or https://cmake.org/licensing for details.  */
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <map>
+#include <memory>
 #include <set>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "cmPathLabel.h"
 #include "cmSearchPath.h"
 #include "cmWindowsRegistry.h"
 
+class cmConfigureLog;
+class cmFindCommonDebugState;
 class cmExecutionStatus;
 class cmMakefile;
 
@@ -27,14 +31,17 @@ class cmFindCommon
 {
 public:
   cmFindCommon(cmExecutionStatus& status);
+  virtual ~cmFindCommon();
 
   void SetError(std::string const& e);
 
-  bool DebugModeEnabled() const { return this->DebugMode; }
+  bool DebugModeEnabled() const;
 
 protected:
   friend class cmSearchPath;
   friend class cmFindBaseDebugState;
+  friend class cmFindCommonDebugState;
+  friend class cmFindPackageDebugState;
 
   /** Used to define groups of path labels */
   class PathGroup : public cmPathLabel
@@ -43,7 +50,7 @@ protected:
     PathGroup();
 
   public:
-    PathGroup(const std::string& label)
+    PathGroup(std::string const& label)
       : cmPathLabel(label)
     {
     }
@@ -57,7 +64,7 @@ protected:
     PathLabel();
 
   public:
-    PathLabel(const std::string& label)
+    PathLabel(std::string const& label)
       : cmPathLabel(label)
     {
     }
@@ -76,6 +83,9 @@ protected:
     RootPathModeOnly,
     RootPathModeBoth
   };
+
+  virtual bool IsFound() const = 0;
+  virtual bool IsDefined() const = 0;
 
   /** Construct the various path groups and labels */
   void InitializeSearchPathGroups();
@@ -111,9 +121,14 @@ protected:
   void SelectDefaultSearchModes();
 
   /** The `InitialPass` functions of the child classes should set
-      this->DebugMode to the result of these.  */
+      this->FullDebugMode to the result of these.  */
   bool ComputeIfDebugModeWanted();
   bool ComputeIfDebugModeWanted(std::string const& var);
+
+  /** The `InitialPass` functions of the child classes should not initialize
+     `DebugState` if there is not a debug mode wanted and these return `true`.
+   */
+  bool ComputeIfImplicitDebugModeSuppressed();
 
   // Path arguments prior to path manipulation routines
   std::vector<std::string> UserHintsArgs;
@@ -126,7 +141,8 @@ protected:
   void AddPathSuffix(std::string const& arg);
 
   void DebugMessage(std::string const& msg) const;
-  bool DebugMode;
+  bool FullDebugMode;
+  std::unique_ptr<cmFindCommonDebugState> DebugState;
   bool NoDefaultPath;
   bool NoPackageRootPath;
   bool NoCMakePath;
@@ -156,4 +172,47 @@ protected:
 
   cmMakefile* Makefile;
   cmExecutionStatus& Status;
+};
+
+class cmFindCommonDebugState
+{
+public:
+  cmFindCommonDebugState(std::string name, cmFindCommon const* findCommand);
+  virtual ~cmFindCommonDebugState() = default;
+
+  void FoundAt(std::string const& path, std::string regexName = std::string());
+  void FailedAt(std::string const& path,
+                std::string regexName = std::string());
+
+  void Write();
+
+protected:
+  virtual void FoundAtImpl(std::string const& path, std::string regexName) = 0;
+  virtual void FailedAtImpl(std::string const& path,
+                            std::string regexName) = 0;
+  virtual bool ShouldImplicitlyLogEvents() const;
+
+  virtual void WriteDebug() const = 0;
+#ifndef CMAKE_BOOTSTRAP
+  virtual void WriteEvent(cmConfigureLog& log, cmMakefile const& mf) const = 0;
+  void WriteSearchVariables(cmConfigureLog& log, cmMakefile const& mf) const;
+  enum class VariableSource
+  {
+    String,
+    PathList,
+    EnvironmentList,
+  };
+  virtual std::vector<std::pair<VariableSource, std::string>>
+  ExtraSearchVariables() const;
+#endif
+
+  cmFindCommon const* const FindCommand;
+  std::string const CommandName;
+  std::string const Mode;
+  bool HasBeenFound() const { return this->IsFound; }
+
+private:
+  bool TrackSearchProgress() const;
+
+  bool IsFound{ false };
 };

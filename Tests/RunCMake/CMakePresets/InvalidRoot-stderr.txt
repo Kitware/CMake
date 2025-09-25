@@ -1,5 +1,5 @@
 ^CMake Error: Could not read presets from [^
 ]*/Tests/RunCMake/CMakePresets/InvalidRoot:
-Error: \@1\,1\: Invalid root object
+CMakePresets.json:1: Invalid root object
 \[\]
 \^$

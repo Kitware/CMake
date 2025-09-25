@@ -1,7 +1,7 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
-# file Copyright.txt or https://cmake.org/licensing for details.
+# file LICENSE.rst or https://cmake.org/licensing for details.
 
-cmake_minimum_required(VERSION 3.13...3.29 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.13...3.31 FATAL_ERROR)
 set(CMAKE_USER_MAKE_RULES_OVERRIDE_C ${CMAKE_CURRENT_SOURCE_DIR}/Source/Modules/OverrideC.cmake)
 set(CMAKE_USER_MAKE_RULES_OVERRIDE_CXX ${CMAKE_CURRENT_SOURCE_DIR}/Source/Modules/OverrideCXX.cmake)
 
@@ -100,6 +100,9 @@ configure_file(Utilities/std/cmSTL.hxx.in Utilities/cmSTL.hxx @ONLY)
 # set the internal encoding of CMake to UTF-8
 set(KWSYS_ENCODING_DEFAULT_CODEPAGE CP_UTF8)
 
+# enable parallel install
+set_property(GLOBAL PROPERTY INSTALL_PARALLEL ON)
+
 # option to use COMPONENT with install command
 option(CMake_INSTALL_COMPONENTS "Using components when installing" OFF)
 mark_as_advanced(CMake_INSTALL_COMPONENTS)
@@ -196,18 +199,18 @@ macro(CMAKE_HANDLE_SYSTEM_LIBRARIES)
   endif()
   option(CMAKE_USE_SYSTEM_CURL "Use system-installed curl" "${CMAKE_USE_SYSTEM_LIBRARY_CURL}")
   option(CMAKE_USE_SYSTEM_EXPAT "Use system-installed expat" "${CMAKE_USE_SYSTEM_LIBRARY_EXPAT}")
-  CMAKE_DEPENDENT_OPTION(CMAKE_USE_SYSTEM_ZLIB "Use system-installed zlib"
+  cmake_dependent_option(CMAKE_USE_SYSTEM_ZLIB "Use system-installed zlib"
     "${CMAKE_USE_SYSTEM_LIBRARY_ZLIB}" "NOT CMAKE_USE_SYSTEM_LIBARCHIVE;NOT CMAKE_USE_SYSTEM_CURL" ON)
-  CMAKE_DEPENDENT_OPTION(CMAKE_USE_SYSTEM_BZIP2 "Use system-installed bzip2"
+  cmake_dependent_option(CMAKE_USE_SYSTEM_BZIP2 "Use system-installed bzip2"
     "${CMAKE_USE_SYSTEM_LIBRARY_BZIP2}" "NOT CMAKE_USE_SYSTEM_LIBARCHIVE" ON)
-  CMAKE_DEPENDENT_OPTION(CMAKE_USE_SYSTEM_ZSTD "Use system-installed zstd"
+  cmake_dependent_option(CMAKE_USE_SYSTEM_ZSTD "Use system-installed zstd"
     "${CMAKE_USE_SYSTEM_LIBRARY_ZSTD}" "NOT CMAKE_USE_SYSTEM_LIBARCHIVE" ON)
-  CMAKE_DEPENDENT_OPTION(CMAKE_USE_SYSTEM_LIBLZMA "Use system-installed liblzma"
+  cmake_dependent_option(CMAKE_USE_SYSTEM_LIBLZMA "Use system-installed liblzma"
     "${CMAKE_USE_SYSTEM_LIBRARY_LIBLZMA}" "NOT CMAKE_USE_SYSTEM_LIBARCHIVE" ON)
-  CMAKE_DEPENDENT_OPTION(CMAKE_USE_SYSTEM_NGHTTP2 "Use system-installed nghttp2"
+  cmake_dependent_option(CMAKE_USE_SYSTEM_NGHTTP2 "Use system-installed nghttp2"
     "${CMAKE_USE_SYSTEM_LIBRARY_NGHTTP2}" "NOT CMAKE_USE_SYSTEM_CURL" ON)
   option(CMAKE_USE_SYSTEM_FORM "Use system-installed libform" "${CMAKE_USE_SYSTEM_LIBRARY_FORM}")
-  CMAKE_DEPENDENT_OPTION(CMAKE_USE_SYSTEM_JSONCPP "Use system-installed jsoncpp"
+  cmake_dependent_option(CMAKE_USE_SYSTEM_JSONCPP "Use system-installed jsoncpp"
     "${CMAKE_USE_SYSTEM_LIBRARY_JSONCPP}" "NOT CMAKE_USE_SYSTEM_CPPDAP" ON)
   option(CMAKE_USE_SYSTEM_LIBRHASH "Use system-installed librhash" "${CMAKE_USE_SYSTEM_LIBRARY_LIBRHASH}")
   option(CMAKE_USE_SYSTEM_LIBUV "Use system-installed libuv" "${CMAKE_USE_SYSTEM_LIBRARY_LIBUV}")
@@ -325,8 +328,8 @@ if(CMake_RUN_CLANG_TIDY)
     unset(clang_tidy_module_sha1)
   endif()
 
+  configure_file(.clang-tidy .clang-tidy COPYONLY)
 endif()
-configure_file(.clang-tidy .clang-tidy COPYONLY)
 
 
 option(CMake_RUN_IWYU "Run include-what-you-use with the compiler." OFF)
@@ -386,13 +389,14 @@ endif()
 # The main section of the CMakeLists file
 #
 #-----------------------------------------------------------------------
+include(Source/CMakeCopyright.cmake)
 include(Source/CMakeVersion.cmake)
 
 include(CTest)
 
 # Set up test-time configuration.
-set_directory_properties(PROPERTIES
-  TEST_INCLUDE_FILE "${CMake_BINARY_DIR}/Tests/EnforceConfig.cmake")
+set_property(DIRECTORY APPEND PROPERTY
+  TEST_INCLUDE_FILES "${CMake_BINARY_DIR}/Tests/EnforceConfig.cmake")
 
 if(NOT CMake_TEST_EXTERNAL_CMAKE)
   # where to write the resulting executables and libraries
@@ -414,8 +418,8 @@ if(NOT CMake_TEST_EXTERNAL_CMAKE)
     set(HAVE_ENVIRON_NOT_REQUIRE_PROTOTYPE 1)
   else()
     include(CheckSymbolExists)
-    CHECK_SYMBOL_EXISTS(unsetenv "stdlib.h" HAVE_UNSETENV)
-    CHECK_SYMBOL_EXISTS(environ "stdlib.h" HAVE_ENVIRON_NOT_REQUIRE_PROTOTYPE)
+    check_symbol_exists(unsetenv "stdlib.h" HAVE_UNSETENV)
+    check_symbol_exists(environ "stdlib.h" HAVE_ENVIRON_NOT_REQUIRE_PROTOTYPE)
   endif()
 endif()
 
@@ -533,7 +537,10 @@ endif()
 
 if(NOT CMake_TEST_EXTERNAL_CMAKE)
   # Install license file as it requires.
-  install(FILES Copyright.txt DESTINATION ${CMAKE_DOC_DIR})
+  install(FILES
+    "${CMake_LICENSE_FILE}"
+    "${CMake_SOURCE_DIR}/CONTRIBUTORS.rst"
+    DESTINATION ${CMAKE_DOC_DIR})
 
   # Install script directories.
   install(

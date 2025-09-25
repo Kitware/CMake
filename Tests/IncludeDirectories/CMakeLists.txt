@@ -206,7 +206,3 @@ get_target_property(incs empty_entry_test INCLUDE_DIRECTORIES)
 if (NOT incs STREQUAL ";/one/two")
   message(SEND_ERROR "Empty include_directories entry was not ignored.")
 endif()
-
-if(NOT CMAKE_GENERATOR STREQUAL "Xcode" AND NOT CMAKE_GENERATOR MATCHES "Ninja")
-  add_subdirectory(CMP0021)
-endif()

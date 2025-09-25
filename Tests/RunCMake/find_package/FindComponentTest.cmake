@@ -1,0 +1,2 @@
+find_package(ComponentTest CONFIG
+   NO_DEFAULT_PATH PATHS ${CMAKE_CURRENT_LIST_DIR})
