@@ -1,0 +1,11 @@
+# Host tools
+curl
+git
+
+# Compilers
+g++
+g++-aarch64-linux-gnu
+
+# CUDA Extras
+cuda-cross-sbsa-13-0
+cuda-opencl-dev-13-0
