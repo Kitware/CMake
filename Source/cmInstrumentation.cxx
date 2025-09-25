@@ -159,12 +159,11 @@ cmsys::SystemInformation& cmInstrumentation::GetSystemInformation()
 bool cmInstrumentation::ReadJSONQueries(std::string const& directory)
 {
   cmsys::Directory d;
-  std::string json = ".json";
   bool result = false;
   if (d.Load(directory)) {
     for (unsigned int i = 0; i < d.GetNumberOfFiles(); i++) {
       std::string fpath = d.GetFilePath(i);
-      if (fpath.rfind(json) == (fpath.size() - json.size())) {
+      if (cmHasLiteralSuffix(fpath, ".json")) {
         result = true;
         this->ReadJSONQuery(fpath);
       }
