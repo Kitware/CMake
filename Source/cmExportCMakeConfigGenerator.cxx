@@ -26,7 +26,7 @@
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmValue.h"
-#include "cmVersion.h"
+#include "cmVersionMacros.h"
 
 struct cmLinkInterface;
 
