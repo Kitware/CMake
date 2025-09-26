@@ -3979,9 +3979,11 @@ std::string cmGeneratorTarget::GetPDBOutputName(
 
     // Now evaluate genex and update the previously-prepared map entry.
     if (outName.empty()) {
-      i->second =
-        this->GetOutputName(config, cmStateEnums::RuntimeBinaryArtifact) +
-        this->GetFilePostfix(config);
+      i->second = cmStrCat(
+        this->GetOutputName(config, cmStateEnums::RuntimeBinaryArtifact),
+        this->GetPolicyStatusCMP0202() != cmPolicies::NEW
+          ? this->GetFilePostfix(config)
+          : "");
     } else {
       i->second =
         cmGeneratorExpression::Evaluate(outName, this->LocalGenerator, config);
@@ -4004,7 +4006,11 @@ std::string cmGeneratorTarget::GetPDBName(std::string const& config) const
 
   std::string base = this->GetPDBOutputName(config);
 
-  return parts.prefix + base + ".pdb";
+  return cmStrCat(parts.prefix, base,
+                  this->GetPolicyStatusCMP0202() == cmPolicies::NEW
+                    ? this->GetFilePostfix(config)
+                    : "",
+                  ".pdb");
 }
 
 std::string cmGeneratorTarget::GetObjectDirectory(
