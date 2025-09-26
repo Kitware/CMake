@@ -74,8 +74,7 @@ public:
   std::string const& GetCDashDir();
 
 private:
-  Json::Value ReadJsonSnippet(std::string const& directory,
-                              std::string const& file_name);
+  Json::Value ReadJsonSnippet(std::string const& file_name);
   void WriteInstrumentationJson(Json::Value& index,
                                 std::string const& directory,
                                 std::string const& file_name);

@@ -18,6 +18,7 @@
 
 #include "cmsys/Directory.hxx"
 #include "cmsys/FStream.hxx"
+#include "cmsys/RegularExpression.hxx"
 #include "cmsys/SystemInformation.hxx"
 
 #include "cmCMakePath.h"
@@ -477,12 +478,12 @@ void cmInstrumentation::InsertTimingData(
   root["duration"] = static_cast<Json::Value::UInt64>(duration);
 }
 
-Json::Value cmInstrumentation::ReadJsonSnippet(std::string const& directory,
-                                               std::string const& file_name)
+Json::Value cmInstrumentation::ReadJsonSnippet(std::string const& file_name)
 {
   Json::CharReaderBuilder builder;
   builder["collectComments"] = false;
-  cmsys::ifstream ftmp(cmStrCat(directory, '/', file_name).c_str());
+  cmsys::ifstream ftmp(
+    cmStrCat(this->timingDirv1, "/data/", file_name).c_str());
   Json::Value snippetData;
   builder["collectComments"] = false;
 
@@ -916,26 +917,33 @@ void cmInstrumentation::PrepareDataForCDash(std::string const& data_dir,
 void cmInstrumentation::WriteTraceFile(Json::Value const& index,
                                        std::string const& trace_name)
 {
-  std::string const& directory = cmStrCat(this->timingDirv1, "/data");
-  std::vector<Json::Value> snippets = std::vector<Json::Value>();
+  std::vector<std::string> snippets = std::vector<std::string>();
   for (auto const& f : index["snippets"]) {
-    Json::Value snippetData = this->ReadJsonSnippet(directory, f.asString());
-    snippets.push_back(snippetData);
+    snippets.push_back(f.asString());
   }
   // Reverse-sort snippets by timeEnd (timeStart + duration) as a
   // prerequisite for AssignTargetToTraceThread().
-  std::sort(snippets.begin(), snippets.end(),
-            [](Json::Value snippetA, Json::Value snippetB) {
-              uint64_t timeEndA = snippetA["timeStart"].asUInt64() +
-                snippetA["duration"].asUInt64();
-              uint64_t timeEndB = snippetB["timeStart"].asUInt64() +
-                snippetB["duration"].asUInt64();
-              return timeEndA > timeEndB;
-            });
+  auto extractSnippetTimestamp = [](std::string file) -> std::string {
+    cmsys::RegularExpression snippetTimeRegex(
+      "[A-Za-z]+-[A-Za-z0-9]+-([0-9T\\-]+)\\.json");
+    cmsys::RegularExpressionMatch matchA;
+    if (snippetTimeRegex.find(file.c_str(), matchA)) {
+      return matchA.match(1);
+    }
+    return "";
+  };
+  std::sort(
+    snippets.begin(), snippets.end(),
+    [extractSnippetTimestamp](std::string snippetA, std::string snippetB) {
+      return extractSnippetTimestamp(snippetA) >
+        extractSnippetTimestamp(snippetB);
+    });
 
   Json::Value trace = Json::arrayValue;
+  Json::Value snippetData;
   std::vector<uint64_t> workers = std::vector<uint64_t>();
-  for (auto const& snippetData : snippets) {
+  for (auto const& snippetFile : snippets) {
+    snippetData = this->ReadJsonSnippet(snippetFile);
     this->AppendTraceEvent(trace, workers, snippetData);
   }
 
