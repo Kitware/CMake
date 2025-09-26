@@ -756,23 +756,17 @@ function(gtest_discover_tests target)
     )
 
     if(GENERATOR_IS_MULTI_CONFIG)
-      foreach(_config ${CMAKE_CONFIGURATION_TYPES})
-        file(GENERATE
-          OUTPUT "${ctest_file_base}_include-${_config}.cmake"
-          CONTENT "${ctest_include_content}"
-          CONDITION $<CONFIG:${_config}>
-        )
-      endforeach()
+      file(GENERATE
+        OUTPUT "${ctest_file_base}_include-$<CONFIG>.cmake"
+        CONTENT "${ctest_include_content}"
+      )
       file(WRITE "${ctest_include_file}"
         "include(\"${ctest_file_base}_include-\${CTEST_CONFIGURATION_TYPE}.cmake\")"
       )
     else()
       file(GENERATE
-        OUTPUT "${ctest_file_base}_include.cmake"
+        OUTPUT "${ctest_include_file}"
         CONTENT "${ctest_include_content}"
-      )
-      file(WRITE "${ctest_include_file}"
-        "include(\"${ctest_file_base}_include.cmake\")"
       )
     endif()
 
