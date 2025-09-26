@@ -98,8 +98,10 @@ set(MACHO_CURRENT_VERSION "${MACHO_COMPATIBILITY_VERSION}.${_revision}")
 # saving and restoring the state of the variables.
 INCLUDE(${CMake_SOURCE_DIR}/Modules/CMakePushCheckState.cmake)
 
+if(0) # XXX(cmake): do not let pkg-config override our search paths
 # Enable the pkg-config helpers.
 INCLUDE(FindPkgConfig)
+endif() # XXX(cmake): end
 
 # Initialize the state of the variables. This initialization is not
 # necessary but this shows you what value the variables initially have.
