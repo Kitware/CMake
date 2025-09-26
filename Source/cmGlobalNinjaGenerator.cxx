@@ -1779,9 +1779,7 @@ void cmGlobalNinjaGenerator::WriteBuiltinTargets(std::ostream& os)
   this->WriteTargetClean(os);
   this->WriteTargetHelp(os);
 #ifndef CMAKE_BOOTSTRAP
-  if (this->GetCMakeInstance()
-        ->GetInstrumentation()
-        ->HasPreOrPostBuildHook()) {
+  if (this->GetCMakeInstance()->GetInstrumentation()->HasQuery()) {
     this->WriteTargetInstrument(os);
   }
 #endif
@@ -1860,9 +1858,7 @@ void cmGlobalNinjaGenerator::WriteTargetRebuildManifest(std::ostream& os)
   reBuild.ImplicitDeps.push_back(this->CMakeCacheFile);
 
 #ifndef CMAKE_BOOTSTRAP
-  if (this->GetCMakeInstance()
-        ->GetInstrumentation()
-        ->HasPreOrPostBuildHook()) {
+  if (this->GetCMakeInstance()->GetInstrumentation()->HasQuery()) {
     reBuild.ExplicitDeps.push_back(this->NinjaOutputPath("start_instrument"));
   }
 #endif

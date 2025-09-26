@@ -350,8 +350,8 @@ and contain the following data:
     * ``compile``: an individual compile step invoked during the build
     * ``link``: an individual link step invoked during the build
     * ``custom``: an individual custom command invoked during the build
-    * ``build``: a complete ``make`` or ``ninja`` invocation.
-      Only generated if ``preBuild`` or ``postBuild`` hooks are enabled.
+    * ``build``: a complete ``make`` or ``ninja`` invocation
+      (not through ``cmake --build``).
     * ``cmakeBuild``: a complete ``cmake --build`` invocation
     * ``cmakeInstall``: a complete ``cmake --install`` invocation
     * ``install``: an individual ``cmake -P cmake_install.cmake`` invocation
