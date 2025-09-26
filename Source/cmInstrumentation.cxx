@@ -944,21 +944,25 @@ void cmInstrumentation::AppendTraceEvent(Json::Value& trace,
 
   // Provide a useful trace event name depending on what data is available
   // from the snippet.
-  std::string name = cmStrCat(snippetData["role"].asString(), ": ");
+  std::string nameSuffix;
   if (snippetData["role"] == "compile") {
-    name.append(snippetData["source"].asString());
+    nameSuffix = snippetData["source"].asString();
   } else if (snippetData["role"] == "link") {
-    name.append(snippetData["target"].asString());
+    nameSuffix = snippetData["target"].asString();
   } else if (snippetData["role"] == "install") {
     cmCMakePath workingDir(snippetData["workingDir"].asCString());
-    std::string lastDirName = workingDir.GetFileName().String();
-    name.append(lastDirName);
+    nameSuffix = workingDir.GetFileName().String();
   } else if (snippetData["role"] == "custom") {
-    name.append(snippetData["command"].asString());
+    nameSuffix = snippetData["command"].asString();
   } else if (snippetData["role"] == "test") {
-    name.append(snippetData["testName"].asString());
+    nameSuffix = snippetData["testName"].asString();
   }
-  snippetTraceEvent["name"] = name;
+  if (!nameSuffix.empty()) {
+    snippetTraceEvent["name"] =
+      cmStrCat(snippetData["role"].asString(), ": ", nameSuffix);
+  } else {
+    snippetTraceEvent["name"] = snippetData["role"].asString();
+  }
 
   snippetTraceEvent["cat"] = snippetData["role"];
   snippetTraceEvent["ph"] = "X";
