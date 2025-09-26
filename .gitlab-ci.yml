@@ -1023,6 +1023,7 @@ t:fedora42-asan:
         - .fedora42_asan
         - .cmake_memcheck_linux
         - .linux_x86_64_tags
+        - .cmake_junit_artifacts
         - .run_dependent
     needs:
         - b:fedora42-asan
