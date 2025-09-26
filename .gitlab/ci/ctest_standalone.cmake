@@ -33,6 +33,10 @@ elseif("$ENV{CMAKE_CONFIGURATION}" MATCHES "extdeps")
   set(CTEST_CONFIGURE_COMMAND "/opt/extdeps/bin/cmake -C \"${initial_cache}\" -G \"${CTEST_CMAKE_GENERATOR}\" \"${CTEST_SOURCE_DIRECTORY}\"")
 endif()
 
+if ("$ENV{CMAKE_CI_RUN_MEMCHECK}" STREQUAL "true")
+  include("${CMAKE_CURRENT_LIST_DIR}/ctest_memcheck_prep.cmake")
+endif ()
+
 # Configure the project.
 ctest_configure(
   OPTIONS "${cmake_args}"
@@ -93,20 +97,37 @@ if (NOT "$ENV{CTEST_LABELS}" STREQUAL "")
 endif ()
 
 include("${CMAKE_CURRENT_LIST_DIR}/ctest_exclusions.cmake")
-ctest_test(
-  PARALLEL_LEVEL "${nproc}"
-  TEST_LOAD "${nproc}"
-  OUTPUT_JUNIT "${CTEST_BINARY_DIRECTORY}/junit.xml"
-  RETURN_VALUE test_result
-  ${ctest_label_args}
-  EXCLUDE "${test_exclusions}")
-ctest_submit(PARTS Test)
+set(extra_annotations)
+if ("$ENV{CMAKE_CI_RUN_MEMCHECK}" STREQUAL "true")
+  ctest_memcheck(
+    PARALLEL_LEVEL "${nproc}"
+    TEST_LOAD "${nproc}"
+    OUTPUT_JUNIT "${CTEST_BINARY_DIRECTORY}/junit.xml"
+    RETURN_VALUE test_result
+    ${ctest_label_args}
+    EXCLUDE "${test_exclusions}")
+  ctest_submit(PARTS Test)
+  ctest_submit(PARTS Memcheck)
+  list(APPEND extra_annotations
+    "Dynamic Analysis"  "https://open.cdash.org/viewDynamicAnalysis.php?buildid=${build_id}"
+  )
+else ()
+  ctest_test(
+    PARALLEL_LEVEL "${nproc}"
+    TEST_LOAD "${nproc}"
+    OUTPUT_JUNIT "${CTEST_BINARY_DIRECTORY}/junit.xml"
+    RETURN_VALUE test_result
+    ${ctest_label_args}
+    EXCLUDE "${test_exclusions}")
+  ctest_submit(PARTS Test)
+endif ()
 
 ctest_annotation_report("${CTEST_BINARY_DIRECTORY}/annotations.json"
   "All Tests"     "https://open.cdash.org/viewTest.php?buildid=${build_id}"
   "Test Failures" "https://open.cdash.org/viewTest.php?onlyfailed&buildid=${build_id}"
   "Tests Not Run" "https://open.cdash.org/viewTest.php?onlynotrun&buildid=${build_id}"
-  "Test Passes"   "https://open.cdash.org/viewTest.php?onlypassed&buildid=${build_id}")
+  "Test Passes"   "https://open.cdash.org/viewTest.php?onlypassed&buildid=${build_id}"
+  ${extra_annotations})
 
 if (test_result)
   ctest_submit(PARTS Done)
