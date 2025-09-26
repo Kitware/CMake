@@ -337,6 +337,15 @@
         CTEST_MEMORYCHECK_TYPE: AddressSanitizer
         CTEST_MEMORYCHECK_SANITIZER_OPTIONS: ""
 
+.fedora_valgrind_addon:
+    extends: .fedora_memcheck
+
+    variables:
+        CTEST_MEMORYCHECK_TYPE: Valgrind
+        CMAKE_CI_RUN_MEMCHECK: "true"
+        CMAKE_CI_TEST_TIMEOUT: "1500"
+        CMAKE_VALGRIND_CONFIGURATION: fedora42
+
 .fedora42_asan:
     extends:
         - .fedora42
@@ -344,6 +353,15 @@
 
     variables:
         CMAKE_CONFIGURATION: fedora42_asan
+
+
+.fedora42_ninja_valgrind:
+    extends:
+        - .fedora42
+        - .fedora_valgrind_addon
+
+    variables:
+        CMAKE_CONFIGURATION: fedora42_ninja_valgrind
 
 ### Intel Compiler
 
@@ -614,6 +632,13 @@
         - cmake
         - docker
         - linux-x86_64
+        - x11
+
+.linux_x86_64_tags_fast_x11:
+    tags:
+        - cmake
+        - docker
+        - linux-x86_64-v4
         - x11
 
 .linux_x86_64_tags_cuda_arch_30:
