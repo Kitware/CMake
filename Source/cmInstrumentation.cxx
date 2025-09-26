@@ -539,10 +539,12 @@ std::string cmInstrumentation::InstrumentTest(
   }
 
   cmsys::SystemInformation& info = this->GetSystemInformation();
+  std::chrono::system_clock::time_point endTime =
+    systemStart + std::chrono::milliseconds(root["duration"].asUInt64());
   std::string file_name = cmStrCat(
     "test-",
-    this->ComputeSuffixHash(cmStrCat(command_str, info.GetProcessId())),
-    this->ComputeSuffixTime(), ".json");
+    this->ComputeSuffixHash(cmStrCat(command_str, info.GetProcessId())), '-',
+    this->ComputeSuffixTime(endTime), ".json");
   this->WriteInstrumentationJson(root, "data", file_name);
   return file_name;
 }
@@ -674,10 +676,12 @@ int cmInstrumentation::InstrumentCommand(
 
   // Write Json
   cmsys::SystemInformation& info = this->GetSystemInformation();
+  std::chrono::system_clock::time_point endTime =
+    system_start + std::chrono::milliseconds(root["duration"].asUInt64());
   std::string const& file_name = cmStrCat(
     command_type, '-',
-    this->ComputeSuffixHash(cmStrCat(command_str, info.GetProcessId())),
-    this->ComputeSuffixTime(), ".json");
+    this->ComputeSuffixHash(cmStrCat(command_str, info.GetProcessId())), '-',
+    this->ComputeSuffixTime(endTime), ".json");
   this->WriteInstrumentationJson(root, "data", file_name);
   return ret;
 }
@@ -704,11 +708,13 @@ std::string cmInstrumentation::ComputeSuffixHash(
   return hash;
 }
 
-std::string cmInstrumentation::ComputeSuffixTime()
+std::string cmInstrumentation::ComputeSuffixTime(
+  cm::optional<std::chrono::system_clock::time_point> time)
 {
   std::chrono::milliseconds ms =
     std::chrono::duration_cast<std::chrono::milliseconds>(
-      std::chrono::system_clock::now().time_since_epoch());
+      (time.has_value() ? time.value() : std::chrono::system_clock::now())
+        .time_since_epoch());
   std::chrono::seconds s =
     std::chrono::duration_cast<std::chrono::seconds>(ms);
 

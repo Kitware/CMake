@@ -89,7 +89,8 @@ private:
   bool HasQueryFile(std::string const& file);
   static std::string GetCommandStr(std::vector<std::string> const& args);
   static std::string ComputeSuffixHash(std::string const& command_str);
-  static std::string ComputeSuffixTime();
+  static std::string ComputeSuffixTime(
+    cm::optional<std::chrono::system_clock::time_point> time = cm::nullopt);
   void PrepareDataForCDash(std::string const& data_dir,
                            std::string const& index_path);
   void RemoveOldFiles(std::string const& dataSubdir);
