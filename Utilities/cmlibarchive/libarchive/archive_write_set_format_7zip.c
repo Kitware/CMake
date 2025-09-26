@@ -44,7 +44,7 @@
 #include <cm3p/zlib.h>
 #endif
 #ifdef HAVE_ZSTD_H
-#include <zstd.h>
+#include <cm3p/zstd.h>
 #endif
 
 #include "archive.h"

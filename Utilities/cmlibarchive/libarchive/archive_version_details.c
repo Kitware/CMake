@@ -56,7 +56,7 @@
 #elif HAVE_BSDXML_H
 #include <bsdxml.h>
 #elif HAVE_EXPAT_H
-#include <expat.h>
+#include <cm3p/expat.h>
 #endif
 #if HAVE_MBEDTLS_VERSION_H
 #include <mbedtls/version.h>

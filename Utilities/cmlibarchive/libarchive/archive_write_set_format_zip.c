@@ -53,13 +53,13 @@
 #include <cm3p/zlib.h>
 #endif
 #ifdef HAVE_LZMA_H
-#include <lzma.h>
+#include <cm3p/lzma.h>
 #endif
 #ifdef HAVE_BZLIB_H
-#include <bzlib.h>
+#include <cm3p/bzlib.h>
 #endif
 #ifdef HAVE_ZSTD_H
-#include <zstd.h>
+#include <cm3p/zstd.h>
 #endif
 
 #include "archive.h"
