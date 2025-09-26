@@ -29,7 +29,7 @@ Result Variables
 This module defines the following variables:
 
 ``Libinput_FOUND``
-  Boolean indicating whether the (requested version of) libinput library is
+  Boolean indicating whether the (requested version of) libinput library was
   found.
 ``Libinput_VERSION``
   The version of the libinput found.

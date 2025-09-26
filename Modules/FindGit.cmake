@@ -31,9 +31,9 @@ Result Variables
 This module defines the following variables:
 
 ``Git_FOUND``
-  Boolean indicating whether (the requested version of) Git was found.  For
-  backward compatibility, the ``GIT_FOUND`` variable is also set to the same
-  value.
+  .. versionadded:: 3.3
+
+  Boolean indicating whether (the requested version of) Git was found.
 
 ``Git_VERSION``
   .. versionadded:: 4.2
@@ -52,6 +52,12 @@ Deprecated Variables
 ^^^^^^^^^^^^^^^^^^^^
 
 The following variables are provided for backward compatibility:
+
+``GIT_FOUND``
+  .. deprecated:: 4.2
+    Use ``Git_FOUND``, which has the same value.
+
+  Boolean indicating whether (the requested version of) Git was found.
 
 ``GIT_VERSION_STRING``
   .. deprecated:: 4.2

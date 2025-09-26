@@ -33,7 +33,7 @@ Result Variables
 This module defines the following variables:
 
 ``Patch_FOUND``
-  Boolean indicating whether the ``patch`` command-line executable is found.
+  Boolean indicating whether the ``patch`` command-line executable was found.
 
 Cache Variables
 ^^^^^^^^^^^^^^^

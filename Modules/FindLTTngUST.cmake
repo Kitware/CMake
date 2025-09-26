@@ -29,8 +29,8 @@ Result Variables
 This module defines the following variables:
 
 ``LTTngUST_FOUND``
-  Boolean indicating whether the LTTng-UST library is found.  For backward
-  compatibility, the ``LTTNGUST_FOUND`` variable is also set to the same value.
+  Boolean indicating whether the (requested version of) LTTng-UST library
+  was found.
 
 ``LTTngUST_VERSION``
   .. versionadded:: 4.2
@@ -57,6 +57,13 @@ Deprecated Variables
 ^^^^^^^^^^^^^^^^^^^^
 
 The following variables are provided for backward compatibility:
+
+``LTTNGUST_FOUND``
+  .. deprecated:: 4.2
+    Use ``LTTngUST_FOUND``, which has the same value.
+
+  Boolean indicating whether the (requested version of) LTTng-UST library
+  was found.
 
 ``LTTNGUST_VERSION_STRING``
   .. deprecated:: 4.2

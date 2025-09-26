@@ -29,9 +29,9 @@ Result Variables
 This module defines the following variables:
 
 ``LibLZMA_FOUND``
-  Boolean indicating whether (the requested version of) liblzma is found.
-  For backward compatibility, the ``LIBLZMA_FOUND`` variable is also set to
-  the same value.
+  .. versionadded:: 3.3
+
+  Boolean indicating whether (the requested version of) liblzma was found.
 
 ``LibLZMA_VERSION``
   .. versionadded:: 4.2
@@ -65,6 +65,12 @@ Deprecated Variables
 ^^^^^^^^^^^^^^^^^^^^
 
 The following variables are provided for backward compatibility:
+
+``LIBLZMA_FOUND``
+  .. deprecated:: 4.2
+    Use ``LibLZMA_FOUND``, which has the same value.
+
+  Boolean indicating whether (the requested version of) liblzma was found.
 
 ``LIBLZMA_VERSION``
   .. versionadded:: 3.26

@@ -90,10 +90,10 @@ Result Variables
 This module defines the following variables:
 
 ``Doxygen_FOUND``
-  Boolean indicating whether (the requested version of) ``doxygen`` executable
-  and all requested required components are found.  For backward compatibility,
-  the ``DOXYGEN_FOUND`` variable is also set, except it has boolean value of
-  ``YES`` or ``NO``.
+  .. versionadded:: 3.3
+
+  Boolean indicating whether the (requested version of) ``doxygen`` executable
+  and all requested required components were found.
 
 ``Doxygen_VERSION``
   .. versionadded:: 4.2
@@ -492,6 +492,14 @@ Deprecated Variables
 For compatibility with previous versions of CMake, the following variables
 are also defined but they are deprecated and should no longer be used:
 
+``DOXYGEN_FOUND``
+  .. deprecated:: 4.2
+    Use ``Doxygen_FOUND``.
+
+  Boolean indicating whether the (requested version of) ``doxygen`` executable
+  and all requested required components were found.  It has a boolean value
+  of ``YES`` or ``NO``.
+
 ``DOXYGEN_EXECUTABLE``
   .. deprecated:: 3.9
     Use ``Doxygen::doxygen`` imported target instead of referring to the
@@ -501,8 +509,9 @@ are also defined but they are deprecated and should no longer be used:
 
 ``DOXYGEN_DOT_FOUND``
   .. deprecated:: 3.9
+    Use ``Doxygen_dot_FOUND``.
 
-  Boolean result variable indicating whether ``dot`` executable is found.
+  Boolean result variable indicating whether ``dot`` executable was found.
 
 ``DOXYGEN_DOT_EXECUTABLE``
   .. deprecated:: 3.9

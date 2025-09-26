@@ -33,7 +33,7 @@ Result Variables
 This module defines the following variables:
 
 ``XalanC_FOUND``
-  Boolean indicating whether (the requested version of) Xalan-C++ is found.
+  Boolean indicating whether (the requested version of) Xalan-C++ was found.
 ``XalanC_VERSION``
   The version of the found Xalan-C++ library.
 ``XalanC_INCLUDE_DIRS``

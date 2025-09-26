@@ -97,7 +97,8 @@ Result Variables
 This module defines the following variables:
 
 ``GTK2_FOUND``
-  Boolean indicating whether GTK and all specified components are found.
+  Boolean indicating whether (the requested version of) GTK 2 and all
+  specified components were found.
 ``GTK2_VERSION``
   The version of GTK found (x.y.z).
 ``GTK2_MAJOR_VERSION``

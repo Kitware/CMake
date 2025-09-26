@@ -361,10 +361,10 @@ reStructuredText-format documentation.  For example:
   Result Variables
   ^^^^^^^^^^^^^^^^
 
-  This will define the following variables:
+  This module defines the following variables:
 
   ``Foo_FOUND``
-    True if the system has the Foo library.
+    Boolean indicating whether (the requested version of) Foo was found.
   ``Foo_VERSION``
     The version of the Foo library which was found.
   ``Foo_INCLUDE_DIRS``

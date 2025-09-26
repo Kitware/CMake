@@ -75,10 +75,11 @@ Result Variables
 This module defines the following variables:
 
 ``MPI_FOUND``
-  Boolean variable indicating that MPI settings for all requested components
-  (languages) have been found.  If no components are specified, this is
-  true if MPI settings for all enabled languages were detected.  Note that
-  the ``MPICXX`` component does not affect this variable.
+  Boolean indicating that MPI settings for all requested components
+  (languages) were found.  If no components are specified, this variable is
+  set to boolean true if MPI settings for all enabled languages were
+  detected.  Note that the ``MPICXX`` component does not affect this
+  variable.
 
 ``MPI_VERSION``
   Minimal version of MPI detected among the requested languages, or all
@@ -88,8 +89,8 @@ This module will set the following variables per language in CMake project,
 where ``<lang>`` is one of C, CXX, or Fortran:
 
 ``MPI_<lang>_FOUND``
-  Boolean variable indicating the MPI settings for ``<lang>`` were found
-  and that simple MPI test programs compile with the provided settings.
+  Boolean indicating the MPI settings for ``<lang>`` were found and that
+  simple MPI test programs compile with the provided settings.
 
 ``MPI_<lang>_COMPILER``
   MPI compiler for ``<lang>`` if such a program exists.
@@ -115,8 +116,8 @@ The following variables indicating which bindings are present will be
 defined:
 
 ``MPI_MPICXX_FOUND``
-  Boolean variable indicating whether the MPI-2 C++ bindings are present
-  (introduced in MPI-2, removed with MPI-3).
+  Boolean indicating whether the MPI-2 C++ bindings are present (introduced
+  in MPI-2, removed with MPI-3).
 
 ``MPI_Fortran_HAVE_F77_HEADER``
   True if the Fortran 77 header ``<mpif.h>`` is available.

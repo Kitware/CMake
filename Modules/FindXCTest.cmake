@@ -30,7 +30,7 @@ Result Variables
 This module defines the following variables:
 
 ``XCTest_FOUND``
-  Boolean indicating whether the XCTest framework and executable are found.
+  Boolean indicating whether the XCTest framework and executable were found.
 
 ``XCTest_INCLUDE_DIRS``
   Include directories containing the XCTest framework headers needed to use

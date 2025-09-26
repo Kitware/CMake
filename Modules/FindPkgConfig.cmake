@@ -30,7 +30,7 @@ This module defines the following variables:
   .. versionadded:: 3.3
 
   Boolean indicating whether the (requested version of) ``pkg-config``
-  executable is found.
+  executable was found.
 
 ``PkgConfig_VERSION``
   .. versionadded:: 4.2
@@ -342,7 +342,7 @@ The following variables are provided for backward compatibility:
     Use ``PkgConfig_FOUND``, which has the same value.
 
   Boolean indicating whether the (requested version of) ``pkg-config``
-  executable is found.
+  executable was found.
 
 ``PKG_CONFIG_VERSION_STRING``
   .. deprecated:: 4.2

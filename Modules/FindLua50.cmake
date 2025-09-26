@@ -41,8 +41,9 @@ Result Variables
 This module defines the following variables:
 
 ``Lua50_FOUND``
-  Boolean indicating whether Lua is found.  For backward compatibility, the
-  ``LUA50_FOUND`` variable is also set to the same value.
+  .. versionadded:: 3.3
+
+  Boolean indicating whether Lua was found.
 
 Cache Variables
 ^^^^^^^^^^^^^^^
@@ -56,6 +57,17 @@ The following cache variables may also be set:
 ``LUA_LIBRARIES``
   Libraries needed to link against to use Lua.  This list includes both ``lua``
   and ``lualib`` libraries.
+
+Deprecated Variables
+^^^^^^^^^^^^^^^^^^^^
+
+The following variables are provided for backward compatibility:
+
+``LUA50_FOUND``
+  .. deprecated:: 4.2
+    Use ``Lua50_FOUND``, which has the same value.
+
+  Boolean indicating whether Lua was found.
 
 Examples
 ^^^^^^^^

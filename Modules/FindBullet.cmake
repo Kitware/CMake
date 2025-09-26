@@ -17,10 +17,13 @@ Result Variables
 This module defines the following variables:
 
 ``Bullet_FOUND``
-  Boolean indicating whether Bullet was found.  For backward compatibility,
-  the ``BULLET_FOUND`` variable is also set to the same value.
+  .. versionadded:: 3.3
+
+  Boolean indicating whether Bullet was found.
+
 ``BULLET_INCLUDE_DIRS``
   The Bullet include directories.
+
 ``BULLET_LIBRARIES``
   Libraries needed to link to Bullet.  By default, all Bullet components
   (Dynamics, Collision, LinearMath, and SoftBody) are added.
@@ -33,6 +36,17 @@ This module accepts the following variables:
 ``BULLET_ROOT``
   Can be set to Bullet install path or Windows build path to specify where to
   find Bullet.
+
+Deprecated Variables
+^^^^^^^^^^^^^^^^^^^^
+
+The following variables are provided for backward compatibility:
+
+``BULLET_FOUND``
+  .. deprecated:: 4.2
+    Use ``Bullet_FOUND``, which has the same value.
+
+  Boolean indicating whether Bullet was found.
 
 Examples
 ^^^^^^^^

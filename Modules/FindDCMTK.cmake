@@ -73,7 +73,7 @@ Result Variables
 This module defines the following variables:
 
 ``DCMTK_FOUND``
-  Boolean indicating whether DCMTK is found.
+  Boolean indicating whether DCMTK was found.
 
 ``DCMTK_INCLUDE_DIRS``
   Include directories containing headers needed to use DCMTK.

@@ -142,9 +142,9 @@ This module defines the following variables
 (see :ref:`Standard Variable Names <CMake Developer Standard Variable Names>`):
 
 ``Python2_FOUND``
-  System has the Python 2 requested components.
+  Boolean indicating whether system has the Python 2 requested components.
 ``Python2_Interpreter_FOUND``
-  System has the Python 2 interpreter.
+  Boolean indicating whether system has the Python 2 interpreter.
 ``Python2_EXECUTABLE``
   Path to the Python 2 interpreter.
 ``Python2_EXECUTABLE_DEBUG``
@@ -190,7 +190,7 @@ This module defines the following variables
   Information returned by ``sysconfig.get_path('platlib')`` or else
   ``distutils.sysconfig.get_python_lib(plat_specific=True,standard_lib=False)``.
 ``Python2_Compiler_FOUND``
-  System has the Python 2 compiler.
+  Boolean indicating whether system has the Python 2 compiler.
 ``Python2_COMPILER``
   Path to the Python 2 compiler. Only offered by IronPython.
 ``Python2_COMPILER_ID``
@@ -203,17 +203,19 @@ This module defines the following variables
   The ``.Net`` interpreter. Only used by ``IronPython`` implementation.
 
 ``Python2_Development_FOUND``
-  System has the Python 2 development artifacts.
+  Boolean indicating whether system has the Python 2 development artifacts.
 
 ``Python2_Development.Module_FOUND``
   .. versionadded:: 3.18
 
-  System has the Python 2 development artifacts for Python module.
+  Boolean indicating whether system has the Python 2 development artifacts
+  for Python module.
 
 ``Python2_Development.Embed_FOUND``
   .. versionadded:: 3.18
 
-  System has the Python 2 development artifacts for Python embedding.
+  Boolean indicating whether system has the Python 2 development artifacts
+  for Python embedding.
 
 ``Python2_INCLUDE_DIRS``
   The Python 2 include directories.
@@ -253,7 +255,7 @@ This module defines the following variables
 ``Python2_NumPy_FOUND``
   .. versionadded:: 3.14
 
-  System has the NumPy.
+  Boolean indicating whether system has the NumPy.
 
 ``Python2_NumPy_INCLUDE_DIRS``
   .. versionadded:: 3.14

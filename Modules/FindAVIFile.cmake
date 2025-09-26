@@ -21,10 +21,13 @@ Result Variables
 This module defines the following variables:
 
 ``AVIFile_FOUND``
-  Boolean indicating whether AVIFile is found.  For backward compatibility,
-  the ``AVIFILE_FOUND`` variable is also set to the same value.
+  .. versionadded:: 3.3
+
+  Boolean indicating whether AVIFile was found.
+
 ``AVIFILE_LIBRARIES``
   The libraries to link against.
+
 ``AVIFILE_DEFINITIONS``
   Definitions to use when compiling.
 
@@ -35,6 +38,17 @@ The following cache variables may also be set:
 
 ``AVIFILE_INCLUDE_DIR``
   Directory containing ``avifile.h`` and other AVIFile headers.
+
+Deprecated Variables
+^^^^^^^^^^^^^^^^^^^^
+
+The following variables are provided for backward compatibility:
+
+``AVIFILE_FOUND``
+  .. deprecated:: 4.2
+    Use ``AVIFile_FOUND``, which has the same value.
+
+  Boolean indicating whether AVIFile was found.
 
 Examples
 ^^^^^^^^

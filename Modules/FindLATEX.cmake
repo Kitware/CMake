@@ -73,10 +73,10 @@ This module defines the following variables:
 
 ``LATEX_FOUND``
   Boolean indicating whether the LaTex compiler and all its required components
-  are found.
+  were found.
 
 ``LATEX_<component>_FOUND``
-  Boolean indicating whether the LaTeX ``<component>`` is found.
+  Boolean indicating whether the LaTeX ``<component>`` was found.
 
 Cache Variables
 ^^^^^^^^^^^^^^^

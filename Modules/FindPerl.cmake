@@ -19,9 +19,10 @@ Result Variables
 This module defines the following variables:
 
 ``Perl_FOUND``
-  Boolean indicating whether the (requested version of) Perl executable is
-  found.  For backward compatibility, the ``PERL_FOUND`` variable is also
-  set to the same value.
+  .. versionadded:: 3.3
+
+  Boolean indicating whether the (requested version of) Perl executable was
+  found.
 
 ``Perl_VERSION``
   .. versionadded:: 4.2
@@ -40,6 +41,13 @@ Deprecated Variables
 ^^^^^^^^^^^^^^^^^^^^
 
 The following variables are provided for backward compatibility:
+
+``PERL_FOUND``
+  .. deprecated:: 4.2
+    Use ``Perl_FOUND``, which has the same value.
+
+  Boolean indicating whether the (requested version of) Perl executable was
+  found.
 
 ``PERL_VERSION_STRING``
   .. deprecated:: 4.2

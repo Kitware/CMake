@@ -55,10 +55,13 @@ Result Variables
 This module defines the following variables:
 
 ``Java_FOUND``
-  Boolean indicating whether Java with all specified components is found.
+  .. versionadded:: 3.3
+
+  Boolean indicating whether (the requested version of) Java with all
+  specified components was found.
 
 ``Java_<component>_FOUND``
-  Boolean indicating whether the ``<component>`` is found.
+  Boolean indicating whether the ``<component>`` was found.
 
 ``Java_VERSION``
   Version of Java found.  This is set to:

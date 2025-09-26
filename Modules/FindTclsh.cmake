@@ -18,9 +18,10 @@ Result Variables
 This module defines the following variables:
 
 ``Tclsh_FOUND``
+  .. versionadded:: 3.3
+
   Boolean indicating whether the (requested version of) ``tclsh`` executable
-  is found.  For backward compatibility, the ``TCLSH_FOUND`` variable is
-  also set to the same value.
+  was found.
 
 ``Tclsh_VERSION``
   .. versionadded:: 4.2
@@ -39,6 +40,13 @@ Deprecated Variables
 ^^^^^^^^^^^^^^^^^^^^
 
 The following variables are provided for backward compatibility:
+
+``TCLSH_FOUND``
+  .. deprecated:: 4.2
+    Use ``Tclsh_FOUND``, which has the same value.
+
+  Boolean indicating whether the (requested version of) ``tclsh`` executable
+  was found.
 
 ``TCLSH_VERSION_STRING``
   .. deprecated:: 4.2

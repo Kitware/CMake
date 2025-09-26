@@ -30,7 +30,7 @@ Result Variables
 This module defines the following variables:
 
 ``EXPAT_FOUND``
-  Boolean indicating whether (the requested version of) Expat is found.
+  Boolean indicating whether (the requested version of) Expat was found.
 
 ``EXPAT_VERSION``
   .. versionadded:: 4.2

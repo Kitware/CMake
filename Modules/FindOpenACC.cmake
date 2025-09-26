@@ -37,14 +37,15 @@ This module defines the following variables:
 ``OpenACC_FOUND``
   .. versionadded:: 3.25
 
-  Boolean variable indicating that OpenACC flags for at least one languages
-  have been found.
+  Boolean indicating that OpenACC flags for at least one language were
+  found.
 
 This module will set the following variables per language in the
 project, where ``<lang>`` is one of C, CXX, or Fortran:
 
 ``OpenACC_<lang>_FOUND``
-  Boolean variable indicating if OpenACC support for ``<lang>`` was detected.
+  Boolean indicating whether OpenACC support for language ``<lang>`` was
+  detected.
 ``OpenACC_<lang>_FLAGS``
   OpenACC compiler flags for ``<lang>``, separated by spaces.
 ``OpenACC_<lang>_OPTIONS``

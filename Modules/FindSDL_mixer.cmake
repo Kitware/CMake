@@ -26,9 +26,10 @@ Result Variables
 This module defines the following variables:
 
 ``SDL_mixer_FOUND``
-  Boolean indicating whether the (requested version of) SDL_mixer library is
-  found.  For backward compatibility, the ``SDL_MIXER_FOUND`` variable is also
-  set to the same value.
+  .. versionadded:: 3.3
+
+  Boolean indicating whether the (requested version of) SDL_mixer library
+  was found.
 
 ``SDL_mixer_VERSION``
   .. versionadded:: 4.2
@@ -59,9 +60,13 @@ The following variables are provided for backward compatibility:
 
 ``SDL_MIXER_VERSION_STRING``
   .. deprecated:: 4.2
-    Use the ``SDL_mixer_VERSION``.
+    Use ``SDL_mixer_VERSION``, which has the same value.
 
   The human-readable string containing the version of SDL_mixer found.
+
+``SDL_MIXER_FOUND``
+  .. deprecated:: 4.2
+    Use ``SDL_mixer_FOUND``, which has the same value.
 
 ``SDLMIXER_FOUND``
   .. deprecated:: 2.8.10

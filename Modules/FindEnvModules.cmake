@@ -43,7 +43,7 @@ Result Variables
 This module defines the following variables:
 
 ``EnvModules_FOUND``
-  Boolean indicating whether a compatible Environment Modules framework is
+  Boolean indicating whether a compatible Environment Modules framework was
   found.
 
 Cache Variables

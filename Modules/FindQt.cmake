@@ -39,9 +39,9 @@ Result Variables
 This module defines the following variables:
 
 ``QT4_INSTALLED``
-  ``TRUE`` if Qt4 is found.
+  ``TRUE`` if Qt4 was found.
 ``QT3_INSTALLED``
-  ``TRUE`` if Qt3 is found.
+  ``TRUE`` if Qt3 was found.
 
 Hints
 ^^^^^

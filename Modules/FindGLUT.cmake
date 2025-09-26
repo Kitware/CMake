@@ -29,7 +29,7 @@ Result Variables
 This module defines the following variables:
 
 ``GLUT_FOUND``
-  Boolean indicating whether GLUT is found.
+  Boolean indicating whether GLUT was found.
 
 ``GLUT_INCLUDE_DIRS``
   .. versionadded:: 3.23

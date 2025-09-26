@@ -157,9 +157,10 @@ Result Variables
 This module defines the following variables:
 
 ``OpenSceneGraph_FOUND``
-  Boolean indicating whether (the requested version of) OpenSceneGraph with all
-  specified components is found.  For backward compatibility, the
-  ``OPENSCENEGRAPH_FOUND`` variable is also set to the same value.
+  .. versionadded:: 3.3
+
+  Boolean indicating whether (the requested version of) OpenSceneGraph with
+  all specified components was found.
 
 ``OpenSceneGraph_VERSION``
   .. versionadded:: 4.2
@@ -207,6 +208,13 @@ Deprecated Variables
 ^^^^^^^^^^^^^^^^^^^^
 
 The following variables are provided for backward compatibility:
+
+``OPENSCENEGRAPH_FOUND``
+  .. deprecated:: 4.2
+    Use ``OpenSceneGraph_FOUND``, which has the same value.
+
+  Boolean indicating whether (the requested version of) OpenSceneGraph with
+  all specified components was found.
 
 ``OPENSCENEGRAPH_VERSION``
   .. deprecated:: 4.2

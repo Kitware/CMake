@@ -44,8 +44,9 @@ Result Variables
 This module defines the following variables:
 
 ``osg_FOUND``
-  Boolean indicating whether osg library is found.  For backward
-  compatibility, the ``OSG_FOUND`` variable is also set to the same value.
+  .. versionadded:: 3.3
+
+  Boolean indicating whether the osg library was found.
 
 ``OSG_LIBRARIES``
   The libraries needed to link against to use osg library.
@@ -75,6 +76,17 @@ This module accepts the following variables:
   toolkit, including its osg library, when installed in a custom
   location.  It should point to the OpenSceneGraph installation prefix used when
   it was configured, built, and installed: ``./configure --prefix=$OSGDIR``.
+
+Deprecated Variables
+^^^^^^^^^^^^^^^^^^^^
+
+The following variables are provided for backward compatibility:
+
+``OSG_FOUND``
+  .. deprecated:: 4.2
+    Use ``osg_FOUND``, which has the same value.
+
+  Boolean indicating whether the osg library was found.
 
 Examples
 ^^^^^^^^

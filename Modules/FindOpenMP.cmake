@@ -78,9 +78,12 @@ Result Variables
 This module defines the following variables:
 
 ``OpenMP_FOUND``
-  Boolean variable indicating that OpenMP flags for all requested languages
-  have been found.  If no components are specified, this is true if OpenMP
-  settings for all enabled languages were detected.
+  .. versionadded:: 3.10
+
+  Boolean indicating that OpenMP flags for all requested languages were
+  found.  If no components are specified, this variable is set to boolean
+  true if OpenMP settings for all enabled languages were detected.
+
 ``OpenMP_VERSION``
   Minimal version of the OpenMP standard detected among the requested
   languages, or all enabled languages if no components were specified.

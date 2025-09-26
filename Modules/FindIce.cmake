@@ -93,8 +93,8 @@ Result Variables
 This module defines the following variables:
 
 ``Ice_FOUND``
-  Boolean indicating whether the main programs, libraries and all requested
-  components for using Ice were found.
+  Boolean indicating whether the (requested version of) main programs,
+  libraries and all requested components for using Ice were found.
 
 ``Ice_VERSION``
   The version of Ice release found.
@@ -112,7 +112,7 @@ This module defines the following variables:
 Ice component libraries are stored in:
 
 ``Ice_<COMPONENT>_FOUND``
-  Boolean indicating whether the specified Ice component is found.  The
+  Boolean indicating whether the specified Ice component was found.  The
   ``<COMPONENT>`` should be written in uppercase.
 
 ``Ice_<COMPONENT>_LIBRARIES``

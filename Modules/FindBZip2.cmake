@@ -28,9 +28,10 @@ Result Variables
 This module defines the following variables:
 
 ``BZip2_FOUND``
-  Boolean indicating whether (the requested version of) BZip2 library is
-  found.  For backward compatibility, the ``BZIP2_FOUND`` variable is also
-  set to the same value.
+  .. versionadded:: 3.3
+
+  Boolean indicating whether the (requested version of) BZip2 library was
+  found.
 
 ``BZip2_VERSION``
   .. versionadded:: 4.2
@@ -68,6 +69,13 @@ Deprecated Variables
 ^^^^^^^^^^^^^^^^^^^^
 
 The following variables are provided for backward compatibility:
+
+``BZIP2_FOUND``
+  .. deprecated:: 4.2
+    Use ``BZip2_FOUND``, which has the same value.
+
+  Boolean indicating whether the (requested version of) BZip2 library was
+  found.
 
 ``BZIP2_VERSION_STRING``
   .. deprecated:: 3.26

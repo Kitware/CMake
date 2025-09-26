@@ -66,7 +66,9 @@ Result Variables
 This module defines the following variables:
 
 ``DevIL_FOUND``
-  Boolean indicating whether the (requested version of) DevIL package is
+  .. versionadded:: 3.8
+
+  Boolean indicating whether the (requested version of) DevIL package was
   found, including the IL and ILU libraries.
 
 ``DevIL_VERSION``
@@ -77,8 +79,8 @@ This module defines the following variables:
 ``DevIL_ILUT_FOUND``
   .. versionadded:: 3.21
 
-  Boolean indicating whether the ILUT library is found.  On most systems, ILUT
-  is found when both IL and ILU are available.
+  Boolean indicating whether the ILUT library was found.  On most systems,
+  ILUT is found when both IL and ILU are available.
 
 Cache Variables
 ^^^^^^^^^^^^^^^

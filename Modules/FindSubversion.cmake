@@ -18,9 +18,8 @@ Result Variables
 This module defines the following variables:
 
 ``Subversion_FOUND``
-  Boolean indicating whether (the requested version of) Subversion command-line
-  client is found.  For backward compatibility, the ``SUBVERSION_FOUND``
-  variable is also set to the same value.
+  Boolean indicating whether the (requested version of) Subversion
+  command-line client was found.
 
 ``Subversion_VERSION``
   .. versionadded:: 4.2
@@ -99,6 +98,13 @@ Deprecated Variables
 ^^^^^^^^^^^^^^^^^^^^
 
 The following variables are provided for backward compatibility:
+
+``SUBVERSION_FOUND``
+  .. deprecated:: 4.2
+    Use ``Subversion_FOUND``, which has the same value.
+
+  Boolean indicating whether the (requested version of) Subversion
+  command-line client was found.
 
 ``Subversion_VERSION_SVN``
   .. deprecated:: 4.2

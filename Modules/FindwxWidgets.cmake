@@ -90,7 +90,7 @@ This module defines the following variables:
 
 ``wxWidgets_FOUND``
   Boolean indicating whether (the requested version of) wxWidgets and all
-  its requested components are found.
+  its requested components were found.
 
 ``wxWidgets_VERSION``
   .. versionadded:: 4.2

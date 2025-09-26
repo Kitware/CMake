@@ -19,11 +19,7 @@ Result Variables
 This module defines the following variables:
 
 ``LibUV_FOUND``
-  True if libuv was found, false otherwise.
-``LibUV_INCLUDE_DIRS``
-  Include directories needed to include libuv headers.
-``LibUV_LIBRARIES``
-  Libraries needed to link to libuv.
+  Boolean indicating whether (the requested version of) libuv was found.
 ``LibUV_VERSION``
   The version of libuv found.
 ``LibUV_VERSION_MAJOR``
@@ -32,6 +28,10 @@ This module defines the following variables:
   The minor version of libuv.
 ``LibUV_VERSION_PATCH``
   The patch version of libuv.
+``LibUV_INCLUDE_DIRS``
+  Include directories needed to include libuv headers.
+``LibUV_LIBRARIES``
+  Libraries needed to link to libuv.
 
 Cache Variables
 ^^^^^^^^^^^^^^^

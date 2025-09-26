@@ -60,7 +60,8 @@ Result Variables
 This module defines the following variables:
 
 ``ASPELL_FOUND``
-  Boolean indicating whether the requested Aspell components have been found.
+  Boolean indicating whether (the requested version of) Aspell and all
+  requested components were found.
 
 ``ASPELL_VERSION``
   .. versionadded:: 4.1

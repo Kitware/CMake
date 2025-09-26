@@ -38,8 +38,10 @@ Result Variables
 This module defines the following variables:
 
 ``OpenAL_FOUND``
-  Boolean indicating whether the OpenAL is found.  For backward compatibility,
-  the ``OPENAL_FOUND`` variable is also set to the same value.
+  .. versionadded:: 3.3
+
+  Boolean indicating whether (the requested version of) OpenAL was found.
+
 ``OPENAL_VERSION_STRING``
   Human-readable string containing the version of OpenAL found.
 
@@ -52,6 +54,17 @@ The following cache variables may also be set:
   The include directory containing headers needed to use the OpenAL library.
 ``OPENAL_LIBRARY``
   The path to the OpenAL library.
+
+Deprecated Variables
+^^^^^^^^^^^^^^^^^^^^
+
+The following variables are provided for backward compatibility:
+
+``OPENAL_FOUND``
+  .. deprecated:: 4.2
+    Use ``OpenAL_FOUND``, which has the same value.
+
+  Boolean indicating whether (the requested version of) OpenAL was found.
 
 Hints
 ^^^^^

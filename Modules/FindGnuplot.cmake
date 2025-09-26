@@ -18,9 +18,9 @@ Result Variables
 This module defines the following variables:
 
 ``Gnuplot_FOUND``
-  Boolean indicating whether (the requested version of) Gnuplot has been
-  found.  For backward compatibility, the ``GNUPLOT_FOUND`` variable is also
-  set to the same value.
+  .. versionadded:: 3.3
+
+  Boolean indicating whether (the requested version of) Gnuplot was found.
 
 ``Gnuplot_VERSION``
   .. versionadded:: 4.2
@@ -44,6 +44,12 @@ Deprecated Variables
 ^^^^^^^^^^^^^^^^^^^^
 
 The following variables are provided for backward compatibility:
+
+``GNUPLOT_FOUND``
+  .. deprecated:: 4.2
+    Use ``Gnuplot_FOUND``, which has the same value.
+
+  Boolean indicating whether (the requested version of) Gnuplot was found.
 
 ``GNUPLOT_VERSION_STRING``
   .. deprecated:: 4.2

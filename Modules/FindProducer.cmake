@@ -35,8 +35,9 @@ Result Variables
 This module defines the following variables:
 
 ``Producer_FOUND``
-  Boolean indicating whether Producer is found.  For backward compatibility, the
-  ``PRODUCER_FOUND`` variable is also set to the same value.
+  .. versionadded:: 3.3
+
+  Boolean indicating whether Producer was found.
 
 Cache Variables
 ^^^^^^^^^^^^^^^
@@ -71,6 +72,17 @@ multiple OpenSceneGraph-related libraries at once:
 
 ``OSG_DIR``
   Environment variable treated the same as ``PRODUCER_DIR``.
+
+Deprecated Variables
+^^^^^^^^^^^^^^^^^^^^
+
+The following variables are provided for backward compatibility:
+
+``PRODUCER_FOUND``
+  .. deprecated:: 4.2
+    Use ``Producer_FOUND``, which has the same value.
+
+  Boolean indicating whether Producer was found.
 
 Examples
 ^^^^^^^^

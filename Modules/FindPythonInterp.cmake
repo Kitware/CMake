@@ -39,9 +39,11 @@ Result Variables
 This module defines the following variables:
 
 ``PythonInterp_FOUND``
-  Boolean indicating whether the (requested version of) Python executable is
-  found.  For backward compatibility, the ``PYTHONINTERP_FOUND`` variable is
-  also set to the same value.
+  .. versionadded:: 3.3
+
+  Boolean indicating whether the (requested version of) Python executable
+  was found.
+
 ``PYTHON_VERSION_STRING``
   Python version found (e.g., ``2.5.2``).
 ``PYTHON_VERSION_MAJOR``
@@ -68,6 +70,18 @@ This module accepts the following variables before calling
 ``Python_ADDITIONAL_VERSIONS``
   This variable can be used to specify a list of version numbers that should be
   taken into account when searching for Python.
+
+Deprecated Variables
+^^^^^^^^^^^^^^^^^^^^
+
+The following variables are provided for backward compatibility:
+
+``PYTHONINTERP_FOUND``
+  .. deprecated:: 3.12
+    Use ``PythonInterp_FOUND``, which has the same value.
+
+  Boolean indicating whether the (requested version of) Python executable
+  was found.
 
 Examples
 ^^^^^^^^

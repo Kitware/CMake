@@ -160,7 +160,7 @@ This module defines the following variables:
 
 ``Vulkan_FOUND``
   Boolean indicating whether (the requested version of) Vulkan and all required
-  components are found.
+  components were found.
 
 ``Vulkan_VERSION``
   .. versionadded:: 3.23

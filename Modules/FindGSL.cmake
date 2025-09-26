@@ -37,7 +37,7 @@ Result Variables
 This module defines the following variables:
 
 ``GSL_FOUND``
-  Boolean indicating whether (the requested version of) GSL is found on the
+  Boolean indicating whether (the requested version of) GSL was found on the
   local system.
 ``GSL_VERSION``
   The version of the discovered GSL installation.

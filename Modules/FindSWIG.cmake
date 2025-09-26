@@ -46,7 +46,7 @@ This module defines the following variables:
 
 ``SWIG_FOUND``
   Boolean indicating whether (the requested version of) SWIG and any required
-  components are found on the system.
+  components were found on the system.
 ``SWIG_VERSION``
   SWIG executable version (result of ``swig -version``).
 ``SWIG_<lang>_FOUND``

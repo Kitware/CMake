@@ -30,7 +30,7 @@ Result Variables
 This module defines the following variables:
 
 ``XercesC_FOUND``
-  Boolean indicating whether (the requested version of) Xerces-C++ is found.
+  Boolean indicating whether (the requested version of) Xerces-C++ was found.
 ``XercesC_VERSION``
   The version of the found Xerces-C++ library.
 ``XercesC_INCLUDE_DIRS``

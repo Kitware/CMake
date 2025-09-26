@@ -26,11 +26,11 @@ This module defines the following variables:
 ``Qt3_FOUND``
   .. versionadded:: 3.3
 
-  Boolean indicating whether (the requested version of) Qt3 is found.
+  Boolean indicating whether (the requested version of) Qt3 was found.
 
 ``QT_FOUND``
   Same as ``Qt3_FOUND``.  Boolean indicating whether (the requested version
-  of) Qt3 is found.  This variable is provided for compatibility with other
+  of) Qt3 was found.  This variable is provided for compatibility with other
   Qt find modules.
 
 ``Qt3_VERSION``
