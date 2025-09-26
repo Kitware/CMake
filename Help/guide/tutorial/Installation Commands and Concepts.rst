@@ -105,7 +105,7 @@ and consists of a single call to :command:`install(targets)`.
   )
 
 Most artifact kinds are installed by default and do not need to be listed in
-the :command:`install` command. However, ``FILE_SET``s must be named to let
+the :command:`install` command. However, ``FILE_SET``\ s must be named to let
 CMake know you want to install. In the above example we install two file
 sets, one named ``HEADERS`` and another named ``AnotherHeaderFileSet``.
 
