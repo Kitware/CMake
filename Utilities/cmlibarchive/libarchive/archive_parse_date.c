@@ -27,7 +27,7 @@
 **  This code is in the public domain and has no copyright.
 */
 
-#ifndef CM_GET_DATE
+#ifndef CM_PARSE_DATE
 #include "archive_platform.h"
 #endif
 
