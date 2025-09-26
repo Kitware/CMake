@@ -31,6 +31,7 @@
 #include "cmUVStream.h"
 
 using InstallScript = cmInstallScriptHandler::InstallScript;
+using InstallScriptRunner = cmInstallScriptHandler::InstallScriptRunner;
 
 cmInstallScriptHandler::cmInstallScriptHandler(std::string _binaryDir,
                                                std::string _component,
@@ -45,13 +46,13 @@ cmInstallScriptHandler::cmInstallScriptHandler(std::string _binaryDir,
 
   auto addScript = [this, &args](std::string script,
                                  std::string config) -> void {
-    this->commands.push_back(args);
+    this->scripts.push_back({ script, config, args });
     if (!config.empty()) {
-      this->commands.back().insert(
-        this->commands.back().end() - 1,
+      this->scripts.back().command.insert(
+        this->scripts.back().command.end() - 1,
         cmStrCat("-DCMAKE_INSTALL_CONFIG_NAME=", config));
     }
-    this->commands.back().emplace_back(script);
+    this->scripts.back().command.emplace_back(script);
     this->directories.push_back(cmSystemTools::GetFilenamePath(script));
   };
 
@@ -97,10 +98,9 @@ bool cmInstallScriptHandler::IsParallel()
   return this->parallel;
 }
 
-std::vector<std::vector<std::string>> cmInstallScriptHandler::GetCommands()
-  const
+std::vector<InstallScript> cmInstallScriptHandler::GetScripts() const
 {
-  return this->commands;
+  return this->scripts;
 }
 
 int cmInstallScriptHandler::Install(unsigned int j,
@@ -108,8 +108,8 @@ int cmInstallScriptHandler::Install(unsigned int j,
 {
   cm::uv_loop_ptr loop;
   loop.init();
-  std::vector<InstallScript> scripts;
-  scripts.reserve(this->commands.size());
+  std::vector<InstallScriptRunner> runners;
+  runners.reserve(this->scripts.size());
 
   std::vector<std::string> instrument_arg;
   if (instrumentation.HasQuery()) {
@@ -119,26 +119,32 @@ int cmInstallScriptHandler::Install(unsigned int j,
                        "install",
                        "--build-dir",
                        this->binaryDir,
+                       "--config",
+                       "",
                        "--" };
   }
 
-  for (auto& cmd : this->commands) {
-    cmd.insert(cmd.begin(), instrument_arg.begin(), instrument_arg.end());
-    scripts.emplace_back(cmd);
+  for (auto& script : this->scripts) {
+    if (!instrument_arg.empty()) {
+      instrument_arg[7] = script.config; // --config <script.config>
+    }
+    script.command.insert(script.command.begin(), instrument_arg.begin(),
+                          instrument_arg.end());
+    runners.emplace_back(script);
   }
   std::size_t working = 0;
   std::size_t installed = 0;
   std::size_t i = 0;
 
   std::function<void()> queueScripts;
-  queueScripts = [&scripts, &working, &installed, &i, &loop, j,
+  queueScripts = [&runners, &working, &installed, &i, &loop, j,
                   &queueScripts]() {
-    for (auto queue = std::min(j - working, scripts.size() - i); queue > 0;
+    for (auto queue = std::min(j - working, runners.size() - i); queue > 0;
          --queue) {
       ++working;
-      scripts[i].start(loop,
-                       [&scripts, &working, &installed, i, &queueScripts]() {
-                         scripts[i].printResult(++installed, scripts.size());
+      runners[i].start(loop,
+                       [&runners, &working, &installed, i, &queueScripts]() {
+                         runners[i].printResult(++installed, runners.size());
                          --working;
                          queueScripts();
                        });
@@ -180,15 +186,15 @@ int cmInstallScriptHandler::Install(unsigned int j,
   return 0;
 }
 
-InstallScript::InstallScript(std::vector<std::string> const& cmd)
+InstallScriptRunner::InstallScriptRunner(InstallScript const& script)
 {
   this->name = cmSystemTools::RelativePath(
-    cmSystemTools::GetLogicalWorkingDirectory(), cmd.back());
-  this->command = cmd;
+    cmSystemTools::GetLogicalWorkingDirectory(), script.path);
+  this->command = script.command;
 }
 
-void InstallScript::start(cm::uv_loop_ptr& loop,
-                          std::function<void()> callback)
+void InstallScriptRunner::start(cm::uv_loop_ptr& loop,
+                                std::function<void()> callback)
 {
   cmUVProcessChainBuilder builder;
   builder.AddCommand(this->command)
@@ -208,7 +214,7 @@ void InstallScript::start(cm::uv_loop_ptr& loop,
     std::move(callback));
 }
 
-void InstallScript::printResult(std::size_t n, std::size_t total)
+void InstallScriptRunner::printResult(std::size_t n, std::size_t total)
 {
   cmSystemTools::Stdout(cmStrCat('[', n, '/', total, "] ", this->name, '\n'));
   for (auto const& line : this->output) {

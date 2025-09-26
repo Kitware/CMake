@@ -359,8 +359,9 @@ and contain the following data:
     * ``test``: a single test executed by CTest
 
   ``target``
-    The CMake target associated with the command. Only included when ``role`` is
-    ``compile`` or ``link``.
+    The CMake target associated with the command. Included when ``role`` is
+    ``compile``, or ``link``, and when ``role`` is ``custom`` and the custom
+    command is attached to a target with :ref:`add_custom_command(TARGET)`.
 
   ``targetType``
     The :prop_tgt:`TYPE` of the target. Only included when ``role`` is
@@ -391,14 +392,15 @@ and contain the following data:
 
   ``language``
     The language of the source file being compiled. Only included when ``role`` is
-    ``compile``.
+    ``compile`` or ``link``.
 
   ``testName``
     The name of the test being executed. Only included when ``role`` is ``test``.
 
   ``config``
     The type of build, such as ``Release`` or ``Debug``. Only included when
-    ``role`` is ``compile``, ``link`` or ``test``.
+    ``role`` is one of: ``compile``, ``link``, ``custom``, ``install``,
+    ``test``.
 
   ``dynamicSystemInformation``
     Specifies the dynamic information collected about the host machine

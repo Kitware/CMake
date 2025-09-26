@@ -22,11 +22,17 @@ public:
                          std::vector<std::string>&);
   bool IsParallel();
   int Install(unsigned int j, cmInstrumentation& instrumentation);
-  std::vector<std::vector<std::string>> GetCommands() const;
-  class InstallScript
+  struct InstallScript
+  {
+    std::string path;
+    std::string config;
+    std::vector<std::string> command;
+  };
+  std::vector<InstallScript> GetScripts() const;
+  class InstallScriptRunner
   {
   public:
-    InstallScript(std::vector<std::string> const&);
+    InstallScriptRunner(InstallScript const&);
     void start(cm::uv_loop_ptr&, std::function<void()>);
     void printResult(std::size_t n, std::size_t total);
 
@@ -40,9 +46,9 @@ public:
   };
 
 private:
-  std::vector<std::vector<std::string>> commands;
-  std::vector<std::string> directories;
+  std::vector<InstallScript> scripts;
   std::vector<std::string> configs;
+  std::vector<std::string> directories;
   std::string binaryDir;
   std::string component;
   bool parallel;

@@ -636,7 +636,8 @@ int cmInstrumentation::InstrumentCommand(
 
   // Create empty config entry if config not found
   if (!root.isMember("config") &&
-      (command_type == "compile" || command_type == "link")) {
+      (command_type == "compile" || command_type == "link" ||
+       command_type == "custom" || command_type == "install")) {
     root["config"] = "";
   }
 

@@ -912,6 +912,8 @@ std::string cmLocalNinjaGenerator::MakeCustomLauncher(
   }
   vars.Output = output.c_str();
   vars.Role = ccg.GetCC().GetRole().c_str();
+  vars.CMTargetName = ccg.GetCC().GetTarget().c_str();
+  vars.Config = ccg.GetOutputConfig().c_str();
 
   auto rulePlaceholderExpander = this->CreateRulePlaceholderExpander();
 
