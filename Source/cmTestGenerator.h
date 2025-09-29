@@ -43,7 +43,6 @@ private:
     std::string const& config) const;
 
 protected:
-  void GenerateScriptConfigs(std::ostream& os, Indent indent) override;
   void GenerateScriptActions(std::ostream& os, Indent indent) override;
   void GenerateScriptForConfig(std::ostream& os, std::string const& config,
                                Indent indent) override;
