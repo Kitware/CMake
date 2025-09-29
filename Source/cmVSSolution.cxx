@@ -17,12 +17,25 @@
 namespace cm {
 namespace VS {
 
-cm::string_view const Solution::Project::TypeIdDefault =
-  "8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942"_s;
 cm::string_view const Solution::Project::TypeIdCSharp =
   "FAE04EC0-301F-11D3-BF4B-00C04F79EFBC"_s;
+cm::string_view const Solution::Project::TypeIdDatabase =
+  "C8D11400-126E-41CD-887F-60BD40844F9E"_s;
+cm::string_view const Solution::Project::TypeIdDefault =
+  "8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942"_s;
+cm::string_view const Solution::Project::TypeIdFSharp =
+  "F2A71F9B-5D33-465A-A702-920D77279786"_s;
 cm::string_view const Solution::Project::TypeIdFortran =
   "6989167D-11E4-40FE-8C1A-2192A86A7E90"_s;
+cm::string_view const Solution::Project::TypeIdPython =
+  "888888A0-9F3D-457C-B088-3A5042F75D52"_s;
+cm::string_view const Solution::Project::TypeIdVDProj =
+  "54435603-DBB4-11D2-8724-00A0C9A8B90C"_s;
+cm::string_view const Solution::Project::TypeIdVisualBasic =
+  "F184B08F-C81C-45F6-A57F-5ABD9991F28F"_s;
+cm::string_view const Solution::Project::TypeIdWiX =
+  "930C7802-8A8C-48F9-8165-68863BCCD9DD"_s;
+
 cm::string_view const Solution::Folder::TypeId =
   "2150E333-8FDC-42A3-9474-1A3956D46DE8"_s;
 

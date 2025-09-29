@@ -183,6 +183,8 @@ protected:
   /** Returns true if the target system support debugging deployment. */
   virtual bool TargetSystemSupportsDeployment() const = 0;
 
+  static cm::string_view ExternalProjectTypeId(std::string const& path);
+
   std::set<std::string> IsPartOfDefaultBuild(
     std::vector<std::string> const& configs,
     TargetDependSet const& projectTargets,

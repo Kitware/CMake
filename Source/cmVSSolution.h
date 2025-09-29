@@ -70,9 +70,15 @@ struct Solution final
     std::vector<Project const*> BuildDependencies;
 
     // Project type GUIDs used during creation.
-    static cm::string_view const TypeIdDefault;
     static cm::string_view const TypeIdCSharp;
+    static cm::string_view const TypeIdDatabase;
+    static cm::string_view const TypeIdDefault;
+    static cm::string_view const TypeIdFSharp;
     static cm::string_view const TypeIdFortran;
+    static cm::string_view const TypeIdPython;
+    static cm::string_view const TypeIdVDProj;
+    static cm::string_view const TypeIdVisualBasic;
+    static cm::string_view const TypeIdWiX;
   };
 
   /** Represent one folder in a Solution.  */

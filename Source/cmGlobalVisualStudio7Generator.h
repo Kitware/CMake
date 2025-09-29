@@ -121,8 +121,6 @@ protected:
   std::string const& GetDevEnvCommand();
   virtual std::string FindDevEnvCommand();
 
-  static char const* ExternalProjectType(std::string const& location);
-
   bool MarmasmEnabled;
   bool MasmEnabled;
   bool NasmEnabled;
