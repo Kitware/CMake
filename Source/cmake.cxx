@@ -3158,10 +3158,10 @@ int cmake::Generate()
   this->SaveCache(this->GetHomeOutputDirectory());
 
 #if !defined(CMAKE_BOOTSTRAP)
-  this->Instrumentation->CollectTimingData(
-    cmInstrumentationQuery::Hook::PostGenerate);
   this->GlobalGenerator->WriteInstallJson();
   this->FileAPI->WriteReplies(cmFileAPI::IndexFor::Success);
+  this->Instrumentation->CollectTimingData(
+    cmInstrumentationQuery::Hook::PostGenerate);
 #endif
 
   return 0;
