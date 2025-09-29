@@ -9,5 +9,8 @@
         "^ALL_BUILD::@25b7fa8ea00134654b85$",
         "^ZERO_CHECK::@25b7fa8ea00134654b85$",
         "^iface_srcs::@25b7fa8ea00134654b85$"
+    ],
+    "abstractTargetIds": [
+        "^iface_none::@25b7fa8ea00134654b85$"
     ]
 }

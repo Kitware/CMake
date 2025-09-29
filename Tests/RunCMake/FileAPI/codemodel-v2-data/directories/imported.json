@@ -12,6 +12,14 @@
         "^link_imported_shared_exe::@ba7eb709d0b48779c6c8$",
         "^link_imported_static_exe::@ba7eb709d0b48779c6c8$"
     ],
+    "abstractTargetIds": [
+        "^imported_exe::@ba7eb709d0b48779c6c8$",
+        "^imported_interface_lib::@ba7eb709d0b48779c6c8$",
+        "^imported_lib::@ba7eb709d0b48779c6c8$",
+        "^imported_object_lib::@ba7eb709d0b48779c6c8$",
+        "^imported_shared_lib::@ba7eb709d0b48779c6c8$",
+        "^imported_static_lib::@ba7eb709d0b48779c6c8$"
+    ],
     "projectName": "Imported",
     "minimumCMakeVersion": "3.13",
     "hasInstallRule": true,
@@ -34,7 +42,7 @@
             "backtrace": [
                 {
                     "file": "^imported/CMakeLists\\.txt$",
-                    "line": 32,
+                    "line": 35,
                     "command": "install",
                     "hasParent": true
                 },
@@ -64,7 +72,7 @@
             "backtrace": [
                 {
                     "file": "^imported/CMakeLists\\.txt$",
-                    "line": 35,
+                    "line": 38,
                     "command": "install",
                     "hasParent": true
                 },

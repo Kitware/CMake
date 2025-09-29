@@ -4,6 +4,9 @@
     "directorySource": "^imported$",
     "projectName": "Imported",
     "type": "UTILITY",
+    "imported": null,
+    "local": null,
+    "abstract": null,
     "isGeneratorProvided": true,
     "fileSets": null,
     "sources": [

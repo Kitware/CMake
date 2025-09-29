@@ -14,6 +14,9 @@
     },
     {
       "$ref": "#/definitions/codemodelV2_3"
+    },
+    {
+      "$ref": "#/definitions/codemodelV2_9"
     }
   ],
   "definitions": {
@@ -54,7 +57,26 @@
         },
         "minor": {
           "type": "integer",
-          "minimum": 3
+          "minimum": 3,
+          "maximum": 8
+        }
+      },
+      "additionalProperties": false
+    },
+    "versionV2_9": {
+      "type": "object",
+      "required": [
+        "major",
+        "minor"
+      ],
+      "properties": {
+        "major": {
+          "type": "integer",
+          "const": 2
+        },
+        "minor": {
+          "type": "integer",
+          "minimum": 9
         }
       },
       "additionalProperties": false
@@ -103,13 +125,21 @@
       "minimum": 0,
       "description": "Index into the projects array"
     },
-    "configurationDirectoryItemTargetIndexes": {
+    "configurationDirectoryItemBuildSystemTargetIndexes": {
       "type": "array",
       "items": {
         "type": "integer",
         "minimum": 0
       },
       "description": "Indices into the targets array"
+    },
+    "configurationDirectoryItemAbstractTargetIndexesV2_9": {
+      "type": "array",
+      "items": {
+        "type": "integer",
+        "minimum": 0
+      },
+      "description": "Indices into the abstractTargets array"
     },
     "configurationDirectoryItemMinimumCMakeVersion": {
       "type": "object",
@@ -160,7 +190,7 @@
             "$ref": "#/definitions/configurationDirectoryItemProjectIndex"
           },
           "targetIndexes": {
-            "$ref": "#/definitions/configurationDirectoryItemTargetIndexes"
+            "$ref": "#/definitions/configurationDirectoryItemBuildSystemTargetIndexes"
           },
           "minimumCMakeVersion": {
             "$ref": "#/definitions/configurationDirectoryItemMinimumCMakeVersion"
@@ -198,7 +228,51 @@
             "$ref": "#/definitions/configurationDirectoryItemProjectIndex"
           },
           "targetIndexes": {
-            "$ref": "#/definitions/configurationDirectoryItemTargetIndexes"
+            "$ref": "#/definitions/configurationDirectoryItemBuildSystemTargetIndexes"
+          },
+          "minimumCMakeVersion": {
+            "$ref": "#/definitions/configurationDirectoryItemMinimumCMakeVersion"
+          },
+          "hasInstallRule": {
+            "$ref": "#/definitions/configurationDirectoryItemHasInstallRule"
+          },
+          "jsonFile": {
+            "$ref": "#/definitions/configurationDirectoryItemJsonFileV2_3"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "configurationDirectoriesV2_9": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "source",
+          "build",
+          "projectIndex"
+        ],
+        "properties": {
+          "source": {
+            "$ref": "#/definitions/configurationDirectoryItemSource"
+          },
+          "build": {
+            "$ref": "#/definitions/configurationDirectoryItemBuild"
+          },
+          "parentIndex": {
+            "$ref": "#/definitions/configurationDirectoryItemParentIndex"
+          },
+          "childIndexes": {
+            "$ref": "#/definitions/configurationDirectoryItemChildIndexes"
+          },
+          "projectIndex": {
+            "$ref": "#/definitions/configurationDirectoryItemProjectIndex"
+          },
+          "targetIndexes": {
+            "$ref": "#/definitions/configurationDirectoryItemBuildSystemTargetIndexes"
+          },
+          "abstractTargetIndexes": {
+            "$ref": "#/definitions/configurationDirectoryItemAbstractTargetIndexesV2_9"
           },
           "minimumCMakeVersion": {
             "$ref": "#/definitions/configurationDirectoryItemMinimumCMakeVersion"
@@ -258,6 +332,59 @@
               "minimum": 0
             },
             "description": "Indices into targets array"
+          }
+        }
+      }
+    },
+    "configurationProjectsV2_9": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "directoryIndexes"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Project name"
+          },
+          "parentIndex": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Index of parent project"
+          },
+          "childIndexes": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "description": "Indices of child projects"
+          },
+          "directoryIndexes": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "description": "Indices into directories array"
+          },
+          "targetIndexes": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "description": "Indices into targets array"
+          },
+          "abstractTargetIndexes": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "description": "Indices into abstractTargets array"
           }
         }
       }
@@ -352,6 +479,37 @@
         "additionalProperties": false
       }
     },
+    "configurationsV2_9": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "directories",
+          "projects",
+          "targets",
+          "abstractTargets"
+        ],
+        "properties": {
+          "name": {
+            "$ref": "#/definitions/configurationName"
+          },
+          "projects": {
+            "$ref": "#/definitions/configurationProjectsV2_9"
+          },
+          "targets": {
+            "$ref": "#/definitions/configurationTargets"
+          },
+          "abstractTargets": {
+            "$ref": "#/definitions/configurationTargets"
+          },
+          "directories": {
+            "$ref": "#/definitions/configurationDirectoriesV2_9"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
     "codemodelV2_0": {
       "properties": {
         "kind": {
@@ -382,6 +540,23 @@
         },
         "configurations": {
           "$ref": "#/definitions/configurationsV2_3"
+        }
+      },
+      "additionalProperties": false
+    },
+    "codemodelV2_9": {
+      "properties": {
+        "kind": {
+          "$ref": "#/definitions/kind"
+        },
+        "version": {
+          "$ref": "#/definitions/versionV2_9"
+        },
+        "paths": {
+          "$ref": "#/definitions/paths"
+        },
+        "configurations": {
+          "$ref": "#/definitions/configurationsV2_9"
         }
       },
       "additionalProperties": false

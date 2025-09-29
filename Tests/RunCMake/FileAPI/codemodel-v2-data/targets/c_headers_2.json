@@ -4,6 +4,9 @@
   "directorySource": "^fileset$",
   "projectName": "codemodel-v2",
   "type": "STATIC_LIBRARY",
+  "imported": null,
+  "local": null,
+  "abstract": null,
   "isGeneratorProvided": null,
   "fileSets": [
     {

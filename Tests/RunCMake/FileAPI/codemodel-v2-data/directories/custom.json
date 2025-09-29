@@ -9,6 +9,7 @@
         "^custom_exe::@c11385ffed57b860da63$",
         "^custom_tgt::@c11385ffed57b860da63$"
     ],
+    "abstractTargetIds": null,
     "projectName": "Custom",
     "minimumCMakeVersion": "3.13",
     "hasInstallRule": null,

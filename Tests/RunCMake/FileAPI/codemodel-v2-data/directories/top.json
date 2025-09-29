@@ -27,6 +27,9 @@
         "^c_subdir::@6890427a1f51a3e7e1df$",
         "^interface_exe::@6890427a1f51a3e7e1df$"
     ],
+    "abstractTargetIds": [
+        "^interface_lib::@6890427a1f51a3e7e1df$"
+    ],
     "projectName": "codemodel-v2",
     "minimumCMakeVersion": "3.13",
     "hasInstallRule": true,

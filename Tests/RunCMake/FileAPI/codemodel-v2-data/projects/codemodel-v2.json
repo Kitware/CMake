@@ -32,5 +32,8 @@
         "^c_subdir::@6890427a1f51a3e7e1df$",
         "^c_headers_1::@6b8db101d64c125f29fe$",
         "^c_headers_2::@6b8db101d64c125f29fe$"
+    ],
+    "abstractTargetIds": [
+        "^interface_lib::@6890427a1f51a3e7e1df$"
     ]
 }

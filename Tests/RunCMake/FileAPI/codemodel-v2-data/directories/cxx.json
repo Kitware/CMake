@@ -18,6 +18,7 @@
         "^cxx_static_exe::@a56b12a3f5c0529fb296$",
         "^cxx_static_lib::@a56b12a3f5c0529fb296$"
     ],
+    "abstractTargetIds": null,
     "projectName": "Cxx",
     "minimumCMakeVersion": "3.13",
     "hasInstallRule": true,
