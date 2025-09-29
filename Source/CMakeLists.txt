@@ -611,6 +611,8 @@ add_library(
   cmCreateTestSourceList.h
   cmDefinePropertyCommand.cxx
   cmDefinePropertyCommand.h
+  cmDiscoverTestsCommand.cxx
+  cmDiscoverTestsCommand.h
   cmEnableLanguageCommand.cxx
   cmEnableLanguageCommand.h
   cmEnableTestingCommand.cxx

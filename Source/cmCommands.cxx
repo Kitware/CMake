@@ -26,6 +26,7 @@
 #include "cmContinueCommand.h"
 #include "cmCreateTestSourceList.h"
 #include "cmDefinePropertyCommand.h"
+#include "cmDiscoverTestsCommand.h"
 #include "cmEnableLanguageCommand.h"
 #include "cmEnableTestingCommand.h"
 #include "cmExecProgramCommand.h"
@@ -239,6 +240,7 @@ void GetProjectCommands(cmState* state)
   state->AddBuiltinCommand("build_command", cmBuildCommand);
   state->AddBuiltinCommand("create_test_sourcelist", cmCreateTestSourceList);
   state->AddBuiltinCommand("define_property", cmDefinePropertyCommand);
+  state->AddBuiltinCommand("discover_tests", cmDiscoverTestsCommand);
   state->AddBuiltinCommand("enable_language", cmEnableLanguageCommand);
   state->AddBuiltinCommand("enable_testing", cmEnableTestingCommand);
   state->AddBuiltinCommand("get_source_file_property",
