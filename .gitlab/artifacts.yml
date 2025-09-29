@@ -146,6 +146,19 @@
             junit:
                 - ${CMAKE_CI_BUILD_DIR}/junit.xml
 
+.cmake_valgrind_artifacts:
+    artifacts:
+        expire_in: 1d
+        when: always
+        reports:
+            annotations:
+                - ${CMAKE_CI_BUILD_DIR}/annotations.json
+            junit:
+                - ${CMAKE_CI_BUILD_DIR}/junit.xml
+        paths:
+            # Valgrind logs.
+            - ${CMAKE_CI_BUILD_DIR}/Testing/Temporary/MemoryChecker.*.log
+
 .cmake_sphinx_artifacts:
     artifacts:
         expire_in: 1d
