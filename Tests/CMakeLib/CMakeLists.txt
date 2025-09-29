@@ -15,6 +15,7 @@ set(CMakeLib_TESTS
   testCTestResourceAllocator.cxx
   testCTestResourceSpec.cxx
   testCTestResourceGroups.cxx
+  testDateTime.cxx
   testDebug.cxx
   testDocumentationFormatter.cxx
   testGccDepfileReader.cxx
