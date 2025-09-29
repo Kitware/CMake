@@ -797,8 +797,8 @@ add_library(
   cmFastbuildUtilityTargetGenerator.cxx
   cmFastbuildUtilityTargetGenerator.h
 
-  cm_get_date.h
-  cm_get_date.c
+  cm_parse_date.h
+  cm_parse_date.c
   cm_utf8.h
   cm_utf8.c
   cm_codecvt.hxx
