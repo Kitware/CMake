@@ -412,13 +412,15 @@ and contain the following data:
       The Host Memory Used in KiB at ``timeStart``.
 
     ``afterHostMemoryUsed``
-      The Host Memory Used in KiB at ``timeStop``.
+      The Host Memory Used in KiB at ``timeStart + duration``.
 
     ``beforeCPULoadAverage``
-      The Average CPU Load at ``timeStart``.
+      The Average CPU Load at ``timeStart``, or ``null`` if it cannot be
+      determined.
 
     ``afterCPULoadAverage``
-      The Average CPU Load at ``timeStop``.
+      The Average CPU Load at ``timeStart + duration``, or ``null`` if it cannot
+      be determined.
 
   ``configureContent``
     The path to a :ref:`cmake_instrumentation Configure Content` file located
