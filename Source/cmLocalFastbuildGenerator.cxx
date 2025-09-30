@@ -104,8 +104,8 @@ std::string cmLocalFastbuildGenerator::ConvertToIncludeReference(
   std::string converted = this->ConvertToOutputForExisting(path, format);
   cmGlobalFastbuildGenerator const* GG = this->GetGlobalFastbuildGenerator();
   if (GG->UsingRelativePaths && cmSystemTools::FileIsFullPath(path)) {
-    std::string const& binDir =
-      GG->GetCMakeInstance()->GetHomeOutputDirectory();
+    std::string const binDir = this->ConvertToOutputFormat(
+      GG->GetCMakeInstance()->GetHomeOutputDirectory(), OutputFormat::SHELL);
     if (binDir == converted) {
       return ".";
     }
