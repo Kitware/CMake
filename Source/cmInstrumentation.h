@@ -55,7 +55,6 @@ public:
   bool HasQuery() const;
   bool HasOption(cmInstrumentationQuery::Option option) const;
   bool HasHook(cmInstrumentationQuery::Hook hook) const;
-  bool HasPreOrPostBuildHook() const;
   bool ReadJSONQueries(std::string const& directory);
   void ReadJSONQuery(std::string const& file);
   void WriteJSONQuery(std::set<cmInstrumentationQuery::Option> const& options,

@@ -79,7 +79,7 @@ std::string cmSplitExtension(std::string const& in, std::string& base)
 void addInstrumentationCommand(cmInstrumentation* instrumentation,
                                std::vector<std::string>& commands)
 {
-  if (instrumentation->HasPreOrPostBuildHook()) {
+  if (instrumentation->HasQuery()) {
     std::string instrumentationCommand =
       "$(CTEST_COMMAND) --start-instrumentation $(CMAKE_BINARY_DIR)";
 #  ifndef _WIN32
@@ -699,9 +699,7 @@ void cmLocalUnixMakefileGenerator3::WriteMakeVariables(
                  << cmakeShellCommand << "\n";
 
 #ifndef CMAKE_BOOTSTRAP
-  if (this->GetCMakeInstance()
-        ->GetInstrumentation()
-        ->HasPreOrPostBuildHook() &&
+  if (this->GetCMakeInstance()->GetInstrumentation()->HasQuery() &&
       // FIXME(#27079): This does not work for MSYS Makefiles.
       this->GlobalGenerator->GetName() != "MSYS Makefiles") {
     std::string ctestShellCommand =

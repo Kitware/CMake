@@ -239,4 +239,7 @@ if(NOT Skip_BUILD_MAKE_PROGRAM_Case)
   instrument(cmake-command-make-program
     NO_WARN BUILD_MAKE_PROGRAM
     CHECK_SCRIPT check-make-program-hooks.cmake)
+  instrument(cmake-command-build-snippet
+    NO_WARN BUILD_MAKE_PROGRAM
+    CHECK_SCRIPT check-data-dir.cmake)
 endif()

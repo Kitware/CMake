@@ -306,12 +306,6 @@ bool cmInstrumentation::HasHook(cmInstrumentationQuery::Hook hook) const
   return (this->hooks.find(hook) != this->hooks.end());
 }
 
-bool cmInstrumentation::HasPreOrPostBuildHook() const
-{
-  return (this->HasHook(cmInstrumentationQuery::Hook::PreBuild) ||
-          this->HasHook(cmInstrumentationQuery::Hook::PostBuild));
-}
-
 int cmInstrumentation::CollectTimingData(cmInstrumentationQuery::Hook hook)
 {
   // Don't run collection if hook is disabled
@@ -745,18 +739,16 @@ int cmInstrumentation::SpawnBuildDaemon()
   }
 
   // postBuild Hook
-  if (this->HasHook(cmInstrumentationQuery::Hook::PostBuild)) {
-    auto ppid = uv_os_getppid();
-    if (ppid) {
-      std::vector<std::string> args;
-      args.push_back(cmSystemTools::GetCTestCommand());
-      args.push_back("--wait-and-collect-instrumentation");
-      args.push_back(this->binaryDir);
-      args.push_back(std::to_string(ppid));
-      auto builder = cmUVProcessChainBuilder().SetDetached().AddCommand(args);
-      auto chain = builder.Start();
-      uv_run(&chain.GetLoop(), UV_RUN_DEFAULT);
-    }
+  auto ppid = uv_os_getppid();
+  if (ppid) {
+    std::vector<std::string> args;
+    args.push_back(cmSystemTools::GetCTestCommand());
+    args.push_back("--wait-and-collect-instrumentation");
+    args.push_back(this->binaryDir);
+    args.push_back(std::to_string(ppid));
+    auto builder = cmUVProcessChainBuilder().SetDetached().AddCommand(args);
+    auto chain = builder.Start();
+    uv_run(&chain.GetLoop(), UV_RUN_DEFAULT);
   }
   return 0;
 }
