@@ -1009,12 +1009,19 @@ cm::VS::Solution cmGlobalVisualStudioGenerator::CreateSolution(
         project->TypeId = Solution::Project::TypeIdDefault;
       }
 
-      project->Platform =
-        // On VS 19 and above, always map .NET SDK projects to "Any CPU".
-        (gt->IsDotNetSdkTarget() && this->Version >= VSVersion::VS16 &&
-         !cmGlobalVisualStudioGenerator::IsReservedTarget(gt->GetName()))
-        ? "Any CPU"
-        : solution.Platform;
+      if (gt->IsDotNetSdkTarget() &&
+          !cmGlobalVisualStudioGenerator::IsReservedTarget(gt->GetName())) {
+        cmValue platformTarget = gt->GetProperty("VS_GLOBAL_PlatformTarget");
+        if (!platformTarget.IsEmpty()) {
+          project->Platform = *platformTarget;
+        } else {
+          project->Platform =
+            // On VS 16 and above, always map .NET SDK projects to "Any CPU".
+            this->Version >= VSVersion::VS16 ? "Any CPU" : solution.Platform;
+        }
+      } else {
+        project->Platform = solution.Platform;
+      }
 
       // Add solution-level dependencies.
       TargetDependSet const& depends = this->GetTargetDirectDepends(gt);
