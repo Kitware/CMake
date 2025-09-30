@@ -3113,7 +3113,8 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
           dagCheckerParent->EvaluatingLinkerLauncher()) {
         // No check required.
       } else if (evaluatingLinkLibraries) {
-        if (!interfacePropertyName.empty()) {
+        if (!interfacePropertyName.empty() &&
+            interfacePropertyName != "INTERFACE_LINK_LIBRARIES"_s) {
           reportError(
             eval, content->GetOriginalExpression(),
             "$<TARGET_PROPERTY:...> expression in link libraries "

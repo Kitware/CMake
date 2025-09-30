@@ -30,6 +30,11 @@
 namespace {
 using UseTo = cmGeneratorTarget::UseTo;
 using TransitiveProperty = cmGeneratorTarget::TransitiveProperty;
+
+bool ComputingLinkLibraries(cmGeneratorExpressionDAGChecker const* dagChecker)
+{
+  return dagChecker && dagChecker->IsComputingLinkLibraries();
+}
 }
 
 std::map<cm::string_view, TransitiveProperty> const
@@ -206,7 +211,7 @@ cmGeneratorTarget::IsTransitiveProperty(
         result->Usage = cmGeneratorTarget::UseTo::Compile;
       }
     }
-  } else if (!dagChecker || !dagChecker->IsComputingLinkLibraries()) {
+  } else if (!ComputingLinkLibraries(dagChecker)) {
     // Honor TRANSITIVE_COMPILE_PROPERTIES and TRANSITIVE_LINK_PROPERTIES
     // from the link closure when we are not evaluating the closure itself.
     CustomTransitiveProperties const& ctp =
