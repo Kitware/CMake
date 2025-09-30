@@ -1,4 +1,4 @@
 -- The ASM compiler identification is GNU
 -- Found assembler: [^
-]*/as(\.exe)?
+]*[-/]as(\.exe)?
 -- CMAKE_ASM_COMPILER_ID_VENDOR_MATCH='GNU assembler'
