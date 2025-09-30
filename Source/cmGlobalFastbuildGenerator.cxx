@@ -273,10 +273,10 @@ void cmGlobalFastbuildGenerator::ProcessEnvironment()
         LocalEnvironment.emplace_back(std::move(val));
       }
     };
-    for (auto& val : cmList{ EnvOverrides }) {
+    for (auto const& val : cmList{ EnvOverrides }) {
       auto const pos = val.find('=');
       if (pos != std::string::npos && ((pos + 1) < val.size())) {
-        overrideEnvVar(val.substr(0, pos + 1), std::move(val));
+        overrideEnvVar(val.substr(0, pos + 1), val);
       }
     }
   }
