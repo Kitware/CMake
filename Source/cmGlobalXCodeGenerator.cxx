@@ -1202,6 +1202,9 @@ std::string GetDirectoryValueFromFileExtension(std::string const& dirExt)
   if (ext == "xcassets"_s) {
     return "folder.assetcatalog";
   }
+  if (ext == "icon"_s) {
+    return "folder.iconcomposer.icon";
+  }
   return "folder";
 }
 
@@ -1276,6 +1279,9 @@ std::string GetSourcecodeValueFromFileExtension(
   } else if (ext == "xcconfig"_s) {
     keepLastKnownFileType = true;
     sourcecode = "text.xcconfig";
+  } else if (ext == "icon"_s) {
+    keepLastKnownFileType = true;
+    sourcecode = "folder.iconcomposer.icon";
   }
   // else
   //  {
