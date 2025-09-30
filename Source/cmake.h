@@ -910,8 +910,6 @@ private:
     cm::static_string_view type,
     std::map<std::string, cmCMakePresetsGraph::PresetPair<T>> const& presets,
     cmCMakePresetsGraph::WorkflowPreset::WorkflowStep const& step);
-
-  std::function<int()> BuildWorkflowStep(std::vector<std::string> const& args);
 #endif
 
 #if !defined(CMAKE_BOOTSTRAP)
