@@ -1,8 +1,8 @@
 {
-    "name": "cxx_exe_test_launcher_and_cross_emulator",
-    "id": "^cxx_exe_test_launcher_and_cross_emulator::@ee4a268216d1f53c4e2e$",
-    "directorySource": "^cxx/cross$",
-    "projectName": "Cxx",
+    "name": "link_imported_interface_symbolic_exe",
+    "id": "^link_imported_interface_symbolic_exe::@ba7eb709d0b48779c6c8$",
+    "directorySource": "^imported$",
+    "projectName": "Imported",
     "type": "EXECUTABLE",
     "imported": null,
     "local": null,
@@ -12,20 +12,20 @@
     "fileSets": null,
     "sources": [
         {
-            "path": "^empty\\.cxx$",
+            "path": "^empty\\.c$",
             "isGenerated": null,
             "fileSetName": null,
             "sourceGroupName": "Source Files",
-            "compileGroupLanguage": "CXX",
+            "compileGroupLanguage": "C",
             "backtrace": [
                 {
-                    "file": "^cxx/cross/CMakeLists\\.txt$",
-                    "line": 9,
+                    "file": "^imported/CMakeLists\\.txt$",
+                    "line": 36,
                     "command": "add_executable",
                     "hasParent": true
                 },
                 {
-                    "file": "^cxx/cross/CMakeLists\\.txt$",
+                    "file": "^imported/CMakeLists\\.txt$",
                     "line": null,
                     "command": null,
                     "hasParent": false
@@ -37,15 +37,15 @@
         {
             "name": "Source Files",
             "sourcePaths": [
-                "^empty\\.cxx$"
+                "^empty\\.c$"
             ]
         }
     ],
     "compileGroups": [
         {
-            "language": "CXX",
+            "language": "C",
             "sourcePaths": [
-                "^empty\\.cxx$"
+                "^empty\\.c$"
             ],
             "includes": null,
             "frameworks": null,
@@ -55,52 +55,42 @@
     ],
     "backtrace": [
         {
-            "file": "^cxx/cross/CMakeLists\\.txt$",
-            "line": 9,
+            "file": "^imported/CMakeLists\\.txt$",
+            "line": 36,
             "command": "add_executable",
             "hasParent": true
         },
         {
-            "file": "^cxx/cross/CMakeLists\\.txt$",
+            "file": "^imported/CMakeLists\\.txt$",
             "line": null,
             "command": null,
             "hasParent": false
         }
     ],
     "folder": null,
-    "nameOnDisk": "^cxx_exe_test_launcher_and_cross_emulator(\\.exe)?$",
+    "nameOnDisk": "^link_imported_interface_symbolic_exe(\\.exe)?$",
     "artifacts": [
         {
-            "path": "^cxx/cross/((Debug|Release|RelWithDebInfo|MinSizeRel)/)?cxx_exe_test_launcher_and_cross_emulator(\\.exe)?$",
+            "path": "^imported/((Debug|Release|RelWithDebInfo|MinSizeRel)/)?link_imported_interface_symbolic_exe(\\.exe)?$",
             "_dllExtra": false
         },
         {
-            "path": "^cxx/cross/((Debug|Release|RelWithDebInfo|MinSizeRel)/)?cxx_exe_test_launcher_and_cross_emulator\\.pdb$",
+            "path": "^imported/((Debug|Release|RelWithDebInfo|MinSizeRel)/)?link_imported_interface_symbolic_exe\\.pdb$",
             "_dllExtra": true
         }
     ],
-    "build": "^cxx/cross$",
-    "source": "^cxx/cross$",
+    "build": "^imported$",
+    "source": "^imported$",
     "install": null,
-    "launchers" : [
-        {
-            "command": "^no-such-launcher(\\.exe)?$",
-            "type" : "test"
-        },
-        {
-            "command": "^no-such-emulator(\\.exe)?$",
-            "type" : "emulator"
-        }
-    ],
     "link": {
-        "language": "CXX",
+        "language": "C",
         "lto": null,
         "commandFragments": null
     },
     "archive": null,
     "dependencies": [
         {
-            "id": "^ZERO_CHECK::@6890427a1f51a3e7e1df$",
+            "id": "^ZERO_CHECK::@ba7eb709d0b48779c6c8$",
             "backtrace": null
         }
     ]

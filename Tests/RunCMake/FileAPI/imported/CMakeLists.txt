@@ -32,6 +32,10 @@ add_library(imported_interface_lib INTERFACE IMPORTED)
 add_executable(link_imported_interface_exe ../empty.c)
 target_link_libraries(link_imported_interface_exe PRIVATE imported_interface_lib)
 
+add_library(imported_interface_symbolic_lib INTERFACE SYMBOLIC IMPORTED)
+add_executable(link_imported_interface_symbolic_exe ../empty.c)
+target_link_libraries(link_imported_interface_symbolic_exe PRIVATE imported_interface_lib)
+
 install(IMPORTED_RUNTIME_ARTIFACTS imported_shared_lib
   DESTINATION lib
 )

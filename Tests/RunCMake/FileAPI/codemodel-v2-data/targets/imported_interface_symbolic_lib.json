@@ -1,13 +1,13 @@
 {
-    "name": "imported_object_lib",
-    "id": "^imported_object_lib::@ba7eb709d0b48779c6c8$",
+    "name": "imported_interface_symbolic_lib",
+    "id": "^imported_interface_symbolic_lib::@ba7eb709d0b48779c6c8$",
     "directorySource": "^imported$",
     "projectName": "Imported",
-    "type": "OBJECT_LIBRARY",
+    "type": "INTERFACE_LIBRARY",
     "imported": true,
     "local": true,
     "abstract": true,
-    "symbolic": null,
+    "symbolic": true,
     "isGeneratorProvided": null,
     "fileSets": null,
     "sources": [],
@@ -16,7 +16,7 @@
     "backtrace": [
         {
             "file": "^imported/CMakeLists\\.txt$",
-            "line": 26,
+            "line": 35,
             "command": "add_library",
             "hasParent": true
         },

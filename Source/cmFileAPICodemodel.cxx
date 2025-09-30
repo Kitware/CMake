@@ -1269,6 +1269,9 @@ Json::Value Target::Dump()
       target["local"] = true;
     }
   }
+  if (this->GT->IsSymbolic()) {
+    target["symbolic"] = true;
+  }
   if (!this->GT->IsInBuildSystem()) {
     target["abstract"] = true;
   }

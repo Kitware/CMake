@@ -93,6 +93,10 @@
       "type": "boolean",
       "description": "True if the target is defined in a local scope rather than being a global target"
     },
+    "symbolicV2_9": {
+      "type": "boolean",
+      "description": "True if an interface target has the SYMBOLIC property set"
+    },
     "abstractV2_9": {
       "type": "boolean",
       "description": "True if the target is not part of the build system"
@@ -1415,6 +1419,9 @@
         },
         "sources": {
           "$ref": "#/definitions/sourcesV2_5"
+        },
+        "symbolic": {
+          "$ref": "#/definitions/symbolicV2_9"
         },
         "sourceGroups": {
           "$ref": "#/definitions/sourceGroups"
