@@ -774,6 +774,38 @@ bool cmGlobalVisualStudioGenerator::Open(std::string const& bindir,
   return std::async(std::launch::async, OpenSolution, sln).get();
 }
 
+cm::string_view cmGlobalVisualStudioGenerator::ExternalProjectTypeId(
+  std::string const& path)
+{
+  using namespace cm::VS;
+  std::string const extension = cmSystemTools::GetFilenameLastExtension(path);
+  if (extension == ".vfproj"_s) {
+    return Solution::Project::TypeIdFortran;
+  }
+  if (extension == ".vbproj"_s) {
+    return Solution::Project::TypeIdVisualBasic;
+  }
+  if (extension == ".csproj"_s) {
+    return Solution::Project::TypeIdCSharp;
+  }
+  if (extension == ".fsproj"_s) {
+    return Solution::Project::TypeIdFSharp;
+  }
+  if (extension == ".vdproj"_s) {
+    return Solution::Project::TypeIdVDProj;
+  }
+  if (extension == ".dbproj"_s) {
+    return Solution::Project::TypeIdDatabase;
+  }
+  if (extension == ".wixproj"_s) {
+    return Solution::Project::TypeIdWiX;
+  }
+  if (extension == ".pyproj"_s) {
+    return Solution::Project::TypeIdPython;
+  }
+  return Solution::Project::TypeIdDefault;
+}
+
 bool cmGlobalVisualStudioGenerator::IsDependedOn(
   TargetDependSet const& projectTargets, cmGeneratorTarget const* gtIn) const
 {
@@ -936,7 +968,7 @@ cm::VS::Solution cmGlobalVisualStudioGenerator::CreateSolution(
       if (!projectType.IsEmpty()) {
         project->TypeId = *projectType;
       } else {
-        project->TypeId = Solution::Project::TypeIdDefault;
+        project->TypeId = this->ExternalProjectTypeId(project->Path);
       }
       for (std::string const& config : solution.Configs) {
         cmList mapConfig{ gt->GetProperty(cmStrCat(

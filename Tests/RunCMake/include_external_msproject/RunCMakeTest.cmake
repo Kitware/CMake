@@ -8,6 +8,7 @@ else()
   set(sln_ext "slnx")
 endif()
 
+run_cmake(AutoType)
 run_cmake(CustomGuid)
 run_cmake(CustomTypePlatform)
 run_cmake(CustomGuidTypePlatform)
