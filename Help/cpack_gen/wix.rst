@@ -492,7 +492,8 @@ Windows using WiX.
 
  .. versionadded:: 4.2
 
- If this variable is set to true one `.cab` file per component is created.
- The default is to create a single `.cab` file for all files in the installer.
+ If this variable is set to true one ``.cab`` file per component is created.
+ The default is to create a single ``.cab`` file for all files in the installer.
 
- WiX creates `.cab` files in parallel so multiple `.cab` files may be desirable for faster packaging.
+ WiX creates ``.cab`` files in parallel so multiple ``.cab`` files may be
+ desirable for faster packaging.
