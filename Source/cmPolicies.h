@@ -602,9 +602,8 @@ class cmMakefile;
          "consistent.",                                                       \
          4, 2, 0, WARN)                                                       \
   SELECT(POLICY, CMP0201,                                                     \
-         "The Python::NumPy target does not depend on the Python::Module "    \
-         "target.",                                                           \
-         4, 2, 0, WARN)                                                       \
+         "Python::NumPy does not depend on Python::Development.Module.", 4,   \
+         2, 0, WARN)                                                          \
   SELECT(POLICY, CMP0202,                                                     \
          "PDB file names always include their target's per-config POSTFIX.",  \
          4, 2, 0, WARN)                                                       \

@@ -100,7 +100,7 @@ Policies Introduced by CMake 4.2
 
    CMP0203: _WINDLL is defined for shared libraries targeting the MSVC ABI. </policy/CMP0203>
    CMP0202: PDB file names always include their target's per-config POSTFIX. </policy/CMP0202>
-   CMP0201: The Python::NumPy target does not depend on the Python::Module target. </policy/CMP0201>
+   CMP0201: Python::NumPy does not depend on Python::Development.Module. </policy/CMP0201>
    CMP0200: Location and configuration selection for imported targets is more consistent. </policy/CMP0200>
    CMP0199: $<CONFIG> only matches the configuration of the consumed target. </policy/CMP0199>
    CMP0198: CMAKE_PARENT_LIST_FILE is not defined in CMakeLists.txt. </policy/CMP0198>

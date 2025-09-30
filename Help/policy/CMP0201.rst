@@ -3,31 +3,25 @@ CMP0201
 
 .. versionadded:: 4.2
 
-The modules :module:`FindPython3`, :module:`FindPython2` and
-:module:`FindPython` change the handling of the ``NumPy``
-component and, respectively, the definition of the ``Python3::NumPy``,
-``Python2::NumPy`` and ``Python::NumPy`` targets.
+``Python::NumPy`` does not depend on ``Python::Development.Module``.
 
-For CMake 4.2 and above, the specification of the ``NumPy`` component does not
-imply anymore the component ``Development.Module`` and the ``Python3::NumPy``,
-``Python2::NumPy`` and ``Python::NumPy`` targets provided, respectively, by the
-modules :module:`FindPython3`, :module:`FindPython2` and :module:`FindPython`
-do not depend on the ``Python3::Development.Module``,
-``Python2::Development.Module`` and ``Python::Development.Module`` targets.
-For CMake 4.1 and below, the specification of the ``NumPy`` component imply the
-component ``Development.Module`` and the ``Python3::NumPy``, ``Python2::NumPy``
-and ``Python::NumPy`` targets provided, respectively, by the modules
-:module:`FindPython3`, :module:`FindPython2` and :module:`FindPython` depend on
-the ``Python3::Development.Module``, ``Python2::Development.Module`` and
-``Python::Development.Module`` targets.
+:module:`FindPython3`, :module:`FindPython2`, and :module:`FindPython` provide
+``Python{3,2,}::NumPy`` and ``Python{3,2,}::Development.Module`` targets when
+the corresponding components are requested.
 
-The ``OLD`` behavior for this policy creates a dependency of the ``NumPy``
-target over the ``Development.Module`` target. The ``NEW`` behavior does not
-create a dependency of the ``NumPy`` target over the ``Development.Module``
-target.
-
+In CMake 4.1 and below, requesting the ``NumPy`` component implies the
+``Development.Module`` component, and the provided ``Python{3,2,}::NumPy``
+targets depend on the provided ``Python{3,2,}::Development.Module`` targets.
+This dependency is not necessary.
+In CMake 4.2 and above, requesting the ``NumPy`` component does not imply the
+``Development.Module`` component, and the provided ``Python{3,2,}::NumPy``
+targets do not depend on the provided ``Python{3,2,}::Development.Module``
+targets.
 This policy provides compatibility with projects that expect the legacy
 behavior.
+
+The ``OLD`` behavior for this policy makes ``NumPy`` depend on
+``Development.Module``.  The ``NEW`` behavior for this policy does not.
 
 .. |INTRODUCED_IN_CMAKE_VERSION| replace:: 4.2
 .. |WARNS_OR_DOES_NOT_WARN| replace:: does *not* warn
