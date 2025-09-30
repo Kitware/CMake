@@ -536,8 +536,6 @@ Terminating Scripts
   above 125 specially.  Therefore, it is advisable to only
   specify an ``<exit-code>`` in the range 0 to 125.
 
-.. _trace:
-
 Trace Control
 ^^^^^^^^^^^^^
 
@@ -546,6 +544,9 @@ Trace Control
 .. signature::
   cmake_language(TRACE ON [EXPAND])
   cmake_language(TRACE OFF)
+  :target:
+    TRACE
+    TRACE-OFF
 
   The TRACE subcommand controls runtime tracing of executed CMake commands and
   macros within the current process. When enabled, trace output is written
