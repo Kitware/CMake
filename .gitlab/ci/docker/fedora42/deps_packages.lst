@@ -40,6 +40,7 @@ texinfo
 clang-analyzer
 clazy
 codespell
+valgrind
 
 # Tools needed for the test suite.
 file
