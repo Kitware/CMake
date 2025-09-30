@@ -14,6 +14,10 @@ if (NOT "$ENV{CTEST_MAX_PARALLELISM}" STREQUAL "")
   endif ()
 endif ()
 
+if (NOT "$ENV{CMAKE_CI_TEST_TIMEOUT}" STREQUAL "")
+  set(CTEST_TEST_TIMEOUT "$ENV{CMAKE_CI_TEST_TIMEOUT}")
+endif ()
+
 # Create an entry in CDash.
 ctest_start("${ctest_model}" GROUP "${ctest_group}")
 
