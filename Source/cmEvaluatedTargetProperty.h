@@ -15,15 +15,14 @@ struct Context;
 }
 }
 
-class cmLinkImplItem;
+class cmLinkItem;
 struct cmGeneratorExpressionDAGChecker;
 
 // Represent a target property entry after evaluating generator expressions
 // and splitting up lists.
 struct EvaluatedTargetPropertyEntry
 {
-  EvaluatedTargetPropertyEntry(cmLinkImplItem const& item,
-                               cmListFileBacktrace bt);
+  EvaluatedTargetPropertyEntry(cmLinkItem const& item, cmListFileBacktrace bt);
 
   // Move-only.
   EvaluatedTargetPropertyEntry(EvaluatedTargetPropertyEntry&&) = default;
@@ -33,7 +32,7 @@ struct EvaluatedTargetPropertyEntry
   EvaluatedTargetPropertyEntry& operator=(
     EvaluatedTargetPropertyEntry const&) = delete;
 
-  cmLinkImplItem const& LinkImplItem;
+  cmLinkItem const& LinkItem;
   cmListFileBacktrace Backtrace;
   std::vector<std::string> Values;
   bool ContextDependent = false;

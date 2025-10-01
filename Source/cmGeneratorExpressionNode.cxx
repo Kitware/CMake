@@ -2921,7 +2921,7 @@ static std::string getLinkedTargetsContent(
   if (cmLinkImplementationLibraries const* impl =
         target->GetLinkImplementationLibraries(
           eval->Context.Config, cmGeneratorTarget::UseTo::Compile)) {
-    for (cmLinkImplItem const& lib : impl->Libraries) {
+    for (cmLinkItem const& lib : impl->Libraries) {
       if (lib.Target) {
         // Pretend $<TARGET_PROPERTY:lib.Target,prop> appeared in our
         // caller's property and hand-evaluate it as if it were compiled.

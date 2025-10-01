@@ -105,7 +105,7 @@ void AddLangSpecificImplicitIncludeDirectories(
       target, propertyName, nullptr, nullptr, context, target->GetBacktrace(),
     };
 
-    for (cmLinkImplItem const& library : libraries->Libraries) {
+    for (cmLinkItem const& library : libraries->Libraries) {
       if (cmGeneratorTarget const* dependency = library.Target) {
         if (!dependency->IsInBuildSystem()) {
           continue;
@@ -146,7 +146,7 @@ void processIncludeDirectories(cmGeneratorTarget const* tgt,
                                bool debugIncludes)
 {
   for (EvaluatedTargetPropertyEntry& entry : entries.Entries) {
-    cmLinkImplItem const& item = entry.LinkImplItem;
+    cmLinkItem const& item = entry.LinkItem;
     std::string const& targetName = item.AsStr();
     bool const fromImported = item.Target && item.Target->IsImported();
 
@@ -273,7 +273,7 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetIncludeDirectories(
   if (this->IsApple()) {
     if (cmLinkImplementationLibraries const* impl =
           this->GetLinkImplementationLibraries(config, UseTo::Compile)) {
-      for (cmLinkImplItem const& lib : impl->Libraries) {
+      for (cmLinkItem const& lib : impl->Libraries) {
         std::string libDir;
         if (!lib.Target) {
           libDir = cmSystemTools::CollapseFullPath(

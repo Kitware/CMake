@@ -159,7 +159,7 @@ void cmLinkLineDeviceComputer::ComputeLinkLibraries(
         cli.GetTarget()->GetLinkImplementation(cli.GetConfig(),
                                                cmGeneratorTarget::UseTo::Link);
 
-      for (cmLinkImplItem const& iter : linkImpl->Libraries) {
+      for (cmLinkItem const& iter : linkImpl->Libraries) {
         if (iter.Target &&
             iter.Target->GetType() != cmStateEnums::INTERFACE_LIBRARY) {
           std::string libPath = iter.Target->GetLocation(cli.GetConfig());

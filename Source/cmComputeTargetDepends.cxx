@@ -221,7 +221,7 @@ void cmComputeTargetDepends::CollectTargetDepends(size_t depender_index)
 
       if (cmLinkImplementation const* impl = depender->GetLinkImplementation(
             it, cmGeneratorTarget::UseTo::Link)) {
-        for (cmLinkImplItem const& lib : impl->Libraries) {
+        for (cmLinkItem const& lib : impl->Libraries) {
           // Don't emit the same library twice for this target.
           if (emitted.insert(lib).second) {
             this->AddTargetDepend(depender_index, lib, true, false);

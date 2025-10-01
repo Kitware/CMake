@@ -14,8 +14,8 @@
 struct cmGeneratorExpressionDAGChecker;
 
 EvaluatedTargetPropertyEntry::EvaluatedTargetPropertyEntry(
-  cmLinkImplItem const& item, cmListFileBacktrace bt)
-  : LinkImplItem(item)
+  cmLinkItem const& item, cmListFileBacktrace bt)
+  : LinkItem(item)
   , Backtrace(std::move(bt))
 {
 }
@@ -25,7 +25,7 @@ EvaluatedTargetPropertyEntry EvaluateTargetPropertyEntry(
   cmGeneratorExpressionDAGChecker* dagChecker,
   cmGeneratorTarget::TargetPropertyEntry& entry)
 {
-  EvaluatedTargetPropertyEntry ee(entry.LinkImplItem, entry.GetBacktrace());
+  EvaluatedTargetPropertyEntry ee(entry.LinkItem, entry.GetBacktrace());
   cmExpandList(entry.Evaluate(context, thisTarget, dagChecker), ee.Values);
   if (entry.GetHadContextSensitiveCondition()) {
     ee.ContextDependent = true;
@@ -55,9 +55,9 @@ void addInterfaceEntry(cmGeneratorTarget const* headTarget,
                        cmGeneratorExpressionDAGChecker* dagChecker,
                        EvaluatedTargetPropertyEntries& entries,
                        cmGeneratorTarget::UseTo usage,
-                       std::vector<cmLinkImplItem> const& libraries)
+                       std::vector<cmLinkItem> const& libraries)
 {
-  for (cmLinkImplItem const& lib : libraries) {
+  for (cmLinkItem const& lib : libraries) {
     if (lib.Target) {
       EvaluatedTargetPropertyEntry ee(lib, lib.Backtrace);
       // Pretend $<TARGET_PROPERTY:lib.Target,prop> appeared in our
