@@ -2730,14 +2730,14 @@ bool cmFindPackageCommand::FindConfigFile(std::string const& dir,
     if (this->DebugMode) {
       this->DebugBuffer = cmStrCat(this->DebugBuffer, "  ", file, '\n');
     }
-    if (cmSystemTools::FileExists(file, true) && this->CheckVersion(file)) {
+    if (cmSystemTools::FileExists(file, true)) {
       // Allow resolving symlinks when the config file is found through a link
       if (this->UseRealPath) {
         file = cmSystemTools::GetRealPath(file);
       } else {
         file = cmSystemTools::ToNormalizedPathOnDisk(file);
       }
-      return true;
+      return this->CheckVersion(file);
     }
   }
   return false;
