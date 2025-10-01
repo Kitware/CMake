@@ -6,6 +6,7 @@
 #include <iomanip>
 #include <set>
 #include <sstream>
+#include <stdexcept>
 #include <utility>
 
 #include <cm/memory>
@@ -18,6 +19,7 @@
 
 #include "cmsys/Directory.hxx"
 #include "cmsys/FStream.hxx"
+#include "cmsys/RegularExpression.hxx"
 #include "cmsys/SystemInformation.hxx"
 
 #include "cmCMakePath.h"
@@ -366,7 +368,7 @@ int cmInstrumentation::CollectTimingData(cmInstrumentationQuery::Hook hook)
   if (this->HasOption(cmInstrumentationQuery::Option::Trace)) {
     std::string trace_name = cmStrCat("trace-", suffix_time, ".json");
     this->WriteTraceFile(index, trace_name);
-    index["trace"] = "trace/" + trace_name;
+    index["trace"] = cmStrCat("trace/", trace_name);
   }
 
   // Write index file
@@ -472,12 +474,12 @@ void cmInstrumentation::InsertTimingData(
   root["duration"] = static_cast<Json::Value::UInt64>(duration);
 }
 
-Json::Value cmInstrumentation::ReadJsonSnippet(std::string const& directory,
-                                               std::string const& file_name)
+Json::Value cmInstrumentation::ReadJsonSnippet(std::string const& file_name)
 {
   Json::CharReaderBuilder builder;
   builder["collectComments"] = false;
-  cmsys::ifstream ftmp(cmStrCat(directory, '/', file_name).c_str());
+  cmsys::ifstream ftmp(
+    cmStrCat(this->timingDirv1, "/data/", file_name).c_str());
   Json::Value snippetData;
   builder["collectComments"] = false;
 
@@ -503,10 +505,21 @@ void cmInstrumentation::WriteInstrumentationJson(Json::Value& root,
     std::unique_ptr<Json::StreamWriter>(wbuilder.newStreamWriter());
   std::string const& directory = cmStrCat(this->timingDirv1, '/', subdir);
   cmSystemTools::MakeDirectory(directory);
+
   cmsys::ofstream ftmp(cmStrCat(directory, '/', file_name).c_str());
-  JsonWriter->write(root, &ftmp);
-  ftmp << "\n";
-  ftmp.close();
+  if (!ftmp.good()) {
+    throw std::runtime_error(std::string("Unable to open: ") + file_name);
+  }
+
+  try {
+    JsonWriter->write(root, &ftmp);
+    ftmp << "\n";
+    ftmp.close();
+  } catch (std::ios_base::failure& fail) {
+    cmSystemTools::Error(cmStrCat("Failed to write JSON: ", fail.what()));
+  } catch (...) {
+    cmSystemTools::Error("Error writing JSON output for instrumentation.");
+  }
 }
 
 std::string cmInstrumentation::InstrumentTest(
@@ -534,10 +547,12 @@ std::string cmInstrumentation::InstrumentTest(
   }
 
   cmsys::SystemInformation& info = this->GetSystemInformation();
+  std::chrono::system_clock::time_point endTime =
+    systemStart + std::chrono::milliseconds(root["duration"].asUInt64());
   std::string file_name = cmStrCat(
     "test-",
-    this->ComputeSuffixHash(cmStrCat(command_str, info.GetProcessId())),
-    this->ComputeSuffixTime(), ".json");
+    this->ComputeSuffixHash(cmStrCat(command_str, info.GetProcessId())), '-',
+    this->ComputeSuffixTime(endTime), ".json");
   this->WriteInstrumentationJson(root, "data", file_name);
   return file_name;
 }
@@ -669,10 +684,12 @@ int cmInstrumentation::InstrumentCommand(
 
   // Write Json
   cmsys::SystemInformation& info = this->GetSystemInformation();
+  std::chrono::system_clock::time_point endTime =
+    system_start + std::chrono::milliseconds(root["duration"].asUInt64());
   std::string const& file_name = cmStrCat(
     command_type, '-',
-    this->ComputeSuffixHash(cmStrCat(command_str, info.GetProcessId())),
-    this->ComputeSuffixTime(), ".json");
+    this->ComputeSuffixHash(cmStrCat(command_str, info.GetProcessId())), '-',
+    this->ComputeSuffixTime(endTime), ".json");
   this->WriteInstrumentationJson(root, "data", file_name);
   return ret;
 }
@@ -699,11 +716,13 @@ std::string cmInstrumentation::ComputeSuffixHash(
   return hash;
 }
 
-std::string cmInstrumentation::ComputeSuffixTime()
+std::string cmInstrumentation::ComputeSuffixTime(
+  cm::optional<std::chrono::system_clock::time_point> time)
 {
   std::chrono::milliseconds ms =
     std::chrono::duration_cast<std::chrono::milliseconds>(
-      std::chrono::system_clock::now().time_since_epoch());
+      (time.has_value() ? time.value() : std::chrono::system_clock::now())
+        .time_since_epoch());
   std::chrono::seconds s =
     std::chrono::duration_cast<std::chrono::seconds>(ms);
 
@@ -903,35 +922,78 @@ void cmInstrumentation::PrepareDataForCDash(std::string const& data_dir,
 void cmInstrumentation::WriteTraceFile(Json::Value const& index,
                                        std::string const& trace_name)
 {
-  std::string const& directory = cmStrCat(this->timingDirv1, "/data");
-  std::vector<Json::Value> snippets = std::vector<Json::Value>();
+  std::vector<std::string> snippets = std::vector<std::string>();
   for (auto const& f : index["snippets"]) {
-    Json::Value snippetData = this->ReadJsonSnippet(directory, f.asString());
-    snippets.push_back(snippetData);
+    snippets.push_back(f.asString());
   }
   // Reverse-sort snippets by timeEnd (timeStart + duration) as a
   // prerequisite for AssignTargetToTraceThread().
-  std::sort(snippets.begin(), snippets.end(),
-            [](Json::Value snippetA, Json::Value snippetB) {
-              uint64_t timeEndA = snippetA["timeStart"].asUInt64() +
-                snippetA["duration"].asUInt64();
-              uint64_t timeEndB = snippetB["timeStart"].asUInt64() +
-                snippetB["duration"].asUInt64();
-              return timeEndA > timeEndB;
-            });
+  auto extractSnippetTimestamp = [](std::string file) -> std::string {
+    cmsys::RegularExpression snippetTimeRegex(
+      "[A-Za-z]+-[A-Za-z0-9]+-([0-9T\\-]+)\\.json");
+    cmsys::RegularExpressionMatch matchA;
+    if (snippetTimeRegex.find(file.c_str(), matchA)) {
+      return matchA.match(1);
+    }
+    return "";
+  };
+  std::sort(
+    snippets.begin(), snippets.end(),
+    [extractSnippetTimestamp](std::string snippetA, std::string snippetB) {
+      return extractSnippetTimestamp(snippetA) >
+        extractSnippetTimestamp(snippetB);
+    });
 
-  Json::Value trace = Json::arrayValue;
+  std::string traceDir = cmStrCat(this->timingDirv1, "/data/trace/");
+  std::string traceFile = cmStrCat(traceDir, trace_name);
+  cmSystemTools::MakeDirectory(traceDir);
+  cmsys::ofstream traceStream;
+  Json::StreamWriterBuilder wbuilder;
+  wbuilder["indentation"] = "\t";
+  std::unique_ptr<Json::StreamWriter> jsonWriter =
+    std::unique_ptr<Json::StreamWriter>(wbuilder.newStreamWriter());
+  traceStream.open(traceFile.c_str(), std::ios::out | std::ios::trunc);
+  if (!traceStream.good()) {
+    throw std::runtime_error(std::string("Unable to open: ") + traceFile);
+  }
+  traceStream << "[";
+
+  // Append trace events from single snippets. Prefer writing to the output
+  // stream incrementally over building up a Json::arrayValue in memory for
+  // large traces.
   std::vector<uint64_t> workers = std::vector<uint64_t>();
-  for (auto const& snippetData : snippets) {
-    this->AppendTraceEvent(trace, workers, snippetData);
+  Json::Value traceEvent;
+  Json::Value snippetData;
+  for (size_t i = 0; i < snippets.size(); i++) {
+    snippetData = this->ReadJsonSnippet(snippets[i]);
+    traceEvent = this->BuildTraceEvent(workers, snippetData);
+    try {
+      if (i > 0) {
+        traceStream << ",";
+      }
+      jsonWriter->write(traceEvent, &traceStream);
+      if (i % 50 == 0 || i == snippets.size() - 1) {
+        traceStream.flush();
+        traceStream.clear();
+      }
+    } catch (std::ios_base::failure& fail) {
+      cmSystemTools::Error(
+        cmStrCat("Failed to write to Google trace file: ", fail.what()));
+    } catch (...) {
+      cmSystemTools::Error("Error writing Google trace output.");
+    }
   }
 
-  this->WriteInstrumentationJson(trace, "data/trace", trace_name);
+  try {
+    traceStream << "]\n";
+    traceStream.close();
+  } catch (...) {
+    cmSystemTools::Error("Error writing Google trace output.");
+  }
 }
 
-void cmInstrumentation::AppendTraceEvent(Json::Value& trace,
-                                         std::vector<uint64_t>& workers,
-                                         Json::Value const& snippetData)
+Json::Value cmInstrumentation::BuildTraceEvent(std::vector<uint64_t>& workers,
+                                               Json::Value const& snippetData)
 {
   Json::Value snippetTraceEvent;
 
@@ -981,7 +1043,7 @@ void cmInstrumentation::AppendTraceEvent(Json::Value& trace,
                                 snippetData["duration"].asUInt64()));
   }
 
-  trace.append(snippetTraceEvent);
+  return snippetTraceEvent;
 }
 
 size_t cmInstrumentation::AssignTargetToTraceThread(

@@ -73,8 +73,7 @@ public:
   std::string const& GetCDashDir();
 
 private:
-  Json::Value ReadJsonSnippet(std::string const& directory,
-                              std::string const& file_name);
+  Json::Value ReadJsonSnippet(std::string const& file_name);
   void WriteInstrumentationJson(Json::Value& index,
                                 std::string const& directory,
                                 std::string const& file_name);
@@ -88,13 +87,14 @@ private:
   bool HasQueryFile(std::string const& file);
   static std::string GetCommandStr(std::vector<std::string> const& args);
   static std::string ComputeSuffixHash(std::string const& command_str);
-  static std::string ComputeSuffixTime();
+  static std::string ComputeSuffixTime(
+    cm::optional<std::chrono::system_clock::time_point> time = cm::nullopt);
   void PrepareDataForCDash(std::string const& data_dir,
                            std::string const& index_path);
   void RemoveOldFiles(std::string const& dataSubdir);
   void WriteTraceFile(Json::Value const& index, std::string const& trace_name);
-  void AppendTraceEvent(Json::Value& trace, std::vector<uint64_t>& workers,
-                        Json::Value const& snippetData);
+  Json::Value BuildTraceEvent(std::vector<uint64_t>& workers,
+                              Json::Value const& snippetData);
   size_t AssignTargetToTraceThread(std::vector<uint64_t>& workers,
                                    uint64_t timeStart, uint64_t duration);
   enum LatestOrOldest
