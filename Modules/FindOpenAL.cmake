@@ -55,17 +55,6 @@ The following cache variables may also be set:
 ``OPENAL_LIBRARY``
   The path to the OpenAL library.
 
-Deprecated Variables
-^^^^^^^^^^^^^^^^^^^^
-
-The following variables are provided for backward compatibility:
-
-``OPENAL_FOUND``
-  .. deprecated:: 4.2
-    Use ``OpenAL_FOUND``, which has the same value.
-
-  Boolean indicating whether (the requested version of) OpenAL was found.
-
 Hints
 ^^^^^
 
@@ -85,6 +74,17 @@ This module accepts the following variables:
   4. User-compiled framework: ``~/Library/Frameworks``.
   5. Manually compiled framework: ``/Library/Frameworks``.
   6. Add-on package: ``/opt``.
+
+Deprecated Variables
+^^^^^^^^^^^^^^^^^^^^
+
+The following variables are provided for backward compatibility:
+
+``OPENAL_FOUND``
+  .. deprecated:: 4.2
+    Use ``OpenAL_FOUND``, which has the same value.
+
+  Boolean indicating whether (the requested version of) OpenAL was found.
 
 Examples
 ^^^^^^^^
