@@ -20,6 +20,7 @@
 
 #include "cmAlgorithms.h"
 #include "cmLinkItem.h"
+#include "cmList.h"
 #include "cmListFileCache.h"
 #include "cmObjectLocation.h"
 #include "cmPolicies.h"
@@ -381,6 +382,11 @@ public:
   /** Get the macro to define when building sources in this target.
       If no macro should be defined null is returned.  */
   std::string const* GetExportMacro() const;
+
+  /** Get the list of preprocessor definitions, that should be defined
+      when building sources in this target.
+      If no macro should be defined the empty list is returned.  */
+  cmList const& GetSharedLibraryCompileDefs(std::string const& config) const;
 
   /** Get the soname of the target.  Allowed only for a shared library.  */
   std::string GetSOName(std::string const& config,
@@ -1167,6 +1173,7 @@ private:
   mutable std::map<std::string, std::vector<std::string>> SystemIncludesCache;
 
   mutable std::string ExportMacro;
+  mutable std::unordered_map<std::string, cmList> SharedLibraryCompileDefs;
 
   void ConstructSourceFileFlags() const;
   mutable bool SourceFileFlagsConstructed = false;

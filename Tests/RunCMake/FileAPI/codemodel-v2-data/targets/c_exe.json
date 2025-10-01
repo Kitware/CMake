@@ -19,7 +19,7 @@
             "backtrace": [
                 {
                     "file": "^codemodel-v2\\.cmake$",
-                    "line": 10,
+                    "line": 12,
                     "command": "add_executable",
                     "hasParent": true
                 },
@@ -67,7 +67,7 @@
     "backtrace": [
         {
             "file": "^codemodel-v2\\.cmake$",
-            "line": 10,
+            "line": 12,
             "command": "add_executable",
             "hasParent": true
         },
@@ -117,7 +117,7 @@
             "backtrace": [
                 {
                     "file": "^codemodel-v2\\.cmake$",
-                    "line": 11,
+                    "line": 13,
                     "command": "target_link_libraries",
                     "hasParent": true
                 },

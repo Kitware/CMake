@@ -424,6 +424,7 @@ if(CMAKE_USE_SYSTEM_JSONCPP)
 endif()
 add_RunCMake_test(FileAPI -DPython_EXECUTABLE=${Python_EXECUTABLE}
                           -DCMAKE_CXX_COMPILER_ID=${CMAKE_CXX_COMPILER_ID}
+                          -DCMAKE_CXX_SIMULATE_ID=${CMAKE_CXX_SIMULATE_ID}
                           -DCMake_TEST_JSON_SCHEMA=${CMake_TEST_JSON_SCHEMA})
 if(CMAKE_GENERATOR MATCHES "Make|Ninja|FASTBuild")
   add_RunCMake_test(Instrumentation)
@@ -1435,4 +1436,13 @@ endif()
 if(CMake_TEST_Emscripten_TOOLCHAINS)
   add_RunCMake_test(Emscripten -DCMake_TEST_Emscripten_TOOLCHAINS=${CMake_TEST_Emscripten_TOOLCHAINS})
   set_property(TEST RunCMake.Emscripten APPEND PROPERTY LABELS "Emscripten")
+endif()
+
+if (CMAKE_C_COMPILER_ID STREQUAL "MSVC" OR CMAKE_C_SIMULATE_ID STREQUAL "MSVC")
+  add_RunCMake_test(SharedLibraryDefines
+    -DCMAKE_C_COMPILER_ID=${CMAKE_C_COMPILER_ID}
+    -DCMAKE_C_SIMULATE_ID=${CMAKE_C_SIMULATE_ID}
+    -DCMake_TEST_CUDA=${CMake_TEST_CUDA}
+  )
+  set_property(TEST RunCMake.SharedLibraryDefines APPEND PROPERTY LABELS "CUDA")
 endif()

@@ -19,7 +19,7 @@
             "backtrace": [
                 {
                     "file": "^codemodel-v2\\.cmake$",
-                    "line": 14,
+                    "line": 16,
                     "command": "add_library",
                     "hasParent": true
                 },
@@ -62,6 +62,10 @@
             "frameworks": null,
             "defines": [
                 {
+                    "define": "_WINDLL",
+                    "backtrace": null
+                },
+                {
                     "define": "c_shared_lib_EXPORTS",
                     "backtrace": null
                 }
@@ -72,7 +76,7 @@
     "backtrace": [
         {
             "file": "^codemodel-v2\\.cmake$",
-            "line": 14,
+            "line": 16,
             "command": "add_library",
             "hasParent": true
         },
@@ -121,7 +125,7 @@
                 "backtrace": [
                     {
                         "file": "^codemodel-v2\\.cmake$",
-                        "line": 51,
+                        "line": 53,
                         "command": "install",
                         "hasParent": true
                     },
@@ -151,7 +155,7 @@
                 "backtrace": [
                     {
                         "file": "^codemodel-v2\\.cmake$",
-                        "line": 51,
+                        "line": 53,
                         "command": "install",
                         "hasParent": true
                     },
@@ -181,7 +185,7 @@
                 "backtrace": [
                     {
                         "file": "^codemodel-v2\\.cmake$",
-                        "line": 56,
+                        "line": 58,
                         "command": "install",
                         "hasParent": true
                     },

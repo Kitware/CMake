@@ -163,6 +163,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--build-dir")
 parser.add_argument("--reply-index")
 parser.add_argument("--cxx-compiler-id")
+parser.add_argument("--cxx-simulate-id")
 args = parser.parse_args()
 
 reply_dir = os.path.dirname(args.reply_index)

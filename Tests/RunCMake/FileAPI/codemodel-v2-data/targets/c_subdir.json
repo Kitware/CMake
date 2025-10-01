@@ -47,24 +47,24 @@
                 "^subdir/empty\\.c$"
             ],
             "includes": [
-              {
-                "path": "^.*/Tests/RunCMake/FileAPI/subdir$",
-                "isSystem": null,
-                "backtrace": [
-                  {
-                    "file": "^subdir/CMakeLists\\.txt$",
-                    "line": 2,
-                    "command": "target_include_directories",
-                    "hasParent": true
-                  },
-                  {
-                    "file": "^subdir/CMakeLists\\.txt$",
-                    "line": null,
-                    "command": null,
-                    "hasParent": false
-                  }
-                ]
-              }
+                {
+                    "path": "^.*/Tests/RunCMake/FileAPI/subdir$",
+                    "isSystem": null,
+                    "backtrace": [
+                        {
+                            "file": "^subdir/CMakeLists\\.txt$",
+                            "line": 2,
+                            "command": "target_include_directories",
+                            "hasParent": true
+                        },
+                        {
+                            "file": "^subdir/CMakeLists\\.txt$",
+                            "line": null,
+                            "command": null,
+                            "hasParent": false
+                        }
+                    ]
+                }
             ],
             "frameworks": null,
             "defines": [
@@ -92,7 +92,7 @@
     "backtrace": [
         {
             "file": "^codemodel-v2\\.cmake$",
-            "line": 22,
+            "line": 24,
             "command": "add_library",
             "hasParent": true
         },

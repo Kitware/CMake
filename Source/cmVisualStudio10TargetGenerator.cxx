@@ -3605,6 +3605,8 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
         this->GeneratorTarget->GetExportMacro()) {
     clOptions.AddDefine(*exportMacro);
   }
+  // No need to add the SharedLibraryCompileDefs define here:
+  // it is added by VisualStudio itself
 
   if (this->MSTools) {
     // If we have the VS_WINRT_COMPONENT set then force Compile as WinRT
@@ -3990,6 +3992,8 @@ bool cmVisualStudio10TargetGenerator::ComputeCudaOptions(
         this->GeneratorTarget->GetExportMacro()) {
     cudaOptions.AddDefine(*exportMacro);
   }
+  // No need to add the SharedLibraryCompileDefs define here:
+  // it is added by VisualStudio itself
 
   // Get includes for this target
   cudaOptions.AddIncludes(this->GetIncludes(configName, "CUDA"));

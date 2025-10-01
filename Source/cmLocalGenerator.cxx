@@ -1859,6 +1859,10 @@ std::set<BT<std::string>> cmLocalGenerator::GetTargetDefines(
   if (std::string const* exportMacro = target->GetExportMacro()) {
     this->AppendDefines(defines, *exportMacro);
   }
+  for (auto const& sharedLibCompileDef :
+       target->GetSharedLibraryCompileDefs(config)) {
+    this->AppendDefines(defines, sharedLibCompileDef);
+  }
 
   // Add preprocessor definitions for this target and configuration.
   std::vector<BT<std::string>> targetDefines =

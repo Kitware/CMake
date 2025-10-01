@@ -59,6 +59,7 @@ macro(__windows_compiler_clang_gnu lang)
   set(CMAKE_${lang}_LINK_OPTIONS_NO_PIE "")
   set(CMAKE_SHARED_LIBRARY_${lang}_FLAGS "")
   set(CMAKE_SHARED_LIBRARY_CREATE_${lang}_FLAGS "-shared")
+  set(CMAKE_${lang}_SHARED_LIBRARY_COMPILE_DEFINITIONS "_WINDLL")
 
   # linker selection
   set(CMAKE_${lang}_USING_LINKER_DEFAULT "-fuse-ld=lld-link")

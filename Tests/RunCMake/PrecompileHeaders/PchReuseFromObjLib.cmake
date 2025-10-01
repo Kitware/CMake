@@ -3,6 +3,8 @@ set(CMAKE_INTERMEDIATE_DIR_STRATEGY FULL CACHE STRING "" FORCE)
 enable_language(C)
 enable_language(CXX)
 
+cmake_policy(SET CMP0203 NEW)
+
 set(CMAKE_PCH_WARN_INVALID OFF)
 
 if(CMAKE_CXX_COMPILE_OPTIONS_USE_PCH)
@@ -41,6 +43,12 @@ namespace std {
 add_library(pch-generator OBJECT ${CMAKE_BINARY_DIR}/pch.cxx)
 set_property(TARGET pch-generator PROPERTY POSITION_INDEPENDENT_CODE ON)
 target_precompile_headers(pch-generator PRIVATE ${CMAKE_BINARY_DIR}/string.hxx)
+
+if(CMAKE_C_COMPILER_ID STREQUAL "MSVC" OR CMAKE_C_SIMULATE_ID STREQUAL "MSVC")
+  # CMP0203 NEW behavior defines _WINDLL in sources of SHARED libraries.
+  # This PCH will be consumed by a SHARED library below.
+  target_compile_definitions(pch-generator PRIVATE _WINDLL)
+endif()
 
 target_include_directories(pch-generator PRIVATE ${CMAKE_BINARY_DIR}/CONFIG)
 
@@ -104,10 +112,6 @@ function(add_library_and_executable type)
       #define WIN32_BUILD_SHARED
     ]=])
     target_include_directories(message_${type} PRIVATE ${CMAKE_BINARY_DIR}/SHARED)
-
-    # Workaround for VS2008, the compiler fails with
-    # c1xx : fatal error C1083: Cannot open source file: '_WINDLL': No such file or directory
-    file(WRITE ${CMAKE_BINARY_DIR}/_WINDLL "/*empty*/\n")
   else()
     target_include_directories(message_${type} PRIVATE ${CMAKE_BINARY_DIR}/CONFIG)
   endif()
