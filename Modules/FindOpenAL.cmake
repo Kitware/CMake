@@ -9,7 +9,7 @@ Finds the Open Audio Library (OpenAL):
 
 .. code-block:: cmake
 
-  find_package(OpenAL [<version>] [...])
+  find_package(OpenAL [...])
 
 OpenAL is a cross-platform 3D audio API designed for efficient rendering of
 multichannel three-dimensional positional audio.  It is commonly used in games
@@ -40,10 +40,7 @@ This module defines the following variables:
 ``OpenAL_FOUND``
   .. versionadded:: 3.3
 
-  Boolean indicating whether (the requested version of) OpenAL was found.
-
-``OPENAL_VERSION_STRING``
-  Human-readable string containing the version of OpenAL found.
+  Boolean indicating whether OpenAL was found.
 
 Cache Variables
 ^^^^^^^^^^^^^^^
@@ -84,7 +81,7 @@ The following variables are provided for backward compatibility:
   .. deprecated:: 4.2
     Use ``OpenAL_FOUND``, which has the same value.
 
-  Boolean indicating whether (the requested version of) OpenAL was found.
+  Boolean indicating whether OpenAL was found.
 
 Examples
 ^^^^^^^^
@@ -143,7 +140,6 @@ include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(
   OpenAL
   REQUIRED_VARS OPENAL_LIBRARY OPENAL_INCLUDE_DIR
-  VERSION_VAR OPENAL_VERSION_STRING
   )
 
 mark_as_advanced(OPENAL_LIBRARY OPENAL_INCLUDE_DIR)
