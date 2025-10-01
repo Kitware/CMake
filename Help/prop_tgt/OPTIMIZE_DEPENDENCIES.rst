@@ -27,7 +27,7 @@ any of the following criteria:
   Objective-C++, assembly, and CUDA are assumed to produce side effects.
   However, side effects from one language are assumed not to be relevant to
   another (for example, a Fortran library is assumed to not have any side
-  effects that are relevant for a Swift library.)
+  effects that are relevant for a Swift library).
 
 As an example, assume you have a static Fortran library which depends on a
 static C library, which in turn depends on a static Fortran library. The
