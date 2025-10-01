@@ -1132,7 +1132,7 @@ with members:
   target.
 
   This field was added in codemodel version 2.9.  Abstract targets were not
-  included anywhere in file API replies in codemodel version 2.8 and earlier.
+  included in codemodel version 2.8 and earlier.
 
 ``backtrace``
   Optional member that is present when a CMake language backtrace to
