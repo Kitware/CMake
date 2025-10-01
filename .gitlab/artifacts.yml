@@ -62,6 +62,12 @@
             - ${CMAKE_CI_BUILD_DIR}/DartConfiguration.tcl
             - ${CMAKE_CI_BUILD_DIR}/CTestCustom.cmake
             - ${CMAKE_CI_BUILD_DIR}/cdash-build-id
+
+            # CTest coverage files.
+            - ${CMAKE_CI_BUILD_DIR}/CMakeFiles/TargetDirectories.txt
+            - ${CMAKE_CI_BUILD_DIR}/**/*.gcno
+            - ${CMAKE_CI_BUILD_DIR}/Source/QtDialog/moc_*.cpp
+            - ${CMAKE_CI_BUILD_DIR}/Source/QtDialog/ui_*.h
         reports:
             annotations:
                 - ${CMAKE_CI_BUILD_DIR}/annotations.json
@@ -166,6 +172,32 @@
         paths:
             # Take the install tree.
             - ${CMAKE_CI_BUILD_DIR}/install/
+
+.cmake_coverage_artifacts:
+    artifacts:
+        expire_in: 1d
+        # External testing can be useful even if test jobs fail.
+        when: always
+        reports:
+            junit:
+                - ${CMAKE_CI_BUILD_DIR}/junit.xml
+            annotations:
+                - ${CMAKE_CI_BUILD_DIR}/annotations.json
+        paths:
+            # Generated sources.
+            - ${CMAKE_CI_BUILD_DIR}/Source/QtDialog/moc_*.cpp
+            - ${CMAKE_CI_BUILD_DIR}/Source/QtDialog/ui_*.h
+
+            # CTest coverage files.
+            - ${CMAKE_CI_BUILD_DIR}/CMakeFiles/TargetDirectories.txt
+            - ${CMAKE_CI_BUILD_DIR}/**/*.gcno
+            - ${CMAKE_CI_BUILD_DIR}/**/*.gcda
+
+            # CTest/CDash information.
+            - ${CMAKE_CI_BUILD_DIR}/Testing/
+            - ${CMAKE_CI_BUILD_DIR}/DartConfiguration.tcl
+            - ${CMAKE_CI_BUILD_DIR}/CTestCustom.cmake
+            - ${CMAKE_CI_BUILD_DIR}/cdash-build-id
 
 .cmake_doc_artifacts:
     artifacts:
