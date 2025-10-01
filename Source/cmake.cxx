@@ -4174,18 +4174,22 @@ T const* cmake::FindPresetForWorkflow(
   return &*it->second.Expanded;
 }
 
-std::function<int()> cmake::BuildWorkflowStep(
+namespace {
+
+std::function<cmUVProcessChain::Status()> buildWorkflowStep(
   std::vector<std::string> const& args)
 {
   cmUVProcessChainBuilder builder;
   builder.AddCommand(args)
     .SetExternalStream(cmUVProcessChainBuilder::Stream_OUTPUT, stdout)
     .SetExternalStream(cmUVProcessChainBuilder::Stream_ERROR, stderr);
-  return [builder]() -> int {
+  return [builder]() -> cmUVProcessChain::Status {
     auto chain = builder.Start();
     chain.Wait();
-    return static_cast<int>(chain.GetStatus(0).ExitStatus);
+    return chain.GetStatus(0);
   };
+}
+
 }
 #endif
 
@@ -4248,10 +4252,11 @@ int cmake::Workflow(std::string const& presetName,
     int StepNumber;
     cm::static_string_view Type;
     std::string Name;
-    std::function<int()> Action;
+    std::function<cmUVProcessChain::Status()> Action;
 
     CalculatedStep(int stepNumber, cm::static_string_view type,
-                   std::string name, std::function<int()> action)
+                   std::string name,
+                   std::function<cmUVProcessChain::Status()> action)
       : StepNumber(stepNumber)
       , Type(type)
       , Name(std::move(name))
@@ -4278,7 +4283,7 @@ int cmake::Workflow(std::string const& presetName,
           args.emplace_back("--fresh");
         }
         steps.emplace_back(stepNumber, "configure"_s, step.PresetName,
-                           this->BuildWorkflowStep(args));
+                           buildWorkflowStep(args));
       } break;
       case cmCMakePresetsGraph::WorkflowPreset::WorkflowStep::Type::Build: {
         auto const* buildPreset = this->FindPresetForWorkflow(
@@ -4288,8 +4293,8 @@ int cmake::Workflow(std::string const& presetName,
         }
         steps.emplace_back(
           stepNumber, "build"_s, step.PresetName,
-          this->BuildWorkflowStep({ cmSystemTools::GetCMakeCommand(),
-                                    "--build", "--preset", step.PresetName }));
+          buildWorkflowStep({ cmSystemTools::GetCMakeCommand(), "--build",
+                              "--preset", step.PresetName }));
       } break;
       case cmCMakePresetsGraph::WorkflowPreset::WorkflowStep::Type::Test: {
         auto const* testPreset = this->FindPresetForWorkflow(
@@ -4299,8 +4304,8 @@ int cmake::Workflow(std::string const& presetName,
         }
         steps.emplace_back(
           stepNumber, "test"_s, step.PresetName,
-          this->BuildWorkflowStep({ cmSystemTools::GetCTestCommand(),
-                                    "--preset", step.PresetName }));
+          buildWorkflowStep({ cmSystemTools::GetCTestCommand(), "--preset",
+                              step.PresetName }));
       } break;
       case cmCMakePresetsGraph::WorkflowPreset::WorkflowStep::Type::Package: {
         auto const* packagePreset = this->FindPresetForWorkflow(
@@ -4310,14 +4315,13 @@ int cmake::Workflow(std::string const& presetName,
         }
         steps.emplace_back(
           stepNumber, "package"_s, step.PresetName,
-          this->BuildWorkflowStep({ cmSystemTools::GetCPackCommand(),
-                                    "--preset", step.PresetName }));
+          buildWorkflowStep({ cmSystemTools::GetCPackCommand(), "--preset",
+                              step.PresetName }));
       } break;
     }
     stepNumber++;
   }
 
-  int stepResult;
   bool first = true;
   for (auto const& step : steps) {
     if (!first) {
@@ -4327,8 +4331,15 @@ int cmake::Workflow(std::string const& presetName,
               << steps.size() << ": " << step.Type << " preset \"" << step.Name
               << "\"\n\n"
               << std::flush;
-    if ((stepResult = step.Action()) != 0) {
-      return stepResult;
+    cmUVProcessChain::Status const status = step.Action();
+    if (status.ExitStatus != 0) {
+      return static_cast<int>(status.ExitStatus);
+    }
+    auto const codeReasonPair = status.GetException();
+    if (codeReasonPair.first != cmUVProcessChain::ExceptionCode::None) {
+      std::cout << "Step command ended abnormally: " << codeReasonPair.second
+                << std::endl;
+      return status.SpawnResult != 0 ? status.SpawnResult : status.TermSignal;
     }
     first = false;
   }
