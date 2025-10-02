@@ -20,7 +20,8 @@ their own target by default.  Generated public headers must be specified
 as members of a ``PUBLIC`` (or ``INTERFACE``) ``FILE_SET``, typically of
 type ``HEADERS``.  With this information, :ref:`Ninja Generators` may omit
 the above-mentioned conservative dependencies and produce more efficient
-build graphs.
+build graphs.  Dependents to such targets may also prune dependencies to such
+targets when using the :prop_tgt:`OPTIMIZE_DEPENDENCIES` target property.
 
 Additionally, if the custom command's output is a member of a file set of type
 ``CXX_MODULES``, it will additionally not be required to exist before
