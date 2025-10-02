@@ -1349,7 +1349,7 @@ bool cmFindPackageCommand::FindPackageUsingConfigMode()
         this->Configs.emplace_back(std::move(config), pdt::Cps);
 
         config = cmStrCat(cmSystemTools::LowerCase(n), ".cps");
-        if (config != this->Configs.front().Name) {
+        if (config != this->Configs.back().Name) {
           this->Configs.emplace_back(std::move(config), pdt::Cps);
         }
       }
