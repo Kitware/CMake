@@ -101,13 +101,13 @@ and consists of a single call to :command:`install(targets)`.
     TARGETS MyApp MyLib
 
     FILE_SET HEADERS
-    FILE_SET AnotherHeaderFileSet
+    FILE_SET anotherHeaderFileSet
   )
 
 Most artifact kinds are installed by default and do not need to be listed in
 the :command:`install` command. However, ``FILE_SET``\ s must be named to let
 CMake know you want to install. In the above example we install two file
-sets, one named ``HEADERS`` and another named ``AnotherHeaderFileSet``.
+sets, one named ``HEADERS`` and another named ``anotherHeaderFileSet``.
 
 When named, an artifact kind can be given various options, such as a destination.
 
