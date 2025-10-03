@@ -69,7 +69,7 @@ otherwise it will be ``STATIC``.
   add_library(MyLib-static STATIC)
   add_library(MyLib-shared SHARED)
 
-  # Depends on BUILD_SHARED_LIBRARY
+  # Depends on BUILD_SHARED_LIBS
   add_library(MyLib)
 
 This is desirable behavior, as it allows packagers to determine what kind of

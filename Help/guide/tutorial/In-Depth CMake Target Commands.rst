@@ -292,7 +292,7 @@ Sometimes, we need to exercise specific control over the exact options being
 passed on the compile and link line. These situations are addressed by
 :command:`target_compile_options` and :command:`target_link_options`.
 
-.. code:: c++
+.. code:: cmake
 
   target_compile_options(MyApp PRIVATE -Wall -Werror)
   target_link_options(MyApp PRIVATE -T LinksScript.ld)
