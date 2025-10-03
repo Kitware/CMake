@@ -37,15 +37,14 @@ Whenever ``cmake_instrumentation`` is invoked, a query file is generated in
 ``<build>/.cmake/instrumentation/v1/query/generated`` to enable instrumentation
 with the provided arguments.
 
-.. _`cmake_instrumentation Configure Content`:
+.. _`cmake_instrumentation CUSTOM_CONTENT`:
 
-Custom Configure Content
-^^^^^^^^^^^^^^^^^^^^^^^^
+Custom CMake Content
+^^^^^^^^^^^^^^^^^^^^
 
 The ``CUSTOM_CONTENT`` argument specifies certain data from configure time to
-include in each :ref:`cmake-instrumentation v1 Snippet File` that
-corresponds to the configure step associated with the command. This may be used
-to associate instrumentation data with certain information about its
+include in each :ref:`cmake-instrumentation v1 CMake Content File`. This
+may be used to associate instrumentation data with certain information about its
 configuration, such as the optimization level or whether it is part of a
 coverage build.
 
@@ -102,12 +101,12 @@ equivalent JSON query file.
     ]
   }
 
-This will also result in a configure content JSON being reported in each
-:ref:`cmake-instrumentation v1 Snippet File` with the following contents:
+This will also result in the following content included in each
+:ref:`cmake-instrumentation v1 CMake Content File`:
 
 .. code-block:: json
 
-  {
+  "custom": {
     "myString": "string",
     "myList": [
       "item1", "item2"

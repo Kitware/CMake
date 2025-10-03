@@ -294,9 +294,6 @@ void cmNinjaNormalTargetGenerator::WriteNvidiaDeviceLinkRule(
     vars.CMTargetType =
       cmState::GetTargetTypeName(this->GetGeneratorTarget()->GetType())
         .c_str();
-    vars.CMTargetLabels =
-      this->GetGeneratorTarget()->GetTargetLabelsString().c_str();
-
     vars.Language = "CUDA";
     std::string linker =
       this->GetGeneratorTarget()->GetLinkerTool("CUDA", config);
@@ -404,9 +401,6 @@ void cmNinjaNormalTargetGenerator::WriteDeviceLinkRules(
   vars.CMTargetName = this->GetGeneratorTarget()->GetName().c_str();
   vars.CMTargetType =
     cmState::GetTargetTypeName(this->GetGeneratorTarget()->GetType()).c_str();
-  vars.CMTargetLabels =
-    this->GetGeneratorTarget()->GetTargetLabelsString().c_str();
-
   vars.Language = "CUDA";
   vars.Object = "$out";
   vars.Fatbinary = "$FATBIN";
@@ -466,9 +460,6 @@ void cmNinjaNormalTargetGenerator::WriteLinkRule(
     cmRulePlaceholderExpander::RuleVariables vars;
     vars.CMTargetName = this->GetGeneratorTarget()->GetName().c_str();
     vars.CMTargetType = cmState::GetTargetTypeName(targetType).c_str();
-    vars.CMTargetLabels =
-      this->GetGeneratorTarget()->GetTargetLabelsString().c_str();
-
     std::string linker = this->GetGeneratorTarget()->GetLinkerTool(config);
     vars.Linker = linker.c_str();
     std::string lang = this->TargetLinkLanguage(config);

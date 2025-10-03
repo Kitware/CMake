@@ -17,13 +17,16 @@
 #include <cm3p/json/value.h>
 #include <stddef.h>
 
-#include "cmFileLock.h"
 #ifndef CMAKE_BOOTSTRAP
 #  include <cmsys/SystemInformation.hxx>
 #endif
 #include <stdint.h>
 
+#include "cmFileLock.h"
 #include "cmInstrumentationQuery.h"
+#include "cmStateTypes.h"
+
+class cmGlobalGenerator;
 
 class cmInstrumentation
 {
@@ -61,7 +64,8 @@ public:
                       std::set<cmInstrumentationQuery::Hook> const& hooks,
                       std::vector<std::vector<std::string>> const& callback);
   void AddCustomContent(std::string const& name, Json::Value const& contents);
-  void WriteCustomContent();
+  void WriteCMakeContent(std::unique_ptr<cmGlobalGenerator> const& gg);
+  Json::Value DumpTargets(std::unique_ptr<cmGlobalGenerator> const& gg);
   void ClearGeneratedQueries();
   int CollectTimingData(cmInstrumentationQuery::Hook hook);
   int SpawnBuildDaemon();
@@ -70,7 +74,16 @@ public:
   void AddHook(cmInstrumentationQuery::Hook hook);
   void AddOption(cmInstrumentationQuery::Option option);
   bool HasErrors() const;
-  std::string const& GetCDashDir();
+  std::string const& GetCDashDir() const;
+  std::string const& GetDataDir() const;
+  enum LatestOrOldest
+  {
+    Latest,
+    Oldest
+  };
+  std::string GetFileByTimestamp(LatestOrOldest latestOrOldest,
+                                 std::string const& dataSubdir,
+                                 std::string const& exclude = "");
 
 private:
   Json::Value ReadJsonSnippet(std::string const& file_name);
@@ -89,6 +102,7 @@ private:
   static std::string ComputeSuffixHash(std::string const& command_str);
   static std::string ComputeSuffixTime(
     cm::optional<std::chrono::system_clock::time_point> time = cm::nullopt);
+  static bool IsInstrumentableTargetType(cmStateEnums::TargetType type);
   void PrepareDataForCDash(std::string const& data_dir,
                            std::string const& index_path);
   void RemoveOldFiles(std::string const& dataSubdir);
@@ -97,18 +111,11 @@ private:
                               Json::Value const& snippetData);
   size_t AssignTargetToTraceThread(std::vector<uint64_t>& workers,
                                    uint64_t timeStart, uint64_t duration);
-  enum LatestOrOldest
-  {
-    Latest,
-    Oldest
-  };
-  std::string GetFileByTimestamp(LatestOrOldest latestOrOldest,
-                                 std::string const& dataSubdir,
-                                 std::string const& exclude = "");
   std::string binaryDir;
   std::string timingDirv1;
   std::string userTimingDirv1;
   std::string cdashDir;
+  std::string dataDir;
   std::set<cmInstrumentationQuery::Option> options;
   std::set<cmInstrumentationQuery::Hook> hooks;
   std::vector<std::string> callbacks;
@@ -120,6 +127,8 @@ private:
   bool ranSystemChecks = false;
   bool ranOSCheck = false;
   Json::Value customContent;
+  Json::Value configureSnippetData;
+  std::string configureSnippetName;
 #ifndef CMAKE_BOOTSTRAP
   std::unique_ptr<cmsys::SystemInformation> systemInformation;
   cmsys::SystemInformation& GetSystemInformation();
