@@ -29,4 +29,6 @@ endif()
 
 sharedLibraryDefs_addTests(NEW)
 
-target_compile_definitions(${language}-CMP0203_NEW_shared PRIVATE "MUST_HAVE_DEFINE")
+if ("${CMAKE_${language}_COMPILER_ID}" STREQUAL "MSVC" OR "${CMAKE_${language}_SIMULATE_ID}" STREQUAL "MSVC")
+  target_compile_definitions(${language}-CMP0203_NEW_shared PRIVATE "MUST_HAVE_DEFINE")
+endif()

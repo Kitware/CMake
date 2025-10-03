@@ -48,7 +48,8 @@ foreach(policy_value IN ITEMS OLD WARN NEW)
   if (CMAKE_GENERATOR MATCHES "Visual Studio")
     # Visual Studio always defines `_MBCS` by default
     set(expected_define "MBCS")
-  elseif (policy_value STREQUAL "NEW")
+  elseif (policy_value STREQUAL "NEW" AND
+    ("${CMAKE_${language}_COMPILER_ID}" STREQUAL "MSVC" OR "${CMAKE_${language}_SIMULATE_ID}" STREQUAL "MSVC"))
     set(expected_define "MBCS")
   endif()
   msvcCharsetDefs_addTests(${policy_value} Default "${expected_define}" "")
