@@ -337,7 +337,7 @@ To describe a collection of header files, we're going to use what's known as a
       library_implementation.cxx
 
     PUBLIC
-      FILE_SET MyHeaders
+      FILE_SET myHeaders
       TYPE HEADERS
       BASE_DIRS
         include
@@ -525,19 +525,19 @@ Consider the following concrete example:
 
   target_sources(MyLibrary
     PRIVATE
-      FILE_SET InternalOnlyHeaders
+      FILE_SET internalOnlyHeaders
       TYPE HEADERS
       FILES
         InternalOnlyHeader.h
 
     INTERFACE
-      FILE_SET ConsumerOnlyHeaders
+      FILE_SET consumerOnlyHeaders
       TYPE HEADERS
       FILES
         ConsumerOnlyHeader.h
 
     PUBLIC
-      FILE_SET PublicHeaders
+      FILE_SET publicHeaders
       TYPE HEADERS
       FILES
         PublicHeader.h
@@ -554,9 +554,9 @@ Two specific properties which will be modified here are :prop_tgt:`HEADER_SETS`
 and :prop_tgt:`INTERFACE_HEADER_SETS`, which both contain lists of header file
 sets added via :command:`target_sources`.
 
-The value ``InternalOnlyHeaders`` will be added to :prop_tgt:`HEADER_SETS`,
-``ConsumerOnlyHeaders`` to :prop_tgt:`INTERFACE_HEADER_SETS`, and
-``PublicHeaders`` will be added to both.
+The value ``internalOnlyHeaders`` will be added to :prop_tgt:`HEADER_SETS`,
+``consumerOnlyHeaders`` to :prop_tgt:`INTERFACE_HEADER_SETS`, and
+``publicHeaders`` will be added to both.
 
 When a given target is being built, it will use its own *non-interface*
 properties (eg, :prop_tgt:`HEADER_SETS`), combined with the *interface*
