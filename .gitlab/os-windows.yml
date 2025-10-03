@@ -471,6 +471,7 @@
     script:
         - *before_script_windows
         - Invoke-Expression -Command .gitlab/ci/vcvarsall.ps1
+        - (& "$pwsh" -File ".gitlab/ci/pre_test.ps1")
         - ctest --output-on-failure -V -S .gitlab/ci/ctest_test.cmake
 
     interruptible: true

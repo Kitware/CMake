@@ -214,6 +214,7 @@
 
     script:
         - *before_script_macos
+        - .gitlab/ci/pre_test.sh
         - ctest --output-on-failure -V -S .gitlab/ci/ctest_test.cmake
 
     interruptible: true

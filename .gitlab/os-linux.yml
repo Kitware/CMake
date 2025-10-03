@@ -729,6 +729,7 @@
 
     script:
         - *before_script_linux
+        - .gitlab/ci/pre_test.sh
         - "$LAUNCHER ctest --output-on-failure -V -S .gitlab/ci/ctest_test.cmake"
 
     interruptible: true
