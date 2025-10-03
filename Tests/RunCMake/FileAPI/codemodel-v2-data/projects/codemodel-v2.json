@@ -9,7 +9,8 @@
         "Interface",
         "Object",
         "External",
-        "Framework"
+        "Framework",
+        "Direct"
     ],
     "directorySources": [
         "^\\.$",

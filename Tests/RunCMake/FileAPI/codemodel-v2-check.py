@@ -798,6 +798,7 @@ def gen_check_directories(c, g):
         read_codemodel_json_data("directories/fileset.json"),
         read_codemodel_json_data("directories/subdir.json"),
         read_codemodel_json_data("directories/framework.json"),
+        read_codemodel_json_data("directories/direct.json"),
     ]
 
     if matches(g["name"], "^Visual Studio "):
@@ -905,12 +906,21 @@ def gen_check_build_system_targets(c, g, inSource):
         read_codemodel_json_data("targets/zero_check_interface.json"),
         read_codemodel_json_data("targets/iface_srcs.json"),
 
+        read_codemodel_json_data("targets/all_build_direct.json"),
+        read_codemodel_json_data("targets/zero_check_direct.json"),
+        read_codemodel_json_data("targets/link_transitive_direct_exe.json"),
+        read_codemodel_json_data("targets/transitive_direct_lib.json"),
+        read_codemodel_json_data("targets/inject_direct_lib_impl.json"),
+        read_codemodel_json_data("targets/usage_lib.json"),
+        read_codemodel_json_data("targets/link_usage_exe.json"),
+        read_codemodel_json_data("targets/compile_usage_exe.json"),
+
         read_codemodel_json_data("targets/all_build_custom.json"),
         read_codemodel_json_data("targets/zero_check_custom.json"),
         read_codemodel_json_data("targets/custom_tgt.json"),
         read_codemodel_json_data("targets/custom_exe.json"),
         read_codemodel_json_data("targets/all_build_external.json"),
-        read_codemodel_json_data("targets/zero_check_external.json"),
+        read_codemodel_json_data("targets/zero_check_external.json"),  # Must be the last zero_check_... because matches all ZERO_CHECK::@XXX target ids
         read_codemodel_json_data("targets/generated_exe.json"),
 
         read_codemodel_json_data("targets/c_headers_1.json"),
@@ -1077,7 +1087,9 @@ def gen_check_abstract_targets(c, g, inSource):
         read_codemodel_json_data("targets/imported_static_lib.json"),
 
         read_codemodel_json_data("targets/iface_none.json"),
-        read_codemodel_json_data("targets/iface_symbolic.json")
+        read_codemodel_json_data("targets/iface_symbolic.json"),
+
+        read_codemodel_json_data("targets/inject_direct_lib.json"),
     ]
 
     if sys.platform == "darwin":
@@ -1124,6 +1136,7 @@ def gen_check_projects(c, g):
         read_codemodel_json_data("projects/custom.json"),
         read_codemodel_json_data("projects/external.json"),
         read_codemodel_json_data("projects/framework.json"),
+        read_codemodel_json_data("projects/direct.json"),
     ]
 
     if matches(g["name"], "^Visual Studio "):

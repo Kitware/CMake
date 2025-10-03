@@ -35,6 +35,7 @@ add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/../FileAPIExternalSource" "${CMAKE
 add_subdirectory(dir)
 add_subdirectory(fileset)
 add_subdirectory(framework)
+add_subdirectory(direct)
 
 set_property(TARGET c_shared_lib PROPERTY LIBRARY_OUTPUT_DIRECTORY lib)
 set_property(TARGET c_shared_lib PROPERTY RUNTIME_OUTPUT_DIRECTORY lib)
