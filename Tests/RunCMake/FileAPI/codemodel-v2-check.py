@@ -314,6 +314,10 @@ def check_target(c, major, minor):
             expected_keys.append("abstract")
             assert is_bool(obj["abstract"], expected["abstract"])
 
+        if expected["symbolic"] is not None:
+            expected_keys.append("symbolic")
+            assert is_bool(obj["symbolic"], expected["symbolic"])
+
         assert is_dict(obj["paths"])
         assert sorted(obj["paths"].keys()) == ["build", "source"]
         assert matches(obj["paths"]["build"], expected["build"])
@@ -895,6 +899,7 @@ def gen_check_build_system_targets(c, g, inSource):
         read_codemodel_json_data("targets/link_imported_static_exe.json"),
         read_codemodel_json_data("targets/link_imported_object_exe.json"),
         read_codemodel_json_data("targets/link_imported_interface_exe.json"),
+        read_codemodel_json_data("targets/link_imported_interface_symbolic_exe.json"),
 
         read_codemodel_json_data("targets/all_build_interface.json"),
         read_codemodel_json_data("targets/zero_check_interface.json"),
@@ -1063,11 +1068,13 @@ def gen_check_abstract_targets(c, g, inSource):
         read_codemodel_json_data("targets/imported_exe.json"),
         read_codemodel_json_data("targets/imported_lib.json"),
         read_codemodel_json_data("targets/imported_interface_lib.json"),
+        read_codemodel_json_data("targets/imported_interface_symbolic_lib.json"),
         read_codemodel_json_data("targets/imported_object_lib.json"),
         read_codemodel_json_data("targets/imported_shared_lib.json"),
         read_codemodel_json_data("targets/imported_static_lib.json"),
 
         read_codemodel_json_data("targets/iface_none.json"),
+        read_codemodel_json_data("targets/iface_symbolic.json")
     ]
 
     if sys.platform == "darwin":

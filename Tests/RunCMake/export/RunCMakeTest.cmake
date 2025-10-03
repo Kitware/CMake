@@ -27,3 +27,4 @@ run_cmake(FindDependencyExportStatic)
 run_cmake(FindDependencyExportShared)
 #FIXME(#26622): The FindDependencyExportFetchContent test case exposes an assertion failure.
 #run_cmake(FindDependencyExportFetchContent)
+run_cmake(SymbolicComponent)

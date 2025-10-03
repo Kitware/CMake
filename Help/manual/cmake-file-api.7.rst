@@ -1132,7 +1132,16 @@ with members:
   target.
 
   This field was added in codemodel version 2.9.  Abstract targets were not
-  included anywhere in file API replies in codemodel version 2.8 and earlier.
+  included in codemodel version 2.8 and earlier.
+
+``symbolic``
+  Optional member that is present with boolean value ``true`` if the target
+  is :prop_tgt:`SYMBOLIC`.  Symbolic targets are created by calls to
+  :command:`add_library(INTERFACE SYMBOLIC) <add_library(INTERFACE-SYMBOLIC)>`,
+  and are also abstract targets that are not part of the build system.
+
+  This field was added in codemodel version 2.9.  Symbolic targets were not
+  included in codemodel version 2.8 and earlier.
 
 ``backtrace``
   Optional member that is present when a CMake language backtrace to

@@ -773,7 +773,9 @@ bool cmPackageInfoReader::ImportTargets(cmMakefile* makefile,
 
     cmTarget* target = nullptr;
     if (type == "symbolic"_s) {
-      // TODO
+      target = this->AddLibraryComponent(
+        makefile, cmStateEnums::INTERFACE_LIBRARY, fullName, *ci, package);
+      target->SetSymbolic(true);
     } else if (type == "dylib"_s) {
       target = this->AddLibraryComponent(
         makefile, cmStateEnums::SHARED_LIBRARY, fullName, *ci, package);

@@ -102,6 +102,11 @@ bool cmTargetLinkLibrariesCommand(std::vector<std::string> const& args,
     return true;
   }
 
+  if (target->IsSymbolic()) {
+    status.SetError("can not be used on a SYMBOLIC target.");
+    return false;
+  }
+
   // Having a UTILITY library on the LHS is a bug.
   if (target->GetType() == cmStateEnums::UTILITY) {
     mf.IssueMessage(

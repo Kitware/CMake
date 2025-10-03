@@ -193,6 +193,8 @@ public:
   //! Get the utilities used by this target
   std::set<BT<std::pair<std::string, bool>>> const& GetUtilities() const;
 
+  void SetSymbolic(bool value);
+
   //! Set/Get a property of this target file
   void SetProperty(std::string const& prop, cmValue value);
   void SetProperty(std::string const& prop, std::nullptr_t)
@@ -232,6 +234,7 @@ public:
   bool IsForeign() const;
   bool IsPerConfig() const;
   bool IsRuntimeBinary() const;
+  bool IsSymbolic() const;
   bool CanCompileSources() const;
 
   bool GetMappedConfig(std::string const& desiredConfig, cmValue& loc,

@@ -634,7 +634,13 @@ bool HandleTargetMode(cmExecutionStatus& status,
       status.SetError("can not be used on an ALIAS target.");
       return false;
     }
+
     if (cmTarget* target = status.GetMakefile().FindTargetToUse(name)) {
+      if (target->IsSymbolic()) {
+        status.SetError("can not be used on a SYMBOLIC target.");
+        return false;
+      }
+
       // Handle the current target.
       if (!HandleTarget(target, status.GetMakefile(), propertyName,
                         propertyValue, appendAsString, appendMode, remove)) {

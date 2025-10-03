@@ -42,6 +42,10 @@ bool cmTargetPropCommandBase::HandleArguments(
     this->HandleMissingTarget(args[0]);
     return false;
   }
+  if (this->Target->IsSymbolic()) {
+    this->SetError("can not be used on a SYMBOLIC target.");
+    return false;
+  }
   bool const isRegularTarget =
     (this->Target->GetType() == cmStateEnums::EXECUTABLE) ||
     (this->Target->GetType() == cmStateEnums::STATIC_LIBRARY) ||

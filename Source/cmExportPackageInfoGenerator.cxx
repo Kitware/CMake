@@ -182,6 +182,7 @@ Json::Value* cmExportPackageInfoGenerator::GenerateImportTarget(
 
   Json::Value& component = components[name];
   Json::Value& type = component["type"];
+
   switch (targetType) {
     case cmStateEnums::EXECUTABLE:
       type = "executable";
@@ -196,7 +197,7 @@ Json::Value* cmExportPackageInfoGenerator::GenerateImportTarget(
       type = "module";
       break;
     case cmStateEnums::INTERFACE_LIBRARY:
-      type = "interface";
+      type = target->IsSymbolic() ? "symbolic" : "interface";
       break;
     default:
       type = "unknown";

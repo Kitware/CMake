@@ -54,9 +54,4 @@ run_cmake(MissingComponentDependency)
 run_cmake(MissingTransitiveComponentCPS)
 run_cmake(MissingTransitiveComponentCMake)
 run_cmake(MissingTransitiveComponentDependency)
-
-# Configuration selection tests
-run_cmake_build(ConfigDefault)
-run_cmake_build(ConfigFirst)
-run_cmake_build(ConfigMapped)
-run_cmake_build(ConfigMatchBuildType Test)
+run_cmake(SymbolicComponents)

@@ -11,6 +11,7 @@
         "^iface_srcs::@25b7fa8ea00134654b85$"
     ],
     "abstractTargetIds": [
-        "^iface_none::@25b7fa8ea00134654b85$"
+        "^iface_none::@25b7fa8ea00134654b85$",
+        "^iface_symbolic::@25b7fa8ea00134654b85$"
     ]
 }
