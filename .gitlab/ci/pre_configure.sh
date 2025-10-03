@@ -13,6 +13,6 @@ quietly() {
   rm -f "$log"
 }
 
-if test -r ".gitlab/ci/pre_build_${CMAKE_CONFIGURATION}.sh"; then
-  source ".gitlab/ci/pre_build_${CMAKE_CONFIGURATION}.sh"
+if test -r ".gitlab/ci/pre_configure_${CMAKE_CONFIGURATION}.sh"; then
+  source ".gitlab/ci/pre_configure_${CMAKE_CONFIGURATION}.sh"
 fi

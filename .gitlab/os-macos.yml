@@ -200,7 +200,7 @@
         # Allow the server to already be running.
         - "sccache --start-server || :"
         - sccache --show-stats
-        - .gitlab/ci/pre_build.sh
+        - .gitlab/ci/pre_configure.sh
         - ctest -VV -S .gitlab/ci/ctest_configure.cmake
         - ctest -VV -S .gitlab/ci/ctest_build.cmake
         - .gitlab/ci/post_build.sh
