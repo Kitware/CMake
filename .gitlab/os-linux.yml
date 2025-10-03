@@ -111,6 +111,19 @@
         CMAKE_CI_TEST_TIMEOUT: "1500"
         CMAKE_CI_NO_INSTALL: 1
 
+.fedora42_bullseye_coverage:
+    extends: .fedora42
+    environment:
+        name: bullseye-coverage
+    variables:
+        # See issue #20001
+        CMAKE_GENERATOR: "Unix Makefiles"
+        CMAKE_CONFIGURATION: fedora42_bullseye_coverage
+        CTEST_NO_WARNINGS_ALLOWED: 1
+        CMAKE_CI_BUILD_TYPE: Debug
+        CMAKE_CI_TEST_TIMEOUT: "1500"
+        CMAKE_CI_NO_INSTALL: 1
+
 #### Lint builds
 
 .fedora42_tidy:

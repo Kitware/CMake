@@ -65,6 +65,7 @@
 
             # CTest coverage files.
             - ${CMAKE_CI_BUILD_DIR}/CMakeFiles/TargetDirectories.txt
+            - ${CMAKE_CI_BUILD_DIR}/Bullseye/
             - ${CMAKE_CI_BUILD_DIR}/**/*.gcno
             - ${CMAKE_CI_BUILD_DIR}/Source/QtDialog/moc_*.cpp
             - ${CMAKE_CI_BUILD_DIR}/Source/QtDialog/ui_*.h
@@ -190,6 +191,7 @@
 
             # CTest coverage files.
             - ${CMAKE_CI_BUILD_DIR}/CMakeFiles/TargetDirectories.txt
+            - ${CMAKE_CI_BUILD_DIR}/Bullseye/
             - ${CMAKE_CI_BUILD_DIR}/**/*.gcno
             - ${CMAKE_CI_BUILD_DIR}/**/*.gcda
 
