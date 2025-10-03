@@ -445,6 +445,7 @@
         - sccache --show-stats
         - (& "$pwsh" -File ".gitlab/ci/pre_configure.ps1")
         - ctest -VV -S .gitlab/ci/ctest_configure.cmake
+        - (& "$pwsh" -File ".gitlab/ci/pre_build.ps1")
         - ctest -VV -S .gitlab/ci/ctest_build.cmake
         - (& "$pwsh" -File ".gitlab/ci/post_build.ps1")
         - sccache --show-stats

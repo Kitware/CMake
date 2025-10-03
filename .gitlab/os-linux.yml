@@ -717,6 +717,7 @@
         - sccache --show-stats
         - .gitlab/ci/pre_configure.sh
         - "$LAUNCHER ctest -VV -S .gitlab/ci/ctest_configure.cmake"
+        - .gitlab/ci/pre_build.sh
         - "$LAUNCHER ctest -VV -S .gitlab/ci/ctest_build.cmake"
         - .gitlab/ci/post_build.sh
         - sccache --show-stats
