@@ -1,0 +1,2 @@
+-- Relative_ROOT='root'
+-- Relative_DIR='[^']*/Tests/RunCMake/find_package/PackageRootRelative-build/root'
