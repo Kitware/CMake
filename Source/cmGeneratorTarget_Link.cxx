@@ -583,6 +583,7 @@ void cmGeneratorTarget::ExpandLinkItems(std::string const& prop,
         cmLinkItem item = std::move(*maybeItem);
 
         if (field == LinkInterfaceField::HeadInclude) {
+          item.InterfaceDirectFrom = this;
           iface.HeadInclude.emplace_back(std::move(item));
           continue;
         }

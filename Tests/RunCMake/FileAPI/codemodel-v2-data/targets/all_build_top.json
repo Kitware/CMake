@@ -262,5 +262,196 @@
             "id": "^compile_usage_exe::@79b6367c9e05c77f6a80$",
             "backtrace": null
         }
+    ],
+    "linkLibraries": null,
+    "interfaceLinkLibraries": null,
+    "compileDependencies": null,
+    "interfaceCompileDependencies": null,
+    "objectDependencies": null,
+    "orderDependencies": [
+        {
+            "id": "^interface_exe::@6890427a1f51a3e7e1df$",
+            "backtrace": null
+        },
+        {
+            "id": "^c_lib::@6890427a1f51a3e7e1df$",
+            "backtrace": null
+        },
+        {
+            "id": "^c_exe::@6890427a1f51a3e7e1df$",
+            "backtrace": null
+        },
+        {
+            "id": "^c_shared_lib::@6890427a1f51a3e7e1df$",
+            "backtrace": null
+        },
+        {
+            "id": "^c_shared_exe::@6890427a1f51a3e7e1df$",
+            "backtrace": null
+        },
+        {
+            "id": "^c_static_lib::@6890427a1f51a3e7e1df$",
+            "backtrace": null
+        },
+        {
+            "id": "^c_subdir::@6890427a1f51a3e7e1df$",
+            "backtrace": null
+        },
+        {
+            "id": "^c_static_exe::@6890427a1f51a3e7e1df$",
+            "backtrace": null
+        },
+        {
+            "id": "^c_alias_exe::@53632cba2752272bb008$",
+            "backtrace": null
+        },
+        {
+            "id": "^cxx_alias_exe::@53632cba2752272bb008$",
+            "backtrace": null
+        },
+        {
+            "id": "^cxx_lib::@a56b12a3f5c0529fb296$",
+            "backtrace": null
+        },
+        {
+            "id": "^cxx_exe::@a56b12a3f5c0529fb296$",
+            "backtrace": null
+        },
+        {
+            "id": "^cxx_exe_cross_emulator::@ee4a268216d1f53c4e2e$",
+            "backtrace": null
+        },
+        {
+            "id": "^cxx_exe_cross_emulator_args::@ee4a268216d1f53c4e2e$",
+            "backtrace": null
+        },
+        {
+            "id": "^cxx_exe_test_launcher_and_cross_emulator::@ee4a268216d1f53c4e2e$",
+            "backtrace": null
+        },
+        {
+            "id": "^cxx_exe_test_launcher::@a56b12a3f5c0529fb296$",
+            "backtrace": null
+        },
+        {
+            "id": "^cxx_standard_compile_feature_exe::@a56b12a3f5c0529fb296$",
+            "backtrace": null
+        },
+        {
+            "id": "^cxx_standard_exe::@a56b12a3f5c0529fb296$",
+            "backtrace": null
+        },
+        {
+            "id": "^cxx_shared_lib::@a56b12a3f5c0529fb296$",
+            "backtrace": null
+        },
+        {
+            "id": "^cxx_shared_exe::@a56b12a3f5c0529fb296$",
+            "backtrace": null
+        },
+        {
+            "id": "^cxx_static_lib::@a56b12a3f5c0529fb296$",
+            "backtrace": null
+        },
+        {
+            "id": "^cxx_static_exe::@a56b12a3f5c0529fb296$",
+            "backtrace": null
+        },
+        {
+            "id": "^c_object_lib::@5ed5358f70faf8d8af7a$",
+            "backtrace": null
+        },
+        {
+            "id": "^c_object_exe::@5ed5358f70faf8d8af7a$",
+            "backtrace": null
+        },
+        {
+            "id": "^cxx_object_lib::@5ed5358f70faf8d8af7a$",
+            "backtrace": null
+        },
+        {
+            "id": "^cxx_object_exe::@5ed5358f70faf8d8af7a$",
+            "backtrace": null
+        },
+        {
+            "id": "^link_imported_exe::@ba7eb709d0b48779c6c8$",
+            "backtrace": null
+        },
+        {
+            "id": "^link_imported_shared_exe::@ba7eb709d0b48779c6c8$",
+            "backtrace": null
+        },
+        {
+            "id": "^link_imported_static_exe::@ba7eb709d0b48779c6c8$",
+            "backtrace": null
+        },
+        {
+            "id": "^link_imported_object_exe::@ba7eb709d0b48779c6c8$",
+            "backtrace": null
+        },
+        {
+            "id": "^link_imported_interface_exe::@ba7eb709d0b48779c6c8$",
+            "backtrace": null
+        },
+        {
+            "id": "^link_imported_interface_symbolic_exe::@ba7eb709d0b48779c6c8$",
+            "backtrace": null
+        },
+        {
+            "id": "^iface_srcs::@25b7fa8ea00134654b85$",
+            "backtrace": null
+        },
+        {
+            "id": "^custom_exe::@c11385ffed57b860da63$",
+            "backtrace": null
+        },
+        {
+            "id": "^generated_exe::@[0-9a-f]+$",
+            "backtrace": null
+        },
+        {
+            "id": "^c_headers_1::@6b8db101d64c125f29fe$",
+            "backtrace": null
+        },
+        {
+            "id": "^c_headers_2::@6b8db101d64c125f29fe$",
+            "backtrace": null
+        },
+        {
+            "id": "^static_framework::@217a96c3a62328a73ef4$",
+            "backtrace": null
+        },
+        {
+            "id": "^shared_framework::@217a96c3a62328a73ef4$",
+            "backtrace": null
+        },
+        {
+            "id": "^exe_framework::@217a96c3a62328a73ef4$",
+            "backtrace": null
+        },
+        {
+            "id": "^link_transitive_direct_exe::@79b6367c9e05c77f6a80$",
+            "backtrace": null
+        },
+        {
+            "id": "^transitive_direct_lib::@79b6367c9e05c77f6a80$",
+            "backtrace": null
+        },
+        {
+            "id": "^inject_direct_lib_impl::@79b6367c9e05c77f6a80$",
+            "backtrace": null
+        },
+        {
+            "id": "^usage_lib::@79b6367c9e05c77f6a80$",
+            "backtrace": null
+        },
+        {
+            "id": "^link_usage_exe::@79b6367c9e05c77f6a80$",
+            "backtrace": null
+        },
+        {
+            "id": "^compile_usage_exe::@79b6367c9e05c77f6a80$",
+            "backtrace": null
+        }
     ]
 }

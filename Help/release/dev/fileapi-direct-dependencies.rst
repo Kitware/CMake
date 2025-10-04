@@ -15,3 +15,8 @@ fileapi-direct-dependencies
   * Entries in the ``directories`` and ``projects`` arrays of the "codemodel"
     object's ``configurations`` entries gained a new ``abstractTargetIndexes``
     array.
+
+* The :manual:`cmake-file-api(7)` "codemodel" version 2 "target" object gained
+  new ``linkLibraries``, ``interfaceLinkLibraries``, ``compileDependencies``,
+  ``interfaceCompileDependencies``, ``objectDependencies``, and
+  ``orderDependencies`` fields.

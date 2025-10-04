@@ -115,5 +115,50 @@
             "id": "^ZERO_CHECK::@53632cba2752272bb008$",
             "backtrace": null
         }
-    ]
+    ],
+    "linkLibraries": [
+        {
+            "id": "^c_lib::@6890427a1f51a3e7e1df$",
+            "fragment": null,
+            "backtrace": [
+                {
+                    "file": "^alias/CMakeLists\\.txt$",
+                    "line": 6,
+                    "command": "target_link_libraries",
+                    "hasParent": true
+                },
+                {
+                    "file": "^alias/CMakeLists\\.txt$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": false
+                }
+            ],
+            "fromDependency": null
+        }
+    ],
+    "interfaceLinkLibraries": null,
+    "compileDependencies": [
+        {
+            "id": "^c_lib::@6890427a1f51a3e7e1df$",
+            "backtrace": [
+                {
+                    "file": "^alias/CMakeLists\\.txt$",
+                    "line": 6,
+                    "command": "target_link_libraries",
+                    "hasParent": true
+                },
+                {
+                    "file": "^alias/CMakeLists\\.txt$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": false
+                }
+            ],
+            "fromDependency": null
+        }
+    ],
+    "interfaceCompileDependencies": null,
+    "objectDependencies": null,
+    "orderDependencies": null
 }

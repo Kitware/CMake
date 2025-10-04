@@ -1337,9 +1337,19 @@ with members:
 
 ``dependencies``
   Optional member that is present when the target depends on other targets.
-  It is not present if the target is not part of the build system (i.e. it is
-  not an imported target or an interface library with no generated sources).
-  The value is a JSON array of entries corresponding to the dependencies.
+  It is only present if the target is part of the build system.
+  Imported targets are not part of the build system.  Interface libraries
+  are only part of the build system if they have sources or file sets.
+
+  The value is a JSON array of entries corresponding to the build dependencies.
+  The array includes not just direct dependencies, but also transitive
+  dependencies.  All listed targets will build before this one.
+
+  The list of dependencies reflects the *build graph* dependencies, not
+  necessarily the link dependencies.  If there are cycles in the link
+  dependencies of static libraries, not all link dependencies will be
+  reflected in this list of build graph dependencies.
+
   Each entry is a JSON object with members:
 
   ``id``
@@ -1352,6 +1362,216 @@ with members:
     or other command invocation that created this dependency is
     available.  The value is an unsigned integer 0-based index into
     the ``backtraceGraph`` member's ``nodes`` array.
+
+``linkLibraries``
+  Optional member that may be present when the target links directly to one or
+  more other targets or libraries.  It contains items that are used when
+  linking this target.  These come from the target's
+  :prop_tgt:`LINK_LIBRARIES` property (evaluated non-transitively), or the
+  :prop_tgt:`INTERFACE_LINK_LIBRARIES_DIRECT` property of another target it
+  links to directly or transitively.
+
+  Items that are only applied as usage requirements (such as being wrapped in a
+  :genex:`$<COMPILE_ONLY:...>` expression) will not be present in this member.
+
+  The value is a JSON array of entries.  Each entry is a JSON object with
+  members:
+
+  ``id``
+    Optional member that is present when the library to be linked is a target.
+    It uniquely identifies the target on which this one has a direct link
+    relationship.  This matches the main ``id`` member of that other target.
+
+    The target this ``id`` identifies is not necessarily part of the build
+    system.  It may be an imported target or an interface library with no
+    sources or file sets.
+
+    Exactly one of ``id`` or ``fragment`` will always be present.
+
+  ``fragment``
+    Optional member that is present when the library to be linked is not a
+    target.  It is a string containing the raw linker command line arguments
+    that capture the relationship.  These will typically be linking to
+    libraries or frameworks by name rather than as a target.
+
+    Exactly one of ``id`` or ``fragment`` will always be present.
+
+  ``backtrace``
+    Optional member that is present when a CMake language backtrace to
+    the command invocation that created this relationship is available.
+    The value is an unsigned integer 0-based index into the
+    ``backtraceGraph`` member's ``nodes`` array.
+
+  ``fromDependency``
+    Optional member that is only present when the relationship is the result of
+    an :prop_tgt:`INTERFACE_LINK_LIBRARIES_DIRECT` target property on one of
+    this target's directly or transitively linked libraries.  It is a JSON
+    object with one member:
+
+    ``id``
+      A string uniquely identifying the target whose
+      :prop_tgt:`INTERFACE_LINK_LIBRARIES_DIRECT` property created the
+      relationship.  The value matches the main ``id`` member of that target.
+
+  This field was added in codemodel version 2.9.
+
+``interfaceLinkLibraries``
+  Optional member that may be present when the target has one or more interface
+  link libraries.  It contains items that are used when linking consumers of
+  this target.  These come from the target's
+  :prop_tgt:`INTERFACE_LINK_LIBRARIES` property.
+
+  Items that are only applied as usage requirements (such as being wrapped in a
+  :genex:`$<COMPILE_ONLY:...>` expression) will not be present in this member.
+
+  The value is a JSON array of entries.  Each entry is a JSON object with
+  members:
+
+  ``id``
+    Optional member that is present when the interface link library is for a
+    target.  It uniquely identifies that target, with the value matching the
+    main ``id`` member of that target.
+
+    The target this ``id`` identifies is not necessarily part of the build
+    system.  It may be an imported target or an interface library with no
+    sources or file sets.
+
+    Exactly one of ``id`` or ``fragment`` will always be present.
+
+  ``fragment``
+    Optional member that is present when the interface link library is not for
+    a target.  It is a string containing the raw linker command line arguments
+    to be applied to consumers of this target's interface link libraries.
+    These will typically be linker arguments for linking to libraries or
+    frameworks by name rather than as a target.
+
+    Exactly one of ``id`` or ``fragment`` will always be present.
+
+  ``backtrace``
+    Optional member that is present when a CMake language backtrace to the
+    command invocation that created this interface relationship is available.
+    The value is an unsigned integer 0-based index into the
+    ``backtraceGraph`` member's ``nodes`` array.
+
+  This field was added in codemodel version 2.9.
+
+``compileDependencies``
+  Optional member that may be present when the target links directly to one or
+  more other targets that may provide usage requirements to this one.  They
+  affect how this target's sources are compiled.  These relationships are
+  defined by the target's :prop_tgt:`LINK_LIBRARIES` property (evaluated
+  non-transitively) and the :prop_tgt:`INTERFACE_LINK_LIBRARIES_DIRECT`
+  property of other targets it links to directly or transitively.
+
+  Relationships that only apply linking requirements (such as being wrapped
+  in a :genex:`$<LINK_ONLY:...>` expression) will not be present in this
+  member.
+
+  The value is a JSON array of entries.  Each entry is a JSON object with
+  members:
+
+  ``id``
+    A string uniquely identifying the target on which this target directly
+    depends.  This matches the main ``id`` member of the other target.
+
+    The target this ``id`` identifies is not necessarily part of the build
+    system.  It may be an imported target or an interface library with no
+    sources or file sets.
+
+  ``backtrace``
+    Optional member that is present when a CMake language backtrace to
+    the command invocation that created this relationship is available.
+    The value is an unsigned integer 0-based index into the
+    ``backtraceGraph`` member's ``nodes`` array.
+
+  ``fromDependency``
+    Optional member that is only present when the relationship is the result of
+    an :prop_tgt:`INTERFACE_LINK_LIBRARIES_DIRECT` target property on one of
+    this target's directly or transitively linked libraries.  It is a JSON
+    object with one member:
+
+    ``id``
+      A string uniquely identifying the target whose
+      :prop_tgt:`INTERFACE_LINK_LIBRARIES_DIRECT` property created the
+      relationship.  The value matches the main ``id`` member of that target.
+
+  This field was added in codemodel version 2.9.
+
+``interfaceCompileDependencies``
+  Optional member that may be present when the target has one or more interface
+  linking relationships to other targets.  It contains items that affect how
+  consumers' sources are compiled.  These relationships are defined by the
+  target's :prop_tgt:`INTERFACE_LINK_LIBRARIES` property.
+
+  Relationships that only apply linking requirements (such as being wrapped
+  in a :genex:`$<LINK_ONLY:...>` expression) will not be present in this
+  member.
+
+  The value is a JSON array of entries.  Each entry is a JSON object with
+  members:
+
+  ``id``
+    A string uniquely identifying the target on which this target specifies
+    an interface relationship.  This matches the main ``id`` member of the
+    other target.
+
+    The target this ``id`` identifies is not necessarily part of the build
+    system.  It may be an imported target or an interface library with no
+    sources or file sets.
+
+  ``backtrace``
+    Optional member that is present when a CMake language backtrace to
+    the command invocation that created this relationship is available.
+    The value is an unsigned integer 0-based index into the
+    ``backtraceGraph`` member's ``nodes`` array.
+
+  This field was added in codemodel version 2.9.
+
+``objectDependencies``
+  Optional member that is present when the target has one or more entries in
+  its :prop_tgt:`SOURCES` property where the entry is specified using
+  :genex:`$<TARGET_OBJECTS:...>`, and where no other generator expression is
+  used within the :genex:`$<TARGET_OBJECTS:...>` expression.
+
+  The value is a JSON array of entries.  Each entry is a JSON object with
+  members:
+
+  ``id``
+    A string uniquely identifying the target whose objects are referred to in
+    the :genex:`$<TARGET_OBJECTS:...>` expression.  This matches the main
+    ``id`` member of that other target.
+
+  ``backtrace``
+    Optional member that is present when a CMake language backtrace to
+    the command invocation that created this dependency is available.
+    The value is an unsigned integer 0-based index into the
+    ``backtraceGraph`` member's ``nodes`` array.
+
+  This field was added in codemodel version 2.9.
+
+``orderDependencies``
+  Optional member that is present when the target has one or more direct order
+  dependencies on other targets.  Such dependencies may arise from calls to
+  :command:`add_dependencies` or from internal CMake processing.
+  Unlike the ``dependencies`` array, the ``ZERO_CHECK`` target will not be
+  included in ``orderDependencies`` (this is only relevant for
+  :generator:`Xcode` and :ref:`Visual Studio <Visual Studio Generators>`
+  generators).
+
+  The value is a JSON array of entries.  Each entry is a JSON object with
+  members:
+
+  ``id``
+    A string uniquely identifying the target on which this target depends.
+    This matches the main ``id`` member of the other target.
+
+  ``backtrace``
+    Optional member that is present when a CMake language backtrace to
+    the command invocation that created this dependency is available.
+    The value is an unsigned integer 0-based index into the
+    ``backtraceGraph`` member's ``nodes`` array.
+
+  This field was added in codemodel version 2.9.
 
 ``fileSets``
   An optional member that is present when a target defines one or more

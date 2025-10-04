@@ -511,7 +511,7 @@ public:
   bool IsDotNetSdkTarget() const;
 
   void GetObjectLibrariesInSources(
-    std::vector<cmGeneratorTarget*>& objlibs) const;
+    std::vector<BT<cmGeneratorTarget*>>& objlibs) const;
 
   std::string GetFullNameImported(std::string const& config,
                                   cmStateEnums::ArtifactType artifact) const;

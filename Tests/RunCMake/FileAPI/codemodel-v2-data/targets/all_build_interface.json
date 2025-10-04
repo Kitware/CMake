@@ -82,5 +82,16 @@
             "id": "^iface_srcs::@25b7fa8ea00134654b85$",
             "backtrace": null
         }
+    ],
+    "linkLibraries": null,
+    "interfaceLinkLibraries": null,
+    "compileDependencies": null,
+    "interfaceCompileDependencies": null,
+    "objectDependencies": null,
+    "orderDependencies": [
+        {
+            "id": "^iface_srcs::@25b7fa8ea00134654b85$",
+            "backtrace": null
+        }
     ]
 }

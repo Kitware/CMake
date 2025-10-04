@@ -567,6 +567,144 @@ def check_target(c, major, minor):
                              missing_exception=lambda e: "Dependency ID: %s" % e["id"],
                              extra_exception=lambda a: "Dependency ID: %s" % a["id"])
 
+        def is_same_link_library(actual, expected):
+            if "id" in actual:
+                return expected["id"] is not None and matches(actual["id"], expected["id"])
+            if "fragment" in actual:
+                return expected["fragment"] is not None and is_string(actual["fragment"], expected["fragment"])
+            assert False  # actual must have one of id or fragment
+
+        if expected["linkLibraries"] is not None:
+            expected_keys.append("linkLibraries")
+
+            def check_link_library(actual, expected):
+                assert is_dict(actual)
+                expected_keys = []
+
+                # We always require exactly one of id or fragment
+                if expected["id"] is not None:
+                    expected_keys.append("id")
+                    assert matches(actual["id"], expected["id"])
+                    assert "fragment" not in actual
+                else:
+                    expected_keys.append("fragment")
+                    assert is_string(actual["fragment"], expected["fragment"])
+                    assert "id" not in actual
+
+                if expected["backtrace"] is not None:
+                    expected_keys.append("backtrace")
+                    check_backtrace(obj, actual["backtrace"], expected["backtrace"])
+
+                if expected["fromDependency"] is not None:
+                    expected_keys.append("fromDependency")
+                    assert is_dict(actual["fromDependency"])
+                    assert matches(actual["fromDependency"]["id"], expected["fromDependency"])
+                    assert sorted(actual["fromDependency"].keys()) == ["id"]
+
+                assert sorted(actual.keys()) == sorted(expected_keys)
+
+            check_list_match(is_same_link_library,
+                             obj["linkLibraries"], expected["linkLibraries"],
+                             check=check_link_library,
+                             check_exception=lambda a, e: "Mismatched link library: %s" % (a["id"] if "id" in a else a["fragment"]),
+                             missing_exception=lambda e: "Missing link library: %s" % (e["id"] if e["id"] is not None else e["fragment"]),
+                             extra_exception=lambda a: "Extra link library: %s" % (a["id"] if "id" in a else a["fragment"]))
+
+        if expected["interfaceLinkLibraries"] is not None:
+            expected_keys.append("interfaceLinkLibraries")
+
+            def check_interface_link_library(actual, expected):
+                assert is_dict(actual)
+                expected_keys = []
+
+                # We always require exactly one of id or fragment
+                if expected["id"] is not None:
+                    expected_keys.append("id")
+                    assert matches(actual["id"], expected["id"])
+                    assert "fragment" not in actual
+                else:
+                    expected_keys.append("fragment")
+                    assert is_string(actual["fragment"], expected["fragment"])
+                    assert "id" not in actual
+
+                if expected["backtrace"] is not None:
+                    expected_keys.append("backtrace")
+                    check_backtrace(obj, actual["backtrace"], expected["backtrace"])
+
+                assert sorted(actual.keys()) == sorted(expected_keys)
+
+            check_list_match(is_same_link_library,
+                             obj["interfaceLinkLibraries"], expected["interfaceLinkLibraries"],
+                             check=check_interface_link_library,
+                             check_exception=lambda a, e: "Mismatched interface link library: %s" % (a["id"] if "id" in a else a["fragment"]),
+                             missing_exception=lambda e: "Missing interface link library: %s" % (e["id"] if e["id"] is not None else e["fragment"]),
+                             extra_exception=lambda a: "Extra interface link library: %s" % (a["id"] if "id" in a else a["fragment"]))
+
+        if expected["compileDependencies"] is not None:
+            expected_keys.append("compileDependencies")
+
+            def check_usage_dependency(actual, expected):
+                assert is_dict(actual)
+                assert matches(actual["id"], expected["id"])
+                expected_keys = ["id"]
+
+                if expected["backtrace"] is not None:
+                    expected_keys.append("backtrace")
+                    check_backtrace(obj, actual["backtrace"], expected["backtrace"])
+
+                if expected["fromDependency"] is not None:
+                    expected_keys.append("fromDependency")
+                    assert is_dict(actual["fromDependency"])
+                    assert matches(actual["fromDependency"]["id"], expected["fromDependency"])
+                    assert sorted(actual["fromDependency"].keys()) == ["id"]
+
+                assert sorted(actual.keys()) == sorted(expected_keys)
+
+            check_list_match(lambda a, e: matches(a["id"], e["id"]),
+                             obj["compileDependencies"], expected["compileDependencies"],
+                             check=check_usage_dependency,
+                             check_exception=lambda a, e: "Mismatched compile dependency: %s" % a["id"],
+                             missing_exception=lambda e: "Missing compile dependency: %s" % e["id"],
+                             extra_exception=lambda a: "Extra compile dependency: %s" % a["id"])
+
+        def check_only_target_dependency(actual, expected):
+            assert is_dict(actual)
+            assert matches(actual["id"], expected["id"])
+            expected_keys = ["id"]
+
+            if expected["backtrace"] is not None:
+                expected_keys.append("backtrace")
+                check_backtrace(obj, actual["backtrace"], expected["backtrace"])
+
+            assert sorted(actual.keys()) == sorted(expected_keys)
+
+        if expected["interfaceCompileDependencies"] is not None:
+            expected_keys.append("interfaceCompileDependencies")
+            check_list_match(lambda a, e: matches(a["id"], e["id"]),
+                             obj["interfaceCompileDependencies"], expected["interfaceCompileDependencies"],
+                             check=check_only_target_dependency,
+                             check_exception=lambda a, e: "Mismatched interface compile dependency: %s" % a["id"],
+                             missing_exception=lambda e: "Missing interface compile dependency: %s" % e["id"],
+                             extra_exception=lambda a: "Extra interface compile dependency: %s" % a["id"])
+
+        if expected["objectDependencies"] is not None:
+            expected_keys.append("objectDependencies")
+            check_list_match(lambda a, e: matches(a["id"], e["id"]),
+                             obj["objectDependencies"], expected["objectDependencies"],
+                             check=check_only_target_dependency,
+                             check_exception=lambda a, e: "Mismatched object dependency: %s" % a["id"],
+                             missing_exception=lambda e: "Missing object dependency: %s" % e["id"],
+                             extra_exception=lambda a: "Extra object dependency: %s" % a["id"])
+
+        if expected["orderDependencies"] is not None:
+            expected_keys.append("orderDependencies")
+            check_list_match(lambda a, e: matches(a["id"], e["id"]),
+                             obj["orderDependencies"], expected["orderDependencies"],
+                             check=check_only_target_dependency,
+                             check_exception=lambda a, e: "Mismatched order dependency: %s" % a["id"],
+                             missing_exception=lambda e: "Missing order dependency: %s" % e["id"],
+                             extra_exception=lambda a: "Extra order dependency: %s" % a["id"])
+
         if expected["sourceGroups"] is not None:
             expected_keys.append("sourceGroups")
 
@@ -1046,7 +1184,8 @@ def gen_check_build_system_targets(c, g, inSource):
             expected = filter_list(lambda e: e["name"] not in ("link_imported_object_exe"), expected)
             for e in expected:
                 e["dependencies"] = filter_list(lambda d: not matches(d["id"], "^\\^link_imported_object_exe::@"), e["dependencies"])
-                if e["name"] in ("c_object_lib", "cxx_object_lib"):
+                e["orderDependencies"] = filter_list(lambda d: not matches(d["id"], "^\\^link_imported_object_exe::@"), e["orderDependencies"])
+                if e["name"] in ("c_object_lib", "cxx_object_lib", "inject_direct_lib_impl"):
                     e["artifacts"] = None
 
     else:

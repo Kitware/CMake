@@ -102,5 +102,36 @@
             "id": "^compile_usage_exe::@79b6367c9e05c77f6a80$",
             "backtrace": null
         }
+    ],
+    "linkLibraries": null,
+    "interfaceLinkLibraries": null,
+    "compileDependencies": null,
+    "interfaceCompileDependencies": null,
+    "objectDependencies": null,
+    "orderDependencies": [
+        {
+            "id": "^link_transitive_direct_exe::@79b6367c9e05c77f6a80$",
+            "backtrace": null
+        },
+        {
+            "id": "^transitive_direct_lib::@79b6367c9e05c77f6a80$",
+            "backtrace": null
+        },
+        {
+            "id": "^inject_direct_lib_impl::@79b6367c9e05c77f6a80$",
+            "backtrace": null
+        },
+        {
+            "id": "^usage_lib::@79b6367c9e05c77f6a80$",
+            "backtrace": null
+        },
+        {
+            "id": "^link_usage_exe::@79b6367c9e05c77f6a80$",
+            "backtrace": null
+        },
+        {
+            "id": "^compile_usage_exe::@79b6367c9e05c77f6a80$",
+            "backtrace": null
+        }
     ]
 }

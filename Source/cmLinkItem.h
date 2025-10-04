@@ -41,6 +41,9 @@ public:
   cmSourceFile const* ObjectSource = nullptr;
   std::string Feature;
   bool Cross = false;
+  // When the item was the result of a target's INTERFACE_LINK_LIBRARIES_DIRECT
+  // property, that originating target is provided here
+  cmGeneratorTarget const* InterfaceDirectFrom = nullptr;
   cmListFileBacktrace Backtrace;
   friend bool operator<(cmLinkItem const& l, cmLinkItem const& r);
   friend bool operator==(cmLinkItem const& l, cmLinkItem const& r);
