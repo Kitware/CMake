@@ -1,3 +1,3 @@
 enable_language(C)
-set(ENV{PATH} "")
+unset(ENV{PATH})
 enable_language(ASM)
