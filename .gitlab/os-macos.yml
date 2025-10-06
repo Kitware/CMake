@@ -200,8 +200,9 @@
         # Allow the server to already be running.
         - "sccache --start-server || :"
         - sccache --show-stats
-        - .gitlab/ci/pre_build.sh
+        - .gitlab/ci/pre_configure.sh
         - ctest -VV -S .gitlab/ci/ctest_configure.cmake
+        - .gitlab/ci/pre_build.sh
         - ctest -VV -S .gitlab/ci/ctest_build.cmake
         - .gitlab/ci/post_build.sh
         - sccache --show-stats
@@ -213,6 +214,7 @@
 
     script:
         - *before_script_macos
+        - .gitlab/ci/pre_test.sh
         - ctest --output-on-failure -V -S .gitlab/ci/ctest_test.cmake
 
     interruptible: true
