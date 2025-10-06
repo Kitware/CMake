@@ -414,7 +414,7 @@ Exercise 3 - Finding Other Kinds of Files
 
 In a perfect world every dependency we care about would be packaged correctly,
 or at least some other developer would have written a module that discovers it
-for us. We do no live in a perfect world, and sometimes we will have to get
+for us. We do not live in a perfect world, and sometimes we will have to get
 our hands dirty and discover build requirements manually.
 
 For this we have the other find commands enumerated earlier in the step, such

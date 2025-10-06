@@ -200,7 +200,7 @@ To change this we have two options. First, we can edit the file which stores
 the cache variables between CMake configuration runs, the "CMake Cache". This
 file is ``build/CMakeCache.txt``, in it we can find the option cache variable.
 
-.. code-block:: cmake
+.. code-block:: text
 
   //Build the Tutorial executable
   TUTORIAL_BUILD_UTILITIES:BOOL=OFF
