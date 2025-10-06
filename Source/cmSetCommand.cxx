@@ -21,6 +21,13 @@
 #include "cmSystemTools.h"
 #include "cmValue.h"
 
+namespace {
+void setENV(std::string const& var, cm::string_view val)
+{
+  cmSystemTools::PutEnv(cmStrCat(var, '=', val));
+}
+}
+
 // cmSetCommand
 bool cmSetCommand(std::vector<std::string> const& args,
                   cmExecutionStatus& status)
@@ -35,7 +42,6 @@ bool cmSetCommand(std::vector<std::string> const& args,
   if (cmHasLiteralPrefix(variable, "ENV{") && variable.size() > 5) {
     // what is the variable name
     auto const& varName = variable.substr(4, variable.size() - 5);
-    std::string putEnvArg = varName + "=";
 
     // what is the current value if any
     std::string currValue;
@@ -45,8 +51,7 @@ bool cmSetCommand(std::vector<std::string> const& args,
     if (args.size() > 1 && !args[1].empty()) {
       // but only if it is different from current value
       if (!currValueSet || currValue != args[1]) {
-        putEnvArg += args[1];
-        cmSystemTools::PutEnv(putEnvArg);
+        setENV(varName, args[1]);
       }
       // if there's extra arguments, warn user
       // that they are ignored by this command.
@@ -61,7 +66,7 @@ bool cmSetCommand(std::vector<std::string> const& args,
 
     // if it will be cleared, then clear it if it isn't already clear
     if (currValueSet) {
-      cmSystemTools::PutEnv(putEnvArg);
+      setENV(varName, ""_s);
     }
     return true;
   }
