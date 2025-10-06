@@ -24,6 +24,14 @@
 namespace {
 void setENV(std::string const& var, cm::string_view val)
 {
+#ifdef _WIN32
+  if (val.empty()) {
+    // FIXME(#27285): On Windows, PutEnv previously treated empty as unset.
+    // KWSys was fixed, but we need to retain the behavior for compatibility.
+    cmSystemTools::UnPutEnv(var);
+    return;
+  }
+#endif
   cmSystemTools::PutEnv(cmStrCat(var, '=', val));
 }
 }
