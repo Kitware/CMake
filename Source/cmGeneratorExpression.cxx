@@ -166,7 +166,7 @@ std::string cmGeneratorExpression::StripEmptyListElements(
 }
 
 static std::string extractAllGeneratorExpressions(
-  std::string const& input,
+  cm::string_view input,
   std::map<std::string, std::vector<std::string>>* collected)
 {
   std::string result;
@@ -176,9 +176,9 @@ static std::string extractAllGeneratorExpressions(
   std::stack<char const*> colons; // indices of ":"
   while ((pos = input.find("$<", lastPos)) != std::string::npos) {
     result += input.substr(lastPos, pos - lastPos);
-    starts.push(input.c_str() + pos);
+    starts.push(input.data() + pos);
     pos += 2;
-    char const* c = input.c_str() + pos;
+    char const* c = input.data() + pos;
     char const* const cStart = c;
     for (; *c; ++c) {
       if (cmGeneratorExpression::StartsWithGeneratorExpression(c)) {
@@ -209,7 +209,7 @@ static std::string extractAllGeneratorExpressions(
     }
     std::string::size_type const traversed = (c - cStart) + 1;
     if (!*c) {
-      result += "$<" + input.substr(pos, traversed);
+      result += cmStrCat("$<", input.substr(pos, traversed));
     }
     pos += traversed;
     lastPos = pos;
@@ -220,7 +220,7 @@ static std::string extractAllGeneratorExpressions(
   return cmGeneratorExpression::StripEmptyListElements(result);
 }
 
-static std::string stripAllGeneratorExpressions(std::string const& input)
+static std::string stripAllGeneratorExpressions(cm::string_view input)
 {
   return extractAllGeneratorExpressions(input, nullptr);
 }
@@ -243,7 +243,7 @@ static void prefixItems(std::string const& content, std::string& result,
 }
 
 static std::string stripExportInterface(
-  std::string const& input, cmGeneratorExpression::PreprocessContext context,
+  cm::string_view input, cmGeneratorExpression::PreprocessContext context,
   cm::string_view importPrefix)
 {
   std::string result;
@@ -282,7 +282,7 @@ static std::string stripExportInterface(
       assert(false && "Invalid position found");
     }
     nestingLevel = 1;
-    char const* c = input.c_str() + pos;
+    char const* c = input.data() + pos;
     char const* const cStart = c;
     for (; *c; ++c) {
       if (cmGeneratorExpression::StartsWithGeneratorExpression(c)) {
@@ -300,7 +300,8 @@ static std::string stripExportInterface(
           result += input.substr(pos, c - cStart);
         } else if (context == cmGeneratorExpression::InstallInterface &&
                    foundGenex == FoundGenex::InstallInterface) {
-          std::string const content = input.substr(pos, c - cStart);
+          std::string const content =
+            static_cast<std::string>(input.substr(pos, c - cStart));
           if (!importPrefix.empty()) {
             prefixItems(content, result, importPrefix);
           } else {
@@ -390,7 +391,7 @@ void cmGeneratorExpression::Split(std::string const& input,
   }
 }
 
-std::string cmGeneratorExpression::Preprocess(std::string const& input,
+std::string cmGeneratorExpression::Preprocess(cm::string_view input,
                                               PreprocessContext context,
                                               cm::string_view importPrefix)
 {

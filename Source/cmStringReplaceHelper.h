@@ -6,6 +6,8 @@
 #include <utility>
 #include <vector>
 
+#include <cm/string_view>
+
 #include "cmsys/RegularExpression.hxx"
 
 class cmMakefile;
@@ -25,7 +27,7 @@ public:
     return this->ValidReplaceExpression;
   }
 
-  bool Replace(std::string const& input, std::string& output);
+  bool Replace(cm::string_view input, std::string& output);
 
   std::string const& GetError() { return this->ErrorString; }
 
