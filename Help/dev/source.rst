@@ -245,7 +245,7 @@ These are:
 
 * ``<cmext/iterator>``:
 
-  * ``cm::is_terator``:
+  * ``cm::is_iterator``:
     Checks if a type is an iterator type.
 
   * ``cm::is_input_iterator``:
