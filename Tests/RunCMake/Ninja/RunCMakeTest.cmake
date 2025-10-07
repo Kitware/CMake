@@ -81,6 +81,7 @@ function(run_WithBuild name)
 endfunction()
 run_WithBuild(CommentsWithDollars)
 run_WithBuild(CommentsWithNewlines)
+run_WithBuild(CommentsWithTrailingNewlines)
 
 function(run_VerboseBuild)
   run_cmake(VerboseBuild)

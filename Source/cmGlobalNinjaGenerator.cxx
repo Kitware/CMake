@@ -521,6 +521,13 @@ void cmGlobalNinjaGenerator::WriteVariable(std::ostream& os,
   if (variablesShouldNotBeTrimmed.find(name) ==
       variablesShouldNotBeTrimmed.end()) {
     val = cmTrimWhitespace(value);
+    // If the value ends with `\n` and a `$` was left at the end of the trimmed
+    // value, put the newline back. Otherwise the next stanza is hidden by the
+    // trailing `$` escaping the newline.
+    if (cmSystemTools::StringEndsWith(value, "\n") &&
+        cmSystemTools::StringEndsWith(val, "$")) {
+      val += '\n';
+    }
   } else {
     val = value;
   }
