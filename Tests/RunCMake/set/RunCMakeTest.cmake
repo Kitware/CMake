@@ -12,3 +12,6 @@ run_cmake(CacheUnknownArguments)
 run_cmake(CacheMissingArguments)
 run_cmake(CacheWrongTYPE)
 run_cmake(CacheSetUnset)
+
+# set(ENV{}) syntax
+run_cmake_script(Env)
