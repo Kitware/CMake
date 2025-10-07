@@ -81,7 +81,7 @@ static void CreatePropertyGeneratorExpressions(
   bool evaluateForBuildsystem = false)
 {
   for (auto const& entry : entries) {
-    items.push_back(cmGeneratorTarget::TargetPropertyEntry::Create(
+    items.emplace_back(cmGeneratorTarget::TargetPropertyEntry::Create(
       cmakeInstance, entry, evaluateForBuildsystem));
   }
 }

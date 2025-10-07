@@ -49,7 +49,12 @@
             ],
             "includes": null,
             "frameworks": null,
-            "defines": null,
+            "defines": [
+                {
+                    "define": "_MBCS",
+                    "backtrace": null
+                }
+            ],
             "compileCommandFragments": null
         }
     ],
@@ -82,10 +87,10 @@
     "build": "^cxx$",
     "source": "^cxx$",
     "install": null,
-    "launchers" : [
+    "launchers": [
         {
             "command": "^no-such-launcher(\\.exe)?$",
-            "type" : "test"
+            "type": "test"
         }
     ],
     "link": {

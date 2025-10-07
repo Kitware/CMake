@@ -956,7 +956,10 @@ def gen_check_build_system_targets(c, g, inSource):
                     continue
 
                 # _WINDLL is expected for compilers targeting the MSVC ABI, but not for others.
-                group["defines"] = [d for d in group["defines"] if d and d["define"] != "_WINDLL"]
+                # And _MBCS too
+                group["defines"] = [d for d in group["defines"] if d and d["define"] != "_WINDLL" and d["define"] != "_MBCS"]
+                if len(group["defines"]) == 0:
+                    group["defines"] = None
 
     if os.path.exists(os.path.join(reply_dir, "..", "..", "..", "..", "cxx", "cxx_std_11.txt")):
         for e in expected:

@@ -1438,11 +1438,12 @@ if(CMake_TEST_Emscripten_TOOLCHAINS)
   set_property(TEST RunCMake.Emscripten APPEND PROPERTY LABELS "Emscripten")
 endif()
 
-if (CMAKE_C_COMPILER_ID STREQUAL "MSVC" OR CMAKE_C_SIMULATE_ID STREQUAL "MSVC")
-  add_RunCMake_test(SharedLibraryDefines
-    -DCMAKE_C_COMPILER_ID=${CMAKE_C_COMPILER_ID}
-    -DCMAKE_C_SIMULATE_ID=${CMAKE_C_SIMULATE_ID}
-    -DCMake_TEST_CUDA=${CMake_TEST_CUDA}
-  )
-  set_property(TEST RunCMake.SharedLibraryDefines APPEND PROPERTY LABELS "CUDA")
-endif()
+add_RunCMake_test(SharedLibraryDefines
+  -DCMake_TEST_CUDA=${CMake_TEST_CUDA}
+)
+set_property(TEST RunCMake.SharedLibraryDefines APPEND PROPERTY LABELS "CUDA")
+
+add_RunCMake_test(MsvcCharsetDefines
+  -DCMake_TEST_CUDA=${CMake_TEST_CUDA}
+)
+set_property(TEST RunCMake.MsvcCharsetDefines APPEND PROPERTY LABELS "CUDA")

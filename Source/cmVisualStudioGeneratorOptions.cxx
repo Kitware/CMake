@@ -134,21 +134,44 @@ bool cmVisualStudioGeneratorOptions::IsManaged() const
   return this->FlagMap.find("CompileAsManaged") != this->FlagMap.end();
 }
 
+void cmVisualStudioGeneratorOptions::CacheCharsetValue() const
+{
+  using MsvcCharSet = cmGeneratorTarget::MsvcCharSet;
+
+  if (this->CachedCharset.has_value()) {
+    return;
+  }
+
+  MsvcCharSet newValue = MsvcCharSet::None;
+
+  // Look for a any charset definition.
+  // Real charset will be updated if something is found.
+  auto it = std::find_if(this->Defines.begin(), this->Defines.end(),
+                         [&newValue](std::string const& define) {
+                           newValue =
+                             cmGeneratorTarget::GetMsvcCharSet(define);
+                           return newValue != MsvcCharSet::None;
+                         });
+
+  if (it == this->Defines.end()) {
+    // Default to multi-byte, as Visual Studio does
+    newValue = MsvcCharSet::MultiByte;
+  }
+
+  this->CachedCharset = newValue;
+}
+
 bool cmVisualStudioGeneratorOptions::UsingUnicode() const
 {
-  // Look for a _UNICODE definition.
-  return std::any_of(
-    this->Defines.begin(), this->Defines.end(), [](std::string const& di) {
-      return di == "_UNICODE"_s || cmHasLiteralPrefix(di, "_UNICODE=");
-    });
+  this->CacheCharsetValue();
+  return this->CachedCharset.value() ==
+    cmGeneratorTarget::MsvcCharSet::Unicode;
 }
 bool cmVisualStudioGeneratorOptions::UsingSBCS() const
 {
-  // Look for a _SBCS definition.
-  return std::any_of(
-    this->Defines.begin(), this->Defines.end(), [](std::string const& di) {
-      return di == "_SBCS"_s || cmHasLiteralPrefix(di, "_SBCS=");
-    });
+  this->CacheCharsetValue();
+  return this->CachedCharset.value() ==
+    cmGeneratorTarget::MsvcCharSet::SingleByte;
 }
 
 void cmVisualStudioGeneratorOptions::FixCudaCodeGeneration()

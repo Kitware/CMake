@@ -70,6 +70,10 @@
             "frameworks": null,
             "defines": [
                 {
+                    "define": "_MBCS",
+                    "backtrace": null
+                },
+                {
                     "define": "SUBDIR",
                     "backtrace": [
                         {
@@ -93,7 +97,7 @@
     "backtrace": [
         {
             "file": "^codemodel-v2\\.cmake$",
-            "line": 24,
+            "line": 25,
             "command": "add_library",
             "hasParent": true
         },

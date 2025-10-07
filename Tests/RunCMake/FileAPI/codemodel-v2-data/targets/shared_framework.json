@@ -51,6 +51,10 @@
             "frameworks": null,
             "defines": [
                 {
+                    "define": "_MBCS",
+                    "backtrace": null
+                },
+                {
                     "define": "_WINDLL",
                     "backtrace": null
                 },

@@ -20,7 +20,7 @@
             "backtrace": [
                 {
                     "file": "^object/CMakeLists\\.txt$",
-                    "line": 5,
+                    "line": 8,
                     "command": "add_library",
                     "hasParent": true
                 },
@@ -49,14 +49,19 @@
             ],
             "includes": null,
             "frameworks": null,
-            "defines": null,
+            "defines": [
+                {
+                    "define": "_MBCS",
+                    "backtrace": null
+                }
+            ],
             "compileCommandFragments": null
         }
     ],
     "backtrace": [
         {
             "file": "^object/CMakeLists\\.txt$",
-            "line": 5,
+            "line": 8,
             "command": "add_library",
             "hasParent": true
         },

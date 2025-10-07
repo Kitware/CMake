@@ -38,6 +38,12 @@ enum class OptionsParse
   Shell
 };
 
+struct MsvcCharSetInfo
+{
+  cmGeneratorTarget::MsvcCharSet CharSet;
+  bool IsNeedToAddDefine;
+};
+
 namespace {
 auto const DL_BEGIN = "<DEVICE_LINK>"_s;
 auto const DL_END = "</DEVICE_LINK>"_s;
@@ -76,15 +82,15 @@ void processOptions(cmGeneratorTarget const* tgt,
           options.emplace_back(opt, entry.Backtrace);
         }
         if (debugOptions) {
-          usedOptions += " * " + opt + "\n";
+          usedOptions += cmStrCat(" * ", opt, '\n');
         }
       }
     }
     if (!usedOptions.empty()) {
       tgt->GetLocalGenerator()->GetCMakeInstance()->IssueMessage(
         MessageType::LOG,
-        std::string("Used ") + logName + std::string(" for target ") +
-          tgt->GetName() + ":\n" + usedOptions,
+        cmStrCat("Used ", logName, " for target ", tgt->GetName(), ":\n",
+                 usedOptions),
         entry.Backtrace);
     }
   }
@@ -205,6 +211,45 @@ std::vector<BT<std::string>> wrapOptions(
   }
   return result;
 }
+
+cm::string_view const UNICODE_DEFINITION = "_UNICODE"_s;
+cm::string_view const MBCS_DEFINITION = "_MBCS"_s;
+cm::string_view const SBCS_DEFINITION = "_SBCS"_s;
+
+constexpr char UNICODE_DEFINITION_PREFIX[] = "_UNICODE=";
+constexpr char MBCS_DEFINITION_PREFIX[] = "_MBCS=";
+constexpr char SBCS_DEFINITION_PREFIX[] = "_SBCS=";
+
+MsvcCharSetInfo GetMsvcCharSetInfo(
+  cmGeneratorTarget const& tgt, std::string const& lang,
+  EvaluatedTargetPropertyEntries const& entries)
+{
+  using MsvcCharSet = cmGeneratorTarget::MsvcCharSet;
+
+  if (tgt.Makefile->GetSafeDefinition(
+        cmStrCat("CMAKE_", lang, "_COMPILER_ID")) != "MSVC"_s &&
+      tgt.Makefile->GetSafeDefinition(
+        cmStrCat("CMAKE_", lang, "_SIMULATE_ID")) != "MSVC"_s) {
+
+    // Only MSVC ABI uses this feature
+    return { MsvcCharSet::None, false };
+  }
+
+  for (EvaluatedTargetPropertyEntry const& entry : entries.Entries) {
+    for (std::string const& value : entry.Values) {
+      MsvcCharSet charSet = cmGeneratorTarget::GetMsvcCharSet(value);
+      if (charSet != MsvcCharSet::None) {
+        return { charSet, false };
+      }
+    }
+  }
+
+  // Default to multi-byte, similar to the Visual Studio generator
+  // Define the default charset for Visual Studio too:
+  // it should filter it out if need
+  return { MsvcCharSet::MultiByte, true };
+}
+
 }
 
 void cmGeneratorTarget::GetCompileOptions(std::vector<std::string>& result,
@@ -305,7 +350,7 @@ void cmGeneratorTarget::GetCompileDefinitions(
 {
   std::vector<BT<std::string>> tmp =
     this->GetCompileDefinitions(config, language);
-  result.reserve(tmp.size());
+  result.reserve(result.size() + tmp.size());
   for (BT<std::string>& v : tmp) {
     result.emplace_back(std::move(v.Value));
   }
@@ -342,6 +387,34 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetCompileDefinitions(
 
   AddInterfaceEntries(this, "INTERFACE_COMPILE_DEFINITIONS", context,
                       &dagChecker, entries, IncludeRuntimeInterface::Yes);
+
+  // Add the character set definition
+  MsvcCharSetInfo charSetInfo = GetMsvcCharSetInfo(*this, language, entries);
+  if (charSetInfo.IsNeedToAddDefine &&
+      this->GetPolicyStatusCMP0204() == cmPolicies::NEW) {
+    cm::string_view define;
+    switch (charSetInfo.CharSet) {
+      case MsvcCharSet::None:
+        // Nothing to set
+        break;
+      case MsvcCharSet::Unicode:
+        define = UNICODE_DEFINITION;
+        break;
+      case MsvcCharSet::MultiByte:
+        define = MBCS_DEFINITION;
+        break;
+      case MsvcCharSet::SingleByte:
+        define = SBCS_DEFINITION;
+        break;
+    }
+    if (!define.empty()) {
+      std::unique_ptr<TargetPropertyEntry> property =
+        TargetPropertyEntry::Create(*this->LocalGenerator->GetCMakeInstance(),
+                                    std::string{ define });
+      entries.Entries.emplace_back(
+        EvaluateTargetPropertyEntry(this, context, &dagChecker, *property));
+    }
+  }
 
   processOptions(this, entries, list, uniqueOptions, debugDefines,
                  "compile definitions", OptionsParse::None);
@@ -676,4 +749,25 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetLinkDepends(
                  OptionsParse::None);
 
   return result;
+}
+
+cmGeneratorTarget::MsvcCharSet cmGeneratorTarget::GetMsvcCharSet(
+  std::string const& singleDefine)
+{
+  if (singleDefine == UNICODE_DEFINITION ||
+      cmHasLiteralPrefix(singleDefine, UNICODE_DEFINITION_PREFIX)) {
+    return MsvcCharSet::Unicode;
+  }
+
+  if (singleDefine == MBCS_DEFINITION ||
+      cmHasLiteralPrefix(singleDefine, MBCS_DEFINITION_PREFIX)) {
+    return MsvcCharSet::MultiByte;
+  }
+
+  if (singleDefine == SBCS_DEFINITION ||
+      cmHasLiteralPrefix(singleDefine, SBCS_DEFINITION_PREFIX)) {
+    return MsvcCharSet::SingleByte;
+  }
+
+  return MsvcCharSet::None;
 }

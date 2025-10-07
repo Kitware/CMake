@@ -115,6 +115,10 @@
             "frameworks": null,
             "defines": [
                 {
+                    "define": "_MBCS",
+                    "backtrace": null
+                },
+                {
                     "define": "EMPTY_C=1",
                     "backtrace": [
                         {
@@ -185,7 +189,7 @@
             ],
             "compileCommandFragments": [
                 {
-                    "fragment" : "SRC_COMPILE_OPTIONS_DUMMY",
+                    "fragment": "SRC_COMPILE_OPTIONS_DUMMY",
                     "backtrace": [
                         {
                             "file": "^.*/Tests/RunCMake/FileAPIExternalSource/CMakeLists\\.txt$",
@@ -194,7 +198,7 @@
                             "hasParent": true
                         },
                         {
-                            "file" : "^.*/Tests/RunCMake/FileAPIExternalSource/CMakeLists\\.txt$",
+                            "file": "^.*/Tests/RunCMake/FileAPIExternalSource/CMakeLists\\.txt$",
                             "line": null,
                             "command": null,
                             "hasParent": false
@@ -230,6 +234,10 @@
             ],
             "frameworks": null,
             "defines": [
+                {
+                    "define": "_MBCS",
+                    "backtrace": null
+                },
                 {
                     "define": "GENERATED_EXE=1",
                     "backtrace": [

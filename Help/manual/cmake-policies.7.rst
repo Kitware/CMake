@@ -98,6 +98,7 @@ Policies Introduced by CMake 4.2
 .. toctree::
    :maxdepth: 1
 
+   CMP0204: A character set is always defined when targeting the MSVC ABI. </policy/CMP0204>
    CMP0203: _WINDLL is defined for shared libraries targeting the MSVC ABI. </policy/CMP0203>
    CMP0202: PDB file names always include their target's per-config POSTFIX. </policy/CMP0202>
    CMP0201: Python::NumPy does not depend on Python::Development.Module. </policy/CMP0201>

@@ -48,7 +48,12 @@
                 "^empty\\.c$"
             ],
             "includes": null,
-            "defines": null,
+            "defines": [
+                {
+                    "define": "_MBCS",
+                    "backtrace": null
+                }
+            ],
             "frameworks": null,
             "compileCommandFragments": null
         }

@@ -1,5 +1,10 @@
 set(CMAKE_EXPERIMENTAL_EXPORT_BUILD_DATABASE "73194a1d-c0b5-41b9-9190-a4512925e192")
 
+# _MBCS default append for MSVC ABI workaround: see CMP0204
+# So, force add the default value for all platforms to be consistent.
+cmake_policy(SET CMP0204 NEW)
+add_compile_definitions(_MBCS)
+
 get_property(is_multiconfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
 if (is_multiconfig)
   set(CMAKE_CONFIGURATION_TYPES "Debug" "Release")

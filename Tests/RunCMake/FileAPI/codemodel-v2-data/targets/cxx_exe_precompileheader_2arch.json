@@ -7,7 +7,12 @@
       ],
       "includes": null,
       "frameworks": null,
-      "defines": null,
+      "defines": [
+        {
+          "define": "_MBCS",
+          "backtrace": null
+        }
+      ],
       "precompileHeaders": [
         {
           "header": ".*empty\\.h$",
@@ -54,7 +59,12 @@
       ],
       "includes": null,
       "frameworks": null,
-      "defines": null,
+      "defines": [
+        {
+          "define": "_MBCS",
+          "backtrace": null
+        }
+      ],
       "precompileHeaders": [
         {
           "header": ".*empty\\.h$",
@@ -101,7 +111,12 @@
       ],
       "includes": null,
       "frameworks": null,
-      "defines": null,
+      "defines": [
+        {
+          "define": "_MBCS",
+          "backtrace": null
+        }
+      ],
       "precompileHeaders": [
         {
           "header": ".*empty\\.h$",

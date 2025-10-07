@@ -20,7 +20,7 @@
             "backtrace": [
                 {
                     "file": "^codemodel-v2\\.cmake$",
-                    "line": 11,
+                    "line": 12,
                     "command": "add_library",
                     "hasParent": true
                 },
@@ -61,14 +61,19 @@
             ],
             "includes": null,
             "frameworks": null,
-            "defines": null,
+            "defines": [
+                {
+                    "define": "_MBCS",
+                    "backtrace": null
+                }
+            ],
             "compileCommandFragments": null
         }
     ],
     "backtrace": [
         {
             "file": "^codemodel-v2\\.cmake$",
-            "line": 11,
+            "line": 12,
             "command": "add_library",
             "hasParent": true
         },
