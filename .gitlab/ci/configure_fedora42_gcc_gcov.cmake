@@ -38,9 +38,4 @@ set(CMAKE_MODULE_LINKER_FLAGS_INIT "${link_flags}" CACHE STRING "")
 # Do not bootstrap for the coverage test suite.
 set(CMAKE_SKIP_BOOTSTRAP_TEST TRUE CACHE BOOL "")
 
-# Cover compilation with C++11 only and not higher standards.
-set(CMAKE_CXX_STANDARD "11" CACHE STRING "")
-# Qt 6 requires C++17, so use Qt 5.
-set(CMake_QT_MAJOR_VERSION "5" CACHE STRING "")
-
 include("${CMAKE_CURRENT_LIST_DIR}/configure_fedora42_common.cmake")
