@@ -1,0 +1,100 @@
+{
+    "name": "inject_direct_lib_impl",
+    "id": "^inject_direct_lib_impl::@79b6367c9e05c77f6a80$",
+    "directorySource": "^direct$",
+    "projectName": "Direct",
+    "type": "OBJECT_LIBRARY",
+    "imported": null,
+    "local": null,
+    "abstract": null,
+    "symbolic": null,
+    "isGeneratorProvided": null,
+    "fileSets": null,
+    "sources": [
+        {
+            "path": "^direct/other\\.c$",
+            "isGenerated": null,
+            "fileSetName": null,
+            "sourceGroupName": "Source Files",
+            "compileGroupLanguage": "C",
+            "backtrace": [
+                {
+                    "file": "^direct/CMakeLists\\.txt$",
+                    "line": 6,
+                    "command": "add_library",
+                    "hasParent": true
+                },
+                {
+                    "file": "^direct/CMakeLists\\.txt$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": false
+                }
+            ]
+        }
+    ],
+    "sourceGroups": [
+        {
+            "name": "Source Files",
+            "sourcePaths": [
+                "^direct/other\\.c$"
+            ]
+        }
+    ],
+    "compileGroups": [
+        {
+            "language": "C",
+            "sourcePaths": [
+                "^direct/other\\.c$"
+            ],
+            "includes": null,
+            "frameworks": null,
+            "defines": [
+                {
+                    "define": "_MBCS",
+                    "backtrace": null
+                }
+            ],
+            "compileCommandFragments": null
+        }
+    ],
+    "backtrace": [
+        {
+            "file": "^direct/CMakeLists\\.txt$",
+            "line": 6,
+            "command": "add_library",
+            "hasParent": true
+        },
+        {
+            "file": "^direct/CMakeLists\\.txt$",
+            "line": null,
+            "command": null,
+            "hasParent": false
+        }
+    ],
+    "folder": null,
+    "nameOnDisk": null,
+    "artifacts": [
+        {
+            "path": "^(direct|build/inject_direct_lib_impl\\.build)/.*/other(\\.c)?\\.o(bj)?$",
+            "_dllExtra": false
+        }
+    ],
+    "build": "^direct$",
+    "source": "^direct$",
+    "install": null,
+    "link": null,
+    "archive": null,
+    "dependencies": [
+        {
+            "id": "^ZERO_CHECK::@79b6367c9e05c77f6a80$",
+            "backtrace": null
+        }
+    ],
+    "linkLibraries": null,
+    "interfaceLinkLibraries": null,
+    "compileDependencies": null,
+    "interfaceCompileDependencies": null,
+    "objectDependencies": null,
+    "orderDependencies": null
+}

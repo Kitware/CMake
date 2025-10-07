@@ -1,0 +1,127 @@
+{
+    "name": "compile_usage_exe",
+    "id": "^compile_usage_exe::@79b6367c9e05c77f6a80$",
+    "directorySource": "^direct$",
+    "projectName": "Direct",
+    "type": "EXECUTABLE",
+    "imported": null,
+    "local": null,
+    "abstract": null,
+    "symbolic": null,
+    "isGeneratorProvided": null,
+    "fileSets": null,
+    "sources": [
+        {
+            "path": "^empty\\.c$",
+            "isGenerated": null,
+            "fileSetName": null,
+            "sourceGroupName": "Source Files",
+            "compileGroupLanguage": "C",
+            "backtrace": [
+                {
+                    "file": "^direct/CMakeLists\\.txt$",
+                    "line": 38,
+                    "command": "add_executable",
+                    "hasParent": true
+                },
+                {
+                    "file": "^direct/CMakeLists\\.txt$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": false
+                }
+            ]
+        }
+    ],
+    "sourceGroups": [
+        {
+            "name": "Source Files",
+            "sourcePaths": [
+                "^empty\\.c$"
+            ]
+        }
+    ],
+    "compileGroups": [
+        {
+            "language": "C",
+            "sourcePaths": [
+                "^empty\\.c$"
+            ],
+            "includes": null,
+            "frameworks": null,
+            "defines": [
+                {
+                    "define": "_MBCS",
+                    "backtrace": null
+                }
+            ],
+            "compileCommandFragments": null
+        }
+    ],
+    "backtrace": [
+        {
+            "file": "^direct/CMakeLists\\.txt$",
+            "line": 38,
+            "command": "add_executable",
+            "hasParent": true
+        },
+        {
+            "file": "^direct/CMakeLists\\.txt$",
+            "line": null,
+            "command": null,
+            "hasParent": false
+        }
+    ],
+    "folder": null,
+    "nameOnDisk": "^compile_usage_exe(\\.exe)?$",
+    "artifacts": [
+        {
+            "path": "^direct/((Debug|Release|RelWithDebInfo|MinSizeRel)/)?compile_usage_exe(\\.exe)?$",
+            "_dllExtra": false
+        },
+        {
+            "path": "^direct/((Debug|Release|RelWithDebInfo|MinSizeRel)/)?compile_usage_exe\\.pdb$",
+            "_dllExtra": true
+        }
+    ],
+    "build": "^direct$",
+    "source": "^direct$",
+    "install": null,
+    "link": {
+        "language": "C",
+        "lto": null,
+        "commandFragments": null
+    },
+    "archive": null,
+    "dependencies": [
+        {
+            "id": "^ZERO_CHECK::@79b6367c9e05c77f6a80$",
+            "backtrace": null
+        }
+    ],
+    "linkLibraries": null,
+    "interfaceLinkLibraries": null,
+    "compileDependencies": [
+        {
+            "id": "^usage_lib::@79b6367c9e05c77f6a80$",
+            "backtrace": [
+                {
+                    "file": "^direct/CMakeLists\\.txt$",
+                    "line": 40,
+                    "command": "target_link_libraries",
+                    "hasParent": true
+                },
+                {
+                    "file": "^direct/CMakeLists\\.txt$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": false
+                }
+            ],
+            "fromDependency": null
+        }
+    ],
+    "interfaceCompileDependencies": null,
+    "objectDependencies": null,
+    "orderDependencies": null
+}

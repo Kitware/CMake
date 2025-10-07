@@ -169,5 +169,124 @@
             "id": "^ZERO_CHECK::@217a96c3a62328a73ef4$",
             "backtrace": null
         }
-    ]
+    ],
+    "linkLibraries": [
+        {
+            "id": "^import_framework::@217a96c3a62328a73ef4$",
+            "fragment": null,
+            "backtrace": [
+                {
+                    "file": "^framework/CMakeLists\\.txt$",
+                    "line": 17,
+                    "command": "target_link_libraries",
+                    "hasParent": true
+                },
+                {
+                    "file": "^framework/CMakeLists\\.txt$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": false
+                }
+            ],
+            "fromDependency": null
+        },
+        {
+            "id": "^shared_framework::@217a96c3a62328a73ef4$",
+            "fragment": null,
+            "backtrace": [
+                {
+                    "file": "^framework/CMakeLists\\.txt$",
+                    "line": 17,
+                    "command": "target_link_libraries",
+                    "hasParent": true
+                },
+                {
+                    "file": "^framework/CMakeLists\\.txt$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": false
+                }
+            ],
+            "fromDependency": null
+        },
+        {
+            "id": "^static_framework::@217a96c3a62328a73ef4$",
+            "fragment": null,
+            "backtrace": [
+                {
+                    "file": "^framework/CMakeLists\\.txt$",
+                    "line": 17,
+                    "command": "target_link_libraries",
+                    "hasParent": true
+                },
+                {
+                    "file": "^framework/CMakeLists\\.txt$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": false
+                }
+            ],
+            "fromDependency": null
+        }
+    ],
+    "interfaceLinkLibraries": null,
+    "compileDependencies": [
+        {
+            "id": "^import_framework::@217a96c3a62328a73ef4$",
+            "backtrace": [
+                {
+                    "file": "^framework/CMakeLists\\.txt$",
+                    "line": 17,
+                    "command": "target_link_libraries",
+                    "hasParent": true
+                },
+                {
+                    "file": "^framework/CMakeLists\\.txt$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": false
+                }
+            ],
+            "fromDependency": null
+        },
+        {
+            "id": "^shared_framework::@217a96c3a62328a73ef4$",
+            "backtrace": [
+                {
+                    "file": "^framework/CMakeLists\\.txt$",
+                    "line": 17,
+                    "command": "target_link_libraries",
+                    "hasParent": true
+                },
+                {
+                    "file": "^framework/CMakeLists\\.txt$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": false
+                }
+            ],
+            "fromDependency": null
+        },
+        {
+            "id": "^static_framework::@217a96c3a62328a73ef4$",
+            "backtrace": [
+                {
+                    "file": "^framework/CMakeLists\\.txt$",
+                    "line": 17,
+                    "command": "target_link_libraries",
+                    "hasParent": true
+                },
+                {
+                    "file": "^framework/CMakeLists\\.txt$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": false
+                }
+            ],
+            "fromDependency": null
+        }
+    ],
+    "interfaceCompileDependencies": null,
+    "objectDependencies": null,
+    "orderDependencies": null
 }

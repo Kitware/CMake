@@ -82,5 +82,16 @@
             "id": "^custom_exe::@c11385ffed57b860da63$",
             "backtrace": null
         }
+    ],
+    "linkLibraries": null,
+    "interfaceLinkLibraries": null,
+    "compileDependencies": null,
+    "interfaceCompileDependencies": null,
+    "objectDependencies": null,
+    "orderDependencies": [
+        {
+            "id": "^custom_exe::@c11385ffed57b860da63$",
+            "backtrace": null
+        }
     ]
 }

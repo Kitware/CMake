@@ -55,7 +55,7 @@ void AddObjectEntries(cmGeneratorTarget const* headTarget,
         headTarget->GetLinkImplementationLibraries(context.Config,
                                                    UseTo::Link)) {
     entries.HadContextSensitiveCondition = impl->HadContextSensitiveCondition;
-    for (cmLinkImplItem const& lib : impl->Libraries) {
+    for (cmLinkItem const& lib : impl->Libraries) {
       if (lib.Target &&
           lib.Target->GetType() == cmStateEnums::OBJECT_LIBRARY) {
         std::string uniqueName =
@@ -174,7 +174,7 @@ bool processSources(cmGeneratorTarget const* tgt,
       contextDependent = true;
     }
 
-    cmLinkImplItem const& item = entry.LinkImplItem;
+    cmLinkItem const& item = entry.LinkItem;
     std::string const& targetName = item.AsStr();
 
     for (std::string& src : entry.Values) {

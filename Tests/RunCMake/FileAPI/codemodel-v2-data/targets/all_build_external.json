@@ -82,5 +82,16 @@
             "id": "^generated_exe::@[0-9a-f]+$",
             "backtrace": null
         }
+    ],
+    "linkLibraries": null,
+    "interfaceLinkLibraries": null,
+    "compileDependencies": null,
+    "interfaceCompileDependencies": null,
+    "objectDependencies": null,
+    "orderDependencies": [
+        {
+            "id": "^generated_exe::@[0-9a-f]+$",
+            "backtrace": null
+        }
     ]
 }

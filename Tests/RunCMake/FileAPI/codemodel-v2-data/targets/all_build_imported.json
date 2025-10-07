@@ -102,5 +102,36 @@
             "id": "^link_imported_interface_symbolic_exe::@ba7eb709d0b48779c6c8$",
             "backtrace": null
         }
+    ],
+    "linkLibraries": null,
+    "interfaceLinkLibraries": null,
+    "compileDependencies": null,
+    "interfaceCompileDependencies": null,
+    "objectDependencies": null,
+    "orderDependencies": [
+        {
+            "id": "^link_imported_exe::@ba7eb709d0b48779c6c8$",
+            "backtrace": null
+        },
+        {
+            "id": "^link_imported_shared_exe::@ba7eb709d0b48779c6c8$",
+            "backtrace": null
+        },
+        {
+            "id": "^link_imported_static_exe::@ba7eb709d0b48779c6c8$",
+            "backtrace": null
+        },
+        {
+            "id": "^link_imported_object_exe::@ba7eb709d0b48779c6c8$",
+            "backtrace": null
+        },
+        {
+            "id": "^link_imported_interface_exe::@ba7eb709d0b48779c6c8$",
+            "backtrace": null
+        },
+        {
+            "id": "^link_imported_interface_symbolic_exe::@ba7eb709d0b48779c6c8$",
+            "backtrace": null
+        }
     ]
 }

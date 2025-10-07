@@ -1,0 +1,196 @@
+{
+    "name": "transitive_direct_lib",
+    "id": "^transitive_direct_lib::@79b6367c9e05c77f6a80$",
+    "directorySource": "^direct$",
+    "projectName": "Direct",
+    "type": "STATIC_LIBRARY",
+    "imported": null,
+    "local": null,
+    "abstract": null,
+    "symbolic": null,
+    "isGeneratorProvided": null,
+    "fileSets": null,
+    "sources": [
+        {
+            "path": "^empty\\.c$",
+            "isGenerated": null,
+            "fileSetName": null,
+            "sourceGroupName": "Source Files",
+            "compileGroupLanguage": "C",
+            "backtrace": [
+                {
+                    "file": "^direct/CMakeLists\\.txt$",
+                    "line": 4,
+                    "command": "add_library",
+                    "hasParent": true
+                },
+                {
+                    "file": "^direct/CMakeLists\\.txt$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": false
+                }
+            ]
+        }
+    ],
+    "sourceGroups": [
+        {
+            "name": "Source Files",
+            "sourcePaths": [
+                "^empty\\.c$"
+            ]
+        }
+    ],
+    "compileGroups": [
+        {
+            "language": "C",
+            "sourcePaths": [
+                "^empty\\.c$"
+            ],
+            "includes": null,
+            "frameworks": null,
+            "defines": [
+                {
+                    "define": "_MBCS",
+                    "backtrace": null
+                }
+            ],
+            "compileCommandFragments": null
+        }
+    ],
+    "backtrace": [
+        {
+            "file": "^direct/CMakeLists\\.txt$",
+            "line": 4,
+            "command": "add_library",
+            "hasParent": true
+        },
+        {
+            "file": "^direct/CMakeLists\\.txt$",
+            "line": null,
+            "command": null,
+            "hasParent": false
+        }
+    ],
+    "folder": null,
+    "nameOnDisk": "^(lib)?transitive_direct_lib\\.(a|lib|l)$",
+    "artifacts": [
+        {
+            "path": "^direct/((Debug|Release|RelWithDebInfo|MinSizeRel)/)?(lib)?transitive_direct_lib\\.(a|lib|l)$",
+            "_dllExtra": false
+        }
+    ],
+    "build": "^direct$",
+    "source": "^direct$",
+    "install": null,
+    "link": null,
+    "archive": {
+        "lto": null
+    },
+    "dependencies": [
+        {
+            "id": "^ZERO_CHECK::@79b6367c9e05c77f6a80$",
+            "backtrace": null
+        }
+    ],
+    "linkLibraries": [
+        {
+            "id": "^inject_direct_lib::@79b6367c9e05c77f6a80$",
+            "fragment": null,
+            "backtrace": [
+                {
+                    "file": "^direct/CMakeLists\\.txt$",
+                    "line": 28,
+                    "command": "target_link_libraries",
+                    "hasParent": true
+                },
+                {
+                    "file": "^direct/CMakeLists\\.txt$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": false
+                }
+            ],
+            "fromDependency": null
+        }
+    ],
+    "interfaceLinkLibraries": [
+        {
+            "id": "^inject_direct_lib::@79b6367c9e05c77f6a80$",
+            "fragment": null,
+            "backtrace": [
+                {
+                    "file": "^direct/CMakeLists\\.txt$",
+                    "line": 28,
+                    "command": "target_link_libraries",
+                    "hasParent": true
+                },
+                {
+                    "file": "^direct/CMakeLists\\.txt$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": false
+                }
+            ]
+        },
+        {
+            "id": null,
+            "fragment": "-lm",
+            "backtrace": [
+                {
+                    "file": "^direct/CMakeLists\\.txt$",
+                    "line": 28,
+                    "command": "target_link_libraries",
+                    "hasParent": true
+                },
+                {
+                    "file": "^direct/CMakeLists\\.txt$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": false
+                }
+            ]
+        }
+    ],
+    "compileDependencies": [
+        {
+            "id": "^inject_direct_lib::@79b6367c9e05c77f6a80$",
+            "backtrace": [
+                {
+                    "file": "^direct/CMakeLists\\.txt$",
+                    "line": 28,
+                    "command": "target_link_libraries",
+                    "hasParent": true
+                },
+                {
+                    "file": "^direct/CMakeLists\\.txt$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": false
+                }
+            ],
+            "fromDependency": null
+        }
+    ],
+    "interfaceCompileDependencies": [
+        {
+            "id": "^inject_direct_lib::@79b6367c9e05c77f6a80$",
+            "backtrace": [
+                {
+                    "file": "^direct/CMakeLists\\.txt$",
+                    "line": 28,
+                    "command": "target_link_libraries",
+                    "hasParent": true
+                },
+                {
+                    "file": "^direct/CMakeLists\\.txt$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": false
+                }
+            ]
+        }
+    ],
+    "objectDependencies": null,
+    "orderDependencies": null
+}

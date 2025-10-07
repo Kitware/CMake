@@ -5053,10 +5053,10 @@ void cmGlobalXCodeGenerator::CreateXCodeDependHackMakefile(
           }
         }
 
-        std::vector<cmGeneratorTarget*> objlibs;
+        std::vector<BT<cmGeneratorTarget*>> objlibs;
         gt->GetObjectLibrariesInSources(objlibs);
-        for (auto* objLib : objlibs) {
-          makefileStream << this->PostBuildMakeTarget(objLib->GetName(),
+        for (auto const& objLib : objlibs) {
+          makefileStream << this->PostBuildMakeTarget(objLib.Value->GetName(),
                                                       configName)
                          << ": " << trel << '\n';
         }
@@ -5074,9 +5074,9 @@ void cmGlobalXCodeGenerator::CreateXCodeDependHackMakefile(
           }
         }
 
-        for (auto* objLib : objlibs) {
+        for (auto const& objLib : objlibs) {
 
-          std::string const objLibName = objLib->GetName();
+          std::string const& objLibName = objLib.Value->GetName();
           std::string d = cmStrCat(this->GetTargetTempDir(gt, configName),
                                    "/lib", objLibName, ".a");
 

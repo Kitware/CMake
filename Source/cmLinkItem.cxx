@@ -71,11 +71,6 @@ std::ostream& operator<<(std::ostream& os, cmLinkItem const& item)
   return os << item.AsStr();
 }
 
-cmLinkImplItem::cmLinkImplItem(cmLinkItem item)
-  : cmLinkItem(std::move(item))
-{
-}
-
 namespace {
 cm::string_view const LL_BEGIN = "<LINK_LIBRARY:"_s;
 cm::string_view const LL_END = "</LINK_LIBRARY:"_s;

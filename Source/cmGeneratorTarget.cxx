@@ -4953,7 +4953,7 @@ bool cmGeneratorTarget::GetConfigCommonSourceFilesForXcode(
 }
 
 void cmGeneratorTarget::GetObjectLibrariesInSources(
-  std::vector<cmGeneratorTarget*>& objlibs) const
+  std::vector<BT<cmGeneratorTarget*>>& objlibs) const
 {
   // FIXME: This searches SOURCES for TARGET_OBJECTS for backwards
   // compatibility with the OLD behavior of CMP0026 since this
@@ -4974,7 +4974,7 @@ void cmGeneratorTarget::GetObjectLibrariesInSources(
         cmGeneratorTarget* objLib =
           this->LocalGenerator->FindGeneratorTargetToUse(objLibName);
         if (objLib) {
-          objlibs.push_back(objLib);
+          objlibs.emplace_back(objLib, entry.Backtrace);
         }
       }
     }

@@ -1,0 +1,137 @@
+{
+    "name": "ALL_BUILD",
+    "id": "^ALL_BUILD::@79b6367c9e05c77f6a80$",
+    "directorySource": "^direct$",
+    "projectName": "Direct",
+    "type": "UTILITY",
+    "imported": null,
+    "local": null,
+    "abstract": null,
+    "symbolic": null,
+    "isGeneratorProvided": true,
+    "fileSets": null,
+    "sources": [
+        {
+            "path": "^.*/Tests/RunCMake/FileAPI/codemodel-v2-build/direct/CMakeFiles/ALL_BUILD$",
+            "isGenerated": true,
+            "fileSetName": null,
+            "sourceGroupName": "",
+            "compileGroupLanguage": null,
+            "backtrace": [
+                {
+                    "file": "^direct/CMakeLists\\.txt$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": false
+                }
+            ]
+        },
+        {
+            "path": "^.*/Tests/RunCMake/FileAPI/codemodel-v2-build/direct/CMakeFiles/ALL_BUILD\\.rule$",
+            "isGenerated": true,
+            "fileSetName": null,
+            "sourceGroupName": "CMake Rules",
+            "compileGroupLanguage": null,
+            "backtrace": [
+                {
+                    "file": "^direct/CMakeLists\\.txt$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": false
+                }
+            ]
+        }
+    ],
+    "sourceGroups": [
+        {
+            "name": "",
+            "sourcePaths": [
+                "^.*/Tests/RunCMake/FileAPI/codemodel-v2-build/direct/CMakeFiles/ALL_BUILD$"
+            ]
+        },
+        {
+            "name": "CMake Rules",
+            "sourcePaths": [
+                "^.*/Tests/RunCMake/FileAPI/codemodel-v2-build/direct/CMakeFiles/ALL_BUILD\\.rule$"
+            ]
+        }
+    ],
+    "compileGroups": null,
+    "backtrace": [
+        {
+            "file": "^direct/CMakeLists\\.txt$",
+            "line": null,
+            "command": null,
+            "hasParent": false
+        }
+    ],
+    "folder": null,
+    "nameOnDisk": null,
+    "artifacts": null,
+    "build": "^direct$",
+    "source": "^direct$",
+    "install": null,
+    "link": null,
+    "archive": null,
+    "dependencies": [
+        {
+            "id": "^ZERO_CHECK::@79b6367c9e05c77f6a80$",
+            "backtrace": null
+        },
+        {
+            "id": "^link_transitive_direct_exe::@79b6367c9e05c77f6a80$",
+            "backtrace": null
+        },
+        {
+            "id": "^transitive_direct_lib::@79b6367c9e05c77f6a80$",
+            "backtrace": null
+        },
+        {
+            "id": "^inject_direct_lib_impl::@79b6367c9e05c77f6a80$",
+            "backtrace": null
+        },
+        {
+            "id": "^usage_lib::@79b6367c9e05c77f6a80$",
+            "backtrace": null
+        },
+        {
+            "id": "^link_usage_exe::@79b6367c9e05c77f6a80$",
+            "backtrace": null
+        },
+        {
+            "id": "^compile_usage_exe::@79b6367c9e05c77f6a80$",
+            "backtrace": null
+        }
+    ],
+    "linkLibraries": null,
+    "interfaceLinkLibraries": null,
+    "compileDependencies": null,
+    "interfaceCompileDependencies": null,
+    "objectDependencies": null,
+    "orderDependencies": [
+        {
+            "id": "^link_transitive_direct_exe::@79b6367c9e05c77f6a80$",
+            "backtrace": null
+        },
+        {
+            "id": "^transitive_direct_lib::@79b6367c9e05c77f6a80$",
+            "backtrace": null
+        },
+        {
+            "id": "^inject_direct_lib_impl::@79b6367c9e05c77f6a80$",
+            "backtrace": null
+        },
+        {
+            "id": "^usage_lib::@79b6367c9e05c77f6a80$",
+            "backtrace": null
+        },
+        {
+            "id": "^link_usage_exe::@79b6367c9e05c77f6a80$",
+            "backtrace": null
+        },
+        {
+            "id": "^compile_usage_exe::@79b6367c9e05c77f6a80$",
+            "backtrace": null
+        }
+    ]
+}

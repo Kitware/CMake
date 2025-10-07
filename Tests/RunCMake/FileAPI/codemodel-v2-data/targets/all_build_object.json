@@ -94,5 +94,28 @@
             "id": "^cxx_object_exe::@5ed5358f70faf8d8af7a$",
             "backtrace": null
         }
+    ],
+    "linkLibraries": null,
+    "interfaceLinkLibraries": null,
+    "compileDependencies": null,
+    "interfaceCompileDependencies": null,
+    "objectDependencies": null,
+    "orderDependencies": [
+        {
+            "id": "^c_object_lib::@5ed5358f70faf8d8af7a$",
+            "backtrace": null
+        },
+        {
+            "id": "^c_object_exe::@5ed5358f70faf8d8af7a$",
+            "backtrace": null
+        },
+        {
+            "id": "^cxx_object_lib::@5ed5358f70faf8d8af7a$",
+            "backtrace": null
+        },
+        {
+            "id": "^cxx_object_exe::@5ed5358f70faf8d8af7a$",
+            "backtrace": null
+        }
     ]
 }
