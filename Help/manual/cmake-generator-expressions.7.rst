@@ -677,7 +677,7 @@ Path Comparisons
   performed on either path. Returns ``1`` if the paths are equal, ``0``
   otherwise.
 
-  See :ref:`cmake_path(COMPARE) <Path COMPARE>` for more details.
+  See :ref:`cmake_path(COMPARE) <Path Comparison>` for more details.
 
 .. _GenEx Path Queries:
 
@@ -720,13 +720,15 @@ All paths are expected to be in cmake-style format.
 
   .. versionadded:: 3.24
 
-  Returns ``1`` if the path is :ref:`absolute <IS_ABSOLUTE>`, ``0`` otherwise.
+  Returns ``1`` if the path is absolute according to
+  :command:`cmake_path(IS_ABSOLUTE)`, ``0`` otherwise.
 
 .. genex:: $<PATH:IS_RELATIVE,path>
 
   .. versionadded:: 3.24
 
-  This will return the opposite of ``IS_ABSOLUTE``.
+  Returns ``1`` if the path is relative according to
+  :command:`cmake_path(IS_RELATIVE)`, ``0`` otherwise.
 
 .. genex:: $<PATH:IS_PREFIX[,NORMALIZE],path,input>
 
@@ -818,7 +820,7 @@ in cmake-style format.
   ``directory-separator``. Depending on the ``input``, the value of ``path``
   may be discarded.
 
-  See :ref:`cmake_path(APPEND) <APPEND>` for more details.
+  See :command:`cmake_path(APPEND)` for more details.
 
 .. genex:: $<PATH:REMOVE_FILENAME,path...>
 
@@ -828,7 +830,7 @@ in cmake-style format.
   ``$<PATH:GET_FILENAME>``) removed. After removal, any trailing
   ``directory-separator`` is left alone, if present.
 
-  See :ref:`cmake_path(REMOVE_FILENAME) <REMOVE_FILENAME>` for more details.
+  See :command:`cmake_path(REMOVE_FILENAME)` for more details.
 
 .. genex:: $<PATH:REPLACE_FILENAME,path...,input>
 
@@ -838,7 +840,7 @@ in cmake-style format.
   ``path`` has no filename component (i.e. ``$<PATH:HAS_FILENAME>`` returns
   ``0``), ``path`` is unchanged.
 
-  See :ref:`cmake_path(REPLACE_FILENAME) <REPLACE_FILENAME>` for more details.
+  See :command:`cmake_path(REPLACE_FILENAME)` for more details.
 
 .. genex:: $<PATH:REMOVE_EXTENSION[,LAST_ONLY],path...>
 
@@ -846,7 +848,7 @@ in cmake-style format.
 
   Returns ``path`` with the :ref:`extension <EXTENSION_DEF>` removed, if any.
 
-  See :ref:`cmake_path(REMOVE_EXTENSION) <REMOVE_EXTENSION>` for more details.
+  See :command:`cmake_path(REMOVE_EXTENSION)` for more details.
 
 .. genex:: $<PATH:REPLACE_EXTENSION[,LAST_ONLY],path...,input>
 
@@ -855,7 +857,7 @@ in cmake-style format.
   Returns ``path`` with the :ref:`extension <EXTENSION_DEF>` replaced by
   ``input``, if any.
 
-  See :ref:`cmake_path(REPLACE_EXTENSION) <REPLACE_EXTENSION>` for more details.
+  See :command:`cmake_path(REPLACE_EXTENSION)` for more details.
 
 .. genex:: $<PATH:NORMAL_PATH,path...>
 
@@ -871,8 +873,7 @@ in cmake-style format.
   Returns ``path``, modified to make it relative to the ``base_directory``
   argument.
 
-  See :ref:`cmake_path(RELATIVE_PATH) <cmake_path-RELATIVE_PATH>` for more
-  details.
+  See :command:`cmake_path(RELATIVE_PATH)` for more details.
 
 .. genex:: $<PATH:ABSOLUTE_PATH[,NORMALIZE],path...,base_directory>
 
@@ -885,7 +886,7 @@ in cmake-style format.
   When the ``NORMALIZE`` option is specified, the path is
   :ref:`normalized <Normalization>` after the path computation.
 
-  See :ref:`cmake_path(ABSOLUTE_PATH) <ABSOLUTE_PATH>` for more details.
+  See :command:`cmake_path(ABSOLUTE_PATH)` for more details.
 
 Shell Paths
 ^^^^^^^^^^^

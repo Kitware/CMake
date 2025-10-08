@@ -415,7 +415,7 @@ Path Comparisons
        ...
     endif()
 
-  See :ref:`cmake_path(COMPARE) <Path COMPARE>` for more details.
+  See :ref:`cmake_path(COMPARE) <Path Comparison>` for more details.
 
 Variable Expansion
 ^^^^^^^^^^^^^^^^^^
