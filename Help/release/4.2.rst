@@ -1,0 +1,193 @@
+CMake 4.2 Release Notes
+***********************
+
+.. only:: html
+
+  .. contents::
+
+Changes made since CMake 4.1 include the following.
+
+* The :module:`CheckTypeSize` module's command :command:`check_type_size`
+  gained a new argument ``RESULT_VARIABLE`` to customize the result variable
+  name instead of the default ``HAVE_<size-var>``.
+
+* The :manual:`cmake(1)` command-line tool now supports
+  ``cmake -E copy_if_newer`` and ``cmake -E copy_directory_if_newer``
+  subcommands to copy files based on timestamp comparison instead of
+  content comparison. These commands copy files only if the source is
+  newer than the destination, providing better performance for build
+  systems compared to ``copy_if_different`` which compares file contents.
+
+* The :command:`cmake_language` command gained a new ``TRACE`` subcommand
+  to enable or disable tracing during script execution.
+
+* :variable:`CMAKE_PARENT_LIST_FILE` is no longer defined when processing
+  a ``CMakeLists.txt`` file.  See policy :policy:`CMP0198`.
+
+* The :manual:`cmake-file-api(7)` "codemodel" version 2 ``version`` field has
+  been updated to 2.9.
+
+* The :manual:`cmake-file-api(7)` "codemodel" version 2 "target" and
+  "directory" objects gained a new ``codemodelVersion`` field.
+
+The :genex:`$<CONFIG:cfgs>` generator expression no longer matches multiple
+configurations.  See policy :policy:`CMP0199`.
+
+* The :cpack_gen:`CPack NSIS Generator` gained a new
+  :variable:`CPACK_NSIS_CRC_CHECK` variable for setting the ``CRCCheck``
+  attribute.
+
+* :variable:`CPACK_PACKAGE_CHECKSUM` now supports multiple values.
+
+* The ``import std`` support learned to use the
+  :variable:`CMAKE_CXX_STDLIB_MODULES_JSON` variable to set the path to the
+  metadata file for the standard library rather than using the compiler to
+  discover its location.
+
+* For builds targeting the MSVC ABI, all generators now add the ``_MBCS``
+  preprocessor definition when compiling sources unless ``_UNICODE`` or ``_SBCS``
+  is found. See policy :policy:`CMP0204`.
+
+* For builds targeting the MSVC ABI, all generators now add the ``_WINDLL``
+  preprocessor definition when compiling sources in shared libraries.
+  See policy :policy:`CMP0203`.
+
+* CMake now supports :ref:`Cross Compiling for Emscripten` with simple
+  toolchain files.
+
+* The :module:`ExternalProject` module's commands :command:`ExternalProject_Add`
+  and :command:`ExternalProject_Add_Step` now provide options to set
+  environment variables on the configure, build, install, and test steps.
+
+* The :generator:`FASTBuild` generator was added.
+
+* The :manual:`cmake-file-api(7)` "codemodel" version 2 now includes imported
+  targets and all interface library targets in its replies.  Previously,
+  imported targets were omitted, and only those interface targets that
+  participated in the build system were included.  The following changes
+  support these new additions:
+
+  * The "target" object gained ``imported``, ``local``, and ``abstract`` fields.
+  * The "target" object's ``type`` field can now also hold the value
+    ``UNKNOWN_LIBRARY``.
+  * The "codemodel" object's ``configurations`` entries gained a new
+    ``abstractTargets`` array.
+  * Entries in the ``directories`` and ``projects`` arrays of the "codemodel"
+    object's ``configurations`` entries gained a new ``abstractTargetIndexes``
+    array.
+
+* The :manual:`cmake-file-api(7)` "codemodel" version 2 "target" object gained
+  new ``linkLibraries``, ``interfaceLinkLibraries``, ``compileDependencies``,
+  ``interfaceCompileDependencies``, ``objectDependencies``, and
+  ``orderDependencies`` fields.
+
+* The :module:`FindDevIL` module now provides a ``DevIL_VERSION`` result
+  variable and version argument and version range can be specified by
+  :command:`find_package`, when finding the DevIL package.
+
+* The uppercased ``<PACKAGENAME>_FOUND`` result variables of find modules
+  are now deprecated in favor of ``<PackageName>_FOUND`` result variables,
+  where appropriate.  See documentation of each find module for details.
+
+* Nearly all find modules now provide a ``<PackageName>_VERSION`` result
+  variable matching the casing of its module name.  Existing variants such as
+  ``<PackageName>_VERSION_STRING`` and uppercased ``<PACKAGENAME>_VERSION``
+  are deprecated.  See documentation of each find module for details.
+
+* The :module:`FindwxWidgets` module's result variable
+  ``wxWidgets_USE_FILE`` is now deprecated in favor of including the
+  :module:`UsewxWidgets` module directly.
+
+* The :command:`find_package()` command gained a new ``UNWIND_INCLUDE`` option
+  to enable immediate :command:`return` from :command:`include()` commands
+  after a failure to discover a transitive dependency.
+
+* The ``Python::NumPy`` target does not depend on
+  the ``Python::Development.Module`` target. See policy :policy:`CMP0201`.
+
+* The :genex:`<LANG>_COMPILER_LINKER_ID <C_COMPILER_LINKER_ID>` and
+  :genex:`<LANG>_COMPILER_LINKER_FRONTEND_VARIANT <C_COMPILER_LINKER_FRONTEND_VARIANT>`
+  families of generator expressions were added to access the value of the
+  associated :variable:`CMAKE_<LANG>_COMPILER_LINKER_ID` and
+  :variable:`CMAKE_<LANG>_COMPILER_LINKER_FRONTEND_VARIANT` variables.
+
+* The :genex:`TARGET_FILE_BASE_NAME`, :genex:`TARGET_IMPORT_FILE_BASE_NAME`,
+  :genex:`TARGET_LINKER_FILE_BASE_NAME`,
+  :genex:`TARGET_LINKER_LIBRARY_FILE_BASE_NAME`,
+  :genex:`TARGET_LINKER_IMPORT_FILE_BASE_NAME`, and
+  :genex:`TARGET_PDB_FILE_BASE_NAME`
+  generator expressions gained the option ``POSTFIX`` to control the inclusion
+  or not of the :prop_tgt:`<CONFIG>_POSTFIX` target property as part of the
+  base name of the target.
+
+* The :genex:`TARGET_INTERMEDIATE_DIR` generator expression was
+  added to refer to a target's intermediate files directory in
+  the build tree.
+
+* The :command:`gtest_discover_tests()` command from the :module:`GoogleTest`
+  module now sets the ``DEF_SOURCE_LINE`` test property for each discovered
+  test if gtest supports the ``--gtest_output=json`` option.  This test
+  property is used by some IDEs to locate the source for each test.
+* The :command:`gtest_discover_tests()` command from the :module:`GoogleTest`
+  module previously parsed certain type-parameterized test names incorrectly.
+  Their names ended up with raw characters from gtest's output and were
+  very obviously misparsed.  Those names are now parsed correctly, so projects
+  may see different test names to before for affected tests.
+
+Location and configuration selection for imported targets is now more
+consistent.  See policy :policy:`CMP0200`.
+
+* The :prop_tgt:`INSTALL_OBJECT_NAME_STRATEGY` target property has been added
+  to control the naming strategy for installed object files.
+
+* The :prop_tgt:`INSTALL_OBJECT_ONLY_USE_DESTINATION` target property has been
+  added to more precisely control the installation path for object files.
+
+* The :prop_sf:`JOB_POOL_COMPILE` source file property was added
+  to assign individual source compilations to :prop_gbl:`JOB_POOLS`.
+
+* The :prop_sf:`OBJECT_NAME` source file property may be used to control
+  object names of source files.
+
+* The :prop_sf:`INSTALL_OBJECT_NAME` source file property may be used to
+  control names of installed object files.
+
+* The :command:`set` and :command:`unset` commands gain the support of the
+  ``CACHE{<variable>}`` syntax to handle cache entries.
+
+* There is now the :variable:`CMAKE_INTERMEDIATE_DIR_STRATEGY` variable (and
+  associated environment variable :envvar:`CMAKE_INTERMEDIATE_DIR_STRATEGY`)
+  that may be used to change the strategy used to name intermediate
+  directories used for object files (and other associated target metadata).
+
+* There is now the :variable:`CMAKE_AUTOGEN_INTERMEDIATE_DIR_STRATEGY`
+  variable (and associated environment variable
+  :envvar:`CMAKE_AUTOGEN_INTERMEDIATE_DIR_STRATEGY`)
+  that may be used to change the strategy used to name intermediate
+  directories used for :manual:`Qt Autogen <cmake-qt(7)>` files.
+
+* The :command:`string(REGEX QUOTE)` command was added to
+  generate a regular expression exactly matching a string.
+
+* The :variable:`CMAKE_SKIP_LINTING` variable and corresponding
+  :prop_tgt:`SKIP_LINTING` target property were added to tell the
+  :ref:`Command-Line Build Tool Generators` to skip linting all
+  sources in a target.
+
+* The :prop_tgt:`UNITY_BUILD_FILENAME_PREFIX` target property was added
+  to control names of source files generated by :prop_tgt:`UNITY_BUILD`.
+
+* The ``swig_add_library()`` command, from the :module:`UseSWIG` module, gained
+  the option ``DEBUG_POSTFIX`` for the management of the
+  :prop_tgt:`DEBUG_POSTFIX` target property.
+
+* The :generator:`Visual Studio 14 2015` generator is now deprecated
+  and will be removed in a future version of CMake.
+
+* The :generator:`Visual Studio 18 2026` generator was added.  This is
+  experimental and based on "Visual Studio 2026 Insiders" because this
+  version of VS has not been released.
+
+* :variable:`CPACK_WIX_CAB_PER_COMPONENT` allows CPack WIX opt-in generation of one
+  `.cab` file per component. Having multiple `.cab` files may improve the time it takes
+  to generate installers and may also work around per `.cab` size constraints.
