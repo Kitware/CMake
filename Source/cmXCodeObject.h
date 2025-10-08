@@ -163,6 +163,15 @@ public:
   void SetComment(std::string const& c) { this->Comment = c; }
   static void PrintString(std::ostream& os, std::string const& String);
 
+  template <typename Proj>
+  void SortObjectList(Proj projector)
+  {
+    std::sort(this->List.begin(), this->List.end(),
+              [&projector](cmXCodeObject* a, cmXCodeObject* b) {
+                return projector(a) < projector(b);
+              });
+  }
+
 protected:
   void PrintString(std::ostream& os) const;
 

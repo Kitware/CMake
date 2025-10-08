@@ -4551,6 +4551,21 @@ bool cmGlobalXCodeGenerator::CreateGroups(
       }
     }
   }
+
+  // Sort all children of each target group by name alphabetically.
+  auto const getName = [](cmXCodeObject* obj) -> cm::string_view {
+    cmXCodeObject* name = obj->GetAttribute("name");
+    return name ? name->GetString() : cm::string_view{ ""_s };
+  };
+  for (auto& group : this->TargetGroup) {
+    if (cmXCodeObject* children = group.second->GetAttribute("children")) {
+      children->SortObjectList(getName);
+    }
+  }
+  // Also sort the-top level group.  Special groups like Products,
+  // Frameworks, and Resources are added later to the end of the list.
+  this->MainGroupChildren->SortObjectList(getName);
+
   return true;
 }
 
