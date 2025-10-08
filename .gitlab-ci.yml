@@ -31,7 +31,9 @@ variables:
 #   - a "base image"
 #   - a build script
 #   - tags for the jobs
-#   - rules for when to run the job
+#   - the `.rules` block
+#     - see `.gitlab/rules.yml` for variables jobs may set to control when the
+#       job is executed
 #
 # Additionally, jobs may also contain:
 #
