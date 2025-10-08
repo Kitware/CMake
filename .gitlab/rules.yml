@@ -7,10 +7,17 @@
 ##     updates.
 ##   CMAKE_CI_JOB_UPDATES_WEBSITE_HELP
 ##     Set to "true" if the job performs tasks to update website help.
+##   CMAKE_CI_JOB_PACKAGE_ONLY
+##     Set to "true" if the job handles packaging tasks. These jobs will only
+##     run during packaging pipelines.
 ## Pipeline variables:
 ##   CMAKE_CI_VERSION_UPDATE
 ##     Set to "true" if the pipeline should perform version update tasks.
 ##     No other tasks are performed if set.
+##   CMAKE_CI_PACKAGE
+##     Set to either "dev" or `vX.Y` to construct a packaging pipeline. Also
+##     uploads constructed packages. May also run website help jobs. No other
+##     tasks are performed if set.
 ## Project variables:
 ##   CMAKE_CI_PROJECT_MAIN_BRANCH
 ##     Set to the name of the main integration branch where development
@@ -88,6 +95,32 @@ workflow:
         - if: '$CMAKE_CI_JOB_UPDATES_WEBSITE_HELP == "true"'
           when: never
 
+        ### Packaging pipelines.
+        # Packaging pipelines build development version packages automatically.
+        - if: '$CMAKE_CI_PACKAGE == "dev" && $CMAKE_CI_JOB_PACKAGE_ONLY == "true" && $CI_JOB_STAGE != "upload"'
+          when: on_success
+        # Packaging pipelines upload development version packages to the website automatically.
+        - if: '$CMAKE_CI_PACKAGE == "dev" && $CMAKE_CI_JOB_PACKAGE_ONLY == "true" && $CI_JOB_STAGE == "upload"'
+          variables:
+              RSYNC_DESTINATION: "kitware@cmake.org:dev/"
+          when: on_success
+        # Packaging pipelines build release version packages upon request.
+        - if: '$CMAKE_CI_PACKAGE != null && $CMAKE_CI_JOB_PACKAGE_ONLY == "true" && $CI_JOB_STAGE == "prep"'
+          when: manual
+        - if: '$CMAKE_CI_PACKAGE != null && $CMAKE_CI_JOB_PACKAGE_ONLY == "true" && $CI_JOB_STAGE != "upload"'
+          when: on_success
+        # Packaging pipelines upload release version packages to a staging area.
+        - if: '$CMAKE_CI_PACKAGE != null && $CMAKE_CI_JOB_PACKAGE_ONLY == "true" && $CI_JOB_STAGE == "upload" && $CMAKE_CI_PACKAGE_URL != null'
+          variables:
+              RSYNC_DESTINATION: "$CMAKE_CI_PACKAGE_URL"
+          when: on_success
+        # Packaging pipelines run no other jobs.
+        - if: '$CMAKE_CI_PACKAGE != null'
+          when: never
+        # Package-only jobs do not run in any other situations.
+        - if: '$CMAKE_CI_JOB_PACKAGE_ONLY == "true"'
+          when: never
+
         ### Development documentation pipelines.
         # Development documentation pipelines run no other jobs.
         - if: '$CMAKE_CI_PROJECT_MAIN_BRANCH != null && $CI_COMMIT_BRANCH != null && $CMAKE_CI_PROJECT_MAIN_BRANCH == $CI_COMMIT_BRANCH'
@@ -154,21 +187,3 @@ workflow:
         - if: '$CI_MERGE_REQUEST_ID'
           when: on_success
         - when: on_success
-
-.run_only_for_package:
-    rules:
-        - if: '$CMAKE_CI_PACKAGE == "dev" && $CI_JOB_STAGE != "upload"'
-          when: on_success
-        - if: '$CMAKE_CI_PACKAGE == "dev" && $CI_JOB_STAGE == "upload"'
-          variables:
-              RSYNC_DESTINATION: "kitware@cmake.org:dev/"
-          when: on_success
-        - if: '$CMAKE_CI_PACKAGE != null && $CI_JOB_STAGE == "prep"'
-          when: manual
-        - if: '$CMAKE_CI_PACKAGE != null && $CI_JOB_STAGE != "upload"'
-          when: on_success
-        - if: '$CMAKE_CI_PACKAGE != null && $CI_JOB_STAGE == "upload" && $CMAKE_CI_PACKAGE_URL != null'
-          variables:
-              RSYNC_DESTINATION: "$CMAKE_CI_PACKAGE_URL"
-          when: on_success
-        - when: never

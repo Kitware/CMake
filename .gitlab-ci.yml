@@ -56,9 +56,10 @@ p:source-package:
         - .cmake_prep_source_linux
         - .linux_x86_64_tags
         - .cmake_release_artifacts
-        - .run_only_for_package
+        - .rules
     variables:
         CMAKE_CI_ARTIFACTS_NAME: "artifacts-source"
+        CMAKE_CI_JOB_PACKAGE_ONLY: "true"
 
 p:doc-package:
     extends:
@@ -66,12 +67,17 @@ p:doc-package:
         - .cmake_prep_doc_linux
         - .linux_x86_64_tags
         - .cmake_doc_artifacts
-        - .run_only_for_package
+        - .rules
+    variables:
+        CMAKE_CI_JOB_PACKAGE_ONLY: "true"
 
 u:source-package:
     extends:
         - .rsync_upload_package
-        - .run_only_for_package
+        - .rules
+    variables:
+        CMAKE_CI_JOB_PACKAGE_ONLY: "true"
+        CMAKE_CI_JOB_NO_MR: "true"
     needs:
         - p:source-package
 
@@ -980,16 +986,20 @@ b:linux-x86_64-package:
         - .cmake_build_linux_release
         - .cmake_release_artifacts
         - .linux_x86_64_tags
-        - .run_only_for_package
+        - .rules
     needs:
         - p:doc-package
     variables:
         CMAKE_CI_ARTIFACTS_NAME: "artifacts-linux-x86_64"
+        CMAKE_CI_JOB_PACKAGE_ONLY: "true"
 
 u:linux-x86_64-package:
     extends:
         - .rsync_upload_package
-        - .run_only_for_package
+        - .rules
+    variables:
+        CMAKE_CI_JOB_PACKAGE_ONLY: "true"
+        CMAKE_CI_JOB_NO_MR: "true"
     needs:
         - b:linux-x86_64-package
 
@@ -1000,16 +1010,20 @@ b:linux-aarch64-package:
         - .cmake_build_linux_release
         - .cmake_release_artifacts
         - .linux_aarch64_tags
-        - .run_only_for_package
+        - .rules
     needs:
         - p:doc-package
     variables:
         CMAKE_CI_ARTIFACTS_NAME: "artifacts-linux-aarch64"
+        CMAKE_CI_JOB_PACKAGE_ONLY: "true"
 
 u:linux-aarch64-package:
     extends:
         - .rsync_upload_package
-        - .run_only_for_package
+        - .rules
+    variables:
+        CMAKE_CI_JOB_PACKAGE_ONLY: "true"
+        CMAKE_CI_JOB_NO_MR: "true"
     needs:
         - b:linux-aarch64-package
 
@@ -1020,16 +1034,20 @@ b:sunos-x86_64-package:
         - .cmake_build_sunos_release
         - .cmake_release_artifacts
         - .linux_x86_64_tags
-        - .run_only_for_package
+        - .rules
     needs:
         - p:doc-package
     variables:
         CMAKE_CI_ARTIFACTS_NAME: "artifacts-sunos-x86_64"
+        CMAKE_CI_JOB_PACKAGE_ONLY: "true"
 
 u:sunos-x86_64-package:
     extends:
         - .rsync_upload_package
-        - .run_only_for_package
+        - .rules
+    variables:
+        CMAKE_CI_JOB_PACKAGE_ONLY: "true"
+        CMAKE_CI_JOB_NO_MR: "true"
     needs:
         - b:sunos-x86_64-package
 
@@ -1040,16 +1058,20 @@ b:sunos-sparc64-package:
         - .cmake_build_sunos_release
         - .cmake_release_artifacts
         - .linux_x86_64_tags
-        - .run_only_for_package
+        - .rules
     needs:
         - p:doc-package
     variables:
         CMAKE_CI_ARTIFACTS_NAME: "artifacts-sunos-sparc64"
+        CMAKE_CI_JOB_PACKAGE_ONLY: "true"
 
 u:sunos-sparc64-package:
     extends:
         - .rsync_upload_package
-        - .run_only_for_package
+        - .rules
+    variables:
+        CMAKE_CI_JOB_PACKAGE_ONLY: "true"
+        CMAKE_CI_JOB_NO_MR: "true"
     needs:
         - b:sunos-sparc64-package
 
@@ -1274,9 +1296,11 @@ b:macos-package:
         - .cmake_build_macos
         - .cmake_release_artifacts
         - .macos_arm64_tags_package
-        - .run_only_for_package
+        - .rules
     needs:
         - p:doc-package
+    variables:
+        CMAKE_CI_JOB_PACKAGE_ONLY: "true"
 
 k:macos-package:
     extends:
@@ -1284,16 +1308,20 @@ k:macos-package:
         - .cmake_sign_macos
         - .cmake_release_artifacts
         - .macos_sign_tags
-        - .run_only_for_package
+        - .rules
     needs:
         - b:macos-package
     variables:
         CMAKE_CI_ARTIFACTS_NAME: "artifacts-macos-universal"
+        CMAKE_CI_JOB_PACKAGE_ONLY: "true"
 
 u:macos-package:
     extends:
         - .rsync_upload_package
-        - .run_only_for_package
+        - .rules
+    variables:
+        CMAKE_CI_JOB_PACKAGE_ONLY: "true"
+        CMAKE_CI_JOB_NO_MR: "true"
     needs:
         - k:macos-package
 
@@ -1303,9 +1331,11 @@ b:macos10.10-package:
         - .cmake_build_macos
         - .cmake_release_artifacts
         - .macos_arm64_tags_package
-        - .run_only_for_package
+        - .rules
     needs:
         - p:doc-package
+    variables:
+        CMAKE_CI_JOB_PACKAGE_ONLY: "true"
 
 k:macos10.10-package:
     extends:
@@ -1313,16 +1343,20 @@ k:macos10.10-package:
         - .cmake_sign_macos
         - .cmake_release_artifacts
         - .macos_sign_tags
-        - .run_only_for_package
+        - .rules
     needs:
         - b:macos10.10-package
     variables:
         CMAKE_CI_ARTIFACTS_NAME: "artifacts-macos10.10-universal"
+        CMAKE_CI_JOB_PACKAGE_ONLY: "true"
 
 u:macos10.10-package:
     extends:
         - .rsync_upload_package
-        - .run_only_for_package
+        - .rules
+    variables:
+        CMAKE_CI_JOB_PACKAGE_ONLY: "true"
+        CMAKE_CI_JOB_NO_MR: "true"
     needs:
         - k:macos10.10-package
 
@@ -1682,11 +1716,12 @@ b:windows-x86_64-package:
         - .cmake_build_windows
         - .cmake_build_package_artifacts
         - .windows_x86_64_tags_nonconcurrent_vs2026
-        - .run_only_for_package
+        - .rules
     needs:
         - p:doc-package
     variables:
         CMAKE_CI_ARTIFACTS_NAME: "artifacts-windows-x86_64-build"
+        CMAKE_CI_JOB_PACKAGE_ONLY: "true"
 
 k:windows-x86_64-package:
     extends:
@@ -1694,16 +1729,20 @@ k:windows-x86_64-package:
         - .cmake_package_windows
         - .cmake_release_artifacts
         - .windows_x86_64_tags_nonconcurrent_sign
-        - .run_only_for_package
+        - .rules
     needs:
         - b:windows-x86_64-package
     variables:
         CMAKE_CI_ARTIFACTS_NAME: "artifacts-windows-x86_64"
+        CMAKE_CI_JOB_PACKAGE_ONLY: "true"
 
 u:windows-x86_64-package:
     extends:
         - .rsync_upload_package
-        - .run_only_for_package
+        - .rules
+    variables:
+        CMAKE_CI_JOB_PACKAGE_ONLY: "true"
+        CMAKE_CI_JOB_NO_MR: "true"
     needs:
         - k:windows-x86_64-package
 
@@ -1713,11 +1752,12 @@ b:windows-i386-package:
         - .cmake_build_windows
         - .cmake_build_package_artifacts
         - .windows_x86_64_tags_nonconcurrent_vs2026
-        - .run_only_for_package
+        - .rules
     needs:
         - p:doc-package
     variables:
         CMAKE_CI_ARTIFACTS_NAME: "artifacts-windows-i386-build"
+        CMAKE_CI_JOB_PACKAGE_ONLY: "true"
 
 k:windows-i386-package:
     extends:
@@ -1725,16 +1765,20 @@ k:windows-i386-package:
         - .cmake_package_windows
         - .cmake_release_artifacts
         - .windows_x86_64_tags_nonconcurrent_sign
-        - .run_only_for_package
+        - .rules
     needs:
         - b:windows-i386-package
     variables:
         CMAKE_CI_ARTIFACTS_NAME: "artifacts-windows-i386"
+        CMAKE_CI_JOB_PACKAGE_ONLY: "true"
 
 u:windows-i386-package:
     extends:
         - .rsync_upload_package
-        - .run_only_for_package
+        - .rules
+    variables:
+        CMAKE_CI_JOB_PACKAGE_ONLY: "true"
+        CMAKE_CI_JOB_NO_MR: "true"
     needs:
         - k:windows-i386-package
 
@@ -1744,11 +1788,12 @@ b:windows-arm64-package:
         - .cmake_build_windows
         - .cmake_build_package_artifacts
         - .windows_x86_64_tags_nonconcurrent_vs2026_arm64
-        - .run_only_for_package
+        - .rules
     needs:
         - p:doc-package
     variables:
         CMAKE_CI_ARTIFACTS_NAME: "artifacts-windows-arm64-build"
+        CMAKE_CI_JOB_PACKAGE_ONLY: "true"
 
 k:windows-arm64-package:
     extends:
@@ -1756,15 +1801,19 @@ k:windows-arm64-package:
         - .cmake_package_windows
         - .cmake_release_artifacts
         - .windows_x86_64_tags_nonconcurrent_sign
-        - .run_only_for_package
+        - .rules
     needs:
         - b:windows-arm64-package
     variables:
         CMAKE_CI_ARTIFACTS_NAME: "artifacts-windows-arm64"
+        CMAKE_CI_JOB_PACKAGE_ONLY: "true"
 
 u:windows-arm64-package:
     extends:
         - .rsync_upload_package
-        - .run_only_for_package
+        - .rules
+    variables:
+        CMAKE_CI_JOB_PACKAGE_ONLY: "true"
+        CMAKE_CI_JOB_NO_MR: "true"
     needs:
         - k:windows-arm64-package
