@@ -79,7 +79,10 @@ b:version-update:
     extends:
         - .cmake_version_update_linux
         - .linux_x86_64_tags
-        - .run_version_update
+        - .rules
+    variables:
+        CMAKE_CI_JOB_UPDATES_VERSION: "true"
+        CMAKE_CI_JOB_NO_MR: "true"
 
 # Documentation builds
 

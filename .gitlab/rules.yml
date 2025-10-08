@@ -1,5 +1,16 @@
 # Rules for where jobs can run
 
+###
+## Job variables:
+##   CMAKE_CI_JOB_UPDATES_VERSION
+##     Set to "true" if the job performs a task that occurs with version
+##     updates.
+## Pipeline variables:
+##   CMAKE_CI_VERSION_UPDATE
+##     Set to "true" if the pipeline should perform version update tasks.
+##     No other tasks are performed if set.
+####
+
 # When to even consider running a pipeline.
 workflow:
     rules:
@@ -29,6 +40,19 @@ workflow:
           when: always
         # Skip pipelines in all other cases.
         - when: never
+
+.rules:
+    rules:
+        ### Version update pipelines.
+        # Version update pipelines run version update jobs automatically.
+        - if: '$CMAKE_CI_VERSION_UPDATE == "true" && $CMAKE_CI_JOB_UPDATES_VERSION == "true"'
+          when: on_success
+        # Version update pipelines run no other jobs.
+        - if: '$CMAKE_CI_VERSION_UPDATE != null'
+          when: never
+        # Version update jobs do not run in any other situations.
+        - if: '$CMAKE_CI_JOB_UPDATES_VERSION == "true"'
+          when: never
 
 .run_manually:
     rules:
@@ -131,11 +155,5 @@ workflow:
               RSYNC_DESTINATION: "kitware@cmake.org:git-stage/"
               CMAKE_CI_SPHINX_QTHELP: "OFF"
               CMAKE_CI_VERSION_NO_GIT: "OFF"
-          when: on_success
-        - when: never
-
-.run_version_update:
-    rules:
-        - if: '$CMAKE_CI_VERSION_UPDATE != null'
           when: on_success
         - when: never
