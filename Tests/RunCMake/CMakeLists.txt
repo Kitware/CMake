@@ -526,8 +526,13 @@ add_RunCMake_test(GenEx-TARGET_RUNTIME_DLLS)
 add_RunCMake_test(GenEx-PATH)
 add_RunCMake_test(GenEx-PATH_EQUAL)
 add_RunCMake_test(GenEx-LIST)
-add_RunCMake_test(GeneratorExpression -DCMake_TEST_OBJC=${CMake_TEST_OBJC} -DCMake_TEST_Fortran=${CMake_TEST_Fortran}
-                                      -DCMake_TEST_CUDA=${CMake_TEST_CUDA} -DCMake_TEST_HIP=${CMake_TEST_HIP})
+add_RunCMake_test(GeneratorExpression
+  -DCMake_TEST_OBJC=${CMake_TEST_OBJC}
+  -DCMake_TEST_Fortran=${CMake_TEST_Fortran}
+  -DCMake_TEST_CUDA=${CMake_TEST_CUDA}
+  -DCMake_TEST_HIP=${CMake_TEST_HIP}
+  -DCMAKE_C_OUTPUT_EXTENSION=${CMAKE_C_OUTPUT_EXTENSION}
+)
 add_RunCMake_test(GeneratorExpressionShortCircuit)
 add_RunCMake_test(GeneratorInstance)
 add_RunCMake_test(GeneratorPlatform)

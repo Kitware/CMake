@@ -1,0 +1,2 @@
+file(GENERATE OUTPUT TARGET_INTERMEDIATE_DIR-not-a-target-generated.txt
+     CONTENT "$<TARGET_INTERMEDIATE_DIR:bar>")

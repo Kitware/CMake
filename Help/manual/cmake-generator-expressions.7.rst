@@ -2836,6 +2836,13 @@ In the following, the phrase "the ``tgt`` filename" means the name of the
   This generator expression can e.g. be used to create a batch file using
   :command:`file(GENERATE)` which sets the PATH environment variable accordingly.
 
+.. genex:: $<TARGET_INTERMEDIATE_DIR:tgt>
+
+  .. versionadded:: 4.2
+
+  The full path to the directory where intermediate target files, such as
+  object and dependency files, are stored.
+
 Export And Install Expressions
 ------------------------------
 
