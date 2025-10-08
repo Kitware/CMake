@@ -1023,11 +1023,25 @@ t:fedora42-asan:
         - .fedora42_asan
         - .cmake_memcheck_linux
         - .linux_x86_64_tags
+        - .cmake_junit_artifacts
         - .run_dependent
     needs:
         - b:fedora42-asan
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
+
+t:fedora42-ninja-valgrind:
+    extends:
+        - .fedora42_ninja_valgrind
+        - .cmake_test_linux_release
+        # Use a fast CPU so that timeouts are less of a concern.
+        - .linux_x86_64_tags_fast_x11
+        - .cmake_valgrind_artifacts
+        - .run_dependent
+        - .needs_centos7_x86_64
+    variables:
+        CMAKE_CI_JOB_NIGHTLY: "true"
+    timeout: 2 hours
 
 # macOS builds
 

@@ -1,0 +1,91 @@
+# Add Valgrind suppressions here.
+{
+   libc_start_main-malloc
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:malloc
+   ...
+   fun:__libc_start_main@@GLIBC_2.34
+   ...
+}
+{
+   dl_init-malloc
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:malloc
+   ...
+   fun:_dl_init
+   ...
+}
+{
+   dl_init-calloc
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:calloc
+   ...
+   fun:_dl_init
+   ...
+}
+{
+   dl_init-realloc
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:realloc
+   ...
+   fun:_dl_init
+   ...
+}
+{
+   dl_open-malloc
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:malloc
+   ...
+   fun:_dl_open
+   ...
+}
+{
+   dl_open-calloc
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:calloc
+   ...
+   fun:_dl_open
+   ...
+}
+{
+   qt5-object-new
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:_Znwm
+   ...
+   fun:_ZN7QObjectC1ER14QObjectPrivatePS_
+   ...
+}
+{
+   qt5-logger-malloc
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:malloc
+   ...
+   fun:_ZNK14QMessageLogger5debugEv
+   ...
+}
+{
+   strerror_l-malloc
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:malloc
+   fun:__vasprintf_internal
+   fun:__asprintf_chk
+   fun:strerror_l
+   ...
+}
+{
+   bash
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   ...
+   obj:/usr/bin/bash
+   ...
+}
