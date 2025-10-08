@@ -209,7 +209,6 @@ endif()
 
 # Include helper macros.
 include(${CMAKE_CURRENT_SOURCE_DIR}/kwsysPlatformTests.cmake)
-include(CheckTypeSize)
 
 # Do full dependency headers.
 include_regular_expression("^.*$")

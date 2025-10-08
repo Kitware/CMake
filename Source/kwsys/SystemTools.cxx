@@ -675,15 +675,21 @@ char const* SystemTools::GetEnv(std::string const& key)
 bool SystemTools::GetEnv(char const* key, std::string& result)
 {
 #if defined(_WIN32)
-  auto wide_key = Encoding::ToWide(key);
-  auto result_size = GetEnvironmentVariableW(wide_key.data(), nullptr, 0);
-  if (result_size <= 0) {
+  std::wstring const wKey = Encoding::ToWide(key);
+  std::vector<wchar_t> heapBuf;
+  wchar_t stackBuf[256];
+  DWORD bufSz = static_cast<DWORD>(sizeof(stackBuf) / sizeof(stackBuf[0]));
+  wchar_t* buf = stackBuf;
+  DWORD r;
+  while ((r = GetEnvironmentVariableW(wKey.c_str(), buf, bufSz)) >= bufSz) {
+    heapBuf.resize(r);
+    bufSz = r;
+    buf = &heapBuf[0];
+  }
+  if (r == 0 && GetLastError() == ERROR_ENVVAR_NOT_FOUND) {
     return false;
   }
-  std::wstring wide_result;
-  wide_result.resize(result_size - 1);
-  GetEnvironmentVariableW(wide_key.data(), &wide_result[0], result_size);
-  result = Encoding::ToNarrow(wide_result);
+  result = Encoding::ToNarrow(buf);
   return true;
 #else
   char const* v = getenv(key);
@@ -703,12 +709,12 @@ bool SystemTools::GetEnv(std::string const& key, std::string& result)
 bool SystemTools::HasEnv(char const* key)
 {
 #if defined(_WIN32)
-  std::wstring const wkey = Encoding::ToWide(key);
-  wchar_t const* v = _wgetenv(wkey.c_str());
+  std::wstring const wKey = Encoding::ToWide(key);
+  DWORD r = GetEnvironmentVariableW(wKey.c_str(), nullptr, 0);
+  return !(r == 0 && GetLastError() == ERROR_ENVVAR_NOT_FOUND);
 #else
-  char const* v = getenv(key);
+  return getenv(key) != nullptr;
 #endif
-  return v;
 }
 
 bool SystemTools::HasEnv(std::string const& key)
@@ -732,8 +738,8 @@ static int kwsysUnPutEnv(std::string const& env)
 }
 
 #elif defined(__CYGWIN__) || defined(__GLIBC__)
-/* putenv("A") removes A from the environment.  It must not put the
-   memory in the environment because it does not have any "=" syntax.  */
+// putenv("A") removes A from the environment with the GNU runtime.
+// It cannot put the memory in the environment since there is no  "=" syntax.
 
 static int kwsysUnPutEnv(std::string const& env)
 {
@@ -750,12 +756,7 @@ static int kwsysUnPutEnv(std::string const& env)
 }
 
 #elif defined(_WIN32)
-/* putenv("A=") places "A=" in the environment, which is as close to
-   removal as we can get with the putenv API.  We have to leak the
-   most recent value placed in the environment for each variable name
-   on program exit in case exit routines access it.  */
-
-static kwsysEnvSet kwsysUnPutEnvSet;
+// putenv("A=") removes A from the environment with the MSVC runtime.
 
 static int kwsysUnPutEnv(std::string const& env)
 {
@@ -763,13 +764,7 @@ static int kwsysUnPutEnv(std::string const& env)
   size_t const pos = wEnv.find('=');
   size_t const len = pos == std::string::npos ? wEnv.size() : pos;
   wEnv.resize(len + 1, L'=');
-  wchar_t* newEnv = _wcsdup(wEnv.c_str());
-  if (!newEnv) {
-    return -1;
-  }
-  kwsysEnvSet::Free oldEnv(kwsysUnPutEnvSet.Release(newEnv));
-  kwsysUnPutEnvSet.insert(newEnv);
-  return _wputenv(newEnv);
+  return _wputenv(wEnv.c_str());
 }
 
 #else
@@ -846,7 +841,7 @@ public:
   bool Put(char const* env)
   {
 #  if defined(_WIN32)
-    std::wstring const wEnv = Encoding::ToWide(env);
+    std::wstring wEnv = Encoding::ToWide(env);
     wchar_t* newEnv = _wcsdup(wEnv.c_str());
 #  else
     char* newEnv = strdup(env);
@@ -854,7 +849,21 @@ public:
     Free oldEnv(this->Release(newEnv));
     this->insert(newEnv);
 #  if defined(_WIN32)
-    return _wputenv(newEnv) == 0;
+    // `_wputenv` updates both the C runtime library's `_wenviron` array
+    // and the process's environment block.
+    if (_wputenv(newEnv) != 0) {
+      return false;
+    }
+    // There seems to be no way to add an empty variable to `_wenviron`
+    // through the C runtime library: `_wputenv("A=")` removes "A".
+    // Add it directly to the process's environment block.
+    // This is used by child processes, and by our `GetEnv`.
+    std::string::size_type const eqPos = wEnv.find(L'=');
+    if (eqPos != std::string::npos && (eqPos + 1) == wEnv.size()) {
+      wEnv.resize(eqPos);
+      return SetEnvironmentVariableW(wEnv.c_str(), L"");
+    }
+    return true;
 #  else
     return putenv(newEnv) == 0;
 #  endif
