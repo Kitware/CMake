@@ -1,6 +1,8 @@
 JOB_POOL_COMPILE
 ----------------
 
+.. versionadded:: 4.2
+
 Ninja only: Pool used for compiling.
 
 The number of parallel compile processes could be limited by defining

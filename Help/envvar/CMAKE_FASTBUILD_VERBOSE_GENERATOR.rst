@@ -1,6 +1,8 @@
 CMAKE_FASTBUILD_VERBOSE_GENERATOR
 ---------------------------------
 
+.. versionadded:: 4.2
+
 .. include:: include/ENV_VAR.rst
 
 The ``CMAKE_FASTBUILD_VERBOSE_GENERATOR`` environment variable specifies a custom default

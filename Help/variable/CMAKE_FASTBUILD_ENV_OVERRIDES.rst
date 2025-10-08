@@ -1,6 +1,8 @@
 CMAKE_FASTBUILD_ENV_OVERRIDES
 -----------------------------
 
+.. versionadded:: 4.2
+
 Allows overriding environment variables in the captured environment written to
 ``fbuild.bff``.
 
