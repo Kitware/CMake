@@ -1,0 +1,2 @@
+^-- ENV{UNSET_THEN_EMPTY} is not defined
+-- ENV{SET_THEN_EMPTY} is not defined$
