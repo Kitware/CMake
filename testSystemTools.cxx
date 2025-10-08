@@ -696,6 +696,12 @@ static bool CheckPutEnv(std::string const& env, char const* name,
               << value << "\"!" << std::endl;
     return false;
   }
+  bool bv = kwsys::SystemTools::HasEnv(name);
+  if (!bv) {
+    std::cerr << "HasEnv(\"" << name << "\") returned \"" << bv
+              << "\", not \"true\"!" << std::endl;
+    return false;
+  }
   return true;
 }
 
@@ -711,6 +717,12 @@ static bool CheckUnPutEnv(char const* env, char const* name)
               << "\", not (null)!" << std::endl;
     return false;
   }
+  bool bv = kwsys::SystemTools::HasEnv(name);
+  if (bv) {
+    std::cerr << "HasEnv(\"" << name << "\") returned \"" << bv
+              << "\", not \"false\"!" << std::endl;
+    return false;
+  }
   return true;
 }
 
@@ -721,6 +733,7 @@ static bool CheckEnvironmentOperations()
   res &= CheckPutEnv("B=C", "B", "C");
   res &= CheckPutEnv("C=D", "C", "D");
   res &= CheckPutEnv("D=E", "D", "E");
+  res &= CheckPutEnv("F=", "F", "");
   res &= CheckUnPutEnv("A", "A");
   res &= CheckUnPutEnv("B=", "B");
   res &= CheckUnPutEnv("C=D", "C");
