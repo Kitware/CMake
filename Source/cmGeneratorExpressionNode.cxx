@@ -52,6 +52,31 @@
 #include "cmValue.h"
 #include "cmake.h"
 
+namespace {
+
+bool HasKnownObjectFileLocation(cm::GenEx::Evaluation* eval,
+                                GeneratorExpressionContent const* content,
+                                std::string const& genex,
+                                cmGeneratorTarget const* target)
+{
+  std::string reason;
+  if (!eval->EvaluateForBuildsystem &&
+      !target->Target->HasKnownObjectFileLocation(&reason)) {
+    std::ostringstream e;
+    e << "The evaluation of the " << genex
+      << " generator expression "
+         "is only suitable for consumption by CMake (limited"
+      << reason
+      << ").  "
+         "It is not suitable for writing out elsewhere.";
+    reportError(eval, content->GetOriginalExpression(), e.str());
+    return false;
+  }
+  return true;
+}
+
+} // namespace
+
 std::string cmGeneratorExpressionNode::EvaluateDependentExpression(
   std::string const& prop, cm::GenEx::Evaluation* eval,
   cmGeneratorTarget const* headTarget,
@@ -3282,19 +3307,8 @@ static const struct TargetObjectsNode : public cmGeneratorExpressionNode
       return std::string();
     }
     cmGlobalGenerator const* gg = eval->Context.LG->GetGlobalGenerator();
-    {
-      std::string reason;
-      if (!eval->EvaluateForBuildsystem &&
-          !gt->Target->HasKnownObjectFileLocation(&reason)) {
-        std::ostringstream e;
-        e << "The evaluation of the TARGET_OBJECTS generator expression "
-             "is only suitable for consumption by CMake (limited"
-          << reason
-          << ").  "
-             "It is not suitable for writing out elsewhere.";
-        reportError(eval, content->GetOriginalExpression(), e.str());
-        return std::string();
-      }
+    if (!HasKnownObjectFileLocation(eval, content, "TARGET_OBJECTS", gt)) {
+      return std::string();
     }
 
     cmList objects;
