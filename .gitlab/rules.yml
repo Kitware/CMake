@@ -5,10 +5,18 @@
 ##   CMAKE_CI_JOB_UPDATES_VERSION
 ##     Set to "true" if the job performs a task that occurs with version
 ##     updates.
+##   CMAKE_CI_JOB_UPDATES_WEBSITE_HELP
+##     Set to "true" if the job performs tasks to update website help.
 ## Pipeline variables:
 ##   CMAKE_CI_VERSION_UPDATE
 ##     Set to "true" if the pipeline should perform version update tasks.
 ##     No other tasks are performed if set.
+## Project variables:
+##   CMAKE_CI_PROJECT_MAIN_BRANCH
+##     Set to the name of the main integration branch where development
+##     version documentation pipelines run.
+##   CMAKE_CI_PROJECT_CONTINUOUS_BRANCH
+##     Set to the name of the staging branch where continuous pipelines run.
 ####
 
 # When to even consider running a pipeline.
@@ -52,6 +60,37 @@ workflow:
           when: never
         # Version update jobs do not run in any other situations.
         - if: '$CMAKE_CI_JOB_UPDATES_VERSION == "true"'
+          when: never
+
+        ### Website help update jobs run in a variety of pipeline kinds.
+        # Packaging pipelines upload release version documentation to the website upon request.
+        - if: '$CMAKE_CI_PACKAGE =~ /v[0-9]+\.[0-9]+/ && $CMAKE_CI_JOB_UPDATES_WEBSITE_HELP == "true"'
+          variables:
+              RSYNC_DESTINATION: "kitware@cmake.org:$CMAKE_CI_PACKAGE/"
+              CMAKE_CI_SPHINX_QTHELP: "ON"
+              CMAKE_CI_VERSION_NO_GIT: "ON"
+          when: manual
+        # Development documentation pipelines upload documentation to the website automatically.
+        - if: '$CMAKE_CI_PROJECT_MAIN_BRANCH != null && $CI_COMMIT_BRANCH != null && $CMAKE_CI_PROJECT_MAIN_BRANCH == $CI_COMMIT_BRANCH && $CMAKE_CI_JOB_UPDATES_WEBSITE_HELP == "true"'
+          variables:
+              RSYNC_DESTINATION: "kitware@cmake.org:git-master/"
+              CMAKE_CI_SPHINX_QTHELP: "OFF"
+              CMAKE_CI_VERSION_NO_GIT: "OFF"
+          when: on_success
+        # Continuous pipelines upload staging branch documentation to the website automatically.
+        - if: '$CMAKE_CI_PROJECT_CONTINUOUS_BRANCH != null && $CI_COMMIT_BRANCH != null && $CMAKE_CI_PROJECT_CONTINUOUS_BRANCH == $CI_COMMIT_BRANCH && $CMAKE_CI_JOB_UPDATES_WEBSITE_HELP == "true"'
+          variables:
+              RSYNC_DESTINATION: "kitware@cmake.org:git-stage/"
+              CMAKE_CI_SPHINX_QTHELP: "OFF"
+              CMAKE_CI_VERSION_NO_GIT: "OFF"
+          when: on_success
+        # Website help update jobs do not run in any other situations.
+        - if: '$CMAKE_CI_JOB_UPDATES_WEBSITE_HELP == "true"'
+          when: never
+
+        ### Development documentation pipelines.
+        # Development documentation pipelines run no other jobs.
+        - if: '$CMAKE_CI_PROJECT_MAIN_BRANCH != null && $CI_COMMIT_BRANCH != null && $CMAKE_CI_PROJECT_MAIN_BRANCH == $CI_COMMIT_BRANCH'
           when: never
 
 .run_manually:
@@ -131,29 +170,5 @@ workflow:
         - if: '$CMAKE_CI_PACKAGE != null && $CI_JOB_STAGE == "upload" && $CMAKE_CI_PACKAGE_URL != null'
           variables:
               RSYNC_DESTINATION: "$CMAKE_CI_PACKAGE_URL"
-          when: on_success
-        - when: never
-
-.run_cmake_org_help:
-    rules:
-        - if: '$CMAKE_CI_VERSION_UPDATE != null'
-          when: never
-        - if: '$CMAKE_CI_PACKAGE =~ /v[0-9]+\.[0-9]+/'
-          variables:
-              RSYNC_DESTINATION: "kitware@cmake.org:$CMAKE_CI_PACKAGE/"
-              CMAKE_CI_SPHINX_QTHELP: "ON"
-              CMAKE_CI_VERSION_NO_GIT: "ON"
-          when: manual
-        - if: '$CMAKE_CI_PROJECT_MAIN_BRANCH != null && $CI_COMMIT_BRANCH != null && $CMAKE_CI_PROJECT_MAIN_BRANCH == $CI_COMMIT_BRANCH'
-          variables:
-              RSYNC_DESTINATION: "kitware@cmake.org:git-master/"
-              CMAKE_CI_SPHINX_QTHELP: "OFF"
-              CMAKE_CI_VERSION_NO_GIT: "OFF"
-          when: on_success
-        - if: '$CMAKE_CI_PROJECT_CONTINUOUS_BRANCH != null && $CI_COMMIT_BRANCH != null && $CMAKE_CI_PROJECT_CONTINUOUS_BRANCH == $CI_COMMIT_BRANCH'
-          variables:
-              RSYNC_DESTINATION: "kitware@cmake.org:git-stage/"
-              CMAKE_CI_SPHINX_QTHELP: "OFF"
-              CMAKE_CI_VERSION_NO_GIT: "OFF"
           when: on_success
         - when: never

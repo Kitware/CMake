@@ -89,13 +89,19 @@ b:version-update:
 b:cmake.org-help:
     extends:
         - .cmake_org_help
-        - .run_cmake_org_help
+        - .rules
+    variables:
+        CMAKE_CI_JOB_UPDATES_WEBSITE_HELP: "true"
+        CMAKE_CI_JOB_NO_MR: "true"
     needs: []
 
 u:cmake.org-help:
     extends:
         - .rsync_upload_help
-        - .run_cmake_org_help
+        - .rules
+    variables:
+        CMAKE_CI_JOB_UPDATES_WEBSITE_HELP: "true"
+        CMAKE_CI_JOB_NO_MR: "true"
     needs:
         - b:cmake.org-help
 
