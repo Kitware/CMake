@@ -6,7 +6,7 @@ include(ExternalProject)
 
 # Comma list-separator
 set(ScriptPath "${CMAKE_CURRENT_SOURCE_DIR}/EnvVars/EchoVar.cmake")
-ExternalProject_Add(CustomCommandEnvVars
+ExternalProject_Add(CustomCommand
   DOWNLOAD_COMMAND ""
   UPDATE_COMMAND ""
   PATCH_COMMAND ""
@@ -37,7 +37,7 @@ ExternalProject_Add(CustomCommandEnvVars
     ListVar=set:4,5,6
     ListSeparator=set:,)
 
-ExternalProject_Add_Step(CustomCommandEnvVars custom
+ExternalProject_Add_Step(CustomCommand custom
   DEPENDERS configure
   COMMAND "${CMAKE_COMMAND}" -DVARNAME=CustomVar -P ${ScriptPath}
   COMMAND "${CMAKE_COMMAND}" -DVARNAME=CustomVar2 -P ${ScriptPath}
@@ -54,12 +54,12 @@ ExternalProject_Add_Step(CustomCommandEnvVars custom
 #
 
 # No list separator
-ExternalProject_Add(DefaultCommandEnvVars
+ExternalProject_Add(DefaultCommand
   SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/EnvVars"
   DOWNLOAD_COMMAND ""
   UPDATE_COMMAND ""
   PATCH_COMMAND ""
-  DEPENDS CustomCommandEnvVars
+  DEPENDS CustomCommand
   CMAKE_ARGS
     -DVARIABLE=ConfigVar
   CONFIGURE_ENVIRONMENT_MODIFICATION
@@ -80,12 +80,12 @@ ExternalProject_Add(DefaultCommandEnvVars
 if(NOT WIN32)
   # Ensure that using `:` as a list-separator does not break setting environment
   # variables
-  ExternalProject_Add(DefaultCommandListSepEnvVars
+  ExternalProject_Add(DefaultCommandListSep
     SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/EnvVars"
     DOWNLOAD_COMMAND ""
     UPDATE_COMMAND ""
     PATCH_COMMAND ""
-    DEPENDS DefaultCommandEnvVars
+    DEPENDS DefaultCommand
     LIST_SEPARATOR :
     CMAKE_ARGS
       -DVARIABLE=ConfigVar

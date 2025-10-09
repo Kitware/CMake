@@ -1,32 +1,32 @@
-.*(Performing custom step for 'CustomCommandEnvVars'|CustomCommandEnvVars-custom).*
+.*(Performing custom step for 'CustomCommand'|CustomCommand-custom).*
  *-- Variable - CustomVar: custom.*
  *-- Variable - CustomVar2: custom2.*
  *-- Stage: custom
  *-- Separator: ;
  *-- List: 1;2;3
-.*(Performing configure step for 'CustomCommandEnvVars'|CustomCommandEnvVars-configure).*
+.*(Performing configure step for 'CustomCommand'|CustomCommand-configure).*
  *-- Stage: config
  *-- Separator: ;
  *-- List: 4;5;6.*
  *-- Variable - Stage: config.*
  *-- Variable - ListVar: 4;5;6
-.*(Performing build step for 'CustomCommandEnvVars'|CustomCommandEnvVars-build).*
+.*(Performing build step for 'CustomCommand'|CustomCommand-build).*
  *-- Stage: build
  *-- Separator: ;
  *-- List: 4;5;6
-.*(Performing install step for 'CustomCommandEnvVars'|CustomCommandEnvVars-install).*
+.*(Performing install step for 'CustomCommand'|CustomCommand-install).*
  *-- Stage: install
  *-- Separator: ;
  *-- List: 4;5;6
-.*(Performing test step for 'CustomCommandEnvVars'|CustomCommandEnvVars-test).*
+.*(Performing test step for 'CustomCommand'|CustomCommand-test).*
  *-- Stage: test
  *-- Separator: ;
  *-- List: 4;5;6
-.*(Performing configure step for 'DefaultCommandEnvVars'|DefaultCommandEnvVars-configure).*
+.*(Performing configure step for 'DefaultCommand'|DefaultCommand-configure).*
  *-- ConfigVar: config
  *-- Separator: ,
  *-- List: 7,8,9
-.*(Performing build step for 'DefaultCommandEnvVars'|DefaultCommandEnvVars-build).*
+.*(Performing build step for 'DefaultCommand'|DefaultCommand-build).*
 .*-- Stage: build
  *-- Separator: ,
  *-- List: 7,8,9,10
