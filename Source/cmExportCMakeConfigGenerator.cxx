@@ -293,9 +293,7 @@ void cmExportCMakeConfigGenerator::GenerateImportTargetCode(
       break;
     case cmStateEnums::INTERFACE_LIBRARY:
       if (target->IsSymbolic()) {
-        os << "if(CMAKE_VERSION VERSION_GREATER_EQUAL \""
-           << CMake_VERSION_DEVEL(4, 2)
-           << "\")\n"
+        os << "if(CMAKE_VERSION VERSION_GREATER_EQUAL \"4.2.0\")\n"
               "  add_library("
            << targetName << " INTERFACE SYMBOLIC IMPORTED)\n"
            << "elseif(CMAKE_VERSION VERSION_GREATER_EQUAL 3.2.0)\n"
