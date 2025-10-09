@@ -1,6 +1,8 @@
 CMAKE_FASTBUILD_CAPTURE_SYSTEM_ENV
 ----------------------------------
 
+.. versionadded:: 4.2
+
 Controls capturing of the system environment into ``fbuild.bff``.
 Setting it to ``OFF`` makes the invocation of all tools (compilers and other external processes) hermetic.
 

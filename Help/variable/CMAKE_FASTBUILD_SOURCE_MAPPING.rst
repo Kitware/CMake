@@ -1,6 +1,8 @@
 CMAKE_FASTBUILD_SOURCE_MAPPING
 ------------------------------
 
+.. versionadded:: 4.2
+
 Sets FASTBuild's ``SourceMapping_Experimental`` option.
 
 Example:

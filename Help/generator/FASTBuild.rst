@@ -1,6 +1,8 @@
 FASTBuild
 =========
 
+.. versionadded:: 4.2
+
 Generates a ``fbuild.bff`` file, which can be used to build the project with
 `FASTBuild <https://www.fastbuild.org/docs/home.html>`_.
 

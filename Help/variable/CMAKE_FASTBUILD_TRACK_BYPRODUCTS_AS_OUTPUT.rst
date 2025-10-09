@@ -1,6 +1,8 @@
 CMAKE_FASTBUILD_TRACK_BYPRODUCTS_AS_OUTPUT
 ------------------------------------------
 
+.. versionadded:: 4.2
+
 By default, custom commands declaring only ``BYPRODUCTS`` will always
 run unconditionally.
 You can use this variable to make FASTBuild rerun the command only when its
