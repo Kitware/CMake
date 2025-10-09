@@ -24,6 +24,7 @@
 #include "cmExportSet.h"
 #include "cmFileAPI.h"
 #include "cmFileSet.h"
+#include "cmGenExContext.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
@@ -1080,16 +1081,15 @@ Json::Value DirectoryObject::DumpInstaller(cmInstallGenerator* gen)
 
     auto* target = installFileSet->GetTarget();
 
+    cm::GenEx::Context context(target->LocalGenerator, this->Config);
+
     auto dirCges = fileSet->CompileDirectoryEntries();
-    auto dirs = fileSet->EvaluateDirectoryEntries(
-      dirCges, target->GetLocalGenerator(), this->Config, target);
+    auto dirs = fileSet->EvaluateDirectoryEntries(dirCges, context, target);
 
     auto entryCges = fileSet->CompileFileEntries();
     std::map<std::string, std::vector<std::string>> entries;
     for (auto const& entryCge : entryCges) {
-      fileSet->EvaluateFileEntry(dirs, entries, entryCge,
-                                 target->GetLocalGenerator(), this->Config,
-                                 target);
+      fileSet->EvaluateFileEntry(dirs, entries, entryCge, context, target);
     }
 
     Json::Value files = Json::arrayValue;
@@ -1608,18 +1608,19 @@ std::pair<Json::Value, Target::FileSetDatabase> Target::DumpFileSets()
         continue;
       }
 
+      cm::GenEx::Context context(this->GT->LocalGenerator, this->Config);
+
       auto fileEntries = fs->CompileFileEntries();
       auto directoryEntries = fs->CompileDirectoryEntries();
 
-      auto directories = fs->EvaluateDirectoryEntries(
-        directoryEntries, this->GT->LocalGenerator, this->Config, this->GT);
+      auto directories =
+        fs->EvaluateDirectoryEntries(directoryEntries, context, this->GT);
 
       fsJson.append(this->DumpFileSet(fs, directories));
 
       std::map<std::string, std::vector<std::string>> files_per_dirs;
       for (auto const& entry : fileEntries) {
-        fs->EvaluateFileEntry(directories, files_per_dirs, entry,
-                              this->GT->LocalGenerator, this->Config,
+        fs->EvaluateFileEntry(directories, files_per_dirs, entry, context,
                               this->GT);
       }
 

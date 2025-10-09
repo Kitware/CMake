@@ -11,6 +11,7 @@
 #include <cmext/string_view>
 
 #include "cmComputeLinkInformation.h"
+#include "cmGenExContext.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorExpressionDAGChecker.h"
 #include "cmGeneratorTarget.h"
@@ -521,13 +522,13 @@ std::string cmCommonTargetGenerator::GetLinkerLauncher(
   std::string propName = lang + "_LINKER_LAUNCHER";
   cmValue launcherProp = this->GeneratorTarget->GetProperty(propName);
   if (cmNonempty(launcherProp)) {
-    cmGeneratorExpressionDAGChecker dagChecker{
-      this->GeneratorTarget,      propName, nullptr, nullptr,
-      this->LocalCommonGenerator, config,
-    };
+    cm::GenEx::Context context(this->LocalCommonGenerator, config, lang);
+    cmGeneratorExpressionDAGChecker dagChecker{ this->GeneratorTarget,
+                                                propName, nullptr, nullptr,
+                                                context };
     std::string evaluatedLinklauncher = cmGeneratorExpression::Evaluate(
-      *launcherProp, this->LocalCommonGenerator, config, this->GeneratorTarget,
-      &dagChecker, this->GeneratorTarget, lang);
+      *launcherProp, context.LG, context.Config, this->GeneratorTarget,
+      &dagChecker, this->GeneratorTarget, context.Language);
     // Convert ;-delimited list to single string
     cmList args{ evaluatedLinklauncher, cmList::EmptyElements::Yes };
     if (!args.empty()) {

@@ -14,8 +14,13 @@ transitively.  CMake 4.1 and above prefer to evaluate the
 target properties transitively because they are among the
 :ref:`build specification <Target Build Specification>` and
 :ref:`usage requirement <Target Usage Requirements>` properties, respectively.
+
 This policy provides compatibility for projects that have not been updated to
-expect the new behavior.
+expect the new behavior.  It takes effect during buildsystem generation.
+Generator expressions are evaluated in each directory using the policy setting
+as of the end of its ``CMakeLists.txt``.  As an exception, generator
+expressions evaluated by the :command:`file(GENERATE)` command use the
+policy setting as of its call site.
 
 The ``OLD`` behavior of this policy is for :genex:`TARGET_PROPERTY` to not
 evaluate :prop_tgt:`LINK_LIBRARIES` and :prop_tgt:`INTERFACE_LINK_LIBRARIES`

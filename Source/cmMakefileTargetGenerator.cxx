@@ -23,6 +23,7 @@
 #include "cmCustomCommand.h"
 #include "cmCustomCommandGenerator.h"
 #include "cmFileSet.h"
+#include "cmGenExContext.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorOptions.h"
@@ -205,6 +206,7 @@ void cmMakefileTargetGenerator::CreateRuleFile()
 
 void cmMakefileTargetGenerator::WriteTargetBuildRules()
 {
+  cm::GenEx::Context context(this->LocalGenerator, this->GetConfigName());
   this->GeneratorTarget->CheckCxxModuleStatus(this->GetConfigName());
 
   // -- Write the custom commands for this target
@@ -362,13 +364,11 @@ void cmMakefileTargetGenerator::WriteTargetBuildRules()
     auto fileEntries = file_set->CompileFileEntries();
     auto directoryEntries = file_set->CompileDirectoryEntries();
     auto directories = file_set->EvaluateDirectoryEntries(
-      directoryEntries, this->LocalGenerator, this->GetConfigName(),
-      this->GeneratorTarget);
+      directoryEntries, context, this->GeneratorTarget);
 
     std::map<std::string, std::vector<std::string>> files;
     for (auto const& entry : fileEntries) {
-      file_set->EvaluateFileEntry(directories, files, entry,
-                                  this->LocalGenerator, this->GetConfigName(),
+      file_set->EvaluateFileEntry(directories, files, entry, context,
                                   this->GeneratorTarget);
     }
 

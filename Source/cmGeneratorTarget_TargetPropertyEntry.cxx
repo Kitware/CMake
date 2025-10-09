@@ -17,7 +17,12 @@
 #include "cmList.h"
 #include "cmListFileCache.h"
 
-class cmLocalGenerator;
+namespace cm {
+namespace GenEx {
+struct Context;
+}
+}
+
 class cmake;
 struct cmGeneratorExpressionDAGChecker;
 
@@ -33,10 +38,9 @@ public:
   {
   }
 
-  std::string const& Evaluate(cmLocalGenerator*, std::string const&,
+  std::string const& Evaluate(cm::GenEx::Context const&,
                               cmGeneratorTarget const*,
-                              cmGeneratorExpressionDAGChecker*,
-                              std::string const&) const override
+                              cmGeneratorExpressionDAGChecker*) const override
   {
     return this->PropertyValue.Value;
   }
@@ -64,13 +68,11 @@ public:
   {
   }
 
-  std::string const& Evaluate(cmLocalGenerator* lg, std::string const& config,
-                              cmGeneratorTarget const* headTarget,
-                              cmGeneratorExpressionDAGChecker* dagChecker,
-                              std::string const& language) const override
+  std::string const& Evaluate(
+    cm::GenEx::Context const& context, cmGeneratorTarget const* headTarget,
+    cmGeneratorExpressionDAGChecker* dagChecker) const override
   {
-    return this->ge->Evaluate(lg, config, headTarget, dagChecker, nullptr,
-                              language);
+    return this->ge->Evaluate(context, dagChecker, headTarget);
   }
 
   cmListFileBacktrace GetBacktrace() const override
@@ -105,14 +107,13 @@ public:
   {
   }
 
-  std::string const& Evaluate(cmLocalGenerator* lg, std::string const& config,
-                              cmGeneratorTarget const* headTarget,
-                              cmGeneratorExpressionDAGChecker* dagChecker,
-                              std::string const& /*lang*/) const override
+  std::string const& Evaluate(
+    cm::GenEx::Context const& context, cmGeneratorTarget const* headTarget,
+    cmGeneratorExpressionDAGChecker* dagChecker) const override
   {
     std::map<std::string, std::vector<std::string>> filesPerDir;
     this->FileSet->EvaluateFileEntry(this->BaseDirs, filesPerDir,
-                                     this->EntryCge, lg, config, headTarget,
+                                     this->EntryCge, context, headTarget,
                                      dagChecker);
 
     std::vector<std::string> files;

@@ -2997,8 +2997,8 @@ if (("Development.Module" IN_LIST ${_PYTHON_BASE}_FIND_COMPONENTS
                            OUTPUT_VARIABLE __${_PYTHON_PREFIX}_ABIFLAGS
                            ERROR_QUIET
                            OUTPUT_STRIP_TRAILING_WHITESPACE)
-          if (_${_PYTHON_PREFIX}_RESULT)
-            # assume ABI is not supported
+          if (_${_PYTHON_PREFIX}_RESULT OR NOT __${_PYTHON_PREFIX}_ABIFLAGS )
+            # assume ABI is not supported or not used
             set (__${_PYTHON_PREFIX}_ABIFLAGS "<none>")
           endif()
           if (DEFINED _${_PYTHON_PREFIX}_FIND_ABI AND NOT __${_PYTHON_PREFIX}_ABIFLAGS IN_LIST _${_PYTHON_PREFIX}_ABIFLAGS)
@@ -3943,12 +3943,19 @@ if (("Development.Module" IN_LIST ${_PYTHON_BASE}_FIND_COMPONENTS
       _python_set_development_module_found (SABIModule)
       _python_set_development_module_found (Embed)
     endif()
-    if (DEFINED _${_PYTHON_PREFIX}_FIND_ABI AND
-        (NOT _${_PYTHON_PREFIX}_ABI IN_LIST _${_PYTHON_PREFIX}_ABIFLAGS
-          OR (NOT WIN32 AND NOT _${_PYTHON_PREFIX}_INC_ABI IN_LIST _${_PYTHON_PREFIX}_ABIFLAGS)))
-      set (${_PYTHON_PREFIX}_Development.Module_FOUND FALSE)
-      set (${_PYTHON_PREFIX}_Development.SABIModule_FOUND FALSE)
-      set (${_PYTHON_PREFIX}_Development.Embed_FOUND FALSE)
+    if (DEFINED _${_PYTHON_PREFIX}_FIND_ABI)
+      if ((_${_PYTHON_PREFIX}_LIBRARY_RELEASE OR _${_PYTHON_PREFIX}_SABI_LIBRARY_RELEASE)
+          AND NOT _${_PYTHON_PREFIX}_ABI IN_LIST _${_PYTHON_PREFIX}_ABIFLAGS)
+        set (${_PYTHON_PREFIX}_Development.Module_FOUND FALSE)
+        set (${_PYTHON_PREFIX}_Development.SABIModule_FOUND FALSE)
+        set (${_PYTHON_PREFIX}_Development.Embed_FOUND FALSE)
+      endif()
+      if (_${_PYTHON_PREFIX}_INCLUDE_DIR AND
+          NOT WIN32 AND NOT _${_PYTHON_PREFIX}_INC_ABI IN_LIST _${_PYTHON_PREFIX}_ABIFLAGS)
+        set (${_PYTHON_PREFIX}_Development.Module_FOUND FALSE)
+        set (${_PYTHON_PREFIX}_Development.SABIModule_FOUND FALSE)
+        set (${_PYTHON_PREFIX}_Development.Embed_FOUND FALSE)
+      endif()
     endif()
   endif()
 

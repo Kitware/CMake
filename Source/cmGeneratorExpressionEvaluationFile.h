@@ -14,6 +14,12 @@
 #include "cmGeneratorExpression.h"
 #include "cmPolicies.h"
 
+namespace cm {
+namespace GenEx {
+struct Context;
+}
+}
+
 class cmGeneratorTarget;
 class cmLocalGenerator;
 
@@ -25,7 +31,8 @@ public:
     std::unique_ptr<cmCompiledGeneratorExpression> outputFileExpr,
     std::unique_ptr<cmCompiledGeneratorExpression> condition,
     bool inputIsContent, std::string newLineCharacter, mode_t permissions,
-    cmPolicies::PolicyStatus policyStatusCMP0070);
+    cmPolicies::PolicyStatus policyStatusCMP0070,
+    cmPolicies::PolicyStatus policyStatusCMP0189);
 
   void Generate(cmLocalGenerator* lg);
 
@@ -39,18 +46,16 @@ private:
                 cmCompiledGeneratorExpression* inputExpression,
                 std::map<std::string, std::string>& outputFiles, mode_t perm);
 
-  std::string GetInputFileName(cmLocalGenerator* lg);
-  std::string GetOutputFileName(cmLocalGenerator* lg,
-                                cmGeneratorTarget* target,
-                                std::string const& config,
-                                std::string const& lang);
+  std::string GetInputFileName(cmLocalGenerator const* lg);
+  std::string GetOutputFileName(cm::GenEx::Context const& context,
+                                cmGeneratorTarget* target);
   enum PathRole
   {
     PathForInput,
     PathForOutput
   };
   std::string FixRelativePath(std::string const& filePath, PathRole role,
-                              cmLocalGenerator* lg);
+                              cmLocalGenerator const* lg);
 
   std::string const Input;
   std::string const Target;
@@ -60,5 +65,6 @@ private:
   bool const InputIsContent;
   std::string const NewLineCharacter;
   cmPolicies::PolicyStatus PolicyStatusCMP0070;
+  cmPolicies::PolicyStatus PolicyStatusCMP0189;
   mode_t Permissions;
 };

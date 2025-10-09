@@ -10,7 +10,12 @@
 #include <utility>
 #include <vector>
 
-struct cmGeneratorExpressionContext;
+namespace cm {
+namespace GenEx {
+struct Evaluation;
+}
+}
+
 struct cmGeneratorExpressionDAGChecker;
 struct cmGeneratorExpressionNode;
 
@@ -32,7 +37,7 @@ struct cmGeneratorExpressionEvaluator
 
   virtual Type GetType() const = 0;
 
-  virtual std::string Evaluate(cmGeneratorExpressionContext* context,
+  virtual std::string Evaluate(cm::GenEx::Evaluation* eval,
                                cmGeneratorExpressionDAGChecker*) const = 0;
 };
 
@@ -47,7 +52,7 @@ struct TextContent : public cmGeneratorExpressionEvaluator
   {
   }
 
-  std::string Evaluate(cmGeneratorExpressionContext*,
+  std::string Evaluate(cm::GenEx::Evaluation*,
                        cmGeneratorExpressionDAGChecker*) const override
   {
     return std::string(this->Content, this->Length);
@@ -87,7 +92,7 @@ struct GeneratorExpressionContent : public cmGeneratorExpressionEvaluator
     return cmGeneratorExpressionEvaluator::Generator;
   }
 
-  std::string Evaluate(cmGeneratorExpressionContext* context,
+  std::string Evaluate(cm::GenEx::Evaluation* eval,
                        cmGeneratorExpressionDAGChecker*) const override;
 
   std::string GetOriginalExpression() const;
@@ -97,14 +102,13 @@ struct GeneratorExpressionContent : public cmGeneratorExpressionEvaluator
 private:
   std::string EvaluateParameters(cmGeneratorExpressionNode const* node,
                                  std::string const& identifier,
-                                 cmGeneratorExpressionContext* context,
+                                 cm::GenEx::Evaluation* eval,
                                  cmGeneratorExpressionDAGChecker* dagChecker,
                                  std::vector<std::string>& parameters) const;
 
   std::string ProcessArbitraryContent(
     cmGeneratorExpressionNode const* node, std::string const& identifier,
-    cmGeneratorExpressionContext* context,
-    cmGeneratorExpressionDAGChecker* dagChecker,
+    cm::GenEx::Evaluation* eval, cmGeneratorExpressionDAGChecker* dagChecker,
     std::vector<cmGeneratorExpressionEvaluatorVector>::const_iterator pit)
     const;
 

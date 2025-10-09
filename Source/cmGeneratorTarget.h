@@ -25,6 +25,13 @@
 #include "cmStateTypes.h"
 #include "cmValue.h"
 
+namespace cm {
+namespace GenEx {
+struct Context;
+struct Evaluation;
+}
+}
+
 class cmake;
 enum class cmBuildStep;
 class cmCompiledGeneratorExpression;
@@ -38,7 +45,6 @@ class cmSourceFile;
 struct cmSyntheticTargetCache;
 class cmTarget;
 
-struct cmGeneratorExpressionContext;
 struct cmGeneratorExpressionDAGChecker;
 
 class cmGeneratorTarget
@@ -986,7 +992,7 @@ public:
   class TargetPropertyEntry;
 
   std::string EvaluateInterfaceProperty(
-    std::string const& prop, cmGeneratorExpressionContext* context,
+    std::string const& prop, cm::GenEx::Evaluation* eval,
     cmGeneratorExpressionDAGChecker* dagCheckerParent, UseTo usage) const;
 
   struct TransitiveProperty
@@ -1006,8 +1012,7 @@ public:
     BuiltinTransitiveProperties;
 
   cm::optional<TransitiveProperty> IsTransitiveProperty(
-    cm::string_view prop, cmLocalGenerator const* lg,
-    std::string const& config,
+    cm::string_view prop, cm::GenEx::Context const& context,
     cmGeneratorExpressionDAGChecker const* dagChecker) const;
 
   bool HaveInstallTreeRPATH(std::string const& config) const;
@@ -1296,7 +1301,7 @@ private:
 
   mutable std::unordered_map<std::string, bool> MaybeInterfacePropertyExists;
   bool MaybeHaveInterfaceProperty(std::string const& prop,
-                                  cmGeneratorExpressionContext* context,
+                                  cm::GenEx::Evaluation* eval,
                                   UseTo usage) const;
 
   using TargetPropertyEntryVector =
@@ -1538,10 +1543,8 @@ public:
     cmFileSet const* fileSet, cmLinkImplItem const& item = NoLinkImplItem);
 
   virtual std::string const& Evaluate(
-    cmLocalGenerator* lg, std::string const& config,
-    cmGeneratorTarget const* headTarget,
-    cmGeneratorExpressionDAGChecker* dagChecker,
-    std::string const& language) const = 0;
+    cm::GenEx::Context const& context, cmGeneratorTarget const* headTarget,
+    cmGeneratorExpressionDAGChecker* dagChecker) const = 0;
 
   virtual cmListFileBacktrace GetBacktrace() const = 0;
   virtual std::string const& GetInput() const = 0;

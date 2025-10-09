@@ -1,10 +1,18 @@
+set(out "${CMAKE_CURRENT_BINARY_DIR}/out-OLD-$<CONFIG>.txt")
+file(GENERATE OUTPUT "${out}" CONTENT "# file(GENERATE) produced:
+${in_LINK_LIBRARIES}
+")
+add_custom_target(check-CMP0189-OLD ALL VERBATIM
+  COMMAND ${CMAKE_COMMAND} -Dconfig=$<CONFIG> -Dout=${out} -P${CMAKE_CURRENT_SOURCE_DIR}/check-OLD.cmake
+)
+
 cmake_policy(SET CMP0189 NEW)
-set(out "${CMAKE_CURRENT_BINARY_DIR}/out-$<CONFIG>.txt")
+set(out "${CMAKE_CURRENT_BINARY_DIR}/out-NEW-$<CONFIG>.txt")
 file(GENERATE OUTPUT "${out}" CONTENT "# file(GENERATE) produced:
 ${in_LINK_LIBRARIES}
 ")
 add_custom_target(check-CMP0189-NEW ALL VERBATIM
-  COMMAND ${CMAKE_COMMAND} -Dconfig=$<CONFIG> -Dout=${out} -P${CMAKE_CURRENT_SOURCE_DIR}/check.cmake
+  COMMAND ${CMAKE_COMMAND} -Dconfig=$<CONFIG> -Dout=${out} -P${CMAKE_CURRENT_SOURCE_DIR}/check-NEW.cmake
   COMMAND check-args
   "$<TARGET_PROPERTY:iface1,LINK_LIBRARIES>" ""
   "$<TARGET_PROPERTY:iface1,INTERFACE_LINK_LIBRARIES>" ""

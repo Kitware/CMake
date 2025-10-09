@@ -19,6 +19,7 @@
 #include "cmsys/RegularExpression.hxx"
 
 #include "cmComputeComponentGraph.h"
+#include "cmGenExContext.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorExpressionDAGChecker.h"
 #include "cmGeneratorTarget.h"
@@ -599,45 +600,42 @@ std::string const& cmComputeLinkDepends::LinkEntry::DEFAULT =
   cmLinkItem::DEFAULT;
 
 cmComputeLinkDepends::cmComputeLinkDepends(cmGeneratorTarget const* target,
-                                           std::string const& config,
-                                           std::string const& linkLanguage,
+                                           std::string config,
+                                           std::string linkLanguage,
                                            LinkLibrariesStrategy strategy)
   : Target(target)
   , Makefile(this->Target->Target->GetMakefile())
   , GlobalGenerator(this->Target->GetLocalGenerator()->GetGlobalGenerator())
   , CMakeInstance(this->GlobalGenerator->GetCMakeInstance())
-  , Config(config)
+  , Config(std::move(config))
   , DebugMode(this->Makefile->IsOn("CMAKE_LINK_DEPENDS_DEBUG_MODE") ||
               this->Target->GetProperty("LINK_DEPENDS_DEBUG_MODE").IsOn())
-  , LinkLanguage(linkLanguage)
+  , LinkLanguage(std::move(linkLanguage))
   , LinkType(ComputeLinkType(
       this->Config, this->Makefile->GetCMakeInstance()->GetDebugConfigs()))
   , Strategy(strategy)
 
 {
+  cm::GenEx::Context context(this->Target->LocalGenerator, this->Config,
+                             this->LinkLanguage);
   // target oriented feature override property takes precedence over
   // global override property
   cm::string_view lloPrefix = "LINK_LIBRARY_OVERRIDE_"_s;
   auto const& keys = this->Target->GetPropertyKeys();
   std::for_each(
     keys.cbegin(), keys.cend(),
-    [this, &lloPrefix, &config, &linkLanguage](std::string const& key) {
+    [this, &lloPrefix, &context](std::string const& key) {
       if (cmHasPrefix(key, lloPrefix)) {
         if (cmValue feature = this->Target->GetProperty(key)) {
           if (!feature->empty() && key.length() > lloPrefix.length()) {
             auto item = key.substr(lloPrefix.length());
             cmGeneratorExpressionDAGChecker dagChecker{
-              this->Target,
-              "LINK_LIBRARY_OVERRIDE",
-              nullptr,
-              nullptr,
-              this->Target->GetLocalGenerator(),
-              config,
-              this->Target->GetBacktrace(),
+              this->Target, "LINK_LIBRARY_OVERRIDE",      nullptr, nullptr,
+              context,      this->Target->GetBacktrace(),
             };
             auto overrideFeature = cmGeneratorExpression::Evaluate(
-              *feature, this->Target->GetLocalGenerator(), config,
-              this->Target, &dagChecker, this->Target, linkLanguage);
+              *feature, context.LG, context.Config, this->Target, &dagChecker,
+              this->Target, context.Language);
             this->LinkLibraryOverride.emplace(item, overrideFeature);
           }
         }
@@ -647,17 +645,12 @@ cmComputeLinkDepends::cmComputeLinkDepends(cmGeneratorTarget const* target,
   if (cmValue linkLibraryOverride =
         this->Target->GetProperty("LINK_LIBRARY_OVERRIDE")) {
     cmGeneratorExpressionDAGChecker dagChecker{
-      target,
-      "LINK_LIBRARY_OVERRIDE",
-      nullptr,
-      nullptr,
-      target->GetLocalGenerator(),
-      config,
-      target->GetBacktrace(),
+      this->Target, "LINK_LIBRARY_OVERRIDE",      nullptr, nullptr,
+      context,      this->Target->GetBacktrace(),
     };
     auto overrideValue = cmGeneratorExpression::Evaluate(
-      *linkLibraryOverride, target->GetLocalGenerator(), config, target,
-      &dagChecker, target, linkLanguage);
+      *linkLibraryOverride, context.LG, context.Config, this->Target,
+      &dagChecker, this->Target, context.Language);
 
     std::vector<std::string> overrideList =
       cmTokenize(overrideValue, ',', cmTokenizerMode::New);
