@@ -52,6 +52,31 @@
 #include "cmValue.h"
 #include "cmake.h"
 
+namespace {
+
+bool HasKnownObjectFileLocation(cm::GenEx::Evaluation* eval,
+                                GeneratorExpressionContent const* content,
+                                std::string const& genex,
+                                cmGeneratorTarget const* target)
+{
+  std::string reason;
+  if (!eval->EvaluateForBuildsystem &&
+      !target->Target->HasKnownObjectFileLocation(&reason)) {
+    std::ostringstream e;
+    e << "The evaluation of the " << genex
+      << " generator expression "
+         "is only suitable for consumption by CMake (limited"
+      << reason
+      << ").  "
+         "It is not suitable for writing out elsewhere.";
+    reportError(eval, content->GetOriginalExpression(), e.str());
+    return false;
+  }
+  return true;
+}
+
+} // namespace
+
 std::string cmGeneratorExpressionNode::EvaluateDependentExpression(
   std::string const& prop, cm::GenEx::Evaluation* eval,
   cmGeneratorTarget const* headTarget,
@@ -3227,6 +3252,71 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
   }
 } targetPropertyNode;
 
+static const struct targetIntermediateDirNode
+  : public cmGeneratorExpressionNode
+{
+  targetIntermediateDirNode() {} // NOLINT(modernize-use-equals-default)
+
+  static char const* GetErrorText(std::string const& targetName)
+  {
+    static cmsys::RegularExpression propertyNameValidator("^[A-Za-z0-9_]+$");
+    if (targetName.empty()) {
+      return "$<TARGET_INTERMEDIATE_DIR:tgt> expression requires a non-empty "
+             "target name.";
+    }
+    if (!cmGeneratorExpression::IsValidTargetName(targetName)) {
+      return "Target name not supported.";
+    }
+    return nullptr;
+  }
+
+  std::string Evaluate(
+    std::vector<std::string> const& parameters, cm::GenEx::Evaluation* eval,
+    GeneratorExpressionContent const* content,
+    cmGeneratorExpressionDAGChecker* /*dagChecker*/) const override
+  {
+    cmGeneratorTarget const* target = nullptr;
+    std::string targetName;
+
+    if (parameters.size() == 1) {
+      targetName = parameters[0];
+
+      if (char const* e = GetErrorText(targetName)) {
+        reportError(eval, content->GetOriginalExpression(), e);
+        return std::string();
+      }
+      cmLocalGenerator const* lg = eval->CurrentTarget
+        ? eval->CurrentTarget->GetLocalGenerator()
+        : eval->Context.LG;
+      target = lg->FindGeneratorTargetToUse(targetName);
+
+      if (!target) {
+        std::ostringstream e;
+        e << "Target \"" << targetName << "\" not found.";
+        reportError(eval, content->GetOriginalExpression(), e.str());
+        return std::string();
+      }
+      eval->AllTargets.insert(target);
+
+    } else {
+      reportError(
+        eval, content->GetOriginalExpression(),
+        "$<TARGET_INTERMEDIATE_DIR:...> expression requires one parameter");
+      return std::string();
+    }
+
+    assert(target);
+
+    if (!HasKnownObjectFileLocation(eval, content, "TARGET_INTERMEDIATE_DIR",
+                                    target)) {
+      return std::string();
+    }
+
+    return cmSystemTools::CollapseFullPath(
+      target->GetObjectDirectory(eval->Context.Config));
+  }
+} targetIntermediateDirNode;
+
 static const struct TargetNameNode : public cmGeneratorExpressionNode
 {
   TargetNameNode() {} // NOLINT(modernize-use-equals-default)
@@ -3282,19 +3372,8 @@ static const struct TargetObjectsNode : public cmGeneratorExpressionNode
       return std::string();
     }
     cmGlobalGenerator const* gg = eval->Context.LG->GetGlobalGenerator();
-    {
-      std::string reason;
-      if (!eval->EvaluateForBuildsystem &&
-          !gt->Target->HasKnownObjectFileLocation(&reason)) {
-        std::ostringstream e;
-        e << "The evaluation of the TARGET_OBJECTS generator expression "
-             "is only suitable for consumption by CMake (limited"
-          << reason
-          << ").  "
-             "It is not suitable for writing out elsewhere.";
-        reportError(eval, content->GetOriginalExpression(), e.str());
-        return std::string();
-      }
+    if (!HasKnownObjectFileLocation(eval, content, "TARGET_OBJECTS", gt)) {
+      return std::string();
     }
 
     cmList objects;
@@ -4809,6 +4888,7 @@ cmGeneratorExpressionNode const* cmGeneratorExpressionNode::GetNode(
     { "SEMICOLON", &semicolonNode },
     { "QUOTE", &quoteNode },
     { "TARGET_PROPERTY", &targetPropertyNode },
+    { "TARGET_INTERMEDIATE_DIR", &targetIntermediateDirNode },
     { "TARGET_NAME", &targetNameNode },
     { "TARGET_OBJECTS", &targetObjectsNode },
     { "TARGET_POLICY", &targetPolicyNode },
