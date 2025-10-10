@@ -13,7 +13,7 @@ macro(__compiler_qcc lang)
   set(CMAKE_PREFIX_LIBRARY_ARCHITECTURE "ON")
 
   set(CMAKE_${lang}_COMPILE_OPTIONS_SYSROOT "-Wc,-isysroot,")
-  set(CMAKE_INCLUDE_SYSTEM_FLAG_${lang} "-Wp,-isystem,")
+  set(CMAKE_INCLUDE_SYSTEM_FLAG_${lang} "-isystem ")
   set(CMAKE_DEPFILE_FLAGS_${lang} "-Wp,-MD,<DEP_FILE> -Wp,-MT,<DEP_TARGET> -Wp,-MF,<DEP_FILE>")
 
   set(CMAKE_${lang}_LINKER_WRAPPER_FLAG "-Wl,")
