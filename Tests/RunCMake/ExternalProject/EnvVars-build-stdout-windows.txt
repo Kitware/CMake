@@ -30,15 +30,3 @@
  *-- Stage: build
  *-- Separator: ,
  *-- List: 7,8,9,10
-.*(Performing configure step for 'DefaultCommandListSep'|DefaultCommandListSep-configure).*
- *-- ConfigVar: config
- *-- Separator: ;
- *-- List: 10;11;12
-.*(Performing build step for 'DefaultCommandListSep'|DefaultCommandListSep-build).*
- *-- Stage: build
- *-- Separator: ;
- *-- List: 10;11;12
-.*(Performing install step for 'DefaultCommandListSep'|DefaultCommandListSep-install).*
- *-- Stage: install
- *-- Separator: ;
- *-- List: 10;11;12;13
