@@ -60,9 +60,8 @@ public:
   // Store options for verbose builds.
   void SetVerboseMakefile(bool verbose);
 
-  // Check for specific options.
-  bool UsingUnicode() const;
-  bool UsingSBCS() const;
+  // Detect a character set definition.
+  cm::optional<cmGeneratorTarget::MsvcCharSet> GetCharSet() const;
 
   void FixCudaCodeGeneration();
 
@@ -98,11 +97,7 @@ private:
 
   std::string UnknownFlagField;
 
-  mutable cm::optional<cmGeneratorTarget::MsvcCharSet> CachedCharset;
-
   void StoreUnknownFlag(std::string const& flag) override;
 
   FlagValue TakeFlag(std::string const& key);
-
-  void CacheCharsetValue() const;
 };

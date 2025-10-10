@@ -816,11 +816,14 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(
     /* clang-format on */
   }
 
+  cm::optional<cmGeneratorTarget::MsvcCharSet> const charSet =
+    targetOptions.GetCharSet();
+
   // If unicode is enabled change the character set to unicode, if not
   // then default to MBCS.
-  if (targetOptions.UsingUnicode()) {
+  if (charSet == cmGeneratorTarget::MsvcCharSet::Unicode) {
     fout << "\t\t\tCharacterSet=\"1\">\n";
-  } else if (targetOptions.UsingSBCS()) {
+  } else if (charSet == cmGeneratorTarget::MsvcCharSet::SingleByte) {
     fout << "\t\t\tCharacterSet=\"0\">\n";
   } else {
     fout << "\t\t\tCharacterSet=\"2\">\n";
@@ -1220,7 +1223,8 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(
         fout << "\t\t\t\tSubSystem=\"8\"\n";
 
         if (!linkOptions.GetFlag("EntryPointSymbol")) {
-          char const* entryPointSymbol = targetOptions.UsingUnicode()
+          char const* entryPointSymbol = targetOptions.GetCharSet() ==
+              cmGeneratorTarget::MsvcCharSet::Unicode
             ? (isWin32Executable ? "wWinMainCRTStartup" : "mainWCRTStartup")
             : (isWin32Executable ? "WinMainCRTStartup" : "mainACRTStartup");
           fout << "\t\t\t\tEntryPointSymbol=\"" << entryPointSymbol << "\"\n";

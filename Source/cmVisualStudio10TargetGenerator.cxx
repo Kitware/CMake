@@ -433,6 +433,17 @@ void cmVisualStudio10TargetGenerator::Generate()
     if (!this->ComputeLibOptions()) {
       return;
     }
+    for (std::string const& config : this->Configurations) {
+      // Default character set if not populated above.
+      this->CharSet.emplace(
+        config,
+        (this->GeneratorTarget->GetPropertyAsBool("VS_WINRT_COMPONENT") ||
+         this->GlobalGenerator->TargetsWindowsPhone() ||
+         this->GlobalGenerator->TargetsWindowsStore() ||
+         this->GeneratorTarget->GetPropertyAsBool("VS_WINRT_EXTENSIONS"))
+          ? MsvcCharSet::Unicode
+          : MsvcCharSet::MultiByte);
+    }
   }
   std::string path =
     cmStrCat(this->LocalGenerator->GetCurrentBinaryDirectory(), '/',
@@ -1536,15 +1547,11 @@ void cmVisualStudio10TargetGenerator::WriteMSToolConfigurationValues(
   }
 
   if ((this->GeneratorTarget->GetType() <= cmStateEnums::OBJECT_LIBRARY &&
-       this->ClOptions[config]->UsingUnicode()) ||
-      this->GeneratorTarget->GetPropertyAsBool("VS_WINRT_COMPONENT") ||
-      this->GlobalGenerator->TargetsWindowsPhone() ||
-      this->GlobalGenerator->TargetsWindowsStore() ||
-      this->GeneratorTarget->GetPropertyAsBool("VS_WINRT_EXTENSIONS")) {
+       this->CharSet[config] == MsvcCharSet::Unicode)) {
     e1.Element("CharacterSet", "Unicode");
   } else if (this->GeneratorTarget->GetType() <=
                cmStateEnums::OBJECT_LIBRARY &&
-             this->ClOptions[config]->UsingSBCS()) {
+             this->CharSet[config] == MsvcCharSet::SingleByte) {
     e1.Element("CharacterSet", "NotSet");
   } else {
     e1.Element("CharacterSet", "MultiByte");
@@ -3631,6 +3638,10 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
     }
   }
 
+  if (cm::optional<MsvcCharSet> charSet = clOptions.GetCharSet()) {
+    this->CharSet.emplace(configName, *charSet);
+  }
+
   if (this->ProjectType != VsProjectType::csproj &&
       (clOptions.IsManaged() || clOptions.HasFlag("CLRSupport"))) {
     this->Managed = true;
@@ -4608,7 +4619,7 @@ bool cmVisualStudio10TargetGenerator::ComputeLinkOptions(
         if (this->GlobalGenerator->TargetsWindowsCE()) {
           linkOptions.AddFlag("SubSystem", "WindowsCE");
           if (this->GeneratorTarget->GetType() == cmStateEnums::EXECUTABLE) {
-            if (this->ClOptions[config]->UsingUnicode()) {
+            if (this->CharSet[config] == MsvcCharSet::Unicode) {
               linkOptions.AddFlag("EntryPointSymbol", "wWinMainCRTStartup");
             } else {
               linkOptions.AddFlag("EntryPointSymbol", "WinMainCRTStartup");
@@ -4621,7 +4632,7 @@ bool cmVisualStudio10TargetGenerator::ComputeLinkOptions(
         if (this->GlobalGenerator->TargetsWindowsCE()) {
           linkOptions.AddFlag("SubSystem", "WindowsCE");
           if (this->GeneratorTarget->GetType() == cmStateEnums::EXECUTABLE) {
-            if (this->ClOptions[config]->UsingUnicode()) {
+            if (this->CharSet[config] == MsvcCharSet::Unicode) {
               linkOptions.AddFlag("EntryPointSymbol", "mainWCRTStartup");
             } else {
               linkOptions.AddFlag("EntryPointSymbol", "mainACRTStartup");
