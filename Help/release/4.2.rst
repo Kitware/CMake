@@ -187,9 +187,10 @@ CPack
 Deprecated and Removed Features
 ===============================
 
-* The uppercased ``<PACKAGENAME>_FOUND`` result variables of find modules
-  are now deprecated in favor of ``<PackageName>_FOUND`` result variables,
-  where appropriate.  See documentation of each find module for details.
+* All find modules now provide a ``<PackageName>_FOUND`` result variable
+  matching the casing of its module name.  Existing variants, such as the
+  uppercased ``<PACKAGENAME>_FOUND``, are deprecated where appropriate.
+  See documentation of each find module for details.
 
 * The :module:`FindwxWidgets` module's result variable
   ``wxWidgets_USE_FILE`` is now deprecated in favor of including the

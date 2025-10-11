@@ -15,6 +15,16 @@ This module searches for executable packers-tools that compress executables or
 shared libraries into on-the-fly, self-extracting versions.  It currently
 supports ``UPX``.
 
+Result Variables
+^^^^^^^^^^^^^^^^
+
+This module defines the following variables:
+
+``SelfPackers_FOUND``
+  .. versionadded:: 4.2
+
+  Boolean indicating whether packer tools were found.
+
 Cache Variables
 ^^^^^^^^^^^^^^^
 
@@ -85,3 +95,9 @@ mark_as_advanced(
   SELF_PACKER_FOR_EXECUTABLE_FLAGS
   SELF_PACKER_FOR_SHARED_LIB_FLAGS
 )
+
+if(SELF_PACKER_FOR_EXECUTABLE AND SELF_PACKER_FOR_SHARED_LIB)
+  set(SelfPackers_FOUND TRUE)
+else()
+  set(SelfPackers_FOUND FALSE)
+endif()
