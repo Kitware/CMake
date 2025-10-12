@@ -7,6 +7,7 @@
 #include <vector>
 
 #include <cm/iterator>
+#include <cm/optional>
 #include <cmext/string_view>
 
 #include "cmAlgorithms.h"
@@ -134,44 +135,18 @@ bool cmVisualStudioGeneratorOptions::IsManaged() const
   return this->FlagMap.find("CompileAsManaged") != this->FlagMap.end();
 }
 
-void cmVisualStudioGeneratorOptions::CacheCharsetValue() const
+cm::optional<cmGeneratorTarget::MsvcCharSet>
+cmVisualStudioGeneratorOptions::GetCharSet() const
 {
-  using MsvcCharSet = cmGeneratorTarget::MsvcCharSet;
-
-  if (this->CachedCharset.has_value()) {
-    return;
+  // Look for a project- or user-specified character set definition.
+  for (std::string const& define : this->Defines) {
+    cmGeneratorTarget::MsvcCharSet charSet =
+      cmGeneratorTarget::GetMsvcCharSet(define);
+    if (charSet != cmGeneratorTarget::MsvcCharSet::None) {
+      return charSet;
+    }
   }
-
-  MsvcCharSet newValue = MsvcCharSet::None;
-
-  // Look for a any charset definition.
-  // Real charset will be updated if something is found.
-  auto it = std::find_if(this->Defines.begin(), this->Defines.end(),
-                         [&newValue](std::string const& define) {
-                           newValue =
-                             cmGeneratorTarget::GetMsvcCharSet(define);
-                           return newValue != MsvcCharSet::None;
-                         });
-
-  if (it == this->Defines.end()) {
-    // Default to multi-byte, as Visual Studio does
-    newValue = MsvcCharSet::MultiByte;
-  }
-
-  this->CachedCharset = newValue;
-}
-
-bool cmVisualStudioGeneratorOptions::UsingUnicode() const
-{
-  this->CacheCharsetValue();
-  return this->CachedCharset.value() ==
-    cmGeneratorTarget::MsvcCharSet::Unicode;
-}
-bool cmVisualStudioGeneratorOptions::UsingSBCS() const
-{
-  this->CacheCharsetValue();
-  return this->CachedCharset.value() ==
-    cmGeneratorTarget::MsvcCharSet::SingleByte;
+  return cm::nullopt;
 }
 
 void cmVisualStudioGeneratorOptions::FixCudaCodeGeneration()
