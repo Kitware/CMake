@@ -7,9 +7,9 @@ FindLua50
 
 .. note::
 
-  This module is specifically for Lua version branch 5.0, which is obsolete and
-  not maintained anymore.  In new code use the latest supported Lua version and
-  the version-agnostic module :module:`FindLua` instead.
+  This module is intended specifically for Lua version branch 5.0, which is
+  obsolete and not maintained anymore.  In new code use the latest supported
+  Lua version and the version-agnostic module :module:`FindLua` instead.
 
 Finds the Lua library:
 

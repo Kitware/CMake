@@ -7,9 +7,9 @@ FindLua51
 
 .. note::
 
-  This module is specifically for Lua version branch 5.1, which is obsolete and
-  not maintained anymore.  In new code use the latest supported Lua version and
-  the version-agnostic module :module:`FindLua` instead.
+  This module is intended specifically for Lua version branch 5.1, which is
+  obsolete and not maintained anymore.  In new code use the latest supported
+  Lua version and the version-agnostic module :module:`FindLua` instead.
 
 Finds the Lua library:
 
@@ -45,10 +45,10 @@ This module defines the following variables:
 
   Boolean indicating whether (the requested version of) Lua was found.
 
-``Lua_VERSION``
+``Lua51_VERSION``
   .. versionadded:: 4.2
 
-  The version of Lua found.
+  The version of Lua 5.1 found.
 
 Cache Variables
 ^^^^^^^^^^^^^^^
@@ -75,9 +75,9 @@ The following variables are provided for backward compatibility:
 
 ``LUA_VERSION_STRING``
   .. deprecated:: 4.2
-    Superseded by the ``Lua_VERSION``.
+    Use ``Lua51_VERSION``, which has the same value.
 
-  The version of Lua found.
+  The version of Lua 5.1 found.
 
 Examples
 ^^^^^^^^
@@ -146,15 +146,15 @@ endif()
 if(LUA_INCLUDE_DIR AND EXISTS "${LUA_INCLUDE_DIR}/lua.h")
   file(STRINGS "${LUA_INCLUDE_DIR}/lua.h" lua_version_str REGEX "^#define[ \t]+LUA_RELEASE[ \t]+\"Lua .+\"")
 
-  string(REGEX REPLACE "^#define[ \t]+LUA_RELEASE[ \t]+\"Lua ([^\"]+)\".*" "\\1" Lua_VERSION "${lua_version_str}")
-  set(LUA_VERSION_STRING "${Lua_VERSION}")
+  string(REGEX REPLACE "^#define[ \t]+LUA_RELEASE[ \t]+\"Lua ([^\"]+)\".*" "\\1" Lua51_VERSION "${lua_version_str}")
+  set(LUA_VERSION_STRING "${Lua51_VERSION}")
   unset(lua_version_str)
 endif()
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(Lua51
                                   REQUIRED_VARS LUA_LIBRARIES LUA_INCLUDE_DIR
-                                  VERSION_VAR Lua_VERSION)
+                                  VERSION_VAR Lua51_VERSION)
 
 mark_as_advanced(LUA_INCLUDE_DIR LUA_LIBRARIES LUA_LIBRARY LUA_MATH_LIBRARY)
 
