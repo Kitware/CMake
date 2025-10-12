@@ -615,7 +615,9 @@ Filesystem
   emitted.
 
   Specifying ``COPY_ON_ERROR`` enables copying the file as a fallback if
-  creating the link fails.  It can be useful for handling situations such as
+  creating the link fails.  If the source is a directory, the destination
+  directory will be created if it does not exist, but no files will be copied
+  the from source one.  It can be useful for handling situations such as
   ``<original>`` and ``<linkname>`` being on different drives or mount points,
   which would make them unable to support a hard link.
 
