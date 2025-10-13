@@ -5,308 +5,767 @@
 FindMatlab
 ----------
 
-Finds Matlab or Matlab Compiler Runtime (MCR) and provides Matlab tools,
+Finds MATLAB or MATLAB Compiler Runtime (MCR) and provides its tools,
 libraries and compilers to CMake:
 
 .. code-block:: cmake
 
-  find_package(Matlab [<version>] [COMPONENTS <components>...] [...])
+  find_package(Matlab [<version>] [COMPONENTS <components>...] [REGISTRY_VIEW <view>] [...])
 
-This package primary purpose is to find the libraries associated with Matlab
-or the MCR in order to be able to build Matlab extensions (mex files). It
-can also be used:
+The primary purpose of this module is to find the libraries associated with
+MATLAB or the MCR in order to be able to build MATLAB extensions (MEX files).
+It can also be used:
 
-* to run specific commands in Matlab in case Matlab is available
-* for declaring Matlab unit test
-* to retrieve various information from Matlab (mex extensions, versions and
+* to run specific commands in MATLAB in case MATLAB is available
+* for declaring MATLAB unit tests
+* to retrieve various information from MATLAB (MEX extensions, versions and
   release queries, ...)
 
 .. versionadded:: 3.12
-  Added Matlab Compiler Runtime (MCR) support.
-
-The module supports the following components:
-
-* ``ENG_LIBRARY`` and ``MAT_LIBRARY``: respectively the ``ENG`` and ``MAT``
-  libraries of Matlab
-* ``MAIN_PROGRAM`` the Matlab binary program. Note that this component is not
-  available on the MCR version, and will yield an error if the MCR is found
-  instead of the regular Matlab installation.
-* ``MEX_COMPILER`` the MEX compiler.
-* ``MCC_COMPILER`` the MCC compiler, included with the Matlab Compiler add-on.
-* ``SIMULINK`` the Simulink environment.
-
-.. versionadded:: 3.7
-  Added the ``MAT_LIBRARY`` component.
-
-.. versionadded:: 3.13
-  Added the ``ENGINE_LIBRARY``, ``DATAARRAY_LIBRARY`` and ``MCC_COMPILER``
-  components.
-
-.. versionchanged:: 3.14
-  Removed the ``MX_LIBRARY``, ``ENGINE_LIBRARY`` and ``DATAARRAY_LIBRARY``
-  components.  These libraries are found unconditionally.
+  MATLAB Compiler Runtime (MCR) support.
 
 .. versionadded:: 3.30
-  Added support for specifying a version range to :command:`find_package` and
-  added support for specifying ``REGISTRY_VIEW`` to :command:`find_package`,
+  Support for specifying a version range to :command:`find_package`,
+  support for specifying ``REGISTRY_VIEW`` argument to
+  :command:`find_package`,
   :command:`matlab_extract_all_installed_versions_from_registry` and
-  :command:`matlab_get_all_valid_matlab_roots_from_registry`. The default
-  behavior remained unchanged, by using the registry view ``TARGET``.
+  :command:`matlab_get_all_valid_matlab_roots_from_registry` commands.
+  The default behavior remained unchanged, by using the registry view
+  ``TARGET``.
 
 .. note::
 
-  The version given to the :command:`find_package` directive is the Matlab
-  **version**, which should not be confused with the Matlab *release* name
-  (e.g. `R2023b`).
-  The :command:`matlab_get_version_from_release_name` and
-  :command:`matlab_get_release_name_from_version` provide a mapping
-  between the release name and the version.
+  The version given to the :command:`find_package` argument is the MATLAB
+  *version*, which should not be confused with the MATLAB *release name*
+  (e.g. ``R2023b``).  The :command:`matlab_get_version_from_release_name`
+  and :command:`matlab_get_release_name_from_version` commands provide a
+  mapping between the release name and the version.
 
-The variable :variable:`Matlab_ROOT_DIR` may be specified in order to give
-the path of the desired Matlab version. Otherwise, the behavior is platform
-specific:
+Components
+^^^^^^^^^^
 
-* Windows: The installed versions of Matlab/MCR are retrieved from the
-  Windows registry. The ``REGISTRY_VIEW`` argument may optionally be specified
-  to manually control whether 32bit or 64bit versions shall be searched for.
-* macOS: The installed versions of Matlab/MCR are given by the MATLAB
-  default installation paths under ``$HOME/Applications`` and ``/Applications``.
-  If no such application is found, it falls back to the one that might be
-  accessible from the ``PATH``.
-* Unix: The desired Matlab should be accessible from the ``PATH``. This does
-  not work for MCR installation and :variable:`Matlab_ROOT_DIR` should be
-  specified on this platform.
+This module supports optional components which can be specified using the
+:command:`find_package` command:
 
-Additional information is provided when :variable:`MATLAB_FIND_DEBUG` is set.
-When a Matlab/MCR installation is found automatically and the ``MATLAB_VERSION``
-is not given, the version is queried from Matlab directly (on Windows this
-may pop up a Matlab window) or from the MCR installation.
+.. code-block:: cmake
 
-The mapping of the release names and the version of Matlab is performed by
-defining pairs (name, version).  The variable
-:variable:`MATLAB_ADDITIONAL_VERSIONS` may be provided before the call to
-the :command:`find_package` in order to handle additional versions.
+  find_package(Matlab [COMPONENTS <components>...])
 
-A Matlab scripts can be added to the set of tests using the
-:command:`matlab_add_unit_test`. By default, the Matlab unit test framework
-will be used (>= 2013a) to run this script, but regular ``.m`` files
-returning an exit code can be used as well (0 indicating a success).
+Supported components include:
 
-Module Input Variables
-^^^^^^^^^^^^^^^^^^^^^^
+``ENG_LIBRARY``
+  .. versionadded:: 3.3
 
-Users or projects may set the following variables to configure the module
-behavior:
+  Finds the ``ENG`` library of MATLAB.
 
-:variable:`Matlab_ROOT <<PackageName>_ROOT>`
-  .. versionadded:: 3.25
+``MAT_LIBRARY``
+  .. versionadded:: 3.7
 
-  Default value for :variable:`Matlab_ROOT_DIR`, the root of the Matlab
-  installation.
+  Finds the ``MAT`` library of MATLAB.
 
-:variable:`Matlab_ROOT_DIR`
-  The root of the Matlab installation.
+``MAIN_PROGRAM``
+  .. versionadded:: 3.3
 
-:variable:`MATLAB_FIND_DEBUG`
-  outputs debug information
+  Finds the MATLAB binary program.  Note that this component is not
+  available on the MCR version, and will yield an error if the MCR is found
+  instead of the regular MATLAB installation.
 
-:variable:`MATLAB_ADDITIONAL_VERSIONS`
-  additional versions of Matlab for the automatic retrieval of the installed
-  versions.
+``MEX_COMPILER``
+  .. versionadded:: 3.3
+
+  Finds the MEX compiler.
+
+``MCC_COMPILER``
+  .. versionadded:: 3.13
+
+  Finds the MCC compiler, included with the MATLAB Compiler add-on.
+
+``SIMULINK``
+  .. versionadded:: 3.3
+
+  Finds the Simulink environment.
+
+Implicitly Found Components
+"""""""""""""""""""""""""""
+
+The following components are always found unconditionally, without needing
+to be specified explicitly:
+
+``MX_LIBRARY``
+  .. versionchanged:: 3.14
+    This component has been removed and is now always found unconditionally.
+
+  .. versionadded:: 3.3
+
+  Finds the MATLAB mx library.
+
+``ENGINE_LIBRARY``
+  .. versionchanged:: 3.14
+    This component has been removed and is now always found unconditionally.
+
+  .. versionadded:: 3.13
+
+  Finds the MATLAB engine library.
+
+``DATAARRAY_LIBRARY``
+  .. versionchanged:: 3.14
+    This component has been removed and is now always found unconditionally.
+
+  .. versionadded:: 3.13
+
+  Finds the C++ MATLAB data array library.
+
+If no components are specified, the module looks for the ``MX_LIBRARY``,
+``ENGINE_LIBRARY``, and ``DATAARRAY_LIBRARY`` by default.
 
 Imported Targets
 ^^^^^^^^^^^^^^^^
 
-.. versionadded:: 3.22
-
-This module defines the following :prop_tgt:`IMPORTED` targets:
+This module provides the following :ref:`Imported Targets`:
 
 ``Matlab::mex``
-  The ``mex`` library, always available for MATLAB installations. Available for
-  MCR installations if provided by MCR.
+  .. versionadded:: 3.22
+
+  Target encapsulating the ``mex`` library usage requirements, always
+  available for MATLAB installations.  Available for MCR installations if
+  provided by MCR.
 
 ``Matlab::mx``
-  The mx library of Matlab (arrays), always available for MATLAB installations.
-  Available for MCR installations if provided by MCR.
+  .. versionadded:: 3.22
+
+  Target encapsulating the usage requirements of the mx library of MATLAB
+  (arrays), always available for MATLAB installations.  Available for MCR
+  installations if provided by MCR.
 
 ``Matlab::eng``
-  Matlab engine library. Available only if the ``ENG_LIBRARY`` component
-  is requested.
+  .. versionadded:: 3.22
+
+  Target encapsulating the MATLAB engine library usage requirements.
+  Available only if the ``ENG_LIBRARY`` component is requested.
 
 ``Matlab::mat``
-  Matlab matrix library. Available only if the ``MAT_LIBRARY`` component
-  is requested.
+  .. versionadded:: 3.22
+
+  Target encapsulating the MATLAB matrix library usage requirements.
+  Available only if the ``MAT_LIBRARY`` component is requested.
 
 ``Matlab::MatlabEngine``
-  Matlab C++ engine library, always available for MATLAB R2018a and newer.
-  Available for MCR installations if provided by MCR.
+  .. versionadded:: 3.22
+
+  Target encapsulating the MATLAB C++ engine library usage requirements,
+  always available for MATLAB R2018a and newer.  Available for MCR
+  installations if provided by MCR.
 
 ``Matlab::MatlabDataArray``
-  Matlab C++ data array library, always available for MATLAB R2018a and newer.
-  Available for MCR installations if provided by MCR.
+  .. versionadded:: 3.22
 
-Variables defined by the module
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Target encapsulating the MATLAB C++ data array library usage requirements,
+  always available for MATLAB R2018a and newer.  Available for MCR
+  installations if provided by MCR.
 
-Result variables
-""""""""""""""""
+Result Variables
+^^^^^^^^^^^^^^^^
+
+This module defines the following variables:
 
 ``Matlab_FOUND``
   .. versionadded:: 3.3
 
-  Boolean indicating whether the (requested version of) Matlab installation
-  was found.  All variables below are defined if Matlab is found.
+  Boolean indicating whether the (requested version of) MATLAB installation
+  was found.  All variables below are defined if MATLAB is found.
 
 ``Matlab_VERSION``
   .. versionadded:: 3.27
 
-  the numerical version (e.g. 23.2.0) of Matlab found. Not to be confused with
-  Matlab release name (e.g. R2023b) that can be obtained with
-  :command:`matlab_get_release_name_from_version`.
+  The numerical version (e.g. ``23.2.0``) of MATLAB found.  Not to be
+  confused with MATLAB release name (e.g. ``R2023b``) that can be obtained
+  with :command:`matlab_get_release_name_from_version`.
+
+  When a MATLAB/MCR installation is found automatically and the
+  ``Matlab_VERSION`` is not given, the version is queried from MATLAB
+  directly (on Windows this may pop up a MATLAB window) or from the MCR
+  installation.
+
 ``Matlab_ROOT_DIR``
-  the final root of the Matlab installation determined by the FindMatlab
-  module.
+  .. versionadded:: 3.3
+
+  The final root of the MATLAB installation determined by this module.
+
 ``Matlab_MAIN_PROGRAM``
-  the Matlab binary program. Available only if the component ``MAIN_PROGRAM``
-  is given in the :command:`find_package` directive.
+  .. versionadded:: 3.3
+
+  The MATLAB binary program.  Available only if the component ``MAIN_PROGRAM``
+  is given in the :command:`find_package` argument.
+
 ``Matlab_INCLUDE_DIRS``
- the path of the Matlab libraries headers
+  .. versionadded:: 3.3
+
+  The path of the MATLAB libraries headers.
+
 ``Matlab_MEX_LIBRARY``
-  library for mex, always available for MATLAB installations. Available for MCR
-  installations if provided by MCR.
+  Library for MEX, always available for MATLAB installations.  Available
+  for MCR installations if provided by MCR.
+
 ``Matlab_MX_LIBRARY``
-  mx library of Matlab (arrays), always available for MATLAB installations.
-  Available for MCR installations if provided by MCR.
+  The mx library of MATLAB (arrays), always available for MATLAB
+  installations.  Available for MCR installations if provided by MCR.
+
 ``Matlab_ENG_LIBRARY``
-  Matlab engine library. Available only if the component ``ENG_LIBRARY``
+  MATLAB engine library.  Available only if the component ``ENG_LIBRARY``
   is requested.
+
 ``Matlab_MAT_LIBRARY``
-  Matlab matrix library. Available only if the component ``MAT_LIBRARY``
+  .. versionadded:: 3.7
+
+  Matlab matrix library.  Available only if the component ``MAT_LIBRARY``
   is requested.
+
 ``Matlab_ENGINE_LIBRARY``
   .. versionadded:: 3.13
 
   Matlab C++ engine library, always available for MATLAB R2018a and newer.
   Available for MCR installations if provided by MCR.
+
 ``Matlab_DATAARRAY_LIBRARY``
   .. versionadded:: 3.13
 
-  Matlab C++ data array library, always available for MATLAB R2018a and newer.
-  Available for MCR installations if provided by MCR.
+  Matlab C++ data array library, always available for MATLAB R2018a and
+  newer.  Available for MCR installations if provided by MCR.
+
 ``Matlab_LIBRARIES``
-  the whole set of libraries of Matlab
+  The whole set of libraries of MATLAB.
+
 ``Matlab_MEX_COMPILER``
-  the mex compiler of Matlab. Currently not used.
-  Available only if the component ``MEX_COMPILER`` is requested.
+  .. versionadded:: 3.3
+
+  The MEX compiler of MATLAB.  Currently not used.  Available only if the
+  component ``MEX_COMPILER`` is requested.
+
 ``Matlab_MCC_COMPILER``
   .. versionadded:: 3.13
 
-  the mcc compiler of Matlab. Included with the Matlab Compiler add-on.
+  The mcc compiler of MATLAB.  Included with the MATLAB Compiler add-on.
   Available only if the component ``MCC_COMPILER`` is requested.
 
-Cached variables
-""""""""""""""""
+Cache Variables
+^^^^^^^^^^^^^^^
+
+The following cache variables may also be set:
 
 ``Matlab_MEX_EXTENSION``
-  the extension of the mex files for the current platform (given by Matlab).
+  .. versionadded:: 3.3
+
+  The extension of the MEX files for the current platform (given by MATLAB).
+
 ``Matlab_ROOT_DIR``
-  the location of the root of the Matlab installation found. If this value
+  .. versionadded:: 3.3
+
+  The location of the root of the MATLAB installation found.  If this value
   is changed by the user, the result variables are recomputed.
 
-Provided commands
-^^^^^^^^^^^^^^^^^
+Input Variables
+^^^^^^^^^^^^^^^
 
-:command:`matlab_get_version_from_release_name`
-  returns the version from the Matlab release name
-:command:`matlab_get_release_name_from_version`
-  returns the release name from the Matlab version
-:command:`matlab_add_mex`
-  adds a target compiling a MEX file.
-:command:`matlab_add_unit_test`
-  adds a Matlab unit test file as a test to the project.
-:command:`matlab_extract_all_installed_versions_from_registry`
-  parses the registry for all Matlab versions. Available on Windows only.
-  The part of the registry parsed is dependent on the host processor
-:command:`matlab_get_all_valid_matlab_roots_from_registry`
-  returns all the possible Matlab or MCR paths, according to a previously
-  given list. Only the existing/accessible paths are kept. This is mainly
-  useful for the searching all possible Matlab installation.
-:command:`matlab_get_mex_suffix`
-  returns the suffix to be used for the mex files
-  (platform/architecture dependent)
-:command:`matlab_get_version_from_matlab_run`
-  returns the version of Matlab/MCR, given the full directory of the Matlab/MCR
-  installation path.
+Users or projects may set the following variables to configure the module
+behavior before calling ``find_package(Matlab)``:
 
+:variable:`Matlab_ROOT <<PackageName>_ROOT>`
+  .. versionadded:: 3.25
 
-Known issues
-^^^^^^^^^^^^
+  Default value for the ``Matlab_ROOT_DIR`` variable, the root of the
+  MATLAB installation.
 
-**Symbol clash in a MEX target**
-  By default, every symbols inside a MEX
-  file defined with the command :command:`matlab_add_mex` have hidden
-  visibility, except for the entry point. This is the default behavior of
-  the MEX compiler, which lowers the risk of symbol collision between the
-  libraries shipped with Matlab, and the libraries to which the MEX file is
-  linking to. This is also the default on Windows platforms.
+``Matlab_ROOT_DIR``
+  .. versionadded:: 3.3
 
-  However, this is not sufficient in certain case, where for instance your
-  MEX file is linking against libraries that are already loaded by Matlab,
-  even if those libraries have different SONAMES.
-  A possible solution is to hide the symbols of the libraries to which the
-  MEX target is linking to. This can be achieved in GNU GCC compilers with
-  the linker option ``-Wl,--exclude-libs,ALL``.
+  The root folder of the MATLAB installation.  If set before the call to
+  :command:`find_package`, the module will look for the components in that
+  path.  If not set, then an automatic search of MATLAB will be performed.
+  If set, it should point to a valid version of MATLAB.
 
-**Tests using GPU resources**
-  in case your MEX file is using the GPU and
-  in order to be able to run unit tests on this MEX file, the GPU resources
-  should be properly released by Matlab. A possible solution is to make
-  Matlab aware of the use of the GPU resources in the session, which can be
-  performed by a command such as ``D = gpuDevice()`` at the beginning of
-  the test script (or via a fixture).
+  This variable may be specified in order to give the path of the desired
+  MATLAB version.  Otherwise, the behavior is platform specific:
 
+  * Windows: The installed versions of MATLAB/MCR are retrieved from the
+    Windows registry.  The ``REGISTRY_VIEW`` argument may optionally be
+    specified to manually control whether 32bit or 64bit versions shall be
+    searched for.
+  * macOS: The installed versions of MATLAB/MCR are given by the MATLAB
+    default installation paths under ``$HOME/Applications`` and
+    ``/Applications``.  If no such application is found, it falls back to
+    the one that might be accessible from the ``PATH``.
+  * Unix: The desired MATLAB should be accessible from the ``PATH``.  This
+    does not work for MCR installation and ``Matlab_ROOT_DIR`` should be
+    specified on this platform.
 
-Reference
-^^^^^^^^^
+``MATLAB_FIND_DEBUG``
+  .. versionadded:: 3.3
 
-.. variable:: Matlab_ROOT_DIR
+  If set to a boolean true, additional debug information is outputted to
+  the console, such as the lookup of MATLAB and the intermediate
+  configuration steps.
 
-   The root folder of the Matlab installation. If set before the call to
-   :command:`find_package`, the module will look for the components in that
-   path. If not set, then an automatic search of Matlab
-   will be performed. If set, it should point to a valid version of Matlab.
+``MATLAB_ADDITIONAL_VERSIONS``
+  .. versionadded:: 3.3
 
-.. variable:: MATLAB_FIND_DEBUG
+  If set, it specifies additional versions of MATLAB for the automatic
+  retrieval of the installed versions that may be handled and looked for.
 
-   If set, the lookup of Matlab and the intermediate configuration steps are
-   outputted to the console.
-
-.. variable:: MATLAB_ADDITIONAL_VERSIONS
-
-  If set, specifies additional versions of Matlab that may be looked for.
-  The variable should be a list of strings, organized by pairs of release
-  name and versions, such as follows:
+  The mapping of the release names and the version of MATLAB is performed
+  by defining pairs (name, version).  The variable should be a list of
+  strings, organized by pairs of release name and versions, such as
+  follows:
 
   .. code-block:: cmake
 
-    set(MATLAB_ADDITIONAL_VERSIONS
+    set(
+      MATLAB_ADDITIONAL_VERSIONS
         "release_name1=corresponding_version1"
         "release_name2=corresponding_version2"
-        ...
-        )
+        # ...
+    )
+
+    find_package(Matlab)
 
   Example:
 
   .. code-block:: cmake
 
-    set(MATLAB_ADDITIONAL_VERSIONS
+    set(
+      MATLAB_ADDITIONAL_VERSIONS
         "R2013b=8.2"
         "R2013a=8.1"
-        "R2012b=8.0")
+        "R2012b=8.0"
+        # ...
+    )
 
-  The order of entries in this list matters when several versions of
-  Matlab are installed. The priority is set according to the ordering in
-  this list.
+    find_package(Matlab)
+
+  The order of entries in this list matters when several versions of MATLAB
+  are installed.  The priority is set according to the ordering in this
+  list.
+
+Commands
+^^^^^^^^
+
+This module provides the following commands:
+
+* :command:`matlab_get_version_from_release_name`
+* :command:`matlab_get_release_name_from_version`
+* :command:`matlab_get_version_from_matlab_run`
+* :command:`matlab_extract_all_installed_versions_from_registry`
+* :command:`matlab_get_all_valid_matlab_roots_from_registry`
+* :command:`matlab_add_mex`
+* :command:`matlab_get_mex_suffix`
+* :command:`matlab_add_unit_test`
+
+.. command:: matlab_get_version_from_release_name
+
+  .. versionadded:: 3.3
+
+  Returns the version of MATLAB from a release name:
+
+  .. code-block:: cmake
+
+    matlab_get_version_from_release_name(<release-name> <version-var>)
+
+  The arguments are:
+
+  ``<release-name>``
+    Input release name string (e.g. ``R2023b``).
+
+  ``<version-var>``
+    The name of the variable in which to store the version of MATLAB.  The
+    output result is e.g. ``23.2.0``.
+
+  .. note::
+
+    This command provides correct versions mappings for MATLAB but not MCR.
+
+.. command:: matlab_get_release_name_from_version
+
+  .. versionadded:: 3.3
+
+  Returns the release name from the version of MATLAB:
+
+  .. code-block:: cmake
+
+    matlab_get_release_name_from_version(<version> <release-name-var>)
+
+  The arguments are:
+
+  ``<version>``
+    Input MATLAB version string (e.g. ``23.2.0``).
+
+  ``<release-name-var>``
+    The name of the variable in which to store the MATLAB release name.  The
+    output result is e.g. ``R2023b``.
+
+  .. note::
+
+    This command provides correct version mappings for MATLAB but not MCR.
+
+.. command:: matlab_get_version_from_matlab_run
+
+  .. versionadded:: 3.3
+
+  Runs the specified MATLAB program and extracts the version of MATLAB/MCR,
+  given the full directory of the MATLAB/MCR installation path:
+
+  .. code-block:: cmake
+
+    matlab_get_version_from_matlab_run(<matlab-binary> <matlab-versions-var>)
+
+  The arguments are:
+
+  ``<matlab-binary>``
+    The path to the ``matlab`` binary executable.
+
+  ``<matlab-versions-var>``
+    The name of the variable in which a list of extracted MATLAB versions
+    are stored.
+
+  If the path provided for the MATLAB installation points to an MCR
+  installation, the version is extracted from the installed files.
+
+.. command:: matlab_extract_all_installed_versions_from_registry
+
+  .. versionadded:: 3.3
+
+  Parses the Windows registry and finds all installed MATLAB versions:
+
+  .. signature::
+    matlab_extract_all_installed_versions_from_registry(<versions-var>
+      [REGISTRY_VIEW <view>])
+    :target: matlab_extract_all_installed_versions_from_registry-keyword
+
+  The arguments are:
+
+  ``<versions-var>``
+    The name of the variable in which to store the list of all MATLAB
+    versions found.
+
+  ``REGISTRY_VIEW <view>``
+    .. versionadded:: 3.30
+
+    Optional registry view argument that provides a more precise interface
+    on how to interact with the Windows Registry.  The argument is passed
+    (or omitted) to :command:`cmake_host_system_information` without
+    further checks or modification.  For example, ``<view>`` value can be
+    one of ``64``, ``32``, ``64_32``, ``32_64``, ``HOST``, ``TARGET``,
+    ``BOTH``.
+
+  The old signature is:
+
+  .. signature::
+    matlab_extract_all_installed_versions_from_registry(<win64> <versions-var>)
+    :target: matlab_extract_all_installed_versions_from_registry-positional
+
+  The arguments are:
+
+  ``<win64>``
+    Boolean whether to search for the 64-bit version of MATLAB.  If set
+    to boolean true, 64-bit registry view will be searched.  If set to
+    boolean false, 32-bit registry view will be searched.  For finer
+    control, use the above signature.
+
+  ``<versions-var>``
+    The name of the variable in which to store the list of all MATLAB
+    versions found.
+
+  This command is available on Windows only.  The part of the registry
+  parsed is dependent on the host processor.
+
+  The returned list contains all versions under
+  ``HKLM\SOFTWARE\Mathworks\MATLAB``,
+  ``HKLM\SOFTWARE\Mathworks\MATLAB Runtime`` and
+  ``HKLM\SOFTWARE\Mathworks\MATLAB Compiler Runtime`` or an empty list in
+  case an error occurred (or nothing found).
+
+  .. note::
+
+    Only the versions are provided.  No check is made over the existence of
+    the installation referenced in the registry.
+
+.. command:: matlab_get_all_valid_matlab_roots_from_registry
+
+  .. versionadded:: 3.3
+
+  Returns all the possible MATLAB or MCR paths, according to a previously
+  given list:
+
+  .. code-block:: cmake
+
+    matlab_get_all_valid_matlab_roots_from_registry(
+      <matlab-versions>
+      <matlab-roots-var>
+      [REGISTRY_VIEW <view>]
+    )
+
+  This command populates the MATLAB root with valid versions of MATLAB or
+  MATLAB Runtime (MCR) and is mainly useful for the searching of all
+  possible MATLAB installations.  Only the existing/accessible paths are
+  kept.
+
+  The arguments are:
+
+  ``<matlab-versions>``
+    A :ref:`semicolon-separated list <CMake Language Lists>` of each of the
+    MATLAB or MCR installations.  Specify it as a single string value.
+
+  ``<matlab-roots-var>``
+    The name of the variable in which to store a list of locations of each
+    of the MATLAB or MCR installations.
+
+    The value of this variable is organized in triplets
+    ``(type,version_number,matlab_root_path)``, where ``type`` indicates
+    either ``MATLAB`` or ``MCR``.
+
+  ``REGISTRY_VIEW <view>``
+    .. versionadded:: 3.30
+
+    Optional registry view argument that provides a more precise interface
+    on how to interact with the Windows Registry.  The argument is passed
+    (or omitted) to :command:`cmake_host_system_information` without
+    further checks or modification.  For example, ``<view>`` value can be
+    one of ``64``, ``32``, ``64_32``, ``32_64``, ``HOST``, ``TARGET``,
+    ``BOTH``.
+
+.. command:: matlab_add_mex
+
+  .. versionadded:: 3.3
+
+  Adds a target that compiles MATLAB MEX target file:
+
+  .. code-block:: cmake
+
+    matlab_add_mex(
+      NAME <name>
+      [EXECUTABLE | MODULE | SHARED]
+      SRC <sources>...
+      [OUTPUT_NAME <output-name>]
+      [DOCUMENTATION <file>]
+      [LINK_TO <targets>...]
+      [R2017b | R2018a]
+      [EXCLUDE_FROM_ALL]
+      [NO_IMPLICIT_LINK_TO_MATLAB_LIBRARIES]
+      [...]
+    )
+
+  This commands compiles the given sources with the current tool-chain in
+  order to produce a MEX file.  The final name of the produced output may
+  be specified, as well as additional link libraries, and a documentation
+  entry for the MEX file.  Remaining arguments of the call are passed to
+  the :command:`add_library` or :command:`add_executable` command.
+
+  The arguments are:
+
+  ``NAME <name>``
+    The name of the target.
+
+  ``SRC <sources>...``
+    One or more source files to be compiled.
+
+  ``LINK_TO <targets>...``
+    A list of additional link dependencies.  The target links to ``libmex``
+    and ``libmx`` by default, unless the
+    ``NO_IMPLICIT_LINK_TO_MATLAB_LIBRARIES`` option is passed.
+
+  ``OUTPUT_NAME <output-name>``
+    If given, overrides the default name.  The default name is the name of
+    the target without any prefix and with ``Matlab_MEX_EXTENSION`` suffix.
+
+  ``DOCUMENTATION <file>``
+    If given, the ``<file>`` will be considered as being the documentation
+    file for the MEX file.  This file is copied into the same folder without
+    any processing, with the same name as the final MEX file, and with
+    extension ``.m``.  In that case, typing ``help <name>`` in MATLAB
+    prints the documentation contained in this file.
+
+    The documentation file is not processed and should be in the following
+    format:
+
+    .. code-block:: matlab
+
+      % This is the documentation
+      function ret = mex_target_output_name(input1)
+
+  ``R2017b`` or ``R2018a``
+    .. versionadded:: 3.14
+
+    May be given to specify the version of the C API
+    to use: ``R2017b`` specifies the traditional (separate complex) C API,
+    and corresponds to the ``-R2017b`` flag for the ``mex`` command.
+    ``R2018a`` specifies the new interleaved complex C API, and corresponds
+    to the ``-R2018a`` flag for the ``mex`` command.  Ignored for MATLAB
+    versions prior to R2018a.  Defaults to ``R2017b``.
+
+  ``MODULE`` or ``SHARED``
+    .. versionadded:: 3.7
+
+    May be given to specify the type of library to be created.
+
+  ``EXECUTABLE``
+    .. versionadded:: 3.7
+
+    May be given to create an executable instead of a library.  If no type
+    is given explicitly, the default type is ``SHARED``.
+
+  ``EXCLUDE_FROM_ALL``
+    This option has the same meaning as the :prop_tgt:`EXCLUDE_FROM_ALL`
+    target property and is forwarded to the :command:`add_library`, or
+    :command:`add_executable` command.
+
+  ``NO_IMPLICIT_LINK_TO_MATLAB_LIBRARIES``
+    .. versionadded:: 3.24
+
+    This option permits to disable the automatic linking of MATLAB
+    libraries, so that only the libraries that are actually required can be
+    linked via the ``LINK_TO`` option.
+
+.. command:: matlab_get_mex_suffix
+
+  .. versionadded:: 3.3
+
+  Returns the extension to be used for the MEX files (the suffix):
+
+  .. code-block:: cmake
+
+    matlab_get_mex_suffix(<matlab-root> <mex-suffix-var>)
+
+  The arguments are:
+
+  ``<matlab-root>``
+    The root of MATLAB/MCR installation.  For example, the value of the
+    ``Matlab_ROOT_DIR`` variable.
+
+  ``<mex-suffix-var>``
+    The name of the variable in which the suffix will be returned.
+
+  This command is platform and architecture dependent.  It should not be
+  called before the appropriate MATLAB root has been found.
+
+.. command:: matlab_add_unit_test
+
+  .. versionadded:: 3.3
+
+  Adds a MATLAB unit test file to the project's test set of CMake/CTest:
+
+  .. code-block:: cmake
+
+    matlab_add_unit_test(
+      NAME <name>
+      UNITTEST_FILE <matlab-file-containing-unittest.m>
+      [CUSTOM_TEST_COMMAND <matlab-command-to-run-as-test>]
+      [UNITTEST_PRECOMMAND <matlab-command-to-run>]
+      [TIMEOUT <timeout>]
+      [ADDITIONAL_PATH <paths>...]
+      [MATLAB_ADDITIONAL_STARTUP_OPTIONS <options>...]
+      [TEST_ARGS <args>...]
+      [NO_UNITTEST_FRAMEWORK]
+      [WORKING_DIRECTORY <dir>]
+    )
+
+  By default, the MATLAB unit test framework will be used (>= 2013a) to run
+  the added MATLAB script, but regular ``.m`` files returning an exit code
+  can be used as well (0 indicating a success).
+
+  This command requires the component ``MAIN_PROGRAM`` and hence is not
+  available for an MCR installation.
+
+  The unit test uses the MATLAB unittest framework (default, available
+  starting MATLAB 2013b+) except if the option ``NO_UNITTEST_FRAMEWORK``
+  is given.
+
+  The command expects one MATLAB test script file to be given.
+  In the case ``NO_UNITTEST_FRAMEWORK`` is given, the unittest script file
+  should contain the script to be run, plus an exit command with the exit
+  value.  This exit value will be passed to the ctest framework (0 success,
+  non 0 failure).  Additional arguments accepted by :command:`add_test` can
+  be passed through ``TEST_ARGS`` (e.g. ``CONFIGURATIONS <config> ...``).
+
+  The arguments are:
+
+  ``NAME <name>``
+    The name of the unittest in ctest.
+
+  ``UNITTEST_FILE <matlab-file-containing-unittest.m>``
+    The MATLAB unittest file.  Its path will be automatically added to the
+    MATLAB path.
+
+  ``CUSTOM_TEST_COMMAND <matlab-command-to-run-as-test>``
+    MATLAB script command to run as the test.
+    If this is not set, then the following is run:
+    ``runtests('matlab_file_name'), exit(max([ans(1,:).Failed]))`` where
+    ``matlab_file_name`` is the ``UNITTEST_FILE`` without the extension.
+
+  ``UNITTEST_PRECOMMAND <matlab-command-to-run>``
+    MATLAB script command to be ran before the file
+    containing the test (e.g. GPU device initialization based on CMake
+    variables).
+
+  ``TIMEOUT <timeout>``
+    The test timeout in seconds.  Defaults to 180 seconds as the
+    MATLAB unit test may hang.
+
+  ``ADDITIONAL_PATH <paths>...``
+    A list of paths to add to the MATLAB path prior to running the unit
+    test.
+
+  ``MATLAB_ADDITIONAL_STARTUP_OPTIONS <options>``
+    A list of additional option in order to run MATLAB from the command
+    line.  The ``-nosplash``, ``-nodesktop``, and ``-nodisplay`` options
+    are always added automatically.
+
+  ``TEST_ARGS <args>...``
+    Additional options provided to the add_test command.  These
+    options are added to the default options (e.g. ``CONFIGURATIONS Release``).
+
+  ``NO_UNITTEST_FRAMEWORK``
+    When set, indicates that the test should not
+    use the unittest framework of MATLAB (available for versions >= R2013a).
+
+  ``WORKING_DIRECTORY <dir>``
+    This will be the working directory for the test.  If specified it will
+    also be the output directory used for the log file of the test run.
+    If not specified the temporary directory ``${CMAKE_BINARY_DIR}/Matlab``
+    will be used as the working directory and the log location.
+
+Known Issues
+^^^^^^^^^^^^
+
+**Symbol clash in a MEX target**
+  By default, every symbol inside a MEX
+  file defined with the command :command:`matlab_add_mex` have hidden
+  visibility, except for the entry point.  This is the default behavior of
+  the MEX compiler, which lowers the risk of symbol collision between the
+  libraries shipped with MATLAB, and the libraries to which the MEX file is
+  linking to.  This is also the default on Windows platforms.
+
+  However, this is not sufficient in certain case, where for instance the
+  MEX file is linking against libraries that are already loaded by MATLAB,
+  even if those libraries have different SONAMES.
+  A possible solution is to hide the symbols of the libraries to which the
+  MEX target is linking to.  This can be achieved in GNU GCC compilers with
+  the linker option ``-Wl,--exclude-libs,ALL``.
+
+**Tests using GPU resources**
+  In case the MEX file is using the GPU and in order to be able to run unit
+  tests on this MEX file, the GPU resources should be properly released by
+  MATLAB.  A possible solution is to make MATLAB aware of the use of the
+  GPU resources in the session, which can be performed by a command, such
+  as ``D = gpuDevice()``, at the beginning of the test script (or via a
+  fixture).
+
+Examples
+^^^^^^^^
+
+Finding MATLAB and linking imported target to a project target:
+
+.. code-block:: cmake
+
+  find_package(Matlab)
+  target_link_libraries(example PRIVATE Matlab::mx)
 #]=======================================================================]
 
 cmake_policy(PUSH)
@@ -370,23 +829,7 @@ set(_matlab_temporary_folder ${CMAKE_BINARY_DIR}/Matlab)
 
 file(MAKE_DIRECTORY "${_matlab_temporary_folder}")
 
-#[=======================================================================[.rst:
-.. command:: matlab_get_version_from_release_name
-
-  .. code-block:: cmake
-
-    matlab_get_version_from_release_name(release version)
-
-  * Input: ``release`` is the release name (e.g. R2023b)
-  * Output: ``version`` is the version of Matlab (e.g. 23.2.0)
-
-  Returns the version of Matlab from a release name
-
-  .. note::
-
-    This command provides correct versions mappings for Matlab but not MCR.
-
-#]=======================================================================]
+# Public.
 macro(matlab_get_version_from_release_name release_name version_name)
 
   string(REGEX MATCHALL "${release_name}=([0-9]+\\.[0-9]+)" _matched ${MATLAB_VERSIONS_MAPPING})
@@ -401,24 +844,7 @@ macro(matlab_get_version_from_release_name release_name version_name)
 
 endmacro()
 
-
-#[=======================================================================[.rst:
-.. command:: matlab_get_release_name_from_version
-
-  .. code-block:: cmake
-
-    matlab_get_release_name_from_version(version release_name)
-
-  * Input: ``version`` is the version of Matlab (e.g. 23.2.0)
-  * Output: ``release_name`` is the release name (R2023b)
-
-  Returns the release name from the version of Matlab
-
-  .. note::
-
-    This command provides correct version mappings for Matlab but not MCR.
-
-#]=======================================================================]
+# Public.
 function(matlab_get_release_name_from_version version release_name)
 
   # only the major.minor version is used
@@ -435,7 +861,6 @@ function(matlab_get_release_name_from_version version release_name)
 
 endfunction()
 
-
 # extracts all the supported release names (R2022b...) of Matlab
 # internal use
 macro(matlab_get_supported_releases list_releases)
@@ -450,8 +875,6 @@ macro(matlab_get_supported_releases list_releases)
   endforeach()
   unset(_var)
 endmacro()
-
-
 
 # extracts all the supported versions of Matlab
 # internal use
@@ -468,47 +891,7 @@ macro(matlab_get_supported_versions list_versions)
   unset(_var)
 endmacro()
 
-
-#[=======================================================================[.rst:
-.. command:: matlab_extract_all_installed_versions_from_registry
-
-  This function parses the Windows registry and finds the Matlab versions that
-  are installed. The found versions are stored in a given ``<versions-var>``.
-
-  .. signature::
-    matlab_extract_all_installed_versions_from_registry(<versions-var>
-      [REGISTRY_VIEW view])
-    :target: matlab_extract_all_installed_versions_from_registry-keyword
-
-    .. versionadded:: 3.30
-
-    * Output: ``<versions-var>`` is a list of all the versions of Matlab found
-    * Input: ``REGISTRY_VIEW`` Optional registry view to use for registry
-      interaction. The argument is passed (or omitted) to
-      :command:`cmake_host_system_information` without further checks or
-      modification.
-
-  .. signature::
-    matlab_extract_all_installed_versions_from_registry(<win64> <versions-var>)
-    :target: matlab_extract_all_installed_versions_from_registry-positional
-
-    * Input: ``win64`` is a boolean to search for the 64 bit version of
-      Matlab. Set to ``ON`` to use the 64bit registry view or ``OFF`` to use the
-      32bit registry view. If finer control is needed, see signature above.
-    * Output: ``<versions-var>`` is a list of all the versions of Matlab found
-
-  The returned list contains all versions under
-  ``HKLM\SOFTWARE\Mathworks\MATLAB``,
-  ``HKLM\SOFTWARE\Mathworks\MATLAB Runtime`` and
-  ``HKLM\SOFTWARE\Mathworks\MATLAB Compiler Runtime`` or an empty list in
-  case an error occurred (or nothing found).
-
-  .. note::
-
-    Only the versions are provided. No check is made over the existence of the
-    installation referenced in the registry,
-
-#]=======================================================================]
+# Public.
 function(matlab_extract_all_installed_versions_from_registry win64_or_matlab_versions)
 
   if(NOT CMAKE_HOST_WIN32)
@@ -562,8 +945,6 @@ function(matlab_extract_all_installed_versions_from_registry win64_or_matlab_ver
 
 endfunction()
 
-
-
 # (internal)
 macro(extract_matlab_versions_from_registry_brute_force matlab_versions)
   # get the supported versions
@@ -579,32 +960,7 @@ macro(extract_matlab_versions_from_registry_brute_force matlab_versions)
   set(${matlab_versions} ${matlab_supported_versions})
 endmacro()
 
-
-#[=======================================================================[.rst:
-.. command:: matlab_get_all_valid_matlab_roots_from_registry
-
-  Populates the Matlab root with valid versions of Matlab or
-  Matlab Runtime (MCR).
-  The returned matlab_roots is organized in triplets
-  ``(type,version_number,matlab_root_path)``, where ``type``
-  indicates either ``MATLAB`` or ``MCR``.
-
-  .. code-block:: cmake
-
-    matlab_get_all_valid_matlab_roots_from_registry(matlab_versions matlab_roots [REGISTRY_VIEW view])
-
-  * Input: ``matlab_versions`` of each of the Matlab or MCR installations
-  * Output: ``matlab_roots`` location of each of the Matlab or MCR installations
-  * Input: ``REGISTRY_VIEW`` Optional registry view to use for registry
-    interaction. The argument is passed (or omitted) to
-    :command:`cmake_host_system_information` without further checks or
-    modification.
-
-  .. versionadded:: 3.30
-    The optional ``REGISTRY_VIEW`` argument was added to provide a more precise
-    interface on how to interact with the Windows Registry.
-
-#]=======================================================================]
+# Public.
 function(matlab_get_all_valid_matlab_roots_from_registry matlab_versions matlab_roots)
 
   # The matlab_versions comes either from
@@ -672,20 +1028,7 @@ function(matlab_get_all_valid_matlab_roots_from_registry matlab_versions matlab_
   set(${matlab_roots} ${_matlab_roots_list} PARENT_SCOPE)
 endfunction()
 
-#[=======================================================================[.rst:
-.. command:: matlab_get_mex_suffix
-
-  Returns the extension of the mex files (the suffixes).
-  This function should not be called before the appropriate Matlab root has
-  been found.
-
-  .. code-block:: cmake
-
-    matlab_get_mex_suffix(matlab_root mex_suffix)
-
-  * Input: ``matlab_root`` root of Matlab/MCR install e.g. ``Matlab_ROOT_DIR``
-  * Output: ``mex_suffix`` variable name in which the suffix will be returned.
-#]=======================================================================]
+# Public.
 function(matlab_get_mex_suffix matlab_root mex_suffix)
 
   # find_program does not consider script suffix .bat for Matlab mexext.bat on Windows
@@ -761,21 +1104,7 @@ function(matlab_get_mex_suffix matlab_root mex_suffix)
   set(${mex_suffix} ${_matlab_mex_extension} PARENT_SCOPE)
 endfunction()
 
-
-#[=======================================================================[.rst:
-.. command:: matlab_get_version_from_matlab_run
-
-  This function runs Matlab program specified on arguments and extracts its
-  version. If the path provided for the Matlab installation points to an MCR
-  installation, the version is extracted from the installed files.
-
-  .. code-block:: cmake
-
-    matlab_get_version_from_matlab_run(matlab_binary_path matlab_list_versions)
-
-  * Input: ``matlab_binary_path`` path of the `matlab` binary executable
-  * Output: ``matlab_list_versions`` the version extracted from Matlab
-#]=======================================================================]
+# Public.
 function(matlab_get_version_from_matlab_run matlab_binary_program matlab_list_versions)
 
   set(${matlab_list_versions} "" PARENT_SCOPE)
@@ -926,77 +1255,7 @@ function(matlab_get_version_from_matlab_run matlab_binary_program matlab_list_ve
 
 endfunction()
 
-#[=======================================================================[.rst:
-.. command:: matlab_add_unit_test
-
-  Adds a Matlab unit test to the test set of cmake/ctest.
-  This command requires the component ``MAIN_PROGRAM`` and hence is not
-  available for an MCR installation.
-
-  The unit test uses the Matlab unittest framework (default, available
-  starting Matlab 2013b+) except if the option ``NO_UNITTEST_FRAMEWORK``
-  is given.
-
-  The function expects one Matlab test script file to be given.
-  In the case ``NO_UNITTEST_FRAMEWORK`` is given, the unittest script file
-  should contain the script to be run, plus an exit command with the exit
-  value. This exit value will be passed to the ctest framework (0 success,
-  non 0 failure). Additional arguments accepted by :command:`add_test` can be
-  passed through ``TEST_ARGS`` (eg. ``CONFIGURATION <config> ...``).
-
-  .. code-block:: cmake
-
-    matlab_add_unit_test(
-        NAME <name>
-        UNITTEST_FILE matlab_file_containing_unittest.m
-        [CUSTOM_TEST_COMMAND matlab_command_to_run_as_test]
-        [UNITTEST_PRECOMMAND matlab_command_to_run]
-        [TIMEOUT timeout]
-        [ADDITIONAL_PATH path1 [path2 ...]]
-        [MATLAB_ADDITIONAL_STARTUP_OPTIONS option1 [option2 ...]]
-        [TEST_ARGS arg1 [arg2 ...]]
-        [NO_UNITTEST_FRAMEWORK]
-        )
-
-  Function Parameters:
-
-  ``NAME``
-    name of the unittest in ctest.
-  ``UNITTEST_FILE``
-    the matlab unittest file. Its path will be automatically
-    added to the Matlab path.
-  ``CUSTOM_TEST_COMMAND``
-    Matlab script command to run as the test.
-    If this is not set, then the following is run:
-    ``runtests('matlab_file_name'), exit(max([ans(1,:).Failed]))``
-    where ``matlab_file_name`` is the ``UNITTEST_FILE`` without the extension.
-  ``UNITTEST_PRECOMMAND``
-    Matlab script command to be ran before the file
-    containing the test (eg. GPU device initialization based on CMake
-    variables).
-  ``TIMEOUT``
-    the test timeout in seconds. Defaults to 180 seconds as the
-    Matlab unit test may hang.
-  ``ADDITIONAL_PATH``
-    a list of paths to add to the Matlab path prior to
-    running the unit test.
-  ``MATLAB_ADDITIONAL_STARTUP_OPTIONS``
-    a list of additional option in order
-    to run Matlab from the command line.
-    ``-nosplash -nodesktop -nodisplay`` are always added.
-  ``TEST_ARGS``
-    Additional options provided to the add_test command. These
-    options are added to the default options (eg. "CONFIGURATIONS Release")
-  ``NO_UNITTEST_FRAMEWORK``
-    when set, indicates that the test should not
-    use the unittest framework of Matlab (available for versions >= R2013a).
-  ``WORKING_DIRECTORY``
-    This will be the working directory for the test. If specified it will
-    also be the output directory used for the log file of the test run.
-    If not specified the temporary directory ``${CMAKE_BINARY_DIR}/Matlab`` will
-    be used as the working directory and the log location.
-
-#]=======================================================================]
+# Public.
 function(matlab_add_unit_test)
 
   if(NOT Matlab_MAIN_PROGRAM)
@@ -1049,93 +1308,7 @@ function(matlab_add_unit_test)
            )
 endfunction()
 
-
-#[=======================================================================[.rst:
-.. command:: matlab_add_mex
-
-  Adds a Matlab MEX target.
-  This commands compiles the given sources with the current tool-chain in
-  order to produce a MEX file. The final name of the produced output may be
-  specified, as well as additional link libraries, and a documentation entry
-  for the MEX file. Remaining arguments of the call are passed to the
-  :command:`add_library` or :command:`add_executable` command.
-
-  .. code-block:: cmake
-
-     matlab_add_mex(
-         NAME <name>
-         [EXECUTABLE | MODULE | SHARED]
-         SRC src1 [src2 ...]
-         [OUTPUT_NAME output_name]
-         [DOCUMENTATION file.txt]
-         [LINK_TO target1 target2 ...]
-         [R2017b | R2018a]
-         [EXCLUDE_FROM_ALL]
-         [NO_IMPLICIT_LINK_TO_MATLAB_LIBRARIES]
-         [...]
-     )
-
-  Function Parameters:
-
-  ``NAME``
-    name of the target.
-  ``SRC``
-    list of source files.
-  ``LINK_TO``
-    a list of additional link dependencies.  The target links to ``libmex``
-    and ``libmx`` by default, unless the
-    ``NO_IMPLICIT_LINK_TO_MATLAB_LIBRARIES`` option is passed.
-  ``OUTPUT_NAME``
-    if given, overrides the default name. The default name is
-    the name of the target without any prefix and
-    with ``Matlab_MEX_EXTENSION`` suffix.
-  ``DOCUMENTATION``
-    if given, the file ``file.txt`` will be considered as
-    being the documentation file for the MEX file. This file is copied into
-    the same folder without any processing, with the same name as the final
-    mex file, and with extension `.m`. In that case, typing ``help <name>``
-    in Matlab prints the documentation contained in this file.
-  ``R2017b`` or ``R2018a``
-    .. versionadded:: 3.14
-
-    May be given to specify the version of the C API
-    to use: ``R2017b`` specifies the traditional (separate complex) C API,
-    and corresponds to the ``-R2017b`` flag for the `mex` command. ``R2018a``
-    specifies the new interleaved complex C API, and corresponds to the
-    ``-R2018a`` flag for the `mex` command. Ignored if MATLAB version prior
-    to R2018a. Defaults to ``R2017b``.
-
-  ``MODULE`` or ``SHARED``
-    .. versionadded:: 3.7
-
-    May be given to specify the type of library to be
-    created.
-
-  ``EXECUTABLE``
-    .. versionadded:: 3.7
-
-    May be given to create an executable instead of
-    a library. If no type is given explicitly, the type is ``SHARED``.
-  ``EXCLUDE_FROM_ALL``
-    This option has the same meaning as for :prop_tgt:`EXCLUDE_FROM_ALL` and
-    is forwarded to :command:`add_library` or :command:`add_executable`
-    commands.
-  ``NO_IMPLICIT_LINK_TO_MATLAB_LIBRARIES``
-    .. versionadded:: 3.24
-
-    This option permits to disable the automatic linking of MATLAB
-    libraries, so that only the libraries that are actually required can be
-    linked via the ``LINK_TO`` option.
-
-  The documentation file is not processed and should be in the following
-  format:
-
-  ::
-
-    % This is the documentation
-    function ret = mex_target_output_name(input1)
-
-#]=======================================================================]
+# Public.
 function(matlab_add_mex)
 
   set(options EXECUTABLE MODULE SHARED R2017b R2018a EXCLUDE_FROM_ALL NO_IMPLICIT_LINK_TO_MATLAB_LIBRARIES)
@@ -1331,7 +1504,6 @@ function(matlab_add_mex)
 
 endfunction()
 
-
 # (internal)
 # Used to get the version of matlab, using caching. This basically transforms the
 # output of the root list, with possible unknown version, to a version
@@ -1477,7 +1649,6 @@ function(_Matlab_get_version_from_root matlab_root matlab_or_mcr matlab_known_ve
 
 endfunction()
 
-
 function(_Matlab_VersionInfoXML matlab_root _version)
 
   set(_ver "unknown")
@@ -1495,7 +1666,6 @@ function(_Matlab_VersionInfoXML matlab_root _version)
   set(${_version} ${_ver} PARENT_SCOPE)
 
 endfunction()
-
 
 # Utility function for finding Matlab or MCR on Win32
 function(_Matlab_find_instances_win32 matlab_roots)
@@ -1819,7 +1989,6 @@ else()
 endif()
 
 
-
 set(MATLAB_INCLUDE_DIR_TO_LOOK ${Matlab_ROOT_DIR}/extern/include)
 if(CMAKE_SIZEOF_VOID_P EQUAL 4)
   set(_matlab_current_suffix ${_matlab_bin_suffix_32bits})
@@ -1850,8 +2019,6 @@ endif()
 if(MATLAB_FIND_DEBUG)
   message(STATUS "[MATLAB] _matlab_lib_prefix_for_search = ${_matlab_lib_prefix_for_search} | _matlab_lib_dir_for_search = ${_matlab_lib_dir_for_search}")
 endif()
-
-
 
 # internal
 # This small stub around find_library is to prevent any pollution of CMAKE_FIND_LIBRARY_PREFIXES in the global scope.
