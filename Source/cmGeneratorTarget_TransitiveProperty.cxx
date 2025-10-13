@@ -15,8 +15,9 @@
 #include <cm/string_view>
 #include <cmext/string_view>
 
+#include "cmGenExContext.h"
+#include "cmGenExEvaluation.h"
 #include "cmGeneratorExpression.h"
-#include "cmGeneratorExpressionContext.h"
 #include "cmGeneratorExpressionDAGChecker.h"
 #include "cmGeneratorExpressionNode.h"
 #include "cmLinkItem.h"
@@ -29,6 +30,11 @@
 namespace {
 using UseTo = cmGeneratorTarget::UseTo;
 using TransitiveProperty = cmGeneratorTarget::TransitiveProperty;
+
+bool ComputingLinkLibraries(cmGeneratorExpressionDAGChecker const* dagChecker)
+{
+  return dagChecker && dagChecker->IsComputingLinkLibraries();
+}
 }
 
 std::map<cm::string_view, TransitiveProperty> const
@@ -54,11 +60,11 @@ std::map<cm::string_view, TransitiveProperty> const
       { "INTERFACE_SYSTEM_INCLUDE_DIRECTORIES"_s, UseTo::Compile } },
   };
 
-bool cmGeneratorTarget::MaybeHaveInterfaceProperty(
-  std::string const& prop, cmGeneratorExpressionContext* context,
-  UseTo usage) const
+bool cmGeneratorTarget::MaybeHaveInterfaceProperty(std::string const& prop,
+                                                   cm::GenEx::Evaluation* eval,
+                                                   UseTo usage) const
 {
-  std::string const key = prop + '@' + context->Config;
+  std::string const key = prop + '@' + eval->Context.Config;
   auto i = this->MaybeInterfacePropertyExists.find(key);
   if (i == this->MaybeInterfacePropertyExists.end()) {
     // Insert an entry now in case there is a cycle.
@@ -71,9 +77,9 @@ bool cmGeneratorTarget::MaybeHaveInterfaceProperty(
     // Otherwise, recurse to interface dependencies.
     if (!maybeInterfaceProp) {
       cmGeneratorTarget const* headTarget =
-        context->HeadTarget ? context->HeadTarget : this;
+        eval->HeadTarget ? eval->HeadTarget : this;
       if (cmLinkInterfaceLibraries const* iface =
-            this->GetLinkInterfaceLibraries(context->Config, headTarget,
+            this->GetLinkInterfaceLibraries(eval->Context.Config, headTarget,
                                             usage)) {
         if (iface->HadHeadSensitiveCondition) {
           // With a different head target we may get to a library with
@@ -84,7 +90,7 @@ bool cmGeneratorTarget::MaybeHaveInterfaceProperty(
           // head target, so we can follow them.
           for (cmLinkItem const& lib : iface->Libraries) {
             if (lib.Target &&
-                lib.Target->MaybeHaveInterfaceProperty(prop, context, usage)) {
+                lib.Target->MaybeHaveInterfaceProperty(prop, eval, usage)) {
               maybeInterfaceProp = true;
               break;
             }
@@ -97,13 +103,13 @@ bool cmGeneratorTarget::MaybeHaveInterfaceProperty(
 }
 
 std::string cmGeneratorTarget::EvaluateInterfaceProperty(
-  std::string const& prop, cmGeneratorExpressionContext* context,
+  std::string const& prop, cm::GenEx::Evaluation* eval,
   cmGeneratorExpressionDAGChecker* dagCheckerParent, UseTo usage) const
 {
   std::string result;
 
   // If the property does not appear transitively at all, we are done.
-  if (!this->MaybeHaveInterfaceProperty(prop, context, usage)) {
+  if (!this->MaybeHaveInterfaceProperty(prop, eval, usage)) {
     return result;
   }
 
@@ -111,18 +117,12 @@ std::string cmGeneratorTarget::EvaluateInterfaceProperty(
   // a subset of TargetPropertyNode::Evaluate without stringify/parse steps
   // but sufficient for transitive interface properties.
   cmGeneratorExpressionDAGChecker dagChecker{
-    this,
-    prop,
-    nullptr,
-    dagCheckerParent,
-    context->LG,
-    context->Config,
-    context->Backtrace,
+    this, prop, nullptr, dagCheckerParent, eval->Context, eval->Backtrace,
   };
   switch (dagChecker.Check()) {
     case cmGeneratorExpressionDAGChecker::SELF_REFERENCE:
       dagChecker.ReportError(
-        context, "$<TARGET_PROPERTY:" + this->GetName() + "," + prop + ">");
+        eval, "$<TARGET_PROPERTY:" + this->GetName() + "," + prop + ">");
       return result;
     case cmGeneratorExpressionDAGChecker::CYCLIC_REFERENCE:
       // No error. We just skip cyclic references.
@@ -134,17 +134,16 @@ std::string cmGeneratorTarget::EvaluateInterfaceProperty(
   }
 
   cmGeneratorTarget const* headTarget =
-    context->HeadTarget ? context->HeadTarget : this;
+    eval->HeadTarget ? eval->HeadTarget : this;
 
   if (cmValue p = this->GetProperty(prop)) {
     result = cmGeneratorExpressionNode::EvaluateDependentExpression(
-      *p, context->LG, context, headTarget, &dagChecker, this);
+      *p, eval, headTarget, &dagChecker, this);
   }
 
-  if (cmLinkInterfaceLibraries const* iface =
-        this->GetLinkInterfaceLibraries(context->Config, headTarget, usage)) {
-    context->HadContextSensitiveCondition =
-      context->HadContextSensitiveCondition ||
+  if (cmLinkInterfaceLibraries const* iface = this->GetLinkInterfaceLibraries(
+        eval->Context.Config, headTarget, usage)) {
+    eval->HadContextSensitiveCondition = eval->HadContextSensitiveCondition ||
       iface->HadContextSensitiveCondition;
     for (cmLinkItem const& lib : iface->Libraries) {
       // Broken code can have a target in its own link interface.
@@ -154,12 +153,11 @@ std::string cmGeneratorTarget::EvaluateInterfaceProperty(
         // Pretend $<TARGET_PROPERTY:lib.Target,prop> appeared in the
         // above property and hand-evaluate it as if it were compiled.
         // Create a context as cmCompiledGeneratorExpression::Evaluate does.
-        cmGeneratorExpressionContext libContext(
-          context->LG, context->Config, context->Quiet, headTarget, this,
-          context->EvaluateForBuildsystem, context->Backtrace,
-          context->Language);
+        cm::GenEx::Evaluation libEval(eval->Context, eval->Quiet, headTarget,
+                                      this, eval->EvaluateForBuildsystem,
+                                      eval->Backtrace);
         std::string libResult = cmGeneratorExpression::StripEmptyListElements(
-          lib.Target->EvaluateInterfaceProperty(prop, &libContext, &dagChecker,
+          lib.Target->EvaluateInterfaceProperty(prop, &libEval, &dagChecker,
                                                 usage));
         if (!libResult.empty()) {
           if (result.empty()) {
@@ -170,12 +168,11 @@ std::string cmGeneratorTarget::EvaluateInterfaceProperty(
             result += libResult;
           }
         }
-        context->HadContextSensitiveCondition =
-          context->HadContextSensitiveCondition ||
-          libContext.HadContextSensitiveCondition;
-        context->HadHeadSensitiveCondition =
-          context->HadHeadSensitiveCondition ||
-          libContext.HadHeadSensitiveCondition;
+        eval->HadContextSensitiveCondition =
+          eval->HadContextSensitiveCondition ||
+          libEval.HadContextSensitiveCondition;
+        eval->HadHeadSensitiveCondition =
+          eval->HadHeadSensitiveCondition || libEval.HadHeadSensitiveCondition;
       }
     }
   }
@@ -185,7 +182,7 @@ std::string cmGeneratorTarget::EvaluateInterfaceProperty(
 
 cm::optional<cmGeneratorTarget::TransitiveProperty>
 cmGeneratorTarget::IsTransitiveProperty(
-  cm::string_view prop, cmLocalGenerator const* lg, std::string const& config,
+  cm::string_view prop, cm::GenEx::Context const& context,
   cmGeneratorExpressionDAGChecker const* dagChecker) const
 {
   cm::optional<TransitiveProperty> result;
@@ -200,26 +197,25 @@ cmGeneratorTarget::IsTransitiveProperty(
   if (i != BuiltinTransitiveProperties.end() &&
       // Look up CMP0189 in the context where evaluation occurs,
       // not where the target was created.
-      lg->GetPolicyStatus(cmPolicies::CMP0189) != cmPolicies::NEW &&
-      prop == "LINK_LIBRARIES"_s) {
+      context.GetCMP0189() != cmPolicies::NEW && prop == "LINK_LIBRARIES"_s) {
     i = BuiltinTransitiveProperties.end();
   }
   if (i != BuiltinTransitiveProperties.end()) {
     result = i->second;
     if (result->Usage != cmGeneratorTarget::UseTo::Compile) {
       cmPolicies::PolicyStatus cmp0166 =
-        lg->GetPolicyStatus(cmPolicies::CMP0166);
+        context.LG->GetPolicyStatus(cmPolicies::CMP0166);
       if ((cmp0166 == cmPolicies::WARN || cmp0166 == cmPolicies::OLD) &&
           (prop == "LINK_DIRECTORIES"_s || prop == "LINK_DEPENDS"_s ||
            prop == "LINK_OPTIONS"_s)) {
         result->Usage = cmGeneratorTarget::UseTo::Compile;
       }
     }
-  } else if (!dagChecker || !dagChecker->IsComputingLinkLibraries()) {
+  } else if (!ComputingLinkLibraries(dagChecker)) {
     // Honor TRANSITIVE_COMPILE_PROPERTIES and TRANSITIVE_LINK_PROPERTIES
     // from the link closure when we are not evaluating the closure itself.
     CustomTransitiveProperties const& ctp =
-      this->GetCustomTransitiveProperties(config, propertyFor);
+      this->GetCustomTransitiveProperties(context.Config, propertyFor);
     auto ci = ctp.find(std::string(prop));
     if (ci != ctp.end()) {
       result = ci->second;

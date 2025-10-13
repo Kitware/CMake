@@ -257,15 +257,16 @@ function(_GNUInstallDirs_cache_path var description)
   if(COMMAND _GNUInstallDirs_${var}_get_default)
     # Check if the current CMAKE_INSTALL_PREFIX is the same as before
     set(install_prefix_is_same TRUE)
-    set(last_default "${default}")
-    if(NOT DEFINED _GNUInstallDirs_LAST_CMAKE_INSTALL_PREFIX
-        OR NOT _GNUInstallDirs_LAST_CMAKE_INSTALL_PREFIX STREQUAL CMAKE_INSTALL_PREFIX)
+    unset(last_default)
+    if(DEFINED _GNUInstallDirs_LAST_CMAKE_INSTALL_PREFIX
+        AND NOT _GNUInstallDirs_LAST_CMAKE_INSTALL_PREFIX STREQUAL CMAKE_INSTALL_PREFIX)
       set(install_prefix_is_same FALSE)
       # Recalculate what the last default would have been
       cmake_language(CALL _GNUInstallDirs_${var}_get_default
         last_default
         "${_GNUInstallDirs_LAST_CMAKE_INSTALL_PREFIX}")
     endif()
+
     if(DEFINED CACHE{${cmake_install_var}} AND install_prefix_is_same)
       # If the cache variable was already set from a previous run and the
       # install prefix has not changed, we don't need to do anything
@@ -278,6 +279,7 @@ function(_GNUInstallDirs_cache_path var description)
       # if the current value is the same as the cache value and the same as
       # the old default, reset the value to the new default
       if(${cmake_install_var} STREQUAL "$CACHE{${cmake_install_var}}"
+          AND DEFINED last_default
           AND ${cmake_install_var} STREQUAL last_default)
         set(full_description "${description} (${default})")
         set_property(CACHE ${cmake_install_var} PROPERTY TYPE PATH)

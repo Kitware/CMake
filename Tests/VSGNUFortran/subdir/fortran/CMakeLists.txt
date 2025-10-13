@@ -26,7 +26,12 @@ target_link_libraries(sunq sunquad)
 endfunction()
 
 if(CMAKE_Fortran_COMPILER_ID STREQUAL "LFortran")
-  add_compile_options(--implicit-interface --generate-object-code)
+  if(CMAKE_Fortran_COMPILER_VERSION VERSION_GREATER_EQUAL "0.55")
+    set(_LFORTRAN_SC_FLAG --separate-compilation)
+  else()
+    set(_LFORTRAN_SC_FLAG --generate-object-code)
+  endif()
+  add_compile_options(--implicit-interface ${_LFORTRAN_SC_FLAG})
 endif()
 
 # check for the fortran c interface mangling

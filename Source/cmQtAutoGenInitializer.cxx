@@ -31,6 +31,7 @@
 #include "cmCustomCommand.h"
 #include "cmCustomCommandLines.h"
 #include "cmEvaluatedTargetProperty.h"
+#include "cmGenExContext.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorExpressionDAGChecker.h"
@@ -1966,25 +1967,24 @@ bool cmQtAutoGenInitializer::SetupWriteAutogenInfo()
     if (this->MultiConfig) {
       for (auto const& cfg : this->ConfigsList) {
         if (!cfg.empty()) {
+          cm::GenEx::Context context(this->LocalGen, cfg, "CXX");
           cmGeneratorExpressionDAGChecker dagChecker{
-            this->GenTarget, "AUTOMOC_MACRO_NAMES", nullptr,
-            nullptr,         this->LocalGen,        cfg,
+            this->GenTarget, "AUTOMOC_MACRO_NAMES", nullptr, nullptr, context,
           };
-          AddInterfaceEntries(this->GenTarget, cfg,
-                              "INTERFACE_AUTOMOC_MACRO_NAMES", "CXX",
-                              &dagChecker, InterfaceAutoMocMacroNamesEntries,
+          AddInterfaceEntries(this->GenTarget, "INTERFACE_AUTOMOC_MACRO_NAMES",
+                              context, &dagChecker,
+                              InterfaceAutoMocMacroNamesEntries,
                               IncludeRuntimeInterface::Yes);
         }
       }
     } else {
+      cm::GenEx::Context context(this->LocalGen, this->ConfigDefault, "CXX");
       cmGeneratorExpressionDAGChecker dagChecker{
-        this->GenTarget, "AUTOMOC_MACRO_NAMES", nullptr,
-        nullptr,         this->LocalGen,        this->ConfigDefault,
+        this->GenTarget, "AUTOMOC_MACRO_NAMES", nullptr, nullptr, context,
       };
-      AddInterfaceEntries(this->GenTarget, this->ConfigDefault,
-                          "INTERFACE_AUTOMOC_MACRO_NAMES", "CXX", &dagChecker,
-                          InterfaceAutoMocMacroNamesEntries,
-                          IncludeRuntimeInterface::Yes);
+      AddInterfaceEntries(
+        this->GenTarget, "INTERFACE_AUTOMOC_MACRO_NAMES", context, &dagChecker,
+        InterfaceAutoMocMacroNamesEntries, IncludeRuntimeInterface::Yes);
     }
 
     for (auto const& entry : InterfaceAutoMocMacroNamesEntries.Entries) {

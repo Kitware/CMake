@@ -234,3 +234,12 @@ Changes made since CMake 4.1.0 include the following.
 * This version made no changes to documented features or interfaces.
   Some implementation updates were made to support ecosystem changes
   and/or fix regressions.
+
+4.1.2
+-----
+
+* The :command:`file(GENERATE)` command, when evaluating generator
+  expressions, now uses the value of policy :policy:`CMP0189` as of
+  each call site.  Previously, it used the value as of the end of the
+  directory's ``CMakeLists.txt``, as all other generator expression
+  evaluations do.

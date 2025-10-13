@@ -17,6 +17,7 @@
 #include <cmext/algorithm>
 
 #include "cmEvaluatedTargetProperty.h"
+#include "cmGenExContext.h"
 #include "cmGeneratorExpressionDAGChecker.h"
 #include "cmGlobalGenerator.h"
 #include "cmLinkItem.h"
@@ -44,16 +45,12 @@ std::string AddLangSpecificInterfaceIncludeDirectories(
   cmGeneratorTarget const* root, cmGeneratorTarget const* target,
   std::string const& lang, std::string const& config,
   std::string const& propertyName, IncludeDirectoryFallBack mode,
-  cmGeneratorExpressionDAGChecker* context)
+  cmGeneratorExpressionDAGChecker* dagCheckerParent)
 {
+  cm::GenEx::Context context(target->LocalGenerator, config);
   cmGeneratorExpressionDAGChecker dagChecker{
-    target,
-    propertyName,
-    nullptr,
-    context,
-    target->GetLocalGenerator(),
-    config,
-    target->GetBacktrace(),
+    target,           propertyName, nullptr,
+    dagCheckerParent, context,      target->GetBacktrace(),
   };
   switch (dagChecker.Check()) {
     case cmGeneratorExpressionDAGChecker::SELF_REFERENCE:
@@ -103,14 +100,9 @@ void AddLangSpecificImplicitIncludeDirectories(
 {
   if (auto const* libraries =
         target->GetLinkImplementationLibraries(config, UseTo::Compile)) {
+    cm::GenEx::Context context(target->LocalGenerator, config, lang);
     cmGeneratorExpressionDAGChecker dagChecker{
-      target,
-      propertyName,
-      nullptr,
-      nullptr,
-      target->GetLocalGenerator(),
-      config,
-      target->GetBacktrace(),
+      target, propertyName, nullptr, nullptr, context, target->GetBacktrace(),
     };
 
     for (cmLinkImplItem const& library : libraries->Libraries) {
@@ -137,8 +129,8 @@ void AddLangSpecificImplicitIncludeDirectories(
           }
 
           cmExpandList(AddLangSpecificInterfaceIncludeDirectories(
-                         target, dependency, lang, config, propertyName, mode,
-                         &dagChecker),
+                         target, dependency, context.Language, context.Config,
+                         propertyName, mode, &dagChecker),
                        entry.Values);
           entries.Entries.emplace_back(std::move(entry));
         }
@@ -231,9 +223,10 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetIncludeDirectories(
   std::vector<BT<std::string>> includes;
   std::unordered_set<std::string> uniqueIncludes;
 
+  cm::GenEx::Context context(this->LocalGenerator, config, lang);
+
   cmGeneratorExpressionDAGChecker dagChecker{
-    this,    "INCLUDE_DIRECTORIES", nullptr,
-    nullptr, this->LocalGenerator,  config,
+    this, "INCLUDE_DIRECTORIES", nullptr, nullptr, context,
   };
 
   cmList debugProperties{ this->Makefile->GetDefinition(
@@ -244,7 +237,7 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetIncludeDirectories(
   this->DebugIncludesDone = true;
 
   EvaluatedTargetPropertyEntries entries = EvaluateTargetPropertyEntries(
-    this, config, lang, &dagChecker, this->IncludeDirectoriesEntries);
+    this, context, &dagChecker, this->IncludeDirectoriesEntries);
 
   if (lang == "Swift") {
     AddLangSpecificImplicitIncludeDirectories(
@@ -271,7 +264,7 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetIncludeDirectories(
       entries);
   }
 
-  AddInterfaceEntries(this, config, "INTERFACE_INCLUDE_DIRECTORIES", lang,
+  AddInterfaceEntries(this, "INTERFACE_INCLUDE_DIRECTORIES", context,
                       &dagChecker, entries, IncludeRuntimeInterface::Yes);
 
   processIncludeDirectories(this, entries, includes, uniqueIncludes,
