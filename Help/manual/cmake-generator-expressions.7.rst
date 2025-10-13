@@ -284,20 +284,8 @@ This section covers the primary and most widely used comparison types.
 Other more specific comparison types are documented in their own separate
 sections further below.
 
-String Comparisons
-^^^^^^^^^^^^^^^^^^
-
-.. genex:: $<STREQUAL:string1,string2>
-
-  ``1`` if ``string1`` and ``string2`` are equal, else ``0``.
-  The comparison is case-sensitive.  For a case-insensitive comparison,
-  combine with a :ref:`string transforming generator expression
-  <String Transforming Generator Expressions>`.  For example, the following
-  evaluates to ``1`` if ``${foo}`` is any of ``BAR``, ``Bar``, ``bar``, etc.
-
-  .. code-block:: cmake
-
-    $<STREQUAL:$<UPPER_CASE:${foo}>,BAR>
+Numeric Comparisons
+^^^^^^^^^^^^^^^^^^^
 
 .. genex:: $<EQUAL:value1,value2>
 
@@ -330,10 +318,57 @@ Version Comparisons
 
   ``1`` if ``v1`` is a version greater than or equal to ``v2``, else ``0``.
 
-.. _`String Transforming Generator Expressions`:
+String Expressions
+------------------
+
+.. _`String Comparisons Generator Expressions`:
+
+String Comparisons
+^^^^^^^^^^^^^^^^^^
+
+The comparisons are case-sensitive.  For a case-insensitive comparison,
+combine with a :ref:`string transforming generator expression
+<String Transforming Generator Expressions>`.  For example, the following
+evaluates to ``1`` if ``${foo}`` is any of ``BAR``, ``Bar``, ``bar``, etc.
+
+  .. code-block:: cmake
+
+    $<STREQUAL:$<UPPER_CASE:${foo}>,BAR>
+
+.. genex:: $<STREQUAL:string1,string2>
+
+  ``1`` if ``string1`` and ``string2`` are lexicographically equal, else ``0``.
+
+.. genex:: $<STRLESS:string1,string2>
+
+  .. versionadded:: 4.3
+
+  ``1`` if ``string1`` is lexicographically less than ``string2``, else ``0``.
+
+.. genex:: $<STRGREATER:string1,string2>
+
+  .. versionadded:: 4.3
+
+  ``1`` if ``string1`` is lexicographically greater than ``string2``, else
+  ``0``.
+
+.. genex:: $<STRLESS_EQUAL:string1,string2>
+
+  .. versionadded:: 4.3
+
+  ``1`` if ``string1`` is lexicographically less than or equal to ``string2``,
+  else ``0``.
+
+.. genex:: $<STRGREATER_EQUAL:string1,string2>
+
+  .. versionadded:: 4.3
+
+  ``1`` if ``string1`` is lexicographically greater than or equal to
+  ``string2``, else ``0``.
+
 
 String Transformations
-----------------------
+^^^^^^^^^^^^^^^^^^^^^^
 
 .. genex:: $<LOWER_CASE:string>
 
@@ -343,7 +378,7 @@ String Transformations
 
   Content of ``string`` converted to upper case.
 
-.. genex:: $<MAKE_C_IDENTIFIER:...>
+.. genex:: $<MAKE_C_IDENTIFIER:string>
 
   Content of ``...`` converted to a C identifier.  The conversion follows the
   same behavior as :command:`string(MAKE_C_IDENTIFIER)`.

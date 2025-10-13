@@ -26,6 +26,7 @@
 #include "cmsys/String.h"
 
 #include "cmCMakePath.h"
+#include "cmCMakeString.hxx"
 #include "cmComputeLinkInformation.h"
 #include "cmGenExContext.h"
 #include "cmGenExEvaluation.h"
@@ -265,9 +266,84 @@ static const struct StrEqualNode : public cmGeneratorExpressionNode
     GeneratorExpressionContent const* /*content*/,
     cmGeneratorExpressionDAGChecker* /*dagChecker*/) const override
   {
-    return parameters.front() == parameters[1] ? "1" : "0";
+    return cm::CMakeString{ parameters.front() }.Compare(
+             cm::CMakeString::CompOperator::EQUAL, parameters[1])
+      ? "1"
+      : "0";
   }
 } strEqualNode;
+static const struct StrLessNode : public cmGeneratorExpressionNode
+{
+  StrLessNode() {} // NOLINT(modernize-use-equals-default)
+
+  int NumExpectedParameters() const override { return 2; }
+
+  std::string Evaluate(
+    std::vector<std::string> const& parameters,
+    cm::GenEx::Evaluation* /*eval*/,
+    GeneratorExpressionContent const* /*content*/,
+    cmGeneratorExpressionDAGChecker* /*dagChecker*/) const override
+  {
+    return cm::CMakeString{ parameters.front() }.Compare(
+             cm::CMakeString::CompOperator::LESS, parameters[1])
+      ? "1"
+      : "0";
+  }
+} strLessNode;
+static const struct StrLessEqualNode : public cmGeneratorExpressionNode
+{
+  StrLessEqualNode() {} // NOLINT(modernize-use-equals-default)
+
+  int NumExpectedParameters() const override { return 2; }
+
+  std::string Evaluate(
+    std::vector<std::string> const& parameters,
+    cm::GenEx::Evaluation* /*eval*/,
+    GeneratorExpressionContent const* /*content*/,
+    cmGeneratorExpressionDAGChecker* /*dagChecker*/) const override
+  {
+    return cm::CMakeString{ parameters.front() }.Compare(
+             cm::CMakeString::CompOperator::LESS_EQUAL, parameters[1])
+      ? "1"
+      : "0";
+  }
+} strLessEqualNode;
+static const struct StrGreaterNode : public cmGeneratorExpressionNode
+{
+  StrGreaterNode() {} // NOLINT(modernize-use-equals-default)
+
+  int NumExpectedParameters() const override { return 2; }
+
+  std::string Evaluate(
+    std::vector<std::string> const& parameters,
+    cm::GenEx::Evaluation* /*eval*/,
+    GeneratorExpressionContent const* /*content*/,
+    cmGeneratorExpressionDAGChecker* /*dagChecker*/) const override
+  {
+    return cm::CMakeString{ parameters.front() }.Compare(
+             cm::CMakeString::CompOperator::GREATER, parameters[1])
+      ? "1"
+      : "0";
+  }
+} strGreaterNode;
+static const struct StrGreaterEqualNode : public cmGeneratorExpressionNode
+{
+  StrGreaterEqualNode() {} // NOLINT(modernize-use-equals-default)
+
+  int NumExpectedParameters() const override { return 2; }
+
+  std::string Evaluate(
+    std::vector<std::string> const& parameters,
+    cm::GenEx::Evaluation* /*eval*/,
+    GeneratorExpressionContent const* /*content*/,
+    cmGeneratorExpressionDAGChecker* /*dagChecker*/) const override
+  {
+    return cm::CMakeString{ parameters.front() }.Compare(
+             cm::CMakeString::CompOperator::GREATER_EQUAL, parameters[1])
+      ? "1"
+      : "0";
+  }
+} strGreaterEqualNode;
 
 static const struct EqualNode : public cmGeneratorExpressionNode
 {
@@ -4872,6 +4948,10 @@ cmGeneratorExpressionNode const* cmGeneratorExpressionNode::GetNode(
     { "TARGET_BUNDLE_DIR_NAME", &targetBundleDirNameNode },
     { "TARGET_BUNDLE_CONTENT_DIR", &targetBundleContentDirNode },
     { "STREQUAL", &strEqualNode },
+    { "STRLESS", &strLessNode },
+    { "STRLESS_EQUAL", &strLessEqualNode },
+    { "STRGREATER", &strGreaterNode },
+    { "STRGREATER_EQUAL", &strGreaterEqualNode },
     { "EQUAL", &equalNode },
     { "IN_LIST", &inListNode },
     { "FILTER", &filterNode },

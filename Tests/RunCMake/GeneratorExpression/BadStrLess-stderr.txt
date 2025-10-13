@@ -1,0 +1,40 @@
+CMake Error at BadStrLess.cmake:1 \(add_custom_target\):
+  Error evaluating generator expression:
+
+    \$<STRLESS>
+
+  \$<STRLESS> expression requires 2 comma separated parameters, but got 0
+  instead.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
++CMake Error at BadStrLess.cmake:1 \(add_custom_target\):
+  Error evaluating generator expression:
+
+    \$<STRLESS:>
+
+  \$<STRLESS> expression requires 2 comma separated parameters, but got 1
+  instead.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
++
+CMake Error at BadStrLess.cmake:1 \(add_custom_target\):
+  Error evaluating generator expression:
+
+    \$<STRLESS:,,>
+
+  \$<STRLESS> expression requires 2 comma separated parameters, but got 3
+  instead.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
++
+CMake Error at BadStrLess.cmake:1 \(add_custom_target\):
+  Error evaluating generator expression:
+
+    \$<STRLESS:something,,>
+
+  \$<STRLESS> expression requires 2 comma separated parameters, but got 3
+  instead.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
++
+CMake Generate step failed\.  Build files cannot be regenerated correctly\.$
