@@ -1,1 +1,1 @@
-#include "checker.h"
+#include "checker.c"
