@@ -1543,8 +1543,8 @@ void cmGlobalFastbuildGenerator::AddGlobCheckExec()
     FastbuildExecNode globCheck;
     globCheck.Name = FASTBUILD_GLOB_CHECK_TARGET;
     globCheck.ExecExecutable = cmSystemTools::GetCMakeCommand();
-    globCheck.ExecArguments = "-P " FASTBUILD_1_INPUT_PLACEHOLDER;
-    globCheck.ExecInput = { this->ConvertToFastbuildPath(globScript) };
+    globCheck.ExecArguments =
+      cmStrCat("-P ", this->ConvertToFastbuildPath(globScript));
     globCheck.ExecAlways = false;
     globCheck.ExecUseStdOutAsOutput = false;
     auto const cache = this->GetCMakeInstance()->GetGlobCacheEntries();
