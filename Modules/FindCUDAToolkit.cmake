@@ -687,7 +687,43 @@ else()
         # If NVCC exists  then invoke it to find the toolkit location.
         # This allows us to support wrapper scripts (e.g. ccache or colornvcc), CUDA Toolkit,
         # NVIDIA HPC SDK, and distro's splayed layouts
-        execute_process(COMMAND ${CUDAToolkit_NVCC_EXECUTABLE} "-v" "__cmake_determine_cuda"
+
+
+        #Allow the user to specify a host compiler except for Visual Studio
+        if(NOT $ENV{CUDAHOSTCXX} STREQUAL "")
+          get_filename_component(CUDAToolkit_CUDA_HOST_COMPILER $ENV{CUDAHOSTCXX} PROGRAM)
+          if(NOT EXISTS ${CUDAToolkit_CUDA_HOST_COMPILER})
+            message(FATAL_ERROR "Could not find compiler set in environment variable CUDAHOSTCXX:\n$ENV{CUDAHOSTCXX}.\n${CUDAToolkit_CUDA_HOST_COMPILER}")
+          endif()
+        elseif(CUDAToolkit_CUDA_HOST_COMPILER)
+          # We get here if CUDAToolkit_CUDA_HOST_COMPILER was specified by the user or toolchain file.
+          if(IS_ABSOLUTE "${CUDAToolkit_CUDA_HOST_COMPILER}")
+            # Convert to forward slashes.
+            cmake_path(CONVERT "${CUDAToolkit_CUDA_HOST_COMPILER}" TO_CMAKE_PATH_LIST CUDAToolkit_CUDA_HOST_COMPILER NORMALIZE)
+          else()
+            # Convert to absolute path so changes in `PATH` do not impact CUDA compilation.
+            find_program(_CUDAToolkit_CUDA_HOST_COMPILER_PATH NO_CACHE NAMES "${CUDAToolkit_CUDA_HOST_COMPILER}")
+            if(_CUDAToolkit_CUDA_HOST_COMPILER_PATH)
+              set(CUDAToolkit_CUDA_HOST_COMPILER "${_CUDAToolkit_CUDA_HOST_COMPILER_PATH}")
+            endif()
+            unset(_CUDAToolkit_CUDA_HOST_COMPILER_PATH)
+          endif()
+          if(NOT EXISTS "${CUDAToolkit_CUDA_HOST_COMPILER}")
+            message(FATAL_ERROR "Could not find compiler set in variable CUDAToolkit_CUDA_HOST_COMPILER:\n  ${CUDAToolkit_CUDA_HOST_COMPILER}")
+          endif()
+          # If the value was cached, update the cache entry with our modifications.
+          get_property(_CUDAToolkit_CUDA_HOST_COMPILER_CACHED CACHE CUDAToolkit_CUDA_HOST_COMPILER PROPERTY TYPE)
+          if(_CUDAToolkit_CUDA_HOST_COMPILER_CACHED)
+            set_property(CACHE CUDAToolkit_CUDA_HOST_COMPILER PROPERTY VALUE "${CUDAToolkit_CUDA_HOST_COMPILER}")
+            mark_as_advanced(CUDAToolkit_CUDA_HOST_COMPILER)
+          endif()
+          unset(_CUDAToolkit_CUDA_HOST_COMPILER_CACHED)
+        endif()
+
+        if(CUDAToolkit_CUDA_HOST_COMPILER)
+          set(nvcc_ccbin_flag "-ccbin=${CUDAToolkit_CUDA_HOST_COMPILER}")
+        endif()
+        execute_process(COMMAND ${CUDAToolkit_NVCC_EXECUTABLE} "${nvcc_ccbin_flag}" "-v" "__cmake_determine_cuda"
           OUTPUT_VARIABLE _CUDA_NVCC_OUT ERROR_VARIABLE _CUDA_NVCC_OUT)
         message(CONFIGURE_LOG
           "Executed nvcc to extract CUDAToolkit information:\n${_CUDA_NVCC_OUT}\n\n")
@@ -971,8 +1007,9 @@ else()
   endif()
 endif()
 
-# Find target directory when crosscompiling.
-if(CMAKE_CROSSCOMPILING)
+# Figure out the target directory when either crosscompiling
+# or if we don't have `nvcc` and need to deduce the target arch
+if(CMAKE_CROSSCOMPILING OR NOT CUDAToolkit_NVCC_EXECUTABLE)
   # When a language is enabled we can use its compiler's target architecture.
   if(CMAKE_CUDA_COMPILER_LOADED AND CMAKE_CUDA_COMPILER_ARCHITECTURE_ID)
     set(_CUDA_TARGET_PROCESSOR "${CMAKE_CUDA_COMPILER_ARCHITECTURE_ID}")
@@ -982,7 +1019,7 @@ if(CMAKE_CROSSCOMPILING)
     set(_CUDA_TARGET_PROCESSOR "${CMAKE_C_COMPILER_ARCHITECTURE_ID}")
   elseif(CMAKE_SYSTEM_PROCESSOR)
     set(_CUDA_TARGET_PROCESSOR "${CMAKE_SYSTEM_PROCESSOR}")
-  else()
+  elseif(CMAKE_CROSSCOMPILING)
     message(FATAL_ERROR "Cross-compiling with the CUDA toolkit requires CMAKE_SYSTEM_PROCESSOR to be set.")
   endif()
   # Keep in sync with equivalent table in CMakeDetermineCUDACompiler and FindCUDA!
@@ -1013,11 +1050,16 @@ if(CMAKE_CROSSCOMPILING)
       # Mark that we need to pop the root search path changes after we have
       # found all cuda libraries so that searches for our cross-compilation
       # libraries work when another cuda sdk is in CMAKE_PREFIX_PATH or
-      # PATh
+      # PATH
       set(_CUDAToolkit_Pop_ROOT_PATH True)
       break()
     endif()
   endforeach()
+endif()
+
+ #If not already set we simply use the toolkit root
+if(NOT CUDAToolkit_TARGET_DIR)
+  set(CUDAToolkit_TARGET_DIR "${CUDAToolkit_ROOT_DIR}")
 endif()
 
 # Determine windows search path suffix for libraries
@@ -1027,19 +1069,6 @@ if(CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")
     set(_CUDAToolkit_win_stub_search_dirs lib/x64/stubs)
   endif()
 endif()
-
-# If not already set we can simply use the toolkit root or it's a scattered installation.
-if(NOT CUDAToolkit_TARGET_DIR)
-  # Not cross compiling
-  set(CUDAToolkit_TARGET_DIR "${CUDAToolkit_ROOT_DIR}")
-  # Now that we have the real ROOT_DIR, find components inside it.
-  list(APPEND CMAKE_PREFIX_PATH ${CUDAToolkit_ROOT_DIR})
-
-  # Mark that we need to pop the prefix path changes after we have
-  # found the cudart library.
-  set(_CUDAToolkit_Pop_Prefix True)
-endif()
-
 
 # We don't need to verify the cuda_runtime header when we are using `nvcc` include paths
 # as the compiler being enabled means the header was found
@@ -1070,7 +1099,8 @@ if(NOT CUDAToolkit_CUBLAS_INCLUDE_DIR)
   cmake_path(NORMAL_PATH CUDAToolkit_MATH_INCLUDE_DIR)
 
   find_path(CUDAToolkit_CUBLAS_INCLUDE_DIR cublas_v2.h PATHS
-    ${CUDAToolkit_INCLUDE_DIRECTORIES}
+    ${CUDAToolkit_MATH_INCLUDE_DIR}
+    NO_DEFAULT_PATH
     )
   if(CUDAToolkit_CUBLAS_INCLUDE_DIR)
     list(APPEND CUDAToolkit_INCLUDE_DIRECTORIES "${CUDAToolkit_CUBLAS_INCLUDE_DIR}")
@@ -1082,22 +1112,17 @@ unset(CUDAToolkit_CUBLAS_INCLUDE_DIR)
 # Find the CUDA Runtime Library libcudart
 find_library(CUDA_CUDART
   NAMES cudart
-  PATHS ${CUDAToolkit_IMPLICIT_LIBRARY_DIRECTORIES}
+  PATHS ${CUDAToolkit_IMPLICIT_LIBRARY_DIRECTORIES} ${CUDAToolkit_TARGET_DIR}
   PATH_SUFFIXES lib64 ${_CUDAToolkit_win_search_dirs}
 )
 find_library(CUDA_CUDART
   NAMES cudart
-  PATHS ${CUDAToolkit_IMPLICIT_LIBRARY_DIRECTORIES}
+  PATHS ${CUDAToolkit_IMPLICIT_LIBRARY_DIRECTORIES} ${CUDAToolkit_TARGET_DIR}
   PATH_SUFFIXES lib64/stubs ${_CUDAToolkit_win_stub_search_dirs} lib/stubs stubs
 )
 
 if(NOT CUDA_CUDART AND NOT CUDAToolkit_FIND_QUIETLY)
   message(STATUS "Unable to find cudart library.")
-endif()
-
-if(_CUDAToolkit_Pop_Prefix)
-  list(REMOVE_AT CMAKE_PREFIX_PATH -1)
-  unset(_CUDAToolkit_Pop_Prefix)
 endif()
 
 #-----------------------------------------------------------------------------
@@ -1130,7 +1155,10 @@ if(CUDAToolkit_FOUND)
 
   # Detect we are in a splayed nvhpc toolkit layout and add extra
   # search paths without symlinks
-  if(CUDAToolkit_LIBRARY_DIR  MATCHES ".*/cuda/${CUDAToolkit_VERSION_MAJOR}.${CUDAToolkit_VERSION_MINOR}/lib64$")
+  #
+  # When the `nvcc` compiler output is parsed we have already resolved
+  # symlinks so we have `cuda/12.X/targets/....` and not `cuda/12.X/lib64`.
+  if(CUDAToolkit_LIBRARY_DIR  MATCHES ".*/cuda/${CUDAToolkit_VERSION_MAJOR}.${CUDAToolkit_VERSION_MINOR}/(lib64$|targets/)")
     # Search location for math_libs/
     block(SCOPE_FOR POLICIES)
       cmake_policy(SET CMP0152 NEW)
