@@ -43,15 +43,3 @@
  *-- -- e
  *-- -- f
  *-- -- g
-.*(Performing configure step for 'DefaultCommandListColon'|DefaultCommandListColon-configure).*
- *-- ConfigVar: config
- *-- Separator: ;
- *-- List: 10;11;12
-.*(Performing build step for 'DefaultCommandListColon'|DefaultCommandListColon-build).*
- *-- Stage: build
- *-- Separator: ;
- *-- List: 10;11;12
-.*(Performing install step for 'DefaultCommandListColon'|DefaultCommandListColon-install).*
- *-- Stage: install
- *-- Separator: ;
- *-- List: 10;11;12;13
