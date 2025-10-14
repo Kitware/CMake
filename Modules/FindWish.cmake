@@ -18,6 +18,16 @@ and libraries are, as well as identifying the name of the TCL library.
 If the :variable:`UNIX` variable is defined, the module will prioritize looking
 for the Cygwin version of ``wish`` executable.
 
+Result Variables
+^^^^^^^^^^^^^^^^
+
+This module defines the following variables:
+
+``Wish_FOUND``
+  .. versionadded:: 4.2
+
+  Boolean indicating whether the ``wish`` executable was found.
+
 Cache Variables
 ^^^^^^^^^^^^^^^
 
@@ -100,3 +110,9 @@ find_program(TK_WISH
   )
 
 mark_as_advanced(TK_WISH)
+
+if(TK_WISH)
+  set(Wish_FOUND TRUE)
+else()
+  set(Wish_FOUND FALSE)
+endif()
