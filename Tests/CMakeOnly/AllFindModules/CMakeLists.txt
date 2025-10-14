@@ -124,7 +124,7 @@ foreach(
     HDF5 Hg HSPELL
     Icotool ImageMagick
     Jasper JPEG
-    LibArchive LibLZMA LIBLZMA LibXml2 LibXslt LTTngUST
+    LibArchive LibLZMA LIBLZMA LibXml2 LibXslt LTTngUST Lua
     OpenCL OpenSceneGraph OPENSCENEGRAPH OpenSSL OPENSSL
     Perl PerlLibs PkgConfig PNG PostgreSQL Protobuf
     Ruby RUBY
