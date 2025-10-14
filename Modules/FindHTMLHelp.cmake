@@ -18,6 +18,16 @@ Help Workshop:
   For modern documentation, consider alternatives such as Microsoft Help Viewer
   for producing ``.mshc`` files or web-based documentation tools.
 
+Result Variables
+^^^^^^^^^^^^^^^^
+
+This module defines the following variables:
+
+``HTMLHelp_FOUND``
+  .. versionadded:: 4.2
+
+  Boolean indicating whether HTML Help was found.
+
 Cache Variables
 ^^^^^^^^^^^^^^^
 
@@ -77,4 +87,10 @@ if(WIN32)
     HTML_HELP_LIBRARY
     )
 
+endif()
+
+if(HTML_HELP_COMPILER AND HTML_HELP_INCLUDE_PATH AND HTML_HELP_LIBRARY)
+  set(HTMLHelp_FOUND TRUE)
+else()
+  set(HTMLHelp_FOUND FALSE)
 endif()

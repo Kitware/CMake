@@ -55,6 +55,15 @@ For usage details, refer to the upstream KDE 4 documentation.  For example,
 at the top of the ``FindKDE4Internal`` module a complete documentation is
 available for all variables and commands these modules provide.
 
+Result Variables
+^^^^^^^^^^^^^^^^
+
+This module defines the following variables:
+
+``KDE4_FOUND``
+  Boolean indicating whether KDE 4 was found.  This variable is set by the
+  upstream ``FindKDE4Internal`` module.
+
 Hints
 ^^^^^
 
@@ -287,4 +296,6 @@ else ()
   if (KDE4_FIND_REQUIRED)
     message(FATAL_ERROR "ERROR: cmake/modules/FindKDE4Internal.cmake not found in ${_data_DIR}")
   endif ()
+
+  set(KDE4_FOUND FALSE)
 endif ()

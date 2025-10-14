@@ -27,6 +27,11 @@ Result Variables
 
 This module defines the following variables:
 
+``Msys_FOUND``
+  .. versionadded:: 4.2
+
+  Boolean indicating whether MSYS was found.
+
 ``MSYS_INSTALL_PATH``
   The path to the MSYS root installation directory.
 
@@ -69,3 +74,9 @@ if (WIN32)
   mark_as_advanced(MSYS_CMD)
 
 endif ()
+
+if(MSYS_CMD AND MSYS_INSTALL_PATH)
+  set(Msys_FOUND TRUE)
+else()
+  set(Msys_FOUND FALSE)
+endif()

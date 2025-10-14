@@ -22,6 +22,16 @@ aim to be portable across different Tcl releases.  It first calls the
 :module:`FindTCL` module to locate Tcl installation and then attempts to find
 the stub libraries corresponding to the located Tcl version.
 
+Result Variables
+^^^^^^^^^^^^^^^^
+
+This module defines the following variables:
+
+``TclStub_FOUND``
+  .. versionadded:: 4.2
+
+  Boolean indicating whether the Tcl Stub Library was found.
+
 Cache Variables
 ^^^^^^^^^^^^^^^
 
@@ -154,3 +164,9 @@ mark_as_advanced(
   TCL_STUB_LIBRARY
   TK_STUB_LIBRARY
   )
+
+if(TCL_STUB_LIBRARY AND TK_STUB_LIBRARY AND TTK_STUB_LIBRARY)
+  set(TclStub_FOUND TRUE)
+else()
+  set(TclStub_FOUND FALSE)
+endif()
