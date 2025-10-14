@@ -2076,6 +2076,11 @@ bool HandleExportMode(std::vector<std::string> const& args,
     return false;
   }
 
+  if (exp.empty()) {
+    status.SetError(cmStrCat(args[0], " missing EXPORT."));
+    return false;
+  }
+
   // Make sure there is a destination.
   if (ica.GetDestination().empty()) {
     // A destination is required.
