@@ -53,6 +53,7 @@ Creating And Installing JARs
             [SOURCES] <source1> [<source2>...] [<resource1>...]
             [RESOURCES NAMESPACE <ns1> <resource1>... [NAMESPACE <nsX> <resourceX>...]... ]
             [INCLUDE_JARS <jar1> [<jar2>...]]
+            [INCLUDE_MODULES <jar1> [<jar2>...]]
             [ENTRY_POINT <entry>]
             [VERSION <version>]
             [MANIFEST <manifest>]
@@ -108,6 +109,13 @@ Creating And Installing JARs
     other target names created by ``add_jar()``. For backwards compatibility,
     jar files listed as sources are ignored (as they have been since the first
     version of this module).
+
+  ``INCLUDE_MODULES``
+    .. versionadded:: 4.3
+
+    The list of jars are added to the module path when building the java sources
+    and also to the dependencies of the target. ``INCLUDE_MODULES`` also
+    accepts other target names created by ``add_jar()``.
 
   ``ENTRY_POINT``
     Defines an entry point in the jar file.
@@ -568,6 +576,9 @@ Creating Java Documentation
     generated docs. Same behavior as option ``-version`` of ``javadoc`` tool.
 #]=======================================================================]
 
+block(SCOPE_FOR POLICIES)
+cmake_policy(SET CMP0140 NEW) # For return(PROPAGATE ...)
+
 function (__java_copy_file src dest comment)
     add_custom_command(
         OUTPUT  ${dest}
@@ -665,11 +676,42 @@ else ()
     set(_UseJava_PATH_SEP ":")
 endif()
 
+function(__java_resolve_jar outvar_path path_or_tgt)
+    if (TARGET "${path_or_tgt}")
+        # Check if this is a target created by add_jar
+        get_target_property(jarpath "${path_or_tgt}" JAR_FILE)
+        set("${outvar_path}" "${jarpath}")
+        if (NOT jarpath) # Some other target that we do not know how to use as a JAR
+            message(SEND_ERROR "target ${path_or_tgt} is not a jar")
+        endif ()
+    else () # Interpreted as the path to an external JAR
+        set("${outvar_path}" "${path_or_tgt}")
+    endif ()
+    return(PROPAGATE "${outvar_path}")
+endfunction()
+
+# Helper that processes a list of add_jar-created targets or paths to external
+# JAR files and:
+# - appends each item (target name or JAR path) to the list in outvar_depsraw.
+# - appends the resolved JAR path to the list in outvar_depsresolved.
+# If any item cannot be resolved, because it is a target name that was not
+# created by add_jar, a SEND_ERROR message is raised.
+function(__java_build_deplists outvar_depsraw outvar_depsresolved jars_or_targets_lst)
+    foreach(item IN LISTS "${jars_or_targets_lst}")
+        __java_resolve_jar(res_path "${item}")
+        if (res_path) # We would get a falsy value in the error case
+            list(APPEND "${outvar_depsraw}" "${item}") # Keep the original name (possibly a target) here
+            list(APPEND "${outvar_depsresolved}" "${res_path}")
+        endif ()
+    endforeach()
+    return(PROPAGATE "${outvar_depsraw}" "${outvar_depsresolved}")
+endfunction()
+
 function(add_jar _TARGET_NAME)
 
     set(options)  # currently there are no zero value args (aka: options)
     set(oneValueArgs "ENTRY_POINT;MANIFEST;OUTPUT_DIR;;OUTPUT_NAME;VERSION" )
-    set(multiValueArgs "GENERATE_NATIVE_HEADERS;INCLUDE_JARS;RESOURCES;SOURCES" )
+    set(multiValueArgs "GENERATE_NATIVE_HEADERS;INCLUDE_JARS;INCLUDE_MODULES;RESOURCES;SOURCES" )
 
     cmake_parse_arguments(PARSE_ARGV 1 _add_jar
                     "${options}"
@@ -803,6 +845,7 @@ function(add_jar _TARGET_NAME)
     set(_JAVA_COMPILE_FILELISTS)
     set(_JAVA_DEPENDS)
     set(_JAVA_COMPILE_DEPENDS)
+    set(_JAVA_COMPILE_MODDEPENDS)
     set(_JAVA_RESOURCE_FILES)
     set(_JAVA_RESOURCE_FILES_RELATIVE)
     foreach(_JAVA_SOURCE_FILE IN LISTS _JAVA_SOURCE_FILES)
@@ -838,7 +881,8 @@ function(add_jar _TARGET_NAME)
             # Ignored for backward compatibility
 
         elseif (_JAVA_EXT STREQUAL "")
-            list(APPEND CMAKE_JAVA_INCLUDE_PATH ${JAVA_JAR_TARGET_${_JAVA_SOURCE_FILE}} ${JAVA_JAR_TARGET_${_JAVA_SOURCE_FILE}_CLASSPATH})
+            # XXX: this was not being used after setting!
+            # list(APPEND CMAKE_JAVA_INCLUDE_PATH ${JAVA_JAR_TARGET_${_JAVA_SOURCE_FILE}} ${JAVA_JAR_TARGET_${_JAVA_SOURCE_FILE}_CLASSPATH})
             list(APPEND _JAVA_DEPENDS ${JAVA_JAR_TARGET_${_JAVA_SOURCE_FILE}})
 
         else ()
@@ -857,24 +901,21 @@ function(add_jar _TARGET_NAME)
                                         _JAVA_RESOURCE_FILES_RELATIVE)
     endif()
 
-    foreach(_JAVA_INCLUDE_JAR IN LISTS _add_jar_INCLUDE_JARS)
-        if (TARGET ${_JAVA_INCLUDE_JAR})
-            get_target_property(_JAVA_JAR_PATH ${_JAVA_INCLUDE_JAR} JAR_FILE)
-            if (_JAVA_JAR_PATH)
-                string(APPEND CMAKE_JAVA_INCLUDE_PATH_FINAL "${_UseJava_PATH_SEP}${_JAVA_JAR_PATH}")
-                list(APPEND CMAKE_JAVA_INCLUDE_PATH ${_JAVA_JAR_PATH})
-                list(APPEND _JAVA_DEPENDS ${_JAVA_INCLUDE_JAR})
-                list(APPEND _JAVA_COMPILE_DEPENDS ${_JAVA_JAR_PATH})
-            else ()
-                message(SEND_ERROR "add_jar: INCLUDE_JARS target ${_JAVA_INCLUDE_JAR} is not a jar")
-            endif ()
-        else ()
-            string(APPEND CMAKE_JAVA_INCLUDE_PATH_FINAL "${_UseJava_PATH_SEP}${_JAVA_INCLUDE_JAR}")
-            list(APPEND CMAKE_JAVA_INCLUDE_PATH "${_JAVA_INCLUDE_JAR}")
-            list(APPEND _JAVA_DEPENDS "${_JAVA_INCLUDE_JAR}")
-            list(APPEND _JAVA_COMPILE_DEPENDS "${_JAVA_INCLUDE_JAR}")
-        endif ()
-    endforeach()
+    # Build dependency lists and arguments for JARs in the classpath
+    __java_build_deplists(_JAVA_DEPENDS _JAVA_COMPILE_DEPENDS _add_jar_INCLUDE_JARS)
+    foreach (resolved_cp_item IN LISTS _JAVA_COMPILE_DEPENDS)
+        string(APPEND CMAKE_JAVA_INCLUDE_PATH_FINAL "${_UseJava_PATH_SEP}${resolved_cp_item}")
+    endforeach ()
+    # Build dependency lists and arguments for JARs in the modulepath
+    set(javac_mp_args)
+    if (_add_jar_INCLUDE_MODULES)
+        if (Java_VERSION VERSION_LESS 9)
+            message(SEND_ERROR "INCLUDE_MODULES requires Java 9+")
+        endif()
+        __java_build_deplists(_JAVA_DEPENDS _JAVA_COMPILE_MODDEPENDS _add_jar_INCLUDE_MODULES)
+        list(JOIN _JAVA_COMPILE_MODDEPENDS "${_UseJava_PATH_SEP}" javac_mp_args)
+        set(javac_mp_args "--module-path [[${javac_mp_args}]]")
+    endif()
 
     if (_JAVA_COMPILE_FILES OR _JAVA_COMPILE_FILELISTS)
         set (_JAVA_SOURCES_FILELISTS)
@@ -899,33 +940,41 @@ function(add_jar _TARGET_NAME)
 
         cmake_language(GET_MESSAGE_LOG_LEVEL _LOG_LEVEL)
         # Compile the java files and create a list of class files
-        add_custom_command(
-            # NOTE: this command generates an artificial dependency file
-            OUTPUT ${CMAKE_JAVA_CLASS_OUTPUT_PATH}/java_compiled_${_TARGET_NAME}
+        # NOTE: this command generates an artificial dependency file
+        set(stamp_file "${CMAKE_JAVA_CLASS_OUTPUT_PATH}/java_compiled_${_TARGET_NAME}")
+        add_custom_command(OUTPUT "${stamp_file}"
             COMMAND ${CMAKE_COMMAND}
                 -DCMAKE_JAVA_CLASS_OUTPUT_PATH=${CMAKE_JAVA_CLASS_OUTPUT_PATH}
                 -DCMAKE_JAR_CLASSES_PREFIX=${CMAKE_JAR_CLASSES_PREFIX}
                 -P ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/UseJava/ClearClassFiles.cmake
                 --log-level ${_LOG_LEVEL}
-            COMMAND ${Java_JAVAC_EXECUTABLE}
-                ${CMAKE_JAVA_COMPILE_FLAGS}
-                -classpath "${CMAKE_JAVA_INCLUDE_PATH_FINAL}"
-                -d ${CMAKE_JAVA_CLASS_OUTPUT_PATH}
-                ${_GENERATE_NATIVE_HEADERS}
-                ${_JAVA_SOURCES_FILELISTS}
-            COMMAND ${CMAKE_COMMAND} -E touch ${CMAKE_JAVA_CLASS_OUTPUT_PATH}/java_compiled_${_TARGET_NAME}
-            DEPENDS ${_JAVA_COMPILE_FILES} ${_JAVA_COMPILE_FILELISTS} ${_JAVA_COMPILE_DEPENDS} ${_JAVA_SOURCES_FILE}
+            DEPENDS ${_JAVA_COMPILE_FILES} ${_JAVA_COMPILE_FILELISTS} ${_JAVA_COMPILE_DEPENDS} ${_JAVA_COMPILE_MODDEPENDS} ${_JAVA_SOURCES_FILE}
             WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
             COMMENT "Building Java objects for ${_TARGET_NAME}.jar"
             VERBATIM
         )
+        cmake_language(EVAL CODE "
+            add_custom_command(OUTPUT [[${stamp_file}]]
+                APPEND COMMAND [[${Java_JAVAC_EXECUTABLE}]]
+                    \${CMAKE_JAVA_COMPILE_FLAGS}
+                    -classpath [[${CMAKE_JAVA_INCLUDE_PATH_FINAL}]]
+                    ${javac_mp_args}
+                    -d [[${CMAKE_JAVA_CLASS_OUTPUT_PATH}]]
+                    \${_GENERATE_NATIVE_HEADERS}
+                    \${_JAVA_SOURCES_FILELISTS}
+            )
+        ")
+        add_custom_command(OUTPUT "${stamp_file}"
+            APPEND COMMAND ${CMAKE_COMMAND} -E touch "${stamp_file}"
+        )
+
         add_custom_command(
             OUTPUT ${CMAKE_JAVA_CLASS_OUTPUT_PATH}/java_class_filelist
             COMMAND ${CMAKE_COMMAND}
                 -DCMAKE_JAVA_CLASS_OUTPUT_PATH=${CMAKE_JAVA_CLASS_OUTPUT_PATH}
                 -DCMAKE_JAR_CLASSES_PREFIX=${CMAKE_JAR_CLASSES_PREFIX}
                 -P ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/UseJava/ClassFilelist.cmake
-            DEPENDS ${CMAKE_JAVA_CLASS_OUTPUT_PATH}/java_compiled_${_TARGET_NAME}
+            DEPENDS "${stamp_file}"
             WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
             VERBATIM
         )
@@ -1725,3 +1774,5 @@ function(install_jar_exports)
             DESTINATION ${_install_jar_exports_DESTINATION}
             ${_COMPONENT})
 endfunction()
+
+endblock()
