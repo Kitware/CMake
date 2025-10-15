@@ -72,7 +72,8 @@ static bool HandleTargetsMode(std::vector<std::string> const& args,
       .Bind("CXX_MODULES_DIRECTORY"_s, &Arguments::CxxModulesDirectory)
       .Bind("TARGETS"_s, &Arguments::Targets)
       .Bind("APPEND"_s, &Arguments::Append)
-      .Bind("ANDROID_MK"_s, &Arguments::AndroidMKFile);
+      .Bind("ANDROID_MK"_s, &Arguments::AndroidMKFile)
+      .Bind("EXPORT_LINK_INTERFACE_LIBRARIES"_s, &Arguments::ExportOld);
 
   std::vector<std::string> unknownArgs;
   Arguments arguments = parser.Parse(args, &unknownArgs);
