@@ -1,0 +1,19 @@
+^CMake Warning \(dev\) at [^
+]*/CMP0205-common\.cmake:[0-9]+ \(file\):
+  Path
+
+    [^
+]*[\\|/]file-CREATE_LINK[\\|/]CMP0205
+
+  is directory.  It will be copied recursively when NEW policy behavior
+  applies for CMP0205\.
+
+  Policy CMP0205 is not set: file\(CREATE_LINK\) with COPY_ON_ERROR copies
+  directory content\.  Run "cmake --help-policy CMP0205" for policy details\.
+  Use the cmake_policy command to set the policy and suppress this warning\.
+Call Stack \(most recent call first\):
+  [^
+]*/CMP0205-common-WARN\.cmake:[0-9]+ \(include\)
+  [^
+]*/CMP0205-SymLink-WARN\.cmake:[0-9]+ \(include\)
+This warning is for project developers\.  Use -Wno-dev to suppress it\.$
