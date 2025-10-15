@@ -3,4 +3,4 @@
 
     .*/Tests/RunCMake/file/SIZE-error-does-not-exist-build/does-not-exist
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)

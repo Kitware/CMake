@@ -6,4 +6,4 @@ CMake Error at TRANSFORM-selector-REGEX-no-arguments.cmake:[0-9]+ \(file\):
   sub-command TRANSFORM, selector REGEX expects 'regular expression'
   argument.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)

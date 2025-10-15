@@ -7,4 +7,4 @@
   target property which is transitive over the link libraries, creating a
   recursion.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)

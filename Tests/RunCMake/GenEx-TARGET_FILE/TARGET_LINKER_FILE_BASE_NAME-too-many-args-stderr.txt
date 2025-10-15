@@ -5,4 +5,4 @@ CMake Error at TARGET_LINKER_FILE_BASE_NAME-too-many-args.cmake:[0-9]+ \(file\):
 
   Unexpected parameters, require one or two parameters.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)

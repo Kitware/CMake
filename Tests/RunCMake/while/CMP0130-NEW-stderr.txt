@@ -6,4 +6,4 @@
   mismatched parenthesis in condition
 Call Stack \(most recent call first\):
   CMP0130-NEW.cmake:[0-9]+ \(include\)
-  CMakeLists.txt:[0-9]+ \(include\)$
+  CMakeLists\.txt:[0-9]+ \(include\)$

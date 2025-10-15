@@ -7,4 +7,4 @@ CMake Error at invalid-property.cmake:[0-9]+ \(set_property\):
   libraries through 'LINK_LIBRARIES', 'INTERFACE_LINK_LIBRARIES', and
   'INTERFACE_LINK_LIBRARIES_DIRECT' properties.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)

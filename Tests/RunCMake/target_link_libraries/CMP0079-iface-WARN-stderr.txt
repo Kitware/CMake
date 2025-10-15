@@ -1,4 +1,4 @@
-^CMake Warning \(dev\) at CMP0079-iface/CMakeLists.txt:[0-9]+ \(target_link_libraries\):
+^CMake Warning \(dev\) at CMP0079-iface/CMakeLists\.txt:[0-9]+ \(target_link_libraries\):
   Policy CMP0079 is not set: target_link_libraries allows use with targets in
   other directories.  Run "cmake --help-policy CMP0079" for policy details.
   Use the cmake_policy command to set the policy and suppress this warning.
@@ -16,7 +16,7 @@
   than in this calling directory.
 This warning is for project developers.  Use -Wno-dev to suppress it.
 +
-CMake Warning \(dev\) at CMP0079-iface/CMakeLists.txt:[0-9]+ \(target_link_libraries\):
+CMake Warning \(dev\) at CMP0079-iface/CMakeLists\.txt:[0-9]+ \(target_link_libraries\):
   Policy CMP0079 is not set: target_link_libraries allows use with targets in
   other directories.  Run "cmake --help-policy CMP0079" for policy details.
   Use the cmake_policy command to set the policy and suppress this warning.

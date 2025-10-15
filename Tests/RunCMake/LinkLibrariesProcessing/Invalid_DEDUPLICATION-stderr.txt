@@ -4,4 +4,4 @@ CMake Error at Invalid_DEDUPLICATION.cmake:[0-9]+ \(add_executable\):
     DEDUPLICATION=WRONG
 
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)

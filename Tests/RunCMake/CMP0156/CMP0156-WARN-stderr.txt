@@ -7,7 +7,7 @@ CMake Warning \(dev\) at CMP0156-Common.cmake:[0-9]+ \(add_library\):
   be applied.
 Call Stack \(most recent call first\):
   CMP0156-WARN.cmake:[0-9]+ \(include\)
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
 This warning is for project developers.  Use -Wno-dev to suppress it.
 
 CMake Warning \(dev\) at CMP0156-Common.cmake:[0-9]+ \(add_library\):
@@ -19,7 +19,7 @@ CMake Warning \(dev\) at CMP0156-Common.cmake:[0-9]+ \(add_library\):
   be applied.
 Call Stack \(most recent call first\):
   CMP0156-WARN.cmake:[0-9]+ \(include\)
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
 This warning is for project developers.  Use -Wno-dev to suppress it.
 
 CMake Warning \(dev\) at CMP0156-Common.cmake:[0-9]+ \(add_executable\):
@@ -31,5 +31,5 @@ CMake Warning \(dev\) at CMP0156-Common.cmake:[0-9]+ \(add_executable\):
   be applied.
 Call Stack \(most recent call first\):
   CMP0156-WARN.cmake:[0-9]+ \(include\)
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
 This warning is for project developers.  Use -Wno-dev to suppress it.

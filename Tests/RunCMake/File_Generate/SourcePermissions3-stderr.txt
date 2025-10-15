@@ -2,4 +2,4 @@ CMake Error at SourcePermissions3.cmake:[0-9]+ \(file\):
   file given both USE_SOURCE_PERMISSIONS and FILE_PERMISSIONS.  Only one
   option allowed.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)

@@ -3,4 +3,4 @@ CMake Error at CacheWrongTYPE.cmake:[0-9]+ \(set\):
 
   Invalid value: FOO.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)

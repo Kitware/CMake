@@ -16,4 +16,4 @@ CMake Error at CMP0139-OLD.cmake:[0-9]+ \(if\):
 
   Unknown arguments specified
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)$
+  CMakeLists\.txt:[0-9]+ \(include\)$

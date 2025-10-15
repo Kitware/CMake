@@ -84,7 +84,7 @@
 ]*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/ParameterCheckConfig/ParameterCheckConfigConfig.cmake
 
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
 
 
 CMake Debug Log at ConfigureLogParameters2.cmake:[0-9]+ \(find_package\):
@@ -196,7 +196,7 @@ CMake Debug Log at ConfigureLogParameters2.cmake:[0-9]+ \(find_package\):
 ]*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/ParameterCheckConfig/ParameterCheckConfigConfig.cmake
 
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
 
 
 CMake Debug Log at ConfigureLogParameters2.cmake:[0-9]+ \(find_package\):
@@ -224,7 +224,7 @@ CMake Debug Log at ConfigureLogParameters2.cmake:[0-9]+ \(find_package\):
   The file was not found.
 
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
 
 
 CMake Debug Log at ConfigureLogParameters2.cmake:[0-9]+ \(find_package\):
@@ -312,7 +312,7 @@ CMake Debug Log at ConfigureLogParameters2.cmake:[0-9]+ \(find_package\):
 ]*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/ParameterCheckConfig/ParameterCheckConfigConfig.cmake
 
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
 
 
 CMake Debug Log at ConfigureLogParameters2.cmake:[0-9]+ \(find_package\):
@@ -400,7 +400,7 @@ CMake Debug Log at ConfigureLogParameters2.cmake:[0-9]+ \(find_package\):
 ]*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/ParameterCheckConfig/ParameterCheckConfigConfig.cmake
 
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
 
 
 CMake Debug Log at ConfigureLogParameters2.cmake:[0-9]+ \(find_package\):
@@ -488,7 +488,7 @@ CMake Debug Log at ConfigureLogParameters2.cmake:[0-9]+ \(find_package\):
 ]*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/ParameterCheckConfig/ParameterCheckConfigConfig.cmake
 
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
 
 
 CMake Debug Log at ConfigureLogParameters2.cmake:[0-9]+ \(find_package\):
@@ -592,4 +592,4 @@ CMake Debug Log at ConfigureLogParameters2.cmake:[0-9]+ \(find_package\):
 ]*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/ParameterCheckConfig/ParameterCheckConfigConfig.cmake
 
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)$
+  CMakeLists\.txt:[0-9]+ \(include\)$

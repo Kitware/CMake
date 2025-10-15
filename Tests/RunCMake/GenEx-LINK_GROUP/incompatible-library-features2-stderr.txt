@@ -3,4 +3,4 @@ CMake Error at incompatible-library-features2.cmake:[0-9]+ \(add_library\):
   with the feature 'feat1', has already occurred with the feature 'feat2',
   which is not allowed.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)

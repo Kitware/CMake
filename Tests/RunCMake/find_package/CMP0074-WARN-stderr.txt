@@ -19,7 +19,7 @@ CMake Warning \(dev\) at CMP0074-common.cmake:[0-9]+ \(find_package\):
 Call Stack \(most recent call first\):
   CMP0074-common.cmake:[0-9]+ \(RunPackageRootTest\)
   CMP0074-WARN.cmake:[0-9]+ \(include\)
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
 This warning is for project developers.  Use -Wno-dev to suppress it.
 +
 find_package\(Foo\)

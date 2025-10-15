@@ -16,14 +16,14 @@ events:(
     kind: "message-v1"
     backtrace:
       - "ConfigureLogTransitionsConfig.cmake:[0-9]+ \(message\)"
-      - "CMakeLists.txt:[0-9]+ \(include\)"
+      - "CMakeLists\.txt:[0-9]+ \(include\)"
     message: |
       NotDefined -> NotFound
   -
     kind: "find_package-v1"
     backtrace:
       - "ConfigureLogTransitionsConfig.cmake:[0-9]+ \(find_package\)"
-      - "CMakeLists.txt:[0-9]+ \(include\)"
+      - "CMakeLists\.txt:[0-9]+ \(include\)"
     name: "ViaConfig"
     configs:
       -
@@ -75,21 +75,21 @@ events:(
     kind: "message-v1"
     backtrace:
       - "ConfigureLogTransitionsConfig.cmake:[0-9]+ \(message\)"
-      - "CMakeLists.txt:[0-9]+ \(include\)"
+      - "CMakeLists\.txt:[0-9]+ \(include\)"
     message: |
       NotFound -> NotFound
   -
     kind: "message-v1"
     backtrace:
       - "ConfigureLogTransitionsConfig.cmake:[0-9]+ \(message\)"
-      - "CMakeLists.txt:[0-9]+ \(include\)"
+      - "CMakeLists\.txt:[0-9]+ \(include\)"
     message: \|
       NotFound -> Found
   -
     kind: "find_package-v1"
     backtrace:
       - "ConfigureLogTransitionsConfig.cmake:[0-9]+ \(find_package\)"
-      - "CMakeLists.txt:[0-9]+ \(include\)"
+      - "CMakeLists\.txt:[0-9]+ \(include\)"
     name: "ViaConfig"
     configs:
       -
@@ -156,21 +156,21 @@ events:(
     kind: "message-v1"
     backtrace:
       - "ConfigureLogTransitionsConfig.cmake:[0-9]+ \(message\)"
-      - "CMakeLists.txt:[0-9]+ \(include\)"
+      - "CMakeLists\.txt:[0-9]+ \(include\)"
     message: \|
       Found -> Found
   -
     kind: "message-v1"
     backtrace:
       - "ConfigureLogTransitionsConfig.cmake:[0-9]+ \(message\)"
-      - "CMakeLists.txt:[0-9]+ \(include\)"
+      - "CMakeLists\.txt:[0-9]+ \(include\)"
     message: \|
       Found -> NotFound
   -
     kind: "find_package-v1"
     backtrace:
       - "ConfigureLogTransitionsConfig.cmake:[0-9]+ \(find_package\)"
-      - "CMakeLists.txt:[0-9]+ \(include\)"
+      - "CMakeLists\.txt:[0-9]+ \(include\)"
     name: "ViaConfig"
     configs:
       -
@@ -230,7 +230,7 @@ events:(
     kind: "message-v1"
     backtrace:
       - "ConfigureLogTransitionsConfig.cmake:[0-9]+ \(message\)"
-      - "CMakeLists.txt:[0-9]+ \(include\)"
+      - "CMakeLists\.txt:[0-9]+ \(include\)"
     message: \|
       END
 \.\.\.$

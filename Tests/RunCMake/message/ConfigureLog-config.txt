@@ -5,14 +5,14 @@ events:
     kind: "message-v1"
     backtrace:
       - "ConfigureLog.cmake:[0-9]+ \(message\)"
-      - "CMakeLists.txt:[0-9]+ \(include\)"
+      - "CMakeLists\.txt:[0-9]+ \(include\)"
     message: |
       Message 0
   -
     kind: "message-v1"
     backtrace:
       - "ConfigureLog.cmake:[0-9]+ \(message\)"
-      - "CMakeLists.txt:[0-9]+ \(include\)"
+      - "CMakeLists\.txt:[0-9]+ \(include\)"
     checks:
       - "Check 1"
     message: |
@@ -21,7 +21,7 @@ events:
     kind: "message-v1"
     backtrace:
       - "ConfigureLog.cmake:[0-9]+ \(message\)"
-      - "CMakeLists.txt:[0-9]+ \(include\)"
+      - "CMakeLists\.txt:[0-9]+ \(include\)"
     checks:
       - "Check 2"
       - "Check 1"

@@ -6,4 +6,4 @@ CMake Error at FILTER-wrong-operator.cmake:[0-9]+ \(file\):
   sub-command FILTER does not recognize operator "WRONG_OPERATOR".  It must
   be either INCLUDE or EXCLUDE.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)

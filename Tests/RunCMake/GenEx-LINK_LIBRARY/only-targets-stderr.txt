@@ -10,4 +10,4 @@ CMake Error at only-targets.cmake:[0-9]+ \(target_link_libraries\):
     \* An ALIAS target is missing.
 
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)

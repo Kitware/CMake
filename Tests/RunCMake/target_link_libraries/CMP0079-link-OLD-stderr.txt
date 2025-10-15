@@ -7,9 +7,9 @@
   specific short-term circumstances.  Projects should be ported to the NEW
   behavior and not rely on setting a policy to OLD.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
 +
-CMake Error at CMP0079-link/CMakeLists.txt:[0-9]+ \(target_link_libraries\):
+CMake Error at CMP0079-link/CMakeLists\.txt:[0-9]+ \(target_link_libraries\):
   Attempt to add link library "foo" to target "top" which is not built in
   this directory.
 

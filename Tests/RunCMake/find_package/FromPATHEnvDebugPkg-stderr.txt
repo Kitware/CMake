@@ -86,4 +86,4 @@
 ]*/Tests/RunCMake/find_package/PackageRoot/ResolvedConfig.cmake
 
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)$
+  CMakeLists\.txt:[0-9]+ \(include\)$

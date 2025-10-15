@@ -8,4 +8,4 @@ CMake Error at circular-dependencies1.cmake:[0-9]+ \(add_library\):
       depends on group "feat:{dep1.1,dep1.2}"
 
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)

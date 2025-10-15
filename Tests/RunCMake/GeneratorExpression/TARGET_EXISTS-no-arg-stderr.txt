@@ -5,4 +5,4 @@ CMake Error at TARGET_EXISTS-no-arg.cmake:2 \(file\):
 
   \$<TARGET_EXISTS> expression requires exactly one parameter.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)

@@ -4,4 +4,4 @@ CMake Error at InvalidConfiguration2.cmake:[0-9]+ \(add_executable\):
     ORDER
 
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)

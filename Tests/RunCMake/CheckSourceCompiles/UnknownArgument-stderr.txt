@@ -8,4 +8,4 @@ Call Stack \(most recent call first\):
   [^
 ]*/Modules/CheckSourceCompiles.cmake:[0-9]+ \(cmake_check_source_compiles\)
   UnknownArgument.cmake:[0-9]+ \(check_source_compiles\)
-  CMakeLists.txt:[0-9]+ \(include\)$
+  CMakeLists\.txt:[0-9]+ \(include\)$

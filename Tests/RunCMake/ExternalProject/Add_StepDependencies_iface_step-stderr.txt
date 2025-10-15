@@ -2,4 +2,4 @@
   External project "MyProj" does not have a step "IFace".
 Call Stack \(most recent call first\):
   Add_StepDependencies_iface_step.cmake:[0-9]+ \(ExternalProject_Add_StepDependencies\)
-  CMakeLists.txt:[0-9]+ \(include\)$
+  CMakeLists\.txt:[0-9]+ \(include\)$

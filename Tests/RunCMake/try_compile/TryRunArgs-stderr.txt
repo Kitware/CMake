@@ -14,5 +14,5 @@
     "ARGS"
     "runArgs"
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
 This warning is for project developers.  Use -Wno-dev to suppress it.$

@@ -5,4 +5,4 @@ CMake Error at unexpected-arg.cmake:[0-9]+ \(file\):
 
   sub-command TRANSFORM, '[A-Z0-9]+': unexpected argument\(s\).
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)

@@ -5,4 +5,4 @@ CMake Error at nested-incompatible-features2.cmake:[0-9]+ \(target_link_librarie
 
   \$<LINK_GROUP:...> cannot be nested.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)

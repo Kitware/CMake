@@ -2,4 +2,4 @@
   This language is not supported.
 Call Stack \(most recent call first\):
   DetermineFail.cmake:[0-9]+ \(enable_language\)
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
