@@ -2034,7 +2034,7 @@ std::string cmSystemTools::RelativeIfUnder(std::string const& top,
   if (in == top) {
     out = ".";
   } else if (cmSystemTools::IsSubDirectory(in, top)) {
-    out = in.substr(top.size() + 1);
+    out = in.substr(top.size() + (top.back() == '/' ? 0 : 1));
   } else {
     out = in;
   }
