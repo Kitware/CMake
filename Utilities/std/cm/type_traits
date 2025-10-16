@@ -11,27 +11,39 @@ namespace cm {
 
 #if __cplusplus >= 201402L || (defined(_MSVC_LANG) && _MSVC_LANG >= 201402L)
 
-// Miscellaneous transformations
 template <bool B, typename T = void>
 using enable_if_t = std::enable_if_t<B, T>;
 
+using std::conditional_t;
+using std::decay_t;
+using std::remove_cv_t;
+using std::remove_reference_t;
+
 #else
 
-// Miscellaneous transformations
 template <bool B, typename T = void>
 using enable_if_t = typename std::enable_if<B, T>::type;
 
-#endif
+template <bool B, typename T, typename F>
+using conditional_t = typename std::conditional<B, T, F>::type;
+
+template <typename T>
+using decay_t = typename std::decay<T>::type;
+
+template <typename T>
+using remove_cv_t = typename std::remove_cv<T>::type;
+
+template <typename T>
+using remove_reference_t = typename std::remove_reference<T>::type;
+
+#endif // C++14 (_t aliases)
 
 #if __cplusplus >= 201703L || (defined(_MSVC_LANG) && _MSVC_LANG >= 201703L)
 
-// Helper classes
 using std::bool_constant;
 
-// Miscellaneous transformations
 using std::invoke_result;
 using std::invoke_result_t;
-
 using std::void_t;
 
 #else
@@ -44,7 +56,7 @@ using bool_constant = std::integral_constant<bool, B>;
 template <typename F, typename... ArgTypes>
 using invoke_result = std::result_of<F(ArgTypes...)>;
 
-template <class F, typename... ArgTypes>
+template <typename F, typename... ArgTypes>
 using invoke_result_t = typename invoke_result<F, ArgTypes...>::type;
 
 template <typename... ArgTypes>
@@ -77,13 +89,13 @@ struct is_scoped_enum_helper<T, true>
       !std::is_convertible<T, typename std::underlying_type<T>::type>::value>
 {
 };
-}
+} // namespace internals
 
 template <typename T>
 struct is_scoped_enum : public internals::is_scoped_enum_helper<T>
 {
 };
 
-#endif
+#endif // is_scoped_enum
 
 } // namespace cm

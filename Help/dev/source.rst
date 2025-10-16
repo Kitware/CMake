@@ -111,7 +111,8 @@ Available features are:
     ``cm::shared_lock``
 
   * ``<cm/type_traits>``:
-    ``cm::enable_if_t``
+    ``cm::conditional_t``, ``cm::decay_t``, ``cm::enable_if_t``,
+    ``cm::remove_cv_t``, ``cm::remove_reference_t``
 
   * ``<cm/unordered_map>``:
     ``cm::cbegin``, ``cm::cend``, ``cm::rbegin``, ``cm::rend``,
@@ -169,7 +170,7 @@ Available features are:
 
   * ``<cm/type_traits>``:
     ``cm::bool_constant``, ``cm::invoke_result_t``, ``cm::invoke_result``,
-    ``cm::void_t``
+    ``cm::is_same_v``, ``cm::void_t``
 
   * ``<cm/unordered_map>``:
     ``cm::size``, ``cm::empty``, ``cm::data``
