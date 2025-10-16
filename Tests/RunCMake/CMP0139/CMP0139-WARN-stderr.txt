@@ -6,7 +6,7 @@ CMake Warning \(dev\) at CMP0139-WARN.cmake:[0-9]+ \(if\):
   PATH_EQUAL will be interpreted as an operator when the policy is set to
   NEW.  Since the policy is not set the OLD behavior will be used.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
 This warning is for project developers.  Use -Wno-dev to suppress it.
 
 CMake Error at CMP0139-WARN.cmake:[0-9]+ \(if\):
@@ -16,4 +16,4 @@ CMake Error at CMP0139-WARN.cmake:[0-9]+ \(if\):
 
   Unknown arguments specified
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)

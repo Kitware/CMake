@@ -15,4 +15,4 @@
 Call Stack \(most recent call first\):
   .*/Modules/ExternalProject.cmake:[0-9]+ \(_ep_add_download_command\)
   SourceEmpty.cmake:[0-9]+ \(ExternalProject_Add\)
-  CMakeLists.txt:[0-9]+ \(include\)$
+  CMakeLists\.txt:[0-9]+ \(include\)$

@@ -7,7 +7,7 @@ CMake Warning \(dev\) at imported-target.cmake:[0-9]+ \(add_library\):
   "CMAKE_C_LINK_LIBRARY_USING_whole_archive" and
   "CMAKE_C_LINK_LIBRARY_USING_whole_archive_SUPPORTED"\?
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
 This warning is for project developers.  Use -Wno-dev to suppress it.
 
 CMake Error at imported-target.cmake:[0-9]+ \(add_library\):
@@ -15,4 +15,4 @@ CMake Error at imported-target.cmake:[0-9]+ \(add_library\):
   '\$<LINK_LIBRARY>' to link target 'lib', is not supported for the 'C' link
   language.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)

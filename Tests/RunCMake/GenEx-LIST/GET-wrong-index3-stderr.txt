@@ -5,4 +5,4 @@ CMake Error at GET-wrong-index3.cmake:[0-9]+ \(file\):
 
   index: -3 out of range \(-2, 1\)
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)

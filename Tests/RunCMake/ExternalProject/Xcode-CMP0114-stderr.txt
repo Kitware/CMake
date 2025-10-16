@@ -7,5 +7,5 @@
   generated build system may not match what the project intends.
 Call Stack \(most recent call first\):
   Xcode-CMP0114.cmake:[0-9]+ \(ExternalProject_Add\)
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
 This warning is for project developers.  Use -Wno-dev to suppress it.$

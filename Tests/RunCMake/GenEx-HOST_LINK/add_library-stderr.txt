@@ -6,4 +6,4 @@ CMake Error at add_library.cmake:[0-9]+ \(add_library\):
   \$<HOST_LINK:...> may only be used with binary targets to specify link
   options.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)

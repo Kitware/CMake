@@ -12,7 +12,7 @@
   For compatibility with CMake 3.11 and below this check is ignoring it.
 Call Stack \(most recent call first\):
   CMP0075.cmake:11 \(check_include_file\)
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
 This warning is for project developers.  Use -Wno-dev to suppress it.
 +
 CMake Warning \(dev\) at [^
@@ -29,7 +29,7 @@ CMake Warning \(dev\) at [^
   For compatibility with CMake 3.11 and below this check is ignoring it.
 Call Stack \(most recent call first\):
   CMP0075.cmake:26 \(check_include_file_cxx\)
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
 This warning is for project developers.  Use -Wno-dev to suppress it.
 +
 CMake Warning \(dev\) at [^
@@ -46,7 +46,7 @@ CMake Warning \(dev\) at [^
   For compatibility with CMake 3.11 and below this check is ignoring it.
 Call Stack \(most recent call first\):
   CMP0075.cmake:41 \(check_include_files\)
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
 This warning is for project developers.  Use -Wno-dev to suppress it.
 +
 CMake Deprecation Warning at CMP0075.cmake:[0-9]+ \(cmake_policy\):
@@ -58,4 +58,4 @@ CMake Deprecation Warning at CMP0075.cmake:[0-9]+ \(cmake_policy\):
   specific short-term circumstances.  Projects should be ported to the NEW
   behavior and not rely on setting a policy to OLD.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)$
+  CMakeLists\.txt:[0-9]+ \(include\)$

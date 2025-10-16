@@ -7,4 +7,4 @@ CMake Error at add_custom_target.cmake:[0-9]+ \(add_custom_target\):
   link libraries through 'LINK_LIBRARIES', 'INTERFACE_LINK_LIBRARIES', and
   'INTERFACE_LINK_LIBRARIES_DIRECT' properties.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)

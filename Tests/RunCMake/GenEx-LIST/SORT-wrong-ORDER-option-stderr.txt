@@ -6,4 +6,4 @@ CMake Error at SORT-wrong-ORDER-option.cmake:[0-9]+ \(file\):
   sub-command SORT, an invalid ORDER option has been specified:
   "WRONG_OPTION".
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)

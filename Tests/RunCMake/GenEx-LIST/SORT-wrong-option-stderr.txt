@@ -5,4 +5,4 @@ CMake Error at SORT-wrong-option.cmake:[0-9]+ \(file\):
 
   sub-command SORT, option "WRONG_OPTION" is invalid.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)

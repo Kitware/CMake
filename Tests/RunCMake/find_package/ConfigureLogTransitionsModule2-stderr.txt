@@ -15,7 +15,7 @@ CMake Warning at ConfigureLogTransitionsModule2.cmake:[0-9]+ \(find_package\):
   "ViaModule" provides a separate development package or SDK, be sure it has
   been installed.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
 
 
 NotFound -> NotFound
@@ -35,7 +35,7 @@ CMake Warning at ConfigureLogTransitionsModule2.cmake:[0-9]+ \(find_package\):
   "ViaModule" provides a separate development package or SDK, be sure it has
   been installed.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
 
 
 NotFound -> Found
@@ -57,7 +57,7 @@ CMake Warning at ConfigureLogTransitionsModule2.cmake:[0-9]+ \(find_package\):
   "ViaModule" provides a separate development package or SDK, be sure it has
   been installed.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
 
 
 END$

@@ -8,4 +8,4 @@ Call Stack \(most recent call first\):
   [^
 ]*/Modules/CMakeTestCCompiler.cmake:[0-9]+ \(CMAKE_DETERMINE_COMPILER_ABI\)
   debug-trycompile.cmake:[0-9]+ \(enable_language\)
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)

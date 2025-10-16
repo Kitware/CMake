@@ -7,7 +7,7 @@ CMake Warning \(dev\) at .*/Modules/FindPackageHandleStandardArgs.cmake:[0-9]+ \
 Call Stack \(most recent call first\):
   FindNameMismatch.cmake:[0-9]+ \(find_package_handle_standard_args\)
   NameMismatch.cmake:[0-9]+ \(find_package\)
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
 This warning is for project developers.  Use -Wno-dev to suppress it.
 
 CMake Warning \(dev\) at .*/Modules/FindPackageHandleStandardArgs.cmake:[0-9]+ \(message\):
@@ -19,5 +19,5 @@ CMake Warning \(dev\) at .*/Modules/FindPackageHandleStandardArgs.cmake:[0-9]+ \
 Call Stack \(most recent call first\):
   FindNameMismatchOld.cmake:[0-9]+ \(find_package_handle_standard_args\)
   NameMismatch.cmake:[0-9]+ \(find_package\)
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
 This warning is for project developers.  Use -Wno-dev to suppress it.

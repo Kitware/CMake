@@ -16,7 +16,7 @@ Call Stack \(most recent call first\):
 ]*/Modules/ExternalProject.cmake:[0-9]+ \(_ep_add_mkdir_command\)
   NO_DEPENDS-CMP0114-Common.cmake:[0-9]+ \(ExternalProject_Add\)
   NO_DEPENDS-CMP0114-WARN.cmake:[0-9]+ \(include\)
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
 This warning is for project developers.  Use -Wno-dev to suppress it.
 +
 CMake Warning \(dev\) at [^
@@ -33,7 +33,7 @@ Call Stack \(most recent call first\):
 ]*/Modules/ExternalProject.cmake:[0-9]+ \(_ep_add_configure_command\)
   NO_DEPENDS-CMP0114-Common.cmake:[0-9]+ \(ExternalProject_Add\)
   NO_DEPENDS-CMP0114-WARN.cmake:[0-9]+ \(include\)
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
 This warning is for project developers.  Use -Wno-dev to suppress it.
 +
 CMake Warning \(dev\) at [^
@@ -50,7 +50,7 @@ Call Stack \(most recent call first\):
 ]*/Modules/ExternalProject.cmake:[0-9]+ \(_ep_add_build_command\)
   NO_DEPENDS-CMP0114-Common.cmake:[0-9]+ \(ExternalProject_Add\)
   NO_DEPENDS-CMP0114-WARN.cmake:[0-9]+ \(include\)
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
 This warning is for project developers.  Use -Wno-dev to suppress it.
 +
 CMake Warning \(dev\) at [^
@@ -71,7 +71,7 @@ Call Stack \(most recent call first\):
 ]*/Modules/ExternalProject.cmake:[0-9]+ \(_ep_add_mkdir_command\)
   NO_DEPENDS-CMP0114-Common.cmake:[0-9]+ \(ExternalProject_Add\)
   NO_DEPENDS-CMP0114-WARN.cmake:[0-9]+ \(include\)
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
 This warning is for project developers.  Use -Wno-dev to suppress it.
 +
 CMake Warning \(dev\) at [^
@@ -88,7 +88,7 @@ Call Stack \(most recent call first\):
 ]*/Modules/ExternalProject.cmake:[0-9]+ \(_ep_add_install_command\)
   NO_DEPENDS-CMP0114-Common.cmake:[0-9]+ \(ExternalProject_Add\)
   NO_DEPENDS-CMP0114-WARN.cmake:[0-9]+ \(include\)
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
 This warning is for project developers.  Use -Wno-dev to suppress it.
 +
 CMake Warning \(dev\) at [^
@@ -104,7 +104,7 @@ CMake Warning \(dev\) at [^
 Call Stack \(most recent call first\):
   NO_DEPENDS-CMP0114-Common.cmake:[0-9]+ \(ExternalProject_Add_StepTargets\)
   NO_DEPENDS-CMP0114-WARN.cmake:[0-9]+ \(include\)
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
 This warning is for project developers.  Use -Wno-dev to suppress it.
 +
 CMake Warning \(dev\) at [^
@@ -115,5 +115,5 @@ Call Stack \(most recent call first\):
 ]*/Modules/ExternalProject.cmake:[0-9]+ \(_ep_step_add_target\)
   NO_DEPENDS-CMP0114-Common.cmake:[0-9]+ \(ExternalProject_Add_StepTargets\)
   NO_DEPENDS-CMP0114-WARN.cmake:[0-9]+ \(include\)
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
 This warning is for project developers.  Use -Wno-dev to suppress it.$

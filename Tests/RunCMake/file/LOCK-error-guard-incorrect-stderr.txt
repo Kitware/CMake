@@ -3,4 +3,4 @@ CMake Error at LOCK-error-guard-incorrect\.cmake:[0-9]+ \(file\):
 
     "FUNCTIO_"\.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)

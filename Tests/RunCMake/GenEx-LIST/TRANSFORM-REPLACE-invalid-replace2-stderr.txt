@@ -6,4 +6,4 @@ CMake Error at TRANSFORM-REPLACE-invalid-replace2.cmake:[0-9]+ \(file\):
   sub-command TRANSFORM, action REPLACE: Unknown escape "\\b" in
   replace-expression.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)

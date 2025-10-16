@@ -5,7 +5,7 @@ CMake Error at nested-incompatible-genex.cmake:[0-9]+ \(add_library\):
 
   \$<LINK_GROUP:...> cannot be nested inside a \$<LINK_LIBRARY:...> expression.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
 
 
 CMake Error at nested-incompatible-genex.cmake:[0-9]+ \(target_link_libraries\):
@@ -15,4 +15,4 @@ CMake Error at nested-incompatible-genex.cmake:[0-9]+ \(target_link_libraries\):
 
   \$<LINK_GROUP:...> cannot be nested inside a \$<LINK_LIBRARY:...> expression.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)

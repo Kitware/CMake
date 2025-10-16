@@ -5,4 +5,4 @@ CMake Error at REMOVE_AT-wrong-index1.cmake:[0-9]+ \(file\):
 
   index: 0 out of range \(0, 0\)
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)

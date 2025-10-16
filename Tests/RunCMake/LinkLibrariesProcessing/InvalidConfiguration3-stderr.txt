@@ -4,4 +4,4 @@ CMake Error at InvalidConfiguration3.cmake:[0-9]+ \(add_executable\):
     WRONG=REVERSE
 
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)

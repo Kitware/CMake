@@ -6,4 +6,4 @@ CMake Error at TARGET_NAME_IF_EXISTS-empty-arg.cmake:2 \(file\):
   \$<TARGET_NAME_IF_EXISTS:tgt> expression requires a non-empty valid target
   name.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)

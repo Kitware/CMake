@@ -8,4 +8,4 @@
     .*/Tests/RunCMake/find_package/VersionedA-[12]/VersionedAConfig.cmake, version: [12]
 
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)$
+  CMakeLists\.txt:[0-9]+ \(include\)$

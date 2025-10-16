@@ -8,4 +8,4 @@
   behavior and not rely on setting a policy to OLD.
 Call Stack \(most recent call first\):
   CMP0110-OLD-FormerInvalidSpecialCharsMC.cmake:[0-9]+ \(include\)
-  CMakeLists.txt:[0-9]+ \(include\)$
+  CMakeLists\.txt:[0-9]+ \(include\)$

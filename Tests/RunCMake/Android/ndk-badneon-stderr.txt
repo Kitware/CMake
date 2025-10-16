@@ -3,4 +3,4 @@
   architecture.
 Call Stack \(most recent call first\):
   .*/Modules/CMakeDetermineSystem.cmake:[0-9]+ \(include\)
-  CMakeLists.txt:[0-9]+ \(project\)$
+  CMakeLists\.txt:[0-9]+ \(project\)$

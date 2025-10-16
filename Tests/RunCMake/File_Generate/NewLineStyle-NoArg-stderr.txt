@@ -4,4 +4,4 @@ CMake Error at NewLineStyle-NoArg.cmake:[0-9]+ \(file\):
     missing required value
 
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)

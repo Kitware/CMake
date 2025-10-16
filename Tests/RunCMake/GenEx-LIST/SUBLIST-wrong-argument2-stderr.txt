@@ -5,4 +5,4 @@ CMake Error at SUBLIST-wrong-argument2.cmake:[0-9]+ \(file\):
 
   length: -2 should be -1 or greater
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)

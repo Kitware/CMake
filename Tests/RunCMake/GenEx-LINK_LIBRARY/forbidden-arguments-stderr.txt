@@ -4,7 +4,7 @@ CMake Error at forbidden-arguments.cmake:[0-9]+ \(add_library\):
   "\$<LINK_LIBRARY:...>" which may be used to specify how the libraries are
   linked.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
 
 
 CMake Error at forbidden-arguments.cmake:[0-9]+ \(target_link_libraries\):
@@ -13,4 +13,4 @@ CMake Error at forbidden-arguments.cmake:[0-9]+ \(target_link_libraries\):
   "\$<LINK_LIBRARY:...>" which may be used to specify how the libraries are
   linked.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)

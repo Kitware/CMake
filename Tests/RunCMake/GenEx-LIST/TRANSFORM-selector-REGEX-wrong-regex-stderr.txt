@@ -5,4 +5,4 @@ CMake Error at TRANSFORM-selector-REGEX-wrong-regex.cmake:[0-9]+ \(file\):
 
   sub-command TRANSFORM, selector REGEX failed to compile regex "\(a".
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)

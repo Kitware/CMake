@@ -20,7 +20,7 @@
 
 Call Stack \(most recent call first\):
   ModuleModeDebugPkg.cmake:[0-9]+ \(find_package\)
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
 +
 CMake Debug Log at ModuleModeDebugPkg/FindFoo.cmake:[0-9]+ \(find_library\):
   find_library called with the following settings:
@@ -44,7 +44,7 @@ CMake Debug Log at ModuleModeDebugPkg/FindFoo.cmake:[0-9]+ \(find_library\):
 
 Call Stack \(most recent call first\):
   ModuleModeDebugPkg.cmake:[0-9]+ \(find_package\)
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
 +
 CMake Debug Log at ModuleModeDebugPkg/FindFoo.cmake:[0-9]+ \(find_path\):
   find_path called with the following settings:
@@ -68,7 +68,7 @@ CMake Debug Log at ModuleModeDebugPkg/FindFoo.cmake:[0-9]+ \(find_path\):
 
 Call Stack \(most recent call first\):
   ModuleModeDebugPkg.cmake:[0-9]+ \(find_package\)
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
 +
 CMake Debug Log at ModuleModeDebugPkg/FindFoo.cmake:[0-9]+ \(find_file\):
   find_file called with the following settings:
@@ -92,7 +92,7 @@ CMake Debug Log at ModuleModeDebugPkg/FindFoo.cmake:[0-9]+ \(find_file\):
 
 Call Stack \(most recent call first\):
   ModuleModeDebugPkg.cmake:[0-9]+ \(find_package\)
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
 +
 FindBar processed here.
 +
@@ -121,7 +121,7 @@ CMake Debug Log at ModuleModeDebugPkg/FindFoo.cmake:[0-9]+ \(find_package\):
 
 Call Stack \(most recent call first\):
   ModuleModeDebugPkg.cmake:[0-9]+ \(find_package\)
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
 +
 CMake Debug Log at ModuleModeDebugPkg.cmake:[0-9]+ \(find_package\):
   find_package considered the following paths for FindFoo.cmake:
@@ -135,4 +135,4 @@ CMake Debug Log at ModuleModeDebugPkg.cmake:[0-9]+ \(find_package\):
 ]*/Tests/RunCMake/find_package/ModuleModeDebugPkg/FindFoo.cmake
 
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)$
+  CMakeLists\.txt:[0-9]+ \(include\)$

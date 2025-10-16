@@ -5,4 +5,4 @@ CMake Error at TARGET_LINKER_FILE_BASE_NAME-non-valid-POSTFIX.cmake:[0-9]+ \(fil
 
   Wrong second parameter: "POSTFIX:INCLUDE" or "POSTFIX:EXCLUDE" is expected
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
