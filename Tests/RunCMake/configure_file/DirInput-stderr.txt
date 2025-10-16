@@ -1,4 +1,4 @@
-CMake Error at DirInput.cmake:[0-9]+ \(configure_file\):
+CMake Error at DirInput\.cmake:[0-9]+ \(configure_file\):
   configure_file input location
 
     .*/Tests/RunCMake/configure_file

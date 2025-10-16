@@ -1,4 +1,4 @@
-^CMake Error at .*/Modules/Platform/Android-Determine.cmake:[0-9]+ \(message\):
+^CMake Error at .*/Modules/Platform/Android-Determine\.cmake:[0-9]+ \(message\):
   The value of CMAKE_SYSROOT:
 
     .*
@@ -16,5 +16,5 @@
     <standalone-toolchain> = Path to standalone toolchain prefix
 
 Call Stack \(most recent call first\):
-  .*/Modules/CMakeDetermineSystem.cmake:[0-9]+ \(include\)
+  .*/Modules/CMakeDetermineSystem\.cmake:[0-9]+ \(include\)
   CMakeLists.txt:2 \(project\)$

@@ -1,11 +1,11 @@
 ^NotDefined -> NotFound
-CMake Warning at ConfigureLogTransitionsModule.cmake:[0-9]+ \(find_package\):
+CMake Warning at ConfigureLogTransitionsModule\.cmake:[0-9]+ \(find_package\):
   No "FindViaModule.cmake" found in CMAKE_MODULE_PATH.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)
 
 
-CMake Warning \(dev\) at ConfigureLogTransitionsModule.cmake:[0-9]+ \(find_package\):
+CMake Warning \(dev\) at ConfigureLogTransitionsModule\.cmake:[0-9]+ \(find_package\):
   FindViaModule.cmake must either be part of this project itself, in this
   case adjust CMAKE_MODULE_PATH so that it points to the correct location
   inside its source tree.
@@ -22,13 +22,13 @@ Call Stack \(most recent call first\):
 This warning is for project developers.  Use -Wno-dev to suppress it.
 
 NotFound -> NotFound
-CMake Warning at ConfigureLogTransitionsModule.cmake:[0-9]+ \(find_package\):
+CMake Warning at ConfigureLogTransitionsModule\.cmake:[0-9]+ \(find_package\):
   No "FindViaModule.cmake" found in CMAKE_MODULE_PATH.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)
 
 
-CMake Warning \(dev\) at ConfigureLogTransitionsModule.cmake:[0-9]+ \(find_package\):
+CMake Warning \(dev\) at ConfigureLogTransitionsModule\.cmake:[0-9]+ \(find_package\):
   FindViaModule.cmake must either be part of this project itself, in this
   case adjust CMAKE_MODULE_PATH so that it points to the correct location
   inside its source tree.
@@ -47,13 +47,13 @@ This warning is for project developers.  Use -Wno-dev to suppress it.
 NotFound -> Found
 Found -> Found
 Found -> NotFound
-CMake Warning at ConfigureLogTransitionsModule.cmake:[0-9]+ \(find_package\):
+CMake Warning at ConfigureLogTransitionsModule\.cmake:[0-9]+ \(find_package\):
   No "FindViaModule.cmake" found in CMAKE_MODULE_PATH.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)
 
 
-CMake Warning \(dev\) at ConfigureLogTransitionsModule.cmake:[0-9]+ \(find_package\):
+CMake Warning \(dev\) at ConfigureLogTransitionsModule\.cmake:[0-9]+ \(find_package\):
   FindViaModule.cmake must either be part of this project itself, in this
   case adjust CMAKE_MODULE_PATH so that it points to the correct location
   inside its source tree.

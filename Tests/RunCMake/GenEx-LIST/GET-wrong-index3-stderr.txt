@@ -1,4 +1,4 @@
-CMake Error at GET-wrong-index3.cmake:[0-9]+ \(file\):
+CMake Error at GET-wrong-index3\.cmake:[0-9]+ \(file\):
   Error evaluating generator expression:
 
     \$<LIST:GET,a;b,1,-3>

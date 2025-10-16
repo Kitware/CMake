@@ -1,4 +1,4 @@
-CMake Error at .*Modules/WriteCompilerDetectionHeader.cmake:[0-9]+ \(message\):
+CMake Error at .*Modules/WriteCompilerDetectionHeader\.cmake:[0-9]+ \(message\):
   Invalid arguments.  write_compiler_detection_header requires at least one
   compiler.
 Call Stack \(most recent call first\):

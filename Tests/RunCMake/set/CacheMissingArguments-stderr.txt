@@ -1,4 +1,4 @@
-CMake Error at CacheMissingArguments.cmake:[0-9]+ \(set\):
+CMake Error at CacheMissingArguments\.cmake:[0-9]+ \(set\):
   Error after keyword "HELP":
 
     missing required value

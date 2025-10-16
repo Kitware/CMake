@@ -1,5 +1,5 @@
 ^CMake Warning \(dev\) at [^
-]*/Modules/CheckIncludeFile.cmake:[0-9]+ \(message\):
+]*/Modules/CheckIncludeFile\.cmake:[0-9]+ \(message\):
   Policy CMP0075 is not set: Include file check macros honor
   CMAKE_REQUIRED_LIBRARIES.  Run "cmake --help-policy CMP0075" for policy
   details.  Use the cmake_policy command to set the policy and suppress this
@@ -16,7 +16,7 @@ Call Stack \(most recent call first\):
 This warning is for project developers.  Use -Wno-dev to suppress it.
 +
 CMake Warning \(dev\) at [^
-]*/Modules/CheckIncludeFileCXX.cmake:[0-9]+ \(message\):
+]*/Modules/CheckIncludeFileCXX\.cmake:[0-9]+ \(message\):
   Policy CMP0075 is not set: Include file check macros honor
   CMAKE_REQUIRED_LIBRARIES.  Run "cmake --help-policy CMP0075" for policy
   details.  Use the cmake_policy command to set the policy and suppress this
@@ -33,7 +33,7 @@ Call Stack \(most recent call first\):
 This warning is for project developers.  Use -Wno-dev to suppress it.
 +
 CMake Warning \(dev\) at [^
-]*/Modules/CheckIncludeFiles.cmake:[0-9]+ \(message\):
+]*/Modules/CheckIncludeFiles\.cmake:[0-9]+ \(message\):
   Policy CMP0075 is not set: Include file check macros honor
   CMAKE_REQUIRED_LIBRARIES.  Run "cmake --help-policy CMP0075" for policy
   details.  Use the cmake_policy command to set the policy and suppress this
@@ -49,7 +49,7 @@ Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)
 This warning is for project developers.  Use -Wno-dev to suppress it.
 +
-CMake Deprecation Warning at CMP0075.cmake:[0-9]+ \(cmake_policy\):
+CMake Deprecation Warning at CMP0075\.cmake:[0-9]+ \(cmake_policy\):
   The OLD behavior for policy CMP0075 will be removed from a future version
   of CMake.
 

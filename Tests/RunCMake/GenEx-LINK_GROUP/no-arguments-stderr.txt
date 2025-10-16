@@ -1,4 +1,4 @@
-CMake Error at no-arguments.cmake:[0-9]+ \(target_link_libraries\):
+CMake Error at no-arguments\.cmake:[0-9]+ \(target_link_libraries\):
   Error evaluating generator expression:
 
     \$<LINK_GROUP>

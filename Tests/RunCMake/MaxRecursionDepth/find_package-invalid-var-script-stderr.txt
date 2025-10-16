@@ -1,7 +1,7 @@
 [0-9]+
 CMake Error at [^
-]*/Tests/RunCMake/MaxRecursionDepth/FindRecursivePackage.cmake:[0-9]+ \(find_package\):
+]*/Tests/RunCMake/MaxRecursionDepth/FindRecursivePackage\.cmake:[0-9]+ \(find_package\):
   find_package maximum nesting depth of [0-9]+ exceeded.
 Call Stack \(most recent call first\):
   [^
-]*/Tests/RunCMake/MaxRecursionDepth/FindRecursivePackage.cmake:[0-9]+ \(find_package\)
+]*/Tests/RunCMake/MaxRecursionDepth/FindRecursivePackage\.cmake:[0-9]+ \(find_package\)

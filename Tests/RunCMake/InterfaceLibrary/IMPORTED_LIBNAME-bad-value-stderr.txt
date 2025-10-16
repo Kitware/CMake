@@ -1,4 +1,4 @@
-^CMake Error at IMPORTED_LIBNAME-bad-value.cmake:[0-9]+ \(set_property\):
+^CMake Error at IMPORTED_LIBNAME-bad-value\.cmake:[0-9]+ \(set_property\):
   IMPORTED_LIBNAME property value
 
     -flag
@@ -7,7 +7,7 @@
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)
 +
-CMake Error at IMPORTED_LIBNAME-bad-value.cmake:[0-9]+ \(set_property\):
+CMake Error at IMPORTED_LIBNAME-bad-value\.cmake:[0-9]+ \(set_property\):
   IMPORTED_LIBNAME property value
 
     item1;item2
@@ -16,7 +16,7 @@ CMake Error at IMPORTED_LIBNAME-bad-value.cmake:[0-9]+ \(set_property\):
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)
 +
-CMake Error at IMPORTED_LIBNAME-bad-value.cmake:[0-9]+ \(set_property\):
+CMake Error at IMPORTED_LIBNAME-bad-value\.cmake:[0-9]+ \(set_property\):
   IMPORTED_LIBNAME property value
 
     /path/to/item1
@@ -25,7 +25,7 @@ CMake Error at IMPORTED_LIBNAME-bad-value.cmake:[0-9]+ \(set_property\):
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)
 +
-CMake Error at IMPORTED_LIBNAME-bad-value.cmake:[0-9]+ \(set_property\):
+CMake Error at IMPORTED_LIBNAME-bad-value\.cmake:[0-9]+ \(set_property\):
   IMPORTED_LIBNAME property value
 
     \\path\\to\\item1
@@ -34,7 +34,7 @@ CMake Error at IMPORTED_LIBNAME-bad-value.cmake:[0-9]+ \(set_property\):
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)
 +
-CMake Error at IMPORTED_LIBNAME-bad-value.cmake:[0-9]+ \(set_property\):
+CMake Error at IMPORTED_LIBNAME-bad-value\.cmake:[0-9]+ \(set_property\):
   IMPORTED_LIBNAME property value
 
     c:\\path\\to\\item1

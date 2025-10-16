@@ -1,4 +1,4 @@
-CMake Error at .*/Modules/ExternalData.cmake:[0-9]+ \(message\):
+CMake Error at .*/Modules/ExternalData\.cmake:[0-9]+ \(message\):
   Neither ExternalData_URL_TEMPLATES nor ExternalData_OBJECT_STORES is set!
 Call Stack \(most recent call first\):
   NoURLTemplates\.cmake:[0-9]+ \(ExternalData_Add_Target\)

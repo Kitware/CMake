@@ -1,4 +1,4 @@
-CMake Error at add_custom_target.cmake:[0-9]+ \(add_custom_target\):
+CMake Error at add_custom_target\.cmake:[0-9]+ \(add_custom_target\):
   Error evaluating generator expression:
 
     \$<HOST_LINK>

@@ -1,4 +1,4 @@
-CMake Error at Registry_BadView1.cmake:[0-9]+ \(cmake_host_system_information\):
+CMake Error at Registry_BadView1\.cmake:[0-9]+ \(cmake_host_system_information\):
   Error after keyword "VIEW":
 
     missing required value

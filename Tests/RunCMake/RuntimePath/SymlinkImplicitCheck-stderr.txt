@@ -1,4 +1,4 @@
-^CMake Error at .*/Tests/RunCMake/RuntimePath/SymlinkImplicitCheck.cmake:[0-9]+ \(file\):
+^CMake Error at .*/Tests/RunCMake/RuntimePath/SymlinkImplicitCheck\.cmake:[0-9]+ \(file\):
   file RPATH_CHANGE could not write new RPATH:
 
     old-should-not-exist

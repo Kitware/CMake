@@ -1,4 +1,4 @@
-CMake Error at AppendExport.cmake:[0-9]+ \(export\):
+CMake Error at AppendExport\.cmake:[0-9]+ \(export\):
   export EXPORT subcommand given unknown argument: "APPEND".
 Call Stack \(most recent call first\):
   CMakeLists.txt:3 \(include\)

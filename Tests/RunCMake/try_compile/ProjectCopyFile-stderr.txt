@@ -1,4 +1,4 @@
-CMake Warning \(dev\) at ProjectCopyFile.cmake:[0-9]+ \(try_compile\):
+CMake Warning \(dev\) at ProjectCopyFile\.cmake:[0-9]+ \(try_compile\):
   Unknown arguments:
 
     "COPY_FILE"

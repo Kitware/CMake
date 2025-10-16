@@ -1,4 +1,4 @@
-CMake Warning \(dev\) at .*/Modules/UseSWIG.cmake:[0-9]+ \(message\):
+CMake Warning \(dev\) at .*/Modules/UseSWIG\.cmake:[0-9]+ \(message\):
   Policy CMP0122 is not set: UseSWIG use standard library name conventions
   for csharp language\.  Run "cmake --help-policy CMP0122" for policy details\.
   Use the cmake_policy command to set the policy and suppress this warning\.

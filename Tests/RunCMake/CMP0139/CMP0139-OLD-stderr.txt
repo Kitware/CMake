@@ -9,7 +9,7 @@
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)
 +
-CMake Error at CMP0139-OLD.cmake:[0-9]+ \(if\):
+CMake Error at CMP0139-OLD\.cmake:[0-9]+ \(if\):
   if given arguments:
 
     "/path1" "PATH_EQUAL" "/path2"

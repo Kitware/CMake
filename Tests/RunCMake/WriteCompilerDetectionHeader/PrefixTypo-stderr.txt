@@ -1,4 +1,4 @@
-CMake Error at .*Modules/WriteCompilerDetectionHeader.cmake:[0-9]+ \(message\):
+CMake Error at .*Modules/WriteCompilerDetectionHeader\.cmake:[0-9]+ \(message\):
   write_compiler_detection_header: PREFIX parameter missing.
 Call Stack \(most recent call first\):
   PrefixTypo.cmake:4 \(write_compiler_detection_header\)

@@ -1,4 +1,4 @@
-^CMake Error at hash-mismatch.cmake:[0-9]+ \(file\):
+^CMake Error at hash-mismatch\.cmake:[0-9]+ \(file\):
   file DOWNLOAD HASH mismatch
 
     for file: ".*/Tests/RunCMake/file-DOWNLOAD/hash-mismatch-build/output.png"

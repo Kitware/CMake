@@ -1,6 +1,6 @@
 ^PROJ1_FULL_BINDIR='/usr/bin'
 CMake Warning \(dev\) at [^
-]*/Modules/GNUInstallDirs.cmake:[0-9]+ \(message\):
+]*/Modules/GNUInstallDirs\.cmake:[0-9]+ \(message\):
   GNUInstallDirs_get_absolute_install_dir called without third argument.
   Using \${dir} from the caller's scope for compatibility with CMake 3.19 and
   below.

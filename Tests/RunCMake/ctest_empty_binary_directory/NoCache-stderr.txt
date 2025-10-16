@@ -1,5 +1,5 @@
 ^CMake Error at [^
-]*/Tests/RunCMake/ctest_empty_binary_directory/NoCache/test.cmake:[0-9]+ \(ctest_empty_binary_directory\):
+]*/Tests/RunCMake/ctest_empty_binary_directory/NoCache/test\.cmake:[0-9]+ \(ctest_empty_binary_directory\):
   Did not remove the binary directory:
 
    [^

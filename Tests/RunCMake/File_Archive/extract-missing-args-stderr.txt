@@ -1,4 +1,4 @@
-^CMake Error at extract-missing-args.cmake:[0-9]+ \(file\):
+^CMake Error at extract-missing-args\.cmake:[0-9]+ \(file\):
   Error after keyword "DESTINATION":
 
     missing required value

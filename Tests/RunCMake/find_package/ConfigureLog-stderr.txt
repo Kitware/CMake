@@ -1,4 +1,4 @@
-^CMake Debug Log at ConfigureLog.cmake:[0-9]+ \(find_package\):
+^CMake Debug Log at ConfigureLog\.cmake:[0-9]+ \(find_package\):
   find_package considered the following paths for FindViaConfig.cmake:
 
     .*/Tests/RunCMake/find_package/ConfigureLog/cmake/FindViaConfig.cmake
@@ -83,7 +83,7 @@ Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)
 
 
-CMake Debug Log at ConfigureLog.cmake:[0-9]+ \(find_package\):
+CMake Debug Log at ConfigureLog\.cmake:[0-9]+ \(find_package\):
   find_package considered the following paths for FindViaModule.cmake:
 
 (    [^
@@ -97,7 +97,7 @@ Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)
 
 
-CMake Debug Log at ConfigureLog/cmake/FindWithInner.cmake:[0-9]+ \(find_package\):
+CMake Debug Log at ConfigureLog/cmake/FindWithInner\.cmake:[0-9]+ \(find_package\):
   find_package considered the following paths for FindInner.cmake:
 
     .*/Tests/RunCMake/find_package/ConfigureLog/cmake/FindInner.cmake
@@ -178,11 +178,11 @@ CMake Debug Log at ConfigureLog/cmake/FindWithInner.cmake:[0-9]+ \(find_package\
     .*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/Inner/InnerConfig.cmake
 
 Call Stack \(most recent call first\):
-  ConfigureLog.cmake:[0-9]+ \(find_package\)
+  ConfigureLog\.cmake:[0-9]+ \(find_package\)
   CMakeLists\.txt:[0-9]+ \(include\)
 
 
-CMake Debug Log at ConfigureLog.cmake:[0-9]+ \(find_package\):
+CMake Debug Log at ConfigureLog\.cmake:[0-9]+ \(find_package\):
   find_package considered the following paths for FindWithInner.cmake:
 
     .*/Modules/FindWithInner.cmake
@@ -195,7 +195,7 @@ Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)
 
 
-CMake Debug Log at ConfigureLog.cmake:[0-9]+ \(find_package\):
+CMake Debug Log at ConfigureLog\.cmake:[0-9]+ \(find_package\):
   find_package considered the following paths for FindVersionCheck.cmake:
 
     .*/Tests/RunCMake/find_package/ConfigureLog/cmake/FindVersionCheck.cmake

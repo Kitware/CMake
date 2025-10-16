@@ -1,4 +1,4 @@
-^CMake Error at LinkImplementationCycle4.cmake:[0-9]+ \(target_link_libraries\):
+^CMake Error at LinkImplementationCycle4\.cmake:[0-9]+ \(target_link_libraries\):
   Error evaluating generator expression:
 
     \$<TARGET_PROPERTY:INTERFACE_INCLUDE_DIRECTORIES>

@@ -1,4 +1,4 @@
-CMake Error at SUBLIST-wrong-argument2.cmake:[0-9]+ \(file\):
+CMake Error at SUBLIST-wrong-argument2\.cmake:[0-9]+ \(file\):
   Error evaluating generator expression:
 
     \$<LIST:SUBLIST,a;b;c,1,-2>

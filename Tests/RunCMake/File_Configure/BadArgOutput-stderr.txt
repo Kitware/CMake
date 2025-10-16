@@ -1,4 +1,4 @@
-CMake Error at BadArgOutput.cmake:[0-9]+ \(file\):
+CMake Error at BadArgOutput\.cmake:[0-9]+ \(file\):
   Error after keyword "OUTPUT":
 
     missing required value

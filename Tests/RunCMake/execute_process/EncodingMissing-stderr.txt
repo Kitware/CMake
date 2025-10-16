@@ -1,4 +1,4 @@
-^CMake Error at EncodingMissing.cmake:[0-9]+ \(execute_process\):
+^CMake Error at EncodingMissing\.cmake:[0-9]+ \(execute_process\):
   Error after keyword "ENCODING":
 
     missing required value

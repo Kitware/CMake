@@ -1,4 +1,4 @@
-CMake Error at target_sources.cmake:[0-9]+ \(target_sources\):
+CMake Error at target_sources\.cmake:[0-9]+ \(target_sources\):
   Error evaluating generator expression:
 
     \$<HOST_LINK:empty.c>

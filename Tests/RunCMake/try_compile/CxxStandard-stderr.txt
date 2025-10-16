@@ -12,7 +12,7 @@ CMake Error in .*/Tests/RunCMake/try_compile/CxxStandard-build/CMakeFiles/CMake(
   value: "3".
 
 )?
-CMake Error at CxxStandard.cmake:[0-9]+ \(try_compile\):
+CMake Error at CxxStandard\.cmake:[0-9]+ \(try_compile\):
   Failed to generate test project build system.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)$

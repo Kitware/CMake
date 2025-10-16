@@ -1,4 +1,4 @@
-CMake Error at SORT-wrong-CASE-option.cmake:[0-9]+ \(file\):
+CMake Error at SORT-wrong-CASE-option\.cmake:[0-9]+ \(file\):
   Error evaluating generator expression:
 
     \$<LIST:SORT,a;b,COMPARE:STRING,CASE:WRONG_OPTION>

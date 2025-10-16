@@ -1,4 +1,4 @@
-^CMake Warning \(dev\) at REAL_PATH-non-existing.cmake:[0-9]+ \(file\):
+^CMake Warning \(dev\) at REAL_PATH-non-existing\.cmake:[0-9]+ \(file\):
   Given path:
 
     dir/bad-magic-file\.txt

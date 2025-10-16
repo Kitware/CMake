@@ -1,4 +1,4 @@
-^CMake Error at create-missing-args.cmake:[0-9]+ \(file\):
+^CMake Error at create-missing-args\.cmake:[0-9]+ \(file\):
   Error after keyword "COMPRESSION":
 
     missing required value

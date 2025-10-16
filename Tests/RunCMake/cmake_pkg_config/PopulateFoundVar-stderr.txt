@@ -1,5 +1,5 @@
 Found Alpha: TRUE
-CMake Warning at PopulateFoundVar.cmake:[0-9]+ \(cmake_pkg_config\):
+CMake Warning at PopulateFoundVar\.cmake:[0-9]+ \(cmake_pkg_config\):
   Could not find pkg-config: 'foxtrot'
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)

@@ -1,4 +1,4 @@
-CMake Error at REMOVE_AT-wrong-index3.cmake:[0-9]+ \(file\):
+CMake Error at REMOVE_AT-wrong-index3\.cmake:[0-9]+ \(file\):
   Error evaluating generator expression:
 
     \$<LIST:REMOVE_AT,a;b;c,-4>

@@ -1,4 +1,4 @@
-CMake Error at TRANSFORM-selector-FOR-wrong-argument.cmake:[0-9]+ \(file\):
+CMake Error at TRANSFORM-selector-FOR-wrong-argument\.cmake:[0-9]+ \(file\):
   Error evaluating generator expression:
 
     \$<LIST:TRANSFORM,a;b;c,TOUPPER,FOR,0,1x,2>

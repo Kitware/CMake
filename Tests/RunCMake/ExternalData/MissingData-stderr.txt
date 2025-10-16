@@ -1,4 +1,4 @@
-CMake Warning \(dev\) at .*/Modules/ExternalData.cmake:[0-9]+ \(message\):
+CMake Warning \(dev\) at .*/Modules/ExternalData\.cmake:[0-9]+ \(message\):
   Data file referenced by argument
 
     DATA{MissingData.txt}

@@ -1,4 +1,4 @@
-CMake Error at MissingComponent.cmake:[0-9]+ \(find_package\):
+CMake Error at MissingComponent\.cmake:[0-9]+ \(find_package\):
   Could not find a configuration file for package "ComponentTest" that is
   compatible with requested version ""\.
 
