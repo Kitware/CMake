@@ -5,4 +5,4 @@ CMake Error at TRANSFORM-selector-FOR-wrong-argument.cmake:[0-9]+ \(file\):
 
   sub-command TRANSFORM, selector FOR expects, at least, two numeric values.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)

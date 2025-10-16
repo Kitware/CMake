@@ -3,4 +3,4 @@ CMake Error at [^
   cmake_instrumentation failed to parse custom content as JSON: Not valid
   JSON content
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)

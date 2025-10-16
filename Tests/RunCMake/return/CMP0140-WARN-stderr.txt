@@ -8,5 +8,5 @@ CMake Warning \(dev\) at CMP0140-WARN.cmake:[0-9]+ \(return\):
   ignored.
 Call Stack \(most recent call first\):
   CMP0140-WARN.cmake:[0-9]+ \(func\)
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
 This warning is for project developers.  Use -Wno-dev to suppress it.

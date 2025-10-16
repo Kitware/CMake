@@ -17,5 +17,5 @@
 Call Stack \(most recent call first\):
   CMP0072-common.cmake:[0-9]+ \(find_package\)
   CMP0072-WARN.cmake:[0-9]+ \(include\)
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
 This warning is for project developers.  Use -Wno-dev to suppress it.$

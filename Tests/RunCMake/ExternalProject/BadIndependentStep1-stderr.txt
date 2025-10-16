@@ -4,4 +4,4 @@
   step 'configure' that is not marked INDEPENDENT.
 Call Stack \(most recent call first\):
   BadIndependentStep1.cmake:[0-9]+ \(ExternalProject_Add_Step\)
-  CMakeLists.txt:[0-9]+ \(include\)$
+  CMakeLists\.txt:[0-9]+ \(include\)$

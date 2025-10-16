@@ -17,4 +17,4 @@ CMake Error at PackageVarOverridesOptional.cmake:[0-9]+ \(find_package\):
   CMAKE_REQUIRE_FIND_PACKAGE_Foo variable has been enabled.
 
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)

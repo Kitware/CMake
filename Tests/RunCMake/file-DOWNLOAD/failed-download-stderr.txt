@@ -5,4 +5,4 @@ CMake Error at failed-download.cmake:[0-9]+ \(file\):
 ]*input.png_invalid"
     status: \[37;"(Could not|Couldn't) read a file:// file"\]
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)

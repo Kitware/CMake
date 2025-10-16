@@ -6,4 +6,4 @@ CMake Error at target_include_directories.cmake:[0-9]+ \(target_include_director
   \$<DEVICE_LINK:...> may only be used with binary targets to specify link
   options.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)

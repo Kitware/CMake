@@ -3,5 +3,5 @@ CMake Warning \(dev\) at .*/Modules/ExternalData.cmake:[0-9]+ \(message\):
   `UNKNOWN_ARGUMENT`
 Call Stack \(most recent call first\):
   BadArguments.cmake:[0-9]+ \(ExternalData_Add_Target\)
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
 This warning is for project developers.  Use -Wno-dev to suppress it.

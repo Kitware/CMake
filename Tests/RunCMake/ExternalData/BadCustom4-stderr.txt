@@ -4,4 +4,4 @@
    RelPathScript.cmake
 Call Stack \(most recent call first\):
   BadCustom4.cmake:[0-9]+ \(ExternalData_Add_Target\)
-  CMakeLists.txt:[0-9]+ \(include\)$
+  CMakeLists\.txt:[0-9]+ \(include\)$

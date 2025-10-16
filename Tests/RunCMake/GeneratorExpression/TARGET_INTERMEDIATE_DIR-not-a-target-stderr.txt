@@ -5,4 +5,4 @@ CMake Error at TARGET_INTERMEDIATE_DIR-not-a-target.cmake:1 \(file\):
 
   Target \"bar\" not found.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)

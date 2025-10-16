@@ -5,4 +5,4 @@ CMake Error at TRANSFORM-selector-FOR-wrong-index.cmake:[0-9]+ \(file\):
 
   sub-command TRANSFORM, selector FOR, index: 4 out of range \(-3, 2\).
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)

@@ -80,7 +80,7 @@
     .*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/ViaConfig/ViaConfigConfig.cmake
 
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
 
 
 CMake Debug Log at ConfigureLog.cmake:[0-9]+ \(find_package\):
@@ -94,7 +94,7 @@ CMake Debug Log at ConfigureLog.cmake:[0-9]+ \(find_package\):
     .*/Tests/RunCMake/find_package/ConfigureLog/cmake/FindViaModule.cmake
 
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
 
 
 CMake Debug Log at ConfigureLog/cmake/FindWithInner.cmake:[0-9]+ \(find_package\):
@@ -179,7 +179,7 @@ CMake Debug Log at ConfigureLog/cmake/FindWithInner.cmake:[0-9]+ \(find_package\
 
 Call Stack \(most recent call first\):
   ConfigureLog.cmake:[0-9]+ \(find_package\)
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
 
 
 CMake Debug Log at ConfigureLog.cmake:[0-9]+ \(find_package\):
@@ -192,7 +192,7 @@ CMake Debug Log at ConfigureLog.cmake:[0-9]+ \(find_package\):
     .*/Tests/RunCMake/find_package/ConfigureLog/cmake/FindWithInner.cmake
 
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
 
 
 CMake Debug Log at ConfigureLog.cmake:[0-9]+ \(find_package\):
@@ -281,4 +281,4 @@ CMake Debug Log at ConfigureLog.cmake:[0-9]+ \(find_package\):
     .*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/VersionCheck-2.5/VersionCheckConfig.cmake
 
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)$
+  CMakeLists\.txt:[0-9]+ \(include\)$

@@ -3,4 +3,4 @@ CMake Error at VersionLowerThan2_4.cmake:[0-9]+ \(cmake_policy\):
   compatibility with older versions please use any CMake 2.8.x release or
   lower.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)

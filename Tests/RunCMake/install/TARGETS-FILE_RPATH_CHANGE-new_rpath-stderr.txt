@@ -8,7 +8,7 @@
   behavior and not rely on setting a policy to OLD.
 Call Stack \(most recent call first\):
   TARGETS-FILE_RPATH_CHANGE-new_rpath.cmake:[0-9]+ \(A_CMP0095\)
-  CMakeLists.txt:[0-9]+ \(include\)(
+  CMakeLists\.txt:[0-9]+ \(include\)(
 +
 CMake Warning \(dev\) at TARGETS-FILE_RPATH_CHANGE-new_rpath\.cmake:[0-9]+ \(install\):
   Policy CMP0095 is not set: RPATH entries are properly escaped in the

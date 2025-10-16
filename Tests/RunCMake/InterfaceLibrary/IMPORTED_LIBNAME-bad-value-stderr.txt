@@ -5,7 +5,7 @@
 
   may not start with '-'.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
 +
 CMake Error at IMPORTED_LIBNAME-bad-value.cmake:[0-9]+ \(set_property\):
   IMPORTED_LIBNAME property value
@@ -14,7 +14,7 @@ CMake Error at IMPORTED_LIBNAME-bad-value.cmake:[0-9]+ \(set_property\):
 
   may not contain ';'.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
 +
 CMake Error at IMPORTED_LIBNAME-bad-value.cmake:[0-9]+ \(set_property\):
   IMPORTED_LIBNAME property value
@@ -23,7 +23,7 @@ CMake Error at IMPORTED_LIBNAME-bad-value.cmake:[0-9]+ \(set_property\):
 
   may not contain '/'.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
 +
 CMake Error at IMPORTED_LIBNAME-bad-value.cmake:[0-9]+ \(set_property\):
   IMPORTED_LIBNAME property value
@@ -32,7 +32,7 @@ CMake Error at IMPORTED_LIBNAME-bad-value.cmake:[0-9]+ \(set_property\):
 
   may not contain '\\'.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
 +
 CMake Error at IMPORTED_LIBNAME-bad-value.cmake:[0-9]+ \(set_property\):
   IMPORTED_LIBNAME property value
@@ -41,4 +41,4 @@ CMake Error at IMPORTED_LIBNAME-bad-value.cmake:[0-9]+ \(set_property\):
 
   may not contain ':'.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)$
+  CMakeLists\.txt:[0-9]+ \(include\)$

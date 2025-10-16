@@ -5,4 +5,4 @@ CMake Error at INSERT-wrong-index1.cmake:[0-9]+ \(file\):
 
   index: 4 out of range \(-3, 3\)
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)

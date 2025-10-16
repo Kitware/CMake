@@ -18,7 +18,7 @@ events:(
       - "[^"]*/Modules/CMakeDetermineCompilerABI.cmake:[0-9]+ \(try_compile\)"
       - "[^"]*/Modules/CMakeTestCCompiler.cmake:[0-9]+ \(CMAKE_DETERMINE_COMPILER_ABI\)"
       - "TopIncludes.cmake:[0-9]+ \(enable_language\)"
-      - "CMakeLists.txt:[0-9]+ \(include\)"
+      - "CMakeLists\.txt:[0-9]+ \(include\)"
     checks:
       - "Detecting C compiler ABI info"
     directories:
@@ -47,7 +47,7 @@ events:(
     kind: "try_compile-v1"
     backtrace:
       - "TopIncludes.cmake:[0-9]+ \(try_compile\)"
-      - "CMakeLists.txt:[0-9]+ \(include\)"
+      - "CMakeLists\.txt:[0-9]+ \(include\)"
     description: "Project without property set\."
     directories:
       source: "[^"]*/Tests/RunCMake/try_compile/proj"
@@ -61,7 +61,7 @@ events:(
     kind: "try_compile-v1"
     backtrace:
       - "TopIncludes.cmake:[0-9]+ \(try_compile\)"
-      - "CMakeLists.txt:[0-9]+ \(include\)"
+      - "CMakeLists\.txt:[0-9]+ \(include\)"
     description: "Project with property set\."
     directories:
       source: "[^"]*/Tests/RunCMake/try_compile/proj"
@@ -77,7 +77,7 @@ events:(
     kind: "try_compile-v1"
     backtrace:
       - "TopIncludes.cmake:[0-9]+ \(try_compile\)"
-      - "CMakeLists.txt:[0-9]+ \(include\)"
+      - "CMakeLists\.txt:[0-9]+ \(include\)"
     description: "Source file with property set\."
     directories:
       source: "[^"]*/Tests/RunCMake/try_compile/TopIncludes-build/CMakeFiles/CMakeScratch/TryCompile-[^/"]+"

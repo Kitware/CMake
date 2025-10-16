@@ -1,12 +1,12 @@
 CMake Error at EmptyValueArgs.cmake:[0-9]+ \(try_compile\):
   COPY_FILE must be followed by a file path
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
 +
 CMake Error at EmptyValueArgs.cmake:[0-9]+ \(try_compile\):
   COPY_FILE_ERROR must be followed by a variable name
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
 +
 CMake Error at EmptyValueArgs.cmake:[0-9]+ \(try_compile\):
   Error after keyword "LOG_DESCRIPTION":
@@ -14,4 +14,4 @@ CMake Error at EmptyValueArgs.cmake:[0-9]+ \(try_compile\):
     empty string not allowed
 
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)

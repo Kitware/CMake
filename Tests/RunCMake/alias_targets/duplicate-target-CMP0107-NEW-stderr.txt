@@ -3,7 +3,7 @@ CMake Error at duplicate-target.cmake:[0-9]+ \(add_library\):
   the same name already exists.
 Call Stack \(most recent call first\):
   duplicate-target-CMP0107-NEW.cmake:[0-9]+ \(include\)
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
 
 
 CMake Error at duplicate-target.cmake:[0-9]+ \(add_library\):
@@ -11,7 +11,7 @@ CMake Error at duplicate-target.cmake:[0-9]+ \(add_library\):
   the same name already exists.
 Call Stack \(most recent call first\):
   duplicate-target-CMP0107-NEW.cmake:[0-9]+ \(include\)
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
 
 
 CMake Error at duplicate-target.cmake:[0-9]+ \(add_library\):
@@ -19,7 +19,7 @@ CMake Error at duplicate-target.cmake:[0-9]+ \(add_library\):
   the same name already exists.
 Call Stack \(most recent call first\):
   duplicate-target-CMP0107-NEW.cmake:[0-9]+ \(include\)
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
 
 
 CMake Error at duplicate-target.cmake:[0-9]+ \(add_library\):
@@ -27,4 +27,4 @@ CMake Error at duplicate-target.cmake:[0-9]+ \(add_library\):
   the same name already exists.
 Call Stack \(most recent call first\):
   duplicate-target-CMP0107-NEW.cmake:[0-9]+ \(include\)
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)

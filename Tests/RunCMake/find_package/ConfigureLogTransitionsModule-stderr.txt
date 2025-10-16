@@ -2,7 +2,7 @@
 CMake Warning at ConfigureLogTransitionsModule.cmake:[0-9]+ \(find_package\):
   No "FindViaModule.cmake" found in CMAKE_MODULE_PATH.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
 
 
 CMake Warning \(dev\) at ConfigureLogTransitionsModule.cmake:[0-9]+ \(find_package\):
@@ -18,14 +18,14 @@ CMake Warning \(dev\) at ConfigureLogTransitionsModule.cmake:[0-9]+ \(find_packa
   is relying on a Find-module without ensuring that it is actually available.
 
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
 This warning is for project developers.  Use -Wno-dev to suppress it.
 
 NotFound -> NotFound
 CMake Warning at ConfigureLogTransitionsModule.cmake:[0-9]+ \(find_package\):
   No "FindViaModule.cmake" found in CMAKE_MODULE_PATH.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
 
 
 CMake Warning \(dev\) at ConfigureLogTransitionsModule.cmake:[0-9]+ \(find_package\):
@@ -41,7 +41,7 @@ CMake Warning \(dev\) at ConfigureLogTransitionsModule.cmake:[0-9]+ \(find_packa
   is relying on a Find-module without ensuring that it is actually available.
 
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
 This warning is for project developers.  Use -Wno-dev to suppress it.
 
 NotFound -> Found
@@ -50,7 +50,7 @@ Found -> NotFound
 CMake Warning at ConfigureLogTransitionsModule.cmake:[0-9]+ \(find_package\):
   No "FindViaModule.cmake" found in CMAKE_MODULE_PATH.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
 
 
 CMake Warning \(dev\) at ConfigureLogTransitionsModule.cmake:[0-9]+ \(find_package\):
@@ -66,7 +66,7 @@ CMake Warning \(dev\) at ConfigureLogTransitionsModule.cmake:[0-9]+ \(find_packa
   is relying on a Find-module without ensuring that it is actually available.
 
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
 This warning is for project developers.  Use -Wno-dev to suppress it.
 
 END$
