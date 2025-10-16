@@ -3,7 +3,7 @@ CMake Warning \(dev\) at ParenInENV1.cmake:2:
 
   Argument not separated from preceding token by whitespace.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
 This warning is for project developers.  Use -Wno-dev to suppress it.
 
 CMake Error at ParenInENV1.cmake:2 \(message\):
@@ -17,4 +17,4 @@ CMake Error at ParenInENV1.cmake:2 \(message\):
 
   There is an unterminated variable reference\.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)

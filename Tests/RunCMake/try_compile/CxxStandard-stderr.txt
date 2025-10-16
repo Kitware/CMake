@@ -1,4 +1,4 @@
-^(CMake Error in .*/Tests/RunCMake/try_compile/CxxStandard-build/CMakeFiles/CMake(Tmp|Scratch/TryCompile-[^/]+)/CMakeLists.txt:
+^(CMake Error in .*/Tests/RunCMake/try_compile/CxxStandard-build/CMakeFiles/CMake(Tmp|Scratch/TryCompile-[^/]+)/CMakeLists\.txt:
   The CXX_STANDARD property on target "cmTC_[0-9a-f]*" contained an invalid
   value: "3".
 
@@ -7,7 +7,7 @@
   CXX_STANDARD is set to invalid value '3'
 
 (
-CMake Error in .*/Tests/RunCMake/try_compile/CxxStandard-build/CMakeFiles/CMake(Tmp|Scratch/TryCompile-[^/]+)/CMakeLists.txt:
+CMake Error in .*/Tests/RunCMake/try_compile/CxxStandard-build/CMakeFiles/CMake(Tmp|Scratch/TryCompile-[^/]+)/CMakeLists\.txt:
   The CXX_STANDARD property on target "cmTC_[0-9a-f]*" contained an invalid
   value: "3".
 

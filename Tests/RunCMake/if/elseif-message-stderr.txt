@@ -5,4 +5,4 @@ CMake Error at elseif-message\.cmake:[0-9]+ \(elseif\):
 
   Unknown arguments specified
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)

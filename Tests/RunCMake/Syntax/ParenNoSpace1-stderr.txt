@@ -3,7 +3,7 @@ CMake Warning \(dev\) at ParenNoSpace1.cmake:1:
 
   Argument not separated from preceding token by whitespace.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
 This warning is for project developers.  Use -Wno-dev to suppress it.
 
 CMake Warning \(dev\) at ParenNoSpace1.cmake:2:
@@ -11,7 +11,7 @@ CMake Warning \(dev\) at ParenNoSpace1.cmake:2:
 
   Argument not separated from preceding token by whitespace.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
 This warning is for project developers.  Use -Wno-dev to suppress it.
 
 CMake Error at ParenNoSpace1.cmake:3:
@@ -19,4 +19,4 @@ CMake Error at ParenNoSpace1.cmake:3:
 
   Argument not separated from preceding token by whitespace.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)

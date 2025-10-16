@@ -1,4 +1,4 @@
-^CMake Warning \(dev\) in CMakeLists.txt:
+^CMake Warning \(dev\) in CMakeLists\.txt:
   AUTOGEN: No valid Qt version found for target main.  AUTOMOC, AUTOUIC and
   AUTORCC disabled.  Consider adding:
 

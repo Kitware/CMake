@@ -6,4 +6,4 @@ CMake Error at .*Modules/WriteCompilerDetectionHeader\.cmake:[0-9]+ \(message\):
   command.
 Call Stack \(most recent call first\):
   OldVersion.cmake:4 \(write_compiler_detection_header\)
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)

@@ -8,7 +8,7 @@ CMake Warning \(dev\) at MissingNormalWarnNoModuleOld.cmake:2 \(find_package\):
 
   \(Variable CMAKE_FIND_PACKAGE_WARN_NO_MODULE enabled this warning.\)
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
 This warning is for project developers.  Use -Wno-dev to suppress it.
 
 CMake Warning at MissingNormalWarnNoModuleOld.cmake:2 \(find_package\):
@@ -27,4 +27,4 @@ CMake Warning at MissingNormalWarnNoModuleOld.cmake:2 \(find_package\):
   "NotHere" provides a separate development package or SDK, be sure it has
   been installed.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)

@@ -5,7 +5,7 @@ CMake Warning \(dev\) at CMP0121-GET-Common.cmake:3 \(list\):
   Invalid list index "2junk".
 Call Stack \(most recent call first\):
   CMP0121-GET-WARN.cmake:2 \(include\)
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
 This warning is for project developers.  Use -Wno-dev to suppress it.
 
 GET: -->a;c<--

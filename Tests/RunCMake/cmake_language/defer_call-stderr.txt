@@ -1,6 +1,6 @@
-^CMake Warning at defer_call/CMakeLists.txt:2 \(message\):
+^CMake Warning at defer_call/CMakeLists\.txt:2 \(message\):
   Double-Deferred Warning In Subdirectory:
 
-   '[^']*/Tests/RunCMake/cmake_language/defer_call/CMakeLists.txt:DEFERRED:id3'
+   '[^']*/Tests/RunCMake/cmake_language/defer_call/CMakeLists\.txt:DEFERRED:id3'
 Call Stack \(most recent call first\):
-  defer_call/CMakeLists.txt:DEFERRED$
+  defer_call/CMakeLists\.txt:DEFERRED$

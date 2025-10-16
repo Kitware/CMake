@@ -6,5 +6,5 @@ CMake Warning \(dev\) at .*/Modules/UseSWIG\.cmake:[0-9]+ \(message\):
 Call Stack \(most recent call first\):
   CMP0122-common.cmake:9 \(swig_add_library\)
   CMP0122-WARN.cmake:1 \(include\)
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
 This warning is for project developers\.  Use -Wno-dev to suppress it\.$

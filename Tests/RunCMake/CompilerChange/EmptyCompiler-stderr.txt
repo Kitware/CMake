@@ -10,4 +10,4 @@ CMake Error at EmptyCompiler.cmake:2 \(enable_language\):
   variable "CC" or the CMake cache entry CMAKE_C_COMPILER to the full path to
   the compiler, or to the compiler name if it is in the PATH.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:6 \(include\)$
+  CMakeLists\.txt:6 \(include\)$

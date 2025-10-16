@@ -5,7 +5,7 @@ CMake Warning \(dev\) at CMP0106-Common.cmake:1 \(include\):
 
 Call Stack \(most recent call first\):
   CMP0106-WARN.cmake:2 \(include\)
-  CMakeLists.txt:7 \(include\)
+  CMakeLists\.txt:7 \(include\)
 This warning is for project developers.  Use -Wno-dev to suppress it.
 
 CMake Warning \(dev\) at .*/Modules/Documentation\.cmake:[0-9]+ \(message\):
@@ -19,7 +19,7 @@ CMake Warning \(dev\) at .*/Modules/Documentation\.cmake:[0-9]+ \(message\):
 Call Stack \(most recent call first\):
   CMP0106-Common.cmake:1 \(include\)
   CMP0106-WARN.cmake:2 \(include\)
-  CMakeLists.txt:7 \(include\)
+  CMakeLists\.txt:7 \(include\)
 This warning is for project developers.  Use -Wno-dev to suppress it.
 
 CMake Warning \(dev\) at .*/Modules/Documentation\.cmake:[0-9]+ \(message\):
@@ -33,5 +33,5 @@ CMake Warning \(dev\) at .*/Modules/Documentation\.cmake:[0-9]+ \(message\):
 Call Stack \(most recent call first\):
   CMP0106-Common.cmake:10 \(include\)
   CMP0106-WARN.cmake:2 \(include\)
-  CMakeLists.txt:7 \(include\)
+  CMakeLists\.txt:7 \(include\)
 This warning is for project developers.  Use -Wno-dev to suppress it.

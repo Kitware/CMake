@@ -1,4 +1,4 @@
-CMake Error in CMakeLists.txt:
+CMake Error in CMakeLists\.txt:
   export called with target "exported" which requires target "doubleexported"
   that is not in this export set, but in multiple other export sets:.*
   .*/Tests/RunCMake/export/DependOnDifferentSetExport-build/exportset.cmake,.*

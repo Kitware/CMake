@@ -10,4 +10,4 @@
 Call Stack \(most recent call first\):
 .*
   ndk-badver.cmake:1 \(enable_language\)
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)

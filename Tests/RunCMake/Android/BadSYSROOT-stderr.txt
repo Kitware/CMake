@@ -17,4 +17,4 @@
 
 Call Stack \(most recent call first\):
   .*/Modules/CMakeDetermineSystem\.cmake:[0-9]+ \(include\)
-  CMakeLists.txt:2 \(project\)$
+  CMakeLists\.txt:2 \(project\)$

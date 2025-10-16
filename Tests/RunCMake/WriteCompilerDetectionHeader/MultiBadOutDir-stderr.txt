@@ -3,4 +3,4 @@ CMake Error at .*Modules/WriteCompilerDetectionHeader\.cmake:[0-9]+ \(message\):
   the main file.
 Call Stack \(most recent call first\):
   MultiBadOutDir.cmake:4 \(write_compiler_detection_header\)
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)

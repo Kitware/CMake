@@ -2,4 +2,4 @@ CMake Error at BadArgGeneratorExpressionOutput\.cmake:[0-9]+ \(file\):
   file CONFIGURE called with OUTPUT containing a "<".  This character is not
   allowed.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)

@@ -1,7 +1,7 @@
 CMake Warning at MissingModule.cmake:1 \(find_package\):
   No "FindNotHere.cmake" found in CMAKE_MODULE_PATH.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
 
 
 CMake Warning \(dev\) at MissingModule.cmake:1 \(find_package\):
@@ -17,10 +17,10 @@ CMake Warning \(dev\) at MissingModule.cmake:1 \(find_package\):
   is relying on a Find-module without ensuring that it is actually available.
 
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
 This warning is for project developers.  Use -Wno-dev to suppress it.
 
 CMake Warning at MissingModule.cmake:2 \(message\):
   This warning must be reachable.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)$
+  CMakeLists\.txt:3 \(include\)$

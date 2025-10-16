@@ -5,4 +5,4 @@ CMake Error at nested-incompatible-features1\.cmake:[0-9]+ \(target_link_librari
 
   \$<LINK_GROUP:...> cannot be nested.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)

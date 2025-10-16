@@ -5,4 +5,4 @@ CMake Error at ComponentRequiredAndOptional.cmake:1 \(find_package\):
     CompB
 
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)

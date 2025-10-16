@@ -5,7 +5,7 @@ CMake Warning \(dev\) at CMP0121-REMOVE_AT-Common.cmake:3 \(list\):
   Invalid list index "invalid".
 Call Stack \(most recent call first\):
   CMP0121-REMOVE_AT-WARN.cmake:2 \(include\)
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
 This warning is for project developers.  Use -Wno-dev to suppress it.
 
 REMOVE_AT: -->b;c;d;e<--

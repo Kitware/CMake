@@ -3,4 +3,4 @@ CMake Error at .*Modules/WriteCompilerDetectionHeader\.cmake:[0-9]+ \(message\):
 Call Stack \(most recent call first\):
   .*Modules/WriteCompilerDetectionHeader\.cmake:[0-9]+ \(_check_feature_lists\)
   InvalidFeature.cmake:4 \(write_compiler_detection_header\)
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)

@@ -2,4 +2,4 @@
   The target name "package_source" is reserved when CPack source packaging is
   enabled.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)$
+  CMakeLists\.txt:3 \(include\)$

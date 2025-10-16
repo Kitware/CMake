@@ -2,4 +2,4 @@
   list sub-command TRANSFORM, selector REGEX failed to compile regex
   "\^\(alpha\$".
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)$
+  CMakeLists\.txt:3 \(include\)$

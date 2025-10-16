@@ -3,7 +3,7 @@ CMake Warning \(dev\) at StringNoSpace.cmake:2:
 
   Argument not separated from preceding token by whitespace.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
 This warning is for project developers.  Use -Wno-dev to suppress it.
 
 CMake Warning \(dev\) at StringNoSpace.cmake:2:
@@ -11,7 +11,7 @@ CMake Warning \(dev\) at StringNoSpace.cmake:2:
 
   Argument not separated from preceding token by whitespace.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
 This warning is for project developers.  Use -Wno-dev to suppress it.
 
 \[1 \${var} \\n 4\]

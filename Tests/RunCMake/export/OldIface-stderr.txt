@@ -2,4 +2,4 @@ CMake Error at OldIface\.cmake:[0-9]+ \(export\):
   export EXPORT subcommand given unknown argument:
   "EXPORT_LINK_INTERFACE_LIBRARIES".
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)

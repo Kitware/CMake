@@ -5,7 +5,7 @@ CMake Error at MissingNormalForceRequired.cmake:2 \(find_package\):
   CMAKE_REQUIRE_FIND_PACKAGE_NotHere variable has been enabled.
 
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
 +
 CMake Warning \(dev\) at MissingNormalForceRequired.cmake:2 \(find_package\):
   FindNotHere.cmake must either be part of this project itself, in this case
