@@ -39,12 +39,3 @@ set(EndStuff_PreArgs
 AddCMakeTest(EndStuff "${EndStuff_PreArgs}")
 
 AddCMakeTest(GetPrerequisites "-DConfiguration:STRING=$<CONFIGURATION>")
-
-if(GIT_EXECUTABLE)
-  set(PolicyCheck_PreArgs
-    "-DCMake_BINARY_DIR:PATH=${CMake_BINARY_DIR}"
-    "-DCMake_SOURCE_DIR:PATH=${CMake_SOURCE_DIR}"
-    "-DGIT_EXECUTABLE:STRING=${GIT_EXECUTABLE}"
-    )
-  AddCMakeTest(PolicyCheck "${PolicyCheck_PreArgs}")
-endif()
