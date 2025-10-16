@@ -1,2 +1,2 @@
 Submit files
-   SubmitURL: http://badhostname.invalid
+   SubmitURL: http://badhostname\.invalid

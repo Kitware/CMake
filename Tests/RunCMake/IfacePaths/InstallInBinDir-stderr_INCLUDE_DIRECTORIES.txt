@@ -3,4 +3,4 @@ CMake Error in CMakeLists\.txt:
 
     ".*Tests/RunCMake/IfacePaths_INCDIRS/InstallInBinDir-build/foo"
 
-  which is prefixed in the build directory.
+  which is prefixed in the build directory\.

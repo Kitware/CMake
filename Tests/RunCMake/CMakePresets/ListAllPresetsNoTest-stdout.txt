@@ -1,4 +1,4 @@
-^Not searching for unused variables given on the command line.
+^Not searching for unused variables given on the command line\.
 Available configure presets:
 
   "default"

@@ -1,4 +1,4 @@
-CMake Error at .*AnyCommandErrorVar.cmake:2 \(execute_process\):
+CMake Error at .*AnyCommandErrorVar\.cmake:2 \(execute_process\):
   execute_process failed command indexes:
 
     2: "Child return code: 1"

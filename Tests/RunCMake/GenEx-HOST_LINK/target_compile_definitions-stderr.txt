@@ -3,7 +3,7 @@ CMake Error at target_compile_definitions\.cmake:[0-9]+ \(target_compile_definit
 
     \$<HOST_LINK:DEF>
 
-  \$<HOST_LINK:...> may only be used with binary targets to specify link
-  options.
+  \$<HOST_LINK:\.\.\.> may only be used with binary targets to specify link
+  options\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:3 \(include\)

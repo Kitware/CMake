@@ -3,7 +3,7 @@ CMake Error at target_link_directories\.cmake:[0-9]+ \(target_link_directories\)
 
     \$<HOST_LINK:/DIR>
 
-  \$<HOST_LINK:...> may only be used with binary targets to specify link
-  options.
+  \$<HOST_LINK:\.\.\.> may only be used with binary targets to specify link
+  options\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)

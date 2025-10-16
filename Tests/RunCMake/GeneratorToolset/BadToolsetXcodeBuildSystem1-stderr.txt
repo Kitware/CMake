@@ -7,4 +7,4 @@ CMake Error at CMakeLists\.txt:[0-9]+ \(project\):
 
     buildsystem=1
 
-  is not allowed with Xcode [0-9.]+\.$
+  is not allowed with Xcode [0-9\.]+\.$

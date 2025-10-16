@@ -3,4 +3,4 @@
 
     "[^"]*/Tests/RunCMake/Ninja/SelectCompiler/2/cc"
 
-  is not able to compile a simple test program.
+  is not able to compile a simple test program\.

@@ -3,4 +3,4 @@ CMake Error in CMakeLists\.txt:
 
   "[^"]*"
 
-  version *[.0-9]+\.
+  version *[\.0-9]+\.

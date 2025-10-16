@@ -1,5 +1,5 @@
 CMake Error at VersionMissingLanguages\.cmake:[0-9]+ \(project\):
   project with VERSION, DESCRIPTION or HOMEPAGE_URL must use LANGUAGES before
-  language names.
+  language names\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)$

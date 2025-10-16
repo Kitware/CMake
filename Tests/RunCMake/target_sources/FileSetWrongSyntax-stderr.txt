@@ -1,4 +1,4 @@
-CMake Error at FileSetWrongSyntax.cmake:4 \(target_sources\):
+CMake Error at FileSetWrongSyntax\.cmake:4 \(target_sources\):
   Cannot find source file:
 
     FILE_SET
@@ -7,6 +7,6 @@ CMake Error at FileSetWrongSyntax.cmake:4 \(target_sources\):
 ]+
 )+
   Hint: the FILE_SET keyword may only appear after a visibility specifier or
-  another FILE_SET within the target_sources\(\) command.
+  another FILE_SET within the target_sources\(\) command\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:3 \(include\)

@@ -5,13 +5,13 @@
 ]*/Tests/RunCMake/FindBoost/CMakePackage_MissingTarget/include
 -- Boost_LIBRARY_DIRS: *
 -- Boost_LIBRARIES: [^
-]*/Tests/RunCMake/FindBoost/CMakePackage_MissingTarget/lib/libboost_date_time.a
+]*/Tests/RunCMake/FindBoost/CMakePackage_MissingTarget/lib/libboost_date_time\.a
 -- Boost_DATE_TIME_FOUND: 1
 -- Boost_DATE_TIME_LIBRARY: [^
-]*/Tests/RunCMake/FindBoost/CMakePackage_MissingTarget/lib/libboost_date_time.a
+]*/Tests/RunCMake/FindBoost/CMakePackage_MissingTarget/lib/libboost_date_time\.a
 -- Boost_VERSION_MACRO: 1070042
--- Boost_VERSION_STRING: 1.70.42
--- Boost_VERSION: 1.70.42
+-- Boost_VERSION_STRING: 1\.70\.42
+-- Boost_VERSION: 1\.70\.42
 -- Boost_LIB_VERSION: 1_70_42
 -- Boost_MAJOR_VERSION: 1
 -- Boost_MINOR_VERSION: 70

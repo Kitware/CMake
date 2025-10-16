@@ -46,7 +46,7 @@
   The file was found at
 
     [^
-]*/Tests/RunCMake/find_package/DebugRoot/Exist/DebugRoot/DebugRootConfig.cmake
+]*/Tests/RunCMake/find_package/DebugRoot/Exist/DebugRoot/DebugRootConfig\.cmake
 
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)$

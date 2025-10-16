@@ -3,4 +3,4 @@ CMake Error in CMakeLists\.txt:
 
     ".*RunCMake/IfacePaths/foo"
 
-  which is prefixed in the source directory.
+  which is prefixed in the source directory\.

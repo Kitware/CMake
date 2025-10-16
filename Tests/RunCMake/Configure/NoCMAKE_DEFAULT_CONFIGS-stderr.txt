@@ -8,4 +8,4 @@
 
     CMAKE_DEFAULT_CONFIGS
 
-  but it has been specified.
+  but it has been specified\.

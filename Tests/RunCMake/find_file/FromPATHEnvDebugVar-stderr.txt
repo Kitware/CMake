@@ -1,6 +1,6 @@
   find_file called with the following settings:.*
     VAR: PrefixInPATH_File
-    NAMES: "PrefixInPATH.h"
+    NAMES: "PrefixInPATH\.h"
     Documentation.*
     Framework.*
     AppBundle.*
@@ -14,7 +14,7 @@
   The item was not found.*
   find_file called with the following settings:.*
     VAR: PrefixInPATH_File
-    NAMES: "PrefixInPATH.h"
+    NAMES: "PrefixInPATH\.h"
     Documentation.*
     Framework.*
     AppBundle.*

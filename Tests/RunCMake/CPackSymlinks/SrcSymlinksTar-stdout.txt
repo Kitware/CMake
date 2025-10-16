@@ -1,9 +1,9 @@
-^x build.sh
-x CMakeLists.txt
+^x build\.sh
+x CMakeLists\.txt
 x dirlink
 x include/
-x include/src.h
-x link.h
-x real.h
+x include/src\.h
+x link\.h
+x real\.h
 x src/
-x src/src.h$
+x src/src\.h$

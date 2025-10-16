@@ -1,5 +1,5 @@
 ^CMake Error: Could not read presets from [^
 ]*/Tests/RunCMake/CMakePresets/UnknownArchitectureStrategy:
-CMakePresets.json:9: Invalid preset
+CMakePresets\.json:9: Invalid preset
         "strategy": "unknown"
                     \^$

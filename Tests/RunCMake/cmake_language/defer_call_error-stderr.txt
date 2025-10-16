@@ -1,4 +1,4 @@
-^CMake Error at defer_call_error.cmake:2 \(message\):
+^CMake Error at defer_call_error\.cmake:2 \(message\):
   Deferred Error
 Call Stack \(most recent call first\):
   CMakeLists\.txt:DEFERRED

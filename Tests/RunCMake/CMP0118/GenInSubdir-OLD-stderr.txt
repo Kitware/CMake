@@ -13,4 +13,4 @@ CMake Error at GenInSubdir/CMakeLists\.txt:[0-9]+ \(target_sources\):
   Cannot find source file:
 
     [^
-]*/Tests/RunCMake/CMP0118/GenInSubdir-OLD-build/GenInSubdir/sub.txt
+]*/Tests/RunCMake/CMP0118/GenInSubdir-OLD-build/GenInSubdir/sub\.txt

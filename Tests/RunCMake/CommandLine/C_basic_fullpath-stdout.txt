@@ -1,2 +1,2 @@
 loading initial cache file [^
-]*/Tests/RunCMake/CommandLine/C_basic_initial-cache.txt
+]*/Tests/RunCMake/CommandLine/C_basic_initial-cache\.txt

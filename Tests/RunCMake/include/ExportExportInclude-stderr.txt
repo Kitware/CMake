@@ -1,4 +1,4 @@
-^CMake Error at ExportExportInclude.cmake:6 \(include\):
+^CMake Error at ExportExportInclude\.cmake:6 \(include\):
   include could not find requested file:
 
     [^

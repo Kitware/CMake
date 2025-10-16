@@ -15,5 +15,5 @@ CMake Warning \(dev\) in CMakeLists\.txt:
   the cmake_policy command to set the policy and suppress this warning\.
 
   For compatibility with older versions of CMake, unnecessary flags for
-  language standard or compiler extensions may be added.
+  language standard or compiler extensions may be added\.
 This warning is for project developers\.  Use -Wno-dev to suppress it\.

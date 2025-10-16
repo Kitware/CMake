@@ -3,7 +3,7 @@
 
     config::iface-Debug
 
-  but the target was not found.  Possible reasons include:
+  but the target was not found\.  Possible reasons include:
 (
     \*[^
 ]+)*
@@ -16,7 +16,7 @@ CMake Error at ConfigCase\.cmake:6 \(target_link_libraries\):
 
     config::impl-Debug
 
-  but the target was not found.  Possible reasons include:
+  but the target was not found\.  Possible reasons include:
 (
     \*[^
 ]+)*

@@ -2,4 +2,4 @@
   Cannot find source file:
 
     [^
-]*/Tests/RunCMake/CMP0118/GenInSubdir-WARN-build/GenInSubdir/sub.txt
+]*/Tests/RunCMake/CMP0118/GenInSubdir-WARN-build/GenInSubdir/sub\.txt

@@ -3,7 +3,7 @@ CMake Error in CMakeLists\.txt:
 
     ".*/Tests/RunCMake/CMP0041/include/\$<TARGET_PROPERTY:NAME>"
 
-  which is prefixed in the source directory.
+  which is prefixed in the source directory\.
 
 
 CMake Error in CMakeLists\.txt:
@@ -11,7 +11,7 @@ CMake Error in CMakeLists\.txt:
 
     ".*/Tests/RunCMake/CMP0041/include/\$<TARGET_PROPERTY:NAME>"
 
-  which is prefixed in the source directory.
+  which is prefixed in the source directory\.
 
 
 CMake Error in CMakeLists\.txt:
@@ -19,4 +19,4 @@ CMake Error in CMakeLists\.txt:
 
     ".*/Tests/RunCMake/CMP0041/CMP0041-tid-NEW-build/include/\$<TARGET_PROPERTY:NAME>"
 
-  which is prefixed in the build directory.
+  which is prefixed in the build directory\.

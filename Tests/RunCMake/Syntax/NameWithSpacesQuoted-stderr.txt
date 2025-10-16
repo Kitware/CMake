@@ -1,7 +1,7 @@
-^CMake Error at NameWithSpacesQuoted.cmake:1 \(message\):
+^CMake Error at NameWithSpacesQuoted\.cmake:1 \(message\):
   Syntax error in cmake code at
 
-    .*/Tests/RunCMake/Syntax/NameWithSpacesQuoted.cmake:1
+    .*/Tests/RunCMake/Syntax/NameWithSpacesQuoted\.cmake:1
 
   when parsing string
 

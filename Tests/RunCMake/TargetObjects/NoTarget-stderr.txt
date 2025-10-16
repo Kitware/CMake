@@ -1,18 +1,18 @@
-(CMake Error at NoTarget.cmake:4 \(file\):
+(CMake Error at NoTarget\.cmake:4 \(file\):
   Error evaluating generator expression:
 
     \$<TARGET_OBJECTS:NoTarget>
 
-  Objects of target "NoTarget" referenced but no such target exists.
+  Objects of target "NoTarget" referenced but no such target exists\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:3 \(include\)
 *)+
-(CMake Error at NoTarget.cmake:5 \(file\):
+(CMake Error at NoTarget\.cmake:5 \(file\):
   Error evaluating generator expression:
 
     \$<TARGET_OBJECTS:NoTarget>
 
-  Objects of target "NoTarget" referenced but no such target exists.
+  Objects of target "NoTarget" referenced but no such target exists\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:3 \(include\)
 *)+
@@ -21,4 +21,4 @@ CMake Error:
 
     \$<TARGET_OBJECTS:NoTarget>
 
-  Objects of target "NoTarget" referenced but no such target exists.
+  Objects of target "NoTarget" referenced but no such target exists\.

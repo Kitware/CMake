@@ -3,5 +3,5 @@ CMake Error:
 
     \$<HOST_LINK:lib>
 
-  \$<HOST_LINK:...> may only be used with binary targets to specify link
-  options.
+  \$<HOST_LINK:\.\.\.> may only be used with binary targets to specify link
+  options\.

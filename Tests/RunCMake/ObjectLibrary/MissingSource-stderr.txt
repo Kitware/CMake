@@ -1,7 +1,7 @@
-CMake Error at MissingSource.cmake:1 \(add_library\):
+CMake Error at MissingSource\.cmake:1 \(add_library\):
   Cannot find source file:
 
-    missing.c
+    missing\.c
 
   Tried extensions ([^
 ]+

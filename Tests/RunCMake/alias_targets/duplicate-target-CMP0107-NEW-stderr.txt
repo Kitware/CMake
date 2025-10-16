@@ -1,6 +1,6 @@
 CMake Error at duplicate-target\.cmake:[0-9]+ \(add_library\):
   add_library cannot create ALIAS target "alias1" because another target with
-  the same name already exists.
+  the same name already exists\.
 Call Stack \(most recent call first\):
   duplicate-target-CMP0107-NEW\.cmake:[0-9]+ \(include\)
   CMakeLists\.txt:[0-9]+ \(include\)
@@ -8,7 +8,7 @@ Call Stack \(most recent call first\):
 
 CMake Error at duplicate-target\.cmake:[0-9]+ \(add_library\):
   add_library cannot create ALIAS target "alias1" because another target with
-  the same name already exists.
+  the same name already exists\.
 Call Stack \(most recent call first\):
   duplicate-target-CMP0107-NEW\.cmake:[0-9]+ \(include\)
   CMakeLists\.txt:[0-9]+ \(include\)
@@ -16,7 +16,7 @@ Call Stack \(most recent call first\):
 
 CMake Error at duplicate-target\.cmake:[0-9]+ \(add_library\):
   add_library cannot create ALIAS target "alias2" because another target with
-  the same name already exists.
+  the same name already exists\.
 Call Stack \(most recent call first\):
   duplicate-target-CMP0107-NEW\.cmake:[0-9]+ \(include\)
   CMakeLists\.txt:[0-9]+ \(include\)
@@ -24,7 +24,7 @@ Call Stack \(most recent call first\):
 
 CMake Error at duplicate-target\.cmake:[0-9]+ \(add_library\):
   add_library cannot create ALIAS target "alias2" because another target with
-  the same name already exists.
+  the same name already exists\.
 Call Stack \(most recent call first\):
   duplicate-target-CMP0107-NEW\.cmake:[0-9]+ \(include\)
   CMakeLists\.txt:[0-9]+ \(include\)

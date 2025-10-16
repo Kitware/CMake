@@ -1,4 +1,4 @@
-CMake Error at .*/Modules/FeatureSummary\.cmake:[0-9]+. \(message\):
+CMake Error at .*/Modules/FeatureSummary\.cmake:[0-9]+ \(message\):
   The WHAT argument of FEATURE_SUMMARY\(\) contains FOO, which is not a valid
   value\.
 Call Stack \(most recent call first\):

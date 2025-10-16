@@ -3,7 +3,7 @@
 
     VAR: FOO_EXE
     NAMES: "ModuleModeDebugPkgFooExe"
-    Documentation: Path to a program.
+    Documentation: Path to a program\.
     Framework
       Only Search Frameworks: 0
       Search Frameworks Last: 0
@@ -16,7 +16,7 @@
 
   find_program considered the following locations:
 
-  The item was not found.
+  The item was not found\.
 
 Call Stack \(most recent call first\):
   ModuleModeDebugPkg\.cmake:[0-9]+ \(find_package\)
@@ -27,7 +27,7 @@ CMake Debug Log at ModuleModeDebugPkg/FindFoo\.cmake:[0-9]+ \(find_library\):
 
     VAR: FOO_LIB
     NAMES: "ModuleModeDebugPkgFooLib"
-    Documentation: Path to a library.
+    Documentation: Path to a library\.
     Framework
       Only Search Frameworks: 0
       Search Frameworks Last: 0
@@ -40,7 +40,7 @@ CMake Debug Log at ModuleModeDebugPkg/FindFoo\.cmake:[0-9]+ \(find_library\):
 
   find_library considered the following locations:
 
-  The item was not found.
+  The item was not found\.
 
 Call Stack \(most recent call first\):
   ModuleModeDebugPkg\.cmake:[0-9]+ \(find_package\)
@@ -50,8 +50,8 @@ CMake Debug Log at ModuleModeDebugPkg/FindFoo\.cmake:[0-9]+ \(find_path\):
   find_path called with the following settings:
 
     VAR: FOO_PATH
-    NAMES: "ModuleModeDebugPkgFoo.h"
-    Documentation: Path to a file.
+    NAMES: "ModuleModeDebugPkgFoo\.h"
+    Documentation: Path to a file\.
     Framework
       Only Search Frameworks: 0
       Search Frameworks Last: 0
@@ -64,7 +64,7 @@ CMake Debug Log at ModuleModeDebugPkg/FindFoo\.cmake:[0-9]+ \(find_path\):
 
   find_path considered the following locations:
 
-  The item was not found.
+  The item was not found\.
 
 Call Stack \(most recent call first\):
   ModuleModeDebugPkg\.cmake:[0-9]+ \(find_package\)
@@ -74,8 +74,8 @@ CMake Debug Log at ModuleModeDebugPkg/FindFoo\.cmake:[0-9]+ \(find_file\):
   find_file called with the following settings:
 
     VAR: FOO_FILE
-    NAMES: "ModuleModeDebugPkgFoo.h"
-    Documentation: Path to a file.
+    NAMES: "ModuleModeDebugPkgFoo\.h"
+    Documentation: Path to a file\.
     Framework
       Only Search Frameworks: 0
       Search Frameworks Last: 0
@@ -88,51 +88,51 @@ CMake Debug Log at ModuleModeDebugPkg/FindFoo\.cmake:[0-9]+ \(find_file\):
 
   find_file considered the following locations:
 
-  The item was not found.
+  The item was not found\.
 
 Call Stack \(most recent call first\):
   ModuleModeDebugPkg\.cmake:[0-9]+ \(find_package\)
   CMakeLists\.txt:[0-9]+ \(include\)
 +
-FindBar processed here.
+FindBar processed here\.
 +
 CMake Debug Log at ModuleModeDebugPkg/FindFoo\.cmake:[0-9]+ \(find_package\):
-  The internally managed CMAKE_FIND_PACKAGE_REDIRECTS_DIR.
+  The internally managed CMAKE_FIND_PACKAGE_REDIRECTS_DIR\.
 
     [^
 ]*/Tests/RunCMake/find_package/ModuleModeDebugPkg-build/CMakeFiles/pkgRedirects
 
-  Paths specified by the find_package HINTS option.
+  Paths specified by the find_package HINTS option\.
 
     none
 
-  Paths specified by the find_package PATHS option.
+  Paths specified by the find_package PATHS option\.
 
     none
 
   find_package considered the following locations for Zot's Config module:
 
     [^
-]*/Tests/RunCMake/find_package/ModuleModeDebugPkg-build/CMakeFiles/pkgRedirects/ZotConfig.cmake
+]*/Tests/RunCMake/find_package/ModuleModeDebugPkg-build/CMakeFiles/pkgRedirects/ZotConfig\.cmake
     [^
-]*/Tests/RunCMake/find_package/ModuleModeDebugPkg-build/CMakeFiles/pkgRedirects/zot-config.cmake
+]*/Tests/RunCMake/find_package/ModuleModeDebugPkg-build/CMakeFiles/pkgRedirects/zot-config\.cmake
 
-  The file was not found.
+  The file was not found\.
 
 Call Stack \(most recent call first\):
   ModuleModeDebugPkg\.cmake:[0-9]+ \(find_package\)
   CMakeLists\.txt:[0-9]+ \(include\)
 +
 CMake Debug Log at ModuleModeDebugPkg\.cmake:[0-9]+ \(find_package\):
-  find_package considered the following paths for FindFoo.cmake:
+  find_package considered the following paths for FindFoo\.cmake:
 
     [^
-]*/Modules/FindFoo.cmake
+]*/Modules/FindFoo\.cmake
 
   The file was found at
 
     [^
-]*/Tests/RunCMake/find_package/ModuleModeDebugPkg/FindFoo.cmake
+]*/Tests/RunCMake/find_package/ModuleModeDebugPkg/FindFoo\.cmake
 
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)$
