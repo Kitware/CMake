@@ -55,7 +55,7 @@ class cmLinkLineComputer;
 #define FASTBUILD_VS_BASE_PATH "VisualStudio/Projects"
 
 #define FASTBUILD_IDE_VS_COMMAND_PREFIX "cd ^$(SolutionDir).. && "
-#define FASTBUILD_IDE_BUILD_ARGS " -ide -cache -summary -dist "
+#define FASTBUILD_DEFAULT_IDE_BUILD_ARGS " -ide -cache -summary -dist "
 
 constexpr auto FASTBUILD_CAPTURE_SYSTEM_ENV =
   "CMAKE_FASTBUILD_CAPTURE_SYSTEM_ENV";
@@ -82,6 +82,8 @@ constexpr auto FASTBUILD_ALLOW_RESPONSE_FILE =
   "CMAKE_FASTBUILD_ALLOW_RESPONSE_FILE";
 constexpr auto FASTBUILD_FORCE_RESPONSE_FILE =
   "CMAKE_FASTBUILD_FORCE_RESPONSE_FILE";
+
+constexpr auto FASTBUILD_IDE_ARGS = "CMAKE_FASTBUILD_IDE_ARGS";
 
 static std::map<std::string, std::string> const compilerIdToFastbuildFamily = {
   { "MSVC", "msvc" }, { "Clang", "clang" },      { "AppleClang", "clang" },
@@ -1451,28 +1453,39 @@ void cmGlobalFastbuildGenerator::WriteIDEProjects()
 #endif
 }
 
+std::string cmGlobalFastbuildGenerator::GetIDEBuildArgs() const
+{
+  cmValue const ideArgs = this->GetGlobalSetting(FASTBUILD_IDE_ARGS);
+  if (ideArgs) {
+    return cmStrCat(' ', ideArgs, ' ');
+  }
+  return FASTBUILD_DEFAULT_IDE_BUILD_ARGS;
+}
+
 void cmGlobalFastbuildGenerator::WriteVSBuildCommands()
 {
-  WriteVariable("ProjectBuildCommand",
-                Quote(FASTBUILD_IDE_VS_COMMAND_PREFIX +
-                      this->FastbuildCommand +
-                      FASTBUILD_IDE_BUILD_ARGS " ^$(ProjectName)"),
-                1);
-  WriteVariable("ProjectRebuildCommand",
-                Quote(FASTBUILD_IDE_VS_COMMAND_PREFIX +
-                      this->FastbuildCommand +
-                      FASTBUILD_IDE_BUILD_ARGS "-clean ^$(ProjectName)"),
-                1);
+  std::string const ideArgs = this->GetIDEBuildArgs();
+  WriteVariable(
+    "ProjectBuildCommand",
+    Quote(cmStrCat(FASTBUILD_IDE_VS_COMMAND_PREFIX, this->FastbuildCommand,
+                   ideArgs, " ^$(ProjectName)")),
+    1);
+  WriteVariable(
+    "ProjectRebuildCommand",
+    Quote(cmStrCat(FASTBUILD_IDE_VS_COMMAND_PREFIX, this->FastbuildCommand,
+                   ideArgs, "-clean ^$(ProjectName)")),
+    1);
   WriteVariable("ProjectCleanCommand",
-                Quote(FASTBUILD_IDE_VS_COMMAND_PREFIX +
-                      this->FastbuildCommand + " -ide clean"),
+                Quote(cmStrCat(FASTBUILD_IDE_VS_COMMAND_PREFIX,
+                               this->FastbuildCommand, ideArgs, " clean")),
                 1);
 }
 void cmGlobalFastbuildGenerator::WriteXCodeBuildCommands()
 {
+  std::string const ideArgs = this->GetIDEBuildArgs();
   WriteVariable("XCodeBuildToolPath", Quote(this->FastbuildCommand), 1);
   WriteVariable("XCodeBuildToolArgs",
-                Quote(FASTBUILD_IDE_BUILD_ARGS "^$(FASTBUILD_TARGET)"), 1);
+                Quote(cmStrCat(ideArgs, "^$(FASTBUILD_TARGET)")), 1);
   WriteVariable("XCodeBuildWorkingDir",
                 Quote(this->CMakeInstance->GetHomeOutputDirectory()), 1);
 }
