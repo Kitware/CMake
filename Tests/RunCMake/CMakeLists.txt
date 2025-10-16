@@ -719,6 +719,7 @@ foreach(var
     list(APPEND file-DOWNLOAD_ARGS -D${var}=${${var}})
   endif()
 endforeach()
+add_RunCMake_test(file-CREATE_LINK)
 add_RunCMake_test(file-DOWNLOAD)
 add_RunCMake_test(file-MAKE_DIRECTORY)
 add_RunCMake_test(file-RPATH
