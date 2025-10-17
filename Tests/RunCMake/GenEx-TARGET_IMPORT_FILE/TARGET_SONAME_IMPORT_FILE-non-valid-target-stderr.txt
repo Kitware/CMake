@@ -1,4 +1,4 @@
-CMake Error at TARGET_SONAME_IMPORT_FILE-non-valid-target.cmake:[0-9]+ \(file\):
+CMake Error at TARGET_SONAME_IMPORT_FILE-non-valid-target\.cmake:[0-9]+ \(file\):
   Error evaluating generator expression:
 
     \$<TARGET_SONAME_IMPORT_FILE:static1>

@@ -1,4 +1,4 @@
-^CMake Debug Log at ConfigureLogParameters2.cmake:[0-9]+ \(find_package\):
+^CMake Debug Log at ConfigureLogParameters2\.cmake:[0-9]+ \(find_package\):
   The internally managed CMAKE_FIND_PACKAGE_REDIRECTS_DIR.
 
     [^
@@ -87,7 +87,7 @@ Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)
 
 
-CMake Debug Log at ConfigureLogParameters2.cmake:[0-9]+ \(find_package\):
+CMake Debug Log at ConfigureLogParameters2\.cmake:[0-9]+ \(find_package\):
   The internally managed CMAKE_FIND_PACKAGE_REDIRECTS_DIR.
 
     [^
@@ -199,7 +199,7 @@ Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)
 
 
-CMake Debug Log at ConfigureLogParameters2.cmake:[0-9]+ \(find_package\):
+CMake Debug Log at ConfigureLogParameters2\.cmake:[0-9]+ \(find_package\):
   The internally managed CMAKE_FIND_PACKAGE_REDIRECTS_DIR.
 
     [^
@@ -227,7 +227,7 @@ Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)
 
 
-CMake Debug Log at ConfigureLogParameters2.cmake:[0-9]+ \(find_package\):
+CMake Debug Log at ConfigureLogParameters2\.cmake:[0-9]+ \(find_package\):
   The internally managed CMAKE_FIND_PACKAGE_REDIRECTS_DIR.
 
     [^
@@ -315,7 +315,7 @@ Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)
 
 
-CMake Debug Log at ConfigureLogParameters2.cmake:[0-9]+ \(find_package\):
+CMake Debug Log at ConfigureLogParameters2\.cmake:[0-9]+ \(find_package\):
   The internally managed CMAKE_FIND_PACKAGE_REDIRECTS_DIR.
 
     [^
@@ -403,7 +403,7 @@ Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)
 
 
-CMake Debug Log at ConfigureLogParameters2.cmake:[0-9]+ \(find_package\):
+CMake Debug Log at ConfigureLogParameters2\.cmake:[0-9]+ \(find_package\):
   The internally managed CMAKE_FIND_PACKAGE_REDIRECTS_DIR.
 
     [^
@@ -491,7 +491,7 @@ Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)
 
 
-CMake Debug Log at ConfigureLogParameters2.cmake:[0-9]+ \(find_package\):
+CMake Debug Log at ConfigureLogParameters2\.cmake:[0-9]+ \(find_package\):
   The internally managed CMAKE_FIND_PACKAGE_REDIRECTS_DIR.
 
     [^

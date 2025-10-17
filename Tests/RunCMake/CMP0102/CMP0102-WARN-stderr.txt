@@ -6,5 +6,5 @@ CMake Warning \(dev\) at CMP0102-Common.cmake:2 \(mark_as_advanced\):
   policy and suppress this warning.
 Call Stack \(most recent call first\):
   CMP0102-WARN.cmake:4 \(include\)
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
 This warning is for project developers.  Use -Wno-dev to suppress it.

@@ -2,4 +2,4 @@
   list sub-command TRANSFORM, action REPLACE: replace-expression ends in a
   backslash.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)$
+  CMakeLists\.txt:3 \(include\)$

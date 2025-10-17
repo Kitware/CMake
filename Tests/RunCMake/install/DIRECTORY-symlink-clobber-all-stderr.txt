@@ -1,4 +1,4 @@
-^CMake Error at cmake_install.cmake:[0-9]+ \(file\):
+^CMake Error at cmake_install\.cmake:[0-9]+ \(file\):
   file INSTALL cannot duplicate symlink
 
     [^

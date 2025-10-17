@@ -1,4 +1,4 @@
-^CMake Warning \(dev\) at TryRunArgs.cmake:[0-9]+ \(try_compile\):
+^CMake Warning \(dev\) at TryRunArgs\.cmake:[0-9]+ \(try_compile\):
   Unknown arguments:
 
     "COMPILE_OUTPUT_VARIABLE"

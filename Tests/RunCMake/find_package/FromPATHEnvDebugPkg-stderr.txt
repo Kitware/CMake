@@ -1,4 +1,4 @@
-^CMake Debug Log at FromPATHEnvDebugPkg.cmake:[0-9]+ \(find_package\):
+^CMake Debug Log at FromPATHEnvDebugPkg\.cmake:[0-9]+ \(find_package\):
   find_package considered the following paths for FindResolved.cmake:
 
     [^

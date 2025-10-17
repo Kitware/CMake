@@ -2,4 +2,4 @@
   foreach called with incorrect range specification: start 2, stop 1, step 1
 Call Stack \(most recent call first\):
   BadRangeInFunction.cmake:5 \(func\)
-  CMakeLists.txt:3 \(include\)$
+  CMakeLists\.txt:3 \(include\)$

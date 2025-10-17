@@ -16,7 +16,7 @@ Call Stack \(most recent call first\):
   MissingComponentDependency\.cmake:[0-9]+ \(find_package\)
   CMakeLists\.txt:[0-9]+ \(include\)
 +
-CMake Error at MissingComponentDependency.cmake:[0-9]+ \(find_package\):
+CMake Error at MissingComponentDependency\.cmake:[0-9]+ \(find_package\):
   find_package could not find DoesNotExist, required by ComponentTest\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)

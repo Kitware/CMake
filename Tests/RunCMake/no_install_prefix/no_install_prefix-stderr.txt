@@ -15,4 +15,4 @@ CMake Error at do_test.cmake:16 \(find_package\):
   been installed.
 Call Stack \(most recent call first\):
   no_install_prefix.cmake:2 \(include\)
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)

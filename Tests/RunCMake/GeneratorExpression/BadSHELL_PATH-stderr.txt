@@ -1,4 +1,4 @@
-CMake Error at BadSHELL_PATH.cmake:[0-9]+ \(add_custom_target\):
+CMake Error at BadSHELL_PATH\.cmake:[0-9]+ \(add_custom_target\):
   Error evaluating generator expression:
 
     \$<SHELL_PATH:>
@@ -7,7 +7,7 @@ CMake Error at BadSHELL_PATH.cmake:[0-9]+ \(add_custom_target\):
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)
 +
-CMake Error at BadSHELL_PATH.cmake:[0-9]+ \(add_custom_target\):
+CMake Error at BadSHELL_PATH\.cmake:[0-9]+ \(add_custom_target\):
   Error evaluating generator expression:
 
     \$<SHELL_PATH:Relative/Path>
@@ -16,7 +16,7 @@ CMake Error at BadSHELL_PATH.cmake:[0-9]+ \(add_custom_target\):
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)
 +
-CMake Error at BadSHELL_PATH.cmake:[0-9]+ \(add_custom_target\):
+CMake Error at BadSHELL_PATH\.cmake:[0-9]+ \(add_custom_target\):
   Error evaluating generator expression:
 
     \$<SHELL_PATH:;>

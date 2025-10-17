@@ -1,4 +1,4 @@
-^CMake Debug Log at ModuleModeDebugPkg/FindFoo.cmake:[0-9]+ \(find_program\):
+^CMake Debug Log at ModuleModeDebugPkg/FindFoo\.cmake:[0-9]+ \(find_program\):
   find_program called with the following settings:
 
     VAR: FOO_EXE
@@ -19,10 +19,10 @@
   The item was not found.
 
 Call Stack \(most recent call first\):
-  ModuleModeDebugPkg.cmake:[0-9]+ \(find_package\)
+  ModuleModeDebugPkg\.cmake:[0-9]+ \(find_package\)
   CMakeLists\.txt:[0-9]+ \(include\)
 +
-CMake Debug Log at ModuleModeDebugPkg/FindFoo.cmake:[0-9]+ \(find_library\):
+CMake Debug Log at ModuleModeDebugPkg/FindFoo\.cmake:[0-9]+ \(find_library\):
   find_library called with the following settings:
 
     VAR: FOO_LIB
@@ -43,10 +43,10 @@ CMake Debug Log at ModuleModeDebugPkg/FindFoo.cmake:[0-9]+ \(find_library\):
   The item was not found.
 
 Call Stack \(most recent call first\):
-  ModuleModeDebugPkg.cmake:[0-9]+ \(find_package\)
+  ModuleModeDebugPkg\.cmake:[0-9]+ \(find_package\)
   CMakeLists\.txt:[0-9]+ \(include\)
 +
-CMake Debug Log at ModuleModeDebugPkg/FindFoo.cmake:[0-9]+ \(find_path\):
+CMake Debug Log at ModuleModeDebugPkg/FindFoo\.cmake:[0-9]+ \(find_path\):
   find_path called with the following settings:
 
     VAR: FOO_PATH
@@ -67,10 +67,10 @@ CMake Debug Log at ModuleModeDebugPkg/FindFoo.cmake:[0-9]+ \(find_path\):
   The item was not found.
 
 Call Stack \(most recent call first\):
-  ModuleModeDebugPkg.cmake:[0-9]+ \(find_package\)
+  ModuleModeDebugPkg\.cmake:[0-9]+ \(find_package\)
   CMakeLists\.txt:[0-9]+ \(include\)
 +
-CMake Debug Log at ModuleModeDebugPkg/FindFoo.cmake:[0-9]+ \(find_file\):
+CMake Debug Log at ModuleModeDebugPkg/FindFoo\.cmake:[0-9]+ \(find_file\):
   find_file called with the following settings:
 
     VAR: FOO_FILE
@@ -91,12 +91,12 @@ CMake Debug Log at ModuleModeDebugPkg/FindFoo.cmake:[0-9]+ \(find_file\):
   The item was not found.
 
 Call Stack \(most recent call first\):
-  ModuleModeDebugPkg.cmake:[0-9]+ \(find_package\)
+  ModuleModeDebugPkg\.cmake:[0-9]+ \(find_package\)
   CMakeLists\.txt:[0-9]+ \(include\)
 +
 FindBar processed here.
 +
-CMake Debug Log at ModuleModeDebugPkg/FindFoo.cmake:[0-9]+ \(find_package\):
+CMake Debug Log at ModuleModeDebugPkg/FindFoo\.cmake:[0-9]+ \(find_package\):
   The internally managed CMAKE_FIND_PACKAGE_REDIRECTS_DIR.
 
     [^
@@ -120,10 +120,10 @@ CMake Debug Log at ModuleModeDebugPkg/FindFoo.cmake:[0-9]+ \(find_package\):
   The file was not found.
 
 Call Stack \(most recent call first\):
-  ModuleModeDebugPkg.cmake:[0-9]+ \(find_package\)
+  ModuleModeDebugPkg\.cmake:[0-9]+ \(find_package\)
   CMakeLists\.txt:[0-9]+ \(include\)
 +
-CMake Debug Log at ModuleModeDebugPkg.cmake:[0-9]+ \(find_package\):
+CMake Debug Log at ModuleModeDebugPkg\.cmake:[0-9]+ \(find_package\):
   find_package considered the following paths for FindFoo.cmake:
 
     [^

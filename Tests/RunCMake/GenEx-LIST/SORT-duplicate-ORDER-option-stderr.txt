@@ -1,4 +1,4 @@
-CMake Error at SORT-duplicate-ORDER-option.cmake:[0-9]+ \(file\):
+CMake Error at SORT-duplicate-ORDER-option\.cmake:[0-9]+ \(file\):
   Error evaluating generator expression:
 
     \$<LIST:SORT,a;b,ORDER:ASCENDING,COMPARE:STRING,ORDER:DESCENDING,CASE:SENSITIVE>

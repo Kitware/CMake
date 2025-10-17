@@ -1,7 +1,7 @@
-CMake Error at .*Modules/CMakeFindDependencyMacro.cmake:[0-9]+ \(find_package\):
+CMake Error at .*Modules/CMakeFindDependencyMacro\.cmake:[0-9]+ \(find_package\):
   find_package called with invalid argument "EXACTYPO"
 Call Stack \(most recent call first\):
   [^
-]*/Modules/CMakeFindDependencyMacro.cmake:[0-9]+ \(__find_dependency_common\)
+]*/Modules/CMakeFindDependencyMacro\.cmake:[0-9]+ \(__find_dependency_common\)
   invalid-arg.cmake:5 \(find_dependency\)
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)

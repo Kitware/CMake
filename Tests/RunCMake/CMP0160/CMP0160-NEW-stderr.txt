@@ -3,7 +3,7 @@ CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
 
 Call Stack \(most recent call first\):
   CMP0160-NEW.cmake:4 \(include\)
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
 
 
 CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
@@ -11,7 +11,7 @@ CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
 
 Call Stack \(most recent call first\):
   CMP0160-NEW.cmake:4 \(include\)
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
 
 
 CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
@@ -19,7 +19,7 @@ CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
 
 Call Stack \(most recent call first\):
   CMP0160-NEW.cmake:4 \(include\)
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
 
 
 CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
@@ -27,7 +27,7 @@ CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
 
 Call Stack \(most recent call first\):
   CMP0160-NEW.cmake:4 \(include\)
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
 
 
 CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
@@ -35,7 +35,7 @@ CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
 
 Call Stack \(most recent call first\):
   CMP0160-NEW.cmake:4 \(include\)
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
 
 
 CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
@@ -43,7 +43,7 @@ CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
 
 Call Stack \(most recent call first\):
   CMP0160-NEW.cmake:4 \(include\)
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
 
 
 CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
@@ -51,7 +51,7 @@ CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
 
 Call Stack \(most recent call first\):
   CMP0160-NEW.cmake:4 \(include\)
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
 
 
 CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
@@ -59,7 +59,7 @@ CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
 
 Call Stack \(most recent call first\):
   CMP0160-NEW.cmake:4 \(include\)
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
 
 
 CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
@@ -67,7 +67,7 @@ CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
 
 Call Stack \(most recent call first\):
   CMP0160-NEW.cmake:4 \(include\)
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
 
 
 CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
@@ -75,7 +75,7 @@ CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
 
 Call Stack \(most recent call first\):
   CMP0160-NEW.cmake:4 \(include\)
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
 
 
 CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
@@ -83,7 +83,7 @@ CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
 
 Call Stack \(most recent call first\):
   CMP0160-NEW.cmake:4 \(include\)
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
 
 
 CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
@@ -91,7 +91,7 @@ CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
 
 Call Stack \(most recent call first\):
   CMP0160-NEW.cmake:4 \(include\)
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
 
 
 CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
@@ -99,7 +99,7 @@ CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
 
 Call Stack \(most recent call first\):
   CMP0160-NEW.cmake:4 \(include\)
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
 
 
 CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
@@ -108,7 +108,7 @@ CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
 
 Call Stack \(most recent call first\):
   CMP0160-NEW.cmake:4 \(include\)
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
 
 
 CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
@@ -116,7 +116,7 @@ CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
 
 Call Stack \(most recent call first\):
   CMP0160-NEW.cmake:4 \(include\)
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
 
 
 CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
@@ -124,7 +124,7 @@ CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
 
 Call Stack \(most recent call first\):
   CMP0160-NEW.cmake:4 \(include\)
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
 
 
 CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
@@ -133,7 +133,7 @@ CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
 
 Call Stack \(most recent call first\):
   CMP0160-NEW.cmake:4 \(include\)
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
 
 
 CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
@@ -141,7 +141,7 @@ CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
 
 Call Stack \(most recent call first\):
   CMP0160-NEW.cmake:4 \(include\)
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
 
 
 CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
@@ -149,7 +149,7 @@ CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
 
 Call Stack \(most recent call first\):
   CMP0160-NEW.cmake:4 \(include\)
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
 
 
 CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
@@ -157,7 +157,7 @@ CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
 
 Call Stack \(most recent call first\):
   CMP0160-NEW.cmake:4 \(include\)
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
 
 
 CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
@@ -165,7 +165,7 @@ CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
 
 Call Stack \(most recent call first\):
   CMP0160-NEW.cmake:4 \(include\)
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
 
 
 CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
@@ -173,7 +173,7 @@ CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
 
 Call Stack \(most recent call first\):
   CMP0160-NEW.cmake:4 \(include\)
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
 
 
 CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
@@ -181,7 +181,7 @@ CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
 
 Call Stack \(most recent call first\):
   CMP0160-NEW.cmake:4 \(include\)
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
 
 
 CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
@@ -190,7 +190,7 @@ CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
 
 Call Stack \(most recent call first\):
   CMP0160-NEW.cmake:4 \(include\)
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
 
 
 CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
@@ -198,7 +198,7 @@ CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
 
 Call Stack \(most recent call first\):
   CMP0160-NEW.cmake:4 \(include\)
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
 
 
 CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
@@ -206,7 +206,7 @@ CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
 
 Call Stack \(most recent call first\):
   CMP0160-NEW.cmake:4 \(include\)
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
 
 
 CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
@@ -214,7 +214,7 @@ CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
 
 Call Stack \(most recent call first\):
   CMP0160-NEW.cmake:4 \(include\)
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
 
 
 CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
@@ -222,7 +222,7 @@ CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
 
 Call Stack \(most recent call first\):
   CMP0160-NEW.cmake:4 \(include\)
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
 
 
 CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
@@ -230,4 +230,4 @@ CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
 
 Call Stack \(most recent call first\):
   CMP0160-NEW.cmake:4 \(include\)
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)

@@ -2,4 +2,4 @@
   math cannot parse the expression: "INVALID": syntax error, unexpected end
   of file \(7\).
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)$
+  CMakeLists\.txt:3 \(include\)$

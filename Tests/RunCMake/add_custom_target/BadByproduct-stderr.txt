@@ -1,19 +1,19 @@
 CMake Error at BadByproduct.cmake:3 \(add_custom_target\):
   BYPRODUCTS containing a "<" is not allowed.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
 
 
 CMake Error at BadByproduct.cmake:4 \(add_custom_target\):
   BYPRODUCTS containing a ">" is not allowed.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
 
 (
 CMake Error at BadByproduct.cmake:5 \(add_custom_target\):
   BYPRODUCTS containing a ">" is not allowed.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
 
 )+
 CMake Error at BadByproduct.cmake:6 \(add_custom_target\):
@@ -23,7 +23,7 @@ CMake Error at BadByproduct.cmake:6 \(add_custom_target\):
 
   in a source directory as an output of custom command.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
 
 (
 CMake Error at BadByproduct.cmake:7 \(add_custom_target\):
@@ -36,7 +36,7 @@ CMake Error at BadByproduct.cmake:7 \(add_custom_target\):
   to read a property from using the \$<TARGET_PROPERTY:tgt,prop> signature
   instead.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
 
 )+(
 CMake Error at BadByproduct.cmake:8 \(add_custom_target\):
@@ -46,7 +46,7 @@ CMake Error at BadByproduct.cmake:8 \(add_custom_target\):
 
   Expression did not evaluate to a known generator expression
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
 
 )+(
 CMake Error at BadByproduct.cmake:9 \(add_custom_target\):
@@ -56,6 +56,6 @@ CMake Error at BadByproduct.cmake:9 \(add_custom_target\):
 
   Expression did not evaluate to a known generator expression
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
 
 )+

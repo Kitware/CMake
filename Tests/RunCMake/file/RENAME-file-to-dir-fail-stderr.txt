@@ -1,5 +1,5 @@
 ^CMake Error at [^
-]*/Tests/RunCMake/file/RENAME-file-to-dir-fail.cmake:[0-9] \(file\):
+]*/Tests/RunCMake/file/RENAME-file-to-dir-fail\.cmake:[0-9] \(file\):
   file RENAME failed to rename
 
     [^

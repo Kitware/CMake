@@ -1,4 +1,4 @@
-CMake Error at FileOpenFailRead.cmake:[0-9]+ \(file\):
+CMake Error at FileOpenFailRead\.cmake:[0-9]+ \(file\):
   file failed to open for reading \(.*\):
 
     .*/Tests/RunCMake/file/does_not_exist/file.txt

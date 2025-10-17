@@ -1,4 +1,4 @@
-CMake Error at LINKER_LANGUAGE-genex.cmake:[0-9]+ \(target_link_libraries\):
+CMake Error at LINKER_LANGUAGE-genex\.cmake:[0-9]+ \(target_link_libraries\):
   Error evaluating generator expression:
 
     \$<TARGET_PROPERTY:LINKER_LANGUAGE>

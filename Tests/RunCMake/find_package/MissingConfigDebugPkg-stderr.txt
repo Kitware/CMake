@@ -17,4 +17,4 @@
 CMake Warning at MissingConfigDebugPkg.cmake:2 \(message\):
   This warning must be reachable.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)$
+  CMakeLists\.txt:3 \(include\)$

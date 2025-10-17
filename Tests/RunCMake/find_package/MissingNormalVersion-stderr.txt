@@ -14,4 +14,4 @@ CMake Warning at MissingNormalVersion.cmake:1 \(find_package\):
   "NotHere" provides a separate development package or SDK, be sure it has
   been installed.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)

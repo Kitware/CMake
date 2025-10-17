@@ -1,4 +1,4 @@
-CMake Error at .*/Modules/CheckIncludeFiles.cmake:[0-9]+. \(message\):
+CMake Error at .*/Modules/CheckIncludeFiles\.cmake:[0-9]+. \(message\):
   Unknown language:
 
     FOOBAR
@@ -6,5 +6,5 @@ CMake Error at .*/Modules/CheckIncludeFiles.cmake:[0-9]+. \(message\):
   Supported languages: C, CXX.
 
 Call Stack \(most recent call first\):
-  CheckIncludeFilesUnknownLanguage.cmake:[0-9]+ \(check_include_files\)
+  CheckIncludeFilesUnknownLanguage\.cmake:[0-9]+ \(check_include_files\)
   CMakeLists\.txt:[0-9]+ \(include\)

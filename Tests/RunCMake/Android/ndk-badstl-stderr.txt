@@ -1,4 +1,4 @@
-^CMake Error at .*/Modules/Platform/Android-Common.cmake:[0-9]+ \(message\):
+^CMake Error at .*/Modules/Platform/Android-Common\.cmake:[0-9]+ \(message\):
   The CMAKE_ANDROID_STL_TYPE 'badstl' is not one of the allowed values:
 
     .*
@@ -6,4 +6,4 @@
 Call Stack \(most recent call first\):
 .*
   ndk-badstl.cmake:1 \(enable_language\)
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)

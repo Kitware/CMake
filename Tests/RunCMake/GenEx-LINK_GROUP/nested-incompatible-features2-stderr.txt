@@ -1,4 +1,4 @@
-CMake Error at nested-incompatible-features2.cmake:[0-9]+ \(target_link_libraries\):
+CMake Error at nested-incompatible-features2\.cmake:[0-9]+ \(target_link_libraries\):
   Error evaluating generator expression:
 
     \$<LINK_GROUP:feat1,dep1,\$<LINK_GROUP:feat2,dep2>>

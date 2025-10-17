@@ -1,7 +1,7 @@
-CMake Error at BadArgContent.cmake:[0-9]+ \(file\):
+CMake Error at BadArgContent\.cmake:[0-9]+ \(file\):
   Error after keyword "CONTENT":
 
     missing required value
 
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)

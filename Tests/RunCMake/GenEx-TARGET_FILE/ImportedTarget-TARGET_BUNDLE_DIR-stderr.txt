@@ -1,4 +1,4 @@
-CMake Error at ImportedTarget-TARGET_BUNDLE_DIR.cmake:[0-9]* \(add_custom_target\):
+CMake Error at ImportedTarget-TARGET_BUNDLE_DIR\.cmake:[0-9]* \(add_custom_target\):
   Error evaluating generator expression:
 
     \$<TARGET_BUNDLE_DIR:empty>

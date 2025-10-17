@@ -8,7 +8,7 @@ if(RunCMake_TEST STREQUAL "ParentVariableRoot" OR
 endif()
 
 if(root_test)
-  message(STATUS "CMakeLists.txt: '${CMAKE_PARENT_LIST_FILE}'")
+  message(STATUS "CMakeLists\.txt: '${CMAKE_PARENT_LIST_FILE}'")
 endif()
 
 if(RunCMake_TEST STREQUAL "CMP0198-implicit-NEW-root")
@@ -20,9 +20,9 @@ endif()
 project(${RunCMake_TEST} NONE)
 
 if(root_test)
-  message(STATUS "CMakeLists.txt: '${CMAKE_PARENT_LIST_FILE}'")
+  message(STATUS "CMakeLists\.txt: '${CMAKE_PARENT_LIST_FILE}'")
   include(ParentVariableRoot/include1.cmake)
-  message(STATUS "CMakeLists.txt: '${CMAKE_PARENT_LIST_FILE}'")
+  message(STATUS "CMakeLists\.txt: '${CMAKE_PARENT_LIST_FILE}'")
   return()
 endif()
 

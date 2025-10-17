@@ -10,7 +10,7 @@ CMake Error at BadCompilerCandCXX.cmake:3 \(project\):
   variable "CC" or the CMake cache entry CMAKE_C_COMPILER to the full path to
   the compiler, or to the compiler name if it is in the PATH.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
 +
 CMake Error at BadCompilerCandCXX.cmake:3 \(project\):
   The CMAKE_CXX_COMPILER:
@@ -24,4 +24,4 @@ CMake Error at BadCompilerCandCXX.cmake:3 \(project\):
   variable "CXX" or the CMake cache entry CMAKE_CXX_COMPILER to the full path
   to the compiler, or to the compiler name if it is in the PATH.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)$
+  CMakeLists\.txt:3 \(include\)$

@@ -1,4 +1,4 @@
-CMake Warning at .*/Modules/ExternalData.cmake:[0-9]+ \(message\):
+CMake Warning at .*/Modules/ExternalData\.cmake:[0-9]+ \(message\):
   ExternalData_LINK_CONTENT cannot be used in-source
 Call Stack \(most recent call first\):
   .*

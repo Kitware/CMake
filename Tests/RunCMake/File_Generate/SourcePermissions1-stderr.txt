@@ -1,4 +1,4 @@
-CMake Error at SourcePermissions1.cmake:[0-9]+ \(file\):
+CMake Error at SourcePermissions1\.cmake:[0-9]+ \(file\):
   file given both NO_SOURCE_PERMISSIONS and USE_SOURCE_PERMISSIONS.  Only one
   option allowed.
 Call Stack \(most recent call first\):

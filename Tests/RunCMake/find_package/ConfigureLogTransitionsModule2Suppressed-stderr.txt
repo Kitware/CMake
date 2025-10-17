@@ -1,5 +1,5 @@
 ^NotDefined -> NotFound
-CMake Warning at ConfigureLogTransitionsModule2Suppressed.cmake:[0-9]+ \(find_package\):
+CMake Warning at ConfigureLogTransitionsModule2Suppressed\.cmake:[0-9]+ \(find_package\):
   By not providing "FindViaModule.cmake" in CMAKE_MODULE_PATH this project
   has asked CMake to find a package configuration file provided by
   "ViaModule", but CMake did not find one.
@@ -19,7 +19,7 @@ Call Stack \(most recent call first\):
 
 
 NotFound -> NotFound
-CMake Warning at ConfigureLogTransitionsModule2Suppressed.cmake:[0-9]+ \(find_package\):
+CMake Warning at ConfigureLogTransitionsModule2Suppressed\.cmake:[0-9]+ \(find_package\):
   By not providing "FindViaModule.cmake" in CMAKE_MODULE_PATH this project
   has asked CMake to find a package configuration file provided by
   "ViaModule", but CMake did not find one.
@@ -41,7 +41,7 @@ Call Stack \(most recent call first\):
 NotFound -> Found
 Found -> Found
 Found -> NotFound
-CMake Warning at ConfigureLogTransitionsModule2Suppressed.cmake:[0-9]+ \(find_package\):
+CMake Warning at ConfigureLogTransitionsModule2Suppressed\.cmake:[0-9]+ \(find_package\):
   By not providing "FindViaModule.cmake" in CMAKE_MODULE_PATH this project
   has asked CMake to find a package configuration file provided by
   "ViaModule", but CMake did not find one.

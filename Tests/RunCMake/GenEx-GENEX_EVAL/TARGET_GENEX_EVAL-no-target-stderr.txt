@@ -6,4 +6,4 @@
   \$<TARGET_GENEX_EVAL:tgt, ...> expression requires a non-empty valid target
   name.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)

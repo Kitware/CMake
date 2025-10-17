@@ -6,4 +6,4 @@ CMake Error at add_custom_target.cmake:2 \(add_custom_target\):
   \$<LINK_LANG_AND_ID:lang,id> may only be used with binary targets to specify
   link libraries, link directories, link options, and link depends.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)

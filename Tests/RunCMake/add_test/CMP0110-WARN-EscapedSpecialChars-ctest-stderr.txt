@@ -1,4 +1,4 @@
-CMake Error at CTestTestfile.cmake:[0-9]+:
+CMake Error at CTestTestfile\.cmake:[0-9]+:
   Parse error\.  Function missing ending "\)"\.  End of file reached\.
 
 

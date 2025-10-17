@@ -35,7 +35,7 @@ CMake Error at IMPORTED_GLOBAL/CMakeLists\.txt:[0-9]+ \(set_property\):
   \(by setting IMPORTED_GLOBAL\) which is not built in this directory.
 
 
-CMake Error in IMPORTED_GLOBAL/CMakeLists.txt:
+CMake Error in IMPORTED_GLOBAL/CMakeLists\.txt:
   IMPORTED_GLOBAL property can't be set to FALSE on targets
   \(\"ImportedSubdirTarget1\"\)
 
@@ -48,7 +48,7 @@ Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)
 
 
-CMake Error in IMPORTED_GLOBAL/CMakeLists.txt:
+CMake Error in IMPORTED_GLOBAL/CMakeLists\.txt:
   IMPORTED_GLOBAL property can't be set to FALSE on targets
   \(\"ImportedSubdirTarget2\"\)
 

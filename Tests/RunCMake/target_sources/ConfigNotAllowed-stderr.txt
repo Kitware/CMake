@@ -1,4 +1,4 @@
-CMake Error in CMakeLists.txt:
+CMake Error in CMakeLists\.txt:
   Target "somelib" has source files which vary by configuration.  This is not
   supported by the "[^"]+" generator.
 

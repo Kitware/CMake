@@ -3,7 +3,7 @@ CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
 
 Call Stack \(most recent call first\):
   CMP0160-WARN.cmake:3 \(include\)
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
 
 
 CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
@@ -11,7 +11,7 @@ CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
 
 Call Stack \(most recent call first\):
   CMP0160-WARN.cmake:3 \(include\)
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
 
 
 CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
@@ -19,7 +19,7 @@ CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
 
 Call Stack \(most recent call first\):
   CMP0160-WARN.cmake:3 \(include\)
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
 
 
 CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
@@ -27,7 +27,7 @@ CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
 
 Call Stack \(most recent call first\):
   CMP0160-WARN.cmake:3 \(include\)
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
 
 
 CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
@@ -35,7 +35,7 @@ CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
 
 Call Stack \(most recent call first\):
   CMP0160-WARN.cmake:3 \(include\)
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
 
 
 CMake Warning \(dev\) at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
@@ -47,7 +47,7 @@ CMake Warning \(dev\) at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
 
 Call Stack \(most recent call first\):
   CMP0160-WARN.cmake:3 \(include\)
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
 This warning is for project developers.  Use -Wno-dev to suppress it.
 
 CMake Warning \(dev\) at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
@@ -59,7 +59,7 @@ CMake Warning \(dev\) at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
 
 Call Stack \(most recent call first\):
   CMP0160-WARN.cmake:3 \(include\)
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
 This warning is for project developers.  Use -Wno-dev to suppress it.
 
 CMake Warning \(dev\) at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
@@ -71,7 +71,7 @@ CMake Warning \(dev\) at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
 
 Call Stack \(most recent call first\):
   CMP0160-WARN.cmake:3 \(include\)
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
 This warning is for project developers.  Use -Wno-dev to suppress it.
 
 CMake Warning \(dev\) at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
@@ -83,7 +83,7 @@ CMake Warning \(dev\) at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
 
 Call Stack \(most recent call first\):
   CMP0160-WARN.cmake:3 \(include\)
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
 This warning is for project developers.  Use -Wno-dev to suppress it.
 
 CMake Warning \(dev\) at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
@@ -95,7 +95,7 @@ CMake Warning \(dev\) at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
 
 Call Stack \(most recent call first\):
   CMP0160-WARN.cmake:3 \(include\)
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
 This warning is for project developers.  Use -Wno-dev to suppress it.
 
 CMake Warning \(dev\) at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
@@ -107,7 +107,7 @@ CMake Warning \(dev\) at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
 
 Call Stack \(most recent call first\):
   CMP0160-WARN.cmake:3 \(include\)
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
 This warning is for project developers.  Use -Wno-dev to suppress it.
 
 CMake Warning \(dev\) at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
@@ -119,7 +119,7 @@ CMake Warning \(dev\) at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
 
 Call Stack \(most recent call first\):
   CMP0160-WARN.cmake:3 \(include\)
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
 This warning is for project developers.  Use -Wno-dev to suppress it.
 
 CMake Warning \(dev\) at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
@@ -131,7 +131,7 @@ CMake Warning \(dev\) at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
 
 Call Stack \(most recent call first\):
   CMP0160-WARN.cmake:3 \(include\)
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
 This warning is for project developers.  Use -Wno-dev to suppress it.
 
 CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
@@ -140,7 +140,7 @@ CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
 
 Call Stack \(most recent call first\):
   CMP0160-WARN.cmake:3 \(include\)
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
 
 
 CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
@@ -148,7 +148,7 @@ CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
 
 Call Stack \(most recent call first\):
   CMP0160-WARN.cmake:3 \(include\)
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
 
 
 CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
@@ -156,7 +156,7 @@ CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
 
 Call Stack \(most recent call first\):
   CMP0160-WARN.cmake:3 \(include\)
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
 
 
 CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
@@ -165,7 +165,7 @@ CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
 
 Call Stack \(most recent call first\):
   CMP0160-WARN.cmake:3 \(include\)
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
 
 
 CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
@@ -173,7 +173,7 @@ CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
 
 Call Stack \(most recent call first\):
   CMP0160-WARN.cmake:3 \(include\)
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
 
 
 CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
@@ -181,7 +181,7 @@ CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
 
 Call Stack \(most recent call first\):
   CMP0160-WARN.cmake:3 \(include\)
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
 
 
 CMake Warning \(dev\) at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
@@ -193,7 +193,7 @@ CMake Warning \(dev\) at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
 
 Call Stack \(most recent call first\):
   CMP0160-WARN.cmake:3 \(include\)
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
 This warning is for project developers.  Use -Wno-dev to suppress it.
 
 CMake Warning \(dev\) at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
@@ -205,7 +205,7 @@ CMake Warning \(dev\) at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
 
 Call Stack \(most recent call first\):
   CMP0160-WARN.cmake:3 \(include\)
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
 This warning is for project developers.  Use -Wno-dev to suppress it.
 
 CMake Warning \(dev\) at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
@@ -217,7 +217,7 @@ CMake Warning \(dev\) at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
 
 Call Stack \(most recent call first\):
   CMP0160-WARN.cmake:3 \(include\)
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
 This warning is for project developers.  Use -Wno-dev to suppress it.
 
 CMake Warning \(dev\) at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
@@ -229,7 +229,7 @@ CMake Warning \(dev\) at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
 
 Call Stack \(most recent call first\):
   CMP0160-WARN.cmake:3 \(include\)
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
 This warning is for project developers.  Use -Wno-dev to suppress it.
 
 CMake Warning \(dev\) at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
@@ -242,7 +242,7 @@ CMake Warning \(dev\) at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
 
 Call Stack \(most recent call first\):
   CMP0160-WARN.cmake:3 \(include\)
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
 This warning is for project developers.  Use -Wno-dev to suppress it.
 
 CMake Warning \(dev\) at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
@@ -254,7 +254,7 @@ CMake Warning \(dev\) at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
 
 Call Stack \(most recent call first\):
   CMP0160-WARN.cmake:3 \(include\)
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
 This warning is for project developers.  Use -Wno-dev to suppress it.
 
 CMake Warning \(dev\) at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
@@ -266,7 +266,7 @@ CMake Warning \(dev\) at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
 
 Call Stack \(most recent call first\):
   CMP0160-WARN.cmake:3 \(include\)
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
 This warning is for project developers.  Use -Wno-dev to suppress it.
 
 CMake Warning \(dev\) at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
@@ -278,7 +278,7 @@ CMake Warning \(dev\) at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
 
 Call Stack \(most recent call first\):
   CMP0160-WARN.cmake:3 \(include\)
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
 This warning is for project developers.  Use -Wno-dev to suppress it.
 
 CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
@@ -286,7 +286,7 @@ CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
 
 Call Stack \(most recent call first\):
   CMP0160-WARN.cmake:3 \(include\)
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
 
 
 CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
@@ -294,4 +294,4 @@ CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
 
 Call Stack \(most recent call first\):
   CMP0160-WARN.cmake:3 \(include\)
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)

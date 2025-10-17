@@ -5,4 +5,4 @@ CMake Error at AppendNotOutput.cmake:1 \(add_custom_command\):
 
   which is not already a custom command output.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)

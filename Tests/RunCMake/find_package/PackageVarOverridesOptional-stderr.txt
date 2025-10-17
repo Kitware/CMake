@@ -1,4 +1,4 @@
-CMake Error at PackageVarOverridesOptional.cmake:[0-9]+ \(find_package\):
+CMake Error at PackageVarOverridesOptional\.cmake:[0-9]+ \(find_package\):
   By not providing "FindFoo.cmake" in CMAKE_MODULE_PATH this project has
   asked CMake to find a package configuration file provided by "Foo", but
   CMake did not find one.

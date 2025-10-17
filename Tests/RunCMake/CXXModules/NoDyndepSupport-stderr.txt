@@ -5,7 +5,7 @@
 ]+
 
   due to lack of required features\.  Ninja 1\.11 or higher is required\.
-|CMake Error in CMakeLists.txt:
+|CMake Error in CMakeLists\.txt:
   The target named "nodyndep" has C\+\+ sources that may use modules, but
   modules are not supported by this generator:
 

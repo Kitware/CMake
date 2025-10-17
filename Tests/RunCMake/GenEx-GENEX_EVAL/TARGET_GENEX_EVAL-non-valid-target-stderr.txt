@@ -5,4 +5,4 @@
 
   \$<TARGET_GENEX_EVAL:tgt, ...> target "bad-target" not found.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
