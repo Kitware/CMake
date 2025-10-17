@@ -4020,8 +4020,6 @@ int cmake::Build(int jobs, std::string dir, std::vector<std::string> targets,
     if (!cmakeCheckStampList(stampList)) {
       // Correctly initialize the home (=source) and home output (=binary)
       // directories, which is required for running the generation step.
-      std::string homeOrig = this->GetHomeDirectory();
-      std::string homeOutputOrig = this->GetHomeOutputDirectory();
       this->SetDirectoriesFromFile(cachePath);
 
       this->AddProjectCommands();
@@ -4041,10 +4039,6 @@ int cmake::Build(int jobs, std::string dir, std::vector<std::string> targets,
       std::string message = cmStrCat("Build files have been written to: ",
                                      this->GetHomeOutputDirectory());
       this->UpdateProgress(message, -1);
-
-      // Restore the previously set directories to their original value.
-      this->SetHomeDirectory(homeOrig);
-      this->SetHomeOutputDirectory(homeOutputOrig);
     }
   }
 #endif
