@@ -1755,8 +1755,6 @@ bool cmCTestTestHandler::GetListOfTests()
   cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                      "Constructing a list of tests" << std::endl, this->Quiet);
   cmake cm(cmake::RoleScript, cmState::CTest);
-  cm.SetHomeDirectory("");
-  cm.SetHomeOutputDirectory("");
   cm.GetCurrentSnapshot().SetDefaultDefinitions();
   cmGlobalGenerator gg(&cm);
   cmMakefile mf(&gg, cm.GetCurrentSnapshot());

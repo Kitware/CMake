@@ -3474,8 +3474,6 @@ int cmake::CheckBuildSystem()
   // global generate.
   // Actually, all we need is the `set` command.
   cmake cm(RoleScript, cmState::Unknown);
-  cm.SetHomeDirectory("");
-  cm.SetHomeOutputDirectory("");
   cm.GetCurrentSnapshot().SetDefaultDefinitions();
   cmGlobalGenerator gg(&cm);
   cmMakefile mf(&gg, cm.GetCurrentSnapshot());
@@ -3816,9 +3814,6 @@ int cmake::Build(int jobs, std::string dir, std::vector<std::string> targets,
                  std::string const& presetName, bool listPresets,
                  std::vector<std::string> const& args)
 {
-  this->SetHomeDirectory("");
-  this->SetHomeOutputDirectory("");
-
 #if !defined(CMAKE_BOOTSTRAP)
   if (!presetName.empty() || listPresets) {
     this->SetHomeDirectory(cmSystemTools::GetLogicalWorkingDirectory());
@@ -4084,8 +4079,6 @@ int cmake::Build(int jobs, std::string dir, std::vector<std::string> targets,
 
 bool cmake::Open(std::string const& dir, DryRun dryRun)
 {
-  this->SetHomeDirectory("");
-  this->SetHomeOutputDirectory("");
   if (!cmSystemTools::FileIsDirectory(dir)) {
     if (dryRun == DryRun::No) {
       std::cerr << "Error: " << dir << " is not a directory\n";

@@ -83,8 +83,6 @@ int main(int argc, char** argv)
   if (argc2 > 1 && doc.CheckOptions(argc2, argv2)) {
     // Construct and print requested documentation.
     cmake hcm(cmake::RoleInternal, cmState::Help);
-    hcm.SetHomeDirectory("");
-    hcm.SetHomeOutputDirectory("");
     hcm.AddCMakePaths();
 
     auto generators = hcm.GetGeneratorsDocumentation();

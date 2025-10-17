@@ -178,8 +178,6 @@ int cmCTestBuildAndTest::Run()
   }
 
   cmake cm(cmake::RoleProject, cmState::Project);
-  cm.SetHomeDirectory("");
-  cm.SetHomeOutputDirectory("");
   cmCTestBuildAndTestCaptureRAII captureRAII(cm);
   static_cast<void>(captureRAII);
 

@@ -2657,8 +2657,6 @@ int cmCTest::ExecuteTests(std::vector<std::string> const& args)
 
   {
     cmake cm(cmake::RoleScript, cmState::CTest);
-    cm.SetHomeDirectory("");
-    cm.SetHomeOutputDirectory("");
     cm.GetCurrentSnapshot().SetDefaultDefinitions();
     cmGlobalGenerator gg(&cm);
     cmMakefile mf(&gg, cm.GetCurrentSnapshot());

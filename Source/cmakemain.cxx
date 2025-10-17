@@ -222,8 +222,6 @@ int do_cmake(int ac, char const* const* av)
   if (doc.CheckOptions(ac, av, "--")) {
     // Construct and print requested documentation.
     cmake hcm(cmake::RoleInternal, cmState::Help);
-    hcm.SetHomeDirectory("");
-    hcm.SetHomeOutputDirectory("");
     hcm.AddCMakePaths();
 
     // the command line args are processed here so that you can do
@@ -362,8 +360,6 @@ int do_cmake(int ac, char const* const* av)
 
   if (sysinfo) {
     cmake cm(cmake::RoleProject, cmState::Project);
-    cm.SetHomeDirectory("");
-    cm.SetHomeOutputDirectory("");
     int ret = cm.GetSystemInformation(parsedArgs);
     return ret;
   }
@@ -386,8 +382,6 @@ int do_cmake(int ac, char const* const* av)
     ? cmake::CommandFailureAction::EXIT_CODE
     : cmake::CommandFailureAction::FATAL_ERROR;
   cmake cm(role, mode);
-  cm.SetHomeDirectory("");
-  cm.SetHomeOutputDirectory("");
   cmSystemTools::SetMessageCallback(
     [&cm](std::string const& msg, cmMessageMetadata const& md) {
       cmakemainMessageCallback(msg, md, &cm);
@@ -975,8 +969,6 @@ int do_install(int ac, char const* const* av)
         cm.SetProgressCallback([&cm](std::string const& msg, float prog) {
           cmakemainProgressCallback(msg, prog, &cm);
         });
-        cm.SetHomeDirectory("");
-        cm.SetHomeOutputDirectory("");
         cm.SetDebugOutputOn(verbose);
         cm.SetWorkingMode(cmake::SCRIPT_MODE,
                           cmake::CommandFailureAction::FATAL_ERROR);

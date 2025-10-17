@@ -173,8 +173,6 @@ void cmCTestScriptHandler::CreateCMake()
 {
   // create a cmake instance to read the configuration script
   this->CMake = cm::make_unique<cmake>(cmake::RoleScript, cmState::CTest);
-  this->CMake->SetHomeDirectory("");
-  this->CMake->SetHomeOutputDirectory("");
   this->CMake->GetCurrentSnapshot().SetDefaultDefinitions();
   this->CMake->AddCMakePaths();
   this->CMake->SetWorkingMode(cmake::SCRIPT_MODE,

@@ -761,8 +761,6 @@ int cmCPackGenerator::InstallCMakeProject(
   }
 
   cmake cm(cmake::RoleScript, cmState::CPack);
-  cm.SetHomeDirectory("");
-  cm.SetHomeOutputDirectory("");
   cm.GetCurrentSnapshot().SetDefaultDefinitions();
   cm.AddCMakePaths();
   cm.SetProgressCallback([this](std::string const& msg, float prog) {
