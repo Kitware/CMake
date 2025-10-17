@@ -1,4 +1,4 @@
 CMake Error: CMake can not determine linker language for target: NoLanguage
-CMake Error in CMakeLists.txt:
+CMake Error in CMakeLists\.txt:
   Exporting the target "NoLanguage" is not allowed since its linker language
   cannot be determined

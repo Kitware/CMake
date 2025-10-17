@@ -1,4 +1,4 @@
-^CMake Error at CMP0120-NEW.cmake:[0-9]+ \(include\):
+^CMake Error at CMP0120-NEW\.cmake:[0-9]+ \(include\):
   include could not find requested file:
 
     WriteCompilerDetectionHeader

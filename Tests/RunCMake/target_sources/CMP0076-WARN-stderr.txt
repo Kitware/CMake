@@ -15,7 +15,7 @@ CMake Warning \(dev\) at CMP0076-WARN/CMakeLists\.txt:[0-9]+ \(target_sources\):
   a relative path.
 This warning is for project developers.  Use -Wno-dev to suppress it.
 
-CMake Error in CMakeLists.txt:
+CMake Error in CMakeLists\.txt:
   Target "publiclib" contains relative path in its INTERFACE_SOURCES:
 
     "CMP0076-WARN/subdir_empty_1.cpp"

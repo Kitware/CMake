@@ -1,4 +1,4 @@
-CMake Error at .*/Modules/ExternalData.cmake:[0-9]+ \(message\):
+CMake Error at .*/Modules/ExternalData\.cmake:[0-9]+ \(message\):
   Unknown option "RECURSE:x" in argument
 
     DATA{Directory1/,RECURSE:x,Data.dat}

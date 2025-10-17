@@ -1,4 +1,4 @@
-CMake Error in CMakeLists.txt:
+CMake Error in CMakeLists\.txt:
   Target "not-cxx-source" contains the source
 
     .*/Tests/RunCMake/CXXModules/sources/c-anchor.c

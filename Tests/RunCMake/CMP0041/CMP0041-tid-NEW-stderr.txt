@@ -1,4 +1,4 @@
-CMake Error in CMakeLists.txt:
+CMake Error in CMakeLists\.txt:
   Target "foo" INTERFACE_INCLUDE_DIRECTORIES property contains path:
 
     ".*/Tests/RunCMake/CMP0041/include/\$<TARGET_PROPERTY:NAME>"
@@ -6,7 +6,7 @@ CMake Error in CMakeLists.txt:
   which is prefixed in the source directory.
 
 
-CMake Error in CMakeLists.txt:
+CMake Error in CMakeLists\.txt:
   Target "foo" INTERFACE_INCLUDE_DIRECTORIES property contains path:
 
     ".*/Tests/RunCMake/CMP0041/include/\$<TARGET_PROPERTY:NAME>"
@@ -14,7 +14,7 @@ CMake Error in CMakeLists.txt:
   which is prefixed in the source directory.
 
 
-CMake Error in CMakeLists.txt:
+CMake Error in CMakeLists\.txt:
   Target "foo" INTERFACE_INCLUDE_DIRECTORIES property contains path:
 
     ".*/Tests/RunCMake/CMP0041/CMP0041-tid-NEW-build/include/\$<TARGET_PROPERTY:NAME>"

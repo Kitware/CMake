@@ -1,5 +1,5 @@
 ^CMake Error at [^
-]*/MAKE_DIRECTORY-one-dir-FAIL.cmake:[0-9]+ \(file\):
+]*/MAKE_DIRECTORY-one-dir-FAIL\.cmake:[0-9]+ \(file\):
   file failed to create directory:
 
     [^

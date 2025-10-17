@@ -1,7 +1,7 @@
-(CMake Error in CMakeLists.txt:
+(CMake Error in CMakeLists\.txt:
   The target named "nocxx" has C\+\+ sources that use modules, but the "CXX"
   language has not been enabled\.
-|CMake Error in CMakeLists.txt:
+|CMake Error in CMakeLists\.txt:
   The target named "nocxx" has C\+\+ sources that may use modules, but modules
   are not supported by this generator:
 
@@ -12,7 +12,7 @@
   generators for VS 17\.4 and newer\.  See the cmake-cxxmodules\(7\) manual for
   details\.  Use the CMAKE_CXX_SCAN_FOR_MODULES variable to enable or disable
   scanning\.
-|CMake Error in CMakeLists.txt:
+|CMake Error in CMakeLists\.txt:
   Target "nocxx" has source file
 
     [^

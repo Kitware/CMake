@@ -1,4 +1,4 @@
-CMake Error at TRANSFORM-selector-AT-wrong-index.cmake:[0-9]+ \(file\):
+CMake Error at TRANSFORM-selector-AT-wrong-index\.cmake:[0-9]+ \(file\):
   Error evaluating generator expression:
 
     \$<LIST:TRANSFORM,a;b;c,TOUPPER,AT,0,3,2>

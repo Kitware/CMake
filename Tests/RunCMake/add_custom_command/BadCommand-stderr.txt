@@ -5,7 +5,7 @@
 
   Expression did not evaluate to a known generator expression
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
 
 
 )+(CMake Error at BadCommand.cmake:2 \(add_custom_command\):
@@ -15,7 +15,7 @@ Call Stack \(most recent call first\):
 
   Expression did not evaluate to a known generator expression
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
 
 
 )+

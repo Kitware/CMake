@@ -1,4 +1,4 @@
-CMake Error at WrongArguments.cmake:[0-9]+ \(add_custom_target\):
+CMake Error at WrongArguments\.cmake:[0-9]+ \(add_custom_target\):
   Error evaluating generator expression:
 
     \$<PATH_EQUAL>
@@ -9,7 +9,7 @@ Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)
 
 
-CMake Error at WrongArguments.cmake:[0-9]+ \(add_custom_target\):
+CMake Error at WrongArguments\.cmake:[0-9]+ \(add_custom_target\):
   Error evaluating generator expression:
 
     \$<PATH_EQUAL:>
@@ -31,7 +31,7 @@ Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)
 
 
-CMake Error at WrongArguments.cmake:[0-9]+ \(add_custom_target\):
+CMake Error at WrongArguments\.cmake:[0-9]+ \(add_custom_target\):
   Error evaluating generator expression:
 
     \$<PATH_EQUAL:something,,>

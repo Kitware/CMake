@@ -1,5 +1,5 @@
 ^CMake Error at [^
-]*/Modules/FindPythonInterp.cmake:[0-9]+ \(message\):
+]*/Modules/FindPythonInterp\.cmake:[0-9]+ \(message\):
   The FindPythonInterp module has been removed by policy CMP0148\.
 Call Stack \(most recent call first\):
   CMP0148-Interp-NEW-path\.cmake:[0-9]+ \(include\)

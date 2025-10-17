@@ -1,4 +1,4 @@
-CMake Error in CMakeLists.txt:
+CMake Error in CMakeLists\.txt:
   install\(EXPORT "bar" ...\) includes target "bar" which requires target "foo"
   that is not in this export set, but in multiple other export sets:
   cmake/foo.cmake, cps/foo.cps, cmake/foo-alt.cmake.
@@ -8,7 +8,7 @@ CMake Error in CMakeLists.txt:
   consolidating the exports of the "foo" target to a single export.
 
 
-CMake Error in CMakeLists.txt:
+CMake Error in CMakeLists\.txt:
   install\(PACKAGE_INFO "bar" ...\) includes target "bar" which requires target
   "foo" that is not in this export set, but in multiple other export sets:
   cmake/foo.cmake, cps/foo.cps, cmake/foo-alt.cmake.

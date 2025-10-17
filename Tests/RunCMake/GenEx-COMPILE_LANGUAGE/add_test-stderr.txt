@@ -7,4 +7,4 @@ CMake Error at add_test.cmake:5 \(add_test\):
   compile definitions, compile options, and to evaluate components of the
   file\(GENERATE\) command.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)

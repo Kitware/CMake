@@ -1,4 +1,4 @@
-CMake Error in CMakeLists.txt:
+CMake Error in CMakeLists\.txt:
   Target "foo" is installed with INCLUDES DESTINATION set to a context
   sensitive path.  Paths which depend on the configuration, policy values or
   the link interface are not supported.  Consider using

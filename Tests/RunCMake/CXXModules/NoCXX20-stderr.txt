@@ -1,8 +1,8 @@
-(CMake Error in CMakeLists.txt:
+(CMake Error in CMakeLists\.txt:
   The target named "nocxx20" has C\+\+ sources that use modules, but does not
   include "cxx_std_20" \(or newer\) among its `target_compile_features`; found
   "cxx_std_17"\.
-|CMake Error in CMakeLists.txt:
+|CMake Error in CMakeLists\.txt:
   The target named "nocxx20" has C\+\+ sources that may use modules, but
   modules are not supported by this generator:
 

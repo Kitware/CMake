@@ -1,23 +1,23 @@
 CMake Warning \(dev\) at warn-uninitialized.cmake:1 \(set\):
   uninitialized variable 'NEW_WARN_FROM_NORMAL_CMAKE_FILE_INSIDE_BRACES'
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
 This warning is for project developers.  Use -Wno-dev to suppress it.
 
 CMake Warning \(dev\) at warn-uninitialized.cmake:2 \(string\):
   uninitialized variable 'NEW_WARN_FROM_STRING_CONFIGURE_INSIDE_BRACES'
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
 This warning is for project developers.  Use -Wno-dev to suppress it.
 
 CMake Warning \(dev\) at warn-uninitialized.cmake:4 \(configure_file\):
   uninitialized variable 'NEW_WARN_FROM_CONFIGURE_FILE_INSIDE_AT'
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
 This warning is for project developers.  Use -Wno-dev to suppress it.
 
 CMake Warning \(dev\) at warn-uninitialized.cmake:5 \(string\):
   uninitialized variable 'NEW_WARN_FROM_STRING_CONFIGURE_INSIDE_AT'
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
 This warning is for project developers.  Use -Wno-dev to suppress it.$

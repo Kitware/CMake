@@ -1,4 +1,4 @@
-^CMake Error at NoCompileOutputVariable.cmake:[0-9]+ \(try_run\):
+^CMake Error at NoCompileOutputVariable\.cmake:[0-9]+ \(try_run\):
   Error after keyword "COMPILE_OUTPUT_VARIABLE":
 
     missing required value

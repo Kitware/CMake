@@ -12,4 +12,4 @@
     CONTENT_LIST_1 at GLOB-error-CONFIGURE_DEPENDS-modified\.cmake:[0-9]+ \(file\)
     CONTENT_LIST_2 at GLOB-error-CONFIGURE_DEPENDS-modified\.cmake:[0-9]+ \(file\)
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)$
+  CMakeLists\.txt:3 \(include\)$

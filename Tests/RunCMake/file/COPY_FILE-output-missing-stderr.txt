@@ -1,5 +1,5 @@
 ^CMake Error at [^
-]*/Tests/RunCMake/file/COPY_FILE-output-missing.cmake:[0-9]+ \(file\):
+]*/Tests/RunCMake/file/COPY_FILE-output-missing\.cmake:[0-9]+ \(file\):
   file COPY_FILE failed to copy
 
     [^

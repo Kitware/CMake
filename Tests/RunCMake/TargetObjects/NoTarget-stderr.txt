@@ -5,7 +5,7 @@
 
   Objects of target "NoTarget" referenced but no such target exists.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
 *)+
 (CMake Error at NoTarget.cmake:5 \(file\):
   Error evaluating generator expression:
@@ -14,7 +14,7 @@ Call Stack \(most recent call first\):
 
   Objects of target "NoTarget" referenced but no such target exists.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
 *)+
 CMake Error:
   Error evaluating generator expression:

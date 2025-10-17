@@ -1,4 +1,4 @@
-CMake Error at NewLineStyle-NoArg.cmake:[0-9]+ \(file\):
+CMake Error at NewLineStyle-NoArg\.cmake:[0-9]+ \(file\):
   Error after keyword "NEWLINE_STYLE":
 
     missing required value

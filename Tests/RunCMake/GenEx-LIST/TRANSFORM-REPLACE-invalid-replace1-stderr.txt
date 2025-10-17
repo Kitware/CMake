@@ -1,4 +1,4 @@
-CMake Error at TRANSFORM-REPLACE-invalid-replace1.cmake:[0-9]+ \(file\):
+CMake Error at TRANSFORM-REPLACE-invalid-replace1\.cmake:[0-9]+ \(file\):
   Error evaluating generator expression:
 
     \$<LIST:TRANSFORM,a;b,REPLACE,\^a,b\\>

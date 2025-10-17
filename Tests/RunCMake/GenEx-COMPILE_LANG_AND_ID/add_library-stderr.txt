@@ -8,4 +8,4 @@ CMake Error at add_library.cmake:2 \(add_library\):
   may not be used with the add_custom_command, add_custom_target, or
   file\(GENERATE\) commands.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)

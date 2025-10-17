@@ -1,4 +1,4 @@
-CMake Error at NonValidTarget-COMPILER_LINKER.cmake:[0-9]+ \(add_custom_command\):
+CMake Error at NonValidTarget-COMPILER_LINKER\.cmake:[0-9]+ \(add_custom_command\):
   Error evaluating generator expression:
 
     \$<OBJC_COMPILER_LINKER_FRONTEND_VARIANT>

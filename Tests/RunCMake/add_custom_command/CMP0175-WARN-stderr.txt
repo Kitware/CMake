@@ -8,7 +8,7 @@ CMake Warning \(dev\) at CMP0175\.cmake:[0-9]+ \(add_custom_command\):
   command to set the policy and suppress this warning\.
 Call Stack \(most recent call first\):
   CMP0175-WARN\.cmake:1 \(include\)
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
 This warning is for project developers\.  Use -Wno-dev to suppress it\.
 
 CMake Warning \(dev\) at CMP0175\.cmake:[0-9]+ \(add_custom_command\):

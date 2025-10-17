@@ -11,4 +11,4 @@ CMake Error at MixedModeOptions.cmake:1 \(find_package\):
 
   The options are incompatible.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)

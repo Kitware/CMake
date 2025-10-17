@@ -6,4 +6,4 @@
   Self reference on target "recursion".
 
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)

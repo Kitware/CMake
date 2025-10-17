@@ -1,4 +1,4 @@
-CMake Error at .*/Modules/ExternalData.cmake:[0-9]+ \(message\):
+CMake Error at .*/Modules/ExternalData\.cmake:[0-9]+ \(message\):
   Data file referenced by argument
 
     DATA{../NotUnderRoot.txt}

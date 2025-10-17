@@ -1,4 +1,4 @@
-CMake Error at TRANSFORM-wrong-action.cmake:[0-9]+ \(file\):
+CMake Error at TRANSFORM-wrong-action\.cmake:[0-9]+ \(file\):
   Error evaluating generator expression:
 
     \$<LIST:TRANSFORM,a;b;c,WRONG_ACTION>

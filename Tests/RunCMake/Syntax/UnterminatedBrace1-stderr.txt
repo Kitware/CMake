@@ -9,4 +9,4 @@ CMake Error at UnterminatedBrace1.cmake:1 \(set\):
 
   There is an unterminated variable reference.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)

@@ -10,4 +10,4 @@
 
   Invalid character escape '\\X'.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:DEFERRED$
+  CMakeLists\.txt:DEFERRED$

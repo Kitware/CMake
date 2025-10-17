@@ -3,4 +3,4 @@ CMake Error at UTF16LE-BOM.cmake:2 \(configure_file\):
 
     .*/Tests/RunCMake/configure_file/UTF16LE-BOM.txt.in
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)

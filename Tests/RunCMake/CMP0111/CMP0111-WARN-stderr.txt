@@ -1,4 +1,4 @@
-^(CMake Warning \(dev\) in CMakeLists.txt:
+^(CMake Warning \(dev\) in CMakeLists\.txt:
   Policy CMP0111 is not set: An imported target missing its location property
   fails during generation.  Run "cmake --help-policy CMP0111" for policy
   details.  Use the cmake_policy command to set the policy and suppress this
@@ -7,7 +7,7 @@
   IMPORTED_(LOCATION|IMPLIB) not set for imported target "(unknown|static)_lib"( configuration
   "[^"]+")?.
 This warning is for project developers.  Use -Wno-dev to suppress it.
-+)+CMake Warning \(dev\) in CMakeLists.txt:
++)+CMake Warning \(dev\) in CMakeLists\.txt:
   Policy CMP0111 is not set: An imported target missing its location property
   fails during generation.  Run "cmake --help-policy CMP0111" for policy
   details.  Use the cmake_policy command to set the policy and suppress this

@@ -15,7 +15,7 @@ CMake Warning at UnwindInclude/UnwindBlock.cmake:4 \(find_package\):
 Call Stack \(most recent call first\):
   UnwindInclude/PrimaryUnwindConfig.cmake:1 \(include\)
   UnwindIncludeBlock.cmake:5 \(find_package\)
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
 
 
 CMake Warning at UnwindIncludeBlock.cmake:5 \(find_package\):
@@ -27,4 +27,4 @@ CMake Warning at UnwindIncludeBlock.cmake:5 \(find_package\):
   but it set PrimaryUnwind_FOUND to FALSE so package "PrimaryUnwind" is
   considered to be NOT FOUND.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)

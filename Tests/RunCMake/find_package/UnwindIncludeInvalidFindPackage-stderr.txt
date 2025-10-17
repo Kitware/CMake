@@ -15,7 +15,7 @@ CMake Warning at UnwindInclude/UnwindInvalidFindPackage.cmake:1 \(find_package\)
 Call Stack \(most recent call first\):
   UnwindInclude/PrimaryUnwindConfig.cmake:1 \(include\)
   UnwindIncludeInvalidFindPackage.cmake:5 \(find_package\)
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
 
 
 CMake Error at UnwindInclude/UnwindInvalidFindPackage.cmake:2 \(find_package\):
@@ -23,4 +23,4 @@ CMake Error at UnwindInclude/UnwindInvalidFindPackage.cmake:2 \(find_package\):
 Call Stack \(most recent call first\):
   UnwindInclude/PrimaryUnwindConfig.cmake:1 \(include\)
   UnwindIncludeInvalidFindPackage.cmake:5 \(find_package\)
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)

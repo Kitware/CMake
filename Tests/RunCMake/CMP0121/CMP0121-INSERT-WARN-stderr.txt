@@ -5,7 +5,7 @@ CMake Warning \(dev\) at CMP0121-INSERT-Common.cmake:3 \(list\):
   Invalid list index "junk2".
 Call Stack \(most recent call first\):
   CMP0121-INSERT-WARN.cmake:2 \(include\)
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
 This warning is for project developers.  Use -Wno-dev to suppress it.
 
 INSERT: -->new;a;b;c;d;e<--

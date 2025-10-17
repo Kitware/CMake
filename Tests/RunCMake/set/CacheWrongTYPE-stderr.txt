@@ -1,4 +1,4 @@
-CMake Error at CacheWrongTYPE.cmake:[0-9]+ \(set\):
+CMake Error at CacheWrongTYPE\.cmake:[0-9]+ \(set\):
   Error after keyword "TYPE":
 
   Invalid value: FOO.

@@ -1,4 +1,4 @@
-CMake Error in CMakeLists.txt:
+CMake Error in CMakeLists\.txt:
   \$<LINK_ONLY:...> expression in "INTERFACE_LINK_LIBRARIES" of target "bar"
   contains a generator expression.  This is not allowed.
 

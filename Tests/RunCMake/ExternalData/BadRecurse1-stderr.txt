@@ -1,4 +1,4 @@
-CMake Error at .*/Modules/ExternalData.cmake:[0-9]+ \(message\):
+CMake Error at .*/Modules/ExternalData\.cmake:[0-9]+ \(message\):
   Recurse option "RECURSE:" allowed only with directories.
 Call Stack \(most recent call first\):
   .*

@@ -1,4 +1,4 @@
-CMake Error at FILTER-wrong-regex.cmake:[0-9]+ \(file\):
+CMake Error at FILTER-wrong-regex\.cmake:[0-9]+ \(file\):
   Error evaluating generator expression:
 
     \$<LIST:FILTER,a;b;c,INCLUDE,\^\(a>

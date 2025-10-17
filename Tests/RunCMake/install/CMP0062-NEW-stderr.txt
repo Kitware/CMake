@@ -1,4 +1,4 @@
-CMake Error at CMP0062-NEW.cmake:[0-9]+ \(install\):
+CMake Error at CMP0062-NEW\.cmake:[0-9]+ \(install\):
   The file
 
     .*Tests/RunCMake/install/CMP0062-NEW-build/exported.cmake

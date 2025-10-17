@@ -4,4 +4,4 @@ CMake Error at UnterminatedBracketComment.cmake:3:
 
   ".
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)

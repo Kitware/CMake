@@ -1,4 +1,4 @@
-CMake Error in CMakeLists.txt:
+CMake Error in CMakeLists\.txt:
   The "CXX_MODULE_STD" property on the target "nocxx26target" requires that
   the "__CMAKE::CXX26" target exist, but it was not provided by the
   toolchain.  Reason:

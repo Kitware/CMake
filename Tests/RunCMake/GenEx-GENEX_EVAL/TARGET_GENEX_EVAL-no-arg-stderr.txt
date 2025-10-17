@@ -6,4 +6,4 @@
   \$<TARGET_GENEX_EVAL> expression requires 2 comma separated parameters, but
   got 1 instead.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)

@@ -1,4 +1,4 @@
-CMake Error at feature-not-supported.cmake:[0-9]+ \(add_library\):
+CMake Error at feature-not-supported\.cmake:[0-9]+ \(add_library\):
   Feature 'feat', specified through generator-expression '\$<LINK_LIBRARY>' to
   link target 'lib', is not supported for the 'C' link language.
 Call Stack \(most recent call first\):

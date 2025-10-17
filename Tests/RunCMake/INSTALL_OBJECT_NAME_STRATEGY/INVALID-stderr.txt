@@ -1,4 +1,4 @@
-CMake Error in CMakeLists.txt:
+CMake Error in CMakeLists\.txt:
   Property INSTALL_OBJECT_NAME_STRATEGY of target "objlib" set to the
   unsupported strategy INVALID
 

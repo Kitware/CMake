@@ -1,4 +1,4 @@
-^CMake Warning \(dev\) at UPLOAD-unused-argument.cmake:[0-9]+ \(file\):
+^CMake Warning \(dev\) at UPLOAD-unused-argument\.cmake:[0-9]+ \(file\):
   Unexpected argument: JUNK
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)

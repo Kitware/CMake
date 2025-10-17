@@ -1,4 +1,4 @@
-CMake Error at RequiredVarOptional.cmake:[0-9]+ \(find_package\):
+CMake Error at RequiredVarOptional\.cmake:[0-9]+ \(find_package\):
   By not providing "FindDoesNotExist.cmake" in CMAKE_MODULE_PATH this project
   has asked CMake to find a package configuration file provided by
   "DoesNotExist", but CMake did not find one.

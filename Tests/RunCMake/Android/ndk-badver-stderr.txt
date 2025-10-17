@@ -1,4 +1,4 @@
-^CMake Error at .*/Modules/Platform/Android/Determine-Compiler-NDK.cmake:[0-9]+ \(message\):
+^CMake Error at .*/Modules/Platform/Android/Determine-Compiler-NDK\.cmake:[0-9]+ \(message\):
   Android: The CMAKE_ANDROID_NDK_TOOLCHAIN_VERSION value 'badver' is not(
   supported by this NDK.  It must be 'clang' or not set at all\.| one
   of the allowed forms:
@@ -10,4 +10,4 @@
 Call Stack \(most recent call first\):
 .*
   ndk-badver.cmake:1 \(enable_language\)
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)

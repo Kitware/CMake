@@ -15,4 +15,4 @@
 CMake Warning at MissingConfigDebug.cmake:3 \(message\):
   This warning must be reachable.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)$
+  CMakeLists\.txt:3 \(include\)$

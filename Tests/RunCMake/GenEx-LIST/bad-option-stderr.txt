@@ -1,4 +1,4 @@
-CMake Error at bad-option.cmake:[0-9]+ \(file\):
+CMake Error at bad-option\.cmake:[0-9]+ \(file\):
   Error evaluating generator expression:
 
     \$<LIST:BAD_OPTION,ARG>

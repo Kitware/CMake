@@ -1,4 +1,4 @@
-^CMake Warning at WrongVersionConfig.cmake:[0-9]+ \(find_package\):
+^CMake Warning at WrongVersionConfig\.cmake:[0-9]+ \(find_package\):
   Could not find a configuration file for package "VersionedA" that is
   compatible with requested version "3".
 

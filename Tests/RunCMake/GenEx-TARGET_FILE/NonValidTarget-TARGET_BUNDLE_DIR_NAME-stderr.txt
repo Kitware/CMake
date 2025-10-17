@@ -1,4 +1,4 @@
-CMake Error at NonValidTarget-TARGET_BUNDLE_DIR_NAME.cmake:[0-9]* \(file\):
+CMake Error at NonValidTarget-TARGET_BUNDLE_DIR_NAME\.cmake:[0-9]* \(file\):
   Error evaluating generator expression:
 
     \$<TARGET_BUNDLE_DIR_NAME:empty>

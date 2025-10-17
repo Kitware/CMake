@@ -6,4 +6,4 @@ CMake Warning at SetFoundFALSE.cmake:2 \(find_package\):
   but it set SetFoundFALSE_FOUND to FALSE so package "SetFoundFALSE" is
   considered to be NOT FOUND.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)

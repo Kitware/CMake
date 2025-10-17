@@ -1,4 +1,4 @@
-^CMake Error at NoWorkingDirectory.cmake:[0-9]+ \(try_run\):
+^CMake Error at NoWorkingDirectory\.cmake:[0-9]+ \(try_run\):
   Error after keyword "WORKING_DIRECTORY":
 
     missing required value

@@ -1,4 +1,4 @@
-CMake Error at failed-download.cmake:[0-9]+ \(file\):
+CMake Error at failed-download\.cmake:[0-9]+ \(file\):
   file DOWNLOAD cannot compute hash on failed download
 
     from url: "[^

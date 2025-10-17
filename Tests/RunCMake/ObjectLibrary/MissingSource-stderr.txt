@@ -6,4 +6,4 @@ CMake Error at MissingSource.cmake:1 \(add_library\):
   Tried extensions ([^
 ]+
 )+Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)

@@ -5,7 +5,7 @@
 
   Dependency loop found.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
 
 
 CMake Error at GENEX_EVAL-recursion1.cmake:7 \(add_custom_target\):
@@ -14,7 +14,7 @@ CMake Error at GENEX_EVAL-recursion1.cmake:7 \(add_custom_target\):
     \$<GENEX_EVAL:\$<TARGET_PROPERTY:CUSTOM_PROPERTY>>
 
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
 
 
 CMake Error at GENEX_EVAL-recursion1.cmake:7 \(add_custom_target\):
@@ -23,4 +23,4 @@ CMake Error at GENEX_EVAL-recursion1.cmake:7 \(add_custom_target\):
     \$<TARGET_GENEX_EVAL:recursion,\$<TARGET_PROPERTY:recursion,CUSTOM_PROPERTY>>
 
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)

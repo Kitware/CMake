@@ -5,14 +5,14 @@ CMake Warning \(dev\) at CMP0121-ERANGE-Common.cmake:3 \(list\):
   Invalid list index "18446744073709551616".
 Call Stack \(most recent call first\):
   CMP0121-ERANGE-WARN.cmake:2 \(include\)
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
 This warning is for project developers.  Use -Wno-dev to suppress it.
 .*
 CMake Error at CMP0121-ERANGE-Common.cmake:3 \(list\):
   list index: (-2147483648|2147483647) out of range \(-5, 4\)
 Call Stack \(most recent call first\):
   CMP0121-ERANGE-WARN.cmake:2 \(include\)
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
 
 
 ERANGE: --><--

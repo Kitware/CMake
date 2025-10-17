@@ -4,4 +4,4 @@ CMake Error at TargetLiteralQuotes.cmake:2 \(add_custom_command\):
     "b"
 
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)

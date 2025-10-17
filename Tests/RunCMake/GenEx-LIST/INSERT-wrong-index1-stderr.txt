@@ -1,4 +1,4 @@
-CMake Error at INSERT-wrong-index1.cmake:[0-9]+ \(file\):
+CMake Error at INSERT-wrong-index1\.cmake:[0-9]+ \(file\):
   Error evaluating generator expression:
 
     \$<LIST:INSERT,a;b;c,4,d>

@@ -14,5 +14,5 @@ CMake Warning at RequiredVarNestedConfig\.cmake:[0-9]+ \(find_package\):
   "DoesNotExist" provides a separate development package or SDK, be sure it
   has been installed\.
 Call Stack \(most recent call first\):
-  RequiredVarNested.cmake:[0-9]+ \(find_package\)
+  RequiredVarNested\.cmake:[0-9]+ \(find_package\)
   CMakeLists\.txt:[0-9]+ \(include\)

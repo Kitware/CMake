@@ -9,4 +9,4 @@ CMake Error at FileSetDirect.cmake:3 \(add_library\):
   Hint: the FILE_SET keyword may only appear after a visibility specifier or
   another FILE_SET within the target_sources\(\) command.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)

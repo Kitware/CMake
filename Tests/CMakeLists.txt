@@ -431,7 +431,7 @@ if(BUILD_TESTING)
   ADD_TEST_MACRO(PreOrder PreOrder)
   ADD_TEST_MACRO(MissingSourceFile MissingSourceFile)
   set_tests_properties(MissingSourceFile PROPERTIES
-    PASS_REGULAR_EXPRESSION "CMake Error at CMakeLists.txt:3 \\(add_executable\\):[ \r\n]*Cannot find source file:[ \r\n]*DoesNotExist/MissingSourceFile.c")
+    PASS_REGULAR_EXPRESSION "CMake Error at CMakeLists\.txt:3 \\(add_executable\\):[ \r\n]*Cannot find source file:[ \r\n]*DoesNotExist/MissingSourceFile.c")
   if(CMake_TEST_Swift)
     ADD_TEST_MACRO(SwiftOnly SwiftOnly)
     ADD_TEST_MACRO(SwiftMixPCH SwiftMixPCH)
