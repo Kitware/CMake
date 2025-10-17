@@ -120,12 +120,14 @@ set(properties
   "C_CPPLINT"                               "cpplint"           "<SAME>"
   "C_CPPCHECK"                              "cppcheck"          "<SAME>"
   "C_INCLUDE_WHAT_YOU_USE"                  "iwyu"              "<SAME>"
+  "C_PVS_STUDIO"                            "pvs-studio-analyzer" "<SAME>"
   ## C++
   "CXX_CLANG_TIDY"                          "clang-tidy"        "<SAME>"
   "CXX_CLANG_TIDY_EXPORT_FIXES_DIR"         "${dir}"            "<SAME>"
   "CXX_CPPLINT"                             "cpplint"           "<SAME>"
   "CXX_CPPCHECK"                            "cppcheck"          "<SAME>"
   "CXX_INCLUDE_WHAT_YOU_USE"                "iwyu"              "<SAME>"
+  "CXX_PVS_STUDIO"                          "pvs-studio-analyzer" "<SAME>"
   ## Objective C
   "OBJC_CLANG_TIDY"                         "clang-tidy"        "<SAME>"
   "OBJC_CLANG_TIDY_EXPORT_FIXES_DIR"        "${dir}"            "<SAME>"

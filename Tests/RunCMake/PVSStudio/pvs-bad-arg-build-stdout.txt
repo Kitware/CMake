@@ -1,0 +1,1 @@
+stderr from bad command line arg '-bad'
