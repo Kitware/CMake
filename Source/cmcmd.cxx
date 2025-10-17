@@ -330,6 +330,7 @@ int CLCompileAndDependencies(std::vector<std::string> const& args)
 #endif
 
 int HandleIWYU(std::string const& runCmd, std::string const& /* sourceFile */,
+               std::string const& /*objectFile*/,
                std::vector<std::string> const& orig_cmd)
 {
   // Construct the iwyu command line by taking what was given
@@ -362,6 +363,7 @@ int HandleIWYU(std::string const& runCmd, std::string const& /* sourceFile */,
 }
 
 int HandleTidy(std::string const& runCmd, std::string const& sourceFile,
+               std::string const& /*objectFile*/,
                std::vector<std::string> const& orig_cmd)
 {
   cmList tidy_cmd{ runCmd, cmList::EmptyElements::Yes };
@@ -410,6 +412,7 @@ int HandleTidy(std::string const& runCmd, std::string const& sourceFile,
 }
 
 int HandleLWYU(std::string const& runCmd, std::string const& sourceFile,
+               std::string const& /*objectFile*/,
                std::vector<std::string> const&)
 {
   // Construct the ldd -r -u (link what you use lwyu) command line
@@ -439,6 +442,7 @@ int HandleLWYU(std::string const& runCmd, std::string const& sourceFile,
 }
 
 int HandleCppLint(std::string const& runCmd, std::string const& sourceFile,
+                  std::string const& /*objectFile*/,
                   std::vector<std::string> const&)
 {
   // Construct the cpplint command line.
@@ -466,6 +470,7 @@ int HandleCppLint(std::string const& runCmd, std::string const& sourceFile,
 }
 
 int HandleCppCheck(std::string const& runCmd, std::string const& sourceFile,
+                   std::string const& /*objectFile*/,
                    std::vector<std::string> const& orig_cmd)
 {
   // Construct the cpplint command line.
@@ -520,6 +525,7 @@ int HandleCppCheck(std::string const& runCmd, std::string const& sourceFile,
 }
 
 int HandleIcstat(std::string const& runCmd, std::string const& sourceFile,
+                 std::string const& /*objectFile*/,
                  std::vector<std::string> const& orig_cmd)
 {
   // Construct the IAR C-STAT command line.
@@ -569,6 +575,7 @@ int HandleIcstat(std::string const& runCmd, std::string const& sourceFile,
 }
 
 using CoCompileHandler = int (*)(std::string const&, std::string const&,
+                                 std::string const&,
                                  std::vector<std::string> const&);
 
 struct CoCompiler
@@ -600,6 +607,7 @@ int cmcmd::HandleCoCompileCommands(std::vector<std::string> const& args)
 {
   std::vector<CoCompileJob> jobs;
   std::string sourceFile; // store --source=
+  std::string objectFile; // store --object=
   cmList launchers;       // store --launcher=
 
   // Default is to run the original command found after -- if the option
@@ -634,6 +642,8 @@ int cmcmd::HandleCoCompileCommands(std::vector<std::string> const& args)
           sourceFile = arg.substr(9);
         } else if (cmHasLiteralPrefix(arg, "--launcher=")) {
           launchers.append(arg.substr(11), cmList::EmptyElements::Yes);
+        } else if (cmHasLiteralPrefix(arg, "--object=")) {
+          objectFile = arg.substr(9);
         } else {
           // if it was not a co-compiler or --source/--launcher then error
           std::cerr << "__run_co_compile given unknown argument: " << arg
@@ -661,7 +671,7 @@ int cmcmd::HandleCoCompileCommands(std::vector<std::string> const& args)
 
   for (CoCompileJob const& job : jobs) {
     // call the command handler here
-    int ret = job.Handler(job.Command, sourceFile, orig_cmd);
+    int ret = job.Handler(job.Command, sourceFile, objectFile, orig_cmd);
 
     // if the command returns non-zero then return and fail.
     // for commands that do not want to break the build, they should return
