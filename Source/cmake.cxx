@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include <array>
+#include <cassert>
 #include <chrono>
 #include <cstdio>
 #include <cstdlib>
@@ -1889,7 +1890,7 @@ bool cmake::SetDirectoriesFromFile(std::string const& arg)
     if (this->LoadCache(cachePath)) {
       cmValue existingValue =
         this->State->GetCacheEntryValue("CMAKE_HOME_DIRECTORY");
-      if (existingValue) {
+      if (existingValue && !existingValue.IsEmpty()) {
         this->SetHomeOutputDirectory(cachePath);
         this->SetHomeDirectory(*existingValue);
         return true;
@@ -2147,6 +2148,7 @@ void cmake::SetHomeDirectoryViaCommandLine(std::string const& path)
 
 void cmake::SetHomeDirectory(std::string const& dir)
 {
+  assert(!dir.empty());
   this->State->SetSourceDirectory(dir);
   if (this->CurrentSnapshot.IsValid()) {
     this->CurrentSnapshot.SetDefinition("CMAKE_SOURCE_DIR", dir);
@@ -2166,6 +2168,7 @@ std::string const& cmake::GetHomeDirectory() const
 
 void cmake::SetHomeOutputDirectory(std::string const& dir)
 {
+  assert(!dir.empty());
   this->State->SetBinaryDirectory(dir);
   if (this->CurrentSnapshot.IsValid()) {
     this->CurrentSnapshot.SetDefinition("CMAKE_BINARY_DIR", dir);

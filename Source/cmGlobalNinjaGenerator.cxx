@@ -2994,9 +2994,33 @@ int cmcmd_cmake_ninja_dyndep(std::vector<std::string>::const_iterator argBeg,
   }
 
   std::string const dir_cur_bld = tdi["dir-cur-bld"].asString();
+  if (!cmSystemTools::FileIsFullPath(dir_cur_bld)) {
+    cmSystemTools::Error(
+      "-E cmake_ninja_dyndep --tdi= file has no absolute dir-cur-bld");
+    return 1;
+  }
+
   std::string const dir_cur_src = tdi["dir-cur-src"].asString();
+  if (!cmSystemTools::FileIsFullPath(dir_cur_src)) {
+    cmSystemTools::Error(
+      "-E cmake_ninja_dyndep --tdi= file has no absolute dir-cur-src");
+    return 1;
+  }
+
   std::string const dir_top_bld = tdi["dir-top-bld"].asString();
+  if (!cmSystemTools::FileIsFullPath(dir_top_bld)) {
+    cmSystemTools::Error(
+      "-E cmake_ninja_dyndep --tdi= file has no absolute dir-top-bld");
+    return 1;
+  }
+
   std::string const dir_top_src = tdi["dir-top-src"].asString();
+  if (!cmSystemTools::FileIsFullPath(dir_top_src)) {
+    cmSystemTools::Error(
+      "-E cmake_ninja_dyndep --tdi= file has no absolute dir-top-src");
+    return 1;
+  }
+
   std::string module_dir = tdi["module-dir"].asString();
   if (!module_dir.empty() && !cmHasLiteralSuffix(module_dir, "/")) {
     module_dir += '/';
