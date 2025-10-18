@@ -1,4 +1,0 @@
-^CMake Error at CUDA\.cmake:1 \(enable_language\):
-  The FASTBuild generator does not support CUDA yet\.
-Call Stack \(most recent call first\):
-  CMakeLists\.txt:[0-9]+ \(include\)

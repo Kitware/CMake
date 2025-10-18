@@ -297,18 +297,6 @@ cmGlobalFastbuildGenerator::NewFactory()
     new cmGlobalGeneratorSimpleFactory<cmGlobalFastbuildGenerator>());
 }
 
-bool cmGlobalFastbuildGenerator::CheckLanguages(
-  std::vector<std::string> const& languages, cmMakefile* mf) const
-{
-  if (std::find(languages.begin(), languages.end(), "CUDA") !=
-      languages.end()) {
-    mf->IssueMessage(MessageType::FATAL_ERROR,
-                     "The FASTBuild generator does not support CUDA yet.");
-    return false;
-  }
-  return true;
-}
-
 void cmGlobalFastbuildGenerator::EnableLanguage(
   std::vector<std::string> const& lang, cmMakefile* mf, bool optional)
 {
@@ -1418,6 +1406,9 @@ void cmGlobalFastbuildGenerator::WriteTarget(FastbuildTarget const& target)
 
   // Libraries / executables.
   if (!target.LinkerNode.empty()) {
+    for (auto const& cudaDeviceLinkNode : target.CudaDeviceLinkNode) {
+      this->WriteLinker(cudaDeviceLinkNode, target.AllowDistribution);
+    }
     for (auto const& linkerNode : target.LinkerNode) {
       this->WriteLinker(linkerNode, target.AllowDistribution);
     }

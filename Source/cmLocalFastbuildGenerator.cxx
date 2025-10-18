@@ -12,8 +12,10 @@
 #include "cmGeneratorTarget.h"
 #include "cmGlobalFastbuildGenerator.h"
 #include "cmList.h"
+#include "cmLocalCommonGenerator.h"
 #include "cmMakefile.h"
 #include "cmObjectLocation.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmValue.h"
 #include "cmake.h"
@@ -63,12 +65,23 @@ void cmLocalFastbuildGenerator::ComputeObjectFilenames(
   std::map<cmSourceFile const*, cmObjectLocations>& mapping,
   std::string const& config, cmGeneratorTarget const* gt)
 {
+  char const* customExt = gt->GetCustomObjectExtension();
   for (auto& si : mapping) {
     cmSourceFile const* sf = si.first;
-    si.second.LongLoc =
-      this->GetObjectFileNameWithoutTarget(*sf, gt->ObjectDirectory);
+    si.second.LongLoc = this->GetObjectFileNameWithoutTarget(
+      *sf, gt->ObjectDirectory, nullptr, nullptr);
     this->FillCustomInstallObjectLocations(*sf, config, nullptr,
                                            si.second.InstallLongLoc);
+    // FASTBuild always appends output extension to the source file name.
+    // So if custom ext is ".ptx", then
+    // "kernelA.cu" will be outputted as "kernelA.cu.ptx",
+    // that's why we can't just replace ".cu" with ".ptx".
+    // This is needed to resolve $<TARGET_OBJECTS> genex correctly.
+    // Tested in "CudaOnly.ExportPTX" test.
+    if (customExt) {
+      si.second.LongLoc.Update(
+        cmStrCat(si.second.LongLoc.GetPath(), customExt));
+    }
   }
 }
 

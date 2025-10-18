@@ -51,6 +51,18 @@ if(NOT bin_to_c)
     )
 endif()
 
+# FASTBuild has a bug where Exec nodes can't depend
+# on files produced by ObjectListNode... So, depend on the
+# target directly.
+# https://github.com/fastbuild/fastbuild/issues/1115
+
+set(DEP "")
+if (CMAKE_GENERATOR MATCHES "FASTBuild")
+  set(DEP "CudaPTX")
+else()
+  set(DEP "$<TARGET_OBJECTS:CudaPTX>")
+endif()
+
 add_custom_command(
   OUTPUT "${output_file}"
   COMMAND ${CMAKE_COMMAND}
@@ -59,7 +71,7 @@ add_custom_command(
     "-DOUTPUT=${output_file}"
     -P ${CMAKE_CURRENT_SOURCE_DIR}/../utils/bin2c_wrapper.cmake
   VERBATIM
-  DEPENDS $<TARGET_OBJECTS:CudaPTX>
+  DEPENDS ${DEP}
   COMMENT "Converting Object files to a C header"
   )
 
