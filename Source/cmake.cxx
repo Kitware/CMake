@@ -4014,6 +4014,8 @@ int cmake::Build(int jobs, std::string dir, std::vector<std::string> targets,
   // Note that the stampList file only exists for VS generators.
   if (cmSystemTools::FileExists(stampList) &&
       !cmakeCheckStampList(stampList)) {
+    // Upgrade cmake role from --build to reconfigure the project.
+    this->State->SetRoleToProjectForCMakeBuildVsReconfigure();
     this->AddScriptingCommands();
     this->AddProjectCommands();
 

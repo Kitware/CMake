@@ -812,6 +812,11 @@ unsigned int cmState::GetCacheMinorVersion() const
   return this->CacheManager->GetCacheMinorVersion();
 }
 
+void cmState::SetRoleToProjectForCMakeBuildVsReconfigure()
+{
+  this->StateRole = Role::Project;
+}
+
 cmState::Role cmState::GetRole() const
 {
   return this->StateRole;
