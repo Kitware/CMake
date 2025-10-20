@@ -55,13 +55,13 @@ public:
     Help
   };
 
-  enum class ProjectKind
+  enum class TryCompile
   {
-    Normal,
-    TryCompile,
+    No,
+    Yes,
   };
 
-  cmState(Mode mode, ProjectKind projectKind = ProjectKind::Normal);
+  cmState(Mode mode, TryCompile isTryCompile = TryCompile::No);
   ~cmState();
 
   cmState(cmState const&) = delete;
@@ -236,7 +236,7 @@ public:
 
   static std::string ModeToString(Mode mode);
 
-  ProjectKind GetProjectKind() const;
+  TryCompile GetIsTryCompile() const;
 
   void ClearDependencyProvider() { this->DependencyProvider.reset(); }
   void SetDependencyProvider(cmDependencyProvider provider)
@@ -305,7 +305,7 @@ private:
   bool NinjaMulti = false;
   bool FastbuildMake = false;
   Mode StateMode = Unknown;
-  ProjectKind StateProjectKind = ProjectKind::Normal;
+  TryCompile IsTryCompile = TryCompile::No;
   cm::optional<cmDependencyProvider> DependencyProvider;
   bool ProcessingTopLevelIncludes = false;
 };

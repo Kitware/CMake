@@ -297,13 +297,13 @@ cmDocumentationEntry cmake::CMAKE_STANDARD_OPTIONS_TABLE[19] = {
     "not errors." }
 };
 
-cmake::cmake(Role role, cmState::Mode mode, cmState::ProjectKind projectKind)
+cmake::cmake(Role role, cmState::Mode mode, cmState::TryCompile isTryCompile)
   : CMakeWorkingDirectory(cmSystemTools::GetLogicalWorkingDirectory())
   , FileTimeCache(cm::make_unique<cmFileTimeCache>())
 #ifndef CMAKE_BOOTSTRAP
   , VariableWatch(cm::make_unique<cmVariableWatch>())
 #endif
-  , State(cm::make_unique<cmState>(mode, projectKind))
+  , State(cm::make_unique<cmState>(mode, isTryCompile))
   , Messenger(cm::make_unique<cmMessenger>())
 {
   this->TraceFile.close();
@@ -2154,7 +2154,7 @@ void cmake::SetHomeDirectory(std::string const& dir)
     this->CurrentSnapshot.SetDefinition("CMAKE_SOURCE_DIR", dir);
   }
 
-  if (this->State->GetProjectKind() == cmState::ProjectKind::Normal) {
+  if (this->State->GetIsTryCompile() == cmState::TryCompile::No) {
     this->Messenger->SetTopSource(this->GetHomeDirectory());
   } else {
     this->Messenger->SetTopSource(cm::nullopt);
@@ -3386,7 +3386,7 @@ void cmake::UpdateProgress(std::string const& msg, float prog)
 
 bool cmake::GetIsInTryCompile() const
 {
-  return this->State->GetProjectKind() == cmState::ProjectKind::TryCompile;
+  return this->State->GetIsTryCompile() == cmState::TryCompile::Yes;
 }
 
 void cmake::AppendGlobalGeneratorsDocumentation(

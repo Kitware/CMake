@@ -31,9 +31,9 @@ namespace cmStateDetail {
 std::string const PropertySentinel = std::string{};
 } // namespace cmStateDetail
 
-cmState::cmState(Mode mode, ProjectKind projectKind)
+cmState::cmState(Mode mode, TryCompile isTryCompile)
   : StateMode(mode)
-  , StateProjectKind(projectKind)
+  , IsTryCompile(isTryCompile)
 {
   this->CacheManager = cm::make_unique<cmCacheManager>();
   this->GlobVerificationManager = cm::make_unique<cmGlobVerificationManager>();
@@ -603,9 +603,8 @@ cmValue cmState::GetGlobalProperty(std::string const& prop)
     std::vector<std::string> commands = this->GetCommandNames();
     this->SetGlobalProperty("COMMANDS", cmList::to_string(commands));
   } else if (prop == "IN_TRY_COMPILE") {
-    this->SetGlobalProperty(
-      "IN_TRY_COMPILE",
-      this->StateProjectKind == ProjectKind::TryCompile ? "1" : "0");
+    this->SetGlobalProperty("IN_TRY_COMPILE",
+                            this->IsTryCompile == TryCompile::Yes ? "1" : "0");
   } else if (prop == "GENERATOR_IS_MULTI_CONFIG") {
     this->SetGlobalProperty("GENERATOR_IS_MULTI_CONFIG",
                             this->IsGeneratorMultiConfig ? "1" : "0");
@@ -845,9 +844,9 @@ std::string cmState::ModeToString(cmState::Mode mode)
   return "UNKNOWN";
 }
 
-cmState::ProjectKind cmState::GetProjectKind() const
+cmState::TryCompile cmState::GetIsTryCompile() const
 {
-  return this->StateProjectKind;
+  return this->IsTryCompile;
 }
 
 std::string const& cmState::GetBinaryDirectory() const

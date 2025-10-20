@@ -172,7 +172,7 @@ public:
 
   /// Default constructor
   cmake(Role role, cmState::Mode mode,
-        cmState::ProjectKind projectKind = cmState::ProjectKind::Normal);
+        cmState::TryCompile isTryCompile = cmState::TryCompile::No);
   /// Destructor
   ~cmake();
 
