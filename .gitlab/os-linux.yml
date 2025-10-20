@@ -514,7 +514,7 @@
 
 .cuda13.0:
     extends: .cuda
-    image: "kitware/cmake:ci-cuda13.0-x86_64-2025-09-18"
+    image: "kitware/cmake:ci-cuda13.0-x86_64-2025-10-20"
     variables:
         CMAKE_ARCH: x86_64
 
