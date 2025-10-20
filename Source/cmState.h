@@ -46,13 +46,13 @@ class cmState
 public:
   enum class Role
   {
-    Unknown,
+    Internal,
     Project,
     Script,
     FindPackage,
     CTest,
     CPack,
-    Help
+    Help,
   };
 
   enum class TryCompile
@@ -304,7 +304,7 @@ private:
   bool Ninja = false;
   bool NinjaMulti = false;
   bool FastbuildMake = false;
-  Role StateRole = Role::Unknown;
+  Role StateRole = Role::Internal;
   TryCompile IsTryCompile = TryCompile::No;
   cm::optional<cmDependencyProvider> DependencyProvider;
   bool ProcessingTopLevelIncludes = false;

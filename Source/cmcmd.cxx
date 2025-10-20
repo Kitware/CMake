@@ -1150,7 +1150,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
         std::cerr << "-E capabilities accepts no additional arguments\n";
         return 1;
       }
-      cmake cm(cmake::CommandSet::None, cmState::Role::Unknown);
+      cmake cm(cmake::CommandSet::None, cmState::Role::Internal);
       std::cout << cm.ReportCapabilities();
       return 0;
     }

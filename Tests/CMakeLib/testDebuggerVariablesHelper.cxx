@@ -501,7 +501,7 @@ static bool testCreateFromFileSet()
   auto variablesManager =
     std::make_shared<cmDebugger::cmDebuggerVariablesManager>();
 
-  cmake cm(cmake::CommandSet::Script, cmState::Role::Unknown);
+  cmake cm(cmake::CommandSet::None, cmState::Role::Internal);
   cmFileSet fileSet(cm, "Foo", "HEADERS", cmFileSetVisibility::Public);
   BT<std::string> directory;
   directory.Value = "c:/";
@@ -545,7 +545,7 @@ static bool testCreateFromFileSets()
   auto variablesManager =
     std::make_shared<cmDebugger::cmDebuggerVariablesManager>();
 
-  cmake cm(cmake::CommandSet::Script, cmState::Role::Unknown);
+  cmake cm(cmake::CommandSet::None, cmState::Role::Internal);
   cmFileSet fileSet(cm, "Foo", "HEADERS", cmFileSetVisibility::Public);
   BT<std::string> directory;
   directory.Value = "c:/";

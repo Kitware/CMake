@@ -2200,7 +2200,7 @@ bool cmCTestTestHandler::SetTestsProperties(
 
             // Ensure we have complete triples otherwise the data is corrupt.
             if (triples.size() % 3 == 0) {
-              cmState state(cmState::Role::Unknown);
+              cmState state(cmState::Role::Internal);
               rt.Backtrace = cmListFileBacktrace();
 
               // the first entry represents the top of the trace so we need to

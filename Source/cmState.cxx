@@ -837,8 +837,8 @@ std::string cmState::RoleToString(cmState::Role mode)
       return "CPACK";
     case Role::Help:
       return "HELP";
-    case Role::Unknown:
-      return "UNKNOWN";
+    case Role::Internal:
+      return "INTERNAL";
   }
   return "UNKNOWN";
 }

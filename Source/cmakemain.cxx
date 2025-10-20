@@ -366,7 +366,7 @@ int do_cmake(int ac, char const* const* av)
   cmake::CommandSet const commandSet = workingMode == cmake::SCRIPT_MODE
     ? cmake::CommandSet::Script
     : cmake::CommandSet::Project;
-  cmState::Role role = cmState::Role::Unknown;
+  cmState::Role role = cmState::Role::Internal;
   switch (workingMode) {
     case cmake::NORMAL_MODE:
     case cmake::HELP_MODE:
@@ -1109,7 +1109,7 @@ int do_open(int ac, char const* const* av)
     return 1;
   }
 
-  cmake cm(cmake::CommandSet::None, cmState::Role::Unknown);
+  cmake cm(cmake::CommandSet::None, cmState::Role::Internal);
   cmSystemTools::SetMessageCallback(
     [&cm](std::string const& msg, cmMessageMetadata const& md) {
       cmakemainMessageCallback(msg, md, &cm);
