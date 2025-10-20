@@ -225,7 +225,7 @@ int main(int argc, char const* const* argv)
                      } },
   };
 
-  cmake cminst(cmake::RoleScript, cmState::CPack);
+  cmake cminst(cmake::CommandSet::Script, cmState::CPack);
   cminst.SetProgressCallback(cpackProgressCallback);
   cminst.GetCurrentSnapshot().SetDefaultDefinitions();
   cmGlobalGenerator cmgg(&cminst);

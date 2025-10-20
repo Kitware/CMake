@@ -2656,7 +2656,7 @@ int cmCTest::ExecuteTests(std::vector<std::string> const& args)
   cmCTestTestHandler handler(this);
 
   {
-    cmake cm(cmake::RoleScript, cmState::CTest);
+    cmake cm(cmake::CommandSet::Script, cmState::CTest);
     cm.GetCurrentSnapshot().SetDefaultDefinitions();
     cmGlobalGenerator gg(&cm);
     cmMakefile mf(&gg, cm.GetCurrentSnapshot());

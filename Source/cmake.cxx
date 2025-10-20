@@ -297,7 +297,8 @@ cmDocumentationEntry cmake::CMAKE_STANDARD_OPTIONS_TABLE[19] = {
     "not errors." }
 };
 
-cmake::cmake(Role role, cmState::Mode mode, cmState::TryCompile isTryCompile)
+cmake::cmake(CommandSet commandSet, cmState::Mode mode,
+             cmState::TryCompile isTryCompile)
   : CMakeWorkingDirectory(cmSystemTools::GetLogicalWorkingDirectory())
   , FileTimeCache(cm::make_unique<cmFileTimeCache>())
 #ifndef CMAKE_BOOTSTRAP
@@ -321,10 +322,10 @@ cmake::cmake(Role role, cmState::Mode mode, cmState::TryCompile isTryCompile)
 
   this->AddDefaultGenerators();
   this->AddDefaultExtraGenerators();
-  if (role == RoleScript || role == RoleProject) {
+  if (commandSet == CommandSet::Script || commandSet == CommandSet::Project) {
     this->AddScriptingCommands();
   }
-  if (role == RoleProject) {
+  if (commandSet == CommandSet::Project) {
     this->AddProjectCommands();
   }
 
@@ -3476,7 +3477,7 @@ int cmake::CheckBuildSystem()
   // Read the rerun check file and use it to decide whether to do the
   // global generate.
   // Actually, all we need is the `set` command.
-  cmake cm(RoleScript, cmState::Unknown);
+  cmake cm(CommandSet::Script, cmState::Unknown);
   cm.GetCurrentSnapshot().SetDefaultDefinitions();
   cmGlobalGenerator gg(&cm);
   cmMakefile mf(&gg, cm.GetCurrentSnapshot());

@@ -47,7 +47,7 @@ QCMake::QCMake(QObject* p)
     [this](std::string const& msg) { this->stderrCallback(msg); });
 
   this->CMakeInstance =
-    cm::make_unique<cmake>(cmake::RoleProject, cmState::Project);
+    cm::make_unique<cmake>(cmake::CommandSet::Project, cmState::Project);
   this->CMakeInstance->SetCMakeEditCommand(
     cmSystemTools::GetCMakeGUICommand());
   this->CMakeInstance->SetProgressCallback(

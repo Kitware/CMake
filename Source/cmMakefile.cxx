@@ -3251,7 +3251,8 @@ int cmMakefile::TryCompile(std::string const& srcdir,
   // make sure the same generator is used
   // use this program as the cmake to be run, it should not
   // be run that way but the cmake object requires a valid path
-  cmake cm(cmake::RoleProject, cmState::Project, cmState::TryCompile::Yes);
+  cmake cm(cmake::CommandSet::Project, cmState::Project,
+           cmState::TryCompile::Yes);
   auto gg = cm.CreateGlobalGenerator(this->GetGlobalGenerator()->GetName());
   if (!gg) {
     this->IssueMessage(MessageType::INTERNAL_ERROR,

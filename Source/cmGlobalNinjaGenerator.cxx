@@ -3049,7 +3049,7 @@ int cmcmd_cmake_ninja_dyndep(std::vector<std::string>::const_iterator argBeg,
 
   auto export_info = cmDyndepCollation::ParseExportInfo(tdi);
 
-  cmake cm(cmake::RoleInternal, cmState::Unknown);
+  cmake cm(cmake::CommandSet::None, cmState::Unknown);
   cm.SetHomeDirectory(dir_top_src);
   cm.SetHomeOutputDirectory(dir_top_bld);
   auto ggd = cm.CreateGlobalGenerator("Ninja");

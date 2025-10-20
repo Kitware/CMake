@@ -177,7 +177,7 @@ int cmCTestBuildAndTest::Run()
     return 1;
   }
 
-  cmake cm(cmake::RoleProject, cmState::Project);
+  cmake cm(cmake::CommandSet::Project, cmState::Project);
   cmCTestBuildAndTestCaptureRAII captureRAII(cm);
   static_cast<void>(captureRAII);
 
