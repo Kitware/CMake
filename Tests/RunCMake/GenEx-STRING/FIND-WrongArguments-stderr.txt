@@ -1,0 +1,18 @@
+CMake Error at FIND-WrongArguments\.cmake:[0-9]+ \(add_custom_target\):
+  Error evaluating generator expression:
+
+    \$<STRING:FIND,string,OTHER,foo>
+
+  Expected option 'FROM:' is missing.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
+
+
+CMake Error at FIND-WrongArguments\.cmake:[0-9]+ \(add_custom_target\):
+  Error evaluating generator expression:
+
+    \$<STRING:FIND,string,FROM:OTHER,foo>
+
+  Invalid value for 'FROM:' option.  'BEGIN' or 'END' expected.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)

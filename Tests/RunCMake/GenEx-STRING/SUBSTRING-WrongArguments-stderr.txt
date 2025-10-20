@@ -1,0 +1,38 @@
+CMake Error at SUBSTRING-WrongArguments\.cmake:[0-9]+ \(add_custom_target\):
+  Error evaluating generator expression:
+
+    \$<STRING:SUBSTRING,string,foo,1>
+
+  index: "foo" is not a valid index
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
+
+
+CMake Error at SUBSTRING-WrongArguments\.cmake:[0-9]+ \(add_custom_target\):
+  Error evaluating generator expression:
+
+    \$<STRING:SUBSTRING,string,1,foo>
+
+  index: "foo" is not a valid index
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
+
+
+CMake Error at SUBSTRING-WrongArguments\.cmake:[0-9]+ \(add_custom_target\):
+  Error evaluating generator expression:
+
+    \$<STRING:SUBSTRING,string,-1,2>
+
+  begin index: -1 is out of range 0 - 6
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
+
+
+CMake Error at SUBSTRING-WrongArguments\.cmake:[0-9]+ \(add_custom_target\):
+  Error evaluating generator expression:
+
+    \$<STRING:SUBSTRING,string,1,-2>
+
+  end index: -2 should be -1 or greater
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)

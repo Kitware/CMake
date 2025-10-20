@@ -1,0 +1,26 @@
+
+cmake_minimum_required(VERSION 4.2...4.3)
+
+include ("${RunCMake_SOURCE_DIR}/check_errors.cmake")
+unset (errors)
+
+string(SUBSTRING  "abcd" 1 2 reference)
+set(output "$<STRING:SUBSTRING,abcd,1,2>")
+if (NOT output STREQUAL reference)
+  list (APPEND errors "<STRING:SUBSTRING,abcd,1,2> returns bad data: ${output}")
+endif()
+
+string(SUBSTRING  "abcd" 1 -1 reference)
+set(output "$<STRING:SUBSTRING,abcd,1,-1>")
+if (NOT output STREQUAL reference)
+  list (APPEND errors "<STRING:SUBSTRING,abcd,1,-1> returns bad data: ${output}")
+endif()
+
+string(SUBSTRING  "abcd" 1 5 reference)
+set(output "$<STRING:SUBSTRING,abcd,1,5>")
+if (NOT output STREQUAL reference)
+  list (APPEND errors "<STRING:SUBSTRING,abcd,1,5> returns bad data: ${output}")
+endif()
+
+
+check_errors("STRING:SUBSTRING" ${errors})

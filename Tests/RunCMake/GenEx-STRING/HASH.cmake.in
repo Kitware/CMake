@@ -1,0 +1,69 @@
+
+cmake_minimum_required(VERSION 4.2...4.3)
+
+include ("${RunCMake_SOURCE_DIR}/check_errors.cmake")
+unset (errors)
+
+# foreach(hash IN ITEMS MD5 SHA1 SHA224 SHA256 SHA384 SHA512 SHA3_224 SHA3_256 SHA3_384 SHA3_512)
+
+string(MD5 reference "sample input string")
+set(output "$<STRING:HASH,sample input string,ALGORITHM:MD5>")
+if (NOT output STREQUAL reference)
+  list (APPEND errors "<STRING:HASH,sample input string,MD5> returns bad data: ${output}")
+endif()
+
+string(SHA1 reference "sample input string")
+set(output "$<STRING:HASH,sample input string,ALGORITHM:SHA1>")
+if (NOT output STREQUAL reference)
+  list (APPEND errors "<STRING:HASH,sample input string,SHA1> returns bad data: ${output}")
+endif()
+
+string(SHA224 reference "sample input string")
+set(output "$<STRING:HASH,sample input string,ALGORITHM:SHA224>")
+if (NOT output STREQUAL reference)
+  list (APPEND errors "<STRING:HASH,sample input string,SHA224> returns bad data: ${output}")
+endif()
+
+string(SHA256 reference "sample input string")
+set(output "$<STRING:HASH,sample input string,ALGORITHM:SHA256>")
+if (NOT output STREQUAL reference)
+  list (APPEND errors "<STRING:HASH,sample input string,SHA256> returns bad data: ${output}")
+endif()
+
+string(SHA384 reference "sample input string")
+set(output "$<STRING:HASH,sample input string,ALGORITHM:SHA384>")
+if (NOT output STREQUAL reference)
+  list (APPEND errors "<STRING:HASH,sample input string,SHA384> returns bad data: ${output}")
+endif()
+
+string(SHA512 reference "sample input string")
+set(output "$<STRING:HASH,sample input string,ALGORITHM:SHA512>")
+if (NOT output STREQUAL reference)
+  list (APPEND errors "<STRING:HASH,sample input string,SHA512> returns bad data: ${output}")
+endif()
+
+string(SHA3_224 reference "sample input string")
+set(output "$<STRING:HASH,sample input string,ALGORITHM:SHA3_224>")
+if (NOT output STREQUAL reference)
+  list (APPEND errors "<STRING:HASH,sample input string,SHA3_224> returns bad data: ${output}")
+endif()
+
+string(SHA3_256 reference "sample input string")
+set(output "$<STRING:HASH,sample input string,ALGORITHM:SHA3_256>")
+if (NOT output STREQUAL reference)
+  list (APPEND errors "<STRING:HASH,sample input string,SHA3_256> returns bad data: ${output}")
+endif()
+
+string(SHA3_384 reference "sample input string")
+set(output "$<STRING:HASH,sample input string,ALGORITHM:SHA3_384>")
+if (NOT output STREQUAL reference)
+  list (APPEND errors "<STRING:HASH,sample input string,SHA3_384> returns bad data: ${output}")
+endif()
+
+string(SHA3_512 reference "sample input string")
+set(output "$<STRING:HASH,sample input string,ALGORITHM:SHA3_512>")
+if (NOT output STREQUAL reference)
+  list (APPEND errors "<STRING:HASH,sample input string,SHA3_512> returns bad data: ${output}")
+endif()
+
+check_errors("STRING:HASH" ${errors})

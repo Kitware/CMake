@@ -1,0 +1,14 @@
+
+cmake_minimum_required(VERSION 4.2...4.3)
+
+include ("${RunCMake_SOURCE_DIR}/check_errors.cmake")
+unset (errors)
+
+string(STRIP " ABCD  "  reference)
+set(output "$<STRING:STRIP,SPACES, ABCD  >")
+if (NOT output STREQUAL reference)
+  list (APPEND errors "<STRING:STRIP,SPACES, ABCD  > returns bad data: ${output}")
+endif()
+
+
+check_errors("STRING:STRIP" ${errors})

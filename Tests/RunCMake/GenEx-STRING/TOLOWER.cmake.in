@@ -1,0 +1,26 @@
+
+cmake_minimum_required(VERSION 4.2...4.3)
+
+include ("${RunCMake_SOURCE_DIR}/check_errors.cmake")
+unset (errors)
+
+string(TOLOWER "ABCD"  reference)
+set(output "$<STRING:TOLOWER,ABCD>")
+if (NOT output STREQUAL reference)
+  list (APPEND errors "<STRING:TOLOWER,ABCD> returns bad data: ${output}")
+endif()
+
+string(TOLOWER "abcd"  reference)
+set(output "$<STRING:TOLOWER,abcd>")
+if (NOT output STREQUAL reference)
+  list (APPEND errors "<STRING:TOLOWER,abcd> returns bad data: ${output}")
+endif()
+
+string(TOLOWER "abcdABCD12@!"  reference)
+set(output "$<STRING:TOLOWER,abcdABCD12@!>")
+if (NOT output STREQUAL reference)
+  list (APPEND errors "<STRING:TOLOWER,abcdABCD12@!> returns bad data: ${output}")
+endif()
+
+
+check_errors("STRING:TOLOWER" ${errors})

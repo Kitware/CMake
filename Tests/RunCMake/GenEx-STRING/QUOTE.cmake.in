@@ -1,0 +1,21 @@
+
+cmake_minimum_required(VERSION 4.2...4.3)
+
+include ("${RunCMake_SOURCE_DIR}/check_errors.cmake")
+unset (errors)
+
+string(REGEX QUOTE reference "abcd")
+set(output "$<STRING:QUOTE,REGEX,abcd>")
+if (NOT output STREQUAL reference)
+  list (APPEND errors "<STRING:QUOTE,REGEX,abcd> returns bad data: ${output}")
+endif()
+
+string(REGEX QUOTE reference "ab|c+12?3[x-z]$(y)\\t\\r\\n.cma*ke^[:alpha:] ")
+set(output [[
+$<STRING:QUOTE,REGEX,ab|c+12?3[x-z]$(y)\t\r\n.cma*ke^[:alpha:]> ]])
+if (NOT output STREQUAL reference)
+  list (APPEND errors "<STRING:QUOTE,REGEX,ab|c+12?3[x-z]$(y)\\t\\r\\n.cma*ke^[:alpha:]> returns bad data: ${output}")
+endif()
+
+
+check_errors("STRING:QUOTE" ${errors})

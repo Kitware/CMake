@@ -1,0 +1,20 @@
+
+cmake_minimum_required(VERSION 4.2...4.3)
+
+include ("${RunCMake_SOURCE_DIR}/check_errors.cmake")
+unset (errors)
+
+string(HEX "The quick brown fox jumps over the lazy dog." reference)
+set(output "$<STRING:HEX,The quick brown fox jumps over the lazy dog.>")
+if (NOT output STREQUAL reference)
+  list (APPEND errors "<STRING:HEX,The quick brown fox jumps over the lazy dog.> returns bad data: ${output}")
+endif()
+
+string(HEX "Ash nazg durbatulûk. Ash nazg gimbatul. Ash nazg thrakatulûk. Agh burzum-ishi krimpatul" reference)
+set(output "$<STRING:HEX,Ash nazg durbatulûk. Ash nazg gimbatul. Ash nazg thrakatulûk. Agh burzum-ishi krimpatul>")
+if (NOT output STREQUAL reference)
+  list (APPEND errors "<STRING:HEX,Ash nazg durbatulûk. Ash nazg gimbatul. Ash nazg thrakatulûk. Agh burzum-ishi krimpatul> returns bad data: ${output}")
+endif()
+
+
+check_errors("STRING:HEX" ${errors})

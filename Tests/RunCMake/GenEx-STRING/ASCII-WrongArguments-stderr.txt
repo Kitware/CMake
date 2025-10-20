@@ -1,0 +1,38 @@
+CMake Error at ASCII-WrongArguments\.cmake:[0-9]+ \(add_custom_target\):
+  Error evaluating generator expression:
+
+    \$<STRING:ASCII,foo>
+
+  Character with code foo does not exist.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
+
+
+CMake Error at ASCII-WrongArguments\.cmake:[0-9]+ \(add_custom_target\):
+  Error evaluating generator expression:
+
+    \$<STRING:ASCII,256>
+
+  Character with code 256 does not exist.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
+
+
+CMake Error at ASCII-WrongArguments\.cmake:[0-9]+ \(add_custom_target\):
+  Error evaluating generator expression:
+
+    \$<STRING:ASCII,32,256>
+
+  Character with code 256 does not exist.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
+
+
+CMake Error at ASCII-WrongArguments\.cmake:[0-9]+ \(add_custom_target\):
+  Error evaluating generator expression:
+
+    \$<STRING:ASCII,32,-1>
+
+  Character with code -1 does not exist.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)

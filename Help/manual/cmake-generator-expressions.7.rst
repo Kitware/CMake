@@ -321,6 +321,21 @@ Version Comparisons
 String Expressions
 ------------------
 
+Most of the expressions in this section are closely associated with the
+:command:`string` command, providing the same capabilities, but in
+the form of a generator expression.
+
+In each of the following string-related generator expressions, the ``string``
+must not contain any commas if that generator expression expects something to
+be provided after the ``string``.  For example, the expression
+``$<STRING:FIND,string,value>`` requires a ``value`` after the ``string``.
+Since a comma is used to separate the ``string`` and the ``value``, the
+``string`` cannot itself contain a comma.  This restriction does not apply to
+the :command:`string` command, it is specific to the string-handling generator
+expressions only. The :genex:`$<COMMA>` generator expression can be used to
+specify a comma as part of the arguments of the string-related generator
+expressions.
+
 .. _`String Comparisons Generator Expressions`:
 
 String Comparisons
@@ -333,7 +348,7 @@ evaluates to ``1`` if ``${foo}`` is any of ``BAR``, ``Bar``, ``bar``, etc.
 
   .. code-block:: cmake
 
-    $<STREQUAL:$<UPPER_CASE:${foo}>,BAR>
+    $<STREQUAL:$<STRING:TOUPPER,${foo}>,BAR>
 
 .. genex:: $<STREQUAL:string1,string2>
 
@@ -366,9 +381,336 @@ evaluates to ``1`` if ``${foo}`` is any of ``BAR``, ``Bar``, ``bar``, etc.
   ``1`` if ``string1`` is lexicographically greater than or equal to
   ``string2``, else ``0``.
 
+.. _`String Queries Generator Expressions`:
+
+String Queries
+^^^^^^^^^^^^^^
+
+.. genex:: $<STRING:LENGTH,string>
+
+  .. versionadded:: 4.3
+
+  The given string's length in bytes. Note that this means, if ``string``
+  contains multi-byte characters, the result will *not* be the number of
+  characters.
+
+.. genex:: $<STRING:SUBSTRING,string,begin,length>
+
+  .. versionadded:: 4.3
+
+  The substring of the given ``string``. If ``length`` is ``-1`` or greater
+  than the ``string`` length the remainder of the string starting at ``begin``
+  will be returned.
+
+  Both ``begin`` and ``length`` are counted in bytes, so care must
+  be exercised if ``string`` could contain multi-byte characters.
+
+.. genex:: $<STRING:FIND,string[,FROM:(BEGIN|END)],substring>
+
+  The position where the given ``substring`` was found in the supplied
+  ``string``. If the ``substring`` is not found, a position of -1 is returned.
+
+  The ``FROM:`` option defines how the search will be done:
+
+  ``BEGIN``
+    The search will start at the beginning of the ``string``. This the default.
+
+  ``END``
+    The search will start from the end of the ``string``.
+
+  The ``$<STRING:FIND>`` generator expression treats all strings as ASCII-only
+  characters. The index returned will also be counted in bytes, so strings
+  containing multi-byte characters may lead to unexpected results.
+
+.. genex:: $<STRING:MATCH,string[,SEEK:(ONCE|ALL)],regular_expression>
+
+  .. versionadded:: 4.3
+
+  Match, in the ``string``, the ``regular_expression``.
+
+  The ``SEEK:`` option specifies the match behavior:
+
+  ``ONCE``
+    Match only the first occurrence. This is the default.
+
+  ``ALL``
+    Match as many times as possible and return the matches as a list.
+
+  See the :ref:`Regular expressions specification <Regex Specification>` for
+  the syntax of the ``regular_expression`` parameter.
+
+.. _`String Generating Generator Expressions`:
+
+String Generations
+^^^^^^^^^^^^^^^^^^
+
+.. genex:: $<STRING:JOIN,glue,input[,input]...>
+
+  .. versionadded:: 4.3
+
+  Join all the ``input`` arguments together using the ``glue`` string.
+
+.. genex:: $<STRING:ASCII,number[,number]...>
+
+  .. versionadded:: 4.3
+
+  Convert all numbers, in the range 1-255, into corresponding ASCII
+  characters. Any number outside this range will raise an error.
+
+.. genex:: $<STRING:TIMESTAMP[,(UTC|format)]...>
+
+  .. versionadded:: 4.3
+
+  Produce a string representation of the current date and/or time.
+
+  If the generator expression is unable to obtain a timestamp, the result will
+  be the empty string ``""``.
+
+  The optional ``UTC`` flag requests the current date/time representation to
+  be in Coordinated Universal Time (UTC) rather than local time.
+
+  If the ``SOURCE_DATE_EPOCH`` environment variable is set, its value will be
+  used instead of the current time.
+  See https://reproducible-builds.org/specs/source-date-epoch/ for details.
+
+  The optional ``<format>`` may contain the following format specifiers:
+
+  ``%%``
+    A literal percent sign (%).
+
+  ``%d``
+    The day of the current month (01-31).
+
+  ``%H``
+    The hour on a 24-hour clock (00-23).
+
+  ``%I``
+    The hour on a 12-hour clock (01-12).
+
+  ``%j``
+    The day of the current year (001-366).
+
+  ``%m``
+    The month of the current year (01-12).
+
+  ``%b``
+    Abbreviated month name (e.g. Oct).
+
+  ``%B``
+    Full month name (e.g. October).
+
+  ``%M``
+    The minute of the current hour (00-59).
+
+  ``%s``
+    Seconds since midnight (UTC) 1-Jan-1970 (UNIX time).
+
+  ``%S``
+    The second of the current minute.  60 represents a leap second. (00-60)
+
+  ``%f``
+    The microsecond of the current second (000000-999999).
+
+  ``%U``
+    The week number of the current year (00-53).
+
+  ``%V``
+    The ISO 8601 week number of the current year (01-53).
+
+  ``%w``
+    The day of the current week. 0 is Sunday. (0-6)
+
+  ``%a``
+    Abbreviated weekday name (e.g. Fri).
+
+  ``%A``
+    Full weekday name (e.g. Friday).
+
+  ``%y``
+    The last two digits of the current year (00-99).
+
+  ``%Y``
+    The current year.
+
+  ``%z``
+    The offset of the time zone from UTC, in hours and minutes,
+    with format ``+hhmm`` or ``-hhmm``.
+
+  ``%Z``
+    The time zone name.
+
+  Unknown format specifiers will be ignored and copied to the output
+  as-is.
+
+  If no explicit ``format`` is given, it will default to:
+
+  * ``%Y-%m-%dT%H:%M:%S`` for local time.
+  * ``%Y-%m-%dT%H:%M:%SZ`` for UTC.
+
+.. genex:: $<STRING:RANDOM[,(LENGTH:length|ALPHABET:alphabet|RANDOM_SEED:seed)]...>
+
+  .. versionadded:: 4.3
+
+  Produce a random string of ASCII characters. The possible options are:
+
+  ``LENGTH:length``
+    Define the length of the string. The default length is 5 characters.
+
+  ``ALPHABET:alphabet``
+    Define the characters used for the generation. The alphabet is always
+    interpreted as holding ASCII characters. The default alphabet is all
+    numbers and upper and lower case letters.
+
+  ``RANDOM_SEED:seed``
+    Specify an integer which will be used to seed the random number generator.
+
+.. genex:: $<STRING:UUID,NAMESPACE:namespace,TYPE:(MD5|SHA1)[,NAME:name][,CASE:(LOWER|UPPER)]>
+
+  .. versionadded:: 4.3
+
+  Create a universally unique identifier (aka GUID) as per RFC4122.
+  A UUID has the format ``xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx``
+  where each ``x`` represents an hexadecimal character.
+
+  The UUID is based on the hash of the combined values of:
+
+  ``NAMESPACE:namespace``
+    ``namespace`` which has to be a valid UUID.
+
+  ``NAME:name``
+    ``name`` is an arbitrary string.
+
+  ``TYPE:``
+    The hash algorithm can be either:
+
+    ``MD5``
+      Version 3 UUID.
+
+    ``SHA1``
+      Version 5 UUID.
+
+  ``CASE:``
+    Specify the case of the hexadecimal characters.
+
+    ``LOWER``
+      Hexadecimal characters are all of lowercase. This is the default.
+
+    ``UPPER``
+      Hexadecimal characters are all of uppercase.
+
+.. _`String Transforming Generator Expressions`:
 
 String Transformations
 ^^^^^^^^^^^^^^^^^^^^^^
+
+.. genex:: $<STRING:REPLACE[,(STRING|REGEX)],string,match_string,replace_string>
+
+  .. versionadded:: 4.3
+
+  Replace all occurrences of ``match_string`` in the ``string`` with
+  ``replace_string``.
+
+  The ``match_string`` can be of two different types:
+
+  ``STRING``
+    ``match_string`` is a literal string and match will be done by simple
+    string comparison. This is the default.
+
+  ``REGEX``
+    ``match_string`` is a regular expression. Match this regular_expression as
+    many times as possible and substitute the ``replace_string`` for the match
+    in the ``string``.
+
+    The ``replace_string`` may refer to parenthesis-delimited subexpressions of
+    the match using \\1, \\2, ..., \\9. Note that two backslashes (\\\\1) are
+    required in CMake code to get a backslash through argument parsing.
+
+.. genex:: $<STRING:APPEND,string,input[,input]...>
+
+  .. versionadded:: 4.3
+
+  Append all the ``input`` arguments to the ``string``.
+
+.. genex:: $<STRING:PREPEND,string,input[,input]...>
+
+  .. versionadded:: 4.3
+
+  Prepend all the ``input`` arguments to the ``string``.
+
+.. genex:: $<STRING:TOLOWER,string>
+
+  .. versionadded:: 4.3
+
+  Content of ``string`` converted to lower case.
+
+.. genex:: $<STRING:TOUPPER,string>
+
+  .. versionadded:: 4.3
+
+  Content of ``string`` converted to upper case.
+
+.. genex:: $<STRING:STRIP,SPACES,string>
+
+  .. versionadded:: 4.3
+
+  Remove the specified elements from the ``string``. The possible options are:
+
+  ``SPACES``
+    Remove the leading and trailing spaces of the ``string``.
+
+.. genex:: $<STRING:QUOTE,REGEX,string>
+
+  .. versionadded:: 4.3
+
+  Escape the specified elements of the ``string``. The possible options are:
+
+  ``REGEX``
+    Escape all characters that have special meaning in a regular expressions,
+    such that the ``string`` can be used as part of a regular expression to
+    match the input literally.
+
+.. genex:: $<STRING:HEX,string>
+
+  .. versionadded:: 4.3
+
+  Convert each byte in the ``string`` to its hexadecimal representation.
+  Letters in the result (a through f) are in lowercase.
+
+.. genex:: $<STRING:HASH,string,ALGORITHM:algorithm>
+
+  .. versionadded:: 4.3
+
+  Compute a cryptographic hash of the ``string``. The supported algorithm
+  names, as specified by the ``ALGORITHM:`` option are:
+
+  ``MD5``
+    Message-Digest Algorithm 5, RFC 1321.
+  ``SHA1``
+    US Secure Hash Algorithm 1, RFC 3174.
+  ``SHA224``
+    US Secure Hash Algorithms, RFC 4634.
+  ``SHA256``
+    US Secure Hash Algorithms, RFC 4634.
+  ``SHA384``
+    US Secure Hash Algorithms, RFC 4634.
+  ``SHA512``
+    US Secure Hash Algorithms, RFC 4634.
+  ``SHA3_224``
+    Keccak SHA-3.
+  ``SHA3_256``
+    Keccak SHA-3.
+  ``SHA3_384``
+    Keccak SHA-3.
+  ``SHA3_512``
+    Keccak SHA-3.
+
+.. genex:: $<STRING:MAKE_C_IDENTIFIER,string>
+
+  .. versionadded:: 4.3
+
+  Convert each non-alphanumeric character in the ``string`` to an underscore.
+  If the first character of the ``string`` is a digit, an underscore will also
+  be prepended.
 
 .. genex:: $<LOWER_CASE:string>
 
@@ -380,8 +722,8 @@ String Transformations
 
 .. genex:: $<MAKE_C_IDENTIFIER:string>
 
-  Content of ``...`` converted to a C identifier.  The conversion follows the
-  same behavior as :command:`string(MAKE_C_IDENTIFIER)`.
+  Content of ``string`` converted to a C identifier.  The conversion follows
+  the same behavior as :command:`string(MAKE_C_IDENTIFIER)`.
 
 List Expressions
 ----------------

@@ -1,0 +1,22 @@
+
+cmake_minimum_required(VERSION 4.2...4.3)
+
+include ("${RunCMake_SOURCE_DIR}/check_errors.cmake")
+unset (errors)
+
+set(reference "abcd")
+string(PREPEND reference  "efg" "ABCD")
+set(output "$<STRING:PREPEND,abcd,efg,ABCD>")
+if (NOT output STREQUAL reference)
+  list (APPEND errors "<STRING:PREPEND,abcd,efg,ABCD> returns bad data: ${output}")
+endif()
+
+unset(reference)
+string(PREPEND reference  "efg" "ABCD")
+set(output "$<STRING:PREPEND,,efg,ABCD>")
+if (NOT output STREQUAL reference)
+  list (APPEND errors "<STRING:PREPEND,,efg,ABCD> returns bad data: ${output}")
+endif()
+
+
+check_errors("STRING:PREPEND" ${errors})
