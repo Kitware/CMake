@@ -4131,6 +4131,10 @@ bool SystemInformationImplementation::QueryWindowsMemory()
   this->TotalPhysicalMemory = tp >> 10 >> 10;
   this->AvailableVirtualMemory = av >> 10 >> 10;
   this->AvailablePhysicalMemory = ap >> 10 >> 10;
+
+  // The virtual WinAPI memory contains both physical memory and page file.
+  this->TotalVirtualMemory -= this->TotalPhysicalMemory;
+  this->AvailableVirtualMemory -= this->AvailablePhysicalMemory;
   return true;
 #else
   return false;
