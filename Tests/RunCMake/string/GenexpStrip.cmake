@@ -35,3 +35,7 @@ test_strip( # Multiple case
   "1$<AND:1,0>2$<IF:$<$<BOOL:1>:$<CONFIG:RELEASE>>,TRUE,FALSE>3"
   "123"
 )
+test_strip( # No : inside of :
+  "$<1:$<SEMICOLON>>1"
+  "1"
+)

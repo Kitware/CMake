@@ -2,7 +2,7 @@ project(LinkInterfaceGeneratorExpression CXX)
 
 add_library(foo foo.cxx)
 add_library(bar foo.cxx)
-target_link_libraries(bar $<1:foo>)
+target_link_libraries(bar $<1:foo> $<1:$<CONFIG>>)
 
 install(TARGETS foo EXPORT foo)
 export(EXPORT foo PACKAGE_INFO foo)

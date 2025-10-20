@@ -191,15 +191,16 @@ static std::string extractAllGeneratorExpressions(
           colons.push(c);
         }
       } else if (c[0] == '>') {
-        if (collected && !starts.empty() && !colons.empty()) {
-          (*collected)[std::string(starts.top() + 2, colons.top())].push_back(
-            std::string(colons.top() + 1, c));
+        if (!colons.empty() && !starts.empty() &&
+            starts.top() < colons.top()) {
+          if (collected) {
+            (*collected)[std::string(starts.top() + 2, colons.top())]
+              .push_back(std::string(colons.top() + 1, c));
+          }
+          colons.pop();
         }
         if (!starts.empty()) {
           starts.pop();
-        }
-        if (!colons.empty()) {
-          colons.pop();
         }
         if (starts.empty()) {
           break;
