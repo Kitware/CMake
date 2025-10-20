@@ -813,6 +813,8 @@ public:
 
   void resize(size_type count) { this->Values.resize(count); }
 
+  void reserve(size_type count) { this->Values.reserve(count); }
+
   enum class FilterMode
   {
     INCLUDE,
