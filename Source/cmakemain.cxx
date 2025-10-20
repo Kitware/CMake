@@ -221,7 +221,7 @@ int do_cmake(int ac, char const* const* av)
   doc.addCMakeStandardDocSections();
   if (doc.CheckOptions(ac, av, "--")) {
     // Construct and print requested documentation.
-    cmake hcm(cmake::CommandSet::None, cmState::Role::Help);
+    cmake hcm(cmState::Role::Help);
     hcm.AddCMakePaths();
 
     // the command line args are processed here so that you can do
@@ -359,13 +359,10 @@ int do_cmake(int ac, char const* const* av)
   }
 
   if (sysinfo) {
-    cmake cm(cmake::CommandSet::Project, cmState::Role::Project);
+    cmake cm(cmState::Role::Project);
     int ret = cm.GetSystemInformation(parsedArgs);
     return ret;
   }
-  cmake::CommandSet const commandSet = workingMode == cmake::SCRIPT_MODE
-    ? cmake::CommandSet::Script
-    : cmake::CommandSet::Project;
   cmState::Role role = cmState::Role::Internal;
   switch (workingMode) {
     case cmake::NORMAL_MODE:
@@ -382,7 +379,7 @@ int do_cmake(int ac, char const* const* av)
   auto const failurePolicy = workingMode == cmake::NORMAL_MODE
     ? cmake::CommandFailureAction::EXIT_CODE
     : cmake::CommandFailureAction::FATAL_ERROR;
-  cmake cm(commandSet, role);
+  cmake cm(role);
   cmSystemTools::SetMessageCallback(
     [&cm](std::string const& msg, cmMessageMetadata const& md) {
       cmakemainMessageCallback(msg, md, &cm);
@@ -680,7 +677,7 @@ int do_build(int ac, char const* const* av)
     return 1;
   }
 
-  cmake cm(cmake::CommandSet::None, cmState::Role::Internal);
+  cmake cm(cmState::Role::Internal);
   cmSystemTools::SetMessageCallback(
     [&cm](std::string const& msg, cmMessageMetadata const& md) {
       cmakemainMessageCallback(msg, md, &cm);
@@ -962,7 +959,7 @@ int do_install(int ac, char const* const* av)
     } else {
       for (auto const& script : handler.GetScripts()) {
         std::vector<std::string> cmd = script.command;
-        cmake cm(cmake::CommandSet::Script, cmState::Role::Script);
+        cmake cm(cmState::Role::Script);
         cmSystemTools::SetMessageCallback(
           [&cm](std::string const& msg, cmMessageMetadata const& md) {
             cmakemainMessageCallback(msg, md, &cm);
@@ -1065,7 +1062,7 @@ int do_workflow(int ac, char const* const* av)
     return 1;
   }
 
-  cmake cm(cmake::CommandSet::None, cmState::Role::Internal);
+  cmake cm(cmState::Role::Internal);
   cmSystemTools::SetMessageCallback(
     [&cm](std::string const& msg, cmMessageMetadata const& md) {
       cmakemainMessageCallback(msg, md, &cm);
@@ -1109,7 +1106,7 @@ int do_open(int ac, char const* const* av)
     return 1;
   }
 
-  cmake cm(cmake::CommandSet::None, cmState::Role::Internal);
+  cmake cm(cmState::Role::Internal);
   cmSystemTools::SetMessageCallback(
     [&cm](std::string const& msg, cmMessageMetadata const& md) {
       cmakemainMessageCallback(msg, md, &cm);

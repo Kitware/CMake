@@ -54,8 +54,7 @@ static Dummies CreateDummies(
   std::string currentBinaryDirectory = "c:/CurrentBinaryDirectory")
 {
   Dummies dummies;
-  dummies.CMake = std::make_shared<cmake>(cmake::CommandSet::Project,
-                                          cmState::Role::Project);
+  dummies.CMake = std::make_shared<cmake>(cmState::Role::Project);
   cmState* state = dummies.CMake->GetState();
   dummies.GlobalGenerator =
     std::make_shared<cmGlobalGenerator>(dummies.CMake.get());
@@ -501,7 +500,7 @@ static bool testCreateFromFileSet()
   auto variablesManager =
     std::make_shared<cmDebugger::cmDebuggerVariablesManager>();
 
-  cmake cm(cmake::CommandSet::None, cmState::Role::Internal);
+  cmake cm(cmState::Role::Internal);
   cmFileSet fileSet(cm, "Foo", "HEADERS", cmFileSetVisibility::Public);
   BT<std::string> directory;
   directory.Value = "c:/";
@@ -545,7 +544,7 @@ static bool testCreateFromFileSets()
   auto variablesManager =
     std::make_shared<cmDebugger::cmDebuggerVariablesManager>();
 
-  cmake cm(cmake::CommandSet::None, cmState::Role::Internal);
+  cmake cm(cmState::Role::Internal);
   cmFileSet fileSet(cm, "Foo", "HEADERS", cmFileSetVisibility::Public);
   BT<std::string> directory;
   directory.Value = "c:/";

@@ -405,7 +405,7 @@ int cmCTestLaunch::Main(int argc, char const* const argv[], Op operation)
 
 void cmCTestLaunch::LoadConfig()
 {
-  cmake cm(cmake::CommandSet::Script, cmState::Role::CTest);
+  cmake cm(cmState::Role::CTest);
   cm.GetCurrentSnapshot().SetDefaultDefinitions();
   cmGlobalGenerator gg(&cm);
   cmMakefile mf(&gg, cm.GetCurrentSnapshot());

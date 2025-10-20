@@ -39,8 +39,7 @@ cmCursesMainForm::cmCursesMainForm(std::vector<std::string> args,
     "Welcome to ccmake, curses based user interface for CMake.");
   this->HelpMessage.emplace_back();
   this->HelpMessage.emplace_back(s_ConstHelpMessage);
-  this->CMakeInstance =
-    cm::make_unique<cmake>(cmake::CommandSet::Project, cmState::Role::Project);
+  this->CMakeInstance = cm::make_unique<cmake>(cmState::Role::Project);
   this->CMakeInstance->SetCMakeEditCommand(
     cmSystemTools::GetCMakeCursesCommand());
 

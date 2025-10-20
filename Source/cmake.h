@@ -86,13 +86,6 @@ struct cmGlobCacheEntry;
 class cmake
 {
 public:
-  enum class CommandSet
-  {
-    None,    // no commands
-    Script,  // script commands
-    Project, // all commands
-  };
-
   enum DiagLevel
   {
     DIAG_IGNORE,
@@ -171,7 +164,7 @@ public:
   static int const DEFAULT_BUILD_PARALLEL_LEVEL = 0;
 
   /// Default constructor
-  cmake(CommandSet commandSet, cmState::Role role,
+  cmake(cmState::Role role,
         cmState::TryCompile isTryCompile = cmState::TryCompile::No);
   /// Destructor
   ~cmake();
