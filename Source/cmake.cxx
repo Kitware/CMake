@@ -3477,7 +3477,7 @@ int cmake::CheckBuildSystem()
   // Read the rerun check file and use it to decide whether to do the
   // global generate.
   // Actually, all we need is the `set` command.
-  cmake cm(CommandSet::Script, cmState::Role::Unknown);
+  cmake cm(CommandSet::Script, cmState::Role::Script);
   cm.GetCurrentSnapshot().SetDefaultDefinitions();
   cmGlobalGenerator gg(&cm);
   cmMakefile mf(&gg, cm.GetCurrentSnapshot());

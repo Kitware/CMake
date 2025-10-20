@@ -1398,7 +1398,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
 
       // Create a cmake object instance to process dependencies.
       // All we need is the `set` command.
-      cmake cm(cmake::CommandSet::Script, cmState::Role::Unknown);
+      cmake cm(cmake::CommandSet::Script, cmState::Role::Script);
       std::string gen;
       std::string homeDir;
       std::string startDir;
@@ -1752,7 +1752,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
       }
       // Create a cmake object instance to process dependencies.
       // All we need is the `set` command.
-      cmake cm(cmake::CommandSet::Script, cmState::Role::Unknown);
+      cmake cm(cmake::CommandSet::Script, cmState::Role::Script);
       std::string homeDir;
       std::string startDir;
       std::string homeOutDir;
