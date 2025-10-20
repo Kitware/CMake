@@ -67,6 +67,7 @@ The following variables can be used to configure this generator:
 * :variable:`CMAKE_FASTBUILD_CACHE_PATH`
 * :variable:`CMAKE_FASTBUILD_CAPTURE_SYSTEM_ENV`
 * :variable:`CMAKE_FASTBUILD_ENV_OVERRIDES`
+* :variable:`CMAKE_FASTBUILD_IDE_ARGS`
 * :variable:`CMAKE_FASTBUILD_TRACK_BYPRODUCTS_AS_OUTPUT`
 * :variable:`CMAKE_FASTBUILD_VERBOSE_GENERATOR`
 

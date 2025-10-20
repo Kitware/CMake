@@ -530,6 +530,7 @@ public:
   void WriteCopy(FastbuildCopyNode const& Copy);
 
   void WriteIDEProjects();
+  std::string GetIDEBuildArgs() const;
   void WriteVSBuildCommands();
   void WriteXCodeBuildCommands();
   void WriteIDEProjectCommon(IDEProjectCommon const& project);
