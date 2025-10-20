@@ -297,14 +297,14 @@ cmDocumentationEntry cmake::CMAKE_STANDARD_OPTIONS_TABLE[19] = {
     "not errors." }
 };
 
-cmake::cmake(CommandSet commandSet, cmState::Mode mode,
+cmake::cmake(CommandSet commandSet, cmState::Role role,
              cmState::TryCompile isTryCompile)
   : CMakeWorkingDirectory(cmSystemTools::GetLogicalWorkingDirectory())
   , FileTimeCache(cm::make_unique<cmFileTimeCache>())
 #ifndef CMAKE_BOOTSTRAP
   , VariableWatch(cm::make_unique<cmVariableWatch>())
 #endif
-  , State(cm::make_unique<cmState>(mode, isTryCompile))
+  , State(cm::make_unique<cmState>(role, isTryCompile))
   , Messenger(cm::make_unique<cmMessenger>())
 {
   this->TraceFile.close();
@@ -329,7 +329,7 @@ cmake::cmake(CommandSet commandSet, cmState::Mode mode,
     this->AddProjectCommands();
   }
 
-  if (mode == cmState::Project || mode == cmState::Help) {
+  if (role == cmState::Role::Project || role == cmState::Role::Help) {
     this->LoadEnvironmentPresets();
   }
 
@@ -3477,7 +3477,7 @@ int cmake::CheckBuildSystem()
   // Read the rerun check file and use it to decide whether to do the
   // global generate.
   // Actually, all we need is the `set` command.
-  cmake cm(CommandSet::Script, cmState::Unknown);
+  cmake cm(CommandSet::Script, cmState::Role::Unknown);
   cm.GetCurrentSnapshot().SetDefaultDefinitions();
   cmGlobalGenerator gg(&cm);
   cmMakefile mf(&gg, cm.GetCurrentSnapshot());

@@ -31,8 +31,8 @@ namespace cmStateDetail {
 std::string const PropertySentinel = std::string{};
 } // namespace cmStateDetail
 
-cmState::cmState(Mode mode, TryCompile isTryCompile)
-  : StateMode(mode)
+cmState::cmState(Role role, TryCompile isTryCompile)
+  : StateRole(role)
   , IsTryCompile(isTryCompile)
 {
   this->CacheManager = cm::make_unique<cmCacheManager>();
@@ -612,8 +612,7 @@ cmValue cmState::GetGlobalProperty(std::string const& prop)
     auto langs = cmList::to_string(this->EnabledLanguages);
     this->SetGlobalProperty("ENABLED_LANGUAGES", langs);
   } else if (prop == "CMAKE_ROLE") {
-    std::string mode = this->GetModeString();
-    this->SetGlobalProperty("CMAKE_ROLE", mode);
+    this->SetGlobalProperty("CMAKE_ROLE", this->GetRoleString());
   }
 #define STRING_LIST_ELEMENT(F) ";" #F
   if (prop == "CMAKE_C_KNOWN_FEATURES") {
@@ -813,32 +812,32 @@ unsigned int cmState::GetCacheMinorVersion() const
   return this->CacheManager->GetCacheMinorVersion();
 }
 
-cmState::Mode cmState::GetMode() const
+cmState::Role cmState::GetRole() const
 {
-  return this->StateMode;
+  return this->StateRole;
 }
 
-std::string cmState::GetModeString() const
+std::string cmState::GetRoleString() const
 {
-  return ModeToString(this->StateMode);
+  return RoleToString(this->StateRole);
 }
 
-std::string cmState::ModeToString(cmState::Mode mode)
+std::string cmState::RoleToString(cmState::Role mode)
 {
   switch (mode) {
-    case Project:
+    case Role::Project:
       return "PROJECT";
-    case Script:
+    case Role::Script:
       return "SCRIPT";
-    case FindPackage:
+    case Role::FindPackage:
       return "FIND_PACKAGE";
-    case CTest:
+    case Role::CTest:
       return "CTEST";
-    case CPack:
+    case Role::CPack:
       return "CPACK";
-    case Help:
+    case Role::Help:
       return "HELP";
-    case Unknown:
+    case Role::Unknown:
       return "UNKNOWN";
   }
   return "UNKNOWN";

@@ -3361,7 +3361,7 @@ bool HandleGetRuntimeDependenciesCommand(std::vector<std::string> const& args,
     return false;
   }
 
-  if (status.GetMakefile().GetState()->GetMode() == cmState::Project) {
+  if (status.GetMakefile().GetState()->GetRole() == cmState::Role::Project) {
     status.GetMakefile().IssueMessage(
       MessageType::AUTHOR_WARNING,
       "You have used file(GET_RUNTIME_DEPENDENCIES)"

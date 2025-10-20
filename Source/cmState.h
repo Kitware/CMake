@@ -44,7 +44,7 @@ class cmState
   friend class cmStateSnapshot;
 
 public:
-  enum Mode
+  enum class Role
   {
     Unknown,
     Project,
@@ -61,7 +61,7 @@ public:
     Yes,
   };
 
-  cmState(Mode mode, TryCompile isTryCompile = TryCompile::No);
+  cmState(Role role, TryCompile isTryCompile = TryCompile::No);
   ~cmState();
 
   cmState(cmState const&) = delete;
@@ -231,10 +231,10 @@ public:
   unsigned int GetCacheMajorVersion() const;
   unsigned int GetCacheMinorVersion() const;
 
-  Mode GetMode() const;
-  std::string GetModeString() const;
+  Role GetRole() const;
+  std::string GetRoleString() const;
 
-  static std::string ModeToString(Mode mode);
+  static std::string RoleToString(Role role);
 
   TryCompile GetIsTryCompile() const;
 
@@ -304,7 +304,7 @@ private:
   bool Ninja = false;
   bool NinjaMulti = false;
   bool FastbuildMake = false;
-  Mode StateMode = Unknown;
+  Role StateRole = Role::Unknown;
   TryCompile IsTryCompile = TryCompile::No;
   cm::optional<cmDependencyProvider> DependencyProvider;
   bool ProcessingTopLevelIncludes = false;

@@ -171,7 +171,7 @@ public:
   static int const DEFAULT_BUILD_PARALLEL_LEVEL = 0;
 
   /// Default constructor
-  cmake(CommandSet commandSet, cmState::Mode mode,
+  cmake(CommandSet commandSet, cmState::Role role,
         cmState::TryCompile isTryCompile = cmState::TryCompile::No);
   /// Destructor
   ~cmake();

@@ -1150,7 +1150,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
         std::cerr << "-E capabilities accepts no additional arguments\n";
         return 1;
       }
-      cmake cm(cmake::CommandSet::None, cmState::Unknown);
+      cmake cm(cmake::CommandSet::None, cmState::Role::Unknown);
       std::cout << cm.ReportCapabilities();
       return 0;
     }
@@ -1398,7 +1398,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
 
       // Create a cmake object instance to process dependencies.
       // All we need is the `set` command.
-      cmake cm(cmake::CommandSet::Script, cmState::Unknown);
+      cmake cm(cmake::CommandSet::Script, cmState::Role::Unknown);
       std::string gen;
       std::string homeDir;
       std::string startDir;
@@ -1752,7 +1752,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
       }
       // Create a cmake object instance to process dependencies.
       // All we need is the `set` command.
-      cmake cm(cmake::CommandSet::Script, cmState::Unknown);
+      cmake cm(cmake::CommandSet::Script, cmState::Role::Unknown);
       std::string homeDir;
       std::string startDir;
       std::string homeOutDir;

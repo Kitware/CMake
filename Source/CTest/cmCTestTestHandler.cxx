@@ -1754,7 +1754,7 @@ bool cmCTestTestHandler::GetListOfTests()
   }
   cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                      "Constructing a list of tests" << std::endl, this->Quiet);
-  cmake cm(cmake::CommandSet::Script, cmState::CTest);
+  cmake cm(cmake::CommandSet::Script, cmState::Role::CTest);
   cm.GetCurrentSnapshot().SetDefaultDefinitions();
   cmGlobalGenerator gg(&cm);
   cmMakefile mf(&gg, cm.GetCurrentSnapshot());
@@ -2200,7 +2200,7 @@ bool cmCTestTestHandler::SetTestsProperties(
 
             // Ensure we have complete triples otherwise the data is corrupt.
             if (triples.size() % 3 == 0) {
-              cmState state(cmState::Unknown);
+              cmState state(cmState::Role::Unknown);
               rt.Backtrace = cmListFileBacktrace();
 
               // the first entry represents the top of the trace so we need to

@@ -760,7 +760,7 @@ int cmCPackGenerator::InstallCMakeProject(
                   "-   Install component: " << component << std::endl);
   }
 
-  cmake cm(cmake::CommandSet::Script, cmState::CPack);
+  cmake cm(cmake::CommandSet::Script, cmState::Role::CPack);
   cm.GetCurrentSnapshot().SetDefaultDefinitions();
   cm.AddCMakePaths();
   cm.SetProgressCallback([this](std::string const& msg, float prog) {
