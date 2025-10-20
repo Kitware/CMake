@@ -1065,7 +1065,7 @@ int do_workflow(int ac, char const* const* av)
     return 1;
   }
 
-  cmake cm(cmake::CommandSet::None, cmState::Role::Project);
+  cmake cm(cmake::CommandSet::None, cmState::Role::Internal);
   cmSystemTools::SetMessageCallback(
     [&cm](std::string const& msg, cmMessageMetadata const& md) {
       cmakemainMessageCallback(msg, md, &cm);
