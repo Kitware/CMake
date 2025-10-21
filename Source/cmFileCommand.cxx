@@ -3233,18 +3233,20 @@ bool HandleCreateLinkCommand(std::vector<std::string> const& args,
   }
 
   // Check if the new file already exists and remove it.
-  if (cmSystemTools::PathExists(newFileName) &&
-      !cmSystemTools::RemoveFile(newFileName)) {
-    auto err = cmStrCat("Failed to create link '", newFileName,
-                        "' because existing path cannot be removed: ",
-                        cmSystemTools::GetLastSystemError(), '\n');
+  if (cmSystemTools::PathExists(newFileName)) {
+    cmsys::Status rmStatus = cmSystemTools::RemoveFile(newFileName);
+    if (!rmStatus) {
+      auto err = cmStrCat("Failed to create link '", newFileName,
+                          "' because existing path cannot be removed: ",
+                          rmStatus.GetString(), '\n');
 
-    if (!arguments.Result.empty()) {
-      status.GetMakefile().AddDefinition(arguments.Result, err);
-      return true;
+      if (!arguments.Result.empty()) {
+        status.GetMakefile().AddDefinition(arguments.Result, err);
+        return true;
+      }
+      status.SetError(err);
+      return false;
     }
-    status.SetError(err);
-    return false;
   }
 
   // Whether the operation completed successfully.
