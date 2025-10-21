@@ -1,6 +1,7 @@
 # Host tools
 curl
 git
+unzip
 
 # Compilers
 g++
