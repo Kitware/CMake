@@ -291,8 +291,38 @@ if(NOT CMAKE_CROSSCOMPILING)
     OUTPUT_STRIP_TRAILING_WHITESPACE)
 endif()
 
-# Set cache variable - end user may change this during ccmake or cmake-gui configure.
-if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-  set(CMAKE_OSX_DEPLOYMENT_TARGET "$ENV{MACOSX_DEPLOYMENT_TARGET}" CACHE STRING
+if(CMAKE_SYSTEM_NAME STREQUAL "Darwin" AND NOT DEFINED CMAKE_OSX_DEPLOYMENT_TARGET)
+  set(_CMAKE_OSX_DEPLOYMENT_TARGET_DEFAULT "$ENV{MACOSX_DEPLOYMENT_TARGET}")
+
+  # Xcode chooses a default macOS deployment target based on the macOS SDK
+  # version, which may be too new for binaries to run on the host.
+  if(NOT _CMAKE_OSX_DEPLOYMENT_TARGET_DEFAULT
+      AND CMAKE_GENERATOR STREQUAL "Xcode" AND NOT CMAKE_CROSSCOMPILING
+      AND _CMAKE_HOST_OSX_VERSION MATCHES "^([0-9]+\\.[0-9]+)")
+    set(_macos_version "${CMAKE_MATCH_1}")
+    if(CMAKE_OSX_SYSROOT)
+      set(_sdk_macosx --sdk ${CMAKE_OSX_SYSROOT})
+    else()
+      set(_sdk_macosx)
+    endif()
+    execute_process(
+      COMMAND xcrun ${_sdk_macosx} --show-sdk-version
+      OUTPUT_VARIABLE _sdk_version OUTPUT_STRIP_TRAILING_WHITESPACE
+      ERROR_VARIABLE _sdk_version_error
+      RESULT_VARIABLE _sdk_version_result
+    )
+    if(_sdk_version_result EQUAL 0 AND _sdk_version
+        AND "${_macos_version}" VERSION_LESS "${_sdk_version}")
+      set(_CMAKE_OSX_DEPLOYMENT_TARGET_DEFAULT "${_macos_version}")
+    endif()
+    unset(_sdk_macosx)
+    unset(_sdk_version_result)
+    unset(_sdk_version_error)
+    unset(_sdk_version)
+    unset(_macos_version)
+  endif()
+
+  set(CMAKE_OSX_DEPLOYMENT_TARGET "${_CMAKE_OSX_DEPLOYMENT_TARGET_DEFAULT}" CACHE STRING
     "Minimum OS X version to target for deployment (at runtime); newer APIs weak linked. Set to empty string for default value.")
+  unset(_CMAKE_OSX_DEPLOYMENT_TARGET_DEFAULT)
 endif()
