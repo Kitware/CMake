@@ -4,4 +4,4 @@
 -- UNIT_TEST_NON_SPACE_VALUE=`Blah-blah-blah`
 -- UNIT_TEST_QUOTED_VALUE=`'The' value in single 'quotes'`
 -- UNIT_TEST_QUOTED_VALUE_STRIPPED_COMMENT=`The value in single quotes`
--- UNIT_TEST_THE_URL_WITH_ANCHOR_TEST=`https://blah.blah/resource#anchor`
+-- UNIT_TEST_THE_URL_WITH_ANCHOR_TEST=`https://blah\.blah/resource#anchor`

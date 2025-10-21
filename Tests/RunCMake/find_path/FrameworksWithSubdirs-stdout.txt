@@ -1,1 +1,1 @@
--- SOME_INCLUDE_DIR='[^']*Tests/RunCMake/find_path/Frameworks/Foo.framework/Headers'
+-- SOME_INCLUDE_DIR='[^']*Tests/RunCMake/find_path/Frameworks/Foo\.framework/Headers'

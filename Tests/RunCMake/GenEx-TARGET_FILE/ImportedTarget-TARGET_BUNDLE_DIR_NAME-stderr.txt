@@ -3,6 +3,6 @@ CMake Error at ImportedTarget-TARGET_BUNDLE_DIR_NAME\.cmake:[0-9]* \(add_custom_
 
     \$<TARGET_BUNDLE_DIR_NAME:empty>
 
-  TARGET_BUNDLE_DIR_NAME not allowed for IMPORTED targets.
+  TARGET_BUNDLE_DIR_NAME not allowed for IMPORTED targets\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]* \(include\)

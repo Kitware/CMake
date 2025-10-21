@@ -1,6 +1,6 @@
 -- The following REQUIRED packages have been found:
 
- \* Foo, The Foo package, <https://foo.example/>
+ \* Foo, The Foo package, <https://foo\.example/>
 
 -- The following OPTIONAL packages have not been found:
 
@@ -8,7 +8,7 @@
 
 -- The following REQUIRED packages have been found:
 
- \* Foo, The Foo package, <https://foo.example/>
+ \* Foo, The Foo package, <https://foo\.example/>
 
 -- The following REQUIRED packages have not been found:
 

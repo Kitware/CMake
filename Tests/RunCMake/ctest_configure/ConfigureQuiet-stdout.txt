@@ -4,5 +4,5 @@ Run dashboard with model Experimental
    Site: test-site
    Build name: test-build-name
    Use Experimental tag: [0-9-]+
-   Each . represents 1024 bytes of output
-    . Size of output: 0K
+   Each \. represents 1024 bytes of output
+    \. Size of output: 0K

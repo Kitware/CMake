@@ -3,7 +3,7 @@ CMake Error at BadTargetTypeInterface\.cmake:[0-9]+ \(add_custom_target\):
 
     \$<TARGET_FILE:iface>
 
-  Target "iface" is not an executable or library.
+  Target "iface" is not an executable or library\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)
 +
@@ -12,7 +12,7 @@ CMake Error at BadTargetTypeInterface\.cmake:[0-9]+ \(add_custom_target\):
 
     \$<TARGET_SONAME_FILE:iface>
 
-  Target "iface" is not an executable or library.
+  Target "iface" is not an executable or library\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)
 +
@@ -21,6 +21,6 @@ CMake Error at BadTargetTypeInterface\.cmake:[0-9]+ \(add_custom_target\):
 
     \$<TARGET_LINKER_FILE:iface>
 
-  Target "iface" is not an executable or library.
+  Target "iface" is not an executable or library\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)

@@ -3,7 +3,7 @@ CMake Error at .*/Modules/ExternalData\.cmake:[0-9]+ \(message\):
 
     DATA{Directory2/}
 
-  must list associated files.
+  must list associated files\.
 Call Stack \(most recent call first\):
   .*
   Directory2\.cmake:[0-9]+ \(ExternalData_Add_Test\)

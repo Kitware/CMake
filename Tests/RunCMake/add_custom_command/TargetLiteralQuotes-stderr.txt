@@ -1,4 +1,4 @@
-CMake Error at TargetLiteralQuotes.cmake:2 \(add_custom_command\):
+CMake Error at TargetLiteralQuotes\.cmake:2 \(add_custom_command\):
   COMMAND may not contain literal quotes:
 
     "b"

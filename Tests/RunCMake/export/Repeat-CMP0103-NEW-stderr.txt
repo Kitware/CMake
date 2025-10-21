@@ -1,7 +1,7 @@
 CMake Error at Repeat\.cmake:[0-9]+ \(export\):
   export command already specified for the file
 
-    foo.cmake
+    foo\.cmake
 
   Did you miss 'APPEND' keyword\?
 Call Stack \(most recent call first\):
@@ -12,6 +12,6 @@ Call Stack \(most recent call first\):
 CMake Error at Repeat/CMakeLists\.txt:[0-9]+ \(export\):
   export command already specified for the file
 
-    .+/foo.cmake
+    .+/foo\.cmake
 
   Did you miss 'APPEND' keyword\?

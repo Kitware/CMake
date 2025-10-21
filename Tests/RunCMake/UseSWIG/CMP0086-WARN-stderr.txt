@@ -1,6 +1,6 @@
 CMake Warning \(dev\) at .*/Modules/UseSWIG\.cmake:[0-9]+ \(message\):
   Policy CMP0086 is not set: UseSWIG honors SWIG_MODULE_NAME via -module
-  flag.  Run "cmake --help-policy CMP0086" for policy details\.  Use the
+  flag\.  Run "cmake --help-policy CMP0086" for policy details\.  Use the
   cmake_policy command to set the policy and suppress this warning\.
 
 Call Stack \(most recent call first\):

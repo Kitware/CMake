@@ -3,7 +3,7 @@
 
     -flag
 
-  may not start with '-'.
+  may not start with '-'\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)
 +
@@ -12,7 +12,7 @@ CMake Error at IMPORTED_LIBNAME-bad-value\.cmake:[0-9]+ \(set_property\):
 
     item1;item2
 
-  may not contain ';'.
+  may not contain ';'\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)
 +
@@ -21,7 +21,7 @@ CMake Error at IMPORTED_LIBNAME-bad-value\.cmake:[0-9]+ \(set_property\):
 
     /path/to/item1
 
-  may not contain '/'.
+  may not contain '/'\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)
 +
@@ -30,7 +30,7 @@ CMake Error at IMPORTED_LIBNAME-bad-value\.cmake:[0-9]+ \(set_property\):
 
     \\path\\to\\item1
 
-  may not contain '\\'.
+  may not contain '\\'\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)
 +
@@ -39,6 +39,6 @@ CMake Error at IMPORTED_LIBNAME-bad-value\.cmake:[0-9]+ \(set_property\):
 
     c:\\path\\to\\item1
 
-  may not contain ':'.
+  may not contain ':'\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)$

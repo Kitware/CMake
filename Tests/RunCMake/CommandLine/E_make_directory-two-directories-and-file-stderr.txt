@@ -1,1 +1,1 @@
-^Error creating directory .*file_for_test.txt\".$
+^Error creating directory .*file_for_test\.txt\"\.$

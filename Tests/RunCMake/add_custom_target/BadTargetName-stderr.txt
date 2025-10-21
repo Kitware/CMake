@@ -1,16 +1,16 @@
-CMake Error at BadTargetName.cmake:1 \(add_custom_target\):
+CMake Error at BadTargetName\.cmake:1 \(add_custom_target\):
   The target name "#" is reserved or not valid for certain CMake features,
   such as generator expressions, and may result in undefined behavior\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:3 \(include\)
 +
-CMake Error at BadTargetName.cmake:2 \(add_custom_target\):
+CMake Error at BadTargetName\.cmake:2 \(add_custom_target\):
   The target name "<" is reserved or not valid for certain CMake features,
   such as generator expressions, and may result in undefined behavior\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:3 \(include\)
 +
-CMake Error at BadTargetName.cmake:3 \(add_custom_target\):
+CMake Error at BadTargetName\.cmake:3 \(add_custom_target\):
   The target name ">" is reserved or not valid for certain CMake features,
   such as generator expressions, and may result in undefined behavior\.
 Call Stack \(most recent call first\):

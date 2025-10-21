@@ -4,6 +4,6 @@ CMake Error at SORT-wrong-CASE-option\.cmake:[0-9]+ \(file\):
     \$<LIST:SORT,a;b,COMPARE:STRING,CASE:WRONG_OPTION>
 
   sub-command SORT, an invalid CASE option has been specified:
-  "WRONG_OPTION".
+  "WRONG_OPTION"\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)

@@ -5,5 +5,5 @@
 
 Call Stack \(most recent call first\):
 .*
-  ndk-badstl.cmake:1 \(enable_language\)
+  ndk-badstl\.cmake:1 \(enable_language\)
   CMakeLists\.txt:3 \(include\)

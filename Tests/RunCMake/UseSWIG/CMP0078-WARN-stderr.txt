@@ -7,4 +7,4 @@ Call Stack \(most recent call first\):
   CMP0078-common\.cmake:8 \(swig_add_library\)
   CMP0078-WARN\.cmake:1 \(include\)
   CMakeLists\.txt:3 \(include\)
-This warning is for project developers.  Use -Wno-dev to suppress it.$
+This warning is for project developers\.  Use -Wno-dev to suppress it\.$

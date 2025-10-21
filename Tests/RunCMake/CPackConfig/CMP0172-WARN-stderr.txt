@@ -3,7 +3,7 @@
   Policy CMP0172 is not set: The CPack module enables per-machine
   installation by default in the CPack WIX Generator\.  Run "cmake
   --help-policy CMP0172" for policy details\.  Use the cmake_policy command to
-  set the policy and suppress this warning.
+  set the policy and suppress this warning\.
 
   For compatibility, CMake will not enable per-machine installation by
   default in the CPack WIX Generator\.

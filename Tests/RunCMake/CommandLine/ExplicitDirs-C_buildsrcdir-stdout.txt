@@ -1,2 +1,2 @@
 loading initial cache file [^
-]*initial-cache.txt
+]*initial-cache\.txt

@@ -3,6 +3,6 @@ CMake Error at unexpected-arg\.cmake:[0-9]+ \(file\):
 
     \$<LIST:TRANSFORM,ARG1,[A-Z_]+(,[A-Z0-9]+)+>
 
-  sub-command TRANSFORM, '[A-Z0-9]+': unexpected argument\(s\).
+  sub-command TRANSFORM, '[A-Z0-9]+': unexpected argument\(s\)\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)

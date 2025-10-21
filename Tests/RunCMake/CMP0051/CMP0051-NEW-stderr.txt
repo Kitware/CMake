@@ -1,1 +1,1 @@
-^Sources: "empty.cpp;\$<TARGET_OBJECTS:objects>"$
+^Sources: "empty\.cpp;\$<TARGET_OBJECTS:objects>"$

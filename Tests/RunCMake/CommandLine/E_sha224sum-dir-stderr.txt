@@ -1,1 +1,1 @@
-Error: . is a directory
+Error: \. is a directory

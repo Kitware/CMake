@@ -19,7 +19,7 @@ test 1
 1: test_launcher: got arg 4 '[^']*/Tests/RunCMake/GoogleTest/Launcher-CMP0178-NEW-build(/Debug)?/launcher_test(\.exe)?'
 1: launching: "[^"]*/Tests/RunCMake/GoogleTest/Launcher-CMP0178-NEW-build(/Debug)?/launcher_test(\.exe)?" "--gtest_filter=launcher_test\.test1" "--gtest_also_run_disabled_tests" "a" "" "b"
 1: launcher_test\.test1
-1/2 Test #1: launcher_test\.test1 [.]+ +Passed +[0-9.]+ sec
+1/2 Test #1: launcher_test\.test1 [\.]+ +Passed +[0-9\.]+ sec
 test 2
     Start 2: launcher_test\.test1
 
@@ -34,5 +34,5 @@ test 2
 2: test_launcher: got arg 3 '--'
 2: test_launcher: got arg 4 '[^']*/Tests/RunCMake/GoogleTest/Launcher-CMP0178-NEW-build(/Debug)?/launcher_test(\.exe)?'
 2: launching: "[^"]*/Tests/RunCMake/GoogleTest/Launcher-CMP0178-NEW-build(/Debug)?/launcher_test(\.exe)?" "--gtest_filter=launcher_test\.test1" "a" "" "b"
-2: launcher_test.test1
-2/2 Test #2: launcher_test\.test1 [.]+ +Passed +[0-9.]+ sec
+2: launcher_test\.test1
+2/2 Test #2: launcher_test\.test1 [\.]+ +Passed +[0-9\.]+ sec

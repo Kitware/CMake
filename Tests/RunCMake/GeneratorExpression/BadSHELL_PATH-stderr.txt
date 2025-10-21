@@ -3,7 +3,7 @@ CMake Error at BadSHELL_PATH\.cmake:[0-9]+ \(add_custom_target\):
 
     \$<SHELL_PATH:>
 
-  "" is not an absolute path.
+  "" is not an absolute path\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)
 +
@@ -12,7 +12,7 @@ CMake Error at BadSHELL_PATH\.cmake:[0-9]+ \(add_custom_target\):
 
     \$<SHELL_PATH:Relative/Path>
 
-  "Relative/Path" is not an absolute path.
+  "Relative/Path" is not an absolute path\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)
 +
@@ -21,6 +21,6 @@ CMake Error at BadSHELL_PATH\.cmake:[0-9]+ \(add_custom_target\):
 
     \$<SHELL_PATH:;>
 
-  "" is not an absolute path.
+  "" is not an absolute path\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)

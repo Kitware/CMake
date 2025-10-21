@@ -1,1 +1,1 @@
-Generating bar.cs
+Generating bar\.cs

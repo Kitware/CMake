@@ -59,21 +59,21 @@ Call Stack \(most recent call first\):
 
 
 CMake Warning at ExtractVersion\.cmake:[0-9]+ \(cmake_pkg_config\):
-  Package 'onedot' version '1.1.1' does not meet version requirement '>1.2.1'
+  Package 'onedot' version '1\.1\.1' does not meet version requirement '>1\.2\.1'
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)
 
 
 CMake Warning at ExtractVersion\.cmake:[0-9]+ \(cmake_pkg_config\):
-  Package 'onedot' version '1.1.1' does not meet version requirement '>
-  1.2.1'
+  Package 'onedot' version '1\.1\.1' does not meet version requirement '>
+  1\.2\.1'
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)
 
 
 CMake Warning at ExtractVersion\.cmake:[0-9]+ \(cmake_pkg_config\):
-  Package 'onedot' version '1.1.1' does not meet exact version requirement
-  '01.01.01'
+  Package 'onedot' version '1\.1\.1' does not meet exact version requirement
+  '01\.01\.01'
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)
 

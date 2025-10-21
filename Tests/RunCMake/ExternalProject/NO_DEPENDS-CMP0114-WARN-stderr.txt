@@ -1,14 +1,14 @@
 ^CMake Warning \(dev\) at [^
 ]*/Modules/ExternalProject\.cmake:[0-9]+ \(message\):
   Policy CMP0114 is not set: ExternalProject step targets fully adopt their
-  steps.  Run "cmake --help-policy CMP0114" for policy details.  Use the
-  cmake_policy command to set the policy and suppress this warning.
+  steps\.  Run "cmake --help-policy CMP0114" for policy details\.  Use the
+  cmake_policy command to set the policy and suppress this warning\.
 
   ExternalProject 'FOO' option INDEPENDENT_STEP_TARGETS is set to
 
     download;patch;update;configure;build
 
-  but the option is deprecated in favor of policy CMP0114.
+  but the option is deprecated in favor of policy CMP0114\.
 Call Stack \(most recent call first\):
   [^
 ]*/Modules/ExternalProject\.cmake:[0-9]+ \(ExternalProject_Add_Step\)
@@ -17,7 +17,7 @@ Call Stack \(most recent call first\):
   NO_DEPENDS-CMP0114-Common\.cmake:[0-9]+ \(ExternalProject_Add\)
   NO_DEPENDS-CMP0114-WARN\.cmake:[0-9]+ \(include\)
   CMakeLists\.txt:[0-9]+ \(include\)
-This warning is for project developers.  Use -Wno-dev to suppress it.
+This warning is for project developers\.  Use -Wno-dev to suppress it\.
 +
 CMake Warning \(dev\) at [^
 ]*/Modules/ExternalProject\.cmake:[0-9]+ \(message\):
@@ -34,7 +34,7 @@ Call Stack \(most recent call first\):
   NO_DEPENDS-CMP0114-Common\.cmake:[0-9]+ \(ExternalProject_Add\)
   NO_DEPENDS-CMP0114-WARN\.cmake:[0-9]+ \(include\)
   CMakeLists\.txt:[0-9]+ \(include\)
-This warning is for project developers.  Use -Wno-dev to suppress it.
+This warning is for project developers\.  Use -Wno-dev to suppress it\.
 +
 CMake Warning \(dev\) at [^
 ]*/Modules/ExternalProject\.cmake:[0-9]+ \(message\):
@@ -51,19 +51,19 @@ Call Stack \(most recent call first\):
   NO_DEPENDS-CMP0114-Common\.cmake:[0-9]+ \(ExternalProject_Add\)
   NO_DEPENDS-CMP0114-WARN\.cmake:[0-9]+ \(include\)
   CMakeLists\.txt:[0-9]+ \(include\)
-This warning is for project developers.  Use -Wno-dev to suppress it.
+This warning is for project developers\.  Use -Wno-dev to suppress it\.
 +
 CMake Warning \(dev\) at [^
 ]*/Modules/ExternalProject\.cmake:[0-9]+ \(message\):
   Policy CMP0114 is not set: ExternalProject step targets fully adopt their
-  steps.  Run "cmake --help-policy CMP0114" for policy details.  Use the
-  cmake_policy command to set the policy and suppress this warning.
+  steps\.  Run "cmake --help-policy CMP0114" for policy details\.  Use the
+  cmake_policy command to set the policy and suppress this warning\.
 
   ExternalProject 'BAR' option INDEPENDENT_STEP_TARGETS is set to
 
     install
 
-  but the option is deprecated in favor of policy CMP0114.
+  but the option is deprecated in favor of policy CMP0114\.
 Call Stack \(most recent call first\):
   [^
 ]*/Modules/ExternalProject\.cmake:[0-9]+ \(ExternalProject_Add_Step\)
@@ -72,7 +72,7 @@ Call Stack \(most recent call first\):
   NO_DEPENDS-CMP0114-Common\.cmake:[0-9]+ \(ExternalProject_Add\)
   NO_DEPENDS-CMP0114-WARN\.cmake:[0-9]+ \(include\)
   CMakeLists\.txt:[0-9]+ \(include\)
-This warning is for project developers.  Use -Wno-dev to suppress it.
+This warning is for project developers\.  Use -Wno-dev to suppress it\.
 +
 CMake Warning \(dev\) at [^
 ]*/Modules/ExternalProject\.cmake:[0-9]+ \(message\):
@@ -89,23 +89,23 @@ Call Stack \(most recent call first\):
   NO_DEPENDS-CMP0114-Common\.cmake:[0-9]+ \(ExternalProject_Add\)
   NO_DEPENDS-CMP0114-WARN\.cmake:[0-9]+ \(include\)
   CMakeLists\.txt:[0-9]+ \(include\)
-This warning is for project developers.  Use -Wno-dev to suppress it.
+This warning is for project developers\.  Use -Wno-dev to suppress it\.
 +
 CMake Warning \(dev\) at [^
 ]*/Modules/ExternalProject\.cmake:[0-9]+ \(message\):
   Policy CMP0114 is not set: ExternalProject step targets fully adopt their
-  steps.  Run "cmake --help-policy CMP0114" for policy details.  Use the
-  cmake_policy command to set the policy and suppress this warning.
+  steps\.  Run "cmake --help-policy CMP0114" for policy details\.  Use the
+  cmake_policy command to set the policy and suppress this warning\.
 
   ExternalProject target 'BAR' would depend on the targets for step\(s\)
   'test;bar' under policy CMP0114, but this is being left out for
-  compatibility since the policy is not set.  Also, the NO_DEPENDS option is
-  deprecated in favor of policy CMP0114.
+  compatibility since the policy is not set\.  Also, the NO_DEPENDS option is
+  deprecated in favor of policy CMP0114\.
 Call Stack \(most recent call first\):
   NO_DEPENDS-CMP0114-Common\.cmake:[0-9]+ \(ExternalProject_Add_StepTargets\)
   NO_DEPENDS-CMP0114-WARN\.cmake:[0-9]+ \(include\)
   CMakeLists\.txt:[0-9]+ \(include\)
-This warning is for project developers.  Use -Wno-dev to suppress it.
+This warning is for project developers\.  Use -Wno-dev to suppress it\.
 +
 CMake Warning \(dev\) at [^
 ]*/Modules/ExternalProject\.cmake:[0-9]+ \(message\):
@@ -116,4 +116,4 @@ Call Stack \(most recent call first\):
   NO_DEPENDS-CMP0114-Common\.cmake:[0-9]+ \(ExternalProject_Add_StepTargets\)
   NO_DEPENDS-CMP0114-WARN\.cmake:[0-9]+ \(include\)
   CMakeLists\.txt:[0-9]+ \(include\)
-This warning is for project developers.  Use -Wno-dev to suppress it.$
+This warning is for project developers\.  Use -Wno-dev to suppress it\.$

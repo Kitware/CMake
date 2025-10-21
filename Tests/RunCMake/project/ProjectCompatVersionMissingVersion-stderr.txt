@@ -1,1 +1,1 @@
-  project with COMPAT_VERSION must also provide VERSION.
+  project with COMPAT_VERSION must also provide VERSION\.

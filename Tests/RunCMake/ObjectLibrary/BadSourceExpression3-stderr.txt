@@ -1,9 +1,9 @@
-CMake Error at BadSourceExpression3.cmake:2 \(add_library\):
+CMake Error at BadSourceExpression3\.cmake:2 \(add_library\):
   Error evaluating generator expression:
 
     \$<TARGET_OBJECTS:NotObjLib>
 
   Objects of target "NotObjLib" referenced but is not one of the allowed
-  target types \(EXECUTABLE, STATIC, SHARED, MODULE, OBJECT\).
+  target types \(EXECUTABLE, STATIC, SHARED, MODULE, OBJECT\)\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)

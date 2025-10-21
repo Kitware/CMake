@@ -3,5 +3,5 @@ CMake Error at .*Modules/CMakeFindDependencyMacro\.cmake:[0-9]+ \(find_package\)
 Call Stack \(most recent call first\):
   [^
 ]*/Modules/CMakeFindDependencyMacro\.cmake:[0-9]+ \(__find_dependency_common\)
-  invalid-arg.cmake:5 \(find_dependency\)
+  invalid-arg\.cmake:5 \(find_dependency\)
   CMakeLists\.txt:3 \(include\)
