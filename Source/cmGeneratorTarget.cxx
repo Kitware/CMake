@@ -22,6 +22,7 @@
 #include "cmAlgorithms.h"
 #include "cmComputeLinkInformation.h" // IWYU pragma: keep
 #include "cmCryptoHash.h"
+#include "cmCxxModuleMetadata.h"
 #include "cmCxxModuleUsageEffects.h"
 #include "cmExperimental.h"
 #include "cmFileSet.h"
@@ -5126,6 +5127,70 @@ bool cmGeneratorTarget::IsNullImpliedByLinkLibraries(
   return cm::contains(this->LinkImplicitNullProperties, p);
 }
 
+namespace {
+bool CreateCxxStdlibTarget(cmMakefile* makefile, cmLocalGenerator* lg,
+                           std::string const& targetName,
+                           std::string const& cxxTargetName,
+                           std::string const& stdLevel,
+                           std::vector<std::string> const& configs)
+{
+#ifndef CMAKE_BOOTSTRAP
+
+  static cm::optional<cmCxxModuleMetadata> metadata;
+
+  // Load metadata only when we need to create a target
+  if (!metadata) {
+    auto errorMessage =
+      makefile->GetDefinition("CMAKE_CXX_COMPILER_IMPORT_STD_ERROR_MESSAGE");
+    if (!errorMessage.IsEmpty()) {
+      makefile->IssueMessage(
+        MessageType::FATAL_ERROR,
+        cmStrCat(R"(The "CXX_MODULE_STD" property on target ")", targetName,
+                 "\" requires toolchain support, but it was not provided.  "
+                 "Reason:\n  ",
+                 *errorMessage));
+      return false;
+    }
+
+    auto metadataPath =
+      makefile->GetDefinition("CMAKE_CXX_STDLIB_MODULES_JSON");
+    if (metadataPath.IsEmpty()) {
+      makefile->IssueMessage(
+        MessageType::FATAL_ERROR,
+        cmStrCat(
+          R"("The "CXX_MODULE_STD" property on target ")", targetName,
+          "\" requires CMAKE_CXX_STDLIB_MODULES_JSON be set, but it was not "
+          "provided by the toolchain."));
+      return false;
+    }
+
+    auto parseResult = cmCxxModuleMetadata::LoadFromFile(*metadataPath);
+    if (!parseResult) {
+      makefile->IssueMessage(
+        MessageType::FATAL_ERROR,
+        cmStrCat("Failed to load C++ standard library modules metadata "
+                 "from \"",
+                 *metadataPath, "\": ", parseResult.Error));
+      return false;
+    }
+
+    metadata = std::move(*parseResult.Meta);
+  }
+
+  auto* stdlibTgt = makefile->AddImportedTarget(
+    cxxTargetName, cmStateEnums::INTERFACE_LIBRARY, true);
+  cmCxxModuleMetadata::PopulateTarget(*stdlibTgt, *metadata, configs);
+  stdlibTgt->AppendProperty("IMPORTED_CXX_MODULES_COMPILE_FEATURES",
+                            cmStrCat("cxx_std_", stdLevel));
+
+  lg->AddGeneratorTarget(cm::make_unique<cmGeneratorTarget>(stdlibTgt, lg));
+
+#endif // CMAKE_BOOTSTRAP
+
+  return true;
+}
+} // namespace
+
 bool cmGeneratorTarget::ApplyCXXStdTargets()
 {
   cmStandardLevelResolver standardResolver(this->Makefile);
@@ -5207,35 +5272,33 @@ bool cmGeneratorTarget::ApplyCXXStdTargets()
 
     auto const stdLevel =
       standardResolver.GetLevelString("CXX", *explicitLevel);
-    auto const targetName = cmStrCat("__CMAKE::CXX", stdLevel);
-    if (!this->Makefile->FindTargetToUse(targetName)) {
-      auto basicReason = this->Makefile->GetDefinition(cmStrCat(
-        "CMAKE_CXX", stdLevel, "_COMPILER_IMPORT_STD_NOT_FOUND_MESSAGE"));
-      std::string reason;
-      if (!basicReason.IsEmpty()) {
-        reason = cmStrCat("  Reason:\n  ", basicReason);
-      }
-      this->Makefile->IssueMessage(
-        MessageType::FATAL_ERROR,
-        cmStrCat(R"(The "CXX_MODULE_STD" property on the target ")",
-                 this->GetName(), "\" requires that the \"", targetName,
-                 "\" target exist, but it was not provided by the toolchain.",
-                 reason));
-      break;
-    }
+    auto const cxxTargetName = cmStrCat("__CMAKE::CXX", stdLevel);
 
-    // Check the experimental feature here as well. A toolchain may have
-    // provided the target and skipped the check in the toolchain preparation
-    // logic.
-    if (!cmExperimental::HasSupportEnabled(
-          *this->Makefile, cmExperimental::Feature::CxxImportStd)) {
-      break;
+    // Create the __CMAKE::CXX## IMPORTED interface target if it doesn't
+    // already exist
+    if (!this->Makefile->FindTargetToUse(cxxTargetName) &&
+        !CreateCxxStdlibTarget(this->Makefile, this->LocalGenerator,
+                               this->GetName(), cxxTargetName, stdLevel,
+                               configs)) {
+      return false;
     }
 
     this->Target->AppendProperty(
       "LINK_LIBRARIES",
-      cmStrCat("$<BUILD_LOCAL_INTERFACE:$<$<CONFIG:", config, ">:", targetName,
-               ">>"));
+      cmStrCat("$<BUILD_LOCAL_INTERFACE:$<$<CONFIG:", config,
+               ">:", cxxTargetName, ">>"));
+  }
+
+  // Check the experimental feature here. A toolchain may have
+  // skipped the check in the toolchain preparation logic.
+  if (!cmExperimental::HasSupportEnabled(
+        *this->Makefile, cmExperimental::Feature::CxxImportStd)) {
+    this->Makefile->IssueMessage(
+      MessageType::FATAL_ERROR,
+      "Experimental `import std` support not enabled when detecting "
+      "toolchain; it must be set before `CXX` is enabled (usually a "
+      "`project()` call).");
+    return false;
   }
 
   return true;
@@ -5335,7 +5398,9 @@ bool cmGeneratorTarget::DiscoverSyntheticTargets(cmSyntheticTargetCache& cache,
         }
         // See `cmGlobalGenerator::ApplyCXXStdTargets` in
         // `cmGlobalGenerator::Compute` for non-synthetic target resolutions.
-        gtp->ApplyCXXStdTargets();
+        if (!gtp->ApplyCXXStdTargets()) {
+          return false;
+        }
 
         gtp->DiscoverSyntheticTargets(cache, config);
 

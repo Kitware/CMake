@@ -165,6 +165,8 @@ add_library(
   cmCustomCommandTypes.h
   cmCxxModuleMapper.cxx
   cmCxxModuleMapper.h
+  cmCxxModuleMetadata.cxx
+  cmCxxModuleMetadata.h
   cmCxxModuleUsageEffects.cxx
   cmCxxModuleUsageEffects.h
   cmDefinitions.cxx
