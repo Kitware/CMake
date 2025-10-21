@@ -5,7 +5,7 @@ Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)
 
 +
-1. cmd='initial'
+1\. cmd='initial'
 CMake Error at ErrorsCommon\.cmake:[0-9]+ \(build_command\):
   build_command unknown argument "BOGUS"
 Call Stack \(most recent call first\):
@@ -13,7 +13,7 @@ Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)
 
 +
-2. cmd='initial'
+2\. cmd='initial'
 CMake Error at ErrorsCommon\.cmake:[0-9]+ \(build_command\):
   build_command unknown argument "STUFF"
 Call Stack \(most recent call first\):

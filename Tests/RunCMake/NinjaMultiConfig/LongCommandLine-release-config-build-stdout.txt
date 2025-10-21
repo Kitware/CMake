@@ -1,2 +1,2 @@
 
-Post-build Debug Release \.*$
+Post-build Debug Release .*$

@@ -4,8 +4,8 @@
 
     download;patch;update;configure;build
 
-  but the option is no longer allowed.  It has been superseded by the
-  per-step 'INDEPENDENT' option.  See policy CMP0114.
+  but the option is no longer allowed\.  It has been superseded by the
+  per-step 'INDEPENDENT' option\.  See policy CMP0114\.
 Call Stack \(most recent call first\):
   [^
 ]*/Modules/ExternalProject\.cmake:[0-9]+ \(ExternalProject_Add_Step\)

@@ -1,12 +1,12 @@
-CMake Error at UnterminatedBrace1.cmake:1 \(set\):
+CMake Error at UnterminatedBrace1\.cmake:1 \(set\):
   Syntax error in cmake code at
 
-    .*/Tests/RunCMake/Syntax/UnterminatedBrace1.cmake:1
+    .*/Tests/RunCMake/Syntax/UnterminatedBrace1\.cmake:1
 
   when parsing string
 
     \${
 
-  There is an unterminated variable reference.
+  There is an unterminated variable reference\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:3 \(include\)

@@ -1,1 +1,1 @@
-^CMake Error: Error opening trace file /no/such/file.txt: .+$
+^CMake Error: Error opening trace file /no/such/file\.txt: .+$

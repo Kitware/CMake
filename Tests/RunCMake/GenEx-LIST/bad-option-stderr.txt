@@ -3,6 +3,6 @@ CMake Error at bad-option\.cmake:[0-9]+ \(file\):
 
     \$<LIST:BAD_OPTION,ARG>
 
-  BAD_OPTION: invalid option.
+  BAD_OPTION: invalid option\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)

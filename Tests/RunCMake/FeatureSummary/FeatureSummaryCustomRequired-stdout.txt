@@ -1,6 +1,6 @@
 -- The following TYPE3 packages have been found:
 
- \* Foo, The Foo package, <https://foo.example/>
+ \* Foo, The Foo package, <https://foo\.example/>
 
 -- The following TYPE2 packages have not been found:
 
@@ -8,7 +8,7 @@
 
 -- The following TYPE3 packages have been found:
 
- \* Foo, The Foo package, <https://foo.example/>
+ \* Foo, The Foo package, <https://foo\.example/>
 
 -- The following TYPE3 packages have not been found:
 

@@ -8,7 +8,7 @@
 Resource spec file:
 
   [^
-]*/Tests/RunCMake/CTestResourceAllocation/resspec.json
+]*/Tests/RunCMake/CTestResourceAllocation/resspec\.json
 CMake Error at [^
 ]*/Tests/RunCMake/CTestResourceAllocation/notenough1-ctest-s-res/test\.cmake:[0-9]+ \(message\):
   Tests did not pass$

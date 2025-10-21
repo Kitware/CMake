@@ -5,6 +5,6 @@ Call Stack \(most recent call first\):
 
 
 CMake Error at Optional\.cmake:[0-9]+ \(find_file\):
-  Could not find FILE_doNotExists using the following files: doNotExists.h
+  Could not find FILE_doNotExists using the following files: doNotExists\.h
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)

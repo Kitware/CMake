@@ -3,7 +3,7 @@ CMake Error at CMP0028-NEW-iface\.cmake:5 \(target_link_libraries\):
 
     External::Library
 
-  but the target was not found.  Possible reasons include:
+  but the target was not found\.  Possible reasons include:
 (
     \*[^
 ]+)*

@@ -3,4 +3,4 @@ CMake Error in CMakeLists\.txt:
 
     ".*RunCMake/IfacePaths_INCDIRS/BinaryDirectoryInInterface-build/foo"
 
-  which is prefixed in the build directory.
+  which is prefixed in the build directory\.

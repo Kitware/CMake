@@ -3,5 +3,5 @@ CMake Error:
 
     \$<DEVICE_LINK:lib>
 
-  \$<DEVICE_LINK:...> may only be used with binary targets to specify link
-  options.
+  \$<DEVICE_LINK:\.\.\.> may only be used with binary targets to specify link
+  options\.

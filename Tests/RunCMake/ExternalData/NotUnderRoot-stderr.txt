@@ -1,7 +1,7 @@
 CMake Error at .*/Modules/ExternalData\.cmake:[0-9]+ \(message\):
   Data file referenced by argument
 
-    DATA{../NotUnderRoot.txt}
+    DATA{\.\./NotUnderRoot\.txt}
 
   does not lie under the top-level source directory
 
@@ -9,4 +9,4 @@ CMake Error at .*/Modules/ExternalData\.cmake:[0-9]+ \(message\):
 
 Call Stack \(most recent call first\):
   .*
-  NotUnderRoot.cmake:2 \(ExternalData_Add_Test\)
+  NotUnderRoot\.cmake:2 \(ExternalData_Add_Test\)

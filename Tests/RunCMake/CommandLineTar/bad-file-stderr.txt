@@ -1,2 +1,2 @@
-^CMake Error: Unable to read from file 'badfile.txt': .*
-CMake Error: Problem creating tar: bad.tar$
+^CMake Error: Unable to read from file 'badfile\.txt': .*
+CMake Error: Problem creating tar: bad\.tar$

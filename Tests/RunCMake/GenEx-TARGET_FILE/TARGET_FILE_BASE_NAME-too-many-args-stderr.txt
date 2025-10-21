@@ -3,6 +3,6 @@ CMake Error at TARGET_FILE_BASE_NAME-too-many-args\.cmake:[0-9]+ \(file\):
 
     \$<TARGET_FILE_BASE_NAME:shared1,POSTFIX:YES,foo>
 
-  Unexpected parameters, require one or two parameters.
+  Unexpected parameters, require one or two parameters\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)

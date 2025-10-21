@@ -4,7 +4,7 @@ CMake Error at WrongArguments\.cmake:[0-9]+ \(add_custom_target\):
     \$<PATH_EQUAL>
 
   \$<PATH_EQUAL> expression requires 2 comma separated parameters, but got 0
-  instead.
+  instead\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)
 
@@ -15,18 +15,18 @@ CMake Error at WrongArguments\.cmake:[0-9]+ \(add_custom_target\):
     \$<PATH_EQUAL:>
 
   \$<PATH_EQUAL> expression requires 2 comma separated parameters, but got 1
-  instead.
+  instead\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)
 
 
-CMake Error at WrongArguments.cmake:2 \(add_custom_target\):
+CMake Error at WrongArguments\.cmake:2 \(add_custom_target\):
   Error evaluating generator expression:
 
     \$<PATH_EQUAL:,,>
 
   \$<PATH_EQUAL> expression requires 2 comma separated parameters, but got 3
-  instead.
+  instead\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)
 
@@ -37,6 +37,6 @@ CMake Error at WrongArguments\.cmake:[0-9]+ \(add_custom_target\):
     \$<PATH_EQUAL:something,,>
 
   \$<PATH_EQUAL> expression requires 2 comma separated parameters, but got 3
-  instead.
+  instead\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)

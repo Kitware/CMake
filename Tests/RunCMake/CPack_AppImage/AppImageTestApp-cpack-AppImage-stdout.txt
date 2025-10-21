@@ -18,12 +18,12 @@ Exportable Squashfs 4\.0 filesystem, zstd compressed, data block size [0-9]+
 [	]compressed data, compressed metadata, compressed fragments,
 [	]compressed xattrs, compressed ids
 [	]duplicates are removed
-Filesystem size [0-9.]+ Kbytes \([0-9.]+ Mbytes\)
-[	][0-9.]+% of uncompressed filesystem size \([0-9.]+ Kbytes\)
-Inode table size [0-9]+ bytes \([0-9.]+ Kbytes\)
-[	][0-9.]+% of uncompressed inode table size \([0-9]+ bytes\)
-Directory table size [0-9]+ bytes \([0-9.]+ Kbytes\)
-[	][0-9.]+% of uncompressed directory table size \([0-9]+ bytes\)
+Filesystem size [0-9\.]+ Kbytes \([0-9\.]+ Mbytes\)
+[	][0-9\.]+% of uncompressed filesystem size \([0-9\.]+ Kbytes\)
+Inode table size [0-9]+ bytes \([0-9\.]+ Kbytes\)
+[	][0-9\.]+% of uncompressed inode table size \([0-9]+ bytes\)
+Directory table size [0-9]+ bytes \([0-9\.]+ Kbytes\)
+[	][0-9\.]+% of uncompressed directory table size \([0-9]+ bytes\)
 Number of duplicate files found [0-9]+
 Number of inodes [0-9]+
 Number of files [0-9]+

@@ -16,7 +16,7 @@
   Target "nocxx" has source file
 
     [^
-]*/Tests/RunCMake/CXXModules/sources/module.cxx
+]*/Tests/RunCMake/CXXModules/sources/module\.cxx
 
-  in a "FILE_SET TYPE CXX_MODULES" but it is not scheduled for compilation.
+  in a "FILE_SET TYPE CXX_MODULES" but it is not scheduled for compilation\.
 )

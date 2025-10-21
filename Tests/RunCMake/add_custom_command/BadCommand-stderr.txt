@@ -1,4 +1,4 @@
-(CMake Error at BadCommand.cmake:1 \(add_custom_command\):
+(CMake Error at BadCommand\.cmake:1 \(add_custom_command\):
   Error evaluating generator expression:
 
     \$<OUTPUT_CONFIG:a>
@@ -8,7 +8,7 @@ Call Stack \(most recent call first\):
   CMakeLists\.txt:3 \(include\)
 
 
-)+(CMake Error at BadCommand.cmake:2 \(add_custom_command\):
+)+(CMake Error at BadCommand\.cmake:2 \(add_custom_command\):
   Error evaluating generator expression:
 
     \$<COMMAND_CONFIG:b>

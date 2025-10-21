@@ -7,6 +7,6 @@
   to the file:
 
     [^
-]*/Tests/RunCMake/file-RPATH/TextChange-build/not_a_binary.txt
+]*/Tests/RunCMake/file-RPATH/TextChange-build/not_a_binary\.txt
 
   The file format is not recognized\.$

@@ -1,8 +1,8 @@
 .*"tests" *:.*
- *"name" *: *"basic.case_foo" *,.*
+ *"name" *: *"basic\.case_foo" *,.*
  *"name" *: *"DEF_SOURCE_LINE", *
- *"value" *: *"file1.cpp:1" *
+ *"value" *: *"file1\.cpp:1" *
 .*
- *"name" *: *"basic.case_bar" *,.*
+ *"name" *: *"basic\.case_bar" *,.*
  *"name" *: *"DEF_SOURCE_LINE", *
- *"value" *: *"file with spaces.cpp:2" *
+ *"value" *: *"file with spaces\.cpp:2" *

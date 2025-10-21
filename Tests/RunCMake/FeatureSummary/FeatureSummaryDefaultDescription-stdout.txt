@@ -1,6 +1,6 @@
 -- The following RUNTIME packages have been found:
 
- \* Foo, The Foo package, <https://foo.example/>
+ \* Foo, The Foo package, <https://foo\.example/>
 
 -- The following OPTIONAL packages have not been found:
 
@@ -11,7 +11,7 @@
  \* Baz
 
 --[ ]
- \* Foo, The Foo package, <https://foo.example/>
+ \* Foo, The Foo package, <https://foo\.example/>
 
 --[ ]
  \* Bar
@@ -21,7 +21,7 @@
 
 -- RUNTIME pkgs found
 
- \* Foo, The Foo package, <https://foo.example/>
+ \* Foo, The Foo package, <https://foo\.example/>
 
 -- OPTIONAL pkgs not found
 
@@ -33,7 +33,7 @@
 
 -- The following RUNTIME packages have been found:
 
- \* Foo, The Foo package, <https://foo.example/>
+ \* Foo, The Foo package, <https://foo\.example/>
 
 -- The following OPTIONAL packages have not been found:
 

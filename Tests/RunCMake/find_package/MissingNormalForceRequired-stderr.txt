@@ -1,14 +1,14 @@
-CMake Error at MissingNormalForceRequired.cmake:2 \(find_package\):
-  No "FindNotHere.cmake" found in CMAKE_MODULE_PATH\.
+CMake Error at MissingNormalForceRequired\.cmake:2 \(find_package\):
+  No "FindNotHere\.cmake" found in CMAKE_MODULE_PATH\.
 
   This package is considered required because the
-  CMAKE_REQUIRE_FIND_PACKAGE_NotHere variable has been enabled.
+  CMAKE_REQUIRE_FIND_PACKAGE_NotHere variable has been enabled\.
 
 Call Stack \(most recent call first\):
   CMakeLists\.txt:3 \(include\)
 +
-CMake Warning \(dev\) at MissingNormalForceRequired.cmake:2 \(find_package\):
-  FindNotHere.cmake must either be part of this project itself, in this case
+CMake Warning \(dev\) at MissingNormalForceRequired\.cmake:2 \(find_package\):
+  FindNotHere\.cmake must either be part of this project itself, in this case
   adjust CMAKE_MODULE_PATH so that it points to the correct location inside
   its source tree\.
 
@@ -16,9 +16,9 @@ CMake Warning \(dev\) at MissingNormalForceRequired.cmake:2 \(find_package\):
   find_package\(\)\.  In this case make sure that package has indeed been found
   and adjust CMAKE_MODULE_PATH to contain the location where that package has
   installed FindNotHere\.cmake\.  This must be a location provided by that
-  package.  This error in general means that the buildsystem of this project
+  package\.  This error in general means that the buildsystem of this project
   is relying on a Find-module without ensuring that it is actually available\.
 
 Call Stack \(most recent call first\):
   CMakeLists\.txt:3 \(include\)
-This warning is for project developers.  Use -Wno-dev to suppress it\.
+This warning is for project developers\.  Use -Wno-dev to suppress it\.

@@ -1,1 +1,1 @@
-Upload file: .* to http:\/\/badhostname.invalid\?FileName=test-site___test-build-name___.*-Experimental___XML___RunCMakeTest.cmake&MD5=.* Size: .*
+Upload file: .* to http:\/\/badhostname\.invalid\?FileName=test-site___test-build-name___.*-Experimental___XML___RunCMakeTest\.cmake&MD5=.* Size: .*

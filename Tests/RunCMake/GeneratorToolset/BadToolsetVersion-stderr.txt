@@ -7,4 +7,4 @@ CMake Error at CMakeLists\.txt:[0-9]+ \(project\):
 
     Test Toolset,version=Bad Toolset Version
 
-  contains an invalid version specification.
+  contains an invalid version specification\.

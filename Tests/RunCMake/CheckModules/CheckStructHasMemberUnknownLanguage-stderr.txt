@@ -1,9 +1,9 @@
-CMake Error at .*/Modules/CheckStructHasMember\.cmake:[0-9]+. \(message\):
+CMake Error at .*/Modules/CheckStructHasMember\.cmake:[0-9]+ \(message\):
   Unknown language:
 
     FORTRAN
 
-  Supported languages: C, CXX.
+  Supported languages: C, CXX\.
 
 Call Stack \(most recent call first\):
   CheckStructHasMemberUnknownLanguage\.cmake:[0-9]+ \(check_struct_has_member\)

@@ -3,7 +3,7 @@ CMake Error at target_compile_definitions\.cmake:[0-9]+ \(target_compile_definit
 
     \$<DEVICE_LINK:DEF>
 
-  \$<DEVICE_LINK:...> may only be used with binary targets to specify link
-  options.
+  \$<DEVICE_LINK:\.\.\.> may only be used with binary targets to specify link
+  options\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:3 \(include\)

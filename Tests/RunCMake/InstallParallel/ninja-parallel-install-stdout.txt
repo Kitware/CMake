@@ -1,24 +1,24 @@
-\[1\/5\] Installing only the local directory...
+\[1\/5\] Installing only the local directory\.\.\.
 \-\- Install configuration:[^
 ]*
 \-\- Installing:[^
 ]*
-\[2\/5\] Installing only the local directory...
+\[2\/5\] Installing only the local directory\.\.\.
 \-\- Install configuration:[^
 ]*
 \-\- Installing:[^
 ]*
-\[3\/5\] Installing only the local directory...
+\[3\/5\] Installing only the local directory\.\.\.
 \-\- Install configuration:[^
 ]*
 \-\- Installing:[^
 ]*
-\[4\/5\] Installing only the local directory...
+\[4\/5\] Installing only the local directory\.\.\.
 \-\- Install configuration:[^
 ]*
 \-\- Installing:[^
 ]*
-\[5\/5\] Installing only the local directory...
+\[5\/5\] Installing only the local directory\.\.\.
 \-\- Install configuration:[^
 ]*
 \-\- Installing:[^

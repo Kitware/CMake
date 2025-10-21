@@ -27,4 +27,4 @@
 
   find_library considered the following locations:.*
   The item was found at.*
-.*lib/libcreated.a
+.*lib/libcreated\.a

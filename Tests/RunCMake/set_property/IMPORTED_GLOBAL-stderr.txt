@@ -1,4 +1,4 @@
-^CMake Error at IMPORTED_GLOBAL.cmake:9 \(set_property\):
+^CMake Error at IMPORTED_GLOBAL\.cmake:9 \(set_property\):
   IMPORTED_GLOBAL property can't be set to FALSE on targets
   \(\"ImportedGlobalTarget\"\)
 
@@ -6,7 +6,7 @@ Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)
 
 
-CMake Error at IMPORTED_GLOBAL.cmake:16 \(set_property\):
+CMake Error at IMPORTED_GLOBAL\.cmake:16 \(set_property\):
   IMPORTED_GLOBAL property can't be appended, only set on imported targets
   \(\"ImportedGlobalTarget\"\)
 
@@ -14,7 +14,7 @@ Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)
 
 
-CMake Error at IMPORTED_GLOBAL.cmake:26 \(set_property\):
+CMake Error at IMPORTED_GLOBAL\.cmake:26 \(set_property\):
   IMPORTED_GLOBAL property can't be set to FALSE on targets
   \(\"ImportedLocalTarget\"\)
 
@@ -22,7 +22,7 @@ Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)
 
 
-CMake Error at IMPORTED_GLOBAL.cmake:32 \(set_property\):
+CMake Error at IMPORTED_GLOBAL\.cmake:32 \(set_property\):
   IMPORTED_GLOBAL property can't be set on non-imported
   targets\(\"NonImportedTarget\"\)
 
@@ -32,7 +32,7 @@ Call Stack \(most recent call first\):
 
 CMake Error at IMPORTED_GLOBAL/CMakeLists\.txt:[0-9]+ \(set_property\):
   Attempt to promote imported target \"ImportedLocalTarget2\" to global scope
-  \(by setting IMPORTED_GLOBAL\) which is not built in this directory.
+  \(by setting IMPORTED_GLOBAL\) which is not built in this directory\.
 
 
 CMake Error in IMPORTED_GLOBAL/CMakeLists\.txt:
@@ -41,9 +41,9 @@ CMake Error in IMPORTED_GLOBAL/CMakeLists\.txt:
 
 
 
-CMake Error at IMPORTED_GLOBAL.cmake:50 \(set_property\):
+CMake Error at IMPORTED_GLOBAL\.cmake:50 \(set_property\):
   Attempt to promote imported target \"ImportedSubdirTarget1\" to global scope
-  \(by setting IMPORTED_GLOBAL\) which is not built in this directory.
+  \(by setting IMPORTED_GLOBAL\) which is not built in this directory\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)
 
@@ -54,8 +54,8 @@ CMake Error in IMPORTED_GLOBAL/CMakeLists\.txt:
 
 
 
-CMake Error at IMPORTED_GLOBAL.cmake:52 \(set_property\):
+CMake Error at IMPORTED_GLOBAL\.cmake:52 \(set_property\):
   Attempt to promote imported target \"ImportedSubdirTarget2\" to global scope
-  \(by setting IMPORTED_GLOBAL\) which is not built in this directory.
+  \(by setting IMPORTED_GLOBAL\) which is not built in this directory\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)$

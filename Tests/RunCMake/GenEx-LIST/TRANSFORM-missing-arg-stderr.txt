@@ -3,6 +3,6 @@ CMake Error at missing-arg\.cmake:[0-9]+ \(file\):
 
     \$<LIST:TRANSFORM,ARG1,[A-Z]+(,ARG[0-9])?>
 
-  sub-command TRANSFORM, action [A-Z]+ expects (1|2) argument\(s\).
+  sub-command TRANSFORM, action [A-Z]+ expects (1|2) argument\(s\)\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)

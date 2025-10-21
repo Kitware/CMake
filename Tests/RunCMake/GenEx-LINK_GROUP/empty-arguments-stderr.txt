@@ -3,6 +3,6 @@ CMake Error at empty-arguments\.cmake:[0-9]+ \(target_link_libraries\):
 
     \$<LINK_GROUP:,>
 
-  \$<LINK_GROUP:...> expects a feature name as first argument.
+  \$<LINK_GROUP:\.\.\.> expects a feature name as first argument\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)

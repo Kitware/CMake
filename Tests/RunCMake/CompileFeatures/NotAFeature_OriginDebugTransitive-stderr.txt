@@ -1,4 +1,4 @@
-CMake Debug Log at NotAFeature_OriginDebugTransitive.cmake:6 \(target_link_libraries\):
+CMake Debug Log at NotAFeature_OriginDebugTransitive\.cmake:6 \(target_link_libraries\):
   Used compile features for target somelib:
 
    \* not_a_feature
@@ -8,4 +8,4 @@ Call Stack \(most recent call first\):
 
 
 CMake Error in CMakeLists\.txt:
-  Specified unknown feature "not_a_feature" for target "somelib".
+  Specified unknown feature "not_a_feature" for target "somelib"\.

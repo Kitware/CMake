@@ -1,1 +1,1 @@
--- FakeApp_EXECUTABLE='.*/Tests/RunCMake/find_program/BundleSpaceInName-build/Fake app.app/Contents/MacOS/Fake app'
+-- FakeApp_EXECUTABLE='.*/Tests/RunCMake/find_program/BundleSpaceInName-build/Fake app\.app/Contents/MacOS/Fake app'

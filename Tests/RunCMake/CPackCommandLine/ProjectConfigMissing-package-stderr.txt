@@ -1,1 +1,1 @@
-^CPack Warning: CPACK_PROJECT_CONFIG_FILE not found: .*/missing.cmake
+^CPack Warning: CPACK_PROJECT_CONFIG_FILE not found: .*/missing\.cmake
