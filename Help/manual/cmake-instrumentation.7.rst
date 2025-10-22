@@ -423,6 +423,10 @@ and contain the following data:
     contains information about the CMake configure and generate steps
     responsible for generating the ``command`` in this snippet.
 
+  ``showOnly``
+    A boolean representing whether the ``--show-only`` option was passed to
+    ``ctest``. Only included when ``role`` is ``ctest``.
+
 Example:
 
 .. code-block:: json

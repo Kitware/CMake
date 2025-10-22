@@ -663,6 +663,8 @@ int cmInstrumentation::InstrumentCommand(
     for (auto const& item : data.value()) {
       if (item.first == "role" && !item.second.empty()) {
         command_type = item.second;
+      } else if (item.first == "showOnly") {
+        root[item.first] = item.second == "1" ? true : false;
       } else if (!item.second.empty()) {
         root[item.first] = item.second;
       }
