@@ -351,7 +351,8 @@ cmGlobalFastbuildGenerator::GenerateBuildCommand(
   std::string const& makeProgram, std::string const& /*projectName*/,
   std::string const& projectDir, std::vector<std::string> const& targetNames,
   std::string const& /*config*/, int /*jobs*/, bool verbose,
-  cmBuildOptions /*buildOptions*/, std::vector<std::string> const& makeOptions)
+  cmBuildOptions /*buildOptions*/, std::vector<std::string> const& makeOptions,
+  BuildTryCompile isInTryCompile)
 {
   GeneratedMakeCommand makeCommand;
   this->FastbuildCommand = this->SelectMakeProgram(makeProgram);
@@ -386,8 +387,12 @@ cmGlobalFastbuildGenerator::GenerateBuildCommand(
     makeCommand.Add("-verbose");
   }
 
-  // Make "rebuild-bff" target up-to-date before running the build.
+  // Don't do extra work during "TryCompile".
+  if (isInTryCompile == BuildTryCompile::Yes) {
+    return { std::move(makeCommand) };
+  }
 
+  // Make "rebuild-bff" target up-to-date before running the build.
   std::string output;
   ExecuteFastbuildTarget(projectDir, FASTBUILD_REBUILD_BFF_TARGET_NAME, output,
                          { "-why" });
@@ -468,10 +473,10 @@ void cmGlobalFastbuildGenerator::Generate()
 
   this->RemoveUnknownClangTidyExportFixesFiles();
 
-  if (this->GetCMakeInstance()->GetRegenerateDuringBuild()) {
+  if (this->GetCMakeInstance()->GetRegenerateDuringBuild() ||
+      this->GetCMakeInstance()->GetIsInTryCompile()) {
     return;
   }
-  // TODO: figure out how to skip this in TryCompile
   //  Make "rebuild-bff" target up-to-date after the generation.
   //  This is actually a noop, it just asks CMake to touch the generated file
   //  so FASTBuild would consider the target as up-to-date.
