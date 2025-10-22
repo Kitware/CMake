@@ -1,5 +1,7 @@
 include(RunCMake)
 
+run_cmake_with_options(ConfigureErrorANY -DCMAKE_EXECUTE_PROCESS_COMMAND_ERROR_IS_FATAL=ANY)
+
 set(RunCMake_TEST_OUTPUT_MERGE 1)
 run_cmake_command(MergeOutput ${CMAKE_COMMAND} -P ${RunCMake_SOURCE_DIR}/MergeOutput.cmake)
 unset(RunCMake_TEST_OUTPUT_MERGE)
