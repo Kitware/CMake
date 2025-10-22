@@ -229,53 +229,51 @@ macro(parse_tests_from_json json_file)
 
   # Return if there are no testsuites
   string(JSON len_test_suites LENGTH "${test_suites_json}")
-  if(len_test_suites LESS_EQUAL 0)
-    return()
-  endif()
+  if(len_test_suites GREATER 0)
+    set(open_sb)
+    set(close_sb)
 
-  set(open_sb)
-  set(close_sb)
+    math(EXPR upper_limit_test_suite_range "${len_test_suites} - 1")
 
-  math(EXPR upper_limit_test_suite_range "${len_test_suites} - 1")
+    foreach(index_test_suite RANGE ${upper_limit_test_suite_range})
+      string(JSON test_suite_json GET "${test_suites_json}" ${index_test_suite})
 
-  foreach(index_test_suite RANGE ${upper_limit_test_suite_range})
-    string(JSON test_suite_json GET "${test_suites_json}" ${index_test_suite})
+      # "suite" is expected to be set in write_test_to_file(). When parsing the
+      # plain text output, "suite" is expected to be the original suite name
+      # before accounting for pretty names. This may be used to construct the
+      # name of XML output results files.
+      string(JSON current_test_suite GET "${test_suite_json}" "name")
+      string(JSON tests_json GET "${test_suite_json}" "testsuite")
 
-    # "suite" is expected to be set in write_test_to_file(). When parsing the
-    # plain text output, "suite" is expected to be the original suite name
-    # before accounting for pretty names. This may be used to construct the
-    # name of XML output results files.
-    string(JSON current_test_suite GET "${test_suite_json}" "name")
-    string(JSON tests_json GET "${test_suite_json}" "testsuite")
-
-    # Skip test suites without tests
-    string(JSON len_tests LENGTH "${tests_json}")
-    if(len_tests LESS_EQUAL 0)
-      continue()
-    endif()
-
-    math(EXPR upper_limit_test_range "${len_tests} - 1")
-    foreach(index_test RANGE ${upper_limit_test_range})
-      string(JSON test_json GET "${tests_json}" ${index_test})
-
-      string(JSON len_test_parameters LENGTH "${test_json}")
-      if(len_test_parameters LESS_EQUAL 0)
+      # Skip test suites without tests
+      string(JSON len_tests LENGTH "${tests_json}")
+      if(len_tests LESS_EQUAL 0)
         continue()
       endif()
 
-      get_json_member_with_default(test_json "name" current_test_name)
-      get_json_member_with_default(test_json "file" current_test_file)
-      get_json_member_with_default(test_json "line" current_test_line)
-      get_json_member_with_default(test_json "value_param" current_test_value_param)
-      get_json_member_with_default(test_json "type_param" current_test_type_param)
+      math(EXPR upper_limit_test_range "${len_tests} - 1")
+      foreach(index_test RANGE ${upper_limit_test_range})
+        string(JSON test_json GET "${tests_json}" ${index_test})
 
-      generate_testname_guards(
-        "${current_test_suite}${current_test_name}${current_test_value_param}${current_test_type_param}"
-        open_guard close_guard
-      )
-      write_test_to_file()
+        string(JSON len_test_parameters LENGTH "${test_json}")
+        if(len_test_parameters LESS_EQUAL 0)
+          continue()
+        endif()
+
+        get_json_member_with_default(test_json "name" current_test_name)
+        get_json_member_with_default(test_json "file" current_test_file)
+        get_json_member_with_default(test_json "line" current_test_line)
+        get_json_member_with_default(test_json "value_param" current_test_value_param)
+        get_json_member_with_default(test_json "type_param" current_test_type_param)
+
+        generate_testname_guards(
+          "${current_test_suite}${current_test_name}${current_test_value_param}${current_test_type_param}"
+          open_guard close_guard
+        )
+        write_test_to_file()
+      endforeach()
     endforeach()
-  endforeach()
+  endif()
 endmacro()
 
 function(gtest_discover_tests_impl)
