@@ -86,6 +86,13 @@ function(run_GoogleTest DISCOVERY_MODE)
     --no-label-summary
   )
 
+  run_cmake_command(GoogleTest-test8
+    ${CMAKE_CTEST_COMMAND}
+    -C Debug
+    -L TEST8
+    --no-label-summary
+  )
+
   run_cmake_command(GoogleTest-test-missing
     ${CMAKE_CTEST_COMMAND}
     -C Debug
