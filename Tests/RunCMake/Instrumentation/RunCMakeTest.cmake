@@ -20,6 +20,7 @@ function(instrument test)
     "MANUAL_HOOK"
     "PRESERVE_DATA"
     "NO_CONFIGURE"
+    "FAIL"
   )
   cmake_parse_arguments(ARGS "${OPTIONS}" "CHECK_SCRIPT;CONFIGURE_ARG" "" ${ARGN})
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/${test})
@@ -78,6 +79,9 @@ function(instrument test)
   if (ARGS_NO_WARN)
     list(APPEND ARGS_CONFIGURE_ARG "-Wno-dev")
   endif()
+  if (ARGS_FAIL)
+    list(APPEND ARGS_CONFIGURE_ARG "-DFAIL=ON")
+  endif()
   set(RunCMake_TEST_SOURCE_DIR ${RunCMake_SOURCE_DIR}/project)
   if(NOT RunCMake_GENERATOR_IS_MULTI_CONFIG)
     set(maybe_CMAKE_BUILD_TYPE -DCMAKE_BUILD_TYPE=Debug)
@@ -88,7 +92,29 @@ function(instrument test)
 
   # Follow-up Commands
   if (ARGS_BUILD)
-    run_cmake_command(${test}-build ${CMAKE_COMMAND} --build . --config Debug)
+    set(cmake_build_args --config Debug)
+    set(additional_build_args)
+    if (ARGS_FAIL)
+      # Tests with ARGS_FAIL expect all targets to build, including the ones
+      # which should succeed and those which should fail.
+      if (RunCMake_GENERATOR MATCHES "Ninja")
+        set(keep_going_arg -k 0)
+      elseif (RunCMake_GENERATOR MATCHES "FASTBuild")
+        set(keep_going_arg -nostoponerror)
+      else()
+        set(keep_going_arg -k)
+      endif()
+      string(APPEND additional_build_args ${keep_going_arg})
+      # Merge stdout and stderr because different compilers will throw their
+      # errors to different places.
+      set(RunCMake_TEST_OUTPUT_MERGE 1)
+    endif()
+    run_cmake_command(${test}-build
+      ${CMAKE_COMMAND} --build . ${cmake_build_args} -- ${additional_build_args}
+    )
+    if (ARGS_FAIL)
+      unset(RunCMake_TEST_OUTPUT_MERGE)
+    endif()
   endif()
   if (ARGS_BUILD_MAKE_PROGRAM)
     set(RunCMake_TEST_OUTPUT_MERGE 1)
@@ -167,6 +193,16 @@ instrument(cmake-command-cmake-build
   NO_WARN BUILD
   CHECK_SCRIPT check-no-make-program-hooks.cmake
 )
+if(RunCMake_GENERATOR STREQUAL "Borland Makefiles")
+  # Borland 'make' has no '-k' flag.
+  set(Skip_COMMAND_FAILURES_Case 1)
+endif()
+if(NOT Skip_COMMAND_FAILURES_Case)
+  instrument(cmake-command-failures
+    FAIL NO_WARN BUILD TEST INSTALL
+    CHECK_SCRIPT check-data-dir.cmake
+  )
+endif()
 
 # Test CUSTOM_CONTENT
 instrument(cmake-command-custom-content

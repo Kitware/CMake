@@ -633,7 +633,6 @@ int cmInstrumentation::InstrumentCommand(
 
   // Execute Command
   int ret = callback();
-  root["result"] = ret;
 
   // Exit early if configure didn't generate a query
   if (reloadQueriesAfterCommand == LoadQueriesAfter::Yes) {
@@ -668,6 +667,9 @@ int cmInstrumentation::InstrumentCommand(
       }
     }
   }
+
+  // See SpawnBuildDaemon(); this data is currently meaningless for build.
+  root["result"] = command_type == "build" ? Json::nullValue : ret;
 
   // Create empty config entry if config not found
   if (!root.isMember("config") &&
@@ -852,6 +854,8 @@ int cmInstrumentation::CollectTimingAfterBuild(int ppid)
     while (0 == uv_kill(ppid, 0)) {
       cmSystemTools::Delay(100);
     };
+    // FIXME(#27331): Investigate a cross-platform solution to obtain the exit
+    // code given the `ppid` above.
     return 0;
   };
   int ret = this->InstrumentCommand(
