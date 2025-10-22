@@ -15,12 +15,6 @@ else()
   set(OSX_DEVELOPER_ROOT "")
 endif()
 
-if(NOT CMAKE_CROSSCOMPILING)
-  execute_process(COMMAND sw_vers -productVersion
-    OUTPUT_VARIABLE _CMAKE_HOST_OSX_VERSION
-    OUTPUT_STRIP_TRAILING_WHITESPACE)
-endif()
-
 # Save CMAKE_OSX_ARCHITECTURES from the environment.
 set(CMAKE_OSX_ARCHITECTURES "$ENV{CMAKE_OSX_ARCHITECTURES}" CACHE STRING
   "Build architectures for OSX")
@@ -48,15 +42,6 @@ endif()
 # macOS, iOS, tvOS, visionOS, and watchOS should lookup compilers from
 # Platform/Apple-${CMAKE_CXX_COMPILER_ID}-<LANG>
 set(CMAKE_EFFECTIVE_SYSTEM_NAME "Apple")
-
-#----------------------------------------------------------------------------
-# CMAKE_OSX_DEPLOYMENT_TARGET
-
-# Set cache variable - end user may change this during ccmake or cmake-gui configure.
-if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-  set(CMAKE_OSX_DEPLOYMENT_TARGET "$ENV{MACOSX_DEPLOYMENT_TARGET}" CACHE STRING
-    "Minimum OS X version to target for deployment (at runtime); newer APIs weak linked. Set to empty string for default value.")
-endif()
 
 #----------------------------------------------------------------------------
 # CMAKE_OSX_SYSROOT
@@ -295,4 +280,19 @@ if(NOT CMAKE_OSX_SYSROOT)
     # default, it is not a fully-implemented implicit link directory.
     /usr/local/lib
   )
+endif()
+
+#----------------------------------------------------------------------------
+# CMAKE_OSX_DEPLOYMENT_TARGET
+
+if(NOT CMAKE_CROSSCOMPILING)
+  execute_process(COMMAND sw_vers -productVersion
+    OUTPUT_VARIABLE _CMAKE_HOST_OSX_VERSION
+    OUTPUT_STRIP_TRAILING_WHITESPACE)
+endif()
+
+# Set cache variable - end user may change this during ccmake or cmake-gui configure.
+if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+  set(CMAKE_OSX_DEPLOYMENT_TARGET "$ENV{MACOSX_DEPLOYMENT_TARGET}" CACHE STRING
+    "Minimum OS X version to target for deployment (at runtime); newer APIs weak linked. Set to empty string for default value.")
 endif()
