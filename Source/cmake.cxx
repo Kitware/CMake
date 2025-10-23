@@ -4509,10 +4509,14 @@ void cmake::SetCMakeListName(std::string const& name)
 
 std::string cmake::GetCMakeListFile(std::string const& dir) const
 {
-  std::string listFile = cmStrCat(dir, '/', this->CMakeListName);
-  if (this->CMakeListName.empty() ||
-      !cmSystemTools::FileExists(listFile, true)) {
-    return cmStrCat(dir, "/CMakeLists.txt");
+  cm::string_view const slash =
+    dir.empty() || dir.back() != '/' ? "/"_s : ""_s;
+  std::string listFile;
+  if (!this->CMakeListName.empty()) {
+    listFile = cmStrCat(dir, slash, this->CMakeListName);
+  }
+  if (listFile.empty() || !cmSystemTools::FileExists(listFile, true)) {
+    listFile = cmStrCat(dir, slash, "CMakeLists.txt");
   }
   return listFile;
 }

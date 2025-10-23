@@ -96,6 +96,50 @@ static bool testStrVersCmp()
   return true;
 }
 
+static bool testRelativeIfUnder()
+{
+  std::cout << "testRelativeIfUnder()\n";
+
+  std::string result = cmSystemTools::RelativeIfUnder("/a/b", "/a/b");
+  if (result != ".") {
+    std::cout << "cmSystemTools::RelativeIfUnder failed on /a/b, /a/b: "
+              << result << "\n";
+    return false;
+  }
+  result = cmSystemTools::RelativeIfUnder("/a/b", "/a/b/c/d");
+  if (result != "c/d") {
+    std::cout << "cmSystemTools::RelativeIfUnder failed on /a/b, /a/b/c/d: "
+              << result << "\n";
+    return false;
+  }
+  result = cmSystemTools::RelativeIfUnder("/d/f/", "/a/b/c/d");
+  if (result != "/a/b/c/d") {
+    std::cout << "cmSystemTools::RelativeIfUnder failed on /d/f/, /a/b/c/d: "
+              << result << "\n";
+    return false;
+  }
+  result = cmSystemTools::RelativeIfUnder("/", "/a/b");
+  if (result != "a/b") {
+    std::cout << "cmSystemTools::RelativeIfUnder failed on /, /a/b: " << result
+              << "\n";
+    return false;
+  }
+  result = cmSystemTools::RelativeIfUnder("I:/", "I:/CMakeLists.txt");
+  if (result != "CMakeLists.txt") {
+    std::cout
+      << "cmSystemTools::RelativeIfUnder failed on I:/, I:/CMakeLists.txt: "
+      << result << "\n";
+    return false;
+  }
+  result = cmSystemTools::RelativeIfUnder("", "/a/b");
+  if (result != "/a/b") {
+    std::cout << "cmSystemTools::RelativeIfUnder failed on \"\", /a/b: "
+              << result << "\n";
+    return false;
+  }
+  return true;
+}
+
 static bool testMakeTempDirectory()
 {
   std::cout << "testMakeTempDirectory()\n";
@@ -124,6 +168,7 @@ int testSystemTools(int /*unused*/, char* /*unused*/[])
     testUpperCase,
     testVersionCompare,
     testStrVersCmp,
+    testRelativeIfUnder,
     testMakeTempDirectory,
   });
 }
