@@ -355,6 +355,8 @@ public:
 
   bool FindMakeProgram(cmMakefile* mf) override;
 
+  bool CheckLanguages(std::vector<std::string> const& languages,
+                      cmMakefile* mf) const override;
   void EnableLanguage(std::vector<std::string> const& lang, cmMakefile* mf,
                       bool optional) override;
 
