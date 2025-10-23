@@ -19,5 +19,6 @@ RunCMake_check_slnx("${RunCMake_TEST_BINARY_DIR}/VsDotnetSdkTargetPlatform.slnx"
   <Project Path="ZERO_CHECK\.vcxproj" Id="[0-9a-f-]+"/>
   <Project Path="foo\.csproj" Id="[0-9a-f-]+">
     <BuildDependency Project="ZERO_CHECK\.vcxproj"/>
+    <Platform Project="[^"]+"/>
   </Project>
 </Solution>$]])

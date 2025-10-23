@@ -331,7 +331,10 @@ void WriteSlnxProject(cmXMLElement& xmlParent, Solution const& solution,
         .Attribute("Solution", cmStrCat(solution.Configs[i], "|*"));
     }
   }
-  if (project.Platform != solution.Platform) {
+  if (project.Platform != solution.Platform ||
+      // C# projects do not build interactively in the VS IDE unless they
+      // have an explicit platform, even if it matches the SLN platform.
+      project.TypeId == Solution::Project::TypeIdCSharp) {
     cmXMLElement(xmlProject, "Platform")
       .Attribute("Project", project.Platform);
   }
