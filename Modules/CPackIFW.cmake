@@ -645,7 +645,7 @@ macro(_cpack_ifw_resolve_script _variable)
 endmacro()
 
 # Resolve full path to license file
-macro(_cpack_ifw_resolve_lisenses _variable)
+macro(_cpack_ifw_resolve_licenses _variable)
   if(${_variable})
     set(_ifw_license_file FALSE)
     set(_ifw_licenses_fix)
@@ -689,7 +689,7 @@ macro(cpack_ifw_configure_component compname)
   cmake_parse_arguments(CPACK_IFW_COMPONENT_${_CPACK_IFWCOMP_UNAME} "${_IFW_OPT}" "${_IFW_ARGS}" "${_IFW_MULTI_ARGS}" ${ARGN})
 
   _cpack_ifw_resolve_script(CPACK_IFW_COMPONENT_${_CPACK_IFWCOMP_UNAME}_SCRIPT)
-  _cpack_ifw_resolve_lisenses(CPACK_IFW_COMPONENT_${_CPACK_IFWCOMP_UNAME}_LICENSES)
+  _cpack_ifw_resolve_licenses(CPACK_IFW_COMPONENT_${_CPACK_IFWCOMP_UNAME}_LICENSES)
   _cpack_ifw_resolve_file_list(CPACK_IFW_COMPONENT_${_CPACK_IFWCOMP_UNAME}_USER_INTERFACES)
   _cpack_ifw_resolve_file_list(CPACK_IFW_COMPONENT_${_CPACK_IFWCOMP_UNAME}_TRANSLATIONS)
 
@@ -730,7 +730,7 @@ macro(cpack_ifw_configure_component_group grpname)
   cmake_parse_arguments(CPACK_IFW_COMPONENT_GROUP_${_CPACK_IFWGRP_UNAME} "${_IFW_OPT}" "${_IFW_ARGS}" "${_IFW_MULTI_ARGS}" ${ARGN})
 
   _cpack_ifw_resolve_script(CPACK_IFW_COMPONENT_GROUP_${_CPACK_IFWGRP_UNAME}_SCRIPT)
-  _cpack_ifw_resolve_lisenses(CPACK_IFW_COMPONENT_GROUP_${_CPACK_IFWGRP_UNAME}_LICENSES)
+  _cpack_ifw_resolve_licenses(CPACK_IFW_COMPONENT_GROUP_${_CPACK_IFWGRP_UNAME}_LICENSES)
   _cpack_ifw_resolve_file_list(CPACK_IFW_COMPONENT_GROUP_${_CPACK_IFWGRP_UNAME}_USER_INTERFACES)
   _cpack_ifw_resolve_file_list(CPACK_IFW_COMPONENT_GROUP_${_CPACK_IFWGRP_UNAME}_TRANSLATIONS)
 
