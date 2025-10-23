@@ -6,7 +6,8 @@ include(CTest)
 cmake_policy(SET CMP0078 NEW)
 cmake_policy(SET CMP0086 NEW)
 
-find_package(Python REQUIRED COMPONENTS Interpreter Development)
+# Development.Module should be enough to get DEBUG_POSTFIX.
+find_package(Python REQUIRED COMPONENTS Development.Module)
 
 find_package(SWIG)
 include(UseSWIG)
@@ -23,6 +24,7 @@ else()
   set (PS ":")
 endif()
 
+find_package(Python REQUIRED COMPONENTS Interpreter)
 add_test (NAME SetPOSTFIX
   COMMAND "${CMAKE_COMMAND}" -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}${PS}$<TARGET_FILE_DIR:example>"
   "${Python_INTERPRETER}" "${CMAKE_CURRENT_SOURCE_DIR}/runme.py")
