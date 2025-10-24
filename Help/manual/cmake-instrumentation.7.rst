@@ -419,7 +419,7 @@ and contain the following data:
       be determined.
 
   ``cmakeContent``
-    The path to a `v1 CMake Content` file located under ``data``, which
+    The path to a `v1 CMake Content File`_ located under ``data``, which
     contains information about the CMake configure and generate steps
     responsible for generating the ``command`` in this snippet.
 
