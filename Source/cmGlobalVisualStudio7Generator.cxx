@@ -180,7 +180,8 @@ cmGlobalVisualStudio7Generator::GenerateBuildCommand(
   std::string const& makeProgram, std::string const& projectName,
   std::string const& projectDir, std::vector<std::string> const& targetNames,
   std::string const& config, int /*jobs*/, bool /*verbose*/,
-  cmBuildOptions /*buildOptions*/, std::vector<std::string> const& makeOptions)
+  cmBuildOptions /*buildOptions*/, std::vector<std::string> const& makeOptions,
+  BuildTryCompile /*isInTryCompile*/)
 {
   // Select the caller- or user-preferred make program, else devenv.
   std::string makeProgramSelected =

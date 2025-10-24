@@ -1010,7 +1010,8 @@ cmGlobalNinjaGenerator::GenerateBuildCommand(
   std::string const& /*projectDir*/,
   std::vector<std::string> const& targetNames, std::string const& config,
   int jobs, bool verbose, cmBuildOptions /*buildOptions*/,
-  std::vector<std::string> const& makeOptions)
+  std::vector<std::string> const& makeOptions,
+  BuildTryCompile /*isInTryCompile*/)
 {
   GeneratedMakeCommand makeCommand;
   makeCommand.Add(this->SelectMakeProgram(makeProgram));

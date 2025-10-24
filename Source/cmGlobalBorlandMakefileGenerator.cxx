@@ -72,7 +72,8 @@ cmGlobalBorlandMakefileGenerator::GenerateBuildCommand(
   std::string const& makeProgram, std::string const& projectName,
   std::string const& projectDir, std::vector<std::string> const& targetNames,
   std::string const& config, int /*jobs*/, bool verbose,
-  cmBuildOptions buildOptions, std::vector<std::string> const& makeOptions)
+  cmBuildOptions buildOptions, std::vector<std::string> const& makeOptions,
+  BuildTryCompile /*isInTryCompile*/)
 {
   return this->cmGlobalUnixMakefileGenerator3::GenerateBuildCommand(
     makeProgram, projectName, projectDir, targetNames, config,
