@@ -109,6 +109,9 @@ The options are:
 
 ``SPDX_LICENSE <license-string>``
   .. versionadded:: 4.2
+  .. note::
+
+    Experimental. Gated by ``CMAKE_EXPERIMENTAL_EXPORT_PACKAGE_INFO``.
 
   Optional.
   Sets the variables
