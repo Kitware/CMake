@@ -32,8 +32,8 @@ class DebGenerator
 public:
   DebGenerator(cmCPackLog* logger, std::string outputName, std::string workDir,
                std::string topLevelDir, std::string temporaryDir,
-               cmValue debianCompressionType, cmValue numThreads,
-               cmValue debianArchiveType,
+               cmValue debianCompressionType, cmValue debianCompressionLevel,
+               cmValue numThreads, cmValue debianArchiveType,
                std::map<std::string, std::string> controlValues,
                bool genShLibs, std::string shLibsFilename, bool genPostInst,
                std::string postInst, bool genPostRm, std::string postRm,
@@ -69,16 +69,18 @@ private:
   bool const PermissionStrictPolicy;
   std::vector<std::string> const PackageFiles;
   cmArchiveWrite::Compress TarCompressionType;
+  long CompressionLevel;
 };
 
 DebGenerator::DebGenerator(
   cmCPackLog* logger, std::string outputName, std::string workDir,
   std::string topLevelDir, std::string temporaryDir,
-  cmValue debCompressionType, cmValue numThreads, cmValue debianArchiveType,
-  std::map<std::string, std::string> controlValues, bool genShLibs,
-  std::string shLibsFilename, bool genPostInst, std::string postInst,
-  bool genPostRm, std::string postRm, cmValue controlExtra,
-  bool permissionStrictPolicy, std::vector<std::string> packageFiles)
+  cmValue debCompressionType, cmValue debCompressionLevel, cmValue numThreads,
+  cmValue debianArchiveType, std::map<std::string, std::string> controlValues,
+  bool genShLibs, std::string shLibsFilename, bool genPostInst,
+  std::string postInst, bool genPostRm, std::string postRm,
+  cmValue controlExtra, bool permissionStrictPolicy,
+  std::vector<std::string> packageFiles)
   : Logger(logger)
   , OutputName(std::move(outputName))
   , WorkDir(std::move(workDir))
@@ -134,6 +136,17 @@ DebGenerator::DebGenerator(
     }
   } else {
     this->NumThreads = 1;
+  }
+
+  if (debCompressionLevel) {
+    if (!cmStrToLong(*debCompressionLevel, &this->CompressionLevel)) {
+      this->CompressionLevel = 0;
+      cmCPackLogger(cmCPackLog::LOG_ERROR,
+                    "Unrecognized compression level: "
+                      << debCompressionLevel << std::endl);
+    }
+  } else {
+    this->CompressionLevel = 0;
   }
 }
 
@@ -192,7 +205,7 @@ bool DebGenerator::generateDataTar() const
     return false;
   }
   cmArchiveWrite data_tar(fileStream_data_tar, this->TarCompressionType,
-                          this->DebianArchiveType, 0,
+                          this->DebianArchiveType, this->CompressionLevel,
                           static_cast<int>(this->NumThreads));
   if (!data_tar.Open()) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
@@ -324,7 +337,7 @@ bool DebGenerator::generateControlTar(std::string const& md5Filename) const
     return false;
   }
   cmArchiveWrite control_tar(fileStream_control_tar, this->TarCompressionType,
-                             this->DebianArchiveType);
+                             this->DebianArchiveType, this->CompressionLevel);
   if (!control_tar.Open()) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
                   "Error opening the archive \""
@@ -469,7 +482,8 @@ bool DebGenerator::generateDeb() const
   std::string const tlDir = this->WorkDir + "/";
   cmGeneratedFileStream debStream;
   debStream.Open(outputPath, false, true);
-  cmArchiveWrite deb(debStream, cmArchiveWrite::CompressNone, "arbsd");
+  cmArchiveWrite deb(debStream, cmArchiveWrite::CompressNone, "arbsd",
+                     this->CompressionLevel);
   if (!deb.Open()) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
                   "Error opening the archive \""
@@ -846,6 +860,7 @@ bool cmCPackDebGenerator::createDeb()
     this->GetOption("CPACK_TOPLEVEL_DIRECTORY"),
     this->GetOption("CPACK_TEMPORARY_DIRECTORY"),
     this->GetOption("GEN_CPACK_DEBIAN_COMPRESSION_TYPE"),
+    this->GetOption("GEN_CPACK_DEBIAN_COMPRESSION_LEVEL"),
     this->GetOption("CPACK_THREADS"),
     this->GetOption("GEN_CPACK_DEBIAN_ARCHIVE_TYPE"), controlValues, gen_shibs,
     shlibsfilename, this->IsOn("GEN_CPACK_DEBIAN_GENERATE_POSTINST"), postinst,
@@ -901,6 +916,7 @@ bool cmCPackDebGenerator::createDbgsymDDeb()
     this->GetOption("CPACK_TOPLEVEL_DIRECTORY"),
     this->GetOption("CPACK_TEMPORARY_DIRECTORY"),
     this->GetOption("GEN_CPACK_DEBIAN_COMPRESSION_TYPE"),
+    this->GetOption("GEN_CPACK_DEBIAN_COMPRESSION_LEVEL"),
     this->GetOption("CPACK_THREADS"),
     this->GetOption("GEN_CPACK_DEBIAN_ARCHIVE_TYPE"), controlValues, false, "",
     false, "", false, "", nullptr,
