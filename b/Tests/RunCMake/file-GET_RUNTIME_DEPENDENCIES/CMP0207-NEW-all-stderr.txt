@@ -1,0 +1,5 @@
+^CMake Error at cmake_install\.cmake:[0-9]+ \(file\):
+  file Could not resolve runtime dependencies:
+
+    [^
+]*test\.dll$

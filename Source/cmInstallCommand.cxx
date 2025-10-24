@@ -247,7 +247,8 @@ void AddInstallRuntimeDependenciesGenerator(
       cmInstallGenerator::SelectMessageLevel(helper.Makefile),
       runtimeDependenciesArgsRef.GetExcludeFromAll() &&
         (apple ? frameworkArgs.GetExcludeFromAll() : true),
-      helper.Makefile->GetBacktrace());
+      helper.Makefile->GetBacktrace(),
+      helper.Makefile->GetPolicyStatus(cmPolicies::CMP0207));
   helper.Makefile->AddInstallGenerator(
     std::move(getRuntimeDependenciesGenerator));
 

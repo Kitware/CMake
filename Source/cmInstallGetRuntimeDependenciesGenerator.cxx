@@ -19,6 +19,7 @@
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmOutputConverter.h"
+#include "cmPolicies.h"
 #include "cmScriptGenerator.h"
 #include "cmStringAlgorithms.h"
 
@@ -83,7 +84,8 @@ cmInstallGetRuntimeDependenciesGenerator::
     std::vector<std::string> postExcludeFiles, std::string libraryComponent,
     std::string frameworkComponent, bool noInstallRPath, char const* depsVar,
     char const* rpathPrefix, std::vector<std::string> const& configurations,
-    MessageLevel message, bool exclude_from_all, cmListFileBacktrace backtrace)
+    MessageLevel message, bool exclude_from_all, cmListFileBacktrace backtrace,
+    cmPolicies::PolicyStatus policyStatusCMP0207)
   : cmInstallGenerator("", configurations, "", message, exclude_from_all,
                        false, std::move(backtrace))
   , RuntimeDependencySet(runtimeDependencySet)
@@ -96,6 +98,7 @@ cmInstallGetRuntimeDependenciesGenerator::
   , PostExcludeFiles(std::move(postExcludeFiles))
   , LibraryComponent(std::move(libraryComponent))
   , FrameworkComponent(std::move(frameworkComponent))
+  , PolicyStatusCMP0207(policyStatusCMP0207)
   , NoInstallRPath(noInstallRPath)
   , DepsVar(depsVar)
   , RPathPrefix(rpathPrefix)
@@ -141,6 +144,14 @@ void cmInstallGetRuntimeDependenciesGenerator::GenerateScriptForConfig(
     this->LocalGenerator->GetMakefile()->GetSafeDefinition(
       "CMAKE_INSTALL_NAME_TOOL");
 
+  Indent inputIndent = indent;
+  if (this->PolicyStatusCMP0207 != cmPolicies::WARN) {
+    indent = indent.Next();
+    os << inputIndent << "block(SCOPE_FOR POLICIES)\n"
+       << indent << "cmake_policy(SET CMP0207 "
+       << (this->PolicyStatusCMP0207 == cmPolicies::NEW ? "NEW" : "OLD")
+       << ")\n";
+  }
   os << indent << "file(GET_RUNTIME_DEPENDENCIES\n"
      << indent << "  RESOLVED_DEPENDENCIES_VAR " << this->DepsVar << '\n';
   WriteFilesArgument(os, "EXECUTABLES"_s,
@@ -204,4 +215,8 @@ void cmInstallGetRuntimeDependenciesGenerator::GenerateScriptForConfig(
     os << indent << "  RPATH_PREFIX " << this->RPathPrefix << '\n';
   }
   os << indent << "  )\n";
+
+  if (this->PolicyStatusCMP0207 != cmPolicies::WARN) {
+    os << inputIndent << "endblock()\n";
+  }
 }

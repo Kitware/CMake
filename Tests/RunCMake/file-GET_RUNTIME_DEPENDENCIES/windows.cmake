@@ -50,6 +50,7 @@ install(TARGETS topexe toplib topmod DESTINATION bin)
 
 install(CODE [[
   function(exec_get_runtime_dependencies depsfile udepsfile cdepsfile)
+    cmake_policy(SET CMP0207 NEW)
     file(GET_RUNTIME_DEPENDENCIES
       RESOLVED_DEPENDENCIES_VAR deps
       UNRESOLVED_DEPENDENCIES_VAR udeps

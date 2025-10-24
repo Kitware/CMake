@@ -155,6 +155,7 @@ bool cmBinUtilsWindowsPELinker::ResolveDependency(std::string const& name,
   for (auto const& searchPath : dirs) {
     path = cmStrCat(searchPath, '/', name);
     if (cmSystemTools::PathExists(path)) {
+      this->NormalizePath(path);
       resolved = true;
       return true;
     }

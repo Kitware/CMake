@@ -170,6 +170,7 @@ bool cmBinUtilsMacOSMachOLinker::ResolveDependency(
   } else {
     resolved = true;
     path = name;
+    this->NormalizePath(path);
   }
 
   if (resolved && !cmSystemTools::FileIsFullPath(path)) {
@@ -198,6 +199,7 @@ bool cmBinUtilsMacOSMachOLinker::ResolveExecutablePathDependency(
     return true;
   }
 
+  this->NormalizePath(path);
   resolved = true;
   return true;
 }
@@ -220,6 +222,7 @@ bool cmBinUtilsMacOSMachOLinker::ResolveLoaderPathDependency(
     return true;
   }
 
+  this->NormalizePath(path);
   resolved = true;
   return true;
 }
@@ -252,7 +255,7 @@ bool cmBinUtilsMacOSMachOLinker::ResolveRPathDependency(
       /*
        * paraphrasing @ben.boeckel:
        *  if /b/libB.dylib is supposed to be used,
-       *  /a/libbB.dylib will be found first if it exists. CMake tries to
+       *  /a/libB.dylib will be found first if it exists. CMake tries to
        *  sort rpath directories to avoid this, but sometimes there is no
        *  right answer.
        *
@@ -268,7 +271,9 @@ bool cmBinUtilsMacOSMachOLinker::ResolveRPathDependency(
        *  so as long as this method's resolution guarantees priority
        *  in that manner further checking should not be necessary?
        */
-      path = searchFile;
+      path = std::move(searchFile);
+
+      this->NormalizePath(path);
       resolved = true;
       return true;
     }
