@@ -2161,9 +2161,10 @@ int cmGlobalGenerator::TryCompile(int jobs, std::string const& srcdir,
   cmBuildOptions defaultBuildOptions(false, fast, PackageResolveMode::Disable);
 
   std::stringstream ostr;
-  auto ret = this->Build(jobs, srcdir, bindir, projectName, newTarget, ostr,
-                         "", config, defaultBuildOptions, true,
-                         this->TryCompileTimeout, cmSystemTools::OUTPUT_NONE);
+  auto ret =
+    this->Build(jobs, srcdir, bindir, projectName, newTarget, ostr, "", config,
+                defaultBuildOptions, true, this->TryCompileTimeout,
+                cmSystemTools::OUTPUT_NONE, {}, BuildTryCompile::Yes);
   output = ostr.str();
   return ret;
 }
@@ -2173,7 +2174,8 @@ cmGlobalGenerator::GenerateBuildCommand(
   std::string const& /*unused*/, std::string const& /*unused*/,
   std::string const& /*unused*/, std::vector<std::string> const& /*unused*/,
   std::string const& /*unused*/, int /*unused*/, bool /*unused*/,
-  cmBuildOptions /*unused*/, std::vector<std::string> const& /*unused*/)
+  cmBuildOptions /*unused*/, std::vector<std::string> const& /*unused*/,
+  BuildTryCompile /*unused*/)
 {
   GeneratedMakeCommand makeCommand;
   makeCommand.Add("cmGlobalGenerator::GenerateBuildCommand not implemented");
@@ -2193,7 +2195,8 @@ int cmGlobalGenerator::Build(
   std::ostream& ostr, std::string const& makeCommandCSTR,
   std::string const& config, cmBuildOptions buildOptions, bool verbose,
   cmDuration timeout, cmSystemTools::OutputOption outputMode,
-  std::vector<std::string> const& nativeOptions)
+  std::vector<std::string> const& nativeOptions,
+  BuildTryCompile isInTryCompile)
 {
   bool hideconsole = cmSystemTools::GetRunCommandHideConsole();
 
@@ -2222,7 +2225,7 @@ int cmGlobalGenerator::Build(
 
   std::vector<GeneratedMakeCommand> makeCommand = this->GenerateBuildCommand(
     makeCommandCSTR, projectName, bindir, targets, realConfig, jobs, verbose,
-    buildOptions, nativeOptions);
+    buildOptions, nativeOptions, isInTryCompile);
 
   // Workaround to convince some commands to produce output.
   if (outputMode == cmSystemTools::OUTPUT_PASSTHROUGH &&

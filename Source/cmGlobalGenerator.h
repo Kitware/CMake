@@ -108,6 +108,11 @@ class cmGlobalGenerator
 {
 public:
   using LocalGeneratorVector = std::vector<std::unique_ptr<cmLocalGenerator>>;
+  enum class BuildTryCompile
+  {
+    No,
+    Yes,
+  };
 
   //! Free any memory allocated with the GlobalGenerator
   cmGlobalGenerator(cmake* cm);
@@ -253,14 +258,15 @@ public:
    * empty then all is assumed. clean indicates if a "make clean" should be
    * done first.
    */
-  int Build(int jobs, std::string const& srcdir, std::string const& bindir,
-            std::string const& projectName,
-            std::vector<std::string> const& targetNames, std::ostream& ostr,
-            std::string const& makeProgram, std::string const& config,
-            cmBuildOptions buildOptions, bool verbose, cmDuration timeout,
-            cmSystemTools::OutputOption outputMode,
-            std::vector<std::string> const& nativeOptions =
-              std::vector<std::string>());
+  int Build(
+    int jobs, std::string const& srcdir, std::string const& bindir,
+    std::string const& projectName,
+    std::vector<std::string> const& targetNames, std::ostream& ostr,
+    std::string const& makeProgram, std::string const& config,
+    cmBuildOptions buildOptions, bool verbose, cmDuration timeout,
+    cmSystemTools::OutputOption outputMode,
+    std::vector<std::string> const& nativeOptions = std::vector<std::string>(),
+    BuildTryCompile isInTryCompile = BuildTryCompile::No);
 
   /**
    * Open a generated IDE project given the following information.
@@ -277,7 +283,8 @@ public:
     std::string const& projectDir, std::vector<std::string> const& targetNames,
     std::string const& config, int jobs, bool verbose,
     cmBuildOptions buildOptions = cmBuildOptions(),
-    std::vector<std::string> const& makeOptions = std::vector<std::string>());
+    std::vector<std::string> const& makeOptions = std::vector<std::string>(),
+    BuildTryCompile isInTryCompile = BuildTryCompile::No);
 
   virtual void PrintBuildCommandAdvice(std::ostream& os, int jobs) const;
 
