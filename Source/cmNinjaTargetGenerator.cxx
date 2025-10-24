@@ -1698,10 +1698,10 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
     if (ispcSuffixes.size() > 1) {
       std::string rootObjectDir =
         this->GeneratorTarget->GetObjectDirectory(config);
-      auto ispcSideEfffectObjects = detail::ComputeISPCExtraObjects(
+      auto ispcSideEffectObjects = detail::ComputeISPCExtraObjects(
         objectName, rootObjectDir, ispcSuffixes);
 
-      for (auto sideEffect : ispcSideEfffectObjects) {
+      for (auto sideEffect : ispcSideEffectObjects) {
         sideEffect = this->ConvertToNinjaPath(sideEffect);
         objBuild.ImplicitOuts.emplace_back(sideEffect);
         this->GetGlobalGenerator()->AddAdditionalCleanFile(sideEffect, config);
