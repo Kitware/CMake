@@ -15,10 +15,11 @@ find_package(Boost OPTIONAL_COMPONENTS
   python312
   python313
   python314
+  python315
 )
 
 set(FAILTEST TRUE)
-foreach (v IN ITEMS 27 34 35 36 37 38 39 310 311 312 313 314)
+foreach (v IN ITEMS 27 34 35 36 37 38 39 310 311 312 313 314 315)
   if (Boost_PYTHON${v}_FOUND)
     set(FAILTEST FALSE)
     break()
