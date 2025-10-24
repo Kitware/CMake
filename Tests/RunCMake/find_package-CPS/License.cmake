@@ -8,20 +8,24 @@ set(CMAKE_FIND_PACKAGE_SORT_DIRECTION DEC)
 find_package(LicenseTest REQUIRED)
 
 function(expect_license COMPONENT EXPECTED)
-  set(target LicenseTest::${COMPONENT})
-  if(TARGET ${target})
-    get_target_property(license ${target} "SPDX_LICENSE")
+  if(TARGET ${COMPONENT})
+    get_target_property(license ${COMPONENT} "SPDX_LICENSE")
     if (NOT "${license}" STREQUAL "${EXPECTED}")
       message(SEND_ERROR
-        "Target ${target} has wrong license '${license}'"
+        "Target ${COMPONENT} has wrong license '${license}'"
         " (expected '${EXPECTED}') !")
     endif()
   else()
-    message(SEND_ERROR "Expected target ${target} was not found !")
+    message(SEND_ERROR "Expected target ${COMPONENT} was not found !")
   endif()
 endfunction()
 
-expect_license(SpecifiedOnTarget "Apache-2.0")
-expect_license(InheritFromRoot "BSD-3-Clause")
-expect_license(InheritFromAppendix "Apache-2.0")
-expect_license(DisableInheritance "license-NOTFOUND")
+expect_license(LicenseTest::SpecifiedOnTarget "Apache-2.0")
+expect_license(LicenseTest::InheritFromRoot "BSD-3-Clause")
+expect_license(LicenseTest::InheritFromAppendix "Apache-2.0")
+expect_license(LicenseTest::DisableInheritance "license-NOTFOUND")
+
+find_package(PackageLicenseTest REQUIRED)
+
+expect_license(PackageLicenseTest::SpecifiedOnTarget "Apache-2.0")
+expect_license(PackageLicenseTest::InheritFromRoot "BSD-3-Clause")
