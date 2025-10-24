@@ -488,6 +488,15 @@ std::unique_ptr<cmPackageInfoReader> cmPackageInfoReader::Read(
     reader->DefaultLicense = defaultLicense.asString();
   } else if (parent) {
     reader->DefaultLicense = parent->DefaultLicense;
+  } else {
+    // If there is no 'default_license', check for 'license'. Note that we
+    // intentionally allow `default_license` on an appendix to override the
+    // parent, but we do not consider `license` on an appendix. This is
+    // consistent with not allowing LICENSE and APPENDIX to be used together.
+    Json::Value const& packageLicense = reader->Data["license"];
+    if (!packageLicense.isNull()) {
+      reader->DefaultLicense = packageLicense.asString();
+    }
   }
 
   return reader;
