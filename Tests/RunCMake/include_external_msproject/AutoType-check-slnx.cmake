@@ -26,6 +26,7 @@ RunCMake_check_slnx("${RunCMake_TEST_BINARY_DIR}/AutoType.slnx" [[
   <Project Path="ZERO_CHECK\.vcxproj" Id="[0-9a-f-]+"/>
   <Project Path="external\.csproj" Id="[0-9a-f-]+">
     <BuildDependency Project="ZERO_CHECK.vcxproj"/>
+    <Platform Project="[^"]+"/>
   </Project>
   <Project Path="external\.dbproj" Id="[0-9a-f-]+">
     <BuildDependency Project="ZERO_CHECK.vcxproj"/>
