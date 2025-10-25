@@ -1102,6 +1102,10 @@ endfunction()
 # Like TARGET_LINK_LIBRARIES but for swig modules
 #
 function(SWIG_LINK_LIBRARIES name)
+  cmake_policy(GET CMP0078 target_name_policy)
+  if (target_name_policy STREQUAL "NEW")
+    set (UseSWIG_TARGET_NAME_PREFERENCE STANDARD)
+  endif()
   if (UseSWIG_TARGET_NAME_PREFERENCE STREQUAL "STANDARD")
     message(DEPRECATION "SWIG_LINK_LIBRARIES is deprecated. Use TARGET_LINK_LIBRARIES instead.")
     target_link_libraries(${name} ${ARGN})
