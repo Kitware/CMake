@@ -152,12 +152,6 @@ if(CMake_INSTALL_DEPENDENCIES AND (APPLE OR WIN32))
   endif()
 endif()
 
-get_property(_Qt_Core_LOCATION TARGET Qt${CMake_QT_MAJOR_VERSION}::Core PROPERTY LOCATION)
-get_filename_component(Qt_BIN_DIR "${_Qt_Core_LOCATION}" PATH)
-if(APPLE)
-  get_filename_component(Qt_BIN_DIR "${Qt_BIN_DIR}" PATH)
-endif()
-
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 add_library(
@@ -362,10 +356,16 @@ if(CMake_INSTALL_DEPENDENCIES AND (APPLE OR WIN32))
   if(APPLE)
     set(fixup_exe "\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/${CMake_INSTALL_APP_DIR_SLASH}MacOS/CMake")
   endif()
+  get_property(_Qt_Core_LOCATION TARGET Qt${CMake_QT_MAJOR_VERSION}::Core PROPERTY LOCATION)
+  if(APPLE AND _Qt_Core_LOCATION MATCHES [[^(.*)/[^/]*\.framework/]])
+    set(Qt_LIB_DIR "${CMAKE_MATCH_1}")
+  else()
+    get_filename_component(Qt_LIB_DIR "${_Qt_Core_LOCATION}" PATH)
+  endif()
   install(CODE "
     include(BundleUtilities)
     set(BU_CHMOD_BUNDLE_ITEMS ON)
-    fixup_bundle(\"${fixup_exe}\" \"${QT_PLUGINS}\" \"${Qt_BIN_DIR};${QT_LIBRARY_DIR};${QT_BINARY_DIR}\")
+    fixup_bundle(\"${fixup_exe}\" \"${QT_PLUGINS}\" \"${Qt_LIB_DIR};${QT_LIBRARY_DIR};${QT_BINARY_DIR}\")
   " ${COMPONENT})
 endif()
 
