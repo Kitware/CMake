@@ -1,3 +1,4 @@
+cmake_minimum_required(VERSION 4.0)
 include(RunCMake)
 
 # Function to build and install a project.  The latter step *-check.cmake
@@ -87,6 +88,7 @@ run_cmake(EXPORT-OldIFace)
 run_cmake(EXPORT-UnknownExport)
 run_cmake(EXPORT-NamelinkOnly)
 run_cmake(EXPORT-SeparateNamelink)
+run_cmake(EXPORT-SystemInclude)
 run_cmake(EXPORT-TargetTwice)
 run_cmake(EXPORT-InterfaceLinkNoexist)
 run_cmake(CMP0062-NEW)

@@ -388,9 +388,8 @@ bool cmExportInstallFileGenerator::PopulateInterfaceProperties(
   cmGeneratorTarget const* const gt = targetExport->Target;
 
   std::string includesDestinationDirs;
-  this->PopulateInterfaceProperty("INTERFACE_SYSTEM_INCLUDE_DIRECTORIES", gt,
-                                  cmGeneratorExpression::InstallInterface,
-                                  properties);
+  this->PopulateSystemIncludeDirectoriesInterface(
+    gt, cmGeneratorExpression::InstallInterface, properties);
   this->PopulateIncludeDirectoriesInterface(
     gt, cmGeneratorExpression::InstallInterface, properties, *targetExport,
     includesDestinationDirs);
@@ -513,6 +512,38 @@ void cmExportInstallFileGenerator::PopulateSourcesInterface(
     this->ResolveTargetsInGeneratorExpressions(prepro, gt);
 
     if (!this->CheckInterfaceDirs(prepro, gt, propName)) {
+      return;
+    }
+    properties[propName] = prepro;
+  }
+}
+
+void cmExportInstallFileGenerator::PopulateSystemIncludeDirectoriesInterface(
+  cmGeneratorTarget const* target,
+  cmGeneratorExpression::PreprocessContext preprocessRule,
+  ImportPropertyMap& properties)
+{
+  assert(preprocessRule == cmGeneratorExpression::InstallInterface);
+
+  char const* const propName = "INTERFACE_SYSTEM_INCLUDE_DIRECTORIES";
+  cmValue input = target->GetProperty(propName);
+
+  if (!input) {
+    return;
+  }
+  if (input->empty()) {
+    // Set to empty
+    properties[propName].clear();
+    return;
+  }
+
+  std::string includes = (input ? *input : "");
+  std::string prepro = cmGeneratorExpression::Preprocess(
+    includes, preprocessRule, this->GetImportPrefixWithSlash());
+  if (!prepro.empty()) {
+    this->ResolveTargetsInGeneratorExpressions(prepro, target);
+
+    if (!this->CheckInterfaceDirs(prepro, target, propName)) {
       return;
     }
     properties[propName] = prepro;
