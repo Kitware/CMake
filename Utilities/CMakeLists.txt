@@ -7,7 +7,7 @@ if (CMake_DOC_ARTIFACT_PREFIX)
   # Undocumented option for CI usage to reuse already
   # built documentation.
   install(DIRECTORY ${CMake_DOC_ARTIFACT_PREFIX}/
-          DESTINATION . USE_SOURCE_PERMISSIONS)
+          DESTINATION ${CMake_INSTALL_APP_DIR} USE_SOURCE_PERMISSIONS)
 else()
   # Normal documentation build.
   add_subdirectory(Sphinx)

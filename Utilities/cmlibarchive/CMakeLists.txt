@@ -2218,4 +2218,4 @@ add_subdirectory(cpio)
 add_subdirectory(unzip)
 ENDIF()
 
-install(FILES COPYING DESTINATION ${CMAKE_DOC_DIR}/cmlibarchive)
+install(FILES COPYING DESTINATION ${CMake_INSTALL_DOC_DIR}/cmlibarchive)

@@ -35,6 +35,14 @@ set_property(CACHE CMake_INSTALL_INFIX PROPERTY HELPSTRING
   )
 mark_as_advanced(CMake_INSTALL_INFIX)
 
+if(APPLE AND BUILD_QtDialog)
+  set(CMake_INSTALL_APP_DIR "CMake.app/Contents")
+  set(CMake_INSTALL_APP_DIR_SLASH "${CMake_INSTALL_APP_DIR}/")
+else()
+  set(CMake_INSTALL_APP_DIR ".")
+  set(CMake_INSTALL_APP_DIR_SLASH "")
+endif()
+
 foreach(v
     BIN
     DATA
@@ -56,4 +64,7 @@ foreach(v
   endif()
   # Remove leading slash to treat as relative to install prefix.
   string(REGEX REPLACE "^/" "" CMAKE_${v}_DIR "${CMAKE_${v}_DIR}")
+
+  # Install under a base path within the prefix.
+  set(CMake_INSTALL_${v}_DIR "${CMake_INSTALL_APP_DIR_SLASH}${CMAKE_${v}_DIR}")
 endforeach()

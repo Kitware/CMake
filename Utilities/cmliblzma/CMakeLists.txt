@@ -195,4 +195,4 @@ if(WIN32 AND CMake_BUILD_PCH)
   target_precompile_headers(cmliblzma PRIVATE "common/mythread.h")
 endif()
 
-INSTALL(FILES COPYING DESTINATION ${CMAKE_DOC_DIR}/cmliblzma)
+INSTALL(FILES COPYING DESTINATION ${CMake_INSTALL_DOC_DIR}/cmliblzma)

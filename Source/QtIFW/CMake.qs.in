@@ -11,7 +11,7 @@ Component.prototype.createOperations = function()
     if (installer.value("os") === "win") {
 
         component.addOperation("CreateShortcut",
-                               "@TargetDir@/%CMAKE_DOC_DIR%/cmake.org.html",
+                               "@TargetDir@/%CMake_INSTALL_DOC_DIR%/cmake.org.html",
                                "@StartMenuDir@/CMake Web Site.lnk");
 
         component.addOperation("CreateShortcut",

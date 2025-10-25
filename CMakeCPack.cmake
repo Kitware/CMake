@@ -177,7 +177,7 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     endif()
   endif()
   install(FILES "${CMake_SOURCE_DIR}/Source/QtIFW/cmake.org.html"
-    DESTINATION "${CMAKE_DOC_DIR}"
+    DESTINATION "${CMake_INSTALL_DOC_DIR}"
   )
 endif()
 
@@ -220,7 +220,7 @@ endif()
 set(CPACK_PACKAGE_CONTACT "cmake+development@discourse.cmake.org")
 
 if(UNIX)
-  set(CPACK_STRIP_FILES "${CMAKE_BIN_DIR}/ccmake;${CMAKE_BIN_DIR}/cmake;${CMAKE_BIN_DIR}/cpack;${CMAKE_BIN_DIR}/ctest")
+  set(CPACK_STRIP_FILES "${CMake_INSTALL_BIN_DIR}/ccmake;${CMake_INSTALL_BIN_DIR}/cmake;${CMake_INSTALL_BIN_DIR}/cpack;${CMake_INSTALL_BIN_DIR}/ctest")
   set(CPACK_SOURCE_STRIP_FILES "")
   set(CPACK_PACKAGE_EXECUTABLES "ccmake" "CMake")
 endif()

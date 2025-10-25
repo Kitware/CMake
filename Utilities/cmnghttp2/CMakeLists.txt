@@ -50,4 +50,4 @@ target_include_directories(cmnghttp2 PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR}/lib/includes
   )
 
-install(FILES COPYING DESTINATION ${CMAKE_DOC_DIR}/cmnghttp2)
+install(FILES COPYING DESTINATION ${CMake_INSTALL_DOC_DIR}/cmnghttp2)

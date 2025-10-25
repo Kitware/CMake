@@ -283,7 +283,7 @@ endif()
 if(SPHINX_INFO)
   CMake_OPTIONAL_COMPONENT(sphinx-info)
   install(FILES ${CMAKE_CURRENT_BINARY_DIR}/texinfo/cmake.info
-          DESTINATION ${CMAKE_INFO_DIR}
+          DESTINATION ${CMake_INSTALL_INFO_DIR}
           ${COMPONENT}
           )
 endif()
@@ -306,7 +306,7 @@ if(SPHINX_MAN)
       if(NOT skip)
         CMake_OPTIONAL_COMPONENT(sphinx-man)
         install(FILES ${CMAKE_CURRENT_BINARY_DIR}/man/${name}.${sec}
-                DESTINATION ${CMAKE_MAN_DIR}/man${sec}
+                DESTINATION ${CMake_INSTALL_MAN_DIR}/man${sec}
                 ${COMPONENT})
       endif()
       unset(skip)
@@ -317,7 +317,7 @@ endif()
 if(SPHINX_HTML)
   CMake_OPTIONAL_COMPONENT(sphinx-html)
   install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/html
-          DESTINATION ${CMAKE_DOC_DIR}
+          DESTINATION ${CMake_INSTALL_DOC_DIR}
           ${COMPONENT}
           PATTERN .buildinfo EXCLUDE
           )
@@ -326,7 +326,7 @@ endif()
 if(SPHINX_SINGLEHTML)
   CMake_OPTIONAL_COMPONENT(sphinx-singlehtml)
   install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/singlehtml
-          DESTINATION ${CMAKE_DOC_DIR}
+          DESTINATION ${CMake_INSTALL_DOC_DIR}
           ${COMPONENT}
           PATTERN .buildinfo EXCLUDE
           )
@@ -335,13 +335,13 @@ endif()
 if(SPHINX_QTHELP)
   CMake_OPTIONAL_COMPONENT(sphinx-qthelp)
   install(FILES ${CMAKE_CURRENT_BINARY_DIR}/qthelp/CMake.qch
-          DESTINATION ${CMAKE_DOC_DIR} ${COMPONENT}
+          DESTINATION ${CMake_INSTALL_DOC_DIR} ${COMPONENT}
           )
 endif()
 
 if(SPHINX_LATEXPDF)
   CMake_OPTIONAL_COMPONENT(sphinx-latexpdf)
   install(FILES ${CMAKE_CURRENT_BINARY_DIR}/latexpdf/latex/CMake.pdf
-          DESTINATION ${CMAKE_DOC_DIR} ${COMPONENT}
+          DESTINATION ${CMake_INSTALL_DOC_DIR} ${COMPONENT}
           )
 endif()

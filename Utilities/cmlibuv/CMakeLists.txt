@@ -341,4 +341,4 @@ if(WIN32 AND CMake_BUILD_PCH)
   target_precompile_headers(cmlibuv PRIVATE "include/uv.h" "src/win/internal.h")
 endif()
 
-install(FILES LICENSE DESTINATION ${CMAKE_DOC_DIR}/cmlibuv)
+install(FILES LICENSE DESTINATION ${CMake_INSTALL_DOC_DIR}/cmlibuv)
