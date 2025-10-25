@@ -1,7 +1,7 @@
 /*
  * nghttp2 - HTTP/2 C Library
  *
- * Copyright (c) 2014 Tatsuhiro Tsujikawa
+ * Copyright (c) 2012 Tatsuhiro Tsujikawa
  *
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the
@@ -22,8 +22,8 @@
  * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-#ifndef NGHTTP2_MEM_H
-#define NGHTTP2_MEM_H
+#ifndef NGHTTP2_ALPN_H
+#define NGHTTP2_ALPN_H
 
 #ifdef HAVE_CONFIG_H
 #  include <config.h>
@@ -31,15 +31,4 @@
 
 #include <nghttp2/nghttp2.h>
 
-/* The default, system standard memory allocator */
-nghttp2_mem *nghttp2_mem_default(void);
-
-/* Convenient wrapper functions to call allocator function in
-   |mem|. */
-void *nghttp2_mem_malloc(nghttp2_mem *mem, size_t size);
-void nghttp2_mem_free(nghttp2_mem *mem, void *ptr);
-void nghttp2_mem_free2(nghttp2_free free_func, void *ptr, void *mem_user_data);
-void *nghttp2_mem_calloc(nghttp2_mem *mem, size_t nmemb, size_t size);
-void *nghttp2_mem_realloc(nghttp2_mem *mem, void *ptr, size_t size);
-
-#endif /* !defined(NGHTTP2_MEM_H) */
+#endif /* !defined(NGHTTP2_ALPN_H) */
