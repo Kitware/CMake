@@ -342,7 +342,17 @@ function(gtest_discover_tests_impl)
     set(discovery_extra_args "[==[${discovery_extra_args}]==]")
   endif()
 
-  set(json_file "${arg_TEST_WORKING_DIR}/cmake_test_discovery.json")
+  # Avoid a potential race condition for the POST_BUILD case when multiple
+  # calls are made to gtest_discover_tests() for different targets but the same
+  # working directory. For PRE_TEST, we're always executing serially during the
+  # ctest setup phase, so there is no race condition there, but POST_BUILD can
+  # lead to this code path being run in parallel. Use a hash to avoid potential
+  # problems with very long target names.
+  string(SHA256 target_hash "${arg_TEST_TARGET}")
+  string(SUBSTRING "${target_hash}" 0 10 target_hash)
+  set(json_file
+    "${arg_TEST_WORKING_DIR}/cmake_test_discovery_${target_hash}.json"
+  )
 
   # Remove json file to make sure we don't pick up an outdated one
   file(REMOVE "${json_file}")
