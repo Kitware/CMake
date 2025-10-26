@@ -1,7 +1,5 @@
 include(RunCMake)
 
-run_cmake(CUDA)
-
 # Unity of size 1 doesn't make sense and shouldn't be created.
 run_cmake(Unity1)
 run_cmake(Unity2)

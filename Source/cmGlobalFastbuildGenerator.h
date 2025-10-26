@@ -320,7 +320,8 @@ struct FastbuildTarget : public FastbuildTargetBase
   std::map<std::string, std::string> Variables;
   std::vector<FastbuildObjectListNode> ObjectListNodes;
   std::vector<FastbuildUnityNode> UnityNodes;
-  // Potentially multiple libs for different archs (apple only);
+  // Potentially multiple libs for different archs (apple only)
+  std::vector<FastbuildLinkerNode> CudaDeviceLinkNode;
   std::vector<FastbuildLinkerNode> LinkerNode;
   std::string RealOutput;
   FastbuildAliasNode PreBuildExecNodes, ExecNodes;
@@ -355,8 +356,6 @@ public:
 
   bool FindMakeProgram(cmMakefile* mf) override;
 
-  bool CheckLanguages(std::vector<std::string> const& languages,
-                      cmMakefile* mf) const override;
   void EnableLanguage(std::vector<std::string> const& lang, cmMakefile* mf,
                       bool optional) override;
 

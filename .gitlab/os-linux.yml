@@ -524,6 +524,14 @@
         CMAKE_CONFIGURATION: cuda13.0_nvidia
         CTEST_NO_WARNINGS_ALLOWED: 1
 
+.cuda13.0_nvidia_fastbuild:
+    extends: .cuda13.0
+
+    variables:
+        CMAKE_CONFIGURATION: cuda13.0_nvidia_fastbuild
+        CTEST_NO_WARNINGS_ALLOWED: 1
+        CMAKE_GENERATOR: "FASTBuild"
+
 ### HIP builds
 
 .hip6.3:
