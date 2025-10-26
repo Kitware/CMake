@@ -332,7 +332,7 @@ same as the Google Test name (i.e. ``suite.testcase``); see also
 
 # Save project's policies
 block(SCOPE_FOR POLICIES)
-cmake_policy(VERSION 3.30)
+cmake_policy(VERSION 4.2)
 
 #------------------------------------------------------------------------------
 function(gtest_add_tests)
