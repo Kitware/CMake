@@ -2672,7 +2672,10 @@ int cmCTest::ExecuteTests(std::vector<std::string> const& args)
   auto processHandler = [&handler]() -> int {
     return handler.ProcessHandler();
   };
-  int ret = instrumentation.InstrumentCommand("ctest", args, processHandler);
+  std::map<std::string, std::string> data;
+  data["showOnly"] = this->GetShowOnly() ? "1" : "0";
+  int ret =
+    instrumentation.InstrumentCommand("ctest", args, processHandler, data);
   instrumentation.CollectTimingData(cmInstrumentationQuery::Hook::PostCTest);
   if (ret < 0) {
     cmCTestLog(this, ERROR_MESSAGE, "Errors while running CTest\n");
