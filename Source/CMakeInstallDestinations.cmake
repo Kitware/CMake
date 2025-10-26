@@ -36,24 +36,24 @@ set_property(CACHE CMake_INSTALL_INFIX PROPERTY HELPSTRING
 mark_as_advanced(CMake_INSTALL_INFIX)
 
 foreach(v
-    CMAKE_BIN_DIR
-    CMAKE_DATA_DIR
-    CMAKE_DOC_DIR
-    CMAKE_INFO_DIR
-    CMAKE_MAN_DIR
-    CMAKE_XDGDATA_DIR
+    BIN
+    DATA
+    DOC
+    INFO
+    MAN
+    XDGDATA
     )
   # Populate the cache with empty values so we know when the user sets them.
-  set(${v} "" CACHE STRING "")
-  set_property(CACHE ${v} PROPERTY HELPSTRING
-    "Location under install prefix for ${${v}_DESC} (default \"${${v}_DEFAULT}\")"
+  set(CMAKE_${v}_DIR "" CACHE STRING "")
+  set_property(CACHE CMAKE_${v}_DIR PROPERTY HELPSTRING
+    "Location under install prefix for ${CMAKE_${v}_DIR_DESC} (default \"${CMAKE_${v}_DIR_DEFAULT}\")"
     )
-  set_property(CACHE ${v} PROPERTY ADVANCED 1)
+  set_property(CACHE CMAKE_${v}_DIR PROPERTY ADVANCED 1)
 
   # Use the default when the user did not set this variable.
-  if(NOT ${v})
-    set(${v} "${CMake_INSTALL_INFIX}${${v}_DEFAULT}")
+  if(NOT CMAKE_${v}_DIR)
+    set(CMAKE_${v}_DIR "${CMake_INSTALL_INFIX}${CMAKE_${v}_DIR_DEFAULT}")
   endif()
   # Remove leading slash to treat as relative to install prefix.
-  string(REGEX REPLACE "^/" "" ${v} "${${v}}")
+  string(REGEX REPLACE "^/" "" CMAKE_${v}_DIR "${CMAKE_${v}_DIR}")
 endforeach()
