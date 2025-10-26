@@ -23,6 +23,7 @@ class cmFastbuildNormalTargetGenerator : public cmFastbuildTargetGenerator
   std::string const ObjectOutDir;
   std::set<std::string> const Languages;
   std::unordered_map<std::string, std::string> const CompileObjectCmakeRules;
+  std::string const CudaCompileMode;
 
   // Now we're adding our link deps to command line and using .Libraries2 for
   // tracking deps.
@@ -50,6 +51,7 @@ private:
   // Example return value: {"CXX" : "<CMAKE_CXX_COMPILER> <DEFINES> <INCLUDES>
   // <FLAGS> -o <OBJECT> -c <SOURCE>" }
   std::unordered_map<std::string, std::string> GetCompileObjectCommand() const;
+  std::string GetCudaCompileMode() const;
   std::string GetLinkCommand() const;
 
   void AddCompilerLaunchersForLanguages();
@@ -70,6 +72,9 @@ private:
 
   std::vector<std::string> GetArches() const;
 
+  void GetCudaDeviceLinkLinkerAndArgs(std::string& linker,
+                                      std::string& args) const;
+  void GenerateCudaDeviceLink(FastbuildTarget& target) const;
   void GenerateObjects(FastbuildTarget& target);
   FastbuildUnityNode GetOneUnity(std::set<std::string> const& isolatedFiles,
                                  std::vector<std::string>& files,
@@ -117,7 +122,8 @@ private:
                               std::set<std::string>& linkedObjects);
 
   void AppendLinkDeps(std::set<FastbuildTargetDep>& preBuildDeps,
-                      FastbuildLinkerNode& linkerNode);
+                      FastbuildLinkerNode& linkerNode,
+                      FastbuildLinkerNode& cudaDeviceLinkLinkerNode);
   void AddLipoCommand(FastbuildTarget& target);
   void GenerateModuleDefinitionInfo(FastbuildTarget& target) const;
   std::vector<FastbuildExecNode> GetSymlinkExecs() const;
@@ -133,6 +139,9 @@ private:
   std::string DetectCompilerFlags(cmSourceFile const& srcFile,
                                   std::string const& arch);
 
+  void SplitLinkerFromArgs(std::string const& command,
+                           std::string& outLinkerExecutable,
+                           std::string& outLinkerArgs) const;
   void GetLinkerExecutableAndArgs(std::string const& command,
                                   std::string& outLinkerExecutable,
                                   std::string& outLinkerArgs);
