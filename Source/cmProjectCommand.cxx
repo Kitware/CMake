@@ -273,7 +273,7 @@ bool cmProjectCommand(std::vector<std::string> const& args,
   // Note, this intentionally doesn't touch cache variables as the legacy
   // behavior did not modify cache
   auto checkAndClearVariables = [&](cm::string_view var) {
-    std::vector<std::string> vv = { "PROJECT_", cmStrCat(projectName, "_") };
+    std::vector<std::string> vv = { "PROJECT_", cmStrCat(projectName, '_') };
     if (mf.IsRootMakefile()) {
       vv.push_back("CMAKE_PROJECT_");
     }
