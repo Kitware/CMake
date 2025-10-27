@@ -85,7 +85,7 @@ bool cmParseGTMCoverage::ReadMCovFile(char const* file)
     }
     // Find the full path to the file
     bool found = this->FindMumpsFile(routine, filepath);
-    if (!found && cmHasLiteralSuffix(routine, "%")) {
+    if (!found && cmHasSuffix(routine, '%')) {
       routine.erase(0, 1);
       found = this->FindMumpsFile(routine, filepath);
     }

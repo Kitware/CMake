@@ -998,7 +998,7 @@ cm::VS::Solution cmGlobalVisualStudioGenerator::CreateSolution(
         root->MaybeRelativeToCurBinDir(lg->GetCurrentBinaryDirectory());
       if (dir == "."_s) {
         dir.clear();
-      } else if (!cmHasLiteralSuffix(dir, "/")) {
+      } else if (!cmHasSuffix(dir, '/')) {
         dir += "/";
       }
 

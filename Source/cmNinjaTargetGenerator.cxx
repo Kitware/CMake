@@ -456,7 +456,7 @@ std::string cmNinjaTargetGenerator::GetPreprocessedFilePath(
 {
   // Choose an extension to compile already-preprocessed source.
   std::string ppExt = source->GetExtension();
-  if (cmHasLiteralPrefix(ppExt, "F")) {
+  if (cmHasPrefix(ppExt, 'F')) {
     // Some Fortran compilers automatically enable preprocessing for
     // upper-case extensions.  Since the source is already preprocessed,
     // use a lower-case extension.

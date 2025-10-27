@@ -283,7 +283,7 @@ bool cmTargetLinkLibrariesCommand(std::vector<std::string> const& args,
           if (cmHasLiteralPrefix(cur, "$<")) {
             ++genexNesting;
             ++pos;
-          } else if (genexNesting > 0 && cmHasLiteralPrefix(cur, ">")) {
+          } else if (genexNesting > 0 && cmHasPrefix(cur, '>')) {
             --genexNesting;
           }
         }
