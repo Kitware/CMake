@@ -1,0 +1,8 @@
+---
+id: cmhasliteralsuffix-char
+valid:
+  - 'cmHasLiteralSuffix(haystack, "foo")'
+invalid:
+  - 'cmHasLiteralSuffix(haystack, "a")'
+  - 'cmHasLiteralSuffix(haystack, "\n")'
+  - "cmHasLiteralSuffix(haystack, \"'\")"

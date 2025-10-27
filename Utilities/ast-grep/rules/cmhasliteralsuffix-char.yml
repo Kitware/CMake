@@ -1,0 +1,27 @@
+---
+id: cmhasliteralsuffix-char
+language: Cpp
+severity: warning
+message: "`cmHasLiteralSuffix` with a one-char suffix search should use `cmHasSuffix`"
+rule:
+  pattern: cmHasLiteralSuffix($HAYSTACK, $NEEDLE)
+constraints:
+  NEEDLE:
+    regex: '^"(.|\\.)"$'
+transform:
+  NEEDLE_CHANGE_QUOTE:
+    replace:
+      source: $NEEDLE
+      replace: '(^"|"$)'
+      by: "'"
+  NEEDLE_ESCAPE_SINGLE_QUOTE:
+    replace:
+      source: $NEEDLE_CHANGE_QUOTE
+      replace: "'''"
+      by: "'\\''"
+  NEEDLE_OUT:
+    replace:
+      source: $NEEDLE_ESCAPE_SINGLE_QUOTE
+      replace: '\\"'
+      by: '"'
+fix: cmHasSuffix($HAYSTACK, $NEEDLE_OUT)

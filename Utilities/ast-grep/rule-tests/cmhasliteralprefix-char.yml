@@ -1,0 +1,8 @@
+---
+id: cmhasliteralprefix-char
+valid:
+  - 'cmHasLiteralPrefix(haystack, "foo")'
+invalid:
+  - 'cmHasLiteralPrefix(haystack, "a")'
+  - 'cmHasLiteralPrefix(haystack, "\n")'
+  - "cmHasLiteralPrefix(haystack, \"'\")"
