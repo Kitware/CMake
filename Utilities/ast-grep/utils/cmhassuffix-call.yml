@@ -1,0 +1,5 @@
+---
+id: cmhassuffix-call
+language: Cpp
+rule:
+  pattern: cmHasSuffix($$$)

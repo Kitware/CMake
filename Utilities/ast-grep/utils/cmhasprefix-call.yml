@@ -1,0 +1,5 @@
+---
+id: cmhasprefix-call
+language: Cpp
+rule:
+  pattern: cmHasPrefix($$$)
