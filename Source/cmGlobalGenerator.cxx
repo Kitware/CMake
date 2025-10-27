@@ -1185,7 +1185,7 @@ void cmGlobalGenerator::SetLanguageEnabledMaps(std::string const& l,
     std::string outputExtension = *p;
     this->LanguageToOutputExtension[l] = outputExtension;
     this->OutputExtensions[outputExtension] = outputExtension;
-    if (cmHasPrefix(outputExtension, ".")) {
+    if (cmHasPrefix(outputExtension, '.')) {
       outputExtension = outputExtension.substr(1);
       this->OutputExtensions[outputExtension] = outputExtension;
     }
