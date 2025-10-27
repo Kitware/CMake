@@ -330,7 +330,8 @@ bool cmExportPackageInfoGenerator::NoteLinkedTarget(
         cmStrCat("Target \"", target->GetName(), "\" references target \"",
                  linkedName, "\", which comes from the \"", pkgName,
                  "\" package, but does not belong to the package's "
-                 "canonical namespace. This is not allowed."));
+                 "canonical namespace (\"",
+                 prefix, "\"). This is not allowed."));
       return false;
     }
 
