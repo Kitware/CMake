@@ -301,3 +301,10 @@ Changes made since CMake 4.0.0 include the following.
 * These versions made no changes to documented features or interfaces.
   Some implementation updates were made to support ecosystem changes
   and/or fix regressions.
+
+.. 4.0.5
+
+  * When building for macOS with the :generator:`Xcode` generator,
+    :variable:`CMAKE_OSX_DEPLOYMENT_TARGET` once again defaults to the
+    host's macOS version if it is older than the macOS SDK version,
+    as it did in CMake versions prior to 4.0.
