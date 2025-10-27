@@ -41,12 +41,17 @@ function(run_tutorial_step name)
   set(RunCMake_TEST_OUTPUT_MERGE 1)
   run_cmake_command(${name}-build ${CMAKE_COMMAND} --build . --config ${config})
 
+  if(name STREQUAL "Step0")
+    return()
+  endif()
+
   unset(RunCMake_TEST_OUTPUT_MERGE)
   set(RunCMake-stdout-file ${name}-run-stdout.txt)
   run_cmake_command(${name}-run ${exe} 25)
 
 endfunction()
 
+run_tutorial_step(Step0 NO_PRESET)
 run_tutorial_step(Step3 NO_PRESET)
 
 if(NOT can_build_cxx20_tutorial)
