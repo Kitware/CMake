@@ -163,7 +163,7 @@ bool cmPackageInfoArguments::SetEffectiveProject(cmExecutionStatus& status)
   if (!this->ProjectName.empty()) {
     // User specified a project; make sure it exists.
     if (!mf.GetStateSnapshot().CheckProjectName(this->ProjectName)) {
-      status.SetError(cmStrCat(R"(PROJECT given invalid project name ")"_s,
+      status.SetError(cmStrCat(R"(PROJECT given unknown project name ")"_s,
                                this->ProjectName, R"(".)"_s));
       return false;
     }
