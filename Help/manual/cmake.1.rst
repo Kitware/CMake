@@ -919,7 +919,23 @@ The options are:
 
 .. option:: --prefix <prefix>
 
-  Override the installation prefix, :variable:`CMAKE_INSTALL_PREFIX`.
+  Specifies an alternative installation prefix, temporarily replacing the
+  value of the :variable:`CMAKE_INSTALL_PREFIX` variable at the installation
+  phase.
+
+  The main purpose of this option is to allow installation to occur in an
+  arbitrary location.  This is commonly used in certain installation and
+  packaging workflows.  It is analogous to selecting the installation
+  directory during the installation phase.  For example, on Windows, where
+  a user may choose the destination folder for the project.
+
+  .. note::
+
+    When the project is using the :module:`GNUInstallDirs` module, there are
+    some :ref:`special cases <GNUInstallDirs special cases>` that are
+    evaluated based on the value of the :variable:`CMAKE_INSTALL_PREFIX`
+    variable during the configuration phase.  The results persist even if an
+    alternative prefix is used during installation.
 
 .. option:: --strip
 

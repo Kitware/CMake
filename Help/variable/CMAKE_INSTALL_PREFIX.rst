@@ -45,3 +45,21 @@ option:
 .. code-block:: shell
 
   cmake --install . --prefix /my/install/prefix
+
+.. note::
+
+  When the project is using the :module:`GNUInstallDirs` module, there are
+  some :ref:`special cases <GNUInstallDirs special cases>` that are
+  evaluated based on the value of the :variable:`CMAKE_INSTALL_PREFIX`
+  variable during the configuration phase.  The results persist even
+  if an alternative :option:`--prefix <cmake--install --prefix>` option
+  is used during installation.
+
+See Also
+^^^^^^^^
+
+* The :option:`--install-prefix <cmake --install-prefix>` option.
+* The :genex:`$<INSTALL_PREFIX>` generator expression.
+* The :ref:`installDir <CMakePresets installDir>` field in CMake configure
+  presets.
+* The :variable:`CPACK_PACKAGING_INSTALL_PREFIX` variable.
