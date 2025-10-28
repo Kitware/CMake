@@ -344,7 +344,8 @@ and contain the following data:
     The working directory in which the ``command`` was executed.
 
   ``result``
-    The exit-value of the command, an integer.
+    The exit code of the command, an integer. This will be ``null`` when
+    ``role`` is ``build``.
 
   ``role``
     The type of command executed, which will be one of the following values:

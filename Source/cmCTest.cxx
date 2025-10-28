@@ -2670,14 +2670,14 @@ int cmCTest::ExecuteTests(std::vector<std::string> const& args)
 
   cmInstrumentation instrumentation(this->GetBinaryDir());
   auto processHandler = [&handler]() -> int {
-    return handler.ProcessHandler();
+    return handler.ProcessHandler() < 0 ? cmCTest::TEST_ERRORS : 0;
   };
   std::map<std::string, std::string> data;
   data["showOnly"] = this->GetShowOnly() ? "1" : "0";
   int ret =
     instrumentation.InstrumentCommand("ctest", args, processHandler, data);
   instrumentation.CollectTimingData(cmInstrumentationQuery::Hook::PostCTest);
-  if (ret < 0) {
+  if (ret == cmCTest::TEST_ERRORS) {
     cmCTestLog(this, ERROR_MESSAGE, "Errors while running CTest\n");
     if (!this->Impl->OutputTestOutputOnTestFailure) {
       std::string const lastTestLog =
@@ -2688,10 +2688,8 @@ int cmCTest::ExecuteTests(std::vector<std::string> const& args)
                  "Use \"--rerun-failed --output-on-failure\" to re-run the "
                  "failed cases verbosely.\n");
     }
-    return cmCTest::TEST_ERRORS;
   }
-
-  return 0;
+  return ret;
 }
 
 int cmCTest::RunCMakeAndTest()

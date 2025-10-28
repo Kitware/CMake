@@ -306,7 +306,7 @@ int cmCTestLaunch::Run()
     this->Reporter.OptionCommandType, this->RealArgV,
     [this]() -> int {
       this->RunChild();
-      return 0;
+      return this->Reporter.ExitCode;
     },
     options, arrayOptions);
 

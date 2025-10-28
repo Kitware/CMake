@@ -25,3 +25,12 @@ add_test(NAME test COMMAND $<TARGET_FILE:main>)
 install(TARGETS main)
 set_target_properties(main PROPERTIES LABELS "label1;label2")
 set_target_properties(lib PROPERTIES LABELS "label3")
+
+if (FAIL)
+  file(WRITE "${CMAKE_BINARY_DIR}/dummy.cxx"
+    "#error \"something which will not compile\"\n"
+  )
+  add_executable(dummy "${CMAKE_BINARY_DIR}/dummy.cxx")
+  add_test(NAME dummy COMMAND ${CMAKE_COMMAND} -E false)
+  install(CODE "message(FATAL_ERROR \"Failed install.\")")
+endif()

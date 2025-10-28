@@ -24,15 +24,12 @@ foreach(snippet IN LISTS snippets)
   string(JSON target ERROR_VARIABLE noTarget GET "${contents}" target)
   if (NOT target MATCHES NOTFOUND)
     set(targets "main;lib;customTarget;TARGET_NAME")
+    if (ARGS_FAIL)
+      list(APPEND targets "dummy")
+    endif()
     if (NOT ${target} IN_LIST targets)
       json_error("${snippet}" "Unexpected target: ${target}")
     endif()
-  endif()
-
-  # Verify output
-  string(JSON result GET "${contents}" result)
-  if (NOT ${result} EQUAL 0)
-    json_error("${snippet}" "Compile command had non-0 result")
   endif()
 
   # Verify contents of compile-* Snippets
@@ -40,11 +37,29 @@ foreach(snippet IN LISTS snippets)
     string(JSON target GET "${contents}" target)
     string(JSON source GET "${contents}" source)
     string(JSON language GET "${contents}" language)
+    string(JSON result GET "${contents}" result)
     if (NOT language MATCHES "C\\+\\+")
       json_error("${snippet}" "Expected C++ compile language")
     endif()
     if (NOT source MATCHES "${target}.cxx$")
       json_error("${snippet}" "Unexpected source file")
+    endif()
+    if (ARGS_FAIL)
+      if (source MATCHES "dummy.cxx" AND result EQUAL 0)
+        json_error("${snippet}"
+          "Expected nonzero exit code for compile command, got: ${result}"
+        )
+      elseif (NOT source MATCHES "dummy.cxx" AND NOT result EQUAL 0)
+        json_error("${snippet}"
+          "Expected zero exit code for compile command, got: ${result}"
+        )
+      endif()
+    else()
+      if (NOT result EQUAL 0)
+        json_error("${snippet}"
+          "Expected zero exit code for compile command, got: ${result}"
+        )
+      endif()
     endif()
   endif()
 
@@ -80,8 +95,40 @@ foreach(snippet IN LISTS snippets)
   # Verify contents of test-* Snippets
   if (filename MATCHES "^test-")
     string(JSON testName GET "${contents}" testName)
-    if (NOT testName STREQUAL "test")
-      json_error("${snippet}" "Unexpected testName: ${testName}")
+    string(JSON result GET "${contents}" result)
+    if (ARGS_FAIL)
+      if (testName STREQUAL "test" AND NOT result EQUAL 0)
+        json_error("${snippet}" "Expected zero exit code for test")
+      elseif (testName STREQUAL "dummy" AND result EQUAL 0)
+        json_error("${snippet}"
+          "Expected nonzero exit code for dummy test, got: ${result}"
+        )
+      elseif (NOT testName MATCHES "test|dummy")
+        json_error("${snippet}" "Unexpected test name: ${testName}")
+      endif()
+    else()
+      if (NOT testName STREQUAL "test")
+        json_error("${snippet}" "Unexpected test name: ${testName}")
+      endif()
+      if (NOT result EQUAL 0)
+        json_error("${snippet}"
+          "Expected zero exit code for test, got: ${result}"
+        )
+      endif()
+    endif()
+  endif()
+
+  # Verify the overall result, in addition to the sub-commands above.
+  if (filename MATCHES "^cmakeInstall|^cmakeBuild|^ctest")
+    string(JSON result GET "${contents}" result)
+    if (ARGS_FAIL AND result EQUAL 0)
+      json_error("${snippet}"
+        "Expected nonzero exit code, got: ${result}"
+      )
+    elseif (NOT ARGS_FAIL AND NOT result EQUAL 0)
+      json_error("${snippet}"
+        "Expected zero exit code, got: ${result}"
+      )
     endif()
   endif()
 
