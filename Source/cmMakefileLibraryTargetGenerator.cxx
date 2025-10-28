@@ -176,7 +176,6 @@ void cmMakefileLibraryTargetGenerator::WriteSharedLibraryRules(bool relink)
   }
 
   std::string extraFlags;
-  this->GetTargetLinkFlags(extraFlags, linkLanguage);
   this->LocalGenerator->AppendTargetCreationLinkFlags(
     extraFlags, this->GeneratorTarget, linkLanguage);
   this->LocalGenerator->AddConfigVariableFlags(
@@ -194,6 +193,8 @@ void cmMakefileLibraryTargetGenerator::WriteSharedLibraryRules(bool relink)
 
   this->UseLWYU = this->LocalGenerator->AppendLWYUFlags(
     extraFlags, this->GeneratorTarget, linkLanguage);
+
+  this->GetTargetLinkFlags(extraFlags, linkLanguage);
 
   this->WriteLibraryRules(linkRuleVar, extraFlags, relink);
 }
@@ -214,7 +215,6 @@ void cmMakefileLibraryTargetGenerator::WriteModuleLibraryRules(bool relink)
     cmStrCat("CMAKE_", linkLanguage, "_CREATE_SHARED_MODULE");
 
   std::string extraFlags;
-  this->GetTargetLinkFlags(extraFlags, linkLanguage);
   this->LocalGenerator->AppendTargetCreationLinkFlags(
     extraFlags, this->GeneratorTarget, linkLanguage);
   this->LocalGenerator->AddConfigVariableFlags(
@@ -233,6 +233,8 @@ void cmMakefileLibraryTargetGenerator::WriteModuleLibraryRules(bool relink)
   this->UseLWYU = this->LocalGenerator->AppendLWYUFlags(
     extraFlags, this->GeneratorTarget, linkLanguage);
 
+  this->GetTargetLinkFlags(extraFlags, linkLanguage);
+
   this->WriteLibraryRules(linkRuleVar, extraFlags, relink);
 }
 
@@ -244,12 +246,12 @@ void cmMakefileLibraryTargetGenerator::WriteFrameworkRules(bool relink)
     cmStrCat("CMAKE_", linkLanguage, "_CREATE_MACOSX_FRAMEWORK");
 
   std::string extraFlags;
-  this->GetTargetLinkFlags(extraFlags, linkLanguage);
   this->LocalGenerator->AppendTargetCreationLinkFlags(
     extraFlags, this->GeneratorTarget, linkLanguage);
   this->LocalGenerator->AddConfigVariableFlags(
     extraFlags, "CMAKE_MACOSX_FRAMEWORK_LINKER_FLAGS", this->GeneratorTarget,
     cmBuildStep::Link, linkLanguage, this->GetConfigName());
+  this->GetTargetLinkFlags(extraFlags, linkLanguage);
 
   this->WriteLibraryRules(linkRuleVar, extraFlags, relink);
 }
