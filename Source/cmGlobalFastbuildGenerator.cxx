@@ -893,6 +893,10 @@ void cmGlobalFastbuildGenerator::WriteCompilers()
     }
     WriteVariable("Executable", Quote(compilerPath), 1);
     WriteVariable("CompilerFamily", Quote(compilerDef.CompilerFamily), 1);
+    if (this->GetCMakeInstance()->GetIsInTryCompile()) {
+      WriteVariable("AllowCaching", "false", 1);
+      WriteVariable("AllowDistribution", "false", 1);
+    }
 
     if (compilerDef.UseLightCache && compilerDef.CompilerFamily == "msvc") {
       WriteVariable("UseLightCache_Experimental", "true", 1);
