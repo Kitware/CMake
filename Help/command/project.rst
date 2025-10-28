@@ -127,6 +127,17 @@ The options are:
   See the :prop_tgt:`SPDX_LICENSE` property for specifying the license(s) on
   individual software artifacts.
 
+  .. note::
+    The project license is *not* used to initialize the
+    :prop_tgt:`SPDX_LICENSE` property of individual targets.  This allows the
+    package license and default component license, which are specified when
+    exporting package information, to be meaningful.  Only |CPS| exports make
+    use of this information.
+
+    The project license *is* inherited as the package license in some cases.
+    Refer to the ``PROJECT`` option and related documentation of the
+    :command:`export` and :command:`install` commands for more information.
+
 .. _SPDX: https://spdx.dev/
 .. |SPDX| replace:: System Package Data Exchange
 
@@ -181,8 +192,6 @@ The variables set through the ``VERSION``, ``COMPAT_VERSION``,
 intended for use as default values in package metadata and documentation.
 The :command:`export` and :command:`install` commands use these accordingly
 when generating |CPS| package descriptions.
-
-.. |CPS| replace:: Common Package Specification
 
 .. _`Code Injection`:
 
@@ -252,3 +261,5 @@ call exists, CMake will issue a warning and pretend there is a
   other commands whose behavior they may affect and for this reason the
   ``project()`` command will issue a warning if this order is not kept.
   See also policy :policy:`CMP0000`.
+
+.. |CPS| replace:: Common Package Specification
