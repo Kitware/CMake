@@ -18,4 +18,4 @@ set(CMake_TEST_TLS_VERIFY_URL_BAD "https://badtls-expired.kitware.com" CACHE STR
 set(CMake_TEST_TLS_VERSION "1.3" CACHE STRING "")
 set(CMake_TEST_TLS_VERSION_URL_BAD "https://badtls-v1-1.kitware.com:8011" CACHE STRING "")
 
-include("${CMAKE_CURRENT_LIST_DIR}/configure_fedora42_common.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/configure_fedora43_common.cmake")

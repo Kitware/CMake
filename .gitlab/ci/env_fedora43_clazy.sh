@@ -1,6 +1,6 @@
 export CC=/usr/bin/clang
 export CXX=/usr/bin/clazy
-export CLANGXX=/usr/bin/clang++
+export CLANGXX=/usr/bin/clang++-20
 
 export CLAZY_CHECKS="level2\
 ,no-base-class-event\
