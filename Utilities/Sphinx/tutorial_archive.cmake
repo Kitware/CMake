@@ -14,7 +14,7 @@ file(COPY "${help_dir}/guide/tutorial/"
   DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/${archive_name}"
   NO_SOURCE_PERMISSIONS
   PATTERN *.rst EXCLUDE
-  PATTERN source.txt EXCLUDE
+  REGEX "/guide/tutorial/include$" EXCLUDE
   )
 file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/${archive_name}/README.txt" [[
 This directory contains source code examples for the CMake Tutorial.
@@ -32,11 +32,11 @@ file(ARCHIVE_CREATE
   )
 
 # Write a reStructuredText snippet included from the tutorial index.
-file(WRITE "${help_dir}/guide/tutorial/source.txt" "
+file(WRITE "${help_dir}/guide/tutorial/include/source.rst" [[
 .. |tutorial_source| replace::
   The tutorial source code examples are available in
-  :download:`this archive </_generated/${archive_name}.zip>`.
-")
+  :download:`this archive </_generated/]] "${archive_name}" [[.zip>`.
+]])
 
 # Remove temporary directory.
 file(REMOVE_RECURSE "${CMAKE_CURRENT_BINARY_DIR}/${archive_name}")
