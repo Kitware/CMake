@@ -988,9 +988,7 @@ cm::VS::Solution cmGlobalVisualStudioGenerator::CreateSolution(
       continue;
     }
 
-    cmValue vcprojName = gt->GetProperty("GENERATOR_FILE_NAME");
-    cmValue vcprojType = gt->GetProperty("GENERATOR_FILE_NAME_EXT");
-    if (vcprojName && vcprojType) {
+    if (cmValue vcprojName = gt->GetProperty("GENERATOR_FILE_NAME")) {
       cmLocalGenerator* lg = gt->GetLocalGenerator();
       std::string dir =
         root->MaybeRelativeToCurBinDir(lg->GetCurrentBinaryDirectory());
@@ -1000,14 +998,21 @@ cm::VS::Solution cmGlobalVisualStudioGenerator::CreateSolution(
         dir += "/";
       }
 
-      project->Path = cmStrCat(dir, *vcprojName, *vcprojType);
+      cm::string_view vcprojExt;
       if (this->TargetIsFortranOnly(gt)) {
+        vcprojExt = ".vfproj"_s;
         project->TypeId = Solution::Project::TypeIdFortran;
       } else if (gt->IsCSharpOnly()) {
+        vcprojExt = ".csproj"_s;
         project->TypeId = Solution::Project::TypeIdCSharp;
       } else {
+        vcprojExt = ".vcproj"_s;
         project->TypeId = Solution::Project::TypeIdDefault;
       }
+      if (cmValue genExt = gt->GetProperty("GENERATOR_FILE_NAME_EXT")) {
+        vcprojExt = *genExt;
+      }
+      project->Path = cmStrCat(dir, *vcprojName, vcprojExt);
 
       if (gt->IsDotNetSdkTarget() &&
           !cmGlobalVisualStudioGenerator::IsReservedTarget(gt->GetName())) {
