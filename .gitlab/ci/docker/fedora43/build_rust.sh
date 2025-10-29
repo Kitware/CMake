@@ -2,7 +2,7 @@
 
 set -e
 
-typos_version=1.36.1
+typos_version=1.38.1
 cargo install --root /usr/local --version "$typos_version" typos-cli
 
 strip /usr/local/bin/typos
