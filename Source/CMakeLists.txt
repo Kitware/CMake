@@ -215,10 +215,14 @@ add_library(
   cmExportInstallFileGenerator.cxx
   cmExportInstallPackageInfoGenerator.h
   cmExportInstallPackageInfoGenerator.cxx
+  cmExportInstallSbomGenerator.h
+  cmExportInstallSbomGenerator.cxx
   cmExportPackageInfoGenerator.h
   cmExportPackageInfoGenerator.cxx
   cmExportTryCompileFileGenerator.h
   cmExportTryCompileFileGenerator.cxx
+  cmExportSbomGenerator.h
+  cmExportSbomGenerator.cxx
   cmExportSet.h
   cmExportSet.cxx
   cmExternalMakefileProjectGenerator.cxx
@@ -344,6 +348,8 @@ add_library(
   cmInstallRuntimeDependencySet.cxx
   cmInstallRuntimeDependencySetGenerator.h
   cmInstallRuntimeDependencySetGenerator.cxx
+  cmInstallSbomExportGenerator.h
+  cmInstallSbomExportGenerator.cxx
   cmInstallScriptGenerator.h
   cmInstallScriptGenerator.cxx
   cmInstallSubdirectoryGenerator.h
@@ -707,6 +713,8 @@ add_library(
   cmRemoveDefinitionsCommand.h
   cmReturnCommand.cxx
   cmReturnCommand.h
+  cmSbomArguments.h
+  cmSbomArguments.cxx
   cmSbomObject.h
   cmSbomSerializer.h
   cmSearchPath.cxx

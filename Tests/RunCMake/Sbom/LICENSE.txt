@@ -1,0 +1,2 @@
+This is a sample file to verify the SBOM install files command.
+It's not an actual license.

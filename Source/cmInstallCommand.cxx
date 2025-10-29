@@ -39,6 +39,7 @@
 #include "cmInstallPackageInfoExportGenerator.h"
 #include "cmInstallRuntimeDependencySet.h"
 #include "cmInstallRuntimeDependencySetGenerator.h"
+#include "cmInstallSbomExportGenerator.h"
 #include "cmInstallScriptGenerator.h"
 #include "cmInstallTargetGenerator.h"
 #include "cmList.h"
@@ -48,6 +49,7 @@
 #include "cmPolicies.h"
 #include "cmRange.h"
 #include "cmRuntimeDependencyArchive.h"
+#include "cmSbomArguments.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSubcommandTable.h"
@@ -2513,6 +2515,92 @@ bool HandleRuntimeDependencySetMode(std::vector<std::string> const& args,
   return true;
 }
 
+bool HandleSbomMode(std::vector<std::string> const& args,
+                    cmExecutionStatus& status)
+{
+#ifndef CMAKE_BOOTSTRAP
+  if (!cmExperimental::HasSupportEnabled(
+        status.GetMakefile(), cmExperimental::Feature::GenerateSbom)) {
+    status.SetError("does not recognize sub-command SBOM");
+    return false;
+  }
+
+  Helper helper(status);
+  cmInstallCommandArguments ica(helper.DefaultComponentName, *helper.Makefile);
+
+  cmSbomArguments arguments;
+  ArgumentParser::NonEmpty<std::string> exportName;
+  ArgumentParser::NonEmpty<std::string> cxxModulesDirectory;
+
+  arguments.Bind(ica);
+  ica.Bind("EXPORT"_s, exportName);
+  // ica.Bind("CXX_MODULES_DIRECTORY"_s, cxxModulesDirectory); TODO?
+
+  std::vector<std::string> unknownArgs;
+  ica.Parse(args, &unknownArgs);
+
+  ArgumentParser::ParseResult result = ica.Parse(args, &unknownArgs);
+  if (!result.Check(args[0], &unknownArgs, status)) {
+    return false;
+  }
+
+  if (!ica.Finalize()) {
+    return false;
+  }
+
+  if (arguments.PackageName.empty()) {
+    // TODO: Fix our use of the parser to enforce this.
+    status.SetError(cmStrCat(args[0], " missing SBOM name."));
+    return false;
+  }
+
+  if (exportName.empty()) {
+    status.SetError(cmStrCat(args[0], " missing EXPORT."));
+    return false;
+  }
+
+  if (!arguments.Check(status) || !arguments.SetMetadataFromProject(status)) {
+    return false;
+  }
+
+  // Get or construct the destination path.
+  std::string dest = ica.GetDestination();
+  if (dest.empty()) {
+    if (helper.Makefile->GetSafeDefinition("CMAKE_SYSTEM_NAME") == "Windows") {
+      dest = std::string{ "/sbom/"_s };
+    } else {
+      dest = cmStrCat(helper.GetLibraryDestination(nullptr), "/sbom/",
+                      arguments.GetPackageDirName());
+    }
+  }
+
+  cmExportSet& exportSet =
+    helper.Makefile->GetGlobalGenerator()->GetExportSets()[exportName];
+
+  cmInstallGenerator::MessageLevel message =
+    cmInstallGenerator::SelectMessageLevel(helper.Makefile);
+
+  // Tell the global generator about any installation component names
+  // specified
+  helper.Makefile->GetGlobalGenerator()->AddInstallComponent(
+    ica.GetComponent());
+
+  // Create the export install generator.
+  helper.Makefile->AddInstallGenerator(
+    cm::make_unique<cmInstallSbomExportGenerator>(
+      &exportSet, dest, ica.GetPermissions(), ica.GetConfigurations(),
+      ica.GetComponent(), message, ica.GetExcludeFromAll(),
+      std::move(arguments), std::move(cxxModulesDirectory),
+      helper.Makefile->GetBacktrace()));
+
+  return true;
+#else
+  static_cast<void>(args);
+  status.SetError("SBOM not supported in bootstrap cmake");
+  return false;
+#endif
+}
+
 bool Helper::MakeFilesFullPath(char const* modeName,
                                std::vector<std::string> const& relFiles,
                                std::vector<std::string>& absFiles)
@@ -2750,6 +2838,7 @@ bool cmInstallCommand(std::vector<std::string> const& args,
     { "EXPORT_ANDROID_MK"_s, HandleExportAndroidMKMode },
     { "PACKAGE_INFO"_s, HandlePackageInfoMode },
     { "RUNTIME_DEPENDENCY_SET"_s, HandleRuntimeDependencySetMode },
+    { "SBOM"_s, HandleSbomMode }
   };
 
   return subcommand(args[0], args, status);
