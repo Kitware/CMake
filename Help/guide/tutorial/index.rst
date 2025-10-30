@@ -21,6 +21,7 @@ provides the complete solution for the previous step.
 .. toctree::
   :maxdepth: 2
 
+  Before You Begin
   Getting Started with CMake
   CMake Language Fundamentals
   Configuration and Cache Variables
