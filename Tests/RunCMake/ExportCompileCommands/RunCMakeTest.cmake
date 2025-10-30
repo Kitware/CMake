@@ -9,4 +9,7 @@ endif()
 run_cmake_with_options(BeforeProject -DCMAKE_PROJECT_INCLUDE_BEFORE=BeforeProjectBEFORE.cmake)
 run_cmake(CustomCompileRule)
 run_cmake(Properties)
-run_cmake(PropertiesGenerateCommand)
+
+if(NOT RunCMake_GENERATOR STREQUAL "FASTBuild")
+  run_cmake(PropertiesGenerateCommand)
+endif()
