@@ -477,11 +477,18 @@ void cmGlobalFastbuildGenerator::Generate()
       this->GetCMakeInstance()->GetIsInTryCompile()) {
     return;
   }
+  std::string const workingDir =
+    this->GetCMakeInstance()->GetHomeOutputDirectory();
   //  Make "rebuild-bff" target up-to-date after the generation.
   //  This is actually a noop, it just asks CMake to touch the generated file
   //  so FASTBuild would consider the target as up-to-date.
-  AskCMakeToMakeRebuildBFFUpToDate(
-    this->GetCMakeInstance()->GetHomeOutputDirectory());
+  AskCMakeToMakeRebuildBFFUpToDate(workingDir);
+
+  if (this->GlobalSettingIsOn("CMAKE_EXPORT_COMPILE_COMMANDS")) {
+    std::string output;
+    ExecuteFastbuildTarget(workingDir, FASTBUILD_ALL_TARGET_NAME, output,
+                           { "-compdb" });
+  }
 }
 
 void cmGlobalFastbuildGenerator::AskCMakeToMakeRebuildBFFUpToDate(
