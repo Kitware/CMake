@@ -183,7 +183,7 @@ function(_apple_resolve_multi_arch_sysroots)
     return() # Only apply to multi-arch
   endif()
 
-  if(NOT CMAKE_OSX_SYSROOT OR CMAKE_OSX_SYSROOT STREQUAL "macosx")
+  if(NOT CMAKE_OSX_SYSROOT OR CMAKE_OSX_SYSROOT MATCHES "(^|/)[Mm][Aa][Cc][Oo][Ss][Xx]")
     # macOS doesn't have a simulator sdk / sysroot, so there is no need to handle per-sdk arches.
     return()
   endif()
