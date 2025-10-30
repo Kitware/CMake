@@ -4,6 +4,7 @@ CMake Error at [^
 +
 [ \t]*Path: '[^']*discovery_timeout_test(\.exe)?'
 [ \t]*Working directory: '[^']*/Tests/RunCMake/GoogleTest/GoogleTest-discovery-timeout'
+[ \t]*Timeout: '[^']*'
 [ \t]*Result: Process terminated due to timeout
 [ \t]*Output:
 [ \t]*timeout\.
