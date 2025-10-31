@@ -1,6 +1,10 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
 # file LICENSE.rst or https://cmake.org/licensing for details.
 
+if(CMake_GUI_OSX_DEPLOYMENT_TARGET)
+  set(CMAKE_OSX_DEPLOYMENT_TARGET "${CMake_GUI_OSX_DEPLOYMENT_TARGET}")
+endif()
+
 project(QtDialog)
 CMake_OPTIONAL_COMPONENT(cmake-gui)
 set(QT_COMPONENTS
@@ -69,7 +73,7 @@ if(CMake_QT_STATIC_QWindowsIntegrationPlugin_LIBRARIES)
 endif()
 
 # We need to install platform plugin and add qt.conf for Qt5 on Mac and Windows.
-if(CMake_INSTALL_DEPENDENCIES AND (APPLE OR WIN32))
+if(CMake_INSTALL_DEPENDENCIES AND (APPLE OR WIN32) AND NOT COMMAND qt_generate_deploy_app_script)
   function(_qt_get_plugin_name_with_version target out_var)
       string(REGEX REPLACE "^Qt::(.+)" "Qt${CMake_QT_MAJOR_VERSION}::\\1"
              qt_plugin_with_version "${target}")
@@ -332,23 +336,33 @@ if(APPLE)
 endif()
 
 if(CMake_INSTALL_DEPENDENCIES AND (APPLE OR WIN32))
-  # install rules for including 3rd party libs such as Qt
-  # if a system Qt is used (e.g. installed in /usr/lib/), it will not be included in the installation
-  set(fixup_exe "\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/${CMake_INSTALL_BIN_DIR}/cmake-gui${CMAKE_EXECUTABLE_SUFFIX}")
-  if(APPLE)
-    set(fixup_exe "\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/${CMake_INSTALL_APP_DIR_SLASH}MacOS/CMake")
-  endif()
-  get_property(_Qt_Core_LOCATION TARGET Qt${CMake_QT_MAJOR_VERSION}::Core PROPERTY LOCATION)
-  if(APPLE AND _Qt_Core_LOCATION MATCHES [[^(.*)/[^/]*\.framework/]])
-    set(Qt_LIB_DIR "${CMAKE_MATCH_1}")
+  if(COMMAND qt_generate_deploy_app_script)
+    # Qt libraries are found via @rpath, so point the runtime path at them.
+    set_property(TARGET cmake-gui PROPERTY INSTALL_RPATH "@executable_path/../Frameworks")
+    qt_generate_deploy_app_script(
+      TARGET cmake-gui
+      OUTPUT_SCRIPT qt_deploy_script
+    )
+    install(SCRIPT "${qt_deploy_script}")
   else()
-    get_filename_component(Qt_LIB_DIR "${_Qt_Core_LOCATION}" PATH)
+    # install rules for including 3rd party libs such as Qt
+    # if a system Qt is used (e.g. installed in /usr/lib/), it will not be included in the installation
+    set(fixup_exe "\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/${CMake_INSTALL_BIN_DIR}/cmake-gui${CMAKE_EXECUTABLE_SUFFIX}")
+    if(APPLE)
+      set(fixup_exe "\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/${CMake_INSTALL_APP_DIR_SLASH}MacOS/CMake")
+    endif()
+    get_property(_Qt_Core_LOCATION TARGET Qt${CMake_QT_MAJOR_VERSION}::Core PROPERTY LOCATION)
+    if(APPLE AND _Qt_Core_LOCATION MATCHES [[^(.*)/[^/]*\.framework/]])
+      set(Qt_LIB_DIR "${CMAKE_MATCH_1}")
+    else()
+      get_filename_component(Qt_LIB_DIR "${_Qt_Core_LOCATION}" PATH)
+    endif()
+    install(CODE "
+      include(BundleUtilities)
+      set(BU_CHMOD_BUNDLE_ITEMS ON)
+      fixup_bundle(\"${fixup_exe}\" \"${QT_PLUGINS}\" \"${Qt_LIB_DIR};${QT_LIBRARY_DIR};${QT_BINARY_DIR}\")
+    " ${COMPONENT})
   endif()
-  install(CODE "
-    include(BundleUtilities)
-    set(BU_CHMOD_BUNDLE_ITEMS ON)
-    fixup_bundle(\"${fixup_exe}\" \"${QT_PLUGINS}\" \"${Qt_LIB_DIR};${QT_LIBRARY_DIR};${QT_BINARY_DIR}\")
-  " ${COMPONENT})
 endif()
 
 set(CMAKE_PACKAGE_QTGUI TRUE)

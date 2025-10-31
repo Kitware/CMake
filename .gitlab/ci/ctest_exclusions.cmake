@@ -41,6 +41,13 @@ if ("$ENV{CMAKE_CONFIGURATION}" MATCHES "_valgrind")
     )
 endif()
 
+if ("$ENV{CMAKE_CONFIGURATION}" MATCHES "_xcode")
+  list(APPEND test_exclusions
+    # FIXME(#27358): Qt6Autogen.RerunMocOnAddFile fails in Xcode.
+    "^Qt6Autogen.RerunMocOnAddFile$"
+    )
+endif()
+
 string(REPLACE ";" "|" test_exclusions "${test_exclusions}")
 if (test_exclusions)
   set(test_exclusions "(${test_exclusions})")

@@ -1,5 +1,6 @@
 # Ignore files known to be downloaded by CI jobs.
 /5.15.1-0-202009071110*
+/6.9.3-0-202509261207*
 /appimagetool
 /bcc*
 /cmake*
