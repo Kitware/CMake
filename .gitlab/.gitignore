@@ -12,7 +12,6 @@
 /innosetup
 /jom
 /llvm*
-/MacOS*
 /mingw
 /msvc*
 /ninja*
