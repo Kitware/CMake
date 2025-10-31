@@ -1,0 +1,11 @@
+# Host tools
+curl
+git
+unzip
+
+# Compilers
+g++
+
+# CUDA Dependencies
+ocl-icd-opencl-dev
+opencl-headers
