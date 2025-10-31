@@ -381,6 +381,7 @@ function(gtest_discover_tests_impl)
       "Error running test executable.\n"
       "  Path: '${path}'\n"
       "  Working directory: '${arg_TEST_WORKING_DIR}'\n"
+      "  Timeout: '${arg_TEST_DISCOVERY_TIMEOUT}'\n"
       "  Result: ${result}\n"
       "  Output:\n"
       "    ${output}\n"
