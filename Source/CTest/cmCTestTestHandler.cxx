@@ -2073,7 +2073,7 @@ void cmCTestTestHandler::RecordCustomTestMeasurements(cmXMLWriter& xml,
             xml.Attribute("encoding", "base64");
             std::ostringstream ostr;
             for (size_t cc = 0; cc < rlen; cc++) {
-              ostr << encoded_buffer[cc];
+              ostr << static_cast<char>(encoded_buffer[cc]);
               if (cc % 60 == 0 && cc) {
                 ostr << std::endl;
               }

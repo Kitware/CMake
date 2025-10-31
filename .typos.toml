@@ -20,6 +20,12 @@ locale = "en-us"
 # script accordingly.
 #extend-ignore-identifiers-re=["\\b[0-9a-f]{8,12}\\b"]
 
+[default.extend-identifiers]
+_tru64 = "_tru64"
+__tru64 = "__tru64"
+__TRU64__ = "__TRU64__"
+Tru64 = "Tru64"
+
 # Add repo-wide false positives here in the form of `word = "word"`.
 # Check the manual for details.
 [default.extend-words]
@@ -82,6 +88,9 @@ SEH = "SEH"
 
 [type.py.extend-identifiers]
 typ = "typ"
+
+[type.sh.extend-identifiers]
+xTRUEx = "xTRUEx"
 
 [type.rst]
 extend-ignore-re = [

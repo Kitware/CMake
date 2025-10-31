@@ -45,6 +45,7 @@ set(targets
   linux-CUDA-NVIDIA-10.1.168-CLANG linux-CUDA-NVIDIA-10.1.168-XLClang-v
     linux-CUDA-NVIDIA-9.2.148-GCC
   linux-Fortran-LLVMFlang-15.0.0
+  linux-Fortran-LLVMFlang-21.1.3
   linux-Fortran-LFortran-0.35.0-clang
   linux-Fortran-LFortran-0.35.0-gcc
   linux-Fortran-LFortran-0.41.0-clang
