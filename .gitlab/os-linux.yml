@@ -532,6 +532,18 @@
         CTEST_NO_WARNINGS_ALLOWED: 1
         CMAKE_GENERATOR: "FASTBuild"
 
+.cuda13.0_aarch64:
+    extends: .cuda
+    image: "kitware/cmake:ci-cuda13.0-aarch64-2025-10-31"
+    variables:
+        CMAKE_ARCH: aarch64
+
+.cuda13.0_aarch64_nvidia:
+    extends: .cuda13.0_aarch64
+    variables:
+        CMAKE_CONFIGURATION: cuda13.0_aarch64_nvidia
+        CTEST_NO_WARNINGS_ALLOWED: 1
+
 ### HIP builds
 
 .hip6.3:
@@ -705,6 +717,13 @@
     tags:
         - cmake
         - build
+        - docker
+        - linux-aarch64
+
+.linux_aarch64_tags_cuda_arch_75:
+    tags:
+        - cmake
+        - cuda-arch-75
         - docker
         - linux-aarch64
 
