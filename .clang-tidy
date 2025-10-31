@@ -36,6 +36,7 @@ modernize-*,\
 -modernize-use-emplace,\
 -modernize-use-nodiscard,\
 -modernize-use-noexcept,\
+-modernize-use-scoped-lock,\
 -modernize-use-trailing-return-type,\
 -modernize-use-transparent-functors,\
 performance-*,\
@@ -62,6 +63,7 @@ readability-*,\
 -readability-static-accessed-through-instance,\
 -readability-suspicious-call-argument,\
 -readability-uppercase-literal-suffix,\
+-readability-use-concise-preprocessor-directives,\
 -readability-use-std-min-max,\
 cmake-*,\
 -cmake-ostringstream-use-cmstrcat,\
