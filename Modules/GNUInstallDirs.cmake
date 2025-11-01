@@ -94,6 +94,12 @@ where ``<dir>`` is one of:
   read-only architecture-independent data root (``share``)
 ``DATADIR``
   read-only architecture-independent data (``DATAROOTDIR``)
+
+  The ``DATADIR`` and ``DATAROOTDIR`` are treated separately so that
+  ``DATADIR`` can be customized for project-specific data files, while
+  ``DATAROOTDIR`` remains unchanged for standard architecture-independent
+  locations ``INFODIR``, ``LOCALEDIR``, ``MANDIR``, and ``DOCDIR``.
+
 ``INFODIR``
   info documentation (``DATAROOTDIR/info``)
 ``LOCALEDIR``
