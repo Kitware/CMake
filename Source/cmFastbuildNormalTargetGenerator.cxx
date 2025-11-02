@@ -928,7 +928,7 @@ void cmFastbuildNormalTargetGenerator::Generate()
   GenerateModuleDefinitionInfo(fastbuildTarget);
   // Needs to be called after we've added all PRE-LINK steps (like creation of
   // .def files on Windows).
-  AddLinkerNodeDependnecies(fastbuildTarget);
+  AddLinkerNodeDependencies(fastbuildTarget);
 
   // Must be called after "GenerateObjects", since it also adds Prebuild deps
   // to it.
