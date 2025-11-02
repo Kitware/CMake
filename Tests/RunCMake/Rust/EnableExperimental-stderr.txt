@@ -1,0 +1,4 @@
+^CMake Error at EnableExperimental\.cmake:[0-9]+ \(enable_language\):
+  Experimental Rust support is not enabled\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)

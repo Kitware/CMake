@@ -69,6 +69,8 @@ public:
     char const* SwiftModuleName = nullptr;
     char const* SwiftOutputFileMapOption = nullptr;
     char const* SwiftSources = nullptr;
+    char const* RustSources = nullptr;
+    char const* RustObjectDeps = nullptr;
     char const* ISPCHeader = nullptr;
     char const* CudaCompileMode = nullptr;
     char const* Fatbinary = nullptr;

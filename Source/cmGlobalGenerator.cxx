@@ -733,6 +733,16 @@ void cmGlobalGenerator::EnableLanguage(
 
   for (std::string const& lang : languages) {
     needSetLanguageEnabledMaps[lang] = false;
+
+    if (lang == "Rust" &&
+        !cmExperimental::HasSupportEnabled(*this->Makefiles[0].get(),
+                                           cmExperimental::Feature::Rust)) {
+      mf->IssueMessage(MessageType::FATAL_ERROR,
+                       "Experimental Rust support is not enabled.");
+      cmSystemTools::SetFatalErrorOccurred();
+      return;
+    }
+
     if (lang == "NONE") {
       this->SetLanguageEnabled("NONE", mf);
       continue;

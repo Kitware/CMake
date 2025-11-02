@@ -80,6 +80,14 @@ cmExperimental::FeatureData const LookupTable[] = {
     "experimentation and feedback to CMake developers.",
     {},
     cmExperimental::TryCompileCondition::Never },
+  // Rust support
+  { "Rust",
+    "3cc9b32c-47d3-4056-8953-d74e69fc0d6c",
+    "CMAKE_EXPERIMENTAL_RUST",
+    "CMake's support for the Rust programming language is experimental. "
+    "It is meant only for experimentation and feedback to CMake developers.",
+    {},
+    cmExperimental::TryCompileCondition::Never },
 };
 static_assert(sizeof(LookupTable) / sizeof(LookupTable[0]) ==
                 static_cast<size_t>(cmExperimental::Feature::Sentinel),

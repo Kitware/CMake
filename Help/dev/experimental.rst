@@ -158,3 +158,15 @@ When activated, this experimental feature provides the following:
 * The experimental ``export(SBOM)`` and ``install(SBOM)`` commands are
   available to generate a Software Bill of Materials or "SBOM" for the current
   project. See :command:`install(SBOM)` for a complete overview of the command.
+
+Rust Support
+============
+
+In order to activate support for Rust, set
+
+* variable ``CMAKE_EXPERIMENTAL_RUST`` to
+* value ``3cc9b32c-47d3-4056-8953-d74e69fc0d6c``.
+
+This UUID may change in future versions of CMake.  Be sure to use the value
+documented here by the source tree of the version of CMake with which you are
+experimenting.
