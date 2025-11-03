@@ -100,7 +100,7 @@ private:
   void SetImportProperty(cmTarget* target, cm::string_view property,
                          cm::string_view configuration,
                          Json::Value const& value) const;
-  void SetMetaProperty(cmTarget* target, cm::string_view property,
+  void SetMetaProperty(cmTarget* target, std::string const& property,
                        Json::Value const& value,
                        std::string const& defaultValue = {}) const;
 

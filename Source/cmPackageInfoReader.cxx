@@ -646,13 +646,13 @@ void cmPackageInfoReader::SetImportProperty(cmTarget* target,
 }
 
 void cmPackageInfoReader::SetMetaProperty(
-  cmTarget* target, cm::string_view property, Json::Value const& value,
+  cmTarget* target, std::string const& property, Json::Value const& value,
   std::string const& defaultValue) const
 {
   if (!value.isNull()) {
-    target->SetProperty(property.data(), value.asString());
+    target->SetProperty(property, value.asString());
   } else if (!defaultValue.empty()) {
-    target->SetProperty(property.data(), defaultValue);
+    target->SetProperty(property, defaultValue);
   }
 }
 
@@ -734,7 +734,7 @@ void cmPackageInfoReader::SetTargetProperties(
 
   // Add other information.
   if (configuration.empty()) {
-    this->SetMetaProperty(target, "SPDX_LICENSE"_s, data["license"],
+    this->SetMetaProperty(target, "SPDX_LICENSE", data["license"],
                           this->DefaultLicense);
   }
 }
