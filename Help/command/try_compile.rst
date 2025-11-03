@@ -320,6 +320,8 @@ Other Behavior Settings
 
   * :variable:`CMAKE_CUDA_RUNTIME_LIBRARY`
   * :variable:`CMAKE_ENABLE_EXPORTS`
+  * :variable:`CMAKE_EXECUTABLE_ENABLE_EXPORTS`
+  * :variable:`CMAKE_SHARED_LIBRARY_ENABLE_EXPORTS`
   * :variable:`CMAKE_EXE_LINKER_FLAGS`, unless using CMake versions
     prior to 4.0 without policy :policy:`CMP0056` set to ``NEW``
   * :variable:`CMAKE_LINK_SEARCH_START_STATIC`
