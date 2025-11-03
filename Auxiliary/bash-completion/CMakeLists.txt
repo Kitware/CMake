@@ -15,7 +15,7 @@ if(NOT CMake_INSTALL_BASH_COMP_DIR)
     set(CMake_INSTALL_BASH_COMP_DIR "${CMAKE_BASH_COMP_DIR}")
   else()
     # Default.
-    set(CMake_INSTALL_BASH_COMP_DIR ${CMAKE_XDGDATA_DIR}/bash-completion/completions)
+    set(CMake_INSTALL_BASH_COMP_DIR ${CMake_INSTALL_XDGDATA_DIR}/bash-completion/completions)
   endif()
 endif()
 install(FILES cmake cpack ctest DESTINATION ${CMake_INSTALL_BASH_COMP_DIR})

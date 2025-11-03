@@ -11,7 +11,7 @@ Component.prototype.createOperations = function()
     if (installer.value("os") === "win") {
 
         component.addOperation("CreateShortcut",
-                               "@TargetDir@/%CMAKE_DOC_DIR%/developer-reference/html/index.html",
+                               "@TargetDir@/%CMake_INSTALL_DOC_DIR%/developer-reference/html/index.html",
                                "@StartMenuDir@/CMake Developer Reference.lnk");
 
     }

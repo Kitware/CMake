@@ -11,7 +11,7 @@ Component.prototype.createOperations = function()
     if (installer.value("os") === "win") {
 
         component.addOperation("CreateShortcut",
-                               "@TargetDir@/%CMAKE_BIN_DIR%/cmake-gui.exe",
+                               "@TargetDir@/%CMake_INSTALL_BIN_DIR%/cmake-gui.exe",
                                "@StartMenuDir@/CMake (cmake-gui).lnk");
 
     }

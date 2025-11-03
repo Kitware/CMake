@@ -52,4 +52,4 @@ target_compile_definitions(cmzstd PRIVATE
   ZSTD_DISABLE_ASM=1
   )
 
-install(FILES LICENSE DESTINATION ${CMAKE_DOC_DIR}/cmzstd)
+install(FILES LICENSE DESTINATION ${CMake_INSTALL_DOC_DIR}/cmzstd)

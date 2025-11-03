@@ -16,7 +16,7 @@ function Component()
 Component.prototype.reactOnTargetDirChange = function(key, value)
 {
     if (key == "TargetDir") {
-        var path = value + "/%CMAKE_BIN_DIR%";
+        var path = value + "/%CMake_INSTALL_BIN_DIR%";
         installer.setValue("CMAKE%CMake_VERSION_MAJOR%%CMake_VERSION_MINOR%_BIN_DIR", path.replace(/\\/g, "/"));
     }
 }

@@ -13,7 +13,7 @@ if(CPACK_GENERATOR MATCHES "NSIS")
   set(CPACK_PACKAGE_ICON "@CMake_SOURCE_DIR@/Utilities/Release\\CMakeInstall.bmp")
   # tell cpack to create links to the doc files
   set(CPACK_NSIS_MENU_LINKS
-    "@CMAKE_DOC_DIR@/html/index.html" "CMake Documentation"
+    "@CMake_INSTALL_DOC_DIR@/html/index.html" "CMake Documentation"
     "https://cmake.org" "CMake Web Site"
     )
   # Use the icon from cmake-gui for add-remove programs
@@ -241,7 +241,7 @@ if("${CPACK_GENERATOR}" STREQUAL "WIX")
     "@CMake_SOURCE_DIR@/Utilities/Release/CMakeLogo.ico"
   )
 
-  set_property(INSTALL "@CMAKE_DOC_DIR@/html/index.html" PROPERTY
+  set_property(INSTALL "@CMake_INSTALL_DOC_DIR@/html/index.html" PROPERTY
     CPACK_START_MENU_SHORTCUTS "CMake Documentation"
   )
 

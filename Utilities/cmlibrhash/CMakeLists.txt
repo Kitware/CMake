@@ -39,4 +39,4 @@ include_directories(
 add_library(cmlibrhash ${librhash_sources})
 target_compile_definitions(cmlibrhash PRIVATE NO_IMPORT_EXPORT)
 
-install(FILES COPYING DESTINATION ${CMAKE_DOC_DIR}/cmlibrhash)
+install(FILES COPYING DESTINATION ${CMake_INSTALL_DOC_DIR}/cmlibrhash)

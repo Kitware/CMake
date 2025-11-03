@@ -1415,7 +1415,7 @@ endif()
 
 foreach(_tool IN LISTS _tools)
   CMake_OPTIONAL_COMPONENT(${_tool})
-  install(TARGETS ${_tool} DESTINATION ${CMAKE_BIN_DIR} ${COMPONENT})
+  install(TARGETS ${_tool} DESTINATION ${CMake_INSTALL_BIN_DIR} ${COMPONENT})
 endforeach()
 
 # Unset temporary variables

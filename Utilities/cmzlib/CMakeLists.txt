@@ -25,4 +25,4 @@ add_library(cmzlib
   zutil.c
   )
 
-install(FILES Copyright.txt DESTINATION ${CMAKE_DOC_DIR}/cmzlib)
+install(FILES Copyright.txt DESTINATION ${CMake_INSTALL_DOC_DIR}/cmzlib)

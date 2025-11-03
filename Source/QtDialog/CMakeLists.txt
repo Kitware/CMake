@@ -97,7 +97,7 @@ if(CMake_INSTALL_DEPENDENCIES AND (APPLE OR WIN32))
       elseif(WIN32)
         set(_qt_plugin_dir "plugins")
       endif()
-      set(_qt_plugin_dest "${_qt_plugin_dir}/${_qt_plugin_type}")
+      set(_qt_plugin_dest "${CMake_INSTALL_APP_DIR_SLASH}${_qt_plugin_dir}/${_qt_plugin_type}")
       install(FILES "${_qt_plugin_path}"
         DESTINATION "${_qt_plugin_dest}"
         ${COMPONENT})
@@ -135,7 +135,7 @@ if(CMake_INSTALL_DEPENDENCIES AND (APPLE OR WIN32))
     file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/qt.conf"
       "[Paths]\nPlugins = ${_qt_plugin_dir}\n")
     install(FILES "${CMAKE_CURRENT_BINARY_DIR}/qt.conf"
-      DESTINATION "${CMAKE_INSTALL_PREFIX}/Resources"
+      DESTINATION "${CMake_INSTALL_APP_DIR_SLASH}Resources"
       ${COMPONENT})
   elseif(WIN32 AND NOT CMake_QT_STATIC_QWindowsIntegrationPlugin_LIBRARIES)
     if(CMake_QT_MAJOR_VERSION VERSION_EQUAL 5)
@@ -250,7 +250,7 @@ endif()
 
 if(USE_LGPL)
   install(FILES ${CMake_SOURCE_DIR}/Licenses/LGPLv${USE_LGPL}.txt
-    DESTINATION ${CMAKE_DATA_DIR}/Licenses
+    DESTINATION ${CMake_INSTALL_DATA_DIR}/Licenses
     ${COMPONENT})
   set_property(SOURCE CMakeSetupDialog.cxx
     PROPERTY COMPILE_DEFINITIONS USE_LGPL="${USE_LGPL}")
@@ -311,8 +311,8 @@ if(APPLE)
   set_target_properties(cmake-gui PROPERTIES
     OUTPUT_NAME CMake
     MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/Info.plist.in"
-    MACOSX_BUNDLE_SHORT_VERSION_STRING "${CMAKE_BUNDLE_VERSION}"
-    # TBD: MACOSX_BUNDLE_BUNDLE_VERSION "${CMAKE_BUNDLE_VERSION}"
+    MACOSX_BUNDLE_SHORT_VERSION_STRING "${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}.${CMake_VERSION_PATCH}"
+    # TBD: MACOSX_BUNDLE_BUNDLE_VERSION "${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}.${CMake_VERSION_PATCH}"
     MACOSX_BUNDLE_COPYRIGHT "${CMake_COPYRIGHT_LINE}"
     MACOSX_BUNDLE_GUI_IDENTIFIER "org.cmake.cmake"
     )
@@ -326,14 +326,14 @@ if(APPLE)
 endif()
 
 install(TARGETS cmake-gui
-  RUNTIME DESTINATION bin ${COMPONENT}
-  BUNDLE DESTINATION "${CMAKE_BUNDLE_LOCATION}" ${COMPONENT})
+  RUNTIME DESTINATION ${CMake_INSTALL_BIN_DIR} ${COMPONENT}
+  BUNDLE  DESTINATION .                        ${COMPONENT})
 
 if(UNIX AND NOT APPLE)
   foreach(size IN ITEMS 32 128)
     install(
       FILES       "${CMAKE_CURRENT_SOURCE_DIR}/CMakeSetup${size}.png"
-      DESTINATION "${CMAKE_XDGDATA_DIR}/icons/hicolor/${size}x${size}/apps"
+      DESTINATION "${CMake_INSTALL_XDGDATA_DIR}/icons/hicolor/${size}x${size}/apps"
       ${COMPONENT}
       RENAME      "CMakeSetup.png")
   endforeach()
@@ -341,26 +341,26 @@ if(UNIX AND NOT APPLE)
   # install a desktop file so CMake appears in the application start menu
   # with an icon
   install(FILES cmake-gui.desktop
-    DESTINATION "${CMAKE_XDGDATA_DIR}/applications"
+    DESTINATION "${CMake_INSTALL_XDGDATA_DIR}/applications"
     ${COMPONENT})
   install(FILES cmakecache.xml
-    DESTINATION "${CMAKE_XDGDATA_DIR}/mime/packages"
+    DESTINATION "${CMake_INSTALL_XDGDATA_DIR}/mime/packages"
     ${COMPONENT})
 endif()
 
 if(APPLE)
   install(CODE "
     execute_process(COMMAND ln -s \"../MacOS/CMake\" cmake-gui
-        WORKING_DIRECTORY \$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/bin)
+        WORKING_DIRECTORY \$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/${CMake_INSTALL_BIN_DIR})
   " ${COMPONENT})
 endif()
 
 if(CMake_INSTALL_DEPENDENCIES AND (APPLE OR WIN32))
   # install rules for including 3rd party libs such as Qt
   # if a system Qt is used (e.g. installed in /usr/lib/), it will not be included in the installation
-  set(fixup_exe "\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/bin/cmake-gui${CMAKE_EXECUTABLE_SUFFIX}")
+  set(fixup_exe "\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/${CMake_INSTALL_BIN_DIR}/cmake-gui${CMAKE_EXECUTABLE_SUFFIX}")
   if(APPLE)
-    set(fixup_exe "\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/MacOS/CMake")
+    set(fixup_exe "\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/${CMake_INSTALL_APP_DIR_SLASH}MacOS/CMake")
   endif()
   install(CODE "
     include(BundleUtilities)

@@ -2240,7 +2240,7 @@ if(BUILD_TESTING AND CMAKE_CURL_TEST_URL)
   add_test(curl curltest ${CMAKE_CURL_TEST_URL})
 endif()
 
-install(FILES COPYING DESTINATION ${CMAKE_DOC_DIR}/cmcurl)
+install(FILES COPYING DESTINATION ${CMake_INSTALL_DOC_DIR}/cmcurl)
 
 return() # The rest of this file is not needed for building within CMake.
 # XXX(cmake): end cmake-specific curl code
