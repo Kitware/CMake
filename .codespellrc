@@ -20,6 +20,8 @@ skip =
   Tests/StringFileTest/test.utf8,
   Utilities/cm*,
   *.pfx,
+  *-stdout.txt,
+  *-stderr.txt
 
 # noqa: spellcheck off
 ignore-words-list =
