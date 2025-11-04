@@ -14,6 +14,7 @@
 
 #include "cmListFileCache.h"
 #include "cmMessageType.h"
+#include "cmState.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmValue.h"
@@ -375,7 +376,7 @@ bool cmSarif::LogFileWriter::ConfigureForCMakeRun(cmake& cm)
     // normal mode, the project variable `CMAKE_EXPORT_SARIF` can also enable
     // SARIF logging.
     return cm.GetSarifFilePath().has_value() ||
-      (cm.GetWorkingMode() == cmake::NORMAL_MODE &&
+      (cm.GetState()->GetRole() == cmState::Role::Project &&
        cm.GetCacheDefinition(cmSarif::PROJECT_SARIF_FILE_VARIABLE).IsOn());
   });
 

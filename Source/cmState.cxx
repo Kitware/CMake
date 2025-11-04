@@ -817,6 +817,11 @@ void cmState::SetRoleToProjectForCMakeBuildVsReconfigure()
   this->StateRole = Role::Project;
 }
 
+void cmState::SetRoleToHelpForListPresets()
+{
+  this->StateRole = Role::Help;
+}
+
 cmState::Role cmState::GetRole() const
 {
   return this->StateRole;

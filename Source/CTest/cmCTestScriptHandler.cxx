@@ -175,7 +175,6 @@ void cmCTestScriptHandler::CreateCMake()
   this->CMake = cm::make_unique<cmake>(cmState::Role::CTest);
   this->CMake->GetCurrentSnapshot().SetDefaultDefinitions();
   this->CMake->AddCMakePaths();
-  this->CMake->SetWorkingMode(cmake::SCRIPT_MODE);
   this->GlobalGenerator =
     cm::make_unique<cmGlobalGenerator>(this->CMake.get());
 

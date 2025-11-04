@@ -585,7 +585,7 @@ bool cmMakefile::ExecuteCommand(cmListFileFunction const& lff,
         }
       }
       if (this->GetCMakeInstance()->HasScriptModeExitCode() &&
-          this->GetCMakeInstance()->GetWorkingMode() == cmake::SCRIPT_MODE) {
+          this->GetCMakeInstance()->RoleSupportsExitCode()) {
         // pass-through the exit code from inner cmake_language(EXIT) ,
         // possibly from include() or similar command...
         status.SetExitCode(this->GetCMakeInstance()->GetScriptModeExitCode());
@@ -3393,8 +3393,8 @@ cmState* cmMakefile::GetState() const
 void cmMakefile::DisplayStatus(std::string const& message, float s) const
 {
   cmake* cm = this->GetCMakeInstance();
-  if (cm->GetWorkingMode() == cmake::FIND_PACKAGE_MODE) {
-    // don't output any STATUS message in FIND_PACKAGE_MODE, since they will
+  if (cm->GetState()->GetRole() == cmState::Role::FindPackage) {
+    // don't output any STATUS message in --find-package mode, since they will
     // directly be fed to the compiler, which will be confused.
     return;
   }

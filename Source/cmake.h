@@ -445,9 +445,7 @@ public:
   //! Do all the checks before running configure
   int DoPreConfigureChecks();
 
-  void SetWorkingMode(WorkingMode mode) { this->CurrentWorkingMode = mode; }
-
-  WorkingMode GetWorkingMode() const { return this->CurrentWorkingMode; }
+  bool RoleSupportsExitCode() const;
 
   CommandFailureAction GetCommandFailureAction() const;
 
@@ -801,7 +799,6 @@ private:
   std::vector<std::string> cmdArgs;
   std::string CMakeWorkingDirectory;
   ProgressCallbackType ProgressCallback;
-  WorkingMode CurrentWorkingMode = NORMAL_MODE;
   bool DebugOutput = false;
   bool DebugFindOutput = false;
   // Elements of `cmakeLangTraceCmdStack` are "trace requests" pushed

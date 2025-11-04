@@ -260,7 +260,7 @@ int do_cmake(int ac, char const* const* av)
   // (Regex) Filter on the cached variable(s) to print.
   std::string filter_var_name;
   bool view_only = false;
-  cmake::WorkingMode workingMode = cmake::NORMAL_MODE;
+  cmState::Role role = cmState::Role::Project;
   std::vector<std::string> parsedArgs;
 
   using CommandArgument =
@@ -306,20 +306,20 @@ int do_cmake(int ac, char const* const* av)
                      CommandArgument::Values::One,
                      CommandArgument::RequiresSeparator::No,
                      [&](std::string const& value) -> bool {
-                       workingMode = cmake::SCRIPT_MODE;
+                       role = cmState::Role::Script;
                        parsedArgs.emplace_back("-P");
                        parsedArgs.push_back(value);
                        return true;
                      } },
     CommandArgument{ "--find-package", CommandArgument::Values::Zero,
                      [&](std::string const&) -> bool {
-                       workingMode = cmake::FIND_PACKAGE_MODE;
+                       role = cmState::Role::FindPackage;
                        parsedArgs.emplace_back("--find-package");
                        return true;
                      } },
     CommandArgument{ "--list-presets", CommandArgument::Values::ZeroOrOne,
                      [&](std::string const& value) -> bool {
-                       workingMode = cmake::HELP_MODE;
+                       role = cmState::Role::Help;
                        parsedArgs.emplace_back("--list-presets");
                        parsedArgs.emplace_back(value);
                        return true;
@@ -336,7 +336,7 @@ int do_cmake(int ac, char const* const* av)
 
     // Only in script mode do we stop parsing instead
     // of preferring the last mode flag provided
-    if (arg == "--" && workingMode == cmake::SCRIPT_MODE) {
+    if (arg == "--" && role == cmState::Role::Script) {
       parsedArgs = inputArgs;
       break;
     }
@@ -363,19 +363,6 @@ int do_cmake(int ac, char const* const* av)
     int ret = cm.GetSystemInformation(parsedArgs);
     return ret;
   }
-  cmState::Role role = cmState::Role::Internal;
-  switch (workingMode) {
-    case cmake::NORMAL_MODE:
-    case cmake::HELP_MODE:
-      role = cmState::Role::Project;
-      break;
-    case cmake::SCRIPT_MODE:
-      role = cmState::Role::Script;
-      break;
-    case cmake::FIND_PACKAGE_MODE:
-      role = cmState::Role::FindPackage;
-      break;
-  }
   cmake cm(role);
   cmSystemTools::SetMessageCallback(
     [&cm](std::string const& msg, cmMessageMetadata const& md) {
@@ -384,7 +371,6 @@ int do_cmake(int ac, char const* const* av)
   cm.SetProgressCallback([&cm](std::string const& msg, float prog) {
     cmakemainProgressCallback(msg, prog, &cm);
   });
-  cm.SetWorkingMode(workingMode);
 
   int res = cm.Run(parsedArgs, view_only);
   if (list_cached || list_all_cached) {
@@ -965,7 +951,6 @@ int do_install(int ac, char const* const* av)
           cmakemainProgressCallback(msg, prog, &cm);
         });
         cm.SetDebugOutputOn(verbose);
-        cm.SetWorkingMode(cmake::SCRIPT_MODE);
         ret_ = int(bool(cm.Run(cmd)));
       }
     }

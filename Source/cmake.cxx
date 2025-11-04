@@ -450,6 +450,12 @@ std::string cmake::ReportCapabilities() const
   return result;
 }
 
+bool cmake::RoleSupportsExitCode() const
+{
+  cmState::Role const role = this->State->GetRole();
+  return role == cmState::Role::Script || role == cmState::Role::CTest;
+}
+
 cmake::CommandFailureAction cmake::GetCommandFailureAction() const
 {
   switch (this->State->GetRole()) {
@@ -665,6 +671,7 @@ bool cmake::SetCacheArgs(std::vector<std::string> const& args)
   };
 
   auto ScriptLambda = [&](std::string const& path, cmake* state) -> bool {
+    assert(this->State->GetRole() == cmState::Role::Script);
 #ifdef CMake_ENABLE_DEBUGGER
     // Script mode doesn't hit the usual code path in cmake::Run() that starts
     // the debugger, so start it manually here instead.
@@ -676,7 +683,6 @@ bool cmake::SetCacheArgs(std::vector<std::string> const& args)
     GetProjectCommandsInScriptMode(state->GetState());
     // Documented behavior of CMAKE{,_CURRENT}_{SOURCE,BINARY}_DIR is to be
     // set to $PWD for -P mode.
-    state->SetWorkingMode(SCRIPT_MODE);
     state->SetHomeDirectory(cmSystemTools::GetLogicalWorkingDirectory());
     state->SetHomeOutputDirectory(cmSystemTools::GetLogicalWorkingDirectory());
     state->ReadListFile(args, path);
@@ -748,7 +754,7 @@ bool cmake::SetCacheArgs(std::vector<std::string> const& args)
   for (decltype(args.size()) i = 1; i < args.size(); ++i) {
     std::string const& arg = args[i];
 
-    if (arg == "--" && this->GetWorkingMode() == SCRIPT_MODE) {
+    if (arg == "--" && this->State->GetRole() == cmState::Role::Script) {
       // Stop processing CMake args and avoid possible errors
       // when arbitrary args are given to CMake script.
       break;
@@ -763,7 +769,7 @@ bool cmake::SetCacheArgs(std::vector<std::string> const& args)
     }
   }
 
-  if (this->GetWorkingMode() == FIND_PACKAGE_MODE) {
+  if (this->State->GetRole() == cmState::Role::FindPackage) {
     return this->FindPackage(args);
   }
 
@@ -817,7 +823,7 @@ void cmake::ReadListFile(std::vector<std::string> const& args,
     snapshot.GetDirectory().SetCurrentSource(this->GetHomeDirectory());
     snapshot.SetDefaultDefinitions();
     cmMakefile mf(gg, snapshot);
-    if (this->GetWorkingMode() != NORMAL_MODE) {
+    if (this->State->GetRole() == cmState::Role::Script) {
       mf.SetScriptModeFile(cmSystemTools::ToNormalizedPathOnDisk(path));
       mf.SetArgcArgv(args);
     }
@@ -1439,7 +1445,7 @@ void cmake::SetArgs(std::vector<std::string> const& args)
     // iterate each argument
     std::string const& arg = args[i];
 
-    if (this->GetWorkingMode() == SCRIPT_MODE && arg == "--") {
+    if (this->State->GetRole() == cmState::Role::Script && arg == "--") {
       // Stop processing CMake args and avoid possible errors
       // when arbitrary args are given to CMake script.
       break;
@@ -1485,12 +1491,14 @@ void cmake::SetArgs(std::vector<std::string> const& args)
     }
   }
 
-  if (!extraProvidedPath.empty() && this->GetWorkingMode() == NORMAL_MODE) {
+  if (!extraProvidedPath.empty() &&
+      this->State->GetRole() == cmState::Role::Project) {
     this->IssueMessage(MessageType::WARNING,
                        cmStrCat("Ignoring extra path from command line:\n \"",
                                 extraProvidedPath, '"'));
   }
-  if (!possibleUnknownArg.empty() && this->GetWorkingMode() != SCRIPT_MODE) {
+  if (!possibleUnknownArg.empty() &&
+      this->State->GetRole() != cmState::Role::Script) {
     cmSystemTools::Error(cmStrCat("Unknown argument ", possibleUnknownArg));
     cmSystemTools::Error("Run 'cmake --help' for all supported options.");
     exit(1);
@@ -1539,7 +1547,7 @@ void cmake::SetArgs(std::vector<std::string> const& args)
     !presetName.empty();
 #endif
 
-  if (this->CurrentWorkingMode == cmake::NORMAL_MODE && !haveSourceDir &&
+  if (this->State->GetRole() == cmState::Role::Project && !haveSourceDir &&
       !haveBinaryDir && !havePreset) {
     this->IssueMessage(
       MessageType::WARNING,
@@ -1582,7 +1590,7 @@ void cmake::SetArgs(std::vector<std::string> const& args)
         presetsGraph.PrintAllPresets();
       }
 
-      this->SetWorkingMode(WorkingMode::HELP_MODE);
+      this->State->SetRoleToHelpForListPresets();
       return;
     }
 
@@ -2149,7 +2157,7 @@ void cmake::SetHomeDirectoryViaCommandLine(std::string const& path)
 
   auto prev_path = this->GetHomeDirectory();
   if (prev_path != path && !prev_path.empty() &&
-      this->GetWorkingMode() == NORMAL_MODE) {
+      this->State->GetRole() == cmState::Role::Project) {
     this->IssueMessage(
       MessageType::WARNING,
       cmStrCat("Ignoring extra path from command line:\n \"", prev_path, '"'));
@@ -2719,7 +2727,7 @@ int cmake::ActualConfigure()
   auto endTime = std::chrono::steady_clock::now();
 
   // configure result
-  if (this->GetWorkingMode() == cmake::NORMAL_MODE) {
+  if (this->State->GetRole() == cmState::Role::Project) {
     std::ostringstream msg;
     if (cmSystemTools::GetErrorOccurredFlag()) {
       msg << "Configuring incomplete, errors occurred!";
@@ -2950,7 +2958,7 @@ int cmake::Run(std::vector<std::string> const& args, bool noconfigure)
   if (cmSystemTools::GetErrorOccurredFlag()) {
     return -1;
   }
-  if (this->GetWorkingMode() == HELP_MODE) {
+  if (this->State->GetRole() == cmState::Role::Help) {
     return 0;
   }
 
@@ -2980,7 +2988,7 @@ int cmake::Run(std::vector<std::string> const& args, bool noconfigure)
     return 0;
   }
 
-  if (this->GetWorkingMode() == NORMAL_MODE) {
+  if (this->State->GetRole() == cmState::Role::Project) {
     if (this->FreshCache) {
       this->DeleteCache(this->GetHomeOutputDirectory());
     }
@@ -3027,7 +3035,7 @@ int cmake::Run(std::vector<std::string> const& args, bool noconfigure)
 #endif
 
   // In script mode we terminate after running the script.
-  if (this->GetWorkingMode() != NORMAL_MODE) {
+  if (this->State->GetRole() != cmState::Role::Project) {
     if (cmSystemTools::GetErrorOccurredFlag()) {
       return -1;
     }

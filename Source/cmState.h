@@ -232,6 +232,7 @@ public:
   unsigned int GetCacheMinorVersion() const;
 
   void SetRoleToProjectForCMakeBuildVsReconfigure();
+  void SetRoleToHelpForListPresets();
   Role GetRole() const;
   std::string GetRoleString() const;
 
