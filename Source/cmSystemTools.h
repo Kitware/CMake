@@ -644,7 +644,7 @@ public:
   static bool CheckRPath(std::string const& file, std::string const& newRPath);
 
   /** Remove a directory; repeat a few times in case of locked files.  */
-  static bool RepeatedRemoveDirectory(std::string const& dir);
+  static cmsys::Status RepeatedRemoveDirectory(std::string const& dir);
 
   /** Encode a string as a URL.  */
   static std::string EncodeURL(std::string const& in,

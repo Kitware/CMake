@@ -4194,21 +4194,21 @@ bool cmSystemTools::CheckRPath(std::string const& file,
   return newRPath.empty();
 }
 
-bool cmSystemTools::RepeatedRemoveDirectory(std::string const& dir)
+cmsys::Status cmSystemTools::RepeatedRemoveDirectory(std::string const& dir)
 {
 #ifdef _WIN32
   // Windows sometimes locks files temporarily so try a few times.
   WindowsFileRetry retry = cmSystemTools::GetWindowsFileRetry();
 
-  for (unsigned int i = 0; i < retry.Count; ++i) {
-    if (cmSystemTools::RemoveADirectory(dir)) {
-      return true;
-    }
+  cmsys::Status status;
+  unsigned int tries = 0;
+  while (!(status = cmSystemTools::RemoveADirectory(dir)) &&
+         ++tries < retry.Count) {
     cmSystemTools::Delay(retry.Delay);
   }
-  return false;
+  return status;
 #else
-  return static_cast<bool>(cmSystemTools::RemoveADirectory(dir));
+  return cmSystemTools::RemoveADirectory(dir);
 #endif
 }
 

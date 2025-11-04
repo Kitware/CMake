@@ -1,6 +1,7 @@
 # Use COPY_ON_ERROR to handle the case where the source and destination
-# directory are on different devices. Cross-device links are not permitted
+# file are on different devices. Cross-device links are not permitted
 # and the following command falls back to copying the file if link fails.
+# Check only command result.
 file(CREATE_LINK
   ${CMAKE_CURRENT_LIST_FILE} TestCreateLink.cmake
   RESULT result
