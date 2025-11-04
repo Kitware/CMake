@@ -4013,33 +4013,30 @@ int cmake::Build(int jobs, std::string dir, std::vector<std::string> targets,
     cmGlobalVisualStudio14Generator::GetGenerateStampList();
 
   // Note that the stampList file only exists for VS generators.
-  if (cmSystemTools::FileExists(stampList)) {
-
+  if (cmSystemTools::FileExists(stampList) &&
+      !cmakeCheckStampList(stampList)) {
     this->AddScriptingCommands();
+    this->AddProjectCommands();
 
-    if (!cmakeCheckStampList(stampList)) {
-      // Correctly initialize the home (=source) and home output (=binary)
-      // directories, which is required for running the generation step.
-      this->SetDirectoriesFromFile(cachePath);
+    // Correctly initialize the home (=source) and home output (=binary)
+    // directories, which is required for running the generation step.
+    this->SetDirectoriesFromFile(cachePath);
 
-      this->AddProjectCommands();
-
-      int ret = this->Configure();
-      if (ret) {
-        cmSystemTools::Message("CMake Configure step failed.  "
-                               "Build files cannot be regenerated correctly.");
-        return ret;
-      }
-      ret = this->Generate();
-      if (ret) {
-        cmSystemTools::Message("CMake Generate step failed.  "
-                               "Build files cannot be regenerated correctly.");
-        return ret;
-      }
-      std::string message = cmStrCat("Build files have been written to: ",
-                                     this->GetHomeOutputDirectory());
-      this->UpdateProgress(message, -1);
+    int ret = this->Configure();
+    if (ret) {
+      cmSystemTools::Message("CMake Configure step failed.  "
+                             "Build files cannot be regenerated correctly.");
+      return ret;
     }
+    ret = this->Generate();
+    if (ret) {
+      cmSystemTools::Message("CMake Generate step failed.  "
+                             "Build files cannot be regenerated correctly.");
+      return ret;
+    }
+    std::string message = cmStrCat("Build files have been written to: ",
+                                   this->GetHomeOutputDirectory());
+    this->UpdateProgress(message, -1);
   }
 #endif
 
