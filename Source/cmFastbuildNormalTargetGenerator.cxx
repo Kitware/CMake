@@ -823,9 +823,10 @@ void cmFastbuildNormalTargetGenerator::ComputePaths(
         (needTrailingSlash ? "\\ " : ""));
     }
   }
-  std::string impLibFile = ConvertToFastbuildPath(
-    GeneratorTarget->GetFullPath(Config, cmStateEnums::ImportLibraryArtifact));
-  cmSystemTools::MakeDirectory(cmSystemTools::GetFilenamePath(impLibFile));
+  std::string const impLibFullPath =
+    GeneratorTarget->GetFullPath(Config, cmStateEnums::ImportLibraryArtifact);
+  std::string impLibFile = ConvertToFastbuildPath(impLibFullPath);
+  cmSystemTools::MakeDirectory(cmSystemTools::GetFilenamePath(impLibFullPath));
   if (!impLibFile.empty()) {
     cmSystemTools::ConvertToOutputSlashes(impLibFile);
     target.Variables["TargetOutputImplib"] = std::move(impLibFile);
