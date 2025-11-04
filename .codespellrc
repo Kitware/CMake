@@ -20,15 +20,15 @@ skip =
   Tests/StringFileTest/test.utf8,
   Utilities/cm*,
   *.pfx,
+  *-stdout.txt,
+  *-stderr.txt
 
 # noqa: spellcheck off
 ignore-words-list =
   abd,
-  aci,
   ags,
   ake,
   ans,
-  ba,
   ccompiler,
   cconfiguration,
   certi,
@@ -42,9 +42,6 @@ ignore-words-list =
   filetest,
   fo,
   helpfull,
-  hiden,
-  isnt,
-  keypair,
   nd,
   ned,
   nin,
@@ -55,7 +52,6 @@ ignore-words-list =
   seh,
   ser,
   te,
-  upto,
   varn,
   vas,
   wee,
