@@ -273,6 +273,7 @@ events:(
         path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/VersionCheck-1.5/VersionCheckConfig.cmake"
         mode: "config"
         reason: "insufficient_version"
+        message: "The version found is not compatible with the version requested."
       -
         path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/VersionCheck-1.5/versioncheck-config.cmake"
         mode: "config"

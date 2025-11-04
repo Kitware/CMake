@@ -5,6 +5,7 @@ CMake Error at .*/Modules/CMakeFindDependencyMacro\.cmake:[0-9]+ \(find_package\
   The following configuration files were considered but not accepted:
 
     .*/Tests/RunCMake/find_dependency/share/cmake/Pack1/Pack1Config\.cmake, version: 1\.3
+      The version found is not compatible with the version requested\.
 
 Call Stack \(most recent call first\):
   [^

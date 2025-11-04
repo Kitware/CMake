@@ -1789,7 +1789,8 @@ bool cmFindPackageCommand::HandlePackageMode(
 
         for (ConfigFileInfo const& info :
              cmMakeRange(this->ConsideredConfigs.cbegin(), duplicate_end)) {
-          e << "  " << info.filename << ", version: " << info.version << '\n';
+          e << "  " << info.filename << ", version: " << info.version
+            << "\n    " << info.message << '\n';
         }
       } else {
         std::string requestedVersionString;
@@ -2927,9 +2928,10 @@ bool cmFindPackageCommand::FindConfigFile(std::string const& dir,
         foundMode = cmFindPackageCommand::FoundMode(config.Type);
         return true;
       }
-      this->ConsideredPaths.emplace_back(file,
-                                         cmFindPackageCommand::FoundMode(type),
-                                         SearchResult::InsufficientVersion);
+      this->ConsideredPaths.emplace_back(
+        file, cmFindPackageCommand::FoundMode(type),
+        this->ConsideredConfigs.back().result,
+        this->ConsideredConfigs.back().message);
     } else {
       this->ConsideredPaths.emplace_back(
         file, cmFindPackageCommand::FoundMode(type), SearchResult::NoExist);
@@ -2943,6 +2945,8 @@ bool cmFindPackageCommand::CheckVersion(std::string const& config_file)
   bool result = false; // by default, assume the version is not ok.
   bool haveResult = false;
   std::string version = "unknown";
+  std::string message;
+  SearchResult reason = SearchResult::InsufficientVersion;
 
   // Get the file extension.
   std::string::size_type pos = config_file.rfind('.');
@@ -2997,6 +3001,14 @@ bool cmFindPackageCommand::CheckVersion(std::string const& config_file)
                     this->VersionMax, version);
                 }
               }
+
+              if (!result) {
+                message =
+                  cmStrCat("Version \""_s, version,
+                           "\" (compatibility version \""_s, *compatVersion,
+                           "\") is not compatible "
+                           "with the version requested."_s);
+              }
             } else {
               // If no, compat_version is assumed to be exactly the actual
               // version, so the result is whether the requested version is
@@ -3006,6 +3018,12 @@ bool cmFindPackageCommand::CheckVersion(std::string const& config_file)
                 cmSystemTools::VersionCompareEqual(this->Version, version);
             }
           }
+        }
+
+        if (!result && message.empty()) {
+          message =
+            cmStrCat("Version \""_s, version,
+                     "\" is not compatible with the version requested."_s);
         }
       }
 
@@ -3037,7 +3055,13 @@ bool cmFindPackageCommand::CheckVersion(std::string const& config_file)
                             allComponents.end(),
                             std::back_inserter(missingComponents));
         if (!missingComponents.empty()) {
+          bool const single = (missingComponents.size() == 1);
           result = false;
+          message =
+            cmStrCat((single ? "Required component was not found: "_s
+                             : "Required components were not found: "_s),
+                     cmJoin(missingComponents, ", "_s), '.');
+          reason = SearchResult::InsufficientComponents;
         }
 
         if (result && hasVersion) {
@@ -3073,6 +3097,14 @@ bool cmFindPackageCommand::CheckVersion(std::string const& config_file)
         this->CpsAppendices = std::move(appendices);
         this->RequiredComponents = std::move(requiredComponents);
       }
+    } else if (reader) {
+      message =
+        cmStrCat("The file describes the package \""_s, reader->GetName(),
+                 "\", which is not the requested package."_s);
+      reason = SearchResult::Ignored;
+    } else {
+      message = "The package description file could not be read.";
+      reason = SearchResult::Error;
     }
   } else {
     // Get the filename without the .cmake extension.
@@ -3092,15 +3124,26 @@ bool cmFindPackageCommand::CheckVersion(std::string const& config_file)
       haveResult = true;
     }
 
+    if (haveResult && !result) {
+      message =
+        "The version found is not compatible with the version requested.";
+    }
+
     // If no version was requested a versionless package is acceptable.
     if (!haveResult && this->Version.empty()) {
       result = true;
     }
   }
 
+  if (result) {
+    reason = SearchResult::Acceptable;
+  }
+
   ConfigFileInfo configFileInfo;
   configFileInfo.filename = config_file;
   configFileInfo.version = version;
+  configFileInfo.message = message;
+  configFileInfo.result = reason;
   this->ConsideredConfigs.push_back(std::move(configFileInfo));
 
   return result;
@@ -3738,8 +3781,14 @@ void cmFindPackageDebugState::WriteEvent(cmConfigureLog& log,
     auto search_result =
       [](cmFindPackageCommand::SearchResult type) -> std::string {
       switch (type) {
+        case cmFindPackageCommand::SearchResult::Acceptable:
+          return "acceptable";
         case cmFindPackageCommand::SearchResult::InsufficientVersion:
           return "insufficient_version";
+        case cmFindPackageCommand::SearchResult::InsufficientComponents:
+          return "insufficient_components";
+        case cmFindPackageCommand::SearchResult::Error:
+          return "error";
         case cmFindPackageCommand::SearchResult::NoExist:
           return "no_exist";
         case cmFindPackageCommand::SearchResult::Ignored:
