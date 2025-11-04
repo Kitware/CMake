@@ -411,9 +411,7 @@ bool cmCMakeLanguageCommand(std::vector<cmListFileArgument> const& args,
                                  expArgs[expArg], '\"'));
     }
 
-    if (workingMode == cmake::SCRIPT_MODE) {
-      status.SetExitCode(static_cast<int>(retCode));
-    }
+    status.SetExitCode(static_cast<int>(retCode));
     return true;
   }
 
