@@ -376,9 +376,6 @@ int do_cmake(int ac, char const* const* av)
       role = cmState::Role::FindPackage;
       break;
   }
-  auto const failurePolicy = workingMode == cmake::NORMAL_MODE
-    ? cmake::CommandFailureAction::EXIT_CODE
-    : cmake::CommandFailureAction::FATAL_ERROR;
   cmake cm(role);
   cmSystemTools::SetMessageCallback(
     [&cm](std::string const& msg, cmMessageMetadata const& md) {
@@ -387,7 +384,7 @@ int do_cmake(int ac, char const* const* av)
   cm.SetProgressCallback([&cm](std::string const& msg, float prog) {
     cmakemainProgressCallback(msg, prog, &cm);
   });
-  cm.SetWorkingMode(workingMode, failurePolicy);
+  cm.SetWorkingMode(workingMode);
 
   int res = cm.Run(parsedArgs, view_only);
   if (list_cached || list_all_cached) {
@@ -968,8 +965,7 @@ int do_install(int ac, char const* const* av)
           cmakemainProgressCallback(msg, prog, &cm);
         });
         cm.SetDebugOutputOn(verbose);
-        cm.SetWorkingMode(cmake::SCRIPT_MODE,
-                          cmake::CommandFailureAction::FATAL_ERROR);
+        cm.SetWorkingMode(cmake::SCRIPT_MODE);
         ret_ = int(bool(cm.Run(cmd)));
       }
     }

@@ -445,18 +445,11 @@ public:
   //! Do all the checks before running configure
   int DoPreConfigureChecks();
 
-  void SetWorkingMode(WorkingMode mode, CommandFailureAction policy)
-  {
-    this->CurrentWorkingMode = mode;
-    this->CurrentCommandFailureAction = policy;
-  }
+  void SetWorkingMode(WorkingMode mode) { this->CurrentWorkingMode = mode; }
 
   WorkingMode GetWorkingMode() const { return this->CurrentWorkingMode; }
 
-  CommandFailureAction GetCommandFailureAction() const
-  {
-    return this->CurrentCommandFailureAction;
-  }
+  CommandFailureAction GetCommandFailureAction() const;
 
   //! Debug the try compile stuff by not deleting the files
   bool GetDebugTryCompile() const { return this->DebugTryCompile; }
@@ -809,8 +802,6 @@ private:
   std::string CMakeWorkingDirectory;
   ProgressCallbackType ProgressCallback;
   WorkingMode CurrentWorkingMode = NORMAL_MODE;
-  CommandFailureAction CurrentCommandFailureAction =
-    CommandFailureAction::FATAL_ERROR;
   bool DebugOutput = false;
   bool DebugFindOutput = false;
   // Elements of `cmakeLangTraceCmdStack` are "trace requests" pushed
