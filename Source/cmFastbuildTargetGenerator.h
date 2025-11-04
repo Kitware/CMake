@@ -54,7 +54,7 @@ public:
 
   void AddObjectDependencies(FastbuildTarget& fastbuildTarget,
                              std::vector<std::string>& allObjectDepends) const;
-  void AddLinkerNodeDependnecies(FastbuildTarget& fastbuildTarget);
+  void AddLinkerNodeDependencies(FastbuildTarget& fastbuildTarget);
 
   std::string ConvertToFastbuildPath(std::string const& path) const;
 

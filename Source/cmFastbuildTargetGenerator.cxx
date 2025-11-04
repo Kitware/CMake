@@ -783,7 +783,7 @@ void cmFastbuildTargetGenerator::AddObjectDependencies(
   cmGlobalFastbuildGenerator::TopologicalSort(fastbuildTarget.ObjectListNodes);
 }
 
-void cmFastbuildTargetGenerator::AddLinkerNodeDependnecies(
+void cmFastbuildTargetGenerator::AddLinkerNodeDependencies(
   FastbuildTarget& fastbuildTarget)
 {
   for (auto& linkerNode : fastbuildTarget.LinkerNode) {
