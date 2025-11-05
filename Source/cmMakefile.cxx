@@ -4120,7 +4120,9 @@ bool cmMakefile::SetPolicy(cmPolicies::PolicyID id,
   this->StateSnapshot.SetPolicy(id, status);
 
   // Handle CMAKE_PARENT_LIST_FILE for CMP0198 policy changes
-  if (id == cmPolicies::CMP0198) {
+  if (id == cmPolicies::CMP0198 &&
+      this->GetCMakeInstance()->GetState()->GetRole() ==
+        cmState::Role::Project) {
     this->UpdateParentListFileVariable();
   }
 
