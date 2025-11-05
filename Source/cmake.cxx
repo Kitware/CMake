@@ -4517,8 +4517,8 @@ void cmake::SetCMakeListName(std::string const& name)
 
 std::string cmake::GetCMakeListFile(std::string const& dir) const
 {
-  cm::string_view const slash =
-    dir.empty() || dir.back() != '/' ? "/"_s : ""_s;
+  assert(!dir.empty());
+  cm::string_view const slash = dir.back() != '/' ? "/"_s : ""_s;
   std::string listFile;
   if (!this->CMakeListName.empty()) {
     listFile = cmStrCat(dir, slash, this->CMakeListName);
