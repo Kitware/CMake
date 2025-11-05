@@ -9,6 +9,8 @@ set(qt_version_patch "1")
 set(qt_version "${qt_version_major}.${qt_version_minor}.${qt_version_patch}")
 set(qt_version_nodot "${qt_version_major}${qt_version_minor}${qt_version_patch}")
 
+set(qt_tar_workdir ".gitlab")
+
 # Files needed to download.
 set(qt_files)
 if ("$ENV{CMAKE_CONFIGURATION}" MATCHES "windows.*package")
@@ -61,14 +63,19 @@ elseif ("$ENV{CMAKE_CONFIGURATION}" MATCHES "windows")
   set(qt_url_path "${qt_platform}/desktop/qt5_${qt_version_nodot}/qt.qt5.${qt_version_nodot}.${qt_abi}")
 elseif ("$ENV{CMAKE_CONFIGURATION}" MATCHES "macos")
   if ("$ENV{CMAKE_CONFIGURATION}" MATCHES "macos10.10_package")
+    set(qt_url_root "https://cmake.org/files/dependencies")
+    set(qt_url_path "")
     list(APPEND qt_files "qt-5.9.9-macosx10.10-x86_64-arm64.tar.xz")
     set(qt_subdir "qt-5.9.9-macosx10.10-x86_64-arm64")
   else ()
-    list(APPEND qt_files "qt-5.15.2-macosx10.13-x86_64-arm64.tar.xz")
-    set(qt_subdir "qt-5.15.2-macosx10.13-x86_64-arm64")
+    # This URL is only visible inside of Kitware's network.
+    # Please use your own Qt Account to obtain these files.
+    set(qt_url_root "https://www.paraview.org/files/dependencies/internal/qt")
+    set(qt_url_path "mac_x64/desktop/qt6_693/qt6_693/qt.qt6.693.clang_64")
+    list(APPEND qt_files "6.9.3-0-202509261207qtbase-MacOS-MacOS_15-Clang-MacOS-MacOS_15-X86_64-ARM64.7z")
+    set(qt_subdir "qt-extract")
+    set(qt_tar_workdir ".gitlab/${qt_subdir}")
   endif()
-  set(qt_url_root "https://cmake.org/files/dependencies")
-  set(qt_url_path "")
 else()
   message(FATAL_ERROR "Unknown OS to use for Qt")
 endif ()
@@ -109,12 +116,13 @@ foreach (qt_file IN LISTS qt_files)
   endif ()
 
   # Extract the file.
+  file(MAKE_DIRECTORY "${qt_tar_workdir}")
   execute_process(
     COMMAND
       "${CMAKE_COMMAND}"
       -E tar
-      xf "${qt_file}"
-    WORKING_DIRECTORY ".gitlab"
+      xf "${CMAKE_CURRENT_SOURCE_DIR}/.gitlab/${qt_file}"
+    WORKING_DIRECTORY "${qt_tar_workdir}"
     RESULT_VARIABLE res
     ERROR_VARIABLE err
     ERROR_STRIP_TRAILING_WHITESPACE)

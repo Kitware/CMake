@@ -1,6 +1,10 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
 # file LICENSE.rst or https://cmake.org/licensing for details.
 
+if(CMake_GUI_OSX_DEPLOYMENT_TARGET)
+  set(CMAKE_OSX_DEPLOYMENT_TARGET "${CMake_GUI_OSX_DEPLOYMENT_TARGET}")
+endif()
+
 project(QtDialog)
 CMake_OPTIONAL_COMPONENT(cmake-gui)
 set(QT_COMPONENTS
@@ -69,7 +73,7 @@ if(CMake_QT_STATIC_QWindowsIntegrationPlugin_LIBRARIES)
 endif()
 
 # We need to install platform plugin and add qt.conf for Qt5 on Mac and Windows.
-if(CMake_INSTALL_DEPENDENCIES AND (APPLE OR WIN32))
+if(CMake_INSTALL_DEPENDENCIES AND (APPLE OR WIN32) AND NOT COMMAND qt_generate_deploy_app_script)
   function(_qt_get_plugin_name_with_version target out_var)
       string(REGEX REPLACE "^Qt::(.+)" "Qt${CMake_QT_MAJOR_VERSION}::\\1"
              qt_plugin_with_version "${target}")
@@ -105,32 +109,15 @@ if(CMake_INSTALL_DEPENDENCIES AND (APPLE OR WIN32))
         "${${_qt_plugins_var}};\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/${_qt_plugin_dest}/${_qt_plugin_file}")
     endif()
   endmacro()
-  macro(install_qt_plugins _comps _plugins_var)
-    foreach(_qt_comp IN LISTS ${_comps})
-      if(CMake_QT_MAJOR_VERSION VERSION_LESS 6)
-        set(_qt_module_plugins ${Qt${CMake_QT_MAJOR_VERSION}${_qt_comp}_PLUGINS})
-      else()
-        get_target_property(_qt_module_plugins Qt${CMake_QT_MAJOR_VERSION}::${_qt_comp} QT_PLUGINS)
-      endif()
-      foreach(_qt_plugin IN LISTS _qt_module_plugins)
-        if(CMake_QT_MAJOR_VERSION VERSION_GREATER_EQUAL 6)
-          # Qt6 provides the plugins as individual packages that need to be found.
-          find_package(Qt${CMake_QT_MAJOR_VERSION}${_qt_plugin} QUIET
-            PATHS ${Qt${CMake_QT_MAJOR_VERSION}${_qt_comp}_DIR})
-        endif()
-        install_qt_plugin("${_qt_plugin}" "${_plugins_var}")
-      endforeach()
-    endforeach()
-  endmacro()
   if(APPLE)
-    if(CMake_QT_MAJOR_VERSION VERSION_EQUAL 5)
-      install_qt_plugin("Qt5::QCocoaIntegrationPlugin" QT_PLUGINS)
-      if(TARGET Qt5::QMacStylePlugin)
-        install_qt_plugin("Qt5::QMacStylePlugin" QT_PLUGINS)
-      endif()
-    else()
-      # FIXME: Minimize plugins for Qt6.
-      install_qt_plugins(QT_COMPONENTS QT_PLUGINS)
+    if(CMake_QT_MAJOR_VERSION VERSION_GREATER_EQUAL 6)
+      # Qt6 provides the plugins as individual packages that need to be found.
+      find_package(Qt${CMake_QT_MAJOR_VERSION}QCocoaIntegrationPlugin QUIET PATHS ${Qt${CMake_QT_MAJOR_VERSION}Gui_DIR})
+      find_package(Qt${CMake_QT_MAJOR_VERSION}QMacStylePlugin QUIET PATHS ${Qt${CMake_QT_MAJOR_VERSION}Widgets_DIR})
+    endif()
+    install_qt_plugin("Qt${CMake_QT_MAJOR_VERSION}::QCocoaIntegrationPlugin" QT_PLUGINS)
+    if(TARGET Qt${CMake_QT_MAJOR_VERSION}::QMacStylePlugin)
+      install_qt_plugin("Qt${CMake_QT_MAJOR_VERSION}::QMacStylePlugin" QT_PLUGINS)
     endif()
     file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/qt.conf"
       "[Paths]\nPlugins = ${_qt_plugin_dir}\n")
@@ -138,24 +125,17 @@ if(CMake_INSTALL_DEPENDENCIES AND (APPLE OR WIN32))
       DESTINATION "${CMake_INSTALL_APP_DIR_SLASH}Resources"
       ${COMPONENT})
   elseif(WIN32 AND NOT CMake_QT_STATIC_QWindowsIntegrationPlugin_LIBRARIES)
-    if(CMake_QT_MAJOR_VERSION VERSION_EQUAL 5)
-      install_qt_plugin("Qt5::QWindowsIntegrationPlugin" QT_PLUGINS)
-    else()
-      # FIXME: Minimize plugins for Qt6.
-      install_qt_plugins(QT_COMPONENTS QT_PLUGINS)
+    if(CMake_QT_MAJOR_VERSION VERSION_GREATER_EQUAL 6)
+      # Qt6 provides the plugins as individual packages that need to be found.
+      find_package(Qt${CMake_QT_MAJOR_VERSION}QWindowsIntegrationPlugin QUIET PATHS ${Qt${CMake_QT_MAJOR_VERSION}Gui_DIR})
     endif()
+    install_qt_plugin("Qt${CMake_QT_MAJOR_VERSION}::QWindowsIntegrationPlugin" QT_PLUGINS)
     file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/qt.conf"
       "[Paths]\nPlugins = ../${_qt_plugin_dir}\n")
     install(FILES "${CMAKE_CURRENT_BINARY_DIR}/qt.conf"
       DESTINATION bin
       ${COMPONENT})
   endif()
-endif()
-
-get_property(_Qt_Core_LOCATION TARGET Qt${CMake_QT_MAJOR_VERSION}::Core PROPERTY LOCATION)
-get_filename_component(Qt_BIN_DIR "${_Qt_Core_LOCATION}" PATH)
-if(APPLE)
-  get_filename_component(Qt_BIN_DIR "${Qt_BIN_DIR}" PATH)
 endif()
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -356,17 +336,33 @@ if(APPLE)
 endif()
 
 if(CMake_INSTALL_DEPENDENCIES AND (APPLE OR WIN32))
-  # install rules for including 3rd party libs such as Qt
-  # if a system Qt is used (e.g. installed in /usr/lib/), it will not be included in the installation
-  set(fixup_exe "\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/${CMake_INSTALL_BIN_DIR}/cmake-gui${CMAKE_EXECUTABLE_SUFFIX}")
-  if(APPLE)
-    set(fixup_exe "\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/${CMake_INSTALL_APP_DIR_SLASH}MacOS/CMake")
+  if(COMMAND qt_generate_deploy_app_script)
+    # Qt libraries are found via @rpath, so point the runtime path at them.
+    set_property(TARGET cmake-gui PROPERTY INSTALL_RPATH "@executable_path/../Frameworks")
+    qt_generate_deploy_app_script(
+      TARGET cmake-gui
+      OUTPUT_SCRIPT qt_deploy_script
+    )
+    install(SCRIPT "${qt_deploy_script}")
+  else()
+    # install rules for including 3rd party libs such as Qt
+    # if a system Qt is used (e.g. installed in /usr/lib/), it will not be included in the installation
+    set(fixup_exe "\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/${CMake_INSTALL_BIN_DIR}/cmake-gui${CMAKE_EXECUTABLE_SUFFIX}")
+    if(APPLE)
+      set(fixup_exe "\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/${CMake_INSTALL_APP_DIR_SLASH}MacOS/CMake")
+    endif()
+    get_property(_Qt_Core_LOCATION TARGET Qt${CMake_QT_MAJOR_VERSION}::Core PROPERTY LOCATION)
+    if(APPLE AND _Qt_Core_LOCATION MATCHES [[^(.*)/[^/]*\.framework/]])
+      set(Qt_LIB_DIR "${CMAKE_MATCH_1}")
+    else()
+      get_filename_component(Qt_LIB_DIR "${_Qt_Core_LOCATION}" PATH)
+    endif()
+    install(CODE "
+      include(BundleUtilities)
+      set(BU_CHMOD_BUNDLE_ITEMS ON)
+      fixup_bundle(\"${fixup_exe}\" \"${QT_PLUGINS}\" \"${Qt_LIB_DIR};${QT_LIBRARY_DIR};${QT_BINARY_DIR}\")
+    " ${COMPONENT})
   endif()
-  install(CODE "
-    include(BundleUtilities)
-    set(BU_CHMOD_BUNDLE_ITEMS ON)
-    fixup_bundle(\"${fixup_exe}\" \"${QT_PLUGINS}\" \"${Qt_BIN_DIR};${QT_LIBRARY_DIR};${QT_BINARY_DIR}\")
-  " ${COMPONENT})
 endif()
 
 set(CMAKE_PACKAGE_QTGUI TRUE)

@@ -26,7 +26,7 @@ void WarningMessagesDialog::setInitialValues()
 
 void WarningMessagesDialog::setupSignals()
 {
-#if (QT_VERSION >= QT_VERSION_CHECK(6, 7, 0))
+#if QT_VERSION >= QT_VERSION_CHECK(6, 7, 0)
   static auto const checkStateChanged = &QCheckBox::checkStateChanged;
 #else
   static auto const checkStateChanged = &QCheckBox::stateChanged;
@@ -59,7 +59,8 @@ void WarningMessagesDialog::doAccept()
     this->deprecatedWarningsAsErrors->isChecked());
 }
 
-void WarningMessagesDialog::doSuppressDeveloperWarningsChanged(int state)
+void WarningMessagesDialog::doSuppressDeveloperWarningsChanged(
+  CheckState state)
 {
   // no warnings implies no errors either
   if (state) {
@@ -67,7 +68,8 @@ void WarningMessagesDialog::doSuppressDeveloperWarningsChanged(int state)
   }
 }
 
-void WarningMessagesDialog::doSuppressDeprecatedWarningsChanged(int state)
+void WarningMessagesDialog::doSuppressDeprecatedWarningsChanged(
+  CheckState state)
 {
   // no warnings implies no errors either
   if (state) {
@@ -75,7 +77,8 @@ void WarningMessagesDialog::doSuppressDeprecatedWarningsChanged(int state)
   }
 }
 
-void WarningMessagesDialog::doDeveloperWarningsAsErrorsChanged(int state)
+void WarningMessagesDialog::doDeveloperWarningsAsErrorsChanged(
+  CheckState state)
 {
   // warnings as errors implies warnings are not suppressed
   if (state) {
@@ -83,7 +86,8 @@ void WarningMessagesDialog::doDeveloperWarningsAsErrorsChanged(int state)
   }
 }
 
-void WarningMessagesDialog::doDeprecatedWarningsAsErrorsChanged(int state)
+void WarningMessagesDialog::doDeprecatedWarningsAsErrorsChanged(
+  CheckState state)
 {
   // warnings as errors implies warnings are not suppressed
   if (state) {

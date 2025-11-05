@@ -91,14 +91,16 @@ readonly vol_name="$(basename "${dmg%.dmg}")"
 readonly vol_path="/Volumes/$vol_name"
 hdiutil attach "${udrw_dmg}"
 
-codesign --verify --timestamp --options=runtime --verbose --deep \
+codesign --verify --timestamp --options=runtime --verbose --force --deep \
   -s "$id" \
   --entitlements "$entitlements_xml" \
-  "$vol_path/CMake.app/Contents/bin/cmake" \
-  "$vol_path/CMake.app/Contents/bin/ccmake" \
-  "$vol_path/CMake.app/Contents/bin/ctest" \
-  "$vol_path/CMake.app/Contents/bin/cpack" \
-  "$vol_path/CMake.app"
+  "$vol_path"/CMake.app/Contents/bin/cmake \
+  "$vol_path"/CMake.app/Contents/bin/ccmake \
+  "$vol_path"/CMake.app/Contents/bin/ctest \
+  "$vol_path"/CMake.app/Contents/bin/cpack \
+  "$vol_path"/CMake.app/Contents/Frameworks/*.framework/Versions/[A56]/Qt* \
+  "$vol_path"/CMake.app/Contents/PlugIns/*/lib*.dylib \
+  "$vol_path"/CMake.app
 
 ditto -c -k --keepParent "$vol_path/CMake.app" "$tmpdir/CMake.app.zip"
 xcrun notarytool submit "$tmpdir/CMake.app.zip" --keychain-profile "$keychain_profile" --wait

@@ -17,6 +17,12 @@ class WarningMessagesDialog
 {
   Q_OBJECT
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 7, 0)
+  using CheckState = Qt::CheckState;
+#else
+  using CheckState = int;
+#endif
+
 public:
   WarningMessagesDialog(QWidget* prnt, QCMake* instance);
 
@@ -30,23 +36,23 @@ private slots:
    * Handler for checked state changed event of the suppress developer warnings
    * checkbox.
    */
-  void doSuppressDeveloperWarningsChanged(int state);
+  void doSuppressDeveloperWarningsChanged(CheckState state);
   /**
    * Handler for checked state changed event of the suppress deprecated
    * warnings checkbox.
    */
-  void doSuppressDeprecatedWarningsChanged(int state);
+  void doSuppressDeprecatedWarningsChanged(CheckState state);
 
   /**
    * Handler for checked state changed event of the developer warnings as
    * errors checkbox.
    */
-  void doDeveloperWarningsAsErrorsChanged(int state);
+  void doDeveloperWarningsAsErrorsChanged(CheckState state);
   /**
    * Handler for checked state changed event of the deprecated warnings as
    * errors checkbox.
    */
-  void doDeprecatedWarningsAsErrorsChanged(int state);
+  void doDeprecatedWarningsAsErrorsChanged(CheckState state);
 
 private:
   QCMake* cmakeInstance;
