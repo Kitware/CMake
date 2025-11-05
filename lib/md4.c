@@ -28,7 +28,6 @@
 
 #include <string.h>
 
-#include "strdup.h"
 #include "curl_md4.h"
 #include "curlx/warnless.h"
 
@@ -51,14 +50,6 @@
 #endif
 #endif
 
-#ifdef USE_MBEDTLS
-#include <mbedtls/version.h>
-#if MBEDTLS_VERSION_NUMBER < 0x03020000
-  #error "mbedTLS 3.2.0 or later required"
-#endif
-#include <mbedtls/mbedtls_config.h>
-#endif /* USE_MBEDTLS */
-
 /* When OpenSSL or wolfSSL is available, we use their MD4 functions. */
 #if defined(USE_WOLFSSL) && !defined(WOLFSSL_NO_MD4)
 #include <wolfssl/openssl/md4.h>
@@ -78,12 +69,9 @@
 #include <wincrypt.h>
 #elif defined(USE_GNUTLS)
 #include <nettle/md4.h>
-#elif(defined(USE_MBEDTLS) && defined(MBEDTLS_MD4_C))
-#include <mbedtls/md4.h>
 #endif
 
-/* The last 3 #include files should be in this order */
-#include "curl_printf.h"
+/* The last 2 #include files should be in this order */
 #include "curl_memory.h"
 #include "memdebug.h"
 
@@ -188,39 +176,6 @@ static void MD4_Final(unsigned char *result, MD4_CTX *ctx)
   md4_digest(ctx, MD4_DIGEST_SIZE, result);
 }
 
-#elif(defined(USE_MBEDTLS) && defined(MBEDTLS_MD4_C))
-
-struct md4_ctx {
-  void *data;
-  unsigned long size;
-};
-typedef struct md4_ctx MD4_CTX;
-
-static int MD4_Init(MD4_CTX *ctx)
-{
-  ctx->data = NULL;
-  ctx->size = 0;
-  return 1;
-}
-
-static void MD4_Update(MD4_CTX *ctx, const void *data, unsigned long size)
-{
-  if(!ctx->data) {
-    ctx->data = Curl_memdup(data, size);
-    if(ctx->data)
-      ctx->size = size;
-  }
-}
-
-static void MD4_Final(unsigned char *result, MD4_CTX *ctx)
-{
-  if(ctx->data) {
-    mbedtls_md4(ctx->data, ctx->size, result);
-    Curl_safefree(ctx->data);
-    ctx->size = 0;
-  }
-}
-
 #else
 /* When no other crypto library is available, or the crypto library does not
  * support MD4, we use this code segment this implementation of it
@@ -247,18 +202,6 @@ static void MD4_Final(unsigned char *result, MD4_CTX *ctx)
  * There is ABSOLUTELY NO WARRANTY, express or implied.
  *
  * (This is a heavily cut-down "BSD license".)
- *
- * This differs from Colin Plumb's older public domain implementation in that
- * no exactly 32-bit integer data type is required (any 32-bit or wider
- * unsigned integer data type will do), there is no compile-time endianness
- * configuration, and the function prototypes match OpenSSL's. No code from
- * Colin Plumb's implementation has been reused; this comment merely compares
- * the properties of the two independent implementations.
- *
- * The primary goals of this implementation are portability and ease of use.
- * It is meant to be fast, but not as fast as possible. Some known
- * optimizations are not included to reduce source code size and avoid
- * compile-time configuration.
  */
 
 /* Any 32-bit or wider unsigned integer data type will do */
@@ -342,7 +285,7 @@ static const void *my_md4_body(MD4_CTX *ctx,
     saved_c = c;
     saved_d = d;
 
-/* Round 1 */
+    /* Round 1 */
     MD4_STEP(MD4_F, a, b, c, d, MD4_SET(0), 3)
     MD4_STEP(MD4_F, d, a, b, c, MD4_SET(1), 7)
     MD4_STEP(MD4_F, c, d, a, b, MD4_SET(2), 11)
@@ -360,7 +303,7 @@ static const void *my_md4_body(MD4_CTX *ctx,
     MD4_STEP(MD4_F, c, d, a, b, MD4_SET(14), 11)
     MD4_STEP(MD4_F, b, c, d, a, MD4_SET(15), 19)
 
-/* Round 2 */
+    /* Round 2 */
     MD4_STEP(MD4_G, a, b, c, d, MD4_GET(0) + 0x5a827999, 3)
     MD4_STEP(MD4_G, d, a, b, c, MD4_GET(4) + 0x5a827999, 5)
     MD4_STEP(MD4_G, c, d, a, b, MD4_GET(8) + 0x5a827999, 9)
@@ -378,7 +321,7 @@ static const void *my_md4_body(MD4_CTX *ctx,
     MD4_STEP(MD4_G, c, d, a, b, MD4_GET(11) + 0x5a827999, 9)
     MD4_STEP(MD4_G, b, c, d, a, MD4_GET(15) + 0x5a827999, 13)
 
-/* Round 3 */
+    /* Round 3 */
     MD4_STEP(MD4_H, a, b, c, d, MD4_GET(0) + 0x6ed9eba1, 3)
     MD4_STEP(MD4_H, d, a, b, c, MD4_GET(8) + 0x6ed9eba1, 9)
     MD4_STEP(MD4_H, c, d, a, b, MD4_GET(4) + 0x6ed9eba1, 11)

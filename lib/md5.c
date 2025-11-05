@@ -34,13 +34,6 @@
 #include "curl_hmac.h"
 #include "curlx/warnless.h"
 
-#ifdef USE_MBEDTLS
-#include <mbedtls/version.h>
-#if MBEDTLS_VERSION_NUMBER < 0x03020000
-  #error "mbedTLS 3.2.0 or later required"
-#endif
-#endif /* USE_MBEDTLS */
-
 #ifdef USE_OPENSSL
   #include <openssl/opensslconf.h>
   #if !defined(OPENSSL_NO_MD5) && !defined(OPENSSL_NO_DEPRECATED_3_0)
@@ -55,14 +48,25 @@
   #endif
 #endif
 
+#ifdef USE_MBEDTLS
+  #include <mbedtls/version.h>
+  #if MBEDTLS_VERSION_NUMBER < 0x03020000
+    #error "mbedTLS 3.2.0 or later required"
+  #endif
+  #include <psa/crypto_config.h>
+  #if defined(PSA_WANT_ALG_MD5) && PSA_WANT_ALG_MD5  /* mbedTLS 4+ */
+    #define USE_MBEDTLS_MD5
+  #endif
+#endif
+
 #ifdef USE_GNUTLS
 #include <nettle/md5.h>
 #elif defined(USE_OPENSSL_MD5)
 #include <openssl/md5.h>
 #elif defined(USE_WOLFSSL_MD5)
 #include <wolfssl/openssl/md5.h>
-#elif defined(USE_MBEDTLS)
-#include <mbedtls/md5.h>
+#elif defined(USE_MBEDTLS_MD5)
+#include <psa/crypto.h>
 #elif (defined(__MAC_OS_X_VERSION_MAX_ALLOWED) && \
               (__MAC_OS_X_VERSION_MAX_ALLOWED >= 1040) && \
        defined(__MAC_OS_X_VERSION_MIN_REQUIRED) && \
@@ -77,8 +81,7 @@
 #include <wincrypt.h>
 #endif
 
-/* The last 3 #include files should be in this order */
-#include "curl_printf.h"
+/* The last 2 #include files should be in this order */
 #include "curl_memory.h"
 #include "memdebug.h"
 
@@ -153,13 +156,14 @@ static void my_md5_final(unsigned char *digest, void *ctx)
   (void)wolfSSL_MD5_Final(digest, ctx);
 }
 
-#elif defined(USE_MBEDTLS)
+#elif defined(USE_MBEDTLS_MD5)
 
-typedef mbedtls_md5_context my_md5_ctx;
+typedef psa_hash_operation_t my_md5_ctx;
 
 static CURLcode my_md5_init(void *ctx)
 {
-  if(mbedtls_md5_starts(ctx))
+  memset(ctx, 0, sizeof(my_md5_ctx));
+  if(psa_hash_setup(ctx, PSA_ALG_MD5) != PSA_SUCCESS)
     return CURLE_OUT_OF_MEMORY;
   return CURLE_OK;
 }
@@ -168,12 +172,13 @@ static void my_md5_update(void *ctx,
                           const unsigned char *data,
                           unsigned int length)
 {
-  (void)mbedtls_md5_update(ctx, data, length);
+  (void)psa_hash_update(ctx, data, length);
 }
 
 static void my_md5_final(unsigned char *digest, void *ctx)
 {
-  (void)mbedtls_md5_finish(ctx, digest);
+  size_t actual_length;
+  (void)psa_hash_finish(ctx, digest, 16, &actual_length);
 }
 
 #elif defined(AN_APPLE_OS)
@@ -282,18 +287,6 @@ static void my_md5_final(unsigned char *digest, void *in)
  * There is ABSOLUTELY NO WARRANTY, express or implied.
  *
  * (This is a heavily cut-down "BSD license".)
- *
- * This differs from Colin Plumb's older public domain implementation in that
- * no exactly 32-bit integer data type is required (any 32-bit or wider
- * unsigned integer data type will do), there is no compile-time endianness
- * configuration, and the function prototypes match OpenSSL's. No code from
- * Colin Plumb's implementation has been reused; this comment merely compares
- * the properties of the two independent implementations.
- *
- * The primary goals of this implementation are portability and ease of use.
- * It is meant to be fast, but not as fast as possible. Some known
- * optimizations are not included to reduce source code size and avoid
- * compile-time configuration.
  */
 
 /* Any 32-bit or wider unsigned integer data type will do */
@@ -382,7 +375,7 @@ static const void *my_md5_body(my_md5_ctx *ctx,
     saved_c = c;
     saved_d = d;
 
-/* Round 1 */
+    /* Round 1 */
     MD5_STEP(MD5_F, a, b, c, d, MD5_SET(0), 0xd76aa478, 7)
     MD5_STEP(MD5_F, d, a, b, c, MD5_SET(1), 0xe8c7b756, 12)
     MD5_STEP(MD5_F, c, d, a, b, MD5_SET(2), 0x242070db, 17)
@@ -400,7 +393,7 @@ static const void *my_md5_body(my_md5_ctx *ctx,
     MD5_STEP(MD5_F, c, d, a, b, MD5_SET(14), 0xa679438e, 17)
     MD5_STEP(MD5_F, b, c, d, a, MD5_SET(15), 0x49b40821, 22)
 
-/* Round 2 */
+    /* Round 2 */
     MD5_STEP(MD5_G, a, b, c, d, MD5_GET(1), 0xf61e2562, 5)
     MD5_STEP(MD5_G, d, a, b, c, MD5_GET(6), 0xc040b340, 9)
     MD5_STEP(MD5_G, c, d, a, b, MD5_GET(11), 0x265e5a51, 14)
@@ -418,7 +411,7 @@ static const void *my_md5_body(my_md5_ctx *ctx,
     MD5_STEP(MD5_G, c, d, a, b, MD5_GET(7), 0x676f02d9, 14)
     MD5_STEP(MD5_G, b, c, d, a, MD5_GET(12), 0x8d2a4c8a, 20)
 
-/* Round 3 */
+    /* Round 3 */
     MD5_STEP(MD5_H, a, b, c, d, MD5_GET(5), 0xfffa3942, 4)
     MD5_STEP(MD5_H2, d, a, b, c, MD5_GET(8), 0x8771f681, 11)
     MD5_STEP(MD5_H, c, d, a, b, MD5_GET(11), 0x6d9d6122, 16)
@@ -436,7 +429,7 @@ static const void *my_md5_body(my_md5_ctx *ctx,
     MD5_STEP(MD5_H, c, d, a, b, MD5_GET(15), 0x1fa27cf8, 16)
     MD5_STEP(MD5_H2, b, c, d, a, MD5_GET(2), 0xc4ac5665, 23)
 
-/* Round 4 */
+    /* Round 4 */
     MD5_STEP(MD5_I, a, b, c, d, MD5_GET(0), 0xf4292244, 6)
     MD5_STEP(MD5_I, d, a, b, c, MD5_GET(7), 0x432aff97, 10)
     MD5_STEP(MD5_I, c, d, a, b, MD5_GET(14), 0xab9423a7, 15)
