@@ -1,4 +1,14 @@
-CMake
+Supported Platforms
+-------------------
+
+* Microsoft Windows
+* Apple macOS
+* Linux
+* FreeBSD
+* OpenBSD
+* Solaris
+* AIX
+
 *****
 
 Introduction
@@ -29,16 +39,6 @@ See `LICENSE.rst`_ for details.
 Building CMake
 ==============
 
-Supported Platforms
--------------------
-
-* Microsoft Windows
-* Apple macOS
-* Linux
-* FreeBSD
-* OpenBSD
-* Solaris
-* AIX
 
 Other UNIX-like operating systems may work too out of the box, if not
 it should not be a major problem to port CMake to this platform.
