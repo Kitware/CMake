@@ -2055,8 +2055,11 @@ cmFindPackageCommand::AppendixMap cmFindPackageCommand::FindAppendices(
         continue;
       }
 
+      cmMakefile::CallRAII cs{ this->Makefile, extra, this->Status };
+
       std::unique_ptr<cmPackageInfoReader> reader =
-        cmPackageInfoReader::Read(extra, &baseReader);
+        cmPackageInfoReader::Read(this->Makefile, extra, &baseReader);
+
       if (reader && reader->GetName() == this->Name) {
         std::vector<std::string> components = reader->GetComponentNames();
         Appendix appendix{ std::move(reader), std::move(components) };
@@ -2249,8 +2252,10 @@ bool cmFindPackageCommand::ImportPackageTargets(cmPackageState& packageState,
 
     // Try to read supplemental data from each file found.
     for (std::string const& extra : glob.GetFiles()) {
+      cmMakefile::CallRAII cs{ this->Makefile, extra, this->Status };
+
       std::unique_ptr<cmPackageInfoReader> configReader =
-        cmPackageInfoReader::Read(extra, &reader);
+        cmPackageInfoReader::Read(this->Makefile, extra, &reader);
       if (configReader && configReader->GetName() == this->Name) {
         if (!configReader->ImportTargetConfigurations(this->Makefile,
                                                       this->Status)) {
@@ -2953,8 +2958,11 @@ bool cmFindPackageCommand::CheckVersion(std::string const& config_file)
   std::string ext = cmSystemTools::LowerCase(config_file.substr(pos));
 
   if (ext == ".cps"_s) {
+    cmMakefile::CallRAII cs{ this->Makefile, config_file, this->Status };
+
     std::unique_ptr<cmPackageInfoReader> reader =
-      cmPackageInfoReader::Read(config_file);
+      cmPackageInfoReader::Read(this->Makefile, config_file);
+
     if (reader && reader->GetName() == this->Name) {
       // Read version information.
       cm::optional<std::string> cpsVersion = reader->GetVersion();

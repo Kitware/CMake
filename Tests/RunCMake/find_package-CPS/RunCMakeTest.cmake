@@ -32,6 +32,7 @@ endfunction()
 # General failure tests
 run_cmake(InvalidCps1)
 run_cmake(InvalidCps2)
+run_cmake(InvalidCps3)
 run_cmake(WrongName)
 run_cmake(BadPrefix)
 
