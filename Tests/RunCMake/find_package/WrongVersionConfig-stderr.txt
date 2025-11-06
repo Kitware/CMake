@@ -5,7 +5,9 @@
   The following configuration files were considered but not accepted:
 
     .*/Tests/RunCMake/find_package/VersionedA-[12]/VersionedAConfig\.cmake, version: [12]
+      The version found is not compatible with the version requested\.
     .*/Tests/RunCMake/find_package/VersionedA-[12]/VersionedAConfig\.cmake, version: [12]
+      The version found is not compatible with the version requested\.
 
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)$
