@@ -291,7 +291,10 @@ private:
 
   enum class SearchResult
   {
+    Acceptable,
     InsufficientVersion,
+    InsufficientComponents,
+    Error,
     NoExist,
     Ignored,
     NoConfigFile,
@@ -300,10 +303,11 @@ private:
   struct ConsideredPath
   {
     ConsideredPath(std::string path, FoundPackageMode mode,
-                   SearchResult reason)
+                   SearchResult result, std::string message = {})
       : Path(std::move(path))
       , Mode(mode)
-      , Reason(reason)
+      , Reason(result)
+      , Message(std::move(message))
     {
     }
 
@@ -347,6 +351,8 @@ private:
   {
     std::string filename;
     std::string version;
+    std::string message;
+    SearchResult result;
 
     bool operator<(ConfigFileInfo const& rhs) const
     {
