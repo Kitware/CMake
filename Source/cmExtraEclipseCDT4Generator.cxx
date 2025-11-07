@@ -518,8 +518,6 @@ void cmExtraEclipseCDT4Generator::CreateLinksForTargets(cmXMLWriter& xml)
           if (!this->GenerateLinkedResources) {
             break; // skip generating the linked resources to the source files
           }
-          std::vector<cmSourceGroup> sourceGroups =
-            makefile->GetSourceGroups();
           // get the files from the source lists then add them to the groups
           std::vector<cmSourceFile*> files;
           target->GetSourceFiles(
@@ -527,11 +525,12 @@ void cmExtraEclipseCDT4Generator::CreateLinksForTargets(cmXMLWriter& xml)
           for (cmSourceFile* sf : files) {
             // Add the file to the list of sources.
             std::string const& source = sf->ResolveFullPath();
-            cmSourceGroup* sourceGroup =
-              makefile->FindSourceGroup(source, sourceGroups);
+            cmSourceGroup* sourceGroup = makefile->FindSourceGroup(source);
             sourceGroup->AssignSource(sf);
           }
 
+          std::vector<cmSourceGroup> sourceGroups =
+            makefile->GetSourceGroups();
           this->WriteGroups(sourceGroups, linkName2, xml);
         } break;
         // ignore all others:

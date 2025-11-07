@@ -1993,29 +1993,24 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
     return;
   }
 
-  // collect up group information
-  std::vector<cmSourceGroup> sourceGroups = this->Makefile->GetSourceGroups();
-
   std::vector<cmGeneratorTarget::AllConfigSource> const& sources =
     this->GeneratorTarget->GetAllConfigSources();
 
   std::set<cmSourceGroup const*> groupsUsed;
   for (cmGeneratorTarget::AllConfigSource const& si : sources) {
     std::string const& source = si.Source->GetFullPath();
-    cmSourceGroup* sourceGroup =
-      this->Makefile->FindSourceGroup(source, sourceGroups);
+    cmSourceGroup* sourceGroup = this->Makefile->FindSourceGroup(source);
     groupsUsed.insert(sourceGroup);
   }
 
   if (cmSourceFile const* srcCMakeLists =
         this->LocalGenerator->CreateVCProjBuildRule()) {
     std::string const& source = srcCMakeLists->GetFullPath();
-    cmSourceGroup* sourceGroup =
-      this->Makefile->FindSourceGroup(source, sourceGroups);
+    cmSourceGroup* sourceGroup = this->Makefile->FindSourceGroup(source);
     groupsUsed.insert(sourceGroup);
   }
 
-  this->AddMissingSourceGroups(groupsUsed, sourceGroups);
+  this->AddMissingSourceGroups(groupsUsed, this->Makefile->GetSourceGroups());
 
   // Write out group file
   std::string path = cmStrCat(
@@ -2035,7 +2030,7 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
                  "http://schemas.microsoft.com/developer/msbuild/2003");
 
     for (auto const& ti : this->Tools) {
-      this->WriteGroupSources(e0, ti.first, ti.second, sourceGroups);
+      this->WriteGroupSources(e0, ti.first, ti.second);
     }
 
     // Added files are images and the manifest.
@@ -2163,16 +2158,14 @@ void cmVisualStudio10TargetGenerator::AddMissingSourceGroups(
 }
 
 void cmVisualStudio10TargetGenerator::WriteGroupSources(
-  Elem& e0, std::string const& name, ToolSources const& sources,
-  std::vector<cmSourceGroup>& sourceGroups)
+  Elem& e0, std::string const& name, ToolSources const& sources)
 {
   Elem e1(e0, "ItemGroup");
   e1.SetHasElements();
   for (ToolSource const& s : sources) {
     cmSourceFile const* sf = s.SourceFile;
     std::string const& source = sf->GetFullPath();
-    cmSourceGroup* sourceGroup =
-      this->Makefile->FindSourceGroup(source, sourceGroups);
+    cmSourceGroup* sourceGroup = this->Makefile->FindSourceGroup(source);
     std::string const& filter = sourceGroup->GetFullName();
     std::string path = this->ConvertPath(source, s.RelativePath);
     ConvertToWindowsSlash(path);
@@ -6043,11 +6036,7 @@ std::string cmVisualStudio10TargetGenerator::GetCSharpSourceLink(
   std::string const& fullFileName = source->GetFullPath();
   std::string const& srcDir = this->Makefile->GetCurrentSourceDirectory();
   std::string const& binDir = this->Makefile->GetCurrentBinaryDirectory();
-  // unfortunately we have to copy the source groups, because
-  // FindSourceGroup uses a regex which is modifying the group
-  std::vector<cmSourceGroup> sourceGroups = this->Makefile->GetSourceGroups();
-  cmSourceGroup* sourceGroup =
-    this->Makefile->FindSourceGroup(fullFileName, sourceGroups);
+  cmSourceGroup* sourceGroup = this->Makefile->FindSourceGroup(fullFileName);
   if (sourceGroup && !sourceGroup->GetFullName().empty()) {
     sourceGroupedFile =
       cmStrCat(sourceGroup->GetFullName(), '/',

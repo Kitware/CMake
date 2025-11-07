@@ -2193,11 +2193,10 @@ cmSourceGroup* cmMakefile::GetOrCreateSourceGroup(std::string const& name)
  * non-inherited SOURCE_GROUP commands will have precedence over
  * inherited ones.
  */
-cmSourceGroup* cmMakefile::FindSourceGroup(
-  std::string const& source, std::vector<cmSourceGroup>& groups) const
+cmSourceGroup* cmMakefile::FindSourceGroup(std::string const& source)
 {
   // First search for a group that lists the file explicitly.
-  for (auto sg = groups.rbegin(); sg != groups.rend(); ++sg) {
+  for (auto sg = SourceGroups.rbegin(); sg != SourceGroups.rend(); ++sg) {
     cmSourceGroup* result = sg->MatchChildrenFiles(source);
     if (result) {
       return result;
@@ -2205,7 +2204,7 @@ cmSourceGroup* cmMakefile::FindSourceGroup(
   }
 
   // Now search for a group whose regex matches the file.
-  for (auto sg = groups.rbegin(); sg != groups.rend(); ++sg) {
+  for (auto sg = SourceGroups.rbegin(); sg != SourceGroups.rend(); ++sg) {
     cmSourceGroup* result = sg->MatchChildrenRegex(source);
     if (result) {
       return result;
@@ -2213,7 +2212,7 @@ cmSourceGroup* cmMakefile::FindSourceGroup(
   }
 
   // Shouldn't get here, but just in case, return the default group.
-  return groups.data();
+  return SourceGroups.data();
 }
 #endif
 

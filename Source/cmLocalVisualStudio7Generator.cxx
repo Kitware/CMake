@@ -1406,9 +1406,6 @@ void cmLocalVisualStudio7Generator::WriteVCProjFile(std::ostream& fout,
   std::vector<std::string> configs =
     this->Makefile->GetGeneratorConfigs(cmMakefile::ExcludeEmptyConfig);
 
-  // We may be modifying the source groups temporarily, so make a copy.
-  std::vector<cmSourceGroup> sourceGroups = this->Makefile->GetSourceGroups();
-
   AllConfigSources sources;
   sources.Sources = target->GetAllConfigSources();
 
@@ -1450,8 +1447,7 @@ void cmLocalVisualStudio7Generator::WriteVCProjFile(std::ostream& fout,
     }
     // Add the file to the list of sources.
     std::string const source = sf->GetFullPath();
-    cmSourceGroup* sourceGroup =
-      this->Makefile->FindSourceGroup(source, sourceGroups);
+    cmSourceGroup* sourceGroup = this->Makefile->FindSourceGroup(source);
     sourceGroup->AssignSource(sf);
   }
 
@@ -1463,6 +1459,7 @@ void cmLocalVisualStudio7Generator::WriteVCProjFile(std::ostream& fout,
   fout << "\t<Files>\n";
 
   // Loop through every source group.
+  std::vector<cmSourceGroup> sourceGroups = this->Makefile->GetSourceGroups();
   for (auto const& sg : sourceGroups) {
     this->WriteGroup(&sg, target, fout, libName, configs, sources);
   }

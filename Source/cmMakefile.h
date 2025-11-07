@@ -658,8 +658,7 @@ public:
   /**
    * find what source group this source is in
    */
-  cmSourceGroup* FindSourceGroup(std::string const& source,
-                                 std::vector<cmSourceGroup>& groups) const;
+  cmSourceGroup* FindSourceGroup(std::string const& source);
 #endif
 
   /**
