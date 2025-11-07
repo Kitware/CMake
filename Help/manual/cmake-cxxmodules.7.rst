@@ -84,7 +84,7 @@ Compilers which CMake natively supports module dependency scanning include:
 
 * MSVC toolset 14.34 and newer (provided with Visual Studio 17.4 and newer)
 * LLVM/Clang 16.0 and newer
-* GCC 14 (for the in-development branch, after 2023-09-20) and newer
+* GCC 14 and newer
 
 ``import std`` Support
 ======================
