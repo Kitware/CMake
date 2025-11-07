@@ -6,41 +6,33 @@ cmake-cxxmodules(7)
 .. versionadded:: 3.28
 
 C++ 20 introduced the concept of "modules" to the language.  The design
-requires build systems to order compilations among each other to satisfy
-``import`` statements reliably.  CMake's implementation asks the compiler
-to scan source files for module dependencies during the build, collates
-scanning results to infer ordering constraints, and tells the build tool
-how to dynamically update the build graph.
+requires build systems to order compilations to satisfy ``import`` statements
+reliably.  CMake's implementation asks the compiler to scan source files for
+module dependencies during the build, collates scanning results to infer
+ordering constraints, and tells the build tool how to dynamically update the
+build graph.
 
 Compilation Strategy
 ====================
 
 With C++ modules, compiling a set of C++ sources is no longer embarrassingly
-parallel. That is, any given source may first require the compilation of
-another source file first in order to provide a "CMI" (compiled module
-interface) or "BMI" (binary module interface) that C++ compilers use to
-satisfy ``import`` statements in other sources. With headers, sources could
-share their declarations so that any consumers could compile independently.
-With modules, declarations are now generated into these BMI files by the
-compiler during compilation based on the contents of the source file and its
-``export`` statements.
+parallel.  That is, any given source may require the compilation of another
+source file first in order to provide a "BMI" (or "CMI") that C++ compilers
+use to satisfy ``import`` statements in other sources.  With included headers,
+sources could share their declarations so that any consumers could compile
+independently. With modules, declarations are now generated into these BMI
+files by the compiler during compilation based on the contents of the source
+file and its ``export`` statements.  That means that, in order to get a
+correct build without regenerating the build graph via a configure and
+generate phase for every source change, the ordering needs to be extracted
+from the source during the build phase.
 
-The order necessary for compilation requires build-time resolution of the
-ordering because the order is controlled by the contents of the sources.  This
-means that the ordering needs extracted from the source during the build to
-avoid regenerating the build graph via a configure and generate phase for
-every source change to get a correct build.
-
-The general strategy is to use a "scanner" to extract the ordering dependency
-information and update the build graph with new edges between existing edges
-by taking the per-source scan results (represented by `P1689R5`_ files) and
-"collating" the dependencies within a target and to modules produced by
-targets visible to the target. The primary task is to generate "module map"
-files to pass to each compile rule with the paths to the BMIs needed to
-satisfy ``import`` statements. The collator also has tasks to use the
-build-time information to fill out information including ``install`` rules for
-the module interface units, their BMIs, and properties for any exported
-targets with C++ modules.
+Build systems must be able to order these compilations within the build graph.
+There are multiple strategies that are suitable for this, but each has
+advantages and disadvantages.  CMake uses a "scanning" step strategy, which is
+the most visible modules-related change for CMake users in the context of the
+build.  CMake provides multiple ways to control the scanning behavior of
+source files.
 
 .. _`P1689R5`: https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/p1689r5.html
 
@@ -59,7 +51,8 @@ Scanning Control
 ================
 
 Whether or not sources get scanned for C++ module usage is dependent on the
-following queries.  The first query that provides a yes/no answer is used.
+following queries.  The first query that provides a decision of whether to
+scan or not is used.
 
 - If the source file belongs to a file set of type ``CXX_MODULES``, it will
   be scanned.
@@ -80,7 +73,8 @@ one place within a C++ translation unit.
 Compiler Support
 ================
 
-Compilers which CMake natively supports module dependency scanning include:
+The list of compilers for which CMake supports scanning sources for C++
+modules includes:
 
 * MSVC toolset 14.34 and newer (provided with Visual Studio 17.4 and newer)
 * LLVM/Clang 16.0 and newer
@@ -95,21 +89,22 @@ library combinations:
 * Clang 18.1.2 and newer with ``-stdlib=libc++`` or ``-stdlib=libstdc++``
 * MSVC toolset 14.36 and newer (provided with Visual Studio 17.6 Preview 2 and
   newer)
-* GCC 15 and newer.
+* GCC 15 and newer
 
-The :variable:`CMAKE_CXX_COMPILER_IMPORT_STD` variable may be used to detect
-support for a standard level with the active C++ toolchain.
+The :variable:`CMAKE_CXX_COMPILER_IMPORT_STD` variable lists standard levels
+which have support for ``import std`` in the active C++ toolchain.
 
 .. note::
 
    This support is provided only when experimental support for
-   ``import std;`` has been enabled by the
+   ``import std`` has been enabled by the
    ``CMAKE_EXPERIMENTAL_CXX_IMPORT_STD`` gate.
 
 Generator Support
 =================
 
-The list of generators which support scanning sources for C++ modules include:
+The list of generators which support scanning sources for C++ modules
+includes:
 
 - :generator:`Ninja`
 - :generator:`Ninja Multi-Config`
@@ -122,20 +117,21 @@ Limitations
 -----------
 
 There are a number of known limitations of the current C++ module support in
-CMake.  This does not document known limitations or bugs in compilers as these
+CMake.  Known limitations or bugs in compilers are not listed here, as these
 can change over time.
 
 For all generators:
 
 - Header units are not supported.
-- No builtin support for ``import std;`` or other compiler-provided modules.
+- There is no builtin support for ``import std`` or other compiler-provided
+  modules.
 
 For the :ref:`Visual Studio Generators`:
 
 - Only Visual Studio 2022 and MSVC toolsets 14.34 (Visual Studio
-  17.4) and newer.
-- No support for exporting or installing BMI or module information.
-- No support for compiling BMIs from ``IMPORTED`` targets with C++ modules
-  (including ``import std``).
-- No diagnosis of using modules provided by ``PRIVATE`` sources from
-  ``PUBLIC`` module sources.
+  17.4) and newer are supported.
+- Exporting or installing BMI or module information is not supported.
+- Compiling BMIs from ``IMPORTED`` targets with C++ modules (including
+  ``import std``) is not supported.
+- Use of modules provided by ``PRIVATE`` sources from ``PUBLIC`` module
+  sources is not diagnosed.
