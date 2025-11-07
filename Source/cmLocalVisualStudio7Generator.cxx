@@ -1456,7 +1456,7 @@ void cmLocalVisualStudio7Generator::WriteVCProjFile(std::ostream& fout,
   }
 
   // open the project
-  this->WriteProjectStart(fout, libName, target, sourceGroups);
+  this->WriteProjectStart(fout, libName, target);
   // write the configuration information
   this->WriteConfigurations(fout, configs, libName, target);
 
@@ -2057,8 +2057,7 @@ void cmLocalVisualStudio7Generator::WriteProjectStartFortran(
 }
 
 void cmLocalVisualStudio7Generator::WriteProjectStart(
-  std::ostream& fout, std::string const& libName, cmGeneratorTarget* target,
-  std::vector<cmSourceGroup>&)
+  std::ostream& fout, std::string const& libName, cmGeneratorTarget* target)
 {
   if (this->FortranProject) {
     this->WriteProjectStartFortran(fout, libName, target);

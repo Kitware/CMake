@@ -130,8 +130,7 @@ private:
                                 std::vector<std::string> const& dirs);
   void WriteProjectSCC(std::ostream& fout, cmGeneratorTarget* target);
   void WriteProjectStart(std::ostream& fout, std::string const& libName,
-                         cmGeneratorTarget* tgt,
-                         std::vector<cmSourceGroup>& sgs);
+                         cmGeneratorTarget* target);
   void WriteProjectStartFortran(std::ostream& fout, std::string const& libName,
                                 cmGeneratorTarget* tgt);
   void WriteVCProjBeginGroup(std::ostream& fout, char const* group,
