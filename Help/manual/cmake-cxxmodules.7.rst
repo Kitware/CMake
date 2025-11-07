@@ -116,6 +116,8 @@ The list of generators which support scanning sources for C++ modules include:
 - :generator:`Visual Studio 17 2022`
 - :generator:`Visual Studio 18 2026`
 
+Note that the :ref:`Ninja Generators` require ``ninja`` 1.11 or newer.
+
 Limitations
 -----------
 
@@ -127,10 +129,6 @@ For all generators:
 
 - Header units are not supported.
 - No builtin support for ``import std;`` or other compiler-provided modules.
-
-For the Ninja Generators:
-
-- ``ninja`` 1.11 or newer is required.
 
 For the :ref:`Visual Studio Generators`:
 
