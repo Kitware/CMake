@@ -318,6 +318,9 @@ int cmCPackArchiveGenerator::addOneComponentToArchive(
   }                                                                           \
   cmArchiveWrite archive(gf, this->Compress, this->ArchiveFormat, 0,          \
                          this->GetThreadCount());                             \
+  if (this->UID >= 0 && this->GID >= 0) {                                     \
+    archive.SetUIDAndGID(this->UID, this->GID);                               \
+  }                                                                           \
   do {                                                                        \
     if (!archive.Open()) {                                                    \
       cmCPackLogger(cmCPackLog::LOG_ERROR,                                    \
@@ -435,6 +438,19 @@ int cmCPackArchiveGenerator::PackageFiles()
 {
   cmCPackLogger(cmCPackLog::LOG_DEBUG,
                 "Toplevel: " << this->toplevel << std::endl);
+
+  if (cmValue UIDoption = this->GetOptionIfSet("CPACK_ARCHIVE_UID")) {
+    long u;
+    if (cmStrToLong(*UIDoption, &u)) {
+      this->UID = static_cast<int>(u);
+    }
+  }
+  if (cmValue GIDoption = this->GetOptionIfSet("CPACK_ARCHIVE_GID")) {
+    long g;
+    if (cmStrToLong(*GIDoption, &g)) {
+      this->GID = static_cast<int>(g);
+    }
+  }
 
   if (this->WantsComponentInstallation()) {
     // CASE 1 : COMPONENT ALL-IN-ONE package

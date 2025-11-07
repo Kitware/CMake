@@ -936,6 +936,24 @@ elseif(APPLE AND CPACK_BINARY_PRODUCTBUILD AND
 endif()
 unset(_CPack_CMP0161)
 
+# Archive specific variables
+if(NOT DEFINED CPACK_ARCHIVE_UID AND NOT DEFINED CPACK_ARCHIVE_GID)
+  cmake_policy(GET CMP0206 _CPack_CMP0206)
+  if(NOT "x${_CPack_CMP0206}x" STREQUAL "xNEWx")
+    if(NOT "x${_CPack_CMP0206}x" STREQUAL "xOLDx" AND CMAKE_POLICY_WARNING_CMP0206)
+      cmake_policy(GET_WARNING CMP0206 _CMP0206_warning)
+      message(AUTHOR_WARNING
+        "${_CMP0206_warning}\n"
+        "For compatibility, CMake will set archive UID/GID to -1/-1."
+        )
+      unset(_CMP0206_warning)
+    endif()
+    _cpack_set_default(CPACK_ARCHIVE_UID "-1")
+    _cpack_set_default(CPACK_ARCHIVE_GID "-1")
+  endif()
+  unset(_CPack_CMP0206)
+endif()
+
 # set sysroot so SDK tools can be used
 if(CMAKE_OSX_SYSROOT)
   _cpack_set_default(CPACK_OSX_SYSROOT "${_CMAKE_OSX_SYSROOT_PATH}")

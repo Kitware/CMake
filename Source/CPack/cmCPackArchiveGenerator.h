@@ -97,4 +97,6 @@ private:
   cmArchiveWrite::Compress Compress;
   std::string ArchiveFormat;
   std::string OutputExtension;
+  int UID = 0;
+  int GID = 0;
 };
