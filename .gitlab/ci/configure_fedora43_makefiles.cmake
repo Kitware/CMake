@@ -1,11 +1,7 @@
 set(CMake_TEST_C_STANDARDS "90;99;11;17;23" CACHE STRING "")
 set(CMake_TEST_CXX_STANDARDS "98;11;14;17;20;23;26" CACHE STRING "")
 
-# FIXME(Fedora): Breezy crashes in Fedora 43
-# https://bugs.launchpad.net/brz/+bug/2121688
-# https://bugzilla.redhat.com/show_bug.cgi?id=2366194
-set(CMake_TEST_CTestUpdate_BZR "OFF" CACHE BOOL "")
-
+set(CMake_TEST_CTestUpdate_BZR "ON" CACHE BOOL "")
 set(CMake_TEST_CTestUpdate_GIT "ON" CACHE BOOL "")
 set(CMake_TEST_CTestUpdate_HG "ON" CACHE BOOL "")
 set(CMake_TEST_CTestUpdate_SVN "ON" CACHE BOOL "")
