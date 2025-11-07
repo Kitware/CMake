@@ -282,6 +282,7 @@ function(gtest_discover_tests_impl)
   set(oneValueArgs
     NO_PRETTY_TYPES   # These two take a value, unlike gtest_discover_tests()
     NO_PRETTY_VALUES  #
+    TEST_TARGET
     TEST_EXECUTABLE
     TEST_WORKING_DIR
     TEST_PREFIX
@@ -420,6 +421,7 @@ if(CMAKE_SCRIPT_MODE_FILE)
   gtest_discover_tests_impl(
     NO_PRETTY_TYPES ${NO_PRETTY_TYPES}
     NO_PRETTY_VALUES ${NO_PRETTY_VALUES}
+    TEST_TARGET ${TEST_TARGET}
     TEST_EXECUTABLE ${TEST_EXECUTABLE}
     TEST_EXECUTOR "${TEST_EXECUTOR}"
     TEST_WORKING_DIR ${TEST_WORKING_DIR}
