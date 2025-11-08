@@ -10,6 +10,7 @@ readonly subtree="Auxiliary/vim"
 readonly repo="https://github.com/pboettch/vim-cmake-syntax.git"
 readonly tag="master"
 readonly shortlog=true
+readonly exact_tree_match=false
 readonly paths="
   indent
   syntax

@@ -14,6 +14,7 @@ readonly repo="https://github.com/libuv/libuv.git"
 # - It requires Windows 8, we support Windows 7.
 readonly tag="v1.44.2"
 readonly shortlog=false
+readonly exact_tree_match=false
 readonly paths="
   LICENSE
   include

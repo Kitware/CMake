@@ -10,6 +10,7 @@ readonly subtree="Utilities/cmpdcurses"
 readonly repo="https://github.com/wmcbrine/PDCurses.git"
 readonly tag="f1cd4f4569451a5028ddf3d3c202f0ad6b1ae446"
 readonly shortlog=false
+readonly exact_tree_match=false
 readonly paths="
   README.md
   *.h

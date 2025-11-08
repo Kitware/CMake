@@ -10,6 +10,7 @@ readonly subtree="Utilities/cmexpat"
 readonly repo="https://github.com/libexpat/libexpat.git"
 readonly tag="R_2_6_2"
 readonly shortlog=false
+readonly exact_tree_match=false
 readonly paths="
   expat/lib/asciitab.h
   expat/lib/expat.h

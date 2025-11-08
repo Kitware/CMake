@@ -10,6 +10,7 @@ readonly subtree="Utilities/KWIML"
 readonly repo="https://gitlab.kitware.com/utils/kwiml.git"
 readonly tag="master"
 readonly shortlog=true
+readonly exact_tree_match=false
 readonly paths="
 "
 

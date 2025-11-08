@@ -12,6 +12,7 @@ readonly subtree="Utilities/cmllpkgc"
 readonly repo="https://gitlab.kitware.com/utils/llpkgc.git"
 readonly tag="7958a1de42b9eec04676d547f6fcf5daa425fbcc"
 readonly shortlog=false
+readonly exact_tree_match=false
 readonly paths="
   bin
   src
