@@ -30,6 +30,20 @@
 
 namespace cm {
 
+/** Whether to call uv_update_time before starting a timer.
+ *
+ * uv_loop_t caches a "now" time that uv_loop_init initializes and
+ * uv_run updates on each event loop iteration.  uv_timer_start
+ * computes timer expiry relative to the loop's cached "now" time.
+ * For short timeouts started before the event loop, we may need to
+ * update the "now" time when starting the timer.
+ */
+enum class uv_update_time
+{
+  no,
+  yes,
+};
+
 /***
  * RAII class to simplify and ensure the safe usage of uv_loop_t. This includes
  * making sure resources are properly freed.
@@ -251,7 +265,8 @@ struct uv_timer_ptr : public uv_handle_ptr_<uv_timer_t>
 
   int init(uv_loop_t& loop, void* data = nullptr);
 
-  int start(uv_timer_cb cb, uint64_t timeout, uint64_t repeat);
+  int start(uv_timer_cb cb, uint64_t timeout, uint64_t repeat,
+            uv_update_time update_time);
 
   void stop();
 };
