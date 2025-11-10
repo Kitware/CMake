@@ -243,9 +243,13 @@ int uv_timer_ptr::init(uv_loop_t& loop, void* data)
   return uv_timer_init(&loop, *this);
 }
 
-int uv_timer_ptr::start(uv_timer_cb cb, uint64_t timeout, uint64_t repeat)
+int uv_timer_ptr::start(uv_timer_cb cb, uint64_t timeout, uint64_t repeat,
+                        uv_update_time update_time)
 {
   assert(this->handle);
+  if (update_time == uv_update_time::yes) {
+    ::uv_update_time(this->handle->loop);
+  }
   return uv_timer_start(*this, cb, timeout, repeat);
 }
 

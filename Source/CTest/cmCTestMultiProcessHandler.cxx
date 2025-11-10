@@ -773,7 +773,7 @@ void cmCTestMultiProcessHandler::StartNextTestsOnTimer()
       auto* self = static_cast<cmCTestMultiProcessHandler*>(timer->data);
       self->StartNextTests();
     },
-    milliseconds, 0);
+    milliseconds, 0, cm::uv_update_time::no);
 }
 
 void cmCTestMultiProcessHandler::FinishTestProcess(

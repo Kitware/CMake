@@ -320,7 +320,7 @@ bool cmExecuteProcessCommand(std::vector<std::string> const& args,
         auto* timeoutPtr = static_cast<bool*>(handle->data);
         *timeoutPtr = true;
       },
-      timeoutMillis, 0);
+      timeoutMillis, 0, cm::uv_update_time::yes);
   }
 
   // Read the process output.
