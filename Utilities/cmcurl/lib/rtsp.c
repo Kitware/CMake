@@ -41,8 +41,8 @@
 #include "cfilters.h"
 #include "strdup.h"
 #include "curlx/strparse.h"
-/* The last 3 #include files should be in this order */
-#include "curl_printf.h"
+
+/* The last 2 #include files should be in this order */
 #include "curl_memory.h"
 #include "memdebug.h"
 
@@ -298,7 +298,8 @@ static CURLcode rtsp_setup_body(struct Curl_easy *data,
     }
     else {
       if(data->set.postfields) {
-        size_t plen = strlen(data->set.postfields);
+        size_t plen = (data->set.postfieldsize >= 0) ?
+          (size_t)data->set.postfieldsize : strlen(data->set.postfields);
         req_clen = (curl_off_t)plen;
         result = Curl_creader_set_buf(data, data->set.postfields, plen);
       }
@@ -482,8 +483,8 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
     if(data->set.str[STRING_RTSP_TRANSPORT]) {
       free(data->state.aptr.rtsp_transport);
       data->state.aptr.rtsp_transport =
-        aprintf("Transport: %s\r\n",
-                data->set.str[STRING_RTSP_TRANSPORT]);
+        curl_maprintf("Transport: %s\r\n",
+                      data->set.str[STRING_RTSP_TRANSPORT]);
       if(!data->state.aptr.rtsp_transport)
         return CURLE_OUT_OF_MEMORY;
     }
@@ -508,7 +509,8 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
        data->set.str[STRING_ENCODING]) {
       free(data->state.aptr.accept_encoding);
       data->state.aptr.accept_encoding =
-        aprintf("Accept-Encoding: %s\r\n", data->set.str[STRING_ENCODING]);
+        curl_maprintf("Accept-Encoding: %s\r\n",
+                      data->set.str[STRING_ENCODING]);
 
       if(!data->state.aptr.accept_encoding) {
         result = CURLE_OUT_OF_MEMORY;
@@ -545,7 +547,8 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
   /* Referrer */
   Curl_safefree(data->state.aptr.ref);
   if(data->state.referer && !Curl_checkheaders(data, STRCONST("Referer")))
-    data->state.aptr.ref = aprintf("Referer: %s\r\n", data->state.referer);
+    data->state.aptr.ref = curl_maprintf("Referer: %s\r\n",
+                                         data->state.referer);
 
   p_referrer = data->state.aptr.ref;
 
@@ -556,12 +559,13 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
    * Go ahead and use the Range stuff supplied for HTTP
    */
   if(data->state.use_range &&
-     (rtspreq  & (RTSPREQ_PLAY | RTSPREQ_PAUSE | RTSPREQ_RECORD))) {
+     (rtspreq & (RTSPREQ_PLAY | RTSPREQ_PAUSE | RTSPREQ_RECORD))) {
 
     /* Check to see if there is a range set in the custom headers */
     if(!Curl_checkheaders(data, STRCONST("Range")) && data->state.range) {
       free(data->state.aptr.rangeline);
-      data->state.aptr.rangeline = aprintf("Range: %s\r\n", data->state.range);
+      data->state.aptr.rangeline = curl_maprintf("Range: %s\r\n",
+                                                 data->state.range);
       p_range = data->state.aptr.rangeline;
     }
   }
