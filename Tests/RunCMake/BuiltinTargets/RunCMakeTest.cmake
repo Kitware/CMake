@@ -1,6 +1,6 @@
 include(RunCMake)
 
-if(RunCMake_GENERATOR MATCHES "Make|Ninja|FASTBuild")
+if(RunCMake_GENERATOR MATCHES "Make|Ninja")
   set(test_target "test")
 else()
   set(test_target "RUN_TESTS")

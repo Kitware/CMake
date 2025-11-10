@@ -411,7 +411,7 @@ public:
   {
     return "install/parallel";
   }
-  char const* GetTestTargetName() const override { return "test"; }
+  char const* GetTestTargetName() const override { return "RUN_TESTS"; }
   char const* GetPackageTargetName() const override { return "package"; }
   char const* GetPackageSourceTargetName() const override
   {
