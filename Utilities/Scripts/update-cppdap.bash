@@ -10,6 +10,7 @@ readonly subtree="Utilities/cmcppdap"
 readonly repo="https://github.com/google/cppdap.git"
 readonly tag="c69444ed76f7468b232ac4f989cb8f2bdc100185" # 2024-08-02
 readonly shortlog=false
+readonly exact_tree_match=false
 readonly paths="
   LICENSE
   include

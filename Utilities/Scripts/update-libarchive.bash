@@ -10,6 +10,7 @@ readonly subtree="Utilities/cmlibarchive"
 readonly repo="https://github.com/libarchive/libarchive.git"
 readonly tag="v3.8.1"
 readonly shortlog=false
+readonly exact_tree_match=false
 readonly paths="
   CMakeLists.txt
   COPYING

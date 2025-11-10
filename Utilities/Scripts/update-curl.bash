@@ -10,6 +10,7 @@ readonly subtree="Utilities/cmcurl"
 readonly repo="https://github.com/curl/curl.git"
 readonly tag="curl-8_17_0"
 readonly shortlog=false
+readonly exact_tree_match=false
 readonly paths="
   CMake/*
   CMakeLists.txt

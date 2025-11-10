@@ -10,6 +10,7 @@ readonly subtree="Utilities/cmliblzma"
 readonly repo="https://git.tukaani.org/xz.git"
 readonly tag="v5.6.3"
 readonly shortlog=false
+readonly exact_tree_match=false
 readonly paths="
   COPYING
   src/common/common_w32res.rc

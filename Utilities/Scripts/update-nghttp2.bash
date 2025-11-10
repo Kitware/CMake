@@ -10,6 +10,7 @@ readonly subtree="Utilities/cmnghttp2"
 readonly repo="https://github.com/nghttp2/nghttp2.git"
 readonly tag="v1.52.0" # When updating, sync PACKAGE_VERSION below!
 readonly shortlog=false
+readonly exact_tree_match=false
 readonly paths="
   COPYING
   lib/*.c

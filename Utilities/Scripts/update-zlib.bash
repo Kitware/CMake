@@ -10,6 +10,7 @@ readonly subtree="Utilities/cmzlib"
 readonly repo="https://github.com/madler/zlib.git"
 readonly tag="v1.3.1" # When updating, sync Copyright.txt below!
 readonly shortlog=false
+readonly exact_tree_match=false
 readonly paths="
   README
 

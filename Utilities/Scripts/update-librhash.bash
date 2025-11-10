@@ -10,6 +10,7 @@ readonly subtree="Utilities/cmlibrhash"
 readonly repo="https://github.com/rhash/rhash.git"
 readonly tag="v1.4.4"
 readonly shortlog=false
+readonly exact_tree_match=false
 readonly paths="
   COPYING
   librhash/algorithms.c

@@ -10,6 +10,7 @@ readonly subtree="Utilities/cmjsoncpp"
 readonly repo="https://github.com/open-source-parsers/jsoncpp.git"
 readonly tag="1.9.6"
 readonly shortlog=false
+readonly exact_tree_match=false
 readonly paths="
   LICENSE
   include/json

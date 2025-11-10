@@ -10,6 +10,7 @@ readonly subtree="Utilities/cmelf"
 readonly repo="https://github.com/freebsd/freebsd-src.git"
 readonly tag="main"
 readonly shortlog=false
+readonly exact_tree_match=false
 readonly paths="
   sys/sys/elf32.h
   sys/sys/elf64.h

@@ -10,6 +10,7 @@ readonly subtree="Utilities/GitSetup"
 readonly repo="https://gitlab.kitware.com/utils/gitsetup.git"
 readonly tag="setup"
 readonly shortlog=false
+readonly exact_tree_match=false
 readonly paths="
   .gitattributes
   LICENSE
