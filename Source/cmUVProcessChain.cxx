@@ -454,7 +454,7 @@ bool cmUVProcessChain::Wait(uint64_t milliseconds)
         auto* timeoutPtr = static_cast<bool*>(handle->data);
         *timeoutPtr = true;
       },
-      milliseconds, 0);
+      milliseconds, 0, cm::uv_update_time::yes);
   }
 
   while (!timeout &&

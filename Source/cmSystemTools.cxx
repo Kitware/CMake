@@ -890,7 +890,8 @@ bool cmSystemTools::RunSingleCommand(std::vector<std::string> const& command,
         auto* timedOutPtr = static_cast<bool*>(t->data);
         *timedOutPtr = true;
       },
-      static_cast<uint64_t>(timeout.count() * 1000.0), 0);
+      static_cast<uint64_t>(timeout.count() * 1000.0), 0,
+      cm::uv_update_time::yes);
   }
 
   std::vector<char> tempStdOut;
@@ -2862,7 +2863,8 @@ cmSystemTools::WaitForLineResult cmSystemTools::WaitForLine(
         auto* timedOutPtr = static_cast<bool*>(handle->data);
         *timedOutPtr = true;
       },
-      static_cast<uint64_t>(timeout.count() * 1000.0), 0);
+      static_cast<uint64_t>(timeout.count() * 1000.0), 0,
+      cm::uv_update_time::no);
 
     uv_run(loop, UV_RUN_ONCE);
     if (timedOut) {
