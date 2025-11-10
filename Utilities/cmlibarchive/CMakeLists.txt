@@ -5,8 +5,10 @@ ENDIF()
 
 PROJECT(libarchive C)
 #
+if(0) # XXX(cmake): not needed for build within cmake
 # Include standard installation directories
 include(GNUInstallDirs)
+endif() # XXX(cmake): end
 #
 SET(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/build/cmake")
 if(NOT CMAKE_RUNTIME_OUTPUT_DIRECTORY)
