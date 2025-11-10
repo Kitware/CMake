@@ -236,13 +236,8 @@ CURLcode Curl_auth_create_xoauth_bearer_message(const char *user,
 #ifdef HAVE_GSSAPI
 # ifdef HAVE_GSSGNU
 #  include <gss.h>
-# elif defined HAVE_GSSAPI_GSSAPI_H
-#  include <gssapi/gssapi.h>
 # else
-#  include <gssapi.h>
-# endif
-# ifdef HAVE_GSSAPI_GSSAPI_GENERIC_H
-#  include <gssapi/gssapi_generic.h>
+#  include <gssapi/gssapi.h>
 # endif
 #endif
 
@@ -311,13 +306,15 @@ struct negotiatedata {
   gss_ctx_id_t context;
   gss_name_t spn;
   gss_buffer_desc output_token;
+#ifdef CURL_GSSAPI_HAS_CHANNEL_BINDING
   struct dynbuf channel_binding_data;
+#endif
 #else
 #ifdef USE_WINDOWS_SSPI
 #ifdef SECPKG_ATTR_ENDPOINT_BINDINGS
   CtxtHandle *sslContext;
 #endif
-  DWORD status;
+  SECURITY_STATUS status;
   CredHandle *credentials;
   CtxtHandle *context;
   SEC_WINNT_AUTH_IDENTITY identity;

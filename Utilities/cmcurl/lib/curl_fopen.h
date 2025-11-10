@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_DES_H
-#define HEADER_CURL_DES_H
+#ifndef HEADER_CURL_FOPEN_H
+#define HEADER_CURL_FOPEN_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) Steve Holme, <steve_holme@hotmail.com>.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -24,16 +24,9 @@
  *
  ***************************************************************************/
 
-#include "curl_setup.h"
+#include "curlx/fopen.h"
 
-#if defined(USE_CURL_NTLM_CORE) && \
-  (defined(USE_GNUTLS) ||          \
-   defined(USE_OS400CRYPTO) ||     \
-   defined(USE_WIN32_CRYPTO))
-
-/* Applies odd parity to the given byte array */
-void Curl_des_set_odd_parity(unsigned char *bytes, size_t length);
+CURLcode Curl_fopen(struct Curl_easy *data, const char *filename,
+                    FILE **fh, char **tempname);
 
 #endif
-
-#endif /* HEADER_CURL_DES_H */

@@ -41,8 +41,7 @@
 #include "escape.h"
 #include "urlapi-int.h"
 
-/* The last 3 #include files should be in this order */
-#include "curl_printf.h"
+/* The last 2 #include files should be in this order */
 #include "curl_memory.h"
 #include "memdebug.h"
 
@@ -377,6 +376,9 @@ static CURLcode doh_probe_run(struct Curl_easy *data,
      options should be added to check doh proxy insecure separately,
      CURLOPT_DOH_PROXY_SSL_VERIFYHOST and CURLOPT_DOH_PROXY_SSL_VERIFYPEER.
      */
+  doh->set.ssl.custom_cafile = data->set.ssl.custom_cafile;
+  doh->set.ssl.custom_capath = data->set.ssl.custom_capath;
+  doh->set.ssl.custom_cablob = data->set.ssl.custom_cablob;
   if(data->set.str[STRING_SSL_CAFILE]) {
     ERROR_CHECK_SETOPT(CURLOPT_CAINFO,
                        data->set.str[STRING_SSL_CAFILE]);
@@ -456,6 +458,7 @@ struct Curl_addrinfo *Curl_doh(struct Curl_easy *data,
 
   DEBUGASSERT(conn);
   DEBUGASSERT(!data->state.async.doh);
+  DEBUGASSERT(hostname && hostname[0]);
   if(data->state.async.doh)
     Curl_doh_cleanup(data);
 
@@ -510,7 +513,7 @@ struct Curl_addrinfo *Curl_doh(struct Curl_easy *data,
     /* Only use HTTPS RR for HTTP(S) transfers */
     char *qname = NULL;
     if(port != PORT_HTTPS) {
-      qname = aprintf("_%d._https.%s", port, hostname);
+      qname = curl_maprintf("_%d._https.%s", port, hostname);
       if(!qname)
         goto error;
     }
@@ -759,7 +762,7 @@ UNITTEST DOHcode doh_resp_decode(const unsigned char *doh,
 
   ancount = doh_get16bit(doh, 6);
   while(ancount) {
-    unsigned short class;
+    unsigned short dnsclass;
     unsigned int ttl;
 
     rc = doh_skipqname(doh, dohlen, &index);
@@ -779,8 +782,8 @@ UNITTEST DOHcode doh_resp_decode(const unsigned char *doh,
 
     if(dohlen < (index + 2))
       return DOH_DNS_OUT_OF_RANGE;
-    class = doh_get16bit(doh, index);
-    if(DNS_CLASS_IN != class)
+    dnsclass = doh_get16bit(doh, index);
+    if(DNS_CLASS_IN != dnsclass)
       return DOH_DNS_UNEXPECTED_CLASS; /* unsupported */
     index += 2;
 
@@ -816,7 +819,7 @@ UNITTEST DOHcode doh_resp_decode(const unsigned char *doh,
     if(dohlen < (index + 8))
       return DOH_DNS_OUT_OF_RANGE;
 
-    index += 2 + 2 + 4; /* type, class and ttl */
+    index += 2 + 2 + 4; /* type, dnsclass and ttl */
 
     if(dohlen < (index + 2))
       return DOH_DNS_OUT_OF_RANGE;
@@ -838,7 +841,7 @@ UNITTEST DOHcode doh_resp_decode(const unsigned char *doh,
     if(dohlen < (index + 8))
       return DOH_DNS_OUT_OF_RANGE;
 
-    index += 2 + 2 + 4; /* type, class and ttl */
+    index += 2 + 2 + 4; /* type, dnsclass and ttl */
 
     if(dohlen < (index + 2))
       return DOH_DNS_OUT_OF_RANGE;
@@ -887,8 +890,9 @@ static void doh_show(struct Curl_easy *data,
       len = sizeof(buffer) - len;
       for(j = 0; j < 16; j += 2) {
         size_t l;
-        msnprintf(ptr, len, "%s%02x%02x", j ? ":" : "", d->addr[i].ip.v6[j],
-                  d->addr[i].ip.v6[j + 1]);
+        curl_msnprintf(ptr, len, "%s%02x%02x", j ? ":" : "",
+                       d->addr[i].ip.v6[j],
+                       d->addr[i].ip.v6[j + 1]);
         l = strlen(ptr);
         len -= l;
         ptr += l;
@@ -1062,7 +1066,7 @@ UNITTEST void de_cleanup(struct dohentry *d)
  * @return is 1 for success, error otherwise
  *
  * The encoding here is defined in
- * https://tools.ietf.org/html/rfc1035#section-3.1
+ * https://datatracker.ietf.org/doc/html/rfc1035#section-3.1
  *
  * The input buffer pointer will be modified so it points to
  * just after the end of the DNS name encoding on output. (And
@@ -1215,8 +1219,9 @@ UNITTEST void doh_print_httpsrr(struct Curl_easy *data,
 CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
                               struct Curl_dns_entry **dnsp)
 {
-  CURLcode result;
+  CURLcode result = CURLE_OK;
   struct doh_probes *dohp = data->state.async.doh;
+  struct dohentry de;
   *dnsp = NULL; /* defaults to no response */
   if(!dohp)
     return CURLE_OUT_OF_MEMORY;
@@ -1229,7 +1234,6 @@ CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
   }
   else if(!dohp->pending) {
     DOHcode rc[DOH_SLOT_COUNT];
-    struct dohentry de;
     int slot;
 
     /* Clear any result the might still be there */
@@ -1261,17 +1265,14 @@ CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
       struct Curl_dns_entry *dns;
       struct Curl_addrinfo *ai;
 
-
       if(Curl_trc_ft_is_verbose(data, &Curl_trc_feat_dns)) {
         CURL_TRC_DNS(data, "hostname: %s", dohp->host);
         doh_show(data, &de);
       }
 
       result = doh2ai(&de, dohp->host, dohp->port, &ai);
-      if(result) {
-        de_cleanup(&de);
-        return result;
-      }
+      if(result)
+        goto error;
 
       /* we got a response, create a dns entry. */
       dns = Curl_dnscache_mk_entry(data, ai, dohp->host, 0, dohp->port, FALSE);
@@ -1284,7 +1285,8 @@ CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
                                            de.https_rrs->len, &hrr);
           if(result) {
             infof(data, "Failed to decode HTTPS RR");
-            return result;
+            Curl_resolv_unlink(data, &dns);
+            goto error;
           }
           infof(data, "Some HTTPS RR to process");
 # ifdef DEBUGBUILD
@@ -1302,14 +1304,15 @@ CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
 
     /* All done */
     data->state.async.done = TRUE;
-    de_cleanup(&de);
-    Curl_doh_cleanup(data);
-    return result;
-
   } /* !dohp->pending */
+  else
+    /* wait for pending DoH transactions to complete */
+    return CURLE_OK;
 
-  /* else wait for pending DoH transactions to complete */
-  return CURLE_OK;
+error:
+  de_cleanup(&de);
+  Curl_doh_cleanup(data);
+  return result;
 }
 
 void Curl_doh_close(struct Curl_easy *data)
