@@ -397,9 +397,7 @@ bool cmCMakeLanguageCommand(std::vector<cmListFileArgument> const& args,
       return FatalError(status, "EXIT requires one argument");
     }
 
-    auto workingMode =
-      status.GetMakefile().GetCMakeInstance()->GetWorkingMode();
-    if (workingMode != cmake::SCRIPT_MODE) {
+    if (!status.GetMakefile().GetCMakeInstance()->RoleSupportsExitCode()) {
       return FatalError(status, "EXIT can be used only in SCRIPT mode");
     }
 
@@ -411,9 +409,7 @@ bool cmCMakeLanguageCommand(std::vector<cmListFileArgument> const& args,
                                  expArgs[expArg], '\"'));
     }
 
-    if (workingMode == cmake::SCRIPT_MODE) {
-      status.SetExitCode(static_cast<int>(retCode));
-    }
+    status.SetExitCode(static_cast<int>(retCode));
     return true;
   }
 

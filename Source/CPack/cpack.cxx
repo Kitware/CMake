@@ -225,9 +225,7 @@ int main(int argc, char const* const* argv)
                      } },
   };
 
-  cmake cminst(cmake::RoleScript, cmState::CPack);
-  cminst.SetHomeDirectory("");
-  cminst.SetHomeOutputDirectory("");
+  cmake cminst(cmState::Role::CPack);
   cminst.SetProgressCallback(cpackProgressCallback);
   cminst.GetCurrentSnapshot().SetDefaultDefinitions();
   cmGlobalGenerator cmgg(&cminst);

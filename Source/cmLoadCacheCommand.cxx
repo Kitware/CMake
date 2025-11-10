@@ -8,6 +8,7 @@
 
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
+#include "cmState.h"
 #include "cmStateTypes.h"
 #include "cmSystemTools.h"
 #include "cmake.h"
@@ -31,8 +32,9 @@ bool cmLoadCacheCommand(std::vector<std::string> const& args,
     return ReadWithPrefix(args, status);
   }
 
-  if (status.GetMakefile().GetCMakeInstance()->GetWorkingMode() ==
-      cmake::SCRIPT_MODE) {
+  cmState::Role const role =
+    status.GetMakefile().GetCMakeInstance()->GetState()->GetRole();
+  if (role != cmState::Role::Project) {
     status.SetError(
       "Only load_cache(READ_WITH_PREFIX) may be used in script mode");
     return false;

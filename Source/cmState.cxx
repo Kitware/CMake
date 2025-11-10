@@ -31,9 +31,9 @@ namespace cmStateDetail {
 std::string const PropertySentinel = std::string{};
 } // namespace cmStateDetail
 
-cmState::cmState(Mode mode, ProjectKind projectKind)
-  : StateMode(mode)
-  , StateProjectKind(projectKind)
+cmState::cmState(Role role, TryCompile isTryCompile)
+  : StateRole(role)
+  , IsTryCompile(isTryCompile)
 {
   this->CacheManager = cm::make_unique<cmCacheManager>();
   this->GlobVerificationManager = cm::make_unique<cmGlobVerificationManager>();
@@ -603,9 +603,8 @@ cmValue cmState::GetGlobalProperty(std::string const& prop)
     std::vector<std::string> commands = this->GetCommandNames();
     this->SetGlobalProperty("COMMANDS", cmList::to_string(commands));
   } else if (prop == "IN_TRY_COMPILE") {
-    this->SetGlobalProperty(
-      "IN_TRY_COMPILE",
-      this->StateProjectKind == ProjectKind::TryCompile ? "1" : "0");
+    this->SetGlobalProperty("IN_TRY_COMPILE",
+                            this->IsTryCompile == TryCompile::Yes ? "1" : "0");
   } else if (prop == "GENERATOR_IS_MULTI_CONFIG") {
     this->SetGlobalProperty("GENERATOR_IS_MULTI_CONFIG",
                             this->IsGeneratorMultiConfig ? "1" : "0");
@@ -613,8 +612,7 @@ cmValue cmState::GetGlobalProperty(std::string const& prop)
     auto langs = cmList::to_string(this->EnabledLanguages);
     this->SetGlobalProperty("ENABLED_LANGUAGES", langs);
   } else if (prop == "CMAKE_ROLE") {
-    std::string mode = this->GetModeString();
-    this->SetGlobalProperty("CMAKE_ROLE", mode);
+    this->SetGlobalProperty("CMAKE_ROLE", this->GetRoleString());
   }
 #define STRING_LIST_ELEMENT(F) ";" #F
   if (prop == "CMAKE_C_KNOWN_FEATURES") {
@@ -814,40 +812,50 @@ unsigned int cmState::GetCacheMinorVersion() const
   return this->CacheManager->GetCacheMinorVersion();
 }
 
-cmState::Mode cmState::GetMode() const
+void cmState::SetRoleToProjectForCMakeBuildVsReconfigure()
 {
-  return this->StateMode;
+  this->StateRole = Role::Project;
 }
 
-std::string cmState::GetModeString() const
+void cmState::SetRoleToHelpForListPresets()
 {
-  return ModeToString(this->StateMode);
+  this->StateRole = Role::Help;
 }
 
-std::string cmState::ModeToString(cmState::Mode mode)
+cmState::Role cmState::GetRole() const
+{
+  return this->StateRole;
+}
+
+std::string cmState::GetRoleString() const
+{
+  return RoleToString(this->StateRole);
+}
+
+std::string cmState::RoleToString(cmState::Role mode)
 {
   switch (mode) {
-    case Project:
+    case Role::Project:
       return "PROJECT";
-    case Script:
+    case Role::Script:
       return "SCRIPT";
-    case FindPackage:
+    case Role::FindPackage:
       return "FIND_PACKAGE";
-    case CTest:
+    case Role::CTest:
       return "CTEST";
-    case CPack:
+    case Role::CPack:
       return "CPACK";
-    case Help:
+    case Role::Help:
       return "HELP";
-    case Unknown:
-      return "UNKNOWN";
+    case Role::Internal:
+      return "INTERNAL";
   }
   return "UNKNOWN";
 }
 
-cmState::ProjectKind cmState::GetProjectKind() const
+cmState::TryCompile cmState::GetIsTryCompile() const
 {
-  return this->StateProjectKind;
+  return this->IsTryCompile;
 }
 
 std::string const& cmState::GetBinaryDirectory() const

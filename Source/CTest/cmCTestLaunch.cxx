@@ -405,9 +405,7 @@ int cmCTestLaunch::Main(int argc, char const* const argv[], Op operation)
 
 void cmCTestLaunch::LoadConfig()
 {
-  cmake cm(cmake::RoleScript, cmState::CTest);
-  cm.SetHomeDirectory("");
-  cm.SetHomeOutputDirectory("");
+  cmake cm(cmState::Role::CTest);
   cm.GetCurrentSnapshot().SetDefaultDefinitions();
   cmGlobalGenerator gg(&cm);
   cmMakefile mf(&gg, cm.GetCurrentSnapshot());

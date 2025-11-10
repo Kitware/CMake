@@ -75,9 +75,7 @@ int main(int argc, char const* const* argv)
   cmDocumentation doc;
   doc.addCMakeStandardDocSections();
   if (doc.CheckOptions(argc, argv)) {
-    cmake hcm(cmake::RoleInternal, cmState::Help);
-    hcm.SetHomeDirectory("");
-    hcm.SetHomeOutputDirectory("");
+    cmake hcm(cmState::Role::Help);
     hcm.AddCMakePaths();
     auto generators = hcm.GetGeneratorsDocumentation();
     doc.SetName("ccmake");

@@ -86,13 +86,6 @@ struct cmGlobCacheEntry;
 class cmake
 {
 public:
-  enum Role
-  {
-    RoleInternal, // no commands
-    RoleScript,   // script commands
-    RoleProject   // all commands
-  };
-
   enum DiagLevel
   {
     DIAG_IGNORE,
@@ -171,8 +164,8 @@ public:
   static int const DEFAULT_BUILD_PARALLEL_LEVEL = 0;
 
   /// Default constructor
-  cmake(Role role, cmState::Mode mode,
-        cmState::ProjectKind projectKind = cmState::ProjectKind::Normal);
+  cmake(cmState::Role role,
+        cmState::TryCompile isTryCompile = cmState::TryCompile::No);
   /// Destructor
   ~cmake();
 
@@ -452,18 +445,9 @@ public:
   //! Do all the checks before running configure
   int DoPreConfigureChecks();
 
-  void SetWorkingMode(WorkingMode mode, CommandFailureAction policy)
-  {
-    this->CurrentWorkingMode = mode;
-    this->CurrentCommandFailureAction = policy;
-  }
+  bool RoleSupportsExitCode() const;
 
-  WorkingMode GetWorkingMode() const { return this->CurrentWorkingMode; }
-
-  CommandFailureAction GetCommandFailureAction() const
-  {
-    return this->CurrentCommandFailureAction;
-  }
+  CommandFailureAction GetCommandFailureAction() const;
 
   //! Debug the try compile stuff by not deleting the files
   bool GetDebugTryCompile() const { return this->DebugTryCompile; }
@@ -815,9 +799,6 @@ private:
   std::vector<std::string> cmdArgs;
   std::string CMakeWorkingDirectory;
   ProgressCallbackType ProgressCallback;
-  WorkingMode CurrentWorkingMode = NORMAL_MODE;
-  CommandFailureAction CurrentCommandFailureAction =
-    CommandFailureAction::FATAL_ERROR;
   bool DebugOutput = false;
   bool DebugFindOutput = false;
   // Elements of `cmakeLangTraceCmdStack` are "trace requests" pushed
