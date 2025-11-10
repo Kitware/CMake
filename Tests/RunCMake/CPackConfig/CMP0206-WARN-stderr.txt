@@ -1,0 +1,10 @@
+^CMake Warning \(dev\) at [^
+]*/Modules/CPack\.cmake:[0-9]+ \(message\):
+  Policy CMP0206 is not set: The CPack Archive Generator defaults to UID 0
+  and GID 0\.  Run "cmake --help-policy CMP0206" for policy details\.  Use the
+  cmake_policy command to set the policy and suppress this warning\.
+
+  For compatibility, CMake will set archive UID/GID to -1/-1\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
+This warning is for project developers\.  Use -Wno-dev to suppress it\.$

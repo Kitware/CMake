@@ -615,7 +615,10 @@ class cmMakefile;
          2, 0, WARN)                                                          \
   SELECT(POLICY, CMP0205,                                                     \
          "file(CREATE_LINK) with COPY_ON_ERROR copies directory content.", 4, \
-         3, 0, WARN)
+         3, 0, WARN)                                                          \
+  SELECT(POLICY, CMP0206,                                                     \
+         "The CPack Archive Generator defaults to UID 0 and GID 0.", 4, 3, 0, \
+         WARN)
 
 #define CM_SELECT_ID(F, A1, A2, A3, A4, A5, A6) F(A1)
 #define CM_FOR_EACH_POLICY_ID(POLICY)                                         \
