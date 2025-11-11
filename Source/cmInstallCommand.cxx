@@ -2035,6 +2035,152 @@ bool HandleExportAndroidMKMode(std::vector<std::string> const& args,
 #endif
 }
 
+#ifndef CMAKE_BOOTSTRAP
+cm::optional<cm::string_view> MatchExport(cm::string_view directive,
+                                          std::string const& exportName)
+{
+  std::string::size_type const l = exportName.size();
+  if (directive.substr(0, l) == exportName) {
+    if (directive.size() > l && directive[l] == ':') {
+      return directive.substr(l + 1);
+    }
+  }
+  return cm::nullopt;
+}
+
+void AssignValue(std::string& dest, std::string const& value)
+{
+  dest = value;
+}
+
+void AssignValue(std::vector<std::string>& dest, std::string const& value)
+{
+  dest = cmList{ value }.data();
+}
+
+template <typename T>
+void GetExportArgumentFromVariable(cmMakefile const* makefile,
+                                   cmExportSet const& exportSet,
+                                   cm::string_view suffix, T& variable)
+{
+  std::string const& name =
+    cmStrCat(exportSet.GetName(), "_EXPORT_PACKAGE_INFO_"_s, suffix);
+  if (cmValue const& value = makefile->GetDefinition(name)) {
+    std::string realValue;
+    makefile->ConfigureString(value, realValue, true, false);
+    AssignValue(variable, realValue);
+  }
+}
+
+bool HandleMappedPackageInfo(
+  cmExportSet& exportSet, cm::string_view directive, Helper& helper,
+  cmInstallCommandArguments const& installCommandArgs,
+  cmExecutionStatus& status, cmInstallGenerator::MessageLevel message,
+  std::string const& cxxModulesDirectory)
+{
+  cmPackageInfoArguments arguments;
+
+  // Extract information from the directive.
+  std::string::size_type const n = directive.find('/');
+  if (n != std::string::npos) {
+    arguments.PackageName = std::string{ directive.substr(0, n) };
+    directive = directive.substr(n + 1);
+
+    if (!directive.empty() && directive[0] == 'l') {
+      arguments.LowerCase = true;
+      directive = directive.substr(1);
+    }
+
+    if (!directive.empty() && directive[0] == 'a') {
+      std::string::size_type const d = directive.find('/');
+      if (d != std::string::npos) {
+        arguments.Appendix = std::string{ directive.substr(1, d - 1) };
+        directive = directive.substr(d);
+      } else {
+        arguments.Appendix = std::string{ directive.substr(1) };
+        directive = {};
+      }
+
+      if (arguments.Appendix.empty()) {
+        status.SetError(cmStrCat(
+          "CMAKE_INSTALL_EXPORTS_AS_PACKAGE_INFO given APPENDIX "
+          R"(directive for export ")"_s,
+          exportSet.GetName(), R"(", but no appendix name was provided.)"_s));
+        return false;
+      }
+    }
+
+    if (!directive.empty()) {
+      if (directive[0] != '/') {
+        status.SetError(
+          cmStrCat("CMAKE_INSTALL_EXPORTS_AS_PACKAGE_INFO given unrecognized "
+                   R"(directive  ")"_s,
+                   directive, R"(".)"_s));
+        return false;
+      }
+
+      directive = directive.substr(1);
+    }
+  } else {
+    arguments.PackageName = std::string{ directive };
+    directive = {};
+  }
+
+  if (arguments.PackageName.empty()) {
+    status.SetError(
+      cmStrCat("CMAKE_INSTALL_EXPORTS_AS_PACKAGE_INFO missing package name "
+               R"(for export ")"_s,
+               exportSet.GetName(), R"(".)"_s));
+    return false;
+  }
+
+  // Build destination.
+  std::string dest = std::string{ directive };
+  if (dest.empty()) {
+    if (helper.Makefile->GetSafeDefinition("CMAKE_SYSTEM_NAME") == "Windows") {
+      dest = std::string{ "cps"_s };
+    } else {
+      dest = cmStrCat(helper.GetLibraryDestination(nullptr), "/cps/",
+                      arguments.GetPackageDirName());
+    }
+  }
+
+  if (arguments.Appendix.empty()) {
+    // Get additional export information from variables.
+    GetExportArgumentFromVariable( // BR
+      helper.Makefile, exportSet, "VERSION"_s, arguments.Version);
+    GetExportArgumentFromVariable( // BR
+      helper.Makefile, exportSet, "COMPAT_VERSION"_s, arguments.VersionCompat);
+    GetExportArgumentFromVariable( // BR
+      helper.Makefile, exportSet, "VERSION_SCHEMA"_s, arguments.VersionSchema);
+    GetExportArgumentFromVariable( // BR
+      helper.Makefile, exportSet, "LICENSE"_s, arguments.License);
+    GetExportArgumentFromVariable( // BR
+      helper.Makefile, exportSet, "DEFAULT_LICENSE"_s,
+      arguments.DefaultLicense);
+    GetExportArgumentFromVariable( // BR
+      helper.Makefile, exportSet, "DEFAULT_CONFIGURATIONS"_s,
+      arguments.DefaultConfigs);
+  }
+
+  // Sanity-check export information.
+  if (!arguments.Check(status)) {
+    return false;
+  }
+
+  // Create the package info generator.
+  helper.Makefile->AddInstallGenerator(
+    cm::make_unique<cmInstallPackageInfoExportGenerator>(
+      &exportSet, dest, installCommandArgs.GetPermissions(),
+      installCommandArgs.GetConfigurations(),
+      installCommandArgs.GetComponent(), message,
+      installCommandArgs.GetExcludeFromAll(), std::move(arguments),
+      cxxModulesDirectory, helper.Makefile->GetBacktrace()));
+
+  return true;
+}
+#endif
+
 bool HandleExportMode(std::vector<std::string> const& args,
                       cmExecutionStatus& status)
 {
@@ -2134,6 +2280,28 @@ bool HandleExportMode(std::vector<std::string> const& args,
   // specified
   helper.Makefile->GetGlobalGenerator()->AddInstallComponent(
     ica.GetComponent());
+
+#ifndef CMAKE_BOOTSTRAP
+  // Check if PACKAGE_INFO export has been requested for this export set.
+  if (cmExperimental::HasSupportEnabled(
+        status.GetMakefile(), cmExperimental::Feature::ExportPackageInfo) &&
+      cmExperimental::HasSupportEnabled(
+        status.GetMakefile(), cmExperimental::Feature::MappedPackageInfo)) {
+    if (cmValue const& piExports = helper.Makefile->GetDefinition(
+          "CMAKE_INSTALL_EXPORTS_AS_PACKAGE_INFO")) {
+      for (auto const& pie : cmList{ piExports }) {
+        cm::optional<cm::string_view> const directive = MatchExport(pie, exp);
+        if (directive) {
+          if (!HandleMappedPackageInfo(exportSet, *directive, helper, ica,
+                                       status, message,
+                                       cxx_modules_directory)) {
+            return false;
+          }
+        }
+      }
+    }
+  }
+#endif
 
   // Create the export install generator.
   helper.Makefile->AddInstallGenerator(

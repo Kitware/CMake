@@ -979,7 +979,7 @@ Signatures
 
     Experimental. Gated by ``CMAKE_EXPERIMENTAL_EXPORT_PACKAGE_INFO``.
 
-  Installs a |CPS|_ file exporting targets for dependent projects:
+  Installs a |CPS|_ ("CPS") file exporting targets for dependent projects:
 
   .. code-block:: cmake
 
@@ -1104,6 +1104,20 @@ Signatures
   combination with ``APPENDIX``.  Additionally, it is strongly recommended that
   use of ``LOWER_CASE_FILE`` should be consistent between the main package and
   any appendices.
+
+  .. note::
+    Because it is intended to be portable across multiple build tools, CPS
+    may not support all features that are allowed in CMake-script exports.  In
+    particular, support for generator expressions in interface properties is
+    limited at this time to configuration-dependent expressions.
+
+  .. note::
+    This is the recommended way to generate |CPS| package information for a
+    project.  For distributors whose users may require CPS package information
+    when making changes to the project's build files is not practical, the
+    :variable:`CMAKE_INSTALL_EXPORTS_AS_PACKAGE_INFO` variable may be used to
+    generate ``.cps`` files from :command:`install(EXPORT)` calls.  Refer to
+    the variable's documentation for usage and caveats.
 
 .. signature::
   install(RUNTIME_DEPENDENCY_SET <set-name> [...])

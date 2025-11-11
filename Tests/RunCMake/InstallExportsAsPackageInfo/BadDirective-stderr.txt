@@ -1,0 +1,5 @@
+CMake Error at BadDirective\.cmake:2 \(install\):
+  install CMAKE_INSTALL_EXPORTS_AS_PACKAGE_INFO given unrecognized directive
+  "error"\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:3 \(include\)
