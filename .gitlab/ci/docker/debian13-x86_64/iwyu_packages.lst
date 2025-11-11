@@ -1,7 +1,7 @@
 # Install development tools.
-clang-15
-libclang-15-dev
-llvm-15-dev
+clang-19
+libclang-19-dev
+llvm-19-dev
 libz-dev
 g++
 cmake
