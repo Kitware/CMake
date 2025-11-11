@@ -7,4 +7,5 @@ set(DECOMPRESSION_FLAGS xvf)
 
 include(${CMAKE_CURRENT_LIST_DIR}/roundtrip.cmake)
 
-check_magic("28b52ffd0058" LIMIT 6 HEX)
+# libarchive 3.8.2 enables a checksum feature; older versions do not.
+check_magic("^28b52ffd0[04]58$" LIMIT 6 HEX)
