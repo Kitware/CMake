@@ -241,7 +241,10 @@ void QCMakeCacheModel::setProperties(QCMakePropertyList const& props)
 
   bool b = this->blockSignals(true);
 
-  this->clear();
+  // Empty the model. Avoid QStandardItemModel::clear(), because that calls
+  // beginResetModel() internally, and we can't nest such calls.
+  this->removeRows(0, this->rowCount());
+
   this->NewPropertyCount = newProps.size();
 
   if (View == FlatView) {
@@ -343,8 +346,6 @@ QCMakeCacheModel::ViewType QCMakeCacheModel::viewType() const
 
 void QCMakeCacheModel::setViewType(QCMakeCacheModel::ViewType t)
 {
-  this->beginResetModel();
-
   this->View = t;
 
   QCMakePropertyList props = this->properties();
@@ -360,7 +361,6 @@ void QCMakeCacheModel::setViewType(QCMakeCacheModel::ViewType t)
   this->setProperties(oldProps);
   this->setProperties(props);
   this->blockSignals(b);
-  this->endResetModel();
 }
 
 void QCMakeCacheModel::setPropertyData(QModelIndex const& idx1,
