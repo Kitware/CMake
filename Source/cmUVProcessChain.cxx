@@ -12,6 +12,8 @@
 
 #include <cm3p/uv.h>
 
+#include "cmsys/Process.h"
+
 #include "cm_fileno.hxx"
 
 #include "cmGetPipes.h"
@@ -58,6 +60,7 @@ struct cmUVProcessChain::InternalData
     const cmUVProcessChainBuilder::ProcessConfiguration& config, bool first,
     bool last);
   void Finish();
+  void Terminate();
 };
 
 cmUVProcessChainBuilder::cmUVProcessChainBuilder() = default;
@@ -388,6 +391,15 @@ void cmUVProcessChain::InternalData::Finish()
   this->Valid = true;
 }
 
+void cmUVProcessChain::InternalData::Terminate()
+{
+  for (std::unique_ptr<ProcessData> const& p : this->Processes) {
+    if (!p->ProcessStatus.Finished) {
+      cmsysProcess_KillPID(static_cast<unsigned long>(p->Process->pid));
+    }
+  }
+}
+
 cmUVProcessChain::cmUVProcessChain()
   : Data(cm::make_unique<InternalData>())
 {
@@ -470,6 +482,11 @@ const cmUVProcessChain::Status& cmUVProcessChain::GetStatus(
 bool cmUVProcessChain::Finished() const
 {
   return this->Data->ProcessesCompleted >= this->Data->Processes.size();
+}
+
+void cmUVProcessChain::Terminate()
+{
+  this->Data->Terminate();
 }
 
 std::pair<cmUVProcessChain::ExceptionCode, std::string>

@@ -116,6 +116,10 @@ public:
   const Status& GetStatus(std::size_t index) const;
   bool Finished() const;
 
+  /** Terminate any remaining child processes.
+      Call this only after exiting the event loop, and at most once.  */
+  void Terminate();
+
 private:
   friend class cmUVProcessChainBuilder;
 
