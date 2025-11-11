@@ -1020,6 +1020,7 @@ bool cmCTestBuildHandler::RunMakeCommand(std::string const& command,
         break;
     }
   } else {
+    chain.Terminate();
     cmCTestOptionalLog(this->CTest, WARNING,
                        "There was a timeout" << std::endl, this->Quiet);
   }

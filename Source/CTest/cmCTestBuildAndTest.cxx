@@ -122,6 +122,8 @@ bool cmCTestBuildAndTest::RunTest(std::vector<std::string> const& argv,
         std::cout << "\n*** Exception executing: " << exception.second;
       } break;
     }
+  } else {
+    chain.Terminate();
   }
 
   return result;
