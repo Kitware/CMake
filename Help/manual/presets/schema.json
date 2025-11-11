@@ -572,7 +572,7 @@
           },
           "installDir": {
             "type": "string",
-            "description": "An optional string representing the path to the installation directory. This field supports macro expansion. If a relative path is specified, it is calculated relative to the source directory."
+            "description": "An optional string representing the path to the installation directory, which will be used as the CMAKE_INSTALL_PREFIX variable. This field supports macro expansion. If a relative path is specified, it is calculated relative to the source directory."
           }
         }
       }

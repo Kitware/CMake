@@ -285,8 +285,11 @@ that may contain the following fields:
   preset is ``hidden``). In version ``3`` or above, this field may be
   omitted.
 
+.. _`CMakePresets installDir`:
+
 ``installDir``
-  An optional string representing the path to the installation directory.
+  An optional string representing the path to the installation directory,
+  which will be used as the :variable:`CMAKE_INSTALL_PREFIX` variable.
   This field supports `macro expansion`_. If a relative path is specified,
   it is calculated relative to the source directory. This is allowed in
   preset files specifying version ``3`` or above.
