@@ -57,7 +57,7 @@ public:
   /**
    * Looks up child and returns it
    */
-  cmSourceGroup* LookupChild(std::string const& name);
+  cmSourceGroup* LookupChild(std::string const& name) const;
 
   /**
    * Get the name of this group.
@@ -72,7 +72,7 @@ public:
   /**
    * Check if the given name matches this group's regex.
    */
-  bool MatchesRegex(std::string const& name);
+  bool MatchesRegex(std::string const& name) const;
 
   /**
    * Check if the given name matches this group's explicit file list.
@@ -94,7 +94,7 @@ public:
   /**
    * Check if the given name matches this group's regex in children.
    */
-  cmSourceGroup* MatchChildrenRegex(std::string const& name);
+  cmSourceGroup* MatchChildrenRegex(std::string const& name) const;
 
   /**
    * Assign the given source file to this group.  Used only by

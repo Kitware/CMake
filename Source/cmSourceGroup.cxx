@@ -96,9 +96,10 @@ std::string const& cmSourceGroup::GetFullName() const
   return this->FullName;
 }
 
-bool cmSourceGroup::MatchesRegex(std::string const& name)
+bool cmSourceGroup::MatchesRegex(std::string const& name) const
 {
-  return this->GroupRegex.find(name);
+  cmsys::RegularExpressionMatch match;
+  return this->GroupRegex.find(name.c_str(), match);
 }
 
 bool cmSourceGroup::MatchesFiles(std::string const& name) const
@@ -121,12 +122,12 @@ void cmSourceGroup::AddChild(cmSourceGroup const& child)
   this->Internal->GroupChildren.push_back(child);
 }
 
-cmSourceGroup* cmSourceGroup::LookupChild(std::string const& name)
+cmSourceGroup* cmSourceGroup::LookupChild(std::string const& name) const
 {
   for (cmSourceGroup& group : this->Internal->GroupChildren) {
-    // look if descenened is the one were looking for
+    // look if descendant is the one we're looking for
     if (group.GetName() == name) {
-      return (&group); // if it so return it
+      return (&group); // if so return it
     }
   }
 
@@ -163,7 +164,7 @@ cmSourceGroup const* cmSourceGroup::MatchChildrenFiles(
   return nullptr;
 }
 
-cmSourceGroup* cmSourceGroup::MatchChildrenRegex(std::string const& name)
+cmSourceGroup* cmSourceGroup::MatchChildrenRegex(std::string const& name) const
 {
   for (cmSourceGroup& group : this->Internal->GroupChildren) {
     cmSourceGroup* result = group.MatchChildrenRegex(name);
@@ -172,7 +173,7 @@ cmSourceGroup* cmSourceGroup::MatchChildrenRegex(std::string const& name)
     }
   }
   if (this->MatchesRegex(name)) {
-    return this;
+    return const_cast<cmSourceGroup*>(this);
   }
 
   return nullptr;
