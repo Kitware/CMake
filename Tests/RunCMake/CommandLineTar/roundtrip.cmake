@@ -86,6 +86,10 @@ function(check_magic EXPECTED)
     ${ARGN}
   )
 
+  if(EXPECTED MATCHES "[^0-9a-f]" AND ACTUAL MATCHES "${EXPECTED}")
+    return()
+  endif()
+
   if(NOT ACTUAL STREQUAL EXPECTED)
     message(FATAL_ERROR
       "Actual [${ACTUAL}] does not match expected [${EXPECTED}]")
