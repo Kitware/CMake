@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-ARG BASE_IMAGE=arm64v8/debian:12
+ARG BASE_IMAGE=arm64v8/debian:13
 
 FROM ${BASE_IMAGE} AS cuda-keyring
 ADD https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/sbsa/cuda-keyring_1.1-1_all.deb /root/
