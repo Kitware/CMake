@@ -1179,6 +1179,7 @@ bool cmCTest::RunMakeCommand(const std::string& command, std::string& output,
         break;
     }
   } else {
+    chain.Terminate();
     cmCTestLog(this, WARNING, "There was a timeout" << std::endl);
   }
 
@@ -1351,6 +1352,8 @@ bool cmCTest::RunTest(const std::vector<std::string>& argv,
         cmCTestLog(this, HANDLER_VERBOSE_OUTPUT, outerr << std::endl);
       } break;
     }
+  } else {
+    chain.Terminate();
   }
 
   return result;
@@ -3611,6 +3614,7 @@ bool cmCTest::RunCommand(std::vector<std::string> const& args,
 
   bool result = true;
   if (timedOut) {
+    chain.Terminate();
     const char* error_str = "Process terminated due to timeout\n";
     cmCTestLog(this, ERROR_MESSAGE, error_str << std::endl);
     stdErr->append(error_str, strlen(error_str));

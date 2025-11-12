@@ -391,6 +391,9 @@ bool cmExecuteProcessCommand(std::vector<std::string> const& args,
          !(chain.Finished() && outputData.Finished && errorData.Finished)) {
     uv_run(&chain.GetLoop(), UV_RUN_ONCE);
   }
+  if (timedOut) {
+    chain.Terminate();
+  }
   if (!arguments.OutputQuiet &&
       (arguments.OutputVariable.empty() || arguments.EchoOutputVariable)) {
     processOutput.DecodeText(std::string(), strdata, 1);

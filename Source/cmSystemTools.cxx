@@ -696,6 +696,7 @@ bool cmSystemTools::RunSingleCommand(std::vector<std::string> const& command,
 
   bool result = true;
   if (timedOut) {
+    chain.Terminate();
     const char* error_str = "Process terminated due to timeout\n";
     if (outputflag != OUTPUT_NONE) {
       std::cerr << error_str << std::endl;
