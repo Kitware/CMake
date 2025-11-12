@@ -184,7 +184,7 @@ Status Directory::Load(std::string const& name, std::string* errorMessage)
   delete[] buf;
 
   if (srchHandle == INVALID_HANDLE_VALUE) {
-    Status status = Status::POSIX_errno();
+    Status status = Status::Windows_GetLastError();
     if (errorMessage) {
       *errorMessage = status.GetString();
     }
@@ -198,7 +198,7 @@ Status Directory::Load(std::string const& name, std::string* errorMessage)
   } while (FindNextFileW(srchHandle, &data));
   this->Internal->Path = name;
   if (!FindClose(srchHandle)) {
-    Status status = Status::POSIX_errno();
+    Status status = Status::Windows_GetLastError();
     if (errorMessage) {
       *errorMessage = status.GetString();
     }
