@@ -240,7 +240,9 @@ This module accepts the following variables:
       correspond to GLVND libraries).
 
   ``LEGACY``
-    Prefer to use the legacy libGL library, if available.
+    Prefer to use the legacy libGL library, if available. This makes
+    ``OPENGL_opengl_LIBRARY`` and ``OPENGL_glx_LIBRARY``
+    point to ``OPENGL_gl_LIBRARY``.
 
 .. _`Linux Specific`:
 
@@ -255,12 +257,10 @@ Projects may use GLVND explicitly with target ``OpenGL::OpenGL`` and either
 ``OpenGL::GLX`` or ``OpenGL::EGL``.
 
 Projects may use the ``OpenGL::GL`` target (or ``OPENGL_LIBRARIES`` variable)
-to use legacy GL interfaces.  These will use the legacy GL library located
-by ``OPENGL_gl_LIBRARY``, if available.  If ``OPENGL_gl_LIBRARY`` is empty or
-not found and GLVND is available, the ``OpenGL::GL`` target will use GLVND
-``OpenGL::OpenGL`` and ``OpenGL::GLX`` (and the ``OPENGL_LIBRARIES``
-variable will use the corresponding libraries).  Thus, for non-EGL-based
-Linux targets, the ``OpenGL::GL`` target is most portable.
+to use legacy GL interfaces.  Depending on ``OpenGL_GL_PREFERENCE``, these
+will either use the legacy GL library or the GLVND ``OpenGL::OpenGL`` and
+``OpenGL::GLX``.  Thus, for non-EGL-based Linux targets,
+the ``OpenGL::GL`` target is most portable.
 
 The ``OpenGL_GL_PREFERENCE`` variable may be set to specify the preferred way
 to provide legacy GL interfaces in case multiple choices are available.
@@ -527,6 +527,12 @@ else()
       PATH_SUFFIXES libglvnd
       )
     list(APPEND _OpenGL_CACHE_VARS OPENGL_gl_LIBRARY)
+  endif()
+
+  # When preferring legacy, linking OpenGL and GLX should behave the same as linking legacy GL.
+  if(OpenGL_GL_PREFERENCE STREQUAL "LEGACY")
+    set(OpenGL_glx_LIBRARY "${OPENGL_gl_LIBRARY}")
+    set(OpenGL_opengl_LIBRARY "${OPENGL_gl_LIBRARY}")
   endif()
 
   if(_OpenGL_GL_POLICY_WARN AND OPENGL_gl_LIBRARY AND OPENGL_opengl_LIBRARY AND OPENGL_glx_LIBRARY)
