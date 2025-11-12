@@ -6,6 +6,10 @@ set (CMAKE_CXX_VISIBILITY_PRESET hidden)
 find_package (JNI REQUIRED)
 find_package (Java REQUIRED COMPONENTS Runtime Development)
 
+if(Java_VERSION VERSION_GREATER_EQUAL 24)
+  set(enable_native_access --enable-native-access=ALL-UNNAMED)
+endif()
+
 add_library (MinimalTgt MODULE minimal.cxx)
 target_link_libraries (MinimalTgt PRIVATE JNI::JNI)
 
@@ -24,6 +28,7 @@ foreach (test MinimalTgt MinimalVar)
   add_test (NAME ${test} COMMAND ${Java_JAVA_EXECUTABLE}
     -cp ${TestMinimal_SOURCE_DIR}
     -Djava.library.path=$<TARGET_FILE_DIR:${test}>
+    ${enable_native_access}
     ${test}
   )
 
