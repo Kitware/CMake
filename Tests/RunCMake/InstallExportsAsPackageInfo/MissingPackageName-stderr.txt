@@ -1,0 +1,5 @@
+CMake Error at MissingPackageName.cmake:2 \(install\):
+  install CMAKE_INSTALL_EXPORTS_AS_PACKAGE_INFO missing package name for
+  export "foo"\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:3 \(include\)

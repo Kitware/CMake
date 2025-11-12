@@ -21,6 +21,7 @@ public:
     CxxImportStd,
     ImportPackageInfo,
     ExportPackageInfo,
+    MappedPackageInfo,
     ExportBuildDatabase,
     Instrumentation,
 

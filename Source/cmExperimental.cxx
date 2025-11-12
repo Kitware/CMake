@@ -55,6 +55,15 @@ cmExperimental::FeatureData const LookupTable[] = {
     "experimentation and feedback to CMake developers.",
     {},
     cmExperimental::TryCompileCondition::Always },
+  // MappedPackageInfo
+  { "MappedPackageInfo",
+    "ababa1b5-7099-495f-a9cd-e22d38f274f2",
+    "CMAKE_EXPERIMENTAL_MAPPED_PACKAGE_INFO",
+    "CMake's support for generating package information in the Common Package "
+    "Specification format from CMake script exports is experimental. It is "
+    "meant only for experimentation and feedback to CMake developers.",
+    {},
+    cmExperimental::TryCompileCondition::Always },
   // ExportBuildDatabase
   { "ExportBuildDatabase",
     "73194a1d-c0b5-41b9-9190-a4512925e192",
