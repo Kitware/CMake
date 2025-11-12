@@ -6,6 +6,7 @@
 #include <array>
 #include <cassert>
 #include <cstdio>
+#include <functional>
 #include <iterator>
 #include <sstream>
 #include <unordered_map>
@@ -13,6 +14,7 @@
 #include <utility>
 
 #include <cm/memory>
+#include <cm/optional>
 #include <cm/string_view>
 #include <cmext/algorithm>
 #include <cmext/string_view>

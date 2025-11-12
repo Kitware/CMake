@@ -5,6 +5,7 @@
 #include <sstream>
 #include <utility>
 
+#include <cm/optional>
 #include <cm/string_view>
 #include <cmext/string_view>
 

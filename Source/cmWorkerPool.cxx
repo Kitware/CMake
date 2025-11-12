@@ -15,6 +15,8 @@
 
 #include <cm3p/uv.h>
 
+#include <sys/types.h>
+
 #include "cmRange.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"

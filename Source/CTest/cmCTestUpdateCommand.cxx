@@ -5,7 +5,6 @@
 #include <chrono>
 #include <sstream>
 #include <string>
-#include <vector>
 
 #include <cm/memory>
 #include <cmext/string_view>

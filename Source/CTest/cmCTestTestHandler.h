@@ -25,7 +25,6 @@
 #include "cmDuration.h"
 #include "cmListFileCache.h"
 
-class cmMakefile;
 class cmXMLWriter;
 
 struct cmCTestTestOptions

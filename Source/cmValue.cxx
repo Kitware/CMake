@@ -1,6 +1,7 @@
 
 #include "cmValue.h"
 
+#include <ostream>
 #include <string>
 
 #include <cmext/string_view>

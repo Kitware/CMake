@@ -2,6 +2,7 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
+#include <cstddef>
 #include <map>
 #include <memory>
 #include <string>

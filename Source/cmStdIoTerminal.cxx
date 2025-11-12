@@ -5,6 +5,7 @@
 #include <array>
 #include <functional>
 #include <iosfwd>
+#include <ostream>
 #include <string>
 #include <type_traits>
 

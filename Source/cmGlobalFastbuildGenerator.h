@@ -24,13 +24,8 @@
 class cmFastbuildTargetGenerator;
 class cmGeneratorTarget;
 class cmGlobalGeneratorFactory;
-class cmLinkLineComputer;
-class cmLocalGenerator;
 class cmMakefile;
-class cmOutputConverter;
-class cmStateDirectory;
 class cmake;
-enum class cmDepfileFormat;
 struct cmDocumentationEntry;
 
 #define FASTBUILD_DOLLAR_TAG "FASTBUILD_DOLLAR_TAG"

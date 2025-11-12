@@ -11,6 +11,8 @@
 
 #include <cm/memory>
 
+#include "cmsys/RegularExpression.hxx"
+
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"

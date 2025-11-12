@@ -5,7 +5,6 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <cstdint> // IWYU pragma: keep
-#include <initializer_list>
 #include <string>
 #include <vector>
 

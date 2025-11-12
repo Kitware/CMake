@@ -4,6 +4,8 @@
 
 #include <utility>
 
+#include <cm/optional>
+
 #include "cmGeneratorExpression.h"
 #include "cmList.h"
 #include "cmListFileCache.h"

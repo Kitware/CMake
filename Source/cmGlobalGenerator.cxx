@@ -11,7 +11,6 @@
 #include <initializer_list>
 #include <iterator>
 #include <sstream>
-#include <type_traits>
 #include <utility>
 
 #include <cm/memory>
@@ -44,6 +43,7 @@
 #include "cmInstallRuntimeDependencySet.h"
 #include "cmLinkLineComputer.h"
 #include "cmList.h"
+#include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
 #include "cmMSVC60LinkLineComputer.h"
 #include "cmMakefile.h"
@@ -70,8 +70,6 @@
 
 #  include "cmQtAutoGenGlobalInitializer.h"
 #endif
-
-class cmListFileBacktrace;
 
 std::string const kCMAKE_PLATFORM_INFO_INITIALIZED =
   "CMAKE_PLATFORM_INFO_INITIALIZED";

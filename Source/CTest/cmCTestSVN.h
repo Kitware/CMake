@@ -13,7 +13,6 @@
 
 class cmCTest;
 class cmMakefile;
-class cmXMLWriter;
 
 /** \class cmCTestSVN
  * \brief Interaction with subversion command-line tool

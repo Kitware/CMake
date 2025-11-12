@@ -2,6 +2,7 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmLocalCommonGenerator.h"
 
+#include <map>
 #include <memory>
 #include <utility>
 #include <vector>

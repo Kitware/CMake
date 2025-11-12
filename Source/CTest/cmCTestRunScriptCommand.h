@@ -5,11 +5,8 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <string>
-#include <vector>
 
 #include "cmCTestCommand.h"
-
-class cmExecutionStatus;
 
 /** \class cmCTestRunScript
  * \brief Run a ctest script

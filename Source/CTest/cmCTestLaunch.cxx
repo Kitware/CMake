@@ -4,10 +4,13 @@
 
 #include <cstdio>
 #include <cstring>
+#include <functional>
 #include <iostream>
 #include <map>
 #include <memory>
 #include <utility>
+
+#include <cm/optional>
 
 #include <cm3p/uv.h>
 

@@ -3,7 +3,7 @@
 
 #include "cmCommands.h"
 
-#include <cm/memory>
+#include <string>
 
 #include "cmAddCompileDefinitionsCommand.h"
 #include "cmAddCustomCommandCommand.h"

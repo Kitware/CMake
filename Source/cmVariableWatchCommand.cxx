@@ -6,8 +6,6 @@
 #include <memory>
 #include <utility>
 
-#include <cm/string_view>
-
 #include "cmExecutionStatus.h"
 #include "cmListFileCache.h"
 #include "cmMakefile.h"

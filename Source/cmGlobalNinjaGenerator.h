@@ -28,11 +28,7 @@
 
 class cmCustomCommand;
 class cmGeneratorTarget;
-class cmLinkLineComputer;
-class cmLocalGenerator;
 class cmMakefile;
-class cmOutputConverter;
-class cmStateDirectory;
 class cmake;
 struct cmCxxModuleExportInfo;
 

@@ -36,6 +36,7 @@
 #include "cmGlobalGenerator.h"
 #include "cmLinkItem.h"
 #include "cmList.h"
+#include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"

@@ -21,7 +21,6 @@ class cmCustomCommand;
 class cmCustomCommandGenerator;
 class cmLocalFastbuildGenerator;
 class cmMakefile;
-class cmSourceFile;
 
 enum class FastbuildBuildStep
 {

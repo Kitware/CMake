@@ -4,7 +4,6 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include <memory>
 #include <string>
 #include <vector>
 
@@ -12,9 +11,6 @@
 
 #include "cmArgumentParserTypes.h" // IWYU pragma: keep
 #include "cmCTestHandlerCommand.h"
-
-class cmExecutionStatus;
-class cmCTestGenericHandler;
 
 class cmCTestCoverageCommand : public cmCTestHandlerCommand
 {

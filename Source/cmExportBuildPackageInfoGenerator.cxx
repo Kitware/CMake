@@ -3,6 +3,7 @@
 #include "cmExportBuildPackageInfoGenerator.h"
 
 #include <cassert>
+#include <functional>
 #include <map>
 #include <utility>
 #include <vector>
