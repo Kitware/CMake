@@ -385,6 +385,11 @@ set(_JNI_JAVA_DIRECTORIES_BASE
   # Arch Linux specific paths for default JVM
   /usr/lib/jvm/default
   # Ubuntu specific paths for default JVM
+  /usr/lib/jvm/java-26-openjdk-{libarch}
+  /usr/lib/jvm/java-25-openjdk-{libarch}    # Ubuntu 24.04 LTS
+  /usr/lib/jvm/java-24-openjdk-{libarch}
+  /usr/lib/jvm/java-23-openjdk-{libarch}
+  /usr/lib/jvm/java-22-openjdk-{libarch}
   /usr/lib/jvm/java-21-openjdk-{libarch}    # Ubuntu 23.04
   /usr/lib/jvm/java-20-openjdk-{libarch}    # Ubuntu 22.10
   /usr/lib/jvm/java-19-openjdk-{libarch}    # Ubuntu 22.04 LTS
