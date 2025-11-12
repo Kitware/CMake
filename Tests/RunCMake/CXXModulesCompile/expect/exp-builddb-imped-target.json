@@ -12,8 +12,8 @@
             "-D_MBCS",
             "-Dtarget_interface_define",
             "-Dtarget_public_define",
-            "PATH:-I<SOURCE_DIR>/examples/exp-builddb/target_interface_include",
-            "PATH:-I<SOURCE_DIR>/examples/exp-builddb/target_public_include",
+            "PATH:-I<SOURCE_DIR>/exp-builddb/target_interface_include",
+            "PATH:-I<SOURCE_DIR>/exp-builddb/target_public_include",
             "-Dfrom_cmake_cxx_flags",
             "-Dfrom_cmake_cxx_<CONFIG_LOWER>_flags",
             "<CXX20_OPTION>",
@@ -22,14 +22,14 @@
             "PATH:-Ddepflag=\"CMakeFiles/use_import_interfaces.dir<CONFIG_DIR>/use.cxx<OBJEXT>.d\"",
             "PATH:<OUTPUT_FLAG>CMakeFiles/use_import_interfaces.dir<CONFIG_DIR>/use.cxx<OBJEXT>",
             "-c",
-            "PATH:<SOURCE_DIR>/examples/imp-mods/use.cxx"
+            "PATH:<SOURCE_DIR>/imp-mods/use.cxx"
           ],
           "baseline-arguments": [
             "-D_MBCS",
             "-Dtarget_interface_define",
             "-Dtarget_public_define",
-            "PATH:-I<SOURCE_DIR>/examples/exp-builddb/target_interface_include",
-            "PATH:-I<SOURCE_DIR>/examples/exp-builddb/target_public_include",
+            "PATH:-I<SOURCE_DIR>/exp-builddb/target_interface_include",
+            "PATH:-I<SOURCE_DIR>/exp-builddb/target_public_include",
             "-Dfrom_cmake_cxx_flags",
             "-Dfrom_cmake_cxx_<CONFIG_LOWER>_flags",
             "<CXX20_OPTION>",
@@ -40,8 +40,8 @@
             "-D_MBCS",
             "-Dtarget_interface_define",
             "-Dtarget_public_define",
-            "PATH:-I<SOURCE_DIR>/examples/exp-builddb/target_interface_include",
-            "PATH:-I<SOURCE_DIR>/examples/exp-builddb/target_public_include",
+            "PATH:-I<SOURCE_DIR>/exp-builddb/target_interface_include",
+            "PATH:-I<SOURCE_DIR>/exp-builddb/target_public_include",
             "-Dfrom_cmake_cxx_flags",
             "-Dfrom_cmake_cxx_<CONFIG_LOWER>_flags",
             "<CXX20_OPTION>",
@@ -52,7 +52,7 @@
           "private": true,
           "provides": {},
           "requires": ["importable"],
-          "source": "PATH:<SOURCE_DIR>/examples/imp-mods/use.cxx",
+          "source": "PATH:<SOURCE_DIR>/imp-mods/use.cxx",
           "work-directory": "<BINARY_DIR>"
         }
       ],

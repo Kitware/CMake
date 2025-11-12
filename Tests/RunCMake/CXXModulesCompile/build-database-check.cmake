@@ -1,4 +1,4 @@
-include("${CMAKE_CURRENT_LIST_DIR}/../check-json.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/check-json.cmake")
 
 function (check_build_database expect_basename fname component)
   if (component STREQUAL "NO_EXIST")
