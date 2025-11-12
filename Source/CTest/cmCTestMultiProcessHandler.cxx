@@ -8,6 +8,7 @@
 #include <cmath>
 #include <cstddef> // IWYU pragma: keep
 #include <cstdlib>
+#include <functional>
 #include <iomanip>
 #include <iostream>
 #include <list>
@@ -34,7 +35,6 @@
 #include "cmCTestBinPacker.h"
 #include "cmCTestRunTest.h"
 #include "cmCTestTestHandler.h"
-#include "cmDuration.h"
 #include "cmJSONState.h"
 #include "cmListFileCache.h"
 #include "cmRange.h"

@@ -10,7 +10,6 @@
 #include <cstdio>
 #include <cstring>
 #include <sstream>
-#include <type_traits>
 #include <unordered_set>
 #include <utility>
 

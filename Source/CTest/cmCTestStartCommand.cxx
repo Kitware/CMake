@@ -4,6 +4,7 @@
 
 #include <cstddef>
 #include <sstream>
+#include <vector>
 
 #include "cmCTest.h"
 #include "cmCTestVC.h"

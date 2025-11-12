@@ -9,8 +9,6 @@
 #include "cmList.h"
 #include "cmListFileCache.h"
 
-class cmLocalGenerator;
-
 cmInstallFilesGenerator::cmInstallFilesGenerator(
   std::vector<std::string> const& files, std::string const& dest,
   bool programs, std::string file_permissions,

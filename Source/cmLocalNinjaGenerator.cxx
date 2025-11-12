@@ -25,6 +25,7 @@
 #include "cmGlobalGenerator.h"
 #include "cmGlobalNinjaGenerator.h"
 #include "cmList.h"
+#include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"

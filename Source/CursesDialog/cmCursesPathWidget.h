@@ -9,8 +9,6 @@
 #include "cmCursesStandardIncludes.h"
 #include "cmCursesStringWidget.h"
 
-class cmCursesMainForm;
-
 class cmCursesPathWidget : public cmCursesStringWidget
 {
 public:

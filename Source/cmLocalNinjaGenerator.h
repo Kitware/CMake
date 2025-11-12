@@ -6,7 +6,6 @@
 
 #include <iosfwd>
 #include <map>
-#include <memory>
 #include <set>
 #include <string>
 #include <vector>
@@ -25,7 +24,6 @@ class cmGlobalGenerator;
 class cmGlobalNinjaGenerator;
 class cmListFileBacktrace;
 class cmMakefile;
-class cmRulePlaceholderExpander;
 class cmake;
 
 /**

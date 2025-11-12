@@ -9,9 +9,7 @@
 #include <iomanip>
 #include <iterator>
 #include <memory>
-#include <ratio>
 #include <sstream>
-#include <type_traits>
 #include <utility>
 
 #include <cmext/algorithm>
@@ -35,8 +33,6 @@
 #include "cmUVProcessChain.h"
 #include "cmWorkingDirectory.h"
 #include "cmXMLWriter.h"
-
-class cmMakefile;
 
 #define SAFEDIV(x, y) (((y) != 0) ? ((x) / (y)) : (0))
 

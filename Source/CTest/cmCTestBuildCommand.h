@@ -4,14 +4,9 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include <memory>
 #include <string>
-#include <vector>
 
 #include "cmCTestHandlerCommand.h"
-
-class cmExecutionStatus;
-class cmCTestGenericHandler;
 
 class cmCTestBuildCommand : public cmCTestHandlerCommand
 {

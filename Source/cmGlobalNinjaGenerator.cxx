@@ -9,7 +9,6 @@
 #include <functional>
 #include <iterator>
 #include <sstream>
-#include <type_traits>
 #include <utility>
 
 #include <cm/memory>

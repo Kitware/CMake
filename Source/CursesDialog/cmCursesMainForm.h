@@ -11,12 +11,12 @@
 
 #include <cm/optional>
 
-#include "cmCursesCacheEntryComposite.h"
 #include "cmCursesForm.h"
 #include "cmCursesStandardIncludes.h"
 #include "cmStateTypes.h"
 
 class cmake;
+class cmCursesCacheEntryComposite;
 class cmCursesLongMessageForm;
 
 /** \class cmCursesMainForm

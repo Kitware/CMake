@@ -6,6 +6,7 @@
 #include <sstream>
 #include <unordered_set>
 
+#include <cm/optional>
 #include <cm/string_view>
 
 #include "cmExecutionStatus.h"

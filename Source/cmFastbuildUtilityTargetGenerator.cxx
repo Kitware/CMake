@@ -8,6 +8,8 @@
 #include <utility>
 #include <vector>
 
+#include <cm/memory>
+
 #include "cmFastbuildTargetGenerator.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalFastbuildGenerator.h"

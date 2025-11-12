@@ -13,7 +13,6 @@
 #include "cmListFileCache.h"
 
 class cmGeneratorTarget;
-class cmLocalGenerator;
 
 /** \class cmInstallTargetGenerator
  * \brief Generate target installation rules.

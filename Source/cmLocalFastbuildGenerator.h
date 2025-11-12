@@ -2,18 +2,14 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
-#include <map>
 #include <string>
 
 #include "cmLocalCommonGenerator.h"
 #include "cmOutputConverter.h"
 
-class cmGeneratorTarget;
 class cmGlobalFastbuildGenerator;
 class cmGlobalGenerator;
 class cmMakefile;
-class cmSourceFile;
-struct cmObjectLocations;
 
 class cmLocalFastbuildGenerator : public cmLocalCommonGenerator
 {
