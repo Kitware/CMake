@@ -112,6 +112,20 @@
     "flags": []
   },
   {
+    "name":  "Keep",
+    "switch": "keep",
+    "comment": "",
+    "value": "true",
+    "flags": []
+  },
+  {
+    "name":  "Keep",
+    "switch": "-keep",
+    "comment": "",
+    "value": "true",
+    "flags": []
+  },
+  {
     "name":  "MaxRegCount",
     "switch": "maxrregcount=",
     "comment": "",
