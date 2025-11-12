@@ -1,1 +1,1 @@
-^Error copying file \(if newer\) from ".+" to ".+"\.$
+^Error copying file \(if newer\) from "[^"]+" to "[^"]+": No such file or directory$

@@ -2273,7 +2273,7 @@ SystemTools::CopyStatus SystemTools::CopyFileIfNewer(
   // source and destination are files so do a copy if source is newer
   // Check if source file exists first
   if (!SystemTools::FileExists(source)) {
-    return CopyStatus{ Status::POSIX_errno(), CopyStatus::SourcePath };
+    return CopyStatus{ Status::POSIX(ENOENT), CopyStatus::SourcePath };
   }
   // If destination doesn't exist, always copy
   if (!SystemTools::FileExists(destination)) {

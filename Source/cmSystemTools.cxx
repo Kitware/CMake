@@ -1646,20 +1646,6 @@ cmSystemTools::CopyResult cmSystemTools::CopySingleFile(
   return CopyResult::Success;
 }
 
-bool cmSystemTools::CopyFileIfNewer(std::string const& source,
-                                    std::string const& destination)
-{
-  return cmsys::SystemTools::CopyFileIfNewer(source, destination).IsSuccess();
-}
-
-bool cmSystemTools::CopyADirectory(std::string const& source,
-                                   std::string const& destination,
-                                   CopyWhen when)
-{
-  return cmsys::SystemTools::CopyADirectory(source, destination, when)
-    .IsSuccess();
-}
-
 bool cmSystemTools::RenameFile(std::string const& oldname,
                                std::string const& newname)
 {

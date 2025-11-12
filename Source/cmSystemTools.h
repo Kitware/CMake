@@ -205,15 +205,6 @@ public:
                                    CopyInputRecent inputRecent,
                                    std::string* err = nullptr);
 
-  /** Copy a file if it is newer than the destination. */
-  static bool CopyFileIfNewer(std::string const& source,
-                              std::string const& destination);
-
-  /** Copy directory contents with specified copy behavior. */
-  static bool CopyADirectory(std::string const& source,
-                             std::string const& destination,
-                             CopyWhen when = CopyWhen::Always);
-
   enum class Replace
   {
     Yes,
