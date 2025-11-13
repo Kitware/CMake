@@ -5,6 +5,7 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <cstddef>
+#include <functional>
 #include <mutex>
 #include <string>
 #include <unordered_map>

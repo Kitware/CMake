@@ -2,6 +2,7 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmMacroCommand.h"
 
+#include <functional>
 #include <utility>
 
 #include <cm/memory>

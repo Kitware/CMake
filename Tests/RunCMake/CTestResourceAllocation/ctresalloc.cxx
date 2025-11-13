@@ -2,6 +2,7 @@
 #include <chrono>
 #include <cstddef> // IWYU pragma: keep
 #include <cstdlib>
+#include <functional>
 #include <iostream>
 #include <map>
 #include <set>

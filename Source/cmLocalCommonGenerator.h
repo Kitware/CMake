@@ -4,7 +4,6 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include <map>
 #include <string>
 #include <vector>
 
@@ -13,11 +12,6 @@
 class cmGeneratorTarget;
 class cmGlobalGenerator;
 class cmMakefile;
-struct cmObjectLocations;
-class cmSourceFile;
-namespace cmStateEnums {
-enum class IntermediateDirKind;
-}
 
 /** \class cmLocalCommonGenerator
  * \brief Common infrastructure for Makefile and Ninja local generators.

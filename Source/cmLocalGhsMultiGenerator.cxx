@@ -2,6 +2,7 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmLocalGhsMultiGenerator.h"
 
+#include <map>
 #include <utility>
 #include <vector>
 
@@ -14,10 +15,6 @@
 #include "cmSourceFile.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
-
-namespace cmStateEnums {
-enum class IntermediateDirKind;
-}
 
 cmLocalGhsMultiGenerator::cmLocalGhsMultiGenerator(cmGlobalGenerator* gg,
                                                    cmMakefile* mf)

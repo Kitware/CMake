@@ -5,6 +5,7 @@
 #include <array>
 #include <cstdio>
 #include <cstring>
+#include <functional>
 #include <set>
 #include <sstream>
 #include <utility>

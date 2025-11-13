@@ -32,9 +32,7 @@ namespace std {
 /* clang-format on */
 #endif
 
-class cmConfigureLog;
 class cmExecutionStatus;
-class cmMakefile;
 class cmPackageState;
 class cmSearchPath;
 class cmPackageInformation;

@@ -24,6 +24,7 @@
 #include "cmListFileCache.h"
 #include "cmObjectLocation.h"
 #include "cmPolicies.h"
+#include "cmSourceFile.h"
 #include "cmStandardLevel.h"
 #include "cmStateTypes.h"
 #include "cmValue.h"
@@ -44,7 +45,6 @@ class cmFileSet;
 class cmGlobalGenerator;
 class cmLocalGenerator;
 class cmMakefile;
-class cmSourceFile;
 struct cmSyntheticTargetCache;
 class cmTarget;
 

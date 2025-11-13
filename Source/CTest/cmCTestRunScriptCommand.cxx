@@ -2,6 +2,8 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmCTestRunScriptCommand.h"
 
+#include <vector>
+
 #include "cmCTestScriptHandler.h"
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"

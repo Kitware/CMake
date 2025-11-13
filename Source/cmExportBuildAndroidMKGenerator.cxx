@@ -2,6 +2,7 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmExportBuildAndroidMKGenerator.h"
 
+#include <functional>
 #include <sstream>
 #include <vector>
 

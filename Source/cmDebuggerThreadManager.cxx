@@ -5,6 +5,9 @@
 
 #include <algorithm>
 
+#include <cm/optional>
+
+#include <cm3p/cppdap/optional.h>
 #include <cm3p/cppdap/protocol.h>
 #include <cm3p/cppdap/types.h>
 

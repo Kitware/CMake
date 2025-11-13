@@ -7,8 +7,6 @@
 #include "cmCursesStandardIncludes.h"
 #include "cmCursesWidget.h"
 
-class cmCursesMainForm;
-
 class cmCursesBoolWidget : public cmCursesWidget
 {
 public:

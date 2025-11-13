@@ -10,8 +10,6 @@
 #include "cmCursesStandardIncludes.h"
 #include "cmCursesWidget.h"
 
-class cmCursesMainForm;
-
 class cmCursesOptionsWidget : public cmCursesWidget
 {
 public:

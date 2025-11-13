@@ -6,6 +6,7 @@
 #include <utility>
 
 #include <cm/memory>
+#include <cm/string_view>
 
 #include "cmCustomCommand.h"
 #include "cmCustomCommandLines.h"

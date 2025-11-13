@@ -5,7 +5,6 @@
 #include <vector>
 
 #include <cm/optional>
-#include <cm/type_traits>
 
 #include <cm3p/json/reader.h>
 #include <cm3p/json/value.h>

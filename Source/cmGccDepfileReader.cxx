@@ -2,7 +2,6 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmGccDepfileReader.h"
 
-#include <type_traits>
 #include <utility>
 #include <vector>
 

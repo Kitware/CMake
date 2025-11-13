@@ -30,6 +30,7 @@
 #include "cmMessageType.h"
 #include "cmPolicies.h"
 #include "cmSourceFile.h"
+#include "cmSourceGroup.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"

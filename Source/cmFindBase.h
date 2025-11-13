@@ -11,9 +11,7 @@
 #include "cmFindCommon.h"
 #include "cmStateTypes.h"
 
-class cmConfigureLog;
 class cmExecutionStatus;
-class cmMakefile;
 
 /** \class cmFindBase
  * \brief Base class for most FIND_XXX commands.

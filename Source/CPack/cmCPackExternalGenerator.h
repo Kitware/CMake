@@ -9,7 +9,6 @@
 
 #include "cmCPackGenerator.h"
 
-class cmGlobalGenerator;
 namespace Json {
 class Value;
 }

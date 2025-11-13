@@ -6,7 +6,6 @@
 #include <cassert>
 #include <functional>
 #include <sstream>
-#include <type_traits>
 #include <vector>
 
 #include <cm/memory>

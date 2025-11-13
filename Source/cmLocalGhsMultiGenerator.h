@@ -2,19 +2,12 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
-#include <map>
 #include <string>
 
 #include "cmLocalGenerator.h"
 
-class cmGeneratorTarget;
 class cmGlobalGenerator;
 class cmMakefile;
-struct cmObjectLocations;
-class cmSourceFile;
-namespace cmStateEnums {
-enum class IntermediateDirKind;
-}
 
 /** \class cmLocalGhsMultiGenerator
  * \brief Write Green Hills MULTI project files.

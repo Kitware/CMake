@@ -8,9 +8,11 @@
 #include <string>
 #include <vector>
 
-#include "cmsys/RegularExpression.hxx"
-
 #include "cmUVProcessChain.h"
+
+namespace cmsys {
+class RegularExpression;
+}
 
 class cmXMLElement;
 

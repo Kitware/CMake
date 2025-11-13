@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <cassert>
 #include <cerrno>
+#include <cstddef>
 #include <cstdlib>
 #include <cstring>
 #include <iterator>

@@ -6,7 +6,6 @@
 #include <utility>
 
 #include <cm/memory>
-#include <cm/string_view>
 
 #include "cmFileSet.h"
 #include "cmGenExContext.h"
@@ -23,8 +22,6 @@
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmValue.h"
-
-class cmTargetExport;
 
 cmExportTryCompileFileGenerator::cmExportTryCompileFileGenerator(
   cmGlobalGenerator* gg, std::vector<std::string> const& targets,

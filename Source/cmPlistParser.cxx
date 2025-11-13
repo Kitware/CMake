@@ -2,6 +2,8 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmPlistParser.h"
 
+#include <vector>
+
 #include <cm3p/json/reader.h>
 #include <cm3p/json/value.h>
 

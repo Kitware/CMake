@@ -11,7 +11,6 @@
 #include <initializer_list>
 #include <iterator>
 #include <sstream>
-#include <type_traits>
 #include <unordered_set>
 #include <utility>
 #include <vector>

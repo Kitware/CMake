@@ -24,6 +24,7 @@
 
 #include "cmBuildDatabase.h"
 #include "cmComputeLinkInformation.h"
+#include "cmCustomCommand.h"
 #include "cmCustomCommandGenerator.h"
 #include "cmDyndepCollation.h"
 #include "cmFileSet.h"
@@ -54,8 +55,6 @@
 #include "cmTargetDepend.h"
 #include "cmValue.h"
 #include "cmake.h"
-
-class cmCustomCommand;
 
 std::unique_ptr<cmNinjaTargetGenerator> cmNinjaTargetGenerator::New(
   cmGeneratorTarget* target)

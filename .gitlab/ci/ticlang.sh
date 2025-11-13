@@ -5,9 +5,9 @@ set -e
 case "$(uname -s)-$(uname -m)" in
     Linux-x86_64)
         shatool="sha256sum"
-        sha256sum="c69ac58e403b82eac1c407cc67b35fab5d95c5d8db75b019095f9412aacff27d"
-        filename="ti_cgt_armllvm_3.2.1.LTS_linux-x64_installer.bin"
-        dirname="ti-cgt-armllvm_3.2.1.LTS"
+        sha256sum="98c60ecc259a07a54be6fcc0f55990332f493bfe5dad460c0ba83963f5dcb06f"
+        filename="ti_cgt_armllvm_4.0.4.LTS_linux-x64_installer.bin"
+        dirname="ti-cgt-armllvm_4.0.4.LTS"
         ;;
     *)
         echo "Unrecognized platform $(uname -s)-$(uname -m)"
