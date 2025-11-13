@@ -115,6 +115,17 @@ using an alternate generator expression:
     VERBATIM
   )
 
+For tools that expect ``-I``'s value to be a separate argument, use the
+semicolon trick learned earlier:
+
+.. code-block:: cmake
+
+  add_custom_target(run_some_tool
+    COMMAND some_tool "$<LIST:TRANSFORM,$<TARGET_PROPERTY:tgt,INCLUDE_DIRECTORIES>,PREPEND,-I;>"
+    COMMAND_EXPAND_LISTS
+    VERBATIM
+  )
+
 A common mistake is to try to split a generator expression across multiple
 lines with indenting:
 
