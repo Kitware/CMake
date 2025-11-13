@@ -181,3 +181,9 @@ void cmDocumentationFormatter::PrintSection(
 
   this->TextIndent = savedIndent;
 }
+
+void cmDocumentationFormatter::PrintFormatted(std::ostream& os,
+                                              std::string const& text) const
+{
+  os << this->Format(text);
+}

@@ -22,6 +22,7 @@
 #include "cmGeneratorExpressionNode.h"
 #include "cmLinkItem.h"
 #include "cmList.h"
+#include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
 #include "cmPolicies.h"
 #include "cmStringAlgorithms.h"

@@ -2,6 +2,8 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmDependsJava.h"
 
+#include <set>
+
 #include "cmSystemTools.h"
 
 cmDependsJava::cmDependsJava() = default;

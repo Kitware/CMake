@@ -11,8 +11,6 @@
 #include "cmExportBuildFileGenerator.h"
 #include "cmStateTypes.h"
 
-class cmGeneratorTarget;
-
 /** \class cmExportBuildAndroidMKGenerator
  * \brief Generate a file exporting targets from a build tree.
  *

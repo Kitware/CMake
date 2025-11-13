@@ -7,7 +7,6 @@
 #include <cassert>
 #include <cstddef>
 #include <functional>
-#include <iterator>
 #include <map>
 #include <string>
 #include <utility>

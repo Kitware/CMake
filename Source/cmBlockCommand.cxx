@@ -4,7 +4,6 @@
 #include "cmBlockCommand.h"
 
 #include <cstdint>
-#include <initializer_list>
 #include <utility>
 
 #include <cm/memory>

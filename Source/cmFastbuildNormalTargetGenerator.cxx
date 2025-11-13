@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <array>
 #include <cstddef>
+#include <functional>
 #include <iterator>
 #include <map>
 #include <sstream>
@@ -21,7 +22,6 @@
 
 #include "cmsys/FStream.hxx"
 
-#include "cmAlgorithms.h"
 #include "cmCommonTargetGenerator.h"
 #include "cmCryptoHash.h"
 #include "cmFastbuildTargetGenerator.h"

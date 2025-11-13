@@ -58,23 +58,23 @@
 
 ### Debian
 
-.debian12:
-    image: "kitware/cmake:ci-debian12-x86_64-2025-03-31"
+.debian13:
+    image: "kitware/cmake:ci-debian13-x86_64-2025-11-11"
 
     variables:
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci"
         CMAKE_ARCH: x86_64
 
-.debian12_iwyu:
-    extends: .debian12
+.debian13_iwyu:
+    extends: .debian13
 
     variables:
-        CMAKE_CONFIGURATION: debian12_iwyu
+        CMAKE_CONFIGURATION: debian13_iwyu
         CTEST_NO_WARNINGS_ALLOWED: 1
         CMAKE_CI_NO_INSTALL: 1
 
-.debian12_aarch64:
-    image: "kitware/cmake:ci-debian12-aarch64-2025-03-31"
+.debian13_aarch64:
+    image: "kitware/cmake:ci-debian13-aarch64-2025-11-11"
 
     variables:
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci"
@@ -169,54 +169,54 @@
 
 #### Build and test
 
-.debian12_ninja:
-    extends: .debian12
+.debian13_ninja:
+    extends: .debian13
 
     variables:
-        CMAKE_CONFIGURATION: debian12_ninja
+        CMAKE_CONFIGURATION: debian13_ninja
         CTEST_NO_WARNINGS_ALLOWED: 1
 
-.debian12_aarch64_ninja:
-    extends: .debian12_aarch64
+.debian13_aarch64_ninja:
+    extends: .debian13_aarch64
 
     variables:
-        CMAKE_CONFIGURATION: debian12_aarch64_ninja
+        CMAKE_CONFIGURATION: debian13_aarch64_ninja
         CTEST_NO_WARNINGS_ALLOWED: 1
 
-.debian12_makefiles_inplace:
-    extends: .debian12
+.debian13_makefiles_inplace:
+    extends: .debian13
 
     variables:
-        CMAKE_CONFIGURATION: debian12_makefiles_inplace
+        CMAKE_CONFIGURATION: debian13_makefiles_inplace
         CMAKE_GENERATOR: "Unix Makefiles"
         CMAKE_CI_BOOTSTRAP: 1
         CMAKE_CI_INPLACE: 1
         CMAKE_CI_NO_INSTALL: 1
         CTEST_NO_WARNINGS_ALLOWED: 1
 
-.debian12_ninja_multi_symlinked:
-    extends: .debian12
+.debian13_ninja_multi_symlinked:
+    extends: .debian13
 
     variables:
-        CMAKE_CONFIGURATION: debian12_ninja_multi_symlinked
+        CMAKE_CONFIGURATION: debian13_ninja_multi_symlinked
         CMAKE_GENERATOR: "Ninja Multi-Config"
         CTEST_NO_WARNINGS_ALLOWED: 1
         CMAKE_CI_IN_SYMLINK_TREE: 1
         CMAKE_CI_BUILD_DIR: "real_work/work/build"
 
-.debian12_extdeps:
-    extends: .debian12
+.debian13_extdeps:
+    extends: .debian13
 
     variables:
-        CMAKE_CONFIGURATION: debian12_extdeps
+        CMAKE_CONFIGURATION: debian13_extdeps
         CMAKE_CI_BUILD_TYPE: Release
         CTEST_NO_WARNINGS_ALLOWED: 1
 
-.debian12_aarch64_extdeps:
-    extends: .debian12_aarch64
+.debian13_aarch64_extdeps:
+    extends: .debian13_aarch64
 
     variables:
-        CMAKE_CONFIGURATION: debian12_aarch64_extdeps
+        CMAKE_CONFIGURATION: debian13_aarch64_extdeps
         CMAKE_CI_BUILD_TYPE: Release
         CTEST_NO_WARNINGS_ALLOWED: 1
 
@@ -272,18 +272,18 @@
 
 ### Clang Compiler
 
-.debian12_makefiles_clang:
-    extends: .debian12
+.debian13_makefiles_clang:
+    extends: .debian13
 
     variables:
-        CMAKE_CONFIGURATION: debian12_makefiles_clang
+        CMAKE_CONFIGURATION: debian13_makefiles_clang
         CMAKE_GENERATOR: "Unix Makefiles"
 
-.debian12_ninja_clang:
-    extends: .debian12
+.debian13_ninja_clang:
+    extends: .debian13
 
     variables:
-        CMAKE_CONFIGURATION: debian12_ninja_clang
+        CMAKE_CONFIGURATION: debian13_ninja_clang
 
 .fedora43_makefiles_clang:
     extends: .fedora43
@@ -563,11 +563,11 @@
         CMAKE_CONFIGURATION: hip6.3_radeon
         CMAKE_GENERATOR: "Ninja Multi-Config"
 
-.debian12_hip_radeon:
-    extends: .debian12
+.debian13_hip_radeon:
+    extends: .debian13
 
     variables:
-        CMAKE_CONFIGURATION: debian12_hip_radeon
+        CMAKE_CONFIGURATION: debian13_hip_radeon
         CTEST_LABELS: "HIP"
 
 .fedora43_hip_radeon:
@@ -689,11 +689,11 @@
         - docker
         - linux-x86_64
 
-.linux_x86_64_tags_rocm5.2:
+.linux_x86_64_tags_rocm5.7:
     tags:
         - cmake
         - radeon
-        - rocm-5.2
+        - rocm-5.7
         - docker
         - linux-x86_64
 

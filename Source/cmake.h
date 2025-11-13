@@ -30,8 +30,6 @@
 #include "cmValue.h"
 
 #if !defined(CMAKE_BOOTSTRAP)
-#  include <type_traits>
-
 #  include <cm/optional>
 
 #  include <cm3p/json/value.h>

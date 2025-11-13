@@ -17,14 +17,7 @@
 #include "cmList.h"
 #include "cmListFileCache.h"
 
-namespace cm {
-namespace GenEx {
-struct Context;
-}
-}
-
 class cmake;
-struct cmGeneratorExpressionDAGChecker;
 
 cmLinkItem cmGeneratorTarget::TargetPropertyEntry::NoLinkItem;
 

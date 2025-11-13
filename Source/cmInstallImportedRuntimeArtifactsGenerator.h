@@ -10,7 +10,6 @@
 #include "cmListFileCache.h"
 
 class cmGeneratorTarget;
-class cmLocalGenerator;
 
 class cmInstallImportedRuntimeArtifactsGenerator : public cmInstallGenerator
 {

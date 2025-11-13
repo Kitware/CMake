@@ -6,7 +6,6 @@
 #include <memory>
 #include <ostream>
 #include <set>
-#include <type_traits>
 #include <utility>
 #include <vector>
 

@@ -15,7 +15,6 @@
 #include "cmCTestGenericHandler.h"
 
 class cmGeneratedFileStream;
-class cmMakefile;
 class cmXMLWriter;
 class cmCTest;
 

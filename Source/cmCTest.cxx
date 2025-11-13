@@ -10,6 +10,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <ctime>
+#include <functional>
 #include <initializer_list>
 #include <iostream>
 #include <map>
@@ -75,6 +76,8 @@
 #if defined(__BEOS__) || defined(__HAIKU__)
 #  include <be/kernel/OS.h> /* disable_debugger() API. */
 #endif
+
+struct tm;
 
 struct cmCTest::Private
 {

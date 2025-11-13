@@ -15,7 +15,7 @@
 #include "cmCacheManager.h"
 #include "cmDefinitions.h"
 #include "cmExecutionStatus.h"
-#include "cmGlobCacheEntry.h"
+#include "cmGlobCacheEntry.h" // IWYU pragma: keep
 #include "cmGlobVerificationManager.h"
 #include "cmList.h"
 #include "cmListFileCache.h"

@@ -1,6 +1,7 @@
 #include <cassert>
 #include <cstddef>
 #include <deque>
+#include <functional>
 #include <iostream>
 #include <vector>
 

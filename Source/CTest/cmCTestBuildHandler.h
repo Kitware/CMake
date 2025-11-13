@@ -17,7 +17,6 @@
 #include "cmDuration.h"
 #include "cmProcessOutput.h"
 
-class cmMakefile;
 class cmStringReplaceHelper;
 class cmXMLWriter;
 class cmCTest;

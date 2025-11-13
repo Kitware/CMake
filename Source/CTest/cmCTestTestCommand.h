@@ -7,7 +7,6 @@
 #include <memory>
 #include <string>
 #include <type_traits>
-#include <vector>
 
 #include <cm/optional>
 #include <cmext/string_view>
@@ -17,7 +16,6 @@
 #include "cmCTestHandlerCommand.h"
 
 class cmExecutionStatus;
-class cmCTestGenericHandler;
 class cmCTestTestHandler;
 
 class cmCTestTestCommand : public cmCTestHandlerCommand

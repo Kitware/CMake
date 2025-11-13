@@ -4,6 +4,7 @@
 #include "cmBinUtilsWindowsPEObjdumpGetRuntimeDependenciesTool.h"
 
 #include <sstream>
+#include <vector>
 
 #include <cmsys/RegularExpression.hxx>
 

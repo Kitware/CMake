@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <set>
 #include <utility>
+#include <vector>
 
 #include <cmext/algorithm>
 

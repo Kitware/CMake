@@ -3,6 +3,7 @@
 #include "cmSpdxSerializer.h"
 
 #include <utility>
+#include <vector>
 
 #include <cm3p/json/writer.h>
 

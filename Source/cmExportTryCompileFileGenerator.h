@@ -11,11 +11,9 @@
 
 #include "cmExportCMakeConfigGenerator.h"
 
-class cmFileSet;
 class cmGeneratorTarget;
 class cmGlobalGenerator;
 class cmMakefile;
-class cmTargetExport;
 
 class cmExportTryCompileFileGenerator : public cmExportCMakeConfigGenerator
 {

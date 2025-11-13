@@ -6,6 +6,7 @@ file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include <array>
 #include <cctype>
 #include <cstdlib>
+#include <utility>
 
 #include <cm/string_view>
 #include <cmext/string_view>

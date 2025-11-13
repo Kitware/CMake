@@ -10,6 +10,7 @@
 
 #include <cm/memory>
 #include <cm/string>
+#include <cm/string_view>
 #include <cmext/algorithm>
 #include <cmext/memory>
 

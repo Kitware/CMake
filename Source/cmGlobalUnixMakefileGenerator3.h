@@ -21,7 +21,6 @@
 class cmGeneratedFileStream;
 class cmLocalGenerator;
 class cmLocalUnixMakefileGenerator3;
-class cmMakefile;
 class cmMakefileTargetGenerator;
 class cmake;
 

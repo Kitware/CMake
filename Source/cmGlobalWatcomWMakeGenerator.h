@@ -13,7 +13,6 @@
 #include "cmGlobalGeneratorFactory.h"
 #include "cmGlobalUnixMakefileGenerator3.h"
 
-class cmMakefile;
 class cmake;
 
 /** \class cmGlobalWatcomWMakeGenerator

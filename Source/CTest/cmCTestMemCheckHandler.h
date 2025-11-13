@@ -9,8 +9,6 @@
 
 #include "cmCTestTestHandler.h"
 
-class cmMakefile;
-class cmXMLWriter;
 class cmCTest;
 
 /** \class cmCTestMemCheckHandler

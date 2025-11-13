@@ -2,6 +2,7 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmExportInstallPackageInfoGenerator.h"
 
+#include <functional>
 #include <map>
 #include <memory>
 #include <set>

@@ -20,7 +20,6 @@
 #include "cmRange.h"
 #include "cmState.h"
 #include "cmStatePrivate.h"
-#include "cmStateTypes.h"
 #include "cmValue.h"
 
 static std::string const kBINARY_DIR = "BINARY_DIR";

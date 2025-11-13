@@ -10,7 +10,6 @@
 #include <set>
 #include <sstream>
 #include <string>
-#include <type_traits>
 #include <unordered_set>
 #include <utility>
 #include <vector>
@@ -21,7 +20,6 @@
 
 #include "cmsys/RegularExpression.hxx"
 
-#include "cmAlgorithms.h"
 #include "cmEvaluatedTargetProperty.h"
 #include "cmFileSet.h"
 #include "cmGenExContext.h"

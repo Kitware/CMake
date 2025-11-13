@@ -17,7 +17,6 @@
 #include "cmInstallExportGenerator.h"
 #include "cmStateTypes.h"
 
-class cmExportSet;
 class cmGeneratorTarget;
 class cmInstallTargetGenerator;
 class cmTargetExport;

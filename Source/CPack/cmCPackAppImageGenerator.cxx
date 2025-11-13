@@ -11,6 +11,8 @@
 
 #include <fcntl.h>
 
+#include <sys/types.h>
+
 #include "cmsys/FStream.hxx"
 
 #include "cmCPackLog.h"

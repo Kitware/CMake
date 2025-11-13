@@ -2,6 +2,7 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 
 #include <memory>
+#include <string>
 #include <vector>
 
 #include <cm3p/cppdap/protocol.h>

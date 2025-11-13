@@ -18,10 +18,7 @@ class cmDocumentationFormatter
 public:
   std::string Format(cm::string_view text) const;
   void PrintSection(std::ostream& os, cmDocumentationSection const& section);
-  void PrintFormatted(std::ostream& os, std::string const& text) const
-  {
-    os << this->Format(text);
-  }
+  void PrintFormatted(std::ostream& os, std::string const& text) const;
   void SetIndent(std::size_t indent) { this->TextIndent = indent; }
 
   static constexpr std::size_t TEXT_WIDTH = 77u;
