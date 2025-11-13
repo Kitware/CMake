@@ -3872,7 +3872,8 @@ bool cmVisualStudio10TargetGenerator::ComputeCudaOptions(
   auto cudaVersion = this->GlobalGenerator->GetPlatformToolsetCudaString();
 
   // Get compile flags for CUDA in this directory.
-  std::string flags;
+  std::string flags =
+    this->Makefile->GetSafeDefinition("_CMAKE_CUDA_EXTRA_FLAGS");
   this->LocalGenerator->AddLanguageFlags(
     flags, this->GeneratorTarget, cmBuildStep::Compile, "CUDA", configName);
   this->LocalGenerator->AddCompileOptions(flags, this->GeneratorTarget, "CUDA",
