@@ -319,6 +319,7 @@ void WriteSlnxProject(cmXMLElement& xmlParent, Solution const& solution,
   for (std::size_t i = 0; i < solution.Configs.size(); ++i) {
     if (project.Configs[i].Config != solution.Configs[i]) {
       cmXMLElement(xmlProject, "BuildType")
+        .Attribute("Solution", cmStrCat(solution.Configs[i], "|*"))
         .Attribute("Project", project.Configs[i].Config);
     }
     if (!project.Configs[i].Build) {
