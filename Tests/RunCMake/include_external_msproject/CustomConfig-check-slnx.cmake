@@ -19,6 +19,8 @@ RunCMake_check_slnx("${RunCMake_TEST_BINARY_DIR}/CustomConfig.slnx" [[
   <Project Path="ZERO_CHECK\.vcxproj" Id="[0-9a-f-]+"/>
   <Project Path="external.project" Id="aaa-bbb-ccc-000">
     <BuildDependency Project="ZERO_CHECK.vcxproj"/>
-    <BuildType Project="Custom - Release"/>
+    <BuildType Solution="Release\|\*" Project="Custom - Release"/>
+    <BuildType Solution="MinSizeRel\|\*" Project="Custom - MinSizeRel"/>
+    <BuildType Solution="RelWithDebInfo\|\*" Project="Custom - RelWithDebInfo"/>
   </Project>
 </Solution>$]])
