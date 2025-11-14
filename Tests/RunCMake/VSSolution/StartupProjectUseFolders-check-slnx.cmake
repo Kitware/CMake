@@ -8,7 +8,7 @@ RunCMake_check_slnx("${RunCMake_TEST_BINARY_DIR}/StartupProjectUseFolders.slnx" 
     <BuildType Name="RelWithDebInfo"/>
     <Platform Name="[^"]+"/>
   </Configurations>
-  <Project Path="TestStartup\.vcxproj" Id="[0-9a-f-]+">
+  <Project Path="TestStartup\.vcxproj" Id="[0-9a-f-]+" DefaultStartup="true">
     <BuildDependency Project="ZERO_CHECK.vcxproj"/>
     <Build Solution="Debug\|\*" Project="false"/>
     <Build Solution="Release\|\*" Project="false"/>
