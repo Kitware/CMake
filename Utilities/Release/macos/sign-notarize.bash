@@ -69,11 +69,23 @@ if ! xcrun --find notarytool 2>/dev/null; then
 fi
 
 # If a signing identity is not provided on the command-line,
+# check for a GitLab CI variable in the environment, and then
 # fall back to finding one automatically.
-if test -z "$id" && found_id="$(security find-identity -v -p codesigning 2>/dev/null | grep -E -m 1 -o '\<[0-9A-F]{40}\>')"; then
+if test -z "$id" -a -n "$CODESIGN_IDENTITY"; then
+    id="$CODESIGN_IDENTITY"
+elif test -z "$id" && found_id="$(security find-identity -v -p codesigning 2>/dev/null | grep -E -m 1 -o '\<[0-9A-F]{40}\>')"; then
     id="$found_id"
 else
     echo "No codesigning identity detected." 1>&2
+fi
+
+# If a keychain path/profile is not provided on the command-line,
+# check for a GitLab CI variable in the environment.
+if test -z "$keychain" -a -n "$NOTARYTOOL_KEYCHAIN"; then
+    keychain="$NOTARYTOOL_KEYCHAIN"
+fi
+if test -z "$keychain_profile" -a -n "$NOTARYTOOL_KEYCHAIN_PROFILE"; then
+    keychain_profile="$NOTARYTOOL_KEYCHAIN_PROFILE"
 fi
 
 # Verify arguments.
