@@ -68,6 +68,14 @@ if ! xcrun --find notarytool 2>/dev/null; then
     die "'xcrun notarytool' not found"
 fi
 
+# If a signing identity is not provided on the command-line,
+# fall back to finding one automatically.
+if test -z "$id" && found_id="$(security find-identity -v -p codesigning 2>/dev/null | grep -E -m 1 -o '\<[0-9A-F]{40}\>')"; then
+    id="$found_id"
+else
+    echo "No codesigning identity detected." 1>&2
+fi
+
 # Verify arguments.
 if test -z "$id" -o -z "$keychain_profile"; then
     die "$usage"
