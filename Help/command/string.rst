@@ -297,7 +297,7 @@ Manipulation
   .. versionadded:: 4.2
 
   Store in an ``<out-var>`` a regular expression matching the ``<input>``.
-  All characters that have special meaning in a regular expressions are
+  All characters that have special meaning in a regular expression are
   escaped, such that the output string can be used as part of a regular
   expression to match the input literally.
 
