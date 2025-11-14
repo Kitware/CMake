@@ -8,8 +8,8 @@ file. An empty string value disables custom object naming. The value must be a
 relative path, and may not include special directory components (e.g.,
 ``..``).
 
-Note that the object name may not be used as-is in
-:prop_tgt:`INSTALL_OBJECT_NAME_STRATEGY` strategies, but instead changed as
+Note that the object name might not be used as-is in some
+:prop_tgt:`INSTALL_OBJECT_NAME_STRATEGY` strategies.  It may be changed as
 the strategy requires to fulfill its goals.
 
 This property supports
@@ -20,6 +20,7 @@ This property supports
    this property, collisions must be avoided in the project code. CMake has a
    number of source files it generates that also create object files that may
    collide with a given custom name. These include:
+
    * Generated PCH source files (``cmake_pch``)
-   * Generated Unity compilation files (``unity_``)
+   * Generated Unity compilation files (``unity_...``)
    * Qt autogen sources (``moc_compilations.cpp``)
