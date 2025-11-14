@@ -48,6 +48,13 @@ if ("$ENV{CMAKE_CONFIGURATION}" MATCHES "_xcode")
     )
 endif()
 
+if ("$ENV{CMAKE_CONFIGURATION}" MATCHES "^macos_x86_64_")
+  list(APPEND test_exclusions
+    # FIXME(#27376): CMakeGUI's simpleConfigure:fail case hangs.
+    "^CMakeGUI$"
+    )
+endif()
+
 string(REPLACE ";" "|" test_exclusions "${test_exclusions}")
 if (test_exclusions)
   set(test_exclusions "(${test_exclusions})")
