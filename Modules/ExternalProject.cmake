@@ -686,7 +686,7 @@ overridden if required.
     )
 
   This snippet defines two environment variables when configuring the example
-  project. The ``SDKROOT`` environment variable is set to ``macosx`, while
+  project. The ``SDKROOT`` environment variable is set to ``macosx``, while
   the value of ``PKG_CONFIG_PATH`` is forwarded to the external project.
 
   Environment modifications work with ``LIST_SEPARATOR`` to replace the
