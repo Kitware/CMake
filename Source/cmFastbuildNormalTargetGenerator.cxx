@@ -1499,11 +1499,13 @@ void cmFastbuildNormalTargetGenerator::GenerateObjects(FastbuildTarget& target)
   objects.reserve(nodesPermutations.size());
   for (auto& val : nodesPermutations) {
     auto& node = val.second;
-    objects.emplace_back(std::move(node));
-    if (!objects.back().PCHInputFile.empty()) {
+    if (!node.PCHInputFile.empty()) {
       // Node that produces PCH should be the first one, since other nodes
       // might reuse this PCH.
-      std::swap(*objects.begin(), objects.back());
+      // Note: we might have several such nodes for different languages.
+      objects.insert(objects.begin(), std::move(node));
+    } else {
+      objects.emplace_back(std::move(node));
     }
   }
   if (useUnity) {
