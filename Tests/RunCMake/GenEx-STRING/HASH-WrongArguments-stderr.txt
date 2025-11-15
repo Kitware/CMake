@@ -1,0 +1,18 @@
+CMake Error at HASH-WrongArguments\.cmake:[0-9]+ \(add_custom_target\):
+  Error evaluating generator expression:
+
+    \$<STRING:HASH,string,ALGORITHM:>
+
+  Missing value for 'ALGORITHM:' option.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
+
+
+CMake Error at HASH-WrongArguments\.cmake:[0-9]+ \(add_custom_target\):
+  Error evaluating generator expression:
+
+    \$<STRING:HASH,string,ALGORITHM:FOO>
+
+  FOO: invalid hash algorithm.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)

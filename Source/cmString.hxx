@@ -425,12 +425,36 @@ public:
     r.append(v.data(), v.size());
     return *this = std::move(r);
   }
+  template <typename T>
+  typename std::enable_if<AsStringView<T>::value, String&>::type append(T&& s)
+  {
+    string_view v = AsStringView<T>::view(std::forward<T>(s));
+    std::string r;
+    r.reserve(this->size() + v.size());
+    r.assign(this->data(), this->size());
+    r.append(v.data(), v.size());
+    return *this = std::move(r);
+  }
 
   /** Assign to an empty string.  */
   void clear() { *this = ""_s; }
 
   /** Insert 'count' copies of 'ch' at position 'index'.  */
   String& insert(size_type index, size_type count, char ch);
+
+  /** Insert into the string using any type that implements the
+      AsStringView trait.  */
+  template <typename T>
+  typename std::enable_if<AsStringView<T>::value, String&>::type insert(
+    size_type index, T&& s)
+  {
+    string_view v = AsStringView<T>::view(std::forward<T>(s));
+    std::string r;
+    r.reserve(this->size() + v.size());
+    r.assign(this->data(), this->size());
+    r.insert(index, v.data(), v.size());
+    return *this = std::move(r);
+  }
 
   /** Erase 'count' characters starting at position 'index'.  */
   String& erase(size_type index = 0, size_type count = npos);

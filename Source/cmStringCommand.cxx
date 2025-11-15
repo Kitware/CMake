@@ -5,9 +5,9 @@
 
 #include "cmStringCommand.h"
 
-#include <algorithm>
 #include <cstdio>
 #include <cstdlib>
+#include <exception>
 #include <limits>
 #include <memory>
 #include <stdexcept>
@@ -22,22 +22,14 @@
 #include <cm3p/json/value.h>
 #include <cm3p/json/writer.h>
 
-#include "cmsys/RegularExpression.hxx"
-
-#include "cmCryptoHash.h"
+#include "cmCMakeString.hxx"
 #include "cmExecutionStatus.h"
-#include "cmGeneratorExpression.h"
+#include "cmList.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
-#include "cmPolicies.h"
 #include "cmRange.h"
 #include "cmStringAlgorithms.h"
-#include "cmStringReplaceHelper.h"
 #include "cmSubcommandTable.h"
-#include "cmSystemTools.h"
-#include "cmTimestamp.h"
-#include "cmUuid.h"
-#include "cmValue.h"
 
 namespace {
 
@@ -62,13 +54,16 @@ bool HandleHashCommand(std::vector<std::string> const& args,
     return false;
   }
 
-  std::unique_ptr<cmCryptoHash> hash(cmCryptoHash::New(args[0]));
-  if (hash) {
-    std::string out = hash->HashString(args[2]);
-    status.GetMakefile().AddDefinition(args[1], out);
+  cm::CMakeString data{ args[2] };
+
+  try {
+    data.Hash(args[0]);
+    status.GetMakefile().AddDefinition(args[1], data);
     return true;
+  } catch (std::exception const& e) {
+    status.SetError(e.what());
+    return false;
   }
-  return false;
 }
 
 bool HandleToUpperLowerCommand(std::vector<std::string> const& args,
@@ -80,16 +75,16 @@ bool HandleToUpperLowerCommand(std::vector<std::string> const& args,
   }
 
   std::string const& outvar = args[2];
-  std::string output;
+  cm::CMakeString data{ args[1] };
 
   if (toUpper) {
-    output = cmSystemTools::UpperCase(args[1]);
+    data.ToUpper();
   } else {
-    output = cmSystemTools::LowerCase(args[1]);
+    data.ToLower();
   }
 
   // Store the output in the provided variable.
-  status.GetMakefile().AddDefinition(outvar, output);
+  status.GetMakefile().AddDefinition(outvar, data);
   return true;
 }
 
@@ -112,23 +107,17 @@ bool HandleAsciiCommand(std::vector<std::string> const& args,
     status.SetError("No output variable specified");
     return false;
   }
-  std::string::size_type cc;
-  std::string const& outvar = args.back();
-  std::string output;
-  for (cc = 1; cc < args.size() - 1; cc++) {
-    int ch = atoi(args[cc].c_str());
-    if (ch > 0 && ch < 256) {
-      output += static_cast<char>(ch);
-    } else {
-      std::string error =
-        cmStrCat("Character with code ", args[cc], " does not exist.");
-      status.SetError(error);
-      return false;
-    }
+
+  try {
+    std::string const& outvar = args.back();
+    cm::CMakeString data;
+    data.FromASCII(cmMakeRange(args).advance(1).retreat(1));
+    status.GetMakefile().AddDefinition(outvar, data);
+    return true;
+  } catch (std::exception const& e) {
+    status.SetError(e.what());
+    return false;
   }
-  // Store the output in the provided variable.
-  status.GetMakefile().AddDefinition(outvar, output);
-  return true;
 }
 
 bool HandleHexCommand(std::vector<std::string> const& args,
@@ -138,17 +127,13 @@ bool HandleHexCommand(std::vector<std::string> const& args,
     status.SetError("Incorrect number of arguments");
     return false;
   }
-  auto const& instr = args[1];
+
   auto const& outvar = args[2];
-  std::string output(instr.size() * 2, ' ');
+  cm::CMakeString data{ args[1] };
 
-  std::string::size_type hexIndex = 0;
-  for (auto const& c : instr) {
-    snprintf(&output[hexIndex], 3, "%.2x", c & 0xFFu);
-    hexIndex += 2;
-  }
+  data.ToHexadecimal();
 
-  status.GetMakefile().AddDefinition(outvar, output);
+  status.GetMakefile().AddDefinition(outvar, data);
   return true;
 }
 
@@ -239,33 +224,21 @@ bool RegexMatch(std::vector<std::string> const& args,
 {
   //"STRING(REGEX MATCH <regular_expression> <output variable>
   // <input> [<input>...])\n";
-  std::string const& regex = args[2];
-  std::string const& outvar = args[3];
+  try {
+    std::string const& regex = args[2];
+    std::string const& outvar = args[3];
+    cm::CMakeString data{ cmMakeRange(args).advance(4) };
 
-  status.GetMakefile().ClearMatches();
-  // Compile the regular expression.
-  cmsys::RegularExpression re;
-  if (!re.compile(regex)) {
-    std::string e =
-      "sub-command REGEX, mode MATCH failed to compile regex \"" + regex +
-      "\".";
-    status.SetError(e);
+    auto result = data.Match(regex, cm::CMakeString::MatchItems::Once,
+                             &status.GetMakefile());
+    // Store the result in the provided variable.
+    status.GetMakefile().AddDefinition(outvar, result.to_string());
+    return true;
+  } catch (std::exception const& e) {
+    status.SetError(
+      cmStrCat("sub-command REGEX, mode MATCH: ", e.what(), '.'));
     return false;
   }
-
-  // Concatenate all the last arguments together.
-  std::string input = cmJoin(cmMakeRange(args).advance(4), std::string());
-
-  // Scan through the input for all matches.
-  std::string output;
-  if (re.find(input)) {
-    status.GetMakefile().StoreMatches(re);
-    output = re.match();
-  }
-
-  // Store the output in the provided variable.
-  status.GetMakefile().AddDefinition(outvar, output);
-  return true;
 }
 
 bool RegexMatchAll(std::vector<std::string> const& args,
@@ -273,55 +246,21 @@ bool RegexMatchAll(std::vector<std::string> const& args,
 {
   //"STRING(REGEX MATCHALL <regular_expression> <output variable> <input>
   // [<input>...])\n";
-  std::string const& regex = args[2];
-  std::string const& outvar = args[3];
+  try {
+    std::string const& regex = args[2];
+    std::string const& outvar = args[3];
+    cm::CMakeString data{ cmMakeRange(args).advance(4) };
 
-  status.GetMakefile().ClearMatches();
-  // Compile the regular expression.
-  cmsys::RegularExpression re;
-  if (!re.compile(regex)) {
-    std::string e =
-      "sub-command REGEX, mode MATCHALL failed to compile regex \"" + regex +
-      "\".";
-    status.SetError(e);
+    auto result = data.Match(regex, cm::CMakeString::MatchItems::All,
+                             &status.GetMakefile());
+    // Store the result in the provided variable.
+    status.GetMakefile().AddDefinition(outvar, result.to_string());
+    return true;
+  } catch (std::exception const& e) {
+    status.SetError(
+      cmStrCat("sub-command REGEX, mode MATCHALL: ", e.what(), '.'));
     return false;
   }
-
-  // Concatenate all the last arguments together.
-  std::string input = cmJoin(cmMakeRange(args).advance(4), std::string());
-
-  unsigned optAnchor = 0;
-  if (status.GetMakefile().GetPolicyStatus(cmPolicies::CMP0186) !=
-      cmPolicies::NEW) {
-    optAnchor = cmsys::RegularExpression::BOL_AT_OFFSET;
-  }
-
-  // Scan through the input for all matches.
-  std::string output;
-  std::string::size_type base = 0;
-  unsigned optNonEmpty = 0;
-  while (re.find(input, base, optAnchor | optNonEmpty)) {
-    status.GetMakefile().ClearMatches();
-    status.GetMakefile().StoreMatches(re);
-    if (!output.empty() || optNonEmpty) {
-      output += ";";
-    }
-    output += re.match();
-    base = re.end();
-
-    if (re.start() == input.length()) {
-      break;
-    }
-    if (re.start() == re.end()) {
-      optNonEmpty = cmsys::RegularExpression::NONEMPTY_AT_OFFSET;
-    } else {
-      optNonEmpty = 0;
-    }
-  }
-
-  // Store the output in the provided variable.
-  status.GetMakefile().AddDefinition(outvar, output);
-  return true;
 }
 
 bool RegexReplace(std::vector<std::string> const& args,
@@ -332,38 +271,20 @@ bool RegexReplace(std::vector<std::string> const& args,
   std::string const& regex = args[2];
   std::string const& replace = args[3];
   std::string const& outvar = args[4];
-  cmStringReplaceHelper replaceHelper(regex, replace, &status.GetMakefile());
 
-  if (!replaceHelper.IsReplaceExpressionValid()) {
+  try {
+    cm::CMakeString data{ cmMakeRange(args).advance(5) };
+
+    data.Replace(regex, replace, cm::CMakeString::Regex::Yes,
+                 &status.GetMakefile());
+    // Store the result in the provided variable.
+    status.GetMakefile().AddDefinition(outvar, data);
+    return true;
+  } catch (std::exception const& e) {
     status.SetError(
-      "sub-command REGEX, mode REPLACE: " + replaceHelper.GetError() + ".");
+      cmStrCat("sub-command REGEX, mode REPLACE: ", e.what(), '.'));
     return false;
   }
-
-  status.GetMakefile().ClearMatches();
-
-  if (!replaceHelper.IsRegularExpressionValid()) {
-    std::string e =
-      "sub-command REGEX, mode REPLACE failed to compile regex \"" + regex +
-      "\".";
-    status.SetError(e);
-    return false;
-  }
-
-  // Concatenate all the last arguments together.
-  std::string const input =
-    cmJoin(cmMakeRange(args).advance(5), std::string());
-  std::string output;
-
-  if (!replaceHelper.Replace(input, output)) {
-    status.SetError(
-      "sub-command REGEX, mode REPLACE: " + replaceHelper.GetError() + ".");
-    return false;
-  }
-
-  // Store the output in the provided variable.
-  status.GetMakefile().AddDefinition(outvar, output);
-  return true;
 }
 
 bool RegexQuote(std::vector<std::string> const& args,
@@ -371,21 +292,19 @@ bool RegexQuote(std::vector<std::string> const& args,
 {
   //"STRING(REGEX QUOTE <output variable> <input> [<input>...]\n"
   std::string const& outvar = args[2];
-  std::string const input =
-    cmJoin(cmMakeRange(args).advance(3), std::string());
-  std::string output;
+  cm::CMakeString data{ cmMakeRange(args).advance(3) };
 
-  // Escape all regex special characters
-  cmStringReplaceHelper replaceHelper("([][()+*^.$?|\\\\])", R"(\\\1)");
-  if (!replaceHelper.Replace(input, output)) {
+  try {
+    // Escape all regex special characters
+    data.Quote();
+    // Store the output in the provided variable.
+    status.GetMakefile().AddDefinition(outvar, data);
+    return true;
+  } catch (std::exception const& e) {
     status.SetError(
-      "sub-command REGEX, mode QUOTE: " + replaceHelper.GetError() + ".");
+      cmStrCat("sub-command REGEX, mode QUOTE: ", e.what(), '.'));
     return false;
   }
-
-  // Store the output in the provided variable.
-  status.GetMakefile().AddDefinition(outvar, output);
-  return true;
 }
 
 bool HandleFindCommand(std::vector<std::string> const& args,
@@ -423,19 +342,14 @@ bool HandleFindCommand(std::vector<std::string> const& args,
   }
 
   // try to find the character and return its position
-  size_t pos;
-  if (!reverseMode) {
-    pos = sstring.find(schar);
-  } else {
-    pos = sstring.rfind(schar);
-  }
-  if (std::string::npos != pos) {
-    status.GetMakefile().AddDefinition(outvar, std::to_string(pos));
-    return true;
-  }
+  auto pos = cm::CMakeString{ sstring }.Find(
+    schar,
+    reverseMode ? cm::CMakeString::FindFrom::End
+                : cm::CMakeString::FindFrom::Begin);
 
-  // the character was not found, but this is not really an error
-  status.GetMakefile().AddDefinition(outvar, "-1");
+  status.GetMakefile().AddDefinition(
+    outvar, pos != cm::CMakeString::npos ? std::to_string(pos) : "-1");
+
   return true;
 }
 
@@ -462,25 +376,22 @@ bool HandleCompareCommand(std::vector<std::string> const& args,
     std::string const& right = args[3];
     std::string const& outvar = args[4];
     bool result;
+    cm::CMakeString::CompOperator op = cm::CMakeString::CompOperator::EQUAL;
     if (mode == "LESS") {
-      result = (left < right);
+      op = cm::CMakeString::CompOperator::LESS;
     } else if (mode == "LESS_EQUAL") {
-      result = (left <= right);
+      op = cm::CMakeString::CompOperator::LESS_EQUAL;
     } else if (mode == "GREATER") {
-      result = (left > right);
+      op = cm::CMakeString::CompOperator::GREATER;
     } else if (mode == "GREATER_EQUAL") {
-      result = (left >= right);
-    } else if (mode == "EQUAL") {
-      result = (left == right);
-    } else // if(mode == "NOTEQUAL")
-    {
-      result = !(left == right);
+      op = cm::CMakeString::CompOperator::GREATER_EQUAL;
     }
-    if (result) {
-      status.GetMakefile().AddDefinition(outvar, "1");
-    } else {
-      status.GetMakefile().AddDefinition(outvar, "0");
+    result = cm::CMakeString{ left }.Compare(op, right);
+    if (mode == "NOTEQUAL") {
+      result = !result;
     }
+
+    status.GetMakefile().AddDefinition(outvar, result ? "1" : "0");
     return true;
   }
   std::string e = "sub-command COMPARE does not recognize mode " + mode;
@@ -496,17 +407,19 @@ bool HandleReplaceCommand(std::vector<std::string> const& args,
     return false;
   }
 
-  std::string const& matchExpression = args[1];
-  std::string const& replaceExpression = args[2];
-  std::string const& variableName = args[3];
+  try {
+    std::string const& matchExpression = args[1];
+    std::string const& replaceExpression = args[2];
+    std::string const& variableName = args[3];
+    cm::CMakeString data{ cmMakeRange(args).advance(4) };
 
-  std::string input = cmJoin(cmMakeRange(args).advance(4), std::string());
-
-  cmsys::SystemTools::ReplaceString(input, matchExpression.c_str(),
-                                    replaceExpression.c_str());
-
-  status.GetMakefile().AddDefinition(variableName, input);
-  return true;
+    data.Replace(matchExpression, replaceExpression);
+    status.GetMakefile().AddDefinition(variableName, data);
+    return true;
+  } catch (std::exception const& e) {
+    status.SetError(cmStrCat("sub-command REPLACE: ", e.what(), '.'));
+    return false;
+  }
 }
 
 bool HandleSubstringCommand(std::vector<std::string> const& args,
@@ -517,25 +430,19 @@ bool HandleSubstringCommand(std::vector<std::string> const& args,
     return false;
   }
 
-  std::string const& stringValue = args[1];
-  int begin = atoi(args[2].c_str());
-  int end = atoi(args[3].c_str());
-  std::string const& variableName = args[4];
+  try {
+    std::string const& stringValue = args[1];
+    int begin = atoi(args[2].c_str());
+    int end = atoi(args[3].c_str());
+    std::string const& variableName = args[4];
 
-  size_t stringLength = stringValue.size();
-  int intStringLength = static_cast<int>(stringLength);
-  if (begin < 0 || begin > intStringLength) {
-    status.SetError(
-      cmStrCat("begin index: ", begin, " is out of range 0 - ", stringLength));
+    cm::CMakeString data{ stringValue };
+    status.GetMakefile().AddDefinition(variableName,
+                                       data.Substring(begin, end));
+  } catch (std::exception const& e) {
+    status.SetError(e.what());
     return false;
   }
-  if (end < -1) {
-    status.SetError(cmStrCat("end index: ", end, " should be -1 or greater"));
-    return false;
-  }
-
-  status.GetMakefile().AddDefinition(variableName,
-                                     stringValue.substr(begin, end));
   return true;
 }
 
@@ -550,11 +457,8 @@ bool HandleLengthCommand(std::vector<std::string> const& args,
   std::string const& stringValue = args[1];
   std::string const& variableName = args[2];
 
-  size_t length = stringValue.size();
-  char buffer[1024];
-  snprintf(buffer, sizeof(buffer), "%d", static_cast<int>(length));
-
-  status.GetMakefile().AddDefinition(variableName, buffer);
+  status.GetMakefile().AddDefinition(
+    variableName, std::to_string(cm::CMakeString{ stringValue }.Length()));
   return true;
 }
 
@@ -572,12 +476,10 @@ bool HandleAppendCommand(std::vector<std::string> const& args,
   }
 
   auto const& variableName = args[1];
+  cm::CMakeString data{ status.GetMakefile().GetDefinition(variableName) };
 
-  cm::string_view oldView{ status.GetMakefile().GetSafeDefinition(
-    variableName) };
-
-  auto const newValue = cmJoin(cmMakeRange(args).advance(2), {}, oldView);
-  status.GetMakefile().AddDefinition(variableName, newValue);
+  data.Append(cmMakeRange(args).advance(2));
+  status.GetMakefile().AddDefinition(variableName, data);
 
   return true;
 }
@@ -596,13 +498,10 @@ bool HandlePrependCommand(std::vector<std::string> const& args,
   }
 
   std::string const& variable = args[1];
+  cm::CMakeString data{ status.GetMakefile().GetDefinition(variable) };
 
-  std::string value = cmJoin(cmMakeRange(args).advance(2), std::string());
-  cmValue oldValue = status.GetMakefile().GetDefinition(variable);
-  if (oldValue) {
-    value += *oldValue;
-  }
-  status.GetMakefile().AddDefinition(variable, value);
+  data.Prepend(cmMakeRange(args).advance(2));
+  status.GetMakefile().AddDefinition(variable, data);
   return true;
 }
 
@@ -634,9 +533,9 @@ bool joinImpl(std::vector<std::string> const& args, std::string const& glue,
   std::string const& variableName = args[varIdx];
   // NOTE Items to concat/join placed right after the variable for
   // both `CONCAT` and `JOIN` sub-commands.
-  std::string value = cmJoin(cmMakeRange(args).advance(varIdx + 1), glue);
+  cm::CMakeString data{ cmMakeRange(args).advance(varIdx + 1), glue };
 
-  makefile.AddDefinition(variableName, value);
+  makefile.AddDefinition(variableName, data);
   return true;
 }
 
@@ -652,7 +551,7 @@ bool HandleMakeCIdentifierCommand(std::vector<std::string> const& args,
   std::string const& variableName = args[2];
 
   status.GetMakefile().AddDefinition(variableName,
-                                     cmSystemTools::MakeCidentifier(input));
+                                     cm::CMakeString{}.MakeCIdentifier(input));
   return true;
 }
 
@@ -664,14 +563,11 @@ bool HandleGenexStripCommand(std::vector<std::string> const& args,
     return false;
   }
 
-  std::string const& input = args[1];
-
-  std::string result = cmGeneratorExpression::Preprocess(
-    input, cmGeneratorExpression::StripAllGeneratorExpressions);
-
+  cm::CMakeString data{ args[1] };
   std::string const& variableName = args[2];
 
-  status.GetMakefile().AddDefinition(variableName, result);
+  status.GetMakefile().AddDefinition(
+    variableName, data.Strip(cm::CMakeString::StripItems::Genex));
   return true;
 }
 
@@ -683,36 +579,10 @@ bool HandleStripCommand(std::vector<std::string> const& args,
     return false;
   }
 
-  std::string const& stringValue = args[1];
+  cm::CMakeString data{ args[1] };
   std::string const& variableName = args[2];
-  size_t inStringLength = stringValue.size();
-  size_t startPos = inStringLength + 1;
-  size_t endPos = 0;
-  char const* ptr = stringValue.c_str();
-  size_t cc;
-  for (cc = 0; cc < inStringLength; ++cc) {
-    if (!cmIsSpace(*ptr)) {
-      if (startPos > inStringLength) {
-        startPos = cc;
-      }
-      endPos = cc;
-    }
-    ++ptr;
-  }
 
-  size_t outLength = 0;
-
-  // if the input string didn't contain any non-space characters, return
-  // an empty string
-  if (startPos > inStringLength) {
-    outLength = 0;
-    startPos = 0;
-  } else {
-    outLength = endPos - startPos + 1;
-  }
-
-  status.GetMakefile().AddDefinition(variableName,
-                                     stringValue.substr(startPos, outLength));
+  status.GetMakefile().AddDefinition(variableName, data.Strip());
   return true;
 }
 
@@ -744,30 +614,12 @@ bool HandleRepeatCommand(std::vector<std::string> const& args,
     return true;
   }
 
-  auto const& stringValue = args[ArgPos::VALUE];
+  cm::CMakeString data{ args[ArgPos::VALUE] };
+  data.Repeat(times);
+
   auto const& variableName = args[ArgPos::OUTPUT_VARIABLE];
-  auto const inStringLength = stringValue.size();
 
-  std::string result;
-  switch (inStringLength) {
-    case 0u:
-      // Nothing to do for zero length input strings
-      break;
-    case 1u:
-      // NOTE If the string to repeat consists of the only character,
-      // use the appropriate constructor.
-      result = std::string(times, stringValue[0]);
-      break;
-    default:
-      result = std::string(inStringLength * times, char{});
-      for (auto i = 0u; i < times; ++i) {
-        std::copy(cm::cbegin(stringValue), cm::cend(stringValue),
-                  &result[i * inStringLength]);
-      }
-      break;
-  }
-
-  makefile.AddDefinition(variableName, result);
+  makefile.AddDefinition(variableName, data);
   return true;
 }
 
@@ -779,14 +631,10 @@ bool HandleRandomCommand(std::vector<std::string> const& args,
     return false;
   }
 
-  static bool seeded = false;
+  int length = 5;
+  cm::string_view alphabet;
   bool force_seed = false;
   unsigned int seed = 0;
-  int length = 5;
-  char const cmStringCommandDefaultAlphabet[] = "qwertyuiopasdfghjklzxcvbnm"
-                                                "QWERTYUIOPASDFGHJKLZXCVBNM"
-                                                "0123456789";
-  std::string alphabet;
 
   if (args.size() > 3) {
     size_t i = 1;
@@ -806,37 +654,22 @@ bool HandleRandomCommand(std::vector<std::string> const& args,
       }
     }
   }
-  if (alphabet.empty()) {
-    alphabet = cmStringCommandDefaultAlphabet;
-  }
 
-  double sizeofAlphabet = static_cast<double>(alphabet.size());
-  if (sizeofAlphabet < 1) {
-    status.SetError("sub-command RANDOM invoked with bad alphabet.");
+  try {
+    cm::CMakeString data;
+    std::string const& variableName = args.back();
+
+    if (force_seed) {
+      data.Random(seed, length, alphabet);
+    } else {
+      data.Random(length, alphabet);
+    }
+    status.GetMakefile().AddDefinition(variableName, data);
+    return true;
+  } catch (std::exception const& e) {
+    status.SetError(cmStrCat("sub-command RANDOM: ", e.what(), '.'));
     return false;
   }
-  if (length < 1) {
-    status.SetError("sub-command RANDOM invoked with bad length.");
-    return false;
-  }
-  std::string const& variableName = args.back();
-
-  std::vector<char> result;
-
-  if (!seeded || force_seed) {
-    seeded = true;
-    srand(force_seed ? seed : cmSystemTools::RandomSeed());
-  }
-
-  char const* alphaPtr = alphabet.c_str();
-  for (int cc = 0; cc < length; cc++) {
-    int idx = static_cast<int>(sizeofAlphabet * rand() / (RAND_MAX + 1.0));
-    result.push_back(*(alphaPtr + idx));
-  }
-  result.push_back(0);
-
-  status.GetMakefile().AddDefinition(variableName, result.data());
-  return true;
 }
 
 bool HandleTimestampCommand(std::vector<std::string> const& args,
@@ -855,26 +688,28 @@ bool HandleTimestampCommand(std::vector<std::string> const& args,
 
   std::string const& outputVariable = args[argsIndex++];
 
-  std::string formatString;
+  cm::string_view formatString;
   if (args.size() > argsIndex && args[argsIndex] != "UTC") {
     formatString = args[argsIndex++];
   }
 
-  bool utcFlag = false;
+  cm::CMakeString::UTC utcFlag = cm::CMakeString::UTC::No;
   if (args.size() > argsIndex) {
     if (args[argsIndex] == "UTC") {
-      utcFlag = true;
+      utcFlag = cm::CMakeString::UTC::Yes;
     } else {
-      std::string e = " TIMESTAMP sub-command does not recognize option " +
-        args[argsIndex] + ".";
+      std::string e =
+        cmStrCat(" TIMESTAMP sub-command does not recognize option ",
+                 args[argsIndex], '.');
       status.SetError(e);
       return false;
     }
   }
 
-  cmTimestamp timestamp;
-  std::string result = timestamp.CurrentTime(formatString, utcFlag);
-  status.GetMakefile().AddDefinition(outputVariable, result);
+  cm::CMakeString data;
+
+  status.GetMakefile().AddDefinition(outputVariable,
+                                     data.Timestamp(formatString, utcFlag));
 
   return true;
 }
@@ -892,10 +727,10 @@ bool HandleUuidCommand(std::vector<std::string> const& args,
 
   std::string const& outputVariable = args[argsIndex++];
 
-  std::string uuidNamespaceString;
-  std::string uuidName;
-  std::string uuidType;
-  bool uuidUpperCase = false;
+  cm::string_view uuidNamespaceString;
+  cm::string_view uuidName;
+  cm::CMakeString::UUIDType uuidType = cm::CMakeString::UUIDType::MD5;
+  cm::CMakeString::Case uuidCase = cm::CMakeString::Case::Lower;
 
   while (args.size() > argsIndex) {
     if (args[argsIndex] == "NAMESPACE") {
@@ -918,50 +753,39 @@ bool HandleUuidCommand(std::vector<std::string> const& args,
         status.SetError("UUID sub-command, TYPE requires a value.");
         return false;
       }
-      uuidType = args[argsIndex++];
+      if (args[argsIndex] == "MD5") {
+        uuidType = cm::CMakeString::UUIDType::MD5;
+      } else if (args[argsIndex] == "SHA1") {
+        uuidType = cm::CMakeString::UUIDType::SHA1;
+      } else {
+        status.SetError(
+          cmStrCat("UUID sub-command, unknown TYPE '", args[argsIndex], "'."));
+        return false;
+      }
+      argsIndex++;
     } else if (args[argsIndex] == "UPPER") {
       ++argsIndex;
-      uuidUpperCase = true;
+      uuidCase = cm::CMakeString::Case::Upper;
     } else {
-      std::string e =
-        "UUID sub-command does not recognize option " + args[argsIndex] + ".";
+      std::string e = cmStrCat("UUID sub-command does not recognize option ",
+                               args[argsIndex], '.');
       status.SetError(e);
       return false;
     }
   }
 
-  std::string uuid;
-  cmUuid uuidGenerator;
+  try {
+    cm::CMakeString data;
 
-  std::vector<unsigned char> uuidNamespace;
-  if (!uuidGenerator.StringToBinary(uuidNamespaceString, uuidNamespace)) {
-    status.SetError("UUID sub-command, malformed NAMESPACE UUID.");
+    data.UUID(uuidNamespaceString, uuidName, uuidType, uuidCase);
+    status.GetMakefile().AddDefinition(outputVariable, data);
+    return true;
+  } catch (std::exception const& e) {
+    status.SetError(cmStrCat("UUID sub-command, ", e.what(), '.'));
     return false;
   }
-
-  if (uuidType == "MD5") {
-    uuid = uuidGenerator.FromMd5(uuidNamespace, uuidName);
-  } else if (uuidType == "SHA1") {
-    uuid = uuidGenerator.FromSha1(uuidNamespace, uuidName);
-  } else {
-    std::string e = "UUID sub-command, unknown TYPE '" + uuidType + "'.";
-    status.SetError(e);
-    return false;
-  }
-
-  if (uuid.empty()) {
-    status.SetError("UUID sub-command, generation failed.");
-    return false;
-  }
-
-  if (uuidUpperCase) {
-    uuid = cmSystemTools::UpperCase(uuid);
-  }
-
-  status.GetMakefile().AddDefinition(outputVariable, uuid);
-  return true;
 #else
-  status.SetError(cmStrCat(args[0], " not available during bootstrap"));
+  status.SetError("UUID sub-command not available during bootstrap.");
   return false;
 #endif
 }

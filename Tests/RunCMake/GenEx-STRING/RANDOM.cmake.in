@@ -1,0 +1,32 @@
+
+cmake_minimum_required(VERSION 4.2...4.3)
+
+include ("${RunCMake_SOURCE_DIR}/check_errors.cmake")
+unset (errors)
+
+string(RANDOM RANDOM_SEED 123 reference)
+set(output "$<STRING:RANDOM,RANDOM_SEED:123>")
+if (NOT output STREQUAL reference)
+  list (APPEND errors "<STRING:RANDOM,RANDOM_SEED:123> returns bad data: ${output}")
+endif()
+
+string(RANDOM LENGTH 9 RANDOM_SEED 5 reference)
+set(output "$<STRING:RANDOM,LENGTH:9,RANDOM_SEED:5>")
+if (NOT output STREQUAL reference)
+  list (APPEND errors "<STRING:RANDOM,LENGTH:9,RANDOM_SEED:5> returns bad data: ${output}")
+endif()
+
+string(RANDOM LENGTH 9 RANDOM_SEED 5 ALPHABET "" reference)
+set(output "$<STRING:RANDOM,LENGTH:9,RANDOM_SEED:5,ALPHABET:>")
+if (NOT output STREQUAL reference)
+  list (APPEND errors "<STRING:RANDOM,LENGTH:9,RANDOM_SEED:5,ALPHABET:> returns bad data: ${output}")
+endif()
+
+string(RANDOM LENGTH 9 RANDOM_SEED 5 ALPHABET "abcdef123456789" reference)
+set(output "$<STRING:RANDOM,LENGTH:9,RANDOM_SEED:5,ALPHABET:abcdef123456789>")
+if (NOT output STREQUAL reference)
+  list (APPEND errors "<STRING:RANDOM,LENGTH:9,RANDOM_SEED:5,ALPHABET:abcdef123456789> returns bad data: ${output}")
+endif()
+
+
+check_errors("STRING:RANDOM" ${errors})

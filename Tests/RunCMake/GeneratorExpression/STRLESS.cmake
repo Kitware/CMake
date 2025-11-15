@@ -1,0 +1,3 @@
+cmake_policy(VERSION 4.2)
+
+file(GENERATE OUTPUT "STRLESS-generated.txt" CONTENT "$<STRLESS:A,AA>:$<STRLESS:AA,BB>:$<STRLESS:AA,AA>:$<STRLESS:BB,AA>")

@@ -1,0 +1,8 @@
+CMake Error at unexpected-arg2\.cmake:[0-9]+ \(file\):
+  Error evaluating generator expression:
+
+    \$<STRING:[A-Z_]+,.+>
+
+  \$<STRING:[A-Z_:]+(,[A-Z_:]+(,[A-Z_:]+)?)?> expression expects at most (two|three|four) parameters?.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)

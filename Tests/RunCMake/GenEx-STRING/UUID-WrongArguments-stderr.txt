@@ -1,0 +1,28 @@
+CMake Error at UUID-WrongArguments\.cmake:[0-9]+ \(add_custom_target\):
+  Error evaluating generator expression:
+
+    \$<STRING:UUID,TYPE:MD5,NAMESPACE:>
+
+  Invalid value for 'NAMESPACE:' option.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
+
+
+CMake Error at UUID-WrongArguments\.cmake:[0-9]+ \(add_custom_target\):
+  Error evaluating generator expression:
+
+    \$<STRING:UUID,NAMESPACE:foo,TYPE:FOO>
+
+  Invalid value for 'TYPE:' option.  'MD5' or 'SHA1' expected.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
+
+
+CMake Error at UUID-WrongArguments\.cmake:[0-9]+ \(add_custom_target\):
+  Error evaluating generator expression:
+
+    \$<STRING:UUID,NAMESPACE:foo,TYPE:MD5,CASE:FOO>
+
+  Invalid value for 'CASE:' option.  'UPPER' or 'LOWER' expected.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)

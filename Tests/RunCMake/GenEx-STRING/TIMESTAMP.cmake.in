@@ -1,0 +1,27 @@
+
+cmake_minimum_required(VERSION 4.2...4.3)
+
+include ("${RunCMake_SOURCE_DIR}/check_errors.cmake")
+unset (errors)
+
+set(ENV{SOURCE_DATE_EPOCH} "1123456789")
+
+string(TIMESTAMP reference "%Y-%m-%d %H:%M:%S.%f %A=%a %B=%b %y day=%j wd=%w week=%U w_iso=%V %%I=%I epoch=%s TZ=%Z tz=%z")
+set(output "$<STRING:TIMESTAMP,%Y-%m-%d %H:%M:%S.%f %A=%a %B=%b %y day=%j wd=%w week=%U w_iso=%V %%I=%I epoch=%s TZ=%Z tz=%z>")
+if (NOT output STREQUAL reference)
+  list (APPEND errors "<STRING:TIMESTAMP,%Y-%m-%d %H:%M:%S.%f %A=%a %B=%b %y day=%j wd=%w week=%U w_iso=%V %%I=%I epoch=%s TZ=%Z tz=%z> returns bad data: ${output}")
+endif()
+
+
+string(TIMESTAMP reference "%Y-%m-%d %H:%M:%S.%f %A=%a %B=%b %y day=%j wd=%w week=%U w_iso=%V %%I=%I epoch=%s TZ=%Z tz=%z" UTC)
+set(output "$<STRING:TIMESTAMP,%Y-%m-%d %H:%M:%S.%f %A=%a %B=%b %y day=%j wd=%w week=%U w_iso=%V %%I=%I epoch=%s TZ=%Z tz=%z,UTC>")
+if (NOT output STREQUAL reference)
+  list (APPEND errors "<STRING:TIMESTAMP,%Y-%m-%d %H:%M:%S.%f %A=%a %B=%b %y day=%j wd=%w week=%U w_iso=%V %%I=%I epoch=%s TZ=%Z tz=%z,UTC> returns bad data: ${output}")
+endif()
+set(output "$<STRING:TIMESTAMP,UTC,%Y-%m-%d %H:%M:%S.%f %A=%a %B=%b %y day=%j wd=%w week=%U w_iso=%V %%I=%I epoch=%s TZ=%Z tz=%z>")
+if (NOT output STREQUAL reference)
+  list (APPEND errors "<STRING:TIMESTAMP,UTC,%Y-%m-%d %H:%M:%S.%f %A=%a %B=%b %y day=%j wd=%w week=%U w_iso=%V %%I=%I epoch=%s TZ=%Z tz=%z> returns bad data: ${output}")
+endif()
+
+
+check_errors("STRING:TIMESTAMP" ${errors})

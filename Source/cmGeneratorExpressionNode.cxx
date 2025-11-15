@@ -7,6 +7,7 @@
 #include <cerrno>
 #include <cstdlib>
 #include <cstring>
+#include <exception>
 #include <functional>
 #include <map>
 #include <memory>
@@ -26,6 +27,7 @@
 #include "cmsys/String.h"
 
 #include "cmCMakePath.h"
+#include "cmCMakeString.hxx"
 #include "cmComputeLinkInformation.h"
 #include "cmGenExContext.h"
 #include "cmGenExEvaluation.h"
@@ -265,9 +267,84 @@ static const struct StrEqualNode : public cmGeneratorExpressionNode
     GeneratorExpressionContent const* /*content*/,
     cmGeneratorExpressionDAGChecker* /*dagChecker*/) const override
   {
-    return parameters.front() == parameters[1] ? "1" : "0";
+    return cm::CMakeString{ parameters.front() }.Compare(
+             cm::CMakeString::CompOperator::EQUAL, parameters[1])
+      ? "1"
+      : "0";
   }
 } strEqualNode;
+static const struct StrLessNode : public cmGeneratorExpressionNode
+{
+  StrLessNode() {} // NOLINT(modernize-use-equals-default)
+
+  int NumExpectedParameters() const override { return 2; }
+
+  std::string Evaluate(
+    std::vector<std::string> const& parameters,
+    cm::GenEx::Evaluation* /*eval*/,
+    GeneratorExpressionContent const* /*content*/,
+    cmGeneratorExpressionDAGChecker* /*dagChecker*/) const override
+  {
+    return cm::CMakeString{ parameters.front() }.Compare(
+             cm::CMakeString::CompOperator::LESS, parameters[1])
+      ? "1"
+      : "0";
+  }
+} strLessNode;
+static const struct StrLessEqualNode : public cmGeneratorExpressionNode
+{
+  StrLessEqualNode() {} // NOLINT(modernize-use-equals-default)
+
+  int NumExpectedParameters() const override { return 2; }
+
+  std::string Evaluate(
+    std::vector<std::string> const& parameters,
+    cm::GenEx::Evaluation* /*eval*/,
+    GeneratorExpressionContent const* /*content*/,
+    cmGeneratorExpressionDAGChecker* /*dagChecker*/) const override
+  {
+    return cm::CMakeString{ parameters.front() }.Compare(
+             cm::CMakeString::CompOperator::LESS_EQUAL, parameters[1])
+      ? "1"
+      : "0";
+  }
+} strLessEqualNode;
+static const struct StrGreaterNode : public cmGeneratorExpressionNode
+{
+  StrGreaterNode() {} // NOLINT(modernize-use-equals-default)
+
+  int NumExpectedParameters() const override { return 2; }
+
+  std::string Evaluate(
+    std::vector<std::string> const& parameters,
+    cm::GenEx::Evaluation* /*eval*/,
+    GeneratorExpressionContent const* /*content*/,
+    cmGeneratorExpressionDAGChecker* /*dagChecker*/) const override
+  {
+    return cm::CMakeString{ parameters.front() }.Compare(
+             cm::CMakeString::CompOperator::GREATER, parameters[1])
+      ? "1"
+      : "0";
+  }
+} strGreaterNode;
+static const struct StrGreaterEqualNode : public cmGeneratorExpressionNode
+{
+  StrGreaterEqualNode() {} // NOLINT(modernize-use-equals-default)
+
+  int NumExpectedParameters() const override { return 2; }
+
+  std::string Evaluate(
+    std::vector<std::string> const& parameters,
+    cm::GenEx::Evaluation* /*eval*/,
+    GeneratorExpressionContent const* /*content*/,
+    cmGeneratorExpressionDAGChecker* /*dagChecker*/) const override
+  {
+    return cm::CMakeString{ parameters.front() }.Compare(
+             cm::CMakeString::CompOperator::GREATER_EQUAL, parameters[1])
+      ? "1"
+      : "0";
+  }
+} strGreaterEqualNode;
 
 static const struct EqualNode : public cmGeneratorExpressionNode
 {
@@ -705,6 +782,55 @@ bool CheckGenExParameters(cm::GenEx::Evaluation* eval,
   }
   return true;
 };
+
+template <typename IndexType>
+bool GetNumericArgument(std::string const& arg, IndexType& value)
+{
+  try {
+    std::size_t pos;
+
+    if (sizeof(IndexType) == sizeof(long)) {
+      value = std::stol(arg, &pos);
+    } else {
+      value = std::stoll(arg, &pos);
+    }
+
+    if (pos != arg.length()) {
+      // this is not a number
+      return false;
+    }
+  } catch (std::invalid_argument const&) {
+    return false;
+  }
+
+  return true;
+}
+
+template <typename IndexType>
+bool GetNumericArguments(
+  cm::GenEx::Evaluation* eval, GeneratorExpressionContent const* cnt,
+  Arguments args, std::vector<IndexType>& indexes,
+  cmList::ExpandElements expandElements = cmList::ExpandElements::No)
+{
+  using IndexRange = cmRange<Arguments::const_iterator>;
+  IndexRange arguments(args.begin(), args.end());
+  cmList list;
+  if (expandElements == cmList::ExpandElements::Yes) {
+    list = cmList{ args.begin(), args.end(), expandElements };
+    arguments = IndexRange{ list.begin(), list.end() };
+  }
+
+  for (auto const& value : arguments) {
+    IndexType index;
+    if (!GetNumericArgument(value, index)) {
+      reportError(eval, cnt->GetOriginalExpression(),
+                  cmStrCat("index: \"", value, "\" is not a valid index"));
+      return false;
+    }
+    indexes.push_back(index);
+  }
+  return true;
+}
 
 bool CheckPathParametersEx(cm::GenEx::Evaluation* eval,
                            GeneratorExpressionContent const* cnt,
@@ -1163,6 +1289,553 @@ static const struct PathEqualNode : public cmGeneratorExpressionNode
 } pathEqualNode;
 
 namespace {
+inline bool CheckStringParametersEx(cm::GenEx::Evaluation* eval,
+                                    GeneratorExpressionContent const* cnt,
+                                    cm::string_view option, std::size_t count,
+                                    int required = 1, bool exactly = true)
+{
+  return CheckGenExParameters(eval, cnt, "STRING"_s, option, count, required,
+                              exactly);
+}
+inline bool CheckStringParameters(cm::GenEx::Evaluation* eval,
+                                  GeneratorExpressionContent const* cnt,
+                                  cm::string_view option, Arguments args,
+                                  int required = 1)
+{
+  return CheckStringParametersEx(eval, cnt, option, args.size(), required);
+};
+}
+
+static const struct StringNode : public cmGeneratorExpressionNode
+{
+  StringNode() {} // NOLINT(modernize-use-equals-default)
+
+  int NumExpectedParameters() const override { return OneOrMoreParameters; }
+
+  bool AcceptsArbitraryContentParameter() const override { return true; }
+
+  std::string Evaluate(
+    std::vector<std::string> const& parameters, cm::GenEx::Evaluation* eval,
+    GeneratorExpressionContent const* content,
+    cmGeneratorExpressionDAGChecker* /*dagChecker*/) const override
+  {
+    static std::unordered_map<
+      cm::string_view,
+      std::function<std::string(cm::GenEx::Evaluation*,
+                                GeneratorExpressionContent const*,
+                                Arguments&)>>
+      stringCommands{
+        { "LENGTH"_s,
+          [](cm::GenEx::Evaluation* ev, GeneratorExpressionContent const* cnt,
+             Arguments& args) -> std::string {
+            if (CheckStringParameters(ev, cnt, "LENGTH"_s, args)) {
+              return std::to_string(cm::CMakeString{ args.front() }.Length());
+            }
+            return std::string{};
+          } },
+        { "SUBSTRING"_s,
+          [](cm::GenEx::Evaluation* ev, GeneratorExpressionContent const* cnt,
+             Arguments& args) -> std::string {
+            if (CheckStringParameters(ev, cnt, "SUBSTRING"_s, args, 3)) {
+              cm::CMakeString str{ args.front() };
+              std::vector<long> indexes;
+              if (GetNumericArguments(ev, cnt, args.advance(1), indexes)) {
+                try {
+                  return str.Substring(indexes.front(), indexes.back());
+                } catch (std::out_of_range const& e) {
+                  reportError(ev, cnt->GetOriginalExpression(), e.what());
+                  return std::string{};
+                }
+              }
+            }
+            return std::string{};
+          } },
+        { "FIND"_s,
+          [](cm::GenEx::Evaluation* ev, GeneratorExpressionContent const* cnt,
+             Arguments& args) -> std::string {
+            if (CheckStringParametersEx(ev, cnt, "FIND"_s, args.size(), 2,
+                                        false)) {
+              if (args.size() > 3) {
+                reportError(ev, cnt->GetOriginalExpression(),
+                            "$<STRING:FIND> expression expects at "
+                            "most three parameters.");
+                return std::string{};
+              }
+
+              auto const FROM = "FROM:"_s;
+
+              cm::CMakeString str{ args.front() };
+              cm::CMakeString::FindFrom from =
+                cm::CMakeString::FindFrom::Begin;
+              cm::string_view substring;
+
+              args.advance(1);
+              if (args.size() == 2) {
+                cm::CMakeString::FindFrom opt =
+                  static_cast<cm::CMakeString::FindFrom>(-1);
+
+                for (auto const& arg : args) {
+                  if (cmHasPrefix(arg, FROM)) {
+                    if (arg != "FROM:BEGIN"_s && arg != "FROM:END"_s) {
+                      reportError(
+                        ev, cnt->GetOriginalExpression(),
+                        cmStrCat("Invalid value for '", FROM,
+                                 "' option. 'BEGIN' or 'END' expected."));
+                      return std::string{};
+                    }
+                    opt = arg == "FROM:BEGIN"_s
+                      ? cm::CMakeString::FindFrom::Begin
+                      : cm::CMakeString::FindFrom::End;
+                  } else {
+                    substring = arg;
+                  }
+                }
+                if (opt == static_cast<cm::CMakeString::FindFrom>(-1)) {
+                  reportError(
+                    ev, cnt->GetOriginalExpression(),
+                    cmStrCat("Expected option '", FROM, "' is missing."));
+                  return std::string{};
+                }
+                from = opt;
+              } else {
+                substring = args.front();
+              }
+              auto pos = str.Find(substring, from);
+              return pos == cm::CMakeString::npos ? "-1" : std::to_string(pos);
+            }
+            return std::string{};
+          } },
+        { "MATCH"_s,
+          [](cm::GenEx::Evaluation* ev, GeneratorExpressionContent const* cnt,
+             Arguments& args) -> std::string {
+            if (CheckStringParametersEx(ev, cnt, "MATCH"_s, args.size(), 2,
+                                        false)) {
+              if (args.size() > 3) {
+                reportError(ev, cnt->GetOriginalExpression(),
+                            "$<STRING:MATCH> expression expects at "
+                            "most three parameters.");
+                return std::string{};
+              }
+
+              auto const SEEK = "SEEK:"_s;
+
+              cm::CMakeString str{ args.front() };
+              cm::CMakeString::MatchItems seek =
+                cm::CMakeString::MatchItems::Once;
+              auto const* regex = &args[1];
+
+              args.advance(1);
+              if (args.size() == 2) {
+                cm::CMakeString::MatchItems opt =
+                  static_cast<cm::CMakeString::MatchItems>(-1);
+
+                for (auto const& arg : args) {
+                  if (cmHasPrefix(arg, SEEK)) {
+                    if (arg != "SEEK:ONCE"_s && arg != "SEEK:ALL"_s) {
+                      reportError(
+                        ev, cnt->GetOriginalExpression(),
+                        cmStrCat("Invalid value for '", SEEK,
+                                 "' option. 'ONCE' or 'ALL' expected."));
+                      return std::string{};
+                    }
+                    opt = arg == "SEEK:ONCE"_s
+                      ? cm::CMakeString::MatchItems::Once
+                      : cm::CMakeString::MatchItems::All;
+                  } else {
+                    regex = &arg;
+                  }
+                }
+                if (opt == static_cast<cm::CMakeString::MatchItems>(-1)) {
+                  reportError(
+                    ev, cnt->GetOriginalExpression(),
+                    cmStrCat("Expected option '", SEEK, "' is missing."));
+                  return std::string{};
+                }
+                seek = opt;
+              }
+
+              try {
+                return str.Match(*regex, seek).to_string();
+              } catch (std::invalid_argument const& e) {
+                reportError(ev, cnt->GetOriginalExpression(), e.what());
+                return std::string{};
+              }
+            }
+            return std::string{};
+          } },
+        { "JOIN"_s,
+          [](cm::GenEx::Evaluation* ev, GeneratorExpressionContent const* cnt,
+             Arguments& args) -> std::string {
+            if (CheckStringParametersEx(ev, cnt, "JOIN"_s, args.size(), 2,
+                                        false)) {
+              auto const& glue = args.front();
+              return cm::CMakeString{ args.advance(1), glue };
+            }
+            return std::string{};
+          } },
+        { "ASCII"_s,
+          [](cm::GenEx::Evaluation* ev, GeneratorExpressionContent const* cnt,
+             Arguments& args) -> std::string {
+            if (CheckStringParametersEx(ev, cnt, "ASCII"_s, args.size(), 1,
+                                        false)) {
+              try {
+                return cm::CMakeString{}.FromASCII(args);
+              } catch (std::invalid_argument const& e) {
+                reportError(ev, cnt->GetOriginalExpression(), e.what());
+                return std::string{};
+              }
+            }
+            return std::string{};
+          } },
+        { "TIMESTAMP"_s,
+          [](cm::GenEx::Evaluation* ev, GeneratorExpressionContent const* cnt,
+             Arguments& args) -> std::string {
+            cm::string_view format;
+            cm::CMakeString::UTC utc = cm::CMakeString::UTC::No;
+
+            if (args.size() == 2 && args.front() != "UTC"_s &&
+                args.back() != "UTC"_s) {
+              reportError(ev, cnt->GetOriginalExpression(),
+                          "'UTC' option is expected.");
+              return std::string{};
+            }
+            if (args.size() > 2) {
+              reportError(ev, cnt->GetOriginalExpression(),
+                          "$<STRING:TIMESTAMP> expression expects at most two "
+                          "parameters.");
+              return std::string{};
+            }
+
+            for (auto const& arg : args) {
+              if (arg == "UTC"_s) {
+                utc = cm::CMakeString::UTC::Yes;
+              } else {
+                format = arg;
+              }
+            }
+            return cm::CMakeString{}.Timestamp(format, utc);
+          } },
+        { "RANDOM"_s,
+          [](cm::GenEx::Evaluation* ev, GeneratorExpressionContent const* cnt,
+             Arguments& args) -> std::string {
+            auto const ALPHABET = "ALPHABET:"_s;
+            auto const LENGTH = "LENGTH:"_s;
+            auto const RANDOM_SEED = "RANDOM_SEED:"_s;
+
+            if (args.size() > 3) {
+              reportError(ev, cnt->GetOriginalExpression(),
+                          "$<STRING:RANDOM> expression expects at most three "
+                          "parameters.");
+              return std::string{};
+            }
+
+            cm::string_view alphabet;
+            std::size_t length = 5;
+            bool seed_specified = false;
+            unsigned int seed = 0;
+            for (auto const& arg : args) {
+              if (cmHasPrefix(arg, ALPHABET)) {
+                alphabet = cm::string_view{ arg.c_str() + ALPHABET.length() };
+                continue;
+              }
+              if (cmHasPrefix(arg, LENGTH)) {
+                try {
+                  length = std::stoul(arg.substr(LENGTH.size()));
+                } catch (std::exception const&) {
+                  reportError(ev, cnt->GetOriginalExpression(),
+                              cmStrCat(arg, ": invalid numeric value for '",
+                                       LENGTH, "' option."));
+                  return std::string{};
+                }
+                continue;
+              }
+              if (cmHasPrefix(arg, RANDOM_SEED)) {
+                try {
+                  seed_specified = true;
+                  seed = static_cast<unsigned int>(
+                    std::stoul(arg.substr(RANDOM_SEED.size())));
+                } catch (std::exception const&) {
+                  reportError(ev, cnt->GetOriginalExpression(),
+                              cmStrCat(arg, ": invalid numeric value for '",
+                                       RANDOM_SEED, "' option."));
+                  return std::string{};
+                }
+                continue;
+              }
+              reportError(ev, cnt->GetOriginalExpression(),
+                          cmStrCat(arg, ": invalid parameter."));
+              return std::string{};
+            }
+
+            try {
+              if (seed_specified) {
+                return cm::CMakeString{}.Random(seed, length, alphabet);
+              }
+              return cm::CMakeString{}.Random(length, alphabet);
+            } catch (std::exception const& e) {
+              reportError(ev, cnt->GetOriginalExpression(), e.what());
+              return std::string{};
+            }
+          } },
+        { "UUID"_s,
+          [](cm::GenEx::Evaluation* ev, GeneratorExpressionContent const* cnt,
+             Arguments& args) -> std::string {
+            if (CheckStringParametersEx(ev, cnt, "UUID"_s, args.size(), 2,
+                                        false)) {
+              auto const NAMESPACE = "NAMESPACE:"_s;
+              auto const NAME = "NAME:"_s;
+              auto const TYPE = "TYPE:"_s;
+              auto const CASE = "CASE:"_s;
+
+              if (args.size() > 4) {
+                reportError(ev, cnt->GetOriginalExpression(),
+                            "$<STRING:UUID> expression expects at most four "
+                            "parameters.");
+                return std::string{};
+              }
+
+              cm::string_view nameSpace;
+              cm::string_view name;
+              cm::CMakeString::UUIDType type =
+                static_cast<cm::CMakeString::UUIDType>(-1);
+              cm::CMakeString::Case uuidCase = cm::CMakeString::Case::Lower;
+              for (auto const& arg : args) {
+                if (cmHasPrefix(arg, NAMESPACE)) {
+                  nameSpace =
+                    cm::string_view{ arg.c_str() + NAMESPACE.length() };
+                  if (nameSpace.empty()) {
+                    reportError(
+                      ev, cnt->GetOriginalExpression(),
+                      cmStrCat("Invalid value for '", NAMESPACE, "' option."));
+                    return std::string{};
+                  }
+                  continue;
+                }
+                if (cmHasPrefix(arg, NAME)) {
+                  name = cm::string_view{ arg.c_str() + NAME.length() };
+                  continue;
+                }
+                if (cmHasPrefix(arg, TYPE)) {
+                  auto value = cm::string_view{ arg.c_str() + TYPE.length() };
+                  if (value != "MD5"_s && value != "SHA1"_s) {
+                    reportError(
+                      ev, cnt->GetOriginalExpression(),
+                      cmStrCat("Invalid value for '", TYPE,
+                               "' option. 'MD5' or 'SHA1' expected."));
+                    return std::string{};
+                  }
+                  type = value == "MD5"_s ? cm::CMakeString::UUIDType::MD5
+                                          : cm::CMakeString::UUIDType::SHA1;
+                  continue;
+                }
+                if (cmHasPrefix(arg, CASE)) {
+                  auto value = cm::string_view{ arg.c_str() + CASE.length() };
+                  if (value != "UPPER"_s && value != "LOWER"_s) {
+                    reportError(
+                      ev, cnt->GetOriginalExpression(),
+                      cmStrCat("Invalid value for '", CASE,
+                               "' option. 'UPPER' or 'LOWER' expected."));
+                    return std::string{};
+                  }
+                  uuidCase = value == "UPPER"_s ? cm::CMakeString::Case::Upper
+                                                : cm::CMakeString::Case::Lower;
+                  continue;
+                }
+                reportError(ev, cnt->GetOriginalExpression(),
+                            cmStrCat(arg, ": invalid parameter."));
+                return std::string{};
+              }
+              if (nameSpace.empty()) {
+                reportError(
+                  ev, cnt->GetOriginalExpression(),
+                  cmStrCat("Required option '", NAMESPACE, "' is missing."));
+                return std::string{};
+              }
+              if (type == static_cast<cm::CMakeString::UUIDType>(-1)) {
+                reportError(
+                  ev, cnt->GetOriginalExpression(),
+                  cmStrCat("Required option '", TYPE, "' is missing."));
+                return std::string{};
+              }
+
+              try {
+                return cm::CMakeString{}.UUID(nameSpace, name, type, uuidCase);
+              } catch (std::exception const& e) {
+                reportError(ev, cnt->GetOriginalExpression(), e.what());
+                return std::string{};
+              }
+            }
+            return std::string{};
+          } },
+        { "REPLACE"_s,
+          [](cm::GenEx::Evaluation* ev, GeneratorExpressionContent const* cnt,
+             Arguments& args) -> std::string {
+            if (CheckStringParametersEx(ev, cnt, "REPLACE"_s, args.size(), 3,
+                                        false)) {
+              if (args.size() > 4) {
+                reportError(ev, cnt->GetOriginalExpression(),
+                            "$<STRING:REPLACE> expression expects at "
+                            "most four parameters.");
+                return std::string{};
+              }
+
+              cm::CMakeString::Regex isRegex = cm::CMakeString::Regex::No;
+              if (args.size() == 4) {
+                cm::string_view type = args.front();
+                if (type != "STRING"_s && type != "REGEX"_s) {
+                  reportError(
+                    ev, cnt->GetOriginalExpression(),
+                    cmStrCat(
+                      '\'', type,
+                      "' is unexpected. 'STRING' or 'REGEX' expected."));
+                  return std::string{};
+                }
+                isRegex = type == "STRING"_s ? cm::CMakeString::Regex::No
+                                             : cm::CMakeString::Regex::Yes;
+                args.advance(1);
+              }
+
+              try {
+                return cm::CMakeString{ args.front() }.Replace(
+                  args[1], args[2], isRegex);
+              } catch (std::invalid_argument const& e) {
+                reportError(ev, cnt->GetOriginalExpression(), e.what());
+                return std::string{};
+              }
+            }
+            return std::string{};
+          } },
+        { "APPEND"_s,
+          [](cm::GenEx::Evaluation* ev, GeneratorExpressionContent const* cnt,
+             Arguments& args) -> std::string {
+            if (CheckStringParametersEx(ev, cnt, "APPEND"_s, args.size(), 2,
+                                        false)) {
+              cm::CMakeString data{ args.front() };
+              return data.Append(args.advance(1));
+            }
+            return std::string{};
+          } },
+        { "PREPEND"_s,
+          [](cm::GenEx::Evaluation* ev, GeneratorExpressionContent const* cnt,
+             Arguments& args) -> std::string {
+            if (CheckStringParametersEx(ev, cnt, "PREPEND "_s, args.size(), 2,
+                                        false)) {
+              cm::CMakeString data{ args.front() };
+              return data.Prepend(args.advance(1));
+            }
+            return std::string{};
+          } },
+        { "TOLOWER"_s,
+          [](cm::GenEx::Evaluation* ev, GeneratorExpressionContent const* cnt,
+             Arguments& args) -> std::string {
+            if (CheckStringParameters(ev, cnt, "TOLOWER"_s, args, 1)) {
+              return cm::CMakeString{}.ToLower(args.front());
+            }
+            return std::string{};
+          } },
+        { "TOUPPER"_s,
+          [](cm::GenEx::Evaluation* ev, GeneratorExpressionContent const* cnt,
+             Arguments& args) -> std::string {
+            if (CheckStringParameters(ev, cnt, "TOUPPER"_s, args, 1)) {
+              return cm::CMakeString{}.ToUpper(args.front());
+            }
+            return std::string{};
+          } },
+        { "STRIP"_s,
+          [](cm::GenEx::Evaluation* ev, GeneratorExpressionContent const* cnt,
+             Arguments& args) -> std::string {
+            if (CheckStringParameters(ev, cnt, "STRIP"_s, args, 2)) {
+              if (args.front() != "SPACES"_s) {
+                reportError(ev, cnt->GetOriginalExpression(),
+                            cmStrCat('\'', args.front(),
+                                     "' is unexpected. 'SPACES' expected."));
+                return std::string{};
+              }
+
+              return cm::CMakeString{ args[1] }.Strip();
+            }
+            return std::string{};
+          } },
+        { "QUOTE"_s,
+          [](cm::GenEx::Evaluation* ev, GeneratorExpressionContent const* cnt,
+             Arguments& args) -> std::string {
+            if (CheckStringParameters(ev, cnt, "QUOTE"_s, args, 2)) {
+              if (args.front() != "REGEX"_s) {
+                reportError(ev, cnt->GetOriginalExpression(),
+                            cmStrCat('\'', args.front(),
+                                     "' is unexpected. 'REGEX' expected."));
+                return std::string{};
+              }
+
+              return cm::CMakeString{ args[1] }.Quote();
+            }
+            return std::string{};
+          } },
+        { "HEX"_s,
+          [](cm::GenEx::Evaluation* ev, GeneratorExpressionContent const* cnt,
+             Arguments& args) -> std::string {
+            if (CheckStringParameters(ev, cnt, "HEX"_s, args, 1)) {
+              return cm::CMakeString{ args.front() }.ToHexadecimal();
+            }
+            return std::string{};
+          } },
+        { "HASH"_s,
+          [](cm::GenEx::Evaluation* ev, GeneratorExpressionContent const* cnt,
+             Arguments& args) -> std::string {
+            if (CheckStringParameters(ev, cnt, "HASH"_s, args, 2)) {
+              auto const ALGORITHM = "ALGORITHM:"_s;
+
+              if (cmHasPrefix(args[1], ALGORITHM)) {
+                try {
+                  auto const algo =
+                    cm::string_view{ args[1].c_str() + ALGORITHM.length() };
+                  if (algo.empty()) {
+                    reportError(
+                      ev, cnt->GetOriginalExpression(),
+                      cmStrCat("Missing value for '", ALGORITHM, "' option."));
+                    return std::string{};
+                  }
+                  return cm::CMakeString{ args.front() }.Hash(algo);
+                } catch (std::exception const& e) {
+                  reportError(ev, cnt->GetOriginalExpression(), e.what());
+                  return std::string{};
+                }
+              }
+              reportError(ev, cnt->GetOriginalExpression(),
+                          cmStrCat(args[1], ": invalid parameter. Option '",
+                                   ALGORITHM, "' expected."));
+            }
+            return std::string{};
+          } },
+        { "MAKE_C_IDENTIFIER"_s,
+          [](cm::GenEx::Evaluation* ev, GeneratorExpressionContent const* cnt,
+             Arguments& args) -> std::string {
+            if (CheckStringParameters(ev, cnt, "MAKE_C_IDENTIFIER"_s, args,
+                                      1)) {
+              return cm::CMakeString{ args.front() }.MakeCIdentifier();
+            }
+            return std::string{};
+          } }
+      };
+
+    if (parameters.front().empty()) {
+      reportError(eval, content->GetOriginalExpression(),
+                  "$<STRING> expression requires at least one parameter.");
+      return std::string{};
+    }
+
+    if (cm::contains(stringCommands, parameters.front())) {
+      auto args = Arguments{ parameters }.advance(1);
+      return stringCommands[parameters.front()](eval, content, args);
+    }
+
+    reportError(eval, content->GetOriginalExpression(),
+                cmStrCat(parameters.front(), ": invalid option."));
+    return std::string{};
+  }
+} stringNode;
+
+namespace {
 inline bool CheckListParametersEx(cm::GenEx::Evaluation* eval,
                                   GeneratorExpressionContent const* cnt,
                                   cm::string_view option, std::size_t count,
@@ -1182,53 +1855,6 @@ inline bool CheckListParameters(cm::GenEx::Evaluation* eval,
 inline cmList GetList(std::string const& list)
 {
   return list.empty() ? cmList{} : cmList{ list, cmList::EmptyElements::Yes };
-}
-
-bool GetNumericArgument(std::string const& arg, cmList::index_type& value)
-{
-  try {
-    std::size_t pos;
-
-    if (sizeof(cmList::index_type) == sizeof(long)) {
-      value = std::stol(arg, &pos);
-    } else {
-      value = std::stoll(arg, &pos);
-    }
-
-    if (pos != arg.length()) {
-      // this is not a number
-      return false;
-    }
-  } catch (std::invalid_argument const&) {
-    return false;
-  }
-
-  return true;
-}
-
-bool GetNumericArguments(
-  cm::GenEx::Evaluation* eval, GeneratorExpressionContent const* cnt,
-  Arguments args, std::vector<cmList::index_type>& indexes,
-  cmList::ExpandElements expandElements = cmList::ExpandElements::No)
-{
-  using IndexRange = cmRange<Arguments::const_iterator>;
-  IndexRange arguments(args.begin(), args.end());
-  cmList list;
-  if (expandElements == cmList::ExpandElements::Yes) {
-    list = cmList{ args.begin(), args.end(), expandElements };
-    arguments = IndexRange{ list.begin(), list.end() };
-  }
-
-  for (auto const& value : arguments) {
-    cmList::index_type index;
-    if (!GetNumericArgument(value, index)) {
-      reportError(eval, cnt->GetOriginalExpression(),
-                  cmStrCat("index: \"", value, "\" is not a valid index"));
-      return false;
-    }
-    indexes.push_back(index);
-  }
-  return true;
 }
 }
 
@@ -4872,6 +5498,11 @@ cmGeneratorExpressionNode const* cmGeneratorExpressionNode::GetNode(
     { "TARGET_BUNDLE_DIR_NAME", &targetBundleDirNameNode },
     { "TARGET_BUNDLE_CONTENT_DIR", &targetBundleContentDirNode },
     { "STREQUAL", &strEqualNode },
+    { "STRLESS", &strLessNode },
+    { "STRLESS_EQUAL", &strLessEqualNode },
+    { "STRGREATER", &strGreaterNode },
+    { "STRGREATER_EQUAL", &strGreaterEqualNode },
+    { "STRING", &stringNode },
     { "EQUAL", &equalNode },
     { "IN_LIST", &inListNode },
     { "FILTER", &filterNode },

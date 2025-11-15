@@ -1,0 +1,8 @@
+CMake Error at TIMESTAMP-WrongArguments\.cmake:[0-9]+ \(add_custom_target\):
+  Error evaluating generator expression:
+
+    \$<STRING:TIMESTAMP,%s,%s>
+
+  'UTC' option is expected.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)

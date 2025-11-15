@@ -1,0 +1,3 @@
+cmake_policy(VERSION 4.2)
+
+file(GENERATE OUTPUT "STREQUAL-generated.txt" CONTENT "$<STREQUAL:AA,AA>:$<STREQUAL:AA,BB>")

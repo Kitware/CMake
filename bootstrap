@@ -314,6 +314,7 @@ CMAKE_CXX_SOURCES="\
   cmCMakePath \
   cmCMakePathCommand \
   cmCMakePolicyCommand \
+  cmCMakeString \
   cmCPackPropertiesGenerator \
   cmCacheManager \
   cmCommands \

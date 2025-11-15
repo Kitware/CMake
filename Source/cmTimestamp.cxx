@@ -36,7 +36,7 @@
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
-std::string cmTimestamp::CurrentTime(std::string const& formatString,
+std::string cmTimestamp::CurrentTime(cm::string_view formatString,
                                      bool utcFlag) const
 {
   // get current time with microsecond resolution
@@ -63,11 +63,12 @@ std::string cmTimestamp::CurrentTime(std::string const& formatString,
   }
 
   return this->CreateTimestampFromTimeT(currentTimeT, microseconds,
-                                        formatString, utcFlag);
+                                        static_cast<std::string>(formatString),
+                                        utcFlag);
 }
 
 std::string cmTimestamp::FileModificationTime(char const* path,
-                                              std::string const& formatString,
+                                              cm::string_view formatString,
                                               bool utcFlag) const
 {
   std::string real_path =
@@ -89,8 +90,8 @@ std::string cmTimestamp::FileModificationTime(char const* path,
   }
   uv_fs_req_cleanup(&req);
 
-  return this->CreateTimestampFromTimeT(mtime, microseconds, formatString,
-                                        utcFlag);
+  return this->CreateTimestampFromTimeT(
+    mtime, microseconds, static_cast<std::string>(formatString), utcFlag);
 }
 
 std::string cmTimestamp::CreateTimestampFromTimeT(time_t timeT,

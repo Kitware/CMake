@@ -8,6 +8,8 @@
 #include <ctime>
 #include <string>
 
+#include <cm/string_view>
+
 /** \class cmTimestamp
  * \brief Utility class to generate string representation of a timestamp
  *
@@ -15,10 +17,10 @@
 class cmTimestamp
 {
 public:
-  std::string CurrentTime(std::string const& formatString, bool utcFlag) const;
+  std::string CurrentTime(cm::string_view formatString, bool utcFlag) const;
 
   std::string FileModificationTime(char const* path,
-                                   std::string const& formatString,
+                                   cm::string_view formatString,
                                    bool utcFlag) const;
 
   std::string CreateTimestampFromTimeT(time_t timeT, std::string formatString,

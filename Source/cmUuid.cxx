@@ -10,7 +10,7 @@
 static std::array<int, 5> const kUuidGroups = { { 4, 2, 2, 2, 6 } };
 
 std::string cmUuid::FromMd5(std::vector<unsigned char> const& uuidNamespace,
-                            std::string const& name) const
+                            cm::string_view name) const
 {
   std::vector<unsigned char> hashInput;
   this->CreateHashInput(uuidNamespace, name, hashInput);
@@ -24,7 +24,7 @@ std::string cmUuid::FromMd5(std::vector<unsigned char> const& uuidNamespace,
 }
 
 std::string cmUuid::FromSha1(std::vector<unsigned char> const& uuidNamespace,
-                             std::string const& name) const
+                             cm::string_view name) const
 {
   std::vector<unsigned char> hashInput;
   this->CreateHashInput(uuidNamespace, name, hashInput);
@@ -38,7 +38,7 @@ std::string cmUuid::FromSha1(std::vector<unsigned char> const& uuidNamespace,
 }
 
 void cmUuid::CreateHashInput(std::vector<unsigned char> const& uuidNamespace,
-                             std::string const& name,
+                             cm::string_view name,
                              std::vector<unsigned char>& output) const
 {
   output = uuidNamespace;
@@ -46,7 +46,7 @@ void cmUuid::CreateHashInput(std::vector<unsigned char> const& uuidNamespace,
   if (!name.empty()) {
     output.resize(output.size() + name.size());
 
-    memcpy(output.data() + uuidNamespace.size(), name.c_str(), name.size());
+    memcpy(output.data() + uuidNamespace.size(), name.data(), name.size());
   }
 }
 
@@ -67,7 +67,7 @@ std::string cmUuid::FromDigest(unsigned char const* digest,
   return this->BinaryToString(uuid);
 }
 
-bool cmUuid::StringToBinary(std::string const& input,
+bool cmUuid::StringToBinary(cm::string_view input,
                             std::vector<unsigned char>& output) const
 {
   output.clear();
@@ -126,7 +126,7 @@ std::string cmUuid::ByteToHex(unsigned char inputByte) const
   return result;
 }
 
-bool cmUuid::StringToBinaryImpl(std::string const& input,
+bool cmUuid::StringToBinaryImpl(cm::string_view input,
                                 std::vector<unsigned char>& output) const
 {
   if (input.size() % 2) {

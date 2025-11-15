@@ -1,0 +1,32 @@
+
+cmake_minimum_required(VERSION 4.2...4.3)
+
+include ("${RunCMake_SOURCE_DIR}/check_errors.cmake")
+unset (errors)
+
+set(UUID_DNS_NAMESPACE 6ba7b810-9dad-11d1-80b4-00c04fd430c8)
+
+string(UUID reference NAMESPACE ${UUID_DNS_NAMESPACE} NAME www.example.com TYPE MD5)
+set(output "$<STRING:UUID,NAMESPACE:6ba7b810-9dad-11d1-80b4-00c04fd430c8,NAME:www.example.com,TYPE:MD5>")
+if (NOT output STREQUAL reference)
+  list (APPEND errors "<STRING:UUID,NAMESPACE:6ba7b810-9dad-11d1-80b4-00c04fd430c8,NAME:www.example.com,TYPE:MD5> returns bad data: ${output}")
+endif()
+set(output "$<STRING:UUID,NAMESPACE:6ba7b810-9dad-11d1-80b4-00c04fd430c8,NAME:www.example.com,TYPE:MD5,CASE:LOWER>")
+if (NOT output STREQUAL reference)
+  list (APPEND errors "<STRING:UUID,NAMESPACE:6ba7b810-9dad-11d1-80b4-00c04fd430c8,NAME:www.example.com,TYPE:MD5,CASE:LOWER> returns bad data: ${output}")
+endif()
+
+string(UUID reference NAMESPACE ${UUID_DNS_NAMESPACE} NAME www.example.com TYPE MD5 UPPER)
+set(output "$<STRING:UUID,NAMESPACE:6ba7b810-9dad-11d1-80b4-00c04fd430c8,NAME:www.example.com,TYPE:MD5,CASE:UPPER>")
+if (NOT output STREQUAL reference)
+  list (APPEND errors "<STRING:UUID,NAMESPACE:6ba7b810-9dad-11d1-80b4-00c04fd430c8,NAME:www.example.com,TYPE:MD5,CASE:UPPER> returns bad data: ${output}")
+endif()
+
+string(UUID reference NAMESPACE ${UUID_DNS_NAMESPACE} NAME www.example.com TYPE SHA1)
+set(output "$<STRING:UUID,NAMESPACE:6ba7b810-9dad-11d1-80b4-00c04fd430c8,NAME:www.example.com,TYPE:SHA1>")
+if (NOT output STREQUAL reference)
+  list (APPEND errors "<STRING:UUID,NAMESPACE:6ba7b810-9dad-11d1-80b4-00c04fd430c8,NAME:www.example.com,TYPE:SHA1> returns bad data: ${output}")
+endif()
+
+
+check_errors("STRING:UUID" ${errors})

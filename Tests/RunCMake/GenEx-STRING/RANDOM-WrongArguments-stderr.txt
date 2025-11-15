@@ -1,0 +1,18 @@
+CMake Error at RANDOM-WrongArguments\.cmake:[0-9]+ \(add_custom_target\):
+  Error evaluating generator expression:
+
+    \$<STRING:RANDOM,LENGTH:foo>
+
+  LENGTH:foo: invalid numeric value for 'LENGTH:' option.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
+
+
+CMake Error at RANDOM-WrongArguments\.cmake:[0-9]+ \(add_custom_target\):
+  Error evaluating generator expression:
+
+    \$<STRING:RANDOM,RANDOM_SEED:foo>
+
+  RANDOM_SEED:foo: invalid numeric value for 'RANDOM_SEED:' option.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)

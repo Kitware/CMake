@@ -1,0 +1,44 @@
+
+cmake_minimum_required(VERSION 4.2...4.3)
+
+include ("${RunCMake_SOURCE_DIR}/check_errors.cmake")
+unset (errors)
+
+string(REPLACE  "bcd" "BCD" reference "abcdabcd")
+set(output "$<STRING:REPLACE,abcdabcd,bcd,BCD>")
+if (NOT output STREQUAL reference)
+  list (APPEND errors "<STRING:REPLACE,abcdabcd,bcd,BCD> returns bad data: ${output}")
+endif()
+set(output "$<STRING:REPLACE,STRING,abcdabcd,bcd,BCD>")
+if (NOT output STREQUAL reference)
+  list (APPEND errors "<STRING:REPLACE,STRING,abcdabcd,bcd,BCD> returns bad data: ${output}")
+endif()
+
+string(REPLACE  "bcd" "" reference "abcdabcd")
+set(output "$<STRING:REPLACE,abcdabcd,bcd,>")
+if (NOT output STREQUAL reference)
+  list (APPEND errors "<STRING:REPLACE,abcdabcd,bcd,> returns bad data: ${output}")
+endif()
+set(output "$<STRING:REPLACE,STRING,abcdabcd,bcd,>")
+if (NOT output STREQUAL reference)
+  list (APPEND errors "<STRING:REPLACE,STRING,abcdabcd,bcd,> returns bad data: ${output}")
+endif()
+
+string(REPLACE  "xyz" "BCD" reference "abcdabcd")
+set(output "$<STRING:REPLACE,abcdabcd,xyz,BCD>")
+if (NOT output STREQUAL reference)
+  list (APPEND errors "<STRING:REPLACE,abcdabcd,xyz,BCD> returns bad data: ${output}")
+endif()
+set(output "$<STRING:REPLACE,STRING,abcdabcd,xyz,BCD>")
+if (NOT output STREQUAL reference)
+  list (APPEND errors "<STRING:REPLACE,STRING,abcdabcd,xyz,BCD> returns bad data: ${output}")
+endif()
+
+string(REGEX REPLACE  "bcd" "BCD" reference "abcdabcd")
+set(output "$<STRING:REPLACE,REGEX,abcdabcd,bcd,BCD>")
+if (NOT output STREQUAL reference)
+  list (APPEND errors "<STRING:REPLACE,REGEX,abcdabcd,bcd,BCD> returns bad data: ${output}")
+endif()
+
+
+check_errors("STRING:REPLACE" ${errors})

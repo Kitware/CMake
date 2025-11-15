@@ -1,0 +1,32 @@
+
+cmake_minimum_required(VERSION 4.2...4.3)
+
+include ("${RunCMake_SOURCE_DIR}/check_errors.cmake")
+unset (errors)
+
+string(JOIN "|" reference "ab" "cd")
+set(output "$<STRING:JOIN,|,ab,cd>")
+if (NOT output STREQUAL reference)
+  list (APPEND errors "<STRING:JOIN,|,ab,cd> returns bad data: ${output}")
+endif()
+
+string(JOIN "" reference "ab" "cd")
+set(output "$<STRING:JOIN,,ab,cd>")
+if (NOT output STREQUAL reference)
+  list (APPEND errors "<STRING:JOIN,,ab,cd> returns bad data: ${output}")
+endif()
+
+string(JOIN "|" reference)
+set(output "$<STRING:JOIN,|,>")
+if (NOT output STREQUAL reference)
+  list (APPEND errors "<STRING:JOIN,|,> returns bad data: ${output}")
+endif()
+
+string(JOIN "" reference)
+set(output "$<STRING:JOIN,,>")
+if (NOT output STREQUAL reference)
+  list (APPEND errors "<STRING:JOIN,,> returns bad data: ${output}")
+endif()
+
+
+check_errors("STRING:JOIN" ${errors})

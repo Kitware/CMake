@@ -1,0 +1,40 @@
+
+cmake_minimum_required(VERSION 4.2...4.3)
+
+include ("${RunCMake_SOURCE_DIR}/check_errors.cmake")
+unset (errors)
+
+string(REGEX MATCH "cd" reference "abcdabcd")
+set(output "$<STRING:MATCH,abcdabcd,cd>")
+if (NOT output STREQUAL reference)
+  list (APPEND errors "<STRING:MATCH,abcdabcd,cd> returns bad data: ${output}")
+endif()
+set(output "$<STRING:MATCH,abcdabcd,SEEK:ONCE,cd>")
+if (NOT output STREQUAL reference)
+  list (APPEND errors "<STRING:MATCH,abcdabcd,SEEK:ONCE,cd> returns bad data: ${output}")
+endif()
+
+string(REGEX MATCH "(b|B)cd" reference "abcdABcd")
+set(output "$<STRING:MATCH,abcdABcd,(b|B)cd>")
+if (NOT output STREQUAL reference)
+  list (APPEND errors "<STRING:MATCH,abcdABcd,B(cd)> returns bad data: ${output}")
+endif()
+set(output "$<STRING:MATCH,abcdABcd,(b|B)cd,SEEK:ONCE>")
+if (NOT output STREQUAL reference)
+  list (APPEND errors "<STRING:MATCH,abcdABcd,B(cd),SEEK:ONCE> returns bad data: ${output}")
+endif()
+
+string(REGEX MATCHALL "cd" reference "abcdabcd")
+set(output "$<STRING:MATCH,abcdabcd,SEEK:ALL,cd>")
+if (NOT output STREQUAL reference)
+  list (APPEND errors "<STRING:MATCH,abcdabcd,SEEK:ALL,cd> returns bad data: ${output}")
+endif()
+
+string(REGEX MATCHALL "(b|B)cd" reference "abcdABcd")
+set(output "$<STRING:MATCH,abcdABcd,(b|B)cd,SEEK:ALL>")
+if (NOT output STREQUAL reference)
+  list (APPEND errors "<STRING:MATCH,abcdABcd,B(cd),SEEK:ALL> returns bad data: ${output}")
+endif()
+
+
+check_errors("STRING:MATCH" ${errors})

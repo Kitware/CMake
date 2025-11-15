@@ -65,7 +65,7 @@ public:
     InstallInterface
   };
 
-  static std::string Preprocess(std::string const& input,
+  static std::string Preprocess(cm::string_view input,
                                 PreprocessContext context,
                                 cm::string_view importPrefix = {});
 

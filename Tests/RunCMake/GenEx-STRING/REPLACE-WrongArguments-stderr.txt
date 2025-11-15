@@ -1,0 +1,18 @@
+CMake Error at REPLACE-WrongArguments\.cmake:[0-9]+ \(add_custom_target\):
+  Error evaluating generator expression:
+
+    \$<STRING:REPLACE,FOO,string,\.\+,>
+
+  'FOO' is unexpected.  'STRING' or 'REGEX' expected.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
+
+
+CMake Error at REPLACE-WrongArguments\.cmake:[0-9]+ \(add_custom_target\):
+  Error evaluating generator expression:
+
+    \$<STRING:REPLACE,REGEX,string,\(,>
+
+  Failed to compile regex "\("
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)

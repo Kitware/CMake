@@ -20,8 +20,7 @@ cmStringReplaceHelper::cmStringReplaceHelper(std::string const& regex,
   this->ParseReplaceExpression();
 }
 
-bool cmStringReplaceHelper::Replace(std::string const& input,
-                                    std::string& output)
+bool cmStringReplaceHelper::Replace(cm::string_view input, std::string& output)
 {
   output.clear();
 
@@ -36,7 +35,7 @@ bool cmStringReplaceHelper::Replace(std::string const& input,
   auto& re = this->RegularExpression;
   std::string::size_type base = 0;
   unsigned optNonEmpty = 0;
-  while (re.find(input, base, optAnchor | optNonEmpty)) {
+  while (re.find(input.data(), base, optAnchor | optNonEmpty)) {
     if (this->Makefile) {
       this->Makefile->ClearMatches();
       this->Makefile->StoreMatches(re);

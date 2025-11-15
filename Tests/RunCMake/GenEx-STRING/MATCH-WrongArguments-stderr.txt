@@ -1,0 +1,28 @@
+CMake Error at MATCH-WrongArguments\.cmake:[0-9]+ \(add_custom_target\):
+  Error evaluating generator expression:
+
+    \$<STRING:MATCH,string,\(>
+
+  Failed to compile regex "\("
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
+
+
+CMake Error at MATCH-WrongArguments\.cmake:[0-9]+ \(add_custom_target\):
+  Error evaluating generator expression:
+
+    \$<STRING:MATCH,string,FOO,\.\+>
+
+  Expected option 'SEEK:' is missing.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
+
+
+CMake Error at MATCH-WrongArguments\.cmake:[0-9]+ \(add_custom_target\):
+  Error evaluating generator expression:
+
+    \$<STRING:MATCH,string,SEEK:FOO,\.\+>
+
+  Invalid value for 'SEEK:' option.  'ONCE' or 'ALL' expected.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)

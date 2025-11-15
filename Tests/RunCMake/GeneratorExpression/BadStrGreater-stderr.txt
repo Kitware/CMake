@@ -1,0 +1,40 @@
+CMake Error at BadStrGreater.cmake:1 \(add_custom_target\):
+  Error evaluating generator expression:
+
+    \$<STRGREATER>
+
+  \$<STRGREATER> expression requires 2 comma separated parameters, but got 0
+  instead.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
++CMake Error at BadStrGreater.cmake:1 \(add_custom_target\):
+  Error evaluating generator expression:
+
+    \$<STRGREATER:>
+
+  \$<STRGREATER> expression requires 2 comma separated parameters, but got 1
+  instead.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
++
+CMake Error at BadStrGreater.cmake:1 \(add_custom_target\):
+  Error evaluating generator expression:
+
+    \$<STRGREATER:,,>
+
+  \$<STRGREATER> expression requires 2 comma separated parameters, but got 3
+  instead.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
++
+CMake Error at BadStrGreater.cmake:1 \(add_custom_target\):
+  Error evaluating generator expression:
+
+    \$<STRGREATER:something,,>
+
+  \$<STRGREATER> expression requires 2 comma separated parameters, but got 3
+  instead.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
++
+CMake Generate step failed\.  Build files cannot be regenerated correctly\.$

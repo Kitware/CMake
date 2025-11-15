@@ -1,0 +1,20 @@
+
+cmake_minimum_required(VERSION 4.2...4.3)
+
+include ("${RunCMake_SOURCE_DIR}/check_errors.cmake")
+unset (errors)
+
+string(ASCII 32 reference)
+set(output "$<STRING:ASCII,32>")
+if (NOT output STREQUAL reference)
+  list (APPEND errors "<STRING:ASCII,32> returns bad data: ${output}")
+endif()
+
+string(ASCII 32 64 reference)
+set(output "$<STRING:ASCII,32,64>")
+if (NOT output STREQUAL reference)
+  list (APPEND errors "<STRING:ASCII,32,64> returns bad data: ${output}")
+endif()
+
+
+check_errors("STRING:ASCII" ${errors})

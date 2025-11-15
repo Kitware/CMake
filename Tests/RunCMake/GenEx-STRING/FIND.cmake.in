@@ -1,0 +1,48 @@
+
+cmake_minimum_required(VERSION 4.2...4.3)
+
+include ("${RunCMake_SOURCE_DIR}/check_errors.cmake")
+unset (errors)
+
+string(FIND  "abcdabcd" "cd" reference)
+set(output "$<STRING:FIND,abcdabcd,cd>")
+if (NOT output STREQUAL reference)
+  list (APPEND errors "<STRING:FIND,abcdabcd,cd> returns bad data: ${output}")
+endif()
+set(output "$<STRING:FIND,abcdabcd,FROM:BEGIN,cd>")
+if (NOT output STREQUAL reference)
+  list (APPEND errors "<STRING:FIND,abcdabcd,FROM:BEGIN,cd> returns bad data: ${output}")
+endif()
+set(output "$<STRING:FIND,abcdabcd,cd,FROM:BEGIN>")
+if (NOT output STREQUAL reference)
+  list (APPEND errors "<STRING:FIND,abcdabcd,cd,FROM:BEGIN> returns bad data: ${output}")
+endif()
+
+string(FIND  "abcdabcd" "cd" reference REVERSE)
+set(output "$<STRING:FIND,abcdabcd,FROM:END,cd>")
+if (NOT output STREQUAL reference)
+  list (APPEND errors "<STRING:FIND,abcdabcd,FROM:END,cd> returns bad data: ${output}")
+endif()
+set(output "$<STRING:FIND,abcdabcd,cd,FROM:END>")
+if (NOT output STREQUAL reference)
+  list (APPEND errors "<STRING:FIND,abcdabcd,cd,FROM:END> returns bad data: ${output}")
+endif()
+
+string(FIND  "abcdabcd" "xy" reference)
+set(output "$<STRING:FIND,abcdabcd,xy>")
+if (NOT output STREQUAL reference)
+  list (APPEND errors "<STRING:FIND,abcdabcd,xy> returns bad data: ${output}")
+endif()
+set(output "$<STRING:FIND,abcdabcd,xy,FROM:BEGIN>")
+if (NOT output STREQUAL reference)
+  list (APPEND errors "<STRING:FIND,abcdabcd,xy,FROM:BEGIN> returns bad data: ${output}")
+endif()
+
+string(FIND  "abcdabcd" "xy" reference REVERSE)
+set(output "$<STRING:FIND,abcdabcd,xy,FROM:END>")
+if (NOT output STREQUAL reference)
+  list (APPEND errors "<STRING:FIND,abcdabcd,xy,FROM:END> returns bad data: ${output}")
+endif()
+
+
+check_errors("STRING:FIND" ${errors})
