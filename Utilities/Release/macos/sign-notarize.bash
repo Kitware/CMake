@@ -91,6 +91,7 @@ readonly vol_name="$(basename "${dmg%.dmg}")"
 readonly vol_path="/Volumes/$vol_name"
 hdiutil attach "${udrw_dmg}"
 
+# Sign the application.
 codesign --verify --timestamp --options=runtime --verbose --force --deep \
   -s "$id" \
   --entitlements "$entitlements_xml" \
@@ -102,8 +103,13 @@ codesign --verify --timestamp --options=runtime --verbose --force --deep \
   "$vol_path"/CMake.app/Contents/PlugIns/*/lib*.dylib \
   "$vol_path"/CMake.app
 
+# Prepare an application archive.
 ditto -c -k --keepParent "$vol_path/CMake.app" "$tmpdir/CMake.app.zip"
+
+# Notarize the application.
 xcrun notarytool submit "$tmpdir/CMake.app.zip" --keychain-profile "$keychain_profile" --wait
+
+# Staple the notarization.
 xcrun stapler staple "$vol_path/CMake.app"
 
 # Create a tarball of the volume next to the original disk image.
