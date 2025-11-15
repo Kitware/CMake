@@ -1,3 +1,6 @@
+# Avoid QtTest library timeouts before ctest's timeout.
+set(ENV{QTEST_FUNCTION_TIMEOUT} 3600000)
+
 function(run_cmake_gui_test name)
   if(DEFINED ENV{CMakeGUITest_TEST_FILTER} AND NOT name MATCHES "$ENV{CMakeGUITest_TEST_FILTER}")
     return()
