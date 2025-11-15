@@ -8,7 +8,7 @@ RunCMake_check_slnx("${RunCMake_TEST_BINARY_DIR}/CustomGuid.slnx" [[
     <BuildType Name="RelWithDebInfo"/>
     <Platform Name="[^"]+"/>
   </Configurations>
-  <Project Path="ALL_BUILD\.vcxproj" Id="[0-9a-f-]+">
+  <Project Path="ALL_BUILD\.vcxproj" Id="[0-9a-f-]+" DefaultStartup="true">
     <BuildDependency Project="ZERO_CHECK\.vcxproj"/>
     <BuildDependency Project="external.project"/>
     <Build Solution="Debug\|\*" Project="false"/>
