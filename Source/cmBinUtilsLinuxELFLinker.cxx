@@ -204,6 +204,7 @@ bool cmBinUtilsLinuxELFLinker::ResolveDependency(
     path = cmStrCat(searchPath, '/', name);
     if (cmSystemTools::PathExists(path) &&
         FileHasArchitecture(path.c_str(), this->Machine)) {
+      this->NormalizePath(path);
       resolved = true;
       return true;
     }

@@ -1122,6 +1122,8 @@ Handling Runtime Binaries
 
   The following arguments specify filters for including or excluding libraries
   to be resolved. See below for a full description of how they work.
+  Directory separators in file paths may be matched using forward
+  slashes unless policy :policy:`CMP0207` is not set to ``NEW``.
 
     ``PRE_INCLUDE_REGEXES <regexes>...``
       List of pre-include regexes through which to filter the names of

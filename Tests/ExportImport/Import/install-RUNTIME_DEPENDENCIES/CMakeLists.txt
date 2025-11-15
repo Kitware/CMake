@@ -1,4 +1,5 @@
 set(CMAKE_SKIP_RPATH OFF)
+cmake_policy(SET CMP0207 NEW)
 
 # Import targets from the install tree.
 include(${Import_BINARY_DIR}/../Root/install-RUNTIME_DEPENDENCY_SET/targets.cmake)

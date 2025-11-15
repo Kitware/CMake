@@ -24,4 +24,6 @@ protected:
   cmRuntimeDependencyArchive* Archive;
 
   void SetError(std::string const& e);
+
+  void NormalizePath(std::string& path) const;
 };
