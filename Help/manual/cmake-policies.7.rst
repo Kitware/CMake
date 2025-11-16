@@ -7,6 +7,8 @@ cmake-policies(7)
 
    .. contents::
 
+.. _cmake-policies-intro:
+
 Introduction
 ============
 
