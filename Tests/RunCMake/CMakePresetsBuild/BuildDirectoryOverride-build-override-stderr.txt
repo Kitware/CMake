@@ -1,0 +1,2 @@
+^Error: [^
+]*/Tests/RunCMake/build2 is not a directory$
