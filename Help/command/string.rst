@@ -22,7 +22,7 @@ Synopsis
     string(`JOIN`_ <glue> <out-var> [<input>...])
     string(`TOLOWER`_ <string> <out-var>)
     string(`TOUPPER`_ <string> <out-var>)
-    string(`LENGTH <LENGTH_>`_ <string> <out-var>)
+    string(`LENGTH`_ <string> <out-var>)
     string(`SUBSTRING`_ <string> <begin> <length> <out-var>)
     string(`STRIP`_ <string> <out-var>)
     string(`GENEX_STRIP`_ <string> <out-var>)
@@ -45,16 +45,16 @@ Synopsis
 
   `JSON`_
     string(JSON <out-var> [ERROR_VARIABLE <error-var>]
-           {`GET <JSON-GET_>`_ | `TYPE <JSON-TYPE_>`_ | `LENGTH <JSON-LENGTH_>`_ | `REMOVE <JSON-REMOVE_>`_}
+           {`GET <JSON-GET_>`__ | `TYPE <JSON-TYPE_>`__ | `LENGTH <JSON-LENGTH_>`__ | `REMOVE <JSON-REMOVE_>`__}
            <json-string> <member|index> [<member|index> ...])
     string(JSON <out-var> [ERROR_VARIABLE <error-var>]
-           `MEMBER <JSON-MEMBER_>`_ <json-string>
+           `MEMBER <JSON-MEMBER_>`__ <json-string>
            [<member|index> ...] <index>)
     string(JSON <out-var> [ERROR_VARIABLE <error-var>]
-           `SET <JSON-SET_>`_ <json-string>
+           `SET <JSON-SET_>`__ <json-string>
            <member|index> [<member|index> ...] <value>)
     string(JSON <out-var> [ERROR_VARIABLE <error-var>]
-           `EQUAL <JSON-EQUAL_>`_ <json-string1> <json-string2>)
+           `EQUAL <JSON-EQUAL_>`__ <json-string1> <json-string2>)
 
 Search and Replace
 ^^^^^^^^^^^^^^^^^^
