@@ -17,6 +17,7 @@ RunCMake_check_slnx("${RunCMake_TEST_BINARY_DIR}/AutoType.slnx" [[
     <BuildDependency Project="external\.vbproj"/>
     <BuildDependency Project="external\.vdproj"/>
     <BuildDependency Project="external\.vfproj"/>
+    <BuildDependency Project="external\.wapproj"/>
     <BuildDependency Project="external\.wixproj"/>
     <Build Solution="Debug\|\*" Project="false"/>
     <Build Solution="Release\|\*" Project="false"/>
@@ -44,6 +45,9 @@ RunCMake_check_slnx("${RunCMake_TEST_BINARY_DIR}/AutoType.slnx" [[
     <BuildDependency Project="ZERO_CHECK.vcxproj"/>
   </Project>
   <Project Path="external\.vfproj" Type="6989167d-11e4-40fe-8c1a-2192a86a7e90" Id="[0-9a-f-]+">
+    <BuildDependency Project="ZERO_CHECK.vcxproj"/>
+  </Project>
+  <Project Path="external\.wapproj" Type="c7167f0d-bc9f-4e6e-afe1-012c56b48db5" Id="[0-9a-f-]+">
     <BuildDependency Project="ZERO_CHECK.vcxproj"/>
   </Project>
   <Project Path="external\.wixproj" Type="930c7802-8a8c-48f9-8165-68863bccd9dd" Id="[0-9a-f-]+">
