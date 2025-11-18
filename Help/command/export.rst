@@ -162,6 +162,32 @@ converted to lower case.
 
 See :command:`install(PACKAGE_INFO)` for a description of the other options.
 
+Exporting Software Bill of Materials (SBOM) Documents
+"""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+.. code-block:: cmake
+
+    export(EXPORT <export-name> SBOM <sbom-name>
+           [PROJECT <project-name>|NO_PROJECT_METADATA]
+           [DESTINATION <dir>]
+           [VERSION <major>[.<minor>[.<patch>[.<tweak>]]]]
+           [LICENSE <license-string>]
+           [DESCRIPTION <description-string>]
+           [HOMEPAGE_URL <url-string>]
+           [PACKAGE_URL <url-string>]
+           [FORMAT <string>])
+
+.. versionadded:: 4.3
+.. note::
+
+  Experimental. Gated by ``CMAKE_EXPERIMENTAL_GENERATE_SBOM``.
+
+Generates a software bill of materials (SBOM) document describing the targets
+in the export ``<export-name>`` and their dependencies in the build tree
+
+See :command:`install(SBOM)` for details about the supported SBOM formats and a
+description of the other options.
+
 Exporting Packages
 ^^^^^^^^^^^^^^^^^^
 
