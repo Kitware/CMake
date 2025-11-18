@@ -311,6 +311,7 @@ void WriteSlnxProject(cmXMLElement& xmlParent, Solution const& solution,
 {
   cmXMLElement xmlProject(xmlParent, "Project");
   xmlProject.Attribute("Path", project.Path);
+  xmlProject.Attribute("Type", cmSystemTools::LowerCase(project.TypeId));
   xmlProject.Attribute("Id", cmSystemTools::LowerCase(project.Id));
   if (project.Name == solution.StartupProject) {
     xmlProject.Attribute("DefaultStartup", "true");
