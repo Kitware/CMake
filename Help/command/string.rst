@@ -22,7 +22,7 @@ Synopsis
     string(`JOIN`_ <glue> <out-var> [<input>...])
     string(`TOLOWER`_ <string> <out-var>)
     string(`TOUPPER`_ <string> <out-var>)
-    string(`LENGTH <LENGTH_>`_ <string> <out-var>)
+    string(`LENGTH`_ <string> <out-var>)
     string(`SUBSTRING`_ <string> <begin> <length> <out-var>)
     string(`STRIP`_ <string> <out-var>)
     string(`GENEX_STRIP`_ <string> <out-var>)
@@ -45,16 +45,16 @@ Synopsis
 
   `JSON`_
     string(JSON <out-var> [ERROR_VARIABLE <error-var>]
-           {`GET <JSON GET_>`_ | `TYPE <JSON TYPE_>`_ | `LENGTH <JSON LENGTH_>`_ | `REMOVE <JSON REMOVE_>`_}
+           {`GET <JSON-GET_>`__ | `TYPE <JSON-TYPE_>`__ | `LENGTH <JSON-LENGTH_>`__ | `REMOVE <JSON-REMOVE_>`__}
            <json-string> <member|index> [<member|index> ...])
     string(JSON <out-var> [ERROR_VARIABLE <error-var>]
-           `MEMBER <JSON MEMBER_>`_ <json-string>
+           `MEMBER <JSON-MEMBER_>`__ <json-string>
            [<member|index> ...] <index>)
     string(JSON <out-var> [ERROR_VARIABLE <error-var>]
-           `SET <JSON SET_>`_ <json-string>
+           `SET <JSON-SET_>`__ <json-string>
            <member|index> [<member|index> ...] <value>)
     string(JSON <out-var> [ERROR_VARIABLE <error-var>]
-           `EQUAL <JSON EQUAL_>`_ <json-string1> <json-string2>)
+           `EQUAL <JSON-EQUAL_>`__ <json-string1> <json-string2>)
 
 Search and Replace
 ^^^^^^^^^^^^^^^^^^
@@ -539,7 +539,7 @@ string is passed as a single argument even if it contains semicolons.
 .. signature::
   string(JSON <out-var> [ERROR_VARIABLE <error-variable>]
          GET <json-string> <member|index> [<member|index> ...])
-  :target: JSON GET
+  :target: JSON-GET
 
   Get an element from ``<json-string>`` at the location given
   by the list of ``<member|index>`` arguments.
@@ -551,7 +551,7 @@ string is passed as a single argument even if it contains semicolons.
 .. signature::
   string(JSON <out-var> [ERROR_VARIABLE <error-variable>]
          TYPE <json-string> <member|index> [<member|index> ...])
-  :target: JSON TYPE
+  :target: JSON-TYPE
 
   Get the type of an element in ``<json-string>`` at the location
   given by the list of ``<member|index>`` arguments. The ``<out-var>``
@@ -562,7 +562,7 @@ string is passed as a single argument even if it contains semicolons.
   string(JSON <out-var> [ERROR_VARIABLE <error-var>]
          MEMBER <json-string>
          [<member|index> ...] <index>)
-  :target: JSON MEMBER
+  :target: JSON-MEMBER
 
   Get the name of the ``<index>``-th member in ``<json-string>``
   at the location given by the list of ``<member|index>`` arguments.
@@ -571,7 +571,7 @@ string is passed as a single argument even if it contains semicolons.
 .. signature::
   string(JSON <out-var> [ERROR_VARIABLE <error-variable>]
          LENGTH <json-string> [<member|index> ...])
-  :target: JSON LENGTH
+  :target: JSON-LENGTH
 
   Get the length of an element in ``<json-string>`` at the location
   given by the list of ``<member|index>`` arguments.
@@ -580,7 +580,7 @@ string is passed as a single argument even if it contains semicolons.
 .. signature::
   string(JSON <out-var> [ERROR_VARIABLE <error-variable>]
          REMOVE <json-string> <member|index> [<member|index> ...])
-  :target: JSON REMOVE
+  :target: JSON-REMOVE
 
   Remove an element from ``<json-string>`` at the location
   given by the list of ``<member|index>`` arguments. The JSON string
@@ -589,7 +589,7 @@ string is passed as a single argument even if it contains semicolons.
 .. signature::
   string(JSON <out-var> [ERROR_VARIABLE <error-variable>]
          SET <json-string> <member|index> [<member|index> ...] <value>)
-  :target: JSON SET
+  :target: JSON-SET
 
   Set an element in ``<json-string>`` at the location
   given by the list of ``<member|index>`` arguments to ``<value>``.
@@ -601,7 +601,7 @@ string is passed as a single argument even if it contains semicolons.
 .. signature::
   string(JSON <out-var> [ERROR_VARIABLE <error-var>]
          EQUAL <json-string1> <json-string2>)
-  :target: JSON EQUAL
+  :target: JSON-EQUAL
 
   Compare the two JSON objects given by ``<json-string1>``
   and ``<json-string2>`` for equality.  The contents of ``<json-string1>``
