@@ -58,6 +58,15 @@ public:
     cmGeneratorTarget const* currentTarget = nullptr,
     std::string const& language = std::string());
 
+  static bool ForbidGeneratorExpressions(
+    cmGeneratorTarget const* target, std::string const& propertyName,
+    std::string const& propertyValue, std::string& evaluatedValue,
+    std::map<std::string, std::vector<std::string>>& allowList);
+
+  static bool ForbidGeneratorExpressions(cmGeneratorTarget const* target,
+                                         std::string const& propertyName,
+                                         std::string const& propertyValue);
+
   enum PreprocessContext
   {
     StripAllGeneratorExpressions,
