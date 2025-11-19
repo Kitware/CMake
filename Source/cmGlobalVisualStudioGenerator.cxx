@@ -798,6 +798,9 @@ cm::string_view cmGlobalVisualStudioGenerator::ExternalProjectTypeId(
   if (extension == ".dbproj"_s) {
     return Solution::Project::TypeIdDatabase;
   }
+  if (extension == ".wapproj"_s) {
+    return Solution::Project::TypeIdWinAppPkg;
+  }
   if (extension == ".wixproj"_s) {
     return Solution::Project::TypeIdWiX;
   }
