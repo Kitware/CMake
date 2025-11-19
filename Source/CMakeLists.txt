@@ -203,6 +203,8 @@ add_library(
   cmExportBuildFileGenerator.cxx
   cmExportBuildPackageInfoGenerator.h
   cmExportBuildPackageInfoGenerator.cxx
+  cmExportBuildSbomGenerator.h
+  cmExportBuildSbomGenerator.cxx
   cmExportCMakeConfigGenerator.h
   cmExportCMakeConfigGenerator.cxx
   cmExportFileGenerator.h

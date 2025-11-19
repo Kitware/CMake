@@ -22,6 +22,7 @@
 #include "cmExportBuildCMakeConfigGenerator.h"
 #include "cmExportBuildFileGenerator.h"
 #include "cmExportBuildPackageInfoGenerator.h"
+#include "cmExportBuildSbomGenerator.h"
 #include "cmExportSet.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGlobalGenerator.h"
@@ -30,6 +31,7 @@
 #include "cmPackageInfoArguments.h"
 #include "cmPolicies.h"
 #include "cmRange.h"
+#include "cmSbomArguments.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSubcommandTable.h"
@@ -217,6 +219,7 @@ static bool HandleExportMode(std::vector<std::string> const& args,
     ArgumentParser::NonEmpty<std::string> Filename;
     ArgumentParser::NonEmpty<std::string> CxxModulesDirectory;
     cm::optional<cmPackageInfoArguments> PackageInfo;
+    cm::optional<cmSbomArguments> Sbom;
     bool ExportPackageDependencies = false;
   };
 
@@ -243,16 +246,29 @@ static bool HandleExportMode(std::vector<std::string> const& args,
                          &ExportArguments::PackageInfo);
   }
 
+  cmArgumentParser<cmSbomArguments> sbomParser;
+  cmSbomArguments::Bind(sbomParser);
+
+  if (cmExperimental::HasSupportEnabled(
+        status.GetMakefile(), cmExperimental::Feature::GenerateSbom)) {
+    parser.BindSubParser("SBOM"_s, sbomParser, &ExportArguments::Sbom);
+  }
+
   std::vector<std::string> unknownArgs;
   ExportArguments arguments = parser.Parse(args, &unknownArgs);
 
   cmMakefile& mf = status.GetMakefile();
   cmGlobalGenerator* gg = mf.GetGlobalGenerator();
 
+  if (arguments.PackageInfo && arguments.Sbom) {
+    status.SetError("PACKAGE_INFO and SBOM are mutually exclusive.");
+    return false;
+  }
+
   if (!arguments.Check(args[0], &unknownArgs, status)) {
     cmPolicies::PolicyStatus const p =
       status.GetMakefile().GetPolicyStatus(cmPolicies::CMP0208);
-    if (arguments.PackageInfo || !unknownArgs.empty() ||
+    if (arguments.PackageInfo || arguments.Sbom || !unknownArgs.empty() ||
         p == cmPolicies::NEW) {
       return false;
     }
@@ -279,11 +295,31 @@ static bool HandleExportMode(std::vector<std::string> const& args,
       return false;
     }
   }
+  if (arguments.Sbom) {
+    if (arguments.Sbom->PackageName.empty()) {
+      status.SetError("SBOM missing required value.");
+      return false;
+    }
+    if (!arguments.Filename.empty()) {
+      status.SetError("SBOM and FILE are mutually exclusive.");
+      return false;
+    }
+    if (!arguments.Namespace.empty()) {
+      status.SetError("SBOM and NAMESPACE are mutually exclusive.");
+      return false;
+    }
+    if (!arguments.Sbom->Check(status) ||
+        !arguments.Sbom->SetMetadataFromProject(status)) {
+      return false;
+    }
+  }
 
   std::string fname;
   if (arguments.Filename.empty()) {
     if (arguments.PackageInfo) {
       fname = arguments.PackageInfo->GetPackageFileName();
+    } else if (arguments.Sbom) {
+      fname = arguments.Sbom->GetPackageFileName();
     } else {
       fname = arguments.ExportSetName + ".cmake";
     }
@@ -338,6 +374,9 @@ static bool HandleExportMode(std::vector<std::string> const& args,
     auto ebpg = cm::make_unique<cmExportBuildPackageInfoGenerator>(
       *arguments.PackageInfo);
     ebfg = std::move(ebpg);
+  } else if (arguments.Sbom) {
+    auto ebsg = cm::make_unique<cmExportBuildSbomGenerator>(*arguments.Sbom);
+    ebfg = std::move(ebsg);
   } else {
     auto ebcg = cm::make_unique<cmExportBuildCMakeConfigGenerator>();
     ebcg->SetNamespace(arguments.Namespace);

@@ -50,9 +50,9 @@ protected:
                            cmGeneratorTarget const* /* depender */,
                            cmGeneratorTarget* /* dependee */) override;
 
-  bool CheckInterfaceDirs(std::string const& prepro,
-                          cmGeneratorTarget const* target,
-                          std::string const& prop) const override;
+  bool CheckInterfaceDirs(std::string const& /* prepro */,
+                          cmGeneratorTarget const* /* target */,
+                          std::string const& /* prop */) const override;
 
   char GetConfigFileNameSeparator() const override { return '@'; }
 
