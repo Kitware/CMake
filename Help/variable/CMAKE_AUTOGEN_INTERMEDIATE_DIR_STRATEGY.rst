@@ -22,6 +22,12 @@ used.
 .. note::
   This only works as a cache variable, not a locally-scoped variable.
 
+This is supported by the following generators:
+
+- :ref:`Ninja Generators`
+- :ref:`Makefile Generators`
+- :ref:`Visual Studio Generators`
+
 .. note::
   Not all generators support all strategies and paths may differ between
   generators.
