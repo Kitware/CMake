@@ -5,4 +5,5 @@ check_project(AutoType externalPy  "" "888888A0-9F3D-457C-B088-3A5042F75D52" "" 
 check_project(AutoType externalVB  "" "F184B08F-C81C-45F6-A57F-5ABD9991F28F" "" "")
 check_project(AutoType externalVD  "" "54435603-DBB4-11D2-8724-00A0C9A8B90C" "" "")
 check_project(AutoType externalVF  "" "6989167D-11E4-40FE-8C1A-2192A86A7E90" "" "")
+check_project(AutoType externalWAP "" "C7167F0D-BC9F-4E6E-AFE1-012C56B48DB5" "" "")
 check_project(AutoType externalWiX "" "930C7802-8A8C-48F9-8165-68863BCCD9DD" "" "")
