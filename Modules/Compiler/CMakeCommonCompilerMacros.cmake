@@ -202,43 +202,21 @@ macro(cmake_record_hip_compile_features)
   _has_compiler_features_hip(98)
 endmacro()
 
-function(cmake_create_cxx_import_std std variable)
-  set(_cmake_supported_import_std_features
-    # Compilers support `import std` in C++20 as an extension. Skip
-    # for now.
-    # 20
-    23
-    26)
-  list(FIND _cmake_supported_import_std_features "${std}" _cmake_supported_import_std_idx)
-  if (_cmake_supported_import_std_idx EQUAL "-1")
-    set("${variable}"
-      "set(CMAKE_CXX${std}_COMPILER_IMPORT_STD_NOT_FOUND_MESSAGE \"Unsupported C++ standard: C++${std}\")\n"
-      PARENT_SCOPE)
-    return ()
-  endif ()
-  # If the target exists, skip. A toolchain file may have provided it.
-  if (TARGET "__CMAKE::CXX${std}")
-    return ()
-  endif ()
+function(cmake_cxx_find_modules_json)
   # The generator must support imported C++ modules.
   if (NOT CMAKE_GENERATOR MATCHES "Ninja")
-    set("${variable}"
-      "set(CMAKE_CXX${std}_COMPILER_IMPORT_STD_NOT_FOUND_MESSAGE \"Unsupported generator: ${CMAKE_GENERATOR}\")\n"
-      PARENT_SCOPE)
+    set(CMAKE_CXX_COMPILER_IMPORT_STD_ERROR_MESSAGE "Unsupported generator: ${CMAKE_GENERATOR}" PARENT_SCOPE)
     return ()
   endif ()
+
   # Check if the compiler understands how to `import std;`.
   include("${CMAKE_ROOT}/Modules/Compiler/${CMAKE_CXX_COMPILER_ID}-CXX-CXXImportStd.cmake" OPTIONAL RESULT_VARIABLE _cmake_import_std_res)
   if (NOT _cmake_import_std_res)
-    set("${variable}"
-      "set(CMAKE_CXX${std}_COMPILER_IMPORT_STD_NOT_FOUND_MESSAGE \"Toolchain does not support discovering `import std` support\")\n"
-      PARENT_SCOPE)
+    set(CMAKE_CXX_COMPILER_IMPORT_STD_ERROR_MESSAGE "Toolchain does not support discovering module metadata" PARENT_SCOPE)
     return ()
   endif ()
-  if (NOT COMMAND _cmake_cxx_import_std)
-    set("${variable}"
-      "set(CMAKE_CXX${std}_COMPILER_IMPORT_STD_NOT_FOUND_MESSAGE \"Toolchain does not provide `import std` discovery command\")\n"
-      PARENT_SCOPE)
+  if (NOT COMMAND _cmake_cxx_find_modules_json)
+    set(CMAKE_CXX_COMPILER_IMPORT_STD_ERROR_MESSAGE "Toolchain does not provide module metadata discovery command" PARENT_SCOPE)
     return ()
   endif ()
 
@@ -249,19 +227,11 @@ function(cmake_create_cxx_import_std std variable)
     "CxxImportStd"
     _cmake_supported_import_std_experimental)
   if (NOT _cmake_supported_import_std_experimental)
-    set("${variable}"
-      "set(CMAKE_CXX${std}_COMPILER_IMPORT_STD_NOT_FOUND_MESSAGE \"Experimental `import std` support not enabled when detecting toolchain; it must be set before `CXX` is enabled (usually a `project()` call)\")\n"
-      PARENT_SCOPE)
+    set(CMAKE_CXX_COMPILER_IMPORT_STD_ERROR_MESSAGE "Experimental `import std` support not enabled when detecting toolchain; it must be set before `CXX` is enabled (usually a `project()` call)" PARENT_SCOPE)
     return ()
   endif ()
 
-  _cmake_cxx_import_std("${std}" target_definition)
-  string(CONCAT guarded_target_definition
-    "if (NOT TARGET \"__CMAKE::CXX${std}\")\n"
-    "${target_definition}"
-    "endif ()\n"
-    "if (TARGET \"__CMAKE::CXX${std}\")\n"
-    "  list(APPEND CMAKE_CXX_COMPILER_IMPORT_STD \"${std}\")\n"
-    "endif ()\n")
-  set("${variable}" "${guarded_target_definition}" PARENT_SCOPE)
+  _cmake_cxx_find_modules_json()
+  set(CMAKE_CXX_COMPILER_IMPORT_STD_ERROR_MESSAGE "${CMAKE_CXX_COMPILER_IMPORT_STD_ERROR_MESSAGE}" PARENT_SCOPE)
+  set(CMAKE_CXX_STDLIB_MODULES_JSON "${CMAKE_CXX_STDLIB_MODULES_JSON}" PARENT_SCOPE)
 endfunction()

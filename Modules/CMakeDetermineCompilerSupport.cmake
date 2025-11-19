@@ -105,18 +105,21 @@ function(cmake_determine_compiler_support lang)
       )
     endif()
 
-    # Create targets for use with `import std;` here.
-    set(CMAKE_CXX_IMPORT_STD "")
-    foreach (_cmake_import_std_version IN ITEMS 23 26)
-      if (CMAKE_CXX${_cmake_import_std_version}_COMPILE_FEATURES)
-        set(_cmake_cxx_import_std "")
-        cmake_create_cxx_import_std("${_cmake_import_std_version}" _cmake_cxx_import_std)
-        if (_cmake_cxx_import_std)
-          string(APPEND CMAKE_CXX_IMPORT_STD "### Imported target for C++${_cmake_import_std_version} standard library\n")
-          string(APPEND CMAKE_CXX_IMPORT_STD "${_cmake_cxx_import_std}\n\n")
-        endif ()
-      endif ()
-    endforeach ()
+    # Find the module metadata for import std
+    set(CMAKE_CXX_COMPILER_IMPORT_STD "")
+    cmake_cxx_find_modules_json()
+    foreach(_cmake_import_std_version IN ITEMS 23 26)
+      if(CMAKE_CXX${_cmake_import_std_version}_COMPILE_FEATURES)
+        # Modules JSON covers all versions, otherwise rely on toolchain targets
+        if(CMAKE_CXX_STDLIB_MODULES_JSON OR (TARGET "__CMAKE:CXX${_cmake_import_std_version}"))
+          list(APPEND CMAKE_CXX_COMPILER_IMPORT_STD ${_cmake_import_std_version})
+        endif()
+      endif()
+    endforeach()
+
+    set(CMAKE_CXX_COMPILER_IMPORT_STD ${CMAKE_CXX_COMPILER_IMPORT_STD} PARENT_SCOPE)
+    set(CMAKE_CXX_STDLIB_MODULES_JSON ${CMAKE_CXX_STDLIB_MODULES_JSON} PARENT_SCOPE)
+    set(CMAKE_CXX_COMPILER_IMPORT_STD_ERROR_MESSAGE "${CMAKE_CXX_COMPILER_IMPORT_STD_ERROR_MESSAGE}" PARENT_SCOPE)
 
     set(CMAKE_CXX_COMPILE_FEATURES ${CMAKE_CXX_COMPILE_FEATURES} PARENT_SCOPE)
     set(CMAKE_CXX98_COMPILE_FEATURES ${CMAKE_CXX98_COMPILE_FEATURES} PARENT_SCOPE)
@@ -126,7 +129,6 @@ function(cmake_determine_compiler_support lang)
     set(CMAKE_CXX20_COMPILE_FEATURES ${CMAKE_CXX20_COMPILE_FEATURES} PARENT_SCOPE)
     set(CMAKE_CXX23_COMPILE_FEATURES ${CMAKE_CXX23_COMPILE_FEATURES} PARENT_SCOPE)
     set(CMAKE_CXX26_COMPILE_FEATURES ${CMAKE_CXX26_COMPILE_FEATURES} PARENT_SCOPE)
-    set(CMAKE_CXX_IMPORT_STD ${CMAKE_CXX_IMPORT_STD} PARENT_SCOPE)
 
     message(CHECK_PASS "done")
 

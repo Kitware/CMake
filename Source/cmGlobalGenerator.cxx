@@ -1787,7 +1787,17 @@ void cmGlobalGenerator::ComputeTargetOrder(cmGeneratorTarget const* gt,
 bool cmGlobalGenerator::ApplyCXXStdTargets()
 {
   for (auto const& gen : this->LocalGenerators) {
-    for (auto const& tgt : gen->GetGeneratorTargets()) {
+
+    // tgt->ApplyCXXStd can create targets itself, so we need iterators which
+    // won't be invalidated by that target creation
+    auto const& genTgts = gen->GetGeneratorTargets();
+    std::vector<cmGeneratorTarget*> existingTgts;
+    existingTgts.reserve(genTgts.size());
+    for (auto const& tgt : genTgts) {
+      existingTgts.push_back(tgt.get());
+    }
+
+    for (auto const& tgt : existingTgts) {
       if (!tgt->ApplyCXXStdTargets()) {
         return false;
       }
