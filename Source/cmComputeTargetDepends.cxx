@@ -224,7 +224,7 @@ void cmComputeTargetDepends::CollectTargetDepends(size_t depender_index)
         for (cmLinkItem const& lib : impl->Libraries) {
           // Don't emit the same library twice for this target.
           if (emitted.insert(lib).second) {
-            this->AddTargetDepend(depender_index, lib, true, false);
+            this->AddTargetDepend(depender_index, lib, true, false, emitted);
             this->AddInterfaceDepends(depender_index, lib, it, emitted);
           }
         }
@@ -255,7 +255,8 @@ void cmComputeTargetDepends::CollectTargetDepends(size_t depender_index)
     for (cmLinkItem const& litem : tutils) {
       // Don't emit the same utility twice for this target.
       if (emitted.insert(litem).second) {
-        this->AddTargetDepend(depender_index, litem, false, litem.Cross);
+        this->AddTargetDepend(depender_index, litem, false, litem.Cross,
+                              emitted);
       }
     }
   }
@@ -277,7 +278,7 @@ void cmComputeTargetDepends::AddInterfaceDepends(
         // code in the project that caused this dependency to be added.
         cmLinkItem libBT = lib;
         libBT.Backtrace = dependee_backtrace;
-        this->AddTargetDepend(depender_index, libBT, true, false);
+        this->AddTargetDepend(depender_index, libBT, true, false, emitted);
         this->AddInterfaceDepends(depender_index, libBT, config, emitted);
       }
     }
@@ -343,7 +344,8 @@ void cmComputeTargetDepends::AddObjectDepends(size_t depender_index,
 
 void cmComputeTargetDepends::AddTargetDepend(size_t depender_index,
                                              cmLinkItem const& dependee_name,
-                                             bool linking, bool cross)
+                                             bool linking, bool cross,
+                                             std::set<cmLinkItem>& emitted)
 {
   // Get the depender.
   cmGeneratorTarget const* depender = this->Targets[depender_index];
@@ -370,22 +372,25 @@ void cmComputeTargetDepends::AddTargetDepend(size_t depender_index,
 
   if (dependee) {
     this->AddTargetDepend(depender_index, dependee, dependee_name.Backtrace,
-                          linking, cross);
+                          linking, cross, emitted);
   }
 }
 
 void cmComputeTargetDepends::AddTargetDepend(
   size_t depender_index, cmGeneratorTarget const* dependee,
-  cmListFileBacktrace const& dependee_backtrace, bool linking, bool cross)
+  cmListFileBacktrace const& dependee_backtrace, bool linking, bool cross,
+  std::set<cmLinkItem>& emitted)
 {
   if (!dependee->IsInBuildSystem()) {
     // Skip targets that are not in the buildsystem but follow their
     // utility dependencies.
     std::set<cmLinkItem> const& utils = dependee->GetUtilityItems();
     for (cmLinkItem const& i : utils) {
-      if (cmGeneratorTarget const* transitive_dependee = i.Target) {
-        this->AddTargetDepend(depender_index, transitive_dependee, i.Backtrace,
-                              false, i.Cross);
+      if (emitted.insert(i).second) {
+        if (cmGeneratorTarget const* transitive_dependee = i.Target) {
+          this->AddTargetDepend(depender_index, transitive_dependee,
+                                i.Backtrace, false, i.Cross, emitted);
+        }
       }
     }
   } else {

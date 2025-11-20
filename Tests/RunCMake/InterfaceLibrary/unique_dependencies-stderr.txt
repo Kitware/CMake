@@ -1,0 +1,26 @@
+The initial target dependency graph is:
+target 0 is \[lib1\]
+target 1 is \[lib2\]
+target 2 is \[top\]
+  depends on target 3 \[util\] \(strong\)
+target 3 is \[util\]
+target 4 is \[edit_cache\]
+target 5 is \[rebuild_cache\]
+.*
+The intermediate target dependency graph is:
+target 0 is \[lib1\]
+target 1 is \[lib2\]
+target 2 is \[top\]
+  depends on target 3 \[util\] \(strong\)
+target 3 is \[util\]
+target 4 is \[edit_cache\]
+target 5 is \[rebuild_cache\]
+.*
+The final target dependency graph is:
+target 0 is \[lib1\]
+target 1 is \[lib2\]
+target 2 is \[top\]
+  depends on target 3 \[util\] \(strong\)
+target 3 is \[util\]
+target 4 is \[edit_cache\]
+target 5 is \[rebuild_cache\]
