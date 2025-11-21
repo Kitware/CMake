@@ -319,6 +319,13 @@ void cmLocalGenerator::TraceDependencies() const
   }
 }
 
+#ifndef CMAKE_BOOTSTRAP
+void cmLocalGenerator::ResolveSourceGroupGenex()
+{
+  this->Makefile->ResolveSourceGroupGenex(this);
+}
+#endif
+
 void cmLocalGenerator::GenerateTestFiles()
 {
   if (!this->Makefile->IsOn("CMAKE_TESTING_ENABLED")) {

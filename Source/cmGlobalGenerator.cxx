@@ -1579,6 +1579,12 @@ bool cmGlobalGenerator::Compute()
 
   this->AddExtraIDETargets();
 
+#ifndef CMAKE_BOOTSTRAP
+  for (auto const& localGen : this->LocalGenerators) {
+    localGen->ResolveSourceGroupGenex();
+  }
+#endif
+
   // Trace the dependencies, after that no custom commands should be added
   // because their dependencies might not be handled correctly
   for (auto const& localGen : this->LocalGenerators) {

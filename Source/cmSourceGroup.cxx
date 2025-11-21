@@ -6,6 +6,8 @@
 
 #include <cm/memory>
 
+#include "cmGeneratorExpression.h"
+#include "cmSourceFile.h"
 #include "cmStringAlgorithms.h"
 
 class cmSourceGroupInternals
@@ -56,6 +58,26 @@ void cmSourceGroup::SetGroupRegex(char const* regex)
     this->GroupRegex.compile(regex);
   } else {
     this->GroupRegex.compile("^$");
+  }
+}
+
+void cmSourceGroup::ResolveGenex(cmLocalGenerator* lg,
+                                 std::string const& config)
+{
+  std::set<std::string> files;
+
+  for (std::string const& file : this->GroupFiles) {
+    files.emplace(cmGeneratorExpression::Evaluate(file, lg, config));
+  }
+
+  this->GroupFiles = std::move(files);
+
+  if (!this->Internal) {
+    return;
+  }
+
+  for (cmSourceGroup& group : this->Internal->GroupChildren) {
+    group.ResolveGenex(lg, config);
   }
 }
 

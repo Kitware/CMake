@@ -2082,6 +2082,14 @@ namespace {
 }
 
 #if !defined(CMAKE_BOOTSTRAP)
+
+void cmMakefile::ResolveSourceGroupGenex(cmLocalGenerator* lg)
+{
+  for (cmSourceGroup& sourceGroup : this->SourceGroups) {
+    sourceGroup.ResolveGenex(lg, {});
+  }
+}
+
 cmSourceGroup* cmMakefile::GetSourceGroup(
   std::vector<std::string> const& name) const
 {
