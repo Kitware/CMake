@@ -477,7 +477,7 @@ void cmExportPackageInfoGenerator::GenerateInterfaceCompileDefines(
   }
 
   if (!defines.empty()) {
-    component["compile_definitions"]["*"] = std::move(defines);
+    component["definitions"]["*"] = std::move(defines);
   }
 }
 
