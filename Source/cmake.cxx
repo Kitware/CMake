@@ -3917,7 +3917,7 @@ int cmake::Build(int jobs, std::string dir, std::vector<std::string> targets,
       return 1;
     }
 
-    if (!expandedConfigurePreset->BinaryDir.empty()) {
+    if (dir.empty() && !expandedConfigurePreset->BinaryDir.empty()) {
       dir = expandedConfigurePreset->BinaryDir;
     }
 
