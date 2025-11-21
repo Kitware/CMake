@@ -1,0 +1,9 @@
+---
+id: cmhasprefix-char
+valid:
+  - "cmHasPrefix(haystack, 'a')"
+  - 'cmHasPrefix(haystack, "foo")'
+invalid:
+  - 'cmHasPrefix(haystack, "a")'
+  - 'cmHasPrefix(haystack, "\n")'
+  - "cmHasPrefix(haystack, \"'\")"

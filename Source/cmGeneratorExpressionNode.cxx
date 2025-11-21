@@ -5053,7 +5053,8 @@ struct TargetOutputNameArtifactResultGetter<ArtifactPdbTag>
         postfix != Postfix::Unspecified) {
       eval->Context.LG->GetCMakeInstance()->IssueMessage(
         MessageType::AUTHOR_WARNING,
-        cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0202), '\n',
+        cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0202),
+                 "\n"
                  "\"POSTFIX\" option is recognized only when the policy is "
                  "set to NEW. Since the policy is not set, the OLD behavior "
                  "will be used."),

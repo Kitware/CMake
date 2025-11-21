@@ -2511,7 +2511,7 @@ cm::optional<cmSourceInfo> cmcmd_cmake_ninja_depends_fortran(
     }
 
     dir_top_bld = tdi["dir-top-bld"].asString();
-    if (!dir_top_bld.empty() && !cmHasLiteralSuffix(dir_top_bld, "/")) {
+    if (!dir_top_bld.empty() && !cmHasSuffix(dir_top_bld, '/')) {
       dir_top_bld += '/';
     }
 
@@ -2524,7 +2524,7 @@ cm::optional<cmSourceInfo> cmcmd_cmake_ninja_depends_fortran(
 
     Json::Value const& tdi_module_dir = tdi["module-dir"];
     module_dir = tdi_module_dir.asString();
-    if (!module_dir.empty() && !cmHasLiteralSuffix(module_dir, "/")) {
+    if (!module_dir.empty() && !cmHasSuffix(module_dir, '/')) {
       module_dir += '/';
     }
 
@@ -3021,7 +3021,7 @@ int cmcmd_cmake_ninja_dyndep(std::vector<std::string>::const_iterator argBeg,
   }
 
   std::string module_dir = tdi["module-dir"].asString();
-  if (!module_dir.empty() && !cmHasLiteralSuffix(module_dir, "/")) {
+  if (!module_dir.empty() && !cmHasSuffix(module_dir, '/')) {
     module_dir += '/';
   }
   std::vector<std::string> linked_target_dirs;

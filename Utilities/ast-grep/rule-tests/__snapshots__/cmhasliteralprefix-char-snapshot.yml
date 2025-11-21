@@ -1,0 +1,23 @@
+id: cmhasliteralprefix-char
+snapshots:
+  cmHasLiteralPrefix(haystack, "'"):
+    fixed: cmHasPrefix(haystack, '\'')
+    labels:
+    - source: cmHasLiteralPrefix(haystack, "'")
+      style: primary
+      start: 0
+      end: 33
+  cmHasLiteralPrefix(haystack, "\n"):
+    fixed: cmHasPrefix(haystack, '\n')
+    labels:
+    - source: cmHasLiteralPrefix(haystack, "\n")
+      style: primary
+      start: 0
+      end: 34
+  cmHasLiteralPrefix(haystack, "a"):
+    fixed: cmHasPrefix(haystack, 'a')
+    labels:
+    - source: cmHasLiteralPrefix(haystack, "a")
+      style: primary
+      start: 0
+      end: 33

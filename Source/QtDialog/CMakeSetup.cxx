@@ -287,7 +287,7 @@ static bool cmOSXInstall(std::string const& dir, std::string const& tool)
 
 static int cmOSXInstall(std::string dir)
 {
-  if (!cmHasLiteralSuffix(dir, "/")) {
+  if (!cmHasSuffix(dir, '/')) {
     dir += "/";
   }
   return (cmOSXInstall(dir, cmSystemTools::GetCMakeCommand()) &&

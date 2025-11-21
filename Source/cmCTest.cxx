@@ -2531,7 +2531,7 @@ int cmCTest::Run(std::vector<std::string> const& args)
         this->Impl->BuildAndTest.TestCommandArgs.emplace_back(args[i]);
       }
     }
-    if (!matched && cmHasLiteralPrefix(arg, "-") &&
+    if (!matched && cmHasPrefix(arg, '-') &&
         !cmHasLiteralPrefix(arg, "--preset")) {
       cmSystemTools::Error(cmStrCat("Unknown argument: ", arg));
       cmSystemTools::Error("Run 'ctest --help' for all supported options.");

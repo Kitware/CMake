@@ -223,7 +223,7 @@ std::vector<std::string> ReadList(Json::Value const& data, char const* key)
 std::string NormalizeTargetName(std::string const& name,
                                 std::string const& context)
 {
-  if (cmHasLiteralPrefix(name, ":")) {
+  if (cmHasPrefix(name, ':')) {
     return cmStrCat(context, ':', name);
   }
 

@@ -233,7 +233,7 @@ int cmCPackArchiveGenerator::InitializeInternal()
   cmValue newExtensionValue = this->GetOption("CPACK_ARCHIVE_FILE_EXTENSION");
   if (!newExtensionValue.IsEmpty()) {
     std::string newExtension = *newExtensionValue;
-    if (!cmHasLiteralPrefix(newExtension, ".")) {
+    if (!cmHasPrefix(newExtension, '.')) {
       newExtension = cmStrCat('.', newExtension);
     }
     cmCPackLogger(cmCPackLog::LOG_DEBUG,

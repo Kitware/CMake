@@ -1,0 +1,27 @@
+---
+id: cmhasliteralprefix-char
+language: Cpp
+severity: warning
+message: "`cmHasLiteralPrefix` with a one-char prefix search should use `cmHasPrefix`"
+rule:
+  pattern: cmHasLiteralPrefix($HAYSTACK, $NEEDLE)
+constraints:
+  NEEDLE:
+    regex: '^"(.|\\.)"$'
+transform:
+  NEEDLE_CHANGE_QUOTE:
+    replace:
+      source: $NEEDLE
+      replace: '(^"|"$)'
+      by: "'"
+  NEEDLE_ESCAPE_SINGLE_QUOTE:
+    replace:
+      source: $NEEDLE_CHANGE_QUOTE
+      replace: "'''"
+      by: "'\\''"
+  NEEDLE_OUT:
+    replace:
+      source: $NEEDLE_ESCAPE_SINGLE_QUOTE
+      replace: '\\"'
+      by: '"'
+fix: cmHasPrefix($HAYSTACK, $NEEDLE_OUT)

@@ -53,7 +53,7 @@ std::string EvaluateSplitConfigGenex(
         ++pos;
         continue;
       }
-      if (cmHasLiteralPrefix(cur, ">")) {
+      if (cmHasPrefix(cur, '>')) {
         --nestingLevel;
         if (nestingLevel == 0) {
           ++pos;

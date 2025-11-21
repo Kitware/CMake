@@ -1,0 +1,23 @@
+id: cmhasliteralsuffix-char
+snapshots:
+  cmHasLiteralSuffix(haystack, "'"):
+    fixed: cmHasSuffix(haystack, '\'')
+    labels:
+    - source: cmHasLiteralSuffix(haystack, "'")
+      style: primary
+      start: 0
+      end: 33
+  cmHasLiteralSuffix(haystack, "\n"):
+    fixed: cmHasSuffix(haystack, '\n')
+    labels:
+    - source: cmHasLiteralSuffix(haystack, "\n")
+      style: primary
+      start: 0
+      end: 34
+  cmHasLiteralSuffix(haystack, "a"):
+    fixed: cmHasSuffix(haystack, 'a')
+    labels:
+    - source: cmHasLiteralSuffix(haystack, "a")
+      style: primary
+      start: 0
+      end: 33

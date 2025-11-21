@@ -1,0 +1,47 @@
+id: cmhassuffix-char
+snapshots:
+  cmHasSuffix(haystack, "'"):
+    fixed: cmHasSuffix(haystack, '\'')
+    labels:
+    - source: '"''"'
+      style: primary
+      start: 22
+      end: 25
+    - source: cmHasSuffix(haystack, "'")
+      style: secondary
+      start: 0
+      end: 26
+    - source: ','
+      style: secondary
+      start: 20
+      end: 21
+  cmHasSuffix(haystack, "\n"):
+    fixed: cmHasSuffix(haystack, '\n')
+    labels:
+    - source: '"\n"'
+      style: primary
+      start: 22
+      end: 26
+    - source: cmHasSuffix(haystack, "\n")
+      style: secondary
+      start: 0
+      end: 27
+    - source: ','
+      style: secondary
+      start: 20
+      end: 21
+  cmHasSuffix(haystack, "a"):
+    fixed: cmHasSuffix(haystack, 'a')
+    labels:
+    - source: '"a"'
+      style: primary
+      start: 22
+      end: 25
+    - source: cmHasSuffix(haystack, "a")
+      style: secondary
+      start: 0
+      end: 26
+    - source: ','
+      style: secondary
+      start: 20
+      end: 21
