@@ -959,7 +959,7 @@ Json::Value cmFileAPI::BuildCMakeFiles(Object object)
 
 // The "toolchains" object kind.
 
-static unsigned int const ToolchainsV1Minor = 0;
+static unsigned int const ToolchainsV1Minor = 1;
 
 void cmFileAPI::BuildClientRequestToolchains(
   ClientRequest& r, std::vector<RequestVersion> const& versions)

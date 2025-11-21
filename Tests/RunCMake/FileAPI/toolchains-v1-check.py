@@ -2,17 +2,20 @@ from check_index import *
 import os
 
 class ExpectedVar(object):
-    def __init__(self, name):
+    def __init__(self, name, omitEmpty=False):
         self.name = name
+        self.omitEmpty = omitEmpty
 
 class ExpectedList(object):
-    def __init__(self, name):
+    def __init__(self, name, omitEmpty=False):
         self.name = name
+        self.omitEmpty = omitEmpty
 
 EXPECTED_TOOLCHAIN = {
     "language": "CXX",
     "compiler": {
         "path": ExpectedVar("CMAKE_CXX_COMPILER"),
+        "commandFragment": ExpectedVar("CMAKE_CXX_COMPILER_ARG1", omitEmpty=True),
         "id": ExpectedVar("CMAKE_CXX_COMPILER_ID"),
         "version": ExpectedVar("CMAKE_CXX_COMPILER_VERSION"),
         "target": ExpectedVar("CMAKE_CXX_COMPILER_TARGET"),
@@ -35,7 +38,7 @@ EXPECTED_TOOLCHAIN = {
 def check_objects(o):
     assert is_list(o)
     assert len(o) == 1
-    check_index_object(o[0], "toolchains", 1, 0, check_object_toolchains)
+    check_index_object(o[0], "toolchains", 1, 1, check_object_toolchains)
 
 def check_object_toolchains(o):
     assert sorted(o.keys()) == ["kind", "toolchains", "version"]
@@ -59,7 +62,8 @@ def check_object_toolchain(o, expected):
         key for (key, value) in expected.items()
         if is_string(value) or is_dict(value)
             or (type(value) in (ExpectedVar, ExpectedList)
-                and variables[value.name]["defined"])]
+                and variables[value.name]["defined"]
+                and not (value.omitEmpty and variables[value.name]["value"] == ''))]
     assert sorted(o.keys()) == sorted(expected_keys), "actual object {!r}, expected keys {!r}".format(o, sorted(expected_keys))
 
     for key in expected_keys:
@@ -81,6 +85,11 @@ with open(os.path.join(args.build_dir, "toolchain_variables.json")) as f:
     variables = json.load(f)
 
 assert is_dict(variables)
+if variables.get("TOOLCHAINSV1_COMPILERARGS", 0) == 1:
+    del EXPECTED_TOOLCHAIN["compiler"]["commandFragment"]
+elif variables.get("TOOLCHAINSV1_COMPILERARGS", 0) == 2:
+    EXPECTED_TOOLCHAIN["compiler"]["commandFragment"] = "--hello world --something=other"
+
 assert is_dict(index)
 assert sorted(index.keys()) == ["cmake", "objects", "reply"]
 check_objects(index["objects"])

@@ -2109,12 +2109,13 @@ There is only one ``toolchains`` object major version, version 1.
 
   {
     "kind": "toolchains",
-    "version": { "major": 1, "minor": 0 },
+    "version": { "major": 1, "minor": 1 },
     "toolchains": [
       {
         "language": "C",
         "compiler": {
           "path": "/usr/bin/cc",
+          "commandFragment": "--config x86_64-linux-gnu.cfg",
           "id": "GNU",
           "version": "9.3.0",
           "implicit": {
@@ -2192,6 +2193,16 @@ The members specific to ``toolchains`` objects are:
       Optional member that is present when the
       :variable:`CMAKE_<LANG>_COMPILER` variable is defined for the current
       language. Its value is a JSON string holding the path to the compiler.
+
+    ``commandFragment``
+      Optional member that is present when the
+      :variable:`CMAKE_<LANG>_COMPILER` variable is a list containing multiple
+      elements or the :envvar:`CC` or similar environment variable contains
+      command line arguments after the compiler executable.
+      Its value is a JSON string holding the second and further elements
+      (mandatory arguments to the compiler) as a command line fragment.
+
+      This field was added in toolchains version 1.1.
 
     ``id``
       Optional member that is present when the

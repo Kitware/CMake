@@ -10,6 +10,9 @@
   "oneOf": [
     {
       "$ref": "#/definitions/toolchainsObjV1_0"
+    },
+    {
+      "$ref": "#/definitions/toolchainsObjV1_1"
     }
   ],
   "definitions": {
@@ -32,6 +35,24 @@
         "minor": {
           "type": "integer",
           "const": 0
+        }
+      },
+      "additionalProperties": false
+    },
+    "versionV1_1": {
+      "type": "object",
+      "required": [
+        "major",
+        "minor"
+      ],
+      "properties": {
+        "major": {
+          "type": "integer",
+          "const": 1
+        },
+        "minor": {
+          "type": "integer",
+          "const": 1
         }
       },
       "additionalProperties": false
@@ -101,11 +122,35 @@
       },
       "additionalProperties": false
     },
-    "compiler": {
+    "compilerV1_0": {
       "type": "object",
       "properties": {
         "path": {
           "$ref": "#/definitions/compilerPath"
+        },
+        "id": {
+          "$ref": "#/definitions/compilerId"
+        },
+        "version": {
+          "$ref": "#/definitions/compilerVersion"
+        },
+        "target": {
+          "$ref": "#/definitions/compilerTarget"
+        },
+        "implicit": {
+          "$ref": "#/definitions/compilerImplicit"
+        }
+      },
+      "additionalProperties": false
+    },
+    "compilerV1_1": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "$ref": "#/definitions/compilerPath"
+        },
+        "commandFragment": {
+          "$ref": "#/definitions/compilerCommandFragment"
         },
         "id": {
           "$ref": "#/definitions/compilerId"
@@ -145,7 +190,42 @@
                 "$ref": "#/definitions/language"
               },
               "compiler": {
-                "$ref": "#/definitions/compiler"
+                "$ref": "#/definitions/compilerV1_0"
+              },
+              "sourceFileExtensions": {
+                "$ref": "#/definitions/sourceFileExtensions"
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "toolchainsObjV1_1": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "$ref": "#/definitions/kind"
+        },
+        "version": {
+          "$ref": "#/definitions/versionV1_1"
+        },
+        "toolchains": {
+          "type": "array",
+          "description": "Array of toolchain configurations per language",
+          "items": {
+            "type": "object",
+            "required": [
+              "language",
+              "compiler"
+            ],
+            "properties": {
+              "language": {
+                "$ref": "#/definitions/language"
+              },
+              "compiler": {
+                "$ref": "#/definitions/compilerV1_1"
               },
               "sourceFileExtensions": {
                 "$ref": "#/definitions/sourceFileExtensions"
