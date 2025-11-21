@@ -604,7 +604,7 @@ Id flags: ${testflags} ${CMAKE_${lang}_COMPILER_ID_FLAGS_ALWAYS}
       set(id_api_level "<AndroidAPILevel>android-${CMAKE_SYSTEM_VERSION}</AndroidAPILevel>")
       if(CMAKE_GENERATOR MATCHES "Visual Studio 14")
         set(id_system_version "<ApplicationTypeRevision>2.0</ApplicationTypeRevision>")
-      elseif(CMAKE_GENERATOR MATCHES "Visual Studio 1[567]")
+      elseif(CMAKE_GENERATOR MATCHES "Visual Studio 1[5678]")
         set(id_system_version "<ApplicationTypeRevision>3.0</ApplicationTypeRevision>")
       else()
         set(id_system_version "")
