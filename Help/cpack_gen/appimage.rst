@@ -1,4 +1,4 @@
-CPack AppImage generator
+CPack AppImage Generator
 ------------------------
 
 .. versionadded:: 4.2
@@ -49,7 +49,7 @@ Qt module's plugins.
 You must also set :variable:`CPACK_PACKAGE_ICON` with the same value
 listed in the Desktop file.
 
-Variables specific to CPack AppImage generator
+Variables Specific to CPack AppImage Generator
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. variable:: CPACK_APPIMAGE_TOOL_EXECUTABLE
