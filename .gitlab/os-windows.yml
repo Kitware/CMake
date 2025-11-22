@@ -449,7 +449,8 @@
         - ctest -VV -S .gitlab/ci/ctest_build.cmake
         - (& "$pwsh" -File ".gitlab/ci/post_build.ps1")
         - sccache --show-stats
-        - sccache --stop-server
+        # Tolerate already-stopped server.
+        - (sccache --stop-server)
 
     interruptible: true
 
