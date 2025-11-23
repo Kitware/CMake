@@ -1272,80 +1272,92 @@ u:macos10.10-package:
 
 # Windows x86_64 jobs
 
-b:windows-vs2022-x64-ninja:
+b:windows-vs2026-x64-ninja:
     extends:
-        - .windows_vs2022_x64_ninja
+        - .windows_vs2026_x64_ninja
         - .cmake_build_windows
         - .cmake_build_artifacts
-        - .windows_x86_64_tags_nonconcurrent_vs2022
+        - .windows_x86_64_tags_nonconcurrent_vs2026
         - .run_manually
     variables:
         CMAKE_CI_JOB_CONTINUOUS: "true"
 
-b:windows-vs2022-x64-pch:
+b:windows-vs2026-x64-pch:
     extends:
-        - .windows_vs2022_x64_pch
+        - .windows_vs2026_x64_pch
         - .cmake_build_windows
-        - .windows_x86_64_tags_nonconcurrent_vs2022
+        - .windows_x86_64_tags_nonconcurrent_vs2026
         - .run_manually
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
-t:windows-vs2022-x64-ninja:
+t:windows-vs2026-x64-ninja:
     extends:
-        - .windows_vs2022_x64_ninja
+        - .windows_vs2026_x64_ninja
         - .cmake_test_windows
-        - .windows_x86_64_tags_nonconcurrent_vs2022
+        - .windows_x86_64_tags_nonconcurrent_vs2026
         - .cmake_test_artifacts
         - .run_dependent
     needs:
-        - b:windows-vs2022-x64-ninja
+        - b:windows-vs2026-x64-ninja
     variables:
         CMAKE_CI_JOB_CONTINUOUS: "true"
         CMAKE_CI_JOB_NIGHTLY_NINJA: "true"
 
-t:windows-vs2022-x64-ninja-multi:
+t:windows-vs2026-x64-ninja-multi:
     extends:
-        - .windows_vs2022_x64_ninja_multi
+        - .windows_vs2026_x64_ninja_multi
         - .cmake_test_windows_external
-        - .windows_x86_64_tags_concurrent_vs2022
+        - .windows_x86_64_tags_concurrent_vs2026
         - .cmake_junit_artifacts
         - .run_dependent
     needs:
-        - t:windows-vs2022-x64-ninja
+        - t:windows-vs2026-x64-ninja
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
-.t:windows-vs2022-x64:
+.t:windows-vs2026-x64:
     extends:
-        - .windows_vs2022_x64
+        - .windows_vs2026_x64
         - .cmake_test_windows_external
         - .cmake_junit_artifacts
         - .run_dependent
     needs:
-        - t:windows-vs2022-x64-ninja
+        - t:windows-vs2026-x64-ninja
 
-t:windows-vs2022-x64:
+t:windows-vs2026-x64:
     extends:
-        - .t:windows-vs2022-x64
-        - .windows_x86_64_tags_concurrent_vs2022
+        - .t:windows-vs2026-x64
+        - .windows_x86_64_tags_concurrent_vs2026
     variables:
         CMAKE_CI_JOB_NIGHTLY: "false"
 
-t:windows-vs2022-x64-nightly:
+t:windows-vs2026-x64-nightly:
     extends:
-        - .t:windows-vs2022-x64
-        - .windows_x86_64_tags_concurrent_vs2022_android
+        - .t:windows-vs2026-x64
+        - .windows_x86_64_tags_concurrent_vs2026_android
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
-t:windows-vs2022-x64-i18n:
+t:windows-vs2026-x64-i18n:
     extends:
-        - .t:windows-vs2022-x64
-        - .windows_x86_64_tags_concurrent_vs2022_android
+        - .t:windows-vs2026-x64
+        - .windows_x86_64_tags_concurrent_vs2026_android
     variables:
         GIT_CLONE_PATH: "$CI_BUILDS_DIR\\cmake i18n cï\\$CI_CONCURRENT_ID"
-        CMAKE_CONFIGURATION: windows_vs2022_x64_i18n
+        CMAKE_CONFIGURATION: windows_vs2026_x64_i18n
+        CMAKE_CI_JOB_NIGHTLY: "true"
+
+t:windows-vs2022-x64:
+    extends:
+        - .windows_vs2022_x64
+        - .cmake_test_windows_external
+        - .windows_x86_64_tags_concurrent_vs2022_android
+        - .cmake_junit_artifacts
+        - .run_dependent
+    needs:
+        - t:windows-vs2026-x64-ninja
+    variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
 t:windows-vs2019-x64:
@@ -1356,43 +1368,43 @@ t:windows-vs2019-x64:
         - .cmake_junit_artifacts
         - .run_dependent
     needs:
-        - t:windows-vs2022-x64-ninja
+        - t:windows-vs2026-x64-ninja
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
-t:windows-vs2022-x64-nmake:
+t:windows-vs2026-x64-nmake:
     extends:
-        - .windows_vs2022_x64_nmake
+        - .windows_vs2026_x64_nmake
         - .cmake_test_windows_external
-        - .windows_x86_64_tags_concurrent_vs2022
+        - .windows_x86_64_tags_concurrent_vs2026
         - .cmake_junit_artifacts
         - .run_dependent
     needs:
-        - t:windows-vs2022-x64-ninja
+        - t:windows-vs2026-x64-ninja
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
-t:windows-vs2022-x64-jom:
+t:windows-vs2026-x64-jom:
     extends:
-        - .windows_vs2022_x64_jom
+        - .windows_vs2026_x64_jom
         - .cmake_test_windows_external
-        - .windows_x86_64_tags_concurrent_vs2022
+        - .windows_x86_64_tags_concurrent_vs2026
         - .cmake_junit_artifacts
         - .run_dependent
     needs:
-        - t:windows-vs2022-x64-ninja
+        - t:windows-vs2026-x64-ninja
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
-t:windows-vs2022-x64-fastbuild:
+t:windows-vs2026-x64-fastbuild:
     extends:
-        - .windows_vs2022_x64_fastbuild
+        - .windows_vs2026_x64_fastbuild
         - .cmake_test_windows_external
-        - .windows_x86_64_tags_concurrent_vs2022
+        - .windows_x86_64_tags_concurrent_vs2026
         - .cmake_junit_artifacts
         - .run_dependent
     needs:
-        - t:windows-vs2022-x64-ninja
+        - t:windows-vs2026-x64-ninja
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
@@ -1404,7 +1416,7 @@ t:windows-borland5.5:
         - .cmake_junit_artifacts
         - .run_dependent
     needs:
-        - t:windows-vs2022-x64-ninja
+        - t:windows-vs2026-x64-ninja
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
@@ -1416,7 +1428,7 @@ t:windows-borland5.8:
         - .cmake_junit_artifacts
         - .run_dependent
     needs:
-        - t:windows-vs2022-x64-ninja
+        - t:windows-vs2026-x64-ninja
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
@@ -1424,11 +1436,11 @@ t:windows-clang19.1-cl-ninja:
     extends:
         - .windows_clang_ninja
         - .cmake_test_windows_external
-        - .windows_x86_64_tags_concurrent
+        - .windows_x86_64_tags_concurrent_vs2022_msvc14.44
         - .cmake_junit_artifacts
         - .run_dependent
     needs:
-        - t:windows-vs2022-x64-ninja
+        - t:windows-vs2026-x64-ninja
     variables:
         CMAKE_CI_BUILD_NAME: windows_clang19.1_cl_ninja
         CMAKE_CI_JOB_NIGHTLY: "true"
@@ -1437,11 +1449,11 @@ t:windows-clang19.1-cl-nmake:
     extends:
         - .windows_clang_nmake
         - .cmake_test_windows_external
-        - .windows_x86_64_tags_concurrent
+        - .windows_x86_64_tags_concurrent_vs2022_msvc14.44
         - .cmake_junit_artifacts
         - .run_dependent
     needs:
-        - t:windows-vs2022-x64-ninja
+        - t:windows-vs2026-x64-ninja
     variables:
         CMAKE_CI_BUILD_NAME: windows_clang19.1_cl_nmake
         CMAKE_CI_JOB_NIGHTLY: "true"
@@ -1450,11 +1462,11 @@ t:windows-clang19.1-gnu-ninja:
     extends:
         - .windows_clang_ninja
         - .cmake_test_windows_external
-        - .windows_x86_64_tags_concurrent
+        - .windows_x86_64_tags_concurrent_vs2022_msvc14.44
         - .cmake_junit_artifacts
         - .run_dependent
     needs:
-        - t:windows-vs2022-x64-ninja
+        - t:windows-vs2026-x64-ninja
     variables:
         CMAKE_CI_BUILD_NAME: windows_clang19.1_gnu_ninja
         CMAKE_CI_JOB_NIGHTLY: "true"
@@ -1463,11 +1475,11 @@ t:windows-clang19.1-gnu-nmake:
     extends:
         - .windows_clang_nmake
         - .cmake_test_windows_external
-        - .windows_x86_64_tags_concurrent
+        - .windows_x86_64_tags_concurrent_vs2022_msvc14.44
         - .cmake_junit_artifacts
         - .run_dependent
     needs:
-        - t:windows-vs2022-x64-ninja
+        - t:windows-vs2026-x64-ninja
     variables:
         CMAKE_CI_BUILD_NAME: windows_clang19.1_gnu_nmake
         CMAKE_CI_JOB_NIGHTLY: "true"
@@ -1480,7 +1492,7 @@ t:windows-intel2021.9-ninja:
         - .cmake_junit_artifacts
         - .run_dependent
     needs:
-        - t:windows-vs2022-x64-ninja
+        - t:windows-vs2026-x64-ninja
     variables:
         CMAKE_CI_BUILD_NAME: windows_intel2021.9_ninja
         CMAKE_CI_JOB_NIGHTLY: "true"
@@ -1489,11 +1501,11 @@ t:windows-oneapi2025.1-ninja:
     extends:
         - .windows_inteloneapi_ninja
         - .cmake_test_windows_external
-        - .windows_x86_64_tags_concurrent_vs2022
+        - .windows_x86_64_tags_concurrent_vs2022_msvc14.44
         - .cmake_junit_artifacts
         - .run_dependent
     needs:
-        - t:windows-vs2022-x64-ninja
+        - t:windows-vs2026-x64-ninja
     variables:
         CMAKE_CI_BUILD_NAME: windows_oneapi2025.1_ninja
         CMAKE_CI_JOB_NIGHTLY: "true"
@@ -1506,7 +1518,7 @@ t:mingw_osdn_io-mingw_makefiles:
         - .cmake_junit_artifacts
         - .run_dependent
     needs:
-        - t:windows-vs2022-x64-ninja
+        - t:windows-vs2026-x64-ninja
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
@@ -1518,7 +1530,7 @@ t:mingw_osdn_io-msys_makefiles:
         - .cmake_junit_artifacts
         - .run_dependent
     needs:
-        - t:windows-vs2022-x64-ninja
+        - t:windows-vs2026-x64-ninja
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
@@ -1530,7 +1542,7 @@ t:windows-msvc-v71-nmake:
         - .cmake_junit_artifacts
         - .run_dependent
     needs:
-        - t:windows-vs2022-x64-ninja
+        - t:windows-vs2026-x64-ninja
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
@@ -1542,7 +1554,7 @@ t:windows-openwatcom1.9:
         - .cmake_junit_artifacts
         - .run_dependent
     needs:
-        - t:windows-vs2022-x64-ninja
+        - t:windows-vs2026-x64-ninja
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
@@ -1554,31 +1566,43 @@ t:windows-orangec6.73.1:
         - .cmake_junit_artifacts
         - .run_dependent
     needs:
-        - t:windows-vs2022-x64-ninja
+        - t:windows-vs2026-x64-ninja
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
 # Windows arm64 jobs
 
-b:windows-arm64-vs2022-ninja:
+b:windows-arm64-vs2026-ninja:
     extends:
-        - .windows_arm64_vs2022_ninja
+        - .windows_arm64_vs2026_ninja
         - .cmake_build_windows
         - .cmake_build_artifacts
-        - .windows_arm64_tags_nonconcurrent_vs2022
+        - .windows_arm64_tags_nonconcurrent_vs2026
         - .run_manually
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
-t:windows-arm64-vs2022-ninja:
+t:windows-arm64-vs2026-ninja:
     extends:
-        - .windows_arm64_vs2022_ninja
+        - .windows_arm64_vs2026_ninja
         - .cmake_test_windows
-        - .windows_arm64_tags_nonconcurrent_vs2022
+        - .windows_arm64_tags_nonconcurrent_vs2026
         - .cmake_test_artifacts
         - .run_dependent
     needs:
-        - b:windows-arm64-vs2022-ninja
+        - b:windows-arm64-vs2026-ninja
+    variables:
+        CMAKE_CI_JOB_NIGHTLY: "true"
+
+t:windows-arm64-vs2026:
+    extends:
+        - .windows_arm64_vs2026
+        - .cmake_test_windows_external
+        - .windows_arm64_tags_concurrent_vs2026
+        - .cmake_junit_artifacts
+        - .run_dependent
+    needs:
+        - t:windows-arm64-vs2026-ninja
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
@@ -1590,7 +1614,7 @@ t:windows-arm64-vs2022:
         - .cmake_junit_artifacts
         - .run_dependent
     needs:
-        - t:windows-arm64-vs2022-ninja
+        - t:windows-arm64-vs2026-ninja
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
@@ -1601,7 +1625,7 @@ b:windows-x86_64-package:
         - .windows_x86_64_package
         - .cmake_build_windows
         - .cmake_build_package_artifacts
-        - .windows_x86_64_tags_nonconcurrent_vs2022
+        - .windows_x86_64_tags_nonconcurrent_vs2026
         - .run_only_for_package
     needs:
         - p:doc-package
@@ -1632,7 +1656,7 @@ b:windows-i386-package:
         - .windows_i386_package
         - .cmake_build_windows
         - .cmake_build_package_artifacts
-        - .windows_x86_64_tags_nonconcurrent_vs2022
+        - .windows_x86_64_tags_nonconcurrent_vs2026
         - .run_only_for_package
     needs:
         - p:doc-package
@@ -1663,7 +1687,7 @@ b:windows-arm64-package:
         - .windows_arm64_package
         - .cmake_build_windows
         - .cmake_build_package_artifacts
-        - .windows_x86_64_tags_nonconcurrent_vs2022_arm64
+        - .windows_x86_64_tags_nonconcurrent_vs2026_arm64
         - .run_only_for_package
     needs:
         - p:doc-package
