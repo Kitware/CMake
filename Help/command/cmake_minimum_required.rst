@@ -22,8 +22,8 @@ The optional ``<policy_max>`` version, if specified, must be at least the
 ``<min>`` version and sets the `Policy Version`_.
 If the running version of CMake is older than 3.12, the extra ``...``
 dots will be seen as version component separators, resulting in the
-``...<max>`` part being ignored and preserving the pre-3.12 behavior
-of basing policies on ``<min>``.
+``...<policy_max>`` part being ignored and preserving the pre-3.12
+behavior of basing policies on ``<min>``.
 
 This command will set the value of the
 :variable:`CMAKE_MINIMUM_REQUIRED_VERSION` variable to ``<min>``.
@@ -53,11 +53,12 @@ with an error instead of just a warning.
 Policy Version
 ^^^^^^^^^^^^^^
 
-``cmake_minimum_required(VERSION <min>[...<max>])`` implicitly invokes
+``cmake_minimum_required(VERSION <min>[...<policy_max>])`` implicitly
+invokes
 
 .. code-block:: cmake
 
-  cmake_policy(VERSION <min>[...<max>])
+  cmake_policy(VERSION <min>[...<policy_max>])
 
 .. include:: include/POLICY_VERSION.rst
 

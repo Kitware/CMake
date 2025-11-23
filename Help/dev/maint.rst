@@ -302,7 +302,7 @@ Update ``Source/CMakeVersion.cmake`` to set the version to
   set(CMake_VERSION_PATCH $date)
   #set(CMake_VERSION_RC 0)
 
-Update ``Help/manual/cmake-policies.7.rst`` to set the ``...<max>``
+Update ``Help/manual/cmake-policies.7.rst`` to set the ``...<policy_max>``
 example to ``...$major.$minor``:
 
 .. code-block:: cmake
