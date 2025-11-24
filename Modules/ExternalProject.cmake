@@ -2285,7 +2285,7 @@ function(ExternalProject_Add_Step name step)
   if(environment)
     set(env_args "")
     foreach(env_mod IN LISTS environment)
-      if(env_mod MATCHES [[^([^=:]+)=([a-z]+):(.*)$]])
+      if(env_mod MATCHES [[^([^=:]+)=([a-z_]+):(.*)$]])
         set(_value "${CMAKE_MATCH_3}")
         # Replace the separator only in the value in case it is `:`.
         if(sep)
