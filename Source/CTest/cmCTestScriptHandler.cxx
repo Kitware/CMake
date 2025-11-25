@@ -117,9 +117,10 @@ int cmCTestScriptHandler::ExecuteScript(std::string const& total_script_arg)
   std::vector<char> out;
   std::vector<char> err;
   std::string line;
-  auto pipe = cmSystemTools::WaitForLine(&process.GetLoop(), outPipe, errPipe,
-                                         line, out, err);
-  while (pipe != cmSystemTools::WaitForLineResult::None) {
+  cmSystemTools::WaitForLineResult pipe;
+  while ((pipe = cmSystemTools::WaitForLine(&process.GetLoop(), outPipe,
+                                            errPipe, line, out, err)) !=
+         cmSystemTools::WaitForLineResult::None) {
     cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                "Output: " << line << "\n");
     if (pipe == cmSystemTools::WaitForLineResult::STDERR) {
@@ -127,8 +128,6 @@ int cmCTestScriptHandler::ExecuteScript(std::string const& total_script_arg)
     } else if (pipe == cmSystemTools::WaitForLineResult::STDOUT) {
       cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, line << "\n");
     }
-    pipe = cmSystemTools::WaitForLine(&process.GetLoop(), outPipe, errPipe,
-                                      line, out, err);
   }
 
   // Properly handle output of the build command
