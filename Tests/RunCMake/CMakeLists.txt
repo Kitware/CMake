@@ -1440,7 +1440,8 @@ if (CMake_TEST_Renesas_TOOLCHAINS)
   set_property(TEST RunCMake.Renesas APPEND PROPERTY LABELS "Renesas")
 endif()
 if(CMake_TEST_Emscripten_TOOLCHAINS)
-  add_RunCMake_test(Emscripten -DCMake_TEST_Emscripten_TOOLCHAINS=${CMake_TEST_Emscripten_TOOLCHAINS})
+  add_RunCMake_test(Emscripten -DCMake_TEST_Emscripten_TOOLCHAINS=${CMake_TEST_Emscripten_TOOLCHAINS}
+                               -DCMake_TEST_Emscripten_NODE=${CMake_TEST_Emscripten_NODE})
   set_property(TEST RunCMake.Emscripten APPEND PROPERTY LABELS "Emscripten")
 endif()
 
