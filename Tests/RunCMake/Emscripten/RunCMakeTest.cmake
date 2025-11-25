@@ -40,6 +40,12 @@ foreach(_emscripten_toolchain IN LISTS _emscripten_toolchains)
   set(cxx_comp ${BIN_DIR}/em++${EMCC_SUFFIX})
   set(comp_ar ${BIN_DIR}/emar${EMCC_SUFFIX})
 
+  # Compiler inspection.
+  run_cmake_with_options(C-enable
+    -DCMAKE_SYSTEM_NAME=Emscripten
+    -DCMAKE_C_COMPILER=${c_comp}
+  )
+
   # Create an executable from .c sources only.
   run_toolchain(C-exe
     -DCMAKE_SYSTEM_NAME=Emscripten
@@ -76,4 +82,9 @@ foreach(_emscripten_toolchain IN LISTS _emscripten_toolchains)
   )
   run_cmake_target(C-WHOLE_ARCHIVE link-exe main)
   run_cmake_target(C-WHOLE_ARCHIVE circular-exe main_circular)
+
+  run_cmake_with_options(C-CheckTypeSize
+    -DCMAKE_SYSTEM_NAME=Emscripten
+    -DCMAKE_C_COMPILER=${c_comp}
+  )
 endforeach()
