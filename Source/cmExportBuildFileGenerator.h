@@ -86,7 +86,8 @@ protected:
   void ComplainAboutDuplicateTarget(
     std::string const& targetName) const override;
 
-  void ReportError(std::string const& errorMessage) const override;
+  void IssueMessage(MessageType type,
+                    std::string const& message) const override;
 
   /** Fill in properties indicating built file locations.  */
   void SetImportLocationProperty(std::string const& config,
