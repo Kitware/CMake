@@ -62,8 +62,11 @@ repos:
                   | define_property/define_property-INITIALIZE_FROM_VARIABLE-invalid_[12]-result\.txt
                   | FindMatlab/MatlabTest2-stderr\.txt
                   | string/UTF-(16|32)LE\.txt
-                  | Syntax/BOM-UTF-(16|32)-LE.cmake
-                  | Syntax/CommandEOF\.cmake
+                  | Syntax/(
+                        OneCharacter
+                      | (Broken-)?BOM-UTF-(16|32)-[BL]E
+                      | CommandEOF
+                      )\.cmake
                   | VS10Project/shader2?\.hlsl
                   )
               | SourceGroups/README\.txt
@@ -81,7 +84,7 @@ repos:
         pass_filenames: false
 
   - repo: https://github.com/sphinx-contrib/sphinx-lint
-    rev: v1.0.1
+    rev: v1.0.2
     hooks:
       - id: sphinx-lint
         # NOTE Looks like `bad-dedent` gives too many false-positives.
@@ -110,7 +113,7 @@ repos:
 
     # NOTE See BUG https://github.com/crate-ci/typos/issues/390
   - repo: https://github.com/adhtruong/mirrors-typos
-    rev: v1.39.0
+    rev: v1.39.2
     hooks:
       - id: typos
         # NOTE Override hook's default args to prevent automatic
