@@ -212,6 +212,7 @@ key is required, but all other fields are optional.
   * ``preCMakeBuild`` (called when ``cmake --build`` is invoked)
   * ``postCMakeBuild`` (called when ``cmake --build`` completes)
   * ``postCMakeInstall``
+  * ``postCMakeWorkflow``
   * ``postCTest``
 
   ``preBuild`` and ``postBuild`` are not supported when using the

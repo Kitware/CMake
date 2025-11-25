@@ -4208,6 +4208,7 @@ std::function<cmUVProcessChain::Status()> buildWorkflowStep(
 int cmake::Workflow(std::string const& presetName,
                     WorkflowListPresets listPresets, WorkflowFresh fresh)
 {
+  int exitStatus = 0;
 #ifndef CMAKE_BOOTSTRAP
   this->SetHomeDirectory(cmSystemTools::GetLogicalWorkingDirectory());
   this->SetHomeOutputDirectory(cmSystemTools::GetLogicalWorkingDirectory());
@@ -4280,11 +4281,12 @@ int cmake::Workflow(std::string const& presetName,
   std::vector<CalculatedStep> steps;
   steps.reserve(expandedPreset->Steps.size());
   int stepNumber = 1;
+  cmCMakePresetsGraph::ConfigurePreset const* configurePreset = {};
   for (auto const& step : expandedPreset->Steps) {
     switch (step.PresetType) {
       case cmCMakePresetsGraph::WorkflowPreset::WorkflowStep::Type::
         Configure: {
-        auto const* configurePreset = this->FindPresetForWorkflow(
+        configurePreset = this->FindPresetForWorkflow(
           "configure"_s, settingsFile.ConfigurePresets, step);
         if (!configurePreset) {
           return 1;
@@ -4345,19 +4347,27 @@ int cmake::Workflow(std::string const& presetName,
               << std::flush;
     cmUVProcessChain::Status const status = step.Action();
     if (status.ExitStatus != 0) {
-      return static_cast<int>(status.ExitStatus);
+      exitStatus = static_cast<int>(status.ExitStatus);
+      break;
     }
     auto const codeReasonPair = status.GetException();
     if (codeReasonPair.first != cmUVProcessChain::ExceptionCode::None) {
       std::cout << "Step command ended abnormally: " << codeReasonPair.second
                 << std::endl;
-      return status.SpawnResult != 0 ? status.SpawnResult : status.TermSignal;
+      exitStatus =
+        status.SpawnResult != 0 ? status.SpawnResult : status.TermSignal;
+      break;
     }
     first = false;
   }
+  if (configurePreset) {
+    cmInstrumentation instrumentation(configurePreset->BinaryDir);
+    instrumentation.CollectTimingData(
+      cmInstrumentationQuery::Hook::PostCMakeWorkflow);
+  }
 #endif
 
-  return 0;
+  return exitStatus;
 }
 
 void cmake::WatchUnusedCli(std::string const& var)

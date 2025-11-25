@@ -20,9 +20,9 @@ std::vector<std::string> const cmInstrumentationQuery::OptionString{
   "cdashVerbose", "trace"
 };
 std::vector<std::string> const cmInstrumentationQuery::HookString{
-  "postGenerate",     "preBuild",        "postBuild",
-  "preCMakeBuild",    "postCMakeBuild",  "postCTest",
-  "postCMakeInstall", "prepareForCDash", "manual"
+  "postGenerate",    "preBuild",  "postBuild",        "preCMakeBuild",
+  "postCMakeBuild",  "postCTest", "postCMakeInstall", "postCMakeWorkflow",
+  "prepareForCDash", "manual"
 };
 
 namespace ErrorMessages {
