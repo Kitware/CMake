@@ -1232,8 +1232,20 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
 
     if ((res == 0) && arguments.CopyFileTo) {
       std::string const& copyFile = *arguments.CopyFileTo;
+      std::string outputFile = this->OutputFile;
+
+      // Emscripten `.js` executables have an adjacent `.wasm` file with the
+      // actual compiled binary.  Our COPY_FILE clients need the latter.
+      if (cmHasLiteralSuffix(outputFile, ".js")) {
+        std::string wasmOutput =
+          cmStrCat(outputFile.substr(0, outputFile.length() - 3), ".wasm");
+        if (cmSystemTools::FileExists(wasmOutput)) {
+          outputFile = std::move(wasmOutput);
+        }
+      }
+
       cmsys::SystemTools::CopyStatus status =
-        cmSystemTools::CopyFileAlways(this->OutputFile, copyFile);
+        cmSystemTools::CopyFileAlways(outputFile, copyFile);
       if (!status) {
         std::string err = status.GetString();
         switch (status.Path) {
@@ -1249,7 +1261,7 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
         /* clang-format off */
         err = cmStrCat(
           "Cannot copy output executable\n"
-          "  '", this->OutputFile, "'\n"
+          "  '", outputFile, "'\n"
           "to destination specified by COPY_FILE:\n"
           "  '", copyFile, "'\n"
           "because:\n"
@@ -1386,14 +1398,6 @@ void cmCoreTryCompile::FindOutputFile(std::string const& targetName)
     emsg << cmStrCat("  ", outputFileLocation, '\n');
     this->FindErrorMessage = emsg.str();
     return;
-  }
-
-  if (cmHasLiteralSuffix(outputFileLocation, ".js")) {
-    std::string wasmOutputLocation = cmStrCat(
-      outputFileLocation.substr(0, outputFileLocation.length() - 3), ".wasm");
-    if (cmSystemTools::FileExists(wasmOutputLocation)) {
-      outputFileLocation = wasmOutputLocation;
-    }
   }
 
   this->OutputFile = cmSystemTools::CollapseFullPath(outputFileLocation);

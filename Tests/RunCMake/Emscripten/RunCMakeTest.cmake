@@ -87,4 +87,12 @@ foreach(_emscripten_toolchain IN LISTS _emscripten_toolchains)
     -DCMAKE_SYSTEM_NAME=Emscripten
     -DCMAKE_C_COMPILER=${c_comp}
   )
+
+  if(CMake_TEST_Emscripten_NODE)
+    run_cmake_with_options(C-try_run
+      -DCMAKE_SYSTEM_NAME=Emscripten
+      -DCMAKE_CROSSCOMPILING_EMULATOR=${CMake_TEST_Emscripten_NODE}
+      -DCMAKE_C_COMPILER=${c_comp}
+    )
+  endif()
 endforeach()
