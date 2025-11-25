@@ -209,7 +209,6 @@ std::string cmExportBuildCMakeConfigGenerator::GetFileSetDirectories(
           cmStrCat("\"$<$<CONFIG:", config, ">:", dest, ">\""));
       } else {
         resultVector.emplace_back(cmStrCat('"', dest, '"'));
-        break;
       }
     }
   }
