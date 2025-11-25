@@ -1,0 +1,8 @@
+CMake Error at bad-TARGET_DIRECTORY\.cmake:[0-9]+ \(file\):
+  Error evaluating generator expression:
+
+    \$<SOURCE_PROPERTY:foo\.c,TARGET_DIRECTORY:bar,FOO>
+
+  Non-existent target: bar
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)

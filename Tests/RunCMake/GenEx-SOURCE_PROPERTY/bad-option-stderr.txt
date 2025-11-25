@@ -1,0 +1,8 @@
+CMake Error at bad-option\.cmake:[0-9]+ \(file\):
+  Error evaluating generator expression:
+
+    \$<SOURCE_PROPERTY:foo\.c,BAD_OPTION,FOO>
+
+  Invalid option.  DIRECTORY: or TARGET_DIRECTORY: expected.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)

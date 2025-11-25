@@ -45,6 +45,7 @@
 #include "cmOutputConverter.h"
 #include "cmPolicies.h"
 #include "cmRange.h"
+#include "cmSourceFile.h"
 #include "cmStandardLevelResolver.h"
 #include "cmState.h"
 #include "cmStateSnapshot.h"
@@ -3577,6 +3578,169 @@ static const struct DeviceLinkNode : public cmGeneratorExpressionNode
   }
 } deviceLinkNode;
 
+namespace {
+bool GetSourceFile(
+  cmRange<std::vector<std::string>::const_iterator> parameters,
+  cm::GenEx::Evaluation* eval, GeneratorExpressionContent const* content,
+  cmSourceFile*& sourceFile)
+{
+  auto sourceName = *parameters.begin();
+  auto* makefile = eval->Context.LG->GetMakefile();
+  sourceFile = nullptr;
+
+  if (parameters.size() == 2) {
+    auto const& option = *parameters.advance(1).begin();
+    auto const DIRECTORY = "DIRECTORY:"_s;
+    auto const TARGET_DIRECTORY = "TARGET_DIRECTORY:"_s;
+    if (cmHasPrefix(option, DIRECTORY)) {
+      auto dir = option.substr(DIRECTORY.length());
+      if (dir.empty()) {
+        reportError(
+          eval, content->GetOriginalExpression(),
+          cmStrCat("No value provided for the ", DIRECTORY, " option."));
+        return false;
+      }
+      dir = cmSystemTools::CollapseFullPath(
+        dir, makefile->GetCurrentSourceDirectory());
+      makefile = makefile->GetGlobalGenerator()->FindMakefile(dir);
+      if (!makefile) {
+        reportError(
+          eval, content->GetOriginalExpression(),
+          cmStrCat("Directory \"", dir, "\" is not known from CMake."));
+        return false;
+      }
+    } else if (cmHasPrefix(option, TARGET_DIRECTORY)) {
+      auto targetName = option.substr(TARGET_DIRECTORY.length());
+      if (targetName.empty()) {
+        reportError(eval, content->GetOriginalExpression(),
+                    cmStrCat("No value provided for the ", TARGET_DIRECTORY,
+                             " option."));
+        return false;
+      }
+      auto* target = makefile->FindTargetToUse(targetName);
+      if (!target) {
+        reportError(eval, content->GetOriginalExpression(),
+                    cmStrCat("Non-existent target: ", targetName));
+        return false;
+      }
+      makefile = makefile->GetGlobalGenerator()->FindMakefile(
+        target->GetProperty("BINARY_DIR"));
+    } else {
+      reportError(eval, content->GetOriginalExpression(),
+                  cmStrCat("Invalid option. ", DIRECTORY, " or ",
+                           TARGET_DIRECTORY, " expected."));
+      return false;
+    }
+
+    sourceName = cmSystemTools::CollapseFullPath(
+      sourceName,
+      eval->Context.LG->GetMakefile()->GetCurrentSourceDirectory());
+  }
+
+  sourceFile = makefile->GetSource(sourceName);
+  return true;
+}
+}
+
+static const struct SourceExistsNode : public cmGeneratorExpressionNode
+{
+  SourceExistsNode() {} // NOLINT(modernize-use-equals-default)
+
+  // This node handles errors on parameter count itself.
+  int NumExpectedParameters() const override { return OneOrMoreParameters; }
+
+  std::string Evaluate(
+    std::vector<std::string> const& parameters, cm::GenEx::Evaluation* eval,
+    GeneratorExpressionContent const* content,
+    cmGeneratorExpressionDAGChecker* /*dagCheckerParent*/) const override
+  {
+    if (parameters.size() > 2) {
+      reportError(eval, content->GetOriginalExpression(),
+                  "$<SOURCE_EXISTS:...> expression requires at most two "
+                  "parameters.");
+      return std::string{};
+    }
+
+    if (parameters[0].empty()) {
+      reportError(eval, content->GetOriginalExpression(),
+                  "$<SOURCE_EXISTS:src> expression requires a "
+                  "non-empty source name.");
+      return std::string{};
+    }
+
+    cmSourceFile* sourceFile = nullptr;
+    if (!GetSourceFile(cmMakeRange(parameters), eval, content, sourceFile)) {
+      return std::string{};
+    }
+
+    return sourceFile ? "1" : "0";
+  }
+} sourceExistsNode;
+
+static const struct SourcePropertyNode : public cmGeneratorExpressionNode
+{
+  SourcePropertyNode() {} // NOLINT(modernize-use-equals-default)
+
+  // This node handles errors on parameter count itself.
+  int NumExpectedParameters() const override { return TwoOrMoreParameters; }
+
+  std::string Evaluate(
+    std::vector<std::string> const& parameters, cm::GenEx::Evaluation* eval,
+    GeneratorExpressionContent const* content,
+    cmGeneratorExpressionDAGChecker* /*dagCheckerParent*/) const override
+  {
+    static cmsys::RegularExpression propertyNameValidator("^[A-Za-z0-9_]+$");
+
+    if (parameters.size() > 3) {
+      reportError(eval, content->GetOriginalExpression(),
+                  "$<SOURCE_PROPERTY:...> expression requires at most three "
+                  "parameters.");
+      return std::string{};
+    }
+
+    std::string sourceName = parameters.front();
+    std::string const& propertyName = parameters.back();
+
+    if (sourceName.empty() && propertyName.empty()) {
+      reportError(eval, content->GetOriginalExpression(),
+                  "$<SOURCE_PROPERTY:src,prop> expression requires a "
+                  "non-empty source name and property name.");
+      return std::string{};
+    }
+    if (sourceName.empty()) {
+      reportError(eval, content->GetOriginalExpression(),
+                  "$<SOURCE_PROPERTY:src,prop> expression requires a "
+                  "non-empty source name.");
+      return std::string{};
+    }
+    if (propertyName.empty()) {
+      reportError(eval, content->GetOriginalExpression(),
+                  "$<SOURCE_PROPERTY:src,prop> expression requires a "
+                  "non-empty property name.");
+      return std::string{};
+    }
+    if (!propertyNameValidator.find(propertyName)) {
+      reportError(eval, content->GetOriginalExpression(),
+                  "Property name not supported.");
+      return std::string{};
+    }
+
+    cmSourceFile* sourceFile = nullptr;
+    if (!GetSourceFile(cmMakeRange(parameters).retreat(1), eval, content,
+                       sourceFile)) {
+      return std::string{};
+    }
+    if (!sourceFile) {
+      reportError(
+        eval, content->GetOriginalExpression(),
+        cmStrCat("Source file \"", sourceName, "\" is not known from CMake."));
+      return std::string{};
+    }
+
+    return sourceFile->GetPropertyForUser(propertyName);
+  }
+} sourcePropertyNode;
+
 static std::string getLinkedTargetsContent(
   cmGeneratorTarget const* target, std::string const& prop,
   cm::GenEx::Evaluation* eval, cmGeneratorExpressionDAGChecker* dagChecker,
@@ -5535,6 +5699,8 @@ cmGeneratorExpressionNode const* cmGeneratorExpressionNode::GetNode(
     { "COMMA", &commaNode },
     { "SEMICOLON", &semicolonNode },
     { "QUOTE", &quoteNode },
+    { "SOURCE_EXISTS", &sourceExistsNode },
+    { "SOURCE_PROPERTY", &sourcePropertyNode },
     { "TARGET_PROPERTY", &targetPropertyNode },
     { "TARGET_INTERMEDIATE_DIR", &targetIntermediateDirNode },
     { "TARGET_NAME", &targetNameNode },

@@ -2422,6 +2422,95 @@ closely related to most of the expressions in this sub-section.
   any one of the entries in ``variant_ids``, otherwise ``0``.
 
 
+.. _`Source-Dependent Expressions`:
+
+Source-Dependent Expressions
+----------------------------
+
+The source file, as specified in the following expressions, can be nonexistent
+on the file system (i.e. generated file) but must be known from CMake. A source
+file becomes known from CMake if it is part of some target (library or
+executable) or when a source file property is defined. Moreover, this
+information is specific to the directory where the declaration occurred.
+
+For example, these generator expressions enable to offer a uniform behavior,
+for the :command:`add_custom_command` and :command:`add_custom_target`
+commands, regarding the source properties:
+
+.. code-block:: cmake
+
+  function(custom_add_library target)
+    unset(sources)
+    foreach(source IN LISTS ARGN)
+      add_custom_command(
+        OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${source}.bin
+        COMMAND my-compiler -o ${CMAKE_CURRENT_BINARY_DIR}/${source}.bin
+                            "$<$<SOURCE_EXISTS:${source}>:$<SOURCE_PROPERTY:${source},COMPILE_OPTIONS>>"
+                            ${source})
+      list(APPEND sources ${CMAKE_CURRENT_BINARY_DIR}/${source}.bin)
+    endforeach()
+    add_custom_target(${target}
+                      DEPENDS ${sources})
+  endfunction()
+
+  custom_add_library(my-lib file1.x file2.x file3.x)
+  set_property(SOURCE file1.x PROPERTY COMPILE_OPTIONS -X)
+  set_property(SOURCE file2.x PROPERTY COMPILE_OPTIONS -Y)
+
+Source Meta-Data
+^^^^^^^^^^^^^^^^
+
+These expressions look up information about a source file.
+
+.. genex:: $<SOURCE_EXISTS:src[,(DIRECTORY:dir|TARGET_DIRECTORY:tgt)]>
+
+  .. versionadded:: 4.3
+
+  ``1`` if ``src`` exists as a CMake source file, else ``0``. By default, the
+  source file is searched in the scope of the current source directory or the
+  directory of the consuming target.
+
+  Directory scope can be overridden with one of the following sub-options:
+
+  ``DIRECTORY:dir``
+    The source file will be searched in the ``dir`` directory's scope.
+    CMake must know about the directory, either by having added  it through a
+    call to :command:`add_subdirectory` or ``dir`` being the top level
+    directory. Relative paths are treated as relative to the current source
+    directory.
+
+  ``TARGET_DIRECTORY:target``
+      The source file will be searched in the directory scope in which
+      ``target`` was created (``target`` must therefore exist).
+
+Source Properties
+^^^^^^^^^^^^^^^^^
+
+These expressions look up the values of
+:ref:`source file properties <Source File Properties>`.
+
+.. genex:: $<SOURCE_PROPERTY:src[,(DIRECTORY:dir|TARGET_DIRECTORY:target)],prop>
+
+  .. versionadded:: 4.3
+
+  Value of the property ``prop`` on the source file ``src``, or empty if
+  the property is not set. An error will be raised if the source file is not
+  known by CMake. By default, the source file's property will be read from the
+  current source directory's scope or the directory of the consuming target.
+
+  Directory scope can be overridden with one of the following sub-options:
+
+  ``DIRECTORY:dir``
+    The source file property will be read from the ``dir`` directory's scope.
+    CMake must know about the directory, either by having added  it through a
+    call to :command:`add_subdirectory` or ``dir`` being the top level
+    directory. Relative paths are treated as relative to the current source
+    directory.
+
+  ``TARGET_DIRECTORY:target``
+      The source file property will be read from the directory scope in which
+      ``target`` was created (``target`` must therefore exist).
+
 .. _`Target-Dependent Expressions`:
 
 Target-Dependent Expressions

@@ -1,0 +1,8 @@
+CMake Error at bad-DIRECTORY\.cmake:[0-9]+ \(file\):
+  Error evaluating generator expression:
+
+    \$<SOURCE_PROPERTY:foo\.c,DIRECTORY:foo,FOO>
+
+  Directory.+".+/Tests/RunCMake/GenEx-SOURCE_PROPERTY/foo".+is.+not.+known.+from.+CMake\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)

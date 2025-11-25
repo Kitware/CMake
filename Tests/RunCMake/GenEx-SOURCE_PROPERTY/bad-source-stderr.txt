@@ -1,0 +1,8 @@
+CMake Error at bad-source\.cmake:[0-9]+ \(file\):
+  Error evaluating generator expression:
+
+    \$<SOURCE_PROPERTY:foo.c,FOO>
+
+  Source file "foo\.c" is not known from CMake.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)

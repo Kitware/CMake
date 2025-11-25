@@ -1,0 +1,8 @@
+CMake Error at bad-arguments\.cmake:[0-9]+ \(file\):
+  Error evaluating generator expression:
+
+    \$<SOURCE_EXISTS:src,opt,foo>
+
+  \$<SOURCE_EXISTS:...> expression requires at most two parameters.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)
