@@ -2,7 +2,6 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmCTestScriptHandler.h"
 
-#include <chrono>
 #include <cstdlib>
 #include <functional>
 #include <map>
@@ -118,9 +117,8 @@ int cmCTestScriptHandler::ExecuteScript(std::string const& total_script_arg)
   std::vector<char> out;
   std::vector<char> err;
   std::string line;
-  auto pipe =
-    cmSystemTools::WaitForLine(&process.GetLoop(), outPipe, errPipe, line,
-                               std::chrono::seconds(100), out, err);
+  auto pipe = cmSystemTools::WaitForLine(&process.GetLoop(), outPipe, errPipe,
+                                         line, out, err);
   while (pipe != cmSystemTools::WaitForLineResult::None) {
     cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                "Output: " << line << "\n");
@@ -129,9 +127,8 @@ int cmCTestScriptHandler::ExecuteScript(std::string const& total_script_arg)
     } else if (pipe == cmSystemTools::WaitForLineResult::STDOUT) {
       cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, line << "\n");
     }
-    pipe =
-      cmSystemTools::WaitForLine(&process.GetLoop(), outPipe, errPipe, line,
-                                 std::chrono::seconds(100), out, err);
+    pipe = cmSystemTools::WaitForLine(&process.GetLoop(), outPipe, errPipe,
+                                      line, out, err);
   }
 
   // Properly handle output of the build command

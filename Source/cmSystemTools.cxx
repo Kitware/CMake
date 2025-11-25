@@ -2788,8 +2788,7 @@ bool cmSystemTools::ListTar(std::string const& outFileName,
 
 cmSystemTools::WaitForLineResult cmSystemTools::WaitForLine(
   uv_loop_t* loop, uv_stream_t* outPipe, uv_stream_t* errPipe,
-  std::string& line, cmDuration timeout, std::vector<char>& out,
-  std::vector<char>& err)
+  std::string& line, std::vector<char>& out, std::vector<char>& err)
 {
   line.clear();
   auto outiter = out.begin();
@@ -2859,22 +2858,7 @@ cmSystemTools::WaitForLineResult cmSystemTools::WaitForLine(
     ReadData errData;
     auto errHandle = startRead(errPipe, errData);
 
-    cm::uv_timer_ptr timer;
-    bool timedOut = false;
-    timer.init(*loop, &timedOut);
-    timer.start(
-      [](uv_timer_t* handle) {
-        auto* timedOutPtr = static_cast<bool*>(handle->data);
-        *timedOutPtr = true;
-      },
-      static_cast<uint64_t>(timeout.count() * 1000.0), 0,
-      cm::uv_update_time::no);
-
     uv_run(loop, UV_RUN_ONCE);
-    if (timedOut) {
-      // Timeout has been exceeded.
-      return WaitForLineResult::Timeout;
-    }
     if (outData.Read) {
       processOutput.DecodeText(outData.Buffer.data(), outData.Buffer.size(),
                                strdata, 1);
