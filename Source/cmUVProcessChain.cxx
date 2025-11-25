@@ -261,7 +261,6 @@ bool cmUVProcessChain::InternalData::Prepare(
 
     case cmUVProcessChainBuilder::Builtin: {
       if (this->Builder->MergedBuiltinStreams) {
-        errorData.BuiltinStream = outputData.BuiltinStream;
         errorData.Stdio.flags = UV_INHERIT_FD;
         errorData.Stdio.data.fd = outputData.Stdio.data.fd;
       } else {

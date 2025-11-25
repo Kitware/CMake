@@ -342,13 +342,8 @@ bool testUVProcessChainBuiltinMerged(char const* helperCommand)
     std::cout << "OutputStream() was invalid, expecting valid" << std::endl;
     return false;
   }
-  if (chain->ErrorStream() < 0) {
-    std::cout << "ErrorStream() was invalid, expecting valid" << std::endl;
-    return false;
-  }
-  if (chain->OutputStream() != chain->ErrorStream()) {
-    std::cout << "OutputStream() and ErrorStream() expected to be the same"
-              << std::endl;
+  if (chain->ErrorStream() >= 0) {
+    std::cout << "ErrorStream() was valid, expecting invalid" << std::endl;
     return false;
   }
 

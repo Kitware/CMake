@@ -377,8 +377,7 @@ bool cmExecuteProcessCommand(std::vector<std::string> const& args,
     outputData.Finished = true;
   }
   std::unique_ptr<cmUVStreamReadHandle> errorHandle;
-  if (chain.ErrorStream() >= 0 &&
-      chain.ErrorStream() != chain.OutputStream()) {
+  if (chain.ErrorStream() >= 0) {
     errorData.Stream.init(chain.GetLoop(), 0);
     uv_pipe_open(errorData.Stream, chain.ErrorStream());
     errorHandle = cmUVStreamRead(

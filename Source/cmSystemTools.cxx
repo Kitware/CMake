@@ -954,7 +954,7 @@ bool cmSystemTools::RunSingleCommand(std::vector<std::string> const& command,
     outputHandle =
       startRead(outStream, chain.OutputStream(), captureStdOut, tempStdOut, 1,
                 cmSystemTools::Stdout, outFinished);
-    if (chain.OutputStream() != chain.ErrorStream()) {
+    if (chain.ErrorStream() >= 0) {
       errorHandle =
         startRead(errStream, chain.ErrorStream(), captureStdErr, tempStdErr, 2,
                   cmSystemTools::Stderr, errFinished);
