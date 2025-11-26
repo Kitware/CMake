@@ -2125,17 +2125,17 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
 // Add to groupsUsed empty source groups that have non-empty children.
 void cmVisualStudio10TargetGenerator::AddMissingSourceGroups(
   std::set<cmSourceGroup const*>& groupsUsed,
-  std::vector<cmSourceGroup> const& allGroups)
+  SourceGroupVector const& allGroups)
 {
-  for (cmSourceGroup const& current : allGroups) {
-    std::vector<cmSourceGroup> const& children = current.GetGroupChildren();
+  for (auto const& current : allGroups) {
+    SourceGroupVector const& children = current->GetGroupChildren();
     if (children.empty()) {
       continue; // the group is really empty
     }
 
     this->AddMissingSourceGroups(groupsUsed, children);
 
-    if (groupsUsed.count(&current) > 0) {
+    if (groupsUsed.count(current.get()) > 0) {
       continue; // group has already been added to set
     }
 
@@ -2143,17 +2143,17 @@ void cmVisualStudio10TargetGenerator::AddMissingSourceGroups(
     // (at least one child must already have been added)
     auto child_it = children.begin();
     while (child_it != children.end()) {
-      if (groupsUsed.count(&(*child_it)) > 0) {
+      if (groupsUsed.count(child_it->get()) > 0) {
         break; // found a child that was already added => add current group too
       }
-      child_it++;
+      ++child_it;
     }
 
     if (child_it == children.end()) {
       continue; // no descendants have source files => ignore this group
     }
 
-    groupsUsed.insert(&current);
+    groupsUsed.insert(current.get());
   }
 }
 

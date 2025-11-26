@@ -14,6 +14,7 @@
 #include <vector>
 
 #include "cmGeneratorTarget.h"
+#include "cmSourceGroup.h"
 #include "cmVsProjectType.h"
 
 class cmComputeLinkInformation;
@@ -204,7 +205,7 @@ private:
   void WriteGroupSources(Elem& e0, std::string const& name,
                          ToolSources const& sources);
   void AddMissingSourceGroups(std::set<cmSourceGroup const*>& groupsUsed,
-                              std::vector<cmSourceGroup> const& allGroups);
+                              SourceGroupVector const& allGroups);
   bool IsResxHeader(std::string const& headerFile);
   bool IsXamlHeader(std::string const& headerFile);
   bool IsXamlSource(std::string const& headerFile);

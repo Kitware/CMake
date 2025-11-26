@@ -10,10 +10,10 @@
 #include <vector>
 
 #include "cmExternalMakefileProjectGenerator.h"
+#include "cmSourceGroup.h"
 
 class cmLocalGenerator;
 class cmMakefile;
-class cmSourceGroup;
 class cmXMLWriter;
 
 /** \class cmExtraEclipseCDT4Generator
@@ -87,7 +87,7 @@ private:
   static void AddEnvVar(std::ostream& out, char const* envVar,
                         cmLocalGenerator& lg);
 
-  void WriteGroups(std::vector<cmSourceGroup> const& sourceGroups,
+  void WriteGroups(SourceGroupVector const& sourceGroups,
                    std::string& linkName, cmXMLWriter& xml);
   void CreateLinksToSubprojects(cmXMLWriter& xml, std::string const& baseDir);
   void CreateLinksForTargets(cmXMLWriter& xml);

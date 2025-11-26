@@ -40,6 +40,10 @@
 // will not compile without the complete type.
 #include "cmTarget.h" // IWYU pragma: keep
 
+#if !defined(CMAKE_BOOTSTRAP)
+#  include "cmSourceGroup.h"
+#endif
+
 enum class cmCustomCommandType;
 enum class cmObjectLibraryCommands;
 
@@ -59,10 +63,6 @@ class cmTest;
 class cmTestGenerator;
 class cmVariableWatch;
 class cmake;
-
-#if !defined(CMAKE_BOOTSTRAP)
-class cmSourceGroup;
-#endif
 
 /** A type-safe wrapper for a string representing a directory id.  */
 class cmDirectoryId
@@ -621,7 +621,7 @@ public:
   /**
    * Get the vector source groups.
    */
-  std::vector<cmSourceGroup> const& GetSourceGroups() const
+  SourceGroupVector const& GetSourceGroups() const
   {
     return this->SourceGroups;
   }
@@ -1131,7 +1131,7 @@ protected:
   std::string DefineFlags;
 
 #if !defined(CMAKE_BOOTSTRAP)
-  std::vector<cmSourceGroup> SourceGroups;
+  SourceGroupVector SourceGroups;
   size_t ObjectLibrariesSourceGroupIndex;
 #endif
 

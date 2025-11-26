@@ -1615,6 +1615,7 @@ bool cmGlobalGenerator::Compute()
 
   for (auto const& localGen : this->LocalGenerators) {
     localGen->ComputeHomeRelativeOutputPath();
+    localGen->ComputeSourceGroupSearchIndex();
   }
 
   return true;

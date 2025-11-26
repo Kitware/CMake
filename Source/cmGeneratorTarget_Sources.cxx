@@ -122,7 +122,7 @@ void addFileSetEntry(cmGeneratorTarget const* headTarget,
       }
       bool found = false;
       for (auto const& sg : headTarget->Makefile->GetSourceGroups()) {
-        if (sg.MatchChildrenFiles(path)) {
+        if (sg->MatchChildrenFiles(path)) {
           found = true;
           break;
         }

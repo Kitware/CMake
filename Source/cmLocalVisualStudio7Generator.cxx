@@ -1459,9 +1459,9 @@ void cmLocalVisualStudio7Generator::WriteVCProjFile(std::ostream& fout,
   fout << "\t<Files>\n";
 
   // Loop through every source group.
-  std::vector<cmSourceGroup> sourceGroups = this->Makefile->GetSourceGroups();
+  SourceGroupVector const& sourceGroups = this->Makefile->GetSourceGroups();
   for (auto const& sg : sourceGroups) {
-    this->WriteGroup(&sg, target, fout, libName, configs, sources);
+    this->WriteGroup(sg.get(), target, fout, libName, configs, sources);
   }
 
   fout << "\t</Files>\n";
@@ -1676,13 +1676,14 @@ bool cmLocalVisualStudio7Generator::WriteGroup(
   cmGlobalVisualStudio7Generator* gg =
     static_cast<cmGlobalVisualStudio7Generator*>(this->GlobalGenerator);
   std::vector<cmSourceFile const*> const& sourceFiles = sg->GetSourceFiles();
-  std::vector<cmSourceGroup> const& children = sg->GetGroupChildren();
+  SourceGroupVector const& children = sg->GetGroupChildren();
 
   // Write the children to temporary output.
   bool hasChildrenWithSources = false;
   std::ostringstream tmpOut;
   for (auto const& child : children) {
-    if (this->WriteGroup(&child, target, tmpOut, libName, configs, sources)) {
+    if (this->WriteGroup(child.get(), target, tmpOut, libName, configs,
+                         sources)) {
       hasChildrenWithSources = true;
     }
   }
