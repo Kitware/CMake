@@ -1312,15 +1312,10 @@ std::string cmGeneratorTarget::GetCompilePDBName(
     return components.prefix + pdbName + ".pdb";
   }
 
-  // If the target is PCH-reused, we need a stable name for the PDB file so
-  // that reusing targets can construct a stable name for it.
-  if (this->PchReused) {
-    NameComponents const& components = GetFullNameInternalComponents(
-      config, cmStateEnums::RuntimeBinaryArtifact);
-    return cmStrCat(components.prefix, this->GetName(), ".pdb");
-  }
-
-  return "";
+  // Always use a name for the compile-time database.
+  NameComponents const& components =
+    GetFullNameInternalComponents(config, cmStateEnums::RuntimeBinaryArtifact);
+  return cmStrCat(components.prefix, this->GetName(), ".pdb");
 }
 
 std::string cmGeneratorTarget::GetCompilePDBPath(
