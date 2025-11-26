@@ -45,7 +45,7 @@ bool cmBinUtilsWindowsPEDumpbinGetRuntimeDependenciesTool::GetFileInfo(
   std::string line;
   static cmsys::RegularExpression const regex(
     "^    ([^\n]*\\.[Dd][Ll][Ll])\r$");
-  cmUVPipeIStream output(process.GetLoop(), process.OutputStream());
+  cmUVIStream output(process.OutputStream());
   while (std::getline(output, line)) {
     cmsys::RegularExpressionMatch match;
     if (regex.find(line.c_str(), match)) {

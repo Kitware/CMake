@@ -51,7 +51,7 @@ bool cmBinUtilsMacOSMachOOToolGetRuntimeDependenciesTool::GetFileInfo(
     "^ *path (.*) \\(offset [0-9]+\\)$");
   static cmsys::RegularExpression const nameRegex(
     "^ *name (.*) \\(offset [0-9]+\\)$");
-  cmUVPipeIStream output(process.GetLoop(), process.OutputStream());
+  cmUVIStream output(process.OutputStream());
   while (std::getline(output, line)) {
     cmsys::RegularExpressionMatch cmdMatch;
     if (rpathRegex.find(line.c_str(), cmdMatch)) {

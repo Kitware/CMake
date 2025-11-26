@@ -921,9 +921,7 @@ bool cmCTest::RunMakeCommand(std::string const& command, std::string& output,
     builder.SetWorkingDirectory(dir);
   }
   auto chain = builder.Start();
-  cm::uv_pipe_ptr outputStream;
-  outputStream.init(chain.GetLoop(), 0);
-  uv_pipe_open(outputStream, chain.OutputStream());
+  uv_stream_t* outputStream = chain.OutputStream();
 
   // Initialize tick's
   std::string::size_type tick = 0;
@@ -3294,19 +3292,14 @@ bool cmCTest::RunCommand(std::vector<std::string> const& args,
 
   std::vector<char> tempOutput;
   bool outFinished = false;
-  cm::uv_pipe_ptr outStream;
   std::vector<char> tempError;
   bool errFinished = false;
-  cm::uv_pipe_ptr errStream;
   cmProcessOutput processOutput(encoding);
-  auto startRead = [this, &chain, &processOutput](
-                     cm::uv_pipe_ptr& pipe, int stream,
-                     std::vector<char>& temp,
+  auto startRead = [this, &processOutput](
+                     uv_stream_t* stream, std::vector<char>& temp,
                      bool& finished) -> std::unique_ptr<cmUVStreamReadHandle> {
-    pipe.init(chain.GetLoop(), 0);
-    uv_pipe_open(pipe, stream);
     return cmUVStreamRead(
-      pipe,
+      stream,
       [this, &temp, &processOutput](std::vector<char> data) {
         cm::append(temp, data);
         if (this->Impl->ExtraVerbose) {
@@ -3317,10 +3310,8 @@ bool cmCTest::RunCommand(std::vector<std::string> const& args,
       },
       [&finished]() { finished = true; });
   };
-  auto outputHandle =
-    startRead(outStream, chain.OutputStream(), tempOutput, outFinished);
-  auto errorHandle =
-    startRead(errStream, chain.ErrorStream(), tempError, errFinished);
+  auto outputHandle = startRead(chain.OutputStream(), tempOutput, outFinished);
+  auto errorHandle = startRead(chain.ErrorStream(), tempError, errFinished);
   while (!timedOut && !(outFinished && errFinished)) {
     uv_run(&chain.GetLoop(), UV_RUN_ONCE);
   }

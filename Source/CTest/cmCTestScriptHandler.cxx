@@ -10,8 +10,6 @@
 
 #include <cm/memory>
 
-#include <cm3p/uv.h>
-
 #include "cmCTest.h"
 #include "cmCTestBuildCommand.h"
 #include "cmCTestConfigureCommand.h"
@@ -33,7 +31,6 @@
 #include "cmStateDirectory.h"
 #include "cmStateSnapshot.h"
 #include "cmSystemTools.h"
-#include "cmUVHandlePtr.h"
 #include "cmUVProcessChain.h"
 #include "cmake.h"
 
@@ -107,20 +104,14 @@ int cmCTestScriptHandler::ExecuteScript(std::string const& total_script_arg)
     .SetBuiltinStream(cmUVProcessChainBuilder::Stream_OUTPUT)
     .SetBuiltinStream(cmUVProcessChainBuilder::Stream_ERROR);
   auto process = builder.Start();
-  cm::uv_pipe_ptr outPipe;
-  outPipe.init(process.GetLoop(), 0);
-  uv_pipe_open(outPipe, process.OutputStream());
-  cm::uv_pipe_ptr errPipe;
-  errPipe.init(process.GetLoop(), 0);
-  uv_pipe_open(errPipe, process.ErrorStream());
 
   std::vector<char> out;
   std::vector<char> err;
   std::string line;
   cmSystemTools::WaitForLineResult pipe;
-  while ((pipe = cmSystemTools::WaitForLine(&process.GetLoop(), outPipe,
-                                            errPipe, line, out, err)) !=
-         cmSystemTools::WaitForLineResult::None) {
+  while ((pipe = cmSystemTools::WaitForLine(
+            &process.GetLoop(), process.OutputStream(), process.ErrorStream(),
+            line, out, err)) != cmSystemTools::WaitForLineResult::None) {
     cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                "Output: " << line << "\n");
     if (pipe == cmSystemTools::WaitForLineResult::STDERR) {

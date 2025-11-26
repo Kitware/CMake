@@ -896,9 +896,7 @@ bool cmSystemTools::RunSingleCommand(std::vector<std::string> const& command,
 
   std::vector<char> tempStdOut;
   std::vector<char> tempStdErr;
-  cm::uv_pipe_ptr outStream;
   bool outFinished = true;
-  cm::uv_pipe_ptr errStream;
   bool errFinished = true;
   cmProcessOutput processOutput(encoding);
   std::unique_ptr<cmUVStreamReadHandle> outputHandle;
@@ -906,21 +904,14 @@ bool cmSystemTools::RunSingleCommand(std::vector<std::string> const& command,
   if (outputflag != OUTPUT_PASSTHROUGH &&
       (captureStdOut || captureStdErr || outputflag != OUTPUT_NONE)) {
     auto startRead =
-      [&outputflag, &processOutput,
-       &chain](cm::uv_pipe_ptr& pipe, int stream, std::string* captureStd,
-               std::vector<char>& tempStd, int id,
-               void (*outputFunc)(std::string const&),
-               bool& finished) -> std::unique_ptr<cmUVStreamReadHandle> {
-      if (stream < 0) {
-        return nullptr;
-      }
-
-      pipe.init(chain.GetLoop(), 0);
-      uv_pipe_open(pipe, stream);
-
+      [&outputflag, &processOutput](
+        uv_stream_t* stream, std::string* captureStd,
+        std::vector<char>& tempStd, int id,
+        void (*outputFunc)(std::string const&),
+        bool& finished) -> std::unique_ptr<cmUVStreamReadHandle> {
       finished = false;
       return cmUVStreamRead(
-        pipe,
+        stream,
         [outputflag, &processOutput, captureStd, &tempStd, id,
          outputFunc](std::vector<char> data) {
           // Translate NULL characters in the output into valid text.
@@ -951,13 +942,11 @@ bool cmSystemTools::RunSingleCommand(std::vector<std::string> const& command,
         });
     };
 
-    outputHandle =
-      startRead(outStream, chain.OutputStream(), captureStdOut, tempStdOut, 1,
-                cmSystemTools::Stdout, outFinished);
-    if (chain.ErrorStream() >= 0) {
-      errorHandle =
-        startRead(errStream, chain.ErrorStream(), captureStdErr, tempStdErr, 2,
-                  cmSystemTools::Stderr, errFinished);
+    outputHandle = startRead(chain.OutputStream(), captureStdOut, tempStdOut,
+                             1, cmSystemTools::Stdout, outFinished);
+    if (chain.ErrorStream()) {
+      errorHandle = startRead(chain.ErrorStream(), captureStdErr, tempStdErr,
+                              2, cmSystemTools::Stderr, errFinished);
     }
   }
 

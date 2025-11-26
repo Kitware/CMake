@@ -46,7 +46,7 @@ bool cmBinUtilsWindowsPEObjdumpGetRuntimeDependenciesTool::GetFileInfo(
   std::string line;
   static cmsys::RegularExpression const regex(
     "^[\t ]*DLL Name: ([^\n]*\\.[Dd][Ll][Ll])$");
-  cmUVPipeIStream output(process.GetLoop(), process.OutputStream());
+  cmUVIStream output(process.OutputStream());
   while (cmSystemTools::GetLineFromStream(output, line)) {
     cmsys::RegularExpressionMatch match;
     if (regex.find(line.c_str(), match)) {

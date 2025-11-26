@@ -27,7 +27,7 @@ cm::optional<Json::Value> cmParsePlist(std::string const& filename)
 
   Json::Reader reader;
   Json::Value value;
-  cmUVPipeIStream outputStream(chain.GetLoop(), chain.OutputStream());
+  cmUVIStream outputStream(chain.OutputStream());
   if (!reader.parse(outputStream, value)) {
     return cm::nullopt;
   }

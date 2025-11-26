@@ -8,9 +8,12 @@
 #include <string>
 #include <vector>
 
-#include "cmUVHandlePtr.h"
 #include "cmUVProcessChain.h"
 #include "cmUVStream.h"
+
+namespace cm {
+class uv_loop_ptr;
+}
 
 class cmInstrumentation;
 
@@ -42,7 +45,6 @@ public:
     std::string name;
     std::unique_ptr<cmUVProcessChain> chain;
     std::unique_ptr<cmUVStreamReadHandle> streamHandler;
-    cm::uv_pipe_ptr pipe;
   };
 
 private:

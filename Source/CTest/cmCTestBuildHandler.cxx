@@ -872,18 +872,14 @@ bool cmCTestBuildHandler::RunMakeCommand(std::string const& command,
   }
 
   // For every chunk of data
-  cm::uv_pipe_ptr outputStream;
   bool outFinished = false;
-  cm::uv_pipe_ptr errorStream;
   bool errFinished = false;
-  auto startRead = [this, &chain, &processOutput, &tick,
-                    &ofs](cm::uv_pipe_ptr& pipe, int stream,
+  auto startRead = [this, &processOutput, &tick,
+                    &ofs](uv_stream_t* stream,
                           t_BuildProcessingQueueType& queue, bool& finished,
                           int id) -> std::unique_ptr<cmUVStreamReadHandle> {
-    pipe.init(chain.GetLoop(), 0);
-    uv_pipe_open(pipe, stream);
     return cmUVStreamRead(
-      pipe,
+      stream,
       [this, &processOutput, &queue, id, &tick, &ofs](std::vector<char> data) {
         // Replace '\0' with '\n', since '\0' does not really make sense. This
         // is for Visual Studio output
@@ -909,11 +905,10 @@ bool cmCTestBuildHandler::RunMakeCommand(std::string const& command,
         finished = true;
       });
   };
-  auto outputHandle = startRead(outputStream, chain.OutputStream(),
+  auto outputHandle = startRead(chain.OutputStream(),
                                 this->BuildProcessingQueue, outFinished, 1);
-  auto errorHandle =
-    startRead(errorStream, chain.ErrorStream(),
-              this->BuildProcessingErrorQueue, errFinished, 2);
+  auto errorHandle = startRead(
+    chain.ErrorStream(), this->BuildProcessingErrorQueue, errFinished, 2);
 
   while (!timedOut && !(outFinished && errFinished && chain.Finished())) {
     uv_run(&chain.GetLoop(), UV_RUN_ONCE);

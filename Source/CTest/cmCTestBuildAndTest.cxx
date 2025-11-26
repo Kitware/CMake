@@ -10,8 +10,6 @@
 
 #include <cm/filesystem>
 
-#include <cm3p/uv.h>
-
 #include "cmBuildArgs.h"
 #include "cmBuildOptions.h"
 #include "cmCTest.h"
@@ -22,7 +20,6 @@
 #include "cmState.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
-#include "cmUVHandlePtr.h"
 #include "cmUVProcessChain.h"
 #include "cmUVStream.h"
 #include "cmWorkingDirectory.h"
@@ -94,11 +91,8 @@ bool cmCTestBuildAndTest::RunTest(std::vector<std::string> const& argv,
   auto chain = builder.Start();
 
   cmProcessOutput processOutput(cmProcessOutput::Auto);
-  cm::uv_pipe_ptr outputStream;
-  outputStream.init(chain.GetLoop(), 0);
-  uv_pipe_open(outputStream, chain.OutputStream());
   auto outputHandle = cmUVStreamRead(
-    outputStream,
+    chain.OutputStream(),
     [&processOutput](std::vector<char> data) {
       std::string decoded;
       processOutput.DecodeText(data.data(), data.size(), decoded);

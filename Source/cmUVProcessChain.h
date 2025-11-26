@@ -108,8 +108,8 @@ public:
   uv_loop_t& GetLoop();
 
   // FIXME: Add stdin support
-  int OutputStream();
-  int ErrorStream();
+  uv_stream_t* OutputStream();
+  uv_stream_t* ErrorStream();
 
   bool Valid() const;
   bool Wait(uint64_t milliseconds = 0);
