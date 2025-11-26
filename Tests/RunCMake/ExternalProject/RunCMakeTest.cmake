@@ -261,6 +261,8 @@ if(GIT_EXECUTABLE)
 endif()
 
 set(RunCMake_TEST_OUTPUT_MERGE 1)
+set(ENV{ConfigVar} "con")
 __ep_test_with_build(EnvVars)
+unset(ENV{ConfigVar})
 unset(RunCMake_TEST_OUTPUT_MERGE)
 run_cmake(InvalidEnvModification)
