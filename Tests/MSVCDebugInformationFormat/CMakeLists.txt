@@ -79,3 +79,11 @@ endif()
 if(CMake_TEST_Fortran)
   verify(Fortran verify.F90)
 endif()
+
+# Issue 27401; 4.2.0 regression
+add_library(PdbCompileFileName PdbCompileFileName.c)
+target_compile_definitions(PdbCompileFileName
+  PRIVATE
+    "TARGET_DIRECTORY=\"$<TARGET_INTERMEDIATE_DIR:PdbCompileFileName>\"")
+set_property(TARGET PdbCompileFileName PROPERTY
+  MSVC_DEBUG_INFORMATION_FORMAT "ProgramDatabase")
