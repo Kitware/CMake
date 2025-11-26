@@ -1,0 +1,2 @@
+CMake Error in CMakeLists\.txt:
+  Package "foo" version "1.2.3rc1" does not conform to the "simple" schema\.

@@ -66,7 +66,7 @@ bool cmExportInstallPackageInfoGenerator::GenerateMainFile(std::ostream& os)
     }
   }
 
-  if (!this->CheckDefaultTargets()) {
+  if (!this->CheckPackage()) {
     return false;
   }
 

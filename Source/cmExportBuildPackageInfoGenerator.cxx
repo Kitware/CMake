@@ -32,7 +32,7 @@ bool cmExportBuildPackageInfoGenerator::GenerateMainFile(std::ostream& os)
     return false;
   }
 
-  if (!this->CheckDefaultTargets()) {
+  if (!this->CheckPackage()) {
     return false;
   }
 
