@@ -30,6 +30,11 @@ enum class TermKind
  */
 class Stream
 {
+#ifdef _WIN32
+  friend class Globals;
+  void Destroy();
+#endif
+
 public:
   /** The kind of terminal to which the stream is attached, if any.  */
   TermKind Kind() const { return this->Kind_; }

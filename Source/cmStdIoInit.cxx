@@ -91,8 +91,25 @@ public:
   OStream StdOut{ std::cout, stdout };
   OStream StdErr{ std::cerr, stderr };
 
+  Globals();
+
   static Globals& Get();
 };
+
+#ifdef _WIN32
+Globals::Globals()
+{
+  static auto const ctrlHandler = [](DWORD /*dwCtrlType*/) -> BOOL {
+    Get().StdErr.Destroy();
+    Get().StdOut.Destroy();
+    Get().StdIn.Destroy();
+    return FALSE;
+  };
+  SetConsoleCtrlHandler(ctrlHandler, TRUE);
+}
+#else
+Globals::Globals() = default;
+#endif
 
 Globals& Globals::Get()
 {
