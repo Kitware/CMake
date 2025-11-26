@@ -84,6 +84,13 @@ public:
    */
   void TraceDependencies() const;
 
+#ifndef CMAKE_BOOTSTRAP
+  /**
+   * Resolve source group genex.
+   */
+  void ResolveSourceGroupGenex();
+#endif
+
   virtual void AddHelperCommands() {}
 
   /**

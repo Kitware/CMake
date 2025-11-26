@@ -489,7 +489,7 @@ bool RuleNeedsCMD(std::string const& cmd)
   auto it = std::find_if(args.cbegin(), args.cend(),
                          [](std::string const& arg) -> bool {
                            // FIXME: Detect more windows shell operators.
-                           return cmHasLiteralPrefix(arg, ">");
+                           return cmHasPrefix(arg, '>');
                          });
   return it != args.cend();
 }

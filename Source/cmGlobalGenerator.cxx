@@ -1185,7 +1185,7 @@ void cmGlobalGenerator::SetLanguageEnabledMaps(std::string const& l,
     std::string outputExtension = *p;
     this->LanguageToOutputExtension[l] = outputExtension;
     this->OutputExtensions[outputExtension] = outputExtension;
-    if (cmHasPrefix(outputExtension, ".")) {
+    if (cmHasPrefix(outputExtension, '.')) {
       outputExtension = outputExtension.substr(1);
       this->OutputExtensions[outputExtension] = outputExtension;
     }
@@ -1578,6 +1578,12 @@ bool cmGlobalGenerator::Compute()
   }
 
   this->AddExtraIDETargets();
+
+#ifndef CMAKE_BOOTSTRAP
+  for (auto const& localGen : this->LocalGenerators) {
+    localGen->ResolveSourceGroupGenex();
+  }
+#endif
 
   // Trace the dependencies, after that no custom commands should be added
   // because their dependencies might not be handled correctly

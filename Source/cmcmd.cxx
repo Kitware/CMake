@@ -180,7 +180,7 @@ bool cmTarFilesFrom(std::string const& file, std::vector<std::string>& files)
     }
     if (cmHasLiteralPrefix(line, "--add-file=")) {
       files.push_back(line.substr(11));
-    } else if (cmHasLiteralPrefix(line, "-")) {
+    } else if (cmHasPrefix(line, '-')) {
       cmSystemTools::Error(cmStrCat("-E tar --files-from='", file,
                                     "' file invalid line:\n", line, '\n'));
       return false;
@@ -1084,7 +1084,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
       bool doing_options = true;
       bool at_least_one_file = false;
       for (auto const& arg : cmMakeRange(args).advance(2)) {
-        if (doing_options && cmHasLiteralPrefix(arg, "-")) {
+        if (doing_options && cmHasPrefix(arg, '-')) {
           if (arg == "--") {
             doing_options = false;
           }
@@ -1239,7 +1239,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
           // Destroy console buffers to drop cout/cerr encoding transform.
           console.reset();
           cmCatFile(arg);
-        } else if (doing_options && cmHasLiteralPrefix(arg, "-")) {
+        } else if (doing_options && cmHasPrefix(arg, '-')) {
           if (arg == "--") {
             doing_options = false;
           } else {
@@ -2416,13 +2416,13 @@ bool cmVSLink::Parse(std::vector<std::string>::const_iterator argBeg,
   // Parse our own arguments.
   std::string intDir;
   auto arg = argBeg;
-  while (arg != argEnd && cmHasLiteralPrefix(*arg, "-")) {
+  while (arg != argEnd && cmHasPrefix(*arg, '-')) {
     if (*arg == "--") {
       ++arg;
       break;
     }
     if (*arg == "--manifests") {
-      for (++arg; arg != argEnd && !cmHasLiteralPrefix(*arg, "-"); ++arg) {
+      for (++arg; arg != argEnd && !cmHasPrefix(*arg, '-'); ++arg) {
         this->UserManifests.push_back(*arg);
       }
     } else if (cmHasLiteralPrefix(*arg, "--intdir=")) {

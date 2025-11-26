@@ -1631,7 +1631,7 @@ void cmGlobalFastbuildGenerator::WriteSolution()
         folderName,
         { { "Path", Quote(pathToFolder) },
           { "Projects",
-            cmStrCat("{", cmJoin(Wrap(projectsInFolder), ","), "}") } },
+            cmStrCat('{', cmJoin(Wrap(projectsInFolder), ","), '}') } },
         1);
       folders.emplace_back(std::move(folderName));
     }

@@ -36,8 +36,10 @@ void cmBinUtilsLinker::NormalizePath(std::string& path) const
   if (policy == cmPolicies::WARN) {
     this->Archive->GetMakefile()->IssueMessage(
       MessageType::AUTHOR_WARNING,
-      cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0207), '\n',
-               "Path\n  \"", path,
+      cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0207),
+               "\n"
+               "Path\n  \"",
+               path,
                "\"\n"
                "would be converted to\n  \"",
                normalizedPath, "\"\n"));

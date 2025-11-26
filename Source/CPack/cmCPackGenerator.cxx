@@ -834,7 +834,7 @@ int cmCPackGenerator::InstallCMakeProject(
     // Make sure that DESTDIR + CPACK_INSTALL_PREFIX directory
     // exists:
     //
-    if (cmHasLiteralPrefix(dir, "/")) {
+    if (cmHasPrefix(dir, '/')) {
       dir = tempInstallDirectory + dir;
     } else {
       dir = tempInstallDirectory + "/" + dir;

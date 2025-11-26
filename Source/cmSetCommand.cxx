@@ -81,7 +81,7 @@ bool cmSetCommand(std::vector<std::string> const& args,
 
   // watch for CACHE{} signature
   if (cmHasLiteralPrefix(variable, "CACHE{") && variable.size() > 7 &&
-      cmHasLiteralSuffix(variable, "}")) {
+      cmHasSuffix(variable, '}')) {
     // what is the variable name
     auto const& varName = variable.substr(6, variable.size() - 7);
     // VALUE handling

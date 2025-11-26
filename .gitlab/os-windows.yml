@@ -37,52 +37,58 @@
         VCVARSPLATFORM: "x64"
         VCVARSVERSION: "14.43.34808"
 
-.windows_vcvarsall_vs2022_x64:
+.windows_vcvarsall_vs2022_x64_msvc14.44:
     variables:
         VCVARSALL: "${VS170COMNTOOLS}\\..\\..\\VC\\Auxiliary\\Build\\vcvarsall.bat"
         VCVARSPLATFORM: "x64"
         VCVARSVERSION: "14.44.35207"
 
-.windows_vcvarsall_vs2022_x86:
+.windows_vcvarsall_vs2026_x64:
     variables:
-        VCVARSALL: "${VS170COMNTOOLS}\\..\\..\\VC\\Auxiliary\\Build\\vcvarsall.bat"
+        VCVARSALL: "${VS180COMNTOOLS}\\..\\..\\VC\\Auxiliary\\Build\\vcvarsall.bat"
+        VCVARSPLATFORM: "x64"
+        VCVARSVERSION: "14.50.35717"
+
+.windows_vcvarsall_vs2026_x86:
+    variables:
+        VCVARSALL: "${VS180COMNTOOLS}\\..\\..\\VC\\Auxiliary\\Build\\vcvarsall.bat"
         VCVARSPLATFORM: "x86"
-        VCVARSVERSION: "14.44.35207"
+        VCVARSVERSION: "14.50.35717"
 
-.windows_vcvarsall_vs2022_x64_arm64:
+.windows_vcvarsall_vs2026_x64_arm64:
     variables:
-        VCVARSALL: "${VS170COMNTOOLS}\\..\\..\\VC\\Auxiliary\\Build\\vcvarsall.bat"
+        VCVARSALL: "${VS180COMNTOOLS}\\..\\..\\VC\\Auxiliary\\Build\\vcvarsall.bat"
         VCVARSPLATFORM: "x64_arm64"
-        VCVARSVERSION: "14.44.35207"
+        VCVARSVERSION: "14.50.35717"
 
-.windows_arm64_vcvarsall_vs2022:
+.windows_arm64_vcvarsall_vs2026:
     variables:
-        VCVARSALL: "${VS170COMNTOOLS}\\..\\..\\VC\\Auxiliary\\Build\\vcvarsall.bat"
+        VCVARSALL: "${VS180COMNTOOLS}\\..\\..\\VC\\Auxiliary\\Build\\vcvarsall.bat"
         VCVARSPLATFORM: "arm64"
-        VCVARSVERSION: "14.44.35207"
+        VCVARSVERSION: "14.50.35717"
 
-.windows_vs2022_x64_pch:
+.windows_vs2026_x64_pch:
     extends:
-        - .windows_vs2022_x64_ninja
+        - .windows_vs2026_x64_ninja
 
     variables:
-        CMAKE_CONFIGURATION: windows_vs2022_x64_pch
+        CMAKE_CONFIGURATION: windows_vs2026_x64_pch
 
-.windows_vs2022_x64_ninja:
-    extends:
-        - .windows_build_ninja
-        - .windows_vcvarsall_vs2022_x64
-
-    variables:
-        CMAKE_CONFIGURATION: windows_vs2022_x64_ninja
-
-.windows_arm64_vs2022_ninja:
+.windows_vs2026_x64_ninja:
     extends:
         - .windows_build_ninja
-        - .windows_arm64_vcvarsall_vs2022
+        - .windows_vcvarsall_vs2026_x64
 
     variables:
-        CMAKE_CONFIGURATION: windows_arm64_vs2022_ninja
+        CMAKE_CONFIGURATION: windows_vs2026_x64_ninja
+
+.windows_arm64_vs2026_ninja:
+    extends:
+        - .windows_build_ninja
+        - .windows_arm64_vcvarsall_vs2026
+
+    variables:
+        CMAKE_CONFIGURATION: windows_arm64_vs2026_ninja
 
 .windows_package:
     extends:
@@ -95,7 +101,7 @@
 .windows_x86_64_package:
     extends:
         - .windows_package
-        - .windows_vcvarsall_vs2022_x64
+        - .windows_vcvarsall_vs2026_x64
 
     variables:
         CMAKE_CONFIGURATION: windows_x86_64_package
@@ -103,7 +109,7 @@
 .windows_i386_package:
     extends:
         - .windows_package
-        - .windows_vcvarsall_vs2022_x86
+        - .windows_vcvarsall_vs2026_x86
 
     variables:
         CMAKE_CONFIGURATION: windows_i386_package
@@ -111,12 +117,22 @@
 .windows_arm64_package:
     extends:
         - .windows_package
-        - .windows_vcvarsall_vs2022_x64_arm64
+        - .windows_vcvarsall_vs2026_x64_arm64
 
     variables:
         CMAKE_CONFIGURATION: windows_arm64_package
 
 ### External testing
+
+.windows_vs2026_x64:
+    extends: .windows
+
+    variables:
+        CMAKE_CONFIGURATION: windows_vs2026_x64
+        CMAKE_GENERATOR: "Visual Studio 18 2026"
+        CMAKE_GENERATOR_PLATFORM: "x64"
+        CMAKE_GENERATOR_TOOLSET: "v145,version=14.50.35717"
+        CMAKE_CI_NIGHTLY_IGNORE_DEPS: "true"
 
 .windows_vs2022_x64:
     extends: .windows
@@ -197,42 +213,42 @@
         CMAKE_CI_BUILD_TYPE: Release
         CMAKE_CI_NIGHTLY_IGNORE_DEPS: "true"
 
-.windows_vs2022_x64_nmake:
+.windows_vs2026_x64_nmake:
     extends:
         - .windows_nmake
-        - .windows_vcvarsall_vs2022_x64
+        - .windows_vcvarsall_vs2026_x64
 
     variables:
-        CMAKE_CONFIGURATION: windows_vs2022_x64_nmake
+        CMAKE_CONFIGURATION: windows_vs2026_x64_nmake
 
-.windows_vs2022_x64_jom:
+.windows_vs2026_x64_jom:
     extends:
         - .windows_jom
-        - .windows_vcvarsall_vs2022_x64
+        - .windows_vcvarsall_vs2026_x64
 
     variables:
-        CMAKE_CONFIGURATION: windows_vs2022_x64_jom
+        CMAKE_CONFIGURATION: windows_vs2026_x64_jom
 
-.windows_vs2022_x64_ninja_multi:
+.windows_vs2026_x64_ninja_multi:
     extends:
         - .windows_ninja_multi
-        - .windows_vcvarsall_vs2022_x64
+        - .windows_vcvarsall_vs2026_x64
 
     variables:
-        CMAKE_CONFIGURATION: windows_vs2022_x64_ninja_multi
+        CMAKE_CONFIGURATION: windows_vs2026_x64_ninja_multi
 
-.windows_vs2022_x64_fastbuild:
+.windows_vs2026_x64_fastbuild:
     extends:
         - .windows_fastbuild
-        - .windows_vcvarsall_vs2022_x64
+        - .windows_vcvarsall_vs2026_x64
 
     variables:
-        CMAKE_CONFIGURATION: windows_vs2022_x64_fastbuild
+        CMAKE_CONFIGURATION: windows_vs2026_x64_fastbuild
 
 .windows_clang_ninja:
     extends:
         - .windows_ninja
-        - .windows_vcvarsall_vs2022_x64
+        - .windows_vcvarsall_vs2022_x64_msvc14.44
 
     variables:
         CMAKE_CONFIGURATION: windows_clang_ninja
@@ -240,7 +256,7 @@
 .windows_clang_nmake:
     extends:
         - .windows_nmake
-        - .windows_vcvarsall_vs2022_x64
+        - .windows_vcvarsall_vs2022_x64_msvc14.44
 
     variables:
         CMAKE_CONFIGURATION: windows_clang_nmake
@@ -262,7 +278,7 @@
 .windows_inteloneapi_ninja:
     extends:
         - .windows_ninja
-        - .windows_vcvarsall_vs2022_x64
+        - .windows_vcvarsall_vs2022_x64_msvc14.44
 
     variables:
         CMAKE_CONFIGURATION: windows_inteloneapi_ninja
@@ -296,6 +312,16 @@
 
     variables:
         CMAKE_CONFIGURATION: windows_orangec6.73.1
+
+.windows_arm64_vs2026:
+    extends: .windows
+
+    variables:
+        CMAKE_CONFIGURATION: windows_arm64_vs2026
+        CMAKE_GENERATOR: "Visual Studio 18 2026"
+        CMAKE_GENERATOR_PLATFORM: "ARM64"
+        CMAKE_GENERATOR_TOOLSET: "v145,version=14.50.35717"
+        CMAKE_CI_NIGHTLY_IGNORE_DEPS: "true"
 
 .windows_arm64_vs2022:
     extends: .windows
@@ -340,25 +366,44 @@
         - sign-windows-v1
         - nonconcurrent
 
-.windows_x86_64_tags_nonconcurrent_vs2022:
+.windows_x86_64_tags_nonconcurrent_vs2026:
     tags:
         - cmake # Since this is a bare runner, pin to a project.
         - windows-x86_64
         - shell
-        - vs2022
-        - msvc-14.44
+        - vs2026
+        - msvc-14.50
         - nonconcurrent
 
-.windows_x86_64_tags_nonconcurrent_vs2022_arm64:
+.windows_x86_64_tags_nonconcurrent_vs2026_arm64:
     tags:
         - cmake # Since this is a bare runner, pin to a project.
         - windows-x86_64
         - shell
-        - vs2022
-        - msvc-14.44-arm64
+        - vs2026
+        - msvc-14.50-arm64
         - nonconcurrent
 
-.windows_x86_64_tags_concurrent_vs2022:
+.windows_x86_64_tags_concurrent_vs2026:
+    tags:
+        - cmake # Since this is a bare runner, pin to a project.
+        - windows-x86_64
+        - shell
+        - vs2026
+        - msvc-14.50
+        - concurrent
+
+.windows_x86_64_tags_concurrent_vs2026_android:
+    tags:
+        - cmake # Since this is a bare runner, pin to a project.
+        - windows-x86_64
+        - shell
+        - vs2026
+        - vs18-android
+        - msvc-14.50
+        - concurrent
+
+.windows_x86_64_tags_concurrent_vs2022_msvc14.44:
     tags:
         - cmake # Since this is a bare runner, pin to a project.
         - windows-x86_64
@@ -403,14 +448,23 @@
         - shell
         - concurrent
 
-.windows_arm64_tags_nonconcurrent_vs2022:
+.windows_arm64_tags_nonconcurrent_vs2026:
     tags:
         - cmake # Since this is a bare runner, pin to a project.
         - windows-arm64
         - shell
-        - vs2022
-        - msvc-14.44
+        - vs2026
+        - msvc-14.50
         - nonconcurrent
+
+.windows_arm64_tags_concurrent_vs2026:
+    tags:
+        - cmake # Since this is a bare runner, pin to a project.
+        - windows-arm64
+        - shell
+        - vs2026
+        - msvc-14.50
+        - concurrent
 
 .windows_arm64_tags_concurrent_vs2022:
     tags:
@@ -449,7 +503,8 @@
         - ctest -VV -S .gitlab/ci/ctest_build.cmake
         - (& "$pwsh" -File ".gitlab/ci/post_build.ps1")
         - sccache --show-stats
-        - sccache --stop-server
+        # Tolerate already-stopped server.
+        - (sccache --stop-server)
 
     interruptible: true
 

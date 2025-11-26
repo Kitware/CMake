@@ -194,7 +194,7 @@ function(run_cmake test)
   # Remove incidental content from both stdout and stderr.
   string(CONCAT ignore_line_regex
     "(^|\n)((==[0-9]+=="
-    "|BullseyeCoverage"
+    "|[^\n]*BullseyeCoverage "
     "|[a-z]+\\([0-9]+\\) malloc:"
     "|clang[^:]*: warning: the object size sanitizer has no effect at -O0, but is explicitly enabled:"
     "|flang-new: warning: argument unused during compilation: .-flang-experimental-exec."

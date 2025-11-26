@@ -172,6 +172,8 @@ Generator Expressions
 CPack
 -----
 
+* The :cpack_gen:`CPack AppImage Generator` was added.
+
 * The :variable:`CPACK_PACKAGE_CHECKSUM` variable now supports multiple values.
 
 * The :cpack_gen:`CPack NSIS Generator` gained a

@@ -185,7 +185,7 @@ void cmFastbuildNormalTargetGenerator::GetLinkerExecutableAndArgs(
   if (iter != compilers.end()) {
     LogMessage("Linker launcher: " + iter->first);
     outLinkerExecutable = iter->second.Executable;
-    outLinkerArgs = cmStrCat(iter->second.Args, " ", command);
+    outLinkerArgs = cmStrCat(iter->second.Args, ' ', command);
   } else {
     SplitLinkerFromArgs(command, outLinkerExecutable, outLinkerArgs);
   }
@@ -359,7 +359,7 @@ void cmFastbuildNormalTargetGenerator::ApplyLinkRuleLauncher(
     this->GetGeneratorTarget(), "RULE_LAUNCH_LINK", Config);
   if (cmNonempty(val)) {
     LogMessage("RULE_LAUNCH_LINK: " + val);
-    command = cmStrCat(val, " ", command);
+    command = cmStrCat(val, ' ', command);
   }
 }
 
@@ -550,7 +550,7 @@ void cmFastbuildNormalTargetGenerator::GenerateModuleDefinitionInfo(
     execNode.Name = target.Name + "-def-files";
     execNode.ExecExecutable = cmSystemTools::GetCMakeCommand();
     execNode.ExecArguments =
-      cmStrCat("-E __create_def ", FASTBUILD_2_INPUT_PLACEHOLDER, " ",
+      cmStrCat("-E __create_def ", FASTBUILD_2_INPUT_PLACEHOLDER, ' ',
                FASTBUILD_1_INPUT_PLACEHOLDER);
     std::string const obj_list_file = mdi->DefFile + ".objs";
 
@@ -1492,7 +1492,7 @@ void cmFastbuildNormalTargetGenerator::GenerateObjects(FastbuildTarget& target)
 
   for (auto& val : nodesPermutations) {
     auto& objectListNode = val.second;
-    objectListNode.Name = cmStrCat(objectListNode.Name, "_", ++groupNameCount);
+    objectListNode.Name = cmStrCat(objectListNode.Name, '_', ++groupNameCount);
     LogMessage(cmStrCat("ObjectList name: ", objectListNode.Name));
   }
   std::vector<FastbuildObjectListNode>& objects = target.ObjectListNodes;

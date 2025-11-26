@@ -67,7 +67,7 @@ ExternalProject_Add(DefaultCommand
   CMAKE_ARGS
     -DVARIABLE=ConfigVar
   CONFIGURE_ENVIRONMENT_MODIFICATION
-    ConfigVar=set:config
+    ConfigVar=string_append:fig # RunCMakeTest.cmake sets to "con"
     ListVar=set:7,8,9
     ListSeparator=set:,
   BUILD_ENVIRONMENT_MODIFICATION

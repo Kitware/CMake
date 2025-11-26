@@ -156,10 +156,10 @@ endfunction()
 try_compile_scope_test()
 
 if(NOT DEFINED CACHE{CACHED_RESULT})
-  message(SEND_ERROR " Result from try_compile was not cached")
+  message(SEND_ERROR "Result from try_compile was not cached")
 endif()
 if(DEFINED SHOULD_NOT_ESCAPE_SCOPE_RESULT)
-  message(SEND_ERROR " Result from try_compile(NO_CACHE) leaked")
+  message(SEND_ERROR "Result from try_compile(NO_CACHE) leaked")
 endif()
 
 ######################################
@@ -178,15 +178,13 @@ EXPECT_RUN_RESULT("exit_success" SHOULD_RUN 0)
 
 # check the compile output for the filename
 if(NOT "${${try_compile_compile_output_var}}" MATCHES "exit_success")
-  message(SEND_ERROR
-    " ${try_compile_compile_output_var} didn't contain \"exit_success\":"
-    " \"${${try_compile_compile_output_var}}\"")
+  string(REPLACE "\n" "\n  " ${try_compile_compile_output_var} "  ${${try_compile_compile_output_var}}")
+  message(SEND_ERROR "${try_compile_compile_output_var} didn't contain \"exit_success\":\n${${try_compile_compile_output_var}}")
 endif()
 # check the run output
 if(NOT "${${try_compile_run_output_var}}" MATCHES "hello world")
-  message(SEND_ERROR
-    " ${try_compile_run_output_var} didn't contain \"hello world\":"
-    " \"${${try_compile_run_output_var}}\"")
+  string(REPLACE "\n" "\n  " ${try_compile_run_output_var} "  ${${try_compile_run_output_var}}")
+  message(SEND_ERROR "${try_compile_run_output_var} didn't contain \"hello world\":\n${${try_compile_run_output_var}}")
 endif()
 
 try_run(ARG_TEST_RUN ARG_TEST_COMPILE
@@ -205,18 +203,20 @@ try_run(SHOULD_EXIT_WITH_ERROR SHOULD_COMPILE
     RUN_OUTPUT_VARIABLE RUN_OUTPUT)
 EXPECT_COMPILED("exit_with_error" SHOULD_COMPILE "${COMPILE_OUTPUT}")
 EXPECT_RUN_RESULT("exit_with_error" SHOULD_EXIT_WITH_ERROR 1)
+string(REPLACE "\n" "\n  " COMPILE_OUTPUT "  ${COMPILE_OUTPUT}")
+string(REPLACE "\n" "\n  " RUN_OUTPUT "  ${RUN_OUTPUT}")
 
 # check the compile output, it should contain the filename
 if(NOT "${COMPILE_OUTPUT}" MATCHES "exit_with_error")
-  message(SEND_ERROR " COMPILE_OUT didn't contain \"exit_with_error\": \"${COMPILE_OUTPUT}\"")
+  message(SEND_ERROR "COMPILE_OUTPUT didn't contain \"exit_with_error\":\n${COMPILE_OUTPUT}")
 endif()
 #... but not the run time output
 if("${COMPILE_OUTPUT}" MATCHES "hello world")
-  message(SEND_ERROR " COMPILE_OUT contains the run output: \"${COMPILE_OUTPUT}\"")
+  message(SEND_ERROR "COMPILE_OUTPUT contains the run output:\n${COMPILE_OUTPUT}")
 endif()
 # check the run output, it should contain stdout
 if(NOT "${RUN_OUTPUT}" MATCHES "hello world")
-  message(SEND_ERROR " RUN_OUTPUT didn't contain \"hello world\": \"${RUN_OUTPUT}\"")
+  message(SEND_ERROR "RUN_OUTPUT didn't contain \"hello world\":\n${RUN_OUTPUT}")
 endif()
 
 # try to run a file and parse stdout and stderr separately
@@ -238,11 +238,13 @@ endif()
 
 # check the run stdout output
 if(NOT "${RUN_OUTPUT_STDOUT}" MATCHES "hello world")
-  message(SEND_ERROR " RUN_OUTPUT_STDOUT didn't contain \"hello world\": \"${RUN_OUTPUT_STDOUT}\"")
+  string(REPLACE "\n" "\n  " RUN_OUTPUT_STDOUT "  ${RUN_OUTPUT_STDOUT}")
+  message(SEND_ERROR "RUN_OUTPUT_STDOUT didn't contain \"hello world\":\n${RUN_OUTPUT_STDOUT}")
 endif()
 # check the run stderr output
 if(NOT "${RUN_OUTPUT_STDERR}" MATCHES "error")
-  message(SEND_ERROR " RUN_OUTPUT_STDERR didn't contain \"error\": \"${RUN_OUTPUT_STDERR}\"")
+  string(REPLACE "\n" "\n  " RUN_OUTPUT_STDERR "  ${RUN_OUTPUT_STDERR}")
+  message(SEND_ERROR "RUN_OUTPUT_STDERR didn't contain \"error\":\n${RUN_OUTPUT_STDERR}")
 endif()
 
 # check that try_run honors NO_CACHE
@@ -263,14 +265,14 @@ endfunction()
 try_run_scope_test()
 
 if(NOT DEFINED CACHE{CACHED_COMPILE_RESULT})
-  message(SEND_ERROR " Compile result from try_run was not cached")
+  message(SEND_ERROR "Compile result from try_run was not cached")
 endif()
 if(NOT DEFINED CACHE{CACHED_RUN_RESULT})
-  message(SEND_ERROR " Run result from try_run was not cached")
+  message(SEND_ERROR "Run result from try_run was not cached")
 endif()
 if(DEFINED SHOULD_NOT_ESCAPE_SCOPE_COMPILE_RESULT)
-  message(SEND_ERROR " Compile result from try_run(NO_CACHE) leaked")
+  message(SEND_ERROR "Compile result from try_run(NO_CACHE) leaked")
 endif()
 if(DEFINED SHOULD_NOT_ESCAPE_SCOPE_RUN_RESULT)
-  message(SEND_ERROR " Run result from try_run(NO_CACHE) leaked")
+  message(SEND_ERROR "Run result from try_run(NO_CACHE) leaked")
 endif()

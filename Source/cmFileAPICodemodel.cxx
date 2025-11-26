@@ -1067,7 +1067,7 @@ Json::Value DirectoryObject::DumpInstaller(cmInstallGenerator* gen)
     installer["destination"] = installDir->GetDestination(this->Config);
     Json::Value paths = Json::arrayValue;
     for (std::string const& dir : dirs) {
-      if (cmHasLiteralSuffix(dir, "/")) {
+      if (cmHasSuffix(dir, '/')) {
         paths.append(this->DumpInstallerPath(
           this->TopSource, dir.substr(0, dir.size() - 1), "."));
       } else {
@@ -2303,8 +2303,10 @@ Json::Value Target::DumpOrderDependencies()
   // dependency.
   Json::Value jsonDependencies = Json::arrayValue;
   for (cmLinkItem const& linkItem : this->GT->GetUtilityItems()) {
-    // We don't want to dump dependencies on reserved targets like ZERO_CHECK
-    if (linkItem.Target &&
+    // We don't want to dump dependencies on reserved targets like ZERO_CHECK.
+    // We shouldn't see link items that are not targets, but for backward
+    // compatibility reasons, they are currently allowed but silently ignored.
+    if (!linkItem.Target ||
         cmGlobalGenerator::IsReservedTarget(linkItem.Target->GetName())) {
       continue;
     }

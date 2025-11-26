@@ -642,7 +642,7 @@ std::vector<std::string> cmSystemTools::HandleResponseFile(
 {
   std::vector<std::string> arg_full;
   for (std::string const& arg : cmMakeRange(argBeg, argEnd)) {
-    if (cmHasLiteralPrefix(arg, "@")) {
+    if (cmHasPrefix(arg, '@')) {
       cmsys::ifstream responseFile(arg.substr(1).c_str(), std::ios::in);
       if (!responseFile) {
         std::string error = cmStrCat("failed to open for reading (",

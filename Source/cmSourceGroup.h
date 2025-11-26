@@ -11,6 +11,7 @@
 
 #include "cmsys/RegularExpression.hxx"
 
+class cmLocalGenerator;
 class cmSourceFile;
 class cmSourceGroupInternals;
 
@@ -37,6 +38,11 @@ public:
    * Set the regular expression for this group.
    */
   void SetGroupRegex(char const* regex);
+
+  /**
+   * Resolve genex.
+   */
+  void ResolveGenex(cmLocalGenerator* lg, std::string const& config);
 
   /**
    * Add a file name to the explicit list of files for this group.

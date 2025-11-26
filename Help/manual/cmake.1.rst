@@ -790,9 +790,13 @@ following options:
 .. option:: --preset <preset>, --preset=<preset>
 
   Use a build preset to specify build options. The project binary directory
-  is inferred from the ``configurePreset`` key. The current working directory
-  must contain CMake preset files.
-  See :manual:`preset <cmake-presets(7)>` for more details.
+  is inferred from the ``configurePreset`` key unless a directory is specified
+  after ``--build``. The current working directory must contain CMake preset
+  files. See :manual:`preset <cmake-presets(7)>` for more details.
+
+.. versionchanged:: 4.3
+  ``cmake --build`` now supports specifying a build directory and
+    preset together.
 
 .. option:: --list-presets
 

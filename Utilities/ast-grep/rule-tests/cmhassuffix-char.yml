@@ -1,0 +1,9 @@
+---
+id: cmhassuffix-char
+valid:
+  - "cmHasSuffix(haystack, 'a')"
+  - 'cmHasSuffix(haystack, "foo")'
+invalid:
+  - 'cmHasSuffix(haystack, "a")'
+  - 'cmHasSuffix(haystack, "\n")'
+  - "cmHasSuffix(haystack, \"'\")"

@@ -1,0 +1,47 @@
+id: cmhasprefix-char
+snapshots:
+  cmHasPrefix(haystack, "'"):
+    fixed: cmHasPrefix(haystack, '\'')
+    labels:
+    - source: '"''"'
+      style: primary
+      start: 22
+      end: 25
+    - source: cmHasPrefix(haystack, "'")
+      style: secondary
+      start: 0
+      end: 26
+    - source: ','
+      style: secondary
+      start: 20
+      end: 21
+  cmHasPrefix(haystack, "\n"):
+    fixed: cmHasPrefix(haystack, '\n')
+    labels:
+    - source: '"\n"'
+      style: primary
+      start: 22
+      end: 26
+    - source: cmHasPrefix(haystack, "\n")
+      style: secondary
+      start: 0
+      end: 27
+    - source: ','
+      style: secondary
+      start: 20
+      end: 21
+  cmHasPrefix(haystack, "a"):
+    fixed: cmHasPrefix(haystack, 'a')
+    labels:
+    - source: '"a"'
+      style: primary
+      start: 22
+      end: 25
+    - source: cmHasPrefix(haystack, "a")
+      style: secondary
+      start: 0
+      end: 26
+    - source: ','
+      style: secondary
+      start: 20
+      end: 21
