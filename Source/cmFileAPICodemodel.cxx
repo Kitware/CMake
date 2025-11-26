@@ -2303,8 +2303,10 @@ Json::Value Target::DumpOrderDependencies()
   // dependency.
   Json::Value jsonDependencies = Json::arrayValue;
   for (cmLinkItem const& linkItem : this->GT->GetUtilityItems()) {
-    // We don't want to dump dependencies on reserved targets like ZERO_CHECK
-    if (linkItem.Target &&
+    // We don't want to dump dependencies on reserved targets like ZERO_CHECK.
+    // We shouldn't see link items that are not targets, but for backward
+    // compatibility reasons, they are currently allowed but silently ignored.
+    if (!linkItem.Target ||
         cmGlobalGenerator::IsReservedTarget(linkItem.Target->GetName())) {
       continue;
     }
