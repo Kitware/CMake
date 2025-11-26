@@ -151,6 +151,10 @@ PRINT *, 'INFO:arch[ppcle]'
 #  else
 PRINT *, 'INFO:arch[ppc]'
 #  endif
+#elif defined(__wasm64) || defined(__wasm64__)
+PRINT *, 'INFO:arch[wasm64]'
+#elif defined(__wasm32) || defined(__wasm32__)
+PRINT *, 'INFO:arch[wasm32]'
 #endif
 
 PRINT *, 'ABI Detection'

@@ -144,6 +144,10 @@ static unsigned short const info_byte_order_little_endian[] = {
 #  else
 #    define ARCHITECTURE_ID "ppc"
 #  endif
+#elif defined(__wasm64) || defined(__wasm64__)
+#  define ARCHITECTURE_ID "wasm64"
+#elif defined(__wasm32) || defined(__wasm32__)
+#  define ARCHITECTURE_ID "wasm32"
 #endif
 
 /* Construct the string literal in pieces to prevent the source from
