@@ -36,6 +36,10 @@ The options are:
  ``<name>``.  Relative paths are interpreted with respect to the
  current source directory.
 
+ .. versionadded:: 4.3
+   Arguments to ``FILES`` may use
+   :manual:`generator expressions <cmake-generator-expressions(7)>`.
+
 ``REGULAR_EXPRESSION``
  Any source file whose name matches the regular expression will
  be placed in group ``<name>``.

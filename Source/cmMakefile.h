@@ -612,6 +612,12 @@ public:
   bool CanIWriteThisFile(std::string const& fileName) const;
 
 #if !defined(CMAKE_BOOTSTRAP)
+
+  /**
+   * Resolve source group genex.
+   */
+  void ResolveSourceGroupGenex(cmLocalGenerator* lg);
+
   /**
    * Get the vector source groups.
    */
