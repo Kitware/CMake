@@ -50,6 +50,7 @@
 #include "cmSourceFile.h"
 #include "cmSourceFileLocation.h"
 #include "cmSourceFileLocationKind.h"
+#include "cmSourceGroup.h"
 #include "cmStandardLevelResolver.h"
 #include "cmState.h"
 #include "cmStateDirectory.h"
@@ -4101,6 +4102,13 @@ std::string cmLocalGenerator::CreateSafeObjectFileName(
   std::replace(ssin.begin(), ssin.end(), ' ', '_');
 
   return ssin;
+}
+
+cmSourceGroup* cmLocalGenerator::FindSourceGroup(
+  std::string const& source) const
+{
+  return cmSourceGroup::FindSourceGroup(source,
+                                        this->Makefile->GetSourceGroups());
 }
 
 std::string& cmLocalGenerator::CreateSafeUniqueObjectFileName(

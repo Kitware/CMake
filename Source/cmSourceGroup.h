@@ -110,6 +110,12 @@ public:
 
   std::vector<cmSourceGroup> const& GetGroupChildren() const;
 
+  /**
+   * Given a source group collection, find the source group for a given source.
+   */
+  static cmSourceGroup* FindSourceGroup(
+    std::string const& source, std::vector<cmSourceGroup> const& groups);
+
 private:
   /**
    * The name of the source group.

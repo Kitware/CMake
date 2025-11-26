@@ -4499,7 +4499,6 @@ bool cmGlobalXCodeGenerator::CreateGroups(
   std::vector<cmLocalGenerator*>& generators)
 {
   for (auto& generator : generators) {
-    cmMakefile* mf = generator->GetMakefile();
     for (auto const& gtgt : generator->GetGeneratorTargets()) {
       // Same skipping logic here as in CreateXCodeTargets so that we do not
       // end up with (empty anyhow) ZERO_CHECK, install, or test source
@@ -4511,8 +4510,9 @@ bool cmGlobalXCodeGenerator::CreateGroups(
         continue;
       }
 
-      auto addSourceToGroup = [this, mf, &gtgt](std::string const& source) {
-        cmSourceGroup* sourceGroup = mf->FindSourceGroup(source);
+      auto addSourceToGroup = [this, &gtgt,
+                               &generator](std::string const& source) {
+        cmSourceGroup* sourceGroup = generator->FindSourceGroup(source);
         cmXCodeObject* pbxgroup =
           this->CreateOrGetPBXGroup(gtgt.get(), sourceGroup);
         std::string key = GetGroupMapKeyFromPath(gtgt.get(), source);

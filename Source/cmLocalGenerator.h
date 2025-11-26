@@ -41,6 +41,7 @@ struct cmObjectLocation;
 struct cmObjectLocations;
 class cmRulePlaceholderExpander;
 class cmSourceFile;
+class cmSourceGroup;
 class cmState;
 class cmTarget;
 class cmake;
@@ -572,6 +573,11 @@ public:
   bool IsSplitSwiftBuild() const;
 
   std::string CreateSafeObjectFileName(std::string const& sin) const;
+
+  /**
+   * find what source group this source is in
+   */
+  cmSourceGroup* FindSourceGroup(std::string const& source) const;
 
 protected:
   // The default implementation converts to a Windows shortpath to

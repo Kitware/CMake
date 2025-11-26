@@ -183,3 +183,33 @@ std::vector<cmSourceGroup> const& cmSourceGroup::GetGroupChildren() const
 {
   return this->Internal->GroupChildren;
 }
+
+/**
+ * Find a source group whose regular expression matches the filename
+ * part of the given source name.  Search backward through the list of
+ * source groups, and take the first matching group found.  This way
+ * non-inherited SOURCE_GROUP commands will have precedence over
+ * inherited ones.
+ */
+cmSourceGroup* cmSourceGroup::FindSourceGroup(
+  std::string const& source, std::vector<cmSourceGroup> const& groups)
+{
+  // First search for a group that lists the file explicitly.
+  for (auto sg = groups.rbegin(); sg != groups.rend(); ++sg) {
+    cmSourceGroup const* result = sg->MatchChildrenFiles(source);
+    if (result) {
+      return const_cast<cmSourceGroup*>(result);
+    }
+  }
+
+  // Now search for a group whose regex matches the file.
+  for (auto sg = groups.rbegin(); sg != groups.rend(); ++sg) {
+    cmSourceGroup const* result = sg->MatchChildrenRegex(source);
+    if (result) {
+      return const_cast<cmSourceGroup*>(result);
+    }
+  }
+
+  // Shouldn't get here, but just in case, return the default group.
+  return const_cast<cmSourceGroup*>(groups.data());
+}

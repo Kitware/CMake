@@ -1999,14 +1999,14 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
   std::set<cmSourceGroup const*> groupsUsed;
   for (cmGeneratorTarget::AllConfigSource const& si : sources) {
     std::string const& source = si.Source->GetFullPath();
-    cmSourceGroup* sourceGroup = this->Makefile->FindSourceGroup(source);
+    cmSourceGroup* sourceGroup = this->LocalGenerator->FindSourceGroup(source);
     groupsUsed.insert(sourceGroup);
   }
 
   if (cmSourceFile const* srcCMakeLists =
         this->LocalGenerator->CreateVCProjBuildRule()) {
     std::string const& source = srcCMakeLists->GetFullPath();
-    cmSourceGroup* sourceGroup = this->Makefile->FindSourceGroup(source);
+    cmSourceGroup* sourceGroup = this->LocalGenerator->FindSourceGroup(source);
     groupsUsed.insert(sourceGroup);
   }
 
@@ -2165,7 +2165,7 @@ void cmVisualStudio10TargetGenerator::WriteGroupSources(
   for (ToolSource const& s : sources) {
     cmSourceFile const* sf = s.SourceFile;
     std::string const& source = sf->GetFullPath();
-    cmSourceGroup* sourceGroup = this->Makefile->FindSourceGroup(source);
+    cmSourceGroup* sourceGroup = this->LocalGenerator->FindSourceGroup(source);
     std::string const& filter = sourceGroup->GetFullName();
     std::string path = this->ConvertPath(source, s.RelativePath);
     ConvertToWindowsSlash(path);
@@ -6036,7 +6036,8 @@ std::string cmVisualStudio10TargetGenerator::GetCSharpSourceLink(
   std::string const& fullFileName = source->GetFullPath();
   std::string const& srcDir = this->Makefile->GetCurrentSourceDirectory();
   std::string const& binDir = this->Makefile->GetCurrentBinaryDirectory();
-  cmSourceGroup* sourceGroup = this->Makefile->FindSourceGroup(fullFileName);
+  cmSourceGroup* sourceGroup =
+    this->LocalGenerator->FindSourceGroup(fullFileName);
   if (sourceGroup && !sourceGroup->GetFullName().empty()) {
     sourceGroupedFile =
       cmStrCat(sourceGroup->GetFullName(), '/',

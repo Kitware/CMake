@@ -514,7 +514,7 @@ void cmGhsMultiTargetGenerator::WriteSources(std::ostream& fout_proj)
   std::set<std::string> groupNames;
   for (cmSourceFile* sf : sources) {
     cmSourceGroup* sourceGroup =
-      this->Makefile->FindSourceGroup(sf->ResolveFullPath());
+      this->LocalGenerator->FindSourceGroup(sf->ResolveFullPath());
     std::string gn = sourceGroup->GetFullName();
     groupFiles[gn].push_back(sf);
     groupNames.insert(std::move(gn));

@@ -2185,35 +2185,6 @@ cmSourceGroup* cmMakefile::GetOrCreateSourceGroup(std::string const& name)
   return this->GetOrCreateSourceGroup(
     cmTokenize(name, p ? cm::string_view(*p) : R"(\/)"_s));
 }
-
-/**
- * Find a source group whose regular expression matches the filename
- * part of the given source name.  Search backward through the list of
- * source groups, and take the first matching group found.  This way
- * non-inherited SOURCE_GROUP commands will have precedence over
- * inherited ones.
- */
-cmSourceGroup* cmMakefile::FindSourceGroup(std::string const& source)
-{
-  // First search for a group that lists the file explicitly.
-  for (auto sg = SourceGroups.rbegin(); sg != SourceGroups.rend(); ++sg) {
-    cmSourceGroup* result = sg->MatchChildrenFiles(source);
-    if (result) {
-      return result;
-    }
-  }
-
-  // Now search for a group whose regex matches the file.
-  for (auto sg = SourceGroups.rbegin(); sg != SourceGroups.rend(); ++sg) {
-    cmSourceGroup* result = sg->MatchChildrenRegex(source);
-    if (result) {
-      return result;
-    }
-  }
-
-  // Shouldn't get here, but just in case, return the default group.
-  return SourceGroups.data();
-}
 #endif
 
 bool cmMakefile::IsOn(std::string const& name) const

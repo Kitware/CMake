@@ -654,11 +654,6 @@ public:
    * The name will be tokenized.
    */
   cmSourceGroup* GetOrCreateSourceGroup(std::string const& name);
-
-  /**
-   * find what source group this source is in
-   */
-  cmSourceGroup* FindSourceGroup(std::string const& source);
 #endif
 
   /**

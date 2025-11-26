@@ -1447,7 +1447,7 @@ void cmLocalVisualStudio7Generator::WriteVCProjFile(std::ostream& fout,
     }
     // Add the file to the list of sources.
     std::string const source = sf->GetFullPath();
-    cmSourceGroup* sourceGroup = this->Makefile->FindSourceGroup(source);
+    cmSourceGroup* sourceGroup = this->FindSourceGroup(source);
     sourceGroup->AssignSource(sf);
   }
 

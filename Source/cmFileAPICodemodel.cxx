@@ -1813,7 +1813,7 @@ Json::Value Target::DumpSource(cmGeneratorTarget::SourceAndKind const& sk,
     source["fileSetIndex"] = fsit->second;
   }
 
-  if (cmSourceGroup* sg = this->GT->Makefile->FindSourceGroup(path)) {
+  if (cmSourceGroup* sg = this->GT->LocalGenerator->FindSourceGroup(path)) {
     source["sourceGroupIndex"] = this->AddSourceGroup(sg, si);
   }
 
