@@ -16,6 +16,4 @@ macro(__emscripten_clang lang)
   set(CMAKE_${lang}_USE_RESPONSE_FILE_FOR_LIBRARIES 1)
   set(CMAKE_${lang}_USE_RESPONSE_FILE_FOR_OBJECTS 1)
   set(CMAKE_${lang}_USE_RESPONSE_FILE_FOR_INCLUDES 1)
-  set(CMAKE_${lang}_COMPILE_OBJECT
-    "<CMAKE_${lang}_COMPILER> <DEFINES> <INCLUDES> <FLAGS> -o <OBJECT> -c <SOURCE> -fPIC")
 endmacro()
