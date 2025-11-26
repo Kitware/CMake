@@ -1,0 +1,2 @@
+-- SIZEOF_INT='[1-9][0-9]*'
+-- HAVE_SIZEOF_INT='TRUE'
