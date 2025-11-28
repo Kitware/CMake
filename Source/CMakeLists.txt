@@ -430,6 +430,8 @@ add_library(
   cmProcessOutput.h
   cmProcessTools.cxx
   cmProcessTools.h
+  cmProjectInfoArguments.cxx
+  cmProjectInfoArguments.h
   cmValue.cxx
   cmValue.h
   cmProperty.h
