@@ -566,7 +566,7 @@ public:
                         cmTarCompression compressType, bool verbose,
                         std::string const& mtime = std::string(),
                         std::string const& format = std::string(),
-                        int compressionLevel = 0);
+                        int compressionLevel = 0, int numThreads = 1);
   static bool ExtractTar(std::string const& inFileName,
                          std::vector<std::string> const& files,
                          cmTarExtractTimestamps extractTimestamps,

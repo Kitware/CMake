@@ -5,6 +5,7 @@
 #include <functional>
 #include <iomanip>
 #include <iterator>
+#include <limits>
 
 #include <cm/optional>
 #include <cmext/algorithm>
@@ -1582,6 +1583,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
       std::vector<std::string> files;
       std::string mtime;
       std::string format;
+      int numThreads = 1;
       cmSystemTools::cmTarExtractTimestamps extractTimestamps =
         cmSystemTools::cmTarExtractTimestamps::Yes;
       cmSystemTools::cmTarCompression compress =
@@ -1597,6 +1599,31 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
             ++nCompress;
           } else if (cmHasLiteralPrefix(arg, "--mtime=")) {
             mtime = arg.substr(8);
+          } else if (cmHasLiteralPrefix(arg, "--cmake-tar-threads=")) {
+            std::string const& numThreadsStr = arg.substr(20);
+            long numThreadsLong = 0;
+            if (!cmStrToLong(numThreadsStr, &numThreadsLong)) {
+              cmSystemTools::Error(
+                cmStrCat("Invalid --cmake-tar-threads value: '", numThreadsStr,
+                         "' - not a number"));
+              return 1;
+            }
+            if (numThreadsLong >
+                std::numeric_limits<decltype(numThreads)>::max()) {
+              cmSystemTools::Error(
+                cmStrCat("Invalid --cmake-tar-threads value: '", numThreadsStr,
+                         "' - too large"));
+              return 1;
+            }
+            if (numThreadsLong <
+                std::numeric_limits<decltype(numThreads)>::min()) {
+              cmSystemTools::Error(
+                cmStrCat("Invalid --cmake-tar-threads value: '", numThreadsStr,
+                         "' - too small"));
+              return 1;
+            }
+
+            numThreads = static_cast<decltype(numThreads)>(numThreadsLong);
           } else if (cmHasLiteralPrefix(arg, "--files-from=")) {
             std::string const& files_from = arg.substr(13);
             if (!cmTarFilesFrom(files_from, files)) {
@@ -1677,7 +1704,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
           std::cerr << "tar: No files or directories specified\n";
         }
         if (!cmSystemTools::CreateTar(outFile, files, {}, compress, verbose,
-                                      mtime, format)) {
+                                      mtime, format, 0, numThreads)) {
           cmSystemTools::Error("Problem creating tar: " + outFile);
           return 1;
         }
