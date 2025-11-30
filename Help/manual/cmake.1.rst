@@ -1460,7 +1460,7 @@ Available commands are:
 
     .. versionadded:: 3.1
 
-    Compress the resulting archive with XZ.
+    Compress the resulting archive with XZ (LZMA2).
 
   .. option:: --zstd
 

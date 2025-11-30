@@ -293,7 +293,7 @@ List of CPack DEB generator specific variables:
     Lempel–Ziv–Markov chain algorithm
 
   ``xz``
-    XZ Utils compression
+    XZ Utils LZMA2 (Lempel–Ziv–Markov chain algorithm, version 2) compression
 
   ``bzip2``
     bzip2 Burrows–Wheeler algorithm
