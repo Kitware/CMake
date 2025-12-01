@@ -54,11 +54,13 @@ private:
   void CollectDepends();
   void CollectTargetDepends(size_t depender_index);
   void AddTargetDepend(size_t depender_index, cmLinkItem const& dependee_name,
-                       bool linking, bool cross);
+                       bool linking, bool cross,
+                       std::set<cmLinkItem>& emitted);
   void AddTargetDepend(size_t depender_index,
                        cmGeneratorTarget const* dependee,
                        cmListFileBacktrace const& dependee_backtrace,
-                       bool linking, bool cross);
+                       bool linking, bool cross,
+                       std::set<cmLinkItem>& emitted);
   void CollectSideEffects();
   void CollectSideEffectsForTarget(std::set<size_t>& visited,
                                    size_t depender_index);
