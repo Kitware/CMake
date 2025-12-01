@@ -1406,9 +1406,6 @@ void cmLocalVisualStudio7Generator::WriteVCProjFile(std::ostream& fout,
   std::vector<std::string> configs =
     this->Makefile->GetGeneratorConfigs(cmMakefile::ExcludeEmptyConfig);
 
-  // We may be modifying the source groups temporarily, so make a copy.
-  std::vector<cmSourceGroup> sourceGroups = this->Makefile->GetSourceGroups();
-
   AllConfigSources sources;
   sources.Sources = target->GetAllConfigSources();
 
@@ -1450,21 +1447,21 @@ void cmLocalVisualStudio7Generator::WriteVCProjFile(std::ostream& fout,
     }
     // Add the file to the list of sources.
     std::string const source = sf->GetFullPath();
-    cmSourceGroup* sourceGroup =
-      this->Makefile->FindSourceGroup(source, sourceGroups);
+    cmSourceGroup* sourceGroup = this->FindSourceGroup(source);
     sourceGroup->AssignSource(sf);
   }
 
   // open the project
-  this->WriteProjectStart(fout, libName, target, sourceGroups);
+  this->WriteProjectStart(fout, libName, target);
   // write the configuration information
   this->WriteConfigurations(fout, configs, libName, target);
 
   fout << "\t<Files>\n";
 
   // Loop through every source group.
+  SourceGroupVector const& sourceGroups = this->Makefile->GetSourceGroups();
   for (auto const& sg : sourceGroups) {
-    this->WriteGroup(&sg, target, fout, libName, configs, sources);
+    this->WriteGroup(sg.get(), target, fout, libName, configs, sources);
   }
 
   fout << "\t</Files>\n";
@@ -1679,13 +1676,14 @@ bool cmLocalVisualStudio7Generator::WriteGroup(
   cmGlobalVisualStudio7Generator* gg =
     static_cast<cmGlobalVisualStudio7Generator*>(this->GlobalGenerator);
   std::vector<cmSourceFile const*> const& sourceFiles = sg->GetSourceFiles();
-  std::vector<cmSourceGroup> const& children = sg->GetGroupChildren();
+  SourceGroupVector const& children = sg->GetGroupChildren();
 
   // Write the children to temporary output.
   bool hasChildrenWithSources = false;
   std::ostringstream tmpOut;
   for (auto const& child : children) {
-    if (this->WriteGroup(&child, target, tmpOut, libName, configs, sources)) {
+    if (this->WriteGroup(child.get(), target, tmpOut, libName, configs,
+                         sources)) {
       hasChildrenWithSources = true;
     }
   }
@@ -2057,8 +2055,7 @@ void cmLocalVisualStudio7Generator::WriteProjectStartFortran(
 }
 
 void cmLocalVisualStudio7Generator::WriteProjectStart(
-  std::ostream& fout, std::string const& libName, cmGeneratorTarget* target,
-  std::vector<cmSourceGroup>&)
+  std::ostream& fout, std::string const& libName, cmGeneratorTarget* target)
 {
   if (this->FortranProject) {
     this->WriteProjectStartFortran(fout, libName, target);

@@ -439,7 +439,6 @@ class Target
   std::string const& Config;
   std::string TopSource;
   std::string TopBuild;
-  std::vector<cmSourceGroup> SourceGroupsLocal;
   BacktraceData Backtraces;
 
   std::map<std::string, CompileData> CompileDataMap;
@@ -1256,7 +1255,6 @@ Target::Target(cmGeneratorTarget* gt, unsigned int versionMajor,
   , TopSource(gt->GetGlobalGenerator()->GetCMakeInstance()->GetHomeDirectory())
   , TopBuild(
       gt->GetGlobalGenerator()->GetCMakeInstance()->GetHomeOutputDirectory())
-  , SourceGroupsLocal(this->GT->Makefile->GetSourceGroups())
   , Backtraces(this->TopSource)
 {
 }
@@ -1815,8 +1813,7 @@ Json::Value Target::DumpSource(cmGeneratorTarget::SourceAndKind const& sk,
     source["fileSetIndex"] = fsit->second;
   }
 
-  if (cmSourceGroup* sg =
-        this->GT->Makefile->FindSourceGroup(path, this->SourceGroupsLocal)) {
+  if (cmSourceGroup* sg = this->GT->LocalGenerator->FindSourceGroup(path)) {
     source["sourceGroupIndex"] = this->AddSourceGroup(sg, si);
   }
 

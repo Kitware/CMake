@@ -10,6 +10,7 @@
 #include <cstdlib>
 #include <initializer_list>
 #include <iterator>
+#include <queue>
 #include <sstream>
 #include <unordered_set>
 #include <utility>
@@ -50,6 +51,7 @@
 #include "cmSourceFile.h"
 #include "cmSourceFileLocation.h"
 #include "cmSourceFileLocationKind.h"
+#include "cmSourceGroup.h"
 #include "cmStandardLevelResolver.h"
 #include "cmState.h"
 #include "cmStateDirectory.h"
@@ -4101,6 +4103,54 @@ std::string cmLocalGenerator::CreateSafeObjectFileName(
   std::replace(ssin.begin(), ssin.end(), ' ', '_');
 
   return ssin;
+}
+
+void cmLocalGenerator::ComputeSourceGroupSearchIndex()
+{
+#if !defined(CMAKE_BOOTSTRAP)
+  SourceGroupVector const& sourceGroups = this->Makefile->GetSourceGroups();
+
+  // Build lookup index from sources to source groups
+  std::queue<cmSourceGroup*> sgToVisit;
+  for (auto const& group : sourceGroups) {
+    cmSourceGroup* cmSourceGroup = group.get();
+    sgToVisit.emplace(cmSourceGroup);
+  }
+
+  while (!sgToVisit.empty()) {
+    cmSourceGroup* sourceGroup = sgToVisit.front();
+    sgToVisit.pop();
+    for (auto const& sgChild : sourceGroup->GetGroupChildren()) {
+      sgToVisit.emplace(sgChild.get());
+    }
+    for (std::string const& source : sourceGroup->GetGroupFiles()) {
+      this->SourceGroupSearchIndex.emplace(source, sourceGroup);
+    }
+  }
+#endif
+}
+
+cmSourceGroup* cmLocalGenerator::FindSourceGroup(std::string const& source)
+{
+#if !defined(CMAKE_BOOTSTRAP)
+  auto const indexIt = SourceGroupSearchIndex.find(source);
+  if (indexIt != SourceGroupSearchIndex.cend()) {
+    if (cmSourceGroup* result = indexIt->second) {
+      return result;
+    }
+  }
+
+  cmSourceGroup* sourceGroup =
+    cmSourceGroup::FindSourceGroup(source, this->Makefile->GetSourceGroups());
+  if (sourceGroup) {
+    // Update index if we have a miss
+    SourceGroupSearchIndex.emplace(source, sourceGroup);
+  }
+  return sourceGroup;
+#else
+  static_cast<void>(source);
+  return nullptr;
+#endif
 }
 
 std::string& cmLocalGenerator::CreateSafeUniqueObjectFileName(

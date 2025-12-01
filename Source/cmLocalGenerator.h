@@ -41,6 +41,7 @@ struct cmObjectLocation;
 struct cmObjectLocations;
 class cmRulePlaceholderExpander;
 class cmSourceFile;
+class cmSourceGroup;
 class cmState;
 class cmTarget;
 class cmake;
@@ -573,6 +574,16 @@ public:
 
   std::string CreateSafeObjectFileName(std::string const& sin) const;
 
+  /**
+   * Build the search index from source files to source groups
+   */
+  void ComputeSourceGroupSearchIndex();
+
+  /**
+   * find what source group this source is in
+   */
+  cmSourceGroup* FindSourceGroup(std::string const& source);
+
 protected:
   // The default implementation converts to a Windows shortpath to
   // help older toolchains handle spaces and such.  A generator may
@@ -630,6 +641,12 @@ protected:
   std::unordered_map<std::string, std::string> AppleArchSysroots;
 
   bool EmitUniversalBinaryFlags;
+
+#if !defined(CMAKE_BOOTSTRAP)
+  // Map from source file path to source group for lookup acceleration
+  using SourceGroupMap = std::unordered_map<std::string, cmSourceGroup*>;
+  SourceGroupMap SourceGroupSearchIndex;
+#endif
 
 private:
   /**

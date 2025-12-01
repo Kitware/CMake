@@ -13,7 +13,10 @@
 
 class cmLocalGenerator;
 class cmSourceFile;
+class cmSourceGroup;
 class cmSourceGroupInternals;
+
+using SourceGroupVector = std::vector<std::unique_ptr<cmSourceGroup>>;
 
 /** \class cmSourceGroup
  * \brief Hold a group of sources as specified by a SOURCE_GROUP command.
@@ -30,9 +33,9 @@ class cmSourceGroup
 public:
   cmSourceGroup(std::string name, char const* regex,
                 char const* parentName = nullptr);
-  cmSourceGroup(cmSourceGroup const& r);
+  cmSourceGroup(cmSourceGroup const& r) = delete;
   ~cmSourceGroup();
-  cmSourceGroup& operator=(cmSourceGroup const&);
+  cmSourceGroup& operator=(cmSourceGroup const&) = delete;
 
   /**
    * Set the regular expression for this group.
@@ -52,12 +55,12 @@ public:
   /**
    * Add child to this sourcegroup
    */
-  void AddChild(cmSourceGroup const& child);
+  void AddChild(std::unique_ptr<cmSourceGroup> child);
 
   /**
    * Looks up child and returns it
    */
-  cmSourceGroup* LookupChild(std::string const& name);
+  cmSourceGroup* LookupChild(std::string const& name) const;
 
   /**
    * Get the name of this group.
@@ -72,7 +75,7 @@ public:
   /**
    * Check if the given name matches this group's regex.
    */
-  bool MatchesRegex(std::string const& name);
+  bool MatchesRegex(std::string const& name) const;
 
   /**
    * Check if the given name matches this group's explicit file list.
@@ -94,7 +97,7 @@ public:
   /**
    * Check if the given name matches this group's regex in children.
    */
-  cmSourceGroup* MatchChildrenRegex(std::string const& name);
+  cmSourceGroup* MatchChildrenRegex(std::string const& name) const;
 
   /**
    * Assign the given source file to this group.  Used only by
@@ -103,12 +106,23 @@ public:
   void AssignSource(cmSourceFile const* sf);
 
   /**
+   * Get the set of file names explicitly added to this source group.
+   */
+  std::set<std::string> const& GetGroupFiles() const;
+
+  /**
    * Get the list of the source files that have been assigned to this
    * source group.
    */
   std::vector<cmSourceFile const*> const& GetSourceFiles() const;
 
-  std::vector<cmSourceGroup> const& GetGroupChildren() const;
+  SourceGroupVector const& GetGroupChildren() const;
+
+  /**
+   * Given a source group collection, find the source group for a given source.
+   */
+  static cmSourceGroup* FindSourceGroup(std::string const& source,
+                                        SourceGroupVector const& groups);
 
 private:
   /**
