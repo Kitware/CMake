@@ -146,9 +146,15 @@ Stream::Stream(std::ios& s, FILE* file, Direction direction)
 #ifdef _WIN32
 Stream::~Stream()
 {
+  this->Destroy();
+}
+
+void Stream::Destroy()
+{
   if (this->Console_) {
     this->IOS_.rdbuf()->pubsync();
     SetConsoleMode(this->Console_, this->ConsoleOrigMode_);
+    this->Console_ = nullptr;
   }
 }
 #else
