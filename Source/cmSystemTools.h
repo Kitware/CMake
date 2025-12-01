@@ -547,6 +547,7 @@ public:
   {
     TarCompressGZip,
     TarCompressBZip2,
+    TarCompressLZMA,
     TarCompressXZ,
     TarCompressZstd,
     TarCompressNone
