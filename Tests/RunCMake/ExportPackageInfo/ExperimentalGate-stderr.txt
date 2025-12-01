@@ -1,2 +1,2 @@
 CMake Error at ExperimentalGate\.cmake:5 \(export\):
-  export EXPORT subcommand given unknown argument: "PACKAGE_INFO"\.
+  export EXPORT given unknown argument: "PACKAGE_INFO"\.
