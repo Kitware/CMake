@@ -25,6 +25,7 @@ function(run_cmake_install test)
 endfunction()
 
 # Test incorrect usage
+run_cmake(BadArgs0)
 run_cmake(BadArgs1)
 run_cmake(BadArgs2)
 run_cmake(BadName)

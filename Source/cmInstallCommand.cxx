@@ -2184,6 +2184,12 @@ bool HandlePackageInfoMode(std::vector<std::string> const& args,
     return false;
   }
 
+  if (arguments.PackageName.empty()) {
+    // TODO: Fix our use of the parser to enforce this.
+    status.SetError(cmStrCat(args[0], " missing package name."));
+    return false;
+  }
+
   if (exportName.empty()) {
     status.SetError(cmStrCat(args[0], " missing EXPORT."));
     return false;
