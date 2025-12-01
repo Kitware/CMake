@@ -212,7 +212,7 @@ static bool HandleExportMode(std::vector<std::string> const& args,
   struct ExportArguments
   {
     ArgumentParser::NonEmpty<std::string> ExportSetName;
-    ArgumentParser::NonEmpty<std::string> Namespace;
+    ArgumentParser::MaybeEmpty<std::string> Namespace;
     ArgumentParser::NonEmpty<std::string> Filename;
     ArgumentParser::NonEmpty<std::string> CxxModulesDirectory;
     cm::optional<cmPackageInfoArguments> PackageInfo;
