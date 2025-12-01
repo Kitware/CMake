@@ -8,6 +8,7 @@
 #include <cstddef>
 #include <functional>
 #include <map>
+#include <set>
 #include <string>
 #include <utility>
 #include <vector>
@@ -23,13 +24,17 @@
 template <typename Result>
 class cmArgumentParser; // IWYU pragma: keep
 
+class cmExecutionStatus;
 class cmMakefile;
 
 namespace ArgumentParser {
 
 class ParseResult
 {
-  std::map<cm::string_view, std::string> KeywordErrors;
+  using KeywordErrorList = std::set<std::string>;
+  using KeywordErrorMap = std::map<cm::string_view, KeywordErrorList>;
+
+  KeywordErrorMap KeywordErrors;
 
 public:
   explicit operator bool() const { return this->KeywordErrors.empty(); }
@@ -37,15 +42,21 @@ public:
   void AddKeywordError(cm::string_view key, cm::string_view text)
 
   {
-    this->KeywordErrors[key] += text;
+    this->KeywordErrors[key].emplace(text);
   }
 
-  std::map<cm::string_view, std::string> const& GetKeywordErrors() const
+  KeywordErrorMap const& GetKeywordErrors() const
   {
     return this->KeywordErrors;
   }
 
   bool MaybeReportError(cmMakefile& mf) const;
+
+  /// Check if argument parsing succeeded. Return \c false and set an error if
+  /// any errors were encountered, or if \p unparsedArguments is non-empty.
+  bool Check(cm::string_view context,
+             std::vector<std::string> const* unparsedArguments,
+             cmExecutionStatus& status) const;
 };
 
 template <typename Result>

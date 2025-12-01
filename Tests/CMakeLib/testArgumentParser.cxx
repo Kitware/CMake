@@ -2,6 +2,7 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 
 #include <map>
+#include <set>
 #include <string>
 #include <utility>
 #include <vector>
@@ -294,7 +295,8 @@ bool verifyResult(Result const& result,
   for (auto const& ke : result.GetKeywordErrors()) {
     auto const ki = keywordErrors.find(ke.first);
     ASSERT_TRUE(ki != keywordErrors.end());
-    ASSERT_TRUE(ke.second == ki->second);
+    ASSERT_TRUE(ke.second.size() == 1);
+    ASSERT_TRUE(*ke.second.begin() == ki->second);
   }
 
   return true;
