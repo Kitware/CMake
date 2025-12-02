@@ -269,8 +269,8 @@ static bool HandleExportMode(std::vector<std::string> const& args,
   }
 
   if (!unknownArgs.empty()) {
-    status.SetError("EXPORT subcommand given unknown argument: \"" +
-                    unknownArgs.front() + "\".");
+    status.SetError("EXPORT given unknown argument: \"" + unknownArgs.front() +
+                    "\".");
     return false;
   }
 
@@ -383,8 +383,8 @@ static bool HandleSetupMode(std::vector<std::string> const& args,
   SetupArguments arguments = parser.Parse(args, &unknownArgs);
 
   if (!unknownArgs.empty()) {
-    status.SetError("SETUP subcommand given unknown argument: \"" +
-                    unknownArgs.front() + "\".");
+    status.SetError("SETUP given unknown argument: \"" + unknownArgs.front() +
+                    "\".");
     return false;
   }
 

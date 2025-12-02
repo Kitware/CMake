@@ -1,64 +1,64 @@
 CMake Error at BadArgs4\.cmake:[0-9]+ \(export\):
-  export EXPORT subcommand given unknown argument: "LOWER_CASE_FILE"\.
+  export EXPORT given unknown argument: "LOWER_CASE_FILE"\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:3 \(include\)
 
 
 CMake Error at BadArgs4\.cmake:[0-9]+ \(export\):
-  export EXPORT subcommand given unknown argument: "APPENDIX"\.
+  export EXPORT given unknown argument: "APPENDIX"\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:3 \(include\)
 
 
 CMake Error at BadArgs4\.cmake:[0-9]+ \(export\):
-  export EXPORT subcommand given unknown argument: "VERSION"\.
+  export EXPORT given unknown argument: "VERSION"\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:3 \(include\)
 
 
 CMake Error at BadArgs4\.cmake:[0-9]+ \(export\):
-  export EXPORT subcommand given unknown argument: "LICENSE"\.
+  export EXPORT given unknown argument: "LICENSE"\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:3 \(include\)
 
 
 CMake Error at BadArgs4\.cmake:[0-9]+ \(export\):
-  export EXPORT subcommand given unknown argument: "DEFAULT_LICENSE"\.
+  export EXPORT given unknown argument: "DEFAULT_LICENSE"\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:3 \(include\)
 
 
 CMake Error at BadArgs4\.cmake:[0-9]+ \(export\):
-  export EXPORT subcommand given unknown argument: "DESCRIPTION"\.
+  export EXPORT given unknown argument: "DESCRIPTION"\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:3 \(include\)
 
 
 CMake Error at BadArgs4\.cmake:[0-9]+ \(export\):
-  export EXPORT subcommand given unknown argument: "HOMEPAGE_URL"\.
+  export EXPORT given unknown argument: "HOMEPAGE_URL"\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:3 \(include\)
 
 
 CMake Error at BadArgs4\.cmake:[0-9]+ \(export\):
-  export EXPORT subcommand given unknown argument: "DEFAULT_TARGETS"\.
+  export EXPORT given unknown argument: "DEFAULT_TARGETS"\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:3 \(include\)
 
 
 CMake Error at BadArgs4\.cmake:[0-9]+ \(export\):
-  export EXPORT subcommand given unknown argument: "DEFAULT_CONFIGURATIONS"\.
+  export EXPORT given unknown argument: "DEFAULT_CONFIGURATIONS"\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:3 \(include\)
 
 
 CMake Error at BadArgs4\.cmake:[0-9]+ \(export\):
-  export EXPORT subcommand given unknown argument: "PROJECT"\.
+  export EXPORT given unknown argument: "PROJECT"\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:3 \(include\)
 
 
 CMake Error at BadArgs4\.cmake:[0-9]+ \(export\):
-  export EXPORT subcommand given unknown argument: "NO_PROJECT_METADATA"\.
+  export EXPORT given unknown argument: "NO_PROJECT_METADATA"\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:3 \(include\)
