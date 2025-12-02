@@ -24,6 +24,7 @@ struct ToolchainVariable
   std::string ObjectKey;
   std::string VariableSuffix;
   bool IsList;
+  bool OmitEmpty;
 };
 
 class Toolchains
@@ -74,22 +75,23 @@ Json::Value Toolchains::DumpToolchains()
 Json::Value Toolchains::DumpToolchain(std::string const& lang)
 {
   static std::vector<ToolchainVariable> const CompilerVariables{
-    { "path", "COMPILER", false },
-    { "id", "COMPILER_ID", false },
-    { "version", "COMPILER_VERSION", false },
-    { "target", "COMPILER_TARGET", false },
+    { "path", "COMPILER", false, false },
+    { "commandFragment", "COMPILER_ARG1", false, true },
+    { "id", "COMPILER_ID", false, false },
+    { "version", "COMPILER_VERSION", false, false },
+    { "target", "COMPILER_TARGET", false, false },
   };
 
   static std::vector<ToolchainVariable> const CompilerImplicitVariables{
-    { "includeDirectories", "IMPLICIT_INCLUDE_DIRECTORIES", true },
-    { "linkDirectories", "IMPLICIT_LINK_DIRECTORIES", true },
-    { "linkFrameworkDirectories", "IMPLICIT_LINK_FRAMEWORK_DIRECTORIES",
-      true },
-    { "linkLibraries", "IMPLICIT_LINK_LIBRARIES", true },
+    { "includeDirectories", "IMPLICIT_INCLUDE_DIRECTORIES", true, false },
+    { "linkDirectories", "IMPLICIT_LINK_DIRECTORIES", true, false },
+    { "linkFrameworkDirectories", "IMPLICIT_LINK_FRAMEWORK_DIRECTORIES", true,
+      false },
+    { "linkLibraries", "IMPLICIT_LINK_LIBRARIES", true, false },
   };
 
   static ToolchainVariable const SourceFileExtensionsVariable{
-    "sourceFileExtensions", "SOURCE_FILE_EXTENSIONS", true
+    "sourceFileExtensions", "SOURCE_FILE_EXTENSIONS", true, false
   };
 
   auto const& mf =
@@ -128,15 +130,17 @@ void Toolchains::DumpToolchainVariable(cmMakefile const* mf,
     cmValue data = mf->GetDefinition(variableName);
     if (data) {
       cmList values(data);
-      Json::Value jsonArray = Json::arrayValue;
-      for (auto const& value : values) {
-        jsonArray.append(value);
+      if (!variable.OmitEmpty || !values.empty()) {
+        Json::Value jsonArray = Json::arrayValue;
+        for (auto const& value : values) {
+          jsonArray.append(value);
+        }
+        object[variable.ObjectKey] = jsonArray;
       }
-      object[variable.ObjectKey] = jsonArray;
     }
   } else {
     cmValue def = mf->GetDefinition(variableName);
-    if (def) {
+    if (def && (!variable.OmitEmpty || !def.IsEmpty())) {
       object[variable.ObjectKey] = *def;
     }
   }

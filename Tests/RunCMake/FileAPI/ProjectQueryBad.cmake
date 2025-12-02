@@ -30,7 +30,7 @@ cmake_file_api(
   CODEMODEL 3
   CACHE 3
   CMAKEFILES 2
-  TOOLCHAINS 1.1
+  TOOLCHAINS 1.2
 )
 
 message(NOTICE "Requested versions too low check")
