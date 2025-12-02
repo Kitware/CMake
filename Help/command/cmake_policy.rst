@@ -24,20 +24,21 @@ The ``cmake_policy`` command is used to set policies to ``OLD`` or ``NEW``
 behavior.  While setting policies individually is supported, we
 encourage projects to set policies based on CMake versions:
 
-.. signature:: cmake_policy(VERSION <min>[...<max>])
+.. signature:: cmake_policy(VERSION <min>[...<policy_max>])
   :target: VERSION
 
 .. versionadded:: 3.12
-  The optional ``<max>`` version.
+  The optional ``<policy_max>`` version.
 
-``<min>`` and the optional ``<max>`` are each CMake versions of the form
-``major.minor[.patch[.tweak]]``, and the ``...`` is literal.  The ``<min>``
-version must be at least ``2.4`` and at most the running version of CMake.
-The ``<max>`` version, if specified, must be at least the ``<min>`` version
-but may exceed the running version of CMake.  If the running version of
-CMake is older than 3.12, the extra ``...`` dots will be seen as version
-component separators, resulting in the ``...<max>`` part being ignored and
-preserving the pre-3.12 behavior of basing policies on ``<min>``.
+``<min>`` and the optional ``<policy_max>`` are each CMake versions of the
+form ``major.minor[.patch[.tweak]]``, and the ``...`` is literal.
+The ``<min>`` version must be at least ``2.4`` and at most the running
+version of CMake.  The ``<policy_max>`` version, if specified, must be at
+least the ``<min>`` version but may exceed the running version of CMake.
+If the running version of CMake is older than 3.12, the extra ``...``
+dots will be seen as version component separators, resulting in the
+``...<policy_max>`` part being ignored and preserving the pre-3.12 behavior
+of basing policies on ``<min>``.
 
 .. include:: include/POLICY_VERSION.rst
 
