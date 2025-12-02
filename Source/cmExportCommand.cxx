@@ -250,22 +250,21 @@ static bool HandleExportMode(std::vector<std::string> const& args,
 
   if (arguments.PackageInfo) {
     if (arguments.PackageInfo->PackageName.empty()) {
-      if (!arguments.PackageInfo->Check(status, false)) {
-        return false;
-      }
-    } else {
-      if (!arguments.Filename.empty()) {
-        status.SetError("PACKAGE_INFO and FILE are mutually exclusive.");
-        return false;
-      }
-      if (!arguments.Namespace.empty()) {
-        status.SetError("PACKAGE_INFO and NAMESPACE are mutually exclusive.");
-        return false;
-      }
-      if (!arguments.PackageInfo->Check(status) ||
-          !arguments.PackageInfo->SetMetadataFromProject(status)) {
-        return false;
-      }
+      // TODO: Fix our use of the parser to enforce this.
+      status.SetError("PACKAGE_INFO missing required value.");
+      return false;
+    }
+    if (!arguments.Filename.empty()) {
+      status.SetError("PACKAGE_INFO and FILE are mutually exclusive.");
+      return false;
+    }
+    if (!arguments.Namespace.empty()) {
+      status.SetError("PACKAGE_INFO and NAMESPACE are mutually exclusive.");
+      return false;
+    }
+    if (!arguments.PackageInfo->Check(status) ||
+        !arguments.PackageInfo->SetMetadataFromProject(status)) {
+      return false;
     }
   }
 
