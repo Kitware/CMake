@@ -13,6 +13,7 @@
 #include <cm/string_view>
 
 #include "cmGeneratorExpression.h"
+#include "cmMessageType.h"
 
 class cmExportSet;
 class cmGeneratorTarget;
@@ -120,7 +121,13 @@ protected:
     cmGeneratorExpression::PreprocessContext preprocessRule,
     ImportPropertyMap& properties);
 
-  virtual void ReportError(std::string const& errorMessage) const = 0;
+  virtual void IssueMessage(MessageType type,
+                            std::string const& message) const = 0;
+
+  void ReportError(std::string const& errorMessage) const
+  {
+    this->IssueMessage(MessageType::FATAL_ERROR, errorMessage);
+  }
 
   struct ExportInfo
   {

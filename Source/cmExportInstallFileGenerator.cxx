@@ -335,11 +335,11 @@ void cmExportInstallFileGenerator::ComplainAboutDuplicateTarget(
   this->ReportError(e.str());
 }
 
-void cmExportInstallFileGenerator::ReportError(
-  std::string const& errorMessage) const
+void cmExportInstallFileGenerator::IssueMessage(
+  MessageType type, std::string const& message) const
 {
   this->IEGen->GetLocalGenerator()->GetCMakeInstance()->IssueMessage(
-    MessageType::FATAL_ERROR, errorMessage,
+    type, message,
     this->IEGen->GetLocalGenerator()->GetMakefile()->GetBacktrace());
 }
 

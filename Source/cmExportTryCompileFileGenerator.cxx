@@ -6,6 +6,7 @@
 #include <utility>
 
 #include <cm/memory>
+#include <cmext/string_view>
 
 #include "cmFileSet.h"
 #include "cmGenExContext.h"
@@ -16,6 +17,7 @@
 #include "cmList.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmOutputConverter.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
@@ -31,10 +33,25 @@ cmExportTryCompileFileGenerator::cmExportTryCompileFileGenerator(
   gg->CreateImportedGenerationObjects(mf, targets, this->Exports);
 }
 
-void cmExportTryCompileFileGenerator::ReportError(
-  std::string const& errorMessage) const
+void cmExportTryCompileFileGenerator::IssueMessage(
+  MessageType type, std::string const& message) const
 {
-  cmSystemTools::Error(errorMessage);
+  switch (type) {
+    case MessageType::FATAL_ERROR:
+    case MessageType::AUTHOR_ERROR:
+    case MessageType::INTERNAL_ERROR:
+    case MessageType::DEPRECATION_ERROR:
+      cmSystemTools::Error(message);
+      break;
+    case MessageType::WARNING:
+    case MessageType::AUTHOR_WARNING:
+    case MessageType::DEPRECATION_WARNING:
+      cmSystemTools::Message(cmStrCat("CMake Warning: "_s, message),
+                             "Warning");
+      break;
+    default:
+      cmSystemTools::Message(message);
+  }
 }
 
 bool cmExportTryCompileFileGenerator::GenerateMainFile(std::ostream& os)

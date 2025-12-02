@@ -16,7 +16,6 @@
 #include "cmList.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
-#include "cmMessageType.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmTarget.h"
@@ -242,12 +241,11 @@ void cmExportBuildFileGenerator::ComplainAboutDuplicateTarget(
   this->ReportError(e.str());
 }
 
-void cmExportBuildFileGenerator::ReportError(
-  std::string const& errorMessage) const
+void cmExportBuildFileGenerator::IssueMessage(MessageType type,
+                                              std::string const& message) const
 {
   this->LG->GetGlobalGenerator()->GetCMakeInstance()->IssueMessage(
-    MessageType::FATAL_ERROR, errorMessage,
-    this->LG->GetMakefile()->GetBacktrace());
+    type, message, this->LG->GetMakefile()->GetBacktrace());
 }
 
 std::string cmExportBuildFileGenerator::InstallNameDir(

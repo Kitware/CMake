@@ -16,6 +16,8 @@
 #include <cm3p/json/value.h>
 #include <cm3p/json/writer.h>
 
+#include "cmsys/RegularExpression.hxx"
+
 #include "cmArgumentParserTypes.h"
 #include "cmExportSet.h"
 #include "cmFindPackageStack.h"
@@ -88,6 +90,63 @@ void BuildArray(Json::Value& object, std::string const& property,
     }
   }
 }
+
+bool CheckSimpleVersion(std::string const& version)
+{
+  cmsys::RegularExpression regex("^[0-9]+([.][0-9]+)*([-+].*)?$");
+  return regex.find(version);
+}
+}
+
+bool cmExportPackageInfoGenerator::CheckVersion() const
+{
+  if (!this->PackageVersion.empty()) {
+    std::string const& schema = [&] {
+      if (this->PackageVersionSchema.empty()) {
+        return std::string{ "simple" };
+      }
+      return cmSystemTools::LowerCase(this->PackageVersionSchema);
+    }();
+    bool (*validator)(std::string const&) = nullptr;
+    bool result = true;
+
+    if (schema == "simple"_s) {
+      validator = &CheckSimpleVersion;
+    } else if (schema == "dpkg"_s || schema == "rpm"_s ||
+               schema == "pep440"_s) {
+      // TODO
+      // We don't validate these at this time. Eventually, we would like to do
+      // so, but will probably need to introduce a policy whether to treat
+      // invalid versions as an error.
+    } else if (schema != "custom"_s) {
+      this->IssueMessage(MessageType::AUTHOR_WARNING,
+                         cmStrCat("Package \""_s, this->GetPackageName(),
+                                  "\" uses unrecognized version schema \""_s,
+                                  this->PackageVersionSchema, "\"."_s));
+    }
+
+    if (validator) {
+      if (!(*validator)(this->PackageVersion)) {
+        this->ReportError(cmStrCat("Package \""_s, this->GetPackageName(),
+                                   "\" version \""_s, this->PackageVersion,
+                                   "\" does not conform to the \""_s, schema,
+                                   "\" schema."_s));
+        result = false;
+      }
+      if (!this->PackageVersionCompat.empty() &&
+          !(*validator)(this->PackageVersionCompat)) {
+        this->ReportError(
+          cmStrCat("Package \""_s, this->GetPackageName(),
+                   "\" compatibility version \""_s, this->PackageVersionCompat,
+                   "\" does not conform to the \""_s, schema, "\" schema."_s));
+        result = false;
+      }
+    }
+
+    return result;
+  }
+
+  return true;
 }
 
 bool cmExportPackageInfoGenerator::CheckDefaultTargets() const

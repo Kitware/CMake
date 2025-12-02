@@ -47,7 +47,10 @@ protected:
   // Methods to implement export file code generation.
   bool GenerateImportFile(std::ostream& os) override;
 
-  bool CheckDefaultTargets() const;
+  bool CheckPackage() const
+  {
+    return this->CheckVersion() && this->CheckDefaultTargets();
+  }
 
   Json::Value GeneratePackageInfo() const;
   Json::Value* GenerateImportTarget(Json::Value& components,
@@ -82,6 +85,9 @@ protected:
                         cmGeneratorTarget const* linkedTarget) override;
 
 private:
+  bool CheckVersion() const;
+  bool CheckDefaultTargets() const;
+
   void GenerateInterfaceLinkProperties(
     bool& result, Json::Value& component, cmGeneratorTarget const* target,
     ImportPropertyMap const& properties) const;

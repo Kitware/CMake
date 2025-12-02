@@ -1,0 +1,3 @@
+CMake Warning \(dev\) in CMakeLists\.txt:
+  Package "foo" uses unrecognized version schema "unrecognized"\.
+This warning is for project developers\.  Use -Wno-dev to suppress it\.

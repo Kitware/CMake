@@ -4,6 +4,10 @@ include(RunCMake)
 run_cmake(ExperimentalGate)
 run_cmake(ExperimentalWarning)
 
+# Test version check author warning
+# TODO Move to be with other tests when experimental gate is removed.
+run_cmake(VersionCheckWarning)
+
 # Enable experimental feature and suppress warnings
 set(RunCMake_TEST_OPTIONS
   -Wno-dev
@@ -58,4 +62,7 @@ run_cmake(DependencyVersionCMake)
 run_cmake(DependencyVersionCps)
 run_cmake(TransitiveSymbolicComponent)
 run_cmake(InstallSymbolicComponent)
+run_cmake(VersionCheck)
+# run_cmake(VersionCheckWarning)
+run_cmake(VersionCheckError)
 run_cmake_install(Destination)
