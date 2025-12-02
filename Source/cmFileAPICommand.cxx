@@ -68,7 +68,7 @@ bool handleQueryCommand(std::vector<std::string> const& args,
                         cmExecutionStatus& status)
 {
   if (args.empty()) {
-    status.SetError("QUERY subcommand called without required arguments.");
+    status.SetError("QUERY called without required arguments.");
     return false;
   }
 
@@ -97,21 +97,20 @@ bool handleQueryCommand(std::vector<std::string> const& args,
     return true;
   }
   if (!unparsedArguments.empty()) {
-    status.SetError("QUERY subcommand given unknown argument \"" +
+    status.SetError("QUERY given unknown argument \"" +
                     unparsedArguments.front() + "\".");
     return false;
   }
 
   if (!std::all_of(arguments.ApiVersion.begin(), arguments.ApiVersion.end(),
                    isCharDigit)) {
-    status.SetError("QUERY subcommand given a non-integer API_VERSION.");
+    status.SetError("QUERY given non-integer API_VERSION.");
     return false;
   }
   int const apiVersion = std::atoi(arguments.ApiVersion.c_str());
   if (apiVersion != 1) {
     status.SetError(
-      cmStrCat("QUERY subcommand given an unsupported API_VERSION \"",
-               arguments.ApiVersion,
+      cmStrCat("QUERY given unsupported API_VERSION \"", arguments.ApiVersion,
                "\" (the only currently supported version is 1)."));
     return false;
   }
@@ -138,7 +137,7 @@ bool handleQueryCommand(std::vector<std::string> const& args,
 
   if (!std::all_of(errors.begin(), errors.end(),
                    [](std::string const& s) -> bool { return s.empty(); })) {
-    std::string message("QUERY subcommand was given invalid arguments:");
+    std::string message("QUERY given invalid arguments:");
     for (std::string const& s : errors) {
       if (!s.empty()) {
         message = cmStrCat(message, "\n  ", s);

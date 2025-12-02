@@ -4,15 +4,15 @@ CMake Error at ProjectQueryBad\.cmake:[0-9]+ \(cmake_file_api\):
 .*
 Invalid API version checks
 CMake Error at ProjectQueryBad\.cmake:[0-9]+ \(cmake_file_api\):
-  cmake_file_api QUERY subcommand given an unsupported API_VERSION "2" \(the
-  only currently supported version is 1\)\.
+  cmake_file_api QUERY given unsupported API_VERSION "2" \(the only currently
+  supported version is 1\)\.
 .*
 CMake Error at ProjectQueryBad\.cmake:[0-9]+ \(cmake_file_api\):
-  cmake_file_api QUERY subcommand given a non-integer API_VERSION\.
+  cmake_file_api QUERY given non-integer API_VERSION\.
 .*
 Invalid version numbers check
 CMake Error at ProjectQueryBad\.cmake:[0-9]+ \(cmake_file_api\):
-  cmake_file_api QUERY subcommand was given invalid arguments:
+  cmake_file_api QUERY given invalid arguments:
 
     Given a malformed version "nope" for CODEMODEL\.
     Given a malformed version "-2" for CACHE\.
@@ -21,7 +21,7 @@ CMake Error at ProjectQueryBad\.cmake:[0-9]+ \(cmake_file_api\):
 .*
 Requested versions too high check
 CMake Error at ProjectQueryBad\.cmake:[0-9]+ \(cmake_file_api\):
-  cmake_file_api QUERY subcommand was given invalid arguments:
+  cmake_file_api QUERY given invalid arguments:
 
     None of the specified CODEMODEL versions is supported by this version of CMake\.
     None of the specified CACHE versions is supported by this version of CMake\.
@@ -30,7 +30,7 @@ CMake Error at ProjectQueryBad\.cmake:[0-9]+ \(cmake_file_api\):
 .*
 Requested versions too low check
 CMake Error at ProjectQueryBad\.cmake:[0-9]+ \(cmake_file_api\):
-  cmake_file_api QUERY subcommand was given invalid arguments:
+  cmake_file_api QUERY given invalid arguments:
 
     None of the specified CODEMODEL versions is supported by this version of CMake\.
     None of the specified CACHE versions is supported by this version of CMake\.
