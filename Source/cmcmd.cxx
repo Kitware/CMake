@@ -1595,6 +1595,9 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
           } else if (arg == "--zstd") {
             compress = cmSystemTools::TarCompressZstd;
             ++nCompress;
+          } else if (arg == "--lzma") {
+            compress = cmSystemTools::TarCompressLZMA;
+            ++nCompress;
           } else if (cmHasLiteralPrefix(arg, "--mtime=")) {
             mtime = arg.substr(8);
           } else if (cmHasLiteralPrefix(arg, "--files-from=")) {

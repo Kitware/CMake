@@ -1468,6 +1468,12 @@ Available commands are:
 
     Compress the resulting archive with Zstandard.
 
+  .. option:: --lzma
+
+    .. versionadded:: 4.3
+
+    Compress the resulting archive with LZMA algorithm.
+
   .. option:: --files-from=<file>
 
     .. versionadded:: 3.1

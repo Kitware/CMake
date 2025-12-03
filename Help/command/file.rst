@@ -938,7 +938,23 @@ Archiving
     The ``7zip`` and ``zip`` archive formats already imply a specific type of
     compression.  The other formats use no compression by default, but can be
     directed to do so with the ``COMPRESSION`` option.  Valid values for
-    ``<compression>`` are ``None``, ``BZip2``, ``GZip``, ``XZ``, and ``Zstd``.
+    ``<compression>`` are:
+
+    * ``None``
+    * ``BZip2``
+    * ``GZip``
+    * ``LZMA``
+
+      .. versionadded:: 4.3
+
+    * ``LZMA2``
+
+      .. versionadded:: 4.3
+
+      This is an alias for ``XZ``.
+
+    * ``XZ``
+    * ``Zstd``
 
     .. note::
       With ``FORMAT`` set to ``raw``, only one file will be compressed

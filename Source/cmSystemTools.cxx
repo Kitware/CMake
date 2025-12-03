@@ -2408,6 +2408,9 @@ bool cmSystemTools::CreateTar(std::string const& outFileName,
     case TarCompressZstd:
       compress = cmArchiveWrite::CompressZstd;
       break;
+    case TarCompressLZMA:
+      compress = cmArchiveWrite::CompressLZMA;
+      break;
     case TarCompressNone:
       compress = cmArchiveWrite::CompressNone;
       break;
