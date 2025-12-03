@@ -12,6 +12,13 @@ run_cmake(zip)
 
 run_cmake(working-directory)
 
+# Check the --cmake-tar-threads option
+run_cmake(argument-validation-threads)
+run_cmake(threads-bz2)
+run_cmake(threads-gz)
+run_cmake(threads-xz)
+run_cmake(threads-zstd)
+
 # Extracting only selected files or directories
 run_cmake(zip-filtered)
 
