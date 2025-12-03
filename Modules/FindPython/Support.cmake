@@ -588,7 +588,22 @@ function (_PYTHON_GET_CONFIG_VAR _PYTHON_PGCV_VALUE NAME)
   if ("Interpreter" IN_LIST ${_PYTHON_BASE}_FIND_COMPONENTS AND _${_PYTHON_PREFIX}_EXECUTABLE
       AND (_${_PYTHON_PREFIX}_CROSSCOMPILING OR NOT CMAKE_CROSSCOMPILING))
     if (NAME STREQUAL "PREFIX")
-      execute_process (COMMAND ${_${_PYTHON_PREFIX}_INTERPRETER_LAUNCHER} "${_${_PYTHON_PREFIX}_EXECUTABLE}" -c "import sys\ntry:\n   import sysconfig\n   sys.stdout.write(';'.join([sysconfig.get_config_var('base') or '', sysconfig.get_config_var('installed_base') or '']))\nexcept Exception:\n   from distutils import sysconfig\n   sys.stdout.write(';'.join([sysconfig.PREFIX,sysconfig.EXEC_PREFIX,sysconfig.BASE_EXEC_PREFIX]))"
+      execute_process (COMMAND ${_${_PYTHON_PREFIX}_INTERPRETER_LAUNCHER} "${_${_PYTHON_PREFIX}_EXECUTABLE}" -c [==[
+import sys
+try:
+    import sysconfig
+    sys.stdout.write(';'.join([
+        sysconfig.get_config_var('base') or '',
+        sysconfig.get_config_var('installed_base') or '',
+    ]))
+except Exception:
+    from distutils import sysconfig
+    sys.stdout.write(';'.join([
+        sysconfig.PREFIX,
+        sysconfig.EXEC_PREFIX,
+        sysconfig.BASE_EXEC_PREFIX,
+    ]))
+]==]
                        RESULT_VARIABLE _result
                        OUTPUT_VARIABLE _values
                        ERROR_QUIET
@@ -605,7 +620,23 @@ function (_PYTHON_GET_CONFIG_VAR _PYTHON_PGCV_VALUE NAME)
         set (_scheme "posix_prefix")
       endif()
       execute_process (COMMAND ${_${_PYTHON_PREFIX}_INTERPRETER_LAUNCHER} "${_${_PYTHON_PREFIX}_EXECUTABLE}" -c
-                               "import sys\ntry:\n   import sysconfig\n   sys.stdout.write(';'.join([sysconfig.get_path('platinclude'),sysconfig.get_path('platinclude','${_scheme}'),sysconfig.get_path('include'),sysconfig.get_path('include','${_scheme}')]))\nexcept Exception:\n   from distutils import sysconfig\n   sys.stdout.write(';'.join([sysconfig.get_python_inc(plat_specific=True),sysconfig.get_python_inc(plat_specific=False)]))"
+                               [==[
+import sys
+try:
+    import sysconfig
+    sys.stdout.write(';'.join([
+        sysconfig.get_path('platinclude'),
+        sysconfig.get_path('platinclude', sys.argv[1]),
+        sysconfig.get_path('include'),
+        sysconfig.get_path('include', sys.argv[1]),
+    ]))
+except Exception:
+    from distutils import sysconfig
+    sys.stdout.write(';'.join([
+        sysconfig.get_python_inc(plat_specific=True),
+        sysconfig.get_python_inc(plat_specific=False),
+    ]))
+]==] "${_scheme}"
                        RESULT_VARIABLE _result
                        OUTPUT_VARIABLE _values
                        ERROR_QUIET
@@ -618,7 +649,15 @@ function (_PYTHON_GET_CONFIG_VAR _PYTHON_PGCV_VALUE NAME)
     elseif (NAME STREQUAL "SOABI")
       # first step: compute SOABI form EXT_SUFFIX config variable
       execute_process (COMMAND ${_${_PYTHON_PREFIX}_INTERPRETER_LAUNCHER} "${_${_PYTHON_PREFIX}_EXECUTABLE}" -c
-                               "import sys\ntry:\n   import sysconfig\n   sys.stdout.write(sysconfig.get_config_var('EXT_SUFFIX') or '')\nexcept Exception:\n   from distutils import sysconfig;sys.stdout.write(sysconfig.get_config_var('EXT_SUFFIX') or '')"
+                               [==[
+import sys
+try:
+    import sysconfig
+    sys.stdout.write(sysconfig.get_config_var('EXT_SUFFIX') or '')
+except Exception:
+    from distutils import sysconfig
+    sys.stdout.write(sysconfig.get_config_var('EXT_SUFFIX') or '')
+]==]
                        RESULT_VARIABLE _result
                        OUTPUT_VARIABLE _values
                        ERROR_QUIET
@@ -639,7 +678,21 @@ function (_PYTHON_GET_CONFIG_VAR _PYTHON_PGCV_VALUE NAME)
       # second step: use SOABI or SO config variables as fallback
       if (NOT _values)
         execute_process (COMMAND ${_${_PYTHON_PREFIX}_INTERPRETER_LAUNCHER} "${_${_PYTHON_PREFIX}_EXECUTABLE}" -c
-          "import sys\ntry:\n   import sysconfig\n   sys.stdout.write(';'.join([sysconfig.get_config_var('SOABI') or '',sysconfig.get_config_var('SO') or '']))\nexcept Exception:\n   from distutils import sysconfig;sys.stdout.write(';'.join([sysconfig.get_config_var('SOABI') or '',sysconfig.get_config_var('SO') or '']))"
+          [==[
+import sys
+try:
+    import sysconfig
+    sys.stdout.write(';'.join([
+        sysconfig.get_config_var('SOABI') or '',
+        sysconfig.get_config_var('SO') or '',
+    ]))
+except Exception:
+    from distutils import sysconfig
+    sys.stdout.write(';'.join([
+        sysconfig.get_config_var('SOABI') or '',
+        sysconfig.get_config_var('SO') or '',
+    ]))
+]==]
           RESULT_VARIABLE _result
           OUTPUT_VARIABLE _soabi
           ERROR_QUIET
@@ -664,7 +717,12 @@ function (_PYTHON_GET_CONFIG_VAR _PYTHON_PGCV_VALUE NAME)
         endif()
       endif()
     elseif (NAME STREQUAL "SOSABI")
-      execute_process (COMMAND ${_${_PYTHON_PREFIX}_INTERPRETER_LAUNCHER} "${_${_PYTHON_PREFIX}_EXECUTABLE}" -c "import sys\nimport re\nimport importlib.machinery\nsys.stdout.write(next(filter(lambda x: re.search('^\\.abi', x), importlib.machinery.EXTENSION_SUFFIXES)))"
+      execute_process (COMMAND ${_${_PYTHON_PREFIX}_INTERPRETER_LAUNCHER} "${_${_PYTHON_PREFIX}_EXECUTABLE}" -c [==[
+import sys
+import re
+import importlib.machinery
+sys.stdout.write(next(filter(lambda x: re.search('^\\.abi', x), importlib.machinery.EXTENSION_SUFFIXES)))
+]==]
                        RESULT_VARIABLE _result
                        OUTPUT_VARIABLE _values
                        ERROR_QUIET
@@ -677,7 +735,14 @@ function (_PYTHON_GET_CONFIG_VAR _PYTHON_PGCV_VALUE NAME)
     elseif (NAME STREQUAL "ABIFLAGS" AND WIN32)
       # config var ABIFLAGS does not exist for version < 3.14, check GIL specific variable
       execute_process (COMMAND ${_${_PYTHON_PREFIX}_INTERPRETER_LAUNCHER} "${_${_PYTHON_PREFIX}_EXECUTABLE}" -c
-                               "import sys\nimport sysconfig\ntry:\n   sys.stdout.write(sysconfig.get_config_var('ABIFLAGS'))\nexcept Exception:\n   sys.stdout.write('t' if sysconfig.get_config_var('Py_GIL_DISABLED') == 1 else '<none>')"
+                               [==[
+import sys
+import sysconfig
+try:
+    sys.stdout.write(sysconfig.get_config_var('ABIFLAGS'))
+except Exception:
+    sys.stdout.write('t' if sysconfig.get_config_var('Py_GIL_DISABLED') == 1 else '<none>')
+]==]
                      RESULT_VARIABLE _result
                      OUTPUT_VARIABLE _values
                      ERROR_QUIET
@@ -692,7 +757,15 @@ function (_PYTHON_GET_CONFIG_VAR _PYTHON_PGCV_VALUE NAME)
         set (config_flag "LIBPL")
       endif()
       execute_process (COMMAND ${_${_PYTHON_PREFIX}_INTERPRETER_LAUNCHER} "${_${_PYTHON_PREFIX}_EXECUTABLE}" -c
-                               "import sys\ntry:\n   import sysconfig\n   sys.stdout.write(sysconfig.get_config_var('${config_flag}'))\nexcept Exception:\n   from distutils import sysconfig\n   sys.stdout.write(sysconfig.get_config_var('${config_flag}'))"
+                               [=[
+import sys
+try:
+    import sysconfig
+    sys.stdout.write(sysconfig.get_config_var(sys.argv[1]))
+except Exception:
+    from distutils import sysconfig
+    sys.stdout.write(sysconfig.get_config_var(sys.argv[1]))
+]=] "${config_flag}"
                        RESULT_VARIABLE _result
                        OUTPUT_VARIABLE _values
                        ERROR_QUIET
@@ -1061,7 +1134,7 @@ function (_PYTHON_VALIDATE_INTERPRETER)
       AND (_${_PYTHON_PREFIX}_CROSSCOMPILING OR NOT CMAKE_CROSSCOMPILING))
     # In this case, interpreter must have same architecture as environment
     execute_process (COMMAND ${_${_PYTHON_PREFIX}_INTERPRETER_LAUNCHER} "${_${_PYTHON_PREFIX}_EXECUTABLE}" -c
-                             "import sys, struct; sys.stdout.write(str(struct.calcsize(\"P\")))"
+                             "import sys, struct; sys.stdout.write(str(struct.calcsize('P')))"
                      RESULT_VARIABLE result
                      OUTPUT_VARIABLE size
                      ERROR_QUIET
@@ -1139,7 +1212,11 @@ function (_PYTHON_VALIDATE_COMPILER)
 
   # retrieve python environment version from compiler
   set (working_dir "${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/PythonCompilerVersion.dir")
-  file (WRITE "${working_dir}/version.py" "import sys; sys.stdout.write('.'.join([str(x) for x in sys.version_info[:3]])); sys.stdout.flush()\n")
+  file (WRITE "${working_dir}/version.py" [==[
+import sys
+sys.stdout.write('.'.join([str(x) for x in sys.version_info[:3]]))
+sys.stdout.flush()
+]==])
   execute_process (COMMAND ${launcher} "${_${_PYTHON_PREFIX}_COMPILER}"
                            ${_${_PYTHON_PREFIX}_IRON_PYTHON_COMPILER_ARCH_FLAGS}
                            /target:exe /embed /standalone "${working_dir}/version.py"
@@ -2394,7 +2471,25 @@ if ("Interpreter" IN_LIST ${_PYTHON_BASE}_FIND_COMPONENTS)
 
         # retrieve various package installation directories
         execute_process (COMMAND ${_${_PYTHON_PREFIX}_INTERPRETER_LAUNCHER} "${_${_PYTHON_PREFIX}_EXECUTABLE}" -c
-                                 "import sys\nif sys.version_info >= (3,10):\n   import sysconfig\n   sys.stdout.write(';'.join([sysconfig.get_path('stdlib'),sysconfig.get_path('platstdlib'),sysconfig.get_path('purelib'),sysconfig.get_path('platlib')]))\nelse:\n   from distutils import sysconfig\n   sys.stdout.write(';'.join([sysconfig.get_python_lib(plat_specific=False,standard_lib=True),sysconfig.get_python_lib(plat_specific=True,standard_lib=True),sysconfig.get_python_lib(plat_specific=False,standard_lib=False),sysconfig.get_python_lib(plat_specific=True,standard_lib=False)]))"
+                                 [==[
+import sys
+if sys.version_info >= (3, 10):
+    import sysconfig
+    sys.stdout.write(';'.join([
+        sysconfig.get_path('stdlib'),
+        sysconfig.get_path('platstdlib'),
+        sysconfig.get_path('purelib'),
+        sysconfig.get_path('platlib'),
+    ]))
+else:
+    from distutils import sysconfig
+    sys.stdout.write(';'.join([
+        sysconfig.get_python_lib(plat_specific=False, standard_lib=True),
+        sysconfig.get_python_lib(plat_specific=True, standard_lib=True),
+        sysconfig.get_python_lib(plat_specific=False, standard_lib=False),
+        sysconfig.get_python_lib(plat_specific=True, standard_lib=False),
+    ]))
+]==]
                          RESULT_VARIABLE _${_PYTHON_PREFIX}_RESULT
                          OUTPUT_VARIABLE _${_PYTHON_PREFIX}_LIBPATHS
                          ERROR_QUIET)
@@ -2740,7 +2835,11 @@ if ("Compiler" IN_LIST ${_PYTHON_BASE}_FIND_COMPONENTS)
     # retrieve python environment version from compiler
     _python_get_launcher (_${_PYTHON_PREFIX}_COMPILER_LAUNCHER COMPILER)
     set (_${_PYTHON_PREFIX}_VERSION_DIR "${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/PythonCompilerVersion.dir")
-    file (WRITE "${_${_PYTHON_PREFIX}_VERSION_DIR}/version.py" "import sys; sys.stdout.write('.'.join([str(x) for x in sys.version_info[:3]])); sys.stdout.flush()\n")
+    file (WRITE "${_${_PYTHON_PREFIX}_VERSION_DIR}/version.py" [==[
+import sys
+sys.stdout.write('.'.join([str(x) for x in sys.version_info[:3]]))
+sys.stdout.flush()
+]==])
     execute_process (COMMAND ${_${_PYTHON_PREFIX}_COMPILER_LAUNCHER} "${_${_PYTHON_PREFIX}_COMPILER}"
                              ${_${_PYTHON_PREFIX}_IRON_PYTHON_COMPILER_ARCH_FLAGS}
                              /target:exe /embed /standalone "${_${_PYTHON_PREFIX}_VERSION_DIR}/version.py"
@@ -4088,7 +4187,14 @@ if ("NumPy" IN_LIST ${_PYTHON_BASE}_FIND_COMPONENTS AND ${_PYTHON_PREFIX}_Interp
 
   if (NOT _${_PYTHON_PREFIX}_NumPy_INCLUDE_DIR)
     execute_process(COMMAND ${${_PYTHON_PREFIX}_INTERPRETER_LAUNCHER} "${_${_PYTHON_PREFIX}_EXECUTABLE}" -c
-                            "import sys\ntry: import numpy; sys.stdout.write(numpy.get_include())\nexcept:pass\n"
+                            [==[
+import sys
+try:
+    import numpy
+    sys.stdout.write(numpy.get_include())
+except Exception:
+    pass
+]==]
                     RESULT_VARIABLE _${_PYTHON_PREFIX}_RESULT
                     OUTPUT_VARIABLE _${_PYTHON_PREFIX}_NumPy_PATH
                     ERROR_QUIET
@@ -4111,7 +4217,14 @@ if ("NumPy" IN_LIST ${_PYTHON_BASE}_FIND_COMPONENTS AND ${_PYTHON_PREFIX}_Interp
 
   if (_${_PYTHON_PREFIX}_NumPy_INCLUDE_DIR)
     execute_process (COMMAND ${${_PYTHON_PREFIX}_INTERPRETER_LAUNCHER} "${_${_PYTHON_PREFIX}_EXECUTABLE}" -c
-                             "import sys\ntry: import numpy; sys.stdout.write(numpy.__version__)\nexcept:pass\n"
+                             [==[
+import sys
+try:
+    import numpy
+    sys.stdout.write(numpy.__version__)
+except Exception:
+    pass
+]==]
                      RESULT_VARIABLE _${_PYTHON_PREFIX}_RESULT
                      OUTPUT_VARIABLE _${_PYTHON_PREFIX}_NumPy_VERSION)
     if (NOT _${_PYTHON_PREFIX}_RESULT)
