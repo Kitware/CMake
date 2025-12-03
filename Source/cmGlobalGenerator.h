@@ -45,6 +45,7 @@
 enum class cmDepfileFormat;
 enum class codecvt_Encoding;
 
+class cmBuildArgs;
 class cmDirectoryId;
 class cmExportBuildFileGenerator;
 class cmExternalMakefileProjectGenerator;
@@ -247,10 +248,9 @@ public:
    * Try running cmake and building a file. This is used for dynamically
    * loaded commands, not as part of the usual build process.
    */
-  int TryCompile(int jobs, std::string const& srcdir,
-                 std::string const& bindir, std::string const& projectName,
-                 std::string const& targetName, bool fast, std::string& output,
-                 cmMakefile* mf);
+  int TryCompile(int jobs, std::string const& bindir,
+                 std::string const& projectName, std::string const& targetName,
+                 bool fast, std::string& output, cmMakefile* mf);
 
   /**
    * Build a file given the following information. This is a more direct call
@@ -259,11 +259,9 @@ public:
    * done first.
    */
   int Build(
-    int jobs, std::string const& srcdir, std::string const& bindir,
-    std::string const& projectName,
-    std::vector<std::string> const& targetNames, std::ostream& ostr,
-    std::string const& makeProgram, std::string const& config,
-    cmBuildOptions buildOptions, bool verbose, cmDuration timeout,
+    cmBuildArgs const& buildArgs, std::vector<std::string> const& targetNames,
+    std::ostream& ostr, std::string const& makeProgram,
+    std::string const& config, cmBuildOptions buildOptions, cmDuration timeout,
     cmSystemTools::OutputOption outputMode,
     std::vector<std::string> const& nativeOptions = std::vector<std::string>(),
     BuildTryCompile isInTryCompile = BuildTryCompile::No);

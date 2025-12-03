@@ -115,6 +115,7 @@ add_library(
   cmBinUtilsWindowsPELinker.h
   cmBinUtilsWindowsPEObjdumpGetRuntimeDependenciesTool.cxx
   cmBinUtilsWindowsPEObjdumpGetRuntimeDependenciesTool.h
+  cmBuildArgs.h
   cmBuildDatabase.cxx
   cmBuildDatabase.h
   cmBuildOptions.h

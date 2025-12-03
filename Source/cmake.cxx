@@ -3833,12 +3833,13 @@ std::vector<std::string> cmake::GetDebugConfigs()
   return std::move(configs.data());
 }
 
-int cmake::Build(int jobs, std::string dir, std::vector<std::string> targets,
-                 std::string config, std::vector<std::string> nativeOptions,
-                 cmBuildOptions& buildOptions, bool verbose,
-                 std::string const& presetName, bool listPresets,
-                 std::vector<std::string> const& args)
+int cmake::Build(cmBuildArgs buildArgs, std::vector<std::string> targets,
+                 std::vector<std::string> nativeOptions,
+                 cmBuildOptions& buildOptions, std::string const& presetName,
+                 bool listPresets, std::vector<std::string> const& args)
 {
+  buildArgs.timeout = cmDuration::zero();
+
 #if !defined(CMAKE_BOOTSTRAP)
   if (!presetName.empty() || listPresets) {
     this->SetHomeDirectory(cmSystemTools::GetLogicalWorkingDirectory());
@@ -3918,17 +3919,18 @@ int cmake::Build(int jobs, std::string dir, std::vector<std::string> targets,
       return 1;
     }
 
-    if (dir.empty() && !expandedConfigurePreset->BinaryDir.empty()) {
-      dir = expandedConfigurePreset->BinaryDir;
+    if (buildArgs.binaryDir.empty() &&
+        !expandedConfigurePreset->BinaryDir.empty()) {
+      buildArgs.binaryDir = expandedConfigurePreset->BinaryDir;
     }
 
     this->UnprocessedPresetEnvironment = expandedPreset->Environment;
     this->ProcessPresetEnvironment();
 
-    if ((jobs == cmake::DEFAULT_BUILD_PARALLEL_LEVEL ||
-         jobs == cmake::NO_BUILD_PARALLEL_LEVEL) &&
+    if ((buildArgs.jobs == cmake::DEFAULT_BUILD_PARALLEL_LEVEL ||
+         buildArgs.jobs == cmake::NO_BUILD_PARALLEL_LEVEL) &&
         expandedPreset->Jobs) {
-      jobs = *expandedPreset->Jobs;
+      buildArgs.jobs = *expandedPreset->Jobs;
     }
 
     if (targets.empty()) {
@@ -3936,8 +3938,8 @@ int cmake::Build(int jobs, std::string dir, std::vector<std::string> targets,
                      expandedPreset->Targets.end());
     }
 
-    if (config.empty()) {
-      config = expandedPreset->Configuration;
+    if (buildArgs.config.empty()) {
+      buildArgs.config = expandedPreset->Configuration;
     }
 
     if (!buildOptions.Clean && expandedPreset->CleanFirst) {
@@ -3949,8 +3951,8 @@ int cmake::Build(int jobs, std::string dir, std::vector<std::string> targets,
       buildOptions.ResolveMode = *expandedPreset->ResolvePackageReferences;
     }
 
-    if (!verbose && expandedPreset->Verbose) {
-      verbose = *expandedPreset->Verbose;
+    if (!buildArgs.verbose && expandedPreset->Verbose) {
+      buildArgs.verbose = *expandedPreset->Verbose;
     }
 
     if (nativeOptions.empty()) {
@@ -3961,12 +3963,13 @@ int cmake::Build(int jobs, std::string dir, std::vector<std::string> targets,
   }
 #endif
 
-  if (!cmSystemTools::FileIsDirectory(dir)) {
-    std::cerr << "Error: " << dir << " is not a directory\n";
+  if (!cmSystemTools::FileIsDirectory(buildArgs.binaryDir.string())) {
+    std::cerr << "Error: " << buildArgs.binaryDir.string()
+              << " is not a directory\n";
     return 1;
   }
 
-  std::string cachePath = FindCacheFile(dir);
+  std::string cachePath = FindCacheFile(buildArgs.binaryDir.string());
   if (!this->LoadCache(cachePath)) {
     std::cerr
       << "Error: not a CMake build directory (missing CMakeCache.txt)\n";
@@ -4011,17 +4014,16 @@ int cmake::Build(int jobs, std::string dir, std::vector<std::string> targets,
       return 1;
     }
   }
-  std::string projName;
   cmValue cachedProjectName =
     this->State->GetCacheEntryValue("CMAKE_PROJECT_NAME");
   if (!cachedProjectName) {
     std::cerr << "Error: could not find CMAKE_PROJECT_NAME in Cache\n";
     return 1;
   }
-  projName = *cachedProjectName;
+  buildArgs.projectName = *cachedProjectName;
 
   if (this->State->GetCacheEntryValue("CMAKE_VERBOSE_MAKEFILE").IsOn()) {
-    verbose = true;
+    buildArgs.verbose = true;
   }
 
 #ifdef CMAKE_HAVE_VS_GENERATORS
@@ -4068,7 +4070,7 @@ int cmake::Build(int jobs, std::string dir, std::vector<std::string> targets,
   }
 
 #if !defined(CMAKE_BOOTSTRAP)
-  cmInstrumentation instrumentation(dir);
+  cmInstrumentation instrumentation(buildArgs.binaryDir.string());
   if (instrumentation.HasErrors()) {
     return 1;
   }
@@ -4076,18 +4078,17 @@ int cmake::Build(int jobs, std::string dir, std::vector<std::string> targets,
     cmInstrumentationQuery::Hook::PreCMakeBuild);
 #endif
 
-  this->GlobalGenerator->PrintBuildCommandAdvice(std::cerr, jobs);
+  this->GlobalGenerator->PrintBuildCommandAdvice(std::cerr, buildArgs.jobs);
   std::stringstream ostr;
   // `cmGlobalGenerator::Build` logs metadata about what directory and commands
   // are being executed to the `output` parameter. If CMake is verbose, print
   // this out.
-  std::ostream& verbose_ostr = verbose ? std::cout : ostr;
-  auto doBuild = [this, jobs, dir, projName, targets, &verbose_ostr, config,
-                  buildOptions, verbose, nativeOptions]() -> int {
+  std::ostream& verbose_ostr = buildArgs.verbose ? std::cout : ostr;
+  auto doBuild = [this, targets, &verbose_ostr, buildOptions, buildArgs,
+                  nativeOptions]() -> int {
     return this->GlobalGenerator->Build(
-      jobs, "", dir, projName, targets, verbose_ostr, "", config, buildOptions,
-      verbose, cmDuration::zero(), cmSystemTools::OUTPUT_PASSTHROUGH,
-      nativeOptions);
+      buildArgs, targets, verbose_ostr, "", buildArgs.config, buildOptions,
+      buildArgs.timeout, cmSystemTools::OUTPUT_PASSTHROUGH, nativeOptions);
   };
 
 #if !defined(CMAKE_BOOTSTRAP)

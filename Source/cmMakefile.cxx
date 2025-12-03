@@ -3330,7 +3330,7 @@ int cmMakefile::TryCompile(std::string const& srcdir,
 
   // finally call the generator to actually build the resulting project
   int ret = this->GetGlobalGenerator()->TryCompile(
-    jobs, srcdir, bindir, projectName, targetName, fast, output, this);
+    jobs, bindir, projectName, targetName, fast, output, this);
 
   this->IsSourceFileTryCompile = false;
   return ret;
