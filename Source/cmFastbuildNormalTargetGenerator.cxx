@@ -523,6 +523,12 @@ void cmFastbuildNormalTargetGenerator::EnsureDirectoryExists(
   }
 }
 
+void cmFastbuildNormalTargetGenerator::EnsureParentDirectoryExists(
+  std::string const& path) const
+{
+  this->EnsureDirectoryExists(cmSystemTools::GetParentDirectory(path));
+}
+
 std::vector<std::string>
 cmFastbuildNormalTargetGenerator::GetManifestsAsFastbuildPath() const
 {
