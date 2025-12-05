@@ -68,6 +68,12 @@ std::string const UNITY_BUILD_BATCH_SIZE("UNITY_BUILD_BATCH_SIZE");
 std::string const SKIP_UNITY_BUILD_INCLUSION("SKIP_UNITY_BUILD_INCLUSION");
 std::string const UNITY_GROUP("UNITY_GROUP");
 
+#ifdef _WIN32
+char const kPATH_SLASH = '\\';
+#else
+char const kPATH_SLASH = '/';
+#endif
+
 } // anonymous namespace
 
 cmFastbuildNormalTargetGenerator::cmFastbuildNormalTargetGenerator(
@@ -810,24 +816,31 @@ void cmFastbuildNormalTargetGenerator::ComputePaths(
         this->ConvertToFastbuildPath(linkerPDB));
     }
   }
-  if (GeneratorTarget->GetType() <= cmStateEnums::OBJECT_LIBRARY) {
-    std::string const pdbDir = GeneratorTarget->GetCompilePDBDirectory(Config);
-    LogMessage("GetCompilePDBDirectory: " + pdbDir);
-    EnsureDirectoryExists(pdbDir);
-    std::string pdbName = this->GeneratorTarget->GetCompilePDBName(Config);
-    LogMessage("GetCompilePDBName: " + pdbDir);
-    // If we don't have Compiler's PDB, we must add a trailing slash to satisfy
-    // MSVC.
-    bool needTrailingSlash = false;
-    if (pdbName.empty()) {
-      needTrailingSlash = true;
+  std::string const compilerPDB = this->ComputeTargetCompilePDB(this->Config);
+  if (!compilerPDB.empty()) {
+    LogMessage("ComputeTargetCompilePDB: " + compilerPDB);
+    std::string compilerPDBArg = cmSystemTools::ConvertToOutputPath(
+      this->ConvertToFastbuildPath(compilerPDB));
+    if (cmHasSuffix(compilerPDB, '/')) {
+      // The compiler will choose the .pdb file name.
+      this->EnsureDirectoryExists(compilerPDB);
+      // ConvertToFastbuildPath dropped the trailing slash.  Add it back.
+      // We do this after ConvertToOutputPath so that we can use a forward
+      // slash in the case that the argument is quoted.
+      if (cmHasSuffix(compilerPDBArg, '"')) {
+        // A quoted trailing backslash requires escaping, e.g., `/Fd"dir\\"`,
+        // but fbuild does not parse such arguments correctly as of 1.15.
+        // Always use a forward slash.
+        compilerPDBArg.insert(compilerPDBArg.size() - 1, 1, '/');
+      } else {
+        // An unquoted trailing slash or backslash is fine.
+        compilerPDBArg.push_back(kPATH_SLASH);
+      }
+    } else {
+      // We have an explicit .pdb path with file name.
+      this->EnsureParentDirectoryExists(compilerPDB);
     }
-    std::string const compilerPDB = cmStrCat(pdbDir, '\\', pdbName);
-    if (!compilerPDB.empty()) {
-      target.Variables["CompilerPDB"] = cmSystemTools::ConvertToOutputPath(
-        this->ConvertToFastbuildPath(compilerPDB) +
-        (needTrailingSlash ? "\\ " : ""));
-    }
+    target.Variables["CompilerPDB"] = std::move(compilerPDBArg);
   }
   std::string const impLibFullPath =
     GeneratorTarget->GetFullPath(Config, cmStateEnums::ImportLibraryArtifact);
