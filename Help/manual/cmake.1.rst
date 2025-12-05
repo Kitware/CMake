@@ -1497,6 +1497,17 @@ Available commands are:
 
     Specify modification time recorded in tarball entries.
 
+  .. option:: --cmake-tar-threads=<number>
+
+    .. versionadded:: 4.3
+
+    Use the ``<number>`` threads to operate on the archive. Currently only
+    multi-threaded compression is supported.
+
+    If set to ``0``, the number of available cores on the machine will be
+    used instead. Note that not all compression modes support threading
+    in all environments.
+
   .. option:: --touch
 
     .. versionadded:: 3.24

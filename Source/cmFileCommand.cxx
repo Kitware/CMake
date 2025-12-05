@@ -3666,6 +3666,7 @@ bool HandleArchiveCreateCommand(std::vector<std::string> const& args,
     // accepted without one and treated as if an empty value were given.
     // Fixing this would require a policy.
     ArgumentParser::Maybe<std::string> MTime;
+    std::string Threads;
     std::string WorkingDirectory;
     bool Verbose = false;
     // "PATHS" requires at least one value, but use a custom check below.
@@ -3679,6 +3680,7 @@ bool HandleArchiveCreateCommand(std::vector<std::string> const& args,
       .Bind("COMPRESSION"_s, &Arguments::Compression)
       .Bind("COMPRESSION_LEVEL"_s, &Arguments::CompressionLevel)
       .Bind("MTIME"_s, &Arguments::MTime)
+      .Bind("THREADS"_s, &Arguments::Threads)
       .Bind("WORKING_DIRECTORY"_s, &Arguments::WorkingDirectory)
       .Bind("VERBOSE"_s, &Arguments::Verbose)
       .Bind("PATHS"_s, &Arguments::Paths);
@@ -3740,7 +3742,7 @@ bool HandleArchiveCreateCommand(std::vector<std::string> const& args,
   }
 
   int compressionLevel = 0;
-  int minCompressionLevel = 0;
+  constexpr int minCompressionLevel = 0;
   int maxCompressionLevel = 9;
   if (compress == cmSystemTools::TarCompressZstd) {
     maxCompressionLevel = 19;
@@ -3775,16 +3777,36 @@ bool HandleArchiveCreateCommand(std::vector<std::string> const& args,
     }
   }
 
+  // Use the single thread by default for backward compatibility
+  int threads = 1;
+  constexpr int minThreads = 0;
+  if (!parsedArgs.Threads.empty()) {
+    if (parsedArgs.Threads.size() != 1 &&
+        !std::isdigit(parsedArgs.Threads[0])) {
+      status.SetError(cmStrCat("number of threads ", parsedArgs.Threads,
+                               " should be at least ", minThreads));
+      cmSystemTools::SetFatalErrorOccurred();
+      return false;
+    }
+    threads = std::stoi(parsedArgs.Threads);
+    if (threads < minThreads) {
+      status.SetError(cmStrCat("number of threads ", parsedArgs.Threads,
+                               " should be at least ", minThreads));
+      cmSystemTools::SetFatalErrorOccurred();
+      return false;
+    }
+  }
+
   if (parsedArgs.Paths.empty()) {
     status.SetError("ARCHIVE_CREATE requires a non-empty list of PATHS");
     cmSystemTools::SetFatalErrorOccurred();
     return false;
   }
 
-  if (!cmSystemTools::CreateTar(parsedArgs.Output, parsedArgs.Paths,
-                                parsedArgs.WorkingDirectory, compress,
-                                parsedArgs.Verbose, parsedArgs.MTime,
-                                parsedArgs.Format, compressionLevel)) {
+  if (!cmSystemTools::CreateTar(
+        parsedArgs.Output, parsedArgs.Paths, parsedArgs.WorkingDirectory,
+        compress, parsedArgs.Verbose, parsedArgs.MTime, parsedArgs.Format,
+        compressionLevel, threads)) {
     status.SetError(cmStrCat("failed to compress: ", parsedArgs.Output));
     cmSystemTools::SetFatalErrorOccurred();
     return false;

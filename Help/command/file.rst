@@ -915,6 +915,7 @@ Archiving
     [COMPRESSION <compression>
     [COMPRESSION_LEVEL <compression-level>]]
     [MTIME <mtime>]
+    [THREADS <number>]
     [WORKING_DIRECTORY <dir>]
     [VERBOSE])
   :target: ARCHIVE_CREATE
@@ -974,6 +975,14 @@ Archiving
 
   ``MTIME <mtime>``
     Specify the modification time recorded in tarball entries.
+
+  ``THREADS <number>``
+    .. versionadded:: 4.3
+
+    Use the ``<number>`` threads to operate on the archive.
+
+    The number of available cores on the machine will be used if set to ``0``.
+    Note that not all compression modes support threading in all environments.
 
   ``WORKING_DIRECTORY <dir>``
     .. versionadded:: 3.31
