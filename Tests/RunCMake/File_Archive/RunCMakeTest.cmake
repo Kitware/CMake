@@ -14,7 +14,7 @@ run_cmake(zip)
 
 run_cmake(working-directory)
 
-# Check the --cmake-tar-threads option
+# Check the THREADS option
 run_cmake(argument-validation-threads)
 run_cmake(threads-bz2)
 run_cmake(threads-gz)

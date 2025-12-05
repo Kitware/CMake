@@ -43,6 +43,19 @@ run_cmake(threads-xz)
 run_cmake(threads-zstd)
 run_cmake(threads-zip)
 
+# Check the --cmake-tar-compression-level option
+external_command_test(bad-compression-level-no-compression  tar cvf bad.tar --cmake-tar-compression-level=1 .)
+external_command_test(bad-compression-level-not-a-number  tar cvjf bad.tar --cmake-tar-compression-level=nan .)
+external_command_test(bad-compression-level-bz2  tar cvjf bad.tar --cmake-tar-compression-level=10 .)
+external_command_test(bad-compression-level-gz  tar cvzf bad.tar --cmake-tar-compression-level=10 .)
+external_command_test(bad-compression-level-xz  tar cvJf bad.tar --cmake-tar-compression-level=10 .)
+external_command_test(bad-compression-level-zstd  tar cvf bad.tar --zstd --cmake-tar-compression-level=20 .)
+
+run_cmake(compression-level-bz2)
+run_cmake(compression-level-gz)
+run_cmake(compression-level-xz)
+run_cmake(compression-level-zstd)
+
 # Extracting only selected files or directories
 run_cmake(zip-filtered)
 

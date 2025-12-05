@@ -1497,6 +1497,17 @@ Available commands are:
 
     Specify modification time recorded in tarball entries.
 
+  .. option:: --cmake-tar-compression-level=<compression-level>
+
+    .. versionadded:: 4.3
+
+    The ``<compression-level>`` should be between ``0`` and ``9``, with the
+    default being ``0``.  The compression algorithm must be selected when
+    the ``--cmake-tar-compression-level`` option is given.
+
+    The ``<compression-level>`` of the ``Zstd`` algorithm can be set
+    between ``0`` and ``19``.
+
   .. option:: --cmake-tar-threads=<number>
 
     .. versionadded:: 4.3
