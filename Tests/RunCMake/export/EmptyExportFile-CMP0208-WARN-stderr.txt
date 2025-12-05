@@ -1,0 +1,15 @@
+CMake Warning \(dev\) at EmptyExportFile-CMP0208-WARN\.cmake:[0-9]+ \(export\):
+  export EXPORT given invalid argument:
+
+    FILE: missing required value
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:3 \(include\)
+This warning is for project developers\.  Use -Wno-dev to suppress it\.
+
+CMake Warning \(dev\) at EmptyExportFile-CMP0208-WARN\.cmake:[0-9]+ \(export\):
+  Policy CMP0208 is not set: export\(EXPORT\) does not allow empty arguments\.
+  Run "cmake --help-policy CMP0208" for policy details\.  Use the cmake_policy
+  command to set the policy and suppress this warning\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:3 \(include\)
+This warning is for project developers\.  Use -Wno-dev to suppress it\.

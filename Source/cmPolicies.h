@@ -621,6 +621,8 @@ class cmMakefile;
          WARN)                                                                \
   SELECT(POLICY, CMP0207,                                                     \
          "file(GET_RUNTIME_DEPENDENCIES) normalizes paths before matching.",  \
+         4, 3, 0, WARN)                                                       \
+  SELECT(POLICY, CMP0208, "export(EXPORT) does not allow empty arguments.",   \
          4, 3, 0, WARN)
 
 #define CM_SELECT_ID(F, A1, A2, A3, A4, A5, A6) F(A1)

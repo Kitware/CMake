@@ -1,5 +1,11 @@
 include(RunCMake)
 
+run_cmake(EmptyExport-CMP0208-OLD)
+run_cmake(EmptyExport-CMP0208-NEW)
+run_cmake(EmptyExportFile-CMP0208-WARN)
+run_cmake(EmptyExportFile-CMP0208-OLD)
+run_cmake(EmptyExportFile-CMP0208-NEW)
+run_cmake(EmptyNamespace)
 run_cmake(CustomTarget)
 run_cmake(Empty)
 run_cmake(Repeat-CMP0103-WARN)

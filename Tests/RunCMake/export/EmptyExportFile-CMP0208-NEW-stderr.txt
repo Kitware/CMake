@@ -1,6 +1,6 @@
-CMake Error at BadArgs0\.cmake:[0-9]+ \(export\):
+CMake Error at EmptyExportFile-CMP0208-NEW\.cmake:[0-9]+ \(export\):
   export EXPORT given invalid argument:
 
-    PACKAGE_INFO: missing required value
+    FILE: missing required value
 Call Stack \(most recent call first\):
   CMakeLists\.txt:3 \(include\)
