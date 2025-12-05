@@ -53,6 +53,14 @@ This module defines the following variables:
 ``LIBXML2_DEFINITIONS``
   The compiler switches required for using libxml2.
 
+Other Variables
+^^^^^^^^^^^^^^^
+
+``LibXml2_USE_STATIC_LIBS``
+  .. versionadded:: 4.3
+
+  Set to ``TRUE`` to use static libraries.  Default is ``FALSE``.
+
 Cache Variables
 ^^^^^^^^^^^^^^^
 
@@ -120,11 +128,26 @@ if(DEFINED LIBXML2_LIBRARIES AND NOT DEFINED LIBXML2_LIBRARY)
   set(LIBXML2_LIBRARY ${LIBXML2_LIBRARIES})
 endif()
 
+# Support preference of static libs by adjusting CMAKE_FIND_LIBRARY_SUFFIXES
+if(LibXml2_USE_STATIC_LIBS)
+  set(_libxml2_ORIG_CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES})
+  if(WIN32)
+    list(INSERT CMAKE_FIND_LIBRARY_SUFFIXES 0 .lib .a)
+  else()
+    set(CMAKE_FIND_LIBRARY_SUFFIXES .a)
+  endif()
+endif()
+
 find_library(LIBXML2_LIBRARY NAMES xml2 libxml2 libxml2_a
    HINTS
    ${PC_LIBXML_LIBDIR}
    ${PC_LIBXML_LIBRARY_DIRS}
    )
+
+# Restore the original find library ordering
+if(LibXml2_USE_STATIC_LIBS)
+  set(CMAKE_FIND_LIBRARY_SUFFIXES ${_libxml2_ORIG_CMAKE_FIND_LIBRARY_SUFFIXES})
+endif()
 
 find_program(LIBXML2_XMLLINT_EXECUTABLE xmllint)
 # for backwards compat. with KDE 4.0.x:
