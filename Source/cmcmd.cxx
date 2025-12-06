@@ -1589,7 +1589,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
       cmSystemTools::cmTarExtractTimestamps extractTimestamps =
         cmSystemTools::cmTarExtractTimestamps::Yes;
       cmSystemTools::cmTarCompression compress =
-        cmSystemTools::TarCompressNone;
+        cmSystemTools::TarCompressAuto;
       int nCompress = 0;
       bool doing_options = true;
       for (auto const& arg : cmMakeRange(args).advance(4)) {
@@ -1717,18 +1717,13 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
           }
         }
       }
-      if ((format == "7zip" || format == "zip") && nCompress > 0) {
-        cmSystemTools::Error("Can not use compression flags with format: " +
-                             format);
-        return 1;
-      }
       if (nCompress > 1) {
         cmSystemTools::Error("Can only compress a tar file one way; "
                              "at most one flag of z, j, or J may be used");
         return 1;
       }
       if (compressionLevelFlagPassed) {
-        if (nCompress == 0) {
+        if (nCompress == 0 && format != "zip" && format != "7zip") {
           cmSystemTools::Error("Can not use --cmake-tar-compression-level "
                                "without compression algorithm selection");
           return 1;
@@ -1736,17 +1731,15 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
 
         constexpr int minCompressionLevel = 0;
         int maxCompressionLevel = 9;
-        if (compress == cmSystemTools::TarCompressZstd) {
+        if (compress == cmSystemTools::TarCompressZstd && format != "zip") {
           maxCompressionLevel = 19;
         }
 
         if (compressionLevel < minCompressionLevel ||
             compressionLevel > maxCompressionLevel) {
-          cmSystemTools::Error(
-            cmStrCat("Compression level must be between ",
-                     std::to_string(minCompressionLevel), " and ",
-                     std::to_string(maxCompressionLevel), ". Got ",
-                     std::to_string(compressionLevel)));
+          cmSystemTools::Error(cmStrCat(
+            "Compression level must be between ", minCompressionLevel, " and ",
+            maxCompressionLevel, ". Got ", compressionLevel));
           return 1;
         }
       }

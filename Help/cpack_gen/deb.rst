@@ -299,7 +299,7 @@ List of CPack DEB generator specific variables:
     bzip2 Burrows–Wheeler algorithm
 
   ``gzip``
-    GNU Gzip compression
+    GNU Gzip Deflate compression
 
   ``zstd``
     .. versionadded:: 3.22

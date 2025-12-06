@@ -934,6 +934,12 @@ Archiving
     ``7zip``, ``gnutar``, ``pax``, ``paxr``, ``raw`` and ``zip``.
     If ``FORMAT`` is not given, the default format is ``paxr``.
 
+    The default compression method depends on the format:
+
+    * ``7zip`` uses ``LZMA`` compression
+    * ``zip`` uses ``Deflate`` compression
+    * others uses no compression by default
+
   ``COMPRESSION <compression>``
     Some archive formats allow the type of compression to be specified.
     The ``7zip`` and ``zip`` archive formats already imply a specific type of
@@ -943,6 +949,12 @@ Archiving
 
     * ``None``
     * ``BZip2``
+    * ``Deflate``
+
+      .. versionadded:: 4.3
+
+      This is an alias for ``GZip``.
+
     * ``GZip``
     * ``LZMA``
 

@@ -1,0 +1,2 @@
+^CMake Error: LZMA is not supported for zip. Please, build CMake with libarchive 3.8.0 or newer if you want to use it.
+CMake Error: Problem creating tar: bad.zip$

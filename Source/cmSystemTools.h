@@ -550,6 +550,7 @@ public:
     TarCompressLZMA,
     TarCompressXZ,
     TarCompressZstd,
+    TarCompressAuto,
     TarCompressNone
   };
 

@@ -49,7 +49,8 @@ public:
     CompressBZip2,
     CompressLZMA,
     CompressXZ,
-    CompressZstd
+    CompressZstd,
+    CompressPPMd,
   };
 
   /** Construct with output stream to which to write archive.  */

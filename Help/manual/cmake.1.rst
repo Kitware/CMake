@@ -1450,7 +1450,7 @@ Available commands are:
 
   .. option:: z
 
-    Compress the resulting archive with gzip.
+    Compress the resulting archive with gzip (Deflate).
 
   .. option:: j
 
@@ -1491,6 +1491,18 @@ Available commands are:
     Supported formats are: ``7zip``, ``gnutar``, ``pax``,
     ``paxr`` (restricted pax, default), and ``zip``.
 
+    If the compression method is not specified, the compression method
+    depends on the format:
+
+    * ``7zip`` uses ``LZMA`` compression
+    * ``zip`` uses ``Deflate`` compression
+    * others uses no compression by default
+
+    .. versionadded:: 4.3
+
+      The ``7zip`` and ``zip`` formats support changing the default compression
+      method and compression level.
+
   .. option:: --mtime=<date>
 
     .. versionadded:: 3.1
@@ -1506,7 +1518,7 @@ Available commands are:
     the ``--cmake-tar-compression-level`` option is given.
 
     The ``<compression-level>`` of the ``Zstd`` algorithm can be set
-    between ``0`` and ``19``.
+    between ``0`` and ``19``, except for the ``zip`` format.
 
   .. option:: --cmake-tar-threads=<number>
 
