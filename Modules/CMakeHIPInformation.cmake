@@ -69,6 +69,13 @@ _cmake_common_language_platform_flags(HIP)
 # CMAKE_HIP_COMPILE_OBJECT
 # CMAKE_HIP_LINK_EXECUTABLE
 
+# For spirv platform (chipStar), set compile and link commands
+if(CMAKE_HIP_PLATFORM STREQUAL "spirv")
+  include(Internal/CMakeChipStarHIP)
+  _cmake_chipstar_set_compiler_flags()
+  _cmake_chipstar_set_link_commands()
+endif()
+
 # create a shared library
 if(NOT CMAKE_HIP_CREATE_SHARED_LIBRARY)
   set(CMAKE_HIP_CREATE_SHARED_LIBRARY

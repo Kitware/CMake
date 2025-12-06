@@ -12,5 +12,9 @@ This is initialized based on the value of :variable:`CMAKE_HIP_PLATFORM`:
   Uses architectures reported by ``rocm_agent_enumerator``, if available,
   and otherwise to a default chosen by the compiler.
 
+``spirv``
+  Defaults to ``OFF``. The HIP package (e.g., chipStar) handles targeting
+  via its own configuration.
+
 This variable is used to initialize the :prop_tgt:`HIP_ARCHITECTURES` property
 on all targets. See the target property for additional information.

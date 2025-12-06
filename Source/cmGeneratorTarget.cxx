@@ -2772,6 +2772,11 @@ void cmGeneratorTarget::AddHIPArchitectureFlags(cmBuildStep compileOrLink,
     return;
   }
 
+  // For spirv platform, chipStar handles targeting via the hip package
+  if (this->Makefile->GetSafeDefinition("CMAKE_HIP_PLATFORM") == "spirv") {
+    return;
+  }
+
   cmList options(arch);
 
   for (std::string& option : options) {
