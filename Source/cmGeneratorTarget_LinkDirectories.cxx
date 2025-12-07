@@ -82,15 +82,15 @@ void processLinkDirectories(cmGeneratorTarget const* tgt,
       if (uniqueDirectories.insert(entryDirectory).second) {
         directories.emplace_back(entryDirectory, entry.Backtrace);
         if (debugDirectories) {
-          usedDirectories += " * " + entryDirectory + "\n";
+          usedDirectories += cmStrCat(" * ", entryDirectory, '\n');
         }
       }
     }
     if (!usedDirectories.empty()) {
       tgt->GetLocalGenerator()->GetCMakeInstance()->IssueMessage(
         MessageType::LOG,
-        std::string("Used link directories for target ") + tgt->GetName() +
-          ":\n" + usedDirectories,
+        cmStrCat("Used link directories for target ", tgt->GetName(), ":\n",
+                 usedDirectories),
         entry.Backtrace);
     }
   }

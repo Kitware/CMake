@@ -265,14 +265,15 @@ int main()
     // The object will not actually be written.
     cmSystemTools::ReplaceString(clrest, "/fo ", " ");
     cmSystemTools::ReplaceString(clrest, "-fo ", " ");
-    cmSystemTools::ReplaceString(clrest, objfile, "-Fo" + objfile + ".obj");
+    cmSystemTools::ReplaceString(clrest, objfile,
+                                 cmStrCat("-Fo", objfile, ".obj"));
 
-    cl = "\"" + cl + "\" /P /DRC_INVOKED /nologo /showIncludes /TC ";
+    cl = cmStrCat('"', cl, "\" /P /DRC_INVOKED /nologo /showIncludes /TC ");
 
     // call cl in object dir so the .i is generated there
     std::string objdir;
     {
-      pos = objfile.rfind("\\");
+      pos = objfile.rfind('\\');
       if (pos != std::string::npos) {
         objdir = objfile.substr(0, pos);
       }
@@ -282,8 +283,9 @@ int main()
     int exit_code =
       process(srcfilename, dfile, objfile, prefix, cl + clrest, objdir, true);
 
-    if (exit_code != 0)
+    if (exit_code != 0) {
       return exit_code;
+    }
 
     // compile rc file with rc.exe
     std::string rc = cmStrCat('"', binpath, '"');

@@ -97,8 +97,8 @@ bool handleQueryCommand(std::vector<std::string> const& args,
     return true;
   }
   if (!unparsedArguments.empty()) {
-    status.SetError("QUERY given unknown argument \"" +
-                    unparsedArguments.front() + "\".");
+    status.SetError(cmStrCat("QUERY given unknown argument \"",
+                             unparsedArguments.front(), "\"."));
     return false;
   }
 

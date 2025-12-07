@@ -581,7 +581,7 @@ protected:
   {
     if (eval->HeadTarget) {
       cmGeneratorExpressionDAGChecker dagChecker{
-        eval->HeadTarget, genexOperator + ":" + expression,
+        eval->HeadTarget, cmStrCat(genexOperator, ':', expression),
         content,          dagCheckerParent,
         eval->Context,    eval->Backtrace,
       };
@@ -2646,7 +2646,7 @@ struct CompilerFrontendVariantNode : public cmGeneratorExpressionNode
   {
     std::string const& compilerFrontendVariant =
       eval->Context.LG->GetMakefile()->GetSafeDefinition(
-        "CMAKE_" + lang + "_COMPILER_FRONTEND_VARIANT");
+        cmStrCat("CMAKE_", lang, "_COMPILER_FRONTEND_VARIANT"));
     if (parameters.empty()) {
       return compilerFrontendVariant;
     }
@@ -4177,7 +4177,7 @@ static const struct CompileFeaturesNode : public cmGeneratorExpressionNode
       std::vector<std::string> const& langAvailable =
         availableFeatures[lit.first];
       cmValue standardDefault = eval->Context.LG->GetMakefile()->GetDefinition(
-        "CMAKE_" + lit.first + "_STANDARD_DEFAULT");
+        cmStrCat("CMAKE_", lit.first, "_STANDARD_DEFAULT"));
       for (std::string const& it : lit.second) {
         if (!cm::contains(langAvailable, it)) {
           return "0";
@@ -4502,7 +4502,8 @@ struct TargetFilesystemArtifactResultCreator<ArtifactPdbTag>
 
     std::string language = target->GetLinkerLanguage(eval->Context.Config);
 
-    std::string pdbSupportVar = "CMAKE_" + language + "_LINKER_SUPPORTS_PDB";
+    std::string pdbSupportVar =
+      cmStrCat("CMAKE_", language, "_LINKER_SUPPORTS_PDB");
 
     if (!eval->Context.LG->GetMakefile()->IsOn(pdbSupportVar)) {
       ::reportError(eval, content->GetOriginalExpression(),
@@ -4764,14 +4765,14 @@ protected:
       eval->Context.LG->FindGeneratorTargetToUse(name);
     if (!target) {
       ::reportError(eval, content->GetOriginalExpression(),
-                    "No target \"" + name + "\"");
+                    cmStrCat("No target \"", name, '"'));
       return nullptr;
     }
     if (target->GetType() >= cmStateEnums::OBJECT_LIBRARY &&
         target->GetType() != cmStateEnums::UNKNOWN_LIBRARY) {
-      ::reportError(eval, content->GetOriginalExpression(),
-                    "Target \"" + name +
-                      "\" is not an executable or library.");
+      ::reportError(
+        eval, content->GetOriginalExpression(),
+        cmStrCat("Target \"", name, "\" is not an executable or library."));
       return nullptr;
     }
     if (dagChecker &&
@@ -5021,7 +5022,8 @@ struct TargetOutputNameArtifactResultGetter<ArtifactPdbTag>
 
     std::string language = target->GetLinkerLanguage(eval->Context.Config);
 
-    std::string pdbSupportVar = "CMAKE_" + language + "_LINKER_SUPPORTS_PDB";
+    std::string pdbSupportVar =
+      cmStrCat("CMAKE_", language, "_LINKER_SUPPORTS_PDB");
 
     if (!eval->Context.LG->GetMakefile()->IsOn(pdbSupportVar)) {
       ::reportError(
@@ -5398,7 +5400,7 @@ static const struct ShellPathNode : public cmGeneratorExpressionNode
     for (auto const& in : list_in) {
       if (!cmSystemTools::FileIsFullPath(in)) {
         reportError(eval, content->GetOriginalExpression(),
-                    "\"" + in + "\" is not an absolute path.");
+                    cmStrCat('"', in, "\" is not an absolute path."));
         return std::string();
       }
       list_out.emplace_back(converter.ConvertDirectorySeparatorsForShell(in));

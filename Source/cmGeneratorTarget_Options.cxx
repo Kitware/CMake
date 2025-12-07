@@ -522,10 +522,10 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetLinkOptions(
   if (this->IsDeviceLink()) {
     // wrap host link options
     std::string const wrapper(this->Makefile->GetSafeDefinition(
-      "CMAKE_" + language + "_DEVICE_COMPILER_WRAPPER_FLAG"));
+      cmStrCat("CMAKE_", language, "_DEVICE_COMPILER_WRAPPER_FLAG")));
     cmList wrapperFlag{ wrapper };
     std::string const wrapperSep(this->Makefile->GetSafeDefinition(
-      "CMAKE_" + language + "_DEVICE_COMPILER_WRAPPER_FLAG_SEP"));
+      cmStrCat("CMAKE_", language, "_DEVICE_COMPILER_WRAPPER_FLAG_SEP")));
     bool concatFlagAndArgs = true;
     if (!wrapperFlag.empty() && wrapperFlag.back() == " ") {
       concatFlagAndArgs = false;

@@ -55,7 +55,8 @@ std::string AddLangSpecificInterfaceIncludeDirectories(
   switch (dagChecker.Check()) {
     case cmGeneratorExpressionDAGChecker::SELF_REFERENCE:
       dagChecker.ReportError(
-        nullptr, "$<TARGET_PROPERTY:" + target->GetName() + ",propertyName");
+        nullptr,
+        cmStrCat("$<TARGET_PROPERTY:", target->GetName(), ",propertyName"));
       CM_FALLTHROUGH;
     case cmGeneratorExpressionDAGChecker::CYCLIC_REFERENCE:
       // No error. We just skip cyclic references.
@@ -195,15 +196,15 @@ void processIncludeDirectories(cmGeneratorTarget const* tgt,
       if (uniqueIncludes.insert(entryInclude).second) {
         includes.emplace_back(entryInclude, entry.Backtrace);
         if (debugIncludes) {
-          usedIncludes += " * " + entryInclude + "\n";
+          usedIncludes += cmStrCat(" * ", entryInclude, "\n");
         }
       }
     }
     if (!usedIncludes.empty()) {
       tgt->GetLocalGenerator()->GetCMakeInstance()->IssueMessage(
         MessageType::LOG,
-        std::string("Used includes for target ") + tgt->GetName() + ":\n" +
-          usedIncludes,
+        cmStrCat("Used includes for target ", tgt->GetName(), ":\n",
+                 usedIncludes),
         entry.Backtrace);
     }
   }

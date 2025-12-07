@@ -169,7 +169,7 @@ void checkPropertyConsistency(cmGeneratorTarget const* depender,
 
   for (std::string const& p : props) {
     std::string pname = cmSystemTools::HelpFileName(p);
-    std::string pfile = pdir + pname + ".rst";
+    std::string pfile = cmStrCat(pdir, pname, ".rst");
     if (cmSystemTools::FileExists(pfile, true)) {
       std::ostringstream e;
       e << "Target \"" << dependee->GetName() << "\" has property \"" << p

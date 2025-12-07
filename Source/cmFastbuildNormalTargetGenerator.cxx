@@ -91,8 +91,8 @@ cmFastbuildNormalTargetGenerator::cmFastbuildNormalTargetGenerator(
     "\"" FASTBUILD_DOLLAR_TAG "TargetOutputImplib" FASTBUILD_DOLLAR_TAG "\"");
   for (auto const& lang : Languages) {
     TargetIncludesByLanguage[lang] = this->GetIncludes(lang, Config);
-    LogMessage("targetIncludes for lang " + lang + " = " +
-               TargetIncludesByLanguage[lang]);
+    LogMessage(cmStrCat("targetIncludes for lang ", lang, " = ",
+                        TargetIncludesByLanguage[lang]));
 
     for (auto const& arch : this->GetArches()) {
       auto& flags = CompileFlagsByLangAndArch[std::make_pair(lang, arch)];
@@ -1765,7 +1765,8 @@ void cmFastbuildNormalTargetGenerator::AppendTargetDep(
       // Tested in "RunCMake.Framework - ImportedFrameworkConsumption".
       std::string const decorated =
         item.GetFormattedItem(item.Value.Value).Value;
-      LogMessage("Adding framework dep <" + decorated + "> to command line");
+      LogMessage(
+        cmStrCat("Adding framework dep <", decorated, "> to command line"));
       linkerNode.LinkerOptions += (" " + decorated);
       return;
     }
@@ -1802,8 +1803,9 @@ void cmFastbuildNormalTargetGenerator::AppendTargetDep(
       // It moves the dep outside of FASTBuild control, so the binary won't
       // be re-built if the shared lib has changed.
       // Tested in "BuildDepends" test.
-      LogMessage("LINK_DEPENDS_NO_SHARED is set on the target, adding dep" +
-                 item.Value.Value + " as is");
+      LogMessage(
+        cmStrCat("LINK_DEPENDS_NO_SHARED is set on the target, adding dep",
+                 item.Value.Value, " as is"));
       linkerNode.LinkerOptions +=
         (" " + cmGlobalFastbuildGenerator::QuoteIfHasSpaces(item.Value.Value));
       return;
@@ -1838,7 +1840,7 @@ void cmFastbuildNormalTargetGenerator::AppendTargetDep(
     // inject any properties in between). Tested in
     // "RunCMake.target_link_libraries-LINK_LIBRARY" test.
     if (isFeature) {
-      LogMessage("AppendTargetDep: " + dep + " as prebuild");
+      LogMessage(cmStrCat("AppendTargetDep: ", dep, " as prebuild"));
       linkerNode.PreBuildDependencies.emplace(dep);
       return;
     }
@@ -1879,7 +1881,7 @@ void cmFastbuildNormalTargetGenerator::AppendPrebuildDeps(
       linkerNode.PreBuildDependencies.insert(std::move(fastbuildTargetName));
     } else {
       if (!cmIsNOTFOUND(linkDep)) {
-        LogMessage("Adding dep " + linkDep + " for sorting");
+        LogMessage(cmStrCat("Adding dep ", linkDep, " for sorting"));
         linkerNode.PreBuildDependencies.insert(linkDep);
       }
     }
@@ -1927,7 +1929,8 @@ void cmFastbuildNormalTargetGenerator::AppendCommandLineDep(
   }
   formatted = this->ConvertToFastbuildPath(formatted);
 
-  LogMessage("Unknown link dep: " + formatted + ", adding to command line");
+  LogMessage(
+    cmStrCat("Unknown link dep: ", formatted, ", adding to command line"));
 
   // Only add real artifacts to .Libraries2, otherwise Fastbuild will always
   // consider the target out-of-date (since its input doesn't exist).
@@ -1949,7 +1952,7 @@ void cmFastbuildNormalTargetGenerator::AppendToLibraries2IfApplicable(
   // target out-of-date (since it never exists).
   if (this->GeneratorTarget->IsApple() &&
       cmSystemTools::StringStartsWith(dep, "-framework")) {
-    LogMessage("Not adding framework: " + dep + " to .Libraries2");
+    LogMessage(cmStrCat("Not adding framework: ", dep, " to .Libraries2"));
     return;
   }
 
@@ -1959,13 +1962,13 @@ void cmFastbuildNormalTargetGenerator::AppendToLibraries2IfApplicable(
   if (this->GeneratorTarget->IsApple() && target &&
       !target->LinkerNode.empty() &&
       target->LinkerNode[0].Type == FastbuildLinkerNode::EXECUTABLE) {
-    LogMessage("Not adding DLL/Executable(" + linkerNode.Name +
-               " to .Libraries2");
+    LogMessage(cmStrCat("Not adding DLL/Executable(", linkerNode.Name,
+                        " to .Libraries2"));
     return;
   }
 
-  // Additing to .Libraries2 for tracking.
-  LogMessage("Adding " + dep + " .Libraries2");
+  // Adding to .Libraries2 for tracking.
+  LogMessage(cmStrCat("Adding ", dep, " .Libraries2"));
   linkerNode.Libraries2.emplace_back(std::move(dep));
 }
 
@@ -1989,8 +1992,8 @@ void cmFastbuildNormalTargetGenerator::AppendLINK_DEPENDS(
 void cmFastbuildNormalTargetGenerator::AppendLinkDep(
   FastbuildLinkerNode& linkerNode, std::string dep) const
 {
-  LogMessage("AppendLinkDep: " + dep +
-             " to .LibrarianAdditionalInputs/.Libraries");
+  LogMessage(cmStrCat("AppendLinkDep: ", dep,
+                      " to .LibrarianAdditionalInputs/.Libraries"));
   linkerNode.LibrarianAdditionalInputs.emplace_back(std::move(dep));
 }
 
@@ -2073,8 +2076,8 @@ void cmFastbuildNormalTargetGenerator::AppendLinkDeps(
         linkerNode.LibrarianAdditionalInputs.emplace_back(std::move(dep));
       }
     } else if (linkerNode.Type == FastbuildLinkerNode::STATIC_LIBRARY) {
-      LogMessage("Skipping linking to STATIC_LIBRARY (" + linkerNode.Name +
-                 ")");
+      LogMessage(cmStrCat("Skipping linking to STATIC_LIBRARY (",
+                          linkerNode.Name, ')'));
       continue;
     }
     // We're linked to exact target.
@@ -2120,8 +2123,8 @@ void cmFastbuildNormalTargetGenerator::AddLipoCommand(FastbuildTarget& target)
   for (auto const& ArchSpecificTarget : target.LinkerNode) {
     exec.ExecInput.emplace_back(ArchSpecificTarget.LinkerOutput);
   }
-  exec.ExecArguments +=
-    "-create -output " + target.RealOutput + " " + cmJoin(exec.ExecInput, " ");
+  exec.ExecArguments += cmStrCat("-create -output ", target.RealOutput, " ",
+                                 cmJoin(exec.ExecInput, " "));
   target.PostBuildExecNodes.Alias.PreBuildDependencies.emplace(
     exec.ExecOutput);
   target.PostBuildExecNodes.Nodes.emplace_back(std::move(exec));
@@ -2211,9 +2214,7 @@ void cmFastbuildNormalTargetGenerator::GenerateLink(
       std::string outpath = GeneratorTarget->GetDirectory(Config);
       this->OSXBundleGenerator->CreateAppBundle(targetNames.Output, outpath,
                                                 Config);
-      targetOutputReal = outpath;
-      targetOutputReal += "/";
-      targetOutputReal += outputReal;
+      targetOutputReal = cmStrCat(outpath, '/', outputReal);
       targetOutputReal = this->ConvertToFastbuildPath(targetOutputReal);
     } else if (GeneratorTarget->IsFrameworkOnApple()) {
       // Create the library framework.
@@ -2305,17 +2306,17 @@ cmFastbuildNormalTargetGenerator::GetSymlinkExecs() const
       if (from.empty() || to.empty() || from == to) {
         return;
       }
-      LogMessage("Symlinking " + from + " -> " + to);
+      LogMessage(cmStrCat("Symlinking ", from, " -> ", to));
       FastbuildExecNode postBuildExecNode;
       postBuildExecNode.Name = "cmake_symlink_" + to;
       postBuildExecNode.ExecOutput =
         cmJoin({ GeneratorTarget->GetDirectory(Config), to }, "/");
       postBuildExecNode.ExecExecutable = cmSystemTools::GetCMakeCommand();
-      postBuildExecNode.ExecArguments =
-        "-E cmake_symlink_executable " +
-        cmGlobalFastbuildGenerator::QuoteIfHasSpaces(from) + " " +
+      postBuildExecNode.ExecArguments = cmStrCat(
+        "-E cmake_symlink_executable ",
+        cmGlobalFastbuildGenerator::QuoteIfHasSpaces(from), ' ',
         cmGlobalFastbuildGenerator::QuoteIfHasSpaces(
-          this->ConvertToFastbuildPath(postBuildExecNode.ExecOutput));
+          this->ConvertToFastbuildPath(postBuildExecNode.ExecOutput)));
       res.emplace_back(std::move(postBuildExecNode));
     };
     generateSymlinkCommand(targetNames.Real, targetNames.Output);

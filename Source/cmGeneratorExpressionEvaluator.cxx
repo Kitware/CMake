@@ -2,16 +2,14 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmGeneratorExpressionEvaluator.h"
 
-#include <sstream>
-
 #ifndef CMAKE_BOOTSTRAP
 #  include <cm3p/json/value.h>
 #endif
-
 #include "cmGenExContext.h"
 #include "cmGenExEvaluation.h"
 #include "cmGeneratorExpressionNode.h"
 #include "cmLocalGenerator.h"
+#include "cmStringAlgorithms.h"
 #include "cmake.h"
 
 GeneratorExpressionContent::GeneratorExpressionContent(
@@ -96,8 +94,9 @@ std::string GeneratorExpressionContent::Evaluate(
     if (node->NumExpectedParameters() == 1 &&
         node->AcceptsArbitraryContentParameter()) {
       if (this->ParamChildren.empty()) {
-        reportError(eval, this->GetOriginalExpression(),
-                    "$<" + identifier + "> expression requires a parameter.");
+        reportError(
+          eval, this->GetOriginalExpression(),
+          cmStrCat("$<", identifier, "> expression requires a parameter."));
       }
     } else {
       std::vector<std::string> parameters;
@@ -166,19 +165,20 @@ std::string GeneratorExpressionContent::EvaluateParameters(
   if ((numExpected > cmGeneratorExpressionNode::DynamicParameters &&
        static_cast<unsigned int>(numExpected) != parameters.size())) {
     if (numExpected == 0) {
-      reportError(eval, this->GetOriginalExpression(),
-                  "$<" + identifier + "> expression requires no parameters.");
+      reportError(
+        eval, this->GetOriginalExpression(),
+        cmStrCat("$<", identifier, "> expression requires no parameters."));
     } else if (numExpected == 1) {
       reportError(eval, this->GetOriginalExpression(),
-                  "$<" + identifier +
-                    "> expression requires "
-                    "exactly one parameter.");
+                  cmStrCat("$<", identifier,
+                           "> expression requires "
+                           "exactly one parameter."));
     } else {
-      std::ostringstream e;
-      e << "$<" + identifier + "> expression requires " << numExpected
-        << " comma separated parameters, but got " << parameters.size()
-        << " instead.";
-      reportError(eval, this->GetOriginalExpression(), e.str());
+      std::string e =
+        cmStrCat("$<", identifier, "> expression requires ", numExpected,
+                 " comma separated parameters, but got ", parameters.size(),
+                 " instead.");
+      reportError(eval, this->GetOriginalExpression(), e);
     }
     return std::string();
   }
@@ -186,18 +186,18 @@ std::string GeneratorExpressionContent::EvaluateParameters(
   if (numExpected == cmGeneratorExpressionNode::OneOrMoreParameters &&
       parameters.empty()) {
     reportError(eval, this->GetOriginalExpression(),
-                "$<" + identifier +
-                  "> expression requires at least one parameter.");
+                cmStrCat("$<", identifier,
+                         "> expression requires at least one parameter."));
   } else if (numExpected == cmGeneratorExpressionNode::TwoOrMoreParameters &&
              parameters.size() < 2) {
     reportError(eval, this->GetOriginalExpression(),
-                "$<" + identifier +
-                  "> expression requires at least two parameters.");
+                cmStrCat("$<", identifier,
+                         "> expression requires at least two parameters."));
   } else if (numExpected == cmGeneratorExpressionNode::OneOrZeroParameters &&
              parameters.size() > 1) {
     reportError(eval, this->GetOriginalExpression(),
-                "$<" + identifier +
-                  "> expression requires one or zero parameters.");
+                cmStrCat("$<", identifier,
+                         "> expression requires one or zero parameters."));
   }
   return std::string();
 }

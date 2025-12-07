@@ -227,7 +227,7 @@ bool cmGeneratorTarget::ComputeLinkClosure(std::string const& config,
     // Now consider languages that propagate from linked targets.
     for (std::string const& lang : languages) {
       std::string propagates =
-        "CMAKE_" + lang + "_LINKER_PREFERENCE_PROPAGATES";
+        cmStrCat("CMAKE_", lang, "_LINKER_PREFERENCE_PROPAGATES");
       if (this->Makefile->IsOn(propagates)) {
         tsl.Consider(lang);
       }
@@ -823,7 +823,7 @@ std::vector<cmLinkItem> cmGeneratorTarget::ComputeImplicitLanguageTargets(
   std::string const& runtimeLibrary =
     this->GetRuntimeLinkLibrary(lang, config);
   if (cmValue runtimeLinkOptions = this->Makefile->GetDefinition(
-        "CMAKE_" + lang + "_RUNTIME_LIBRARIES_" + runtimeLibrary)) {
+        cmStrCat("CMAKE_", lang, "_RUNTIME_LIBRARIES_", runtimeLibrary))) {
     cmList libsList{ *runtimeLinkOptions };
     result.reserve(libsList.size());
 

@@ -16,6 +16,7 @@
 #include "cmListFileCache.h"
 #include "cmMakefile.h"
 #include "cmStateTypes.h"
+#include "cmStringAlgorithms.h"
 #include "cmTarget.h"
 #include "cmTargetDepend.h"
 
@@ -75,7 +76,7 @@ void cmFastbuildUtilityTargetGenerator::Generate()
     }
   }
   if (this->GetGlobalGenerator()->IsExcluded(this->GetGeneratorTarget())) {
-    LogMessage("Excluding " + targetName + " from ALL");
+    LogMessage(cmStrCat("Excluding ", targetName, " from ALL"));
     fastbuildTarget.ExcludeFromAll = true;
   }
   auto preBuild = GenerateCommands(FastbuildBuildStep::PRE_BUILD);
