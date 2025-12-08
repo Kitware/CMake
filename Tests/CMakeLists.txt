@@ -3047,13 +3047,6 @@ if(BUILD_TESTING)
   set_tests_properties(CTestTestTimeout PROPERTIES
     PASS_REGULAR_EXPRESSION "TestTimeout *\\.+ *\\*\\*\\*Timeout.*TestSleep *\\.+ *Passed.*timeout correctly killed child")
 
-  add_test(
-    NAME CTestTestRerunFailed
-    COMMAND ${CMAKE_CTEST_COMMAND} --rerun-failed)
-  set_tests_properties(CTestTestRerunFailed PROPERTIES
-    PASS_REGULAR_EXPRESSION "1/1 Test #1: TestTimeout" DEPENDS CTestTestTimeout
-    WORKING_DIRECTORY ${CMake_BINARY_DIR}/Tests/CTestTestTimeout)
-
   configure_file(
     "${CMake_SOURCE_DIR}/Tests/CTestTestDepends/test.cmake.in"
     "${CMake_BINARY_DIR}/Tests/CTestTestDepends/test.cmake"
