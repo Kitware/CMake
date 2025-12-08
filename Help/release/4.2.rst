@@ -224,3 +224,15 @@ Other Changes
   flags ``-fp:precise``, ``-Gd``, and ``-GS`` if they are not specified by
   the project or user.  This makes builds more consistent with other
   generators, and with what projects and users actually specify.
+
+Updates
+=======
+
+Changes made since CMake 4.2.0 include the following.
+
+4.2.1
+-----
+
+* This version made no changes to documented features or interfaces.
+  Some implementation updates were made to support ecosystem changes
+  and/or fix regressions.
