@@ -21,9 +21,26 @@ Imported Targets
 
 This module provides the following :ref:`Imported Targets`:
 
-``SQLite::SQLite3``
+``SQLite3::SQLite3``
   Target encapsulating SQLite library usage requirements.  It is available only
   when SQLite is found.
+
+  .. versionadded:: 4.3
+
+``SQLite::SQLite3``
+  Deprecated.  Identical to ``SQLite3::SQLite3``.
+
+  If your project needs to support CMake < 4.3, consider adding the following
+  to your project after calling ``find_package(SQLite3 ...)``:
+
+  .. code-block:: cmake
+
+    if(NOT TARGET SQLite3::SQLite3) # CMake < 4.3
+      add_library(SQLite3::SQLite3 ALIAS SQLite::SQLite3)
+    endif()
+
+  This will allow your project to use the new name while still permitting it to
+  compile with older versions of CMake.
 
 Result Variables
 ^^^^^^^^^^^^^^^^
@@ -96,11 +113,18 @@ find_package_handle_standard_args(SQLite3
 if(SQLite3_FOUND)
     set(SQLite3_INCLUDE_DIRS ${SQLite3_INCLUDE_DIR})
     set(SQLite3_LIBRARIES ${SQLite3_LIBRARY})
+    if(NOT TARGET SQLite3::SQLite3)
+        add_library(SQLite3::SQLite3 UNKNOWN IMPORTED)
+        set_target_properties(SQLite3::SQLite3 PROPERTIES
+            IMPORTED_LOCATION             "${SQLite3_LIBRARY}"
+            INTERFACE_INCLUDE_DIRECTORIES "${SQLite3_INCLUDE_DIR}")
+    endif()
     if(NOT TARGET SQLite::SQLite3)
         add_library(SQLite::SQLite3 UNKNOWN IMPORTED)
         set_target_properties(SQLite::SQLite3 PROPERTIES
             IMPORTED_LOCATION             "${SQLite3_LIBRARY}"
-            INTERFACE_INCLUDE_DIRECTORIES "${SQLite3_INCLUDE_DIR}")
+            INTERFACE_INCLUDE_DIRECTORIES "${SQLite3_INCLUDE_DIR}"
+            DEPRECATION                   "The target name SQLite::SQLite3 is deprecated. Please use SQLite3::SQLite3 instead.")
     endif()
 endif()
 
