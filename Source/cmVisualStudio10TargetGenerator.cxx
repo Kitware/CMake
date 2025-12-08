@@ -170,10 +170,16 @@ public:
       std::string const cond =
         this->TargetGenerator->CalcCondition(this->GetConfiguration());
       this->Parent->WritePlatformConfigTag(tag, cond, content);
+    } else if (!this->SuppressStartupBannerCondition.empty() &&
+               tag == "SuppressStartupBanner"_s) {
+      this->Parent->WritePlatformConfigTag(
+        tag, this->SuppressStartupBannerCondition, content);
     } else {
       this->Parent->Element(tag, content);
     }
   }
+
+  std::string SuppressStartupBannerCondition;
 
 private:
   cmVisualStudio10TargetGenerator* const TargetGenerator;
@@ -3704,6 +3710,13 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
     }
     if (!clOptions.HasFlag("RemoveUnreferencedCodeData")) {
       clOptions.AddFlag("RemoveUnreferencedCodeData", "");
+      // Visual Studio 2019 with toolset v142 versions 14.20 to 14.28.16.9
+      // fails if both RemoveUnreferencedCodeData and SuppressStartupBanner
+      // are empty.  Since the latter is incidental, make it conditional.
+      if (this->GlobalGenerator->GetPlatformToolsetString() == "v142"_s) {
+        clOptions.SuppressStartupBannerCondition =
+          "'$(VCToolsVersion)' >= '14.29'";
+      }
     }
     if (!clOptions.HasFlag("RuntimeLibrary")) {
       clOptions.AddFlag("RuntimeLibrary", "");
