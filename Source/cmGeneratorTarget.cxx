@@ -1312,15 +1312,17 @@ std::string cmGeneratorTarget::GetCompilePDBName(
     return components.prefix + pdbName + ".pdb";
   }
 
-  // If the target is PCH-reused, we need a stable name for the PDB file so
-  // that reusing targets can construct a stable name for it.
-  if (this->PchReused) {
+  // If the target is PCH-reused or PCH-reuses, we need a stable name for the
+  // PDB file so that reusing targets can construct a stable name for it.
+  cmGeneratorTarget const* reuseTarget = this->GetPchReuseTarget();
+  bool const hasReuse = reuseTarget && reuseTarget != this;
+  if (this->PchReused || hasReuse) {
     NameComponents const& components = GetFullNameInternalComponents(
       config, cmStateEnums::RuntimeBinaryArtifact);
     return cmStrCat(components.prefix, this->GetName(), ".pdb");
   }
 
-  return "";
+  return std::string{};
 }
 
 std::string cmGeneratorTarget::GetCompilePDBPath(
@@ -4657,8 +4659,10 @@ bool cmGeneratorTarget::ComputePDBOutputDir(std::string const& kind,
     }
   }
   if (out.empty()) {
-    // Compile output should always have a path.
-    if (kind == "COMPILE_PDB"_s) {
+    cmGeneratorTarget const* reuseTarget = this->GetPchReuseTarget();
+    bool const hasReuse = reuseTarget && reuseTarget != this;
+    // Compiler-generated PDB output always needed for REUSE_FROM.
+    if (kind == "COMPILE_PDB"_s && (this->PchReused || hasReuse)) {
       out = this->GetSupportDirectory();
     } else {
       return false;
