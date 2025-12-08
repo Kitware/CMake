@@ -1625,7 +1625,7 @@ b:windows-x86_64-package:
         - .windows_x86_64_package
         - .cmake_build_windows
         - .cmake_build_package_artifacts
-        - .windows_x86_64_tags_nonconcurrent_vs2026
+        - .windows_x86_64_tags_nonconcurrent_vs2022_msvc14.44
         - .run_only_for_package
     needs:
         - p:doc-package
@@ -1656,7 +1656,7 @@ b:windows-i386-package:
         - .windows_i386_package
         - .cmake_build_windows
         - .cmake_build_package_artifacts
-        - .windows_x86_64_tags_nonconcurrent_vs2026
+        - .windows_x86_64_tags_nonconcurrent_vs2022_msvc14.44
         - .run_only_for_package
     needs:
         - p:doc-package
