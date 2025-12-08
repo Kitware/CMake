@@ -157,4 +157,5 @@ private:
   std::vector<std::string> GetManifestsAsFastbuildPath() const;
 
   void EnsureDirectoryExists(std::string const& path) const;
+  void EnsureParentDirectoryExists(std::string const& path) const;
 };
