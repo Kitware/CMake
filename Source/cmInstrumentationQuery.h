@@ -31,6 +31,7 @@ public:
     PostCMakeBuild,
     PostCTest,
     PostCMakeInstall,
+    PostCMakeWorkflow,
     PrepareForCDash,
     Manual
   };

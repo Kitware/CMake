@@ -1,0 +1,45 @@
+{
+  "version": 10,
+  "cmakeMinimumRequired": {
+    "major": 4,
+    "minor": 2,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "default",
+      "binaryDir": "@RunCMake_TEST_BINARY_DIR@/build",
+      "warnings": {
+        "dev": false,
+        "unusedCli": false
+      },
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "INSTRUMENT_COMMAND_FILE": "cmake-command-workflow.cmake"
+      },
+      "generator" : "@RunCMake_GENERATOR@"
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "default",
+      "configurePreset": "default",
+      "configuration": "Debug"
+    }
+  ],
+  "workflowPresets": [
+    {
+      "name": "default",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "default"
+        },
+        {
+          "type": "build",
+          "name": "default"
+        }
+      ]
+    }
+  ]
+}

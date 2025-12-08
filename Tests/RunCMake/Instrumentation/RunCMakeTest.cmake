@@ -11,6 +11,7 @@ function(instrument test)
     "INSTALL"
     "INSTALL_PARALLEL"
     "TEST"
+    "WORKFLOW"
     "NO_WARN"
     "COPY_QUERIES"
     "COPY_QUERIES_GENERATED"
@@ -89,6 +90,28 @@ function(instrument test)
   set(RunCMake_TEST_SOURCE_DIR ${RunCMake_SOURCE_DIR}/project)
   if(NOT RunCMake_GENERATOR_IS_MULTI_CONFIG)
     set(maybe_CMAKE_BUILD_TYPE -DCMAKE_BUILD_TYPE=Debug)
+  endif()
+  if (ARGS_WORKFLOW)
+    configure_file(
+      "${RunCMake_TEST_SOURCE_DIR}/CMakePresets.json.in"
+      "${RunCMake_TEST_BINARY_DIR}/CMakePresets.json"
+      @ONLY
+    )
+    configure_file(
+      "${cmake_file}.in"
+      "${RunCMake_TEST_BINARY_DIR}/cmake-command-workflow.cmake"
+      @ONLY
+    )
+    foreach(f IN ITEMS CMakeLists.txt main.cxx lib.cxx lib.h)
+      configure_file(
+        "${RunCMake_TEST_SOURCE_DIR}/${f}"
+        "${RunCMake_TEST_BINARY_DIR}/${f}"
+        COPYONLY
+      )
+    endforeach()
+    set(v1 ${RunCMake_TEST_BINARY_DIR}/build/.cmake/instrumentation-${uuid}/v1)
+    run_cmake_command(${test}-workflow ${CMAKE_COMMAND} --workflow default)
+    set(ARGS_NO_CONFIGURE TRUE)
   endif()
   if (NOT ARGS_NO_CONFIGURE)
     run_cmake_with_options(${test} ${ARGS_CONFIGURE_ARG} ${maybe_CMAKE_BUILD_TYPE})
@@ -207,6 +230,10 @@ if(NOT Skip_COMMAND_FAILURES_Case)
     CHECK_SCRIPT check-data-dir.cmake
   )
 endif()
+instrument(cmake-command-workflow
+  NO_WARN WORKFLOW
+  CHECK_SCRIPT check-workflow-hook.cmake
+)
 
 # Test CUSTOM_CONTENT
 instrument(cmake-command-custom-content
