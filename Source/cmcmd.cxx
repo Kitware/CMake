@@ -1584,6 +1584,8 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
       std::string mtime;
       std::string format;
       int numThreads = 1;
+      int compressionLevel = 0;
+      bool compressionLevelFlagPassed = false;
       cmSystemTools::cmTarExtractTimestamps extractTimestamps =
         cmSystemTools::cmTarExtractTimestamps::Yes;
       cmSystemTools::cmTarCompression compress =
@@ -1627,6 +1629,34 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
             }
 
             numThreads = static_cast<decltype(numThreads)>(numThreadsLong);
+          } else if (cmHasLiteralPrefix(arg,
+                                        "--cmake-tar-compression-level=")) {
+            std::string const& compressionLevelStr = arg.substr(30);
+            long compressionLevelLong = 0;
+            if (!cmStrToLong(compressionLevelStr, &compressionLevelLong)) {
+              cmSystemTools::Error(
+                cmStrCat("Invalid --cmake-tar-compression-level value: '",
+                         compressionLevelStr, "' - not a number"));
+              return 1;
+            }
+            if (compressionLevelLong >
+                std::numeric_limits<decltype(compressionLevel)>::max()) {
+              cmSystemTools::Error(
+                cmStrCat("Invalid --cmake-tar-compression-level value: '",
+                         compressionLevelStr, "' - too large"));
+              return 1;
+            }
+            if (compressionLevelLong <
+                std::numeric_limits<decltype(compressionLevel)>::min()) {
+              cmSystemTools::Error(
+                cmStrCat("Invalid --cmake-tar-compression-level value: '",
+                         compressionLevelStr, "' - too small"));
+              return 1;
+            }
+
+            compressionLevel =
+              static_cast<decltype(compressionLevel)>(compressionLevelLong);
+            compressionLevelFlagPassed = true;
           } else if (cmHasLiteralPrefix(arg, "--files-from=")) {
             std::string const& files_from = arg.substr(13);
             if (!cmTarFilesFrom(files_from, files)) {
@@ -1697,6 +1727,30 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
                              "at most one flag of z, j, or J may be used");
         return 1;
       }
+      if (compressionLevelFlagPassed) {
+        if (nCompress == 0) {
+          cmSystemTools::Error("Can not use --cmake-tar-compression-level "
+                               "without compression algorithm selection");
+          return 1;
+        }
+
+        constexpr int minCompressionLevel = 0;
+        int maxCompressionLevel = 9;
+        if (compress == cmSystemTools::TarCompressZstd) {
+          maxCompressionLevel = 19;
+        }
+
+        if (compressionLevel < minCompressionLevel ||
+            compressionLevel > maxCompressionLevel) {
+          cmSystemTools::Error(
+            cmStrCat("Compression level must be between ",
+                     std::to_string(minCompressionLevel), " and ",
+                     std::to_string(maxCompressionLevel), ". Got ",
+                     std::to_string(compressionLevel)));
+          return 1;
+        }
+      }
+
       if (action == cmSystemTools::TarActionList) {
         if (!cmSystemTools::ListTar(outFile, files, verbose)) {
           cmSystemTools::Error("Problem listing tar: " + outFile);
@@ -1707,7 +1761,8 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
           std::cerr << "tar: No files or directories specified\n";
         }
         if (!cmSystemTools::CreateTar(outFile, files, {}, compress, verbose,
-                                      mtime, format, 0, numThreads)) {
+                                      mtime, format, compressionLevel,
+                                      numThreads)) {
           cmSystemTools::Error("Problem creating tar: " + outFile);
           return 1;
         }
