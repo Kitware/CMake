@@ -219,3 +219,8 @@ Other Changes
 * For builds targeting the MSVC ABI, all generators now add the ``_WINDLL``
   preprocessor definition when compiling sources in shared libraries.
   See policy :policy:`CMP0203`.
+
+* The :ref:`Visual Studio Generators` now suppress Visual Studio's default
+  flags ``-fp:precise``, ``-Gd``, and ``-GS`` if they are not specified by
+  the project or user.  This makes builds more consistent with other
+  generators, and with what projects and users actually specify.
