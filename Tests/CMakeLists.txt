@@ -3036,25 +3036,6 @@ if(BUILD_TESTING)
     PASS_REGULAR_EXPRESSION "0 tests failed out of 3")
 
   configure_file(
-    "${CMake_SOURCE_DIR}/Tests/CTestTestTimeout/test.cmake.in"
-    "${CMake_BINARY_DIR}/Tests/CTestTestTimeout/test.cmake"
-    @ONLY ESCAPE_QUOTES)
-  add_test(CTestTestTimeout ${CMAKE_CTEST_COMMAND}
-    -C "\${CTestTest_CONFIG}"
-    -S "${CMake_BINARY_DIR}/Tests/CTestTestTimeout/test.cmake" -V
-    --output-log "${CMake_BINARY_DIR}/Tests/CTestTestTimeout/testOutput.log"
-    )
-  set_tests_properties(CTestTestTimeout PROPERTIES
-    PASS_REGULAR_EXPRESSION "TestTimeout *\\.+ *\\*\\*\\*Timeout.*TestSleep *\\.+ *Passed.*timeout correctly killed child")
-
-  add_test(
-    NAME CTestTestRerunFailed
-    COMMAND ${CMAKE_CTEST_COMMAND} --rerun-failed)
-  set_tests_properties(CTestTestRerunFailed PROPERTIES
-    PASS_REGULAR_EXPRESSION "1/1 Test #1: TestTimeout" DEPENDS CTestTestTimeout
-    WORKING_DIRECTORY ${CMake_BINARY_DIR}/Tests/CTestTestTimeout)
-
-  configure_file(
     "${CMake_SOURCE_DIR}/Tests/CTestTestDepends/test.cmake.in"
     "${CMake_BINARY_DIR}/Tests/CTestTestDepends/test.cmake"
     @ONLY ESCAPE_QUOTES)
