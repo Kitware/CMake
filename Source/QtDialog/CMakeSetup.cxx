@@ -54,13 +54,6 @@ static void cmAddPluginPath();
 Q_IMPORT_PLUGIN(QXcbIntegrationPlugin);
 #endif
 
-#if defined(USE_QWindowsIntegrationPlugin)
-Q_IMPORT_PLUGIN(QWindowsIntegrationPlugin);
-#  if QT_VERSION >= QT_VERSION_CHECK(5, 10, 0)
-Q_IMPORT_PLUGIN(QWindowsVistaStylePlugin);
-#  endif
-#endif
-
 int CMakeGUIExec(CMakeSetupDialog* window);
 void SetupDefaultQSettings();
 void OpenReferenceManual(QString const& filename);

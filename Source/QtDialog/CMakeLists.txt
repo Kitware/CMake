@@ -66,12 +66,6 @@ if(CMake_QT_STATIC_QXcbIntegrationPlugin_LIBRARIES)
     PROPERTY COMPILE_DEFINITIONS USE_QXcbIntegrationPlugin)
 endif()
 
-if(CMake_QT_STATIC_QWindowsIntegrationPlugin_LIBRARIES)
-  list(APPEND CMake_QT_EXTRA_LIBRARIES ${CMake_QT_STATIC_QWindowsIntegrationPlugin_LIBRARIES})
-  set_property(SOURCE CMakeSetup.cxx
-    PROPERTY COMPILE_DEFINITIONS USE_QWindowsIntegrationPlugin)
-endif()
-
 # We need to install platform plugin and add qt.conf for Qt5 on Mac and Windows.
 if(CMake_INSTALL_DEPENDENCIES AND (APPLE OR WIN32) AND NOT COMMAND qt_generate_deploy_app_script)
   function(_qt_get_plugin_name_with_version target out_var)
@@ -124,7 +118,7 @@ if(CMake_INSTALL_DEPENDENCIES AND (APPLE OR WIN32) AND NOT COMMAND qt_generate_d
     install(FILES "${CMAKE_CURRENT_BINARY_DIR}/qt.conf"
       DESTINATION "${CMake_INSTALL_APP_DIR_SLASH}Resources"
       ${COMPONENT})
-  elseif(WIN32 AND NOT CMake_QT_STATIC_QWindowsIntegrationPlugin_LIBRARIES)
+  elseif(WIN32)
     if(CMake_QT_MAJOR_VERSION VERSION_GREATER_EQUAL 6)
       # Qt6 provides the plugins as individual packages that need to be found.
       find_package(Qt${CMake_QT_MAJOR_VERSION}QWindowsIntegrationPlugin QUIET PATHS ${Qt${CMake_QT_MAJOR_VERSION}Gui_DIR})
