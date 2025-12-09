@@ -23,28 +23,21 @@ else()
   return()
 endif()
 
-set(srcname "qtbase-everywhere-src-6.3.0")
-set(pkgname "qt-6.3.0-win-${arch}-${toolset}-1")
-set(pkgname_host "qt-6.3.0-win-x86_64-${toolset}-1")
+set(srcname "qtbase-everywhere-src-6.10.1")
+set(pkgname "qt-6.10.1-win-${arch}-${toolset}-1")
+set(pkgname_host "qt-6.10.1-win-x86_64-${toolset}-1")
 set(topdir "${CMAKE_CURRENT_BINARY_DIR}")
 set(srcdir "${topdir}/${srcname}")
-set(blddir "${topdir}/${pkgname}-build")
+set(blddir "${topdir}/${pkgname}-b")
 set(prefix "${topdir}/${pkgname}")
 set(prefix_host "${topdir}/${pkgname_host}")
 
 # Qt Source
 if (NOT EXISTS "${srcdir}")
-  file(DOWNLOAD "https://download.qt.io/official_releases/qt/6.3/6.3.0/submodules/qtbase-everywhere-src-6.3.0.tar.xz" qt.tar.xz
-       EXPECTED_HASH SHA256=b865aae43357f792b3b0a162899d9bf6a1393a55c4e5e4ede5316b157b1a0f99)
+  file(DOWNLOAD "https://download.qt.io/official_releases/qt/6.10/6.10.1/submodules/qtbase-everywhere-src-6.10.1.tar.xz" qt.tar.xz
+       EXPECTED_HASH SHA256=5a6226f7e23db51fdc3223121eba53f3f5447cf0cc4d6cb82a3a2df7a65d265d)
   file(ARCHIVE_EXTRACT INPUT qt.tar.xz)
   file(REMOVE qt.tar.xz)
-endif()
-
-# Download and use LLVM's clang-cl to compiler for arm64
-if (arch STREQUAL "arm64" AND CMAKE_ARGV3 STREQUAL "clang-cl")
-  set(ENV{PATH} "c:/Program Files/LLVM/bin;$ENV{PATH}")
-  set(ENV{CC} "clang-cl --target=arm64-pc-windows-msvc")
-  set(ENV{CXX} "clang-cl --target=arm64-pc-windows-msvc")
 endif()
 
 # Build Qt
