@@ -72,6 +72,16 @@ void Instance::Bind(std::string& val)
     ExpectAtLeast{ 1 });
 }
 
+void Instance::Bind(MaybeEmpty<std::string>& val)
+{
+  this->Bind(
+    [&val](cm::string_view arg) -> Continue {
+      val = std::string(arg);
+      return Continue::No;
+    },
+    ExpectAtLeast{ 1 });
+}
+
 void Instance::Bind(NonEmpty<std::string>& val)
 {
   this->Bind(

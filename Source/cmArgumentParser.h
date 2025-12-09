@@ -212,6 +212,7 @@ public:
   void Bind(std::function<Continue(cm::string_view)> f, ExpectAtLeast expect);
   void Bind(bool& val);
   void Bind(std::string& val);
+  void Bind(MaybeEmpty<std::string>& val);
   void Bind(NonEmpty<std::string>& val);
   void Bind(Maybe<std::string>& val);
   void Bind(MaybeEmpty<std::vector<std::string>>& val);

@@ -36,6 +36,12 @@ struct MaybeEmpty<std::vector<T>> : public std::vector<T>
   using std::vector<T>::vector;
   using std::vector<T>::operator=;
 };
+template <>
+struct MaybeEmpty<std::string> : public std::string
+{
+  using std::string::basic_string;
+  using std::string::operator=;
+};
 
 template <typename T>
 struct NonEmpty;
