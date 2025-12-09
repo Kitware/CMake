@@ -7,7 +7,7 @@ find_package(SQLite3 REQUIRED)
 add_definitions(-DCMAKE_EXPECTED_SQLite3_VERSION="${SQLite3_VERSION}")
 
 add_executable(test_tgt main.c)
-target_link_libraries(test_tgt SQLite::SQLite3)
+target_link_libraries(test_tgt SQLite3::SQLite3)
 add_test(NAME test_tgt COMMAND test_tgt)
 
 add_executable(test_var main.c)
