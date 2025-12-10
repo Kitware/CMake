@@ -380,7 +380,7 @@ The first ``TODO`` is easy, we add another option to our project.
   <details><summary>TODO 6: Click to show/hide answer</summary>
 
 .. literalinclude:: Step7/CMakeLists.txt
-  :caption: TODO 6: MathFunctions/CMakeLists.txt
+  :caption: TODO 6: CMakeLists.txt
   :name: CMakeLists.txt-enable-ipo
   :language: cmake
   :start-at: option(TUTORIAL_ENABLE_IPO
