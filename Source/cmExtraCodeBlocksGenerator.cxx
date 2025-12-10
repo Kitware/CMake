@@ -154,9 +154,10 @@ void Tree::BuildVirtualFolder(cmXMLWriter& xml) const
 void Tree::BuildVirtualFolderImpl(std::string& virtualFolders,
                                   std::string const& prefix) const
 {
-  virtualFolders += "CMake Files\\" + prefix + this->path + "\\;";
+  virtualFolders += cmStrCat("CMake Files\\", prefix, this->path, "\\;");
   for (Tree const& folder : this->folders) {
-    folder.BuildVirtualFolderImpl(virtualFolders, prefix + this->path + "\\");
+    folder.BuildVirtualFolderImpl(virtualFolders,
+                                  cmStrCat(prefix, this->path, '\\'));
   }
 }
 
@@ -452,7 +453,7 @@ void cmExtraCodeBlocksGenerator::CreateNewProjectFile(
   }
 
   // Add CMakeLists.txt
-  tree.BuildUnit(xml, mf->GetHomeDirectory() + "/");
+  tree.BuildUnit(xml, mf->GetHomeDirectory() + '/');
 
   xml.EndElement(); // Project
   xml.EndElement(); // CodeBlocks_project_file
@@ -474,7 +475,7 @@ std::string cmExtraCodeBlocksGenerator::CreateDummyTargetFile(
     fout << "# This is a dummy file for the OBJECT library "
          << target->GetName()
          << " for the CMake CodeBlocks project generator.\n"
-         << "# Don't edit, this file will be overwritten.\n";
+            "# Don't edit, this file will be overwritten.\n";
     /* clang-format on */
   }
   return filename;

@@ -79,7 +79,8 @@ static bool HandleTargetsMode(std::vector<std::string> const& args,
   Arguments arguments = parser.Parse(args, &unknownArgs);
 
   if (!unknownArgs.empty()) {
-    status.SetError("Unknown argument: \"" + unknownArgs.front() + "\".");
+    status.SetError(
+      cmStrCat("Unknown argument: \"", unknownArgs.front(), "\"."));
     return false;
   }
 
@@ -117,7 +118,7 @@ static bool HandleTargetsMode(std::vector<std::string> const& args,
   } else {
     // Interpret relative paths with respect to the current build dir.
     std::string const& dir = mf.GetCurrentBinaryDirectory();
-    fname = dir + "/" + fname;
+    fname = cmStrCat(dir, '/', fname);
   }
 
   std::vector<cmExportBuildFileGenerator::TargetExport> targets;
@@ -304,7 +305,7 @@ static bool HandleExportMode(std::vector<std::string> const& args,
   } else {
     // Interpret relative paths with respect to the current build dir.
     std::string const& dir = mf.GetCurrentBinaryDirectory();
-    fname = dir + "/" + fname;
+    fname = cmStrCat(dir, '/', fname);
   }
 
   if (gg->GetExportedTargetsFile(fname)) {
@@ -414,8 +415,8 @@ static bool HandleSetupMode(std::vector<std::string> const& args,
         cmMakeRange(packageDependencyArgs).advance(1), &unknownArgs);
 
     if (!unknownArgs.empty()) {
-      status.SetError("PACKAGE_DEPENDENCY given unknown argument: \"" +
-                      unknownArgs.front() + "\".");
+      status.SetError(cmStrCat("PACKAGE_DEPENDENCY given unknown argument: \"",
+                               unknownArgs.front(), "\"."));
       return false;
     }
     auto& packageDependency =
@@ -457,8 +458,8 @@ static bool HandleSetupMode(std::vector<std::string> const& args,
       targetParser.Parse(cmMakeRange(targetArgs).advance(1), &unknownArgs);
 
     if (!unknownArgs.empty()) {
-      status.SetError("TARGET given unknown argument: \"" +
-                      unknownArgs.front() + "\".");
+      status.SetError(cmStrCat("TARGET given unknown argument: \"",
+                               unknownArgs.front(), "\"."));
       return false;
     }
     exportSet.SetXcFrameworkLocation(targetArgs.front(),

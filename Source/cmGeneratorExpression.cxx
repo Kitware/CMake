@@ -382,7 +382,7 @@ void cmGeneratorExpression::Split(std::string const& input,
       }
     }
     std::string::size_type const traversed = (c - cStart) + 1;
-    output.push_back(preGenex + "$<" + input.substr(pos, traversed));
+    output.push_back(cmStrCat(preGenex, "$<", input.substr(pos, traversed)));
     pos += traversed;
     lastPos = pos;
   }

@@ -185,9 +185,8 @@ void cmExtraCodeLiteGenerator::CreateProjectFile(
 {
   std::string const& outputDir = lgs[0]->GetCurrentBinaryDirectory();
   std::string projectName = lgs[0]->GetProjectName();
-  std::string filename = outputDir + "/";
+  std::string filename = cmStrCat(outputDir, '/', projectName, ".project");
 
-  filename += projectName + ".project";
   this->CreateNewProjectFile(lgs, filename);
 }
 
@@ -661,8 +660,8 @@ std::string cmExtraCodeLiteGenerator::GetCleanCommand(
 std::string cmExtraCodeLiteGenerator::GetRebuildCommand(
   cmMakefile const* mf, std::string const& targetName) const
 {
-  return this->GetCleanCommand(mf, targetName) + " && " +
-    this->GetBuildCommand(mf, targetName);
+  return cmStrCat(this->GetCleanCommand(mf, targetName), " && ",
+                  this->GetBuildCommand(mf, targetName));
 }
 
 std::string cmExtraCodeLiteGenerator::GetSingleFileBuildCommand(

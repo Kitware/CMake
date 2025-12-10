@@ -127,7 +127,7 @@ std::shared_ptr<cmDebuggerVariables> cmDebuggerVariablesHelper::CreateIfAny(
       ret.reserve(values.size());
       int i = 0;
       for (std::string const& value : values) {
-        ret.emplace_back("[" + std::to_string(i++) + "]", value);
+        ret.emplace_back(cmStrCat('[', i++, ']'), value);
       }
       return ret;
     });
@@ -151,7 +151,7 @@ std::shared_ptr<cmDebuggerVariables> cmDebuggerVariablesHelper::CreateIfAny(
       ret.reserve(values.size());
       int i = 0;
       for (std::string const& value : values) {
-        ret.emplace_back("[" + std::to_string(i++) + "]", value);
+        ret.emplace_back(cmStrCat('[', i++, ']'), value);
       }
       return ret;
     });
@@ -176,7 +176,7 @@ std::shared_ptr<cmDebuggerVariables> cmDebuggerVariablesHelper::CreateIfAny(
       ret.reserve(list.size());
       int i = 0;
       for (auto const& item : list) {
-        ret.emplace_back("[" + std::to_string(i++) + "]", item.Value);
+        ret.emplace_back(cmStrCat('[', i++, ']'), item.Value);
       }
 
       return ret;
@@ -426,8 +426,8 @@ std::shared_ptr<cmDebuggerVariables> cmDebuggerVariablesHelper::Create(
   for (auto const& key : keys) {
     auto entry = std::make_shared<cmDebuggerVariables>(
       variablesManager,
-      key + ":" +
-        cmState::CacheEntryTypeToString(state->GetCacheEntryType(key)),
+      cmStrCat(key, ':',
+               cmState::CacheEntryTypeToString(state->GetCacheEntryType(key))),
       supportsVariableType, [=]() {
         std::vector<cmDebuggerVariableEntry> ret;
         auto properties = state->GetCacheEntryPropertyList(key);

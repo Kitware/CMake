@@ -734,7 +734,8 @@ bool cmake::SetCacheArgs(std::vector<std::string> const& args)
           cmSystemTools::Error("No file name specified for -C");
           return false;
         }
-        cmSystemTools::Stdout("loading initial cache file " + value + "\n");
+        cmSystemTools::Stdout(
+          cmStrCat("loading initial cache file ", value, '\n'));
         // Resolve script path specified on command line
         // relative to $PWD.
         auto path = cmSystemTools::ToNormalizedPathOnDisk(value);
@@ -1986,10 +1987,10 @@ int cmake::AddCMakePaths()
         (cmSystemTools::GetCMakeRoot() + "/Modules/CMake.cmake"))) {
     // couldn't find modules
     cmSystemTools::Error(
-      "Could not find CMAKE_ROOT !!!\n"
-      "CMake has most likely not been installed correctly.\n"
-      "Modules directory not found in\n" +
-      cmSystemTools::GetCMakeRoot());
+      cmStrCat("Could not find CMAKE_ROOT !!!\n"
+               "CMake has most likely not been installed correctly.\n"
+               "Modules directory not found in\n",
+               cmSystemTools::GetCMakeRoot()));
     return 0;
   }
   this->AddCacheEntry("CMAKE_ROOT", cmSystemTools::GetCMakeRoot(),
@@ -4028,8 +4029,9 @@ int cmake::Build(int jobs, std::string dir, std::vector<std::string> targets,
   // actually starting the build. If not done separately from the build
   // itself, there is the risk of building an out-of-date solution file due
   // to limitations of the underlying build system.
-  std::string const stampList = cachePath + "/" + "CMakeFiles/" +
-    cmGlobalVisualStudio14Generator::GetGenerateStampList();
+  std::string const stampList =
+    cmStrCat(cachePath, "/CMakeFiles/",
+             cmGlobalVisualStudio14Generator::GetGenerateStampList());
 
   // Note that the stampList file only exists for VS generators.
   if (cmSystemTools::FileExists(stampList) &&

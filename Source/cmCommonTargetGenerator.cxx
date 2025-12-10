@@ -275,8 +275,8 @@ std::string cmCommonTargetGenerator::GetManifests(std::string const& config)
   manifests.reserve(manifest_srcs.size());
 
   std::string lang = this->GeneratorTarget->GetLinkerLanguage(config);
-  std::string manifestFlag =
-    this->Makefile->GetDefinition("CMAKE_" + lang + "_LINKER_MANIFEST_FLAG");
+  std::string manifestFlag = this->Makefile->GetDefinition(
+    cmStrCat("CMAKE_", lang, "_LINKER_MANIFEST_FLAG"));
   for (cmSourceFile const* manifest_src : manifest_srcs) {
     manifests.push_back(manifestFlag +
                         this->LocalCommonGenerator->ConvertToOutputFormat(
@@ -425,7 +425,7 @@ std::string cmCommonTargetGenerator::GenerateCodeCheckRules(
     if (cmNonempty(tidy)) {
       code_check += " --tidy=";
       cmValue const p = this->Makefile->GetDefinition(
-        "CMAKE_" + lang + "_CLANG_TIDY_DRIVER_MODE");
+        cmStrCat("CMAKE_", lang, "_CLANG_TIDY_DRIVER_MODE"));
       std::string driverMode;
       if (cmNonempty(p)) {
         driverMode = *p;

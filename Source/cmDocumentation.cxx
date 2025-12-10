@@ -479,7 +479,7 @@ bool cmDocumentation::PrintHelpOneManual(std::ostream& os)
   std::string mname = this->CurrentArgument;
   std::string::size_type mlen = mname.length();
   if (mlen > 3 && mname[mlen - 3] == '(' && mname[mlen - 1] == ')') {
-    mname = mname.substr(0, mlen - 3) + "." + mname[mlen - 2];
+    mname = cmStrCat(mname.substr(0, mlen - 3), '.', mname[mlen - 2]);
   }
   if (this->PrintFiles(os, cmStrCat("manual/", mname)) ||
       this->PrintFiles(os, cmStrCat("manual/", mname, ".[0-9]"))) {

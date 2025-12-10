@@ -455,7 +455,7 @@ bool cmFileInstaller::HandleInstallDestination()
     }
     if (!cmSystemTools::FileIsDirectory(destination)) {
       std::string errstring =
-        "INSTALL destination: " + destination + " is not a directory.";
+        cmStrCat("INSTALL destination: ", destination, " is not a directory.");
       this->Status.SetError(errstring);
       return false;
     }

@@ -86,7 +86,7 @@ std::size_t collectPathsForDebug(std::string& buffer,
     return 0;
   }
   for (auto i = startIndex; i < paths.size(); i++) {
-    buffer += "  " + paths[i].Path + "\n";
+    buffer += cmStrCat("  ", paths[i].Path, '\n');
   }
   return paths.size();
 }

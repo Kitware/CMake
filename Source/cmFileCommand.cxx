@@ -93,8 +93,8 @@ bool HandleWriteImpl(std::vector<std::string> const& args, bool append,
   i++;
 
   if (!status.GetMakefile().CanIWriteThisFile(fileName)) {
-    std::string e =
-      "attempted to write a file: " + fileName + " into a source directory.";
+    std::string e = cmStrCat("attempted to write a file: ", fileName,
+                             " into a source directory.");
     status.SetError(e);
     cmSystemTools::SetFatalErrorOccurred();
     return false;
@@ -770,13 +770,13 @@ bool HandleGlobImpl(std::vector<std::string> const& args, bool recurse,
           if (globMessage.type == cmsys::Glob::cyclicRecursion) {
             status.GetMakefile().IssueMessage(
               MessageType::AUTHOR_WARNING,
-              "Cyclic recursion detected while globbing for '" + *i + "':\n" +
-                globMessage.content);
+              cmStrCat("Cyclic recursion detected while globbing for '", *i,
+                       "':\n", globMessage.content));
           } else if (globMessage.type == cmsys::Glob::error) {
             status.GetMakefile().IssueMessage(
               MessageType::FATAL_ERROR,
-              "Error has occurred while globbing for '" + *i + "' - " +
-                globMessage.content);
+              cmStrCat("Error has occurred while globbing for '", *i, "' - ",
+                       globMessage.content));
             shouldExit = true;
           } else if (cm->GetDebugOutput() || cm->GetTrace()) {
             status.GetMakefile().IssueMessage(
@@ -929,8 +929,8 @@ bool HandleTouchImpl(std::vector<std::string> const& args, bool create,
         cmStrCat(status.GetMakefile().GetCurrentSourceDirectory(), '/', arg);
     }
     if (!status.GetMakefile().CanIWriteThisFile(tfile)) {
-      std::string e =
-        "attempted to touch a file: " + tfile + " in a source directory.";
+      std::string e = cmStrCat("attempted to touch a file: ", tfile,
+                               " in a source directory.");
       status.SetError(e);
       cmSystemTools::SetFatalErrorOccurred();
       return false;
@@ -3106,8 +3106,9 @@ bool HandleTimestampCommand(std::vector<std::string> const& args,
     if (args[argsIndex] == "UTC") {
       utcFlag = true;
     } else {
-      std::string e = " TIMESTAMP sub-command does not recognize option " +
-        args[argsIndex] + ".";
+      std::string e =
+        cmStrCat(" TIMESTAMP sub-command does not recognize option ",
+                 args[argsIndex], '.');
       status.SetError(e);
       return false;
     }
@@ -3227,7 +3228,8 @@ bool HandleCreateLinkCommand(std::vector<std::string> const& args,
   if (!arguments.Symbolic &&
       (!cmSystemTools::PathExists(fileName) ||
        (cmp0205 != cmPolicies::NEW && !cmSystemTools::FileExists(fileName)))) {
-    result = "Cannot hard link \'" + fileName + "\' as it does not exist.";
+    result =
+      cmStrCat("Cannot hard link \'", fileName, "\' as it does not exist.");
     if (!arguments.Result.empty()) {
       status.GetMakefile().AddDefinition(arguments.Result, result);
       return true;
@@ -3469,7 +3471,7 @@ bool HandleGetRuntimeDependenciesCommand(std::vector<std::string> const& args,
       deps.push_back(firstPath);
       if (!parsedArgs.RPathPrefix.empty()) {
         status.GetMakefile().AddDefinition(
-          parsedArgs.RPathPrefix + "_" + firstPath,
+          cmStrCat(parsedArgs.RPathPrefix, '_', firstPath),
           cmList::to_string(archive.GetRPaths().at(firstPath)));
       }
     } else if (!parsedArgs.ConflictingDependenciesPrefix.empty()) {
@@ -3477,7 +3479,7 @@ bool HandleGetRuntimeDependenciesCommand(std::vector<std::string> const& args,
       std::vector<std::string> paths;
       paths.insert(paths.begin(), val.second.begin(), val.second.end());
       std::string varName =
-        parsedArgs.ConflictingDependenciesPrefix + "_" + val.first;
+        cmStrCat(parsedArgs.ConflictingDependenciesPrefix, '_', val.first);
       std::string pathsStr = cmList::to_string(paths);
       status.GetMakefile().AddDefinition(varName, pathsStr);
     } else {

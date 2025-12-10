@@ -157,11 +157,11 @@ void cmExportInstallCMakeConfigGenerator::GenerateImportPrefix(
   } else {
     // Add code to compute the installation prefix relative to the
     // import file location.
-    std::string absDest = installPrefix + "/" + expDest;
-    std::string absDestS = absDest + "/";
+    std::string absDest = cmStrCat(installPrefix, '/', expDest);
+    std::string absDestS = absDest + '/';
     os << "# Compute the installation prefix relative to this file.\n"
-       << "get_filename_component(_IMPORT_PREFIX"
-       << " \"${CMAKE_CURRENT_LIST_FILE}\" PATH)\n";
+          "get_filename_component(_IMPORT_PREFIX"
+          " \"${CMAKE_CURRENT_LIST_FILE}\" PATH)\n";
     if (cmHasLiteralPrefix(absDestS, "/lib/") ||
         cmHasLiteralPrefix(absDestS, "/lib64/") ||
         cmHasLiteralPrefix(absDestS, "/libx32/") ||
@@ -189,9 +189,9 @@ void cmExportInstallCMakeConfigGenerator::GenerateImportPrefix(
       dest = cmSystemTools::GetFilenamePath(dest);
     }
     os << "if(_IMPORT_PREFIX STREQUAL \"/\")\n"
-       << "  set(_IMPORT_PREFIX \"\")\n"
-       << "endif()\n"
-       << "\n";
+          "  set(_IMPORT_PREFIX \"\")\n"
+          "endif()\n"
+          "\n";
   }
 }
 
@@ -200,8 +200,8 @@ void cmExportInstallCMakeConfigGenerator::CleanupTemporaryVariables(
 {
   /* clang-format off */
   os << "# Cleanup temporary variables.\n"
-     << "set(_IMPORT_PREFIX)\n"
-     << "\n";
+        "set(_IMPORT_PREFIX)\n"
+        "\n";
   /* clang-format on */
 }
 
@@ -210,14 +210,14 @@ void cmExportInstallCMakeConfigGenerator::LoadConfigFiles(std::ostream& os)
   // Now load per-configuration properties for them.
   /* clang-format off */
   os << "# Load information for each installed configuration.\n"
-     << "file(GLOB _cmake_config_files \"${CMAKE_CURRENT_LIST_DIR}/"
-     << this->GetConfigImportFileGlob() << "\")\n"
-     << "foreach(_cmake_config_file IN LISTS _cmake_config_files)\n"
-     << "  include(\"${_cmake_config_file}\")\n"
-     << "endforeach()\n"
-     << "unset(_cmake_config_file)\n"
-     << "unset(_cmake_config_files)\n"
-     << "\n";
+        "file(GLOB _cmake_config_files \"${CMAKE_CURRENT_LIST_DIR}/"
+        << this->GetConfigImportFileGlob() << "\")\n"
+        "foreach(_cmake_config_file IN LISTS _cmake_config_files)\n"
+        "  include(\"${_cmake_config_file}\")\n"
+        "endforeach()\n"
+        "unset(_cmake_config_file)\n"
+        "unset(_cmake_config_files)\n"
+        "\n";
   /* clang-format on */
 }
 

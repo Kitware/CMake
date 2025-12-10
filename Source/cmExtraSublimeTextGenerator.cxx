@@ -87,7 +87,7 @@ void cmExtraSublimeTextGenerator::CreateProjectFile(
   std::string projectName = lgs[0]->GetProjectName();
 
   std::string const filename =
-    outputDir + "/" + projectName + ".sublime-project";
+    cmStrCat(outputDir, '/', projectName, ".sublime-project");
 
   this->CreateNewProjectFile(lgs, filename);
 }
@@ -456,7 +456,8 @@ bool cmExtraSublimeTextGenerator::Open(std::string const& bindir,
     return false;
   }
 
-  std::string filename = bindir + "/" + projectName + ".sublime-project";
+  std::string filename =
+    cmStrCat(bindir, '/', projectName, ".sublime-project");
   if (dryRun) {
     return cmSystemTools::FileExists(filename, true);
   }
