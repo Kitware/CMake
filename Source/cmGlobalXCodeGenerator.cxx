@@ -2856,8 +2856,9 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
       buildSettings->AddAttribute("LIBRARY_STYLE",
                                   this->CreateString("BUNDLE"));
       // Add the flags to create a module library (bundle).
-      std::string createFlags = this->LookupFlags(
-        "CMAKE_SHARED_MODULE_CREATE_", llang, "_FLAGS", gtgt);
+      std::string createFlags;
+      this->CurrentLocalGenerator->AppendTargetCreationLinkFlags(createFlags,
+                                                                 gtgt, llang);
       if (this->GetTargetProductType(gtgt) !=
           "com.apple.product-type.app-extension"_s) {
         // Xcode passes -bundle automatically.
@@ -2912,8 +2913,9 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
                                     this->CreateString(plist));
       } else {
         // Add the flags to create a shared library.
-        std::string createFlags = this->LookupFlags(
-          "CMAKE_SHARED_LIBRARY_CREATE_", llang, "_FLAGS", gtgt);
+        std::string createFlags;
+        this->CurrentLocalGenerator->AppendTargetCreationLinkFlags(
+          createFlags, gtgt, llang);
         // Xcode passes -dynamiclib automatically.
         cmSystemTools::ReplaceString(createFlags, "-dynamiclib", "");
         createFlags = cmTrimWhitespace(createFlags);
@@ -2935,8 +2937,9 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
     }
     case cmStateEnums::EXECUTABLE: {
       // Add the flags to create an executable.
-      std::string createFlags =
-        this->LookupFlags("CMAKE_", llang, "_LINK_FLAGS", gtgt);
+      std::string createFlags;
+      this->CurrentLocalGenerator->AppendTargetCreationLinkFlags(createFlags,
+                                                                 gtgt, llang);
       if (!createFlags.empty()) {
         extraLinkOptions += ' ';
         extraLinkOptions += createFlags;
