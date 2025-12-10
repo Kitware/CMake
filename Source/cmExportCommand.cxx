@@ -210,10 +210,10 @@ static bool HandleTargetsMode(std::vector<std::string> const& args,
 static bool HandleExportMode(std::vector<std::string> const& args,
                              cmExecutionStatus& status)
 {
-  struct ExportArguments
+  struct ExportArguments : public ArgumentParser::ParseResult
   {
     ArgumentParser::NonEmpty<std::string> ExportSetName;
-    ArgumentParser::NonEmpty<std::string> Namespace;
+    ArgumentParser::MaybeEmpty<std::string> Namespace;
     ArgumentParser::NonEmpty<std::string> Filename;
     ArgumentParser::NonEmpty<std::string> CxxModulesDirectory;
     cm::optional<cmPackageInfoArguments> PackageInfo;
@@ -249,12 +249,23 @@ static bool HandleExportMode(std::vector<std::string> const& args,
   cmMakefile& mf = status.GetMakefile();
   cmGlobalGenerator* gg = mf.GetGlobalGenerator();
 
-  if (arguments.PackageInfo) {
-    if (arguments.PackageInfo->PackageName.empty()) {
-      // TODO: Fix our use of the parser to enforce this.
-      status.SetError("PACKAGE_INFO missing required value.");
+  if (!arguments.Check(args[0], &unknownArgs, status)) {
+    cmPolicies::PolicyStatus const p =
+      status.GetMakefile().GetPolicyStatus(cmPolicies::CMP0208);
+    if (arguments.PackageInfo || !unknownArgs.empty() ||
+        p == cmPolicies::NEW) {
       return false;
     }
+    if (p == cmPolicies::WARN) {
+      status.GetMakefile().IssueMessage(
+        MessageType::AUTHOR_WARNING, cmStrCat("export "_s, status.GetError()));
+      status.GetMakefile().IssueMessage(
+        MessageType::AUTHOR_WARNING,
+        cmPolicies::GetPolicyWarning(cmPolicies::CMP0208));
+    }
+  }
+
+  if (arguments.PackageInfo) {
     if (!arguments.Filename.empty()) {
       status.SetError("PACKAGE_INFO and FILE are mutually exclusive.");
       return false;
@@ -267,12 +278,6 @@ static bool HandleExportMode(std::vector<std::string> const& args,
         !arguments.PackageInfo->SetMetadataFromProject(status)) {
       return false;
     }
-  }
-
-  if (!unknownArgs.empty()) {
-    status.SetError("EXPORT given unknown argument: \"" + unknownArgs.front() +
-                    "\".");
-    return false;
   }
 
   std::string fname;

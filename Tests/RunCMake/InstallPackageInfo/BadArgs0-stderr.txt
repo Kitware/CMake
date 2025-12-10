@@ -1,22 +1,28 @@
-CMake Error at BadArgs0\.cmake:1 \(install\):
-  install PACKAGE_INFO missing package name\.
+CMake Error at BadArgs0\.cmake:[0-9]+ \(install\):
+  install PACKAGE_INFO given invalid argument:
+
+    PACKAGE_INFO: missing required value
 Call Stack \(most recent call first\):
   CMakeLists\.txt:3 \(include\)
 
 
-CMake Error at BadArgs0\.cmake:2 \(install\):
+CMake Error at BadArgs0\.cmake:[0-9]+ \(install\):
   install PACKAGE_INFO missing EXPORT\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:3 \(include\)
 
 
-CMake Error at BadArgs0\.cmake:3 \(install\):
-  install PACKAGE_INFO missing EXPORT\.
+CMake Error at BadArgs0\.cmake:[0-9]+ \(install\):
+  install PACKAGE_INFO given invalid argument:
+
+    EXPORT: missing required value
 Call Stack \(most recent call first\):
   CMakeLists\.txt:3 \(include\)
 
 
-CMake Error at BadArgs0\.cmake:7 \(install\):
-  install PACKAGE_INFO missing package name\.
+CMake Error at BadArgs0\.cmake:[0-9]+ \(install\):
+  install PACKAGE_INFO given invalid argument:
+
+    PACKAGE_INFO: missing required value
 Call Stack \(most recent call first\):
   CMakeLists\.txt:3 \(include\)

@@ -1,6 +1,7 @@
 CMake Error at CacheWrongTYPE\.cmake:[0-9]+ \(set\):
   Error after keyword "TYPE":
 
-  Invalid value: FOO\.
+    invalid value: "FOO"
+
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)

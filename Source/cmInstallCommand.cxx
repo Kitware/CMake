@@ -2340,22 +2340,13 @@ bool HandlePackageInfoMode(std::vector<std::string> const& args,
   // ica.Bind("CXX_MODULES_DIRECTORY"_s, cxxModulesDirectory); TODO?
 
   std::vector<std::string> unknownArgs;
-  ica.Parse(args, &unknownArgs);
+  ArgumentParser::ParseResult result = ica.Parse(args, &unknownArgs);
 
-  if (!unknownArgs.empty()) {
-    // Unknown argument.
-    status.SetError(
-      cmStrCat(args[0], " given unknown argument \"", unknownArgs[0], "\"."));
+  if (!result.Check(args[0], &unknownArgs, status)) {
     return false;
   }
 
   if (!ica.Finalize()) {
-    return false;
-  }
-
-  if (arguments.PackageName.empty()) {
-    // TODO: Fix our use of the parser to enforce this.
-    status.SetError(cmStrCat(args[0], " missing package name."));
     return false;
   }
 

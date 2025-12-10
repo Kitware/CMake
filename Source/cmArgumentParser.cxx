@@ -5,6 +5,7 @@
 #include <algorithm>
 
 #include "cmArgumentParserTypes.h"
+#include "cmExecutionStatus.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmStringAlgorithms.h"
@@ -63,6 +64,16 @@ void Instance::Bind(bool& val)
 }
 
 void Instance::Bind(std::string& val)
+{
+  this->Bind(
+    [&val](cm::string_view arg) -> Continue {
+      val = std::string(arg);
+      return Continue::No;
+    },
+    ExpectAtLeast{ 1 });
+}
+
+void Instance::Bind(MaybeEmpty<std::string>& val)
 {
   this->Bind(
     [&val](cm::string_view arg) -> Continue {
@@ -204,10 +215,40 @@ bool ParseResult::MaybeReportError(cmMakefile& mf) const
     return false;
   }
   std::string e;
-  for (auto const& ke : this->KeywordErrors) {
-    e = cmStrCat(e, "Error after keyword \"", ke.first, "\":\n", ke.second);
+  for (auto const& kel : this->KeywordErrors) {
+    e = cmStrCat(e, "Error after keyword \"", kel.first, "\":\n");
+    for (auto const& ke : kel.second) {
+      e += ke;
+    }
   }
   mf.IssueMessage(MessageType::FATAL_ERROR, e);
+  return true;
+}
+
+bool ParseResult::Check(cm::string_view context,
+                        std::vector<std::string> const* unparsedArguments,
+                        cmExecutionStatus& status) const
+{
+  if (unparsedArguments && !unparsedArguments->empty()) {
+    status.SetError(cmStrCat(context, " given unknown argument: \""_s,
+                             unparsedArguments->front(), "\"."_s));
+    return false;
+  }
+
+  if (!this->KeywordErrors.empty()) {
+    std::string msg = cmStrCat(
+      context, (context.empty() ? ""_s : " "_s), "given invalid "_s,
+      (this->KeywordErrors.size() > 1 ? "arguments:"_s : "argument:"_s));
+    for (auto const& kel : this->KeywordErrors) {
+      for (auto const& ke : kel.second) {
+        msg =
+          cmStrCat(msg, "\n  "_s, kel.first, ": "_s, cmStripWhitespace(ke));
+      }
+    }
+    status.SetError(msg);
+    return false;
+  }
+
   return true;
 }
 

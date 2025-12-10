@@ -38,6 +38,24 @@ std::string cmTrimWhitespace(cm::string_view str)
   return std::string(start, stop + 1);
 }
 
+cm::string_view cmStripWhitespace(cm::string_view str)
+{
+  std::string::size_type const l = str.size();
+
+  std::string::size_type s = 0;
+  while (s < l && cmIsSpace(str[s])) {
+    ++s;
+  }
+  if (s == l) {
+    return cm::string_view{};
+  }
+  std::string::size_type e = l - 1;
+  while (cmIsSpace(str[e])) {
+    --e;
+  }
+  return str.substr(s, e + 1 - s);
+}
+
 std::string cmRemoveQuotes(cm::string_view str)
 {
   // We process only strings that have two quotes at least.
