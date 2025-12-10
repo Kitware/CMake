@@ -6,6 +6,7 @@
 .editorconfig    export-ignore
 .pre-commit-config.yaml export-ignore
 .typos.toml      export-ignore
+sgconfig.yml     export-ignore
 
 # Custom attribute to mark sources as using our C code style.
 [attr]our-c-style  whitespace=tab-in-indent  format.clang-format=18
