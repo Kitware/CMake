@@ -2027,9 +2027,23 @@ bool cmQtAutoGenInitializer::SetupWriteAutogenInfo()
       this->GenTarget->Makefile->GetSafeDefinition(CompileOptionFlag);
 
     if (!CompileOptionValue.empty()) {
-      if (this->Moc.PredefsCmd.size() >= 3) {
-        this->Moc.PredefsCmd.insert(this->Moc.PredefsCmd.begin() + 1,
-                                    CompileOptionValue);
+      // Determine where to insert the compile option (e.g., -std=gnu++23).
+      // CMAKE_CXX_COMPILER_PREDEFINES_COMMAND is built as:
+      //   [CMAKE_CXX_COMPILER, CMAKE_CXX_COMPILER_ARG1, predefs_flags...]
+      // We need to insert after all compiler elements, before predefs flags.
+      size_t compilerElements = 1; // CMAKE_CXX_COMPILER
+
+      cmValue compilerArg1 =
+        this->Makefile->GetDefinition("CMAKE_CXX_COMPILER_ARG1");
+      if (compilerArg1 && !compilerArg1->empty()) {
+        std::vector<std::string> arg1List;
+        cmSystemTools::ParseUnixCommandLine(compilerArg1->c_str(), arg1List);
+        compilerElements += arg1List.size();
+      }
+
+      if (this->Moc.PredefsCmd.size() > compilerElements) {
+        this->Moc.PredefsCmd.insert(
+          this->Moc.PredefsCmd.begin() + compilerElements, CompileOptionValue);
       }
     }
     info.SetArray("MOC_PREDEFS_CMD", this->Moc.PredefsCmd);
