@@ -25,25 +25,21 @@ foreach(_ticlang_toolchain_path IN LISTS _ticlang_toolchains)
   message(STATUS "Found TIClang toolchain: ${_ticlang_toolchain}")
 
   if(_ticlang_toolchain MATCHES "tiarmclang")
-    set(LINK_OPTS "--use_memcpy=fast,--use_memset=fast,-llnk.cmd")
     set(CMAKE_FLAGS "-mcpu=cortex-r5 -Oz")
   else()
     set(CMAKE_FLAGS "")
-    set(LINK_OPTS "")
   endif()
 
   run_toolchain(ticlang-c
     -DCMAKE_SYSTEM_NAME=Generic
     -DCMAKE_C_COMPILER=${_ticlang_toolchain}
     -DCMAKE_C_FLAGS=${CMAKE_FLAGS}
-    -DCMAKE_C_LINKER_FLAGS=${LINK_OPTS}
   )
 
   run_toolchain(ticlang-cxx
     -DCMAKE_SYSTEM_NAME=Generic
     -DCMAKE_CXX_COMPILER=${_ticlang_toolchain}
     -DCMAKE_CXX_FLAGS=${CMAKE_FLAGS}
-    -DCMAKE_CXX_LINKER_FLAGS=${LINK_OPTS}
   )
 
   run_toolchain(ticlang-asm
@@ -56,6 +52,5 @@ foreach(_ticlang_toolchain_path IN LISTS _ticlang_toolchains)
     -DCMAKE_SYSTEM_NAME=Generic
     -DCMAKE_C_COMPILER=${_ticlang_toolchain}
     -DCMAKE_C_FLAGS=${CMAKE_FLAGS}
-    -DCMAKE_C_LINKER_FLAGS=${LINK_OPTS}
   )
 endforeach()
