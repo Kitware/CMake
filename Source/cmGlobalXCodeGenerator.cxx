@@ -491,6 +491,37 @@ bool cmGlobalXCodeGenerator::ProcessGeneratorToolsetField(
   return false;
 }
 
+bool cmGlobalXCodeGenerator::ParseFixedAttributes(cm::string_view attribute, cm::string_view attributeValue)
+{
+      const auto lowerAtt = cmSystemTools::LowerCase(std::string{attribute});
+
+      const auto knownRegions = cm::string_view{"knownRegions"};
+      const auto known = cm::string_view{"known"};
+      const auto regions = cm::string_view{"regions"};
+      if (lowerAtt.find(known) != cm::string_view::npos && lowerAtt.find(regions) != cm::string_view::npos)
+      {
+        std::vector<std::string> regionsVec(cmTokenize(attributeValue, ','));
+        cmXCodeObject* allLangs = this->CreateObject(cmXCodeObject::OBJECT_LIST);
+        for (const auto& r : regionsVec) {
+          allLangs->AddObject(this->CreateString(cmTrimWhitespace(r)));
+        }
+        this->RootObject->AddAttribute(std::string{knownRegions}, allLangs);
+        return true;
+      }
+
+      const auto developmentRegion = cm::string_view{"developmentRegion"};
+      const auto development = cm::string_view{"development"};
+      const auto region = cm::string_view{"region"};
+      if (lowerAtt.find(development) != cm::string_view::npos && lowerAtt.find(region) != cm::string_view::npos)
+      {
+        this->RootObject->AddAttribute(
+          std::string{developmentRegion},
+          this->CreateString(cmTrimWhitespace(attributeValue)));
+        return true;
+      }
+      return false;
+    };
+
 void cmGlobalXCodeGenerator::EnableLanguage(
   std::vector<std::string> const& lang, cmMakefile* mf, bool optional)
 {
@@ -4734,6 +4765,11 @@ bool cmGlobalXCodeGenerator::CreateXCodeObjects(
   this->RootObject->AddAttribute("buildStyles", listObjs);
   this->RootObject->AddAttribute("hasScannedForEncodings",
                                  this->CreateString("0"));
+  cmXCodeObject* knownRegions = this->CreateObject(cmXCodeObject::OBJECT_LIST);
+  knownRegions->AddObject(this->CreateString("Base"));
+  knownRegions->AddObject(this->CreateString("en"));
+  knownRegions->AddObject(this->CreateString("de"));
+  this->RootObject->AddAttribute("knownRegions", knownRegions);
   group = this->CreateObject(cmXCodeObject::ATTRIBUTE_GROUP);
   group->AddAttribute("BuildIndependentTargetsInParallel",
                       this->CreateString("YES"));
@@ -4871,8 +4907,13 @@ bool cmGlobalXCodeGenerator::CreateXCodeObjects(
         std::string attribute = var.substr(22);
         this->FilterConfigurationAttribute(config.first, attribute);
         if (!attribute.empty()) {
+          const auto configValue = this->CurrentMakefile->GetSafeDefinition(var);
+          if (this->ParseFixedAttributes(attribute, configValue)) {
+            continue;
+          }
+
           std::string processed = cmGeneratorExpression::Evaluate(
-            this->CurrentMakefile->GetSafeDefinition(var),
+            configValue,
             this->CurrentLocalGenerator, config.first);
           buildSettingsForCfg->AddAttribute(attribute,
                                             this->CreateString(processed));
