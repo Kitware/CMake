@@ -447,13 +447,25 @@ Getting Started
 
 You will need to build the vendor library into a static archive to complete this
 exercise. Navigate to the ``Help/guide/tutorial/Step4/Vendor/lib`` directory
-and build the code as appropriate for your platform. On Unix-like operating
-systems the appropriate commands are usually:
+and build the code as appropriate for your platform.
+
+Typical commands for a GCC toolchain on Unix-like systems are:
 
 .. code-block:: console
 
-  g++ -c Vendors.cxx
+  g++ -c Vendor.cxx
   ar rvs libVendor.a Vendor.o
+
+Likewise, sample commands for an MSVC toolchain on Windows are:
+
+.. code-block:: console
+
+  cl -c Vendor.cxx
+  lib -out:Vendor.lib Vendor.obj
+
+Here, since you're directly invoking ``cl`` and ``lib``, make sure to use a
+Developer Command Prompt for your version of Visual Studio with the same
+target architecture used by this CMake project.
 
 Then complete ``TODO 11`` through ``TODO 14``.
 
