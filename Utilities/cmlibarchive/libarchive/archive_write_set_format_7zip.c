@@ -511,6 +511,11 @@ _7z_options(struct archive_write *a, const char *key, const char *value)
 				"compression-level option value `%ld' out of range", lvl);
 			return (ARCHIVE_FAILED);
 		}
+#ifdef _AIX
+		if (lvl > 6) {
+			lvl = 6;
+		}
+#endif
 
 		// Note: we don't know here if this value is for zstd (negative to ~22),
 		// or zlib-style 0-9. If zstd is enabled but not in use, we will need to
