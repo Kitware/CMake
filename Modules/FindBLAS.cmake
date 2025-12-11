@@ -1378,7 +1378,7 @@ if(BLA_VENDOR STREQUAL "NVPL" OR BLA_VENDOR STREQUAL "All")
   endif()
 
   if(NOT BLAS_LIBRARIES)
-    find_package(nvpl)
+    find_package(nvpl QUIET)
     if(nvpl_FOUND)
       foreach(_nvpl_thread IN LISTS _blas_nvpl_threads)
         foreach(_nvpl_int IN LISTS _blas_nvpl_ints)
