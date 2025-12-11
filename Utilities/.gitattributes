@@ -1,3 +1,4 @@
+/ast-grep               export-ignore
 /Git                    export-ignore
 /GitSetup               export-ignore
 SetupForDevelopment.sh  export-ignore
