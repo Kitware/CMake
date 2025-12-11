@@ -78,10 +78,6 @@ endif()
 add_subdirectory(Utilities/std)
 CMAKE_SET_TARGET_FOLDER(cmstd "Utilities/std")
 
-# check for the use of system libraries versus builtin ones
-# (a macro defined in this file)
-CMAKE_HANDLE_SYSTEM_LIBRARIES()
-
 if(CMAKE_USE_SYSTEM_KWIML)
   find_package(KWIML 1.0)
   if(NOT KWIML_FOUND)

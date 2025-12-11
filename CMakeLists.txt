@@ -44,6 +44,81 @@ if(NOT CMake_TEST_EXTERNAL_CMAKE)
   endif()
 
   set(CMake_BIN_DIR ${CMake_BINARY_DIR}/bin)
+
+  include(CMakeDependentOption)
+
+  # Allow the user to enable/disable all system utility library options by
+  # defining CMAKE_USE_SYSTEM_LIBRARIES or CMAKE_USE_SYSTEM_LIBRARY_${util}.
+  set(UTILITIES BZIP2 CPPDAP CURL EXPAT FORM JSONCPP LIBARCHIVE LIBLZMA LIBRHASH LIBUV NGHTTP2 ZLIB ZSTD)
+  foreach(util IN LISTS UTILITIES)
+    if(NOT DEFINED CMAKE_USE_SYSTEM_LIBRARY_${util}
+        AND DEFINED CMAKE_USE_SYSTEM_LIBRARIES)
+      set(CMAKE_USE_SYSTEM_LIBRARY_${util} "${CMAKE_USE_SYSTEM_LIBRARIES}")
+    endif()
+    if(DEFINED CMAKE_USE_SYSTEM_LIBRARY_${util})
+      if(CMAKE_USE_SYSTEM_LIBRARY_${util})
+        set(CMAKE_USE_SYSTEM_LIBRARY_${util} ON)
+      else()
+        set(CMAKE_USE_SYSTEM_LIBRARY_${util} OFF)
+      endif()
+      if(CMAKE_BOOTSTRAP)
+        unset(CMAKE_USE_SYSTEM_LIBRARY_${util} CACHE)
+      endif()
+      string(TOLOWER "${util}" lutil)
+      set(CMAKE_USE_SYSTEM_${util} "${CMAKE_USE_SYSTEM_LIBRARY_${util}}"
+        CACHE BOOL "Use system-installed ${lutil}" FORCE)
+    elseif(util STREQUAL "CURL" AND APPLE)
+      # macOS provides a curl with backends configured by Apple.
+      set(CMAKE_USE_SYSTEM_LIBRARY_${util} ON)
+    else()
+      set(CMAKE_USE_SYSTEM_LIBRARY_${util} OFF)
+    endif()
+  endforeach()
+  if(CMAKE_BOOTSTRAP)
+    unset(CMAKE_USE_SYSTEM_LIBRARIES CACHE)
+  endif()
+
+  # Optionally use system utility libraries.
+  option(CMAKE_USE_SYSTEM_LIBARCHIVE "Use system-installed libarchive" "${CMAKE_USE_SYSTEM_LIBRARY_LIBARCHIVE}")
+  if(CMake_ENABLE_DEBUGGER)
+    option(CMAKE_USE_SYSTEM_CPPDAP "Use system-installed cppdap" "${CMAKE_USE_SYSTEM_LIBRARY_CPPDAP}")
+  endif()
+  option(CMAKE_USE_SYSTEM_CURL "Use system-installed curl" "${CMAKE_USE_SYSTEM_LIBRARY_CURL}")
+  option(CMAKE_USE_SYSTEM_EXPAT "Use system-installed expat" "${CMAKE_USE_SYSTEM_LIBRARY_EXPAT}")
+  cmake_dependent_option(CMAKE_USE_SYSTEM_ZLIB "Use system-installed zlib"
+    "${CMAKE_USE_SYSTEM_LIBRARY_ZLIB}" "NOT CMAKE_USE_SYSTEM_LIBARCHIVE;NOT CMAKE_USE_SYSTEM_CURL" ON)
+  cmake_dependent_option(CMAKE_USE_SYSTEM_BZIP2 "Use system-installed bzip2"
+    "${CMAKE_USE_SYSTEM_LIBRARY_BZIP2}" "NOT CMAKE_USE_SYSTEM_LIBARCHIVE" ON)
+  cmake_dependent_option(CMAKE_USE_SYSTEM_ZSTD "Use system-installed zstd"
+    "${CMAKE_USE_SYSTEM_LIBRARY_ZSTD}" "NOT CMAKE_USE_SYSTEM_LIBARCHIVE" ON)
+  cmake_dependent_option(CMAKE_USE_SYSTEM_LIBLZMA "Use system-installed liblzma"
+    "${CMAKE_USE_SYSTEM_LIBRARY_LIBLZMA}" "NOT CMAKE_USE_SYSTEM_LIBARCHIVE" ON)
+  cmake_dependent_option(CMAKE_USE_SYSTEM_NGHTTP2 "Use system-installed nghttp2"
+    "${CMAKE_USE_SYSTEM_LIBRARY_NGHTTP2}" "NOT CMAKE_USE_SYSTEM_CURL" ON)
+  option(CMAKE_USE_SYSTEM_FORM "Use system-installed libform" "${CMAKE_USE_SYSTEM_LIBRARY_FORM}")
+  cmake_dependent_option(CMAKE_USE_SYSTEM_JSONCPP "Use system-installed jsoncpp"
+    "${CMAKE_USE_SYSTEM_LIBRARY_JSONCPP}" "NOT CMAKE_USE_SYSTEM_CPPDAP" ON)
+  option(CMAKE_USE_SYSTEM_LIBRHASH "Use system-installed librhash" "${CMAKE_USE_SYSTEM_LIBRARY_LIBRHASH}")
+  option(CMAKE_USE_SYSTEM_LIBUV "Use system-installed libuv" "${CMAKE_USE_SYSTEM_LIBRARY_LIBUV}")
+
+  # For now use system KWIML only if explicitly requested rather
+  # than activating via the general system libs options.
+  option(CMAKE_USE_SYSTEM_KWIML "Use system-installed KWIML" OFF)
+  mark_as_advanced(CMAKE_USE_SYSTEM_KWIML)
+
+  # Mention to the user what system libraries are being used.
+  if(CMAKE_USE_SYSTEM_CURL)
+    # Avoid messaging about curl-only dependencies.
+    list(REMOVE_ITEM UTILITIES NGHTTP2)
+  endif()
+  foreach(util IN LISTS UTILITIES ITEMS KWIML)
+    if(CMAKE_USE_SYSTEM_${util})
+      message(STATUS "Using system-installed ${util}")
+    endif()
+  endforeach()
+
+  # Inform utility library header wrappers whether to use system versions.
+  configure_file(Utilities/cmThirdParty.h.in Utilities/cmThirdParty.h @ONLY)
 endif()
 
 if(CMake_GUI_DISTRIBUTE_WITH_Qt_LGPL)
@@ -153,88 +228,6 @@ if(NOT CMake_TEST_EXTERNAL_CMAKE)
 else()
   set(CMake_ENABLE_DEBUGGER 0)
 endif()
-
-#-----------------------------------------------------------------------
-# a macro to deal with system libraries, implemented as a macro
-# simply to improve readability of the main script
-#-----------------------------------------------------------------------
-macro(CMAKE_HANDLE_SYSTEM_LIBRARIES)
-  include(CMakeDependentOption)
-
-  # Allow the user to enable/disable all system utility library options by
-  # defining CMAKE_USE_SYSTEM_LIBRARIES or CMAKE_USE_SYSTEM_LIBRARY_${util}.
-  set(UTILITIES BZIP2 CPPDAP CURL EXPAT FORM JSONCPP LIBARCHIVE LIBLZMA LIBRHASH LIBUV NGHTTP2 ZLIB ZSTD)
-  foreach(util IN LISTS UTILITIES)
-    if(NOT DEFINED CMAKE_USE_SYSTEM_LIBRARY_${util}
-        AND DEFINED CMAKE_USE_SYSTEM_LIBRARIES)
-      set(CMAKE_USE_SYSTEM_LIBRARY_${util} "${CMAKE_USE_SYSTEM_LIBRARIES}")
-    endif()
-    if(DEFINED CMAKE_USE_SYSTEM_LIBRARY_${util})
-      if(CMAKE_USE_SYSTEM_LIBRARY_${util})
-        set(CMAKE_USE_SYSTEM_LIBRARY_${util} ON)
-      else()
-        set(CMAKE_USE_SYSTEM_LIBRARY_${util} OFF)
-      endif()
-      if(CMAKE_BOOTSTRAP)
-        unset(CMAKE_USE_SYSTEM_LIBRARY_${util} CACHE)
-      endif()
-      string(TOLOWER "${util}" lutil)
-      set(CMAKE_USE_SYSTEM_${util} "${CMAKE_USE_SYSTEM_LIBRARY_${util}}"
-        CACHE BOOL "Use system-installed ${lutil}" FORCE)
-    elseif(util STREQUAL "CURL" AND APPLE)
-      # macOS provides a curl with backends configured by Apple.
-      set(CMAKE_USE_SYSTEM_LIBRARY_${util} ON)
-    else()
-      set(CMAKE_USE_SYSTEM_LIBRARY_${util} OFF)
-    endif()
-  endforeach()
-  if(CMAKE_BOOTSTRAP)
-    unset(CMAKE_USE_SYSTEM_LIBRARIES CACHE)
-  endif()
-
-  # Optionally use system utility libraries.
-  option(CMAKE_USE_SYSTEM_LIBARCHIVE "Use system-installed libarchive" "${CMAKE_USE_SYSTEM_LIBRARY_LIBARCHIVE}")
-  if(CMake_ENABLE_DEBUGGER)
-    option(CMAKE_USE_SYSTEM_CPPDAP "Use system-installed cppdap" "${CMAKE_USE_SYSTEM_LIBRARY_CPPDAP}")
-  endif()
-  option(CMAKE_USE_SYSTEM_CURL "Use system-installed curl" "${CMAKE_USE_SYSTEM_LIBRARY_CURL}")
-  option(CMAKE_USE_SYSTEM_EXPAT "Use system-installed expat" "${CMAKE_USE_SYSTEM_LIBRARY_EXPAT}")
-  cmake_dependent_option(CMAKE_USE_SYSTEM_ZLIB "Use system-installed zlib"
-    "${CMAKE_USE_SYSTEM_LIBRARY_ZLIB}" "NOT CMAKE_USE_SYSTEM_LIBARCHIVE;NOT CMAKE_USE_SYSTEM_CURL" ON)
-  cmake_dependent_option(CMAKE_USE_SYSTEM_BZIP2 "Use system-installed bzip2"
-    "${CMAKE_USE_SYSTEM_LIBRARY_BZIP2}" "NOT CMAKE_USE_SYSTEM_LIBARCHIVE" ON)
-  cmake_dependent_option(CMAKE_USE_SYSTEM_ZSTD "Use system-installed zstd"
-    "${CMAKE_USE_SYSTEM_LIBRARY_ZSTD}" "NOT CMAKE_USE_SYSTEM_LIBARCHIVE" ON)
-  cmake_dependent_option(CMAKE_USE_SYSTEM_LIBLZMA "Use system-installed liblzma"
-    "${CMAKE_USE_SYSTEM_LIBRARY_LIBLZMA}" "NOT CMAKE_USE_SYSTEM_LIBARCHIVE" ON)
-  cmake_dependent_option(CMAKE_USE_SYSTEM_NGHTTP2 "Use system-installed nghttp2"
-    "${CMAKE_USE_SYSTEM_LIBRARY_NGHTTP2}" "NOT CMAKE_USE_SYSTEM_CURL" ON)
-  option(CMAKE_USE_SYSTEM_FORM "Use system-installed libform" "${CMAKE_USE_SYSTEM_LIBRARY_FORM}")
-  cmake_dependent_option(CMAKE_USE_SYSTEM_JSONCPP "Use system-installed jsoncpp"
-    "${CMAKE_USE_SYSTEM_LIBRARY_JSONCPP}" "NOT CMAKE_USE_SYSTEM_CPPDAP" ON)
-  option(CMAKE_USE_SYSTEM_LIBRHASH "Use system-installed librhash" "${CMAKE_USE_SYSTEM_LIBRARY_LIBRHASH}")
-  option(CMAKE_USE_SYSTEM_LIBUV "Use system-installed libuv" "${CMAKE_USE_SYSTEM_LIBRARY_LIBUV}")
-
-  # For now use system KWIML only if explicitly requested rather
-  # than activating via the general system libs options.
-  option(CMAKE_USE_SYSTEM_KWIML "Use system-installed KWIML" OFF)
-  mark_as_advanced(CMAKE_USE_SYSTEM_KWIML)
-
-  # Mention to the user what system libraries are being used.
-  if(CMAKE_USE_SYSTEM_CURL)
-    # Avoid messaging about curl-only dependencies.
-    list(REMOVE_ITEM UTILITIES NGHTTP2)
-  endif()
-  foreach(util IN LISTS UTILITIES ITEMS KWIML)
-    if(CMAKE_USE_SYSTEM_${util})
-      message(STATUS "Using system-installed ${util}")
-    endif()
-  endforeach()
-
-  # Inform utility library header wrappers whether to use system versions.
-  configure_file(Utilities/cmThirdParty.h.in Utilities/cmThirdParty.h @ONLY)
-
-endmacro()
 
 #-----------------------------------------------------------------------
 # a macro to determine the generator and ctest executable to use
