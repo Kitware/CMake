@@ -68,8 +68,14 @@ endif()
 
 # Use 64-bit off_t on 32-bit Linux
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_SIZEOF_VOID_P EQUAL 4)
-  # ensure 64bit offsets are used for filesystem accesses for 32bit compilation
-  add_compile_definitions(_FILE_OFFSET_BITS=64 _TIME_BITS=64)
+  # Use 64-bit off_t even in 32-bit builds.
+  add_compile_definitions(_FILE_OFFSET_BITS=64)
+
+  # Use 64-bit time_t even in 32-bit builds.  Skip this with
+  # system libarchive because its ABI uses the default time_t.
+  if (NOT CMAKE_USE_SYSTEM_LIBARCHIVE)
+    add_compile_definitions(_TIME_BITS=64)
+  endif()
 endif()
 
 # Workaround for TOC Overflow on ppc64
