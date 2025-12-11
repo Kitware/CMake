@@ -750,7 +750,7 @@ if(NOT LAPACK_NOT_FOUND_MESSAGE)
       list(APPEND _lapack_nvpl_threads "_seq")
     endif()
 
-    find_package(nvpl)
+    find_package(nvpl QUIET)
     if(nvpl_FOUND)
       foreach(_nvpl_thread IN LISTS _lapack_nvpl_threads)
         foreach(_nvpl_int IN LISTS _lapack_nvpl_ints)
