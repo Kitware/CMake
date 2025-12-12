@@ -47,6 +47,13 @@ function(test_unparsed_version PACKAGE VERSION)
   test_version(${PACKAGE} "${VERSION}" 0 0 0 0 0)
 endfunction()
 
+function(test_global TARGET VALUE)
+  get_target_property(global "${TARGET}" IMPORTED_GLOBAL)
+  if((VALUE AND NOT global) OR (NOT VALUE AND global))
+    message(SEND_ERROR "${TARGET} has wrong IMPORTED_GLOBAL '${global}' !")
+  endif()
+endfunction()
+
 ###############################################################################
 # Test a basic package search.
 # It should NOT find the package's CMake package file.
@@ -172,6 +179,20 @@ else()
     message(SEND_ERROR "Foo::RelativeTest has wrong includes '${rt_includes}' !")
   endif()
   set(rt_includes)
+
+  test_global(Foo::Empty FALSE)
+endif()
+
+###############################################################################
+# Test importing into global scope.
+
+find_package(Global CONFIG GLOBAL)
+if(NOT Global_FOUND)
+  message(SEND_ERROR "Global not found !")
+elseif(NOT TARGET Global::Target)
+  message(SEND_ERROR "Global::Target missing !")
+else()
+  test_global(Foo::Empty FALSE)
 endif()
 
 ###############################################################################

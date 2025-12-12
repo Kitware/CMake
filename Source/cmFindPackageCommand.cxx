@@ -2238,7 +2238,7 @@ bool cmFindPackageCommand::ImportPackageTargets(cmPackageState& packageState,
   }
 
   // Import base file.
-  if (!reader.ImportTargets(this->Makefile, this->Status)) {
+  if (!reader.ImportTargets(this->Makefile, this->Status, this->GlobalScope)) {
     return false;
   }
 
