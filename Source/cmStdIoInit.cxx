@@ -93,19 +93,23 @@ public:
 
   Globals();
 
+#ifdef _WIN32
+  static BOOL WINAPI CtrlHandler(DWORD /*dwCtrlType*/)
+  {
+    Get().StdErr.Destroy();
+    Get().StdOut.Destroy();
+    Get().StdIn.Destroy();
+    return FALSE;
+  }
+#endif
+
   static Globals& Get();
 };
 
 #ifdef _WIN32
 Globals::Globals()
 {
-  static auto const ctrlHandler = [](DWORD /*dwCtrlType*/) -> BOOL {
-    Get().StdErr.Destroy();
-    Get().StdOut.Destroy();
-    Get().StdIn.Destroy();
-    return FALSE;
-  };
-  SetConsoleCtrlHandler(ctrlHandler, TRUE);
+  SetConsoleCtrlHandler(CtrlHandler, TRUE);
 }
 #else
 Globals::Globals() = default;
