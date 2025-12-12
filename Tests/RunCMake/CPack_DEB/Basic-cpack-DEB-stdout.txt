@@ -1,0 +1,8 @@
+CPack: Create package using DEB
+CPack: Install projects(
+CPack: - Run preinstall target for: Basic)?
+CPack: - Install project: Basic \[Release\]
+CPack: Create package
+-- CPACK_DEBIAN_PACKAGE_DEPENDS not set, the package will have no dependencies\.
+CPack: - package: [^
+]*/Tests/RunCMake/CPack_DEB/Basic-build/Basic-1\.2\.3-[A-Za-z]+\.deb generated\.

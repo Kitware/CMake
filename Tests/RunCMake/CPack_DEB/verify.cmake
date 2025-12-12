@@ -1,0 +1,4 @@
+message(STATUS "dpkg-deb --info")
+execute_process(COMMAND dpkg-deb --info ${CMAKE_ARGV4})
+message(STATUS "dpkg-deb --contents")
+execute_process(COMMAND dpkg-deb --contents ${CMAKE_ARGV4})
