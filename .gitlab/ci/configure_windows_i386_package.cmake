@@ -9,5 +9,7 @@ set(CMAKE_C_FLAGS "-D_WIN32_WINNT=0x0A00 -DNTDDI_VERSION=0x0A000000" CACHE STRIN
 set(CMAKE_CXX_FLAGS "-GR -EHsc -D_WIN32_WINNT=0x0A00 -DNTDDI_VERSION=0x0A000000" CACHE STRING "")
 set(CMAKE_EXE_LINKER_FLAGS "-machine:x86 -subsystem:console,6.02" CACHE STRING "")
 
-include("${CMAKE_CURRENT_LIST_DIR}/configure_windows_package_common_x86.cmake")
+set(qt "$ENV{CI_PROJECT_DIR}/.gitlab/qt")
+set(CMAKE_PREFIX_PATH "${qt}" CACHE STRING "")
+
 include("${CMAKE_CURRENT_LIST_DIR}/configure_windows_package_common.cmake")
