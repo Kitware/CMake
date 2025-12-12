@@ -1,1 +1,1 @@
-^tar: Unknown argument: q
+^tar: Unknown argument: q$

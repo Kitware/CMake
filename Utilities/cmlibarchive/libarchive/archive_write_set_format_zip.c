@@ -1365,6 +1365,11 @@ archive_write_zip_header(struct archive_write *a, struct archive_entry *entry)
 		int zstd_compression_level = zip->compression_level == 1
 			? ZSTD_minCLevel() // ZSTD_minCLevel is negative !
 			: (zip->compression_level - 1) * ZSTD_maxCLevel() / 8;
+#ifdef _AIX
+		if (zstd_compression_level > 6) {
+			zstd_compression_level = 6;
+		}
+#endif
 		zip->stream.zstd.context = ZSTD_createCStream();
 		size_t zret = ZSTD_initCStream(zip->stream.zstd.context, zstd_compression_level);
 		if (ZSTD_isError(zret)) {

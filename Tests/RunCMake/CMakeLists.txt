@@ -1071,6 +1071,9 @@ add_RunCMake_test(CommandLine -DLLVM_RC=$<TARGET_FILE:pseudo_llvm-rc> -DCMAKE_SY
                   -DCYGWIN=${CYGWIN} -DMSYS=${MSYS} -DPython_EXECUTABLE=${Python_EXECUTABLE}
                   -DEXIT_CODE_EXE=$<TARGET_FILE:exit_code>
                   -DPRINT_STDIN_EXE=$<TARGET_FILE:print_stdin>)
+if(CMake_TEST_LibArchive_VERSION)
+  list(APPEND CommandLineTar_ARGS -DCMake_TEST_LibArchive_VERSION=${CMake_TEST_LibArchive_VERSION})
+endif()
 add_RunCMake_test(CommandLineTar)
 
 if(CMAKE_PLATFORM_NO_VERSIONED_SONAME OR (NOT CMAKE_SHARED_LIBRARY_SONAME_FLAG AND NOT CMAKE_SHARED_LIBRARY_SONAME_C_FLAG))

@@ -1,1 +1,1 @@
-CMake Error: Unknown -E tar --format= argument: bad-format
+^CMake Error: Unknown -E tar --format= argument: bad-format$

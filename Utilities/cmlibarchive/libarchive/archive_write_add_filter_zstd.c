@@ -265,6 +265,11 @@ archive_compressor_zstd_options(struct archive_write_filter *f, const char *key,
 		if (level < minimum || level > maximum) {
 			return (ARCHIVE_WARN);
 		}
+#ifdef _AIX
+		if (level > 6) {
+			level = 6;
+		}
+#endif
 		data->compression_level = (int)level;
 		return (ARCHIVE_OK);
 	} else if (strcmp(key, "threads") == 0) {

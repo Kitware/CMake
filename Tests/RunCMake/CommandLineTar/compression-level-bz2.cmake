@@ -1,7 +1,7 @@
 set(OUTPUT_NAME "test.tar.bz2")
 
 set(COMPRESSION_FLAGS cvjf)
-set(COMPRESSION_OPTIONS --cmake-tar-threads=9)
+set(COMPRESSION_OPTIONS --cmake-tar-compression-level=9)
 
 set(DECOMPRESSION_FLAGS xvjf)
 
