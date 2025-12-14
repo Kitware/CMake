@@ -59,14 +59,14 @@ case "$1" in
 esac
 test "$#" = 0 || die "$usage"
 
-# Verify arguments.
-if test -z "$id" -o -z "$keychain_profile"; then
-    die "$usage"
-fi
-
 # Verify environment.
 if ! xcrun --find notarytool 2>/dev/null; then
     die "'xcrun notarytool' not found"
+fi
+
+# Verify arguments.
+if test -z "$id" -o -z "$keychain_profile"; then
+    die "$usage"
 fi
 
 readonly tmpdir="$(mktemp -d)"
