@@ -9,11 +9,13 @@ Options:
 
     -id <id>               Signing Identity
     -kp <keychain-profile> Keychain profile containing notarization credentials.
+    -kc <keychain-path>    Keychain path containing named profile.
 
 Create the keychain profile ahead of time using
 
     xcrun notarytool store-credentials <keychain-profile> \
-      --apple-id <dev-acct> --team-id <team-id> [--password <app-specific-password>]
+      --apple-id <dev-acct> --team-id <team-id> \
+      [--keychain <keychain-path>] [--password <app-specific-password>]
 
 where:
 
@@ -42,10 +44,12 @@ die() {
 }
 
 id=''
+keychain=''
 keychain_profile=''
 while test "$#" != 0; do
     case "$1" in
     -id|-i) shift; id="$1" ;;
+    -kc|--keychain) shift; keychain="$1" ;;
     -kp|-k|--keychain-profile) shift; keychain_profile="$1" ;;
     --) shift ; break ;;
     -*) die "$usage" ;;
@@ -107,7 +111,15 @@ codesign --verify --timestamp --options=runtime --verbose --force \
 ditto -c -k --keepParent "$vol_path/CMake.app" "$tmpdir/CMake.app.zip"
 
 # Notarize the application.
-xcrun notarytool submit "$tmpdir/CMake.app.zip" --keychain-profile "$keychain_profile" --wait
+notarize="xcrun notarytool submit '$tmpdir/CMake.app.zip'"
+if test -n "$keychain_profile"; then
+    notarize="$notarize --keychain-profile '$keychain_profile'"
+    if test -n "$keychain"; then
+        notarize="$notarize --keychain '$keychain'"
+    fi
+fi
+notarize="$notarize --wait"
+eval "$notarize"
 
 # Staple the notarization.
 xcrun stapler staple "$vol_path/CMake.app"
