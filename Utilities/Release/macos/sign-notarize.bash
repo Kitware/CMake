@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 set -e
-readonly usage='usage: sign-notarize.bash -i <id> -k <keychain-profile> [--] <package>.dmg
+readonly usage='usage: sign-notarize.bash <options>... [--] <package>.dmg
 
 Sign and notarize the "CMake.app" bundle inside the given "<package>.dmg" disk image.
 Also produce a "<package>.tar.gz" tarball containing the same "CMake.app".
 
 Options:
 
-    -i <id>                Signing Identity
-    -k <keychain-profile>  Keychain profile containing stored credentials
+    -id <id>               Signing Identity
+    -kp <keychain-profile> Keychain profile containing notarization credentials.
 
 Create the keychain profile ahead of time using
 
@@ -45,8 +45,8 @@ id=''
 keychain_profile=''
 while test "$#" != 0; do
     case "$1" in
-    -i) shift; id="$1" ;;
-    -k) shift; keychain_profile="$1" ;;
+    -id|-i) shift; id="$1" ;;
+    -kp|-k|--keychain-profile) shift; keychain_profile="$1" ;;
     --) shift ; break ;;
     -*) die "$usage" ;;
     *) break ;;
