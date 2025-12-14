@@ -22,7 +22,18 @@ endif()
 
 include(FortranCInterface)
 
-FortranCInterface_HEADER(VerifyFortran.h SYMBOLS VerifyFortran)
+if(CMAKE_Fortran_COMPILER_ID STREQUAL "LFortran")
+  FortranCInterface_HEADER(
+    VerifyFortran.h
+    SYMBOLS VerifyFortran verifyfortran
+  )
+else()
+  FortranCInterface_HEADER(
+    VerifyFortran.h
+    SYMBOLS VerifyFortran
+  )
+endif()
+
 include_directories(${VerifyFortranC_BINARY_DIR})
 
 add_library(VerifyFortran STATIC VerifyFortran.f)
