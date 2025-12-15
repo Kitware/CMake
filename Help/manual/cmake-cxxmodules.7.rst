@@ -115,8 +115,6 @@ can change over time.
 For all generators:
 
 - :term:`Header units <header unit>` are not supported.
-- There is no builtin support for ``import std`` or other compiler-provided
-  modules.
 
 For the :ref:`Visual Studio Generators`:
 
