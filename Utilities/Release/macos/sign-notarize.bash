@@ -92,7 +92,7 @@ readonly vol_path="/Volumes/$vol_name"
 hdiutil attach "${udrw_dmg}"
 
 # Sign the application.
-codesign --verify --timestamp --options=runtime --verbose --force --deep \
+codesign --verify --timestamp --options=runtime --verbose --force \
   -s "$id" \
   --entitlements "$entitlements_xml" \
   "$vol_path"/CMake.app/Contents/bin/cmake \
