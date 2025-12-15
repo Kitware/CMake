@@ -693,6 +693,13 @@ bool cmCMakePresetsGraph::ReadJSONFile(std::string const& filename,
       return false;
     }
 
+    // Support for processor-count-based jobs added in version 11.
+    if (v < 11 && preset.Execution && preset.Execution->Jobs.has_value() &&
+        !preset.Execution->Jobs->has_value()) {
+      cmCMakePresetsErrors::JOBS_PROC_UNSUPPORTED(&this->parseState);
+      return false;
+    }
+
     this->TestPresetOrder.push_back(preset.Name);
   }
 

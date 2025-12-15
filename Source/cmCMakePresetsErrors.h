@@ -72,6 +72,8 @@ void TOOLCHAIN_FILE_UNSUPPORTED(cmJSONState* state);
 
 void GRAPHVIZ_FILE_UNSUPPORTED(cmJSONState* state);
 
+void JOBS_PROC_UNSUPPORTED(cmJSONState* state);
+
 void CYCLIC_INCLUDE(std::string const& file, cmJSONState* state);
 
 void TEST_OUTPUT_TRUNCATION_UNSUPPORTED(cmJSONState* state);

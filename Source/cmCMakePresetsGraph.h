@@ -289,7 +289,7 @@ public:
 
       cm::optional<bool> StopOnFailure;
       cm::optional<bool> EnableFailover;
-      cm::optional<unsigned int> Jobs;
+      cm::optional<cm::optional<unsigned int>> Jobs;
       std::string ResourceSpecFile;
       cm::optional<int> TestLoad;
       cm::optional<ShowOnlyEnum> ShowOnly;

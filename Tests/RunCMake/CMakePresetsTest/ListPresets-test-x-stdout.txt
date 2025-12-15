@@ -9,4 +9,5 @@ Available test presets:
   "exclude"
   "index"
   "indexFile"
+  "jobsProc"
   "showOnly"

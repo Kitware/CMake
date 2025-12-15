@@ -902,7 +902,9 @@ that may contain the following fields:
     :option:`--parallel <ctest --parallel>` on the command line. If the value
     is ``0``, it is equivalent to unbounded parallelism.
 
-    In preset files specifying version ``11`` or above, this field does not accept
+    In preset files specifying version ``11`` or above, this field can also be
+    a string, in which case it must be empty, and is equivalent to passing
+    ``--parallel`` with ``<jobs>`` omitted; additionally, it does not accept
     negative values.
 
   ``resourceSpecFile``
@@ -1465,8 +1467,10 @@ they were added and a summary of the new features and changes is given below.
 
     * Changes to `Test Presets <Test Preset_>`_
 
-      * The `jobs <CMakePresets test jobs_>`_ field no longer accepts negative
-        values.
+      * The `jobs <CMakePresets test jobs_>`_ field now accepts an empty string
+        representing :option:`--parallel <ctest --parallel>` with ``<jobs>``
+        omitted. In addition, when an integer is specified, it must not be
+        negative.
 
 Schema
 ======

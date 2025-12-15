@@ -1006,9 +1006,19 @@
       }
     },
     "testPresetsExecutionJobsV11": {
-      "type": "integer",
-      "description": "An optional integer. Equivalent to passing --parallel on the command line.",
-      "minimum": 0
+      "oneOf": [
+        {
+          "type": "integer",
+          "description": "An optional integer. Equivalent to passing --parallel on the command line.",
+          "minimum": 0
+        },
+        {
+          "type": "string",
+          "description": "An optional string. Equivalent to passing --parallel on the command line with the number of jobs omitted.",
+          "minLength": 0,
+          "maxLength": 0
+        }
+      ]
     },
     "testPresetsExecutionJobsV2": {
       "type": "integer",
