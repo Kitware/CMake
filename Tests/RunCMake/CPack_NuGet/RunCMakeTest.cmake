@@ -1,4 +1,4 @@
-include(RunCPack)
+include(RunCPack) # Uses sample projects from `../RunCPack/*`
 
 set(env_PATH "$ENV{PATH}")
 

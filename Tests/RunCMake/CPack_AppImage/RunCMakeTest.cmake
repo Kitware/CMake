@@ -1,4 +1,4 @@
-include(RunCPack)
+include(RunCPack) # Uses sample projects from `../RunCPack/*`
 
 set(RunCPack_GENERATORS AppImage)
 
