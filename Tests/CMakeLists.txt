@@ -157,15 +157,22 @@ if(BUILD_TESTING)
   # Look for git to use for tests.
   find_program(GIT_EXECUTABLE NAMES git)
 
-  # Look for rpmbuild to use for tests.
-  # The tool does not work with spaces in the path.
-  if(NOT CMAKE_CURRENT_BINARY_DIR MATCHES " ")
-    find_program(RPMBUILD_EXECUTABLE NAMES rpmbuild)
-  else()
-    set(RPMBUILD_EXECUTABLE "RPMBUILD_EXECUTABLE-NOTFOUND")
+  if(NOT DEFINED CMake_TEST_CPACK_RPM)
+    # Look for rpmbuild to use for tests.
+    # The tool does not work with spaces in the path.
+    if(NOT CMAKE_CURRENT_BINARY_DIR MATCHES " ")
+      find_program(RPMBUILD_EXECUTABLE NAMES rpmbuild)
+    else()
+      set(RPMBUILD_EXECUTABLE "RPMBUILD_EXECUTABLE-NOTFOUND")
+    endif()
+    if(RPMBUILD_EXECUTABLE)
+      set(CMake_TEST_CPACK_RPM 1)
+    else()
+      set(CMake_TEST_CPACK_RPM 0)
+    endif()
   endif()
 
-  if(RPMBUILD_EXECUTABLE)
+  if(CMake_TEST_CPACK_RPM)
     set(CPACK_BINARY_RPM ON)
   else()
     set(CPACK_BINARY_RPM OFF)
