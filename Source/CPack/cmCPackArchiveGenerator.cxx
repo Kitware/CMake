@@ -135,7 +135,7 @@ private:
 
 cmCPackGenerator* cmCPackArchiveGenerator::Create7ZGenerator()
 {
-  return new cmCPackArchiveGenerator(cmArchiveWrite::CompressNone, "7zip",
+  return new cmCPackArchiveGenerator(cmArchiveWrite::CompressLZMA, "7zip",
                                      ".7z");
 }
 
@@ -177,7 +177,7 @@ cmCPackGenerator* cmCPackArchiveGenerator::CreateTarGenerator()
 
 cmCPackGenerator* cmCPackArchiveGenerator::CreateZIPGenerator()
 {
-  return new cmCPackArchiveGenerator(cmArchiveWrite::CompressNone, "zip",
+  return new cmCPackArchiveGenerator(cmArchiveWrite::CompressGZip, "zip",
                                      ".zip");
 }
 
