@@ -46,7 +46,10 @@ Synopsis
 
   `JSON`_
     string(JSON <out-var> [ERROR_VARIABLE <error-var>]
-           {`GET <JSON-GET_>`__ | `GET_RAW <JSON-GET-RAW_>`__ | `TYPE <JSON-TYPE_>`__ | `LENGTH <JSON-LENGTH_>`__ | `REMOVE <JSON-REMOVE_>`__}
+           {`GET <JSON-GET_>`__ | `GET_RAW <JSON-GET-RAW_>`__ | `TYPE <JSON-TYPE_>`__ | `LENGTH <JSON-LENGTH_>`__}
+           <json-string> [<member|index> ...])
+    string(JSON <out-var> [ERROR_VARIABLE <error-var>]
+           `REMOVE <JSON-REMOVE_>`__
            <json-string> <member|index> [<member|index> ...])
     string(JSON <out-var> [ERROR_VARIABLE <error-var>]
            `MEMBER <JSON-MEMBER_>`__ <json-string>
@@ -551,7 +554,7 @@ string is passed as a single argument even if it contains semicolons.
 
 .. signature::
   string(JSON <out-var> [ERROR_VARIABLE <error-variable>]
-         GET <json-string> <member|index> [<member|index> ...])
+         GET <json-string> [<member|index> ...])
   :target: JSON-GET
 
   Get an element from ``<json-string>`` at the location given
@@ -563,7 +566,7 @@ string is passed as a single argument even if it contains semicolons.
 
 .. signature::
   string(JSON <out-var> [ERROR_VARIABLE <error-variable>]
-         GET_RAW <json-string> <member|index> [<member|index> ...])
+         GET_RAW <json-string> [<member|index> ...])
   :target: JSON-GET-RAW
 
   Get an element from ``<json-string>`` at the location given
@@ -573,7 +576,7 @@ string is passed as a single argument even if it contains semicolons.
 
 .. signature::
   string(JSON <out-var> [ERROR_VARIABLE <error-variable>]
-         TYPE <json-string> <member|index> [<member|index> ...])
+         TYPE <json-string> [<member|index> ...])
   :target: JSON-TYPE
 
   Get the type of an element in ``<json-string>`` at the location
