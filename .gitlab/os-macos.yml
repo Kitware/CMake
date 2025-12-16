@@ -79,6 +79,11 @@
         CTEST_NO_WARNINGS_ALLOWED: 1
         CMAKE_CI_NO_INSTALL: 1
 
+.macos_sign:
+    variables:
+        GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci"
+        CMAKE_CONFIGURATION: macos_sign
+
 ### External testing
 
 .macos_x86_64_xcode:
@@ -181,6 +186,13 @@
         - nonconcurrent
         - finder
 
+.macos_sign_tags:
+    tags:
+        - cmake # Since this is a bare runner, pin to a project.
+        - shell
+        - sign-macos-v1
+        - nonconcurrent
+
 ## macOS-specific scripts
 
 .before_script_macos: &before_script_macos
@@ -231,4 +243,13 @@
         - "$LAUNCHER build/install/CMake.app/Contents/bin/ctest --output-on-failure -V -S .gitlab/ci/ctest_standalone.cmake"
         - sccache --show-stats
 
+    interruptible: true
+
+.cmake_sign_macos:
+    stage: package
+    environment:
+        name: sign-macos
+    script:
+        - source .gitlab/ci/env.sh
+        - source .gitlab/ci/package_macos_sign.sh
     interruptible: true

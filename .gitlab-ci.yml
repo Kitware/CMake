@@ -1252,6 +1252,16 @@ b:macos-package:
         - .run_only_for_package
     needs:
         - p:doc-package
+
+k:macos-package:
+    extends:
+        - .macos_sign
+        - .cmake_sign_macos
+        - .cmake_release_artifacts
+        - .macos_sign_tags
+        - .run_only_for_package
+    needs:
+        - b:macos-package
     variables:
         CMAKE_CI_ARTIFACTS_NAME: "artifacts-macos-universal"
 
@@ -1260,7 +1270,7 @@ u:macos-package:
         - .rsync_upload_package
         - .run_only_for_package
     needs:
-        - b:macos-package
+        - k:macos-package
 
 b:macos10.10-package:
     extends:
@@ -1271,6 +1281,16 @@ b:macos10.10-package:
         - .run_only_for_package
     needs:
         - p:doc-package
+
+k:macos10.10-package:
+    extends:
+        - .macos_sign
+        - .cmake_sign_macos
+        - .cmake_release_artifacts
+        - .macos_sign_tags
+        - .run_only_for_package
+    needs:
+        - b:macos10.10-package
     variables:
         CMAKE_CI_ARTIFACTS_NAME: "artifacts-macos10.10-universal"
 
@@ -1279,7 +1299,7 @@ u:macos10.10-package:
         - .rsync_upload_package
         - .run_only_for_package
     needs:
-        - b:macos10.10-package
+        - k:macos10.10-package
 
 # Windows x86_64 jobs
 
