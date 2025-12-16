@@ -1,0 +1,4 @@
+-- Original content: IMPORTANT DATA THAT MUST NOT BE DESTROYED
+-- Lock result: 0
+-- Final content: IMPORTANT DATA THAT MUST NOT BE DESTROYED
+-- PASS: Symlink target was not truncated
