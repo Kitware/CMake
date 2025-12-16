@@ -56,6 +56,8 @@ Synopsis
            <member|index> [<member|index> ...] <value>)
     string(JSON <out-var> [ERROR_VARIABLE <error-var>]
            `EQUAL <JSON-EQUAL_>`__ <json-string1> <json-string2>)
+    string(JSON <out-var> [ERROR_VARIABLE <error-var>]
+           `STRING_ENCODE <STRING-ENCODE_>`__ <string>)
 
 Search and Replace
 ^^^^^^^^^^^^^^^^^^
@@ -629,3 +631,11 @@ string is passed as a single argument even if it contains semicolons.
   and ``<json-string2>`` should be valid JSON.  The ``<out-var>``
   will be set to a true value if the JSON objects are considered equal,
   or a false value otherwise.
+
+.. signature::
+  string(JSON <out-var> [ERROR_VARIABLE <error-var>]
+         STRING_ENCODE <string>)
+  :target: STRING-ENCODE
+
+  Turn a raw string into a JSON string surrounded by quotes. Special characters
+  will be properly escaped inside the JSON string.

@@ -360,3 +360,19 @@ assert_json_equal("${error}" "${result}"
   "foo" : "bar",
   "array" : [5, "val", {"some": "other"}, null, "append"]
 }]=])
+
+# Test STRING_ENCODE
+string(JSON result STRING_ENCODE Hello)
+assert_strequal("${result}" "\"Hello\"")
+string(JSON result STRING_ENCODE "\"Hello\"")
+assert_strequal("${result}" "\"\\\"Hello\\\"\"")
+string(JSON result STRING_ENCODE null)
+assert_strequal("${result}" "\"null\"")
+string(JSON result STRING_ENCODE 0)
+assert_strequal("${result}" "\"0\"")
+string(JSON result STRING_ENCODE false)
+assert_strequal("${result}" "\"false\"")
+string(JSON result STRING_ENCODE {})
+assert_strequal("${result}" "\"{}\"")
+string(JSON result STRING_ENCODE [])
+assert_strequal("${result}" "\"[]\"")
