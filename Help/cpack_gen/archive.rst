@@ -8,6 +8,36 @@ any of the following formats:
 
   .. versionadded:: 3.1
 
+  This is an alias for ``7Z_LZMA``
+
+- 7Z_BZ2 - 7zip - (``.7z``) - BZip2 compressed
+
+  .. versionadded:: 4.3
+
+- 7Z_DEFLATE - 7zip - (``.7z``) - Deflate compressed
+
+  .. versionadded:: 4.3
+
+- 7Z_LZMA - 7zip - (``.7z``) - LZMA compressed
+
+  .. versionadded:: 4.3
+
+- 7Z_LZMA2 - 7zip - (``.7z``) - LZMA2 compressed
+
+  .. versionadded:: 4.3
+
+- 7Z_PPMD - 7zip - (``.7z``) - PPMd compressed
+
+  .. versionadded:: 4.3
+
+- 7Z_STORE - 7zip - (``.7z``) - no compression is used
+
+  .. versionadded:: 4.3
+
+- 7Z_ZSTD - 7zip - (``.7z``) - Zstandard compressed
+
+  .. versionadded:: 4.3
+
 - TAR (``.tar``) - no compression is used
 
   .. versionadded:: 4.0
@@ -27,6 +57,32 @@ any of the following formats:
   .. versionadded:: 3.16
 
 - ZIP (``.zip``) - Deflate compressed
+
+  This is an alias for ``ZIP_DEFLATE``
+
+- ZIP_BZ2 (``.zip``) - BZip2 compressed
+
+  .. versionadded:: 4.3
+
+- ZIP_DEFLATE (``.zip``) - Deflate compressed
+
+  .. versionadded:: 4.3
+
+- ZIP_LZMA (``.zip``) - LZMA compressed
+
+  .. versionadded:: 4.3
+
+- ZIP_LZMA2 (``.zip``) - LZMA2 compressed
+
+  .. versionadded:: 4.3
+
+- ZIP_STORE (``.zip``) - no compression is used
+
+  .. versionadded:: 4.3
+
+- ZIP_ZSTD (``.zip``) - Zstandard compressed
+
+  .. versionadded:: 4.3
 
 When this generator is called from ``CPackSourceConfig.cmake`` (or through
 the ``package_source`` target), then the generated archive will contain all
