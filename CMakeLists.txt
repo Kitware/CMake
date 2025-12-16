@@ -180,6 +180,14 @@ if(NOT CMake_TEST_EXTERNAL_CMAKE)
   if(NOT CMake_HAVE_CXX_UNIQUE_PTR)
     message(FATAL_ERROR "The C++ compiler does not support C++11 (e.g. std::unique_ptr).")
   endif()
+
+  if(CMake_ENABLE_INSTRUMENTATION)
+    cmake_instrumentation(
+        API_VERSION 1
+        DATA_VERSION 1
+        OPTIONS cdashSubmit cdashVerbose trace
+    )
+  endif()
 endif()
 
 # Inform STL library header wrappers whether to use system versions.
