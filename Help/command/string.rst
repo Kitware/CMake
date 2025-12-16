@@ -46,7 +46,7 @@ Synopsis
 
   `JSON`_
     string(JSON <out-var> [ERROR_VARIABLE <error-var>]
-           {`GET <JSON-GET_>`__ | `TYPE <JSON-TYPE_>`__ | `LENGTH <JSON-LENGTH_>`__ | `REMOVE <JSON-REMOVE_>`__}
+           {`GET <JSON-GET_>`__ | `GET_RAW <JSON-GET-RAW_>`__ | `TYPE <JSON-TYPE_>`__ | `LENGTH <JSON-LENGTH_>`__ | `REMOVE <JSON-REMOVE_>`__}
            <json-string> <member|index> [<member|index> ...])
     string(JSON <out-var> [ERROR_VARIABLE <error-var>]
            `MEMBER <JSON-MEMBER_>`__ <json-string>
@@ -558,6 +558,16 @@ string is passed as a single argument even if it contains semicolons.
   Boolean elements will be returned as ``ON`` or ``OFF``.
   Null elements will be returned as an empty string.
   Number and string types will be returned as strings.
+
+.. signature::
+  string(JSON <out-var> [ERROR_VARIABLE <error-variable>]
+         GET_RAW <json-string> <member|index> [<member|index> ...])
+  :target: JSON-GET-RAW
+
+  Get an element from ``<json-string>`` at the location given
+  by the list of ``<member|index>`` arguments. Similar to
+  `GET <JSON-GET_>`__, but does not convert number, string,
+  boolean, or null elements.
 
 .. signature::
   string(JSON <out-var> [ERROR_VARIABLE <error-variable>]

@@ -952,13 +952,13 @@ bool HandleJSONCommand(std::vector<std::string> const& arguments,
     }
 
     auto const& mode = args.PopFront("missing mode argument"_s);
-    if (mode != "GET"_s && mode != "TYPE"_s && mode != "MEMBER"_s &&
-        mode != "LENGTH"_s && mode != "REMOVE"_s && mode != "SET"_s &&
-        mode != "EQUAL"_s) {
-      throw json_error(
-        cmStrCat("got an invalid mode '"_s, mode,
-                 "', expected one of GET, TYPE, MEMBER, LENGTH, REMOVE, SET, "
-                 " EQUAL"_s));
+    if (mode != "GET"_s && mode != "GET_RAW"_s && mode != "TYPE"_s &&
+        mode != "MEMBER"_s && mode != "LENGTH"_s && mode != "REMOVE"_s &&
+        mode != "SET"_s && mode != "EQUAL"_s) {
+      throw json_error(cmStrCat(
+        "got an invalid mode '"_s, mode,
+        "', expected one of GET, GET_RAW, TYPE, MEMBER, LENGTH, REMOVE, SET, "
+        " EQUAL"_s));
     }
 
     auto const& jsonstr = args.PopFront("missing json string argument"_s);
@@ -973,6 +973,10 @@ bool HandleJSONCommand(std::vector<std::string> const& arguments,
       } else {
         makefile.AddDefinition(*outputVariable, value.asString());
       }
+
+    } else if (mode == "GET_RAW"_s) {
+      auto const& value = ResolvePath(json, args);
+      makefile.AddDefinition(*outputVariable, WriteJson(value));
 
     } else if (mode == "TYPE"_s) {
       auto const& value = ResolvePath(json, args);

@@ -65,6 +65,9 @@ set(json1 [=[
     "false" : false,
     "true" : true
   },
+  "object": {
+    "foo": "bar"
+  },
   "special" : {
     "foo;bar" : "value1",
     ";" : "value2",
@@ -90,6 +93,7 @@ set(json1 [=[
 }
 ]=])
 
+# test GET
 string(JSON result GET "${json1}" foo)
 assert_strequal("${result}" bar)
 string(JSON result GET "${json1}" array 0)
@@ -200,6 +204,22 @@ string(JSON char ERROR_VARIABLE error GET "${unicode}" datalinkescape)
 string(JSON result ERROR_VARIABLE error GET "${unicode}" "${char}")
 assert_strequal_error("${result}" "datalinkescape" "${error}")
 
+# Test GET_RAW
+string(JSON result GET_RAW "${json1}" values null)
+assert_strequal("${result}" null)
+string(JSON result GET_RAW "${json1}" values number)
+assert_strequal("${result}" 5)
+string(JSON result GET_RAW "${json1}" values string)
+assert_strequal("${result}" "\"foo\"")
+string(JSON result GET_RAW "${json1}" values false)
+assert_strequal("${result}" false)
+string(JSON result GET_RAW "${json1}" values true)
+assert_strequal("${result}" true)
+string(JSON result ERROR_VARIABLE error GET_RAW "${json1}" array)
+assert_json_equal("${error}" "${result}" [=[ [5, "val", {"some": "other"}, null] ]=])
+string(JSON result ERROR_VARIABLE error GET_RAW "${json1}" object)
+assert_json_equal("${error}" "${result}" [=[ { "foo": "bar" } ]=])
+
 # Test TYPE
 string(JSON result TYPE "${json1}" types null)
 assert_strequal("${result}" NULL)
@@ -216,7 +236,7 @@ assert_strequal("${result}" OBJECT)
 
 # Test LENGTH
 string(JSON result ERROR_VARIABLE error LENGTH "${json1}")
-assert_strequal("${result}" 5)
+assert_strequal("${result}" 6)
 if(error)
   message(SEND_ERROR "Unexpected error: ${error}")
 endif()
