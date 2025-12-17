@@ -15,6 +15,12 @@ macro(__hpux_compiler_gnu lang)
   set(CMAKE_SHARED_LIBRARY_RUNTIME_${lang}_FLAG_SEP ":")
   set(CMAKE_SHARED_LIBRARY_SONAME_${lang}_FLAG "-Wl,+h")
 
-  set(CMAKE_${lang}_LINK_FLAGS "-Wl,+s,+nodefaultrpath")
+  set(CMAKE_EXECUTABLE_CREATE_${lang}_FLAGS "-Wl,+s,+nodefaultrpath")
+  cmake_policy(GET CMP0210 _CMP0210)
+  if (NOT _CMP0210 STREQUAL "NEW")
+    set(CMAKE_${lang}_LINK_FLAGS "${CMAKE_EXECUTABLE_CREATE_${lang}_FLAGS}")
+  endif()
+  unset(_CMP0210)
+
   unset(CMAKE_${lang}_COMPILE_OPTIONS_VISIBILITY)
 endmacro()

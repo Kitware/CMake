@@ -2700,6 +2700,8 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
   } else {
     this->CurrentLocalGenerator->AddTargetTypeLinkerFlags(
       extraLinkOptions, gtgt, llang, configName);
+    this->CurrentLocalGenerator->AddPerLanguageLinkFlags(
+      extraLinkOptions, gtgt, llang, configName);
     this->CurrentLocalGenerator->AppendLinkerTypeFlags(extraLinkOptions, gtgt,
                                                        configName, llang);
     this->CurrentLocalGenerator->AppendWarningAsErrorLinkerFlags(

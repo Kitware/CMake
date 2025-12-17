@@ -1525,6 +1525,13 @@ void cmLocalGenerator::GetTargetFlags(
         }
       }
 
+      std::string langLinkFlags;
+      this->AddPerLanguageLinkFlags(langLinkFlags, target, linkLanguage,
+                                    config);
+      if (!langLinkFlags.empty()) {
+        linkFlags.emplace_back(std::move(langLinkFlags));
+      }
+
       std::string sharedLibFlags;
       this->AddTargetPropertyLinkFlags(sharedLibFlags, target, config);
       if (!sharedLibFlags.empty()) {
@@ -1551,6 +1558,13 @@ void cmLocalGenerator::GetTargetFlags(
         if (!exeFlags.empty()) {
           linkFlags.emplace_back(std::move(exeFlags));
         }
+      }
+
+      std::string langLinkFlags;
+      this->AddPerLanguageLinkFlags(langLinkFlags, target, linkLanguage,
+                                    config);
+      if (!langLinkFlags.empty()) {
+        linkFlags.emplace_back(std::move(langLinkFlags));
       }
 
       {
@@ -3342,6 +3356,64 @@ void cmLocalGenerator::AddUnityBuild(cmGeneratorTarget* target)
   }
 }
 
+void cmLocalGenerator::AddPerLanguageLinkFlags(std::string& flags,
+                                               cmGeneratorTarget const* target,
+                                               std::string const& lang,
+                                               std::string const& config)
+{
+  switch (target->GetType()) {
+    case cmStateEnums::MODULE_LIBRARY:
+    case cmStateEnums::SHARED_LIBRARY:
+    case cmStateEnums::EXECUTABLE:
+      break;
+    default:
+      return;
+  }
+
+  std::string langLinkFlags =
+    this->Makefile->GetSafeDefinition(cmStrCat("CMAKE_", lang, "_LINK_FLAGS"));
+
+  switch (target->GetPolicyStatusCMP0210()) {
+    case cmPolicies::WARN:
+      // WARN only when CMAKE_<LANG>_LINK_FLAGS is set, and when the current
+      // target is not an executable, and CMAKE_<LANG>_LINK_FLAGS is not equal
+      // to CMAKE_EXECUTABLE_CREATE_<LANG>_FLAGS. This warns users trying to
+      // use the NEW behavior on old projects (since CMake will be ignoring
+      // their wishes), while also exempting cases when the latter variable
+      // (substituted for the former spelling under the NEW behavior) is being
+      // used legitimately by CMake.
+      if (!langLinkFlags.empty() &&
+          target->GetType() != cmStateEnums::EXECUTABLE &&
+          langLinkFlags !=
+            this->Makefile->GetSafeDefinition(
+              cmStrCat("CMAKE_EXECUTABLE_CREATE_", lang, "_FLAGS"))) {
+        this->IssueMessage(
+          MessageType::AUTHOR_WARNING,
+          cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0210), "\n",
+                   "For compatibility with older versions of CMake, ",
+                   "CMAKE_", lang, "_LINK_FLAGS will be ignored for target '",
+                   target->GetName(), "'."));
+      }
+      CM_FALLTHROUGH;
+    case cmPolicies::OLD:
+      // OLD behavior is to do nothing here, since the use of
+      // CMAKE_<LANG>_LINK_FLAGS for EXECUTABLEs is handled elsewhere.
+      break;
+    case cmPolicies::NEW:
+      // NEW behavior is to support per-language link flags for all target
+      // types.
+      this->AppendLinkFlagsWithParsing(flags, langLinkFlags, target, lang);
+      if (!config.empty()) {
+        std::string lankLinkFlagsConfig =
+          this->Makefile->GetSafeDefinition(cmStrCat(
+            "CMAKE_", lang, "_LINK_FLAGS_", cmSystemTools::UpperCase(config)));
+        this->AppendLinkFlagsWithParsing(flags, lankLinkFlagsConfig, target,
+                                         lang);
+      }
+      break;
+  }
+}
+
 void cmLocalGenerator::AppendTargetCreationLinkFlags(
   std::string& flags, cmGeneratorTarget const* target,
   std::string const& linkLanguage)
@@ -3365,7 +3437,9 @@ void cmLocalGenerator::AppendTargetCreationLinkFlags(
       }
       break;
     case cmStateEnums::EXECUTABLE:
-      createFlagsVar = cmStrCat("CMAKE_", linkLanguage, "_LINK_FLAGS");
+      createFlagsVar = target->GetPolicyStatusCMP0210() == cmPolicies::NEW
+        ? cmStrCat("CMAKE_EXECUTABLE_CREATE_", linkLanguage, "_FLAGS")
+        : cmStrCat("CMAKE_", linkLanguage, "_LINK_FLAGS");
       createFlagsVal = this->Makefile->GetDefinition(createFlagsVar);
       break;
     default:

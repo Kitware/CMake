@@ -16,7 +16,12 @@ macro(__aix_compiler_gnu lang)
   set(CMAKE_${lang}_USE_IMPLICIT_LINK_DIRECTORIES_IN_RUNTIME_PATH 1)
   set(CMAKE_${lang}_VERBOSE_LINK_FLAG "-Wl,-v")
 
-  set(CMAKE_${lang}_LINK_FLAGS "-Wl,-bnoipath")
+  set(CMAKE_EXECUTABLE_CREATE_${lang}_FLAGS "-Wl,-bnoipath")
+  cmake_policy(GET CMP0210 _CMP0210)
+  if (NOT _CMP0210 STREQUAL "NEW")
+    set(CMAKE_${lang}_LINK_FLAGS "${CMAKE_EXECUTABLE_CREATE_${lang}_FLAGS}")
+  endif()
+  unset(_CMP0210)
 
   if(CMAKE_${lang}_COMPILER_VERSION VERSION_LESS 7 OR CMAKE_SYSTEM_VERSION VERSION_LESS 7.1)
     unset(CMAKE_${lang}_COMPILE_OPTIONS_VISIBILITY)

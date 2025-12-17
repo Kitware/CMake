@@ -97,6 +97,8 @@ Variables that Provide Information
    /variable/CMAKE_LANG_COMPILER_LINKER_VERSION
    /variable/CMAKE_LANG_COMPILER_RANLIB
    /variable/CMAKE_LANG_DEVICE_LINK_MODE
+   /variable/CMAKE_LANG_LINK_FLAGS
+   /variable/CMAKE_LANG_LINK_FLAGS_CONFIG
    /variable/CMAKE_LANG_LINK_LIBRARY_SUFFIX
    /variable/CMAKE_LANG_LINK_MODE
    /variable/CMAKE_LINK_LIBRARY_SUFFIX

@@ -180,6 +180,8 @@ void cmMakefileLibraryTargetGenerator::WriteSharedLibraryRules(bool relink)
     extraFlags, this->GeneratorTarget, linkLanguage);
   this->LocalGenerator->AddTargetTypeLinkerFlags(
     extraFlags, this->GeneratorTarget, linkLanguage, this->GetConfigName());
+  this->LocalGenerator->AddPerLanguageLinkFlags(
+    extraFlags, this->GeneratorTarget, linkLanguage, this->GetConfigName());
 
   std::unique_ptr<cmLinkLineComputer> linkLineComputer =
     this->CreateLinkLineComputer(
@@ -217,6 +219,8 @@ void cmMakefileLibraryTargetGenerator::WriteModuleLibraryRules(bool relink)
   this->LocalGenerator->AppendTargetCreationLinkFlags(
     extraFlags, this->GeneratorTarget, linkLanguage);
   this->LocalGenerator->AddTargetTypeLinkerFlags(
+    extraFlags, this->GeneratorTarget, linkLanguage, this->GetConfigName());
+  this->LocalGenerator->AddPerLanguageLinkFlags(
     extraFlags, this->GeneratorTarget, linkLanguage, this->GetConfigName());
 
   std::unique_ptr<cmLinkLineComputer> linkLineComputer =

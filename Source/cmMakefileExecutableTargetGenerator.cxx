@@ -381,6 +381,8 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     linkFlags, this->GeneratorTarget, linkLanguage);
   this->LocalGenerator->AddTargetTypeLinkerFlags(
     linkFlags, this->GeneratorTarget, linkLanguage, this->GetConfigName());
+  this->LocalGenerator->AddPerLanguageLinkFlags(
+    linkFlags, this->GeneratorTarget, linkLanguage, this->GetConfigName());
 
   {
     auto exeType =

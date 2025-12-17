@@ -56,6 +56,13 @@ if (RunCMake_GENERATOR MATCHES "Makefiles|Ninja|Xcode|Visual Studio"
       endif()
     endif()
   endforeach()
+
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/LINKER_expansion5-build)
+  run_cmake(LINKER_expansion5)
+  run_cmake_target(LINKER_expansion5 EXE_C_LINK_FLAGS exe_c_link_flags --verbose)
+  run_cmake_target(LINKER_expansion5 SHARED_C_LINK_FLAGS shared_c_link_flags --verbose)
+  run_cmake_target(LINKER_expansion5 MODULE_C_LINK_FLAGS module_c_link_flags --verbose)
+  unset(RunCMake_TEST_BINARY_DIR)
 endif()
 
 if(RunCMake_GENERATOR MATCHES "Makefiles|Ninja" AND

@@ -969,6 +969,8 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(
   std::string extraLinkOptions;
   this->AddTargetTypeLinkerFlags(extraLinkOptions, target, linkLanguage,
                                  configName);
+  this->AddPerLanguageLinkFlags(extraLinkOptions, target, linkLanguage,
+                                configName);
 
   this->AddTargetPropertyLinkFlags(extraLinkOptions, target, configName);
 

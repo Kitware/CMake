@@ -626,7 +626,10 @@ class cmMakefile;
          4, 3, 0, WARN)                                                       \
   SELECT(POLICY, CMP0209,                                                     \
          "Verify interface header sets checks executables without exports.",  \
-         4, 3, 0, WARN)
+         4, 3, 0, WARN)                                                       \
+  SELECT(POLICY, CMP0210,                                                     \
+         "CMAKE_<LANG>_LINK_FLAGS adds link flags to all target types.", 4,   \
+         3, 0, WARN)
 
 #define CM_SELECT_ID(F, A1, A2, A3, A4, A5, A6) F(A1)
 #define CM_FOR_EACH_POLICY_ID(POLICY)                                         \
@@ -680,7 +683,8 @@ class cmMakefile;
   F(CMP0202)                                                                  \
   F(CMP0203)                                                                  \
   F(CMP0204)                                                                  \
-  F(CMP0209)
+  F(CMP0209)                                                                  \
+  F(CMP0210)
 
 #define CM_FOR_EACH_CUSTOM_COMMAND_POLICY(F)                                  \
   F(CMP0116)                                                                  \

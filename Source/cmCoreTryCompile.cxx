@@ -794,6 +794,43 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
     fprintf(fout,
             "set(CMAKE_EXE_LINKER_FLAGS \"${CMAKE_EXE_LINKER_FLAGS}"
             " ${EXE_LINKER_FLAGS}\")\n");
+
+    switch (this->Makefile->GetPolicyStatus(cmPolicies::CMP0210)) {
+      case cmPolicies::WARN:
+        // This policy does WARN, but not during try_compile.
+        CM_FALLTHROUGH;
+      case cmPolicies::OLD:
+        // OLD behavior is to do nothing here. CMAKE_<LANG>_LINK_FLAGS was
+        // previously used internally by executables only, and not during
+        // try_compile.
+        break;
+      case cmPolicies::NEW:
+        // NEW behavior is to propagate language-specific link flags (stored
+        // in both the default and per-configuration variables, similar to the
+        // NEW behavior of CMP0066) to the test project.
+        for (std::string const& li : testLangs) {
+          std::string langLinkFlags = cmStrCat("CMAKE_", li, "_LINK_FLAGS");
+          cmValue flags = this->Makefile->GetDefinition(langLinkFlags);
+          fprintf(fout, "set(CMAKE_%s_LINK_FLAGS %s)\n", li.c_str(),
+                  cmOutputConverter::EscapeForCMake(*flags).c_str());
+          std::string langLinkFlagsConfig =
+            cmStrCat("CMAKE_", li, "_LINK_FLAGS_", tcConfig);
+          cmValue flagsConfig =
+            this->Makefile->GetDefinition(langLinkFlagsConfig);
+          fprintf(fout, "set(CMAKE_%s_LINK_FLAGS_%s %s)\n", li.c_str(),
+                  tcConfig.c_str(),
+                  cmOutputConverter::EscapeForCMake(*flagsConfig).c_str());
+
+          if (flags) {
+            cmakeVariables.emplace(langLinkFlags, *flags);
+          }
+          if (flagsConfig) {
+            cmakeVariables.emplace(langLinkFlagsConfig, *flagsConfig);
+          }
+        }
+        break;
+    }
+
     fprintf(fout, "include_directories(${INCLUDE_DIRECTORIES})\n");
     fprintf(fout, "set(CMAKE_SUPPRESS_REGENERATION 1)\n");
     fprintf(fout, "link_directories(${LINK_DIRECTORIES})\n");
@@ -871,6 +908,15 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
      */
     fprintf(fout, "cmake_policy(SET CMP0181 %s)\n",
             this->Makefile->GetPolicyStatus(cmPolicies::CMP0181) ==
+                cmPolicies::NEW
+              ? "NEW"
+              : "OLD");
+
+    /* Set the appropriate policy information for passing
+     * CMAKE_<LANG>_LINK_FLAGS
+     */
+    fprintf(fout, "cmake_policy(SET CMP0210 %s)\n",
+            this->Makefile->GetPolicyStatus(cmPolicies::CMP0210) ==
                 cmPolicies::NEW
               ? "NEW"
               : "OLD");

@@ -39,15 +39,21 @@ if(NOT (DEFINED _CMAKE_HOST_OSX_VERSION AND _CMAKE_HOST_OSX_VERSION VERSION_LESS
   set(CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG "-Wl,-rpath,")
 endif()
 
+cmake_policy(GET CMP0210 _CMP0210)
 foreach(lang C CXX OBJC OBJCXX)
   set(CMAKE_${lang}_OSX_COMPATIBILITY_VERSION_FLAG "-compatibility_version ")
   set(CMAKE_${lang}_OSX_CURRENT_VERSION_FLAG "-current_version ")
-  set(CMAKE_${lang}_LINK_FLAGS "-Wl,-search_paths_first -Wl,-headerpad_max_install_names")
+
+  set(CMAKE_EXECUTABLE_CREATE_${lang}_FLAGS "-Wl,-search_paths_first -Wl,-headerpad_max_install_names")
+  if (NOT _CMP0210 STREQUAL "NEW")
+    set(CMAKE_${lang}_LINK_FLAGS "${CMAKE_EXECUTABLE_CREATE_${lang}_FLAGS}")
+  endif()
 
   set(CMAKE_SHARED_LIBRARY_CREATE_${lang}_FLAGS "-dynamiclib -Wl,-headerpad_max_install_names")
   set(CMAKE_SHARED_MODULE_CREATE_${lang}_FLAGS "-bundle -Wl,-headerpad_max_install_names")
   set(CMAKE_SHARED_MODULE_LOADER_${lang}_FLAG "-Wl,-bundle_loader,")
 endforeach()
+unset(_CMP0210)
 
 set(CMAKE_PLATFORM_HAS_INSTALLNAME 1)
 set(CMAKE_FIND_LIBRARY_SUFFIXES ".tbd" ".dylib" ".so" ".a")

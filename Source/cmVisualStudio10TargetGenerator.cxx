@@ -4545,6 +4545,9 @@ bool cmVisualStudio10TargetGenerator::ComputeLinkOptions(
   this->LocalGenerator->AddTargetTypeLinkerFlags(flags, this->GeneratorTarget,
                                                  linkLanguage, config);
 
+  this->LocalGenerator->AddPerLanguageLinkFlags(flags, this->GeneratorTarget,
+                                                linkLanguage, config);
+
   this->LocalGenerator->AddTargetPropertyLinkFlags(
     flags, this->GeneratorTarget, config);
 

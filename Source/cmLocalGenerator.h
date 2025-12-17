@@ -181,6 +181,10 @@ public:
   void AddPchDependencies(cmGeneratorTarget* target);
   void AddUnityBuild(cmGeneratorTarget* target);
   virtual void AddXCConfigSources(cmGeneratorTarget* /* target */) {}
+  void AddPerLanguageLinkFlags(std::string& flags,
+                               cmGeneratorTarget const* target,
+                               std::string const& lang,
+                               std::string const& config);
   void AppendTargetCreationLinkFlags(std::string& flags,
                                      cmGeneratorTarget const* target,
                                      std::string const& linkLanguage);
