@@ -135,7 +135,48 @@ private:
 
 cmCPackGenerator* cmCPackArchiveGenerator::Create7ZGenerator()
 {
+  return cmCPackArchiveGenerator::Create7ZLzmaGenerator();
+}
+
+cmCPackGenerator* cmCPackArchiveGenerator::Create7ZStoreGenerator()
+{
   return new cmCPackArchiveGenerator(cmArchiveWrite::CompressNone, "7zip",
+                                     ".7z");
+}
+
+cmCPackGenerator* cmCPackArchiveGenerator::Create7ZDeflateGenerator()
+{
+  return new cmCPackArchiveGenerator(cmArchiveWrite::CompressGZip, "7zip",
+                                     ".7z");
+}
+
+cmCPackGenerator* cmCPackArchiveGenerator::Create7ZBzip2Generator()
+{
+  return new cmCPackArchiveGenerator(cmArchiveWrite::CompressBZip2, "7zip",
+                                     ".7z");
+}
+
+cmCPackGenerator* cmCPackArchiveGenerator::Create7ZLzmaGenerator()
+{
+  return new cmCPackArchiveGenerator(cmArchiveWrite::CompressLZMA, "7zip",
+                                     ".7z");
+}
+
+cmCPackGenerator* cmCPackArchiveGenerator::Create7ZLzma2Generator()
+{
+  return new cmCPackArchiveGenerator(cmArchiveWrite::CompressXZ, "7zip",
+                                     ".7z");
+}
+
+cmCPackGenerator* cmCPackArchiveGenerator::Create7ZZstdGenerator()
+{
+  return new cmCPackArchiveGenerator(cmArchiveWrite::CompressZstd, "7zip",
+                                     ".7z");
+}
+
+cmCPackGenerator* cmCPackArchiveGenerator::Create7ZPPMdGenerator()
+{
+  return new cmCPackArchiveGenerator(cmArchiveWrite::CompressPPMd, "7zip",
                                      ".7z");
 }
 
@@ -177,7 +218,42 @@ cmCPackGenerator* cmCPackArchiveGenerator::CreateTarGenerator()
 
 cmCPackGenerator* cmCPackArchiveGenerator::CreateZIPGenerator()
 {
+  return cmCPackArchiveGenerator::CreateZipDeflateGenerator();
+}
+
+cmCPackGenerator* cmCPackArchiveGenerator::CreateZipStoreGenerator()
+{
   return new cmCPackArchiveGenerator(cmArchiveWrite::CompressNone, "zip",
+                                     ".zip");
+}
+
+cmCPackGenerator* cmCPackArchiveGenerator::CreateZipDeflateGenerator()
+{
+  return new cmCPackArchiveGenerator(cmArchiveWrite::CompressGZip, "zip",
+                                     ".zip");
+}
+
+cmCPackGenerator* cmCPackArchiveGenerator::CreateZipBzip2Generator()
+{
+  return new cmCPackArchiveGenerator(cmArchiveWrite::CompressBZip2, "zip",
+                                     ".zip");
+}
+
+cmCPackGenerator* cmCPackArchiveGenerator::CreateZipLzmaGenerator()
+{
+  return new cmCPackArchiveGenerator(cmArchiveWrite::CompressLZMA, "zip",
+                                     ".zip");
+}
+
+cmCPackGenerator* cmCPackArchiveGenerator::CreateZipLzma2Generator()
+{
+  return new cmCPackArchiveGenerator(cmArchiveWrite::CompressXZ, "zip",
+                                     ".zip");
+}
+
+cmCPackGenerator* cmCPackArchiveGenerator::CreateZipZstdGenerator()
+{
+  return new cmCPackArchiveGenerator(cmArchiveWrite::CompressZstd, "zip",
                                      ".zip");
 }
 

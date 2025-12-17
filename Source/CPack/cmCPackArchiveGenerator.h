@@ -24,6 +24,13 @@ public:
   using Superclass = cmCPackGenerator;
 
   static cmCPackGenerator* Create7ZGenerator();
+  static cmCPackGenerator* Create7ZStoreGenerator();
+  static cmCPackGenerator* Create7ZDeflateGenerator();
+  static cmCPackGenerator* Create7ZBzip2Generator();
+  static cmCPackGenerator* Create7ZLzmaGenerator();
+  static cmCPackGenerator* Create7ZLzma2Generator();
+  static cmCPackGenerator* Create7ZZstdGenerator();
+  static cmCPackGenerator* Create7ZPPMdGenerator();
   static cmCPackGenerator* CreateTBZ2Generator();
   static cmCPackGenerator* CreateTGZGenerator();
   static cmCPackGenerator* CreateTXZGenerator();
@@ -31,6 +38,12 @@ public:
   static cmCPackGenerator* CreateTZSTGenerator();
   static cmCPackGenerator* CreateTarGenerator();
   static cmCPackGenerator* CreateZIPGenerator();
+  static cmCPackGenerator* CreateZipStoreGenerator();
+  static cmCPackGenerator* CreateZipDeflateGenerator();
+  static cmCPackGenerator* CreateZipBzip2Generator();
+  static cmCPackGenerator* CreateZipLzmaGenerator();
+  static cmCPackGenerator* CreateZipLzma2Generator();
+  static cmCPackGenerator* CreateZipZstdGenerator();
 
   /**
    * Construct generator

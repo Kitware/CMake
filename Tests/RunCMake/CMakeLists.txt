@@ -1261,12 +1261,26 @@ set(cpack_tests
   RPM.COMPONENT_WITH_SPECIAL_CHARS
 
   7Z
+  7Z_STORE
+  7Z_DEFLATE
+  7Z_BZ2
+  7Z_LZMA
+  7Z_LZMA2
+  7Z_ZSTD
+  7Z_PPMD
   TAR
   TBZ2
   TGZ
   TXZ
   TZ
+  TZST
   ZIP
+  ZIP_STORE
+  ZIP_DEFLATE
+  ZIP_BZ2
+  ZIP_LZMA
+  ZIP_LZMA2
+  ZIP_ZSTD
   STGZ
   External
   )
@@ -1302,15 +1316,41 @@ if(CMAKE_SYSTEM_PROCESSOR STREQUAL "e2k" AND NOT DEFINED CMake_TEST_E2K_BROKEN_L
       RPM.DIST
       RPM.AUTO_SUFFIXES
       7Z
+      7Z_STORE
+      7Z_DEFLATE
+      7Z_BZ2
+      7Z_LZMA
+      7Z_LZMA2
+      7Z_ZSTD
+      7Z_PPMD
       TXZ
+      TZST
       TBZ2
       TGZ
       ZIP
+      ZIP_STORE
+      ZIP_DEFLATE
+      ZIP_BZ2
+      ZIP_LZMA
+      ZIP_LZMA2
+      ZIP_ZSTD
       STGZ
       External
       )
     set(CMake_TEST_E2K_BROKEN_LIBC 1)
   endif()
+endif()
+
+if(CMake_TEST_LibArchive_VERSION AND CMake_TEST_LibArchive_VERSION VERSION_LESS 3.8.0)
+  # Exclude tests, that require libarchive >= 3.8.0
+  # if the version of libarchive is less than required
+  list(REMOVE_ITEM cpack_tests
+    7Z_ZSTD
+    ZIP_BZ2
+    ZIP_LZMA
+    ZIP_LZMA2
+    ZIP_ZSTD
+  )
 endif()
 
 add_RunCMake_test_group(CPack "${cpack_tests}")

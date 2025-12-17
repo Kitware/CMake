@@ -46,8 +46,30 @@
 cmCPackGeneratorFactory::cmCPackGeneratorFactory()
 {
   if (cmCPackArchiveGenerator::CanGenerate()) {
-    this->RegisterGenerator("7Z", "7-Zip file format",
-                            cmCPackArchiveGenerator::Create7ZGenerator);
+    this->RegisterGenerator(
+      "7Z", "7-Zip file format with default compression algorithm",
+      cmCPackArchiveGenerator::Create7ZGenerator);
+    this->RegisterGenerator("7Z_STORE",
+                            "7-Zip file format without compression",
+                            cmCPackArchiveGenerator::Create7ZStoreGenerator);
+    this->RegisterGenerator("7Z_DEFLATE",
+                            "7-Zip file format with Deflate compression",
+                            cmCPackArchiveGenerator::Create7ZDeflateGenerator);
+    this->RegisterGenerator("7Z_BZ2",
+                            "7-Zip file format with BZip2 compression",
+                            cmCPackArchiveGenerator::Create7ZBzip2Generator);
+    this->RegisterGenerator("7Z_LZMA",
+                            "7-Zip file format with LZMA compression",
+                            cmCPackArchiveGenerator::Create7ZLzmaGenerator);
+    this->RegisterGenerator("7Z_LZMA2",
+                            "7-Zip file format with LZMA2 compression",
+                            cmCPackArchiveGenerator::Create7ZLzma2Generator);
+    this->RegisterGenerator("7Z_ZSTD",
+                            "7-Zip file format with Zstandard compression",
+                            cmCPackArchiveGenerator::Create7ZZstdGenerator);
+    this->RegisterGenerator("7Z_PPMD",
+                            "7-Zip file format with PPMd compression",
+                            cmCPackArchiveGenerator::Create7ZPPMdGenerator);
     this->RegisterGenerator("TBZ2", "Tar BZip2 compression",
                             cmCPackArchiveGenerator::CreateTBZ2Generator);
     this->RegisterGenerator("TGZ", "Tar GZip compression",
@@ -60,8 +82,26 @@ cmCPackGeneratorFactory::cmCPackGeneratorFactory()
                             cmCPackArchiveGenerator::CreateTZSTGenerator);
     this->RegisterGenerator("TAR", "Tar no compression",
                             cmCPackArchiveGenerator::CreateTarGenerator);
-    this->RegisterGenerator("ZIP", "ZIP file format",
-                            cmCPackArchiveGenerator::CreateZIPGenerator);
+    this->RegisterGenerator(
+      "ZIP", "ZIP file format with default compression algorithm",
+      cmCPackArchiveGenerator::CreateZIPGenerator);
+    this->RegisterGenerator("ZIP_STORE", "ZIP file format without compression",
+                            cmCPackArchiveGenerator::CreateZipStoreGenerator);
+    this->RegisterGenerator(
+      "ZIP_DEFLATE", "ZIP file format with Deflate compression",
+      cmCPackArchiveGenerator::CreateZipDeflateGenerator);
+    this->RegisterGenerator("ZIP_BZ2",
+                            "ZIP file format with BZip2 compression",
+                            cmCPackArchiveGenerator::CreateZipBzip2Generator);
+    this->RegisterGenerator("ZIP_LZMA",
+                            "ZIP file format with LZMA compression",
+                            cmCPackArchiveGenerator::CreateZipLzmaGenerator);
+    this->RegisterGenerator("ZIP_LZMA2",
+                            "ZIP file format with LZMA2 compression",
+                            cmCPackArchiveGenerator::CreateZipLzma2Generator);
+    this->RegisterGenerator("ZIP_ZSTD",
+                            "ZIP file format with Zstandard compression",
+                            cmCPackArchiveGenerator::CreateZipZstdGenerator);
   }
   if (cmCPackSTGZGenerator::CanGenerate()) {
     this->RegisterGenerator("STGZ", "Self extracting Tar GZip compression",
