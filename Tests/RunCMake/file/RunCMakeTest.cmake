@@ -91,6 +91,8 @@ if(NOT WIN32
   if(NOT CYGWIN)
     run_cmake(INSTALL-FOLLOW_SYMLINK_CHAIN)
   endif()
+  # Test that file(LOCK) doesn't truncate symlink targets (CVE regression test)
+  run_cmake(LOCK-symlink-no-truncate)
 endif()
 
 run_cmake(REAL_PATH-non-existing)

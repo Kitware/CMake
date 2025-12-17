@@ -3017,7 +3017,7 @@ bool HandleLockCommand(std::vector<std::string> const& args,
     cmSystemTools::SetFatalErrorOccurred();
     return false;
   }
-  FILE* file = cmsys::SystemTools::Fopen(path, "w");
+  FILE* file = cmsys::SystemTools::Fopen(path, "a");
   if (!file) {
     status.GetMakefile().IssueMessage(
       MessageType::FATAL_ERROR,
