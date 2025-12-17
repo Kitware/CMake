@@ -44,6 +44,8 @@ key ``$comment`` at any level within the JSON object to provide documentation.
 
 The root object recognizes the following fields:
 
+.. _`CMakePresets schema`:
+
 ``$schema``
   An optional string that provides a URI to the JSON schema that describes the
   structure of this JSON document. This field is used for validation and
@@ -51,41 +53,11 @@ The root object recognizes the following fields:
   behavior of the document itself. If this field is not specified, the JSON
   document will still be valid, but tools that use JSON schema for validation
   and autocompletion may not function correctly.
-  This is allowed in preset files specifying version ``8`` or above.
 
 ``version``
-  A required integer representing the version of the JSON schema.
-  The supported versions are:
-
-  ``1``
-    .. versionadded:: 3.19
-
-  ``2``
-    .. versionadded:: 3.20
-
-  ``3``
-    .. versionadded:: 3.21
-
-  ``4``
-    .. versionadded:: 3.23
-
-  ``5``
-    .. versionadded:: 3.24
-
-  ``6``
-    .. versionadded:: 3.25
-
-  ``7``
-    .. versionadded:: 3.27
-
-  ``8``
-    .. versionadded:: 3.28
-
-  ``9``
-    .. versionadded:: 3.30
-
-  ``10``
-    .. versionadded:: 3.31
+  A required integer representing the version of the JSON schema. See
+  `Versions`_ for discussion of the supported versions and the corresponding
+  version of CMake in which they were added.
 
 ``cmakeMinimumRequired``
   An optional object representing the minimum version of CMake needed to
@@ -217,6 +189,8 @@ that may contain the following fields:
 ``description``
   An optional string with a human-friendly description of the preset.
 
+.. _`CMakePresets generator`:
+
 ``generator``
   An optional string representing the generator to use for the preset. If
   ``generator`` is not specified, it must be inherited from the
@@ -259,6 +233,8 @@ that may contain the following fields:
     If no ``strategy`` field is given, or if the field uses the string form
     rather than the object form, the behavior is the same as ``"set"``.
 
+.. _`CMakePresets toolchainFile`:
+
 ``toolchainFile``
   An optional string representing the path to the toolchain file.
   This field supports `macro expansion`_. If a relative path is specified,
@@ -266,6 +242,8 @@ that may contain the following fields:
   relative to the source directory. This field takes precedence over any
   :variable:`CMAKE_TOOLCHAIN_FILE` value. It is allowed in preset files
   specifying version ``3`` or above.
+
+.. _`CMakePresets graphviz`:
 
 ``graphviz``
   An optional string representing the path to the graphviz input file,
@@ -276,6 +254,8 @@ that may contain the following fields:
   This field supports `macro expansion`_. If a relative path is specified,
   it is calculated relative to the current working directory. It is allowed
   in preset files specifying version ``10`` or above.
+
+.. _`CMakePresets binaryDir`:
 
 ``binaryDir``
   An optional string representing the path to the output binary directory.
@@ -405,6 +385,8 @@ that may contain the following fields:
   ``find``
     An optional boolean. Setting this to ``true`` is equivalent to passing
     :option:`--debug-find <cmake --debug-find>` on the command line.
+
+.. _`CMakePresets trace`:
 
 ``trace``
   An optional object specifying trace options. This is allowed in preset
@@ -576,6 +558,8 @@ that may contain the following fields:
   An optional bool. If true, equivalent to passing
   :option:`--clean-first <cmake--build --clean-first>` on the command line.
 
+.. _`CMakePresets resolvePackageReferences`:
+
 ``resolvePackageReferences``
   An optional string that specifies the package resolve mode. This is
   allowed in preset files specifying version ``4`` or above.
@@ -720,6 +704,8 @@ that may contain the following fields:
   :option:`--overwrite <ctest --overwrite>` for each value in the array.
   The array values support macro expansion.
 
+.. _`CMakePresets output`:
+
 ``output``
   An optional object specifying output options. The object may contain the
   following fields.
@@ -761,6 +747,8 @@ that may contain the following fields:
     passing :option:`--output-log <ctest --output-log>` on the command line.
     This field supports macro expansion.
 
+.. _`CMakePresets outputJUnitFile`:
+
   ``outputJUnitFile``
     An optional string specifying a path to a JUnit file. Equivalent to
     passing :option:`--output-junit <ctest --output-junit>` on the command line.
@@ -788,6 +776,8 @@ that may contain the following fields:
     bytes. Equivalent to passing
     :option:`--test-output-size-failed <ctest --test-output-size-failed>`
     on the command line.
+
+.. _`CMakePresets testOutputTruncation`:
 
   ``testOutputTruncation``
     An optional string specifying the test output truncation mode. Equivalent
@@ -1278,10 +1268,14 @@ Recognized macros include:
 
   This is a preset-specific macro.
 
+.. _`CMakePresets hostSystemName`:
+
 ``${hostSystemName}``
   The name of the host operating system. Contains the same value as
   :variable:`CMAKE_HOST_SYSTEM_NAME`. This is allowed in preset files
   specifying version ``3`` or above.
+
+.. _`CMakePresets fileDir`:
 
 ``${fileDir}``
   Path to the directory containing the preset file which contains the macro.
@@ -1289,6 +1283,8 @@ Recognized macros include:
 
 ``${dollar}``
   A literal dollar sign (``$``).
+
+.. _`CMakePresets pathListSep`:
 
 ``${pathListSep}``
   Native character for separating lists of paths, such as ``:`` or ``;``.
@@ -1332,6 +1328,114 @@ Recognized macros include:
   ``<macro-name>`` with a very short (preferably <= 4 characters) vendor
   identifier prefix, followed by a ``.``, followed by the macro name. For
   example, the Example IDE could have ``$vendor{xide.ideInstallDir}``.
+
+Versions
+========
+
+The JSON schema of ``CMakePresets.json`` and ``CMakeUserPresets.json``
+follows a version scheme where new versions are added and allowed in newer
+versions of CMake.
+
+A list of the supported versions along with the version of CMake in which
+they were added and a summary of the new features and changes is given below.
+
+  ``1``
+    .. versionadded:: 3.19
+
+    The initial version supports `Configure Presets <Configure Preset_>`_
+    and `Macro Expansion`_.
+
+  ``2``
+    .. versionadded:: 3.20
+
+    * `Build Presets <Build Preset_>`_ were added.
+    * `Test Presets <Test Preset_>`_ were added.
+
+  ``3``
+    .. versionadded:: 3.21
+
+    * The `Condition`_ object was added for `Configure <Configure Preset_>`_,
+      `Build <Build Preset_>`_, and `Test Presets <Test Preset_>`_.
+    * Changes to `Configure Presets <Configure Preset_>`_
+
+      * The `installDir <CMakePresets installDir_>`_ field was added.
+      * The `toolchainFile <CMakePresets toolchainFile_>`_ field was added.
+      * The `binaryDir <CMakePresets binaryDir_>`_ field is now optional.
+      * The `generator <CMakePresets generator_>`_ field is now optional.
+
+    * Changes to `Macro Expansion`_
+
+      * The `${hostSystemName} <CMakePresets hostSystemName_>`_ macro was
+        added.
+
+  ``4``
+    .. versionadded:: 3.23
+
+    * `Includes`_ were added to support including other JSON files in
+      ``CMakePresets.json`` and ``CMakeUserPresets.json``.
+    * Changes to `Build Presets <Build Preset_>`_
+
+      * The
+        `resolvePackageReferences <CMakePresets resolvePackageReferences_>`_
+        field was added.
+
+    * Changes to `Macro Expansion`_
+
+      * The `${fileDir} <CMakePresets fileDir_>`_ macro was added.
+
+  ``5``
+    .. versionadded:: 3.24
+
+    * Changes to `Test Presets <Test Preset_>`_
+
+      * The `testOutputTruncation <CMakePresets testOutputTruncation_>`_
+        field was added to the `output <CMakePresets output_>`_ object.
+
+    * Changes to `Macro Expansion`_
+
+      * The `${pathListSep} <CMakePresets pathListSep_>`_ macro was added.
+
+  ``6``
+    .. versionadded:: 3.25
+
+    * `Package Presets <Package Preset_>`_ were added.
+    * `Workflow Presets <Workflow Preset_>`_ were added.
+    * Changes to `Test Presets <Test Preset_>`_
+
+      * The `outputJUnitFile <CMakePresets outputJUnitFile_>`_ field was added
+        to the `output <CMakePresets output_>`_ object.
+
+  ``7``
+    .. versionadded:: 3.27
+
+    * Changes to `Configure Presets <Configure Preset_>`_
+
+      * The `trace <CMakePresets trace_>`_ field was added.
+
+    * Changes to `Includes`_
+
+      * The ``include`` field now supports ``$penv{}`` `macro expansion`_.
+
+  ``8``
+    .. versionadded:: 3.28
+
+    * The `$schema <CMakePresets schema_>`_ field was added to the root object.
+
+  ``9``
+    .. versionadded:: 3.30
+
+    * Changes to `Includes`_
+
+      * The ``include`` field now supports other types of `macro expansion`_.
+
+  ``10``
+    .. versionadded:: 3.31
+
+    * The optional ``$comment`` field was added to support documentation
+      throughout ``CMakePresets.json`` and ``CMakeUserPresets.json``.
+    * Changes to `Configure Presets <Configure Preset_>`_:
+
+      * The `graphviz <CMakePresets graphviz_>`_ field was added.
 
 Schema
 ======
