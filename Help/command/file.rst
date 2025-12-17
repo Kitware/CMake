@@ -966,12 +966,22 @@ Archiving
 
       This is an alias for ``XZ``.
 
+    * ``PPMd``
+
+      .. versionadded:: 4.3
+
+      This compression method is only supported by the ``7zip`` archive format.
+
     * ``XZ``
     * ``Zstd``
 
     .. note::
       With ``FORMAT`` set to ``raw``, only one file will be compressed
       with the compression type specified by ``COMPRESSION``.
+
+    .. versionadded:: 4.3
+
+      The ``7zip`` and ``zip`` formats support changing the default compression.
 
   ``COMPRESSION_LEVEL <compression-level>``
     .. versionadded:: 3.19
@@ -981,9 +991,18 @@ Archiving
     default being 0.  The ``COMPRESSION`` option must be present when
     ``COMPRESSION_LEVEL`` is given.
 
+    The value ``0`` is used to specify the default compression level.
+    It is selected automatically by the archive library backend and
+    not directly set by CMake itself. The default compression level
+    may vary between archive formats, platforms, etc.
+
     .. versionadded:: 3.26
       The ``<compression-level>`` of the ``Zstd`` algorithm can be set
       between 0-19.
+
+    .. versionadded:: 4.3
+      The ``<compression-level>`` can be specified for the ``7zip`` and ``zip``
+      formats too. The ``Zstd`` algorithm compression level can be set between 0-19, except for ``zip`` format.
 
   ``MTIME <mtime>``
     Specify the modification time recorded in tarball entries.
