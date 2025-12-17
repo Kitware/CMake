@@ -12,7 +12,7 @@ function(instrument test)
     "INSTALL_PARALLEL"
     "TEST"
     "WORKFLOW"
-    "NO_WARN"
+    "EXPERIMENTAL_WARNING"
     "COPY_QUERIES"
     "COPY_QUERIES_GENERATED"
     "STATIC_QUERY"
@@ -55,7 +55,10 @@ function(instrument test)
   if (EXISTS ${query})
     file(MAKE_DIRECTORY ${v1}/query)
     configure_file(${query} ${v1}/query/${test}.json)
-  elseif (EXISTS ${cmake_file})
+  else ()
+    if (NOT EXISTS ${cmake_file} AND NOT EXISTS ${cmake_file}.in)
+      set(cmake_file ${query_dir}/default.cmake)
+    endif()
     list(APPEND ARGS_CONFIGURE_ARG "-DINSTRUMENT_COMMAND_FILE=${cmake_file}")
   endif()
 
@@ -81,7 +84,7 @@ function(instrument test)
 
   # Configure Test Case
   set(RunCMake_TEST_NO_CLEAN 1)
-  if (ARGS_NO_WARN)
+  if (NOT ARGS_EXPERIMENTAL_WARNING)
     list(APPEND ARGS_CONFIGURE_ARG "-Wno-dev")
   endif()
   if (ARGS_FAIL)
@@ -198,26 +201,29 @@ instrument(both-query
 
 # Test cmake_instrumentation command
 instrument(cmake-command
-  COPY_QUERIES NO_WARN STATIC_QUERY DYNAMIC_QUERY
+  COPY_QUERIES STATIC_QUERY DYNAMIC_QUERY
   CHECK_SCRIPT check-generated-queries.cmake
 )
 instrument(cmake-command-data
-  COPY_QUERIES NO_WARN BUILD INSTALL TEST DYNAMIC_QUERY
+  COPY_QUERIES BUILD INSTALL TEST DYNAMIC_QUERY
   CHECK_SCRIPT check-data-dir.cmake
 )
-instrument(cmake-command-bad-api-version NO_WARN)
-instrument(cmake-command-bad-data-version NO_WARN)
-instrument(cmake-command-missing-version NO_WARN)
-instrument(cmake-command-bad-arg NO_WARN)
+instrument(cmake-command-experimental-warning
+  EXPERIMENTAL_WARNING
+)
+instrument(cmake-command-bad-api-version)
+instrument(cmake-command-bad-data-version)
+instrument(cmake-command-missing-version)
+instrument(cmake-command-bad-arg)
 instrument(cmake-command-parallel-install
-  BUILD INSTALL TEST NO_WARN INSTALL_PARALLEL DYNAMIC_QUERY
+  BUILD INSTALL TEST INSTALL_PARALLEL DYNAMIC_QUERY
   CHECK_SCRIPT check-data-dir.cmake)
 instrument(cmake-command-resets-generated
-  NO_WARN COPY_QUERIES_GENERATED
+  COPY_QUERIES_GENERATED
   CHECK_SCRIPT check-data-dir.cmake
 )
 instrument(cmake-command-cmake-build
-  NO_WARN BUILD
+  BUILD
   CHECK_SCRIPT check-no-make-program-hooks.cmake
 )
 if(RunCMake_GENERATOR STREQUAL "Borland Makefiles")
@@ -226,22 +232,22 @@ if(RunCMake_GENERATOR STREQUAL "Borland Makefiles")
 endif()
 if(NOT Skip_COMMAND_FAILURES_Case)
   instrument(cmake-command-failures
-    FAIL NO_WARN BUILD TEST INSTALL
+    FAIL BUILD TEST INSTALL
     CHECK_SCRIPT check-data-dir.cmake
   )
 endif()
 instrument(cmake-command-workflow
-  NO_WARN WORKFLOW
+  WORKFLOW
   CHECK_SCRIPT check-workflow-hook.cmake
 )
 
 # Test CUSTOM_CONTENT
 instrument(cmake-command-custom-content
-  NO_WARN BUILD
+  BUILD
   CONFIGURE_ARG "-DN=1"
 )
 instrument(cmake-command-custom-content
-  NO_WARN BUILD PRESERVE_DATA
+  BUILD PRESERVE_DATA
   CONFIGURE_ARG "-DN=2"
   CHECK_SCRIPT check-custom-content.cmake
 )
@@ -252,18 +258,18 @@ file(TOUCH ${fakeIndex})
 # fakeIndex newer than all content files prevents their deletion
 set(EXPECTED_CONTENT_FILES 2)
 instrument(cmake-command-custom-content
-  NO_WARN NO_CONFIGURE MANUAL_HOOK PRESERVE_DATA
+  NO_CONFIGURE MANUAL_HOOK PRESERVE_DATA
   CHECK_SCRIPT check-custom-content-removed.cmake
 )
 file(REMOVE ${fakeIndex})
 # old content files will be removed if no index file exists
 set(EXPECTED_CONTENT_FILES 1)
 instrument(cmake-command-custom-content
-  NO_WARN NO_CONFIGURE MANUAL_HOOK PRESERVE_DATA
+  NO_CONFIGURE MANUAL_HOOK PRESERVE_DATA
   CHECK_SCRIPT check-custom-content-removed.cmake
 )
-instrument(cmake-command-custom-content-bad-type NO_WARN)
-instrument(cmake-command-custom-content-bad-content NO_WARN)
+instrument(cmake-command-custom-content-bad-type)
+instrument(cmake-command-custom-content-bad-content)
 
 # Test Google trace
 instrument(trace-query
@@ -271,10 +277,10 @@ instrument(trace-query
   CHECK_SCRIPT check-generated-queries.cmake
 )
 instrument(cmake-command-trace
-  NO_WARN BUILD INSTALL TEST TRACE_QUERY
+  BUILD INSTALL TEST TRACE_QUERY
 )
 instrument(cmake-command-trace
-  NO_WARN BUILD PRESERVE_DATA
+  BUILD PRESERVE_DATA
   CHECK_SCRIPT check-trace-removed.cmake
 )
 
@@ -304,9 +310,9 @@ elseif(RunCMake_GENERATOR STREQUAL "NMake Makefiles")
 endif()
 if(NOT Skip_BUILD_MAKE_PROGRAM_Case)
   instrument(cmake-command-make-program
-    NO_WARN BUILD_MAKE_PROGRAM
+    BUILD_MAKE_PROGRAM
     CHECK_SCRIPT check-make-program-hooks.cmake)
   instrument(cmake-command-build-snippet
-    NO_WARN BUILD_MAKE_PROGRAM
+    BUILD_MAKE_PROGRAM
     CHECK_SCRIPT check-data-dir.cmake)
 endif()
