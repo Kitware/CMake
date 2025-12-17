@@ -1,19 +1,21 @@
 #!/usr/bin/env bash
 set -e
-readonly usage='usage: sign-notarize.bash -i <id> -k <keychain-profile> [--] <package>.dmg
+readonly usage='usage: sign-notarize.bash <options>... [--] <package>.dmg
 
 Sign and notarize the "CMake.app" bundle inside the given "<package>.dmg" disk image.
 Also produce a "<package>.tar.gz" tarball containing the same "CMake.app".
 
 Options:
 
-    -i <id>                Signing Identity
-    -k <keychain-profile>  Keychain profile containing stored credentials
+    -id <id>               Signing Identity
+    -kp <keychain-profile> Keychain profile containing notarization credentials.
+    -kc <keychain-path>    Keychain path containing named profile.
 
 Create the keychain profile ahead of time using
 
     xcrun notarytool store-credentials <keychain-profile> \
-      --apple-id <dev-acct> --team-id <team-id> [--password <app-specific-password>]
+      --apple-id <dev-acct> --team-id <team-id> \
+      [--keychain <keychain-path>] [--password <app-specific-password>]
 
 where:
 
@@ -42,11 +44,13 @@ die() {
 }
 
 id=''
+keychain=''
 keychain_profile=''
 while test "$#" != 0; do
     case "$1" in
-    -i) shift; id="$1" ;;
-    -k) shift; keychain_profile="$1" ;;
+    -id|-i) shift; id="$1" ;;
+    -kc|--keychain) shift; keychain="$1" ;;
+    -kp|-k|--keychain-profile) shift; keychain_profile="$1" ;;
     --) shift ; break ;;
     -*) die "$usage" ;;
     *) break ;;
@@ -59,14 +63,34 @@ case "$1" in
 esac
 test "$#" = 0 || die "$usage"
 
-# Verify arguments.
-if test -z "$id" -o -z "$keychain_profile"; then
-    die "$usage"
-fi
-
 # Verify environment.
 if ! xcrun --find notarytool 2>/dev/null; then
     die "'xcrun notarytool' not found"
+fi
+
+# If a signing identity is not provided on the command-line,
+# check for a GitLab CI variable in the environment, and then
+# fall back to finding one automatically.
+if test -z "$id" -a -n "$CODESIGN_IDENTITY"; then
+    id="$CODESIGN_IDENTITY"
+elif test -z "$id" && found_id="$(security find-identity -v -p codesigning 2>/dev/null | grep -E -m 1 -o '\<[0-9A-F]{40}\>')"; then
+    id="$found_id"
+else
+    echo "No codesigning identity detected." 1>&2
+fi
+
+# If a keychain path/profile is not provided on the command-line,
+# check for a GitLab CI variable in the environment.
+if test -z "$keychain" -a -n "$NOTARYTOOL_KEYCHAIN"; then
+    keychain="$NOTARYTOOL_KEYCHAIN"
+fi
+if test -z "$keychain_profile" -a -n "$NOTARYTOOL_KEYCHAIN_PROFILE"; then
+    keychain_profile="$NOTARYTOOL_KEYCHAIN_PROFILE"
+fi
+
+# Verify arguments.
+if test -z "$id" -o -z "$keychain_profile"; then
+    die "$usage"
 fi
 
 readonly tmpdir="$(mktemp -d)"
@@ -91,7 +115,8 @@ readonly vol_name="$(basename "${dmg%.dmg}")"
 readonly vol_path="/Volumes/$vol_name"
 hdiutil attach "${udrw_dmg}"
 
-codesign --verify --timestamp --options=runtime --verbose --force --deep \
+# Sign the application.
+codesign --verify --timestamp --options=runtime --verbose --force \
   -s "$id" \
   --entitlements "$entitlements_xml" \
   "$vol_path"/CMake.app/Contents/bin/cmake \
@@ -102,8 +127,21 @@ codesign --verify --timestamp --options=runtime --verbose --force --deep \
   "$vol_path"/CMake.app/Contents/PlugIns/*/lib*.dylib \
   "$vol_path"/CMake.app
 
+# Prepare an application archive.
 ditto -c -k --keepParent "$vol_path/CMake.app" "$tmpdir/CMake.app.zip"
-xcrun notarytool submit "$tmpdir/CMake.app.zip" --keychain-profile "$keychain_profile" --wait
+
+# Notarize the application.
+notarize="xcrun notarytool submit '$tmpdir/CMake.app.zip'"
+if test -n "$keychain_profile"; then
+    notarize="$notarize --keychain-profile '$keychain_profile'"
+    if test -n "$keychain"; then
+        notarize="$notarize --keychain '$keychain'"
+    fi
+fi
+notarize="$notarize --wait"
+eval "$notarize"
+
+# Staple the notarization.
 xcrun stapler staple "$vol_path/CMake.app"
 
 # Create a tarball of the volume next to the original disk image.
