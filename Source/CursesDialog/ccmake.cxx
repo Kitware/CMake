@@ -144,7 +144,7 @@ int main(int argc, char const* const* argv)
 
   myform = new cmCursesMainForm(args, x);
   if (myform->LoadCache(cacheDir.c_str())) {
-    curses_clear();
+    clear();
     touchwin(stdscr);
     endwin();
     delete myform;
@@ -184,7 +184,7 @@ int main(int argc, char const* const* argv)
   }
 
   // Need to clean-up better
-  curses_clear();
+  clear();
   touchwin(stdscr);
   endwin();
   delete cmCursesForm::CurrentForm;

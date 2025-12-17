@@ -197,15 +197,15 @@ bool cmCursesStringWidget::PrintKeys()
   if (this->InEdit) {
     char fmt_s[] = "%s";
     // Clean the toolbar
-    curses_move(y - 4, 0);
+    move(y - 4, 0);
     clrtoeol();
-    curses_move(y - 3, 0);
+    move(y - 3, 0);
     printw(fmt_s, "Editing option, press [enter] to confirm");
     clrtoeol();
-    curses_move(y - 2, 0);
+    move(y - 2, 0);
     printw(fmt_s, "                press [esc] to cancel");
     clrtoeol();
-    curses_move(y - 1, 0);
+    move(y - 1, 0);
     clrtoeol();
 
     return true;
