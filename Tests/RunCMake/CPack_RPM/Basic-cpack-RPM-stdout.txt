@@ -1,0 +1,7 @@
+CPack: Create package using RPM
+CPack: Install projects(
+CPack: - Run preinstall target for: Basic)?
+CPack: - Install project: Basic \[Release\]
+CPack: Create package
+CPack: - package: [^
+]*/Tests/RunCMake/CPack_RPM/Basic-build/Basic-1\.2\.3-[A-Za-z]+\.rpm generated\.

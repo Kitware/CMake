@@ -1,0 +1,14 @@
+-- Basic-1\.2\.3-[A-Za-z]+\.deb
+-- dpkg-deb --info(
+ [^
+]+)*
+ Maintainer: somebody@cmake\.org(
+ [^
+]+)*
+-- dpkg-deb --contents
+d[rwx-]+ root/root         0 [0-9-]+ [0-9:]+ \./usr/
+d[rwx-]+ root/root         0 [0-9-]+ [0-9:]+ \./usr/share/
+d[rwx-]+ root/root         0 [0-9-]+ [0-9:]+ \./usr/share/doc/
+d[rwx-]+ root/root         0 [0-9-]+ [0-9:]+ \./usr/share/doc/basic/
+-[rwx-]+ root/root         0 [0-9-]+ [0-9:]+ \./usr/share/doc/basic/basic\.txt
+--

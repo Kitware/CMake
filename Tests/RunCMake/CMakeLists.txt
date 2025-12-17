@@ -1321,6 +1321,14 @@ if(CMake_TEST_CPACK_APPIMAGE)
   )
 endif()
 
+if(CMake_TEST_CPACK_DEB)
+  add_RunCMake_test(CPack_DEB)
+endif()
+
+if(CMake_TEST_CPACK_RPM)
+  add_RunCMake_test(CPack_RPM)
+endif()
+
 if(CMake_TEST_CPACK_WIX3 OR CMake_TEST_CPACK_WIX4)
   add_RunCMake_test(CPack_WIX
     -DCMake_TEST_CPACK_WIX3=${CMake_TEST_CPACK_WIX3}

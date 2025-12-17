@@ -157,24 +157,38 @@ if(BUILD_TESTING)
   # Look for git to use for tests.
   find_program(GIT_EXECUTABLE NAMES git)
 
-  # Look for rpmbuild to use for tests.
-  # The tool does not work with spaces in the path.
-  if(NOT CMAKE_CURRENT_BINARY_DIR MATCHES " ")
-    find_program(RPMBUILD_EXECUTABLE NAMES rpmbuild)
-  else()
-    set(RPMBUILD_EXECUTABLE "RPMBUILD_EXECUTABLE-NOTFOUND")
+  if(NOT DEFINED CMake_TEST_CPACK_RPM)
+    # Look for rpmbuild to use for tests.
+    # The tool does not work with spaces in the path.
+    if(NOT CMAKE_CURRENT_BINARY_DIR MATCHES " ")
+      find_program(RPMBUILD_EXECUTABLE NAMES rpmbuild)
+    else()
+      set(RPMBUILD_EXECUTABLE "RPMBUILD_EXECUTABLE-NOTFOUND")
+    endif()
+    if(RPMBUILD_EXECUTABLE)
+      set(CMake_TEST_CPACK_RPM 1)
+    else()
+      set(CMake_TEST_CPACK_RPM 0)
+    endif()
   endif()
 
-  if(RPMBUILD_EXECUTABLE)
+  if(CMake_TEST_CPACK_RPM)
     set(CPACK_BINARY_RPM ON)
   else()
     set(CPACK_BINARY_RPM OFF)
   endif()
 
-  # Look for dpkg to use for tests.
-  find_program(DPKG_EXECUTABLE NAMES dpkg)
+  if(NOT DEFINED CMake_TEST_CPACK_DEB)
+    # Look for dpkg to use for tests.
+    find_program(DPKG_EXECUTABLE NAMES dpkg)
+    if(DPKG_EXECUTABLE)
+      set(CMake_TEST_CPACK_DEB 1)
+    else()
+      set(CMake_TEST_CPACK_DEB 0)
+    endif()
+  endif()
 
-  if(DPKG_EXECUTABLE)
+  if(CMake_TEST_CPACK_DEB)
     set(CPACK_BINARY_DEB ON)
   else()
     set(CPACK_BINARY_DEB OFF)
@@ -1205,7 +1219,7 @@ if(BUILD_TESTING)
     endforeach()
 
     # debian specific
-    if(DPKG_EXECUTABLE)
+    if(CMake_TEST_CPACK_DEB)
       unset(CPackRun_CPackDEBConfiguration_ALL_CONFIGS)
       set(DEB_TEST_NAMES "CPackComponentsDEB")
       set(DEB_CONFIGURATIONS_TO_TEST "components-lintian-dpkgdeb-checks"
