@@ -1,5 +1,5 @@
 CMake Error at JSONWrongMode\.cmake:1 \(string\):
   string sub-command JSON got an invalid mode 'FOO', expected one of GET,
-  TYPE, MEMBER, LENGTH, REMOVE, SET, EQUAL\.
+  GET_RAW, TYPE, MEMBER, LENGTH, REMOVE, SET, EQUAL, STRING_ENCODE\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)

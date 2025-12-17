@@ -46,7 +46,10 @@ Synopsis
 
   `JSON`_
     string(JSON <out-var> [ERROR_VARIABLE <error-var>]
-           {`GET <JSON-GET_>`__ | `TYPE <JSON-TYPE_>`__ | `LENGTH <JSON-LENGTH_>`__ | `REMOVE <JSON-REMOVE_>`__}
+           {`GET <JSON-GET_>`__ | `GET_RAW <JSON-GET-RAW_>`__ | `TYPE <JSON-TYPE_>`__ | `LENGTH <JSON-LENGTH_>`__}
+           <json-string> [<member|index> ...])
+    string(JSON <out-var> [ERROR_VARIABLE <error-var>]
+           `REMOVE <JSON-REMOVE_>`__
            <json-string> <member|index> [<member|index> ...])
     string(JSON <out-var> [ERROR_VARIABLE <error-var>]
            `MEMBER <JSON-MEMBER_>`__ <json-string>
@@ -56,6 +59,8 @@ Synopsis
            <member|index> [<member|index> ...] <value>)
     string(JSON <out-var> [ERROR_VARIABLE <error-var>]
            `EQUAL <JSON-EQUAL_>`__ <json-string1> <json-string2>)
+    string(JSON <out-var> [ERROR_VARIABLE <error-var>]
+           `STRING_ENCODE <STRING-ENCODE_>`__ <string>)
 
 Search and Replace
 ^^^^^^^^^^^^^^^^^^
@@ -549,7 +554,7 @@ string is passed as a single argument even if it contains semicolons.
 
 .. signature::
   string(JSON <out-var> [ERROR_VARIABLE <error-variable>]
-         GET <json-string> <member|index> [<member|index> ...])
+         GET <json-string> [<member|index> ...])
   :target: JSON-GET
 
   Get an element from ``<json-string>`` at the location given
@@ -561,7 +566,17 @@ string is passed as a single argument even if it contains semicolons.
 
 .. signature::
   string(JSON <out-var> [ERROR_VARIABLE <error-variable>]
-         TYPE <json-string> <member|index> [<member|index> ...])
+         GET_RAW <json-string> [<member|index> ...])
+  :target: JSON-GET-RAW
+
+  Get an element from ``<json-string>`` at the location given
+  by the list of ``<member|index>`` arguments. Similar to
+  `GET <JSON-GET_>`__, but does not convert number, string,
+  boolean, or null elements.
+
+.. signature::
+  string(JSON <out-var> [ERROR_VARIABLE <error-variable>]
+         TYPE <json-string> [<member|index> ...])
   :target: JSON-TYPE
 
   Get the type of an element in ``<json-string>`` at the location
@@ -619,3 +634,11 @@ string is passed as a single argument even if it contains semicolons.
   and ``<json-string2>`` should be valid JSON.  The ``<out-var>``
   will be set to a true value if the JSON objects are considered equal,
   or a false value otherwise.
+
+.. signature::
+  string(JSON <out-var> [ERROR_VARIABLE <error-var>]
+         STRING_ENCODE <string>)
+  :target: STRING-ENCODE
+
+  Turn a raw string into a JSON string surrounded by quotes. Special characters
+  will be properly escaped inside the JSON string.
