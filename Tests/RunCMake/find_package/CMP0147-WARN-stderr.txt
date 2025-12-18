@@ -7,13 +7,5 @@
   specific short-term circumstances\.  Projects should be ported to the NEW
   behavior and not rely on setting a policy to OLD\.
 Call Stack \(most recent call first\):
-  CMP0147-NEW\.cmake:[0-9]+ \(include\)
-  CMakeLists\.txt:[0-9]+ \(include\)
-+
-CMake Error at [^
-]*/Modules/FindCUDA\.cmake:[0-9]+ \(message\):
-  The FindCUDA module does not work in Visual Studio with policy CMP0147\.
-Call Stack \(most recent call first\):
-  CMP0147-common\.cmake:[0-9]+ \(find_package\)
-  CMP0147-NEW\.cmake:[0-9]+ \(include\)
+  CMP0147-WARN\.cmake:[0-9]+ \(include\)
   CMakeLists\.txt:[0-9]+ \(include\)$
