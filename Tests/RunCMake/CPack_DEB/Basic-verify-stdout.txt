@@ -11,4 +11,8 @@ d[rwx-]+ root/root         0 [0-9-]+ [0-9:]+ \./usr/share/
 d[rwx-]+ root/root         0 [0-9-]+ [0-9:]+ \./usr/share/doc/
 d[rwx-]+ root/root         0 [0-9-]+ [0-9:]+ \./usr/share/doc/basic/
 -[rwx-]+ root/root         0 [0-9-]+ [0-9:]+ \./usr/share/doc/basic/basic\.txt
+-- ar t
+debian-binary
+control\.tar\.xz
+data\.tar\.xz
 --
