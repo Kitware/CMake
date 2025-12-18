@@ -337,17 +337,17 @@ void cmCursesMainForm::PrintKeys(int process /* = 0 */)
                "      [h] Help              [q] Quit without generating");
     }
 
-    curses_move(y - 4, 0);
+    move(y - 4, 0);
     char fmt[512] = "Keys: [enter] Edit an entry [d] Delete an entry";
     if (process) {
       memset(fmt, ' ', 57);
     }
     printw(fmt_s, fmt);
-    curses_move(y - 3, 0);
+    move(y - 3, 0);
     printw(fmt_s, firstLine);
-    curses_move(y - 2, 0);
+    move(y - 2, 0);
     printw(fmt_s, secondLine);
-    curses_move(y - 1, 0);
+    move(y - 1, 0);
     printw(fmt_s, thirdLine);
   }
 
@@ -355,7 +355,7 @@ void cmCursesMainForm::PrintKeys(int process /* = 0 */)
     char pageLine[512] = "";
     snprintf(pageLine, sizeof(pageLine), "Page %d of %d", cw->GetPage(),
              this->NumberOfPages);
-    curses_move(0, 65 - static_cast<unsigned int>(strlen(pageLine)) - 1);
+    move(0, 65 - static_cast<unsigned int>(strlen(pageLine)) - 1);
     printw(fmt_s, pageLine);
   }
 
@@ -372,8 +372,8 @@ void cmCursesMainForm::UpdateStatusBar(cm::optional<std::string> message)
   // If window size is too small, display error and return
   if (x < cmCursesMainForm::MIN_WIDTH || x < this->InitialWidth ||
       y < cmCursesMainForm::MIN_HEIGHT) {
-    curses_clear();
-    curses_move(0, 0);
+    clear();
+    move(0, 0);
     char fmt[] = "Window is too small. A size of at least %dx%d is required.";
     printw(fmt,
            (cmCursesMainForm::MIN_WIDTH < this->InitialWidth
@@ -416,7 +416,7 @@ void cmCursesMainForm::UpdateStatusBar(cm::optional<std::string> message)
   // Pad with spaces to erase any previous text,
   // or truncate as necessary to fit the screen
   bar.resize(x, ' ');
-  curses_move(y - 5, 0);
+  move(y - 5, 0);
   attron(A_STANDOUT);
   char fmt_s[] = "%s";
   printw(fmt_s, bar.c_str());
@@ -438,7 +438,7 @@ void cmCursesMainForm::UpdateStatusBar(cm::optional<std::string> message)
   std::string version = "CMake Version ";
   version += cmVersion::GetCMakeVersion();
   version.resize(std::min<std::string::size_type>(x, version.size()));
-  curses_move(y - 4, x - static_cast<int>(version.size()));
+  move(y - 4, x - static_cast<int>(version.size()));
   printw(fmt_s, version.c_str());
 
   pos_form_cursor(this->Form);
@@ -690,8 +690,8 @@ void cmCursesMainForm::HandleInput()
       std::string searchstr = "Search: " + this->SearchString;
       this->UpdateStatusBar(searchstr);
       this->PrintKeys(1);
-      curses_move(y - 5, static_cast<unsigned int>(searchstr.size()));
-      // curses_move(1,1);
+      move(y - 5, static_cast<unsigned int>(searchstr.size()));
+      // move(1,1);
       touchwin(stdscr);
       refresh();
     }

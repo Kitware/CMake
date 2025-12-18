@@ -4,39 +4,16 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-// Record whether __attribute__ is currently defined.  See purpose below.
-#ifndef __attribute__
-#  define cm_no__attribute__
-#endif
-
 #if defined(__hpux)
 #  define _BOOL_DEFINED
 #  include <sys/time.h>
 #endif
 
-#include <form.h>
-
-// on some machines move erase and clear conflict with stl
-// so remove them from the namespace
-inline void curses_move(unsigned int x, unsigned int y)
-{
-  move(x, y);
-}
-
-inline void curses_clear()
-{
-  erase();
-  clearok(stdscr, TRUE);
-}
-
-#undef move
-#undef erase
-#undef clear
-
-// The curses headers on some platforms (e.g. Solaris) may
-// define __attribute__ as a macro.  This breaks C++ headers
-// in some cases, so undefine it now.
-#if defined(cm_no__attribute__) && defined(__attribute__)
-#  undef __attribute__
+// Tell curses headers on Solaris to not define macros
+// that conflict with C++ standard library interfaces.
+#if defined(__sun__)
+#  define NOMACROS
+#  define NCURSES_NOMACROS
 #endif
-#undef cm_no__attribute__
+
+#include <form.h>
