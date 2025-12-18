@@ -26,18 +26,6 @@ endif()
 string(REGEX REPLACE "^([0-9]+)\\.([0-9]+).*$" "\\1" DARWIN_MAJOR_VERSION "${CMAKE_SYSTEM_VERSION}")
 string(REGEX REPLACE "^([0-9]+)\\.([0-9]+).*$" "\\2" DARWIN_MINOR_VERSION "${CMAKE_SYSTEM_VERSION}")
 
-# Do not use the "-Wl,-search_paths_first" flag with the OSX 10.2 compiler.
-# Done this way because it is too early to do a TRY_COMPILE.
-if(NOT DEFINED HAVE_FLAG_SEARCH_PATHS_FIRST)
-  set(HAVE_FLAG_SEARCH_PATHS_FIRST 0)
-  if("${DARWIN_MAJOR_VERSION}" GREATER 6)
-    set(HAVE_FLAG_SEARCH_PATHS_FIRST 1)
-  endif()
-endif()
-# More desirable, but does not work:
-  #include(CheckCXXCompilerFlag)
-  #check_cxx_compiler_flag("-Wl,-search_paths_first" HAVE_FLAG_SEARCH_PATHS_FIRST)
-
 set(CMAKE_SHARED_LIBRARY_PREFIX "lib")
 set(CMAKE_SHARED_LIBRARY_SUFFIX ".dylib")
 set(CMAKE_EXTRA_SHARED_LIBRARY_SUFFIXES ".tbd" ".so")
@@ -54,11 +42,7 @@ endif()
 foreach(lang C CXX OBJC OBJCXX)
   set(CMAKE_${lang}_OSX_COMPATIBILITY_VERSION_FLAG "-compatibility_version ")
   set(CMAKE_${lang}_OSX_CURRENT_VERSION_FLAG "-current_version ")
-  set(CMAKE_${lang}_LINK_FLAGS "-Wl,-headerpad_max_install_names")
-
-  if(HAVE_FLAG_SEARCH_PATHS_FIRST)
-    set(CMAKE_${lang}_LINK_FLAGS "-Wl,-search_paths_first ${CMAKE_${lang}_LINK_FLAGS}")
-  endif()
+  set(CMAKE_${lang}_LINK_FLAGS "-Wl,-search_paths_first -Wl,-headerpad_max_install_names")
 
   set(CMAKE_SHARED_LIBRARY_CREATE_${lang}_FLAGS "-dynamiclib -Wl,-headerpad_max_install_names")
   set(CMAKE_SHARED_MODULE_CREATE_${lang}_FLAGS "-bundle -Wl,-headerpad_max_install_names")
