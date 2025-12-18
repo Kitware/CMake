@@ -4576,35 +4576,32 @@ bool cmVisualStudio10TargetGenerator::ComputeLinkOptions(
   }
 
   if (this->MSTools) {
-    if (this->GeneratorTarget->GetType() == cmStateEnums::EXECUTABLE) {
-      // Specify an entry point for executables.
-      if (this->GeneratorTarget->IsWin32Executable(config)) {
-        if (this->GlobalGenerator->TargetsWindowsCE()) {
-          linkOptions.AddFlag("SubSystem", "WindowsCE");
-          if (this->GeneratorTarget->GetType() == cmStateEnums::EXECUTABLE) {
-            if (this->ClOptions[config]->UsingUnicode()) {
-              linkOptions.AddFlag("EntryPointSymbol", "wWinMainCRTStartup");
-            } else {
-              linkOptions.AddFlag("EntryPointSymbol", "WinMainCRTStartup");
-            }
+    if (this->GeneratorTarget->IsWin32Executable(config)) {
+      if (this->GlobalGenerator->TargetsWindowsCE()) {
+        linkOptions.AddFlag("SubSystem", "WindowsCE");
+        if (this->GeneratorTarget->GetType() == cmStateEnums::EXECUTABLE) {
+          if (this->ClOptions[config]->UsingUnicode()) {
+            linkOptions.AddFlag("EntryPointSymbol", "wWinMainCRTStartup");
+          } else {
+            linkOptions.AddFlag("EntryPointSymbol", "WinMainCRTStartup");
           }
-        } else {
-          linkOptions.AddFlag("SubSystem", "Windows");
         }
       } else {
-        if (this->GlobalGenerator->TargetsWindowsCE()) {
-          linkOptions.AddFlag("SubSystem", "WindowsCE");
-          if (this->GeneratorTarget->GetType() == cmStateEnums::EXECUTABLE) {
-            if (this->ClOptions[config]->UsingUnicode()) {
-              linkOptions.AddFlag("EntryPointSymbol", "mainWCRTStartup");
-            } else {
-              linkOptions.AddFlag("EntryPointSymbol", "mainACRTStartup");
-            }
-          }
-        } else {
-          linkOptions.AddFlag("SubSystem", "Console");
-        };
+        linkOptions.AddFlag("SubSystem", "Windows");
       }
+    } else {
+      if (this->GlobalGenerator->TargetsWindowsCE()) {
+        linkOptions.AddFlag("SubSystem", "WindowsCE");
+        if (this->GeneratorTarget->GetType() == cmStateEnums::EXECUTABLE) {
+          if (this->ClOptions[config]->UsingUnicode()) {
+            linkOptions.AddFlag("EntryPointSymbol", "mainWCRTStartup");
+          } else {
+            linkOptions.AddFlag("EntryPointSymbol", "mainACRTStartup");
+          }
+        }
+      } else {
+        linkOptions.AddFlag("SubSystem", "Console");
+      };
     }
 
     if (cmValue stackVal = this->Makefile->GetDefinition(
