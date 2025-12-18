@@ -7,13 +7,13 @@
 #include <string>
 #include <vector>
 
+#include <cm/string_view>
 #include <cm/type_traits>
 #include <cmext/string_view>
 
 #include "cmArgumentParser.h" // IWYU pragma: keep
 #include "cmArgumentParserTypes.h"
-
-class cmExecutionStatus;
+#include "cmProjectInfoArguments.h"
 
 /** \class cmPackageInfoArguments
  * \brief Convey information about a package.
@@ -23,7 +23,7 @@ class cmExecutionStatus;
  * container, and also provides utilities to obtain this metadata from commands
  * which produce packages (i.e. export and install).
  */
-class cmPackageInfoArguments
+class cmPackageInfoArguments : public cmProjectInfoArguments
 {
 public:
   template <typename T,
@@ -31,7 +31,8 @@ public:
               std::is_base_of<cmPackageInfoArguments, T>::value>>
   static void Bind(cmArgumentParser<T>& parser)
   {
-    cmPackageInfoArguments::Bind(parser, nullptr);
+    cmPackageInfoArguments* const self = nullptr;
+    cmPackageInfoArguments::Bind(parser, self);
   }
 
   void Bind(cmArgumentParser<void>& parser)
@@ -43,76 +44,50 @@ public:
   std::string GetPackageDirName() const;
   std::string GetPackageFileName() const;
 
-  /// Ensure that no conflicting options were specified.
-  bool Check(cmExecutionStatus& status) const;
+  bool Check(cmExecutionStatus& status) const override;
 
-  /// Set metadata (not already specified) from either the specified project,
-  /// or from the project which matches the package name.
-  bool SetMetadataFromProject(cmExecutionStatus& status);
-
-  ArgumentParser::NonEmpty<std::string> PackageName;
   ArgumentParser::NonEmpty<std::string> Appendix;
-  ArgumentParser::NonEmpty<std::string> Version;
-  ArgumentParser::NonEmpty<std::string> VersionCompat;
-  ArgumentParser::NonEmpty<std::string> VersionSchema;
-  ArgumentParser::NonEmpty<std::string> License;
   ArgumentParser::NonEmpty<std::string> DefaultLicense;
-  ArgumentParser::NonEmpty<std::string> Description;
-  ArgumentParser::NonEmpty<std::string> Website;
   ArgumentParser::NonEmpty<std::vector<std::string>> DefaultTargets;
   ArgumentParser::NonEmpty<std::vector<std::string>> DefaultConfigs;
   bool LowerCase = false;
 
-  ArgumentParser::NonEmpty<std::string> ProjectName;
-  bool NoProjectDefaults = false;
+protected:
+  cm::string_view CommandName() const override;
 
-private:
-  bool SetEffectiveProject(cmExecutionStatus& status);
+  bool SetEffectiveProject(cmExecutionStatus& status) override;
 
   template <typename T>
   static void Bind(cmArgumentParser<T>& parser, cmPackageInfoArguments* self)
   {
-    Bind(self, parser, "PACKAGE_INFO"_s, &cmPackageInfoArguments::PackageName);
+    cmProjectInfoArguments* const base = self;
+
+    Bind(base, parser, "PACKAGE_INFO"_s, &cmProjectInfoArguments::PackageName);
     Bind(self, parser, "LOWER_CASE_FILE"_s,
          &cmPackageInfoArguments::LowerCase);
     Bind(self, parser, "APPENDIX"_s, &cmPackageInfoArguments::Appendix);
-    Bind(self, parser, "VERSION"_s, &cmPackageInfoArguments::Version);
-    Bind(self, parser, "COMPAT_VERSION"_s,
-         &cmPackageInfoArguments::VersionCompat);
-    Bind(self, parser, "VERSION_SCHEMA"_s,
-         &cmPackageInfoArguments::VersionSchema);
+
+    Bind(base, parser, "COMPAT_VERSION"_s,
+         &cmProjectInfoArguments::VersionCompat);
+    Bind(base, parser, "VERSION_SCHEMA"_s,
+         &cmProjectInfoArguments::VersionSchema);
     Bind(self, parser, "DEFAULT_TARGETS"_s,
          &cmPackageInfoArguments::DefaultTargets);
     Bind(self, parser, "DEFAULT_CONFIGURATIONS"_s,
          &cmPackageInfoArguments::DefaultConfigs);
-    Bind(self, parser, "LICENSE"_s, &cmPackageInfoArguments::License);
     Bind(self, parser, "DEFAULT_LICENSE"_s,
          &cmPackageInfoArguments::DefaultLicense);
-    Bind(self, parser, "DESCRIPTION"_s, &cmPackageInfoArguments::Description);
-    Bind(self, parser, "HOMEPAGE_URL"_s, &cmPackageInfoArguments::Website);
 
-    Bind(self, parser, "PROJECT"_s, &cmPackageInfoArguments::ProjectName);
-    Bind(self, parser, "NO_PROJECT_METADATA"_s,
-         &cmPackageInfoArguments::NoProjectDefaults);
+    cmProjectInfoArguments::Bind(parser, self);
   }
 
-  template <typename T, typename U,
-            typename = cm::enable_if_t<
-              std::is_base_of<cmPackageInfoArguments, T>::value>>
-  static void Bind(cmPackageInfoArguments*, cmArgumentParser<T>& parser,
-                   cm::static_string_view name,
-                   U cmPackageInfoArguments::*member)
+  using cmProjectInfoArguments::Bind;
+
+  static bool ArgWasSpecified(std::vector<std::string> const& value)
   {
-    parser.Bind(name, member);
+    return !value.empty();
   }
-
-  template <typename U>
-  static void Bind(cmPackageInfoArguments* self,
-                   cmArgumentParser<void>& parser, cm::static_string_view name,
-                   U cmPackageInfoArguments::*member)
-  {
-    parser.Bind(name, (self)->*member);
-  }
+  using cmProjectInfoArguments::ArgWasSpecified;
 };
 
 extern template void cmPackageInfoArguments::Bind<void>(

@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <cstddef>
 #include <memory>
 #include <stack>
 #include <utility>
@@ -18,8 +19,11 @@
 #include "cmGeneratorExpressionEvaluator.h"
 #include "cmGeneratorExpressionLexer.h"
 #include "cmGeneratorExpressionParser.h"
+#include "cmGeneratorTarget.h"
 #include "cmList.h"
 #include "cmLocalGenerator.h"
+#include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmake.h"
@@ -412,6 +416,50 @@ std::string cmGeneratorExpression::Collect(
   std::map<std::string, std::vector<std::string>>& collected)
 {
   return extractAllGeneratorExpressions(input, &collected);
+}
+
+bool cmGeneratorExpression::ForbidGeneratorExpressions(
+  cmGeneratorTarget const* target, std::string const& propertyName,
+  std::string const& propertyValue)
+{
+  std::map<std::string, std::vector<std::string>> allowList;
+  std::string evaluatedValue;
+  return ForbidGeneratorExpressions(target, propertyName, propertyValue,
+                                    evaluatedValue, allowList);
+}
+
+bool cmGeneratorExpression::ForbidGeneratorExpressions(
+  cmGeneratorTarget const* target, std::string const& propertyName,
+  std::string const& propertyValue, std::string& evaluatedValue,
+  std::map<std::string, std::vector<std::string>>& allowList)
+{
+  size_t const initialAllowedGenExps = allowList.size();
+  evaluatedValue = Collect(propertyValue, allowList);
+  if (evaluatedValue != propertyValue &&
+      allowList.size() > initialAllowedGenExps) {
+    target->Makefile->IssueMessage(
+      MessageType::FATAL_ERROR,
+      cmStrCat("Property \"", propertyName, "\" of target \"",
+               target->GetName(),
+               "\" contains a generator expression. This is not allowed."));
+    return false;
+  }
+
+  // Check for nested generator expressions (e.g., $<LINK_ONLY:$<...>>).
+  for (auto const& genexp : allowList) {
+    for (auto const& value : genexp.second) {
+      if (value.find("$<") != std::string::npos) {
+        target->Makefile->IssueMessage(
+          MessageType::FATAL_ERROR,
+          cmStrCat("$<", genexp.first, ":...> expression in \"", propertyName,
+                   "\" of target \"", target->GetName(),
+                   "\" contains a generator expression. This is not "
+                   "allowed."));
+        return false;
+      }
+    }
+  }
+  return true;
 }
 
 cm::string_view::size_type cmGeneratorExpression::Find(cm::string_view input)

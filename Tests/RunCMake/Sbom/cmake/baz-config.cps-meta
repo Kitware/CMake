@@ -1,0 +1,12 @@
+{
+  "name": "baz",
+  "cps_path" : "@prefix@",
+  "cps_version" : "0.13.0",
+  "version_schema" : "simple",
+  "version": "1.8.5",
+  "description": "A description",
+  "license": "MIT",
+  "website": "https://example.com/baz",
+  "package_url": "https://example.com/baz/releases/download/v1.8.5/baz-1.8.5.tar.gz",
+  "components" : {}
+}

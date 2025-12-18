@@ -80,6 +80,14 @@ cmExperimental::FeatureData const LookupTable[] = {
     "is meant only for experimentation and feedback to CMake developers.",
     {},
     cmExperimental::TryCompileCondition::Never },
+  { "GenerateSbom",
+    "ca494ed3-b261-4205-a01f-603c95e4cae0",
+    "CMAKE_EXPERIMENTAL_GENERATE_SBOM",
+    "CMake's support for generating software bill of materials (Sbom) "
+    "information in SPDX format is experimental. It is meant only for "
+    "experimentation and feedback to CMake developers.",
+    {},
+    cmExperimental::TryCompileCondition::Never },
 };
 static_assert(sizeof(LookupTable) / sizeof(LookupTable[0]) ==
                 static_cast<size_t>(cmExperimental::Feature::Sentinel),

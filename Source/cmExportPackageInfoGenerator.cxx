@@ -2,7 +2,6 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmExportPackageInfoGenerator.h"
 
-#include <cstddef>
 #include <memory>
 #include <set>
 #include <utility>
@@ -295,51 +294,6 @@ bool cmExportPackageInfoGenerator::GenerateInterfaceProperties(
   return result;
 }
 
-namespace {
-bool ForbidGeneratorExpressions(
-  cmGeneratorTarget const* target, std::string const& propertyName,
-  std::string const& propertyValue, std::string& evaluatedValue,
-  std::map<std::string, std::vector<std::string>>& allowList)
-{
-  size_t const allowedExpressions = allowList.size();
-  evaluatedValue = cmGeneratorExpression::Collect(propertyValue, allowList);
-  if (evaluatedValue != propertyValue &&
-      allowList.size() > allowedExpressions) {
-    target->Makefile->IssueMessage(
-      MessageType::FATAL_ERROR,
-      cmStrCat("Property \"", propertyName, "\" of target \"",
-               target->GetName(),
-               "\" contains a generator expression. This is not allowed."));
-    return false;
-  }
-  // Forbid Nested Generator Expressions
-  for (auto const& genexp : allowList) {
-    for (auto const& value : genexp.second) {
-      if (value.find("$<") != std::string::npos) {
-        target->Makefile->IssueMessage(
-          MessageType::FATAL_ERROR,
-          cmStrCat(
-            "$<", genexp.first, ":...> expression in \"", propertyName,
-            "\" of target \"", target->GetName(),
-            "\" contains a generator expression. This is not allowed."));
-        return false;
-      }
-    }
-  }
-  return true;
-}
-
-bool ForbidGeneratorExpressions(cmGeneratorTarget const* target,
-                                std::string const& propertyName,
-                                std::string const& propertyValue)
-{
-  std::map<std::string, std::vector<std::string>> allowList;
-  std::string evaluatedValue;
-  return ForbidGeneratorExpressions(target, propertyName, propertyValue,
-                                    evaluatedValue, allowList);
-}
-}
-
 bool cmExportPackageInfoGenerator::NoteLinkedTarget(
   cmGeneratorTarget const* target, std::string const& linkedName,
   cmGeneratorTarget const* linkedTarget)
@@ -446,8 +400,9 @@ void cmExportPackageInfoGenerator::GenerateInterfaceLinkProperties(
   std::map<std::string, std::vector<std::string>> allowList = { { "LINK_ONLY",
                                                                   {} } };
   std::string interfaceLinkLibraries;
-  if (!ForbidGeneratorExpressions(target, iter->first, iter->second,
-                                  interfaceLinkLibraries, allowList)) {
+  if (!cmGeneratorExpression::ForbidGeneratorExpressions(
+        target, iter->first, iter->second, interfaceLinkLibraries,
+        allowList)) {
     result = false;
     return;
   }
@@ -490,7 +445,8 @@ void cmExportPackageInfoGenerator::GenerateInterfaceCompileFeatures(
     return;
   }
 
-  if (!ForbidGeneratorExpressions(target, iter->first, iter->second)) {
+  if (!cmGeneratorExpression::ForbidGeneratorExpressions(target, iter->first,
+                                                         iter->second)) {
     result = false;
     return;
   }
@@ -519,7 +475,8 @@ void cmExportPackageInfoGenerator::GenerateInterfaceCompileDefines(
   }
 
   // TODO: Support language-specific defines.
-  if (!ForbidGeneratorExpressions(target, iter->first, iter->second)) {
+  if (!cmGeneratorExpression::ForbidGeneratorExpressions(target, iter->first,
+                                                         iter->second)) {
     result = false;
     return;
   }
@@ -550,7 +507,8 @@ void cmExportPackageInfoGenerator::GenerateInterfaceListProperty(
     return;
   }
 
-  if (!ForbidGeneratorExpressions(target, prop, iter->second)) {
+  if (!cmGeneratorExpression::ForbidGeneratorExpressions(target, prop,
+                                                         iter->second)) {
     result = false;
     return;
   }
@@ -571,7 +529,8 @@ void cmExportPackageInfoGenerator::GenerateProperty(
     return;
   }
 
-  if (!ForbidGeneratorExpressions(target, inName, iter->second)) {
+  if (!cmGeneratorExpression::ForbidGeneratorExpressions(target, inName,
+                                                         iter->second)) {
     result = false;
     return;
   }

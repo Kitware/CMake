@@ -139,3 +139,22 @@ you need to set the following environment variables:
 
 * ``CTEST_USE_INSTRUMENTATION=1``
 * ``CTEST_EXPERIMENTAL_INSTRUMENTATION=ec7aa2dc-b87f-45a3-8022-fe01c5f59984``
+
+Software Bill Of Materials |SBOM|
+=================================
+
+In order to activate support for the :command:`install(SBOM)` command,
+set
+
+* variable ``CMAKE_EXPERIMENTAL_GENERATE_SBOM`` to
+* value ``ca494ed3-b261-4205-a01f-603c95e4cae0``.
+
+This UUID may change in future versions of CMake.  Be sure to use the value
+documented here by the source tree of the version of CMake with which you are
+experimenting.
+
+When activated, this experimental feature provides the following:
+
+* The experimental ``install(SBOM)`` command is available to generate
+  a Software Bill of Materials or "SBOM" for the current project. See
+  :command:`install(SBOM)` for a complete overview of the command

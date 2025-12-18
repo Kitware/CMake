@@ -1389,8 +1389,10 @@ add_RunCMake_test(AutoExportDll
 
 add_RunCMake_test(AndroidMK)
 add_RunCMake_test(ExportPackageInfo)
+add_RunCMake_test(ExportSbom)
 add_RunCMake_test(InstallPackageInfo)
 add_RunCMake_test(InstallExportsAsPackageInfo)
+add_RunCMake_test(InstallSbom)
 
 if(CMake_TEST_ANDROID_NDK OR CMake_TEST_ANDROID_STANDALONE_TOOLCHAIN)
   if(NOT "${CMAKE_GENERATOR}" MATCHES "Make|Ninja|Visual Studio 1[456]")
