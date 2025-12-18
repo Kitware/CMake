@@ -18,9 +18,9 @@
 #include <cm/string_view>
 #include <cmext/string_view>
 
+#include "cmBuildArgs.h"
 #include "cmDocumentationEntry.h" // IWYU pragma: keep
 #include "cmGeneratedFileStream.h"
-#include "cmGlobalGeneratorFactory.h"
 #include "cmInstalledFile.h"
 #include "cmListFileCache.h"
 #include "cmMessageType.h"
@@ -54,6 +54,7 @@ class cmGlobalGenerator;
 class cmMakefile;
 class cmMessenger;
 class cmVariableWatch;
+class cmGlobalGeneratorFactory;
 struct cmBuildOptions;
 struct cmGlobCacheEntry;
 
@@ -158,8 +159,10 @@ public:
 
   using InstalledFilesMap = std::map<std::string, cmInstalledFile>;
 
-  static int const NO_BUILD_PARALLEL_LEVEL = -1;
-  static int const DEFAULT_BUILD_PARALLEL_LEVEL = 0;
+  static int const NO_BUILD_PARALLEL_LEVEL =
+    cmBuildArgs::NO_BUILD_PARALLEL_LEVEL;
+  static int const DEFAULT_BUILD_PARALLEL_LEVEL =
+    cmBuildArgs::DEFAULT_BUILD_PARALLEL_LEVEL;
 
   /// Default constructor
   cmake(cmState::Role role,
@@ -653,11 +656,10 @@ public:
     cmListFileBacktrace const& backtrace = cmListFileBacktrace()) const;
 
   //! run the --build option
-  int Build(int jobs, std::string dir, std::vector<std::string> targets,
-            std::string config, std::vector<std::string> nativeOptions,
-            cmBuildOptions& buildOptions, bool verbose,
-            std::string const& presetName, bool listPresets,
-            std::vector<std::string> const& args);
+  int Build(cmBuildArgs buildArgs, std::vector<std::string> targets,
+            std::vector<std::string> nativeOptions,
+            cmBuildOptions& buildOptions, std::string const& presetName,
+            bool listPresets, std::vector<std::string> const& args);
 
   enum class DryRun
   {

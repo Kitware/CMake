@@ -8,8 +8,11 @@
 #include <ratio>
 #include <utility>
 
+#include <cm/filesystem>
+
 #include <cm3p/uv.h>
 
+#include "cmBuildArgs.h"
 #include "cmBuildOptions.h"
 #include "cmCTest.h"
 #include "cmCTestTestHandler.h"
@@ -256,12 +259,17 @@ int cmCTestBuildAndTest::Run()
       config = "Debug";
     }
 
+    cmBuildArgs buildArgs;
+    buildArgs.jobs = cmake::NO_BUILD_PARALLEL_LEVEL;
+    buildArgs.binaryDir = this->BinaryDir;
+    buildArgs.projectName = this->BuildProject;
+    buildArgs.verbose = false;
+
     cmBuildOptions buildOptions(!this->BuildNoClean, false,
                                 PackageResolveMode::Disable);
     int retVal = cm.GetGlobalGenerator()->Build(
-      cmake::NO_BUILD_PARALLEL_LEVEL, this->SourceDir, this->BinaryDir,
-      this->BuildProject, { tar }, std::cout, this->BuildMakeProgram, config,
-      buildOptions, false, remainingTime, cmSystemTools::OUTPUT_PASSTHROUGH);
+      buildArgs, { tar }, std::cout, this->BuildMakeProgram, config,
+      buildOptions, remainingTime, cmSystemTools::OUTPUT_PASSTHROUGH);
     // if the build failed then return
     if (retVal) {
       return 1;

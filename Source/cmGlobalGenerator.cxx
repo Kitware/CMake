@@ -13,6 +13,7 @@
 #include <sstream>
 #include <utility>
 
+#include <cm/filesystem>
 #include <cm/memory>
 #include <cm/optional>
 #include <cmext/algorithm>
@@ -25,6 +26,7 @@
 #include "cm_codecvt_Encoding.hxx"
 
 #include "cmAlgorithms.h"
+#include "cmBuildArgs.h"
 #include "cmCMakePath.h"
 #include "cmCPackPropertiesGenerator.h"
 #include "cmComputeTargetDepends.h"
@@ -2143,12 +2145,17 @@ void cmGlobalGenerator::CheckTargetProperties()
   }
 }
 
-int cmGlobalGenerator::TryCompile(int jobs, std::string const& srcdir,
-                                  std::string const& bindir,
+int cmGlobalGenerator::TryCompile(int jobs, std::string const& bindir,
                                   std::string const& projectName,
                                   std::string const& target, bool fast,
                                   std::string& output, cmMakefile* mf)
 {
+  cmBuildArgs buildArgs;
+  buildArgs.jobs = jobs;
+  buildArgs.binaryDir = bindir;
+  buildArgs.projectName = projectName;
+  buildArgs.verbose = true;
+
   // if this is not set, then this is a first time configure
   // and there is a good chance that the try compile stuff will
   // take the bulk of the time, so try and guess some progress
@@ -2176,10 +2183,9 @@ int cmGlobalGenerator::TryCompile(int jobs, std::string const& srcdir,
   cmBuildOptions defaultBuildOptions(false, fast, PackageResolveMode::Disable);
 
   std::stringstream ostr;
-  auto ret =
-    this->Build(jobs, srcdir, bindir, projectName, newTarget, ostr, "", config,
-                defaultBuildOptions, true, this->TryCompileTimeout,
-                cmSystemTools::OUTPUT_NONE, {}, BuildTryCompile::Yes);
+  auto ret = this->Build(buildArgs, newTarget, ostr, "", config,
+                         defaultBuildOptions, this->TryCompileTimeout,
+                         cmSystemTools::OUTPUT_NONE, {}, BuildTryCompile::Yes);
   output = ostr.str();
   return ret;
 }
@@ -2204,22 +2210,23 @@ void cmGlobalGenerator::PrintBuildCommandAdvice(std::ostream& /*os*/,
   // they do not support certain build command line options
 }
 
-int cmGlobalGenerator::Build(
-  int jobs, std::string const& /*unused*/, std::string const& bindir,
-  std::string const& projectName, std::vector<std::string> const& targets,
-  std::ostream& ostr, std::string const& makeCommandCSTR,
-  std::string const& config, cmBuildOptions buildOptions, bool verbose,
-  cmDuration timeout, cmSystemTools::OutputOption outputMode,
-  std::vector<std::string> const& nativeOptions,
-  BuildTryCompile isInTryCompile)
+int cmGlobalGenerator::Build(cmBuildArgs const& buildArgs,
+                             std::vector<std::string> const& targets,
+                             std::ostream& ostr,
+                             std::string const& makeCommandCSTR,
+                             std::string const& config,
+                             cmBuildOptions buildOptions, cmDuration timeout,
+                             cmSystemTools::OutputOption outputMode,
+                             std::vector<std::string> const& nativeOptions,
+                             BuildTryCompile isInTryCompile)
 {
   bool hideconsole = cmSystemTools::GetRunCommandHideConsole();
 
   /**
    * Run an executable command and put the stdout in output.
    */
-  cmWorkingDirectory workdir(bindir);
-  ostr << "Change Dir: '" << bindir << '\'' << std::endl;
+  cmWorkingDirectory workdir(buildArgs.binaryDir.string());
+  ostr << "Change Dir: '" << buildArgs.binaryDir.string() << '\'' << std::endl;
   if (workdir.Failed()) {
     cmSystemTools::SetRunCommandHideConsole(hideconsole);
     std::string const& err = workdir.GetError();
@@ -2239,8 +2246,9 @@ int cmGlobalGenerator::Build(
   std::string outputBuf;
 
   std::vector<GeneratedMakeCommand> makeCommand = this->GenerateBuildCommand(
-    makeCommandCSTR, projectName, bindir, targets, realConfig, jobs, verbose,
-    buildOptions, nativeOptions, isInTryCompile);
+    makeCommandCSTR, buildArgs.projectName, buildArgs.binaryDir.string(),
+    targets, realConfig, buildArgs.jobs, buildArgs.verbose, buildOptions,
+    nativeOptions, isInTryCompile);
 
   // Workaround to convince some commands to produce output.
   if (outputMode == cmSystemTools::OUTPUT_PASSTHROUGH &&
@@ -2251,8 +2259,9 @@ int cmGlobalGenerator::Build(
   // should we do a clean first?
   if (buildOptions.Clean) {
     std::vector<GeneratedMakeCommand> cleanCommand =
-      this->GenerateBuildCommand(makeCommandCSTR, projectName, bindir,
-                                 { "clean" }, realConfig, jobs, verbose,
+      this->GenerateBuildCommand(makeCommandCSTR, buildArgs.projectName,
+                                 buildArgs.binaryDir.string(), { "clean" },
+                                 realConfig, buildArgs.jobs, buildArgs.verbose,
                                  buildOptions);
     ostr << "\nRun Clean Command: " << cleanCommand.front().QuotedPrintable()
          << std::endl;

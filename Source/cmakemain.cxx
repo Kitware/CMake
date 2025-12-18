@@ -15,11 +15,13 @@
 #include <utility>
 #include <vector>
 
+#include <cm/filesystem>
 #include <cm/optional>
 #include <cmext/algorithm>
 
 #include <cm3p/uv.h>
 
+#include "cmBuildArgs.h"
 #include "cmBuildOptions.h"
 #include "cmCommandLineArgument.h"
 #include "cmDocumentationEntry.h"
@@ -447,7 +449,7 @@ int extract_job_number(std::string const& command,
   return jobs;
 }
 std::function<bool(std::string const&)> extract_job_number_lambda_builder(
-  std::string& dir, int& jobs, std::string const& flag)
+  cm::filesystem::path& dir, int& jobs, std::string const& flag)
 {
   return [&dir, &jobs, flag](std::string const& value) -> bool {
     jobs = extract_job_number(flag, value);
@@ -465,23 +467,22 @@ int do_build(int ac, char const* const* av)
   std::cerr << "This cmake does not support --build\n";
   return -1;
 #else
-  int jobs = cmake::NO_BUILD_PARALLEL_LEVEL;
+  cmBuildArgs buildArgs;
   std::vector<std::string> targets;
-  std::string config;
-  std::string dir;
   std::vector<std::string> nativeOptions;
   bool nativeOptionsPassed = false;
   bool cleanFirst = false;
   bool foundClean = false;
   bool foundNonClean = false;
   PackageResolveMode resolveMode = PackageResolveMode::Default;
-  bool verbose = cmSystemTools::HasEnv("VERBOSE");
+  buildArgs.verbose = cmSystemTools::HasEnv("VERBOSE");
   std::string presetName;
   bool listPresets = false;
 
-  auto jLambda = extract_job_number_lambda_builder(dir, jobs, "-j");
-  auto parallelLambda =
-    extract_job_number_lambda_builder(dir, jobs, "--parallel");
+  auto jLambda = extract_job_number_lambda_builder(buildArgs.binaryDir,
+                                                   buildArgs.jobs, "-j");
+  auto parallelLambda = extract_job_number_lambda_builder(
+    buildArgs.binaryDir, buildArgs.jobs, "--parallel");
 
   auto targetLambda = [&](std::string const& value) -> bool {
     if (!value.empty()) {
@@ -515,7 +516,7 @@ int do_build(int ac, char const* const* av)
     return true;
   };
   auto verboseLambda = [&](std::string const&) -> bool {
-    verbose = true;
+    buildArgs.verbose = true;
     return true;
   };
 
@@ -535,7 +536,7 @@ int do_build(int ac, char const* const* av)
     CommandArgument{ "--target", CommandArgument::Values::OneOrMore,
                      targetLambda },
     CommandArgument{ "--config", CommandArgument::Values::One,
-                     CommandArgument::setToValue(config) },
+                     CommandArgument::setToValue(buildArgs.config) },
     CommandArgument{ "--clean-first", CommandArgument::Values::Zero,
                      CommandArgument::setToTrue(cleanFirst) },
     CommandArgument{ "--resolve-package-references",
@@ -570,12 +571,12 @@ int do_build(int ac, char const* const* av)
         }
       }
       if (!matched && i == 0) {
-        dir = cmSystemTools::ToNormalizedPathOnDisk(arg);
+        buildArgs.binaryDir = cmSystemTools::ToNormalizedPathOnDisk(arg);
         matched = true;
         parsed = true;
       }
       if (!(matched && parsed)) {
-        dir.clear();
+        buildArgs.binaryDir.clear();
         if (!matched) {
           std::cerr << "Unknown argument " << arg << std::endl;
         }
@@ -592,38 +593,38 @@ int do_build(int ac, char const* const* av)
     std::cerr << "Error: Building 'clean' and other targets together "
                  "is not supported."
               << std::endl;
-    dir.clear();
+    buildArgs.binaryDir.clear();
   }
 
-  if (jobs == cmake::NO_BUILD_PARALLEL_LEVEL) {
+  if (buildArgs.jobs == cmake::NO_BUILD_PARALLEL_LEVEL) {
     std::string parallel;
     if (cmSystemTools::GetEnv("CMAKE_BUILD_PARALLEL_LEVEL", parallel)) {
       if (parallel.empty()) {
-        jobs = cmake::DEFAULT_BUILD_PARALLEL_LEVEL;
+        buildArgs.jobs = cmake::DEFAULT_BUILD_PARALLEL_LEVEL;
       } else {
         unsigned long numJobs = 0;
         if (cmStrToULong(parallel, &numJobs)) {
           if (numJobs == 0) {
             std::cerr << "The CMAKE_BUILD_PARALLEL_LEVEL environment variable "
                          "requires a positive integer argument.\n\n";
-            dir.clear();
+            buildArgs.binaryDir.clear();
           } else if (numJobs > INT_MAX) {
             std::cerr << "The CMAKE_BUILD_PARALLEL_LEVEL environment variable "
                          "is too large.\n\n";
-            dir.clear();
+            buildArgs.binaryDir.clear();
           } else {
-            jobs = static_cast<int>(numJobs);
+            buildArgs.jobs = static_cast<int>(numJobs);
           }
         } else {
           std::cerr << "'CMAKE_BUILD_PARALLEL_LEVEL' environment variable\n"
                     << "invalid number '" << parallel << "' given.\n\n";
-          dir.clear();
+          buildArgs.binaryDir.clear();
         }
       }
     }
   }
 
-  if (dir.empty() && presetName.empty() && !listPresets) {
+  if (buildArgs.binaryDir.empty() && presetName.empty() && !listPresets) {
     /* clang-format off */
     std::cerr <<
       "Usage: cmake --build <dir>            "
@@ -672,9 +673,8 @@ int do_build(int ac, char const* const* av)
   cmBuildOptions buildOptions(cleanFirst, false, resolveMode);
   std::vector<std::string> cmd;
   cm::append(cmd, av, av + ac);
-  return cm.Build(jobs, dir, std::move(targets), std::move(config),
-                  std::move(nativeOptions), buildOptions, verbose, presetName,
-                  listPresets, cmd);
+  return cm.Build(buildArgs, std::move(targets), std::move(nativeOptions),
+                  buildOptions, presetName, listPresets, cmd);
 #endif
 }
 
@@ -805,7 +805,7 @@ int do_install(int ac, char const* const* av)
   std::string component;
   std::string defaultDirectoryPermissions;
   std::string prefix;
-  std::string dir;
+  cm::filesystem::path dir;
   int jobs = 0;
   bool strip = false;
   bool verbose = cmSystemTools::HasEnv("VERBOSE");
@@ -919,8 +919,8 @@ int do_install(int ac, char const* const* av)
 
   args.emplace_back("-P");
 
-  cmInstrumentation instrumentation(dir);
-  auto handler = cmInstallScriptHandler(dir, component, config, args);
+  cmInstrumentation instrumentation(dir.string());
+  auto handler = cmInstallScriptHandler(dir.string(), component, config, args);
   int ret = 0;
   if (!jobs && handler.IsParallel()) {
     jobs = 1;
