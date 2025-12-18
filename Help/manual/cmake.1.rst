@@ -1520,6 +1520,11 @@ Available commands are:
     The ``<compression-level>`` of the ``Zstd`` algorithm can be set
     between ``0`` and ``19``, except for the ``zip`` format.
 
+    The value ``0`` is used to specify the default compression level.
+    It is selected automatically by the archive library backend and
+    not directly set by CMake itself. The default compression level
+    may vary between archive formats, platforms, etc.
+
   .. option:: --cmake-tar-threads=<number>
 
     .. versionadded:: 4.3

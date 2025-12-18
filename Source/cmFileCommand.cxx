@@ -3714,15 +3714,6 @@ bool HandleArchiveCreateCommand(std::vector<std::string> const& args,
     return false;
   }
 
-  char const* zipFileFormats[] = { "7zip", "zip" };
-  if (!parsedArgs.Compression.empty() &&
-      cm::contains(zipFileFormats, parsedArgs.Format)) {
-    status.SetError(cmStrCat("archive format ", parsedArgs.Format,
-                             " does not support COMPRESSION arguments"));
-    cmSystemTools::SetFatalErrorOccurred();
-    return false;
-  }
-
   static std::map<std::string, cmSystemTools::cmTarCompression>
     compressionTypeMap = { { "None", cmSystemTools::TarCompressNone },
                            { "BZip2", cmSystemTools::TarCompressBZip2 },
@@ -3730,10 +3721,11 @@ bool HandleArchiveCreateCommand(std::vector<std::string> const& args,
                            { "GZip", cmSystemTools::TarCompressGZip },
                            { "LZMA", cmSystemTools::TarCompressLZMA },
                            { "LZMA2", cmSystemTools::TarCompressXZ },
+                           { "PPMd", cmSystemTools::TarCompressPPMd },
                            { "XZ", cmSystemTools::TarCompressXZ },
                            { "Zstd", cmSystemTools::TarCompressZstd } };
 
-  cmSystemTools::cmTarCompression compress = cmSystemTools::TarCompressNone;
+  cmSystemTools::cmTarCompression compress = cmSystemTools::TarCompressAuto;
   auto typeIt = compressionTypeMap.find(parsedArgs.Compression);
   if (typeIt != compressionTypeMap.end()) {
     compress = typeIt->second;
@@ -3744,10 +3736,19 @@ bool HandleArchiveCreateCommand(std::vector<std::string> const& args,
     return false;
   }
 
+  if (compress == cmSystemTools::TarCompressPPMd &&
+      parsedArgs.Format != "7zip") {
+    status.SetError(cmStrCat("PPMd compression is not supported for ",
+                             parsedArgs.Format, " format"));
+    cmSystemTools::SetFatalErrorOccurred();
+    return false;
+  }
+
   int compressionLevel = 0;
   constexpr int minCompressionLevel = 0;
   int maxCompressionLevel = 9;
-  if (compress == cmSystemTools::TarCompressZstd) {
+  if (compress == cmSystemTools::TarCompressZstd &&
+      parsedArgs.Format != "zip") {
     maxCompressionLevel = 19;
   }
 
@@ -3772,9 +3773,10 @@ bool HandleArchiveCreateCommand(std::vector<std::string> const& args,
       return false;
     }
     if (compress == cmSystemTools::TarCompressNone) {
-      status.SetError(cmStrCat("compression level is not supported for "
-                               "compression \"None\"",
-                               parsedArgs.Compression));
+      status.SetError(
+        cmStrCat("compression level is not supported for "
+                 "compression \"None\". Provided compression level: ",
+                 parsedArgs.CompressionLevel));
       cmSystemTools::SetFatalErrorOccurred();
       return false;
     }

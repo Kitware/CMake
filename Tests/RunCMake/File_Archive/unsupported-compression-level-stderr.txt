@@ -1,5 +1,6 @@
 CMake Error at compression-level\.cmake:39 \(file\):
-  file compression level is not supported for compression "None"
+  file compression level is not supported for compression "None"\.  Provided
+  compression level: 1
 Call Stack \(most recent call first\):
-  unsupported-compression-level\.cmake:7 \(check_compression_level\)
+  unsupported-compression-level\.cmake:8 \(check_compression_level\)
   CMakeLists\.txt:3 \(include\)

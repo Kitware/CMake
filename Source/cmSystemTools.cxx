@@ -2412,6 +2412,9 @@ bool cmSystemTools::CreateTar(std::string const& outFileName,
     case TarCompressLZMA:
       compress = cmArchiveWrite::CompressLZMA;
       break;
+    case TarCompressPPMd:
+      compress = cmArchiveWrite::CompressPPMd;
+      break;
     case TarCompressAuto:
       // Kept for backwards compatibility with pre-4.3 versions of CMake
       if (format == "zip") {
