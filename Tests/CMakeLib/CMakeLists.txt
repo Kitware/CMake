@@ -1,13 +1,6 @@
 # Render the header file with source path macro
 configure_file(testConfig.h.in testConfig.h @ONLY)
 
-include_directories(
-  ${CMAKE_CURRENT_BINARY_DIR}
-  ${CMake_BINARY_DIR}/Source
-  ${CMake_SOURCE_DIR}/Source
-  ${CMake_SOURCE_DIR}/Source/CTest
-  )
-
 set(CMakeLib_TESTS
   testAssert.cxx
   testArgumentParser.cxx
@@ -81,6 +74,7 @@ file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/testUVProcessChainInput.txt" "HELLO WORL
 
 create_test_sourcelist(CMakeLib_TEST_SRCS CMakeLibTests.cxx ${CMakeLib_TESTS})
 add_executable(CMakeLibTests ${CMakeLib_TEST_SRCS})
+target_include_directories(CMakeLibTests PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 target_link_libraries(CMakeLibTests PRIVATE CTestLib CMakeLib)
 if(CMake_BUILD_PCH)
   target_precompile_headers(CMakeLibTests PRIVATE "<iostream>" "<cm3p/uv.h>")
