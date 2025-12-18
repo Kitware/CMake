@@ -16,7 +16,7 @@ RUN --mount=type=bind,source=dnf.conf,target=/etc/dnf/dnf.conf \
 
 
 FROM ${BASE_IMAGE} AS rust-build-env
-LABEL maintainer="Ben Boeckel <ben.boeckel@kitware.com>"
+LABEL maintainer="Brad King <brad.king@kitware.com>"
 # Pre-install prerequisites to build Rust projects.
 RUN --mount=type=bind,source=dnf.conf,target=/etc/dnf/dnf.conf \
     --mount=type=bind,source=rust_packages.lst,target=/root/rust_packages.lst \
@@ -27,7 +27,7 @@ RUN --mount=type=bind,source=dnf.conf,target=/etc/dnf/dnf.conf \
 
 
 FROM rust-build-env AS rust-build
-LABEL maintainer="Ben Boeckel <ben.boeckel@kitware.com>"
+LABEL maintainer="Brad King <brad.king@kitware.com>"
 # Build the needed Rust packages.
 # https://doc.rust-lang.org/cargo/guide/cargo-home.html?highlight=.cargo#caching-the-cargo-home-in-ci
 RUN --mount=type=bind,source=build_rust.sh,target=/root/build_rust.sh \
@@ -38,7 +38,7 @@ RUN --mount=type=bind,source=build_rust.sh,target=/root/build_rust.sh \
 
 
 FROM ${BASE_IMAGE} AS rvm-build-env
-LABEL maintainer="Ben Boeckel <ben.boeckel@kitware.com>"
+LABEL maintainer="Brad King <brad.king@kitware.com>"
 # Pre-install prerequisites for RVM.
 RUN --mount=type=bind,source=dnf.conf,target=/etc/dnf/dnf.conf \
     --mount=type=bind,source=rvm_packages.lst,target=/root/rvm_packages.lst \
@@ -49,7 +49,7 @@ RUN --mount=type=bind,source=dnf.conf,target=/etc/dnf/dnf.conf \
 
 
 FROM rvm-build-env AS rvm-build
-LABEL maintainer="Ben Boeckel <ben.boeckel@kitware.com>"
+LABEL maintainer="Brad King <brad.king@kitware.com>"
 # Build Ruby with RVM.
 RUN --mount=type=bind,source=build_rvm.sh,target=/root/build_rvm.sh \
     --mount=type=cache,target=/usr/local/rvm/archives \
@@ -108,7 +108,7 @@ RUN curl -C- -L https://www.perforce.com/downloads/perforce/r21.2/bin.linux26x86
 
 
 FROM ${BASE_IMAGE}
-LABEL maintainer="Ben Boeckel <ben.boeckel@kitware.com>"
+LABEL maintainer="Brad King <brad.king@kitware.com>"
 
 ENV RBENV_ROOT=/opt/rbenv
 

@@ -16,7 +16,7 @@ RUN --mount=type=tmpfs,target=/var/log \
 
 
 FROM ${BASE_IMAGE} AS iwyu-build
-LABEL maintainer="Ben Boeckel <ben.boeckel@kitware.com>"
+LABEL maintainer="Brad King <brad.king@kitware.com>"
 
 RUN --mount=type=bind,source=install_iwyu.sh,target=/root/install_iwyu.sh \
     --mount=type=bind,source=iwyu_packages.lst,target=/root/iwyu_packages.lst \
@@ -29,7 +29,7 @@ RUN --mount=type=bind,source=install_iwyu.sh,target=/root/install_iwyu.sh \
 
 
 FROM ${BASE_IMAGE} AS rvm-build
-LABEL maintainer="Ben Boeckel <ben.boeckel@kitware.com>"
+LABEL maintainer="Brad King <brad.king@kitware.com>"
 
 RUN --mount=type=bind,source=install_rvm.sh,target=/root/install_rvm.sh \
     --mount=type=bind,source=rvm_packages.lst,target=/root/rvm_packages.lst \
@@ -42,7 +42,7 @@ RUN --mount=type=bind,source=install_rvm.sh,target=/root/install_rvm.sh \
 
 
 FROM ${BASE_IMAGE}
-LABEL maintainer="Ben Boeckel <ben.boeckel@kitware.com>"
+LABEL maintainer="Brad King <brad.king@kitware.com>"
 
 ENV RBENV_ROOT=/opt/rbenv
 
