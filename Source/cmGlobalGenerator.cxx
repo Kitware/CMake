@@ -13,7 +13,6 @@
 #include <sstream>
 #include <utility>
 
-#include <cm/filesystem>
 #include <cm/memory>
 #include <cm/optional>
 #include <cmext/algorithm>
@@ -2225,8 +2224,8 @@ int cmGlobalGenerator::Build(cmBuildArgs const& buildArgs,
   /**
    * Run an executable command and put the stdout in output.
    */
-  cmWorkingDirectory workdir(buildArgs.binaryDir.string());
-  ostr << "Change Dir: '" << buildArgs.binaryDir.string() << '\'' << std::endl;
+  cmWorkingDirectory workdir(buildArgs.binaryDir);
+  ostr << "Change Dir: '" << buildArgs.binaryDir << '\'' << std::endl;
   if (workdir.Failed()) {
     cmSystemTools::SetRunCommandHideConsole(hideconsole);
     std::string const& err = workdir.GetError();
@@ -2246,9 +2245,9 @@ int cmGlobalGenerator::Build(cmBuildArgs const& buildArgs,
   std::string outputBuf;
 
   std::vector<GeneratedMakeCommand> makeCommand = this->GenerateBuildCommand(
-    makeCommandCSTR, buildArgs.projectName, buildArgs.binaryDir.string(),
-    targets, realConfig, buildArgs.jobs, buildArgs.verbose, buildOptions,
-    nativeOptions, isInTryCompile);
+    makeCommandCSTR, buildArgs.projectName, buildArgs.binaryDir, targets,
+    realConfig, buildArgs.jobs, buildArgs.verbose, buildOptions, nativeOptions,
+    isInTryCompile);
 
   // Workaround to convince some commands to produce output.
   if (outputMode == cmSystemTools::OUTPUT_PASSTHROUGH &&
@@ -2260,8 +2259,8 @@ int cmGlobalGenerator::Build(cmBuildArgs const& buildArgs,
   if (buildOptions.Clean) {
     std::vector<GeneratedMakeCommand> cleanCommand =
       this->GenerateBuildCommand(makeCommandCSTR, buildArgs.projectName,
-                                 buildArgs.binaryDir.string(), { "clean" },
-                                 realConfig, buildArgs.jobs, buildArgs.verbose,
+                                 buildArgs.binaryDir, { "clean" }, realConfig,
+                                 buildArgs.jobs, buildArgs.verbose,
                                  buildOptions);
     ostr << "\nRun Clean Command: " << cleanCommand.front().QuotedPrintable()
          << std::endl;

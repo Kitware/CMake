@@ -15,7 +15,6 @@
 #include <utility>
 #include <vector>
 
-#include <cm/filesystem>
 #include <cm/optional>
 #include <cmext/algorithm>
 
@@ -449,7 +448,7 @@ int extract_job_number(std::string const& command,
   return jobs;
 }
 std::function<bool(std::string const&)> extract_job_number_lambda_builder(
-  cm::filesystem::path& dir, int& jobs, std::string const& flag)
+  std::string& dir, int& jobs, std::string const& flag)
 {
   return [&dir, &jobs, flag](std::string const& value) -> bool {
     jobs = extract_job_number(flag, value);
@@ -805,7 +804,7 @@ int do_install(int ac, char const* const* av)
   std::string component;
   std::string defaultDirectoryPermissions;
   std::string prefix;
-  cm::filesystem::path dir;
+  std::string dir;
   int jobs = 0;
   bool strip = false;
   bool verbose = cmSystemTools::HasEnv("VERBOSE");
@@ -919,8 +918,8 @@ int do_install(int ac, char const* const* av)
 
   args.emplace_back("-P");
 
-  cmInstrumentation instrumentation(dir.string());
-  auto handler = cmInstallScriptHandler(dir.string(), component, config, args);
+  cmInstrumentation instrumentation(dir);
+  auto handler = cmInstallScriptHandler(dir, component, config, args);
   int ret = 0;
   if (!jobs && handler.IsParallel()) {
     jobs = 1;
