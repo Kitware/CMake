@@ -38,7 +38,7 @@ cmBasicUVIStream<CharT, Traits>::cmBasicUVIStream()
 
 template <typename CharT, typename Traits>
 cmBasicUVIStream<CharT, Traits>::cmBasicUVIStream(uv_stream_t* stream)
-  : cmBasicUVIStream()
+  : std::basic_istream<CharT, Traits>(&this->Buffer)
 {
   this->open(stream);
 }
