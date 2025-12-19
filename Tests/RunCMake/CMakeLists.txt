@@ -1533,3 +1533,8 @@ add_RunCMake_test(MsvcCharsetDefines
   -DCMake_TEST_CUDA=${CMake_TEST_CUDA}
 )
 set_property(TEST RunCMake.MsvcCharsetDefines APPEND PROPERTY LABELS "CUDA")
+
+add_RunCMake_test(cmake-E-bin2c -DCMake_TEST_BIN2C_LARGE_FILE=${CMake_TEST_BIN2C_LARGE_FILE})
+if(CMake_TEST_BIN2C_LARGE_FILE)
+  set_property(TEST RunCMake.cmake-E-bin2c PROPERTY TIMEOUT ${CMAKE_LONG_TEST_TIMEOUT})
+endif()

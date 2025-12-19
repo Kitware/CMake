@@ -1,0 +1,6 @@
+static unsigned char const array[] = {};
+
+static size_t const length = 0;
+static size_t const @length2 = 0ull;
+static int const unclosed = @array
+static int const other = @other@;

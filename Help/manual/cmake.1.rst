@@ -1027,6 +1027,75 @@ CMake provides builtin command-line tools through the signature
 
 Available commands are:
 
+.. option:: bin2c [<options>...] [--] [<input-file> [<output-file>]]
+
+  .. versionadded:: 4.3
+
+  Convert a binary file to a C array. If input file is unspecified or ``-``,
+  read from standard input instead of a file. If output file is unspecified or
+  ``-``, write to standard output instead of a file.
+
+  By default, this prints only the bytes. Enclosing text can be added with the
+  ``--template-file`` argument. You can also ``#include`` the bytes from
+  another file, acting as a drop-in replacement for the ``#embed`` directive
+  from C23 and C++26:
+
+  .. code-block:: c
+
+    unsigned char my_bytes[] = {
+    /* #embed "bin2c_input.bin" */
+    #include "bin2c_output.c.txt"
+    };
+
+  .. program:: cmake-E_bin2c
+
+  .. option:: --signed
+
+    Print the bytes as signed integers rather than unsigned.
+
+  .. option:: --decimal
+
+    Print the bytes as decimal rather than hexadecimal.
+
+  .. option:: --trailing-comma
+
+    Append a trailing comma after the last byte (not included by default.)
+
+  .. option:: --template-file <template-file>
+
+    Format from a template file. The template file contains placeholders for
+    the array and optionally the length (which will be a non-negative decimal
+    integer). Such placeholders are enclosed in ``@`` at the beginning and end
+    of the placeholder.
+
+    An example of a potential template file:
+
+    .. code-block:: text
+
+      unsigned char my_bytes[] = {@array@};
+
+      size_t length = @length@;
+
+    The array placeholder may occur at most once in the template file. The
+    length placeholder may occur zero or more times after the array
+    placeholder, but not before it.
+
+    Note that the length is the number of elements printed, and may not match
+    the ``sizeof`` the resulting array if a type other than ``unsigned char``
+    is used.
+
+  .. option:: --template-array-placeholder <placeholder-name>
+
+    Specify a name for the array placeholder in the template file. Set to
+    ``array`` by default.
+
+  .. option:: --template-length-placeholder <placeholder-name>
+
+    Specify a name for the length placeholder in the template file. Set to
+    ``length`` by default.
+
+.. program:: cmake-E
+
 .. option:: capabilities
 
   .. versionadded:: 3.7
