@@ -2241,7 +2241,7 @@ In the following, the phrase "the ``tgt`` filename" means the name of the
   .. versionadded:: 3.15
 
   .. versionadded:: 4.2
-    The option ``POSTFIX``, which can be used to control the inclusion or not
+    The ``POSTFIX`` option can be used to control the inclusion or not
     of the :prop_tgt:`<CONFIG>_POSTFIX` target property value as part of the
     base name. The default is ``POSTFIX:INCLUDE``.
 
@@ -2319,7 +2319,7 @@ In the following, the phrase "the ``tgt`` filename" means the name of the
   .. versionadded:: 3.27
 
   .. versionadded:: 4.2
-    The option ``POSTFIX``, which can be used to control the inclusion or not
+    The ``POSTFIX`` option can be used to control the inclusion or not
     of the :prop_tgt:`<CONFIG>_POSTFIX` target property value as part of the
     base name. The default is ``POSTFIX:INCLUDE``.
 
@@ -2405,14 +2405,15 @@ In the following, the phrase "the ``tgt`` filename" means the name of the
   .. versionadded:: 3.15
 
   .. versionadded:: 4.2
-    The option ``POSTFIX``, which can be used to control the inclusion or not
+    The ``POSTFIX`` option can be used to control the inclusion or not
     of the :prop_tgt:`<CONFIG>_POSTFIX` target property value as part of the
     base name. The default is ``POSTFIX:INCLUDE``.
 
   Base name of file used to link the target ``tgt``, i.e.
   :genex:`$<TARGET_LINKER_FILE_NAME:tgt>` without prefix and suffix, and,
   optionally, postfix.
-  For example, if target file name is ``libbase_postfix.a``, the base name is:
+  For example, if the target file name is ``libbase_postfix.a``, the base name
+  is:
 
     * ``base_postfix`` for ``$<TARGET_LINKER_FILE_BASE_NAME:tgt>`` or
       ``$<TARGET_LINKER_FILE_BASE_NAME:tgt,POSTFIX:INCLUDE>``.
@@ -2483,14 +2484,15 @@ In the following, the phrase "the ``tgt`` filename" means the name of the
   .. versionadded:: 3.27
 
   .. versionadded:: 4.2
-    The option ``POSTFIX``, which can be used to control the inclusion or not
+    The ``POSTFIX`` option can be used to control the inclusion or not
     of the :prop_tgt:`<CONFIG>_POSTFIX` target property value as part of the
     base name. The default is ``POSTFIX:INCLUDE``.
 
   Base name of library file used to link the target ``tgt``, i.e.
   :genex:`$<TARGET_LINKER_LIBRARY_FILE_NAME:tgt>` without prefix and
   suffix,and, optionally, postfix.
-  For example, if target file name is ``libbase_postfix.a``, the base name is:
+  For example, if the target file name is ``libbase_postfix.a``, the base name
+  is:
 
     * ``base_postfix`` for ``$<TARGET_LINKER_LIBRARY_FILE_BASE_NAME:tgt>`` or
       ``$<TARGET_LINKER_LIBRARY_FILE_BASE_NAME:tgt,POSTFIX:INCLUDE>``.
@@ -2564,14 +2566,15 @@ In the following, the phrase "the ``tgt`` filename" means the name of the
   .. versionadded:: 3.27
 
   .. versionadded:: 4.2
-    The option ``POSTFIX``, which can be used to control the inclusion or not
+    The ``POSTFIX`` option can be used to control the inclusion or not
     of the :prop_tgt:`<CONFIG>_POSTFIX` target property value as part of the
     base name. The default is ``POSTFIX:INCLUDE``.
 
   Base name of the import file used to link the target ``tgt``, i.e.
   :genex:`$<TARGET_LINKER_IMPORT_FILE_NAME:tgt>` without prefix and suffix,
   and, optionally, postfix.
-  For example, if target file name is ``libbase_postfix.tbd``, the base name is
+  For example, if the target file name is ``libbase_postfix.tbd``, the base
+  name is
 
     * ``base_postfix`` for ``$<TARGET_LINKER_IMPORT_FILE_BASE_NAME:tgt>`` or
       ``$<TARGET_LINKER_IMPORT_FILE_BASE_NAME:tgt,POSTFIX:INCLUDE>``.
@@ -2696,29 +2699,29 @@ In the following, the phrase "the ``tgt`` filename" means the name of the
   where ``tgt`` is the name of a target.
 
   .. versionadded:: 4.2
-    The option ``POSTFIX``, which can be used to control the inclusion or not
+    The ``POSTFIX`` option can be used to control the inclusion or not
     of the :prop_tgt:`<CONFIG>_POSTFIX` target property value as part of the
     base name. The default is ``POSTFIX:INCLUDE``.
 
   .. versionchanged:: 4.2
     The postfix, as specified by :prop_tgt:`DEBUG_POSTFIX` or
     :prop_tgt:`<CONFIG>_POSTFIX` target properties, is always included in the
-    ``PDB`` base name, except if option ``POSTFIX`` has value ``EXCLUDE``.
-    See the policy :policy:`CMP0202`.
+    ``PDB`` base name, except if the ``POSTFIX`` option has the value
+    ``EXCLUDE``.  See the policy :policy:`CMP0202`.
 
   The base name corresponds to the target PDB file name (see
   ``$<TARGET_PDB_FILE_NAME:tgt>``) without prefix and suffix, and, optionally,
-  postfix. For example, if target file name is ``base_postfix.pdb``, the base
-  name is
+  postfix.  For example, if the target file name is ``base_postfix.pdb``, the
+  base name is
 
     * ``base_postfix`` for ``$<TARGET_PDB_FILE_BASE_NAME:tgt>`` or
       ``$<TARGET_PDB_FILE_BASE_NAME:tgt,POSTFIX:INCLUDE>``.
     * ``base`` for ``$<TARGET_PDB_FILE_BASE_NAME:tgt,POSTFIX:EXCLUDE>``.
 
-  See also the :prop_tgt:`OUTPUT_NAME`, :prop_tgt:`PDB_NAME` target properties,
-  and their configuration-specific variants :prop_tgt:`OUTPUT_NAME_<CONFIG>`
-  and :prop_tgt:`PDB_NAME_<CONFIG>`, and the :prop_tgt:`<CONFIG>_POSTFIX` and
-  :prop_tgt:`DEBUG_POSTFIX` target properties.
+  See also the :prop_tgt:`OUTPUT_NAME` and :prop_tgt:`PDB_NAME` target
+  properties, their configuration-specific variants
+  :prop_tgt:`OUTPUT_NAME_<CONFIG>` and :prop_tgt:`PDB_NAME_<CONFIG>`, and the
+  :prop_tgt:`<CONFIG>_POSTFIX` and :prop_tgt:`DEBUG_POSTFIX` target properties.
 
   Note that ``tgt`` is not added as a dependency of the target this
   expression is evaluated on.
