@@ -5,8 +5,6 @@
 #include <memory>
 #include <stdexcept>
 
-#include <cm/filesystem>
-
 #include <cm3p/json/value.h>
 #include <cm3p/json/writer.h>
 
@@ -300,8 +298,7 @@ cmSarif::LogFileWriter::~LogFileWriter()
     if (this->TryWrite() == WriteResult::FAILURE) {
       // If the result is `FAILURE`, it means the write condition is true but
       // the file still wasn't written. This is an error.
-      cmSystemTools::Error("Failed to write SARIF log to " +
-                           this->FilePath.generic_string());
+      cmSystemTools::Error("Failed to write SARIF log to " + this->FilePath);
     }
   }
 }
@@ -309,16 +306,16 @@ cmSarif::LogFileWriter::~LogFileWriter()
 bool cmSarif::LogFileWriter::EnsureFileValid()
 {
   // First, ensure directory exists
-  cm::filesystem::path dir = this->FilePath.parent_path();
-  if (!cmSystemTools::FileIsDirectory(dir.generic_string())) {
+  std::string const dir = cmSystemTools::GetFilenamePath(this->FilePath);
+  if (!cmSystemTools::FileIsDirectory(dir)) {
     if (!this->CreateDirectories ||
-        !cmSystemTools::MakeDirectory(dir.generic_string()).IsSuccess()) {
+        !cmSystemTools::MakeDirectory(dir).IsSuccess()) {
       return false;
     }
   }
 
   // Open the file for writing
-  cmsys::ofstream outputFile(this->FilePath.generic_string().c_str());
+  cmsys::ofstream outputFile(this->FilePath.c_str());
   if (!outputFile.good()) {
     return false;
   }
@@ -336,7 +333,7 @@ cmSarif::LogFileWriter::WriteResult cmSarif::LogFileWriter::TryWrite()
   if (!this->EnsureFileValid()) {
     return WriteResult::FAILURE;
   }
-  cmsys::ofstream outputFile(this->FilePath.generic_string().c_str());
+  cmsys::ofstream outputFile(this->FilePath.c_str());
 
   // The file is available, so proceed to write the log
 
@@ -358,9 +355,8 @@ cmSarif::LogFileWriter::WriteResult cmSarif::LogFileWriter::TryWrite()
 bool cmSarif::LogFileWriter::ConfigureForCMakeRun(cmake& cm)
 {
   // If an explicit SARIF output path has been provided, set and check it
-  cm::optional<std::string> sarifFilePath = cm.GetSarifFilePath();
-  if (sarifFilePath) {
-    this->SetPath(cm::filesystem::path(*sarifFilePath));
+  if (cm::optional<std::string> sarifFilePath = cm.GetSarifFilePath()) {
+    this->SetPath(*sarifFilePath);
     if (!this->EnsureFileValid()) {
       cmSystemTools::Error(
         cmStrCat("Invalid SARIF output file path: ", *sarifFilePath));
