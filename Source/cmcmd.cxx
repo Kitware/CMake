@@ -2210,7 +2210,7 @@ int cmcmd::RunPreprocessor(std::vector<std::string> const& command,
     return 1;
   }
   if (process.GetStatus(0).ExitStatus != 0) {
-    cmUVPipeIStream errorStream(process.GetLoop(), process.ErrorStream());
+    cmUVIStream errorStream(process.ErrorStream());
     std::cerr << errorStream.rdbuf();
 
     return 1;
@@ -2335,7 +2335,7 @@ int cmcmd::RunLLVMRC(std::vector<std::string> const& args)
     return result;
   }
   if (process.GetStatus(0).ExitStatus != 0) {
-    cmUVPipeIStream errorStream(process.GetLoop(), process.ErrorStream());
+    cmUVIStream errorStream(process.ErrorStream());
     std::cerr << errorStream.rdbuf();
     return 1;
   }

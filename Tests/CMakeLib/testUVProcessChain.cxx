@@ -306,17 +306,17 @@ bool testUVProcessChainBuiltin(char const* helperCommand)
     return false;
   }
 
-  if (chain->OutputStream() < 0) {
+  if (!chain->OutputStream()) {
     std::cout << "OutputStream() was invalid, expecting valid" << std::endl;
     return false;
   }
-  if (chain->ErrorStream() < 0) {
+  if (!chain->ErrorStream()) {
     std::cout << "ErrorStream() was invalid, expecting valid" << std::endl;
     return false;
   }
 
-  cmUVPipeIStream output(chain->GetLoop(), chain->OutputStream());
-  cmUVPipeIStream error(chain->GetLoop(), chain->ErrorStream());
+  cmUVIStream output(chain->OutputStream());
+  cmUVIStream error(chain->ErrorStream());
 
   if (!checkOutput(output, error)) {
     return false;
@@ -338,21 +338,16 @@ bool testUVProcessChainBuiltinMerged(char const* helperCommand)
     return false;
   }
 
-  if (chain->OutputStream() < 0) {
+  if (!chain->OutputStream()) {
     std::cout << "OutputStream() was invalid, expecting valid" << std::endl;
     return false;
   }
-  if (chain->ErrorStream() < 0) {
-    std::cout << "ErrorStream() was invalid, expecting valid" << std::endl;
-    return false;
-  }
-  if (chain->OutputStream() != chain->ErrorStream()) {
-    std::cout << "OutputStream() and ErrorStream() expected to be the same"
-              << std::endl;
+  if (chain->ErrorStream()) {
+    std::cout << "ErrorStream() was valid, expecting invalid" << std::endl;
     return false;
   }
 
-  cmUVPipeIStream mergedStream(chain->GetLoop(), chain->OutputStream());
+  cmUVIStream mergedStream(chain->OutputStream());
 
   std::string merged = getInput(mergedStream);
   auto qemuErrorPos = merged.find("qemu:");
@@ -412,11 +407,11 @@ bool testUVProcessChainExternal(char const* helperCommand)
     return false;
   }
 
-  if (chain->OutputStream() >= 0) {
+  if (chain->OutputStream()) {
     std::cout << "OutputStream() was valid, expecting invalid" << std::endl;
     return false;
   }
-  if (chain->ErrorStream() >= 0) {
+  if (chain->ErrorStream()) {
     std::cout << "ErrorStream() was valid, expecting invalid" << std::endl;
     return false;
   }
@@ -460,11 +455,11 @@ bool testUVProcessChainNone(char const* helperCommand)
     return false;
   }
 
-  if (chain->OutputStream() >= 0) {
+  if (chain->OutputStream()) {
     std::cout << "OutputStream() was valid, expecting invalid" << std::endl;
     return false;
   }
-  if (chain->ErrorStream() >= 0) {
+  if (chain->ErrorStream()) {
     std::cout << "ErrorStream() was valid, expecting invalid" << std::endl;
     return false;
   }
@@ -487,7 +482,7 @@ bool testUVProcessChainCwdUnchanged(char const* helperCommand)
     return false;
   }
 
-  cmUVPipeIStream output(chain.GetLoop(), chain.OutputStream());
+  cmUVIStream output(chain.OutputStream());
   auto cwd = getInput(output);
   if (!cmHasLiteralSuffix(cwd, "/Tests/CMakeLib")) {
     std::cout << "Working directory was \"" << cwd
@@ -514,7 +509,7 @@ bool testUVProcessChainCwdChanged(char const* helperCommand)
     return false;
   }
 
-  cmUVPipeIStream output(chain.GetLoop(), chain.OutputStream());
+  cmUVIStream output(chain.OutputStream());
   auto cwd = getInput(output);
   if (!cmHasLiteralSuffix(cwd, "/Tests")) {
     std::cout << "Working directory was \"" << cwd
@@ -649,7 +644,7 @@ bool testUVProcessChainInputFile(char const* helperCommand)
     return false;
   }
 
-  cmUVPipeIStream stream(chain.GetLoop(), chain.OutputStream());
+  cmUVIStream stream(chain.OutputStream());
   std::string output = getInput(stream);
   if (output != "HELO WRD!") {
     std::cout << "Output was \"" << output << "\", expected \"HELO WRD!\""
@@ -700,7 +695,7 @@ bool testUVProcessChainExternalLoop(char const* helperCommand)
     return false;
   }
 
-  cmUVPipeIStream stream(chain.GetLoop(), chain.OutputStream());
+  cmUVIStream stream(chain.OutputStream());
   std::string output = getInput(stream);
   if (output != "HELLO world!") {
     std::cout << "Output was \"" << output << "\", expected \"HELLO world!\""

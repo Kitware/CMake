@@ -326,12 +326,14 @@ bool cmExecuteProcessCommand(std::vector<std::string> const& args,
   // Read the process output.
   struct ReadData
   {
+    uv_stream_t* Stream = nullptr;
     bool Finished = false;
     std::vector<char> Output;
-    cm::uv_pipe_ptr Stream;
   };
   ReadData outputData;
   ReadData errorData;
+  outputData.Stream = chain.OutputStream();
+  errorData.Stream = chain.ErrorStream();
   cmPolicies::PolicyStatus const cmp0176 =
     status.GetMakefile().GetPolicyStatus(cmPolicies::CMP0176);
   cmProcessOutput::Encoding encoding =
@@ -353,9 +355,7 @@ bool cmExecuteProcessCommand(std::vector<std::string> const& args,
   std::string strdata;
 
   std::unique_ptr<cmUVStreamReadHandle> outputHandle;
-  if (chain.OutputStream() >= 0) {
-    outputData.Stream.init(chain.GetLoop(), 0);
-    uv_pipe_open(outputData.Stream, chain.OutputStream());
+  if (outputData.Stream) {
     outputHandle = cmUVStreamRead(
       outputData.Stream,
       [&arguments, &processOutput, &outputData,
@@ -377,10 +377,7 @@ bool cmExecuteProcessCommand(std::vector<std::string> const& args,
     outputData.Finished = true;
   }
   std::unique_ptr<cmUVStreamReadHandle> errorHandle;
-  if (chain.ErrorStream() >= 0 &&
-      chain.ErrorStream() != chain.OutputStream()) {
-    errorData.Stream.init(chain.GetLoop(), 0);
-    uv_pipe_open(errorData.Stream, chain.ErrorStream());
+  if (errorData.Stream) {
     errorHandle = cmUVStreamRead(
       errorData.Stream,
       [&arguments, &processOutput, &errorData,

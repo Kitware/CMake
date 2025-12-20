@@ -48,7 +48,7 @@ bool cmBinUtilsLinuxELFObjdumpGetRuntimeDependenciesTool::GetFileInfo(
   static cmsys::RegularExpression const neededRegex("^ *NEEDED *([^\n]*)$");
   static cmsys::RegularExpression const rpathRegex("^ *RPATH *([^\n]*)$");
   static cmsys::RegularExpression const runpathRegex("^ *RUNPATH *([^\n]*)$");
-  cmUVPipeIStream output(process.GetLoop(), process.OutputStream());
+  cmUVIStream output(process.OutputStream());
   while (std::getline(output, line)) {
     cmsys::RegularExpressionMatch match;
     if (neededRegex.find(line.c_str(), match)) {

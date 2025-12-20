@@ -27,7 +27,6 @@
 #include "cmStateSnapshot.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
-#include "cmUVHandlePtr.h"
 #include "cmUVProcessChain.h"
 #include "cmUVStream.h"
 #include "cmake.h"
@@ -236,23 +235,19 @@ void cmCTestLaunch::RunChild()
   auto chain = builder.Start();
 
   // Record child stdout and stderr if necessary.
-  cm::uv_pipe_ptr outPipe;
-  cm::uv_pipe_ptr errPipe;
   bool outFinished = true;
   bool errFinished = true;
   cmProcessOutput processOutput;
   std::unique_ptr<cmUVStreamReadHandle> outputHandle;
   std::unique_ptr<cmUVStreamReadHandle> errorHandle;
   if (!this->Reporter.Passthru) {
-    auto beginRead = [&chain, &processOutput](
-                       cm::uv_pipe_ptr& pipe, int stream, std::ostream& out,
+    auto beginRead =
+      [&processOutput](uv_stream_t* stream, std::ostream& out,
                        cmsys::ofstream& file, bool& haveData, bool& finished,
                        int id) -> std::unique_ptr<cmUVStreamReadHandle> {
-      pipe.init(chain.GetLoop(), 0);
-      uv_pipe_open(pipe, stream);
       finished = false;
       return cmUVStreamRead(
-        pipe,
+        stream,
         [&processOutput, &out, &file, id, &haveData](std::vector<char> data) {
           std::string strdata;
           processOutput.DecodeText(data.data(), data.size(), strdata, id);
@@ -270,9 +265,9 @@ void cmCTestLaunch::RunChild()
           finished = true;
         });
     };
-    outputHandle = beginRead(outPipe, chain.OutputStream(), std::cout, fout,
+    outputHandle = beginRead(chain.OutputStream(), std::cout, fout,
                              this->HaveOut, outFinished, 1);
-    errorHandle = beginRead(errPipe, chain.ErrorStream(), std::cerr, ferr,
+    errorHandle = beginRead(chain.ErrorStream(), std::cerr, ferr,
                             this->HaveErr, errFinished, 2);
   }
 

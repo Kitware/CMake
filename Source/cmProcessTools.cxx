@@ -9,7 +9,6 @@
 #include <cm3p/uv.h>
 
 #include "cmProcessOutput.h"
-#include "cmUVHandlePtr.h"
 #include "cmUVStream.h"
 
 std::vector<cmUVProcessChain::Status> cmProcessTools::RunProcess(
@@ -24,11 +23,8 @@ std::vector<cmUVProcessChain::Status> cmProcessTools::RunProcess(
   auto chain = builder.Start();
 
   std::string strdata;
-  cm::uv_pipe_ptr outputPipe;
-  outputPipe.init(chain.GetLoop(), 0);
-  uv_pipe_open(outputPipe, chain.OutputStream());
   auto outputHandle = cmUVStreamRead(
-    outputPipe,
+    chain.OutputStream(),
     [&out, &processOutput, &strdata](std::vector<char> data) {
       if (out) {
         processOutput.DecodeText(data.data(), data.size(), strdata, 1);
@@ -38,11 +34,8 @@ std::vector<cmUVProcessChain::Status> cmProcessTools::RunProcess(
       }
     },
     [&out]() { out = nullptr; });
-  cm::uv_pipe_ptr errorPipe;
-  errorPipe.init(chain.GetLoop(), 0);
-  uv_pipe_open(errorPipe, chain.ErrorStream());
   auto errorHandle = cmUVStreamRead(
-    errorPipe,
+    chain.ErrorStream(),
     [&err, &processOutput, &strdata](std::vector<char> data) {
       if (err) {
         processOutput.DecodeText(data.data(), data.size(), strdata, 2);

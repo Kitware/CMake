@@ -201,10 +201,8 @@ void InstallScriptRunner::start(cm::uv_loop_ptr& loop,
     .SetExternalLoop(*loop)
     .SetMergedBuiltinStreams();
   this->chain = cm::make_unique<cmUVProcessChain>(builder.Start());
-  this->pipe.init(this->chain->GetLoop(), 0);
-  uv_pipe_open(this->pipe, this->chain->OutputStream());
   this->streamHandler = cmUVStreamRead(
-    this->pipe,
+    this->chain->OutputStream(),
     [this](std::vector<char> data) {
       std::string strdata;
       cmProcessOutput(cmProcessOutput::Auto)

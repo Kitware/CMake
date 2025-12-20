@@ -443,7 +443,7 @@ end:
   return success;
 }
 
-bool testUVPipeIStream()
+bool testUVIStream()
 {
   int pipe[] = { -1, -1 };
   if (cmGetPipes(pipe) < 0) {
@@ -464,8 +464,11 @@ bool testUVPipeIStream()
   buf.len = str.length();
   uv_write(&writeReq, pipeSink, &buf, 1, nullptr);
   uv_run(loop, UV_RUN_DEFAULT);
+  cm::uv_pipe_ptr pipeSource;
+  pipeSource.init(*loop, 0);
+  uv_pipe_open(pipeSource, pipe[0]);
 
-  cmUVPipeIStream pin(*loop, pipe[0]);
+  cmUVIStream pin(pipeSource);
   std::string line;
   std::getline(pin, line);
   if (line != "Hello world!") {
@@ -593,8 +596,8 @@ int testUVStreambuf(int argc, char** const argv)
     return -1;
   }
 
-  if (!testUVPipeIStream()) {
-    std::cout << "While executing testUVPipeIStream().\n";
+  if (!testUVIStream()) {
+    std::cout << "While executing testUVIStream().\n";
     return -1;
   }
 

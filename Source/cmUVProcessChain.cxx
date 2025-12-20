@@ -23,7 +23,7 @@ struct cmUVProcessChain::InternalData
 {
   struct StreamData
   {
-    int BuiltinStream = -1;
+    cm::uv_pipe_ptr BuiltinStream;
     uv_stdio_container_t Stdio;
   };
 
@@ -219,6 +219,44 @@ bool cmUVProcessChain::InternalData::Prepare(
       break;
   }
 
+  auto const& output =
+    this->Builder->Stdio[cmUVProcessChainBuilder::Stream_OUTPUT];
+  auto& outputData = this->OutputStreamData;
+  switch (output.Type) {
+    case cmUVProcessChainBuilder::None:
+      outputData.Stdio.flags = UV_IGNORE;
+      break;
+
+    case cmUVProcessChainBuilder::Builtin: {
+      int pipeFd[2];
+      if (cmGetPipes(pipeFd) < 0) {
+        return false;
+      }
+
+      if (outputData.BuiltinStream.init(*this->Loop, 0) < 0) {
+        return false;
+      }
+      if (uv_pipe_open(outputData.BuiltinStream, pipeFd[0]) < 0) {
+        return false;
+      }
+
+      if (this->TempOutputPipe.init(*this->Loop, 0) < 0) {
+        return false;
+      }
+      if (uv_pipe_open(this->TempOutputPipe, pipeFd[1]) < 0) {
+        return false;
+      }
+
+      outputData.Stdio.flags = UV_INHERIT_FD;
+      outputData.Stdio.data.fd = pipeFd[1];
+    } break;
+
+    case cmUVProcessChainBuilder::External:
+      outputData.Stdio.flags = UV_INHERIT_FD;
+      outputData.Stdio.data.fd = output.FileDescriptor;
+      break;
+  }
+
   auto const& error =
     this->Builder->Stdio[cmUVProcessChainBuilder::Stream_ERROR];
   auto& errorData = this->ErrorStreamData;
@@ -228,66 +266,37 @@ bool cmUVProcessChain::InternalData::Prepare(
       break;
 
     case cmUVProcessChainBuilder::Builtin: {
-      int pipeFd[2];
-      if (cmGetPipes(pipeFd) < 0) {
-        return false;
-      }
-
-      errorData.BuiltinStream = pipeFd[0];
-      errorData.Stdio.flags = UV_INHERIT_FD;
-      errorData.Stdio.data.fd = pipeFd[1];
-
-      if (this->TempErrorPipe.init(*this->Loop, 0) < 0) {
-        return false;
-      }
-      if (uv_pipe_open(this->TempErrorPipe, errorData.Stdio.data.fd) < 0) {
-        return false;
-      }
-
-      break;
-    }
-
-    case cmUVProcessChainBuilder::External:
-      errorData.Stdio.flags = UV_INHERIT_FD;
-      errorData.Stdio.data.fd = error.FileDescriptor;
-      break;
-  }
-
-  auto const& output =
-    this->Builder->Stdio[cmUVProcessChainBuilder::Stream_OUTPUT];
-  auto& outputData = this->OutputStreamData;
-  switch (output.Type) {
-    case cmUVProcessChainBuilder::None:
-      outputData.Stdio.flags = UV_IGNORE;
-      break;
-
-    case cmUVProcessChainBuilder::Builtin:
       if (this->Builder->MergedBuiltinStreams) {
-        outputData.BuiltinStream = errorData.BuiltinStream;
-        outputData.Stdio.flags = UV_INHERIT_FD;
-        outputData.Stdio.data.fd = errorData.Stdio.data.fd;
+        errorData.Stdio.flags = UV_INHERIT_FD;
+        errorData.Stdio.data.fd = outputData.Stdio.data.fd;
       } else {
         int pipeFd[2];
         if (cmGetPipes(pipeFd) < 0) {
           return false;
         }
 
-        outputData.BuiltinStream = pipeFd[0];
-        outputData.Stdio.flags = UV_INHERIT_FD;
-        outputData.Stdio.data.fd = pipeFd[1];
+        if (errorData.BuiltinStream.init(*this->Loop, 0) < 0) {
+          return false;
+        }
+        if (uv_pipe_open(errorData.BuiltinStream, pipeFd[0]) < 0) {
+          return false;
+        }
 
-        if (this->TempOutputPipe.init(*this->Loop, 0) < 0) {
+        if (this->TempErrorPipe.init(*this->Loop, 0) < 0) {
           return false;
         }
-        if (uv_pipe_open(this->TempOutputPipe, outputData.Stdio.data.fd) < 0) {
+        if (uv_pipe_open(this->TempErrorPipe, pipeFd[1]) < 0) {
           return false;
         }
+
+        errorData.Stdio.flags = UV_INHERIT_FD;
+        errorData.Stdio.data.fd = pipeFd[1];
       }
-      break;
+    } break;
 
     case cmUVProcessChainBuilder::External:
-      outputData.Stdio.flags = UV_INHERIT_FD;
-      outputData.Stdio.data.fd = output.FileDescriptor;
+      errorData.Stdio.flags = UV_INHERIT_FD;
+      errorData.Stdio.data.fd = error.FileDescriptor;
       break;
   }
 
@@ -439,12 +448,12 @@ uv_loop_t& cmUVProcessChain::GetLoop()
   return *this->Data->Loop;
 }
 
-int cmUVProcessChain::OutputStream()
+uv_stream_t* cmUVProcessChain::OutputStream()
 {
   return this->Data->OutputStreamData.BuiltinStream;
 }
 
-int cmUVProcessChain::ErrorStream()
+uv_stream_t* cmUVProcessChain::ErrorStream()
 {
   return this->Data->ErrorStreamData.BuiltinStream;
 }
