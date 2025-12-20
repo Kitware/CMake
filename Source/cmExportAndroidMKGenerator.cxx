@@ -68,9 +68,9 @@ void cmExportAndroidMKGenerator::GenerateInterfaceProperties(
 
             if (gt->GetType() == cmStateEnums::SHARED_LIBRARY ||
                 gt->GetType() == cmStateEnums::MODULE_LIBRARY) {
-              sharedLibs += " " + lib;
+              sharedLibs = cmStrCat(std::move(sharedLibs), ' ', lib);
             } else {
-              staticLibs += " " + lib;
+              staticLibs = cmStrCat(std::move(staticLibs), ' ', lib);
             }
           } else {
             bool relpath = false;
@@ -82,10 +82,10 @@ void cmExportAndroidMKGenerator::GenerateInterfaceProperties(
             // if it is full or a link library then use string directly
             if (cmSystemTools::FileIsFullPath(lib) ||
                 cmHasLiteralPrefix(lib, "-l") || relpath) {
-              ldlibs += " " + lib;
+              ldlibs = cmStrCat(std::move(ldlibs), ' ', lib);
               // if it is not a path and does not have a -l then add -l
             } else if (!lib.empty()) {
-              ldlibs += " -l" + lib;
+              ldlibs = cmStrCat(std::move(ldlibs), " -l", lib);
             }
           }
         }

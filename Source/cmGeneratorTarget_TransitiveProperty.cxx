@@ -65,7 +65,7 @@ bool cmGeneratorTarget::MaybeHaveInterfaceProperty(std::string const& prop,
                                                    cm::GenEx::Evaluation* eval,
                                                    UseTo usage) const
 {
-  std::string const key = prop + '@' + eval->Context.Config;
+  std::string const key = cmStrCat(prop, '@', eval->Context.Config);
   auto i = this->MaybeInterfacePropertyExists.find(key);
   if (i == this->MaybeInterfacePropertyExists.end()) {
     // Insert an entry now in case there is a cycle.

@@ -339,9 +339,9 @@ void cmFastbuildTargetGenerator::AddOutput(cmCustomCommandGenerator const& ccg,
 void cmFastbuildTargetGenerator::AddExecArguments(
   FastbuildExecNode& exec, std::string const& scriptFilename) const
 {
-  exec.ExecArguments = FASTBUILD_SCRIPT_FILE_ARG;
-  exec.ExecArguments +=
-    cmGlobalFastbuildGenerator::QuoteIfHasSpaces(scriptFilename);
+  exec.ExecArguments =
+    cmStrCat(FASTBUILD_SCRIPT_FILE_ARG,
+             cmGlobalFastbuildGenerator::QuoteIfHasSpaces(scriptFilename));
 
   exec.ScriptFile = scriptFilename;
   exec.ExecExecutable =
@@ -510,18 +510,16 @@ FastbuildExecNode cmFastbuildTargetGenerator::GetDepsCheckExec(
   exec.ExecUseStdOutAsOutput = true;
   exec.ExecOutput = depender.ExecOutput + ".deps-checker";
   exec.ExecExecutable = cmSystemTools::GetCMakeCommand();
-  exec.ExecArguments += "-E cmake_fastbuild_check_depends ";
-  exec.ExecArguments += depender.ExecOutput + ' ';
-  char const* sep = "";
+  exec.ExecArguments =
+    cmStrCat(std::move(exec.ExecArguments),
+             "-E cmake_fastbuild_check_depends ", depender.ExecOutput);
   for (auto const& dep : depender.OutputsAlias.PreBuildDependencies) {
-    exec.ExecArguments += sep;
-    exec.ExecArguments += dep.Name;
-    sep = " ";
+    exec.ExecArguments =
+      cmStrCat(std::move(exec.ExecArguments), ' ', dep.Name);
   }
   for (auto const& dep : depender.ByproductsAlias.PreBuildDependencies) {
-    exec.ExecArguments += sep;
-    exec.ExecArguments += dep.Name;
-    sep = " ";
+    exec.ExecArguments =
+      cmStrCat(std::move(exec.ExecArguments), ' ', dep.Name);
   }
   return exec;
 }

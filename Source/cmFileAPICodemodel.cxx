@@ -2060,9 +2060,9 @@ Json::Value Target::DumpArtifacts()
       this->GT->GetOutputInfo(this->Config);
     if (output && !output->PdbDir.empty()) {
       Json::Value artifact = Json::objectValue;
-      artifact["path"] = RelativeIfUnder(this->TopBuild,
-                                         output->PdbDir + '/' +
-                                           this->GT->GetPDBName(this->Config));
+      artifact["path"] = RelativeIfUnder(
+        this->TopBuild,
+        cmStrCat(output->PdbDir, '/', this->GT->GetPDBName(this->Config)));
       artifacts.append(std::move(artifact)); // NOLINT(*)
     }
   }

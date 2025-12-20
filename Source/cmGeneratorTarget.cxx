@@ -322,7 +322,7 @@ std::string cmGeneratorTarget::GetOutputName(
     std::string configUpper = cmSystemTools::UpperCase(config);
     if (!type.empty() && !configUpper.empty()) {
       // <ARCHIVE|LIBRARY|RUNTIME>_OUTPUT_NAME_<CONFIG>
-      props.push_back(type + "_OUTPUT_NAME_" + configUpper);
+      props.push_back(cmStrCat(type, "_OUTPUT_NAME_", configUpper));
     }
     if (!type.empty()) {
       // <ARCHIVE|LIBRARY|RUNTIME>_OUTPUT_NAME
@@ -357,7 +357,8 @@ std::string cmGeneratorTarget::GetOutputName(
     // from the above block.
     this->LocalGenerator->GetCMakeInstance()->IssueMessage(
       MessageType::FATAL_ERROR,
-      "Target '" + this->GetName() + "' OUTPUT_NAME depends on itself.",
+      cmStrCat("Target '", this->GetName(),
+               "' OUTPUT_NAME depends on itself."),
       this->GetBacktrace());
   }
   return i->second;
@@ -806,7 +807,8 @@ bool cmGeneratorTarget::IsIPOEnabled(std::string const& lang,
   cmPolicies::PolicyStatus cmp0069 = this->GetPolicyStatusCMP0069();
 
   if (cmp0069 == cmPolicies::OLD || cmp0069 == cmPolicies::WARN) {
-    if (this->Makefile->IsOn("_CMAKE_" + lang + "_IPO_LEGACY_BEHAVIOR")) {
+    if (this->Makefile->IsOn(
+          cmStrCat("_CMAKE_", lang, "_IPO_LEGACY_BEHAVIOR"))) {
       return true;
     }
     if (this->PolicyReportedCMP0069) {
@@ -2683,32 +2685,33 @@ void cmGeneratorTarget::AddCUDAArchitectureFlagsImpl(cmBuildStep compileOrLink,
     }
 
     for (CudaArchitecture& architecture : architectures) {
-      flags +=
-        " \"--generate-code=arch=compute_" + architecture.name + ",code=[";
+      flags = cmStrCat(std::move(flags), " \"--generate-code=arch=compute_",
+                       architecture.name, ",code=[");
 
       if (architecture.virtual_) {
-        flags += "compute_" + architecture.name;
+        flags = cmStrCat(std::move(flags), "compute_", architecture.name);
 
         if (ipoEnabled || architecture.real) {
-          flags += ",";
+          flags += ',';
         }
       }
 
       if (ipoEnabled) {
         if (compileOrLink == cmBuildStep::Compile) {
-          flags += "lto_" + architecture.name;
+          flags = cmStrCat(std::move(flags), "lto_", architecture.name);
         } else if (compileOrLink == cmBuildStep::Link) {
-          flags += "sm_" + architecture.name;
+          flags = cmStrCat(std::move(flags), "sm_", architecture.name);
         }
       } else if (architecture.real) {
-        flags += "sm_" + architecture.name;
+        flags = cmStrCat(std::move(flags), "sm_", architecture.name);
       }
 
       flags += "]\"";
     }
   } else if (compiler == "Clang" && compileOrLink == cmBuildStep::Compile) {
     for (CudaArchitecture& architecture : architectures) {
-      flags += " --cuda-gpu-arch=sm_" + architecture.name;
+      flags =
+        cmStrCat(std::move(flags), " --cuda-gpu-arch=sm_", architecture.name);
 
       if (!architecture.real) {
         this->Makefile->IssueMessage(
@@ -2717,7 +2720,8 @@ void cmGeneratorTarget::AddCUDAArchitectureFlagsImpl(cmBuildStep compileOrLink,
       }
 
       if (!architecture.virtual_) {
-        flags += " --no-cuda-include-ptx=sm_" + architecture.name;
+        flags = cmStrCat(std::move(flags), " --no-cuda-include-ptx=sm_",
+                         architecture.name);
       }
     }
   }
@@ -2750,9 +2754,10 @@ void cmGeneratorTarget::AddHIPArchitectureFlags(cmBuildStep compileOrLink,
   std::string arch = this->GetSafeProperty("HIP_ARCHITECTURES");
 
   if (arch.empty()) {
-    this->Makefile->IssueMessage(MessageType::FATAL_ERROR,
-                                 "HIP_ARCHITECTURES is empty for target \"" +
-                                   this->GetName() + "\".");
+    this->Makefile->IssueMessage(
+      MessageType::FATAL_ERROR,
+      cmStrCat("HIP_ARCHITECTURES is empty for target \"", this->GetName(),
+               "\"."));
   }
 
   // If HIP_ARCHITECTURES is false we don't add any architectures.
@@ -2816,29 +2821,29 @@ std::string cmGeneratorTarget::GetCreateRuleVariable(
 {
   switch (this->GetType()) {
     case cmStateEnums::STATIC_LIBRARY: {
-      std::string var = "CMAKE_" + lang + "_CREATE_STATIC_LIBRARY";
+      std::string var = cmStrCat("CMAKE_", lang, "_CREATE_STATIC_LIBRARY");
       return this->GetFeatureSpecificLinkRuleVariable(var, lang, config);
     }
     case cmStateEnums::SHARED_LIBRARY:
       if (this->IsArchivedAIXSharedLibrary()) {
-        return "CMAKE_" + lang + "_CREATE_SHARED_LIBRARY_ARCHIVE";
+        return cmStrCat("CMAKE_", lang, "_CREATE_SHARED_LIBRARY_ARCHIVE");
       }
-      return "CMAKE_" + lang + "_CREATE_SHARED_LIBRARY";
+      return cmStrCat("CMAKE_", lang, "_CREATE_SHARED_LIBRARY");
     case cmStateEnums::MODULE_LIBRARY:
-      return "CMAKE_" + lang + "_CREATE_SHARED_MODULE";
+      return cmStrCat("CMAKE_", lang, "_CREATE_SHARED_MODULE");
     case cmStateEnums::EXECUTABLE:
       if (this->IsExecutableWithExports()) {
         std::string linkExeWithExports =
-          "CMAKE_" + lang + "_LINK_EXECUTABLE_WITH_EXPORTS";
+          cmStrCat("CMAKE_", lang, "_LINK_EXECUTABLE_WITH_EXPORTS");
         if (this->Makefile->IsDefinitionSet(linkExeWithExports)) {
           return linkExeWithExports;
         }
       }
-      return "CMAKE_" + lang + "_LINK_EXECUTABLE";
+      return cmStrCat("CMAKE_", lang, "_LINK_EXECUTABLE");
     default:
       break;
   }
-  return "";
+  return {};
 }
 
 //----------------------------------------------------------------------------
@@ -3276,9 +3281,9 @@ std::string cmGeneratorTarget::GetPchCreateCompileOptions(
     if (GlobalGenerator->IsFastbuild()) {
       // Account for potential spaces in a shell-friendly way.
       cmSystemTools::ReplaceString(createOptionList, "<PCH_HEADER>",
-                                   '"' + pchHeader + '"');
+                                   cmStrCat('"', pchHeader, '"'));
       cmSystemTools::ReplaceString(createOptionList, "<PCH_FILE>",
-                                   '"' + pchFile + '"');
+                                   cmStrCat('"', pchFile, '"'));
     } else {
       cmSystemTools::ReplaceString(createOptionList, "<PCH_HEADER>",
                                    pchHeader);
@@ -3320,9 +3325,9 @@ std::string cmGeneratorTarget::GetPchUseCompileOptions(
     if (GlobalGenerator->IsFastbuild()) {
       // Account for potential spaces in a shell-friendly way.
       cmSystemTools::ReplaceString(useOptionList, "<PCH_HEADER>",
-                                   '"' + pchHeader + '"');
+                                   cmStrCat('"', pchHeader, '"'));
       cmSystemTools::ReplaceString(useOptionList, "<PCH_FILE>",
-                                   '"' + pchFile + '"');
+                                   cmStrCat('"', pchFile, '"'));
     } else {
       cmSystemTools::ReplaceString(useOptionList, "<PCH_HEADER>", pchHeader);
       cmSystemTools::ReplaceString(useOptionList, "<PCH_FILE>", pchFile);
@@ -4021,7 +4026,7 @@ std::string cmGeneratorTarget::GetPDBOutputName(
     // from the above block.
     this->LocalGenerator->GetCMakeInstance()->IssueMessage(
       MessageType::FATAL_ERROR,
-      "Target '" + this->GetName() + "' PDB_NAME depends on itself.",
+      cmStrCat("Target '", this->GetName(), "' PDB_NAME depends on itself."),
       this->GetBacktrace());
   }
   return i->second;
@@ -4541,7 +4546,8 @@ cmGeneratorTarget::OutputInfo const* cmGeneratorTarget::GetOutputInfo(
     // from the above block.
     this->LocalGenerator->GetCMakeInstance()->IssueMessage(
       MessageType::FATAL_ERROR,
-      "Target '" + this->GetName() + "' OUTPUT_DIRECTORY depends on itself.",
+      cmStrCat("Target '", this->GetName(),
+               "' OUTPUT_DIRECTORY depends on itself."),
       this->GetBacktrace());
     return nullptr;
   }
@@ -6347,7 +6353,8 @@ std::string cmGeneratorTarget::GetSwiftModuleFileName() const
   if (this->GetPolicyStatusCMP0195() == cmPolicies::NEW) {
     if (cmValue moduleTriple =
           this->Makefile->GetDefinition("CMAKE_Swift_MODULE_TRIPLE")) {
-      moduleFilename += "/" + *moduleTriple + ".swiftmodule";
+      moduleFilename = cmStrCat(std::move(moduleFilename), '/', *moduleTriple,
+                                ".swiftmodule");
     }
   }
   return moduleFilename;
@@ -6383,8 +6390,8 @@ std::string cmGeneratorTarget::GetSwiftModuleDirectory(
 std::string cmGeneratorTarget::GetSwiftModulePath(
   std::string const& config) const
 {
-  return this->GetSwiftModuleDirectory(config) + "/" +
-    this->GetSwiftModuleFileName();
+  return cmStrCat(this->GetSwiftModuleDirectory(config), '/',
+                  this->GetSwiftModuleFileName());
 }
 
 std::string cmGeneratorTarget::GetPropertyOrDefault(

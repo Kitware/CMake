@@ -388,12 +388,12 @@ int cmCPackFreeBSDGenerator::PackageFiles()
     // a file with the package name and version as specified in the
     // manifest, so we look those up (again). lastSlash is the slash
     // itself, we need that as path separator to the calculated package name.
-    std::string actualPackage =
-      ((lastSlash != std::string::npos)
-         ? std::string(currentPackage, 0, lastSlash + 1)
-         : std::string()) +
-      var_lookup("CPACK_FREEBSD_PACKAGE_NAME") + '-' +
-      var_lookup("CPACK_FREEBSD_PACKAGE_VERSION") + FreeBSDPackageSuffix_17;
+    std::string actualPackage = cmStrCat(
+      (lastSlash != std::string::npos)
+        ? cm::string_view(currentPackage).substr(0, lastSlash + 1)
+        : ""_s,
+      var_lookup("CPACK_FREEBSD_PACKAGE_NAME"), '-',
+      var_lookup("CPACK_FREEBSD_PACKAGE_VERSION"), FreeBSDPackageSuffix_17);
 
     this->packageFileNames.clear();
     this->packageFileNames.emplace_back(actualPackage);
@@ -442,7 +442,7 @@ int cmCPackFreeBSDGenerator::PackageFiles()
     std::string const packageSubDirectory =
       cmSystemTools::GetParentDirectory(sourceFile);
     std::string const targetFileName =
-      packageSubDirectory + '/' + packageFileName;
+      cmStrCat(packageSubDirectory, '/', packageFileName);
     if (cmSystemTools::RenameFile(sourceFile, targetFileName)) {
       this->packageFileNames.clear();
       this->packageFileNames.emplace_back(targetFileName);

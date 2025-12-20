@@ -246,5 +246,5 @@ void cmInstallExportGenerator::GenerateScriptActions(std::ostream& os,
 
 std::string cmInstallExportGenerator::GetDestinationFile() const
 {
-  return this->Destination + '/' + this->FileName;
+  return cmStrCat(this->Destination, '/', this->FileName);
 }

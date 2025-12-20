@@ -679,8 +679,9 @@ PropertyType checkInterfacePropertyCompatibility(cmGeneratorTarget const* tgt,
       if (propInitialized) {
         std::pair<bool, PropertyType> consistent =
           consistentProperty(propContent, ifacePropContent, t);
-        report += reportEntry;
-        report += compatibilityAgree(t, propContent != consistent.second);
+        report =
+          cmStrCat(std::move(report), reportEntry,
+                   compatibilityAgree(t, propContent != consistent.second));
         if (!consistent.first) {
           std::ostringstream e;
           e << "The INTERFACE_" << p << " property of \""
@@ -692,7 +693,7 @@ PropertyType checkInterfacePropertyCompatibility(cmGeneratorTarget const* tgt,
         propContent = consistent.second;
         continue;
       }
-      report += reportEntry + "(Interface set)\n";
+      report = cmStrCat(std::move(report), reportEntry, "(Interface set)\n");
       propContent = ifacePropContent;
       propInitialized = true;
     } else {

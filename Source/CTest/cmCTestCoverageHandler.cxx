@@ -791,9 +791,9 @@ static std::string joinCommandLine(std::vector<std::string> const& args)
 
   for (std::string const& s : args) {
     if (s.find(' ') == std::string::npos) {
-      ret += s + ' ';
+      ret = cmStrCat(std::move(ret), s, ' ');
     } else {
-      ret += "\"" + s + "\" ";
+      ret = cmStrCat(std::move(ret), '"', s, "\" ");
     }
   }
 

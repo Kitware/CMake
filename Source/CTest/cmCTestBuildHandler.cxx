@@ -514,11 +514,11 @@ void cmCTestBuildHandler::GenerateXMLLaunched(cmXMLWriter& xml)
     char const* fname = launchDir.GetFile(i);
     if (this->IsLaunchedErrorFile(fname) && numErrorsAllowed) {
       numErrorsAllowed--;
-      fragments.insert(this->CTestLaunchDir + '/' + fname);
+      fragments.insert(cmStrCat(this->CTestLaunchDir, '/', fname));
       ++this->TotalErrors;
     } else if (this->IsLaunchedWarningFile(fname) && numWarningsAllowed) {
       numWarningsAllowed--;
-      fragments.insert(this->CTestLaunchDir + '/' + fname);
+      fragments.insert(cmStrCat(this->CTestLaunchDir, '/', fname));
       ++this->TotalWarnings;
     }
   }
