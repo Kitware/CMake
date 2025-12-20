@@ -798,7 +798,9 @@ static std::string joinCommandLine(std::vector<std::string> const& args)
   }
 
   // drop trailing whitespace
-  ret.erase(ret.size() - 1);
+  if (!ret.empty()) {
+    ret.pop_back();
+  }
 
   return ret;
 }
