@@ -96,7 +96,7 @@ provided:
 ``OpenGL::GLX``
   .. versionadded:: 3.10
 
-  Target encapsulating the usage requirements of the OpenGL Extension to the
+  Target encapsulating the usage requirements of the OpenGL Extension to
   the X Window System (GLX), available if OpenGL and GLX are found.
 
 ``OpenGL::EGL``

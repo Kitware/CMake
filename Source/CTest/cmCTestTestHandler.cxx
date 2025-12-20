@@ -2612,7 +2612,7 @@ bool cmCTestTestHandler::WriteJUnitXML()
       // be ok to put it here as a cmake-list.
       xml.Attribute("value", cmList::to_string(result.Properties->Labels));
       // if we export more properties, this should be done the same way,
-      // i.e. prefix the property name with "cmake_", and it it can be
+      // i.e. prefix the property name with "cmake_", and it can be
       // a list, write it cmake-formatted.
       xml.EndElement(); // </property>
     }

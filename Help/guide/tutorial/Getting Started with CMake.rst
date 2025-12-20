@@ -430,7 +430,7 @@ We should be able to see our library created alongside the Tutorial executable.
 Solution
 --------
 
-We start by adding the library target in the same manner as the the Tutorial
+We start by adding the library target in the same manner as the Tutorial
 executable.
 
 .. raw:: html

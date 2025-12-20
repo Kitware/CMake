@@ -151,7 +151,7 @@ cmVisualStudioGeneratorOptions::GetCharSet() const
 
 void cmVisualStudioGeneratorOptions::FixCudaCodeGeneration()
 {
-  // Create an empty CodeGeneration field, and pass the the actual
+  // Create an empty CodeGeneration field, and pass the actual
   // compile flags via additional options so that we have consistent
   // behavior and avoid issues with MSBuild extensions injecting
   // virtual code when we request real only.

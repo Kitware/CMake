@@ -55,7 +55,7 @@ Supported components are:
   Finds the DVIPDF converter.
 
 ``PS2PDF``
-  Finds the the PS2PDF converter.
+  Finds the PS2PDF converter.
 
 ``PDFTOPS``
   Finds the PDF-to-PostScript converter.

@@ -57,7 +57,7 @@ Hints
 This module accepts the following variables:
 
 ``CURSES_NEED_NCURSES``
-  Set this variable to ``TRUE`` before calling ``find_package(Curses)`` if the
+  Set this variable to ``TRUE`` before calling ``find_package(Curses)`` if
   the ncurses implementation functionality is specifically required.
 
 ``CURSES_NEED_WIDE``

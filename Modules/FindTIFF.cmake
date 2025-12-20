@@ -45,7 +45,7 @@ This module provides the following :ref:`Imported Targets`:
 ``TIFF::CXX``
   .. versionadded:: 3.19
 
-  Target encapsulating the usage requirements for the the C++ wrapper library
+  Target encapsulating the usage requirements for the C++ wrapper library
   ``libtiffxx``, available only if TIFF is found.  This target provides CXX
   usage requirements only if the compiler is not MSVC.  It also has the
   ``TIFF::TIFF`` target linked in to simplify its usage.
