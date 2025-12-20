@@ -40,8 +40,8 @@ Properties of Global Scope
    /prop_gbl/GENERATOR_IS_MULTI_CONFIG
    /prop_gbl/GLOBAL_DEPENDS_DEBUG_MODE
    /prop_gbl/GLOBAL_DEPENDS_NO_CYCLES
-   /prop_gbl/INSTALL_PARALLEL
    /prop_gbl/IN_TRY_COMPILE
+   /prop_gbl/INSTALL_PARALLEL
    /prop_gbl/JOB_POOLS
    /prop_gbl/PACKAGES_FOUND
    /prop_gbl/PACKAGES_NOT_FOUND
@@ -333,7 +333,6 @@ Properties on Targets
    /prop_tgt/LIBRARY_OUTPUT_DIRECTORY_CONFIG
    /prop_tgt/LIBRARY_OUTPUT_NAME
    /prop_tgt/LIBRARY_OUTPUT_NAME_CONFIG
-   /prop_tgt/SPDX_LICENSE
    /prop_tgt/LINK_DEPENDS
    /prop_tgt/LINK_DEPENDS_NO_SHARED
    /prop_tgt/LINK_DIRECTORIES
@@ -408,6 +407,7 @@ Properties on Targets
    /prop_tgt/SOURCE_DIR
    /prop_tgt/SOURCES
    /prop_tgt/SOVERSION
+   /prop_tgt/SPDX_LICENSE
    /prop_tgt/STATIC_LIBRARY_FLAGS
    /prop_tgt/STATIC_LIBRARY_FLAGS_CONFIG
    /prop_tgt/STATIC_LIBRARY_OPTIONS
@@ -505,13 +505,13 @@ Properties on Targets
    /prop_tgt/XCODE_SCHEME_EXECUTABLE
    /prop_tgt/XCODE_SCHEME_GUARD_MALLOC
    /prop_tgt/XCODE_SCHEME_LAUNCH_CONFIGURATION
-   /prop_tgt/XCODE_SCHEME_TEST_CONFIGURATION
    /prop_tgt/XCODE_SCHEME_LAUNCH_MODE
    /prop_tgt/XCODE_SCHEME_LLDB_INIT_FILE
    /prop_tgt/XCODE_SCHEME_MAIN_THREAD_CHECKER_STOP
    /prop_tgt/XCODE_SCHEME_MALLOC_GUARD_EDGES
    /prop_tgt/XCODE_SCHEME_MALLOC_SCRIBBLE
    /prop_tgt/XCODE_SCHEME_MALLOC_STACK
+   /prop_tgt/XCODE_SCHEME_TEST_CONFIGURATION
    /prop_tgt/XCODE_SCHEME_THREAD_SANITIZER
    /prop_tgt/XCODE_SCHEME_THREAD_SANITIZER_STOP
    /prop_tgt/XCODE_SCHEME_UNDEFINED_BEHAVIOUR_SANITIZER
@@ -581,6 +581,7 @@ Properties on Source Files
    /prop_sf/HEADER_FILE_ONLY
    /prop_sf/INCLUDE_DIRECTORIES
    /prop_sf/INSTALL_OBJECT_NAME
+   /prop_sf/JOB_POOL_COMPILE
    /prop_sf/KEEP_EXTENSION
    /prop_sf/LABELS
    /prop_sf/LANGUAGE
@@ -589,7 +590,6 @@ Properties on Source Files
    /prop_sf/OBJECT_DEPENDS
    /prop_sf/OBJECT_NAME
    /prop_sf/OBJECT_OUTPUTS
-   /prop_sf/JOB_POOL_COMPILE
    /prop_sf/SKIP_AUTOGEN
    /prop_sf/SKIP_AUTOMOC
    /prop_sf/SKIP_AUTORCC
