@@ -14,7 +14,6 @@
 #include <stdexcept>
 #include <utility>
 
-#include <cm/filesystem>
 #include <cm/memory>
 #include <cm/optional>
 #include <cm/string_view>
@@ -2945,10 +2944,9 @@ int cmake::Run(std::vector<std::string> const& args, bool noconfigure)
     if (!this->SarifFileOutput) {
       // If no output file is specified, use the default path
       // Enable parent directory creation for the default path
-      sarifLogFileWriter.SetPath(
-        cm::filesystem::path(this->GetHomeOutputDirectory()) /
-          std::string(cmSarif::PROJECT_DEFAULT_SARIF_FILE),
-        true);
+      sarifLogFileWriter.SetPath(cmStrCat(this->GetHomeOutputDirectory(), '/',
+                                          cmSarif::PROJECT_DEFAULT_SARIF_FILE),
+                                 true);
     }
 #endif
   } else {
