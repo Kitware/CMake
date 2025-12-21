@@ -190,14 +190,14 @@ endfunction()
 
 # Query Ruby RBConfig module for the specified variable (_RUBY_CONFIG_VAR)
 function(_RUBY_CONFIG_VAR RBVAR OUTVAR)
-  execute_process(COMMAND ${Ruby_EXECUTABLE} -r rbconfig -e "print RbConfig::CONFIG['${RBVAR}']"
+  execute_process(COMMAND "${Ruby_EXECUTABLE}" -r rbconfig -e "print RbConfig::CONFIG['${RBVAR}']"
                   RESULT_VARIABLE _Ruby_SUCCESS
                   OUTPUT_VARIABLE _Ruby_OUTPUT
                   ERROR_QUIET)
 
   # Config was deprecated in Ruby 1.9 and then removed in Ruby 2 - so this is for ancient code
   if (_Ruby_SUCCESS OR _Ruby_OUTPUT STREQUAL "")
-    execute_process(COMMAND ${Ruby_EXECUTABLE} -r rbconfig -e "print Config::CONFIG['${RBVAR}']"
+    execute_process(COMMAND "${Ruby_EXECUTABLE}" -r rbconfig -e "print Config::CONFIG['${RBVAR}']"
                     RESULT_VARIABLE _Ruby_SUCCESS
                     OUTPUT_VARIABLE _Ruby_OUTPUT
                     ERROR_QUIET)
@@ -362,8 +362,8 @@ if (Ruby_EXECUTABLE AND NOT Ruby_EXECUTABLE STREQUAL "${_Ruby_EXECUTABLE_LAST_QU
   _RUBY_CONFIG_VAR("sitearchdir" Ruby_SITEARCH_DIR)
   _RUBY_CONFIG_VAR("sitelibdir" Ruby_SITELIB_DIR)
 
-  # vendor_ruby available ?
-  execute_process(COMMAND ${Ruby_EXECUTABLE} -r vendor-specific -e "print 'true'"
+  # vendor_ruby - TODO - Not relevant and should be removed.
+  execute_process(COMMAND "${Ruby_EXECUTABLE}" -r vendor-specific -e "print 'true'"
                   OUTPUT_VARIABLE Ruby_HAS_VENDOR_RUBY ERROR_QUIET)
 
   if (Ruby_HAS_VENDOR_RUBY)
