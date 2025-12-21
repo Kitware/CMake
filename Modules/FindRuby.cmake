@@ -137,9 +137,9 @@ endif()
 set(_Ruby_POSSIBLE_EXECUTABLE_NAMES ruby)
 
 # If the user has not specified a Ruby version, create a list of Ruby versions
-# to check going from 1.8 to 3.4
+# to check going from 1.8 to 4.0
 if (NOT Ruby_FIND_VERSION_EXACT)
-  foreach (_ruby_version RANGE 34 18 -1)
+  foreach (_ruby_version RANGE 40 18 -1)
     string(SUBSTRING "${_ruby_version}" 0 1 _ruby_major_version)
     string(SUBSTRING "${_ruby_version}" 1 1 _ruby_minor_version)
     # Append both rubyX.Y and rubyXY (eg: ruby3.4 ruby34)
