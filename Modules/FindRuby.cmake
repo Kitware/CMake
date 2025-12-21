@@ -350,15 +350,25 @@ if (Ruby_EXECUTABLE AND NOT Ruby_EXECUTABLE STREQUAL "${_Ruby_EXECUTABLE_LAST_QU
   _RUBY_CONFIG_VAR("MINOR" Ruby_VERSION_MINOR)
   _RUBY_CONFIG_VAR("TEENY" Ruby_VERSION_PATCH)
 
-  # query the different directories
+  # Ruby extensions information
+  _RUBY_CONFIG_VAR("arch" Ruby_ARCH) # x86_64-linux, arm64-darwin, x64-mswin64_140, etc
+  # Extension directory where so/bundle files are stored
   _RUBY_CONFIG_VAR("archdir" Ruby_ARCH_DIR)
-  _RUBY_CONFIG_VAR("arch" Ruby_ARCH)
+  # Extension suffix
+  _RUBY_CONFIG_VAR("DLEXT" _Ruby_DLEXT) # so, bundle, *not* dll
+
+  # Headers
   _RUBY_CONFIG_VAR("rubyhdrdir" Ruby_HDR_DIR)
   _RUBY_CONFIG_VAR("rubyarchhdrdir" Ruby_ARCHHDR_DIR)
-  _RUBY_CONFIG_VAR("libdir" _Ruby_POSSIBLE_LIB_DIR)
+
+  # Ruby library information
+  _RUBY_CONFIG_VAR("libdir" _Ruby_POSSIBLE_LIB_DIR) # /usr/lib64
+  _RUBY_CONFIG_VAR("RUBY_SO_NAME" _Ruby_SO_NAME) # ruby, x64-vcruntime140-ruby340, etc.
+
+  # Ruby directory for ruby files (*.rb). TODO - not relevant should be removed
   _RUBY_CONFIG_VAR("rubylibdir" Ruby_RUBY_LIB_DIR)
 
-  # site_ruby
+  # site_ruby - TODO - not relevant and should be removed
   _RUBY_CONFIG_VAR("sitearchdir" Ruby_SITEARCH_DIR)
   _RUBY_CONFIG_VAR("sitelibdir" Ruby_SITELIB_DIR)
 
@@ -381,6 +391,8 @@ if (Ruby_EXECUTABLE AND NOT Ruby_EXECUTABLE STREQUAL "${_Ruby_EXECUTABLE_LAST_QU
   set(Ruby_ARCHHDR_DIR ${Ruby_ARCHHDR_DIR} CACHE INTERNAL "The Ruby arch header dir (2.0+)" FORCE)
   set(_Ruby_POSSIBLE_LIB_DIR ${_Ruby_POSSIBLE_LIB_DIR} CACHE INTERNAL "The Ruby lib dir" FORCE)
   set(Ruby_RUBY_LIB_DIR ${Ruby_RUBY_LIB_DIR} CACHE INTERNAL "The Ruby ruby-lib dir" FORCE)
+  set(_Ruby_SO_NAME ${_Ruby_SO_NAME} CACHE PATH "The Ruby shared library name" FORCE)
+  set(_Ruby_DLEXT ${_Ruby_DLEXT} CACHE PATH "Ruby extensions extension" FORCE)
   set(Ruby_SITEARCH_DIR ${Ruby_SITEARCH_DIR} CACHE INTERNAL "The Ruby site arch dir" FORCE)
   set(Ruby_SITELIB_DIR ${Ruby_SITELIB_DIR} CACHE INTERNAL "The Ruby site lib dir" FORCE)
   set(Ruby_HAS_VENDOR_RUBY ${Ruby_HAS_VENDOR_RUBY} CACHE BOOL "Vendor Ruby is available" FORCE)
@@ -394,6 +406,8 @@ if (Ruby_EXECUTABLE AND NOT Ruby_EXECUTABLE STREQUAL "${_Ruby_EXECUTABLE_LAST_QU
       Ruby_ARCHHDR_DIR
       _Ruby_POSSIBLE_LIB_DIR
       Ruby_RUBY_LIB_DIR
+      _Ruby_SO_NAME
+      _Ruby_DLEXT
       Ruby_SITEARCH_DIR
       Ruby_SITELIB_DIR
       Ruby_HAS_VENDOR_RUBY
@@ -504,7 +518,8 @@ set(CMAKE_FIND_FRAMEWORK ${_Ruby_CMAKE_FIND_FRAMEWORK_ORIGINAL})
 message(DEBUG "--------FindRuby.cmake debug------------")
 message(DEBUG "_Ruby_POSSIBLE_EXECUTABLE_NAMES: ${_Ruby_POSSIBLE_EXECUTABLE_NAMES}")
 message(DEBUG "_Ruby_POSSIBLE_LIB_DIR: ${_Ruby_POSSIBLE_LIB_DIR}")
-message(DEBUG "_Ruby_POSSIBLE_LIB_NAMES: ${_Ruby_POSSIBLE_LIB_NAMES}")
+message(DEBUG "Ruby_LIBRUBY_SO: ${_Ruby_SO_NAME}")
+message(DEBUG "_Ruby_DLEXT: ${_Ruby_DLEXT}")
 message(DEBUG "Ruby_FIND_VIRTUALENV=${Ruby_FIND_VIRTUALENV}")
 message(DEBUG "Ruby_ENV: ${Ruby_ENV}")
 message(DEBUG "Found Ruby_VERSION: \"${Ruby_VERSION}\"")
