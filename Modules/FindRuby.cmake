@@ -420,12 +420,12 @@ if (Ruby_EXECUTABLE AND NOT Ruby_VERSION_MAJOR)
   # check whether we found 2.[0-7].x
   if (${Ruby_EXECUTABLE} MATCHES "ruby2")
     set(Ruby_VERSION_MAJOR 2)
-    string(REGEX_REPLACE ${Ruby_EXECUTABLE} "ruby2\\.?([0-7])" "\\1" Ruby_VERSION_MINOR)
+    string(REGEX REPLACE ${Ruby_EXECUTABLE} "ruby2\\.?([0-7])" "\\1" Ruby_VERSION_MINOR)
   endif ()
-  # check whether we found 3.[0-1].x
+  # check whether we found 3.[0-4].x
   if (${Ruby_EXECUTABLE} MATCHES "ruby3")
     set(Ruby_VERSION_MAJOR 3)
-    string(REGEX_REPLACE ${Ruby_EXECUTABLE} "ruby3\\.?([0-1])" "\\1" Ruby_VERSION_MINOR)
+    string(REGEX REPLACE ${Ruby_EXECUTABLE} "ruby3\\.?([0-4])" "\\1" Ruby_VERSION_MINOR)
   endif ()
 endif ()
 
