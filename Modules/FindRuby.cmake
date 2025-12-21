@@ -373,9 +373,9 @@ if (Ruby_EXECUTABLE AND NOT Ruby_EXECUTABLE STREQUAL "${_Ruby_EXECUTABLE_LAST_QU
 
   # save the results in the cache so we don't have to run ruby the next time again
   set(_Ruby_EXECUTABLE_LAST_QUERIED "${Ruby_EXECUTABLE}" CACHE INTERNAL "The ruby executable last queried for version and path info")
-  set(Ruby_VERSION_MAJOR ${Ruby_VERSION_MAJOR} CACHE PATH "The Ruby major version" FORCE)
-  set(Ruby_VERSION_MINOR ${Ruby_VERSION_MINOR} CACHE PATH "The Ruby minor version" FORCE)
-  set(Ruby_VERSION_PATCH ${Ruby_VERSION_PATCH} CACHE PATH "The Ruby patch version" FORCE)
+  set(Ruby_VERSION_MAJOR ${Ruby_VERSION_MAJOR} CACHE STRING "The Ruby major version" FORCE)
+  set(Ruby_VERSION_MINOR ${Ruby_VERSION_MINOR} CACHE STRING "The Ruby minor version" FORCE)
+  set(Ruby_VERSION_PATCH ${Ruby_VERSION_PATCH} CACHE STRING "The Ruby patch version" FORCE)
   set(Ruby_ARCH_DIR ${Ruby_ARCH_DIR} CACHE INTERNAL "The Ruby arch dir" FORCE)
   set(Ruby_HDR_DIR ${Ruby_HDR_DIR} CACHE INTERNAL "The Ruby header dir (1.9+)" FORCE)
   set(Ruby_ARCHHDR_DIR ${Ruby_ARCHHDR_DIR} CACHE INTERNAL "The Ruby arch header dir (2.0+)" FORCE)
