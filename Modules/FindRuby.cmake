@@ -71,7 +71,7 @@ This module accepts the following variables:
   Virtual environments may be provided by:
 
   ``rvm``
-    Requires that the ``MY_RUBY_HOME`` environment environment is defined.
+    Requires that the ``MY_RUBY_HOME`` environment is defined.
 
   ``rbenv``
     Requires that ``rbenv`` is installed in ``~/.rbenv/bin``
