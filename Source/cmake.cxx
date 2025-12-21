@@ -16,7 +16,6 @@
 #include <stdexcept>
 #include <utility>
 
-#include <cm/filesystem>
 #include <cm/memory>
 #include <cm/optional>
 #include <cm/string_view>
@@ -3962,13 +3961,12 @@ int cmake::Build(cmBuildArgs buildArgs, std::vector<std::string> targets,
   }
 #endif
 
-  if (!cmSystemTools::FileIsDirectory(buildArgs.binaryDir.string())) {
-    std::cerr << "Error: " << buildArgs.binaryDir.string()
-              << " is not a directory\n";
+  if (!cmSystemTools::FileIsDirectory(buildArgs.binaryDir)) {
+    std::cerr << "Error: " << buildArgs.binaryDir << " is not a directory\n";
     return 1;
   }
 
-  std::string cachePath = FindCacheFile(buildArgs.binaryDir.string());
+  std::string cachePath = FindCacheFile(buildArgs.binaryDir);
   if (!this->LoadCache(cachePath)) {
     std::cerr
       << "Error: not a CMake build directory (missing CMakeCache.txt)\n";
@@ -4069,7 +4067,7 @@ int cmake::Build(cmBuildArgs buildArgs, std::vector<std::string> targets,
   }
 
 #if !defined(CMAKE_BOOTSTRAP)
-  cmInstrumentation instrumentation(buildArgs.binaryDir.string());
+  cmInstrumentation instrumentation(buildArgs.binaryDir);
   if (instrumentation.HasErrors()) {
     return 1;
   }
