@@ -446,41 +446,8 @@ find_path(Ruby_CONFIG_INCLUDE_DIR
 
 set(Ruby_INCLUDE_DIRS ${Ruby_INCLUDE_DIR} ${Ruby_CONFIG_INCLUDE_DIR})
 
-# Determine the list of possible names for the ruby library
-set(_Ruby_POSSIBLE_LIB_NAMES
-  ruby
-  ruby-static
-  ruby-${Ruby_VERSION}
-  ruby${_Ruby_VERSION_NODOT}
-  ruby${_Ruby_VERSION_NODOT_ZERO_PATCH}
-  ruby-${_Ruby_VERSION_SHORT}
-  ruby${_Ruby_VERSION_SHORT}
-  ruby${_Ruby_VERSION_SHORT_NODOT}
-)
-
-if (WIN32)
-  set(_Ruby_POSSIBLE_RUNTIMES "ucrt;msvcrt;vcruntime140;vcruntime140_1;vcruntime${MSVC_TOOLSET_VERSION}")
-  set(_Ruby_POSSIBLE_VERSION_SUFFIXES "${_Ruby_VERSION_NODOT};${_Ruby_VERSION_NODOT_ZERO_PATCH}")
-
-  if (CMAKE_SIZEOF_VOID_P EQUAL 8)
-    set(_Ruby_POSSIBLE_ARCH_PREFIXES "libx64-;x64-")
-  else ()
-    set(_Ruby_POSSIBLE_ARCH_PREFIXES "lib")
-  endif ()
-
-  foreach (_Ruby_RUNTIME ${_Ruby_POSSIBLE_RUNTIMES})
-    foreach (_Ruby_VERSION_SUFFIX ${_Ruby_POSSIBLE_VERSION_SUFFIXES})
-      foreach (_Ruby_ARCH_PREFIX ${_Ruby_POSSIBLE_ARCH_PREFIXES})
-        list(APPEND _Ruby_POSSIBLE_LIB_NAMES
-             "${_Ruby_ARCH_PREFIX}${_Ruby_RUNTIME}-ruby${_Ruby_VERSION_SUFFIX}"
-             "${_Ruby_ARCH_PREFIX}${_Ruby_RUNTIME}-ruby${_Ruby_VERSION_SUFFIX}-static")
-      endforeach ()
-    endforeach ()
-  endforeach ()
-endif ()
-
 find_library(Ruby_LIBRARY
-        NAMES ${_Ruby_POSSIBLE_LIB_NAMES}
+        NAMES "${_Ruby_SO_NAME}"
         HINTS ${_Ruby_POSSIBLE_LIB_DIR})
 
 set(_Ruby_REQUIRED_VARS Ruby_EXECUTABLE Ruby_INCLUDE_DIR Ruby_LIBRARY)
