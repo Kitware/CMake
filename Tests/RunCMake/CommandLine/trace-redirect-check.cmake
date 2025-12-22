@@ -1,4 +1,4 @@
-file(READ ${RunCMake_SOURCE_DIR}/trace-stderr.txt expected_content)
+file(READ ${RunCMake_SOURCE_DIR}/trace-redirect-stderr-file-contents.txt expected_content)
 string(REGEX REPLACE "\n+$" "" expected_content "${expected_content}")
 
 file(READ ${RunCMake_BINARY_DIR}/redirected.trace actual_content)
