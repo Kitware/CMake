@@ -816,6 +816,7 @@ bool cmCTestRunTest::ForkProcess()
     if (timeUntilStop < timeRemaining) {
       timeRemaining = timeUntilStop;
     }
+    this->TestProcess->SetStopTimeout(timeUntilStop);
   }
 
   // Enforce remaining time even over explicit TIMEOUT=0.
