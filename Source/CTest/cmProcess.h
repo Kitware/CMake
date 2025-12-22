@@ -49,8 +49,13 @@ public:
     Normal,
     StopTime,
   };
-  void SetTimeoutReason(TimeoutReason r) { this->TimeoutReason_ = r; }
   TimeoutReason GetTimeoutReason() const { return this->TimeoutReason_; }
+  struct ComputedTimeout
+  {
+    TimeoutReason Reason;
+    cmDuration Duration;
+  };
+  cm::optional<ComputedTimeout> GetComputedTimeout() const;
 
   enum class State
   {
