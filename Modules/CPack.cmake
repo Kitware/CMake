@@ -338,6 +338,24 @@ installers.  The most commonly-used variables are:
 
   Other compression methods ignore this value and use only one thread.
 
+.. variable:: CPACK_COMPRESSION_LEVEL
+
+  .. versionadded:: 4.3
+
+  Select the compression level to use when it's applicable,
+  such as compressing the installer package.
+
+  Some compression methods used by CPack generators such as Debian or Archive
+  may take advantage of different compression levels. The accepted values
+  are in the range ``0`` to ``9``. If you select the ``zstd`` compression method,
+  you can select the compression level between ``0`` and ``19``, except the ``zip``
+  archive format.
+
+  By default ``CPACK_COMPRESSION_LEVEL`` is set to ``0``, which selects the default
+  compression level. It is selected automatically by the archive library backend and
+  not directly set by CMake itself. The default compression level
+  may vary between archive formats, platforms, etc.
+
 Variables for Source Package Generators
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

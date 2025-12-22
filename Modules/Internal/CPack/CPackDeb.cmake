@@ -810,6 +810,9 @@ function(cpack_deb_prepare_package_vars)
 
   if(NOT DEFINED CPACK_DEBIAN_COMPRESSION_LEVEL)
     set(CPACK_DEBIAN_COMPRESSION_LEVEL "0")
+    if(DEFINED CPACK_COMPRESSION_LEVEL)
+      set(CPACK_DEBIAN_COMPRESSION_LEVEL "${CPACK_COMPRESSION_LEVEL}")
+    endif()
   endif()
 
   # Print out some debug information if we were asked for that

@@ -392,7 +392,8 @@ int cmCPackArchiveGenerator::addOneComponentToArchive(
                     << (filename) << ">." << std::endl);                      \
     return 0;                                                                 \
   }                                                                           \
-  cmArchiveWrite archive(gf, this->Compress, this->ArchiveFormat, 0,          \
+  cmArchiveWrite archive(gf, this->Compress, this->ArchiveFormat,             \
+                         this->GetCompressionLevel(),                         \
                          this->GetThreadCount());                             \
   if (this->UID >= 0 && this->GID >= 0) {                                     \
     archive.SetUIDAndGID(this->UID, this->GID);                               \
@@ -594,4 +595,18 @@ int cmCPackArchiveGenerator::GetThreadCount() const
   }
 
   return threads;
+}
+
+int cmCPackArchiveGenerator::GetCompressionLevel() const
+{
+  int level = 0;
+
+  // CPACK_ARCHIVE_COMPRESSION_LEVEL overrides CPACK_COMPRESSION_LEVEL
+  if (cmValue v = this->GetOptionIfSet("CPACK_ARCHIVE_COMPRESSION_LEVEL")) {
+    level = std::stoi(*v);
+  } else if (cmValue v2 = this->GetOptionIfSet("CPACK_COMPRESSION_LEVEL")) {
+    level = std::stoi(*v2);
+  }
+
+  return level;
 }

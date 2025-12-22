@@ -105,6 +105,7 @@ private:
   }
 
   int GetThreadCount() const;
+  int GetCompressionLevel() const;
 
 private:
   cmArchiveWrite::Compress Compress;
