@@ -5725,10 +5725,13 @@ bool cmGeneratorTarget::AddHeaderSetVerification()
   }
 
   cmTarget* verifyTarget = nullptr;
+  std::string const verifyTargetName =
+    cmStrCat(this->GetName(), "_verify_interface_header_sets");
+
+  char const* allVerifyTargetName = "all_verify_interface_header_sets";
   cmTarget* allVerifyTarget =
     this->GlobalGenerator->GetMakefiles().front()->FindTargetToUse(
-      "all_verify_interface_header_sets",
-      { cmStateEnums::TargetDomain::NATIVE });
+      allVerifyTargetName, { cmStateEnums::TargetDomain::NATIVE });
 
   auto interfaceFileSetEntries = this->Target->GetInterfaceHeaderSetsEntries();
 
@@ -5807,7 +5810,8 @@ bool cmGeneratorTarget::AddHeaderSetVerification()
       for (auto const& files : filesPerDir) {
         for (auto const& file : files.second) {
           std::string filename = this->GenerateHeaderSetVerificationFile(
-            *this->Makefile->GetOrCreateSource(file), files.first, languages);
+            *this->Makefile->GetOrCreateSource(file), files.first,
+            verifyTargetName, languages);
           if (filename.empty()) {
             continue;
           }
@@ -5817,8 +5821,7 @@ bool cmGeneratorTarget::AddHeaderSetVerification()
               cmMakefile::PolicyPushPop polScope(this->Makefile);
               this->Makefile->SetPolicy(cmPolicies::CMP0119, cmPolicies::NEW);
               verifyTarget = this->Makefile->AddLibrary(
-                cmStrCat(this->GetName(), "_verify_interface_header_sets"),
-                cmStateEnums::OBJECT_LIBRARY, {}, true);
+                verifyTargetName, cmStateEnums::OBJECT_LIBRARY, {}, true);
             }
 
             verifyTarget->AddLinkLibrary(
@@ -5834,13 +5837,13 @@ bool cmGeneratorTarget::AddHeaderSetVerification()
               this->Makefile->GetCompileDefinitionsEntries());
 
             if (!allVerifyTarget) {
-              allVerifyTarget = this->GlobalGenerator->GetMakefiles()
-                                  .front()
-                                  ->AddNewUtilityTarget(
-                                    "all_verify_interface_header_sets", true);
+              allVerifyTarget =
+                this->GlobalGenerator->GetMakefiles()
+                  .front()
+                  ->AddNewUtilityTarget(allVerifyTargetName, true);
             }
 
-            allVerifyTarget->AddUtility(verifyTarget->GetName(), false);
+            allVerifyTarget->AddUtility(verifyTargetName, false);
           }
 
           if (fileCgesContextSensitive) {
@@ -5867,6 +5870,7 @@ bool cmGeneratorTarget::AddHeaderSetVerification()
 
 std::string cmGeneratorTarget::GenerateHeaderSetVerificationFile(
   cmSourceFile& source, std::string const& dir,
+  std::string const& verifyTargetName,
   cm::optional<std::set<std::string>>& languages) const
 {
   std::string extension;
@@ -5920,9 +5924,9 @@ std::string cmGeneratorTarget::GenerateHeaderSetVerificationFile(
   }
   headerFilename += source.GetLocation().GetName();
 
-  auto filename = cmStrCat(
-    this->LocalGenerator->GetCurrentBinaryDirectory(), '/', this->GetName(),
-    "_verify_interface_header_sets/", headerFilename, extension);
+  auto filename =
+    cmStrCat(this->LocalGenerator->GetCurrentBinaryDirectory(), '/',
+             verifyTargetName, '/', headerFilename, extension);
   auto* verificationSource = this->Makefile->GetOrCreateSource(filename);
   source.SetSpecialSourceType(
     cmSourceFile::SpecialSourceType::HeaderSetVerificationSource);

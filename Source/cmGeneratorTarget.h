@@ -1112,6 +1112,7 @@ public:
   bool AddHeaderSetVerification();
   std::string GenerateHeaderSetVerificationFile(
     cmSourceFile& source, std::string const& dir,
+    std::string const& verifyTargetName,
     cm::optional<std::set<std::string>>& languages) const;
 
   std::string GetImportedXcFrameworkPath(std::string const& config) const;
