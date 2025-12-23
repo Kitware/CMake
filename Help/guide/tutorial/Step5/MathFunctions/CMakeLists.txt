@@ -14,9 +14,10 @@ target_sources(MathFunctions
 #        MathLogger will only be used in the MathFunctions implementation,
 #        not the headers
 
-# TODO8: Add links to MathLogger for the OpAdd, OpMul, and OpSub libraries.
-#        Note that their headers will be exposed in the MathFunctions.h
-#        header, and must be available to consumers.
+# TODO8: Add links to OpAdd, OpMul, and OpSub libraries for the
+#        MathFunctions library.  Note that their headers will be
+#        exposed in the MathFunctions.h header, and must be available
+#        to consumers.
 
 target_compile_features(MathFunctions PRIVATE cxx_std_20)
 
