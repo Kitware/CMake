@@ -37,19 +37,6 @@ strategy, which is the most visible modules-related change for CMake users in
 the context of the build.  CMake provides multiple ways to control the
 scanning behavior of source files.
 
-.. _`P1689R5`: https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/p1689r5.html
-
-.. note::
-
-   CMake is focusing on correct builds before looking at performance
-   improvements. There are known tactics within the chosen strategy which may
-   offer build performance improvements. However, they are being deferred
-   until we have a working model against which to compare them. It is also
-   important to note that a tactic useful in one situation (e.g., clean
-   builds) may not be performant in a different situation (e.g., incremental
-   builds). Finding a balance and offering controls to select the tactics is
-   future work.
-
 Scanning Control
 ================
 
@@ -403,6 +390,26 @@ mixed configurations are supported by CMake via multi-config generators such
 as :generator:`Ninja Multi-Config` and :ref:`Visual Studio Generators`.  This
 section describes how CMake addresses these constraints.
 
+Selected Design
+---------------
+
+The general strategy CMake uses is to ":term:`scan`" sources to extract the
+ordering dependency information and update the build graph with new edges
+between existing edges.  This is done by taking the per-source scan results
+(represented by `P1689R5`_ files) and then ":term:`collating <collate>`" them
+for each target with information from its dependencies.  The primary task of
+the collator is to generate ":term:`module map`" files to pass to each compile
+rule with the paths to the :term:`BMIs <BMI>` needed to satisfy ``import``
+statements, and to inform the :term:`build tool` of dependencies needed to
+satisfy those ``import`` statements during the compilation.  The collator also
+uses the build-time information to generate ``install`` rules for the module
+interface units, their :term:`BMIs <BMI>`, and properties for any exported
+targets with C++ modules.  It also enforces that ``PRIVATE`` modules may not
+be used by other targets or by any ``PUBLIC`` :term:`module interface unit`
+within the target.
+
+.. _`P1689R5`: https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/p1689r5.html
+
 Possible Future Enhancements
 ============================
 
@@ -494,6 +501,11 @@ Module Compilation Glossary
      A C++20 language feature for describing the API of a piece of software.
      Intended as a replacement for headers for this purpose.
 
+   collate
+     The process of aggregating module information from scanned sources to
+     ensure correct compilation order and to provide metadata for other parts
+     of the build (e.g., installation or a :term:`build database`).
+
    dynamic dependencies
      Dependencies which require a separate command to detect so that a further
      command may have its dependencies satisfied.
@@ -543,6 +555,10 @@ Module Compilation Glossary
    primary module interface unit
      A :term:`module interface unit` which exports a named module that is not
      a :term:`partition unit`.
+
+   scan
+     The process of analyzing a :term:`translation unit` to discover module
+     imports and exports.
 
    strong module ownership
      C++ implementations have settled on a model where the module "owns" the
