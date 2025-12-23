@@ -100,6 +100,7 @@ Policies Introduced by CMake 4.3
 .. toctree::
    :maxdepth: 1
 
+   CMP0209: Verify interface header sets checks executables without exports. </policy/CMP0209>
    CMP0208: export(EXPORT) does not allow empty arguments. </policy/CMP0208>
    CMP0207: file(GET_RUNTIME_DEPENDENCIES) normalizes paths before matching. </policy/CMP0207>
    CMP0206: The CPack Archive Generator defaults to UID 0 and GID 0. </policy/CMP0206>

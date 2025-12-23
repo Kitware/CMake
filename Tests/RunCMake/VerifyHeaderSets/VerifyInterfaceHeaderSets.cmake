@@ -1,3 +1,5 @@
+cmake_policy(SET CMP0209 NEW)
+
 enable_language(C CXX)
 
 add_compile_definitions(TEST_ADD_COMPILE_DEFINITIONS)

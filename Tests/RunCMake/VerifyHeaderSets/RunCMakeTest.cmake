@@ -55,3 +55,7 @@ run_cmake_build(AllVerifyInterfaceHeaderSets interface all)
 set(RunCMake_TEST_OPTIONS -DCMAKE_VERIFY_INTERFACE_HEADER_SETS=ON)
 run_cmake(VerifyInterfaceHeaderSetsNonexistent)
 unset(RunCMake_TEST_OPTIONS)
+
+run_cmake(VerifyInterfaceHeaderSets-CMP0209-NEW)
+run_cmake(VerifyInterfaceHeaderSets-CMP0209-OLD)
+run_cmake(VerifyInterfaceHeaderSets-CMP0209-WARN)

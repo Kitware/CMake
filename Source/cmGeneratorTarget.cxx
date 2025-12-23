@@ -5712,7 +5712,7 @@ bool cmGeneratorTarget::AddHeaderSetVerification()
       this->GetType() != cmStateEnums::UNKNOWN_LIBRARY &&
       this->GetType() != cmStateEnums::OBJECT_LIBRARY &&
       this->GetType() != cmStateEnums::INTERFACE_LIBRARY &&
-      !this->IsExecutableWithExports()) {
+      this->GetType() != cmStateEnums::EXECUTABLE) {
     return true;
   }
 
@@ -5740,6 +5740,24 @@ bool cmGeneratorTarget::AddHeaderSetVerification()
         verifySet.erase(name);
       }
     }
+  }
+
+  cmPolicies::PolicyStatus const cmp0209 = this->GetPolicyStatusCMP0209();
+  if (cmp0209 != cmPolicies::NEW &&
+      this->GetType() == cmStateEnums::EXECUTABLE &&
+      !this->GetPropertyAsBool("ENABLE_EXPORTS")) {
+    if (cmp0209 == cmPolicies::WARN && !fileSets.empty()) {
+      this->Makefile->IssueMessage(
+        MessageType::AUTHOR_WARNING,
+        cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0209),
+                 "\n"
+                 "Executable target \"",
+                 this->GetName(),
+                 "\" has interface header file sets, but it does not "
+                 "enable exports. Those headers would be verified under "
+                 "CMP0209 NEW behavior.\n"));
+    }
+    return true;
   }
   if (!verifySet.empty()) {
     this->Makefile->IssueMessage(
