@@ -49,7 +49,7 @@ Exercise 1 - Check Include File
 A fast and easy check to perform is if a given header file is available on
 a certain platform, for which CMake provides :module:`CheckIncludeFiles`. This
 is most appropriate for system and intrinsic headers, which may not be provided
-by a specific package by are expected to be available in many build environments.
+by a specific package yet are expected to be available in many build environments.
 
 .. code-block:: cmake
 
