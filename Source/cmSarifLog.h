@@ -197,7 +197,7 @@ private:
 
   // Mapping of rule IDs to rule indices in the log.
   // In SARIF, rule metadata is typically only included if the rule is
-  // referenced. The indices are unique to one log output and and vary
+  // referenced. The indices are unique to one log output and vary
   // depending on when the rule was first encountered.
   mutable std::unordered_map<std::string, std::size_t> RuleToIndex;
 

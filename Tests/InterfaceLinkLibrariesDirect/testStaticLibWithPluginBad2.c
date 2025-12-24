@@ -1,4 +1,4 @@
-/* Produce an error if if the object compiled from this source is used.  */
+/* Produce an error if the object compiled from this source is used.  */
 extern int testStaticLibWithPlugin_linked_before_testStaticLibPluginExtra(
   void);
 int testStaticLibPluginExtra(void)

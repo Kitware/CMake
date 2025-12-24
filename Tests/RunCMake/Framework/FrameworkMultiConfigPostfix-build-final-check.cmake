@@ -10,7 +10,7 @@ set(framework_release_path "${framework_dir}/Versions/A/${target_file_name}")
 
 # When using a multi config generator (like Ninja Multi-Config and Xcode),
 # the postfix will be applied to the debug framework library name and the symlink name.
-# For single config generators, the name stays the same as the the release framework.
+# For single config generators, the name stays the same as the release framework.
 if(is_multi_config)
     set(symlink_debug_path "${framework_dir}/${target_file_name}_debug")
     set(framework_debug_path "${framework_dir}/Versions/A/${target_file_name}_debug")
