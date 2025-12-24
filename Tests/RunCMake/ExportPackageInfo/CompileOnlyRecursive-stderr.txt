@@ -1,0 +1,6 @@
+CMake Error in CMakeLists\.txt:
+  \$<COMPILE_ONLY:\.\.\.> expression in "INTERFACE_LINK_LIBRARIES" of target
+  "bar" contains a generator expression\.  This is not allowed\.
+
+
+CMake Generate step failed\.  Build files cannot be regenerated correctly\.

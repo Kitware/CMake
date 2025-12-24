@@ -129,7 +129,7 @@ bool CheckSchemaVersion(Json::Value const& data)
   // Check that we understand this version.
   return cmSystemTools::VersionCompare(cmSystemTools::OP_GREATER_EQUAL,
                                        version, "0.13") &&
-    cmSystemTools::VersionCompare(cmSystemTools::OP_LESS, version, "0.14");
+    cmSystemTools::VersionCompare(cmSystemTools::OP_LESS, version, "0.15");
 
   // TODO Eventually this probably needs to return the version tuple, and
   // should share code with cmPackageInfoReader::ParseVersion.
@@ -766,6 +766,12 @@ void cmPackageInfoReader::SetTargetProperties(
   for (std::string const& dep : ReadList(data, "requires")) {
     AppendProperty(makefile, target, "LINK_LIBRARIES"_s, configuration,
                    NormalizeTargetName(dep, package));
+  }
+
+  for (std::string const& dep : ReadList(data, "compile_requires")) {
+    std::string const& lib =
+      cmStrCat("$<COMPILE_ONLY:"_s, NormalizeTargetName(dep, package), '>');
+    AppendProperty(makefile, target, "LINK_LIBRARIES"_s, configuration, lib);
   }
 
   for (std::string const& dep : ReadList(data, "link_requires")) {

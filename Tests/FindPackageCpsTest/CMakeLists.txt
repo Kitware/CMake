@@ -217,8 +217,11 @@ endif()
 
 find_package(RequiresTest CONFIG REQUIRED)
 
-add_library(requires-test STATIC requires-test.cxx)
+add_executable(requires-test requires-test.cxx)
 target_link_libraries(requires-test RequiresTest::Indirect)
+
+add_executable(requires-test-compile_only requires-test.cxx)
+target_link_libraries(requires-test-compile_only RequiresTest::CompileOnly)
 
 ###############################################################################
 # Test importing of (language-specific) include paths.

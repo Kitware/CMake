@@ -5,3 +5,8 @@
 #    error ANSWER has the wrong value
 #  endif
 #endif
+
+int main()
+{
+  return 0;
+}
