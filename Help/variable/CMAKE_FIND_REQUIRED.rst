@@ -22,6 +22,6 @@ Note that enabling this variable breaks some commonly used patterns.
 Multiple calls to :command:`find_package` are sometimes used to obtain a
 different search order to the default.
 
-See also the :variable:`CMAKE_REQUIRE_FIND_PACKAGE_<PackageName>` for making
-a :command:`find_package` call ``REQUIRED``, and for additional information on
-how enabling these variables can break commonly used patterns.
+See also the :variable:`CMAKE_REQUIRE_FIND_PACKAGE_<PackageName>` variable for
+making a :command:`find_package` call ``REQUIRED``, and for additional
+information on how enabling these variables can break commonly used patterns.
