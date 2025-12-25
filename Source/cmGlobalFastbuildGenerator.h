@@ -96,6 +96,8 @@ enum class FastbuildTargetDepType
   ORDER_ONLY,
   // Regular target dep.
   REGULAR,
+  // Utility target dep.
+  UTIL,
 };
 struct FastbuildTargetDep
 {
@@ -265,6 +267,7 @@ struct XCodeProject : public IDEProjectCommon
 struct VCXProject : public IDEProjectCommon
 {
   std::string folder;
+  std::set<FastbuildTargetDep> deps;
 };
 
 struct FastbuildLinkerNode
@@ -545,7 +548,8 @@ public:
   void AddCompiler(std::string const& lang, cmMakefile* mf);
   void AddLauncher(std::string const& prefix, std::string const& launcher,
                    std::string const& lang, std::string const& args);
-  void AddIDEProject(FastbuildTarget const& target, std::string const& config);
+  void AddIDEProject(FastbuildTargetBase const& target,
+                     std::string const& config);
 
   template <class T>
   void AddTarget(T target)
