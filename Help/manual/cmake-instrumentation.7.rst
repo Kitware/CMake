@@ -43,6 +43,8 @@ link, and custom command respectively. If the project has been configured with
 :module:`CTestUseLaunchers`, ``ctest --instrument`` will also include the
 behavior usually performed by ``ctest --launch``.
 
+.. _`cmake-instrumentation Indexing`:
+
 Indexing
 --------
 
@@ -53,7 +55,7 @@ triggered, an index file is generated containing a list of snippet files newer
 than the previous indexing.
 
 Indexing and can also be performed by manually invoking
-``ctest --collect-instrumentation <build>``.
+:option:`ctest --collect-instrumentation`.
 
 Callbacks
 ---------
@@ -97,9 +99,10 @@ the :envvar:`CMAKE_CONFIG_DIR` under
 Enabling Instrumentation for CDash Submissions
 ----------------------------------------------
 
-You can enable instrumentation when using CTest in :ref:`Dashboard Client`
-mode by setting the :envvar:`CTEST_USE_INSTRUMENTATION` environment variable.
-Doing so automatically enables the ``dynamicSystemInformation`` option.
+You can enable instrumentation when using :module:`CTest` in
+:ref:`Dashboard Client` mode by setting the :envvar:`CTEST_USE_INSTRUMENTATION`
+environment variable. Doing so automatically enables the
+``dynamicSystemInformation`` option.
 
 The following table shows how each type of instrumented command gets mapped
 to a corresponding type of CTest XML file.
@@ -210,8 +213,8 @@ key is required, but all other fields are optional.
   * ``postGenerate``
   * ``preBuild`` (called when ``ninja``  or ``make`` is invoked)
   * ``postBuild`` (called when ``ninja`` or ``make`` completes)
-  * ``preCMakeBuild`` (called when ``cmake --build`` is invoked)
-  * ``postCMakeBuild`` (called when ``cmake --build`` completes)
+  * ``preCMakeBuild`` (called when :option:`cmake --build` is invoked)
+  * ``postCMakeBuild`` (called when :option:`cmake --build` completes)
   * ``postCMakeInstall``
   * ``postCMakeWorkflow``
   * ``postCTest``
@@ -219,7 +222,7 @@ key is required, but all other fields are optional.
   ``preBuild`` and ``postBuild`` are not supported when using the
   :generator:`MSYS Makefiles` or :generator:`FASTBuild` generators.
   Additionally, they will not be triggered when the build tool is invoked by
-  ``cmake --build``.
+  :option:`cmake --build`.
 
 ``options``
   A list of strings used to enable certain optional behavior, including the
@@ -284,11 +287,11 @@ Example:
     ]
   }
 
-In this example, after every ``cmake --build`` or ``cmake --install``
-invocation, an index file ``index-<timestamp>.json`` will be generated in
-``<build>/.cmake/instrumentation/v1/data/index`` containing a list of data
-snippet files created since the previous indexing. The commands
-``/usr/bin/python callback.py index-<timestamp>.json`` and
+In this example, after every :option:`cmake --build` or
+:option:`cmake --install` invocation, an index file ``index-<timestamp>.json``
+will be generated in ``<build>/.cmake/instrumentation/v1/data/index``
+containing a list of data snippet files created since the previous indexing.
+The commands ``/usr/bin/python callback.py index-<timestamp>.json`` and
 ``/usr/bin/cmake -P callback.cmake arg index-<timestamp>.json`` will be
 executed in that order. The index file will contain the
 ``staticSystemInformation`` data and each snippet file listed in the index will
@@ -326,11 +329,11 @@ following:
 
 * The CMake configure step
 * The CMake generate step
-* Entire build step (executed with ``cmake --build``)
-* Entire install step (executed with ``cmake --install``)
-* Each time ``ctest`` is invoked to :ref:`run tests <Run Tests>` (even if no
-  tests are found)
-* Each individual test executed by ``ctest``.
+* Entire build step (executed with :option:`cmake --build`)
+* Entire install step (executed with :option:`cmake --install`)
+* Each time :manual:`ctest <ctest(1)>` is invoked to
+  :ref:`run tests <Run Tests>` (even if no tests are found)
+* Each individual test executed by :manual:`ctest <ctest(1)>`
 
 These files remain in the build tree until after `Indexing`_ occurs and any
 user-specified `Callbacks`_ are executed.
@@ -361,12 +364,12 @@ Snippet files have a filename with the syntax
     * ``link``: an individual link step invoked during the build
     * ``custom``: an individual custom command invoked during the build
     * ``build``: a complete ``make`` or ``ninja`` invocation
-      (not through ``cmake --build``).
-    * ``cmakeBuild``: a complete ``cmake --build`` invocation
-    * ``cmakeInstall``: a complete ``cmake --install`` invocation
+      (not through :option:`cmake --build`).
+    * ``cmakeBuild``: a complete :option:`cmake --build` invocation
+    * ``cmakeInstall``: a complete :option:`cmake --install` invocation
     * ``install``: an individual ``cmake -P cmake_install.cmake`` invocation
-    * ``ctest``: a complete ``ctest`` invocation
-    * ``test``: a single test executed by CTest
+    * ``ctest``: a complete :manual:`ctest <ctest(1)>` command invocation
+    * ``test``: a single test executed by :manual:`ctest <ctest(1)>`
 
   ``target``
     The CMake target associated with the command. Only included when ``role``
@@ -401,9 +404,9 @@ Snippet files have a filename with the syntax
     ``test``.
 
   ``config``
-    The type of build, such as ``Release`` or ``Debug``. Only included when
-    ``role`` is one of: ``compile``, ``link``, ``custom``, ``install``,
-    ``test``.
+    The :ref:`Build Configuration <Build Configurations>`, such as ``Release``
+    or ``Debug``. Only included when ``role`` is one of: ``compile``, ``link``,
+    ``custom``, ``install``, ``test``.
 
   ``dynamicSystemInformation``
     Specifies the dynamic information collected about the host machine
@@ -431,8 +434,9 @@ Snippet files have a filename with the syntax
     responsible for generating the ``command`` in this snippet.
 
   ``showOnly``
-    A boolean representing whether the ``--show-only`` option was passed to
-    ``ctest``. Only included when ``role`` is ``ctest``.
+    A boolean representing whether the
+    :option:`--show-only <ctest --show-only>` option was passed to
+    :manual:`ctest <ctest(1)>`. Only included when ``role`` is ``ctest``.
 
 Example:
 
@@ -483,7 +487,7 @@ generated whenever `Indexing`_ occurs and deleted after any user-specified
   The name of the hook responsible for generating the index file. In addition
   to the hooks that can be specified by one of the `v1 Query Files`_, this
   value may be set to ``manual`` if indexing is performed by invoking
-  ``ctest --collect-instrumentation <build>``.
+  :option:`ctest --collect-instrumentation`.
 
 ``snippets``
   Contains a list of `v1 Snippet Files <v1 Snippet File_>`_. This includes all
@@ -562,8 +566,9 @@ Each CMake content file contains the following:
     corresponding instrumentation data. Each target contains the following:
 
     ``type``
-      The target type. One of ``EXECUTABLE``, ``STATIC_LIBRARY``,
-      ``SHARED_LIBRARY`` or ``OBJECT_LIBRARY``.
+      The :prop_tgt:`TYPE` property of the target. Only ``EXECUTABLE``,
+      ``STATIC_LIBRARY``, ``SHARED_LIBRARY``, and ``OBJECT_LIBRARY`` targets
+      are included.
 
     ``labels``
       The :prop_tgt:`LABELS` property of the target.
