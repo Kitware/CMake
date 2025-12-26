@@ -328,7 +328,8 @@ following:
 * The CMake generate step
 * Entire build step (executed with ``cmake --build``)
 * Entire install step (executed with ``cmake --install``)
-* Each ``ctest`` invocation
+* Each time ``ctest`` is invoked to :ref:`run tests <Run Tests>` (even if no
+  tests are found)
 * Each individual test executed by ``ctest``.
 
 These files remain in the build tree until after `Indexing`_ occurs and any
