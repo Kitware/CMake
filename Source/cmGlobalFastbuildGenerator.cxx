@@ -1020,7 +1020,8 @@ void cmGlobalFastbuildGenerator::AddCompiler(std::string const& language,
   // If FASTBUILD_COMPILER_EXTRA_FILES is not set - automatically add extra
   // files based on compiler (see
   // https://fastbuild.org/docs/functions/compiler.html)
-  if (compilerDef.ExtraFiles.empty() &&
+  if (!this->GetCMakeInstance()->GetIsInTryCompile() &&
+      compilerDef.ExtraFiles.empty() &&
       (language == "C" || language == "CXX") &&
       compilerDef.CmakeCompilerID == "MSVC") {
     // https://cmake.org/cmake/help/latest/variable/MSVC_VERSION.html
