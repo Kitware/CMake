@@ -94,6 +94,31 @@ if (test_3_8_0)
   run_cmake(compression-level-zip-zstd)
 endif()
 
+# Check the --cmake-tar-compression-method option
+external_command_test(bad-compression-method-unknown
+  tar cvf bad.tar "--cmake-tar-compression-method=bad-method"
+    ${CMAKE_CURRENT_LIST_DIR}/test-file.txt
+)
+external_command_test(bad-compression-method-duplicate
+  tar cvzf bad.tar "--cmake-tar-compression-method=gzip"
+    ${CMAKE_CURRENT_LIST_DIR}/test-file.txt
+)
+external_command_test(bad-compression-method-different
+  tar cvzf bad.tar "--cmake-tar-compression-method=none"
+    ${CMAKE_CURRENT_LIST_DIR}/test-file.txt
+)
+
+run_cmake(compression-method-none)
+run_cmake(compression-method-store)
+run_cmake(compression-method-bzip2)
+run_cmake(compression-method-gzip)
+run_cmake(compression-method-deflate)
+run_cmake(compression-method-xz)
+run_cmake(compression-method-lzma2)
+run_cmake(compression-method-lzma)
+run_cmake(compression-method-zstd)
+run_cmake(compression-method-ppmd)
+
 # Extracting only selected files or directories
 run_cmake(zip-filtered)
 

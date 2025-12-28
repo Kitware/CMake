@@ -1509,6 +1509,30 @@ Available commands are:
 
     Specify modification time recorded in tarball entries.
 
+  .. option:: --cmake-tar-compression-method=<compression-method>
+
+    .. versionadded:: 4.3
+
+    The ``<compression-method>`` must be one of the following:
+
+    * ``none`` or ``store`` - no compression is used
+    * ``deflate`` or ``gzip`` - Deflate-based
+    * ``bzip2`` - BZip2-based
+    * ``lzma`` - LZMA-based
+    * ``lzma2`` or ``xz`` - LZMA2-based
+    * ``ppmd`` - PPMd-based
+
+      This compression method is only supported by the ``7zip`` archive format.
+
+    * ``zstd`` - Zstandard-based
+
+    This is the second variant for the compression method selection.
+    It provide more compression methods, that the classic ``tar``-like interface.
+    You can use any of them.
+
+    The default value depends on the :option:`--format <cmake-E_tar --format>`
+    option value and described in the corresponding section.
+
   .. option:: --cmake-tar-compression-level=<compression-level>
 
     .. versionadded:: 4.3
