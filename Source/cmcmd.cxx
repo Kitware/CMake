@@ -1576,7 +1576,8 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
 
     // Tar files
     if (args[1] == "tar" && args.size() > 3) {
-      char const* knownFormats[] = { "7zip", "gnutar", "pax", "paxr", "zip" };
+      char const* knownFormats[] = { "7zip", "gnutar", "pax",
+                                     "paxr", "raw",    "zip" };
 
       std::string const& flags = args[2];
       std::string const& outFile = args[3];

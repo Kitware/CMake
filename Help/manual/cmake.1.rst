@@ -1488,8 +1488,21 @@ Available commands are:
     .. versionadded:: 3.3
 
     Specify the format of the archive to be created.
-    Supported formats are: ``7zip``, ``gnutar``, ``pax``,
-    ``paxr`` (restricted pax, default), and ``zip``.
+    Supported formats are:
+
+    * ``7zip``
+    * ``gnutar``
+    * ``pax``
+    * ``paxr`` (restricted pax, default)
+    * ``raw``
+
+      .. versionadded:: 4.3
+
+      If this format is used, only one file will be compressed
+      with the compression type specified by the
+      :option:`--cmake-tar-compression-method <cmake-E_tar --cmake-tar-compression-method>`.
+
+    * ``zip``
 
     If the compression method is not specified, the compression method
     depends on the format:
