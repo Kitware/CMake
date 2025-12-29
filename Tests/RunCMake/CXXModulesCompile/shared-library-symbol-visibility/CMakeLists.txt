@@ -5,7 +5,7 @@ include("${CMAKE_SOURCE_DIR}/../cxx-modules-rules.cmake")
 
 include(GenerateExportHeader)
 
-add_library(library)
+add_library(library SHARED)
 generate_export_header(library)
 target_sources(library
   PUBLIC
@@ -22,6 +22,7 @@ target_sources(library
   PRIVATE
     importable.cxx)
 target_compile_features(library PUBLIC cxx_std_20)
+target_compile_definitions(library INTERFACE CHECK_IMPORT_INTERFACE)
 
 add_executable(exe)
 target_link_libraries(exe PRIVATE library)

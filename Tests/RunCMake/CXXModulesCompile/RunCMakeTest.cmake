@@ -251,6 +251,7 @@ endif ()
 # Tests which use named modules in shared libraries.
 if ("shared" IN_LIST CMake_TEST_MODULE_COMPILATION)
   run_cxx_module_test(library library-shared -DBUILD_SHARED_LIBS=ON)
+  run_cxx_module_test(shared-library-symbol-visibility)
 endif ()
 
 # Tests which use partitions.
