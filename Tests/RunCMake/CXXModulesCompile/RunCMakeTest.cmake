@@ -177,6 +177,13 @@ if ("named" IN_LIST CMake_TEST_MODULE_COMPILATION)
   run_cxx_module_test(scan_props)
   run_cxx_module_test(target-objects)
 
+  # mixed-bmi-compatibility requires a generator that implements per-importer
+  # BMI generation
+  if ("cxx_std_23" IN_LIST CMAKE_CXX_COMPILE_FEATURES AND
+      RunCMake_GENERATOR MATCHES "Ninja")
+    run_cxx_module_test(mixed-bmi-compatibility)
+  endif()
+
   if ("cxx_std_23" IN_LIST CMAKE_CXX_COMPILE_FEATURES AND
       "import_std23" IN_LIST CMake_TEST_MODULE_COMPILATION)
     run_cxx_module_test(imp-std)
