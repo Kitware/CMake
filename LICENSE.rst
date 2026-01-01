@@ -1,4 +1,4 @@
-Copyright 2000-2025 Kitware, Inc. and `Contributors <CONTRIBUTORS.rst>`_
+Copyright 2000-2026 Kitware, Inc. and `Contributors <CONTRIBUTORS.rst>`_
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
