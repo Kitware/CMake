@@ -689,7 +689,7 @@ archive_read_format_lha_read_header(struct archive_read *a,
 	 * a pathname and a symlink has '\' character, a directory
 	 * separator in DOS/Windows. So we should convert it to '/'.
 	 */
-	if (p[H_LEVEL_OFFSET] == 0)
+	if (lha->level == 0)
 		lha_replace_path_separator(lha, entry);
 
 	archive_entry_set_mode(entry, lha->mode);
@@ -2374,7 +2374,7 @@ lzh_decode_blocks(struct lzh_stream *strm, int last)
 					lzh_br_consume(&bre, lt_bitlen[c]);
 				}
 				blocks_avail--;
-				if (c > UCHAR_MAX)
+				if ((unsigned int)c > UCHAR_MAX)
 					/* Current block is a match data. */
 					break;
 				/*

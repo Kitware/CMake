@@ -2054,6 +2054,26 @@ archive_strncat_l(struct archive_string *as, const void *_p, size_t n,
 	return (r);
 }
 
+struct archive_string *
+archive_string_dirname(struct archive_string *as)
+{
+	/* strip trailing separators */
+	while (as->length > 1 && as->s[as->length - 1] == '/')
+		as->length--;
+	/* strip final component */
+	while (as->length > 0 && as->s[as->length - 1] != '/')
+		as->length--;
+	/* empty path -> cwd */
+	if (as->length == 0)
+		return (archive_strcat(as, "."));
+	/* strip separator(s) */
+	while (as->length > 1 && as->s[as->length - 1] == '/')
+		as->length--;
+	/* terminate */
+	as->s[as->length] = '\0';
+	return (as);
+}
+
 #if HAVE_ICONV
 
 /*
@@ -3553,7 +3573,7 @@ win_strncat_from_utf16(struct archive_string *as, const void *_p, size_t bytes,
 
 	if (sc->to_cp == CP_C_LOCALE) {
 		/*
-		 * "C" locale special process.
+		 * "C" locale special processing.
 		 */
 		u16 = _p;
 		ll = 0;
@@ -3670,7 +3690,7 @@ win_strncat_to_utf16(struct archive_string *as16, const void *_p,
 	avail = as16->buffer_length - 2;
 	if (sc->from_cp == CP_C_LOCALE) {
 		/*
-		 * "C" locale special process.
+		 * "C" locale special processing.
 		 */
 		count = 0;
 		while (count < length && *s) {
