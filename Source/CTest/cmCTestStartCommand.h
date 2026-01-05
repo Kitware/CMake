@@ -14,7 +14,7 @@ class cmExecutionStatus;
 /** \class cmCTestStart
  * \brief Run a ctest script
  *
- * cmCTestStartCommand defineds the command to start the nightly testing.
+ * cmCTestStartCommand defines the command to start the nightly testing.
  */
 class cmCTestStartCommand : public cmCTestCommand
 {

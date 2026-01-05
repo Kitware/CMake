@@ -1377,7 +1377,7 @@ void cmCTestMultiProcessHandler::CreateSerialTestCostList()
 void cmCTestMultiProcessHandler::WriteCheckpoint(int index)
 {
   std::string fname =
-    this->CTest->GetBinaryDir() + "/Testing/Temporary/CTestCheckpoint.txt";
+    this->CTest->GetOutputDir() + "/Temporary/CTestCheckpoint.txt";
   cmsys::ofstream fout;
   fout.open(fname.c_str(), std::ios::app);
   fout << index << "\n";
@@ -1387,7 +1387,7 @@ void cmCTestMultiProcessHandler::WriteCheckpoint(int index)
 void cmCTestMultiProcessHandler::MarkFinished()
 {
   std::string fname =
-    this->CTest->GetBinaryDir() + "/Testing/Temporary/CTestCheckpoint.txt";
+    this->CTest->GetOutputDir() + "/Temporary/CTestCheckpoint.txt";
   cmSystemTools::RemoveFile(fname);
 }
 
@@ -1925,7 +1925,7 @@ void cmCTestMultiProcessHandler::PrintLabels()
 void cmCTestMultiProcessHandler::CheckResume()
 {
   std::string fname =
-    this->CTest->GetBinaryDir() + "/Testing/Temporary/CTestCheckpoint.txt";
+    this->CTest->GetOutputDir() + "/Temporary/CTestCheckpoint.txt";
   if (this->CTest->GetFailover()) {
     if (cmSystemTools::FileExists(fname, true)) {
       *this->TestHandler->LogFile

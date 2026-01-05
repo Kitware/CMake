@@ -8,6 +8,12 @@ cmake_minimum_required(VERSION @CMAKE_VERSION@)
 set(CTEST_SOURCE_DIRECTORY "@PROJECT_SOURCE_DIR@")
 set(CTEST_BINARY_DIRECTORY "@PROJECT_BINARY_DIR@")
 
+# Where CTest writes its output files.  May be set on the command line to
+# keep separate ctest runs over one build tree from overwriting each other.
+if(NOT DEFINED CTEST_OUTPUT_DIRECTORY)
+  set(CTEST_OUTPUT_DIRECTORY "${CTEST_BINARY_DIRECTORY}/Testing")
+endif()
+
 # CTest Update Step
 set(CTEST_UPDATE_COMMAND "@UPDATE_COMMAND@")
 set(CTEST_UPDATE_OPTIONS "@UPDATE_OPTIONS@")
@@ -92,7 +98,7 @@ endif()
 
 set(_exit_code 0)
 
-if("Start" IN_LIST ACTIONS OR NOT EXISTS "${CTEST_BINARY_DIRECTORY}/Testing/TAG")
+if("Start" IN_LIST ACTIONS OR NOT EXISTS "${CTEST_OUTPUT_DIRECTORY}/TAG")
   ctest_start("${MODEL}")
 else()
   ctest_start("${MODEL}" APPEND)
@@ -148,7 +154,7 @@ if("MemCheck" IN_LIST ACTIONS)
 endif()
 
 file(GLOB notes_files LIST_DIRECTORIES OFF
-  "${CTEST_BINARY_DIRECTORY}/Testing/Notes/*")
+  "${CTEST_OUTPUT_DIRECTORY}/Notes/*")
 if(notes_files)
   list(APPEND CTEST_NOTES_FILES "${notes_files}")
 endif()

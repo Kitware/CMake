@@ -237,6 +237,9 @@ function(ctest_coverage_collect_gcov)
     return()
   endif()
   # setup the dir for the coverage files
+  # FIXME(#27518): This staging directory ignores CTEST_OUTPUT_DIRECTORY.
+  # Moving it is not a simple substitution: the .gcov files are
+  # globbed relative to binary_dir and tar runs from there.
   set(coverage_dir "${binary_dir}/Testing/CoverageInfo")
   file(MAKE_DIRECTORY  "${coverage_dir}")
   # run gcov, this will produce the .gcov files in the current

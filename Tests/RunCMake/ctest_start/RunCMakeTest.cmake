@@ -51,6 +51,13 @@ run_ctest_start(TooManyArgs Experimental
 run_ctest_start(NoStartTimeExperimental Experimental)
 run_ctest_start(NoStartTimeNightly Nightly)
 
+block()
+  set(CASE SetOutputDir)
+  set(DEFAULT_OUTPUT_DIR "${RunCMake_BINARY_DIR}/${CASE}-build/Testing")
+  set(OUTPUT_DIR "${RunCMake_BINARY_DIR}/${CASE}-build/CTestStartOutputDir")
+  run_ctest_start(${CASE} Experimental)
+endblock()
+
 function(run_ConfigInBuild)
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/ConfigInBuild-build)
   set(RunCMake_TEST_NO_CLEAN 1)

@@ -36,13 +36,11 @@ using ConfigurePreset = cmCMakePresetsGraph::ConfigurePreset;
 
 namespace {
 
-bool ConstructConfigureCommand(cmExecutionStatus& status, cmMakefile& mf,
-                               std::string const sourceDirectory,
-                               std::string const buildDirectory,
-                               std::string const options,
-                               std::string const presetName,
-                               std::string const presetsFile,
-                               std::string& configureCommand)
+bool ConstructConfigureCommand(
+  cmExecutionStatus& status, cmMakefile& mf, std::string const sourceDirectory,
+  std::string const buildDirectory, std::string const outputDirectory,
+  std::string const options, std::string const presetName,
+  std::string const presetsFile, std::string& configureCommand)
 {
   configureCommand =
     cmStrCat('"', cmSystemTools::GetCMakeCommand(), "\" \"-S",
@@ -130,8 +128,7 @@ bool ConstructConfigureCommand(cmExecutionStatus& status, cmMakefile& mf,
   cmValue buildName = mf.GetDefinition("CTEST_BUILD_NAME");
   if (cmNonempty(site) || cmNonempty(buildName)) {
     std::string const initialCacheFile =
-      cmStrCat(cmSystemTools::CollapseFullPath(buildDirectory),
-               "/Testing/Temporary/CTestConfigureInitialCache.cmake");
+      cmStrCat(outputDirectory, "/Temporary/CTestConfigureInitialCache.cmake");
     cmGeneratedFileStream initialCache(initialCacheFile);
     if (cmNonempty(site)) {
       initialCache << "set(SITE " << cmOutputConverter::EscapeForCMake(*site)
@@ -244,8 +241,8 @@ bool cmCTestConfigureCommand::ExecuteConfigure(ConfigureArguments const& args,
   }
   if (configureCommand.empty() &&
       !ConstructConfigureCommand(status, mf, sourceDirectory, buildDirectory,
-                                 args.Options, presetName, presetsFile,
-                                 configureCommand)) {
+                                 this->CTest->GetOutputDir(), args.Options,
+                                 presetName, presetsFile, configureCommand)) {
     return false;
   }
 

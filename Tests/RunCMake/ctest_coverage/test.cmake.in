@@ -9,10 +9,28 @@ set(CTEST_CMAKE_GENERATOR_PLATFORM      "@RunCMake_GENERATOR_PLATFORM@")
 set(CTEST_CMAKE_GENERATOR_TOOLSET       "@RunCMake_GENERATOR_TOOLSET@")
 set(CTEST_BUILD_CONFIGURATION           "$ENV{CMAKE_CONFIG_TYPE}")
 set(CTEST_COVERAGE_COMMAND              "@COVERAGE_COMMAND@")
+if("@CASE_NAME@" MATCHES "^SetOutputDir$")
+  set(CTEST_OUTPUT_DIRECTORY              "@OUTPUT_DIR@")
+endif()
 
 set(ctest_coverage_args "@CASE_CTEST_COVERAGE_ARGS@")
 ctest_start(Experimental)
 ctest_configure()
 ctest_build()
 ctest_test()
+if("@CASE_NAME@" MATCHES "^SetOutputDir$")
+  # Leave Cobertura-style coverage data in the build tree so that
+  # ctest_coverage() produces real output files to check.  No coverage
+  # tool runs; the handler just parses what it finds.
+  file(WRITE "${CTEST_BINARY_DIRECTORY}/covsrc/main.cpp" "int main(){return 0;}\n")
+  file(WRITE "${CTEST_BINARY_DIRECTORY}/coverage.xml"
+"<?xml version=\"1.0\"?>
+<coverage>
+  <sources><source>${CTEST_BINARY_DIRECTORY}/covsrc</source></sources>
+  <packages><package><classes>
+    <class filename=\"main.cpp\"><lines><line number=\"1\" hits=\"1\"/></lines></class>
+  </classes></package></packages>
+</coverage>
+")
+endif()
 ctest_coverage(${ctest_coverage_args})
