@@ -31,6 +31,17 @@ int main()
       b1.lexically_normal()) {
     return 1;
   }
+
+  // LWG 3070 not implemented on some old Visual Studio compilers (2017, for
+  // example)
+  if (!std::filesystem::path("/a:/b:").lexically_relative("/a:/c:").empty()) {
+    return 1;
+  }
+  // LWG 3096 not implemented on some old Visual Studio compilers (2017, for
+  // example)
+  if (fs::path("/a").lexically_relative("/a/.") != ".") {
+    return 1;
+  }
 #endif
 
   // If std::string is copy-on-write, the std::filesystem::path

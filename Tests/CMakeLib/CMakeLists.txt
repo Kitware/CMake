@@ -37,6 +37,7 @@ set(CMakeLib_TESTS
   testCMExtAlgorithm.cxx
   testCMExtEnumSet.cxx
   testList.cxx
+  testCMFilesystemPath.cxx
   testCMakePath.cxx
   )
 if(CMake_ENABLE_DEBUGGER)
@@ -49,9 +50,6 @@ if(CMake_ENABLE_DEBUGGER)
     testDebuggerVariablesManager.cxx
     testDebuggerThread.cxx
     )
-endif()
-if (CMake_TEST_FILESYSTEM_PATH OR NOT CMake_HAVE_CXX_FILESYSTEM)
-  list(APPEND CMakeLib_TESTS testCMFilesystemPath.cxx)
 endif()
 
 add_executable(testUVProcessChainHelper testUVProcessChainHelper.cxx)
