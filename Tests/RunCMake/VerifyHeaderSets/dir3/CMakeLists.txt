@@ -1,0 +1,3 @@
+add_library(lib3 STATIC ../lib.c)
+add_custom_command(OUTPUT lib3.h COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/lib3.h lib3.h)
+target_sources(lib3 PRIVATE FILE_SET HEADERS BASE_DIRS ${CMAKE_CURRENT_BINARY_DIR} FILES ${CMAKE_CURRENT_BINARY_DIR}/lib3.h)

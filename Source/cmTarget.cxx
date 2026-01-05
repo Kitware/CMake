@@ -498,6 +498,7 @@ TargetProperty const StaticTargetProperties[] = {
   { "UNITY_BUILD_RELOCATABLE"_s, IC::CanCompileSources },
   { "OPTIMIZE_DEPENDENCIES"_s, IC::CanCompileSources },
   { "VERIFY_INTERFACE_HEADER_SETS"_s },
+  { "VERIFY_PRIVATE_HEADER_SETS"_s },
   // -- Android
   { "ANDROID_ANT_ADDITIONAL_OPTIONS"_s, IC::CanCompileSources },
   { "ANDROID_PROCESS_MAX"_s, IC::CanCompileSources },

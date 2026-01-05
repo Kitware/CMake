@@ -392,6 +392,7 @@ Properties on Targets
    /prop_tgt/PRECOMPILE_HEADERS_REUSE_FROM
    /prop_tgt/PREFIX
    /prop_tgt/PRIVATE_HEADER
+   /prop_tgt/PRIVATE_HEADER_SETS_TO_VERIFY
    /prop_tgt/PROJECT_LABEL
    /prop_tgt/PUBLIC_HEADER
    /prop_tgt/RESOURCE
@@ -432,6 +433,7 @@ Properties on Targets
    /prop_tgt/UNITY_BUILD_RELOCATABLE
    /prop_tgt/UNITY_BUILD_UNIQUE_ID
    /prop_tgt/VERIFY_INTERFACE_HEADER_SETS
+   /prop_tgt/VERIFY_PRIVATE_HEADER_SETS
    /prop_tgt/VERSION
    /prop_tgt/VISIBILITY_INLINES_HIDDEN
    /prop_tgt/VS_CONFIGURATION_TYPE

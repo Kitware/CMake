@@ -1861,13 +1861,36 @@ bool cmGlobalGenerator::AddHeaderSetVerification()
     }
   }
 
-  cmTarget* allVerifyTarget = this->Makefiles.front()->FindTargetToUse(
-    "all_verify_interface_header_sets",
-    { cmStateEnums::TargetDomain::NATIVE });
-  if (allVerifyTarget) {
+  cmTarget* allVerifyInterfaceTarget =
+    this->Makefiles.front()->FindTargetToUse(
+      "all_verify_interface_header_sets",
+      { cmStateEnums::TargetDomain::NATIVE });
+  if (allVerifyInterfaceTarget) {
+    this->LocalGenerators.front()->AddGeneratorTarget(
+      cm::make_unique<cmGeneratorTarget>(allVerifyInterfaceTarget,
+                                         this->LocalGenerators.front().get()));
+  }
+  cmTarget* allVerifyPrivateTarget = this->Makefiles.front()->FindTargetToUse(
+    "all_verify_private_header_sets", { cmStateEnums::TargetDomain::NATIVE });
+  if (allVerifyPrivateTarget) {
+    this->LocalGenerators.front()->AddGeneratorTarget(
+      cm::make_unique<cmGeneratorTarget>(allVerifyPrivateTarget,
+                                         this->LocalGenerators.front().get()));
+  }
+
+  if (allVerifyInterfaceTarget || allVerifyPrivateTarget) {
+    cmTarget* allVerifyTarget =
+      this->GetMakefiles().front()->AddNewUtilityTarget(
+        "all_verify_header_sets", true);
     this->LocalGenerators.front()->AddGeneratorTarget(
       cm::make_unique<cmGeneratorTarget>(allVerifyTarget,
                                          this->LocalGenerators.front().get()));
+    if (allVerifyInterfaceTarget) {
+      allVerifyTarget->AddUtility(allVerifyInterfaceTarget->GetName(), false);
+    }
+    if (allVerifyPrivateTarget) {
+      allVerifyTarget->AddUtility(allVerifyPrivateTarget->GetName(), false);
+    }
   }
 
   return true;
