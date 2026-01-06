@@ -497,6 +497,14 @@ Run Tests
  This option can also be set by setting the :envvar:`CTEST_NO_TESTS_ACTION`
  environment variable.
 
+.. option:: --collect-instrumentation <build>
+
+ .. versionadded:: 4.0
+
+ Manually collect instrumentation data from the specified build directory. See
+ the :ref:`cmake-instrumentation Indexing` section of CMake instrumentation for
+ more details.
+
 View Help
 =========
 
