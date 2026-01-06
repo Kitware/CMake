@@ -2636,6 +2636,18 @@ bool extract_tar(std::string const& outFileName,
   static_cast<void>(localeRAII);
   struct archive* a = archive_read_new();
   struct archive* ext = archive_write_disk_new();
+  if (extract) {
+    int flags = 0;
+    if (extractTimestamps == cmSystemTools::cmTarExtractTimestamps::Yes) {
+      flags |= ARCHIVE_EXTRACT_TIME;
+    }
+    if (archive_write_disk_set_options(ext, flags) != ARCHIVE_OK) {
+      ArchiveError("Problem with archive_write_disk_set_options(): ", ext);
+      archive_write_free(ext);
+      archive_read_free(a);
+      return false;
+    }
+  }
   archive_read_support_filter_all(a);
   archive_read_support_format_all(a);
   struct archive_entry* entry;
@@ -2687,14 +2699,6 @@ bool extract_tar(std::string const& outFileName,
       cmSystemTools::Stdout(cmStrCat(cm_archive_entry_pathname(entry), '\n'));
     }
     if (extract) {
-      if (extractTimestamps == cmSystemTools::cmTarExtractTimestamps::Yes) {
-        r = archive_write_disk_set_options(ext, ARCHIVE_EXTRACT_TIME);
-        if (r != ARCHIVE_OK) {
-          ArchiveError("Problem with archive_write_disk_set_options(): ", ext);
-          break;
-        }
-      }
-
       r = archive_write_header(ext, entry);
       if (r == ARCHIVE_OK) {
         if (!copy_data(a, ext)) {
