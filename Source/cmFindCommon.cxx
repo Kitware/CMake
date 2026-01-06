@@ -301,8 +301,9 @@ void cmFindCommon::RerootPaths(std::vector<std::string>& paths,
 
   auto isSameDirectoryOrSubDirectory = [](std::string const& l,
                                           std::string const& r) {
-    return (cmSystemTools::GetRealPath(l) == cmSystemTools::GetRealPath(r)) ||
-      cmSystemTools::IsSubDirectory(l, r);
+    std::string const lReal = cmSystemTools::GetRealPath(l);
+    std::string const rReal = cmSystemTools::GetRealPath(r);
+    return (lReal == rReal) || cmSystemTools::IsSubDirectory(lReal, rReal);
   };
 
   for (auto const& r : roots) {
