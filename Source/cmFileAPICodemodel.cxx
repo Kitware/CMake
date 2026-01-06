@@ -1748,7 +1748,7 @@ std::pair<Json::Value, Target::FileSetDatabase> Target::DumpFileSets()
         auto const& dir = files_per_dir.first;
         for (auto const& file : files_per_dir.second) {
           std::string sf_path;
-          if (dir.empty()) {
+          if (dir.empty() || cmSystemTools::FileIsFullPath(file)) {
             sf_path = file;
           } else {
             sf_path = cmStrCat(dir, '/', file);
