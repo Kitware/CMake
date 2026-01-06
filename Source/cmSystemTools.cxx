@@ -2637,7 +2637,8 @@ bool extract_tar(std::string const& outFileName,
   struct archive* a = archive_read_new();
   struct archive* ext = archive_write_disk_new();
   if (extract) {
-    int flags = 0;
+    int flags = ARCHIVE_EXTRACT_SECURE_NODOTDOT |
+      ARCHIVE_EXTRACT_SECURE_NOABSOLUTEPATHS | ARCHIVE_EXTRACT_SECURE_SYMLINKS;
     if (extractTimestamps == cmSystemTools::cmTarExtractTimestamps::Yes) {
       flags |= ARCHIVE_EXTRACT_TIME;
     }

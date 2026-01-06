@@ -1,0 +1,7 @@
+^CMake Error: Problem with archive_write_header\(\): Path is absolute
+CMake Error: Current file:
+  [^
+]*/Tests/RunCMake/CommandLineTar/path-absolute-build/SHOULD_NOT_EXIST_ABS\.txt
+CMake Error: Problem extracting tar:
+  [^
+]*/Tests/RunCMake/CommandLineTar/path-absolute-build/malicious_abs\.tar$

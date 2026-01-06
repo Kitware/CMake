@@ -1,0 +1,9 @@
+^CMake Error: Problem with archive_write_header\(\): Path contains '\.\.'
+CMake Error: Current file:
+  \.\./SHOULD_NOT_EXIST\.txt
+CMake Error at [^
+]*/Tests/RunCMake/File_Archive/path-traversal\.cmake:[0-9]+ \(file\):
+  file failed to extract:
+
+    [^
+]*/Tests/RunCMake/File_Archive/path-traversal-build/malicious\.tar$

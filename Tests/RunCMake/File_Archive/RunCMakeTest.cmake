@@ -52,3 +52,9 @@ run_cmake(pax-xz-compression-level)
 run_cmake(pax-zstd-compression-level)
 run_cmake(paxr-bz2-compression-level)
 run_cmake(zip-deflate-compression-level)
+
+# Security: Test path traversal protection
+if(Python_EXECUTABLE)
+  run_cmake_script(path-absolute -DPython_EXECUTABLE=${Python_EXECUTABLE})
+  run_cmake_script(path-traversal -DPython_EXECUTABLE=${Python_EXECUTABLE})
+endif()

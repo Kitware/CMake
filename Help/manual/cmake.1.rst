@@ -1454,6 +1454,10 @@ Available commands are:
       When extracting selected files or directories, you must provide their exact
       names including the path, as printed by list (``-t``).
 
+    .. versionchanged:: 4.3
+      Archive entries containing path traversal sequences (``..``), or
+      absolute paths, are rejected for security.
+
   .. option:: t
 
     List archive contents.
