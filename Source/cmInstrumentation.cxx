@@ -794,6 +794,7 @@ bool cmInstrumentation::IsInstrumentableTargetType(
   return type == cmStateEnums::TargetType::EXECUTABLE ||
     type == cmStateEnums::TargetType::SHARED_LIBRARY ||
     type == cmStateEnums::TargetType::STATIC_LIBRARY ||
+    type == cmStateEnums::TargetType::MODULE_LIBRARY ||
     type == cmStateEnums::TargetType::OBJECT_LIBRARY;
 }
 
