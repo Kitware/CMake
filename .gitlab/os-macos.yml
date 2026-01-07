@@ -8,8 +8,6 @@
         # TODO: Factor this out so that each job selects the Xcode version to
         # use so that different versions can be tested in a single pipeline.
         DEVELOPER_DIR: "/Applications/Xcode-26.1.app/Contents/Developer"
-        # Avoid conflicting with other projects running on the same machine.
-        SCCACHE_SERVER_PORT: 4227
 
 ### Build and test
 
