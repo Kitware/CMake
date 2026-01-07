@@ -1437,6 +1437,14 @@ void cmGlobalFastbuildGenerator::WriteTarget(FastbuildTarget const& target)
 }
 void cmGlobalFastbuildGenerator::WriteIDEProjects()
 {
+#if defined(_WIN32)
+  std::string platformToolset;
+  std::string const toolset =
+    this->GetSafeGlobalSetting("MSVC_TOOLSET_VERSION");
+  if (!toolset.empty()) {
+    platformToolset = cmStrCat('v', toolset);
+  }
+#endif
   for (auto const& proj : IDEProjects) {
     (void)proj;
     // VS
@@ -1445,6 +1453,9 @@ void cmGlobalFastbuildGenerator::WriteIDEProjects()
     WriteCommand("VCXProject", Quote(VSProj.Alias));
     *this->BuildFileStream << "{\n";
     WriteVariable("ProjectOutput", Quote(VSProj.ProjectOutput), 1);
+    if (!platformToolset.empty()) {
+      WriteVariable("PlatformToolset", Quote(platformToolset), 1);
+    }
     WriteIDEProjectConfig(VSProj.ProjectConfigs);
     WriteVSBuildCommands();
     WriteIDEProjectCommon(VSProj);
