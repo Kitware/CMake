@@ -1,3 +1,5 @@
+#ifndef HEADER_CURLX_STRCOPY_H
+#define HEADER_CURLX_STRCOPY_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -22,16 +24,9 @@
  *
  ***************************************************************************/
 
-/* Unset redefined system symbols. */
+void curlx_strcopy(char *dest,
+                   size_t dsize, /* size of target buffer */
+                   const char *src,
+                   size_t slen); /* length of string to copy */
 
-#undef strdup
-#undef malloc
-#undef calloc
-#undef realloc
-#undef free
-#ifdef _WIN32
-#undef Curl_tcsdup
-#endif
-
-#undef HEADER_CURL_MEMORY_H
-#undef HEADER_CURL_MEMDEBUG_H
+#endif /* HEADER_CURLX_STRCOPY_H */

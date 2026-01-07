@@ -21,7 +21,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #if !defined(CURL_DISABLE_HTTP) && defined(USE_NTLM)
@@ -34,7 +33,7 @@
  */
 
 #include "urldata.h"
-#include "sendf.h"
+#include "curl_trc.h"
 #include "strcase.h"
 #include "http_ntlm.h"
 #include "curl_ntlm_core.h"
@@ -48,10 +47,6 @@
 #ifdef USE_WINDOWS_SSPI
 #include "curl_sspi.h"
 #endif
-
-/* The last 2 #include files should be in this order */
-#include "curl_memory.h"
-#include "memdebug.h"
 
 CURLcode Curl_input_ntlm(struct Curl_easy *data,
                          bool proxy,         /* if proxy or not */
@@ -68,7 +63,7 @@ CURLcode Curl_input_ntlm(struct Curl_easy *data,
   if(checkprefix("NTLM", header)) {
     struct ntlmdata *ntlm = Curl_auth_ntlm_get(conn, proxy);
     if(!ntlm)
-      return CURLE_FAILED_INIT;
+      return CURLE_OUT_OF_MEMORY;
 
     header += strlen("NTLM");
     curlx_str_passblanks(&header);
@@ -148,7 +143,7 @@ CURLcode Curl_output_ntlm(struct Curl_easy *data, bool proxy)
     userp = data->state.aptr.proxyuser;
     passwdp = data->state.aptr.proxypasswd;
     service = data->set.str[STRING_PROXY_SERVICE_NAME] ?
-      data->set.str[STRING_PROXY_SERVICE_NAME] : "HTTP";
+              data->set.str[STRING_PROXY_SERVICE_NAME] : "HTTP";
     hostname = conn->http_proxy.host.name;
     state = &conn->proxy_ntlm_state;
     authp = &data->state.authproxy;
@@ -161,7 +156,7 @@ CURLcode Curl_output_ntlm(struct Curl_easy *data, bool proxy)
     userp = data->state.aptr.user;
     passwdp = data->state.aptr.passwd;
     service = data->set.str[STRING_SERVICE_NAME] ?
-      data->set.str[STRING_SERVICE_NAME] : "HTTP";
+              data->set.str[STRING_SERVICE_NAME] : "HTTP";
     hostname = conn->host.name;
     state = &conn->http_ntlm_state;
     authp = &data->state.authhost;
@@ -180,7 +175,7 @@ CURLcode Curl_output_ntlm(struct Curl_easy *data, bool proxy)
 
 #ifdef USE_WINDOWS_SSPI
   if(!Curl_pSecFn) {
-    /* not thread safe and leaks - use curl_global_init() to avoid */
+    /* not thread-safe and leaks - use curl_global_init() to avoid */
     CURLcode err = Curl_sspi_global_init();
     if(!Curl_pSecFn)
       return err;
@@ -205,14 +200,13 @@ CURLcode Curl_output_ntlm(struct Curl_easy *data, bool proxy)
                                                  hostname, ntlm, &ntlmmsg);
     if(!result) {
       DEBUGASSERT(Curl_bufref_len(&ntlmmsg) != 0);
-      result = curlx_base64_encode((const char *) Curl_bufref_ptr(&ntlmmsg),
-                                  Curl_bufref_len(&ntlmmsg), &base64, &len);
+      result = curlx_base64_encode(Curl_bufref_uptr(&ntlmmsg),
+                                   Curl_bufref_len(&ntlmmsg), &base64, &len);
       if(!result) {
-        free(*allocuserpwd);
+        curlx_free(*allocuserpwd);
         *allocuserpwd = curl_maprintf("%sAuthorization: NTLM %s\r\n",
-                                      proxy ? "Proxy-" : "",
-                                      base64);
-        free(base64);
+                                      proxy ? "Proxy-" : "", base64);
+        curlx_free(base64);
         if(!*allocuserpwd)
           result = CURLE_OUT_OF_MEMORY;
       }
@@ -224,14 +218,13 @@ CURLcode Curl_output_ntlm(struct Curl_easy *data, bool proxy)
     result = Curl_auth_create_ntlm_type3_message(data, userp, passwdp,
                                                  ntlm, &ntlmmsg);
     if(!result && Curl_bufref_len(&ntlmmsg)) {
-      result = curlx_base64_encode((const char *) Curl_bufref_ptr(&ntlmmsg),
+      result = curlx_base64_encode(Curl_bufref_uptr(&ntlmmsg),
                                    Curl_bufref_len(&ntlmmsg), &base64, &len);
       if(!result) {
-        free(*allocuserpwd);
+        curlx_free(*allocuserpwd);
         *allocuserpwd = curl_maprintf("%sAuthorization: NTLM %s\r\n",
-                                      proxy ? "Proxy-" : "",
-                                      base64);
-        free(base64);
+                                      proxy ? "Proxy-" : "", base64);
+        curlx_free(base64);
         if(!*allocuserpwd)
           result = CURLE_OUT_OF_MEMORY;
         else {
