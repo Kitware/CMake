@@ -1488,8 +1488,21 @@ Available commands are:
     .. versionadded:: 3.3
 
     Specify the format of the archive to be created.
-    Supported formats are: ``7zip``, ``gnutar``, ``pax``,
-    ``paxr`` (restricted pax, default), and ``zip``.
+    Supported formats are:
+
+    * ``7zip``
+    * ``gnutar``
+    * ``pax``
+    * ``paxr`` (restricted pax, default)
+    * ``raw``
+
+      .. versionadded:: 4.3
+
+      If this format is used, only one file will be compressed
+      with the compression type specified by the
+      :option:`--cmake-tar-compression-method <cmake-E_tar --cmake-tar-compression-method>`.
+
+    * ``zip``
 
     If the compression method is not specified, the compression method
     depends on the format:
@@ -1508,6 +1521,30 @@ Available commands are:
     .. versionadded:: 3.1
 
     Specify modification time recorded in tarball entries.
+
+  .. option:: --cmake-tar-compression-method=<compression-method>
+
+    .. versionadded:: 4.3
+
+    The ``<compression-method>`` must be one of the following:
+
+    * ``none`` or ``store`` - no compression is used
+    * ``deflate`` or ``gzip`` - Deflate-based
+    * ``bzip2`` - BZip2-based
+    * ``lzma`` - LZMA-based
+    * ``lzma2`` or ``xz`` - LZMA2-based
+    * ``ppmd`` - PPMd-based
+
+      This compression method is only supported by the ``7zip`` archive format.
+
+    * ``zstd`` - Zstandard-based
+
+    This is the second variant for the compression method selection.
+    It provide more compression methods, that the classic ``tar``-like interface.
+    You can use any of them.
+
+    The default value depends on the :option:`--format <cmake-E_tar --format>`
+    option value and described in the corresponding section.
 
   .. option:: --cmake-tar-compression-level=<compression-level>
 

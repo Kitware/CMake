@@ -1,7 +1,7 @@
 set(OUTPUT_NAME "test.tar.lzma")
 
 set(COMPRESSION_FLAGS cvf)
-set(COMPRESSION_OPTIONS --format=pax --lzma --cmake-tar-compression-level=9)
+set(COMPRESSION_OPTIONS --format=pax --cmake-tar-compression-method=lzma)
 
 set(DECOMPRESSION_FLAGS xvf)
 

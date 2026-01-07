@@ -1576,7 +1576,8 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
 
     // Tar files
     if (args[1] == "tar" && args.size() > 3) {
-      char const* knownFormats[] = { "7zip", "gnutar", "pax", "paxr", "zip" };
+      char const* knownFormats[] = { "7zip", "gnutar", "pax",
+                                     "paxr", "raw",    "zip" };
 
       std::string const& flags = args[2];
       std::string const& outFile = args[3];
@@ -1657,6 +1658,39 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
             compressionLevel =
               static_cast<decltype(compressionLevel)>(compressionLevelLong);
             compressionLevelFlagPassed = true;
+          } else if (cmHasLiteralPrefix(arg,
+                                        "--cmake-tar-compression-method=")) {
+            std::string const& compressionMethodStr = arg.substr(31);
+            if (compressionMethodStr == "none" ||
+                compressionMethodStr == "store") {
+              compress = cmSystemTools::TarCompressNone;
+              ++nCompress;
+            } else if (compressionMethodStr == "deflate" ||
+                       compressionMethodStr == "gzip") {
+              compress = cmSystemTools::TarCompressGZip;
+              ++nCompress;
+            } else if (compressionMethodStr == "bzip2") {
+              compress = cmSystemTools::TarCompressBZip2;
+              ++nCompress;
+            } else if (compressionMethodStr == "lzma") {
+              compress = cmSystemTools::TarCompressLZMA;
+              ++nCompress;
+            } else if (compressionMethodStr == "lzma2" ||
+                       compressionMethodStr == "xz") {
+              compress = cmSystemTools::TarCompressXZ;
+              ++nCompress;
+            } else if (compressionMethodStr == "zstd") {
+              compress = cmSystemTools::TarCompressZstd;
+              ++nCompress;
+            } else if (compressionMethodStr == "ppmd") {
+              compress = cmSystemTools::TarCompressPPMd;
+              ++nCompress;
+            } else {
+              cmSystemTools::Error(
+                cmStrCat("Unknown --cmake-tar-compression-method value: '",
+                         compressionMethodStr, '\''));
+              return 1;
+            }
           } else if (cmHasLiteralPrefix(arg, "--files-from=")) {
             std::string const& files_from = arg.substr(13);
             if (!cmTarFilesFrom(files_from, files)) {
