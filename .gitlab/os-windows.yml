@@ -5,8 +5,6 @@
 .windows:
     variables:
         GIT_CLONE_PATH: "$CI_BUILDS_DIR\\cmake ci ext\\$CI_CONCURRENT_ID"
-        # Avoid conflicting with other projects running on the same machine.
-        SCCACHE_SERVER_PORT: 4227
 
 ### Build and test
 
