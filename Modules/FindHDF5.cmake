@@ -683,7 +683,16 @@ if(NOT HDF5_FOUND AND NOT HDF5_NO_FIND_PACKAGE_CONFIG_FILE)
         if(HDF5_FIND_DEBUG)
             message(STATUS "Found HDF5 at ${HDF5_DIR} via NO_MODULE. Now trying to extract locations etc.")
         endif()
-        set(HDF5_IS_PARALLEL ${HDF5_ENABLE_PARALLEL})
+        # Extract information from imported targets
+        if (DEFINED HDF5_ENABLE_PARALLEL)
+          # Versions of <2.0.0 use `HDF5_ENABLE_PARALLEL`
+          set(HDF5_IS_PARALLEL ${HDF5_ENABLE_PARALLEL})
+        elseif(DEFINED HDF5_PROVIDES_PARALLEL)
+          # Versions of >=2.0.0 use `HDF5_PROVIDES_PARALLEL`
+          set(HDF5_IS_PARALLEL ${HDF5_PROVIDES_PARALLEL})
+        else()
+          set(HDF5_IS_PARALLEL NONE)
+        endif()
         set(HDF5_INCLUDE_DIRS ${HDF5_INCLUDE_DIR})
         set(HDF5_LIBRARIES)
         if (NOT TARGET hdf5 AND NOT TARGET hdf5-static AND NOT TARGET hdf5-shared)
