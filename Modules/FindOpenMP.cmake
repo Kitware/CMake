@@ -760,7 +760,7 @@ foreach(LANG IN LISTS OpenMP_FINDLIST)
         set_property(TARGET OpenMP::OpenMP_${LANG} PROPERTY
           INTERFACE_COMPILE_OPTIONS "$<$<COMPILE_LANGUAGE:${LANG}>:SHELL:${OpenMP_${LANG}_FLAGS}>")
         if(CMAKE_${LANG}_COMPILER_ID STREQUAL "Fujitsu"
-          OR ${CMAKE_${LANG}_COMPILER_ID} STREQUAL "IntelLLVM"
+          OR CMAKE_${LANG}_COMPILER_ID STREQUAL "IntelLLVM"
           OR CMAKE_${LANG}_COMPILER_ID MATCHES "^(Cray|CrayClang)$")
           set_property(TARGET OpenMP::OpenMP_${LANG} PROPERTY
             INTERFACE_LINK_OPTIONS "SHELL:${OpenMP_${LANG}_FLAGS}")
