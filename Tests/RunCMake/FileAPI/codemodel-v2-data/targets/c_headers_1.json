@@ -129,6 +129,27 @@
       ]
     },
     {
+      "path": "^fileset/dir/h4\\.h$",
+      "isGenerated": null,
+      "fileSetName": "a",
+      "sourceGroupName": "Header Files",
+      "compileGroupLanguage": null,
+      "backtrace": [
+        {
+          "file": "^fileset/CMakeLists\\.txt$",
+          "line": 3,
+          "command": "target_sources",
+          "hasParent": true
+        },
+        {
+          "file": "^fileset/CMakeLists\\.txt$",
+          "line": null,
+          "command": null,
+          "hasParent": false
+        }
+      ]
+    },
+    {
       "path": "^fileset/dir/h2\\.h$",
       "isGenerated": null,
       "fileSetName": "b",
@@ -163,7 +184,8 @@
       "sourcePaths": [
         "^fileset/error\\.c$",
         "^fileset/h1\\.h$",
-        "^fileset/dir/h2\\.h$"
+        "^fileset/dir/h2\\.h$",
+        "^fileset/dir/h4\\.h$"
       ]
     }
   ],
