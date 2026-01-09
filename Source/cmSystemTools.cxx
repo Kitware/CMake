@@ -1727,7 +1727,13 @@ cmSystemTools::RenameResult cmSystemTools::RenameFile(
   // On UNIX we have OS-provided calls to create 'newname' atomically.
   if (replace == Replace::No) {
     if (link(oldname.c_str(), newname.c_str()) == 0) {
-      return RenameResult::Success;
+      if (unlink(oldname.c_str()) == 0) {
+        return RenameResult::Success;
+      }
+      if (err) {
+        *err = cmsys::Status::POSIX_errno().GetString();
+      }
+      return RenameResult::Failure;
     }
     if (errno == EEXIST) {
       return RenameResult::NoReplace;
