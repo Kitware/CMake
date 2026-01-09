@@ -37,6 +37,7 @@ public:
   void SetCommand(std::string const& command);
   void SetCommandArguments(std::vector<std::string> const& arg);
   void SetWorkingDirectory(std::string const& dir);
+  void SetStopTimeout(cmDuration t) { this->StopTimeout = t; }
   void SetTimeout(cmDuration t) { this->Timeout = t; }
   void ChangeTimeout(cmDuration t);
   void ResetStartTime();
@@ -48,8 +49,13 @@ public:
     Normal,
     StopTime,
   };
-  void SetTimeoutReason(TimeoutReason r) { this->TimeoutReason_ = r; }
   TimeoutReason GetTimeoutReason() const { return this->TimeoutReason_; }
+  struct ComputedTimeout
+  {
+    TimeoutReason Reason;
+    cmDuration Duration;
+  };
+  cm::optional<ComputedTimeout> GetComputedTimeout() const;
 
   enum class State
   {
@@ -104,6 +110,7 @@ public:
   Termination GetTerminationStyle() const { return this->TerminationStyle; }
 
 private:
+  cm::optional<cmDuration> StopTimeout;
   cm::optional<cmDuration> Timeout;
   TimeoutReason TimeoutReason_ = TimeoutReason::Normal;
   std::chrono::steady_clock::time_point StartTime;
