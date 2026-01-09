@@ -406,6 +406,7 @@ set_property(TEST RunCMake.CompilerTest APPEND PROPERTY LABELS "CUDA" "HIP" "ISP
 add_RunCMake_test(Configure -DMSVC_IDE=${MSVC_IDE})
 add_RunCMake_test(CpsExportImportBuild)
 add_RunCMake_test(CpsExportImportInstall)
+add_RunCMake_test(CpsMapConfig)
 add_RunCMake_test(DisallowedCommands)
 if("${CMAKE_GENERATOR}" MATCHES "Unix Makefiles|Ninja|FASTBuild")
   add_RunCMake_test(ExportCompileCommands)
