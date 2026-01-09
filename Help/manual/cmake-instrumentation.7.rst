@@ -569,8 +569,8 @@ Each CMake content file contains the following:
 
     ``type``
       The :prop_tgt:`TYPE` property of the target. Only ``EXECUTABLE``,
-      ``STATIC_LIBRARY``, ``SHARED_LIBRARY``, and ``OBJECT_LIBRARY`` targets
-      are included.
+      ``STATIC_LIBRARY``, ``SHARED_LIBRARY``, ``MODULE_LIBRARY`` and
+      ``OBJECT_LIBRARY`` targets are included.
 
     ``labels``
       The :prop_tgt:`LABELS` property of the target.
