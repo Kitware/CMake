@@ -11,6 +11,7 @@
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
+#include "cmake.h"
 
 bool cmFunctionBlocker::IsFunctionBlocked(cmListFileFunction const& lff,
                                           cmExecutionStatus& status)
@@ -49,7 +50,15 @@ bool cmFunctionBlocker::IsFunctionBlocked(cmListFileFunction const& lff,
         mf.IssueMessage(MessageType::AUTHOR_WARNING, e.str());
       }
 
-      return this->Replay(std::move(this->Functions), status);
+      bool replayResult = this->Replay(std::move(this->Functions), status);
+      cmListFileBacktrace endCommandBT =
+        mf.GetBacktrace().Push(closingContext);
+      // if trace is enabled, print a (trivially) evaluated "end" statement
+      if (mf.GetCMakeInstance()->GetTrace()) {
+        mf.PrintCommandTrace(lff, endCommandBT,
+                             cmMakefile::CommandMissingFromStack::Yes);
+      }
+      return replayResult;
     }
   }
 

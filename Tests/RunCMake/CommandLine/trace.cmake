@@ -1,0 +1,11 @@
+function(testFlowControl)
+  foreach(i RANGE 1)
+    if("${i}" STREQUAL "1")
+      set(foo)
+    else()
+      set(bar)
+    endif()
+  endforeach()
+endfunction()
+
+testFlowControl()
