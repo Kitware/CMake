@@ -1,0 +1,307 @@
+CMAKE_LANG=CUDA
+CMAKE_LINKER=C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/link.exe
+CMAKE_CUDA_COMPILER_ABI=
+CMAKE_CUDA_COMPILER_AR=
+CMAKE_CUDA_COMPILER_ARCHITECTURE_ID=x64
+CMAKE_CUDA_COMPILER_EXTERNAL_TOOLCHAIN=
+CMAKE_CUDA_COMPILER_ID=NVIDIA
+CMAKE_CUDA_COMPILER_LAUNCHER=
+CMAKE_CUDA_COMPILER_LOADED=1
+CMAKE_CUDA_COMPILER_RANLIB=
+CMAKE_CUDA_COMPILER_TARGET=
+CMAKE_CUDA_COMPILER_VERSION=13.1.115
+CMAKE_CUDA_COMPILER_VERSION_INTERNAL=
+CMAKE_CUDA_SIMULATE_ID=MSVC
+CMAKE_CUDA_USE_NVCC_PARSE_IMPLICIT_INFO=
+Change Dir: 'C:/Users/rober/source/cmake/build/CMakeFiles/CMakeTmp'
+
+Run Build Command(s): C:/PROGRA~1/MICROS~4/2022/COMMUN~1/Common7/IDE/COMMON~1/MICROS~1/CMake/Ninja/ninja.exe -v cmTC_8c471
+[1/2] C:\PROGRA~1\NVIDIA~2\CUDA\v13.1\bin\nvcc.exe -forward-unknown-to-host-compiler   -v -Xcompiler=/VERBOSE -force-cl-env-setup  -Xcompiler="-MDd  -Zi -Ob0 -Od /RTC1"   -Xcompiler=-v -MD -MT CMakeFiles\cmTC_8c471.dir\CMakeCUDACompilerABI.cu.obj -MF CMakeFiles\cmTC_8c471.dir\CMakeCUDACompilerABI.cu.obj.d -x cu -c "C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.31\Modules\CMakeCUDACompilerABI.cu" -o CMakeFiles\cmTC_8c471.dir\CMakeCUDACompilerABI.cu.obj -Xcompiler=-FdCMakeFiles\cmTC_8c471.dir\,-FS
+
+
+
+C:\Users\rober\source\cmake\build\CMakeFiles\CMakeTmp>call "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.44.35207/bin/HostX64/x64/../../../../../../../VC/Auxiliary/Build/vcvars64.bat"
+
+**********************************************************************
+
+** Visual Studio 2022 Developer Command Prompt v17.14.23
+
+** Copyright (c) 2025 Microsoft Corporation
+
+**********************************************************************
+
+[vcvarsall.bat] Environment initialized for: 'x64'
+
+#$ C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.44.35207/bin/HostX64/x64/../../../../../../../VC/Auxiliary/Build/vcvars64.bat
+
+#$ 3DVPATH=C:\AMD\Chipset_Software\Binaries\3D_V-Cache_Performance_Optimizer_Driver\
+
+#$ ALLUSERSPROFILE=C:\ProgramData
+
+#$ APPDATA=C:\Users\rober\AppData\Roaming
+
+#$ CommandPromptType=Native
+
+#$ CommonProgramFiles=C:\Program Files\Common Files
+
+#$ CommonProgramFiles(x86)=C:\Program Files (x86)\Common Files
+
+#$ CommonProgramW6432=C:\Program Files\Common Files
+
+#$ COMPUTERNAME=FORGE
+
+#$ ComSpec=C:\Windows\system32\cmd.exe
+
+#$ CUDACXX=C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v13.1/bin/nvcc.exe
+
+#$ CUDA_PATH=C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.1
+
+#$ CUDA_PATH_V13_1=C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.1
+
+#$ D3DGEARPATH=c:\program files (x86)\iracing\d3dgear
+
+#$ DevEnvDir=C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\
+
+#$ DriverData=C:\Windows\System32\Drivers\DriverData
+
+#$ ExtensionSdkDir=C:\Program Files (x86)\Microsoft SDKs\Windows Kits\10\ExtensionSDKs
+
+#$ EXTERNAL_INCLUDE=C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\includeC:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\ATLMFC\includeC:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\VS\includeC:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrtC:\Program Files (x86)\Windows Kits\10\\include\10.0.26100.0\\umC:\Program Files (x86)\Windows Kits\10\\include\10.0.26100.0\\sharedC:\Program Files (x86)\Windows Kits\10\\include\10.0.26100.0\\winrtC:\Program Files (x86)\Windows Kits\10\\include\10.0.26100.0\\cppwinrtC:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\includeC:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\ATLMFC\includeC:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\VS\includeC:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrtC:\Program Files (x86)\Windows Kits\10\\include\10.0.26100.0\\umC:\Program Files (x86)\Windows Kits\10\\include\10.0.26100.0\\sharedC:\Program Files (x86)\Windows Kits\10\\include\10.0.26100.0\\winrtC:\Program Files (x86)\Windows Kits\10\\include\10.0.26100.0\\cppwinrt
+
+#$ Framework40Version=v4.0
+
+#$ FrameworkDir=C:\Windows\Microsoft.NET\Framework64\
+
+#$ FrameworkDir64=C:\Windows\Microsoft.NET\Framework64\
+
+#$ FrameworkVersion=v4.0.30319
+
+#$ FrameworkVersion64=v4.0.30319
+
+#$ HOMEDRIVE=C:
+
+#$ HOMEPATH=\Users\rober
+
+#$ INCLUDE=C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\includeC:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\ATLMFC\includeC:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\VS\includeC:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrtC:\Program Files (x86)\Windows Kits\10\\include\10.0.26100.0\\umC:\Program Files (x86)\Windows Kits\10\\include\10.0.26100.0\\sharedC:\Program Files (x86)\Windows Kits\10\\include\10.0.26100.0\\winrtC:\Program Files (x86)\Windows Kits\10\\include\10.0.26100.0\\cppwinrtC:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\includeC:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\ATLMFC\includeC:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\VS\includeC:\Program Files (x86)\Windows Kits\10\include\10.0.26100.0\ucrtC:\Program Files (x86)\Windows Kits\10\\include\10.0.26100.0\\umC:\Program Files (x86)\Windows Kits\10\\include\10.0.26100.0\\sharedC:\Program Files (x86)\Windows Kits\10\\include\10.0.26100.0\\winrtC:\Program Files (x86)\Windows Kits\10\\include\10.0.26100.0\\cppwinrt
+
+#$ INCLUDES="-IC:\Test"
+
+#$ LIB=C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\ATLMFC\lib\x64C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\lib\x64C:\Program Files (x86)\Windows Kits\10\lib\10.0.26100.0\ucrt\x64C:\Program Files (x86)\Windows Kits\10\\lib\10.0.26100.0\\um\x64C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\ATLMFC\lib\x64C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\lib\x64C:\Program Files (x86)\Windows Kits\10\lib\10.0.26100.0\ucrt\x64C:\Program Files (x86)\Windows Kits\10\\lib\10.0.26100.0\\um\x64
+
+#$ LIBPATH=C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\ATLMFC\lib\x64C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\lib\x64C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\lib\x86\store\referencesC:\Program Files (x86)\Windows Kits\10\UnionMetadata\10.0.26100.0C:\Program Files (x86)\Windows Kits\10\References\10.0.26100.0C:\Windows\Microsoft.NET\Framework64\v4.0.30319C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\ATLMFC\lib\x64C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\lib\x64C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\lib\x86\store\referencesC:\Program Files (x86)\Windows Kits\10\UnionMetadata\10.0.26100.0C:\Program Files (x86)\Windows Kits\10\References\10.0.26100.0C:\Windows\Microsoft.NET\Framework64\v4.0.30319
+
+#$ LIBRARIES="/LIBPATH:C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\ATLMFC\lib\x64"
+
+#$ LOCALAPPDATA=C:\Users\rober\AppData\Local
+
+#$ LOGONSERVER=\\FORGE
+
+#$ MOSQUITTO_DIR=C:\Program Files\mosquitto
+
+#$ NUMBER_OF_PROCESSORS=16
+
+#$ OneDrive=C:\Users\rober\OneDrive
+
+#$ OneDriveConsumer=C:\Users\rober\OneDrive
+
+#$ OS=Windows_NT
+
+#$ Path=C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\VC\VCPackagesC:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\TestWindowC:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\TeamFoundation\Team ExplorerC:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\bin\RoslynC:\Program Files\Microsoft Visual Studio\2022\Community\Team Tools\DiagnosticsHub\CollectorC:\Program Files (x86)\Windows Kits\10\bin\10.0.26100.0\\x64C:\Program Files (x86)\Windows Kits\10\bin\\x64C:\Program Files\Microsoft Visual Studio\2022\Community\\MSBuild\Current\Bin\amd64C:\Windows\Microsoft.NET\Framework64\v4.0.30319C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE;C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\Tools;C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\VC\VCPackagesC:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\TestWindowC:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\TeamFoundation\Team ExplorerC:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\bin\RoslynC:\Program Files\Microsoft Visual Studio\2022\Community\Team Tools\DiagnosticsHub\CollectorC:\Program Files (x86)\Windows Kits\10\bin\10.0.26100.0\\x64C:\Program Files (x86)\Windows Kits\10\bin\\x64C:\Program Files\Microsoft Visual Studio\2022\Community\\MSBuild\Current\Bin\amd64C:\Windows\Microsoft.NET\Framework64\v4.0.30319C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE;C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\Tools;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.1\bin\x64C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.1\binC:\Windows\system32C:\WindowsC:\Windows\System32\WbemC:\Windows\System32\WindowsPowerShell\v1.0;C:\Windows\System32\OpenSSH;C:\Program Files\NVIDIA Corporation\NVIDIA App\NvDLISRC:\Program Files (x86)\NVIDIA Corporation\PhysX\Commonc:\program files (x86)\iracing\d3dgearC:\Program Files (x86)\Windows Kits\10\Windows Performance Toolkit;C:\Program Files\Git\cmdC:\Users\rober\AppData\Local\Microsoft\WindowsAppsC:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\binC:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\NinjaC:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\VC\Linux\bin\ConnectionManagerExeC:\Program Files\Microsoft Visual Studio\2022\Community\VC\vcpkgC:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\binC:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\NinjaC:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\VC\Linux\bin\ConnectionManagerExeC:\Program Files\Microsoft Visual Studio\2022\Community\VC\vcpkg
+
+#$ PATHEXT=.COM.EXE.BAT.CMD.VBS.VBE.JS.JSE.WSF.WSH.MSC
+
+#$ Platform=x64
+
+#$ PROCESSOR_ARCHITECTURE=AMD64
+
+#$ PROCESSOR_IDENTIFIER=AMD64 Family 26 Model 68 Stepping 0, AuthenticAMD
+
+#$ PROCESSOR_LEVEL=26
+
+#$ PROCESSOR_REVISION=4400
+
+#$ ProgramData=C:\ProgramData
+
+#$ ProgramFiles=C:\Program Files
+
+#$ ProgramFiles(x86)=C:\Program Files (x86)
+
+#$ ProgramW6432=C:\Program Files
+
+#$ PROMPT=$P$G
+
+#$ PSModulePath=C:\Program Files\WindowsPowerShell\ModulesC:\Windows\system32\WindowsPowerShell\v1.0\Modules
+
+#$ PUBLIC=C:\Users\Public
+
+#$ RC=C:/Program Files (x86)/Windows Kits/10/bin/10.0.26100.0/x64/rc.exe
+
+#$ SESSIONNAME=Console
+
+#$ SystemDrive=C:
+
+#$ SystemRoot=C:\Windows
+
+#$ UCRTVersion=10.0.26100.0
+
+#$ UniversalCRTSdkDir=C:\Program Files (x86)\Windows Kits\10\
+
+#$ USERDOMAIN=FORGE
+
+#$ USERDOMAIN_ROAMINGPROFILE=FORGE
+
+#$ USERNAME=rober
+
+#$ USERPROFILE=C:\Users\rober
+
+#$ VCIDEInstallDir=C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\VC\
+
+#$ VCINSTALLDIR=C:\Program Files\Microsoft Visual Studio\2022\Community\VC\
+
+#$ VCPKG_ROOT=C:\Program Files\Microsoft Visual Studio\2022\Community\VC\vcpkg
+
+#$ VCToolsInstallDir=C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\
+
+#$ VCToolsRedistDir=C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Redist\MSVC\14.44.35112\
+
+#$ VCToolsVersion=14.44.35207
+
+#$ VisualStudioVersion=17.0
+
+#$ VS170COMNTOOLS=C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\Tools\
+
+#$ VSCMD_ARG_app_plat=Desktop
+
+#$ VSCMD_ARG_HOST_ARCH=x64
+
+#$ VSCMD_ARG_TGT_ARCH=x64
+
+#$ VSCMD_VER=17.14.23
+
+#$ vsconsoleoutput=1
+
+#$ VSINSTALLDIR=C:\Program Files\Microsoft Visual Studio\2022\Community\
+
+#$ windir=C:\Windows
+
+#$ WindowsLibPath=C:\Program Files (x86)\Windows Kits\10\UnionMetadata\10.0.26100.0C:\Program Files (x86)\Windows Kits\10\References\10.0.26100.0
+
+#$ WindowsSdkBinPath=C:\Program Files (x86)\Windows Kits\10\bin\
+
+#$ WindowsSdkDir=C:\Program Files (x86)\Windows Kits\10\
+
+#$ WindowsSDKLibVersion=10.0.26100.0\
+
+#$ WindowsSdkVerBinPath=C:\Program Files (x86)\Windows Kits\10\bin\10.0.26100.0\
+
+#$ WindowsSDKVersion=10.0.26100.0\
+
+#$ WSLENV=WT_SESSION:WT_PROFILE_ID:
+
+#$ WT_PROFILE_ID={ef2f55a4-f987-53c7-87af-fe6fb80f9221}
+
+#$ WT_SESSION=88063638-ae53-46d3-beaf-2adda4ade4d3
+
+#$ __DOTNET_ADD_64BIT=1
+
+#$ __DOTNET_PREFERRED_BITNESS=64
+
+#$ __VSCMD_PREINIT_PATH=C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.1\bin\x64C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.1\binC:\Windows\system32C:\WindowsC:\Windows\System32\WbemC:\Windows\System32\WindowsPowerShell\v1.0;C:\Windows\System32\OpenSSH;C:\Program Files\NVIDIA Corporation\NVIDIA App\NvDLISRC:\Program Files (x86)\NVIDIA Corporation\PhysX\Commonc:\program files (x86)\iracing\d3dgearC:\Program Files (x86)\Windows Kits\10\Windows Performance Toolkit;C:\Program Files\Git\cmdC:\Users\rober\AppData\Local\Microsoft\WindowsApps
+
+#$ __VSCMD_PREINIT_VCToolsVersion=14.44.35207
+
+#$ __VSCMD_PREINIT_VS170COMNTOOLS=C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\Tools\
+
+#$ PATH=C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\VC\VCPackagesC:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\TestWindowC:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\TeamFoundation\Team ExplorerC:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\bin\RoslynC:\Program Files\Microsoft Visual Studio\2022\Community\Team Tools\DiagnosticsHub\CollectorC:\Program Files (x86)\Windows Kits\10\bin\10.0.26100.0\\x64C:\Program Files (x86)\Windows Kits\10\bin\\x64C:\Program Files\Microsoft Visual Studio\2022\Community\\MSBuild\Current\Bin\amd64C:\Windows\Microsoft.NET\Framework64\v4.0.30319C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE;C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\Tools;C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\VC\VCPackagesC:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\TestWindowC:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\TeamFoundation\Team ExplorerC:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\bin\RoslynC:\Program Files\Microsoft Visual Studio\2022\Community\Team Tools\DiagnosticsHub\CollectorC:\Program Files (x86)\Windows Kits\10\bin\10.0.26100.0\\x64C:\Program Files (x86)\Windows Kits\10\bin\\x64C:\Program Files\Microsoft Visual Studio\2022\Community\\MSBuild\Current\Bin\amd64C:\Windows\Microsoft.NET\Framework64\v4.0.30319C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE;C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\Tools;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.1\bin\x64C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.1\binC:\Windows\system32C:\WindowsC:\Windows\System32\WbemC:\Windows\System32\WindowsPowerShell\v1.0;C:\Windows\System32\OpenSSH;C:\Program Files\NVIDIA Corporation\NVIDIA App\NvDLISRC:\Program Files (x86)\NVIDIA Corporation\PhysX\Commonc:\program files (x86)\iracing\d3dgearC:\Program Files (x86)\Windows Kits\10\Windows Performance Toolkit;C:\Program Files\Git\cmdC:\Users\rober\AppData\Local\Microsoft\WindowsAppsC:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\binC:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\NinjaC:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\VC\Linux\bin\ConnectionManagerExeC:\Program Files\Microsoft Visual Studio\2022\Community\VC\vcpkgC:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\binC:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\NinjaC:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\VC\Linux\bin\ConnectionManagerExeC:\Program Files\Microsoft Visual Studio\2022\Community\VC\vcpkg
+
+#$ _NVVM_BRANCH_=nvvm
+
+#$ _SPACE_=
+
+#$ _CUDART_=cudart
+
+#$ _HERE_=C:\PROGRA~1\NVIDIA~2\CUDA\v13.1\bin
+
+#$ _THERE_=C:\PROGRA~1\NVIDIA~2\CUDA\v13.1\bin
+
+#$ _TARGET_SIZE_=
+
+#$ _TARGET_DIR_=
+
+#$ _TARGET_SIZE_=64
+
+#$ _WIN_PLATFORM_=x64
+
+#$ TOP=C:\PROGRA~1\NVIDIA~2\CUDA\v13.1\bin/..
+
+#$ CICC_PATH=C:\PROGRA~1\NVIDIA~2\CUDA\v13.1\bin/../nvvm/bin
+
+#$ NVVMIR_LIBRARY_DIR=C:\PROGRA~1\NVIDIA~2\CUDA\v13.1\bin/../nvvm/libdevice
+
+#$ PATH=C:\PROGRA~1\NVIDIA~2\CUDA\v13.1\bin/../nvvm/binC:\PROGRA~1\NVIDIA~2\CUDA\v13.1\binC:\PROGRA~1\NVIDIA~2\CUDA\v13.1\bin/../libC:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\VC\VCPackagesC:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\TestWindowC:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\TeamFoundation\Team ExplorerC:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\bin\RoslynC:\Program Files\Microsoft Visual Studio\2022\Community\Team Tools\DiagnosticsHub\CollectorC:\Program Files (x86)\Windows Kits\10\bin\10.0.26100.0\\x64C:\Program Files (x86)\Windows Kits\10\bin\\x64C:\Program Files\Microsoft Visual Studio\2022\Community\\MSBuild\Current\Bin\amd64C:\Windows\Microsoft.NET\Framework64\v4.0.30319C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE;C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\Tools;C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\VC\VCPackagesC:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\TestWindowC:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\TeamFoundation\Team ExplorerC:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\bin\RoslynC:\Program Files\Microsoft Visual Studio\2022\Community\Team Tools\DiagnosticsHub\CollectorC:\Program Files (x86)\Windows Kits\10\bin\10.0.26100.0\\x64C:\Program Files (x86)\Windows Kits\10\bin\\x64C:\Program Files\Microsoft Visual Studio\2022\Community\\MSBuild\Current\Bin\amd64C:\Windows\Microsoft.NET\Framework64\v4.0.30319C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE;C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\Tools;C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.1\bin\x64C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v13.1\binC:\Windows\system32C:\WindowsC:\Windows\System32\WbemC:\Windows\System32\WindowsPowerShell\v1.0;C:\Windows\System32\OpenSSH;C:\Program Files\NVIDIA Corporation\NVIDIA App\NvDLISRC:\Program Files (x86)\NVIDIA Corporation\PhysX\Commonc:\program files (x86)\iracing\d3dgearC:\Program Files (x86)\Windows Kits\10\Windows Performance Toolkit;C:\Program Files\Git\cmdC:\Users\rober\AppData\Local\Microsoft\WindowsAppsC:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\binC:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\NinjaC:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\VC\Linux\bin\ConnectionManagerExeC:\Program Files\Microsoft Visual Studio\2022\Community\VC\vcpkgC:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\binC:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\NinjaC:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\VC\Linux\bin\ConnectionManagerExeC:\Program Files\Microsoft Visual Studio\2022\Community\VC\vcpkg
+
+#$ INCLUDES="-IC:\Test" "-IC:\PROGRA~1\NVIDIA~2\CUDA\v13.1\bin/../include" "-IC:\PROGRA~1\NVIDIA~2\CUDA\v13.1\bin/../include/cccl"
+
+#$ SYSTEM_INCLUDES=
+
+#$ LIBRARIES="/LIBPATH:C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\ATLMFC\lib\x64"  "/LIBPATH:C:\PROGRA~1\NVIDIA~2\CUDA\v13.1\bin/../lib/x64"
+
+#$ CUDAFE_FLAGS=
+
+#$ PTXAS_FLAGS=
+
+CMakeCUDACompilerABI.cu
+
+#$ resource file C:\Users\rober\AppData\Local\Temp/tmpxft_00001f34_00000000-12.res: [-D__CUDA_ARCH__=750 -D__CUDA_ARCH_LIST__=750 -nologo -E -TP  -DCUDA_DOUBLE_MATH_FUNCTIONS -EHsc -D__CUDACC__ -D__NVCC__  /VERBOSE -MDd  -Zi -Ob0 -Od /RTC1 -v -FdCMakeFiles\cmTC_8c471.dir\ -FS "-IC:\PROGRA~1\NVIDIA~2\CUDA\v13.1\bin/../include" "-IC:\PROGRA~1\NVIDIA~2\CUDA\v13.1\bin/../include/cccl"      -D__CUDACC_VER_MAJOR__=13 -D__CUDACC_VER_MINOR__=1 -D__CUDACC_VER_BUILD__=115 -D__CUDA_API_VER_MAJOR__=13 -D__CUDA_API_VER_MINOR__=1 -D__NVCC_DIAG_PRAGMA_SUPPORT__=1 -D__CUDACC_DEVICE_ATOMIC_BUILTINS__=1 -FI "cuda_runtime.h" "C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.31\Modules\CMakeCUDACompilerABI.cu" ]
+
+#$ cl.exe @"C:\Users\rober\AppData\Local\Temp/tmpxft_00001f34_00000000-12.res" > "C:/Users/rober/AppData/Local/Temp/tmpxft_00001f34_00000000-11_CMakeCUDACompilerABI.cpp1.ii"
+
+cl : Command line warning D9035 : option 'V' has been deprecated and will be removed in a future release
+
+cl : Command line warning D9002 : ignoring unknown option '-v'
+
+CMakeCUDACompilerABI.cu
+
+#$ erase C:\Users\rober\AppData\Local\Temp/tmpxft_00001f34_00000000-12.res
+
+#$ resource file C:\Users\rober\AppData\Local\Temp/tmpxft_00001f34_00000000-13.res: [-D__CUDA_ARCH_LIST__=750 -nologo -E -TP -EHsc -D__CUDACC__ -D__NVCC__  /VERBOSE -MDd  -Zi -Ob0 -Od /RTC1 -v -FdCMakeFiles\cmTC_8c471.dir\ -FS "-IC:\PROGRA~1\NVIDIA~2\CUDA\v13.1\bin/../include" "-IC:\PROGRA~1\NVIDIA~2\CUDA\v13.1\bin/../include/cccl"      -D__CUDACC_VER_MAJOR__=13 -D__CUDACC_VER_MINOR__=1 -D__CUDACC_VER_BUILD__=115 -D__CUDA_API_VER_MAJOR__=13 -D__CUDA_API_VER_MINOR__=1 -D__NVCC_DIAG_PRAGMA_SUPPORT__=1 -D__CUDACC_DEVICE_ATOMIC_BUILTINS__=1 -FI "cuda_runtime.h" "C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.31\Modules\CMakeCUDACompilerABI.cu" ]
+
+#$ cl.exe @"C:\Users\rober\AppData\Local\Temp/tmpxft_00001f34_00000000-13.res" > "C:/Users/rober/AppData/Local/Temp/tmpxft_00001f34_00000000-9_CMakeCUDACompilerABI.cpp4.ii"
+
+cl : Command line warning D9035 : option 'V' has been deprecated and will be removed in a future release
+
+cl : Command line warning D9002 : ignoring unknown option '-v'
+
+CMakeCUDACompilerABI.cu
+
+#$ erase C:\Users\rober\AppData\Local\Temp/tmpxft_00001f34_00000000-13.res
+
+#$ -- Filter Dependencies -- > CMakeFiles\cmTC_8c471.dir\CMakeCUDACompilerABI.cu.obj.d
+
+#$ cudafe++ --ms_c++14 --static-host-stub --device-hidden-visibility --microsoft_version=1944 --msvc_target_version=1944 --compiler_bindir "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.44.35207/bin/HostX64/x64/../../../../../../.." --sdk_dir "C:/Program Files (x86)/Windows Kits/10/" --display_error_number --orig_src_file_name "C:/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-3.31/Modules/CMakeCUDACompilerABI.cu" --orig_src_path_name "C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.31\Modules\CMakeCUDACompilerABI.cu" --allow_managed --m64 --parse_templates --gen_c_file_name "C:/Users/rober/AppData/Local/Temp/tmpxft_00001f34_00000000-10_CMakeCUDACompilerABI.cudafe1.cpp" --stub_file_name "tmpxft_00001f34_00000000-10_CMakeCUDACompilerABI.cudafe1.stub.c" --gen_module_id_file --module_id_file_name "C:/Users/rober/AppData/Local/Temp/tmpxft_00001f34_00000000-8_CMakeCUDACompilerABI.module_id" "C:/Users/rober/AppData/Local/Temp/tmpxft_00001f34_00000000-9_CMakeCUDACompilerABI.cpp4.ii"
+
+#$ ""%CICC_PATH%\cicc" --ms_c++14 --static-host-stub --device-hidden-visibility --microsoft_version=1944 --msvc_target_version=1944 --compiler_bindir "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.44.35207/bin/HostX64/x64/../../../../../../.." --sdk_dir "C:/Program Files (x86)/Windows Kits/10/" --display_error_number --orig_src_file_name "C:/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/share/cmake-3.31/Modules/CMakeCUDACompilerABI.cu" --orig_src_path_name "C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.31\Modules\CMakeCUDACompilerABI.cu" --allow_managed  -arch compute_75 -m64 --no-version-ident -ftz=0 -prec_div=1 -prec_sqrt=1 -fmad=1 --include_file_name "tmpxft_00001f34_00000000-7_CMakeCUDACompilerABI.fatbin.c" -tused --module_id_file_name "C:/Users/rober/AppData/Local/Temp/tmpxft_00001f34_00000000-8_CMakeCUDACompilerABI.module_id" --gen_c_file_name "C:/Users/rober/AppData/Local/Temp/tmpxft_00001f34_00000000-10_CMakeCUDACompilerABI.cudafe1.c" --stub_file_name "C:/Users/rober/AppData/Local/Temp/tmpxft_00001f34_00000000-10_CMakeCUDACompilerABI.cudafe1.stub.c" --gen_device_file_name "C:/Users/rober/AppData/Local/Temp/tmpxft_00001f34_00000000-10_CMakeCUDACompilerABI.cudafe1.gpu"  "C:/Users/rober/AppData/Local/Temp/tmpxft_00001f34_00000000-11_CMakeCUDACompilerABI.cpp1.ii" -o "C:/Users/rober/AppData/Local/Temp/tmpxft_00001f34_00000000-10_CMakeCUDACompilerABI.ptx""
+
+#$ ptxas -arch=sm_75 -m64 "C:/Users/rober/AppData/Local/Temp/tmpxft_00001f34_00000000-10_CMakeCUDACompilerABI.ptx"  -o "C:/Users/rober/AppData/Local/Temp/tmpxft_00001f34_00000000-14_CMakeCUDACompilerABI.sm_75.cubin"
+
+#$ fatbinary -64 --cicc-cmdline="-ftz=0 -prec_div=1 -prec_sqrt=1 -fmad=1 " "--image3=kind=elf,sm=75,file=C:/Users/rober/AppData/Local/Temp/tmpxft_00001f34_00000000-14_CMakeCUDACompilerABI.sm_75.cubin" "--image3=kind=ptx,sm=75,file=C:/Users/rober/AppData/Local/Temp/tmpxft_00001f34_00000000-10_CMakeCUDACompilerABI.ptx" --embedded-fatbin="C:/Users/rober/AppData/Local/Temp/tmpxft_00001f34_00000000-7_CMakeCUDACompilerABI.fatbin.c"
+
+#$ erase C:/Users/rober/AppData/Local/Temp/tmpxft_00001f34_00000000-7_CMakeCUDACompilerABI.fatbin
+
+#$ resource file C:\Users\rober\AppData\Local\Temp/tmpxft_00001f34_00000000-15.res: [-D__CUDA_ARCH__=750 -D__CUDA_ARCH_LIST__=750 -nologo -c -TP  -DCUDA_DOUBLE_MATH_FUNCTIONS -EHsc /VERBOSE -MDd  -Zi -Ob0 -Od /RTC1 -v -FdCMakeFiles\cmTC_8c471.dir\ -FS "-IC:\PROGRA~1\NVIDIA~2\CUDA\v13.1\bin/../include" "-IC:\PROGRA~1\NVIDIA~2\CUDA\v13.1\bin/../include/cccl"     "C:\Users\rober\AppData\Local\Temp\tmpxft_00001f34_00000000-10_CMakeCUDACompilerABI.cudafe1.cpp" ]
+
+#$ cl.exe @"C:\Users\rober\AppData\Local\Temp/tmpxft_00001f34_00000000-15.res" -Fo"CMakeFiles/cmTC_8c471.dir/CMakeCUDACompilerABI.cu.obj"
+
+cl : Command line warning D9035 : option 'V' has been deprecated and will be removed in a future release
+
+cl : Command line warning D9002 : ignoring unknown option '-v'
+
+tmpxft_00001f34_00000000-10_CMakeCUDACompilerABI.cudafe1.cpp
+
+C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\share\cmake-3.31\Modules\CMakeCompilerCUDAArch.h(10): warning C4305: 'return': truncation from 'int' to 'bool'
+
+
+#$ erase C:\Users\rober\AppData\Local\Temp/tmpxft_00001f34_00000000-15.res
+
+
+[2/2] C:\Windows\system32\cmd.exe /C "cd . && "C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E vs_link_exe --intdir=CMakeFiles\cmTC_8c471.dir --rc=C:\PROGRA~2\WI3CF2~1\10\bin\100261~1.0\x64\rc.exe --mt=C:\PROGRA~2\WI3CF2~1\10\bin\100261~1.0\x64\mt.exe --manifests  -- C:\PROGRA~1\MICROS~4\2022\COMMUN~1\VC\Tools\MSVC\1444~1.352\bin\Hostx64\x64\link.exe /nologo CMakeFiles\cmTC_8c471.dir\CMakeCUDACompilerABI.cu.obj  /out:CompilerIdCUDA.exe /implib:cmTC_8c471.lib /pdb:cmTC_8c471.pdb /version:0.0 -v /debug /INCREMENTAL  cudadevrt.lib  cudart.lib -LIBPATH:"C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.44.35207/atlmfc/lib/x64" -LIBPATH:"C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v13.1/lib/x64" && cd ."
