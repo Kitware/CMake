@@ -1224,6 +1224,7 @@ def gen_check_abstract_targets(c, g, inSource):
         read_codemodel_json_data("targets/imported_object_lib.json"),
         read_codemodel_json_data("targets/imported_shared_lib.json"),
         read_codemodel_json_data("targets/imported_static_lib.json"),
+        read_codemodel_json_data("targets/unused_imported_shared_lib.json"),
 
         read_codemodel_json_data("targets/iface_none.json"),
         read_codemodel_json_data("targets/iface_symbolic.json"),

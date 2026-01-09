@@ -22,6 +22,7 @@
         "^imported_interface_symbolic_lib::@ba7eb709d0b48779c6c8$",
         "^imported_object_lib::@ba7eb709d0b48779c6c8$",
         "^imported_shared_lib::@ba7eb709d0b48779c6c8$",
-        "^imported_static_lib::@ba7eb709d0b48779c6c8$"
+        "^imported_static_lib::@ba7eb709d0b48779c6c8$",
+        "^unused_imported_shared_lib::@ba7eb709d0b48779c6c8$"
     ]
 }

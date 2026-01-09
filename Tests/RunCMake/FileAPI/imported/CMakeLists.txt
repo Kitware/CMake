@@ -42,3 +42,10 @@ install(IMPORTED_RUNTIME_ARTIFACTS imported_shared_lib
 install(IMPORTED_RUNTIME_ARTIFACTS imported_shared_lib
   DESTINATION lib2 OPTIONAL
 )
+
+# This is deliberately missing the IMPORTED_IMPLIB property.
+# The file API needs to tolerate this for unused imported targets.
+add_library(unused_imported_shared_lib SHARED IMPORTED)
+set_target_properties(unused_imported_shared_lib PROPERTIES
+    IMPORTED_LOCATION "unused_imported_shared${CMAKE_SHARED_LIBRARY_SUFFIX}"
+)
