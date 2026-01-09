@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 3.10)
+project(TimeoutAfterMatch NONE)
+enable_testing()
+add_test(NAME SleepFor1Second COMMAND "${CMAKE_COMMAND}" -P ${CMAKE_SOURCE_DIR}/../SleepFor1Second.cmake)
+set_property(TEST SleepFor1Second PROPERTY TIMEOUT_AFTER_MATCH "${arg1}" "${arg2}")

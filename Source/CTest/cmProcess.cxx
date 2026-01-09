@@ -158,9 +158,10 @@ bool cmProcess::StartProcess(uv_loop_t& loop, std::vector<size_t>* affinity)
 
 void cmProcess::StartTimer()
 {
-  if (this->Timeout) {
-    auto msec =
-      std::chrono::duration_cast<std::chrono::milliseconds>(*this->Timeout);
+  if (auto ctimeout = this->GetComputedTimeout()) {
+    this->TimeoutReason_ = ctimeout->Reason;
+    auto msec = std::chrono::duration_cast<std::chrono::milliseconds>(
+      ctimeout->Duration);
     this->Timer.start(&cmProcess::OnTimeoutCB,
                       static_cast<uint64_t>(msec.count()), 0,
                       cm::uv_update_time::no);
@@ -372,6 +373,24 @@ void cmProcess::Finish()
 cmProcess::State cmProcess::GetProcessStatus()
 {
   return this->ProcessState;
+}
+
+cm::optional<cmProcess::ComputedTimeout> cmProcess::GetComputedTimeout() const
+{
+  if (this->StopTimeout && this->Timeout) {
+    if (*this->StopTimeout < *this->Timeout) {
+      return ComputedTimeout{ TimeoutReason::StopTime, *this->StopTimeout };
+    }
+    return ComputedTimeout{ TimeoutReason::Normal, *this->Timeout };
+  }
+  if (this->StopTimeout) {
+    return ComputedTimeout{ TimeoutReason::StopTime, *this->StopTimeout };
+  }
+  if (this->Timeout) {
+    return ComputedTimeout{ TimeoutReason::Normal, *this->Timeout };
+  }
+
+  return cm::nullopt;
 }
 
 void cmProcess::ChangeTimeout(cmDuration t)

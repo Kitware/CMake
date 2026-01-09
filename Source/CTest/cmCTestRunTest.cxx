@@ -813,9 +813,7 @@ bool cmCTestRunTest::ForkProcess()
   if (stop_time != std::chrono::system_clock::time_point()) {
     cmDuration timeUntilStop =
       (stop_time - std::chrono::system_clock::now()) % std::chrono::hours(24);
-    if (timeUntilStop < timeRemaining) {
-      timeRemaining = timeUntilStop;
-    }
+    this->TestProcess->SetStopTimeout(timeUntilStop);
   }
 
   // Enforce remaining time even over explicit TIMEOUT=0.
@@ -824,7 +822,16 @@ bool cmCTestRunTest::ForkProcess()
   }
   if (!timeout || timeRemaining < *timeout) {
     timeout = timeRemaining;
-    this->TestProcess->SetTimeoutReason(cmProcess::TimeoutReason::StopTime);
+  }
+
+  // Inform the test process of its normal timeout
+  if (timeout) {
+    this->TestProcess->SetTimeout(*timeout);
+  }
+
+  // Ask the test process which timeout is in effect.
+  if (auto ctimeout = this->TestProcess->GetComputedTimeout()) {
+    timeout = ctimeout->Duration;
   }
 
   if (timeout) {
