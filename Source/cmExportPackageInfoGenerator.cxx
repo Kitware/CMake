@@ -30,7 +30,7 @@
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 
-static std::string const kCPS_VERSION_STR = "0.13.0";
+static std::string const kCPS_VERSION_STR = "0.14.0";
 
 cmExportPackageInfoGenerator::cmExportPackageInfoGenerator(
   cmPackageInfoArguments arguments)
@@ -397,8 +397,10 @@ void cmExportPackageInfoGenerator::GenerateInterfaceLinkProperties(
 
   // Extract any $<LINK_ONLY:...> from the link libraries, and assert that no
   // other generator expressions are present.
-  std::map<std::string, std::vector<std::string>> allowList = { { "LINK_ONLY",
-                                                                  {} } };
+  std::map<std::string, std::vector<std::string>> allowList = {
+    { "COMPILE_ONLY", {} },
+    { "LINK_ONLY", {} },
+  };
   std::string interfaceLinkLibraries;
   if (!cmGeneratorExpression::ForbidGeneratorExpressions(
         target, iter->first, iter->second, interfaceLinkLibraries,
@@ -407,9 +409,10 @@ void cmExportPackageInfoGenerator::GenerateInterfaceLinkProperties(
     return;
   }
 
-  std::vector<std::string> linkLibraries;
-  std::vector<std::string> linkRequires;
   std::vector<std::string> buildRequires;
+  std::vector<std::string> compileRequires;
+  std::vector<std::string> linkRequires;
+  std::vector<std::string> linkLibraries;
 
   auto addLibraries = [this, &linkLibraries,
                        &result](std::vector<std::string> const& names,
@@ -428,12 +431,14 @@ void cmExportPackageInfoGenerator::GenerateInterfaceLinkProperties(
     }
   };
 
+  addLibraries(allowList["COMPILE_ONLY"], compileRequires);
   addLibraries(allowList["LINK_ONLY"], linkRequires);
   addLibraries(cmList{ interfaceLinkLibraries }, buildRequires);
 
   BuildArray(component, "requires", buildRequires);
   BuildArray(component, "link_requires", linkRequires);
   BuildArray(component, "link_libraries", linkLibraries);
+  BuildArray(component, "compile_requires", compileRequires);
 }
 
 void cmExportPackageInfoGenerator::GenerateInterfaceCompileFeatures(
