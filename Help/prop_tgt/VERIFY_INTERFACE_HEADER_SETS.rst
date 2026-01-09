@@ -17,7 +17,8 @@ The verification target links against the original target to get all of its
 usage requirements. The verification target has its
 :prop_tgt:`EXCLUDE_FROM_ALL` and :prop_tgt:`DISABLE_PRECOMPILE_HEADERS`
 properties set to true, and its :prop_tgt:`AUTOMOC`, :prop_tgt:`AUTORCC`,
-:prop_tgt:`AUTOUIC`, and :prop_tgt:`UNITY_BUILD` properties set to false.
+:prop_tgt:`AUTOUIC`, :prop_tgt:`UNITY_BUILD`, and
+:prop_tgt:`CXX_SCAN_FOR_MODULES` properties set to false.
 
 If the header's :prop_sf:`LANGUAGE` property is set, the value of that property
 is used to determine the language with which to compile the header file.
