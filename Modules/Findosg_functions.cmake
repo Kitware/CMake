@@ -43,7 +43,7 @@ function(OSG_FIND_LIBRARY module library)
   string(TOUPPER ${module} module_uc)
 
   find_library(${module_uc}_LIBRARY_RELEASE
-    NAMES ${library}
+    NAMES ${library} ${library}rd
     HINTS
       ENV ${module_uc}_DIR
       ENV OSG_DIR

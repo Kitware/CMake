@@ -123,7 +123,7 @@ find_path(OPENTHREADS_INCLUDE_DIR OpenThreads/Thread
 )
 
 find_library(OPENTHREADS_LIBRARY_RELEASE
-    NAMES OpenThreads OpenThreadsWin32
+    NAMES OpenThreads OpenThreadsWin32 OpenThreadsrd
     HINTS
         ENV OPENTHREADS_LIBRARY_DIR
         ENV OPENTHREADS_DIR
