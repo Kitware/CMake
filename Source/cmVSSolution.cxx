@@ -64,7 +64,7 @@ T* GetEntry(std::map<cm::string_view, std::unique_ptr<T>>& entryMap,
   auto i = entryMap.find(name);
   if (i == entryMap.end()) {
     auto p = cm::make_unique<T>();
-    p->Name = name;
+    p->Name = std::string{ name };
     i = entryMap.emplace(p->Name, std::move(p)).first;
   }
   return i->second.get();
