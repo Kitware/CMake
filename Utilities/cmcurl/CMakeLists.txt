@@ -13,6 +13,7 @@ set(BUILD_STATIC_CURL OFF)
 set(CURL_CA_SEARCH_SAFE OFF)
 set(CURL_USE_GSASL OFF)
 set(CURL_USE_GSSAPI OFF)
+set(CURL_USE_LIBBACKTRACE OFF)
 set(CURL_USE_LIBPSL OFF)
 set(CURL_USE_LIBSSH2 OFF)
 set(CURL_USE_LIBSSH OFF)
@@ -71,6 +72,7 @@ set(CURL_DISABLE_SOCKETPAIR OFF)
 set(CURL_DISABLE_SRP OFF)
 set(CURL_DISABLE_TELNET ON CACHE INTERNAL "Disable curl telnet protocol?")
 set(CURL_DISABLE_TFTP ON CACHE INTERNAL "Disable curl tftp protocol?")
+set(CURL_DISABLE_TYPECHECK ON)
 set(CURL_DISABLE_VERBOSE_STRINGS OFF CACHE INTERNAL "Do not disable curl verbosity")
 set(CURL_DISABLE_WEBSOCKETS OFF)
 set(CURL_ENABLE_EXPORT_TARGET OFF)
@@ -1999,6 +2001,7 @@ if(CURL_CODE_COVERAGE)
   list(APPEND CURL_LIBS ${CURL_COVERAGE_LIBS})
 endif()
 
+if(0) # XXX(cmake): not needed for build within cmake
 # Hack to add some libraries to the end of the library list to make binutils ld
 # for GCC find symbols when linking statically. Necessary for libs detected via
 # CMake's built-in find modules, which CMake adds to the beginning of the lib
@@ -2020,6 +2023,7 @@ if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
     list(APPEND CURL_LIBS CURL::win32_winsock)
   endif()
 endif()
+endif() # XXX(cmake): end
 
 if(CMAKE_C_COMPILER_ID STREQUAL "MSVC")  # MSVC but exclude clang-cl
   set_property(DIRECTORY APPEND PROPERTY COMPILE_OPTIONS "-MP")  # Parallel compilation
