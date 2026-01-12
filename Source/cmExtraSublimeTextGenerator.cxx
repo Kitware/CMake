@@ -318,14 +318,12 @@ std::string cmExtraSublimeTextGenerator::BuildMakeCommand(
   std::string generator = this->GlobalGenerator->GetName();
   if (generator == "NMake Makefiles") {
     std::string makefileName = cmSystemTools::ConvertToOutputPath(makefile);
-    command += R"(, "/NOLOGO", "/f", ")";
-    command += makefileName + "\"";
-    command += ", \"" + target + "\"";
+    command = cmStrCat(std::move(command), R"(, "/NOLOGO", "/f", ")",
+                       std::move(makefileName), "\", \"", target, '"');
   } else if (generator == "Ninja") {
     std::string makefileName = cmSystemTools::ConvertToOutputPath(makefile);
-    command += R"(, "-f", ")";
-    command += makefileName + "\"";
-    command += ", \"" + target + "\"";
+    command = cmStrCat(std::move(command), R"(, "-f", ")",
+                       std::move(makefileName), "\", \"", target, '"');
   } else {
     std::string makefileName;
     if (generator == "MinGW Makefiles") {
@@ -335,9 +333,8 @@ std::string cmExtraSublimeTextGenerator::BuildMakeCommand(
     } else {
       makefileName = cmSystemTools::ConvertToOutputPath(makefile);
     }
-    command += R"(, "-f", ")";
-    command += makefileName + "\"";
-    command += ", \"" + target + "\"";
+    command = cmStrCat(std::move(command), R"(, "-f", ")",
+                       std::move(makefileName), "\", \"", target, '"');
   }
   return command;
 }

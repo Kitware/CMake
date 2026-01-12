@@ -14,6 +14,7 @@
 #include "cmsys/FStream.hxx"
 
 #include "cmDependsJavaLexer.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 int cmDependsJava_yyparse(yyscan_t yyscanner);
@@ -40,8 +41,7 @@ void cmDependsJavaParserHelper::CurrentClass::AddFileNamesForPrinting(
 {
   std::string rname;
   if (prefix) {
-    rname += prefix;
-    rname += sep;
+    rname = cmStrCat(std::move(rname), prefix, sep);
   }
   rname += this->Name;
   files->push_back(rname);
@@ -310,10 +310,10 @@ void cmDependsJavaParserHelper::UpdateCombine(char const* str1,
                                               char const* str2)
 {
   if (this->CurrentCombine.empty() && str1) {
-    this->CurrentCombine = str1;
+    // We can reuse allocated memory from `this->CurrentCombine`
+    this->CurrentCombine = cmStrCat(std::move(this->CurrentCombine), str1);
   }
-  this->CurrentCombine += ".";
-  this->CurrentCombine += str2;
+  this->CurrentCombine = cmStrCat(std::move(this->CurrentCombine), '.', str2);
 }
 
 int cmDependsJavaParserHelper::ParseFile(char const* file)
@@ -329,7 +329,7 @@ int cmDependsJavaParserHelper::ParseFile(char const* file)
   std::string fullfile;
   std::string line;
   while (cmSystemTools::GetLineFromStream(ifs, line)) {
-    fullfile += line + "\n";
+    fullfile = cmStrCat(std::move(fullfile), line, '\n');
   }
   return this->ParseString(fullfile.c_str(), 0);
 }

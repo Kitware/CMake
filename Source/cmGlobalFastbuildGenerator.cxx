@@ -699,7 +699,7 @@ std::string cmGlobalFastbuildGenerator::Quote(std::string const& str,
 std::string cmGlobalFastbuildGenerator::QuoteIfHasSpaces(std::string str)
 {
   if (str.find(' ') != std::string::npos) {
-    return '"' + str + '"';
+    return cmStrCat('"', str, '"');
   }
   return str;
 }
@@ -976,7 +976,7 @@ void cmGlobalFastbuildGenerator::AddCompiler(std::string const& language,
   }
 
   // Calculate the root location of the compiler
-  std::string const variableString = "CMAKE_" + language + "_COMPILER";
+  std::string const variableString = cmStrCat("CMAKE_", language, "_COMPILER");
   std::string const compilerLocation = mf->GetSafeDefinition(variableString);
   if (compilerLocation.empty()) {
     return;
@@ -992,15 +992,15 @@ void cmGlobalFastbuildGenerator::AddCompiler(std::string const& language,
   compilerDef.Name = FASTBUILD_COMPILER_PREFIX + language;
   compilerDef.Executable = compilerLocation;
   compilerDef.CmakeCompilerID =
-    mf->GetSafeDefinition("CMAKE_" + language + "_COMPILER_ID");
+    mf->GetSafeDefinition(cmStrCat("CMAKE_", language, "_COMPILER_ID"));
   if (compilerDef.CmakeCompilerID == "Clang" &&
-      mf->GetSafeDefinition("CMAKE_" + language +
-                            "_COMPILER_FRONTEND_VARIANT") == "MSVC") {
+      mf->GetSafeDefinition(cmStrCat(
+        "CMAKE_", language, "_COMPILER_FRONTEND_VARIANT")) == "MSVC") {
     compilerDef.CmakeCompilerID = "Clang-cl";
   }
 
   compilerDef.CmakeCompilerVersion =
-    mf->GetSafeDefinition("CMAKE_" + language + "_COMPILER_VERSION");
+    mf->GetSafeDefinition(cmStrCat("CMAKE_", language, "_COMPILER_VERSION"));
   compilerDef.Language = language;
 
   cmExpandList(mf->GetSafeDefinition(FASTBUILD_COMPILER_EXTRA_FILES),
@@ -1052,10 +1052,11 @@ void cmGlobalFastbuildGenerator::AddCompiler(std::string const& language,
       compilerDef.ExtraFiles.push_back("$Root$/vcruntime140.dll");
       compilerDef.ExtraFiles.push_back(
         "$Root$/vcruntime140_1.dll"); // Required as of 16.5.1 (14.25.28610)
-      compilerDef.ExtraFiles.push_back("$Root$/" + i18nNum + "/clui.dll");
       compilerDef.ExtraFiles.push_back(
-        "$Root$/" + i18nNum + "/mspft140ui.dll"); // Localized messages for
-                                                  // static analysis
+        cmStrCat("$Root$/", i18nNum, "/clui.dll"));
+      compilerDef.ExtraFiles.push_back(cmStrCat(
+        "$Root$/", i18nNum, "/mspft140ui.dll")); // Localized messages for
+                                                 // static analysis
     }
     // Visual Studio 15 (19.10 to 19.19)
     else if (cmSystemTools::VersionCompare(cmSystemTools::OP_GREATER_EQUAL,

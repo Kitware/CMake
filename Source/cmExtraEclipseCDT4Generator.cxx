@@ -738,7 +738,7 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
     // - only if not named the same as an output directory
     if (!cmSystemTools::FileIsDirectory(
           cmStrCat(this->HomeOutputDirectory, '/', p))) {
-      excludeFromOut += p + "/|";
+      excludeFromOut = cmStrCat(std::move(excludeFromOut), p, "/|");
     }
   }
 

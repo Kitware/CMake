@@ -393,9 +393,10 @@ std::string cmCommonTargetGenerator::GenerateCodeCheckRules(
     if (!compilerLauncher.empty()) {
       // In __run_co_compile case the launcher command is supplied
       // via --launcher=<maybe-list> and consumed
-      code_check += " --launcher=";
-      code_check += this->GeneratorTarget->GetLocalGenerator()->EscapeForShell(
-        compilerLauncher);
+      code_check =
+        cmStrCat(std::move(code_check), " --launcher=",
+                 this->GeneratorTarget->GetLocalGenerator()->EscapeForShell(
+                   compilerLauncher));
       compilerLauncher.clear();
     }
     if (cmNonempty(iwyu)) {

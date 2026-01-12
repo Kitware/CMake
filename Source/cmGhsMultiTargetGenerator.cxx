@@ -658,8 +658,9 @@ void cmGhsMultiTargetGenerator::WriteSources(std::ostream& fout_proj)
     } else {
       std::vector<cmSourceFile const*> customCommands;
       if (this->ComputeCustomCommandOrder(customCommands)) {
-        std::string message = "The custom commands for target [" +
-          this->GeneratorTarget->GetName() + "] had a cycle.\n";
+        std::string message =
+          cmStrCat("The custom commands for target [",
+                   this->GeneratorTarget->GetName(), "] had a cycle.\n");
         cmSystemTools::Error(message);
       } else {
         /* Custom targets do not have a dependency on SOURCES files.

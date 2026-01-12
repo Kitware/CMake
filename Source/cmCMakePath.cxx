@@ -7,6 +7,8 @@
 
 #include <string>
 
+#include "cmStringAlgorithms.h"
+
 #if defined(_WIN32)
 #  include <cstdlib>
 #endif
@@ -17,7 +19,6 @@
 #if defined(_WIN32)
 #  include <cmext/string_view>
 
-#  include "cmStringAlgorithms.h"
 #endif
 
 cmCMakePath& cmCMakePath::ReplaceWideExtension(cm::string_view extension)
@@ -33,7 +34,7 @@ cmCMakePath& cmCMakePath::ReplaceWideExtension(cm::string_view extension)
     if (extension[0] != '.') {
       file += '.';
     }
-    file.append(std::string(extension));
+    file = cmStrCat(std::move(file), extension);
   }
   this->Path.replace_filename(file);
   return *this;

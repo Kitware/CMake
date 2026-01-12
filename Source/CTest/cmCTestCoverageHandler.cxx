@@ -791,14 +791,16 @@ static std::string joinCommandLine(std::vector<std::string> const& args)
 
   for (std::string const& s : args) {
     if (s.find(' ') == std::string::npos) {
-      ret += s + ' ';
+      ret = cmStrCat(std::move(ret), s, ' ');
     } else {
-      ret += "\"" + s + "\" ";
+      ret = cmStrCat(std::move(ret), '"', s, "\" ");
     }
   }
 
   // drop trailing whitespace
-  ret.erase(ret.size() - 1);
+  if (!ret.empty()) {
+    ret.pop_back();
+  }
 
   return ret;
 }

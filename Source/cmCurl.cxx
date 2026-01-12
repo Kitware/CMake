@@ -2,6 +2,8 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmCurl.h"
 
+#include <utility>
+
 #include <cm/string_view>
 #include <cmext/string_view>
 
@@ -28,9 +30,9 @@
 #define check_curl_result(result, errstr)                                     \
   do {                                                                        \
     if ((result) != CURLE_OK && (result) != CURLE_NOT_BUILT_IN) {             \
-      e += e.empty() ? "" : "\n";                                             \
-      e += (errstr);                                                          \
-      e += ::curl_easy_strerror(result);                                      \
+      bool isNeedNewline = !e.empty();                                        \
+      e = cmStrCat(std::move(e), isNeedNewline ? "\n"_s : ""_s, (errstr),     \
+                   ::curl_easy_strerror(result));                             \
     }                                                                         \
   } while (false)
 

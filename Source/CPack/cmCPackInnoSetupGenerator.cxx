@@ -889,7 +889,7 @@ bool cmCPackInnoSetupGenerator::BuildDownloadedComponentArchive(
 {
   // Remove the old archive, if one exists
   std::string const& archiveFile =
-    uploadDirectory + '/' + component->ArchiveFile;
+    cmStrCat(uploadDirectory, '/', component->ArchiveFile);
   cmCPackLogger(cmCPackLog::LOG_OUTPUT,
                 "-   Building downloaded component archive: " << archiveFile
                                                               << std::endl);

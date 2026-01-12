@@ -216,10 +216,8 @@ bool ParseResult::MaybeReportError(cmMakefile& mf) const
   }
   std::string e;
   for (auto const& kel : this->KeywordErrors) {
-    e = cmStrCat(e, "Error after keyword \"", kel.first, "\":\n");
-    for (auto const& ke : kel.second) {
-      e += ke;
-    }
+    e = cmStrCat(std::move(e), "Error after keyword \"", kel.first, "\":\n",
+                 cmJoin(kel.second, {}));
   }
   mf.IssueMessage(MessageType::FATAL_ERROR, e);
   return true;

@@ -1607,9 +1607,10 @@ bool HandleRemoveImpl(std::vector<std::string> const& args, bool recurse,
   {
     std::string fileName = arg;
     if (fileName.empty()) {
-      std::string const r = recurse ? "REMOVE_RECURSE" : "REMOVE";
+      std::string r = recurse ? "REMOVE_RECURSE" : "REMOVE";
       status.GetMakefile().IssueMessage(
-        MessageType::AUTHOR_WARNING, "Ignoring empty file name in " + r + ".");
+        MessageType::AUTHOR_WARNING,
+        cmStrCat("Ignoring empty file name in ", std::move(r), '.'));
       continue;
     }
     if (!cmsys::SystemTools::FileIsFullPath(fileName)) {
@@ -2195,8 +2196,9 @@ bool HandleDownloadCommand(std::vector<std::string> const& args,
   }
 
   for (auto const& range : curl_ranges) {
-    std::string curl_range = range.first + '-' +
-      (range.second.has_value() ? range.second.value() : "");
+    std::string curl_range =
+      cmStrCat(range.first, '-',
+               (range.second.has_value() ? range.second.value() : ""));
     res = ::curl_easy_setopt(curl, CURLOPT_RANGE, curl_range.c_str());
     check_curl_result(res, "DOWNLOAD cannot set range: ");
   }
@@ -3203,7 +3205,8 @@ bool HandleCreateLinkCommand(std::vector<std::string> const& args,
     parser.Parse(cmMakeRange(args).advance(3), &unconsumedArgs);
 
   if (!unconsumedArgs.empty()) {
-    status.SetError("unknown argument: \"" + unconsumedArgs.front() + '\"');
+    status.SetError(cmStrCat("unknown argument: \"",
+                             std::move(unconsumedArgs.front()), '\"'));
     return false;
   }
 

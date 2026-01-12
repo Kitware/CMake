@@ -1610,12 +1610,12 @@ std::string cmCPackGenerator::GetSanitizedDirOrFileName(
                                               "[Ll][Pp][Tt][1-9]"
                                               ")[.]?$");
     if (reserved_pattern.find(name)) {
-      return "_" + name;
+      return cmStrCat('_', std::move(name));
     }
     // Given name ends in a dot (on Windows)?
     // Then return it appended with an underscore.
     if (name.back() == '.') {
-      return name + '_';
+      return cmStrCat(std::move(name), '_');
     }
 #endif
   }
