@@ -6,4 +6,4 @@ set(CMAKE_CONFIGURATION_TYPES "" CACHE STRING "" FORCE)
 add_library(foo foo.cxx)
 
 install(TARGETS foo EXPORT foo)
-export(EXPORT foo PACKAGE_INFO foo)
+export(PACKAGE_INFO foo EXPORT foo)

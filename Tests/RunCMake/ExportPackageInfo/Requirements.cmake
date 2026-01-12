@@ -14,7 +14,7 @@ add_library(bar ALIAS libc)
 target_link_libraries(libd INTERFACE test::liba foo bar)
 
 install(TARGETS libb EXPORT foo DESTINATION .)
-export(EXPORT foo PACKAGE_INFO foo)
+export(PACKAGE_INFO foo EXPORT foo)
 
 install(TARGETS libc libd EXPORT bar DESTINATION .)
-export(EXPORT bar PACKAGE_INFO bar)
+export(PACKAGE_INFO bar EXPORT bar)

@@ -11,20 +11,21 @@ install(TARGETS foo EXPORT foo DESTINATION .)
 
 # Test inheriting from project matching package name.
 export(
-  EXPORT foo
   PACKAGE_INFO foo
+  EXPORT foo
   )
 
 # Test inheriting from a specified project.
 export(
+  PACKAGE_INFO test1
   EXPORT foo
-  PACKAGE_INFO test1 PROJECT foo
+  PROJECT foo
   )
 
 # Test that inheriting doesn't override explicitly specified metadata.
 export(
-  EXPORT foo
   PACKAGE_INFO test2
+  EXPORT foo
   PROJECT foo
   VERSION 1.4.7
   LICENSE "Apache-2.0"

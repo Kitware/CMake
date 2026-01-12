@@ -26,4 +26,4 @@ install(
   FILE_SET genex
     DESTINATION $<$<CONFIG:FAKE_CONFIG>:FAKE_DEST>genex
 )
-export(EXPORT foo PACKAGE_INFO foo)
+export(PACKAGE_INFO foo EXPORT foo)

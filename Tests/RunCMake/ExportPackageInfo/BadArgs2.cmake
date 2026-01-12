@@ -1,6 +1,6 @@
 add_library(foo INTERFACE)
 install(TARGETS foo EXPORT foo DESTINATION .)
-set(args EXPORT foo PACKAGE_INFO foo APPENDIX test)
+set(args PACKAGE_INFO foo EXPORT foo APPENDIX test)
 export(${args} VERSION 1.0)
 export(${args} LICENSE "BSD-3-Clause AND CC-BY-SA-4.0")
 export(${args} DESCRIPTION "Test")

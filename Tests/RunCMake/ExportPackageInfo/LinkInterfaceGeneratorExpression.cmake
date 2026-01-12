@@ -5,7 +5,7 @@ add_library(bar foo.cxx)
 target_link_libraries(bar $<1:foo> $<1:$<CONFIG>>)
 
 install(TARGETS foo EXPORT foo)
-export(EXPORT foo PACKAGE_INFO foo)
+export(PACKAGE_INFO foo EXPORT foo)
 
 install(TARGETS bar EXPORT bar)
-export(EXPORT bar PACKAGE_INFO bar)
+export(PACKAGE_INFO bar EXPORT bar)

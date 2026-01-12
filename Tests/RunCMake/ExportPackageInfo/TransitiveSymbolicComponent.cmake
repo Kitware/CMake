@@ -11,4 +11,4 @@ find_package(Symbolic REQUIRED CONFIG
 target_link_libraries(bar INTERFACE Symbolic::test)
 
 install(TARGETS bar EXPORT bar DESTINATION .)
-export(EXPORT bar PACKAGE_INFO bar)
+export(PACKAGE_INFO bar EXPORT bar)
