@@ -13,4 +13,8 @@ schema_file = os.path.join(
 with open(schema_file, "r", encoding="utf-8") as f:
     schema = json.load(f)
 
-jsonschema.validate(contents, schema)
+try:
+    jsonschema.validate(contents, schema)
+except (jsonschema.ValidationError, jsonschema.SchemaError) as e:
+    sys.stderr.write(e.message)
+    sys.exit(1)
