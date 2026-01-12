@@ -491,6 +491,29 @@ bool cmGlobalXCodeGenerator::ProcessGeneratorToolsetField(
   return false;
 }
 
+bool cmGlobalXCodeGenerator::ParseKnownAttributes(
+  cm::string_view attribute, cm::string_view attributeValue)
+{
+  static std::string const knownRegions{ "knownRegions"_s };
+  if (attribute == knownRegions) {
+    std::vector<std::string> regionsVec(cmTokenize(attributeValue, ','));
+    cmXCodeObject* allLangs = this->CreateObject(cmXCodeObject::OBJECT_LIST);
+    for (auto const& region : regionsVec) {
+      allLangs->AddObject(this->CreateString(cmTrimWhitespace(region)));
+    }
+    this->RootObject->AddAttribute(knownRegions, allLangs);
+    return true;
+  }
+
+  static std::string const developmentRegion{ "developmentRegion"_s };
+  if (attribute == developmentRegion) {
+    this->RootObject->AddAttribute(
+      developmentRegion, this->CreateString(cmTrimWhitespace(attributeValue)));
+    return true;
+  }
+  return false;
+};
+
 void cmGlobalXCodeGenerator::EnableLanguage(
   std::vector<std::string> const& lang, cmMakefile* mf, bool optional)
 {
@@ -4871,9 +4894,14 @@ bool cmGlobalXCodeGenerator::CreateXCodeObjects(
         std::string attribute = var.substr(22);
         this->FilterConfigurationAttribute(config.first, attribute);
         if (!attribute.empty()) {
+          std::string const attributeValue =
+            this->CurrentMakefile->GetSafeDefinition(var);
+          if (this->ParseKnownAttributes(attribute, attributeValue)) {
+            continue;
+          }
+
           std::string processed = cmGeneratorExpression::Evaluate(
-            this->CurrentMakefile->GetSafeDefinition(var),
-            this->CurrentLocalGenerator, config.first);
+            attributeValue, this->CurrentLocalGenerator, config.first);
           buildSettingsForCfg->AddAttribute(attribute,
                                             this->CreateString(processed));
         }

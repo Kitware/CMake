@@ -157,6 +157,8 @@ private:
   bool ParseGeneratorToolset(std::string const& ts, cmMakefile* mf);
   bool ProcessGeneratorToolsetField(std::string const& key,
                                     std::string const& value, cmMakefile* mf);
+  bool ParseKnownAttributes(cm::string_view attribute,
+                            cm::string_view attributeValue);
 
   cmXCodeObject* CreateOrGetPBXGroup(cmGeneratorTarget* gtgt,
                                      cmSourceGroup* sg);
