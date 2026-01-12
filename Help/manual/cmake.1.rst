@@ -1312,6 +1312,9 @@ Available commands are:
      351abe79cd3800b38cdfb25d45015a15  file1.txt
      052f86c15bbde68af55c7f7b340ab639  file2.txt
 
+  .. versionchanged:: 4.3
+    Passing ``-`` reads from standard input.
+
 .. option:: sha1sum <file>...
 
   .. versionadded:: 3.10
@@ -1320,6 +1323,9 @@ Available commands are:
 
      4bb7932a29e6f73c97bb9272f2bdc393122f86e0  file1.txt
      1df4c8f318665f9a5f2ed38f55adadb7ef9f559c  file2.txt
+
+  .. versionchanged:: 4.3
+    Passing ``-`` reads from standard input.
 
 .. option:: sha224sum <file>...
 
@@ -1330,6 +1336,9 @@ Available commands are:
      b9b9346bc8437bbda630b0b7ddfc5ea9ca157546dbbf4c613192f930  file1.txt
      6dfbe55f4d2edc5fe5c9197bca51ceaaf824e48eba0cc453088aee24  file2.txt
 
+  .. versionchanged:: 4.3
+    Passing ``-`` reads from standard input.
+
 .. option:: sha256sum <file>...
 
   .. versionadded:: 3.10
@@ -1338,6 +1347,9 @@ Available commands are:
 
      76713b23615d31680afeb0e9efe94d47d3d4229191198bb46d7485f9cb191acc  file1.txt
      15b682ead6c12dedb1baf91231e1e89cfc7974b3787c1e2e01b986bffadae0ea  file2.txt
+
+  .. versionchanged:: 4.3
+    Passing ``-`` reads from standard input.
 
 .. option:: sha384sum <file>...
 
@@ -1348,6 +1360,9 @@ Available commands are:
      acc049fedc091a22f5f2ce39a43b9057fd93c910e9afd76a6411a28a8f2b8a12c73d7129e292f94fc0329c309df49434  file1.txt
      668ddeb108710d271ee21c0f3acbd6a7517e2b78f9181c6a2ff3b8943af92b0195dcb7cce48aa3e17893173c0a39e23d  file2.txt
 
+  .. versionchanged:: 4.3
+    Passing ``-`` reads from standard input.
+
 .. option:: sha512sum <file>...
 
   .. versionadded:: 3.10
@@ -1356,6 +1371,9 @@ Available commands are:
 
      2a78d7a6c5328cfb1467c63beac8ff21794213901eaadafd48e7800289afbc08e5fb3e86aa31116c945ee3d7bf2a6194489ec6101051083d1108defc8e1dba89  file1.txt
      7a0b54896fe5e70cca6dd643ad6f672614b189bf26f8153061c4d219474b05dad08c4e729af9f4b009f1a1a280cb625454bf587c690f4617c27e3aebdf3b7a2d  file2.txt
+
+  .. versionchanged:: 4.3
+    Passing ``-`` reads from standard input.
 
 .. option:: remove [-f] <file>...
 

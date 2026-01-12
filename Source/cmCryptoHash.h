@@ -5,6 +5,7 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <cstddef>
+#include <iostream>
 #include <memory>
 #include <string>
 #include <vector>
@@ -58,6 +59,12 @@ public:
   /// @return Binary hash vector
   std::vector<unsigned char> ByteHashString(cm::string_view input);
 
+  /// @brief Calculates a binary hash from stream content
+  /// @see ByteHashString()
+  /// @return Non empty binary hash vector if the stream was read successfully.
+  ///         An empty vector otherwise.
+  std::vector<unsigned char> ByteHashStream(std::istream& sin);
+
   /// @brief Calculates a binary hash from file content
   /// @see ByteHashString()
   /// @return Non empty binary hash vector if the file was read successfully.
@@ -67,6 +74,12 @@ public:
   /// @brief Calculates a hash string from string input data
   /// @return Sequence of hex characters pairs for each byte of the binary hash
   std::string HashString(cm::string_view input);
+
+  /// @brief Calculates a hash string from stream content
+  /// @see HashString()
+  /// @return Non empty hash string if the stream was read successfully.
+  ///         An empty string otherwise.
+  std::string HashStream(std::istream& sin);
 
   /// @brief Calculates a hash string from file content
   /// @see HashString()

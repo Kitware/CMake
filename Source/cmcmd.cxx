@@ -1920,8 +1920,21 @@ int cmcmd::HashSumFile(std::vector<std::string> const& args,
   int retval = 0;
 
   for (auto const& filename : cmMakeRange(args).advance(2)) {
-    // Cannot compute sum of a directory
-    if (cmSystemTools::FileIsDirectory(filename)) {
+    if (filename == "-") {
+#ifdef _WIN32
+      _setmode(fileno(stdin), _O_BINARY);
+#endif
+      cmCryptoHash hasher(algo);
+      std::string value = hasher.HashStream(std::cin);
+      if (value.empty()) {
+        // To mimic "md5sum/shasum" behavior in a shell:
+        std::cerr << filename << ": No such file or directory\n";
+        retval++;
+      } else {
+        std::cout << value << "  " << filename << '\n';
+      }
+    } else if (cmSystemTools::FileIsDirectory(filename)) {
+      // Cannot compute sum of a directory
       std::cerr << "Error: " << filename << " is a directory\n";
       retval++;
     } else {
