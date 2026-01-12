@@ -7,6 +7,7 @@ CPack: Found Desktop file: "[^"]*/_CPack_Packages/Linux/AppImage/GeneratorTest-1
 CPack: Desktop file destination: "[^"]*/_CPack_Packages/Linux/AppImage/GeneratorTest-1\.2\.3-Linux/com\.example\.app\.desktop"
 CPack: Icon file: "[^"]*/_CPack_Packages/Linux/AppImage/GeneratorTest-1\.2\.3-Linux/share/icons/hicolor/64x64/apps/ApplicationIcon\.png"
 CPack: Icon link destination: "[^"]*/_CPack_Packages/Linux/AppImage/GeneratorTest-1\.2\.3-Linux/ApplicationIcon\.png"
+CPack: No AppRun found, generating a default one that will run: "bin/app"
 CPack: Running AppImageTool: "[^"]*" "[^"]*/_CPack_Packages/Linux/AppImage/GeneratorTest-1\.2\.3-Linux" "\.\./GeneratorTest-1\.2\.3-Linux\.AppImage" "--runtime-file" "[^"]*"
 [^
 ]*/_CPack_Packages/Linux/AppImage/GeneratorTest-1\.2\.3-Linux should be packaged as \.\./GeneratorTest-1\.2\.3-Linux\.AppImage
