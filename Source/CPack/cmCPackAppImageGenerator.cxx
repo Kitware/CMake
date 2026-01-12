@@ -18,6 +18,7 @@
 #include "cmCPackLog.h"
 #include "cmELF.h"
 #include "cmGeneratedFileStream.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmValue.h"
 
@@ -182,8 +183,18 @@ int cmCPackAppImageGenerator::PackageFiles()
   }
 
   std::string const appRunFile = this->toplevel + "/AppRun";
-  {
-    // AppRun script will run our application
+  if (cmSystemTools::PathExists(appRunFile)) {
+    // User provided an AppRun file
+    cmCPackLogger(cmCPackLog::LOG_OUTPUT,
+                  cmStrCat("Found AppRun file: \"", appRunFile, '"')
+                    << std::endl);
+  } else {
+    // Generate a default AppRun script that will run our application
+    cmCPackLogger(
+      cmCPackLog::LOG_OUTPUT,
+      cmStrCat("No AppRun found, generating a default one that will run: \"",
+               application, '"')
+        << std::endl);
     cmGeneratedFileStream appRun(appRunFile);
     appRun << R"sh(#! /usr/bin/env bash
 
