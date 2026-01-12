@@ -15,7 +15,8 @@ variables that are created by the :command:`project` command.
 
 The following restrictions apply to where ``enable_language()`` may be called:
 
-* It must be called in file scope, not in a function call.
+* It must be called in file scope, not in a :command:`function` call
+  nor inside a :command:`block()`.
 * It must not be called before the first call to :command:`project`.
   See policy :policy:`CMP0165`.
 * It must be called in the highest directory common to all targets
