@@ -524,6 +524,19 @@ Target Created:
 
 **Note**: direct usage of this target by consumers should not be necessary.
 
+.. _`FindCUDAToolkit_bin2c`:
+
+bin2c
+"""""
+
+.. versionadded:: 4.3
+
+A utility that converts binary files to C files containing byte arrays.
+
+Target Created:
+
+- ``CUDA::bin2c``
+
 Result Variables
 ^^^^^^^^^^^^^^^^
 
@@ -1486,6 +1499,16 @@ if(CUDAToolkit_FOUND)
   endif()
 
   _CUDAToolkit_find_and_add_import_lib(OpenCL)
+
+  find_program(CUDA_bin2c_EXECUTABLE
+    NAMES bin2c
+    HINTS ${CUDAToolkit_BIN_DIR}
+    NO_DEFAULT_PATH
+  )
+  if(NOT TARGET CUDA::bin2c AND CUDA_bin2c_EXECUTABLE)
+    add_executable(CUDA::bin2c IMPORTED)
+    set_property(TARGET CUDA::bin2c PROPERTY IMPORTED_LOCATION "${CUDA_bin2c_EXECUTABLE}")
+  endif()
 endif()
 
 if(_CUDAToolkit_Pop_ROOT_PATH)
