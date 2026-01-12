@@ -593,10 +593,10 @@ class cmMakefile;
   SELECT(POLICY, CMP0198,                                                     \
          "CMAKE_PARENT_LIST_FILE is not defined in CMakeLists.txt.", 4, 2, 0, \
          WARN)                                                                \
-  SELECT(                                                                     \
-    POLICY, CMP0199,                                                          \
-    "$<CONFIG:cfgs> only matches the configuration of the consumed target.",  \
-    4, 2, 0, WARN)                                                            \
+  SELECT(POLICY, CMP0199,                                                     \
+         "$<CONFIG:cfgs> does not match mapped configurations that are not "  \
+         "selected.",                                                         \
+         4, 2, 0, WARN)                                                       \
   SELECT(POLICY, CMP0200,                                                     \
          "Location and configuration selection for imported targets is more " \
          "consistent.",                                                       \

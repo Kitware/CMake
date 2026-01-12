@@ -203,8 +203,8 @@ Other Changes
 =============
 
 * The :genex:`$<CONFIG:cfgs>` generator expression, when appearing on an
-  imported target, has been fixed to only match the configuration actually
-  being consumed.  See policy :policy:`CMP0199`.
+  imported target, has been fixed to not match configurations that are not
+  applicable.  See policy :policy:`CMP0199`.
 
 * Selection of configuration and location of imported targets is now more
   consistent.  See policy :policy:`CMP0200`.
@@ -236,3 +236,11 @@ Changes made since CMake 4.2.0 include the following.
 * This version made no changes to documented features or interfaces.
   Some implementation updates were made to support ecosystem changes
   and/or fix regressions.
+
+.. 4.2.2
+
+  * Policy :policy:`CMP0199`'s NEW behavior has been partially reverted.
+    In 4.2.0 and 4.2.1, ``$<CONFIG:cfgs>`` only matched the configuration
+    of the consumed target.  This broke existing use cases that rely on
+    matching the configuration of the consuming target, and so has been
+    partially reverted to match either as CMake 4.1 and below did.

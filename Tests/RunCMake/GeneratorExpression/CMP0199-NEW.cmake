@@ -10,4 +10,3 @@ cmake_policy(SET CMP0200 OLD)
 include(CMP0199-cases.cmake)
 
 do_mapped_config_test(EXPECT_RELEASE)
-do_unique_config_test(EXPECT_DEBUG)
