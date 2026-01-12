@@ -4,8 +4,8 @@
 # Produce an image with custom-built dependencies for portable CMake binaries.
 # Build using the directory containing this file as its own build context.
 
-ARG FROM_IMAGE_NAME=kitware/cmake:build-linux-x86_64-base-2023-08-16
-ARG FROM_IMAGE_DIGEST=@sha256:95c4d937a635067096dc8fa21b20cce6108ced091d3c42d56cf0261f40406a10
+ARG FROM_IMAGE_NAME=kitware/cmake:build-linux-x86_64-base-2026-01-13
+ARG FROM_IMAGE_DIGEST=@sha256:66bbc699da90b66fbfe5ee6161026587b78bcd01b903740b1287f80c40adfc95
 ARG FROM_IMAGE=$FROM_IMAGE_NAME$FROM_IMAGE_DIGEST
 FROM $FROM_IMAGE
 
@@ -123,10 +123,10 @@ COPY openssl-source.patch /opt/openssl/src/
 RUN : \
  && mkdir -p /opt/openssl/src \
  && cd /opt/openssl/src \
- && curl -O https://www.openssl.org/source/openssl-1.1.1v.tar.gz \
- && sha512sum openssl-1.1.1v.tar.gz | grep -q 1a67340d99026aa62bf50ff89165d9f77fe4a6690fe30d1751b5021dd3f238391afd581b41724687c322c4e3af1770c44a63766a06e9b8cab6425101153e0c7e \
- && tar xzf openssl-1.1.1v.tar.gz \
- && cd openssl-1.1.1v \
+ && curl -OL https://github.com/openssl/openssl/releases/download/openssl-3.6.0/openssl-3.6.0.tar.gz \
+ && sha256sum openssl-3.6.0.tar.gz | grep -q b6a5f44b7eb69e3fa35dbf15524405b44837a481d43d81daddde3ff21fcbb8e9 \
+ && tar xzf openssl-3.6.0.tar.gz \
+ && cd openssl-3.6.0 \
  && patch -p1 -i ../openssl-source.patch \
  && source /opt/rh/devtoolset-7/enable \
  && ./Configure --prefix=/opt/openssl linux-elf no-asm no-shared -D_POSIX_C_SOURCE=199506L -D_POSIX_SOURCE=1 -D_SVID_SOURCE=1 -D_BSD_SOURCE=1 \
