@@ -313,7 +313,7 @@ List of CPack DEB generator specific variables:
  The compression level used for creating the Debian package.
 
  :Mandatory: No
- :Default: Automatically determined by the compression tool.
+ :Default: value of :variable:`CPACK_COMPRESSION_LEVEL`
 
  This variable allows fine-tuning of the compression ratio and speed for the
  Debian package archive. It controls the numeric compression level passed to
@@ -323,11 +323,11 @@ List of CPack DEB generator specific variables:
 
  The valid range and interpretation depend on the selected compression type:
 
-  - ``gzip``  – level 1–9 (default 6)
-  - ``bzip2`` – level 1–9 (default 9)
-  - ``xz``    – level 1–9 (default 6)
-  - ``lzma``  – level 1–9 (default 6)
-  - ``zstd``  – level 1–19 (default 3)
+  - ``gzip``  – level 1–9
+  - ``bzip2`` – level 1–9
+  - ``xz``    – level 1–9
+  - ``lzma``  – level 1–9
+  - ``zstd``  – level 1–19
 
  Example usage:
 

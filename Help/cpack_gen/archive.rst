@@ -199,3 +199,21 @@ CPack generators which are essentially archives at their core. These include:
     Official CMake binaries available on ``cmake.org`` now ship
     with a ``liblzma`` that supports parallel compression.
     Older versions did not.
+
+.. variable:: CPACK_ARCHIVE_COMPRESSION_LEVEL
+
+  .. versionadded:: 4.3
+
+  The compression level to use when compressing the archive.
+
+  :Default: value of :variable:`CPACK_COMPRESSION_LEVEL`
+
+  The compression level should be between ``0`` and ``9``.
+
+  The compression level of the Zstandard-based algorithm can be set
+  between ``0`` and ``19``, except for the ``ZIP_ZSTD`` mode.
+
+  The value ``0`` is used to specify the default compression level.
+  It is selected automatically by the archive library backend and
+  not directly set by CMake itself. The default compression level
+  may vary between archive formats, platforms, etc.

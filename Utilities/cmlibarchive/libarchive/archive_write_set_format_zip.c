@@ -1391,6 +1391,11 @@ archive_write_zip_header(struct archive_write *a, struct archive_entry *entry)
 		uint32_t lzma_compression_level = zip->compression_level == 9
 			? LZMA_PRESET_EXTREME | zip->compression_level
 			: (uint32_t)zip->compression_level;
+#ifdef _AIX
+		if (lzma_compression_level > 6) {
+			lzma_compression_level = 6;
+		}
+#endif
 		/* Forcibly setting up the encoder to use the LZMA1 variant, as
 		 * it is the one LZMA Alone uses. */
 		lzma_filter filters[2] = {
@@ -1420,6 +1425,11 @@ archive_write_zip_header(struct archive_write *a, struct archive_entry *entry)
 		uint32_t lzma_compression_level = zip->compression_level == 9
 			? LZMA_PRESET_EXTREME | zip->compression_level
 			: (uint32_t)zip->compression_level;
+#ifdef _AIX
+		if (lzma_compression_level > 6) {
+			lzma_compression_level = 6;
+		}
+#endif
 		lzma_ret retval;
 #ifndef HAVE_LZMA_STREAM_ENCODER_MT
 		/* Force the number of threads to one, and thus to a mono-threaded
