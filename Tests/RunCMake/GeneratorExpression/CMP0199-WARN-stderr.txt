@@ -1,7 +1,8 @@
 CMake Warning \(dev\) at CMP0199-WARN\.cmake:[0-9]+ \(target_link_libraries\):
-  Policy CMP0199 is not set: \$<CONFIG:cfgs> only matches the configuration of
-  the consumed target\.  Run "cmake --help-policy CMP0199" for policy details\.
-  Use the cmake_policy command to set the policy and suppress this warning\.
+  Policy CMP0199 is not set: \$<CONFIG:cfgs> does not match mapped
+  configurations that are not selected\.  Run "cmake --help-policy CMP0199"
+  for policy details\.  Use the cmake_policy command to set the policy and
+  suppress this warning\.
 
   Evaluation of \$<CONFIG> for imported target "lib_test", used by "exe_test",
   may match multiple configurations\.
