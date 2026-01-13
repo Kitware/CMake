@@ -116,7 +116,7 @@ Policies Introduced by CMake 4.2
    CMP0202: PDB file names always include their target's per-config POSTFIX. </policy/CMP0202>
    CMP0201: Python::NumPy does not depend on Python::Development.Module. </policy/CMP0201>
    CMP0200: Location and configuration selection for imported targets is more consistent. </policy/CMP0200>
-   CMP0199: $<CONFIG> only matches the configuration of the consumed target. </policy/CMP0199>
+   CMP0199: $<CONFIG> does not match mapped configurations that are not selected. </policy/CMP0199>
    CMP0198: CMAKE_PARENT_LIST_FILE is not defined in CMakeLists.txt. </policy/CMP0198>
 
 Policies Introduced by CMake 4.1

@@ -1,7 +1,15 @@
+# TODO: $<CONFIG> matches both the conumer's configuration AND the selected
+# configuration of the imported target. This is ungood, and eventually we need
+# a way to match only the selected configuration of the imported target. For
+# historic reasons, that will probably not be $<CONFIG>, which means $<CONFIG>
+# should eventually stop matching the selected configuration of the imported
+# target. When that happens, this test should be changed to use the new
+# mechanism, and the test cases adjusted accordingly.
+
 # Under CMP0200 OLD, CMake fails to select a valid configuration for an
 # imported INTERFACE library with no location, and will (as an implementation
 # artifact) select the last configuration in IMPORTED_CONFIGURATIONS.
-
+#
 # Under NEW, CMake should select a configuration which matches the current
 # build type, if available in IMPORTED_CONFIGURATIONS.
 function(do_match_config_test)

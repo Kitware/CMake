@@ -2836,57 +2836,26 @@ static const struct ConfigurationTestNode : public cmGeneratorExpressionNode
       firstParam = false;
     }
 
-    // Determine the context(s) in which the expression should be evaluated. If
-    // CMPxxxx is NEW, the context is exactly one of the imported target's
-    // selected configuration, if applicable, or the consuming target's
-    // configuration, otherwise.
+    // Partially determine the context(s) in which the expression should be
+    // evaluated.
     //
-    // If CMPxxxx is OLD, we evaluate first in the context of the consuming
-    // target, then, if the consumed target is imported, we evaluate based on
-    // the mapped configurations (this logic is... problematic; see comment
-    // below), then finally based on the selected configuration of the imported
-    // target.
+    // If CMPxxxx is NEW, the context is exactly one of the imported target's
+    // selected configuration, if applicable and if the target was imported
+    // from CPS, or the consuming target's configuration otherwise. Here, we
+    // determine if we are in that 'otherwise' branch.
+    //
+    // Longer term, we need a way for non-CPS users to match the selected
+    // configuration of the imported target. At that time, CPS should switch
+    // to that mechanism and the CPS-specific logic here should be dropped.
+    // (We can do that because CPS doesn't use generator expressions directly;
+    // rather, CMake generates them on import.)
     bool const targetIsImported =
       (eval->CurrentTarget && eval->CurrentTarget->IsImported());
-    bool const oldPolicy = [&] {
-      if (!targetIsImported) {
-        // For non-imported targets, there is no behavior difference between
-        // the OLD and NEW policy.
-        return false;
-      }
-      cmTarget const* const t = eval->CurrentTarget->Target;
-      if (t->GetOrigin() == cmTarget::Origin::Cps) {
-        // Generator expressions appearing on targets imported from CPS should
-        // always be evaluated according to the selected configuration of the
-        // imported target, i.e. the NEW policy.
-        return false;
-      }
-      switch (eval->HeadTarget->GetPolicyStatusCMP0199()) {
-        case cmPolicies::WARN:
-          if (eval->Context.LG->GetMakefile()->PolicyOptionalWarningEnabled(
-                "CMAKE_POLICY_WARNING_CMP0199")) {
-            std::string const err =
-              cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0199),
-                       "\nEvaluation of $<CONFIG> for imported target  \"",
-                       eval->CurrentTarget->GetName(), "\", used by \"",
-                       eval->HeadTarget->GetName(),
-                       "\", may match multiple configurations.\n");
-            eval->Context.LG->GetCMakeInstance()->IssueMessage(
-              MessageType ::AUTHOR_WARNING, err, eval->Backtrace);
-          }
-          CM_FALLTHROUGH;
-        case cmPolicies::OLD:
-          return true;
-        case cmPolicies::NEW:
-          return false;
-      }
+    bool const useConsumerConfig =
+      (targetIsImported &&
+       eval->CurrentTarget->Target->GetOrigin() != cmTarget::Origin::Cps);
 
-      // Should be unreachable
-      assert(false);
-      return false;
-    }();
-
-    if (!targetIsImported || oldPolicy) {
+    if (!targetIsImported || useConsumerConfig) {
       // Does the consuming target's configuration match any of the arguments?
       for (auto const& param : parameters) {
         if (eval->Context.Config.empty()) {
@@ -2906,13 +2875,55 @@ static const struct ConfigurationTestNode : public cmGeneratorExpressionNode
       std::string suffix;
       if (eval->CurrentTarget->Target->GetMappedConfig(eval->Context.Config,
                                                        loc, imp, suffix)) {
+        // Finish determine the context(s) in which the expression should be
+        // evaluated. Note that we use the consumer's policy, so that end users
+        // can override the imported target's policy. This may be needed if
+        // upstream has changed their policy version without realizing that
+        // consumers were depending on the OLD behavior.
+        bool const oldPolicy = [&] {
+          if (!useConsumerConfig) {
+            // Targets imported from CPS shall use only the selected
+            // configuration of the imported target.
+            return false;
+          }
+          cmLocalGenerator const* const lg = eval->Context.LG;
+          switch (eval->HeadTarget->GetPolicyStatusCMP0199()) {
+            case cmPolicies::WARN:
+              if (lg->GetMakefile()->PolicyOptionalWarningEnabled(
+                    "CMAKE_POLICY_WARNING_CMP0199")) {
+                std::string const err =
+                  cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0199),
+                           "\nEvaluation of $<CONFIG> for imported target  \"",
+                           eval->CurrentTarget->GetName(), "\", used by \"",
+                           eval->HeadTarget->GetName(),
+                           "\", may match multiple configurations.\n");
+                lg->GetCMakeInstance()->IssueMessage(
+                  MessageType ::AUTHOR_WARNING, err, eval->Backtrace);
+              }
+              CM_FALLTHROUGH;
+            case cmPolicies::OLD:
+              return true;
+            case cmPolicies::NEW:
+              return false;
+          }
+
+          // Should be unreachable
+          assert(false);
+          return false;
+        }();
+
         if (oldPolicy) {
+          // If CMPxxxx is OLD (and we aren't dealing with a target imported
+          // form CPS), we already evaluated in the context of the consuming
+          // target. Next, for imported targets, we will evaluate based on the
+          // mapped configurations.
+          //
           // If the target has a MAP_IMPORTED_CONFIG_<CONFIG> property for the
-          // consumer's <CONFIG>, match *any* config in that list, regardless
-          // of whether it's valid or of what GetMappedConfig actually picked.
-          // This will result in $<CONFIG> producing '1' for multiple configs,
-          // and is almost certainly wrong, but it's what CMake did for a very
-          // long time, and... Hyrum's Law.
+          // consumer's <CONFIG>, we will match *any* config in that list,
+          // regardless of whether it's valid or of what GetMappedConfig
+          // actually picked. This will result in $<CONFIG> producing '1' for
+          // multiple configs, and is almost certainly wrong, but it's what
+          // CMake did for a very long time, and... Hyrum's Law.
           cmList mappedConfigs;
           std::string mapProp =
             cmStrCat("MAP_IMPORTED_CONFIG_",
@@ -2931,11 +2942,13 @@ static const struct ConfigurationTestNode : public cmGeneratorExpressionNode
           }
         }
 
-        // This imported target has an appropriate location for this (possibly
-        // mapped) config.
+        // Finally, check if we selected (possibly via mapping) a configuration
+        // for this imported target, and if we should evaluate the expression
+        // in the context of the same.
+        //
+        // For targets imported from CPS, this is the only context we evaluate
+        // the expression.
         if (!suffix.empty()) {
-          // Use the (possibly mapped) configuration of the imported location
-          // that was selected.
           for (auto const& param : parameters) {
             if (cmStrCat('_', cmSystemTools::UpperCase(param)) == suffix) {
               return "1";
