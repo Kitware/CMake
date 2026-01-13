@@ -8,5 +8,5 @@
 +#undef _POSIX_C_SOURCE
 +#undef _POSIX_SOURCE
 
- #include <openssl/crypto.h>
- #include "internal/cryptlib.h"
+ /* We need to use the OPENSSL_fork_*() deprecated APIs */
+ #define OPENSSL_SUPPRESS_DEPRECATED

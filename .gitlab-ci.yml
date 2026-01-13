@@ -234,7 +234,7 @@ b:centos7-x86_64:
     variables:
         CMAKE_CI_ARTIFACTS_NAME: "artifacts-centos7-x86_64"
 
-b:centos7-aarch64:
+b:centos8-aarch64:
     extends:
         - .linux_release_aarch64
         - .cmake_build_linux_release
@@ -242,7 +242,7 @@ b:centos7-aarch64:
         - .linux_aarch64_tags
         - .run_manually
     variables:
-        CMAKE_CI_ARTIFACTS_NAME: "artifacts-centos7-aarch64"
+        CMAKE_CI_ARTIFACTS_NAME: "artifacts-centos8-aarch64"
         CMAKE_CI_NO_MR: "true"
 
 t:debian13-ninja:
@@ -263,7 +263,7 @@ t:debian13-aarch64-ninja:
         - .linux_aarch64_tags
         - .cmake_junit_artifacts
         - .run_dependent
-        - .needs_centos7_aarch64
+        - .needs_centos8_aarch64
     variables:
         CMAKE_CI_NO_MR: "true"
 
@@ -551,7 +551,7 @@ t:cuda13.0-aarch64-nvidia:
         - .linux_aarch64_tags_cuda_arch_75
         - .cmake_junit_artifacts
         - .run_dependent
-        - .needs_centos7_aarch64
+        - .needs_centos8_aarch64
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
