@@ -309,7 +309,7 @@ auto const TestPresetExecutionHelper =
       .Bind("enableFailover"_s, &TestPreset::ExecutionOptions::EnableFailover,
             cmCMakePresetsGraphInternal::PresetOptionalBoolHelper, false)
       .Bind("jobs"_s, &TestPreset::ExecutionOptions::Jobs,
-            cmCMakePresetsGraphInternal::PresetOptionalIntHelper, false)
+            cmCMakePresetsGraphInternal::PresetOptionalUIntHelper, false)
       .Bind("resourceSpecFile"_s,
             &TestPreset::ExecutionOptions::ResourceSpecFile,
             cmCMakePresetsGraphInternal::PresetStringHelper, false)

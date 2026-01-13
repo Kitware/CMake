@@ -40,7 +40,7 @@ using cmCMakePresetsGraphInternal::BaseMacroExpander;
 using cmCMakePresetsGraphInternal::ExpandMacros;
 
 constexpr int MIN_VERSION = 1;
-constexpr int MAX_VERSION = 10;
+constexpr int MAX_VERSION = 11;
 
 struct CMakeVersion
 {
@@ -381,6 +381,21 @@ bool PresetOptionalIntHelper(cm::optional<int>& out, Json::Value const* value,
                              cmJSONState* state)
 {
   static auto const helper = JSONHelperBuilder::Optional<int>(PresetIntHelper);
+  return helper(out, value, state);
+}
+
+bool PresetUIntHelper(unsigned int& out, Json::Value const* value,
+                      cmJSONState* state)
+{
+  static auto const helper = JSONHelperBuilder::UInt();
+  return helper(out, value, state);
+}
+
+bool PresetOptionalUIntHelper(cm::optional<unsigned int>& out,
+                              Json::Value const* value, cmJSONState* state)
+{
+  static auto const helper =
+    JSONHelperBuilder::Optional<unsigned int>(PresetUIntHelper);
   return helper(out, value, state);
 }
 

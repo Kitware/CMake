@@ -83,6 +83,7 @@ run_cmake_build_presets(BuildDirectoryOverride "" "override" "${RunCMake_BINARY_
 set(CMakePresets_SCHEMA_EXPECTED_RESULT 1)
 run_cmake_build_presets(PresetsUnsupported "x" "x" "")
 run_cmake_build_presets(ConditionFuture "x" "conditionFuture" "")
+run_cmake_build_presets(JobsNegative "" "default" "")
 set(CMakePresets_SCHEMA_EXPECTED_RESULT 0)
 
 run_cmake_build_presets(ConfigurePresetUnreachable "x" "x" "")

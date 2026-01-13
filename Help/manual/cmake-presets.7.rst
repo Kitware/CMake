@@ -543,6 +543,8 @@ that may contain the following fields:
   inherited build preset environments, but before environment variables
   explicitly specified in this build preset.
 
+.. _`CMakePresets build jobs`:
+
 ``jobs``
   An optional integer. Equivalent to passing
   :option:`--parallel <cmake--build --parallel>` or ``-j`` on the command line.
@@ -550,6 +552,9 @@ that may contain the following fields:
   ``<jobs>`` omitted; alternatively, one can define the environment variable
   :envvar:`CMAKE_BUILD_PARALLEL_LEVEL` as an empty string using the
   ``environment`` field.
+
+  In preset files specifying version ``11`` or above, this field does not
+  accept negative values.
 
 ``targets``
   An optional string or array of strings. Equivalent to passing
@@ -890,10 +895,15 @@ that may contain the following fields:
     An optional bool. If true, equivalent to passing :option:`-F <ctest -F>`
     on the command line.
 
+.. _`CMakePresets test jobs`:
+
   ``jobs``
     An optional integer. Equivalent to passing
     :option:`--parallel <ctest --parallel>` on the command line. If the value
     is ``0``, it is equivalent to unbounded parallelism.
+
+    In preset files specifying version ``11`` or above, this field does not accept
+    negative values.
 
   ``resourceSpecFile``
     An optional string. Equivalent to passing
@@ -1444,6 +1454,19 @@ they were added and a summary of the new features and changes is given below.
     * Changes to `Configure Presets <Configure Preset_>`_:
 
       * The `graphviz <CMakePresets graphviz_>`_ field was added.
+
+  ``11``
+    .. versionadded:: 4.3
+
+    * Changes to `Build Presets <Build Preset_>`_
+
+      * The `jobs <CMakePresets build jobs_>`_ field no longer accepts negative
+        values.
+
+    * Changes to `Test Presets <Test Preset_>`_
+
+      * The `jobs <CMakePresets test jobs_>`_ field no longer accepts negative
+        values.
 
 Schema
 ======

@@ -1,0 +1,5 @@
+^CMake Error: Could not read presets from [^
+]*/Tests/RunCMake/CMakePresetsBuild/JobsNegative:
+CMakePresets\.json:14: "jobs" expected an unsigned integer, got: -10
+            "jobs": -10
+                    \^$
