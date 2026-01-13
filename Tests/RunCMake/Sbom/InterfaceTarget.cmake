@@ -16,4 +16,5 @@ target_link_libraries(interface INTERFACE bar::bar)
 install(
   TARGETS interface
   EXPORT interface_targets
+  DESTINATION .
 )

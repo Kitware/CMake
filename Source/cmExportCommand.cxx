@@ -84,7 +84,6 @@ static void AddExportGenerator(
   if (exportSet) {
     globalGenerator->AddBuildExportExportSet(exportGenerator.get());
   }
-
   makefile.AddExportBuildFileGenerator(std::move(exportGenerator));
 }
 
@@ -426,6 +425,7 @@ static bool HandleSbomMode(std::vector<std::string> const& args,
 
   using arg_t = cmSbomArguments;
   using gen_t = cmExportBuildSbomGenerator;
+  status.GetMakefile().SetExplicitlyGeneratesSbom(true);
   return HandleSpecialExportMode<arg_t, gen_t>(args, status);
 }
 

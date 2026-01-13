@@ -1430,6 +1430,16 @@ void cmMakefile::AddTestGenerator(std::unique_ptr<cmTestGenerator> g)
   }
 }
 
+bool cmMakefile::ExplicitlyGeneratesSbom() const
+{
+  return this->ExplicitSbomGenerator;
+}
+
+void cmMakefile::SetExplicitlyGeneratesSbom(bool status)
+{
+  this->ExplicitSbomGenerator = status;
+}
+
 void cmMakefile::PushFunctionScope(std::string const& fileName,
                                    cmPolicies::PolicyMap const& pm)
 {

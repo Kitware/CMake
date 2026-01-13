@@ -1412,6 +1412,7 @@ add_RunCMake_test(AutoExportDll
 add_RunCMake_test(AndroidMK)
 add_RunCMake_test(ExportPackageInfo)
 add_RunCMake_test(ExportSbom)
+add_RunCMake_test(EnvSbom)
 add_RunCMake_test(InstallPackageInfo)
 add_RunCMake_test(InstallExportsAsPackageInfo)
 add_RunCMake_test(InstallSbom)

@@ -854,6 +854,9 @@ public:
   //! Initialize a makefile from its parent
   void InitializeFromParent(cmMakefile* parent);
 
+  bool ExplicitlyGeneratesSbom() const;
+  void SetExplicitlyGeneratesSbom(bool status = true);
+
   void AddInstallGenerator(std::unique_ptr<cmInstallGenerator> g);
 
   std::vector<std::unique_ptr<cmInstallGenerator>>& GetInstallGenerators()
@@ -1239,6 +1242,7 @@ private:
   cmFindPackageStack FindPackageStack;
   unsigned int FindPackageStackNextIndex = 0;
 
+  bool ExplicitSbomGenerator = false;
   bool DebugFindPkg = false;
 
   bool CheckSystemVars;
