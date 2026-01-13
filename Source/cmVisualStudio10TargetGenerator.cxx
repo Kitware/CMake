@@ -1927,7 +1927,7 @@ void cmVisualStudio10TargetGenerator::WriteCustomRuleCpp(
     platforms.push_back("ARM64");
   }
   for (std::string const& p : platforms) {
-    std::string const cond = this->CalcCondition(config);
+    std::string const cond = this->CalcCondition(config, p);
     if (buildInParallel == BuildInParallel::Yes &&
         this->GlobalGenerator->IsBuildInParallelSupported()) {
       e2.WritePlatformConfigTag("BuildInParallel", cond, "true");
@@ -3109,7 +3109,7 @@ void cmVisualStudio10TargetGenerator::WritePathAndIncrementalLinkOptions(
   }
   for (std::string const& p : platforms) {
     for (std::string const& config : this->Configurations) {
-      std::string const cond = this->CalcCondition(config);
+      std::string const cond = this->CalcCondition(config, p);
       if (this->BuildAsX && p == this->Platform) {
         e1.WritePlatformConfigTag("BuildAsX", cond, "true");
       }
