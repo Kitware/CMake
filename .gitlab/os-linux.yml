@@ -235,14 +235,6 @@
         CMAKE_CI_BUILD_TYPE: Release
         CTEST_NO_WARNINGS_ALLOWED: 1
 
-.fedora43_ninja_multi:
-    extends: .fedora43
-
-    variables:
-        CMAKE_CONFIGURATION: fedora43_ninja_multi
-        CTEST_NO_WARNINGS_ALLOWED: 1
-        CMAKE_GENERATOR: "Ninja Multi-Config"
-
 .fedora43_makefiles:
     extends: .fedora43
 
@@ -309,6 +301,13 @@
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake-ci"
         CMAKE_CONFIGURATION: fedora43_ninja_lfortran
         CTEST_LABELS: "Fortran"
+
+.fedora43_ninja_multi:
+    extends: .fedora43
+
+    variables:
+        CMAKE_CONFIGURATION: fedora43_ninja_multi
+        CMAKE_GENERATOR: "Ninja Multi-Config"
 
 .fedora43_ninja_clang:
     extends: .fedora43
@@ -875,19 +874,6 @@
         # Make the CMake package available.
         - mkdir -p build/install
         - tar -C build/install --strip-components=1 -xzf build/cmake-*-linux-$CMAKE_ARCH.tar.gz
-        - .gitlab/ci/sccache.sh
-        - sccache --start-server
-        - sccache --show-stats
-        - "$LAUNCHER build/install/bin/ctest --output-on-failure -V -S .gitlab/ci/ctest_standalone.cmake"
-        - sccache --show-stats
-
-    interruptible: true
-
-.cmake_test_linux_external:
-    stage: test-ext
-
-    script:
-        - *before_script_linux
         - .gitlab/ci/sccache.sh
         - sccache --start-server
         - sccache --show-stats

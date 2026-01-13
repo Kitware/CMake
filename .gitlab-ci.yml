@@ -339,6 +339,14 @@ t:fedora43-ninja-lfortran:
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
+t:fedora43-ninja-multi:
+    extends:
+        - .fedora43_ninja_multi
+        - .cmake_test_linux_release
+        - .linux_x86_64_tags
+        - .run_dependent
+        - .needs_centos7_x86_64
+
 t:fedora43-ninja-clang:
     extends:
         - .fedora43_ninja_clang
@@ -706,16 +714,6 @@ t:fedora43-makefiles-symlinked:
         - b:fedora43-makefiles-symlinked
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
-
-t:fedora43-ninja-multi:
-    extends:
-        - .fedora43_ninja_multi
-        - .cmake_test_linux_external
-        - .linux_x86_64_tags
-        - .cmake_junit_artifacts
-        - .run_dependent
-    needs:
-        - t:fedora43-ninja
 
 t:intel2016u2-makefiles:
     extends:
