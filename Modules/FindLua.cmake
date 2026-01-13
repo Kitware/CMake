@@ -16,6 +16,9 @@ Lua is a embeddable scripting language.
 .. versionadded:: 3.18
   Support for Lua 5.4.
 
+.. versionadded:: 4.3
+  Support for Lua 5.5.
+
 When working with Lua, its library headers are intended to be included in
 project source code as:
 
@@ -144,7 +147,7 @@ unset(_lua_append_versions)
 
 # this is a function only to have all the variables inside go away automatically
 function(_lua_get_versions)
-    set(LUA_VERSIONS5 5.4 5.3 5.2 5.1 5.0)
+    set(LUA_VERSIONS5 5.5 5.4 5.3 5.2 5.1 5.0)
 
     if (Lua_FIND_VERSION_EXACT)
         if (Lua_FIND_VERSION_COUNT GREATER 1)
@@ -214,11 +217,11 @@ function(_lua_get_header_version)
   file(STRINGS "${_hdr_file}" lua_version_strings
        REGEX "^#define[ \t]+LUA_(RELEASE[ \t]+\"Lua [0-9]|VERSION([ \t]+\"Lua [0-9]|_[MR])).*")
 
-  string(REGEX REPLACE ".*;#define[ \t]+LUA_VERSION_MAJOR[ \t]+\"([0-9])\"[ \t]*;.*" "\\1" Lua_VERSION_MAJOR ";${lua_version_strings};")
+  string(REGEX REPLACE ".*;#define[ \t]+LUA_VERSION_MAJOR(_N)?[ \t]+\"?([0-9])\"?[ \t]*;.*" "\\2" Lua_VERSION_MAJOR ";${lua_version_strings};")
 
   if (Lua_VERSION_MAJOR MATCHES "^[0-9]+$")
-    string(REGEX REPLACE ".*;#define[ \t]+LUA_VERSION_MINOR[ \t]+\"([0-9])\"[ \t]*;.*" "\\1" Lua_VERSION_MINOR ";${lua_version_strings};")
-    string(REGEX REPLACE ".*;#define[ \t]+LUA_VERSION_RELEASE[ \t]+\"([0-9])\"[ \t]*;.*" "\\1" Lua_VERSION_PATCH ";${lua_version_strings};")
+    string(REGEX REPLACE ".*;#define[ \t]+LUA_VERSION_MINOR(_N)?[ \t]+\"?([0-9])\"?[ \t]*;.*" "\\2" Lua_VERSION_MINOR ";${lua_version_strings};")
+    string(REGEX REPLACE ".*;#define[ \t]+LUA_VERSION_RELEASE(_N)?[ \t]+\"?([0-9])\"?[ \t]*;.*" "\\2" Lua_VERSION_PATCH ";${lua_version_strings};")
     set(Lua_VERSION "${Lua_VERSION_MAJOR}.${Lua_VERSION_MINOR}.${Lua_VERSION_PATCH}")
   else ()
     string(REGEX REPLACE ".*;#define[ \t]+LUA_RELEASE[ \t]+\"Lua ([0-9.]+)\"[ \t]*;.*" "\\1" Lua_VERSION ";${lua_version_strings};")

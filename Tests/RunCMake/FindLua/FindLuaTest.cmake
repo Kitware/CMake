@@ -64,13 +64,13 @@ endfunction()
 # Simple test
 test_path(prefix1 prefix1/include 5.3)
 # Find highest version
-test_path(prefix2 prefix2/include/lua5.3 5.3)
-foreach(ver 5.3 5.2 5.1)
+test_path(prefix2 prefix2/include/lua5.5 5.5)
+foreach(ver 5.5 5.3 5.2 5.1)
     # At least X or X.0 -> Highest
     set(VERSION "${ver}")
-    test_path(prefix2 prefix2/include/lua5.3 5.3)
+    test_path(prefix2 prefix2/include/lua5.5 5.5)
     set(VERSION "${ver}.0")
-    test_path(prefix2 prefix2/include/lua5.3 5.3)
+    test_path(prefix2 prefix2/include/lua5.5 5.5)
     # Exactly X/X.0
     set(VERSION "${ver}" EXACT)
     test_path(prefix2 prefix2/include/lua${ver} ${ver})
