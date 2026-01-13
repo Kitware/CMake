@@ -2046,13 +2046,34 @@ Json::Value Target::DumpArtifacts()
   }
 
   // Add Windows-specific artifacts produced by the linker.
+  // NOTE: HasImportLibrary() only checks if the target SHOULD have an import
+  //       library, not whether it has one set.
   if (this->GT->HasImportLibrary(this->Config)) {
-    Json::Value artifact = Json::objectValue;
-    artifact["path"] =
-      RelativeIfUnder(this->TopBuild,
-                      this->GT->GetFullPath(
-                        this->Config, cmStateEnums::ImportLibraryArtifact));
-    artifacts.append(std::move(artifact)); // NOLINT(*)
+    std::string fullPath;
+    if (this->GT->IsImported()) {
+      // This imported target might not be well-formed. For Windows, it should
+      // have its IMPORTED_IMPLIB property set, and CMP0111's NEW behavior is
+      // intended to catch and report that. But if nothing uses the imported
+      // target, there won't have been any opportunity to detect that property
+      // being missing before here. Therefore, we tell ImportedGetFullPath()
+      // not to raise that CMP0111 error if it sees the problem. We don't want
+      // to trigger an error for a target that nothing uses, as that would be a
+      // regression compared to CMake 4.1 and earlier behavior.
+      fullPath = this->GT->Target->ImportedGetFullPath(
+        this->Config, cmStateEnums::ImportLibraryArtifact,
+        cmTarget::ImportArtifactMissingOk::Yes);
+      if (cmHasLiteralSuffix(fullPath, "-NOTFOUND")) {
+        fullPath.clear();
+      }
+    } else {
+      fullPath = this->GT->NormalGetFullPath(
+        this->Config, cmStateEnums::ImportLibraryArtifact, false);
+    }
+    if (!fullPath.empty()) {
+      Json::Value artifact = Json::objectValue;
+      artifact["path"] = RelativeIfUnder(this->TopBuild, fullPath);
+      artifacts.append(std::move(artifact)); // NOLINT(*)
+    }
   }
   if (this->GT->IsDLLPlatform() &&
       this->GT->GetType() != cmStateEnums::STATIC_LIBRARY) {

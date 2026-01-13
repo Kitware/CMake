@@ -328,8 +328,15 @@ public:
   cmBTStringRange GetInterfaceHeaderSetsEntries() const;
   cmBTStringRange GetInterfaceCxxModuleSetsEntries() const;
 
-  std::string ImportedGetFullPath(std::string const& config,
-                                  cmStateEnums::ArtifactType artifact) const;
+  enum class ImportArtifactMissingOk
+  {
+    No,
+    Yes
+  };
+
+  std::string ImportedGetFullPath(
+    std::string const& config, cmStateEnums::ArtifactType artifact,
+    ImportArtifactMissingOk missingOk = ImportArtifactMissingOk::No) const;
 
   struct StrictTargetComparison
   {
