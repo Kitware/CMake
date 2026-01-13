@@ -37,11 +37,11 @@ tree with data specific to that command. These files remain until after
 `Indexing`_ occurs.
 
 CMake sets the :prop_gbl:`RULE_LAUNCH_COMPILE`, :prop_gbl:`RULE_LAUNCH_LINK`
-and :prop_gbl:`RULE_LAUNCH_CUSTOM` global properties to use the
-``ctest --instrument`` launcher in order to capture details of each compile,
-link, and custom command respectively. If the project has been configured with
-:module:`CTestUseLaunchers`, ``ctest --instrument`` will also include the
-behavior usually performed by ``ctest --launch``.
+and :prop_gbl:`RULE_LAUNCH_CUSTOM` global properties to wrap each compile, link
+and custom command invocation in a launcher that performs instrumentation and
+writes out a `v1 Snippet File`_. If the project has been configured with
+:module:`CTestUseLaunchers`, the launcher will collect instrumentation data in
+addition to performing the communication typically handled by that module.
 
 .. _`cmake-instrumentation Indexing`:
 
