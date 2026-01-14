@@ -23,7 +23,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
 
 #ifdef USE_ARES
@@ -33,7 +32,7 @@
 #ifdef USE_HTTPSRR
 
 #define CURL_MAXLEN_host_name 253
-#define MAX_HTTPSRR_ALPNS 4
+#define MAX_HTTPSRR_ALPNS     4
 
 struct Curl_easy;
 

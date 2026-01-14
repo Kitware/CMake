@@ -21,16 +21,11 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "curl_setup.h"
+
 #ifndef CURL_DISABLE_FTP
-#include <curl/curl.h>
 
 #include "curl_fnmatch.h"
-#include "curl_memory.h"
-
-/* The last #include file should be: */
-#include "memdebug.h"
 
 #ifndef HAVE_FNMATCH
 
@@ -243,7 +238,7 @@ static int setcharset(const unsigned char **p, unsigned char *charset)
     case CURLFNM_SCHS_RIGHTBRLEFTBR:
       if(c == ']')
         return SETCHARSET_OK;
-      state  = CURLFNM_SCHS_DEFAULT;
+      state = CURLFNM_SCHS_DEFAULT;
       charset[c] = 1;
       (*p)++;
       break;
@@ -361,7 +356,8 @@ int Curl_fnmatch(void *ptr, const char *pattern, const char *string)
   return loop((const unsigned char *)pattern,
               (const unsigned char *)string, 2);
 }
-#else
+#else /* HAVE_FNMATCH */
+
 #include <fnmatch.h>
 /*
  * @unittest: 1307
@@ -384,7 +380,6 @@ int Curl_fnmatch(void *ptr, const char *pattern, const char *string)
   }
   /* not reached */
 }
+#endif /* !HAVE_FNMATCH */
 
-#endif
-
-#endif /* if FTP is disabled */
+#endif /* !CURL_DISABLE_FTP */

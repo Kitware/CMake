@@ -56,10 +56,10 @@ macro(curl_internal_test _curl_test)
         "${_curl_test_add_libraries}"
       OUTPUT_VARIABLE CURL_TEST_OUTPUT)
     if(${_curl_test})
-      set(${_curl_test} 1 CACHE INTERNAL "Curl test")
+      set(${_curl_test} 1 CACHE INTERNAL "curl test")
       message(STATUS "Performing Test ${_curl_test} - Success")
     else()
-      set(${_curl_test} "" CACHE INTERNAL "Curl test")
+      set(${_curl_test} "" CACHE INTERNAL "curl test")
       message(STATUS "Performing Test ${_curl_test} - Failed")
     endif()
   endif()
@@ -74,6 +74,10 @@ macro(curl_dependency_option _option_name _find_name _desc_name)
     find_package(${_find_name})
   elseif(${_option_name})
     find_package(${_find_name} REQUIRED)
+  else()
+    string(TOUPPER "${_find_name}" _find_name_upper)
+    set(${_find_name}_FOUND OFF)  # cmake-lint: disable=C0103
+    set(${_find_name_upper}_FOUND OFF)  # cmake-lint: disable=C0103
   endif()
 endmacro()
 

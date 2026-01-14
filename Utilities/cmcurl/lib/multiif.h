@@ -23,14 +23,12 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 /*
  * Prototypes for library-wide functions provided by multi.c
  */
 
 void Curl_expire(struct Curl_easy *data, timediff_t milli, expire_id);
 void Curl_expire_ex(struct Curl_easy *data,
-                    const struct curltime *nowp,
                     timediff_t milli, expire_id id);
 bool Curl_expire_clear(struct Curl_easy *data);
 void Curl_expire_done(struct Curl_easy *data, expire_id id);
@@ -47,7 +45,7 @@ void Curl_multi_connchanged(struct Curl_multi *multi);
 
 /* Internal version of curl_multi_init() accepts size parameters for the
    socket, connection and dns hashes */
-struct Curl_multi *Curl_multi_handle(unsigned int xfer_table_size,
+struct Curl_multi *Curl_multi_handle(uint32_t xfer_table_size,
                                      size_t hashsize,
                                      size_t chashsize,
                                      size_t dnssize,
@@ -68,13 +66,11 @@ CURLMcode Curl_multi_add_perform(struct Curl_multi *multi,
                                  struct Curl_easy *data,
                                  struct connectdata *conn);
 
-
 /* Return the value of the CURLMOPT_MAX_CONCURRENT_STREAMS option */
 unsigned int Curl_multi_max_concurrent_streams(struct Curl_multi *multi);
 
 CURLMcode Curl_multi_pollset(struct Curl_easy *data,
-                             struct easy_pollset *ps,
-                             const char *caller);
+                             struct easy_pollset *ps);
 
 /**
  * Borrow the transfer buffer from the multi, suitable
@@ -154,7 +150,7 @@ void Curl_multi_xfer_sockbuf_release(struct Curl_easy *data, char *buf);
  * Returns NULL if not found.
  */
 struct Curl_easy *Curl_multi_get_easy(struct Curl_multi *multi,
-                                      unsigned int mid);
+                                      uint32_t mid);
 
 /* Get the # of transfers current in process/pending. */
 unsigned int Curl_multi_xfers_running(struct Curl_multi *multi);
@@ -164,5 +160,7 @@ unsigned int Curl_multi_xfers_running(struct Curl_multi *multi);
 void Curl_multi_mark_dirty(struct Curl_easy *data);
 /* Clear transfer from the dirty set. */
 void Curl_multi_clear_dirty(struct Curl_easy *data);
+
+void Curl_multi_set_now(struct Curl_multi *multi);
 
 #endif /* HEADER_CURL_MULTIIF_H */

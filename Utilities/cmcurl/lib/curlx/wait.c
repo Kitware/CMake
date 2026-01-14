@@ -21,14 +21,11 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 #include "../curl_setup.h"
 
 #ifndef HAVE_SELECT
 #error "We cannot compile without select() support."
 #endif
-
-#include <limits.h>
 
 #ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>
@@ -74,7 +71,7 @@ int curlx_wait_ms(timediff_t timeout_ms)
   /* prevent overflow, timeout_ms is typecast to ULONG/DWORD. */
 #if TIMEDIFF_T_MAX >= ULONG_MAX
   if(timeout_ms >= ULONG_MAX)
-    timeout_ms = ULONG_MAX-1;
+    timeout_ms = ULONG_MAX - 1;
     /* do not use ULONG_MAX, because that is equal to INFINITE */
 #endif
   Sleep((DWORD)timeout_ms);

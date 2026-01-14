@@ -23,9 +23,7 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
 /* This file is for lib internal stuff */
-
 #include "curl_setup.h"
 
 #include "bufq.h"
@@ -47,7 +45,6 @@ enum upgrade101 {
   UPGR101_H2,                 /* upgrade to HTTP/2 requested */
   UPGR101_RECEIVED            /* 101 response received */
 };
-
 
 /*
  * Request specific data in the easy handle (Curl_easy). Previously,
@@ -130,6 +127,7 @@ struct SingleRequest {
   BIT(sendbuf_init); /* sendbuf is initialized */
   BIT(shutdown);     /* request end will shutdown connection */
   BIT(shutdown_err_ignore); /* errors in shutdown will not fail request */
+  BIT(reader_started); /* client reads have started */
 };
 
 /**
@@ -195,10 +193,12 @@ bool Curl_req_done_sending(struct Curl_easy *data);
  */
 CURLcode Curl_req_send_more(struct Curl_easy *data);
 
-/**
- * TRUE iff the request wants to send, e.g. has buffered bytes.
- */
+/* TRUE if the request wants to send, e.g. is not done sending
+ * and is not blocked. */
 bool Curl_req_want_send(struct Curl_easy *data);
+
+/* TRUE if the request wants to receive and is not blocked. */
+bool Curl_req_want_recv(struct Curl_easy *data);
 
 /**
  * TRUE iff the request has no buffered bytes yet to send.

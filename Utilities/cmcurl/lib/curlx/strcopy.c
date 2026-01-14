@@ -1,5 +1,3 @@
-#ifndef HEADER_CURL_MBEDTLS_THREADLOCK_H
-#define HEADER_CURL_MBEDTLS_THREADLOCK_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -8,7 +6,6 @@
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
- * Copyright (C) Hoi-Ho Chan, <hoiho.chan@gmail.com>
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -26,25 +23,28 @@
  ***************************************************************************/
 #include "../curl_setup.h"
 
-#ifdef USE_MBEDTLS
+#include "strcopy.h"
 
-#if (defined(USE_THREADS_POSIX) && defined(HAVE_PTHREAD_H)) || \
-    defined(_WIN32)
-
-int Curl_mbedtlsthreadlock_thread_setup(void);
-int Curl_mbedtlsthreadlock_thread_cleanup(void);
-int Curl_mbedtlsthreadlock_lock_function(int n);
-int Curl_mbedtlsthreadlock_unlock_function(int n);
-
-#else
-
-#define Curl_mbedtlsthreadlock_thread_setup() 1
-#define Curl_mbedtlsthreadlock_thread_cleanup() 1
-#define Curl_mbedtlsthreadlock_lock_function(x) 1
-#define Curl_mbedtlsthreadlock_unlock_function(x) 1
-
-#endif /* (USE_THREADS_POSIX && HAVE_PTHREAD_H) || _WIN32 */
-
-#endif /* USE_MBEDTLS */
-
-#endif /* HEADER_CURL_MBEDTLS_THREADLOCK_H */
+/*
+ * curlx_strcopy() is a replacement for strcpy.
+ *
+ * Provide the target buffer @dest and size of the target buffer @dsize, If
+ * the source string @src with its *string length* @slen fits in the target
+ * buffer it will be copied there - including storing a null terminator.
+ *
+ * If the target buffer is too small, the copy is not performed but if the
+ * target buffer has a non-zero size it will get a null terminator stored.
+ */
+void curlx_strcopy(char *dest,      /* destination buffer */
+                   size_t dsize,    /* size of target buffer */
+                   const char *src, /* source string */
+                   size_t slen)     /* length of source string to copy */
+{
+  DEBUGASSERT(slen < dsize);
+  if(slen < dsize) {
+    memcpy(dest, src, slen);
+    dest[slen] = 0;
+  }
+  else if(dsize)
+    dest[0] = 0;
+}
