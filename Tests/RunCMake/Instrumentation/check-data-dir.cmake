@@ -1,5 +1,6 @@
 include(${CMAKE_CURRENT_LIST_DIR}/verify-snippet.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/json.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/check-query-dir.cmake)
 
 file(GLOB snippets LIST_DIRECTORIES false ${v1}/data/*)
 if (NOT snippets)

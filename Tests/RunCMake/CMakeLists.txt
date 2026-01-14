@@ -429,7 +429,8 @@ add_RunCMake_test(FileAPI -DPython_EXECUTABLE=${Python_EXECUTABLE}
                           -DCMAKE_CXX_SIMULATE_ID=${CMAKE_CXX_SIMULATE_ID}
                           -DCMake_TEST_JSON_SCHEMA=${CMake_TEST_JSON_SCHEMA})
 if(CMAKE_GENERATOR MATCHES "Make|Ninja|FASTBuild")
-  add_RunCMake_test(Instrumentation)
+  add_RunCMake_test(Instrumentation -DPython_EXECUTABLE=${Python_EXECUTABLE}
+                                    -DCMake_TEST_JSON_SCHEMA=${CMake_TEST_JSON_SCHEMA})
 endif()
 add_RunCMake_test(ConfigDir)
 if(CMake_TEST_FindPython2)

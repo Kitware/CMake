@@ -1,4 +1,5 @@
 # Performs generic (non-project specific) validation of v1 Snippet File Contents
+include_guard()
 
 include(${CMAKE_CURRENT_LIST_DIR}/json.cmake)
 
