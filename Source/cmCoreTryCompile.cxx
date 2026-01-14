@@ -832,8 +832,9 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
               fprintf(fout, "add_executable(\"%s\" ALIAS \"%s\")\n", i.c_str(),
                       alias->second.c_str());
             } else {
-              // Other cases like UTILITY and GLOBAL_TARGET are excluded when
-              // arguments.LinkLibraries is initially parsed in this function.
+              // Other cases like UTILITY and GLOBAL_TARGET are excluded
+              // when arguments.LinkLibraries is initially parsed in this
+              // function.
               fprintf(fout, "add_library(\"%s\" ALIAS \"%s\")\n", i.c_str(),
                       alias->second.c_str());
             }
@@ -865,7 +866,8 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
         ? "OLD"
         : "NEW");
 
-    /* Set the appropriate policy information for the LINKER: prefix expansion
+    /* Set the appropriate policy information for the LINKER: prefix
+     * expansion
      */
     fprintf(fout, "cmake_policy(SET CMP0181 %s)\n",
             this->Makefile->GetPolicyStatus(cmPolicies::CMP0181) ==
@@ -873,8 +875,8 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
               ? "NEW"
               : "OLD");
 
-    // Workaround for -Wl,-headerpad_max_install_names issue until we can avoid
-    // adding that flag in the platform and compiler language files
+    // Workaround for -Wl,-headerpad_max_install_names issue until we can
+    // avoid adding that flag in the platform and compiler language files
     fprintf(fout,
             "include(\"${CMAKE_ROOT}/Modules/Internal/"
             "HeaderpadWorkaround.cmake\")\n");
