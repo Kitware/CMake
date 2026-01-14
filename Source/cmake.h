@@ -709,6 +709,7 @@ public:
   }
 #endif
   void InitializeFileAPI();
+  void InitializeInstrumentation();
 
   cmState* GetState() const { return this->State.get(); }
   void SetCurrentSnapshot(cmStateSnapshot const& snapshot)
