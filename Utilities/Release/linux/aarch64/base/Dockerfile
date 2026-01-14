@@ -4,28 +4,33 @@
 # Produce a base image with a build environment for portable CMake binaries.
 # Build using the directory containing this file as its own build context.
 
-ARG FROM_IMAGE_NAME=centos:7
-ARG FROM_IMAGE_DIGEST=@sha256:43964203bf5d7fe38c6fca6166ac89e4c095e2b0c0a28f6c7c678a1348ddc7fa
+ARG FROM_IMAGE_NAME=centos:8
+ARG FROM_IMAGE_DIGEST=@sha256:a27fd8080b517143cbbbab9dfb7c8571c40d67d534bbdee55bd6c473f432b177
 ARG FROM_IMAGE=$FROM_IMAGE_NAME$FROM_IMAGE_DIGEST
 FROM $FROM_IMAGE
 
+COPY repo-vault.sed /root/
+
 RUN : \
- && yum install -y centos-release-scl \
- && yum install -y \
+ && sed -f /root/repo-vault.sed -i /etc/yum.repos.d/*.repo \
+ && sed -i '/^enabled=0/s/0/1/' /etc/yum.repos.d/CentOS-Linux-PowerTools.repo \
+ && dnf install -y \
         ca-certificates \
         curl \
-        devtoolset-7-gcc \
-        devtoolset-7-gcc-c++ \
         fontconfig-devel \
         freetype-devel \
+        gcc \
+        gcc-c++ \
         git \
+        libstdc++-static \
         libX11-devel \
         libxcb-devel \
         make \
         patch \
         perl \
+        perl-core \
         python3-pip \
         xz \
         which \
- && yum clean all \
+ && dnf clean all \
  && :
