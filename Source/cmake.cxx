@@ -691,6 +691,7 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
         // Resolve script path specified on command line
         // relative to $PWD.
         auto path = cmSystemTools::CollapseFullPath(value);
+        state->InitializeFileAPI();
         state->ReadListFile(args, path);
         return true;
       } },
@@ -2549,7 +2550,7 @@ int cmake::ActualConfigure()
   }
 
 #if !defined(CMAKE_BOOTSTRAP)
-  this->FileAPI = cm::make_unique<cmFileAPI>(this);
+  this->InitializeFileAPI();
   this->FileAPI->ReadQueries();
 
   if (!this->GetIsInTryCompile()) {
@@ -2770,6 +2771,15 @@ void cmake::StopDebuggerIfNeeded(int exitCode)
 }
 
 #endif
+
+void cmake::InitializeFileAPI()
+{
+#ifndef CMAKE_BOOTSTRAP
+  if (!this->FileAPI) {
+    this->FileAPI = cm::make_unique<cmFileAPI>(this);
+  }
+#endif
+}
 
 // handle a command line invocation
 int cmake::Run(const std::vector<std::string>& args, bool noconfigure)
