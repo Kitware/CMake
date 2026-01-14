@@ -6,13 +6,13 @@ install(TARGETS mammal EXPORT mammal DESTINATION .)
 install(TARGETS canine EXPORT canine DESTINATION .)
 
 export(
-  EXPORT mammal
   PACKAGE_INFO foo
+  EXPORT mammal
   VERSION 1.0
   DEFAULT_LICENSE "LGPL-3.0-or-later")
 
 export(
-  EXPORT canine
   PACKAGE_INFO foo
+  EXPORT canine
   APPENDIX dog
   DEFAULT_LICENSE "GPL-3.0-or-later")

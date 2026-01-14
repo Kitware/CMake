@@ -2,4 +2,4 @@ unset(CMAKE_EXPERIMENTAL_EXPORT_PACKAGE_INFO)
 
 add_library(foo INTERFACE)
 install(TARGETS foo EXPORT foo DESTINATION .)
-export(EXPORT foo PACKAGE_INFO foo)
+export(PACKAGE_INFO foo EXPORT foo)

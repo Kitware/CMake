@@ -16,6 +16,8 @@ Synopsis
   export(`EXPORT`_ <export-name> [...])
   export(`PACKAGE`_ <PackageName>)
   export(`SETUP`_ <export-name> [...])
+  export(`PACKAGE_INFO`_ <package-name> [...])
+  export(`SBOM`_ <sbom-name> [...])
 
 Exporting Targets
 ^^^^^^^^^^^^^^^^^
@@ -130,9 +132,12 @@ of the :command:`install(TARGETS)` command.
 Exporting Targets to the |CPS|
 """"""""""""""""""""""""""""""
 
+.. signature::
+  export(PACKAGE_INFO <package-name> [...])
+
 .. code-block:: cmake
 
-  export(EXPORT <export-name> PACKAGE_INFO <package-name>
+  export(PACKAGE_INFO <package-name> EXPORT <export-name>
          [PROJECT <project-name>|NO_PROJECT_METADATA]
          [APPENDIX <appendix-name>]
          [LOWER_CASE_FILE]
@@ -146,7 +151,7 @@ Exporting Targets to the |CPS|
          [DESCRIPTION <description-string>]
          [HOMEPAGE_URL <url-string>])
 
-.. versionadded:: 4.1
+.. versionadded:: 4.3
 .. note::
 
   Experimental. Gated by ``CMAKE_EXPERIMENTAL_EXPORT_PACKAGE_INFO``.
@@ -165,17 +170,19 @@ See :command:`install(PACKAGE_INFO)` for a description of the other options.
 Exporting Software Bill of Materials (SBOM) Documents
 """""""""""""""""""""""""""""""""""""""""""""""""""""
 
+.. signature::
+  export(SBOM <sbom-name> [...])
+
 .. code-block:: cmake
 
-    export(EXPORT <export-name> SBOM <sbom-name>
-           [PROJECT <project-name>|NO_PROJECT_METADATA]
-           [DESTINATION <dir>]
-           [VERSION <major>[.<minor>[.<patch>[.<tweak>]]]]
-           [LICENSE <license-string>]
-           [DESCRIPTION <description-string>]
-           [HOMEPAGE_URL <url-string>]
-           [PACKAGE_URL <url-string>]
-           [FORMAT <string>])
+  export(SBOM <sbom-name> EXPORT <export-name>
+         [FORMAT <string>]
+         [PROJECT <project-name>|NO_PROJECT_METADATA]
+         [VERSION <major>[.<minor>[.<patch>[.<tweak>]]]]
+         [LICENSE <license-string>]
+         [DESCRIPTION <description-string>]
+         [HOMEPAGE_URL <url-string>]
+         [PACKAGE_URL <url-string>])
 
 .. versionadded:: 4.3
 .. note::

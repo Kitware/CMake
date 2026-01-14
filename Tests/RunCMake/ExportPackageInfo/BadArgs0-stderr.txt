@@ -1,5 +1,27 @@
 CMake Error at BadArgs0\.cmake:[0-9]+ \(export\):
-  export EXPORT given invalid argument:
+  export PACKAGE_INFO given invalid argument:
+
+    PACKAGE_INFO: missing required value
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:3 \(include\)
+
+
+CMake Error at BadArgs0\.cmake:[0-9]+ \(export\):
+  export PACKAGE_INFO missing EXPORT\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:3 \(include\)
+
+
+CMake Error at BadArgs0\.cmake:[0-9]+ \(export\):
+  export PACKAGE_INFO given invalid argument:
+
+    EXPORT: missing required value
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:3 \(include\)
+
+
+CMake Error at BadArgs0\.cmake:[0-9]+ \(export\):
+  export PACKAGE_INFO given invalid argument:
 
     PACKAGE_INFO: missing required value
 Call Stack \(most recent call first\):

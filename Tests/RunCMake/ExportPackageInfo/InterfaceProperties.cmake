@@ -13,4 +13,4 @@ target_link_libraries(foo INTERFACE /usr/lib/libm.so)
 set_property(TARGET foo PROPERTY SPDX_LICENSE "BSD-3-Clause")
 
 install(TARGETS foo EXPORT foo DESTINATION .)
-export(EXPORT foo PACKAGE_INFO foo)
+export(PACKAGE_INFO foo EXPORT foo)

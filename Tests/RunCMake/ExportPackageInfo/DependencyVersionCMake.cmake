@@ -8,4 +8,4 @@ add_library(foo INTERFACE)
 target_link_libraries(foo INTERFACE bar::bar)
 
 install(TARGETS foo EXPORT foo DESTINATION .)
-export(EXPORT foo PACKAGE_INFO foo)
+export(PACKAGE_INFO foo EXPORT foo)

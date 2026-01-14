@@ -27,7 +27,7 @@ target_sources(libb
 target_link_libraries(libb PUBLIC liba)
 
 install(TARGETS liba EXPORT liba FILE_SET HEADERS)
-export(EXPORT liba PACKAGE_INFO liba)
+export(PACKAGE_INFO liba EXPORT liba)
 
 install(TARGETS libb EXPORT libb FILE_SET HEADERS)
-export(EXPORT libb PACKAGE_INFO libb)
+export(PACKAGE_INFO libb EXPORT libb)

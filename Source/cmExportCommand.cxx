@@ -51,6 +51,43 @@
 static void StorePackageRegistry(cmMakefile& mf, std::string const& package,
                                  char const* content, char const* hash);
 
+static cm::optional<cmExportSet*> GetExportSet(std::string const& name,
+                                               cmGlobalGenerator* generator,
+                                               cmExecutionStatus& status)
+{
+  cmExportSetMap& setMap = generator->GetExportSets();
+  auto const it = setMap.find(name);
+  if (it == setMap.end()) {
+    status.SetError(cmStrCat("Export set \""_s, name, "\" not found."_s));
+    return cm::nullopt;
+  }
+  return &it->second;
+}
+
+static void AddExportGenerator(
+  cmMakefile& makefile, cmGlobalGenerator* globalGenerator,
+  std::unique_ptr<cmExportBuildFileGenerator> exportGenerator,
+  std::string const& fileName, cmExportSet* exportSet,
+  std::string const& cxxModulesDirectory)
+{
+  exportGenerator->SetExportFile(fileName.c_str());
+  exportGenerator->SetCxxModuleDirectory(cxxModulesDirectory);
+  if (exportSet) {
+    exportGenerator->SetExportSet(exportSet);
+  }
+  std::vector<std::string> configurationTypes =
+    makefile.GetGeneratorConfigs(cmMakefile::IncludeEmptyConfig);
+
+  for (std::string const& ct : configurationTypes) {
+    exportGenerator->AddConfiguration(ct);
+  }
+  if (exportSet) {
+    globalGenerator->AddBuildExportExportSet(exportGenerator.get());
+  }
+
+  makefile.AddExportBuildFileGenerator(std::move(exportGenerator));
+}
+
 static bool HandleTargetsMode(std::vector<std::string> const& args,
                               cmExecutionStatus& status)
 {
@@ -218,8 +255,6 @@ static bool HandleExportMode(std::vector<std::string> const& args,
     ArgumentParser::MaybeEmpty<std::string> Namespace;
     ArgumentParser::NonEmpty<std::string> Filename;
     ArgumentParser::NonEmpty<std::string> CxxModulesDirectory;
-    cm::optional<cmPackageInfoArguments> PackageInfo;
-    cm::optional<cmSbomArguments> Sbom;
     bool ExportPackageDependencies = false;
   };
 
@@ -237,39 +272,16 @@ static bool HandleExportMode(std::vector<std::string> const& args,
                 &ExportArguments::ExportPackageDependencies);
   }
 
-  cmArgumentParser<cmPackageInfoArguments> packageInfoParser;
-  cmPackageInfoArguments::Bind(packageInfoParser);
-
-  if (cmExperimental::HasSupportEnabled(
-        status.GetMakefile(), cmExperimental::Feature::ExportPackageInfo)) {
-    parser.BindSubParser("PACKAGE_INFO"_s, packageInfoParser,
-                         &ExportArguments::PackageInfo);
-  }
-
-  cmArgumentParser<cmSbomArguments> sbomParser;
-  cmSbomArguments::Bind(sbomParser);
-
-  if (cmExperimental::HasSupportEnabled(
-        status.GetMakefile(), cmExperimental::Feature::GenerateSbom)) {
-    parser.BindSubParser("SBOM"_s, sbomParser, &ExportArguments::Sbom);
-  }
-
   std::vector<std::string> unknownArgs;
   ExportArguments arguments = parser.Parse(args, &unknownArgs);
 
   cmMakefile& mf = status.GetMakefile();
   cmGlobalGenerator* gg = mf.GetGlobalGenerator();
 
-  if (arguments.PackageInfo && arguments.Sbom) {
-    status.SetError("PACKAGE_INFO and SBOM are mutually exclusive.");
-    return false;
-  }
-
   if (!arguments.Check(args[0], &unknownArgs, status)) {
     cmPolicies::PolicyStatus const p =
       status.GetMakefile().GetPolicyStatus(cmPolicies::CMP0208);
-    if (arguments.PackageInfo || arguments.Sbom || !unknownArgs.empty() ||
-        p == cmPolicies::NEW) {
+    if (!unknownArgs.empty() || p == cmPolicies::NEW) {
       return false;
     }
     if (p == cmPolicies::WARN) {
@@ -281,48 +293,9 @@ static bool HandleExportMode(std::vector<std::string> const& args,
     }
   }
 
-  if (arguments.PackageInfo) {
-    if (!arguments.Filename.empty()) {
-      status.SetError("PACKAGE_INFO and FILE are mutually exclusive.");
-      return false;
-    }
-    if (!arguments.Namespace.empty()) {
-      status.SetError("PACKAGE_INFO and NAMESPACE are mutually exclusive.");
-      return false;
-    }
-    if (!arguments.PackageInfo->Check(status) ||
-        !arguments.PackageInfo->SetMetadataFromProject(status)) {
-      return false;
-    }
-  }
-  if (arguments.Sbom) {
-    if (arguments.Sbom->PackageName.empty()) {
-      status.SetError("SBOM missing required value.");
-      return false;
-    }
-    if (!arguments.Filename.empty()) {
-      status.SetError("SBOM and FILE are mutually exclusive.");
-      return false;
-    }
-    if (!arguments.Namespace.empty()) {
-      status.SetError("SBOM and NAMESPACE are mutually exclusive.");
-      return false;
-    }
-    if (!arguments.Sbom->Check(status) ||
-        !arguments.Sbom->SetMetadataFromProject(status)) {
-      return false;
-    }
-  }
-
   std::string fname;
   if (arguments.Filename.empty()) {
-    if (arguments.PackageInfo) {
-      fname = arguments.PackageInfo->GetPackageFileName();
-    } else if (arguments.Sbom) {
-      fname = arguments.Sbom->GetPackageFileName();
-    } else {
-      fname = arguments.ExportSetName + ".cmake";
-    }
+    fname = arguments.ExportSetName + ".cmake";
   } else {
     if (cmSystemTools::GetFilenameLastExtension(arguments.Filename) !=
         ".cmake") {
@@ -349,58 +322,111 @@ static bool HandleExportMode(std::vector<std::string> const& args,
     fname = cmStrCat(dir, '/', fname);
   }
 
-  if (gg->GetExportedTargetsFile(fname)) {
-    if (arguments.PackageInfo) {
-      status.SetError(cmStrCat("command already specified for the file "_s,
-                               cmSystemTools::GetFilenameName(fname), '.'));
-      return false;
-    }
-  }
-
-  cmExportSet* exportSet = nullptr;
-  cmExportSetMap& setMap = gg->GetExportSets();
-  auto const it = setMap.find(arguments.ExportSetName);
-  if (it == setMap.end()) {
-    std::ostringstream e;
-    e << "Export set \"" << arguments.ExportSetName << "\" not found.";
-    status.SetError(e.str());
+  cm::optional<cmExportSet*> const exportSet =
+    GetExportSet(arguments.ExportSetName, gg, status);
+  if (!exportSet) {
     return false;
   }
-  exportSet = &it->second;
 
   // Set up export file generation.
-  std::unique_ptr<cmExportBuildFileGenerator> ebfg = nullptr;
-  if (arguments.PackageInfo) {
-    auto ebpg = cm::make_unique<cmExportBuildPackageInfoGenerator>(
-      *arguments.PackageInfo);
-    ebfg = std::move(ebpg);
-  } else if (arguments.Sbom) {
-    auto ebsg = cm::make_unique<cmExportBuildSbomGenerator>(*arguments.Sbom);
-    ebfg = std::move(ebsg);
-  } else {
-    auto ebcg = cm::make_unique<cmExportBuildCMakeConfigGenerator>();
-    ebcg->SetNamespace(arguments.Namespace);
-    ebcg->SetExportPackageDependencies(arguments.ExportPackageDependencies);
-    ebfg = std::move(ebcg);
-  }
+  auto ebcg = cm::make_unique<cmExportBuildCMakeConfigGenerator>();
+  ebcg->SetNamespace(arguments.Namespace);
+  ebcg->SetExportPackageDependencies(arguments.ExportPackageDependencies);
 
-  ebfg->SetExportFile(fname.c_str());
-  ebfg->SetCxxModuleDirectory(arguments.CxxModulesDirectory);
-  if (exportSet) {
-    ebfg->SetExportSet(exportSet);
-  }
-  std::vector<std::string> configurationTypes =
-    mf.GetGeneratorConfigs(cmMakefile::IncludeEmptyConfig);
-
-  for (std::string const& ct : configurationTypes) {
-    ebfg->AddConfiguration(ct);
-  }
-  if (exportSet) {
-    gg->AddBuildExportExportSet(ebfg.get());
-  }
-
-  mf.AddExportBuildFileGenerator(std::move(ebfg));
+  AddExportGenerator(mf, gg, std::move(ebcg), fname, *exportSet,
+                     arguments.CxxModulesDirectory);
   return true;
+}
+
+template <typename ArgumentsType, typename GeneratorType>
+static bool HandleSpecialExportMode(std::vector<std::string> const& args,
+                                    cmExecutionStatus& status)
+{
+  struct ExportArguments
+    : public ArgumentsType
+    , public ArgumentParser::ParseResult
+  {
+    ArgumentParser::NonEmpty<std::string> ExportSetName;
+    ArgumentParser::NonEmpty<std::string> CxxModulesDirectory;
+
+    using ArgumentsType::Check;
+    using ArgumentParser::ParseResult::Check;
+  };
+
+  auto parser =
+    cmArgumentParser<ExportArguments>{}
+      .Bind("EXPORT"_s, &ExportArguments::ExportSetName)
+      .Bind("CXX_MODULES_DIRECTORY"_s, &ExportArguments::CxxModulesDirectory);
+  ArgumentsType::Bind(parser);
+
+  std::vector<std::string> unknownArgs;
+  ExportArguments arguments = parser.Parse(args, &unknownArgs);
+
+  if (!arguments.Check(args[0], &unknownArgs, status)) {
+    return false;
+  }
+
+  if (arguments.ExportSetName.empty()) {
+    status.SetError(cmStrCat(args[0], " missing EXPORT."));
+    return false;
+  }
+
+  if (!arguments.Check(status) || !arguments.SetMetadataFromProject(status)) {
+    return false;
+  }
+
+  cmMakefile& mf = status.GetMakefile();
+  cmGlobalGenerator* gg = mf.GetGlobalGenerator();
+
+  std::string const& dir = mf.GetCurrentBinaryDirectory();
+  std::string const fname = cmStrCat(dir, '/', arguments.GetPackageFileName());
+
+  if (gg->GetExportedTargetsFile(fname)) {
+    status.SetError(cmStrCat("command already specified for the file "_s,
+                             cmSystemTools::GetFilenameName(fname), '.'));
+    return false;
+  }
+
+  // Look up the export set
+  cm::optional<cmExportSet*> const exportSet =
+    GetExportSet(arguments.ExportSetName, gg, status);
+  if (!exportSet) {
+    return false;
+  }
+
+  // Create the export build generator
+  auto ebpg = cm::make_unique<GeneratorType>(arguments);
+  AddExportGenerator(mf, gg, std::move(ebpg), fname, *exportSet,
+                     arguments.CxxModulesDirectory);
+  return true;
+}
+
+static bool HandlePackageInfoMode(std::vector<std::string> const& args,
+                                  cmExecutionStatus& status)
+{
+  if (!cmExperimental::HasSupportEnabled(
+        status.GetMakefile(), cmExperimental::Feature::ExportPackageInfo)) {
+    status.SetError("does not recognize sub-command PACKAGE_INFO");
+    return false;
+  }
+
+  using arg_t = cmPackageInfoArguments;
+  using gen_t = cmExportBuildPackageInfoGenerator;
+  return HandleSpecialExportMode<arg_t, gen_t>(args, status);
+}
+
+static bool HandleSbomMode(std::vector<std::string> const& args,
+                           cmExecutionStatus& status)
+{
+  if (!cmExperimental::HasSupportEnabled(
+        status.GetMakefile(), cmExperimental::Feature::GenerateSbom)) {
+    status.SetError("does not recognize sub-command SBOM");
+    return false;
+  }
+
+  using arg_t = cmSbomArguments;
+  using gen_t = cmExportBuildSbomGenerator;
+  return HandleSpecialExportMode<arg_t, gen_t>(args, status);
 }
 
 static bool HandleSetupMode(std::vector<std::string> const& args,
@@ -675,6 +701,8 @@ bool cmExportCommand(std::vector<std::string> const& args,
     { "EXPORT"_s, HandleExportMode },
     { "SETUP"_s, HandleSetupMode },
     { "PACKAGE"_s, HandlePackageMode },
+    { "PACKAGE_INFO"_s, HandlePackageInfoMode },
+    { "SBOM"_s, HandleSbomMode },
   };
 
   return subcommand(args[0], args, status);

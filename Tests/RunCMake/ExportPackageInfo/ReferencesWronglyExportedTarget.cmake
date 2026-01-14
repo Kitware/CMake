@@ -11,4 +11,4 @@ export(EXPORT foo)
 export(EXPORT bar NAMESPACE bar_)
 
 install(TARGETS test EXPORT test DESTINATION .)
-export(EXPORT test PACKAGE_INFO test)
+export(PACKAGE_INFO test EXPORT test)

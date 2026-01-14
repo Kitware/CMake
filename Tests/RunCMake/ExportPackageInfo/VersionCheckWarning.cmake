@@ -1,6 +1,6 @@
 set(
   CMAKE_EXPERIMENTAL_EXPORT_PACKAGE_INFO
-  "b80be207-778e-46ba-8080-b23bba22639e"
+  "7fa7d13b-8308-4dc7-af39-9e450456d68f"
 )
 
 add_library(foo INTERFACE)
@@ -8,8 +8,8 @@ install(TARGETS foo EXPORT foo DESTINATION .)
 
 # Try exporting with an unrecognized schema.
 export(
-  EXPORT foo
   PACKAGE_INFO foo
+  EXPORT foo
   VERSION "irrelevant"
   VERSION_SCHEMA "unrecognized"
 )
