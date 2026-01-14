@@ -713,6 +713,7 @@ bool cmake::SetCacheArgs(std::vector<std::string> const& args)
         // relative to $PWD.
         auto path = cmSystemTools::ToNormalizedPathOnDisk(value);
         state->InitializeFileAPI();
+        state->InitializeInstrumentation();
         state->ReadListFile(args, path);
         return true;
       } },
@@ -2619,11 +2620,7 @@ int cmake::ActualConfigure()
 #if !defined(CMAKE_BOOTSTRAP)
   this->InitializeFileAPI();
   this->FileAPI->ReadQueries();
-
-  this->Instrumentation = cm::make_unique<cmInstrumentation>(
-    this->State->GetBinaryDirectory(),
-    cmInstrumentation::LoadQueriesAfter::No);
-  this->Instrumentation->ClearGeneratedQueries();
+  this->InitializeInstrumentation();
 
   if (!this->GetIsInTryCompile()) {
     this->TruncateOutputLog("CMakeConfigureLog.yaml");
@@ -2882,6 +2879,18 @@ void cmake::InitializeFileAPI()
 #ifndef CMAKE_BOOTSTRAP
   if (!this->FileAPI) {
     this->FileAPI = cm::make_unique<cmFileAPI>(this);
+  }
+#endif
+}
+
+void cmake::InitializeInstrumentation()
+{
+#ifndef CMAKE_BOOTSTRAP
+  if (!this->Instrumentation) {
+    this->Instrumentation = cm::make_unique<cmInstrumentation>(
+      this->State->GetBinaryDirectory(),
+      cmInstrumentation::LoadQueriesAfter::No);
+    this->Instrumentation->ClearGeneratedQueries();
   }
 #endif
 }
