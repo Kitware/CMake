@@ -6,8 +6,8 @@
 # The resulting image will have an '/out' directory containing the package.
 
 # Keep this in sync with the `.gitlab/os-linux.yml` `.linux_release_x86_64` image.
-ARG FROM_IMAGE_NAME=kitware/cmake:build-linux-x86_64-deps-2023-08-16
-ARG FROM_IMAGE_DIGEST=@sha256:aa0ebdbd90a51cc83d31f393c5c48ec4599a28f7ccdc288558522c6265b24fae
+ARG FROM_IMAGE_NAME=kitware/cmake:build-linux-x86_64-deps-2026-01-13
+ARG FROM_IMAGE_DIGEST=@sha256:eae18d032e8d7be3caa97d2e5754ae2b7196d7a3d375b7b4d1ba9034f1229317
 ARG FROM_IMAGE=$FROM_IMAGE_NAME$FROM_IMAGE_DIGEST
 FROM $FROM_IMAGE
 

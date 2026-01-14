@@ -9,8 +9,12 @@ ARG FROM_IMAGE_DIGEST=@sha256:be65f488b7764ad3638f236b7b515b3678369a5124c47b8d32
 ARG FROM_IMAGE=$FROM_IMAGE_NAME$FROM_IMAGE_DIGEST
 FROM $FROM_IMAGE
 
+COPY repo-vault.sed /root/
+
 RUN : \
+ && sed -f /root/repo-vault.sed -i /etc/yum.repos.d/*.repo \
  && yum install -y centos-release-scl \
+ && sed -f /root/repo-vault.sed -i /etc/yum.repos.d/*.repo \
  && yum install -y \
         ca-certificates \
         curl \
@@ -24,6 +28,7 @@ RUN : \
         make \
         patch \
         perl \
+        perl-core \
         python3-pip \
         xz \
         which \
