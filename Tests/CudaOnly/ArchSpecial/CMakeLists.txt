@@ -61,7 +61,14 @@ try_compile(native_archs_compiles
   COMPILE_DEFINITIONS ${try_compile_flags}
   OUTPUT_VARIABLE output
   )
-verify_output(native)
+if(native_archs_compiles)
+  verify_output(native)
+elseif("$ENV{CMAKE_CUDA_ARCHITECTURES_NATIVE_CLAMP}"
+    AND CMAKE_CUDA_COMPILER_ID STREQUAL "NVIDIA"
+    AND output MATCHES "Unsupported gpu architecture")
+  # nvcc -arch=native is not affected by the clamp
+  set(native_archs_compiles 1)
+endif()
 
 if(all_archs_compiles AND all_major_archs_compiles AND native_archs_compiles)
   set(CMAKE_CUDA_ARCHITECTURES all)
