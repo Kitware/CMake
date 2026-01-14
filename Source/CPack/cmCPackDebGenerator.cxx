@@ -211,9 +211,9 @@ bool DebGenerator::generateDataTar() const
                     << filename_data_tar << "\" for writing" << std::endl);
     return false;
   }
-  cmArchiveWrite data_tar(fileStream_data_tar, this->TarCompressionType,
-                          this->DebianArchiveType, this->CompressionLevel,
-                          static_cast<int>(this->NumThreads));
+  cmArchiveWrite data_tar(
+    fileStream_data_tar, this->TarCompressionType, this->DebianArchiveType,
+    "OEM", this->CompressionLevel, static_cast<int>(this->NumThreads));
   if (!data_tar.Open()) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
                   "Error opening the archive \""
@@ -344,7 +344,8 @@ bool DebGenerator::generateControlTar(std::string const& md5Filename) const
     return false;
   }
   cmArchiveWrite control_tar(fileStream_control_tar, this->TarCompressionType,
-                             this->DebianArchiveType, this->CompressionLevel);
+                             this->DebianArchiveType, "OEM",
+                             this->CompressionLevel);
   if (!control_tar.Open()) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
                   "Error opening the archive \""

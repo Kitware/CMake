@@ -96,8 +96,9 @@ struct cmArchiveWrite::Callback
 };
 
 cmArchiveWrite::cmArchiveWrite(std::ostream& os, Compress c,
-                               std::string const& format, int compressionLevel,
-                               int numThreads)
+                               std::string const& format,
+                               std::string const& encoding,
+                               int compressionLevel, int numThreads)
   : Stream(os)
   , Archive(archive_write_new())
   , Disk(archive_read_disk_new())
@@ -223,6 +224,20 @@ cmArchiveWrite::cmArchiveWrite(std::ostream& os, Compress c,
       case CompressPPMd:
         this->Error = cmStrCat("PPMd is not supported for ", format);
         return;
+    }
+  }
+
+  // 7zip always uses UTF16-LE for the headers and doesn't support
+  // header encoding specification.
+  // arbsd can use the default encoding of the system only.
+  if (!is7zip && format != "arbsd" && encoding != "OEM") {
+    char const* formatForOptions = format == "paxr" ? "pax" : format.c_str();
+    if (archive_write_set_format_option(this->Archive, formatForOptions,
+                                        "hdrcharset",
+                                        encoding.c_str()) != ARCHIVE_OK) {
+      this->Error = cmStrCat("archive_write_set_format_option(hdrcharset): ",
+                             cm_archive_error_string(this->Archive));
+      return;
     }
   }
 

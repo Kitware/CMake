@@ -1920,6 +1920,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
         cmSystemTools::TarCompressAuto;
       int nCompress = 0;
       bool doing_options = true;
+      std::string encoding = "OEM";
       for (auto const& arg : cmMakeRange(args).advance(4)) {
         if (doing_options && cmHasLiteralPrefix(arg, "--")) {
           if (arg == "--") {
@@ -1957,6 +1958,13 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
             }
 
             numThreads = static_cast<decltype(numThreads)>(numThreadsLong);
+          } else if (cmHasLiteralPrefix(arg, "--cmake-tar-encoding=")) {
+            encoding = arg.substr(21);
+            if (encoding.empty()) {
+              cmSystemTools::Error(
+                "Encoding value is empty - it must be filled if passed");
+              return 1;
+            }
           } else if (cmHasLiteralPrefix(arg,
                                         "--cmake-tar-compression-level=")) {
             std::string const& compressionLevelStr = arg.substr(30);
@@ -2106,7 +2114,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
       }
 
       if (action == cmSystemTools::TarActionList) {
-        if (!cmSystemTools::ListTar(outFile, files, verbose)) {
+        if (!cmSystemTools::ListTar(outFile, files, encoding, verbose)) {
           cmSystemTools::Error("Problem listing tar: " + outFile);
           return 1;
         }
@@ -2114,15 +2122,15 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
         if (files.empty()) {
           std::cerr << "tar: No files or directories specified\n";
         }
-        if (!cmSystemTools::CreateTar(outFile, files, {}, compress, verbose,
-                                      mtime, format, compressionLevel,
+        if (!cmSystemTools::CreateTar(outFile, files, {}, compress, encoding,
+                                      verbose, mtime, format, compressionLevel,
                                       numThreads)) {
           cmSystemTools::Error(cmStrCat("Problem creating tar:\n  ", outFile));
           return 1;
         }
       } else if (action == cmSystemTools::TarActionExtract) {
         if (!cmSystemTools::ExtractTar(outFile, files, extractTimestamps,
-                                       verbose)) {
+                                       encoding, verbose)) {
           cmSystemTools::Error(
             cmStrCat("Problem extracting tar:\n  ", outFile));
           return 1;

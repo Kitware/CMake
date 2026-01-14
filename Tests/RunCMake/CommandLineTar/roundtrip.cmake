@@ -31,6 +31,7 @@ set(CHECK_FILES
   "d_4/f1.txt"
   "d-4/f1.txt"
   "My Special Directory/f1.txt"
+  ${COMPRESSION_ADDITIONAL_FILE_NAMES}
 )
 
 foreach(file ${CHECK_FILES})

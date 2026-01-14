@@ -1694,6 +1694,35 @@ Available commands are:
     not directly set by CMake itself. The default compression level
     may vary between archive formats, platforms, etc.
 
+  .. option:: --cmake-tar-encoding=<encoding>
+
+    .. versionadded:: 4.4
+
+    Specify the pathname character encoding used in the archive.
+
+    The ``<encoding>`` may be one of:
+
+    ``UTF-8``
+      Archive pathnames are encoded as UTF-8.
+
+    ``OEM``
+      On Windows platforms, pathnames are encoded as using the original
+      equipment manufacturer (OEM) code page.  On non-Windows platforms,
+      pathnames are encoded according to the current locale.
+
+      This is the default value.
+
+    ``UTF-16LE``, ``UTF-16BE``
+      Archive pathnames are encoded as UTF-16 little-endian or big-endian.
+
+    ``...``
+      Any encoding name supported by ``iconv`` on the current platform.
+      On Windows, code page names may be specified.
+
+    .. note::
+      ``7zip`` archives always encode paths as ``UTF-16LE``,
+      so this option is silently ignored for that format.
+
   .. option:: --cmake-tar-threads=<number>
 
     .. versionadded:: 4.3

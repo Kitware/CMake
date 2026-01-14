@@ -2359,13 +2359,11 @@ bool cmSystemTools::IsPathToMacOSSharedLibrary(std::string const& path)
           cmHasLiteralSuffix(path, ".dylib"));
 }
 
-bool cmSystemTools::CreateTar(std::string const& arFileName,
-                              std::vector<std::string> const& files,
-                              std::string const& workingDirectory,
-                              cmTarCompression compressType, bool verbose,
-                              std::string const& mtime,
-                              std::string const& format, int compressionLevel,
-                              int numThreads)
+bool cmSystemTools::CreateTar(
+  std::string const& arFileName, std::vector<std::string> const& files,
+  std::string const& workingDirectory, cmTarCompression compressType,
+  std::string const& encoding, bool verbose, std::string const& mtime,
+  std::string const& format, int compressionLevel, int numThreads)
 {
 #if !defined(CMAKE_BOOTSTRAP)
   cmWorkingDirectory workdir(cmSystemTools::GetLogicalWorkingDirectory());
@@ -2416,7 +2414,7 @@ bool cmSystemTools::CreateTar(std::string const& arFileName,
       break;
   }
 
-  cmArchiveWrite a(fout, compress, format.empty() ? "paxr" : format,
+  cmArchiveWrite a(fout, compress, format.empty() ? "paxr" : format, encoding,
                    compressionLevel, numThreads);
 
   if (!a.Open()) {
@@ -2440,6 +2438,7 @@ bool cmSystemTools::CreateTar(std::string const& arFileName,
 #else
   (void)arFileName;
   (void)files;
+  (void)encoding;
   (void)verbose;
   return false;
 #endif
@@ -2619,7 +2618,8 @@ bool copy_data(struct archive* ar, struct archive* aw)
 }
 
 bool extract_tar(std::string const& arFileName,
-                 std::vector<std::string> const& files, bool verbose,
+                 std::vector<std::string> const& files,
+                 std::string const& encoding, bool verbose,
                  cmSystemTools::cmTarExtractTimestamps extractTimestamps,
                  bool extract)
 {
@@ -2640,6 +2640,15 @@ bool extract_tar(std::string const& arFileName,
   }
   archive_read_support_filter_all(a);
   archive_read_support_format_all(a);
+
+  if (encoding != "OEM") {
+    if (archive_read_set_options(
+          a, cmStrCat("hdrcharset=", encoding).c_str()) != ARCHIVE_OK) {
+      cmSystemTools::Error(
+        cmStrCat("Cannot set archive encoding: ", encoding));
+      return false;
+    }
+  }
   struct archive_entry* entry;
 
   struct archive* matching = archive_match_new();
@@ -2749,14 +2758,16 @@ bool extract_tar(std::string const& arFileName,
 bool cmSystemTools::ExtractTar(std::string const& arFileName,
                                std::vector<std::string> const& files,
                                cmTarExtractTimestamps extractTimestamps,
-                               bool verbose)
+                               std::string const& encoding, bool verbose)
 {
 #if !defined(CMAKE_BOOTSTRAP)
-  return extract_tar(arFileName, files, verbose, extractTimestamps, true);
+  return extract_tar(arFileName, files, encoding, verbose, extractTimestamps,
+                     true);
 #else
   (void)arFileName;
   (void)files;
   (void)extractTimestamps;
+  (void)encoding;
   (void)verbose;
   return false;
 #endif
@@ -2764,14 +2775,15 @@ bool cmSystemTools::ExtractTar(std::string const& arFileName,
 
 bool cmSystemTools::ListTar(std::string const& arFileName,
                             std::vector<std::string> const& files,
-                            bool verbose)
+                            std::string const& encoding, bool verbose)
 {
 #if !defined(CMAKE_BOOTSTRAP)
-  return extract_tar(arFileName, files, verbose, cmTarExtractTimestamps::Yes,
-                     false);
+  return extract_tar(arFileName, files, encoding, verbose,
+                     cmTarExtractTimestamps::Yes, false);
 #else
   (void)arFileName;
   (void)files;
+  (void)encoding;
   (void)verbose;
   return false;
 #endif
