@@ -419,30 +419,6 @@ if (Ruby_EXECUTABLE AND NOT Ruby_EXECUTABLE STREQUAL "${_Ruby_EXECUTABLE_LAST_QU
   )
 endif ()
 
-# In case Ruby_EXECUTABLE could not be executed (e.g. cross compiling)
-# try to detect which version we found. This is not too good.
-if (Ruby_EXECUTABLE AND NOT Ruby_VERSION_MAJOR)
-  # by default assume 1.8.0
-  set(Ruby_VERSION_MAJOR 1)
-  set(Ruby_VERSION_MINOR 8)
-  set(Ruby_VERSION_PATCH 0)
-  # check whether we found 1.9.x
-  if (${Ruby_EXECUTABLE} MATCHES "ruby1\\.?9")
-    set(Ruby_VERSION_MAJOR 1)
-    set(Ruby_VERSION_MINOR 9)
-  endif ()
-  # check whether we found 2.[0-7].x
-  if (${Ruby_EXECUTABLE} MATCHES "ruby2")
-    set(Ruby_VERSION_MAJOR 2)
-    string(REGEX REPLACE ${Ruby_EXECUTABLE} "ruby2\\.?([0-7])" "\\1" Ruby_VERSION_MINOR)
-  endif ()
-  # check whether we found 3.[0-4].x
-  if (${Ruby_EXECUTABLE} MATCHES "ruby3")
-    set(Ruby_VERSION_MAJOR 3)
-    string(REGEX REPLACE ${Ruby_EXECUTABLE} "ruby3\\.?([0-4])" "\\1" Ruby_VERSION_MINOR)
-  endif ()
-endif ()
-
 if (Ruby_VERSION_MAJOR)
   set(Ruby_VERSION "${Ruby_VERSION_MAJOR}.${Ruby_VERSION_MINOR}.${Ruby_VERSION_PATCH}")
   set(_Ruby_VERSION_NODOT "${Ruby_VERSION_MAJOR}${Ruby_VERSION_MINOR}${Ruby_VERSION_PATCH}")
