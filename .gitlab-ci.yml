@@ -347,9 +347,9 @@ t:fedora43-ninja-multi:
         - .run_dependent
         - .needs_centos7_x86_64
 
-t:fedora43-ninja-clang:
+t:fedora43-ninja:
     extends:
-        - .fedora43_ninja_clang
+        - .fedora43_ninja
         - .cmake_test_linux_release
         - .linux_x86_64_tags
         - .run_dependent
@@ -635,9 +635,9 @@ t:debian10-legacy:
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
-b:fedora43-ninja:
+b:fedora43-ninja-clang:
     extends:
-        - .fedora43_ninja
+        - .fedora43_ninja_clang
         - .cmake_build_linux
         - .cmake_build_artifacts
         - .linux_x86_64_tags
@@ -691,15 +691,15 @@ b:fedora43-extdeps:
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
-t:fedora43-ninja:
+t:fedora43-ninja-clang:
     extends:
-        - .fedora43_ninja
+        - .fedora43_ninja_clang
         - .cmake_test_linux
         - .linux_x86_64_tags_x11
         - .cmake_test_artifacts
         - .run_dependent
     needs:
-        - b:fedora43-ninja
+        - b:fedora43-ninja-clang
     variables:
         CMAKE_CI_JOB_CONTINUOUS: "true"
 
