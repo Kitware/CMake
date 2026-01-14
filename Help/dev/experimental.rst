@@ -53,8 +53,9 @@ experimenting.
 
 When activated, this experimental feature provides the following:
 
-* The experimental ``install(PACKAGE_INFO)`` command is available to export
-  package information in the |CPS|_ format.
+* The experimental ``export(PACKAGE_INFO)`` and ``install(PACKAGE_INFO)``
+  commands are available to export package information in the |CPS|_ format.
+  See :command:`install(PACKAGE_INFO)` for a complete overview of the command.
 
 Find/Import |CPS| Packages
 ==========================
@@ -155,6 +156,6 @@ experimenting.
 
 When activated, this experimental feature provides the following:
 
-* The experimental ``install(SBOM)`` command is available to generate
-  a Software Bill of Materials or "SBOM" for the current project. See
-  :command:`install(SBOM)` for a complete overview of the command
+* The experimental ``export(SBOM)`` and ``install(SBOM)`` commands are
+  available to generate a Software Bill of Materials or "SBOM" for the current
+  project. See :command:`install(SBOM)` for a complete overview of the command.
