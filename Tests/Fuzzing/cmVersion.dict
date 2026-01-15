@@ -1,0 +1,42 @@
+# Version string dictionary
+
+# Separators
+"."
+"-"
+"+"
+
+# Common versions
+"0"
+"1"
+"2"
+"3"
+"10"
+"99"
+"100"
+"999"
+
+# CMake versions
+"3.28"
+"3.28.0"
+"3.27.0"
+"2.8.12"
+"3.0.0"
+
+# Semantic versioning
+"alpha"
+"beta"
+"rc"
+"rc1"
+"rc2"
+"dev"
+"SNAPSHOT"
+"build"
+"pre"
+"post"
+
+# Edge cases
+"0.0.0"
+"999.999.999"
+"1.0.0-alpha"
+"1.0.0+build"
+"1.0.0-alpha+build"

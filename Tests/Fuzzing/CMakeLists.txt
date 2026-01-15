@@ -76,3 +76,6 @@ add_fuzzer(cmGccDepfileFuzzer cmGccDepfileFuzzer.cxx)
 
 # String algorithms fuzzer
 add_fuzzer(cmStringAlgorithmsFuzzer cmStringAlgorithmsFuzzer.cxx)
+
+# Version parser fuzzer
+add_fuzzer(cmVersionFuzzer cmVersionFuzzer.cxx)
