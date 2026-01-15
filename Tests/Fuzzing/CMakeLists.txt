@@ -55,3 +55,6 @@ message(STATUS "Fuzzing targets enabled with engine: ${FUZZING_ENGINE}")
 
 # CMakeLists.txt lexer fuzzer
 add_fuzzer(cmListFileLexerFuzzer cmListFileLexerFuzzer.cxx)
+
+# CMakeLists.txt parser fuzzer
+add_fuzzer(cmListFileParserFuzzer cmListFileParserFuzzer.cxx)
