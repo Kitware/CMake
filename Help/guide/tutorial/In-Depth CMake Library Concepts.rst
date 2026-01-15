@@ -384,7 +384,7 @@ These are ``PUBLIC``, because we want the objects to be added to the
 ``MathFunctions`` library as part of its own build step, and we want the
 headers to be available to consumers of the library.
 
-Then we add the ``MathExtensions`` subdirectoy to the project.
+Then we add the ``MathExtensions`` subdirectory to the project.
 
 .. raw:: html
 
