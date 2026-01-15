@@ -85,3 +85,6 @@ add_fuzzer(cmCMakePathFuzzer cmCMakePathFuzzer.cxx)
 
 # File glob fuzzer
 add_fuzzer(cmGlobFuzzer cmGlobFuzzer.cxx)
+
+# ELF binary parser fuzzer
+add_fuzzer(cmELFFuzzer cmELFFuzzer.cxx)

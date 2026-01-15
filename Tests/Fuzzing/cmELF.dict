@@ -1,0 +1,85 @@
+# ELF File Format Dictionary
+
+# ELF magic number
+"\x7fELF"
+
+# ELF class (32/64 bit)
+"\x01"
+"\x02"
+
+# Data encoding (little/big endian)
+"\x01"
+"\x02"
+
+# ELF version
+"\x01"
+
+# OS/ABI
+"\x00"
+"\x03"
+"\x09"
+
+# Object file types
+"\x00\x00"
+"\x01\x00"
+"\x02\x00"
+"\x03\x00"
+"\x04\x00"
+
+# Machine types
+"\x03\x00"
+"\x3e\x00"
+"\x28\x00"
+"\xb7\x00"
+"\x08\x00"
+
+# Section types
+"\x00\x00\x00\x00"
+"\x01\x00\x00\x00"
+"\x02\x00\x00\x00"
+"\x03\x00\x00\x00"
+"\x04\x00\x00\x00"
+"\x05\x00\x00\x00"
+"\x06\x00\x00\x00"
+"\x07\x00\x00\x00"
+"\x08\x00\x00\x00"
+"\x09\x00\x00\x00"
+"\x0b\x00\x00\x00"
+
+# Dynamic tags
+"\x01\x00\x00\x00"
+"\x0e\x00\x00\x00"
+"\x0f\x00\x00\x00"
+"\x1d\x00\x00\x00"
+
+# Section names
+".text"
+".data"
+".bss"
+".rodata"
+".dynamic"
+".dynsym"
+".dynstr"
+".interp"
+".note"
+".shstrtab"
+".strtab"
+".symtab"
+".rela"
+".rel"
+".plt"
+".got"
+".init"
+".fini"
+
+# String entries
+"RPATH"
+"RUNPATH"
+"SONAME"
+"NEEDED"
+
+# Common library paths
+"/lib"
+"/usr/lib"
+"$ORIGIN"
+"$LIB"
