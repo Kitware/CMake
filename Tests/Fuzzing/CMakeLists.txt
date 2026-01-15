@@ -73,3 +73,6 @@ add_fuzzer(cmJSONParserFuzzer cmJSONParserFuzzer.cxx)
 
 # GCC dependency file fuzzer
 add_fuzzer(cmGccDepfileFuzzer cmGccDepfileFuzzer.cxx)
+
+# String algorithms fuzzer
+add_fuzzer(cmStringAlgorithmsFuzzer cmStringAlgorithmsFuzzer.cxx)
