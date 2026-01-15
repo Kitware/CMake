@@ -1,0 +1,45 @@
+# GCC depfile dictionary
+
+# Target separator
+":"
+
+# Dependency continuation
+"\\"
+
+# Whitespace
+" "
+"\x09"
+"\x0a"
+
+# Common file extensions
+".o"
+".obj"
+".d"
+".cpp"
+".c"
+".h"
+".hpp"
+".hxx"
+
+# Escape sequences
+"\\ "
+"\\#"
+"\\:"
+
+# Special characters
+"#"
+"$"
+
+# Common paths
+"/usr/include/"
+"/usr/local/include/"
+"../include/"
+"./src/"
+
+# Common headers
+"stdio.h"
+"stdlib.h"
+"string.h"
+"iostream"
+"vector"
+"string"
