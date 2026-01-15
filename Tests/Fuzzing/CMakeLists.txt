@@ -82,3 +82,6 @@ add_fuzzer(cmVersionFuzzer cmVersionFuzzer.cxx)
 
 # CMake path fuzzer
 add_fuzzer(cmCMakePathFuzzer cmCMakePathFuzzer.cxx)
+
+# File glob fuzzer
+add_fuzzer(cmGlobFuzzer cmGlobFuzzer.cxx)
