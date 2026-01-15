@@ -58,3 +58,6 @@ add_fuzzer(cmListFileLexerFuzzer cmListFileLexerFuzzer.cxx)
 
 # CMakeLists.txt parser fuzzer
 add_fuzzer(cmListFileParserFuzzer cmListFileParserFuzzer.cxx)
+
+# Generator expression fuzzer
+add_fuzzer(cmGeneratorExpressionFuzzer cmGeneratorExpressionFuzzer.cxx)
