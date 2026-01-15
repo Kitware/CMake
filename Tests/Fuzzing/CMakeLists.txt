@@ -67,3 +67,6 @@ add_fuzzer(cmExprParserFuzzer cmExprParserFuzzer.cxx)
 
 # pkg-config parser fuzzer
 add_fuzzer(cmPkgConfigParserFuzzer cmPkgConfigParserFuzzer.cxx)
+
+# JSON parser fuzzer
+add_fuzzer(cmJSONParserFuzzer cmJSONParserFuzzer.cxx)
