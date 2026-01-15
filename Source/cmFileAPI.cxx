@@ -72,7 +72,8 @@ void cmFileAPI::ReadQueries()
 {
   std::string const query_dir = cmStrCat(this->APIv1, "/query");
   std::string const user_query_dir = cmStrCat(this->UserAPIv1, "/query");
-  this->QueryExists = cmSystemTools::FileIsDirectory(query_dir);
+  this->QueryExists =
+    this->QueryExists || cmSystemTools::FileIsDirectory(query_dir);
   if (!this->UserAPIv1.empty()) {
     this->QueryExists =
       this->QueryExists || cmSystemTools::FileIsDirectory(user_query_dir);
