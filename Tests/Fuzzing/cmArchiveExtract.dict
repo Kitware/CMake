@@ -1,0 +1,72 @@
+# Archive Format Dictionary
+
+# Tar magic
+"ustar"
+"ustar  "
+"ustar\x0000"
+
+# Gzip magic
+"\x1f\x8b"
+"\x1f\x8b\x08"
+
+# Bzip2 magic
+"BZ"
+"BZh"
+"BZh9"
+
+# XZ magic
+"\xfd7zXZ\x00"
+
+# Zip magic
+"PK\x03\x04"
+"PK\x01\x02"
+"PK\x05\x06"
+
+# 7z magic
+"7z\xbc\xaf\x27\x1c"
+
+# Tar header fields
+"\x00\x00\x00\x00\x00\x00\x00\x00"
+"0000000"
+"0000644"
+"0000755"
+"0000777"
+"00000000000"
+"        "
+
+# Path traversal (security testing)
+"../"
+"../../"
+"../../../"
+"../../../../"
+"/../"
+"/../../"
+
+# Absolute paths
+"/etc/passwd"
+"/tmp/"
+"/home/"
+"/.."
+
+# Long paths
+"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+
+# Symlink indicators
+"1"
+"2"
+
+# File type indicators
+"0"
+"5"
+"L"
+"K"
+
+# Checksum placeholder
+"        "
+
+# Filenames
+"test.txt"
+"file.dat"
+"CMakeLists.txt"
+".hidden"
+"__MACOSX"

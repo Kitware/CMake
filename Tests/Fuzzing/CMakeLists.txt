@@ -88,3 +88,6 @@ add_fuzzer(cmGlobFuzzer cmGlobFuzzer.cxx)
 
 # ELF binary parser fuzzer
 add_fuzzer(cmELFFuzzer cmELFFuzzer.cxx)
+
+# Archive extraction fuzzer
+add_fuzzer(cmArchiveExtractFuzzer cmArchiveExtractFuzzer.cxx)
