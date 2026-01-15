@@ -1,0 +1,75 @@
+# XML dictionary for xml_parser_fuzzer
+
+# Processing instruction
+"<?xml"
+"?>"
+"version="
+"encoding="
+"standalone="
+
+# Document structure
+"<!DOCTYPE"
+"<!ELEMENT"
+"<!ATTLIST"
+"<!ENTITY"
+"<!NOTATION"
+"SYSTEM"
+"PUBLIC"
+
+# Tags
+"<"
+">"
+"/>"
+"</"
+
+# Attributes
+"="
+"\x22"
+"\x27"
+
+# CDATA and comments
+"<![CDATA["
+"]]>"
+"<!--"
+"-->"
+
+# Namespaces
+"xmlns"
+"xmlns:"
+
+# Common CMake XML elements
+"<cmake"
+"<project"
+"<target"
+"<file"
+"<dependency"
+"<source"
+"<include"
+"<define"
+"<flag"
+"<option"
+"<property"
+"<configuration"
+"<install"
+"<test"
+"<cache"
+
+# Entity references
+"&lt;"
+"&gt;"
+"&amp;"
+"&quot;"
+"&apos;"
+"&#"
+"&#x"
+
+# Whitespace
+"\x09"
+"\x0a"
+"\x0d"
+"\x20"
+
+# Special patterns
+"]]]]><![CDATA["
+"-->"
+"?>"

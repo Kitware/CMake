@@ -1,0 +1,9 @@
+{
+  "string": "hello",
+  "number": 42,
+  "float": 3.14,
+  "bool": true,
+  "null": null,
+  "array": [1, "two", false],
+  "object": {"nested": "value"}
+}

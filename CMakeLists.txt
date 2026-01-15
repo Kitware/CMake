@@ -224,6 +224,9 @@ endif()
 
 option(CMake_BUILD_PCH "Compile CMake with precompiled headers" OFF)
 
+option(CMake_BUILD_FUZZING "Build fuzz testing targets" OFF)
+mark_as_advanced(CMake_BUILD_FUZZING)
+
 # Check whether to build support for the debugger mode.
 if(NOT CMake_TEST_EXTERNAL_CMAKE)
   if(NOT DEFINED CMake_ENABLE_DEBUGGER)

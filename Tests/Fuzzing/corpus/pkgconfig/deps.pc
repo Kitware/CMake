@@ -1,0 +1,5 @@
+Name: WithDeps
+Version: 2.0
+Requires: dep1 >= 1.0, dep2
+Requires.private: internal
+Libs: -lwithdeps

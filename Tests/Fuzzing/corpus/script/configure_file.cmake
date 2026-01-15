@@ -1,0 +1,7 @@
+set(VERSION "1.0.0")
+set(AUTHOR "Test Author")
+file(WRITE /tmp/config.h.in "#define VERSION \"@VERSION@\"\n#define AUTHOR \"@AUTHOR@\"\n")
+configure_file(/tmp/config.h.in /tmp/config.h @ONLY)
+file(READ /tmp/config.h config_content)
+message(STATUS "Configured: ${config_content}")
+file(REMOVE /tmp/config.h.in /tmp/config.h)

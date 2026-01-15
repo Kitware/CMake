@@ -33,4 +33,10 @@ are organized as follows.
 
   See `RunCMake/README.rst`_.
 
+* ``Fuzzing/``:
+  Fuzz testing targets using libFuzzer, integrated with OSS-Fuzz.
+
+  See `Fuzzing/README.rst`_.
+
 .. _`RunCMake/README.rst`: RunCMake/README.rst
+.. _`Fuzzing/README.rst`: Fuzzing/README.rst

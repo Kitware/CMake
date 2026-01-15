@@ -1,0 +1,12 @@
+set(X 5)
+if(X GREATER 3)
+  message("X > 3")
+elseif(X EQUAL 3)
+  message("X == 3")
+else()
+  message("X < 3")
+endif()
+
+foreach(i RANGE 3)
+  message("i = ${i}")
+endforeach()

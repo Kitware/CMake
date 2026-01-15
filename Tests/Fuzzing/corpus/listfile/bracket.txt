@@ -1,0 +1,2 @@
+set(x [=[nested [[brackets]] here]=])
+set(y [==[even more [=[nested]=] brackets]==])
