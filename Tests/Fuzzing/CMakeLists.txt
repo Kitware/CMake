@@ -91,3 +91,6 @@ add_fuzzer(cmELFFuzzer cmELFFuzzer.cxx)
 
 # Archive extraction fuzzer
 add_fuzzer(cmArchiveExtractFuzzer cmArchiveExtractFuzzer.cxx)
+
+# File lock fuzzer
+add_fuzzer(cmFileLockFuzzer cmFileLockFuzzer.cxx)

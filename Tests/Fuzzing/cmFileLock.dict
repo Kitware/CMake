@@ -1,0 +1,43 @@
+# CMake file lock dictionary
+# Path components
+"/"
+"\\"
+"./"
+"../"
+"~/"
+
+# Common lock file names
+"lock"
+".lock"
+"lockfile"
+".lockfile"
+"cmake.lock"
+"CMakeCache.txt.lock"
+
+# Path patterns
+"/tmp/"
+"/var/lock/"
+"/run/lock/"
+
+# File extensions
+".lock"
+".lck"
+".pid"
+
+# Special paths
+"/dev/null"
+"/dev/zero"
+"NUL"
+"CON"
+"PRN"
+
+# Edge cases (space, dot, dotdot, null, newline, cr)
+" "
+"."
+".."
+"\x00"
+"\x0a"
+"\x0d"
+
+# Long path components
+"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
