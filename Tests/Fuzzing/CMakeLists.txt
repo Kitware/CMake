@@ -64,3 +64,6 @@ add_fuzzer(cmGeneratorExpressionFuzzer cmGeneratorExpressionFuzzer.cxx)
 
 # Math expression parser fuzzer
 add_fuzzer(cmExprParserFuzzer cmExprParserFuzzer.cxx)
+
+# pkg-config parser fuzzer
+add_fuzzer(cmPkgConfigParserFuzzer cmPkgConfigParserFuzzer.cxx)
