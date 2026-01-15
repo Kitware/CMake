@@ -79,3 +79,6 @@ add_fuzzer(cmStringAlgorithmsFuzzer cmStringAlgorithmsFuzzer.cxx)
 
 # Version parser fuzzer
 add_fuzzer(cmVersionFuzzer cmVersionFuzzer.cxx)
+
+# CMake path fuzzer
+add_fuzzer(cmCMakePathFuzzer cmCMakePathFuzzer.cxx)
