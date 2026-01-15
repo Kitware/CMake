@@ -2715,8 +2715,8 @@ bool extract_tar(std::string const& outFileName,
 #  endif
       else {
         ArchiveError("Problem with archive_write_header(): ", ext);
-        cmSystemTools::Error("Current file: " +
-                             cm_archive_entry_pathname(entry));
+        cmSystemTools::Error(
+          cmStrCat("Current file:\n  ", cm_archive_entry_pathname(entry)));
         break;
       }
     }

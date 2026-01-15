@@ -1790,13 +1790,14 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
         if (!cmSystemTools::CreateTar(outFile, files, {}, compress, verbose,
                                       mtime, format, compressionLevel,
                                       numThreads)) {
-          cmSystemTools::Error("Problem creating tar: " + outFile);
+          cmSystemTools::Error(cmStrCat("Problem creating tar:\n  ", outFile));
           return 1;
         }
       } else if (action == cmSystemTools::TarActionExtract) {
         if (!cmSystemTools::ExtractTar(outFile, files, extractTimestamps,
                                        verbose)) {
-          cmSystemTools::Error("Problem extracting tar: " + outFile);
+          cmSystemTools::Error(
+            cmStrCat("Problem extracting tar:\n  ", outFile));
           return 1;
         }
 #ifdef _WIN32
