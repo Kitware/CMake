@@ -52,3 +52,6 @@ endmacro()
 add_fuzzer(xml_parser_fuzzer xml_parser_fuzzer.cc)
 
 message(STATUS "Fuzzing targets enabled with engine: ${FUZZING_ENGINE}")
+
+# CMakeLists.txt lexer fuzzer
+add_fuzzer(cmListFileLexerFuzzer cmListFileLexerFuzzer.cxx)
