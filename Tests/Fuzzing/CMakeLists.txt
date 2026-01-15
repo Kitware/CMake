@@ -94,3 +94,6 @@ add_fuzzer(cmArchiveExtractFuzzer cmArchiveExtractFuzzer.cxx)
 
 # File lock fuzzer
 add_fuzzer(cmFileLockFuzzer cmFileLockFuzzer.cxx)
+
+# CMake script fuzzer
+add_fuzzer(cmScriptFuzzer cmScriptFuzzer.cxx)
