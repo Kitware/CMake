@@ -17,6 +17,9 @@
 ##     Set to "true" if the job should run even if dependent jobs fail (e.g.,
 ##     further testing of the same setup under a different generator. Should
 ##     only be used on jobs with `needs` on other jobs.
+##   CMAKE_CI_JOB_RUN_MANUALLY
+##     Set to "true" if the job should be manually triggered in MRs.
+##     These jobs will also be delayed for branch update pipelines.
 ## Pipeline variables:
 ##   CMAKE_CI_VERSION_UPDATE
 ##     Set to "true" if the pipeline should perform version update tasks.
@@ -135,6 +138,18 @@ workflow:
         - if: '$CMAKE_CI_PROJECT_MAIN_BRANCH != null && $CI_COMMIT_BRANCH != null && $CMAKE_CI_PROJECT_MAIN_BRANCH == $CI_COMMIT_BRANCH'
           when: never
 
+        ### Continuous pipelines.
+        # Continuous pipelines run manual jobs automatically after 5 minutes.
+        - if: '$CMAKE_CI_PROJECT_CONTINUOUS_BRANCH != null && $CI_COMMIT_BRANCH != null && $CMAKE_CI_PROJECT_CONTINUOUS_BRANCH == $CI_COMMIT_BRANCH && $CMAKE_CI_JOB_CONTINUOUS == "true" && $CMAKE_CI_JOB_RUN_MANUALLY == "true"'
+          when: delayed
+          start_in: 5 minutes
+        # Continuous pipelines run other jobs automatically.
+        - if: '$CMAKE_CI_PROJECT_CONTINUOUS_BRANCH != null && $CI_COMMIT_BRANCH != null && $CMAKE_CI_PROJECT_CONTINUOUS_BRANCH == $CI_COMMIT_BRANCH && $CMAKE_CI_JOB_CONTINUOUS == "true"'
+          when: on_success
+        # Continuous pipelines run no other jobs.
+        - if: '$CMAKE_CI_PROJECT_CONTINUOUS_BRANCH != null && $CI_COMMIT_BRANCH != null && $CMAKE_CI_PROJECT_CONTINUOUS_BRANCH == $CI_COMMIT_BRANCH'
+          when: never
+
         ### Nightly pipelines.
         # Nightly pipelines do not run jobs that are explicitly excluded.
         - if: '$CMAKE_CI_NIGHTLY == "true" && $CMAKE_CI_JOB_NIGHTLY == "false"'
@@ -151,9 +166,6 @@ workflow:
 
 .run_manually:
     rules:
-        - if: '$CMAKE_CI_PROJECT_CONTINUOUS_BRANCH != null && $CI_COMMIT_BRANCH != null && $CMAKE_CI_PROJECT_CONTINUOUS_BRANCH == $CI_COMMIT_BRANCH && $CMAKE_CI_JOB_CONTINUOUS == "true"'
-          when: delayed
-          start_in: 5 minutes
         - if: '($CMAKE_CI_JOB_NO_MR == "true" && $CI_MERGE_REQUEST_ID)'
           when: never
         - if: '$CI_MERGE_REQUEST_ID'
@@ -164,8 +176,6 @@ workflow:
 
 .run_automatically:
     rules:
-        - if: '$CMAKE_CI_PROJECT_CONTINUOUS_BRANCH != null && $CI_COMMIT_BRANCH != null && $CMAKE_CI_PROJECT_CONTINUOUS_BRANCH == $CI_COMMIT_BRANCH && $CMAKE_CI_JOB_CONTINUOUS == "true"'
-          when: on_success
         - if: '($CMAKE_CI_JOB_NO_MR == "true" && $CI_MERGE_REQUEST_ID)'
           when: never
         - if: '$CI_MERGE_REQUEST_ID'
@@ -177,8 +187,6 @@ workflow:
 
 .run_dependent:
     rules:
-        - if: '$CMAKE_CI_PROJECT_CONTINUOUS_BRANCH != null && $CI_COMMIT_BRANCH != null && $CMAKE_CI_PROJECT_CONTINUOUS_BRANCH == $CI_COMMIT_BRANCH && $CMAKE_CI_JOB_CONTINUOUS == "true"'
-          when: on_success
         - if: '($CMAKE_CI_JOB_NO_MR == "true" && $CI_MERGE_REQUEST_ID)'
           when: never
         - if: '$CI_MERGE_REQUEST_ID'
