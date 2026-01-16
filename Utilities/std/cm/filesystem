@@ -7,6 +7,16 @@
 
 #include "cmSTL.hxx" // IWYU pragma: keep
 
+#include <cstdint>
+#include <cstring>
+#include <iterator>
+#include <string>
+#include <utility>
+
+#include <cm/string_view>
+#include <cm/type_traits>
+#include <cmext/iterator>
+
 #if defined(CMake_HAVE_CXX_FILESYSTEM)
 
 #  include <filesystem> // IWYU pragma: export
@@ -14,17 +24,10 @@
 #else
 
 #  include <cstddef>
-#  include <cstdint>
 #  include <iostream>
-#  include <iterator>
 #  include <memory>
-#  include <string>
-#  include <utility>
 
 #  include <cm/iomanip>
-#  include <cm/string_view>
-#  include <cm/type_traits>
-#  include <cmext/iterator>
 
 #  if defined(_WIN32) && !defined(__CYGWIN__)
 #    include <algorithm>
@@ -35,23 +38,13 @@
 namespace cm {
 namespace filesystem {
 
-#if defined(CMake_HAVE_CXX_FILESYSTEM)
-
-using std::filesystem::path;
-using std::filesystem::swap;
-using std::filesystem::hash_value;
-
-#else
-
-#  if !defined(CM_FILESYSTEM_SOURCE_TRAITS_ITERATOR)
+#if !defined(CM_FILESYSTEM_SOURCE_TRAITS_ITERATOR)
 // Oracle DeveloperStudio C++ compiler on Solaris/Sparc fails to compile
 // the source_traits for iterator check.  So disable it for now.
-#    define CM_FILESYSTEM_SOURCE_TRAITS_ITERATOR 0
-#  endif
+#  define CM_FILESYSTEM_SOURCE_TRAITS_ITERATOR 0
+#endif
 
 namespace internals {
-
-class path_parser;
 
 class unicode_helper
 {
@@ -81,7 +74,28 @@ protected:
     return (c & 0xfffffc00) == 0xdc00;
   }
 
-  static void append(std::string& str, std::uint32_t codepoint);
+  template <typename Char>
+  static void append(std::basic_string<Char>& str, std::uint32_t codepoint)
+  {
+    if (codepoint <= 0x7f) {
+      str.push_back(static_cast<Char>(codepoint));
+    } else if (codepoint >= 0x80 && codepoint <= 0x7ff) {
+      str.push_back(static_cast<Char>((codepoint >> 6) + 192));
+      str.push_back(static_cast<Char>((codepoint & 0x3f) + 128));
+    } else if ((codepoint >= 0x800 && codepoint <= 0xd7ff) ||
+               (codepoint >= 0xe000 && codepoint <= 0xffff)) {
+      str.push_back(static_cast<Char>((codepoint >> 12) + 224));
+      str.push_back(static_cast<Char>(((codepoint & 0xfff) >> 6) + 128));
+      str.push_back(static_cast<Char>((codepoint & 0x3f) + 128));
+    } else if (codepoint >= 0x10000 && codepoint <= 0x10ffff) {
+      str.push_back(static_cast<Char>((codepoint >> 18) + 240));
+      str.push_back(static_cast<Char>(((codepoint & 0x3ffff) >> 12) + 128));
+      str.push_back(static_cast<Char>(((codepoint & 0xfff) >> 6) + 128));
+      str.push_back(static_cast<Char>((codepoint & 0x3f) + 128));
+    } else {
+      append(str, 0xfffd);
+    }
+  }
 
   static utf8_state decode(utf8_state const state, std::uint8_t const fragment,
                            std::uint32_t& codepoint);
@@ -98,31 +112,38 @@ class unicode<Char, typename std::enable_if<(sizeof(Char) == 4)>::type>
 {
 public:
   // UTF32 -> UTF8
-  static std::string to_utf8(std::wstring const& str)
+  template <typename UTF8Char>
+  static std::basic_string<UTF8Char> to_utf8(wchar_t const* str)
   {
-    std::string result;
-    for (auto c : str) {
+    std::basic_string<UTF8Char> result;
+    while (auto c = *str++) {
       append(result, c);
     }
     return result;
   }
-  static std::string to_utf8(Char c)
+  template <typename UTF8Char>
+  static std::basic_string<UTF8Char> to_utf8(std::wstring const& str)
   {
-    std::string result;
+    return unicode<Char>::template to_utf8<UTF8Char>(str.c_str());
+  }
+  template <typename UTF8Char>
+  static std::basic_string<UTF8Char> to_utf8(wchar_t c)
+  {
+    std::basic_string<UTF8Char> result;
     append(result, c);
     return result;
   }
 
   // UTF8 -> UTF32
-  static std::wstring from_utf8(std::string const& str)
+  template <typename UTF8Char>
+  static std::wstring from_utf8(UTF8Char const* str, std::size_t length)
   {
     std::wstring result;
-    result.reserve(str.length());
-    auto iter = str.begin();
+    result.reserve(length);
     utf8_state state = s_start;
     std::uint32_t codepoint = 0;
-    while (iter < str.end()) {
-      if ((state = decode(state, static_cast<std::uint8_t>(*iter++),
+    while (*str) {
+      if ((state = decode(state, static_cast<std::uint8_t>(*str++),
                           codepoint)) == s_start) {
         result += static_cast<std::wstring::value_type>(codepoint);
         codepoint = 0;
@@ -137,7 +158,19 @@ public:
     }
     return result;
   }
-  static std::wstring from_utf8(char c)
+  template <typename UTF8Char>
+  static std::wstring from_utf8(UTF8Char const* str)
+  {
+    return unicode<Char>::from_utf8(
+      str, std::strlen(reinterpret_cast<char const*>(str)));
+  }
+  template <typename UTF8Char>
+  static std::wstring from_utf8(std::basic_string<UTF8Char> const& str)
+  {
+    return unicode<Char>::from_utf8(str.c_str(), str.length());
+  }
+  template <typename UTF8Char>
+  static std::wstring from_utf8(UTF8Char c)
   {
     std::wstring result;
     utf8_state state = s_start;
@@ -159,19 +192,19 @@ class unicode<Char, typename std::enable_if<(sizeof(Char) == 2)>::type>
 {
 public:
   // UTF16 -> UTF8
-  static std::string to_utf8(std::wstring const& str)
+  template <typename UTF8Char>
+  static std::basic_string<UTF8Char> to_utf8(wchar_t const* str)
   {
-    std::string result;
-    for (auto iter = str.begin(); iter != str.end(); ++iter) {
-      std::uint32_t c = *iter;
+    std::basic_string<UTF8Char> result;
+    for (; *str; ++str) {
+      std::uint32_t c = *str;
       if (is_surrogate(c)) {
-        ++iter;
-        if (iter != str.end() && is_high_surrogate(c) &&
-            is_low_surrogate(*iter)) {
-          append(result, (std::uint32_t(c) << 10) + *iter - 0x35fdc00);
+        ++str;
+        if (*str && is_high_surrogate(c) && is_low_surrogate(*str)) {
+          append(result, (std::uint32_t(c) << 10) + *str - 0x35fdc00);
         } else {
           append(result, 0xfffd);
-          if (iter == str.end()) {
+          if (!*str) {
             break;
           }
         }
@@ -181,9 +214,15 @@ public:
     }
     return result;
   }
-  static std::string to_utf8(Char c)
+  template <typename UTF8Char>
+  static std::basic_string<UTF8Char> to_utf8(std::wstring const& str)
   {
-    std::string result;
+    return unicode<Char>::template to_utf8<UTF8Char>(str.c_str());
+  }
+  template <typename UTF8Char>
+  static std::basic_string<UTF8Char> to_utf8(wchar_t c)
+  {
+    std::basic_string<UTF8Char> result;
     if (is_surrogate(c)) {
       append(result, 0xfffd);
     } else {
@@ -193,15 +232,15 @@ public:
   }
 
   // UTF8 -> UTF16
-  static std::wstring from_utf8(std::string const& str)
+  template <typename UTF8Char>
+  static std::wstring from_utf8(UTF8Char const* str, std::size_t length)
   {
     std::wstring result;
-    result.reserve(str.length());
-    auto iter = str.begin();
+    result.reserve(length);
     utf8_state state = s_start;
     std::uint32_t codepoint = 0;
-    while (iter < str.end()) {
-      if ((state = decode(state, static_cast<std::uint8_t>(*iter++),
+    while (*str) {
+      if ((state = decode(state, static_cast<std::uint8_t>(*str++),
                           codepoint)) == s_start) {
         if (codepoint <= 0xffff) {
           result += static_cast<std::wstring::value_type>(codepoint);
@@ -224,7 +263,19 @@ public:
     }
     return result;
   }
-  static std::wstring from_utf8(char c)
+  template <typename UTF8Char>
+  static std::wstring from_utf8(UTF8Char const* str)
+  {
+    return unicode<Char>::from_utf8(
+      str, std::strlen(reinterpret_cast<char const*>(str)));
+  }
+  template <typename UTF8Char>
+  static std::wstring from_utf8(std::basic_string<UTF8Char> const& str)
+  {
+    return unicode<Char>::from_utf8(str.c_str(), str.length());
+  }
+  template <typename UTF8Char>
+  static std::wstring from_utf8(UTF8Char c)
   {
     std::wstring result;
     utf8_state state = s_start;
@@ -258,6 +309,10 @@ public:
   {
     return unicode<wchar_t>::from_utf8(in);
   }
+  std::wstring operator()(std::string&& in)
+  {
+    return unicode<wchar_t>::from_utf8(in);
+  }
   std::wstring operator()(char const* in)
   {
     return unicode<wchar_t>::from_utf8(in);
@@ -270,19 +325,27 @@ class unicode_converter<wchar_t, char>
 public:
   std::string operator()(std::wstring const& in)
   {
-    return unicode<wchar_t>::to_utf8(in);
+    return unicode<wchar_t>::to_utf8<char>(in);
+  }
+  std::string operator()(std::wstring&& in)
+  {
+    return unicode<wchar_t>::to_utf8<char>(in);
   }
   std::string operator()(wchar_t const* in)
   {
-    return unicode<wchar_t>::to_utf8(in);
+    return unicode<wchar_t>::to_utf8<char>(in);
   }
-  std::string operator()(wchar_t in) { return unicode<wchar_t>::to_utf8(in); }
+  std::string operator()(wchar_t in)
+  {
+    return unicode<wchar_t>::to_utf8<char>(in);
+  }
 };
 template <>
 class unicode_converter<char, char>
 {
 public:
   std::string operator()(std::string const& in) { return in; }
+  std::string operator()(std::string&& in) { return in; }
   std::string operator()(char const* in) { return std::string(in); }
   std::string operator()(char in) { return std::string(1, in); }
 };
@@ -291,9 +354,96 @@ class unicode_converter<wchar_t, wchar_t>
 {
 public:
   std::wstring operator()(std::wstring const& in) { return in; }
+  std::wstring operator()(std::wstring&& in) { return in; }
   std::wstring operator()(wchar_t const* in) { return std::wstring(in); }
   std::wstring operator()(wchar_t in) { return std::wstring(1, in); }
 };
+#if defined(__cpp_char8_t)
+template <>
+class unicode_converter<char, char8_t>
+{
+public:
+  std::u8string operator()(std::string const& in)
+  {
+    return std::u8string{ reinterpret_cast<char8_t const*>(in.c_str()) };
+  }
+  std::u8string operator()(std::string&& in)
+  {
+    return std::u8string{ reinterpret_cast<char8_t const*>(in.c_str()) };
+  }
+  std::u8string operator()(char const* in)
+  {
+    return std::u8string{ reinterpret_cast<char8_t const*>(in) };
+  }
+  std::u8string operator()(char in)
+  {
+    return std::u8string{ 1, static_cast<char8_t>(in) };
+  }
+};
+template <>
+class unicode_converter<char8_t, char>
+{
+public:
+  std::string operator()(std::u8string const& in)
+  {
+    return std::string{ reinterpret_cast<char const*>(in.c_str()) };
+  }
+  std::string operator()(std::u8string&& in)
+  {
+    return std::string{ reinterpret_cast<char const*>(in.c_str()) };
+  }
+  std::string operator()(char8_t const* in)
+  {
+    return std::string{ reinterpret_cast<char const*>(in) };
+  }
+  std::string operator()(char8_t in)
+  {
+    return std::string{ 1, static_cast<char>(in) };
+  }
+};
+template <>
+class unicode_converter<wchar_t, char8_t>
+{
+public:
+  std::u8string operator()(std::wstring const& in)
+  {
+    return unicode<wchar_t>::to_utf8<char8_t>(in);
+  }
+  std::u8string operator()(std::wstring&& in)
+  {
+    return unicode<wchar_t>::to_utf8<char8_t>(in);
+  }
+  std::u8string operator()(wchar_t const* in)
+  {
+    return unicode<wchar_t>::to_utf8<char8_t>(in);
+  }
+  std::u8string operator()(wchar_t in)
+  {
+    return unicode<wchar_t>::to_utf8<char8_t>(in);
+  }
+};
+template <>
+class unicode_converter<char8_t, wchar_t>
+{
+public:
+  std::wstring operator()(std::u8string const& in)
+  {
+    return unicode<wchar_t>::from_utf8(in);
+  }
+  std::wstring operator()(std::u8string&& in)
+  {
+    return unicode<wchar_t>::from_utf8(in);
+  }
+  std::wstring operator()(char8_t const* in)
+  {
+    return unicode<wchar_t>::from_utf8(in);
+  }
+  std::wstring operator()(char8_t in)
+  {
+    return unicode<wchar_t>::from_utf8(in);
+  }
+};
+#endif
 
 template <typename In>
 struct string_converter
@@ -334,6 +484,18 @@ struct string_converter<char>
     return std::basic_string<Char>(unicode_converter<char, Char>()(in));
   }
   template <typename Char>
+  static std::basic_string<Char> to(std::string&& in)
+  {
+    return std::basic_string<Char>(
+      unicode_converter<char, Char>()(std::move(in)));
+  }
+  template <typename Char>
+  static std::basic_string<Char> to(cm::string_view in)
+  {
+    return std::basic_string<Char>(
+      unicode_converter<char, Char>()(std::string{ in.begin(), in.end() }));
+  }
+  template <typename Char>
   static std::basic_string<Char> to(char const* in)
   {
     return std::basic_string<Char>(unicode_converter<char, Char>()(in));
@@ -342,6 +504,24 @@ struct string_converter<char>
   static std::basic_string<Char> to(char in)
   {
     return std::basic_string<Char>(unicode_converter<char, Char>()(in));
+  }
+
+  template <typename Char, typename Iterator>
+  static std::basic_string<Char> to(Iterator it)
+  {
+    char e = '\0';
+    std::string tmp;
+    for (; *it != e; ++it) {
+      tmp.push_back(*it);
+    }
+    return std::basic_string<Char>(
+      unicode_converter<char, Char>()(std::move(tmp)));
+  }
+  template <typename Char, typename Iterator>
+  static std::basic_string<Char> to(Iterator begin, Iterator end)
+  {
+    return std::basic_string<Char>(
+      unicode_converter<char, Char>()(std::string{ begin, end }));
   }
 };
 template <>
@@ -378,6 +558,12 @@ struct string_converter<wchar_t>
     return std::basic_string<Char>(unicode_converter<wchar_t, Char>()(in));
   }
   template <typename Char>
+  static std::basic_string<Char> to(std::wstring&& in)
+  {
+    return std::basic_string<Char>(
+      unicode_converter<wchar_t, Char>()(std::move(in)));
+  }
+  template <typename Char>
   static std::basic_string<Char> to(wchar_t const* in)
   {
     return std::basic_string<Char>(unicode_converter<wchar_t, Char>()(in));
@@ -387,7 +573,95 @@ struct string_converter<wchar_t>
   {
     return std::basic_string<Char>(unicode_converter<wchar_t, Char>()(in));
   }
+
+  template <typename Char, typename Iterator>
+  static std::basic_string<Char> to(Iterator it)
+  {
+    wchar_t e = '\0';
+    std::wstring tmp;
+    for (; *it != e; ++it) {
+      tmp.push_back(*it);
+    }
+    return std::basic_string<Char>(
+      unicode_converter<wchar_t, Char>()(std::move(tmp)));
+  }
+  template <typename Char, typename Iterator>
+  static std::basic_string<Char> to(Iterator begin, Iterator end)
+  {
+    return std::basic_string<Char>(
+      unicode_converter<wchar_t, Char>()(std::wstring{ begin, end }));
+  }
 };
+#if defined(__cpp_char8_t)
+template <>
+struct string_converter<char8_t>
+{
+  // some compilers, like gcc 4.8 does not implement the following C++11
+  // signature:
+  // std::string::string(const string&, const Allocator&)
+  // As workaround, use char* pointer.
+  template <typename Char, typename Traits, typename Alloc>
+  static std::basic_string<Char, Traits, Alloc> to(std::u8string const& in,
+                                                   Alloc const& a)
+  {
+    return std::basic_string<Char, Traits, Alloc>(
+      unicode_converter<char8_t, Char>()(in).c_str(), a);
+  }
+  template <typename Char, typename Traits, typename Alloc>
+  static std::basic_string<Char, Traits, Alloc> to(char8_t const* in,
+                                                   Alloc const& a)
+  {
+    return std::basic_string<Char, Traits, Alloc>(
+      unicode_converter<char8_t, Char>()(in).c_str(), a);
+  }
+  template <typename Char, typename Traits, typename Alloc>
+  static std::basic_string<Char, Traits, Alloc> to(char8_t in, Alloc const& a)
+  {
+    return std::basic_string<Char, Traits, Alloc>(
+      unicode_converter<char8_t, Char>()(in).c_str(), a);
+  }
+
+  template <typename Char>
+  static std::basic_string<Char> to(std::u8string const& in)
+  {
+    return std::basic_string<Char>(unicode_converter<char8_t, Char>()(in));
+  }
+  template <typename Char>
+  static std::basic_string<Char> to(std::u8string&& in)
+  {
+    return std::basic_string<Char>(
+      unicode_converter<char8_t, Char>()(std::move(in)));
+  }
+  template <typename Char>
+  static std::basic_string<Char> to(char8_t const* in)
+  {
+    return std::basic_string<Char>(unicode_converter<char8_t, Char>()(in));
+  }
+  template <typename Char>
+  static std::basic_string<Char> to(char8_t in)
+  {
+    return std::basic_string<Char>(unicode_converter<char8_t, Char>()(in));
+  }
+
+  template <typename Char, typename Iterator>
+  static std::basic_string<Char> to(Iterator it)
+  {
+    char8_t e = '\0';
+    std::u8string tmp;
+    for (; *it != e; ++it) {
+      tmp.push_back(*it);
+    }
+    return std::basic_string<Char>(
+      unicode_converter<char8_t, Char>()(std::move(tmp)));
+  }
+  template <typename Char, typename Iterator>
+  static std::basic_string<Char> to(Iterator begin, Iterator end)
+  {
+    return std::basic_string<Char>(
+      unicode_converter<char8_t, Char>()(std::u8string{ begin, end }));
+  }
+};
+#endif
 
 template <typename T, typename = void>
 struct source_traits
@@ -398,6 +672,12 @@ template <typename T, std::size_t N>
 struct source_traits<T[N]>
 {
   using value_type = T;
+};
+
+template <typename T>
+struct source_traits<T*>
+{
+  using value_type = cm::decay_t<T>;
 };
 
 template <typename Char, typename Traits, typename Alloc>
@@ -413,111 +693,14 @@ struct source_traits<cm::string_view>
   using value_type = cm::string_view::value_type;
 };
 
-#  if CM_FILESYSTEM_SOURCE_TRAITS_ITERATOR
+#if CM_FILESYSTEM_SOURCE_TRAITS_ITERATOR
 template <typename T>
 struct source_traits<T, cm::enable_if_t<cm::is_iterator<T>::value, void>>
 {
   using value_type =
     typename std::iterator_traits<typename std::decay<T>::type>::value_type;
 };
-#  endif
-
-template <typename In, typename Out>
-struct source_converter
-{
-};
-
-template <>
-struct source_converter<char, char>
-{
-  template <typename Iterator>
-  static void append_range(std::string& p, Iterator b, Iterator e)
-  {
-    if (b == e) {
-      return;
-    }
-    p.append(b, e);
-  }
-  template <typename Iterator>
-  static void append_range(std::string& p, Iterator b)
-  {
-    char e = '\0';
-
-    if (*b == e) {
-      return;
-    }
-    for (; *b != e; ++b) {
-      p.push_back(*b);
-    }
-  }
-
-  static void append_source(std::string& p, cm::string_view const s)
-  {
-    append_range(p, s.begin(), s.end());
-  }
-  template <typename Traits, typename Alloc>
-  static void append_source(std::string& p,
-                            std::basic_string<char, Traits, Alloc> const& s)
-  {
-    append_range(p, s.begin(), s.end());
-  }
-  template <typename Source>
-  static void append_source(std::string& p, Source const& s)
-  {
-    append_range(p, s);
-  }
-
-  static void set_source(std::string& p, std::string&& s) { p = std::move(s); }
-};
-
-template <>
-struct source_converter<wchar_t, char>
-{
-  template <typename Iterator>
-  static void append_range(std::string& p, Iterator b, Iterator e)
-  {
-    if (b == e) {
-      return;
-    }
-
-    std::wstring tmp(b, e);
-    std::string dest = string_converter<wchar_t>::to<char>(tmp);
-    p.append(dest.begin(), dest.end());
-  }
-  template <typename Iterator>
-  static void append_range(std::string& p, Iterator b)
-  {
-    wchar_t e = '\0';
-
-    if (*b == e) {
-      return;
-    }
-    std::wstring tmp;
-    for (; *b != e; ++b) {
-      tmp.push_back(*b);
-    }
-
-    std::string dest = string_converter<wchar_t>::to<char>(tmp);
-    p.append(dest.begin(), dest.end());
-  }
-
-  template <typename Traits, typename Alloc>
-  static void append_source(std::string& p,
-                            std::basic_string<wchar_t, Traits, Alloc> const& s)
-  {
-    append_range(p, s.begin(), s.end());
-  }
-  template <typename Source>
-  static void append_source(std::string& p, Source const& s)
-  {
-    append_range(p, s);
-  }
-
-  static void set_source(std::string& p, std::wstring&& s)
-  {
-    p = string_converter<wchar_t>::to<char>(s);
-  }
-};
+#endif
 
 template <typename T>
 struct is_pathable_string : std::false_type
@@ -580,7 +763,7 @@ struct is_pathable_iterator<
 {
 };
 
-#  if defined(__SUNPRO_CC) && defined(__sparc)
+#if defined(__SUNPRO_CC) && defined(__sparc)
 // Oracle DeveloperStudio C++ compiler on Solaris/Sparc fails to compile
 // the full 'is_pathable' check.  We use it only to improve error messages
 // via 'enable_if' when calling methods with incorrect types.  Just
@@ -589,7 +772,7 @@ template <typename T>
 struct is_pathable : std::true_type
 {
 };
-#  else
+#else
 template <typename T>
 struct is_pathable
   : bool_constant<is_pathable_string<T>::value ||
@@ -597,11 +780,700 @@ struct is_pathable
                   is_pathable_iterator<T>::value>
 {
 };
+#endif
+
+template <typename In, typename Out>
+struct source_converter
+{
+};
+
+template <>
+struct source_converter<char, char>
+{
+  template <typename Iterator>
+  static void append_range(std::string& p, Iterator b, Iterator e)
+  {
+    if (b == e) {
+      return;
+    }
+    p.append(b, e);
+  }
+  template <typename Iterator>
+  static void append_range(std::string& p, Iterator b)
+  {
+    char e = '\0';
+
+    if (*b == e) {
+      return;
+    }
+    for (; *b != e; ++b) {
+      p.push_back(*b);
+    }
+  }
+
+  static void append_source(std::string& p, cm::string_view s)
+  {
+    append_range(p, s.begin(), s.end());
+  }
+  static void append_source(std::string& p, std::string const& s)
+  {
+    append_range(p, s.begin(), s.end());
+  }
+  template <typename Source>
+  static void append_source(std::string& p, Source const& s)
+  {
+    append_range(p, s);
+  }
+
+  static void set_source(std::string& p, std::string&& s) { p = std::move(s); }
+
+  static std::string from(cm::string_view s)
+  {
+    return std::string{ s.begin(), s.end() };
+  }
+  static std::string from(std::string const& s) { return s; }
+  static std::string from(std::string&& s) { return s; }
+  template <typename Source>
+  static std::string from(Source const& s)
+  {
+    std::string result;
+    append_source(result, s);
+    return result;
+  }
+  template <typename Iterator>
+  static std::string from(Iterator first, Iterator last)
+  {
+    return std::string{ first, last };
+  }
+};
+template <>
+struct source_converter<char, wchar_t>
+{
+  static std::wstring from(std::string const& s)
+  {
+    return string_converter<char>::to<wchar_t>(s);
+  }
+  static std::wstring from(std::string&& s)
+  {
+    return string_converter<char>::to<wchar_t>(std::move(s));
+  }
+  template <typename Source>
+  static std::wstring from(Source const& s)
+  {
+    return string_converter<char>::to<wchar_t>(s);
+  }
+  template <typename Iterator>
+  static std::wstring from(Iterator first, Iterator last)
+  {
+    return string_converter<char>::to<wchar_t>(first, last);
+  }
+};
+
+template <>
+struct source_converter<wchar_t, wchar_t>
+{
+  template <typename Iterator>
+  static void append_range(std::wstring& p, Iterator b, Iterator e)
+  {
+    if (b == e) {
+      return;
+    }
+    p.append(b, e);
+  }
+  template <typename Iterator>
+  static void append_range(std::wstring& p, Iterator b)
+  {
+    char e = '\0';
+
+    if (*b == e) {
+      return;
+    }
+    for (; *b != e; ++b) {
+      p.push_back(*b);
+    }
+  }
+
+  template <typename Source>
+  static void append_source(std::wstring& p, Source const& s)
+  {
+    append_range(p, s);
+  }
+
+  static std::wstring from(std::wstring const& s) { return s; }
+  static std::wstring from(std::wstring&& s) { return s; }
+  template <typename Source>
+  static std::wstring from(Source const& s)
+  {
+    std::wstring result;
+    append_source(result, s);
+    return result;
+  }
+  template <typename Iterator>
+  static std::wstring from(Iterator first, Iterator last)
+  {
+    return std::wstring{ first, last };
+  }
+};
+template <>
+struct source_converter<wchar_t, char>
+{
+  template <typename Iterator>
+  static void append_range(std::string& p, Iterator b, Iterator e)
+  {
+    if (b == e) {
+      return;
+    }
+
+    std::string dest = string_converter<wchar_t>::to<char>(b, e);
+    p.append(dest.begin(), dest.end());
+  }
+  template <typename Iterator>
+  static void append_range(std::string& p, Iterator b)
+  {
+    wchar_t e = '\0';
+
+    if (*b == e) {
+      return;
+    }
+
+    std::string dest = string_converter<wchar_t>::to<char>(b);
+    p.append(dest.begin(), dest.end());
+  }
+
+  static void append_source(std::string& p, std::wstring const& s)
+  {
+    append_range(p, s.begin(), s.end());
+  }
+  template <typename Source>
+  static void append_source(std::string& p, Source const& s)
+  {
+    append_range(p, s);
+  }
+
+  static void set_source(std::string& p, std::wstring&& s)
+  {
+    p = string_converter<wchar_t>::to<char>(std::move(s));
+  }
+
+  static std::string from(std::wstring const& s)
+  {
+    return string_converter<wchar_t>::to<char>(s);
+  }
+  static std::string from(std::wstring&& s)
+  {
+    return string_converter<wchar_t>::to<char>(std::move(s));
+  }
+  template <typename Source>
+  static std::string from(Source const& s)
+  {
+    return string_converter<wchar_t>::to<char>(s);
+  }
+  template <typename Iterator>
+  static std::string from(Iterator first, Iterator last)
+  {
+    return string_converter<wchar_t>::to<char>(first, last);
+  }
+};
+
+#if defined(__cpp_char8_t)
+template <>
+struct source_converter<char, char8_t>
+{
+  static std::u8string from(std::string const& s)
+  {
+    return string_converter<char>::to<char8_t>(s);
+  }
+  static std::u8string from(std::string&& s)
+  {
+    return string_converter<char>::to<char8_t>(std::move(s));
+  }
+  template <typename Source>
+  static std::u8string from(Source const& s)
+  {
+    return string_converter<char>::to<char8_t>(s);
+  }
+  template <typename Iterator>
+  static std::u8string from(Iterator first, Iterator last)
+  {
+    return string_converter<char>::to<char8_t>(first, last);
+  }
+};
+template <>
+struct source_converter<char8_t, char>
+{
+  static std::string from(std::u8string const& s)
+  {
+    return string_converter<char8_t>::to<char>(s);
+  }
+  static std::string from(std::u8string&& s)
+  {
+    return string_converter<char8_t>::to<char>(std::move(s));
+  }
+  template <typename Source>
+  static std::string from(Source const& s)
+  {
+    return string_converter<char8_t>::to<char>(s);
+  }
+  template <typename Iterator>
+  static std::string from(Iterator first, Iterator last)
+  {
+    return string_converter<char8_t>::to<char>(first, last);
+  }
+};
+template <>
+struct source_converter<wchar_t, char8_t>
+{
+  static std::u8string from(std::wstring const& s)
+  {
+    return string_converter<wchar_t>::to<char8_t>(s);
+  }
+  static std::u8string from(std::wstring&& s)
+  {
+    return string_converter<wchar_t>::to<char8_t>(std::move(s));
+  }
+  template <typename Source>
+  static std::u8string from(Source const& s)
+  {
+    return string_converter<wchar_t>::to<char8_t>(s);
+  }
+  template <typename Iterator>
+  static std::u8string from(Iterator first, Iterator last)
+  {
+    return string_converter<wchar_t>::to<char8_t>(first, last);
+  }
+};
+template <>
+struct source_converter<char8_t, wchar_t>
+{
+  static std::wstring from(std::u8string const& s)
+  {
+    return string_converter<char8_t>::to<wchar_t>(s);
+  }
+  static std::wstring from(std::u8string&& s)
+  {
+    return string_converter<char8_t>::to<wchar_t>(std::move(s));
+  }
+  template <typename Source>
+  static std::wstring from(Source const& s)
+  {
+    return string_converter<char8_t>::to<wchar_t>(s);
+  }
+  template <typename Iterator>
+  static std::wstring from(Iterator first, Iterator last)
+  {
+    return string_converter<char8_t>::to<wchar_t>(first, last);
+  }
+};
+#endif
+}
+
+#if defined(CMake_HAVE_CXX_FILESYSTEM)
+
+class path : public std::filesystem::path
+{
+private:
+  using base = std::filesystem::path;
+  // define the char type to convert to
+#  if defined(__cpp_char8_t) && defined(_WIN32) && !defined(__CYGWIN__)
+  using target_type = char8_t;
+#  else
+  using target_type = base::value_type;
 #  endif
+
+  template <typename Source>
+  using enable_if_pathable =
+    enable_if_t<filesystem::internals::is_pathable<Source>::value, path&>;
+
+  template <typename Source, typename Target = target_type>
+  using string_converter = filesystem::internals::source_converter<
+    typename filesystem::internals::source_traits<Source>::value_type, Target>;
+  template <typename Iterator, typename Target = target_type>
+  using range_converter = filesystem::internals::source_converter<
+    typename std::iterator_traits<Iterator>::value_type, Target>;
+
+public:
+  class iterator;
+  using const_iterator = iterator;
+
+  // Constructors
+  // ============
+  path() noexcept {}
+  path(path const& p)
+    : base(p)
+  {
+  }
+  path(path&& p) noexcept
+    : base(std::move(p))
+  {
+  }
+  path(string_type&& source, format fmt = format::auto_format)
+    : base(string_converter<string_type>::from(std::move(source)), fmt)
+  {
+  }
+  template <typename Source, typename = enable_if_pathable<Source>>
+  path(Source const& source, format fmt = format::auto_format)
+    : base(string_converter<Source>::from(source), fmt)
+  {
+  }
+  template <typename Iterator, typename = enable_if_pathable<Iterator>>
+  path(Iterator first, Iterator last, format fmt = format::auto_format)
+    : base(range_converter<Iterator>::from(first, last), fmt)
+  {
+  }
+
+  ~path() = default;
+
+  // Assignments
+  // ===========
+  path& operator=(path const& p)
+  {
+    if (this != &p) {
+      this->base::operator=(static_cast<base const&>(p));
+    }
+    return *this;
+  }
+  path& operator=(path&& p) noexcept
+  {
+    if (this != &p) {
+      this->base::operator=(std::move(static_cast<base&&>(p)));
+    }
+    return *this;
+  }
+
+  path& operator=(string_type&& source)
+  {
+    return this->assign(std::move(source));
+  }
+  template <typename Source, typename = enable_if_pathable<Source>>
+  path& operator=(Source const& source)
+  {
+    return this->assign(source);
+  }
+
+  path& assign(string_type&& source)
+  {
+    this->base::assign(string_converter<string_type>::from(std::move(source)));
+    return *this;
+  }
+  template <typename Source, typename = enable_if_pathable<Source>>
+  path& assign(Source const& source)
+  {
+    this->base::assign(string_converter<Source>::from(source));
+    return *this;
+  }
+  template <typename Iterator, typename = enable_if_pathable<Iterator>>
+  path& assign(Iterator first, Iterator last)
+  {
+    this->base::assign(range_converter<Iterator>::from(first, last));
+    return *this;
+  }
+
+  // Concatenation
+  // =============
+  path& operator/=(path const& p)
+  {
+    this->base::operator/=(static_cast<base const&>(p));
+    return *this;
+  }
+  template <typename Source>
+  path& operator/=(Source const& source)
+  {
+    return this->append(source);
+  }
+  template <typename Source, typename = enable_if_pathable<Source>>
+  path& append(Source const& source)
+  {
+    this->base::append(string_converter<Source>::from(source));
+    return *this;
+  }
+  template <typename Iterator, typename = enable_if_pathable<Iterator>>
+  path& append(Iterator first, Iterator last)
+  {
+    this->base::append(range_converter<Iterator>::from(first, last));
+    return *this;
+  }
+
+  path& operator+=(path const& p)
+  {
+    this->base::operator+=(static_cast<base const&>(p));
+    return *this;
+  }
+  path& operator+=(string_type const& str) { return this->concat(str); }
+  path& operator+=(cm::string_view str)
+  {
+    this->concat(str.begin(), str.end());
+    return *this;
+  }
+  path& operator+=(value_type const* str) { return this->concat(str); }
+  path& operator+=(value_type const c)
+  {
+    return this->concat(string_type{ 1, c });
+  }
+  template <typename Source>
+  path& operator+=(Source const& source)
+  {
+    return this->concat(source);
+  }
+  template <typename Source, typename = enable_if_pathable<Source>>
+  path& concat(Source const& source)
+  {
+    this->base::concat(string_converter<Source>::from(source));
+    return *this;
+  }
+  template <typename Iterator, typename = enable_if_pathable<Iterator>>
+  path& concat(Iterator first, Iterator last)
+  {
+    this->base::concat(range_converter<Iterator>::from(first, last));
+    return *this;
+  }
+
+  // Format observers
+  // ================
+  string_type const& native() const noexcept
+  {
+#  if defined(_WIN32) && !defined(__CYGWIN__)
+    this->native_path_ = this->wstring();
+    return this->native_path_;
+#  else
+    return this->base::native();
+#  endif
+  }
+  value_type const* c_str() const noexcept { return this->native().c_str(); }
+  operator string_type() const { return this->native(); }
+
+  std::string string() const
+  {
+#  if defined(_WIN32) && !defined(__CYGWIN__)
+#    if defined(__cpp_char8_t)
+    return string_converter<std::u8string, std::string::value_type>::from(
+      this->base::u8string());
+#    else
+    return string_converter<std::wstring, std::string::value_type>::from(
+      this->base::wstring());
+#    endif
+#  else
+    return this->base::string();
+#  endif
+  }
+  std::wstring wstring() const { return this->base::wstring(); }
+#  if defined(__cpp_char8_t)
+  std::u8string u8string() const
+#  else
+  std::string u8string() const
+#  endif
+  {
+#  if defined(_WIN32) && !defined(__CYGWIN__) && !defined(__cpp_char8_t)
+    return string_converter<std::wstring, std::string::value_type>::from(
+      this->base::wstring());
+#  else
+    return this->base::u8string();
+#  endif
+  }
+
+  std::string generic_string() const
+  {
+#  if defined(_WIN32) && !defined(__CYGWIN__)
+#    if defined(__cpp_char8_t)
+    return string_converter<std::u8string, std::string::value_type>::from(
+      this->base::generic_u8string());
+#    else
+    return string_converter<std::wstring, std::string::value_type>::from(
+      this->base::generic_wstring());
+#    endif
+#  else
+    return this->base::generic_string();
+#  endif
+  }
+  std::wstring generic_wstring() const
+  {
+    return this->base::generic_wstring();
+  }
+#  if defined(__cpp_char8_t)
+  std::u8string generic_u8string() const
+#  else
+  std::string generic_u8string() const
+#  endif
+  {
+#  if defined(_WIN32) && !defined(__CYGWIN__) && !defined(__cpp_char8_t)
+    return string_converter<std::wstring, std::string::value_type>::from(
+      this->base::generic_wstring());
+#  else
+    return this->base::generic_u8string();
+#  endif
+  }
+
+  // Generation
+  // ==========
+  path lexically_normal() const { return this->base::lexically_normal(); }
+
+  path lexically_relative(path const& root) const
+  {
+    return this->base::lexically_relative(root);
+  }
+
+  path lexically_proximate(path const& root) const
+  {
+    return this->base::lexically_proximate(root);
+  }
+
+  // Decomposition
+  // =============
+  path root_name() const { return this->base::root_name(); }
+
+  path root_directory() const { return this->base::root_directory(); }
+
+  path root_path() const { return this->base::root_path(); }
+
+  path relative_path() const { return this->base::relative_path(); }
+
+  path parent_path() const { return this->base::parent_path(); }
+
+  path filename() const { return this->base::filename(); }
+
+  path stem() const { return this->base::stem(); }
+  path extension() const { return this->base::extension(); }
+
+  // Iterators
+  // =========
+  inline iterator begin() const;
+  inline iterator end() const;
+
+  // Non-members
+  // ===========
+  friend inline path operator/(path const& lhs, path const& rhs)
+  {
+    path result{ lhs };
+    result /= rhs;
+
+    return result;
+  }
+
+private:
+  friend class iterator;
+  path(base&& p)
+    : base(std::move(p))
+  {
+  }
+  mutable string_type native_path_;
+};
+
+class path::iterator
+{
+public:
+  using iterator_category = std::filesystem::path::iterator::iterator_category;
+
+  using value_type = path;
+  using difference_type = std::filesystem::path::iterator::difference_type;
+  using pointer = path const*;
+  using reference = path const&;
+
+  iterator() = default;
+  iterator(iterator const& other)
+    : iterator_(other.iterator_)
+  {
+  }
+
+  ~iterator() = default;
+
+  iterator& operator=(iterator const& other)
+  {
+    this->iterator_ = other.iterator_;
+    return *this;
+  }
+
+  reference operator*() const
+  {
+    this->path_element_ = path{ *this->iterator_ };
+    return this->path_element_;
+  }
+
+  pointer operator->() const
+  {
+    this->path_element_ = path{ *this->iterator_ };
+    return &this->path_element_;
+  }
+
+  iterator& operator++()
+  {
+    this->iterator_++;
+    return *this;
+  }
+
+  iterator operator++(int)
+  {
+    iterator it(*this);
+    this->operator++();
+    return *this;
+  }
+
+  iterator& operator--()
+  {
+    this->iterator_--;
+    return *this;
+  }
+
+  iterator operator--(int)
+  {
+    iterator it(*this);
+    this->operator--();
+    return it;
+  }
+
+private:
+  friend class path;
+  friend bool operator==(iterator const&, iterator const&);
+
+  iterator(std::filesystem::path::iterator it)
+    : iterator_(it)
+  {
+  }
+
+  std::filesystem::path::iterator iterator_;
+  mutable path path_element_;
+};
+
+inline path::iterator path::begin() const
+{
+  return iterator{ this->base::begin() };
+}
+inline path::iterator path::end() const
+{
+  return iterator{ this->base::end() };
+}
+
+// Non-member functions
+// ====================
+inline bool operator==(path::iterator const& lhs, path::iterator const& rhs)
+{
+  return lhs.iterator_ == rhs.iterator_;
+}
+
+inline bool operator!=(path::iterator const& lhs, path::iterator const& rhs)
+{
+  return !(lhs == rhs);
+}
+
+inline void swap(path& lhs, path& rhs) noexcept
+{
+  lhs.swap(rhs);
+}
+
+inline std::size_t hash_value(path const& p) noexcept
+{
+  return std::filesystem::hash_value(p);
+}
+
+#else
+
+namespace internals {
+
+class path_parser;
+
 }
 
 class path
 {
+protected:
   using path_type = std::string;
 
   template <typename Source>
@@ -664,7 +1536,7 @@ public:
       path_type::value_type>::append_source(this->path_, source);
   }
   template <typename Iterator, typename = enable_if_pathable<Iterator>>
-  path(Iterator const first, Iterator last, format fmt = auto_format)
+  path(Iterator first, Iterator last, format fmt = auto_format)
   {
     (void)fmt;
     internals::source_converter<
@@ -690,7 +1562,10 @@ public:
     }
     return *this;
   }
-  path& operator=(string_type&& source) { return this->assign(source); }
+  path& operator=(string_type&& source)
+  {
+    return this->assign(std::move(source));
+  }
   template <typename Source, typename = enable_if_pathable<Source>>
   path& operator=(Source const& source)
   {
@@ -873,13 +1748,13 @@ public:
                                                                   Alloc>(
       this->path_, a);
   }
-  std::string const string() const { return this->path_; }
+  std::string string() const { return this->path_; }
   std::wstring wstring() const
   {
-    std::string out = this->string();
     return internals::string_converter<path_type::value_type>::to<
-      std::wstring::value_type>(out);
+      std::wstring::value_type>(this->string());
   }
+  std::string u8string() const { return this->path_; }
 
   template <
     typename Char, typename Traits = std::char_traits<Char>,
@@ -899,10 +1774,10 @@ public:
   std::string generic_string() const { return this->get_generic(); }
   std::wstring generic_wstring() const
   {
-    auto dest = this->generic_string();
     return internals::string_converter<path_type::value_type>::to<
-      std::wstring::value_type>(dest);
+      std::wstring::value_type>(this->generic_string());
   }
+  std::string generic_u8string() const { return this->get_generic(); }
 
   // Compare
   // =======

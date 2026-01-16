@@ -61,6 +61,11 @@ are accessible under the ``cm/`` directory.  The headers under ``cm/`` can
 be used in place of the standard ones when extended features are needed.
 For example ``<cm/memory>`` can be used in place of ``<memory>``.
 
+The class ``cm::filesystem::path``, from the ``<cm/filesystem>`` header, is
+fully compatible with the class ``std::filesystem::path`` regarding the API but
+is a specific implementation (derived from the ``std::filesystem::path`` class)
+to ensure a behavior independent of the current locale.
+
 Available features are:
 
 * From ``C++14``:

@@ -24,7 +24,42 @@
 #  include <cm/string_view>
 #  include <cmext/string_view>
 
+#endif
+
 namespace cm {
+namespace filesystem {
+namespace internals {
+
+// class unicode_helper
+unicode_helper::utf8_state unicode_helper::decode(utf8_state const state,
+                                                  std::uint8_t const fragment,
+                                                  std::uint32_t& codepoint)
+{
+  std::uint32_t const utf8_state_info[] = {
+    // encoded states
+    0x11111111u, 0x11111111u, 0x77777777u, 0x77777777u, 0x88888888u,
+    0x88888888u, 0x88888888u, 0x88888888u, 0x22222299u, 0x22222222u,
+    0x22222222u, 0x22222222u, 0x3333333au, 0x33433333u, 0x9995666bu,
+    0x99999999u, 0x88888880u, 0x22818108u, 0x88888881u, 0x88888882u,
+    0x88888884u, 0x88888887u, 0x88888886u, 0x82218108u, 0x82281108u,
+    0x88888888u, 0x88888883u, 0x88888885u, 0u,          0u,
+    0u,          0u,
+  };
+  std::uint8_t category = fragment < 128
+    ? 0
+    : (utf8_state_info[(fragment >> 3) & 0xf] >> ((fragment & 7) << 2)) & 0xf;
+  codepoint = (state ? (codepoint << 6) | (fragment & 0x3fu)
+                     : (0xffu >> category) & fragment);
+  return state == s_reject
+    ? s_reject
+    : static_cast<utf8_state>(
+        (utf8_state_info[category + 16] >> (state << 2)) & 0xf);
+}
+}
+}
+
+#if !defined(CMake_HAVE_CXX_FILESYSTEM)
+
 namespace filesystem {
 namespace internals {
 
@@ -479,54 +514,6 @@ private:
   cm::string_view const Path;
   cm::string_view Entry;
 };
-
-// class unicode_helper
-void unicode_helper::append(std::string& str, std::uint32_t codepoint)
-{
-  if (codepoint <= 0x7f) {
-    str.push_back(static_cast<char>(codepoint));
-  } else if (codepoint >= 0x80 && codepoint <= 0x7ff) {
-    str.push_back(static_cast<char>((codepoint >> 6) + 192));
-    str.push_back(static_cast<char>((codepoint & 0x3f) + 128));
-  } else if ((codepoint >= 0x800 && codepoint <= 0xd7ff) ||
-             (codepoint >= 0xe000 && codepoint <= 0xffff)) {
-    str.push_back(static_cast<char>((codepoint >> 12) + 224));
-    str.push_back(static_cast<char>(((codepoint & 0xfff) >> 6) + 128));
-    str.push_back(static_cast<char>((codepoint & 0x3f) + 128));
-  } else if (codepoint >= 0x10000 && codepoint <= 0x10ffff) {
-    str.push_back(static_cast<char>((codepoint >> 18) + 240));
-    str.push_back(static_cast<char>(((codepoint & 0x3ffff) >> 12) + 128));
-    str.push_back(static_cast<char>(((codepoint & 0xfff) >> 6) + 128));
-    str.push_back(static_cast<char>((codepoint & 0x3f) + 128));
-  } else {
-    append(str, 0xfffd);
-  }
-}
-
-unicode_helper::utf8_state unicode_helper::decode(utf8_state const state,
-                                                  std::uint8_t const fragment,
-                                                  std::uint32_t& codepoint)
-{
-  std::uint32_t const utf8_state_info[] = {
-    // encoded states
-    0x11111111u, 0x11111111u, 0x77777777u, 0x77777777u, 0x88888888u,
-    0x88888888u, 0x88888888u, 0x88888888u, 0x22222299u, 0x22222222u,
-    0x22222222u, 0x22222222u, 0x3333333au, 0x33433333u, 0x9995666bu,
-    0x99999999u, 0x88888880u, 0x22818108u, 0x88888881u, 0x88888882u,
-    0x88888884u, 0x88888887u, 0x88888886u, 0x82218108u, 0x82281108u,
-    0x88888888u, 0x88888883u, 0x88888885u, 0u,          0u,
-    0u,          0u,
-  };
-  std::uint8_t category = fragment < 128
-    ? 0
-    : (utf8_state_info[(fragment >> 3) & 0xf] >> ((fragment & 7) << 2)) & 0xf;
-  codepoint = (state ? (codepoint << 6) | (fragment & 0x3fu)
-                     : (0xffu >> category) & fragment);
-  return state == s_reject
-    ? s_reject
-    : static_cast<utf8_state>(
-        (utf8_state_info[category + 16] >> (state << 2)) & 0xf);
-}
 
 } // internals
 
@@ -1018,13 +1005,5 @@ std::size_t hash_value(path const& p) noexcept
   return value;
 }
 } // filesystem
-} // cm
-
-#else
-
-// Avoid empty translation unit.
-void cm_filesystem_path_cxx()
-{
-}
-
 #endif
+} // cm
