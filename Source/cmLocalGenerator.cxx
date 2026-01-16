@@ -2568,6 +2568,25 @@ void cmLocalGenerator::AppendFlagEscape(std::string& flags,
     this->EscapeForShell(rawFlag, false, false, false, this->IsNinjaMulti()));
 }
 
+void cmLocalGenerator::AppendLinkFlagsWithParsing(
+  std::string& flags, std::string const& newFlags,
+  cmGeneratorTarget const* target, std::string const& language)
+{
+  std::vector<std::string> options;
+  cmSystemTools::ParseUnixCommandLine(newFlags.c_str(), options);
+  this->SetLinkScriptShell(this->GlobalGenerator->GetUseLinkScript());
+  std::vector<BT<std::string>> optionsWithBT{ options.size() };
+  std::transform(options.cbegin(), options.cend(), optionsWithBT.begin(),
+                 [](std::string const& item) -> BT<std::string> {
+                   return BT<std::string>{ item };
+                 });
+  target->ResolveLinkerWrapper(optionsWithBT, language);
+  for (auto const& item : optionsWithBT) {
+    this->AppendFlagEscape(flags, item.Value);
+  }
+  this->SetLinkScriptShell(false);
+}
+
 void cmLocalGenerator::AppendFlags(std::string& flags,
                                    std::string const& newFlags,
                                    std::string const& name,
@@ -2596,19 +2615,7 @@ void cmLocalGenerator::AppendFlags(std::string& flags,
       break;
     case cmPolicies::NEW:
       if (compileOrLink == cmBuildStep::Link) {
-        std::vector<std::string> options;
-        cmSystemTools::ParseUnixCommandLine(newFlags.c_str(), options);
-        this->SetLinkScriptShell(this->GlobalGenerator->GetUseLinkScript());
-        std::vector<BT<std::string>> optionsWithBT{ options.size() };
-        std::transform(options.cbegin(), options.cend(), optionsWithBT.begin(),
-                       [](std::string const& item) -> BT<std::string> {
-                         return BT<std::string>{ item };
-                       });
-        target->ResolveLinkerWrapper(optionsWithBT, language);
-        for (auto const& item : optionsWithBT) {
-          this->AppendFlagEscape(flags, item.Value);
-        }
-        this->SetLinkScriptShell(false);
+        this->AppendLinkFlagsWithParsing(flags, newFlags, target, language);
       } else {
         this->AppendFlags(flags, newFlags);
       }

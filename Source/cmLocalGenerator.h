@@ -170,6 +170,10 @@ public:
    * Append flags after parsing, prefixes processing (like LINKER:) and
    * escaping
    */
+  void AppendLinkFlagsWithParsing(std::string& flags,
+                                  std::string const& newFlags,
+                                  cmGeneratorTarget const* target,
+                                  std::string const& lang);
   void AppendFlags(std::string& flags, std::string const& newFlags,
                    std::string const& name, cmGeneratorTarget const* target,
                    cmBuildStep compileOrLink, std::string const& lang);
