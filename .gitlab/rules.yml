@@ -10,6 +10,13 @@
 ##   CMAKE_CI_JOB_PACKAGE_ONLY
 ##     Set to "true" if the job handles packaging tasks. These jobs will only
 ##     run during packaging pipelines.
+##   CMAKE_CI_JOB_NIGHTLY
+##     Set to "true" if the job should only run for nightly pipelines. Set to
+##     "false" to suppress the job for nightly pipelines.
+##   CMAKE_CI_JOB_NIGHTLY_IGNORE_DEPS
+##     Set to "true" if the job should run even if dependent jobs fail (e.g.,
+##     further testing of the same setup under a different generator. Should
+##     only be used on jobs with `needs` on other jobs.
 ## Pipeline variables:
 ##   CMAKE_CI_VERSION_UPDATE
 ##     Set to "true" if the pipeline should perform version update tasks.
@@ -18,6 +25,8 @@
 ##     Set to either "dev" or `vX.Y` to construct a packaging pipeline. Also
 ##     uploads constructed packages. May also run website help jobs. No other
 ##     tasks are performed if set.
+##   CMAKE_CI_NIGHTLY
+##     Set to "true" to enable nightly-only jobs.
 ## Project variables:
 ##   CMAKE_CI_PROJECT_MAIN_BRANCH
 ##     Set to the name of the main integration branch where development
@@ -126,14 +135,22 @@ workflow:
         - if: '$CMAKE_CI_PROJECT_MAIN_BRANCH != null && $CI_COMMIT_BRANCH != null && $CMAKE_CI_PROJECT_MAIN_BRANCH == $CI_COMMIT_BRANCH'
           when: never
 
-.run_manually:
-    rules:
-        - if: '($CMAKE_CI_NIGHTLY == "true" && $CMAKE_CI_JOB_NIGHTLY == "false")'
+        ### Nightly pipelines.
+        # Nightly pipelines do not run jobs that are explicitly excluded.
+        - if: '$CMAKE_CI_NIGHTLY == "true" && $CMAKE_CI_JOB_NIGHTLY == "false"'
           when: never
+        # Nightly pipelines always run jobs that ignore their dependencies.
+        - if: '$CMAKE_CI_NIGHTLY == "true" && $CMAKE_CI_JOB_NIGHTLY_IGNORE_DEPS == "true"'
+          when: always
+        # Nightly pipelines run all other jobs automatically when ready.
         - if: '$CMAKE_CI_NIGHTLY == "true"'
           when: on_success
+        # Nightly-only jobs do not run in any other situations.
         - if: '$CMAKE_CI_JOB_NIGHTLY == "true"'
           when: never
+
+.run_manually:
+    rules:
         - if: '$CMAKE_CI_PROJECT_CONTINUOUS_BRANCH != null && $CI_COMMIT_BRANCH != null && $CMAKE_CI_PROJECT_CONTINUOUS_BRANCH == $CI_COMMIT_BRANCH && $CMAKE_CI_JOB_CONTINUOUS == "true"'
           when: delayed
           start_in: 5 minutes
@@ -147,12 +164,6 @@ workflow:
 
 .run_automatically:
     rules:
-        - if: '($CMAKE_CI_NIGHTLY == "true" && $CMAKE_CI_JOB_NIGHTLY == "false")'
-          when: never
-        - if: '$CMAKE_CI_NIGHTLY == "true"'
-          when: on_success
-        - if: '$CMAKE_CI_JOB_NIGHTLY == "true"'
-          when: never
         - if: '$CMAKE_CI_PROJECT_CONTINUOUS_BRANCH != null && $CI_COMMIT_BRANCH != null && $CMAKE_CI_PROJECT_CONTINUOUS_BRANCH == $CI_COMMIT_BRANCH && $CMAKE_CI_JOB_CONTINUOUS == "true"'
           when: on_success
         - if: '($CMAKE_CI_JOB_NO_MR == "true" && $CI_MERGE_REQUEST_ID)'
@@ -166,14 +177,6 @@ workflow:
 
 .run_dependent:
     rules:
-        - if: '($CMAKE_CI_NIGHTLY == "true" && $CMAKE_CI_JOB_NIGHTLY == "false")'
-          when: never
-        - if: '($CMAKE_CI_NIGHTLY == "true" && $CMAKE_CI_JOB_NIGHTLY_IGNORE_DEPS == "true")'
-          when: always
-        - if: '$CMAKE_CI_NIGHTLY == "true"'
-          when: on_success
-        - if: '$CMAKE_CI_JOB_NIGHTLY == "true"'
-          when: never
         - if: '$CMAKE_CI_PROJECT_CONTINUOUS_BRANCH != null && $CI_COMMIT_BRANCH != null && $CMAKE_CI_PROJECT_CONTINUOUS_BRANCH == $CI_COMMIT_BRANCH && $CMAKE_CI_JOB_CONTINUOUS == "true"'
           when: on_success
         - if: '($CMAKE_CI_JOB_NO_MR == "true" && $CI_MERGE_REQUEST_ID)'
