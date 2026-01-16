@@ -353,10 +353,6 @@ as needed to honor the state of the calling project:
 * :policy:`CMP0181`
 * :policy:`CMP0184`
 
-.. versionadded:: 4.0
-  The current setting of :policy:`CMP0181` policy is propagated through to the
-  generated test project.
-
 Set variable :variable:`CMAKE_TRY_COMPILE_CONFIGURATION` to choose a build
 configuration:
 
