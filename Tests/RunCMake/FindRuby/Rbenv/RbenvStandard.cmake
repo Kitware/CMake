@@ -1,7 +1,7 @@
 set(CMAKE_FIND_LIBRARY_PREFIXES "")
 set(CMAKE_FIND_LIBRARY_SUFFIXES "")
 
-set (Ruby_FIND_VIRTUALENV STANDARD)
+set(Ruby_FIND_VIRTUALENV STANDARD)
 unset(ENV{MY_RUBY_HOME}) # Suppress RVM code path for this test.
 
 # We should find the standard Ruby
