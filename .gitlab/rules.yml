@@ -7,6 +7,10 @@
 ##     updates.
 ##   CMAKE_CI_JOB_UPDATES_WEBSITE_HELP
 ##     Set to "true" if the job performs tasks to update website help.
+##   CMAKE_CI_JOB_NO_MR
+##     Set to "true" if the job should never run for merge requests.
+##     These jobs require secrets that MR pipelines cannot provide
+##     (software license information, upload secrets, etc.).
 ##   CMAKE_CI_JOB_PACKAGE_ONLY
 ##     Set to "true" if the job handles packaging tasks. These jobs will only
 ##     run during packaging pipelines.
@@ -164,22 +168,25 @@ workflow:
         - if: '$CMAKE_CI_JOB_NIGHTLY == "true"'
           when: never
 
+        ### Merge request pipelines.
+        # Merge request pipelines do not run jobs that are explicitly excluded.
+        - if: '$CI_MERGE_REQUEST_ID && $CMAKE_CI_JOB_NO_MR == "true"'
+          when: never
+        # Merge request pipelines run manual jobs upon request.
+        - if: '$CI_MERGE_REQUEST_ID && $CMAKE_CI_JOB_RUN_MANUALLY == "true"'
+          when: manual
+        # Merge request pipelines run other jobs automatically when ready.
+        - if: '$CI_MERGE_REQUEST_ID'
+          when: on_success
+
 .run_manually:
     rules:
-        - if: '($CMAKE_CI_JOB_NO_MR == "true" && $CI_MERGE_REQUEST_ID)'
-          when: never
-        - if: '$CI_MERGE_REQUEST_ID'
-          when: manual
         - if: '$CI_PIPELINE_SOURCE == "schedule"'
           when: on_success
         - when: manual
 
 .run_automatically:
     rules:
-        - if: '($CMAKE_CI_JOB_NO_MR == "true" && $CI_MERGE_REQUEST_ID)'
-          when: never
-        - if: '$CI_MERGE_REQUEST_ID'
-          when: on_success
         - if: '$CI_PIPELINE_SOURCE == "schedule"'
           when: on_success
         - when: delayed
@@ -187,8 +194,4 @@ workflow:
 
 .run_dependent:
     rules:
-        - if: '($CMAKE_CI_JOB_NO_MR == "true" && $CI_MERGE_REQUEST_ID)'
-          when: never
-        - if: '$CI_MERGE_REQUEST_ID'
-          when: on_success
         - when: on_success
