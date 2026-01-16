@@ -29,6 +29,7 @@ function(instrument test)
   set(v1 ${RunCMake_TEST_BINARY_DIR}/.cmake/instrumentation-${uuid}/v1)
   set(v1 ${v1} PARENT_SCOPE)
   set(query_dir ${CMAKE_CURRENT_LIST_DIR}/query)
+  configure_file(${RunCMake_SOURCE_DIR}/initial.cmake.in ${RunCMake_BINARY_DIR}/initial.cmake)
 
   # Clear previous instrumentation data
   # We can't use RunCMake_TEST_NO_CLEAN 0 because we preserve queries placed in the build tree after
@@ -218,6 +219,10 @@ instrument(cmake-command-bad-arg)
 instrument(cmake-command-parallel-install
   BUILD INSTALL TEST INSTALL_PARALLEL DYNAMIC_QUERY
   CHECK_SCRIPT check-data-dir.cmake)
+instrument(cmake-command-initial-cache
+  CONFIGURE_ARG "-C ${RunCMake_BINARY_DIR}/initial.cmake"
+  CHECK_SCRIPT check-data-dir.cmake
+)
 instrument(cmake-command-resets-generated
   COPY_QUERIES_GENERATED
   CHECK_SCRIPT check-data-dir.cmake
