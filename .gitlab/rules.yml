@@ -188,10 +188,9 @@ workflow:
         # Other pipelines run manual jobs upon request.
         - if: '$CMAKE_CI_JOB_RUN_MANUALLY == "true"'
           when: manual
-
-.run_automatically:
-    rules:
-        - when: delayed
+        # Other pipelines run jobs in the `build` stage automatically after 5 minutes.
+        - if: '$CI_JOB_STAGE == "build"'
+          when: delayed
           start_in: 5 minutes
 
 .run_dependent:

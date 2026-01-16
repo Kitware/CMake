@@ -119,7 +119,7 @@ l:spellcheck:
     extends:
         - .cmake_spellcheck_linux
         - .linux_x86_64_tags
-        - .run_automatically
+        - .rules
 
 l:iwyu-debian13:
     extends:
@@ -127,7 +127,7 @@ l:iwyu-debian13:
         - .cmake_build_linux
         - .linux_x86_64_tags
         - .cmake_cdash_artifacts
-        - .run_automatically
+        - .rules
 
 l:tidy-fedora43:
     extends:
@@ -136,7 +136,7 @@ l:tidy-fedora43:
         - .cmake_tidy_artifacts
         - .linux_x86_64_tags
         - .cmake_cdash_artifacts
-        - .run_automatically
+        - .rules
 
 l:sphinx-fedora43:
     extends:
@@ -144,7 +144,7 @@ l:sphinx-fedora43:
         - .cmake_build_linux
         - .cmake_sphinx_artifacts
         - .linux_x86_64_tags
-        - .run_automatically
+        - .rules
     variables:
         CMAKE_CI_JOB_CONTINUOUS: "true"
         CMAKE_CI_JOB_HELP: "true"
@@ -154,7 +154,7 @@ l:clang-analyzer-fedora43:
         - .fedora43_clang_analyzer
         - .cmake_build_linux
         - .linux_x86_64_tags
-        - .run_automatically
+        - .rules
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
@@ -163,14 +163,14 @@ l:clang-fuzzing-fedora43:
         - .fedora43_clang_fuzzing
         - .cmake_build_linux
         - .linux_x86_64_tags
-        - .run_automatically
+        - .rules
 
 l:clazy-fedora43:
     extends:
         - .fedora43_clazy
         - .cmake_build_linux
         - .linux_x86_64_tags
-        - .run_automatically
+        - .rules
 
 # Coverage builds
 
