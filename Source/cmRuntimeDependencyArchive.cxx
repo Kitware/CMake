@@ -236,6 +236,7 @@ bool cmRuntimeDependencyArchive::GetGetRuntimeDependenciesCommand(
   cmGlobalGenerator* gg = this->GetMakefile()->GetGlobalGenerator();
 
   // Add newer Visual Studio paths
+  AddVisualStudioPath(paths, "Visual Studio 18 ", 18, gg);
   AddVisualStudioPath(paths, "Visual Studio 17 ", 17, gg);
   AddVisualStudioPath(paths, "Visual Studio 16 ", 16, gg);
   AddVisualStudioPath(paths, "Visual Studio 15 ", 15, gg);
