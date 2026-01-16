@@ -227,11 +227,11 @@
         CMAKE_CI_BUILD_TYPE: Release
         CTEST_NO_WARNINGS_ALLOWED: 1
 
-.fedora43_ninja_clang:
+.fedora43_ninja:
     extends: .fedora43
 
     variables:
-        CMAKE_CONFIGURATION: fedora43_ninja_clang
+        CMAKE_CONFIGURATION: fedora43_ninja
         CMAKE_CI_BUILD_TYPE: Release
         CTEST_NO_WARNINGS_ALLOWED: 1
 
@@ -309,11 +309,11 @@
         CMAKE_CONFIGURATION: fedora43_ninja_multi
         CMAKE_GENERATOR: "Ninja Multi-Config"
 
-.fedora43_ninja:
+.fedora43_ninja_clang:
     extends: .fedora43
 
     variables:
-        CMAKE_CONFIGURATION: fedora43_ninja
+        CMAKE_CONFIGURATION: fedora43_ninja_clang
 
 .fedora43_ninja_multi_clang:
     extends: .fedora43
