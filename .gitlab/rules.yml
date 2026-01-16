@@ -179,16 +179,17 @@ workflow:
         - if: '$CI_MERGE_REQUEST_ID'
           when: on_success
 
-.run_manually:
-    rules:
+        ### Scheduled pipelines.
+        # Scheduled pipelines run all jobs automatically when ready.
         - if: '$CI_PIPELINE_SOURCE == "schedule"'
           when: on_success
+
+.run_manually:
+    rules:
         - when: manual
 
 .run_automatically:
     rules:
-        - if: '$CI_PIPELINE_SOURCE == "schedule"'
-          when: on_success
         - when: delayed
           start_in: 5 minutes
 
