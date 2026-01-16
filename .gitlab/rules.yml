@@ -192,7 +192,5 @@ workflow:
         - if: '$CI_JOB_STAGE == "build"'
           when: delayed
           start_in: 5 minutes
-
-.run_dependent:
-    rules:
+        # Other pipelines run other jobs automatically when ready.
         - when: on_success
