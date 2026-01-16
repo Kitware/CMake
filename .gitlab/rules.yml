@@ -128,8 +128,6 @@ workflow:
 
 .run_manually:
     rules:
-        - if: '$CMAKE_CI_PACKAGE != null || $CMAKE_CI_VERSION_UPDATE != null'
-          when: never
         - if: '($CMAKE_CI_NIGHTLY == "true" && $CMAKE_CI_JOB_NIGHTLY == "false")'
           when: never
         - if: '$CMAKE_CI_NIGHTLY == "true"'
@@ -149,8 +147,6 @@ workflow:
 
 .run_automatically:
     rules:
-        - if: '$CMAKE_CI_PACKAGE != null || $CMAKE_CI_VERSION_UPDATE != null'
-          when: never
         - if: '($CMAKE_CI_NIGHTLY == "true" && $CMAKE_CI_JOB_NIGHTLY == "false")'
           when: never
         - if: '$CMAKE_CI_NIGHTLY == "true"'
@@ -170,8 +166,6 @@ workflow:
 
 .run_dependent:
     rules:
-        - if: '$CMAKE_CI_PACKAGE != null || $CMAKE_CI_VERSION_UPDATE != null'
-          when: never
         - if: '($CMAKE_CI_NIGHTLY == "true" && $CMAKE_CI_JOB_NIGHTLY == "false")'
           when: never
         - if: '($CMAKE_CI_NIGHTLY == "true" && $CMAKE_CI_JOB_NIGHTLY_IGNORE_DEPS == "true")'
