@@ -127,3 +127,9 @@ run_cmake(set-mtime)
 
 # Use the --touch option to avoid extracting the mtime
 run_cmake(touch-mtime)
+
+# Security: Test path traversal protection
+if(Python_EXECUTABLE)
+  run_cmake_script(path-absolute -DPython_EXECUTABLE=${Python_EXECUTABLE})
+  run_cmake_script(path-traversal -DPython_EXECUTABLE=${Python_EXECUTABLE})
+endif()

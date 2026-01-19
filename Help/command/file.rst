@@ -1065,6 +1065,10 @@ Archiving
   ``VERBOSE``
     Enable verbose output from the extraction operation.
 
+  .. versionchanged:: 4.3
+    Archive entries containing path traversal sequences (``..``), or
+    absolute paths, are rejected for security.
+
   .. note::
     The working directory for this subcommand is the ``DESTINATION`` directory
     (provided or computed) except when ``LIST_ONLY`` is specified. Therefore,

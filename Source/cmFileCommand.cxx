@@ -3901,7 +3901,7 @@ bool HandleArchiveExtractCommand(std::vector<std::string> const& args,
           parsedArgs.Touch ? cmSystemTools::cmTarExtractTimestamps::No
                            : cmSystemTools::cmTarExtractTimestamps::Yes,
           parsedArgs.Verbose)) {
-      status.SetError(cmStrCat("failed to extract: ", inFile));
+      status.SetError(cmStrCat("failed to extract:\n  ", inFile));
       cmSystemTools::SetFatalErrorOccurred();
       return false;
     }

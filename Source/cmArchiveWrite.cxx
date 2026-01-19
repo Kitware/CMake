@@ -448,8 +448,9 @@ bool cmArchiveWrite::AddFile(char const* file, size_t skip, char const* prefix)
   cm_archive_entry_copy_pathname(e, dest);
   if (archive_read_disk_entry_from_file(this->Disk, e, -1, nullptr) !=
       ARCHIVE_OK) {
-    this->Error = cmStrCat("Unable to read from file '", file,
-                           "': ", cm_archive_error_string(this->Disk));
+    this->Error =
+      cmStrCat("Unable to read from file:\n  ", file, "\nbecause:\n  ",
+               cm_archive_error_string(this->Disk));
     return false;
   }
   if (!this->MTime.empty()) {

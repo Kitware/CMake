@@ -25,7 +25,8 @@ set(stamp_dir "${CMAKE_CURRENT_BINARY_DIR}/stamps-fc")
 set(archive_file ${CMAKE_CURRENT_BINARY_DIR}/test_archive.7z)
 file(ARCHIVE_CREATE
   OUTPUT ${archive_file}
-  PATHS ${CMAKE_CURRENT_LIST_DIR}
+  PATHS "${CMAKE_CURRENT_LIST_FILE}"
+  WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}"
   FORMAT 7zip
 )
 include(FetchContent)

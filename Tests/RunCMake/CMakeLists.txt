@@ -979,7 +979,7 @@ endif()
 
 add_RunCMake_test(LinkLibrariesProcessing)
 add_RunCMake_test(LinkLibrariesStrategy)
-add_RunCMake_test(File_Archive)
+add_RunCMake_test(File_Archive -DPython_EXECUTABLE=${Python_EXECUTABLE})
 add_RunCMake_test(File_Configure)
 add_RunCMake_test(File_Generate)
 add_RunCMake_test(ExportWithoutLanguage)
@@ -1075,6 +1075,7 @@ add_RunCMake_test(CommandLine -DLLVM_RC=$<TARGET_FILE:pseudo_llvm-rc> -DCMAKE_SY
 if(CMake_TEST_LibArchive_VERSION)
   list(APPEND CommandLineTar_ARGS -DCMake_TEST_LibArchive_VERSION=${CMake_TEST_LibArchive_VERSION})
 endif()
+list(APPEND CommandLineTar_ARGS -DPython_EXECUTABLE=${Python_EXECUTABLE})
 add_RunCMake_test(CommandLineTar)
 
 if(CMAKE_PLATFORM_NO_VERSIONED_SONAME OR (NOT CMAKE_SHARED_LIBRARY_SONAME_FLAG AND NOT CMAKE_SHARED_LIBRARY_SONAME_C_FLAG))
