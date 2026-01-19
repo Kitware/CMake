@@ -26,6 +26,7 @@ RunCMake_check_slnx("${RunCMake_TEST_BINARY_DIR}/ProjType.slnx" [[
   </Project>
   <Project Path="DotNetCore.project" Type="9a19103f-16f7-4668-be54-9a1e7a4f7556" Id="[0-9a-f-]+">
     <BuildDependency Project="ZERO_CHECK\.vcxproj"/>
+    <Platform Project="[^"]+"/>
   </Project>
   <Project Path="JScript.project" Type="262852c6-cd72-467d-83fe-5eeb1973a190" Id="[0-9a-f-]+">
     <BuildDependency Project="ZERO_CHECK\.vcxproj"/>

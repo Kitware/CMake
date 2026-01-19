@@ -311,6 +311,18 @@ void WriteSln(std::ostream& sln, Solution const& solution)
 }
 
 namespace {
+
+bool NeedExplicitProjectPlatform(cm::string_view typeId)
+{
+  // Some projects do not build interactively in the VS IDE unless they
+  // have an explicit platform, even if it matches the SLN platform.
+  if (typeId == Solution::Project::TypeIdCSharp ||
+      typeId == Solution::Project::TypeIdDotNetCore) {
+    return true;
+  }
+  return false;
+}
+
 void WriteSlnxSolutionConfigurationPlatforms(cmXMLElement& xmlParent,
                                              Solution const& solution)
 {
@@ -353,9 +365,7 @@ void WriteSlnxProject(cmXMLElement& xmlParent, Solution const& solution,
     }
   }
   if (project.Platform != solution.Platform ||
-      // C# projects do not build interactively in the VS IDE unless they
-      // have an explicit platform, even if it matches the SLN platform.
-      project.TypeId == Solution::Project::TypeIdCSharp) {
+      NeedExplicitProjectPlatform(project.TypeId)) {
     cmXMLElement(xmlProject, "Platform")
       .Attribute("Project", project.Platform);
   }
