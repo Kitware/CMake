@@ -1,3 +1,5 @@
+cmake_policy(SET CMP0209 NEW)
+
 enable_language(C CXX)
 
 add_compile_definitions(TEST_ADD_COMPILE_DEFINITIONS)
@@ -61,9 +63,11 @@ add_library(lang_test_cxx STATIC lib.c lib.cxx)
 target_compile_definitions(lang_test_cxx INTERFACE EXPECT_CXX)
 target_sources(lang_test_cxx INTERFACE FILE_SET HEADERS FILES lang_test.h)
 
-add_library(interface_lang_test_cxx INTERFACE)
-target_compile_definitions(interface_lang_test_cxx INTERFACE EXPECT_CXX)
-target_sources(interface_lang_test_cxx INTERFACE FILE_SET HEADERS FILES lang_test.h)
+# Don't make the name of this target any longer or else it triggers a crash in the OpenWatcom compiler.
+# That crash only occurs when debug information is enabled, which is the case when this test runs.
+add_library(iface_lang_cxx INTERFACE)
+target_compile_definitions(iface_lang_cxx INTERFACE EXPECT_CXX)
+target_sources(iface_lang_cxx INTERFACE FILE_SET HEADERS FILES lang_test.h)
 
 set_property(SOURCE error.h PROPERTY LANGUAGE C)
 

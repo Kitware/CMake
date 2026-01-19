@@ -5,6 +5,7 @@ set(properties
 
   # Build graph properties
   "VERIFY_INTERFACE_HEADER_SETS"  "TRUE"    "<SAME>"
+  "VERIFY_PRIVATE_HEADER_SETS"    "TRUE"    "<SAME>"
 
   # Metadata
   "FOLDER"                        "folder"  "<SAME>"

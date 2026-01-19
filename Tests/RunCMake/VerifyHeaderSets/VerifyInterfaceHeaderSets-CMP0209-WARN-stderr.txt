@@ -1,0 +1,10 @@
+CMake Warning \(dev\) in CMakeLists\.txt:
+  Policy CMP0209 is not set: Verify interface header sets checks executables
+  without exports\.  Run "cmake --help-policy CMP0209" for policy details\.
+  Use the cmake_policy command to set the policy and suppress this warning\.
+
+  Executable target "exe" has interface header file sets, but it does not
+  enable exports\.  Those headers would be verified under CMP0209 NEW
+  behavior\.
+
+This warning is for project developers\.  Use -Wno-dev to suppress it\.

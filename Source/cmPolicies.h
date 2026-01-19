@@ -623,6 +623,9 @@ class cmMakefile;
          "file(GET_RUNTIME_DEPENDENCIES) normalizes paths before matching.",  \
          4, 3, 0, WARN)                                                       \
   SELECT(POLICY, CMP0208, "export(EXPORT) does not allow empty arguments.",   \
+         4, 3, 0, WARN)                                                       \
+  SELECT(POLICY, CMP0209,                                                     \
+         "Verify interface header sets checks executables without exports.",  \
          4, 3, 0, WARN)
 
 #define CM_SELECT_ID(F, A1, A2, A3, A4, A5, A6) F(A1)
@@ -676,7 +679,8 @@ class cmMakefile;
   F(CMP0200)                                                                  \
   F(CMP0202)                                                                  \
   F(CMP0203)                                                                  \
-  F(CMP0204)
+  F(CMP0204)                                                                  \
+  F(CMP0209)
 
 #define CM_FOR_EACH_CUSTOM_COMMAND_POLICY(F)                                  \
   F(CMP0116)                                                                  \

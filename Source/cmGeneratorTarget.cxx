@@ -9,6 +9,7 @@
 #include <cstddef>
 #include <cstdio>
 #include <cstring>
+#include <initializer_list>
 #include <sstream>
 #include <unordered_set>
 #include <utility>
@@ -5709,145 +5710,236 @@ cmGeneratorTarget::ManagedType cmGeneratorTarget::GetManagedType(
 
 bool cmGeneratorTarget::AddHeaderSetVerification()
 {
-  if (!this->GetPropertyAsBool("VERIFY_INTERFACE_HEADER_SETS")) {
-    return true;
-  }
-
-  if (this->GetType() != cmStateEnums::STATIC_LIBRARY &&
-      this->GetType() != cmStateEnums::SHARED_LIBRARY &&
-      this->GetType() != cmStateEnums::UNKNOWN_LIBRARY &&
-      this->GetType() != cmStateEnums::OBJECT_LIBRARY &&
-      this->GetType() != cmStateEnums::INTERFACE_LIBRARY &&
-      !this->IsExecutableWithExports()) {
-    return true;
-  }
-
-  auto verifyValue = this->GetProperty("INTERFACE_HEADER_SETS_TO_VERIFY");
-  bool const all = verifyValue.IsEmpty();
-  std::set<std::string> verifySet;
-  if (!all) {
-    cmList verifyList{ verifyValue };
-    verifySet.insert(verifyList.begin(), verifyList.end());
-  }
-
-  cmTarget* verifyTarget = nullptr;
-  cmTarget* allVerifyTarget =
-    this->GlobalGenerator->GetMakefiles().front()->FindTargetToUse(
-      "all_verify_interface_header_sets",
-      { cmStateEnums::TargetDomain::NATIVE });
-
-  auto interfaceFileSetEntries = this->Target->GetInterfaceHeaderSetsEntries();
-
-  std::set<cmFileSet*> fileSets;
-  for (auto const& entry : interfaceFileSetEntries) {
-    for (auto const& name : cmList{ entry.Value }) {
-      if (all || verifySet.count(name)) {
-        fileSets.insert(this->Target->GetFileSet(name));
-        verifySet.erase(name);
-      }
+  for (bool const isInterface : { false, true }) {
+    if (!this->GetPropertyAsBool(isInterface ? "VERIFY_INTERFACE_HEADER_SETS"
+                                             : "VERIFY_PRIVATE_HEADER_SETS")) {
+      continue;
     }
-  }
-  if (!verifySet.empty()) {
-    this->Makefile->IssueMessage(
-      MessageType::FATAL_ERROR,
-      cmStrCat("Property INTERFACE_HEADER_SETS_TO_VERIFY of target \"",
-               this->GetName(),
-               "\" contained the following header sets that are nonexistent "
-               "or not INTERFACE:\n  ",
-               cmJoin(verifySet, "\n  ")));
-    return false;
-  }
 
-  cm::optional<std::set<std::string>> languages;
-  for (auto* fileSet : fileSets) {
-    auto dirCges = fileSet->CompileDirectoryEntries();
-    auto fileCges = fileSet->CompileFileEntries();
+    if (this->GetType() != cmStateEnums::STATIC_LIBRARY &&
+        this->GetType() != cmStateEnums::SHARED_LIBRARY &&
+        (this->GetType() != cmStateEnums::MODULE_LIBRARY || isInterface) &&
+        this->GetType() != cmStateEnums::UNKNOWN_LIBRARY &&
+        this->GetType() != cmStateEnums::OBJECT_LIBRARY &&
+        this->GetType() != cmStateEnums::INTERFACE_LIBRARY &&
+        this->GetType() != cmStateEnums::EXECUTABLE) {
+      continue;
+    }
 
-    static auto const contextSensitive =
-      [](std::unique_ptr<cmCompiledGeneratorExpression> const& cge) {
-        return cge->GetHadContextSensitiveCondition();
-      };
-    bool dirCgesContextSensitive = false;
-    bool fileCgesContextSensitive = false;
+    char const* headerSetsProperty = isInterface
+      ? "INTERFACE_HEADER_SETS_TO_VERIFY"
+      : "PRIVATE_HEADER_SETS_TO_VERIFY";
 
-    std::vector<std::string> dirs;
-    std::map<std::string, std::vector<std::string>> filesPerDir;
-    bool first = true;
-    for (auto const& config : this->Makefile->GetGeneratorConfigs(
-           cmMakefile::GeneratorConfigQuery::IncludeEmptyConfig)) {
-      cm::GenEx::Context context(this->LocalGenerator, config);
-      if (first || dirCgesContextSensitive) {
-        dirs = fileSet->EvaluateDirectoryEntries(dirCges, context, this);
-        dirCgesContextSensitive =
-          std::any_of(dirCges.begin(), dirCges.end(), contextSensitive);
-      }
-      if (first || fileCgesContextSensitive) {
-        filesPerDir.clear();
-        for (auto const& fileCge : fileCges) {
-          fileSet->EvaluateFileEntry(dirs, filesPerDir, fileCge, context,
-                                     this);
-          if (fileCge->GetHadContextSensitiveCondition()) {
-            fileCgesContextSensitive = true;
-          }
+    auto verifyValue = this->GetProperty(headerSetsProperty);
+    bool const all = verifyValue.IsEmpty();
+    std::set<std::string> verifySet;
+    if (!all) {
+      cmList verifyList{ verifyValue };
+      verifySet.insert(verifyList.begin(), verifyList.end());
+    }
+
+    cmTarget* verifyTarget = nullptr;
+    std::string const verifyTargetName =
+      cmStrCat(this->GetName(),
+               isInterface ? "_verify_interface_header_sets"
+                           : "_verify_private_header_sets");
+
+    char const* allVerifyTargetName = isInterface
+      ? "all_verify_interface_header_sets"
+      : "all_verify_private_header_sets";
+    cmTarget* allVerifyTarget =
+      this->GlobalGenerator->GetMakefiles().front()->FindTargetToUse(
+        allVerifyTargetName, { cmStateEnums::TargetDomain::NATIVE });
+
+    auto fileSetEntries = isInterface
+      ? this->Target->GetInterfaceHeaderSetsEntries()
+      : this->Target->GetHeaderSetsEntries();
+
+    std::set<cmFileSet*> fileSets;
+    for (auto const& entry : fileSetEntries) {
+      for (auto const& name : cmList{ entry.Value }) {
+        if (all || verifySet.count(name)) {
+          fileSets.insert(this->Target->GetFileSet(name));
+          verifySet.erase(name);
         }
       }
-
-      for (auto const& files : filesPerDir) {
-        for (auto const& file : files.second) {
-          std::string filename = this->GenerateHeaderSetVerificationFile(
-            *this->Makefile->GetOrCreateSource(file), files.first, languages);
-          if (filename.empty()) {
-            continue;
-          }
-
-          if (!verifyTarget) {
-            {
-              cmMakefile::PolicyPushPop polScope(this->Makefile);
-              this->Makefile->SetPolicy(cmPolicies::CMP0119, cmPolicies::NEW);
-              verifyTarget = this->Makefile->AddLibrary(
-                cmStrCat(this->GetName(), "_verify_interface_header_sets"),
-                cmStateEnums::OBJECT_LIBRARY, {}, true);
-            }
-
-            verifyTarget->AddLinkLibrary(
-              *this->Makefile, this->GetName(),
-              cmTargetLinkLibraryType::GENERAL_LibraryType);
-            verifyTarget->SetProperty("AUTOMOC", "OFF");
-            verifyTarget->SetProperty("AUTORCC", "OFF");
-            verifyTarget->SetProperty("AUTOUIC", "OFF");
-            verifyTarget->SetProperty("DISABLE_PRECOMPILE_HEADERS", "ON");
-            verifyTarget->SetProperty("UNITY_BUILD", "OFF");
-            verifyTarget->SetProperty("CXX_SCAN_FOR_MODULES", "OFF");
-            verifyTarget->FinalizeTargetConfiguration(
-              this->Makefile->GetCompileDefinitionsEntries());
-
-            if (!allVerifyTarget) {
-              allVerifyTarget = this->GlobalGenerator->GetMakefiles()
-                                  .front()
-                                  ->AddNewUtilityTarget(
-                                    "all_verify_interface_header_sets", true);
-            }
-
-            allVerifyTarget->AddUtility(verifyTarget->GetName(), false);
-          }
-
-          if (fileCgesContextSensitive) {
-            filename = cmStrCat("$<$<CONFIG:", config, ">:", filename, '>');
-          }
-          verifyTarget->AddSource(filename);
-        }
-      }
-
-      if (!dirCgesContextSensitive && !fileCgesContextSensitive) {
-        break;
-      }
-      first = false;
     }
-  }
 
-  if (verifyTarget) {
-    this->LocalGenerator->AddGeneratorTarget(
-      cm::make_unique<cmGeneratorTarget>(verifyTarget, this->LocalGenerator));
+    if (isInterface) {
+      cmPolicies::PolicyStatus const cmp0209 = this->GetPolicyStatusCMP0209();
+      if (cmp0209 != cmPolicies::NEW &&
+          this->GetType() == cmStateEnums::EXECUTABLE &&
+          !this->GetPropertyAsBool("ENABLE_EXPORTS")) {
+        if (cmp0209 == cmPolicies::WARN && !fileSets.empty()) {
+          this->Makefile->IssueMessage(
+            MessageType::AUTHOR_WARNING,
+            cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0209),
+                     "\n"
+                     "Executable target \"",
+                     this->GetName(),
+                     "\" has interface header file sets, but it does not "
+                     "enable exports. Those headers would be verified under "
+                     "CMP0209 NEW behavior.\n"));
+        }
+        continue;
+      }
+    }
+
+    if (!verifySet.empty()) {
+      this->Makefile->IssueMessage(
+        MessageType::FATAL_ERROR,
+        cmStrCat("Property ", headerSetsProperty, " of target \"",
+                 this->GetName(),
+                 "\" contained the following header sets that are nonexistent "
+                 "or not ",
+                 isInterface ? "INTERFACE" : "PRIVATE", ":\n  ",
+                 cmJoin(verifySet, "\n  ")));
+      return false;
+    }
+
+    cm::optional<std::set<std::string>> languages;
+    for (auto* fileSet : fileSets) {
+      auto dirCges = fileSet->CompileDirectoryEntries();
+      auto fileCges = fileSet->CompileFileEntries();
+
+      static auto const contextSensitive =
+        [](std::unique_ptr<cmCompiledGeneratorExpression> const& cge) {
+          return cge->GetHadContextSensitiveCondition();
+        };
+      bool dirCgesContextSensitive = false;
+      bool fileCgesContextSensitive = false;
+
+      std::vector<std::string> dirs;
+      std::map<std::string, std::vector<std::string>> filesPerDir;
+      bool first = true;
+      for (auto const& config : this->Makefile->GetGeneratorConfigs(
+             cmMakefile::GeneratorConfigQuery::IncludeEmptyConfig)) {
+        cm::GenEx::Context context(this->LocalGenerator, config);
+        if (first || dirCgesContextSensitive) {
+          dirs = fileSet->EvaluateDirectoryEntries(dirCges, context, this);
+          dirCgesContextSensitive =
+            std::any_of(dirCges.begin(), dirCges.end(), contextSensitive);
+        }
+        if (first || fileCgesContextSensitive) {
+          filesPerDir.clear();
+          for (auto const& fileCge : fileCges) {
+            fileSet->EvaluateFileEntry(dirs, filesPerDir, fileCge, context,
+                                       this);
+            if (fileCge->GetHadContextSensitiveCondition()) {
+              fileCgesContextSensitive = true;
+            }
+          }
+        }
+
+        for (auto const& files : filesPerDir) {
+          for (auto const& file : files.second) {
+            std::string filename = this->GenerateHeaderSetVerificationFile(
+              *this->Makefile->GetOrCreateSource(file), files.first,
+              verifyTargetName, languages);
+            if (filename.empty()) {
+              continue;
+            }
+
+            if (!verifyTarget) {
+              {
+                cmMakefile::PolicyPushPop polScope(this->Makefile);
+                this->Makefile->SetPolicy(cmPolicies::CMP0119,
+                                          cmPolicies::NEW);
+                verifyTarget = this->Makefile->AddLibrary(
+                  verifyTargetName, cmStateEnums::OBJECT_LIBRARY, {}, true);
+              }
+
+              if (isInterface) {
+                // Link to the original target so that we pick up its
+                // interface compile options just like a consumer would.
+                // This also ensures any generated headers in the original
+                // target will be created.
+                verifyTarget->AddLinkLibrary(
+                  *this->Makefile, this->GetName(),
+                  cmTargetLinkLibraryType::GENERAL_LibraryType);
+              } else {
+                // For private file sets, we need to simulate compiling the
+                // same way as the original target. That includes linking to
+                // the same things so we pick up the same transitive
+                // properties. For the <LANG>_... properties, we don't care if
+                // we set them for languages this target won't eventually use.
+                // The verify header sets feature currently only supports the
+                // C and C++ languages, so we just always set those here for
+                // simplicity rather than working out all languages the target
+                // has to compile for.
+                static std::vector<std::string> propertiesToCopy = {
+                  "COMPILE_DEFINITIONS", "COMPILE_FEATURES",
+                  "COMPILE_FLAGS",       "COMPILE_OPTIONS",
+                  "DEFINE_SYMBOL",       "INCLUDE_DIRECTORIES",
+                  "LINK_LIBRARIES",      "C_STANDARD",
+                  "C_STANDARD_REQUIRED", "C_EXTENSIONS",
+                  "CXX_STANDARD",        "CXX_STANDARD_REQUIRED",
+                  "CXX_EXTENSIONS"
+                };
+                for (std::string const& prop : propertiesToCopy) {
+                  cmValue propValue = this->Target->GetProperty(prop);
+                  if (propValue.IsSet()) {
+                    verifyTarget->SetProperty(prop, propValue);
+                  }
+                }
+                // The original target might have generated headers. Since
+                // we only link to the original target for compilation,
+                // there's nothing to force such generation to happen yet.
+                // Our verify target must depend on the original target to
+                // ensure such generated files will be created.
+                verifyTarget->AddUtility(this->GetName(), false,
+                                         this->Makefile);
+                verifyTarget->AddCodegenDependency(this->GetName());
+              }
+
+              verifyTarget->SetProperty("AUTOMOC", "OFF");
+              verifyTarget->SetProperty("AUTORCC", "OFF");
+              verifyTarget->SetProperty("AUTOUIC", "OFF");
+              verifyTarget->SetProperty("DISABLE_PRECOMPILE_HEADERS", "ON");
+              verifyTarget->SetProperty("UNITY_BUILD", "OFF");
+              verifyTarget->SetProperty("CXX_SCAN_FOR_MODULES", "OFF");
+
+              if (isInterface) {
+                verifyTarget->FinalizeTargetConfiguration(
+                  this->Makefile->GetCompileDefinitionsEntries());
+              } else {
+                // Private verification only needs to add the directory scope
+                // definitions here
+                for (auto const& def :
+                     this->Makefile->GetCompileDefinitionsEntries()) {
+                  verifyTarget->InsertCompileDefinition(def);
+                }
+              }
+
+              if (!allVerifyTarget) {
+                allVerifyTarget =
+                  this->GlobalGenerator->GetMakefiles()
+                    .front()
+                    ->AddNewUtilityTarget(allVerifyTargetName, true);
+              }
+
+              allVerifyTarget->AddUtility(verifyTargetName, false);
+            }
+
+            if (fileCgesContextSensitive) {
+              filename = cmStrCat("$<$<CONFIG:", config, ">:", filename, '>');
+            }
+            verifyTarget->AddSource(filename);
+          }
+        }
+
+        if (!dirCgesContextSensitive && !fileCgesContextSensitive) {
+          break;
+        }
+        first = false;
+      }
+    }
+
+    if (verifyTarget) {
+      this->LocalGenerator->AddGeneratorTarget(
+        cm::make_unique<cmGeneratorTarget>(verifyTarget,
+                                           this->LocalGenerator));
+    }
   }
 
   return true;
@@ -5855,6 +5947,7 @@ bool cmGeneratorTarget::AddHeaderSetVerification()
 
 std::string cmGeneratorTarget::GenerateHeaderSetVerificationFile(
   cmSourceFile& source, std::string const& dir,
+  std::string const& verifyTargetName,
   cm::optional<std::set<std::string>>& languages) const
 {
   std::string extension;
@@ -5908,9 +6001,9 @@ std::string cmGeneratorTarget::GenerateHeaderSetVerificationFile(
   }
   headerFilename += source.GetLocation().GetName();
 
-  auto filename = cmStrCat(
-    this->LocalGenerator->GetCurrentBinaryDirectory(), '/', this->GetName(),
-    "_verify_interface_header_sets/", headerFilename, extension);
+  auto filename =
+    cmStrCat(this->LocalGenerator->GetCurrentBinaryDirectory(), '/',
+             verifyTargetName, '/', headerFilename, extension);
   auto* verificationSource = this->Makefile->GetOrCreateSource(filename);
   source.SetSpecialSourceType(
     cmSourceFile::SpecialSourceType::HeaderSetVerificationSource);
