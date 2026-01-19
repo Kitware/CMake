@@ -388,6 +388,7 @@
     image: "kitware/cmake:ci-nvhpc24.9-x86_64-2024-09-27"
     variables:
         CMAKE_ARCH: x86_64
+        CMAKE_CUDA_ARCHITECTURES_NATIVE_CLAMP: 1
 
 .nvhpc_ninja:
     extends: .nvhpc
