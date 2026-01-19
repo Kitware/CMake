@@ -241,15 +241,15 @@ key is required, but all other fields are optional.
       after the command is executed.
 
     ``cdashSubmit``
-      Enables including instrumentation data in CDash. This does not
-      automatically enable ``dynamicSystemInformation``, but is otherwise
+      Enables including instrumentation data in CDash. This is
       equivalent to having the :envvar:`CTEST_USE_INSTRUMENTATION` environment
       variable enabled.
 
     ``cdashVerbose``
       Enables including the full untruncated commands in data submitted to
       CDash. Equivalent to having the
-      :envvar:`CTEST_USE_VERBOSE_INSTRUMENTATION` environment variable enabled.
+      :envvar:`CTEST_USE_VERBOSE_INSTRUMENTATION` and
+      :envvar:`CTEST_USE_INSTRUMENTATION` environment variables enabled.
 
     ``trace``
       Enables generation of a `Google Trace File`_ during `Indexing`_ to

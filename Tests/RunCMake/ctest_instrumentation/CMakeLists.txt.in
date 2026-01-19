@@ -1,18 +1,16 @@
 cmake_minimum_required(VERSION 3.10)
 @CASE_CMAKELISTS_PREFIX_CODE@
 project(CTestInstrumentation@CASE_NAME@)
-if(USE_INSTRUMENTATION)
-  set(CMAKE_EXPERIMENTAL_INSTRUMENTATION "ec7aa2dc-b87f-45a3-8022-fe01c5f59984")
-endif()
 include(CTest)
 add_executable(main main.c)
 add_test(NAME main COMMAND main)
 
-if(USE_CMAKE_INSTRUMENTATION_CMD)
+if($ENV{USE_INSTRUMENTATION_CMD})
+  set(CMAKE_EXPERIMENTAL_INSTRUMENTATION "ec7aa2dc-b87f-45a3-8022-fe01c5f59984")
   cmake_instrumentation(
     API_VERSION 1
     DATA_VERSION 1
-    OPTIONS cdashSubmit
+    OPTIONS cdashVerbose
     CUSTOM_CONTENT exampleContent STRING exampleData
   )
 endif()
