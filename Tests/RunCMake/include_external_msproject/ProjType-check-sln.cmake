@@ -1,0 +1,6 @@
+check_project(ProjType AspNetCore    "" "8BB2217D-0F2D-49D1-97BC-3654ED321F3B" "" "")
+check_project(ProjType DotNetCore    "" "9A19103F-16F7-4668-BE54-9A1E7A4F7556" "" "")
+check_project(ProjType Misc          "" "66A2671D-8FB5-11D2-AA7E-00C04F688DDE" "" "")
+check_project(ProjType SqlSrv        "" "00D1A9C2-B5F0-4AF3-8072-F6C62B433612" "" "")
+check_project(ProjType JScript       "" "262852C6-CD72-467D-83FE-5EEB1973A190" "" "")
+check_project(ProjType WebSite       "" "E24C65DC-7377-472B-9ABA-BC803B73C61A" "" "")
