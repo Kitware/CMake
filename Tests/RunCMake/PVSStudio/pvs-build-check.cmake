@@ -1,0 +1,8 @@
+file (GLOB_RECURSE errFiles "${RunCMake_TEST_BINARY_DIR}/*-pvs.err")
+file (GLOB_RECURSE logFiles "${RunCMake_TEST_BINARY_DIR}/*-pvs.log")
+if (NOT errFiles)
+  set(RunCMake_TEST_FAILED ".err file not found.")
+endif()
+if (logFiles)
+  set(RunCMake_TEST_FAILED "Leftover .log file found:\n  ${logFiles}\n.err files:\n  ${errFiles}")
+endif()

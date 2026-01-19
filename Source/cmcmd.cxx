@@ -330,6 +330,7 @@ int CLCompileAndDependencies(std::vector<std::string> const& args)
 #endif
 
 int HandleIWYU(std::string const& runCmd, std::string const& /* sourceFile */,
+               std::string const& /*objectFile*/,
                std::vector<std::string> const& orig_cmd)
 {
   // Construct the iwyu command line by taking what was given
@@ -362,6 +363,7 @@ int HandleIWYU(std::string const& runCmd, std::string const& /* sourceFile */,
 }
 
 int HandleTidy(std::string const& runCmd, std::string const& sourceFile,
+               std::string const& /*objectFile*/,
                std::vector<std::string> const& orig_cmd)
 {
   cmList tidy_cmd{ runCmd, cmList::EmptyElements::Yes };
@@ -409,7 +411,83 @@ int HandleTidy(std::string const& runCmd, std::string const& sourceFile,
   return ret;
 }
 
+int HandlePVSStudio(std::string const& runCmd, std::string const& sourceFile,
+                    std::string const& objectFile,
+                    std::vector<std::string> const& orig_cmd)
+{
+  cmList pvsCmd{ runCmd, cmList::EmptyElements::Yes };
+  std::string logFile = cmStrCat(objectFile, "-pvs.log");
+  std::string errFile = cmStrCat(objectFile, "-pvs.err");
+  pvsCmd.reserve(pvsCmd.size() + 5 + orig_cmd.size());
+  pvsCmd.emplace_back("--source-file");
+  pvsCmd.emplace_back(sourceFile);
+  pvsCmd.emplace_back("--output-file");
+  pvsCmd.emplace_back(logFile);
+  pvsCmd.emplace_back("--cl-params");
+  for (size_t i = 1; i < orig_cmd.size(); ++i) {
+    pvsCmd.emplace_back(orig_cmd[i]);
+  }
+  int ret;
+  std::string stdOut;
+  std::string stdErr;
+
+  // Run the PVS command line.  Capture its stdout and hide its stderr.
+  if (!cmSystemTools::RunSingleCommand(pvsCmd, &stdOut, &stdErr, &ret, nullptr,
+                                       cmSystemTools::OUTPUT_NONE)) {
+    std::cerr << "Error running '" << pvsCmd[0] << "': " << stdErr << '\n';
+    return 1;
+  }
+  if (ret != 0) {
+    if (ret == 7 && !cmSystemTools::FileExists(logFile)) {
+      return 0; // Analyzer generated no output from source
+    }
+    std::cout << stdOut;
+    std::cerr << stdErr;
+    return ret;
+  }
+
+  // Find the plog-converter tool
+#ifdef _WIN32
+  std::string plogConvertName = "HtmlGenerator.exe";
+#else
+  std::string plogConvertName = "plog-converter";
+#endif
+  std::string plogConvert = cmStrCat(
+    cmSystemTools::GetFilenamePath(pvsCmd.front()), '/', plogConvertName);
+  if (!cmSystemTools::FileIsExecutable(plogConvert)) {
+    plogConvert = cmSystemTools::FindProgram(plogConvertName);
+  }
+  if (plogConvert.empty()) {
+    std::cerr << "Could not find " << plogConvertName << std::endl;
+    return 1;
+  }
+
+  // Run the plog-converter tool
+  std::vector<std::string> plogCmd{ plogConvert, "-t",    "errorfile",
+                                    "-o",        errFile, logFile };
+  if (!cmSystemTools::RunSingleCommand(plogCmd, &stdOut, &stdErr, &ret,
+                                       nullptr, cmSystemTools::OUTPUT_NONE)) {
+    std::cerr << "Error running '" << plogCmd[0] << "': " << stdErr << '\n';
+    return 1;
+  }
+
+  // Show error messages from plog-converter output
+  if (stdOut.find("Total messages 0") == std::string::npos) {
+    cmsys::ifstream errFileStream(errFile.c_str());
+    // output always begins with a Help message
+    errFileStream.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    std::cerr << errFileStream.rdbuf();
+  }
+  cmSystemTools::RemoveFile(logFile);
+
+  if (ret != 0) {
+    std::cerr << stdErr;
+  }
+  return ret;
+}
+
 int HandleLWYU(std::string const& runCmd, std::string const& sourceFile,
+               std::string const& /*objectFile*/,
                std::vector<std::string> const&)
 {
   // Construct the ldd -r -u (link what you use lwyu) command line
@@ -439,6 +517,7 @@ int HandleLWYU(std::string const& runCmd, std::string const& sourceFile,
 }
 
 int HandleCppLint(std::string const& runCmd, std::string const& sourceFile,
+                  std::string const& /*objectFile*/,
                   std::vector<std::string> const&)
 {
   // Construct the cpplint command line.
@@ -466,6 +545,7 @@ int HandleCppLint(std::string const& runCmd, std::string const& sourceFile,
 }
 
 int HandleCppCheck(std::string const& runCmd, std::string const& sourceFile,
+                   std::string const& /*objectFile*/,
                    std::vector<std::string> const& orig_cmd)
 {
   // Construct the cpplint command line.
@@ -520,6 +600,7 @@ int HandleCppCheck(std::string const& runCmd, std::string const& sourceFile,
 }
 
 int HandleIcstat(std::string const& runCmd, std::string const& sourceFile,
+                 std::string const& /*objectFile*/,
                  std::vector<std::string> const& orig_cmd)
 {
   // Construct the IAR C-STAT command line.
@@ -569,6 +650,7 @@ int HandleIcstat(std::string const& runCmd, std::string const& sourceFile,
 }
 
 using CoCompileHandler = int (*)(std::string const&, std::string const&,
+                                 std::string const&,
                                  std::vector<std::string> const&);
 
 struct CoCompiler
@@ -578,15 +660,16 @@ struct CoCompiler
   bool NoOriginalCommand;
 };
 
-std::array<CoCompiler, 6> const CoCompilers = {
-  { // Table of options and handlers.
-    { "--cppcheck=", HandleCppCheck, false },
-    { "--cpplint=", HandleCppLint, false },
-    { "--icstat=", HandleIcstat, false },
-    { "--iwyu=", HandleIWYU, false },
-    { "--lwyu=", HandleLWYU, true },
-    { "--tidy=", HandleTidy, false } }
-};
+std::array<CoCompiler, 7> const CoCompilers = { {
+  // Table of options and handlers.
+  { "--cppcheck=", HandleCppCheck, false },
+  { "--cpplint=", HandleCppLint, false },
+  { "--icstat=", HandleIcstat, false },
+  { "--iwyu=", HandleIWYU, false },
+  { "--lwyu=", HandleLWYU, true },
+  { "--pvs-studio=", HandlePVSStudio, false },
+  { "--tidy=", HandleTidy, false },
+} };
 
 struct CoCompileJob
 {
@@ -600,6 +683,7 @@ int cmcmd::HandleCoCompileCommands(std::vector<std::string> const& args)
 {
   std::vector<CoCompileJob> jobs;
   std::string sourceFile; // store --source=
+  std::string objectFile; // store --object=
   cmList launchers;       // store --launcher=
 
   // Default is to run the original command found after -- if the option
@@ -634,6 +718,8 @@ int cmcmd::HandleCoCompileCommands(std::vector<std::string> const& args)
           sourceFile = arg.substr(9);
         } else if (cmHasLiteralPrefix(arg, "--launcher=")) {
           launchers.append(arg.substr(11), cmList::EmptyElements::Yes);
+        } else if (cmHasLiteralPrefix(arg, "--object=")) {
+          objectFile = arg.substr(9);
         } else {
           // if it was not a co-compiler or --source/--launcher then error
           std::cerr << "__run_co_compile given unknown argument: " << arg
@@ -661,7 +747,7 @@ int cmcmd::HandleCoCompileCommands(std::vector<std::string> const& args)
 
   for (CoCompileJob const& job : jobs) {
     // call the command handler here
-    int ret = job.Handler(job.Command, sourceFile, orig_cmd);
+    int ret = job.Handler(job.Command, sourceFile, objectFile, orig_cmd);
 
     // if the command returns non-zero then return and fail.
     // for commands that do not want to break the build, they should return

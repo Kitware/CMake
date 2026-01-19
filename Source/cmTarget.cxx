@@ -473,6 +473,7 @@ TargetProperty const StaticTargetProperties[] = {
   { "C_CPPCHECK"_s, IC::CanCompileSources },
   { "C_ICSTAT"_s, IC::CanCompileSources },
   { "C_INCLUDE_WHAT_YOU_USE"_s, IC::CanCompileSources },
+  { "C_PVS_STUDIO"_s, IC::CanCompileSources },
   // -- C++
   { "CXX_CLANG_TIDY"_s, IC::CanCompileSources },
   { "CXX_CLANG_TIDY_EXPORT_FIXES_DIR"_s, IC::CanCompileSources },
@@ -480,6 +481,7 @@ TargetProperty const StaticTargetProperties[] = {
   { "CXX_CPPCHECK"_s, IC::CanCompileSources },
   { "CXX_ICSTAT"_s, IC::CanCompileSources },
   { "CXX_INCLUDE_WHAT_YOU_USE"_s, IC::CanCompileSources },
+  { "CXX_PVS_STUDIO"_s, IC::CanCompileSources },
   // -- Objective C
   { "OBJC_CLANG_TIDY"_s, IC::CanCompileSources },
   { "OBJC_CLANG_TIDY_EXPORT_FIXES_DIR"_s, IC::CanCompileSources },
@@ -1809,6 +1811,7 @@ void cmTarget::CopyImportedCxxModulesProperties(cmTarget const* tgt)
     "CXX_CPPCHECK",
     "CXX_ICSTAT",
     "CXX_INCLUDE_WHAT_YOU_USE",
+    "CXX_PVS_STUDIO",
     "SKIP_LINTING",
 
     // Build graph properties

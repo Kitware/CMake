@@ -5,6 +5,7 @@ set(RunCMake_TEST_OPTIONS
   "-DPSEUDO_CPPLINT=${PSEUDO_CPPLINT}"
   "-DPSEUDO_IWYU=${PSEUDO_IWYU}"
   "-DPSEUDO_TIDY=${PSEUDO_TIDY}"
+  "-DPSEUDO_PVS=${PSEUDO_PVS}"
   )
 
 function(run_multilint lang)
