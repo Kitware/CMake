@@ -9,17 +9,18 @@ Synopsis
 .. parsed-literal::
 
   `Query host system specific information`_
-    cmake_host_system_information(RESULT <variable> QUERY <key> ...)
+    cmake_host_system_information(RESULT <variable> `QUERY`_ <key> ...)
 
-  `Query Windows registry`_
-    cmake_host_system_information(RESULT <variable> QUERY WINDOWS_REGISTRY <key> ...)
+  `Query the Windows registry`_
+    cmake_host_system_information(RESULT <variable> `QUERY WINDOWS_REGISTRY`_ <key> ...)
 
 Query host system specific information
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. code-block:: cmake
-
+.. signature::
   cmake_host_system_information(RESULT <variable> QUERY <key> ...)
+  :target:
+    QUERY
 
 Queries system information of the host system on which cmake runs.
 One or more ``<key>`` can be provided to select the information to be
@@ -290,20 +291,19 @@ system information:
 .. _man 5 os-release: https://www.freedesktop.org/software/systemd/man/latest/os-release.html
 .. _various distribution-specific files: http://linuxmafia.com/faq/Admin/release-files.html
 
-.. _Query Windows registry:
-
-Query Windows registry
-^^^^^^^^^^^^^^^^^^^^^^
+Query the Windows registry
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. versionadded:: 3.24
 
-.. code-block:: cmake
-
+.. signature::
   cmake_host_system_information(RESULT <variable>
                                 QUERY WINDOWS_REGISTRY <key> [VALUE_NAMES|SUBKEYS|VALUE <name>]
                                 [VIEW (64|32|64_32|32_64|HOST|TARGET|BOTH)]
                                 [SEPARATOR <separator>]
                                 [ERROR_VARIABLE <result>])
+  :target:
+    QUERY WINDOWS_REGISTRY
 
 Performs query operations on local computer registry subkey. Returns a list of
 subkeys or value names that are located under the specified subkey in the

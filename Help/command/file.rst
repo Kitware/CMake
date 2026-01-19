@@ -11,7 +11,8 @@ For other path manipulation, handling only syntactic aspects, see the
 
 .. note::
 
-  The sub-commands `RELATIVE_PATH`_, `TO_CMAKE_PATH`_, and `TO_NATIVE_PATH`_
+  The sub-commands :command:`file(RELATIVE_PATH)`,
+  :command:`file(TO_CMAKE_PATH)`, and :command:`file(TO_NATIVE_PATH)`
   have been superseded, respectively, by the sub-commands
   :command:`cmake_path(RELATIVE_PATH)`,
   :command:`cmake_path(CONVERT ... TO_CMAKE_PATH_LIST)`, and

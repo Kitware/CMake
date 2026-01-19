@@ -29,9 +29,9 @@ Query Windows Registry
 .. versionadded:: 3.24
 
 The :command:`cmake_host_system_information` command offers the possibility to
-query the registry on the local computer. See
-:ref:`cmake_host_system(QUERY_WINDOWS_REGISTRY) <Query Windows registry>` for
-more information.
+query the registry on the local computer. See the
+:command:`cmake_host_system_information(QUERY WINDOWS_REGISTRY)` sub-command
+for more information.
 
 .. _`Find Using Windows Registry`:
 

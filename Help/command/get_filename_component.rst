@@ -10,9 +10,8 @@ Get a specific component of a full filename.
 
 .. versionchanged:: 3.24
   The undocumented feature offering the capability to query the ``Windows``
-  registry is superseded by
-  :ref:`cmake_host_system_information(QUERY WINDOWS_REGISTRY)<Query Windows registry>`
-  command.
+  registry is superseded by the
+  :command:`cmake_host_system_information(QUERY WINDOWS_REGISTRY)` command.
 
 .. code-block:: cmake
 

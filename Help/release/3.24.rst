@@ -85,7 +85,8 @@ Commands
 
 * The :command:`cmake_host_system_information` command, on Windows,
   gained a ``QUERY WINDOWS_REGISTRY`` mode.
-  See its :ref:`Query Windows registry` section.
+  See its :command:`cmake_host_system_information(QUERY WINDOWS_REGISTRY)`
+  signature.
 
 * The :command:`cmake_language` command gained a new
   ``SET_DEPENDENCY_PROVIDER`` sub-command.  When a dependency provider is set,
