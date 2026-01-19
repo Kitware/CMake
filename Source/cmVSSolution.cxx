@@ -27,6 +27,8 @@ cm::string_view const Solution::Project::TypeIdFSharp =
   "F2A71F9B-5D33-465A-A702-920D77279786"_s;
 cm::string_view const Solution::Project::TypeIdFortran =
   "6989167D-11E4-40FE-8C1A-2192A86A7E90"_s;
+cm::string_view const Solution::Project::TypeIdNodeJS =
+  "9092AA53-FB77-4645-B42D-1CCCA6BD08BD"_s;
 cm::string_view const Solution::Project::TypeIdPython =
   "888888A0-9F3D-457C-B088-3A5042F75D52"_s;
 cm::string_view const Solution::Project::TypeIdVDProj =

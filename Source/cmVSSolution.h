@@ -75,6 +75,7 @@ struct Solution final
     static cm::string_view const TypeIdDefault;
     static cm::string_view const TypeIdFSharp;
     static cm::string_view const TypeIdFortran;
+    static cm::string_view const TypeIdNodeJS;
     static cm::string_view const TypeIdPython;
     static cm::string_view const TypeIdVDProj;
     static cm::string_view const TypeIdVisualBasic;
