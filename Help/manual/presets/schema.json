@@ -189,6 +189,52 @@
         }
       ]
     },
+    "commonPropertiesAll": {
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "A required string representing the machine-friendly name of the preset. This identifier is used in the --preset argument. There must not be two presets (configure, build, test, package, or workflow) in the union of CMakePresets.json and CMakeUserPresets.json in the same directory with the same name.",
+          "minLength": 1
+        },
+        "vendor": {
+          "type": "object",
+          "description": "An optional map containing vendor-specific information. CMake does not interpret the contents of this field except to verify that it is a map if it does exist. However, it should follow the same conventions as the root-level vendor field.",
+          "properties": {}
+        },
+        "displayName": {
+          "type": "string",
+          "description": "An optional string with a human-friendly name of the preset."
+        },
+        "description": {
+          "type": "string",
+          "description": "An optional string with a human-friendly description of the preset."
+        }
+      }
+    },
+    "configureBuildTestPackagePresetsEnvironmentProperty": {
+      "properties": {
+        "environment": {
+          "type": "object",
+          "description": "An optional map of environment variables. The key is the variable name (which must not be an empty string). Each variable is set regardless of whether or not a value was given to it by the process's environment. This field supports macro expansion, and environment variables in this map may reference each other, and may be listed in any order, as long as such references do not cause a cycle (for example,if ENV_1 is $env{ENV_2}, ENV_2 may not be $env{ENV_1}.) Environment variables are inherited through the inherits field, and the preset's environment will be the union of its own environment and the environment from all its parents. If multiple presets in this union define the same variable, the standard rules of inherits are applied. Setting a variable to null causes it to not be set, even if a value was inherited from another preset.",
+          "properties": {},
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "null",
+                "description": "Setting a variable to null causes it to not be set, even if a value was inherited from another preset."
+              },
+              {
+                "type": "string",
+                "description": "A string representing the value of the variable."
+              }
+            ]
+          },
+          "propertyNames": {
+            "pattern": "^.+$"
+          }
+        }
+      }
+    },
     "commentAsProperty": {
       "properties": {
         "$comment": { "$ref": "#/definitions/$comment" }
@@ -567,72 +613,40 @@
       }
     },
     "configurePresetsItemsV1": {
-      "properties": {
-        "name": {
-          "type": "string",
-          "description": "A required string representing the machine-friendly name of the preset. This identifier is used in the --preset argument. There must not be two presets in the union of CMakePresets.json and CMakeUserPresets.json in the same directory with the same name.",
-          "minLength": 1
-        },
-        "hidden": {
-          "type": "boolean",
-          "description": "An optional boolean specifying whether or not a preset should be hidden. If a preset is hidden, it cannot be used in the --preset= argument, will not show up in the CMake GUI, and does not have to have a valid generator or binaryDir, even from inheritance. Hidden presets are intended to be used as a base for other presets to inherit via the inherits field."
-        },
-        "inherits": {
-          "anyOf": [
-            {
-              "type": "string",
-              "description": "An optional string representing the name of the preset to inherit from.",
-              "minLength": 1
+      "allOf": [
+        { "$ref": "#/definitions/commonPropertiesAll" },
+        { "$ref": "#/definitions/configureBuildTestPackagePresetsEnvironmentProperty" },
+        {
+          "properties": {
+            "hidden": {
+              "type": "boolean",
+              "description": "An optional boolean specifying whether or not a preset should be hidden. If a preset is hidden, it cannot be used in the --preset= argument, will not show up in the CMake GUI, and does not have to have a valid generator or binaryDir, even from inheritance. Hidden presets are intended to be used as a base for other presets to inherit via the inherits field."
             },
-            {
-              "type": "array",
-              "description": "An optional array of strings representing the names of presets to inherit from. The preset will inherit all of the fields from the inherits presets by default (except name, hidden, inherits, description, and displayName), but can override them as desired. If multiple inherits presets provide conflicting values for the same field, the earlier preset in the inherits list will be preferred. Presets in CMakePresets.json must not inherit from presets in CMakeUserPresets.json.",
-              "items": {
-                "type": "string",
-                "description": "An optional string representing the name of the preset to inherit from.",
-                "minLength": 1
-              }
+            "inherits": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "description": "An optional string representing the name of the preset to inherit from.",
+                  "minLength": 1
+                },
+                {
+                  "type": "array",
+                  "description": "An optional array of strings representing the names of presets to inherit from. The preset will inherit all of the fields from the inherits presets by default (except name, hidden, inherits, description, and displayName), but can override them as desired. If multiple inherits presets provide conflicting values for the same field, the earlier preset in the inherits list will be preferred. Presets in CMakePresets.json must not inherit from presets in CMakeUserPresets.json.",
+                  "items": {
+                    "type": "string",
+                    "description": "An optional string representing the name of the preset to inherit from.",
+                    "minLength": 1
+                  }
+                }
+              ]
+            },
+            "cmakeExecutable": {
+              "type": "string",
+              "description": "An optional string representing the path to the CMake executable to use for this preset. This is reserved for use by IDEs, and is not used by CMake itself. IDEs that use this field should expand any macros in it."
             }
-          ]
-        },
-        "vendor": {
-          "type": "object",
-          "description": "An optional map containing vendor-specific information. CMake does not interpret the contents of this field except to verify that it is a map if it does exist. However, it should follow the same conventions as the root-level vendor field. If vendors use their own per-preset vendor field, they should implement inheritance in a sensible manner when appropriate.",
-          "properties": {}
-        },
-        "displayName": {
-          "type": "string",
-          "description": "An optional string with a human-friendly name of the preset."
-        },
-        "description": {
-          "type": "string",
-          "description": "An optional string with a human-friendly description of the preset."
-        },
-        "cmakeExecutable": {
-          "type": "string",
-          "description": "An optional string representing the path to the CMake executable to use for this preset. This is reserved for use by IDEs, and is not used by CMake itself. IDEs that use this field should expand any macros in it."
-        },
-        "environment": {
-          "type": "object",
-          "description": "An optional map of environment variables. The key is the variable name (which must not be an empty string). Each variable is set regardless of whether or not a value was given to it by the process's environment. This field supports macro expansion, and environment variables in this map may reference each other, and may be listed in any order, as long as such references do not cause a cycle (for example,if ENV_1 is $env{ENV_2}, ENV_2 may not be $env{ENV_1}.) Environment variables are inherited through the inherits field, and the preset's environment will be the union of its own environment and the environment from all its parents. If multiple presets in this union define the same variable, the standard rules of inherits are applied. Setting a variable to null causes it to not be set, even if a value was inherited from another preset.",
-          "properties": {},
-          "additionalProperties": {
-            "anyOf": [
-              {
-                "type": "null",
-                "description": "Setting a variable to null causes it to not be set, even if a value was inherited from another preset."
-              },
-              {
-                "type": "string",
-                "description": "A string representing the value of the variable."
-              }
-            ]
-          },
-          "propertyNames": {
-            "pattern": "^.+$"
           }
         }
-      },
+      ],
       "required": [
         "name"
       ]
@@ -788,117 +802,85 @@
       }
     },
     "buildPresetsItemsV2": {
-      "properties": {
-        "name": {
-          "type": "string",
-          "description": "A required string representing the machine-friendly name of the preset. This identifier is used in the --preset argument. There must not be two presets (configure, build, test, package, or workflow) in the union of CMakePresets.json and CMakeUserPresets.json in the same directory with the same name.",
-          "minLength": 1
-        },
-        "hidden": {
-          "type": "boolean",
-          "description": "An optional boolean specifying whether or not a preset should be hidden. If a preset is hidden, it cannot be used in the --preset argument and does not have to have a valid configurePreset, even from inheritance. Hidden presets are intended to be used as a base for other presets to inherit via the inherits field."
-        },
-        "inherits": {
-          "anyOf": [
-            {
+      "allOf": [
+        { "$ref": "#/definitions/commonPropertiesAll" },
+        { "$ref": "#/definitions/configureBuildTestPackagePresetsEnvironmentProperty" },
+        {
+          "properties": {
+            "hidden": {
+              "type": "boolean",
+              "description": "An optional boolean specifying whether or not a preset should be hidden. If a preset is hidden, it cannot be used in the --preset argument and does not have to have a valid configurePreset, even from inheritance. Hidden presets are intended to be used as a base for other presets to inherit via the inherits field."
+            },
+            "inherits": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "description": "An optional string representing the name of the build preset to inherit from.",
+                  "minLength": 1
+                },
+                {
+                  "type": "array",
+                  "description": "An optional array of strings representing the names of build presets to inherit from. The preset will inherit all of the fields from the inherits presets by default (except name, hidden, inherits, description, and displayName), but can override them as desired. If multiple inherits presets provide conflicting values for the same field, the earlier preset in the inherits list will be preferred. Presets in CMakePresets.json must not inherit from presets in CMakeUserPresets.json.",
+                  "items": {
+                    "type": "string",
+                    "description": "An optional string representing the name of the preset to inherit from.",
+                    "minLength": 1
+                  }
+                }
+              ]
+            },
+            "configurePreset": {
               "type": "string",
-              "description": "An optional string representing the name of the build preset to inherit from.",
+              "description": "An optional string specifying the name of a configure preset to associate with this build preset. If configurePreset is not specified, it must be inherited from the inherits preset (unless this preset is hidden). The build tree directory is inferred from the configure preset.",
               "minLength": 1
             },
-            {
-              "type": "array",
-              "description": "An optional array of strings representing the names of build presets to inherit from. The preset will inherit all of the fields from the inherits presets by default (except name, hidden, inherits, description, and displayName), but can override them as desired. If multiple inherits presets provide conflicting values for the same field, the earlier preset in the inherits list will be preferred. Presets in CMakePresets.json must not inherit from presets in CMakeUserPresets.json.",
-              "items": {
-                "type": "string",
-                "description": "An optional string representing the name of the preset to inherit from.",
-                "minLength": 1
-              }
-            }
-          ]
-        },
-        "configurePreset": {
-          "type": "string",
-          "description": "An optional string specifying the name of a configure preset to associate with this build preset. If configurePreset is not specified, it must be inherited from the inherits preset (unless this preset is hidden). The build tree directory is inferred from the configure preset.",
-          "minLength": 1
-        },
-        "vendor": {
-          "type": "object",
-          "description": "An optional map containing vendor-specific information. CMake does not interpret the contents of this field except to verify that it is a map if it does exist. However, it should follow the same conventions as the root-level vendor field. If vendors use their own per-preset vendor field, they should implement inheritance in a sensible manner when appropriate.",
-          "properties": {}
-        },
-        "displayName": {
-          "type": "string",
-          "description": "An optional string with a human-friendly name of the preset."
-        },
-        "description": {
-          "type": "string",
-          "description": "An optional string with a human-friendly description of the preset."
-        },
-        "inheritConfigureEnvironment": {
-          "type": "boolean",
-          "description": "An optional boolean that defaults to true. If true, the environment variables from the associated configure preset are inherited after all inherited build preset environments, but before environment variables explicitly specified in this build preset."
-        },
-        "environment": {
-          "type": "object",
-          "description": "An optional map of environment variables. The key is the variable name (which must not be an empty string). Each variable is set regardless of whether or not a value was given to it by the process's environment. This field supports macro expansion, and environment variables in this map may reference each other, and may be listed in any order, as long as such references do not cause a cycle (for example,if ENV_1 is $env{ENV_2}, ENV_2 may not be $env{ENV_1}.) Environment variables are inherited through the inherits field, and the preset's environment will be the union of its own environment and the environment from all its parents. If multiple presets in this union define the same variable, the standard rules of inherits are applied. Setting a variable to null causes it to not be set, even if a value was inherited from another preset.",
-          "properties": {},
-          "additionalProperties": {
-            "anyOf": [
-              {
-                "type": "null",
-                "description": "Setting a variable to null causes it to not be set, even if a value was inherited from another preset."
-              },
-              {
-                "type": "string",
-                "description": "A string representing the value of the variable."
-              }
-            ]
-          },
-          "propertyNames": {
-            "pattern": "^.+$"
-          }
-        },
-        "jobs": {
-          "type": "integer",
-          "description": "An optional integer. Equivalent to passing --parallel or -j on the command line."
-        },
-        "targets": {
-          "anyOf": [
-            {
-              "type": "string",
-              "description": "An optional string. Equivalent to passing --target or -t on the command line. Vendors may ignore the targets property or hide build presets that explicitly specify targets."
+            "inheritConfigureEnvironment": {
+              "type": "boolean",
+              "description": "An optional boolean that defaults to true. If true, the environment variables from the associated configure preset are inherited after all inherited build preset environments, but before environment variables explicitly specified in this build preset."
             },
-            {
+            "jobs": {
+              "type": "integer",
+              "description": "An optional integer. Equivalent to passing --parallel or -j on the command line."
+            },
+            "targets": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "description": "An optional string. Equivalent to passing --target or -t on the command line. Vendors may ignore the targets property or hide build presets that explicitly specify targets."
+                },
+                {
+                  "type": "array",
+                  "description": "An optional array of strings. Equivalent to passing --target or -t on the command line. Vendors may ignore the targets property or hide build presets that explicitly specify targets.",
+                  "items": {
+                    "type": "string",
+                    "description": "An optional string. Equivalent to passing --target or -t on the command line. Vendors may ignore the targets property or hide build presets that explicitly specify targets."
+                  }
+                }
+              ]
+            },
+            "configuration": {
+              "type": "string",
+              "description": "An optional string. Equivalent to passing --config on the command line."
+            },
+            "cleanFirst": {
+              "type": "boolean",
+              "description": "An optional boolean. If true, equivalent to passing --clean-first on the command line."
+            },
+            "verbose": {
+              "type": "boolean",
+              "description": "An optional boolean. If true, equivalent to passing --verbose on the command line."
+            },
+            "nativeToolOptions": {
               "type": "array",
-              "description": "An optional array of strings. Equivalent to passing --target or -t on the command line. Vendors may ignore the targets property or hide build presets that explicitly specify targets.",
+              "description": "An optional array of strings. Equivalent to passing options after -- on the command line.",
               "items": {
                 "type": "string",
-                "description": "An optional string. Equivalent to passing --target or -t on the command line. Vendors may ignore the targets property or hide build presets that explicitly specify targets."
+                "description": "An optional string representing an option to pass after -- on the command line."
               }
             }
-          ]
-        },
-        "configuration": {
-          "type": "string",
-          "description": "An optional string. Equivalent to passing --config on the command line."
-        },
-        "cleanFirst": {
-          "type": "boolean",
-          "description": "An optional boolean. If true, equivalent to passing --clean-first on the command line."
-        },
-        "verbose": {
-          "type": "boolean",
-          "description": "An optional boolean. If true, equivalent to passing --verbose on the command line."
-        },
-        "nativeToolOptions": {
-          "type": "array",
-          "description": "An optional array of strings. Equivalent to passing options after -- on the command line.",
-          "items": {
-            "type": "string",
-            "description": "An optional string representing an option to pass after -- on the command line."
           }
         }
-      },
+      ],
       "required": [
         "name"
       ]
@@ -1427,89 +1409,57 @@
       }
     },
     "testPresetsItemsV2": {
-      "properties": {
-        "name": {
-          "type": "string",
-          "description": "A required string representing the machine-friendly name of the preset. This identifier is used in the --preset argument. There must not be two presets (configure, build, test, package, or workflow) in the union of CMakePresets.json and CMakeUserPresets.json in the same directory with the same name.",
-          "minLength": 1
-        },
-        "hidden": {
-          "type": "boolean",
-          "description": "An optional boolean specifying whether or not a preset should be hidden. If a preset is hidden, it cannot be used in the --preset argument and does not have to have a valid configurePreset, even from inheritance. Hidden presets are intended to be used as a base for other presets to inherit via the inherits field."
-        },
-        "inherits": {
-          "anyOf": [
-            {
+      "allOf": [
+        { "$ref": "#/definitions/commonPropertiesAll" },
+        { "$ref": "#/definitions/configureBuildTestPackagePresetsEnvironmentProperty" },
+        {
+          "properties": {
+            "hidden": {
+              "type": "boolean",
+              "description": "An optional boolean specifying whether or not a preset should be hidden. If a preset is hidden, it cannot be used in the --preset argument and does not have to have a valid configurePreset, even from inheritance. Hidden presets are intended to be used as a base for other presets to inherit via the inherits field."
+            },
+            "inherits": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "description": "An optional string representing the name of the test preset to inherit from.",
+                  "minLength": 1
+                },
+                {
+                  "type": "array",
+                  "description": "An optional array of strings representing the names of test presets to inherit from. The preset will inherit all of the fields from the inherits presets by default (except name, hidden, inherits, description, and displayName), but can override them as desired. If multiple inherits presets provide conflicting values for the same field, the earlier preset in the inherits list will be preferred. Presets in CMakePresets.json must not inherit from presets in CMakeUserPresets.json.",
+                  "items": {
+                    "type": "string",
+                    "description": "An optional string representing the name of the preset to inherit from.",
+                    "minLength": 1
+                  }
+                }
+              ]
+            },
+            "configurePreset": {
               "type": "string",
-              "description": "An optional string representing the name of the test preset to inherit from.",
+              "description": "An optional string specifying the name of a configure preset to associate with this test preset. If configurePreset is not specified, it must be inherited from the inherits preset (unless this preset is hidden). The build tree directory is inferred from the configure preset.",
               "minLength": 1
             },
-            {
+            "inheritConfigureEnvironment": {
+              "type": "boolean",
+              "description": "An optional boolean that defaults to true. If true, the environment variables from the associated configure preset are inherited after all inherited test preset environments, but before environment variables explicitly specified in this test preset."
+            },
+            "configuration": {
+              "type": "string",
+              "description": "An optional string. Equivalent to passing --build-config on the command line."
+            },
+            "overwriteConfigurationFile": {
               "type": "array",
-              "description": "An optional array of strings representing the names of test presets to inherit from. The preset will inherit all of the fields from the inherits presets by default (except name, hidden, inherits, description, and displayName), but can override them as desired. If multiple inherits presets provide conflicting values for the same field, the earlier preset in the inherits list will be preferred. Presets in CMakePresets.json must not inherit from presets in CMakeUserPresets.json.",
+              "description": "An optional array of configuration options to overwrite options specified in the CTest configuration file. Equivalent to passing ``--overwrite`` for each value in the array.",
               "items": {
                 "type": "string",
-                "description": "An optional string representing the name of the preset to inherit from.",
-                "minLength": 1
+                "description": "An option written as a key-value pair in the form \"key=value\"."
               }
             }
-          ]
-        },
-        "configurePreset": {
-          "type": "string",
-          "description": "An optional string specifying the name of a configure preset to associate with this test preset. If configurePreset is not specified, it must be inherited from the inherits preset (unless this preset is hidden). The build tree directory is inferred from the configure preset.",
-          "minLength": 1
-        },
-        "vendor": {
-          "type": "object",
-          "description": "An optional map containing vendor-specific information. CMake does not interpret the contents of this field except to verify that it is a map if it does exist. However, it should follow the same conventions as the root-level vendor field. If vendors use their own per-preset vendor field, they should implement inheritance in a sensible manner when appropriate.",
-          "properties": {}
-        },
-        "displayName": {
-          "type": "string",
-          "description": "An optional string with a human-friendly name of the preset."
-        },
-        "description": {
-          "type": "string",
-          "description": "An optional string with a human-friendly description of the preset."
-        },
-        "inheritConfigureEnvironment": {
-          "type": "boolean",
-          "description": "An optional boolean that defaults to true. If true, the environment variables from the associated configure preset are inherited after all inherited test preset environments, but before environment variables explicitly specified in this test preset."
-        },
-        "environment": {
-          "type": "object",
-          "description": "An optional map of environment variables. The key is the variable name (which must not be an empty string). Each variable is set regardless of whether or not a value was given to it by the process's environment. This field supports macro expansion, and environment variables in this map may reference each other, and may be listed in any order, as long as such references do not cause a cycle (for example,if ENV_1 is $env{ENV_2}, ENV_2 may not be $env{ENV_1}.) Environment variables are inherited through the inherits field, and the preset's environment will be the union of its own environment and the environment from all its parents. If multiple presets in this union define the same variable, the standard rules of inherits are applied. Setting a variable to null causes it to not be set, even if a value was inherited from another preset.",
-          "properties": {},
-          "additionalProperties": {
-            "anyOf": [
-              {
-                "type": "null",
-                "description": "Setting a variable to null causes it to not be set, even if a value was inherited from another preset."
-              },
-              {
-                "type": "string",
-                "description": "A string representing the value of the variable."
-              }
-            ]
-          },
-          "propertyNames": {
-            "pattern": "^.+$"
-          }
-        },
-        "configuration": {
-          "type": "string",
-          "description": "An optional string. Equivalent to passing --build-config on the command line."
-        },
-        "overwriteConfigurationFile": {
-          "type": "array",
-          "description": "An optional array of configuration options to overwrite options specified in the CTest configuration file. Equivalent to passing ``--overwrite`` for each value in the array.",
-          "items": {
-            "type": "string",
-            "description": "An option written as a key-value pair in the form \"key=value\"."
           }
         }
-      },
+      ],
       "required": [
         "name"
       ]
@@ -1623,121 +1573,89 @@
       }
     },
     "packagePresetsItemsV6": {
-      "properties": {
-        "name": {
-          "type": "string",
-          "description": "A required string representing the machine-friendly name of the preset. This identifier is used in the --preset argument. There must not be two presets (configure, build, test, package, or workflow) in the union of CMakePresets.json and CMakeUserPresets.json in the same directory with the same name.",
-          "minLength": 1
-        },
-        "hidden": {
-          "type": "boolean",
-          "description": "An optional boolean specifying whether or not a preset should be hidden. If a preset is hidden, it cannot be used in the --preset argument and does not have to have a valid configurePreset, even from inheritance. Hidden presets are intended to be used as a base for other presets to inherit via the inherits field."
-        },
-        "inherits": {
-          "anyOf": [
-            {
+      "allOf": [
+        { "$ref": "#/definitions/commonPropertiesAll" },
+        { "$ref": "#/definitions/configureBuildTestPackagePresetsEnvironmentProperty" },
+        {
+          "properties": {
+            "hidden": {
+              "type": "boolean",
+              "description": "An optional boolean specifying whether or not a preset should be hidden. If a preset is hidden, it cannot be used in the --preset argument and does not have to have a valid configurePreset, even from inheritance. Hidden presets are intended to be used as a base for other presets to inherit via the inherits field."
+            },
+            "inherits": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "description": "An optional string representing the name of the package preset to inherit from.",
+                  "minLength": 1
+                },
+                {
+                  "type": "array",
+                  "description": "An optional array of strings representing the names of package presets to inherit from. The preset will inherit all of the fields from the inherits presets by default (except name, hidden, inherits, description, and displayName), but can override them as desired. If multiple inherits presets provide conflicting values for the same field, the earlier preset in the inherits list will be preferred. Presets in CMakePresets.json must not inherit from presets in CMakeUserPresets.json.",
+                  "items": {
+                    "type": "string",
+                    "description": "An optional string representing the name of the preset to inherit from.",
+                    "minLength": 1
+                  }
+                }
+              ]
+            },
+            "configurePreset": {
               "type": "string",
-              "description": "An optional string representing the name of the package preset to inherit from.",
+              "description": "An optional string specifying the name of a configure preset to associate with this package preset. If configurePreset is not specified, it must be inherited from the inherits preset (unless this preset is hidden). The build tree directory is inferred from the configure preset.",
               "minLength": 1
             },
-            {
+            "inheritConfigureEnvironment": {
+              "type": "boolean",
+              "description": "An optional boolean that defaults to true. If true, the environment variables from the associated configure preset are inherited after all inherited package preset environments, but before environment variables explicitly specified in this package preset."
+            },
+            "generators": {
               "type": "array",
-              "description": "An optional array of strings representing the names of package presets to inherit from. The preset will inherit all of the fields from the inherits presets by default (except name, hidden, inherits, description, and displayName), but can override them as desired. If multiple inherits presets provide conflicting values for the same field, the earlier preset in the inherits list will be preferred. Presets in CMakePresets.json must not inherit from presets in CMakeUserPresets.json.",
+              "description": "An optional list of strings representing generators for CPack to use.",
               "items": {
                 "type": "string",
-                "description": "An optional string representing the name of the preset to inherit from.",
-                "minLength": 1
+                "description": "An optional string representing the name of the CPack generator to use."
               }
-            }
-          ]
-        },
-        "configurePreset": {
-          "type": "string",
-          "description": "An optional string specifying the name of a configure preset to associate with this package preset. If configurePreset is not specified, it must be inherited from the inherits preset (unless this preset is hidden). The build tree directory is inferred from the configure preset.",
-          "minLength": 1
-        },
-        "vendor": {
-          "type": "object",
-          "description": "An optional map containing vendor-specific information. CMake does not interpret the contents of this field except to verify that it is a map if it does exist. However, it should follow the same conventions as the root-level vendor field. If vendors use their own per-preset vendor field, they should implement inheritance in a sensible manner when appropriate.",
-          "properties": {}
-        },
-        "displayName": {
-          "type": "string",
-          "description": "An optional string with a human-friendly name of the preset."
-        },
-        "description": {
-          "type": "string",
-          "description": "An optional string with a human-friendly description of the preset."
-        },
-        "inheritConfigureEnvironment": {
-          "type": "boolean",
-          "description": "An optional boolean that defaults to true. If true, the environment variables from the associated configure preset are inherited after all inherited package preset environments, but before environment variables explicitly specified in this package preset."
-        },
-        "environment": {
-          "type": "object",
-          "description": "An optional map of environment variables. The key is the variable name (which must not be an empty string). Each variable is set regardless of whether or not a value was given to it by the process's environment. This field supports macro expansion, and environment variables in this map may reference each other, and may be listed in any order, as long as such references do not cause a cycle (for example,if ENV_1 is $env{ENV_2}, ENV_2 may not be $env{ENV_1}.) Environment variables are inherited through the inherits field, and the preset's environment will be the union of its own environment and the environment from all its parents. If multiple presets in this union define the same variable, the standard rules of inherits are applied. Setting a variable to null causes it to not be set, even if a value was inherited from another preset.",
-          "properties": {},
-          "additionalProperties": {
-            "anyOf": [
-              {
-                "type": "null",
-                "description": "Setting a variable to null causes it to not be set, even if a value was inherited from another preset."
-              },
-              {
+            },
+            "configurations": {
+              "type": "array",
+              "description": "An optional list of strings representing build configurations for CPack to package.",
+              "items": {
                 "type": "string",
-                "description": "A string representing the value of the variable."
+                "description": "An optional string representing the name of the configuration to use."
               }
-            ]
-          },
-          "propertyNames": {
-            "pattern": "^.+$"
+            },
+            "variables": {
+              "type": "object",
+              "description": "An optional map of variables to pass to CPack, equivalent to -D arguments. Each key is the name of a variable, and the value is the string to assign to that variable.",
+              "items": {
+                "type": "string",
+                "description": "An optional string representing the value of the variable."
+              }
+            },
+            "configFile": {
+              "type": "string",
+              "description": "An optional string representing the config file for CPack to use."
+            },
+            "packageName": {
+              "type": "string",
+              "description": "An optional string representing the package name."
+            },
+            "packageVersion": {
+              "type": "string",
+              "description": "An optional string representing the package version."
+            },
+            "packageDirectory": {
+              "type": "string",
+              "description": "An optional string representing the directory in which to place the package."
+            },
+            "vendorName": {
+              "type": "string",
+              "description": "An optional string representing the vendor name."
+            }
           }
-        },
-        "generators": {
-          "type": "array",
-          "description": "An optional list of strings representing generators for CPack to use.",
-          "items": {
-            "type": "string",
-            "description": "An optional string representing the name of the CPack generator to use."
-          }
-        },
-        "configurations": {
-          "type": "array",
-          "description": "An optional list of strings representing build configurations for CPack to package.",
-          "items": {
-            "type": "string",
-            "description": "An optional string representing the name of the configuration to use."
-          }
-        },
-        "variables": {
-          "type": "object",
-          "description": "An optional map of variables to pass to CPack, equivalent to -D arguments. Each key is the name of a variable, and the value is the string to assign to that variable.",
-          "items": {
-            "type": "string",
-            "description": "An optional string representing the value of the variable."
-          }
-        },
-        "configFile": {
-          "type": "string",
-          "description": "An optional string representing the config file for CPack to use."
-        },
-        "packageName": {
-          "type": "string",
-          "description": "An optional string representing the package name."
-        },
-        "packageVersion": {
-          "type": "string",
-          "description": "An optional string representing the package version."
-        },
-        "packageDirectory": {
-          "type": "string",
-          "description": "An optional string representing the directory in which to place the package."
-        },
-        "vendorName": {
-          "type": "string",
-          "description": "An optional string representing the vendor name."
         }
-      },
+      ],
       "required": [
         "name"
       ]
@@ -1820,28 +1738,6 @@
         "steps": { "$ref": "#/definitions/workflowPresetsStepsV6" }
       }
     },
-    "workflowPresetsItemsV6": {
-      "properties": {
-        "name": {
-          "type": "string",
-          "description": "A required string representing the machine-friendly name of the preset. This identifier is used in the --preset argument. There must not be two presets (configure, build, test, package, or workflow) in the union of CMakePresets.json and CMakeUserPresets.json in the same directory with the same name.",
-          "minLength": 1
-        },
-        "vendor": {
-          "type": "object",
-          "description": "An optional map containing vendor-specific information. CMake does not interpret the contents of this field except to verify that it is a map if it does exist. However, it should follow the same conventions as the root-level vendor field.",
-          "properties": {}
-        },
-        "displayName": {
-          "type": "string",
-          "description": "An optional string with a human-friendly name of the preset."
-        },
-        "description": {
-          "type": "string",
-          "description": "An optional string with a human-friendly description of the preset."
-        }
-      }
-    },
     "workflowPresetsV10": {
       "type": "array",
       "description": "An optional array of workflow preset objects. Used to execute configure, build, test, and package presets in order. Available in version 10 and higher.",
@@ -1849,7 +1745,7 @@
         "type": "object",
         "description": "An optional workflow preset object",
         "allOf": [
-          { "$ref": "#/definitions/workflowPresetsItemsV6" },
+          { "$ref": "#/definitions/commonPropertiesAll" },
           { "$ref": "#/definitions/workflowPresetsAdditionalPropertiesV10" }
         ],
         "required": [
@@ -1866,7 +1762,7 @@
         "type": "object",
         "description": "An optional workflow preset object",
         "allOf": [
-          { "$ref": "#/definitions/workflowPresetsItemsV6" },
+          { "$ref": "#/definitions/commonPropertiesAll" },
           { "$ref": "#/definitions/workflowPresetsAdditionalPropertiesV6" }
         ],
         "required": [
