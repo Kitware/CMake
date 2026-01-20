@@ -28,6 +28,19 @@ if (NOT CMAKE_C_COMPILER_ID STREQUAL "Intel")
   run_cmake_target(STATIC_LIBRARY_OPTIONS genex StaticLinkOptions_genex --config Release)
   run_cmake_target(STATIC_LIBRARY_OPTIONS shared SharedLinkOptions)
 
+  run_cmake(STATIC_LIBRARY_FLAGS)
+  run_cmake_target(STATIC_LIBRARY_FLAGS basic StaticLinkFlags)
+  run_cmake_target(STATIC_LIBRARY_FLAGS config StaticLinkFlags_config --config Release)
+  run_cmake_target(STATIC_LIBRARY_FLAGS shared SharedLinkFlags)
+
+  run_cmake(CMAKE_STATIC_LINKER_FLAGS)
+  run_cmake_target(CMAKE_STATIC_LINKER_FLAGS basic CMakeStaticLinkerFlags)
+  run_cmake_target(CMAKE_STATIC_LINKER_FLAGS shared SharedCMakeStaticLinkerFlags)
+
+  run_cmake(CMAKE_STATIC_LINKER_FLAGS_CONFIG)
+  run_cmake_target(CMAKE_STATIC_LINKER_FLAGS_CONFIG basic CMakeStaticLinkerFlags_config --config Release)
+  run_cmake_target(CMAKE_STATIC_LINKER_FLAGS_CONFIG shared SharedCMakeStaticLinkerFlags_config --config Release)
+
   unset(RunCMake_TEST_OPTIONS)
   unset(RunCMake_TEST_OUTPUT_MERGE)
 endif()

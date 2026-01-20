@@ -1,6 +1,3 @@
-set(CMAKE_STATIC_LINKER_FLAGS ${pre}BADFLAG${obj})
-add_library(LinkFlags_lib_flags STATIC ../LinkFlagsLib.c)
-
 set(CMAKE_SHARED_LINKER_FLAGS ${pre}BADFLAG${obj})
 add_library(LinkFlags_dll_flags SHARED ../LinkFlagsLib.c)
 
