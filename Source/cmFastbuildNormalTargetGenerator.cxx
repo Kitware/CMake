@@ -857,6 +857,12 @@ void cmFastbuildNormalTargetGenerator::Generate()
   this->GeneratorTarget->CheckCxxModuleStatus(Config);
 
   FastbuildTarget fastbuildTarget;
+  auto const addUtilDepToTarget = [&fastbuildTarget](std::string depName) {
+    FastbuildTargetDep dep{ depName };
+    dep.Type = FastbuildTargetDepType::UTIL;
+    fastbuildTarget.PreBuildDependencies.emplace(std::move(dep));
+  };
+
   fastbuildTarget.Name = GetTargetName();
   fastbuildTarget.BaseName = this->GeneratorTarget->GetName();
 
@@ -882,7 +888,7 @@ void cmFastbuildNormalTargetGenerator::Generate()
 
   for (auto& cc : GenerateCommands(FastbuildBuildStep::PRE_BUILD).Nodes) {
     fastbuildTarget.PreBuildExecNodes.PreBuildDependencies.emplace(cc.Name);
-    fastbuildTarget.PreBuildDependencies.emplace(cc.Name);
+    addUtilDepToTarget(cc.Name);
     this->GetGlobalGenerator()->AddTarget(std::move(cc));
   }
   for (auto& cc : GenerateCommands(FastbuildBuildStep::PRE_LINK).Nodes) {

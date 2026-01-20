@@ -51,6 +51,7 @@
 // IDE support
 #define FASTBUILD_XCODE_BASE_PATH "XCode/Projects"
 #define FASTBUILD_VS_BASE_PATH "VisualStudio/Projects"
+#define FASTBUILD_VS_PROJECT_SUFFIX "-vcxproj"
 
 #define FASTBUILD_IDE_VS_COMMAND_PREFIX "cd ^$(SolutionDir).. && "
 #define FASTBUILD_DEFAULT_IDE_BUILD_ARGS " -ide -cache -summary -dist "
@@ -1613,12 +1614,23 @@ void cmGlobalFastbuildGenerator::AddGlobCheckExec()
 void cmGlobalFastbuildGenerator::WriteSolution()
 {
   std::string const solutionName = LocalGenerators[0]->GetProjectName();
-  std::map<std::string /*folder*/, std::vector<std::string>> VSProjects;
+  std::unordered_map<std::string /*folder*/, std::vector<std::string>>
+    VSProjectFolders;
+  std::unordered_map<std::string /*project*/,
+                     std::vector<std::string> /*deps*/>
+    VSProjectDeps;
   std::vector<std::string> VSProjectsWithoutFolder;
 
   for (auto const& IDEProj : IDEProjects) {
     auto const VSProj = IDEProj.second.first;
-    VSProjects[VSProj.folder].emplace_back(VSProj.Alias);
+    VSProjectFolders[VSProj.folder].emplace_back(VSProj.Alias);
+    auto& deps = VSProjectDeps[VSProj.Alias];
+    deps.reserve(VSProj.deps.size());
+    for (auto const& dep : VSProj.deps) {
+      if (dep.Type == FastbuildTargetDepType::REGULAR) {
+        deps.push_back(cmStrCat(dep.Name, FASTBUILD_VS_PROJECT_SUFFIX));
+      }
+    }
   }
 
   WriteCommand("VSSolution", Quote("solution"));
@@ -1632,7 +1644,7 @@ void cmGlobalFastbuildGenerator::WriteSolution()
   WriteIDEProjectConfig(configs, "SolutionConfigs");
   int folderNumber = 0;
   std::vector<std::string> folders;
-  for (auto& item : VSProjects) {
+  for (auto& item : VSProjectFolders) {
     auto const& pathToFolder = item.first;
     auto& projectsInFolder = item.second;
     if (pathToFolder.empty()) {
@@ -1651,6 +1663,29 @@ void cmGlobalFastbuildGenerator::WriteSolution()
   }
   if (!folders.empty()) {
     WriteArray("SolutionFolders ", Wrap(folders, ".", ""), 1);
+  }
+
+  int depNumber = 0;
+  std::vector<std::string> dependencies;
+  for (auto const& dep : VSProjectDeps) {
+    std::string const& projectName = dep.first;
+    std::vector<std::string> const& projectDeps = dep.second;
+    // This project has some deps.
+    if (!projectDeps.empty()) {
+      std::string depName = cmStrCat("Deps_", ++depNumber);
+      WriteStruct(depName,
+                  {
+                    { "Projects", Quote(projectName) },
+                    { "Dependencies",
+                      cmStrCat('{', cmJoin(Wrap(projectDeps), ","), '}') },
+                  },
+                  1);
+      dependencies.emplace_back(std::move(depName));
+    }
+  }
+
+  if (!dependencies.empty()) {
+    WriteArray("SolutionDependencies  ", Wrap(dependencies, ".", ""), 1);
   }
   if (!VSProjectsWithoutFolder.empty()) {
     WriteArray("SolutionProjects", Wrap(VSProjectsWithoutFolder), 1);
@@ -1872,8 +1907,8 @@ cmGlobalFastbuildGenerator::GetTargetByOutputName(
   return cm::nullopt;
 }
 
-void cmGlobalFastbuildGenerator::AddIDEProject(FastbuildTarget const& target,
-                                               std::string const& config)
+void cmGlobalFastbuildGenerator::AddIDEProject(
+  FastbuildTargetBase const& target, std::string const& config)
 {
   auto const& configs = GetConfigNames();
   if (std::find(configs.begin(), configs.end(), config) == configs.end()) {
@@ -1886,11 +1921,12 @@ void cmGlobalFastbuildGenerator::AddIDEProject(FastbuildTarget const& target,
     this->GetCMakeInstance()->GetHomeDirectory(), target.BasePath);
   // VS
   auto& VSProject = IDEProject.first;
-  VSProject.Alias = target.BaseName + "-vcxproj";
+  VSProject.Alias = cmStrCat(target.BaseName, FASTBUILD_VS_PROJECT_SUFFIX);
   VSProject.ProjectOutput = cmStrCat("VisualStudio/Projects/", relativeSubdir,
                                      '/', target.BaseName + ".vcxproj");
   VSProject.ProjectBasePath = target.BasePath;
   VSProject.folder = relativeSubdir;
+  VSProject.deps = target.PreBuildDependencies;
   // XCode
   auto& XCodeProject = IDEProject.second;
   XCodeProject.Alias = target.BaseName + "-xcodeproj";

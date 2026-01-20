@@ -35,7 +35,14 @@ void cmFastbuildUtilityTargetGenerator::Generate()
   }
 
   FastbuildAliasNode fastbuildTarget;
+  auto const addUtilDepToTarget = [&fastbuildTarget](std::string depName) {
+    FastbuildTargetDep dep{ depName };
+    dep.Type = FastbuildTargetDepType::UTIL;
+    fastbuildTarget.PreBuildDependencies.emplace(std::move(dep));
+  };
+
   fastbuildTarget.Name = targetName;
+  fastbuildTarget.BaseName = targetName;
 
   LogMessage("<-------------->");
   LogMessage("Generate Utility target: " + targetName);
@@ -67,12 +74,11 @@ void cmFastbuildUtilityTargetGenerator::Generate()
         LogMessage("Transitively propagating iface dep: " + depName +
                    ", is cross: " + std::to_string(dep.Value.second));
         nonImportedUtils.emplace_back(depName);
-        fastbuildTarget.PreBuildDependencies.emplace(
-          this->ConvertToFastbuildPath(depName));
+        addUtilDepToTarget(this->ConvertToFastbuildPath(depName));
       }
     } else {
       nonImportedUtils.emplace_back(utilTargetName);
-      fastbuildTarget.PreBuildDependencies.emplace(utilTargetName);
+      addUtilDepToTarget(utilTargetName);
     }
   }
   if (this->GetGlobalGenerator()->IsExcluded(this->GetGeneratorTarget())) {
@@ -84,7 +90,7 @@ void cmFastbuildUtilityTargetGenerator::Generate()
   // Tested in "RunCMake.CPack*" tests.
   // Utility target "package" has packaging steps as "POST_BUILD".
   for (auto& exec : GenerateCommands(FastbuildBuildStep::POST_BUILD).Nodes) {
-    fastbuildTarget.PreBuildDependencies.emplace(exec.Name);
+    addUtilDepToTarget(exec.Name);
     for (std::string const& util : nonImportedUtils) {
       LogMessage("Adding: util " + util);
       exec.PreBuildDependencies.emplace(util);
@@ -100,12 +106,12 @@ void cmFastbuildUtilityTargetGenerator::Generate()
 
   for (auto& exec : preBuild.Nodes) {
     LogMessage("Adding exec " + exec.Name);
-    fastbuildTarget.PreBuildDependencies.emplace(exec.Name);
+    addUtilDepToTarget(exec.Name);
     this->GetGlobalGenerator()->AddTarget(std::move(exec));
   }
 
   for (auto& exec : GenerateCommands(FastbuildBuildStep::REST).Nodes) {
-    fastbuildTarget.PreBuildDependencies.emplace(exec.Name);
+    addUtilDepToTarget(exec.Name);
     for (auto const& dep : TargetDirectDependencies) {
       LogMessage("Direct dep " + dep->GetName() +
                  "-all propagating to CC: " + exec.Name);
@@ -119,9 +125,15 @@ void cmFastbuildUtilityTargetGenerator::Generate()
     if (fastbuildTarget.ExcludeFromAll) {
       return;
     }
-    fastbuildTarget.PreBuildDependencies.emplace(FASTBUILD_NOOP_FILE_NAME);
+    FastbuildTargetDep dep{ FASTBUILD_NOOP_FILE_NAME };
+    dep.Type = FastbuildTargetDepType::ORDER_ONLY;
+    fastbuildTarget.PreBuildDependencies.emplace(std::move(dep));
   }
   fastbuildTarget.Hidden = false;
   this->AdditionalCleanFiles();
+
+  fastbuildTarget.BasePath = this->GetMakefile()->GetCurrentSourceDirectory();
+  this->GetGlobalGenerator()->AddIDEProject(fastbuildTarget, Config);
+
   this->GetGlobalGenerator()->AddTarget(std::move(fastbuildTarget));
 }
