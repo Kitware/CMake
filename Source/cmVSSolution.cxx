@@ -17,22 +17,36 @@
 namespace cm {
 namespace VS {
 
+cm::string_view const Solution::Project::TypeIdAspNetCore =
+  "8BB2217D-0F2D-49D1-97BC-3654ED321F3B"_s;
 cm::string_view const Solution::Project::TypeIdCSharp =
   "FAE04EC0-301F-11D3-BF4B-00C04F79EFBC"_s;
 cm::string_view const Solution::Project::TypeIdDatabase =
   "C8D11400-126E-41CD-887F-60BD40844F9E"_s;
 cm::string_view const Solution::Project::TypeIdDefault =
   "8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942"_s;
+cm::string_view const Solution::Project::TypeIdDotNetCore =
+  "9A19103F-16F7-4668-BE54-9A1E7A4F7556"_s;
 cm::string_view const Solution::Project::TypeIdFSharp =
   "F2A71F9B-5D33-465A-A702-920D77279786"_s;
 cm::string_view const Solution::Project::TypeIdFortran =
   "6989167D-11E4-40FE-8C1A-2192A86A7E90"_s;
+cm::string_view const Solution::Project::TypeIdJScript =
+  "262852C6-CD72-467D-83FE-5EEB1973A190"_s;
+cm::string_view const Solution::Project::TypeIdMisc =
+  "66A2671D-8FB5-11D2-AA7E-00C04F688DDE"_s;
+cm::string_view const Solution::Project::TypeIdNodeJS =
+  "9092AA53-FB77-4645-B42D-1CCCA6BD08BD"_s;
 cm::string_view const Solution::Project::TypeIdPython =
   "888888A0-9F3D-457C-B088-3A5042F75D52"_s;
+cm::string_view const Solution::Project::TypeIdSqlSrv =
+  "00D1A9C2-B5F0-4AF3-8072-F6C62B433612"_s;
 cm::string_view const Solution::Project::TypeIdVDProj =
   "54435603-DBB4-11D2-8724-00A0C9A8B90C"_s;
 cm::string_view const Solution::Project::TypeIdVisualBasic =
   "F184B08F-C81C-45F6-A57F-5ABD9991F28F"_s;
+cm::string_view const Solution::Project::TypeIdWebSite =
+  "E24C65DC-7377-472B-9ABA-BC803B73C61A"_s;
 cm::string_view const Solution::Project::TypeIdWinAppPkg =
   "C7167F0D-BC9F-4E6E-AFE1-012C56B48DB5"_s;
 cm::string_view const Solution::Project::TypeIdWiX =
@@ -297,6 +311,18 @@ void WriteSln(std::ostream& sln, Solution const& solution)
 }
 
 namespace {
+
+bool NeedExplicitProjectPlatform(cm::string_view typeId)
+{
+  // Some projects do not build interactively in the VS IDE unless they
+  // have an explicit platform, even if it matches the SLN platform.
+  if (typeId == Solution::Project::TypeIdCSharp ||
+      typeId == Solution::Project::TypeIdDotNetCore) {
+    return true;
+  }
+  return false;
+}
+
 void WriteSlnxSolutionConfigurationPlatforms(cmXMLElement& xmlParent,
                                              Solution const& solution)
 {
@@ -339,9 +365,7 @@ void WriteSlnxProject(cmXMLElement& xmlParent, Solution const& solution,
     }
   }
   if (project.Platform != solution.Platform ||
-      // C# projects do not build interactively in the VS IDE unless they
-      // have an explicit platform, even if it matches the SLN platform.
-      project.TypeId == Solution::Project::TypeIdCSharp) {
+      NeedExplicitProjectPlatform(project.TypeId)) {
     cmXMLElement(xmlProject, "Platform")
       .Attribute("Project", project.Platform);
   }

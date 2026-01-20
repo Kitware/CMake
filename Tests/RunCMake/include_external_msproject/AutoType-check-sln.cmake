@@ -1,6 +1,7 @@
 check_project(AutoType externalCS  "" "FAE04EC0-301F-11D3-BF4B-00C04F79EFBC" "" "")
 check_project(AutoType externalDB  "" "C8D11400-126E-41CD-887F-60BD40844F9E" "" "")
 check_project(AutoType externalFS  "" "F2A71F9B-5D33-465A-A702-920D77279786" "" "")
+check_project(AutoType externalNJS "" "9092AA53-FB77-4645-B42D-1CCCA6BD08BD" "" "")
 check_project(AutoType externalPy  "" "888888A0-9F3D-457C-B088-3A5042F75D52" "" "")
 check_project(AutoType externalVB  "" "F184B08F-C81C-45F6-A57F-5ABD9991F28F" "" "")
 check_project(AutoType externalVD  "" "54435603-DBB4-11D2-8724-00A0C9A8B90C" "" "")

@@ -9,6 +9,8 @@ else()
 endif()
 
 run_cmake(AutoType)
+run_cmake(ProjType)
+
 run_cmake(CustomGuid)
 run_cmake(CustomTypePlatform)
 run_cmake(CustomGuidTypePlatform)

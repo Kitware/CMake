@@ -1,0 +1,6 @@
+include_external_msproject(AspNetCore    AspNetCore.project    TYPE 8BB2217D-0F2D-49D1-97BC-3654ED321F3B)
+include_external_msproject(DotNetCore    DotNetCore.project    TYPE 9A19103F-16F7-4668-BE54-9A1E7A4F7556)
+include_external_msproject(Misc          Misc.project          TYPE 66A2671D-8FB5-11D2-AA7E-00C04F688DDE)
+include_external_msproject(SqlSrv        SqlSrv.project        TYPE 00D1A9C2-B5F0-4AF3-8072-F6C62B433612)
+include_external_msproject(JScript       JScript.project       TYPE 262852C6-CD72-467D-83FE-5EEB1973A190)
+include_external_msproject(WebSite       WebSite.project       TYPE E24C65DC-7377-472B-9ABA-BC803B73C61A)
