@@ -152,7 +152,7 @@ customized by setting the following variables before a call.
 
 ``RunCMake_GENERATOR``
   CMake generator to use when configuring projects.
-  This provided to ``RunCMakeTest.cmake`` scripts automatically
+  This is provided to ``RunCMakeTest.cmake`` scripts automatically
   when they are executed, based on the CMake generator used to
   configure the test suite.
 
@@ -170,18 +170,18 @@ customized by setting the following variables before a call.
 ``RunCMake_GENERATOR_IS_MULTI_CONFIG``
   Boolean value indicating whether ``${RunCMake_GENERATOR}`` is a
   multi-config generator.
-  This provided to ``RunCMakeTest.cmake`` scripts automatically
+  This is provided to ``RunCMakeTest.cmake`` scripts automatically
   when they are executed, based on the CMake generator used to
   configure the test suite.
 
 ``RunCMake_SOURCE_DIR``
   Absolute path to the ``Tests/RunCMake/<Test>`` directory in
-  the CMake source tree.  This provided to ``RunCMakeTest.cmake``
+  the CMake source tree.  This is provided to ``RunCMakeTest.cmake``
   scripts automatically when they are executed.
 
 ``RunCMake_BINARY_DIR``
   Absolute path to the ``Tests/RunCMake/<Test>`` directory in
-  the CMake binary tree.  This provided to ``RunCMakeTest.cmake``
+  the CMake binary tree.  This is provided to ``RunCMakeTest.cmake``
   scripts automatically when they are executed.
 
 ``RunCMake_TEST_SOURCE_DIR``
