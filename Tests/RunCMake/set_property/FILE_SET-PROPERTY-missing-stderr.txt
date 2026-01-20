@@ -1,0 +1,10 @@
+CMake Error at FILE_SET-PROPERTY-missing\.cmake:5 \(set_property\):
+  set_property not given a PROPERTY <name> argument\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:3 \(include\)
+
+
+CMake Error at FILE_SET-PROPERTY-missing\.cmake:7 \(set_property\):
+  set_property not given a PROPERTY <name> argument\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:3 \(include\)

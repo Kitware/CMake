@@ -88,9 +88,9 @@ bool cmFileSetTypeCanBeIncluded(std::string const& type)
   return type == "HEADERS"_s;
 }
 
-cmFileSet::cmFileSet(cmake& cmakeInstance, std::string name, std::string type,
+cmFileSet::cmFileSet(cmMakefile* makefile, std::string name, std::string type,
                      cmFileSetVisibility visibility)
-  : CMakeInstance(cmakeInstance)
+  : Makefile(makefile)
   , Name(std::move(name))
   , Type(std::move(type))
   , Visibility(visibility)
@@ -130,7 +130,8 @@ cmFileSet::CompileFileEntries() const
 
   for (auto const& entry : this->FileEntries) {
     for (auto const& ex : cmList{ entry.Value }) {
-      cmGeneratorExpression ge(this->CMakeInstance, entry.Backtrace);
+      cmGeneratorExpression ge(*this->GetMakefile()->GetCMakeInstance(),
+                               entry.Backtrace);
       auto cge = ge.Parse(ex);
       result.push_back(std::move(cge));
     }
@@ -146,7 +147,8 @@ cmFileSet::CompileDirectoryEntries() const
 
   for (auto const& entry : this->DirectoryEntries) {
     for (auto const& ex : cmList{ entry.Value }) {
-      cmGeneratorExpression ge(this->CMakeInstance, entry.Backtrace);
+      cmGeneratorExpression ge(*this->GetMakefile()->GetCMakeInstance(),
+                               entry.Backtrace);
       auto cge = ge.Parse(ex);
       result.push_back(std::move(cge));
     }
@@ -260,4 +262,92 @@ bool cmFileSet::IsValidName(std::string const& name)
 
   cmsys::RegularExpressionMatch match;
   return regex.find(name.c_str(), match);
+}
+
+std::string const cmFileSet::propCOMPILE_DEFINITIONS = "COMPILE_DEFINITIONS";
+std::string const cmFileSet::propCOMPILE_OPTIONS = "COMPILE_OPTIONS";
+std::string const cmFileSet::propINCLUDE_DIRECTORIES = "INCLUDE_DIRECTORIES";
+
+void cmFileSet::SetProperty(std::string const& prop, cmValue value)
+{
+  if (prop == propINCLUDE_DIRECTORIES) {
+    this->IncludeDirectories.clear();
+    if (value) {
+      cmListFileBacktrace lfbt = this->GetMakefile()->GetBacktrace();
+      this->IncludeDirectories.emplace_back(value, lfbt);
+    }
+  } else if (prop == propCOMPILE_OPTIONS) {
+    this->CompileOptions.clear();
+    if (value) {
+      cmListFileBacktrace lfbt = this->GetMakefile()->GetBacktrace();
+      this->CompileOptions.emplace_back(value, lfbt);
+    }
+  } else if (prop == propCOMPILE_DEFINITIONS) {
+    this->CompileDefinitions.clear();
+    if (value) {
+      cmListFileBacktrace lfbt = this->GetMakefile()->GetBacktrace();
+      this->CompileDefinitions.emplace_back(value, lfbt);
+    }
+  } else {
+    this->Properties.SetProperty(prop, value);
+  }
+}
+
+void cmFileSet::AppendProperty(std::string const& prop,
+                               std::string const& value, bool asString)
+{
+  if (prop == propINCLUDE_DIRECTORIES) {
+    if (!value.empty()) {
+      cmListFileBacktrace lfbt = this->GetMakefile()->GetBacktrace();
+      this->IncludeDirectories.emplace_back(value, lfbt);
+    }
+  } else if (prop == propCOMPILE_OPTIONS) {
+    if (!value.empty()) {
+      cmListFileBacktrace lfbt = this->GetMakefile()->GetBacktrace();
+      this->CompileOptions.emplace_back(value, lfbt);
+    }
+  } else if (prop == propCOMPILE_DEFINITIONS) {
+    if (!value.empty()) {
+      cmListFileBacktrace lfbt = this->GetMakefile()->GetBacktrace();
+      this->CompileDefinitions.emplace_back(value, lfbt);
+    }
+  } else {
+    this->Properties.AppendProperty(prop, value, asString);
+  }
+}
+
+cmValue cmFileSet::GetProperty(std::string const& prop) const
+{
+  // Check for the properties with backtraces.
+  if (prop == propINCLUDE_DIRECTORIES) {
+    if (this->IncludeDirectories.empty()) {
+      return nullptr;
+    }
+
+    static std::string output;
+    output = cmList::to_string(this->IncludeDirectories);
+    return cmValue(output);
+  }
+
+  if (prop == propCOMPILE_OPTIONS) {
+    if (this->CompileOptions.empty()) {
+      return nullptr;
+    }
+
+    static std::string output;
+    output = cmList::to_string(this->CompileOptions);
+    return cmValue(output);
+  }
+
+  if (prop == propCOMPILE_DEFINITIONS) {
+    if (this->CompileDefinitions.empty()) {
+      return nullptr;
+    }
+
+    static std::string output;
+    output = cmList::to_string(this->CompileDefinitions);
+    return cmValue(output);
+  }
+
+  return this->Properties.GetPropertyValue(prop);
 }

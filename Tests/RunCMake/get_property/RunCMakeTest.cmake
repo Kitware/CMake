@@ -26,6 +26,8 @@ run_cmake(NoTarget)
 run_cmake(NoSource)
 run_cmake(NoProperty)
 run_cmake(NoCache)
+run_cmake(BadFileSet)
+run_cmake(BadFileSetTarget)
 
 # Since we are testing the GENERATOR_IS_MULTI_CONFIG property itself,
 # don't rely on RunCMake_GENERATOR_IS_MULTI_CONFIG being set correctly

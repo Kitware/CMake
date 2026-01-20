@@ -1,0 +1,5 @@
+CMake Error at BadFileSet\.cmake:[0-9]+ \(get_property\):
+  get_property could not find FILE_SET FOO for TARGET FOO\.  Perhaps it has
+  not yet been created.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)

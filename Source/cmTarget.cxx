@@ -3138,8 +3138,7 @@ std::pair<cmFileSet*, bool> cmTarget::GetOrCreateFileSet(
   std::string const& name, std::string const& type, cmFileSetVisibility vis)
 {
   auto result = this->impl->FileSets.emplace(
-    name,
-    cmFileSet(*this->GetMakefile()->GetCMakeInstance(), name, type, vis));
+    name, cmFileSet(this->GetMakefile(), name, type, vis));
   if (result.second) {
     auto bt = this->impl->Makefile->GetBacktrace();
     if (type == this->impl->HeadersFileSets.TypeName) {
