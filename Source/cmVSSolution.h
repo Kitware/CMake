@@ -70,14 +70,21 @@ struct Solution final
     std::vector<Project const*> BuildDependencies;
 
     // Project type GUIDs used during creation.
+    static cm::string_view const TypeIdAspNetCore;
     static cm::string_view const TypeIdCSharp;
     static cm::string_view const TypeIdDatabase;
     static cm::string_view const TypeIdDefault;
+    static cm::string_view const TypeIdDotNetCore;
     static cm::string_view const TypeIdFSharp;
     static cm::string_view const TypeIdFortran;
+    static cm::string_view const TypeIdJScript;
+    static cm::string_view const TypeIdMisc;
+    static cm::string_view const TypeIdNodeJS;
     static cm::string_view const TypeIdPython;
+    static cm::string_view const TypeIdSqlSrv;
     static cm::string_view const TypeIdVDProj;
     static cm::string_view const TypeIdVisualBasic;
+    static cm::string_view const TypeIdWebSite;
     static cm::string_view const TypeIdWinAppPkg;
     static cm::string_view const TypeIdWiX;
   };

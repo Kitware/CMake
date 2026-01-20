@@ -798,6 +798,9 @@ cm::string_view cmGlobalVisualStudioGenerator::ExternalProjectTypeId(
   if (extension == ".dbproj"_s) {
     return Solution::Project::TypeIdDatabase;
   }
+  if (extension == ".njsproj"_s) {
+    return Solution::Project::TypeIdNodeJS;
+  }
   if (extension == ".wapproj"_s) {
     return Solution::Project::TypeIdWinAppPkg;
   }

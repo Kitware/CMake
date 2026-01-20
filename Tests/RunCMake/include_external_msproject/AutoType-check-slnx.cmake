@@ -13,6 +13,7 @@ RunCMake_check_slnx("${RunCMake_TEST_BINARY_DIR}/AutoType.slnx" [[
     <BuildDependency Project="external\.csproj"/>
     <BuildDependency Project="external\.dbproj"/>
     <BuildDependency Project="external\.fsproj"/>
+    <BuildDependency Project="external\.njsproj"/>
     <BuildDependency Project="external\.pyproj"/>
     <BuildDependency Project="external\.vbproj"/>
     <BuildDependency Project="external\.vdproj"/>
@@ -33,6 +34,9 @@ RunCMake_check_slnx("${RunCMake_TEST_BINARY_DIR}/AutoType.slnx" [[
     <BuildDependency Project="ZERO_CHECK.vcxproj"/>
   </Project>
   <Project Path="external\.fsproj" Type="f2a71f9b-5d33-465a-a702-920d77279786" Id="[0-9a-f-]+">
+    <BuildDependency Project="ZERO_CHECK.vcxproj"/>
+  </Project>
+  <Project Path="external\.njsproj" Type="9092aa53-fb77-4645-b42d-1ccca6bd08bd" Id="[0-9a-f-]+">
     <BuildDependency Project="ZERO_CHECK.vcxproj"/>
   </Project>
   <Project Path="external\.pyproj" Type="888888a0-9f3d-457c-b088-3a5042f75d52" Id="[0-9a-f-]+">
