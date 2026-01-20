@@ -1,5 +1,3 @@
-#ifndef HEADER_CURL_RENAME_H
-#define HEADER_CURL_RENAME_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -24,6 +22,15 @@
  *
  ***************************************************************************/
 
-int Curl_rename(const char *oldpath, const char *newpath);
+/* Raw snprintf() for curlx */
 
-#endif /* HEADER_CURL_RENAME_H */
+#ifdef WITHOUT_LIBCURL /* when built for the test servers */
+#if defined(_MSC_VER) && (_MSC_VER < 1900)  /* adjust for old MSVC */
+#define SNPRINTF _snprintf
+#else
+#define SNPRINTF snprintf
+#endif
+#else /* !WITHOUT_LIBCURL */
+#include <curl/mprintf.h>
+#define SNPRINTF curl_msnprintf
+#endif /* WITHOUT_LIBCURL */
