@@ -3,7 +3,9 @@ DEBUGGER_WORKING_DIRECTORY
 
 .. versionadded:: 4.0
 
-Sets the local debugger working directory for C++ targets.
+Sets the local debugger working directory for targets,
+specifically the process launched by the debugger.
+
 The property value may use
 :manual:`generator expressions <cmake-generator-expressions(7)>`.
 This property is initialized by the value of the variable
