@@ -136,21 +136,14 @@ void cmInstrumentation::CheckCDashVariable()
                                  .Uuid;
       if (envVal == uuid) {
         std::set<cmInstrumentationQuery::Option> options_ = {
-          cmInstrumentationQuery::Option::CDashSubmit,
-          cmInstrumentationQuery::Option::DynamicSystemInformation
+          cmInstrumentationQuery::Option::CDashSubmit
         };
         if (cmSystemTools::GetEnv("CTEST_USE_VERBOSE_INSTRUMENTATION",
                                   envVal) &&
             !cmIsOff(envVal)) {
           options_.insert(cmInstrumentationQuery::Option::CDashVerbose);
         }
-        for (auto const& option : options_) {
-          this->AddOption(option);
-        }
-        std::set<cmInstrumentationQuery::Hook> hooks_ = {
-          cmInstrumentationQuery::Hook::PrepareForCDash
-        };
-        this->AddHook(cmInstrumentationQuery::Hook::PrepareForCDash);
+        std::set<cmInstrumentationQuery::Hook> hooks_;
         this->WriteJSONQuery(options_, hooks_, {});
       }
     }
@@ -186,6 +179,13 @@ void cmInstrumentation::ReadJSONQuery(std::string const& file)
   auto query = cmInstrumentationQuery();
   query.ReadJSON(file, this->errorMsg, this->options, this->hooks,
                  this->callbacks);
+  if (this->HasOption(cmInstrumentationQuery::Option::CDashVerbose)) {
+    this->AddOption(cmInstrumentationQuery::Option::CDashSubmit);
+  }
+  if (this->HasOption(cmInstrumentationQuery::Option::CDashSubmit)) {
+    this->AddHook(cmInstrumentationQuery::Hook::PrepareForCDash);
+    this->AddOption(cmInstrumentationQuery::Option::DynamicSystemInformation);
+  }
   if (!this->errorMsg.empty()) {
     cmSystemTools::Error(cmStrCat(
       "Could not load instrumentation queries from ",
