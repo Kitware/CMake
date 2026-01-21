@@ -1,0 +1,6 @@
+set(STR "Hello World")
+string(LENGTH "${STR}" len)
+string(TOUPPER "${STR}" upper)
+string(TOLOWER "${STR}" lower)
+string(REPLACE "World" "CMake" result "${STR}")
+string(REGEX MATCH "[A-Z]+" match "${STR}")

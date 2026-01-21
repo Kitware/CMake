@@ -1,0 +1,50 @@
+# CMake glob pattern dictionary
+# Basic wildcards
+"*"
+"?"
+"**"
+
+# Character classes
+"[a-z]"
+"[A-Z]"
+"[0-9]"
+"[a-zA-Z]"
+"[a-zA-Z0-9]"
+"[!a-z]"
+"[^a-z]"
+"[]"
+"[]]"
+"[[]"
+
+# Common patterns
+"*.txt"
+"*.cmake"
+"*.c"
+"*.cpp"
+"*.cxx"
+"*.h"
+"*.hpp"
+"*.hxx"
+"**/*.cmake"
+"**/CMakeLists.txt"
+
+# Path separators
+"/"
+"\\"
+"./"
+"../"
+"/"
+
+# Special characters
+"."
+".."
+"~"
+
+# Brace expansion (if supported)
+"{a,b}"
+"{*.c,*.h}"
+
+# Edge cases (space, tab, newline)
+" "
+"\x09"
+"\x0a"

@@ -1,0 +1,1 @@
+$<IF:$<AND:$<BOOL:${BUILD_SHARED},$<NOT:$<PLATFORM_ID:Windows>>>>,shared,static>

@@ -1,0 +1,84 @@
+# CMake Generator Expression Dictionary
+
+# Basic syntax
+"$<"
+">"
+":"
+","
+
+# Boolean expressions
+"$<BOOL:"
+"$<AND:"
+"$<OR:"
+"$<NOT:"
+"$<IF:"
+"$<0:"
+"$<1:"
+
+# String operations
+"$<STREQUAL:"
+"$<EQUAL:"
+"$<IN_LIST:"
+"$<LOWER_CASE:"
+"$<UPPER_CASE:"
+"$<MAKE_C_IDENTIFIER:"
+"$<JOIN:"
+"$<REMOVE_DUPLICATES:"
+"$<FILTER:"
+"$<GENEX_EVAL:"
+
+# Version comparisons
+"$<VERSION_LESS:"
+"$<VERSION_GREATER:"
+"$<VERSION_EQUAL:"
+"$<VERSION_LESS_EQUAL:"
+"$<VERSION_GREATER_EQUAL:"
+
+# Target operations
+"$<TARGET_FILE:"
+"$<TARGET_FILE_NAME:"
+"$<TARGET_FILE_DIR:"
+"$<TARGET_FILE_BASE_NAME:"
+"$<TARGET_LINKER_FILE:"
+"$<TARGET_SONAME_FILE:"
+"$<TARGET_PDB_FILE:"
+"$<TARGET_PROPERTY:"
+"$<TARGET_OBJECTS:"
+"$<TARGET_BUNDLE_DIR:"
+"$<TARGET_BUNDLE_CONTENT_DIR:"
+"$<TARGET_EXISTS:"
+"$<TARGET_NAME_IF_EXISTS:"
+"$<TARGET_POLICY:"
+
+# Config/Platform
+"$<CONFIG:"
+"$<PLATFORM_ID:"
+"$<COMPILE_LANGUAGE:"
+"$<LINK_LANGUAGE:"
+"$<COMPILE_LANG_AND_ID:"
+"$<LINK_LANG_AND_ID:"
+"$<C_COMPILER_ID:"
+"$<CXX_COMPILER_ID:"
+"$<CUDA_COMPILER_ID:"
+
+# Interface expressions
+"$<BUILD_INTERFACE:"
+"$<INSTALL_INTERFACE:"
+"$<INSTALL_PREFIX>"
+
+# Output expressions
+"$<TARGET_NAME:"
+"$<LINK_ONLY:"
+"$<COMPILE_ONLY:"
+
+# Special
+"$<ANGLE-R>"
+"$<COMMA>"
+"$<SEMICOLON>"
+
+# Nesting patterns
+"$<$<"
+">>"
+"::"
+",,"
+"$<IF:$<"

@@ -1,0 +1,71 @@
+# String algorithms dictionary
+
+# Whitespace
+" "
+"\x09"
+"\x0a"
+"\x0d"
+"\x0d\x0a"
+
+# CMake separators
+";"
+","
+
+# Quotes
+"\""
+"'"
+
+# Escape sequences
+"\\"
+"\\x0a"
+"\\x09"
+"\\x0d"
+"\\;"
+
+# Variable references
+"$"
+"${"
+"}"
+"${}"
+"$ENV{"
+"$CACHE{"
+
+# Generator expressions
+"$<"
+">"
+"$<AND:"
+"$<OR:"
+"$<NOT:"
+"$<IF:"
+"$<TARGET_FILE:"
+"$<TARGET_PROPERTY:"
+
+# Common CMake variables
+"CMAKE_"
+"CMAKE_SOURCE_DIR"
+"CMAKE_BINARY_DIR"
+"CMAKE_CURRENT_SOURCE_DIR"
+"CMAKE_CURRENT_BINARY_DIR"
+"PROJECT_NAME"
+"PROJECT_SOURCE_DIR"
+"PROJECT_BINARY_DIR"
+
+# List operations
+"APPEND"
+"PREPEND"
+"INSERT"
+"REMOVE"
+"FILTER"
+"TRANSFORM"
+
+# String operations
+"TOUPPER"
+"TOLOWER"
+"STRIP"
+"REPLACE"
+"REGEX"
+"MATCH"
+"SUBSTRING"
+"LENGTH"
+"FIND"
+"COMPARE"

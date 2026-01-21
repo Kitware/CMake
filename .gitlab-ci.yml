@@ -141,6 +141,13 @@ l:clang-analyzer-fedora43:
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
+l:clang-fuzzing-fedora43:
+    extends:
+        - .fedora43_clang_fuzzing
+        - .cmake_build_linux
+        - .linux_x86_64_tags
+        - .run_automatically
+
 l:clazy-fedora43:
     extends:
         - .fedora43_clazy

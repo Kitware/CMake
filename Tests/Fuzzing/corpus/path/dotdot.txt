@@ -1,0 +1,1 @@
+/home/user/../other/./path

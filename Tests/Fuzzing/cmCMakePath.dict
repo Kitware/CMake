@@ -1,0 +1,61 @@
+# CMake path dictionary
+
+# Separators
+"/"
+"\\"
+":"
+
+# Unix paths
+"/usr"
+"/usr/local"
+"/home"
+"/tmp"
+"/var"
+"/etc"
+"/opt"
+"/bin"
+"/lib"
+
+# Windows paths
+"C:"
+"D:"
+"C:\\"
+"Program Files"
+"Windows"
+
+# CMake directories
+"CMakeFiles"
+"cmake"
+"share"
+"lib"
+"include"
+"bin"
+"build"
+"src"
+"source"
+
+# Special paths
+"."
+".."
+"./"
+"../"
+"~"
+
+# Extensions
+".cmake"
+".txt"
+".h"
+".hpp"
+".c"
+".cpp"
+".cxx"
+".a"
+".so"
+".dll"
+".lib"
+
+# CMake files
+"CMakeLists.txt"
+"CMakeCache.txt"
+"cmake_install.cmake"
+"CTestTestfile.cmake"

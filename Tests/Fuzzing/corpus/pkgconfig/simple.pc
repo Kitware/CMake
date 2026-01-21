@@ -1,0 +1,9 @@
+prefix=/usr
+libdir=${prefix}/lib
+includedir=${prefix}/include
+
+Name: Example
+Description: An example library
+Version: 1.0.0
+Libs: -L${libdir} -lexample
+Cflags: -I${includedir}

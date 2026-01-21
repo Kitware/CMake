@@ -1,0 +1,63 @@
+# pkg-config File Dictionary
+
+# Key-value separators
+"="
+":"
+
+# Variable reference
+"${"
+"}"
+
+# Common keywords
+"Name"
+"Description"
+"Version"
+"Requires"
+"Requires.private"
+"Conflicts"
+"Libs"
+"Libs.private"
+"Cflags"
+"URL"
+
+# Common variables
+"prefix"
+"exec_prefix"
+"libdir"
+"includedir"
+"datarootdir"
+"datadir"
+"sysconfdir"
+"sharedstatedir"
+"localstatedir"
+
+# Common values
+"/usr"
+"/usr/local"
+"/usr/lib"
+"/usr/include"
+"-I"
+"-L"
+"-l"
+"-D"
+"-pthread"
+
+# Whitespace
+" "
+"\x09"
+"\x0a"
+"\x0d\x0a"
+
+# Comments
+"#"
+
+# Version operators
+">="
+"<="
+">"
+"<"
+"!="
+
+# Escapes
+"\\"
+"\\$"

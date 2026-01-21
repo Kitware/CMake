@@ -1,0 +1,51 @@
+# CMake Expression Parser Dictionary (math expressions)
+
+# Operators
+"+"
+"-"
+"*"
+"/"
+"%"
+"|"
+"&"
+"^"
+"~"
+"<<"
+">>"
+"("
+")"
+
+# Numbers
+"0"
+"1"
+"2"
+"10"
+"100"
+"1000"
+"-1"
+"-100"
+"0x"
+"0X"
+"0xff"
+"0xFF"
+"0x7fffffff"
+"0xffffffff"
+
+# Hex digits
+"0123456789"
+"abcdef"
+"ABCDEF"
+
+# Large numbers
+"2147483647"
+"2147483648"
+"4294967295"
+"9223372036854775807"
+
+# Edge cases
+"00"
+"0x0"
+"0x00"
+" "
+"\x09"
+"\x0a"

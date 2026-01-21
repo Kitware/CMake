@@ -1,0 +1,72 @@
+# JSON Parser Dictionary
+
+# Structure
+"{"
+"}"
+"["
+"]"
+":"
+","
+
+# Values
+"true"
+"false"
+"null"
+
+# Strings
+"\""
+"\\"
+"\\x0a"
+"\\x0d"
+"\\x09"
+"\\u"
+"\\u0000"
+"\\uFFFF"
+
+# Numbers
+"0"
+"1"
+"-1"
+"0.0"
+"1.0"
+"-1.0"
+"1e10"
+"1E10"
+"1e-10"
+"1e+10"
+"1.5e10"
+
+# Whitespace
+" "
+"\x09"
+"\x0a"
+"\x0d"
+
+# Common CMake preset keys
+"version"
+"cmakeMinimumRequired"
+"configurePresets"
+"buildPresets"
+"testPresets"
+"packagePresets"
+"workflowPresets"
+"name"
+"hidden"
+"inherits"
+"displayName"
+"description"
+"generator"
+"binaryDir"
+"cacheVariables"
+"environment"
+"condition"
+"vendor"
+
+# Common values
+"Ninja"
+"Unix Makefiles"
+"Visual Studio"
+"Debug"
+"Release"
+"RelWithDebInfo"
+"MinSizeRel"

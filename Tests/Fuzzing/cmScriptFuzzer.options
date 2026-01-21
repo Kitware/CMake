@@ -1,0 +1,10 @@
+[libfuzzer]
+max_len = 262144
+timeout = 30
+rss_limit_mb = 2048
+
+[afl]
+timeout = 30
+
+[honggfuzz]
+timeout = 30

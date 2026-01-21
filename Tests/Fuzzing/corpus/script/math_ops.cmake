@@ -1,0 +1,3 @@
+math(EXPR result "1 + 2 * 3")
+math(EXPR hex "0xFF" OUTPUT_FORMAT HEXADECIMAL)
+math(EXPR dec "0x10" OUTPUT_FORMAT DECIMAL)
