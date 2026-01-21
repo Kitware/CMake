@@ -17,15 +17,17 @@ if(NOT CMAKE_HIP_PLATFORM)
     )
   if(_CMAKE_HIPCONFIG_RESULT EQUAL 0 AND _CMAKE_HIPCONFIG_PLATFORM MATCHES "^(nvidia|nvcc)$")
     set(CMAKE_HIP_PLATFORM "nvidia" CACHE STRING "HIP platform" FORCE)
+  elseif(_CMAKE_HIPCONFIG_RESULT EQUAL 0 AND _CMAKE_HIPCONFIG_PLATFORM MATCHES "^(spirv)$")
+    set(CMAKE_HIP_PLATFORM "spirv" CACHE STRING "HIP platform" FORCE)
   else()
     set(CMAKE_HIP_PLATFORM "amd" CACHE STRING "HIP platform" FORCE)
   endif()
 endif()
-if(NOT CMAKE_HIP_PLATFORM MATCHES "^(amd|nvidia)$")
+if(NOT CMAKE_HIP_PLATFORM MATCHES "^(amd|nvidia|spirv)$")
   message(FATAL_ERROR
     "The CMAKE_HIP_PLATFORM has unsupported value:\n"
     " '${CMAKE_HIP_PLATFORM}'\n"
-    "It must be 'amd' or 'nvidia'."
+    "It must be 'amd', 'nvidia', or 'spirv'."
     )
 endif()
 
@@ -54,10 +56,10 @@ if(NOT CMAKE_HIP_COMPILER)
   if(NOT CMAKE_HIP_COMPILER_INIT)
     if(CMAKE_HIP_PLATFORM STREQUAL "nvidia")
       set(CMAKE_HIP_COMPILER_LIST nvcc)
-    elseif(CMAKE_HIP_PLATFORM STREQUAL "amd")
+    elseif(CMAKE_HIP_PLATFORM STREQUAL "amd" OR CMAKE_HIP_PLATFORM STREQUAL "spirv")
       set(CMAKE_HIP_COMPILER_LIST clang++)
 
-      # Look for the Clang coming with ROCm to support HIP.
+      # Look for the Clang coming with ROCm or chipStar to support HIP.
       execute_process(COMMAND hipconfig --hipclangpath
         OUTPUT_VARIABLE _CMAKE_HIPCONFIG_CLANGPATH
         RESULT_VARIABLE _CMAKE_HIPCONFIG_RESULT
@@ -140,7 +142,13 @@ if(NOT CMAKE_HIP_COMPILER_ID_RUN)
   endif()
 
   if(CMAKE_HIP_COMPILER_ID STREQUAL "Clang")
-    list(APPEND CMAKE_HIP_COMPILER_ID_TEST_FLAGS_FIRST "-v")
+    # For spirv platform (chipStar), set special flags for compiler identification
+    include(Internal/CMakeChipStarHIP)
+    if(CMAKE_HIP_PLATFORM STREQUAL "spirv")
+      _cmake_chipstar_set_compiler_id_flags()
+    else()
+      list(APPEND CMAKE_HIP_COMPILER_ID_TEST_FLAGS_FIRST "-v")
+    endif()
   elseif(CMAKE_HIP_COMPILER_ID STREQUAL "NVIDIA")
     # Tell nvcc to treat .hip files as CUDA sources.
     list(APPEND CMAKE_HIP_COMPILER_ID_TEST_FLAGS_FIRST "-x cu -v")
@@ -194,11 +202,18 @@ if(NOT CMAKE_HIP_COMPILER_ROCM_ROOT)
   endif()
 endif()
 if(NOT CMAKE_HIP_COMPILER_ROCM_ROOT)
-  message(FATAL_ERROR "Failed to find ROCm root directory.")
+  # For spirv platform (chipStar), fall back to HIP_PATH environment variable
+  if(CMAKE_HIP_PLATFORM STREQUAL "spirv" AND DEFINED ENV{HIP_PATH} AND IS_DIRECTORY "$ENV{HIP_PATH}")
+    set(CMAKE_HIP_COMPILER_ROCM_ROOT "$ENV{HIP_PATH}")
+    file(TO_CMAKE_PATH "${CMAKE_HIP_COMPILER_ROCM_ROOT}" CMAKE_HIP_COMPILER_ROCM_ROOT)
+  else()
+    message(FATAL_ERROR "Failed to find HIP root directory.")
+  endif()
 endif()
 
-if(CMAKE_HIP_PLATFORM STREQUAL "amd")
-  # For this platform we need the hip-lang cmake package.
+
+if(CMAKE_HIP_PLATFORM STREQUAL "amd" OR CMAKE_HIP_PLATFORM STREQUAL "spirv")
+  # For amd and spirv platforms we need the hip-lang cmake package.
 
   # Normally implicit link information is not detected until ABI detection,
   # but we need to populate CMAKE_HIP_LIBRARY_ARCHITECTURE to find hip-lang.
@@ -309,6 +324,9 @@ if(CMAKE_HIP_COMPILER_ID STREQUAL "NVIDIA")
     endif()
   endif()
   unset(CMAKE_HIP_ARCHITECTURES_DEFAULT)
+elseif(NOT DEFINED CMAKE_HIP_ARCHITECTURES AND CMAKE_HIP_PLATFORM STREQUAL "spirv")
+  # chipStar handles targeting via hip package
+  set(CMAKE_HIP_ARCHITECTURES "OFF" CACHE STRING "HIP architectures")
 elseif(NOT DEFINED CMAKE_HIP_ARCHITECTURES)
   # Use 'rocm_agent_enumerator' to get the current GPU architecture.
   set(_CMAKE_HIP_ARCHITECTURES)

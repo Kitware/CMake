@@ -11,7 +11,7 @@ endif()
 
 set(__CMAKE_HIP_FLAGS "${CMAKE_HIP_FLAGS}")
 
-if(CMAKE_HIP_COMPILER_ID STREQUAL "Clang")
+if(CMAKE_HIP_COMPILER_ID STREQUAL "Clang" AND NOT CMAKE_HIP_PLATFORM STREQUAL "spirv")
   string(APPEND CMAKE_HIP_FLAGS " --cuda-host-only")
 endif()
 

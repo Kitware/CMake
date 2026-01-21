@@ -13,6 +13,11 @@ The value must be one of:
 ``nvidia``
   NVIDIA GPUs
 
+``spirv``
+  .. versionadded:: 4.3
+
+  SPIR-V target (e.g., chipStar)
+
 If not specified, a default is computed via ``hipconfig --platform``.
 
 :variable:`CMAKE_HIP_ARCHITECTURES` entries are interpreted with
