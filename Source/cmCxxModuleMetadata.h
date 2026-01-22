@@ -3,7 +3,6 @@
 #pragma once
 
 #include <string>
-#include <unordered_map>
 #include <vector>
 
 #include <cm/optional>
@@ -18,36 +17,54 @@ class cmCxxModuleMetadata
 public:
   struct PreprocessorDefineData
   {
+    // definition["name"]
     std::string Name;
+    // definition["value"]
     cm::optional<std::string> Value;
+    // definition["undef"]
     bool Undef = false;
-    cm::optional<Json::Value> Vendor;
   };
 
   struct LocalArgumentsData
   {
+    // local-arguments["include-directories"]
     std::vector<std::string> IncludeDirectories;
+    // local-arguments["system-include-directories"]
     std::vector<std::string> SystemIncludeDirectories;
+    // local-arguments["definitions"]
     std::vector<PreprocessorDefineData> Definitions;
-    cm::optional<Json::Value> Vendor;
+
+    // These are CMake vendor extensions
+    // local-arguments["vendor"]["cmake"]["compile-options"]
+    std::vector<std::string> CompileOptions;
+    // local-arguments["vendor"]["cmake"]["compile-features"]
+    std::vector<std::string> CompileFeatures;
   };
 
   struct ModuleData
   {
+    // module["logical-name"]
     std::string LogicalName;
+    // module["source-path"]
     std::string SourcePath;
+    // module["is-interface"]
     bool IsInterface = true;
+    // module["is-std-library"]
     bool IsStdLibrary = false;
+    // module["local-arguments"]
     cm::optional<LocalArgumentsData> LocalArguments;
-    cm::optional<Json::Value> Vendor;
   };
 
-  int Version = 0;
-  int Revision = 0;
+  // root["version"]
+  int Version = 1;
+  // root["revision"]
+  int Revision = 1;
+  // root["modules"]
   std::vector<ModuleData> Modules;
-  std::string MetadataFilePath;
 
-  std::unordered_map<std::string, Json::Value> Extensions;
+  // The path to the manifest file, either absolute or relative to the
+  // installation root
+  std::string MetadataFilePath;
 
   struct ParseResult;
 

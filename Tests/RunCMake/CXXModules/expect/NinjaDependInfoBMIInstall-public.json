@@ -12,7 +12,11 @@
   "cxx-modules": {
     "CMakeFiles/ninja-bmi-install-public.dir<CONFIG_DIR>/sources/module-internal-part.cxx<OBJEXT>": {
       "bmi-only": false,
+      "compile-features" : ["cxx_std_20"],
+      "compile-options" : [],
+      "definitions" : [],
       "destination": "lib/cxx/internals",
+      "include-directories" : [],
       "name": "internal_partitions",
       "relative-directory": "sources",
       "source": "<SOURCE_DIR>/sources/module-internal-part.cxx",
@@ -21,7 +25,11 @@
     },
     "CMakeFiles/ninja-bmi-install-public.dir<CONFIG_DIR>/sources/module-part.cxx<OBJEXT>": {
       "bmi-only": false,
+      "compile-features" : ["cxx_std_20"],
+      "compile-options" : [],
+      "definitions" : [],
       "destination": "lib/cxx",
+      "include-directories" : [],
       "name": "modules",
       "relative-directory": "",
       "source": "<SOURCE_DIR>/sources/module-part.cxx",
@@ -30,7 +38,11 @@
     },
     "CMakeFiles/ninja-bmi-install-public.dir<CONFIG_DIR>/sources/module.cxx<OBJEXT>": {
       "bmi-only": false,
+      "compile-features" : ["cxx_std_20"],
+      "compile-options" : [],
+      "definitions" : [],
       "destination": "lib/cxx",
+      "include-directories" : [],
       "name": "modules",
       "relative-directory": "",
       "source": "<SOURCE_DIR>/sources/module.cxx",
