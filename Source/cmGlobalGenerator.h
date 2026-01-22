@@ -359,9 +359,9 @@ public:
   bool GetToolSupportsColor() const { return this->ToolSupportsColor; }
 
   //! return the language for the given extension
-  std::string GetLanguageFromExtension(char const* ext) const;
+  std::string GetLanguageFromExtension(cm::string_view ext) const;
   //! is an extension to be ignored
-  bool IgnoreFile(char const* ext) const;
+  bool IgnoreFile(cm::string_view ext) const;
   //! What is the preference for linkers and this language (None or Preferred)
   int GetLinkerPreference(std::string const& lang) const;
   //! What is the object file extension for a given source file?

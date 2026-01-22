@@ -1100,17 +1100,18 @@ std::string cmGlobalGenerator::GetLanguageOutputExtension(
   return "";
 }
 
-std::string cmGlobalGenerator::GetLanguageFromExtension(char const* ext) const
+std::string cmGlobalGenerator::GetLanguageFromExtension(
+  cm::string_view ext) const
 {
   // if there is an extension and it starts with . then move past the
   // . because the extensions are not stored with a .  in the map
-  if (!ext) {
+  if (ext.empty()) {
     return "";
   }
-  if (*ext == '.') {
-    ++ext;
+  if (ext.front() == '.') {
+    ext = ext.substr(1);
   }
-  auto const it = this->ExtensionToLanguage.find(ext);
+  auto const it = this->ExtensionToLanguage.find(std::string(ext));
   if (it != this->ExtensionToLanguage.end()) {
     return it->second;
   }
@@ -1239,12 +1240,12 @@ std::string cmGlobalGenerator::GetSafeGlobalSetting(
   return this->Makefiles[0]->GetDefinition(name);
 }
 
-bool cmGlobalGenerator::IgnoreFile(char const* ext) const
+bool cmGlobalGenerator::IgnoreFile(cm::string_view ext) const
 {
   if (!this->GetLanguageFromExtension(ext).empty()) {
     return false;
   }
-  return (this->IgnoreExtensions.count(ext) > 0);
+  return (this->IgnoreExtensions.count(std::string(ext)) > 0);
 }
 
 bool cmGlobalGenerator::GetLanguageEnabled(std::string const& l) const

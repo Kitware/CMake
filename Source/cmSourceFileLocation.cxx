@@ -112,7 +112,7 @@ void cmSourceFileLocation::UpdateExtension(std::string const& name)
   cmGlobalGenerator* gg = this->Makefile->GetGlobalGenerator();
   cmMakefile const* mf = this->Makefile;
   auto* cm = mf->GetCMakeInstance();
-  if (!gg->GetLanguageFromExtension(ext.c_str()).empty() ||
+  if (!gg->GetLanguageFromExtension(ext).empty() ||
       cm->IsAKnownExtension(ext)) {
     // This is a known extension.  Use the given filename with extension.
     this->Name = cmSystemTools::GetFilenameName(name);
