@@ -275,6 +275,9 @@ instrument(cmake-command-custom-content
 )
 instrument(cmake-command-custom-content-bad-type)
 instrument(cmake-command-custom-content-bad-content)
+instrument(cmake-command-custom-content-empty
+  CHECK_SCRIPT check-custom-content-empty.cmake
+)
 
 # Test Google trace
 instrument(trace-query
