@@ -1,5 +1,5 @@
 [file "update-common.sh" from "https://gitlab.kitware.com/utils/git-import-third-party.git"]
-commit = 8e52fdc2adb7d481798581af64047cbc228fea8e
+commit = 8f83cbcdac0af41574abfb632dfbe2c403948803
 branch = master
 target = Utilities/Scripts/update-third-party.bash
 comment = Core third party import logic
