@@ -1568,13 +1568,6 @@ void cmLocalGenerator::GetTargetFlags(
       }
     } break;
     case cmStateEnums::EXECUTABLE: {
-      if (linkLanguage.empty()) {
-        cmSystemTools::Error(
-          "CMake can not determine linker language for target: " +
-          target->GetName());
-        return;
-      }
-
       if (linkLanguage != "Swift") {
         std::string exeFlags;
         this->AddConfigVariableFlags(exeFlags, "CMAKE_EXE_LINKER_FLAGS",
