@@ -160,8 +160,6 @@ else
     basehash="$( git rev-list --author="$ownership" --grep="$basehash_regex" -n 1 HEAD )"
 fi
 readonly basehash
-upstream_old_short="$( git cat-file commit "$basehash" | sed -n '/'"$basehash_regex"'/ {s/.*(//;s/)//;p;}' | grep -E '^[0-9a-f]+$' )"
-readonly upstream_old_short
 
 [ -n "$basehash" ] || \
     warn "'basehash' is empty; performing initial import"
@@ -212,6 +210,9 @@ readonly upstream_datetime
 upstream_date="$( echo "$upstream_datetime" | grep -o -e "$regex_date" )"
 readonly upstream_date
 if $do_shortlog && [ -n "$basehash" ]; then
+    upstream_old_short="$( git -C "$toplevel_dir" cat-file commit "$basehash" | sed -n '/'"$basehash_regex"'/ {s/.*(//;s/)//;p;}' | grep -E '^[0-9a-f]+$' )"
+    readonly upstream_old_short
+
     commit_shortlog="
 
 Upstream Shortlog
@@ -252,9 +253,10 @@ if [ -n "$basehash" ]; then
     git merge --log -s recursive "-Xsubtree=$subtree/" --no-commit "upstream-$name"
 else
     # Note: on Windows 'git merge --help' will open a browser, and the check
-    # will fail, so use the flag by default.
+    # will fail, so use the flag by default. Apple opens an editor instead;
+    # assume the flag is understood there too.
     unrelated_histories_flag=""
-    if git --version | grep -q windows; then
+    if git --version | grep -q -E 'windows|Apple'; then
         unrelated_histories_flag="--allow-unrelated-histories"
     elif git merge --help | grep -q -e allow-unrelated-histories; then
         unrelated_histories_flag="--allow-unrelated-histories"
