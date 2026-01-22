@@ -578,6 +578,25 @@ modules.  The :term:`collate` step uses a target-specific
   :term:`collation <collate>` metadata file is describing
 - ``include-dirs`` and ``forward-modules-from-target-dirs``: unused for C++
 
+Each entry in the ``cxx-modules`` map records the following:
+
+- ``bmi-only`` (bool): True if only the BMI, not the source of the BMI, is
+  available
+- ``compile-features`` (list[string]): :manual:`cmake-compile-features(7)` used
+  to build the object
+- ``compile-options`` (list[string]): compilation options/flags used to build
+  the object, except for those derived from ``compile-features``
+- ``definitions`` (list[string]): preprocessor defines used to build the object
+- ``destination`` (string): intended install destination of the source file
+- ``include-directories`` (list[string]): include directories used to build the
+  object
+- ``name`` (string): name of the file set which owns the source file
+- ``relative-directory`` (string): base path relative to which the source file
+  will be relocated into the install destination
+- ``source`` (string): path to the source file
+- ``type`` (string): type of the file set which owns the source file
+- ``visibility`` (string): visibility of the file set which owns the source file
+
 For each compilation, CMake will also provide a :term:`module map` which will
 be created during the build by the :term:`collate` command.  How this is
 provided to the compiler is specified by the ``CMAKE_CXX_MODULE_MAP_FORMAT``
