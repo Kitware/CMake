@@ -91,8 +91,8 @@ std::string const& cmSourceFile::GetOrDetermineLanguage()
       this->ResolveFullPath();
     } else {
       // Use the known extension to get the language if possible.
-      std::string ext =
-        cmSystemTools::GetFilenameLastExtension(this->Location.GetName());
+      cm::string_view ext =
+        cmSystemTools::GetFilenameLastExtensionView(this->Location.GetName());
       this->CheckLanguage(ext);
     }
   }
