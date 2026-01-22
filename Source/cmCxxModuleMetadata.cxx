@@ -300,10 +300,10 @@ Json::Value SerializePreprocessorDefine(
   dv["name"] = d.Name;
   if (d.Value) {
     dv["value"] = *d.Value;
-  } else {
-    dv["value"] = Json::Value::null;
   }
-  dv["undef"] = d.Undef;
+  if (d.Undef) {
+    dv["undef"] = d.Undef;
+  }
   return dv;
 }
 
