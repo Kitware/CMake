@@ -1111,7 +1111,11 @@ std::string cmGlobalGenerator::GetLanguageFromExtension(
   if (ext.front() == '.') {
     ext = ext.substr(1);
   }
+#if __cplusplus >= 201402L || defined(_MSVC_LANG) && _MSVC_LANG >= 201402L
+  auto const it = this->ExtensionToLanguage.find(ext);
+#else
   auto const it = this->ExtensionToLanguage.find(std::string(ext));
+#endif
   if (it != this->ExtensionToLanguage.end()) {
     return it->second;
   }

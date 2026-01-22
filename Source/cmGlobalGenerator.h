@@ -5,6 +5,7 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <cstddef>
+#include <functional>
 #include <iosfwd>
 #include <map>
 #include <memory>
@@ -872,7 +873,11 @@ private:
   std::set<std::string> LanguagesInProgress;
   std::map<std::string, std::string> OutputExtensions;
   std::map<std::string, std::string> LanguageToOutputExtension;
+#if __cplusplus >= 201402L || defined(_MSVC_LANG) && _MSVC_LANG >= 201402L
+  std::map<std::string, std::string, std::less<void>> ExtensionToLanguage;
+#else
   std::map<std::string, std::string> ExtensionToLanguage;
+#endif
   std::map<std::string, int> LanguageToLinkerPreference;
 
 #if !defined(CMAKE_BOOTSTRAP)
