@@ -1,0 +1,8 @@
+CMake Error at no-property\.cmake:[0-9]+ \(file\):
+  Error evaluating generator expression:
+
+    \$<SOURCE_PROPERTY:foo.c,>
+
+  \$<SOURCE_PROPERTY:src,prop> expression requires a non-empty property name.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)

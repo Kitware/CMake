@@ -1,0 +1,8 @@
+CMake Error at no-TARGET_DIRECTORY\.cmake:[0-9]+ \(file\):
+  Error evaluating generator expression:
+
+    \$<SOURCE_PROPERTY:foo\.c,TARGET_DIRECTORY:,FOO>
+
+  No value provided for the TARGET_DIRECTORY: option.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)

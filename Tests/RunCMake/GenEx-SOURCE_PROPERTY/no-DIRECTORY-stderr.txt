@@ -1,0 +1,8 @@
+CMake Error at no-DIRECTORY\.cmake:[0-9]+ \(file\):
+  Error evaluating generator expression:
+
+    \$<SOURCE_PROPERTY:foo\.c,DIRECTORY:,FOO>
+
+  No value provided for the DIRECTORY: option.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)

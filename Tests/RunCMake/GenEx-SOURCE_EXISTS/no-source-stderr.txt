@@ -1,0 +1,8 @@
+CMake Error at no-source\.cmake:[0-9]+ \(file\):
+  Error evaluating generator expression:
+
+    \$<SOURCE_EXISTS:>
+
+  \$<SOURCE_EXISTS:src> expression requires a non-empty source name.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
