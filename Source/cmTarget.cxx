@@ -1102,11 +1102,13 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
   }
 
   for (auto const& prop : mf->GetState()->GetPropertyDefinitions().GetMap()) {
-    if (prop.first.second == cmProperty::TARGET &&
-        !prop.second.GetInitializeFromVariable().empty()) {
-      if (auto value =
-            mf->GetDefinition(prop.second.GetInitializeFromVariable())) {
-        this->SetProperty(prop.first.first, value);
+    auto iter = prop.second.find(cmProperty::TARGET);
+    if (iter != prop.second.end()) {
+      if (!iter->second.GetInitializeFromVariable().empty()) {
+        if (auto value =
+              mf->GetDefinition(iter->second.GetInitializeFromVariable())) {
+          this->SetProperty(prop.first, value);
+        }
       }
     }
   }
