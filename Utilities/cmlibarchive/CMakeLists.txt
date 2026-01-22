@@ -1200,6 +1200,13 @@ IF(ENABLE_ICONV)
       ENDIF(HAVE_ICONV)
     ENDIF(NOT HAVE_ICONV AND LIBICONV_PATH)
   ENDIF(ICONV_INCLUDE_DIR)
+
+  # XXX(cmake): iconv is required on non-Windows platforms
+  if(NOT HAVE_ICONV AND NOT WIN32)
+    message(FATAL_ERROR "iconv is required, but was not found.")
+  endif()
+  # XXX(cmake): end
+
   #
   # Find locale_charset() for libiconv.
   #
