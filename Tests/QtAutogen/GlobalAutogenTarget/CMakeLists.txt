@@ -18,10 +18,10 @@ set(MCB "sdb/sdb_autogen/mocs_compilation*.cpp")
 set(MCC "sdc/sdc_autogen/mocs_compilation*.cpp")
 set(MCG "gat_autogen/mocs_compilation*.cpp")
 
-set(DRA "sda/sda_autogen/*qrc_data.cpp")
-set(DRB "sdb/sdb_autogen/*qrc_data.cpp")
-set(DRC "sdc/sdc_autogen/*qrc_data.cpp")
-set(DRG "gat_autogen/*qrc_data.cpp")
+set(DRA "sda/sda_autogen/*qrc_data*.cpp")
+set(DRB "sdb/sdb_autogen/*qrc_data*.cpp")
+set(DRC "sdc/sdc_autogen/*qrc_data*.cpp")
+set(DRG "gat_autogen/*qrc_data*.cpp")
 
 # -- Utility macros
 macro(GAT_FIND_FILES VAR NAME)

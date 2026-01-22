@@ -44,7 +44,8 @@ public:
     std::string QrcPathChecksum;
     std::string InfoFile;
     ConfigString SettingsFile;
-    std::string OutputFile;
+    ConfigString OutputFile;
+    std::string OutputFileGenex;
     bool Generated = false;
     bool Unique = false;
     std::vector<std::string> Options;
@@ -135,6 +136,8 @@ private:
                        cm::string_view suffix);
   void ConfigFileNamesAndGenex(ConfigString& configString, std::string& genex,
                                cm::string_view prefix, cm::string_view suffix);
+  void ConfigFileNameCommon(ConfigString& configString,
+                            std::string const& fileName);
   void ConfigFileClean(ConfigString& configString);
 
   std::string GetMocBuildPath(MUFile const& muf);
