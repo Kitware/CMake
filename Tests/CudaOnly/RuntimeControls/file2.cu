@@ -5,14 +5,21 @@
 #  define EXPORT
 #endif
 
-void __global__ file2_kernel(int x, int& r)
+void __global__ file2_kernel(int x, int* r)
 {
-  r = -x;
+  *r = -x;
 }
 
 EXPORT int file2_launch_kernel(int x)
 {
-  int r = 0;
+  int* r;
+  cudaMallocManaged(&r, sizeof(int));
+
   file2_kernel<<<1, 1>>>(x, r);
-  return r;
+  cudaDeviceSynchronize();
+
+  auto result = *r;
+  cudaFree(r);
+
+  return result;
 }
