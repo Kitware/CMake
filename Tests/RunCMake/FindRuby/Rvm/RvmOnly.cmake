@@ -5,7 +5,7 @@ set(Ruby_FIND_VIRTUALENV ONLY)
 set(Ruby_RBENV_EXECUTABLE "") # Suppress rbenv code path for this test.
 
 # Test: FindRuby.RvmOnly
-if (RUBY_HOME)
+if (MY_RUBY_HOME)
   # => Trying to find exactly system ruby using ONLY virtual environment should fail
   find_package (Ruby ${SYSTEM_RUBY_VERSION} EXACT QUIET)
   if(Ruby_FOUND)
@@ -20,7 +20,7 @@ endif()
 
 
 # Test: FindRuby.UnsetRvmOnly
-if (NOT RUBY_HOME)
+if (NOT MY_RUBY_HOME)
 
   # If ENV{MY_RUBY_HOME} isn't defined and Ruby_FIND_VIRTUALENV is set to ONLY
   # then Ruby should not be found

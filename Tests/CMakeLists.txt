@@ -1585,10 +1585,6 @@ if(BUILD_TESTING)
     add_subdirectory(UseSWIG)
   endif()
 
-  if(CMake_TEST_FindRuby)
-    add_subdirectory(FindRuby)
-  endif()
-
   add_subdirectory(FindThreads)
 
   # Matlab module
