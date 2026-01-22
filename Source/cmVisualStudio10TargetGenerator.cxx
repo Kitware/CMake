@@ -4541,22 +4541,12 @@ bool cmVisualStudio10TargetGenerator::ComputeLinkOptions(
     return false;
   }
 
-  std::string CONFIG = cmSystemTools::UpperCase(config);
-
   std::string flags;
   this->LocalGenerator->AddTargetTypeLinkerFlags(flags, this->GeneratorTarget,
                                                  linkLanguage, config);
 
-  cmValue targetLinkFlags = this->GeneratorTarget->GetProperty("LINK_FLAGS");
-  if (targetLinkFlags) {
-    flags += ' ';
-    flags += *targetLinkFlags;
-  }
-  std::string flagsProp = cmStrCat("LINK_FLAGS_", CONFIG);
-  if (cmValue flagsConfig = this->GeneratorTarget->GetProperty(flagsProp)) {
-    flags += ' ';
-    flags += *flagsConfig;
-  }
+  this->LocalGenerator->AddTargetPropertyLinkFlags(
+    flags, this->GeneratorTarget, config);
 
   std::vector<std::string> opts;
   this->GeneratorTarget->GetLinkOptions(opts, config, linkLanguage);

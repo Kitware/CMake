@@ -138,13 +138,8 @@ void cmMakefileTargetGenerator::GetDeviceLinkFlags(
 void cmMakefileTargetGenerator::GetTargetLinkFlags(
   std::string& flags, std::string const& linkLanguage)
 {
-  this->LocalGenerator->AppendFlags(
-    flags, this->GeneratorTarget->GetSafeProperty("LINK_FLAGS"));
-
-  std::string const linkFlagsConfig =
-    cmStrCat("LINK_FLAGS_", cmSystemTools::UpperCase(this->GetConfigName()));
-  this->LocalGenerator->AppendFlags(
-    flags, this->GeneratorTarget->GetSafeProperty(linkFlagsConfig));
+  this->LocalGenerator->AddTargetPropertyLinkFlags(
+    flags, this->GeneratorTarget, this->GetConfigName());
 
   std::vector<std::string> opts;
   this->GeneratorTarget->GetLinkOptions(opts, this->GetConfigName(),

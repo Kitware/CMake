@@ -970,18 +970,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(
   this->AddTargetTypeLinkerFlags(extraLinkOptions, target, linkLanguage,
                                  configName);
 
-  cmValue targetLinkFlags = target->GetProperty("LINK_FLAGS");
-  if (targetLinkFlags) {
-    extraLinkOptions += ' ';
-    extraLinkOptions += *targetLinkFlags;
-  }
-  std::string configTypeUpper = cmSystemTools::UpperCase(configName);
-  std::string linkFlagsConfig = cmStrCat("LINK_FLAGS_", configTypeUpper);
-  targetLinkFlags = target->GetProperty(linkFlagsConfig);
-  if (targetLinkFlags) {
-    extraLinkOptions += ' ';
-    extraLinkOptions += *targetLinkFlags;
-  }
+  this->AddTargetPropertyLinkFlags(extraLinkOptions, target, configName);
 
   std::vector<std::string> opts;
   target->GetLinkOptions(opts, configName,

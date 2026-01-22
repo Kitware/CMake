@@ -2705,18 +2705,9 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
     this->CurrentLocalGenerator->AppendWarningAsErrorLinkerFlags(
       extraLinkOptions, gtgt, llang);
 
-    cmValue targetLinkFlags = gtgt->GetProperty("LINK_FLAGS");
-    if (targetLinkFlags) {
-      this->CurrentLocalGenerator->AppendFlags(extraLinkOptions,
-                                               *targetLinkFlags);
-    }
-    if (!configName.empty()) {
-      std::string linkFlagsVar =
-        cmStrCat("LINK_FLAGS_", cmSystemTools::UpperCase(configName));
-      if (cmValue linkFlags = gtgt->GetProperty(linkFlagsVar)) {
-        this->CurrentLocalGenerator->AppendFlags(extraLinkOptions, *linkFlags);
-      }
-    }
+    this->CurrentLocalGenerator->AddTargetPropertyLinkFlags(extraLinkOptions,
+                                                            gtgt, configName);
+
     std::vector<std::string> opts;
     gtgt->GetLinkOptions(opts, configName, llang);
     // LINK_OPTIONS are escaped.

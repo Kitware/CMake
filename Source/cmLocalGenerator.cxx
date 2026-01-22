@@ -1532,20 +1532,7 @@ void cmLocalGenerator::GetTargetFlags(
       }
 
       std::string sharedLibFlags;
-      cmValue targetLinkFlags = target->GetProperty("LINK_FLAGS");
-      if (targetLinkFlags) {
-        sharedLibFlags += *targetLinkFlags;
-        sharedLibFlags += " ";
-      }
-      if (!configUpper.empty()) {
-        targetLinkFlags =
-          target->GetProperty(cmStrCat("LINK_FLAGS_", configUpper));
-        if (targetLinkFlags) {
-          sharedLibFlags += *targetLinkFlags;
-          sharedLibFlags += " ";
-        }
-      }
-
+      this->AddTargetPropertyLinkFlags(sharedLibFlags, target, config);
       if (!sharedLibFlags.empty()) {
         this->GetGlobalGenerator()->EncodeLiteral(sharedLibFlags);
         linkFlags.emplace_back(std::move(sharedLibFlags));
@@ -1610,19 +1597,7 @@ void cmLocalGenerator::GetTargetFlags(
         exeFlags += " ";
       }
 
-      cmValue targetLinkFlags = target->GetProperty("LINK_FLAGS");
-      if (targetLinkFlags) {
-        exeFlags += *targetLinkFlags;
-        exeFlags += " ";
-      }
-      if (!configUpper.empty()) {
-        targetLinkFlags =
-          target->GetProperty(cmStrCat("LINK_FLAGS_", configUpper));
-        if (targetLinkFlags) {
-          exeFlags += *targetLinkFlags;
-          exeFlags += " ";
-        }
-      }
+      this->AddTargetPropertyLinkFlags(exeFlags, target, config);
 
       if (!exeFlags.empty()) {
         this->GetGlobalGenerator()->EncodeLiteral(exeFlags);
@@ -3477,6 +3452,23 @@ void cmLocalGenerator::AddTargetTypeLinkerFlags(
   }
   this->AddConfigVariableFlags(flags, linkerFlagsVar, target,
                                cmBuildStep::Link, lang, config);
+}
+
+void cmLocalGenerator::AddTargetPropertyLinkFlags(
+  std::string& flags, cmGeneratorTarget const* target,
+  std::string const& config)
+{
+  cmValue targetLinkFlags = target->GetProperty("LINK_FLAGS");
+  if (targetLinkFlags) {
+    this->AppendFlags(flags, *targetLinkFlags);
+  }
+  if (!config.empty()) {
+    cmValue targetLinkFlagsConfig = target->GetProperty(
+      cmStrCat("LINK_FLAGS_", cmSystemTools::UpperCase(config)));
+    if (targetLinkFlagsConfig) {
+      this->AppendFlags(flags, *targetLinkFlagsConfig);
+    }
+  }
 }
 
 void cmLocalGenerator::AppendIPOLinkerFlags(std::string& flags,
