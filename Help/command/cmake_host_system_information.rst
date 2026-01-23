@@ -112,6 +112,11 @@ queried.  The list of queried values is stored in ``<variable>``.
 
   One if processor has serial number
 
+``HAS_APIC``
+  .. versionadded:: 4.3
+
+  One if processor supports APIC
+
 ``PROCESSOR_SERIAL_NUMBER``
   .. versionadded:: 3.10
 
@@ -176,6 +181,11 @@ queried.  The list of queried values is stored in ``<variable>``.
   .. versionadded:: 4.3
 
   The processor model name
+
+``PROCESSOR_APIC_ID``
+  .. versionadded:: 4.3
+
+  The processor APIC ID
 
 ``DISTRIB_INFO``
   .. versionadded:: 3.22

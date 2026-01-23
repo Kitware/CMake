@@ -133,6 +133,10 @@ cm::optional<std::string> GetValue(cmsys::SystemInformation& info,
     return ValueToString(info.DoesCPUSupportFeature(
       cmsys::SystemInformation::CPU_FEATURE_SERIALNUMBER));
   }
+  if (key == "HAS_APIC"_s) {
+    return ValueToString(
+      info.DoesCPUSupportFeature(cmsys::SystemInformation::CPU_FEATURE_APIC));
+  }
   if (key == "PROCESSOR_NAME"_s) {
     return ValueToString(info.GetExtendedProcessorName());
   }
@@ -162,6 +166,13 @@ cm::optional<std::string> GetValue(cmsys::SystemInformation& info,
   }
   if (key == "MODEL_NAME"_s) {
     return ValueToString(info.GetModelName());
+  }
+  if (key == "PROCESSOR_APIC_ID"_s) {
+    int apicId = info.GetProcessorAPICID();
+    if (apicId) {
+      return ValueToString(apicId);
+    }
+    return "";
   }
   return {};
 }
