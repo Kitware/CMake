@@ -6,8 +6,12 @@
   "config": "<CONFIG>",
   "cxx-modules": {
     "CMakeFiles/ninja-compiledb-private.dir<CONFIG_DIR>/sources/module-internal-part.cxx<OBJEXT>": {
-      "bmi-only": false,
-      "destination": null,
+      "bmi-only" : false,
+      "compile-features" : ["cxx_std_20"],
+      "compile-options" : [],
+      "definitions" : [],
+      "destination" : null,
+      "include-directories" : [],
       "name": "internal_partitions",
       "relative-directory": "sources",
       "source": "<SOURCE_DIR>/sources/module-internal-part.cxx",
@@ -15,8 +19,12 @@
       "visibility": "PRIVATE"
     },
     "CMakeFiles/ninja-compiledb-private.dir<CONFIG_DIR>/sources/module-part.cxx<OBJEXT>": {
-      "bmi-only": false,
-      "destination": null,
+      "bmi-only" : false,
+      "compile-features" : ["cxx_std_20"],
+      "compile-options" : [],
+      "definitions" : [],
+      "destination" : null,
+      "include-directories" : [],
       "name": "modules",
       "relative-directory": "",
       "source": "<SOURCE_DIR>/sources/module-part.cxx",
@@ -24,8 +32,12 @@
       "visibility": "PRIVATE"
     },
     "CMakeFiles/ninja-compiledb-private.dir<CONFIG_DIR>/sources/module.cxx<OBJEXT>": {
-      "bmi-only": false,
-      "destination": null,
+      "bmi-only" : false,
+      "compile-features" : ["cxx_std_20"],
+      "compile-options" : [],
+      "definitions" : [],
+      "destination" : null,
+      "include-directories" : [],
       "name": "modules",
       "relative-directory": "",
       "source": "<SOURCE_DIR>/sources/module.cxx",

@@ -17,6 +17,7 @@
 #include <cm3p/json/value.h>
 
 #include "cmBuildDatabase.h"
+#include "cmCxxModuleMetadata.h"
 #include "cmExportBuildFileGenerator.h"
 #include "cmExportSet.h"
 #include "cmFileSet.h"
@@ -29,6 +30,7 @@
 #include "cmInstallExportGenerator.h"
 #include "cmInstallFileSetGenerator.h"
 #include "cmInstallGenerator.h"
+#include "cmListFileCache.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmOutputConverter.h"
@@ -174,6 +176,30 @@ TdiSourceInfo CollationInformationSources(cmGeneratorTarget const* gt,
           : cb.BmiFilePath(sf, config);
         Json::Value& tdi_module_info = tdi_cxx_module_info[obj_path] =
           Json::objectValue;
+
+        Json::Value& tdi_include_dirs =
+          tdi_module_info["include-directories"] = Json::arrayValue;
+        for (auto const& i : gt->GetIncludeDirectories(config, "CXX")) {
+          tdi_include_dirs.append(i.Value);
+        }
+
+        Json::Value& tdi_defs = tdi_module_info["definitions"] =
+          Json::arrayValue;
+        for (auto const& i : gt->GetCompileDefinitions(config, "CXX")) {
+          tdi_defs.append(i.Value);
+        }
+
+        Json::Value& tdi_opts = tdi_module_info["compile-options"] =
+          Json::arrayValue;
+        for (auto const& i : gt->GetCompileOptions(config, "CXX")) {
+          tdi_opts.append(i.Value);
+        }
+
+        Json::Value& tdi_feats = tdi_module_info["compile-features"] =
+          Json::arrayValue;
+        for (auto const& i : gt->GetCompileFeatures(config)) {
+          tdi_feats.append(i.Value);
+        }
 
         tdi_module_info["source"] = full_file;
         tdi_module_info["bmi-only"] = ct == CompileType::BmiOnly;
@@ -343,6 +369,28 @@ Json::Value CollationInformationExports(cmGeneratorTarget const* gt)
 
   return tdi_exports;
 }
+
+std::vector<cmCxxModuleMetadata::PreprocessorDefineData>
+MakePreprocessorDefines(std::vector<std::string> const& defines)
+{
+  std::vector<cmCxxModuleMetadata::PreprocessorDefineData> result;
+  result.reserve(defines.size());
+
+  for (auto const& def : defines) {
+    cmCxxModuleMetadata::PreprocessorDefineData data;
+    auto offset = def.find('=');
+    if (offset == def.npos) {
+      data.Name = def;
+    } else {
+      data.Name = def.substr(0, offset);
+      data.Value = def.substr(offset);
+    }
+    result.emplace_back(std::move(data));
+  }
+
+  return result;
+}
+
 }
 
 void cmDyndepCollation::AddCollationInformation(
@@ -373,6 +421,10 @@ struct CxxModuleFileSet
   std::string Type;
   cmFileSetVisibility Visibility = cmFileSetVisibility::Private;
   cm::optional<std::string> Destination;
+  std::vector<std::string> IncludeDirectories;
+  std::vector<std::string> Definitions;
+  std::vector<std::string> CompileOptions;
+  std::vector<std::string> CompileFeatures;
 };
 
 struct CxxModuleDatabaseInfo
@@ -401,6 +453,13 @@ struct CxxModuleExport
   std::string CxxModuleInfoDir;
   std::string Namespace;
   bool Install;
+};
+
+struct CxxModuleExportOutputHelper
+{
+  CxxModuleExport const* Export;
+  std::unique_ptr<cmGeneratedFileStream> File;
+  cmCxxModuleMetadata Manifest;
 };
 
 struct cmCxxModuleExportInfo
@@ -489,6 +548,18 @@ cmDyndepCollation::ParseExportInfo(Json::Value const& tdi)
       if (tdi_fs_dest.isString()) {
         fsi.Destination = tdi_fs_dest.asString();
       }
+      for (auto const& j : tdi_cxx_module_info["include-directories"]) {
+        fsi.IncludeDirectories.push_back(j.asString());
+      }
+      for (auto const& j : tdi_cxx_module_info["definitions"]) {
+        fsi.Definitions.push_back(j.asString());
+      }
+      for (auto const& j : tdi_cxx_module_info["compile-options"]) {
+        fsi.CompileOptions.push_back(j.asString());
+      }
+      for (auto const& j : tdi_cxx_module_info["compile-features"]) {
+        fsi.CompileFeatures.push_back(j.asString());
+      }
     }
   }
   Json::Value const& tdi_sources = tdi["sources"];
@@ -520,25 +591,30 @@ bool cmDyndepCollation::WriteDyndepMetadata(
   // Prepare the export information blocks.
   std::string const config_upper =
     cmSystemTools::UpperCase(export_info.Config);
-  std::vector<
-    std::pair<std::unique_ptr<cmGeneratedFileStream>, CxxModuleExport const*>>
-    exports;
+  std::vector<CxxModuleExportOutputHelper> exports;
   for (auto const& exp : export_info.Exports) {
-    std::unique_ptr<cmGeneratedFileStream> properties;
+    CxxModuleExportOutputHelper exp_helper;
 
     std::string const export_dir =
       cmStrCat(exp.Prefix, '/', exp.CxxModuleInfoDir, '/');
     std::string const property_file_path =
-      cmStrCat(export_dir, "target-", exp.FilesystemName, '-',
-               export_info.Config, ".cmake");
-    properties = cm::make_unique<cmGeneratedFileStream>(property_file_path);
+      cmStrCat(export_dir, "target-"_s, exp.FilesystemName, '-',
+               export_info.Config, ".cmake"_s);
+    exp_helper.Manifest.MetadataFilePath =
+      cmStrCat(exp.Destination, '/', exp.CxxModuleInfoDir, "/target-"_s,
+               exp.FilesystemName, '-', export_info.Config, ".modules.json"_s);
+
+    exp_helper.File =
+      cm::make_unique<cmGeneratedFileStream>(property_file_path);
 
     // Set up the preamble.
-    *properties << "set_property(TARGET \"" << exp.Namespace << exp.Name
-                << "\"\n"
-                << "  PROPERTY IMPORTED_CXX_MODULES_" << config_upper << '\n';
+    *exp_helper.File << "set_property(TARGET \"" << exp.Namespace << exp.Name
+                     << "\"\n"
+                        "  PROPERTY IMPORTED_CXX_MODULES_"
+                     << config_upper << '\n';
 
-    exports.emplace_back(std::move(properties), &exp);
+    exp_helper.Export = &exp;
+    exports.emplace_back(std::move(exp_helper));
   }
 
   std::unique_ptr<cmBuildDatabase> module_database;
@@ -718,21 +794,26 @@ bool cmDyndepCollation::WriteDyndepMetadata(
         build_bmi_path = cmEscape(*m);
       }
 
-      for (auto const& exp : exports) {
+      for (auto& exp : exports) {
         std::string iface_source;
-        if (exp.second->Install && file_set.Destination) {
-          auto dest = install_destination(*file_set.Destination);
+        cmCxxModuleMetadata::ModuleData mod;
+
+        if (exp.Export->Install && file_set.Destination) {
+          auto rel =
+            cmStrCat('/', file_set.RelativeDirectory,
+                     cmSystemTools::GetFilenameName(file_set.SourcePath));
           iface_source = cmStrCat(
-            dest.second, '/', cmEscape(file_set.RelativeDirectory),
-            cmEscape(cmSystemTools::GetFilenameName(file_set.SourcePath)));
+            install_destination(*file_set.Destination).second, cmEscape(rel));
+          mod.SourcePath = cmStrCat(*file_set.Destination, rel);
         } else {
           iface_source = cmEscape(file_set.SourcePath);
+          mod.SourcePath = file_set.SourcePath;
         }
 
         std::string bmi_path;
-        if (exp.second->Install && export_info.BmiInstallation) {
+        if (exp.Export->Install && export_info.BmiInstallation) {
           bmi_path = install_bmi_path;
-        } else if (!exp.second->Install) {
+        } else if (!exp.Export->Install) {
           bmi_path = build_bmi_path;
         }
 
@@ -742,12 +823,23 @@ bool cmDyndepCollation::WriteDyndepMetadata(
           continue;
         }
 
-        *exp.first << "    \"" << cmEscape(p.LogicalName) << '='
-                   << iface_source;
+        mod.LogicalName = p.LogicalName;
+        mod.IsInterface = p.IsInterface;
+
+        auto& local_args = mod.LocalArguments.emplace();
+        local_args.Definitions = MakePreprocessorDefines(file_set.Definitions);
+        local_args.IncludeDirectories = file_set.IncludeDirectories;
+        local_args.CompileOptions = file_set.CompileOptions;
+        local_args.CompileFeatures = file_set.CompileFeatures;
+
+        exp.Manifest.Modules.emplace_back(std::move(mod));
+
+        *exp.File << "    \"" << cmEscape(p.LogicalName) << '='
+                  << iface_source;
         if (!bmi_path.empty()) {
-          *exp.first << ',' << bmi_path;
+          *exp.File << ',' << bmi_path;
         }
-        *exp.first << "\"\n";
+        *exp.File << "\"\n";
       }
 
       if (bmi_install_script) {
@@ -800,9 +892,15 @@ bool cmDyndepCollation::WriteDyndepMetadata(
     }
   }
 
-  // Add trailing parenthesis for the `set_property` call.
   for (auto const& exp : exports) {
-    *exp.first << ")\n";
+
+    cmCxxModuleMetadata::SaveToFile(
+      cmStrCat(exp.Export->Prefix, '/', exp.Export->CxxModuleInfoDir,
+               "/target-"_s, exp.Export->FilesystemName, '-',
+               export_info.Config, ".modules.json"_s),
+      exp.Manifest);
+
+    *exp.File << ")\n";
   }
 
   // Check that public sources only require public modules.
