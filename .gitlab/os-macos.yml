@@ -90,7 +90,7 @@
     variables:
         CMAKE_CONFIGURATION: macos_x86_64_xcode
         CMAKE_GENERATOR: Xcode
-        CMAKE_CI_NIGHTLY_IGNORE_DEPS: "true"
+        CMAKE_CI_JOB_NIGHTLY_IGNORE_DEPS: "true"
 
 .macos_arm64_xcode:
     extends: .macos
@@ -98,7 +98,7 @@
     variables:
         CMAKE_CONFIGURATION: macos_arm64_xcode
         CMAKE_GENERATOR: Xcode
-        CMAKE_CI_NIGHTLY_IGNORE_DEPS: "true"
+        CMAKE_CI_JOB_NIGHTLY_IGNORE_DEPS: "true"
 
 .macos_arm64_xcode_symlinked:
     extends: .macos
@@ -106,7 +106,7 @@
     variables:
         CMAKE_CONFIGURATION: macos_arm64_xcode_symlinked
         CMAKE_GENERATOR: Xcode
-        CMAKE_CI_NIGHTLY_IGNORE_DEPS: "true"
+        CMAKE_CI_JOB_NIGHTLY_IGNORE_DEPS: "true"
         CMAKE_CI_IN_SYMLINK_TREE: 1
         CMAKE_CI_BUILD_DIR: "real_work/work/build"
 
@@ -116,7 +116,7 @@
     variables:
         CMAKE_CONFIGURATION: macos_arm64_xcode_ub
         CMAKE_GENERATOR: Xcode
-        CMAKE_CI_NIGHTLY_IGNORE_DEPS: "true"
+        CMAKE_CI_JOB_NIGHTLY_IGNORE_DEPS: "true"
 
 .macos_arm64_ninja_multi:
     extends: .macos
@@ -124,14 +124,14 @@
     variables:
         CMAKE_CONFIGURATION: macos_arm64_ninja_multi
         CMAKE_GENERATOR: "Ninja Multi-Config"
-        CMAKE_CI_NIGHTLY_IGNORE_DEPS: "true"
+        CMAKE_CI_JOB_NIGHTLY_IGNORE_DEPS: "true"
 
 .macos_x86_64_ninja_ub:
     extends: .macos
 
     variables:
         CMAKE_CONFIGURATION: macos_x86_64_ninja_ub
-        CMAKE_CI_NIGHTLY_IGNORE_DEPS: "true"
+        CMAKE_CI_JOB_NIGHTLY_IGNORE_DEPS: "true"
 
 .macos_arm64_fastbuild:
     extends: .macos
@@ -139,7 +139,7 @@
     variables:
         CMAKE_CONFIGURATION: macos_arm64_fastbuild
         CMAKE_GENERATOR: FASTBuild
-        CMAKE_CI_NIGHTLY_IGNORE_DEPS: "true"
+        CMAKE_CI_JOB_NIGHTLY_IGNORE_DEPS: "true"
 
 ## Tags
 

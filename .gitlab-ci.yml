@@ -250,7 +250,7 @@ b:centos8-aarch64:
         - .run_manually
     variables:
         CMAKE_CI_ARTIFACTS_NAME: "artifacts-centos8-aarch64"
-        CMAKE_CI_NO_MR: "true"
+        CMAKE_CI_JOB_NO_MR: "true"
 
 t:debian13-ninja:
     extends:
@@ -272,7 +272,7 @@ t:debian13-aarch64-ninja:
         - .run_dependent
         - .needs_centos8_aarch64
     variables:
-        CMAKE_CI_NO_MR: "true"
+        CMAKE_CI_JOB_NO_MR: "true"
 
 t:debian13-ninja-clang:
     extends:
@@ -1091,7 +1091,7 @@ b:macos-x86_64-ninja:
         - .macos_x86_64_tags
         - .run_manually
     variables:
-        CMAKE_CI_NO_MR: "true"
+        CMAKE_CI_JOB_NO_MR: "true"
 
 b:macos-arm64-ninja:
     extends:
@@ -1132,7 +1132,7 @@ t:macos-x86_64-ninja:
     needs:
         - b:macos-x86_64-ninja
     variables:
-        CMAKE_CI_NO_MR: "true"
+        CMAKE_CI_JOB_NO_MR: "true"
 
 t:macos-arm64-ninja:
     extends:
@@ -1199,7 +1199,7 @@ t:macos-x86_64-xcode:
     needs:
         - t:macos-x86_64-ninja
     variables:
-        CMAKE_CI_NO_MR: "true"
+        CMAKE_CI_JOB_NO_MR: "true"
 
 t:macos-arm64-xcode:
     extends:
@@ -1245,7 +1245,7 @@ t:macos-x86_64-ninja-ub:
     needs:
         - t:macos-x86_64-ninja
     variables:
-        CMAKE_CI_NO_MR: "true"
+        CMAKE_CI_JOB_NO_MR: "true"
 
 t:macos-arm64-xcode-ub:
     extends:
