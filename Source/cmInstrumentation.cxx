@@ -475,6 +475,7 @@ void cmInstrumentation::InsertStaticSystemInformation(Json::Value& root)
   infoRoot["hostname"] = info.GetHostname();
   infoRoot["is64Bits"] = info.Is64Bits();
   infoRoot["modelId"] = info.GetModelID();
+  infoRoot["modelName"] = info.GetModelName();
   infoRoot["numberOfLogicalCPU"] = info.GetNumberOfLogicalCPU();
   infoRoot["numberOfPhysicalCPU"] = info.GetNumberOfPhysicalCPU();
   infoRoot["OSName"] = info.GetOSName();

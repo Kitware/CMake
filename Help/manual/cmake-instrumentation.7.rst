@@ -520,6 +520,7 @@ generated whenever `Indexing`_ occurs and deleted after any user-specified
   * ``hostname``
   * ``is64Bits``
   * ``modelId``
+  * ``modelName``
   * ``numberOfLogicalCPU``
   * ``numberOfPhysicalCPU``
   * ``processorAPICID``
