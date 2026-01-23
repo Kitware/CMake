@@ -167,6 +167,11 @@ queried.  The list of queried values is stored in ``<variable>``.
 
   The processor family name
 
+``MODEL_ID``
+  .. versionadded:: 4.3
+
+  The processor model ID
+
 ``DISTRIB_INFO``
   .. versionadded:: 3.22
 

@@ -26,3 +26,4 @@
 -- OS_VERSION=`.*`
 -- OS_PLATFORM=`.*`
 -- FAMILY_ID=`.*`
+-- MODEL_ID=`.*`
