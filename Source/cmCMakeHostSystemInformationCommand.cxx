@@ -188,6 +188,9 @@ cm::optional<std::string> GetValue(cmsys::SystemInformation& info,
   if (key == "PROCESSOR_CLOCK_FREQUENCY"_s) {
     return ValueToString(info.GetProcessorClockFrequency());
   }
+  if (key == "VENDOR_ID"_s) {
+    return ValueToString(info.GetVendorID());
+  }
   return {};
 }
 

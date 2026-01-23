@@ -202,6 +202,11 @@ queried.  The list of queried values is stored in ``<variable>``.
 
   The processor clock frequency
 
+``VENDOR_ID``
+  .. versionadded:: 4.3
+
+  The processor vendor ID
+
 ``DISTRIB_INFO``
   .. versionadded:: 3.22
 
