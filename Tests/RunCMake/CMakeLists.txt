@@ -989,6 +989,7 @@ endif()
 
 add_RunCMake_test(LinkLibrariesProcessing)
 add_RunCMake_test(LinkLibrariesStrategy)
+add_RunCMake_test(LinkFlags)
 add_RunCMake_test(File_Archive -DPython_EXECUTABLE=${Python_EXECUTABLE})
 add_RunCMake_test(File_Configure)
 add_RunCMake_test(File_Generate)
