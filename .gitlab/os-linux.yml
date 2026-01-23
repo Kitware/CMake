@@ -269,6 +269,14 @@
         CTEST_NO_WARNINGS_ALLOWED: 1
         CMAKE_GENERATOR: "FASTBuild"
 
+.fedora43_ninja_instrumentation:
+    extends: .fedora43
+
+    variables:
+        CMAKE_CONFIGURATION: fedora43_ninja_instrumentation
+        CTEST_NO_WARNINGS_ALLOWED: 1
+        CMAKE_GENERATOR: "Ninja"
+
 ### Clang Compiler
 
 .debian13_makefiles_clang:

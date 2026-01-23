@@ -415,6 +415,17 @@ t:fedora43-fastbuild:
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
+t:fedora43-instrumentation:
+    extends:
+        - .fedora43_ninja_instrumentation
+        - .cmake_test_linux_release
+        - .linux_x86_64_tags
+        - .run_dependent
+        - .needs_centos7_x86_64
+        - .cmake_junit_artifacts
+    variables:
+        CMAKE_CI_JOB_NIGHTLY: "true"
+
 t:nvhpc24.9-ninja:
     extends:
         - .nvhpc_ninja
