@@ -126,7 +126,7 @@ private:
   bool hasQuery = false;
   bool ranSystemChecks = false;
   bool ranOSCheck = false;
-  Json::Value customContent;
+  Json::Value customContent = Json::objectValue;
   Json::Value configureSnippetData;
   std::string configureSnippetName;
 #ifndef CMAKE_BOOTSTRAP
