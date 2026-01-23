@@ -185,6 +185,9 @@ cm::optional<std::string> GetValue(cmsys::SystemInformation& info,
     }
     return "";
   }
+  if (key == "PROCESSOR_CLOCK_FREQUENCY"_s) {
+    return ValueToString(info.GetProcessorClockFrequency());
+  }
   return {};
 }
 

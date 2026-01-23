@@ -197,6 +197,11 @@ queried.  The list of queried values is stored in ``<variable>``.
 
   The processor L1 cache size
 
+``PROCESSOR_CLOCK_FREQUENCY``
+  .. versionadded:: 4.3
+
+  The processor clock frequency
+
 ``DISTRIB_INFO``
   .. versionadded:: 3.22
 
