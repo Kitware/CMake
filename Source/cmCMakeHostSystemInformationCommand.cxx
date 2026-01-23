@@ -160,6 +160,9 @@ cm::optional<std::string> GetValue(cmsys::SystemInformation& info,
   if (key == "MODEL_ID"_s) {
     return ValueToString(info.GetModelID());
   }
+  if (key == "MODEL_NAME"_s) {
+    return ValueToString(info.GetModelName());
+  }
   return {};
 }
 
