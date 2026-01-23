@@ -117,6 +117,11 @@ queried.  The list of queried values is stored in ``<variable>``.
 
   One if processor supports APIC
 
+``HAS_L1_CACHE``
+  .. versionadded:: 4.3
+
+  One if processor has L1 cache
+
 ``PROCESSOR_SERIAL_NUMBER``
   .. versionadded:: 3.10
 
@@ -186,6 +191,11 @@ queried.  The list of queried values is stored in ``<variable>``.
   .. versionadded:: 4.3
 
   The processor APIC ID
+
+``PROCESSOR_CACHE_SIZE``
+  .. versionadded:: 4.3
+
+  The processor L1 cache size
 
 ``DISTRIB_INFO``
   .. versionadded:: 3.22

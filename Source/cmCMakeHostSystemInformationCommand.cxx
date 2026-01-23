@@ -137,6 +137,10 @@ cm::optional<std::string> GetValue(cmsys::SystemInformation& info,
     return ValueToString(
       info.DoesCPUSupportFeature(cmsys::SystemInformation::CPU_FEATURE_APIC));
   }
+  if (key == "HAS_L1_CACHE"_s) {
+    return ValueToString(info.DoesCPUSupportFeature(
+      cmsys::SystemInformation::CPU_FEATURE_L1CACHE));
+  }
   if (key == "PROCESSOR_NAME"_s) {
     return ValueToString(info.GetExtendedProcessorName());
   }
@@ -171,6 +175,13 @@ cm::optional<std::string> GetValue(cmsys::SystemInformation& info,
     int apicId = info.GetProcessorAPICID();
     if (apicId) {
       return ValueToString(apicId);
+    }
+    return "";
+  }
+  if (key == "PROCESSOR_CACHE_SIZE"_s) {
+    int cacheSize = info.GetProcessorCacheSize();
+    if (cacheSize > 0) {
+      return ValueToString(cacheSize);
     }
     return "";
   }
