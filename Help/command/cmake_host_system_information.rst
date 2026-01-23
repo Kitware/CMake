@@ -207,6 +207,11 @@ queried.  The list of queried values is stored in ``<variable>``.
 
   The processor vendor ID
 
+``VENDOR_STRING``
+  .. versionadded:: 4.3
+
+  The processor vendor string
+
 ``DISTRIB_INFO``
   .. versionadded:: 3.22
 

@@ -191,6 +191,9 @@ cm::optional<std::string> GetValue(cmsys::SystemInformation& info,
   if (key == "VENDOR_ID"_s) {
     return ValueToString(info.GetVendorID());
   }
+  if (key == "VENDOR_STRING"_s) {
+    return ValueToString(info.GetVendorString());
+  }
   return {};
 }
 
