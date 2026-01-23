@@ -154,6 +154,9 @@ cm::optional<std::string> GetValue(cmsys::SystemInformation& info,
   if (key == "OS_PLATFORM"_s) {
     return ValueToString(info.GetOSPlatform());
   }
+  if (key == "FAMILY_ID"_s) {
+    return ValueToString(info.GetFamilyID());
+  }
   return {};
 }
 
