@@ -1,0 +1,5 @@
+^CMake Error: Cannot open file for write: [^
+]*/Tests/RunCMake/cmake-E-bin2c/generate_binaries-build/not_a_dir/output_not_a_dir\.c\.txt\.tmp[^
+]*
+CMake Error: : System Error: (Not a directory|No such file or directory)
+Could not open file for writing: "not_a_dir/output_not_a_dir\.c\.txt"$

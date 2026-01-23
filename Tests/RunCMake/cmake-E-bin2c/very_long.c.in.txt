@@ -1,0 +1,3 @@
+static unsigned char const array[] = {@array@};
+
+static size_t const length = @length@;

@@ -9,6 +9,7 @@
 
 #include <cm/optional>
 #include <cmext/algorithm>
+#include <cmext/string_view>
 
 #include <cm3p/uv.h>
 #include <fcntl.h>
@@ -16,6 +17,7 @@
 #include "cmCommandLineArgument.h"
 #include "cmCryptoHash.h"
 #include "cmDuration.h"
+#include "cmGeneratedFileStream.h"
 #include "cmGlobalGenerator.h"
 #include "cmList.h"
 #include "cmLocalGenerator.h"
@@ -60,6 +62,7 @@
 
 #include <array>
 #include <chrono>
+#include <cstdint>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -86,10 +89,18 @@ int cmcmd_cmake_module_compile_db(
   std::vector<std::string>::const_iterator argBeg,
   std::vector<std::string>::const_iterator argEnd);
 
+std::ostream& operator<<(
+  std::ostream& stream,
+  std::function<std::ostream&(std::ostream&)> const& func)
+{
+  return func(stream);
+}
+
 namespace {
 // ATTENTION If you add new commands, change here,
 // and in `cmakemain.cxx` in the options table
 char const* const HELP_AVAILABLE_COMMANDS = R"(Available commands:
+  bin2c                     - Turn a binary file into a C array
   capabilities              - Report capabilities built into cmake in JSON format
   cat [--] <files>...       - concat the files and print them to the standard output
   chdir dir cmd [args...]   - run command in a given directory
@@ -676,6 +687,213 @@ struct CoCompileJob
   std::string Command;
   CoCompileHandler Handler;
 };
+
+struct Bin2CTemplateFile
+{
+  std::string ArrayPlaceholder{ "array"_s };
+  std::string LengthPlaceholder{ "length"_s };
+  std::istream* TemplateStream = nullptr;
+};
+
+enum class Bin2CBase
+{
+  Hex,
+  Decimal,
+};
+
+std::size_t const BIN2C_BUFFER_SIZE = 16384;
+std::size_t const BIN2C_ROW_WIDTH = 32;
+
+inline std::size_t Bin2CColumnPosHex(std::size_t column)
+{
+  return cmStrLen(" ") + column * cmStrLen(" 0x__,");
+}
+
+inline std::size_t Bin2CColumnPosDecimal(std::size_t column)
+{
+  return cmStrLen(" ") + column * cmStrLen("____,");
+}
+
+inline char Bin2CDigit(unsigned char byte, int place)
+{
+  return '0' + static_cast<char>((byte / place) % 10);
+}
+
+inline void Bin2CPrintCharToBuffer(bool printSigned, Bin2CBase base,
+                                   std::string& line, unsigned char byte,
+                                   std::uint64_t pos)
+{
+  static char const hextable[] = "0123456789ABCDEF";
+  bool neg = false;
+  if (printSigned && byte & 0x80) {
+    neg = true;
+    byte = ~byte + 1;
+  }
+  switch (base) {
+    case Bin2CBase::Hex:
+      if (printSigned) {
+        line[Bin2CColumnPosHex(pos % BIN2C_ROW_WIDTH)] = neg ? '-' : ' ';
+      }
+      line[Bin2CColumnPosHex(pos % BIN2C_ROW_WIDTH) + cmStrLen(" 0x")] =
+        hextable[byte >> 4];
+      line[Bin2CColumnPosHex(pos % BIN2C_ROW_WIDTH) + cmStrLen(" 0x_")] =
+        hextable[byte & 0xF];
+      break;
+    case Bin2CBase::Decimal:
+      std::size_t negOffset = byte >= 100 ? cmStrLen("")
+        : byte >= 10                      ? cmStrLen("_")
+                                          : cmStrLen("__");
+      for (std::size_t i = cmStrLen(""); i < negOffset; i++) {
+        line[Bin2CColumnPosDecimal(pos % BIN2C_ROW_WIDTH) + i] = ' ';
+      }
+      line[Bin2CColumnPosDecimal(pos % BIN2C_ROW_WIDTH) + negOffset] =
+        neg ? '-' : ' ';
+      if (byte >= 100) {
+        line[Bin2CColumnPosDecimal(pos % BIN2C_ROW_WIDTH) + cmStrLen("_")] =
+          Bin2CDigit(byte, 100);
+      }
+      if (byte >= 10) {
+        line[Bin2CColumnPosDecimal(pos % BIN2C_ROW_WIDTH) + cmStrLen("__")] =
+          Bin2CDigit(byte, 10);
+      }
+      line[Bin2CColumnPosDecimal(pos % BIN2C_ROW_WIDTH) + cmStrLen("___")] =
+        Bin2CDigit(byte, 1);
+      break;
+  }
+}
+
+void Bin2CPrintChar(std::ostream& sout, bool printSigned, Bin2CBase base,
+                    bool printFirstNewline, std::string& line,
+                    unsigned char byte, std::uint64_t& pos, bool& any)
+{
+  if (!any) {
+    if (printFirstNewline) {
+      sout << "\n";
+    }
+  } else if (pos % BIN2C_ROW_WIDTH == 0) {
+    sout << line;
+  }
+  Bin2CPrintCharToBuffer(printSigned, base, line, byte, pos);
+  any = true;
+  pos++;
+}
+
+std::function<std::ostream&(std::ostream& sout)> Bin2CPrintChars(
+  std::istream& sin, bool printTrailingComma, bool printSigned, Bin2CBase base,
+  bool printFirstNewline, std::uint64_t* length = nullptr)
+{
+  return [&sin, printTrailingComma, printSigned, base, printFirstNewline,
+          length](std::ostream& sout) -> std::ostream& {
+    // Construct a line buffer and modify the characters within it. This is
+    // an order of magnitude faster than `sout <<`-ing everything.
+    std::string line = " ";
+    line.reserve(
+      cmStrLen(" ") +
+      (base == Bin2CBase::Hex ? cmStrLen(" 0x__,") : cmStrLen("____,")) *
+        BIN2C_ROW_WIDTH +
+      cmStrLen("\n"));
+    for (std::size_t i = 0; i < BIN2C_ROW_WIDTH; i++) {
+      line = cmStrCat(line, base == Bin2CBase::Hex ? " 0x__," : "____,");
+    }
+    line = cmStrCat(line, '\n');
+
+    bool any = false;
+    std::uint64_t pos = 0;
+    std::size_t readSize;
+    std::vector<std::uint8_t> buffer(BIN2C_BUFFER_SIZE);
+    do {
+      sin.read(reinterpret_cast<char*>(buffer.data()), BIN2C_BUFFER_SIZE);
+      readSize = sin.gcount();
+      for (std::size_t i = 0; i < readSize; i++) {
+        Bin2CPrintChar(sout, printSigned, base, printFirstNewline, line,
+                       buffer[i], pos, any);
+      }
+    } while (readSize >= BIN2C_BUFFER_SIZE);
+    if (any) {
+      std::size_t column = pos % BIN2C_ROW_WIDTH;
+      if (column == 0) {
+        column = BIN2C_ROW_WIDTH;
+      }
+      sout << line.substr(0,
+                          (base == Bin2CBase::Hex
+                             ? Bin2CColumnPosHex(column)
+                             : Bin2CColumnPosDecimal(column)) -
+                            cmStrLen(","))
+           << (printTrailingComma ? ",\n" : "\n");
+    }
+
+    if (length) {
+      *length = pos;
+    }
+    return sout;
+  };
+}
+
+bool Bin2CFromTemplateFile(std::ostream& sout, std::istream& sin,
+                           Bin2CTemplateFile& templateFile,
+                           bool printTrailingComma, bool printSigned,
+                           Bin2CBase base)
+{
+  cm::optional<std::uint64_t> length;
+  std::string line;
+
+  bool hasNewline;
+  while (cmSystemTools::GetLineFromStream(*templateFile.TemplateStream, line,
+                                          &hasNewline)) {
+    cm::optional<std::size_t> at;
+    for (std::size_t i = 0; i < line.length(); i++) {
+      if (line[i] == '@') {
+        if (at) {
+          cm::string_view variableName{ &line[*at + 1], i - (*at + 1) };
+          at.reset();
+          if (variableName == templateFile.ArrayPlaceholder) {
+            if (length) {
+              std::cerr << "Cannot print array twice\n";
+              return false;
+            }
+            length.emplace();
+            sout << Bin2CPrintChars(sin, printTrailingComma, printSigned, base,
+                                    true, &*length);
+          } else if (variableName == templateFile.LengthPlaceholder) {
+            if (!length) {
+              std::cerr << "Cannot print length before array\n";
+              return false;
+            }
+            sout << *length;
+          } else {
+            sout << '@' << variableName;
+            at = i; // Allow for `@` outside of placeholder expansion
+          }
+        } else {
+          at = i;
+        }
+      } else if (!at) {
+        sout << line[i];
+      }
+    }
+    if (at) {
+      sout << &line[*at];
+    }
+    if (hasNewline) {
+      sout << '\n';
+    }
+  }
+
+  return true;
+}
+
+bool Bin2C(std::ostream& sout, std::istream& sin,
+           cm::optional<Bin2CTemplateFile>& templateFile,
+           bool printTrailingComma, bool printSigned, Bin2CBase base)
+{
+  if (templateFile) {
+    return Bin2CFromTemplateFile(sout, sin, *templateFile, printTrailingComma,
+                                 printSigned, base);
+  }
+
+  sout << Bin2CPrintChars(sin, printTrailingComma, printSigned, base, false);
+  return true;
+}
 }
 
 // called when args[0] == "__run_co_compile"
@@ -1907,6 +2125,175 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
                              "(list), 'c' (create) or 'x' (extract)");
         return 1;
       }
+      return 0;
+    }
+
+    // bin2c
+    if (args[1] == "bin2c"_s) {
+      auto const usage = []() {
+        std::cerr << "bin2c Usage: -E bin2c "
+                     "[<options>...] "
+                     "[--] [<input-file> [<output-file>]]\n";
+        return 1;
+      };
+      auto const isFilename = [](std::string const& arg) -> bool {
+        return arg == "-"_s || !cmHasLiteralPrefix(arg, "-");
+      };
+
+      static char const validPlaceholderChars[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                                                  "abcdefghijklmnopqrstuvwxyz"
+                                                  "0123456789/_.+-";
+
+      std::string inputFile = "-";
+      std::string outputFile = "-";
+      cm::optional<Bin2CTemplateFile> templateFile;
+      cm::optional<cm::string_view> templateFilename;
+      bool printTrailingComma = false;
+      bool printSigned = false;
+      auto base = Bin2CBase::Hex;
+
+      auto const ensureTemplateFile = [&templateFile]() -> Bin2CTemplateFile& {
+        if (!templateFile) {
+          templateFile.emplace();
+        }
+        return *templateFile;
+      };
+
+      using CommandArgument =
+        cmCommandLineArgument<bool(std::string const& value)>;
+      std::vector<CommandArgument> arguments = {
+        CommandArgument{ "--template-file", CommandArgument::Values::One,
+                         [&ensureTemplateFile,
+                          &templateFilename](std::string const& arg) -> bool {
+                           ensureTemplateFile();
+                           templateFilename = arg;
+                           return true;
+                         } },
+        CommandArgument{
+          "--template-array-placeholder", CommandArgument::Values::One,
+          [&ensureTemplateFile](std::string const& arg) -> bool {
+            if (arg.find_first_not_of(validPlaceholderChars) !=
+                std::string::npos) {
+              std::cerr << "Invalid array placeholder name: \"" << arg
+                        << "\"\n";
+              return false;
+            }
+            ensureTemplateFile().ArrayPlaceholder = arg;
+            return true;
+          } },
+        CommandArgument{
+          "--template-length-placeholder", CommandArgument::Values::One,
+          [&ensureTemplateFile](std::string const& arg) -> bool {
+            if (arg.find_first_not_of(validPlaceholderChars) !=
+                std::string::npos) {
+              std::cerr << "Invalid length placeholder name: \"" << arg
+                        << "\"\n";
+              return false;
+            }
+            ensureTemplateFile().LengthPlaceholder = arg;
+            return true;
+          } },
+        CommandArgument{ "--trailing-comma", CommandArgument::Values::Zero,
+                         CommandArgument::setToTrue(printTrailingComma) },
+        CommandArgument{ "--signed", CommandArgument::Values::Zero,
+                         CommandArgument::setToTrue(printSigned) },
+        CommandArgument{ "--decimal", CommandArgument::Values::Zero,
+                         [&base](std::string const&) -> bool {
+                           base = Bin2CBase::Decimal;
+                           return true;
+                         } },
+      };
+
+      size_t i;
+      for (i = 2; i < args.size(); i++) {
+        bool matched = false;
+        auto const& arg = args[i];
+        if (arg == "--"_s) {
+          i++;
+          break;
+        }
+        for (auto const& argument : arguments) {
+          if (argument.matches(arg)) {
+            matched = true;
+            if (!argument.parse(arg, i, args)) {
+              std::cerr << "\n";
+              return usage();
+            }
+            break;
+          }
+        }
+
+        if (isFilename(arg)) {
+          break;
+        }
+        if (!matched) {
+          return usage();
+        }
+      }
+
+      if (i < args.size() - 2) {
+        return usage();
+      }
+      if (i < args.size()) {
+        if (!isFilename(args[i])) {
+          return usage();
+        }
+        inputFile = args[i];
+        i++;
+      }
+      if (i < args.size()) {
+        if (!isFilename(args[i])) {
+          return usage();
+        }
+        outputFile = args[i];
+        i++;
+      }
+
+      cmsys::ifstream templateStream;
+      if (templateFilename) {
+        templateStream.open(templateFilename->data());
+        if (!templateStream) {
+          std::cerr << "Could not open template file for reading: \""
+                    << *templateFilename << "\"\n";
+          return 1;
+        }
+        templateFile->TemplateStream = &templateStream;
+      }
+
+      std::istream* sin = &std::cin;
+      cmsys::ifstream fin;
+      if (inputFile != "-"_s) {
+        fin.open(inputFile.c_str(), std::ios::in | std::ios::binary);
+        if (!fin) {
+          std::cerr << "Could not open file for reading: \"" << inputFile
+                    << "\"\n";
+          return 1;
+        }
+        sin = &fin;
+#ifdef _WIN32
+      } else {
+        _setmode(fileno(stdin), _O_BINARY);
+#endif
+      }
+
+      std::ostream* sout = &std::cout;
+      cmGeneratedFileStream fout;
+      if (outputFile != "-"_s) {
+        fout.Open(outputFile);
+        if (!fout) {
+          std::cerr << "Could not open file for writing: \"" << outputFile
+                    << "\"\n";
+          return 1;
+        }
+        fout.SetCopyIfDifferent(true);
+        sout = &fout;
+      }
+
+      if (!Bin2C(*sout, *sin, templateFile, printTrailingComma, printSigned,
+                 base)) {
+        return 1;
+      }
+
       return 0;
     }
 

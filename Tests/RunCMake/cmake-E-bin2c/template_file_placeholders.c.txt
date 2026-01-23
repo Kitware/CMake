@@ -1,0 +1,7 @@
+static unsigned char const array[] = {
+  0xFC, 0xFD, 0xFE, 0xFF, 0x00, 0x01, 0x02, 0x03
+};
+static unsigned char const array2[] = {@array@};
+
+static size_t const length = 8;
+static size_t const length2 = @length@;

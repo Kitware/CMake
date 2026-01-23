@@ -12,6 +12,9 @@
 #if defined(CMake_HAVE_CXX_OPTIONAL)
 #  include <optional> // IWYU pragma: export
 #else
+#  if defined(__GNUC__) && !defined(__clang__)
+#    include <cstring>
+#  endif
 #  include <memory>
 
 #  include <cm/utility>
@@ -121,7 +124,13 @@ private:
     T value;
 
     // Explicit constructor and destructor is required to make this work
-    _mem_union() noexcept {}
+    _mem_union() noexcept
+    {
+#  if defined(__GNUC__) && !defined(__clang__)
+      // Some versions of GCC complain about uninitialized memory
+      std::memset(this, 0, sizeof(*this));
+#  endif
+    }
     ~_mem_union() noexcept {}
   } _mem;
 };
