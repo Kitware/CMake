@@ -1080,6 +1080,7 @@ endif()
 add_executable(pseudo_llvm-rc pseudo_llvm-rc.c)
 add_RunCMake_test(CommandLine -DLLVM_RC=$<TARGET_FILE:pseudo_llvm-rc> -DCMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME}
                   -DCYGWIN=${CYGWIN} -DMSYS=${MSYS} -DPython_EXECUTABLE=${Python_EXECUTABLE}
+                  -DCMake_TEST_JSON_SCHEMA=${CMake_TEST_JSON_SCHEMA}
                   -DEXIT_CODE_EXE=$<TARGET_FILE:exit_code>
                   -DPRINT_STDIN_EXE=$<TARGET_FILE:print_stdin>)
 if(CMake_TEST_LibArchive_VERSION)
