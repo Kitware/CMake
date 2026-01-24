@@ -575,7 +575,12 @@ archive_wstring_append_from_mbs_in_codepage(struct archive_wstring *dest,
 		} else
 			mbflag = MB_PRECOMPOSED;
 
+		/* FIXME(CMake#26903): Offer control over encoding conversion.
+		   For now, we instead tolerate invalid characters as
+		   libarchive 3.7.2 / CMake 3.30 and below did.  */
+		#if 0
 		mbflag |= MB_ERR_INVALID_CHARS;
+		#endif
 
 		buffsize = dest->length + length + 1;
 		do {
