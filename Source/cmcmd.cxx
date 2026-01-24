@@ -690,9 +690,9 @@ struct CoCompileJob
 
 struct Bin2CTemplateFile
 {
-  std::string ArrayPlaceholder{ "array"_s };
-  std::string LengthPlaceholder{ "length"_s };
-  std::istream* TemplateStream = nullptr;
+  std::istream* TemplateStream;
+  cm::string_view ArrayPlaceholder;
+  cm::string_view LengthPlaceholder;
 };
 
 enum class Bin2CBase
@@ -2146,51 +2146,43 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
 
       std::string inputFile = "-";
       std::string outputFile = "-";
-      cm::optional<Bin2CTemplateFile> templateFile;
       cm::optional<cm::string_view> templateFilename;
+      cm::optional<cm::string_view> templateArrayPlaceholder;
+      cm::optional<cm::string_view> templateLengthPlaceholder;
       bool printTrailingComma = false;
       bool printSigned = false;
       auto base = Bin2CBase::Hex;
-
-      auto const ensureTemplateFile = [&templateFile]() -> Bin2CTemplateFile& {
-        if (!templateFile) {
-          templateFile.emplace();
-        }
-        return *templateFile;
-      };
 
       using CommandArgument =
         cmCommandLineArgument<bool(std::string const& value)>;
       std::vector<CommandArgument> arguments = {
         CommandArgument{ "--template-file", CommandArgument::Values::One,
-                         [&ensureTemplateFile,
-                          &templateFilename](std::string const& arg) -> bool {
-                           ensureTemplateFile();
+                         [&templateFilename](std::string const& arg) -> bool {
                            templateFilename = arg;
                            return true;
                          } },
         CommandArgument{
           "--template-array-placeholder", CommandArgument::Values::One,
-          [&ensureTemplateFile](std::string const& arg) -> bool {
+          [&templateArrayPlaceholder](std::string const& arg) -> bool {
             if (arg.find_first_not_of(validPlaceholderChars) !=
                 std::string::npos) {
               std::cerr << "Invalid array placeholder name: \"" << arg
                         << "\"\n";
               return false;
             }
-            ensureTemplateFile().ArrayPlaceholder = arg;
+            templateArrayPlaceholder = arg;
             return true;
           } },
         CommandArgument{
           "--template-length-placeholder", CommandArgument::Values::One,
-          [&ensureTemplateFile](std::string const& arg) -> bool {
+          [&templateLengthPlaceholder](std::string const& arg) -> bool {
             if (arg.find_first_not_of(validPlaceholderChars) !=
                 std::string::npos) {
               std::cerr << "Invalid length placeholder name: \"" << arg
                         << "\"\n";
               return false;
             }
-            ensureTemplateFile().LengthPlaceholder = arg;
+            templateLengthPlaceholder = arg;
             return true;
           } },
         CommandArgument{ "--trailing-comma", CommandArgument::Values::Zero,
@@ -2249,6 +2241,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
         i++;
       }
 
+      cm::optional<Bin2CTemplateFile> templateFile;
       cmsys::ifstream templateStream;
       if (templateFilename) {
         templateStream.open(templateFilename->data());
@@ -2257,7 +2250,21 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
                     << *templateFilename << "\"\n";
           return 1;
         }
-        templateFile->TemplateStream = &templateStream;
+        templateFile =
+          Bin2CTemplateFile{ &templateStream,
+                             templateArrayPlaceholder.value_or("array"_s),
+                             templateLengthPlaceholder.value_or("length"_s) };
+      } else {
+        if (templateArrayPlaceholder) {
+          std::cerr << "Cannot use --template-array-placeholder without "
+                       "--template-file\n\n";
+          return usage();
+        }
+        if (templateLengthPlaceholder) {
+          std::cerr << "Cannot use --template-length-placeholder without "
+                       "--template-file\n\n";
+          return usage();
+        }
       }
 
       std::istream* sin = &std::cin;
