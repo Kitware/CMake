@@ -7,7 +7,10 @@ run_cmake(System/FailExact)
 
 # RBENV specific tests
 if(CMake_TEST_FindRuby_RBENV)
-  set(ENV{RBENV_ROOT} "${RBENV_ROOT}")
+  set(RBENV_ROOT "$ENV{RBENV_ROOT}")
+  if(NOT IS_DIRECTORY "${RBENV_ROOT}")
+    message(FATAL_ERROR "RBENV_ROOT should be set to a valid rbenv ruby location")
+  endif()
 
   # Test environment has RBENV_ROOT setup
   find_program(rbenv
@@ -82,11 +85,10 @@ endif()
 if(CMake_TEST_FindRuby_RVM)
   # Properly using rvm would require sourcing a shell script, eg `source "$HOME/.rvm/scripts/rvm"`
   # Instead, we just rely on the env variable MY_RUBY_HOME
-  if(NOT MY_RUBY_HOME)
+  set(MY_RUBY_HOME "$ENV{MY_RUBY_HOME}")
+  if(NOT IS_DIRECTORY "${MY_RUBY_HOME}")
     message(FATAL_ERROR "MY_RUBY_HOME should be set to a valid RVM ruby location, or you should call `rvm use x.y.z` before")
   endif()
-
-  set(ENV{MY_RUBY_HOME} "${MY_RUBY_HOME}")
 
   execute_process(COMMAND "${MY_RUBY_HOME}/bin/ruby" -e "puts RUBY_VERSION"
     RESULT_VARIABLE result

@@ -9,11 +9,49 @@ Finds Ruby installation and the locations of its include files and libraries:
 
 .. code-block:: cmake
 
-  find_package(Ruby [<version>] [...])
+  find_package(Ruby [<version>] [COMPONENTS <components>...] [...])
 
 Ruby is a general-purpose programming language.  This module supports Ruby
-1.8 through 3.4.  Virtual environments, such as RVM or RBENV, are also
+2.0 through 4.0.  Virtual environments, such as RVM or RBENV, are also
 supported.
+
+Components
+^^^^^^^^^^
+
+.. versionadded:: 4.3
+
+This module supports the following components:
+
+``Interpreter``
+  The Ruby interpreter executable.
+
+``Development``
+  Headers and libraries needed to build Ruby extensions or embed Ruby.
+
+If no components are specified, both ``Interpreter`` and ``Development``
+are searched for.
+
+Imported Targets
+^^^^^^^^^^^^^^^^
+
+.. versionadded:: 4.3
+
+This module defines the following :prop_tgt:`IMPORTED` targets:
+
+``Ruby::Interpreter``
+  Ruby interpreter. Target defined if component ``Interpreter`` is found.
+
+``Ruby::Ruby``
+  Ruby library for embedding Ruby in C/C++ applications.
+  Target defined if component ``Development`` is found.
+
+``Ruby::Module``
+  Ruby library for building Ruby extension modules.
+  Target defined if component ``Development`` is found.
+  Use this target when creating native extensions that will be
+  loaded into Ruby via ``require``. On most platforms, extension
+  modules do not link directly to libruby. Includes appropriate
+  symbol visibility settings.
 
 Result Variables
 ^^^^^^^^^^^^^^^^
@@ -71,7 +109,7 @@ This module accepts the following variables:
   Virtual environments may be provided by:
 
   ``rvm``
-    Requires that the ``MY_RUBY_HOME`` environment environment is defined.
+    Requires that the ``MY_RUBY_HOME`` environment is defined.
 
   ``rbenv``
     Requires that ``rbenv`` is installed in ``~/.rbenv/bin``
@@ -137,9 +175,9 @@ endif()
 set(_Ruby_POSSIBLE_EXECUTABLE_NAMES ruby)
 
 # If the user has not specified a Ruby version, create a list of Ruby versions
-# to check going from 1.8 to 3.4
+# to check going from 1.8 to 4.0
 if (NOT Ruby_FIND_VERSION_EXACT)
-  foreach (_ruby_version RANGE 34 18 -1)
+  foreach (_ruby_version RANGE 40 18 -1)
     string(SUBSTRING "${_ruby_version}" 0 1 _ruby_major_version)
     string(SUBSTRING "${_ruby_version}" 1 1 _ruby_minor_version)
     # Append both rubyX.Y and rubyXY (eg: ruby3.4 ruby34)
@@ -190,14 +228,14 @@ endfunction()
 
 # Query Ruby RBConfig module for the specified variable (_RUBY_CONFIG_VAR)
 function(_RUBY_CONFIG_VAR RBVAR OUTVAR)
-  execute_process(COMMAND ${Ruby_EXECUTABLE} -r rbconfig -e "print RbConfig::CONFIG['${RBVAR}']"
+  execute_process(COMMAND "${Ruby_EXECUTABLE}" -r rbconfig -e "print RbConfig::CONFIG['${RBVAR}']"
                   RESULT_VARIABLE _Ruby_SUCCESS
                   OUTPUT_VARIABLE _Ruby_OUTPUT
                   ERROR_QUIET)
 
   # Config was deprecated in Ruby 1.9 and then removed in Ruby 2 - so this is for ancient code
   if (_Ruby_SUCCESS OR _Ruby_OUTPUT STREQUAL "")
-    execute_process(COMMAND ${Ruby_EXECUTABLE} -r rbconfig -e "print Config::CONFIG['${RBVAR}']"
+    execute_process(COMMAND "${Ruby_EXECUTABLE}" -r rbconfig -e "print Config::CONFIG['${RBVAR}']"
                     RESULT_VARIABLE _Ruby_SUCCESS
                     OUTPUT_VARIABLE _Ruby_OUTPUT
                     ERROR_QUIET)
@@ -350,20 +388,30 @@ if (Ruby_EXECUTABLE AND NOT Ruby_EXECUTABLE STREQUAL "${_Ruby_EXECUTABLE_LAST_QU
   _RUBY_CONFIG_VAR("MINOR" Ruby_VERSION_MINOR)
   _RUBY_CONFIG_VAR("TEENY" Ruby_VERSION_PATCH)
 
-  # query the different directories
+  # Ruby extensions information
+  _RUBY_CONFIG_VAR("arch" Ruby_ARCH) # x86_64-linux, arm64-darwin, x64-mswin64_140, etc
+  # Extension directory where so/bundle files are stored
   _RUBY_CONFIG_VAR("archdir" Ruby_ARCH_DIR)
-  _RUBY_CONFIG_VAR("arch" Ruby_ARCH)
+  # Extension suffix
+  _RUBY_CONFIG_VAR("DLEXT" _Ruby_DLEXT) # so, bundle, *not* dll
+
+  # Headers
   _RUBY_CONFIG_VAR("rubyhdrdir" Ruby_HDR_DIR)
   _RUBY_CONFIG_VAR("rubyarchhdrdir" Ruby_ARCHHDR_DIR)
-  _RUBY_CONFIG_VAR("libdir" _Ruby_POSSIBLE_LIB_DIR)
+
+  # Ruby library information
+  _RUBY_CONFIG_VAR("libdir" _Ruby_POSSIBLE_LIB_DIR) # /usr/lib64
+  _RUBY_CONFIG_VAR("RUBY_SO_NAME" _Ruby_SO_NAME) # ruby, x64-vcruntime140-ruby340, etc.
+
+  # Ruby directory for ruby files (*.rb). TODO - not relevant should be removed
   _RUBY_CONFIG_VAR("rubylibdir" Ruby_RUBY_LIB_DIR)
 
-  # site_ruby
+  # site_ruby - TODO - not relevant and should be removed
   _RUBY_CONFIG_VAR("sitearchdir" Ruby_SITEARCH_DIR)
   _RUBY_CONFIG_VAR("sitelibdir" Ruby_SITELIB_DIR)
 
-  # vendor_ruby available ?
-  execute_process(COMMAND ${Ruby_EXECUTABLE} -r vendor-specific -e "print 'true'"
+  # vendor_ruby - TODO - Not relevant and should be removed.
+  execute_process(COMMAND "${Ruby_EXECUTABLE}" -r vendor-specific -e "print 'true'"
                   OUTPUT_VARIABLE Ruby_HAS_VENDOR_RUBY ERROR_QUIET)
 
   if (Ruby_HAS_VENDOR_RUBY)
@@ -373,14 +421,16 @@ if (Ruby_EXECUTABLE AND NOT Ruby_EXECUTABLE STREQUAL "${_Ruby_EXECUTABLE_LAST_QU
 
   # save the results in the cache so we don't have to run ruby the next time again
   set(_Ruby_EXECUTABLE_LAST_QUERIED "${Ruby_EXECUTABLE}" CACHE INTERNAL "The ruby executable last queried for version and path info")
-  set(Ruby_VERSION_MAJOR ${Ruby_VERSION_MAJOR} CACHE PATH "The Ruby major version" FORCE)
-  set(Ruby_VERSION_MINOR ${Ruby_VERSION_MINOR} CACHE PATH "The Ruby minor version" FORCE)
-  set(Ruby_VERSION_PATCH ${Ruby_VERSION_PATCH} CACHE PATH "The Ruby patch version" FORCE)
+  set(Ruby_VERSION_MAJOR ${Ruby_VERSION_MAJOR} CACHE STRING "The Ruby major version" FORCE)
+  set(Ruby_VERSION_MINOR ${Ruby_VERSION_MINOR} CACHE STRING "The Ruby minor version" FORCE)
+  set(Ruby_VERSION_PATCH ${Ruby_VERSION_PATCH} CACHE STRING "The Ruby patch version" FORCE)
   set(Ruby_ARCH_DIR ${Ruby_ARCH_DIR} CACHE INTERNAL "The Ruby arch dir" FORCE)
   set(Ruby_HDR_DIR ${Ruby_HDR_DIR} CACHE INTERNAL "The Ruby header dir (1.9+)" FORCE)
   set(Ruby_ARCHHDR_DIR ${Ruby_ARCHHDR_DIR} CACHE INTERNAL "The Ruby arch header dir (2.0+)" FORCE)
   set(_Ruby_POSSIBLE_LIB_DIR ${_Ruby_POSSIBLE_LIB_DIR} CACHE INTERNAL "The Ruby lib dir" FORCE)
   set(Ruby_RUBY_LIB_DIR ${Ruby_RUBY_LIB_DIR} CACHE INTERNAL "The Ruby ruby-lib dir" FORCE)
+  set(_Ruby_SO_NAME ${_Ruby_SO_NAME} CACHE PATH "The Ruby shared library name" FORCE)
+  set(_Ruby_DLEXT ${_Ruby_DLEXT} CACHE PATH "Ruby extensions extension" FORCE)
   set(Ruby_SITEARCH_DIR ${Ruby_SITEARCH_DIR} CACHE INTERNAL "The Ruby site arch dir" FORCE)
   set(Ruby_SITELIB_DIR ${Ruby_SITELIB_DIR} CACHE INTERNAL "The Ruby site lib dir" FORCE)
   set(Ruby_HAS_VENDOR_RUBY ${Ruby_HAS_VENDOR_RUBY} CACHE BOOL "Vendor Ruby is available" FORCE)
@@ -394,6 +444,8 @@ if (Ruby_EXECUTABLE AND NOT Ruby_EXECUTABLE STREQUAL "${_Ruby_EXECUTABLE_LAST_QU
       Ruby_ARCHHDR_DIR
       _Ruby_POSSIBLE_LIB_DIR
       Ruby_RUBY_LIB_DIR
+      _Ruby_SO_NAME
+      _Ruby_DLEXT
       Ruby_SITEARCH_DIR
       Ruby_SITELIB_DIR
       Ruby_HAS_VENDOR_RUBY
@@ -405,30 +457,6 @@ if (Ruby_EXECUTABLE AND NOT Ruby_EXECUTABLE STREQUAL "${_Ruby_EXECUTABLE_LAST_QU
   )
 endif ()
 
-# In case Ruby_EXECUTABLE could not be executed (e.g. cross compiling)
-# try to detect which version we found. This is not too good.
-if (Ruby_EXECUTABLE AND NOT Ruby_VERSION_MAJOR)
-  # by default assume 1.8.0
-  set(Ruby_VERSION_MAJOR 1)
-  set(Ruby_VERSION_MINOR 8)
-  set(Ruby_VERSION_PATCH 0)
-  # check whether we found 1.9.x
-  if (${Ruby_EXECUTABLE} MATCHES "ruby1\\.?9")
-    set(Ruby_VERSION_MAJOR 1)
-    set(Ruby_VERSION_MINOR 9)
-  endif ()
-  # check whether we found 2.[0-7].x
-  if (${Ruby_EXECUTABLE} MATCHES "ruby2")
-    set(Ruby_VERSION_MAJOR 2)
-    string(REGEX_REPLACE ${Ruby_EXECUTABLE} "ruby2\\.?([0-7])" "\\1" Ruby_VERSION_MINOR)
-  endif ()
-  # check whether we found 3.[0-1].x
-  if (${Ruby_EXECUTABLE} MATCHES "ruby3")
-    set(Ruby_VERSION_MAJOR 3)
-    string(REGEX_REPLACE ${Ruby_EXECUTABLE} "ruby3\\.?([0-1])" "\\1" Ruby_VERSION_MINOR)
-  endif ()
-endif ()
-
 if (Ruby_VERSION_MAJOR)
   set(Ruby_VERSION "${Ruby_VERSION_MAJOR}.${Ruby_VERSION_MINOR}.${Ruby_VERSION_PATCH}")
   set(_Ruby_VERSION_NODOT "${Ruby_VERSION_MAJOR}${Ruby_VERSION_MINOR}${Ruby_VERSION_PATCH}")
@@ -437,8 +465,11 @@ if (Ruby_VERSION_MAJOR)
   set(_Ruby_VERSION_SHORT_NODOT "${Ruby_VERSION_MAJOR}${Ruby_VERSION_MINOR}")
 endif ()
 
-# FIXME: Currently we require both the interpreter and development components to be found
-# in order to use either.  See issue #20474.
+# Save CMAKE_FIND_FRAMEWORK
+set(_Ruby_CMAKE_FIND_FRAMEWORK_ORIGINAL ${CMAKE_FIND_FRAMEWORK})
+
+# Avoid finding the ancient Ruby framework included in macOS.
+set(CMAKE_FIND_FRAMEWORK LAST)
 
 find_path(Ruby_INCLUDE_DIR
         NAMES ruby.h
@@ -450,53 +481,9 @@ find_path(Ruby_CONFIG_INCLUDE_DIR
 
 set(Ruby_INCLUDE_DIRS ${Ruby_INCLUDE_DIR} ${Ruby_CONFIG_INCLUDE_DIR})
 
-# Determine the list of possible names for the ruby library
-set(_Ruby_POSSIBLE_LIB_NAMES
-  ruby
-  ruby-static
-  ruby-${Ruby_VERSION}
-  ruby${_Ruby_VERSION_NODOT}
-  ruby${_Ruby_VERSION_NODOT_ZERO_PATCH}
-  ruby-${_Ruby_VERSION_SHORT}
-  ruby${_Ruby_VERSION_SHORT}
-  ruby${_Ruby_VERSION_SHORT_NODOT}
-)
-
-if (WIN32)
-  set(_Ruby_POSSIBLE_RUNTIMES "ucrt;msvcrt;vcruntime140;vcruntime140_1;vcruntime${MSVC_TOOLSET_VERSION}")
-  set(_Ruby_POSSIBLE_VERSION_SUFFIXES "${_Ruby_VERSION_NODOT};${_Ruby_VERSION_NODOT_ZERO_PATCH}")
-
-  if (CMAKE_SIZEOF_VOID_P EQUAL 8)
-    set(_Ruby_POSSIBLE_ARCH_PREFIXES "libx64-;x64-")
-  else ()
-    set(_Ruby_POSSIBLE_ARCH_PREFIXES "lib")
-  endif ()
-
-  foreach (_Ruby_RUNTIME ${_Ruby_POSSIBLE_RUNTIMES})
-    foreach (_Ruby_VERSION_SUFFIX ${_Ruby_POSSIBLE_VERSION_SUFFIXES})
-      foreach (_Ruby_ARCH_PREFIX ${_Ruby_POSSIBLE_ARCH_PREFIXES})
-        list(APPEND _Ruby_POSSIBLE_LIB_NAMES
-             "${_Ruby_ARCH_PREFIX}${_Ruby_RUNTIME}-ruby${_Ruby_VERSION_SUFFIX}"
-             "${_Ruby_ARCH_PREFIX}${_Ruby_RUNTIME}-ruby${_Ruby_VERSION_SUFFIX}-static")
-      endforeach ()
-    endforeach ()
-  endforeach ()
-endif ()
-
-# Save CMAKE_FIND_FRAMEWORK
-set(_Ruby_CMAKE_FIND_FRAMEWORK_ORIGINAL ${CMAKE_FIND_FRAMEWORK})
-
-# Avoid finding the ancient Ruby framework included in macOS.
-set(CMAKE_FIND_FRAMEWORK LAST)
-
 find_library(Ruby_LIBRARY
-        NAMES ${_Ruby_POSSIBLE_LIB_NAMES}
+        NAMES "${_Ruby_SO_NAME}"
         HINTS ${_Ruby_POSSIBLE_LIB_DIR})
-
-set(_Ruby_REQUIRED_VARS Ruby_EXECUTABLE Ruby_INCLUDE_DIR Ruby_LIBRARY)
-if (_Ruby_VERSION_SHORT_NODOT GREATER 18)
-  list(APPEND _Ruby_REQUIRED_VARS Ruby_CONFIG_INCLUDE_DIR)
-endif ()
 
 # Restore CMAKE_FIND_FRAMEWORK
 set(CMAKE_FIND_FRAMEWORK ${_Ruby_CMAKE_FIND_FRAMEWORK_ORIGINAL})
@@ -504,7 +491,8 @@ set(CMAKE_FIND_FRAMEWORK ${_Ruby_CMAKE_FIND_FRAMEWORK_ORIGINAL})
 message(DEBUG "--------FindRuby.cmake debug------------")
 message(DEBUG "_Ruby_POSSIBLE_EXECUTABLE_NAMES: ${_Ruby_POSSIBLE_EXECUTABLE_NAMES}")
 message(DEBUG "_Ruby_POSSIBLE_LIB_DIR: ${_Ruby_POSSIBLE_LIB_DIR}")
-message(DEBUG "_Ruby_POSSIBLE_LIB_NAMES: ${_Ruby_POSSIBLE_LIB_NAMES}")
+message(DEBUG "Ruby_LIBRUBY_SO: ${_Ruby_SO_NAME}")
+message(DEBUG "_Ruby_DLEXT: ${_Ruby_DLEXT}")
 message(DEBUG "Ruby_FIND_VIRTUALENV=${Ruby_FIND_VIRTUALENV}")
 message(DEBUG "Ruby_ENV: ${Ruby_ENV}")
 message(DEBUG "Found Ruby_VERSION: \"${Ruby_VERSION}\"")
@@ -517,12 +505,111 @@ message(DEBUG "Ruby_ARCH_DIR: ${Ruby_ARCH_DIR}")
 message(DEBUG "Ruby_ARCHHDR_DIR: ${Ruby_ARCHHDR_DIR}")
 message(DEBUG "--------------------")
 
+# Components
+#
+# If the caller does not request components, preserve legacy behavior
+if (NOT Ruby_FIND_COMPONENTS)
+  set(Ruby_FIND_COMPONENTS Interpreter Development)
+endif ()
+
+set(_Ruby_WANT_INTERPRETER FALSE)
+set(_Ruby_WANT_DEVELOPMENT FALSE)
+set(_Ruby_REQUIRED_VARS "")
+
+foreach (component IN LISTS Ruby_FIND_COMPONENTS)
+  if (component STREQUAL "Interpreter")
+    set(_Ruby_WANT_INTERPRETER TRUE)
+    list(APPEND _Ruby_REQUIRED_VARS Ruby_EXECUTABLE)
+  elseif (component STREQUAL "Development")
+    set(_Ruby_WANT_DEVELOPMENT TRUE)
+    list(APPEND _Ruby_REQUIRED_VARS Ruby_INCLUDE_DIR Ruby_CONFIG_INCLUDE_DIR)
+    if (WIN32)
+      list(APPEND _Ruby_REQUIRED_VARS Ruby_LIBRARY)
+    endif ()
+  else ()
+    message(FATAL_ERROR
+            "FindRuby: Unsupported component '${component}'. Supported components are: Interpreter, Development")
+  endif ()
+endforeach ()
+
+# Set component found flags
+if (Ruby_EXECUTABLE)
+  set(Ruby_Interpreter_FOUND TRUE)
+else ()
+  set(Ruby_Interpreter_FOUND FALSE)
+endif ()
+
+if (Ruby_INCLUDE_DIR AND Ruby_CONFIG_INCLUDE_DIR AND (Ruby_LIBRARY OR NOT WIN32))
+  set(Ruby_Development_FOUND TRUE)
+else ()
+  set(Ruby_Development_FOUND FALSE)
+endif ()
+
 include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(Ruby REQUIRED_VARS ${_Ruby_REQUIRED_VARS}
-                                  VERSION_VAR Ruby_VERSION)
+find_package_handle_standard_args(Ruby
+                                  REQUIRED_VARS ${_Ruby_REQUIRED_VARS}
+                                  VERSION_VAR Ruby_VERSION
+                                  HANDLE_COMPONENTS)
 
 if (Ruby_FOUND)
-  set(Ruby_LIBRARIES ${Ruby_LIBRARY})
+  if (NOT TARGET Ruby::Interpreter)
+    add_executable(Ruby::Interpreter IMPORTED GLOBAL)
+    set_target_properties(Ruby::Interpreter PROPERTIES
+      IMPORTED_LOCATION "${Ruby_EXECUTABLE}"
+    )
+  endif ()
+
+  if (Ruby_Development_FOUND)
+    set(Ruby_LIBRARIES ${Ruby_LIBRARY})
+
+    if (Ruby_LIBRARY AND NOT TARGET Ruby::Ruby)
+      add_library(Ruby::Ruby UNKNOWN IMPORTED)
+      set_target_properties(Ruby::Ruby PROPERTIES
+        IMPORTED_LOCATION "${Ruby_LIBRARY}"
+        INTERFACE_INCLUDE_DIRECTORIES "${Ruby_INCLUDE_DIRS}"
+        # Custom property for extension suffix (with dot), e.g. ".so", ".bundle"
+        INTERFACE_RUBY_EXTENSION_SUFFIX ".${_Ruby_DLEXT}"
+      )
+    endif ()
+
+    # Ruby::Module - For building Ruby extension modules
+    if (NOT TARGET Ruby::Module)
+      if (WIN32)
+        add_library(Ruby::Module UNKNOWN IMPORTED)
+        set_target_properties(Ruby::Module PROPERTIES
+          IMPORTED_LOCATION "${Ruby_LIBRARY}"
+        )
+      else ()
+        add_library(Ruby::Module INTERFACE IMPORTED)
+      endif ()
+
+      set_target_properties(Ruby::Module PROPERTIES
+        INTERFACE_INCLUDE_DIRECTORIES "${Ruby_INCLUDE_DIRS}"
+        # Custom property for extension suffix (with dot), e.g. ".so", ".bundle"
+        INTERFACE_RUBY_EXTENSION_SUFFIX ".${_Ruby_DLEXT}"
+        INTERFACE_C_VISIBILITY_PRESET hidden
+        INTERFACE_CXX_VISIBILITY_PRESET hidden
+        INTERFACE_VISIBILITY_INLINES_HIDDEN ON
+      )
+
+      # macOS: allow unresolved Ruby API symbols; resolved when Ruby loads the bundle.
+      if (APPLE)
+        target_link_options(Ruby::Module INTERFACE
+          "LINKER:-undefined,dynamic_lookup"
+        )
+      endif ()
+
+      # Linux (and other ELF platforms):
+      # Normally undefined Ruby API symbols are allowed in shared objects and resolved at dlopen().
+      # But if the toolchain/preset adds -Wl,--no-undefined, linking will fail.
+      # This counteracts that.
+      if (UNIX AND NOT APPLE)
+        target_link_options(Ruby::Module INTERFACE
+          "LINKER:--unresolved-symbols=ignore-all"
+        )
+      endif ()
+    endif ()
+  endif ()
 endif ()
 
 mark_as_advanced(

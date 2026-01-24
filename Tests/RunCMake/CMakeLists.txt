@@ -503,8 +503,7 @@ if(CMake_TEST_FindRuby)
   add_RunCMake_test(FindRuby
     -DCMake_TEST_FindRuby_RBENV=${CMake_TEST_FindRuby_RBENV}
     -DCMake_TEST_FindRuby_RVM=${CMake_TEST_FindRuby_RVM}
-    -DRBENV_ROOT=$ENV{RBENV_ROOT}
-    -DMY_RUBY_HOME=$ENV{MY_RUBY_HOME})
+    )
 endif()
 add_RunCMake_test(FindOpenGL)
 add_RunCMake_test(InitialFlags)
