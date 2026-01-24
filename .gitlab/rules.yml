@@ -68,6 +68,16 @@ workflow:
               on_new_commit: none
           variables:
               CMAKE_CI_PIPELINE_NAME: 'Schedule "$CI_PIPELINE_SCHEDULE_DESCRIPTION"'
+        # Run for development documentation.
+        - if: '$CMAKE_CI_PROJECT_MAIN_BRANCH != null && $CI_COMMIT_BRANCH != null && $CMAKE_CI_PROJECT_MAIN_BRANCH == $CI_COMMIT_BRANCH'
+          when: always
+          variables:
+              CMAKE_CI_PIPELINE_NAME: 'Development documentation on branch "$CI_COMMIT_REF_NAME"'
+        # Run for continuous testing of staging branch.
+        - if: '$CMAKE_CI_PROJECT_CONTINUOUS_BRANCH != null && $CI_COMMIT_BRANCH != null && $CMAKE_CI_PROJECT_CONTINUOUS_BRANCH == $CI_COMMIT_BRANCH'
+          when: always
+          variables:
+              CMAKE_CI_PIPELINE_NAME: 'Continuous branch "$CI_COMMIT_REF_NAME"'
         # Run for protected branches.
         - if: '$CI_COMMIT_REF_PROTECTED == "true"'
           when: always
