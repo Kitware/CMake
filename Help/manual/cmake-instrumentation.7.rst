@@ -448,7 +448,7 @@ Example:
     "version": 1,
     "command" : "\"/usr/bin/c++\" \"-MD\" \"-MT\" \"CMakeFiles/main.dir/main.cxx.o\" \"-MF\" \"CMakeFiles/main.dir/main.cxx.o.d\" \"-o\" \"CMakeFiles/main.dir/main.cxx.o\" \"-c\" \"<src>/main.cxx\"",
     "role" : "compile",
-    "return" : 1,
+    "result" : 1,
     "target": "main",
     "language" : "C++",
     "outputs" : [ "CMakeFiles/main.dir/main.cxx.o" ],
