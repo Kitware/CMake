@@ -465,6 +465,11 @@ void cmInstrumentation::InsertStaticSystemInformation(Json::Value& root)
     info.RunOSCheck();
     this->ranOSCheck = true;
   }
+  if (!this->ranSystemChecks) {
+    info.RunCPUCheck();
+    info.RunMemoryCheck();
+    this->ranSystemChecks = true;
+  }
   Json::Value infoRoot;
   infoRoot["familyId"] = info.GetFamilyID();
   infoRoot["hostname"] = info.GetHostname();
