@@ -263,11 +263,11 @@ bool cmSourceFile::FindFullPath(std::string* error,
 void cmSourceFile::CheckExtension()
 {
   // Compute the extension.
-  std::string realExt =
-    cmSystemTools::GetFilenameLastExtension(this->FullPath);
+  cm::string_view realExt =
+    cmSystemTools::GetFilenameLastExtensionView(this->FullPath);
   if (!realExt.empty()) {
     // Store the extension without the leading '.'.
-    this->Extension = realExt.substr(1);
+    this->Extension = std::string(realExt.substr(1));
   }
 
   // Look for object files.

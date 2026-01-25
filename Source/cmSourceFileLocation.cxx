@@ -103,7 +103,7 @@ void cmSourceFileLocation::UpdateExtension(std::string const& name)
 {
   assert(this->Makefile);
   // Check the extension.
-  std::string ext = cmSystemTools::GetFilenameLastExtension(name);
+  cm::string_view ext = cmSystemTools::GetFilenameLastExtensionView(name);
   if (!ext.empty()) {
     ext = ext.substr(1);
   }

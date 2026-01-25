@@ -167,9 +167,11 @@ bool cmTargetTraceDependencies::IsUtility(std::string const& dep)
   // no output-name property which old code would not have set).  In
   // that case the target name will be the file basename of the
   // dependency.
-  std::string util = cmSystemTools::GetFilenameName(dep);
-  if (cmSystemTools::GetFilenameLastExtension(util) == ".exe") {
-    util = cmSystemTools::GetFilenameWithoutLastExtension(util);
+  std::string util;
+  if (cmSystemTools::GetFilenameLastExtensionView(dep) == ".exe") {
+    util = cmSystemTools::GetFilenameWithoutLastExtension(dep);
+  } else {
+    util = cmSystemTools::GetFilenameName(dep);
   }
 
   // Check for a target with this name.

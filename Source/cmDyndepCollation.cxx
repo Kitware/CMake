@@ -769,7 +769,7 @@ bool cmDyndepCollation::WriteDyndepMetadata(
       auto m = cb.ModuleFile(p.LogicalName);
       if (m) {
         install_bmi_path = cmStrCat(
-          bmi_destination, cmEscape(cmSystemTools::GetFilenameName(*m)));
+          bmi_destination, cmEscape(cmSystemTools::GetFilenameNameView(*m)));
         build_bmi_path = cmEscape(*m);
       }
 
@@ -780,7 +780,7 @@ bool cmDyndepCollation::WriteDyndepMetadata(
         if (exp.Export->Install && file_set.Destination) {
           auto rel =
             cmStrCat('/', file_set.RelativeDirectory,
-                     cmSystemTools::GetFilenameName(file_set.SourcePath));
+                     cmSystemTools::GetFilenameNameView(file_set.SourcePath));
           iface_source = cmStrCat(
             install_destination(*file_set.Destination).second, cmEscape(rel));
           mod.SourcePath = cmStrCat(*file_set.Destination, rel);
@@ -853,7 +853,7 @@ bool cmDyndepCollation::WriteDyndepMetadata(
           *bmi_install_script
             << "  list(APPEND CMAKE_ABSOLUTE_DESTINATION_FILES\n"
                "    \""
-            << cmEscape(cmSystemTools::GetFilenameName(*m))
+            << cmEscape(cmSystemTools::GetFilenameNameView(*m))
             << "\")\n"
                "  if (CMAKE_WARN_ON_ABSOLUTE_INSTALL_DESTINATION)\n"
                "    message(WARNING\n"

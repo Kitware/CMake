@@ -2826,7 +2826,7 @@ cmGlobalGenerator::SplitFrameworkPath(std::string const& path,
   static cmsys::RegularExpression frameworkPath(
     "((.+)/)?([^/]+)\\.framework(/Versions/([^/]+))?(/(.+))?$");
 
-  auto ext = cmSystemTools::GetFilenameLastExtension(path);
+  auto ext = cmSystemTools::GetFilenameLastExtensionView(path);
   if ((ext.empty() || ext == ".tbd" || ext == ".framework") &&
       frameworkPath.find(path)) {
     auto name = frameworkPath.match(3);
@@ -2851,7 +2851,7 @@ cmGlobalGenerator::SplitFrameworkPath(std::string const& path,
   if (format == FrameworkFormat::Extended) {
     // path format can be more flexible: (/path/to/)?fwName(.framework)?
     auto fwDir = cmSystemTools::GetParentDirectory(path);
-    auto name = cmSystemTools::GetFilenameLastExtension(path) == ".framework"
+    auto name = ext == ".framework"
       ? cmSystemTools::GetFilenameWithoutExtension(path)
       : cmSystemTools::GetFilenameName(path);
 
