@@ -388,7 +388,10 @@
       "properties": {
         "type": {
           "type": "string",
-          "description": "An optional string representing the type of the variable. It should be BOOL, FILEPATH, PATH, STRING, or INTERNAL."
+          "description": "An optional string representing the type of the variable. It should be BOOL, FILEPATH, PATH, STRING, or INTERNAL.",
+          "enum": [
+            "BOOL", "FILEPATH", "PATH", "STRING", "INTERNAL"
+          ]
         },
         "value": {
           "anyOf": [
