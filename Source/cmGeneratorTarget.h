@@ -1326,6 +1326,9 @@ private:
   mutable std::vector<AllConfigSource> AllConfigSources;
   void ComputeAllConfigSources() const;
 
+  mutable std::set<std::string> AllConfigCompileLanguages;
+  void ComputeAllConfigCompileLanguages() const;
+
   mutable std::unordered_map<std::string, bool> MaybeInterfacePropertyExists;
   bool MaybeHaveInterfaceProperty(std::string const& prop,
                                   cm::GenEx::Evaluation* eval,

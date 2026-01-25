@@ -511,7 +511,7 @@ cmGeneratorTarget::GetAllConfigSources(SourceKind kind) const
   return result;
 }
 
-std::set<std::string> cmGeneratorTarget::GetAllConfigCompileLanguages() const
+void cmGeneratorTarget::ComputeAllConfigCompileLanguages() const
 {
   std::set<std::string> languages;
   std::vector<AllConfigSource> const& sources = this->GetAllConfigSources();
@@ -521,5 +521,13 @@ std::set<std::string> cmGeneratorTarget::GetAllConfigCompileLanguages() const
       languages.emplace(lang);
     }
   }
-  return languages;
+  this->AllConfigCompileLanguages = languages;
+}
+
+std::set<std::string> cmGeneratorTarget::GetAllConfigCompileLanguages() const
+{
+  if (this->AllConfigCompileLanguages.empty()) {
+    this->ComputeAllConfigCompileLanguages();
+  }
+  return this->AllConfigCompileLanguages;
 }

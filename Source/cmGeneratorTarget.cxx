@@ -533,6 +533,7 @@ cmValue cmGeneratorTarget::GetFileSuffixInternal(
 void cmGeneratorTarget::ClearSourcesCache()
 {
   this->AllConfigSources.clear();
+  this->AllConfigCompileLanguages.clear();
   this->KindedSourcesMap.clear();
   this->SourcesAreContextDependent = Tribool::Indeterminate;
   this->Objects.clear();
