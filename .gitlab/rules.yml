@@ -1,117 +1,218 @@
 # Rules for where jobs can run
 
-.run_manually:
-    rules:
-        - if: '$CMAKE_CI_PACKAGE != null || $CMAKE_CI_VERSION_UPDATE != null'
-          when: never
-        - if: '($CMAKE_CI_NIGHTLY == "true" && $CMAKE_CI_JOB_NIGHTLY == "false")'
-          when: never
-        - if: '$CMAKE_CI_NIGHTLY == "true"'
-          when: on_success
-        - if: '$CMAKE_CI_JOB_NIGHTLY == "true"'
-          when: never
-        - if: '$CMAKE_CI_PROJECT_CONTINUOUS_BRANCH != null && $CI_COMMIT_BRANCH != null && $CMAKE_CI_PROJECT_CONTINUOUS_BRANCH == $CI_COMMIT_BRANCH && $CMAKE_CI_JOB_CONTINUOUS == "true"'
-          when: delayed
-          start_in: 5 minutes
-        - if: '($CMAKE_CI_NO_MR == "true" && $CI_MERGE_REQUEST_ID)'
-          when: never
-        - if: '$CI_MERGE_REQUEST_ID'
-          when: manual
-        - if: '$CI_PROJECT_PATH == "cmake/cmake" && $CI_PIPELINE_SOURCE == "schedule"'
-          when: on_success
-        - if: '$CI_PROJECT_PATH == "cmake/cmake"'
-          when: manual
-        - when: never
+###
+## Job variables:
+##   CMAKE_CI_JOB_UPDATES_VERSION
+##     Set to "true" if the job performs a task that occurs with version
+##     updates.
+##   CMAKE_CI_JOB_UPDATES_WEBSITE_HELP
+##     Set to "true" if the job performs tasks to update website help.
+##   CMAKE_CI_JOB_NO_MR
+##     Set to "true" if the job should never run for merge requests.
+##     These jobs require secrets that MR pipelines cannot provide
+##     (software license information, upload secrets, etc.).
+##   CMAKE_CI_JOB_PACKAGE_ONLY
+##     Set to "true" if the job handles packaging tasks. These jobs will only
+##     run during packaging pipelines.
+##   CMAKE_CI_JOB_NIGHTLY
+##     Set to "true" if the job should only run for nightly pipelines. Set to
+##     "false" to suppress the job for nightly pipelines.
+##   CMAKE_CI_JOB_NIGHTLY_IGNORE_DEPS
+##     Set to "true" if the job should run even if dependent jobs fail (e.g.,
+##     further testing of the same setup under a different generator. Should
+##     only be used on jobs with `needs` on other jobs.
+##   CMAKE_CI_JOB_RUN_MANUALLY
+##     Set to "true" if the job should be manually triggered in MRs.
+##     These jobs will also be delayed for branch update pipelines.
+## Pipeline variables:
+##   CMAKE_CI_VERSION_UPDATE
+##     Set to "true" if the pipeline should perform version update tasks.
+##     No other tasks are performed if set.
+##   CMAKE_CI_PACKAGE
+##     Set to either "dev" or `vX.Y` to construct a packaging pipeline. Also
+##     uploads constructed packages. May also run website help jobs. No other
+##     tasks are performed if set.
+##   CMAKE_CI_NIGHTLY
+##     Set to "true" to enable nightly-only jobs.
+## Project variables:
+##   CMAKE_CI_PROJECT_MAIN_BRANCH
+##     Set to the name of the main integration branch where development
+##     version documentation pipelines run.
+##   CMAKE_CI_PROJECT_CONTINUOUS_BRANCH
+##     Set to the name of the staging branch where continuous pipelines run.
+####
 
-.run_automatically:
-    rules:
-        - if: '$CMAKE_CI_PACKAGE != null || $CMAKE_CI_VERSION_UPDATE != null'
-          when: never
-        - if: '($CMAKE_CI_NIGHTLY == "true" && $CMAKE_CI_JOB_NIGHTLY == "false")'
-          when: never
-        - if: '$CMAKE_CI_NIGHTLY == "true"'
-          when: on_success
-        - if: '$CMAKE_CI_JOB_NIGHTLY == "true"'
-          when: never
-        - if: '$CMAKE_CI_PROJECT_CONTINUOUS_BRANCH != null && $CI_COMMIT_BRANCH != null && $CMAKE_CI_PROJECT_CONTINUOUS_BRANCH == $CI_COMMIT_BRANCH && $CMAKE_CI_JOB_CONTINUOUS == "true"'
-          when: on_success
-        - if: '($CMAKE_CI_NO_MR == "true" && $CI_MERGE_REQUEST_ID)'
-          when: never
-        - if: '$CI_MERGE_REQUEST_ID'
-          when: on_success
-        - if: '$CI_PROJECT_PATH == "cmake/cmake" && $CI_PIPELINE_SOURCE == "schedule"'
-          when: on_success
-        - if: '$CI_PROJECT_PATH == "cmake/cmake"'
-          when: delayed
-          start_in: 5 minutes
-        - when: never
+variables:
+    CMAKE_CI_PIPELINE_NAME: 'Branch "$CI_COMMIT_REF_NAME"'
 
-.run_dependent:
+# When to even consider running a pipeline.
+workflow:
+    name: "$CMAKE_CI_PIPELINE_NAME"
     rules:
-        - if: '$CMAKE_CI_PACKAGE != null || $CMAKE_CI_VERSION_UPDATE != null'
-          when: never
-        - if: '($CMAKE_CI_NIGHTLY == "true" && $CMAKE_CI_JOB_NIGHTLY == "false")'
-          when: never
-        - if: '($CMAKE_CI_NIGHTLY == "true" && $CMAKE_CI_NIGHTLY_IGNORE_DEPS == "true")'
+        # Run for merge requests.
+        - if: '$CI_MERGE_REQUEST_ID'
           when: always
-        - if: '$CMAKE_CI_NIGHTLY == "true"'
-          when: on_success
-        - if: '$CMAKE_CI_JOB_NIGHTLY == "true"'
+          auto_cancel:
+              # Cancel all pipeline jobs if a new commit comes in on the branch/tag.
+              on_new_commit: interruptible
+          variables:
+              CMAKE_CI_PIPELINE_NAME: 'Merge request !$CI_MERGE_REQUEST_IID'
+        # If this is not a MR, do not run for other projects.
+        - if: '$CI_PROJECT_PATH != "cmake/cmake" && $CMAKE_CI_PROJECT_CONTINUOUS_BRANCH == null && $CMAKE_CI_PROJECT_MAIN_BRANCH == null'
           when: never
-        - if: '$CMAKE_CI_PROJECT_CONTINUOUS_BRANCH != null && $CI_COMMIT_BRANCH != null && $CMAKE_CI_PROJECT_CONTINUOUS_BRANCH == $CI_COMMIT_BRANCH && $CMAKE_CI_JOB_CONTINUOUS == "true"'
-          when: on_success
-        - if: '($CMAKE_CI_NO_MR == "true" && $CI_MERGE_REQUEST_ID)'
-          when: never
-        - if: '$CI_MERGE_REQUEST_ID'
-          when: on_success
-        - if: '$CI_PROJECT_PATH == "cmake/cmake"'
-          when: on_success
+        # Run for schedules.
+        - if: '$CI_PIPELINE_SOURCE == "schedule"'
+          when: always
+          auto_cancel:
+              # Never cancel scheduled pipelines because of new commits.
+              on_new_commit: none
+          variables:
+              CMAKE_CI_PIPELINE_NAME: 'Schedule "$CI_PIPELINE_SCHEDULE_DESCRIPTION"'
+        # Run for development documentation.
+        - if: '$CMAKE_CI_PROJECT_MAIN_BRANCH != null && $CI_COMMIT_BRANCH != null && $CMAKE_CI_PROJECT_MAIN_BRANCH == $CI_COMMIT_BRANCH'
+          when: always
+          variables:
+              CMAKE_CI_PIPELINE_NAME: 'Development documentation on branch "$CI_COMMIT_REF_NAME"'
+        # Run for continuous testing of staging branch.
+        - if: '$CMAKE_CI_PROJECT_CONTINUOUS_BRANCH != null && $CI_COMMIT_BRANCH != null && $CMAKE_CI_PROJECT_CONTINUOUS_BRANCH == $CI_COMMIT_BRANCH'
+          when: always
+          variables:
+              CMAKE_CI_PIPELINE_NAME: 'Continuous branch "$CI_COMMIT_REF_NAME"'
+        # Run for protected branches.
+        - if: '$CI_COMMIT_REF_PROTECTED == "true"'
+          when: always
+          auto_cancel:
+              # Cancel all pipeline jobs if a new commit comes in on the branch.
+              on_new_commit: interruptible
+          variables:
+              CMAKE_CI_PIPELINE_NAME: 'Protected branch "$CI_COMMIT_REF_NAME"'
+        # Run for tags.
+        - if: '$CI_COMMIT_TAG'
+          when: always
+          variables:
+              CMAKE_CI_PIPELINE_NAME: 'Tag "$CI_COMMIT_TAG"'
+        # Skip pipelines in all other cases.
         - when: never
 
-.run_only_for_package:
+.rules:
     rules:
-        - if: '$CMAKE_CI_PACKAGE == "dev" && $CI_JOB_STAGE != "upload"'
+        ### Version update pipelines.
+        # Version update pipelines run version update jobs automatically.
+        - if: '$CMAKE_CI_VERSION_UPDATE == "true" && $CMAKE_CI_JOB_UPDATES_VERSION == "true"'
           when: on_success
-        - if: '$CMAKE_CI_PACKAGE == "dev" && $CI_JOB_STAGE == "upload"'
-          variables:
-              RSYNC_DESTINATION: "kitware@cmake.org:dev/"
-          when: on_success
-        - if: '$CMAKE_CI_PACKAGE != null && $CI_JOB_STAGE == "prep"'
-          when: manual
-        - if: '$CMAKE_CI_PACKAGE != null && $CI_JOB_STAGE != "upload"'
-          when: on_success
-        - if: '$CMAKE_CI_PACKAGE != null && $CI_JOB_STAGE == "upload" && $CMAKE_CI_PACKAGE_URL != null'
-          variables:
-              RSYNC_DESTINATION: "$CMAKE_CI_PACKAGE_URL"
-          when: on_success
-        - when: never
-
-.run_cmake_org_help:
-    rules:
+        # Version update pipelines run no other jobs.
         - if: '$CMAKE_CI_VERSION_UPDATE != null'
           when: never
-        - if: '$CMAKE_CI_PACKAGE =~ /v[0-9]+\.[0-9]+/'
+        # Version update jobs do not run in any other situations.
+        - if: '$CMAKE_CI_JOB_UPDATES_VERSION == "true"'
+          when: never
+
+        ### Website help update jobs run in a variety of pipeline kinds.
+        # Packaging pipelines upload release version documentation to the website upon request.
+        - if: '$CMAKE_CI_PACKAGE =~ /v[0-9]+\.[0-9]+/ && $CMAKE_CI_JOB_UPDATES_WEBSITE_HELP == "true"'
           variables:
               RSYNC_DESTINATION: "kitware@cmake.org:$CMAKE_CI_PACKAGE/"
               CMAKE_CI_SPHINX_QTHELP: "ON"
               CMAKE_CI_VERSION_NO_GIT: "ON"
           when: manual
-        - if: '$CMAKE_CI_PROJECT_MAIN_BRANCH != null && $CI_COMMIT_BRANCH != null && $CMAKE_CI_PROJECT_MAIN_BRANCH == $CI_COMMIT_BRANCH'
+        # Development documentation pipelines upload documentation to the website automatically.
+        - if: '$CMAKE_CI_PROJECT_MAIN_BRANCH != null && $CI_COMMIT_BRANCH != null && $CMAKE_CI_PROJECT_MAIN_BRANCH == $CI_COMMIT_BRANCH && $CMAKE_CI_JOB_UPDATES_WEBSITE_HELP == "true"'
           variables:
               RSYNC_DESTINATION: "kitware@cmake.org:git-master/"
               CMAKE_CI_SPHINX_QTHELP: "OFF"
               CMAKE_CI_VERSION_NO_GIT: "OFF"
           when: on_success
-        - if: '$CMAKE_CI_PROJECT_CONTINUOUS_BRANCH != null && $CI_COMMIT_BRANCH != null && $CMAKE_CI_PROJECT_CONTINUOUS_BRANCH == $CI_COMMIT_BRANCH'
+        # Continuous pipelines upload staging branch documentation to the website automatically.
+        - if: '$CMAKE_CI_PROJECT_CONTINUOUS_BRANCH != null && $CI_COMMIT_BRANCH != null && $CMAKE_CI_PROJECT_CONTINUOUS_BRANCH == $CI_COMMIT_BRANCH && $CMAKE_CI_JOB_UPDATES_WEBSITE_HELP == "true"'
           variables:
               RSYNC_DESTINATION: "kitware@cmake.org:git-stage/"
               CMAKE_CI_SPHINX_QTHELP: "OFF"
               CMAKE_CI_VERSION_NO_GIT: "OFF"
           when: on_success
-        - when: never
+        # Website help update jobs do not run in any other situations.
+        - if: '$CMAKE_CI_JOB_UPDATES_WEBSITE_HELP == "true"'
+          when: never
 
-.run_version_update:
-    rules:
-        - if: '$CMAKE_CI_VERSION_UPDATE != null'
+        ### Packaging pipelines.
+        # Packaging pipelines build development version packages automatically.
+        - if: '$CMAKE_CI_PACKAGE == "dev" && $CMAKE_CI_JOB_PACKAGE_ONLY == "true" && $CI_JOB_STAGE != "upload"'
           when: on_success
-        - when: never
+        # Packaging pipelines upload development version packages to the website automatically.
+        - if: '$CMAKE_CI_PACKAGE == "dev" && $CMAKE_CI_JOB_PACKAGE_ONLY == "true" && $CI_JOB_STAGE == "upload"'
+          variables:
+              RSYNC_DESTINATION: "kitware@cmake.org:dev/"
+          when: on_success
+        # Packaging pipelines build release version packages upon request.
+        - if: '$CMAKE_CI_PACKAGE != null && $CMAKE_CI_JOB_PACKAGE_ONLY == "true" && $CI_JOB_STAGE == "prep"'
+          when: manual
+        - if: '$CMAKE_CI_PACKAGE != null && $CMAKE_CI_JOB_PACKAGE_ONLY == "true" && $CI_JOB_STAGE != "upload"'
+          when: on_success
+        # Packaging pipelines upload release version packages to a staging area.
+        - if: '$CMAKE_CI_PACKAGE != null && $CMAKE_CI_JOB_PACKAGE_ONLY == "true" && $CI_JOB_STAGE == "upload" && $CMAKE_CI_PACKAGE_URL != null'
+          variables:
+              RSYNC_DESTINATION: "$CMAKE_CI_PACKAGE_URL"
+          when: on_success
+        # Packaging pipelines run no other jobs.
+        - if: '$CMAKE_CI_PACKAGE != null'
+          when: never
+        # Package-only jobs do not run in any other situations.
+        - if: '$CMAKE_CI_JOB_PACKAGE_ONLY == "true"'
+          when: never
+
+        ### Development documentation pipelines.
+        # Development documentation pipelines run no other jobs.
+        - if: '$CMAKE_CI_PROJECT_MAIN_BRANCH != null && $CI_COMMIT_BRANCH != null && $CMAKE_CI_PROJECT_MAIN_BRANCH == $CI_COMMIT_BRANCH'
+          when: never
+
+        ### Continuous pipelines.
+        # Continuous pipelines run manual jobs automatically after 5 minutes.
+        - if: '$CMAKE_CI_PROJECT_CONTINUOUS_BRANCH != null && $CI_COMMIT_BRANCH != null && $CMAKE_CI_PROJECT_CONTINUOUS_BRANCH == $CI_COMMIT_BRANCH && $CMAKE_CI_JOB_CONTINUOUS == "true" && $CMAKE_CI_JOB_RUN_MANUALLY == "true"'
+          when: delayed
+          start_in: 5 minutes
+        # Continuous pipelines run other jobs automatically.
+        - if: '$CMAKE_CI_PROJECT_CONTINUOUS_BRANCH != null && $CI_COMMIT_BRANCH != null && $CMAKE_CI_PROJECT_CONTINUOUS_BRANCH == $CI_COMMIT_BRANCH && $CMAKE_CI_JOB_CONTINUOUS == "true"'
+          when: on_success
+        # Continuous pipelines run no other jobs.
+        - if: '$CMAKE_CI_PROJECT_CONTINUOUS_BRANCH != null && $CI_COMMIT_BRANCH != null && $CMAKE_CI_PROJECT_CONTINUOUS_BRANCH == $CI_COMMIT_BRANCH'
+          when: never
+
+        ### Nightly pipelines.
+        # Nightly pipelines do not run jobs that are explicitly excluded.
+        - if: '$CMAKE_CI_NIGHTLY == "true" && $CMAKE_CI_JOB_NIGHTLY == "false"'
+          when: never
+        # Nightly pipelines always run jobs that ignore their dependencies.
+        - if: '$CMAKE_CI_NIGHTLY == "true" && $CMAKE_CI_JOB_NIGHTLY_IGNORE_DEPS == "true"'
+          when: always
+        # Nightly pipelines run all other jobs automatically when ready.
+        - if: '$CMAKE_CI_NIGHTLY == "true"'
+          when: on_success
+        # Nightly-only jobs do not run in any other situations.
+        - if: '$CMAKE_CI_JOB_NIGHTLY == "true"'
+          when: never
+
+        ### Merge request pipelines.
+        # Merge request pipelines do not run jobs that are explicitly excluded.
+        - if: '$CI_MERGE_REQUEST_ID && $CMAKE_CI_JOB_NO_MR == "true"'
+          when: never
+        # Merge request pipelines run manual jobs upon request.
+        - if: '$CI_MERGE_REQUEST_ID && $CMAKE_CI_JOB_RUN_MANUALLY == "true"'
+          when: manual
+        # Merge request pipelines run other jobs automatically when ready.
+        - if: '$CI_MERGE_REQUEST_ID'
+          when: on_success
+
+        ### Scheduled pipelines.
+        # Scheduled pipelines run all jobs automatically when ready.
+        - if: '$CI_PIPELINE_SOURCE == "schedule"'
+          when: on_success
+
+        ### Other pipelines.
+        # Other pipelines run manual jobs upon request.
+        - if: '$CMAKE_CI_JOB_RUN_MANUALLY == "true"'
+          when: manual
+        # Other pipelines run jobs in the `build` stage automatically after 5 minutes.
+        - if: '$CI_JOB_STAGE == "build"'
+          when: delayed
+          start_in: 5 minutes
+        # Other pipelines run other jobs automatically when ready.
+        - when: on_success
