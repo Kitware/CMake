@@ -280,3 +280,10 @@ Changes made since CMake 3.31.0 include the following.
 * The :command:`execute_process` command once again terminates child
   processes when its ``TIMEOUT`` is reached.  This was accidentally
   regressed by CMake 3.29.
+
+3.31.11
+-------
+
+* This version made no changes to documented features or interfaces.
+  Some implementation updates were made to support ecosystem changes
+  and/or fix regressions.
