@@ -317,7 +317,7 @@ function(_RUBY_CHECK_BREW)
     return()
   endif ()
 
-  MESSAGE(DEBUG "Found brew at: ${_BREW_EXECUTABLE}")
+  message(DEBUG "Found brew at: ${_BREW_EXECUTABLE}")
 
   # Query Homebrew for the prefix of the 'ruby' formula.
   # If Ruby is not installed via Homebrew, this will fail.
@@ -328,7 +328,7 @@ function(_RUBY_CHECK_BREW)
           ERROR_QUIET
           OUTPUT_STRIP_TRAILING_WHITESPACE
   )
-  MESSAGE(DEBUG "Ruby BREW is: ${_Ruby_BREW_DIR}")
+  message(DEBUG "Ruby BREW is: ${_Ruby_BREW_DIR}")
 
   if (NOT _Ruby_BREW_RESULT EQUAL 0 OR _Ruby_BREW_DIR STREQUAL "")
     # No 'ruby' formula installed in Homebrew
