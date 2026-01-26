@@ -2511,6 +2511,46 @@ These expressions look up the values of
       The source file property will be read from the directory scope in which
       ``target`` was created (``target`` must therefore exist).
 
+.. _`FileSet-Dependent Expressions`:
+
+FileSet-Dependent Expressions
+-----------------------------
+
+FileSet Meta-Data
+^^^^^^^^^^^^^^^^^
+
+These expressions look up information about a file set.
+
+.. genex:: $<FILE_SET_EXISTS:fileset,TARGET:target>
+
+  .. versionadded:: 4.3
+
+  ``1`` if the ``fileset`` exists as a CMake file set attached to the
+  ``target``, else ``0``.
+
+  The possible sub-options are:
+
+  ``TARGET:target``
+    The target on which the file set depends.
+
+FileSet Properties
+^^^^^^^^^^^^^^^^^^
+
+These expressions look up the values of file set properties.
+
+.. genex:: $<FILE_SET_PROPERTY:fileset,TARGET:target,prop>
+
+  .. versionadded:: 4.3
+
+  Value of the property ``prop`` on the file set ``fileset``, or empty if
+  the property is not set. An error will be raised if the file set is not
+  known by CMake.
+
+  The possible sub-options are:
+
+  ``TARGET:target``
+    The target on which the file set depends.
+
 .. _`Target-Dependent Expressions`:
 
 Target-Dependent Expressions

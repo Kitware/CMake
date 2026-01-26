@@ -29,6 +29,7 @@
 #include "cmCMakePath.h"
 #include "cmCMakeString.hxx"
 #include "cmComputeLinkInformation.h"
+#include "cmFileSet.h"
 #include "cmGenExContext.h"
 #include "cmGenExEvaluation.h"
 #include "cmGeneratorExpression.h"
@@ -3579,6 +3580,128 @@ static const struct DeviceLinkNode : public cmGeneratorExpressionNode
 } deviceLinkNode;
 
 namespace {
+bool GetFileSet(std::vector<std::string> const& parameters,
+                cm::GenEx::Evaluation* eval,
+                GeneratorExpressionContent const* content, cmFileSet*& fileSet)
+{
+  auto const& fileSetName = parameters[0];
+  auto targetName = parameters[1];
+  auto* makefile = eval->Context.LG->GetMakefile();
+  fileSet = nullptr;
+
+  auto const TARGET = "TARGET:"_s;
+
+  if (cmHasPrefix(targetName, TARGET)) {
+    targetName = targetName.substr(TARGET.length());
+    if (targetName.empty()) {
+      reportError(eval, content->GetOriginalExpression(),
+                  cmStrCat("No value provided for the ", TARGET, " option."));
+      return false;
+    }
+    auto* target = makefile->FindTargetToUse(targetName);
+    if (!target) {
+      reportError(eval, content->GetOriginalExpression(),
+                  cmStrCat("Non-existent target: ", targetName));
+      return false;
+    }
+    fileSet = target->GetFileSet(fileSetName);
+  } else {
+    reportError(eval, content->GetOriginalExpression(),
+                cmStrCat("Invalid option. ", TARGET, " expected."));
+    return false;
+  }
+  return true;
+}
+}
+
+static const struct FileSetExistsNode : public cmGeneratorExpressionNode
+{
+  FileSetExistsNode() {} // NOLINT(modernize-use-equals-default)
+
+  // This node handles errors on parameter count itself.
+  int NumExpectedParameters() const override { return 2; }
+
+  std::string Evaluate(
+    std::vector<std::string> const& parameters, cm::GenEx::Evaluation* eval,
+    GeneratorExpressionContent const* content,
+    cmGeneratorExpressionDAGChecker* /*dagCheckerParent*/) const override
+  {
+    if (parameters[0].empty()) {
+      reportError(
+        eval, content->GetOriginalExpression(),
+        "$<FILE_SET_EXISTS:fileset,TARGET:tgt> expression requires a "
+        "non-empty FILE_SET name.");
+      return std::string{};
+    }
+
+    cmFileSet* fileSet = nullptr;
+    if (!GetFileSet(parameters, eval, content, fileSet)) {
+      return std::string{};
+    }
+
+    return fileSet ? "1" : "0";
+  }
+} fileSetExistsNode;
+
+static const struct FileSetPropertyNode : public cmGeneratorExpressionNode
+{
+  FileSetPropertyNode() {} // NOLINT(modernize-use-equals-default)
+
+  // This node handles errors on parameter count itself.
+  int NumExpectedParameters() const override { return 3; }
+
+  std::string Evaluate(
+    std::vector<std::string> const& parameters, cm::GenEx::Evaluation* eval,
+    GeneratorExpressionContent const* content,
+    cmGeneratorExpressionDAGChecker* /*dagCheckerParent*/) const override
+  {
+    static cmsys::RegularExpression propertyNameValidator("^[A-Za-z0-9_]+$");
+
+    std::string const& fileSetName = parameters.front();
+    std::string const& propertyName = parameters.back();
+
+    if (fileSetName.empty() && propertyName.empty()) {
+      reportError(eval, content->GetOriginalExpression(),
+                  "$<FILE_SET_PROPERTY:fileset,TARGET:tgt,prop> expression "
+                  "requires a non-empty FILE_SET name and property name.");
+      return std::string{};
+    }
+    if (fileSetName.empty()) {
+      reportError(
+        eval, content->GetOriginalExpression(),
+        "$<FILE_SET_PROPERTY:fileset,TARGET:tgt,prop> expression requires a "
+        "non-empty FILE_SET name.");
+      return std::string{};
+    }
+    if (propertyName.empty()) {
+      reportError(
+        eval, content->GetOriginalExpression(),
+        "$<FILE_SET_PROPERTY:fileset,TARGET:tgt,prop> expression requires a "
+        "non-empty property name.");
+      return std::string{};
+    }
+    if (!propertyNameValidator.find(propertyName)) {
+      reportError(eval, content->GetOriginalExpression(),
+                  "Property name not supported.");
+      return std::string{};
+    }
+
+    cmFileSet* fileSet = nullptr;
+    if (!GetFileSet(parameters, eval, content, fileSet)) {
+      return std::string{};
+    }
+    if (!fileSet) {
+      reportError(
+        eval, content->GetOriginalExpression(),
+        cmStrCat("FILE_SET \"", fileSetName, "\" is not known from CMake."));
+      return std::string{};
+    }
+
+    return fileSet->GetProperty(propertyName);
+  }
+} fileSetPropertyNode;
+
+namespace {
 bool GetSourceFile(
   cmRange<std::vector<std::string>::const_iterator> parameters,
   cm::GenEx::Evaluation* eval, GeneratorExpressionContent const* content,
@@ -5701,6 +5824,8 @@ cmGeneratorExpressionNode const* cmGeneratorExpressionNode::GetNode(
     { "QUOTE", &quoteNode },
     { "SOURCE_EXISTS", &sourceExistsNode },
     { "SOURCE_PROPERTY", &sourcePropertyNode },
+    { "FILE_SET_EXISTS", &fileSetExistsNode },
+    { "FILE_SET_PROPERTY", &fileSetPropertyNode },
     { "TARGET_PROPERTY", &targetPropertyNode },
     { "TARGET_INTERMEDIATE_DIR", &targetIntermediateDirNode },
     { "TARGET_NAME", &targetNameNode },

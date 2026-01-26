@@ -1,0 +1,2 @@
+
+file(GENERATE OUTPUT result.txt CONTENT "$<FILE_SET_EXISTS:foo,BAD_OPTION>")

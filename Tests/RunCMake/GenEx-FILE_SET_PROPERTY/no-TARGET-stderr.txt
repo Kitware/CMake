@@ -1,0 +1,8 @@
+CMake Error at no-TARGET\.cmake:[0-9]+ \(file\):
+  Error evaluating generator expression:
+
+    \$<FILE_SET_PROPERTY:foo,TARGET:,FOO>
+
+  No value provided for the TARGET: option.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)

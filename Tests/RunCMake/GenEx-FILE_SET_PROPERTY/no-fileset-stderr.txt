@@ -1,0 +1,9 @@
+CMake Error at no-fileset\.cmake:[0-9]+ \(file\):
+  Error evaluating generator expression:
+
+    \$<FILE_SET_PROPERTY:,TARGET:foo,FOO>
+
+  \$<FILE_SET_PROPERTY:fileset,TARGET:tgt,prop> expression requires a
+  non-empty FILE_SET name.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)

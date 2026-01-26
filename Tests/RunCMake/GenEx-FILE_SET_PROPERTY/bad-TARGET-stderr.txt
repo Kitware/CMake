@@ -1,0 +1,8 @@
+CMake Error at bad-TARGET\.cmake:[0-9]+ \(file\):
+  Error evaluating generator expression:
+
+    \$<FILE_SET_PROPERTY:foo,TARGET:foo,FOO>
+
+  Non-existent target: foo
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
