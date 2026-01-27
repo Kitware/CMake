@@ -386,6 +386,28 @@ bool cmExportPackageInfoGenerator::NoteLinkedTarget(
   return false;
 }
 
+std::vector<std::string> cmExportPackageInfoGenerator::ExtractRequirements(
+  std::vector<std::string> const& names, bool& result,
+  std::vector<std::string>& libraryPaths) const
+{
+  std::vector<std::string> output;
+
+  for (auto const& name : names) {
+    auto const& ti = this->LinkTargets.find(name);
+    if (ti != this->LinkTargets.end()) {
+      if (ti->second.empty()) {
+        result = false;
+      } else {
+        output.emplace_back(ti->second);
+      }
+    } else {
+      libraryPaths.emplace_back(name);
+    }
+  }
+
+  return output;
+}
+
 void cmExportPackageInfoGenerator::GenerateInterfaceLinkProperties(
   bool& result, Json::Value& component, cmGeneratorTarget const* target,
   ImportPropertyMap const& properties) const
@@ -397,43 +419,26 @@ void cmExportPackageInfoGenerator::GenerateInterfaceLinkProperties(
 
   // Extract any $<LINK_ONLY:...> from the link libraries, and assert that no
   // other generator expressions are present.
-  std::map<std::string, std::vector<std::string>> allowList = {
-    { "COMPILE_ONLY", {} },
-    { "LINK_ONLY", {} },
-  };
+  std::map<std::string, std::vector<std::string>>
+    allowedGeneratorExpressions = {
+      { "COMPILE_ONLY", {} },
+      { "LINK_ONLY", {} },
+    };
   std::string interfaceLinkLibraries;
   if (!cmGeneratorExpression::ForbidGeneratorExpressions(
         target, iter->first, iter->second, interfaceLinkLibraries,
-        allowList)) {
+        allowedGeneratorExpressions)) {
     result = false;
     return;
   }
 
-  std::vector<std::string> buildRequires;
-  std::vector<std::string> compileRequires;
-  std::vector<std::string> linkRequires;
   std::vector<std::string> linkLibraries;
-
-  auto addLibraries = [this, &linkLibraries,
-                       &result](std::vector<std::string> const& names,
-                                std::vector<std::string>& output) -> void {
-    for (auto const& name : names) {
-      auto const& ti = this->LinkTargets.find(name);
-      if (ti != this->LinkTargets.end()) {
-        if (ti->second.empty()) {
-          result = false;
-        } else {
-          output.emplace_back(ti->second);
-        }
-      } else {
-        linkLibraries.emplace_back(name);
-      }
-    }
-  };
-
-  addLibraries(allowList["COMPILE_ONLY"], compileRequires);
-  addLibraries(allowList["LINK_ONLY"], linkRequires);
-  addLibraries(cmList{ interfaceLinkLibraries }, buildRequires);
+  std::vector<std::string> buildRequires = this->ExtractRequirements(
+    cmList{ interfaceLinkLibraries }, result, linkLibraries);
+  std::vector<std::string> compileRequires = this->ExtractRequirements(
+    allowedGeneratorExpressions["COMPILE_ONLY"], result, linkLibraries);
+  std::vector<std::string> linkRequires = this->ExtractRequirements(
+    allowedGeneratorExpressions["LINK_ONLY"], result, linkLibraries);
 
   BuildArray(component, "requires", buildRequires);
   BuildArray(component, "link_requires", linkRequires);
