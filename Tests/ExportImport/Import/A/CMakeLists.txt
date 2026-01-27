@@ -435,7 +435,7 @@ set_property(TARGET testSharedLibDepends APPEND PROPERTY
 if (((CMAKE_C_COMPILER_ID STREQUAL GNU AND CMAKE_C_COMPILER_VERSION VERSION_GREATER 4.4)
     OR CMAKE_C_COMPILER_ID MATCHES "LCC"
     OR (CMAKE_C_COMPILER_ID STREQUAL Clang AND NOT "x${CMAKE_CXX_SIMULATE_ID}" STREQUAL "xMSVC"))
-    AND (CMAKE_GENERATOR STREQUAL "Unix Makefiles" OR CMAKE_GENERATOR STREQUAL "Ninja"))
+    AND (CMAKE_GENERATOR STREQUAL "Unix Makefiles" OR CMAKE_GENERATOR STREQUAL "Ninja" OR CMAKE_GENERATOR STREQUAL "FASTBuild"))
   include(CheckCXXCompilerFlag)
   check_cxx_compiler_flag(-Wunused-variable run_sys_includes_test)
   if(run_sys_includes_test)
@@ -607,7 +607,7 @@ checkForProperty(Req::testLinkDirectories "INTERFACE_LINK_DIRECTORIES" "${CMAKE_
 
 #---------------------------------------------------------------------------------
 # check that imported libraries have the expected INTERFACE_LINK_DEPENDS property
-if(CMAKE_GENERATOR MATCHES "Make|Ninja")
+if(CMAKE_GENERATOR MATCHES "Make|Ninja|FASTBuild")
   checkForProperty(bld_testLinkDepends "INTERFACE_LINK_DEPENDS" "BUILD_LINK_DEPENDS")
   checkForProperty(Req::testLinkDepends "INTERFACE_LINK_DEPENDS" "${CMAKE_INSTALL_PREFIX}/INSTALL_LINK_DEPENDS")
 endif()

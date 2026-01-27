@@ -1,0 +1,9 @@
+CMake Error in CMakeLists\.txt:
+  The "INSTALL_OBJECT_NAME" property for
+
+    .*/Tests/RunCMake/INSTALL_OBJECT_NAME/lib\.c
+
+  contains an invalid component \(subdir/\.\./sibling/lib\.c\)\.
+
+
+CMake Generate step failed\.  Build files cannot be regenerated correctly\.

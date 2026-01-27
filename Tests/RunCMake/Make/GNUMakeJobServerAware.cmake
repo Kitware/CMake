@@ -1,3 +1,5 @@
+set(CMAKE_INTERMEDIATE_DIR_STRATEGY FULL CACHE STRING "" FORCE)
+
 # Test JOB_SERVER_AWARE with custom commands
 add_custom_command(
   OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/missing"

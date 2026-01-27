@@ -1,0 +1,6 @@
+.* Malformed environment modification specifier: 'HI'
+.* Expected MYVAR=OP:VALUE
+.* Malformed environment modification specifier: 'INVALID=SETTING'
+.* Expected MYVAR=OP:VALUE
+.* Malformed environment modification specifier: 'INVALID=OP1:operation:10'
+.* Expected MYVAR=OP:VALUE

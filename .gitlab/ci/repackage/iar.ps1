@@ -23,12 +23,26 @@ $exclude = @(
   "arm/config/flashloader"
   "arm/drivers"
   "arm/src"
+  "riscv/config/debugger"
+  "riscv/config/flashloader"
+  "riscv/drivers"
+  "riscv/src"
+  "rl78/config/debugger"
+  "rl78/config/flashloader"
+  "rl78/drivers"
+  "rl78/src"
+  "rx/config/debugger"
+  "rx/config/flashloader"
+  "rx/drivers"
+  "rx/src"
   )
 
 Write-Host "Installing to: $package_dir"
 Start-Process -Wait -FilePath "$installer_file" -ArgumentList "/hide_usd /autoinstall/$package_dir"
 foreach ($p in $exclude) {
-    Remove-Item "$package_dir/$p" -Recurse -Force
+    if (Test-Path "$package_dir/$p") {
+        Remove-Item "$package_dir/$p" -Recurse -Force
+    }
 }
 
 @"

@@ -25,7 +25,6 @@
 #include "cmDuration.h"
 #include "cmListFileCache.h"
 
-class cmMakefile;
 class cmXMLWriter;
 
 struct cmCTestTestOptions
@@ -242,7 +241,7 @@ protected:
   bool ProcessOptions();
   void LogTestSummary(std::vector<std::string> const& passed,
                       std::vector<std::string> const& failed,
-                      cmDuration const& durationInSecs);
+                      cmDuration durationInSecs);
   void LogDisabledTests(std::vector<cmCTestTestResult> const& disabledTests);
   void LogFailedTests(std::vector<std::string> const& failed,
                       SetOfTests const& resultsSet);

@@ -8,7 +8,11 @@ FindPatch
 .. versionadded:: 3.10
 
 Finds the ``patch`` command-line executable for applying diff patches to
-original files.
+original files:
+
+.. code-block:: cmake
+
+  find_package(Patch [...])
 
 Imported Targets
 ^^^^^^^^^^^^^^^^
@@ -29,7 +33,7 @@ Result Variables
 This module defines the following variables:
 
 ``Patch_FOUND``
-  Boolean indicating whether the ``patch`` command-line executable is found.
+  Boolean indicating whether the ``patch`` command-line executable was found.
 
 Cache Variables
 ^^^^^^^^^^^^^^^

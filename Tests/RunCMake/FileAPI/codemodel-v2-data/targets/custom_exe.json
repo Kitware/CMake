@@ -4,6 +4,10 @@
     "directorySource": "^custom$",
     "projectName": "Custom",
     "type": "EXECUTABLE",
+    "imported": null,
+    "local": null,
+    "abstract": null,
+    "symbolic": null,
     "isGeneratorProvided": null,
     "fileSets": null,
     "sources": [
@@ -45,7 +49,12 @@
             ],
             "includes": null,
             "frameworks": null,
-            "defines": null,
+            "defines": [
+                {
+                    "define": "_MBCS",
+                    "backtrace": null
+                }
+            ],
             "compileCommandFragments": null
         }
     ],
@@ -105,6 +114,30 @@
         {
             "id": "^ZERO_CHECK::@c11385ffed57b860da63$",
             "backtrace": null
+        }
+    ],
+    "linkLibraries": null,
+    "interfaceLinkLibraries": null,
+    "compileDependencies": null,
+    "interfaceCompileDependencies": null,
+    "objectDependencies": null,
+    "orderDependencies": [
+        {
+            "id": "^custom_tgt::@c11385ffed57b860da63$",
+            "backtrace": [
+                {
+                    "file": "^custom/CMakeLists\\.txt$",
+                    "line": 5,
+                    "command": "add_dependencies",
+                    "hasParent": true
+                },
+                {
+                    "file": "^custom/CMakeLists\\.txt$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": false
+                }
+            ]
         }
     ]
 }

@@ -33,6 +33,7 @@
 #include "keylog.h"
 #include <curl/curl.h>
 #include "../escape.h"
+#include "../curlx/fopen.h"
 
 /* The last #include files should be: */
 #include "../curl_memory.h"
@@ -49,7 +50,7 @@ Curl_tls_keylog_open(void)
   if(!keylog_file_fp) {
     keylog_file_name = curl_getenv("SSLKEYLOGFILE");
     if(keylog_file_name) {
-      keylog_file_fp = fopen(keylog_file_name, FOPEN_APPENDTEXT);
+      keylog_file_fp = curlx_fopen(keylog_file_name, FOPEN_APPENDTEXT);
       if(keylog_file_fp) {
 #ifdef _WIN32
         if(setvbuf(keylog_file_fp, NULL, _IONBF, 0))
@@ -57,7 +58,7 @@ Curl_tls_keylog_open(void)
         if(setvbuf(keylog_file_fp, NULL, _IOLBF, 4096))
 #endif
         {
-          fclose(keylog_file_fp);
+          curlx_fclose(keylog_file_fp);
           keylog_file_fp = NULL;
         }
       }
@@ -70,7 +71,7 @@ void
 Curl_tls_keylog_close(void)
 {
   if(keylog_file_fp) {
-    fclose(keylog_file_fp);
+    curlx_fclose(keylog_file_fp);
     keylog_file_fp = NULL;
   }
 }
@@ -134,14 +135,14 @@ Curl_tls_keylog_write(const char *label,
 
   /* Client Random */
   for(i = 0; i < CLIENT_RANDOM_SIZE; i++) {
-    Curl_hexbyte(&line[pos], client_random[i], FALSE);
+    Curl_hexbyte(&line[pos], client_random[i]);
     pos += 2;
   }
   line[pos++] = ' ';
 
   /* Secret */
   for(i = 0; i < secretlen; i++) {
-    Curl_hexbyte(&line[pos], secret[i], FALSE);
+    Curl_hexbyte(&line[pos], secret[i]);
     pos += 2;
   }
   line[pos++] = '\n';

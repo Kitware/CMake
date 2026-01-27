@@ -47,6 +47,10 @@ struct cmXcFrameworkPlist
     cmListFileBacktrace const& bt = cmListFileBacktrace{}) const;
 };
 
+/**
+ * Parses Plist file of .xcframework.
+ * Expects normalized path as input
+ */
 cm::optional<cmXcFrameworkPlist> cmParseXcFrameworkPlist(
   std::string const& xcframeworkPath, cmMakefile const& mf,
   cmListFileBacktrace const& bt = cmListFileBacktrace{});

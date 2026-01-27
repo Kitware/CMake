@@ -63,6 +63,14 @@ Ninja Generators
    /generator/Ninja
    /generator/Ninja Multi-Config
 
+FASTBuild Generator
+^^^^^^^^^^^^^^^^^^^
+
+.. toctree::
+   :maxdepth: 1
+
+   /generator/FASTBuild
+
 .. _`IDE Build Tool Generators`:
 
 IDE Build Tool Generators

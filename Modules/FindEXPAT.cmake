@@ -5,8 +5,13 @@
 FindEXPAT
 ---------
 
-Finds the native Expat headers and library.  Expat is a stream-oriented XML
-parser library written in C.
+Finds the native Expat headers and library:
+
+.. code-block:: cmake
+
+  find_package(EXPAT [<version>] [...])
+
+Expat is a stream-oriented XML parser library written in C.
 
 Imported Targets
 ^^^^^^^^^^^^^^^^
@@ -22,15 +27,22 @@ This module provides the following :ref:`Imported Targets`:
 Result Variables
 ^^^^^^^^^^^^^^^^
 
-This module sets the following variables:
+This module defines the following variables:
+
+``EXPAT_FOUND``
+  Boolean indicating whether (the requested version of) Expat was found.
+
+``EXPAT_VERSION``
+  .. versionadded:: 4.2
+
+  The version of Expat found.
 
 ``EXPAT_INCLUDE_DIRS``
   Include directories containing ``expat.h`` and related headers needed to use
   Expat.
+
 ``EXPAT_LIBRARIES``
   Libraries needed to link against to use Expat.
-``EXPAT_FOUND``
-  Boolean indicating whether the Expat is found.
 
 Hints
 ^^^^^
@@ -45,6 +57,17 @@ This module accepts the following variables:
   .. versionadded:: 3.31
 
     Implemented on non-Windows platforms.
+
+Deprecated Variables
+^^^^^^^^^^^^^^^^^^^^
+
+The following variables are provided for backward compatibility:
+
+``EXPAT_VERSION_STRING``
+  .. deprecated:: 4.2
+    Superseded by the ``EXPAT_VERSION``.
+
+  The version of Expat found.
 
 Examples
 ^^^^^^^^
@@ -61,7 +84,7 @@ cmake_policy(PUSH)
 cmake_policy(SET CMP0159 NEW) # file(STRINGS) with REGEX updates CMAKE_MATCH_<n>
 
 find_package(PkgConfig QUIET)
-if(PKG_CONFIG_FOUND)
+if(PkgConfig_FOUND)
   pkg_check_modules(PC_EXPAT QUIET expat)
 endif()
 
@@ -135,25 +158,26 @@ if(EXPAT_INCLUDE_DIR AND EXISTS "${EXPAT_INCLUDE_DIR}/expat.h")
   file(STRINGS "${EXPAT_INCLUDE_DIR}/expat.h" expat_version_str
     REGEX "^#[\t ]*define[\t ]+XML_(MAJOR|MINOR|MICRO)_VERSION[\t ]+[0-9]+$")
 
-  unset(EXPAT_VERSION_STRING)
+  unset(EXPAT_VERSION)
   foreach(VPART MAJOR MINOR MICRO)
     foreach(VLINE ${expat_version_str})
       if(VLINE MATCHES "^#[\t ]*define[\t ]+XML_${VPART}_VERSION[\t ]+([0-9]+)$")
         set(EXPAT_VERSION_PART "${CMAKE_MATCH_1}")
-        if(EXPAT_VERSION_STRING)
-          string(APPEND EXPAT_VERSION_STRING ".${EXPAT_VERSION_PART}")
+        if(EXPAT_VERSION)
+          string(APPEND EXPAT_VERSION ".${EXPAT_VERSION_PART}")
         else()
-          set(EXPAT_VERSION_STRING "${EXPAT_VERSION_PART}")
+          set(EXPAT_VERSION "${EXPAT_VERSION_PART}")
         endif()
       endif()
     endforeach()
   endforeach()
+  set(EXPAT_VERSION_STRING ${EXPAT_VERSION})
 endif()
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(EXPAT
                                   REQUIRED_VARS EXPAT_LIBRARY EXPAT_INCLUDE_DIR
-                                  VERSION_VAR EXPAT_VERSION_STRING)
+                                  VERSION_VAR EXPAT_VERSION)
 
 # Copy the results to the output variables and target.
 if(EXPAT_FOUND)

@@ -4,6 +4,7 @@
 #include "cmBinUtilsLinuxELFObjdumpGetRuntimeDependenciesTool.h"
 
 #include <sstream>
+#include <vector>
 
 #include <cmsys/RegularExpression.hxx>
 

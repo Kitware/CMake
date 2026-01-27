@@ -5,16 +5,59 @@
 FindOpenMP
 ----------
 
-Finds Open Multi-Processing (OpenMP) support.
+Finds Open Multi-Processing (OpenMP) support in a compiler:
 
-This module can be used to detect OpenMP support in a compiler.  If
-the compiler supports OpenMP, the flags required to compile with
-OpenMP support are returned in variables for the different languages.
-The variables may be empty if the compiler does not need a special
-flag to support OpenMP.
+.. code-block:: cmake
+
+  find_package(OpenMP [<version>] [COMPONENTS <langs>...] [...])
+
+If the compiler supports OpenMP, the flags required to compile with OpenMP
+support are returned in variables for the different languages.  The variables
+may be empty if the compiler does not need a special flag to support OpenMP.
 
 .. versionadded:: 3.5
   Clang support.
+
+Components
+^^^^^^^^^^
+
+This module supports components that can be specified using the standard
+syntax:
+
+.. code-block:: cmake
+
+  find_package(OpenMP [COMPONENTS <langs>...])
+
+Each of these components controls the various languages to search OpenMP
+support for.  The following components are exposed:
+
+``C``
+  .. versionadded:: 3.10
+
+``CXX``
+  .. versionadded:: 3.10
+
+``Fortran``
+  .. versionadded:: 3.10
+
+``CUDA``
+  .. versionadded:: 3.31
+
+  The ``CUDA`` language component is supported when using a CUDA compiler
+  that supports OpenMP on the host.
+
+If no components are specified, module checks for all of them automatically,
+depending on the enabled languages in the project.
+
+Imported Targets
+^^^^^^^^^^^^^^^^
+
+This module provides the following :ref:`Imported Targets`:
+
+``OpenMP::OpenMP_<lang>``
+  .. versionadded:: 3.9
+
+  Target encapsulating the OpenMP usage requirements for language ``<lang>``.
 
 Input Variables
 ^^^^^^^^^^^^^^^
@@ -33,32 +76,63 @@ The following variables may be set to influence this module's behavior:
 Result Variables
 ^^^^^^^^^^^^^^^^
 
-.. versionadded:: 3.10
-  The module exposes the components ``C``, ``CXX``, and ``Fortran``.
-  Each of these controls the various languages to search OpenMP support for.
-
-.. versionadded:: 3.31
-  The ``CUDA`` language component is supported when using a CUDA compiler
-  that supports OpenMP on the host.
-
-Depending on the enabled components the following variables will be set:
+This module defines the following variables:
 
 ``OpenMP_FOUND``
-  Variable indicating that OpenMP flags for all requested languages have been found.
-  If no components are specified, this is true if OpenMP settings for all enabled languages
-  were detected.
-``OpenMP_VERSION``
-  Minimal version of the OpenMP standard detected among the requested languages,
-  or all enabled languages if no components were specified.
+  .. versionadded:: 3.10
 
-This module will set the following variables per language in your
+  Boolean indicating that OpenMP flags for all requested languages were
+  found.  If no components are specified, this variable is set to boolean
+  true if OpenMP settings for all enabled languages were detected.
+
+``OpenMP_VERSION``
+  .. versionadded:: 4.2
+
+  Minimal version of the OpenMP standard detected among the requested
+  languages, or all enabled languages if no components were specified.
+
+This module will set the following variables per language in the
 project, where ``<lang>`` is one of C, CXX, CUDA, or Fortran:
 
 ``OpenMP_<lang>_FOUND``
-  Variable indicating if OpenMP support for ``<lang>`` was detected.
+  .. versionadded:: 3.9
+
+  Boolean indicating whether the (requested version of) OpenMP support for
+  ``<lang>`` was detected.
+
+``OpenMP_<lang>_VERSION``
+  .. versionadded:: 3.9
+
+  OpenMP version implemented by the ``<lang>`` compiler, if available.
+
+``OpenMP_<lang>_VERSION_MAJOR``
+  .. versionadded:: 3.9
+
+  Major version of OpenMP implemented by the ``<lang>`` compiler, if
+  available.
+
+``OpenMP_<lang>_VERSION_MINOR``
+  .. versionadded:: 3.9
+
+  Minor version of OpenMP implemented by the ``<lang>`` compiler, if
+  available.
+
+``OpenMP_<lang>_SPEC_DATE``
+  .. versionadded:: 3.7
+
+  Date of the OpenMP specification implemented by the ``<lang>`` compiler,
+  if available.
+
+  The specification date is formatted as given in the OpenMP standard:
+  ``yyyymm`` where ``yyyy`` and ``mm`` represents the year and month of the
+  OpenMP specification implemented by the ``<lang>`` compiler.
+
 ``OpenMP_<lang>_FLAGS``
   OpenMP compiler flags for ``<lang>``, separated by spaces.
+
 ``OpenMP_<lang>_INCLUDE_DIRS``
+  .. versionadded:: 3.16
+
   Directories that must be added to the header search path for ``<lang>``
   when using OpenMP.
 
@@ -66,48 +140,56 @@ For linking with OpenMP code written in ``<lang>``, the following
 variables are provided:
 
 ``OpenMP_<lang>_LIB_NAMES``
-  :ref:`;-list <CMake Language Lists>` of libraries for OpenMP programs for ``<lang>``.
+  .. versionadded:: 3.9
+
+  A :ref:`semicolon-separated list <CMake Language Lists>` of OpenMP
+  programs libraries for ``<lang>``.
+
 ``OpenMP_<libname>_LIBRARY``
-  Location of the individual libraries needed for OpenMP support in ``<lang>``.
+  .. versionadded:: 3.9
+
+  Location of the individual libraries needed for OpenMP support in
+  ``<lang>``.  The ``<libname>`` names are stored in the
+  ``OpenMP_<lang>_LIB_NAMES`` list.
+
 ``OpenMP_<lang>_LIBRARIES``
+  .. versionadded:: 3.9
+
   A list of libraries needed to link with OpenMP code written in ``<lang>``.
-
-Additionally, the module provides :prop_tgt:`IMPORTED` targets:
-
-``OpenMP::OpenMP_<lang>``
-  Target for using OpenMP from ``<lang>``.
 
 Specifically for Fortran, the module sets the following variables:
 
 ``OpenMP_Fortran_HAVE_OMPLIB_HEADER``
-  Boolean indicating if OpenMP is accessible through ``omp_lib.h``.
+  .. versionadded:: 3.9
+
+  Boolean indicating whether OpenMP is accessible through the ``omp_lib.h``
+  Fortran header.
+
 ``OpenMP_Fortran_HAVE_OMPLIB_MODULE``
-  Boolean indicating if OpenMP is accessible through the ``omp_lib`` Fortran module.
+  .. versionadded:: 3.9
 
-The module will also try to provide the OpenMP version variables:
-
-``OpenMP_<lang>_SPEC_DATE``
-  .. versionadded:: 3.7
-
-  Date of the OpenMP specification implemented by the ``<lang>`` compiler.
-``OpenMP_<lang>_VERSION_MAJOR``
-  Major version of OpenMP implemented by the ``<lang>`` compiler.
-``OpenMP_<lang>_VERSION_MINOR``
-  Minor version of OpenMP implemented by the ``<lang>`` compiler.
-``OpenMP_<lang>_VERSION``
-  OpenMP version implemented by the ``<lang>`` compiler.
-
-The specification date is formatted as given in the OpenMP standard:
-``yyyymm`` where ``yyyy`` and ``mm`` represents the year and month of
-the OpenMP specification implemented by the ``<lang>`` compiler.
+  Boolean indicating whether OpenMP is accessible through the ``omp_lib``
+  Fortran module.
 
 For some compilers, it may be necessary to add a header search path to find
 the relevant OpenMP headers.  This location may be language-specific.  Where
 this is needed, the module may attempt to find the location, but it can be
 provided directly by setting the ``OpenMP_<lang>_INCLUDE_DIR`` cache variable.
-Note that this variable is an _input_ control to the module.  Project code
-should use the ``OpenMP_<lang>_INCLUDE_DIRS`` _output_ variable if it needs
-to know what include directories are needed.
+Note that this variable is an *input* control to the module.  Project code
+should use the ``OpenMP_<lang>_INCLUDE_DIRS`` *output* variable if it needs
+to know what include directories are needed, or preferably the
+``OpenMP::OpenMP_<lang>`` imported target.
+
+Examples
+^^^^^^^^
+
+Finding OpenMP support and linking the imported target to a project target
+using the C language component:
+
+.. code-block:: cmake
+
+  find_package(OpenMP)
+  target_link_libraries(project_target PRIVATE OpenMP::OpenMP_C)
 #]=======================================================================]
 
 cmake_policy(PUSH)
@@ -376,7 +458,7 @@ function(_OPENMP_GET_FLAGS LANG FLAG_MODE OPENMP_FLAG_VAR OPENMP_LIB_NAMES_VAR)
           break()
         endif()
       endif()
-    elseif(CMAKE_${LANG}_COMPILER_ID STREQUAL "LLVMFlang" AND WIN32)
+    elseif(CMAKE_${LANG}_COMPILER_ID STREQUAL "LLVMFlang")
       find_library(OpenMP_libomp_LIBRARY
         NAMES omp
         HINTS ${CMAKE_${LANG}_IMPLICIT_LINK_DIRECTORIES}
@@ -622,7 +704,7 @@ else()
   set(OpenMP_FINDLIST ${OpenMP_FIND_COMPONENTS})
 endif()
 
-unset(_OpenMP_MIN_VERSION)
+unset(OpenMP_VERSION)
 
 include(FindPackageHandleStandardArgs)
 
@@ -657,8 +739,8 @@ foreach(LANG IN LISTS OpenMP_FINDLIST)
 
     if(OpenMP_${LANG}_FOUND)
       if(DEFINED OpenMP_${LANG}_VERSION)
-        if(NOT _OpenMP_MIN_VERSION OR _OpenMP_MIN_VERSION VERSION_GREATER OpenMP_${LANG}_VERSION)
-          set(_OpenMP_MIN_VERSION OpenMP_${LANG}_VERSION)
+        if(NOT OpenMP_VERSION OR OpenMP_VERSION VERSION_GREATER OpenMP_${LANG}_VERSION)
+          set(OpenMP_VERSION "${OpenMP_${LANG}_VERSION}")
         endif()
       endif()
       set(OpenMP_${LANG}_LIBRARIES "")
@@ -705,7 +787,7 @@ endforeach()
 
 find_package_handle_standard_args(OpenMP
     REQUIRED_VARS ${_OpenMP_REQ_VARS}
-    VERSION_VAR ${_OpenMP_MIN_VERSION}
+    VERSION_VAR OpenMP_VERSION
     HANDLE_COMPONENTS)
 
 if(CMAKE_Fortran_COMPILER_LOADED AND OpenMP_Fortran_FOUND)

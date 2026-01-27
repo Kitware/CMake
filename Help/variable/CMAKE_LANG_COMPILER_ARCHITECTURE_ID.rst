@@ -123,6 +123,15 @@ targets a UNIX platform.
 ``sparcv9``
   SPARC 64-bit
 
+``sw_64``
+  Sunway
+
+``wasm32``
+  WebAssembly (Emscripten) 32-bit
+
+``wasm64``
+  WebAssembly (Emscripten) 64-bit
+
 ``x86_64``
   Intel 64-bit
 

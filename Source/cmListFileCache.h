@@ -11,9 +11,10 @@
 #include <vector>
 
 #include <cm/optional>
+#include <cm/string_view>
 
-#include "cmConstStack.h"
 #include "cmList.h"
+#include "cmStack.h"
 #include "cmSystemTools.h"
 
 /** \class cmListFileCache
@@ -34,8 +35,8 @@ struct cmListFileArgument
     Bracket
   };
   cmListFileArgument() = default;
-  cmListFileArgument(std::string v, Delimiter d, long line)
-    : Value(std::move(v))
+  cmListFileArgument(cm::string_view v, Delimiter d, long line)
+    : Value(v.data(), v.size())
     , Delim(d)
     , Line(line)
   {
@@ -169,11 +170,12 @@ bool operator!=(cmListFileContext const& lhs, cmListFileContext const& rhs);
 class cmListFileBacktrace
   : public cmConstStack<cmListFileContext, cmListFileBacktrace>
 {
-  using cmConstStack::cmConstStack;
-  friend class cmConstStack<cmListFileContext, cmListFileBacktrace>;
+  using cmStack::cmStack;
+  friend cmListFileBacktrace::Base;
 };
 #ifndef cmListFileCache_cxx
-extern template class cmConstStack<cmListFileContext, cmListFileBacktrace>;
+extern template class cmStack<cmListFileContext const, cmListFileBacktrace,
+                              cmStackType::Const>;
 #endif
 
 // Wrap type T as a value with a backtrace.  For purposes of
@@ -240,7 +242,7 @@ struct cmListFile
   bool ParseFile(char const* path, cmMessenger* messenger,
                  cmListFileBacktrace const& lfbt);
 
-  bool ParseString(char const* str, char const* virtual_filename,
+  bool ParseString(cm::string_view str, char const* virtual_filename,
                    cmMessenger* messenger, cmListFileBacktrace const& lfbt);
 
   std::vector<cmListFileFunction> Functions;

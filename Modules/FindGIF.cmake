@@ -5,7 +5,11 @@
 FindGIF
 -------
 
-Finds the Graphics Interchange Format (GIF) library (``giflib``).
+Finds the Graphics Interchange Format (GIF) library (``giflib``):
+
+.. code-block:: cmake
+
+  find_package(GIF [<version>] [...])
 
 Imported Targets
 ^^^^^^^^^^^^^^^^
@@ -21,18 +25,21 @@ This module provides the following :ref:`Imported Targets`:
 Result Variables
 ^^^^^^^^^^^^^^^^
 
-This module sets the following variables:
+This module defines the following variables:
 
 ``GIF_FOUND``
-  Boolean indicating whether the GIF library was found.
-``GIF_INCLUDE_DIRS``
-  Include directories needed to use the GIF library.
-``GIF_LIBRARIES``
-  Libraries needed to link to the GIF library.
+  Boolean indicating whether the (requested version of) GIF library was found.
+
 ``GIF_VERSION``
   Version string of the GIF library found (for example, ``5.1.4``).  For GIF
   library versions prior to 4.1.6, version string will be set only to ``3`` or
   ``4`` as these versions did not provide version information in their headers.
+
+``GIF_INCLUDE_DIRS``
+  Include directories needed to use the GIF library.
+
+``GIF_LIBRARIES``
+  Libraries needed to link to the GIF library.
 
 Cache Variables
 ^^^^^^^^^^^^^^^
@@ -41,6 +48,7 @@ The following cache variables may also be set:
 
 ``GIF_INCLUDE_DIR``
   Directory containing the ``gif_lib.h`` and other GIF library headers.
+
 ``GIF_LIBRARY``
   Path to the GIF library.
 

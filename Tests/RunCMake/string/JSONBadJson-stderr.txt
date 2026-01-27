@@ -1,0 +1,26 @@
+CMake Error at JSONBadJson\.cmake:1 \(string\):
+  string sub-command JSON failed parsing json string:
+
+  invalid
+
+  \* Line 1, Column 1
+
+    Syntax error: value, object or array expected\.
+
+  \.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
+
+
+CMake Error at JSONBadJson\.cmake:2 \(string\):
+  string sub-command JSON failed parsing json string:
+
+  value
+
+  \* Line 1, Column 1
+
+    Syntax error: value, object or array expected\.
+
+  \.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)

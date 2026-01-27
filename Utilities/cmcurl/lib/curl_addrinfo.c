@@ -53,8 +53,8 @@
 #include "fake_addrinfo.h"
 #include "curlx/inet_pton.h"
 #include "curlx/warnless.h"
-/* The last 3 #include files should be in this order */
-#include "curl_printf.h"
+
+/* The last 2 #include files should be in this order */
 #include "curl_memory.h"
 #include "memdebug.h"
 
@@ -68,7 +68,7 @@
  */
 
 #if defined(__INTEL_COMPILER) && (__INTEL_COMPILER == 910) && \
-    defined(__OPTIMIZE__) && defined(__unix__) &&  defined(__i386__)
+  defined(__OPTIMIZE__) && defined(__unix__) &&  defined(__i386__)
   /* workaround icc 9.1 optimizer issue */
 # define vqualifier volatile
 #else
@@ -398,11 +398,7 @@ Curl_ip2addr(int af, const void *inaddr, const char *hostname, int port)
     addr = (void *)ai->ai_addr; /* storage area for this info */
 
     memcpy(&addr->sin_addr, inaddr, sizeof(struct in_addr));
-#ifdef __MINGW32__
-    addr->sin_family = (short)af;
-#else
     addr->sin_family = (CURL_SA_FAMILY_T)af;
-#endif
     addr->sin_port = htons((unsigned short)port);
     break;
 
@@ -411,11 +407,7 @@ Curl_ip2addr(int af, const void *inaddr, const char *hostname, int port)
     addr6 = (void *)ai->ai_addr; /* storage area for this info */
 
     memcpy(&addr6->sin6_addr, inaddr, sizeof(struct in6_addr));
-#ifdef __MINGW32__
-    addr6->sin6_family = (short)af;
-#else
     addr6->sin6_family = (CURL_SA_FAMILY_T)af;
-#endif
     addr6->sin6_port = htons((unsigned short)port);
     break;
 #endif
@@ -515,13 +507,15 @@ curl_dbg_freeaddrinfo(struct addrinfo *freethis,
     if(env)
       r_freeaddrinfo(freethis);
     else
+      /* !checksrc! disable BANNEDFUNC 1 */
       freeaddrinfo(freethis);
   }
 #else
+  /* !checksrc! disable BANNEDFUNC 1 */
   freeaddrinfo(freethis);
 #endif
 }
-#endif /* defined(CURLDEBUG) && defined(HAVE_FREEADDRINFO) */
+#endif /* CURLDEBUG && HAVE_FREEADDRINFO */
 
 
 #if defined(CURLDEBUG) && defined(HAVE_GETADDRINFO)
@@ -548,11 +542,13 @@ curl_dbg_getaddrinfo(const char *hostname,
   if(env)
     res = r_getaddrinfo(hostname, service, hints, result);
   else
+    /* !checksrc! disable BANNEDFUNC 1 */
     res = getaddrinfo(hostname, service, hints, result);
 #else
+  /* !checksrc! disable BANNEDFUNC 1 */
   int res = getaddrinfo(hostname, service, hints, result);
 #endif
-  if(0 == res)
+  if(res == 0)
     /* success */
     curl_dbg_log("ADDR %s:%d getaddrinfo() = %p\n",
                  source, line, (void *)*result);
@@ -561,7 +557,7 @@ curl_dbg_getaddrinfo(const char *hostname,
                  source, line);
   return res;
 }
-#endif /* defined(CURLDEBUG) && defined(HAVE_GETADDRINFO) */
+#endif /* CURLDEBUG && HAVE_GETADDRINFO */
 
 #if defined(HAVE_GETADDRINFO) && defined(USE_RESOLVE_ON_IPS)
 /*

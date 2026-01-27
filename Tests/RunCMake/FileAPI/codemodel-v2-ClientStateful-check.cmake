@@ -10,4 +10,6 @@ set(expect
   )
 check_api("^${expect}$")
 
+check_stateful_queries(foo)
+
 check_python(codemodel-v2 index)

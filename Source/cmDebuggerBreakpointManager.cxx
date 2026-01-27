@@ -33,7 +33,7 @@ int64_t cmDebuggerBreakpointManager::FindFunctionStartLine(
   auto location =
     find_if(ListFileFunctionLines[sourcePath].begin(),
             ListFileFunctionLines[sourcePath].end(),
-            [=](cmDebuggerFunctionLocation const& loc) {
+            [=](cmDebuggerFunctionLocation loc) {
               return loc.StartLine <= line && loc.EndLine >= line;
             });
 
@@ -47,11 +47,10 @@ int64_t cmDebuggerBreakpointManager::FindFunctionStartLine(
 int64_t cmDebuggerBreakpointManager::CalibrateBreakpointLine(
   std::string const& sourcePath, int64_t line)
 {
-  auto location = find_if(ListFileFunctionLines[sourcePath].begin(),
-                          ListFileFunctionLines[sourcePath].end(),
-                          [=](cmDebuggerFunctionLocation const& loc) {
-                            return loc.StartLine >= line;
-                          });
+  auto location = find_if(
+    ListFileFunctionLines[sourcePath].begin(),
+    ListFileFunctionLines[sourcePath].end(),
+    [=](cmDebuggerFunctionLocation loc) { return loc.StartLine >= line; });
 
   if (location != ListFileFunctionLines[sourcePath].end()) {
     return location->StartLine;

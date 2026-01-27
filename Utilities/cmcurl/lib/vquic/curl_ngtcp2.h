@@ -26,7 +26,7 @@
 
 #include "../curl_setup.h"
 
-#if defined(USE_NGTCP2) && defined(USE_NGHTTP3)
+#if !defined(CURL_DISABLE_HTTP) && defined(USE_NGTCP2) && defined(USE_NGHTTP3)
 
 #ifdef HAVE_NETINET_UDP_H
 #include <netinet/udp.h>
@@ -52,9 +52,9 @@ struct Curl_cfilter;
 void Curl_ngtcp2_ver(char *p, size_t len);
 
 CURLcode Curl_cf_ngtcp2_create(struct Curl_cfilter **pcf,
-                             struct Curl_easy *data,
-                             struct connectdata *conn,
-                             const struct Curl_addrinfo *ai);
+                               struct Curl_easy *data,
+                               struct connectdata *conn,
+                               const struct Curl_addrinfo *ai);
 
 bool Curl_conn_is_ngtcp2(const struct Curl_easy *data,
                          const struct connectdata *conn,

@@ -27,30 +27,29 @@
 #include <curl/curl.h>
 
 #include "../bufref.h"
+#include "../curlx/dynbuf.h"
 
 struct Curl_easy;
+struct connectdata;
 
-#if !defined(CURL_DISABLE_DIGEST_AUTH)
+#ifndef CURL_DISABLE_DIGEST_AUTH
 struct digestdata;
 #endif
 
-#if defined(USE_NTLM)
+#ifdef USE_NTLM
 struct ntlmdata;
-#endif
-
-#if defined(USE_KERBEROS5)
-struct kerberos5data;
 #endif
 
 #if (defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)) && defined(USE_SPNEGO)
 struct negotiatedata;
 #endif
 
-#if defined(USE_GSASL)
+#ifdef USE_GSASL
 struct gsasldata;
 #endif
 
-#if defined(USE_WINDOWS_SSPI)
+#ifdef USE_WINDOWS_SSPI
+#include "../curl_sspi.h"
 #define GSS_ERROR(status) ((status) & 0x80000000)
 #endif
 
@@ -61,7 +60,7 @@ struct gsasldata;
 bool Curl_auth_allowed_to_host(struct Curl_easy *data);
 
 /* This is used to build an SPN string */
-#if !defined(USE_WINDOWS_SSPI)
+#ifndef USE_WINDOWS_SSPI
 char *Curl_auth_build_spn(const char *service, const char *host,
                           const char *realm);
 #else
@@ -117,9 +116,23 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
 
 /* This is used to clean up the digest specific data */
 void Curl_auth_digest_cleanup(struct digestdata *digest);
+#else
+#define Curl_auth_is_digest_supported()       FALSE
 #endif /* !CURL_DISABLE_DIGEST_AUTH */
 
 #ifdef USE_GSASL
+
+/* meta key for storing GSASL meta at connection */
+#define CURL_META_GSASL_CONN   "meta:auth:gsasl:conn"
+
+#include <gsasl.h>
+struct gsasldata {
+  Gsasl *ctx;
+  Gsasl_session *client;
+};
+
+struct gsasldata *Curl_auth_gsasl_get(struct connectdata *conn);
+
 /* This is used to evaluate if MECH is supported by gsasl */
 bool Curl_auth_gsasl_is_supported(struct Curl_easy *data,
                                   const char *mech,
@@ -140,9 +153,46 @@ CURLcode Curl_auth_gsasl_token(struct Curl_easy *data,
 void Curl_auth_gsasl_cleanup(struct gsasldata *digest);
 #endif
 
-#if defined(USE_NTLM)
+#ifdef USE_NTLM
+
+/* meta key for storing NTML meta at connection */
+#define CURL_META_NTLM_CONN   "meta:auth:ntml:conn"
+/* meta key for storing NTML-PROXY meta at connection */
+#define CURL_META_NTLM_PROXY_CONN   "meta:auth:ntml-proxy:conn"
+
+struct ntlmdata {
+#ifdef USE_WINDOWS_SSPI
+/* The sslContext is used for the Schannel bindings. The
+ * api is available on the Windows 7 SDK and later.
+ */
+#ifdef SECPKG_ATTR_ENDPOINT_BINDINGS
+  CtxtHandle *sslContext;
+#endif
+  CredHandle *credentials;
+  CtxtHandle *context;
+  SEC_WINNT_AUTH_IDENTITY identity;
+  SEC_WINNT_AUTH_IDENTITY *p_identity;
+  size_t token_max;
+  BYTE *output_token;
+  BYTE *input_token;
+  size_t input_token_len;
+  TCHAR *spn;
+#else
+  unsigned int flags;
+  unsigned char nonce[8];
+  unsigned int target_info_len;
+  void *target_info; /* TargetInfo received in the NTLM type-2 message */
+#endif
+};
+
 /* This is used to evaluate if NTLM is supported */
 bool Curl_auth_is_ntlm_supported(void);
+
+struct ntlmdata *Curl_auth_ntlm_get(struct connectdata *conn, bool proxy);
+void Curl_auth_ntlm_remove(struct connectdata *conn, bool proxy);
+
+/* This is used to clean up the NTLM specific data */
+void Curl_auth_cleanup_ntlm(struct ntlmdata *ntlm);
 
 /* This is used to generate a base64 encoded NTLM type-1 message */
 CURLcode Curl_auth_create_ntlm_type1_message(struct Curl_easy *data,
@@ -165,8 +215,6 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
                                              struct ntlmdata *ntlm,
                                              struct bufref *out);
 
-/* This is used to clean up the NTLM specific data */
-void Curl_auth_cleanup_ntlm(struct ntlmdata *ntlm);
 #else
 #define Curl_auth_is_ntlm_supported()     FALSE
 #endif /* USE_NTLM */
@@ -183,7 +231,36 @@ CURLcode Curl_auth_create_xoauth_bearer_message(const char *user,
                                                 const char *bearer,
                                                 struct bufref *out);
 
-#if defined(USE_KERBEROS5)
+#ifdef USE_KERBEROS5
+
+#ifdef HAVE_GSSAPI
+# ifdef HAVE_GSSGNU
+#  include <gss.h>
+# else
+#  include <gssapi/gssapi.h>
+# endif
+#endif
+
+/* meta key for storing KRB5 meta at connection */
+#define CURL_META_KRB5_CONN   "meta:auth:krb5:conn"
+
+struct kerberos5data {
+#ifdef USE_WINDOWS_SSPI
+  CredHandle *credentials;
+  CtxtHandle *context;
+  TCHAR *spn;
+  SEC_WINNT_AUTH_IDENTITY identity;
+  SEC_WINNT_AUTH_IDENTITY *p_identity;
+  size_t token_max;
+  BYTE *output_token;
+#else
+  gss_ctx_id_t context;
+  gss_name_t spn;
+#endif
+};
+
+struct kerberos5data *Curl_auth_krb5_get(struct connectdata *conn);
+
 /* This is used to evaluate if GSSAPI (Kerberos V5) is supported */
 bool Curl_auth_is_gssapi_supported(void);
 
@@ -213,9 +290,49 @@ void Curl_auth_cleanup_gssapi(struct kerberos5data *krb5);
 #define Curl_auth_is_gssapi_supported()       FALSE
 #endif /* USE_KERBEROS5 */
 
-#if defined(USE_SPNEGO)
-/* This is used to evaluate if SPNEGO (Negotiate) is supported */
+#ifdef USE_SPNEGO
+
 bool Curl_auth_is_spnego_supported(void);
+
+/* meta key for storing NEGO meta at connection */
+#define CURL_META_NEGO_CONN         "meta:auth:nego:conn"
+/* meta key for storing NEGO PROXY meta at connection */
+#define CURL_META_NEGO_PROXY_CONN   "meta:auth:nego-proxy:conn"
+
+/* Struct used for Negotiate (SPNEGO) authentication */
+struct negotiatedata {
+#ifdef HAVE_GSSAPI
+  OM_uint32 status;
+  gss_ctx_id_t context;
+  gss_name_t spn;
+  gss_buffer_desc output_token;
+#ifdef CURL_GSSAPI_HAS_CHANNEL_BINDING
+  struct dynbuf channel_binding_data;
+#endif
+#else
+#ifdef USE_WINDOWS_SSPI
+#ifdef SECPKG_ATTR_ENDPOINT_BINDINGS
+  CtxtHandle *sslContext;
+#endif
+  SECURITY_STATUS status;
+  CredHandle *credentials;
+  CtxtHandle *context;
+  SEC_WINNT_AUTH_IDENTITY identity;
+  SEC_WINNT_AUTH_IDENTITY *p_identity;
+  TCHAR *spn;
+  size_t token_max;
+  BYTE *output_token;
+  size_t output_token_length;
+#endif
+#endif
+  BIT(noauthpersist);
+  BIT(havenoauthpersist);
+  BIT(havenegdata);
+  BIT(havemultiplerequests);
+};
+
+struct negotiatedata *
+Curl_auth_nego_get(struct connectdata *conn, bool proxy);
 
 /* This is used to decode a base64 encoded SPNEGO (Negotiate) challenge
    message */

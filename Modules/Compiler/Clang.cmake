@@ -113,8 +113,14 @@ else()
     if(CMAKE_${lang}_COMPILER_VERSION VERSION_GREATER_EQUAL 11.0.0 AND NOT __is_apple_clang)
       set(CMAKE_${lang}_COMPILE_OPTIONS_INSTANTIATE_TEMPLATES_PCH -fpch-instantiate-templates)
     endif()
-    set(CMAKE_${lang}_COMPILE_OPTIONS_USE_PCH -Xclang -include-pch -Xclang <PCH_FILE> -Xclang -include -Xclang <PCH_HEADER>)
-    set(CMAKE_${lang}_COMPILE_OPTIONS_CREATE_PCH -Xclang -emit-pch -Xclang -include -Xclang <PCH_HEADER> -x ${__pch_header_${lang}})
+    if (CMAKE_GENERATOR MATCHES "FASTBuild")
+      # We can't use "-Xclang -emit-pch" since Fastbuild gets spammed with binary content of the .pch file while trying to scan dependencies.
+      set(CMAKE_${lang}_COMPILE_OPTIONS_USE_PCH -include-pch <PCH_FILE> -Xclang -include -Xclang <PCH_HEADER>)
+      set(CMAKE_${lang}_COMPILE_OPTIONS_CREATE_PCH -Xclang -include -Xclang <PCH_HEADER> -x ${__pch_header_${lang}})
+    else()
+      set(CMAKE_${lang}_COMPILE_OPTIONS_USE_PCH -Xclang -include-pch -Xclang <PCH_FILE> -Xclang -include -Xclang <PCH_HEADER>)
+      set(CMAKE_${lang}_COMPILE_OPTIONS_CREATE_PCH -Xclang -emit-pch -Xclang -include -Xclang <PCH_HEADER> -x ${__pch_header_${lang}})
+    endif()
 
     # '-fcolor-diagnostics' introduced since Clang 2.6
     if(CMAKE_${lang}_COMPILER_VERSION VERSION_GREATER_EQUAL 2.6)

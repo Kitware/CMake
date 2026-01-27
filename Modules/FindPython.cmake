@@ -7,8 +7,12 @@ FindPython
 
 .. versionadded:: 3.12
 
-Find Python interpreter, compiler and development environment (include
-directories and libraries).
+Finds Python interpreter, compiler and development environment (include
+directories and libraries):
+
+.. code-block:: cmake
+
+  find_package(Python [<version>] [COMPONENTS <components>...] [...])
 
 .. versionadded:: 3.19
   When a version is requested, it can be specified as a simple value or as a
@@ -38,10 +42,14 @@ The following components are supported:
       `Stable Application Binary Interface <https://docs.python.org/3/c-api/stable.html>`_.
       This component is available only for version ``3.2`` and upper.
 
-* ``NumPy``: search for NumPy include directories.
-
 .. versionadded:: 3.14
-  Added the ``NumPy`` component.
+
+  * ``NumPy``: search for NumPy include directories. Specifying this component
+    imply also the components ``Interpreter`` and ``Development.Module``.
+
+  .. versionchanged:: 4.2
+    The component ``Development.Module`` is no longer implied when the policy
+    :policy:`CMP0201` is set to ``NEW``.
 
 If no ``COMPONENTS`` are specified, ``Interpreter`` is assumed.
 
@@ -87,7 +95,7 @@ To manage concurrent versions 3 and 2 of Python, use :module:`FindPython3` and
 Imported Targets
 ^^^^^^^^^^^^^^^^
 
-This module defines the following :ref:`Imported Targets <Imported Targets>`:
+This module provides the following :ref:`Imported Targets`:
 
 .. versionchanged:: 3.14
   :ref:`Imported Targets <Imported Targets>` are only created when
@@ -134,17 +142,22 @@ This module defines the following :ref:`Imported Targets <Imported Targets>`:
   .. versionadded:: 3.14
 
   NumPy Python library. Target defined if component ``NumPy`` is found.
+  Moreover, this target has the ``Python::Module`` target as dependency.
+
+  .. versionchanged:: 4.2
+    This target does not have anymore the ``Python::Module`` target as
+    dependency when the policy :policy:`CMP0201` is set to ``NEW``.
 
 Result Variables
 ^^^^^^^^^^^^^^^^
 
-This module will set the following variables in your project
+This module defines the following variables
 (see :ref:`Standard Variable Names <CMake Developer Standard Variable Names>`):
 
 ``Python_FOUND``
-  System has the Python requested components.
+  Boolean indicating whether system has the Python requested components.
 ``Python_Interpreter_FOUND``
-  System has the Python interpreter.
+  Boolean indicating whether system has the Python interpreter.
 ``Python_EXECUTABLE``
   Path to the Python interpreter.
 ``Python_EXECUTABLE_DEBUG``
@@ -206,7 +219,7 @@ This module will set the following variables in your project
   string.
 
 ``Python_Compiler_FOUND``
-  System has the Python compiler.
+  Boolean indicating whether system has the Python compiler.
 ``Python_COMPILER``
   Path to the Python compiler. Only offered by IronPython.
 ``Python_COMPILER_ID``
@@ -219,23 +232,25 @@ This module will set the following variables in your project
   The ``.Net`` interpreter. Only used by ``IronPython`` implementation.
 
 ``Python_Development_FOUND``
-  System has the Python development artifacts.
+  Boolean indicating whether system has the Python development artifacts.
 
 ``Python_Development.Module_FOUND``
   .. versionadded:: 3.18
 
-  System has the Python development artifacts for Python module.
+  Boolean indicating whether system has the Python development artifacts
+  for Python module.
 
 ``Python_Development.SABIModule_FOUND``
   .. versionadded:: 3.26
 
-  System has the Python development artifacts for Python module using the
-  Stable Application Binary Interface.
+  Boolean indicating whether system has the Python development artifacts
+  for Python module using the Stable Application Binary Interface.
 
 ``Python_Development.Embed_FOUND``
   .. versionadded:: 3.18
 
-  System has the Python development artifacts for Python embedding.
+  Boolean indicating whether system has the Python development artifacts
+  for Python embedding.
 
 ``Python_INCLUDE_DIRS``
 
@@ -293,7 +308,7 @@ This module will set the following variables in your project
 ``Python_NumPy_FOUND``
   .. versionadded:: 3.14
 
-  System has the NumPy.
+  Boolean indicating whether system has the NumPy.
 
 ``Python_NumPy_INCLUDE_DIRS``
   .. versionadded:: 3.14

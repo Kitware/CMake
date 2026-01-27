@@ -7,9 +7,14 @@ CPackIFWConfigureFile
 
 .. versionadded:: 3.8
 
-The module defines :command:`configure_file` similar command to
+This module defines :command:`configure_file` similar command to
 configure file templates prepared in QtIFW/SDK/Creator style.
 
+Load this module in a CMake project with:
+
+.. code-block:: cmake
+
+  include(CPackIFWConfigureFile)
 
 Commands
 ^^^^^^^^
@@ -30,10 +35,6 @@ The module defines the following commands:
   variable, or the empty string if the variable is not defined.
 
 #]=======================================================================]
-
-# NOTE: This file used to himself packaging via CPack IFW generator and
-# should be compatible with minimal CMake version defined in
-# ../CMakeLists.txt file.
 
 if(NOT DEFINED CPackIFWConfigureFile_CMake_INCLUDED)
 set(CPackIFWConfigureFile_CMake_INCLUDED 1)

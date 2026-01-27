@@ -32,11 +32,27 @@ The general signature is:
             )
 
 This command is used to find a |SEARCH_XXX_DESC|.
-A cache entry, or a normal variable if ``NO_CACHE`` is specified,
-named by ``<VAR>`` is created to store the result of this command.
-If the |SEARCH_XXX| is found the result is stored in the variable
-and the search will not be repeated unless the variable is cleared.
-If nothing is found, the result will be ``<VAR>-NOTFOUND``.
+
+Prior to searching, |FIND_XXX| checks if variable ``<VAR>`` is defined. If
+the variable is not defined, the search will be performed. If the variable is
+defined and its value is ``NOTFOUND``, or ends in ``-NOTFOUND``, the search
+will be performed. If the variable contains any other value the search is not
+performed.
+
+  .. note::
+      ``VAR`` is considered defined if it is available in the current scope. See
+      the :ref:`cmake-language(7) variables <CMake Language Variables>`
+      documentation for details on scopes, and the interaction of normal
+      variables and cache entries.
+
+The results of the search will be stored in a cache entry named ``<VAR>``.
+Future calls to |FIND_XXX| will inspect this cache entry when specifying the
+same ``<VAR>``. This optimization ensures successful searches will not be
+repeated unless the cache entry is :command:`unset`.
+
+If the |SEARCH_XXX| is found the recorded value in cache entry ``<VAR>`` will
+be the result of the search. If nothing is found, the recorded value will be
+``<VAR>-NOTFOUND``.
 
 Options include:
 
@@ -103,8 +119,9 @@ Options include:
 
   .. note::
 
-    If the variable is already set before the call (as a normal or cache
-    variable) then the search will not occur.
+    |FIND_XXX| will still check for ``<VAR>`` as usual, checking first for a
+    variable, and then a cache entry. If either indicate a previous successful
+    search, the search will not be performed.
 
   .. warning::
 

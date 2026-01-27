@@ -137,9 +137,13 @@ function(_cmake_find_compiler_sysroot lang)
     execute_process(COMMAND "${CMAKE_${lang}_COMPILER}" -print-sysroot
       OUTPUT_STRIP_TRAILING_WHITESPACE
       OUTPUT_VARIABLE _cmake_sysroot_run_out
-      ERROR_VARIABLE _cmake_sysroot_run_err)
+      ERROR_VARIABLE _cmake_sysroot_run_err
+      RESULT_VARIABLE _cmake_sysroot_run_res
+    )
 
-    if(_cmake_sysroot_run_out AND NOT _cmake_sysroot_run_err
+    if(_cmake_sysroot_run_res EQUAL 0
+        AND _cmake_sysroot_run_out
+        AND NOT _cmake_sysroot_run_err
         AND NOT _cmake_sysroot_run_out STREQUAL "/"
         AND IS_DIRECTORY "${_cmake_sysroot_run_out}/usr")
       file(TO_CMAKE_PATH "${_cmake_sysroot_run_out}/usr" _cmake_sysroot_run_out_usr)

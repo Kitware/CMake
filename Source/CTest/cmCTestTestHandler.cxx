@@ -530,7 +530,7 @@ bool cmCTestTestHandler::ProcessOptions()
 
 void cmCTestTestHandler::LogTestSummary(std::vector<std::string> const& passed,
                                         std::vector<std::string> const& failed,
-                                        cmDuration const& durationInSecs)
+                                        cmDuration durationInSecs)
 {
   std::size_t total = passed.size() + failed.size();
 
@@ -2073,7 +2073,7 @@ void cmCTestTestHandler::RecordCustomTestMeasurements(cmXMLWriter& xml,
             xml.Attribute("encoding", "base64");
             std::ostringstream ostr;
             for (size_t cc = 0; cc < rlen; cc++) {
-              ostr << encoded_buffer[cc];
+              ostr << static_cast<char>(encoded_buffer[cc]);
               if (cc % 60 == 0 && cc) {
                 ostr << std::endl;
               }

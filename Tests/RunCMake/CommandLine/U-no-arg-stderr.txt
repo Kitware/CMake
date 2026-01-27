@@ -1,2 +1,2 @@
-^CMake Error: -U must be followed with VAR.
-CMake Error: Run 'cmake --help' for all supported options.$
+^CMake Error: -U must be followed with VAR\.
+CMake Error: Run 'cmake --help' for all supported options\.$

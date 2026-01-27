@@ -10,4 +10,4 @@ CMake Warning \(dev\) in CMakeLists\.txt:
 
   "\\´
 
-This warning is for project developers\.  Use -Wno-dev to suppress it.
+This warning is for project developers\.  Use -Wno-dev to suppress it\.

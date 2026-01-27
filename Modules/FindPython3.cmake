@@ -7,8 +7,12 @@ FindPython3
 
 .. versionadded:: 3.12
 
-Find Python 3 interpreter, compiler and development environment (include
-directories and libraries).
+Finds Python 3 interpreter, compiler and development environment (include
+directories and libraries):
+
+.. code-block:: cmake
+
+  find_package(Python3 [<version>] [COMPONENTS <components>...] [...])
 
 .. versionadded:: 3.19
   When a version is requested, it can be specified as a simple value or as a
@@ -38,10 +42,14 @@ The following components are supported:
       `Stable Application Binary Interface <https://docs.python.org/3/c-api/stable.html>`_.
       This component is available only for version ``3.2`` and upper.
 
-* ``NumPy``: search for NumPy include directories.
-
 .. versionadded:: 3.14
-  Added the ``NumPy`` component.
+
+  * ``NumPy``: search for NumPy include directories. Specifying this component
+    imply also the components ``Interpreter`` and ``Development.Module``.
+
+  .. versionchanged:: 4.2
+    The component ``Development.Module`` is no longer implied when the policy
+    :policy:`CMP0201` is set to ``NEW``.
 
 If no ``COMPONENTS`` are specified, ``Interpreter`` is assumed.
 
@@ -89,7 +97,7 @@ for you.
 Imported Targets
 ^^^^^^^^^^^^^^^^
 
-This module defines the following :ref:`Imported Targets <Imported Targets>`:
+This module provides the following :ref:`Imported Targets`:
 
 .. versionchanged:: 3.14
   :ref:`Imported Targets <Imported Targets>` are only created when
@@ -136,17 +144,22 @@ This module defines the following :ref:`Imported Targets <Imported Targets>`:
   .. versionadded:: 3.14
 
   NumPy library for Python 3. Target defined if component ``NumPy`` is found.
+  Moreover, this target has the ``Python3::Module`` target as dependency.
+
+  .. versionchanged:: 4.2
+    This target does not have anymore the ``Python3::Module`` target as
+    dependency when the policy :policy:`CMP0201` is set to ``NEW``.
 
 Result Variables
 ^^^^^^^^^^^^^^^^
 
-This module will set the following variables in your project
+This module defines the following variables
 (see :ref:`Standard Variable Names <CMake Developer Standard Variable Names>`):
 
 ``Python3_FOUND``
-  System has the Python 3 requested components.
+  Boolean indicating whether system has the Python 3 requested components.
 ``Python3_Interpreter_FOUND``
-  System has the Python 3 interpreter.
+  Boolean indicating whether system has the Python 3 interpreter.
 ``Python3_EXECUTABLE``
   Path to the Python 3 interpreter.
 ``Python3_EXECUTABLE_DEBUG``
@@ -208,7 +221,7 @@ This module will set the following variables in your project
   string.
 
 ``Python3_Compiler_FOUND``
-  System has the Python 3 compiler.
+  Boolean indicating whether system has the Python 3 compiler.
 ``Python3_COMPILER``
   Path to the Python 3 compiler. Only offered by IronPython.
 ``Python3_COMPILER_ID``
@@ -222,23 +235,25 @@ This module will set the following variables in your project
 
 ``Python3_Development_FOUND``
 
-  System has the Python 3 development artifacts.
+  Boolean indicating whether system has the Python 3 development artifacts.
 
 ``Python3_Development.Module_FOUND``
   .. versionadded:: 3.18
 
-  System has the Python 3 development artifacts for Python module.
+  Boolean indicating whether system has the Python 3 development artifacts
+  for Python module.
 
 ``Python3_Development.SABIModule_FOUND``
   .. versionadded:: 3.26
 
-  System has the Python 3 development artifacts for Python module using the
-  Stable Application Binary Interface.
+  Boolean indicating whether system has the Python 3 development artifacts
+  for Python module using the Stable Application Binary Interface.
 
 ``Python3_Development.Embed_FOUND``
   .. versionadded:: 3.18
 
-  System has the Python 3 development artifacts for Python embedding.
+  Boolean indicating whether system has the Python 3 development artifacts
+  for Python embedding.
 
 ``Python3_INCLUDE_DIRS``
 
@@ -296,7 +311,7 @@ This module will set the following variables in your project
 ``Python3_NumPy_FOUND``
   .. versionadded:: 3.14
 
-  System has the NumPy.
+  Boolean indicating whether system has the NumPy.
 
 ``Python3_NumPy_INCLUDE_DIRS``
   .. versionadded:: 3.14

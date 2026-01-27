@@ -49,8 +49,8 @@
 #include "hash.h"
 #include "share.h"
 #include "url.h"
-/* The last 3 #include files should be in this order */
-#include "curl_printf.h"
+
+/* The last 2 #include files should be in this order */
 #include "curl_memory.h"
 #include "memdebug.h"
 
@@ -94,8 +94,7 @@ struct Curl_addrinfo *Curl_sync_getaddrinfo(struct Curl_easy *data,
 #endif /* CURLRES_SYNCH */
 #endif /* CURLRES_IPV4 */
 
-#if defined(CURLRES_IPV4) && \
-   !defined(CURLRES_ARES) && !defined(CURLRES_AMIGA)
+#if defined(CURLRES_IPV4) && !defined(CURLRES_ARES) && !defined(CURLRES_AMIGA)
 
 /*
  * Curl_ipv4_resolve_r() - ipv4 threadsafe resolver function.
@@ -108,7 +107,7 @@ struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname,
                                           int port)
 {
 #if !(defined(HAVE_GETADDRINFO) && defined(HAVE_GETADDRINFO_THREADSAFE)) && \
-   defined(HAVE_GETHOSTBYNAME_R_3)
+  defined(HAVE_GETHOSTBYNAME_R_3)
   int res;
 #endif
   struct Curl_addrinfo *ai = NULL;
@@ -126,7 +125,7 @@ struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname,
   hints.ai_family = PF_INET;
   hints.ai_socktype = SOCK_STREAM;
   if(port) {
-    msnprintf(sbuf, sizeof(sbuf), "%d", port);
+    curl_msnprintf(sbuf, sizeof(sbuf), "%d", port);
     sbufptr = sbuf;
   }
 
@@ -145,11 +144,11 @@ struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname,
     return NULL; /* major failure */
   /*
    * The clearing of the buffer is a workaround for a gethostbyname_r bug in
-   * qnx nto and it is also _required_ for some of these functions on some
+   * QNX Neutrino and it is also _required_ for some of these functions on some
    * platforms.
    */
 
-#if defined(HAVE_GETHOSTBYNAME_R_5)
+#ifdef HAVE_GETHOSTBYNAME_R_5
   /* Solaris, IRIX and more */
   h = gethostbyname_r(hostname,
                       (struct hostent *)buf,
@@ -287,5 +286,4 @@ struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname,
 
   return ai;
 }
-#endif /* defined(CURLRES_IPV4) && !defined(CURLRES_ARES) &&
-                                   !defined(CURLRES_AMIGA) */
+#endif /* CURLRES_IPV4 && !CURLRES_ARES && !CURLRES_AMIGA */

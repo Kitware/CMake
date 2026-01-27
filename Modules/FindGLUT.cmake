@@ -5,8 +5,13 @@
 FindGLUT
 --------
 
-Finds the OpenGL Utility Toolkit (GLUT) library, which provides a simple API for
-creating windows, handling input, and managing events in OpenGL applications.
+Finds the OpenGL Utility Toolkit (GLUT) library, which provides a simple API
+for creating windows, handling input, and managing events in OpenGL
+applications:
+
+.. code-block:: cmake
+
+  find_package(GLUT [...])
 
 Imported Targets
 ^^^^^^^^^^^^^^^^
@@ -24,7 +29,7 @@ Result Variables
 This module defines the following variables:
 
 ``GLUT_FOUND``
-  Boolean indicating whether GLUT is found.
+  Boolean indicating whether GLUT was found.
 
 ``GLUT_INCLUDE_DIRS``
   .. versionadded:: 3.23
@@ -72,7 +77,7 @@ include(${CMAKE_CURRENT_LIST_DIR}/SelectLibraryConfigurations.cmake)
 include(FindPackageHandleStandardArgs)
 
 find_package(PkgConfig QUIET)
-if(PKG_CONFIG_FOUND)
+if(PkgConfig_FOUND)
   pkg_check_modules(PC_GLUT QUIET glut)
   if(NOT PC_GLUT_FOUND)
     pkg_check_modules(PC_GLUT QUIET freeglut)

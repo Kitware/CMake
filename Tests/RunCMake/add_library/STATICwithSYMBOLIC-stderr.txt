@@ -1,0 +1,4 @@
+^CMake Error at STATICwithSYMBOLIC\.cmake:[0-9]+ \(add_library\):
+  add_library SYMBOLIC option may only be used with INTERFACE libraries
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)$

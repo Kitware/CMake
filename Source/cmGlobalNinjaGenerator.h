@@ -28,11 +28,7 @@
 
 class cmCustomCommand;
 class cmGeneratorTarget;
-class cmLinkLineComputer;
-class cmLocalGenerator;
 class cmMakefile;
-class cmOutputConverter;
-class cmStateDirectory;
 class cmake;
 struct cmCxxModuleExportInfo;
 
@@ -201,9 +197,9 @@ public:
     std::string const& makeProgram, std::string const& projectName,
     std::string const& projectDir, std::vector<std::string> const& targetNames,
     std::string const& config, int jobs, bool verbose,
-    cmBuildOptions const& buildOptions = cmBuildOptions(),
-    std::vector<std::string> const& makeOptions =
-      std::vector<std::string>()) override;
+    cmBuildOptions buildOptions = cmBuildOptions(),
+    std::vector<std::string> const& makeOptions = std::vector<std::string>(),
+    BuildTryCompile isInTryCompile = BuildTryCompile::No) override;
 
   // Setup target names
   char const* GetAllTargetName() const override { return "all"; }
@@ -391,6 +387,7 @@ public:
   void AddTargetAlias(std::string const& alias, cmGeneratorTarget* target,
                       std::string const& config);
 
+  bool SupportsShortObjectNames() const override;
   void ComputeTargetObjectDirectory(cmGeneratorTarget* gt) const override;
 
   // Ninja generator uses 'deps' and 'msvc_deps_prefix' introduced in 1.3
@@ -535,8 +532,7 @@ private:
   void WriteTargetRebuildManifest(std::ostream& os);
   bool WriteTargetCleanAdditional(std::ostream& os);
   void WriteTargetClean(std::ostream& os);
-#if !defined(CMAKE_BOOTSTRAP) && !defined(_WIN32)
-  // FIXME(#26668) This does not work on Windows
+#ifndef CMAKE_BOOTSTRAP
   void WriteTargetInstrument(std::ostream& os);
 #endif
   void WriteTargetHelp(std::ostream& os);

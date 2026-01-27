@@ -10,7 +10,7 @@ self-describing array data:
 
 .. code-block:: cmake
 
-  find_package(HDF5 [<version>] ... [COMPONENTS <components>...] ...)
+  find_package(HDF5 [<version>] [COMPONENTS <components>...] [...])
 
 If the HDF5 library is built using its CMake-based build system, it will as
 of HDF5 version 1.8.15 provide its own CMake Package Configuration file
@@ -71,8 +71,9 @@ This module provides the following :ref:`Imported Targets`:
 ``HDF5::HDF5``
   .. versionadded:: 3.19
 
-  Target encapsulating the usage requirements for all found HDF5 libraries
-  (``HDF5_LIBRARIES``), available if HDF5 and all required components are found.
+  Target encapsulating the usage requirements for all found HDF5 binding
+  libraries (``HDF5_LIBRARIES``), available if HDF5 and all required components
+  are found.
 
 ``hdf5::hdf5``
   .. versionadded:: 3.19
@@ -126,7 +127,7 @@ Result Variables
 This module defines the following variables:
 
 ``HDF5_FOUND``
-  Boolean indicating whether (the requested version of) HDF5 is found.
+  Boolean indicating whether (the requested version of) HDF5 was found.
 
 ``HDF5_VERSION``
   .. versionadded:: 3.3

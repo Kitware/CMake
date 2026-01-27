@@ -5,7 +5,11 @@
 FindJPEG
 --------
 
-Finds the Joint Photographic Experts Group (JPEG) library (``libjpeg``).
+Finds the Joint Photographic Experts Group (JPEG) library (``libjpeg``):
+
+.. code-block:: cmake
+
+  find_package(JPEG [<version>] [...])
 
 .. versionchanged:: 3.12
   Debug and Release JPEG library variants are now found separately.
@@ -24,10 +28,16 @@ This module provides the following :ref:`Imported Targets`:
 Result Variables
 ^^^^^^^^^^^^^^^^
 
-This module sets the following variables:
+This module defines the following variables:
 
 ``JPEG_FOUND``
-  Boolean indicating whether the JPEG is found.
+  Boolean indicating whether the (requested version of) JPEG library was
+  found.
+
+``JPEG_VERSION``
+  .. versionadded:: 3.12
+
+  The version of JPEG library found.
 
 ``JPEG_INCLUDE_DIRS``
   Include directories containing headers needed to use JPEG.
@@ -35,18 +45,13 @@ This module sets the following variables:
 ``JPEG_LIBRARIES``
   Libraries needed to link to JPEG.
 
-``JPEG_VERSION``
-  .. versionadded:: 3.12
-
-  The version of the JPEG library found.
-
 Cache Variables
 ^^^^^^^^^^^^^^^
 
 The following cache variables may also be set:
 
 ``JPEG_INCLUDE_DIR``
-  Directory containing the ``jpeglib.h`` and related header files.
+  Directory containing the ``<jpeglib.h>`` and related header files.
 
 ``JPEG_LIBRARY_RELEASE``
   .. versionadded:: 3.12
@@ -58,13 +63,13 @@ The following cache variables may also be set:
 
   Path to the debug variant of the JPEG library.
 
-Obsolete Variables
-^^^^^^^^^^^^^^^^^^
+Deprecated Variables
+^^^^^^^^^^^^^^^^^^^^
 
-The following legacy variables are provided for backward compatibility:
+The following variables are provided for backward compatibility:
 
 ``JPEG_LIBRARY``
-  .. versionchanged:: 3.12
+  .. deprecated:: 3.12
     This variable has been superseded by the ``JPEG_LIBRARY_RELEASE`` and
     ``JPEG_LIBRARY_DEBUG`` variables.
 

@@ -4,6 +4,10 @@
     "directorySource": "^cxx/cross$",
     "projectName": "Cxx",
     "type": "EXECUTABLE",
+    "imported": null,
+    "local": null,
+    "abstract": null,
+    "symbolic": null,
     "isGeneratorProvided": null,
     "fileSets": null,
     "sources": [
@@ -45,7 +49,12 @@
             ],
             "includes": null,
             "frameworks": null,
-            "defines": null,
+            "defines": [
+                {
+                    "define": "_MBCS",
+                    "backtrace": null
+                }
+            ],
             "compileCommandFragments": null
         }
     ],
@@ -78,14 +87,14 @@
     "build": "^cxx/cross$",
     "source": "^cxx/cross$",
     "install": null,
-    "launchers" : [
+    "launchers": [
         {
             "command": "^no-such-launcher(\\.exe)?$",
-            "type" : "test"
+            "type": "test"
         },
         {
             "command": "^no-such-emulator(\\.exe)?$",
-            "type" : "emulator"
+            "type": "emulator"
         }
     ],
     "link": {
@@ -99,5 +108,11 @@
             "id": "^ZERO_CHECK::@6890427a1f51a3e7e1df$",
             "backtrace": null
         }
-    ]
+    ],
+    "linkLibraries": null,
+    "interfaceLinkLibraries": null,
+    "compileDependencies": null,
+    "interfaceCompileDependencies": null,
+    "objectDependencies": null,
+    "orderDependencies": null
 }

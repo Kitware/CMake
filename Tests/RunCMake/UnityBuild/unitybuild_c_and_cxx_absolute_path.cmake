@@ -1,3 +1,5 @@
+set(CMAKE_INTERMEDIATE_DIR_STRATEGY FULL CACHE STRING "" FORCE)
+
 project(unitybuild_c_and_cxx_absolute_path C CXX)
 
 set(srcs "")

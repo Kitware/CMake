@@ -12,7 +12,8 @@ target_include_directories(main BEFORE PRIVATE "${before_include_dir}")
 
 get_target_property(actual_include_dirs main INCLUDE_DIRECTORIES)
 set(desired_include_dirs "${before_include_dir}" "${include_dir}")
+string(REGEX QUOTE desired_include_dirs_regex "${desired_include_dirs}")
 
-if (NOT "${actual_include_dirs}" MATCHES "${desired_include_dirs}")
+if (NOT "${actual_include_dirs}" MATCHES "^${desired_include_dirs_regex}$")
     message(SEND_ERROR "include before does not work")
 endif()

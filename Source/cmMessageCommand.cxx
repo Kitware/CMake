@@ -69,7 +69,7 @@ void WriteMessageEvent(cmConfigureLog& log, cmMakefile const& mf,
                        std::string const& message)
 {
   // Keep in sync with cmFileAPIConfigureLog's DumpEventKindNames.
-  static std::vector<unsigned long> const LogVersionsWithMessageV1{ 1 };
+  static std::vector<unsigned int> const LogVersionsWithMessageV1{ 1 };
 
   if (log.IsAnyLogVersionEnabled(LogVersionsWithMessageV1)) {
     log.BeginEvent("message-v1", mf);

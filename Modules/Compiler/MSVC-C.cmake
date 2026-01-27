@@ -33,6 +33,16 @@ if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 19.27)
     endmacro()
   endif()
 
+  if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 19.39)
+    # VS 17.10 did not have a "stdclatest" value for LanguageStandard_C.
+    if(NOT CMAKE_GENERATOR MATCHES "Visual Studio"
+        OR CMAKE_VS_VERSION_BUILD_NUMBER VERSION_GREATER_EQUAL 17.11)
+      set(CMAKE_C23_STANDARD_COMPILE_OPTION "-std:clatest")
+      set(CMAKE_C23_EXTENSION_COMPILE_OPTION "-std:clatest")
+      set(CMAKE_C_STANDARD_LATEST 23)
+    endif()
+  endif()
+
   __compiler_check_default_language_standard(C 19.27 99)
 else()
   # MSVC has no specific options to set C language standards, but set them as

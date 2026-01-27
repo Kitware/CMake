@@ -11,7 +11,7 @@ for integrating Doxygen-based documentation into CMake projects:
 
 .. code-block:: cmake
 
-  find_package(Doxygen [<version>] [...] [COMPONENTS <components>...] [...])
+  find_package(Doxygen [<version>] [COMPONENTS <components>...] [...])
 
 Components
 ^^^^^^^^^^
@@ -90,12 +90,14 @@ Result Variables
 This module defines the following variables:
 
 ``Doxygen_FOUND``
-  Boolean indicating whether (the requested version of) ``doxygen`` executable
-  and all requested required components are found.  For backward compatibility,
-  the ``DOXYGEN_FOUND`` variable is also set, except it has boolean value of
-  ``YES`` or ``NO``.
+  .. versionadded:: 3.3
 
-``DOXYGEN_VERSION``
+  Boolean indicating whether the (requested version of) ``doxygen`` executable
+  and all requested required components were found.
+
+``Doxygen_VERSION``
+  .. versionadded:: 4.2
+
   The version of Doxygen found (as reported by ``doxygen --version``).
 
 Commands
@@ -490,6 +492,14 @@ Deprecated Variables
 For compatibility with previous versions of CMake, the following variables
 are also defined but they are deprecated and should no longer be used:
 
+``DOXYGEN_FOUND``
+  .. deprecated:: 4.2
+    Use ``Doxygen_FOUND``.
+
+  Boolean indicating whether the (requested version of) ``doxygen`` executable
+  and all requested required components were found.  It has a boolean value
+  of ``YES`` or ``NO``.
+
 ``DOXYGEN_EXECUTABLE``
   .. deprecated:: 3.9
     Use ``Doxygen::doxygen`` imported target instead of referring to the
@@ -499,8 +509,9 @@ are also defined but they are deprecated and should no longer be used:
 
 ``DOXYGEN_DOT_FOUND``
   .. deprecated:: 3.9
+    Use ``Doxygen_dot_FOUND``.
 
-  Boolean result variable indicating whether ``dot`` executable is found.
+  Boolean result variable indicating whether ``dot`` executable was found.
 
 ``DOXYGEN_DOT_EXECUTABLE``
   .. deprecated:: 3.9
@@ -528,6 +539,12 @@ are also defined but they are deprecated and should no longer be used:
   ``find_package(Doxygen COMPONENTS ...)``.  In backward-compatibility mode
   (i.e. without specifying components) it prevents this find module from
   searching for Graphviz's ``dot`` utility.
+
+``DOXYGEN_VERSION``
+  .. deprecated:: 4.2
+    Superseded by the ``Doxygen_VERSION``.
+
+  The version of Doxygen found.
 
 Examples
 ^^^^^^^^
@@ -653,7 +670,7 @@ Example: Custom Configuration File
 
 In the following example, a custom ``Doxyfile`` configuration file is created
 in the current binary directory (:variable:`CMAKE_CURRENT_BINARY_DIR`) prior
-to calling the ``doxygen_add_doxs()``.  This allows project-specific
+to calling the ``doxygen_add_docs()``.  This allows project-specific
 configuration tags to be customized as needed:
 
 .. code-block:: cmake
@@ -664,7 +681,7 @@ configuration tags to be customized as needed:
   if(Doxygen_FOUND)
     configure_file(Doxyfile.in Doxyfile)
 
-    doxygen_add_doxs(
+    doxygen_add_docs(
       example_docs
       foo.c bar.c
       ALL
@@ -765,7 +782,8 @@ macro(_Doxygen_find_doxygen)
     mark_as_advanced(DOXYGEN_EXECUTABLE)
 
     if(DOXYGEN_EXECUTABLE)
-        _Doxygen_get_version(DOXYGEN_VERSION _Doxygen_version_result "${DOXYGEN_EXECUTABLE}")
+        _Doxygen_get_version(Doxygen_VERSION _Doxygen_version_result "${DOXYGEN_EXECUTABLE}")
+        set(DOXYGEN_VERSION "${Doxygen_VERSION}")
 
         if(_Doxygen_version_result)
             if(NOT Doxygen_FIND_QUIETLY)
@@ -959,7 +977,7 @@ unset(_comp)
 find_package_handle_standard_args(
     Doxygen
     REQUIRED_VARS DOXYGEN_EXECUTABLE
-    VERSION_VAR DOXYGEN_VERSION
+    VERSION_VAR Doxygen_VERSION
     HANDLE_VERSION_RANGE
     HANDLE_COMPONENTS
 )

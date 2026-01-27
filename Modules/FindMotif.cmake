@@ -5,7 +5,11 @@
 FindMotif
 ---------
 
-Finds Motif (or LessTif) graphical user interface toolkit.
+Finds Motif (or LessTif) graphical user interface toolkit:
+
+.. code-block:: cmake
+
+  find_package(Motif [...])
 
 Result Variables
 ^^^^^^^^^^^^^^^^
@@ -13,27 +17,53 @@ Result Variables
 This module defines the following variables:
 
 ``Motif_FOUND``
-  Boolean indicating whether the Motif was found.  For backward compatibility,
-  the ``MOTIF_FOUND`` variable is also set to the same value.
+  .. versionadded:: 3.3
+
+  Boolean indicating whether Motif was found.
 
 Cache Variables
 ^^^^^^^^^^^^^^^
 
 The following cache variables may also be set:
 
-``MOTIF_LIBRARIES``
-  Libraries needed to link to Motif.
 ``MOTIF_INCLUDE_DIR``
   Include directories needed to use Motif.
+
+``MOTIF_LIBRARIES``
+  Libraries needed to link to Motif.
+
+Deprecated Variables
+^^^^^^^^^^^^^^^^^^^^
+
+The following variables are provided for backward compatibility:
+
+``MOTIF_FOUND``
+  .. deprecated:: 4.2
+    Use ``Motif_FOUND``, which has the same value.
+
+  Boolean indicating whether Motif was found.
 
 Examples
 ^^^^^^^^
 
-Finding Motif:
+Finding Motif and creating an imported interface target for linking it to a
+project target:
 
 .. code-block:: cmake
 
   find_package(Motif)
+
+  if(Motif_FOUND AND NOT TARGET Motif::Motif)
+    add_library(Motif::Motif INTERFACE IMPORTED)
+    set_target_properties(
+      Motif::Motif
+      PROPERTIES
+        INTERFACE_INCLUDE_DIRECTORIES "${MOTIF_INCLUDE_DIR}"
+        INTERFACE_LINK_LIBRARIES "${MOTIF_LIBRARIES}"
+    )
+  endif()
+
+  target_link_libraries(example PRIVATE Motif::Motif)
 #]=======================================================================]
 
 if(UNIX)

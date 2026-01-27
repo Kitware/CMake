@@ -134,7 +134,7 @@ protected:
   }
 
 public:
-  StringSorter(cmList::SortConfiguration const& config)
+  StringSorter(cmList::SortConfiguration config)
     : Filters{ this->GetCompareFilter(config.Compare),
                this->GetCaseFilter(config.Case) }
     , SortMethod(this->GetComparisonFunction(config.Compare))
@@ -175,7 +175,7 @@ private:
 
 cmList::SortConfiguration::SortConfiguration() = default;
 
-cmList& cmList::sort(SortConfiguration const& cfg)
+cmList& cmList::sort(SortConfiguration cfg)
 {
   SortConfiguration config{ cfg };
 
@@ -910,7 +910,7 @@ cmList& cmList::RemoveItems(std::vector<index_type>&& indexes)
   // compute all indexes
   std::vector<size_type> idx(indexes.size());
   std::transform(indexes.cbegin(), indexes.cend(), idx.begin(),
-                 [this](index_type const& index) -> size_type {
+                 [this](index_type index) -> size_type {
                    return this->ComputeIndex(index);
                  });
 

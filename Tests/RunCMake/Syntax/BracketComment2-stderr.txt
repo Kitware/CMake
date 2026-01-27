@@ -1,4 +1,4 @@
-CMake Error at BracketComment2.cmake:2 \(message\):
-  This is not commented out.
+CMake Error at BracketComment2\.cmake:2 \(message\):
+  This is not commented out\.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)

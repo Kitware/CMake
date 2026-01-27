@@ -1,8 +1,8 @@
-CMake Error at missing-arg.cmake:[0-9]+ \(file\):
+CMake Error at missing-arg\.cmake:[0-9]+ \(file\):
   Error evaluating generator expression:
 
     \$<LIST:[A-Z_]+,.+>
 
-  \$<LIST:[A-Z_]+> expression requires at least (two|three) parameters.
+  \$<LIST:[A-Z_]+> expression requires at least (two|three) parameters\.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)

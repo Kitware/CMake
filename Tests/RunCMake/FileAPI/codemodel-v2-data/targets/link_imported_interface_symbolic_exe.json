@@ -1,0 +1,147 @@
+{
+    "name": "link_imported_interface_symbolic_exe",
+    "id": "^link_imported_interface_symbolic_exe::@ba7eb709d0b48779c6c8$",
+    "directorySource": "^imported$",
+    "projectName": "Imported",
+    "type": "EXECUTABLE",
+    "imported": null,
+    "local": null,
+    "abstract": null,
+    "symbolic": null,
+    "isGeneratorProvided": null,
+    "fileSets": null,
+    "sources": [
+        {
+            "path": "^empty\\.c$",
+            "isGenerated": null,
+            "fileSetName": null,
+            "sourceGroupName": "Source Files",
+            "compileGroupLanguage": "C",
+            "backtrace": [
+                {
+                    "file": "^imported/CMakeLists\\.txt$",
+                    "line": 36,
+                    "command": "add_executable",
+                    "hasParent": true
+                },
+                {
+                    "file": "^imported/CMakeLists\\.txt$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": false
+                }
+            ]
+        }
+    ],
+    "sourceGroups": [
+        {
+            "name": "Source Files",
+            "sourcePaths": [
+                "^empty\\.c$"
+            ]
+        }
+    ],
+    "compileGroups": [
+        {
+            "language": "C",
+            "sourcePaths": [
+                "^empty\\.c$"
+            ],
+            "includes": null,
+            "frameworks": null,
+            "defines": [
+                {
+                    "define": "_MBCS",
+                    "backtrace": null
+                }
+            ],
+            "compileCommandFragments": null
+        }
+    ],
+    "backtrace": [
+        {
+            "file": "^imported/CMakeLists\\.txt$",
+            "line": 36,
+            "command": "add_executable",
+            "hasParent": true
+        },
+        {
+            "file": "^imported/CMakeLists\\.txt$",
+            "line": null,
+            "command": null,
+            "hasParent": false
+        }
+    ],
+    "folder": null,
+    "nameOnDisk": "^link_imported_interface_symbolic_exe(\\.exe)?$",
+    "artifacts": [
+        {
+            "path": "^imported/((Debug|Release|RelWithDebInfo|MinSizeRel)/)?link_imported_interface_symbolic_exe(\\.exe)?$",
+            "_dllExtra": false
+        },
+        {
+            "path": "^imported/((Debug|Release|RelWithDebInfo|MinSizeRel)/)?link_imported_interface_symbolic_exe\\.pdb$",
+            "_dllExtra": true
+        }
+    ],
+    "build": "^imported$",
+    "source": "^imported$",
+    "install": null,
+    "link": {
+        "language": "C",
+        "lto": null,
+        "commandFragments": null
+    },
+    "archive": null,
+    "dependencies": [
+        {
+            "id": "^ZERO_CHECK::@ba7eb709d0b48779c6c8$",
+            "backtrace": null
+        }
+    ],
+    "linkLibraries": [
+        {
+            "id": "^imported_interface_symbolic_lib::@ba7eb709d0b48779c6c8$",
+            "fragment": null,
+            "backtrace": [
+                {
+                    "file": "^imported/CMakeLists\\.txt$",
+                    "line": 37,
+                    "command": "target_link_libraries",
+                    "hasParent": true
+                },
+                {
+                    "file": "^imported/CMakeLists\\.txt$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": false
+                }
+            ],
+            "fromDependency": null
+        }
+    ],
+    "interfaceLinkLibraries": null,
+    "compileDependencies": [
+        {
+            "id": "^imported_interface_symbolic_lib::@ba7eb709d0b48779c6c8$",
+            "backtrace": [
+                {
+                    "file": "^imported/CMakeLists\\.txt$",
+                    "line": 37,
+                    "command": "target_link_libraries",
+                    "hasParent": true
+                },
+                {
+                    "file": "^imported/CMakeLists\\.txt$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": false
+                }
+            ],
+            "fromDependency": null
+        }
+    ],
+    "interfaceCompileDependencies": null,
+    "objectDependencies": null,
+    "orderDependencies": null
+}

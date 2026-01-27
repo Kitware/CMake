@@ -1,0 +1,9 @@
+# Install development tools.
+clang-19
+libclang-19-dev
+llvm-19-dev
+libz-dev
+g++
+cmake
+ninja-build
+git

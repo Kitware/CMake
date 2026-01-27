@@ -1,12 +1,12 @@
-^CMake Error at NameWithTabs.cmake:1 \(message\):
+^CMake Error at NameWithTabs\.cmake:1 \(message\):
   Syntax error in cmake code at
 
-    .*/Tests/RunCMake/Syntax/NameWithTabs.cmake:1
+    .*/Tests/RunCMake/Syntax/NameWithTabs\.cmake:1
 
   when parsing string
 
     \${var
 
-  There is an unterminated variable reference.
+  There is an unterminated variable reference\.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)$
+  CMakeLists\.txt:3 \(include\)$

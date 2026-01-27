@@ -1,2 +1,2 @@
 ^CMake Error:.*CMake can not determine linker language for target: main.*
-CMake Generate step failed.  Build files cannot be regenerated correctly.$
+CMake Generate step failed\.  Build files cannot be regenerated correctly\.$

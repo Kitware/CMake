@@ -1,21 +1,25 @@
 function (_cmake_cxx_import_std std variable)
-  find_file(_msvc_modules_json_file
-    NAME modules.json
-    HINTS
-      "$ENV{VCToolsInstallDir}/modules"
-    PATHS
-      "$ENV{INCLUDE}"
-      "${CMAKE_CXX_COMPILER}/../../.."
-      "${CMAKE_CXX_COMPILER}/../.."    # msvc-wine layout
-    PATH_SUFFIXES
-      ../modules
-    NO_CACHE)
-  # Without this file, we do not have modules installed.
-  if (NOT EXISTS "${_msvc_modules_json_file}")
-    set("${variable}"
-      "set(CMAKE_CXX${std}_COMPILER_IMPORT_STD_NOT_FOUND_MESSAGE \"Could not find `modules.json` resource\")\n"
-      PARENT_SCOPE)
-    return ()
+  if (CMAKE_CXX_STDLIB_MODULES_JSON)
+    set(_msvc_modules_json_file "${CMAKE_CXX_STDLIB_MODULES_JSON}")
+  else ()
+    find_file(_msvc_modules_json_file
+      NAME modules.json
+      HINTS
+        "$ENV{VCToolsInstallDir}/modules"
+      PATHS
+        "$ENV{INCLUDE}"
+        "${CMAKE_CXX_COMPILER}/../../.."
+        "${CMAKE_CXX_COMPILER}/../.."    # msvc-wine layout
+      PATH_SUFFIXES
+        ../modules
+      NO_CACHE)
+    # Without this file, we do not have modules installed.
+    if (NOT EXISTS "${_msvc_modules_json_file}")
+      set("${variable}"
+        "set(CMAKE_CXX${std}_COMPILER_IMPORT_STD_NOT_FOUND_MESSAGE \"Could not find `modules.json` resource\")\n"
+        PARENT_SCOPE)
+      return ()
+    endif ()
   endif ()
 
   file(READ "${_msvc_modules_json_file}" _msvc_modules_json)

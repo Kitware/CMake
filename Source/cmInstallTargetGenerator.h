@@ -13,7 +13,6 @@
 #include "cmListFileCache.h"
 
 class cmGeneratorTarget;
-class cmLocalGenerator;
 
 /** \class cmInstallTargetGenerator
  * \brief Generate target installation rules.
@@ -86,6 +85,7 @@ public:
     std::string ToDir;
 
     NamelinkModeType NamelinkMode = NamelinkModeNone;
+    bool Rename = false;
     bool NoTweak = false;
     bool UseSourcePermissions = false;
     cmInstallType Type = cmInstallType();

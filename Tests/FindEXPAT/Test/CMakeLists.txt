@@ -4,7 +4,7 @@ include(CTest)
 
 find_package(EXPAT REQUIRED)
 
-add_definitions(-DCMAKE_EXPECTED_EXPAT_VERSION="${EXPAT_VERSION_STRING}")
+add_definitions(-DCMAKE_EXPECTED_EXPAT_VERSION="${EXPAT_VERSION}")
 
 add_executable(testexpat_tgt main.c)
 target_link_libraries(testexpat_tgt EXPAT::EXPAT)

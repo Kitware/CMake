@@ -11,7 +11,20 @@ WriteCompilerDetectionHeader
 
 .. versionadded:: 3.1
 
-This module provides the function ``write_compiler_detection_header()``.
+This module provides a command to generate header with preprocessor macros.
+
+Load this module in a CMake project with:
+
+.. code-block:: cmake
+
+  include(WriteCompilerDetectionHeader)
+
+Commands
+^^^^^^^^
+
+This module provides the following command:
+
+.. command:: write_compiler_detection_header
 
 This function can be used to generate a file suitable for preprocessor
 inclusion which contains macros to be used in source code:
@@ -818,14 +831,13 @@ template<> struct ${prefix_arg}StaticAssert<true>{};
     foreach(compiler ${_WCD_COMPILERS})
       foreach(_lang ${_langs})
         if(compiler_file_content_${compiler}_${_lang})
-          set(CMAKE_CONFIGURABLE_FILE_CONTENT "${compiler_file_content_}")
-          string(APPEND CMAKE_CONFIGURABLE_FILE_CONTENT "${compiler_file_content_${compiler}_${_lang}}")
-
           set(compile_file_name "${_WCD_OUTPUT_DIR}${prefix_arg}_COMPILER_INFO_${compiler}_${_lang}.h")
           set(full_path "${main_file_dir}/${compile_file_name}")
           list(APPEND ${_WCD_OUTPUT_FILES_VAR} ${full_path})
-          configure_file("${CMAKE_ROOT}/Modules/CMakeConfigurableFile.in"
-            "${full_path}"
+          file(
+            CONFIGURE
+            OUTPUT "${full_path}"
+            CONTENT "${compiler_file_content_}${compiler_file_content_${compiler}_${_lang}}\n"
             @ONLY
           )
         endif()
@@ -839,9 +851,5 @@ template<> struct ${prefix_arg}StaticAssert<true>{};
   endif()
   string(APPEND file_content "\n#endif")
 
-  set(CMAKE_CONFIGURABLE_FILE_CONTENT ${file_content})
-  configure_file("${CMAKE_ROOT}/Modules/CMakeConfigurableFile.in"
-    "${file_arg}"
-    @ONLY
-  )
+  file(CONFIGURE OUTPUT "${file_arg}" CONTENT "${file_content}\n" @ONLY)
 endfunction()

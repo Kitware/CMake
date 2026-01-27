@@ -20,7 +20,7 @@
 #include "cmsys/Encoding.hxx"
 #include "cmsys/FStream.hxx"
 
-#include "cm_get_date.h"
+#include "cm_parse_date.h"
 
 #include "cmLocale.h"
 #include "cmStringAlgorithms.h"
@@ -345,7 +345,7 @@ bool cmArchiveWrite::AddFile(char const* file, size_t skip, char const* prefix)
   if (!this->MTime.empty()) {
     time_t now;
     time(&now);
-    time_t t = cm_get_date(now, this->MTime.c_str());
+    time_t t = cm_parse_date(now, this->MTime.c_str());
     if (t == -1) {
       this->Error = cmStrCat("unable to parse mtime '", this->MTime, '\'');
       return false;

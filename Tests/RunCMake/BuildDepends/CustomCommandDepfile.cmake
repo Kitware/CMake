@@ -1,3 +1,5 @@
+set(CMAKE_INTERMEDIATE_DIR_STRATEGY FULL CACHE STRING "" FORCE)
+
 cmake_policy(SET CMP0116 NEW)
 enable_language(C)
 

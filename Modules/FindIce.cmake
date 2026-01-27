@@ -7,7 +7,12 @@ FindIce
 
 .. versionadded:: 3.1
 
-Finds the Internet Communication Engine (Ice) programs, libraries and datafiles.
+Finds the Internet Communication Engine (Ice) programs, libraries and datafiles:
+
+.. code-block:: cmake
+
+  find_package(Ice [<version>] COMPONENTS <components>... [...])
+
 Ice is an open-source remote procedure call (RPC) framework developed by ZeroC
 and provides SDKs for various languages to develop network applications.
 
@@ -88,8 +93,8 @@ Result Variables
 This module defines the following variables:
 
 ``Ice_FOUND``
-  Boolean indicating whether the main programs, libraries and all requested
-  components for using Ice were found.
+  Boolean indicating whether the (requested version of) main programs,
+  libraries and all requested components for using Ice were found.
 
 ``Ice_VERSION``
   The version of Ice release found.
@@ -107,7 +112,7 @@ This module defines the following variables:
 Ice component libraries are stored in:
 
 ``Ice_<COMPONENT>_FOUND``
-  Boolean indicating whether the specified Ice component is found.  The
+  Boolean indicating whether the specified Ice component was found.  The
   ``<COMPONENT>`` should be written in uppercase.
 
 ``Ice_<COMPONENT>_LIBRARIES``

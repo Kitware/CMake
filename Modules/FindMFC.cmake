@@ -6,7 +6,11 @@ FindMFC
 -------
 
 Finds the native Microsoft Foundation Class Library (MFC) for developing MFC
-applications on Windows.
+applications on Windows:
+
+.. code-block:: cmake
+
+  find_package(MFC [...])
 
 .. note::
 
@@ -22,7 +26,7 @@ Result Variables
 This module defines the following variables:
 
 ``MFC_FOUND``
-  Boolean indicating whether MFC support is found.
+  Boolean indicating whether MFC support was found.
 
 Examples
 ^^^^^^^^

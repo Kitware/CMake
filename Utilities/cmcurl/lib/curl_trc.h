@@ -85,12 +85,22 @@ void Curl_trc_cf_infof(struct Curl_easy *data, const struct Curl_cfilter *cf,
 void Curl_trc_multi(struct Curl_easy *data,
                     const char *fmt, ...) CURL_PRINTF(2, 3);
 const char *Curl_trc_mstate_name(int state);
+const char *Curl_trc_timer_name(int tid);
+void Curl_trc_easy_timers(struct Curl_easy *data);
+
 void Curl_trc_write(struct Curl_easy *data,
                     const char *fmt, ...) CURL_PRINTF(2, 3);
 void Curl_trc_read(struct Curl_easy *data,
                    const char *fmt, ...) CURL_PRINTF(2, 3);
 void Curl_trc_dns(struct Curl_easy *data,
                   const char *fmt, ...) CURL_PRINTF(2, 3);
+void Curl_trc_timer(struct Curl_easy *data, int tid,
+                    const char *fmt, ...) CURL_PRINTF(3, 4);
+
+struct curl_trc_feat {
+  const char *name;
+  int log_level;
+};
 
 #ifndef CURL_DISABLE_FTP
 extern struct curl_trc_feat Curl_trc_feat_ftp;
@@ -113,12 +123,19 @@ void Curl_trc_ws(struct Curl_easy *data,
                  const char *fmt, ...) CURL_PRINTF(2, 3);
 #endif
 
+#define CURL_TRC_M_is_verbose(data) \
+  Curl_trc_ft_is_verbose(data, &Curl_trc_feat_multi)
+#define CURL_TRC_DNS_is_verbose(data) \
+  Curl_trc_ft_is_verbose(data, &Curl_trc_feat_dns)
+#define CURL_TRC_TIMER_is_verbose(data) \
+  Curl_trc_ft_is_verbose(data, &Curl_trc_feat_timer)
+
 #if defined(CURL_HAVE_C99) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
 #define infof(data, ...) \
   do { if(Curl_trc_is_verbose(data)) \
          Curl_infof(data, __VA_ARGS__); } while(0)
 #define CURL_TRC_M(data, ...) \
-  do { if(Curl_trc_ft_is_verbose(data, &Curl_trc_feat_multi)) \
+  do { if(CURL_TRC_M_is_verbose(data)) \
          Curl_trc_multi(data, __VA_ARGS__); } while(0)
 #define CURL_TRC_CF(data, cf, ...) \
   do { if(Curl_trc_cf_is_verbose(cf, data)) \
@@ -130,8 +147,11 @@ void Curl_trc_ws(struct Curl_easy *data,
   do { if(Curl_trc_ft_is_verbose(data, &Curl_trc_feat_read)) \
          Curl_trc_read(data, __VA_ARGS__); } while(0)
 #define CURL_TRC_DNS(data, ...) \
-  do { if(Curl_trc_ft_is_verbose(data, &Curl_trc_feat_dns)) \
+  do { if(CURL_TRC_DNS_is_verbose(data)) \
          Curl_trc_dns(data, __VA_ARGS__); } while(0)
+#define CURL_TRC_TIMER(data, tid, ...) \
+  do { if(CURL_TRC_TIMER_is_verbose(data)) \
+         Curl_trc_timer(data, tid, __VA_ARGS__); } while(0)
 
 #ifndef CURL_DISABLE_FTP
 #define CURL_TRC_FTP(data, ...) \
@@ -162,6 +182,7 @@ void Curl_trc_ws(struct Curl_easy *data,
 #define CURL_TRC_WRITE Curl_trc_write
 #define CURL_TRC_READ  Curl_trc_read
 #define CURL_TRC_DNS   Curl_trc_dns
+#define CURL_TRC_TIMER Curl_trc_timer
 
 #ifndef CURL_DISABLE_FTP
 #define CURL_TRC_FTP   Curl_trc_ftp
@@ -178,11 +199,6 @@ void Curl_trc_ws(struct Curl_easy *data,
 
 #endif /* !CURL_HAVE_C99 */
 
-struct curl_trc_feat {
-  const char *name;
-  int log_level;
-};
-
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
 /* informational messages enabled */
 
@@ -190,6 +206,7 @@ extern struct curl_trc_feat Curl_trc_feat_multi;
 extern struct curl_trc_feat Curl_trc_feat_read;
 extern struct curl_trc_feat Curl_trc_feat_write;
 extern struct curl_trc_feat Curl_trc_feat_dns;
+extern struct curl_trc_feat Curl_trc_feat_timer;
 
 #define Curl_trc_is_verbose(data) \
             ((data) && (data)->set.verbose && \
@@ -202,15 +219,19 @@ extern struct curl_trc_feat Curl_trc_feat_dns;
             (Curl_trc_is_verbose(data) && \
              (ft)->log_level >= CURL_LOG_LVL_INFO)
 #define CURL_MSTATE_NAME(s)  Curl_trc_mstate_name((int)(s))
+#define CURL_TRC_EASY_TIMERS(data) \
+  do { if(CURL_TRC_TIMER_is_verbose(data)) \
+         Curl_trc_easy_timers(data); } while(0)
 
-#else /* defined(CURL_DISABLE_VERBOSE_STRINGS) */
+#else /* CURL_DISABLE_VERBOSE_STRINGS */
 /* All informational messages are not compiled in for size savings */
 
 #define Curl_trc_is_verbose(d)        (FALSE)
 #define Curl_trc_cf_is_verbose(x,y)   (FALSE)
 #define Curl_trc_ft_is_verbose(x,y)   (FALSE)
 #define CURL_MSTATE_NAME(x)           ((void)(x), "-")
+#define CURL_TRC_EASY_TIMERS(x)       Curl_nop_stmt
 
-#endif /* !defined(CURL_DISABLE_VERBOSE_STRINGS) */
+#endif /* !CURL_DISABLE_VERBOSE_STRINGS */
 
 #endif /* HEADER_CURL_TRC_H */

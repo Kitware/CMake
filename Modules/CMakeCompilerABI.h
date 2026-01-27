@@ -114,6 +114,8 @@ static unsigned short const info_byte_order_little_endian[] = {
 #  define ARCHITECTURE_ID "riscv64"
 #elif defined(__riscv) && __riscv_xlen == 32
 #  define ARCHITECTURE_ID "riscv32"
+#elif defined(__sw_64)
+#  define ARCHITECTURE_ID "sw_64"
 #elif defined(__s390x__)
 #  define ARCHITECTURE_ID "s390x"
 #elif defined(__s390__)
@@ -142,6 +144,10 @@ static unsigned short const info_byte_order_little_endian[] = {
 #  else
 #    define ARCHITECTURE_ID "ppc"
 #  endif
+#elif defined(__wasm64) || defined(__wasm64__)
+#  define ARCHITECTURE_ID "wasm64"
+#elif defined(__wasm32) || defined(__wasm32__)
+#  define ARCHITECTURE_ID "wasm32"
 #endif
 
 /* Construct the string literal in pieces to prevent the source from

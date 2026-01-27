@@ -11,7 +11,6 @@
 #include <utility>
 
 #include <cm/memory>
-#include <cm/string_view>
 
 #include "cmsys/RegularExpression.hxx"
 

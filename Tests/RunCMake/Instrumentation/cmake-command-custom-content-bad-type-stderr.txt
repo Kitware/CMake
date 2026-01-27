@@ -1,0 +1,5 @@
+CMake Error at [^
+]*:1 \(cmake_instrumentation\):
+  cmake_instrumentation got an invalid type for CUSTOM_CONTENT: INVALID
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)

@@ -43,9 +43,8 @@ public:
   std::string GetPackageDirName() const;
   std::string GetPackageFileName() const;
 
-  /// Ensure that no conflicting options were specified.  If \p enable is
-  /// \c false, forbid specifying any options whatsoever.
-  bool Check(cmExecutionStatus& status, bool enable = true) const;
+  /// Ensure that no conflicting options were specified.
+  bool Check(cmExecutionStatus& status) const;
 
   /// Set metadata (not already specified) from either the specified project,
   /// or from the project which matches the package name.
@@ -56,6 +55,8 @@ public:
   ArgumentParser::NonEmpty<std::string> Version;
   ArgumentParser::NonEmpty<std::string> VersionCompat;
   ArgumentParser::NonEmpty<std::string> VersionSchema;
+  ArgumentParser::NonEmpty<std::string> License;
+  ArgumentParser::NonEmpty<std::string> DefaultLicense;
   ArgumentParser::NonEmpty<std::string> Description;
   ArgumentParser::NonEmpty<std::string> Website;
   ArgumentParser::NonEmpty<std::vector<std::string>> DefaultTargets;
@@ -84,6 +85,9 @@ private:
          &cmPackageInfoArguments::DefaultTargets);
     Bind(self, parser, "DEFAULT_CONFIGURATIONS"_s,
          &cmPackageInfoArguments::DefaultConfigs);
+    Bind(self, parser, "LICENSE"_s, &cmPackageInfoArguments::License);
+    Bind(self, parser, "DEFAULT_LICENSE"_s,
+         &cmPackageInfoArguments::DefaultLicense);
     Bind(self, parser, "DESCRIPTION"_s, &cmPackageInfoArguments::Description);
     Bind(self, parser, "HOMEPAGE_URL"_s, &cmPackageInfoArguments::Website);
 

@@ -30,12 +30,6 @@
 
 #if defined(_WIN32_WINNT) && _WIN32_WINNT >= 0x600
 
-#ifdef __MINGW32__
-#ifndef SRWLOCK_INIT
-#define SRWLOCK_INIT NULL
-#endif
-#endif /* __MINGW32__ */
-
 #define curl_simple_lock SRWLOCK
 #define CURL_SIMPLE_LOCK_INIT SRWLOCK_INIT
 
@@ -44,27 +38,25 @@
 
 #elif defined(HAVE_ATOMIC) && defined(HAVE_STDATOMIC_H)
 #include <stdatomic.h>
-#if defined(HAVE_SCHED_YIELD)
+#ifdef HAVE_SCHED_YIELD
 #include <sched.h>
 #endif
 
 #define curl_simple_lock atomic_int
 #define CURL_SIMPLE_LOCK_INIT 0
 
-/* a clang-thing */
-#ifndef __has_builtin
-#define __has_builtin(x) 0
-#endif
-
 #ifndef __INTEL_COMPILER
 /* The Intel compiler tries to look like GCC *and* clang *and* lies in its
    __has_builtin() function, so override it. */
 
 /* if GCC on i386/x86_64 or if the built-in is present */
-#if ( (defined(__GNUC__) && !defined(__clang__)) &&     \
-      (defined(__i386__) || defined(__x86_64__))) ||    \
-  __has_builtin(__builtin_ia32_pause)
+#if (defined(__GNUC__) && !defined(__clang__)) &&     \
+    (defined(__i386__) || defined(__x86_64__))
 #define HAVE_BUILTIN_IA32_PAUSE
+#elif defined(__has_builtin)  /* Keep this PP check separate from others */
+#if __has_builtin(__builtin_ia32_pause)
+#define HAVE_BUILTIN_IA32_PAUSE
+#endif
 #endif
 
 #endif

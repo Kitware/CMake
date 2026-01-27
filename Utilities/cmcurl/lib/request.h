@@ -42,11 +42,10 @@ enum expect100 {
 };
 
 enum upgrade101 {
-  UPGR101_INIT,               /* default state */
-  UPGR101_WS,                 /* upgrade to WebSockets requested */
+  UPGR101_NONE,               /* default state */
+  UPGR101_WS,                 /* upgrade to WebSocket requested */
   UPGR101_H2,                 /* upgrade to HTTP/2 requested */
-  UPGR101_RECEIVED,           /* 101 response received */
-  UPGR101_WORKING             /* talking upgraded protocol */
+  UPGR101_RECEIVED            /* 101 response received */
 };
 
 
@@ -123,7 +122,6 @@ struct SingleRequest {
   BIT(ignore_cl);     /* ignore content-length */
   BIT(upload_chunky); /* set TRUE if we are doing chunked transfer-encoding
                          on upload */
-  BIT(getheader);    /* TRUE if header parsing is wanted */
   BIT(no_body);      /* the response has no body */
   BIT(authneg);      /* TRUE when the auth phase has started, which means
                         that we are creating a request with an auth header,

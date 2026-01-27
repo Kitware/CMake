@@ -9,8 +9,6 @@
 #include "cmStringAlgorithms.h"
 #include "cmTargetPropCommandBase.h"
 
-class cmTarget;
-
 namespace {
 
 class TargetCompileFeaturesImpl : public cmTargetPropCommandBase

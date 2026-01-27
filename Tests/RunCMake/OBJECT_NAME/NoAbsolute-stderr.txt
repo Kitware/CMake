@@ -1,0 +1,11 @@
+CMake Error in CMakeLists\.txt:
+  The "OBJECT_NAME" property for
+
+    .*/Tests/RunCMake/OBJECT_NAME/lib\.c
+
+  resolves to an absolute path which is not supported:
+
+    .*/Tests/RunCMake/OBJECT_NAME/NoAbsolute-build/lib\.c
+
+
+CMake Generate step failed\.  Build files cannot be regenerated correctly\.

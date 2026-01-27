@@ -1,1 +1,1 @@
--- iface: .*Tests/RunCMake/target_sources/empty_1.cpp
+-- iface: .*Tests/RunCMake/target_sources/empty_1\.cpp

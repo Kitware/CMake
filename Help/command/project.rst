@@ -12,7 +12,8 @@ Synopsis
  project(<PROJECT-NAME>
          [VERSION <major>[.<minor>[.<patch>[.<tweak>]]]]
          [COMPAT_VERSION <major>[.<minor>[.<patch>[.<tweak>]]]]
-         [DESCRIPTION <project-description-string>]
+         [SPDX_LICENSE <license-string>]
+         [DESCRIPTION <description-string>]
          [HOMEPAGE_URL <url-string>]
          [LANGUAGES <language-name>...])
 
@@ -106,7 +107,44 @@ The options are:
     ``CMakeLists.txt``, then the compatibility version is also stored in the
     variable :variable:`CMAKE_PROJECT_COMPAT_VERSION`.
 
-``DESCRIPTION <project-description-string>``
+``SPDX_LICENSE <license-string>``
+  .. versionadded:: 4.2
+  .. note::
+
+    Experimental. Gated by ``CMAKE_EXPERIMENTAL_EXPORT_PACKAGE_INFO``.
+
+  Optional.
+  Sets the variables
+
+  * :variable:`PROJECT_SPDX_LICENSE`,
+    :variable:`<PROJECT-NAME>_SPDX_LICENSE`
+
+  to ``<license-string>``, which shall be a |SPDX|_ (SPDX)
+  `License Expression`_ that describes the license(s) of the project as a
+  whole, including documentation, resources, or other materials distributed
+  with the project, in addition to software artifacts. See the SPDX
+  `License List`_ for a list of commonly used licenses and their identifiers.
+  See the :prop_tgt:`SPDX_LICENSE` property for specifying the license(s) on
+  individual software artifacts.
+
+  .. note::
+    The project license is *not* used to initialize the
+    :prop_tgt:`SPDX_LICENSE` property of individual targets.  This allows the
+    package license and default component license, which are specified when
+    exporting package information, to be meaningful.  Only |CPS| exports make
+    use of this information.
+
+    The project license *is* inherited as the package license in some cases.
+    Refer to the ``PROJECT`` option and related documentation of the
+    :command:`export` and :command:`install` commands for more information.
+
+.. _SPDX: https://spdx.dev/
+.. |SPDX| replace:: System Package Data Exchange
+
+.. _License Expression: https://spdx.github.io/spdx-spec/v3.0.1/annexes/spdx-license-expressions/
+.. _License List: https://spdx.org/licenses/
+
+``DESCRIPTION <description-string>``
   .. versionadded:: 3.9
 
   Optional.
@@ -114,7 +152,7 @@ The options are:
 
   * :variable:`PROJECT_DESCRIPTION`, :variable:`<PROJECT-NAME>_DESCRIPTION`
 
-  to ``<project-description-string>``.
+  to ``<description-string>``.
   It is recommended that this description is a relatively short string,
   usually no more than a few words.
 
@@ -149,12 +187,11 @@ By default ``C`` and ``CXX`` are enabled if no language options are given.
 Specify language ``NONE``, or use the ``LANGUAGES`` keyword and list no languages,
 to skip enabling any languages.
 
-The variables set through the ``VERSION``, ``COMPAT_VERSION``, ``DESCRIPTION``
-and ``HOMEPAGE_URL`` options are intended for use as default values in package
-metadata and documentation. The :command:`export` and :command:`install`
-commands use these accordingly when generating |CPS| package descriptions.
-
-.. |CPS| replace:: Common Package Specification
+The variables set through the ``VERSION``, ``COMPAT_VERSION``,
+``SPDX_LICENSE``, ``DESCRIPTION`` and ``HOMEPAGE_URL`` options are
+intended for use as default values in package metadata and documentation.
+The :command:`export` and :command:`install` commands use these accordingly
+when generating |CPS| package descriptions.
 
 .. _`Code Injection`:
 
@@ -224,3 +261,5 @@ call exists, CMake will issue a warning and pretend there is a
   other commands whose behavior they may affect and for this reason the
   ``project()`` command will issue a warning if this order is not kept.
   See also policy :policy:`CMP0000`.
+
+.. |CPS| replace:: Common Package Specification

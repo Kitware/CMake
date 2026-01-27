@@ -1,4 +1,4 @@
-CMake Error at circular-dependencies2.cmake:[0-9]+ \(add_library\):
+CMake Error at circular-dependencies2\.cmake:[0-9]+ \(add_library\):
   The inter-target dependency graph, for the target "lib2", contains the
   following strongly connected component \(cycle\):
 
@@ -8,4 +8,4 @@ CMake Error at circular-dependencies2.cmake:[0-9]+ \(add_library\):
       depends on group "feat:{base3,base4}"
 
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)

@@ -5,7 +5,11 @@
 FindMPEG2
 ---------
 
-Finds the native MPEG2 library (libmpeg2).
+Finds the native MPEG2 library (libmpeg2):
+
+.. code-block:: cmake
+
+  find_package(MPEG2 [...])
 
 .. note::
 
@@ -19,14 +23,14 @@ Result Variables
 This module defines the following variables:
 
 ``MPEG2_FOUND``
-  Boolean indicating whether the libmpeg2 library is found.
+  Boolean indicating whether the libmpeg2 library was found.
 ``MPEG2_LIBRARIES``
   Libraries needed to link against to use libmpeg2.
 
 Cache Variables
 ^^^^^^^^^^^^^^^
 
-The following cache variables may be also set:
+The following cache variables may also be set:
 
 ``MPEG2_INCLUDE_DIR``
   The directory containing the ``mpeg2.h`` and related headers needed to use

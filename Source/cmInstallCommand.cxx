@@ -2014,6 +2014,11 @@ bool HandleExportAndroidMKMode(std::vector<std::string> const& args,
   cmInstallGenerator::MessageLevel message =
     cmInstallGenerator::SelectMessageLevel(helper.Makefile);
 
+  // Tell the global generator about any installation component names
+  // specified
+  helper.Makefile->GetGlobalGenerator()->AddInstallComponent(
+    ica.GetComponent());
+
   // Create the export install generator.
   helper.Makefile->AddInstallGenerator(
     cm::make_unique<cmInstallAndroidMKExportGenerator>(
@@ -2071,6 +2076,11 @@ bool HandleExportMode(std::vector<std::string> const& args,
     return false;
   }
 
+  if (exp.empty()) {
+    status.SetError(cmStrCat(args[0], " missing EXPORT."));
+    return false;
+  }
+
   // Make sure there is a destination.
   if (ica.GetDestination().empty()) {
     // A destination is required.
@@ -2119,6 +2129,11 @@ bool HandleExportMode(std::vector<std::string> const& args,
 
   cmInstallGenerator::MessageLevel message =
     cmInstallGenerator::SelectMessageLevel(helper.Makefile);
+
+  // Tell the global generator about any installation component names
+  // specified
+  helper.Makefile->GetGlobalGenerator()->AddInstallComponent(
+    ica.GetComponent());
 
   // Create the export install generator.
   helper.Makefile->AddInstallGenerator(
@@ -2169,6 +2184,12 @@ bool HandlePackageInfoMode(std::vector<std::string> const& args,
     return false;
   }
 
+  if (arguments.PackageName.empty()) {
+    // TODO: Fix our use of the parser to enforce this.
+    status.SetError(cmStrCat(args[0], " missing package name."));
+    return false;
+  }
+
   if (exportName.empty()) {
     status.SetError(cmStrCat(args[0], " missing EXPORT."));
     return false;
@@ -2194,6 +2215,11 @@ bool HandlePackageInfoMode(std::vector<std::string> const& args,
 
   cmInstallGenerator::MessageLevel message =
     cmInstallGenerator::SelectMessageLevel(helper.Makefile);
+
+  // Tell the global generator about any installation component names
+  // specified
+  helper.Makefile->GetGlobalGenerator()->AddInstallComponent(
+    ica.GetComponent());
 
   // Create the export install generator.
   helper.Makefile->AddInstallGenerator(

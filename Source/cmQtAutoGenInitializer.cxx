@@ -5,6 +5,7 @@
 #include <array>
 #include <cstddef>
 #include <deque>
+#include <functional>
 #include <initializer_list>
 #include <limits>
 #include <map>
@@ -326,8 +327,8 @@ cmQtAutoGen::ConfigStrings<std::vector<std::string>> generateListOptions(
 
 cmQtAutoGenInitializer::cmQtAutoGenInitializer(
   cmQtAutoGenGlobalInitializer* globalInitializer,
-  cmGeneratorTarget* genTarget, IntegerVersion const& qtVersion,
-  bool mocEnabled, bool uicEnabled, bool rccEnabled, bool globalAutogenTarget,
+  cmGeneratorTarget* genTarget, IntegerVersion qtVersion, bool mocEnabled,
+  bool uicEnabled, bool rccEnabled, bool globalAutogenTarget,
   bool globalAutoRccTarget)
   : GlobalInitializer(globalInitializer)
   , GenTarget(genTarget)
@@ -461,20 +462,31 @@ bool cmQtAutoGenInitializer::InitCustomTargets()
     // Collapsed current binary directory
     std::string const cbd = cmSystemTools::CollapseFullPath(
       std::string(), this->Makefile->GetCurrentBinaryDirectory());
+    std::string infoDir;
+    std::string buildDir;
+    auto idirkind = cmStateEnums::IntermediateDirKind::QtAutogenMetadata;
+    if (this->GenTarget->GetUseShortObjectNames(idirkind)) {
+      infoDir = cmSystemTools::CollapseFullPath(
+        std::string(),
+        cmStrCat(this->GenTarget->GetSupportDirectory(idirkind),
+                 "/autogen_info"));
+      buildDir = cmSystemTools::CollapseFullPath(
+        std::string(),
+        cmStrCat(this->GenTarget->GetSupportDirectory(idirkind), "/autogen"));
+    } else {
+      infoDir = cmStrCat(cbd, "/CMakeFiles/", this->GenTarget->GetName(),
+                         "_autogen.dir");
+      buildDir = cmStrCat(cbd, '/', this->GenTarget->GetName(), "_autogen");
+    }
 
     // Info directory
-    // TODO: Split this? `AutogenInfo.json` is expected to always be under the
-    // `CMakeFiles` directory, but not all generators places its `<tgt>.dir`
-    // directories there.
-    this->Dir.Info = cmStrCat(cbd, "/CMakeFiles/", this->GenTarget->GetName(),
-                              "_autogen.dir");
+    this->Dir.Info = infoDir;
     cmSystemTools::ConvertToUnixSlashes(this->Dir.Info);
 
     // Build directory
     this->Dir.Build = this->GenTarget->GetSafeProperty("AUTOGEN_BUILD_DIR");
     if (this->Dir.Build.empty()) {
-      this->Dir.Build =
-        cmStrCat(cbd, '/', this->GenTarget->GetName(), "_autogen");
+      this->Dir.Build = buildDir;
     }
     cmSystemTools::ConvertToUnixSlashes(this->Dir.Build);
     this->Dir.RelativeBuild =
@@ -1383,7 +1395,9 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
   if (this->Uic.Enabled) {
     for (auto const& file : this->Uic.UiHeaders) {
       this->AddGeneratedSource(file.first, this->Uic);
-      autogenByproducts.push_back(file.second);
+      if (!this->GlobalGen->IsFastbuild()) {
+        autogenByproducts.push_back(file.second);
+      }
     }
   }
 
@@ -2094,6 +2108,8 @@ cmSourceFile* cmQtAutoGenInitializer::RegisterGeneratedSource(
   std::string const& filename)
 {
   cmSourceFile* gFile = this->Makefile->GetOrCreateSource(filename, true);
+  gFile->SetSpecialSourceType(
+    cmSourceFile::SpecialSourceType::QtAutogenSource);
   gFile->MarkAsGenerated();
   gFile->SetProperty("SKIP_AUTOGEN", "1");
   gFile->SetProperty("SKIP_LINTING", "ON");

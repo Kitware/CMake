@@ -11,8 +11,12 @@ function(run_git exe exe_display)
     message(SEND_ERROR "Result of ${exe_display} --version is ${result}, should be 0")
   endif()
 
-  if(NOT output STREQUAL "git version ${GIT_VERSION_STRING}")
-    message(SEND_ERROR "Output of ${exe_display} --version is \"${output}\", should be \"git version ${GIT_VERSION_STRING}\"")
+  if(NOT output STREQUAL "git version ${Git_VERSION}")
+    message(SEND_ERROR "Output of ${exe_display} --version is \"${output}\", should be \"git version ${Git_VERSION}\"")
+  endif()
+
+  if(NOT Git_VERSION VERSION_EQUAL GIT_VERSION_STRING)
+    message(SEND_ERROR "Git_VERSION=\"${Git_VERSION}\" is not equal to GIT_VERSION_STRING=\"${GIT_VERSION_STRING}\"")
   endif()
 endfunction()
 

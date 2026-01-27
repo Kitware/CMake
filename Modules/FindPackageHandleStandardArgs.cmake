@@ -5,28 +5,42 @@
 FindPackageHandleStandardArgs
 -----------------------------
 
-This module provides functions intended to be used in :ref:`Find Modules`
+This module provides commands intended for use in :ref:`Find Modules`
 implementing :command:`find_package(<PackageName>)` calls.
+
+Load this module in a CMake find module with:
+
+.. code-block:: cmake
+  :caption: ``FindFoo.cmake``
+
+  include(FindPackageHandleStandardArgs)
+
+Commands
+^^^^^^^^
+
+This module provides the following commands:
+
+* :command:`find_package_handle_standard_args`
+* :command:`find_package_check_version`
 
 .. command:: find_package_handle_standard_args
 
-  This command handles the ``REQUIRED``, ``QUIET`` and version-related
-  arguments of :command:`find_package`.  It also sets the
-  ``<PackageName>_FOUND`` variable.  The package is considered found if all
-  variables listed contain valid results, e.g. valid filepaths.
+  Handles the ``REQUIRED``, ``QUIET`` and version-related arguments of
+  :command:`find_package`.
 
   There are two signatures:
 
   .. code-block:: cmake
 
-    find_package_handle_standard_args(<PackageName>
+    find_package_handle_standard_args(
+      <PackageName>
       (DEFAULT_MSG|<custom-failure-message>)
-      <required-var>...
-      )
+      <required-vars>...
+    )
 
-    find_package_handle_standard_args(<PackageName>
-      [FOUND_VAR <result-var>]
-      [REQUIRED_VARS <required-var>...]
+    find_package_handle_standard_args(
+      <PackageName>
+      [REQUIRED_VARS <required-vars>...]
       [VERSION_VAR <version-var>]
       [HANDLE_VERSION_RANGE]
       [HANDLE_COMPONENTS]
@@ -34,37 +48,33 @@ implementing :command:`find_package(<PackageName>)` calls.
       [NAME_MISMATCHED]
       [REASON_FAILURE_MESSAGE <reason-failure-message>]
       [FAIL_MESSAGE <custom-failure-message>]
-      )
+      [FOUND_VAR <result-var>] # Deprecated
+    )
 
-  The ``<PackageName>_FOUND`` variable will be set to ``TRUE`` if all
-  the variables ``<required-var>...`` are valid and any optional
-  constraints are satisfied, and ``FALSE`` otherwise.  A success or
-  failure message may be displayed based on the results and on
-  whether the ``REQUIRED`` and/or ``QUIET`` option was given to
-  the :command:`find_package` call.
+  This command sets the ``<PackageName>_FOUND`` variable to ``TRUE`` if all
+  the variables listed in ``<required-vars>...`` contain valid results
+  (e.g., valid filepaths) and any optional constraints are satisfied, and
+  ``FALSE`` otherwise.  A success or failure message may be displayed based
+  on the results and on whether the ``REQUIRED`` and/or ``QUIET`` option
+  was given to the :command:`find_package` call.
 
-  The options are:
+  The arguments are:
+
+  ``<PackageName>``
+    The name of the package.  For example, as written in the
+    ``Find<PackageName>.cmake`` find module filename.
 
   ``(DEFAULT_MSG|<custom-failure-message>)``
     In the simple signature this specifies the failure message.
     Use ``DEFAULT_MSG`` to ask for a default message to be computed
     (recommended).  Not valid in the full signature.
 
-  ``FOUND_VAR <result-var>``
-    .. deprecated:: 3.3
-
-    Specifies either ``<PackageName>_FOUND`` or
-    ``<PACKAGENAME>_FOUND`` as the result variable.  This exists only
-    for compatibility with older versions of CMake and is now ignored.
-    Result variables of both names are now always set for compatibility
-    also with or without this option.
-
-  ``REQUIRED_VARS <required-var>...``
+  ``REQUIRED_VARS <required-vars>...``
     Specify the variables which are required for this package.
     These may be named in the generated failure message asking the
     user to set the missing variable values.  Therefore these should
-    typically be cache entries such as ``FOO_LIBRARY`` and not output
-    variables like ``FOO_LIBRARIES``.
+    typically be cache entries such as ``Foo_LIBRARY`` and not output
+    variables like ``Foo_LIBRARIES``.
 
     .. versionchanged:: 3.18
       If ``HANDLE_COMPONENTS`` is specified, this option can be omitted.
@@ -100,6 +110,14 @@ implementing :command:`find_package(<PackageName>)` calls.
     will automatically check whether the package configuration file
     was found.
 
+  ``NAME_MISMATCHED``
+    .. versionadded:: 3.17
+
+    Indicate that the ``<PackageName>`` does not match the value of
+    :variable:`CMAKE_FIND_PACKAGE_NAME` variable. This is usually a mistake
+    and raises a warning, but it may be intentional for usage of the
+    command for components of a larger package.
+
   ``REASON_FAILURE_MESSAGE <reason-failure-message>``
     .. versionadded:: 3.16
 
@@ -110,48 +128,76 @@ implementing :command:`find_package(<PackageName>)` calls.
     Specify a custom failure message instead of using the default
     generated message.  Not recommended.
 
-  ``NAME_MISMATCHED``
-    .. versionadded:: 3.17
+  ``FOUND_VAR <result-var>``
+    .. deprecated:: 3.3
+      This option should no longer be used.
 
-    Indicate that the ``<PackageName>`` does not match
-    ``${CMAKE_FIND_PACKAGE_NAME}``. This is usually a mistake and raises a
-    warning, but it may be intentional for usage of the command for components
-    of a larger package.
+    Specifies either ``<PackageName>_FOUND`` or ``<PACKAGENAME>_FOUND`` as the
+    result variable.  This exists only for backward compatibility with older
+    versions of CMake and is now ignored.  Result variables of both names are
+    now always set for compatibility also with or without this option.
 
-Example for the simple signature:
+  .. note::
+
+    If ``<PackageName>`` does not match :variable:`CMAKE_FIND_PACKAGE_NAME`
+    for the calling module, a warning that there is a mismatch is given.  The
+    ``FPHSA_NAME_MISMATCHED`` variable may be set to bypass the warning if using
+    the old signature and the ``NAME_MISMATCHED`` argument using the new
+    signature.  To avoid forcing the caller to require newer versions of CMake
+    for usage, the variable's value will be used if defined when the
+    ``NAME_MISMATCHED`` argument is not passed for the new signature (but using
+    both is an error).
+
+.. command:: find_package_check_version
+
+  .. versionadded:: 3.19
+
+  Checks if a given version is valid against the version-related arguments
+  of :command:`find_package`:
+
+  .. code-block:: cmake
+
+    find_package_check_version(
+      <version>
+      <result-var>
+      [HANDLE_VERSION_RANGE]
+      [RESULT_MESSAGE_VARIABLE <message-var>]
+    )
+
+  The arguments are:
+
+  ``<version>``
+    The version string to check.
+
+  ``<result-var>``
+    Name of the result variable that will hold a boolean value giving the
+    result of the check.
+
+  ``HANDLE_VERSION_RANGE``
+    Enable handling of a version range, if one is specified.  Without this
+    option, a developer warning will be displayed if a version range is
+    specified.
+
+  ``RESULT_MESSAGE_VARIABLE <message-var>``
+    Specify a variable to get back a message describing the result of the check.
+
+Examples
+^^^^^^^^
+
+Examples: Full Signature
+""""""""""""""""""""""""
+
+Example for using a full signature of ``find_package_handle_standard_args()``:
 
 .. code-block:: cmake
+  :caption: ``FindLibArchive.cmake``
 
-  find_package_handle_standard_args(LibXml2 DEFAULT_MSG
-    LIBXML2_LIBRARY LIBXML2_INCLUDE_DIR)
-
-The ``LibXml2`` package is considered to be found if both
-``LIBXML2_LIBRARY`` and ``LIBXML2_INCLUDE_DIR`` are valid.
-Then also ``LibXml2_FOUND`` is set to ``TRUE``.  If it is not found
-and ``REQUIRED`` was used, it fails with a
-:command:`message(FATAL_ERROR)`, independent whether ``QUIET`` was
-used or not.  If it is found, success will be reported, including
-the content of the first ``<required-var>``.  On repeated CMake runs,
-the same message will not be printed again.
-
-.. note::
-
-  If ``<PackageName>`` does not match ``CMAKE_FIND_PACKAGE_NAME`` for the
-  calling module, a warning that there is a mismatch is given. The
-  ``FPHSA_NAME_MISMATCHED`` variable may be set to bypass the warning if using
-  the old signature and the ``NAME_MISMATCHED`` argument using the new
-  signature. To avoid forcing the caller to require newer versions of CMake for
-  usage, the variable's value will be used if defined when the
-  ``NAME_MISMATCHED`` argument is not passed for the new signature (but using
-  both is an error)..
-
-Example for the full signature:
-
-.. code-block:: cmake
-
-  find_package_handle_standard_args(LibArchive
+  include(FindPackageHandleStandardArgs)
+  find_package_handle_standard_args(
+    LibArchive
     REQUIRED_VARS LibArchive_LIBRARY LibArchive_INCLUDE_DIR
-    VERSION_VAR LibArchive_VERSION)
+    VERSION_VAR LibArchive_VERSION
+  )
 
 In this case, the ``LibArchive`` package is considered to be found if
 both ``LibArchive_LIBRARY`` and ``LibArchive_INCLUDE_DIR`` are valid.
@@ -159,56 +205,73 @@ Also the version of ``LibArchive`` will be checked by using the version
 contained in ``LibArchive_VERSION``.  Since no ``FAIL_MESSAGE`` is given,
 the default messages will be printed.
 
-Another example for the full signature:
+Another example for the full signature of
+``find_package_handle_standard_args()``:
 
 .. code-block:: cmake
+  :caption: ``FindAutomoc4.cmake``
 
   find_package(Automoc4 QUIET NO_MODULE HINTS /opt/automoc4)
-  find_package_handle_standard_args(Automoc4  CONFIG_MODE)
 
-In this case, a ``FindAutmoc4.cmake`` module wraps a call to
+  include(FindPackageHandleStandardArgs)
+  find_package_handle_standard_args(Automoc4 CONFIG_MODE)
+
+In this case, a ``FindAutomoc4.cmake`` module wraps a call to
 ``find_package(Automoc4 NO_MODULE)`` and adds an additional search
 directory for ``automoc4``.  Then the call to
-``find_package_handle_standard_args`` produces a proper success/failure
+``find_package_handle_standard_args()`` produces a proper success/failure
 message.
 
-.. command:: find_package_check_version
+Example: Simple Signature
+"""""""""""""""""""""""""
 
-  .. versionadded:: 3.19
-
-  Helper function which can be used to check if a ``<version>`` is valid
-  against version-related arguments of :command:`find_package`.
-
-  .. code-block:: cmake
-
-    find_package_check_version(<version> <result-var>
-      [HANDLE_VERSION_RANGE]
-      [RESULT_MESSAGE_VARIABLE <message-var>]
-      )
-
-  The ``<result-var>`` will hold a boolean value giving the result of the check.
-
-  The options are:
-
-  ``HANDLE_VERSION_RANGE``
-    Enable handling of a version range, if one is specified. Without this
-    option, a developer warning will be displayed if a version range is
-    specified.
-
-  ``RESULT_MESSAGE_VARIABLE <message-var>``
-    Specify a variable to get back a message describing the result of the check.
-
-Example for the usage:
+Example for using a simple signature of ``find_package_handle_standard_args()``:
 
 .. code-block:: cmake
+  :caption: ``FindLibXml2.cmake``
 
-  find_package_check_version(1.2.3 result HANDLE_VERSION_RANGE
-    RESULT_MESSAGE_VARIABLE reason)
+  include(FindPackageHandleStandardArgs)
+  find_package_handle_standard_args(
+    LibXml2
+    DEFAULT_MSG
+    LIBXML2_LIBRARY LIBXML2_INCLUDE_DIR
+  )
+
+In this example, the ``LibXml2`` package is considered to be found if both
+``LIBXML2_LIBRARY`` and ``LIBXML2_INCLUDE_DIR`` variables are valid.  Then
+also ``LibXml2_FOUND`` is set to ``TRUE``.  If it is not found and
+``REQUIRED`` was used, it fails with a :command:`message(FATAL_ERROR)`,
+independent whether ``QUIET`` was used or not.  If it is found, success will
+be reported, including the content of the first required variable specified
+in ``<required-vars>...``.  On repeated CMake runs, the same message will
+not be printed again.
+
+Example: Checking Version
+"""""""""""""""""""""""""
+
+Example for the ``find_package_check_version()`` usage:
+
+.. code-block:: cmake
+  :caption: ``FindFoo.cmake``
+
+  include(FindPackageHandleStandardArgs)
+  find_package_check_version(
+    1.2.3
+    result
+    HANDLE_VERSION_RANGE
+    RESULT_MESSAGE_VARIABLE reason
+  )
   if(result)
     message(STATUS "${reason}")
   else()
-    message(FATAL_ERROR "${reason}")
+    # Logic when version check is not successful.
+    message(WARNING "${reason}")
   endif()
+
+See Also
+^^^^^^^^
+
+* :ref:`Find Modules` for details how to write a find module.
 #]=======================================================================]
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageMessage.cmake)

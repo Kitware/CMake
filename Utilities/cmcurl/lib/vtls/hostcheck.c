@@ -24,8 +24,7 @@
 
 #include "../curl_setup.h"
 
-#if defined(USE_OPENSSL)                        \
-  || defined(USE_SCHANNEL)
+#if defined(USE_OPENSSL) || defined(USE_SCHANNEL)
 /* these backends use functions from this file */
 
 #ifdef HAVE_NETINET_IN_H
@@ -36,7 +35,6 @@
 #endif
 #include "../curl_memrchr.h"
 #include "hostcheck.h"
-#include "../strcase.h"
 #include "../hostip.h"
 
 #include "../curl_memory.h"
@@ -50,7 +48,7 @@ static bool pmatch(const char *hostname, size_t hostlen,
 {
   if(hostlen != patternlen)
     return FALSE;
-  return strncasecompare(hostname, pattern, hostlen);
+  return curl_strnequal(hostname, pattern, hostlen);
 }
 
 /*

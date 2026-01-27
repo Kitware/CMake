@@ -23,7 +23,6 @@
 #include "cmExperimental.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
-#include "cmGlobalVisualStudio71Generator.h"
 #include "cmGlobalVisualStudio7Generator.h"
 #include "cmGlobalVisualStudioGenerator.h"
 #include "cmIDEFlagTable.h"
@@ -37,8 +36,28 @@
 #include "cmVersion.h"
 #include "cmVisualStudioSlnData.h"
 #include "cmVisualStudioSlnParser.h"
+#include "cmXMLParser.h"
 #include "cmXMLWriter.h"
 #include "cmake.h"
+
+class cmSlnxParser : public cmXMLParser
+{
+public:
+  std::map<std::string, std::string> ProjectToPath;
+  void StartElement(std::string const& name, char const** atts) override
+  {
+    if (name == "Project"_s) {
+      if (char const* rawPath = this->FindAttribute(atts, "Path")) {
+        std::string path = rawPath;
+        cmSystemTools::ConvertToUnixSlashes(path);
+        std::string nameOnly =
+          cmsys::SystemTools::GetFilenameWithoutLastExtension(path);
+        this->ProjectToPath[cmSystemTools::LowerCase(nameOnly)] = path;
+      }
+    }
+  }
+  void EndElement(std::string const&) override {}
+};
 
 static std::map<std::string, std::vector<cmIDEFlagTable>> loadedFlagJsonFiles;
 
@@ -797,6 +816,15 @@ std::string const& cmGlobalVisualStudio10Generator::
   return this->GeneratorToolsetCudaVSIntegrationSubdir;
 }
 
+cm::optional<std::string>
+cmGlobalVisualStudio10Generator::GetPlatformToolsetFortran() const
+{
+  if (this->GeneratorToolsetFortran) {
+    return this->GeneratorToolsetFortran;
+  }
+  return this->DefaultToolsetFortran;
+}
+
 cmGlobalVisualStudio10Generator::AuxToolset
 cmGlobalVisualStudio10Generator::FindAuxToolset(std::string&,
                                                 std::string&) const
@@ -861,7 +889,7 @@ std::string cmGlobalVisualStudio10Generator::FindDevEnvCommand()
   // Skip over the cmGlobalVisualStudio8Generator implementation because
   // we expect a real devenv and do not want to look for VCExpress.
   // NOLINTNEXTLINE(bugprone-parent-virtual-call)
-  return this->cmGlobalVisualStudio71Generator::FindDevEnvCommand();
+  return this->cmGlobalVisualStudio7Generator::FindDevEnvCommand();
 }
 
 bool cmGlobalVisualStudio10Generator::FindVCTargetsPath(cmMakefile* mf)
@@ -1050,13 +1078,15 @@ cmGlobalVisualStudio10Generator::GenerateBuildCommand(
   std::string const& makeProgram, std::string const& projectName,
   std::string const& projectDir, std::vector<std::string> const& targetNames,
   std::string const& config, int jobs, bool verbose,
-  cmBuildOptions const& buildOptions,
-  std::vector<std::string> const& makeOptions)
+  cmBuildOptions buildOptions, std::vector<std::string> const& makeOptions,
+  BuildTryCompile /*isInTryCompile*/)
 {
   std::vector<GeneratedMakeCommand> makeCommands;
   // Select the caller- or user-preferred make program, else MSBuild.
   std::string makeProgramSelected =
     this->SelectMakeProgram(makeProgram, this->GetMSBuildCommand());
+
+  std::string const slnFile = this->GetSLNFile(projectDir, projectName);
 
   // Check if the caller explicitly requested a devenv tool.
   std::string makeProgramLower = makeProgramSelected;
@@ -1070,25 +1100,27 @@ cmGlobalVisualStudio10Generator::GenerateBuildCommand(
 
   // MSBuild is preferred (and required for VS Express), but if the .sln has
   // an Intel Fortran .vfproj then we have to use devenv. Parse it to find out.
+  cmSlnxParser slnxParser;
   cmSlnData slnData;
-  {
-    std::string slnFile;
-    if (!projectDir.empty()) {
-      slnFile = cmStrCat(projectDir, '/');
+  if (this->Version >= VSVersion::VS18) {
+    if (slnxParser.ParseFile(slnFile.c_str())) {
+      for (auto const& i : slnxParser.ProjectToPath) {
+        if (cmHasLiteralSuffix(i.second, ".vfproj")) {
+          useDevEnv = true;
+          break;
+        }
+      }
     }
-    slnFile += projectName;
-    slnFile += ".sln";
+  } else {
     cmVisualStudioSlnParser parser;
     if (parser.ParseFile(slnFile, slnData,
                          cmVisualStudioSlnParser::DataGroupAll)) {
       std::vector<cmSlnProjectEntry> slnProjects = slnData.GetProjects();
       for (cmSlnProjectEntry const& project : slnProjects) {
-        if (useDevEnv) {
-          break;
-        }
         std::string proj = project.GetRelativePath();
-        if (proj.size() > 7 && proj.substr(proj.size() - 7) == ".vfproj"_s) {
+        if (cmHasLiteralSuffix(proj, ".vfproj")) {
           useDevEnv = true;
+          break;
         }
       }
     }
@@ -1116,19 +1148,26 @@ cmGlobalVisualStudio10Generator::GenerateBuildCommand(
     GeneratedMakeCommand makeCommand;
     makeCommand.RequiresOutputForward = requiresOutputForward;
     makeCommand.Add(makeProgramSelected);
-    cm::optional<cmSlnProjectEntry> proj = cm::nullopt;
 
     if (tname == "clean"_s) {
-      makeCommand.Add(cmStrCat(projectName, ".sln"));
+      makeCommand.Add(slnFile);
       makeCommand.Add("/t:Clean");
     } else {
       std::string targetProject = cmStrCat(tname, ".vcxproj");
-      proj = slnData.GetProjectByName(tname);
       if (targetProject.find('/') == std::string::npos) {
         // it might be in a subdir
-        if (proj) {
-          targetProject = proj->GetRelativePath();
-          cmSystemTools::ConvertToUnixSlashes(targetProject);
+        if (this->Version >= VSVersion::VS18) {
+          auto i =
+            slnxParser.ProjectToPath.find(cmSystemTools::LowerCase(tname));
+          if (i != slnxParser.ProjectToPath.end()) {
+            targetProject = i->second;
+          }
+        } else {
+          if (cmSlnProjectEntry const* proj =
+                slnData.GetProjectByName(tname)) {
+            targetProject = proj->GetRelativePath();
+            cmSystemTools::ConvertToUnixSlashes(targetProject);
+          }
         }
       }
       makeCommand.Add(targetProject);
@@ -1192,25 +1231,9 @@ cmGlobalVisualStudio10Generator::GenerateBuildCommand(
       }
     }
 
-    std::string plainConfig = config;
-    if (config.empty()) {
-      plainConfig = "Debug";
-    }
-
-    std::string platform = GetPlatformName();
-    if (proj) {
-      std::string extension =
-        cmSystemTools::GetFilenameLastExtension(proj->GetRelativePath());
-      extension = cmSystemTools::LowerCase(extension);
-      if (extension == ".csproj"_s) {
-        // Use correct platform name
-        platform =
-          slnData.GetConfigurationTarget(tname, plainConfig, platform);
-      }
-    }
-
-    makeCommand.Add(cmStrCat("/p:Configuration=", plainConfig));
-    makeCommand.Add(cmStrCat("/p:Platform=", platform));
+    makeCommand.Add(
+      cmStrCat("/p:Configuration=", config.empty() ? "Debug" : config));
+    makeCommand.Add(cmStrCat("/p:Platform=", this->GetPlatformName()));
     makeCommand.Add(
       cmStrCat("/p:VisualStudioVersion=", this->GetIDEVersion()));
 
@@ -1565,6 +1588,12 @@ bool cmGlobalVisualStudio10Generator::IsBuildInParallelSupported() const
   return (vsVer &&
           cmSystemTools::VersionCompareGreaterEq(*vsVer, vsVer15_8_0));
 }
+
+bool cmGlobalVisualStudio10Generator::SupportsShortObjectNames() const
+{
+  return true;
+}
+
 std::string cmGlobalVisualStudio10Generator::GetClFlagTableName() const
 {
   std::string const& toolset = this->GetPlatformToolsetString();

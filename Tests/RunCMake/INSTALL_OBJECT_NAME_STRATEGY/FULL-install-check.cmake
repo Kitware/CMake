@@ -1,0 +1,8 @@
+set(ext_suffix ".c")
+set(subdir "subdir/")
+if (RunCMake_GENERATOR MATCHES "(Visual Studio|Xcode)")
+  set(ext_suffix "")
+  set(subdir "")
+endif ()
+check_installed_object("${RunCMake_TEST_BINARY_DIR}/real_install/lib/objlib/objects-Debug/objlib/test${ext_suffix}${CMAKE_C_OUTPUT_EXTENSION}")
+check_installed_object("${RunCMake_TEST_BINARY_DIR}/real_install/lib/objlib/objects-Debug/objlib/${subdir}inner_test${ext_suffix}${CMAKE_C_OUTPUT_EXTENSION}")

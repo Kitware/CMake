@@ -1,4 +1,4 @@
-^CMake Error at SUBLIST-InvalidLength.cmake:2 \(list\):
+^CMake Error at SUBLIST-InvalidLength\.cmake:2 \(list\):
   list length: -2 should be -1 or greater
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)$
+  CMakeLists\.txt:3 \(include\)$

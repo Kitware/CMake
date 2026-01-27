@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.14)
 project(ToClean)
 
+set(CMAKE_INTERMEDIATE_DIR_STRATEGY FULL CACHE STRING "" FORCE)
+
 # Utility variables
 set(CSD ${CMAKE_CURRENT_SOURCE_DIR})
 set(CBD ${CMAKE_CURRENT_BINARY_DIR})

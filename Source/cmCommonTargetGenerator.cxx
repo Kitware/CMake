@@ -4,7 +4,6 @@
 
 #include <algorithm>
 #include <sstream>
-#include <type_traits>
 #include <utility>
 
 #include <cm/string_view>
@@ -459,7 +458,8 @@ std::string cmCommonTargetGenerator::GenerateCodeCheckRules(
           this->GeneratorTarget->GetLocalGenerator()->EscapeForShell(
             cmStrCat(tidy, ";--extra-arg-before=--driver-mode=", driverMode,
                      exportFixes));
-      } else if (generatorName.find("Ninja") != std::string::npos) {
+      } else if (generatorName.find("Ninja") != std::string::npos ||
+                 generatorName.find("FASTBuild") != std::string::npos) {
         if (!clangTidyExportFixedDir.empty()) {
           this->GlobalCommonGenerator->AddClangTidyExportFixesFile(fixesFile);
           cmSystemTools::MakeDirectory(

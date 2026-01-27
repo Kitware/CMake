@@ -37,7 +37,7 @@ bool cmSetSourceFilesPropertiesCommand(std::vector<std::string> const& args,
   };
 
   auto isAPropertyKeyword =
-    [](std::vector<std::string>::const_iterator const& arg_it) {
+    [](std::vector<std::string>::const_iterator arg_it) {
       return std::any_of(
         std::begin(prop_names), std::end(prop_names),
         [&arg_it](cm::string_view prop_name) { return *arg_it == prop_name; });

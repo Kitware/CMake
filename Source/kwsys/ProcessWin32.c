@@ -2145,7 +2145,7 @@ static void kwsysProcessSetExitExceptionByIndex(kwsysProcess* cp, int code,
     default:
       cp->ProcessResults[idx].ExitException = kwsysProcess_Exception_Other;
       snprintf(cp->ProcessResults[idx].ExitExceptionString,
-               KWSYSPE_PIPE_BUFFER_SIZE, "Exit code 0x%x\n", code);
+               KWSYSPE_PIPE_BUFFER_SIZE, "Exit code 0x%x", code);
       break;
   }
 }

@@ -9,10 +9,10 @@
   CMake System Package Registry.*
   Paths specified by the find_package PATHS option.*
 .*
-    .*NotHereConfig.cmake
-    .*nothere-config.cmake
+    .*NotHereConfig\.cmake
+    .*nothere-config\.cmake
 .*
-CMake Warning at MissingConfigDebug.cmake:3 \(message\):
-  This warning must be reachable.
+CMake Warning at MissingConfigDebug\.cmake:3 \(message\):
+  This warning must be reachable\.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)$
+  CMakeLists\.txt:3 \(include\)$

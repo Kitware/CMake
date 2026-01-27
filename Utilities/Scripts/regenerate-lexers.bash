@@ -12,7 +12,6 @@ pushd "${BASH_SOURCE%/*}/../../Source/LexerParser" > /dev/null
 extra_args_CommandArgument="--never-interactive --batch"
 
 for lexer in            \
-    CommandArgument     \
     CTestResourceGroups \
     DependsJava         \
     Expr                \

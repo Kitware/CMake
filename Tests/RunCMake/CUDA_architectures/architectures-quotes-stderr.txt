@@ -1,0 +1,10 @@
+^CMake Error at .*/Internal/CMakeCUDAArchitecturesValidate\.cmake:[0-9]+ \(message\):
+  CMAKE_CUDA_ARCHITECTURES contains literal quotes:
+
+    "all-major"
+
+Call Stack \(most recent call first\):
+  [^
+]*/Modules/CMakeDetermineCUDACompiler\.cmake:[0-9]+ \(cmake_cuda_architectures_validate\)
+  architectures-quotes\.cmake:2 \(enable_language\)
+  CMakeLists\.txt:3 \(include\)$

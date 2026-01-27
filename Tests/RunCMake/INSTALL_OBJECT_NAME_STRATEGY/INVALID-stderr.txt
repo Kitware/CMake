@@ -1,0 +1,6 @@
+CMake Error in CMakeLists\.txt:
+  Property INSTALL_OBJECT_NAME_STRATEGY of target "objlib" set to the
+  unsupported strategy INVALID
+
+
+CMake Generate step failed\.  Build files cannot be regenerated correctly\.

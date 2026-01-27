@@ -10,7 +10,6 @@ fi
 pushd "${BASH_SOURCE%/*}/../../Source/LexerParser" > /dev/null
 
 for parser in            \
-    CommandArgument     \
     DependsJava         \
     Expr                \
     Fortran

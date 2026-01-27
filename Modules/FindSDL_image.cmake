@@ -6,7 +6,11 @@ FindSDL_image
 -------------
 
 Finds the SDL_image library that loads images of various formats as SDL (Simple
-DirectMedia Layer) surfaces.
+DirectMedia Layer) surfaces:
+
+.. code-block:: cmake
+
+  find_package(SDL_image [<version>] [...])
 
 .. note::
 
@@ -23,11 +27,14 @@ Result Variables
 This module defines the following variables:
 
 ``SDL_image_FOUND``
-  Boolean indicating whether the (requested version of) SDL_image library is
-  found.  For backward compatibility, the ``SDL_IMAGE_FOUND`` variable is also
-  set to the same value.
+  .. versionadded:: 3.3
 
-``SDL_IMAGE_VERSION_STRING``
+  Boolean indicating whether the (requested version of) SDL_image library
+  was found.
+
+``SDL_image_VERSION``
+  .. versionadded:: 4.2
+
   The human-readable string containing the version of SDL_image found.
 
 ``SDL_IMAGE_INCLUDE_DIRS``
@@ -50,19 +57,29 @@ This module accepts the following variables:
 Deprecated Variables
 ^^^^^^^^^^^^^^^^^^^^
 
-For backward compatibility the following variables are also set:
+The following variables are provided for backward compatibility:
+
+``SDL_IMAGE_VERSION_STRING``
+  .. deprecated:: 4.2
+    Use ``SDL_image_VERSION``, which has the same value.
+
+  The human-readable string containing the version of SDL_image found.
+
+``SDL_IMAGE_FOUND``
+  .. deprecated:: 4.2
+    Use ``SDL_image_FOUND``, which has the same value.
 
 ``SDLIMAGE_FOUND``
   .. deprecated:: 2.8.10
-    Use the ``SDL_image_FOUND``, which has the same value.
+    Use ``SDL_image_FOUND``, which has the same value.
 
 ``SDLIMAGE_INCLUDE_DIR``
   .. deprecated:: 2.8.10
-    Use the ``SDL_IMAGE_INCLUDE_DIRS``, which has the same value.
+    Use ``SDL_IMAGE_INCLUDE_DIRS``, which has the same value.
 
 ``SDLIMAGE_LIBRARY``
   .. deprecated:: 2.8.10
-    Use the ``SDL_IMAGE_LIBRARIES``, which has the same value.
+    Use ``SDL_IMAGE_LIBRARIES``, which has the same value.
 
 Examples
 ^^^^^^^^
@@ -149,7 +166,8 @@ if(SDL_IMAGE_INCLUDE_DIR AND EXISTS "${SDL_IMAGE_INCLUDE_DIR}/SDL_image.h")
   string(REGEX REPLACE "^#define[ \t]+SDL_IMAGE_MAJOR_VERSION[ \t]+([0-9]+)$" "\\1" SDL_IMAGE_VERSION_MAJOR "${SDL_IMAGE_VERSION_MAJOR_LINE}")
   string(REGEX REPLACE "^#define[ \t]+SDL_IMAGE_MINOR_VERSION[ \t]+([0-9]+)$" "\\1" SDL_IMAGE_VERSION_MINOR "${SDL_IMAGE_VERSION_MINOR_LINE}")
   string(REGEX REPLACE "^#define[ \t]+SDL_IMAGE_PATCHLEVEL[ \t]+([0-9]+)$" "\\1" SDL_IMAGE_VERSION_PATCH "${SDL_IMAGE_VERSION_PATCH_LINE}")
-  set(SDL_IMAGE_VERSION_STRING ${SDL_IMAGE_VERSION_MAJOR}.${SDL_IMAGE_VERSION_MINOR}.${SDL_IMAGE_VERSION_PATCH})
+  set(SDL_image_VERSION ${SDL_IMAGE_VERSION_MAJOR}.${SDL_IMAGE_VERSION_MINOR}.${SDL_IMAGE_VERSION_PATCH})
+  set(SDL_IMAGE_VERSION_STRING "${SDL_image_VERSION}")
   unset(SDL_IMAGE_VERSION_MAJOR_LINE)
   unset(SDL_IMAGE_VERSION_MINOR_LINE)
   unset(SDL_IMAGE_VERSION_PATCH_LINE)
@@ -165,7 +183,7 @@ include(FindPackageHandleStandardArgs)
 
 find_package_handle_standard_args(SDL_image
                                   REQUIRED_VARS SDL_IMAGE_LIBRARIES SDL_IMAGE_INCLUDE_DIRS
-                                  VERSION_VAR SDL_IMAGE_VERSION_STRING)
+                                  VERSION_VAR SDL_image_VERSION)
 
 # for backward compatibility
 set(SDLIMAGE_LIBRARY ${SDL_IMAGE_LIBRARIES})

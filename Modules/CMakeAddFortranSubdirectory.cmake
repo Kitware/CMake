@@ -8,7 +8,7 @@ CMakeAddFortranSubdirectory
 This module provides a command to add a Fortran project located in a
 subdirectory.
 
-Load it in a CMake project with:
+Load this module in a CMake project with:
 
 .. code-block:: cmake
 

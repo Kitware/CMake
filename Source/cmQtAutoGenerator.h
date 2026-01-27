@@ -88,7 +88,7 @@ public:
   // -- Info options
   std::string const& InfoFile() const { return this->InfoFile_; }
   std::string const& InfoDir() const { return this->InfoDir_; }
-  cmFileTime const& InfoFileTime() const { return this->InfoFileTime_; }
+  cmFileTime InfoFileTime() const { return this->InfoFileTime_; }
   std::string const& InfoConfig() const { return this->InfoConfig_; }
   std::string const& ExecutableConfig() const
   {

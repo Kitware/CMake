@@ -5,8 +5,13 @@
 FindArmadillo
 -------------
 
-Finds the Armadillo C++ library.  Armadillo is a library for linear algebra and
-scientific computing.
+Finds the Armadillo C++ library:
+
+.. code-block:: cmake
+
+  find_package(Armadillo [<version>] [...])
+
+Armadillo is a library for linear algebra and scientific computing.
 
 .. versionadded:: 3.18
   Support for linking wrapped libraries directly (see the
@@ -16,30 +21,76 @@ scientific computing.
 Result Variables
 ^^^^^^^^^^^^^^^^
 
-This module sets the following variables:
+This module defines the following variables:
 
 ``Armadillo_FOUND``
-  Set to true if the library is found.  For backward compatibility, the
-  ``ARMADILLO_FOUND`` variable is also set to the same value.
+  .. versionadded:: 3.3
+
+  Boolean indicating whether the (requested version of) Armadillo library
+  was found.
+
+``Armadillo_VERSION``
+  .. versionadded:: 4.2
+
+  The version of Armadillo found (e.g., ``14.90.0``).
+
+``Armadillo_VERSION_NAME``
+  .. versionadded:: 4.2
+
+  The version name of Armadillo found (e.g., ``Antipodean Antileech``).
+
 ``ARMADILLO_INCLUDE_DIRS``
   List of required include directories.
+
 ``ARMADILLO_LIBRARIES``
   List of libraries to be linked.
+
+Deprecated Variables
+^^^^^^^^^^^^^^^^^^^^
+
+The following variables are provided for backward compatibility:
+
+``ARMADILLO_FOUND``
+  .. deprecated:: 4.2
+    Use ``Armadillo_FOUND``, which has the same value.
+
+  Boolean indicating whether the (requested version of) Armadillo library
+  was found.
+
 ``ARMADILLO_VERSION_STRING``
-  Version as a string (ex: ``1.0.4``).
+  .. deprecated:: 4.2
+    Superseded by the ``Armadillo_VERSION``.
+
+  The version of Armadillo found.
+
 ``ARMADILLO_VERSION_MAJOR``
+  .. deprecated:: 4.2
+    Superseded by the ``Armadillo_VERSION``.
+
   Major version number.
+
 ``ARMADILLO_VERSION_MINOR``
+  .. deprecated:: 4.2
+    Superseded by the ``Armadillo_VERSION``.
+
   Minor version number.
+
 ``ARMADILLO_VERSION_PATCH``
+  .. deprecated:: 4.2
+    Superseded by the ``Armadillo_VERSION``.
+
   Patch version number.
+
 ``ARMADILLO_VERSION_NAME``
-  Name of the version (ex: ``Antipodean Antileech``).
+  .. deprecated:: 4.2
+    Superseded by the ``Armadillo_VERSION_NAME``.
+
+  The version name of Armadillo found (e.g., ``Antipodean Antileech``).
 
 Examples
 ^^^^^^^^
 
-Using Armadillo:
+Finding Armadillo and creating an imported target:
 
 .. code-block:: cmake
 
@@ -79,10 +130,9 @@ if(ARMADILLO_INCLUDE_DIR)
   set(ARMADILLO_VERSION_MAJOR 0)
   set(ARMADILLO_VERSION_MINOR 0)
   set(ARMADILLO_VERSION_PATCH 0)
-  set(ARMADILLO_VERSION_NAME "EARLY RELEASE")
+  set(Armadillo_VERSION_NAME "EARLY RELEASE")
 
   if(EXISTS "${ARMADILLO_INCLUDE_DIR}/armadillo_bits/arma_version.hpp")
-
     # Read and parse armdillo version header file for version number
     file(STRINGS "${ARMADILLO_INCLUDE_DIR}/armadillo_bits/arma_version.hpp" _ARMA_HEADER_CONTENTS REGEX "#define ARMA_VERSION_[A-Z]+ ")
     string(REGEX REPLACE ".*#define ARMA_VERSION_MAJOR ([0-9]+).*" "\\1" ARMADILLO_VERSION_MAJOR "${_ARMA_HEADER_CONTENTS}")
@@ -90,11 +140,13 @@ if(ARMADILLO_INCLUDE_DIR)
     string(REGEX REPLACE ".*#define ARMA_VERSION_PATCH ([0-9]+).*" "\\1" ARMADILLO_VERSION_PATCH "${_ARMA_HEADER_CONTENTS}")
 
     # WARNING: The number of spaces before the version name is not one.
-    string(REGEX REPLACE ".*#define ARMA_VERSION_NAME\ +\"([0-9a-zA-Z\ _-]+)\".*" "\\1" ARMADILLO_VERSION_NAME "${_ARMA_HEADER_CONTENTS}")
+    string(REGEX REPLACE ".*#define ARMA_VERSION_NAME\ +\"([0-9a-zA-Z\ _-]+)\".*" "\\1" Armadillo_VERSION_NAME "${_ARMA_HEADER_CONTENTS}")
 
+    set(ARMADILLO_VERSION_NAME "${Armadillo_VERSION_NAME}")
   endif()
 
-  set(ARMADILLO_VERSION_STRING "${ARMADILLO_VERSION_MAJOR}.${ARMADILLO_VERSION_MINOR}.${ARMADILLO_VERSION_PATCH}")
+  set(Armadillo_VERSION "${ARMADILLO_VERSION_MAJOR}.${ARMADILLO_VERSION_MINOR}.${ARMADILLO_VERSION_PATCH}")
+  set(ARMADILLO_VERSION_STRING "${Armadillo_VERSION}")
 endif ()
 
 if(EXISTS "${ARMADILLO_INCLUDE_DIR}/armadillo_bits/config.hpp")
@@ -150,7 +202,7 @@ endif()
 
 find_package_handle_standard_args(Armadillo
   REQUIRED_VARS ARMADILLO_INCLUDE_DIR ${_ARMA_REQUIRED_VARS}
-  VERSION_VAR ARMADILLO_VERSION_STRING)
+  VERSION_VAR Armadillo_VERSION)
 
 if (Armadillo_FOUND)
   set(ARMADILLO_INCLUDE_DIRS ${ARMADILLO_INCLUDE_DIR})

@@ -12,6 +12,8 @@
 
 #include <cm3p/uv.h>
 
+#include "cmsys/Process.h"
+
 #include "cm_fileno.hxx"
 
 #include "cmGetPipes.h"
@@ -58,6 +60,7 @@ struct cmUVProcessChain::InternalData
     cmUVProcessChainBuilder::ProcessConfiguration const& config, bool first,
     bool last);
   void Finish();
+  void Terminate();
 };
 
 cmUVProcessChainBuilder::cmUVProcessChainBuilder() = default;
@@ -403,6 +406,15 @@ void cmUVProcessChain::InternalData::Finish()
   this->Valid = true;
 }
 
+void cmUVProcessChain::InternalData::Terminate()
+{
+  for (std::unique_ptr<ProcessData> const& p : this->Processes) {
+    if (!p->ProcessStatus.Finished) {
+      cmsysProcess_KillPID(static_cast<unsigned long>(p->Process->pid));
+    }
+  }
+}
+
 cmUVProcessChain::cmUVProcessChain()
   : Data(cm::make_unique<InternalData>())
 {
@@ -454,7 +466,7 @@ bool cmUVProcessChain::Wait(uint64_t milliseconds)
         auto* timeoutPtr = static_cast<bool*>(handle->data);
         *timeoutPtr = true;
       },
-      milliseconds, 0);
+      milliseconds, 0, cm::uv_update_time::yes);
   }
 
   while (!timeout &&
@@ -485,6 +497,11 @@ cmUVProcessChain::Status const& cmUVProcessChain::GetStatus(
 bool cmUVProcessChain::Finished() const
 {
   return this->Data->ProcessesCompleted >= this->Data->Processes.size();
+}
+
+void cmUVProcessChain::Terminate()
+{
+  this->Data->Terminate();
 }
 
 std::pair<cmUVProcessChain::ExceptionCode, std::string>
@@ -564,7 +581,7 @@ cmUVProcessChain::Status::GetException() const
       case STATUS_NO_MEMORY:
       default: {
         char buf[256];
-        snprintf(buf, sizeof(buf), "Exit code 0x%x\n",
+        snprintf(buf, sizeof(buf), "Exit code 0x%x",
                  static_cast<unsigned int>(this->ExitStatus));
         return std::make_pair(ExceptionCode::Other, buf);
       }

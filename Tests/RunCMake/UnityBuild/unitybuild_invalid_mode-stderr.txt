@@ -1,4 +1,4 @@
-^CMake Error in CMakeLists.txt:
+^CMake Error in CMakeLists\.txt:
   Invalid UNITY_BUILD_MODE value of INVALID assigned to target tgt\.
   Acceptable values are BATCH and GROUP\.
 .*

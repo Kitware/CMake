@@ -40,6 +40,36 @@ public:
   cmCustomCommand* GetCustomCommand() const;
   void SetCustomCommand(std::unique_ptr<cmCustomCommand> cc);
 
+  enum class SpecialSourceType
+  {
+    // Sources for user-provided sources.
+    User,
+    // Source files for object files.
+    Object,
+    // Sources representing `CMakeLists.txt` files.
+    CMakeLists,
+    // Xcode `Info.plist` files for bundle targets.
+    BundleInfoPlist,
+    // Xcode source to force a link to occur with an appropriate language.
+    XcodeForceLinkerSource,
+    // Xcode `
+    XcodeXCConfigFile,
+    // Header set verification files.
+    HeaderSetVerificationSource,
+    // PCH files.
+    PchHeader,
+    PchSource,
+    PchPdbReuseSource,
+    // Unity sources.
+    UnitySource,
+    // Qt support sources.
+    QtWrapCppSource,
+    QtAutogenSource,
+  };
+  void SetSpecialSourceType(SpecialSourceType type);
+  bool IsPchHeader() const;
+  bool IsPchSource() const;
+
   //! Set/Get a property of this source file
   void SetProperty(std::string const& prop, cmValue value);
   void RemoveProperty(std::string const& prop)
@@ -166,6 +196,7 @@ private:
   std::vector<BT<std::string>> IncludeDirectories;
   bool FindFullPathFailed = false;
   bool IsGenerated = false;
+  SpecialSourceType SpecialSource = SpecialSourceType::User;
 
   bool FindFullPath(std::string* error, std::string* cmp0115Warning);
   void CheckExtension();

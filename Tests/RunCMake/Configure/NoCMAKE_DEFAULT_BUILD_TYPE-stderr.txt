@@ -8,4 +8,4 @@
 
     CMAKE_DEFAULT_BUILD_TYPE
 
-  but it has been specified.
+  but it has been specified\.

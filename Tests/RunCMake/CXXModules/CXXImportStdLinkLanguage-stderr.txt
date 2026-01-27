@@ -3,5 +3,5 @@ CMake Error:
 
     \$<LINK_LANGUAGE:CXX>
 
-  \$<LINK_LANGUAGE:...> may only be used with binary targets to specify link
-  libraries, link directories, link options and link depends.
+  \$<LINK_LANGUAGE:\.\.\.> may only be used with binary targets to specify link
+  libraries, link directories, link options and link depends\.

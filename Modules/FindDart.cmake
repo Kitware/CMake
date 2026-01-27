@@ -8,10 +8,32 @@ FindDart
 .. deprecated:: 3.27
   This module is available only if policy :policy:`CMP0145` is not set to ``NEW``.
 
-Find DART
+Finds DART:
 
-This module looks for the dart testing software and sets DART_ROOT to
+.. code-block:: cmake
+
+  find_package(DART [...])
+
+This module looks for the dart testing software and sets ``DART_ROOT`` to
 point to where it found it.
+
+Result Variables
+^^^^^^^^^^^^^^^^
+
+This module defines the following variables:
+
+``Dart_FOUND``
+  .. versionadded:: 3.3
+
+  Boolean indicating whether DART was found.
+
+Cache Variables
+^^^^^^^^^^^^^^^
+
+The following cache variables may also be set:
+
+``DART_ROOT``
+  The path to the Dart root installation.
 #]=======================================================================]
 
 if(_FindDart_testing)

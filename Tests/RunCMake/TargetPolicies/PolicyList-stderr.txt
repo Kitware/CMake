@@ -2,7 +2,7 @@
 
     \$<TARGET_POLICY:NOT_A_POLICY>
 
-  \$<TARGET_POLICY:prop> may only be used with a limited number of policies.
+  \$<TARGET_POLICY:prop> may only be used with a limited number of policies\.
   Currently it may be used with the following policies:
 
    \* CMP0003
@@ -47,6 +47,11 @@
    \* CMP0181
    \* CMP0182
    \* CMP0195
+   \* CMP0199
+   \* CMP0200
+   \* CMP0202
+   \* CMP0203
+   \* CMP0204
 
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)

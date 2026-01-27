@@ -1,4 +1,4 @@
-^CMake Error at IncludeIsDirectory.cmake:1 \(include\):
+^CMake Error at IncludeIsDirectory\.cmake:1 \(include\):
   include requested file is a directory:
 
     [^

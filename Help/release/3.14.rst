@@ -302,7 +302,7 @@ Autogen
 * A new :variable:`CMAKE_AUTOGEN_ORIGIN_DEPENDS` variable and
   :prop_tgt:`AUTOGEN_ORIGIN_DEPENDS` target property may be set to enable or
   disable forwarding of the origin target dependencies to the corresponding
-  :ref:`<ORIGIN>_autogen` target.
+  :ref:`<ORIGIN>_autogen <<ORIGIN>_autogen>` target.
 
 CTest
 -----
@@ -345,6 +345,9 @@ Deprecated and Removed Features
 * CTest no longer supports submissions via ``ftp``, ``scp``, ``cp``, and
   ``xmlrpc``.  CDash is the only maintained testing dashboard for CTest,
   and it only supports submissions over ``http`` and ``https``.
+
+* The :module:`MacroAddFileDependencies` module is deprecated.
+  Port projects to use :command:`set_property` directly.
 
 Other Changes
 =============

@@ -25,6 +25,7 @@
 #include "cmGlobalGenerator.h"
 #include "cmGlobalNinjaGenerator.h"
 #include "cmList.h"
+#include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
@@ -161,6 +162,16 @@ void cmLocalNinjaGenerator::Generate()
     this->WriteCustomCommandBuildStatements(config);
     this->AdditionalCleanFiles(config);
   }
+}
+
+std::string cmLocalNinjaGenerator::GetObjectOutputRoot(
+  cmStateEnums::IntermediateDirKind kind) const
+{
+  if (this->UseShortObjectNames(kind)) {
+    return cmStrCat(this->GetBinaryDirectory(), '/',
+                    this->GetGlobalGenerator()->GetShortBinaryOutputDir());
+  }
+  return cmStrCat(this->GetCurrentBinaryDirectory(), "/CMakeFiles");
 }
 
 // Non-virtual public methods.
@@ -902,6 +913,8 @@ std::string cmLocalNinjaGenerator::MakeCustomLauncher(
   }
   vars.Output = output.c_str();
   vars.Role = ccg.GetCC().GetRole().c_str();
+  vars.CMTargetName = ccg.GetCC().GetTarget().c_str();
+  vars.Config = ccg.GetOutputConfig().c_str();
 
   auto rulePlaceholderExpander = this->CreateRulePlaceholderExpander();
 

@@ -1,10 +1,10 @@
-CMake Error at .*/Modules/CheckTypeSize.cmake:[0-9]+. \(message\):
+CMake Error at .*/Modules/CheckTypeSize\.cmake:[0-9]+ \(message\):
   Unknown language:
 
-    FORTRAN.
+    FORTRAN\.
 
-  Supported languages: C, CXX.
+  Supported languages: C, CXX\.
 
 Call Stack \(most recent call first\):
-  CheckTypeSizeUnknownLanguage.cmake:[0-9]+ \(check_type_size\)
-  CMakeLists.txt:[0-9]+ \(include\)
+  CheckTypeSizeUnknownLanguage\.cmake:[0-9]+ \(check_type_size\)
+  CMakeLists\.txt:[0-9]+ \(include\)

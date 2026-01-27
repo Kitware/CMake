@@ -35,9 +35,6 @@ extern const struct Curl_handler Curl_handler_ftp;
 extern const struct Curl_handler Curl_handler_ftps;
 #endif
 
-CURLcode Curl_GetFTPResponse(struct Curl_easy *data, ssize_t *nread,
-                             int *ftpcode);
-
 bool ftp_conns_match(struct connectdata *needle, struct connectdata *conn);
 
 #endif /* CURL_DISABLE_FTP */
@@ -62,12 +59,14 @@ enum {
   FTP_QUOTE, /* waiting for a response to a command sent in a quote list */
   FTP_RETR_PREQUOTE,
   FTP_STOR_PREQUOTE,
+  FTP_LIST_PREQUOTE,
   FTP_POSTQUOTE,
   FTP_CWD,  /* change dir */
   FTP_MKD,  /* if the dir did not exist */
   FTP_MDTM, /* to figure out the datestamp */
   FTP_TYPE, /* to set type when doing a head-like request */
   FTP_LIST_TYPE, /* set type when about to do a dir list */
+  FTP_RETR_LIST_TYPE,
   FTP_RETR_TYPE, /* set type when about to RETR a file */
   FTP_STOR_TYPE, /* set type when about to STOR a file */
   FTP_SIZE, /* get the remote file's size for head-like request */
@@ -118,6 +117,11 @@ struct FTP {
   curl_off_t downloadsize;
 };
 
+/* one struct entry for each path component (of 'rawpath') */
+struct pathcomp {
+  int start; /* start column */
+  int len;   /* length in bytes */
+};
 
 /* ftp_conn is used for struct connection-oriented data in the connectdata
    struct */
@@ -126,28 +130,25 @@ struct ftp_conn {
   char *account;
   char *alternative_to_user;
   char *entrypath; /* the PWD reply when we logged on */
-  char *file;    /* url-decoded filename (or path) */
-  char **dirs;   /* realloc()ed array for path components */
-  char *newhost; /* the (allocated) IP addr or hostname to connect the data
-                    connection to */
+  const char *file; /* url-decoded filename (or path), points into rawpath */
+  char *rawpath; /* URL decoded, allocated, version of the path */
+  struct pathcomp *dirs; /* allocated array for path components */
   char *prevpath;   /* url-decoded conn->path from the previous transfer */
   char transfertype; /* set by ftp_transfertype for use by Curl_client_write()a
                         and others (A/I or zero) */
-  curl_off_t retr_size_saved; /* Size of retrieved file saved */
   char *server_os;     /* The target server operating system. */
   curl_off_t known_filesize; /* file size is different from -1, if wildcard
                                 LIST parsing was done and wc_statemach set
                                 it */
-  int dirdepth;  /* number of entries used in the 'dirs' array */
-  int cwdcount;     /* number of CWD commands issued */
   int count1; /* general purpose counter for the state machine */
   int count2; /* general purpose counter for the state machine */
   int count3; /* general purpose counter for the state machine */
-  unsigned short newport;  /* the port of 'newhost' to connect the data
-                              connection to */
-  ftpstate state; /* always use ftp.c:state() to change state! */
-  ftpstate state_saved; /* transfer type saved to be reloaded after data
-                           connection is established */
+  unsigned short dirdepth;  /* number of entries used in the 'dirs' array,
+                               < FTP_MAX_DIR_DEPTH */
+  unsigned short cwdcount;  /* number of CWD commands issued,
+                               < FTP_MAX_DIR_DEPTH */
+  unsigned char state; /* (ftpstate enum) always use ftp.c:state() to change
+                          state! */
   unsigned char use_ssl;   /* if AUTH TLS is to be attempted etc, for FTP or
                               IMAP or POP3 or others! (type: curl_usessl)*/
   unsigned char ccc;       /* ccc level for this connection */

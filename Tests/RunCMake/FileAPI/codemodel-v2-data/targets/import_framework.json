@@ -1,0 +1,54 @@
+{
+    "name": "import_framework",
+    "id": "^import_framework::@217a96c3a62328a73ef4$",
+    "directorySource": "^framework$",
+    "projectName": "Framework",
+    "type": "SHARED_LIBRARY",
+    "imported": true,
+    "local": true,
+    "abstract": true,
+    "symbolic": null,
+    "isGeneratorProvided": null,
+    "fileSets": null,
+    "sources": [],
+    "sourceGroups": null,
+    "compileGroups": null,
+    "backtrace": [
+        {
+            "file": "^framework/CMakeLists\\.txt$",
+            "line": 11,
+            "command": "add_library",
+            "hasParent": true
+        },
+        {
+            "file": "^framework/CMakeLists\\.txt$",
+            "line": null,
+            "command": null,
+            "hasParent": false
+        }
+    ],
+    "folder": null,
+    "nameOnDisk": "^(lib|cyg|msys-)?Foo(\\.(so|dll))?$",
+    "artifacts": [
+        {
+            "path": "^/usr/Frameworks/Foo.framework/Foo(\\.(so|dll))?$",
+            "_dllExtra": false
+        },
+        {
+            "path": "^/usr/Frameworks/Foo.framework/(lib)?Foo\\.(dll\\.a|lib|l)$",
+            "_dllExtra": true
+        }
+    ],
+    "build": "^framework$",
+    "source": "^framework$",
+    "install": null,
+    "link": null,
+    "archive": null,
+    "dependencies": null,
+    "linkLibraries": null,
+    "interfaceLinkLibraries": null,
+    "compileDependencies": null,
+    "interfaceCompileDependencies": null,
+    "objectDependencies": null,
+    "orderDependencies": null
+}

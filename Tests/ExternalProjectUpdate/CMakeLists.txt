@@ -56,9 +56,9 @@ set(do_git_tests 0)
 if(GIT_EXECUTABLE)
   set(do_git_tests 1)
 
-  message(STATUS "GIT_VERSION_STRING='${GIT_VERSION_STRING}'")
+  message(STATUS "Git_VERSION='${Git_VERSION}'")
 
-  if("${GIT_VERSION_STRING}" VERSION_LESS 1.6.5)
+  if(Git_VERSION VERSION_LESS 1.6.5)
     message(STATUS "No ExternalProject git tests with git client less than version 1.6.5")
     set(do_git_tests 0)
   endif()
@@ -95,6 +95,7 @@ if(do_git_tests)
     GIT_TAG ${TEST_GIT_TAG}
     GIT_CONFIG "user.email=testauthor@cmake.org"
                "user.name=testauthor"
+               "commit.gpgsign=false"
     CMAKE_GENERATOR "${CMAKE_GENERATOR}"
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
     INSTALL_COMMAND ""

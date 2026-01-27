@@ -13,8 +13,11 @@ FindPythonInterp
   Use :module:`FindPython3`, :module:`FindPython2`, or :module:`FindPython`
   instead.
 
-This module finds the Python interpreter and determines the location of its
-executable.
+Finds the Python interpreter and determines the location of its executable:
+
+.. code-block:: cmake
+
+  find_package(PythonInterp [<version>] [...])
 
 .. note::
 
@@ -36,9 +39,11 @@ Result Variables
 This module defines the following variables:
 
 ``PythonInterp_FOUND``
-  Boolean indicating whether the (requested version of) Python executable is
-  found.  For backward compatibility, the ``PYTHONINTERP_FOUND`` variable is
-  also set to the same value.
+  .. versionadded:: 3.3
+
+  Boolean indicating whether the (requested version of) Python executable
+  was found.
+
 ``PYTHON_VERSION_STRING``
   Python version found (e.g., ``2.5.2``).
 ``PYTHON_VERSION_MAJOR``
@@ -65,6 +70,18 @@ This module accepts the following variables before calling
 ``Python_ADDITIONAL_VERSIONS``
   This variable can be used to specify a list of version numbers that should be
   taken into account when searching for Python.
+
+Deprecated Variables
+^^^^^^^^^^^^^^^^^^^^
+
+The following variables are provided for backward compatibility:
+
+``PYTHONINTERP_FOUND``
+  .. deprecated:: 3.12
+    Use ``PythonInterp_FOUND``, which has the same value.
+
+  Boolean indicating whether the (requested version of) Python executable
+  was found.
 
 Examples
 ^^^^^^^^
@@ -100,7 +117,7 @@ unset(_Python_NAMES)
 
 set(_PYTHON1_VERSIONS 1.6 1.5)
 set(_PYTHON2_VERSIONS 2.7 2.6 2.5 2.4 2.3 2.2 2.1 2.0)
-set(_PYTHON3_VERSIONS 3.14 3.13 3.12 3.11 3.10 3.9 3.8 3.7 3.6 3.5 3.4 3.3 3.2 3.1 3.0)
+set(_PYTHON3_VERSIONS 3.15 3.14 3.13 3.12 3.11 3.10 3.9 3.8 3.7 3.6 3.5 3.4 3.3 3.2 3.1 3.0)
 
 if(PythonInterp_FIND_VERSION)
     if(PythonInterp_FIND_VERSION_COUNT GREATER 1)

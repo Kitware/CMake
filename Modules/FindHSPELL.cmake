@@ -5,7 +5,11 @@
 FindHSPELL
 ----------
 
-Finds Hebrew spell-checker (Hspell) and morphology engine.
+Finds the Hebrew spell-checker and morphology engine (Hspell):
+
+.. code-block:: cmake
+
+  find_package(HSPELL [<version>] [...])
 
 Result Variables
 ^^^^^^^^^^^^^^^^
@@ -13,13 +17,18 @@ Result Variables
 This module defines the following variables:
 
 ``HSPELL_FOUND``
-  Boolean indicating whether the Hspell is found.
-``HSPELL_VERSION_STRING``
+  Boolean indicating whether (the requested version of) Hspell was found.
+
+``HSPELL_VERSION``
+  .. versionadded:: 4.2
+
   The version of Hspell found (x.y).
-``HSPELL_MAJOR_VERSION``
-  The major version of Hspell.
-``HSPELL_MINOR_VERSION``
-  The minor version of Hspell.
+
+``HSPELL_VERSION_MAJOR``
+  The major version of Hspell found.
+
+``HSPELL_VERSION_MINOR``
+  The minor version of Hspell found.
 
 Cache Variables
 ^^^^^^^^^^^^^^^
@@ -28,8 +37,20 @@ The following cache variables may also be set:
 
 ``HSPELL_INCLUDE_DIR``
   The Hspell include directory.
+
 ``HSPELL_LIBRARIES``
   The libraries needed to use Hspell.
+
+Deprecated Variables
+^^^^^^^^^^^^^^^^^^^^
+
+The following variables are provided for backward compatibility:
+
+``HSPELL_VERSION_STRING``
+  .. deprecated:: 4.2
+    Use ``HSPELL_VERSION``, which has the same value.
+
+  The version of Hspell found (x.y).
 
 Examples
 ^^^^^^^^
@@ -52,14 +73,15 @@ if (HSPELL_INCLUDE_DIR)
     file(STRINGS "${HSPELL_INCLUDE_DIR}/hspell.h" HSPELL_H REGEX "#define HSPELL_VERSION_M(AJO|INO)R [0-9]+")
     string(REGEX REPLACE ".*#define HSPELL_VERSION_MAJOR ([0-9]+).*" "\\1" HSPELL_VERSION_MAJOR "${HSPELL_H}")
     string(REGEX REPLACE ".*#define HSPELL_VERSION_MINOR ([0-9]+).*" "\\1" HSPELL_VERSION_MINOR "${HSPELL_H}")
-    set(HSPELL_VERSION_STRING "${HSPELL_VERSION_MAJOR}.${HSPELL_VERSION_MINOR}")
+    set(HSPELL_VERSION "${HSPELL_VERSION_MAJOR}.${HSPELL_VERSION_MINOR}")
+    set(HSPELL_VERSION_STRING "${HSPELL_VERSION}")
     unset(HSPELL_H)
 endif()
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(HSPELL
                                   REQUIRED_VARS HSPELL_LIBRARIES HSPELL_INCLUDE_DIR
-                                  VERSION_VAR HSPELL_VERSION_STRING)
+                                  VERSION_VAR HSPELL_VERSION)
 
 mark_as_advanced(HSPELL_INCLUDE_DIR HSPELL_LIBRARIES)
 

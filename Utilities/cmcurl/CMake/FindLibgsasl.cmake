@@ -25,8 +25,8 @@
 #
 # Input variables:
 #
-# - `LIBGSASL_INCLUDE_DIR`:   The libgsasl include directory.
-# - `LIBGSASL_LIBRARY`:       Path to `libgsasl` library.
+# - `LIBGSASL_INCLUDE_DIR`:   Absolute path to libgsasl include directory.
+# - `LIBGSASL_LIBRARY`:       Absolute path to `libgsasl` library.
 #
 # Result variables:
 #
@@ -66,12 +66,12 @@ else()
   endif()
 
   include(FindPackageHandleStandardArgs)
-    find_package_handle_standard_args(Libgsasl
-    REQUIRED_VARS
-      LIBGSASL_INCLUDE_DIR
-      LIBGSASL_LIBRARY
-    VERSION_VAR
-      LIBGSASL_VERSION
+  find_package_handle_standard_args(Libgsasl
+  REQUIRED_VARS
+    LIBGSASL_INCLUDE_DIR
+    LIBGSASL_LIBRARY
+  VERSION_VAR
+    LIBGSASL_VERSION
   )
 
   if(LIBGSASL_FOUND)

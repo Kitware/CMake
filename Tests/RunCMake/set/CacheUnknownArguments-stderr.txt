@@ -1,0 +1,4 @@
+CMake Error at CacheUnknownArguments\.cmake:[0-9]+ \(set\):
+  set Called with unsupported argument\(s\): FOO\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)

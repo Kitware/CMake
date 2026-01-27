@@ -6,7 +6,11 @@ FindJasper
 ----------
 
 Finds the JasPer Image Coding Toolkit for handling image data in a variety of
-formats, such as the JPEG-2000.
+formats, such as the JPEG-2000:
+
+.. code-block:: cmake
+
+  find_package(Jasper [<version>] [...])
 
 Imported Targets
 ^^^^^^^^^^^^^^^^
@@ -25,8 +29,14 @@ Result Variables
 This module defines the following variables:
 
 ``Jasper_FOUND``
-  Boolean indicating whether the JasPer is found.  For backward compatibility,
-  the ``JASPER_FOUND`` variable is also set to the same value.
+  .. versionadded:: 3.3
+
+  Boolean indicating whether (the requested version of) JasPer was found.
+
+``Jasper_VERSION``
+  .. versionadded:: 4.2
+
+  The version of JasPer found.
 
 ``JASPER_INCLUDE_DIRS``
   .. versionadded:: 3.22
@@ -35,9 +45,6 @@ This module defines the following variables:
 
 ``JASPER_LIBRARIES``
   The libraries needed to use JasPer.
-
-``JASPER_VERSION_STRING``
-  The version of JasPer found.
 
 Cache Variables
 ^^^^^^^^^^^^^^^
@@ -53,6 +60,23 @@ The following cache variables may also be set:
 
 ``JASPER_LIBRARY_DEBUG``
   The path to the debug variant of the JasPer library.
+
+Deprecated Variables
+^^^^^^^^^^^^^^^^^^^^
+
+The following variables are provided for backward compatibility:
+
+``JASPER_FOUND``
+  .. deprecated:: 4.2
+    Use ``Jasper_FOUND``, which has the same value.
+
+  Boolean indicating whether (the requested version of) JasPer was found.
+
+``JASPER_VERSION_STRING``
+  .. deprecated:: 4.2
+    Superseded by the ``Jasper_VERSION``.
+
+  The version of JasPer found.
 
 Examples
 ^^^^^^^^
@@ -81,13 +105,14 @@ endif()
 
 if(JASPER_INCLUDE_DIR AND EXISTS "${JASPER_INCLUDE_DIR}/jasper/jas_config.h")
   file(STRINGS "${JASPER_INCLUDE_DIR}/jasper/jas_config.h" jasper_version_str REGEX "^#define[\t ]+JAS_VERSION[\t ]+\".*\".*")
-  string(REGEX REPLACE "^#define[\t ]+JAS_VERSION[\t ]+\"([^\"]+)\".*" "\\1" JASPER_VERSION_STRING "${jasper_version_str}")
+  string(REGEX REPLACE "^#define[\t ]+JAS_VERSION[\t ]+\"([^\"]+)\".*" "\\1" Jasper_VERSION "${jasper_version_str}")
+  set(JASPER_VERSION_STRING "${Jasper_VERSION}")
 endif()
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(Jasper
                                   REQUIRED_VARS JASPER_LIBRARIES JASPER_INCLUDE_DIR
-                                  VERSION_VAR JASPER_VERSION_STRING)
+                                  VERSION_VAR Jasper_VERSION)
 
 if(Jasper_FOUND)
   set(JASPER_LIBRARIES ${JASPER_LIBRARIES})

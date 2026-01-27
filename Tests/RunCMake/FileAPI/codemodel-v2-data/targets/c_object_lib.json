@@ -4,6 +4,10 @@
     "directorySource": "^object$",
     "projectName": "Object",
     "type": "OBJECT_LIBRARY",
+    "imported": null,
+    "local": null,
+    "abstract": null,
+    "symbolic": null,
     "isGeneratorProvided": null,
     "fileSets": null,
     "sources": [
@@ -16,7 +20,7 @@
             "backtrace": [
                 {
                     "file": "^object/CMakeLists\\.txt$",
-                    "line": 5,
+                    "line": 8,
                     "command": "add_library",
                     "hasParent": true
                 },
@@ -45,14 +49,19 @@
             ],
             "includes": null,
             "frameworks": null,
-            "defines": null,
+            "defines": [
+                {
+                    "define": "_MBCS",
+                    "backtrace": null
+                }
+            ],
             "compileCommandFragments": null
         }
     ],
     "backtrace": [
         {
             "file": "^object/CMakeLists\\.txt$",
-            "line": 5,
+            "line": 8,
             "command": "add_library",
             "hasParent": true
         },
@@ -81,5 +90,11 @@
             "id": "^ZERO_CHECK::@5ed5358f70faf8d8af7a$",
             "backtrace": null
         }
-    ]
+    ],
+    "linkLibraries": null,
+    "interfaceLinkLibraries": null,
+    "compileDependencies": null,
+    "interfaceCompileDependencies": null,
+    "objectDependencies": null,
+    "orderDependencies": null
 }

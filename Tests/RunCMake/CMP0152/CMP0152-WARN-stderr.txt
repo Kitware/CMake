@@ -20,8 +20,8 @@
 ]*/Tests/RunCMake/CMP0152/CMP0152-WARN-build/dir/nested
 
   Since the policy is not set, CMake is using the OLD behavior for
-  compatibility.
+  compatibility\.
 Call Stack \(most recent call first\):
   CMP0152-WARN\.cmake:[0-9]+ \(include\)
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
 This warning is for project developers\.  Use -Wno-dev to suppress it\.$

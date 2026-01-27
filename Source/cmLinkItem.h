@@ -41,17 +41,13 @@ public:
   cmSourceFile const* ObjectSource = nullptr;
   std::string Feature;
   bool Cross = false;
+  // When the item was the result of a target's INTERFACE_LINK_LIBRARIES_DIRECT
+  // property, that originating target is provided here
+  cmGeneratorTarget const* InterfaceDirectFrom = nullptr;
   cmListFileBacktrace Backtrace;
   friend bool operator<(cmLinkItem const& l, cmLinkItem const& r);
   friend bool operator==(cmLinkItem const& l, cmLinkItem const& r);
   friend std::ostream& operator<<(std::ostream& os, cmLinkItem const& item);
-};
-
-class cmLinkImplItem : public cmLinkItem
-{
-public:
-  cmLinkImplItem() = default;
-  cmLinkImplItem(cmLinkItem item);
 };
 
 /** The link implementation specifies the direct library
@@ -59,7 +55,7 @@ public:
 struct cmLinkImplementationLibraries
 {
   // Libraries linked directly in this configuration.
-  std::vector<cmLinkImplItem> Libraries;
+  std::vector<cmLinkItem> Libraries;
 
   // Object files linked directly in this configuration.
   std::vector<cmLinkItem> Objects;
@@ -124,7 +120,7 @@ struct cmLinkImplementation : public cmLinkImplementationLibraries
 {
   // Languages whose runtime libraries must be linked.
   std::vector<std::string> Languages;
-  std::unordered_map<std::string, std::vector<cmLinkImplItem>>
+  std::unordered_map<std::string, std::vector<cmLinkItem>>
     LanguageRuntimeLibraries;
 
   // Whether the list depends on a link language genex.

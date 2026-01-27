@@ -161,8 +161,7 @@ private:
   std::string WriteSource(std::string const& name, std::string const& content,
                           char const* command) const;
 
-  Arguments ParseArgs(
-    cmRange<std::vector<std::string>::const_iterator> const& args,
-    cmArgumentParser<Arguments> const& parser,
-    std::vector<std::string>& unparsedArguments);
+  Arguments ParseArgs(cmRange<std::vector<std::string>::const_iterator> args,
+                      cmArgumentParser<Arguments> const& parser,
+                      std::vector<std::string>& unparsedArguments);
 };

@@ -1,0 +1,6 @@
+if (EXISTS ${v1}/preBuild.hook OR EXISTS ${v1}/postBuild.hook)
+  set(RunCMake_TEST_FAILED "Got unexpected preBuild/postBuild hooks.")
+endif()
+if (NOT EXISTS ${v1}/postCMakeBuild.hook)
+  set(RunCMake_TEST_FAILED "Missing expected postCMakeBuild hook.")
+endif()

@@ -267,9 +267,16 @@ Updates
 
 Changes made since CMake 3.31.0 include the following.
 
-3.31.1, 3.31.2, 3.31.3, 3.31.4, 3.31.5, 3.31.6, 3.31.7, 3.31.8, 3,31.9
+3.31.1, 3.31.2, 3.31.3, 3.31.4, 3.31.5, 3.31.6, 3.31.7, 3.31.8, 3.31.9
 ----------------------------------------------------------------------
 
 * These versions made no changes to documented features or interfaces.
   Some implementation updates were made to support ecosystem changes
   and/or fix regressions.
+
+3.31.10
+-------
+
+* The :command:`execute_process` command once again terminates child
+  processes when its ``TIMEOUT`` is reached.  This was accidentally
+  regressed by CMake 3.29.

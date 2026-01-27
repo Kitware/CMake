@@ -7,6 +7,7 @@
 #include <vector>
 
 #include <cm/iterator>
+#include <cm/optional>
 #include <cmext/string_view>
 
 #include "cmAlgorithms.h"
@@ -135,21 +136,18 @@ bool cmVisualStudioGeneratorOptions::IsManaged() const
   return this->FlagMap.find("CompileAsManaged") != this->FlagMap.end();
 }
 
-bool cmVisualStudioGeneratorOptions::UsingUnicode() const
+cm::optional<cmGeneratorTarget::MsvcCharSet>
+cmVisualStudioGeneratorOptions::GetCharSet() const
 {
-  // Look for a _UNICODE definition.
-  return std::any_of(
-    this->Defines.begin(), this->Defines.end(), [](std::string const& di) {
-      return di == "_UNICODE"_s || cmHasLiteralPrefix(di, "_UNICODE=");
-    });
-}
-bool cmVisualStudioGeneratorOptions::UsingSBCS() const
-{
-  // Look for a _SBCS definition.
-  return std::any_of(
-    this->Defines.begin(), this->Defines.end(), [](std::string const& di) {
-      return di == "_SBCS"_s || cmHasLiteralPrefix(di, "_SBCS=");
-    });
+  // Look for a project- or user-specified character set definition.
+  for (std::string const& define : this->Defines) {
+    cmGeneratorTarget::MsvcCharSet charSet =
+      cmGeneratorTarget::GetMsvcCharSet(define);
+    if (charSet != cmGeneratorTarget::MsvcCharSet::None) {
+      return charSet;
+    }
+  }
+  return cm::nullopt;
 }
 
 void cmVisualStudioGeneratorOptions::FixCudaCodeGeneration()

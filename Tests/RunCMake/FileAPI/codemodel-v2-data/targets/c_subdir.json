@@ -4,6 +4,10 @@
     "directorySource": "^\\.$",
     "projectName": "codemodel-v2",
     "type": "STATIC_LIBRARY",
+    "imported": null,
+    "local": null,
+    "abstract": null,
+    "symbolic": null,
     "isGeneratorProvided": null,
     "fileSets": null,
     "sources": [
@@ -44,27 +48,31 @@
                 "^subdir/empty\\.c$"
             ],
             "includes": [
-              {
-                "path": "^.*/Tests/RunCMake/FileAPI/subdir$",
-                "isSystem": null,
-                "backtrace": [
-                  {
-                    "file": "^subdir/CMakeLists\\.txt$",
-                    "line": 2,
-                    "command": "target_include_directories",
-                    "hasParent": true
-                  },
-                  {
-                    "file": "^subdir/CMakeLists\\.txt$",
-                    "line": null,
-                    "command": null,
-                    "hasParent": false
-                  }
-                ]
-              }
+                {
+                    "path": "^.*/Tests/RunCMake/FileAPI/subdir$",
+                    "isSystem": null,
+                    "backtrace": [
+                        {
+                            "file": "^subdir/CMakeLists\\.txt$",
+                            "line": 2,
+                            "command": "target_include_directories",
+                            "hasParent": true
+                        },
+                        {
+                            "file": "^subdir/CMakeLists\\.txt$",
+                            "line": null,
+                            "command": null,
+                            "hasParent": false
+                        }
+                    ]
+                }
             ],
             "frameworks": null,
             "defines": [
+                {
+                    "define": "_MBCS",
+                    "backtrace": null
+                },
                 {
                     "define": "SUBDIR",
                     "backtrace": [
@@ -89,7 +97,7 @@
     "backtrace": [
         {
             "file": "^codemodel-v2\\.cmake$",
-            "line": 20,
+            "line": 25,
             "command": "add_library",
             "hasParent": true
         },
@@ -149,5 +157,70 @@
             "id": "^ZERO_CHECK::@6890427a1f51a3e7e1df$",
             "backtrace": null
         }
-    ]
+    ],
+    "linkLibraries": [
+        {
+            "id": "^c_lib::@6890427a1f51a3e7e1df$",
+            "fragment": null,
+            "backtrace": [
+                {
+                    "file": "^subdir/CMakeLists\\.txt$",
+                    "line": 3,
+                    "command": "target_link_libraries",
+                    "hasParent": true
+                },
+                {
+                    "file": "^subdir/CMakeLists\\.txt$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": false
+                }
+            ],
+            "fromDependency": null
+        }
+    ],
+    "interfaceLinkLibraries": [
+        {
+            "id": "^c_lib::@6890427a1f51a3e7e1df$",
+            "fragment": null,
+            "backtrace": [
+                {
+                    "file": "^subdir/CMakeLists\\.txt$",
+                    "line": 3,
+                    "command": "target_link_libraries",
+                    "hasParent": true
+                },
+                {
+                    "file": "^subdir/CMakeLists\\.txt$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": false
+                }
+            ],
+            "fromDependency": null
+        }
+    ],
+    "compileDependencies": [
+        {
+            "id": "^c_lib::@6890427a1f51a3e7e1df$",
+            "backtrace": [
+                {
+                    "file": "^subdir/CMakeLists\\.txt$",
+                    "line": 3,
+                    "command": "target_link_libraries",
+                    "hasParent": true
+                },
+                {
+                    "file": "^subdir/CMakeLists\\.txt$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": false
+                }
+            ],
+            "fromDependency": null
+        }
+    ],
+    "interfaceCompileDependencies": null,
+    "objectDependencies": null,
+    "orderDependencies": null
 }

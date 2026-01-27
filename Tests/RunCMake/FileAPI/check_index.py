@@ -2,6 +2,7 @@ import sys
 import os
 import json
 import re
+import argparse
 
 if sys.version_info[0] >= 3:
     unicode = str
@@ -158,8 +159,14 @@ def check_error_re(value, error):
     assert is_string(value["error"])
     assert re.search(error, value["error"])
 
-reply_index = sys.argv[1]
-reply_dir = os.path.dirname(reply_index)
+parser = argparse.ArgumentParser()
+parser.add_argument("--build-dir")
+parser.add_argument("--reply-index")
+parser.add_argument("--cxx-compiler-id")
+parser.add_argument("--cxx-simulate-id")
+args = parser.parse_args()
 
-with open(reply_index) as f:
+reply_dir = os.path.dirname(args.reply_index)
+
+with open(args.reply_index) as f:
     index = json.load(f)

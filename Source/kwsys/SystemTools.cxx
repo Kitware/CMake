@@ -675,15 +675,21 @@ char const* SystemTools::GetEnv(std::string const& key)
 bool SystemTools::GetEnv(char const* key, std::string& result)
 {
 #if defined(_WIN32)
-  auto wide_key = Encoding::ToWide(key);
-  auto result_size = GetEnvironmentVariableW(wide_key.data(), nullptr, 0);
-  if (result_size <= 0) {
+  std::wstring const wKey = Encoding::ToWide(key);
+  std::vector<wchar_t> heapBuf;
+  wchar_t stackBuf[256];
+  DWORD bufSz = static_cast<DWORD>(sizeof(stackBuf) / sizeof(stackBuf[0]));
+  wchar_t* buf = stackBuf;
+  DWORD r;
+  while ((r = GetEnvironmentVariableW(wKey.c_str(), buf, bufSz)) >= bufSz) {
+    heapBuf.resize(r);
+    bufSz = r;
+    buf = &heapBuf[0];
+  }
+  if (r == 0 && GetLastError() == ERROR_ENVVAR_NOT_FOUND) {
     return false;
   }
-  std::wstring wide_result;
-  wide_result.resize(result_size - 1);
-  GetEnvironmentVariableW(wide_key.data(), &wide_result[0], result_size);
-  result = Encoding::ToNarrow(wide_result);
+  result = Encoding::ToNarrow(buf);
   return true;
 #else
   char const* v = getenv(key);
@@ -703,12 +709,12 @@ bool SystemTools::GetEnv(std::string const& key, std::string& result)
 bool SystemTools::HasEnv(char const* key)
 {
 #if defined(_WIN32)
-  std::wstring const wkey = Encoding::ToWide(key);
-  wchar_t const* v = _wgetenv(wkey.c_str());
+  std::wstring const wKey = Encoding::ToWide(key);
+  DWORD r = GetEnvironmentVariableW(wKey.c_str(), nullptr, 0);
+  return !(r == 0 && GetLastError() == ERROR_ENVVAR_NOT_FOUND);
 #else
-  char const* v = getenv(key);
+  return getenv(key) != nullptr;
 #endif
-  return v;
 }
 
 bool SystemTools::HasEnv(std::string const& key)
@@ -732,8 +738,8 @@ static int kwsysUnPutEnv(std::string const& env)
 }
 
 #elif defined(__CYGWIN__) || defined(__GLIBC__)
-/* putenv("A") removes A from the environment.  It must not put the
-   memory in the environment because it does not have any "=" syntax.  */
+// putenv("A") removes A from the environment with the GNU runtime.
+// It cannot put the memory in the environment since there is no  "=" syntax.
 
 static int kwsysUnPutEnv(std::string const& env)
 {
@@ -750,12 +756,7 @@ static int kwsysUnPutEnv(std::string const& env)
 }
 
 #elif defined(_WIN32)
-/* putenv("A=") places "A=" in the environment, which is as close to
-   removal as we can get with the putenv API.  We have to leak the
-   most recent value placed in the environment for each variable name
-   on program exit in case exit routines access it.  */
-
-static kwsysEnvSet kwsysUnPutEnvSet;
+// putenv("A=") removes A from the environment with the MSVC runtime.
 
 static int kwsysUnPutEnv(std::string const& env)
 {
@@ -763,13 +764,7 @@ static int kwsysUnPutEnv(std::string const& env)
   size_t const pos = wEnv.find('=');
   size_t const len = pos == std::string::npos ? wEnv.size() : pos;
   wEnv.resize(len + 1, L'=');
-  wchar_t* newEnv = _wcsdup(wEnv.c_str());
-  if (!newEnv) {
-    return -1;
-  }
-  kwsysEnvSet::Free oldEnv(kwsysUnPutEnvSet.Release(newEnv));
-  kwsysUnPutEnvSet.insert(newEnv);
-  return _wputenv(newEnv);
+  return _wputenv(wEnv.c_str());
 }
 
 #else
@@ -846,7 +841,7 @@ public:
   bool Put(char const* env)
   {
 #  if defined(_WIN32)
-    std::wstring const wEnv = Encoding::ToWide(env);
+    std::wstring wEnv = Encoding::ToWide(env);
     wchar_t* newEnv = _wcsdup(wEnv.c_str());
 #  else
     char* newEnv = strdup(env);
@@ -854,7 +849,21 @@ public:
     Free oldEnv(this->Release(newEnv));
     this->insert(newEnv);
 #  if defined(_WIN32)
-    return _wputenv(newEnv) == 0;
+    // `_wputenv` updates both the C runtime library's `_wenviron` array
+    // and the process's environment block.
+    if (_wputenv(newEnv) != 0) {
+      return false;
+    }
+    // There seems to be no way to add an empty variable to `_wenviron`
+    // through the C runtime library: `_wputenv("A=")` removes "A".
+    // Add it directly to the process's environment block.
+    // This is used by child processes, and by our `GetEnv`.
+    std::string::size_type const eqPos = wEnv.find(L'=');
+    if (eqPos != std::string::npos && (eqPos + 1) == wEnv.size()) {
+      wEnv.resize(eqPos);
+      return SetEnvironmentVariableW(wEnv.c_str(), L"");
+    }
+    return true;
 #  else
     return putenv(newEnv) == 0;
 #  endif
@@ -2247,6 +2256,48 @@ SystemTools::CopyStatus SystemTools::CopyFileIfDifferent(
   return CopyStatus{ Status::Success(), CopyStatus::NoPath };
 }
 
+SystemTools::CopyStatus SystemTools::CopyFileIfNewer(
+  std::string const& source, std::string const& destination)
+{
+  // special check for a destination that is a directory
+  // FileTimeCompare does not handle file to directory compare
+  if (SystemTools::FileIsDirectory(destination)) {
+    std::string const new_destination = FileInDir(source, destination);
+    if (!SystemTools::ComparePath(new_destination, destination)) {
+      return SystemTools::CopyFileIfNewer(source, new_destination);
+    }
+    // If source and destination are the same path, don't copy
+    return CopyStatus{ Status::Success(), CopyStatus::NoPath };
+  }
+
+  // source and destination are files so do a copy if source is newer
+  // Check if source file exists first
+  if (!SystemTools::FileExists(source)) {
+    return CopyStatus{ Status::POSIX_errno(), CopyStatus::SourcePath };
+  }
+  // If destination doesn't exist, always copy
+  if (!SystemTools::FileExists(destination)) {
+    return SystemTools::CopyFileAlways(source, destination);
+  }
+  // Check if source is newer than destination
+  int timeResult;
+  Status timeStatus =
+    SystemTools::FileTimeCompare(source, destination, &timeResult);
+  if (timeStatus.IsSuccess()) {
+    if (timeResult > 0) {
+      // Source is newer, copy it
+      return SystemTools::CopyFileAlways(source, destination);
+    } else {
+      // Source is not newer, no need to copy
+      return CopyStatus{ Status::Success(), CopyStatus::NoPath };
+    }
+  } else {
+    // Time comparison failed, be conservative and copy to ensure updates are
+    // not missed
+    return SystemTools::CopyFileAlways(source, destination);
+  }
+}
+
 #define KWSYS_ST_BUFFER 4096
 
 bool SystemTools::FilesDiffer(std::string const& source,
@@ -2585,13 +2636,29 @@ SystemTools::CopyStatus SystemTools::CopyFileAlways(
 
 SystemTools::CopyStatus SystemTools::CopyAFile(std::string const& source,
                                                std::string const& destination,
+                                               SystemTools::CopyWhen when)
+{
+  switch (when) {
+    case SystemTools::CopyWhen::Always:
+      return SystemTools::CopyFileAlways(source, destination);
+    case SystemTools::CopyWhen::OnlyIfDifferent:
+      return SystemTools::CopyFileIfDifferent(source, destination);
+    case SystemTools::CopyWhen::OnlyIfNewer:
+      return SystemTools::CopyFileIfNewer(source, destination);
+    default:
+      break;
+  }
+  // Should not reach here
+  return CopyStatus{ Status::POSIX_errno(), CopyStatus::NoPath };
+}
+
+SystemTools::CopyStatus SystemTools::CopyAFile(std::string const& source,
+                                               std::string const& destination,
                                                bool always)
 {
-  if (always) {
-    return SystemTools::CopyFileAlways(source, destination);
-  } else {
-    return SystemTools::CopyFileIfDifferent(source, destination);
-  }
+  return SystemTools::CopyAFile(source, destination,
+                                always ? CopyWhen::Always
+                                       : CopyWhen::OnlyIfDifferent);
 }
 
 /**
@@ -2599,7 +2666,8 @@ SystemTools::CopyStatus SystemTools::CopyAFile(std::string const& source,
  * "destination".
  */
 Status SystemTools::CopyADirectory(std::string const& source,
-                                   std::string const& destination, bool always)
+                                   std::string const& destination,
+                                   SystemTools::CopyWhen when)
 {
   Status status;
   Directory dir;
@@ -2622,12 +2690,12 @@ Status SystemTools::CopyADirectory(std::string const& source,
         std::string fullDestPath = destination;
         fullDestPath += "/";
         fullDestPath += dir.GetFile(static_cast<unsigned long>(fileNum));
-        status = SystemTools::CopyADirectory(fullPath, fullDestPath, always);
+        status = SystemTools::CopyADirectory(fullPath, fullDestPath, when);
         if (!status.IsSuccess()) {
           return status;
         }
       } else {
-        status = SystemTools::CopyAFile(fullPath, destination, always);
+        status = SystemTools::CopyAFile(fullPath, destination, when);
         if (!status.IsSuccess()) {
           return status;
         }
@@ -2636,6 +2704,14 @@ Status SystemTools::CopyADirectory(std::string const& source,
   }
 
   return status;
+}
+
+Status SystemTools::CopyADirectory(std::string const& source,
+                                   std::string const& destination, bool always)
+{
+  return SystemTools::CopyADirectory(source, destination,
+                                     always ? CopyWhen::Always
+                                            : CopyWhen::OnlyIfDifferent);
 }
 
 // return size of file; also returns zero if no file exists

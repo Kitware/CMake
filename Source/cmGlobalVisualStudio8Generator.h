@@ -9,7 +9,7 @@
 
 #include <cm/optional>
 
-#include "cmGlobalVisualStudio71Generator.h"
+#include "cmGlobalVisualStudio7Generator.h"
 
 class cmGeneratorTarget;
 class cmMakefile;
@@ -21,7 +21,7 @@ struct cmIDEFlagTable;
  *
  * cmGlobalVisualStudio8Generator manages UNIX build process for a tree
  */
-class cmGlobalVisualStudio8Generator : public cmGlobalVisualStudio71Generator
+class cmGlobalVisualStudio8Generator : public cmGlobalVisualStudio7Generator
 {
 public:
   //! Get the name for the generator.
@@ -64,27 +64,12 @@ protected:
 
   bool AddCheckTarget();
 
-  /** Return true if the configuration needs to be deployed */
-  virtual bool NeedsDeploy(cmGeneratorTarget const& target,
-                           char const* config) const;
+  bool NeedsDeploy(cmGeneratorTarget const& target,
+                   char const* config) const override;
 
-  /** Returns true if the target system support debugging deployment. */
-  virtual bool TargetSystemSupportsDeployment() const;
+  bool TargetSystemSupportsDeployment() const override;
 
   static cmIDEFlagTable const* GetExtraFlagTableVS8();
-  void WriteSolutionConfigurations(
-    std::ostream& fout,
-    std::vector<std::string> const& configs) const override;
-  void WriteProjectConfigurations(
-    std::ostream& fout, std::string const& name,
-    cmGeneratorTarget const& target, std::vector<std::string> const& configs,
-    std::set<std::string> const& configsPartOfDefaultBuild,
-    std::string const& platformMapping = "") const override;
-  void WriteProjectDepends(std::ostream& fout, std::string const& name,
-                           std::string const& path,
-                           cmGeneratorTarget const* t) const override;
-
-  bool UseFolderProperty() const override;
 
   std::string Name;
   std::string WindowsCEVersion;

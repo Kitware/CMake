@@ -6,7 +6,11 @@ FindCygwin
 ----------
 
 Finds Cygwin, a POSIX-compatible environment that runs natively on Microsoft
-Windows.
+Windows:
+
+.. code-block:: cmake
+
+  find_package(Cygwin [...])
 
 .. note::
 
@@ -21,6 +25,11 @@ Result Variables
 
 This module defines the following variables:
 
+``Cygwin_FOUND``
+  .. versionadded:: 4.2
+
+  Boolean indicating whether Cygwin was found.
+
 ``CYGWIN_INSTALL_PATH``
   The path to the Cygwin root installation directory.
 
@@ -30,7 +39,7 @@ Examples
 Finding the Cygwin installation and using its path in a custom find module:
 
 .. code-block:: cmake
-  :caption: FindFoo.cmake
+  :caption: ``FindFoo.cmake``
 
   find_package(Cygwin)
   find_program(Foo_EXECUTABLE NAMES foo PATHS ${CYGWIN_INSTALL_PATH}/bin)
@@ -61,3 +70,9 @@ if (WIN32)
   mark_as_advanced(CYGWIN_BAT)
 
 endif ()
+
+if(CYGWIN_BAT AND CYGWIN_INSTALL_PATH)
+  set(Cygwin_FOUND TRUE)
+else()
+  set(Cygwin_FOUND FALSE)
+endif()

@@ -59,10 +59,9 @@
 #include "escape.h"
 #include "progress.h"
 #include "dict.h"
-#include "curl_printf.h"
-#include "strcase.h"
+
+/* The last 2 #include files should be: */
 #include "curl_memory.h"
-/* The last #include file should be: */
 #include "memdebug.h"
 
 
@@ -93,10 +92,10 @@ const struct Curl_handler Curl_handler_dict = {
   ZERO_NULL,                            /* connect_it */
   ZERO_NULL,                            /* connecting */
   ZERO_NULL,                            /* doing */
-  ZERO_NULL,                            /* proto_getsock */
-  ZERO_NULL,                            /* doing_getsock */
-  ZERO_NULL,                            /* domore_getsock */
-  ZERO_NULL,                            /* perform_getsock */
+  ZERO_NULL,                            /* proto_pollset */
+  ZERO_NULL,                            /* doing_pollset */
+  ZERO_NULL,                            /* domore_pollset */
+  ZERO_NULL,                            /* perform_pollset */
   ZERO_NULL,                            /* disconnect */
   ZERO_NULL,                            /* write_resp */
   ZERO_NULL,                            /* write_resp_hd */
@@ -145,7 +144,7 @@ static CURLcode sendf(struct Curl_easy *data, const char *fmt, ...)
   char *sptr;
   va_list ap;
   va_start(ap, fmt);
-  s = vaprintf(fmt, ap); /* returns an allocated string */
+  s = curl_mvaprintf(fmt, ap); /* returns an allocated string */
   va_end(ap);
   if(!s)
     return CURLE_OUT_OF_MEMORY; /* failure */
@@ -198,9 +197,9 @@ static CURLcode dict_do(struct Curl_easy *data, bool *done)
   if(result)
     return result;
 
-  if(strncasecompare(path, DICT_MATCH, sizeof(DICT_MATCH)-1) ||
-     strncasecompare(path, DICT_MATCH2, sizeof(DICT_MATCH2)-1) ||
-     strncasecompare(path, DICT_MATCH3, sizeof(DICT_MATCH3)-1)) {
+  if(curl_strnequal(path, DICT_MATCH, sizeof(DICT_MATCH)-1) ||
+     curl_strnequal(path, DICT_MATCH2, sizeof(DICT_MATCH2)-1) ||
+     curl_strnequal(path, DICT_MATCH3, sizeof(DICT_MATCH3)-1)) {
 
     word = strchr(path, ':');
     if(word) {
@@ -243,11 +242,11 @@ static CURLcode dict_do(struct Curl_easy *data, bool *done)
       failf(data, "Failed sending DICT request");
       goto error;
     }
-    Curl_xfer_setup1(data, CURL_XFER_RECV, -1, FALSE); /* no upload */
+    Curl_xfer_setup_recv(data, FIRSTSOCKET, -1);
   }
-  else if(strncasecompare(path, DICT_DEFINE, sizeof(DICT_DEFINE)-1) ||
-          strncasecompare(path, DICT_DEFINE2, sizeof(DICT_DEFINE2)-1) ||
-          strncasecompare(path, DICT_DEFINE3, sizeof(DICT_DEFINE3)-1)) {
+  else if(curl_strnequal(path, DICT_DEFINE, sizeof(DICT_DEFINE)-1) ||
+          curl_strnequal(path, DICT_DEFINE2, sizeof(DICT_DEFINE2)-1) ||
+          curl_strnequal(path, DICT_DEFINE3, sizeof(DICT_DEFINE3)-1)) {
 
     word = strchr(path, ':');
     if(word) {
@@ -284,7 +283,7 @@ static CURLcode dict_do(struct Curl_easy *data, bool *done)
       failf(data, "Failed sending DICT request");
       goto error;
     }
-    Curl_xfer_setup1(data, CURL_XFER_RECV, -1, FALSE);
+    Curl_xfer_setup_recv(data, FIRSTSOCKET, -1);
   }
   else {
 
@@ -306,7 +305,7 @@ static CURLcode dict_do(struct Curl_easy *data, bool *done)
         goto error;
       }
 
-      Curl_xfer_setup1(data, CURL_XFER_RECV, -1, FALSE);
+      Curl_xfer_setup_recv(data, FIRSTSOCKET, -1);
     }
   }
 

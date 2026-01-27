@@ -1,1 +1,1 @@
-check_project(CustomConfig external "aaa-bbb-ccc-000" "" "" "Custom - Release")
+include(${CMAKE_CURRENT_LIST_DIR}/CustomConfig-check-${sln_ext}.cmake)

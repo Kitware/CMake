@@ -1,4 +1,4 @@
-CMake Error at global-interface.cmake:2 \(add_library\):
+CMake Error at global-interface\.cmake:2 \(add_library\):
   Cannot find source file:
 
     GLOBAL
@@ -6,4 +6,4 @@ CMake Error at global-interface.cmake:2 \(add_library\):
   Tried extensions ([^
 ]+
 )+Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)

@@ -6,6 +6,7 @@
 #include <array>
 #include <cassert>
 #include <cstdio>
+#include <functional>
 #include <iterator>
 #include <sstream>
 #include <unordered_map>
@@ -13,6 +14,7 @@
 #include <utility>
 
 #include <cm/memory>
+#include <cm/optional>
 #include <cm/string_view>
 #include <cmext/algorithm>
 #include <cmext/string_view>
@@ -932,7 +934,6 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
   vars.CMTargetName = this->GeneratorTarget->GetName().c_str();
   vars.CMTargetType =
     cmState::GetTargetTypeName(this->GeneratorTarget->GetType()).c_str();
-  vars.CMTargetLabels = this->GeneratorTarget->GetTargetLabelsString().c_str();
   vars.Language = lang.c_str();
   vars.Target = targetOutPathReal.c_str();
   vars.TargetPDB = targetOutPathPDB.c_str();
@@ -946,6 +947,12 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
     this->LocalGenerator->MaybeRelativeToCurBinDir(objectDir),
     cmOutputConverter::SHELL);
   vars.ObjectDir = objectDir.c_str();
+  std::string targetSupportDir =
+    this->GeneratorTarget->GetCMFSupportDirectory();
+  targetSupportDir = this->LocalGenerator->ConvertToOutputFormat(
+    this->LocalGenerator->MaybeRelativeToTopBinDir(targetSupportDir),
+    cmOutputConverter::SHELL);
+  vars.TargetSupportDir = targetSupportDir.c_str();
   std::string objectFileDir = cmSystemTools::GetFilenamePath(obj);
   objectFileDir = this->LocalGenerator->ConvertToOutputFormat(
     this->LocalGenerator->MaybeRelativeToCurBinDir(objectFileDir),
@@ -1085,8 +1092,12 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
       compilerLauncher = GetCompilerLauncher(lang, config);
     }
 
-    cmValue const skipCodeCheck = source.GetProperty("SKIP_LINTING");
-    if (!skipCodeCheck.IsOn()) {
+    cmValue const srcSkipCodeCheckVal = source.GetProperty("SKIP_LINTING");
+    bool const skipCodeCheck = srcSkipCodeCheckVal.IsSet()
+      ? srcSkipCodeCheckVal.IsOn()
+      : this->GetGeneratorTarget()->GetPropertyAsBool("SKIP_LINTING");
+
+    if (!skipCodeCheck) {
       std::string const codeCheck = this->GenerateCodeCheckRules(
         source, compilerLauncher, "$(CMAKE_COMMAND)", config, nullptr);
       if (!codeCheck.empty()) {
@@ -1542,6 +1553,7 @@ void cmMakefileTargetGenerator::WriteTargetDependRules()
   //                          <home-src-dir> <start-src-dir>
   //                          <home-out-dir> <start-out-dir>
   //                          <dep-info> --color=$(COLOR)
+  //                          <target-name>
   //
   // This gives the dependency scanner enough information to recreate
   // the state of our local generator sufficiently for its needs.
@@ -1568,6 +1580,9 @@ void cmMakefileTargetGenerator::WriteTargetDependRules()
   if (this->LocalGenerator->GetColorMakefile()) {
     depCmd << " \"--color=$(COLOR)\"";
   }
+  depCmd << ' '
+         << this->LocalGenerator->ConvertToOutputFormat(
+              this->GeneratorTarget->GetName(), cmOutputConverter::SHELL);
   commands.push_back(depCmd.str());
 
   // Make sure all custom command outputs in this target are built.
@@ -1699,7 +1714,6 @@ void cmMakefileTargetGenerator::WriteDeviceLinkRule(
   vars.CMTargetName = this->GetGeneratorTarget()->GetName().c_str();
   vars.CMTargetType =
     cmState::GetTargetTypeName(this->GetGeneratorTarget()->GetType()).c_str();
-  vars.CMTargetLabels = this->GeneratorTarget->GetTargetLabelsString().c_str();
   vars.Language = "CUDA";
   vars.Object = output.c_str();
   vars.Fatbinary = fatbinaryOutput.c_str();

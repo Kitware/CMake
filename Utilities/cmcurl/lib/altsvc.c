@@ -31,20 +31,18 @@
 #include <curl/curl.h>
 #include "urldata.h"
 #include "altsvc.h"
+#include "curl_fopen.h"
 #include "curl_get_line.h"
-#include "strcase.h"
 #include "parsedate.h"
 #include "sendf.h"
 #include "curlx/warnless.h"
-#include "fopen.h"
 #include "rename.h"
 #include "strdup.h"
 #include "curlx/inet_pton.h"
 #include "curlx/strparse.h"
 #include "connect.h"
 
-/* The last 3 #include files should be in this order */
-#include "curl_printf.h"
+/* The last 2 #include files should be in this order */
 #include "curl_memory.h"
 #include "memdebug.h"
 
@@ -188,13 +186,13 @@ static CURLcode altsvc_add(struct altsvcinfo *asi, const char *line)
   else {
     struct altsvc *as;
     char dbuf[MAX_ALTSVC_DATELEN + 1];
-    time_t expires;
+    time_t expires = 0;
 
     /* The date parser works on a null-terminated string. The maximum length
        is upheld by curlx_str_quotedword(). */
     memcpy(dbuf, curlx_str(&date), curlx_strlen(&date));
     dbuf[curlx_strlen(&date)] = 0;
-    expires = Curl_getdate_capped(dbuf);
+    Curl_getdate_capped(dbuf, &expires);
     as = altsvc_create(&srchost, &dsthost, &srcalpn, &dstalpn,
                        (size_t)srcport, (size_t)dstport);
     if(as) {
@@ -228,18 +226,22 @@ static CURLcode altsvc_load(struct altsvcinfo *asi, const char *file)
   if(!asi->filename)
     return CURLE_OUT_OF_MEMORY;
 
-  fp = fopen(file, FOPEN_READTEXT);
+  fp = curlx_fopen(file, FOPEN_READTEXT);
   if(fp) {
+    bool eof = FALSE;
     struct dynbuf buf;
     curlx_dyn_init(&buf, MAX_ALTSVC_LINE);
-    while(Curl_get_line(&buf, fp)) {
-      const char *lineptr = curlx_dyn_ptr(&buf);
-      curlx_str_passblanks(&lineptr);
-      if(curlx_str_single(&lineptr, '#'))
-        altsvc_add(asi, lineptr);
-    }
+    do {
+      result = Curl_get_line(&buf, fp, &eof);
+      if(!result) {
+        const char *lineptr = curlx_dyn_ptr(&buf);
+        curlx_str_passblanks(&lineptr);
+        if(curlx_str_single(&lineptr, '#'))
+          altsvc_add(asi, lineptr);
+      }
+    } while(!result && !eof);
     curlx_dyn_free(&buf); /* free the line buffer */
-    fclose(fp);
+    curlx_fclose(fp);
   }
   return result;
 }
@@ -261,33 +263,33 @@ static CURLcode altsvc_out(struct altsvc *as, FILE *fp)
 #ifdef USE_IPV6
   else {
     char ipv6_unused[16];
-    if(1 == curlx_inet_pton(AF_INET6, as->dst.host, ipv6_unused)) {
+    if(curlx_inet_pton(AF_INET6, as->dst.host, ipv6_unused) == 1) {
       dst6_pre = "[";
       dst6_post = "]";
     }
-    if(1 == curlx_inet_pton(AF_INET6, as->src.host, ipv6_unused)) {
+    if(curlx_inet_pton(AF_INET6, as->src.host, ipv6_unused) == 1) {
       src6_pre = "[";
       src6_post = "]";
     }
   }
 #endif
-  fprintf(fp,
-          "%s %s%s%s %u "
-          "%s %s%s%s %u "
-          "\"%d%02d%02d "
-          "%02d:%02d:%02d\" "
-          "%u %u\n",
-          Curl_alpnid2str(as->src.alpnid),
-          src6_pre, as->src.host, src6_post,
-          as->src.port,
+  curl_mfprintf(fp,
+                "%s %s%s%s %u "
+                "%s %s%s%s %u "
+                "\"%d%02d%02d "
+                "%02d:%02d:%02d\" "
+                "%u %u\n",
+                Curl_alpnid2str(as->src.alpnid),
+                src6_pre, as->src.host, src6_post,
+                as->src.port,
 
-          Curl_alpnid2str(as->dst.alpnid),
-          dst6_pre, as->dst.host, dst6_post,
-          as->dst.port,
+                Curl_alpnid2str(as->dst.alpnid),
+                dst6_pre, as->dst.host, dst6_post,
+                as->dst.port,
 
-          stamp.tm_year + 1900, stamp.tm_mon + 1, stamp.tm_mday,
-          stamp.tm_hour, stamp.tm_min, stamp.tm_sec,
-          as->persist, as->prio);
+                stamp.tm_year + 1900, stamp.tm_mon + 1, stamp.tm_mday,
+                stamp.tm_hour, stamp.tm_min, stamp.tm_sec,
+                as->persist, as->prio);
   return CURLE_OK;
 }
 
@@ -392,7 +394,7 @@ CURLcode Curl_altsvc_save(struct Curl_easy *data,
       if(result)
         break;
     }
-    fclose(out);
+    curlx_fclose(out);
     if(!result && tempstore && Curl_rename(tempstore, file))
       result = CURLE_WRITE_ERROR;
 
@@ -416,7 +418,7 @@ static bool hostcompare(const char *host, const char *check)
   if(hlen != clen)
     /* they cannot match if they have different lengths */
     return FALSE;
-  return strncasecompare(host, check, hlen);
+  return curl_strnequal(host, check, hlen);
 }
 
 /* altsvc_flush() removes all alternatives for this source origin from the
@@ -487,8 +489,7 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
   DEBUGASSERT(asi);
 
   /* initial check for "clear" */
-  if(!curlx_str_until(&p, &alpn, MAX_ALTSVC_LINE, ';') &&
-     !curlx_str_single(&p, ';')) {
+  if(!curlx_str_cspn(&p, &alpn, ";\n\r")) {
     curlx_str_trimblanks(&alpn);
     /* "clear" is a magic keyword */
     if(curlx_str_casecompare(&alpn, "clear")) {
@@ -665,5 +666,9 @@ bool Curl_altsvc_lookup(struct altsvcinfo *asi,
   }
   return FALSE;
 }
+
+#if defined(DEBUGBUILD) || defined(UNITTESTS)
+#undef time
+#endif
 
 #endif /* !CURL_DISABLE_HTTP && !CURL_DISABLE_ALTSVC */

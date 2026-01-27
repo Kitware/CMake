@@ -32,6 +32,7 @@
 #include "cmTarget.h"
 #include "cmTargetDepend.h"
 #include "cmValue.h"
+#include "cmXcFramework.h"
 
 #if !defined(CMAKE_BOOTSTRAP)
 #  include <cm3p/json/value.h>
@@ -107,6 +108,11 @@ class cmGlobalGenerator
 {
 public:
   using LocalGeneratorVector = std::vector<std::unique_ptr<cmLocalGenerator>>;
+  enum class BuildTryCompile
+  {
+    No,
+    Yes,
+  };
 
   //! Free any memory allocated with the GlobalGenerator
   cmGlobalGenerator(cmake* cm);
@@ -172,6 +178,8 @@ public:
   {
     return false;
   }
+
+  virtual bool SupportsCustomObjectNames() const { return true; }
 
   virtual bool SupportsBuildDatabase() const { return false; }
   bool AddBuildDatabaseTargets();
@@ -250,14 +258,15 @@ public:
    * empty then all is assumed. clean indicates if a "make clean" should be
    * done first.
    */
-  int Build(int jobs, std::string const& srcdir, std::string const& bindir,
-            std::string const& projectName,
-            std::vector<std::string> const& targetNames, std::ostream& ostr,
-            std::string const& makeProgram, std::string const& config,
-            cmBuildOptions const& buildOptions, bool verbose,
-            cmDuration timeout, cmSystemTools::OutputOption outputMode,
-            std::vector<std::string> const& nativeOptions =
-              std::vector<std::string>());
+  int Build(
+    int jobs, std::string const& srcdir, std::string const& bindir,
+    std::string const& projectName,
+    std::vector<std::string> const& targetNames, std::ostream& ostr,
+    std::string const& makeProgram, std::string const& config,
+    cmBuildOptions buildOptions, bool verbose, cmDuration timeout,
+    cmSystemTools::OutputOption outputMode,
+    std::vector<std::string> const& nativeOptions = std::vector<std::string>(),
+    BuildTryCompile isInTryCompile = BuildTryCompile::No);
 
   /**
    * Open a generated IDE project given the following information.
@@ -273,8 +282,9 @@ public:
     std::string const& makeProgram, std::string const& projectName,
     std::string const& projectDir, std::vector<std::string> const& targetNames,
     std::string const& config, int jobs, bool verbose,
-    cmBuildOptions const& buildOptions = cmBuildOptions(),
-    std::vector<std::string> const& makeOptions = std::vector<std::string>());
+    cmBuildOptions buildOptions = cmBuildOptions(),
+    std::vector<std::string> const& makeOptions = std::vector<std::string>(),
+    BuildTryCompile isInTryCompile = BuildTryCompile::No);
 
   virtual void PrintBuildCommandAdvice(std::ostream& os, int jobs) const;
 
@@ -563,6 +573,8 @@ public:
 
   virtual bool IsNinja() const { return false; }
 
+  virtual bool IsFastbuild() const { return false; }
+
   /** Return true if we know the exact location of object files for the given
      cmTarget. If false, store the reason in the given string. This is
      meaningful only after EnableLanguage has been called.  */
@@ -629,6 +641,14 @@ public:
     std::string const& filename) const;
   void AddCMP0068WarnTarget(std::string const& target);
 
+  virtual bool SupportsShortObjectNames() const;
+  bool UseShortObjectNames(
+    cmStateEnums::IntermediateDirKind kind =
+      cmStateEnums::IntermediateDirKind::ObjectFiles) const;
+  virtual std::string GetShortBinaryOutputDir() const;
+  std::string ComputeTargetShortName(std::string const& bindir,
+                                     std::string const& targetName) const;
+
   virtual void ComputeTargetObjectDirectory(cmGeneratorTarget* gt) const;
 
   bool GenerateCPackPropertiesFile();
@@ -685,15 +705,21 @@ public:
   bool ShouldWarnExperimental(cm::string_view featureName,
                               cm::string_view featureUuid);
 
+  cm::optional<cmXcFrameworkPlist> GetXcFrameworkPListContent(
+    std::string const& path) const;
+  void SetXcFrameworkPListContent(std::string const& path,
+                                  cmXcFrameworkPlist const& content);
+
 protected:
-  // for a project collect all its targets by following depend
-  // information, and also collect all the targets
-  void GetTargetSets(TargetDependSet& projectTargets,
-                     TargetDependSet& originalTargets, cmLocalGenerator* root,
-                     std::vector<cmLocalGenerator*>& generators);
+  /** Get all targets produced under the given root, plus the transitive
+      closure of targets on which they depend, possibly from other dirs.  */
+  TargetDependSet GetTargetsForProject(
+    cmLocalGenerator const* root,
+    std::vector<cmLocalGenerator*> const& generators) const;
+
   bool IsRootOnlyTarget(cmGeneratorTarget* target) const;
   void AddTargetDepends(cmGeneratorTarget const* target,
-                        TargetDependSet& projectTargets);
+                        TargetDependSet& projectTargets) const;
   void SetLanguageEnabledFlag(std::string const& l, cmMakefile* mf);
   void SetLanguageEnabledMaps(std::string const& l, cmMakefile* mf);
   void FillExtensionToLanguageMap(std::string const& l, cmMakefile* mf);
@@ -858,7 +884,7 @@ private:
   void CheckTargetLinkLibraries() const;
   bool CheckTargetsForMissingSources() const;
   bool CheckTargetsForType() const;
-  bool CheckTargetsForPchCompilePdb() const;
+  void MarkTargetsForPchReuse() const;
 
   void CreateLocalGenerators();
 
@@ -906,6 +932,9 @@ private:
   };
   std::map<std::string, DirectoryContent> DirectoryContentMap;
 
+  // Cache parsed PList files
+  std::map<std::string, cmXcFrameworkPlist> XcFrameworkPListContentMap;
+
   // Set of binary directories on disk.
   std::set<std::string> BinaryDirectories;
 
@@ -940,6 +969,15 @@ private:
     std::map<std::string, PerLanguageModuleDatabases>;
   PerConfigModuleDatabases PerConfigModuleDbs;
   PerLanguageModuleDatabases PerLanguageModuleDbs;
+
+  enum class IntermediateDirStrategy
+  {
+    Full,
+    Short,
+  };
+  IntermediateDirStrategy IntDirStrategy = IntermediateDirStrategy::Full;
+  IntermediateDirStrategy QtAutogenIntDirStrategy =
+    IntermediateDirStrategy::Full;
 
 protected:
   float FirstTimeProgress;

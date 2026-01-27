@@ -32,7 +32,6 @@ public:
   {
     char const* CMTargetName = nullptr;
     char const* CMTargetType = nullptr;
-    char const* CMTargetLabels = nullptr;
     char const* TargetPDB = nullptr;
     char const* TargetCompilePDB = nullptr;
     char const* TargetVersionMajor = nullptr;
@@ -48,6 +47,7 @@ public:
     char const* DynDepFile = nullptr;
     char const* Output = nullptr;
     char const* Object = nullptr;
+    char const* TargetSupportDir = nullptr;
     char const* ObjectDir = nullptr;
     char const* ObjectFileDir = nullptr;
     char const* Flags = nullptr;

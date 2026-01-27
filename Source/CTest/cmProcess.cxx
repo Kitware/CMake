@@ -162,7 +162,8 @@ void cmProcess::StartTimer()
     auto msec =
       std::chrono::duration_cast<std::chrono::milliseconds>(*this->Timeout);
     this->Timer.start(&cmProcess::OnTimeoutCB,
-                      static_cast<uint64_t>(msec.count()), 0);
+                      static_cast<uint64_t>(msec.count()), 0,
+                      cm::uv_update_time::no);
   }
 }
 
@@ -536,7 +537,7 @@ std::string cmProcess::GetExitExceptionString() const
     case STATUS_NO_MEMORY:
     default:
       char buf[1024];
-      char const* fmt = "Exit code 0x%" KWIML_INT_PRIx64 "\n";
+      char const* fmt = "Exit code 0x%" KWIML_INT_PRIx64;
       snprintf(buf, sizeof(buf), fmt, this->ExitValue);
       exception_str.assign(buf);
   }

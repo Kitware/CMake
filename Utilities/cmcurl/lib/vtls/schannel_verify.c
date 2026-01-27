@@ -46,7 +46,6 @@
 #include "../strerror.h"
 #include "../curlx/winapi.h"
 #include "../curlx/multibyte.h"
-#include "../curl_printf.h"
 #include "hostcheck.h"
 #include "../curlx/version_win32.h"
 
@@ -55,8 +54,6 @@
 #include "../memdebug.h"
 
 #define BACKEND ((struct schannel_ssl_backend_data *)connssl->backend)
-
-#ifdef HAS_MANUAL_VERIFY_API
 
 #ifdef __MINGW32CE__
 #define CERT_QUERY_OBJECT_BLOB 0x00000002
@@ -78,6 +75,28 @@
 #define BEGIN_CERT "-----BEGIN CERTIFICATE-----"
 #define END_CERT "\n-----END CERTIFICATE-----"
 
+struct cert_chain_engine_config_win8 {
+  DWORD cbSize;
+  HCERTSTORE hRestrictedRoot;
+  HCERTSTORE hRestrictedTrust;
+  HCERTSTORE hRestrictedOther;
+  DWORD cAdditionalStore;
+  HCERTSTORE *rghAdditionalStore;
+  DWORD dwFlags;
+  DWORD dwUrlRetrievalTimeout;
+  DWORD MaximumCachedCertificates;
+  DWORD CycleDetectionModulus;
+  HCERTSTORE hExclusiveRoot;
+  HCERTSTORE hExclusiveTrustedPeople;
+  DWORD dwExclusiveFlags;
+};
+
+/* Offered by mingw-w64 v4+. MS SDK ~10+/~VS2017+. */
+#ifndef CERT_CHAIN_EXCLUSIVE_ENABLE_CA_FLAG
+#define CERT_CHAIN_EXCLUSIVE_ENABLE_CA_FLAG 0x00000001
+#endif
+
+/* Legacy structure to supply size to Win7 clients */
 struct cert_chain_engine_config_win7 {
   DWORD cbSize;
   HCERTSTORE hRestrictedRoot;
@@ -348,11 +367,7 @@ cleanup:
 
   return result;
 }
-#endif
 
-#endif /* HAS_MANUAL_VERIFY_API */
-
-#ifndef UNDER_CE
 /*
  * Returns the number of characters necessary to populate all the host_names.
  * If host_names is not NULL, populate it with all the hostnames. Each string
@@ -368,18 +383,11 @@ static DWORD cert_get_name_string(struct Curl_easy *data,
                                   BOOL Win8_compat)
 {
   DWORD actual_length = 0;
-#if defined(CURL_WINDOWS_UWP)
-  (void)data;
-  (void)cert_context;
-  (void)host_names;
-  (void)length;
-  (void)alt_name_info;
-  (void)Win8_compat;
-#else
   BOOL compute_content = FALSE;
   LPTSTR current_pos = NULL;
   DWORD i;
 
+/* Offered by mingw-w64 v4+. MS SDK ~10+/~VS2017+. */
 #ifdef CERT_NAME_SEARCH_ALL_NAMES_FLAG
   /* CERT_NAME_SEARCH_ALL_NAMES_FLAG is available from Windows 8 onwards. */
   if(Win8_compat) {
@@ -449,7 +457,6 @@ static DWORD cert_get_name_string(struct Curl_easy *data,
     /* Last string has double null-terminator. */
     *current_pos = '\0';
   }
-#endif
   return actual_length;
 }
 
@@ -488,12 +495,6 @@ static bool get_alt_name_info(struct Curl_easy *data,
                               LPDWORD alt_name_info_size)
 {
   bool result = FALSE;
-#if defined(CURL_WINDOWS_UWP)
-  (void)data;
-  (void)ctx;
-  (void)alt_name_info;
-  (void)alt_name_info_size;
-#else
   PCERT_INFO cert_info = NULL;
   PCERT_EXTENSION extension = NULL;
   CRYPT_DECODE_PARA decode_para = { sizeof(CRYPT_DECODE_PARA), NULL, NULL };
@@ -531,7 +532,6 @@ static bool get_alt_name_info(struct Curl_easy *data,
     return result;
   }
   result = TRUE;
-#endif
   return result;
 }
 #endif /* !UNDER_CE */
@@ -551,7 +551,7 @@ CURLcode Curl_verify_host(struct Curl_cfilter *cf,
    * Right now we are only asking for the first preferred alternative name.
    * Instead we would need to do all via CERT_NAME_SEARCH_ALL_NAMES_FLAG
    * (If Windows CE supports that?) and run this section in a loop for each.
-   * https://msdn.microsoft.com/en-us/library/windows/desktop/aa376086.aspx
+   * https://learn.microsoft.com/windows/win32/api/wincrypt/nf-wincrypt-certgetnamestringa
    * curl: (51) schannel: CertGetNameString() certificate hostname
    * (.google.com) did not match connection (google.com)
    */
@@ -576,7 +576,7 @@ CURLcode Curl_verify_host(struct Curl_cfilter *cf,
                              conn_hostname, strlen(conn_hostname))) {
         infof(data,
               "schannel: connection hostname (%s) validated "
-              "against certificate name (%s)\n",
+              "against certificate name (%s)",
               conn_hostname, cert_hostname);
         result = CURLE_OK;
       }
@@ -611,8 +611,8 @@ CURLcode Curl_verify_host(struct Curl_cfilter *cf,
 
   sspi_status =
     Curl_pSecFn->QueryContextAttributes(&BACKEND->ctxt->ctxt_handle,
-                                     SECPKG_ATTR_REMOTE_CERT_CONTEXT,
-                                     &pCertContextServer);
+                                        SECPKG_ATTR_REMOTE_CERT_CONTEXT,
+                                        &pCertContextServer);
 
   if((sspi_status != SEC_E_OK) || !pCertContextServer) {
     char buffer[WINAPI_ERROR_LEN];
@@ -667,13 +667,14 @@ CURLcode Curl_verify_host(struct Curl_cfilter *cf,
       goto cleanup;
     }
     actual_len = cert_get_name_string(data, pCertContextServer,
-                 (LPTSTR)cert_hostname_buff, len, alt_name_info, Win8_compat);
+                                      (LPTSTR)cert_hostname_buff, len,
+                                      alt_name_info, Win8_compat);
 
     /* Sanity check */
     if(actual_len != len) {
       failf(data,
-      "schannel: CertGetNameString() returned certificate "
-      "name information of unexpected size");
+            "schannel: CertGetNameString() returned certificate "
+            "name information of unexpected size");
       goto cleanup;
     }
 
@@ -684,7 +685,6 @@ CURLcode Curl_verify_host(struct Curl_cfilter *cf,
     while(cert_hostname_buff_index < len &&
           cert_hostname_buff[cert_hostname_buff_index] != TEXT('\0') &&
           result == CURLE_PEER_FAILED_VERIFICATION) {
-
       char *cert_hostname;
 
       /* Comparing the cert name and the connection hostname encoded as UTF-8
@@ -692,15 +692,14 @@ CURLcode Curl_verify_host(struct Curl_cfilter *cf,
        * (or some equivalent) encoding
        */
       cert_hostname = curlx_convert_tchar_to_UTF8(
-      &cert_hostname_buff[cert_hostname_buff_index]);
+        &cert_hostname_buff[cert_hostname_buff_index]);
       if(!cert_hostname) {
         result = CURLE_OUT_OF_MEMORY;
       }
       else {
         if(Curl_cert_hostcheck(cert_hostname, strlen(cert_hostname),
                                conn_hostname, hostlen)) {
-          infof(data,
-                "schannel: connection hostname (%s) validated "
+          infof(data, "schannel: connection hostname (%s) validated "
                 "against certificate name (%s)",
                 conn_hostname, cert_hostname);
           result = CURLE_OK;
@@ -736,6 +735,7 @@ CURLcode Curl_verify_host(struct Curl_cfilter *cf,
   }
 
 cleanup:
+  LocalFree(alt_name_info);
   Curl_safefree(cert_hostname_buff);
 
   if(pCertContextServer)
@@ -745,7 +745,6 @@ cleanup:
   return result;
 }
 
-#ifdef HAS_MANUAL_VERIFY_API
 /* Verify the server's certificate and hostname */
 CURLcode Curl_verify_certificate(struct Curl_cfilter *cf,
                                  struct Curl_easy *data)
@@ -779,8 +778,8 @@ CURLcode Curl_verify_certificate(struct Curl_cfilter *cf,
 
 #ifndef UNDER_CE
   if(result == CURLE_OK &&
-      (conn_config->CAfile || conn_config->ca_info_blob) &&
-      BACKEND->use_manual_cred_validation) {
+     (conn_config->CAfile || conn_config->ca_info_blob) &&
+     BACKEND->use_manual_cred_validation) {
     /*
      * Create a chain engine that uses the certificates in the CA file as
      * trusted certificates. This is only supported on Windows 7+.
@@ -838,12 +837,21 @@ CURLcode Curl_verify_certificate(struct Curl_cfilter *cf,
     }
 
     if(result == CURLE_OK) {
-      struct cert_chain_engine_config_win7 engine_config;
+      struct cert_chain_engine_config_win8 engine_config;
       BOOL create_engine_result;
 
       memset(&engine_config, 0, sizeof(engine_config));
-      engine_config.cbSize = sizeof(engine_config);
       engine_config.hExclusiveRoot = trust_store;
+
+      /* Win8/Server2012 allows us to match partial chains */
+      if(curlx_verify_windows_version(6, 2, 0, PLATFORM_WINNT,
+                                      VERSION_GREATER_THAN_EQUAL) &&
+         !ssl_config->no_partialchain) {
+        engine_config.cbSize = sizeof(engine_config);
+        engine_config.dwExclusiveFlags = CERT_CHAIN_EXCLUSIVE_ENABLE_CA_FLAG;
+      }
+      else
+        engine_config.cbSize = sizeof(struct cert_chain_engine_config_win7);
 
       /* CertCreateCertificateChainEngine will check the expected size of the
        * CERT_CHAIN_ENGINE_CONFIG structure and fail if the specified size
@@ -880,7 +888,7 @@ CURLcode Curl_verify_certificate(struct Curl_cfilter *cf,
                                 NULL,
                                 &pChainContext)) {
       char buffer[WINAPI_ERROR_LEN];
-      failf(data, "schannel: CertGetCertificateChain failed: %s",
+      failf(data, "schannel: failed to get the certificate chain: %s",
             curlx_winapi_strerror(GetLastError(), buffer, sizeof(buffer)));
       pChainContext = NULL;
       result = CURLE_PEER_FAILED_VERIFICATION;
@@ -901,23 +909,20 @@ CURLcode Curl_verify_certificate(struct Curl_cfilter *cf,
 
       if(dwTrustErrorMask) {
         if(dwTrustErrorMask & CERT_TRUST_IS_REVOKED)
-          failf(data, "schannel: CertGetCertificateChain trust error"
-                " CERT_TRUST_IS_REVOKED");
+          failf(data, "schannel: trust for this certificate or one of "
+                "the certificates in the certificate chain has been revoked");
         else if(dwTrustErrorMask & CERT_TRUST_IS_PARTIAL_CHAIN)
-          failf(data, "schannel: CertGetCertificateChain trust error"
-                " CERT_TRUST_IS_PARTIAL_CHAIN");
+          failf(data, "schannel: the certificate chain is incomplete");
         else if(dwTrustErrorMask & CERT_TRUST_IS_UNTRUSTED_ROOT)
-          failf(data, "schannel: CertGetCertificateChain trust error"
-                " CERT_TRUST_IS_UNTRUSTED_ROOT");
+          failf(data, "schannel: the certificate or certificate chain is "
+                "based on an untrusted root");
         else if(dwTrustErrorMask & CERT_TRUST_IS_NOT_TIME_VALID)
-          failf(data, "schannel: CertGetCertificateChain trust error"
-                " CERT_TRUST_IS_NOT_TIME_VALID");
+          failf(data, "schannel: this certificate or one of the certificates "
+                "in the certificate chain is not time valid");
         else if(dwTrustErrorMask & CERT_TRUST_REVOCATION_STATUS_UNKNOWN)
-          failf(data, "schannel: CertGetCertificateChain trust error"
-                " CERT_TRUST_REVOCATION_STATUS_UNKNOWN");
+          failf(data, "schannel: the revocation status is unknown");
         else
-          failf(data, "schannel: CertGetCertificateChain error mask: 0x%08lx",
-                dwTrustErrorMask);
+          failf(data, "schannel: error 0x%08lx", dwTrustErrorMask);
         result = CURLE_PEER_FAILED_VERIFICATION;
       }
     }
@@ -948,5 +953,4 @@ CURLcode Curl_verify_certificate(struct Curl_cfilter *cf,
   return result;
 }
 
-#endif /* HAS_MANUAL_VERIFY_API */
 #endif /* USE_SCHANNEL */

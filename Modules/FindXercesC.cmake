@@ -7,12 +7,16 @@ FindXercesC
 
 .. versionadded:: 3.1
 
-Finds the Apache Xerces-C++ validating XML parser headers and libraries.
+Finds the Apache Xerces-C++ validating XML parser headers and libraries:
+
+.. code-block:: cmake
+
+  find_package(XercesC [<version>] [...])
 
 Imported Targets
 ^^^^^^^^^^^^^^^^
 
-This module defines the following :ref:`Imported Targets`:
+This module provides the following :ref:`Imported Targets`:
 
 ``XercesC::XercesC``
   .. versionadded:: 3.5
@@ -26,7 +30,7 @@ Result Variables
 This module defines the following variables:
 
 ``XercesC_FOUND``
-  Boolean indicating whether the Xerces-C++ is found.
+  Boolean indicating whether (the requested version of) Xerces-C++ was found.
 ``XercesC_VERSION``
   The version of the found Xerces-C++ library.
 ``XercesC_INCLUDE_DIRS``

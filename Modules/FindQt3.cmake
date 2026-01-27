@@ -5,8 +5,12 @@
 FindQt3
 -------
 
-This module finds Qt3, a cross-platform application development framework for
-creating graphical user interfaces and applications.
+Finds Qt3, a cross-platform application development framework for creating
+graphical user interfaces and applications:
+
+.. code-block:: cmake
+
+  find_package(Qt3 [<version>] [...])
 
 .. note::
 
@@ -17,17 +21,26 @@ creating graphical user interfaces and applications.
 Result Variables
 ^^^^^^^^^^^^^^^^
 
-This module sets the following variables:
+This module defines the following variables:
 
 ``Qt3_FOUND``
-  True if Qt3 has been found.
+  .. versionadded:: 3.3
+
+  Boolean indicating whether (the requested version of) Qt3 was found.
+
 ``QT_FOUND``
-  True if Qt3 has been found.  This variable is for compatibility with other Qt
-  find modules.
-``QT_VERSION_STRING``
+  Same as ``Qt3_FOUND``.  Boolean indicating whether (the requested version
+  of) Qt3 was found.  This variable is provided for compatibility with other
+  Qt find modules.
+
+``Qt3_VERSION``
+  .. versionadded:: 4.2
+
   The version of Qt3 that was found.
+
 ``QT_LIBRARIES``
   Libraries needed to link against for using Qt3.
+
 ``QT_DEFINITIONS``
   A list of compile definitions to use when compiling code that uses Qt3.
 
@@ -56,6 +69,17 @@ Hints
 ``QT_MT_REQUIRED``
   To search for the multithreaded version of Qt3, set this variable to ``TRUE``
   before looking for Qt3.
+
+Deprecated Variables
+^^^^^^^^^^^^^^^^^^^^
+
+The following variables are provided for backward compatibility:
+
+``QT_VERSION_STRING``
+  .. deprecated:: 4.2
+    Use ``Qt3_VERSION``, which has the same value.
+
+  The version of Qt3 that was found.
 
 Examples
 ^^^^^^^^
@@ -88,7 +112,7 @@ cmake_policy(SET CMP0159 NEW) # file(STRINGS) with REGEX updates CMAKE_MATCH_<n>
 #  QT_WRAP_UI set true if QT_UIC_EXECUTABLE is found
 
 # If Qt4 has already been found, fail.
-if(QT4_FOUND)
+if(Qt4_FOUND)
   if(Qt3_FIND_REQUIRED)
     message( FATAL_ERROR "Qt3 and Qt4 cannot be used together in one project.")
   else()
@@ -134,7 +158,8 @@ if(QT_INCLUDE_DIR)
   # Under windows the qt library (MSVC) has the format qt-mtXYZ where XYZ is the
   # version X.Y.Z, so we need to remove the dots from version
   string(REGEX REPLACE "\\." "" qt_version_str_lib "${qt_version_str}")
-  set(QT_VERSION_STRING "${qt_version_str}")
+  set(Qt3_VERSION "${qt_version_str}")
+  set(QT_VERSION_STRING "${Qt3_VERSION}")
 endif()
 
 file(GLOB GLOB_PATHS_LIB /usr/lib/qt-3*/lib/)
@@ -261,9 +286,9 @@ if (CMAKE_FIND_PACKAGE_NAME STREQUAL "Qt")
 endif ()
 find_package_handle_standard_args(Qt3
                                   REQUIRED_VARS QT_QT_LIBRARY QT_INCLUDE_DIR QT_MOC_EXECUTABLE
-                                  VERSION_VAR QT_VERSION_STRING)
+                                  VERSION_VAR Qt3_VERSION)
 unset(FPHSA_NAME_MISMATCHED)
-set(QT_FOUND ${QT3_FOUND} )
+set(QT_FOUND ${Qt3_FOUND})
 
 if(QT_FOUND)
   set( QT_LIBRARIES ${QT_LIBRARIES} ${QT_QT_LIBRARY} )

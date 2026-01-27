@@ -4,6 +4,10 @@
     "directorySource": "^custom$",
     "projectName": "Custom",
     "type": "UTILITY",
+    "imported": null,
+    "local": null,
+    "abstract": null,
+    "symbolic": null,
     "isGeneratorProvided": null,
     "fileSets": null,
     "sources": [
@@ -86,5 +90,11 @@
             "id": "^ZERO_CHECK::@c11385ffed57b860da63$",
             "backtrace": null
         }
-    ]
+    ],
+    "linkLibraries": null,
+    "interfaceLinkLibraries": null,
+    "compileDependencies": null,
+    "interfaceCompileDependencies": null,
+    "objectDependencies": null,
+    "orderDependencies": null
 }

@@ -26,7 +26,7 @@
 
 #include "../curl_setup.h"
 
-#ifdef USE_HTTP3
+#if !defined(CURL_DISABLE_HTTP) && defined(USE_HTTP3)
 struct Curl_cfilter;
 struct Curl_easy;
 struct connectdata;
@@ -51,9 +51,10 @@ extern struct Curl_cftype Curl_cft_http3;
 
 #else
 #define Curl_vquic_init() 1
-#endif /* !USE_HTTP3 */
+#endif /* !CURL_DISABLE_HTTP && USE_HTTP3 */
 
 CURLcode Curl_conn_may_http3(struct Curl_easy *data,
-                             const struct connectdata *conn);
+                             const struct connectdata *conn,
+                             unsigned char transport);
 
 #endif /* HEADER_CURL_VQUIC_QUIC_H */

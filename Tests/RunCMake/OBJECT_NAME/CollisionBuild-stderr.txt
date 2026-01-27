@@ -1,0 +1,1 @@
+((Makefiles)?Warning: Source file "[^"]*/Tests/RunCMake/OBJECT_NAME/lib2?\.c" is listed multiple times for target "objlib"\.|^$)

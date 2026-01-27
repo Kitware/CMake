@@ -36,6 +36,8 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/CheckSwift.cmake)
 set(TEST_HOME "${CMake_BINARY_DIR}/Tests/CMakeFiles/TestHome")
 set(TEST_CONFIG_ENV_CODE "# Isolate tests from user-wide configuration.
 set(ENV{CMAKE_CONFIG_DIR} \"${TEST_HOME}/.config/cmake\")\n")
+set(TEST_INSTRUMENTATION_ENV_CODE "# Isolate tests from CTEST_USE_INSTRUMENTATION var
+unset(ENV{CTEST_USE_INSTRUMENTATION})\n")
 file(MAKE_DIRECTORY "${TEST_HOME}/.config/cmake")
 
 # Fake a user home directory to avoid polluting the real one.
@@ -48,6 +50,13 @@ if(DEFINED ENV{HOME} AND NOT DEFINED ENV{CTEST_REAL_HOME})
 endif()
 set(ENV{HOME} \"${TEST_HOME}\")
 ")
+endif()
+
+# Suppress generator deprecation warnings in test suite.
+if(CMAKE_GENERATOR MATCHES "^Visual Studio 14 2015")
+  set(TEST_WARN_VS_CODE "set(ENV{CMAKE_WARN_VS14} OFF)")
+else()
+  set(TEST_WARN_VS_CODE "")
 endif()
 
 # 3.9 or later provides a definitive answer to whether we are multi-config
@@ -104,7 +113,7 @@ if(BUILD_TESTING)
   # some old versions of make simply cannot handle spaces in paths
   if(MAKE_IS_GNU OR
       CMAKE_MAKE_PROGRAM MATCHES "nmake|gmake|wmake" OR
-      CMAKE_GENERATOR MATCHES "Visual Studio|Xcode|Borland|Ninja")
+      CMAKE_GENERATOR MATCHES "Visual Studio|Xcode|Borland|Ninja|FASTBuild")
     set(MAKE_SUPPORTS_SPACES 1)
   else()
     set(MAKE_SUPPORTS_SPACES 0)
@@ -422,7 +431,7 @@ if(BUILD_TESTING)
   ADD_TEST_MACRO(PreOrder PreOrder)
   ADD_TEST_MACRO(MissingSourceFile MissingSourceFile)
   set_tests_properties(MissingSourceFile PROPERTIES
-    PASS_REGULAR_EXPRESSION "CMake Error at CMakeLists.txt:3 \\(add_executable\\):[ \r\n]*Cannot find source file:[ \r\n]*DoesNotExist/MissingSourceFile.c")
+    PASS_REGULAR_EXPRESSION "CMake Error at CMakeLists\.txt:3 \\(add_executable\\):[ \r\n]*Cannot find source file:[ \r\n]*DoesNotExist/MissingSourceFile.c")
   if(CMake_TEST_Swift)
     ADD_TEST_MACRO(SwiftOnly SwiftOnly)
     ADD_TEST_MACRO(SwiftMixPCH SwiftMixPCH)
@@ -589,11 +598,11 @@ if(BUILD_TESTING)
   if(NOT DEFINED CMake_TEST_Qt4)
     set(CMake_TEST_Qt4 1)
   endif()
-  if(CMake_TEST_Qt4 AND NOT QT4_FOUND)
+  if(CMake_TEST_Qt4 AND NOT Qt4_FOUND)
     find_package(Qt4 QUIET)
   endif()
 
-  if(CMake_TEST_Qt4 AND QT4_FOUND)
+  if(CMake_TEST_Qt4 AND Qt4_FOUND)
     # test whether the Qt4 which has been found works, on some machines
     # which run nightly builds there were errors like "wrong file format"
     # for libQtCore.so. So first check it works, and only if it does add
@@ -663,8 +672,6 @@ if(BUILD_TESTING)
   add_test(CMakeDoubleProject ${CMAKE_CMAKE_COMMAND} -P
     "${CMake_BINARY_DIR}/Tests/CMakeBuildDoubleProjectTest.cmake")
   list(APPEND TEST_BUILD_DIRS ${CMAKE_BUILD_TEST_BINARY_DIR})
-
-  ADD_TEST_MACRO(Module.CheckTypeSize CheckTypeSize)
 
   set(Module.CheckIPOSupported-C_BUILD_OPTIONS -DCMake_TEST_IPO_WORKS_C=${CMake_TEST_IPO_WORKS_C})
   ADD_TEST_MACRO(Module.CheckIPOSupported-C CheckIPOSupported-C)
@@ -780,7 +787,7 @@ if(BUILD_TESTING)
 
   # test for correct sub-project generation
   # not implemented in Xcode or Ninja
-  if(NOT CMAKE_GENERATOR MATCHES "Xcode|Ninja")
+  if(NOT CMAKE_GENERATOR MATCHES "Xcode|Ninja|FASTBuild")
     # run cmake and configure all of SubProject
     # but only build the independent executable car
     add_test(SubProject ${CMAKE_CTEST_COMMAND}
@@ -2107,8 +2114,7 @@ if(BUILD_TESTING)
 
   ADD_TEST_MACRO(CheckCompilerRelatedVariables CheckCompilerRelatedVariables)
 
-  if("${CMAKE_GENERATOR}" MATCHES "Makefile" OR
-     "${CMAKE_GENERATOR}" MATCHES "^Ninja$")
+  if("${CMAKE_GENERATOR}" MATCHES "^Ninja$|Makefile|FASTBuild")
     add_test(MakeClean ${CMAKE_CTEST_COMMAND}
       --build-and-test
       "${CMake_SOURCE_DIR}/Tests/MakeClean"
@@ -3128,7 +3134,7 @@ if(BUILD_TESTING)
         )
     endif()
 
-    if("${CMAKE_GENERATOR}" MATCHES "Makefiles" OR "${CMAKE_GENERATOR}" MATCHES "Ninja")
+    if("${CMAKE_GENERATOR}" MATCHES "Makefiles|Ninja|FASTBuild")
       configure_file("${CMake_SOURCE_DIR}/Tests/CTestTestLaunchers/test.cmake.in"
         "${CMake_BINARY_DIR}/Tests/CTestTestLaunchers/test.cmake" @ONLY ESCAPE_QUOTES)
       add_test(CTestTestLaunchers ${CMAKE_CTEST_COMMAND}
@@ -3458,7 +3464,7 @@ if(BUILD_TESTING)
     --test-command IncludeDirectories)
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/IncludeDirectories")
 
-  if(CMAKE_GENERATOR MATCHES "^((Unix|MSYS) Makefiles|Ninja)$" AND
+  if(CMAKE_GENERATOR MATCHES "^((Unix|MSYS) Makefiles|Ninja|FASTBuild)$" AND
      ((CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 4.4)
       OR (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND NOT "x${CMAKE_CXX_SIMULATE_ID}" STREQUAL "xMSVC")
       OR (CMAKE_CXX_COMPILER_ID STREQUAL "LCC")

@@ -1,3 +1,5 @@
+set(CMAKE_AUTOGEN_INTERMEDIATE_DIR_STRATEGY FULL CACHE STRING "" FORCE)
+
 enable_language(CXX)
 
 find_package(Qt${with_qt_version} REQUIRED COMPONENTS Core)

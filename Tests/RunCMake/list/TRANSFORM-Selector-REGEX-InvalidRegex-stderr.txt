@@ -1,5 +1,5 @@
-^CMake Error at TRANSFORM-Selector-REGEX-InvalidRegex.cmake:2 \(list\):
+^CMake Error at TRANSFORM-Selector-REGEX-InvalidRegex\.cmake:2 \(list\):
   list sub-command TRANSFORM, selector REGEX failed to compile regex
-  "\^\(alpha\$".
+  "\^\(alpha\$"\.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)$
+  CMakeLists\.txt:3 \(include\)$

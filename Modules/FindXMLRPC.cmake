@@ -5,9 +5,15 @@
 FindXMLRPC
 ----------
 
-Finds the native XML-RPC library for C and C++.  XML-RPC is a standard network
-protocol that enables remote procedure calls (RPC) between systems.  It encodes
-requests and responses in XML and uses HTTP as the transport mechanism.
+Finds the native XML-RPC library for C and C++:
+
+.. code-block:: cmake
+
+  find_package(XMLRPC [...] [COMPONENTS <components>...] [...])
+
+XML-RPC is a standard network protocol that enables remote procedure calls
+(RPC) between systems.  It encodes requests and responses in XML and uses
+HTTP as the transport mechanism.
 
 Components
 ^^^^^^^^^^
@@ -21,7 +27,7 @@ To list the available features on a system, the ``xmlrpc-c-config`` command-line
 utility can be used.
 
 In CMake, these features can be specified as components with the
-``find_package()`` command:
+:command:`find_package` command:
 
 .. code-block:: cmake
 
@@ -50,29 +56,46 @@ Components may be:
 ``openssl``
   OpenSSL convenience functions.
 
+If no components are specified, this module searches for XML-RPC library and
+its include directories without additional features.
+
 Result Variables
 ^^^^^^^^^^^^^^^^
 
 This module defines the following variables:
 
+``XMLRPC_FOUND``
+  Boolean indicating whether the XML-RPC library and all its requested
+  components were found.
 ``XMLRPC_INCLUDE_DIRS``
   Include directories containing ``xmlrpc.h`` and other headers needed to use
   the XML-RPC library.
 ``XMLRPC_LIBRARIES``
   List of libraries needed for linking to XML-RPC library and its requested
   features.
-``XMLRPC_FOUND``
-  Boolean indicating whether the XML-RPC library and all its requested
-  components are found.
 
 Examples
 ^^^^^^^^
 
-Finding XML-RPC library and its ``client`` feature to use in the project:
+Finding XML-RPC library and its ``client`` feature, and conditionally
+creating an interface :ref:`imported target <Imported Targets>` that
+encapsulates its usage requirements for linking to a project target:
 
 .. code-block:: cmake
 
   find_package(XMLRPC REQUIRED COMPONENTS client)
+
+  if(XMLRPC_FOUND AND NOT TARGET XMLRPC::XMLRPC)
+    add_library(XMLRPC::XMLRPC INTERFACE IMPORTED)
+    set_target_properties(
+      XMLRPC::XMLRPC
+      PROPERTIES
+        INTERFACE_INCLUDE_DIRECTORIES "${XMLRPC_INCLUDE_DIRS}"
+        INTERFACE_LINK_LIBRARIES "${XMLRPC_LIBRARIES}"
+    )
+  endif()
+
+  target_link_libraries(example PRIVATE XMLRPC::XMLRPC)
 #]=======================================================================]
 
 # First find the config script from which to obtain other values.

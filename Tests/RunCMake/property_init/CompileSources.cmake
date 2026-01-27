@@ -78,6 +78,8 @@ set(properties
   "BUILD_WITH_INSTALL_NAME_DIR"             "@rpath/"           "<SAME>"
   ### Install
   "INSTALL_NAME_DIR"                        "@rpath/"           "<SAME>"
+  "INSTALL_OBJECT_NAME_STRATEGY"            "SHORT"             "<SAME>"
+  "INSTALL_OBJECT_ONLY_USE_DESTINATION"     "ON"                "<SAME>"
   "INSTALL_REMOVE_ENVIRONMENT_RPATH"        "ON"                "<SAME>"
   "INSTALL_RPATH"                           "@rpath/"           "<SAME>"
   "INSTALL_RPATH_USE_LINK_PATH"             "ON"                "<SAME>"
@@ -112,6 +114,7 @@ set(properties
   "OBJCXX_LINKER_LAUNCHER"                  "ccache"            "<SAME>"
 
   # Static analysis
+  "SKIP_LINTING"                            "OFF"               "<SAME>"
   ## C
   "C_CLANG_TIDY"                            "clang-tidy"        "<SAME>"
   "C_CLANG_TIDY_EXPORT_FIXES_DIR"           "${dir}"            "<SAME>"
@@ -246,6 +249,13 @@ if (CMAKE_GENERATOR MATCHES "Ninja")
         link_pool=1
         pch_pool=1)
 endif ()
+
+# FASTBuild requires that launchers actually be available
+# at configure time
+if(CMAKE_GENERATOR MATCHES FASTBuild)
+  file(TOUCH "${dir}/ccache")
+  file(CHMOD "${dir}/ccache" PERMISSIONS OWNER_READ OWNER_EXECUTE)
+endif()
 
 prepare_target_types(can_compile_sources
   EXECUTABLE SHARED STATIC MODULE OBJECT)

@@ -1,5 +1,5 @@
 ^CMake Error at [^
-]*/Tests/RunCMake/file-RPATH/TextSet.cmake:[0-9]+ \(file\):
+]*/Tests/RunCMake/file-RPATH/TextSet\.cmake:[0-9]+ \(file\):
   file RPATH_SET could not write new RPATH:
 
     /new/rpath
@@ -7,6 +7,6 @@
   to the file:
 
     [^
-]*/Tests/RunCMake/file-RPATH/TextSet-build/not_a_binary.txt
+]*/Tests/RunCMake/file-RPATH/TextSet-build/not_a_binary\.txt
 
   The file format is not recognized\.$

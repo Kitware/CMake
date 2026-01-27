@@ -1,4 +1,4 @@
-^CMake Error at extract-missing-args.cmake:[0-9]+ \(file\):
+^CMake Error at extract-missing-args\.cmake:[0-9]+ \(file\):
   Error after keyword "DESTINATION":
 
     missing required value
@@ -8,4 +8,4 @@
     missing required value
 
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)$
+  CMakeLists\.txt:[0-9]+ \(include\)$

@@ -4,16 +4,20 @@
 
 #include <cstdio>
 #include <cstring>
+#include <functional>
 #include <iostream>
 #include <map>
 #include <memory>
 #include <utility>
+
+#include <cm/optional>
 
 #include <cm3p/uv.h>
 
 #include "cmsys/FStream.hxx"
 #include "cmsys/RegularExpression.hxx"
 
+#include "cmCMakePath.h"
 #include "cmCTestLaunchReporter.h"
 #include "cmGlobalGenerator.h"
 #include "cmInstrumentation.h"
@@ -71,7 +75,8 @@ bool cmCTestLaunch::ParseArguments(int argc, char const* const* argv)
     DoingCurrentBuildDir,
     DoingCount,
     DoingFilterPrefix,
-    DoingConfig
+    DoingConfig,
+    DoingObjectDir
   };
   Doing doing = DoingNone;
   int arg0 = 0;
@@ -103,6 +108,8 @@ bool cmCTestLaunch::ParseArguments(int argc, char const* const* argv)
       doing = DoingFilterPrefix;
     } else if (strcmp(arg, "--config") == 0) {
       doing = DoingConfig;
+    } else if (strcmp(arg, "--object-dir") == 0) {
+      doing = DoingObjectDir;
     } else if (doing == DoingOutput) {
       this->Reporter.OptionOutput = arg;
       doing = DoingNone;
@@ -142,7 +149,26 @@ bool cmCTestLaunch::ParseArguments(int argc, char const* const* argv)
     } else if (doing == DoingConfig) {
       this->Reporter.OptionConfig = arg;
       doing = DoingNone;
+    } else if (doing == DoingObjectDir) {
+      this->Reporter.OptionObjectDir = arg;
+      doing = DoingNone;
     }
+  }
+
+  // Older builds do not pass `--object-dir`, so construct a default if the
+  // components are available.
+  if (this->Reporter.OptionObjectDir.empty() &&
+      !this->Reporter.OptionCurrentBuildDir.empty() &&
+      !this->Reporter.OptionTargetName.empty()) {
+    this->Reporter.OptionObjectDir =
+      cmStrCat(this->Reporter.OptionCurrentBuildDir, "/CMakeFiles/",
+               this->Reporter.OptionTargetName, ".dir");
+  }
+  if (!this->Reporter.OptionObjectDir.empty() &&
+      !cmCMakePath(this->Reporter.OptionObjectDir).IsAbsolute() &&
+      !this->Reporter.OptionBuildDir.empty()) {
+    this->Reporter.OptionObjectDir = cmStrCat(
+      this->Reporter.OptionBuildDir, '/', this->Reporter.OptionObjectDir);
   }
 
   // Extract the real command line.
@@ -283,7 +309,7 @@ int cmCTestLaunch::Run()
     this->Reporter.OptionCommandType, this->RealArgV,
     [this]() -> int {
       this->RunChild();
-      return 0;
+      return this->Reporter.ExitCode;
     },
     options, arrayOptions);
 

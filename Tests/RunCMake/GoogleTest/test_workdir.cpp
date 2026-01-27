@@ -19,13 +19,30 @@ int main(int argc, char** argv)
   // the current directory. If we are not handling spaces in the
   // working directory correctly, the files we expect won't exist.
 
-  if (argc > 1 && std::string(argv[1]) == "--gtest_list_tests") {
-    std::ifstream inFile("test_list_output.txt");
-    if (!inFile) {
+  if (argc > 2 && std::string(argv[1]) == "--gtest_list_tests" &&
+      std::string(argv[2]).find("--gtest_output=json:") != std::string::npos) {
+    std::ifstream inTestListFile("test_list_output.txt");
+    if (!inTestListFile) {
       std::cout << "ERROR: Failed to open test_list_output.txt" << std::endl;
       return 1;
     }
-    std::cout << inFile.rdbuf();
+    std::cout << inTestListFile.rdbuf();
+
+    std::ifstream inJsonFile("test_list_output.json");
+    if (!inJsonFile) {
+      std::cout << "ERROR: Failed to open test_list_output.json" << std::endl;
+      return 1;
+    }
+    std::string output_param(argv[2]);
+    std::string::size_type split = output_param.find(":");
+    std::string filepath = output_param.substr(split + 1);
+    // The full file path is passed
+    std::ofstream ostrm(filepath.c_str(), std::ios::binary);
+    if (!ostrm) {
+      std::cerr << "Failed to create file: " << filepath.c_str() << std::endl;
+      return 1;
+    }
+    ostrm << inJsonFile.rdbuf();
     return 0;
   }
 

@@ -74,7 +74,7 @@ static bool testTimer()
 
   cm::uv_timer_ptr timer;
   timer.init(*loop, &timed);
-  timer.start(cb, 10, 0);
+  timer.start(cb, 10, 0, cm::uv_update_time::no);
   uv_run(loop, UV_RUN_DEFAULT);
 
   if (!timed) {
@@ -83,7 +83,7 @@ static bool testTimer()
   }
 
   timed = false;
-  timer.start(cb, 10, 0);
+  timer.start(cb, 10, 0, cm::uv_update_time::no);
   timer.stop();
   uv_run(loop, UV_RUN_DEFAULT);
 

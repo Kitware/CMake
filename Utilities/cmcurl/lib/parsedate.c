@@ -80,7 +80,6 @@
 #include <limits.h>
 
 #include <curl/curl.h>
-#include "strcase.h"
 #include "curlx/warnless.h"
 #include "parsedate.h"
 #include "curlx/strparse.h"
@@ -151,7 +150,7 @@ static const struct tzinfo tz[]= {
   {"HDT", 600 tDAYZONE},   /* Hawaii Daylight */
   {"CAT", 600},            /* Central Alaska */
   {"AHST", 600},           /* Alaska-Hawaii Standard */
-  {"NT",  660},            /* Nome */
+  {"NT",  660},            /* Nome */ /* spellchecker:disable-line */
   {"IDLW", 720},           /* International Date Line West */
   {"CET", -60},            /* Central European */
   {"MET", -60},            /* Middle European */
@@ -162,7 +161,8 @@ static const struct tzinfo tz[]= {
   {"FWT", -60},            /* French Winter */
   {"FST", -60 tDAYZONE},   /* French Summer */
   {"EET", -120},           /* Eastern Europe, USSR Zone 1 */
-  {"WAST", -420},          /* West Australian Standard */
+  {"WAST", -420}, /* spellchecker:disable-line */
+                           /* West Australian Standard */
   {"WADT", -420 tDAYZONE}, /* West Australian Daylight */
   {"CCT", -480},           /* China Coast, USSR Zone 7 */
   {"JST", -540},           /* Japan Standard, USSR Zone 8 */
@@ -224,7 +224,7 @@ static int checkday(const char *check, size_t len)
   for(i = 0; i < 7; i++) {
     size_t ilen = strlen(what[0]);
     if((ilen == len) &&
-       strncasecompare(check, what[0], len))
+       curl_strnequal(check, what[0], len))
       return i;
     what++;
   }
@@ -239,7 +239,7 @@ static int checkmonth(const char *check, size_t len)
     return -1; /* not a month */
 
   for(i = 0; i < 12; i++) {
-    if(strncasecompare(check, what[0], 3))
+    if(curl_strnequal(check, what[0], 3))
       return i;
     what++;
   }
@@ -259,7 +259,7 @@ static int checktz(const char *check, size_t len)
   for(i = 0; i < CURL_ARRAYSIZE(tz); i++) {
     size_t ilen = strlen(what->name);
     if((ilen == len) &&
-       strncasecompare(check, what->name, len))
+       curl_strnequal(check, what->name, len))
       return what->offset*60;
     what++;
   }
@@ -589,26 +589,12 @@ time_t curl_getdate(const char *p, const time_t *now)
 
 /* Curl_getdate_capped() differs from curl_getdate() in that this will return
    TIME_T_MAX in case the parsed time value was too big, instead of an
-   error. */
+   error. Returns non-zero on error. */
 
-time_t Curl_getdate_capped(const char *p)
+int Curl_getdate_capped(const char *p, time_t *tp)
 {
-  time_t parsed = -1;
-  int rc = parsedate(p, &parsed);
-
-  switch(rc) {
-  case PARSEDATE_OK:
-    if(parsed == (time_t)-1)
-      /* avoid returning -1 for a working scenario */
-      parsed++;
-    return parsed;
-  case PARSEDATE_LATER:
-    /* this returns the maximum time value */
-    return parsed;
-  default:
-    return -1; /* everything else is fail */
-  }
-  /* UNREACHABLE */
+  int rc = parsedate(p, tp);
+  return (rc == PARSEDATE_FAIL);
 }
 
 /*

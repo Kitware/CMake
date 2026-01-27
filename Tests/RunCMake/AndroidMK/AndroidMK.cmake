@@ -10,4 +10,6 @@ target_link_options(foo2 INTERFACE -lm)
 export(TARGETS bar dog car foo foo2 ANDROID_MK
   ${build_BINARY_DIR}/Android.mk)
 install(TARGETS bar dog car foo foo2 DESTINATION lib EXPORT myexp)
-install(EXPORT_ANDROID_MK myexp DESTINATION share/ndk-modules)
+install(EXPORT_ANDROID_MK myexp DESTINATION share/ndk-modules COMPONENT android)
+get_cmake_property(components COMPONENTS)
+message(STATUS "COMPONENTS='${components}'")

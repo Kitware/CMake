@@ -25,24 +25,30 @@
 
 #include "curl_setup.h"
 
-#if !defined(CURL_DISABLE_AWS) || !defined(CURL_DISABLE_DIGEST_AUTH) \
-  || defined(USE_LIBSSH2) || defined(USE_SSL)
+#if !defined(CURL_DISABLE_AWS) || !defined(CURL_DISABLE_DIGEST_AUTH) || \
+  defined(USE_LIBSSH2) || defined(USE_SSL)
 
 #include "curlx/warnless.h"
 #include "curl_sha256.h"
 #include "curl_hmac.h"
 
+#ifdef USE_MBEDTLS
+  #include <mbedtls/version.h>
+  #if MBEDTLS_VERSION_NUMBER < 0x03020000
+    #error "mbedTLS 3.2.0 or later required"
+  #endif
+  #include <psa/crypto_config.h>
+  #if defined(PSA_WANT_ALG_SHA_256) && PSA_WANT_ALG_SHA_256  /* mbedTLS 4+ */
+    #define USE_MBEDTLS_SHA256
+  #endif
+#endif
+
 #ifdef USE_OPENSSL
 #include <openssl/evp.h>
 #elif defined(USE_GNUTLS)
 #include <nettle/sha.h>
-#elif defined(USE_MBEDTLS)
-#include <mbedtls/version.h>
-#if(MBEDTLS_VERSION_NUMBER >= 0x02070000) && \
-   (MBEDTLS_VERSION_NUMBER < 0x03000000)
-  #define HAS_MBEDTLS_RESULT_CODE_BASED_FUNCTIONS
-#endif
-#include <mbedtls/sha256.h>
+#elif defined(USE_MBEDTLS_SHA256)
+#include <psa/crypto.h>
 #elif (defined(__MAC_OS_X_VERSION_MAX_ALLOWED) && \
               (__MAC_OS_X_VERSION_MAX_ALLOWED >= 1040)) || \
       (defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && \
@@ -53,8 +59,7 @@
 #include <wincrypt.h>
 #endif
 
-/* The last 3 #include files should be in this order */
-#include "curl_printf.h"
+/* The last 2 #include files should be in this order */
 #include "curl_memory.h"
 #include "memdebug.h"
 
@@ -128,17 +133,15 @@ static void my_sha256_final(unsigned char *digest, void *ctx)
   sha256_digest(ctx, SHA256_DIGEST_SIZE, digest);
 }
 
-#elif defined(USE_MBEDTLS)
+#elif defined(USE_MBEDTLS_SHA256)
 
-typedef mbedtls_sha256_context my_sha256_ctx;
+typedef psa_hash_operation_t my_sha256_ctx;
 
 static CURLcode my_sha256_init(void *ctx)
 {
-#if !defined(HAS_MBEDTLS_RESULT_CODE_BASED_FUNCTIONS)
-  (void) mbedtls_sha256_starts(ctx, 0);
-#else
-  (void) mbedtls_sha256_starts_ret(ctx, 0);
-#endif
+  memset(ctx, 0, sizeof(my_sha256_ctx));
+  if(psa_hash_setup(ctx, PSA_ALG_SHA_256) != PSA_SUCCESS)
+    return CURLE_OUT_OF_MEMORY;
   return CURLE_OK;
 }
 
@@ -146,20 +149,14 @@ static void my_sha256_update(void *ctx,
                              const unsigned char *data,
                              unsigned int length)
 {
-#if !defined(HAS_MBEDTLS_RESULT_CODE_BASED_FUNCTIONS)
-  (void) mbedtls_sha256_update(ctx, data, length);
-#else
-  (void) mbedtls_sha256_update_ret(ctx, data, length);
-#endif
+  (void)psa_hash_update(ctx, data, length);
 }
 
 static void my_sha256_final(unsigned char *digest, void *ctx)
 {
-#if !defined(HAS_MBEDTLS_RESULT_CODE_BASED_FUNCTIONS)
-  (void) mbedtls_sha256_finish(ctx, digest);
-#else
-  (void) mbedtls_sha256_finish_ret(ctx, digest);
-#endif
+  size_t actual_length;
+  (void)psa_hash_finish(ctx, digest, CURL_SHA256_DIGEST_LENGTH,
+                        &actual_length);
 }
 
 #elif defined(AN_APPLE_OS)
@@ -167,7 +164,7 @@ typedef CC_SHA256_CTX my_sha256_ctx;
 
 static CURLcode my_sha256_init(void *ctx)
 {
-  (void) CC_SHA256_Init(ctx);
+  (void)CC_SHA256_Init(ctx);
   return CURLE_OK;
 }
 
@@ -175,12 +172,12 @@ static void my_sha256_update(void *ctx,
                              const unsigned char *data,
                              unsigned int length)
 {
-  (void) CC_SHA256_Update(ctx, data, length);
+  (void)CC_SHA256_Update(ctx, data, length);
 }
 
 static void my_sha256_final(unsigned char *digest, void *ctx)
 {
-  (void) CC_SHA256_Final(digest, ctx);
+  (void)CC_SHA256_Final(digest, ctx);
 }
 
 #elif defined(USE_WIN32_CRYPTO)
@@ -191,7 +188,8 @@ struct sha256_ctx {
 };
 typedef struct sha256_ctx my_sha256_ctx;
 
-#if !defined(CALG_SHA_256)
+/* Offered when targeting Vista (XP SP2+) */
+#ifndef CALG_SHA_256
 #define CALG_SHA_256 0x0000800c
 #endif
 
@@ -243,8 +241,8 @@ static void my_sha256_final(unsigned char *digest, void *in)
 
 /* When no other crypto library is available we use this code segment */
 
-/* This is based on SHA256 implementation in LibTomCrypt that was released into
- * public domain by Tom St Denis. */
+/* This is based on the SHA256 implementation in LibTomCrypt that was released
+ * into public domain. */
 
 #define WPA_GET_BE32(a) ((((unsigned long)(a)[0]) << 24) | \
                          (((unsigned long)(a)[1]) << 16) | \

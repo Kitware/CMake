@@ -8,7 +8,6 @@
 #include <cstdio>
 #include <iterator>
 #include <sstream>
-#include <type_traits>
 #include <unordered_map>
 #include <utility>
 
@@ -772,7 +771,7 @@ cmComputeLinkDepends::AllocateLinkEntry(cmLinkItem const& item)
 }
 
 std::pair<size_t, bool> cmComputeLinkDepends::AddLinkEntry(
-  cmLinkItem const& item, cm::optional<size_t> const& groupIndex)
+  cmLinkItem const& item, cm::optional<size_t> groupIndex)
 {
   // Allocate a spot for the item entry.
   auto lei = this->AllocateLinkEntry(item);
@@ -943,7 +942,7 @@ void cmComputeLinkDepends::HandleSharedDependency(SharedDepEntry const& dep)
 }
 
 void cmComputeLinkDepends::AddVarLinkEntries(
-  cm::optional<size_t> const& depender_index, char const* value)
+  cm::optional<size_t> depender_index, char const* value)
 {
   // This is called to add the dependencies named by
   // <item>_LIB_DEPENDS.  The variable contains a semicolon-separated
@@ -1013,8 +1012,8 @@ void cmComputeLinkDepends::AddDirectLinkEntries()
 }
 
 template <typename T>
-void cmComputeLinkDepends::AddLinkEntries(
-  cm::optional<size_t> const& depender_index, std::vector<T> const& libs)
+void cmComputeLinkDepends::AddLinkEntries(cm::optional<size_t> depender_index,
+                                          std::vector<T> const& libs)
 {
   // Track inferred dependency sets implied by this list.
   std::map<size_t, DependSet> dependSets;
@@ -1298,7 +1297,7 @@ void cmComputeLinkDepends::AddLinkObjects(std::vector<cmLinkItem> const& objs)
 }
 
 cmLinkItem cmComputeLinkDepends::ResolveLinkItem(
-  cm::optional<size_t> const& depender_index, std::string const& name)
+  cm::optional<size_t> depender_index, std::string const& name)
 {
   // Look for a target in the scope of the depender.
   cmGeneratorTarget const* from = this->Target;

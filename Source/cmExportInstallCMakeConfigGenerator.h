@@ -10,10 +10,7 @@
 #include "cmExportCMakeConfigGenerator.h"
 #include "cmExportInstallFileGenerator.h"
 
-class cmFileSet;
-class cmGeneratorTarget;
 class cmInstallExportGenerator;
-class cmTargetExport;
 
 /** \class cmExportInstallCMakeConfigGenerator
  * \brief Generate files exporting targets from an install tree.

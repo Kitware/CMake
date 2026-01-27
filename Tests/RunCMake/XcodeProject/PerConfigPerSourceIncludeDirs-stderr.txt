@@ -1,10 +1,10 @@
-^CMake Error in CMakeLists.txt:
+^CMake Error in CMakeLists\.txt:
   Xcode does not support per-config per-source INCLUDE_DIRECTORIES:
 
     \$<\$<CONFIG:Debug>:MYDEBUG>
 
   specified for source:
 
-    .*/Tests/RunCMake/XcodeProject/main.c
+    .*/Tests/RunCMake/XcodeProject/main\.c
 +
 CMake Generate step failed\.  Build files cannot be regenerated correctly\.$

@@ -5,7 +5,11 @@
 FindJNI
 -------
 
-Finds the Java Native Interface (JNI) include directories and libraries.
+Finds the Java Native Interface (JNI) include directories and libraries:
+
+.. code-block:: cmake
+
+  find_package(JNI [<version>] [COMPONENTS <components>...] [...])
 
 JNI enables Java code running in a Java Virtual Machine (JVM) or Dalvik Virtual
 Machine (DVM) on Android to call and be called by native applications and
@@ -95,12 +99,12 @@ Result Variables
 This module defines the following variables:
 
 ``JNI_FOUND``
-  Boolean indicating whether the JNI is found.
+  Boolean indicating whether (the requested version of) JNI was found.
 
 ``JNI_<component>_FOUND``
   .. versionadded:: 3.24
 
-  Boolean indicating whether the ``<component>`` is found.
+  Boolean indicating whether the ``<component>`` was found.
 
 ``JNI_VERSION``
   Full Android NDK package version (including suffixes such as ``-beta3`` and
@@ -381,6 +385,11 @@ set(_JNI_JAVA_DIRECTORIES_BASE
   # Arch Linux specific paths for default JVM
   /usr/lib/jvm/default
   # Ubuntu specific paths for default JVM
+  /usr/lib/jvm/java-26-openjdk-{libarch}
+  /usr/lib/jvm/java-25-openjdk-{libarch}    # Ubuntu 24.04 LTS
+  /usr/lib/jvm/java-24-openjdk-{libarch}
+  /usr/lib/jvm/java-23-openjdk-{libarch}
+  /usr/lib/jvm/java-22-openjdk-{libarch}
   /usr/lib/jvm/java-21-openjdk-{libarch}    # Ubuntu 23.04
   /usr/lib/jvm/java-20-openjdk-{libarch}    # Ubuntu 22.10
   /usr/lib/jvm/java-19-openjdk-{libarch}    # Ubuntu 22.04 LTS

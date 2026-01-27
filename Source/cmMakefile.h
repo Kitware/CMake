@@ -40,10 +40,6 @@
 // will not compile without the complete type.
 #include "cmTarget.h" // IWYU pragma: keep
 
-#if !defined(CMAKE_BOOTSTRAP)
-#  include "cmSourceGroup.h"
-#endif
-
 enum class cmCustomCommandType;
 enum class cmObjectLibraryCommands;
 
@@ -63,6 +59,10 @@ class cmTest;
 class cmTestGenerator;
 class cmVariableWatch;
 class cmake;
+
+#if !defined(CMAKE_BOOTSTRAP)
+class cmSourceGroup;
+#endif
 
 /** A type-safe wrapper for a string representing a directory id.  */
 class cmDirectoryId
@@ -390,6 +390,9 @@ public:
                         std::string const& version_max);
   void RecordPolicies(cmPolicies::PolicyMap& pm) const;
   //@}
+
+  /** Update CMAKE_PARENT_LIST_FILE based on CMP0198 policy status.  */
+  void UpdateParentListFileVariable();
 
   /** Helper class to push and pop policies automatically.  */
   class PolicyPushPop
@@ -1031,17 +1034,7 @@ public:
   // searches
   std::deque<std::vector<std::string>> FindPackageRootPathStack;
 
-  class FindPackageStackRAII
-  {
-    cmMakefile* Makefile;
-
-  public:
-    FindPackageStackRAII(cmMakefile* mf, std::string const& pkg);
-    ~FindPackageStackRAII();
-
-    FindPackageStackRAII(FindPackageStackRAII const&) = delete;
-    FindPackageStackRAII& operator=(FindPackageStackRAII const&) = delete;
-  };
+  friend class cmFindPackageStackRAII;
 
   class DebugFindPkgRAII
   {

@@ -28,6 +28,7 @@
 
 #include "urldata.h"
 #include "getinfo.h"
+#include "cfilters.h"
 #include "vtls/vtls.h"
 #include "connect.h" /* Curl_getconnectinfo() */
 #include "progress.h"
@@ -579,19 +580,14 @@ static CURLcode getinfo_slist(struct Curl_easy *data, CURLINFO info,
       struct curl_tlssessioninfo **tsip = (struct curl_tlssessioninfo **)
                                           param_slistp;
       struct curl_tlssessioninfo *tsi = &data->tsi;
-#ifdef USE_SSL
-      struct connectdata *conn = data->conn;
-#endif
 
+      /* we are exposing a pointer to internal memory with unknown
+       * lifetime here. */
       *tsip = tsi;
-      tsi->backend = Curl_ssl_backend();
-      tsi->internals = NULL;
-
-#ifdef USE_SSL
-      if(conn && tsi->backend != CURLSSLBACKEND_NONE) {
-        tsi->internals = Curl_ssl_get_internals(data, FIRSTSOCKET, info, 0);
+      if(!Curl_conn_get_ssl_info(data, data->conn, FIRSTSOCKET, tsi)) {
+        tsi->backend = Curl_ssl_backend();
+        tsi->internals = NULL;
       }
-#endif
     }
     break;
   default:
@@ -625,7 +621,7 @@ CURLcode Curl_getinfo(struct Curl_easy *data, CURLINFO info, ...)
   struct curl_slist **param_slistp = NULL;
   curl_socket_t *param_socketp = NULL;
   int type;
-  CURLcode result = CURLE_UNKNOWN_OPTION;
+  CURLcode result = CURLE_BAD_FUNCTION_ARGUMENT;
 
   if(!data)
     return CURLE_BAD_FUNCTION_ARGUMENT;
@@ -665,6 +661,7 @@ CURLcode Curl_getinfo(struct Curl_easy *data, CURLINFO info, ...)
       result = getinfo_socket(data, info, param_socketp);
     break;
   default:
+    result = CURLE_UNKNOWN_OPTION;
     break;
   }
 

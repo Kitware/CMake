@@ -1,34 +1,29 @@
-add_library(MathFunctions MathFunctions.cxx)
+add_library(MathFunctions)
 
-# state that anybody linking to us needs to include the current source dir
-# to find MathFunctions.h, while we don't.
-target_include_directories(MathFunctions
-                           INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}
-                           )
+target_sources(MathFunctions
+  PRIVATE
+    MathFunctions.cxx
 
-# should we use our own math functions
-option(USE_MYMATH "Use tutorial provided math implementation" ON)
-if (USE_MYMATH)
-  target_compile_definitions(MathFunctions PRIVATE "USE_MYMATH")
+  PUBLIC
+    FILE_SET HEADERS
+    FILES
+      MathFunctions.h
+)
 
-  # library that just does sqrt
-  add_library(SqrtLibrary STATIC
-              mysqrt.cxx
-              )
+# TODO3: Add a link to MathLogger for the MathFunctions library. Note that
+#        MathLogger will only be used in the MathFunctions implementation,
+#        not the headers
 
-  # link SqrtLibrary to tutorial_compiler_flags
-  target_link_libraries(SqrtLibrary PUBLIC tutorial_compiler_flags)
+# TODO8: Add links to MathLogger for the OpAdd, OpMul, and OpSub libraries.
+#        Note that their headers will be exposed in the MathFunctions.h
+#        header, and must be available to consumers.
 
-  target_link_libraries(MathFunctions PRIVATE SqrtLibrary)
+target_compile_features(MathFunctions PRIVATE cxx_std_20)
+
+if(TUTORIAL_USE_STD_SQRT)
+  target_compile_definitions(MathFunctions PRIVATE TUTORIAL_USE_STD_SQRT)
 endif()
 
-# link MathFunctions to tutorial_compiler_flags
-target_link_libraries(MathFunctions PUBLIC tutorial_compiler_flags)
+# TODO4: Add the MathLogger subdirectory
 
-# TODO 1: Create a variable called installable_libs that is a list of all
-# libraries we want to install (e.g. MathFunctions and tutorial_compiler_flags)
-# Then install the installable libraries to the lib folder.
-# Hint: Use the TARGETS and DESTINATION parameters
-
-# TODO 2: Install the library headers to the include folder.
-# Hint: Use the FILES and DESTINATION parameters
+# TODO9: Add the MathExtensions subdirectory

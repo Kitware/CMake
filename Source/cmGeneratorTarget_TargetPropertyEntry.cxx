@@ -17,22 +17,15 @@
 #include "cmList.h"
 #include "cmListFileCache.h"
 
-namespace cm {
-namespace GenEx {
-struct Context;
-}
-}
-
 class cmake;
-struct cmGeneratorExpressionDAGChecker;
 
-cmLinkImplItem cmGeneratorTarget::TargetPropertyEntry::NoLinkImplItem;
+cmLinkItem cmGeneratorTarget::TargetPropertyEntry::NoLinkItem;
 
 class TargetPropertyEntryString : public cmGeneratorTarget::TargetPropertyEntry
 {
 public:
   TargetPropertyEntryString(BT<std::string> propertyValue,
-                            cmLinkImplItem const& item = NoLinkImplItem)
+                            cmLinkItem const& item = NoLinkItem)
     : cmGeneratorTarget::TargetPropertyEntry(item)
     , PropertyValue(std::move(propertyValue))
   {
@@ -62,7 +55,7 @@ class TargetPropertyEntryGenex : public cmGeneratorTarget::TargetPropertyEntry
 {
 public:
   TargetPropertyEntryGenex(std::unique_ptr<cmCompiledGeneratorExpression> cge,
-                           cmLinkImplItem const& item = NoLinkImplItem)
+                           cmLinkItem const& item = NoLinkItem)
     : cmGeneratorTarget::TargetPropertyEntry(item)
     , ge(std::move(cge))
   {
@@ -98,7 +91,7 @@ public:
   TargetPropertyEntryFileSet(
     std::vector<std::string> dirs, bool contextSensitiveDirs,
     std::unique_ptr<cmCompiledGeneratorExpression> entryCge,
-    cmFileSet const* fileSet, cmLinkImplItem const& item = NoLinkImplItem)
+    cmFileSet const* fileSet, cmLinkItem const& item = NoLinkItem)
     : cmGeneratorTarget::TargetPropertyEntry(item)
     , BaseDirs(std::move(dirs))
     , ContextSensitiveDirs(contextSensitiveDirs)
@@ -171,15 +164,15 @@ std::unique_ptr<cmGeneratorTarget::TargetPropertyEntry>
 cmGeneratorTarget::TargetPropertyEntry::CreateFileSet(
   std::vector<std::string> dirs, bool contextSensitiveDirs,
   std::unique_ptr<cmCompiledGeneratorExpression> entryCge,
-  cmFileSet const* fileSet, cmLinkImplItem const& item)
+  cmFileSet const* fileSet, cmLinkItem const& item)
 {
   return cm::make_unique<TargetPropertyEntryFileSet>(
     std::move(dirs), contextSensitiveDirs, std::move(entryCge), fileSet, item);
 }
 
 cmGeneratorTarget::TargetPropertyEntry::TargetPropertyEntry(
-  cmLinkImplItem const& item)
-  : LinkImplItem(item)
+  cmLinkItem const& item)
+  : LinkItem(item)
 {
 }
 

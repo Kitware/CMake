@@ -5,7 +5,14 @@
 FindFreetype
 ------------
 
-Finds the FreeType font renderer library.
+Finds the FreeType font renderer library:
+
+.. code-block:: cmake
+
+  find_package(Freetype [<version>] [...])
+
+.. versionadded:: 3.7
+  Debug and Release (optimized) library variants are found separately.
 
 Imported Targets
 ^^^^^^^^^^^^^^^^
@@ -24,9 +31,14 @@ Result Variables
 This module defines the following variables:
 
 ``Freetype_FOUND``
-  Boolean indicating whether the (requested version of) Freetype is found.  For
-  backward compatibility, the ``FREETYPE_FOUND`` variable is also set to the
-  same value.
+  .. versionadded:: 3.3
+
+  Boolean indicating whether (the requested version of) Freetype was found.
+
+``Freetype_VERSION``
+  .. versionadded:: 4.2
+
+  The version of Freetype found.
 
 ``FREETYPE_INCLUDE_DIRS``
   Include directories containing headers needed to use Freetype.  This is the
@@ -35,9 +47,6 @@ This module defines the following variables:
 
 ``FREETYPE_LIBRARIES``
   Libraries needed to link against for using Freetype.
-
-``FREETYPE_VERSION_STRING``
-  The version of Freetype found.
 
 .. versionadded:: 3.7
   Debug and Release library variants are found separately.
@@ -61,6 +70,23 @@ This module accepts the following variables:
 ``FREETYPE_DIR``
   The user may set this environment variable to the root directory of a Freetype
   installation to find Freetype in non-standard locations.
+
+Deprecated Variables
+^^^^^^^^^^^^^^^^^^^^
+
+The following variables are provided for backward compatibility:
+
+``FREETYPE_FOUND``
+  .. deprecated:: 4.2
+    Use ``Freetype_FOUND``, which has the same value.
+
+  Boolean indicating whether (the requested version of) Freetype was found.
+
+``FREETYPE_VERSION_STRING``
+  .. deprecated:: 4.2
+    Superseded by the ``Freetype_VERSION``.
+
+  The version of Freetype found.
 
 Examples
 ^^^^^^^^
@@ -170,20 +196,21 @@ if(FREETYPE_INCLUDE_DIR_freetype2 AND FREETYPE_H)
   file(STRINGS "${FREETYPE_H}" freetype_version_str
        REGEX "^#[\t ]*define[\t ]+FREETYPE_(MAJOR|MINOR|PATCH)[\t ]+[0-9]+$")
 
-  unset(FREETYPE_VERSION_STRING)
+  unset(Freetype_VERSION)
   foreach(VPART MAJOR MINOR PATCH)
     foreach(VLINE ${freetype_version_str})
       if(VLINE MATCHES "^#[\t ]*define[\t ]+FREETYPE_${VPART}[\t ]+([0-9]+)$")
         set(FREETYPE_VERSION_PART "${CMAKE_MATCH_1}")
-        if(FREETYPE_VERSION_STRING)
-          string(APPEND FREETYPE_VERSION_STRING ".${FREETYPE_VERSION_PART}")
+        if(Freetype_VERSION)
+          string(APPEND Freetype_VERSION ".${FREETYPE_VERSION_PART}")
         else()
-          set(FREETYPE_VERSION_STRING "${FREETYPE_VERSION_PART}")
+          set(Freetype_VERSION "${FREETYPE_VERSION_PART}")
         endif()
         unset(FREETYPE_VERSION_PART)
       endif()
     endforeach()
   endforeach()
+  set(FREETYPE_VERSION_STRING ${Freetype_VERSION})
 endif()
 
 include(FindPackageHandleStandardArgs)
@@ -194,7 +221,7 @@ find_package_handle_standard_args(
     FREETYPE_LIBRARY
     FREETYPE_INCLUDE_DIRS
   VERSION_VAR
-    FREETYPE_VERSION_STRING
+    Freetype_VERSION
 )
 
 mark_as_advanced(

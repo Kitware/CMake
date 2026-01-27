@@ -1,0 +1,5 @@
+^CMake Error: Could not load instrumentation queries from [^
+]+:
+bad-option\.json:[0-9]+: Not a valid option: "bad option"
+  "options": \["staticSystemInformation", "bad option"\]
+                                         \^$

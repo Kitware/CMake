@@ -10,6 +10,7 @@
 #include <initializer_list>
 #include <iomanip>
 #include <iostream>
+#include <iterator>
 #include <sstream>
 #include <stdexcept>
 #include <utility>
@@ -24,6 +25,8 @@
 
 #include <cmext/algorithm>
 #include <cmext/string_view>
+
+#include <sys/types.h>
 
 #include "cmsys/FStream.hxx"
 #include "cmsys/Glob.hxx"
@@ -50,7 +53,7 @@
 #include "cmExternalMakefileProjectGenerator.h"
 #include "cmFileTimeCache.h"
 #include "cmGeneratorTarget.h"
-#include "cmGlobCacheEntry.h"
+#include "cmGlobCacheEntry.h" // IWYU pragma: keep
 #include "cmGlobalGenerator.h"
 #include "cmGlobalGeneratorFactory.h"
 #include "cmLinkLineComputer.h"
@@ -100,6 +103,7 @@
 #    include <cmext/memory>
 
 #    include "cmGlobalBorlandMakefileGenerator.h"
+#    include "cmGlobalFastbuildGenerator.h"
 #    include "cmGlobalJOMMakefileGenerator.h"
 #    include "cmGlobalNMakeMakefileGenerator.h"
 #    include "cmGlobalVisualStudio14Generator.h"
@@ -123,6 +127,7 @@
 #elif defined(CMAKE_BOOTSTRAP_NINJA)
 #  include "cmGlobalNinjaGenerator.h"
 #endif
+#include "cmGlobalFastbuildGenerator.h"
 
 #if !defined(CMAKE_BOOTSTRAP)
 #  include "cmExtraCodeBlocksGenerator.h"
@@ -455,8 +460,8 @@ void cmake::CleanupCommandsAndMacros()
 
 #ifndef CMAKE_BOOTSTRAP
 void cmake::SetWarningFromPreset(std::string const& name,
-                                 cm::optional<bool> const& warning,
-                                 cm::optional<bool> const& error)
+                                 cm::optional<bool> warning,
+                                 cm::optional<bool> error)
 {
   if (warning) {
     if (*warning) {
@@ -937,6 +942,10 @@ void cmake::LoadEnvironmentPresets()
   readGeneratorVar("CMAKE_GENERATOR_INSTANCE", this->GeneratorInstance);
   readGeneratorVar("CMAKE_GENERATOR_PLATFORM", this->GeneratorPlatform);
   readGeneratorVar("CMAKE_GENERATOR_TOOLSET", this->GeneratorToolset);
+  this->IntermediateDirStrategy =
+    cmSystemTools::GetEnvVar("CMAKE_INTERMEDIATE_DIR_STRATEGY");
+  this->AutogenIntermediateDirStrategy =
+    cmSystemTools::GetEnvVar("CMAKE_AUTOGEN_INTERMEDIATE_DIR_STRATEGY");
 }
 
 namespace {
@@ -1759,6 +1768,16 @@ cmake::TraceFormat cmake::StringToTraceFormat(std::string const& traceStr)
                                  return p.first == traceStrLowCase;
                                });
   return (it != levels.cend()) ? it->second : TraceFormat::Undefined;
+}
+
+bool cmake::PopTraceCmd()
+{
+  if (this->cmakeLangTraceCmdStack.empty()) {
+    // Nothing to pop! A caller should report an error.
+    return false;
+  }
+  this->cmakeLangTraceCmdStack.pop();
+  return true;
 }
 
 void cmake::SetTraceFile(std::string const& file)
@@ -2604,6 +2623,23 @@ int cmake::ActualConfigure()
                         "Name of generator toolset.", cmStateEnums::INTERNAL);
   }
 
+  if (!this->State->GetInitializedCacheValue(
+        "CMAKE_INTERMEDIATE_DIR_STRATEGY") &&
+      this->IntermediateDirStrategy) {
+    this->AddCacheEntry(
+      "CMAKE_INTERMEDIATE_DIR_STRATEGY", *this->IntermediateDirStrategy,
+      "Select the intermediate directory strategy", cmStateEnums::INTERNAL);
+  }
+  if (!this->State->GetInitializedCacheValue(
+        "CMAKE_AUTOGEN_INTERMEDIATE_DIR_STRATEGY") &&
+      this->AutogenIntermediateDirStrategy) {
+    this->AddCacheEntry(
+      "CMAKE_AUTOGEN_INTERMEDIATE_DIR_STRATEGY",
+      *this->AutogenIntermediateDirStrategy,
+      "Select the intermediate directory strategy for Autogen",
+      cmStateEnums::INTERNAL);
+  }
+
   if (!this->State->GetInitializedCacheValue("CMAKE_TEST_LAUNCHER")) {
     cm::optional<std::string> testLauncher =
       cmSystemTools::GetEnvVar("CMAKE_TEST_LAUNCHER");
@@ -2647,7 +2683,7 @@ int cmake::ActualConfigure()
     this->ConfigureLog = cm::make_unique<cmConfigureLog>(
       cmStrCat(this->GetHomeOutputDirectory(), "/CMakeFiles"_s),
       this->FileAPI->GetConfigureLogVersions());
-    this->Instrumentation->LoadQueries();
+    this->Instrumentation->CheckCDashVariable();
   }
 #endif
 
@@ -2713,26 +2749,25 @@ int cmake::ActualConfigure()
     if (mf->IsOn("CTEST_USE_LAUNCHERS")) {
       launcher = cmStrCat('"', cmSystemTools::GetCTestCommand(),
                           "\" --launch "
-                          "--current-build-dir <CMAKE_CURRENT_BINARY_DIR> ");
+                          "--current-build-dir <CMAKE_CURRENT_BINARY_DIR> "
+                          "--object-dir <TARGET_SUPPORT_DIR> ");
     } else {
       launcher =
         cmStrCat('"', cmSystemTools::GetCTestCommand(), "\" --instrument ");
     }
     std::string common_args =
-      cmStrCat(" --target-name <TARGET_NAME> --build-dir \"",
+      cmStrCat(" --target-name <TARGET_NAME> --config <CONFIG> --build-dir \"",
                this->State->GetBinaryDirectory(), "\" ");
     this->State->SetGlobalProperty(
       "RULE_LAUNCH_COMPILE",
       cmStrCat(
         launcher, "--command-type compile", common_args,
-        "--config <CONFIG> "
         "--output <OBJECT> --source <SOURCE> --language <LANGUAGE> -- "));
     this->State->SetGlobalProperty(
       "RULE_LAUNCH_LINK",
       cmStrCat(
         launcher, "--command-type link", common_args,
-        "--output <TARGET> --target-type <TARGET_TYPE> --config <CONFIG> "
-        "--language <LANGUAGE> --target-labels \"<TARGET_LABELS>\" -- "));
+        "--output <TARGET> --config <CONFIG> --language <LANGUAGE> -- "));
     this->State->SetGlobalProperty(
       "RULE_LAUNCH_CUSTOM",
       cmStrCat(launcher, "--command-type custom", common_args,
@@ -3016,6 +3051,23 @@ int cmake::Run(std::vector<std::string> const& args, bool noconfigure)
   if (!this->CheckBuildSystem()) {
     return 0;
   }
+  // After generating fbuild.bff, FastBuild sees rebuild-bff as outdated since
+  // it hasn’t built the target yet. To make it a no-op for future runs, we
+  // trigger a dummy fbuild invocation that creates this marker file and runs
+  // CMake, marking rebuild-bff as up-to-date.
+  std::string const FBuildRestatFile =
+    cmStrCat(this->GetHomeOutputDirectory(), '/', FASTBUILD_RESTAT_FILE);
+  if (cmSystemTools::FileExists(FBuildRestatFile)) {
+    cmsys::ifstream restat(FBuildRestatFile.c_str(),
+                           std::ios::in | std::ios::binary);
+    std::string const file((std::istreambuf_iterator<char>(restat)),
+                           std::istreambuf_iterator<char>());
+    // On Windows can not delete file if it's still opened.
+    restat.close();
+    cmSystemTools::Touch(file, true);
+    cmSystemTools::RemoveFile(FBuildRestatFile);
+    return 0;
+  }
 
 #ifdef CMake_ENABLE_DEBUGGER
   if (!this->StartDebuggerIfEnabled()) {
@@ -3069,6 +3121,9 @@ int cmake::Generate()
       return -1;
     }
     this->GlobalGenerator->Generate();
+    if (this->Instrumentation->HasQuery()) {
+      this->Instrumentation->WriteCMakeContent(this->GlobalGenerator);
+    }
     return 0;
   };
 
@@ -3092,10 +3147,6 @@ int cmake::Generate()
         << ms.count() / 1000.0L << "s)";
     this->UpdateProgress(msg.str(), -1);
   }
-#if !defined(CMAKE_BOOTSTRAP)
-  this->Instrumentation->CollectTimingData(
-    cmInstrumentationQuery::Hook::PostGenerate);
-#endif
   if (!this->GraphVizFile.empty()) {
     std::cout << "Generate graphviz: " << this->GraphVizFile << '\n';
     this->GenerateGraphViz(this->GraphVizFile);
@@ -3117,6 +3168,8 @@ int cmake::Generate()
 #if !defined(CMAKE_BOOTSTRAP)
   this->GlobalGenerator->WriteInstallJson();
   this->FileAPI->WriteReplies(cmFileAPI::IndexFor::Success);
+  this->Instrumentation->CollectTimingData(
+    cmInstrumentationQuery::Hook::PostGenerate);
 #endif
 
   return 0;
@@ -3241,6 +3294,7 @@ void cmake::AddDefaultGenerators()
   this->Generators.push_back(cmGlobalUnixMakefileGenerator3::NewFactory());
   this->Generators.push_back(cmGlobalNinjaGenerator::NewFactory());
   this->Generators.push_back(cmGlobalNinjaMultiGenerator::NewFactory());
+  this->Generators.push_back(cmGlobalFastbuildGenerator::NewFactory());
 #elif defined(CMAKE_BOOTSTRAP_NINJA)
   this->Generators.push_back(cmGlobalNinjaGenerator::NewFactory());
 #elif defined(CMAKE_BOOTSTRAP_MAKEFILES)
@@ -4029,6 +4083,9 @@ int cmake::Build(int jobs, std::string dir, std::vector<std::string> targets,
   };
 
 #if !defined(CMAKE_BOOTSTRAP)
+  // Block the instrumentation build daemon from spawning during this build.
+  // This lock will be released when the process exits at the end of the build.
+  instrumentation.LockBuildDaemon();
   int buildresult =
     instrumentation.InstrumentCommand("cmakeBuild", args, doBuild);
   instrumentation.CollectTimingData(
@@ -4125,18 +4182,22 @@ T const* cmake::FindPresetForWorkflow(
   return &*it->second.Expanded;
 }
 
-std::function<int()> cmake::BuildWorkflowStep(
+namespace {
+
+std::function<cmUVProcessChain::Status()> buildWorkflowStep(
   std::vector<std::string> const& args)
 {
   cmUVProcessChainBuilder builder;
   builder.AddCommand(args)
     .SetExternalStream(cmUVProcessChainBuilder::Stream_OUTPUT, stdout)
     .SetExternalStream(cmUVProcessChainBuilder::Stream_ERROR, stderr);
-  return [builder]() -> int {
+  return [builder]() -> cmUVProcessChain::Status {
     auto chain = builder.Start();
     chain.Wait();
-    return static_cast<int>(chain.GetStatus(0).ExitStatus);
+    return chain.GetStatus(0);
   };
+}
+
 }
 #endif
 
@@ -4199,10 +4260,11 @@ int cmake::Workflow(std::string const& presetName,
     int StepNumber;
     cm::static_string_view Type;
     std::string Name;
-    std::function<int()> Action;
+    std::function<cmUVProcessChain::Status()> Action;
 
     CalculatedStep(int stepNumber, cm::static_string_view type,
-                   std::string name, std::function<int()> action)
+                   std::string name,
+                   std::function<cmUVProcessChain::Status()> action)
       : StepNumber(stepNumber)
       , Type(type)
       , Name(std::move(name))
@@ -4229,7 +4291,7 @@ int cmake::Workflow(std::string const& presetName,
           args.emplace_back("--fresh");
         }
         steps.emplace_back(stepNumber, "configure"_s, step.PresetName,
-                           this->BuildWorkflowStep(args));
+                           buildWorkflowStep(args));
       } break;
       case cmCMakePresetsGraph::WorkflowPreset::WorkflowStep::Type::Build: {
         auto const* buildPreset = this->FindPresetForWorkflow(
@@ -4239,8 +4301,8 @@ int cmake::Workflow(std::string const& presetName,
         }
         steps.emplace_back(
           stepNumber, "build"_s, step.PresetName,
-          this->BuildWorkflowStep({ cmSystemTools::GetCMakeCommand(),
-                                    "--build", "--preset", step.PresetName }));
+          buildWorkflowStep({ cmSystemTools::GetCMakeCommand(), "--build",
+                              "--preset", step.PresetName }));
       } break;
       case cmCMakePresetsGraph::WorkflowPreset::WorkflowStep::Type::Test: {
         auto const* testPreset = this->FindPresetForWorkflow(
@@ -4250,8 +4312,8 @@ int cmake::Workflow(std::string const& presetName,
         }
         steps.emplace_back(
           stepNumber, "test"_s, step.PresetName,
-          this->BuildWorkflowStep({ cmSystemTools::GetCTestCommand(),
-                                    "--preset", step.PresetName }));
+          buildWorkflowStep({ cmSystemTools::GetCTestCommand(), "--preset",
+                              step.PresetName }));
       } break;
       case cmCMakePresetsGraph::WorkflowPreset::WorkflowStep::Type::Package: {
         auto const* packagePreset = this->FindPresetForWorkflow(
@@ -4261,14 +4323,13 @@ int cmake::Workflow(std::string const& presetName,
         }
         steps.emplace_back(
           stepNumber, "package"_s, step.PresetName,
-          this->BuildWorkflowStep({ cmSystemTools::GetCPackCommand(),
-                                    "--preset", step.PresetName }));
+          buildWorkflowStep({ cmSystemTools::GetCPackCommand(), "--preset",
+                              step.PresetName }));
       } break;
     }
     stepNumber++;
   }
 
-  int stepResult;
   bool first = true;
   for (auto const& step : steps) {
     if (!first) {
@@ -4278,8 +4339,15 @@ int cmake::Workflow(std::string const& presetName,
               << steps.size() << ": " << step.Type << " preset \"" << step.Name
               << "\"\n\n"
               << std::flush;
-    if ((stepResult = step.Action()) != 0) {
-      return stepResult;
+    cmUVProcessChain::Status const status = step.Action();
+    if (status.ExitStatus != 0) {
+      return static_cast<int>(status.ExitStatus);
+    }
+    auto const codeReasonPair = status.GetException();
+    if (codeReasonPair.first != cmUVProcessChain::ExceptionCode::None) {
+      std::cout << "Step command ended abnormally: " << codeReasonPair.second
+                << std::endl;
+      return status.SpawnResult != 0 ? status.SpawnResult : status.TermSignal;
     }
     first = false;
   }

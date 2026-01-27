@@ -215,7 +215,7 @@ void cmExportFileGenerator::AddImportPrefix(std::string& exportDirs) const
   cmGeneratorExpression::Split(exportDirs, entries);
   exportDirs.clear();
   char const* sep = "";
-  cm::string_view const& prefixWithSlash = this->GetImportPrefixWithSlash();
+  cm::string_view const prefixWithSlash = this->GetImportPrefixWithSlash();
   for (std::string const& e : entries) {
     exportDirs += sep;
     sep = ";";

@@ -12,7 +12,9 @@ def read_codemodel_json_data(filename):
 def check_objects(o, g):
     assert is_list(o)
     assert len(o) == 1
-    check_index_object(o[0], "codemodel", 2, 8, check_object_codemodel(g))
+    major = 2
+    minor = 9
+    check_index_object(o[0], "codemodel", major, minor, check_object_codemodel(g, major, minor))
 
 def check_backtrace(t, b, backtrace):
     btg = t["backtraceGraph"]
@@ -52,7 +54,7 @@ def check_backtraces(t, actual, expected):
         check_backtrace(t, actual[i], expected[i])
         i += 1
 
-def check_directory(c):
+def check_directory(c, major, minor):
     def _check(actual, expected):
         assert is_dict(actual)
         expected_keys = ["build", "jsonFile", "source", "projectIndex"]
@@ -80,6 +82,13 @@ def check_directory(c):
                              missing_exception=lambda e: "Target ID: %s" % e,
                              extra_exception=lambda a: "Target ID: %s" % c["targets"][a]["id"])
 
+        if expected["abstractTargetIds"] is not None:
+            expected_keys.append("abstractTargetIndexes")
+            check_list_match(lambda a, e: matches(c["abstractTargets"][a]["id"], e),
+                             actual["abstractTargetIndexes"], expected["abstractTargetIds"],
+                             missing_exception=lambda e: "Abstract target ID: %s" % e,
+                             extra_exception=lambda a: "Abstract target ID: %s" % c["abstractTargets"][a]["id"])
+
         if expected["minimumCMakeVersion"] is not None:
             expected_keys.append("minimumCMakeVersion")
             assert is_dict(actual["minimumCMakeVersion"])
@@ -100,7 +109,12 @@ def check_directory(c):
             d = json.load(f)
 
         assert is_dict(d)
-        assert sorted(d.keys()) == ["backtraceGraph", "installers", "paths"]
+        assert sorted(d.keys()) == ["backtraceGraph", "codemodelVersion", "installers", "paths"]
+
+        # We get the values for major and minor directly rather than from the "expected" data.
+        # This avoids having to update every data file any time the major or minor version changes.
+        assert is_int(d["codemodelVersion"]["major"], major)
+        assert is_int(d["codemodelVersion"]["minor"], minor)
 
         assert is_string(d["paths"]["source"], actual["source"])
         assert is_string(d["paths"]["build"], actual["build"])
@@ -266,7 +280,7 @@ def check_backtrace_graph(btg):
 
         assert sorted(n.keys()) == sorted(expected_keys)
 
-def check_target(c):
+def check_target(c, major, minor):
     def _check(actual, expected):
         assert is_dict(actual)
         assert sorted(actual.keys()) == ["directoryIndex", "id", "jsonFile", "name", "projectIndex"]
@@ -281,17 +295,40 @@ def check_target(c):
         with open(filepath) as f:
             obj = json.load(f)
 
-        expected_keys = ["name", "id", "type", "backtraceGraph", "paths", "sources"]
+        expected_keys = ["codemodelVersion", "name", "id", "type", "backtraceGraph", "paths", "sources"]
         assert is_dict(obj)
         assert is_string(obj["name"], expected["name"])
         assert matches(obj["id"], expected["id"])
         assert is_string(obj["type"], expected["type"])
         check_backtrace_graph(obj["backtraceGraph"])
 
+        if expected["imported"] is not None:
+            expected_keys.append("imported")
+            assert is_bool(obj["imported"], expected["imported"])
+
+        if expected["local"] is not None:
+            expected_keys.append("local")
+            assert is_bool(obj["local"], expected["local"])
+
+        if expected["abstract"] is not None:
+            expected_keys.append("abstract")
+            assert is_bool(obj["abstract"], expected["abstract"])
+
+        if expected["symbolic"] is not None:
+            expected_keys.append("symbolic")
+            assert is_bool(obj["symbolic"], expected["symbolic"])
+
         assert is_dict(obj["paths"])
         assert sorted(obj["paths"].keys()) == ["build", "source"]
         assert matches(obj["paths"]["build"], expected["build"])
         assert matches(obj["paths"]["source"], expected["source"])
+
+        # We get the values for major and minor directly rather than from the "expected" data.
+        # This avoids having to update every data file any time the major or minor version changes.
+        assert is_dict(obj["codemodelVersion"])
+        assert sorted(obj["codemodelVersion"].keys()) == ["major", "minor"]
+        assert is_int(obj["codemodelVersion"]["major"], major)
+        assert is_int(obj["codemodelVersion"]["minor"], minor)
 
         def check_file_set(actual, expected):
             assert is_dict(actual)
@@ -530,6 +567,144 @@ def check_target(c):
                              missing_exception=lambda e: "Dependency ID: %s" % e["id"],
                              extra_exception=lambda a: "Dependency ID: %s" % a["id"])
 
+        def is_same_link_library(actual, expected):
+            if "id" in actual:
+                return expected["id"] is not None and matches(actual["id"], expected["id"])
+            if "fragment" in actual:
+                return expected["fragment"] is not None and is_string(actual["fragment"], expected["fragment"])
+            assert False  # actual must have one of id or fragment
+
+        if expected["linkLibraries"] is not None:
+            expected_keys.append("linkLibraries")
+
+            def check_link_library(actual, expected):
+                assert is_dict(actual)
+                expected_keys = []
+
+                # We always require exactly one of id or fragment
+                if expected["id"] is not None:
+                    expected_keys.append("id")
+                    assert matches(actual["id"], expected["id"])
+                    assert "fragment" not in actual
+                else:
+                    expected_keys.append("fragment")
+                    assert is_string(actual["fragment"], expected["fragment"])
+                    assert "id" not in actual
+
+                if expected["backtrace"] is not None:
+                    expected_keys.append("backtrace")
+                    check_backtrace(obj, actual["backtrace"], expected["backtrace"])
+
+                if expected["fromDependency"] is not None:
+                    expected_keys.append("fromDependency")
+                    assert is_dict(actual["fromDependency"])
+                    assert matches(actual["fromDependency"]["id"], expected["fromDependency"])
+                    assert sorted(actual["fromDependency"].keys()) == ["id"]
+
+                assert sorted(actual.keys()) == sorted(expected_keys)
+
+            check_list_match(is_same_link_library,
+                             obj["linkLibraries"], expected["linkLibraries"],
+                             check=check_link_library,
+                             check_exception=lambda a, e: "Mismatched link library: %s" % (a["id"] if "id" in a else a["fragment"]),
+                             missing_exception=lambda e: "Missing link library: %s" % (e["id"] if e["id"] is not None else e["fragment"]),
+                             extra_exception=lambda a: "Extra link library: %s" % (a["id"] if "id" in a else a["fragment"]))
+
+        if expected["interfaceLinkLibraries"] is not None:
+            expected_keys.append("interfaceLinkLibraries")
+
+            def check_interface_link_library(actual, expected):
+                assert is_dict(actual)
+                expected_keys = []
+
+                # We always require exactly one of id or fragment
+                if expected["id"] is not None:
+                    expected_keys.append("id")
+                    assert matches(actual["id"], expected["id"])
+                    assert "fragment" not in actual
+                else:
+                    expected_keys.append("fragment")
+                    assert is_string(actual["fragment"], expected["fragment"])
+                    assert "id" not in actual
+
+                if expected["backtrace"] is not None:
+                    expected_keys.append("backtrace")
+                    check_backtrace(obj, actual["backtrace"], expected["backtrace"])
+
+                assert sorted(actual.keys()) == sorted(expected_keys)
+
+            check_list_match(is_same_link_library,
+                             obj["interfaceLinkLibraries"], expected["interfaceLinkLibraries"],
+                             check=check_interface_link_library,
+                             check_exception=lambda a, e: "Mismatched interface link library: %s" % (a["id"] if "id" in a else a["fragment"]),
+                             missing_exception=lambda e: "Missing interface link library: %s" % (e["id"] if e["id"] is not None else e["fragment"]),
+                             extra_exception=lambda a: "Extra interface link library: %s" % (a["id"] if "id" in a else a["fragment"]))
+
+        if expected["compileDependencies"] is not None:
+            expected_keys.append("compileDependencies")
+
+            def check_usage_dependency(actual, expected):
+                assert is_dict(actual)
+                assert matches(actual["id"], expected["id"])
+                expected_keys = ["id"]
+
+                if expected["backtrace"] is not None:
+                    expected_keys.append("backtrace")
+                    check_backtrace(obj, actual["backtrace"], expected["backtrace"])
+
+                if expected["fromDependency"] is not None:
+                    expected_keys.append("fromDependency")
+                    assert is_dict(actual["fromDependency"])
+                    assert matches(actual["fromDependency"]["id"], expected["fromDependency"])
+                    assert sorted(actual["fromDependency"].keys()) == ["id"]
+
+                assert sorted(actual.keys()) == sorted(expected_keys)
+
+            check_list_match(lambda a, e: matches(a["id"], e["id"]),
+                             obj["compileDependencies"], expected["compileDependencies"],
+                             check=check_usage_dependency,
+                             check_exception=lambda a, e: "Mismatched compile dependency: %s" % a["id"],
+                             missing_exception=lambda e: "Missing compile dependency: %s" % e["id"],
+                             extra_exception=lambda a: "Extra compile dependency: %s" % a["id"])
+
+        def check_only_target_dependency(actual, expected):
+            assert is_dict(actual)
+            assert matches(actual["id"], expected["id"])
+            expected_keys = ["id"]
+
+            if expected["backtrace"] is not None:
+                expected_keys.append("backtrace")
+                check_backtrace(obj, actual["backtrace"], expected["backtrace"])
+
+            assert sorted(actual.keys()) == sorted(expected_keys)
+
+        if expected["interfaceCompileDependencies"] is not None:
+            expected_keys.append("interfaceCompileDependencies")
+            check_list_match(lambda a, e: matches(a["id"], e["id"]),
+                             obj["interfaceCompileDependencies"], expected["interfaceCompileDependencies"],
+                             check=check_only_target_dependency,
+                             check_exception=lambda a, e: "Mismatched interface compile dependency: %s" % a["id"],
+                             missing_exception=lambda e: "Missing interface compile dependency: %s" % e["id"],
+                             extra_exception=lambda a: "Extra interface compile dependency: %s" % a["id"])
+
+        if expected["objectDependencies"] is not None:
+            expected_keys.append("objectDependencies")
+            check_list_match(lambda a, e: matches(a["id"], e["id"]),
+                             obj["objectDependencies"], expected["objectDependencies"],
+                             check=check_only_target_dependency,
+                             check_exception=lambda a, e: "Mismatched object dependency: %s" % a["id"],
+                             missing_exception=lambda e: "Missing object dependency: %s" % e["id"],
+                             extra_exception=lambda a: "Extra object dependency: %s" % a["id"])
+
+        if expected["orderDependencies"] is not None:
+            expected_keys.append("orderDependencies")
+            check_list_match(lambda a, e: matches(a["id"], e["id"]),
+                             obj["orderDependencies"], expected["orderDependencies"],
+                             check=check_only_target_dependency,
+                             check_exception=lambda a, e: "Mismatched order dependency: %s" % a["id"],
+                             missing_exception=lambda e: "Missing order dependency: %s" % e["id"],
+                             extra_exception=lambda a: "Extra order dependency: %s" % a["id"])
+
         if expected["sourceGroups"] is not None:
             expected_keys.append("sourceGroups")
 
@@ -733,6 +908,13 @@ def check_project(c):
                              missing_exception=lambda e: "Target ID: %s" % e,
                              extra_exception=lambda a: "Target ID: %s" % c["targets"][a]["id"])
 
+        if expected["abstractTargetIds"] is not None:
+            expected_keys.append("abstractTargetIndexes")
+            check_list_match(lambda a, e: matches(c["abstractTargets"][a]["id"], e),
+                             actual["abstractTargetIndexes"], expected["abstractTargetIds"],
+                             missing_exception=lambda e: "Abstract target ID: %s" % e,
+                             extra_exception=lambda a: "Abstract target ID: %s" % c["abstractTargets"][a]["id"])
+
         assert sorted(actual.keys()) == sorted(expected_keys)
 
     return _check
@@ -754,6 +936,7 @@ def gen_check_directories(c, g):
         read_codemodel_json_data("directories/fileset.json"),
         read_codemodel_json_data("directories/subdir.json"),
         read_codemodel_json_data("directories/framework.json"),
+        read_codemodel_json_data("directories/direct.json"),
     ]
 
     if matches(g["name"], "^Visual Studio "):
@@ -765,6 +948,7 @@ def gen_check_directories(c, g):
         if ';' in os.environ.get("CMAKE_OSX_ARCHITECTURES", ""):
             for e in expected:
                 e["targetIds"] = filter_list(lambda t: not matches(t, "^\\^(link_imported_object_exe)"), e["targetIds"])
+                e["abstractTargetIds"] = filter_list(lambda t: not matches(t, "^\\^(imported_object_lib)"), e["abstractTargetIds"])
 
     else:
         for e in expected:
@@ -794,14 +978,14 @@ def gen_check_directories(c, g):
 
     return expected
 
-def check_directories(c, g):
+def check_directories(c, g, major, minor):
     check_list_match(lambda a, e: matches(a["source"], e["source"]), c["directories"], gen_check_directories(c, g),
-                     check=check_directory(c),
+                     check=check_directory(c, major, minor),
                      check_exception=lambda a, e: "Directory source: %s" % a["source"],
                      missing_exception=lambda e: "Directory source: %s" % e["source"],
                      extra_exception=lambda a: "Directory source: %s" % a["source"])
 
-def gen_check_targets(c, g, inSource):
+def gen_check_build_system_targets(c, g, inSource):
     expected = [
         read_codemodel_json_data("targets/all_build_top.json"),
         read_codemodel_json_data("targets/zero_check_top.json"),
@@ -854,17 +1038,27 @@ def gen_check_targets(c, g, inSource):
         read_codemodel_json_data("targets/link_imported_static_exe.json"),
         read_codemodel_json_data("targets/link_imported_object_exe.json"),
         read_codemodel_json_data("targets/link_imported_interface_exe.json"),
+        read_codemodel_json_data("targets/link_imported_interface_symbolic_exe.json"),
 
         read_codemodel_json_data("targets/all_build_interface.json"),
         read_codemodel_json_data("targets/zero_check_interface.json"),
         read_codemodel_json_data("targets/iface_srcs.json"),
+
+        read_codemodel_json_data("targets/all_build_direct.json"),
+        read_codemodel_json_data("targets/zero_check_direct.json"),
+        read_codemodel_json_data("targets/link_transitive_direct_exe.json"),
+        read_codemodel_json_data("targets/transitive_direct_lib.json"),
+        read_codemodel_json_data("targets/inject_direct_lib_impl.json"),
+        read_codemodel_json_data("targets/usage_lib.json"),
+        read_codemodel_json_data("targets/link_usage_exe.json"),
+        read_codemodel_json_data("targets/compile_usage_exe.json"),
 
         read_codemodel_json_data("targets/all_build_custom.json"),
         read_codemodel_json_data("targets/zero_check_custom.json"),
         read_codemodel_json_data("targets/custom_tgt.json"),
         read_codemodel_json_data("targets/custom_exe.json"),
         read_codemodel_json_data("targets/all_build_external.json"),
-        read_codemodel_json_data("targets/zero_check_external.json"),
+        read_codemodel_json_data("targets/zero_check_external.json"),  # Must be the last zero_check_... because matches all ZERO_CHECK::@XXX target ids
         read_codemodel_json_data("targets/generated_exe.json"),
 
         read_codemodel_json_data("targets/c_headers_1.json"),
@@ -886,7 +1080,7 @@ def gen_check_targets(c, g, inSource):
                 e["compileGroups"] = apple_exe_framework["compileGroups"]
                 e["link"] = apple_exe_framework["link"]
 
-    if cxx_compiler_id in ['Clang', 'AppleClang', 'LCC', 'GNU', 'Intel', 'IntelLLVM', 'MSVC', 'Embarcadero', 'CrayClang', 'IBMClang'] and g["name"] != "Xcode":
+    if args.cxx_compiler_id in ['Clang', 'AppleClang', 'LCC', 'GNU', 'Intel', 'IntelLLVM', 'MSVC', 'Embarcadero', 'CrayClang', 'IBMClang'] and g["name"] != "Xcode":
         for e in expected:
             if e["name"] == "cxx_exe":
                 if matches(g["name"], "^(Visual Studio |Ninja Multi-Config)"):
@@ -899,6 +1093,21 @@ def gen_check_targets(c, g, inSource):
                 e["compileGroups"] = precompile_header_data["compileGroups"]
                 e["sources"] = precompile_header_data["sources"]
                 e["sourceGroups"] = precompile_header_data["sourceGroups"]
+
+    if args.cxx_compiler_id != 'MSVC' and args.cxx_simulate_id != 'MSVC':
+        for e in expected:
+            if not e["compileGroups"]:
+                continue
+
+            for group in e["compileGroups"]:
+                if not group["defines"]:
+                    continue
+
+                # _WINDLL is expected for compilers targeting the MSVC ABI, but not for others.
+                # And _MBCS too
+                group["defines"] = [d for d in group["defines"] if d and d["define"] != "_WINDLL" and d["define"] != "_MBCS"]
+                if len(group["defines"]) == 0:
+                    group["defines"] = None
 
     if os.path.exists(os.path.join(reply_dir, "..", "..", "..", "..", "cxx", "cxx_std_11.txt")):
         for e in expected:
@@ -975,7 +1184,8 @@ def gen_check_targets(c, g, inSource):
             expected = filter_list(lambda e: e["name"] not in ("link_imported_object_exe"), expected)
             for e in expected:
                 e["dependencies"] = filter_list(lambda d: not matches(d["id"], "^\\^link_imported_object_exe::@"), e["dependencies"])
-                if e["name"] in ("c_object_lib", "cxx_object_lib"):
+                e["orderDependencies"] = filter_list(lambda d: not matches(d["id"], "^\\^link_imported_object_exe::@"), e["orderDependencies"])
+                if e["name"] in ("c_object_lib", "cxx_object_lib", "inject_direct_lib_impl"):
                     e["artifacts"] = None
 
     else:
@@ -1001,13 +1211,58 @@ def gen_check_targets(c, g, inSource):
 
     return expected
 
-def check_targets(c, g, inSource):
+def gen_check_abstract_targets(c, g, inSource):
+    expected = [
+        read_codemodel_json_data("targets/interface_lib.json"),
+
+        read_codemodel_json_data("targets/import_framework.json"),
+
+        read_codemodel_json_data("targets/imported_exe.json"),
+        read_codemodel_json_data("targets/imported_lib.json"),
+        read_codemodel_json_data("targets/imported_interface_lib.json"),
+        read_codemodel_json_data("targets/imported_interface_symbolic_lib.json"),
+        read_codemodel_json_data("targets/imported_object_lib.json"),
+        read_codemodel_json_data("targets/imported_shared_lib.json"),
+        read_codemodel_json_data("targets/imported_static_lib.json"),
+
+        read_codemodel_json_data("targets/iface_none.json"),
+        read_codemodel_json_data("targets/iface_symbolic.json"),
+
+        read_codemodel_json_data("targets/inject_direct_lib.json"),
+    ]
+
+    if sys.platform == "darwin":
+        for e in expected:
+            if e["name"] == "import_framework":
+                apple_import_framework = read_codemodel_json_data("targets/apple_import_framework.json")
+                e["artifacts"] = apple_import_framework["artifacts"]
+                e["nameOnDisk"] = apple_import_framework["nameOnDisk"]
+
+    if g["name"] == "Xcode":
+        if ';' in os.environ.get("CMAKE_OSX_ARCHITECTURES", ""):
+            expected = filter_list(lambda e: e["name"] not in ("imported_object_lib"), expected)
+
+    if sys.platform not in ("win32", "cygwin", "msys"):
+        for e in expected:
+            e["artifacts"] = filter_list(lambda a: not a["_dllExtra"], e["artifacts"])
+
+    return expected
+
+def check_build_system_targets(c, g, major, minor, inSource):
     check_list_match(lambda a, e: matches(a["id"], e["id"]),
-                     c["targets"], gen_check_targets(c, g, inSource),
-                     check=check_target(c),
+                     c["targets"], gen_check_build_system_targets(c, g, inSource),
+                     check=check_target(c, major, minor),
                      check_exception=lambda a, e: "Target ID: %s" % a["id"],
                      missing_exception=lambda e: "Target ID: %s" % e["id"],
                      extra_exception=lambda a: "Target ID: %s" % a["id"])
+
+def check_abstract_targets(c, g, major, minor, inSource):
+    check_list_match(lambda a, e: matches(a["id"], e["id"]),
+                     c["abstractTargets"], gen_check_abstract_targets(c, g, inSource),
+                     check=check_target(c, major, minor),
+                     check_exception=lambda a, e: "Abstract target ID: %s" % a["id"],
+                     missing_exception=lambda e: "Abstract target ID: %s" % e["id"],
+                     extra_exception=lambda a: "Abstract target ID: %s" % a["id"])
 
 def gen_check_projects(c, g):
     expected = [
@@ -1020,6 +1275,7 @@ def gen_check_projects(c, g):
         read_codemodel_json_data("projects/custom.json"),
         read_codemodel_json_data("projects/external.json"),
         read_codemodel_json_data("projects/framework.json"),
+        read_codemodel_json_data("projects/direct.json"),
     ]
 
     if matches(g["name"], "^Visual Studio "):
@@ -1031,6 +1287,7 @@ def gen_check_projects(c, g):
         if ';' in os.environ.get("CMAKE_OSX_ARCHITECTURES", ""):
             for e in expected:
                 e["targetIds"] = filter_list(lambda t: not matches(t, "^\\^(link_imported_object_exe)"), e["targetIds"])
+                e["abstractTargetIds"] = filter_list(lambda t: not matches(t, "^\\^(imported_object_lib)"), e["abstractTargetIds"])
 
     else:
         for e in expected:
@@ -1045,14 +1302,15 @@ def check_projects(c, g):
                      missing_exception=lambda e: "Project name: %s" % e["name"],
                      extra_exception=lambda a: "Project name: %s" % a["name"])
 
-def check_object_codemodel_configuration(c, g, inSource):
-    assert sorted(c.keys()) == ["directories", "name", "projects", "targets"]
+def check_object_codemodel_configuration(c, g, major, minor, inSource):
+    assert sorted(c.keys()) == ["abstractTargets", "directories", "name", "projects", "targets"]
     assert is_string(c["name"])
-    check_directories(c, g)
-    check_targets(c, g, inSource)
+    check_directories(c, g, major, minor)
+    check_build_system_targets(c, g, major, minor, inSource)
+    check_abstract_targets(c, g, major, minor, inSource)
     check_projects(c, g)
 
-def check_object_codemodel(g):
+def check_object_codemodel(g, major, minor):
     def _check(o):
         assert sorted(o.keys()) == ["configurations", "kind", "paths", "version"]
         # The "kind" and "version" members are handled by check_index_object.
@@ -1070,10 +1328,9 @@ def check_object_codemodel(g):
             assert o["configurations"][0]["name"] in ("", "Debug", "Release", "RelWithDebInfo", "MinSizeRel")
 
         for c in o["configurations"]:
-            check_object_codemodel_configuration(c, g, inSource)
+            check_object_codemodel_configuration(c, g, major, minor, inSource)
     return _check
 
-cxx_compiler_id = sys.argv[2]
 assert is_dict(index)
 assert sorted(index.keys()) == ["cmake", "objects", "reply"]
 check_objects(index["objects"], index["cmake"]["generator"])

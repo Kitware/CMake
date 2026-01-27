@@ -1,0 +1,4 @@
+CMake Error at UnwindIncludeInvalidContext\.cmake:5 \(find_package\):
+  find_package called with UNWIND_INCLUDE in an invalid context
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:3 \(include\)

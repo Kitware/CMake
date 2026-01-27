@@ -74,21 +74,22 @@ std::string cmSplitExtension(std::string const& in, std::string& base)
   return ext;
 }
 
-#if !defined(CMAKE_BOOTSTRAP) && !defined(_WIN32)
+#ifndef CMAKE_BOOTSTRAP
 // Helper function to add the Start Instrumentation command
 void addInstrumentationCommand(cmInstrumentation* instrumentation,
                                std::vector<std::string>& commands)
 {
-  // FIXME(#26668) This does not work on Windows
-  if (instrumentation->HasPreOrPostBuildHook()) {
+  if (instrumentation->HasQuery()) {
     std::string instrumentationCommand =
       "$(CTEST_COMMAND) --start-instrumentation $(CMAKE_BINARY_DIR)";
+#  ifndef _WIN32
     /*
      * On Unix systems, Make will prefix the command with `/bin/sh -c`.
      * Use exec so that Make is the parent process of the command.
      * Add a `;` to convince BSD make to not optimize out the shell.
      */
     instrumentationCommand = cmStrCat("exec ", instrumentationCommand, " ;");
+#  endif
     commands.push_back(instrumentationCommand);
   }
 }
@@ -198,6 +199,16 @@ void cmLocalUnixMakefileGenerator3::Generate()
 
   // Write the cmake file with information for this directory.
   this->WriteDirectoryInformationFile();
+}
+
+std::string cmLocalUnixMakefileGenerator3::GetObjectOutputRoot(
+  cmStateEnums::IntermediateDirKind kind) const
+{
+  if (this->UseShortObjectNames(kind)) {
+    return cmStrCat(this->GetCurrentBinaryDirectory(), '/',
+                    this->GetGlobalGenerator()->GetShortBinaryOutputDir());
+  }
+  return cmStrCat(this->GetCurrentBinaryDirectory(), "/CMakeFiles");
 }
 
 void cmLocalUnixMakefileGenerator3::ComputeHomeRelativeOutputPath()
@@ -687,11 +698,10 @@ void cmLocalUnixMakefileGenerator3::WriteMakeVariables(
                     "CMAKE_COMMAND = "
                  << cmakeShellCommand << "\n";
 
-#if !defined(CMAKE_BOOTSTRAP) && !defined(_WIN32)
-  // FIXME(#26668) This does not work on Windows
-  if (this->GetCMakeInstance()
-        ->GetInstrumentation()
-        ->HasPreOrPostBuildHook()) {
+#ifndef CMAKE_BOOTSTRAP
+  if (this->GetCMakeInstance()->GetInstrumentation()->HasQuery() &&
+      // FIXME(#27079): This does not work for MSYS Makefiles.
+      this->GlobalGenerator->GetName() != "MSYS Makefiles") {
     std::string ctestShellCommand =
       getShellCommand(cmSystemTools::GetCTestCommand());
     makefileStream << "# The CTest executable.\n"
@@ -849,9 +859,12 @@ void cmLocalUnixMakefileGenerator3::WriteSpecialTargetsBottom(
 
     std::vector<std::string> no_depends;
     commands.push_back(std::move(runRule));
-#if !defined(CMAKE_BOOTSTRAP) && !defined(_WIN32)
-    addInstrumentationCommand(this->GetCMakeInstance()->GetInstrumentation(),
-                              commands);
+#ifndef CMAKE_BOOTSTRAP
+    // FIXME(#27079): This does not work for MSYS Makefiles.
+    if (this->GlobalGenerator->GetName() != "MSYS Makefiles") {
+      addInstrumentationCommand(this->GetCMakeInstance()->GetInstrumentation(),
+                                commands);
+    }
 #endif
     if (!this->IsRootMakefile()) {
       this->CreateCDCommand(commands, this->GetBinaryDirectory(),
@@ -1031,10 +1044,17 @@ void cmLocalUnixMakefileGenerator3::AppendCustomCommand(
       if (cmNonempty(val)) {
         // Expand rule variables referenced in the given launcher command.
         cmRulePlaceholderExpander::RuleVariables vars;
+        std::string targetSupportDir =
+          target->GetGlobalGenerator()->ConvertToOutputPath(
+            target->GetCMFSupportDirectory());
+        targetSupportDir = target->GetLocalGenerator()->ConvertToOutputFormat(
+          target->GetLocalGenerator()->MaybeRelativeToTopBinDir(
+            targetSupportDir),
+          cmOutputConverter::SHELL);
+        vars.TargetSupportDir = targetSupportDir.c_str();
         vars.CMTargetName = target->GetName().c_str();
         vars.CMTargetType =
           cmState::GetTargetTypeName(target->GetType()).c_str();
-        vars.CMTargetLabels = target->GetTargetLabelsString().c_str();
         std::string output;
         std::vector<std::string> const& outputs = ccg.GetOutputs();
         for (size_t i = 0; i < outputs.size(); ++i) {
@@ -1050,6 +1070,8 @@ void cmLocalUnixMakefileGenerator3::AppendCustomCommand(
         }
         vars.Output = output.c_str();
         vars.Role = ccg.GetCC().GetRole().c_str();
+        vars.CMTargetName = ccg.GetCC().GetTarget().c_str();
+        vars.Config = ccg.GetOutputConfig().c_str();
 
         launcher = val;
         rulePlaceholderExpander->ExpandRuleVariables(this, launcher, vars);
@@ -1363,7 +1385,8 @@ std::string cmLocalUnixMakefileGenerator3::CreateMakeVariable(
 }
 
 bool cmLocalUnixMakefileGenerator3::UpdateDependencies(
-  std::string const& tgtInfo, bool verbose, bool color)
+  std::string const& tgtInfo, std::string const& targetName, bool verbose,
+  bool color)
 {
   // read in the target info file
   if (!this->Makefile->ReadListFile(tgtInfo) ||
@@ -1460,8 +1483,6 @@ bool cmLocalUnixMakefileGenerator3::UpdateDependencies(
     if (needRescanDependInfo || needRescanDirInfo || needRescanDependencies) {
       // The dependencies must be regenerated.
       if (verbose) {
-        std::string targetName = cmSystemTools::GetFilenameName(targetDir);
-        targetName = targetName.substr(0, targetName.length() - 4);
         std::string message =
           cmStrCat("Scanning dependencies of target ", targetName);
         echoColor(message);
@@ -1495,10 +1516,6 @@ bool cmLocalUnixMakefileGenerator3::UpdateDependencies(
                       : std::function<bool(std::string const&)>())) {
       // regenerate dependencies files
       if (verbose) {
-        std::string targetName = cmCMakePath(targetDir)
-                                   .GetFileName()
-                                   .RemoveExtension()
-                                   .GenericString();
         auto message =
           cmStrCat("Consolidate compiler generated dependencies of target ",
                    targetName);
@@ -1855,9 +1872,12 @@ void cmLocalUnixMakefileGenerator3::WriteLocalAllRules(
         this->ConvertToOutputFormat(cmakefileName, cmOutputConverter::SHELL),
         " 1");
       commands.push_back(std::move(runRule));
-#if !defined(CMAKE_BOOTSTRAP) && !defined(_WIN32)
-      addInstrumentationCommand(this->GetCMakeInstance()->GetInstrumentation(),
-                                commands);
+#ifndef CMAKE_BOOTSTRAP
+      // FIXME(#27079): This does not work for MSYS Makefiles.
+      if (this->GlobalGenerator->GetName() != "MSYS Makefiles") {
+        addInstrumentationCommand(
+          this->GetCMakeInstance()->GetInstrumentation(), commands);
+      }
 #endif
     }
     this->CreateCDCommand(commands, this->GetBinaryDirectory(),

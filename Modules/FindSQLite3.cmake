@@ -7,9 +7,14 @@ FindSQLite3
 
 .. versionadded:: 3.14
 
-Finds the SQLite 3 library.  SQLite is a small, fast, self-contained,
-high-reliability, and full-featured SQL database engine written in C, intended
-for embedding in applications.
+Finds the SQLite 3 library:
+
+.. code-block:: cmake
+
+  find_package(SQLite3 [<version>] [...])
+
+SQLite is a small, fast, self-contained, high-reliability, and full-featured
+SQL database engine written in C, intended for embedding in applications.
 
 Imported Targets
 ^^^^^^^^^^^^^^^^
@@ -23,17 +28,21 @@ This module provides the following :ref:`Imported Targets`:
 Result Variables
 ^^^^^^^^^^^^^^^^
 
-This module sets the following variables:
+This module defines the following variables:
+
+``SQLite3_FOUND``
+  Boolean indicating whether the (requested version of) SQLite library was
+  found.
+
+``SQLite3_VERSION``
+  The version of SQLite library found.
 
 ``SQLite3_INCLUDE_DIRS``
-  Include directories containing the ``sqlite3.h`` and related headers needed
-  to use SQLite.
+  Include directories containing the ``<sqlite3.h>`` and related headers
+  needed to use SQLite.
+
 ``SQLite3_LIBRARIES``
   Libraries needed to link against to use SQLite.
-``SQLite3_VERSION``
-  Version of the SQLite library found.
-``SQLite3_FOUND``
-  Boolean indicating whether the SQLite library is found.
 
 Examples
 ^^^^^^^^
@@ -50,7 +59,7 @@ cmake_policy(PUSH)
 cmake_policy(SET CMP0159 NEW) # file(STRINGS) with REGEX updates CMAKE_MATCH_<n>
 
 find_package(PkgConfig QUIET)
-if(PKG_CONFIG_FOUND)
+if(PkgConfig_FOUND)
   pkg_check_modules(PC_SQLite3 QUIET sqlite3)
 endif()
 

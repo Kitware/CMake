@@ -1,3 +1,5 @@
+set(CMAKE_INTERMEDIATE_DIR_STRATEGY FULL CACHE STRING "" FORCE)
+
 enable_language(C)
 
 set(CMAKE_DEBUG_POSTFIX "_debug")

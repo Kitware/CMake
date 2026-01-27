@@ -30,6 +30,17 @@ block()
   endif()
 endblock()
 
+# Older Xcode versions didn't support Swift static libraries.
+if(NOT (RunCMake_GENERATOR STREQUAL "Xcode" AND XCODE_VERSION VERSION_LESS 9.0))
+  block()
+    set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/MultiLangChain-build)
+    run_cmake(MultiLangChain)
+    set(RunCMake_TEST_NO_CLEAN 1)
+    set(RunCMake_TEST_OUTPUT_MERGE 1)
+    run_cmake_command(MultiLangChain-build ${CMAKE_COMMAND} --build .)
+  endblock()
+endif()
+
 if(RunCMake_GENERATOR MATCHES "Ninja.*")
   block()
     set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/CMP0195-NEW-build)

@@ -6,7 +6,11 @@ FindMatlab
 ----------
 
 Finds Matlab or Matlab Compiler Runtime (MCR) and provides Matlab tools,
-libraries and compilers to CMake.
+libraries and compilers to CMake:
+
+.. code-block:: cmake
+
+  find_package(Matlab [<version>] [COMPONENTS <components>...] [...])
 
 This package primary purpose is to find the libraries associated with Matlab
 or the MCR in order to be able to build Matlab extensions (mex files). It
@@ -148,8 +152,11 @@ Result variables
 """"""""""""""""
 
 ``Matlab_FOUND``
-  ``TRUE`` if the Matlab installation is found, ``FALSE``
-  otherwise. All variable below are defined if Matlab is found.
+  .. versionadded:: 3.3
+
+  Boolean indicating whether the (requested version of) Matlab installation
+  was found.  All variables below are defined if Matlab is found.
+
 ``Matlab_VERSION``
   .. versionadded:: 3.27
 

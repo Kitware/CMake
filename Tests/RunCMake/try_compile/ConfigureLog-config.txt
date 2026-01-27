@@ -15,10 +15,10 @@ events:(
   -
     kind: "try_compile-v1"
     backtrace:
-      - "[^"]*/Modules/CMakeDetermineCompilerABI.cmake:[0-9]+ \(try_compile\)"
-      - "[^"]*/Modules/CMakeTestCCompiler.cmake:[0-9]+ \(CMAKE_DETERMINE_COMPILER_ABI\)"
-      - "ConfigureLog.cmake:[0-9]+ \(enable_language\)"
-      - "CMakeLists.txt:[0-9]+ \(include\)"
+      - "[^"]*/Modules/CMakeDetermineCompilerABI\.cmake:[0-9]+ \(try_compile\)"
+      - "[^"]*/Modules/CMakeTestCCompiler\.cmake:[0-9]+ \(CMAKE_DETERMINE_COMPILER_ABI\)"
+      - "ConfigureLog\.cmake:[0-9]+ \(enable_language\)"
+      - "CMakeLists\.txt:[0-9]+ \(include\)"
     checks:
       - "Detecting C compiler ABI info"
     directories:
@@ -46,13 +46,13 @@ events:(
   -
     kind: "try_compile-v1"
     backtrace:
-      - "[^"]*/Modules/Internal/FeatureTesting.cmake:[0-9]+ \(try_compile\)"
-      - "[^"]*/Modules/Internal/FeatureTesting.cmake:[0-9]+ \(_record_compiler_features\)"
-      - "[^"]*/Modules/Compiler/CMakeCommonCompilerMacros.cmake:[0-9]+ \(_record_compiler_features_c\)"
-      - "[^"]*/Modules/CMakeDetermineCompilerSupport.cmake:[0-9]+ \(cmake_record_c_compile_features\)"
-      - "[^"]*/Modules/CMakeTestCCompiler.cmake:[0-9]+ \(CMAKE_DETERMINE_COMPILER_SUPPORT\)"
-      - "ConfigureLog.cmake:[0-9]+ \(enable_language\)"
-      - "CMakeLists.txt:[0-9]+ \(include\)"
+      - "[^"]*/Modules/Internal/FeatureTesting\.cmake:[0-9]+ \(try_compile\)"
+      - "[^"]*/Modules/Internal/FeatureTesting\.cmake:[0-9]+ \(_record_compiler_features\)"
+      - "[^"]*/Modules/Compiler/CMakeCommonCompilerMacros\.cmake:[0-9]+ \(_record_compiler_features_c\)"
+      - "[^"]*/Modules/CMakeDetermineCompilerSupport\.cmake:[0-9]+ \(cmake_record_c_compile_features\)"
+      - "[^"]*/Modules/CMakeTestCCompiler\.cmake:[0-9]+ \(CMAKE_DETERMINE_COMPILER_SUPPORT\)"
+      - "ConfigureLog\.cmake:[0-9]+ \(enable_language\)"
+      - "CMakeLists\.txt:[0-9]+ \(include\)"
     checks:
       - "Detecting C compile features"
     directories:
@@ -69,8 +69,8 @@ events:(
   -
     kind: "try_compile-v1"
     backtrace:
-      - "ConfigureLog.cmake:[0-9]+ \(try_compile\)"
-      - "CMakeLists.txt:[0-9]+ \(include\)"
+      - "ConfigureLog\.cmake:[0-9]+ \(try_compile\)"
+      - "CMakeLists\.txt:[0-9]+ \(include\)"
     description: "Source that should not compile\."
     directories:
       source: "[^"]*/Tests/RunCMake/try_compile/ConfigureLog-build/CMakeFiles/CMakeScratch/TryCompile-[^/"]+"
@@ -86,12 +86,12 @@ events:(
       variable: "COMPILE_RESULT"
       cached: true
       stdout: \|.*
-      exitCode: [1-9][0-9]*
+      exitCode: -?[1-9][0-9]*
   -
     kind: "try_compile-v1"
     backtrace:
-      - "ConfigureLog.cmake:[0-9]+ \(try_compile\)"
-      - "CMakeLists.txt:[0-9]+ \(include\)"
+      - "ConfigureLog\.cmake:[0-9]+ \(try_compile\)"
+      - "CMakeLists\.txt:[0-9]+ \(include\)"
     checks:
       - "Check 2"
       - "Check 1"

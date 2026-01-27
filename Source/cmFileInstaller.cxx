@@ -6,6 +6,7 @@
 #include <map>
 #include <sstream>
 #include <utility>
+#include <vector>
 
 #include <cm/string_view>
 #include <cmext/string_view>

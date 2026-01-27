@@ -6,7 +6,11 @@ FindCURL
 --------
 
 Finds the native curl installation (include directories and libraries) for
-transferring data with URLS.
+transferring data with URLS:
+
+.. code-block:: cmake
+
+  find_package(CURL [<version>] [COMPONENTS <components>...] [...])
 
 .. versionadded:: 3.17
   If curl is built using its CMake-based build system, it will provide its own
@@ -68,8 +72,8 @@ Result Variables
 This module defines the following variables:
 
 ``CURL_FOUND``
-  Boolean indicating whether the (requested version of) curl and all required
-  components are found.
+  Boolean indicating whether (the requested version of) curl and all required
+  components were found.
 
 ``CURL_VERSION``
   .. versionadded:: 4.0
@@ -80,7 +84,7 @@ This module defines the following variables:
   .. versionadded:: 3.14
 
   Boolean indicating whether the specified component (curl protocol or feature)
-  is found.
+  was found.
 
 ``CURL_INCLUDE_DIRS``
   Include directories containing the ``curl/curl.h`` and other headers needed to
@@ -183,7 +187,7 @@ if(NOT CURL_NO_CURL_CMAKE)
 endif()
 
 find_package(PkgConfig QUIET)
-if(PKG_CONFIG_FOUND)
+if(PkgConfig_FOUND)
   pkg_check_modules(PC_CURL QUIET libcurl)
   if(PC_CURL_FOUND)
     pkg_get_variable(CURL_SUPPORTED_PROTOCOLS_STRING libcurl supported_protocols)

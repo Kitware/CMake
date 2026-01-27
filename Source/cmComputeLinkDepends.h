@@ -105,16 +105,16 @@ private:
   std::pair<std::map<cmLinkItem, size_t>::iterator, bool> AllocateLinkEntry(
     cmLinkItem const& item);
   std::pair<size_t, bool> AddLinkEntry(cmLinkItem const& item,
-                                       cm::optional<size_t> const& groupIndex);
+                                       cm::optional<size_t> groupIndex);
   void AddLinkObject(cmLinkItem const& item);
-  void AddVarLinkEntries(cm::optional<size_t> const& depender_index,
+  void AddVarLinkEntries(cm::optional<size_t> depender_index,
                          char const* value);
   void AddDirectLinkEntries();
   template <typename T>
-  void AddLinkEntries(cm::optional<size_t> const& depender_index,
+  void AddLinkEntries(cm::optional<size_t> depender_index,
                       std::vector<T> const& libs);
   void AddLinkObjects(std::vector<cmLinkItem> const& objs);
-  cmLinkItem ResolveLinkItem(cm::optional<size_t> const& depender_index,
+  cmLinkItem ResolveLinkItem(cm::optional<size_t> depender_index,
                              std::string const& name);
 
   // One entry for each unique item.

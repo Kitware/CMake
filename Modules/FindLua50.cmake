@@ -7,11 +7,17 @@ FindLua50
 
 .. note::
 
-  This module is specifically for Lua version branch 5.0, which is obsolete and
-  not maintained anymore.  In new code use the latest supported Lua version and
-  the version-agnostic module :module:`FindLua` instead.
+  This module is intended specifically for Lua version branch 5.0, which is
+  obsolete and not maintained anymore.  In new code use the latest supported
+  Lua version and the version-agnostic module :module:`FindLua` instead.
 
-Finds the Lua library.  Lua is a embeddable scripting language.
+Finds the Lua library:
+
+.. code-block:: cmake
+
+  find_package(Lua50 [...])
+
+Lua is a embeddable scripting language.
 
 When working with Lua, its library headers are intended to be included in
 project source code as:
@@ -35,8 +41,9 @@ Result Variables
 This module defines the following variables:
 
 ``Lua50_FOUND``
-  Boolean indicating whether Lua is found.  For backward compatibility, the
-  ``LUA50_FOUND`` variable is also set to the same value.
+  .. versionadded:: 3.3
+
+  Boolean indicating whether Lua was found.
 
 Cache Variables
 ^^^^^^^^^^^^^^^
@@ -50,6 +57,17 @@ The following cache variables may also be set:
 ``LUA_LIBRARIES``
   Libraries needed to link against to use Lua.  This list includes both ``lua``
   and ``lualib`` libraries.
+
+Deprecated Variables
+^^^^^^^^^^^^^^^^^^^^
+
+The following variables are provided for backward compatibility:
+
+``LUA50_FOUND``
+  .. deprecated:: 4.2
+    Use ``Lua50_FOUND``, which has the same value.
+
+  Boolean indicating whether Lua was found.
 
 Examples
 ^^^^^^^^

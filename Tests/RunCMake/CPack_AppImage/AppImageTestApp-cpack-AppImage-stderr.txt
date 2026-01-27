@@ -1,0 +1,19 @@
+appimagetool[^
+]*
+Using architecture x86_64
+Deleting pre-existing \.DirIcon
+Creating \.DirIcon symlink based on information from desktop file
+WARNING: AppStream upstream metadata is missing, please consider creating it
+         in usr/share/metainfo/com\.example\.app\.appdata\.xml
+         Please see https://www\.freedesktop\.org/software/appstream/docs/chap-Quickstart\.html#sect-Quickstart-DesktopApps
+         for more information or use the generator at
+         https://docs\.appimage\.org/packaging-guide/optional/appstream\.html#using-the-appstream-generator
+Generating squashfs\.\.\.
+Embedding ELF\.\.\.
+Marking the AppImage as executable\.\.\.
+Embedding MD5 digest
+Success
+
+Please consider submitting your AppImage to AppImageHub, the crowd-sourced
+central directory of available AppImages, by opening a pull request
+at https://github\.com/AppImage/appimage\.github\.io

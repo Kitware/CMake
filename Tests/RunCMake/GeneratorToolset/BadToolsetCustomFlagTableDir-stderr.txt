@@ -1,4 +1,4 @@
-CMake Error at CMakeLists.txt:[0-9]+ \(project\):
+CMake Error at CMakeLists\.txt:[0-9]+ \(project\):
   Generator
 
     Visual Studio [^
@@ -8,4 +8,4 @@ CMake Error at CMakeLists.txt:[0-9]+ \(project\):
 
     customFlagTableDir=does_not_exist
 
-  that is not an absolute path to an existing directory.$
+  that is not an absolute path to an existing directory\.$

@@ -4,7 +4,6 @@
 
 #include <cstdlib>
 #include <memory>
-#include <ratio>
 #include <set>
 #include <utility>
 
@@ -626,48 +625,38 @@ void cmCTestBuildHandler::GenerateInstrumentationXML(cmXMLWriter& xml)
       xml.StartElement("Target");
       xml.Attribute("name", target_name);
 
-      // Check if we have a link snippet for this target.
-      cmsys::Directory target_dir;
-      if (!target_dir.Load(targets_dir.GetFilePath(i))) {
-        cmSystemTools::Error(
-          cmStrCat("Error loading directory ", targets_dir.GetFilePath(i)));
-      }
-      Json::Value link_item;
-      for (unsigned int j = 0; j < target_dir.GetNumberOfFiles(); j++) {
-        std::string fname = target_dir.GetFile(j);
-        if (fname.rfind("link-", 0) == 0) {
-          std::string fpath = target_dir.GetFilePath(j);
-          cmJSONState parseState = cmJSONState(fpath, &link_item);
-          if (!parseState.errors.empty()) {
-            cmSystemTools::Error(parseState.GetErrorMessage(true));
-            break;
-          }
-
-          if (!link_item.isObject()) {
-            std::string error_msg =
-              cmStrCat("Expected snippet ", fpath, " to contain an object");
-            cmSystemTools::Error(error_msg);
-            break;
-          }
+      // Load latest CMake content file
+      Json::Value target_data;
+      std::string cmake_content_file =
+        cmStrCat(CTest->GetInstrumentation().GetDataDir(), "/content/",
+                 this->CTest->GetInstrumentation().GetFileByTimestamp(
+                   cmInstrumentation::LatestOrOldest::Latest, "content"));
+      if (!cmake_content_file.empty() &&
+          cmSystemTools::FileExists(cmake_content_file)) {
+        Json::Value cmake_content;
+        cmJSONState parseState =
+          cmJSONState(cmake_content_file, &cmake_content);
+        if (!parseState.errors.empty()) {
+          cmSystemTools::Error(parseState.GetErrorMessage(true));
           break;
         }
-      }
-
-      // If so, parse targetType and targetLabels (optional) from it.
-      if (link_item.isMember("targetType")) {
-        target_type = link_item["targetType"].asString();
-      }
-
-      xml.Attribute("type", target_type);
-
-      if (link_item.isMember("targetLabels") &&
-          !link_item["targetLabels"].empty()) {
-        xml.StartElement("Labels");
-        for (auto const& json_label_item : link_item["targetLabels"]) {
-          xml.Element("Label", json_label_item.asString());
+        if (cmake_content.isMember("targets")) {
+          target_data = cmake_content["targets"];
         }
-        xml.EndElement(); // Labels
       }
+      // Extract targetType and targetLabels
+      if (target_data.isObject() && target_data.isMember(target_name)) {
+        target_type = target_data[target_name]["type"].asString();
+        if (!target_data[target_name]["labels"].empty()) {
+          xml.StartElement("Labels");
+          for (auto const& json_label_item :
+               target_data[target_name]["labels"]) {
+            xml.Element("Label", json_label_item.asString());
+          }
+          xml.EndElement(); // Labels
+        }
+      }
+      xml.Attribute("type", target_type);
 
       // Write instrumendation data for this target.
       std::string target_subdir = cmStrCat("build/targets/", target_name);
@@ -879,7 +868,7 @@ bool cmCTestBuildHandler::RunMakeCommand(std::string const& command,
         auto* timedOutPtr = static_cast<bool*>(t->data);
         *timedOutPtr = true;
       },
-      timeout * 1000, 0);
+      timeout * 1000, 0, cm::uv_update_time::yes);
   }
 
   // For every chunk of data
@@ -1020,6 +1009,7 @@ bool cmCTestBuildHandler::RunMakeCommand(std::string const& command,
         break;
     }
   } else {
+    chain.Terminate();
     cmCTestOptionalLog(this->CTest, WARNING,
                        "There was a timeout" << std::endl, this->Quiet);
   }

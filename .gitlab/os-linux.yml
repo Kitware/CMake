@@ -5,7 +5,7 @@
 ### Release
 
 .linux_prep_source:
-    image: "fedora:42"
+    image: "fedora:43"
 
     variables:
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci"
@@ -58,23 +58,23 @@
 
 ### Debian
 
-.debian12:
-    image: "kitware/cmake:ci-debian12-x86_64-2025-03-31"
+.debian13:
+    image: "kitware/cmake:ci-debian13-x86_64-2025-11-11"
 
     variables:
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci"
         CMAKE_ARCH: x86_64
 
-.debian12_iwyu:
-    extends: .debian12
+.debian13_iwyu:
+    extends: .debian13
 
     variables:
-        CMAKE_CONFIGURATION: debian12_iwyu
+        CMAKE_CONFIGURATION: debian13_iwyu
         CTEST_NO_WARNINGS_ALLOWED: 1
         CMAKE_CI_NO_INSTALL: 1
 
-.debian12_aarch64:
-    image: "kitware/cmake:ci-debian12-aarch64-2025-03-31"
+.debian13_aarch64:
+    image: "kitware/cmake:ci-debian13-aarch64-2025-11-11"
 
     variables:
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci"
@@ -82,202 +82,246 @@
 
 ### Fedora
 
-.fedora42:
-    image: "kitware/cmake:ci-fedora42-x86_64-2025-04-22"
+.fedora43:
+    image: "kitware/cmake:ci-fedora43-x86_64-2025-11-06"
 
     variables:
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci/long file name for testing purposes"
         CMAKE_ARCH: x86_64
 
-.fedora42_hip:
-    image: "kitware/cmake:ci-fedora42-hip-x86_64-2025-04-22"
+.fedora43_hip:
+    image: "kitware/cmake:ci-fedora43-hip-x86_64-2025-10-29"
 
     variables:
         # FIXME(rocclr): device modules fail loading from binaries in paths with spaces
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake-ci"
         CMAKE_ARCH: x86_64
 
-#### Lint builds
+#### Coverage builds
 
-.fedora42_tidy:
-    extends: .fedora42
+.fedora43_gcc_gcov:
+    extends: .fedora43
 
     variables:
-        CMAKE_CONFIGURATION: fedora42_tidy
+        # See issue #20001
+        CMAKE_GENERATOR: "Unix Makefiles"
+        CMAKE_CONFIGURATION: fedora43_gcc_gcov
+        CTEST_NO_WARNINGS_ALLOWED: 1
+        CMAKE_CI_BUILD_TYPE: Debug
+        CMAKE_CI_TEST_TIMEOUT: "1500"
         CMAKE_CI_NO_INSTALL: 1
 
-.fedora42_clang_analyzer:
-    extends: .fedora42
+.fedora43_bullseye_coverage:
+    extends: .fedora43
+    environment:
+        name: bullseye-coverage
+    variables:
+        # See issue #20001
+        CMAKE_GENERATOR: "Unix Makefiles"
+        CMAKE_CONFIGURATION: fedora43_bullseye_coverage
+        CTEST_NO_WARNINGS_ALLOWED: 1
+        CMAKE_CI_BUILD_TYPE: Debug
+        CMAKE_CI_TEST_TIMEOUT: "1500"
+        CMAKE_CI_NO_INSTALL: 1
+
+#### Lint builds
+
+.fedora43_tidy:
+    extends: .fedora43
 
     variables:
-        CMAKE_CONFIGURATION: fedora42_clang_analyzer
+        CMAKE_CONFIGURATION: fedora43_tidy
+        CMAKE_CI_NO_INSTALL: 1
+
+.fedora43_clang_analyzer:
+    extends: .fedora43
+
+    variables:
+        CMAKE_CONFIGURATION: fedora43_clang_analyzer
         CMAKE_CI_BUILD_TYPE: Debug
         CTEST_NO_WARNINGS_ALLOWED: 1
         CMAKE_CI_NO_INSTALL: 1
 
-.fedora42_sphinx:
-    extends: .fedora42
+.fedora43_clazy:
+    extends: .fedora43
 
     variables:
-        CMAKE_CONFIGURATION: fedora42_sphinx
+        CMAKE_CONFIGURATION: fedora43_clazy
+        CMAKE_CI_BUILD_TYPE: Debug
+        CTEST_NO_WARNINGS_ALLOWED: 1
+        CMAKE_CI_NO_INSTALL: 1
+
+.fedora43_sphinx:
+    extends: .fedora43
+
+    variables:
+        CMAKE_CONFIGURATION: fedora43_sphinx
         CTEST_NO_WARNINGS_ALLOWED: 1
         CTEST_SOURCE_SUBDIRECTORY: "Utilities/Sphinx"
         CMAKE_CI_NO_INSTALL: 1
 
-.fedora42_sphinx_package:
-    extends: .fedora42
+.fedora43_sphinx_package:
+    extends: .fedora43
 
     variables:
-        CMAKE_CONFIGURATION: fedora42_sphinx_package
+        CMAKE_CONFIGURATION: fedora43_sphinx_package
         CTEST_SOURCE_SUBDIRECTORY: "Utilities/Sphinx"
 
 #### Build and test
 
-.debian12_ninja:
-    extends: .debian12
+.debian13_ninja:
+    extends: .debian13
 
     variables:
-        CMAKE_CONFIGURATION: debian12_ninja
+        CMAKE_CONFIGURATION: debian13_ninja
         CTEST_NO_WARNINGS_ALLOWED: 1
 
-.debian12_aarch64_ninja:
-    extends: .debian12_aarch64
+.debian13_aarch64_ninja:
+    extends: .debian13_aarch64
 
     variables:
-        CMAKE_CONFIGURATION: debian12_aarch64_ninja
+        CMAKE_CONFIGURATION: debian13_aarch64_ninja
         CTEST_NO_WARNINGS_ALLOWED: 1
 
-.debian12_makefiles_inplace:
-    extends: .debian12
+.debian13_makefiles_inplace:
+    extends: .debian13
 
     variables:
-        CMAKE_CONFIGURATION: debian12_makefiles_inplace
+        CMAKE_CONFIGURATION: debian13_makefiles_inplace
         CMAKE_GENERATOR: "Unix Makefiles"
         CMAKE_CI_BOOTSTRAP: 1
         CMAKE_CI_INPLACE: 1
         CMAKE_CI_NO_INSTALL: 1
         CTEST_NO_WARNINGS_ALLOWED: 1
 
-.debian12_ninja_multi_symlinked:
-    extends: .debian12
+.debian13_ninja_multi_symlinked:
+    extends: .debian13
 
     variables:
-        CMAKE_CONFIGURATION: debian12_ninja_multi_symlinked
+        CMAKE_CONFIGURATION: debian13_ninja_multi_symlinked
         CMAKE_GENERATOR: "Ninja Multi-Config"
         CTEST_NO_WARNINGS_ALLOWED: 1
         CMAKE_CI_IN_SYMLINK_TREE: 1
         CMAKE_CI_BUILD_DIR: "real_work/work/build"
 
-.debian12_extdeps:
-    extends: .debian12
+.debian13_extdeps:
+    extends: .debian13
 
     variables:
-        CMAKE_CONFIGURATION: debian12_extdeps
+        CMAKE_CONFIGURATION: debian13_extdeps
         CMAKE_CI_BUILD_TYPE: Release
         CTEST_NO_WARNINGS_ALLOWED: 1
 
-.debian12_aarch64_extdeps:
-    extends: .debian12_aarch64
+.debian13_aarch64_extdeps:
+    extends: .debian13_aarch64
 
     variables:
-        CMAKE_CONFIGURATION: debian12_aarch64_extdeps
+        CMAKE_CONFIGURATION: debian13_aarch64_extdeps
         CMAKE_CI_BUILD_TYPE: Release
         CTEST_NO_WARNINGS_ALLOWED: 1
 
-.fedora42_extdeps:
-    extends: .fedora42
+.fedora43_extdeps:
+    extends: .fedora43
 
     variables:
-        CMAKE_CONFIGURATION: fedora42_extdeps
+        CMAKE_CONFIGURATION: fedora43_extdeps
         CMAKE_CI_BUILD_TYPE: Release
         CTEST_NO_WARNINGS_ALLOWED: 1
 
-.fedora42_ninja:
-    extends: .fedora42
+.fedora43_ninja:
+    extends: .fedora43
 
     variables:
-        CMAKE_CONFIGURATION: fedora42_ninja
+        CMAKE_CONFIGURATION: fedora43_ninja
         CMAKE_CI_BUILD_TYPE: Release
         CTEST_NO_WARNINGS_ALLOWED: 1
 
-.fedora42_ninja_multi:
-    extends: .fedora42
+.fedora43_ninja_multi:
+    extends: .fedora43
 
     variables:
-        CMAKE_CONFIGURATION: fedora42_ninja_multi
+        CMAKE_CONFIGURATION: fedora43_ninja_multi
         CTEST_NO_WARNINGS_ALLOWED: 1
         CMAKE_GENERATOR: "Ninja Multi-Config"
 
-.fedora42_makefiles:
-    extends: .fedora42
+.fedora43_makefiles:
+    extends: .fedora43
 
     variables:
-        CMAKE_CONFIGURATION: fedora42_makefiles
+        CMAKE_CONFIGURATION: fedora43_makefiles
         CTEST_NO_WARNINGS_ALLOWED: 1
         CMAKE_GENERATOR: "Unix Makefiles"
 
-.fedora42_makefiles_symlinked:
-    extends: .fedora42
+.fedora43_makefiles_symlinked:
+    extends: .fedora43
 
     variables:
-        CMAKE_CONFIGURATION: fedora42_makefiles_symlinked
+        CMAKE_CONFIGURATION: fedora43_makefiles_symlinked
         CTEST_NO_WARNINGS_ALLOWED: 1
         CMAKE_GENERATOR: "Unix Makefiles"
         CMAKE_CI_IN_SYMLINK_TREE: 1
         CMAKE_CI_BUILD_DIR: "real_work/work/build"
+
+.fedora43_fastbuild:
+    extends: .fedora43
+
+    variables:
+        CMAKE_CONFIGURATION: fedora43_fastbuild
+        CTEST_NO_WARNINGS_ALLOWED: 1
+        CMAKE_GENERATOR: "FASTBuild"
 
 ### Clang Compiler
 
-.debian12_makefiles_clang:
-    extends: .debian12
+.debian13_makefiles_clang:
+    extends: .debian13
 
     variables:
-        CMAKE_CONFIGURATION: debian12_makefiles_clang
+        CMAKE_CONFIGURATION: debian13_makefiles_clang
         CMAKE_GENERATOR: "Unix Makefiles"
 
-.debian12_ninja_clang:
-    extends: .debian12
+.debian13_ninja_clang:
+    extends: .debian13
 
     variables:
-        CMAKE_CONFIGURATION: debian12_ninja_clang
+        CMAKE_CONFIGURATION: debian13_ninja_clang
 
-.fedora42_makefiles_clang:
-    extends: .fedora42
+.fedora43_makefiles_clang:
+    extends: .fedora43
 
     variables:
-        CMAKE_CONFIGURATION: fedora42_makefiles_clang
+        CMAKE_CONFIGURATION: fedora43_makefiles_clang
         CMAKE_GENERATOR: "Unix Makefiles"
 
-.fedora42_makefiles_lfortran:
-    extends: .fedora42
+.fedora43_makefiles_lfortran:
+    extends: .fedora43
 
     variables:
         # FIXME(lfortran): -rpath flags with spaces not forwarded
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake-ci"
-        CMAKE_CONFIGURATION: fedora42_makefiles_lfortran
+        CMAKE_CONFIGURATION: fedora43_makefiles_lfortran
         CMAKE_GENERATOR: "Unix Makefiles"
         CTEST_LABELS: "Fortran"
 
-.fedora42_ninja_lfortran:
-    extends: .fedora42
+.fedora43_ninja_lfortran:
+    extends: .fedora43
 
     variables:
         # FIXME(lfortran): -rpath flags with spaces not forwarded
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake-ci"
-        CMAKE_CONFIGURATION: fedora42_ninja_lfortran
+        CMAKE_CONFIGURATION: fedora43_ninja_lfortran
         CTEST_LABELS: "Fortran"
 
-.fedora42_ninja_clang:
-    extends: .fedora42
+.fedora43_ninja_clang:
+    extends: .fedora43
 
     variables:
-        CMAKE_CONFIGURATION: fedora42_ninja_clang
+        CMAKE_CONFIGURATION: fedora43_ninja_clang
 
-.fedora42_ninja_multi_clang:
-    extends: .fedora42
+.fedora43_ninja_multi_clang:
+    extends: .fedora43
 
     variables:
-        CMAKE_CONFIGURATION: fedora42_ninja_multi_clang
+        CMAKE_CONFIGURATION: fedora43_ninja_multi_clang
         CMAKE_GENERATOR: "Ninja Multi-Config"
 
 ### Sanitizers
@@ -293,13 +337,31 @@
         CTEST_MEMORYCHECK_TYPE: AddressSanitizer
         CTEST_MEMORYCHECK_SANITIZER_OPTIONS: ""
 
-.fedora42_asan:
+.fedora_valgrind_addon:
+    extends: .fedora_memcheck
+
+    variables:
+        CTEST_MEMORYCHECK_TYPE: Valgrind
+        CMAKE_CI_RUN_MEMCHECK: "true"
+        CMAKE_CI_TEST_TIMEOUT: "1500"
+        CMAKE_VALGRIND_CONFIGURATION: fedora43
+
+.fedora43_asan:
     extends:
-        - .fedora42
+        - .fedora43
         - .fedora_asan_addon
 
     variables:
-        CMAKE_CONFIGURATION: fedora42_asan
+        CMAKE_CONFIGURATION: fedora43_asan
+
+
+.fedora43_ninja_valgrind:
+    extends:
+        - .fedora43
+        - .fedora_valgrind_addon
+
+    variables:
+        CMAKE_CONFIGURATION: fedora43_ninja_valgrind
 
 ### Intel Compiler
 
@@ -450,6 +512,26 @@
         CMAKE_CONFIGURATION: cuda12.6_clang
         CTEST_NO_WARNINGS_ALLOWED: 1
 
+.cuda13.0:
+    extends: .cuda
+    image: "kitware/cmake:ci-cuda13.0-x86_64-2025-10-20"
+    variables:
+        CMAKE_ARCH: x86_64
+
+.cuda13.0_nvidia:
+    extends: .cuda13.0
+    variables:
+        CMAKE_CONFIGURATION: cuda13.0_nvidia
+        CTEST_NO_WARNINGS_ALLOWED: 1
+
+.cuda13.0_nvidia_fastbuild:
+    extends: .cuda13.0
+
+    variables:
+        CMAKE_CONFIGURATION: cuda13.0_nvidia_fastbuild
+        CTEST_NO_WARNINGS_ALLOWED: 1
+        CMAKE_GENERATOR: "FASTBuild"
+
 ### HIP builds
 
 .hip6.3:
@@ -469,18 +551,18 @@
         CMAKE_CONFIGURATION: hip6.3_radeon
         CMAKE_GENERATOR: "Ninja Multi-Config"
 
-.debian12_hip_radeon:
-    extends: .debian12
+.debian13_hip_radeon:
+    extends: .debian13
 
     variables:
-        CMAKE_CONFIGURATION: debian12_hip_radeon
+        CMAKE_CONFIGURATION: debian13_hip_radeon
         CTEST_LABELS: "HIP"
 
-.fedora42_hip_radeon:
-    extends: .fedora42_hip
+.fedora43_hip_radeon:
+    extends: .fedora43_hip
 
     variables:
-        CMAKE_CONFIGURATION: fedora42_hip_radeon
+        CMAKE_CONFIGURATION: fedora43_hip_radeon
         CTEST_LABELS: "HIP"
 
 .hip6.3_nvidia:
@@ -506,6 +588,13 @@
 
     variables:
         CMAKE_CONFIGURATION: linux_gcc_cxx_modules_ninja
+
+.gcc_cxx_modules_reloc_ninja:
+    extends: .gcc_cxx_modules_x86_64
+
+    variables:
+        CMAKE_CONFIGURATION: linux_gcc_cxx_modules_reloc_ninja
+        CTEST_LABELS: "CXXModules"
 
 .gcc_cxx_modules_ninja_multi:
     extends: .gcc_cxx_modules_x86_64
@@ -553,6 +642,13 @@
         - linux-x86_64
         - x11
 
+.linux_x86_64_tags_fast_x11:
+    tags:
+        - cmake
+        - docker
+        - linux-x86_64-v4
+        - x11
+
 .linux_x86_64_tags_cuda_arch_30:
     tags:
         - cmake
@@ -574,11 +670,18 @@
         - docker
         - linux-x86_64-v3
 
-.linux_x86_64_tags_rocm5.2:
+.linux_x86_64_tags_cuda_arch_75:
+    tags:
+        - cmake
+        - cuda-arch-75
+        - docker
+        - linux-x86_64
+
+.linux_x86_64_tags_rocm5.7:
     tags:
         - cmake
         - radeon
-        - rocm-5.2
+        - rocm-5.7
         - docker
         - linux-x86_64
 
@@ -637,14 +740,14 @@
 
 .cmake_version_update_linux:
     stage: build
-    extends: .fedora42
+    extends: .fedora43
     script:
         - .gitlab/ci/cmake_version_update.sh
     interruptible: false # The job internally fetches and retries.
 
 .cmake_spellcheck_linux:
     stage: build
-    extends: .fedora42
+    extends: .fedora43
     script:
         - .gitlab/ci/codespell.bash
         - .gitlab/ci/typos.bash
@@ -658,8 +761,9 @@
         - .gitlab/ci/sccache.sh
         - sccache --start-server
         - sccache --show-stats
-        - .gitlab/ci/pre_build.sh
+        - .gitlab/ci/pre_configure.sh
         - "$LAUNCHER ctest -VV -S .gitlab/ci/ctest_configure.cmake"
+        - .gitlab/ci/pre_build.sh
         - "$LAUNCHER ctest -VV -S .gitlab/ci/ctest_build.cmake"
         - .gitlab/ci/post_build.sh
         - sccache --show-stats
@@ -671,6 +775,7 @@
 
     script:
         - *before_script_linux
+        - .gitlab/ci/pre_test.sh
         - "$LAUNCHER ctest --output-on-failure -V -S .gitlab/ci/ctest_test.cmake"
 
     interruptible: true
@@ -681,6 +786,16 @@
     script:
         - *before_script_linux
         - "$LAUNCHER ctest --output-on-failure -V -S .gitlab/ci/ctest_memcheck.cmake"
+
+    interruptible: true
+
+.cmake_coverage_linux:
+    stage: test
+
+    script:
+        - *before_script_linux
+        - "$LAUNCHER ctest --output-on-failure -V -S .gitlab/ci/ctest_coverage.cmake"
+    coverage: '/Percentage Coverage: \d+.\d+%/'
 
     interruptible: true
 
@@ -772,6 +887,7 @@
         - .needs_centos7_x86_64
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
+        CMAKE_CI_NO_MR: "true"
 
 .cmake_test_linux_inteloneapi_makefiles:
     extends:
@@ -815,7 +931,7 @@
 .cmake_org_help:
     stage: build
     extends:
-        - .fedora42
+        - .fedora43
         - .linux_x86_64_tags
         - .cmake_org_help_artifacts
     script:

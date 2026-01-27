@@ -15,43 +15,43 @@ events:(
   -
     kind: "message-v1"
     backtrace:
-      - "ConfigureLogTransitionsModule2Suppressed.cmake:[0-9]+ \(message\)"
-      - "CMakeLists.txt:[0-9]+ \(include\)"
+      - "ConfigureLogTransitionsModule2Suppressed\.cmake:[0-9]+ \(message\)"
+      - "CMakeLists\.txt:[0-9]+ \(include\)"
     message: \|
       NotDefined -> NotFound
   -
     kind: "message-v1"
     backtrace:
-      - "ConfigureLogTransitionsModule2Suppressed.cmake:[0-9]+ \(message\)"
-      - "CMakeLists.txt:[0-9]+ \(include\)"
+      - "ConfigureLogTransitionsModule2Suppressed\.cmake:[0-9]+ \(message\)"
+      - "CMakeLists\.txt:[0-9]+ \(include\)"
     message: \|
       NotFound -> NotFound
   -
     kind: "message-v1"
     backtrace:
-      - "ConfigureLogTransitionsModule2Suppressed.cmake:[0-9]+ \(message\)"
-      - "CMakeLists.txt:[0-9]+ \(include\)"
+      - "ConfigureLogTransitionsModule2Suppressed\.cmake:[0-9]+ \(message\)"
+      - "CMakeLists\.txt:[0-9]+ \(include\)"
     message: \|
       NotFound -> Found
   -
     kind: "message-v1"
     backtrace:
-      - "ConfigureLogTransitionsModule2Suppressed.cmake:[0-9]+ \(message\)"
-      - "CMakeLists.txt:[0-9]+ \(include\)"
+      - "ConfigureLogTransitionsModule2Suppressed\.cmake:[0-9]+ \(message\)"
+      - "CMakeLists\.txt:[0-9]+ \(include\)"
     message: \|
       Found -> Found
   -
     kind: "message-v1"
     backtrace:
-      - "ConfigureLogTransitionsModule2Suppressed.cmake:[0-9]+ \(message\)"
-      - "CMakeLists.txt:[0-9]+ \(include\)"
+      - "ConfigureLogTransitionsModule2Suppressed\.cmake:[0-9]+ \(message\)"
+      - "CMakeLists\.txt:[0-9]+ \(include\)"
     message: \|
       Found -> NotFound
   -
     kind: "message-v1"
     backtrace:
-      - "ConfigureLogTransitionsModule2Suppressed.cmake:[0-9]+ \(message\)"
-      - "CMakeLists.txt:[0-9]+ \(include\)"
+      - "ConfigureLogTransitionsModule2Suppressed\.cmake:[0-9]+ \(message\)"
+      - "CMakeLists\.txt:[0-9]+ \(include\)"
     message: \|
       END
 \.\.\.$

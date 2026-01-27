@@ -1,0 +1,8 @@
+CMake Error at TARGET_INTERMEDIATE_DIR-bad-arg\.cmake:1 \(file\):
+  Error evaluating generator expression:
+
+    \$<TARGET_INTERMEDIATE_DIR>
+
+  \$<TARGET_INTERMEDIATE_DIR> expression requires exactly one parameter\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)

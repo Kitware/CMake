@@ -77,7 +77,7 @@ def check_object_toolchain(o, expected):
         else:
             assert False
 
-with open(os.path.join(sys.argv[3], "toolchain_variables.json")) as f:
+with open(os.path.join(args.build_dir, "toolchain_variables.json")) as f:
     variables = json.load(f)
 
 assert is_dict(variables)

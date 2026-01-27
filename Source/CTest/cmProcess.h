@@ -16,6 +16,8 @@
 
 #include <cm3p/uv.h>
 
+#include <sys/types.h>
+
 #include "cmDuration.h"
 #include "cmProcessOutput.h"
 #include "cmUVHandlePtr.h"

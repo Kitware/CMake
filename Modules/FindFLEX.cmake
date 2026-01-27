@@ -10,7 +10,7 @@ and provides CMake commands to create custom build rules for using Flex:
 
 .. code-block:: cmake
 
-  find_package(FLEX [<version>] ...)
+  find_package(FLEX [<version>] [...])
 
 Flex generates lexical analyzers, also known as *scanners* or *lexers*.  It also
 includes a runtime library (``fl``) that supplies support functions for the
@@ -23,7 +23,7 @@ Result Variables
 This module defines the following variables:
 
 ``FLEX_FOUND``
-  Boolean indicating whether (the requested version of) Flex is found.
+  Boolean indicating whether (the requested version of) Flex was found.
 
 ``FLEX_VERSION``
   The version of Flex found.

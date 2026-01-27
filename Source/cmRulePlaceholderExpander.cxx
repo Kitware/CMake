@@ -77,6 +77,11 @@ std::string cmRulePlaceholderExpander::ExpandVariable(
       return this->ReplaceValues->Object;
     }
   }
+  if (this->ReplaceValues->TargetSupportDir) {
+    if (variable == "TARGET_SUPPORT_DIR") {
+      return this->ReplaceValues->TargetSupportDir;
+    }
+  }
   if (this->ReplaceValues->ObjectDir) {
     if (variable == "OBJECT_DIR") {
       return this->ReplaceValues->ObjectDir;
@@ -261,13 +266,6 @@ std::string cmRulePlaceholderExpander::ExpandVariable(
       return this->ReplaceValues->CMTargetType;
     }
   }
-  if (variable == "TARGET_LABELS") {
-    if (this->ReplaceValues->CMTargetLabels) {
-      return this->ReplaceValues->CMTargetLabels;
-    }
-    return "";
-  }
-
   if (this->ReplaceValues->Output) {
     if (variable == "OUTPUT") {
       return this->ReplaceValues->Output;

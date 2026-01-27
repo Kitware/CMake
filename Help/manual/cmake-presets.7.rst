@@ -270,8 +270,8 @@ that may contain the following fields:
 ``graphviz``
   An optional string representing the path to the graphviz input file,
   that will contain all the library and executable dependencies
-  in the project. See the documentation for :module:`CMakeGraphVizOptions`
-  for more details.
+  in the project.  See the documentation for :option:`cmake --graphviz` for
+  more details.
 
   This field supports `macro expansion`_. If a relative path is specified,
   it is calculated relative to the current working directory. It is allowed
@@ -1083,8 +1083,24 @@ fields:
 ``packageName``
   An optional string representing the package name.
 
+  .. note::
+
+    Due to problems with the implementation, this field does not affect the
+    name of the final package file produced.  Other aspects of the package
+    may use the value though, leading to inconsistencies.
+    A future CMake release may address this problem, but until then, it is
+    recommended that this field not be used.
+
 ``packageVersion``
   An optional string representing the package version.
+
+  .. note::
+
+    Due to problems with the implementation, this field does not affect the
+    name of the final package file produced.  Other aspects of the package
+    may use the value though, leading to inconsistencies.
+    A future CMake release may address this problem, but until then, it is
+    recommended that this field not be used.
 
 ``packageDirectory``
   An optional string representing the directory in which to place the package.

@@ -9,6 +9,9 @@ compiler while building source files.
 This property specifies the base name for the debug symbols file.
 If not set, the default is unspecified.
 
+If the :prop_tgt:`PRECOMPILE_HEADERS_REUSE_FROM` target is set, this property
+is ignored and the reusage target's value of this property is used instead.
+
 .. versionadded:: 4.1
 
   Contents of ``COMPILE_PDB_NAME`` may use

@@ -62,7 +62,7 @@ void cmIDEOptions::HandleFlag(std::string const& flag)
         this->DoingDefine = true;
       } else {
         // Store this definition.
-        this->Defines.push_back(flag.substr(2));
+        this->Defines.emplace_back(flag.substr(2));
       }
       return;
     }
@@ -73,7 +73,7 @@ void cmIDEOptions::HandleFlag(std::string const& flag)
         this->DoingInclude = true;
       } else {
         // Store this include directory.
-        this->Includes.push_back(flag.substr(2));
+        this->Includes.emplace_back(flag.substr(2));
       }
       return;
     }

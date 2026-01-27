@@ -78,13 +78,12 @@ void cmCTestLaunchReporter::ComputeFileNames()
 
 void cmCTestLaunchReporter::LoadLabels()
 {
-  if (this->OptionCurrentBuildDir.empty() || this->OptionTargetName.empty()) {
+  if (this->OptionObjectDir.empty()) {
     return;
   }
 
   // Labels are listed in per-target files.
-  std::string fname = cmStrCat(this->OptionCurrentBuildDir, "/CMakeFiles/",
-                               this->OptionTargetName, ".dir/Labels.txt");
+  std::string fname = cmStrCat(this->OptionObjectDir, "/Labels.txt");
 
   // We are interested in per-target labels for this source file.
   std::string source = this->OptionSource;

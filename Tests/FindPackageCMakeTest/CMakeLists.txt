@@ -117,7 +117,7 @@ foreach(p ${PACKAGES})
 endforeach()
 
 # Enable framework and bundle searching.  Make sure bundles are found
-# before unix-syle packages.
+# before unix-style packages.
 set(CMAKE_FIND_FRAMEWORK LAST)
 set(CMAKE_FIND_APPBUNDLE FIRST)
 
@@ -580,6 +580,17 @@ set(SortLib_DIR "" CACHE FILEPATH "Wipe out find results for testing." FORCE)
 FIND_PACKAGE(SortLib 4.0 CONFIG)
 IF (NOT "${SortLib_VERSION}" STREQUAL "4.0.0")
   message(SEND_ERROR "FIND_PACKAGE_SORT_ORDER gave up too soon! ${SortLib_VERSION}")
+endif()
+unset(SortLib_VERSION)
+
+
+set(SortLib_DIR "" CACHE FILEPATH "Wipe out find results for testing." FORCE)
+# Expected to default to 'NATURAL' and 'DEC'
+unset(CMAKE_FIND_PACKAGE_SORT_ORDER)
+unset(CMAKE_FIND_PACKAGE_SORT_DIRECTION)
+FIND_PACKAGE(SortLib CONFIG)
+IF (NOT "${SortLib_VERSION}" STREQUAL "3.10.1")
+  message(SEND_ERROR "FIND_PACKAGE_SORT_ORDER Default! ${SortLib_VERSION}")
 endif()
 unset(SortLib_VERSION)
 

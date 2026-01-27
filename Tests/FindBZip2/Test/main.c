@@ -1,6 +1,7 @@
 #include <bzlib.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 int main(void)
 {
@@ -19,5 +20,9 @@ int main(void)
 
   remove("test.bzip2");
 
-  return 0;
+  printf("Found BZip2 version %s, expected version %s\n", BZ2_bzlibVersion(),
+         CMAKE_EXPECTED_BZip2_VERSION);
+
+  return strncmp(BZ2_bzlibVersion(), CMAKE_EXPECTED_BZip2_VERSION,
+                 strlen(CMAKE_EXPECTED_BZip2_VERSION));
 }

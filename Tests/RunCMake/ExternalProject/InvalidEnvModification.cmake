@@ -1,0 +1,12 @@
+include(ExternalProject)
+
+ExternalProject_Add(EnvModification
+  SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/EnvVars"
+  DOWNLOAD_COMMAND ""
+  UPDATE_COMMAND ""
+  PATCH_COMMAND ""
+  LIST_SEPARATOR :
+  CONFIGURE_ENVIRONMENT_MODIFICATION
+    HI
+    INVALID=SETTING
+    INVALID=OP1:operation:10)

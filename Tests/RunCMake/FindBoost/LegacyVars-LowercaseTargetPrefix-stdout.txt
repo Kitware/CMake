@@ -13,8 +13,8 @@
 -- Boost_MPI_PYTHON2_FOUND: 1
 -- Boost_MPI_PYTHON2_LIBRARY: boost::mpi_python
 -- Boost_VERSION_MACRO: 1070042
--- Boost_VERSION_STRING: 1.70.42
--- Boost_VERSION: 1.70.42
+-- Boost_VERSION_STRING: 1\.70\.42
+-- Boost_VERSION: 1\.70\.42
 -- Boost_LIB_VERSION: 1_70_42
 -- Boost_MAJOR_VERSION: 1
 -- Boost_MINOR_VERSION: 70
@@ -23,12 +23,12 @@
 ]*/Tests/RunCMake/FindBoost/CMakePackage[^/]*/include
 -- Boost_DATE_TIME_LIBRARY_DEBUG: *
 -- Boost_DATE_TIME_LIBRARY_RELEASE: [^
-]*/Tests/RunCMake/FindBoost/CMakePackage[^/]*/lib/libboost_date_time.a
+]*/Tests/RunCMake/FindBoost/CMakePackage[^/]*/lib/libboost_date_time\.a
 -- Boost_PYTHON37_LIBRARY_DEBUG: [^
-]*/Tests/RunCMake/FindBoost/CMakePackage[^/]*/lib/libboost_python.a
+]*/Tests/RunCMake/FindBoost/CMakePackage[^/]*/lib/libboost_python\.a
 -- Boost_PYTHON37_LIBRARY_RELEASE: [^
-]*/Tests/RunCMake/FindBoost/CMakePackage[^/]*/lib/libboost_python_release.a
+]*/Tests/RunCMake/FindBoost/CMakePackage[^/]*/lib/libboost_python_release\.a
 -- Boost_MPI_PYTHON2_LIBRARY_DEBUG: [^
-]*/Tests/RunCMake/FindBoost/CMakePackage[^/]*/lib/libboost_mpi_python.a
+]*/Tests/RunCMake/FindBoost/CMakePackage[^/]*/lib/libboost_mpi_python\.a
 -- Boost_MPI_PYTHON2_LIBRARY_RELEASE: [^
-]*/Tests/RunCMake/FindBoost/CMakePackage[^/]*/lib/libboost_mpi_python.a
+]*/Tests/RunCMake/FindBoost/CMakePackage[^/]*/lib/libboost_mpi_python\.a

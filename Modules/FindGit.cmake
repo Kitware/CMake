@@ -5,7 +5,11 @@
 FindGit
 -------
 
-Finds the Git distributed version control system.
+Finds the Git distributed version control system:
+
+.. code-block:: cmake
+
+  find_package(Git [<version>] [...])
 
 Imported Targets
 ^^^^^^^^^^^^^^^^
@@ -27,9 +31,13 @@ Result Variables
 This module defines the following variables:
 
 ``Git_FOUND``
-  Boolean indicating whether the Git was found.  For backward compatibility, the
-  ``GIT_FOUND`` variable is also set to the same value.
-``GIT_VERSION_STRING``
+  .. versionadded:: 3.3
+
+  Boolean indicating whether (the requested version of) Git was found.
+
+``Git_VERSION``
+  .. versionadded:: 4.2
+
   The version of Git found.
 
 Cache Variables
@@ -39,6 +47,23 @@ The following cache variables may also be set:
 
 ``GIT_EXECUTABLE``
   Path to the ``git`` command-line client executable.
+
+Deprecated Variables
+^^^^^^^^^^^^^^^^^^^^
+
+The following variables are provided for backward compatibility:
+
+``GIT_FOUND``
+  .. deprecated:: 4.2
+    Use ``Git_FOUND``, which has the same value.
+
+  Boolean indicating whether (the requested version of) Git was found.
+
+``GIT_VERSION_STRING``
+  .. deprecated:: 4.2
+    Use ``Git_VERSION``, which has the same value.
+
+  The version of Git found.
 
 Examples
 ^^^^^^^^
@@ -124,7 +149,8 @@ if(GIT_EXECUTABLE)
     list(GET __gitVersionProp 0 __gitExe)
     list(GET __gitVersionProp 1 __gitVersion)
     if(__gitExe STREQUAL GIT_EXECUTABLE AND NOT __gitVersion STREQUAL "")
-      set(GIT_VERSION_STRING "${__gitVersion}")
+      set(Git_VERSION "${__gitVersion}")
+      set(GIT_VERSION_STRING "${Git_VERSION}")
       set(__doGitVersionCheck FALSE)
     endif()
     unset(__gitExe)
@@ -138,9 +164,10 @@ if(GIT_EXECUTABLE)
                     ERROR_QUIET
                     OUTPUT_STRIP_TRAILING_WHITESPACE)
     if (git_version MATCHES "^git version [0-9]")
-      string(REPLACE "git version " "" GIT_VERSION_STRING "${git_version}")
+      string(REPLACE "git version " "" Git_VERSION "${git_version}")
+      set(GIT_VERSION_STRING "${Git_VERSION}")
       set_property(GLOBAL PROPERTY _CMAKE_FindGit_GIT_EXECUTABLE_VERSION
-        "${GIT_EXECUTABLE};${GIT_VERSION_STRING}"
+        "${GIT_EXECUTABLE};${Git_VERSION}"
       )
     endif()
     unset(git_version)
@@ -158,4 +185,4 @@ endif()
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(Git
                                   REQUIRED_VARS GIT_EXECUTABLE
-                                  VERSION_VAR GIT_VERSION_STRING)
+                                  VERSION_VAR Git_VERSION)

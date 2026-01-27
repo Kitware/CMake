@@ -1,0 +1,9 @@
+{
+    "nameOnDisk": "^Foo",
+    "artifacts": [
+        {
+            "path": "^/usr/Frameworks/Foo.framework/Foo$",
+            "_dllExtra": false
+        }
+    ]
+}

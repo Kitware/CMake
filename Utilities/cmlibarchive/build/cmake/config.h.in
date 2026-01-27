@@ -513,6 +513,9 @@
 /* Define to 1 if you have the `gcc' library (-lgcc). */
 #cmakedefine HAVE_LIBGCC 1
 
+/* Define to 1 if you have the `iconv' library (-liconv). */
+#cmakedefine HAVE_LIBICONV 1
+
 /* Define to 1 if you have the `lz4' library (-llz4). */
 #cmakedefine HAVE_LIBLZ4 1
 
@@ -549,6 +552,9 @@
 /* Define to 1 if you have the <libxml/xmlwriter.h> header file. */
 #cmakedefine HAVE_LIBXML_XMLWRITER_H 1
 
+/* Define to 1 if you have the <libxml/xmlversion.h> header file. */
+#cmakedefine HAVE_LIBXML_XMLVERSION_H 1
+
 /* Define to 1 if you have the `z' library (-lz). */
 #cmakedefine HAVE_LIBZ 1
 
@@ -557,6 +563,9 @@
 
 /* Define to 1 if you have the ZSTD_compressStream function. */
 #cmakedefine HAVE_ZSTD_compressStream 1
+
+/* Define to 1 if you have the ZSTD_minCLevel function. */
+#cmakedefine HAVE_ZSTD_minCLevel 1
 
 /* Define to 1 if you have the <limits.h> header file. */
 #cmakedefine HAVE_LIMITS_H 1
@@ -649,6 +658,9 @@
 /* Define to 1 if you have the <mbedtls/pkcs5.h> header file. */
 #cmakedefine HAVE_MBEDTLS_PKCS5_H 1
 
+/* Define to 1 if you have the <mbedtls/pkcs5.h> header file. */
+#cmakedefine HAVE_MBEDTLS_VERSION_H 1
+
 /* Define to 1 if you have the `mbrtowc' function. */
 #cmakedefine HAVE_MBRTOWC 1
 
@@ -694,6 +706,9 @@
 /* Define to 1 if you have the <nettle/sha.h> header file. */
 #cmakedefine HAVE_NETTLE_SHA_H 1
 
+/* Define to 1 if you have the <nettle/version.h> header file. */
+#cmakedefine HAVE_NETTLE_VERSION_H 1
+
 /* Define to 1 if you have the `nl_langinfo' function. */
 #cmakedefine HAVE_NL_LANGINFO 1
 
@@ -702,6 +717,9 @@
 
 /* Define to 1 if you have the <openssl/evp.h> header file. */
 #cmakedefine HAVE_OPENSSL_EVP_H 1
+
+/* Define to 1 if you have the <openssl/opensslv.h> header file. */
+#cmakedefine HAVE_OPENSSL_OPENSSLV_H 1
 
 /* Define to 1 if you have the <paths.h> header file. */
 #cmakedefine HAVE_PATHS_H 1
@@ -922,7 +940,6 @@
 /* Define to 1 if you have the <sys/stat.h> header file. */
 #cmakedefine HAVE_SYS_STAT_H 1
 
-
 /* Define to 1 if you have the <sys/sysmacros.h> header file. */
 #cmakedefine HAVE_SYS_SYSMACROS_H 1
 
@@ -1046,6 +1063,9 @@
 /* Define to 1 if you have a working FS_IOC_GETFLAGS */
 #cmakedefine HAVE_WORKING_FS_IOC_GETFLAGS 1
 
+/* Define to 1 if you have the Windows `xmllite' library (-lxmllite). */
+#cmakedefine HAVE_XMLLITE_H 1
+
 /* Define to 1 if you have the <zlib.h> header file. */
 #cmakedefine HAVE_ZLIB_H 1
 
@@ -1102,6 +1122,15 @@
 
 /* Define to 1 if you can safely include both <sys/time.h> and <time.h>. */
 #cmakedefine TIME_WITH_SYS_TIME 1
+
+/* Version number of package */
+#cmakedefine LIBATTR_PKGCONFIG_VERSION "@LIBATTR_PKGCONFIG_VERSION@"
+
+/* Version number of package */
+#cmakedefine LIBACL_PKGCONFIG_VERSION "@LIBACL_PKGCONFIG_VERSION@"
+
+/* Version number of package */
+#cmakedefine LIBRICHACL_PKGCONFIG_VERSION "@LIBRICHACL_PKGCONFIG_VERSION@"
 
 /*
  * Some platform requires a macro to use extension functions.

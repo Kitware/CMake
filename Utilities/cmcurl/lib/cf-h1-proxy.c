@@ -46,8 +46,7 @@
 #include "multiif.h"
 #include "curlx/strparse.h"
 
-/* The last 3 #include files should be in this order */
-#include "curl_printf.h"
+/* The last 2 #include files should be in this order */
 #include "curl_memory.h"
 #include "memdebug.h"
 
@@ -252,7 +251,7 @@ static CURLcode send_CONNECT(struct Curl_cfilter *cf,
   size_t request_len = curlx_dyn_len(&ts->request_data);
   size_t blen = request_len;
   CURLcode result = CURLE_OK;
-  ssize_t nwritten;
+  size_t nwritten;
 
   if(blen <= ts->nsent)
     goto out;  /* we are done */
@@ -260,16 +259,15 @@ static CURLcode send_CONNECT(struct Curl_cfilter *cf,
   blen -= ts->nsent;
   buf += ts->nsent;
 
-  nwritten = cf->next->cft->do_send(cf->next, data, buf, blen, FALSE, &result);
-  if(nwritten < 0) {
-    if(result == CURLE_AGAIN) {
+  result = cf->next->cft->do_send(cf->next, data, buf, blen, FALSE, &nwritten);
+  if(result) {
+    if(result == CURLE_AGAIN)
       result = CURLE_OK;
-    }
     goto out;
   }
 
-  DEBUGASSERT(blen >= (size_t)nwritten);
-  ts->nsent += (size_t)nwritten;
+  DEBUGASSERT(blen >= nwritten);
+  ts->nsent += nwritten;
   Curl_debug(data, CURLINFO_HEADER_OUT, buf, (size_t)nwritten);
 
 out:
@@ -375,11 +373,8 @@ static CURLcode recv_CONNECT_resp(struct Curl_cfilter *cf,
   error = SELECT_OK;
   *done = FALSE;
 
-  if(!Curl_conn_data_pending(data, cf->sockindex))
-    return CURLE_OK;
-
   while(ts->keepon) {
-    ssize_t nread;
+    size_t nread;
     char byte;
 
     /* Read one byte at a time to avoid a race condition. Wait at most one
@@ -397,7 +392,7 @@ static CURLcode recv_CONNECT_resp(struct Curl_cfilter *cf,
       break;
     }
 
-    if(nread <= 0) {
+    if(!nread) {
       if(data->set.proxyauth && data->state.authproxy.avail &&
          data->state.aptr.proxyuserpwd) {
         /* proxy auth was requested and there was proxy auth available,
@@ -686,11 +681,12 @@ out:
   return result;
 }
 
-static void cf_h1_proxy_adjust_pollset(struct Curl_cfilter *cf,
-                                        struct Curl_easy *data,
-                                        struct easy_pollset *ps)
+static CURLcode cf_h1_proxy_adjust_pollset(struct Curl_cfilter *cf,
+                                           struct Curl_easy *data,
+                                           struct easy_pollset *ps)
 {
   struct h1_tunnel_state *ts = cf->ctx;
+  CURLcode result = CURLE_OK;
 
   if(!cf->connected) {
     /* If we are not connected, but the filter "below" is
@@ -702,13 +698,14 @@ static void cf_h1_proxy_adjust_pollset(struct Curl_cfilter *cf,
          response headers or if we are still sending the request, wait
          for write. */
       if(tunnel_want_send(ts))
-        Curl_pollset_set_out_only(data, ps, sock);
+        result = Curl_pollset_set_out_only(data, ps, sock);
       else
-        Curl_pollset_set_in_only(data, ps, sock);
+        result = Curl_pollset_set_in_only(data, ps, sock);
     }
     else
-      Curl_pollset_set_out_only(data, ps, sock);
+      result = Curl_pollset_set_out_only(data, ps, sock);
   }
+  return result;
 }
 
 static void cf_h1_proxy_destroy(struct Curl_cfilter *cf,
@@ -741,7 +738,6 @@ struct Curl_cftype Curl_cft_h1_proxy = {
   cf_h1_proxy_connect,
   cf_h1_proxy_close,
   Curl_cf_def_shutdown,
-  Curl_cf_http_proxy_get_host,
   cf_h1_proxy_adjust_pollset,
   Curl_cf_def_data_pending,
   Curl_cf_def_send,
@@ -749,7 +745,7 @@ struct Curl_cftype Curl_cft_h1_proxy = {
   Curl_cf_def_cntrl,
   Curl_cf_def_conn_is_alive,
   Curl_cf_def_conn_keep_alive,
-  Curl_cf_def_query,
+  Curl_cf_http_proxy_query,
 };
 
 CURLcode Curl_cf_h1_proxy_insert_after(struct Curl_cfilter *cf_at,

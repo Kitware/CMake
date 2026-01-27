@@ -71,7 +71,7 @@ wchar_t *Curl_wcsdup(const wchar_t *src)
 {
   size_t length = wcslen(src);
 
-  if(length > (SIZE_T_MAX / sizeof(wchar_t)) - 1)
+  if(length > (SIZE_MAX / sizeof(wchar_t)) - 1)
     return (wchar_t *)NULL; /* integer overflow */
 
   return (wchar_t *)Curl_memdup(src, (length + 1) * sizeof(wchar_t));
@@ -111,7 +111,7 @@ void *Curl_memdup(const void *src, size_t length)
  ***************************************************************************/
 void *Curl_memdup0(const char *src, size_t length)
 {
-  char *buf = malloc(length + 1);
+  char *buf = (length < SIZE_MAX) ? malloc(length + 1) : NULL;
   if(!buf)
     return NULL;
   if(length) {

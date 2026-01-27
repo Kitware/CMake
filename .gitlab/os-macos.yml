@@ -7,7 +7,7 @@
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci ext/$CI_CONCURRENT_ID"
         # TODO: Factor this out so that each job selects the Xcode version to
         # use so that different versions can be tested in a single pipeline.
-        DEVELOPER_DIR: "/Applications/Xcode-26.0.app/Contents/Developer"
+        DEVELOPER_DIR: "/Applications/Xcode-26.1.app/Contents/Developer"
         # Avoid conflicting with other projects running on the same machine.
         SCCACHE_SERVER_PORT: 4227
 
@@ -48,13 +48,6 @@
         CTEST_NO_WARNINGS_ALLOWED: 1
         CMAKE_CI_IN_SYMLINK_TREE: 1
         CMAKE_CI_BUILD_DIR: "real_work/work/build"
-
-.macos_arm64_curl:
-    extends: .macos_build
-
-    variables:
-        CMAKE_CONFIGURATION: macos_arm64_curl
-        CTEST_NO_WARNINGS_ALLOWED: 1
 
 .macos_arm64_pch:
     extends: .macos_arm64_ninja
@@ -137,6 +130,14 @@
         CMAKE_CONFIGURATION: macos_x86_64_ninja_ub
         CMAKE_CI_NIGHTLY_IGNORE_DEPS: "true"
 
+.macos_arm64_fastbuild:
+    extends: .macos
+
+    variables:
+        CMAKE_CONFIGURATION: macos_arm64_fastbuild
+        CMAKE_GENERATOR: FASTBuild
+        CMAKE_CI_NIGHTLY_IGNORE_DEPS: "true"
+
 ## Tags
 
 .macos_x86_64_tags:
@@ -144,7 +145,7 @@
         - cmake # Since this is a bare runner, pin to a project.
         - macos-x86_64
         - shell
-        - xcode-26.0
+        - xcode-26.1
         - nonconcurrent
 
 .macos_x86_64_tags_ext:
@@ -152,7 +153,7 @@
         - cmake # Since this is a bare runner, pin to a project.
         - macos-x86_64
         - shell
-        - xcode-26.0
+        - xcode-26.1
         - concurrent
 
 .macos_arm64_tags:
@@ -160,7 +161,7 @@
         - cmake # Since this is a bare runner, pin to a project.
         - macos-arm64
         - shell
-        - xcode-26.0
+        - xcode-26.1
         - nonconcurrent
 
 .macos_arm64_tags_ext:
@@ -168,7 +169,7 @@
         - cmake # Since this is a bare runner, pin to a project.
         - macos-arm64
         - shell
-        - xcode-26.0
+        - xcode-26.1
         - concurrent
 
 .macos_arm64_tags_package:
@@ -176,7 +177,7 @@
         - cmake # Since this is a bare runner, pin to a project.
         - macos-arm64
         - shell
-        - xcode-26.0
+        - xcode-26.1
         - nonconcurrent
         - finder
 
@@ -199,8 +200,9 @@
         # Allow the server to already be running.
         - "sccache --start-server || :"
         - sccache --show-stats
-        - .gitlab/ci/pre_build.sh
+        - .gitlab/ci/pre_configure.sh
         - ctest -VV -S .gitlab/ci/ctest_configure.cmake
+        - .gitlab/ci/pre_build.sh
         - ctest -VV -S .gitlab/ci/ctest_build.cmake
         - .gitlab/ci/post_build.sh
         - sccache --show-stats
@@ -212,6 +214,7 @@
 
     script:
         - *before_script_macos
+        - .gitlab/ci/pre_test.sh
         - ctest --output-on-failure -V -S .gitlab/ci/ctest_test.cmake
 
     interruptible: true

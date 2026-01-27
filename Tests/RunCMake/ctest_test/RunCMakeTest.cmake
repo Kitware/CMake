@@ -63,6 +63,7 @@ run_ctest_test(Parallel4     INCLUDE test PARALLEL_LEVEL 4)
 set(ENV{CTEST_PARALLEL_LEVEL} bad)
 run_ctest_test(ParallelEnvBad INCLUDE test)
 if(CMAKE_HOST_WIN32)
+  # FIXME(#27285): `set(ENV{VAR} "")` unsets VAR on Windows.
   set(ENV{CTEST_PARALLEL_LEVEL} " ")
 else()
   set(ENV{CTEST_PARALLEL_LEVEL} "")

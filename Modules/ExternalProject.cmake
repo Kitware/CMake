@@ -11,6 +11,15 @@ ExternalProject
 
    .. contents::
 
+This module provides commands to download and build external projects as
+part of CMake build phase.
+
+Load this module in a CMake project with:
+
+.. code-block:: cmake
+
+  include(ExternalProject)
+
 External Project Definition
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -654,6 +663,48 @@ overridden if required.
   examples of build systems whose build step is smart enough to know if the
   configure step needs to be rerun.
 
+``CONFIGURE_ENVIRONMENT_MODIFICATION <modification>...``
+  .. versionadded:: 4.2
+
+  Specify environment variables that should be modified for the configure step.
+
+  Set a :ref:`semicolon-separated list <CMake Language Lists>` of environment
+  variables and values of the form ``MYVAR=OP:VALUE``, where ``MYVAR`` is the
+  case-sensitive name of an environment variable to be modified.  Entries are
+  considered in the order specified in the property's value. The ``OP`` may be
+  one of:
+
+  .. include:: ../include/ENVIRONMENT_MODIFICATION_OPS.rst
+
+  .. code-block:: cmake
+
+    ExternalProject_Add(example
+      ... # Download options, etc...
+      CONFIGURE_ENVIRONMENT_MODIFICATION
+        SDKROOT=set:macosx
+        PKG_CONFIG_PATH=set:$ENV{PKG_CONFIG_PATH}
+    )
+
+  This snippet defines two environment variables when configuring the example
+  project. The ``SDKROOT`` environment variable is set to ``macosx``, while
+  the value of ``PKG_CONFIG_PATH`` is forwarded to the external project.
+
+  Environment modifications work with ``LIST_SEPARATOR`` to replace the
+  separator with a ``;`` in the environment variable.
+
+  .. code-block:: cmake
+
+    ExternalProject_Add(example
+      ... # Download options, etc...
+      LIST_SEPARATOR ,
+      CONFIGURE_ENVIRONMENT_MODIFICATION
+        LIST_VAR=set:a,b,c
+    )
+
+  This snippet
+  and the environment variable ``LIST_VAR`` is passed to the configure command
+  invocation with the value ``a;b;c``.
+
 Build Step Options
 """"""""""""""""""
 
@@ -719,6 +770,19 @@ pass ``-v`` to the external project's build step, even if it also uses
   ``JOB_SERVER_AWARE`` option for details.  This option is relevant
   only when an explicit ``BUILD_COMMAND`` is specified.
 
+``BUILD_ENVIRONMENT_MODIFICATION <modification>...``
+  .. versionadded:: 4.2
+
+  Specify environment variables that should be modified for the build step.
+
+  Set a :ref:`semicolon-separated list <CMake Language Lists>` of environment
+  variables and values of the form ``MYVAR=OP:VALUE``, where ``MYVAR`` is the
+  case-sensitive name of an environment variable to be modified.  Entries are
+  considered in the order specified in the property's value. The ``OP`` may be
+  one of:
+
+  .. include:: ../include/ENVIRONMENT_MODIFICATION_OPS.rst
+
 Install Step Options
 """"""""""""""""""""
 
@@ -777,6 +841,19 @@ step. This can be overridden with custom install commands if required.
   :envvar:`CMAKE_INSTALL_MODE` environment variable changes from one run
   to another.
 
+``INSTALL_ENVIRONMENT_MODIFICATION <modification>...``
+  .. versionadded:: 4.2
+
+  Specify environment variables that should be modified for the install step.
+
+  Set a :ref:`semicolon-separated list <CMake Language Lists>` of environment
+  variables and values of the form ``MYVAR=OP:VALUE``, where ``MYVAR`` is the
+  case-sensitive name of an environment variable to be modified.  Entries are
+  considered in the order specified in the property's value. The ``OP`` may be
+  one of:
+
+  .. include:: ../include/ENVIRONMENT_MODIFICATION_OPS.rst
+
 Test Step Options
 """""""""""""""""
 
@@ -814,6 +891,19 @@ options are provided.
   but only gets invoked when manually requested.
   This may cause a step target to be created automatically for either
   the ``install`` or ``build`` step.  See policy :policy:`CMP0114`.
+
+``TEST_ENVIRONMENT_MODIFICATION <modification>...``
+  .. versionadded:: 4.2
+
+  Specify environment variables that should be modified for the test step.
+
+  Set a :ref:`semicolon-separated list <CMake Language Lists>` of environment
+  variables and values of the form ``MYVAR=OP:VALUE``, where ``MYVAR`` is the
+  case-sensitive name of an environment variable to be modified.  Entries are
+  considered in the order specified in the property's value. The ``OP`` may be
+  one of:
+
+  .. include:: ../include/ENVIRONMENT_MODIFICATION_OPS.rst
 
 Output Logging Options
 """"""""""""""""""""""
@@ -940,7 +1030,8 @@ Miscellaneous Options
 """""""""""""""""""""
 
 ``LIST_SEPARATOR <sep>``
-  For any of the various ``..._COMMAND`` options, and ``CMAKE_ARGS``,
+  For any of the various ``..._COMMAND`` options, ``CMAKE_ARGS``, and
+  `..._ENVIRONMENT_MODIFICATION`` operations,
   ``ExternalProject`` will replace ``<sep>`` with ``;`` in the specified
   command lines. This can be used to ensure a command has a literal ``;`` in it
   where direct usage would otherwise be interpreted as argument separators to
@@ -1042,6 +1133,20 @@ control needed to implement such step-level capabilities.
 
   ``DEPENDS <file>...``
     Files on which this custom step depends.
+
+  ``ENVIRONMENT_MODIFICATION <modification>...``
+    .. versionadded:: 4.2
+
+    Specify environment variables that should be modified while running the
+    commands in the external project step.
+
+    Set a :ref:`semicolon-separated list <CMake Language Lists>` of environment
+    variables and values of the form ``MYVAR=OP:VALUE``, where ``MYVAR`` is the
+    case-sensitive name of an environment variable to be modified.  Entries are
+    considered in the order specified in the property's value. The ``OP`` may be
+    one of:
+
+    .. include:: ../include/ENVIRONMENT_MODIFICATION_OPS.rst
 
   ``INDEPENDENT <bool>``
     .. versionadded:: 3.19
@@ -2057,6 +2162,7 @@ function(ExternalProject_Add_Step name step)
     DEPENDEES
     DEPENDERS
     DEPENDS
+    ENVIRONMENT_MODIFICATION
     INDEPENDENT
     BYPRODUCTS
     ALWAYS
@@ -2167,13 +2273,50 @@ function(ExternalProject_Add_Step name step)
     PROPERTY _EP_${step}_WORKING_DIRECTORY
   )
 
-  # Replace list separators.
+  # Replace list separators and inject environment modifications.
   get_property(sep
     TARGET ${name}
     PROPERTY _EP_LIST_SEPARATOR
   )
-  if(sep AND command)
-    string(REPLACE "${sep}" "\\;" command "${command}")
+  get_property(environment
+    TARGET ${name}
+    PROPERTY _EP_${step}_ENVIRONMENT_MODIFICATION
+  )
+  if(environment)
+    set(env_args "")
+    foreach(env_mod IN LISTS environment)
+      if(env_mod MATCHES [[^([^=:]+)=([a-z_]+):(.*)$]])
+        set(_value "${CMAKE_MATCH_3}")
+        # Replace the separator only in the value in case it is `:`.
+        if(sep)
+          string(REPLACE "${sep}" [[\;]] _value "${_value}")
+        endif()
+        list(APPEND env_args --modify "${CMAKE_MATCH_1}=${CMAKE_MATCH_2}:${_value}")
+      else()
+        message(SEND_ERROR "Malformed environment modification specifier:"
+        " '${env_mod}'\n"
+        "Expected MYVAR=OP:VALUE")
+      endif()
+    endforeach()
+    set(env_command "${CMAKE_COMMAND};-E;env;${env_args};--")
+  else()
+    set(env_command "")
+  endif()
+  if(command)
+    if(env_command)
+      # Strip empty commands so we do not add env for them.
+      string(REGEX REPLACE [[^COMMAND;+(COMMAND;+)*]] "" command "${command}")
+      string(REGEX REPLACE [[;COMMAND;+(COMMAND;+)*]] ";COMMAND;" command "${command}")
+      # Replace the separator with an extra escape to survive list(TRANSFORM).
+      if(sep)
+        string(REPLACE "${sep}" [[\\;]] command "${command}")
+      endif()
+      # Prepend every command with our environment modification launcher.
+      list(TRANSFORM command APPEND ";${env_command}" REGEX "^COMMAND$")
+      set(command "${env_command};${command}")
+    elseif(sep)
+      string(REPLACE "${sep}" [[\;]] command "${command}")
+    endif()
   endif()
 
   # Replace location tags.
@@ -2660,6 +2803,14 @@ function(_ep_add_configure_command name)
     set(dependees patch)
   endif()
 
+  get_property(environment
+    TARGET ${name}
+    PROPERTY _EP_CONFIGURE_ENVIRONMENT_MODIFICATION
+  )
+  if(environment)
+    set(environment "ENVIRONMENT_MODIFICATION" ${environment})
+  endif()
+
   get_property(log
     TARGET ${name}
     PROPERTY _EP_LOG_CONFIGURE
@@ -2691,6 +2842,7 @@ function(_ep_add_configure_command name)
       WORKING_DIRECTORY \${binary_dir}
       DEPENDEES \${dependees}
       DEPENDS \${file_deps}
+      ${environment}
       ${log}
       ${uses_terminal}
     )"
@@ -2770,6 +2922,13 @@ function(_ep_add_build_command name)
     set(maybe_JOB_SERVER_AWARE "")
   endif()
 
+  get_property(environment
+    TARGET ${name}
+    PROPERTY _EP_BUILD_ENVIRONMENT_MODIFICATION
+  )
+  if(environment)
+    set(environment ENVIRONMENT_MODIFICATION ${environment})
+  endif()
 
   set(__cmdQuoted)
   foreach(__item IN LISTS cmd)
@@ -2785,6 +2944,7 @@ function(_ep_add_build_command name)
       DEPENDS \${file_deps}
       ALWAYS \${always}
       ${maybe_JOB_SERVER_AWARE}
+      ${environment}
       ${log}
       ${uses_terminal}
     )"
@@ -2857,6 +3017,14 @@ function(_ep_add_install_command name)
     set(maybe_JOB_SERVER_AWARE "")
   endif()
 
+  get_property(environment
+    TARGET ${name}
+    PROPERTY _EP_INSTALL_ENVIRONMENT_MODIFICATION
+  )
+  if(environment)
+    set(environment ENVIRONMENT_MODIFICATION ${environment})
+  endif()
+
   set(__cmdQuoted)
   foreach(__item IN LISTS cmd)
     string(APPEND __cmdQuoted " [==[${__item}]==]")
@@ -2870,6 +3038,7 @@ function(_ep_add_install_command name)
       DEPENDEES build
       ALWAYS \${always}
       ${maybe_JOB_SERVER_AWARE}
+      ${environment}
       ${log}
       ${uses_terminal}
     )"
@@ -2936,6 +3105,14 @@ function(_ep_add_test_command name)
       set(uses_terminal "")
     endif()
 
+    get_property(environment
+      TARGET ${name}
+      PROPERTY _EP_TEST_ENVIRONMENT_MODIFICATION
+    )
+    if(environment)
+      set(environment ENVIRONMENT_MODIFICATION ${environment})
+    endif()
+
     set(__cmdQuoted)
     foreach(__item IN LISTS cmd)
       string(APPEND __cmdQuoted " [==[${__item}]==]")
@@ -2948,6 +3125,7 @@ function(_ep_add_test_command name)
         ${dependees_args}
         ${dependers_args}
         ${exclude_args}
+        ${environment}
         ${log}
         ${uses_terminal}
       )"
@@ -3043,11 +3221,11 @@ function(ExternalProject_Add name)
   # rebuilds.  It is important that 'done' is not the output of any
   # custom command so that CMake does not propagate build rules to
   # other external project targets, which may cause problems during
-  # parallel builds.  However, the Ninja generator needs to see the entire
+  # parallel builds.  However, the Ninja and Fastbuild generators need to see the entire
   # dependency graph, and can cope with custom commands belonging to
-  # multiple targets, so we add the 'done' mark as an output for Ninja only.
+  # multiple targets, so we add the 'done' mark as an output for Ninja and Fastbuild only.
   set(complete_outputs ${complete_stamp_file})
-  if(${CMAKE_GENERATOR} MATCHES "Ninja")
+  if(${CMAKE_GENERATOR} MATCHES "Ninja|FASTBuild")
     set(complete_outputs ${complete_outputs} ${done_stamp_file})
   endif()
 

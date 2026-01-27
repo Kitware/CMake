@@ -6,7 +6,11 @@ FindLibXslt
 -----------
 
 Finds the XSL Transformations, Extensible Stylesheet Language Transformations
-(XSLT) library (libxslt).
+(XSLT) library (libxslt):
+
+.. code-block:: cmake
+
+  find_package(LibXslt [<version>] [...])
 
 Imported Targets
 ^^^^^^^^^^^^^^^^
@@ -33,20 +37,23 @@ This module provides the following :ref:`Imported Targets`:
 Result Variables
 ^^^^^^^^^^^^^^^^
 
-This module sets the following variables:
+This module defines the following variables:
 
 ``LibXslt_FOUND``
-  Boolean indicating whether the libxslt is found.  For backward compatibility,
-  the ``LIBXSLT_FOUND`` variable is also set to the same value.
+  .. versionadded:: 3.3
+
+  Boolean indicating whether (the requested version of) libxslt was found.
+
+``LibXslt_VERSION``
+  .. versionadded:: 4.2
+
+  The version of libxslt found.
 
 ``LIBXSLT_LIBRARIES``
   Libraries needed to link to libxslt.
 
 ``LIBXSLT_DEFINITIONS``
   Compiler switches required for using libxslt.
-
-``LIBXSLT_VERSION_STRING``
-  Version of libxslt found.
 
 ``LIBXSLT_EXSLT_LIBRARIES``
   Libraries needed when linking against the exslt library.  These are available
@@ -69,6 +76,23 @@ The following cache variables may also be set:
 ``LIBXSLT_XSLTPROC_EXECUTABLE``
   Full path to the XSLT processor executable ``xsltproc`` if found.  This path
   is optional.
+
+Deprecated Variables
+^^^^^^^^^^^^^^^^^^^^
+
+The following variables are provided for backward compatibility:
+
+``LIBXSLT_FOUND``
+  .. deprecated:: 4.2
+    Use ``LibXslt_FOUND``, which has the same value.
+
+  Boolean indicating whether (the requested version of) libxslt was found.
+
+``LIBXSLT_VERSION_STRING``
+  .. deprecated:: 4.2
+    Superseded by the ``LibXslt_VERSION``.
+
+  The version of libxslt found.
 
 Examples
 ^^^^^^^^
@@ -109,7 +133,7 @@ cmake_policy(SET CMP0159 NEW) # file(STRINGS) with REGEX updates CMAKE_MATCH_<n>
 # use pkg-config to get the directories and then use these values
 # in the find_path() and find_library() calls
 find_package(PkgConfig QUIET)
-if(PKG_CONFIG_FOUND)
+if(PkgConfig_FOUND)
   pkg_check_modules(PC_LIBXSLT QUIET libxslt)
 endif()
 set(LIBXSLT_DEFINITIONS ${PC_LIBXSLT_CFLAGS_OTHER})
@@ -135,7 +159,7 @@ find_library(LIBXSLT_LIBRARY NAMES xslt libxslt
 
 set(LIBXSLT_LIBRARIES ${LIBXSLT_LIBRARY})
 
-if(PKG_CONFIG_FOUND)
+if(PkgConfig_FOUND)
   pkg_check_modules(PC_LIBXSLT_EXSLT QUIET libexslt)
 endif()
 set(LIBXSLT_EXSLT_DEFINITIONS ${PC_LIBXSLT_EXSLT_CFLAGS_OTHER})
@@ -159,20 +183,22 @@ set(LIBXSLT_EXSLT_LIBRARIES ${LIBXSLT_EXSLT_LIBRARY} )
 find_program(LIBXSLT_XSLTPROC_EXECUTABLE xsltproc)
 
 if(PC_LIBXSLT_VERSION)
-    set(LIBXSLT_VERSION_STRING ${PC_LIBXSLT_VERSION})
+    set(LibXslt_VERSION ${PC_LIBXSLT_VERSION})
+    set(LIBXSLT_VERSION_STRING "${LibXslt_VERSION}")
 elseif(LIBXSLT_INCLUDE_DIR AND EXISTS "${LIBXSLT_INCLUDE_DIR}/libxslt/xsltconfig.h")
     file(STRINGS "${LIBXSLT_INCLUDE_DIR}/libxslt/xsltconfig.h" libxslt_version_str
          REGEX "^#define[\t ]+LIBXSLT_DOTTED_VERSION[\t ]+\".*\"")
 
     string(REGEX REPLACE "^#define[\t ]+LIBXSLT_DOTTED_VERSION[\t ]+\"([^\"]*)\".*" "\\1"
-           LIBXSLT_VERSION_STRING "${libxslt_version_str}")
+           LibXslt_VERSION "${libxslt_version_str}")
+    set(LIBXSLT_VERSION_STRING "${LibXslt_VERSION}")
     unset(libxslt_version_str)
 endif()
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(LibXslt
                                   REQUIRED_VARS LIBXSLT_LIBRARIES LIBXSLT_INCLUDE_DIR
-                                  VERSION_VAR LIBXSLT_VERSION_STRING)
+                                  VERSION_VAR LibXslt_VERSION)
 
 mark_as_advanced(LIBXSLT_INCLUDE_DIR
                  LIBXSLT_LIBRARY

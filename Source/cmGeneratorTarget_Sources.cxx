@@ -10,7 +10,6 @@
 #include <set>
 #include <sstream>
 #include <string>
-#include <type_traits>
 #include <unordered_set>
 #include <utility>
 #include <vector>
@@ -21,7 +20,6 @@
 
 #include "cmsys/RegularExpression.hxx"
 
-#include "cmAlgorithms.h"
 #include "cmEvaluatedTargetProperty.h"
 #include "cmFileSet.h"
 #include "cmGenExContext.h"
@@ -55,7 +53,7 @@ void AddObjectEntries(cmGeneratorTarget const* headTarget,
         headTarget->GetLinkImplementationLibraries(context.Config,
                                                    UseTo::Link)) {
     entries.HadContextSensitiveCondition = impl->HadContextSensitiveCondition;
-    for (cmLinkImplItem const& lib : impl->Libraries) {
+    for (cmLinkItem const& lib : impl->Libraries) {
       if (lib.Target &&
           lib.Target->GetType() == cmStateEnums::OBJECT_LIBRARY) {
         std::string uniqueName =
@@ -97,10 +95,11 @@ void addFileSetEntry(cmGeneratorTarget const* headTarget,
   }
   cmake* cm = headTarget->GetLocalGenerator()->GetCMakeInstance();
   for (auto& entryCge : fileSet->CompileFileEntries()) {
-    auto tpe = cmGeneratorTarget::TargetPropertyEntry::CreateFileSet(
-      dirs, contextSensitiveDirs, std::move(entryCge), fileSet);
-    entries.Entries.emplace_back(
-      EvaluateTargetPropertyEntry(headTarget, context, dagChecker, *tpe));
+    auto targetPropEntry =
+      cmGeneratorTarget::TargetPropertyEntry::CreateFileSet(
+        dirs, contextSensitiveDirs, std::move(entryCge), fileSet);
+    entries.Entries.emplace_back(EvaluateTargetPropertyEntry(
+      headTarget, context, dagChecker, *targetPropEntry));
     EvaluatedTargetPropertyEntry const& entry = entries.Entries.back();
     for (auto const& file : entry.Values) {
       auto* sf = headTarget->Makefile->GetOrCreateSource(file);
@@ -173,7 +172,7 @@ bool processSources(cmGeneratorTarget const* tgt,
       contextDependent = true;
     }
 
-    cmLinkImplItem const& item = entry.LinkImplItem;
+    cmLinkItem const& item = entry.LinkItem;
     std::string const& targetName = item.AsStr();
 
     for (std::string& src : entry.Values) {

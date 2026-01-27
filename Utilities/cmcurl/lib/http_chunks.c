@@ -27,7 +27,6 @@
 #ifndef CURL_DISABLE_HTTP
 
 #include "urldata.h" /* it includes http_chunks.h */
-#include "curl_printf.h"
 #include "curl_trc.h"
 #include "sendf.h"   /* for the client write stuff */
 #include "curlx/dynbuf.h"
@@ -159,7 +158,7 @@ static CURLcode httpchunk_readwrite(struct Curl_easy *data,
       }
       else {
         const char *p;
-        if(0 == ch->hexindex) {
+        if(ch->hexindex == 0) {
           /* This is illegal data, we received junk where we expected
              a hexadecimal digit. */
           failf(data, "chunk hex-length char not a hex digit: 0x%x", *buf);
@@ -184,7 +183,7 @@ static CURLcode httpchunk_readwrite(struct Curl_easy *data,
       /* waiting for the LF after a chunk size */
       if(*buf == 0x0a) {
         /* we are now expecting data to come, unless size was zero! */
-        if(0 == ch->datasize) {
+        if(ch->datasize == 0) {
           ch->state = CHUNK_TRAILER; /* now check for trailers */
         }
         else {
@@ -229,7 +228,7 @@ static CURLcode httpchunk_readwrite(struct Curl_easy *data,
                      FMT_OFF_T " bytes in chunk remain",
                      piece, ch->datasize);
 
-      if(0 == ch->datasize)
+      if(ch->datasize == 0)
         /* end of data this round, we now expect a trailing CRLF */
         ch->state = CHUNK_POSTLF;
       break;
@@ -584,7 +583,7 @@ static CURLcode add_chunk(struct Curl_easy *data,
     int hdlen;
     size_t n;
 
-    hdlen = msnprintf(hd, sizeof(hd), "%zx\r\n", nread);
+    hdlen = curl_msnprintf(hd, sizeof(hd), "%zx\r\n", nread);
     if(hdlen <= 0)
       return CURLE_READ_ERROR;
     /* On a soft-limited bufq, we do not need to check that all was written */
@@ -656,8 +655,7 @@ const struct Curl_crtype Curl_httpchunk_encoder = {
   Curl_creader_def_needs_rewind,
   cr_chunked_total_length,
   Curl_creader_def_resume_from,
-  Curl_creader_def_rewind,
-  Curl_creader_def_unpause,
+  Curl_creader_def_cntrl,
   Curl_creader_def_is_paused,
   Curl_creader_def_done,
   sizeof(struct chunked_reader)

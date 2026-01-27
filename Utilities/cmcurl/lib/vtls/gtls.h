@@ -100,7 +100,8 @@ CURLcode Curl_gtls_client_trust_setup(struct Curl_cfilter *cf,
                                       struct Curl_easy *data,
                                       struct gtls_ctx *gtls);
 
-CURLcode Curl_gtls_verifyserver(struct Curl_easy *data,
+CURLcode Curl_gtls_verifyserver(struct Curl_cfilter *cf,
+                                struct Curl_easy *data,
                                 gnutls_session_t session,
                                 struct ssl_primary_config *config,
                                 struct ssl_config_data *ssl_config,
@@ -116,6 +117,10 @@ CURLcode Curl_gtls_cache_session(struct Curl_cfilter *cf,
                                  const char *alpn,
                                  unsigned char *quic_tp,
                                  size_t quic_tp_len);
+
+/* Report properties of a successful handshake */
+void Curl_gtls_report_handshake(struct Curl_easy *data,
+                                struct gtls_ctx *gctx);
 
 extern const struct Curl_ssl Curl_ssl_gnutls;
 

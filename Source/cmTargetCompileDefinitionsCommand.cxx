@@ -2,6 +2,8 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmTargetCompileDefinitionsCommand.h"
 
+#include <cm/optional>
+
 #include "cmListFileCache.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"

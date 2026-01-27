@@ -10,7 +10,6 @@
 #include <cstdio>
 #include <cstring>
 #include <sstream>
-#include <type_traits>
 #include <unordered_set>
 #include <utility>
 
@@ -46,6 +45,7 @@
 #include "cmStandardLevel.h"
 #include "cmStandardLevelResolver.h"
 #include "cmState.h"
+#include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSyntheticTargetCache.h"
 #include "cmSystemTools.h"
@@ -80,7 +80,7 @@ static void CreatePropertyGeneratorExpressions(
   bool evaluateForBuildsystem = false)
 {
   for (auto const& entry : entries) {
-    items.push_back(cmGeneratorTarget::TargetPropertyEntry::Create(
+    items.emplace_back(cmGeneratorTarget::TargetPropertyEntry::Create(
       cmakeInstance, entry, evaluateForBuildsystem));
   }
 }
@@ -566,10 +566,11 @@ void cmGeneratorTarget::AddSourceCommon(std::string const& src, bool before)
   this->ClearSourcesCache();
 }
 
-void cmGeneratorTarget::AddSource(std::string const& src, bool before)
+cmSourceFile* cmGeneratorTarget::AddSource(std::string const& src, bool before)
 {
-  this->Target->AddSource(src, before);
+  auto* sf = this->Target->AddSource(src, before);
   this->AddSourceCommon(src, before);
+  return sf;
 }
 
 void cmGeneratorTarget::AddTracedSources(std::vector<std::string> const& srcs)
@@ -697,7 +698,7 @@ void cmGeneratorTarget::GetObjectSources(
     this->Objects[it];
   }
 
-  this->LocalGenerator->ComputeObjectFilenames(this->Objects, this);
+  this->LocalGenerator->ComputeObjectFilenames(this->Objects, config, this);
   this->VisitedConfigsForObjects.insert(config);
 }
 
@@ -857,7 +858,10 @@ bool cmGeneratorTarget::IsIPOEnabled(std::string const& lang,
 std::string const& cmGeneratorTarget::GetObjectName(cmSourceFile const* file)
 {
   this->ComputeObjectMapping();
-  return this->Objects[file];
+  auto const useShortPaths = this->GetUseShortObjectNames()
+    ? cmObjectLocations::UseShortPath::Yes
+    : cmObjectLocations::UseShortPath::No;
+  return this->Objects[file].GetPath(useShortPaths);
 }
 
 char const* cmGeneratorTarget::GetCustomObjectExtension() const
@@ -1010,6 +1014,10 @@ std::set<cmLinkItem> const& cmGeneratorTarget::GetUtilityItems() const
           cmLinkItem(i.Value.first, i.Value.second, i.Backtrace));
       }
     }
+    if (cmGeneratorTarget const* reuseTarget = this->GetPchReuseTarget()) {
+      this->UtilityItems.insert(
+        cmLinkItem(reuseTarget, false, cmListFileBacktrace()));
+    }
   }
   return this->UtilityItems;
 }
@@ -1144,6 +1152,11 @@ bool cmGeneratorTarget::IsImportedGloballyVisible() const
   return this->Target->IsImportedGloballyVisible();
 }
 
+bool cmGeneratorTarget::IsSymbolic() const
+{
+  return this->Target->IsSymbolic();
+}
+
 bool cmGeneratorTarget::IsForeign() const
 {
   return this->Target->IsForeign();
@@ -1272,6 +1285,12 @@ bool cmGeneratorTarget::GetPropertyAsBool(std::string const& prop) const
 std::string cmGeneratorTarget::GetCompilePDBName(
   std::string const& config) const
 {
+  if (cmGeneratorTarget const* reuseTarget = this->GetPchReuseTarget()) {
+    if (reuseTarget != this) {
+      return reuseTarget->GetCompilePDBName(config);
+    }
+  }
+
   // Check for a per-configuration output directory target property.
   std::string configUpper = cmSystemTools::UpperCase(config);
   std::string configProp = cmStrCat("COMPILE_PDB_NAME_", configUpper);
@@ -1293,7 +1312,17 @@ std::string cmGeneratorTarget::GetCompilePDBName(
     return components.prefix + pdbName + ".pdb";
   }
 
-  return "";
+  // If the target is PCH-reused or PCH-reuses, we need a stable name for the
+  // PDB file so that reusing targets can construct a stable name for it.
+  cmGeneratorTarget const* reuseTarget = this->GetPchReuseTarget();
+  bool const hasReuse = reuseTarget && reuseTarget != this;
+  if (this->PchReused || hasReuse) {
+    NameComponents const& components = GetFullNameInternalComponents(
+      config, cmStateEnums::RuntimeBinaryArtifact);
+    return cmStrCat(components.prefix, this->GetName(), ".pdb");
+  }
+
+  return std::string{};
 }
 
 std::string cmGeneratorTarget::GetCompilePDBPath(
@@ -1821,6 +1850,36 @@ std::string const* cmGeneratorTarget::GetExportMacro() const
   return nullptr;
 }
 
+cmList const& cmGeneratorTarget::GetSharedLibraryCompileDefs(
+  std::string const& config) const
+{
+  {
+    auto it = this->SharedLibraryCompileDefs.find(config);
+    if (it != this->SharedLibraryCompileDefs.end()) {
+      return it->second;
+    }
+  }
+
+  auto emplaceResult =
+    this->SharedLibraryCompileDefs.emplace(config, cmList{});
+  auto& defs = emplaceResult.first->second;
+  if (this->GetType() != cmStateEnums::SHARED_LIBRARY &&
+      this->GetType() != cmStateEnums::MODULE_LIBRARY) {
+    return defs;
+  }
+
+  if (this->GetPolicyStatusCMP0203() != cmPolicies::NEW) {
+    return defs;
+  }
+
+  auto linkerLang = this->GetLinkerLanguage(config);
+  auto definitionVar =
+    cmStrCat("CMAKE_", linkerLang, "_SHARED_LIBRARY_COMPILE_DEFINITIONS");
+  defs = this->Makefile->GetSafeDefinition(definitionVar);
+
+  return defs;
+}
+
 cmGeneratorTarget::NameComponents const&
 cmGeneratorTarget::GetFullNameComponents(
   std::string const& config, cmStateEnums::ArtifactType artifact) const
@@ -2040,14 +2099,6 @@ std::vector<std::string> cmGeneratorTarget::GetAppleArchs(
       this->Makefile->GetDefinition("_CMAKE_APPLE_ARCHS_DEFAULT"));
   }
   return std::move(archList.data());
-}
-
-std::string const& cmGeneratorTarget::GetTargetLabelsString()
-{
-  this->targetLabelsString = this->GetSafeProperty("LABELS");
-  std::replace(this->targetLabelsString.begin(),
-               this->targetLabelsString.end(), ';', ',');
-  return this->targetLabelsString;
 }
 
 namespace {
@@ -2314,7 +2365,6 @@ cmGeneratorTarget::GetClassifiedFlagsForSource(cmSourceFile const* sf,
   cmRulePlaceholderExpander::RuleVariables vars;
   vars.CMTargetName = this->GetName().c_str();
   vars.CMTargetType = cmState::GetTargetTypeName(this->GetType()).c_str();
-  vars.CMTargetLabels = this->GetTargetLabelsString().c_str();
   vars.Language = lang.c_str();
 
   auto const sfPath = this->LocalGenerator->ConvertToOutputFormat(
@@ -2344,6 +2394,7 @@ cmGeneratorTarget::GetClassifiedFlagsForSource(cmSourceFile const* sf,
     vars.Object = sfVars.ObjectFileDir.c_str();
     vars.ObjectDir = sfVars.ObjectDir.c_str();
     vars.ObjectFileDir = sfVars.ObjectFileDir.c_str();
+    vars.TargetSupportDir = sfVars.TargetSupportDir.c_str();
     vars.Flags = PlaceholderFlags.c_str();
     vars.DependencyFile = sfVars.DependencyFile.c_str();
     vars.DependencyTarget = sfVars.DependencyTarget.c_str();
@@ -2424,12 +2475,16 @@ cmGeneratorTarget::SourceVariables cmGeneratorTarget::GetSourceVariables(
 
   // Object settings.
   {
+    std::string const targetSupportDir = lg->MaybeRelativeToTopBinDir(
+      gg->ConvertToOutputPath(this->GetCMFSupportDirectory()));
     std::string const objectDir = gg->ConvertToOutputPath(
       cmStrCat(this->GetSupportDirectory(), gg->GetConfigDirectory(config)));
     std::string const objectFileName = this->GetObjectName(sf);
     std::string const objectFilePath =
       cmStrCat(objectDir, '/', objectFileName);
 
+    vars.TargetSupportDir =
+      lg->ConvertToOutputFormat(targetSupportDir, cmOutputConverter::SHELL);
     vars.ObjectDir =
       lg->ConvertToOutputFormat(objectDir, cmOutputConverter::SHELL);
     vars.ObjectFileDir =
@@ -2803,6 +2858,122 @@ std::string cmGeneratorTarget::GetClangTidyExportFixesDirectory(
   return cmSystemTools::CollapseFullPath(path);
 }
 
+struct CycleWatcher
+{
+  CycleWatcher(bool& flag)
+    : Flag(flag)
+  {
+    this->Flag = true;
+  }
+  ~CycleWatcher() { this->Flag = false; }
+  bool& Flag;
+};
+
+cmGeneratorTarget const* cmGeneratorTarget::GetPchReuseTarget() const
+{
+  if (this->ComputingPchReuse) {
+    // TODO: Get the full cycle.
+    if (!this->PchReuseCycleDetected) {
+      this->Makefile->IssueMessage(
+        MessageType::FATAL_ERROR,
+        cmStrCat("Circular PCH reuse target involving '", this->GetName(),
+                 '\''));
+    }
+    this->PchReuseCycleDetected = true;
+    return nullptr;
+  }
+  CycleWatcher watch(this->ComputingPchReuse);
+  (void)watch;
+  cmValue pchReuseFrom = this->GetProperty("PRECOMPILE_HEADERS_REUSE_FROM");
+  if (!pchReuseFrom) {
+    return nullptr;
+  }
+  cmGeneratorTarget const* generatorTarget =
+    this->GetGlobalGenerator()->FindGeneratorTarget(*pchReuseFrom);
+  if (!generatorTarget) {
+    this->Makefile->IssueMessage(
+      MessageType::FATAL_ERROR,
+      cmStrCat(
+        "Target \"", *pchReuseFrom, "\" for the \"", this->GetName(),
+        R"(" target's "PRECOMPILE_HEADERS_REUSE_FROM" property does not exist.)"));
+  }
+  if (this->GetProperty("PRECOMPILE_HEADERS").IsOn()) {
+    this->Makefile->IssueMessage(
+      MessageType::FATAL_ERROR,
+      cmStrCat("PRECOMPILE_HEADERS property is already set on target (\"",
+               this->GetName(), "\")\n"));
+  }
+
+  if (generatorTarget) {
+    if (generatorTarget->GetPropertyAsBool("DISABLE_PRECOMPILE_HEADERS")) {
+      this->Makefile->IssueMessage(
+        MessageType::WARNING,
+        cmStrCat(
+          "Target \"", *pchReuseFrom, "\" for the \"", this->GetName(),
+          R"(" target's "PRECOMPILE_HEADERS_REUSE_FROM" property has set "DISABLE_PRECOMPILE_HEADERS"; ignoring.)"));
+      return nullptr;
+    }
+
+    if (auto const* recurseReuseTarget =
+          generatorTarget->GetPchReuseTarget()) {
+      return recurseReuseTarget;
+    }
+  }
+  return generatorTarget;
+}
+
+cmGeneratorTarget* cmGeneratorTarget::GetPchReuseTarget()
+{
+  if (this->ComputingPchReuse) {
+    // TODO: Get the full cycle.
+    if (!this->PchReuseCycleDetected) {
+      this->Makefile->IssueMessage(
+        MessageType::FATAL_ERROR,
+        cmStrCat("Circular PCH reuse target involving '", this->GetName(),
+                 '\''));
+    }
+    this->PchReuseCycleDetected = true;
+    return nullptr;
+  }
+  CycleWatcher watch(this->ComputingPchReuse);
+  (void)watch;
+  cmValue pchReuseFrom = this->GetProperty("PRECOMPILE_HEADERS_REUSE_FROM");
+  if (!pchReuseFrom) {
+    return nullptr;
+  }
+  cmGeneratorTarget* generatorTarget =
+    this->GetGlobalGenerator()->FindGeneratorTarget(*pchReuseFrom);
+  if (!generatorTarget) {
+    this->Makefile->IssueMessage(
+      MessageType::FATAL_ERROR,
+      cmStrCat(
+        "Target \"", *pchReuseFrom, "\" for the \"", this->GetName(),
+        R"(" target's "PRECOMPILE_HEADERS_REUSE_FROM" property does not exist.)"));
+  }
+  if (this->GetProperty("PRECOMPILE_HEADERS").IsOn()) {
+    this->Makefile->IssueMessage(
+      MessageType::FATAL_ERROR,
+      cmStrCat("PRECOMPILE_HEADERS property is already set on target (\"",
+               this->GetName(), "\")\n"));
+  }
+
+  if (generatorTarget) {
+    if (generatorTarget->GetPropertyAsBool("DISABLE_PRECOMPILE_HEADERS")) {
+      this->Makefile->IssueMessage(
+        MessageType::WARNING,
+        cmStrCat(
+          "Target \"", *pchReuseFrom, "\" for the \"", this->GetName(),
+          R"(" target's "PRECOMPILE_HEADERS_REUSE_FROM" property has set "DISABLE_PRECOMPILE_HEADERS"; ignoring.)"));
+      return nullptr;
+    }
+
+    if (auto* recurseReuseTarget = generatorTarget->GetPchReuseTarget()) {
+      return recurseReuseTarget;
+    }
+  }
+  return generatorTarget;
+}
+
 std::vector<std::string> cmGeneratorTarget::GetPchArchs(
   std::string const& config, std::string const& lang) const
 {
@@ -2830,23 +3001,21 @@ std::string cmGeneratorTarget::GetPchHeader(std::string const& config,
     return std::string();
   }
   cmGeneratorTarget const* generatorTarget = this;
-  cmValue pchReuseFrom =
-    generatorTarget->GetProperty("PRECOMPILE_HEADERS_REUSE_FROM");
+  cmGeneratorTarget const* reuseTarget = this->GetPchReuseTarget();
+  bool const haveReuseTarget = reuseTarget && reuseTarget != this;
+  if (reuseTarget) {
+    generatorTarget = reuseTarget;
+  }
 
   auto const inserted =
     this->PchHeaders.insert(std::make_pair(language + config + arch, ""));
   if (inserted.second) {
     std::vector<BT<std::string>> const headers =
       this->GetPrecompileHeaders(config, language);
-    if (headers.empty() && !pchReuseFrom) {
+    if (headers.empty() && !haveReuseTarget) {
       return std::string();
     }
     std::string& filename = inserted.first->second;
-
-    if (pchReuseFrom) {
-      generatorTarget =
-        this->GetGlobalGenerator()->FindGeneratorTarget(*pchReuseFrom);
-    }
 
     std::map<std::string, std::string> const languageToExtension = {
       { "C", ".h" },
@@ -2861,12 +3030,13 @@ std::string cmGeneratorTarget::GetPchHeader(std::string const& config,
       filename = cmStrCat(filename, '/', config);
     }
 
+    // This is acceptable as its the source file, won't have a rename/hash
     filename =
       cmStrCat(filename, "/cmake_pch", arch.empty() ? "" : cmStrCat('_', arch),
                languageToExtension.at(language));
 
     std::string const filename_tmp = cmStrCat(filename, ".tmp");
-    if (!pchReuseFrom) {
+    if (!haveReuseTarget) {
       cmValue pchPrologue =
         this->Makefile->GetDefinition("CMAKE_PCH_PROLOGUE");
       cmValue pchEpilogue =
@@ -2941,11 +3111,10 @@ std::string cmGeneratorTarget::GetPchSource(std::string const& config,
     std::string& filename = inserted.first->second;
 
     cmGeneratorTarget const* generatorTarget = this;
-    cmValue pchReuseFrom =
-      generatorTarget->GetProperty("PRECOMPILE_HEADERS_REUSE_FROM");
-    if (pchReuseFrom) {
-      generatorTarget =
-        this->GetGlobalGenerator()->FindGeneratorTarget(*pchReuseFrom);
+    cmGeneratorTarget const* reuseTarget = this->GetPchReuseTarget();
+    bool const haveReuseTarget = reuseTarget && reuseTarget != this;
+    if (reuseTarget) {
+      generatorTarget = reuseTarget;
     }
 
     filename =
@@ -2972,7 +3141,7 @@ std::string cmGeneratorTarget::GetPchSource(std::string const& config,
     }
 
     std::string const filename_tmp = cmStrCat(filename, ".tmp");
-    if (!pchReuseFrom) {
+    if (!haveReuseTarget) {
       {
         cmGeneratedFileStream file(filename_tmp);
         file << "/* generated by CMake */\n";
@@ -3003,12 +3172,10 @@ std::string cmGeneratorTarget::GetPchFileObject(std::string const& config,
 
     auto* pchSf = this->Makefile->GetOrCreateSource(
       pchSource, false, cmSourceFileLocationKind::Known);
-
-    filename = cmStrCat(this->ObjectDirectory, this->GetObjectName(pchSf));
-    if (this->GetGlobalGenerator()->IsMultiConfig()) {
-      cmSystemTools::ReplaceString(
-        filename, this->GetGlobalGenerator()->GetCMakeCFGIntDir(), config);
-    }
+    pchSf->SetSpecialSourceType(cmSourceFile::SpecialSourceType::PchSource);
+    pchSf->ResolveFullPath();
+    filename = cmStrCat(this->GetObjectDirectory(config), '/',
+                        this->GetObjectName(pchSf));
   }
   return inserted.first->second;
 }
@@ -3038,11 +3205,9 @@ std::string cmGeneratorTarget::GetPchFile(std::string const& config,
       };
 
       cmGeneratorTarget* generatorTarget = this;
-      cmValue pchReuseFrom =
-        generatorTarget->GetProperty("PRECOMPILE_HEADERS_REUSE_FROM");
-      if (pchReuseFrom) {
-        generatorTarget =
-          this->GetGlobalGenerator()->FindGeneratorTarget(*pchReuseFrom);
+      cmGeneratorTarget* reuseTarget = this->GetPchReuseTarget();
+      if (reuseTarget) {
+        generatorTarget = reuseTarget;
       }
 
       std::string const pchFileObject =
@@ -3051,8 +3216,24 @@ std::string cmGeneratorTarget::GetPchFile(std::string const& config,
         pchFile = replaceExtension(pchFileObject, pchExtension);
       }
     } else {
-      pchFile = this->GetPchHeader(config, language, arch);
-      pchFile += pchExtension;
+      if (this->GetUseShortObjectNames() && !pchExtension.empty()) {
+        auto pchSource = this->GetPchSource(config, language, arch);
+        auto* pchSf = this->Makefile->GetOrCreateSource(
+          pchSource, false, cmSourceFileLocationKind::Known);
+        pchSf->SetSpecialSourceType(
+          cmSourceFile::SpecialSourceType::PchSource);
+        pchSf->ResolveFullPath();
+        std::string cfgSubdir;
+        if (this->GetGlobalGenerator()->IsMultiConfig()) {
+          cfgSubdir = cmStrCat(config, '/');
+        }
+        pchFile = cmStrCat(
+          this->GetSupportDirectory(), '/', cfgSubdir,
+          this->LocalGenerator->GetShortObjectFileName(*pchSf), pchExtension);
+      } else {
+        pchFile =
+          cmStrCat(this->GetPchHeader(config, language, arch), pchExtension);
+      }
     }
   }
   return inserted.first->second;
@@ -3091,8 +3272,17 @@ std::string cmGeneratorTarget::GetPchCreateCompileOptions(
     std::string const pchHeader = this->GetPchHeader(config, language, arch);
     std::string const pchFile = this->GetPchFile(config, language, arch);
 
-    cmSystemTools::ReplaceString(createOptionList, "<PCH_HEADER>", pchHeader);
-    cmSystemTools::ReplaceString(createOptionList, "<PCH_FILE>", pchFile);
+    if (GlobalGenerator->IsFastbuild()) {
+      // Account for potential spaces in a shell-friendly way.
+      cmSystemTools::ReplaceString(createOptionList, "<PCH_HEADER>",
+                                   '"' + pchHeader + '"');
+      cmSystemTools::ReplaceString(createOptionList, "<PCH_FILE>",
+                                   '"' + pchFile + '"');
+    } else {
+      cmSystemTools::ReplaceString(createOptionList, "<PCH_HEADER>",
+                                   pchHeader);
+      cmSystemTools::ReplaceString(createOptionList, "<PCH_FILE>", pchFile);
+    }
   }
   return inserted.first->second;
 }
@@ -3126,8 +3316,16 @@ std::string cmGeneratorTarget::GetPchUseCompileOptions(
     std::string const pchHeader = this->GetPchHeader(config, language, arch);
     std::string const pchFile = this->GetPchFile(config, language, arch);
 
-    cmSystemTools::ReplaceString(useOptionList, "<PCH_HEADER>", pchHeader);
-    cmSystemTools::ReplaceString(useOptionList, "<PCH_FILE>", pchFile);
+    if (GlobalGenerator->IsFastbuild()) {
+      // Account for potential spaces in a shell-friendly way.
+      cmSystemTools::ReplaceString(useOptionList, "<PCH_HEADER>",
+                                   '"' + pchHeader + '"');
+      cmSystemTools::ReplaceString(useOptionList, "<PCH_FILE>",
+                                   '"' + pchFile + '"');
+    } else {
+      cmSystemTools::ReplaceString(useOptionList, "<PCH_HEADER>", pchHeader);
+      cmSystemTools::ReplaceString(useOptionList, "<PCH_FILE>", pchFile);
+    }
   }
   return inserted.first->second;
 }
@@ -3808,9 +4006,11 @@ std::string cmGeneratorTarget::GetPDBOutputName(
 
     // Now evaluate genex and update the previously-prepared map entry.
     if (outName.empty()) {
-      i->second =
-        this->GetOutputName(config, cmStateEnums::RuntimeBinaryArtifact) +
-        this->GetFilePostfix(config);
+      i->second = cmStrCat(
+        this->GetOutputName(config, cmStateEnums::RuntimeBinaryArtifact),
+        this->GetPolicyStatusCMP0202() != cmPolicies::NEW
+          ? this->GetFilePostfix(config)
+          : "");
     } else {
       i->second =
         cmGeneratorExpression::Evaluate(outName, this->LocalGenerator, config);
@@ -3833,7 +4033,11 @@ std::string cmGeneratorTarget::GetPDBName(std::string const& config) const
 
   std::string base = this->GetPDBOutputName(config);
 
-  return parts.prefix + base + ".pdb";
+  return cmStrCat(parts.prefix, base,
+                  this->GetPolicyStatusCMP0202() == cmPolicies::NEW
+                    ? this->GetFilePostfix(config)
+                    : "",
+                  ".pdb");
 }
 
 std::string cmGeneratorTarget::GetObjectDirectory(
@@ -3856,22 +4060,43 @@ std::string cmGeneratorTarget::GetObjectDirectory(
 void cmGeneratorTarget::GetTargetObjectNames(
   std::string const& config, std::vector<std::string>& objects) const
 {
+  this->GetTargetObjectLocations(
+    config,
+    [&objects](cmObjectLocation const& buildLoc, cmObjectLocation const&) {
+      objects.push_back(buildLoc.GetPath());
+    });
+}
+
+void cmGeneratorTarget::GetTargetObjectLocations(
+  std::string const& config,
+  std::function<void(cmObjectLocation const&, cmObjectLocation const&)> cb)
+  const
+{
   std::vector<cmSourceFile const*> objectSources;
   this->GetObjectSources(objectSources, config);
-  std::map<cmSourceFile const*, std::string> mapping;
+  std::map<cmSourceFile const*, cmObjectLocations> mapping;
 
   for (cmSourceFile const* sf : objectSources) {
     mapping[sf];
   }
 
-  this->LocalGenerator->ComputeObjectFilenames(mapping, this);
+  this->LocalGenerator->ComputeObjectFilenames(mapping, config, this);
+
+  auto const buildUseShortPaths = this->GetUseShortObjectNames()
+    ? cmObjectLocations::UseShortPath::Yes
+    : cmObjectLocations::UseShortPath::No;
+  auto const installUseShortPaths = this->GetUseShortObjectNamesForInstall();
 
   for (cmSourceFile const* src : objectSources) {
     // Find the object file name corresponding to this source file.
     auto map_it = mapping.find(src);
+    auto const& buildLoc = map_it->second.GetLocation(buildUseShortPaths);
+    auto const& installLoc =
+      map_it->second.GetInstallLocation(installUseShortPaths, config);
     // It must exist because we populated the mapping just above.
-    assert(!map_it->second.empty());
-    objects.push_back(map_it->second);
+    assert(!buildLoc.GetPath().empty());
+    assert(!installLoc.GetPath().empty());
+    cb(buildLoc, installLoc);
   }
 
   // We need to compute the relative path from the root of
@@ -3881,7 +4106,9 @@ void cmGeneratorTarget::GetTargetObjectNames(
   auto ispcObjects = this->GetGeneratedISPCObjects(config);
   for (std::string const& output : ispcObjects) {
     auto relativePathFromObjectDir = output.substr(rootObjectDir.size());
-    objects.push_back(relativePathFromObjectDir);
+    cmObjectLocation ispcLoc(relativePathFromObjectDir);
+    // FIXME: apply short path to this object if needed.
+    cb(ispcLoc, ispcLoc);
   }
 }
 
@@ -4432,7 +4659,14 @@ bool cmGeneratorTarget::ComputePDBOutputDir(std::string const& kind,
     }
   }
   if (out.empty()) {
-    return false;
+    cmGeneratorTarget const* reuseTarget = this->GetPchReuseTarget();
+    bool const hasReuse = reuseTarget && reuseTarget != this;
+    // Compiler-generated PDB output always needed for REUSE_FROM.
+    if (kind == "COMPILE_PDB"_s && (this->PchReused || hasReuse)) {
+      out = this->GetSupportDirectory();
+    } else {
+      return false;
+    }
   }
 
   // Convert the output path to a full path in case it is
@@ -4722,7 +4956,7 @@ bool cmGeneratorTarget::GetConfigCommonSourceFilesForXcode(
 }
 
 void cmGeneratorTarget::GetObjectLibrariesInSources(
-  std::vector<cmGeneratorTarget*>& objlibs) const
+  std::vector<BT<cmGeneratorTarget*>>& objlibs) const
 {
   // FIXME: This searches SOURCES for TARGET_OBJECTS for backwards
   // compatibility with the OLD behavior of CMP0026 since this
@@ -4743,7 +4977,7 @@ void cmGeneratorTarget::GetObjectLibrariesInSources(
         cmGeneratorTarget* objLib =
           this->LocalGenerator->FindGeneratorTargetToUse(objLibName);
         if (objLib) {
-          objlibs.push_back(objLib);
+          objlibs.emplace_back(objLib, entry.Backtrace);
         }
       }
     }
@@ -5220,22 +5454,49 @@ bool cmGeneratorTarget::NeedImportLibraryName(std::string const& config) const
       this->GetType() == cmStateEnums::MODULE_LIBRARY));
 }
 
-std::string cmGeneratorTarget::GetSupportDirectory() const
+bool cmGeneratorTarget::GetUseShortObjectNames(
+  cmStateEnums::IntermediateDirKind kind) const
 {
-  cmLocalGenerator* lg = this->GetLocalGenerator();
-  return cmStrCat(lg->GetObjectOutputRoot(), '/',
-                  lg->GetTargetDirectory(this));
+  return this->LocalGenerator->UseShortObjectNames(kind);
 }
 
-std::string cmGeneratorTarget::GetCMFSupportDirectory() const
+cmObjectLocations::UseShortPath
+cmGeneratorTarget::GetUseShortObjectNamesForInstall() const
+{
+  auto prop = this->Target->GetProperty("INSTALL_OBJECT_NAME_STRATEGY");
+  if (prop == "SHORT"_s) {
+    return cmObjectLocations::UseShortPath::Yes;
+  }
+  if (prop == "FULL"_s) {
+    return cmObjectLocations::UseShortPath::No;
+  }
+  if (prop.IsSet()) {
+    this->Makefile->IssueMessage(
+      MessageType::FATAL_ERROR,
+      cmStrCat("Property INSTALL_OBJECT_NAME_STRATEGY of target \"",
+               this->GetName(), "\" set to the unsupported strategy ", prop));
+  }
+  return cmObjectLocations::UseShortPath::No;
+}
+
+std::string cmGeneratorTarget::GetSupportDirectory(
+  cmStateEnums::IntermediateDirKind kind) const
+{
+  cmLocalGenerator* lg = this->GetLocalGenerator();
+  return cmStrCat(lg->GetObjectOutputRoot(kind), '/',
+                  lg->GetTargetDirectory(this, kind));
+}
+
+std::string cmGeneratorTarget::GetCMFSupportDirectory(
+  cmStateEnums::IntermediateDirKind kind) const
 {
   cmLocalGenerator* lg = this->GetLocalGenerator();
   if (!lg->AlwaysUsesCMFPaths()) {
     return cmStrCat(lg->GetCurrentBinaryDirectory(), "/CMakeFiles/",
-                    lg->GetTargetDirectory(this));
+                    lg->GetTargetDirectory(this, kind));
   }
-  return cmStrCat(lg->GetObjectOutputRoot(), '/',
-                  lg->GetTargetDirectory(this));
+  return cmStrCat(lg->GetObjectOutputRoot(kind), '/',
+                  lg->GetTargetDirectory(this, kind));
 }
 
 bool cmGeneratorTarget::IsLinkable() const
@@ -5580,6 +5841,8 @@ std::string cmGeneratorTarget::GenerateHeaderSetVerificationFile(
     this->LocalGenerator->GetCurrentBinaryDirectory(), '/', this->GetName(),
     "_verify_interface_header_sets/", headerFilename, extension);
   auto* verificationSource = this->Makefile->GetOrCreateSource(filename);
+  source.SetSpecialSourceType(
+    cmSourceFile::SpecialSourceType::HeaderSetVerificationSource);
   verificationSource->SetProperty("LANGUAGE", language);
 
   cmSystemTools::MakeDirectory(cmSystemTools::GetFilenamePath(filename));

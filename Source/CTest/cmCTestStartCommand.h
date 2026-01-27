@@ -6,7 +6,6 @@
 
 #include <iosfwd>
 #include <string>
-#include <vector>
 
 #include "cmCTestCommand.h"
 

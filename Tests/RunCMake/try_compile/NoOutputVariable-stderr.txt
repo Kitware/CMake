@@ -1,7 +1,7 @@
-CMake Error at NoOutputVariable.cmake:[0-9]+ \(try_compile\):
+CMake Error at NoOutputVariable\.cmake:[0-9]+ \(try_compile\):
   Error after keyword "OUTPUT_VARIABLE":
 
     missing required value
 
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)

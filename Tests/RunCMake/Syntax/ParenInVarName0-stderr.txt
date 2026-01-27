@@ -1,7 +1,7 @@
-CMake Error at ParenInVarName0.cmake:2 \(message\):
+CMake Error at ParenInVarName0\.cmake:2 \(message\):
   Syntax error in cmake code at
 
-    .*/Tests/RunCMake/Syntax/ParenInVarName0.cmake:2
+    .*/Tests/RunCMake/Syntax/ParenInVarName0\.cmake:2
 
   when parsing string
 
@@ -9,4 +9,4 @@ CMake Error at ParenInVarName0.cmake:2 \(message\):
 
   Invalid character \('\('\) in a variable name: 'e'
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)

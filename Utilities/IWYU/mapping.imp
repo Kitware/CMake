@@ -23,36 +23,12 @@
   { include: [ "<wctype.h>", public, "<cwctype>", public ] },
 
   # HACK: check whether this can be removed with next iwyu release.
-  { include: [ "<bits/cxxabi_forced.h>", private, "<ctime>", public ] },
-  { include: [ "<bits/chrono.h>", private, "<chrono>", public ] },
-  { include: [ "<bits/exception.h>", private, "<exception>", public ] },
-  { include: [ "<bits/shared_ptr.h>", private, "<memory>", public ] },
-  { include: [ "<bits/std_function.h>", private, "<functional>", public ] },
-  { include: [ "<bits/refwrap.h>", private, "<functional>", public ] },
-  { include: [ "<bits/std_abs.h>", private, "<stdlib.h>", public ] },
-  { include: [ "<bits/stdint-intn.h>", private, "<stdint.h>", public ] },
-  { include: [ "<bits/stdint-uintn.h>", private, "<stdint.h>", public ] },
-  { include: [ "<bits/string_view.tcc>", private, "<string_view>", public ] },
-  { include: [ "<bits/time.h>", private, "<time.h>", public ] },
-  { include: [ "<bits/types/clock_t.h>", private, "<time.h>", public ] },
+  { include: [ "<bits/c++config.h>", private, "<cstddef>", public ] },
   { include: [ "<bits/types/mbstate_t.h>", private, "<wchar.h>", public ] },
-  { include: [ "<bits/types/struct_timespec.h>", private, "<time.h>", public ] },
-  { include: [ "<bits/types/struct_timeval.h>", private, "<time.h>", public ] },
-  { include: [ "<bits/types/struct_tm.h>", private, "<time.h>", public ] },
-  { include: [ "<bits/types/time_t.h>", private, "<time.h>", public ] },
 
   # HACK: check whether this can be removed with next iwyu release.
   { symbol: [ "__GLIBC__", private, "<stdlib.h>", public ] },
-
-  # HACK: iwyu wrongly thinks that including <iosfwd> is sufficient.
-  { symbol: [ "std::stringstream", private, "<sstream>", public ] },
-  { symbol: [ "std::istringstream", private, "<sstream>", public ] },
-  { symbol: [ "std::ostringstream", private, "<sstream>", public ] },
-
-  # HACK: iwyu attributes vector's usage of std::max to its caller.
-  # https://github.com/include-what-you-use/include-what-you-use/issues/908
-  { symbol: ["std::max", "private", "<algorithm>", "public" ] },
-  { symbol: ["std::max", "private", "<vector>", "public" ] },
+  { symbol: [ "std::pair", private, "<utility>", public ] },
 
   # Wrappers for 3rd-party libraries
   { include: [ "@<.*curl/curlver.h>", private, "<cm3p/curl/curl.h>", public ] },
@@ -63,8 +39,7 @@
   { include: [ "@<.*expat_external.h>", private, "<cm3p/expat.h>", public ] },
   { include: [ "@<.*zconf.h>", private, "<cm3p/zlib.h>", public ] },
   { include: [ "@<.*cm_zlib_mangle.h>", private, "<cm3p/zlib.h>", public ] },
-  # # System symbols used by libuv
-  { symbol: [ "ssize_t", private, "<cm3p/uv.h>", public ] },
+  { include: [ "<cmllpkgc/llpkgc__internal.h>", public, "<cmllpkgc/llpkgc.h>", public ] },
 
   { symbol: [ "std::ifstream", private, "\"cmsys/FStream.hxx\"", public ] },
   { symbol: [ "std::ofstream", private, "\"cmsys/FStream.hxx\"", public ] },
@@ -88,12 +63,15 @@
   { symbol: [ "major", private, "\"cmVersion.h\"", public ] },
   { symbol: [ "minor", private, "\"cmVersion.h\"", public ] },
 
-  { include: [ "<curses.h>", private, "\"cmCursesStandardIncludes.h\"", public ] },
+  { include: [ "<ncurses.h>", private, "\"cmCursesStandardIncludes.h\"", public ] },
   { include: [ "\"form.h\"", private, "\"cmCursesStandardIncludes.h\"", public ] },
-  { include: [ "<form.h>", private, "\"cmCursesStandardIncludes.h\"", public ] },
 
-  # Help IWYU understand our explicit instantiation for cmConstStack.
-  { symbol: [ "cmConstStack::cmConstStack<T, Stack>", private, "\"cmConstStack.h\"", public ] },
+  # Help IWYU understand our explicit instantiation for cmStack.
+  { symbol: [ "cmStack::cmStack<T, Stack, Mutable>", private, "\"cmStack.h\"", public ] },
+  { symbol: [ "cmStack<cmFindPackageCall, cmFindPackageStack>::Empty", private, "\"cmStack.h\"", public ] },
+  { symbol: [ "cmStack<cmFindPackageCall, cmFindPackageStack>::Top", private, "\"cmStack.h\"", public ] },
+  { symbol: [ "cmStack<cmFindPackageCall, cmFindPackageStack>::Pop", private, "\"cmStack.h\"", public ] },
+  { symbol: [ "cmStack<cmFindPackageCall, cmFindPackageStack>::Push", private, "\"cmStack.h\"", public ] },
 ]
 
 # vim: set ft=toml:

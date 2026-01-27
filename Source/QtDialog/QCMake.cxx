@@ -589,11 +589,12 @@ void QCMake::loadPresets()
     preset.setToolset = !p.ToolsetStrategy ||
       p.ToolsetStrategy == cmCMakePresetsGraph::ArchToolsetStrategy::Set;
     preset.enabled = it.Expanded && it.Expanded->ConditionResult &&
-      std::find_if(this->AvailableGenerators.begin(),
-                   this->AvailableGenerators.end(),
-                   [&p](cmake::GeneratorInfo const& g) {
-                     return g.name == p.Generator;
-                   }) != this->AvailableGenerators.end();
+      ((p.OriginFile->Version >= 3 && p.Generator.empty()) ||
+       std::find_if(this->AvailableGenerators.begin(),
+                    this->AvailableGenerators.end(),
+                    [&p](cmake::GeneratorInfo const& g) {
+                      return g.name == p.Generator;
+                    }) != this->AvailableGenerators.end());
     presets.push_back(preset);
   }
   emit this->presetsChanged(presets);

@@ -25,10 +25,10 @@
 #
 # Input variables:
 #
-# - `MBEDTLS_INCLUDE_DIR`:   The mbedTLS include directory.
-# - `MBEDTLS_LIBRARY`:       Path to `mbedtls` library.
-# - `MBEDX509_LIBRARY`:      Path to `mbedx509` library.
-# - `MBEDCRYPTO_LIBRARY`:    Path to `mbedcrypto` library.
+# - `MBEDTLS_INCLUDE_DIR`:   Absolute path to mbedTLS include directory.
+# - `MBEDTLS_LIBRARY`:       Absolute path to `mbedtls` library.
+# - `MBEDX509_LIBRARY`:      Absolute path to `mbedx509` library.
+# - `MBEDCRYPTO_LIBRARY`:    Absolute path to `mbedcrypto` library.
 #
 # Result variables:
 #
@@ -59,7 +59,7 @@ endif()
 
 if(MBEDTLS_FOUND)
   set(MbedTLS_FOUND TRUE)
-  set(MBEDTLS_VERSION "${MBEDTLS_mbedtls_VERSION}")
+  set(MBEDTLS_VERSION ${MBEDTLS_mbedtls_VERSION})
   string(REPLACE ";" " " MBEDTLS_CFLAGS "${MBEDTLS_CFLAGS}")
   message(STATUS "Found MbedTLS (via pkg-config): ${MBEDTLS_INCLUDE_DIRS} (found version \"${MBEDTLS_VERSION}\")")
 else()
@@ -71,23 +71,13 @@ else()
   find_library(MBEDCRYPTO_LIBRARY NAMES "mbedcrypto" "libmbedcrypto")
 
   unset(MBEDTLS_VERSION CACHE)
-  if(MBEDTLS_INCLUDE_DIR)
-    if(EXISTS "${MBEDTLS_INCLUDE_DIR}/mbedtls/build_info.h")  # 3.x
-      set(_version_header "${MBEDTLS_INCLUDE_DIR}/mbedtls/build_info.h")
-    elseif(EXISTS "${MBEDTLS_INCLUDE_DIR}/mbedtls/version.h")  # 2.x
-      set(_version_header "${MBEDTLS_INCLUDE_DIR}/mbedtls/version.h")
-    else()
-      unset(_version_header)
-    endif()
-    if(_version_header)
-      set(_version_regex "#[\t ]*define[\t ]+MBEDTLS_VERSION_STRING[\t ]+\"([0-9.]+)\"")
-      file(STRINGS "${_version_header}" _version_str REGEX "${_version_regex}")
-      string(REGEX REPLACE "${_version_regex}" "\\1" _version_str "${_version_str}")
-      set(MBEDTLS_VERSION "${_version_str}")
-      unset(_version_regex)
-      unset(_version_str)
-      unset(_version_header)
-    endif()
+  if(MBEDTLS_INCLUDE_DIR AND EXISTS "${MBEDTLS_INCLUDE_DIR}/mbedtls/build_info.h")
+    set(_version_regex "#[\t ]*define[\t ]+MBEDTLS_VERSION_STRING[\t ]+\"([0-9.]+)\"")
+    file(STRINGS "${MBEDTLS_INCLUDE_DIR}/mbedtls/build_info.h" _version_str REGEX "${_version_regex}")
+    string(REGEX REPLACE "${_version_regex}" "\\1" _version_str "${_version_str}")
+    set(MBEDTLS_VERSION "${_version_str}")
+    unset(_version_regex)
+    unset(_version_str)
   endif()
 
   include(FindPackageHandleStandardArgs)

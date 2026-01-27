@@ -1,4 +1,4 @@
 {
   "version": 1,
-  "hooks": ["bad hook", "postGenerate", "preCMakeBuild", "postCMakeBuild", "postInstall"]
+  "hooks": ["bad hook", "postGenerate", "preCMakeBuild", "postCMakeBuild", "postCMakeInstall"]
 }

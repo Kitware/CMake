@@ -13,6 +13,12 @@ This module sets the ``RULE_LAUNCH_*`` global properties when the
 * :prop_gbl:`RULE_LAUNCH_CUSTOM`
 * :prop_gbl:`RULE_LAUNCH_LINK`
 
+Load this module in a CMake project with:
+
+.. code-block:: cmake
+
+  include(CTestUseLaunchers)
+
 The ``CTestUseLaunchers`` module is automatically included by the
 :module:`CTest` module when ``include(CTest)`` is called.  However, it is
 provided as a separate module so that projects can use the
@@ -54,13 +60,13 @@ if(NOT DEFINED CTEST_USE_LAUNCHERS AND DEFINED ENV{CTEST_USE_LAUNCHERS_DEFAULT})
     CACHE INTERNAL "CTEST_USE_LAUNCHERS initial value from ENV")
 endif()
 
-if(NOT "${CMAKE_GENERATOR}" MATCHES "Make|Ninja")
+if(NOT "${CMAKE_GENERATOR}" MATCHES "Make|Ninja|FASTBuild")
   set(CTEST_USE_LAUNCHERS 0)
 endif()
 
 if(CTEST_USE_LAUNCHERS)
   set(__launch_common_options
-    "--target-name <TARGET_NAME> --current-build-dir <CMAKE_CURRENT_BINARY_DIR>")
+    "--target-name <TARGET_NAME> --current-build-dir <CMAKE_CURRENT_BINARY_DIR> --build-dir <CMAKE_BINARY_DIR> --object-dir <TARGET_SUPPORT_DIR>")
 
   set(__launch_compile_options
     "${__launch_common_options} --output <OBJECT> --source <SOURCE> --language <LANGUAGE>")
@@ -71,7 +77,7 @@ if(CTEST_USE_LAUNCHERS)
   set(__launch_custom_options
     "${__launch_common_options} --output <OUTPUT>")
 
-  if("${CMAKE_GENERATOR}" MATCHES "Ninja")
+  if("${CMAKE_GENERATOR}" MATCHES "Ninja|FASTBuild")
     string(APPEND __launch_compile_options " --filter-prefix <CMAKE_CL_SHOWINCLUDES_PREFIX>")
   endif()
 

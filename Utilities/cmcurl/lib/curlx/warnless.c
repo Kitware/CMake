@@ -35,11 +35,6 @@
 
 #endif /* __INTEL_COMPILER && __unix__ */
 
-#ifdef _WIN32
-#undef read
-#undef write
-#endif
-
 #include <limits.h>
 
 #define CURL_MASK_UCHAR   ((unsigned char)~0)
@@ -103,7 +98,7 @@ unsigned long curlx_uztoul(size_t uznum)
 #  pragma warning(disable:810) /* conversion may lose significant bits */
 #endif
 
-#if ULONG_MAX < SIZE_T_MAX
+#if ULONG_MAX < SIZE_MAX
   DEBUGASSERT(uznum <= (size_t) CURL_MASK_ULONG);
 #endif
   return (unsigned long)(uznum & (size_t) CURL_MASK_ULONG);
@@ -124,7 +119,7 @@ unsigned int curlx_uztoui(size_t uznum)
 #  pragma warning(disable:810) /* conversion may lose significant bits */
 #endif
 
-#if UINT_MAX < SIZE_T_MAX
+#if UINT_MAX < SIZE_MAX
   DEBUGASSERT(uznum <= (size_t) CURL_MASK_UINT);
 #endif
   return (unsigned int)(uznum & (size_t) CURL_MASK_UINT);
@@ -248,7 +243,7 @@ int curlx_sztosi(ssize_t sznum)
 #endif
 
   DEBUGASSERT(sznum >= 0);
-#if INT_MAX < SSIZE_T_MAX
+#if INT_MAX < SSIZE_MAX
   DEBUGASSERT((size_t) sznum <= (size_t) CURL_MASK_SINT);
 #endif
   return (int)(sznum & (ssize_t) CURL_MASK_SINT);
@@ -295,21 +290,3 @@ size_t curlx_sitouz(int sinum)
 #  pragma warning(pop)
 #endif
 }
-
-#ifdef _WIN32
-
-ssize_t curlx_read(int fd, void *buf, size_t count)
-{
-  return (ssize_t)read(fd, buf, curlx_uztoui(count));
-}
-
-ssize_t curlx_write(int fd, const void *buf, size_t count)
-{
-  return (ssize_t)write(fd, buf, curlx_uztoui(count));
-}
-
-#endif /* _WIN32 */
-
-/* Ensure that warnless.h redefinitions continue to have an effect
-   in "unity" builds. */
-#undef HEADER_CURL_WARNLESS_H_REDEFS

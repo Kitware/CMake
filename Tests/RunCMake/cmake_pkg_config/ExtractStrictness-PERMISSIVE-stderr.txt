@@ -1,29 +1,29 @@
-CMake Warning at ExtractStrictness.cmake:[0-9]+ \(cmake_pkg_config\):
+CMake Warning at ExtractStrictness\.cmake:[0-9]+ \(cmake_pkg_config\):
   Resolution failed for file[^
-]*(.)*/PackageRoot/no-name.pc'
+]*(.)*/PackageRoot/no-name\.pc'
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
 
 
-CMake Warning at ExtractStrictness.cmake:[0-9]+ \(cmake_pkg_config\):
+CMake Warning at ExtractStrictness\.cmake:[0-9]+ \(cmake_pkg_config\):
   Resolution failed for file[^
-]*(.)*/PackageRoot/no-description.pc'
+]*(.)*/PackageRoot/no-description\.pc'
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
 
 
-CMake Warning at ExtractStrictness.cmake:[0-9]+ \(cmake_pkg_config\):
+CMake Warning at ExtractStrictness\.cmake:[0-9]+ \(cmake_pkg_config\):
   Resolution failed for file[^
-]*(.)*/PackageRoot/no-version.pc'
+]*(.)*/PackageRoot/no-version\.pc'
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
 
 
-CMake Warning at ExtractStrictness.cmake:[0-9]+ \(cmake_pkg_config\):
+CMake Warning at ExtractStrictness\.cmake:[0-9]+ \(cmake_pkg_config\):
   Parsing failed for file[^
-]*(.)*/PackageRoot/invalid.pc'
+]*(.)*/PackageRoot/invalid\.pc'
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
 
 
 Cflags: lowercase

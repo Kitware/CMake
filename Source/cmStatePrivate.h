@@ -33,6 +33,8 @@ struct cmStateDetail::SnapshotDataType
   cmLinkedTree<cmStateDetail::PolicyStackEntry>::iterator PolicyRoot;
   cmLinkedTree<cmStateDetail::PolicyStackEntry>::iterator PolicyScope;
   cmStateEnums::SnapshotType SnapshotType;
+  cmStateEnums::SnapshotUnwindType UnwindType = cmStateEnums::NO_UNWIND;
+  cmStateEnums::SnapshotUnwindState UnwindState = cmStateEnums::NOT_UNWINDING;
   bool Keep;
   cmLinkedTree<std::string>::iterator ExecutionListFile;
   cmLinkedTree<cmStateDetail::BuildsystemDirectoryStateType>::iterator

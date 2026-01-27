@@ -193,11 +193,12 @@ protected:
 
   void ExportObjectCompileCommand(
     std::string const& language, std::string const& sourceFileName,
-    std::string const& objectDir, std::string const& objectFileName,
-    std::string const& objectFileDir, std::string const& flags,
-    std::string const& defines, std::string const& includes,
-    std::string const& targetCompilePdb, std::string const& targetPdb,
-    std::string const& outputConfig, WithScanning withScanning);
+    std::string const& objectDir, std::string const& targetSupportDir,
+    std::string const& objectFileName, std::string const& objectFileDir,
+    std::string const& flags, std::string const& defines,
+    std::string const& includes, std::string const& targetCompilePdb,
+    std::string const& targetPdb, std::string const& outputConfig,
+    WithScanning withScanning);
 
   void ExportSwiftObjectCompileCommand(
     std::vector<cmSourceFile const*> const& moduleSourceFiles,
@@ -236,8 +237,10 @@ protected:
   std::unique_ptr<cmOSXBundleGenerator> OSXBundleGenerator;
   std::set<std::string> MacContentFolders;
 
+  /// @param source may be nullptr.
   void addPoolNinjaVariable(std::string const& pool_property,
-                            cmGeneratorTarget* target, cmNinjaVars& vars);
+                            cmGeneratorTarget* target,
+                            cmSourceFile const* source, cmNinjaVars& vars);
 
   bool ForceResponseFile();
 

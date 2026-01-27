@@ -1,3 +1,4 @@
+#include <fstream>
 #include <iostream>
 #include <string>
 
@@ -7,12 +8,44 @@ int main(int argc, char** argv)
   // it only requires that we produces output in the expected format when
   // invoked with --gtest_list_tests. Thus, we fake that here. This allows us
   // to test the module without actually needing Google Test.
-  if (argc > 1 && std::string(argv[1]) == "--gtest_list_tests") {
+  if (argc > 2 && std::string(argv[1]) == "--gtest_list_tests" &&
+      std::string(argv[2]).find("--gtest_output=json:") != std::string::npos) {
     std::cout << "test_list_test/test.\n";
     std::cout << "  case/0  # GetParam() = \"semicolon;\"\n";
     std::cout << "  case/1  # GetParam() = 'osb['\n";
     std::cout << "  case/2  # GetParam() = 'csb]'\n";
     std::cout << "  case/3  # GetParam() = 'S p a c e s'\n";
+
+    std::string output_param(argv[2]);
+    std::string::size_type split = output_param.find(":");
+    std::string filepath = output_param.substr(split + 1);
+    // The full file path is passed
+    std::ofstream ostrm(filepath.c_str(), std::ios::binary);
+    if (!ostrm) {
+      std::cerr << "Failed to create file: " << filepath.c_str() << std::endl;
+      return 1;
+    }
+    ostrm
+      << "{\n"
+         "    \"tests\": 4,\n"
+         "    \"name\": \"AllTests\",\n"
+         "    \"testsuites\": [\n"
+         "        {\n"
+         "            \"name\": \"test_list_test/test\",\n"
+         "            \"tests\": 4,\n"
+         "            \"testsuite\": [\n"
+         "                { \"name\": \"case/0\", \"value_param\": "
+         "\"\\\"semicolon;\\\"\", \"file\": \"file.cpp\", \"line\": 42 },\n"
+         "                { \"name\": \"case/1\", \"value_param\": "
+         "\"'osb['\", \"file\": \"file.cpp\", \"line\": 42 },\n"
+         "                { \"name\": \"case/2\", \"value_param\": "
+         "\"'csb]'\", \"file\": \"file.cpp\", \"line\": 42 },\n"
+         "                { \"name\": \"case/3\", \"value_param\": \"'S p a c "
+         "e s'\", \"file\": \"file.cpp\", \"line\": 42 }\n"
+         "            ]\n"
+         "        }\n"
+         "    ]\n"
+         "}";
   }
   return 0;
 }

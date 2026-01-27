@@ -26,7 +26,7 @@
 
 #include "../curl_setup.h"
 
-#if defined(USE_LIBSSH2)
+#ifdef USE_LIBSSH2
 #include <libssh2.h>
 #include <libssh2_sftp.h>
 #elif defined(USE_LIBSSH)
@@ -34,9 +34,6 @@
 #define SSH_SUPPRESS_DEPRECATED
 #include <libssh/libssh.h>
 #include <libssh/sftp.h>
-#elif defined(USE_WOLFSSH)
-#include <wolfssh/ssh.h>
-#include <wolfssh/wolfsftp.h>
 #endif
 
 #include "curl_path.h"
@@ -123,7 +120,7 @@ typedef enum {
    Everything that is strictly related to a connection is banned from this
    struct. */
 struct SSHPROTO {
-  char *path;                  /* the path we operate on */
+  char *path;        /* the path we operate on, at least one byte long */
 #ifdef USE_LIBSSH2
   struct dynbuf readdir_link;
   struct dynbuf readdir;
@@ -162,7 +159,7 @@ struct ssh_conn {
   int orig_waitfor;             /* default READ/WRITE bits wait for */
   char *slash_pos;              /* used by the SFTP_CREATE_DIRS state */
 
-#if defined(USE_LIBSSH)
+#ifdef USE_LIBSSH
   CURLcode actualcode;        /* the actual error code */
   char *readdir_linkPath;
   size_t readdir_len;
@@ -180,10 +177,13 @@ struct ssh_conn {
 
   unsigned sftp_recv_state; /* 0 or 1 */
 #if LIBSSH_VERSION_INT > SSH_VERSION_INT(0, 11, 0)
-  sftp_aio sftp_aio;
+  sftp_aio sftp_recv_aio;
+
+  sftp_aio sftp_send_aio;
   unsigned sftp_send_state; /* 0 or 1 */
-#endif
+#else
   int sftp_file_index; /* for async read */
+#endif
   sftp_attributes readdir_attrs; /* used by the SFTP readdir actions */
   sftp_attributes readdir_link_attrs; /* used by the SFTP readdir actions */
   sftp_attributes quote_attrs; /* used by the SFTP_QUOTE state */
@@ -191,6 +191,7 @@ struct ssh_conn {
   const char *readdir_filename; /* points within readdir_attrs */
   const char *readdir_longentry;
   char *readdir_tmp;
+  BIT(initialised);
 #elif defined(USE_LIBSSH2)
   LIBSSH2_SESSION *ssh_session; /* Secure Shell session */
   LIBSSH2_CHANNEL *ssh_channel; /* Secure Shell channel handle */
@@ -207,15 +208,7 @@ struct ssh_conn {
   struct libssh2_agent_publickey *sshagent_identity;
   struct libssh2_agent_publickey *sshagent_prev_identity;
   LIBSSH2_KNOWNHOSTS *kh;
-#elif defined(USE_WOLFSSH)
-  CURLcode actualcode;        /* the actual error code */
-  WOLFSSH *ssh_session;
-  WOLFSSH_CTX *ctx;
-  word32 handleSz;
-  byte handle[WOLFSSH_MAX_HANDLE];
-  curl_off_t offset;
 #endif /* USE_LIBSSH */
-  BIT(initialised);
   BIT(authed);                /* the connection has been authenticated fine */
   BIT(acceptfail);            /* used by the SFTP_QUOTE (continue if
                                  quote command fails) */
@@ -227,7 +220,7 @@ struct ssh_conn {
 #endif
 #endif
 
-#if defined(USE_LIBSSH2)
+#ifdef USE_LIBSSH2
 
 /* Feature detection based on version numbers to better work with
    non-configure platforms */

@@ -9,6 +9,7 @@
 
 #include <cm/optional>
 
+#include "cmGeneratorTarget.h"
 #include "cmGlobalVisualStudioGenerator.h"
 #include "cmIDEFlagTable.h"
 #include "cmIDEOptions.h"
@@ -60,9 +61,8 @@ public:
   // Store options for verbose builds.
   void SetVerboseMakefile(bool verbose);
 
-  // Check for specific options.
-  bool UsingUnicode() const;
-  bool UsingSBCS() const;
+  // Detect a character set definition.
+  cm::optional<cmGeneratorTarget::MsvcCharSet> GetCharSet() const;
 
   void FixCudaCodeGeneration();
 

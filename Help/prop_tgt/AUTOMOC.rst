@@ -251,8 +251,8 @@ e.g.  in MSVS.
 
 :variable:`CMAKE_GLOBAL_AUTOGEN_TARGET`:
 A global ``autogen`` target, that depends on all ``AUTOMOC`` or
-:prop_tgt:`AUTOUIC` generated :ref:`<ORIGIN>_autogen` targets in the project,
-will be generated when this variable is ``ON``.
+:prop_tgt:`AUTOUIC` generated :ref:`<ORIGIN>_autogen <<ORIGIN>_autogen>`
+targets in the project, will be generated when this variable is ``ON``.
 
 :prop_tgt:`AUTOGEN_PARALLEL`:
 This target property controls the number of ``moc`` or ``uic`` processes to

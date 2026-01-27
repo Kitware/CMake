@@ -67,6 +67,7 @@
 #include "amigaos.h"
 #include "macos.h"
 #include "curlx/warnless.h"
+#include "curlx/wait.h"
 #include "sigpipe.h"
 #include "vssh/ssh.h"
 #include "setopt.h"
@@ -79,8 +80,7 @@
 
 #include "easy_lock.h"
 
-/* The last 3 #include files should be in this order */
-#include "curl_printf.h"
+/* The last 2 #include files should be in this order */
 #include "curl_memory.h"
 #include "memdebug.h"
 
@@ -106,7 +106,7 @@ static curl_simple_lock s_lock = CURL_SIMPLE_LOCK_INIT;
  * ways, but at this point it must be defined as the system-supplied strdup
  * so the callback pointer is initialized correctly.
  */
-#if defined(UNDER_CE)
+#ifdef UNDER_CE
 #define system_strdup _strdup
 #elif !defined(HAVE_STRDUP)
 #define system_strdup Curl_strdup
@@ -128,9 +128,6 @@ curl_free_callback Curl_cfree = (curl_free_callback)free;
 curl_realloc_callback Curl_crealloc = (curl_realloc_callback)realloc;
 curl_strdup_callback Curl_cstrdup = (curl_strdup_callback)system_strdup;
 curl_calloc_callback Curl_ccalloc = (curl_calloc_callback)calloc;
-#if defined(_WIN32) && defined(UNICODE)
-curl_wcsdup_callback Curl_cwcsdup = Curl_wcsdup;
-#endif
 
 #if defined(_MSC_VER) && defined(_DLL)
 #  pragma warning(pop)
@@ -156,48 +153,45 @@ static CURLcode global_init(long flags, bool memoryfuncs)
     Curl_crealloc = (curl_realloc_callback)realloc;
     Curl_cstrdup = (curl_strdup_callback)system_strdup;
     Curl_ccalloc = (curl_calloc_callback)calloc;
-#if defined(_WIN32) && defined(UNICODE)
-    Curl_cwcsdup = (curl_wcsdup_callback)_wcsdup;
-#endif
   }
 
   if(Curl_trc_init()) {
-    DEBUGF(fprintf(stderr, "Error: Curl_trc_init failed\n"));
+    DEBUGF(curl_mfprintf(stderr, "Error: Curl_trc_init failed\n"));
     goto fail;
   }
 
   if(!Curl_ssl_init()) {
-    DEBUGF(fprintf(stderr, "Error: Curl_ssl_init failed\n"));
+    DEBUGF(curl_mfprintf(stderr, "Error: Curl_ssl_init failed\n"));
     goto fail;
   }
 
   if(!Curl_vquic_init()) {
-    DEBUGF(fprintf(stderr, "Error: Curl_vquic_init failed\n"));
+    DEBUGF(curl_mfprintf(stderr, "Error: Curl_vquic_init failed\n"));
     goto fail;
   }
 
   if(Curl_win32_init(flags)) {
-    DEBUGF(fprintf(stderr, "Error: win32_init failed\n"));
+    DEBUGF(curl_mfprintf(stderr, "Error: win32_init failed\n"));
     goto fail;
   }
 
   if(Curl_amiga_init()) {
-    DEBUGF(fprintf(stderr, "Error: Curl_amiga_init failed\n"));
+    DEBUGF(curl_mfprintf(stderr, "Error: Curl_amiga_init failed\n"));
     goto fail;
   }
 
   if(Curl_macos_init()) {
-    DEBUGF(fprintf(stderr, "Error: Curl_macos_init failed\n"));
+    DEBUGF(curl_mfprintf(stderr, "Error: Curl_macos_init failed\n"));
     goto fail;
   }
 
   if(Curl_async_global_init()) {
-    DEBUGF(fprintf(stderr, "Error: resolver_global_init failed\n"));
+    DEBUGF(curl_mfprintf(stderr, "Error: resolver_global_init failed\n"));
     goto fail;
   }
 
   if(Curl_ssh_init()) {
-    DEBUGF(fprintf(stderr, "Error: Curl_ssh_init failed\n"));
+    DEBUGF(curl_mfprintf(stderr, "Error: Curl_ssh_init failed\n"));
     goto fail;
   }
 
@@ -366,7 +360,7 @@ CURL *curl_easy_init(void)
     result = global_init(CURL_GLOBAL_DEFAULT, TRUE);
     if(result) {
       /* something in the global init failed, return nothing */
-      DEBUGF(fprintf(stderr, "Error: curl_global_init failed\n"));
+      DEBUGF(curl_mfprintf(stderr, "Error: curl_global_init failed\n"));
       global_init_unlock();
       return NULL;
     }
@@ -376,7 +370,7 @@ CURL *curl_easy_init(void)
   /* We use curl_open() with undefined URL so far */
   result = Curl_open(&data);
   if(result) {
-    DEBUGF(fprintf(stderr, "Error: Curl_open failed\n"));
+    DEBUGF(curl_mfprintf(stderr, "Error: Curl_open failed\n"));
     return NULL;
   }
 
@@ -412,7 +406,7 @@ static int events_timer(CURLM *multi,    /* multi handle */
   struct events *ev = userp;
   (void)multi;
 #if DEBUG_EV_POLL
-  fprintf(stderr, "events_timer: set timeout %ldms\n", timeout_ms);
+  curl_mfprintf(stderr, "events_timer: set timeout %ldms\n", timeout_ms);
 #endif
   ev->ms = timeout_ms;
   ev->msbump = TRUE;
@@ -470,8 +464,8 @@ static int events_socket(CURL *easy,      /* easy handle */
   bool found = FALSE;
   struct Curl_easy *data = easy;
 
-#if defined(CURL_DISABLE_VERBOSE_STRINGS)
-  (void) easy;
+#ifdef CURL_DISABLE_VERBOSE_STRINGS
+  (void)easy;
 #endif
   (void)socketp;
 
@@ -564,12 +558,45 @@ static unsigned int populate_fds(struct pollfd *fds, struct events *ev)
     f->events = m->socket.events;
     f->revents = 0;
 #if DEBUG_EV_POLL
-    fprintf(stderr, "poll() %d check socket %d\n", numfds, f->fd);
+    curl_mfprintf(stderr, "poll() %d check socket %d\n", numfds, f->fd);
 #endif
     f++;
     numfds++;
   }
   return numfds;
+}
+
+/* poll_fds()
+ *
+ * poll the fds[] array
+ */
+static CURLcode poll_fds(struct events *ev,
+                         struct pollfd *fds,
+                         const unsigned int numfds,
+                         int *pollrc)
+{
+  if(numfds) {
+    /* wait for activity or timeout */
+#if DEBUG_EV_POLL
+    curl_mfprintf(stderr, "poll(numfds=%u, timeout=%ldms)\n", numfds, ev->ms);
+#endif
+    *pollrc = Curl_poll(fds, numfds, ev->ms);
+#if DEBUG_EV_POLL
+    curl_mfprintf(stderr, "poll(numfds=%u, timeout=%ldms) -> %d\n",
+                  numfds, ev->ms, *pollrc);
+#endif
+    if(*pollrc < 0)
+      return CURLE_UNRECOVERABLE_POLL;
+  }
+  else {
+#if DEBUG_EV_POLL
+    curl_mfprintf(stderr, "poll, but no fds, wait timeout=%ldms\n", ev->ms);
+#endif
+    *pollrc = 0;
+    if(ev->ms > 0)
+      curlx_wait_ms(ev->ms);
+  }
+  return CURLE_OK;
 }
 
 /* wait_or_timeout()
@@ -592,34 +619,16 @@ static CURLcode wait_or_timeout(struct Curl_multi *multi, struct events *ev)
     /* get the time stamp to use to figure out how long poll takes */
     before = curlx_now();
 
-    if(numfds) {
-      /* wait for activity or timeout */
-#if DEBUG_EV_POLL
-      fprintf(stderr, "poll(numfds=%u, timeout=%ldms)\n", numfds, ev->ms);
-#endif
-      pollrc = Curl_poll(fds, numfds, ev->ms);
-#if DEBUG_EV_POLL
-      fprintf(stderr, "poll(numfds=%u, timeout=%ldms) -> %d\n",
-              numfds, ev->ms, pollrc);
-#endif
-      if(pollrc < 0)
-        return CURLE_UNRECOVERABLE_POLL;
-    }
-    else {
-#if DEBUG_EV_POLL
-      fprintf(stderr, "poll, but no fds, wait timeout=%ldms\n", ev->ms);
-#endif
-      pollrc = 0;
-      if(ev->ms > 0)
-        Curl_wait_ms(ev->ms);
-    }
+    result = poll_fds(ev, fds, numfds, &pollrc);
+    if(result)
+      return result;
 
     ev->msbump = FALSE; /* reset here */
 
     if(!pollrc) {
       /* timeout! */
       ev->ms = 0;
-      /* fprintf(stderr, "call curl_multi_socket_action(TIMEOUT)\n"); */
+      /* curl_mfprintf(stderr, "call curl_multi_socket_action(TIMEOUT)\n"); */
       mcode = curl_multi_socket_action(multi, CURL_SOCKET_TIMEOUT, 0,
                                        &ev->running_handles);
     }
@@ -648,8 +657,8 @@ static CURLcode wait_or_timeout(struct Curl_multi *multi, struct events *ev)
         timediff_t timediff = curlx_timediff(curlx_now(), before);
         if(timediff > 0) {
 #if DEBUG_EV_POLL
-        fprintf(stderr, "poll timeout %ldms not updated, decrease by "
-                "time spent %ldms\n", ev->ms, (long)timediff);
+        curl_mfprintf(stderr, "poll timeout %ldms not updated, decrease by "
+                      "time spent %ldms\n", ev->ms, (long)timediff);
 #endif
           if(timediff > ev->ms)
             ev->ms = 0;
@@ -733,7 +742,7 @@ static CURLcode easy_transfer(struct Curl_multi *multi)
 
 
 /*
- * easy_perform() is the external interface that performs a blocking
+ * easy_perform() is the internal interface that performs a blocking
  * transfer as previously setup.
  *
  * CONCEPT: This function creates a multi handle, adds the easy handle to it,
@@ -827,7 +836,6 @@ static CURLcode easy_perform(struct Curl_easy *data, bool events)
   return result;
 }
 
-
 /*
  * curl_easy_perform() is the external interface that performs a blocking
  * transfer as previously setup.
@@ -846,7 +854,6 @@ CURLcode curl_easy_perform_ev(struct Curl_easy *data)
 {
   return easy_perform(data, TRUE);
 }
-
 #endif
 
 /*
@@ -869,11 +876,15 @@ void curl_easy_cleanup(CURL *ptr)
  * information from a performed transfer and similar.
  */
 #undef curl_easy_getinfo
-CURLcode curl_easy_getinfo(CURL *data, CURLINFO info, ...)
+CURLcode curl_easy_getinfo(CURL *easy, CURLINFO info, ...)
 {
+  struct Curl_easy *data = easy;
   va_list arg;
   void *paramp;
   CURLcode result;
+
+  if(!GOOD_EASY_HANDLE(data))
+    return CURLE_BAD_FUNCTION_ARGUMENT;
 
   va_start(arg, info);
   paramp = va_arg(arg, void *);
@@ -955,7 +966,11 @@ static void dupeasy_meta_freeentry(void *p)
 CURL *curl_easy_duphandle(CURL *d)
 {
   struct Curl_easy *data = d;
-  struct Curl_easy *outcurl = calloc(1, sizeof(struct Curl_easy));
+  struct Curl_easy *outcurl = NULL;
+
+  if(!GOOD_EASY_HANDLE(data))
+    goto fail;
+  outcurl = calloc(1, sizeof(struct Curl_easy));
   if(!outcurl)
     goto fail;
 
@@ -1079,6 +1094,9 @@ fail:
 void curl_easy_reset(CURL *d)
 {
   struct Curl_easy *data = d;
+  if(!GOOD_EASY_HANDLE(data))
+    return;
+
   Curl_req_hard_reset(&data->req, data);
   Curl_hash_clean(&data->meta_hash);
 
@@ -1091,7 +1109,7 @@ void curl_easy_reset(CURL *d)
   /* zero out UserDefined data: */
   Curl_freeset(data);
   memset(&data->set, 0, sizeof(struct UserDefined));
-  (void)Curl_init_userdefined(data);
+  Curl_init_userdefined(data);
 
   /* zero out Progress data: */
   memset(&data->progress, 0, sizeof(struct Progress));
@@ -1101,7 +1119,7 @@ void curl_easy_reset(CURL *d)
 
   data->progress.hide = TRUE;
   data->state.current_speed = -1; /* init to negative == impossible */
-  data->state.retrycount = 0;     /* reset the retry counter */
+  data->state.recent_conn_id = -1; /* clear remembered connection id */
 
   /* zero out authentication data: */
   memset(&data->state.authhost, 0, sizeof(struct auth));
@@ -1128,13 +1146,12 @@ void curl_easy_reset(CURL *d)
  */
 CURLcode curl_easy_pause(CURL *d, int action)
 {
-  struct SingleRequest *k;
   CURLcode result = CURLE_OK;
-  int oldstate;
-  int newstate;
   bool recursive = FALSE;
-  bool keep_changed, unpause_read, not_all_paused;
+  bool changed = FALSE;
   struct Curl_easy *data = d;
+  bool recv_paused, recv_paused_new;
+  bool send_paused, send_paused_new;
 
   if(!GOOD_EASY_HANDLE(data) || !data->conn)
     /* crazy input, do not continue */
@@ -1142,62 +1159,40 @@ CURLcode curl_easy_pause(CURL *d, int action)
 
   if(Curl_is_in_callback(data))
     recursive = TRUE;
-  k = &data->req;
-  oldstate = k->keepon & (KEEP_RECV_PAUSE| KEEP_SEND_PAUSE);
 
-  /* first switch off both pause bits then set the new pause bits */
-  newstate = (k->keepon &~ (KEEP_RECV_PAUSE| KEEP_SEND_PAUSE)) |
-    ((action & CURLPAUSE_RECV) ? KEEP_RECV_PAUSE : 0) |
-    ((action & CURLPAUSE_SEND) ? KEEP_SEND_PAUSE : 0);
+  recv_paused = Curl_xfer_recv_is_paused(data);
+  recv_paused_new = (action & CURLPAUSE_RECV);
+  send_paused = Curl_xfer_send_is_paused(data);
+  send_paused_new = (action & CURLPAUSE_SEND);
 
-  keep_changed = ((newstate & (KEEP_RECV_PAUSE| KEEP_SEND_PAUSE)) != oldstate);
-  not_all_paused = (newstate & (KEEP_RECV_PAUSE|KEEP_SEND_PAUSE)) !=
-                   (KEEP_RECV_PAUSE|KEEP_SEND_PAUSE);
-  unpause_read = ((k->keepon & ~newstate & KEEP_SEND_PAUSE) &&
-                  (data->mstate == MSTATE_PERFORMING ||
-                   data->mstate == MSTATE_RATELIMITING));
-  /* Unpausing writes is detected on the next run in
-   * transfer.c:Curl_sendrecv(). This is because this may result
-   * in a transfer error if the application's callbacks fail */
+  if((send_paused != send_paused_new) ||
+     (send_paused_new != Curl_creader_is_paused(data))) {
+    changed = TRUE;
+    result = Curl_1st_err(result, Curl_xfer_pause_send(data, send_paused_new));
+  }
 
-  /* Set the new keepon state, so it takes effect no matter what error
-   * may happen afterwards. */
-  k->keepon = newstate;
+  if(recv_paused != recv_paused_new) {
+    changed = TRUE;
+    result = Curl_1st_err(result, Curl_xfer_pause_recv(data, recv_paused_new));
+  }
 
   /* If not completely pausing both directions now, run again in any case. */
-  if(not_all_paused) {
-    Curl_expire(data, 0, EXPIRE_RUN_NOW);
+  if(!Curl_xfer_is_blocked(data)) {
     /* reset the too-slow time keeper */
     data->state.keeps_speed.tv_sec = 0;
-    /* Simulate socket events on next run for unpaused directions */
-    if(!(newstate & KEEP_SEND_PAUSE))
-      data->state.select_bits |= CURL_CSELECT_OUT;
-    if(!(newstate & KEEP_RECV_PAUSE))
-      data->state.select_bits |= CURL_CSELECT_IN;
-    /* On changes, tell application to update its timers. */
-    if(keep_changed && data->multi) {
-      if(Curl_update_timer(data->multi)) {
-        result = CURLE_ABORTED_BY_CALLBACK;
-        goto out;
+    if(data->multi) {
+      Curl_multi_mark_dirty(data); /* make it run */
+      /* On changes, tell application to update its timers. */
+      if(changed) {
+        if(Curl_update_timer(data->multi) && !result)
+          result = CURLE_ABORTED_BY_CALLBACK;
       }
     }
   }
 
-  if(unpause_read) {
-    result = Curl_creader_unpause(data);
-    if(result)
-      goto out;
-  }
-
-  if(!(k->keepon & KEEP_RECV_PAUSE) && Curl_cwriter_is_paused(data)) {
-    Curl_conn_ev_data_pause(data, FALSE);
-    result = Curl_cwriter_unpause(data);
-  }
-
-out:
-  if(!result && !data->state.done && keep_changed && data->multi)
+  if(!result && changed && !data->state.done && data->multi)
     /* pause/unpausing may result in multi event changes */
-    if(Curl_multi_ev_assess_xfer(data->multi, data))
+    if(Curl_multi_ev_assess_xfer(data->multi, data) && !result)
       result = CURLE_ABORTED_BY_CALLBACK;
 
   if(recursive)
@@ -1241,10 +1236,11 @@ static CURLcode easy_connection(struct Curl_easy *data,
 CURLcode curl_easy_recv(CURL *d, void *buffer, size_t buflen, size_t *n)
 {
   CURLcode result;
-  ssize_t n1;
   struct connectdata *c;
   struct Curl_easy *data = d;
 
+  if(!GOOD_EASY_HANDLE(data))
+    return CURLE_BAD_FUNCTION_ARGUMENT;
   if(Curl_is_in_callback(data))
     return CURLE_RECURSIVE_API_CALL;
 
@@ -1258,13 +1254,7 @@ CURLcode curl_easy_recv(CURL *d, void *buffer, size_t buflen, size_t *n)
     Curl_attach_connection(data, c);
 
   *n = 0;
-  result = Curl_conn_recv(data, FIRSTSOCKET, buffer, buflen, &n1);
-
-  if(result)
-    return result;
-
-  *n = (size_t)n1;
-  return CURLE_OK;
+  return Curl_conn_recv(data, FIRSTSOCKET, buffer, buflen, n);
 }
 
 #ifndef CURL_DISABLE_WEBSOCKETS
@@ -1326,6 +1316,8 @@ CURLcode curl_easy_send(CURL *d, const void *buffer, size_t buflen, size_t *n)
   size_t written = 0;
   CURLcode result;
   struct Curl_easy *data = d;
+  if(!GOOD_EASY_HANDLE(data))
+    return CURLE_BAD_FUNCTION_ARGUMENT;
   if(Curl_is_in_callback(data))
     return CURLE_RECURSIVE_API_CALL;
 
@@ -1355,7 +1347,7 @@ CURLcode curl_easy_ssls_import(CURL *d, const char *session_key,
                                const unsigned char *shmac, size_t shmac_len,
                                const unsigned char *sdata, size_t sdata_len)
 {
-#ifdef USE_SSLS_EXPORT
+#if defined(USE_SSL) && defined(USE_SSLS_EXPORT)
   struct Curl_easy *data = d;
   if(!GOOD_EASY_HANDLE(data))
     return CURLE_BAD_FUNCTION_ARGUMENT;
@@ -1376,7 +1368,7 @@ CURLcode curl_easy_ssls_export(CURL *d,
                                curl_ssls_export_cb *export_fn,
                                void *userptr)
 {
-#ifdef USE_SSLS_EXPORT
+#if defined(USE_SSL) && defined(USE_SSLS_EXPORT)
   struct Curl_easy *data = d;
   if(!GOOD_EASY_HANDLE(data))
     return CURLE_BAD_FUNCTION_ARGUMENT;

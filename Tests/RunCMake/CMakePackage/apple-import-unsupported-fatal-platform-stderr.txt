@@ -1,5 +1,5 @@
 ^CMake Error at [^
-]*/Tests/RunCMake/CMakePackage/apple-install/lib/cmake/bad-platform-fatal/bad-platform-fatal-config.cmake:[0-9]+ \(message\):
+]*/Tests/RunCMake/CMakePackage/apple-install/lib/cmake/bad-platform-fatal/bad-platform-fatal-config\.cmake:[0-9]+ \(message\):
   Platform not supported
 Call Stack \(most recent call first\):
   apple-import-unsupported-fatal-platform\.cmake:[0-9]+ \(find_package\)

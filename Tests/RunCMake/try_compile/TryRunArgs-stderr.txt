@@ -1,4 +1,4 @@
-^CMake Warning \(dev\) at TryRunArgs.cmake:[0-9]+ \(try_compile\):
+^CMake Warning \(dev\) at TryRunArgs\.cmake:[0-9]+ \(try_compile\):
   Unknown arguments:
 
     "COMPILE_OUTPUT_VARIABLE"
@@ -14,5 +14,5 @@
     "ARGS"
     "runArgs"
 Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)
-This warning is for project developers.  Use -Wno-dev to suppress it.$
+  CMakeLists\.txt:[0-9]+ \(include\)
+This warning is for project developers\.  Use -Wno-dev to suppress it\.$

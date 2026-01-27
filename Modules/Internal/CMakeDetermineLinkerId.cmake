@@ -29,7 +29,9 @@ function(cmake_determine_linker_id lang linker)
                     OUTPUT_VARIABLE linker_desc
                     ERROR_VARIABLE linker_desc
                     OUTPUT_STRIP_TRAILING_WHITESPACE
-                    ERROR_STRIP_TRAILING_WHITESPACE)
+                    ERROR_STRIP_TRAILING_WHITESPACE
+                    COMMAND_ERROR_IS_FATAL NONE
+    )
 
     string(JOIN "\" \"" flags_string ${flags})
     string(REGEX REPLACE "\n\n.*" "" linker_desc_head "${linker_desc}")

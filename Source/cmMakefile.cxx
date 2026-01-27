@@ -50,6 +50,8 @@
 #include "cmRange.h"
 #include "cmSourceFile.h"
 #include "cmSourceFileLocation.h"
+#include "cmSourceGroup.h"
+#include "cmStack.h"
 #include "cmState.h"
 #include "cmStateDirectory.h"
 #include "cmStateTypes.h"
@@ -836,7 +838,7 @@ bool cmMakefile::ReadListFileAsString(std::string const& content,
   ListFileScope scope(this, filenametoread);
 
   cmListFile listFile;
-  if (!listFile.ParseString(content.c_str(), virtualFileName.c_str(),
+  if (!listFile.ParseString(content, virtualFileName.c_str(),
                             this->GetMessenger(), this->Backtrace)) {
     return false;
   }
@@ -1554,7 +1556,23 @@ void cmMakefile::Configure()
   cmSystemTools::MakeDirectory(filesDir);
 
   assert(cmSystemTools::FileExists(currentStart, true));
-  this->AddDefinition(kCMAKE_PARENT_LIST_FILE, currentStart);
+
+  // In the top-most directory, cmake_minimum_required() may not have been
+  // called yet, so ApplyPolicyVersion() may not have handled the default
+  // policy value.  Check them here.
+  if (this->GetPolicyStatus(cmPolicies::CMP0198) == cmPolicies::WARN) {
+    if (cmValue defaultValue =
+          this->GetDefinition("CMAKE_POLICY_DEFAULT_CMP0198")) {
+      if (*defaultValue == "NEW") {
+        this->SetPolicy(cmPolicies::CMP0198, cmPolicies::NEW);
+      } else if (*defaultValue == "OLD") {
+        this->SetPolicy(cmPolicies::CMP0198, cmPolicies::OLD);
+      }
+    }
+  }
+
+  // Set CMAKE_PARENT_LIST_FILE for CMakeLists.txt based on CMP0198 policy
+  this->UpdateParentListFileVariable();
 
 #ifdef CMake_ENABLE_DEBUGGER
   if (this->GetCMakeInstance()->GetDebugAdapter()) {
@@ -3131,6 +3149,7 @@ void cmMakefile::AddTargetObject(std::string const& tgtName,
 {
   cmSourceFile* sf =
     this->GetOrCreateSource(objFile, true, cmSourceFileLocationKind::Known);
+  sf->SetSpecialSourceType(cmSourceFile::SpecialSourceType::Object);
   sf->SetObjectLibrary(tgtName);
   sf->SetProperty("EXTERNAL_OBJECT", "1");
   // TODO: Compute a language for this object based on the associated source
@@ -3220,6 +3239,14 @@ int cmMakefile::TryCompile(std::string const& srcdir,
     cmSystemTools::SetFatalErrorOccurred();
     this->IsSourceFileTryCompile = false;
     return 1;
+  }
+
+  // unset the NINJA_STATUS environment variable while running try compile.
+  // since we parse the output, we need to ensure there aren't any unexpected
+  // characters that will cause issues, such as ANSI color escape codes.
+  cm::optional<cmSystemTools::ScopedEnv> maybeNinjaStatus;
+  if (this->GetGlobalGenerator()->IsNinja()) {
+    maybeNinjaStatus.emplace("NINJA_STATUS=");
   }
 
   // make sure the same generator is used
@@ -4078,7 +4105,7 @@ bool cmMakefile::SetPolicy(cmPolicies::PolicyID id,
   }
 
   // Deprecate old policies.
-  if (status == cmPolicies::OLD && id <= cmPolicies::CMP0142 &&
+  if (status == cmPolicies::OLD && id <= cmPolicies::CMP0143 &&
       !(this->GetCMakeInstance()->GetIsInTryCompile() &&
         (
           // Policies set by cmCoreTryCompile::TryCompileCode.
@@ -4093,6 +4120,12 @@ bool cmMakefile::SetPolicy(cmPolicies::PolicyID id,
   }
 
   this->StateSnapshot.SetPolicy(id, status);
+
+  // Handle CMAKE_PARENT_LIST_FILE for CMP0198 policy changes
+  if (id == cmPolicies::CMP0198) {
+    this->UpdateParentListFileVariable();
+  }
+
   return true;
 }
 
@@ -4145,6 +4178,21 @@ bool cmMakefile::SetPolicyVersion(std::string const& version_min,
                                         cmPolicies::WarnCompat::On);
 }
 
+void cmMakefile::UpdateParentListFileVariable()
+{
+  // CMP0198 determines CMAKE_PARENT_LIST_FILE behavior in CMakeLists.txt
+  if (this->GetPolicyStatus(cmPolicies::CMP0198) == cmPolicies::NEW) {
+    this->RemoveDefinition(kCMAKE_PARENT_LIST_FILE);
+  } else {
+    std::string currentSourceDir =
+      this->StateSnapshot.GetDirectory().GetCurrentSource();
+    std::string currentStart =
+      this->GetCMakeInstance()->GetCMakeListFile(currentSourceDir);
+
+    this->AddDefinition(kCMAKE_PARENT_LIST_FILE, currentStart);
+  }
+}
+
 cmMakefile::VariablePushPop::VariablePushPop(cmMakefile* m)
   : Makefile(m)
 {
@@ -4194,20 +4242,34 @@ cmMakefile::MacroPushPop::~MacroPushPop()
   this->Makefile->PopMacroScope(this->ReportError);
 }
 
-cmMakefile::FindPackageStackRAII::FindPackageStackRAII(cmMakefile* mf,
-                                                       std::string const& name)
+cmFindPackageStackRAII::cmFindPackageStackRAII(cmMakefile* mf,
+                                               std::string const& name)
   : Makefile(mf)
 {
   this->Makefile->FindPackageStack =
     this->Makefile->FindPackageStack.Push(cmFindPackageCall{
       name,
+      cmPackageInformation(),
       this->Makefile->FindPackageStackNextIndex,
     });
   this->Makefile->FindPackageStackNextIndex++;
 }
 
-cmMakefile::FindPackageStackRAII::~FindPackageStackRAII()
+void cmFindPackageStackRAII::BindTop(cmPackageInformation*& value)
 {
+  if (this->Value) {
+    *this->Value = nullptr;
+  }
+  this->Value = &value;
+  value = &this->Makefile->FindPackageStack.cmStack::Top().PackageInfo;
+}
+
+cmFindPackageStackRAII::~cmFindPackageStackRAII()
+{
+  if (this->Value) {
+    *this->Value = nullptr;
+  }
+
   this->Makefile->FindPackageStackNextIndex =
     this->Makefile->FindPackageStack.Top().Index + 1;
   this->Makefile->FindPackageStack = this->Makefile->FindPackageStack.Pop();

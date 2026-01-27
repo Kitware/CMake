@@ -5,6 +5,12 @@ Call Stack \(most recent call first\):
 
 
 CMake Error at BadArgs2\.cmake:[0-9]+ \(export\):
+  export APPENDIX and LICENSE are mutually exclusive\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:3 \(include\)
+
+
+CMake Error at BadArgs2\.cmake:[0-9]+ \(export\):
   export APPENDIX and DESCRIPTION are mutually exclusive\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:3 \(include\)

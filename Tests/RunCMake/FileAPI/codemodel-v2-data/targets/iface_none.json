@@ -1,0 +1,45 @@
+{
+    "name": "iface_none",
+    "id": "^iface_none::@25b7fa8ea00134654b85$",
+    "directorySource": "^interface$",
+    "projectName": "Interface",
+    "type": "INTERFACE_LIBRARY",
+    "imported": null,
+    "local": null,
+    "abstract": true,
+    "symbolic": null,
+    "isGeneratorProvided": null,
+    "fileSets": null,
+    "sources": [],
+    "sourceGroups": null,
+    "compileGroups": null,
+    "backtrace": [
+        {
+            "file": "^interface/CMakeLists\\.txt$",
+            "line": 2,
+            "command": "add_library",
+            "hasParent": true
+        },
+        {
+            "file": "^interface/CMakeLists\\.txt$",
+            "line": null,
+            "command": null,
+            "hasParent": false
+        }
+    ],
+    "folder": null,
+    "nameOnDisk": null,
+    "artifacts": null,
+    "build": "^interface$",
+    "source": "^interface$",
+    "install": null,
+    "link": null,
+    "archive": null,
+    "dependencies": null,
+    "linkLibraries": null,
+    "interfaceLinkLibraries": null,
+    "compileDependencies": null,
+    "interfaceCompileDependencies": null,
+    "objectDependencies": null,
+    "orderDependencies": null
+}

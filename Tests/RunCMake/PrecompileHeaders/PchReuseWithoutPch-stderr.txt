@@ -1,0 +1,4 @@
+CMake Warning in CMakeLists\.txt:
+  Target "pch-generator" for the "reuse_from_nopch" target's
+  "PRECOMPILE_HEADERS_REUSE_FROM" property has set
+  "DISABLE_PRECOMPILE_HEADERS"; ignoring\.

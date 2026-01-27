@@ -5,14 +5,47 @@
 FindLAPACK
 ----------
 
-Find Linear Algebra PACKage (LAPACK) library
+Finds the installed Linear Algebra PACKage (LAPACK) Fortran library that
+implements the `LAPACK linear-algebra interface`_:
 
-This module finds an installed Fortran library that implements the
-`LAPACK linear-algebra interface`_.
+.. code-block:: cmake
+
+  find_package(LAPACK [...])
 
 At least one of the ``C``, ``CXX``, or ``Fortran`` languages must be enabled.
 
 .. _`LAPACK linear-algebra interface`: https://netlib.org/lapack/
+
+Imported Targets
+^^^^^^^^^^^^^^^^
+
+This module provides the following :ref:`Imported Targets`:
+
+``LAPACK::LAPACK``
+  .. versionadded:: 3.18
+
+  Target encapsulating the LAPACK usage requirements, available only if
+  LAPACK is found.
+
+Result Variables
+^^^^^^^^^^^^^^^^
+
+This module defines the following variables:
+
+``LAPACK_FOUND``
+  Boolean indicating whether the library implementing the LAPACK interface
+  was found.
+``LAPACK_LINKER_FLAGS``
+  Uncached list of required linker flags (excluding ``-l`` and ``-L``).
+``LAPACK_LIBRARIES``
+  Uncached list of libraries (using full path name) to link against to use
+  LAPACK.
+``LAPACK95_LIBRARIES``
+  Uncached list of libraries (using full path name) to link against to use
+  LAPACK95.
+``LAPACK95_FOUND``
+  Boolean indicating whether the library implementing the LAPACK95 interface
+  was found.
 
 Input Variables
 ^^^^^^^^^^^^^^^
@@ -20,27 +53,26 @@ Input Variables
 The following variables may be set to influence this module's behavior:
 
 ``BLA_STATIC``
-  if ``ON`` use static linkage
+  If ``ON``, the static linkage will be used.
 
 ``BLA_VENDOR``
   Set to one of the :ref:`BLAS/LAPACK Vendors` to search for BLAS only
   from the specified vendor.  If not set, all vendors are considered.
 
 ``BLA_F95``
-  if ``ON`` tries to find the BLAS95/LAPACK95 interfaces
+  If ``ON``, the module tries to find the BLAS95/LAPACK95 interfaces.
 
 ``BLA_PREFER_PKGCONFIG``
   .. versionadded:: 3.20
 
-  if set ``pkg-config`` will be used to search for a LAPACK library first
-  and if one is found that is preferred
+  If set, ``pkg-config`` will be used to search for a LAPACK library first
+  and if one is found that is preferred.
 
 ``BLA_PKGCONFIG_LAPACK``
   .. versionadded:: 3.25
 
   If set, the ``pkg-config`` method will look for this module name instead of
   just ``lapack``.
-
 
 ``BLA_SIZEOF_INTEGER``
   .. versionadded:: 3.22
@@ -70,34 +102,6 @@ The following variables may be set to influence this module's behavior:
 
   This is currently only supported by NVIDIA NVPL.
 
-Imported Targets
-^^^^^^^^^^^^^^^^
-
-This module defines the following :prop_tgt:`IMPORTED` targets:
-
-``LAPACK::LAPACK``
-  .. versionadded:: 3.18
-
-  The libraries to use for LAPACK, if found.
-
-Result Variables
-^^^^^^^^^^^^^^^^
-
-This module defines the following variables:
-
-``LAPACK_FOUND``
-  library implementing the LAPACK interface is found
-``LAPACK_LINKER_FLAGS``
-  uncached list of required linker flags (excluding ``-l`` and ``-L``).
-``LAPACK_LIBRARIES``
-  uncached list of libraries (using full path name) to link against
-  to use LAPACK
-``LAPACK95_LIBRARIES``
-  uncached list of libraries (using full path name) to link against
-  to use LAPACK95
-``LAPACK95_FOUND``
-  library implementing the LAPACK95 interface is found
-
 Intel MKL
 ^^^^^^^^^
 
@@ -115,6 +119,15 @@ In order to build a project using Intel MKL, and end user must first
 establish an Intel MKL environment.  See the :module:`FindBLAS` module
 section on :ref:`Intel MKL` for details.
 
+Examples
+^^^^^^^^
+
+Finding LAPACK and linking it to a project target:
+
+.. code-block:: cmake
+
+  find_package(LAPACK)
+  target_link_libraries(project_target PRIVATE LAPACK::LAPACK)
 #]=======================================================================]
 
 # The approach follows that of the ``autoconf`` macro file, ``acx_lapack.m4``
@@ -314,7 +327,7 @@ if(BLA_PREFER_PKGCONFIG)
     set(BLA_PKGCONFIG_LAPACK "lapack")
   endif()
   find_package(PkgConfig QUIET)
-  if(PKG_CONFIG_FOUND)
+  if(PkgConfig_FOUND)
     pkg_check_modules(PKGC_LAPACK QUIET ${BLA_PKGCONFIG_LAPACK})
     if(PKGC_LAPACK_FOUND)
       set(LAPACK_FOUND TRUE)

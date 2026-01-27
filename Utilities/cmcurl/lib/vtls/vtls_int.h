@@ -127,6 +127,7 @@ struct ssl_connect_data {
   BIT(use_alpn);                    /* if ALPN shall be used in handshake */
   BIT(peer_closed);                 /* peer has closed connection */
   BIT(prefs_checked);               /* SSL preferences have been checked */
+  BIT(input_pending);               /* data for SSL_read() may be available */
 };
 
 
@@ -152,6 +153,10 @@ struct Curl_ssl {
   size_t (*version)(char *buffer, size_t size);
   CURLcode (*shut_down)(struct Curl_cfilter *cf, struct Curl_easy *data,
                         bool send_shutdown, bool *done);
+
+  /* data_pending() shall return TRUE when it wants to get called again to
+     drain internal buffers and deliver data instead of waiting for the socket
+     to get readable */
   bool (*data_pending)(struct Curl_cfilter *cf,
                        const struct Curl_easy *data);
 
@@ -165,8 +170,8 @@ struct Curl_ssl {
 
   /* During handshake/shutdown, adjust the pollset to include the socket
    * for POLLOUT or POLLIN as needed. Mandatory. */
-  void (*adjust_pollset)(struct Curl_cfilter *cf, struct Curl_easy *data,
-                          struct easy_pollset *ps);
+  CURLcode (*adjust_pollset)(struct Curl_cfilter *cf, struct Curl_easy *data,
+                             struct easy_pollset *ps);
   void *(*get_internals)(struct ssl_connect_data *connssl, CURLINFO info);
   void (*close)(struct Curl_cfilter *cf, struct Curl_easy *data);
   void (*close_all)(struct Curl_easy *data);
@@ -175,13 +180,12 @@ struct Curl_ssl {
   CURLcode (*set_engine_default)(struct Curl_easy *data);
   struct curl_slist *(*engines_list)(struct Curl_easy *data);
 
-  bool (*false_start)(void);
   CURLcode (*sha256sum)(const unsigned char *input, size_t inputlen,
                     unsigned char *sha256sum, size_t sha256sumlen);
-  ssize_t (*recv_plain)(struct Curl_cfilter *cf, struct Curl_easy *data,
-                        char *buf, size_t len, CURLcode *code);
-  ssize_t (*send_plain)(struct Curl_cfilter *cf, struct Curl_easy *data,
-                        const void *mem, size_t len, CURLcode *code);
+  CURLcode (*recv_plain)(struct Curl_cfilter *cf, struct Curl_easy *data,
+                         char *buf, size_t len, size_t *pnread);
+  CURLcode (*send_plain)(struct Curl_cfilter *cf, struct Curl_easy *data,
+                         const void *mem, size_t len, size_t *pnwritten);
 
   CURLcode (*get_channel_binding)(struct Curl_easy *data, int sockindex,
                                   struct dynbuf *binding);
@@ -190,8 +194,9 @@ struct Curl_ssl {
 
 extern const struct Curl_ssl *Curl_ssl;
 
-void Curl_ssl_adjust_pollset(struct Curl_cfilter *cf, struct Curl_easy *data,
-                             struct easy_pollset *ps);
+CURLcode Curl_ssl_adjust_pollset(struct Curl_cfilter *cf,
+                                 struct Curl_easy *data,
+                                 struct easy_pollset *ps);
 
 /**
  * Get the SSL filter below the given one or NULL if there is none.

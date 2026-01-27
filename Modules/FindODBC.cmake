@@ -7,11 +7,16 @@ FindODBC
 
 .. versionadded:: 3.12
 
-Finds the Open Database Connectivity (ODBC) library, which implements a standard
-API for accessing database systems.  ODBC enables applications to communicate
-with different database management systems (DBMS) using a common set of
-functions.  Communication with a specific database is handled through ODBC
-drivers, which the library loads at runtime.
+Finds the Open Database Connectivity (ODBC) library, which implements a
+standard API for accessing database systems:
+
+.. code-block:: cmake
+
+  find_package(ODBC [...])
+
+ODBC enables applications to communicate with different database management
+systems (DBMS) using a common set of functions.  Communication with a specific
+database is handled through ODBC drivers, which the library loads at runtime.
 
 On Windows, when building with Visual Studio, this module assumes the ODBC
 library is provided by the available Windows SDK.
@@ -36,7 +41,7 @@ Result Variables
 This module defines the following variables:
 
 ``ODBC_FOUND``
-  Boolean indicating whether ODBC is found.
+  Boolean indicating whether ODBC was found.
 
 ``ODBC_INCLUDE_DIRS``
   Include directories containing headers needed to use ODBC.
@@ -76,19 +81,19 @@ Limitations
 Examples
 ^^^^^^^^
 
-Finding and using ODBC
-""""""""""""""""""""""
+Example: Finding and Using ODBC
+"""""""""""""""""""""""""""""""
 
 Finding ODBC and linking it to a project target:
 
 .. code-block:: cmake
-  :caption: CMakeLists.txt
+  :caption: ``CMakeLists.txt``
 
   find_package(ODBC)
   target_link_libraries(project_target PRIVATE ODBC::ODBC)
 
-Finding a custom ODBC installation on Unix-like systems
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""
+Example: Finding a Custom ODBC Installation
+"""""""""""""""""""""""""""""""""""""""""""
 
 The following examples are for Unix-like systems and demonstrate how to set hint
 and cache variables during the CMake configuration phase to help this module

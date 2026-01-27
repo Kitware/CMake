@@ -21,7 +21,6 @@
 class cmGeneratedFileStream;
 class cmLocalGenerator;
 class cmLocalUnixMakefileGenerator3;
-class cmMakefile;
 class cmMakefileTargetGenerator;
 class cmake;
 
@@ -172,9 +171,9 @@ public:
     std::string const& makeProgram, std::string const& projectName,
     std::string const& projectDir, std::vector<std::string> const& targetNames,
     std::string const& config, int jobs, bool verbose,
-    cmBuildOptions const& buildOptions = cmBuildOptions(),
-    std::vector<std::string> const& makeOptions =
-      std::vector<std::string>()) override;
+    cmBuildOptions buildOptions = cmBuildOptions(),
+    std::vector<std::string> const& makeOptions = std::vector<std::string>(),
+    BuildTryCompile isInTryCompile = BuildTryCompile::No) override;
 
   /** Record per-target progress information.  */
   void RecordTargetProgress(cmMakefileTargetGenerator* tg);
@@ -195,6 +194,7 @@ public:
 
   bool IsIPOSupported() const override { return true; }
 
+  bool SupportsShortObjectNames() const override;
   void ComputeTargetObjectDirectory(cmGeneratorTarget* gt) const override;
 
   std::string IncludeDirective;

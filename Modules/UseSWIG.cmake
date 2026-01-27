@@ -5,12 +5,18 @@
 UseSWIG
 -------
 
-This file provides support for ``SWIG``. It is assumed that :module:`FindSWIG`
-module has already been loaded.
-
 .. only:: html
 
   .. contents::
+
+This module provides support for ``SWIG``. It is assumed that :module:`FindSWIG`
+module has already been loaded.
+
+Load this module in a CMake project with:
+
+.. code-block:: cmake
+
+  include(UseSWIG)
 
 CMake Commands
 ^^^^^^^^^^^^^^
@@ -29,6 +35,7 @@ The following command is defined for use with ``SWIG``:
                      [TYPE <SHARED|MODULE|STATIC|USE_BUILD_SHARED_LIBS>]
                      LANGUAGE <language>
                      [NO_PROXY]
+                     [DEBUG_POSTFIX <postfix>]
                      [OUTPUT_DIR <directory>]
                      [OUTFILE_DIR <directory>]
                      SOURCES <file>...
@@ -93,6 +100,16 @@ The following command is defined for use with ``SWIG``:
     .. versionadded:: 3.12
 
     Prevent the generation of the wrapper layer (swig ``-noproxy`` option).
+
+  ``DEBUG_POSTFIX``
+    .. versionadded:: 4.2
+
+    Manage the :prop_tgt:`DEBUG_POSTFIX` target property. Currently, only
+    meaningful for the ``python`` language.
+
+    If the :prop_gbl:`DEBUG_CONFIGURATIONS` global property is defined, define
+    the :prop_tgt:`<CONFIG>_POSTFIX` target property for each debug
+    configuration.
 
   ``OUTPUT_DIR``
     .. versionadded:: 3.12
@@ -669,7 +686,7 @@ function(SWIG_ADD_SOURCE_TO_MODULE name outfiles infile)
         NOT ("-interface" IN_LIST swig_source_file_flags OR "-interface" IN_LIST SWIG_MODULE_${name}_EXTRA_FLAGS))
       # This makes sure that the name used in the proxy code
       # matches the library name created by CMake
-      list (APPEND SWIG_MODULE_${name}_EXTRA_FLAGS "-interface" "$<TARGET_FILE_PREFIX:${target_name}>$<TARGET_FILE_BASE_NAME:${target_name}>")
+      list (APPEND SWIG_MODULE_${name}_EXTRA_FLAGS "-interface" "$<TARGET_FILE_PREFIX:${target_name}>$<TARGET_FILE_BASE_NAME:${target_name},POSTFIX:$<IF:$<AND:$<BOOL:${SWIG_DEBUG_POSTFIX}>,$<CONFIG:${SWIG_DEBUG_CONFIGS}>>,EXCLUDE,INCLUDE>>")
     endif()
   endif()
   list (APPEND swig_extra_flags ${SWIG_MODULE_${name}_EXTRA_FLAGS})
@@ -781,6 +798,7 @@ function(SWIG_ADD_LIBRARY name)
   set(options NO_PROXY)
   set(oneValueArgs LANGUAGE
                    TYPE
+                   DEBUG_POSTFIX
                    OUTPUT_DIR
                    OUTFILE_DIR)
   set(multiValueArgs SOURCES)
@@ -802,6 +820,18 @@ function(SWIG_ADD_LIBRARY name)
     set(_SAM_TYPE MODULE)
   elseif(_SAM_TYPE STREQUAL "USE_BUILD_SHARED_LIBS")
     unset(_SAM_TYPE)
+  endif()
+
+  if(_SAM_DEBUG_POSTFIX)
+    get_property(SWIG_DEBUG_CONFIGS GLOBAL PROPERTY DEBUG_CONFIGURATIONS)
+    if(NOT SWIG_DEBUG_CONFIGS)
+      set(SWIG_DEBUG_CONFIGS DEBUG)
+    endif()
+    string(TOUPPER "${SWIG_DEBUG_CONFIGS}" SWIG_DEBUG_CONFIGS)
+    set(SWIG_DEBUG_POSTFIX "${_SAM_DEBUG_POSTFIX}")
+  else()
+    unset(SWIG_DEBUG_CONFIGS)
+    unset(SWIG_DEBUG_POSTFIX)
   endif()
 
   cmake_policy(GET CMP0078 target_name_policy)
@@ -995,6 +1025,11 @@ function(SWIG_ADD_LIBRARY name)
     if(WIN32 AND NOT CYGWIN)
       set_target_properties(${target_name} PROPERTIES SUFFIX ".pyd")
     endif()
+    if(SWIG_DEBUG_POSTFIX)
+      foreach(config IN LISTS SWIG_DEBUG_CONFIGS)
+        set_target_properties(${target_name} PROPERTIES ${config}_POSTFIX "${SWIG_DEBUG_POSTFIX}")
+      endforeach()
+    endif()
   elseif (swig_lowercase_language STREQUAL "r")
     set_target_properties(${target_name} PROPERTIES PREFIX "")
   elseif (swig_lowercase_language STREQUAL "ruby")
@@ -1067,6 +1102,10 @@ endfunction()
 # Like TARGET_LINK_LIBRARIES but for swig modules
 #
 function(SWIG_LINK_LIBRARIES name)
+  cmake_policy(GET CMP0078 target_name_policy)
+  if (target_name_policy STREQUAL "NEW")
+    set (UseSWIG_TARGET_NAME_PREFERENCE STANDARD)
+  endif()
   if (UseSWIG_TARGET_NAME_PREFERENCE STREQUAL "STANDARD")
     message(DEPRECATION "SWIG_LINK_LIBRARIES is deprecated. Use TARGET_LINK_LIBRARIES instead.")
     target_link_libraries(${name} ${ARGN})

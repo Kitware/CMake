@@ -15,6 +15,7 @@ set(CMakeLib_TESTS
   testCTestResourceAllocator.cxx
   testCTestResourceSpec.cxx
   testCTestResourceGroups.cxx
+  testDateTime.cxx
   testDebug.cxx
   testDocumentationFormatter.cxx
   testGccDepfileReader.cxx
@@ -24,6 +25,7 @@ set(CMakeLib_TESTS
   testRange.cxx
   testOptional.cxx
   testPathResolver.cxx
+  testSPDXSerializer.cxx
   testStdIo.cxx
   testString.cxx
   testStringAlgorithms.cxx

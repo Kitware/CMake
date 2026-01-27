@@ -26,20 +26,16 @@
 
 #include <curl/curl.h>
 
-#if defined(USE_THREADS_POSIX)
-#  ifdef HAVE_PTHREAD_H
-#    include <pthread.h>
-#  endif
-#elif defined(USE_THREADS_WIN32)
-#  include <process.h>
+#if defined(USE_THREADS_POSIX) && defined(HAVE_PTHREAD_H)
+#include <pthread.h>
 #endif
 
 #include "curl_threads.h"
 #include "curl_memory.h"
-/* The last #include file should be: */
+/* The last #include FILE should be: */
 #include "memdebug.h"
 
-#if defined(USE_THREADS_POSIX)
+#ifdef USE_THREADS_POSIX
 
 struct Curl_actual_call {
   unsigned int (*func)(void *);
@@ -59,18 +55,23 @@ static void *curl_thread_create_thunk(void *arg)
   return 0;
 }
 
-curl_thread_t Curl_thread_create(unsigned int (*func) (void *), void *arg)
+curl_thread_t Curl_thread_create(CURL_THREAD_RETURN_T
+                                 (CURL_STDCALL *func) (void *), void *arg)
 {
   curl_thread_t t = malloc(sizeof(pthread_t));
   struct Curl_actual_call *ac = malloc(sizeof(struct Curl_actual_call));
+  int rc;
   if(!(ac && t))
     goto err;
 
   ac->func = func;
   ac->arg = arg;
 
-  if(pthread_create(t, NULL, curl_thread_create_thunk, ac) != 0)
+  rc = pthread_create(t, NULL, curl_thread_create_thunk, ac);
+  if(rc) {
+    CURL_SETERRNO(rc);
     goto err;
+  }
 
   return t;
 
@@ -101,37 +102,17 @@ int Curl_thread_join(curl_thread_t *hnd)
 
 #elif defined(USE_THREADS_WIN32)
 
-curl_thread_t Curl_thread_create(
-#if defined(CURL_WINDOWS_UWP) || defined(UNDER_CE)
-                                 DWORD
-#else
-                                 unsigned int
-#endif
-                                 (CURL_STDCALL *func) (void *),
-                                 void *arg)
+curl_thread_t Curl_thread_create(CURL_THREAD_RETURN_T
+                                 (CURL_STDCALL *func) (void *), void *arg)
 {
-#if defined(CURL_WINDOWS_UWP) || defined(UNDER_CE)
-  typedef HANDLE curl_win_thread_handle_t;
-#else
-  typedef uintptr_t curl_win_thread_handle_t;
-#endif
-  curl_thread_t t;
-  curl_win_thread_handle_t thread_handle;
-#if defined(CURL_WINDOWS_UWP) || defined(UNDER_CE)
-  thread_handle = CreateThread(NULL, 0, func, arg, 0, NULL);
-#else
-  thread_handle = _beginthreadex(NULL, 0, func, arg, 0, NULL);
-#endif
-  t = (curl_thread_t)thread_handle;
-  if((t == 0) || (t == LongToHandle(-1L))) {
-#ifdef UNDER_CE
+  curl_thread_t t = CreateThread(NULL, 0, func, arg, 0, NULL);
+  if(!t) {
     DWORD gle = GetLastError();
     /* !checksrc! disable ERRNOVAR 1 */
     int err = (gle == ERROR_ACCESS_DENIED ||
                gle == ERROR_NOT_ENOUGH_MEMORY) ?
                EACCES : EINVAL;
     CURL_SETERRNO(err);
-#endif
     return curl_thread_t_null;
   }
   return t;
@@ -147,8 +128,7 @@ void Curl_thread_destroy(curl_thread_t *hnd)
 
 int Curl_thread_join(curl_thread_t *hnd)
 {
-#if !defined(_WIN32_WINNT) || !defined(_WIN32_WINNT_VISTA) || \
-    (_WIN32_WINNT < _WIN32_WINNT_VISTA)
+#ifdef UNDER_CE
   int ret = (WaitForSingleObject(*hnd, INFINITE) == WAIT_OBJECT_0);
 #else
   int ret = (WaitForSingleObjectEx(*hnd, INFINITE, FALSE) == WAIT_OBJECT_0);

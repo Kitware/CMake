@@ -14,6 +14,22 @@ WorkDirWithSpaces.
   test1
   test2
 ]=])
+file(WRITE ${workdir}/test_list_output.json [=[
+{
+    "tests": 2,
+    "name": "AllTests",
+    "testsuites": [
+        {
+            "name": "WorkDirWithSpaces",
+            "tests": 2,
+            "testsuite": [
+                { "name": "test1", "file": "file.cpp", "line": 42 },
+                { "name": "test2", "file": "file.cpp", "line": 43 }
+            ]
+        }
+    ]
+}
+]=])
 file(WRITE ${workdir}/test_output.txt [=[
 Some output text for the test.
 ]=])

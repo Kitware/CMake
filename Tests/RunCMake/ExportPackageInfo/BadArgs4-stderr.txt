@@ -1,52 +1,64 @@
 CMake Error at BadArgs4\.cmake:[0-9]+ \(export\):
-  export LOWER_CASE_FILE requires PACKAGE_INFO\.
+  export EXPORT given unknown argument: "LOWER_CASE_FILE"\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:3 \(include\)
 
 
 CMake Error at BadArgs4\.cmake:[0-9]+ \(export\):
-  export APPENDIX requires PACKAGE_INFO\.
+  export EXPORT given unknown argument: "APPENDIX"\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:3 \(include\)
 
 
 CMake Error at BadArgs4\.cmake:[0-9]+ \(export\):
-  export VERSION requires PACKAGE_INFO\.
+  export EXPORT given unknown argument: "VERSION"\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:3 \(include\)
 
 
 CMake Error at BadArgs4\.cmake:[0-9]+ \(export\):
-  export DESCRIPTION requires PACKAGE_INFO\.
+  export EXPORT given unknown argument: "LICENSE"\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:3 \(include\)
 
 
 CMake Error at BadArgs4\.cmake:[0-9]+ \(export\):
-  export HOMEPAGE_URL requires PACKAGE_INFO\.
+  export EXPORT given unknown argument: "DEFAULT_LICENSE"\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:3 \(include\)
 
 
 CMake Error at BadArgs4\.cmake:[0-9]+ \(export\):
-  export DEFAULT_TARGETS requires PACKAGE_INFO\.
+  export EXPORT given unknown argument: "DESCRIPTION"\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:3 \(include\)
 
 
 CMake Error at BadArgs4\.cmake:[0-9]+ \(export\):
-  export DEFAULT_CONFIGURATIONS requires PACKAGE_INFO\.
+  export EXPORT given unknown argument: "HOMEPAGE_URL"\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:3 \(include\)
 
 
 CMake Error at BadArgs4\.cmake:[0-9]+ \(export\):
-  export PROJECT requires PACKAGE_INFO\.
+  export EXPORT given unknown argument: "DEFAULT_TARGETS"\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:3 \(include\)
 
 
 CMake Error at BadArgs4\.cmake:[0-9]+ \(export\):
-  export NO_PROJECT_METADATA requires PACKAGE_INFO\.
+  export EXPORT given unknown argument: "DEFAULT_CONFIGURATIONS"\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:3 \(include\)
+
+
+CMake Error at BadArgs4\.cmake:[0-9]+ \(export\):
+  export EXPORT given unknown argument: "PROJECT"\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:3 \(include\)
+
+
+CMake Error at BadArgs4\.cmake:[0-9]+ \(export\):
+  export EXPORT given unknown argument: "NO_PROJECT_METADATA"\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:3 \(include\)

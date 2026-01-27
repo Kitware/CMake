@@ -257,7 +257,6 @@ static struct passwd *vms_getpwuid(uid_t uid)
 #endif
 #define PEM_read_X509 PEM_READ_X509
 #define PEM_write_bio_X509 PEM_WRITE_BIO_X509
-#define PKCS12_PBE_add PKCS12_PBE_ADD
 #define PKCS12_free PKCS12_FREE
 #define PKCS12_parse PKCS12_PARSE
 #define RAND_add RAND_ADD
@@ -374,9 +373,7 @@ static struct passwd *vms_getpwuid(uid_t uid)
 #ifdef HAVE_NETDB_H
 #include <netdb.h>
 #ifndef AI_NUMERICHOST
-#ifdef USE_IPV6
 #undef USE_IPV6
-#endif
 #endif
 #endif
 

@@ -1,11 +1,12 @@
-CMake Error at MissingComponent.cmake:[0-9]+ \(find_package\):
+CMake Error at MissingComponent\.cmake:[0-9]+ \(find_package\):
   Could not find a configuration file for package "ComponentTest" that is
   compatible with requested version ""\.
 
   The following configuration files were considered but not accepted:
 (
     [^
-]*/Tests/RunCMake/find_package-CPS/cps/[Cc]omponent[Tt]est\.cps, version: 1\.0)+
+]*/Tests/RunCMake/find_package-CPS/cps/[Cc]omponent[Tt]est\.cps, version: 1\.0
+      Required component was not found: DoesNotExist\.)+
 
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)

@@ -14,15 +14,21 @@ For instance:
 
   set_property(GLOBAL PROPERTY JOB_POOLS two_jobs=2 ten_jobs=10)
 
-Defined pools could be used globally by setting
-:variable:`CMAKE_JOB_POOL_COMPILE` and :variable:`CMAKE_JOB_POOL_LINK`
-or per target by setting the target properties
-:prop_tgt:`JOB_POOL_COMPILE` and :prop_tgt:`JOB_POOL_LINK`.
-:command:`Custom commands <add_custom_command>` and
-:command:`custom targets <add_custom_target>` can specify pools using the
-option ``JOB_POOL``.
-Using a pool that is not defined by ``JOB_POOLS`` causes
-an error by ninja at build time.
+Defined pools can be used at different levels:
+
+* Globally, by setting :variable:`CMAKE_JOB_POOL_COMPILE` and
+  :variable:`CMAKE_JOB_POOL_LINK`.
+* Per target, by setting the target properties :prop_tgt:`JOB_POOL_COMPILE`
+  and :prop_tgt:`JOB_POOL_LINK`.
+* :command:`Custom commands <add_custom_command>` and
+  :command:`custom targets <add_custom_target>` can specify pools using the
+  option ``JOB_POOL``.
+* Per-source, by setting the source file property :prop_sf:`JOB_POOL_COMPILE`,
+  in case some specific source files require to override their global or
+  target assigned pool.
+
+Using a pool that is not defined by ``JOB_POOLS`` causes an error by ninja
+at build time.
 
 If not set, this property uses the value of the :variable:`CMAKE_JOB_POOLS`
 variable.

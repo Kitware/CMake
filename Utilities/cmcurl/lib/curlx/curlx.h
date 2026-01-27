@@ -31,6 +31,9 @@
  * be.
  */
 
+#include "binmode.h"
+/* "binmode.h" provides macro CURLX_SET_BINMODE() */
+
 #include "nonblock.h"
 /* "nonblock.h" provides curlx_nonblock() */
 
@@ -55,20 +58,32 @@
 #include "version_win32.h"
 /* provides curlx_verify_windows_version() */
 
+#include "strerr.h"
+/* The curlx_strerror() function */
+
 #include "strparse.h"
 /* The curlx_str_* parsing functions */
 
 #include "dynbuf.h"
 /* The curlx_dyn_* functions */
 
+#include "fopen.h"
+/* The curlx_f* functions */
+
 #include "base64.h"
 #include "timeval.h"
 #include "timediff.h"
+
+#include "wait.h"
+/* for curlx_wait_ms */
 
 #include "winapi.h"
 /* for curlx_winapi_strerror */
 
 #include "inet_pton.h"
 /* for curlx_inet_pton */
+
+#include "inet_ntop.h"
+/* for curlx_inet_ntop */
 
 #endif /* HEADER_CURL_CURLX_H */

@@ -278,6 +278,9 @@ private:
   using ToolSourceMap = std::map<std::string, ToolSources>;
   ToolSourceMap Tools;
 
+  using MsvcCharSet = cmGeneratorTarget::MsvcCharSet;
+  std::map<std::string, MsvcCharSet> CharSet;
+
   std::set<std::string> ExpectedResxHeaders;
   std::set<std::string> ExpectedXamlHeaders;
   std::set<std::string> ExpectedXamlSources;

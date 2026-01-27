@@ -1,0 +1,10 @@
+CMake Error in CMakeLists\.txt:
+  The "OBJECT_NAME" property for
+
+    .*/Tests/RunCMake/OBJECT_NAME/lib\.c
+
+  contains a context-sensitive condition which is not supported
+  \(\$<CONFIG>/objlib_lib\.c\)\.
+
+
+CMake Generate step failed\.  Build files cannot be regenerated correctly\.

@@ -5,6 +5,26 @@
 CMakeFindDependencyMacro
 ------------------------
 
+This module provides a command implemented as a macro that finds dependency
+for a package.
+
+Load this module in a CMake package configuration file with:
+
+.. code-block:: cmake
+  :caption: ``FooConfig.cmake`` or ``foo-config.cmake``:
+
+  include(CMakeFindDependencyMacro)
+
+.. note::
+
+  This module is designed to be used in a :ref:`Package Configuration File
+  <Config File Packages>` (``<PackageName>Config.cmake``).
+
+Commands
+^^^^^^^^
+
+This module provides the following command:
+
 .. command:: find_dependency
 
   The ``find_dependency()`` macro wraps a :command:`find_package` call for
@@ -56,44 +76,59 @@ avoid setting such variables before their calls to ``find_dependency``.
 
 #]=======================================================================]
 
-macro(find_dependency dep)
+macro(__find_dependency_common cmake_fd_call_hash dep)
+  set(cmake_fd_quiet_arg)
+  if(${CMAKE_FIND_PACKAGE_NAME}_FIND_QUIETLY)
+    set(cmake_fd_quiet_arg QUIET)
+  endif()
+  set(cmake_fd_required_arg)
+  if(${CMAKE_FIND_PACKAGE_NAME}_FIND_REQUIRED)
+    set(cmake_fd_required_arg REQUIRED)
+  endif()
+
+  get_property(cmake_fd_alreadyTransitive GLOBAL PROPERTY
+    _CMAKE_${dep}_TRANSITIVE_DEPENDENCY
+    )
+
+  find_package(${dep} ${ARGN}
+    ${cmake_fd_quiet_arg}
+    ${cmake_fd_required_arg}
+    )
+  set("_CMAKE_${dep}_${cmake_fd_call_hash}_FOUND" "${${dep}_FOUND}")
+
+  if(NOT DEFINED cmake_fd_alreadyTransitive OR cmake_fd_alreadyTransitive)
+    set_property(GLOBAL PROPERTY _CMAKE_${dep}_TRANSITIVE_DEPENDENCY TRUE)
+  endif()
+
+  unset(cmake_fd_alreadyTransitive)
+  unset(cmake_fd_quiet_arg)
+  unset(cmake_fd_required_arg)
+endmacro()
+
+macro(__find_dependency_no_return dep)
   string(SHA256 cmake_fd_call_hash "${dep};${ARGN};${${CMAKE_FIND_PACKAGE_NAME}_FIND_REQUIRED}")
   if(_CMAKE_${dep}_${cmake_fd_call_hash}_FOUND)
-    unset(cmake_fd_call_hash)
+    set(${dep}_FOUND ${_CMAKE_${dep}_${cmake_fd_call_hash}_FOUND})
   else()
-    list(APPEND _CMAKE_${dep}_HASH_STACK ${cmake_fd_call_hash})
-    set(cmake_fd_quiet_arg)
-    if(${CMAKE_FIND_PACKAGE_NAME}_FIND_QUIETLY)
-      set(cmake_fd_quiet_arg QUIET)
-    endif()
-    set(cmake_fd_required_arg)
-    if(${CMAKE_FIND_PACKAGE_NAME}_FIND_REQUIRED)
-      set(cmake_fd_required_arg REQUIRED)
-    endif()
-
-    get_property(cmake_fd_alreadyTransitive GLOBAL PROPERTY
-      _CMAKE_${dep}_TRANSITIVE_DEPENDENCY
-      )
-
-    find_package(${dep} ${ARGN}
-      ${cmake_fd_quiet_arg}
-      ${cmake_fd_required_arg}
-      )
-    list(POP_BACK _CMAKE_${dep}_HASH_STACK cmake_fd_call_hash)
-    set("_CMAKE_${dep}_${cmake_fd_call_hash}_FOUND" "${${dep}_FOUND}")
-
-    if(NOT DEFINED cmake_fd_alreadyTransitive OR cmake_fd_alreadyTransitive)
-      set_property(GLOBAL PROPERTY _CMAKE_${dep}_TRANSITIVE_DEPENDENCY TRUE)
-    endif()
-
-    unset(cmake_fd_alreadyTransitive)
-    unset(cmake_fd_call_hash)
-    unset(cmake_fd_quiet_arg)
-    unset(cmake_fd_required_arg)
+    __find_dependency_common(${cmake_fd_call_hash} ${ARGV})
     if (NOT ${dep}_FOUND)
       set(${CMAKE_FIND_PACKAGE_NAME}_NOT_FOUND_MESSAGE "${CMAKE_FIND_PACKAGE_NAME} could not be found because dependency ${dep} could not be found.")
       set(${CMAKE_FIND_PACKAGE_NAME}_FOUND False)
+    endif()
+  endif()
+  unset(cmake_fd_call_hash)
+endmacro()
+
+macro(find_dependency dep)
+  string(SHA256 cmake_fd_call_hash "${dep};${ARGN};${${CMAKE_FIND_PACKAGE_NAME}_FIND_REQUIRED}")
+  if(NOT _CMAKE_${dep}_${cmake_fd_call_hash}_FOUND)
+    __find_dependency_common(${cmake_fd_call_hash} ${ARGV})
+    if (NOT ${dep}_FOUND)
+      set(${CMAKE_FIND_PACKAGE_NAME}_NOT_FOUND_MESSAGE "${CMAKE_FIND_PACKAGE_NAME} could not be found because dependency ${dep} could not be found.")
+      set(${CMAKE_FIND_PACKAGE_NAME}_FOUND False)
+      unset(cmake_fd_call_hash)
       return()
     endif()
   endif()
+  unset(cmake_fd_call_hash)
 endmacro()

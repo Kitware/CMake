@@ -17,15 +17,15 @@ events:(
   -
     kind: "message-v1"
     backtrace:
-      - "ConfigureLogTransitions.cmake:[0-9]+ \(message\)"
-      - "CMakeLists.txt:[0-9]+ \(include\)"
+      - "ConfigureLogTransitions\.cmake:[0-9]+ \(message\)"
+      - "CMakeLists\.txt:[0-9]+ \(include\)"
     message: |
       NotDefined -> NotFound
   -
     kind: "find-v1"
     backtrace:
-      - "ConfigureLogTransitions.cmake:[0-9]+ \(find_library\)"
-      - "CMakeLists.txt:[0-9]+ \(include\)"
+      - "ConfigureLogTransitions\.cmake:[0-9]+ \(find_library\)"
+      - "CMakeLists\.txt:[0-9]+ \(include\)"
     mode: "library"
     variable: "NOEXIST_FILE"
     description: "Path to a library."
@@ -54,22 +54,22 @@ events:(
   -
     kind: "message-v1"
     backtrace:
-      - "ConfigureLogTransitions.cmake:[0-9]+ \(find_library\)"
-      - "CMakeLists.txt:[0-9]+ \(include\)"
+      - "ConfigureLogTransitions\.cmake:[0-9]+ \(find_library\)"
+      - "CMakeLists\.txt:[0-9]+ \(include\)"
     message: |
       NotFound -> NotFound
   -
     kind: "message-v1"
     backtrace:
-      - "ConfigureLogTransitions.cmake:[0-9]+ \(find_library\)"
-      - "CMakeLists.txt:[0-9]+ \(include\)"
+      - "ConfigureLogTransitions\.cmake:[0-9]+ \(find_library\)"
+      - "CMakeLists\.txt:[0-9]+ \(include\)"
     message: |
       NotDefined -> Found
   -
     kind: "find-v1"
     backtrace:
-      - "ConfigureLogTransitions.cmake:[0-9]+ \(find_library\)"
-      - "CMakeLists.txt:[0-9]+ \(include\)"
+      - "ConfigureLogTransitions\.cmake:[0-9]+ \(find_library\)"
+      - "CMakeLists\.txt:[0-9]+ \(include\)"
     mode: "library"
     variable: "PREFIX_IN_PATH"
     description: "Path to a library."
@@ -94,22 +94,22 @@ events:(
   -
     kind: "message-v1"
     backtrace:
-      - "ConfigureLogTransitions.cmake:[0-9]+ \(find_library\)"
-      - "CMakeLists.txt:[0-9]+ \(include\)"
+      - "ConfigureLogTransitions\.cmake:[0-9]+ \(find_library\)"
+      - "CMakeLists\.txt:[0-9]+ \(include\)"
     message: |
       Found -> Found
   -
     kind: "message-v1"
     backtrace:
-      - "ConfigureLogTransitions.cmake:[0-9]+ \(find_library\)"
-      - "CMakeLists.txt:[0-9]+ \(include\)"
+      - "ConfigureLogTransitions\.cmake:[0-9]+ \(find_library\)"
+      - "CMakeLists\.txt:[0-9]+ \(include\)"
     message: |
       Found -> NotFound
   -
     kind: "find-v1"
     backtrace:
-      - "ConfigureLogTransitions.cmake:[0-9]+ \(find_library\)"
-      - "CMakeLists.txt:[0-9]+ \(include\)"
+      - "ConfigureLogTransitions\.cmake:[0-9]+ \(find_library\)"
+      - "CMakeLists\.txt:[0-9]+ \(include\)"
     mode: "library"
     variable: "PREFIX_IN_PATH"
     description: "Path to a library."
@@ -134,15 +134,15 @@ events:(
   -
     kind: "message-v1"
     backtrace:
-      - "ConfigureLogTransitions.cmake:[0-9]+ \(find_library\)"
-      - "CMakeLists.txt:[0-9]+ \(include\)"
+      - "ConfigureLogTransitions\.cmake:[0-9]+ \(find_library\)"
+      - "CMakeLists\.txt:[0-9]+ \(include\)"
     message: |
       NotFound -> Found
   -
     kind: "find-v1"
     backtrace:
-      - "ConfigureLogTransitions.cmake:[0-9]+ \(find_library\)"
-      - "CMakeLists.txt:[0-9]+ \(include\)"
+      - "ConfigureLogTransitions\.cmake:[0-9]+ \(find_library\)"
+      - "CMakeLists\.txt:[0-9]+ \(include\)"
     mode: "library"
     variable: "PREFIX_IN_PATH"
     description: "Path to a library."

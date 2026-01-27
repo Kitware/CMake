@@ -40,9 +40,8 @@ struct cmIDEFlagTable;
 
 cmGlobalVisualStudio8Generator::cmGlobalVisualStudio8Generator(
   cmake* cm, std::string const& name)
-  : cmGlobalVisualStudio71Generator(cm)
+  : cmGlobalVisualStudio7Generator(cm)
 {
-  this->ProjectConfigurationSectionName = "ProjectConfigurationPlatforms";
   this->Name = name;
   this->ExtraFlagTable =
     cmGlobalVisualStudio8Generator::GetExtraFlagTableVS8();
@@ -62,7 +61,7 @@ std::string cmGlobalVisualStudio8Generator::FindDevEnvCommand()
     return vsxcmd;
   }
   // Now look for devenv.
-  return this->cmGlobalVisualStudio71Generator::FindDevEnvCommand();
+  return this->cmGlobalVisualStudio7Generator::FindDevEnvCommand();
 }
 
 void cmGlobalVisualStudio8Generator::EnableLanguage(
@@ -218,12 +217,6 @@ std::string cmGlobalVisualStudio8Generator::GetGenerateStampList()
   return "generate.stamp.list";
 }
 
-bool cmGlobalVisualStudio8Generator::UseFolderProperty() const
-{
-  // NOLINTNEXTLINE(bugprone-parent-virtual-call)
-  return IsExpressEdition() ? false : cmGlobalGenerator::UseFolderProperty();
-}
-
 bool cmGlobalVisualStudio8Generator::AddCheckTarget()
 {
   // Add a special target on which all other targets depend that
@@ -313,7 +306,7 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
     std::string argS = cmStrCat("-S", lg.GetSourceDirectory());
     std::string argB = cmStrCat("-B", lg.GetBinaryDirectory());
     std::string const sln =
-      cmStrCat(lg.GetBinaryDirectory(), '/', lg.GetProjectName(), ".sln");
+      this->GetSLNFile(lg.GetBinaryDirectory(), lg.GetProjectName());
     cmCustomCommandLines commandLines = cmMakeSingleCommandLine(
       { cmSystemTools::GetCMakeCommand(), argS, argB, "--check-stamp-list",
         stampList, "--vs-solution-file", sln });
@@ -362,72 +355,6 @@ void cmGlobalVisualStudio8Generator::AddExtraIDETargets()
   }
 }
 
-void cmGlobalVisualStudio8Generator::WriteSolutionConfigurations(
-  std::ostream& fout, std::vector<std::string> const& configs) const
-{
-  fout << "\tGlobalSection(SolutionConfigurationPlatforms) = preSolution\n";
-  std::vector<std::string> platforms = { this->GetPlatformName() };
-  if (this->GetBuildAsX()) {
-    platforms.push_back("ARM64");
-  }
-  for (std::string const& p : platforms) {
-    for (std::string const& i : configs) {
-      fout << "\t\t" << i << "|" << p << " = " << i << "|"
-          << p << "\n";
-    }
-  }
-  fout << "\tEndGlobalSection\n";
-}
-
-void cmGlobalVisualStudio8Generator::WriteProjectConfigurations(
-  std::ostream& fout, std::string const& name, cmGeneratorTarget const& target,
-  std::vector<std::string> const& configs,
-  std::set<std::string> const& configsPartOfDefaultBuild,
-  std::string const& platformMapping) const
-{
-  std::string guid = this->GetGUID(name);
-  std::vector<std::string> platforms = { this->GetPlatformName() };
-  if (this->GetBuildAsX()) {
-    platforms.push_back("ARM64");
-  }
-
-  for (std::string const& p : platforms) {
-    for (std::string const& i : configs) {
-      std::vector<std::string> mapConfig;
-      char const* dstConfig = i.c_str();
-      if (target.GetProperty("EXTERNAL_MSPROJECT")) {
-        if (cmValue m = target.GetProperty("MAP_IMPORTED_CONFIG_" +
-                                          cmSystemTools::UpperCase(i))) {
-          cmExpandList(*m, mapConfig);
-          if (!mapConfig.empty()) {
-            dstConfig = mapConfig[0].c_str();
-          }
-        }
-      }
-      fout << "\t\t{" << guid << "}." << i << "|" << p
-          << ".ActiveCfg = " << dstConfig << "|"
-          << (!platformMapping.empty() ? platformMapping
-                                        : p)
-          << "\n";
-      auto ci = configsPartOfDefaultBuild.find(i);
-      if (!(ci == configsPartOfDefaultBuild.end())) {
-        fout << "\t\t{" << guid << "}." << i << "|" << p
-            << ".Build.0 = " << dstConfig << "|"
-            << (!platformMapping.empty() ? platformMapping
-                                          : p)
-            << "\n";
-      }
-      if (this->NeedsDeploy(target, dstConfig)) {
-        fout << "\t\t{" << guid << "}." << i << "|" << p
-            << ".Deploy.0 = " << dstConfig << "|"
-            << (!platformMapping.empty() ? platformMapping
-                                          : p)
-            << "\n";
-      }
-    }
-  }
-}
-
 bool cmGlobalVisualStudio8Generator::NeedsDeploy(
   cmGeneratorTarget const& target, char const* config) const
 {
@@ -461,21 +388,6 @@ bool cmGlobalVisualStudio8Generator::NeedsDeploy(
 bool cmGlobalVisualStudio8Generator::TargetSystemSupportsDeployment() const
 {
   return this->TargetsWindowsCE();
-}
-
-void cmGlobalVisualStudio8Generator::WriteProjectDepends(
-  std::ostream& fout, std::string const&, std::string const&,
-  cmGeneratorTarget const* gt) const
-{
-  TargetDependSet const& unordered = this->GetTargetDirectDepends(gt);
-  OrderedTargetDependSet depends(unordered, std::string());
-  for (cmTargetDepend const& i : depends) {
-    if (!this->IsInSolution(i)) {
-      continue;
-    }
-    std::string guid = this->GetGUID(i->GetName());
-    fout << "\t\t{" << guid << "} = {" << guid << "}\n";
-  }
 }
 
 bool cmGlobalVisualStudio8Generator::NeedLinkLibraryDependencies(

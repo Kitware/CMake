@@ -163,6 +163,9 @@ struct cmFortranParser_s
   // Lexical scanner instance.
   yyscan_t Scanner;
 
+  // List of full paths to already processed files.
+  std::set<std::string> VisitedFilePaths;
+
   // Stack of open files in the translation unit.
   std::stack<cmFortranFile> FileStack;
 

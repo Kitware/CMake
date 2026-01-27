@@ -1,0 +1,8 @@
+.*/trace_nested\.cmake\(3\):  set\(foo \${bar} \)
+.*/trace_nested\.cmake\(4\):  cmake_language\(TRACE ON EXPAND \)
+.*/trace_nested\.cmake\(5\):  set\(foo bar \)
+.*/trace_nested\.cmake\(6\):  cmake_language\(TRACE ON \)
+.*/trace_nested\.cmake\(7\):  set\(foo \${bar} \)
+.*/trace_nested\.cmake\(8\):  cmake_language\(TRACE OFF \)
+.*/trace_nested\.cmake\(9\):  cmake_language\(TRACE OFF \)
+.*/trace_nested\.cmake\(10\):  cmake_language\(TRACE OFF \)

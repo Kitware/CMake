@@ -8,6 +8,7 @@
 #include <cmath>
 #include <cstddef> // IWYU pragma: keep
 #include <cstdlib>
+#include <functional>
 #include <iomanip>
 #include <iostream>
 #include <list>
@@ -34,7 +35,6 @@
 #include "cmCTestBinPacker.h"
 #include "cmCTestRunTest.h"
 #include "cmCTestTestHandler.h"
-#include "cmDuration.h"
 #include "cmJSONState.h"
 #include "cmListFileCache.h"
 #include "cmRange.h"
@@ -773,7 +773,7 @@ void cmCTestMultiProcessHandler::StartNextTestsOnTimer()
       auto* self = static_cast<cmCTestMultiProcessHandler*>(timer->data);
       self->StartNextTests();
     },
-    milliseconds, 0);
+    milliseconds, 0, cm::uv_update_time::no);
 }
 
 void cmCTestMultiProcessHandler::FinishTestProcess(

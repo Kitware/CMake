@@ -7,19 +7,74 @@ TestBigEndian
 
 .. deprecated:: 3.20
 
-  Supserseded by the :variable:`CMAKE_<LANG>_BYTE_ORDER` variable.
+  Superseded by the :variable:`CMAKE_<LANG>_BYTE_ORDER` variable.
 
-Check if the target architecture is big endian or little endian.
+This module provides a command to check the endianness (byte order) of the
+target architecture.
+
+Load this module in a CMake project with:
+
+.. code-block:: cmake
+
+  include(TestBigEndian)
+
+Commands
+^^^^^^^^
+
+This module provides the following command:
 
 .. command:: test_big_endian
+
+  Checks if the target architecture is big-endian or little-endian:
 
   .. code-block:: cmake
 
     test_big_endian(<var>)
 
-  Stores in variable ``<var>`` either 1 or 0 indicating whether the
-  target architecture is big or little endian.
+  This command stores in variable ``<var>`` either 1 or 0 indicating whether
+  the target architecture is big or little endian.
 
+  At least one of the supported languages must be enabled in
+  CMake project when using this command.
+
+  Supported languages are ``C``, ``CXX``.
+
+  .. versionchanged:: 3.20
+    This command is now mainly a wrapper around the
+    :variable:`CMAKE_<LANG>_BYTE_ORDER` where also ``OBJC``, ``OBJCXX``,
+    and ``CUDA`` languages are supported.
+
+Examples
+^^^^^^^^
+
+Example: Checking Endianness
+""""""""""""""""""""""""""""
+
+Checking endianness of the target architecture with this module and storing
+the result in a CMake variable ``WORDS_BIGENDIAN``:
+
+.. code-block:: cmake
+
+  include(TestBigEndian)
+  test_big_endian(WORDS_BIGENDIAN)
+
+Example: Checking Endianness in New Code
+""""""""""""""""""""""""""""""""""""""""
+
+As of CMake 3.20, this module should be replaced with the
+:variable:`CMAKE_<LANG>_BYTE_ORDER` variable.  For example, in a project,
+where ``C`` language is one of the enabled languages:
+
+.. code-block:: cmake
+
+  if(CMAKE_C_BYTE_ORDER STREQUAL "BIG_ENDIAN")
+    set(WORDS_BIGENDIAN TRUE)
+  elseif(CMAKE_C_BYTE_ORDER STREQUAL "LITTLE_ENDIAN")
+    set(WORDS_BIGENDIAN FALSE)
+  else()
+    set(WORDS_BIGENDIAN FALSE)
+    message(WARNING "Endianness could not be determined.")
+  endif()
 #]=======================================================================]
 include_guard()
 

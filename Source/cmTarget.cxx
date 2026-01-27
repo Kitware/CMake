@@ -419,6 +419,8 @@ TargetProperty const StaticTargetProperties[] = {
   { "BUILD_WITH_INSTALL_NAME_DIR"_s, IC::CanCompileSources },
   // ---- Install
   { "INSTALL_NAME_DIR"_s, IC::CanCompileSources },
+  { "INSTALL_OBJECT_NAME_STRATEGY"_s, IC::CanCompileSources },
+  { "INSTALL_OBJECT_ONLY_USE_DESTINATION"_s, IC::CanCompileSources },
   { "INSTALL_REMOVE_ENVIRONMENT_RPATH"_s, IC::CanCompileSources },
   { "INSTALL_RPATH"_s, ""_s, IC::CanCompileSources },
   { "INSTALL_RPATH_USE_LINK_PATH"_s, "OFF"_s, IC::CanCompileSources },
@@ -463,6 +465,7 @@ TargetProperty const StaticTargetProperties[] = {
   { "Fortran_LINKER_LAUNCHER"_s, IC::CanCompileSources },
 
   // Static analysis
+  { "SKIP_LINTING"_s, IC::CanCompileSources },
   // -- C
   { "C_CLANG_TIDY"_s, IC::CanCompileSources },
   { "C_CLANG_TIDY_EXPORT_FIXES_DIR"_s, IC::CanCompileSources },
@@ -589,6 +592,7 @@ class cmTargetInternals
 {
 public:
   cmStateEnums::TargetType TargetType;
+  cmTarget::Origin Origin = cmTarget::Origin::Unknown;
   cmMakefile* Makefile;
   cmPolicies::PolicyMap PolicyMap;
   cmTarget const* TemplateTarget;
@@ -604,6 +608,7 @@ public:
   bool IsAndroid;
   bool BuildInterfaceIncludesAppended;
   bool PerConfig;
+  bool IsSymbolic;
   cmTarget::Visibility TargetVisibility;
   std::set<BT<std::pair<std::string, bool>>> Utilities;
   std::set<std::string> CodegenDependencies;
@@ -881,6 +886,7 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
   this->impl->IsAIX = false;
   this->impl->IsApple = false;
   this->impl->IsAndroid = false;
+  this->impl->IsSymbolic = false;
   this->impl->TargetVisibility = vis;
   this->impl->BuildInterfaceIncludesAppended = false;
   this->impl->PerConfig = (perConfig == PerConfig::Yes);
@@ -1110,6 +1116,18 @@ cmTarget& cmTarget::operator=(cmTarget&&) noexcept = default;
 cmStateEnums::TargetType cmTarget::GetType() const
 {
   return this->impl->TargetType;
+}
+
+void cmTarget::SetOrigin(Origin origin)
+{
+  assert(origin != cmTarget::Origin::Unknown);
+  assert(this->impl->Origin == cmTarget::Origin::Unknown);
+  this->impl->Origin = origin;
+}
+
+cmTarget::Origin cmTarget::GetOrigin() const
+{
+  return this->impl->Origin;
 }
 
 cmMakefile* cmTarget::GetMakefile() const
@@ -1613,7 +1631,7 @@ std::set<std::string> const& cmTarget::GetSystemIncludeDirectories() const
 }
 
 void cmTarget::AddInstallIncludeDirectories(cmTargetExport const& te,
-                                            cmStringRange const& incs)
+                                            cmStringRange incs)
 {
   std::copy(
     incs.begin(), incs.end(),
@@ -1790,6 +1808,7 @@ void cmTarget::CopyImportedCxxModulesProperties(cmTarget const* tgt)
     "CXX_CPPCHECK",
     "CXX_ICSTAT",
     "CXX_INCLUDE_WHAT_YOU_USE",
+    "SKIP_LINTING",
 
     // Build graph properties
     "EXCLUDE_FROM_ALL",
@@ -1911,7 +1930,6 @@ MAKE_PROP(COMPILE_DEFINITIONS);
 MAKE_PROP(COMPILE_FEATURES);
 MAKE_PROP(COMPILE_OPTIONS);
 MAKE_PROP(PRECOMPILE_HEADERS);
-MAKE_PROP(PRECOMPILE_HEADERS_REUSE_FROM);
 MAKE_PROP(CUDA_CUBIN_COMPILATION);
 MAKE_PROP(CUDA_FATBIN_COMPILATION);
 MAKE_PROP(CUDA_OPTIX_COMPILATION);
@@ -1930,6 +1948,7 @@ MAKE_PROP(LINK_LIBRARIES);
 MAKE_PROP(MANUALLY_ADDED_DEPENDENCIES);
 MAKE_PROP(NAME);
 MAKE_PROP(SOURCES);
+MAKE_PROP(SYMBOLIC);
 MAKE_PROP(TYPE);
 MAKE_PROP(BINARY_DIR);
 MAKE_PROP(SOURCE_DIR);
@@ -2031,6 +2050,7 @@ bool IsSettableProperty(cmMakefile* context, cmTarget* target,
     { "MANUALLY_ADDED_DEPENDENCIES", { ROC::All } },
     { "NAME", { ROC::All } },
     { "SOURCES", { ROC::Imported } },
+    { "SYMBOLIC", { ROC::All } },
     { "TYPE", { ROC::All } },
     { "ALIAS_GLOBAL", { ROC::All, cmPolicies::CMP0160 } },
     { "BINARY_DIR", { ROC::All, cmPolicies::CMP0160 } },
@@ -2049,6 +2069,11 @@ bool IsSettableProperty(cmMakefile* context, cmTarget* target,
   }
   return true;
 }
+}
+
+void cmTarget::SetSymbolic(bool const value)
+{
+  this->impl->IsSymbolic = value;
 }
 
 void cmTarget::SetProperty(std::string const& prop, cmValue value)
@@ -2147,38 +2172,6 @@ void cmTarget::SetProperty(std::string const& prop, cmValue value)
       this->impl->Makefile->IssueMessage(MessageType::FATAL_ERROR, e);
       return;
     }
-  } else if (prop == propPRECOMPILE_HEADERS_REUSE_FROM) {
-    if (this->GetProperty("PRECOMPILE_HEADERS")) {
-      std::ostringstream e;
-      e << "PRECOMPILE_HEADERS property is already set on target (\""
-        << this->impl->Name << "\")\n";
-      this->impl->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
-      return;
-    }
-    auto* reusedTarget = this->impl->Makefile->GetCMakeInstance()
-                           ->GetGlobalGenerator()
-                           ->FindTarget(value);
-    if (!reusedTarget) {
-      std::string const e(
-        "PRECOMPILE_HEADERS_REUSE_FROM set with non existing target");
-      this->impl->Makefile->IssueMessage(MessageType::FATAL_ERROR, e);
-      return;
-    }
-
-    std::string reusedFrom = reusedTarget->GetSafeProperty(prop);
-    if (reusedFrom.empty()) {
-      reusedFrom = *value;
-    }
-
-    this->impl->Properties.SetProperty(prop, reusedFrom);
-
-    reusedTarget->SetProperty("COMPILE_PDB_NAME", reusedFrom);
-    reusedTarget->SetProperty("COMPILE_PDB_OUTPUT_DIRECTORY",
-                              cmStrCat(reusedFrom, ".dir/"));
-
-    cmValue tmp = reusedTarget->GetProperty("COMPILE_PDB_NAME");
-    this->SetProperty("COMPILE_PDB_NAME", tmp);
-    this->AddUtility(reusedFrom, false, this->impl->Makefile);
   } else if (prop == propC_STANDARD || prop == propCXX_STANDARD ||
              prop == propCUDA_STANDARD || prop == propHIP_STANDARD ||
              prop == propOBJC_STANDARD || prop == propOBJCXX_STANDARD) {
@@ -2207,15 +2200,6 @@ void cmTarget::AppendProperty(std::string const& prop,
       cmStrCat("IMPORTED_GLOBAL property can't be appended, only set on "
                "imported targets (\"",
                this->impl->Name, "\")\n"));
-  }
-  if (prop == propPRECOMPILE_HEADERS &&
-      this->GetProperty("PRECOMPILE_HEADERS_REUSE_FROM")) {
-    this->impl->Makefile->IssueMessage(
-      MessageType::FATAL_ERROR,
-      cmStrCat(
-        "PRECOMPILE_HEADERS_REUSE_FROM property is already set on target (\"",
-        this->impl->Name, "\")\n"));
-    return;
   }
 
   UsageRequirementProperty* usageRequirements[] = {
@@ -2432,8 +2416,7 @@ bool CheckLinkLibraryPattern(UsageRequirementProperty const& usage,
 }
 }
 
-void cmTarget::FinalizeTargetConfiguration(
-  cmBTStringRange const& compileDefinitions)
+void cmTarget::FinalizeTargetConfiguration(cmBTStringRange compileDefinitions)
 {
   if (this->GetType() == cmStateEnums::GLOBAL_TARGET) {
     return;
@@ -2632,6 +2615,7 @@ cmValue cmTarget::GetProperty(std::string const& prop) const
     propBINARY_DIR,
     propSOURCE_DIR,
     propSOURCES,
+    propSYMBOLIC,
     propINTERFACE_LINK_LIBRARIES,
     propINTERFACE_LINK_LIBRARIES_DIRECT,
     propINTERFACE_LINK_LIBRARIES_DIRECT_EXCLUDE,
@@ -2650,6 +2634,10 @@ cmValue cmTarget::GetProperty(std::string const& prop) const
         return nullptr;
       }
       return cmValue(propertyIter->second.Value);
+    }
+
+    if (prop == propSYMBOLIC) {
+      return this->IsSymbolic() ? cmValue(propTRUE) : cmValue(propFALSE);
     }
 
     UsageRequirementProperty const* usageRequirements[] = {
@@ -2784,6 +2772,11 @@ bool cmTarget::IsAIX() const
 bool cmTarget::IsApple() const
 {
   return this->impl->IsApple;
+}
+
+bool cmTarget::IsSymbolic() const
+{
+  return this->impl->IsSymbolic;
 }
 
 bool cmTarget::IsNormal() const
@@ -3239,8 +3232,75 @@ bool cmTargetInternals::CheckImportedLibName(std::string const& prop,
   return true;
 }
 
-bool cmTarget::GetMappedConfig(std::string const& desired_config, cmValue& loc,
+bool cmTarget::GetMappedConfig(std::string const& desiredConfig, cmValue& loc,
                                cmValue& imp, std::string& suffix) const
+{
+  switch (this->GetPolicyStatusCMP0200()) {
+    case cmPolicies::WARN:
+      if (this->GetMakefile()->PolicyOptionalWarningEnabled(
+            "CMAKE_POLICY_WARNING_CMP0200")) {
+        break;
+      }
+      CM_FALLTHROUGH;
+    case cmPolicies::OLD:
+      return this->GetMappedConfigOld(desiredConfig, loc, imp, suffix);
+    case cmPolicies::NEW:
+      return this->GetMappedConfigNew(desiredConfig, loc, imp, suffix);
+  }
+
+  cmValue newLoc;
+  cmValue newImp;
+  std::string newSuffix;
+
+  bool const newResult =
+    this->GetMappedConfigNew(desiredConfig, newLoc, newImp, newSuffix);
+
+  auto configFromSuffix = [](cm::string_view s) -> cm::string_view {
+    return s.empty() ? "(none)"_s : s.substr(1);
+  };
+
+  if (!this->GetMappedConfigOld(desiredConfig, loc, imp, suffix)) {
+    if (newResult) {
+      // NEW policy found a configuration, OLD did not.
+      cm::string_view newConfig = configFromSuffix(newSuffix);
+      std::string const err = cmStrCat(
+        cmPolicies::GetPolicyWarning(cmPolicies::CMP0200),
+        "\nConfiguration selection for imported target \"", this->GetName(),
+        "\" failed, but would select configuration \"", newConfig,
+        "\" under the NEW policy.\n");
+      this->GetMakefile()->IssueMessage(MessageType::AUTHOR_WARNING, err);
+    }
+
+    return false;
+  }
+
+  cm::string_view oldConfig = configFromSuffix(suffix);
+  if (!newResult) {
+    // NEW policy did not find a configuration, OLD did.
+    std::string const err =
+      cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0200),
+               "\nConfiguration selection for imported target \"",
+               this->GetName(), "\" selected configuration \"", oldConfig,
+               "\", but would fail under the NEW policy.\n");
+    this->GetMakefile()->IssueMessage(MessageType::AUTHOR_WARNING, err);
+  } else if (suffix != newSuffix) {
+    // OLD and NEW policies found different configurations.
+    cm::string_view newConfig = configFromSuffix(newSuffix);
+    std::string const err =
+      cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0200),
+               "\nConfiguration selection for imported target \"",
+               this->GetName(), "\" selected configuration \"", oldConfig,
+               "\", but would select configuration \"", newConfig,
+               "\" under the NEW policy.\n");
+    this->GetMakefile()->IssueMessage(MessageType::AUTHOR_WARNING, err);
+  }
+
+  return true;
+}
+
+bool cmTarget::GetMappedConfigOld(std::string const& desired_config,
+                                  cmValue& loc, cmValue& imp,
+                                  std::string& suffix) const
 {
   std::string config_upper;
   if (!desired_config.empty()) {
@@ -3367,4 +3427,112 @@ bool cmTarget::GetMappedConfig(std::string const& desired_config, cmValue& loc,
   }
 
   return true;
+}
+
+cmValue cmTarget::GetLocation(std::string const& base,
+                              std::string const& suffix) const
+{
+  cmValue value = this->GetProperty(cmStrCat(base, suffix));
+  if (value || suffix.empty()) {
+    return value;
+  }
+  return this->GetProperty(base);
+}
+
+bool cmTarget::GetLocation(std::string const& config, cmValue& loc,
+                           cmValue& imp, std::string& suffix) const
+{
+  suffix = (config.empty() ? std::string{} : cmStrCat('_', config));
+
+  // There may be only IMPORTED_IMPLIB for a shared library or an executable
+  // with exports.
+  bool const allowImp = (this->GetType() == cmStateEnums::SHARED_LIBRARY ||
+                         this->IsExecutableWithExports()) ||
+    (this->IsAIX() && this->IsExecutableWithExports()) ||
+    (this->GetMakefile()->PlatformSupportsAppleTextStubs() &&
+     this->IsSharedLibraryWithExports());
+
+  if (allowImp) {
+    imp = this->GetLocation("IMPORTED_IMPLIB", suffix);
+  }
+
+  switch (this->GetType()) {
+    case cmStateEnums::INTERFACE_LIBRARY:
+      loc = this->GetLocation("IMPORTED_LIBNAME", suffix);
+      break;
+    case cmStateEnums::OBJECT_LIBRARY:
+      loc = this->GetLocation("IMPORTED_OBJECTS", suffix);
+      break;
+    default:
+      loc = this->GetLocation("IMPORTED_LOCATION", suffix);
+      break;
+  }
+
+  return loc || imp || (this->GetType() == cmStateEnums::INTERFACE_LIBRARY);
+}
+
+bool cmTarget::GetMappedConfigNew(std::string desiredConfig, cmValue& loc,
+                                  cmValue& imp, std::string& suffix) const
+{
+  desiredConfig = cmSystemTools::UpperCase(desiredConfig);
+
+  // Get configuration mapping, if present.
+  cmList mappedConfigs;
+  if (!desiredConfig.empty()) {
+    std::string mapProp = cmStrCat("MAP_IMPORTED_CONFIG_", desiredConfig);
+    if (cmValue mapValue = this->GetProperty(mapProp)) {
+      mappedConfigs.assign(cmSystemTools::UpperCase(*mapValue),
+                           cmList::EmptyElements::Yes);
+    }
+  }
+
+  // Get imported configurations, if specified.
+  if (cmValue iconfigs = this->GetProperty("IMPORTED_CONFIGURATIONS")) {
+    cmList const availableConfigs{ cmSystemTools::UpperCase(*iconfigs) };
+
+    if (!mappedConfigs.empty()) {
+      for (auto const& c : mappedConfigs) {
+        if (cm::contains(availableConfigs, c)) {
+          this->GetLocation(c, loc, imp, suffix);
+          return true;
+        }
+      }
+
+      // If a configuration mapping was specified, but no matching
+      // configuration was found, we don't want to try anything else.
+      return false;
+    }
+
+    // There is no mapping; try the requested configuration first.
+    if (cm::contains(availableConfigs, desiredConfig)) {
+      this->GetLocation(desiredConfig, loc, imp, suffix);
+      return true;
+    }
+
+    // If there is no mapping and the requested configuration is not one of
+    // the available configurations, just take the first available
+    // configuration.
+    this->GetLocation(availableConfigs[0], loc, imp, suffix);
+    return true;
+  }
+
+  if (!mappedConfigs.empty()) {
+    for (auto const& c : mappedConfigs) {
+      if (this->GetLocation(c, loc, imp, suffix)) {
+        return true;
+      }
+    }
+
+    // If a configuration mapping was specified, but no matching
+    // configuration was found, we don't want to try anything else.
+    return false;
+  }
+
+  // There is no mapping and no explicit list of configurations; the only
+  // configuration left to try is the requested configuration.
+  if (this->GetLocation(desiredConfig, loc, imp, suffix)) {
+    return true;
+  }
+
+  return false;
 }

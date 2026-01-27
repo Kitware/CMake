@@ -46,10 +46,6 @@
 #include <sys/param.h>
 #endif
 
-#ifdef HAVE_FCNTL_H
-#include <fcntl.h>
-#endif
-
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
@@ -65,15 +61,15 @@
 #include "escape.h"
 #include "file.h"
 #include "speedcheck.h"
-#include "getinfo.h"
 #include "multiif.h"
 #include "transfer.h"
 #include "url.h"
 #include "parsedate.h" /* for the week day and month names */
+#include "curlx/fopen.h"
 #include "curlx/warnless.h"
 #include "curl_range.h"
-/* The last 3 #include files should be in this order */
-#include "curl_printf.h"
+
+/* The last 2 #include files should be in this order */
 #include "curl_memory.h"
 #include "memdebug.h"
 
@@ -120,10 +116,10 @@ const struct Curl_handler Curl_handler_file = {
   file_connect,                         /* connect_it */
   ZERO_NULL,                            /* connecting */
   ZERO_NULL,                            /* doing */
-  ZERO_NULL,                            /* proto_getsock */
-  ZERO_NULL,                            /* doing_getsock */
-  ZERO_NULL,                            /* domore_getsock */
-  ZERO_NULL,                            /* perform_getsock */
+  ZERO_NULL,                            /* proto_pollset */
+  ZERO_NULL,                            /* doing_pollset */
+  ZERO_NULL,                            /* domore_pollset */
+  ZERO_NULL,                            /* perform_pollset */
   file_disconnect,                      /* disconnect */
   ZERO_NULL,                            /* write_resp */
   ZERO_NULL,                            /* write_resp_hd */
@@ -237,7 +233,7 @@ static CURLcode file_connect(struct Curl_easy *data, bool *done)
       return CURLE_URL_MALFORMAT;
     }
 
-  fd = open(actual_path, O_RDONLY|CURL_O_BINARY);
+  fd = curlx_open(actual_path, O_RDONLY | CURL_O_BINARY);
   file->path = actual_path;
 #else
   if(memchr(real_path, 0, real_path_len)) {
@@ -261,16 +257,16 @@ static CURLcode file_connect(struct Curl_easy *data, bool *done)
     extern int __unix_path_semantics;
     if(strchr(real_path + 1, ':')) {
       /* Amiga absolute path */
-      fd = open(real_path + 1, O_RDONLY);
+      fd = curlx_open(real_path + 1, O_RDONLY);
       file->path++;
     }
     else if(__unix_path_semantics) {
       /* -lunix fallback */
-      fd = open(real_path, O_RDONLY);
+      fd = curlx_open(real_path, O_RDONLY);
     }
   }
   #else
-  fd = open(real_path, O_RDONLY);
+  fd = curlx_open(real_path, O_RDONLY);
   file->path = real_path;
   #endif
 #endif
@@ -292,8 +288,8 @@ static CURLcode file_done(struct Curl_easy *data,
                           CURLcode status, bool premature)
 {
   struct FILEPROTO *file = Curl_meta_get(data, CURL_META_FILE_EASY);
-  (void)status; /* not used */
-  (void)premature; /* not used */
+  (void)status;
+  (void)premature;
 
   if(file)
     file_cleanup(file);
@@ -305,7 +301,7 @@ static CURLcode file_disconnect(struct Curl_easy *data,
                                 struct connectdata *conn,
                                 bool dead_connection)
 {
-  (void)dead_connection; /* not used */
+  (void)dead_connection;
   (void)conn;
   return file_done(data, CURLE_OK, FALSE);
 }
@@ -348,17 +344,17 @@ static CURLcode file_upload(struct Curl_easy *data,
     mode |= O_TRUNC;
 
 #if (defined(ANDROID) || defined(__ANDROID__)) && \
-    (defined(__i386__) || defined(__arm__))
-  fd = open(file->path, mode, (mode_t)data->set.new_file_perms);
+  (defined(__i386__) || defined(__arm__))
+  fd = curlx_open(file->path, mode, (mode_t)data->set.new_file_perms);
 #else
-  fd = open(file->path, mode, data->set.new_file_perms);
+  fd = curlx_open(file->path, mode, data->set.new_file_perms);
 #endif
   if(fd < 0) {
     failf(data, "cannot open %s for writing", file->path);
     return CURLE_WRITE_ERROR;
   }
 
-  if(-1 != data->state.infilesize)
+  if(data->state.infilesize != -1)
     /* known size of data to "upload" */
     Curl_pgrsSetUploadSize(data, data->state.infilesize);
 
@@ -470,7 +466,7 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
   fd = file->fd;
 
   /* VMS: This only works reliable for STREAMLF files */
-  if(-1 != fstat(fd, &statbuf)) {
+  if(fstat(fd, &statbuf) != -1) {
     if(!S_ISDIR(statbuf.st_mode))
       expected_size = statbuf.st_size;
     /* and store the modification time */
@@ -491,8 +487,8 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
     static const char accept_ranges[]= { "Accept-ranges: bytes\r\n" };
     if(expected_size >= 0) {
       headerlen =
-        msnprintf(header, sizeof(header), "Content-Length: %" FMT_OFF_T "\r\n",
-                  expected_size);
+        curl_msnprintf(header, sizeof(header),
+                       "Content-Length: %" FMT_OFF_T "\r\n", expected_size);
       result = Curl_client_write(data, CLIENTWRITE_HEADER, header, headerlen);
       if(result)
         return result;
@@ -510,15 +506,15 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
 
     /* format: "Tue, 15 Nov 1994 12:45:26 GMT" */
     headerlen =
-      msnprintf(header, sizeof(header),
-                "Last-Modified: %s, %02d %s %4d %02d:%02d:%02d GMT\r\n",
-                Curl_wkday[tm->tm_wday ? tm->tm_wday-1 : 6],
-                tm->tm_mday,
-                Curl_month[tm->tm_mon],
-                tm->tm_year + 1900,
-                tm->tm_hour,
-                tm->tm_min,
-                tm->tm_sec);
+      curl_msnprintf(header, sizeof(header),
+                     "Last-Modified: %s, %02d %s %4d %02d:%02d:%02d GMT\r\n",
+                     Curl_wkday[tm->tm_wday ? tm->tm_wday-1 : 6],
+                     tm->tm_mday,
+                     Curl_month[tm->tm_mon],
+                     tm->tm_year + 1900,
+                     tm->tm_hour,
+                     tm->tm_min,
+                     tm->tm_sec);
     result = Curl_client_write(data, CLIENTWRITE_HEADER, header, headerlen);
     if(!result)
       /* end of headers */

@@ -126,7 +126,7 @@ std::string cmJoinStrings(Range const& rng, cm::string_view separator,
 std::string cmJoin(std::vector<std::string> const& rng,
                    cm::string_view separator, cm::string_view initial = {});
 
-std::string cmJoin(cmStringRange const& rng, cm::string_view separator,
+std::string cmJoin(cmStringRange rng, cm::string_view separator,
                    cm::string_view initial = {});
 
 enum class cmTokenizerMode
@@ -167,7 +167,7 @@ void cmTokenize(OutIt outIt, cm::string_view str, Sep sep,
   }
   // clang-format on
   if (!hasTokens && mode == cmTokenizerMode::Legacy) {
-    *outIt = {};
+    *outIt = StringT{};
   }
 }
 

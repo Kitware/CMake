@@ -9,6 +9,7 @@
         {
           "arguments": [
             "<IGNORE>",
+            "-D_MBCS",
             "-Dtarget_interface_define",
             "-Dtarget_public_define",
             "PATH:-I<SOURCE_DIR>/examples/export-build-database/target_interface_include",
@@ -24,6 +25,7 @@
             "PATH:<SOURCE_DIR>/examples/import-modules/use.cxx"
           ],
           "baseline-arguments": [
+            "-D_MBCS",
             "-Dtarget_interface_define",
             "-Dtarget_public_define",
             "PATH:-I<SOURCE_DIR>/examples/export-build-database/target_interface_include",
@@ -35,6 +37,7 @@
             "-Dtarget_public_option"
           ],
           "local-arguments": [
+            "-D_MBCS",
             "-Dtarget_interface_define",
             "-Dtarget_public_define",
             "PATH:-I<SOURCE_DIR>/examples/export-build-database/target_interface_include",
@@ -62,6 +65,7 @@
         {
           "arguments": [
             "<IGNORE>",
+            "-D_MBCS",
             "-Dtarget_interface_define",
             "-Dtarget_public_define",
             "PATH:-I<SOURCE_DIR>/examples/export-build-database/target_interface_include",
@@ -77,6 +81,7 @@
             "PATH:<SOURCE_DIR>/examples/import-modules/use.cxx"
           ],
           "baseline-arguments": [
+            "-D_MBCS",
             "-Dtarget_interface_define",
             "-Dtarget_public_define",
             "PATH:-I<SOURCE_DIR>/examples/export-build-database/target_interface_include",
@@ -88,6 +93,7 @@
             "-Dtarget_public_option"
           ],
           "local-arguments": [
+            "-D_MBCS",
             "-Dtarget_interface_define",
             "-Dtarget_public_define",
             "PATH:-I<SOURCE_DIR>/examples/export-build-database/target_interface_include",
@@ -115,6 +121,7 @@
         {
           "arguments": [
             "<IGNORE>",
+            "-D_MBCS",
             "-Ddep_interface_define",
             "-Dfrom_compile_definitions",
             "-Dtarget_interface_define",
@@ -140,6 +147,7 @@
             "PATH:<SOURCE_DIR>/examples/export-build-database/importable.cxx"
           ],
           "baseline-arguments": [
+            "-D_MBCS",
             "-Ddep_interface_define",
             "-Dfrom_compile_definitions",
             "-Dtarget_interface_define",
@@ -160,6 +168,7 @@
             "-Dtarget_interface_option"
           ],
           "local-arguments": [
+            "-D_MBCS",
             "-Ddep_interface_define",
             "-Dfrom_compile_definitions",
             "-Dtarget_interface_define",
@@ -198,6 +207,7 @@
         {
           "arguments": [
             "<IGNORE>",
+            "-D_MBCS",
             "-Ddep_interface_define",
             "-Dfrom_compile_definitions",
             "-Dtarget_interface_define",
@@ -223,6 +233,7 @@
             "PATH:<SOURCE_DIR>/examples/export-build-database/importable.cxx"
           ],
           "baseline-arguments": [
+            "-D_MBCS",
             "-Ddep_interface_define",
             "-Dfrom_compile_definitions",
             "-Dtarget_interface_define",
@@ -243,6 +254,7 @@
             "-Dtarget_interface_option"
           ],
           "local-arguments": [
+            "-D_MBCS",
             "-Ddep_interface_define",
             "-Dfrom_compile_definitions",
             "-Dtarget_interface_define",

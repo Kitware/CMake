@@ -5,7 +5,11 @@
 FindLibXml2
 -----------
 
-Finds the XML processing library (libxml2).
+Finds the XML processing library (libxml2):
+
+.. code-block:: cmake
+
+  find_package(LibXml2 [<version>] [...])
 
 Imported Targets
 ^^^^^^^^^^^^^^^^
@@ -30,15 +34,24 @@ Result Variables
 This module defines the following variables:
 
 ``LibXml2_FOUND``
-  Boolean indicating whether the libxml2 library is found.
+  .. versionadded:: 3.3
+
+  Boolean indicating whether the (requested version of) libxml2 library was
+  found.
+
+``LibXml2_VERSION``
+  .. versionadded:: 4.2
+
+  The version of the libxml2 found.
+
 ``LIBXML2_INCLUDE_DIRS``
   Include directories needed to use the libxml2 library.
+
 ``LIBXML2_LIBRARIES``
   Libraries needed to link against to use the libxml2 library.
+
 ``LIBXML2_DEFINITIONS``
   The compiler switches required for using libxml2.
-``LIBXML2_VERSION_STRING``
-  The version of the libxml2 found.
 
 Cache Variables
 ^^^^^^^^^^^^^^^
@@ -47,10 +60,30 @@ The following cache variables may also be set:
 
 ``LIBXML2_INCLUDE_DIR``
   The include directory containing libxml2 headers.
+
 ``LIBXML2_LIBRARY``
   The path to the libxml2 library.
+
 ``LIBXML2_XMLLINT_EXECUTABLE``
   The path to the XML checking tool ``xmllint`` coming with libxml2.
+
+Deprecated Variables
+^^^^^^^^^^^^^^^^^^^^
+
+The following variables are provided for backward compatibility:
+
+``LIBXML2_FOUND``
+  .. deprecated:: 4.2
+    Use ``LibXml2_FOUND``, which has the same value.
+
+  Boolean indicating whether the (requested version of) libxml2 library was
+  found.
+
+``LIBXML2_VERSION_STRING``
+  .. deprecated:: 4.2
+    Superseded by the ``LibXml2_VERSION``.
+
+  The version of the libxml2 found.
 
 Examples
 ^^^^^^^^
@@ -69,7 +102,7 @@ cmake_policy(SET CMP0159 NEW) # file(STRINGS) with REGEX updates CMAKE_MATCH_<n>
 # use pkg-config to get the directories and then use these values
 # in the find_path() and find_library() calls
 find_package(PkgConfig QUIET)
-if(PKG_CONFIG_FOUND)
+if(PkgConfig_FOUND)
   pkg_check_modules(PC_LIBXML QUIET libxml-2.0)
 endif()
 
@@ -102,7 +135,8 @@ if(LIBXML2_INCLUDE_DIR AND EXISTS "${LIBXML2_INCLUDE_DIR}/libxml/xmlversion.h")
          REGEX "^#define[\t ]+LIBXML_DOTTED_VERSION[\t ]+\".*\"")
 
     string(REGEX REPLACE "^#define[\t ]+LIBXML_DOTTED_VERSION[\t ]+\"([^\"]*)\".*" "\\1"
-           LIBXML2_VERSION_STRING "${libxml2_version_str}")
+           LibXml2_VERSION "${libxml2_version_str}")
+    set(LIBXML2_VERSION_STRING "${LibXml2_VERSION}")
     unset(libxml2_version_str)
 endif()
 
@@ -123,7 +157,7 @@ endforeach()
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(LibXml2
                                   REQUIRED_VARS LIBXML2_LIBRARY LIBXML2_INCLUDE_DIR
-                                  VERSION_VAR LIBXML2_VERSION_STRING)
+                                  VERSION_VAR LibXml2_VERSION)
 
 mark_as_advanced(LIBXML2_INCLUDE_DIR LIBXML2_LIBRARY LIBXML2_XMLLINT_EXECUTABLE)
 

@@ -4,6 +4,10 @@
     "directorySource": "^cxx$",
     "projectName": "Cxx",
     "type": "EXECUTABLE",
+    "imported": null,
+    "local": null,
+    "abstract": null,
+    "symbolic": null,
     "isGeneratorProvided": null,
     "fileSets": null,
     "sources": [
@@ -45,7 +49,12 @@
             ],
             "includes": null,
             "frameworks": null,
-            "defines": null,
+            "defines": [
+                {
+                    "define": "_MBCS",
+                    "backtrace": null
+                }
+            ],
             "compileCommandFragments": null
         }
     ],
@@ -78,10 +87,10 @@
     "build": "^cxx$",
     "source": "^cxx$",
     "install": null,
-    "launchers" : [
+    "launchers": [
         {
             "command": "^no-such-launcher(\\.exe)?$",
-            "type" : "test"
+            "type": "test"
         }
     ],
     "link": {
@@ -95,5 +104,11 @@
             "id": "^ZERO_CHECK::@a56b12a3f5c0529fb296$",
             "backtrace": null
         }
-    ]
+    ],
+    "linkLibraries": null,
+    "interfaceLinkLibraries": null,
+    "compileDependencies": null,
+    "interfaceCompileDependencies": null,
+    "objectDependencies": null,
+    "orderDependencies": null
 }

@@ -1,2 +1,2 @@
-^CMake Error: Not a file: nosuchscriptfile.cmake
-CMake Error: Error processing file: nosuchscriptfile.cmake$
+^CMake Error: Not a file: nosuchscriptfile\.cmake
+CMake Error: Error processing file: nosuchscriptfile\.cmake$

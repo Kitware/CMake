@@ -154,7 +154,7 @@ libraries) should search for the components listed in
 ``Foo_FIND_COMPONENTS`` if it is set , and only set ``Foo_FOUND`` to
 true if for each searched-for component ``<c>`` that was not found,
 ``Foo_FIND_REQUIRED_<c>`` is not set to true.  The ``HANDLE_COMPONENTS``
-argument of ``find_package_handle_standard_args()`` can be used to
+argument of :command:`find_package_handle_standard_args` can be used to
 implement this.
 
 If ``Foo_FIND_COMPONENTS`` is not set, which modules are searched for
@@ -361,10 +361,10 @@ reStructuredText-format documentation.  For example:
   Result Variables
   ^^^^^^^^^^^^^^^^
 
-  This will define the following variables:
+  This module defines the following variables:
 
   ``Foo_FOUND``
-    True if the system has the Foo library.
+    Boolean indicating whether (the requested version of) Foo was found.
   ``Foo_VERSION``
     The version of the Foo library which was found.
   ``Foo_INCLUDE_DIRS``
@@ -415,7 +415,7 @@ starting point.
 .. code-block:: cmake
 
   find_package(PkgConfig)
-  if(PKG_CONFIG_FOUND)
+  if(PkgConfig_FOUND)
     pkg_check_modules(PC_Foo QUIET Foo)
   endif()
 

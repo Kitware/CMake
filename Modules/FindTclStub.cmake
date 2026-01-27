@@ -6,7 +6,11 @@ FindTclStub
 -----------
 
 Finds the Tcl Stub Library, which is used for building version-independent Tcl
-extensions.
+extensions:
+
+.. code-block:: cmake
+
+  find_package(TclStub [...])
 
 Tcl (Tool Command Language) is a dynamic programming language, and the Tcl Stub
 Library provides a mechanism to allow Tcl extensions to be compiled in a way
@@ -17,6 +21,16 @@ This module is typically used in conjunction with Tcl development projects that
 aim to be portable across different Tcl releases.  It first calls the
 :module:`FindTCL` module to locate Tcl installation and then attempts to find
 the stub libraries corresponding to the located Tcl version.
+
+Result Variables
+^^^^^^^^^^^^^^^^
+
+This module defines the following variables:
+
+``TclStub_FOUND``
+  .. versionadded:: 4.2
+
+  Boolean indicating whether the Tcl Stub Library was found.
 
 Cache Variables
 ^^^^^^^^^^^^^^^
@@ -150,3 +164,9 @@ mark_as_advanced(
   TCL_STUB_LIBRARY
   TK_STUB_LIBRARY
   )
+
+if(TCL_STUB_LIBRARY AND TK_STUB_LIBRARY AND TTK_STUB_LIBRARY)
+  set(TclStub_FOUND TRUE)
+else()
+  set(TclStub_FOUND FALSE)
+endif()

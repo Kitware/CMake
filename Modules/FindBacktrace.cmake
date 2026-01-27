@@ -6,7 +6,11 @@ FindBacktrace
 -------------
 
 Finds `backtrace(3) <https://man7.org/linux/man-pages/man3/backtrace.3.html>`_,
-a library that provides functions for application self-debugging.
+a library that provides functions for application self-debugging:
+
+.. code-block:: cmake
+
+  find_package(Backtrace [...])
 
 This module checks whether ``backtrace(3)`` is supported, either through the
 standard C library (``libc``), or a separate library.
@@ -14,11 +18,11 @@ standard C library (``libc``), or a separate library.
 Imported Targets
 ^^^^^^^^^^^^^^^^
 
-.. versionadded:: 3.30
-
 This module provides the following :ref:`Imported Targets`:
 
 ``Backtrace::Backtrace``
+  .. versionadded:: 3.30
+
   An interface library encapsulating the usage requirements of Backtrace.  This
   target is available only when Backtrace is found.
 
@@ -27,12 +31,14 @@ Result Variables
 
 This module defines the following variables:
 
-``Backtrace_INCLUDE_DIRS``
-  The include directories needed to use ``backtrace(3)`` header.
-``Backtrace_LIBRARIES``
-  The libraries (linker flags) needed to use ``backtrace(3)``, if any.
 ``Backtrace_FOUND``
   Boolean indicating whether the ``backtrace(3)`` support is available.
+
+``Backtrace_INCLUDE_DIRS``
+  The include directories needed to use ``backtrace(3)`` header.
+
+``Backtrace_LIBRARIES``
+  The libraries (linker flags) needed to use ``backtrace(3)``, if any.
 
 Cache Variables
 ^^^^^^^^^^^^^^^
@@ -43,10 +49,12 @@ The following cache variables are also available to set or use:
   The header file needed for ``backtrace(3)``.  This variable allows dynamic
   usage of the header in the project code.  It can also be overridden by the
   user.
-``Backtrace_LIBRARY``
-  The external library providing backtrace, if any.
+
 ``Backtrace_INCLUDE_DIR``
   The directory holding the ``backtrace(3)`` header.
+
+``Backtrace_LIBRARY``
+  The external library providing backtrace, if any.
 
 Examples
 ^^^^^^^^
@@ -54,7 +62,7 @@ Examples
 Finding Backtrace and linking it to a project target as of CMake 3.30:
 
 .. code-block:: cmake
-  :caption: CMakeLists.txt
+  :caption: ``CMakeLists.txt``
 
   find_package(Backtrace)
   target_link_libraries(app PRIVATE Backtrace::Backtrace)
@@ -63,7 +71,7 @@ The ``Backtrace_HEADER`` variable can be used, for example, in a configuration
 header file created by :command:`configure_file`:
 
 .. code-block:: cmake
-  :caption: CMakeLists.txt
+  :caption: ``CMakeLists.txt``
 
   add_library(app app.c)
 
@@ -73,7 +81,7 @@ header file created by :command:`configure_file`:
   configure_file(config.h.in config.h)
 
 .. code-block:: c
-  :caption: config.h.in
+  :caption: ``config.h.in``
 
   #cmakedefine01 Backtrace_FOUND
   #if Backtrace_FOUND
@@ -81,7 +89,7 @@ header file created by :command:`configure_file`:
   #endif
 
 .. code-block:: c
-  :caption: app.c
+  :caption: ``app.c``
 
   #include "config.h"
 
@@ -89,7 +97,7 @@ If the project needs to support CMake 3.29 or earlier, the imported target can
 be defined manually:
 
 .. code-block:: cmake
-  :caption: CMakeLists.txt
+  :caption: ``CMakeLists.txt``
 
   find_package(Backtrace)
   if(Backtrace_FOUND AND NOT TARGET Backtrace::Backtrace)

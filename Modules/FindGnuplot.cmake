@@ -6,18 +6,25 @@ FindGnuplot
 -----------
 
 Finds the Gnuplot command-line graphing utility for generating two- and
-three-dimensional plots (``gnuplot``).
+three-dimensional plots (``gnuplot``):
+
+.. code-block:: cmake
+
+  find_package(Gnuplot [<version>] [...])
 
 Result Variables
 ^^^^^^^^^^^^^^^^
 
-This module sets the following variables:
+This module defines the following variables:
 
 ``Gnuplot_FOUND``
-  Boolean indicating whether Gnuplot has been found.  For backward
-  compatibility, the ``GNUPLOT_FOUND`` variable is also set to the same value.
+  .. versionadded:: 3.3
 
-``GNUPLOT_VERSION_STRING``
+  Boolean indicating whether (the requested version of) Gnuplot was found.
+
+``Gnuplot_VERSION``
+  .. versionadded:: 4.2
+
   The version of Gnuplot found.
 
   .. note::
@@ -33,14 +40,34 @@ The following cache variables may also be set:
 ``GNUPLOT_EXECUTABLE``
   Absolute path to the ``gnuplot`` executable.
 
+Deprecated Variables
+^^^^^^^^^^^^^^^^^^^^
+
+The following variables are provided for backward compatibility:
+
+``GNUPLOT_FOUND``
+  .. deprecated:: 4.2
+    Use ``Gnuplot_FOUND``, which has the same value.
+
+  Boolean indicating whether (the requested version of) Gnuplot was found.
+
+``GNUPLOT_VERSION_STRING``
+  .. deprecated:: 4.2
+    Superseded by the ``Gnuplot_VERSION``.
+
+  The version of Gnuplot found.
+
 Examples
 ^^^^^^^^
 
-Finding Gnuplot:
+Finding Gnuplot and executing it in a process:
 
 .. code-block:: cmake
 
   find_package(Gnuplot)
+  if(Gnuplot_FOUND)
+    execute_process(COMMAND ${GNUPLOT_EXECUTABLE} --help)
+  endif()
 #]=======================================================================]
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindCygwin.cmake)
@@ -62,8 +89,9 @@ if (GNUPLOT_EXECUTABLE)
                   ERROR_QUIET
                   OUTPUT_STRIP_TRAILING_WHITESPACE)
 
-    string(REGEX REPLACE "^gnuplot ([0-9\\.]+)( patchlevel )?" "\\1." GNUPLOT_VERSION_STRING "${GNUPLOT_OUTPUT_VARIABLE}")
-    string(REGEX REPLACE "\\.$" "" GNUPLOT_VERSION_STRING "${GNUPLOT_VERSION_STRING}")
+    string(REGEX REPLACE "^gnuplot ([0-9\\.]+)( patchlevel )?" "\\1." Gnuplot_VERSION "${GNUPLOT_OUTPUT_VARIABLE}")
+    string(REGEX REPLACE "\\.$" "" Gnuplot_VERSION "${Gnuplot_VERSION}")
+    set(GNUPLOT_VERSION_STRING "${Gnuplot_VERSION}")
     unset(GNUPLOT_OUTPUT_VARIABLE)
 endif()
 
@@ -73,6 +101,6 @@ set(GNUPLOT ${GNUPLOT_EXECUTABLE})
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(Gnuplot
                                   REQUIRED_VARS GNUPLOT_EXECUTABLE
-                                  VERSION_VAR GNUPLOT_VERSION_STRING)
+                                  VERSION_VAR Gnuplot_VERSION)
 
 mark_as_advanced( GNUPLOT_EXECUTABLE )

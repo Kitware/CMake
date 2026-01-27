@@ -1,0 +1,8 @@
+CMake Error at TARGET_LINKER_FILE_BASE_NAME-non-valid-POSTFIX\.cmake:[0-9]+ \(file\):
+  Error evaluating generator expression:
+
+    \$<TARGET_LINKER_FILE_BASE_NAME:shared1,FOO>
+
+  Wrong second parameter: "POSTFIX:INCLUDE" or "POSTFIX:EXCLUDE" is expected
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)

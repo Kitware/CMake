@@ -81,9 +81,9 @@ public:
     std::string const& makeProgram, std::string const& projectName,
     std::string const& projectDir, std::vector<std::string> const& targetNames,
     std::string const& config, int jobs, bool verbose,
-    cmBuildOptions const& buildOptions = cmBuildOptions(),
-    std::vector<std::string> const& makeOptions =
-      std::vector<std::string>()) override;
+    cmBuildOptions buildOptions = cmBuildOptions(),
+    std::vector<std::string> const& makeOptions = std::vector<std::string>(),
+    BuildTryCompile isInTryCompile = BuildTryCompile::No) override;
 
   /** Append the subdirectory for the given configuration.  */
   void AppendDirectoryForConfig(std::string const& prefix,
@@ -115,6 +115,8 @@ public:
   bool UseEffectivePlatformName(cmMakefile* mf) const override;
 
   bool ShouldStripResourcePath(cmMakefile*) const override;
+
+  bool SupportsCustomObjectNames() const override { return false; }
 
   /**
    * Used to determine if this generator supports DEPFILE option.

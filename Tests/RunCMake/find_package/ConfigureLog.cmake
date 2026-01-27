@@ -6,6 +6,7 @@ list(INSERT CMAKE_PREFIX_PATH 0
 set(CMAKE_FIND_DEBUG_MODE 1)
 # Stable sorting for predictable behaviors.
 set(CMAKE_FIND_PACKAGE_SORT_ORDER NAME)
+set(CMAKE_FIND_PACKAGE_SORT_DIRECTION ASCENDING)
 
 # Unset search variables for more predictable output.
 unset(CMAKE_FRAMEWORK_PATH)

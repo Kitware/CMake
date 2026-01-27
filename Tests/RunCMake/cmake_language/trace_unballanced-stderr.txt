@@ -1,0 +1,6 @@
+.*/trace_unballanced\.cmake\(3\):  set\(foo \${bar} \)
+.*/trace_unballanced\.cmake\(4\):  cmake_language\(TRACE OFF \)
+CMake Error at trace_unballanced\.cmake:5 \(cmake_language\):
+  cmake_language TRACE OFF request without a corresponding TRACE ON
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)

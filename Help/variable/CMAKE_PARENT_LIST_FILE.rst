@@ -8,7 +8,8 @@ While processing a CMake file loaded by :command:`include` or
 including it.
 
 While processing a ``CMakeLists.txt`` file, even in subdirectories,
-this variable has the same value as :variable:`CMAKE_CURRENT_LIST_FILE`.
+this variable is not defined.  See policy :policy:`CMP0198`.
+
 While processing a :option:`cmake -P` script, this variable is not defined
 in the outermost script.
 

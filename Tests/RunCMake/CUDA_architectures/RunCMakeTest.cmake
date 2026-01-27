@@ -5,6 +5,7 @@ run_cmake(architectures-all-major)
 run_cmake(architectures-native)
 run_cmake(architectures-empty)
 run_cmake(architectures-invalid)
+run_cmake(architectures-quotes)
 
 run_cmake(architectures-not-set)
 include("${RunCMake_BINARY_DIR}/architectures-not-set-build/info.cmake" OPTIONAL)

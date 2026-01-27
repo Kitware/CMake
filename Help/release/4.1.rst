@@ -219,6 +219,11 @@ Other Changes
 * The MSVC link ``-machine:`` flag is no longer added to the
   ``CMAKE_*_LINKER_FLAGS`` variables.  See policy :policy:`CMP0197`.
 
+* The :ref:`Visual Studio Generators` now suppress Visual Studio's default
+  flags ``-Zc:forScope``, ``-Zc:inline``, and ``-Zc:wchar_t`` if they are
+  not specified by the project or user.  This makes builds more consistent
+  with other generators, and with what projects and users actually specify.
+
 * The :genex:`TARGET_PROPERTY` generator expression now evaluates the
   :prop_tgt:`LINK_LIBRARIES` and :prop_tgt:`INTERFACE_LINK_LIBRARIES`
   target properties transitively.  See policy :policy:`CMP0189`.
@@ -243,3 +248,22 @@ Changes made since CMake 4.1.0 include the following.
   each call site.  Previously, it used the value as of the end of the
   directory's ``CMakeLists.txt``, as all other generator expression
   evaluations do.
+
+4.1.3
+-----
+
+* When building for macOS with the :generator:`Xcode` generator,
+  :variable:`CMAKE_OSX_DEPLOYMENT_TARGET` once again defaults to the
+  host's macOS version if it is older than the macOS SDK version,
+  as it did in CMake versions prior to 4.0.
+
+* The :command:`execute_process` command once again terminates child
+  processes when its ``TIMEOUT`` is reached.  This was accidentally
+  regressed by CMake 3.29.
+
+4.1.4
+-----
+
+* This version made no changes to documented features or interfaces.
+  Some implementation updates were made to support ecosystem changes
+  and/or fix regressions.

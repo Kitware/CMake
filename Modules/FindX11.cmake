@@ -5,15 +5,28 @@
 FindX11
 -------
 
-Find X11 installation
+Finds the X11 installation on Unix-like systems:
 
-Try to find X11 on UNIX systems. The following values are defined
+.. code-block:: cmake
 
-::
+  find_package(X11 [COMPONENTS <components>...] [...])
 
-  X11_FOUND        - True if X11 is available
-  X11_INCLUDE_DIR  - include directories to use X11
-  X11_LIBRARIES    - link against these to use X11
+Result Variables
+^^^^^^^^^^^^^^^^
+
+This module defines the following variables:
+
+``X11_FOUND``
+  Boolean indicating whether X11 was found.
+
+``X11_<component>_FOUND``
+  Boolean indicating whether the ``<component>`` was found.
+
+``X11_INCLUDE_DIR``
+  Include directories needed to use X11.
+
+``X11_LIBRARIES``
+  Libraries needed to link against to use X11.
 
 and also the following more fine grained variables and targets:
 

@@ -1,0 +1,51 @@
+include(RunCMake)
+
+function(run_cmake_intdir_strategy base strategy kind)
+  if (kind STREQUAL "Object")
+    set(varname "CMAKE_INTERMEDIATE_DIR_STRATEGY")
+  elseif (kind STREQUAL "Autogen")
+    set(varname "CMAKE_AUTOGEN_INTERMEDIATE_DIR_STRATEGY")
+  else ()
+    message(FATAL_ERROR "unsupported kind: ${kind}")
+  endif ()
+  unset(ENV{${varname}})
+
+  if (base STREQUAL "IntDirStrategyCache")
+    set(RunCMake_TEST_OPTIONS -D${varname}=${strategy})
+  elseif (base STREQUAL "IntDirStrategyEnv")
+    set(ENV{${varname}} "${strategy}")
+  else ()
+    message(FATAL_ERROR "unsupported base: ${base}")
+  endif ()
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/${kind}${base}${strategy}-build)
+  run_cmake(${kind}${base}${strategy})
+endfunction()
+
+foreach (kind IN ITEMS Object Autogen)
+  foreach (strategy IN ITEMS INVALID FULL SHORT)
+    run_cmake_intdir_strategy(IntDirStrategyCache ${strategy} ${kind})
+    run_cmake_intdir_strategy(IntDirStrategyEnv ${strategy} ${kind})
+  endforeach ()
+endforeach ()
+
+# The following tests perform installation of `OBJECT` libraries which does not
+# work with multi-arch compilation under Xcode.
+if (RunCMake_GENERATOR STREQUAL "Xcode" AND "$ENV{CMAKE_OSX_ARCHITECTURES}" MATCHES "[;$]")
+  return ()
+endif ()
+
+run_cmake(Inspect)
+include("${RunCMake_BINARY_DIR}/Inspect-build/info.cmake")
+
+function(run_install_test case)
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/${case}-build)
+  set(RunCMake_TEST_OPTIONS -DCMAKE_BUILD_TYPE:STRING=Debug "-DCMAKE_INSTALL_PREFIX:PATH=${RunCMake_TEST_BINARY_DIR}/fake_install")
+  run_cmake(${case})
+  set(RunCMake_TEST_NO_CLEAN 1)
+  run_cmake_command(${case}-build ${CMAKE_COMMAND} --build . --config Debug)
+  run_cmake_command(${case}-install ${CMAKE_COMMAND} --install . --config Debug --prefix "${RunCMake_TEST_BINARY_DIR}/real_install")
+endfunction()
+
+if (RunCMake_GENERATOR MATCHES "(Ninja|Makefiles|Visual Studio)")
+  run_install_test(ShortObjectDoesntChangeInstall)
+endif ()

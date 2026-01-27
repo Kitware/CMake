@@ -29,12 +29,6 @@
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
-#ifdef HAVE_SYS_STAT_H
-#include <sys/stat.h>
-#endif
-#ifdef HAVE_FCNTL_H
-#include <fcntl.h>
-#endif
 
 #include "../urldata.h"
 #include "../cfilters.h"
@@ -52,8 +46,6 @@
 #include "../curl_sha256.h"
 #include "../rand.h"
 #include "../curlx/warnless.h"
-#include "../curl_printf.h"
-#include "../strdup.h"
 
 /* The last #include files should be: */
 #include "../curl_memory.h"
@@ -361,6 +353,15 @@ void Curl_ssl_scache_destroy(struct Curl_ssl_scache *scache)
   }
 }
 
+bool Curl_ssl_scache_use(struct Curl_cfilter *cf, struct Curl_easy *data)
+{
+  if(cf_ssl_scache_get(data)) {
+    struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
+    return ssl_config ? ssl_config->primary.cache_session : FALSE;
+  }
+  return FALSE;
+}
+
 /* Lock shared SSL session data */
 void Curl_ssl_scache_lock(struct Curl_easy *data)
 {
@@ -376,9 +377,9 @@ void Curl_ssl_scache_unlock(struct Curl_easy *data)
 }
 
 static CURLcode cf_ssl_peer_key_add_path(struct dynbuf *buf,
-                                          const char *name,
-                                          char *path,
-                                          bool *is_local)
+                                         const char *name,
+                                         const char *path,
+                                         bool *is_local)
 {
   if(path && path[0]) {
     /* We try to add absolute paths, so that the session key can stay
@@ -410,8 +411,8 @@ static CURLcode cf_ssl_peer_key_add_path(struct dynbuf *buf,
 }
 
 static CURLcode cf_ssl_peer_key_add_hash(struct dynbuf *buf,
-                                          const char *name,
-                                          struct curl_blob *blob)
+                                         const char *name,
+                                         struct curl_blob *blob)
 {
   CURLcode r = CURLE_OK;
   if(blob && blob->len) {
@@ -649,7 +650,7 @@ cf_ssl_find_peer_by_key(struct Curl_easy *data,
   /* check for entries with known peer_key */
   for(i = 0; scache && i < scache->peer_count; i++) {
     if(scache->peers[i].ssl_peer_key &&
-       strcasecompare(ssl_peer_key, scache->peers[i].ssl_peer_key) &&
+       curl_strequal(ssl_peer_key, scache->peers[i].ssl_peer_key) &&
        cf_ssl_scache_match_auth(&scache->peers[i], conn_config)) {
       /* yes, we have a cached session for this! */
       *ppeer = &scache->peers[i];
@@ -868,9 +869,9 @@ CURLcode Curl_ssl_scache_put(struct Curl_cfilter *cf,
 }
 
 void Curl_ssl_scache_return(struct Curl_cfilter *cf,
-                           struct Curl_easy *data,
-                           const char *ssl_peer_key,
-                           struct Curl_ssl_session *s)
+                            struct Curl_easy *data,
+                            const char *ssl_peer_key,
+                            struct Curl_ssl_session *s)
 {
   /* See RFC 8446 C.4:
    * "Clients SHOULD NOT reuse a ticket for multiple connections." */
@@ -908,7 +909,6 @@ CURLcode Curl_ssl_scache_take(struct Curl_cfilter *cf,
       peer->age = scache->age; /* set this as used in this age */
     }
   }
-  Curl_ssl_scache_unlock(data);
   if(s) {
     *ps = s;
     CURL_TRC_SSLS(data, "took session for %s [proto=0x%x, "
@@ -920,6 +920,7 @@ CURLcode Curl_ssl_scache_take(struct Curl_cfilter *cf,
   else {
     CURL_TRC_SSLS(data, "no cached session for %s", ssl_peer_key);
   }
+  Curl_ssl_scache_unlock(data);
   return result;
 }
 

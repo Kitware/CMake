@@ -5,28 +5,56 @@
 FindOpenGL
 ----------
 
-FindModule for OpenGL and OpenGL Utility Library (GLU).
+Finds the OpenGL and OpenGL Utility Library (GLU), for using OpenGL in a
+CMake project:
+
+.. code-block:: cmake
+
+  find_package(OpenGL [COMPONENTS <components>...] [...])
+
+OpenGL (Open Graphics Library) is a cross-platform API for rendering 2D and
+3D graphics.  It is widely used in CAD, games, and visualization software.
+
+* *GL* refers to the core OpenGL library, which provides the fundamental
+  graphics rendering API.
+
+* *GLU* (OpenGL Utility Library) is a companion library that offers utility
+  functions built on top of OpenGL, such as tessellation and more complex
+  shape drawing.
 
 .. versionchanged:: 3.2
   X11 is no longer added as a dependency on Unix/Linux systems.
 
 .. versionadded:: 3.10
-  GLVND support on Linux.  See the :ref:`Linux Specific` section below.
+  GLVND (GL Vendor-Neutral Dispatch library) support on Linux.  See the
+  :ref:`Linux Specific` section below.
 
-Optional COMPONENTS
-^^^^^^^^^^^^^^^^^^^
+Components
+^^^^^^^^^^
 
-.. versionadded:: 3.10
+This module supports optional components which can be specified with the
+:command:`find_package` command:
 
-This module respects several optional COMPONENTS:
+.. code-block:: cmake
+
+  find_package(OpenGL [COMPONENTS <components>...])
+
+Supported components are:
 
 ``EGL``
-  The EGL interface between OpenGL, OpenGL ES and the underlying windowing system.
+  .. versionadded:: 3.10
+
+  The EGL interface between OpenGL, OpenGL ES and the underlying windowing
+  system.
 
 ``GLX``
+  .. versionadded:: 3.10
+
   An extension to X that interfaces OpenGL, OpenGL ES with X window system.
 
 ``OpenGL``
+  .. versionadded:: 3.10
+
   The cross platform API for 3D graphics.
 
 ``GLES2``
@@ -42,103 +70,177 @@ This module respects several optional COMPONENTS:
 Imported Targets
 ^^^^^^^^^^^^^^^^
 
-.. versionadded:: 3.8
-
-This module defines the :prop_tgt:`IMPORTED` targets:
+This module provides the following :ref:`Imported Targets`:
 
 ``OpenGL::GL``
-  Defined to the platform-specific OpenGL libraries if the system has OpenGL.
-``OpenGL::GLU``
-  Defined if the system has OpenGL Utility Library (GLU).
+  .. versionadded:: 3.8
 
-.. versionadded:: 3.10
-  Additionally, the following GLVND-specific library targets are defined:
+  Target encapsulating the usage requirements of platform-specific OpenGL
+  libraries, available if OpenGL is found.
+
+``OpenGL::GLU``
+  .. versionadded:: 3.8
+
+  Target encapsulating the OpenGL Utility Library (GLU) usage requirements,
+  available if GLU is found.
+
+Additionally, the following GLVND-specific library imported targets are
+provided:
 
 ``OpenGL::OpenGL``
-  Defined to libOpenGL if the system is GLVND-based.
+  .. versionadded:: 3.10
+
+  Target encapsulating the libOpenGL usage requirements, available if
+  system is GLVND-based and OpenGL is found.
+
 ``OpenGL::GLX``
-  Defined if the system has OpenGL Extension to the X Window System (GLX).
+  .. versionadded:: 3.10
+
+  Target encapsulating the usage requirements of the OpenGL Extension to the
+  the X Window System (GLX), available if OpenGL and GLX are found.
+
 ``OpenGL::EGL``
-  Defined if the system has EGL.
+  .. versionadded:: 3.10
+
+  Target encapsulating the EGL usage requirements, available if OpenGL and EGL
+  are found.
+
 ``OpenGL::GLES2``
   .. versionadded:: 3.27
 
-  Defined if the system has GLES2.
+  Target encapsulating the GLES2 usage requirements, available if OpenGL and
+  GLES2 are found.
+
 ``OpenGL::GLES3``
   .. versionadded:: 3.27
 
-  Defined if the system has GLES3.
+  Target encapsulating the GLES3 usage requirements, available if OpenGL and
+  GLES3 are found.
 
 Result Variables
 ^^^^^^^^^^^^^^^^
 
-This module sets the following variables:
+This module defines the following variables:
 
-``OPENGL_FOUND``
- True, if the system has OpenGL and all components are found.
+``OpenGL_FOUND``
+  .. versionadded:: 3.3
+
+  Boolean indicating whether OpenGL and all requested components were found.
+
 ``OPENGL_XMESA_FOUND``
- True, if the system has XMESA.
+  Boolean indicating whether OpenGL XMESA was found.
+
 ``OPENGL_GLU_FOUND``
- True, if the system has GLU.
+  Boolean indicating whether GLU was found.
+
 ``OpenGL_OpenGL_FOUND``
- True, if the system has an OpenGL library.
+  .. versionadded:: 3.10
+
+  Boolean indicating whether the GLVND OpenGL library was found.
+
 ``OpenGL_GLX_FOUND``
- True, if the system has GLX.
+  .. versionadded:: 3.10
+
+  Boolean indicating whether GLVND GLX was found.
+
 ``OpenGL_EGL_FOUND``
- True, if the system has EGL.
-``OpenGL::GLES2``
- Defined if the system has GLES2.
-``OpenGL::GLES3``
- Defined if the system has GLES3.
-``OPENGL_INCLUDE_DIR``
- Path to the OpenGL include directory.
- The ``OPENGL_INCLUDE_DIRS`` variable is preferred.
-``OPENGL_EGL_INCLUDE_DIRS``
- Path to the EGL include directory.
-``OPENGL_LIBRARIES``
- Paths to the OpenGL library, windowing system libraries, and GLU libraries.
- On Linux, this assumes GLX and is never correct for EGL-based targets.
- Clients are encouraged to use the ``OpenGL::*`` import targets instead.
+  .. versionadded:: 3.10
+
+  Boolean indicating whether GLVND EGL was found.
+
+``OpenGL_GLES2_FOUND``
+  .. versionadded:: 3.27
+
+  Boolean indicating whether GLES2 was found.
+
+``OpenGL_GLES3_FOUND``
+  .. versionadded:: 3.27
+
+  Boolean indicating whether GLES3 was found.
+
 ``OPENGL_INCLUDE_DIRS``
   .. versionadded:: 3.29
 
   Paths to the OpenGL include directories.
 
-.. versionadded:: 3.10
-  Variables for GLVND-specific libraries ``OpenGL``, ``EGL`` and ``GLX``.
+``OPENGL_EGL_INCLUDE_DIRS``
+  .. versionadded:: 3.10
 
-Cache variables
+  Path to the EGL include directory.
+
+``OPENGL_LIBRARIES``
+  Paths to the OpenGL library, windowing system libraries, and GLU libraries.
+  On Linux, this assumes GLX and is never correct for EGL-based targets.
+  Clients are encouraged to use the ``OpenGL::*`` imported targets instead.
+
+Cache Variables
 ^^^^^^^^^^^^^^^
 
 The following cache variables may also be set:
 
-``OPENGL_egl_LIBRARY``
- Path to the EGL library.
-``OPENGL_glu_LIBRARY``
- Path to the GLU library.
-``OPENGL_glx_LIBRARY``
- Path to the GLVND 'GLX' library.
-``OPENGL_opengl_LIBRARY``
- Path to the GLVND 'OpenGL' library
-``OPENGL_gl_LIBRARY``
- Path to the OpenGL library.  New code should prefer the ``OpenGL::*`` import
- targets.
-``OPENGL_gles2_LIBRARY``
-  .. versionadded:: 3.27
-
-  Path to the OpenGL GLES2 library.
-``OPENGL_gles3_LIBRARY``
-  .. versionadded:: 3.27
-
-  Path to the OpenGL GLES3 library.
+``OPENGL_INCLUDE_DIR``
+  The path to the OpenGL include directory.
+  The ``OPENGL_INCLUDE_DIRS`` variable is preferred.
 
 ``OPENGL_GLU_INCLUDE_DIR``
   .. versionadded:: 3.29
 
   Path to the OpenGL GLU include directory.
 
-.. versionadded:: 3.10
-  Variables for GLVND-specific libraries ``OpenGL``, ``EGL`` and ``GLX``.
+``OPENGL_egl_LIBRARY``
+  .. versionadded:: 3.10
+
+  Path to the GLVND EGL library.
+
+``OPENGL_glu_LIBRARY``
+  Path to the GLU library.
+
+``OPENGL_glx_LIBRARY``
+  .. versionadded:: 3.10
+
+  Path to the GLVND GLX library.
+
+``OPENGL_opengl_LIBRARY``
+  .. versionadded:: 3.10
+
+  Path to the GLVND OpenGL library
+
+``OPENGL_gl_LIBRARY``
+  Path to the OpenGL library.
+
+``OPENGL_gles2_LIBRARY``
+  .. versionadded:: 3.27
+
+  Path to the OpenGL GLES2 library.
+
+``OPENGL_gles3_LIBRARY``
+  .. versionadded:: 3.27
+
+  Path to the OpenGL GLES3 library.
+
+Hints
+^^^^^
+
+This module accepts the following variables:
+
+``OpenGL_GL_PREFERENCE``
+  .. versionadded:: 3.10
+
+  This variable is supported on Linux systems to specify the preferred way to
+  provide legacy GL interfaces in case multiple choices are available.  The
+  value may be one of:
+
+  ``GLVND``
+    If the GLVND OpenGL and GLX libraries are available, prefer them.
+    This forces ``OPENGL_gl_LIBRARY`` to be empty.
+
+    .. versionchanged:: 3.11
+      This is the default, unless policy :policy:`CMP0072` is set to ``OLD``
+      and no components are requested (since components
+      correspond to GLVND libraries).
+
+  ``LEGACY``
+    Prefer to use the legacy libGL library, if available.
 
 .. _`Linux Specific`:
 
@@ -160,21 +262,8 @@ not found and GLVND is available, the ``OpenGL::GL`` target will use GLVND
 variable will use the corresponding libraries).  Thus, for non-EGL-based
 Linux targets, the ``OpenGL::GL`` target is most portable.
 
-A ``OpenGL_GL_PREFERENCE`` variable may be set to specify the preferred way
+The ``OpenGL_GL_PREFERENCE`` variable may be set to specify the preferred way
 to provide legacy GL interfaces in case multiple choices are available.
-The value may be one of:
-
-``GLVND``
- If the GLVND OpenGL and GLX libraries are available, prefer them.
- This forces ``OPENGL_gl_LIBRARY`` to be empty.
-
- .. versionchanged:: 3.11
-  This is the default, unless policy :policy:`CMP0072` is set to ``OLD``
-  and no components are requested (since components
-  correspond to GLVND libraries).
-
-``LEGACY``
- Prefer to use the legacy libGL library, if available.
 
 For EGL targets the client must rely on GLVND support on the user's system.
 Linking should use the ``OpenGL::OpenGL OpenGL::EGL`` targets.  Using GLES*
@@ -189,7 +278,8 @@ macOS-Specific
 
 On macOS this module defaults to using the macOS-native framework
 version of OpenGL.  To use the X11 version of OpenGL on macOS, one
-can disable searching of frameworks.  For example:
+can disable searching of frameworks using the :variable:`CMAKE_FIND_FRAMEWORK`
+variable.  For example:
 
 .. code-block:: cmake
 
@@ -205,6 +295,35 @@ can disable searching of frameworks.  For example:
 An end user building this project may need to point CMake at their
 X11 installation, e.g., with ``-DOpenGL_ROOT=/opt/X11``.
 
+Deprecated Variables
+^^^^^^^^^^^^^^^^^^^^
+
+The following variables are provided for backward compatibility:
+
+``OPENGL_FOUND``
+  .. deprecated:: 4.2
+    Use ``OpenGL_FOUND``, which has the same value.
+
+  Boolean indicating whether OpenGL and all requested components were found.
+
+Examples
+^^^^^^^^
+
+Finding the OpenGL library and linking it to a project target:
+
+.. code-block:: cmake
+
+  find_package(OpenGL)
+  target_link_libraries(project_target PRIVATE OpenGL::OpenGL)
+
+See Also
+^^^^^^^^
+
+* The :module:`FindGLEW` module to find OpenGL Extension Wrangler Library
+  (GLEW).
+* The :module:`FindGLUT` module to find OpenGL Utility Toolkit (GLUT)
+  library.
+* The :module:`FindVulkan` module to find Vulkan graphics API.
 #]=======================================================================]
 
 set(_OpenGL_REQUIRED_VARS OPENGL_gl_LIBRARY)
@@ -582,7 +701,7 @@ unset(FPHSA_NAME_MISMATCHED)
 unset(_OpenGL_REQUIRED_VARS)
 
 # OpenGL:: targets
-if(OPENGL_FOUND)
+if(OpenGL_FOUND)
   set(OPENGL_INCLUDE_DIRS ${OPENGL_INCLUDE_DIR})
 
   # ::OpenGL is a GLVND library, and thus Linux-only: we don't bother checking

@@ -863,7 +863,7 @@ public:
     {
     }
   };
-  cmList& sort(SortConfiguration const& config = SortConfiguration{});
+  cmList& sort(SortConfiguration config = SortConfiguration{});
 
   // exception raised on error during transform operations
   class transform_error : public std::runtime_error

@@ -204,6 +204,12 @@ void cmMakefileExecutableTargetGenerator::WriteNvidiaDeviceExecutableRule(
     objectDir = this->LocalGenerator->ConvertToOutputFormat(
       this->LocalGenerator->MaybeRelativeToCurBinDir(objectDir),
       cmOutputConverter::SHELL);
+    std::string targetSupportDir =
+      this->GeneratorTarget->GetCMFSupportDirectory();
+
+    targetSupportDir = this->LocalGenerator->ConvertToOutputFormat(
+      this->LocalGenerator->MaybeRelativeToTopBinDir(targetSupportDir),
+      cmOutputConverter::SHELL);
 
     std::string target = this->LocalGenerator->ConvertToOutputFormat(
       this->LocalGenerator->MaybeRelativeToCurBinDir(targetOutput),
@@ -219,6 +225,7 @@ void cmMakefileExecutableTargetGenerator::WriteNvidiaDeviceExecutableRule(
     vars.Objects = buildObjs.c_str();
     vars.ObjectDir = objectDir.c_str();
     vars.Target = target.c_str();
+    vars.TargetSupportDir = targetSupportDir.c_str();
     vars.LinkLibraries = linkLibs.c_str();
     vars.LanguageCompileFlags = langFlags.c_str();
     vars.LinkFlags = linkFlags.c_str();
@@ -538,8 +545,6 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     vars.CMTargetName = this->GeneratorTarget->GetName().c_str();
     vars.CMTargetType =
       cmState::GetTargetTypeName(this->GeneratorTarget->GetType()).c_str();
-    vars.CMTargetLabels =
-      this->GeneratorTarget->GetTargetLabelsString().c_str();
     vars.Language = linkLanguage.c_str();
     vars.Linker = linker.c_str();
     vars.AIXExports = aixExports.c_str();
@@ -550,6 +555,13 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
       this->LocalGenerator->MaybeRelativeToCurBinDir(objectDir),
       cmOutputConverter::SHELL);
     vars.ObjectDir = objectDir.c_str();
+    std::string targetSupportDir =
+      this->GeneratorTarget->GetCMFSupportDirectory();
+
+    targetSupportDir = this->LocalGenerator->ConvertToOutputFormat(
+      this->LocalGenerator->MaybeRelativeToTopBinDir(targetSupportDir),
+      cmOutputConverter::SHELL);
+    vars.TargetSupportDir = targetSupportDir.c_str();
     std::string target = this->LocalGenerator->ConvertToOutputFormat(
       this->LocalGenerator->MaybeRelativeToCurBinDir(targetFullPathReal),
       cmOutputConverter::SHELL, useWatcomQuote);

@@ -87,7 +87,7 @@ set(xcframework_platforms macos ios ${maybe_ios_catalyst} tvos watchos ios-simul
 if(CMake_TEST_XCODE_VERSION VERSION_GREATER_EQUAL 15.2)
   list(APPEND xcframework_platforms visionos visionos-simulator)
 endif()
-if(CMake_TEST_XCODE_VERSION VERSION_GREATER_EQUAL 12)
+if(CMake_TEST_XCODE_VERSION VERSION_GREATER_EQUAL 12 AND NOT RunCMake_GENERATOR STREQUAL "FASTBuild")
   set(macos_archs_1 "x86_64\\;arm64")
   set(macos_archs_2 "x86_64\\\\;arm64")
   set(watch_sim_archs_2 "x86_64")

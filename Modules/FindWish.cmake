@@ -5,7 +5,11 @@
 FindWish
 --------
 
-Finds ``wish``, a simple windowing shell command-line executable.
+Finds ``wish``, a simple windowing shell command-line executable:
+
+.. code-block:: cmake
+
+  find_package(Wish [...])
 
 This module is commonly used in conjunction with finding a TCL installation (see
 the :module:`FindTCL` module).  It helps determine where the TCL include paths
@@ -14,10 +18,20 @@ and libraries are, as well as identifying the name of the TCL library.
 If the :variable:`UNIX` variable is defined, the module will prioritize looking
 for the Cygwin version of ``wish`` executable.
 
+Result Variables
+^^^^^^^^^^^^^^^^
+
+This module defines the following variables:
+
+``Wish_FOUND``
+  .. versionadded:: 4.2
+
+  Boolean indicating whether the ``wish`` executable was found.
+
 Cache Variables
 ^^^^^^^^^^^^^^^
 
-The following cache variables may be set:
+The following cache variables may also be set:
 
 ``TK_WISH``
   The path to the ``wish`` executable.
@@ -96,3 +110,9 @@ find_program(TK_WISH
   )
 
 mark_as_advanced(TK_WISH)
+
+if(TK_WISH)
+  set(Wish_FOUND TRUE)
+else()
+  set(Wish_FOUND FALSE)
+endif()

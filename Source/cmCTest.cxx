@@ -10,6 +10,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <ctime>
+#include <functional>
 #include <initializer_list>
 #include <iostream>
 #include <map>
@@ -38,7 +39,7 @@
 #  include <unistd.h> // IWYU pragma: keep
 #endif
 
-#include "cm_get_date.h"
+#include "cm_parse_date.h"
 
 #include "cmCMakePresetsGraph.h"
 #include "cmCTestBuildAndTest.h"
@@ -75,6 +76,8 @@
 #if defined(__BEOS__) || defined(__HAIKU__)
 #  include <be/kernel/OS.h> /* disable_debugger() API. */
 #endif
+
+struct tm;
 
 struct cmCTest::Private
 {
@@ -114,7 +117,6 @@ struct cmCTest::Private
   bool UseHTTP10 = false;
   bool PrintLabels = false;
   bool Failover = false;
-  bool UseVerboseInstrumentation = false;
   cmJSONState parseState;
 
   bool FlushTestProgressLine = false;
@@ -215,7 +217,7 @@ struct tm* cmCTest::GetNightlyTime(std::string const& str, bool tomorrowtag)
   char buf[1024];
   std::snprintf(buf, sizeof(buf), "%d%02d%02d %s", lctime->tm_year + 1900,
                 lctime->tm_mon + 1, lctime->tm_mday, str.c_str());
-  time_t ntime = cm_get_date(tctime, buf);
+  time_t ntime = cm_parse_date(tctime, buf);
   cmCTestLog(this, DEBUG,
              "   Get the nightly start time: " << ntime << std::endl);
   tctime = time(nullptr);
@@ -318,10 +320,6 @@ cmCTest::cmCTest()
   envValue.clear();
   if (cmSystemTools::GetEnv("CTEST_PROGRESS_OUTPUT", envValue)) {
     this->Impl->TestProgressOutput = !cmIsOff(envValue);
-  }
-  envValue.clear();
-  if (cmSystemTools::GetEnv("CTEST_USE_VERBOSE_INSTRUMENTATION", envValue)) {
-    this->Impl->UseVerboseInstrumentation = !cmIsOff(envValue);
   }
   envValue.clear();
 
@@ -729,8 +727,8 @@ int cmCTest::ProcessSteps()
   this->SetTimeLimit(mf.GetDefinition("CTEST_TIME_LIMIT"));
   this->SetCMakeVariables(mf);
   std::vector<cmListFileArgument> args{
-    cmListFileArgument("RETURN_VALUE", cmListFileArgument::Unquoted, 0),
-    cmListFileArgument("return_value", cmListFileArgument::Unquoted, 0),
+    cmListFileArgument("RETURN_VALUE"_s, cmListFileArgument::Unquoted, 0),
+    cmListFileArgument("return_value"_s, cmListFileArgument::Unquoted, 0),
   };
 
   if (this->Impl->Parts[PartStart]) {
@@ -848,12 +846,12 @@ int cmCTest::ProcessSteps()
     auto const func = cmListFileFunction(
       "ctest_submit", 0, 0,
       {
-        cmListFileArgument("RETRY_COUNT", cmListFileArgument::Unquoted, 0),
+        cmListFileArgument("RETRY_COUNT"_s, cmListFileArgument::Unquoted, 0),
         cmListFileArgument(count, cmListFileArgument::Quoted, 0),
-        cmListFileArgument("RETRY_DELAY", cmListFileArgument::Unquoted, 0),
+        cmListFileArgument("RETRY_DELAY"_s, cmListFileArgument::Unquoted, 0),
         cmListFileArgument(delay, cmListFileArgument::Quoted, 0),
-        cmListFileArgument("RETURN_VALUE", cmListFileArgument::Unquoted, 0),
-        cmListFileArgument("return_value", cmListFileArgument::Unquoted, 0),
+        cmListFileArgument("RETURN_VALUE"_s, cmListFileArgument::Unquoted, 0),
+        cmListFileArgument("return_value"_s, cmListFileArgument::Unquoted, 0),
       });
     auto status = cmExecutionStatus(mf);
     if (!mf.ExecuteCommand(func, status) ||
@@ -1004,6 +1002,7 @@ bool cmCTest::RunMakeCommand(std::string const& command, std::string& output,
         break;
     }
   } else {
+    chain.Terminate();
     cmCTestLog(this, WARNING, "There was a timeout" << std::endl);
   }
 
@@ -1012,32 +1011,7 @@ bool cmCTest::RunMakeCommand(std::string const& command, std::string& output,
 
 std::string cmCTest::SafeBuildIdField(std::string const& value)
 {
-  std::string safevalue(value);
-
-  if (!safevalue.empty()) {
-    // Disallow non-filename and non-space whitespace characters.
-    // If they occur, replace them with ""
-    //
-    char const* disallowed = "\\:*?\"<>|\n\r\t\f\v";
-
-    if (safevalue.find_first_of(disallowed) != std::string::npos) {
-      std::string::size_type i = 0;
-      std::string::size_type n = strlen(disallowed);
-      char replace[2];
-      replace[1] = 0;
-
-      for (i = 0; i < n; ++i) {
-        replace[0] = disallowed[i];
-        cmSystemTools::ReplaceString(safevalue, replace, "");
-      }
-    }
-  }
-
-  if (safevalue.empty()) {
-    safevalue = "(empty)";
-  }
-
-  return safevalue;
+  return value.empty() ? "(empty)" : value;
 }
 
 void cmCTest::StartXML(cmXMLWriter& xml, cmake* cm, bool append)
@@ -2700,11 +2674,14 @@ int cmCTest::ExecuteTests(std::vector<std::string> const& args)
 
   cmInstrumentation instrumentation(this->GetBinaryDir());
   auto processHandler = [&handler]() -> int {
-    return handler.ProcessHandler();
+    return handler.ProcessHandler() < 0 ? cmCTest::TEST_ERRORS : 0;
   };
-  int ret = instrumentation.InstrumentCommand("ctest", args, processHandler);
-  instrumentation.CollectTimingData(cmInstrumentationQuery::Hook::PostTest);
-  if (ret < 0) {
+  std::map<std::string, std::string> data;
+  data["showOnly"] = this->GetShowOnly() ? "1" : "0";
+  int ret =
+    instrumentation.InstrumentCommand("ctest", args, processHandler, data);
+  instrumentation.CollectTimingData(cmInstrumentationQuery::Hook::PostCTest);
+  if (ret == cmCTest::TEST_ERRORS) {
     cmCTestLog(this, ERROR_MESSAGE, "Errors while running CTest\n");
     if (!this->Impl->OutputTestOutputOnTestFailure) {
       std::string const lastTestLog =
@@ -2715,10 +2692,8 @@ int cmCTest::ExecuteTests(std::vector<std::string> const& args)
                  "Use \"--rerun-failed --output-on-failure\" to re-run the "
                  "failed cases verbosely.\n");
     }
-    return cmCTest::TEST_ERRORS;
   }
-
-  return 0;
+  return ret;
 }
 
 int cmCTest::RunCMakeAndTest()
@@ -2772,7 +2747,7 @@ void cmCTest::SetStopTime(std::string const& time_str)
            lctime->tm_mon + 1, lctime->tm_mday, time_str.c_str(),
            tzone_offset);
 
-  time_t stop_time = cm_get_date(current_time, buf);
+  time_t stop_time = cm_parse_date(current_time, buf);
   if (stop_time == -1) {
     this->Impl->StopTime = std::chrono::system_clock::time_point();
     return;
@@ -3314,7 +3289,8 @@ bool cmCTest::RunCommand(std::vector<std::string> const& args,
         auto* timedOutPtr = static_cast<bool*>(t->data);
         *timedOutPtr = true;
       },
-      static_cast<uint64_t>(timeout.count() * 1000.0), 0);
+      static_cast<uint64_t>(timeout.count() * 1000.0), 0,
+      cm::uv_update_time::yes);
   }
 
   std::vector<char> tempOutput;
@@ -3371,6 +3347,7 @@ bool cmCTest::RunCommand(std::vector<std::string> const& args,
 
   bool result = true;
   if (timedOut) {
+    chain.Terminate();
     char const* error_str = "Process terminated due to timeout\n";
     cmCTestLog(this, ERROR_MESSAGE, error_str << std::endl);
     stdErr->append(error_str, strlen(error_str));
@@ -3667,11 +3644,6 @@ cmInstrumentation& cmCTest::GetInstrumentation()
   return *this->Impl->Instrumentation;
 }
 
-bool cmCTest::GetUseVerboseInstrumentation() const
-{
-  return this->Impl->UseVerboseInstrumentation;
-}
-
 void cmCTest::ConvertInstrumentationSnippetsToXML(cmXMLWriter& xml,
                                                   std::string const& subdir)
 {
@@ -3700,6 +3672,8 @@ void cmCTest::ConvertInstrumentationSnippetsToXML(cmXMLWriter& xml,
 bool cmCTest::ConvertInstrumentationJSONFileToXML(std::string const& fpath,
                                                   cmXMLWriter& xml)
 {
+  bool verboseCommands = this->GetInstrumentation().HasOption(
+    cmInstrumentationQuery::Option::CDashVerbose);
   Json::Value root;
   this->Impl->parseState = cmJSONState(fpath, &root);
   if (!this->Impl->parseState.errors.empty()) {
@@ -3748,7 +3722,7 @@ bool cmCTest::ConvertInstrumentationJSONFileToXML(std::string const& fpath,
       }
       // Truncate the full command line if verbose instrumentation
       // was not requested.
-      if (key == "command" && !this->GetUseVerboseInstrumentation()) {
+      if (key == "command" && !verboseCommands) {
         std::string command_str = root[key].asString();
         std::string truncated = command_str.substr(0, command_str.find(' '));
         if (command_str != truncated) {

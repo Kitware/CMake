@@ -28,6 +28,14 @@ bool cmUnsetCommand(std::vector<std::string> const& args,
 #endif
     return true;
   }
+  // unset(CACHE{VAR})
+  if (cmHasLiteralPrefix(variable, "CACHE{") && variable.size() > 7 &&
+      cmHasLiteralSuffix(variable, "}")) {
+    // get the variable name
+    auto const& varName = variable.substr(6, variable.size() - 7);
+    status.GetMakefile().RemoveCacheDefinition(varName);
+    return true;
+  }
   // unset(VAR)
   if (args.size() == 1) {
     status.GetMakefile().RemoveDefinition(variable);

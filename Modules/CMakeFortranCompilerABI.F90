@@ -105,6 +105,8 @@ PRINT *, 'INFO:arch[loongarch64]'
 PRINT *, 'INFO:arch[loongarch32]'
 #elif defined(__m68k__)
 PRINT *, 'INFO:arch[m68k]'
+#elif defined(__sw_64)
+PRINT *, 'INFO:arch[sw_64]'
 #elif defined(__mips64) || defined(__mips64__)
 #  if defined(_MIPSEL)
 PRINT *, 'INFO:arch[mips64el]'
@@ -149,6 +151,10 @@ PRINT *, 'INFO:arch[ppcle]'
 #  else
 PRINT *, 'INFO:arch[ppc]'
 #  endif
+#elif defined(__wasm64) || defined(__wasm64__)
+PRINT *, 'INFO:arch[wasm64]'
+#elif defined(__wasm32) || defined(__wasm32__)
+PRINT *, 'INFO:arch[wasm32]'
 #endif
 
 PRINT *, 'ABI Detection'

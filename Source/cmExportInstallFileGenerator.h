@@ -17,7 +17,6 @@
 #include "cmInstallExportGenerator.h"
 #include "cmStateTypes.h"
 
-class cmExportSet;
 class cmGeneratorTarget;
 class cmInstallTargetGenerator;
 class cmTargetExport;
@@ -75,7 +74,7 @@ protected:
 
   std::string GetInstallPrefix() const
   {
-    cm::string_view const& prefixWithSlash = this->GetImportPrefixWithSlash();
+    cm::string_view const prefixWithSlash = this->GetImportPrefixWithSlash();
     return std::string(prefixWithSlash.data(), prefixWithSlash.length() - 1);
   }
   virtual char GetConfigFileNameSeparator() const = 0;

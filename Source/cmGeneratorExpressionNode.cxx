@@ -36,6 +36,7 @@
 #include "cmGlobalGenerator.h"
 #include "cmLinkItem.h"
 #include "cmList.h"
+#include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
@@ -51,6 +52,31 @@
 #include "cmTarget.h"
 #include "cmValue.h"
 #include "cmake.h"
+
+namespace {
+
+bool HasKnownObjectFileLocation(cm::GenEx::Evaluation* eval,
+                                GeneratorExpressionContent const* content,
+                                std::string const& genex,
+                                cmGeneratorTarget const* target)
+{
+  std::string reason;
+  if (!eval->EvaluateForBuildsystem &&
+      !target->Target->HasKnownObjectFileLocation(&reason)) {
+    std::ostringstream e;
+    e << "The evaluation of the " << genex
+      << " generator expression "
+         "is only suitable for consumption by CMake (limited"
+      << reason
+      << ").  "
+         "It is not suitable for writing out elsewhere.";
+    reportError(eval, content->GetOriginalExpression(), e.str());
+    return false;
+  }
+  return true;
+}
+
+} // namespace
 
 std::string cmGeneratorExpressionNode::EvaluateDependentExpression(
   std::string const& prop, cm::GenEx::Evaluation* eval,
@@ -690,7 +716,7 @@ bool CheckPathParametersEx(cm::GenEx::Evaluation* eval,
 }
 bool CheckPathParameters(cm::GenEx::Evaluation* eval,
                          GeneratorExpressionContent const* cnt,
-                         cm::string_view option, Arguments const& args,
+                         cm::string_view option, Arguments args,
                          int required = 1)
 {
   return CheckPathParametersEx(eval, cnt, option, args.size(), required);
@@ -1147,7 +1173,7 @@ inline bool CheckListParametersEx(cm::GenEx::Evaluation* eval,
 }
 inline bool CheckListParameters(cm::GenEx::Evaluation* eval,
                                 GeneratorExpressionContent const* cnt,
-                                cm::string_view option, Arguments const& args,
+                                cm::string_view option, Arguments args,
                                 int required = 1)
 {
   return CheckListParametersEx(eval, cnt, option, args.size(), required);
@@ -1182,7 +1208,7 @@ bool GetNumericArgument(std::string const& arg, cmList::index_type& value)
 
 bool GetNumericArguments(
   cm::GenEx::Evaluation* eval, GeneratorExpressionContent const* cnt,
-  Arguments const& args, std::vector<cmList::index_type>& indexes,
+  Arguments args, std::vector<cmList::index_type>& indexes,
   cmList::ExpandElements expandElements = cmList::ExpandElements::No)
 {
   using IndexRange = cmRange<Arguments::const_iterator>;
@@ -2157,11 +2183,11 @@ static const struct ConfigurationTestNode : public cmGeneratorExpressionNode
     if (parameters.empty()) {
       return configurationNode.Evaluate(parameters, eval, content, nullptr);
     }
-    static cmsys::RegularExpression configValidator("^[A-Za-z0-9_]*$");
-    if (!configValidator.find(parameters.front())) {
-    }
 
     eval->HadContextSensitiveCondition = true;
+
+    // First, validate our arguments.
+    static cmsys::RegularExpression configValidator("^[A-Za-z0-9_]*$");
     bool firstParam = true;
     for (auto const& param : parameters) {
       if (!configValidator.find(param)) {
@@ -2181,42 +2207,109 @@ static const struct ConfigurationTestNode : public cmGeneratorExpressionNode
         eval->Context.LG->GetCMakeInstance()->IssueMessage(
           MessageType::WARNING, e.str(), eval->Backtrace);
       }
-
       firstParam = false;
-      if (eval->Context.Config.empty()) {
-        if (param.empty()) {
+    }
+
+    // Determine the context(s) in which the expression should be evaluated. If
+    // CMPxxxx is NEW, the context is exactly one of the imported target's
+    // selected configuration, if applicable, or the consuming target's
+    // configuration, otherwise.
+    //
+    // If CMPxxxx is OLD, we evaluate first in the context of the consuming
+    // target, then, if the consumed target is imported, we evaluate based on
+    // the mapped configurations (this logic is... problematic; see comment
+    // below), then finally based on the selected configuration of the imported
+    // target.
+    bool const targetIsImported =
+      (eval->CurrentTarget && eval->CurrentTarget->IsImported());
+    bool const oldPolicy = [&] {
+      if (!targetIsImported) {
+        // For non-imported targets, there is no behavior difference between
+        // the OLD and NEW policy.
+        return false;
+      }
+      cmTarget const* const t = eval->CurrentTarget->Target;
+      if (t->GetOrigin() == cmTarget::Origin::Cps) {
+        // Generator expressions appearing on targets imported from CPS should
+        // always be evaluated according to the selected configuration of the
+        // imported target, i.e. the NEW policy.
+        return false;
+      }
+      switch (eval->HeadTarget->GetPolicyStatusCMP0199()) {
+        case cmPolicies::WARN:
+          if (eval->Context.LG->GetMakefile()->PolicyOptionalWarningEnabled(
+                "CMAKE_POLICY_WARNING_CMP0199")) {
+            std::string const err =
+              cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0199),
+                       "\nEvaluation of $<CONFIG> for imported target  \"",
+                       eval->CurrentTarget->GetName(), "\", used by \"",
+                       eval->HeadTarget->GetName(),
+                       "\", may match multiple configurations.\n");
+            eval->Context.LG->GetCMakeInstance()->IssueMessage(
+              MessageType ::AUTHOR_WARNING, err, eval->Backtrace);
+          }
+          CM_FALLTHROUGH;
+        case cmPolicies::OLD:
+          return true;
+        case cmPolicies::NEW:
+          return false;
+      }
+
+      // Should be unreachable
+      assert(false);
+      return false;
+    }();
+
+    if (!targetIsImported || oldPolicy) {
+      // Does the consuming target's configuration match any of the arguments?
+      for (auto const& param : parameters) {
+        if (eval->Context.Config.empty()) {
+          if (param.empty()) {
+            return "1";
+          }
+        } else if (cmsysString_strcasecmp(param.c_str(),
+                                          eval->Context.Config.c_str()) == 0) {
           return "1";
         }
-      } else if (cmsysString_strcasecmp(param.c_str(),
-                                        eval->Context.Config.c_str()) == 0) {
-        return "1";
       }
     }
 
-    if (eval->CurrentTarget && eval->CurrentTarget->IsImported()) {
+    if (targetIsImported) {
       cmValue loc = nullptr;
       cmValue imp = nullptr;
       std::string suffix;
       if (eval->CurrentTarget->Target->GetMappedConfig(eval->Context.Config,
                                                        loc, imp, suffix)) {
-        // This imported target has an appropriate location
-        // for this (possibly mapped) config.
-        // Check if there is a proper config mapping for the tested config.
-        cmList mappedConfigs;
-        std::string mapProp =
-          cmStrCat("MAP_IMPORTED_CONFIG_",
-                   cmSystemTools::UpperCase(eval->Context.Config));
-        if (cmValue mapValue = eval->CurrentTarget->GetProperty(mapProp)) {
-          mappedConfigs.assign(cmSystemTools::UpperCase(*mapValue));
+        if (oldPolicy) {
+          // If the target has a MAP_IMPORTED_CONFIG_<CONFIG> property for the
+          // consumer's <CONFIG>, match *any* config in that list, regardless
+          // of whether it's valid or of what GetMappedConfig actually picked.
+          // This will result in $<CONFIG> producing '1' for multiple configs,
+          // and is almost certainly wrong, but it's what CMake did for a very
+          // long time, and... Hyrum's Law.
+          cmList mappedConfigs;
+          std::string mapProp =
+            cmStrCat("MAP_IMPORTED_CONFIG_",
+                     cmSystemTools::UpperCase(eval->Context.Config));
+          if (cmValue mapValue = eval->CurrentTarget->GetProperty(mapProp)) {
+            mappedConfigs.assign(cmSystemTools::UpperCase(*mapValue));
 
-          for (auto const& param : parameters) {
-            if (cm::contains(mappedConfigs, cmSystemTools::UpperCase(param))) {
-              return "1";
+            for (auto const& param : parameters) {
+              if (cm::contains(mappedConfigs,
+                               cmSystemTools::UpperCase(param))) {
+                return "1";
+              }
             }
+
+            return "0";
           }
-        } else if (!suffix.empty()) {
-          // There is no explicit mapping for the tested config, so use
-          // the configuration of the imported location that was selected.
+        }
+
+        // This imported target has an appropriate location for this (possibly
+        // mapped) config.
+        if (!suffix.empty()) {
+          // Use the (possibly mapped) configuration of the imported location
+          // that was selected.
           for (auto const& param : parameters) {
             if (cmStrCat('_', cmSystemTools::UpperCase(param)) == suffix) {
               return "1";
@@ -2225,6 +2318,7 @@ static const struct ConfigurationTestNode : public cmGeneratorExpressionNode
         }
       }
     }
+
     return "0";
   }
 } configurationTestNode;
@@ -2275,6 +2369,7 @@ static const struct CompileLanguageNode : public cmGeneratorExpressionNode
         genName.find("Visual Studio") == std::string::npos &&
         genName.find("Xcode") == std::string::npos &&
         genName.find("Watcom WMake") == std::string::npos &&
+        genName.find("FASTBuild") == std::string::npos &&
         genName.find("Green Hills MULTI") == std::string::npos) {
       reportError(eval, content->GetOriginalExpression(),
                   "$<COMPILE_LANGUAGE:...> not supported for this generator.");
@@ -2321,6 +2416,7 @@ static const struct CompileLanguageAndIdNode : public cmGeneratorExpressionNode
     std::string genName = gg->GetName();
     if (genName.find("Makefiles") == std::string::npos &&
         genName.find("Ninja") == std::string::npos &&
+        genName.find("FASTBuild") == std::string::npos &&
         genName.find("Visual Studio") == std::string::npos &&
         genName.find("Xcode") == std::string::npos &&
         genName.find("Watcom WMake") == std::string::npos &&
@@ -2374,6 +2470,7 @@ static const struct LinkLanguageNode : public cmGeneratorExpressionNode
     std::string genName = gg->GetName();
     if (genName.find("Makefiles") == std::string::npos &&
         genName.find("Ninja") == std::string::npos &&
+        genName.find("FASTBuild") == std::string::npos &&
         genName.find("Visual Studio") == std::string::npos &&
         genName.find("Xcode") == std::string::npos &&
         genName.find("Watcom WMake") == std::string::npos &&
@@ -2464,6 +2561,7 @@ static const struct LinkLanguageAndIdNode : public cmGeneratorExpressionNode
     std::string genName = gg->GetName();
     if (genName.find("Makefiles") == std::string::npos &&
         genName.find("Ninja") == std::string::npos &&
+        genName.find("FASTBuild") == std::string::npos &&
         genName.find("Visual Studio") == std::string::npos &&
         genName.find("Xcode") == std::string::npos &&
         genName.find("Watcom WMake") == std::string::npos &&
@@ -2488,6 +2586,144 @@ static const struct LinkLanguageAndIdNode : public cmGeneratorExpressionNode
     return "0";
   }
 } linkLanguageAndIdNode;
+
+struct CompilerLinkerIdNode : public cmGeneratorExpressionNode
+{
+  CompilerLinkerIdNode(char const* lang)
+    : Language(lang)
+  {
+  }
+
+  int NumExpectedParameters() const override { return ZeroOrMoreParameters; }
+
+  std::string Evaluate(
+    std::vector<std::string> const& parameters, cm::GenEx::Evaluation* eval,
+    GeneratorExpressionContent const* content,
+    cmGeneratorExpressionDAGChecker* dagChecker) const override
+  {
+    if (!eval->HeadTarget) {
+      reportError(
+        eval, content->GetOriginalExpression(),
+        cmStrCat(
+          "$<", this->Language,
+          "_COMPILER_LINKER_ID> may only be used with binary targets. It may "
+          "not be used with add_custom_command or add_custom_target."));
+      return {};
+    }
+    return this->EvaluateWithLanguage(parameters, eval, content, dagChecker,
+                                      this->Language);
+  }
+
+  std::string EvaluateWithLanguage(std::vector<std::string> const& parameters,
+                                   cm::GenEx::Evaluation* eval,
+                                   GeneratorExpressionContent const* content,
+                                   cmGeneratorExpressionDAGChecker* /*unused*/,
+                                   std::string const& lang) const
+  {
+    std::string const& compilerLinkerId =
+      eval->Context.LG->GetMakefile()->GetSafeDefinition(
+        cmStrCat("CMAKE_", lang, "_COMPILER_LINKER_ID"));
+    if (parameters.empty()) {
+      return compilerLinkerId;
+    }
+    if (compilerLinkerId.empty()) {
+      return parameters.front().empty() ? "1" : "0";
+    }
+    static cmsys::RegularExpression compilerLinkerIdValidator(
+      "^[A-Za-z0-9_]*$");
+
+    for (auto const& param : parameters) {
+      if (!compilerLinkerIdValidator.find(param)) {
+        reportError(eval, content->GetOriginalExpression(),
+                    "Expression syntax not recognized.");
+        return std::string();
+      }
+
+      if (param == compilerLinkerId) {
+        return "1";
+      }
+    }
+    return "0";
+  }
+
+  char const* const Language;
+};
+
+static CompilerLinkerIdNode const cCompilerLinkerIdNode("C"),
+  cxxCompilerLinkerIdNode("CXX"), cudaCompilerLinkerIdNode("CUDA"),
+  objcCompilerLinkerIdNode("OBJC"), objcxxCompilerLinkerIdNode("OBJCXX"),
+  fortranCompilerLinkerIdNode("Fortran"), hipCompilerLinkerIdNode("HIP");
+
+struct CompilerLinkerFrontendVariantNode : public cmGeneratorExpressionNode
+{
+  CompilerLinkerFrontendVariantNode(char const* lang)
+    : Language(lang)
+  {
+  }
+
+  int NumExpectedParameters() const override { return ZeroOrMoreParameters; }
+
+  std::string Evaluate(
+    std::vector<std::string> const& parameters, cm::GenEx::Evaluation* eval,
+    GeneratorExpressionContent const* content,
+    cmGeneratorExpressionDAGChecker* dagChecker) const override
+  {
+    if (!eval->HeadTarget) {
+      reportError(
+        eval, content->GetOriginalExpression(),
+        cmStrCat(
+          "$<", this->Language,
+          "_COMPILER_LINKER_FRONTEND_VARIANT> may only be used with binary "
+          "targets. It may not be used with add_custom_command or "
+          "add_custom_target."));
+      return {};
+    }
+    return this->EvaluateWithLanguage(parameters, eval, content, dagChecker,
+                                      this->Language);
+  }
+
+  std::string EvaluateWithLanguage(std::vector<std::string> const& parameters,
+                                   cm::GenEx::Evaluation* eval,
+                                   GeneratorExpressionContent const* content,
+                                   cmGeneratorExpressionDAGChecker* /*unused*/,
+                                   std::string const& lang) const
+  {
+    std::string const& compilerLinkerFrontendVariant =
+      eval->Context.LG->GetMakefile()->GetSafeDefinition(
+        cmStrCat("CMAKE_", lang, "_COMPILER_LINKER_FRONTEND_VARIANT"));
+    if (parameters.empty()) {
+      return compilerLinkerFrontendVariant;
+    }
+    if (compilerLinkerFrontendVariant.empty()) {
+      return parameters.front().empty() ? "1" : "0";
+    }
+    static cmsys::RegularExpression compilerLinkerFrontendVariantValidator(
+      "^[A-Za-z0-9_]*$");
+
+    for (auto const& param : parameters) {
+      if (!compilerLinkerFrontendVariantValidator.find(param)) {
+        reportError(eval, content->GetOriginalExpression(),
+                    "Expression syntax not recognized.");
+        return {};
+      }
+      if (param == compilerLinkerFrontendVariant) {
+        return "1";
+      }
+    }
+    return "0";
+  }
+
+  char const* const Language;
+};
+
+static CompilerLinkerFrontendVariantNode const
+  cCompilerLinkerFrontendVariantNode("C"),
+  cxxCompilerLinkerFrontendVariantNode("CXX"),
+  cudaCompilerLinkerFrontendVariantNode("CUDA"),
+  objcCompilerLinkerFrontendVariantNode("OBJC"),
+  objcxxCompilerLinkerFrontendVariantNode("OBJCXX"),
+  fortranCompilerLinkerFrontendVariantNode("Fortran"),
+  hipCompilerLinkerFrontendVariantNode("HIP");
 
 static const struct LinkLibraryNode : public cmGeneratorExpressionNode
 {
@@ -2711,7 +2947,7 @@ static std::string getLinkedTargetsContent(
   if (cmLinkImplementationLibraries const* impl =
         target->GetLinkImplementationLibraries(
           eval->Context.Config, cmGeneratorTarget::UseTo::Compile)) {
-    for (cmLinkImplItem const& lib : impl->Libraries) {
+    for (cmLinkItem const& lib : impl->Libraries) {
       if (lib.Target) {
         // Pretend $<TARGET_PROPERTY:lib.Target,prop> appeared in our
         // caller's property and hand-evaluate it as if it were compiled.
@@ -3017,6 +3253,71 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
   }
 } targetPropertyNode;
 
+static const struct targetIntermediateDirNode
+  : public cmGeneratorExpressionNode
+{
+  targetIntermediateDirNode() {} // NOLINT(modernize-use-equals-default)
+
+  static char const* GetErrorText(std::string const& targetName)
+  {
+    static cmsys::RegularExpression propertyNameValidator("^[A-Za-z0-9_]+$");
+    if (targetName.empty()) {
+      return "$<TARGET_INTERMEDIATE_DIR:tgt> expression requires a non-empty "
+             "target name.";
+    }
+    if (!cmGeneratorExpression::IsValidTargetName(targetName)) {
+      return "Target name not supported.";
+    }
+    return nullptr;
+  }
+
+  std::string Evaluate(
+    std::vector<std::string> const& parameters, cm::GenEx::Evaluation* eval,
+    GeneratorExpressionContent const* content,
+    cmGeneratorExpressionDAGChecker* /*dagChecker*/) const override
+  {
+    cmGeneratorTarget const* target = nullptr;
+    std::string targetName;
+
+    if (parameters.size() == 1) {
+      targetName = parameters[0];
+
+      if (char const* e = GetErrorText(targetName)) {
+        reportError(eval, content->GetOriginalExpression(), e);
+        return std::string();
+      }
+      cmLocalGenerator const* lg = eval->CurrentTarget
+        ? eval->CurrentTarget->GetLocalGenerator()
+        : eval->Context.LG;
+      target = lg->FindGeneratorTargetToUse(targetName);
+
+      if (!target) {
+        std::ostringstream e;
+        e << "Target \"" << targetName << "\" not found.";
+        reportError(eval, content->GetOriginalExpression(), e.str());
+        return std::string();
+      }
+      eval->AllTargets.insert(target);
+
+    } else {
+      reportError(
+        eval, content->GetOriginalExpression(),
+        "$<TARGET_INTERMEDIATE_DIR:...> expression requires one parameter");
+      return std::string();
+    }
+
+    assert(target);
+
+    if (!HasKnownObjectFileLocation(eval, content, "TARGET_INTERMEDIATE_DIR",
+                                    target)) {
+      return std::string();
+    }
+
+    return cmSystemTools::CollapseFullPath(
+      target->GetObjectDirectory(eval->Context.Config));
+  }
+} targetIntermediateDirNode;
+
 static const struct TargetNameNode : public cmGeneratorExpressionNode
 {
   TargetNameNode() {} // NOLINT(modernize-use-equals-default)
@@ -3072,19 +3373,8 @@ static const struct TargetObjectsNode : public cmGeneratorExpressionNode
       return std::string();
     }
     cmGlobalGenerator const* gg = eval->Context.LG->GetGlobalGenerator();
-    {
-      std::string reason;
-      if (!eval->EvaluateForBuildsystem &&
-          !gt->Target->HasKnownObjectFileLocation(&reason)) {
-        std::ostringstream e;
-        e << "The evaluation of the TARGET_OBJECTS generator expression "
-             "is only suitable for consumption by CMake (limited"
-          << reason
-          << ").  "
-             "It is not suitable for writing out elsewhere.";
-        reportError(eval, content->GetOriginalExpression(), e.str());
-        return std::string();
-      }
+    if (!HasKnownObjectFileLocation(eval, content, "TARGET_OBJECTS", gt)) {
+      return std::string();
     }
 
     cmList objects;
@@ -3954,12 +4244,20 @@ static TargetFilesystemArtifact<ArtifactBundleContentDirTag,
 //
 // To retrieve base name for various artifacts
 //
+enum class Postfix
+{
+  Unspecified,
+  Exclude,
+  Include
+};
+
 template <typename ArtifactT>
 struct TargetOutputNameArtifactResultGetter
 {
   static std::string Get(cmGeneratorTarget* target,
                          cm::GenEx::Evaluation* eval,
-                         GeneratorExpressionContent const* content);
+                         GeneratorExpressionContent const* content,
+                         Postfix postfix);
 };
 
 template <>
@@ -3967,11 +4265,14 @@ struct TargetOutputNameArtifactResultGetter<ArtifactNameTag>
 {
   static std::string Get(cmGeneratorTarget* target,
                          cm::GenEx::Evaluation* eval,
-                         GeneratorExpressionContent const* /*unused*/)
+                         GeneratorExpressionContent const* /*unused*/,
+                         Postfix postfix)
   {
-    return target->GetOutputName(eval->Context.Config,
-                                 cmStateEnums::RuntimeBinaryArtifact) +
-      target->GetFilePostfix(eval->Context.Config);
+    auto output = target->GetOutputName(eval->Context.Config,
+                                        cmStateEnums::RuntimeBinaryArtifact);
+    return postfix != Postfix::Exclude
+      ? cmStrCat(output, target->GetFilePostfix(eval->Context.Config))
+      : output;
   }
 };
 
@@ -3980,12 +4281,15 @@ struct TargetOutputNameArtifactResultGetter<ArtifactImportTag>
 {
   static std::string Get(cmGeneratorTarget* target,
                          cm::GenEx::Evaluation* eval,
-                         GeneratorExpressionContent const* /*unused*/)
+                         GeneratorExpressionContent const* /*unused*/,
+                         Postfix postfix)
   {
     if (target->HasImportLibrary(eval->Context.Config)) {
-      return target->GetOutputName(eval->Context.Config,
-                                   cmStateEnums::ImportLibraryArtifact) +
-        target->GetFilePostfix(eval->Context.Config);
+      auto output = target->GetOutputName(eval->Context.Config,
+                                          cmStateEnums::ImportLibraryArtifact);
+      return postfix != Postfix::Exclude
+        ? cmStrCat(output, target->GetFilePostfix(eval->Context.Config))
+        : output;
     }
     return std::string{};
   }
@@ -3996,7 +4300,8 @@ struct TargetOutputNameArtifactResultGetter<ArtifactLinkerTag>
 {
   static std::string Get(cmGeneratorTarget* target,
                          cm::GenEx::Evaluation* eval,
-                         GeneratorExpressionContent const* content)
+                         GeneratorExpressionContent const* content,
+                         Postfix postfix)
   {
     // The library file used to link to the target (.so, .lib, .a) or import
     // file (.lin,  .tbd).
@@ -4010,8 +4315,10 @@ struct TargetOutputNameArtifactResultGetter<ArtifactLinkerTag>
       target->HasImportLibrary(eval->Context.Config)
       ? cmStateEnums::ImportLibraryArtifact
       : cmStateEnums::RuntimeBinaryArtifact;
-    return target->GetOutputName(eval->Context.Config, artifact) +
-      target->GetFilePostfix(eval->Context.Config);
+    auto output = target->GetOutputName(eval->Context.Config, artifact);
+    return postfix != Postfix::Exclude
+      ? cmStrCat(output, target->GetFilePostfix(eval->Context.Config))
+      : output;
   }
 };
 
@@ -4020,7 +4327,8 @@ struct TargetOutputNameArtifactResultGetter<ArtifactLinkerLibraryTag>
 {
   static std::string Get(cmGeneratorTarget* target,
                          cm::GenEx::Evaluation* eval,
-                         GeneratorExpressionContent const* content)
+                         GeneratorExpressionContent const* content,
+                         Postfix postfix)
   {
     // The library file used to link to the target (.so, .lib, .a).
     if (!target->IsLinkable() ||
@@ -4033,9 +4341,11 @@ struct TargetOutputNameArtifactResultGetter<ArtifactLinkerLibraryTag>
 
     if (!target->IsDLLPlatform() ||
         target->GetType() == cmStateEnums::STATIC_LIBRARY) {
-      return target->GetOutputName(eval->Context.Config,
-                                   cmStateEnums::ImportLibraryArtifact) +
-        target->GetFilePostfix(eval->Context.Config);
+      auto output = target->GetOutputName(eval->Context.Config,
+                                          cmStateEnums::ImportLibraryArtifact);
+      return postfix != Postfix::Exclude
+        ? cmStrCat(output, target->GetFilePostfix(eval->Context.Config))
+        : output;
     }
     return std::string{};
   }
@@ -4046,7 +4356,8 @@ struct TargetOutputNameArtifactResultGetter<ArtifactLinkerImportTag>
 {
   static std::string Get(cmGeneratorTarget* target,
                          cm::GenEx::Evaluation* eval,
-                         GeneratorExpressionContent const* content)
+                         GeneratorExpressionContent const* content,
+                         Postfix postfix)
   {
     // The import file used to link to the target (.lib, .tbd).
     if (!target->IsLinkable()) {
@@ -4057,9 +4368,11 @@ struct TargetOutputNameArtifactResultGetter<ArtifactLinkerImportTag>
     }
 
     if (target->HasImportLibrary(eval->Context.Config)) {
-      return target->GetOutputName(eval->Context.Config,
-                                   cmStateEnums::ImportLibraryArtifact) +
-        target->GetFilePostfix(eval->Context.Config);
+      auto output = target->GetOutputName(eval->Context.Config,
+                                          cmStateEnums::ImportLibraryArtifact);
+      return postfix != Postfix::Exclude
+        ? cmStrCat(output, target->GetFilePostfix(eval->Context.Config))
+        : output;
     }
     return std::string{};
   }
@@ -4070,7 +4383,8 @@ struct TargetOutputNameArtifactResultGetter<ArtifactPdbTag>
 {
   static std::string Get(cmGeneratorTarget* target,
                          cm::GenEx::Evaluation* eval,
-                         GeneratorExpressionContent const* content)
+                         GeneratorExpressionContent const* content,
+                         Postfix postfix)
   {
     if (target->IsImported()) {
       ::reportError(
@@ -4101,7 +4415,26 @@ struct TargetOutputNameArtifactResultGetter<ArtifactPdbTag>
       return std::string();
     }
 
-    return target->GetPDBOutputName(eval->Context.Config);
+    auto output = target->GetPDBOutputName(eval->Context.Config);
+
+    if (target->GetPolicyStatusCMP0202() == cmPolicies::NEW) {
+      return postfix != Postfix::Exclude
+        ? cmStrCat(output, target->GetFilePostfix(eval->Context.Config))
+        : output;
+    }
+
+    if (target->GetPolicyStatusCMP0202() == cmPolicies::WARN &&
+        postfix != Postfix::Unspecified) {
+      eval->Context.LG->GetCMakeInstance()->IssueMessage(
+        MessageType::AUTHOR_WARNING,
+        cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0202), '\n',
+                 "\"POSTFIX\" option is recognized only when the policy is "
+                 "set to NEW. Since the policy is not set, the OLD behavior "
+                 "will be used."),
+        eval->Backtrace);
+    }
+
+    return output;
   }
 };
 
@@ -4110,21 +4443,40 @@ struct TargetFileBaseNameArtifact : public TargetArtifactBase
 {
   TargetFileBaseNameArtifact() {} // NOLINT(modernize-use-equals-default)
 
-  int NumExpectedParameters() const override { return 1; }
+  int NumExpectedParameters() const override { return OneOrMoreParameters; }
 
   std::string Evaluate(
     std::vector<std::string> const& parameters, cm::GenEx::Evaluation* eval,
     GeneratorExpressionContent const* content,
     cmGeneratorExpressionDAGChecker* dagChecker) const override
   {
+    if (parameters.size() > 2) {
+      ::reportError(eval, content->GetOriginalExpression(),
+                    "Unexpected parameters, require one or two parameters.");
+      return std::string{};
+    }
+
     cmGeneratorTarget* target =
       this->GetTarget(parameters, eval, content, dagChecker);
     if (!target) {
       return std::string();
     }
 
+    Postfix postfix = Postfix::Unspecified;
+    if (parameters.size() == 2) {
+      if (parameters[1] == "POSTFIX:INCLUDE") {
+        postfix = Postfix::Include;
+      } else if (parameters[1] == "POSTFIX:EXCLUDE") {
+        postfix = Postfix::Exclude;
+      } else {
+        ::reportError(eval, content->GetOriginalExpression(),
+                      "Wrong second parameter: \"POSTFIX:INCLUDE\" or "
+                      "\"POSTFIX:EXCLUDE\" is expected");
+      }
+    }
+
     std::string result = TargetOutputNameArtifactResultGetter<ArtifactT>::Get(
-      target, eval, content);
+      target, eval, content, postfix);
     if (eval->HadError) {
       return std::string();
     }
@@ -4537,6 +4889,7 @@ cmGeneratorExpressionNode const* cmGeneratorExpressionNode::GetNode(
     { "SEMICOLON", &semicolonNode },
     { "QUOTE", &quoteNode },
     { "TARGET_PROPERTY", &targetPropertyNode },
+    { "TARGET_INTERMEDIATE_DIR", &targetIntermediateDirNode },
     { "TARGET_NAME", &targetNameNode },
     { "TARGET_OBJECTS", &targetObjectsNode },
     { "TARGET_POLICY", &targetPolicyNode },
@@ -4557,6 +4910,27 @@ cmGeneratorExpressionNode const* cmGeneratorExpressionNode::GetNode(
     { "COMPILE_LANGUAGE", &languageNode },
     { "LINK_LANG_AND_ID", &linkLanguageAndIdNode },
     { "LINK_LANGUAGE", &linkLanguageNode },
+    { "C_COMPILER_LINKER_ID", &cCompilerLinkerIdNode },
+    { "CXX_COMPILER_LINKER_ID", &cxxCompilerLinkerIdNode },
+    { "OBJC_COMPILER_LINKER_ID", &objcCompilerLinkerIdNode },
+    { "OBJCXX_COMPILER_LINKER_ID", &objcxxCompilerLinkerIdNode },
+    { "CUDA_COMPILER_LINKER_ID", &cudaCompilerLinkerIdNode },
+    { "Fortran_COMPILER_LINKER_ID", &fortranCompilerLinkerIdNode },
+    { "HIP_COMPILER_LINKER_ID", &hipCompilerLinkerIdNode },
+    { "C_COMPILER_LINKER_FRONTEND_VARIANT",
+      &cCompilerLinkerFrontendVariantNode },
+    { "CXX_COMPILER_LINKER_FRONTEND_VARIANT",
+      &cxxCompilerLinkerFrontendVariantNode },
+    { "CUDA_COMPILER_LINKER_FRONTEND_VARIANT",
+      &cudaCompilerLinkerFrontendVariantNode },
+    { "OBJC_COMPILER_LINKER_FRONTEND_VARIANT",
+      &objcCompilerLinkerFrontendVariantNode },
+    { "OBJCXX_COMPILER_LINKER_FRONTEND_VARIANT",
+      &objcxxCompilerLinkerFrontendVariantNode },
+    { "Fortran_COMPILER_LINKER_FRONTEND_VARIANT",
+      &fortranCompilerLinkerFrontendVariantNode },
+    { "HIP_COMPILER_LINKER_FRONTEND_VARIANT",
+      &hipCompilerLinkerFrontendVariantNode },
     { "LINK_LIBRARY", &linkLibraryNode },
     { "LINK_GROUP", &linkGroupNode },
     { "HOST_LINK", &hostLinkNode },

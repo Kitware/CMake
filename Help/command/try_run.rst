@@ -155,6 +155,20 @@ These cache entries are:
   the target platform.  This is created only if the
   ``RUN_OUTPUT_VARIABLE`` or ``OUTPUT_VARIABLE`` option was used.
 
+``<runResultVar>__TRYRUN_OUTPUT_STDOUT``
+  .. versionadded:: 3.25
+
+  Output from stdout if the executable were to be run on the target
+  platform.  This is created only if the ``RUN_OUTPUT_STDOUT_VARIABLE``
+  or ``RUN_OUTPUT_STDERR_VARIABLE`` option was used.
+
+``<runResultVar>__TRYRUN_OUTPUT_STDERR``
+  .. versionadded:: 3.25
+
+  Output from stderr if the executable were to be run on the target
+  platform.  This is created only if the ``RUN_OUTPUT_STDOUT_VARIABLE``
+  or ``RUN_OUTPUT_STDERR_VARIABLE`` option was used.
+
 In order to make cross compiling your project easier, use ``try_run``
 only if really required.  If you use ``try_run``, use the
 ``RUN_OUTPUT_STDOUT_VARIABLE``, ``RUN_OUTPUT_STDERR_VARIABLE``,

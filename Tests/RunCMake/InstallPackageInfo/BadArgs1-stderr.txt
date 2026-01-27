@@ -1,11 +1,11 @@
-CMake Error at BadArgs1.cmake:3 \(install\):
-  install COMPAT_VERSION requires VERSION.
+CMake Error at BadArgs1\.cmake:3 \(install\):
+  install COMPAT_VERSION requires VERSION\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:3 \(include\)
 
 
-CMake Error at BadArgs1.cmake:4 \(install\):
-  install VERSION_SCHEMA requires VERSION.
+CMake Error at BadArgs1\.cmake:4 \(install\):
+  install VERSION_SCHEMA requires VERSION\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:3 \(include\)
 
@@ -17,6 +17,6 @@ Call Stack \(most recent call first\):
 
 
 CMake Error at BadArgs1\.cmake:6 \(install\):
-  install PROJECT given invalid project name "bar"\.
+  install PROJECT given unknown project name "bar"\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:3 \(include\)

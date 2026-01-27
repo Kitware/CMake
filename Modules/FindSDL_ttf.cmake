@@ -6,7 +6,11 @@ FindSDL_ttf
 -----------
 
 Finds the SDL_ttf library that provides support for rendering text with TrueType
-fonts in SDL (Simple DirectMedia Layer) applications.
+fonts in SDL (Simple DirectMedia Layer) applications:
+
+.. code-block:: cmake
+
+  find_package(SDL_ttf [<version>] [...])
 
 .. note::
 
@@ -23,11 +27,14 @@ Result Variables
 This module defines the following variables:
 
 ``SDL_ttf_FOUND``
-  Boolean indicating whether the (requested version of) SDL_ttf library is
-  found.  For backward compatibility, the ``SDL_TTF_FOUND`` variable is also set
-  to the same value.
+  .. versionadded:: 3.3
 
-``SDL_TTF_VERSION_STRING``
+  Boolean indicating whether the (requested version of) SDL_ttf library was
+  found.
+
+``SDL_ttf_VERSION``
+  .. versionadded:: 4.2
+
   The human-readable string containing the version of SDL_ttf found.
 
 ``SDL_TTF_INCLUDE_DIRS``
@@ -36,10 +43,31 @@ This module defines the following variables:
 ``SDL_TTF_LIBRARIES``
   Libraries needed to link against to use SDL_ttf.
 
+Hints
+^^^^^
+
+This module accepts the following variables:
+
+``SDLDIR``
+  Environment variable that can be set to help locate an SDL library installed
+  in a custom location.  It should point to the installation destination that
+  was used when configuring, building, and installing SDL library:
+  ``./configure --prefix=$SDLDIR``.
+
 Deprecated Variables
 ^^^^^^^^^^^^^^^^^^^^
 
-For backward compatibility the following variables are also set:
+The following variables are provided for backward compatibility:
+
+``SDL_TTF_VERSION_STRING``
+  .. deprecated:: 4.2
+    Use ``SDL_ttf_VERSION``, which has the same value.
+
+  The human-readable string containing the version of SDL_ttf found.
+
+``SDL_TTF_FOUND``
+  .. deprecated:: 4.2
+    Use ``SDL_ttf_FOUND``, which has the same value.
 
 ``SDLTTF_FOUND``
   .. deprecated:: 2.8.10
@@ -52,17 +80,6 @@ For backward compatibility the following variables are also set:
 ``SDLTTF_LIBRARY``
   .. deprecated:: 2.8.10
     Replaced with ``SDL_TTF_LIBRARIES``, which has the same value.
-
-Hints
-^^^^^
-
-This module accepts the following variables:
-
-``SDLDIR``
-  Environment variable that can be set to help locate an SDL library installed
-  in a custom location.  It should point to the installation destination that
-  was used when configuring, building, and installing SDL library:
-  ``./configure --prefix=$SDLDIR``.
 
 Examples
 ^^^^^^^^
@@ -149,7 +166,8 @@ if(SDL_TTF_INCLUDE_DIR AND EXISTS "${SDL_TTF_INCLUDE_DIR}/SDL_ttf.h")
   string(REGEX REPLACE "^#define[ \t]+SDL_TTF_MAJOR_VERSION[ \t]+([0-9]+)$" "\\1" SDL_TTF_VERSION_MAJOR "${SDL_TTF_VERSION_MAJOR_LINE}")
   string(REGEX REPLACE "^#define[ \t]+SDL_TTF_MINOR_VERSION[ \t]+([0-9]+)$" "\\1" SDL_TTF_VERSION_MINOR "${SDL_TTF_VERSION_MINOR_LINE}")
   string(REGEX REPLACE "^#define[ \t]+SDL_TTF_PATCHLEVEL[ \t]+([0-9]+)$" "\\1" SDL_TTF_VERSION_PATCH "${SDL_TTF_VERSION_PATCH_LINE}")
-  set(SDL_TTF_VERSION_STRING ${SDL_TTF_VERSION_MAJOR}.${SDL_TTF_VERSION_MINOR}.${SDL_TTF_VERSION_PATCH})
+  set(SDL_ttf_VERSION ${SDL_TTF_VERSION_MAJOR}.${SDL_TTF_VERSION_MINOR}.${SDL_TTF_VERSION_PATCH})
+  set(SDL_TTF_VERSION_STRING "${SDL_ttf_VERSION}")
   unset(SDL_TTF_VERSION_MAJOR_LINE)
   unset(SDL_TTF_VERSION_MINOR_LINE)
   unset(SDL_TTF_VERSION_PATCH_LINE)
@@ -165,7 +183,7 @@ include(FindPackageHandleStandardArgs)
 
 find_package_handle_standard_args(SDL_ttf
                                   REQUIRED_VARS SDL_TTF_LIBRARIES SDL_TTF_INCLUDE_DIRS
-                                  VERSION_VAR SDL_TTF_VERSION_STRING)
+                                  VERSION_VAR SDL_ttf_VERSION)
 
 # for backward compatibility
 set(SDLTTF_LIBRARY ${SDL_TTF_LIBRARIES})

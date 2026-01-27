@@ -16,6 +16,10 @@ if (NOT "$ENV{CTEST_MAX_PARALLELISM}" STREQUAL "")
   endif ()
 endif ()
 
+if (NOT "$ENV{CMAKE_CI_TEST_TIMEOUT}" STREQUAL "")
+  set(CTEST_TEST_TIMEOUT "$ENV{CMAKE_CI_TEST_TIMEOUT}")
+endif ()
+
 include("${CMAKE_CURRENT_LIST_DIR}/ctest_exclusions.cmake")
 ctest_test(
   PARALLEL_LEVEL "${nproc}"

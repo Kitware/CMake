@@ -1,0 +1,7 @@
+cmake_policy(SET CMP0074 NEW)
+set(Relative_ROOT root)
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/root/RelativeConfig.cmake" "")
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/root/RelativeConfigVersion.cmake" "set(PACKAGE_VERSION 1)")
+find_package(Relative)
+message(STATUS "Relative_ROOT='${Relative_ROOT}'")
+message(STATUS "Relative_DIR='${Relative_DIR}'")

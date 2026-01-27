@@ -87,7 +87,7 @@ int main(void)
 #elif defined(HAVE_GETHOSTBYNAME_R_5) || \
       defined(HAVE_GETHOSTBYNAME_R_5_REENTRANT)
   rc = gethostbyname_r(address, &h, buffer, 8192, &h_errnop);
-  (void)hp; /* not used for test */
+  (void)hp;
   (void)h_errnop;
 #elif defined(HAVE_GETHOSTBYNAME_R_6) || \
       defined(HAVE_GETHOSTBYNAME_R_6_REENTRANT)
@@ -203,7 +203,7 @@ int main(void)
 #ifdef HAVE_UNISTD_H
 #  include <unistd.h>
 #endif
-#ifdef HAVE_SYS_SOCKET_H
+#ifndef _WIN32
 #  include <sys/socket.h>
 #endif
 #ifdef HAVE_SYS_IOCTL_H
@@ -230,7 +230,7 @@ int main(void)
 #ifdef HAVE_UNISTD_H
 #  include <unistd.h>
 #endif
-#ifdef HAVE_SYS_SOCKET_H
+#ifndef _WIN32
 #  include <sys/socket.h>
 #endif
 #ifdef HAVE_SYS_IOCTL_H
@@ -257,7 +257,7 @@ int main(void)
 #ifdef HAVE_SYS_TYPES_H
 #  include <sys/types.h>
 #endif
-#ifdef HAVE_SYS_SOCKET_H
+#ifndef _WIN32
 #  include <sys/socket.h>
 #endif
 int main(void)

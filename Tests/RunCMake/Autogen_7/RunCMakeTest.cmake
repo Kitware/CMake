@@ -7,4 +7,7 @@ if (DEFINED with_qt_version)
     "-DCMAKE_PREFIX_PATH:STRING=${CMAKE_PREFIX_PATH}"
   )
   run_cmake(AutoMocIncludeDirectories)
+  if (RunCMake_GENERATOR MATCHES "(Ninja|Makefiles|Visual Studio)")
+    run_cmake(AutoMocIncludeDirectoriesShort)
+  endif ()
 endif()

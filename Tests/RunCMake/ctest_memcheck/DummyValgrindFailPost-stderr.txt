@@ -1,2 +1,2 @@
 Problem running command: .*memcheck_fail.*
-Problem executing post-memcheck command\(s\).
+Problem executing post-memcheck command\(s\)\.

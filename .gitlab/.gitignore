@@ -1,13 +1,17 @@
 # Ignore files known to be downloaded by CI jobs.
 /5.15.1-0-202009071110*
+/appimagetool
 /bcc*
 /cmake*
+/emsdk
+/fastbuild
 /iar
 /intel
 /ispc*
 /innosetup
 /jom
 /llvm*
+/MacOS*
 /mingw
 /msvc*
 /ninja*

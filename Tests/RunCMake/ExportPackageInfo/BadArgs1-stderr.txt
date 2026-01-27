@@ -17,6 +17,6 @@ Call Stack \(most recent call first\):
 
 
 CMake Error at BadArgs1\.cmake:6 \(export\):
-  export PROJECT given invalid project name "bar"\.
+  export PROJECT given unknown project name "bar"\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:3 \(include\)

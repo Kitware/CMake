@@ -395,15 +395,17 @@ endif()
 unset(__WINDOWS_MSVC_CMP0184)
 
 macro(__windows_compiler_msvc lang)
-  if(NOT MSVC_VERSION LESS 1400)
+  if(NOT MSVC_VERSION LESS 1400 AND NOT CMAKE_GENERATOR MATCHES "FASTBuild")
     # for 2005 make sure the manifest is put in the dll with mt
     set(_CMAKE_VS_LINK_DLL "<CMAKE_COMMAND> -E vs_link_dll --msvc-ver=${MSVC_VERSION} --intdir=<OBJECT_DIR> --rc=<CMAKE_RC_COMPILER> --mt=<CMAKE_MT> --manifests <MANIFESTS> -- ")
     set(_CMAKE_VS_LINK_EXE "<CMAKE_COMMAND> -E vs_link_exe --msvc-ver=${MSVC_VERSION} --intdir=<OBJECT_DIR> --rc=<CMAKE_RC_COMPILER> --mt=<CMAKE_MT> --manifests <MANIFESTS> -- ")
   endif()
   set(CMAKE_SHARED_LIBRARY_CREATE_${lang}_FLAGS "")
   if(CMAKE_SYSTEM_NAME STREQUAL "WindowsKernelModeDriver")
+    set(CMAKE_${lang}_SHARED_LIBRARY_COMPILE_DEFINITIONS "")
     set(_DLL_DRIVER "-driver")
   else()
+    set(CMAKE_${lang}_SHARED_LIBRARY_COMPILE_DEFINITIONS "_WINDLL")
     set(_DLL_DRIVER "/dll")
   endif()
   set(CMAKE_${lang}_CREATE_SHARED_LIBRARY
@@ -441,10 +443,11 @@ macro(__windows_compiler_msvc lang)
     # macOS paths usually start with /Users/*. Unfortunately, clang-cl interprets
     # paths starting with /U as macro undefines, so we need to put a -- before the
     # input file path to force it to be treated as a path.
-    string(REPLACE "-c <SOURCE>" "-c -- <SOURCE>" CMAKE_${lang}_COMPILE_OBJECT "${CMAKE_${lang}_COMPILE_OBJECT}")
-    string(REPLACE "-c <SOURCE>" "-c -- <SOURCE>" CMAKE_${lang}_CREATE_PREPROCESSED_SOURCE "${CMAKE_${lang}_CREATE_PREPROCESSED_SOURCE}")
-    string(REPLACE "-c <SOURCE>" "-c -- <SOURCE>" CMAKE_${lang}_CREATE_ASSEMBLY_SOURCE "${CMAKE_${lang}_CREATE_ASSEMBLY_SOURCE}")
-
+    if(NOT CMAKE_GENERATOR MATCHES "FASTBuild")
+      string(REPLACE "-c <SOURCE>" "-c -- <SOURCE>" CMAKE_${lang}_COMPILE_OBJECT "${CMAKE_${lang}_COMPILE_OBJECT}")
+      string(REPLACE "-c <SOURCE>" "-c -- <SOURCE>" CMAKE_${lang}_CREATE_PREPROCESSED_SOURCE "${CMAKE_${lang}_CREATE_PREPROCESSED_SOURCE}")
+      string(REPLACE "-c <SOURCE>" "-c -- <SOURCE>" CMAKE_${lang}_CREATE_ASSEMBLY_SOURCE "${CMAKE_${lang}_CREATE_ASSEMBLY_SOURCE}")
+    endif()
   elseif(MSVC_VERSION GREATER_EQUAL 1913)
     # At least MSVC toolet 14.13 from VS 2017 15.6
     set(CMAKE_PCH_PROLOGUE "#pragma system_header")

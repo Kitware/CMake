@@ -37,10 +37,8 @@
 #include "pingpong.h"
 #include "multiif.h"
 #include "vtls/vtls.h"
-#include "strdup.h"
 
-/* The last 3 #include files should be in this order */
-#include "curl_printf.h"
+/* The last 2 #include files should be in this order */
 #include "curl_memory.h"
 #include "memdebug.h"
 
@@ -52,8 +50,8 @@ timediff_t Curl_pp_state_timeout(struct Curl_easy *data,
                                  struct pingpong *pp, bool disconnecting)
 {
   timediff_t timeout_ms; /* in milliseconds */
-  timediff_t response_time = (data->set.server_response_timeout) ?
-    data->set.server_response_timeout : pp->response_time;
+  timediff_t response_time = data->set.server_response_timeout ?
+    data->set.server_response_timeout : RESP_TIMEOUT;
   struct curltime now = curlx_now();
 
   /* if CURLOPT_SERVER_RESPONSE_TIMEOUT is set, use that to determine
@@ -99,7 +97,6 @@ CURLcode Curl_pp_statemach(struct Curl_easy *data,
     return CURLE_OPERATION_TIMEDOUT; /* already too little time */
   }
 
-  DEBUGF(infof(data, "pp_statematch, timeout=%" FMT_TIMEDIFF_T, timeout_ms));
   if(block) {
     interval_ms = 1000;  /* use 1 second timeout intervals */
     if(timeout_ms < interval_ms)
@@ -116,11 +113,12 @@ CURLcode Curl_pp_statemach(struct Curl_easy *data,
   else if(!pp->sendleft && Curl_conn_data_pending(data, FIRSTSOCKET))
     /* We are receiving and there is data ready in the SSL library */
     rc = 1;
-  else
+  else {
     rc = Curl_socket_check(pp->sendleft ? CURL_SOCKET_BAD : sock, /* reading */
                            CURL_SOCKET_BAD,
                            pp->sendleft ? sock : CURL_SOCKET_BAD, /* writing */
                            interval_ms);
+  }
 
   if(block) {
     /* if we did not wait, we do not have to spend time on this now */
@@ -178,10 +176,6 @@ CURLcode Curl_pp_vsendf(struct Curl_easy *data,
   CURLcode result;
   struct connectdata *conn = data->conn;
 
-#ifdef HAVE_GSSAPI
-  enum protection_level data_sec;
-#endif
-
   DEBUGASSERT(pp->sendleft == 0);
   DEBUGASSERT(pp->sendsize == 0);
   DEBUGASSERT(pp->sendthis == NULL);
@@ -204,9 +198,6 @@ CURLcode Curl_pp_vsendf(struct Curl_easy *data,
   write_len = curlx_dyn_len(&pp->sendbuf);
   s = curlx_dyn_ptr(&pp->sendbuf);
 
-#ifdef HAVE_GSSAPI
-  conn->data_prot = PROT_CMD;
-#endif
   result = Curl_conn_send(data, FIRSTSOCKET, s, write_len, FALSE,
                           &bytes_written);
   if(result == CURLE_AGAIN) {
@@ -214,11 +205,6 @@ CURLcode Curl_pp_vsendf(struct Curl_easy *data,
   }
   else if(result)
     return result;
-#ifdef HAVE_GSSAPI
-  data_sec = conn->data_prot;
-  DEBUGASSERT(data_sec > PROT_NONE && data_sec < PROT_LAST);
-  conn->data_prot = (unsigned char)data_sec;
-#endif
 
   Curl_debug(data, CURLINFO_HEADER_OUT, s, bytes_written);
 
@@ -266,19 +252,9 @@ static CURLcode pingpong_read(struct Curl_easy *data,
                               int sockindex,
                               char *buffer,
                               size_t buflen,
-                              ssize_t *nread)
+                              size_t *nread)
 {
-  CURLcode result;
-#ifdef HAVE_GSSAPI
-  enum protection_level prot = data->conn->data_prot;
-  data->conn->data_prot = PROT_CLEAR;
-#endif
-  result = Curl_conn_recv(data, sockindex, buffer, buflen, nread);
-#ifdef HAVE_GSSAPI
-  DEBUGASSERT(prot  > PROT_NONE && prot < PROT_LAST);
-  data->conn->data_prot = (unsigned char)prot;
-#endif
-  return result;
+  return Curl_conn_recv(data, sockindex, buffer, buflen, nread);
 }
 
 /*
@@ -294,7 +270,7 @@ CURLcode Curl_pp_readresp(struct Curl_easy *data,
 {
   struct connectdata *conn = data->conn;
   CURLcode result = CURLE_OK;
-  ssize_t gotbytes;
+  size_t gotbytes;
   char buffer[900];
 
   *code = 0; /* 0 for errors or not done */
@@ -321,7 +297,7 @@ CURLcode Curl_pp_readresp(struct Curl_easy *data,
       if(result)
         return result;
 
-      if(gotbytes <= 0) {
+      if(!gotbytes) {
         failf(data, "response reading failed (errno: %d)", SOCKERRNO);
         return CURLE_RECV_ERROR;
       }
@@ -344,10 +320,7 @@ CURLcode Curl_pp_readresp(struct Curl_easy *data,
         size_t length = nl - line + 1;
 
         /* output debug output if that is requested */
-#ifdef HAVE_GSSAPI
-        if(!conn->sec_complete)
-#endif
-          Curl_debug(data, CURLINFO_HEADER_IN, line, length);
+        Curl_debug(data, CURLINFO_HEADER_IN, line, length);
 
         /*
          * Pass all response-lines to the callback function registered for
@@ -393,19 +366,13 @@ CURLcode Curl_pp_readresp(struct Curl_easy *data,
   return result;
 }
 
-int Curl_pp_getsock(struct Curl_easy *data,
-                    struct pingpong *pp, curl_socket_t *socks)
+CURLcode Curl_pp_pollset(struct Curl_easy *data,
+                         struct pingpong *pp,
+                         struct easy_pollset *ps)
 {
-  struct connectdata *conn = data->conn;
-  socks[0] = conn->sock[FIRSTSOCKET];
-
-  if(pp->sendleft) {
-    /* write mode */
-    return GETSOCK_WRITESOCK(0);
-  }
-
-  /* read mode */
-  return GETSOCK_READSOCK(0);
+  int flags = pp->sendleft ? CURL_POLL_OUT : CURL_POLL_IN;
+  return Curl_pollset_change(data, ps, data->conn->sock[FIRSTSOCKET],
+                             flags, 0);
 }
 
 bool Curl_pp_needs_flush(struct Curl_easy *data,

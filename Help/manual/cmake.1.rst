@@ -252,11 +252,145 @@ Options
 
 .. option:: --graphviz=<file>
 
- Generate graphviz of dependencies, see :module:`CMakeGraphVizOptions` for more.
+  Generate `Graphviz <https://www.graphviz.org/>`_ of dependencies
 
- Generate a graphviz input file that will contain all the library and
- executable dependencies in the project.  See the documentation for
- :module:`CMakeGraphVizOptions` for more details.
+  This option generates a graphviz input file that will contain all the
+  library and executable dependencies in the project showing the
+  dependencies between the targets in a project, as well as external libraries
+  which are linked against.
+
+  When running CMake with the ``--graphviz=foo.dot`` option, it produces:
+
+  * a ``foo.dot`` file, showing all dependencies in the project
+  * a ``foo.dot.<target>`` file for each target, showing on which other targets
+    it depends
+  * a ``foo.dot.<target>.dependers`` file for each target, showing which other
+    targets depend on it
+
+  Those .dot files can be converted to images using the *dot* command from the
+  Graphviz package:
+
+  .. code-block:: shell
+
+    dot -Tpng -o foo.png foo.dot
+
+  .. versionadded:: 3.10
+    The different dependency types ``PUBLIC``, ``INTERFACE`` and ``PRIVATE``
+    are represented as solid, dashed and dotted edges.
+
+  .. rubric:: Variables specific to the Graphviz support
+
+  The resulting graphs can be huge.  The look and content of the generated graphs
+  can be controlled using the file ``CMakeGraphVizOptions.cmake``.  This file is
+  first searched in :variable:`CMAKE_BINARY_DIR`, and then in
+  :variable:`CMAKE_SOURCE_DIR`.  If found, the variables set in it are used to
+  adjust options for the generated Graphviz files.
+
+  .. variable:: GRAPHVIZ_GRAPH_NAME
+
+    The graph name.
+
+    * Mandatory: NO
+    * Default: value of :variable:`CMAKE_PROJECT_NAME`
+
+  .. variable:: GRAPHVIZ_GRAPH_HEADER
+
+    The header written at the top of the Graphviz files.
+
+    * Mandatory: NO
+    * Default: "node [ fontsize = "12" ];"
+
+  .. variable:: GRAPHVIZ_NODE_PREFIX
+
+    The prefix for each node in the Graphviz files.
+
+    * Mandatory: NO
+    * Default: "node"
+
+  .. variable:: GRAPHVIZ_EXECUTABLES
+
+    Set to FALSE to exclude executables from the generated graphs.
+
+    * Mandatory: NO
+    * Default: TRUE
+
+  .. variable:: GRAPHVIZ_STATIC_LIBS
+
+    Set to FALSE to exclude static libraries from the generated graphs.
+
+    * Mandatory: NO
+    * Default: TRUE
+
+  .. variable:: GRAPHVIZ_SHARED_LIBS
+
+    Set to FALSE to exclude shared libraries from the generated graphs.
+
+    * Mandatory: NO
+    * Default: TRUE
+
+  .. variable:: GRAPHVIZ_MODULE_LIBS
+
+    Set to FALSE to exclude module libraries from the generated graphs.
+
+    * Mandatory: NO
+    * Default: TRUE
+
+  .. variable:: GRAPHVIZ_INTERFACE_LIBS
+
+    Set to FALSE to exclude interface libraries from the generated graphs.
+
+    * Mandatory: NO
+    * Default: TRUE
+
+  .. variable:: GRAPHVIZ_OBJECT_LIBS
+
+    Set to FALSE to exclude object libraries from the generated graphs.
+
+    * Mandatory: NO
+    * Default: TRUE
+
+  .. variable:: GRAPHVIZ_UNKNOWN_LIBS
+
+    Set to FALSE to exclude unknown libraries from the generated graphs.
+
+    * Mandatory: NO
+    * Default: TRUE
+
+  .. variable:: GRAPHVIZ_EXTERNAL_LIBS
+
+    Set to FALSE to exclude external libraries from the generated graphs.
+
+    * Mandatory: NO
+    * Default: TRUE
+
+  .. variable:: GRAPHVIZ_CUSTOM_TARGETS
+
+    Set to TRUE to include custom targets in the generated graphs.
+
+    * Mandatory: NO
+    * Default: FALSE
+
+  .. variable:: GRAPHVIZ_IGNORE_TARGETS
+
+    A list of regular expressions for names of targets to exclude from the
+    generated graphs.
+
+    * Mandatory: NO
+    * Default: empty
+
+  .. variable:: GRAPHVIZ_GENERATE_PER_TARGET
+
+    Set to FALSE to not generate per-target graphs ``foo.dot.<target>``.
+
+    * Mandatory: NO
+    * Default: TRUE
+
+  .. variable:: GRAPHVIZ_GENERATE_DEPENDERS
+
+    Set to FALSE to not generate depender graphs ``foo.dot.<target>.dependers``.
+
+    * Mandatory: NO
+    * Default: TRUE
 
 .. option:: --system-information [file]
 
@@ -1029,6 +1163,19 @@ Available commands are:
   ``copy_directory_if_different`` does follow symlinks.
   The command fails when the source directory does not exist.
 
+.. option:: copy_directory_if_newer <dir>... <destination>
+
+  .. versionadded:: 4.2
+
+  Copy content of ``<dir>...`` directories to ``<destination>`` directory
+  if source files are newer than destination files (based on file timestamps).
+  If ``<destination>`` directory does not exist it will be created.
+
+  ``copy_directory_if_newer`` does follow symlinks.
+  The command fails when the source directory does not exist.
+  This is faster than ``copy_directory_if_different`` as it only compares
+  file timestamps instead of file contents.
+
 .. option:: copy_if_different <file>... <destination>
 
   Copy files to ``<destination>`` (either file or directory) if
@@ -1039,6 +1186,18 @@ Available commands are:
 
   .. versionadded:: 3.5
     Support for multiple input files.
+
+.. option:: copy_if_newer <file>... <destination>
+
+  .. versionadded:: 4.2
+
+  Copy files to ``<destination>`` (either file or directory) if
+  source files are newer than destination files (based on file timestamps).
+  If multiple files are specified, the ``<destination>`` must be
+  directory and it must exist.
+  ``copy_if_newer`` does follow symlinks.
+  This is faster than ``copy_if_different`` as it only compares
+  file timestamps instead of file contents.
 
 .. option:: create_symlink <old> <new>
 

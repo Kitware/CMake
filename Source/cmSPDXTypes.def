@@ -1,0 +1,54 @@
+/* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
+   file LICENSE.rst or https://cmake.org/licensing for details.  */
+#ifndef X_SPDX
+#  define X_SPDX(classtype, enumid, member, camel)
+#endif
+
+// Convenience
+X_SPDX(cmSPDXIdentifierReference, CM_IDENTIFIER_REFERENCE, IdentifierReference,
+       identifierReference)
+
+// Core
+X_SPDX(cmSPDXAgent, CORE_AGENT, Agent, agent)
+X_SPDX(cmSPDXAnnotation, CORE_ANNOTATION, Annotation, annotation)
+X_SPDX(cmSPDXBom, CORE_BOM, Bom, bom)
+X_SPDX(cmSPDXBundle, CORE_BUNDLE, Bundle, bundle)
+X_SPDX(cmSPDXCreationInfo, CORE_CREATION_INFO, CreationInfo, creationInfo)
+X_SPDX(cmSPDXDictionaryEntry, CORE_DICTIONARY_ENTRY, DictionaryEntry,
+       dictionaryEntry)
+X_SPDX(cmSPDXExternalIdentifier, CORE_EXTERNAL_IDENTIFIER, ExternalIdentifier,
+       externalIdentifier)
+X_SPDX(cmSPDXExternalMap, CORE_EXTERNAL_MAP, ExternalMap, externalMap)
+X_SPDX(cmSPDXExternalRef, CORE_EXTERNAL_REF, ExternalRef, externalRef)
+X_SPDX(cmSPDXHash, CORE_HASH, Hash, hash)
+X_SPDX(cmSPDXIndividualElement, CORE_INDIVIDUAL_ELEMENT, IndividualElement,
+       individualElement)
+X_SPDX(cmSPDXLifecycleScopedRelationship, CORE_LIFECYCLE_SCOPED_RELATIONSHIP,
+       LifecycleScopedRelationship, lifecycleScopedRelationship)
+X_SPDX(cmSPDXNamespaceMap, CORE_NAMESPACE_MAP, NamespaceMap, namespaceMap)
+X_SPDX(cmSPDXOrganization, CORE_ORGANIZATION, Organization, organization)
+X_SPDX(cmSPDXPackageVerificationCode, CORE_PACKAGE_VERIFICATION_CODE,
+       PackageVerificationCode, packageVerificationCode)
+X_SPDX(cmSPDXPerson, CORE_PERSON, Person, person)
+X_SPDX(cmSPDXPositiveIntegerRange, CORE_POSITIVE_INTEGER_RANGE,
+       PositiveIntegerRange, positiveIntegerRange)
+X_SPDX(cmSPDXRelationship, CORE_RELATIONSHIP, Relationship, relationship)
+X_SPDX(cmSPDXSoftwareAgent, CORE_SOFTWARE_AGENT, SoftwareAgent, softwareAgent)
+X_SPDX(cmSPDXSpdxDocument, CORE_SPDX_DOCUMENT, SpdxDocument, spdxDocument)
+X_SPDX(cmSPDXTool, CORE_TOOL, Tool, tool)
+
+// Software
+X_SPDX(cmSPDXContentIdentifier, SOFTWARE_CONTENT_IDENTIFIER, ContentIdentifier,
+       contentIdentifier)
+X_SPDX(cmSPDXFile, SOFTWARE_FILE, File, file)
+X_SPDX(cmSPDXPackage, SOFTWARE_PACKAGE, Package, package)
+X_SPDX(cmSPDXSbom, SOFTWARE_SBOM, Sbom, sbom)
+X_SPDX(cmSPDXSnippet, SOFTWARE_SNIPPET, Snippet, snippet)
+
+// SimpleLicensing
+X_SPDX(cmSPDXLicenseExpression, SIMPLE_LICENSING_LICENSE_EXPRESSION,
+       LicenseExpression, licenseExpression)
+X_SPDX(cmSPDXSimpleLicensingText, SIMPLE_LICENSING_SIMPLE_LICENSING_TEXT,
+       SimpleLicensingText, simpleLicensingText)
+
+#undef X_SPDX

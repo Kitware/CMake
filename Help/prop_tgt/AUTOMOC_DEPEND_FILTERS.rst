@@ -22,7 +22,7 @@ file gets rebuilt even when the source file itself doesn't change.
 
 If any of the extracted files is :prop_sf:`GENERATED` or if it is not in the
 target's sources, then it might be necessary to add it to the
-:ref:`<ORIGIN>_autogen` target  dependencies.
+:ref:`<ORIGIN>_autogen <<ORIGIN>_autogen>` target dependencies.
 See :prop_tgt:`AUTOGEN_TARGET_DEPENDS` for reference.
 
 By default ``AUTOMOC_DEPEND_FILTERS`` is initialized from

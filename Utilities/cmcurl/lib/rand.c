@@ -26,9 +26,6 @@
 
 #include <limits.h>
 
-#ifdef HAVE_FCNTL_H
-#include <fcntl.h>
-#endif
 #ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
@@ -41,20 +38,20 @@
 #include "rand.h"
 #include "escape.h"
 
-/* The last 3 #include files should be in this order */
-#include "curl_printf.h"
+/* The last 2 #include files should be in this order */
 #include "curl_memory.h"
 #include "memdebug.h"
 
 #ifdef _WIN32
 
-#if defined(_WIN32_WINNT) && _WIN32_WINNT >= 0x600 && \
+#if defined(_WIN32_WINNT) && _WIN32_WINNT >= _WIN32_WINNT_VISTA && \
   !defined(CURL_WINDOWS_UWP)
 #  define HAVE_WIN_BCRYPTGENRANDOM
 #  include <bcrypt.h>
 #  ifdef _MSC_VER
 #    pragma comment(lib, "bcrypt.lib")
 #  endif
+   /* Offered by mingw-w64 v3+. MS SDK v7.0A+. */
 #  ifndef BCRYPT_USE_SYSTEM_PREFERRED_RNG
 #  define BCRYPT_USE_SYSTEM_PREFERRED_RNG 0x00000002
 #  endif
@@ -72,7 +69,7 @@ CURLcode Curl_win32_random(unsigned char *entropy, size_t length)
 {
   memset(entropy, 0, length);
 
-#if defined(HAVE_WIN_BCRYPTGENRANDOM)
+#ifdef HAVE_WIN_BCRYPTGENRANDOM
   if(BCryptGenRandom(NULL, entropy, (ULONG)length,
                      BCRYPT_USE_SYSTEM_PREFERRED_RNG) != STATUS_SUCCESS)
     return CURLE_FAILED_INIT;
@@ -100,11 +97,11 @@ CURLcode Curl_win32_random(unsigned char *entropy, size_t length)
 }
 #endif
 
-#if !defined(USE_SSL)
+#ifndef USE_SSL
 /* ---- possibly non-cryptographic version following ---- */
 static CURLcode weak_random(struct Curl_easy *data,
-                          unsigned char *entropy,
-                          size_t length) /* always 4, size of int */
+                            unsigned char *entropy,
+                            size_t length) /* always 4, size of int */
 {
   unsigned int r;
   DEBUGASSERT(length == sizeof(int));
@@ -119,7 +116,7 @@ static CURLcode weak_random(struct Curl_easy *data,
   }
 #endif
 
-#if defined(HAVE_ARC4RANDOM)
+#ifdef HAVE_ARC4RANDOM
   (void)data;
   r = (unsigned int)arc4random();
   memcpy(entropy, &r, length);
@@ -146,12 +143,6 @@ static CURLcode weak_random(struct Curl_easy *data,
 #endif
   return CURLE_OK;
 }
-#endif
-
-#ifdef USE_SSL
-#define _random(x,y,z) Curl_ssl_random(x,y,z)
-#else
-#define _random(x,y,z) weak_random(x,y,z)
 #endif
 
 static CURLcode randit(struct Curl_easy *data, unsigned int *rnd,
@@ -184,7 +175,11 @@ static CURLcode randit(struct Curl_easy *data, unsigned int *rnd,
 #endif
 
   /* data may be NULL! */
-  return _random(data, (unsigned char *)rnd, sizeof(*rnd));
+#ifdef USE_SSL
+  return Curl_ssl_random(data, (unsigned char *)rnd, sizeof(*rnd));
+#else
+  return weak_random(data, (unsigned char *)rnd, sizeof(*rnd));
+#endif
 }
 
 /*

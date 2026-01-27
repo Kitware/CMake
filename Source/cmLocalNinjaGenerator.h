@@ -6,7 +6,6 @@
 
 #include <iosfwd>
 #include <map>
-#include <memory>
 #include <set>
 #include <string>
 #include <vector>
@@ -15,6 +14,7 @@
 #include "cmLocalCommonGenerator.h"
 #include "cmNinjaTypes.h"
 #include "cmOutputConverter.h"
+#include "cmStateTypes.h"
 
 class cmCustomCommand;
 class cmCustomCommandGenerator;
@@ -24,7 +24,6 @@ class cmGlobalGenerator;
 class cmGlobalNinjaGenerator;
 class cmListFileBacktrace;
 class cmMakefile;
-class cmRulePlaceholderExpander;
 class cmake;
 
 /**
@@ -62,6 +61,9 @@ public:
   {
     return this->HomeRelativeOutputPath;
   }
+  std::string GetObjectOutputRoot(
+    cmStateEnums::IntermediateDirKind kind =
+      cmStateEnums::IntermediateDirKind::ObjectFiles) const override;
 
   std::string BuildCommandLine(
     std::vector<std::string> const& cmdLines, std::string const& outputConfig,

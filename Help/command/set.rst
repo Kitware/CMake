@@ -44,15 +44,16 @@ Set Cache Entry
 ^^^^^^^^^^^^^^^
 
 .. signature::
-  set(<variable> <value>... CACHE <type> <docstring> [FORCE])
+  set(CACHE{<variable>} [TYPE <type>] [HELP <helpstring>...] [FORCE]
+                        VALUE [<value>...])
   :target: CACHE
 
-  Sets the given cache ``<variable>`` (cache entry).  Since cache entries
-  are meant to provide user-settable values this does not overwrite
-  existing cache entries by default.  Use the ``FORCE`` option to
-  overwrite existing entries.
+  .. versionadded:: 4.2
 
-  The ``<type>`` must be specified as one of:
+  Sets the given cache ``<variable>`` (cache entry). The options are:
+
+  ``TYPE <type>``
+    Specify the type of the cache entry. The ``<type>`` must be one of:
 
     ``BOOL``
       Boolean ``ON/OFF`` value.
@@ -77,9 +78,26 @@ Set Cache Entry
       They may be used to store variables persistently across runs.
       Use of this type implies ``FORCE``.
 
-  The ``<docstring>`` must be specified as a line of text
-  providing a quick summary of the option
-  for presentation to :manual:`cmake-gui(1)` users.
+    If ``TYPE`` is not specified, if the cache variable already exist and its
+    type is not ``UNINITIALIZED``, the type previously specified will be kept
+    otherwise, ``STRING`` will be used.
+
+  ``HELP <helpstring>...``
+    The ``<helpstring>`` must be specified as a line of text providing a quick
+    summary of the option for presentation to :manual:`cmake-gui(1)` users. If
+    more than one string is given, they are concatenated into a single string
+    with no separator between them.
+
+    If ``HELP`` is not specified, an empty string will be used.
+
+  ``FORCE``
+    Since cache entries are meant to provide user-settable values this does not
+    overwrite existing cache entries by default.  Use the ``FORCE`` option to
+    overwrite existing entries.
+
+  ``VALUE <value>...``
+    List of values to be set to the cache ``<variable>``. This argument must be
+    always the last one.
 
   If the cache entry does not exist prior to the call or the ``FORCE``
   option is given then the cache entry will be set to the given value.
@@ -100,6 +118,13 @@ Set Cache Entry
   and the ``<value>`` provided on the command line is a relative path,
   then the ``set`` command will treat the path as relative to the
   current working directory and convert it to an absolute path.
+
+.. signature::
+  set(<variable> <value>... CACHE <type> <docstring> [FORCE])
+  :target: CACHE_legacy
+
+  This signature is supported for compatibility purpose. Use preferably the
+  other one.
 
 Set Environment Variable
 ^^^^^^^^^^^^^^^^^^^^^^^^

@@ -11,7 +11,7 @@ FOO_TEST_FILE_ZOT :FOO_TEST_FILE_ZOT-NOTFOUND
 FOO_TEST_PATH_FOO :FOO_TEST_PATH_FOO-NOTFOUND
 FOO_TEST_PATH_ZOT :FOO_TEST_PATH_ZOT-NOTFOUND
 FOO_TEST_PROG_FOO :FOO_TEST_PROG_FOO-NOTFOUND
-BAR_CMAKE_FILE    :<base>/FindBar.cmake
+BAR_CMAKE_FILE    :<base>/FindBar\.cmake
 BAR_TEST_FILE_FOO :BAR_TEST_FILE_FOO-NOTFOUND
 BAR_TEST_FILE_BAR :BAR_TEST_FILE_BAR-NOTFOUND
 BAR_TEST_FILE_ZOT :BAR_TEST_FILE_ZOT-NOTFOUND
@@ -29,20 +29,20 @@ Bar_ROOT      :
 ENV{Bar_ROOT} :
 
 find_package\(Foo COMPONENTS BarModule\)
-FOO_TEST_FILE_FOO :<base>/foo/cmake_root/include/foo.h
-FOO_TEST_FILE_ZOT :<base>/foo/cmake_root/include/zot/zot.h
+FOO_TEST_FILE_FOO :<base>/foo/cmake_root/include/foo\.h
+FOO_TEST_FILE_ZOT :<base>/foo/cmake_root/include/zot/zot\.h
 FOO_TEST_PATH_FOO :<base>/foo/cmake_root/include
 FOO_TEST_PATH_ZOT :<base>/foo/cmake_root/include/zot
-FOO_TEST_PROG_FOO :<base>/foo/cmake_root/bin/foo.exe
-BAR_CMAKE_FILE    :<base>/FindBar.cmake
-BAR_TEST_FILE_FOO :<base>/foo/cmake_root/include/foo.h
-BAR_TEST_FILE_BAR :<base>/foo/cmake_root/include/bar.h
-BAR_TEST_FILE_ZOT :<base>/foo/cmake_root/include/zot/zot.h
+FOO_TEST_PROG_FOO :<base>/foo/cmake_root/bin/foo\.exe
+BAR_CMAKE_FILE    :<base>/FindBar\.cmake
+BAR_TEST_FILE_FOO :<base>/foo/cmake_root/include/foo\.h
+BAR_TEST_FILE_BAR :<base>/foo/cmake_root/include/bar\.h
+BAR_TEST_FILE_ZOT :<base>/foo/cmake_root/include/zot/zot\.h
 BAR_TEST_PATH_FOO :<base>/foo/cmake_root/include
 BAR_TEST_PATH_BAR :<base>/foo/cmake_root/include
 BAR_TEST_PATH_ZOT :<base>/foo/cmake_root/include/zot
-BAR_TEST_PROG_FOO :<base>/foo/cmake_root/bin/foo.exe
-BAR_TEST_PROG_BAR :<base>/foo/cmake_root/bin/bar.exe
+BAR_TEST_PROG_FOO :<base>/foo/cmake_root/bin/foo\.exe
+BAR_TEST_PROG_BAR :<base>/foo/cmake_root/bin/bar\.exe
 
 ----------
 Foo_ROOT      :<base>/foo/cmake_root
@@ -52,20 +52,20 @@ Bar_ROOT      :<base>/bar/cmake_root
 ENV{Bar_ROOT} :
 
 find_package\(Foo COMPONENTS BarModule\)
-FOO_TEST_FILE_FOO :<base>/foo/cmake_root/include/foo.h
-FOO_TEST_FILE_ZOT :<base>/foo/cmake_root/include/zot/zot.h
+FOO_TEST_FILE_FOO :<base>/foo/cmake_root/include/foo\.h
+FOO_TEST_FILE_ZOT :<base>/foo/cmake_root/include/zot/zot\.h
 FOO_TEST_PATH_FOO :<base>/foo/cmake_root/include
 FOO_TEST_PATH_ZOT :<base>/foo/cmake_root/include/zot
-FOO_TEST_PROG_FOO :<base>/foo/cmake_root/bin/foo.exe
-BAR_CMAKE_FILE    :<base>/FindBar.cmake
-BAR_TEST_FILE_FOO :<base>/foo/cmake_root/include/foo.h
-BAR_TEST_FILE_BAR :<base>/bar/cmake_root/include/bar.h
-BAR_TEST_FILE_ZOT :<base>/bar/cmake_root/include/zot/zot.h
+FOO_TEST_PROG_FOO :<base>/foo/cmake_root/bin/foo\.exe
+BAR_CMAKE_FILE    :<base>/FindBar\.cmake
+BAR_TEST_FILE_FOO :<base>/foo/cmake_root/include/foo\.h
+BAR_TEST_FILE_BAR :<base>/bar/cmake_root/include/bar\.h
+BAR_TEST_FILE_ZOT :<base>/bar/cmake_root/include/zot/zot\.h
 BAR_TEST_PATH_FOO :<base>/foo/cmake_root/include
 BAR_TEST_PATH_BAR :<base>/bar/cmake_root/include
 BAR_TEST_PATH_ZOT :<base>/bar/cmake_root/include/zot
-BAR_TEST_PROG_FOO :<base>/foo/cmake_root/bin/foo.exe
-BAR_TEST_PROG_BAR :<base>/bar/cmake_root/bin/bar.exe
+BAR_TEST_PROG_FOO :<base>/foo/cmake_root/bin/foo\.exe
+BAR_TEST_PROG_BAR :<base>/bar/cmake_root/bin/bar\.exe
 
 ----------
 Foo_ROOT      :<base>/foo/cmake_root
@@ -75,20 +75,20 @@ Bar_ROOT      :
 ENV{Bar_ROOT} :<base>/bar/env_root
 
 find_package\(Foo COMPONENTS BarModule\)
-FOO_TEST_FILE_FOO :<base>/foo/cmake_root/include/foo.h
-FOO_TEST_FILE_ZOT :<base>/foo/cmake_root/include/zot/zot.h
+FOO_TEST_FILE_FOO :<base>/foo/cmake_root/include/foo\.h
+FOO_TEST_FILE_ZOT :<base>/foo/cmake_root/include/zot/zot\.h
 FOO_TEST_PATH_FOO :<base>/foo/cmake_root/include
 FOO_TEST_PATH_ZOT :<base>/foo/cmake_root/include/zot
-FOO_TEST_PROG_FOO :<base>/foo/cmake_root/bin/foo.exe
-BAR_CMAKE_FILE    :<base>/FindBar.cmake
-BAR_TEST_FILE_FOO :<base>/foo/cmake_root/include/foo.h
-BAR_TEST_FILE_BAR :<base>/bar/env_root/include/bar.h
-BAR_TEST_FILE_ZOT :<base>/bar/env_root/include/zot/zot.h
+FOO_TEST_PROG_FOO :<base>/foo/cmake_root/bin/foo\.exe
+BAR_CMAKE_FILE    :<base>/FindBar\.cmake
+BAR_TEST_FILE_FOO :<base>/foo/cmake_root/include/foo\.h
+BAR_TEST_FILE_BAR :<base>/bar/env_root/include/bar\.h
+BAR_TEST_FILE_ZOT :<base>/bar/env_root/include/zot/zot\.h
 BAR_TEST_PATH_FOO :<base>/foo/cmake_root/include
 BAR_TEST_PATH_BAR :<base>/bar/env_root/include
 BAR_TEST_PATH_ZOT :<base>/bar/env_root/include/zot
-BAR_TEST_PROG_FOO :<base>/foo/cmake_root/bin/foo.exe
-BAR_TEST_PROG_BAR :<base>/bar/env_root/bin/bar.exe
+BAR_TEST_PROG_FOO :<base>/foo/cmake_root/bin/foo\.exe
+BAR_TEST_PROG_BAR :<base>/bar/env_root/bin/bar\.exe
 
 ----------
 Foo_ROOT      :<base>/foo/cmake_root
@@ -98,20 +98,20 @@ Bar_ROOT      :<base>/bar/cmake_root
 ENV{Bar_ROOT} :<base>/bar/env_root
 
 find_package\(Foo COMPONENTS BarModule\)
-FOO_TEST_FILE_FOO :<base>/foo/cmake_root/include/foo.h
-FOO_TEST_FILE_ZOT :<base>/foo/cmake_root/include/zot/zot.h
+FOO_TEST_FILE_FOO :<base>/foo/cmake_root/include/foo\.h
+FOO_TEST_FILE_ZOT :<base>/foo/cmake_root/include/zot/zot\.h
 FOO_TEST_PATH_FOO :<base>/foo/cmake_root/include
 FOO_TEST_PATH_ZOT :<base>/foo/cmake_root/include/zot
-FOO_TEST_PROG_FOO :<base>/foo/cmake_root/bin/foo.exe
-BAR_CMAKE_FILE    :<base>/FindBar.cmake
-BAR_TEST_FILE_FOO :<base>/foo/cmake_root/include/foo.h
-BAR_TEST_FILE_BAR :<base>/bar/cmake_root/include/bar.h
-BAR_TEST_FILE_ZOT :<base>/bar/cmake_root/include/zot/zot.h
+FOO_TEST_PROG_FOO :<base>/foo/cmake_root/bin/foo\.exe
+BAR_CMAKE_FILE    :<base>/FindBar\.cmake
+BAR_TEST_FILE_FOO :<base>/foo/cmake_root/include/foo\.h
+BAR_TEST_FILE_BAR :<base>/bar/cmake_root/include/bar\.h
+BAR_TEST_FILE_ZOT :<base>/bar/cmake_root/include/zot/zot\.h
 BAR_TEST_PATH_FOO :<base>/foo/cmake_root/include
 BAR_TEST_PATH_BAR :<base>/bar/cmake_root/include
 BAR_TEST_PATH_ZOT :<base>/bar/cmake_root/include/zot
-BAR_TEST_PROG_FOO :<base>/foo/cmake_root/bin/foo.exe
-BAR_TEST_PROG_BAR :<base>/bar/cmake_root/bin/bar.exe
+BAR_TEST_PROG_FOO :<base>/foo/cmake_root/bin/foo\.exe
+BAR_TEST_PROG_BAR :<base>/bar/cmake_root/bin/bar\.exe
 
 ----------
 Foo_ROOT      :<base>/foo/cmake_root
@@ -121,20 +121,20 @@ Bar_ROOT      :
 ENV{Bar_ROOT} :
 
 find_package\(Foo COMPONENTS BarModule\)
-FOO_TEST_FILE_FOO :<base>/foo/cmake_root/include/foo.h
-FOO_TEST_FILE_ZOT :<base>/foo/cmake_root/include/zot/zot.h
+FOO_TEST_FILE_FOO :<base>/foo/cmake_root/include/foo\.h
+FOO_TEST_FILE_ZOT :<base>/foo/cmake_root/include/zot/zot\.h
 FOO_TEST_PATH_FOO :<base>/foo/cmake_root/include
 FOO_TEST_PATH_ZOT :<base>/foo/cmake_root/include/zot
-FOO_TEST_PROG_FOO :<base>/foo/cmake_root/bin/foo.exe
-BAR_CMAKE_FILE    :<base>/FindBar.cmake
-BAR_TEST_FILE_FOO :<base>/foo/cmake_root/include/foo.h
-BAR_TEST_FILE_BAR :<base>/foo/cmake_root/include/bar.h
-BAR_TEST_FILE_ZOT :<base>/foo/cmake_root/include/zot/zot.h
+FOO_TEST_PROG_FOO :<base>/foo/cmake_root/bin/foo\.exe
+BAR_CMAKE_FILE    :<base>/FindBar\.cmake
+BAR_TEST_FILE_FOO :<base>/foo/cmake_root/include/foo\.h
+BAR_TEST_FILE_BAR :<base>/foo/cmake_root/include/bar\.h
+BAR_TEST_FILE_ZOT :<base>/foo/cmake_root/include/zot/zot\.h
 BAR_TEST_PATH_FOO :<base>/foo/cmake_root/include
 BAR_TEST_PATH_BAR :<base>/foo/cmake_root/include
 BAR_TEST_PATH_ZOT :<base>/foo/cmake_root/include/zot
-BAR_TEST_PROG_FOO :<base>/foo/cmake_root/bin/foo.exe
-BAR_TEST_PROG_BAR :<base>/foo/cmake_root/bin/bar.exe
+BAR_TEST_PROG_FOO :<base>/foo/cmake_root/bin/foo\.exe
+BAR_TEST_PROG_BAR :<base>/foo/cmake_root/bin/bar\.exe
 
 ----------
 Foo_ROOT      :<base>/foo/cmake_root
@@ -144,20 +144,20 @@ Bar_ROOT      :<base>/bar/cmake_root
 ENV{Bar_ROOT} :
 
 find_package\(Foo COMPONENTS BarModule\)
-FOO_TEST_FILE_FOO :<base>/foo/cmake_root/include/foo.h
-FOO_TEST_FILE_ZOT :<base>/foo/cmake_root/include/zot/zot.h
+FOO_TEST_FILE_FOO :<base>/foo/cmake_root/include/foo\.h
+FOO_TEST_FILE_ZOT :<base>/foo/cmake_root/include/zot/zot\.h
 FOO_TEST_PATH_FOO :<base>/foo/cmake_root/include
 FOO_TEST_PATH_ZOT :<base>/foo/cmake_root/include/zot
-FOO_TEST_PROG_FOO :<base>/foo/cmake_root/bin/foo.exe
-BAR_CMAKE_FILE    :<base>/FindBar.cmake
-BAR_TEST_FILE_FOO :<base>/foo/cmake_root/include/foo.h
-BAR_TEST_FILE_BAR :<base>/bar/cmake_root/include/bar.h
-BAR_TEST_FILE_ZOT :<base>/bar/cmake_root/include/zot/zot.h
+FOO_TEST_PROG_FOO :<base>/foo/cmake_root/bin/foo\.exe
+BAR_CMAKE_FILE    :<base>/FindBar\.cmake
+BAR_TEST_FILE_FOO :<base>/foo/cmake_root/include/foo\.h
+BAR_TEST_FILE_BAR :<base>/bar/cmake_root/include/bar\.h
+BAR_TEST_FILE_ZOT :<base>/bar/cmake_root/include/zot/zot\.h
 BAR_TEST_PATH_FOO :<base>/foo/cmake_root/include
 BAR_TEST_PATH_BAR :<base>/bar/cmake_root/include
 BAR_TEST_PATH_ZOT :<base>/bar/cmake_root/include/zot
-BAR_TEST_PROG_FOO :<base>/foo/cmake_root/bin/foo.exe
-BAR_TEST_PROG_BAR :<base>/bar/cmake_root/bin/bar.exe
+BAR_TEST_PROG_FOO :<base>/foo/cmake_root/bin/foo\.exe
+BAR_TEST_PROG_BAR :<base>/bar/cmake_root/bin/bar\.exe
 
 ----------
 Foo_ROOT      :<base>/foo/cmake_root
@@ -167,20 +167,20 @@ Bar_ROOT      :
 ENV{Bar_ROOT} :<base>/bar/env_root
 
 find_package\(Foo COMPONENTS BarModule\)
-FOO_TEST_FILE_FOO :<base>/foo/cmake_root/include/foo.h
-FOO_TEST_FILE_ZOT :<base>/foo/cmake_root/include/zot/zot.h
+FOO_TEST_FILE_FOO :<base>/foo/cmake_root/include/foo\.h
+FOO_TEST_FILE_ZOT :<base>/foo/cmake_root/include/zot/zot\.h
 FOO_TEST_PATH_FOO :<base>/foo/cmake_root/include
 FOO_TEST_PATH_ZOT :<base>/foo/cmake_root/include/zot
-FOO_TEST_PROG_FOO :<base>/foo/cmake_root/bin/foo.exe
-BAR_CMAKE_FILE    :<base>/FindBar.cmake
-BAR_TEST_FILE_FOO :<base>/foo/cmake_root/include/foo.h
-BAR_TEST_FILE_BAR :<base>/bar/env_root/include/bar.h
-BAR_TEST_FILE_ZOT :<base>/bar/env_root/include/zot/zot.h
+FOO_TEST_PROG_FOO :<base>/foo/cmake_root/bin/foo\.exe
+BAR_CMAKE_FILE    :<base>/FindBar\.cmake
+BAR_TEST_FILE_FOO :<base>/foo/cmake_root/include/foo\.h
+BAR_TEST_FILE_BAR :<base>/bar/env_root/include/bar\.h
+BAR_TEST_FILE_ZOT :<base>/bar/env_root/include/zot/zot\.h
 BAR_TEST_PATH_FOO :<base>/foo/cmake_root/include
 BAR_TEST_PATH_BAR :<base>/bar/env_root/include
 BAR_TEST_PATH_ZOT :<base>/bar/env_root/include/zot
-BAR_TEST_PROG_FOO :<base>/foo/cmake_root/bin/foo.exe
-BAR_TEST_PROG_BAR :<base>/bar/env_root/bin/bar.exe
+BAR_TEST_PROG_FOO :<base>/foo/cmake_root/bin/foo\.exe
+BAR_TEST_PROG_BAR :<base>/bar/env_root/bin/bar\.exe
 
 ----------
 Foo_ROOT      :<base>/foo/cmake_root
@@ -190,20 +190,20 @@ Bar_ROOT      :<base>/bar/cmake_root
 ENV{Bar_ROOT} :<base>/bar/env_root
 
 find_package\(Foo COMPONENTS BarModule\)
-FOO_TEST_FILE_FOO :<base>/foo/cmake_root/include/foo.h
-FOO_TEST_FILE_ZOT :<base>/foo/cmake_root/include/zot/zot.h
+FOO_TEST_FILE_FOO :<base>/foo/cmake_root/include/foo\.h
+FOO_TEST_FILE_ZOT :<base>/foo/cmake_root/include/zot/zot\.h
 FOO_TEST_PATH_FOO :<base>/foo/cmake_root/include
 FOO_TEST_PATH_ZOT :<base>/foo/cmake_root/include/zot
-FOO_TEST_PROG_FOO :<base>/foo/cmake_root/bin/foo.exe
-BAR_CMAKE_FILE    :<base>/FindBar.cmake
-BAR_TEST_FILE_FOO :<base>/foo/cmake_root/include/foo.h
-BAR_TEST_FILE_BAR :<base>/bar/cmake_root/include/bar.h
-BAR_TEST_FILE_ZOT :<base>/bar/cmake_root/include/zot/zot.h
+FOO_TEST_PROG_FOO :<base>/foo/cmake_root/bin/foo\.exe
+BAR_CMAKE_FILE    :<base>/FindBar\.cmake
+BAR_TEST_FILE_FOO :<base>/foo/cmake_root/include/foo\.h
+BAR_TEST_FILE_BAR :<base>/bar/cmake_root/include/bar\.h
+BAR_TEST_FILE_ZOT :<base>/bar/cmake_root/include/zot/zot\.h
 BAR_TEST_PATH_FOO :<base>/foo/cmake_root/include
 BAR_TEST_PATH_BAR :<base>/bar/cmake_root/include
 BAR_TEST_PATH_ZOT :<base>/bar/cmake_root/include/zot
-BAR_TEST_PROG_FOO :<base>/foo/cmake_root/bin/foo.exe
-BAR_TEST_PROG_BAR :<base>/bar/cmake_root/bin/bar.exe
+BAR_TEST_PROG_FOO :<base>/foo/cmake_root/bin/foo\.exe
+BAR_TEST_PROG_BAR :<base>/bar/cmake_root/bin/bar\.exe
 
 ----------
 Foo_ROOT      :<base>/foo/cmake_root
@@ -213,20 +213,20 @@ Bar_ROOT      :
 ENV{Bar_ROOT} :
 
 find_package\(Foo COMPONENTS BarModule\)
-FOO_TEST_FILE_FOO :<base>/foo/cmake_root/include/foo.h
-FOO_TEST_FILE_ZOT :<base>/foo/cmake_root/include/zot/zot.h
+FOO_TEST_FILE_FOO :<base>/foo/cmake_root/include/foo\.h
+FOO_TEST_FILE_ZOT :<base>/foo/cmake_root/include/zot/zot\.h
 FOO_TEST_PATH_FOO :<base>/foo/cmake_root/include
 FOO_TEST_PATH_ZOT :<base>/foo/cmake_root/include/zot
-FOO_TEST_PROG_FOO :<base>/foo/cmake_root/bin/foo.exe
-BAR_CMAKE_FILE    :<base>/FindBar.cmake
-BAR_TEST_FILE_FOO :<base>/foo/cmake_root/include/foo.h
-BAR_TEST_FILE_BAR :<base>/foo/cmake_root/include/bar.h
-BAR_TEST_FILE_ZOT :<base>/foo/cmake_root/include/zot/zot.h
+FOO_TEST_PROG_FOO :<base>/foo/cmake_root/bin/foo\.exe
+BAR_CMAKE_FILE    :<base>/FindBar\.cmake
+BAR_TEST_FILE_FOO :<base>/foo/cmake_root/include/foo\.h
+BAR_TEST_FILE_BAR :<base>/foo/cmake_root/include/bar\.h
+BAR_TEST_FILE_ZOT :<base>/foo/cmake_root/include/zot/zot\.h
 BAR_TEST_PATH_FOO :<base>/foo/cmake_root/include
 BAR_TEST_PATH_BAR :<base>/foo/cmake_root/include
 BAR_TEST_PATH_ZOT :<base>/foo/cmake_root/include/zot
-BAR_TEST_PROG_FOO :<base>/foo/cmake_root/bin/foo.exe
-BAR_TEST_PROG_BAR :<base>/foo/cmake_root/bin/bar.exe
+BAR_TEST_PROG_FOO :<base>/foo/cmake_root/bin/foo\.exe
+BAR_TEST_PROG_BAR :<base>/foo/cmake_root/bin/bar\.exe
 
 ----------
 Foo_ROOT      :<base>/foo/cmake_root
@@ -236,20 +236,20 @@ Bar_ROOT      :<base>/bar/cmake_root
 ENV{Bar_ROOT} :
 
 find_package\(Foo COMPONENTS BarModule\)
-FOO_TEST_FILE_FOO :<base>/foo/cmake_root/include/foo.h
-FOO_TEST_FILE_ZOT :<base>/foo/cmake_root/include/zot/zot.h
+FOO_TEST_FILE_FOO :<base>/foo/cmake_root/include/foo\.h
+FOO_TEST_FILE_ZOT :<base>/foo/cmake_root/include/zot/zot\.h
 FOO_TEST_PATH_FOO :<base>/foo/cmake_root/include
 FOO_TEST_PATH_ZOT :<base>/foo/cmake_root/include/zot
-FOO_TEST_PROG_FOO :<base>/foo/cmake_root/bin/foo.exe
-BAR_CMAKE_FILE    :<base>/FindBar.cmake
-BAR_TEST_FILE_FOO :<base>/foo/cmake_root/include/foo.h
-BAR_TEST_FILE_BAR :<base>/bar/cmake_root/include/bar.h
-BAR_TEST_FILE_ZOT :<base>/bar/cmake_root/include/zot/zot.h
+FOO_TEST_PROG_FOO :<base>/foo/cmake_root/bin/foo\.exe
+BAR_CMAKE_FILE    :<base>/FindBar\.cmake
+BAR_TEST_FILE_FOO :<base>/foo/cmake_root/include/foo\.h
+BAR_TEST_FILE_BAR :<base>/bar/cmake_root/include/bar\.h
+BAR_TEST_FILE_ZOT :<base>/bar/cmake_root/include/zot/zot\.h
 BAR_TEST_PATH_FOO :<base>/foo/cmake_root/include
 BAR_TEST_PATH_BAR :<base>/bar/cmake_root/include
 BAR_TEST_PATH_ZOT :<base>/bar/cmake_root/include/zot
-BAR_TEST_PROG_FOO :<base>/foo/cmake_root/bin/foo.exe
-BAR_TEST_PROG_BAR :<base>/bar/cmake_root/bin/bar.exe
+BAR_TEST_PROG_FOO :<base>/foo/cmake_root/bin/foo\.exe
+BAR_TEST_PROG_BAR :<base>/bar/cmake_root/bin/bar\.exe
 
 ----------
 Foo_ROOT      :<base>/foo/cmake_root
@@ -259,20 +259,20 @@ Bar_ROOT      :
 ENV{Bar_ROOT} :<base>/bar/env_root
 
 find_package\(Foo COMPONENTS BarModule\)
-FOO_TEST_FILE_FOO :<base>/foo/cmake_root/include/foo.h
-FOO_TEST_FILE_ZOT :<base>/foo/cmake_root/include/zot/zot.h
+FOO_TEST_FILE_FOO :<base>/foo/cmake_root/include/foo\.h
+FOO_TEST_FILE_ZOT :<base>/foo/cmake_root/include/zot/zot\.h
 FOO_TEST_PATH_FOO :<base>/foo/cmake_root/include
 FOO_TEST_PATH_ZOT :<base>/foo/cmake_root/include/zot
-FOO_TEST_PROG_FOO :<base>/foo/cmake_root/bin/foo.exe
-BAR_CMAKE_FILE    :<base>/FindBar.cmake
-BAR_TEST_FILE_FOO :<base>/foo/cmake_root/include/foo.h
-BAR_TEST_FILE_BAR :<base>/bar/env_root/include/bar.h
-BAR_TEST_FILE_ZOT :<base>/bar/env_root/include/zot/zot.h
+FOO_TEST_PROG_FOO :<base>/foo/cmake_root/bin/foo\.exe
+BAR_CMAKE_FILE    :<base>/FindBar\.cmake
+BAR_TEST_FILE_FOO :<base>/foo/cmake_root/include/foo\.h
+BAR_TEST_FILE_BAR :<base>/bar/env_root/include/bar\.h
+BAR_TEST_FILE_ZOT :<base>/bar/env_root/include/zot/zot\.h
 BAR_TEST_PATH_FOO :<base>/foo/cmake_root/include
 BAR_TEST_PATH_BAR :<base>/bar/env_root/include
 BAR_TEST_PATH_ZOT :<base>/bar/env_root/include/zot
-BAR_TEST_PROG_FOO :<base>/foo/cmake_root/bin/foo.exe
-BAR_TEST_PROG_BAR :<base>/bar/env_root/bin/bar.exe
+BAR_TEST_PROG_FOO :<base>/foo/cmake_root/bin/foo\.exe
+BAR_TEST_PROG_BAR :<base>/bar/env_root/bin/bar\.exe
 
 ----------
 Foo_ROOT      :<base>/foo/cmake_root
@@ -282,17 +282,17 @@ Bar_ROOT      :<base>/bar/cmake_root
 ENV{Bar_ROOT} :<base>/bar/env_root
 
 find_package\(Foo COMPONENTS BarModule\)
-FOO_TEST_FILE_FOO :<base>/foo/cmake_root/include/foo.h
-FOO_TEST_FILE_ZOT :<base>/foo/cmake_root/include/zot/zot.h
+FOO_TEST_FILE_FOO :<base>/foo/cmake_root/include/foo\.h
+FOO_TEST_FILE_ZOT :<base>/foo/cmake_root/include/zot/zot\.h
 FOO_TEST_PATH_FOO :<base>/foo/cmake_root/include
 FOO_TEST_PATH_ZOT :<base>/foo/cmake_root/include/zot
-FOO_TEST_PROG_FOO :<base>/foo/cmake_root/bin/foo.exe
-BAR_CMAKE_FILE    :<base>/FindBar.cmake
-BAR_TEST_FILE_FOO :<base>/foo/cmake_root/include/foo.h
-BAR_TEST_FILE_BAR :<base>/bar/cmake_root/include/bar.h
-BAR_TEST_FILE_ZOT :<base>/bar/cmake_root/include/zot/zot.h
+FOO_TEST_PROG_FOO :<base>/foo/cmake_root/bin/foo\.exe
+BAR_CMAKE_FILE    :<base>/FindBar\.cmake
+BAR_TEST_FILE_FOO :<base>/foo/cmake_root/include/foo\.h
+BAR_TEST_FILE_BAR :<base>/bar/cmake_root/include/bar\.h
+BAR_TEST_FILE_ZOT :<base>/bar/cmake_root/include/zot/zot\.h
 BAR_TEST_PATH_FOO :<base>/foo/cmake_root/include
 BAR_TEST_PATH_BAR :<base>/bar/cmake_root/include
 BAR_TEST_PATH_ZOT :<base>/bar/cmake_root/include/zot
-BAR_TEST_PROG_FOO :<base>/foo/cmake_root/bin/foo.exe
-BAR_TEST_PROG_BAR :<base>/bar/cmake_root/bin/bar.exe
+BAR_TEST_PROG_FOO :<base>/foo/cmake_root/bin/foo\.exe
+BAR_TEST_PROG_BAR :<base>/bar/cmake_root/bin/bar\.exe

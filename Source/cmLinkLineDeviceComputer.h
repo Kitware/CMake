@@ -6,7 +6,6 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <string>
-#include <vector>
 
 #include "cmLinkLineComputer.h"
 
@@ -15,8 +14,6 @@ class cmGeneratorTarget;
 class cmLocalGenerator;
 class cmOutputConverter;
 class cmStateDirectory;
-template <typename T>
-class BT;
 
 class cmLinkLineDeviceComputer : public cmLinkLineComputer
 {

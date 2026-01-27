@@ -13,7 +13,8 @@
         "^dir$",
         "^fileset$",
         "^subdir$",
-        "^framework$"
+        "^framework$",
+        "^direct$"
     ],
     "targetIds": [
         "^ALL_BUILD::@6890427a1f51a3e7e1df$",
@@ -26,6 +27,9 @@
         "^c_static_lib::@6890427a1f51a3e7e1df$",
         "^c_subdir::@6890427a1f51a3e7e1df$",
         "^interface_exe::@6890427a1f51a3e7e1df$"
+    ],
+    "abstractTargetIds": [
+        "^interface_lib::@6890427a1f51a3e7e1df$"
     ],
     "projectName": "codemodel-v2",
     "minimumCMakeVersion": "3.13",
@@ -51,7 +55,7 @@
             "backtrace": [
                 {
                     "file": "^codemodel-v2\\.cmake$",
-                    "line": 46,
+                    "line": 52,
                     "command": "install",
                     "hasParent": true
                 },
@@ -96,7 +100,7 @@
             "backtrace": [
                 {
                     "file": "^codemodel-v2\\.cmake$",
-                    "line": 49,
+                    "line": 55,
                     "command": "install",
                     "hasParent": true
                 },
@@ -144,7 +148,7 @@
             "backtrace": [
                 {
                     "file": "^codemodel-v2\\.cmake$",
-                    "line": 49,
+                    "line": 55,
                     "command": "install",
                     "hasParent": true
                 },
@@ -189,7 +193,7 @@
             "backtrace": [
                 {
                     "file": "^codemodel-v2\\.cmake$",
-                    "line": 49,
+                    "line": 55,
                     "command": "install",
                     "hasParent": true
                 },
@@ -233,7 +237,7 @@
             "backtrace": [
                 {
                     "file": "^codemodel-v2\\.cmake$",
-                    "line": 49,
+                    "line": 55,
                     "command": "install",
                     "hasParent": true
                 },
@@ -277,7 +281,7 @@
             "backtrace": [
                 {
                     "file": "^codemodel-v2\\.cmake$",
-                    "line": 54,
+                    "line": 60,
                     "command": "install",
                     "hasParent": true
                 },
@@ -324,7 +328,7 @@
             "backtrace": [
                 {
                     "file": "^codemodel-v2\\.cmake$",
-                    "line": 56,
+                    "line": 62,
                     "command": "install",
                     "hasParent": true
                 },
@@ -369,7 +373,7 @@
             "backtrace": [
                 {
                     "file": "^codemodel-v2\\.cmake$",
-                    "line": 57,
+                    "line": 63,
                     "command": "install",
                     "hasParent": true
                 },
@@ -418,7 +422,7 @@
             "backtrace": [
                 {
                     "file": "^codemodel-v2\\.cmake$",
-                    "line": 58,
+                    "line": 64,
                     "command": "install",
                     "hasParent": true
                 },
@@ -470,7 +474,7 @@
             "backtrace": [
                 {
                     "file": "^codemodel-v2\\.cmake$",
-                    "line": 59,
+                    "line": 65,
                     "command": "install",
                     "hasParent": true
                 },
@@ -519,7 +523,7 @@
             "backtrace": [
                 {
                     "file": "^codemodel-v2\\.cmake$",
-                    "line": 60,
+                    "line": 66,
                     "command": "install",
                     "hasParent": true
                 },
@@ -561,7 +565,7 @@
             "backtrace": [
                 {
                     "file": "^codemodel-v2\\.cmake$",
-                    "line": 61,
+                    "line": 67,
                     "command": "install",
                     "hasParent": true
                 },
@@ -603,7 +607,7 @@
             "backtrace": [
                 {
                     "file": "^codemodel-v2\\.cmake$",
-                    "line": 62,
+                    "line": 68,
                     "command": "install",
                     "hasParent": true
                 },

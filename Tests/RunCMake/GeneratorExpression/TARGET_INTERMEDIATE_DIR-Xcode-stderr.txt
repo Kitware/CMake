@@ -1,0 +1,8 @@
+CMake Error at TARGET_INTERMEDIATE_DIR\.cmake:[0-9]+ \(file\):
+  Error evaluating generator expression:
+
+    \$\<TARGET_INTERMEDIATE_DIR:foo\>
+
+  The evaluation of the TARGET_INTERMEDIATE_DIR generator expression is only
+  suitable for consumption by CMake \(limited under Xcode with multiple
+  architectures\)\.  It is not suitable for writing out elsewhere\.

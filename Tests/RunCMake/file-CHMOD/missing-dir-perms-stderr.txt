@@ -1,5 +1,5 @@
 ^CMake Error at [^
-]*/missing-dir-perms.cmake:[0-9]+ \(file\):
+]*/missing-dir-perms\.cmake:[0-9]+ \(file\):
   Error after keyword "DIRECTORY_PERMISSIONS":
 
     missing required value$

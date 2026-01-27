@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <cstddef>
 #include <functional>
 #include <map>
 #include <set>
@@ -21,6 +22,7 @@
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
+#include "cmObjectLocation.h"
 #include "cmOutputConverter.h"
 #include "cmPolicies.h"
 #include "cmScriptGenerator.h"
@@ -174,18 +176,40 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(
 
   // Write code to install the target file.
   char const* no_dir_permissions = nullptr;
-  char const* no_rename = nullptr;
   bool optional = this->Optional || this->ImportLibrary;
   std::string literal_args;
-  if (!files.FromDir.empty()) {
-    literal_args += " FILES_FROM_DIR \"" + files.FromDir + "\"";
-  }
   if (files.UseSourcePermissions) {
     literal_args += " USE_SOURCE_PERMISSIONS";
   }
-  this->AddInstallRule(os, dest, files.Type, files.From, optional,
-                       this->FilePermissions.c_str(), no_dir_permissions,
-                       no_rename, literal_args.c_str(), indent);
+  if (files.Rename) {
+    if (files.From.size() != files.To.size()) {
+      this->Target->GetLocalGenerator()->IssueMessage(
+        MessageType::INTERNAL_ERROR,
+        "cmInstallTargetGenerator generated a rename request with mismatched "
+        "names.");
+      return;
+    }
+    std::vector<std::string> FileNames;
+    FileNames.resize(1);
+    for (size_t i = 0; i < files.From.size(); ++i) {
+      if (files.FromDir.empty()) {
+        FileNames[0] = files.From[i];
+      } else {
+        FileNames[0] = cmStrCat(files.FromDir, '/', files.From[i]);
+      }
+      this->AddInstallRule(os, dest, files.Type, FileNames, optional,
+                           this->FilePermissions.c_str(), no_dir_permissions,
+                           files.To[i].c_str(), literal_args.c_str(), indent);
+    }
+  } else {
+    char const* no_rename = nullptr;
+    if (!files.FromDir.empty()) {
+      literal_args += " FILES_FROM_DIR \"" + files.FromDir + "\"";
+    }
+    this->AddInstallRule(os, dest, files.Type, files.From, optional,
+                         this->FilePermissions.c_str(), no_dir_permissions,
+                         no_rename, literal_args.c_str(), indent);
+  }
 
   // Add post-installation tweaks.
   if (!files.NoTweak) {
@@ -225,16 +249,24 @@ cmInstallTargetGenerator::Files cmInstallTargetGenerator::GetFiles(
 
     case cmStateEnums::OBJECT_LIBRARY: {
       // Compute all the object files inside this target
-      std::vector<std::string> objects;
-      this->Target->GetTargetObjectNames(config, objects);
+      std::vector<std::pair<cmObjectLocation, cmObjectLocation>> objects;
+      auto storeObjectLocations = [&objects](cmObjectLocation const& build,
+                                             cmObjectLocation const& install) {
+        objects.emplace_back(build, install);
+      };
+      this->Target->GetTargetObjectLocations(config, storeObjectLocations);
 
       files.Type = cmInstallType_FILES;
       files.NoTweak = true;
+      files.Rename = true;
       files.FromDir = this->Target->GetObjectDirectory(config);
-      files.ToDir = computeInstallObjectDir(this->Target, config);
-      for (std::string& obj : objects) {
-        files.From.emplace_back(obj);
-        files.To.emplace_back(std::move(obj));
+      if (!this->Target->GetPropertyAsBool(
+            "INSTALL_OBJECT_ONLY_USE_DESTINATION")) {
+        files.ToDir = computeInstallObjectDir(this->Target, config);
+      }
+      for (auto const& obj : objects) {
+        files.From.emplace_back(obj.first.GetPath());
+        files.To.emplace_back(obj.second.GetPath());
       }
       return files;
     }
@@ -423,9 +455,21 @@ cmInstallTargetGenerator::Files cmInstallTargetGenerator::GetFiles(
 void cmInstallTargetGenerator::GetInstallObjectNames(
   std::string const& config, std::vector<std::string>& objects) const
 {
-  this->Target->GetTargetObjectNames(config, objects);
-  for (std::string& o : objects) {
-    o = cmStrCat(computeInstallObjectDir(this->Target, config), '/', o);
+  std::vector<cmObjectLocation> installedObjects;
+  auto storeObjectLocations =
+    [&installedObjects](cmObjectLocation const&,
+                        cmObjectLocation const& install) {
+      installedObjects.emplace_back(install);
+    };
+  this->Target->GetTargetObjectLocations(config, storeObjectLocations);
+  objects.reserve(installedObjects.size());
+  std::string rootDir;
+  if (!this->Target->GetPropertyAsBool(
+        "INSTALL_OBJECT_ONLY_USE_DESTINATION")) {
+    rootDir = cmStrCat(computeInstallObjectDir(this->Target, config), '/');
+  }
+  for (cmObjectLocation const& o : installedObjects) {
+    objects.emplace_back(cmStrCat(rootDir, o.GetPath()));
   }
 }
 

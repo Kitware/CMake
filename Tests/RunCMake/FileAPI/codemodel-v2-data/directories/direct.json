@@ -1,0 +1,23 @@
+{
+    "source": "^direct$",
+    "build": "^direct$",
+    "parentSource": "^\\.$",
+    "childSources": null,
+    "targetIds": [
+        "^ALL_BUILD::@79b6367c9e05c77f6a80$",
+        "^ZERO_CHECK::@79b6367c9e05c77f6a80$",
+        "^link_transitive_direct_exe::@79b6367c9e05c77f6a80$",
+        "^transitive_direct_lib::@79b6367c9e05c77f6a80$",
+        "^inject_direct_lib_impl::@79b6367c9e05c77f6a80$",
+        "^usage_lib::@79b6367c9e05c77f6a80$",
+        "^link_usage_exe::@79b6367c9e05c77f6a80$",
+        "^compile_usage_exe::@79b6367c9e05c77f6a80$"
+    ],
+    "abstractTargetIds": [
+        "^inject_direct_lib::@79b6367c9e05c77f6a80$"
+    ],
+    "projectName": "Direct",
+    "minimumCMakeVersion": "3.13",
+    "hasInstallRule": null,
+    "installers": []
+}

@@ -2,11 +2,13 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmPackageInfoReader.h"
 
+#include <algorithm>
 #include <initializer_list>
 #include <limits>
 #include <unordered_map>
 #include <utility>
 
+#include <cmext/algorithm>
 #include <cmext/string_view>
 
 #include <cm3p/json/reader.h>
@@ -17,12 +19,14 @@
 #include "cmsys/RegularExpression.hxx"
 
 #include "cmExecutionStatus.h"
+#include "cmList.h"
 #include "cmListFileCache.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
+#include "cmValue.h"
 
 namespace {
 
@@ -105,9 +109,17 @@ Json::Value ReadJson(std::string const& fileName)
   return data;
 }
 
+std::string ToString(Json::Value const& value)
+{
+  if (value.isString()) {
+    return value.asString();
+  }
+  return {};
+}
+
 bool CheckSchemaVersion(Json::Value const& data)
 {
-  std::string const& version = data["cps_version"].asString();
+  std::string const& version = ToString(data["cps_version"]);
 
   // Check that a valid version is specified.
   if (version.empty()) {
@@ -133,7 +145,7 @@ std::string DeterminePrefix(std::string const& filepath,
                             Json::Value const& data)
 {
   // First check if an absolute prefix was supplied.
-  std::string prefix = data["prefix"].asString();
+  std::string prefix = ToString(data["prefix"]);
   if (!prefix.empty()) {
     // Ensure that the specified prefix is valid.
     if (cmsys::SystemTools::FileIsFullPath(prefix) &&
@@ -147,7 +159,7 @@ std::string DeterminePrefix(std::string const& filepath,
 
   // Get and validate prefix-relative path.
   std::string const& absPath = cmSystemTools::GetFilenamePath(filepath);
-  std::string relPath = data["cps_path"].asString();
+  std::string relPath = ToString(data["cps_path"]);
   cmSystemTools::ConvertToUnixSlashes(relPath);
   if (relPath.empty() || !cmHasLiteralPrefix(relPath, "@prefix@")) {
     // The relative prefix is not valid.
@@ -180,7 +192,7 @@ std::string DeterminePrefix(std::string const& filepath,
 }
 
 // Extract key name from value iterator as string_view.
-cm::string_view IterKey(Json::Value::const_iterator const& iter)
+cm::string_view IterKey(Json::Value::const_iterator iter)
 {
   char const* end;
   char const* const start = iter.memberName(&end);
@@ -227,15 +239,14 @@ void AppendProperty(cmMakefile* makefile, cmTarget* target,
                     cm::string_view property, cm::string_view configuration,
                     std::string const& value)
 {
-  std::string fullprop;
-  if (configuration.empty()) {
-    fullprop = cmStrCat("INTERFACE_"_s, property);
+  std::string const fullprop = cmStrCat("INTERFACE_", property);
+  if (!configuration.empty()) {
+    std::string const genexValue =
+      cmStrCat("$<$<CONFIG:", configuration, ">:", value, '>');
+    target->AppendProperty(fullprop, genexValue, makefile->GetBacktrace());
   } else {
-    fullprop = cmStrCat("INTERFACE_"_s, property, '_',
-                        cmSystemTools::UpperCase(configuration));
+    target->AppendProperty(fullprop, value, makefile->GetBacktrace());
   }
-
-  target->AppendProperty(fullprop, value, makefile->GetBacktrace());
 }
 
 template <typename Transform>
@@ -433,7 +444,8 @@ cm::optional<cmPackageInfoReader::Pep440Version> ParseSimpleVersion(
 } // namespace
 
 std::unique_ptr<cmPackageInfoReader> cmPackageInfoReader::Read(
-  std::string const& path, cmPackageInfoReader const* parent)
+  cmMakefile* makefile, std::string const& path,
+  cmPackageInfoReader const* parent)
 {
   // Read file and perform some basic validation:
   //   - the input is valid JSON
@@ -479,12 +491,41 @@ std::unique_ptr<cmPackageInfoReader> cmPackageInfoReader::Read(
     }
   }
 
+  // Check for a default license.
+  Json::Value const& defaultLicense = reader->Data["default_license"];
+  if (!defaultLicense.isNull()) {
+    if (defaultLicense.isString()) {
+      reader->DefaultLicense = defaultLicense.asString();
+    } else {
+      makefile->IssueMessage(
+        MessageType::WARNING,
+        "Package attribute \"default_license\" is not a string.");
+    }
+  } else if (parent) {
+    reader->DefaultLicense = parent->DefaultLicense;
+  } else {
+    // If there is no 'default_license', check for 'license'. Note that we
+    // intentionally allow `default_license` on an appendix to override the
+    // parent, but we do not consider `license` on an appendix. This is
+    // consistent with not allowing LICENSE and APPENDIX to be used together.
+    Json::Value const& packageLicense = reader->Data["license"];
+    if (!packageLicense.isNull()) {
+      if (packageLicense.isString()) {
+        reader->DefaultLicense = packageLicense.asString();
+      } else {
+        makefile->IssueMessage(
+          MessageType::WARNING,
+          "Package attribute \"license\" is not a string.");
+      }
+    }
+  }
+
   return reader;
 }
 
 std::string cmPackageInfoReader::GetName() const
 {
-  return this->Data["name"].asString();
+  return ToString(this->Data["name"]);
 }
 
 cm::optional<std::string> cmPackageInfoReader::GetVersion() const
@@ -516,7 +557,7 @@ cmPackageInfoReader::ParseVersion(
 
   // Check if we know how to parse the version.
   Json::Value const& schema = this->Data["version_schema"];
-  if (schema.isNull() || cmStrCaseEq(schema.asString(), "simple"_s)) {
+  if (schema.isNull() || cmStrCaseEq(ToString(schema), "simple"_s)) {
     return ParseSimpleVersion(*version);
   }
 
@@ -531,7 +572,7 @@ std::vector<cmPackageRequirement> cmPackageInfoReader::GetRequirements() const
 
   for (auto ri = requirementObjects.begin(), re = requirementObjects.end();
        ri != re; ++ri) {
-    cmPackageRequirement r{ ri.name(), (*ri)["version"].asString(),
+    cmPackageRequirement r{ ri.name(), ToString((*ri)["version"]),
                             ReadList(*ri, "components"),
                             ReadList(*ri, "hints") };
     requirements.emplace_back(std::move(r));
@@ -564,11 +605,57 @@ std::string cmPackageInfoReader::ResolvePath(std::string path) const
   return path;
 }
 
-void cmPackageInfoReader::SetImportProperty(cmTarget* target,
+void cmPackageInfoReader::AddTargetConfiguration(
+  cmTarget* target, cm::string_view configuration) const
+{
+  static std::string const icProp = "IMPORTED_CONFIGURATIONS";
+
+  std::string const& configUpper = cmSystemTools::UpperCase(configuration);
+
+  // Get existing list of imported configurations.
+  cmList configs;
+  if (cmValue v = target->GetProperty(icProp)) {
+    configs.assign(cmSystemTools::UpperCase(*v));
+  } else {
+    // If the existing list is empty, just add the new one and return.
+    target->SetProperty(icProp, configUpper);
+    return;
+  }
+
+  if (cm::contains(configs, configUpper)) {
+    // If the configuration is already listed, we don't need to do anything.
+    return;
+  }
+
+  // Add the new configuration.
+  configs.append(configUpper);
+
+  // Rebuild the configuration list by extracting any configuration in the
+  // default configurations and reinserting it at the beginning of the list
+  // according to the order of the default configurations.
+  std::vector<std::string> newConfigs;
+  for (std::string const& c : this->DefaultConfigurations) {
+    auto ci = std::find(configs.begin(), configs.end(), c);
+    if (ci != configs.end()) {
+      newConfigs.emplace_back(std::move(*ci));
+      configs.erase(ci);
+    }
+  }
+  for (std::string& c : configs) {
+    newConfigs.emplace_back(std::move(c));
+  }
+
+  target->SetProperty("IMPORTED_CONFIGURATIONS", cmJoin(newConfigs, ";"_s));
+}
+
+void cmPackageInfoReader::SetImportProperty(cmMakefile* makefile,
+                                            cmTarget* target,
                                             cm::string_view property,
                                             cm::string_view configuration,
-                                            Json::Value const& value) const
+                                            Json::Value const& object,
+                                            std::string const& attribute) const
 {
+  Json::Value const& value = object[attribute];
   if (!value.isNull()) {
     std::string fullprop;
     if (configuration.empty()) {
@@ -578,16 +665,36 @@ void cmPackageInfoReader::SetImportProperty(cmTarget* target,
                           cmSystemTools::UpperCase(configuration));
     }
 
-    target->SetProperty(fullprop, this->ResolvePath(value.asString()));
+    if (value.isString()) {
+      target->SetProperty(fullprop, this->ResolvePath(value.asString()));
+    } else {
+      makefile->IssueMessage(MessageType::WARNING,
+                             cmStrCat("Failed to set property \""_s, property,
+                                      "\" on target \""_s, target->GetName(),
+                                      "\": attribute \"", attribute,
+                                      "\" is not a string."_s));
+    }
   }
 }
 
-void cmPackageInfoReader::SetMetaProperty(cmTarget* target,
-                                          cm::string_view property,
-                                          Json::Value const& value) const
+void cmPackageInfoReader::SetMetaProperty(
+  cmMakefile* makefile, cmTarget* target, std::string const& property,
+  Json::Value const& object, std::string const& attribute,
+  std::string const& defaultValue) const
 {
+  Json::Value const& value = object[attribute];
   if (!value.isNull()) {
-    target->SetProperty(property.data(), value.asString());
+    if (value.isString()) {
+      target->SetProperty(property, value.asString());
+    } else {
+      makefile->IssueMessage(MessageType::WARNING,
+                             cmStrCat("Failed to set property \""_s, property,
+                                      "\" on target \""_s, target->GetName(),
+                                      "\": attribute \"", attribute,
+                                      "\" is not a string."_s));
+    }
+  } else if (!defaultValue.empty()) {
+    target->SetProperty(property, defaultValue);
   }
 }
 
@@ -597,9 +704,7 @@ void cmPackageInfoReader::SetTargetProperties(
 {
   // Add configuration (if applicable).
   if (!configuration.empty()) {
-    target->AppendProperty("IMPORTED_CONFIGURATIONS",
-                           cmSystemTools::UpperCase(configuration),
-                           makefile->GetBacktrace());
+    this->AddTargetConfiguration(target, configuration);
   }
 
   // Add compile and link features.
@@ -639,14 +744,14 @@ void cmPackageInfoReader::SetTargetProperties(
                            });
 
   // Add link name/location(s).
-  this->SetImportProperty(target, "LOCATION"_s, configuration,
-                          data["location"]);
+  this->SetImportProperty(makefile, target, "LOCATION"_s, // br
+                          configuration, data, "location");
 
-  this->SetImportProperty(target, "IMPLIB"_s, configuration,
-                          data["link_location"]);
+  this->SetImportProperty(makefile, target, "IMPLIB"_s, // br
+                          configuration, data, "link_location");
 
-  this->SetImportProperty(target, "SONAME"_s, configuration,
-                          data["link_name"]);
+  this->SetImportProperty(makefile, target, "SONAME"_s, // br
+                          configuration, data, "link_name");
 
   // Add link languages.
   for (std::string const& originalLang : ReadList(data, "link_languages")) {
@@ -671,7 +776,8 @@ void cmPackageInfoReader::SetTargetProperties(
 
   // Add other information.
   if (configuration.empty()) {
-    this->SetMetaProperty(target, "SPDX_LICENSE"_s, data["license"]);
+    this->SetMetaProperty(makefile, target, "SPDX_LICENSE", data, "license",
+                          this->DefaultLicense);
   }
 }
 
@@ -681,12 +787,7 @@ cmTarget* cmPackageInfoReader::AddLibraryComponent(
 {
   // Create the imported target.
   cmTarget* const target = makefile->AddImportedTarget(name, type, false);
-
-  // Set default configurations.
-  if (!this->DefaultConfigurations.empty()) {
-    target->SetProperty("IMPORTED_CONFIGURATIONS",
-                        cmJoin(this->DefaultConfigurations, ";"_s));
-  }
+  target->SetOrigin(cmTarget::Origin::Cps);
 
   // Set target properties.
   this->SetTargetProperties(makefile, target, data, package, {});
@@ -707,9 +808,9 @@ bool cmPackageInfoReader::ImportTargets(cmMakefile* makefile,
   Json::Value const& components = this->Data["components"];
 
   for (auto ci = components.begin(), ce = components.end(); ci != ce; ++ci) {
-    cm::string_view const& name = IterKey(ci);
+    cm::string_view const name = IterKey(ci);
     std::string const& type =
-      cmSystemTools::LowerCase((*ci)["type"].asString());
+      cmSystemTools::LowerCase(ToString((*ci)["type"]));
 
     // Get and validate full target name.
     std::string const& fullName = cmStrCat(package, "::"_s, name);
@@ -723,7 +824,9 @@ bool cmPackageInfoReader::ImportTargets(cmMakefile* makefile,
 
     cmTarget* target = nullptr;
     if (type == "symbolic"_s) {
-      // TODO
+      target = this->AddLibraryComponent(
+        makefile, cmStateEnums::INTERFACE_LIBRARY, fullName, *ci, package);
+      target->SetSymbolic(true);
     } else if (type == "dylib"_s) {
       target = this->AddLibraryComponent(
         makefile, cmStateEnums::SHARED_LIBRARY, fullName, *ci, package);
@@ -772,7 +875,7 @@ bool cmPackageInfoReader::ImportTargets(cmMakefile* makefile,
 bool cmPackageInfoReader::ImportTargetConfigurations(
   cmMakefile* makefile, cmExecutionStatus& status) const
 {
-  std::string const& configuration = this->Data["configuration"].asString();
+  std::string const& configuration = ToString(this->Data["configuration"]);
 
   if (configuration.empty()) {
     makefile->IssueMessage(MessageType::WARNING,
@@ -786,7 +889,7 @@ bool cmPackageInfoReader::ImportTargetConfigurations(
 
   for (auto ci = components.begin(), ce = components.end(); ci != ce; ++ci) {
     // Get component name and look up target.
-    cm::string_view const& name = IterKey(ci);
+    cm::string_view const name = IterKey(ci);
     auto const& ti = this->ComponentTargets.find(std::string{ name });
     if (ti == this->ComponentTargets.end()) {
       status.SetError(cmStrCat("component "_s, name, " was not found"_s));

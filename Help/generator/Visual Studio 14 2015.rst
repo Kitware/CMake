@@ -1,6 +1,14 @@
 Visual Studio 14 2015
 ---------------------
 
+.. deprecated:: 4.2
+
+  This generator is deprecated and will be removed in a future version
+  of CMake.  It will still be possible to build with VS 14 2015 tools
+  using the :generator:`Visual Studio 15 2017` (or above) generator
+  with :variable:`CMAKE_GENERATOR_TOOLSET` set to ``v140``, or by
+  using the :generator:`NMake Makefiles` generator.
+
 .. versionadded:: 3.1
 
 Generates Visual Studio 14 (VS 2015) project files.

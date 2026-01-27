@@ -24,6 +24,7 @@
 
 #include "cmBuildDatabase.h"
 #include "cmComputeLinkInformation.h"
+#include "cmCustomCommand.h"
 #include "cmCustomCommandGenerator.h"
 #include "cmDyndepCollation.h"
 #include "cmFileSet.h"
@@ -54,8 +55,6 @@
 #include "cmTargetDepend.h"
 #include "cmValue.h"
 #include "cmake.h"
-
-class cmCustomCommand;
 
 std::unique_ptr<cmNinjaTargetGenerator> cmNinjaTargetGenerator::New(
   cmGeneratorTarget* target)
@@ -596,7 +595,6 @@ cmNinjaRule GetScanRule(
   cmRulePlaceholderExpander::RuleVariables scanVars;
   scanVars.CMTargetName = vars.CMTargetName;
   scanVars.CMTargetType = vars.CMTargetType;
-  scanVars.CMTargetLabels = vars.CMTargetLabels;
   scanVars.Language = vars.Language;
   scanVars.Object = "$OBJ_FILE";
   scanVars.PreprocessedSource = ppFileName.c_str();
@@ -656,8 +654,6 @@ void cmNinjaTargetGenerator::WriteCompileRule(std::string const& lang,
   vars.CMTargetName = this->GetGeneratorTarget()->GetName().c_str();
   vars.CMTargetType =
     cmState::GetTargetTypeName(this->GetGeneratorTarget()->GetType()).c_str();
-  vars.CMTargetLabels =
-    this->GetGeneratorTarget()->GetTargetLabelsString().c_str();
   vars.Language = lang.c_str();
   vars.Source = "$in";
   vars.Object = "$out";
@@ -666,6 +662,7 @@ void cmNinjaTargetGenerator::WriteCompileRule(std::string const& lang,
   vars.TargetPDB = "$TARGET_PDB";
   vars.TargetCompilePDB = "$TARGET_COMPILE_PDB";
   vars.ObjectDir = "$OBJECT_DIR";
+  vars.TargetSupportDir = "$TARGET_SUPPORT_DIR";
   vars.ObjectFileDir = "$OBJECT_FILE_DIR";
   vars.CudaCompileMode = "$CUDA_COMPILE_MODE";
   vars.ISPCHeader = "$ISPC_HEADER_FILE";
@@ -1377,6 +1374,8 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
 {
   std::string const language = source->GetLanguage();
   std::string const sourceFilePath = this->GetCompiledSourceNinjaPath(source);
+  std::string const targetSupportDir =
+    this->ConvertToNinjaPath(this->GeneratorTarget->GetCMFSupportDirectory());
   std::string const objectDir =
     this->ConvertToNinjaPath(this->GetObjectFileDir(config));
   std::string const objectFileName =
@@ -1411,11 +1410,21 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
   vars["DEFINES"] = this->ComputeDefines(source, language, config);
   vars["INCLUDES"] = this->ComputeIncludes(source, language, config);
   vars["CONFIG"] = config;
+  if (this->GetGeneratorTarget()->GetUseShortObjectNames()) {
+    vars.emplace(
+      "description",
+      cmStrCat("Compiling object ", objectFileName, " from source ",
+               this->GetLocalGenerator()->GetRelativeSourceFileName(*source)));
+  }
 
   auto compilerLauncher = this->GetCompilerLauncher(language, config);
 
-  cmValue const skipCodeCheck = source->GetProperty("SKIP_LINTING");
-  if (!skipCodeCheck.IsOn()) {
+  cmValue const srcSkipCodeCheckVal = source->GetProperty("SKIP_LINTING");
+  bool const skipCodeCheck = srcSkipCodeCheckVal.IsSet()
+    ? srcSkipCodeCheckVal.IsOn()
+    : this->GetGeneratorTarget()->GetPropertyAsBool("SKIP_LINTING");
+
+  if (!skipCodeCheck) {
     auto const cmakeCmd = this->GetLocalGenerator()->ConvertToOutputFormat(
       cmSystemTools::GetCMakeCommand(), cmLocalGenerator::SHELL);
     vars["CODE_CHECK"] =
@@ -1460,8 +1469,8 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
 
   if (firstForConfig) {
     this->ExportObjectCompileCommand(
-      language, sourceFilePath, objectDir, objectFileName, objectFileDir,
-      vars["FLAGS"], vars["DEFINES"], vars["INCLUDES"],
+      language, sourceFilePath, objectDir, targetSupportDir, objectFileName,
+      objectFileDir, vars["FLAGS"], vars["DEFINES"], vars["INCLUDES"],
       vars["TARGET_COMPILE_PDB"], vars["TARGET_PDB"], config, withScanning);
   }
 
@@ -1606,7 +1615,7 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
     }
 
     this->addPoolNinjaVariable("JOB_POOL_COMPILE", this->GetGeneratorTarget(),
-                               ppBuild.Variables);
+                               source, ppBuild.Variables);
 
     this->GetGlobalGenerator()->WriteBuild(this->GetImplFileStream(fileConfig),
                                            ppBuild, commandLineLengthLimit);
@@ -1635,17 +1644,20 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
 
   vars["OBJECT_DIR"] = this->GetLocalGenerator()->ConvertToOutputFormat(
     objectDir, cmOutputConverter::SHELL);
+  vars["TARGET_SUPPORT_DIR"] =
+    this->GetLocalGenerator()->ConvertToOutputFormat(targetSupportDir,
+                                                     cmOutputConverter::SHELL);
   vars["OBJECT_FILE_DIR"] = this->GetLocalGenerator()->ConvertToOutputFormat(
     objectFileDir, cmOutputConverter::SHELL);
 
   this->addPoolNinjaVariable("JOB_POOL_COMPILE", this->GetGeneratorTarget(),
-                             vars);
+                             source, vars);
 
   if (!pchSources.empty() && !source->GetProperty("SKIP_PRECOMPILE_HEADERS")) {
     auto pchIt = pchSources.find(source->GetFullPath());
     if (pchIt != pchSources.end()) {
       this->addPoolNinjaVariable("JOB_POOL_PRECOMPILE_HEADER",
-                                 this->GetGeneratorTarget(), vars);
+                                 this->GetGeneratorTarget(), nullptr, vars);
     }
   }
 
@@ -1685,10 +1697,10 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
     if (ispcSuffixes.size() > 1) {
       std::string rootObjectDir =
         this->GeneratorTarget->GetObjectDirectory(config);
-      auto ispcSideEfffectObjects = detail::ComputeISPCExtraObjects(
+      auto ispcSideEffectObjects = detail::ComputeISPCExtraObjects(
         objectName, rootObjectDir, ispcSuffixes);
 
-      for (auto sideEffect : ispcSideEfffectObjects) {
+      for (auto sideEffect : ispcSideEffectObjects) {
         sideEffect = this->ConvertToNinjaPath(sideEffect);
         objBuild.ImplicitOuts.emplace_back(sideEffect);
         this->GetGlobalGenerator()->AddAdditionalCleanFile(sideEffect, config);
@@ -1748,6 +1760,8 @@ void cmNinjaTargetGenerator::WriteCxxModuleBmiBuildStatement(
   }
 
   std::string const sourceFilePath = this->GetCompiledSourceNinjaPath(source);
+  std::string const targetSupportDir =
+    this->ConvertToNinjaPath(this->GeneratorTarget->GetCMFSupportDirectory());
   std::string const bmiDir = this->ConvertToNinjaPath(
     cmStrCat(this->GeneratorTarget->GetSupportDirectory(),
              this->GetGlobalGenerator()->ConfigDirectory(config)));
@@ -1799,9 +1813,10 @@ void cmNinjaTargetGenerator::WriteCxxModuleBmiBuildStatement(
 
   if (firstForConfig) {
     this->ExportObjectCompileCommand(
-      language, sourceFilePath, bmiDir, bmiFileName, bmiFileDir, vars["FLAGS"],
-      vars["DEFINES"], vars["INCLUDES"], vars["TARGET_COMPILE_PDB"],
-      vars["TARGET_PDB"], config, WithScanning::Yes);
+      language, sourceFilePath, bmiDir, targetSupportDir, bmiFileName,
+      bmiFileDir, vars["FLAGS"], vars["DEFINES"], vars["INCLUDES"],
+      vars["TARGET_COMPILE_PDB"], vars["TARGET_PDB"], config,
+      WithScanning::Yes);
   }
 
   bmiBuild.Outputs.push_back(bmiFileName);
@@ -1836,7 +1851,7 @@ void cmNinjaTargetGenerator::WriteCxxModuleBmiBuildStatement(
     }
 
     this->addPoolNinjaVariable("JOB_POOL_COMPILE", this->GetGeneratorTarget(),
-                               ppBuild.Variables);
+                               source, ppBuild.Variables);
 
     this->GetGlobalGenerator()->WriteBuild(this->GetImplFileStream(fileConfig),
                                            ppBuild, commandLineLengthLimit);
@@ -1860,11 +1875,14 @@ void cmNinjaTargetGenerator::WriteCxxModuleBmiBuildStatement(
 
   vars["OBJECT_DIR"] = this->GetLocalGenerator()->ConvertToOutputFormat(
     bmiDir, cmOutputConverter::SHELL);
+  vars["TARGET_SUPPORT_DIR"] =
+    this->GetLocalGenerator()->ConvertToOutputFormat(targetSupportDir,
+                                                     cmOutputConverter::SHELL);
   vars["OBJECT_FILE_DIR"] = this->GetLocalGenerator()->ConvertToOutputFormat(
     bmiFileDir, cmOutputConverter::SHELL);
 
   this->addPoolNinjaVariable("JOB_POOL_COMPILE", this->GetGeneratorTarget(),
-                             vars);
+                             source, vars);
 
   bmiBuild.RspFile = cmStrCat(bmiFileName, ".rsp");
 
@@ -2203,11 +2221,12 @@ void cmNinjaTargetGenerator::EmitSwiftDependencyInfo(
 
 void cmNinjaTargetGenerator::ExportObjectCompileCommand(
   std::string const& language, std::string const& sourceFileName,
-  std::string const& objectDir, std::string const& objectFileName,
-  std::string const& objectFileDir, std::string const& flags,
-  std::string const& defines, std::string const& includes,
-  std::string const& targetCompilePdb, std::string const& targetPdb,
-  std::string const& outputConfig, WithScanning withScanning)
+  std::string const& objectDir, std::string const& targetSupportDir,
+  std::string const& objectFileName, std::string const& objectFileDir,
+  std::string const& flags, std::string const& defines,
+  std::string const& includes, std::string const& targetCompilePdb,
+  std::string const& targetPdb, std::string const& outputConfig,
+  WithScanning withScanning)
 {
   if (!this->GeneratorTarget->GetPropertyAsBool("EXPORT_COMPILE_COMMANDS")) {
     return;
@@ -2254,6 +2273,7 @@ void cmNinjaTargetGenerator::ExportObjectCompileCommand(
                                                 cmOutputConverter::SHELL);
   compileObjectVars.Object = escapedObjectFileName.c_str();
   compileObjectVars.ObjectDir = objectDir.c_str();
+  compileObjectVars.TargetSupportDir = targetSupportDir.c_str();
   compileObjectVars.ObjectFileDir = objectFileDir.c_str();
   compileObjectVars.Flags = fullFlags.c_str();
   compileObjectVars.Defines = defines.c_str();
@@ -2494,9 +2514,18 @@ void cmNinjaTargetGenerator::RemoveDepfileBinding(cmNinjaVars& vars) const
 
 void cmNinjaTargetGenerator::addPoolNinjaVariable(
   std::string const& pool_property, cmGeneratorTarget* target,
-  cmNinjaVars& vars)
+  cmSourceFile const* source, cmNinjaVars& vars)
 {
-  cmValue pool = target->GetProperty(pool_property);
+  // First check the current source properties, then if not found, its target
+  // ones. Allows to override a target-wide compile pool with a source-specific
+  // one.
+  cmValue pool = {};
+  if (source) {
+    pool = source->GetProperty(pool_property);
+  }
+  if (!pool) {
+    pool = target->GetProperty(pool_property);
+  }
   if (pool) {
     vars["pool"] = *pool;
   }

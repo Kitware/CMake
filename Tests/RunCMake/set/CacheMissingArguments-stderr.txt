@@ -1,0 +1,11 @@
+CMake Error at CacheMissingArguments\.cmake:[0-9]+ \(set\):
+  Error after keyword "HELP":
+
+    missing required value
+
+  Error after keyword "TYPE":
+
+    missing required value
+
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)

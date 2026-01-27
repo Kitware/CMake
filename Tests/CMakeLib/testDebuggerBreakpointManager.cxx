@@ -16,10 +16,11 @@
 
 #include "cmDebuggerBreakpointManager.h"
 #include "cmDebuggerSourceBreakpoint.h" // IWYU pragma: keep
-#include "cmListFileCache.h"
 
 #include "testCommon.h"
 #include "testDebugger.h"
+
+class cmListFileFunction;
 
 static bool testHandleBreakpointRequestBeforeFileIsLoaded()
 {

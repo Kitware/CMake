@@ -6,7 +6,11 @@ FindSDL_sound
 -------------
 
 Finds the SDL_sound library, an abstract soundfile decoder for use in SDL
-(Simple DirectMedia Layer) applications.
+(Simple DirectMedia Layer) applications:
+
+.. code-block:: cmake
+
+  find_package(SDL_sound [<version>] [...])
 
 .. note::
 
@@ -31,11 +35,14 @@ Result Variables
 This module defines the following variables:
 
 ``SDL_sound_FOUND``
-  Boolean indicating whether the (requested version of) SDL_sound library is
-  found.  For backward compatibility, the ``SDL_SOUND_FOUND`` variable is also
-  set to the same value.
+  .. versionadded:: 3.3
 
-``SDL_SOUND_VERSION_STRING``
+  Boolean indicating whether the (requested version of) SDL_sound library
+  was found.
+
+``SDL_sound_VERSION``
+  .. versionadded:: 4.2
+
   The human-readable string containing the version of SDL_sound found.
 
 ``SDL_SOUND_LIBRARIES``
@@ -99,6 +106,24 @@ This module accepts the following variables:
   that are prepended to the ``SDL_SOUND_LIBRARIES`` result variable.  This is
   available mostly for cases this module failed to anticipate for and additional
   flags must be added.
+
+Deprecated Variables
+^^^^^^^^^^^^^^^^^^^^
+
+The following variables are provided for backward compatibility:
+
+``SDL_SOUND_FOUND``
+  .. deprecated:: 4.2
+    Use ``SDL_sound_FOUND``, which has the same value.
+
+  Boolean indicating whether the (requested version of) SDL_sound library
+  was found.
+
+``SDL_SOUND_VERSION_STRING``
+  .. deprecated:: 4.2
+    Use ``SDL_sound_VERSION``, which has the same value.
+
+  The human-readable string containing the version of SDL_sound found.
 
 Examples
 ^^^^^^^^
@@ -441,7 +466,8 @@ if(SDL_SOUND_INCLUDE_DIR AND EXISTS "${SDL_SOUND_INCLUDE_DIR}/SDL_sound.h")
   string(REGEX REPLACE "^#define[ \t]+SOUND_VER_MAJOR[ \t]+([0-9]+)$" "\\1" SDL_SOUND_VERSION_MAJOR "${SDL_SOUND_VERSION_MAJOR_LINE}")
   string(REGEX REPLACE "^#define[ \t]+SOUND_VER_MINOR[ \t]+([0-9]+)$" "\\1" SDL_SOUND_VERSION_MINOR "${SDL_SOUND_VERSION_MINOR_LINE}")
   string(REGEX REPLACE "^#define[ \t]+SOUND_VER_PATCH[ \t]+([0-9]+)$" "\\1" SDL_SOUND_VERSION_PATCH "${SDL_SOUND_VERSION_PATCH_LINE}")
-  set(SDL_SOUND_VERSION_STRING ${SDL_SOUND_VERSION_MAJOR}.${SDL_SOUND_VERSION_MINOR}.${SDL_SOUND_VERSION_PATCH})
+  set(SDL_sound_VERSION ${SDL_SOUND_VERSION_MAJOR}.${SDL_SOUND_VERSION_MINOR}.${SDL_SOUND_VERSION_PATCH})
+  set(SDL_SOUND_VERSION_STRING "${SDL_sound_VERSION}")
   unset(SDL_SOUND_VERSION_MAJOR_LINE)
   unset(SDL_SOUND_VERSION_MINOR_LINE)
   unset(SDL_SOUND_VERSION_PATCH_LINE)
@@ -454,6 +480,6 @@ include(FindPackageHandleStandardArgs)
 
 find_package_handle_standard_args(SDL_sound
                                   REQUIRED_VARS SDL_SOUND_LIBRARY SDL_SOUND_INCLUDE_DIR
-                                  VERSION_VAR SDL_SOUND_VERSION_STRING)
+                                  VERSION_VAR SDL_sound_VERSION)
 
 cmake_policy(POP)

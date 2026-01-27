@@ -1,4 +1,4 @@
-^CMake Error at NameWithCarriageReturn.cmake:1 \(message\):
+^CMake Error at NameWithCarriageReturn\.cmake:1 \(message\):
   message called with incorrect number of arguments
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)$
+  CMakeLists\.txt:3 \(include\)$

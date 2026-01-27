@@ -11,7 +11,7 @@ if(NOT DEFINED CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_NO_WARNINGS)
 endif()
 
 if(CMake_INSTALL_DEPENDENCIES)
-  include(${CMake_SOURCE_DIR}/Modules/InstallRequiredSystemLibraries.cmake)
+  include(InstallRequiredSystemLibraries)
 endif()
 
 set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/LICENSE.txt")
@@ -52,7 +52,7 @@ if(NOT DEFINED CPACK_SYSTEM_NAME)
 endif()
 
 # Command for configure IFW script templates
-include(${CMake_SOURCE_DIR}/Modules/CPackIFWConfigureFile.cmake)
+include(CPackIFWConfigureFile)
 
 # Advanced IFW configuration
 set(_cpifwrc CPACK_IFW_COMPONENT_GROUP_CMAKE_)

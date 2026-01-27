@@ -4,7 +4,7 @@ include(CTest)
 
 find_package(PostgreSQL REQUIRED COMPONENTS Server)
 
-add_definitions(-DCMAKE_EXPECTED_POSTGRESQL_VERSION="${PostgreSQL_VERSION_STRING}")
+add_definitions(-DCMAKE_EXPECTED_POSTGRESQL_VERSION="${PostgreSQL_VERSION}")
 
 add_executable(test_tgt main.c)
 target_link_libraries(test_tgt PostgreSQL::PostgreSQL)

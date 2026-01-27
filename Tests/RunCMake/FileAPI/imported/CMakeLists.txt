@@ -3,6 +3,9 @@ project(Imported)
 add_library(imported_lib UNKNOWN IMPORTED)
 set_target_properties(imported_lib PROPERTIES IMPORTED_LOCATION "imported_unk${CMAKE_STATIC_LIBRARY_SUFFIX}")
 add_executable(imported_exe IMPORTED)
+set_target_properties(imported_exe PROPERTIES
+  IMPORTED_LOCATION "imported_exe${CMAKE_EXECUTABLE_SUFFIX}"
+)
 add_executable(link_imported_exe ../empty.c)
 target_link_libraries(link_imported_exe PRIVATE imported_lib)
 
@@ -28,6 +31,10 @@ endif()
 add_library(imported_interface_lib INTERFACE IMPORTED)
 add_executable(link_imported_interface_exe ../empty.c)
 target_link_libraries(link_imported_interface_exe PRIVATE imported_interface_lib)
+
+add_library(imported_interface_symbolic_lib INTERFACE SYMBOLIC IMPORTED)
+add_executable(link_imported_interface_symbolic_exe ../empty.c)
+target_link_libraries(link_imported_interface_symbolic_exe PRIVATE imported_interface_symbolic_lib)
 
 install(IMPORTED_RUNTIME_ARTIFACTS imported_shared_lib
   DESTINATION lib

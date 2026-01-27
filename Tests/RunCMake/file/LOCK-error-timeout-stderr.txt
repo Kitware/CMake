@@ -1,5 +1,5 @@
 Output:[ ]*
-Error: CMake Error at .*.timeout-script\.cmake:[0-9]+ \(file\):
+Error: CMake Error at .*timeout-script\.cmake:[0-9]+ \(file\):
   error locking file
 
     ".*"

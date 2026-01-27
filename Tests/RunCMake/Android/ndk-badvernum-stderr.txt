@@ -1,6 +1,6 @@
-^CMake Error at .*/Modules/Platform/Android/Determine-Compiler-NDK.cmake:[0-9]+ \(message\):(
-  Android: The CMAKE_ANDROID_NDK_TOOLCHAIN_VERSION value '1.0' is not
-  supported by this NDK.  It must be 'clang' or not set at all.|
+^CMake Error at .*/Modules/Platform/Android/Determine-Compiler-NDK\.cmake:[0-9]+ \(message\):(
+  Android: The CMAKE_ANDROID_NDK_TOOLCHAIN_VERSION value '1\.0' is not
+  supported by this NDK\.  It must be 'clang' or not set at all\.|
   Android: No toolchain for ABI 'armeabi(-v7a)?' found in the NDK:
 
     .*
@@ -11,5 +11,5 @@
 )
 Call Stack \(most recent call first\):
 .*
-  ndk-badvernum.cmake:1 \(enable_language\)
-  CMakeLists.txt:3 \(include\)
+  ndk-badvernum\.cmake:1 \(enable_language\)
+  CMakeLists\.txt:3 \(include\)

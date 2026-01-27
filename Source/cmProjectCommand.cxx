@@ -38,6 +38,7 @@ struct ProjectArguments : ArgumentParser::ParseResult
 {
   cm::optional<std::string> Version;
   cm::optional<std::string> CompatVersion;
+  cm::optional<std::string> License;
   cm::optional<std::string> Description;
   cm::optional<std::string> HomepageURL;
   cm::optional<ArgumentParser::MaybeEmpty<std::vector<std::string>>> Languages;
@@ -72,11 +73,12 @@ bool cmProjectCommand(std::vector<std::string> const& args,
     .Bind("LANGUAGES"_s, prArgs.Languages);
 
   cmMakefile& mf = status.GetMakefile();
-  bool enableCompatVersion = cmExperimental::HasSupportEnabled(
+  bool enablePackageInfo = cmExperimental::HasSupportEnabled(
     mf, cmExperimental::Feature::ExportPackageInfo);
 
-  if (enableCompatVersion) {
+  if (enablePackageInfo) {
     parser.Bind("COMPAT_VERSION"_s, prArgs.CompatVersion);
+    parser.Bind("SPDX_LICENSE"_s, prArgs.License);
   }
 
   if (args.empty()) {
@@ -303,6 +305,7 @@ bool cmProjectCommand(std::vector<std::string> const& args,
   }
 
   createVariables("COMPAT_VERSION"_s, prArgs.CompatVersion.value_or(""));
+  createVariables("SPDX_LICENSE"_s, prArgs.License.value_or(""));
   createVariables("DESCRIPTION"_s, prArgs.Description.value_or(""));
   createVariables("HOMEPAGE_URL"_s, prArgs.HomepageURL.value_or(""));
 

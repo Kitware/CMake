@@ -24,5 +24,6 @@ project(Omissions LANGUAGES)
 # expect_empty(VERSION_TWEAK)
 
 expect_empty(COMPAT_VERSION)
+expect_empty(SPDX_LICENSE)
 expect_empty(DESCRIPTION)
 expect_empty(HOMEPAGE_URL)

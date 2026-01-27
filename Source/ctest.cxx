@@ -194,8 +194,8 @@ int main(int argc, char const* const* argv)
   // Dispatch 'ctest --collect-instrumentation' once given PID finishes
   if (argc == 4 &&
       strcmp(argv[1], "--wait-and-collect-instrumentation") == 0) {
-    return cmInstrumentation(argv[2]).CollectTimingAfterBuild(
-      std::stoi(argv[3]));
+    return cmInstrumentation(argv[2], cmInstrumentation::LoadQueriesAfter::No)
+      .CollectTimingAfterBuild(std::stoi(argv[3]));
   }
 
   // Dispatch 'ctest --collect-instrumentation' mode directly.

@@ -5,10 +5,10 @@
 check-file = true
 check-filename = true
 extend-ignore-re = [
-    # NOTE Allow to mark a block of text to exclude from spellchecking
-    "(?s)(#|/(/|\\*)|\\.\\.)\\s*(NOQA|noqa):? spellcheck(: *|=| +)off.*?\\n\\s*(#|/(/|\\*)|\\.\\.)\\s*(NOQA|noqa):? spellcheck(: *|=| +)on"
+    # NOTE Allow to mark block of text to exclude from spellchecking inside C++ or hash-style comments (CMake,Python,&etc.)
+    "(?s)(#|//)\\s*(NOQA|noqa):? spellcheck(: *|=| +)off.*?\\n\\s*(#|//)\\s*(NOQA|noqa):? spellcheck(: *|=| +)on"
     # NOTE Allow to mark a line to exclude from spellchecking
-  , "(?Rm)^.*(#|/(/|\\*)|\\.\\.)\\s*(NOQA|noqa):? spellcheck(: *|=| +)disable-line$"
+  , "(?Rm)^.*(#|//)\\s*(NOQA|noqa):? spellcheck(: *|=| +)disable-line$"
     # NOTE Stop checking from this line to the end of file
     # This line is a marker added by Git to the `COMMIT_EDITMSG`.
   , "(?sm)^# ------------------------ >8 ------------------------$.*"
@@ -18,7 +18,13 @@ locale = "en-us"
 # `extend-ignore-identifiers-re` to this section,
 # please also modify the `.gitlab/ci/typos.bash`
 # script accordingly.
-#extend-ignore-identifiers-re=["\\b[0-9a-f]{10}\\b"]
+#extend-ignore-identifiers-re=["\\b[0-9a-f]{8,12}\\b"]
+
+[default.extend-identifiers]
+_tru64 = "_tru64"
+__tru64 = "__tru64"
+__TRU64__ = "__TRU64__"
+Tru64 = "Tru64"
 
 # Add repo-wide false positives here in the form of `word = "word"`.
 # Check the manual for details.
@@ -34,31 +40,8 @@ ser = "ser"
 restat = "restat"
 # SpectreMitigation
 Spectre = "Spectre"
-
-[type.cmake.extend-identifiers]
-COMMANDs = "COMMANDs"
-xCOMMANDx = "xCOMMANDx"
-TYPEs = "TYPEs"
-
-[type.cmake.extend-words]
-# Some compiler's options trigger false-positives
-Fo = "Fo"
-ot = "ot"
-# Part of compiler executable name, e.g., `arm-unknown-nto-qnx6`, but also could be in a literal string.
-nto = "nto"
-
-[type.cpp.extend-identifiers]
-APPENDed = "APPENDed"
-
-[type.json.extend-identifiers]
-# Some compiler options from `Templates/MSBuild/FlagTables/*.json` trigger too many false-positives.
-Fo = "Fo"
-fo = "fo"
-Ot = "Ot"
-SEH = "SEH"
-
-[type.py.extend-identifiers]
-typ = "typ"
+# Identifier used in source code (`GlobalTargetInfo`)
+gti = "gti"
 
 [files]
 ignore-hidden = false
@@ -77,3 +60,41 @@ extend-exclude = [
     # FIXME: Fix spelling typos in tests.  Exclude for now.
   , "Tests"
   ]
+
+# BEGIN Type-specific settings
+[type.cmake.extend-identifiers]
+COMMANDs = "COMMANDs"
+xCOMMANDx = "xCOMMANDx"
+TYPEs = "TYPEs"
+
+[type.cmake.extend-words]
+# Some compiler's options trigger false-positives
+Fo = "Fo"
+ot = "ot"
+# Part of compiler executable name, e.g., `arm-unknown-nto-qnx6`, but also could be in a literal string.
+nto = "nto"
+
+[type.cpp.extend-identifiers]
+APPENDed = "APPENDed"
+setp = "setp"
+setp_ = "setp_"
+
+[type.json.extend-identifiers]
+# Some compiler options from `Templates/MSBuild/FlagTables/*.json` trigger too many false-positives.
+Fo = "Fo"
+fo = "fo"
+Ot = "Ot"
+SEH = "SEH"
+
+[type.py.extend-identifiers]
+typ = "typ"
+
+[type.sh.extend-identifiers]
+xTRUEx = "xTRUEx"
+
+[type.rst]
+extend-ignore-re = [
+    # NOTE Allow to mark block of text to exclude from spellchecking as RST comments
+    "(?s)\\.\\.\\s+(NOQA|noqa):? spellcheck(: *|=| +)off.*?\\n\\.\\.\\s+(NOQA|noqa):? spellcheck(: *|=| +)on"
+  ]
+# END Type-specific settings

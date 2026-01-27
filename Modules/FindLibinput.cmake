@@ -8,7 +8,11 @@ FindLibinput
 .. versionadded:: 3.14
 
 Finds the libinput library which handles input devices in Wayland compositors
-and provides a generic X.Org input driver.
+and provides a generic X.Org input driver:
+
+.. code-block:: cmake
+
+  find_package(Libinput [<version>] [...])
 
 Imported Targets
 ^^^^^^^^^^^^^^^^
@@ -25,7 +29,7 @@ Result Variables
 This module defines the following variables:
 
 ``Libinput_FOUND``
-  Boolean indicating whether the (requested version of) libinput library is
+  Boolean indicating whether the (requested version of) libinput library was
   found.
 ``Libinput_VERSION``
   The version of the libinput found.
@@ -53,7 +57,7 @@ Finding the libinput library and linking it to a project target:
 # Use pkg-config to get the directories and then use these values
 # in the FIND_PATH() and FIND_LIBRARY() calls
 find_package(PkgConfig QUIET)
-if(PKG_CONFIG_FOUND)
+if(PkgConfig_FOUND)
   pkg_check_modules(PKG_Libinput QUIET libinput)
 endif()
 

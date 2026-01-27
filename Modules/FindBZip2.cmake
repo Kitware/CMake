@@ -28,8 +28,15 @@ Result Variables
 This module defines the following variables:
 
 ``BZip2_FOUND``
-  Boolean indicating whether the BZip2 library is found.  For backward
-  compatibility, the ``BZIP2_FOUND`` variable is also set to the same value.
+  .. versionadded:: 3.3
+
+  Boolean indicating whether the (requested version of) BZip2 library was
+  found.
+
+``BZip2_VERSION``
+  .. versionadded:: 4.2
+
+  The version of BZip2 found.
 
 ``BZIP2_INCLUDE_DIRS``
   .. versionadded:: 3.12
@@ -38,11 +45,6 @@ This module defines the following variables:
 
 ``BZIP2_LIBRARIES``
   Libraries needed for linking to use BZip2.
-
-``BZIP2_VERSION``
-  .. versionadded:: 3.26
-
-  The version of BZip2 found.
 
 Cache Variables
 ^^^^^^^^^^^^^^^
@@ -63,14 +65,29 @@ The following cache variables may also be set:
   (e.g., ``BZ2_bzCompressInit()``).  Versions of BZip2 prior to 1.0.0 used
   unprefixed function names (e.g., ``bzCompressInit()``).
 
-Legacy Variables
-^^^^^^^^^^^^^^^^
+Deprecated Variables
+^^^^^^^^^^^^^^^^^^^^
 
 The following variables are provided for backward compatibility:
 
+``BZIP2_FOUND``
+  .. deprecated:: 4.2
+    Use ``BZip2_FOUND``, which has the same value.
+
+  Boolean indicating whether the (requested version of) BZip2 library was
+  found.
+
 ``BZIP2_VERSION_STRING``
-  .. versionchanged:: 3.26
-    Superseded by ``BZIP2_VERSION``.
+  .. deprecated:: 3.26
+    Superseded by the ``BZIP2_VERSION`` (and ``BZip2_VERSION``).
+
+  The version of BZip2 found.
+
+``BZIP2_VERSION``
+  .. versionadded:: 3.26
+
+  .. deprecated:: 4.2
+    Superseded by the ``BZip2_VERSION``.
 
   The version of BZip2 found.
 
@@ -108,12 +125,13 @@ if (BZIP2_INCLUDE_DIR AND EXISTS "${BZIP2_INCLUDE_DIR}/bzlib.h")
     file(STRINGS "${BZIP2_INCLUDE_DIR}/bzlib.h" BZLIB_H REGEX "bzip2/libbzip2 version [0-9]+\\.[^ ]+ of [0-9]+ ")
     string(REGEX REPLACE ".* bzip2/libbzip2 version ([0-9]+\\.[^ ]+) of [0-9]+ .*" "\\1" BZIP2_VERSION_STRING "${BZLIB_H}")
     set(BZIP2_VERSION ${BZIP2_VERSION_STRING})
+    set(BZip2_VERSION ${BZIP2_VERSION_STRING})
 endif ()
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(BZip2
                                   REQUIRED_VARS BZIP2_LIBRARIES BZIP2_INCLUDE_DIR
-                                  VERSION_VAR BZIP2_VERSION)
+                                  VERSION_VAR BZip2_VERSION)
 
 if (BZip2_FOUND)
   set(BZIP2_INCLUDE_DIRS ${BZIP2_INCLUDE_DIR})
@@ -126,7 +144,7 @@ if (BZip2_FOUND)
 
   # Versions before 1.0.2 required <stdio.h> for the FILE definition.
   set(BZip2_headers "bzlib.h")
-  if(BZIP2_VERSION VERSION_LESS "1.0.2")
+  if(BZip2_VERSION VERSION_LESS "1.0.2")
     list(PREPEND BZip2_headers "stdio.h")
   endif()
   check_symbol_exists(BZ2_bzCompressInit "${BZip2_headers}" BZIP2_NEED_PREFIX)

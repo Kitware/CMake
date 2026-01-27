@@ -11,12 +11,14 @@
 #include <utility>
 #include <vector>
 
-#include "cmsys/RegularExpression.hxx"
-
 #include "cmGeneratedFileStream.h"
 #include "cmLinkItem.h"
 #include "cmLinkItemGraphVisitor.h"
 #include "cmStateTypes.h"
+
+namespace cmsys {
+class RegularExpression;
+}
 
 class cmGlobalGenerator;
 

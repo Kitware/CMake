@@ -320,7 +320,7 @@ bool cmExecuteProcessCommand(std::vector<std::string> const& args,
         auto* timeoutPtr = static_cast<bool*>(handle->data);
         *timeoutPtr = true;
       },
-      timeoutMillis, 0);
+      timeoutMillis, 0, cm::uv_update_time::yes);
   }
 
   // Read the process output.
@@ -404,6 +404,9 @@ bool cmExecuteProcessCommand(std::vector<std::string> const& args,
   while (chain.Valid() && !timedOut &&
          !(chain.Finished() && outputData.Finished && errorData.Finished)) {
     uv_run(&chain.GetLoop(), UV_RUN_ONCE);
+  }
+  if (timedOut) {
+    chain.Terminate();
   }
   if (!arguments.OutputQuiet &&
       (arguments.OutputVariable.empty() || arguments.EchoOutputVariable)) {

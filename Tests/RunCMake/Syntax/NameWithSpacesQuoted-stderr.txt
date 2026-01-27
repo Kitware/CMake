@@ -1,7 +1,7 @@
-^CMake Error at NameWithSpacesQuoted.cmake:1 \(message\):
+^CMake Error at NameWithSpacesQuoted\.cmake:1 \(message\):
   Syntax error in cmake code at
 
-    .*/Tests/RunCMake/Syntax/NameWithSpacesQuoted.cmake:1
+    .*/Tests/RunCMake/Syntax/NameWithSpacesQuoted\.cmake:1
 
   when parsing string
 
@@ -9,4 +9,4 @@
 
   Invalid character \(' '\) in a variable name: 'var'
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)$
+  CMakeLists\.txt:3 \(include\)$

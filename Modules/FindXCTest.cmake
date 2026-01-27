@@ -7,7 +7,11 @@ FindXCTest
 
 .. versionadded:: 3.3
 
-Finds the XCTest framework for writing unit tests in Xcode projects.
+Finds the XCTest framework for writing unit tests in Xcode projects:
+
+.. code-block:: cmake
+
+  find_package(XCTest [...])
 
 .. note::
 
@@ -26,7 +30,7 @@ Result Variables
 This module defines the following variables:
 
 ``XCTest_FOUND``
-  Boolean indicating whether the XCTest framework and executable are found.
+  Boolean indicating whether the XCTest framework and executable were found.
 
 ``XCTest_INCLUDE_DIRS``
   Include directories containing the XCTest framework headers needed to use

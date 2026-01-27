@@ -4,6 +4,10 @@
     "directorySource": "^object$",
     "projectName": "Object",
     "type": "EXECUTABLE",
+    "imported": null,
+    "local": null,
+    "abstract": null,
+    "symbolic": null,
     "isGeneratorProvided": null,
     "fileSets": null,
     "sources": [
@@ -16,7 +20,7 @@
             "backtrace": [
                 {
                     "file": "^object/CMakeLists\\.txt$",
-                    "line": 10,
+                    "line": 13,
                     "command": "add_executable",
                     "hasParent": true
                 },
@@ -37,7 +41,7 @@
             "backtrace": [
                 {
                     "file": "^object/CMakeLists\\.txt$",
-                    "line": 11,
+                    "line": 14,
                     "command": "target_link_libraries",
                     "hasParent": true
                 },
@@ -72,14 +76,19 @@
             ],
             "includes": null,
             "frameworks": null,
-            "defines": null,
+            "defines": [
+                {
+                    "define": "_MBCS",
+                    "backtrace": null
+                }
+            ],
             "compileCommandFragments": null
         }
     ],
     "backtrace": [
         {
             "file": "^object/CMakeLists\\.txt$",
-            "line": 10,
+            "line": 13,
             "command": "add_executable",
             "hasParent": true
         },
@@ -112,7 +121,7 @@
                 "backtrace": [
                     {
                         "file": "^object/CMakeLists\\.txt$",
-                        "line": 13,
+                        "line": 16,
                         "command": "install",
                         "hasParent": true
                     },
@@ -138,7 +147,7 @@
             "backtrace": [
                 {
                     "file": "^object/CMakeLists\\.txt$",
-                    "line": 11,
+                    "line": 14,
                     "command": "target_link_libraries",
                     "hasParent": true
                 },
@@ -154,5 +163,50 @@
             "id": "^ZERO_CHECK::@5ed5358f70faf8d8af7a$",
             "backtrace": null
         }
-    ]
+    ],
+    "linkLibraries": [
+        {
+            "id": "^cxx_object_lib::@5ed5358f70faf8d8af7a$",
+            "fragment": null,
+            "backtrace": [
+                {
+                    "file": "^object/CMakeLists\\.txt$",
+                    "line": 14,
+                    "command": "target_link_libraries",
+                    "hasParent": true
+                },
+                {
+                    "file": "^object/CMakeLists\\.txt$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": false
+                }
+            ],
+            "fromDependency": null
+        }
+    ],
+    "interfaceLinkLibraries": null,
+    "compileDependencies": [
+        {
+            "id": "^cxx_object_lib::@5ed5358f70faf8d8af7a$",
+            "backtrace": [
+                {
+                    "file": "^object/CMakeLists\\.txt$",
+                    "line": 14,
+                    "command": "target_link_libraries",
+                    "hasParent": true
+                },
+                {
+                    "file": "^object/CMakeLists\\.txt$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": false
+                }
+            ],
+            "fromDependency": null
+        }
+    ],
+    "interfaceCompileDependencies": null,
+    "objectDependencies": null,
+    "orderDependencies": null
 }

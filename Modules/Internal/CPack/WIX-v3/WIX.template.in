@@ -19,7 +19,9 @@
         <Package InstallerVersion="301" Compressed="yes" InstallScope="$(var.CPACK_WIX_INSTALL_SCOPE)"/>
         <?endif?>
 
+        <?ifndef CPACK_WIX_CAB_PER_COMPONENT?>
         <Media Id="1" Cabinet="media1.cab" EmbedCab="yes"/>
+        <?endif?>
 
         <MajorUpgrade
             Schedule="afterInstallInitialize"

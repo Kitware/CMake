@@ -6,7 +6,11 @@ FindCxxTest
 -----------
 
 Finds `CxxTest`_, a C++ unit testing framework suite, and provides a helper
-command to create test runners and integrate them with CTest.
+command to create test runners and integrate them with CTest:
+
+.. code-block:: cmake
+
+  find_package(CxxTest [...])
 
 .. _`CxxTest`: https://github.com/CxxTest/cxxtest
 
@@ -15,8 +19,10 @@ Result Variables
 
 This module defines the following variables:
 
-``CXXTEST_FOUND``
-  Boolean indicating whether the CxxTest framework is found.
+``CxxTest_FOUND``
+  .. versionadded:: 4.2
+
+  Boolean indicating whether the CxxTest framework was found.
 
 ``CXXTEST_INCLUDE_DIRS``
   Include directories containing headers needed to use CxxTest.
@@ -35,11 +41,15 @@ Cache Variables
 
 The following cache variables may also be set:
 
+``CXXTEST_PYTHON_TESTGEN_EXECUTABLE``
+  The path to the Python-based CxxTest test generator script.
+
 ``CXXTEST_PERL_TESTGEN_EXECUTABLE``
   The path to the Perl-based CxxTest test generator script.
 
-``CXXTEST_PYTHON_TESTGEN_EXECUTABLE``
-  The path to the Python-based CxxTest test generator script.
+  .. note::
+    Perl-based test generator script has been removed in CxxTest version
+    4.0 in favor of Python-based script.
 
 Hints
 ^^^^^
@@ -76,7 +86,7 @@ This module provides the following command if CxxTest is found:
     This must be a relative path.  It is interpreted relative to the
     current binary directory (:variable:`CMAKE_CURRENT_BINARY_DIR`).
 
-  ``<input-files-to-testgen>``
+  ``<input-files-to-testgen>...``
     A list of header files containing test suite classes derived from the C++
     class ``CxxTest::TestSuite``, to be included in the test runner.  These must
     be given as absolute paths.
@@ -84,7 +94,13 @@ This module provides the following command if CxxTest is found:
 Deprecated Variables
 ^^^^^^^^^^^^^^^^^^^^
 
-The following variables are deprecated and provided for backward compatibility:
+The following variables are provided for backward compatibility:
+
+``CXXTEST_FOUND``
+  .. deprecated:: 4.2
+    Use ``CxxTest_FOUND``, which has the same value.
+
+  Boolean indicating whether the CxxTest framework was found.
 
 ``CXXTEST_USE_PYTHON``
   .. deprecated:: 2.8.3
@@ -121,7 +137,7 @@ module.  If CxxTest is found:
   find_package(CxxTest)
 
   # Create interface imported target:
-  if(CXXTEST_FOUND AND NOT TARGET CxxTest::CxxTest)
+  if(CxxTest_FOUND AND NOT TARGET CxxTest::CxxTest)
     add_library(CxxTest::CxxTest INTERFACE IMPORTED)
     set_target_properties(
       CxxTest::CxxTest
@@ -130,7 +146,7 @@ module.  If CxxTest is found:
   endif()
 
   # Add test:
-  if(CXXTEST_FOUND)
+  if(CxxTest_FOUND)
     enable_testing()
 
     cxxtest_add_test(
@@ -164,8 +180,11 @@ module.  If CxxTest is found:
   };
 #]=======================================================================]
 
+# CMake 4.2
+#     Module now consistently defines the CxxTest_FOUND result variable.
+#
 # Version 1.4 (11/18/10) (CMake 2.8.4)
-#     Issue 11384: Added support to the CXX_ADD_TEST macro so header
+#     Issue 11384: Added support to the cxxtest_add_test() macro so header
 #                  files (containing the tests themselves) show up in
 #                  Visual Studio and other IDEs.
 #
@@ -177,17 +196,21 @@ module.  If CxxTest is found:
 #
 #     Also added support for CXXTEST_TESTGEN_ARGS, for manually specifying
 #     options to the CxxTest code generator.
-# Version 1.2 (3/2/08)
+#
+# Version 1.2 (3/2/08) (CMake 2.8.0)
 #     Included patch from Tyler Roscoe to have the perl & python binaries
-#     detected based on CXXTEST_INCLUDE_DIR
-# Version 1.1 (2/9/08)
-#     Clarified example to illustrate need to call target_link_libraries()
-#     Changed commands to lowercase
-#     Added licensing info
-# Version 1.0 (1/8/08)
-#     Fixed CXXTEST_INCLUDE_DIRS so it will work properly
-#     Eliminated superfluous CXXTEST_FOUND assignment
-#     Cleaned up and added more documentation
+#     detected based on CXXTEST_INCLUDE_DIR.
+#
+# Version 1.1 (2/9/08) (CMake 2.8.0)
+#     Clarified example to illustrate need to call target_link_libraries().
+#     Changed commands to lowercase.
+#     Added licensing info.
+#
+# Version 1.0 (1/8/08) (CMake 2.6.3)
+#     Module added to CMake.
+#     Fixed CXXTEST_INCLUDE_DIRS so it will work properly.
+#     Eliminated superfluous CXXTEST_FOUND assignment.
+#     Cleaned up and added more documentation.
 
 #=============================================================
 # cxxtest_add_test (public macro)
@@ -214,7 +237,6 @@ macro(CXXTEST_ADD_TEST _cxxtest_testname _cxxtest_outfname)
     else()
         add_test(${_cxxtest_testname} ${CMAKE_CURRENT_BINARY_DIR}/${_cxxtest_testname})
     endif()
-
 endmacro()
 
 #=============================================================
@@ -234,10 +256,10 @@ find_program(CXXTEST_PYTHON_TESTGEN_EXECUTABLE
 find_program(CXXTEST_PERL_TESTGEN_EXECUTABLE cxxtestgen.pl
          PATHS ${CXXTEST_INCLUDE_DIR})
 
-if(PYTHON_FOUND OR Perl_FOUND)
+if(Python_FOUND OR Perl_FOUND)
   include(FindPackageHandleStandardArgs)
 
-  if(PYTHON_FOUND AND (CXXTEST_USE_PYTHON OR NOT Perl_FOUND OR NOT DEFINED CXXTEST_USE_PYTHON))
+  if(Python_FOUND AND (CXXTEST_USE_PYTHON OR NOT Perl_FOUND OR NOT DEFINED CXXTEST_USE_PYTHON))
     set(CXXTEST_TESTGEN_EXECUTABLE ${CXXTEST_PYTHON_TESTGEN_EXECUTABLE})
     execute_process(COMMAND ${CXXTEST_PYTHON_TESTGEN_EXECUTABLE} --version
       OUTPUT_VARIABLE _CXXTEST_OUT ERROR_VARIABLE _CXXTEST_OUT RESULT_VARIABLE _CXXTEST_RESULT)
@@ -256,13 +278,14 @@ if(PYTHON_FOUND OR Perl_FOUND)
         CXXTEST_INCLUDE_DIR CXXTEST_PERL_TESTGEN_EXECUTABLE)
   endif()
 
-  if(CXXTEST_FOUND)
+  if(CxxTest_FOUND)
     set(CXXTEST_INCLUDE_DIRS ${CXXTEST_INCLUDE_DIR})
   endif()
 
 else()
+  set(CxxTest_FOUND FALSE)
+  set(CXXTEST_FOUND ${CxxTest_FOUND})
 
-  set(CXXTEST_FOUND false)
   if(NOT CxxTest_FIND_QUIETLY)
     if(CxxTest_FIND_REQUIRED)
       message(FATAL_ERROR "Neither Python nor Perl found, cannot use CxxTest, aborting!")

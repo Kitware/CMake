@@ -5,6 +5,7 @@
 #include <array>
 #include <cstdio>
 #include <cstring>
+#include <functional>
 #include <set>
 #include <sstream>
 #include <utility>
@@ -236,7 +237,7 @@ ArgumentParser::Continue cmCoreTryCompile::Arguments::SetSourceType(
 }
 
 Arguments cmCoreTryCompile::ParseArgs(
-  cmRange<std::vector<std::string>::const_iterator> const& args,
+  cmRange<std::vector<std::string>::const_iterator> args,
   cmArgumentParser<Arguments> const& parser,
   std::vector<std::string>& unparsedArguments)
 {
@@ -1095,6 +1096,7 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
     vars.emplace("CMAKE_MSVC_RUNTIME_CHECKS"_s);
     vars.emplace("CMAKE_CXX_COMPILER_CLANG_SCAN_DEPS"_s);
     vars.emplace("CMAKE_VS_USE_DEBUG_LIBRARIES"_s);
+    vars.emplace("CMAKE_CXX_STDLIB_MODULES_JSON"_s);
 
     if (cmValue varListStr = this->Makefile->GetDefinition(
           kCMAKE_TRY_COMPILE_PLATFORM_VARIABLES)) {
@@ -1230,8 +1232,20 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
 
     if ((res == 0) && arguments.CopyFileTo) {
       std::string const& copyFile = *arguments.CopyFileTo;
+      std::string outputFile = this->OutputFile;
+
+      // Emscripten `.js` executables have an adjacent `.wasm` file with the
+      // actual compiled binary.  Our COPY_FILE clients need the latter.
+      if (cmHasLiteralSuffix(outputFile, ".js")) {
+        std::string wasmOutput =
+          cmStrCat(outputFile.substr(0, outputFile.length() - 3), ".wasm");
+        if (cmSystemTools::FileExists(wasmOutput)) {
+          outputFile = std::move(wasmOutput);
+        }
+      }
+
       cmsys::SystemTools::CopyStatus status =
-        cmSystemTools::CopyFileAlways(this->OutputFile, copyFile);
+        cmSystemTools::CopyFileAlways(outputFile, copyFile);
       if (!status) {
         std::string err = status.GetString();
         switch (status.Path) {
@@ -1247,7 +1261,7 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
         /* clang-format off */
         err = cmStrCat(
           "Cannot copy output executable\n"
-          "  '", this->OutputFile, "'\n"
+          "  '", outputFile, "'\n"
           "to destination specified by COPY_FILE:\n"
           "  '", copyFile, "'\n"
           "because:\n"

@@ -7,6 +7,7 @@
     "^c_headers_1::@6b8db101d64c125f29fe$",
     "^c_headers_2::@6b8db101d64c125f29fe$"
   ],
+  "abstractTargetIds": null,
   "projectName": "codemodel-v2",
   "minimumCMakeVersion": "3.13",
   "hasInstallRule": true,

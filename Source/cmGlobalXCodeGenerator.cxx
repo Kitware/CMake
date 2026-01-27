@@ -545,8 +545,9 @@ cmGlobalXCodeGenerator::GenerateBuildCommand(
   std::string const& makeProgram, std::string const& projectName,
   std::string const& /*projectDir*/,
   std::vector<std::string> const& targetNames, std::string const& config,
-  int jobs, bool /*verbose*/, cmBuildOptions const& /*buildOptions*/,
-  std::vector<std::string> const& makeOptions)
+  int jobs, bool /*verbose*/, cmBuildOptions /*buildOptions*/,
+  std::vector<std::string> const& makeOptions,
+  BuildTryCompile /*isInTryCompile */)
 {
   std::string const xcodebuild =
     this->SelectMakeProgram(makeProgram, this->GetXcodeBuildCommand());
@@ -740,7 +741,9 @@ void cmGlobalXCodeGenerator::AddExtraTargets(
       this->CurrentMakefile->GetSafeDefinition("CMAKE_XCODE_XCCONFIG"),
       this->CurrentLocalGenerator, config);
     if (!xcconfig.empty()) {
-      allbuild->AddSource(xcconfig);
+      auto* xcconfig_sf = allbuild->AddSource(xcconfig);
+      xcconfig_sf->SetSpecialSourceType(
+        cmSourceFile::SpecialSourceType::XcodeXCConfigFile);
     }
   }
 
@@ -1161,6 +1164,8 @@ void cmGlobalXCodeGenerator::AddXCodeProjBuildRule(
     target->GetLocalGenerator()->GetCurrentSourceDirectory());
   cmSourceFile* srcCMakeLists = target->Makefile->GetOrCreateSource(
     listfile, false, cmSourceFileLocationKind::Known);
+  srcCMakeLists->SetSpecialSourceType(
+    cmSourceFile::SpecialSourceType::CMakeLists);
   if (!cm::contains(sources, srcCMakeLists)) {
     sources.push_back(srcCMakeLists);
   }
@@ -1197,6 +1202,9 @@ std::string GetDirectoryValueFromFileExtension(std::string const& dirExt)
   }
   if (ext == "xcassets"_s) {
     return "folder.assetcatalog";
+  }
+  if (ext == "icon"_s) {
+    return "folder.iconcomposer.icon";
   }
   return "folder";
 }
@@ -1272,6 +1280,9 @@ std::string GetSourcecodeValueFromFileExtension(
   } else if (ext == "xcconfig"_s) {
     keepLastKnownFileType = true;
     sourcecode = "text.xcconfig";
+  } else if (ext == "icon"_s) {
+    keepLastKnownFileType = true;
+    sourcecode = "folder.iconcomposer.icon";
   }
   // else
   //  {
@@ -1538,6 +1549,7 @@ bool cmGlobalXCodeGenerator::CreateXCodeTarget(
     std::string plist = this->ComputeInfoPListLocation(gtgt);
     cmSourceFile* sf = gtgt->Makefile->GetOrCreateSource(
       plist, true, cmSourceFileLocationKind::Known);
+    sf->SetSpecialSourceType(cmSourceFile::SpecialSourceType::BundleInfoPlist);
     commonSourceFiles.push_back(sf);
   }
 
@@ -1811,6 +1823,8 @@ void cmGlobalXCodeGenerator::ForceLinkerLanguage(cmGeneratorTarget* gtgt)
     fout << '\n';
   }
   if (cmSourceFile* sf = mf->GetOrCreateSource(fname)) {
+    sf->SetSpecialSourceType(
+      cmSourceFile::SpecialSourceType::XcodeForceLinkerSource);
     sf->SetProperty("LANGUAGE", llang);
     sf->SetProperty("CXX_SCAN_FOR_MODULES", "0");
     gtgt->AddSource(fname);
@@ -2596,6 +2610,10 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
   if (std::string const* exportMacro = gtgt->GetExportMacro()) {
     // Add the export symbol definition for shared library objects.
     this->AppendDefines(ppDefs, exportMacro->c_str());
+  }
+  for (auto const& sharedLibCompileDef :
+       gtgt->GetSharedLibraryCompileDefs(configName)) {
+    this->AppendDefines(ppDefs, sharedLibCompileDef.c_str());
   }
   std::vector<std::string> targetDefines;
   if (!langForPreprocessorDefinitions.empty()) {
@@ -4519,6 +4537,7 @@ bool cmGlobalXCodeGenerator::CreateGroups(
           gtgt->GetLocalGenerator()->GetCurrentSourceDirectory());
         cmSourceFile* sf = gtgt->Makefile->GetOrCreateSource(
           listfile, false, cmSourceFileLocationKind::Known);
+        sf->SetSpecialSourceType(cmSourceFile::SpecialSourceType::CMakeLists);
         addSourceToGroup(sf->ResolveFullPath());
       }
 
@@ -4527,10 +4546,27 @@ bool cmGlobalXCodeGenerator::CreateGroups(
         std::string plist = this->ComputeInfoPListLocation(gtgt.get());
         cmSourceFile* sf = gtgt->Makefile->GetOrCreateSource(
           plist, true, cmSourceFileLocationKind::Known);
+        sf->SetSpecialSourceType(
+          cmSourceFile::SpecialSourceType::BundleInfoPlist);
         addSourceToGroup(sf->ResolveFullPath());
       }
     }
   }
+
+  // Sort all children of each target group by name alphabetically.
+  auto const getName = [](cmXCodeObject* obj) -> cm::string_view {
+    cmXCodeObject* name = obj->GetAttribute("name");
+    return name ? name->GetString() : cm::string_view{ ""_s };
+  };
+  for (auto& group : this->TargetGroup) {
+    if (cmXCodeObject* children = group.second->GetAttribute("children")) {
+      children->SortObjectList(getName);
+    }
+  }
+  // Also sort the-top level group.  Special groups like Products,
+  // Frameworks, and Resources are added later to the end of the list.
+  this->MainGroupChildren->SortObjectList(getName);
+
   return true;
 }
 
@@ -5033,10 +5069,10 @@ void cmGlobalXCodeGenerator::CreateXCodeDependHackMakefile(
           }
         }
 
-        std::vector<cmGeneratorTarget*> objlibs;
+        std::vector<BT<cmGeneratorTarget*>> objlibs;
         gt->GetObjectLibrariesInSources(objlibs);
-        for (auto* objLib : objlibs) {
-          makefileStream << this->PostBuildMakeTarget(objLib->GetName(),
+        for (auto const& objLib : objlibs) {
+          makefileStream << this->PostBuildMakeTarget(objLib.Value->GetName(),
                                                       configName)
                          << ": " << trel << '\n';
         }
@@ -5054,9 +5090,9 @@ void cmGlobalXCodeGenerator::CreateXCodeDependHackMakefile(
           }
         }
 
-        for (auto* objLib : objlibs) {
+        for (auto const& objLib : objlibs) {
 
-          std::string const objLibName = objLib->GetName();
+          std::string const& objLibName = objLib.Value->GetName();
           std::string d = cmStrCat(this->GetTargetTempDir(gt, configName),
                                    "/lib", objLibName, ".a");
 

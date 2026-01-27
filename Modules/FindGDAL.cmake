@@ -5,61 +5,86 @@
 FindGDAL
 --------
 
-Find Geospatial Data Abstraction Library (GDAL).
-
 .. deprecated:: 4.0
   GDAL 3.5 and above provide a ``GDALConfig.cmake`` package configuration file.
   Call ``find_package(GDAL CONFIG)`` to find it directly and avoid using this
   find module.  For further details, see `GDAL's documentation on CMake
   integration <https://gdal.org/en/latest/development/cmake.html>`_.
 
+Finds Geospatial Data Abstraction Library (GDAL):
+
+.. code-block:: cmake
+
+  find_package(GDAL [<version>] [...])
+
 Imported Targets
 ^^^^^^^^^^^^^^^^
 
-.. versionadded:: 3.14
+This module provides the following :ref:`Imported Targets`:
 
-This module defines :prop_tgt:`IMPORTED` target ``GDAL::GDAL``
-if GDAL has been found.
+``GDAL::GDAL``
+  .. versionadded:: 3.14
+
+  Target encapsulating the GDAL usage requirements, available only if GDAL
+  has been found.
 
 Result Variables
 ^^^^^^^^^^^^^^^^
 
-This module will set the following variables in your project:
+This module defines the following variables:
 
 ``GDAL_FOUND``
-  True if GDAL is found.
-``GDAL_INCLUDE_DIRS``
-  Include directories for GDAL headers.
-``GDAL_LIBRARIES``
-  Libraries to link to GDAL.
+  Boolean indicating whether (the requested version of) GDAL was found.
+
 ``GDAL_VERSION``
   .. versionadded:: 3.14
-    The version of GDAL found.
 
-Cache variables
+  The version of GDAL found.
+
+``GDAL_INCLUDE_DIRS``
+  Include directories for GDAL headers.
+
+``GDAL_LIBRARIES``
+  Libraries to link to GDAL.
+
+Cache Variables
 ^^^^^^^^^^^^^^^
 
 The following cache variables may also be set:
 
+``GDAL_INCLUDE_DIR``
+  The directory containing ``<gdal.h>``.
+
 ``GDAL_LIBRARY``
   The libgdal library file.
-``GDAL_INCLUDE_DIR``
-  The directory containing ``gdal.h``.
 
 Hints
 ^^^^^
 
-Set ``GDAL_DIR`` or ``GDAL_ROOT`` in the environment to specify the
-GDAL installation prefix.
-
 The following variables may be set to modify the search strategy:
 
+``GDAL_DIR`` or ``GDAL_ROOT``
+  Set one of these environment variables to specify the GDAL installation
+  prefix.
+
 ``FindGDAL_SKIP_GDAL_CONFIG``
-  If set, ``gdal-config`` will not be used. This can be useful if there are
+  If set, ``gdal-config`` will not be used.  This can be useful if there are
   GDAL libraries built with autotools (which provide the tool) and CMake (which
   do not) in the same environment.
+
 ``GDAL_ADDITIONAL_LIBRARY_VERSIONS``
   Extra versions of library names to search for.
+
+Examples
+^^^^^^^^
+
+Finding GDAL in config mode without using this module and linking its
+imported target to a project target:
+
+.. code-block:: cmake
+
+  find_package(GDAL CONFIG)
+  target_link_libraries(example PRIVATE GDAL::GDAL)
 #]=======================================================================]
 
 # $GDALDIR is an environment variable that would

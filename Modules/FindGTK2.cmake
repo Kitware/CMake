@@ -5,14 +5,10 @@
 FindGTK2
 --------
 
-Finds the GTK widget libraries and several of its other optional components.
-
-GTK is a multi-platform toolkit for creating graphical user interfaces.
-
 .. note::
 
-  This module is specifically for GTK version 2.x, which is obsolete and no
-  longer maintained.  Use the latest supported GTK version and
+  This module is intended specifically for GTK version 2.x, which is obsolete
+  and no longer maintained.  Use the latest supported GTK version and
   :module:`FindPkgConfig` module to find GTK in CMake instead of this module.
   For example:
 
@@ -21,6 +17,14 @@ GTK is a multi-platform toolkit for creating graphical user interfaces.
     find_package(PkgConfig REQUIRED)
     pkg_check_modules(GTK REQUIRED IMPORTED_TARGET gtk4>=4.14)
     target_link_libraries(example PRIVATE PkgConfig::GTK)
+
+Finds the GTK widget libraries and several of its other optional components:
+
+.. code-block:: cmake
+
+  find_package(GTK2 [<version>] [COMPONENTS <components>...] [...])
+
+GTK is a multi-platform toolkit for creating graphical user interfaces.
 
 Components
 ^^^^^^^^^^
@@ -93,7 +97,8 @@ Result Variables
 This module defines the following variables:
 
 ``GTK2_FOUND``
-  Boolean indicating whether GTK and all specified components are found.
+  Boolean indicating whether (the requested version of) GTK 2 and all
+  specified components were found.
 ``GTK2_VERSION``
   The version of GTK found (x.y.z).
 ``GTK2_MAJOR_VERSION``
@@ -703,7 +708,7 @@ endif()
 # used to compute the arch-specific include prefixes. While at it,
 # also retrieve their INCLUDEDIR, to accommodate non-standard layouts.
 find_package(PkgConfig QUIET)
-if(PKG_CONFIG_FOUND)
+if(PkgConfig_FOUND)
   pkg_check_modules(PC_GTK2 QUIET gtk+-2.0)
   if(PC_GTK2_FOUND)
     pkg_get_variable(PC_GTK2_INCLUDEDIR gtk+-2.0 includedir)

@@ -90,6 +90,7 @@ foreach(CMAKE_FIND_PACKAGE_SORT_DIRECTION IN ITEMS "" ASC Bogus)
   unset(SortLib_VERSION)
 endforeach()
 
+
 set(SortLib_DIR "" CACHE FILEPATH "Wipe out find results for testing." FORCE)
 set(CMAKE_FIND_PACKAGE_SORT_ORDER NATURAL)
 set(CMAKE_FIND_PACKAGE_SORT_DIRECTION DEC)
@@ -100,12 +101,25 @@ endif()
 set(SortLib_DIR "" CACHE FILEPATH "Wipe out find results for testing." FORCE)
 unset(SortLib_VERSION)
 
+
 set(SortLib_DIR "" CACHE FILEPATH "Wipe out find results for testing." FORCE)
 FIND_PACKAGE(SortLib 4.0 CONFIG)
 IF (NOT "${SortLib_VERSION}" STREQUAL "4.0.0")
   message(SEND_ERROR "FIND_PACKAGE_SORT_ORDER gave up too soon! ${SortLib_VERSION}")
 endif()
 unset(SortLib_VERSION)
+
+
+set(SortLib_DIR "" CACHE FILEPATH "Wipe out find results for testing." FORCE)
+# Expected to default to 'NATURAL' and 'DEC'
+unset(CMAKE_FIND_PACKAGE_SORT_ORDER)
+unset(CMAKE_FIND_PACKAGE_SORT_DIRECTION)
+FIND_PACKAGE(SortLib CONFIG)
+IF (NOT "${SortLib_VERSION}" STREQUAL "3.10.1")
+  message(SEND_ERROR "FIND_PACKAGE_SORT_ORDER Default! ${SortLib_VERSION}")
+endif()
+unset(SortLib_VERSION)
+
 
 set(SortFramework_DIR "" CACHE FILEPATH "Wipe out find results for testing." FORCE)
 set(CMAKE_FIND_PACKAGE_SORT_ORDER NAME)
@@ -117,6 +131,7 @@ endif()
 set(SortLib_DIR "" CACHE FILEPATH "Wipe out find results for testing." FORCE)
 unset(SortFramework_VERSION)
 
+
 set(SortFramework_DIR "" CACHE FILEPATH "Wipe out find results for testing." FORCE)
 set(CMAKE_FIND_PACKAGE_SORT_ORDER NATURAL)
 set(CMAKE_FIND_PACKAGE_SORT_DIRECTION DEC)
@@ -126,6 +141,7 @@ if(NOT "${SortFramework_VERSION}" STREQUAL "3.10.1")
 endif()
 set(SortLib_DIR "" CACHE FILEPATH "Wipe out find results for testing." FORCE)
 unset(SortFramework_VERSION)
+
 
 unset(CMAKE_FIND_PACKAGE_SORT_ORDER)
 unset(CMAKE_FIND_PACKAGE_SORT_DIRECTION)
@@ -144,15 +160,15 @@ elseif(NOT TARGET Foo::Empty)
   message(SEND_ERROR "Foo::Empty missing !")
 else()
   get_property(pt_includes
-    TARGET Foo::PrefixTest PROPERTY INTERFACE_INCLUDE_DIRECTORIES_DEFAULT)
-  if(NOT "${CMAKE_CURRENT_SOURCE_DIR}/include" PATH_EQUAL "${pt_includes}")
+    TARGET Foo::PrefixTest PROPERTY INTERFACE_INCLUDE_DIRECTORIES)
+  if(NOT "${pt_includes}" STREQUAL "$<$<CONFIG:default>:${CMAKE_CURRENT_SOURCE_DIR}/include>" )
     message(SEND_ERROR "Foo::PrefixTest has wrong includes '${pt_includes}' !")
   endif()
   set(pt_includes)
 
   get_property(rt_includes
-    TARGET Foo::RelativeTest PROPERTY INTERFACE_INCLUDE_DIRECTORIES_DEFAULT)
-  if(NOT "${CMAKE_CURRENT_SOURCE_DIR}/cps/../include" PATH_EQUAL "${rt_includes}")
+    TARGET Foo::RelativeTest PROPERTY INTERFACE_INCLUDE_DIRECTORIES)
+  if(NOT "${rt_includes}" STREQUAL "$<$<CONFIG:default>:${CMAKE_CURRENT_SOURCE_DIR}/cps/../include>")
     message(SEND_ERROR "Foo::RelativeTest has wrong includes '${rt_includes}' !")
   endif()
   set(rt_includes)
@@ -298,13 +314,21 @@ endif()
 find_package(DefaultConfigurationsTest)
 if(NOT DefaultConfigurationsTest_FOUND)
   message(SEND_ERROR "DefaultConfigurationsTest not found !")
-elseif(NOT TARGET DefaultConfigurationsTest::Target)
-  message(SEND_ERROR "DefaultConfigurationsTest::Target missing !")
+elseif(NOT TARGET DefaultConfigurationsTest::Target1)
+  message(SEND_ERROR "DefaultConfigurationsTest::Target1 missing !")
+elseif(NOT TARGET DefaultConfigurationsTest::Target2)
+  message(SEND_ERROR "DefaultConfigurationsTest::Target2 missing !")
 else()
-  get_property(dct_configs
-    TARGET DefaultConfigurationsTest::Target PROPERTY IMPORTED_CONFIGURATIONS)
-  if(NOT "${dct_configs}" STREQUAL "DEFAULT;TEST")
-    message(SEND_ERROR "DefaultConfigurationsTest::Target has wrong configurations '${dct_configs}' !")
+  get_property(dct1_configs
+    TARGET DefaultConfigurationsTest::Target1 PROPERTY IMPORTED_CONFIGURATIONS)
+  if(NOT "${dct1_configs}" STREQUAL "DEFAULT;TEST")
+    message(SEND_ERROR "DefaultConfigurationsTest::Target1 has wrong configurations '${dct1_configs}' !")
   endif()
-  set(dct_configs)
+  get_property(dct2_configs
+    TARGET DefaultConfigurationsTest::Target2 PROPERTY IMPORTED_CONFIGURATIONS)
+  if(NOT "${dct2_configs}" STREQUAL "TEST")
+    message(SEND_ERROR "DefaultConfigurationsTest::Target2 has wrong configurations '${dct2_configs}' !")
+  endif()
+  set(dct1_configs)
+  set(dct2_configs)
 endif()

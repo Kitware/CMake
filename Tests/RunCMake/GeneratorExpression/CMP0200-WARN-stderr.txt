@@ -1,0 +1,23 @@
+CMake Warning \(dev\) in CMakeLists\.txt:
+  Policy CMP0200 is not set: Location and configuration selection for
+  imported targets is more consistent\.  Run "cmake --help-policy CMP0200" for
+  policy details\.  Use the cmake_policy command to set the policy and
+  suppress this warning\.
+
+  Configuration selection for imported target "lib_test1" selected
+  configuration "CAT", but would select configuration "DOG" under the NEW
+  policy\.
+
+This warning is for project developers\.  Use -Wno-dev to suppress it\.
+
+CMake Warning \(dev\) in CMakeLists\.txt:
+  Policy CMP0200 is not set: Location and configuration selection for
+  imported targets is more consistent\.  Run "cmake --help-policy CMP0200" for
+  policy details\.  Use the cmake_policy command to set the policy and
+  suppress this warning\.
+
+  Configuration selection for imported target "lib_test2" selected
+  configuration "\(none\)", but would select configuration "[^"]*" under the
+  NEW policy\.
+
+This warning is for project developers\.  Use -Wno-dev to suppress it\.

@@ -76,7 +76,7 @@ public:
   static void Split(std::string const& input,
                     std::vector<std::string>& output);
 
-  static cm::string_view::size_type Find(cm::string_view const& input);
+  static cm::string_view::size_type Find(cm::string_view input);
 
   static bool IsValidTargetName(std::string const& input);
 

@@ -11,7 +11,11 @@ FindwxWindows
 
 Finds the wxWidgets (formerly known as wxWindows) installation and determines
 the locations of its include directories and libraries, as well as the name of
-the library.
+the library:
+
+.. code-block:: cmake
+
+  find_package(wxWindows [...])
 
 wxWidgets 2.6.x is supported for monolithic builds, such as those compiled in
 the ``wx/build/msw`` directory using:
@@ -26,7 +30,7 @@ Result Variables
 This module defines the following variables:
 
 ``WXWINDOWS_FOUND``
-  Boolean indicating whether the wxWidgets is found.
+  Boolean indicating whether the wxWidgets was found.
 ``WXWINDOWS_LIBRARIES``
   Libraries needed to link against to use wxWidgets.  This includes paths to
   the wxWidgets libraries and any additional linker flags, typically derived
@@ -57,7 +61,7 @@ This module accepts the following variables before calling the
 Deprecated Variables
 ^^^^^^^^^^^^^^^^^^^^
 
-These variables are provided for backward compatibility:
+The following variables are provided for backward compatibility:
 
 ``CMAKE_WX_CAN_COMPILE``
   .. deprecated:: 1.8
@@ -78,7 +82,7 @@ These variables are provided for backward compatibility:
 Examples
 ^^^^^^^^
 
-Example: Finding wxWidgets in earlier CMake versions
+Example: Finding wxWidgets in Earlier CMake Versions
 """"""""""""""""""""""""""""""""""""""""""""""""""""
 
 In earlier versions of CMake, wxWidgets (wxWindows) could be found using:

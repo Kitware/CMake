@@ -965,7 +965,8 @@ int do_install(int ac, char const* const* av)
     if (handler.IsParallel()) {
       ret_ = handler.Install(jobs, instrumentation);
     } else {
-      for (auto const& cmd : handler.GetCommands()) {
+      for (auto const& script : handler.GetScripts()) {
+        std::vector<std::string> cmd = script.command;
         cmake cm(cmake::RoleScript, cmState::Script);
         cmSystemTools::SetMessageCallback(
           [&cm](std::string const& msg, cmMessageMetadata const& md) {
@@ -989,7 +990,8 @@ int do_install(int ac, char const* const* av)
   cm::append(cmd, av, av + ac);
   ret = instrumentation.InstrumentCommand(
     "cmakeInstall", cmd, [doInstall]() { return doInstall(); });
-  instrumentation.CollectTimingData(cmInstrumentationQuery::Hook::PostInstall);
+  instrumentation.CollectTimingData(
+    cmInstrumentationQuery::Hook::PostCMakeInstall);
   return ret;
 #endif
 }

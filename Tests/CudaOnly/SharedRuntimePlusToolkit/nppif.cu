@@ -69,9 +69,18 @@ EXPORT int nppif_main()
     return 1;
   }
   // copy src to dst
-  NppStatus ret =
-    nppiFilterRow_8u_C1R(d_pSrc, nSrcStep, d_pDst, nDstStep, oROI, d_pKernel,
-                         nMaskSize, nAnchor, nDivisor);
+  NppStatus ret;
+#if CUDART_VERSION >= 13000
+  NppStreamContext context;
+  context.hStream = 0; // execute on the default stream
+  ret =
+    nppiFilterRow_8u_C1R_Ctx(d_pSrc, nSrcStep, d_pDst, nDstStep, oROI,
+                             d_pKernel, nMaskSize, nAnchor, nDivisor, context);
+
+#else
+  ret = nppiFilterRow_8u_C1R(d_pSrc, nSrcStep, d_pDst, nDstStep, oROI,
+                             d_pKernel, nMaskSize, nAnchor, nDivisor);
+#endif
   assert(ret == NPP_NO_ERROR);
   Npp8u* h_imgres = new Npp8u[dimgpix];
   err = cudaMemcpy(h_imgres, d_pDst, dimgsize, cudaMemcpyDeviceToHost);

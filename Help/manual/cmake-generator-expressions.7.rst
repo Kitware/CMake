@@ -677,7 +677,7 @@ Path Comparisons
   performed on either path. Returns ``1`` if the paths are equal, ``0``
   otherwise.
 
-  See :ref:`cmake_path(COMPARE) <Path COMPARE>` for more details.
+  See :ref:`cmake_path(COMPARE) <Path Comparison>` for more details.
 
 .. _GenEx Path Queries:
 
@@ -720,13 +720,15 @@ All paths are expected to be in cmake-style format.
 
   .. versionadded:: 3.24
 
-  Returns ``1`` if the path is :ref:`absolute <IS_ABSOLUTE>`, ``0`` otherwise.
+  Returns ``1`` if the path is absolute according to
+  :command:`cmake_path(IS_ABSOLUTE)`, ``0`` otherwise.
 
 .. genex:: $<PATH:IS_RELATIVE,path>
 
   .. versionadded:: 3.24
 
-  This will return the opposite of ``IS_ABSOLUTE``.
+  Returns ``1`` if the path is relative according to
+  :command:`cmake_path(IS_RELATIVE)`, ``0`` otherwise.
 
 .. genex:: $<PATH:IS_PREFIX[,NORMALIZE],path,input>
 
@@ -818,7 +820,7 @@ in cmake-style format.
   ``directory-separator``. Depending on the ``input``, the value of ``path``
   may be discarded.
 
-  See :ref:`cmake_path(APPEND) <APPEND>` for more details.
+  See :command:`cmake_path(APPEND)` for more details.
 
 .. genex:: $<PATH:REMOVE_FILENAME,path...>
 
@@ -828,7 +830,7 @@ in cmake-style format.
   ``$<PATH:GET_FILENAME>``) removed. After removal, any trailing
   ``directory-separator`` is left alone, if present.
 
-  See :ref:`cmake_path(REMOVE_FILENAME) <REMOVE_FILENAME>` for more details.
+  See :command:`cmake_path(REMOVE_FILENAME)` for more details.
 
 .. genex:: $<PATH:REPLACE_FILENAME,path...,input>
 
@@ -838,7 +840,7 @@ in cmake-style format.
   ``path`` has no filename component (i.e. ``$<PATH:HAS_FILENAME>`` returns
   ``0``), ``path`` is unchanged.
 
-  See :ref:`cmake_path(REPLACE_FILENAME) <REPLACE_FILENAME>` for more details.
+  See :command:`cmake_path(REPLACE_FILENAME)` for more details.
 
 .. genex:: $<PATH:REMOVE_EXTENSION[,LAST_ONLY],path...>
 
@@ -846,7 +848,7 @@ in cmake-style format.
 
   Returns ``path`` with the :ref:`extension <EXTENSION_DEF>` removed, if any.
 
-  See :ref:`cmake_path(REMOVE_EXTENSION) <REMOVE_EXTENSION>` for more details.
+  See :command:`cmake_path(REMOVE_EXTENSION)` for more details.
 
 .. genex:: $<PATH:REPLACE_EXTENSION[,LAST_ONLY],path...,input>
 
@@ -855,7 +857,7 @@ in cmake-style format.
   Returns ``path`` with the :ref:`extension <EXTENSION_DEF>` replaced by
   ``input``, if any.
 
-  See :ref:`cmake_path(REPLACE_EXTENSION) <REPLACE_EXTENSION>` for more details.
+  See :command:`cmake_path(REPLACE_EXTENSION)` for more details.
 
 .. genex:: $<PATH:NORMAL_PATH,path...>
 
@@ -871,8 +873,7 @@ in cmake-style format.
   Returns ``path``, modified to make it relative to the ``base_directory``
   argument.
 
-  See :ref:`cmake_path(RELATIVE_PATH) <cmake_path-RELATIVE_PATH>` for more
-  details.
+  See :command:`cmake_path(RELATIVE_PATH)` for more details.
 
 .. genex:: $<PATH:ABSOLUTE_PATH[,NORMALIZE],path...,base_directory>
 
@@ -885,7 +886,7 @@ in cmake-style format.
   When the ``NORMALIZE`` option is specified, the path is
   :ref:`normalized <Normalization>` after the path computation.
 
-  See :ref:`cmake_path(ABSOLUTE_PATH) <ABSOLUTE_PATH>` for more details.
+  See :command:`cmake_path(ABSOLUTE_PATH)` for more details.
 
 Shell Paths
 ^^^^^^^^^^^
@@ -1420,8 +1421,8 @@ Compile Context
   Note that for proper evaluation of this expression requires policy :policy:`CMP0099`
   to be set to ``NEW``.
 
-Linker Language And ID
-^^^^^^^^^^^^^^^^^^^^^^
+Link Language and ID
+^^^^^^^^^^^^^^^^^^^^
 
 .. genex:: $<LINK_LANGUAGE>
 
@@ -1827,6 +1828,209 @@ Link Context
   (see :genex:`$<DEVICE_LINK:list>` generator expression). This expression can
   only be used to specify link options.
 
+Linker ID and Frontend-Variant
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+See also the :variable:`CMAKE_<LANG>_COMPILER_LINKER_ID` and
+:variable:`CMAKE_<LANG>_COMPILER_LINKER_FRONTEND_VARIANT` variables, which are
+closely related to most of the expressions in this sub-section.
+
+.. genex:: $<C_COMPILER_LINKER_ID>
+
+  .. versionadded:: 4.2
+
+  CMake's linker id of the C linker used.
+
+.. genex:: $<C_COMPILER_LINKER_ID:linker_ids>
+
+  .. versionadded:: 4.2
+
+  where ``linker_ids`` is a comma-separated list.
+  ``1`` if CMake's linker id of the C linker matches any one
+  of the entries in ``linker_ids``, otherwise ``0``.
+
+.. genex:: $<CXX_COMPILER_LINKER_ID>
+
+  .. versionadded:: 4.2
+
+  CMake's linker id of the C++ linker used.
+
+.. genex:: $<CXX_COMPILER_LINKER_ID:linker_ids>
+
+  .. versionadded:: 4.2
+
+  where ``linker_ids`` is a comma-separated list.
+  ``1`` if CMake's linker id of the C++ linker matches any one
+  of the entries in ``linker_ids``, otherwise ``0``.
+
+.. genex:: $<CUDA_COMPILER_LINKER_ID>
+
+  .. versionadded:: 4.2
+
+  CMake's linker id of the CUDA linker used.
+
+.. genex:: $<CUDA_COMPILER_LINKER_ID:linker_ids>
+
+  .. versionadded:: 4.2
+
+  where ``linker_ids`` is a comma-separated list.
+  ``1`` if CMake's linker id of the CUDA linker matches any one
+  of the entries in ``linker_ids``, otherwise ``0``.
+
+.. genex:: $<OBJC_COMPILER_LINKER_ID>
+
+  .. versionadded:: 4.2
+
+  CMake's linker id of the Objective-C linker used.
+
+.. genex:: $<OBJC_COMPILER_LINKER_ID:linker_ids>
+
+  .. versionadded:: 4.2
+
+  where ``linker_ids`` is a comma-separated list.
+  ``1`` if CMake's linker id of the Objective-C linker matches any one
+  of the entries in ``linker_ids``, otherwise ``0``.
+
+.. genex:: $<OBJCXX_COMPILER_LINKER_ID>
+
+  .. versionadded:: 4.2
+
+  CMake's linker id of the Objective-C++ linker used.
+
+.. genex:: $<OBJCXX_COMPILER_LINKER_ID:linker_ids>
+
+  .. versionadded:: 4.2
+
+  where ``linker_ids`` is a comma-separated list.
+  ``1`` if CMake's linker id of the Objective-C++ linker matches any one
+  of the entries in ``linker_ids``, otherwise ``0``.
+
+.. genex:: $<Fortran_COMPILER_LINKER_ID>
+
+  .. versionadded:: 4.2
+
+  CMake's linker id of the Fortran linker used.
+
+.. genex:: $<Fortran_COMPILER_LINKER_ID:linker_ids>
+
+  .. versionadded:: 4.2
+
+  where ``linker_ids`` is a comma-separated list.
+  ``1`` if CMake's linker id of the Fortran linker matches any one
+  of the entries in ``linker_ids``, otherwise ``0``.
+
+.. genex:: $<HIP_COMPILER_LINKER_ID>
+
+  .. versionadded:: 4.2
+
+  CMake's linker id of the HIP linker used.
+
+.. genex:: $<HIP_COMPILER_LINKER_ID:linker_ids>
+
+  .. versionadded:: 4.2
+
+  where ``linker_ids`` is a comma-separated list.
+  ``1`` if CMake's linker id of the HIP linker matches any one
+  of the entries in ``linker_ids``, otherwise ``0``.
+
+.. genex:: $<C_COMPILER_LINKER_FRONTEND_VARIANT>
+
+  .. versionadded:: 4.2
+
+  CMake's linker frontend variant of the C linker used.
+
+.. genex:: $<C_COMPILER_LINKER_FRONTEND_VARIANT:variant_ids>
+
+  .. versionadded:: 4.2
+
+  where ``variant_ids`` is a comma-separated list.
+  ``1`` if CMake's linker frontend variant of the C linker matches any one
+  of the entries in ``variant_ids``, otherwise ``0``.
+
+.. genex:: $<CXX_COMPILER_LINKER_FRONTEND_VARIANT>
+
+  .. versionadded:: 4.2
+
+  CMake's linker frontend variant of the C++ linker used.
+
+.. genex:: $<CXX_COMPILER_LINKER_FRONTEND_VARIANT:variant_ids>
+
+  .. versionadded:: 4.2
+
+  where ``variant_ids`` is a comma-separated list.
+  ``1`` if CMake's linker frontend variant of the C++ linker matches any one
+  of the entries in ``variant_ids``, otherwise ``0``.
+
+.. genex:: $<CUDA_COMPILER_LINKER_FRONTEND_VARIANT>
+
+  .. versionadded:: 4.2
+
+  CMake's linker frontend variant of the CUDA linker used.
+
+.. genex:: $<CUDA_COMPILER_LINKER_FRONTEND_VARIANT:variant_ids>
+
+  .. versionadded:: 4.2
+
+  where ``variant_ids`` is a comma-separated list.
+  ``1`` if CMake's linker frontend variant of the CUDA linker matches any one
+  of the entries in ``variant_ids``, otherwise ``0``.
+
+.. genex:: $<OBJC_COMPILER_LINKER_FRONTEND_VARIANT>
+
+  .. versionadded:: 4.2
+
+  CMake's linker frontend variant of the Objective-C linker used.
+
+.. genex:: $<OBJC_COMPILER_LINKER_FRONTEND_VARIANT:variant_ids>
+
+  .. versionadded:: 4.2
+
+  where ``variant_ids`` is a comma-separated list.
+  ``1`` if CMake's linker frontend variant of the Objective-C linker matches
+  any one of the entries in ``variant_ids``, otherwise ``0``.
+
+.. genex:: $<OBJCXX_COMPILER_LINKER_FRONTEND_VARIANT>
+
+  .. versionadded:: 4.2
+
+  CMake's linker frontend variant of the Objective-C++ linker used.
+
+.. genex:: $<OBJCXX_COMPILER_LINKER_FRONTEND_VARIANT:variant_ids>
+
+  .. versionadded:: 4.2
+
+  where ``variant_ids`` is a comma-separated list.
+  ``1`` if CMake's linker frontend variant of the Objective-C++ linker matches
+  any one of the entries in ``variant_ids``, otherwise ``0``.
+
+.. genex:: $<Fortran_COMPILER_LINKER_FRONTEND_VARIANT>
+
+  .. versionadded:: 4.2
+
+  CMake's linker frontend variant of the Fortran linker used.
+
+.. genex:: $<Fortran_COMPILER_LINKER_FRONTEND_VARIANT:variant_ids>
+
+  .. versionadded:: 4.2
+
+  where ``variant_ids`` is a comma-separated list.
+  ``1`` if CMake's linker frontend variant of the Fortran linker matches
+  any one of the entries in ``variant_ids``, otherwise ``0``.
+
+.. genex:: $<HIP_COMPILER_LINKER_FRONTEND_VARIANT>
+
+  .. versionadded:: 4.2
+
+  CMake's linker frontend variant of the HIP linker used.
+
+.. genex:: $<HIP_COMPILER_LINKER_FRONTEND_VARIANT:variant_ids>
+
+  .. versionadded:: 4.2
+
+  where ``variant_ids`` is a comma-separated list.
+  ``1`` if CMake's linker frontend variant of the HIP linker matches
+  any one of the entries in ``variant_ids``, otherwise ``0``.
+
 
 .. _`Target-Dependent Expressions`:
 
@@ -2032,13 +2236,23 @@ In the following, the phrase "the ``tgt`` filename" means the name of the
   expression is evaluated on, unless the expression is being used in
   :command:`add_custom_command` or :command:`add_custom_target`.
 
-.. genex:: $<TARGET_FILE_BASE_NAME:tgt>
+.. genex:: $<TARGET_FILE_BASE_NAME:tgt[,POSTFIX:(INCLUDE|EXCLUDE)]>
 
   .. versionadded:: 3.15
 
+  .. versionadded:: 4.2
+    The option ``POSTFIX``, which can be used to control the inclusion or not
+    of the :prop_tgt:`<CONFIG>_POSTFIX` target property value as part of the
+    base name. The default is ``POSTFIX:INCLUDE``.
+
   Base name of ``tgt``, i.e. ``$<TARGET_FILE_NAME:tgt>`` without prefix and
-  suffix.
-  For example, if the ``tgt`` filename is ``libbase.so``, the base name is ``base``.
+  suffix and, optionally, postfix.
+  For example, if the ``tgt`` filename is ``libbase_postfix.so``, the base name
+  is:
+
+    * ``base_postfix`` for ``$<TARGET_FILE_BASE_NAME:tgt>`` or
+      ``$<TARGET_FILE_BASE_NAME:tgt,POSTFIX:INCLUDE>``.
+    * ``base`` for ``$<TARGET_FILE_BASE_NAME:tgt,POSTFIX:EXCLUDE>``.
 
   See also the :prop_tgt:`OUTPUT_NAME`, :prop_tgt:`ARCHIVE_OUTPUT_NAME`,
   :prop_tgt:`LIBRARY_OUTPUT_NAME` and :prop_tgt:`RUNTIME_OUTPUT_NAME`
@@ -2100,13 +2314,23 @@ In the following, the phrase "the ``tgt`` filename" means the name of the
   This expands to an empty string when there is no import file associated
   with the target.
 
-.. genex:: $<TARGET_IMPORT_FILE_BASE_NAME:tgt>
+.. genex:: $<TARGET_IMPORT_FILE_BASE_NAME:tgt[,POSTFIX:(INCLUDE|EXCLUDE)]>
 
   .. versionadded:: 3.27
 
+  .. versionadded:: 4.2
+    The option ``POSTFIX``, which can be used to control the inclusion or not
+    of the :prop_tgt:`<CONFIG>_POSTFIX` target property value as part of the
+    base name. The default is ``POSTFIX:INCLUDE``.
+
   Base name of the linker import file of the target ``tgt`` without prefix or
-  suffix. For example, if the target file name is ``libbase.tbd``, the base
-  name is ``base``.
+  suffix and, optionally, postfix.
+  For example, if the target file name is ``libbase_postfix.tbd``, the base
+  name is:
+
+    * ``base_postfix`` for ``$<TARGET_IMPORT_FILE_BASE_NAME:tgt>`` or
+      ``$<TARGET_IMPORT_FILE_BASE_NAME:tgt,POSTFIX:INCLUDE>``.
+    * ``base`` for ``$<TARGET_IMPORT_FILE_BASE_NAME:tgt,POSTFIX:EXCLUDE>``.
 
   See also the :prop_tgt:`OUTPUT_NAME` and :prop_tgt:`ARCHIVE_OUTPUT_NAME`
   target properties, their configuration-specific variants
@@ -2176,13 +2400,23 @@ In the following, the phrase "the ``tgt`` filename" means the name of the
   :genex:`$<TARGET_LINKER_IMPORT_FILE>` generator expressions, depending on the
   characteristics of the target and the platform.
 
-.. genex:: $<TARGET_LINKER_FILE_BASE_NAME:tgt>
+.. genex:: $<TARGET_LINKER_FILE_BASE_NAME:tgt[,POSTFIX:(INCLUDE|EXCLUDE)]>
 
   .. versionadded:: 3.15
 
+  .. versionadded:: 4.2
+    The option ``POSTFIX``, which can be used to control the inclusion or not
+    of the :prop_tgt:`<CONFIG>_POSTFIX` target property value as part of the
+    base name. The default is ``POSTFIX:INCLUDE``.
+
   Base name of file used to link the target ``tgt``, i.e.
-  :genex:`$<TARGET_LINKER_FILE_NAME:tgt>` without prefix and suffix. For
-  example, if target file name is ``libbase.a``, the base name is ``base``.
+  :genex:`$<TARGET_LINKER_FILE_NAME:tgt>` without prefix and suffix, and,
+  optionally, postfix.
+  For example, if target file name is ``libbase_postfix.a``, the base name is:
+
+    * ``base_postfix`` for ``$<TARGET_LINKER_FILE_BASE_NAME:tgt>`` or
+      ``$<TARGET_LINKER_FILE_BASE_NAME:tgt,POSTFIX:INCLUDE>``.
+    * ``base`` for ``$<TARGET_LINKER_FILE_BASE_NAME:tgt,POSTFIX:EXCLUDE>``.
 
   See also the :prop_tgt:`OUTPUT_NAME`, :prop_tgt:`ARCHIVE_OUTPUT_NAME`,
   and :prop_tgt:`LIBRARY_OUTPUT_NAME` target properties, their
@@ -2244,13 +2478,24 @@ In the following, the phrase "the ``tgt`` filename" means the name of the
   ``tgt`` represents (``.a``, ``.so``, ``.dylib``). So, on DLL platforms, it
   will be an empty string.
 
-.. genex:: $<TARGET_LINKER_LIBRARY_FILE_BASE_NAME:tgt>
+.. genex:: $<TARGET_LINKER_LIBRARY_FILE_BASE_NAME:tgt[,POSTFIX:(INCLUDE|EXCLUDE)]>
 
   .. versionadded:: 3.27
 
+  .. versionadded:: 4.2
+    The option ``POSTFIX``, which can be used to control the inclusion or not
+    of the :prop_tgt:`<CONFIG>_POSTFIX` target property value as part of the
+    base name. The default is ``POSTFIX:INCLUDE``.
+
   Base name of library file used to link the target ``tgt``, i.e.
-  :genex:`$<TARGET_LINKER_LIBRARY_FILE_NAME:tgt>` without prefix and suffix.
-  For example, if target file name is ``libbase.a``, the base name is ``base``.
+  :genex:`$<TARGET_LINKER_LIBRARY_FILE_NAME:tgt>` without prefix and
+  suffix,and, optionally, postfix.
+  For example, if target file name is ``libbase_postfix.a``, the base name is:
+
+    * ``base_postfix`` for ``$<TARGET_LINKER_LIBRARY_FILE_BASE_NAME:tgt>`` or
+      ``$<TARGET_LINKER_LIBRARY_FILE_BASE_NAME:tgt,POSTFIX:INCLUDE>``.
+    * ``base`` for
+      ``$<TARGET_LINKER_LIBRARY_FILE_BASE_NAME:tgt,POSTFIX:EXCLUDE>``.
 
   See also the :prop_tgt:`OUTPUT_NAME`, :prop_tgt:`ARCHIVE_OUTPUT_NAME`,
   and :prop_tgt:`LIBRARY_OUTPUT_NAME` target properties, their
@@ -2314,13 +2559,24 @@ In the following, the phrase "the ``tgt`` filename" means the name of the
   (``.lib``, ``.tbd``). So, when no import file is involved in the link step,
   an empty string is returned.
 
-.. genex:: $<TARGET_LINKER_IMPORT_FILE_BASE_NAME:tgt>
+.. genex:: $<TARGET_LINKER_IMPORT_FILE_BASE_NAME:tgt[,POSTFIX:(INCLUDE|EXCLUDE)]>
 
   .. versionadded:: 3.27
 
+  .. versionadded:: 4.2
+    The option ``POSTFIX``, which can be used to control the inclusion or not
+    of the :prop_tgt:`<CONFIG>_POSTFIX` target property value as part of the
+    base name. The default is ``POSTFIX:INCLUDE``.
+
   Base name of the import file used to link the target ``tgt``, i.e.
-  :genex:`$<TARGET_LINKER_IMPORT_FILE_NAME:tgt>` without prefix and suffix.
-  For example, if target file name is ``libbase.tbd``, the base name is ``base``.
+  :genex:`$<TARGET_LINKER_IMPORT_FILE_NAME:tgt>` without prefix and suffix,
+  and, optionally, postfix.
+  For example, if target file name is ``libbase_postfix.tbd``, the base name is
+
+    * ``base_postfix`` for ``$<TARGET_LINKER_IMPORT_FILE_BASE_NAME:tgt>`` or
+      ``$<TARGET_LINKER_IMPORT_FILE_BASE_NAME:tgt,POSTFIX:INCLUDE>``.
+    * ``base`` for
+      ``$<TARGET_LINKER_IMPORT_FILE_BASE_NAME:tgt,POSTFIX:EXCLUDE>``.
 
   See also the :prop_tgt:`OUTPUT_NAME` and :prop_tgt:`ARCHIVE_OUTPUT_NAME`,
   target properties, their configuration-specific variants
@@ -2423,23 +2679,46 @@ In the following, the phrase "the ``tgt`` filename" means the name of the
   Full path to the linker generated program database file (.pdb)
   where ``tgt`` is the name of a target.
 
+  .. versionchanged:: 4.2
+    The postfix, as specified by :prop_tgt:`DEBUG_POSTFIX` or
+    :prop_tgt:`<CONFIG>_POSTFIX` target properties, is always included in the
+    ``PDB`` file name. See the policy :policy:`CMP0202`.
+
   See also the :prop_tgt:`PDB_NAME` and :prop_tgt:`PDB_OUTPUT_DIRECTORY`
   target properties and their configuration specific variants
   :prop_tgt:`PDB_NAME_<CONFIG>` and :prop_tgt:`PDB_OUTPUT_DIRECTORY_<CONFIG>`.
 
-.. genex:: $<TARGET_PDB_FILE_BASE_NAME:tgt>
+.. genex:: $<TARGET_PDB_FILE_BASE_NAME:tgt[,POSTFIX:(INCLUDE|EXCLUDE)]>
 
   .. versionadded:: 3.15
 
   Base name of the linker generated program database file (.pdb)
   where ``tgt`` is the name of a target.
 
-  The base name corresponds to the target PDB file name (see
-  ``$<TARGET_PDB_FILE_NAME:tgt>``) without prefix and suffix. For example,
-  if target file name is ``base.pdb``, the base name is ``base``.
+  .. versionadded:: 4.2
+    The option ``POSTFIX``, which can be used to control the inclusion or not
+    of the :prop_tgt:`<CONFIG>_POSTFIX` target property value as part of the
+    base name. The default is ``POSTFIX:INCLUDE``.
 
-  See also the :prop_tgt:`PDB_NAME` target property, and its
-  configuration-specific variant :prop_tgt:`PDB_NAME_<CONFIG>`.
+  .. versionchanged:: 4.2
+    The postfix, as specified by :prop_tgt:`DEBUG_POSTFIX` or
+    :prop_tgt:`<CONFIG>_POSTFIX` target properties, is always included in the
+    ``PDB`` base name, except if option ``POSTFIX`` has value ``EXCLUDE``.
+    See the policy :policy:`CMP0202`.
+
+  The base name corresponds to the target PDB file name (see
+  ``$<TARGET_PDB_FILE_NAME:tgt>``) without prefix and suffix, and, optionally,
+  postfix. For example, if target file name is ``base_postfix.pdb``, the base
+  name is
+
+    * ``base_postfix`` for ``$<TARGET_PDB_FILE_BASE_NAME:tgt>`` or
+      ``$<TARGET_PDB_FILE_BASE_NAME:tgt,POSTFIX:INCLUDE>``.
+    * ``base`` for ``$<TARGET_PDB_FILE_BASE_NAME:tgt,POSTFIX:EXCLUDE>``.
+
+  See also the :prop_tgt:`OUTPUT_NAME`, :prop_tgt:`PDB_NAME` target properties,
+  and their configuration-specific variants :prop_tgt:`OUTPUT_NAME_<CONFIG>`
+  and :prop_tgt:`PDB_NAME_<CONFIG>`, and the :prop_tgt:`<CONFIG>_POSTFIX` and
+  :prop_tgt:`DEBUG_POSTFIX` target properties.
 
   Note that ``tgt`` is not added as a dependency of the target this
   expression is evaluated on.
@@ -2557,6 +2836,13 @@ In the following, the phrase "the ``tgt`` filename" means the name of the
 
   This generator expression can e.g. be used to create a batch file using
   :command:`file(GENERATE)` which sets the PATH environment variable accordingly.
+
+.. genex:: $<TARGET_INTERMEDIATE_DIR:tgt>
+
+  .. versionadded:: 4.2
+
+  The full path to the directory where intermediate target files, such as
+  object and dependency files, are stored.
 
 Export And Install Expressions
 ------------------------------

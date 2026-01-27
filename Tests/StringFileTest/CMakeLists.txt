@@ -115,6 +115,19 @@ if(NOT "${CMAKE_MATCH_2}" STREQUAL "")
   message(SEND_ERROR "CMAKE_MATCH_2 wrong: \"${CMAKE_MATCH_2}\", expected empty string")
 endif()
 
+set(regex_quote "ab|c+12?3[x-z]$(y)\\t\\r\\n.cma*ke^[:alpha:]")
+string(REGEX QUOTE regex_quote_output "${regex_quote}")
+if(NOT regex_quote MATCHES "^${regex_quote_output}$")
+  message(SEND_ERROR "string(REGEX QUOTE) problem: \"${regex_quote}\" does not match against \"^${regex_quote_output}$\"")
+endif()
+string(REPLACE "." "a" nomatch_regex_quote "${regex_quote}")
+if(nomatch_regex_quote MATCHES "^${regex_quote_output}$")
+  message(SEND_ERROR "string(REGEX QUOTE) problem: \"${nomatch_regex_quote}\" matches against \"^${regex_quote_output}$\"")
+endif()
+string(REGEX QUOTE multi_regex_quote ${regex_quote} ${regex_quote})
+if(NOT "${regex_quote}${regex_quote}" MATCHES "^${multi_regex_quote}$")
+  message(SEND_ERROR "string(REGEX QUOTE) problem: \"${regex_quote}${regex_quote}\" does not match against \"^${multi_regex_quote}$\"")
+endif()
 
 string(STRIP "
   ST1

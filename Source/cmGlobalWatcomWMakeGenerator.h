@@ -13,7 +13,6 @@
 #include "cmGlobalGeneratorFactory.h"
 #include "cmGlobalUnixMakefileGenerator3.h"
 
-class cmMakefile;
 class cmake;
 
 /** \class cmGlobalWatcomWMakeGenerator
@@ -55,14 +54,16 @@ public:
 
   bool IsGNUMakeJobServerAware() const override { return false; }
 
+  std::string GetShortBinaryOutputDir() const override;
+
 protected:
   std::vector<GeneratedMakeCommand> GenerateBuildCommand(
     std::string const& makeProgram, std::string const& projectName,
     std::string const& projectDir, std::vector<std::string> const& targetNames,
     std::string const& config, int jobs, bool verbose,
-    cmBuildOptions const& buildOptions = cmBuildOptions(),
-    std::vector<std::string> const& makeOptions =
-      std::vector<std::string>()) override;
+    cmBuildOptions buildOptions = cmBuildOptions(),
+    std::vector<std::string> const& makeOptions = std::vector<std::string>(),
+    BuildTryCompile isInTryCompile = BuildTryCompile::No) override;
 
   void PrintBuildCommandAdvice(std::ostream& os, int jobs) const override;
 };

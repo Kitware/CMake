@@ -11,6 +11,15 @@ FetchContent
 
   .. contents::
 
+This module provides commands to populate content at configure time or as
+part of the calling script.
+
+Load this module in CMake with:
+
+.. code-block:: cmake
+
+  include(FetchContent)
+
 .. note:: The :guide:`Using Dependencies Guide` provides a high-level
   introduction to this general topic. It provides a broader overview of
   where the ``FetchContent`` module fits into the bigger picture,
@@ -111,9 +120,10 @@ Commands
   The ``<contentOptions>`` can be any of the download, update, or patch options
   that the :command:`ExternalProject_Add` command understands.  The configure,
   build, install, and test steps are explicitly disabled, so options related
-  to those steps will be ignored.  The ``SOURCE_SUBDIR`` option is an
-  exception, see :command:`FetchContent_MakeAvailable` for details on how that
-  affects behavior.
+  to those steps are prohibited and will be discarded if given.
+  The ``SOURCE_SUBDIR`` option is an exception, see
+  :command:`FetchContent_MakeAvailable` for details on how that affects
+  behavior.
 
   .. versionchanged:: 3.30
     When policy :policy:`CMP0168` is set to ``NEW``, some output-related and
@@ -1128,7 +1138,7 @@ current working directory.
 # FetchContent_MakeAvailable() implementation details are excluded for
 # backward compatibility reasons (see just after the endblock()).
 block(SCOPE_FOR POLICIES)
-cmake_policy(VERSION 3.29)
+cmake_policy(VERSION 4.1)
 
 include(${CMAKE_CURRENT_LIST_DIR}/ExternalProject/shared_internal_commands.cmake)
 
@@ -1876,9 +1886,9 @@ ExternalProject_Add_Step(${contentName}-populate copyfile
 # Pass through things we've already detected in the main project to avoid
 # paying the cost of redetecting them again in ExternalProject_Add()
 set(GIT_EXECUTABLE [==[${GIT_EXECUTABLE}]==])
-set(GIT_VERSION_STRING [==[${GIT_VERSION_STRING}]==])
+set(Git_VERSION [==[${Git_VERSION}]==])
 set_property(GLOBAL PROPERTY _CMAKE_FindGit_GIT_EXECUTABLE_VERSION
-  [==[${GIT_EXECUTABLE};${GIT_VERSION_STRING}]==]
+  [==[${GIT_EXECUTABLE};${Git_VERSION}]==]
 )
 ")
   endif()

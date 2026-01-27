@@ -7,8 +7,12 @@ FindPython2
 
 .. versionadded:: 3.12
 
-Find Python 2 interpreter, compiler and development environment (include
-directories and libraries).
+Finds Python 2 interpreter, compiler and development environment (include
+directories and libraries):
+
+.. code-block:: cmake
+
+  find_package(Python2 [<version>] [COMPONENTS <components>...] [...])
 
 .. versionadded:: 3.19
   When a version is requested, it can be specified as a simple value or as a
@@ -31,10 +35,14 @@ The following components are supported:
     * ``Development.Embed``: search for artifacts for Python 2 embedding
       developments.
 
-* ``NumPy``: search for NumPy include directories.
-
 .. versionadded:: 3.14
-  Added the ``NumPy`` component.
+
+  * ``NumPy``: search for NumPy include directories. Specifying this component
+    imply also the components ``Interpreter`` and ``Development.Module``.
+
+  .. versionchanged:: 4.2
+    The component ``Development.Module`` is no longer implied when the policy
+    :policy:`CMP0201` is set to ``NEW``.
 
 If no ``COMPONENTS`` are specified, ``Interpreter`` is assumed.
 
@@ -81,7 +89,7 @@ for you.
 Imported Targets
 ^^^^^^^^^^^^^^^^
 
-This module defines the following :ref:`Imported Targets <Imported Targets>`:
+This module provides the following :ref:`Imported Targets`:
 
 .. versionchanged:: 3.14
   :ref:`Imported Targets <Imported Targets>` are only created when
@@ -121,17 +129,22 @@ This module defines the following :ref:`Imported Targets <Imported Targets>`:
   .. versionadded:: 3.14
 
   NumPy library for Python 2. Target defined if component ``NumPy`` is found.
+  Moreover, this target has the ``Python2::Module`` target as dependency.
+
+  .. versionchanged:: 4.2
+    This target does not have anymore the ``Python2::Module`` target as
+    dependency when the policy :policy:`CMP0201` is set to ``NEW``.
 
 Result Variables
 ^^^^^^^^^^^^^^^^
 
-This module will set the following variables in your project
+This module defines the following variables
 (see :ref:`Standard Variable Names <CMake Developer Standard Variable Names>`):
 
 ``Python2_FOUND``
-  System has the Python 2 requested components.
+  Boolean indicating whether system has the Python 2 requested components.
 ``Python2_Interpreter_FOUND``
-  System has the Python 2 interpreter.
+  Boolean indicating whether system has the Python 2 interpreter.
 ``Python2_EXECUTABLE``
   Path to the Python 2 interpreter.
 ``Python2_EXECUTABLE_DEBUG``
@@ -177,7 +190,7 @@ This module will set the following variables in your project
   Information returned by ``sysconfig.get_path('platlib')`` or else
   ``distutils.sysconfig.get_python_lib(plat_specific=True,standard_lib=False)``.
 ``Python2_Compiler_FOUND``
-  System has the Python 2 compiler.
+  Boolean indicating whether system has the Python 2 compiler.
 ``Python2_COMPILER``
   Path to the Python 2 compiler. Only offered by IronPython.
 ``Python2_COMPILER_ID``
@@ -190,17 +203,19 @@ This module will set the following variables in your project
   The ``.Net`` interpreter. Only used by ``IronPython`` implementation.
 
 ``Python2_Development_FOUND``
-  System has the Python 2 development artifacts.
+  Boolean indicating whether system has the Python 2 development artifacts.
 
 ``Python2_Development.Module_FOUND``
   .. versionadded:: 3.18
 
-  System has the Python 2 development artifacts for Python module.
+  Boolean indicating whether system has the Python 2 development artifacts
+  for Python module.
 
 ``Python2_Development.Embed_FOUND``
   .. versionadded:: 3.18
 
-  System has the Python 2 development artifacts for Python embedding.
+  Boolean indicating whether system has the Python 2 development artifacts
+  for Python embedding.
 
 ``Python2_INCLUDE_DIRS``
   The Python 2 include directories.
@@ -240,7 +255,7 @@ This module will set the following variables in your project
 ``Python2_NumPy_FOUND``
   .. versionadded:: 3.14
 
-  System has the NumPy.
+  Boolean indicating whether system has the NumPy.
 
 ``Python2_NumPy_INCLUDE_DIRS``
   .. versionadded:: 3.14

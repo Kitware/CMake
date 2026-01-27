@@ -6,7 +6,7 @@
   to tell CMake that the project requires at least <min> but has been updated
   to work with policies introduced by <max> or earlier\.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)
 +
 CMake Deprecation Warning at BeforeVersionDeprecated\.cmake:5 \(cmake_policy\):
   Compatibility with CMake < 3\.10 will be removed from a future version of
@@ -16,4 +16,4 @@ CMake Deprecation Warning at BeforeVersionDeprecated\.cmake:5 \(cmake_policy\):
   to tell CMake that the project requires at least <min> but has been updated
   to work with policies introduced by <max> or earlier\.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)$
+  CMakeLists\.txt:3 \(include\)$

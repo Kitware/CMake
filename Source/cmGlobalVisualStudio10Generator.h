@@ -38,9 +38,9 @@ public:
     std::string const& makeProgram, std::string const& projectName,
     std::string const& projectDir, std::vector<std::string> const& targetNames,
     std::string const& config, int jobs, bool verbose,
-    cmBuildOptions const& buildOptions = cmBuildOptions(),
-    std::vector<std::string> const& makeOptions =
-      std::vector<std::string>()) override;
+    cmBuildOptions buildOptions = cmBuildOptions(),
+    std::vector<std::string> const& makeOptions = std::vector<std::string>(),
+    BuildTryCompile isInTryCompile = BuildTryCompile::No) override;
 
   //! create the correct local generator
   std::unique_ptr<cmLocalGenerator> CreateLocalGenerator(
@@ -94,10 +94,7 @@ public:
   std::string const& GetPlatformToolsetCudaVSIntegrationSubdirString() const;
 
   /** The fortran toolset name.  */
-  cm::optional<std::string> GetPlatformToolsetFortran() const override
-  {
-    return this->GeneratorToolsetFortran;
-  }
+  cm::optional<std::string> GetPlatformToolsetFortran() const override;
 
   /** Return whether we need to use No/Debug instead of false/true
       for GenerateDebugInformation.  */
@@ -184,6 +181,8 @@ public:
   bool IsMsBuildRestoreSupported() const;
   bool IsBuildInParallelSupported() const;
 
+  bool SupportsShortObjectNames() const override;
+
 protected:
   cmGlobalVisualStudio10Generator(cmake* cm, std::string const& name);
 
@@ -234,6 +233,7 @@ protected:
   std::string GeneratorToolsetCudaNvccSubdir;
   std::string GeneratorToolsetCudaVSIntegrationSubdir;
   cm::optional<std::string> GeneratorToolsetFortran;
+  cm::optional<std::string> DefaultToolsetFortran;
   std::string DefaultPlatformToolset;
   std::string DefaultPlatformToolsetHostArchitecture;
   std::string DefaultAndroidToolset;

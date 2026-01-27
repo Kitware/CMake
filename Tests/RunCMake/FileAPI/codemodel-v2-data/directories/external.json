@@ -8,6 +8,7 @@
         "^ZERO_CHECK::@[0-9a-f]+$",
         "^generated_exe::@[0-9a-f]+$"
     ],
+    "abstractTargetIds": null,
     "projectName": "External",
     "minimumCMakeVersion": "3.13",
     "hasInstallRule": true,

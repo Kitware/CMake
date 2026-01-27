@@ -23,6 +23,7 @@ while test "$#" != 0; do
     -n) no_objects='1' ;;
     -c) shift; compiler="$1" ;;
     --) shift; break ;;
+    --target=*) ;;
     -*) die "$usage" ;;
     *)  break ;;
     esac

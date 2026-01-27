@@ -1,5 +1,5 @@
-CMake Error at name-conflict.cmake:8 \(add_library\):
+CMake Error at name-conflict\.cmake:8 \(add_library\):
   add_library cannot create target "bar" because an alias with the same name
-  already exists.
+  already exists\.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:3 \(include\)

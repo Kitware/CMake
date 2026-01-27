@@ -12,12 +12,15 @@ class cmInstrumentationQuery
 {
 
 public:
-  enum Query
+  enum Option
   {
     StaticSystemInformation,
-    DynamicSystemInformation
+    DynamicSystemInformation,
+    CDashSubmit,
+    CDashVerbose,
+    Trace
   };
-  static std::vector<std::string> const QueryString;
+  static std::vector<std::string> const OptionString;
 
   enum Hook
   {
@@ -26,8 +29,8 @@ public:
     PostBuild,
     PreCMakeBuild,
     PostCMakeBuild,
-    PostTest,
-    PostInstall,
+    PostCTest,
+    PostCMakeInstall,
     PrepareForCDash,
     Manual
   };
@@ -35,7 +38,7 @@ public:
 
   struct QueryJSONRoot
   {
-    std::vector<cmInstrumentationQuery::Query> queries;
+    std::vector<cmInstrumentationQuery::Option> options;
     std::vector<cmInstrumentationQuery::Hook> hooks;
     std::vector<std::string> callbacks;
     int version;
@@ -43,7 +46,7 @@ public:
 
   cmInstrumentationQuery() = default;
   bool ReadJSON(std::string const& file, std::string& errorMessage,
-                std::set<Query>& queries, std::set<Hook>& hooks,
+                std::set<Option>& options, std::set<Hook>& hooks,
                 std::vector<std::string>& callbacks);
   QueryJSONRoot queryRoot;
   cmJSONState parseState;

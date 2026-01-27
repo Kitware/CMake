@@ -20,24 +20,30 @@ This module provides the following command:
 
 .. command:: check_include_files
 
-  Checks once whether one or more header files can be included together in
-  source code:
+  Checks once whether one or more header files exist and can be included
+  together in C or C++ code:
 
   .. code-block:: cmake
 
     check_include_files(<includes> <variable> [LANGUAGE <language>])
 
-  This command checks once whether the given ``<includes>`` list of header
-  files exist and can be included together in a C or C++ source file.  The
-  result of the check is stored in an internal cache variable named
-  ``<variable>``.  Specify the ``<includes>`` argument as a
-  :ref:`semicolon-separated list <CMake Language Lists>` of header file
-  names.
+  .. rubric:: The arguments are:
 
-  If ``LANGUAGE`` is set, the specified compiler will be used to perform the
-  check.  Acceptable values are ``C`` and ``CXX``.  If not set, the C
-  compiler will be used if enabled.  If the C compiler is not enabled, the
-  C++ compiler will be used if enabled.
+  ``<includes>``
+    A :ref:`semicolon-separated list <CMake Language Lists>` of header
+    files to be checked.
+
+  ``<variable>``
+    The name of the variable to store the result of the check.  This
+    variable will be created as an internal cache variable.
+
+  ``LANGUAGE <language>``
+    .. versionadded:: 3.11
+
+    If set, the specified ``<language>`` compiler will be used to perform
+    the check.  Acceptable values are ``C`` and ``CXX``.  If this option is
+    not given, the C compiler will be used if enabled.  If the C compiler
+    is not enabled, the C++ compiler will be used if enabled.
 
   .. rubric:: Variables Affecting the Check
 

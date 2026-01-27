@@ -1,0 +1,5 @@
+CMake Error:
+  Unsupported intermediate directory strategy 'INVALID'
+
+
+CMake Generate step failed\.  Build files cannot be regenerated correctly\.

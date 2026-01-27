@@ -15,7 +15,7 @@
 #include "cmCacheManager.h"
 #include "cmDefinitions.h"
 #include "cmExecutionStatus.h"
-#include "cmGlobCacheEntry.h"
+#include "cmGlobCacheEntry.h" // IWYU pragma: keep
 #include "cmGlobVerificationManager.h"
 #include "cmList.h"
 #include "cmListFileCache.h"
@@ -794,6 +794,16 @@ bool cmState::UseNinjaMulti() const
   return this->NinjaMulti;
 }
 
+void cmState::SetFastbuildMake(bool fastbuildMake)
+{
+  this->FastbuildMake = fastbuildMake;
+}
+
+bool cmState::UseFastbuildMake() const
+{
+  return this->FastbuildMake;
+}
+
 unsigned int cmState::GetCacheMajorVersion() const
 {
   return this->CacheManager->GetCacheMajorVersion();
@@ -1034,6 +1044,7 @@ cmStateSnapshot cmState::Pop(cmStateSnapshot const& originSnapshot)
   prevPos->LinkDirectoriesPosition =
     prevPos->BuildSystemDirectory->LinkDirectories.size();
   prevPos->BuildSystemDirectory->CurrentScope = prevPos;
+  prevPos->UnwindState = pos->UnwindState;
 
   if (!pos->Keep && this->SnapshotData.IsLast(pos)) {
     if (pos->Vars != prevPos->Vars) {

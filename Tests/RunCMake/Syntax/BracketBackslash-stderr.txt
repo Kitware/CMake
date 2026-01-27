@@ -1,6 +1,6 @@
-CMake Error at BracketBackslash.cmake:1 \(message\):
+CMake Error at BracketBackslash\.cmake:1 \(message\):
   a\\
 
   b
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)$
+  CMakeLists\.txt:3 \(include\)$

@@ -8,6 +8,7 @@
 #include <utility>
 #include <vector>
 
+#include <cm/optional>
 #include <cmext/string_view>
 
 #include "cmsys/FStream.hxx"
@@ -512,6 +513,9 @@ cmGlobalVisualStudioVersionedGenerator::cmGlobalVisualStudioVersionedGenerator(
     // see 'Reference Assemblies\Microsoft\Framework\.NETFramework'.
     // Use a version installed by VS 2022 without a separate component.
     this->DefaultTargetFrameworkVersion = "v4.7.2";
+  }
+  if (this->Version >= cmGlobalVisualStudioGenerator::VSVersion::VS18) {
+    this->DefaultToolsetFortran = "ifx";
   }
 }
 

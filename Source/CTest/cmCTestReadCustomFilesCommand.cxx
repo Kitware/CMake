@@ -2,6 +2,8 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmCTestReadCustomFilesCommand.h"
 
+#include <vector>
+
 #include "cmCTest.h"
 #include "cmExecutionStatus.h"
 

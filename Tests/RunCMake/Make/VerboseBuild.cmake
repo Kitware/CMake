@@ -1,3 +1,5 @@
+set(CMAKE_INTERMEDIATE_DIR_STRATEGY FULL CACHE STRING "" FORCE)
+
 enable_language(C)
 
 # Make sure compile command is not hidden in a temp file.

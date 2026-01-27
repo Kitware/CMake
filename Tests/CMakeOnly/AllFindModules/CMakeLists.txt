@@ -44,7 +44,7 @@ foreach(FIND_MODULE IN LISTS FIND_MODULES)
 endforeach()
 
 # Qt4 is not present, so we can check Qt3
-if (NOT QT4_FOUND)
+if (NOT Qt4_FOUND)
     set(DESIRED_QT_VERSION 3)
     foreach(FIND_MODULE ${NO_QT4_MODULES} "Qt")
         do_find(${FIND_MODULE})
@@ -90,16 +90,52 @@ endmacro()
 # If any of these modules reported that it was found a version number should have been
 # reported.
 
-foreach(VTEST ALSA ARMADILLO BZIP2 CUPS CURL EXPAT FREETYPE GETTEXT GIT HG
-        HSPELL ICOTOOL JASPER LIBLZMA LIBXML2 LIBXSLT LTTNGUST PERL PKG_CONFIG
-        PostgreSQL TIFF ZLIB)
-    check_version_string(${VTEST} ${VTEST}_VERSION_STRING)
+foreach(
+  VTEST
+    ALSA ARMADILLO
+    BZIP2
+    CUPS CURL
+    EXPAT
+    FREETYPE
+    GETTEXT GIT GNUTLS
+    HG HSPELL
+    ICOTOOL ImageMagick
+    JASPER
+    LIBLZMA LIBXML2 LIBXSLT LTTNGUST
+    OpenCL
+    PERL PKG_CONFIG PNG PostgreSQL
+    SDL
+    TCLSH TIFF
+    wxWidgets
+    ZLIB
+)
+  check_version_string(${VTEST} ${VTEST}_VERSION_STRING)
 endforeach()
 
-foreach(VTEST BISON Boost BZIP2 CUDA DOXYGEN FLEX GIF GTK2
-    HDF5 JPEG LibArchive LIBLZMA OPENSCENEGRAPH Ruby RUBY SWIG Protobuf ZLIB)
-    check_version_string(${VTEST} ${VTEST}_VERSION)
+foreach(
+  VTEST
+    ALSA Armadillo
+    BISON Boost BZip2 BZIP2
+    CUDA Cups
+    DevIL Doxygen DOXYGEN
+    EXPAT
+    FLEX Freetype
+    Gettext GIF Git GnuTLS GNUTLS GTK2
+    HDF5 Hg HSPELL
+    Icotool ImageMagick
+    Jasper JPEG
+    LibArchive LibLZMA LIBLZMA LibXml2 LibXslt LTTngUST Lua
+    OpenCL OpenSceneGraph OPENSCENEGRAPH OpenSSL OPENSSL
+    Perl PerlLibs PkgConfig PNG PostgreSQL Protobuf
+    Ruby RUBY
+    SDL SWIG
+    Tclsh TIFF
+    wxWidgets
+    ZLIB
+)
+  check_version_string(${VTEST} ${VTEST}_VERSION)
 endforeach()
 
 check_version_string(PYTHONINTERP PYTHON_VERSION_STRING)
+check_version_string(SUBVERSION Subversion_VERSION)
 check_version_string(SUBVERSION Subversion_VERSION_SVN)

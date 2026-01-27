@@ -19,6 +19,8 @@ message(" git = ${GIT}")
 set(AUTHOR_CONFIG "[user]
 \tname = Test Author
 \temail = testauthor@cmake.org
+[commit]
+\tgpgsign = false
 ")
 
 #-----------------------------------------------------------------------------

@@ -6,8 +6,15 @@ find_package(ImageMagick REQUIRED COMPONENTS Magick++ MagickWand)
 
 add_executable(test_magick++ main_magick++.cxx)
 target_link_libraries(test_magick++ PRIVATE ImageMagick::Magick++)
+target_compile_definitions(
+  test_magick++
+  PRIVATE CMAKE_EXPECTED_IMAGEMAGICK_VERSION="${ImageMagick_VERSION}"
+)
 add_test(NAME test_magick++ COMMAND test_magick++)
 
 add_executable(test_magick_wand main_magick_wand.c)
 target_link_libraries(test_magick_wand ImageMagick::MagickWand)
+if(ImageMagick_VERSION VERSION_GREATER_EQUAL 7)
+  target_compile_definitions(test_magick_wand PRIVATE TEST_IMAGE_MAGICK_7)
+endif()
 add_test(NAME test_magick_wand COMMAND test_magick_wand)

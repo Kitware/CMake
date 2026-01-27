@@ -4,6 +4,7 @@
 #include "cmBinUtilsMacOSMachOOToolGetRuntimeDependenciesTool.h"
 
 #include <sstream>
+#include <vector>
 
 #include <cmsys/RegularExpression.hxx>
 

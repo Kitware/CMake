@@ -1,0 +1,10 @@
+^CMake Warning \(dev\) at CMP0202-WARN-TARGET_PDB_FILE_BASE_NAME\.cmake:[0-9]+ \(file\):
+  Policy CMP0202 is not set: PDB file names always include their target's
+  per-config POSTFIX\.  Run "cmake --help-policy CMP0202" for policy details\.
+  Use the cmake_policy command to set the policy and suppress this warning\.
+
+  "POSTFIX" option is recognized only when the policy is set to NEW\.  Since
+  the policy is not set, the OLD behavior will be used\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
+This warning is for project developers\.  Use -Wno-dev to suppress it\.

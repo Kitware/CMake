@@ -36,7 +36,7 @@ void processLinkDirectories(cmGeneratorTarget const* tgt,
                             bool debugDirectories)
 {
   for (EvaluatedTargetPropertyEntry& entry : entries.Entries) {
-    cmLinkImplItem const& item = entry.LinkImplItem;
+    cmLinkItem const& item = entry.LinkItem;
     std::string const& targetName = item.AsStr();
 
     std::string usedDirectories;

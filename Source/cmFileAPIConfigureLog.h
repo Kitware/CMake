@@ -9,4 +9,4 @@
 class cmFileAPI;
 
 extern Json::Value cmFileAPIConfigureLogDump(cmFileAPI& fileAPI,
-                                             unsigned long version);
+                                             unsigned int version);

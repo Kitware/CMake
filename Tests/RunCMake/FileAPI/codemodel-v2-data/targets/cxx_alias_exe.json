@@ -4,6 +4,10 @@
     "directorySource": "^alias$",
     "projectName": "Alias",
     "type": "EXECUTABLE",
+    "imported": null,
+    "local": null,
+    "abstract": null,
+    "symbolic": null,
     "isGeneratorProvided": null,
     "fileSets": null,
     "sources": [
@@ -45,7 +49,12 @@
             ],
             "includes": null,
             "frameworks": null,
-            "defines": null,
+            "defines": [
+                {
+                    "define": "_MBCS",
+                    "backtrace": null
+                }
+            ],
             "compileCommandFragments": null
         }
     ],
@@ -106,5 +115,50 @@
             "id": "^ZERO_CHECK::@53632cba2752272bb008$",
             "backtrace": null
         }
-    ]
+    ],
+    "linkLibraries": [
+        {
+            "id": "^cxx_lib::@a56b12a3f5c0529fb296$",
+            "fragment": null,
+            "backtrace": [
+                {
+                    "file": "^alias/CMakeLists\\.txt$",
+                    "line": 10,
+                    "command": "target_link_libraries",
+                    "hasParent": true
+                },
+                {
+                    "file": "^alias/CMakeLists\\.txt$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": false
+                }
+            ],
+            "fromDependency": null
+        }
+    ],
+    "interfaceLinkLibraries": null,
+    "compileDependencies": [
+        {
+            "id": "^cxx_lib::@a56b12a3f5c0529fb296$",
+            "backtrace": [
+                {
+                    "file": "^alias/CMakeLists\\.txt$",
+                    "line": 10,
+                    "command": "target_link_libraries",
+                    "hasParent": true
+                },
+                {
+                    "file": "^alias/CMakeLists\\.txt$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": false
+                }
+            ],
+            "fromDependency": null
+        }
+    ],
+    "interfaceCompileDependencies": null,
+    "objectDependencies": null,
+    "orderDependencies": null
 }

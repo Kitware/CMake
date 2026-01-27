@@ -1,0 +1,4 @@
+CMake Error at BadArgs0\.cmake:3 \(export\):
+  export PACKAGE_INFO missing required value\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:3 \(include\)

@@ -4,7 +4,6 @@
 #pragma once
 
 #include <string>
-#include <vector>
 
 #include "cmBinUtilsWindowsPEGetRuntimeDependenciesTool.h"
 

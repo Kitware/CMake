@@ -11,7 +11,7 @@ This module provides commands for managing the state of variables that influence
 how various CMake check commands (e.g., :command:`check_symbol_exists`, etc.)
 are performed.
 
-Load this module in CMake project with:
+Load this module in a CMake project with:
 
 .. code-block:: cmake
 

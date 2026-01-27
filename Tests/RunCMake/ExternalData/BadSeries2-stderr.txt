@@ -1,11 +1,11 @@
-CMake Error at .*/Modules/ExternalData.cmake:[0-9]+ \(message\):
+CMake Error at .*/Modules/ExternalData\.cmake:[0-9]+ \(message\):
   Data file referenced by argument
 
-    DATA{Data.txt,:}
+    DATA{Data\.txt,:}
 
   corresponds to path
 
-    Data.txt
+    Data\.txt
 
   that does not match regular expression
 

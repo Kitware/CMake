@@ -85,9 +85,12 @@ int string_view::compare(size_type pos1, size_type count1, char const* s,
 string_view::size_type string_view::find(string_view v,
                                          size_type pos) const noexcept
 {
-  for (; pos + v.size_ <= size_; ++pos) {
-    if (std::char_traits<char>::compare(data_ + pos, v.data_, v.size_) == 0) {
-      return pos;
+  if (pos < size_) {
+    for (; pos + v.size_ <= size_; ++pos) {
+      if (std::char_traits<char>::compare(data_ + pos, v.data_, v.size_) ==
+          0) {
+        return pos;
+      }
     }
   }
   return npos;

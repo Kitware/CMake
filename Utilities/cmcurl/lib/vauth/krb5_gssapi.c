@@ -36,7 +36,6 @@
 #include "../urldata.h"
 #include "../curl_gssapi.h"
 #include "../sendf.h"
-#include "../curl_printf.h"
 
 /* The last #include files should be: */
 #include "../curl_memory.h"
@@ -96,14 +95,15 @@ CURLcode Curl_auth_create_gssapi_user_message(struct Curl_easy *data,
   OM_uint32 major_status;
   OM_uint32 minor_status;
   OM_uint32 unused_status;
-  gss_buffer_desc spn_token = GSS_C_EMPTY_BUFFER;
   gss_buffer_desc input_token = GSS_C_EMPTY_BUFFER;
   gss_buffer_desc output_token = GSS_C_EMPTY_BUFFER;
 
-  (void) userp;
-  (void) passwdp;
+  (void)userp;
+  (void)passwdp;
 
   if(!krb5->spn) {
+    gss_buffer_desc spn_token = GSS_C_EMPTY_BUFFER;
+
     /* Generate our SPN */
     char *spn = Curl_auth_build_spn(service, NULL, host);
     if(!spn)
@@ -225,6 +225,7 @@ CURLcode Curl_auth_create_gssapi_security_message(struct Curl_easy *data,
   /* Not 4 octets long so fail as per RFC4752 Section 3.1 */
   if(output_token.length != 4) {
     infof(data, "GSSAPI handshake failure (invalid security data)");
+    gss_release_buffer(&unused_status, &output_token);
     return CURLE_BAD_CONTENT_ENCODING;
   }
 
@@ -315,7 +316,8 @@ void Curl_auth_cleanup_gssapi(struct kerberos5data *krb5)
 
   /* Free our security context */
   if(krb5->context != GSS_C_NO_CONTEXT) {
-    gss_delete_sec_context(&minor_status, &krb5->context, GSS_C_NO_BUFFER);
+    Curl_gss_delete_sec_context(&minor_status, &krb5->context,
+                                GSS_C_NO_BUFFER);
     krb5->context = GSS_C_NO_CONTEXT;
   }
 

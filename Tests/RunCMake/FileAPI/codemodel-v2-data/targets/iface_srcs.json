@@ -4,6 +4,10 @@
     "directorySource": "^interface$",
     "projectName": "Interface",
     "type": "INTERFACE_LIBRARY",
+    "imported": null,
+    "local": null,
+    "abstract": null,
+    "symbolic": null,
     "isGeneratorProvided": null,
     "fileSets": null,
     "sources": [
@@ -65,5 +69,11 @@
             "id": "^ZERO_CHECK::@25b7fa8ea00134654b85$",
             "backtrace": null
         }
-    ]
+    ],
+    "linkLibraries": null,
+    "interfaceLinkLibraries": null,
+    "compileDependencies": null,
+    "interfaceCompileDependencies": null,
+    "objectDependencies": null,
+    "orderDependencies": null
 }

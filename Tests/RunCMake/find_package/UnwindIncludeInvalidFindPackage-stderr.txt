@@ -1,0 +1,26 @@
+CMake Warning at UnwindInclude/UnwindInvalidFindPackage\.cmake:1 \(find_package\):
+  By not providing "Findfoo\.cmake" in CMAKE_MODULE_PATH this project has
+  asked CMake to find a package configuration file provided by "foo", but
+  CMake did not find one\.
+
+  Could not find a package configuration file provided by "foo" with any of
+  the following names:
+
+    fooConfig\.cmake
+    foo-config\.cmake
+
+  Add the installation prefix of "foo" to CMAKE_PREFIX_PATH or set "foo_DIR"
+  to a directory containing one of the above files\.  If "foo" provides a
+  separate development package or SDK, be sure it has been installed\.
+Call Stack \(most recent call first\):
+  UnwindInclude/PrimaryUnwindConfig\.cmake:1 \(include\)
+  UnwindIncludeInvalidFindPackage\.cmake:5 \(find_package\)
+  CMakeLists\.txt:3 \(include\)
+
+
+CMake Error at UnwindInclude/UnwindInvalidFindPackage\.cmake:2 \(find_package\):
+  find_package called while already in an UNWIND state
+Call Stack \(most recent call first\):
+  UnwindInclude/PrimaryUnwindConfig\.cmake:1 \(include\)
+  UnwindIncludeInvalidFindPackage\.cmake:5 \(find_package\)
+  CMakeLists\.txt:3 \(include\)

@@ -26,13 +26,6 @@
 
 #include "../curl_setup.h"
 
-#if !defined(CURL_DISABLE_HTTP_AUTH) || defined(USE_SSH) || \
-  !defined(CURL_DISABLE_LDAP) || \
-  !defined(CURL_DISABLE_SMTP) || \
-  !defined(CURL_DISABLE_POP3) || \
-  !defined(CURL_DISABLE_IMAP) || \
-  !defined(CURL_DISABLE_DIGEST_AUTH) || \
-  !defined(CURL_DISABLE_DOH) || defined(USE_SSL) || !defined(BUILDING_LIBCURL)
 #include <curl/curl.h>
 #include "warnless.h"
 #include "base64.h"
@@ -189,12 +182,12 @@ static CURLcode base64_encode(const char *table64,
   *outlen = 0;
 
   if(!insize)
-    insize = strlen(inputbuff);
+    return CURLE_OK;
 
-#if SIZEOF_SIZE_T == 4
-  if(insize > UINT_MAX/4)
-    return CURLE_OUT_OF_MEMORY;
-#endif
+  /* safety precaution */
+  DEBUGASSERT(insize <= CURL_MAX_BASE64_INPUT);
+  if(insize > CURL_MAX_BASE64_INPUT)
+    return CURLE_TOO_LARGE;
 
   base64data = output = malloc((insize + 2) / 3 * 4 + 1);
   if(!output)
@@ -247,8 +240,6 @@ static CURLcode base64_encode(const char *table64,
  * encoded data. Size of encoded data is returned in variable pointed by
  * outlen.
  *
- * Input length of 0 indicates input buffer holds a null-terminated string.
- *
  * Returns CURLE_OK on success, otherwise specific error code. Function
  * output shall not be considered valid unless CURLE_OK is returned.
  *
@@ -281,5 +272,3 @@ CURLcode curlx_base64url_encode(const char *inputbuff, size_t insize,
 {
   return base64_encode(base64url, 0, inputbuff, insize, outptr, outlen);
 }
-
-#endif /* no users so disabled */

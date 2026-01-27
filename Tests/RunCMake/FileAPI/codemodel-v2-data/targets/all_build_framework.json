@@ -4,6 +4,10 @@
     "directorySource": "^framework$",
     "projectName": "Framework",
     "type": "UTILITY",
+    "imported": null,
+    "local": null,
+    "abstract": null,
+    "symbolic": null,
     "isGeneratorProvided": true,
     "fileSets": null,
     "sources": [
@@ -74,6 +78,25 @@
             "id": "^ZERO_CHECK::@217a96c3a62328a73ef4$",
             "backtrace": null
         },
+        {
+            "id": "^shared_framework::@217a96c3a62328a73ef4$",
+            "backtrace": null
+        },
+        {
+            "id": "^static_framework::@217a96c3a62328a73ef4$",
+            "backtrace": null
+        },
+        {
+            "id": "^exe_framework::@217a96c3a62328a73ef4$",
+            "backtrace": null
+        }
+    ],
+    "linkLibraries": null,
+    "interfaceLinkLibraries": null,
+    "compileDependencies": null,
+    "interfaceCompileDependencies": null,
+    "objectDependencies": null,
+    "orderDependencies": [
         {
             "id": "^shared_framework::@217a96c3a62328a73ef4$",
             "backtrace": null

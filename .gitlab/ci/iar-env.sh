@@ -1,10 +1,10 @@
 files='
-bxarm-9.60.4.deb
+bxarm-9.70.1.deb
 bxavr-8.10.2.deb
 bxrh850-3.10.2.deb
-bxriscv-3.30.1.deb
-bxrl78-5.10.3.deb
-bxrx-5.10.1.deb
+bxriscv-3.40.1.deb
+bxrl78-5.20.1.deb
+bxrx-5.20.1.deb
 '
 for f in $files; do
   # This URL is only visible inside of Kitware's network.
@@ -12,12 +12,12 @@ for f in $files; do
 done
 
 echo '
-cd92a136bc9bbb1e713121cb407131b54250d2ae30809df3cd752c6383e1878f  bxarm-9.60.4.deb
+3b16748e560ab8fa3ffe6d6807186ac706134c78bc9db911112ab3ee67c7b997  bxarm-9.70.1.deb
 4a1065291952a23a8bfbbaa4eb36ca49b0af8653b8faab34ce955d9d48d64506  bxavr-8.10.2.deb
 b14085a0f21750c58168125d3cece2e3fcbd4c6495c652b5e65b6637bac0ac31  bxrh850-3.10.2.deb
-517e18dffdd4345f97c480b5128c7feea25ec1c3f06e62d8e2e6808c401d514a  bxriscv-3.30.1.deb
-3deca7f6afd5f47684464ad748334ab0690097a109d9c680603450074fc32ccf  bxrl78-5.10.3.deb
-260e592c48cbaf902b13bdb2feeeba83068978131fcb5c027dab17e715dec7e7  bxrx-5.10.1.deb
+2e7de58a3aad43ef4199b811edd4dae9c4bff633376393f12fcb77ca27aba831  bxriscv-3.40.1.deb
+6a2b6163dd971635715f49cb072c853e5de55d2b0089f319a6a9f6db540af4bd  bxrl78-5.20.1.deb
+059667a53b6683b1b09b7842d71e784c04bc2376734421c3a628acdbc6bef9e3  bxrx-5.20.1.deb
 ' > bxdebs.sha256sum
 sha256sum --check bxdebs.sha256sum
 

@@ -57,7 +57,7 @@ public:
   cmDocumentationEntry GetDocumentation() const override
   {
     return { std::string(vs14generatorName),
-             "Generates Visual Studio 2015 project files.  "
+             "Deprecated.  Generates Visual Studio 2015 project files.  "
              "Use -A option to specify architecture." };
   }
 
@@ -520,61 +520,4 @@ std::string cmGlobalVisualStudio14Generator::GetWindows10SDKVersion(
   (void)mf;
   // Return an empty string
   return std::string();
-}
-
-void cmGlobalVisualStudio14Generator::AddSolutionItems(cmLocalGenerator* root,
-                                                       VSFolders& vsFolders)
-{
-  cmValue n = root->GetMakefile()->GetProperty("VS_SOLUTION_ITEMS");
-  if (cmNonempty(n)) {
-    cmMakefile* makefile = root->GetMakefile();
-
-    std::vector<cmSourceGroup> sourceGroups = makefile->GetSourceGroups();
-
-    cmVisualStudioFolder* defaultFolder = nullptr;
-
-    std::vector<std::string> pathComponents = {
-      makefile->GetCurrentSourceDirectory(),
-      "",
-      "",
-    };
-
-    for (std::string const& relativePath : cmList(n)) {
-      pathComponents[2] = relativePath;
-
-      std::string fullPath = cmSystemTools::FileIsFullPath(relativePath)
-        ? relativePath
-        : cmSystemTools::JoinPath(pathComponents);
-
-      cmSourceGroup* sg = makefile->FindSourceGroup(fullPath, sourceGroups);
-
-      cmVisualStudioFolder* folder = nullptr;
-      if (!sg->GetFullName().empty()) {
-        std::string folderPath = sg->GetFullName();
-        // Source groups use '\' while solution folders use '/'.
-        cmSystemTools::ReplaceString(folderPath, "\\", "/");
-        folder = vsFolders.Create(folderPath);
-      } else {
-        // Lazily initialize the default solution items folder.
-        if (defaultFolder == nullptr) {
-          defaultFolder = vsFolders.Create("Solution Items");
-        }
-        folder = defaultFolder;
-      }
-
-      folder->SolutionItems.insert(fullPath);
-    }
-  }
-}
-
-void cmGlobalVisualStudio14Generator::WriteFolderSolutionItems(
-  std::ostream& fout, cmVisualStudioFolder const& folder) const
-{
-  fout << "\tProjectSection(SolutionItems) = preProject\n";
-
-  for (std::string const& item : folder.SolutionItems) {
-    fout << "\t\t" << item << " = " << item << "\n";
-  }
-
-  fout << "\tEndProjectSection\n";
 }

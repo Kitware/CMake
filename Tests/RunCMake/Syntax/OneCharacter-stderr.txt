@@ -1,0 +1,4 @@
+CMake Error at OneCharacter\.cmake:1:
+  Unexpected end of file\.
+
+  Parse error\.  Function missing opening "\("\.

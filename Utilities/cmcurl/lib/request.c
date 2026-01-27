@@ -36,8 +36,7 @@
 #include "url.h"
 #include "curlx/strparse.h"
 
-/* The last 3 #include files should be in this order */
-#include "curl_printf.h"
+/* The last 2 #include files should be in this order */
 #include "curl_memory.h"
 #include "memdebug.h"
 
@@ -62,7 +61,7 @@ CURLcode Curl_req_soft_reset(struct SingleRequest *req,
   req->shutdown = FALSE;
   req->bytecount = 0;
   req->writebytecount = 0;
-  req->header = TRUE; /* assume header */
+  req->header = FALSE;
   req->headerline = 0;
   req->headerbytecount = 0;
   req->allheadercount =  0;
@@ -139,7 +138,7 @@ void Curl_req_hard_reset(struct SingleRequest *req, struct Curl_easy *data)
   req->offset = 0;
   req->httpcode = 0;
   req->keepon = 0;
-  req->upgr101 = UPGR101_INIT;
+  req->upgr101 = UPGR101_NONE;
   req->sendbuf_hds_len = 0;
   req->timeofdoc = 0;
   req->location = NULL;
@@ -153,6 +152,7 @@ void Curl_req_hard_reset(struct SingleRequest *req, struct Curl_easy *data)
   req->eos_written = FALSE;
   req->eos_read = FALSE;
   req->eos_sent = FALSE;
+  req->rewind_read = FALSE;
   req->upload_done = FALSE;
   req->upload_aborted = FALSE;
   req->ignorebody = FALSE;
@@ -160,7 +160,6 @@ void Curl_req_hard_reset(struct SingleRequest *req, struct Curl_easy *data)
   req->chunk = FALSE;
   req->ignore_cl = FALSE;
   req->upload_chunky = FALSE;
-  req->getheader = FALSE;
   req->no_body = data->set.opt_no_body;
   req->authneg = FALSE;
   req->shutdown = FALSE;
@@ -308,7 +307,7 @@ static CURLcode req_flush(struct Curl_easy *data)
   }
 
   if(data->req.eos_read && !data->req.eos_sent) {
-    char tmp;
+    char tmp = 0;
     size_t nwritten;
     result = xfer_send(data, &tmp, 0, 0, &nwritten);
     if(result)
@@ -338,20 +337,18 @@ static CURLcode req_flush(struct Curl_easy *data)
   return CURLE_OK;
 }
 
-static ssize_t add_from_client(void *reader_ctx,
-                               unsigned char *buf, size_t buflen,
-                               CURLcode *err)
+static CURLcode add_from_client(void *reader_ctx,
+                                unsigned char *buf, size_t buflen,
+                                size_t *pnread)
 {
   struct Curl_easy *data = reader_ctx;
-  size_t nread;
+  CURLcode result;
   bool eos;
 
-  *err = Curl_client_read(data, (char *)buf, buflen, &nread, &eos);
-  if(*err)
-    return -1;
-  if(eos)
+  result = Curl_client_read(data, (char *)buf, buflen, pnread, &eos);
+  if(!result && eos)
     data->req.eos_read = TRUE;
-  return (ssize_t)nread;
+  return result;
 }
 
 static CURLcode req_send_buffer_add(struct Curl_easy *data,
@@ -359,13 +356,12 @@ static CURLcode req_send_buffer_add(struct Curl_easy *data,
                                     size_t hds_len)
 {
   CURLcode result = CURLE_OK;
-  ssize_t n;
-  n = Curl_bufq_write(&data->req.sendbuf,
-                      (const unsigned char *)buf, blen, &result);
-  if(n < 0)
+  size_t n;
+  result = Curl_bufq_cwrite(&data->req.sendbuf, buf, blen, &n);
+  if(result)
     return result;
   /* We rely on a SOFTLIMIT on sendbuf, so it can take all data in */
-  DEBUGASSERT((size_t)n == blen);
+  DEBUGASSERT(n == blen);
   data->req.sendbuf_hds_len += hds_len;
   return CURLE_OK;
 }
@@ -383,8 +379,14 @@ CURLcode Curl_req_send(struct Curl_easy *data, struct dynbuf *req,
   data->req.httpversion_sent = httpversion;
   buf = curlx_dyn_ptr(req);
   blen = curlx_dyn_len(req);
-  if(!Curl_creader_total_length(data)) {
-    /* Request without body. Try to send directly from the buf given. */
+  /* if the sendbuf is empty and the request without body and
+   * the length to send fits info a sendbuf chunk, we send it directly.
+   * If `blen` is larger then `chunk_size`, we can not. Because we
+   * might have to retry a blocked send later from sendbuf and that
+   * would result in retry sends with a shrunken length. That is trouble. */
+  if(Curl_bufq_is_empty(&data->req.sendbuf) &&
+     !Curl_creader_total_length(data) &&
+     (blen <= data->req.sendbuf.chunk_size)) {
     data->req.eos_read = TRUE;
     result = xfer_send(data, buf, blen, blen, &nwritten);
     if(result)
@@ -435,11 +437,12 @@ CURLcode Curl_req_send_more(struct Curl_easy *data)
   /* Fill our send buffer if more from client can be read. */
   if(!data->req.upload_aborted &&
      !data->req.eos_read &&
-     !(data->req.keepon & KEEP_SEND_PAUSE) &&
+     !Curl_xfer_send_is_paused(data) &&
      !Curl_bufq_is_full(&data->req.sendbuf)) {
-    ssize_t nread = Curl_bufq_sipn(&data->req.sendbuf, 0,
-                                   add_from_client, data, &result);
-    if(nread < 0 && result != CURLE_AGAIN)
+    size_t nread;
+    result = Curl_bufq_sipn(&data->req.sendbuf, 0,
+                            add_from_client, data, &nread);
+    if(result && result != CURLE_AGAIN)
       return result;
   }
 

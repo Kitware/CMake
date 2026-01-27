@@ -40,8 +40,8 @@
 #include "curlx/warnless.h"
 #include "multihandle.h"
 #include "socks.h"
-/* The last 3 #include files should be in this order */
-#include "curl_printf.h"
+
+/* The last 2 #include files should be in this order */
 #include "curl_memory.h"
 #include "memdebug.h"
 
@@ -50,8 +50,6 @@ static void mev_in_callback(struct Curl_multi *multi, bool value)
 {
   multi->in_callback = value;
 }
-
-#define CURL_MEV_CONN_HASH_SIZE 3
 
 /* Information about a socket for which we inform the libcurl application
  * what to supervise (CURL_POLL_IN/CURL_POLL_OUT/CURL_POLL_REMOVE)
@@ -64,19 +62,21 @@ struct mev_sh_entry {
                          * libcurl application to watch out for */
   unsigned int readers; /* this many transfers want to read */
   unsigned int writers; /* this many transfers want to write */
+  BIT(announced);       /* this socket has been passed to the socket
+                           callback at least once */
 };
 
 static size_t mev_sh_entry_hash(void *key, size_t key_length, size_t slots_num)
 {
   curl_socket_t fd = *((curl_socket_t *) key);
-  (void) key_length;
+  (void)key_length;
   return (fd % (curl_socket_t)slots_num);
 }
 
 static size_t mev_sh_entry_compare(void *k1, size_t k1_len,
                                    void *k2, size_t k2_len)
 {
-  (void) k1_len; (void) k2_len;
+  (void)k1_len; (void)k2_len;
   return (*((curl_socket_t *) k1)) == (*((curl_socket_t *) k2));
 }
 
@@ -205,13 +205,14 @@ static CURLMcode mev_forget_socket(struct Curl_multi *multi,
     return CURLM_OK;
 
   /* We managed this socket before, tell the socket callback to forget it. */
-  if(multi->socket_cb) {
+  if(entry->announced && multi->socket_cb) {
     CURL_TRC_M(data, "ev %s, call(fd=%" FMT_SOCKET_T ", ev=REMOVE)",
                cause, s);
     mev_in_callback(multi, TRUE);
     rc = multi->socket_cb(data, s, CURL_POLL_REMOVE,
                           multi->socket_userp, entry->user_data);
     mev_in_callback(multi, FALSE);
+    entry->announced = FALSE;
   }
 
   mev_sh_entry_kill(multi, s);
@@ -281,8 +282,8 @@ static CURLMcode mev_sh_entry_update(struct Curl_multi *multi,
   mev_in_callback(multi, TRUE);
   rc = multi->socket_cb(data, s, comboaction, multi->socket_userp,
                         entry->user_data);
-
   mev_in_callback(multi, FALSE);
+  entry->announced = TRUE;
   if(rc == -1) {
     multi->dead = TRUE;
     return CURLM_ABORTED_BY_CALLBACK;
@@ -314,7 +315,7 @@ static CURLMcode mev_pollset_diff(struct Curl_multi *multi,
   DEBUGASSERT(prev_ps);
 
   /* Handle changes to sockets the transfer is interested in. */
-  for(i = 0; i < ps->num; i++) {
+  for(i = 0; i < ps->n; i++) {
     unsigned char last_action;
     bool first_time = FALSE; /* data/conn appears first time on socket */
 
@@ -359,7 +360,7 @@ static CURLMcode mev_pollset_diff(struct Curl_multi *multi,
                  entry->conn ? 1 : 0);
     }
     else {
-      for(j = 0; j < prev_ps->num; j++) {
+      for(j = 0; j < prev_ps->n; j++) {
         if(s == prev_ps->sockets[j]) {
           last_action = prev_ps->actions[j];
           break;
@@ -374,11 +375,11 @@ static CURLMcode mev_pollset_diff(struct Curl_multi *multi,
   }
 
   /* Handle changes to sockets the transfer is NO LONGER interested in. */
-  for(i = 0; i < prev_ps->num; i++) {
+  for(i = 0; i < prev_ps->n; i++) {
     bool stillused = FALSE;
 
     s = prev_ps->sockets[i];
-    for(j = 0; j < ps->num; j++) {
+    for(j = 0; j < ps->n; j++) {
       if(s == ps->sockets[j]) {
         /* socket is still supervised */
         stillused = TRUE;
@@ -434,15 +435,19 @@ static CURLMcode mev_pollset_diff(struct Curl_multi *multi,
   } /* for loop over num */
 
   /* Remember for next time */
-  memcpy(prev_ps, ps, sizeof(*prev_ps));
+  Curl_pollset_move(prev_ps, ps);
   return CURLM_OK;
 }
 
 static void mev_pollset_dtor(void *key, size_t klen, void *entry)
 {
+  struct easy_pollset *ps = entry;
   (void)key;
   (void)klen;
-  free(entry);
+  if(ps) {
+    Curl_pollset_cleanup(ps);
+    free(ps);
+  }
 }
 
 static struct easy_pollset*
@@ -450,7 +455,7 @@ mev_add_new_conn_pollset(struct connectdata *conn)
 {
   struct easy_pollset *ps;
 
-  ps = calloc(1, sizeof(*ps));
+  ps = Curl_pollset_create();
   if(!ps)
     return NULL;
   if(Curl_conn_meta_set(conn, CURL_META_MEV_POLLSET, ps, mev_pollset_dtor))
@@ -463,7 +468,7 @@ mev_add_new_xfer_pollset(struct Curl_easy *data)
 {
   struct easy_pollset *ps;
 
-  ps = calloc(1, sizeof(*ps));
+  ps = Curl_pollset_create();
   if(!ps)
     return NULL;
   if(Curl_meta_set(data, CURL_META_MEV_POLLSET, ps, mev_pollset_dtor))
@@ -483,42 +488,47 @@ mev_get_last_pollset(struct Curl_easy *data,
   return NULL;
 }
 
-static void mev_init_cur_pollset(struct easy_pollset *ps,
-                                 struct Curl_easy *data,
-                                 struct connectdata *conn)
-{
-  memset(ps, 0, sizeof(*ps));
-  if(conn)
-    Curl_conn_adjust_pollset(data, conn, ps);
-  else if(data)
-    Curl_multi_getsock(data, ps, "ev assess");
-}
-
 static CURLMcode mev_assess(struct Curl_multi *multi,
                             struct Curl_easy *data,
                             struct connectdata *conn)
 {
-  if(multi && multi->socket_cb) {
-    struct easy_pollset ps, *last_ps;
+  struct easy_pollset ps, *last_ps;
+  CURLMcode res = CURLM_OK;
 
-    mev_init_cur_pollset(&ps, data, conn);
-    last_ps = mev_get_last_pollset(data, conn);
+  if(!multi || !multi->socket_cb)
+    return CURLM_OK;
 
-    if(!last_ps && ps.num) {
-      if(conn)
-        last_ps = mev_add_new_conn_pollset(conn);
-      else
-        last_ps = mev_add_new_xfer_pollset(data);
-      if(!last_ps)
-        return CURLM_OUT_OF_MEMORY;
+  Curl_pollset_init(&ps);
+  if(conn) {
+    CURLcode r = Curl_conn_adjust_pollset(data, conn, &ps);
+    if(r) {
+      res = (r == CURLE_OUT_OF_MEMORY) ?
+            CURLM_OUT_OF_MEMORY : CURLM_INTERNAL_ERROR;
+      goto out;
     }
-
-    if(last_ps)
-      return mev_pollset_diff(multi, data, conn, &ps, last_ps);
-    else
-      DEBUGASSERT(!ps.num);
   }
-  return CURLM_OK;
+  else
+    Curl_multi_pollset(data, &ps, "ev assess");
+  last_ps = mev_get_last_pollset(data, conn);
+
+  if(!last_ps && ps.n) {
+    if(conn)
+      last_ps = mev_add_new_conn_pollset(conn);
+    else
+      last_ps = mev_add_new_xfer_pollset(data);
+    if(!last_ps) {
+      res = CURLM_OUT_OF_MEMORY;
+      goto out;
+    }
+  }
+
+  if(last_ps)
+    res = mev_pollset_diff(multi, data, conn, &ps, last_ps);
+  else
+    DEBUGASSERT(!ps.n);
+out:
+  Curl_pollset_cleanup(&ps);
+  return res;
 }
 
 CURLMcode Curl_multi_ev_assess_xfer(struct Curl_multi *multi,
@@ -563,10 +573,9 @@ CURLMcode Curl_multi_ev_assign(struct Curl_multi *multi,
   return CURLM_OK;
 }
 
-void Curl_multi_ev_expire_xfers(struct Curl_multi *multi,
-                                curl_socket_t s,
-                                const struct curltime *nowp,
-                                bool *run_cpool)
+void Curl_multi_ev_dirty_xfers(struct Curl_multi *multi,
+                               curl_socket_t s,
+                               bool *run_cpool)
 {
   struct mev_sh_entry *entry;
 
@@ -586,9 +595,11 @@ void Curl_multi_ev_expire_xfers(struct Curl_multi *multi,
       do {
         data = Curl_multi_get_easy(multi, mid);
         if(data) {
-          /* Expire with out current now, so we will get it below when
-           * asking the splaytree for expired transfers. */
-          Curl_expire_ex(data, nowp, 0, EXPIRE_RUN_NOW);
+          Curl_multi_mark_dirty(data);
+        }
+        else {
+          CURL_TRC_M(multi->admin, "socket transfer %u no longer found", mid);
+          Curl_uint_spbset_remove(&entry->xfers, mid);
         }
       }
       while(Curl_uint_spbset_next(&entry->xfers, mid, &mid));
@@ -622,8 +633,6 @@ void Curl_multi_ev_conn_done(struct Curl_multi *multi,
   (void)mev_assess(multi, data, conn);
   Curl_conn_meta_remove(conn, CURL_META_MEV_POLLSET);
 }
-
-#define CURL_MEV_PS_HASH_SLOTS   (991)  /* nice prime */
 
 void Curl_multi_ev_init(struct Curl_multi *multi, size_t hashsize)
 {

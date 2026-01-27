@@ -1,5 +1,11 @@
 include(RunCMake)
 
+# FASTBuild generator does Unity build natively
+# and has its own tests for it in "RunCMake/FASTBuild" folder.
+if(RunCMake_GENERATOR STREQUAL "FASTBuild")
+  return()
+endif()
+
 function(run_build name)
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/${name}-build)
   run_cmake(${name})
@@ -19,6 +25,7 @@ run_cmake(unitybuild_cxx_group)
 run_cmake(unitybuild_c_and_cxx_absolute_path)
 run_cmake(unitybuild_c_and_cxx_relocatable_path)
 run_cmake(unitybuild_c_and_cxx)
+run_cmake(unitybuild_c_and_cxx_filename_prefix)
 run_cmake(unitybuild_c_and_cxx_group)
 if(CMake_TEST_OBJC)
   run_cmake(unitybuild_objc)
@@ -71,3 +78,7 @@ endfunction()
 
 run_test(unitybuild_runtest)
 run_test(unitybuild_object_library)
+
+if (RunCMake_GENERATOR MATCHES "(Ninja|Makefiles|Visual Studio)")
+  run_build(unitybuild_cxx_short)
+endif ()

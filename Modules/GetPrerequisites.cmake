@@ -9,12 +9,19 @@ GetPrerequisites
 
   Use :command:`file(GET_RUNTIME_DEPENDENCIES)` instead.
 
-This module provides functions to analyze and list the dependencies
-(prerequisites) of executable or shared library files.  These functions list the
-shared libraries (``.dll``, ``.dylib``, or ``.so`` files) required by an
+This module provides commands to analyze and list the dependencies
+(prerequisites) of executable or shared library files.  These commands list
+the shared libraries (``.dll``, ``.dylib``, or ``.so`` files) required by an
 executable or shared library.
 
-It determines dependencies using the following platform-specific tools:
+Load this module in CMake with:
+
+.. code-block:: cmake
+
+  include(GetPrerequisites)
+
+This module determines dependencies using the following platform-specific
+tools:
 
 * ``dumpbin`` (Windows)
 * ``objdump`` (MinGW on Windows)
@@ -25,7 +32,10 @@ It determines dependencies using the following platform-specific tools:
   The tool specified by the :variable:`CMAKE_OBJDUMP` variable will be used, if
   set.
 
-The following functions are provided by this module:
+Commands
+^^^^^^^^
+
+This module provides the following commands:
 
 * :command:`get_prerequisites`
 * :command:`list_prerequisites`
@@ -40,20 +50,18 @@ The following functions are provided by this module:
   (projects can override it with ``gp_resolved_file_type_override()``)
 * :command:`gp_file_type`
 
-Functions
-^^^^^^^^^
-
 .. command:: get_prerequisites
+
+  Gets the list of shared library files required by specified target:
 
   .. code-block:: cmake
 
     get_prerequisites(<target> <prerequisites-var> <exclude-system> <recurse>
                       <exepath> <dirs> [<rpaths>])
 
-  Gets the list of shared library files required by ``<target>``.  The list
-  in the variable named ``<prerequisites-var>`` should be empty on first
-  entry to this function.  On exit, ``<prerequisites-var>`` will contain the
-  list of required shared library files.
+  The list in the variable named ``<prerequisites-var>`` should be empty on
+  first entry to this command.  On exit, ``<prerequisites-var>`` will contain
+  the list of required shared library files.
 
   The arguments are:
 
@@ -80,15 +88,15 @@ Functions
 
   .. versionadded:: 3.14
     The variable ``GET_PREREQUISITES_VERBOSE`` can be set to true before calling
-    this function to enable verbose output.
+    this command to enable verbose output.
 
 .. command:: list_prerequisites
+
+  Prints a message listing the prerequisites of the specified target:
 
   .. code-block:: cmake
 
     list_prerequisites(<target> [<recurse> [<exclude-system> [<verbose>]]])
-
-  Prints a message listing the prerequisites of ``<target>``.
 
   The arguments are:
 
@@ -107,14 +115,14 @@ Functions
 
 .. command:: list_prerequisites_by_glob
 
+  Prints the prerequisites of shared library and executable files matching a
+  globbing pattern:
+
   .. code-block:: cmake
 
     list_prerequisites_by_glob(<GLOB|GLOB_RECURSE>
                                <glob-exp>
                                [<optional-args>...])
-
-  Prints the prerequisites of shared library and executable files matching a
-  globbing pattern.
 
   The arguments are:
 
@@ -131,43 +139,55 @@ Functions
 
 .. command:: gp_append_unique
 
+  Appends the value to the list only if it is not already in the list:
+
   .. code-block:: cmake
 
     gp_append_unique(<list-var> <value>)
 
-  Appends ``<value>`` to the list variable ``<list-var>`` only if the value is
-  not already in the list.
+  The arguments are:
+
+  ``<value>``
+    The value to be appended to the list.
+  ``<list-var>``
+    The list variable name that will have the value appended only if it is
+    not already in the list.
 
 .. command:: is_file_executable
+
+  Checks if given file is a binary executable:
 
   .. code-block:: cmake
 
     is_file_executable(<file> <result-var>)
 
-  Sets ``<result-var>`` to 1 if ``<file>`` is a binary executable; otherwise
-  sets it to 0.
+  This command sets the ``<result-var>`` to 1 if ``<file>`` is a binary
+  executable; otherwise it sets it to 0.
 
 .. command:: gp_item_default_embedded_path
+
+  Determines the reference path for the specified item:
 
   .. code-block:: cmake
 
     gp_item_default_embedded_path(<item> <default-embedded-path-var>)
 
-  Determines the reference path for ``<item>`` when it is embedded inside a
-  bundle and stores it to a variable ``<default-embedded-path-var>``.
+  This command determines the reference path for ``<item>`` when it is
+  embedded inside a bundle and stores it to a variable
+  ``<default-embedded-path-var>``.
 
-  Projects can override this function by defining a custom
-  ``gp_item_default_embedded_path_override()`` function.
+  Projects can override this command by defining a custom
+  ``gp_item_default_embedded_path_override()`` command.
 
 .. command:: gp_resolve_item
+
+  Resolves a given item into an existing full path file and stores it to a
+  variable:
 
   .. code-block:: cmake
 
     gp_resolve_item(<context> <item> <exepath> <dirs> <resolved-item-var>
                     [<rpaths>])
-
-  Resolves a given ``<item>`` into an existing full path file and stores it to a
-  ``<resolved-item-var>`` variable.
 
   The arguments are:
 
@@ -187,18 +207,21 @@ Functions
   ``<rpaths>``
     See the argument description in :command:`get_prerequisites`.
 
-  Projects can override this function by defining a custom
-  ``gp_resolve_item_override()`` function.
+  Projects can override this command by defining a custom
+  ``gp_resolve_item_override()`` command.
 
 .. command:: gp_resolved_file_type
+
+  Determines the type of a given file:
 
   .. code-block:: cmake
 
     gp_resolved_file_type(<original-file> <file> <exepath> <dirs> <type-var>
                           [<rpaths>])
 
-  Determines the type of ``<file>`` with respect to ``<original-file>``. The
-  resulting type of prerequisite is stored in the ``<type-var>`` variable.
+  This command determines the type of ``<file>`` with respect to the
+  ``<original-file>``.  The resulting type of prerequisite is stored in the
+  ``<type-var>`` variable.
 
   Use ``<exepath>`` and ``<dirs>`` if necessary to resolve non-absolute
   ``<file>`` values -- but only for non-embedded items.
@@ -213,17 +236,20 @@ Functions
   * ``embedded``
   * ``other``
 
-  Projects can override this function by defining a custom
-  ``gp_resolved_file_type_override()`` function.
+  Projects can override this command by defining a custom
+  ``gp_resolved_file_type_override()`` command.
 
 .. command:: gp_file_type
+
+  Determines the type of a given file:
 
   .. code-block:: cmake
 
     gp_file_type(<original-file> <file> <type-var>)
 
-  Determines the type of ``<file>`` with respect to ``<original-file>``. The
-  resulting type of prerequisite is stored in the ``<type-var>`` variable.
+  This command determines the type of ``<file>`` with respect to the
+  ``<original-file>``.  The resulting type of prerequisite is stored in the
+  ``<type-var>`` variable.
 
   The ``<type-var>`` variable will be set to one of the following values:
 
@@ -235,6 +261,9 @@ Functions
 Examples
 ^^^^^^^^
 
+Example: Basic Usage
+""""""""""""""""""""
+
 Printing all dependencies of a shared library, including system libraries, with
 verbose output:
 
@@ -242,6 +271,25 @@ verbose output:
 
   include(GetPrerequisites)
   list_prerequisites("path/to/libfoo.dylib" 1 0 1)
+
+Example: Upgrading Code
+"""""""""""""""""""""""
+
+For example:
+
+.. code-block:: cmake
+
+  include(GetPrerequisites)
+  # ...
+  gp_append_unique(keys "${key}")
+
+the ``gp_append_unique()`` can be in new code replaced with:
+
+.. code-block:: cmake
+
+  if(NOT key IN_LIST keys)
+    list(APPEND keys "${key}")
+  endif()
 #]=======================================================================]
 
 function(gp_append_unique list_var value)

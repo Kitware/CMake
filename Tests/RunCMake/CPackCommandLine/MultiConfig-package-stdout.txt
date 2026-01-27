@@ -4,5 +4,5 @@ CPack: - Install project: MultiConfig \[Debug\]
 CPack: - Install project: MultiConfig \[Release\]
 CPack: Create package
 CPack: - package: [^
-]*/Tests/RunCMake/CPackCommandLine/MultiConfig-build/MultiConfig-0.1.1-[^
-]*.zip generated.$
+]*/Tests/RunCMake/CPackCommandLine/MultiConfig-build/MultiConfig-0\.1\.1-[^
+]*\.zip generated\.$

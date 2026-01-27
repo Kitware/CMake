@@ -1,0 +1,1 @@
+((Ninja)?multiple rules generate CMakeFiles/objlib\.dir/objlib_lib\.c\.o)

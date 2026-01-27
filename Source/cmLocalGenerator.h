@@ -24,6 +24,7 @@
 #include "cmOutputConverter.h"
 #include "cmPolicies.h"
 #include "cmStateSnapshot.h"
+#include "cmStateTypes.h"
 #include "cmValue.h"
 
 class cmCompiledGeneratorExpression;
@@ -36,6 +37,8 @@ class cmImplicitDependsList;
 class cmLinkLineComputer;
 class cmLinkLineDeviceComputer;
 class cmMakefile;
+struct cmObjectLocation;
+struct cmObjectLocations;
 class cmRulePlaceholderExpander;
 class cmSourceFile;
 class cmState;
@@ -290,6 +293,7 @@ public:
 
   /** Called from command-line hook to update dependencies.  */
   virtual bool UpdateDependencies(std::string const& /* tgtInfo */,
+                                  std::string const& /* targetName */,
                                   bool /*verbose*/, bool /*color*/)
   {
     return true;
@@ -426,7 +430,8 @@ public:
    * per-target support directory.
    */
   virtual std::string GetTargetDirectory(
-    cmGeneratorTarget const* target) const;
+    cmGeneratorTarget const* target,
+    cmStateEnums::IntermediateDirKind kind) const;
 
   cmPolicies::PolicyStatus GetPolicyStatus(cmPolicies::PolicyID id) const;
 
@@ -438,8 +443,24 @@ public:
   std::string const& GetCurrentBinaryDirectory() const;
   std::string const& GetCurrentSourceDirectory() const;
 
-  virtual std::string GetObjectOutputRoot() const;
+  bool UseShortObjectNames(
+    cmStateEnums::IntermediateDirKind kind =
+      cmStateEnums::IntermediateDirKind::ObjectFiles) const;
+  virtual std::string GetObjectOutputRoot(
+    cmStateEnums::IntermediateDirKind kind =
+      cmStateEnums::IntermediateDirKind::ObjectFiles) const;
   virtual bool AlwaysUsesCMFPaths() const;
+  virtual std::string GetShortObjectFileName(cmSourceFile const& source) const;
+  virtual std::string ComputeShortTargetDirectory(
+    cmGeneratorTarget const* gt) const;
+  std::string GetCustomObjectFileName(cmSourceFile const& source) const;
+  std::string GetCustomInstallObjectFileName(cmSourceFile const& source,
+                                             std::string const& config,
+                                             char const* custom_ext) const;
+  void FillCustomInstallObjectLocations(
+    cmSourceFile const& source, std::string const& config,
+    char const* custom_ext,
+    std::map<std::string, cmObjectLocation>& mapping) const;
 
   /**
    * Generate a macOS application bundle Info.plist file.
@@ -457,11 +478,14 @@ public:
   /** Construct a comment for a custom command.  */
   std::string ConstructComment(cmCustomCommandGenerator const& ccg,
                                char const* default_comment = "") const;
+  // Computes relative path to source respective to source or binary dir.
+  std::string GetRelativeSourceFileName(cmSourceFile const& source) const;
   // Compute object file names.
   std::string GetObjectFileNameWithoutTarget(
     cmSourceFile const& source, std::string const& dir_max,
     bool* hasSourceExtension = nullptr,
-    char const* customOutputExtension = nullptr);
+    char const* customOutputExtension = nullptr,
+    bool const* forceShortObjectName = nullptr);
 
   /** Fill out the static linker flags for the given target.  */
   void GetStaticLibraryFlags(std::string& flags, std::string const& config,
@@ -512,14 +536,15 @@ public:
                                             std::string const& config);
 
   virtual void ComputeObjectFilenames(
-    std::map<cmSourceFile const*, std::string>& mapping,
-    cmGeneratorTarget const* gt = nullptr);
+    std::map<cmSourceFile const*, cmObjectLocations>& mapping,
+    std::string const& config, cmGeneratorTarget const* gt = nullptr);
 
   bool IsWindowsShell() const;
   bool IsWatcomWMake() const;
   bool IsMinGWMake() const;
   bool IsNMake() const;
   bool IsNinjaMulti() const;
+  bool IsWindowsVSIDE() const;
 
   void IssueMessage(MessageType t, std::string const& text) const;
 
@@ -640,7 +665,6 @@ private:
   void CopyPchCompilePdb(std::string const& config,
                          std::string const& language,
                          cmGeneratorTarget* target,
-                         std::string const& ReuseFrom,
                          cmGeneratorTarget* reuseTarget,
                          std::vector<std::string> const& extensions);
 

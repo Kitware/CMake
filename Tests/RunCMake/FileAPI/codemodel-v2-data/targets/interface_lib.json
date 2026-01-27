@@ -1,0 +1,69 @@
+{
+    "name": "interface_lib",
+    "id": "^interface_lib::@6890427a1f51a3e7e1df$",
+    "directorySource": "^\\.$",
+    "projectName": "codemodel-v2",
+    "type": "INTERFACE_LIBRARY",
+    "imported": null,
+    "local": null,
+    "abstract": true,
+    "symbolic": null,
+    "isGeneratorProvided": null,
+    "fileSets": null,
+    "sources": [],
+    "sourceGroups": null,
+    "compileGroups": null,
+    "backtrace": [
+        {
+            "file": "^include_test\\.cmake$",
+            "line": 1,
+            "command": "add_library",
+            "hasParent": true
+        },
+        {
+            "file": "^include_test\\.cmake$",
+            "line": null,
+            "command": null,
+            "hasParent": true
+        },
+        {
+            "file": "^codemodel-v2\\.cmake$",
+            "line": 10,
+            "command": "include",
+            "hasParent": true
+        },
+        {
+            "file": "^codemodel-v2\\.cmake$",
+            "line": null,
+            "command": null,
+            "hasParent": true
+        },
+        {
+            "file": "^CMakeLists\\.txt$",
+            "line": 3,
+            "command": "include",
+            "hasParent": true
+        },
+        {
+            "file": "^CMakeLists\\.txt$",
+            "line": null,
+            "command": null,
+            "hasParent": false
+        }
+    ],
+    "folder": null,
+    "nameOnDisk": null,
+    "artifacts": null,
+    "build": "^\\.$",
+    "source": "^\\.$",
+    "install": null,
+    "link": null,
+    "archive": null,
+    "dependencies": null,
+    "linkLibraries": null,
+    "interfaceLinkLibraries": null,
+    "compileDependencies": null,
+    "interfaceCompileDependencies": null,
+    "objectDependencies": null,
+    "orderDependencies": null
+}
