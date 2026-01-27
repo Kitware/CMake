@@ -1405,24 +1405,18 @@ std::vector<BT<std::string>> cmLocalGenerator::GetStaticLibraryFlags(
   std::string const& config, std::string const& linkLanguage,
   cmGeneratorTarget* target)
 {
-  std::string const configUpper = cmSystemTools::UpperCase(config);
   std::vector<BT<std::string>> flags;
   if (linkLanguage != "Swift" && !this->IsSplitSwiftBuild()) {
     std::string staticLibFlags;
-    this->AppendFlags(
-      staticLibFlags,
-      this->Makefile->GetSafeDefinition("CMAKE_STATIC_LINKER_FLAGS"));
-    if (!configUpper.empty()) {
-      std::string name = "CMAKE_STATIC_LINKER_FLAGS_" + configUpper;
-      this->AppendFlags(staticLibFlags,
-                        this->Makefile->GetSafeDefinition(name));
-    }
+    this->AddConfigVariableFlags(staticLibFlags, "CMAKE_STATIC_LINKER_FLAGS",
+                                 config);
     if (!staticLibFlags.empty()) {
       flags.emplace_back(std::move(staticLibFlags));
     }
   }
 
   std::string staticLibFlags;
+  std::string const configUpper = cmSystemTools::UpperCase(config);
   this->AppendFlags(staticLibFlags,
                     target->GetSafeProperty("STATIC_LIBRARY_FLAGS"));
   if (!configUpper.empty()) {
