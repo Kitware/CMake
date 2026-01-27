@@ -140,7 +140,7 @@ that may contain the following fields:
 
 ``name``
   A required string representing the machine-friendly name of the preset.
-  This identifier is used in the :ref:`cmake --preset <CMake Options>` option.
+  This identifier is used in the :option:`cmake --preset` option.
   There must not be two configure presets in the union of ``CMakePresets.json``
   and ``CMakeUserPresets.json`` in the same directory with the same name.
   However, a configure preset may have the same name as a build, test,
@@ -148,11 +148,12 @@ that may contain the following fields:
 
 ``hidden``
   An optional boolean specifying whether or not a preset should be hidden.
-  If a preset is hidden, it cannot be used in the ``--preset=`` argument,
-  will not show up in the :manual:`CMake GUI <cmake-gui(1)>`, and does not
-  have to have a valid ``generator`` or ``binaryDir``, even from
-  inheritance. ``hidden`` presets are intended to be used as a base for
-  other presets to inherit via the ``inherits`` field.
+  If a preset is hidden, it cannot be used in the
+  :option:`--preset <cmake --preset>` argument, will not show up in the
+  :manual:`CMake GUI <cmake-gui(1)>`, and does not have to have a valid
+  ``generator`` or ``binaryDir``, even from inheritance. ``hidden`` presets are
+  intended to be used as a base for other presets to inherit via the
+  ``inherits`` field.
 
 ``inherits``
   An optional array of strings representing the names of presets to inherit
@@ -192,13 +193,13 @@ that may contain the following fields:
 .. _`CMakePresets generator`:
 
 ``generator``
-  An optional string representing the generator to use for the preset. If
-  ``generator`` is not specified, it must be inherited from the
-  ``inherits`` preset (unless this preset is ``hidden``). In version ``3``
-  or above, this field may be omitted to fall back to regular generator
-  discovery procedure.
+  An optional string representing the :manual:`generator <cmake-generators(7)>`
+  to use for the preset. If ``generator`` is not specified, it must be
+  inherited from the ``inherits`` preset (unless this preset is ``hidden``).
+  In version ``3`` or above, this field may be omitted to fall back to regular
+  generator discovery procedure.
 
-  Note that for Visual Studio generators, unlike in the command line
+  Note that for :ref:`Visual Studio generators`, unlike in the command line
   :option:`-G <cmake -G>` argument, you cannot include the platform name
   in the generator name. Use the ``architecture`` field instead.
 
@@ -443,7 +444,7 @@ that may contain the following fields:
 ``name``
   A required string representing the machine-friendly name of the preset.
   This identifier is used in the
-  :ref:`cmake --build --preset <Build Tool Mode>` option.
+  :option:`cmake --build --preset <cmake--build --preset>` option.
   There must not be two build presets in the union of ``CMakePresets.json``
   and ``CMakeUserPresets.json`` in the same directory with the same name.
   However, a build preset may have the same name as a configure, test,
@@ -452,7 +453,7 @@ that may contain the following fields:
 ``hidden``
   An optional boolean specifying whether or not a preset should be hidden.
   If a preset is hidden, it cannot be used in the
-  :option:`--preset <cmake --preset>` argument
+  :option:`--preset <cmake--build --preset>` argument
   and does not have to have a valid ``configurePreset``, even from
   inheritance. ``hidden`` presets are intended to be used as a base for
   other presets to inherit via the ``inherits`` field.
@@ -515,16 +516,16 @@ that may contain the following fields:
 
   .. note::
 
-    For a CMake project using ExternalProject with a configuration preset
-    having environment variables needed in the ExternalProject, use a build
-    preset that inherits that configuration preset or the ExternalProject
+    For a CMake project using :module:`ExternalProject` with a configuration
+    preset having environment variables needed in the ExternalProject, use a
+    build preset that inherits that configuration preset or the ExternalProject
     will not have the environment variables set in the configuration preset.
     Example: suppose the host defaults to one compiler (say Clang)
     and the user wishes to use another compiler (say GCC). Set configuration
-    preset environment variables ``CC`` and ``CXX`` and use a build preset
-    that inherits that configuration preset. Otherwise the ExternalProject
-    may use a different (system default) compiler than the top-level CMake
-    project.
+    preset environment variables :envvar:`CC` and :envvar:`CXX` and use a build
+    preset that inherits that configuration preset. Otherwise the
+    ExternalProject may use a different (system default) compiler than the
+    top-level CMake project.
 
 ``configurePreset``
   An optional string specifying the name of a configure preset to
@@ -566,8 +567,8 @@ that may contain the following fields:
 
   Package references are used to define dependencies to packages from
   external package managers. Currently only NuGet in combination with the
-  Visual Studio generator is supported. If there are no targets that define
-  package references, this option does nothing. Valid values are:
+  :ref:`Visual Studio generators` is supported. If there are no targets that
+  define package references, this option does nothing. Valid values are:
 
   ``on``
     Causes package references to be resolved before attempting a build.
@@ -588,11 +589,11 @@ that may contain the following fields:
     variable will be evaluated to decide, if package restoration should be
     performed.
 
-    When using the Visual Studio generator, package references are defined
-    using the :prop_tgt:`VS_PACKAGE_REFERENCES` property. Package references
-    are restored using NuGet. It can be disabled by setting the
-    ``CMAKE_VS_NUGET_PACKAGE_RESTORE`` variable to ``OFF``. This can also be
-    done from within a configure preset.
+    When using the :ref:`Visual Studio generators`, package references are
+    defined using the :prop_tgt:`VS_PACKAGE_REFERENCES` property. Package
+    references are restored using NuGet. It can be disabled by setting the
+    :variable:`CMAKE_VS_NUGET_PACKAGE_RESTORE` variable to ``OFF``. This can
+    also be done from within a configure preset.
 
 ``verbose``
   An optional bool. If true, equivalent to passing
@@ -1113,8 +1114,8 @@ fields:
 ``name``
   A required string representing the machine-friendly name of the preset.
   This identifier is used in the
-  :ref:`cmake --workflow --preset <Workflow Mode>` option. There must not be
-  two workflow presets in the union of ``CMakePresets.json`` and
+  :option:`cmake --workflow --preset <cmake--workflow --preset>` option. There
+  must not be two workflow presets in the union of ``CMakePresets.json`` and
   ``CMakeUserPresets.json`` in the same directory with the same name. However,
   a workflow preset may have the same name as a configure, build, test, or
   package preset.
