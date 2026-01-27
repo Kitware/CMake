@@ -254,7 +254,7 @@ archive_read_disk_entry_from_file(struct archive *_a,
 	if (S_ISLNK(st->st_mode)) {
 		size_t linkbuffer_len = st->st_size;
 		char *linkbuffer;
-		int lnklen;
+		ssize_t lnklen;
 
 		linkbuffer = malloc(linkbuffer_len + 1);
 		if (linkbuffer == NULL) {
@@ -358,12 +358,10 @@ setup_mac_metadata(struct archive_read_disk *a,
 		return (ARCHIVE_OK);
 
 	archive_string_init(&tempfile);
-	if (__archive_get_tempdir(&tempfile) != ARCHIVE_OK) {
-		ret = ARCHIVE_WARN;
-		goto cleanup;
-	}
-	archive_strcat(&tempfile, "tar.md.XXXXXX");
-	tempfd = mkstemp(tempfile.s);
+	archive_strcpy(&tempfile, name);
+	archive_string_dirname(&tempfile);
+	archive_strcat(&tempfile, "/tar.XXXXXXXX");
+	tempfd = __archive_mkstemp(tempfile.s);
 	if (tempfd < 0) {
 		archive_set_error(&a->archive, errno,
 		    "Could not open extended attribute file");
@@ -894,7 +892,7 @@ setup_sparse_fiemap(struct archive_read_disk *a,
 	for (iters = 0; ; ++iters) {
 		int i, r;
 
-		r = ioctl(*fd, FS_IOC_FIEMAP, fm); 
+		r = ioctl(*fd, FS_IOC_FIEMAP, fm);
 		if (r < 0) {
 			/* When something error happens, it is better we
 			 * should return ARCHIVE_OK because an earlier
@@ -1081,4 +1079,3 @@ setup_sparse(struct archive_read_disk *a,
 #endif
 
 #endif /* !defined(_WIN32) || defined(__CYGWIN__) */
-

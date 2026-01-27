@@ -111,6 +111,8 @@
 #define O_CLOEXEC	0
 #endif
 
+#define MAX_FILESYSTEM_ID 1000000
+
 #if defined(__hpux) && !defined(HAVE_DIRFD)
 #define dirfd(x) ((x)->__dd_fd)
 #define HAVE_DIRFD
@@ -1420,8 +1422,12 @@ update_current_filesystem(struct archive_read_disk *a, int64_t dev)
 	 * This is the new filesystem which we have to generate a new ID for.
 	 */
 	fid = t->max_filesystem_id++;
+	if (fid > MAX_FILESYSTEM_ID) {
+		archive_set_error(&a->archive, ENOMEM, "Too many filesystems");
+		return (ARCHIVE_FATAL);
+	}
 	if (t->max_filesystem_id > t->allocated_filesystem) {
-		size_t s;
+		int s;
 		void *p;
 
 		s = t->max_filesystem_id * 2;
@@ -1701,8 +1707,6 @@ setup_current_filesystem(struct archive_read_disk *a)
 #endif
 		t->current_filesystem->noatime = 0;
 
-	/* Set maximum filename length. */
-	t->current_filesystem->name_max = svfs.f_namemax;
 	return (ARCHIVE_OK);
 }
 
@@ -2022,11 +2026,8 @@ tree_dup(int fd)
 	}
 #endif /* F_DUPFD_CLOEXEC */
 	new_fd = dup(fd);
-	if (new_fd != -1) {
-		__archive_ensure_cloexec_flag(new_fd);
-		return (new_fd);
-	}
-	return (-1);
+	__archive_ensure_cloexec_flag(new_fd);
+	return (new_fd);
 }
 
 /*
@@ -2148,16 +2149,11 @@ tree_reopen(struct tree *t, const char *path, int restore_time)
 	 * so try again for execute. The consequences of not opening this are
 	 * unhelpful and unnecessary errors later.
 	 */
-	if (t->initial_dir_fd < 0) {
+	if (t->initial_dir_fd < 0)
 		t->initial_dir_fd = open(".", o_flag | O_CLOEXEC);
-		if (t->initial_dir_fd < 0)
-			return NULL;
-	}
 #endif
 	__archive_ensure_cloexec_flag(t->initial_dir_fd);
 	t->working_dir_fd = tree_dup(t->initial_dir_fd);
-	if (t->working_dir_fd < 0)
-		return NULL;
 	return (t);
 }
 
@@ -2366,15 +2362,20 @@ static int
 tree_dir_next_posix(struct tree *t)
 {
 	int r;
+#if defined(HAVE_FDOPENDIR)
+	int fd;
+#endif
 	const char *name;
 	size_t namelen;
 
 	if (t->d == NULL) {
 
 #if defined(HAVE_FDOPENDIR)
-		int fd = tree_dup(t->working_dir_fd);
-		if (fd != -1)
-			t->d = fdopendir(fd);
+		if (t->working_dir_fd >= 0) {
+			fd = tree_dup(t->working_dir_fd);
+			if (fd != -1)
+				t->d = fdopendir(fd);
+		}
 #else /* HAVE_FDOPENDIR */
 		if (tree_enter_working_dir(t) == 0) {
 			t->d = opendir(".");
