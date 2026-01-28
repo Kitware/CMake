@@ -69,7 +69,6 @@ protected:
                              std::string const& config) override;
 
   std::string GetCxxModulesDirectory() const override;
-  // TODO: Generate C++ module info in a not-CMake-specific format.
 
   cm::optional<std::string> GetFileSetDirectory(
     cmGeneratorTarget* gte, cmTargetExport const* te, cmFileSet* fileSet,
@@ -78,5 +77,6 @@ protected:
   bool GenerateFileSetProperties(Json::Value& component,
                                  cmGeneratorTarget* gte,
                                  cmTargetExport const* te,
+                                 std::string const& packagePath,
                                  cm::optional<std::string> config = {});
 };

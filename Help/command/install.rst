@@ -1000,6 +1000,7 @@ Signatures
             [HOMEPAGE_URL <url-string>]
             [PERMISSIONS <permission>...]
             [CONFIGURATIONS <config>...]
+            [CXX_MODULES_DIRECTORY <directory>]
             [COMPONENT <component>]
             [EXCLUDE_FROM_ALL])
 

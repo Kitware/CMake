@@ -108,6 +108,9 @@ private:
                        std::string const& property, Json::Value const& object,
                        std::string const& attribute,
                        std::string const& defaultValue = {}) const;
+  void ReadCxxModulesMetadata(cmMakefile* makefile, cmTarget* target,
+                              cm::string_view configuration,
+                              Json::Value const& object) const;
 
   std::string ResolvePath(std::string path) const;
 

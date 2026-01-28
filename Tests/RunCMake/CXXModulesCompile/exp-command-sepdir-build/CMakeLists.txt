@@ -11,6 +11,9 @@ install(TARGETS export_sepdir
 export(EXPORT CXXModules
   NAMESPACE CXXModules::
   FILE "${CMAKE_CURRENT_BINARY_DIR}/export_sepdir-targets.cmake")
+export(PACKAGE_INFO export_sepdir_cps
+  EXPORT CXXModules
+  CXX_MODULES_DIRECTORY "export_sepdir-cxx-modules-cps")
 file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/export_sepdir-config.cmake"
   "include(\"\${CMAKE_CURRENT_LIST_DIR}/export_sepdir-targets.cmake\")
 set(\${CMAKE_FIND_PACKAGE_NAME}_FOUND 1)
@@ -32,6 +35,8 @@ add_test(NAME export_sepdir_build
     "${CMAKE_COMMAND}"
     "-Dexpected_dir=${CMAKE_CURRENT_SOURCE_DIR}"
     "-Dexport_sepdir_DIR=${CMAKE_CURRENT_BINARY_DIR}"
+    "-Dexport_sepdir_cps_DIR=${CMAKE_CURRENT_BINARY_DIR}"
+    "-DCMAKE_EXPERIMENTAL_FIND_CPS_PACKAGES=e82e467b-f997-4464-8ace-b00808fff261"
     ${generator}
     -S "${CMAKE_CURRENT_SOURCE_DIR}/test"
     -B "${CMAKE_CURRENT_BINARY_DIR}/test")

@@ -70,15 +70,21 @@ protected:
 
   std::string GetCxxModuleFile(std::string const& /*name*/) const override
   {
-    // TODO
+    // CPS does not have a general CxxModuleFile, we use the config-specific
+    // manifests directly
     return {};
   }
 
   void GenerateCxxModuleConfigInformation(std::string const& /*name*/,
                                           std::ostream& /*os*/) const override
   {
-    // TODO
+    // We embed this directly in the CPS json
   }
+
+  std::string GenerateCxxModules(Json::Value& component,
+                                 cmGeneratorTarget* target,
+                                 std::string const& packagePath,
+                                 std::string const& config);
 
   bool NoteLinkedTarget(cmGeneratorTarget const* target,
                         std::string const& linkedName,

@@ -149,7 +149,8 @@ Exporting Targets to the |CPS|
          [LICENSE <license-string>]
          [DEFAULT_LICENSE <license-string>]
          [DESCRIPTION <description-string>]
-         [HOMEPAGE_URL <url-string>])
+         [HOMEPAGE_URL <url-string>]
+         [CXX_MODULES_DIRECTORY <directory>])
 
 .. versionadded:: 4.3
 .. note::

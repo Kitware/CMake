@@ -2339,7 +2339,7 @@ bool HandlePackageInfoMode(std::vector<std::string> const& args,
 
   arguments.Bind(ica);
   ica.Bind("EXPORT"_s, exportName);
-  // ica.Bind("CXX_MODULES_DIRECTORY"_s, cxxModulesDirectory); TODO?
+  ica.Bind("CXX_MODULES_DIRECTORY"_s, cxxModulesDirectory);
 
   std::vector<std::string> unknownArgs;
   ArgumentParser::ParseResult result = ica.Parse(args, &unknownArgs);

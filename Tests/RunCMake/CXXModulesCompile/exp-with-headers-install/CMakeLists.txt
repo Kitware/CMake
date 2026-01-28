@@ -24,6 +24,10 @@ install(EXPORT CXXModules
   NAMESPACE CXXModules::
   DESTINATION "lib/cmake/export_with_headers"
   FILE "export_with_headers-targets.cmake")
+install(PACKAGE_INFO "export_with_headers_cps"
+  EXPORT CXXModules
+  DESTINATION "lib/cmake/export_with_headers_cps"
+  CXX_MODULES_DIRECTORY "export_with_headers-cxx-modules-cps")
 file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/export_with_headers-config.cmake"
   "include(\"\${CMAKE_CURRENT_LIST_DIR}/export_with_headers-targets.cmake\")
 set(\${CMAKE_FIND_PACKAGE_NAME}_FOUND 1)
@@ -46,6 +50,8 @@ add_test(NAME export_with_headers_build
   COMMAND
     "${CMAKE_COMMAND}"
     "-Dexport_with_headers_DIR=${CMAKE_INSTALL_PREFIX}/lib/cmake/export_with_headers"
+    "-Dexport_with_headers_cps_DIR=${CMAKE_INSTALL_PREFIX}/lib/cmake/export_with_headers_cps"
+    "-DCMAKE_EXPERIMENTAL_FIND_CPS_PACKAGES=e82e467b-f997-4464-8ace-b00808fff261"
     ${generator}
     -S "${CMAKE_CURRENT_SOURCE_DIR}/test"
     -B "${CMAKE_CURRENT_BINARY_DIR}/test")

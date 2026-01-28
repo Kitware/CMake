@@ -576,3 +576,22 @@ Json::Value cmExportPackageInfoGenerator::GenerateInterfaceConfigProperties(
 
   return component;
 }
+
+std::string cmExportPackageInfoGenerator::GenerateCxxModules(
+  Json::Value& component, cmGeneratorTarget* target,
+  std::string const& packagePath, std::string const& config)
+{
+  std::string manifestPath;
+
+  std::string const cxxModulesDirName = this->GetCxxModulesDirectory();
+  if (cxxModulesDirName.empty() || !target->HaveCxx20ModuleSources()) {
+    return manifestPath;
+  }
+
+  manifestPath =
+    cmStrCat(cxxModulesDirName, "/target-", target->GetFilesystemExportName(),
+             '-', config.empty() ? "noconfig" : config, ".modules.json");
+
+  component["cpp_module_metadata"] = cmStrCat(packagePath, '/', manifestPath);
+  return manifestPath;
+}
