@@ -492,6 +492,14 @@ void cmInstrumentation::InsertStaticSystemInformation(Json::Value& root)
     static_cast<Json::Value::UInt64>(info.GetTotalVirtualMemory());
   infoRoot["vendorID"] = info.GetVendorID();
   infoRoot["vendorString"] = info.GetVendorString();
+
+  // Record fields unable to be determined as null JSON objects.
+  for (std::string const& field : infoRoot.getMemberNames()) {
+    if ((infoRoot[field].isNumeric() && infoRoot[field].asInt64() <= 0) ||
+        (infoRoot[field].isString() && infoRoot[field].asString().empty())) {
+      infoRoot[field] = Json::nullValue;
+    }
+  }
   root["staticSystemInformation"] = infoRoot;
 }
 
