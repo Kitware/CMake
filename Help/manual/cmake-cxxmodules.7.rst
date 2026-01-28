@@ -126,6 +126,12 @@ For the :ref:`Visual Studio Generators`:
 - Use of modules provided by ``PRIVATE`` sources from ``PUBLIC`` module
   sources is not diagnosed.
 
+Separately, as a design choice, CMake does not express configuration-agnostic
+module maps for imported targets. The :prop_tgt:`IMPORTED_CXX_MODULES_<CONFIG>`
+target property is always tied to a specific configuration. This can lead to
+some friction when importing/exporting targets from/to configuration-unaware
+build systems. Future work will alleviate this restriction.
+
 Usage
 =====
 
