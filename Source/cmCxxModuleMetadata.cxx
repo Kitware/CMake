@@ -439,10 +439,10 @@ void cmCxxModuleMetadata::PopulateTarget(
   cmTarget& target, cmCxxModuleMetadata const& meta,
   std::vector<std::string> const& configs)
 {
-  std::vector<cm::string_view> allIncludeDirectories;
-  std::vector<cm::string_view> allCompileOptions;
-  std::vector<cm::string_view> allCompileFeatures;
-  std::vector<std::string> allCompileDefinitions;
+  std::set<cm::string_view> allIncludeDirectories;
+  std::set<cm::string_view> allCompileOptions;
+  std::set<cm::string_view> allCompileFeatures;
+  std::set<std::string> allCompileDefinitions;
   std::set<std::string> baseDirs;
 
   std::string metadataDir =
@@ -457,6 +457,8 @@ void cmCxxModuleMetadata::PopulateTarget(
       sourcePath = cmStrCat(metadataDir, '/', sourcePath);
     }
 
+    sourcePath = cmSystemTools::ToNormalizedPathOnDisk(std::move(sourcePath));
+
     // Module metadata files can reference files in different roots,
     // just use the immediate parent directory as a base directory
     baseDirs.insert(cmSystemTools::GetFilenamePath(sourcePath));
@@ -465,26 +467,26 @@ void cmCxxModuleMetadata::PopulateTarget(
 
     if (module.LocalArguments) {
       for (auto const& incDir : module.LocalArguments->IncludeDirectories) {
-        allIncludeDirectories.push_back(incDir);
+        allIncludeDirectories.emplace(incDir);
       }
       for (auto const& sysIncDir :
            module.LocalArguments->SystemIncludeDirectories) {
-        allIncludeDirectories.push_back(sysIncDir);
+        allIncludeDirectories.emplace(sysIncDir);
       }
       for (auto const& opt : module.LocalArguments->CompileOptions) {
-        allCompileOptions.push_back(opt);
+        allCompileOptions.emplace(opt);
       }
       for (auto const& opt : module.LocalArguments->CompileFeatures) {
-        allCompileFeatures.push_back(opt);
+        allCompileFeatures.emplace(opt);
       }
 
       for (auto const& def : module.LocalArguments->Definitions) {
         if (!def.Undef) {
           if (def.Value) {
-            allCompileDefinitions.push_back(
+            allCompileDefinitions.emplace(
               cmStrCat(def.Name, "="_s, *def.Value));
           } else {
-            allCompileDefinitions.push_back(def.Name);
+            allCompileDefinitions.emplace(def.Name);
           }
         }
       }
@@ -523,6 +525,8 @@ void cmCxxModuleMetadata::PopulateTarget(
         if (!cmSystemTools::FileIsFullPath(sourcePath)) {
           sourcePath = cmStrCat(metadataDir, '/', sourcePath);
         }
+        sourcePath =
+          cmSystemTools::ToNormalizedPathOnDisk(std::move(sourcePath));
         moduleList.push_back(cmStrCat(module.LogicalName, "="_s, sourcePath));
       }
     }
