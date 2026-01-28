@@ -10,11 +10,25 @@
 class cmMakefile;
 class cmExecutionStatus;
 class cmSourceFile;
+class cmTarget;
 
 bool cmSetPropertyCommand(std::vector<std::string> const& args,
                           cmExecutionStatus& status);
 
 namespace SetPropertyCommand {
+bool HandleFileSetTargetScopes(cmExecutionStatus& status,
+                               std::string& file_set_target_name,
+                               cmTarget*& file_set_target);
+
+bool HandleFileSetTargetScopeValidation(cmExecutionStatus& status,
+                                        bool file_set_target_option_enabled,
+                                        std::string& file_set_target_name);
+
+bool HandleAndValidateFileSetTargetScopes(cmExecutionStatus& status,
+                                          bool file_set_target_option_enabled,
+                                          std::string& file_set_target_name,
+                                          cmTarget*& file_set_target);
+
 bool HandleSourceFileDirectoryScopes(
   cmExecutionStatus& status, std::vector<std::string>& source_file_directories,
   std::vector<std::string>& source_file_target_directories,

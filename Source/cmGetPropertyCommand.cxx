@@ -9,6 +9,7 @@
 #include <cmext/string_view>
 
 #include "cmExecutionStatus.h"
+#include "cmFileSet.h"
 #include "cmGlobalGenerator.h"
 #include "cmInstalledFile.h"
 #include "cmMakefile.h"
@@ -45,6 +46,9 @@ bool HandleDirectoryMode(cmExecutionStatus& status, std::string const& name,
 bool HandleTargetMode(cmExecutionStatus& status, std::string const& name,
                       OutType infoType, std::string const& variable,
                       std::string const& propertyName);
+bool HandleFileSetMode(cmExecutionStatus& status, std::string const& name,
+                       OutType infoType, std::string const& variable,
+                       std::string const& propertyName, cmTarget* target);
 bool HandleSourceMode(cmExecutionStatus& status, std::string const& name,
                       OutType infoType, std::string const& variable,
                       std::string const& propertyName,
@@ -80,6 +84,9 @@ bool cmGetPropertyCommand(std::vector<std::string> const& args,
   std::string name;
   std::string propertyName;
 
+  std::string file_set_target_name;
+  bool file_set_target_option_enabled = false;
+
   std::vector<std::string> source_file_directories;
   std::vector<std::string> source_file_target_directories;
   bool source_file_directory_option_enabled = false;
@@ -96,6 +103,8 @@ bool cmGetPropertyCommand(std::vector<std::string> const& args,
     scope = cmProperty::DIRECTORY;
   } else if (args[1] == "TARGET") {
     scope = cmProperty::TARGET;
+  } else if (args[1] == "FILE_SET") {
+    scope = cmProperty::FILE_SET;
   } else if (args[1] == "SOURCE") {
     scope = cmProperty::SOURCE_FILE;
   } else if (args[1] == "TEST") {
@@ -107,11 +116,11 @@ bool cmGetPropertyCommand(std::vector<std::string> const& args,
   } else if (args[1] == "INSTALL") {
     scope = cmProperty::INSTALL;
   } else {
-    status.SetError(cmStrCat(
-      "given invalid scope ", args[1],
-      ".  "
-      "Valid scopes are "
-      "GLOBAL, DIRECTORY, TARGET, SOURCE, TEST, VARIABLE, CACHE, INSTALL."));
+    status.SetError(cmStrCat("given invalid scope ", args[1],
+                             ".  "
+                             "Valid scopes are "
+                             "GLOBAL, DIRECTORY, TARGET, FILE_SET, SOURCE, "
+                             "TEST, VARIABLE, CACHE, INSTALL."));
     return false;
   }
 
@@ -122,6 +131,7 @@ bool cmGetPropertyCommand(std::vector<std::string> const& args,
     DoingName,
     DoingProperty,
     DoingType,
+    DoingFileSetTarget,
     DoingSourceDirectory,
     DoingSourceTargetDirectory,
     DoingTestDirectory,
@@ -145,6 +155,10 @@ bool cmGetPropertyCommand(std::vector<std::string> const& args,
     } else if (doing == DoingName) {
       doing = DoingNone;
       name = args[i];
+    } else if (doing == DoingNone && scope == cmProperty::FILE_SET &&
+               args[i] == "TARGET") {
+      doing = DoingFileSetTarget;
+      file_set_target_option_enabled = true;
     } else if (doing == DoingNone && scope == cmProperty::SOURCE_FILE &&
                args[i] == "DIRECTORY") {
       doing = DoingSourceDirectory;
@@ -157,6 +171,9 @@ bool cmGetPropertyCommand(std::vector<std::string> const& args,
                args[i] == "DIRECTORY") {
       doing = DoingTestDirectory;
       test_directory_option_enabled = true;
+    } else if (doing == DoingFileSetTarget) {
+      file_set_target_name = args[i];
+      doing = DoingNone;
     } else if (doing == DoingSourceDirectory) {
       source_file_directories.push_back(args[i]);
       doing = DoingNone;
@@ -178,21 +195,6 @@ bool cmGetPropertyCommand(std::vector<std::string> const& args,
   // Make sure a property name was found.
   if (propertyName.empty()) {
     status.SetError("not given a PROPERTY <name> argument.");
-    return false;
-  }
-
-  std::vector<cmMakefile*> source_file_directory_makefiles;
-  bool source_file_scopes_handled =
-    SetPropertyCommand::HandleAndValidateSourceFileDirectoryScopes(
-      status, source_file_directory_option_enabled,
-      source_file_target_option_enabled, source_file_directories,
-      source_file_target_directories, source_file_directory_makefiles);
-  cmMakefile* test_directory_makefile;
-  bool test_scopes_handled =
-    SetPropertyCommand::HandleAndValidateTestDirectoryScopes(
-      status, test_directory_option_enabled, test_directory,
-      test_directory_makefile);
-  if (!(source_file_scopes_handled && test_scopes_handled)) {
     return false;
   }
 
@@ -231,11 +233,6 @@ bool cmGetPropertyCommand(std::vector<std::string> const& args,
     }
   } else {
     // Dispatch property getting.
-    cmMakefile& directory_scope_mf = *(source_file_directory_makefiles[0]);
-    bool source_file_paths_should_be_absolute =
-      source_file_directory_option_enabled ||
-      source_file_target_option_enabled;
-
     switch (scope) {
       case cmProperty::GLOBAL:
         return HandleGlobalMode(status, name, infoType, variable,
@@ -246,13 +243,43 @@ bool cmGetPropertyCommand(std::vector<std::string> const& args,
       case cmProperty::TARGET:
         return HandleTargetMode(status, name, infoType, variable,
                                 propertyName);
-      case cmProperty::SOURCE_FILE:
+      case cmProperty::FILE_SET: {
+        cmTarget* file_set_target;
+        if (!SetPropertyCommand::HandleAndValidateFileSetTargetScopes(
+              status, file_set_target_option_enabled, file_set_target_name,
+              file_set_target)) {
+          return false;
+        }
+        return HandleFileSetMode(status, name, infoType, variable,
+                                 propertyName, file_set_target);
+      }
+      case cmProperty::SOURCE_FILE: {
+        std::vector<cmMakefile*> source_file_directory_makefiles;
+        if (!SetPropertyCommand::HandleAndValidateSourceFileDirectoryScopes(
+              status, source_file_directory_option_enabled,
+              source_file_target_option_enabled, source_file_directories,
+              source_file_target_directories,
+              source_file_directory_makefiles)) {
+          return false;
+        }
+        bool source_file_paths_should_be_absolute =
+          source_file_directory_option_enabled ||
+          source_file_target_option_enabled;
+        cmMakefile& directory_scope_mf = *(source_file_directory_makefiles[0]);
         return HandleSourceMode(status, name, infoType, variable, propertyName,
                                 directory_scope_mf,
                                 source_file_paths_should_be_absolute);
-      case cmProperty::TEST:
+      }
+      case cmProperty::TEST: {
+        cmMakefile* test_directory_makefile;
+        if (!SetPropertyCommand::HandleAndValidateTestDirectoryScopes(
+              status, test_directory_option_enabled, test_directory,
+              test_directory_makefile)) {
+          return false;
+        }
         return HandleTestMode(status, name, infoType, variable, propertyName,
                               *test_directory_makefile);
+      }
       case cmProperty::VARIABLE:
         return HandleVariableMode(status, name, infoType, variable,
                                   propertyName);
@@ -409,6 +436,25 @@ bool HandleTargetMode(cmExecutionStatus& status, std::string const& name,
     return StoreResult(infoType, status.GetMakefile(), variable, prop);
   }
   status.SetError(cmStrCat("could not find TARGET ", name,
+                           ".  Perhaps it has not yet been created."));
+  return false;
+}
+
+bool HandleFileSetMode(cmExecutionStatus& status, std::string const& name,
+                       OutType infoType, std::string const& variable,
+                       std::string const& propertyName, cmTarget* target)
+{
+  if (name.empty()) {
+    status.SetError("not given name for FILE_SET scope.");
+    return false;
+  }
+
+  if (cmFileSet* fileSet = target->GetFileSet(name)) {
+    cmValue prop = fileSet->GetProperty(propertyName);
+    return StoreResult(infoType, status.GetMakefile(), variable, prop);
+  }
+  status.SetError(cmStrCat("could not find FILE_SET ", name, " for TARGET ",
+                           target->GetName(),
                            ".  Perhaps it has not yet been created."));
   return false;
 }

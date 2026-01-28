@@ -1,2 +1,3 @@
 -- Target USER_PROP is 'a;b;c;d;;e'
 -- Directory USER_PROP is 'a;b;c;d;;e'
+-- FileSet USER_PROP is 'a;b;c;d;;e'

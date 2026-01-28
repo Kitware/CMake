@@ -17,6 +17,7 @@ public:
     TEST,
     VARIABLE,
     CACHED_VARIABLE,
-    INSTALL
+    INSTALL,
+    FILE_SET
   };
 };

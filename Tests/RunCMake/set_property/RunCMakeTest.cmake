@@ -19,3 +19,8 @@ set(RunCMake_TEST_BINARY_DIR "${RunCMake_BINARY_DIR}/TEST-build")
 run_cmake(TEST)
 set(RunCMake_TEST_NO_CLEAN 1)
 run_cmake_command(TEST-test ${CMAKE_CTEST_COMMAND} -C Debug)
+
+run_cmake(FILE_SET-invalid)
+run_cmake(FILE_SET-TARGET-invalid)
+run_cmake(FILE_SET-PROPERTY-missing)
+run_cmake(FILE_SET)

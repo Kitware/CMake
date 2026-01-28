@@ -6,16 +6,17 @@ Get a property.
 .. code-block:: cmake
 
   get_property(<variable>
-               <GLOBAL             |
-                DIRECTORY [<dir>]  |
-                TARGET    <target> |
+               <GLOBAL                                                  |
+                DIRECTORY [<dir>]                                       |
+                TARGET    <target>                                      |
+                FILE_SET  <file_set> TARGET <target>                    |
                 SOURCE    <source>
                           [DIRECTORY <dir> | TARGET_DIRECTORY <target>] |
-                INSTALL   <file>   |
+                INSTALL   <file>                                        |
                 TEST      <test>
-                          [DIRECTORY <dir>] |
-                CACHE     <entry>  |
-                VARIABLE           >
+                          [DIRECTORY <dir>]                             |
+                CACHE     <entry>                                       |
+                VARIABLE>
                PROPERTY <name>
                [SET | DEFINED | BRIEF_DOCS | FULL_DOCS])
 
@@ -41,6 +42,16 @@ It must be one of the following:
 ``TARGET``
   Scope must name one existing target.
   See also the :command:`get_target_property` command.
+
+``FILE_SET``
+  .. versionadded:: 4.3
+
+  Scope must name one existing file set.
+
+  The following option is required:
+
+  ``TARGET <target>``
+    The target to which the file set is attached.
 
 ``SOURCE``
   Scope must name one source file.  By default, the source file's property

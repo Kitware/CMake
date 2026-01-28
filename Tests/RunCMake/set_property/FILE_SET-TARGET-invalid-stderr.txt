@@ -1,0 +1,4 @@
+CMake Error at FILE_SET-TARGET-invalid\.cmake:[0-9]+ \(set_property\):
+  set_property given non-existent TARGET foo
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)

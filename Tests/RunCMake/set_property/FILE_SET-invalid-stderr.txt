@@ -1,0 +1,5 @@
+CMake Error at FILE_SET-invalid\.cmake:[0-9]+ \(set_property\):
+  set_property could not find FILE_SET foo for TARGET foo\.  Perhaps it has
+  not yet been created.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)

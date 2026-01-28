@@ -1,5 +1,5 @@
 ^CMake Error at BadScope\.cmake:1 \(get_property\):
   get_property given invalid scope FOO\.  Valid scopes are GLOBAL, DIRECTORY,
-  TARGET, SOURCE, TEST, VARIABLE, CACHE, INSTALL\.
+  TARGET, FILE_SET, SOURCE, TEST, VARIABLE, CACHE, INSTALL\.
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)$

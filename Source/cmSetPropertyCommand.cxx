@@ -10,6 +10,7 @@
 #include <cm/string_view>
 
 #include "cmExecutionStatus.h"
+#include "cmFileSet.h"
 #include "cmGlobalGenerator.h"
 #include "cmInstalledFile.h"
 #include "cmListFileCache.h"
@@ -48,6 +49,14 @@ bool HandleTarget(cmTarget* target, cmMakefile& makefile,
                   std::string const& propertyName,
                   std::string const& propertyValue, bool appendAsString,
                   bool appendMode, bool remove);
+bool HandleFileSetMode(cmExecutionStatus& status,
+                       std::set<std::string> const& names,
+                       std::string const& propertyName,
+                       std::string const& propertyValue, bool appendAsString,
+                       bool appendMode, bool remove, cmTarget* target);
+bool HandleFileSet(cmFileSet* fileSet, std::string const& propertyName,
+                   std::string const& propertyValue, bool appendAsString,
+                   bool appendMode, bool remove);
 bool HandleSourceMode(cmExecutionStatus& status,
                       std::set<std::string> const& names,
                       std::string const& propertyName,
@@ -87,6 +96,54 @@ bool HandleInstall(cmInstalledFile* file, cmMakefile& makefile,
 }
 
 namespace SetPropertyCommand {
+bool HandleFileSetTargetScopes(cmExecutionStatus& status,
+                               std::string& file_set_target_name,
+                               cmTarget*& file_set_target)
+{
+  file_set_target = status.GetMakefile().FindTargetToUse(file_set_target_name);
+  if (!file_set_target) {
+    status.SetError(
+      cmStrCat("given non-existent TARGET ", file_set_target_name));
+    return false;
+  }
+  return true;
+}
+
+bool HandleFileSetTargetScopeValidation(cmExecutionStatus& status,
+                                        bool file_set_target_option_enabled,
+                                        std::string& file_set_target_name)
+{
+  if (!file_set_target_option_enabled) {
+    status.SetError("required TARGET option is missing");
+    return false;
+  }
+
+  // Validate file set target scopes.
+  if (file_set_target_name.empty()) {
+    status.SetError("called with incorrect number of arguments "
+                    "no value provided to the TARGET option");
+    return false;
+  }
+  return true;
+}
+
+bool HandleAndValidateFileSetTargetScopes(cmExecutionStatus& status,
+                                          bool file_set_target_option_enabled,
+                                          std::string& file_set_target_name,
+                                          cmTarget*& file_set_target)
+{
+  bool scope_options_valid =
+    SetPropertyCommand::HandleFileSetTargetScopeValidation(
+      status, file_set_target_option_enabled, file_set_target_name);
+  if (!scope_options_valid) {
+    return false;
+  }
+
+  scope_options_valid = SetPropertyCommand::HandleFileSetTargetScopes(
+    status, file_set_target_name, file_set_target);
+  return scope_options_valid;
+}
+
 bool HandleSourceFileDirectoryScopes(
   cmExecutionStatus& status, std::vector<std::string>& source_file_directories,
   std::vector<std::string>& source_file_target_directories,
@@ -402,6 +459,8 @@ bool cmSetPropertyCommand(std::vector<std::string> const& args,
     scope = cmProperty::DIRECTORY;
   } else if (scopeName == "TARGET") {
     scope = cmProperty::TARGET;
+  } else if (scopeName == "FILE_SET") {
+    scope = cmProperty::FILE_SET;
   } else if (scopeName == "SOURCE") {
     scope = cmProperty::SOURCE_FILE;
   } else if (scopeName == "TEST") {
@@ -412,9 +471,8 @@ bool cmSetPropertyCommand(std::vector<std::string> const& args,
     scope = cmProperty::INSTALL;
   } else {
     status.SetError(cmStrCat("given invalid scope ", scopeName,
-                             ".  "
-                             "Valid scopes are GLOBAL, DIRECTORY, "
-                             "TARGET, SOURCE, TEST, CACHE, INSTALL."));
+                             ".  Valid scopes are GLOBAL, DIRECTORY, TARGET, "
+                             "FILE_SET, SOURCE, TEST, CACHE, INSTALL."));
     return false;
   }
 
@@ -424,6 +482,9 @@ bool cmSetPropertyCommand(std::vector<std::string> const& args,
   std::set<std::string> names;
   std::string propertyName;
   std::string propertyValue;
+
+  std::string file_set_target_name;
+  bool file_set_target_option_enabled = false;
 
   std::vector<std::string> source_file_directories;
   std::vector<std::string> source_file_target_directories;
@@ -440,6 +501,7 @@ bool cmSetPropertyCommand(std::vector<std::string> const& args,
     DoingNames,
     DoingProperty,
     DoingValues,
+    DoingFileSetTarget,
     DoingSourceDirectory,
     DoingSourceTargetDirectory,
     DoingTestDirectory,
@@ -460,6 +522,10 @@ bool cmSetPropertyCommand(std::vector<std::string> const& args,
       remove = false;
       appendAsString = true;
     } else if (doing != DoingProperty && doing != DoingValues &&
+               scope == cmProperty::FILE_SET && arg == "TARGET") {
+      doing = DoingFileSetTarget;
+      file_set_target_option_enabled = true;
+    } else if (doing != DoingProperty && doing != DoingValues &&
                scope == cmProperty::SOURCE_FILE && arg == "DIRECTORY") {
       doing = DoingSourceDirectory;
       source_file_directory_option_enabled = true;
@@ -473,6 +539,10 @@ bool cmSetPropertyCommand(std::vector<std::string> const& args,
       test_directory_option_enabled = true;
     } else if (doing == DoingNames) {
       names.insert(arg);
+    } else if (doing == DoingFileSetTarget) {
+      file_set_target_name = arg;
+      file_set_target_option_enabled = true;
+      doing = DoingNone;
     } else if (doing == DoingSourceDirectory) {
       source_file_directories.push_back(arg);
     } else if (doing == DoingSourceTargetDirectory) {
@@ -500,23 +570,6 @@ bool cmSetPropertyCommand(std::vector<std::string> const& args,
     return false;
   }
 
-  std::vector<cmMakefile*> source_file_directory_makefiles;
-  bool source_file_scopes_handled =
-    SetPropertyCommand::HandleAndValidateSourceFileDirectoryScopes(
-      status, source_file_directory_option_enabled,
-      source_file_target_option_enabled, source_file_directories,
-      source_file_target_directories, source_file_directory_makefiles);
-  cmMakefile* test_directory_makefile;
-  bool test_scopes_handled =
-    SetPropertyCommand::HandleAndValidateTestDirectoryScopes(
-      status, test_directory_option_enabled, test_directory,
-      test_directory_makefile);
-  if (!(source_file_scopes_handled && test_scopes_handled)) {
-    return false;
-  }
-  bool source_file_paths_should_be_absolute =
-    source_file_directory_option_enabled || source_file_target_option_enabled;
-
   // Dispatch property setting.
   switch (scope) {
     case cmProperty::GLOBAL:
@@ -528,15 +581,44 @@ bool cmSetPropertyCommand(std::vector<std::string> const& args,
     case cmProperty::TARGET:
       return HandleTargetMode(status, names, propertyName, propertyValue,
                               appendAsString, appendMode, remove);
-    case cmProperty::SOURCE_FILE:
+    case cmProperty::FILE_SET: {
+      cmTarget* file_set_target;
+      if (!SetPropertyCommand::HandleAndValidateFileSetTargetScopes(
+            status, file_set_target_option_enabled, file_set_target_name,
+            file_set_target)) {
+        return false;
+      }
+      return HandleFileSetMode(status, names, propertyName, propertyValue,
+                               appendAsString, appendMode, remove,
+                               file_set_target);
+    }
+    case cmProperty::SOURCE_FILE: {
+      std::vector<cmMakefile*> source_file_directory_makefiles;
+      if (!SetPropertyCommand::HandleAndValidateSourceFileDirectoryScopes(
+            status, source_file_directory_option_enabled,
+            source_file_target_option_enabled, source_file_directories,
+            source_file_target_directories, source_file_directory_makefiles)) {
+        return false;
+      }
+      bool source_file_paths_should_be_absolute =
+        source_file_directory_option_enabled ||
+        source_file_target_option_enabled;
       return HandleSourceMode(status, names, propertyName, propertyValue,
                               appendAsString, appendMode, remove,
                               source_file_directory_makefiles,
                               source_file_paths_should_be_absolute);
-    case cmProperty::TEST:
+    }
+    case cmProperty::TEST: {
+      cmMakefile* test_directory_makefile;
+      if (!SetPropertyCommand::HandleAndValidateTestDirectoryScopes(
+            status, test_directory_option_enabled, test_directory,
+            test_directory_makefile)) {
+        return false;
+      }
       return HandleTestMode(status, names, propertyName, propertyValue,
                             appendAsString, appendMode, remove,
                             test_directory_makefile);
+    }
     case cmProperty::CACHE:
       return HandleCacheMode(status, names, propertyName, propertyValue,
                              appendAsString, appendMode, remove);
@@ -676,6 +758,46 @@ bool HandleTarget(cmTarget* target, cmMakefile& makefile,
   // Check the resulting value.
   target->CheckProperty(propertyName, &makefile);
 
+  return true;
+}
+
+bool HandleFileSetMode(cmExecutionStatus& status,
+                       std::set<std::string> const& names,
+                       std::string const& propertyName,
+                       std::string const& propertyValue, bool appendAsString,
+                       bool appendMode, bool remove, cmTarget* target)
+{
+  for (std::string const& name : names) {
+    if (cmFileSet* fileSet = target->GetFileSet(name)) {
+      // Handle the current file set.
+      if (!HandleFileSet(fileSet, propertyName, propertyValue, appendAsString,
+                         appendMode, remove)) {
+        return false;
+      }
+    } else {
+      status.SetError(cmStrCat("could not find FILE_SET ", name,
+                               " for TARGET ", target->GetName(),
+                               ".  Perhaps it has not yet been created."));
+      return false;
+    }
+  }
+  return true;
+}
+
+bool HandleFileSet(cmFileSet* fileSet, std::string const& propertyName,
+                   std::string const& propertyValue, bool appendAsString,
+                   bool appendMode, bool remove)
+{
+  // Set or append the property.
+  if (appendMode) {
+    fileSet->AppendProperty(propertyName, propertyValue, appendAsString);
+  } else {
+    if (remove) {
+      fileSet->SetProperty(propertyName, nullptr);
+    } else {
+      fileSet->SetProperty(propertyName, propertyValue);
+    }
+  }
   return true;
 }
 

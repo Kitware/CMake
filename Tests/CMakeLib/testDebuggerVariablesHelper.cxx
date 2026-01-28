@@ -499,9 +499,10 @@ static bool testCreateFromFileSet()
 {
   auto variablesManager =
     std::make_shared<cmDebugger::cmDebuggerVariablesManager>();
+  auto dummies = CreateDummies("Foo");
 
-  cmake cm(cmState::Role::Internal);
-  cmFileSet fileSet(cm, "Foo", "HEADERS", cmFileSetVisibility::Public);
+  cmFileSet fileSet(dummies.Makefile.get(), "Foo", "HEADERS",
+                    cmFileSetVisibility::Public);
   BT<std::string> directory;
   directory.Value = "c:/";
   fileSet.AddDirectoryEntry(directory);
@@ -543,9 +544,10 @@ static bool testCreateFromFileSets()
 {
   auto variablesManager =
     std::make_shared<cmDebugger::cmDebuggerVariablesManager>();
+  auto dummies = CreateDummies("Foo");
 
-  cmake cm(cmState::Role::Internal);
-  cmFileSet fileSet(cm, "Foo", "HEADERS", cmFileSetVisibility::Public);
+  cmFileSet fileSet(dummies.Makefile.get(), "Foo", "HEADERS",
+                    cmFileSetVisibility::Public);
   BT<std::string> directory;
   directory.Value = "c:/";
   fileSet.AddDirectoryEntry(directory);
