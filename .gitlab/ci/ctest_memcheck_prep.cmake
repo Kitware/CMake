@@ -29,7 +29,7 @@ if (CTEST_MEMORYCHECK_TYPE STREQUAL "Valgrind")
     sample_script
     */Tests/CTestTest2/kwsysBin/*
     */Tests/CTestTestCrash/Crash
-    *QtAutogen
+    */Tests/Qt*Autogen/*
     # Ignore ISPC files which may contain unimplemented instructions.
     */build/Tests/ISPC/TryCompile/ISPCTryCompile
     # Ignore anything CI downloads.
