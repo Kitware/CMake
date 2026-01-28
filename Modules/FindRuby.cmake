@@ -175,13 +175,17 @@ endif()
 set(_Ruby_POSSIBLE_EXECUTABLE_NAMES ruby)
 
 # If the user has not specified a Ruby version, create a list of Ruby versions
-# to check going from 1.8 to 4.0
+# to search (newest to oldest). Based on https://www.ruby-lang.org/en/downloads/releases/
 if (NOT Ruby_FIND_VERSION_EXACT)
-  foreach (_ruby_version RANGE 40 18 -1)
+  set(_Ruby_SUPPORTED_VERSIONS 40 34 33 32)
+  set(_Ruby_UNSUPPORTED_VERSIONS 31 30 27 26 25 24 23 22 21 20)
+  foreach (_ruby_version IN LISTS _Ruby_SUPPORTED_VERSIONS _Ruby_UNSUPPORTED_VERSIONS)
     string(SUBSTRING "${_ruby_version}" 0 1 _ruby_major_version)
     string(SUBSTRING "${_ruby_version}" 1 1 _ruby_minor_version)
     # Append both rubyX.Y and rubyXY (eg: ruby3.4 ruby34)
-    list(APPEND _Ruby_POSSIBLE_EXECUTABLE_NAMES ruby${_ruby_major_version}.${_ruby_minor_version} ruby${_ruby_major_version}${_ruby_minor_version})
+    list(APPEND _Ruby_POSSIBLE_EXECUTABLE_NAMES
+         ruby${_ruby_major_version}.${_ruby_minor_version}
+         ruby${_ruby_major_version}${_ruby_minor_version})
   endforeach ()
 endif ()
 
@@ -232,14 +236,6 @@ function(_RUBY_CONFIG_VAR RBVAR OUTVAR)
                   RESULT_VARIABLE _Ruby_SUCCESS
                   OUTPUT_VARIABLE _Ruby_OUTPUT
                   ERROR_QUIET)
-
-  # Config was deprecated in Ruby 1.9 and then removed in Ruby 2 - so this is for ancient code
-  if (_Ruby_SUCCESS OR _Ruby_OUTPUT STREQUAL "")
-    execute_process(COMMAND "${Ruby_EXECUTABLE}" -r rbconfig -e "print Config::CONFIG['${RBVAR}']"
-                    RESULT_VARIABLE _Ruby_SUCCESS
-                    OUTPUT_VARIABLE _Ruby_OUTPUT
-                    ERROR_QUIET)
-  endif ()
 
   set(${OUTVAR} "${_Ruby_OUTPUT}" PARENT_SCOPE)
 endfunction()
@@ -317,7 +313,7 @@ function(_RUBY_CHECK_BREW)
     return()
   endif ()
 
-  MESSAGE(DEBUG "Found brew at: ${_BREW_EXECUTABLE}")
+  message(DEBUG "Found brew at: ${_BREW_EXECUTABLE}")
 
   # Query Homebrew for the prefix of the 'ruby' formula.
   # If Ruby is not installed via Homebrew, this will fail.
@@ -328,7 +324,7 @@ function(_RUBY_CHECK_BREW)
           ERROR_QUIET
           OUTPUT_STRIP_TRAILING_WHITESPACE
   )
-  MESSAGE(DEBUG "Ruby BREW is: ${_Ruby_BREW_DIR}")
+  message(DEBUG "Ruby BREW is: ${_Ruby_BREW_DIR}")
 
   if (NOT _Ruby_BREW_RESULT EQUAL 0 OR _Ruby_BREW_DIR STREQUAL "")
     # No 'ruby' formula installed in Homebrew
@@ -429,8 +425,8 @@ if (Ruby_EXECUTABLE AND NOT Ruby_EXECUTABLE STREQUAL "${_Ruby_EXECUTABLE_LAST_QU
   set(Ruby_ARCHHDR_DIR ${Ruby_ARCHHDR_DIR} CACHE INTERNAL "The Ruby arch header dir (2.0+)" FORCE)
   set(_Ruby_POSSIBLE_LIB_DIR ${_Ruby_POSSIBLE_LIB_DIR} CACHE INTERNAL "The Ruby lib dir" FORCE)
   set(Ruby_RUBY_LIB_DIR ${Ruby_RUBY_LIB_DIR} CACHE INTERNAL "The Ruby ruby-lib dir" FORCE)
-  set(_Ruby_SO_NAME ${_Ruby_SO_NAME} CACHE PATH "The Ruby shared library name" FORCE)
-  set(_Ruby_DLEXT ${_Ruby_DLEXT} CACHE PATH "Ruby extensions extension" FORCE)
+  set(_Ruby_SO_NAME ${_Ruby_SO_NAME} CACHE STRING "The Ruby shared library name" FORCE)
+  set(_Ruby_DLEXT ${_Ruby_DLEXT} CACHE STRING "Ruby extensions extension" FORCE)
   set(Ruby_SITEARCH_DIR ${Ruby_SITEARCH_DIR} CACHE INTERNAL "The Ruby site arch dir" FORCE)
   set(Ruby_SITELIB_DIR ${Ruby_SITELIB_DIR} CACHE INTERNAL "The Ruby site lib dir" FORCE)
   set(Ruby_HAS_VENDOR_RUBY ${Ruby_HAS_VENDOR_RUBY} CACHE BOOL "Vendor Ruby is available" FORCE)
@@ -491,7 +487,7 @@ set(CMAKE_FIND_FRAMEWORK ${_Ruby_CMAKE_FIND_FRAMEWORK_ORIGINAL})
 message(DEBUG "--------FindRuby.cmake debug------------")
 message(DEBUG "_Ruby_POSSIBLE_EXECUTABLE_NAMES: ${_Ruby_POSSIBLE_EXECUTABLE_NAMES}")
 message(DEBUG "_Ruby_POSSIBLE_LIB_DIR: ${_Ruby_POSSIBLE_LIB_DIR}")
-message(DEBUG "Ruby_LIBRUBY_SO: ${_Ruby_SO_NAME}")
+message(DEBUG "_Ruby_SO_NAME: ${_Ruby_SO_NAME}")
 message(DEBUG "_Ruby_DLEXT: ${_Ruby_DLEXT}")
 message(DEBUG "Ruby_FIND_VIRTUALENV=${Ruby_FIND_VIRTUALENV}")
 message(DEBUG "Ruby_ENV: ${Ruby_ENV}")
