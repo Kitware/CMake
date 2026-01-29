@@ -2691,26 +2691,15 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
     }
   }
 
-  std::string extraLinkOptionsVar;
   std::string extraLinkOptions;
-  if (gtgt->GetType() == cmStateEnums::EXECUTABLE) {
-    extraLinkOptionsVar = "CMAKE_EXE_LINKER_FLAGS";
-  } else if (gtgt->GetType() == cmStateEnums::SHARED_LIBRARY) {
-    extraLinkOptionsVar = "CMAKE_SHARED_LINKER_FLAGS";
-  } else if (gtgt->GetType() == cmStateEnums::MODULE_LIBRARY) {
-    extraLinkOptionsVar = "CMAKE_MODULE_LINKER_FLAGS";
-  }
-  if (!extraLinkOptionsVar.empty()) {
-    this->CurrentLocalGenerator->AddConfigVariableFlags(
-      extraLinkOptions, extraLinkOptionsVar, gtgt, cmBuildStep::Link, llang,
-      configName);
-  }
 
   if (gtgt->GetType() == cmStateEnums::OBJECT_LIBRARY ||
       gtgt->GetType() == cmStateEnums::STATIC_LIBRARY) {
     this->CurrentLocalGenerator->GetStaticLibraryFlags(
       extraLinkOptions, configName, llang, gtgt);
   } else {
+    this->CurrentLocalGenerator->AddTargetTypeLinkerFlags(
+      extraLinkOptions, gtgt, llang, configName);
     this->CurrentLocalGenerator->AppendLinkerTypeFlags(extraLinkOptions, gtgt,
                                                        configName, llang);
     this->CurrentLocalGenerator->AppendWarningAsErrorLinkerFlags(

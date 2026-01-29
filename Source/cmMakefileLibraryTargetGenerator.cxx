@@ -178,9 +178,8 @@ void cmMakefileLibraryTargetGenerator::WriteSharedLibraryRules(bool relink)
   std::string extraFlags;
   this->LocalGenerator->AppendTargetCreationLinkFlags(
     extraFlags, this->GeneratorTarget, linkLanguage);
-  this->LocalGenerator->AddConfigVariableFlags(
-    extraFlags, "CMAKE_SHARED_LINKER_FLAGS", this->GeneratorTarget,
-    cmBuildStep::Link, linkLanguage, this->GetConfigName());
+  this->LocalGenerator->AddTargetTypeLinkerFlags(
+    extraFlags, this->GeneratorTarget, linkLanguage, this->GetConfigName());
 
   std::unique_ptr<cmLinkLineComputer> linkLineComputer =
     this->CreateLinkLineComputer(
@@ -217,9 +216,8 @@ void cmMakefileLibraryTargetGenerator::WriteModuleLibraryRules(bool relink)
   std::string extraFlags;
   this->LocalGenerator->AppendTargetCreationLinkFlags(
     extraFlags, this->GeneratorTarget, linkLanguage);
-  this->LocalGenerator->AddConfigVariableFlags(
-    extraFlags, "CMAKE_MODULE_LINKER_FLAGS", this->GeneratorTarget,
-    cmBuildStep::Link, linkLanguage, this->GetConfigName());
+  this->LocalGenerator->AddTargetTypeLinkerFlags(
+    extraFlags, this->GeneratorTarget, linkLanguage, this->GetConfigName());
 
   std::unique_ptr<cmLinkLineComputer> linkLineComputer =
     this->CreateLinkLineComputer(

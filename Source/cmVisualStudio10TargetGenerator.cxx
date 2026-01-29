@@ -4543,17 +4543,10 @@ bool cmVisualStudio10TargetGenerator::ComputeLinkOptions(
 
   std::string CONFIG = cmSystemTools::UpperCase(config);
 
-  char const* linkType = "SHARED";
-  if (this->GeneratorTarget->GetType() == cmStateEnums::MODULE_LIBRARY) {
-    linkType = "MODULE";
-  }
-  if (this->GeneratorTarget->GetType() == cmStateEnums::EXECUTABLE) {
-    linkType = "EXE";
-  }
   std::string flags;
-  this->LocalGenerator->AddConfigVariableFlags(
-    flags, cmStrCat("CMAKE_", linkType, "_LINKER_FLAGS"),
-    this->GeneratorTarget, cmBuildStep::Link, linkLanguage, config);
+  this->LocalGenerator->AddTargetTypeLinkerFlags(flags, this->GeneratorTarget,
+                                                 linkLanguage, config);
+
   cmValue targetLinkFlags = this->GeneratorTarget->GetProperty("LINK_FLAGS");
   if (targetLinkFlags) {
     flags += ' ';

@@ -1504,8 +1504,6 @@ void cmLocalGenerator::GetTargetFlags(
 {
   std::string const configUpper = cmSystemTools::UpperCase(config);
   cmComputeLinkInformation* pcli = target->GetLinkInformation(config);
-  char const* libraryLinkVariable =
-    "CMAKE_SHARED_LINKER_FLAGS"; // default to shared library
 
   std::string const linkLanguage =
     linkLineComputer->GetLinkerLanguage(target, config);
@@ -1523,13 +1521,11 @@ void cmLocalGenerator::GetTargetFlags(
       linkFlags = this->GetStaticLibraryFlags(config, linkLanguage, target);
       break;
     case cmStateEnums::MODULE_LIBRARY:
-      libraryLinkVariable = "CMAKE_MODULE_LINKER_FLAGS";
       CM_FALLTHROUGH;
     case cmStateEnums::SHARED_LIBRARY: {
       if (this->IsSplitSwiftBuild() || linkLanguage != "Swift") {
         std::string libFlags;
-        this->AddConfigVariableFlags(libFlags, libraryLinkVariable, target,
-                                     cmBuildStep::Link, linkLanguage, config);
+        this->AddTargetTypeLinkerFlags(libFlags, target, linkLanguage, config);
         if (!libFlags.empty()) {
           linkFlags.emplace_back(std::move(libFlags));
         }
@@ -1570,9 +1566,7 @@ void cmLocalGenerator::GetTargetFlags(
     case cmStateEnums::EXECUTABLE: {
       if (linkLanguage != "Swift") {
         std::string exeFlags;
-        this->AddConfigVariableFlags(exeFlags, "CMAKE_EXE_LINKER_FLAGS",
-                                     target, cmBuildStep::Link, linkLanguage,
-                                     config);
+        this->AddTargetTypeLinkerFlags(exeFlags, target, linkLanguage, config);
         if (!exeFlags.empty()) {
           linkFlags.emplace_back(std::move(exeFlags));
         }
@@ -3461,6 +3455,28 @@ void cmLocalGenerator::AppendLinkerTypeFlags(std::string& flags,
                  "' variable?"));
     }
   }
+}
+
+void cmLocalGenerator::AddTargetTypeLinkerFlags(
+  std::string& flags, cmGeneratorTarget const* target, std::string const& lang,
+  std::string const& config)
+{
+  std::string linkerFlagsVar;
+  switch (target->GetType()) {
+    case cmStateEnums::EXECUTABLE:
+      linkerFlagsVar = "CMAKE_EXE_LINKER_FLAGS";
+      break;
+    case cmStateEnums::SHARED_LIBRARY:
+      linkerFlagsVar = "CMAKE_SHARED_LINKER_FLAGS";
+      break;
+    case cmStateEnums::MODULE_LIBRARY:
+      linkerFlagsVar = "CMAKE_MODULE_LINKER_FLAGS";
+      break;
+    default:
+      return;
+  }
+  this->AddConfigVariableFlags(flags, linkerFlagsVar, target,
+                               cmBuildStep::Link, lang, config);
 }
 
 void cmLocalGenerator::AppendIPOLinkerFlags(std::string& flags,
