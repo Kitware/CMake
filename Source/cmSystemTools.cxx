@@ -4393,7 +4393,7 @@ char cmSystemTools::GetSystemPathlistSeparator()
 #endif
 }
 
-cm::string_view cmSystemTools::GetFilenameNameView(std::string const& filename)
+cm::string_view cmSystemTools::GetFilenameNameView(cm::string_view filename)
 {
 // implementation mostly taken from cmsys::SystemTools
 #if defined(_WIN32) || defined(KWSYS_SYSTEMTOOLS_SUPPORT_WINDOWS_SLASHES)
@@ -4410,7 +4410,7 @@ cm::string_view cmSystemTools::GetFilenameNameView(std::string const& filename)
 }
 
 cm::string_view cmSystemTools::GetFilenameLastExtensionView(
-  std::string const& filename)
+  cm::string_view filename)
 {
   cm::string_view name = cmSystemTools::GetFilenameNameView(filename);
   cm::string_view::size_type dot_pos = name.rfind('.');
