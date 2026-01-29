@@ -17,7 +17,9 @@
 #include <cm3p/archive_entry.h>
 
 #include "cmsys/Directory.hxx"
-#include "cmsys/Encoding.hxx"
+#ifdef _WIN32
+#  include "cmsys/Encoding.hxx"
+#endif
 #include "cmsys/FStream.hxx"
 
 #include "cm_parse_date.h"
@@ -40,14 +42,22 @@ static std::string cm_archive_error_string(struct archive* a)
 static void cm_archive_entry_copy_pathname(struct archive_entry* e,
                                            std::string const& dest)
 {
+#ifdef _WIN32
   archive_entry_copy_pathname_w(e, cmsys::Encoding::ToWide(dest).c_str());
+#else
+  archive_entry_copy_pathname(e, dest.c_str());
+#endif
 }
 
 // Set path used for filesystem access.
 static void cm_archive_entry_copy_sourcepath(struct archive_entry* e,
                                              std::string const& file)
 {
+#ifdef _WIN32
   archive_entry_copy_sourcepath_w(e, cmsys::Encoding::ToWide(file).c_str());
+#else
+  archive_entry_copy_sourcepath(e, file.c_str());
+#endif
 }
 
 class cmArchiveWrite::Entry

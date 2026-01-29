@@ -99,7 +99,9 @@
 #include <fcntl.h>
 
 #include "cmsys/Directory.hxx"
-#include "cmsys/Encoding.hxx"
+#ifdef _WIN32
+#  include "cmsys/Encoding.hxx"
+#endif
 #include "cmsys/FStream.hxx"
 #include "cmsys/RegularExpression.hxx"
 #include "cmsys/System.h"
@@ -379,15 +381,27 @@ extern char** environ; // NOLINT(readability-redundant-declaration)
 // Get path that was read from the archive.
 static std::string cm_archive_entry_pathname(struct archive_entry* entry)
 {
+#  ifdef _WIN32
   return cmsys::Encoding::ToNarrow(archive_entry_pathname_w(entry));
+#  else
+  std::string pathname;
+  if (char const* p = archive_entry_pathname(entry)) {
+    pathname = p;
+  }
+  return pathname;
+#  endif
 }
 
 // Open archive file for reading.
 static int cm_archive_read_open_filename(struct archive* a, char const* file,
                                          int block_size)
 {
+#  ifdef _WIN32
   std::wstring wfile = cmsys::Encoding::ToWide(file);
   return archive_read_open_filename_w(a, wfile.c_str(), block_size);
+#  else
+  return archive_read_open_filename(a, file, block_size);
+#  endif
 }
 #endif
 
