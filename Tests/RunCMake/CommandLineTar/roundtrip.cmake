@@ -11,7 +11,7 @@ function(run_tar WORKING_DIRECTORY)
   )
 
   if(NOT result STREQUAL "0")
-    message(FATAL_ERROR "tar failed with arguments [${ARGN}] result [${result}]")
+    message(FATAL_ERROR "tar failed with arguments:\n  ${ARGN}\nresult:\n  ${result}")
   endif()
 endfunction()
 
@@ -58,18 +58,25 @@ foreach(file ${CHECK_FILES})
   set(output ${FULL_DECOMPRESS_DIR}/${COMPRESS_DIR}/${file})
 
   if(NOT EXISTS ${input})
-     message(SEND_ERROR "Cannot find input file ${output}")
+    message(SEND_ERROR "Cannot find input file:\n  \"${output}\"")
   endif()
 
   if(NOT EXISTS ${output})
-     message(SEND_ERROR "Cannot find output file ${output}")
+    message(SEND_ERROR "Cannot find output file:\n  \"${output}\"")
   endif()
 
   file(MD5 ${input} input_md5)
   file(MD5 ${output} output_md5)
 
   if(NOT input_md5 STREQUAL output_md5)
-    message(SEND_ERROR "Files \"${input}\" and \"${output}\" are different")
+    message(SEND_ERROR
+      "Files:\n"
+      "  \"${input}\"\n"
+      "and\n"
+      "  \"${output}\"\n"
+      "are different"
+    )
+
   endif()
 endforeach()
 
@@ -77,7 +84,7 @@ foreach(file ${NOT_EXISTING_FILES_CHECK})
   set(output ${FULL_DECOMPRESS_DIR}/${COMPRESS_DIR}/${file})
 
   if(EXISTS ${output})
-     message(SEND_ERROR "File ${output} exists but it shouldn't")
+    message(SEND_ERROR "File exists but it shouldn't:\n  \"${output}\"")
   endif()
 endforeach()
 
