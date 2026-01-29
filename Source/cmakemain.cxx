@@ -428,7 +428,7 @@ int do_cmake(int ac, char const* const* av)
 int extract_job_number(std::string const& command,
                        std::string const& jobString)
 {
-  int jobs = -1;
+  int jobs = cmake::NO_BUILD_PARALLEL_LEVEL;
   unsigned long numJobs = 0;
   if (jobString.empty()) {
     jobs = cmake::DEFAULT_BUILD_PARALLEL_LEVEL;
