@@ -377,6 +377,7 @@ private:
     this->Stream->seekg(this->ELFHeader.e_shoff +
                         this->ELFHeader.e_shentsize * i);
     if (!this->Read(this->SectionHeaders[i])) {
+      this->SetErrorMessage("Failed to load section headers.");
       return false;
     }
 
@@ -450,11 +451,12 @@ cmELFInternalImpl<Types>::cmELFInternalImpl(cmELF* external,
   // Load the section headers.
   this->SectionHeaders.resize(
     this->ELFHeader.e_shnum == 0 ? 1 : this->ELFHeader.e_shnum);
-  this->LoadSectionHeader(0);
+  if (!this->LoadSectionHeader(0)) {
+    return;
+  }
   this->SectionHeaders.resize(this->GetNumberOfSections());
   for (std::size_t i = 1; i < this->GetNumberOfSections(); ++i) {
     if (!this->LoadSectionHeader(i)) {
-      this->SetErrorMessage("Failed to load section headers.");
       return;
     }
   }
