@@ -265,6 +265,9 @@ be present in all snippet files. User written ``callbacks`` should be able to
 handle the presence of this optional data, since it may be requested by an
 unrelated query.
 
+The JSON format is described in machine-readable form by
+:download:`this JSON schema </manual/instrumentation/query-v1-schema.json>`.
+
 Example:
 
 .. code-block:: json

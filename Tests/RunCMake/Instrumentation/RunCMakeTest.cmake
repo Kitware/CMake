@@ -22,6 +22,7 @@ function(instrument test)
     "PRESERVE_DATA"
     "NO_CONFIGURE"
     "FAIL"
+    "BAD_QUERY"
   )
   cmake_parse_arguments(ARGS "${OPTIONS}" "CHECK_SCRIPT;CONFIGURE_ARG" "" ${ARGN})
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/${test})
@@ -38,6 +39,13 @@ function(instrument test)
   else()
     file(REMOVE_RECURSE ${RunCMake_TEST_BINARY_DIR})
   endif()
+
+  if (ARGS_BAD_QUERY)
+    set(schema_validate_result 1)
+  else()
+    set(schema_validate_result 0)
+  endif()
+  set(schema_validate_result ${schema_validate_result} PARENT_SCOPE)
 
   # Set hook command
   set(static_query_hook_arg 0)
@@ -176,15 +184,29 @@ function(instrument test)
 endfunction()
 
 # Bad Queries
-instrument(bad-option)
-instrument(bad-hook)
-instrument(empty)
-instrument(bad-version)
+instrument(bad-option BAD_QUERY
+  CHECK_SCRIPT check-query-dir.cmake
+)
+instrument(bad-hook BAD_QUERY
+  CHECK_SCRIPT check-query-dir.cmake
+)
+instrument(empty BAD_QUERY
+  CHECK_SCRIPT check-query-dir.cmake
+)
+instrument(bad-version BAD_QUERY
+  CHECK_SCRIPT check-query-dir.cmake
+)
 
 # Verify Hooks Run and Index File
-instrument(hooks-1 BUILD INSTALL TEST STATIC_QUERY)
-instrument(hooks-2 BUILD INSTALL TEST)
-instrument(hooks-no-callbacks MANUAL_HOOK)
+instrument(hooks-1 BUILD INSTALL TEST STATIC_QUERY
+  CHECK_SCRIPT check-query-dir.cmake
+)
+instrument(hooks-2 BUILD INSTALL TEST
+  CHECK_SCRIPT check-query-dir.cmake
+)
+instrument(hooks-no-callbacks MANUAL_HOOK
+  CHECK_SCRIPT check-query-dir.cmake
+)
 
 # Check data file contents for optional query data
 instrument(no-query
