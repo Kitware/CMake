@@ -6,6 +6,7 @@
 #include <utility>
 
 #include <cmext/algorithm>
+#include <cmext/string_view>
 
 #include "cmCustomCommand.h"
 #include "cmCustomCommandGenerator.h"
@@ -168,7 +169,7 @@ bool cmTargetTraceDependencies::IsUtility(std::string const& dep)
   // that case the target name will be the file basename of the
   // dependency.
   std::string util;
-  if (cmSystemTools::GetFilenameLastExtensionView(dep) == ".exe") {
+  if (cmHasSuffix(dep, ".exe"_s)) {
     util = cmSystemTools::GetFilenameWithoutLastExtension(dep);
   } else {
     util = cmSystemTools::GetFilenameName(dep);

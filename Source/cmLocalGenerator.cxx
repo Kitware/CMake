@@ -2321,7 +2321,7 @@ bool cmLocalGenerator::GetRealDependency(std::string const& inName,
   if (name.empty()) {
     return false;
   }
-  if (cmSystemTools::GetFilenameLastExtensionView(name) == ".exe") {
+  if (cmHasSuffix(name, ".exe"_s)) {
     name = cmSystemTools::GetFilenameWithoutLastExtension(name);
   }
 

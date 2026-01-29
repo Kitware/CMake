@@ -131,8 +131,7 @@ static bool HandleTargetsMode(std::vector<std::string> const& args,
     fname = arguments.ExportSetName + ".cmake";
   } else {
     // Make sure the file has a .cmake extension.
-    if (cmSystemTools::GetFilenameLastExtensionView(arguments.Filename) !=
-        ".cmake") {
+    if (!cmHasSuffix(arguments.Filename, ".cmake"_s)) {
       std::ostringstream e;
       e << "FILE option given filename \"" << arguments.Filename
         << "\" which does not have an extension of \".cmake\".\n";
@@ -296,8 +295,7 @@ static bool HandleExportMode(std::vector<std::string> const& args,
   if (arguments.Filename.empty()) {
     fname = arguments.ExportSetName + ".cmake";
   } else {
-    if (cmSystemTools::GetFilenameLastExtensionView(arguments.Filename) !=
-        ".cmake") {
+    if (!cmHasSuffix(arguments.Filename, ".cmake"_s)) {
       std::ostringstream e;
       e << "FILE option given filename \"" << arguments.Filename
         << "\" which does not have an extension of \".cmake\".\n";
