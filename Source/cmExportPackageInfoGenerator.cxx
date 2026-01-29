@@ -30,7 +30,7 @@
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 
-static std::string const kCPS_VERSION_STR = "0.14.0";
+static std::string const kCPS_VERSION_STR = "0.14.1";
 
 cmExportPackageInfoGenerator::cmExportPackageInfoGenerator(
   cmPackageInfoArguments arguments)
@@ -565,6 +565,22 @@ Json::Value cmExportPackageInfoGenerator::GenerateInterfaceConfigProperties(
       component["location"] = p.second;
     } else if (prop == "IMPLIB") {
       component["link_location"] = p.second;
+    } else if (prop == "LINK_DEPENDENT_LIBRARIES") {
+      bool result;
+      std::vector<std::string> libraries;
+      std::vector<std::string> components =
+        this->ExtractRequirements(cmList{ p.second }, result, libraries);
+      BuildArray(component, "dyld_requires", components);
+      if (!libraries.empty()) {
+        // In theory this can never happen?
+        this->IssueMessage(
+          MessageType::AUTHOR_WARNING,
+          cmStrCat("Package \""_s, this->GetPackageName(),
+                   "\" has IMPORTED_LINK_DEPENDENT_LIBRARIES \""_s,
+                   cmJoin(libraries, ";"_s), this->PackageVersionSchema,
+                   "\". These cannot be exported. "
+                   "Consumers may encounter link errors."_s));
+      }
     } else if (prop == "LINK_INTERFACE_LANGUAGES") {
       std::vector<std::string> languages;
       for (auto const& lang : cmList{ p.second }) {
