@@ -6,7 +6,7 @@ FindLibLZMA
 -----------
 
 Finds the liblzma, a data compression library that implements the LZMA
-(Lempel–Ziv–Markov chain algorithm):
+(Lempel-Ziv-Markov chain algorithm):
 
 .. code-block:: cmake
 
