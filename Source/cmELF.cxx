@@ -103,7 +103,7 @@ public:
   virtual ~cmELFInternal() = default;
 
   // Forward to the per-class implementation.
-  virtual unsigned int GetNumberOfSections() const = 0;
+  virtual std::size_t GetNumberOfSections() const = 0;
   virtual unsigned long GetDynamicEntryPosition(int j) = 0;
   virtual cmELF::DynamicEntryList GetDynamicEntries() = 0;
   virtual std::vector<char> EncodeDynamicEntries(
@@ -213,7 +213,7 @@ public:
                     ByteOrderType order);
 
   // Return the number of sections as specified by the ELF header.
-  unsigned int GetNumberOfSections() const override
+  std::size_t GetNumberOfSections() const override
   {
     return static_cast<unsigned int>(this->ELFHeader.e_shnum +
                                      this->SectionHeaders[0].sh_size);
@@ -371,7 +371,7 @@ private:
     return !this->Stream->fail();
   }
 
-  bool LoadSectionHeader(unsigned int i)
+  bool LoadSectionHeader(std::size_t i)
   {
     // Read the section header from the file.
     this->Stream->seekg(this->ELFHeader.e_shoff +
@@ -452,7 +452,7 @@ cmELFInternalImpl<Types>::cmELFInternalImpl(cmELF* external,
     this->ELFHeader.e_shnum == 0 ? 1 : this->ELFHeader.e_shnum);
   this->LoadSectionHeader(0);
   this->SectionHeaders.resize(this->GetNumberOfSections());
-  for (unsigned int i = 1; i < this->GetNumberOfSections(); ++i) {
+  for (std::size_t i = 1; i < this->GetNumberOfSections(); ++i) {
     if (!this->LoadSectionHeader(i)) {
       this->SetErrorMessage("Failed to load section headers.");
       return;
@@ -740,7 +740,7 @@ std::uint16_t cmELF::GetMachine() const
   return 0;
 }
 
-unsigned int cmELF::GetNumberOfSections() const
+std::size_t cmELF::GetNumberOfSections() const
 {
   if (this->Valid()) {
     return this->Internal->GetNumberOfSections();

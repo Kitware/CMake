@@ -4,6 +4,7 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <cstddef>
 #include <cstdint>
 #include <iosfwd>
 #include <memory>
@@ -73,7 +74,7 @@ public:
   std::uint16_t GetMachine() const;
 
   /** Get the number of ELF sections present.  */
-  unsigned int GetNumberOfSections() const;
+  std::size_t GetNumberOfSections() const;
 
   /** Get the position of a DYNAMIC section header entry.  Returns
       zero on error.  */
