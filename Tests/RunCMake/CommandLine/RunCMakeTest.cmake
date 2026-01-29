@@ -837,7 +837,7 @@ run_cmake_command(E_cat_directory
 file(WRITE "${out}/first_file.txt" "first file to append\n")
 file(WRITE "${out}/second_file.txt" "second file to append\n")
 file(WRITE "${out}/empty_file.txt" "")
-file(WRITE "${out}/unicode_file.txt" "àéùç - 한국어") # Korean in Korean
+file(WRITE "${out}/unicode_file.txt" "àéùç - 한국어") # UTF-8: Korean in Korean
 run_cmake_command(E_cat_good_cat
   ${CMAKE_COMMAND} -E cat "${out}/first_file.txt" "${out}/second_file.txt" "${out}/empty_file.txt" "${out}/unicode_file.txt")
 
