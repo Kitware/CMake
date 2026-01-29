@@ -2,6 +2,7 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmELF.h"
 
+#include <algorithm>
 #include <cstddef>
 #include <cstdint>
 #include <map>
@@ -449,13 +450,15 @@ cmELFInternalImpl<Types>::cmELFInternalImpl(cmELF* external,
   this->Machine = this->ELFHeader.e_machine;
 
   // Load the section headers.
-  this->SectionHeaders.resize(
-    this->ELFHeader.e_shnum == 0 ? 1 : this->ELFHeader.e_shnum);
+  std::size_t const minSections = 1;
+  std::size_t numSections = this->ELFHeader.e_shnum;
+  this->SectionHeaders.resize(std::max(numSections, minSections));
   if (!this->LoadSectionHeader(0)) {
     return;
   }
-  this->SectionHeaders.resize(this->GetNumberOfSections());
-  for (std::size_t i = 1; i < this->GetNumberOfSections(); ++i) {
+  numSections = this->GetNumberOfSections();
+  this->SectionHeaders.resize(std::max(numSections, minSections));
+  for (std::size_t i = 1; i < numSections; ++i) {
     if (!this->LoadSectionHeader(i)) {
       return;
     }
