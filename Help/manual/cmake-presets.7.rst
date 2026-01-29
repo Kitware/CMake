@@ -892,7 +892,8 @@ that may contain the following fields:
 
   ``jobs``
     An optional integer. Equivalent to passing
-    :option:`--parallel <ctest --parallel>` on the command line.
+    :option:`--parallel <ctest --parallel>` on the command line. If the value
+    is ``0``, it is equivalent to unbounded parallelism.
 
   ``resourceSpecFile``
     An optional string. Equivalent to passing
