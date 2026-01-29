@@ -493,6 +493,8 @@ that may contain the following fields:
 ``description``
   An optional string with a human-friendly description of the preset.
 
+.. _`CMakePresets build environment`:
+
 ``environment``
   An optional map of environment variables. The key is the variable name
   (which may not be an empty string), and the value is either ``null`` or
@@ -544,6 +546,10 @@ that may contain the following fields:
 ``jobs``
   An optional integer. Equivalent to passing
   :option:`--parallel <cmake--build --parallel>` or ``-j`` on the command line.
+  If the value is ``0``, it is equivalent to passing ``--parallel`` with
+  ``<jobs>`` omitted; alternatively, one can define the environment variable
+  :envvar:`CMAKE_BUILD_PARALLEL_LEVEL` as an empty string using the
+  ``environment`` field.
 
 ``targets``
   An optional string or array of strings. Equivalent to passing
