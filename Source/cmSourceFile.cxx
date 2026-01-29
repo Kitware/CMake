@@ -287,9 +287,9 @@ void cmSourceFile::CheckLanguage(cm::string_view ext)
   // Try to identify the source file language from the extension.
   cmMakefile const* mf = this->Location.GetMakefile();
   cmGlobalGenerator* gg = mf->GetGlobalGenerator();
-  std::string l = gg->GetLanguageFromExtension(ext);
+  cm::string_view l = gg->GetLanguageFromExtension(ext);
   if (!l.empty()) {
-    this->Language = std::move(l);
+    this->Language = std::string(l);
   }
 }
 

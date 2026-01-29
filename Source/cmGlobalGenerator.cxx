@@ -1100,7 +1100,7 @@ std::string cmGlobalGenerator::GetLanguageOutputExtension(
   return "";
 }
 
-std::string cmGlobalGenerator::GetLanguageFromExtension(
+cm::string_view cmGlobalGenerator::GetLanguageFromExtension(
   cm::string_view ext) const
 {
   // if there is an extension and it starts with . then move past the

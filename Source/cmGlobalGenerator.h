@@ -360,7 +360,7 @@ public:
   bool GetToolSupportsColor() const { return this->ToolSupportsColor; }
 
   //! return the language for the given extension
-  std::string GetLanguageFromExtension(cm::string_view ext) const;
+  cm::string_view GetLanguageFromExtension(cm::string_view ext) const;
   //! is an extension to be ignored
   bool IgnoreFile(cm::string_view ext) const;
   //! What is the preference for linkers and this language (None or Preferred)
