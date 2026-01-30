@@ -1,5 +1,5 @@
 {
-    "version": 6,
+    "version": 11,
     "configurePresets": [
         {
             "name": "default",
@@ -158,6 +158,13 @@
                 "include": {
                     "index": "${sourceDir}/Good-indexFile.txt"
                 }
+            }
+        },
+        {
+            "name": "jobsProc",
+            "inherits": "minimal",
+            "execution": {
+                "jobs": ""
             }
         },
         {

@@ -40,7 +40,7 @@ using cmCMakePresetsGraphInternal::BaseMacroExpander;
 using cmCMakePresetsGraphInternal::ExpandMacros;
 
 constexpr int MIN_VERSION = 1;
-constexpr int MAX_VERSION = 10;
+constexpr int MAX_VERSION = 11;
 
 struct CMakeVersion
 {
@@ -384,6 +384,21 @@ bool PresetOptionalIntHelper(cm::optional<int>& out, Json::Value const* value,
   return helper(out, value, state);
 }
 
+bool PresetUIntHelper(unsigned int& out, Json::Value const* value,
+                      cmJSONState* state)
+{
+  static auto const helper = JSONHelperBuilder::UInt();
+  return helper(out, value, state);
+}
+
+bool PresetOptionalUIntHelper(cm::optional<unsigned int>& out,
+                              Json::Value const* value, cmJSONState* state)
+{
+  static auto const helper =
+    JSONHelperBuilder::Optional<unsigned int>(PresetUIntHelper);
+  return helper(out, value, state);
+}
+
 bool PresetVectorIntHelper(std::vector<int>& out, Json::Value const* value,
                            cmJSONState* state)
 {
@@ -675,6 +690,13 @@ bool cmCMakePresetsGraph::ReadJSONFile(std::string const& filename,
     // Support for outputJUnitFile added in version 6.
     if (v < 6 && preset.Output && !preset.Output->OutputJUnitFile.empty()) {
       cmCMakePresetsErrors::CTEST_JUNIT_UNSUPPORTED(&this->parseState);
+      return false;
+    }
+
+    // Support for processor-count-based jobs added in version 11.
+    if (v < 11 && preset.Execution && preset.Execution->Jobs.has_value() &&
+        !preset.Execution->Jobs->has_value()) {
+      cmCMakePresetsErrors::JOBS_PROC_UNSUPPORTED(&this->parseState);
       return false;
     }
 

@@ -218,6 +218,12 @@ bool PresetIntHelper(int& out, Json::Value const* value, cmJSONState* state);
 bool PresetOptionalIntHelper(cm::optional<int>& out, Json::Value const* value,
                              cmJSONState* state);
 
+bool PresetUIntHelper(unsigned int& out, Json::Value const* value,
+                      cmJSONState* state);
+
+bool PresetOptionalUIntHelper(cm::optional<unsigned int>& out,
+                              Json::Value const* value, cmJSONState* state);
+
 bool PresetVectorIntHelper(std::vector<int>& out, Json::Value const* value,
                            cmJSONState* state);
 

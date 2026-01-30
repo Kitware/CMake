@@ -161,6 +161,25 @@
         "include": { "$ref": "#/definitions/include" }
       },
       "additionalProperties": false
+    },
+    {
+      "properties": {
+        "$schema": { "$ref": "#/definitions/$schema" },
+        "$comment": { "$ref": "#/definitions/$comment" },
+        "version": {
+          "const": 11,
+          "description": "A required integer representing the version of the JSON schema."
+        },
+        "cmakeMinimumRequired": { "$ref": "#/definitions/cmakeMinimumRequiredV10" },
+        "vendor": { "$ref": "#/definitions/vendor" },
+        "configurePresets": { "$ref": "#/definitions/configurePresetsV10" },
+        "buildPresets": { "$ref": "#/definitions/buildPresetsV11" },
+        "testPresets": { "$ref": "#/definitions/testPresetsV11" },
+        "packagePresets": { "$ref": "#/definitions/packagePresetsV10" },
+        "workflowPresets": { "$ref": "#/definitions/workflowPresetsV10" },
+        "include": { "$ref": "#/definitions/include" }
+      },
+      "additionalProperties": false
     }
   ],
   "required": [
@@ -793,6 +812,15 @@
         "unevaluatedProperties": false
       }
     },
+    "buildPresetsJobsV11": {
+      "type": "integer",
+      "description": "An optional integer. Equivalent to passing --parallel or -j on the command line.",
+      "minimum": 0
+    },
+    "buildPresetsJobsV2": {
+      "type": "integer",
+      "description": "An optional integer. Equivalent to passing --parallel or -j on the command line."
+    },
     "buildPresetsItemsV4": {
       "properties": {
         "resolvePackageReferences": {
@@ -841,10 +869,6 @@
               "type": "boolean",
               "description": "An optional boolean that defaults to true. If true, the environment variables from the associated configure preset are inherited after all inherited build preset environments, but before environment variables explicitly specified in this build preset."
             },
-            "jobs": {
-              "type": "integer",
-              "description": "An optional integer. Equivalent to passing --parallel or -j on the command line."
-            },
             "targets": {
               "anyOf": [
                 {
@@ -888,14 +912,42 @@
         "name"
       ]
     },
+    "buildPresetsAdditionalPropertiesV11": {
+      "properties": {
+        "condition": { "$ref": "#/definitions/topConditionV10" },
+        "jobs": { "$ref": "#/definitions/buildPresetsJobsV11" }
+      }
+    },
     "buildPresetsAdditionalPropertiesV10": {
       "properties": {
-        "condition": { "$ref": "#/definitions/topConditionV10" }
+        "condition": { "$ref": "#/definitions/topConditionV10" },
+        "jobs": { "$ref": "#/definitions/buildPresetsJobsV2" }
       }
     },
     "buildPresetsAdditionalPropertiesV3": {
       "properties": {
-        "condition": { "$ref": "#/definitions/topConditionV3" }
+        "condition": { "$ref": "#/definitions/topConditionV3" },
+        "jobs": { "$ref": "#/definitions/buildPresetsJobsV2" }
+      }
+    },
+    "buildPresetsAdditionalPropertiesV2": {
+      "properties": {
+        "jobs": { "$ref": "#/definitions/buildPresetsJobsV2" }
+      }
+    },
+    "buildPresetsV11": {
+      "type": "array",
+      "description": "An optional array of build preset objects. Used to specify arguments to cmake --build. Available in version 10 and higher.",
+      "items": {
+        "type": "object",
+        "description": "A build preset object.",
+        "allOf": [
+          { "$ref": "#/definitions/buildPresetsItemsV4" },
+          { "$ref": "#/definitions/buildPresetsItemsV2" },
+          { "$ref": "#/definitions/buildPresetsAdditionalPropertiesV11" },
+          { "$ref": "#/definitions/commentAsProperty" }
+        ],
+        "unevaluatedProperties": false
       }
     },
     "buildPresetsV10": {
@@ -947,10 +999,30 @@
         "type": "object",
         "description": "A build preset object.",
         "allOf": [
-          { "$ref": "#/definitions/buildPresetsItemsV2" }
+          { "$ref": "#/definitions/buildPresetsItemsV2" },
+          { "$ref": "#/definitions/buildPresetsAdditionalPropertiesV2" }
         ],
         "unevaluatedProperties": false
       }
+    },
+    "testPresetsExecutionJobsV11": {
+      "oneOf": [
+        {
+          "type": "integer",
+          "description": "An optional integer. Equivalent to passing --parallel on the command line.",
+          "minimum": 0
+        },
+        {
+          "type": "string",
+          "description": "An optional string. Equivalent to passing --parallel on the command line with the number of jobs omitted.",
+          "minLength": 0,
+          "maxLength": 0
+        }
+      ]
+    },
+    "testPresetsExecutionJobsV2": {
+      "type": "integer",
+      "description": "An optional integer. Equivalent to passing --parallel on the command line."
     },
     "testPresetsExecutionRepeatV10": {
       "type": "object",
@@ -1152,6 +1224,21 @@
         }
       }
     },
+    "testPresetsExecutionV11": {
+      "type": "object",
+      "description": "An optional object specifying options for test execution.",
+      "allOf": [
+        { "$ref": "#/definitions/testPresetsExecutionObject" },
+        { "$ref": "#/definitions/commentAsProperty" },
+        {
+          "properties": {
+            "repeat": { "$ref": "#/definitions/testPresetsExecutionRepeatV10" },
+            "jobs": { "$ref": "#/definitions/testPresetsExecutionJobsV11" }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
     "testPresetsExecutionV10": {
       "type": "object",
       "description": "An optional object specifying options for test execution.",
@@ -1160,7 +1247,8 @@
         { "$ref": "#/definitions/commentAsProperty" },
         {
           "properties": {
-            "repeat": { "$ref": "#/definitions/testPresetsExecutionRepeatV10" }
+            "repeat": { "$ref": "#/definitions/testPresetsExecutionRepeatV10" },
+            "jobs": { "$ref": "#/definitions/testPresetsExecutionJobsV2" }
           }
         }
       ],
@@ -1173,7 +1261,8 @@
         { "$ref": "#/definitions/testPresetsExecutionObject" },
         {
           "properties": {
-            "repeat": { "$ref": "#/definitions/testPresetsExecutionRepeatV2" }
+            "repeat": { "$ref": "#/definitions/testPresetsExecutionRepeatV2" },
+            "jobs": { "$ref": "#/definitions/testPresetsExecutionJobsV2" }
           }
         }
       ],
@@ -1188,10 +1277,6 @@
         "enableFailover": {
           "type": "boolean",
           "description": "An optional boolean. If true, equivalent to passing -F on the command line."
-        },
-        "jobs": {
-          "type": "integer",
-          "description": "An optional integer. Equivalent to passing --parallel on the command line."
         },
         "resourceSpecFile": {
           "type": "string",
@@ -1341,6 +1426,22 @@
         }
       }
     },
+    "testPresetsAdditionalPropertiesV11": {
+      "properties": {
+        "execution": { "$ref": "#/definitions/testPresetsExecutionV11" },
+        "filter": {
+          "type": "object",
+          "description": "An optional object specifying how to filter the tests to run.",
+          "properties": {
+            "include": { "$ref": "#/definitions/testPresetsFilterIncludeV10" },
+            "exclude": { "$ref": "#/definitions/testPresetsFilterExcludeV10" },
+            "$comment": { "$ref": "#/definitions/$comment" }
+          }
+        },
+        "output": { "$ref": "#/definitions/testPresetsOutputV6" },
+        "condition": { "$ref": "#/definitions/topConditionV10" }
+      }
+    },
     "testPresetsAdditionalPropertiesV10": {
       "properties": {
         "execution": { "$ref": "#/definitions/testPresetsExecutionV10" },
@@ -1466,6 +1567,20 @@
       "required": [
         "name"
       ]
+    },
+    "testPresetsV11": {
+      "type": "array",
+      "description": "An optional array of test preset objects. Used to specify arguments to ctest. Available in version 11 and higher.",
+      "items": {
+        "type": "object",
+        "description": "A test preset object",
+        "allOf": [
+          { "$ref": "#/definitions/testPresetsItemsV2" },
+          { "$ref": "#/definitions/testPresetsAdditionalPropertiesV11" },
+          { "$ref": "#/definitions/commentAsProperty" }
+        ],
+        "unevaluatedProperties": false
+      }
     },
     "testPresetsV10": {
       "type": "array",

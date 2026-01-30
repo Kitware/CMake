@@ -167,7 +167,7 @@ public:
 
     std::string ConfigurePreset;
     cm::optional<bool> InheritConfigureEnvironment;
-    cm::optional<int> Jobs;
+    cm::optional<unsigned int> Jobs;
     std::vector<std::string> Targets;
     std::string Configuration;
     cm::optional<bool> CleanFirst;
@@ -289,7 +289,7 @@ public:
 
       cm::optional<bool> StopOnFailure;
       cm::optional<bool> EnableFailover;
-      cm::optional<int> Jobs;
+      cm::optional<cm::optional<unsigned int>> Jobs;
       std::string ResourceSpecFile;
       cm::optional<int> TestLoad;
       cm::optional<ShowOnlyEnum> ShowOnly;

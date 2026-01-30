@@ -1710,8 +1710,12 @@ bool cmCTest::SetArgsFromPreset(std::string const& presetName,
       expandedPreset->Execution->EnableFailover.value_or(false);
 
     if (expandedPreset->Execution->Jobs) {
-      auto jobs = *expandedPreset->Execution->Jobs;
-      this->SetParallelLevel(jobs);
+      cm::optional<unsigned int> jobs = *expandedPreset->Execution->Jobs;
+      if (jobs.has_value()) {
+        this->SetParallelLevel(static_cast<size_t>(jobs.value()));
+      } else {
+        this->SetParallelLevel(cm::nullopt);
+      }
       this->Impl->ParallelLevelSetInCli = true;
     }
 

@@ -1,0 +1,19 @@
+{
+    "version": 11,
+    "configurePresets": [
+        {
+            "name": "default",
+            "generator": "@RunCMake_GENERATOR@",
+            "binaryDir": "${sourceDir}/build/${presetName}"
+        }
+    ],
+    "testPresets": [
+        {
+            "name": "x",
+            "configurePreset": "default",
+            "execution": {
+                "jobs": -10
+            }
+        }
+    ]
+}

@@ -301,6 +301,32 @@ auto const TestPresetOptionalExecutionNoTestsActionHelper =
   JSONHelperBuilder::Optional<TestPreset::ExecutionOptions::NoTestsActionEnum>(
     TestPresetExecutionNoTestsActionHelper);
 
+bool TestPresetExecutionJobsHelper(cm::optional<unsigned int>& out,
+                                   Json::Value const* value,
+                                   cmJSONState* state)
+{
+  if (value->isString()) {
+    if (!value->asString().empty()) {
+      cmCMakePresetsErrors::INVALID_PRESET(value, state);
+      return false;
+    }
+    out.reset();
+    return true;
+  }
+
+  if (value->isUInt()) {
+    out.emplace(value->asUInt());
+    return true;
+  }
+
+  cmCMakePresetsErrors::INVALID_PRESET(value, state);
+  return false;
+}
+
+auto const TestPresetOptionalExecutionJobsHelper =
+  JSONHelperBuilder::Optional<cm::optional<unsigned int>>(
+    TestPresetExecutionJobsHelper);
+
 auto const TestPresetExecutionHelper =
   JSONHelperBuilder::Optional<TestPreset::ExecutionOptions>(
     JSONHelperBuilder::Object<TestPreset::ExecutionOptions>()
@@ -309,7 +335,7 @@ auto const TestPresetExecutionHelper =
       .Bind("enableFailover"_s, &TestPreset::ExecutionOptions::EnableFailover,
             cmCMakePresetsGraphInternal::PresetOptionalBoolHelper, false)
       .Bind("jobs"_s, &TestPreset::ExecutionOptions::Jobs,
-            cmCMakePresetsGraphInternal::PresetOptionalIntHelper, false)
+            TestPresetOptionalExecutionJobsHelper, false)
       .Bind("resourceSpecFile"_s,
             &TestPreset::ExecutionOptions::ResourceSpecFile,
             cmCMakePresetsGraphInternal::PresetStringHelper, false)

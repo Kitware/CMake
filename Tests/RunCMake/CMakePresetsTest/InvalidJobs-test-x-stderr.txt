@@ -1,0 +1,5 @@
+^CMake Error: Could not read presets from [^
+]*/Tests/RunCMake/CMakePresetsTest/InvalidJobs:
+CMakePresets\.json:15: Invalid preset
+                "jobs": -10
+                        \^$

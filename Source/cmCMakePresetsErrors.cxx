@@ -183,6 +183,12 @@ void GRAPHVIZ_FILE_UNSUPPORTED(cmJSONState* state)
     "File version must be 10 or higher for graphviz preset support");
 }
 
+void JOBS_PROC_UNSUPPORTED(cmJSONState* state)
+{
+  state->AddError("File version must be 11 or higher for "
+                  "processor-count-based jobs preset support");
+}
+
 void CYCLIC_INCLUDE(std::string const& file, cmJSONState* state)
 {
   state->AddError(cmStrCat("Cyclic include among preset files: ", file));
