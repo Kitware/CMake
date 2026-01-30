@@ -2,6 +2,7 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmELF.h"
 
+#include <algorithm>
 #include <cstddef>
 #include <cstdint>
 #include <map>
@@ -103,7 +104,7 @@ public:
   virtual ~cmELFInternal() = default;
 
   // Forward to the per-class implementation.
-  virtual unsigned int GetNumberOfSections() const = 0;
+  virtual std::size_t GetNumberOfSections() const = 0;
   virtual unsigned long GetDynamicEntryPosition(int j) = 0;
   virtual cmELF::DynamicEntryList GetDynamicEntries() = 0;
   virtual std::vector<char> EncodeDynamicEntries(
@@ -213,7 +214,7 @@ public:
                     ByteOrderType order);
 
   // Return the number of sections as specified by the ELF header.
-  unsigned int GetNumberOfSections() const override
+  std::size_t GetNumberOfSections() const override
   {
     return static_cast<unsigned int>(this->ELFHeader.e_shnum +
                                      this->SectionHeaders[0].sh_size);
@@ -371,12 +372,13 @@ private:
     return !this->Stream->fail();
   }
 
-  bool LoadSectionHeader(unsigned int i)
+  bool LoadSectionHeader(std::size_t i)
   {
     // Read the section header from the file.
     this->Stream->seekg(this->ELFHeader.e_shoff +
                         this->ELFHeader.e_shentsize * i);
     if (!this->Read(this->SectionHeaders[i])) {
+      this->SetErrorMessage("Failed to load section headers.");
       return false;
     }
 
@@ -448,13 +450,16 @@ cmELFInternalImpl<Types>::cmELFInternalImpl(cmELF* external,
   this->Machine = this->ELFHeader.e_machine;
 
   // Load the section headers.
-  this->SectionHeaders.resize(
-    this->ELFHeader.e_shnum == 0 ? 1 : this->ELFHeader.e_shnum);
-  this->LoadSectionHeader(0);
-  this->SectionHeaders.resize(this->GetNumberOfSections());
-  for (unsigned int i = 1; i < this->GetNumberOfSections(); ++i) {
+  std::size_t const minSections = 1;
+  std::size_t numSections = this->ELFHeader.e_shnum;
+  this->SectionHeaders.resize(std::max(numSections, minSections));
+  if (!this->LoadSectionHeader(0)) {
+    return;
+  }
+  numSections = this->GetNumberOfSections();
+  this->SectionHeaders.resize(std::max(numSections, minSections));
+  for (std::size_t i = 1; i < numSections; ++i) {
     if (!this->LoadSectionHeader(i)) {
-      this->SetErrorMessage("Failed to load section headers.");
       return;
     }
   }
@@ -740,7 +745,7 @@ std::uint16_t cmELF::GetMachine() const
   return 0;
 }
 
-unsigned int cmELF::GetNumberOfSections() const
+std::size_t cmELF::GetNumberOfSections() const
 {
   if (this->Valid()) {
     return this->Internal->GetNumberOfSections();
