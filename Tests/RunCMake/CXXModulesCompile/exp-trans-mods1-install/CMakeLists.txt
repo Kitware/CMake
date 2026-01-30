@@ -22,6 +22,10 @@ install(EXPORT CXXModules
   DESTINATION "lib/cmake/export_transitive_modules1"
   FILE "export_transitive_modules1-targets.cmake"
   CXX_MODULES_DIRECTORY "export_transitive_modules1-cxx-modules")
+install(PACKAGE_INFO "export_transitive_modules1_cps"
+  EXPORT CXXModules
+  DESTINATION "lib/cmake/export_transitive_modules1_cps"
+  CXX_MODULES_DIRECTORY "export_transitive_modules1-cxx-modules-cps")
 file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/export_transitive_modules1-config.cmake"
   "include(\"\${CMAKE_CURRENT_LIST_DIR}/export_transitive_modules1-targets.cmake\")
 set(\${CMAKE_FIND_PACKAGE_NAME}_FOUND 1)
@@ -46,6 +50,8 @@ add_test(NAME export_transitive_modules1_build
     "-Dexpected_source_dir=${CMAKE_INSTALL_PREFIX}/lib/cxx/miu"
     "-Dexpected_binary_dir=${CMAKE_INSTALL_PREFIX}/lib/cxx/bmi"
     "-Dexport_transitive_modules1_DIR=${CMAKE_INSTALL_PREFIX}/lib/cmake/export_transitive_modules1"
+    "-Dexport_transitive_modules1_cps_DIR=${CMAKE_INSTALL_PREFIX}/lib/cmake/export_transitive_modules1_cps"
+    "-DCMAKE_EXPERIMENTAL_FIND_CPS_PACKAGES=e82e467b-f997-4464-8ace-b00808fff261"
     ${generator}
     -S "${CMAKE_CURRENT_SOURCE_DIR}/test"
     -B "${CMAKE_CURRENT_BINARY_DIR}/test")

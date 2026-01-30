@@ -46,5 +46,4 @@ protected:
                                          std::string const& config);
 
   std::string GetCxxModulesDirectory() const override;
-  // TODO: Generate C++ module info in a not-CMake-specific format.
 };

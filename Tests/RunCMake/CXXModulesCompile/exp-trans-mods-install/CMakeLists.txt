@@ -4,6 +4,7 @@ project(cxx_modules_export_transitive_modules CXX)
 include("${CMAKE_SOURCE_DIR}/../cxx-modules-rules.cmake")
 
 find_package(export_transitive_modules1 REQUIRED)
+find_package(export_transitive_modules1_cps REQUIRED)
 
 add_library(export_transitive_modules STATIC)
 target_sources(export_transitive_modules
@@ -17,14 +18,34 @@ target_sources(export_transitive_modules
 target_compile_features(export_transitive_modules PUBLIC cxx_std_20)
 target_link_libraries(export_transitive_modules PRIVATE CXXModules::export_transitive_modules1)
 
+add_library(export_transitive_modules_cps STATIC)
+target_sources(export_transitive_modules_cps
+  PUBLIC
+    FILE_SET modules TYPE CXX_MODULES
+      BASE_DIRS
+        "${CMAKE_CURRENT_SOURCE_DIR}"
+      FILES
+        importable.cxx
+  )
+target_compile_features(export_transitive_modules_cps PUBLIC cxx_std_20)
+target_link_libraries(export_transitive_modules_cps PRIVATE export_transitive_modules1_cps::export_transitive_modules1)
+set_target_properties(export_transitive_modules_cps PROPERTIES EXPORT_NAME export_transitive_modules)
+
 install(TARGETS export_transitive_modules
   EXPORT CXXModules
+  FILE_SET modules DESTINATION "lib/cxx/miu")
+install(TARGETS export_transitive_modules_cps
+  EXPORT CXXModules_cps
   FILE_SET modules DESTINATION "lib/cxx/miu")
 install(EXPORT CXXModules
   NAMESPACE CXXModules::
   DESTINATION "lib/cmake/export_transitive_modules"
   FILE "export_transitive_modules-targets.cmake"
   CXX_MODULES_DIRECTORY "export_transitive_modules-cxx-modules")
+install(PACKAGE_INFO "export_transitive_modules_cps"
+  EXPORT CXXModules_cps
+  DESTINATION "lib/cmake/export_transitive_modules_cps"
+  CXX_MODULES_DIRECTORY "export_transitive_modules-cxx-modules-cps")
 file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/export_transitive_modules-config.cmake"
   "include(CMakeFindDependencyMacro)
 set(export_transitive_modules1_DIR \"${export_transitive_modules1_DIR}\")
@@ -52,6 +73,9 @@ add_test(NAME export_transitive_modules_build
     "-Dexpected_source_dir=${CMAKE_INSTALL_PREFIX}/lib/cxx/miu"
     "-Dexpected_binary_dir=${CMAKE_INSTALL_PREFIX}/lib/cxx/bmi"
     "-Dexport_transitive_modules_DIR=${CMAKE_INSTALL_PREFIX}/lib/cmake/export_transitive_modules"
+    "-Dexport_transitive_modules1_cps_DIR=${CMAKE_PREFIX_PATH}/lib/cmake/export_transitive_modules1_cps"
+    "-Dexport_transitive_modules_cps_DIR=${CMAKE_INSTALL_PREFIX}/lib/cmake/export_transitive_modules_cps"
+    "-DCMAKE_EXPERIMENTAL_FIND_CPS_PACKAGES=e82e467b-f997-4464-8ace-b00808fff261"
     ${generator}
     -S "${CMAKE_CURRENT_SOURCE_DIR}/test"
     -B "${CMAKE_CURRENT_BINARY_DIR}/test")

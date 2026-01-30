@@ -18,6 +18,7 @@
 #include "cmsys/FStream.hxx"
 #include "cmsys/RegularExpression.hxx"
 
+#include "cmCxxModuleMetadata.h"
 #include "cmExecutionStatus.h"
 #include "cmList.h"
 #include "cmListFileCache.h"
@@ -780,11 +781,42 @@ void cmPackageInfoReader::SetTargetProperties(
     AppendProperty(makefile, target, "LINK_LIBRARIES"_s, configuration, lib);
   }
 
+  // TODO: Handle non-configuration modules
+  // once IMPORTED_CXX_MODULES supports it
+  if (!configuration.empty()) {
+    this->ReadCxxModulesMetadata(makefile, target, configuration, data);
+  }
+
   // Add other information.
   if (configuration.empty()) {
     this->SetMetaProperty(makefile, target, "SPDX_LICENSE", data, "license",
                           this->DefaultLicense);
   }
+}
+
+void cmPackageInfoReader::ReadCxxModulesMetadata(
+  cmMakefile* makefile, cmTarget* target, cm::string_view configuration,
+  Json::Value const& object) const
+{
+#ifndef CMAKE_BOOTSTRAP
+  Json::Value const& path = object["cpp_module_metadata"];
+
+  if (!path.isString()) {
+    return;
+  }
+
+  cmCxxModuleMetadata::ParseResult result =
+    cmCxxModuleMetadata::LoadFromFile(this->ResolvePath(path.asString()));
+
+  if (!result) {
+    makefile->IssueMessage(
+      MessageType::WARNING,
+      cmStrCat("Error parsing module manifest:\n"_s, result.Error));
+    return;
+  }
+
+  cmCxxModuleMetadata::PopulateTarget(*target, *result.Meta, configuration);
+#endif
 }
 
 cmTarget* cmPackageInfoReader::AddLibraryComponent(
