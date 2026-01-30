@@ -506,7 +506,9 @@ generated whenever `Indexing`_ occurs and deleted after any user-specified
 
 ``staticSystemInformation``
   Specifies the static information collected about the host machine
-  CMake is being run from. Only included when enabled by the `v1 Query Files`_.
+  CMake is being run from. If CMake is unable to determine the value of any
+  given field, it will be ``null``. Only included when enabled by the
+  `v1 Query Files`_.
 
   * ``OSName``
   * ``OSPlatform``

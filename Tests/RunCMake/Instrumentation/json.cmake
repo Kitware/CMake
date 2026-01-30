@@ -43,6 +43,7 @@ function(json_missing_key file json key)
 endfunction()
 
 # Check if the JSON string `json` has `key` and its value matches `expected`.
+# If successful, return its value in `key`.
 function(json_assert_key file json key expected)
   string(JSON data ERROR_VARIABLE missingKey GET "${json}" ${key})
   if (NOT missingKey MATCHES NOTFOUND)
@@ -54,6 +55,7 @@ function(json_assert_key file json key expected)
       "Unexpected data in custom content file:\nGot ${data}, Expected ${expected}."
     )
   endif()
+  set(${key} ${data} PARENT_SCOPE)
   return(PROPAGATE RunCMake_TEST_FAILED ERROR_MESSAGE)
 endfunction()
 

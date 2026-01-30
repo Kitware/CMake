@@ -465,6 +465,11 @@ void cmInstrumentation::InsertStaticSystemInformation(Json::Value& root)
     info.RunOSCheck();
     this->ranOSCheck = true;
   }
+  if (!this->ranSystemChecks) {
+    info.RunCPUCheck();
+    info.RunMemoryCheck();
+    this->ranSystemChecks = true;
+  }
   Json::Value infoRoot;
   infoRoot["familyId"] = info.GetFamilyID();
   infoRoot["hostname"] = info.GetHostname();
@@ -487,6 +492,14 @@ void cmInstrumentation::InsertStaticSystemInformation(Json::Value& root)
     static_cast<Json::Value::UInt64>(info.GetTotalVirtualMemory());
   infoRoot["vendorID"] = info.GetVendorID();
   infoRoot["vendorString"] = info.GetVendorString();
+
+  // Record fields unable to be determined as null JSON objects.
+  for (std::string const& field : infoRoot.getMemberNames()) {
+    if ((infoRoot[field].isNumeric() && infoRoot[field].asInt64() <= 0) ||
+        (infoRoot[field].isString() && infoRoot[field].asString().empty())) {
+      infoRoot[field] = Json::nullValue;
+    }
+  }
   root["staticSystemInformation"] = infoRoot;
 }
 

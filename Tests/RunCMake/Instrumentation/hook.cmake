@@ -108,6 +108,53 @@ if (NOT hasStaticInfo STREQUAL UNEXPECTED)
   json_has_key("${index}" "${staticSystemInformation}" totalVirtualMemory ${hasStaticInfo})
   json_has_key("${index}" "${staticSystemInformation}" vendorID ${hasStaticInfo})
   json_has_key("${index}" "${staticSystemInformation}" vendorString ${hasStaticInfo})
+
+  # FIXME(#27545): We currently do not guarantee that the fields above which
+  # output strings are non-empty. `vendorString` and `processorName` especially
+  # have shown issues on some platforms. This test is logically equivalent to
+  # RunCMake.cmake_host_system_information, which uses the same underlying
+  # implementation.
+  set(string_fields
+    OSName
+    OSPlatform
+    OSRelease
+    OSVersion
+    familyId
+    hostname
+    modelId
+    vendorID
+    vendorString
+  )
+  foreach (field IN LISTS string_fields)
+    string(JSON ${field}_type TYPE "${staticSystemInformation}" ${field})
+    if (NOT "${${field}_type}" STREQUAL "NULL" AND NOT "${${field}_type}" STREQUAL "STRING")
+      add_error("Got bad type '${${field}_type}' for field '${field}': ${${field}}")
+    endif()
+    if ("${${field}_type}" STREQUAL "STRING" AND ${field} STREQUAL "")
+      add_error("Got empty string for field '${field}'")
+    endif()
+  endforeach()
+
+  # We guarantee that the numeric fields are either indeed numeric, or else
+  # null.
+  set(numeric_fields
+    numberOfLogicalCPU
+    numberOfPhysicalCPU
+    processorAPICID
+    processorCacheSize
+    processorClockFrequency
+    totalPhysicalMemory
+    totalVirtualMemory
+  )
+  foreach (field IN LISTS numeric_fields)
+    string(JSON ${field}_type TYPE "${staticSystemInformation}" ${field})
+    if (NOT "${${field}_type}" STREQUAL "NULL" AND NOT "${${field}_type}" STREQUAL "NUMBER")
+      add_error("Got bad type '${${field}_type}' for field '${field}': ${${field}}")
+    endif()
+    if ("${${field}_type}" STREQUAL "NUMBER" AND ${field} LESS_EQUAL 0)
+      add_error("Got bad value for field '${field}': ${${field}}")
+    endif()
+  endforeach()
 endif()
 
 get_filename_component(v1 ${dataDir} DIRECTORY)
