@@ -35,11 +35,6 @@ public:
 private:
   // -- Utility
   bool IsMultiConfig() const { return this->MultiConfig_; }
-  std::string const& GetGenerator() const { return this->Generator_; }
-  bool IsXcode() const
-  {
-    return this->GetGenerator().find("Xcode") != std::string::npos;
-  }
   std::string MultiConfigOutput() const;
 
   // -- Abstract processing interface
@@ -114,6 +109,13 @@ bool cmQtAutoRccT::InitFromInfo(InfoT const& info)
       !info.GetArray("OPTIONS", this->Options_, false)) {
     return false;
   }
+
+  // Expand $<CONFIG> in RccFileName if present (for better graph multi-config)
+  if (this->IsMultiConfig()) {
+    cmSystemTools::ReplaceString(this->RccFileName_, "$<CONFIG>",
+                                 this->InfoConfig());
+  }
+
   if (this->UseBetterGraph_) {
     if (!info.GetArrayConfig("INPUTS", this->Inputs_, false)) {
       return false;
@@ -142,15 +144,10 @@ bool cmQtAutoRccT::InitFromInfo(InfoT const& info)
   // -- Derive information
   this->QrcFileName_ = cmSystemTools::GetFilenameName(this->QrcFile_);
   this->QrcFileDir_ = cmSystemTools::GetFilenamePath(this->QrcFile_);
-  if (IsMultiConfig() && !this->IsXcode() && this->UseBetterGraph_) {
-    this->RccFilePublic_ =
-      cmStrCat(this->AutogenBuildDir_, '/', this->RccPathChecksum_, '_',
-               this->InfoConfig(), '/', this->RccFileName_);
-  } else {
-    this->RccFilePublic_ =
-      cmStrCat(this->AutogenBuildDir_, '/', this->RccPathChecksum_, '/',
-               this->RccFileName_);
-  }
+  // For better graph multi-config, OUTPUT_NAME already includes config suffix
+  this->RccFilePublic_ =
+    cmStrCat(this->AutogenBuildDir_, '/', this->RccPathChecksum_, '/',
+             this->RccFileName_);
 
   // rcc output file name
   if (this->IsMultiConfig()) {
