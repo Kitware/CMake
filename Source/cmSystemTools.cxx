@@ -4402,11 +4402,10 @@ cm::string_view cmSystemTools::GetFilenameNameView(cm::string_view filename)
   char separators = '/';
 #endif
   std::string::size_type slash_pos = filename.find_last_of(separators);
-  if (slash_pos != std::string::npos) {
-    return cm::string_view(filename).substr(slash_pos + 1);
-  } else {
-    return cm::string_view(filename);
+  if (slash_pos == std::string::npos) {
+    return filename;
   }
+  return filename.substr(slash_pos + 1);
 }
 
 cm::string_view cmSystemTools::GetFilenameLastExtensionView(
@@ -4414,9 +4413,8 @@ cm::string_view cmSystemTools::GetFilenameLastExtensionView(
 {
   cm::string_view name = cmSystemTools::GetFilenameNameView(filename);
   cm::string_view::size_type dot_pos = name.rfind('.');
-  if (dot_pos != std::string::npos) {
-    return name.substr(dot_pos);
-  } else {
+  if (dot_pos == std::string::npos) {
     return cm::string_view();
   }
+  return name.substr(dot_pos);
 }
