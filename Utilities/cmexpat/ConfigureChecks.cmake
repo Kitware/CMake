@@ -46,10 +46,11 @@ else(WORDS_BIGENDIAN)
 endif(WORDS_BIGENDIAN)
 
 check_c_source_compiles("
+        #define _GNU_SOURCE
         #include <stdlib.h>  /* for NULL */
         #include <unistd.h>  /* for syscall */
         #include <sys/syscall.h>  /* for SYS_getrandom */
-        int main() {
+        int main(void) {
             syscall(SYS_getrandom, NULL, 0, 0);
             return 0;
         }"
