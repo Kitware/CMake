@@ -13,6 +13,7 @@
 
 #include <cm/optional>
 #include <cm/string_view>
+#include <cm/type_traits>
 #include <cmext/string_view>
 
 #include "cmsys/FStream.hxx"
@@ -41,7 +42,9 @@ namespace {
 std::string const DELIM[2] = { {}, ";" };
 
 // BEGIN Private functions
-std::string ValueToString(std::size_t const value)
+template <typename T>
+cm::enable_if_t<std::is_arithmetic<T>::value, std::string> ValueToString(
+  T const& value)
 {
   return std::to_string(value);
 }
