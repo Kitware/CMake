@@ -55,9 +55,10 @@ all-lowercase names.
 Arguments
 ^^^^^^^^^
 
-When a macro is invoked, the commands recorded in the macro are
-first modified by replacing formal parameters (``${arg1}``, ...)
-with the arguments passed, and then invoked as normal commands.
+When a macro is invoked, first all commands recorded in the macro are
+modified by replacing formal parameters (``${arg1}``, ...)
+with the arguments passed. Then all modified commands are invoked as
+normal commands.
 
 In addition to referencing the formal parameters you can reference the
 values ``${ARGC}`` which will be set to the number of arguments passed
