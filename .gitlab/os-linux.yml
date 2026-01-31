@@ -909,7 +909,6 @@
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
         CMAKE_CI_JOB_NO_MR: "true"
-        CMAKE_CI_JOB_RUN_MANUALLY: "true"
 
 .cmake_test_linux_inteloneapi_makefiles:
     extends:
@@ -920,7 +919,6 @@
         - .needs_centos7_x86_64
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
-        CMAKE_CI_JOB_RUN_MANUALLY: "true"
 
 .cmake_build_sunos_release:
     stage: build
