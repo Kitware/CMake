@@ -379,16 +379,14 @@ extern char** environ; // NOLINT(readability-redundant-declaration)
 
 #if !defined(CMAKE_BOOTSTRAP)
 // Get path that was read from the archive.
-static std::string cm_archive_entry_pathname(struct archive_entry* entry)
+static char const* cm_archive_entry_pathname(struct archive_entry* entry)
 {
 #  ifdef _WIN32
-  return cmsys::Encoding::ToNarrow(archive_entry_pathname_w(entry));
+  // libarchive converts the archive's encoding to our UTF-8 encoding.
+  return archive_entry_pathname_utf8(entry);
 #  else
-  std::string pathname;
-  if (char const* p = archive_entry_pathname(entry)) {
-    pathname = p;
-  }
-  return pathname;
+  // libarchive converts the archive's encoding to our locale's encoding.
+  return archive_entry_pathname(entry);
 #  endif
 }
 
@@ -2562,7 +2560,7 @@ void list_item_verbose(FILE* out, struct archive_entry* entry)
   }
   strftime(tmp, sizeof(tmp), fmt, localtime(&tim));
   fprintf(out, " %s ", tmp);
-  fprintf(out, "%s", cm_archive_entry_pathname(entry).c_str());
+  fprintf(out, "%s", cm_archive_entry_pathname(entry));
 
   /* Extra information for links. */
   if (archive_entry_hardlink(entry)) /* Hard link */

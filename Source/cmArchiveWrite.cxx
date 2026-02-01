@@ -40,12 +40,14 @@ static std::string cm_archive_error_string(struct archive* a)
 
 // Set path to be written to the archive.
 static void cm_archive_entry_copy_pathname(struct archive_entry* e,
-                                           std::string const& dest)
+                                           char const* dest)
 {
 #ifdef _WIN32
-  archive_entry_copy_pathname_w(e, cmsys::Encoding::ToWide(dest).c_str());
+  // libarchive converts our UTF-8 encoding to the archive's encoding.
+  archive_entry_update_pathname_utf8(e, dest);
 #else
-  archive_entry_copy_pathname(e, dest.c_str());
+  // libarchive converts our locale's encoding to the archive's encoding.
+  archive_entry_copy_pathname(e, dest);
 #endif
 }
 
@@ -457,7 +459,7 @@ bool cmArchiveWrite::AddFile(char const* file, size_t skip, char const* prefix)
   }
   Entry e;
   cm_archive_entry_copy_sourcepath(e, file);
-  cm_archive_entry_copy_pathname(e, dest);
+  cm_archive_entry_copy_pathname(e, dest.c_str());
   if (archive_read_disk_entry_from_file(this->Disk, e, -1, nullptr) !=
       ARCHIVE_OK) {
     this->Error =
