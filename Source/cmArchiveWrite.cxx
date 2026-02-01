@@ -36,12 +36,14 @@ static std::string cm_archive_error_string(struct archive* a)
   return e ? e : "unknown error";
 }
 
+// Set path to be written to the archive.
 static void cm_archive_entry_copy_pathname(struct archive_entry* e,
                                            std::string const& dest)
 {
   archive_entry_copy_pathname_w(e, cmsys::Encoding::ToWide(dest).c_str());
 }
 
+// Set path used for filesystem access.
 static void cm_archive_entry_copy_sourcepath(struct archive_entry* e,
                                              std::string const& file)
 {

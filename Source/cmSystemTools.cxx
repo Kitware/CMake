@@ -376,13 +376,15 @@ extern char** environ; // NOLINT(readability-redundant-declaration)
 #endif
 
 #if !defined(CMAKE_BOOTSTRAP)
+// Get path that was read from the archive.
 static std::string cm_archive_entry_pathname(struct archive_entry* entry)
 {
   return cmsys::Encoding::ToNarrow(archive_entry_pathname_w(entry));
 }
 
-static int cm_archive_read_open_file(struct archive* a, char const* file,
-                                     int block_size)
+// Open archive file for reading.
+static int cm_archive_read_open_filename(struct archive* a, char const* file,
+                                         int block_size)
 {
   std::wstring wfile = cmsys::Encoding::ToWide(file);
   return archive_read_open_filename_w(a, wfile.c_str(), block_size);
@@ -2667,9 +2669,9 @@ bool extract_tar(std::string const& arFileName,
     }
   }
 
-  int r = cm_archive_read_open_file(a, arFileName.c_str(), 10240);
+  int r = cm_archive_read_open_filename(a, arFileName.c_str(), 10240);
   if (r) {
-    ArchiveError("Problem with archive_read_open_file(): ", a);
+    ArchiveError("Problem with archive_read_open_filename(): ", a);
     archive_write_free(ext);
     archive_read_close(a);
     return false;
