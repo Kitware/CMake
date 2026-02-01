@@ -559,16 +559,16 @@ public:
     No
   };
 
-  static bool ListTar(std::string const& outFileName,
+  static bool ListTar(std::string const& arFileName,
                       std::vector<std::string> const& files, bool verbose);
-  static bool CreateTar(std::string const& outFileName,
+  static bool CreateTar(std::string const& arFileName,
                         std::vector<std::string> const& files,
                         std::string const& workingDirectory,
                         cmTarCompression compressType, bool verbose,
                         std::string const& mtime = std::string(),
                         std::string const& format = std::string(),
                         int compressionLevel = 0, int numThreads = 1);
-  static bool ExtractTar(std::string const& inFileName,
+  static bool ExtractTar(std::string const& arFileName,
                          std::vector<std::string> const& files,
                          cmTarExtractTimestamps extractTimestamps,
                          bool verbose);

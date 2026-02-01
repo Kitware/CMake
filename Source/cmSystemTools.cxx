@@ -2368,7 +2368,7 @@ bool cmSystemTools::IsPathToMacOSSharedLibrary(std::string const& path)
           cmHasLiteralSuffix(path, ".dylib"));
 }
 
-bool cmSystemTools::CreateTar(std::string const& outFileName,
+bool cmSystemTools::CreateTar(std::string const& arFileName,
                               std::vector<std::string> const& files,
                               std::string const& workingDirectory,
                               cmTarCompression compressType, bool verbose,
@@ -2383,9 +2383,9 @@ bool cmSystemTools::CreateTar(std::string const& outFileName,
   }
 
   std::string const cwd = cmSystemTools::GetLogicalWorkingDirectory();
-  cmsys::ofstream fout(outFileName.c_str(), std::ios::out | std::ios::binary);
+  cmsys::ofstream fout(arFileName.c_str(), std::ios::out | std::ios::binary);
   if (!fout) {
-    std::string e = cmStrCat("Cannot open output file \"", outFileName,
+    std::string e = cmStrCat("Cannot open output file \"", arFileName,
                              "\": ", cmSystemTools::GetLastSystemError());
     cmSystemTools::Error(e);
     return false;
@@ -2447,7 +2447,7 @@ bool cmSystemTools::CreateTar(std::string const& outFileName,
   }
   return tarCreatedSuccessfully;
 #else
-  (void)outFileName;
+  (void)arFileName;
   (void)files;
   (void)verbose;
   return false;
@@ -2627,7 +2627,7 @@ bool copy_data(struct archive* ar, struct archive* aw)
 #  endif
 }
 
-bool extract_tar(std::string const& outFileName,
+bool extract_tar(std::string const& arFileName,
                  std::vector<std::string> const& files, bool verbose,
                  cmSystemTools::cmTarExtractTimestamps extractTimestamps,
                  bool extract)
@@ -2667,7 +2667,7 @@ bool extract_tar(std::string const& outFileName,
     }
   }
 
-  int r = cm_archive_read_open_file(a, outFileName.c_str(), 10240);
+  int r = cm_archive_read_open_file(a, arFileName.c_str(), 10240);
   if (r) {
     ArchiveError("Problem with archive_read_open_file(): ", a);
     archive_write_free(ext);
@@ -2755,15 +2755,15 @@ bool extract_tar(std::string const& outFileName,
 }
 #endif
 
-bool cmSystemTools::ExtractTar(std::string const& outFileName,
+bool cmSystemTools::ExtractTar(std::string const& arFileName,
                                std::vector<std::string> const& files,
                                cmTarExtractTimestamps extractTimestamps,
                                bool verbose)
 {
 #if !defined(CMAKE_BOOTSTRAP)
-  return extract_tar(outFileName, files, verbose, extractTimestamps, true);
+  return extract_tar(arFileName, files, verbose, extractTimestamps, true);
 #else
-  (void)outFileName;
+  (void)arFileName;
   (void)files;
   (void)extractTimestamps;
   (void)verbose;
@@ -2771,15 +2771,15 @@ bool cmSystemTools::ExtractTar(std::string const& outFileName,
 #endif
 }
 
-bool cmSystemTools::ListTar(std::string const& outFileName,
+bool cmSystemTools::ListTar(std::string const& arFileName,
                             std::vector<std::string> const& files,
                             bool verbose)
 {
 #if !defined(CMAKE_BOOTSTRAP)
-  return extract_tar(outFileName, files, verbose, cmTarExtractTimestamps::Yes,
+  return extract_tar(arFileName, files, verbose, cmTarExtractTimestamps::Yes,
                      false);
 #else
-  (void)outFileName;
+  (void)arFileName;
   (void)files;
   (void)verbose;
   return false;
