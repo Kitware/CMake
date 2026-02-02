@@ -404,9 +404,14 @@ for compiling a target.
   These are passed to the compiler with ``-D`` flags, or equivalent,
   in an unspecified order.
 
-  The :prop_tgt:`DEFINE_SYMBOL` target property is also used
-  as a compile definition as a special convenience case for
-  ``SHARED`` and ``MODULE`` library targets.
+  When compiling sources of a ``SHARED`` library, a ``MODULE`` library,
+  or an ``EXECUTABLE`` with :prop_tgt:`ENABLE_EXPORTS` enabled, CMake
+  automatically defines a target-specific preprocessor symbol.
+  By default the definition is of the form ``<target>_EXPORTS``, but it
+  can be overridden by the :prop_tgt:`DEFINE_SYMBOL` target property.
+  This allows headers to detect whether they are included from inside
+  their implementation sources, and to correctly set up export/import
+  annotations or visibility of symbols.
 
 :prop_tgt:`COMPILE_OPTIONS`
   List of compile options for compiling sources in the target.
