@@ -58,7 +58,6 @@
 #  include <cm3p/archive_entry.h>
 
 #  include "cmArchiveWrite.h"
-#  include "cmLocale.h"
 #  ifndef __LA_INT64_T
 #    define __LA_INT64_T la_int64_t
 #  endif
@@ -2624,8 +2623,6 @@ bool extract_tar(std::string const& arFileName,
                  cmSystemTools::cmTarExtractTimestamps extractTimestamps,
                  bool extract)
 {
-  cmLocaleRAII localeRAII;
-  static_cast<void>(localeRAII);
   struct archive* a = archive_read_new();
   struct archive* ext = archive_write_disk_new();
   if (extract) {

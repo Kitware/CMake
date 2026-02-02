@@ -401,7 +401,6 @@ add_library(
   cmRulePlaceholderExpander.cxx
   cmRulePlaceholderExpander.h
   cmLocalUnixMakefileGenerator3.cxx
-  cmLocale.h
   cmMakefile.cxx
   cmMakefile.h
   cmMakefileTargetGenerator.cxx

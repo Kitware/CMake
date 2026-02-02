@@ -24,7 +24,6 @@
 
 #include "cm_parse_date.h"
 
-#include "cmLocale.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
@@ -448,9 +447,6 @@ bool cmArchiveWrite::AddFile(char const* file, size_t skip, char const* prefix)
     return true;
   }
   char const* out = file + skip;
-
-  cmLocaleRAII localeRAII;
-  static_cast<void>(localeRAII);
 
   // Meta-data.
   std::string dest = cmStrCat(prefix ? prefix : "", out);
