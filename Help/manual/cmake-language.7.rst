@@ -78,6 +78,11 @@ Furthermore, CMake 3.0 and above allow a leading UTF-8
 
 .. _Byte-Order Mark: https://en.wikipedia.org/wiki/Byte_order_mark
 
+.. versionadded:: 4.3
+
+  The :command:`cmake_host_system_information` command's ``LOCALE_CHARSET``
+  query returns the expected character set encoding.
+
 Source Files
 ------------
 

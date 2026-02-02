@@ -1,0 +1,1 @@
+^-- LOCALE_CHARSET='UTF-8'$
