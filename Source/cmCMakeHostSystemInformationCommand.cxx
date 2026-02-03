@@ -13,6 +13,7 @@
 
 #include <cm/optional>
 #include <cm/string_view>
+#include <cm/type_traits>
 #include <cmext/string_view>
 
 #include "cmsys/FStream.hxx"
@@ -41,7 +42,9 @@ namespace {
 std::string const DELIM[2] = { {}, ";" };
 
 // BEGIN Private functions
-std::string ValueToString(std::size_t const value)
+template <typename T>
+cm::enable_if_t<std::is_arithmetic<T>::value, std::string> ValueToString(
+  T const& value)
 {
   return std::to_string(value);
 }
@@ -130,6 +133,14 @@ cm::optional<std::string> GetValue(cmsys::SystemInformation& info,
     return ValueToString(info.DoesCPUSupportFeature(
       cmsys::SystemInformation::CPU_FEATURE_SERIALNUMBER));
   }
+  if (key == "HAS_APIC"_s) {
+    return ValueToString(
+      info.DoesCPUSupportFeature(cmsys::SystemInformation::CPU_FEATURE_APIC));
+  }
+  if (key == "HAS_L1_CACHE"_s) {
+    return ValueToString(info.DoesCPUSupportFeature(
+      cmsys::SystemInformation::CPU_FEATURE_L1CACHE));
+  }
   if (key == "PROCESSOR_NAME"_s) {
     return ValueToString(info.GetExtendedProcessorName());
   }
@@ -150,6 +161,38 @@ cm::optional<std::string> GetValue(cmsys::SystemInformation& info,
   }
   if (key == "OS_PLATFORM"_s) {
     return ValueToString(info.GetOSPlatform());
+  }
+  if (key == "FAMILY_ID"_s) {
+    return ValueToString(info.GetFamilyID());
+  }
+  if (key == "MODEL_ID"_s) {
+    return ValueToString(info.GetModelID());
+  }
+  if (key == "MODEL_NAME"_s) {
+    return ValueToString(info.GetModelName());
+  }
+  if (key == "PROCESSOR_APIC_ID"_s) {
+    int apicId = info.GetProcessorAPICID();
+    if (apicId) {
+      return ValueToString(apicId);
+    }
+    return "";
+  }
+  if (key == "PROCESSOR_CACHE_SIZE"_s) {
+    int cacheSize = info.GetProcessorCacheSize();
+    if (cacheSize > 0) {
+      return ValueToString(cacheSize);
+    }
+    return "";
+  }
+  if (key == "PROCESSOR_CLOCK_FREQUENCY"_s) {
+    return ValueToString(info.GetProcessorClockFrequency());
+  }
+  if (key == "VENDOR_ID"_s) {
+    return ValueToString(info.GetVendorID());
+  }
+  if (key == "VENDOR_STRING"_s) {
+    return ValueToString(info.GetVendorString());
   }
   return {};
 }

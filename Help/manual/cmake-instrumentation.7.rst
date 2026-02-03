@@ -499,7 +499,7 @@ generated whenever `Indexing`_ occurs and deleted after any user-specified
   snippet files generated since the previous index file was created. The file
   paths are relative to ``dataDir``.
 
-``trace``:
+``trace``
   Contains the path to the `Google Trace File`_. This includes data from all
   corresponding ``snippets`` in the index file. The file path is relative to
   ``dataDir``. Only included when enabled by the `v1 Query Files`_.
@@ -507,8 +507,10 @@ generated whenever `Indexing`_ occurs and deleted after any user-specified
 ``staticSystemInformation``
   Specifies the static information collected about the host machine
   CMake is being run from. If CMake is unable to determine the value of any
-  given field, it will be ``null``. Only included when enabled by the
-  `v1 Query Files`_.
+  given field, it will be ``null``. See :command:`cmake_host_system_information`
+  for a description of each of the following fields.
+
+  Only included when enabled by the `v1 Query Files`_.
 
   * ``OSName``
   * ``OSPlatform``
@@ -518,6 +520,7 @@ generated whenever `Indexing`_ occurs and deleted after any user-specified
   * ``hostname``
   * ``is64Bits``
   * ``modelId``
+  * ``modelName``
   * ``numberOfLogicalCPU``
   * ``numberOfPhysicalCPU``
   * ``processorAPICID``

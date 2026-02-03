@@ -98,6 +98,7 @@ if (NOT hasStaticInfo STREQUAL UNEXPECTED)
   json_has_key("${index}" "${staticSystemInformation}" hostname ${hasStaticInfo})
   json_has_key("${index}" "${staticSystemInformation}" is64Bits ${hasStaticInfo})
   json_has_key("${index}" "${staticSystemInformation}" modelId ${hasStaticInfo})
+  json_has_key("${index}" "${staticSystemInformation}" modelName ${hasStaticInfo})
   json_has_key("${index}" "${staticSystemInformation}" numberOfLogicalCPU ${hasStaticInfo})
   json_has_key("${index}" "${staticSystemInformation}" numberOfPhysicalCPU ${hasStaticInfo})
   json_has_key("${index}" "${staticSystemInformation}" processorAPICID ${hasStaticInfo})
@@ -122,6 +123,7 @@ if (NOT hasStaticInfo STREQUAL UNEXPECTED)
     familyId
     hostname
     modelId
+    modelName
     vendorID
     vendorString
   )
