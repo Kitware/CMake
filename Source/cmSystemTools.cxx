@@ -2686,6 +2686,8 @@ bool extract_tar(std::string const& arFileName,
     ArchiveError("Problem with archive_read_open_filename(): ", a);
     archive_write_free(ext);
     archive_read_close(a);
+    archive_read_free(a);
+    archive_match_free(matching);
     return false;
   }
   for (;;) {
