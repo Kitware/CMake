@@ -170,6 +170,10 @@ public:
    * Append flags after parsing, prefixes processing (like LINKER:) and
    * escaping
    */
+  void AppendLinkFlagsWithParsing(std::string& flags,
+                                  std::string const& newFlags,
+                                  cmGeneratorTarget const* target,
+                                  std::string const& lang);
   void AppendFlags(std::string& flags, std::string const& newFlags,
                    std::string const& name, cmGeneratorTarget const* target,
                    cmBuildStep compileOrLink, std::string const& lang);
@@ -177,12 +181,23 @@ public:
   void AddPchDependencies(cmGeneratorTarget* target);
   void AddUnityBuild(cmGeneratorTarget* target);
   virtual void AddXCConfigSources(cmGeneratorTarget* /* target */) {}
+  void AddPerLanguageLinkFlags(std::string& flags,
+                               cmGeneratorTarget const* target,
+                               std::string const& lang,
+                               std::string const& config);
   void AppendTargetCreationLinkFlags(std::string& flags,
                                      cmGeneratorTarget const* target,
                                      std::string const& linkLanguage);
   void AppendLinkerTypeFlags(std::string& flags, cmGeneratorTarget* target,
                              std::string const& config,
                              std::string const& linkLanguage);
+  void AddTargetTypeLinkerFlags(std::string& flags,
+                                cmGeneratorTarget const* target,
+                                std::string const& lang,
+                                std::string const& config);
+  void AddTargetPropertyLinkFlags(std::string& flags,
+                                  cmGeneratorTarget const* target,
+                                  std::string const& config);
   void AppendIPOLinkerFlags(std::string& flags, cmGeneratorTarget* target,
                             std::string const& config,
                             std::string const& lang);

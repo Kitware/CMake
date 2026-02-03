@@ -793,6 +793,7 @@ function(add_RunCMake_test_try_compile)
   foreach(
     var
     IN ITEMS
+      CMAKE_C_COMPILER_ID
       CMAKE_SYSTEM_NAME
       CMake_TEST_CUDA
       CMake_TEST_ISPC
@@ -991,7 +992,7 @@ endif()
 
 add_RunCMake_test(LinkLibrariesProcessing)
 add_RunCMake_test(LinkLibrariesStrategy)
-add_RunCMake_test(LinkFlags)
+add_RunCMake_test(LinkFlags -DCMAKE_C_COMPILER_ID=${CMAKE_C_COMPILER_ID})
 add_RunCMake_test(File_Archive -DPython_EXECUTABLE=${Python_EXECUTABLE})
 add_RunCMake_test(File_Configure)
 add_RunCMake_test(File_Generate)

@@ -2691,43 +2691,25 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
     }
   }
 
-  std::string extraLinkOptionsVar;
   std::string extraLinkOptions;
-  if (gtgt->GetType() == cmStateEnums::EXECUTABLE) {
-    extraLinkOptionsVar = "CMAKE_EXE_LINKER_FLAGS";
-  } else if (gtgt->GetType() == cmStateEnums::SHARED_LIBRARY) {
-    extraLinkOptionsVar = "CMAKE_SHARED_LINKER_FLAGS";
-  } else if (gtgt->GetType() == cmStateEnums::MODULE_LIBRARY) {
-    extraLinkOptionsVar = "CMAKE_MODULE_LINKER_FLAGS";
-  }
-  if (!extraLinkOptionsVar.empty()) {
-    this->CurrentLocalGenerator->AddConfigVariableFlags(
-      extraLinkOptions, extraLinkOptionsVar, gtgt, cmBuildStep::Link, llang,
-      configName);
-  }
 
   if (gtgt->GetType() == cmStateEnums::OBJECT_LIBRARY ||
       gtgt->GetType() == cmStateEnums::STATIC_LIBRARY) {
     this->CurrentLocalGenerator->GetStaticLibraryFlags(
       extraLinkOptions, configName, llang, gtgt);
   } else {
+    this->CurrentLocalGenerator->AddTargetTypeLinkerFlags(
+      extraLinkOptions, gtgt, llang, configName);
+    this->CurrentLocalGenerator->AddPerLanguageLinkFlags(
+      extraLinkOptions, gtgt, llang, configName);
     this->CurrentLocalGenerator->AppendLinkerTypeFlags(extraLinkOptions, gtgt,
                                                        configName, llang);
     this->CurrentLocalGenerator->AppendWarningAsErrorLinkerFlags(
       extraLinkOptions, gtgt, llang);
 
-    cmValue targetLinkFlags = gtgt->GetProperty("LINK_FLAGS");
-    if (targetLinkFlags) {
-      this->CurrentLocalGenerator->AppendFlags(extraLinkOptions,
-                                               *targetLinkFlags);
-    }
-    if (!configName.empty()) {
-      std::string linkFlagsVar =
-        cmStrCat("LINK_FLAGS_", cmSystemTools::UpperCase(configName));
-      if (cmValue linkFlags = gtgt->GetProperty(linkFlagsVar)) {
-        this->CurrentLocalGenerator->AppendFlags(extraLinkOptions, *linkFlags);
-      }
-    }
+    this->CurrentLocalGenerator->AddTargetPropertyLinkFlags(extraLinkOptions,
+                                                            gtgt, configName);
+
     std::vector<std::string> opts;
     gtgt->GetLinkOptions(opts, configName, llang);
     // LINK_OPTIONS are escaped.
@@ -2856,8 +2838,9 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
       buildSettings->AddAttribute("LIBRARY_STYLE",
                                   this->CreateString("BUNDLE"));
       // Add the flags to create a module library (bundle).
-      std::string createFlags = this->LookupFlags(
-        "CMAKE_SHARED_MODULE_CREATE_", llang, "_FLAGS", gtgt);
+      std::string createFlags;
+      this->CurrentLocalGenerator->AppendTargetCreationLinkFlags(createFlags,
+                                                                 gtgt, llang);
       if (this->GetTargetProductType(gtgt) !=
           "com.apple.product-type.app-extension"_s) {
         // Xcode passes -bundle automatically.
@@ -2912,8 +2895,9 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
                                     this->CreateString(plist));
       } else {
         // Add the flags to create a shared library.
-        std::string createFlags = this->LookupFlags(
-          "CMAKE_SHARED_LIBRARY_CREATE_", llang, "_FLAGS", gtgt);
+        std::string createFlags;
+        this->CurrentLocalGenerator->AppendTargetCreationLinkFlags(
+          createFlags, gtgt, llang);
         // Xcode passes -dynamiclib automatically.
         cmSystemTools::ReplaceString(createFlags, "-dynamiclib", "");
         createFlags = cmTrimWhitespace(createFlags);
@@ -2935,8 +2919,9 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
     }
     case cmStateEnums::EXECUTABLE: {
       // Add the flags to create an executable.
-      std::string createFlags =
-        this->LookupFlags("CMAKE_", llang, "_LINK_FLAGS", gtgt);
+      std::string createFlags;
+      this->CurrentLocalGenerator->AppendTargetCreationLinkFlags(createFlags,
+                                                                 gtgt, llang);
       if (!createFlags.empty()) {
         extraLinkOptions += ' ';
         extraLinkOptions += createFlags;

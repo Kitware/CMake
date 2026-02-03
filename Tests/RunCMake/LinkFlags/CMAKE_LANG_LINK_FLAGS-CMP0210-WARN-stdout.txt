@@ -1,0 +1,8 @@
+CMake Warning \(dev\) in CMakeLists\.txt:
+  Policy CMP0210 is not set: CMAKE_<LANG>_LINK_FLAGS adds link flags to all
+  target types\.  Run "cmake --help-policy CMP0210" for policy details\.  Use
+  the cmake_policy command to set the policy and suppress this warning\.
+
+  For compatibility with older versions of CMake, CMAKE_C_LINK_FLAGS will be
+  ignored for target 'LinkFlags_shared'\.
+This warning is for project developers\.  Use -Wno-dev to suppress it\.

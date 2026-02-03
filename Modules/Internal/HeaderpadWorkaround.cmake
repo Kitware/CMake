@@ -48,6 +48,7 @@ function(__cmake_internal_workaround_headerpad_flag_conflict _LANG)
   if(remove_headerpad)
     foreach(flag IN ITEMS
       CMAKE_${_LANG}_LINK_FLAGS
+      CMAKE_EXECUTABLE_CREATE_${_LANG}_FLAGS
       CMAKE_SHARED_LIBRARY_CREATE_${_LANG}_FLAGS
       CMAKE_SHARED_MODULE_CREATE_${_LANG}_FLAGS)
       string(REPLACE "-Wl,-headerpad_max_install_names" "" ${flag} "${${flag}}")

@@ -967,34 +967,12 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(
     static_cast<cmGlobalVisualStudio7Generator*>(this->GlobalGenerator);
   std::string temp;
   std::string extraLinkOptions;
-  if (target->GetType() == cmStateEnums::EXECUTABLE) {
-    this->AddConfigVariableFlags(extraLinkOptions, "CMAKE_EXE_LINKER_FLAGS",
-                                 target, cmBuildStep::Link, linkLanguage,
+  this->AddTargetTypeLinkerFlags(extraLinkOptions, target, linkLanguage,
                                  configName);
-  }
-  if (target->GetType() == cmStateEnums::SHARED_LIBRARY) {
-    this->AddConfigVariableFlags(extraLinkOptions, "CMAKE_SHARED_LINKER_FLAGS",
-                                 target, cmBuildStep::Link, linkLanguage,
-                                 configName);
-  }
-  if (target->GetType() == cmStateEnums::MODULE_LIBRARY) {
-    this->AddConfigVariableFlags(extraLinkOptions, "CMAKE_MODULE_LINKER_FLAGS",
-                                 target, cmBuildStep::Link, linkLanguage,
-                                 configName);
-  }
+  this->AddPerLanguageLinkFlags(extraLinkOptions, target, linkLanguage,
+                                configName);
 
-  cmValue targetLinkFlags = target->GetProperty("LINK_FLAGS");
-  if (targetLinkFlags) {
-    extraLinkOptions += ' ';
-    extraLinkOptions += *targetLinkFlags;
-  }
-  std::string configTypeUpper = cmSystemTools::UpperCase(configName);
-  std::string linkFlagsConfig = cmStrCat("LINK_FLAGS_", configTypeUpper);
-  targetLinkFlags = target->GetProperty(linkFlagsConfig);
-  if (targetLinkFlags) {
-    extraLinkOptions += ' ';
-    extraLinkOptions += *targetLinkFlags;
-  }
+  this->AddTargetPropertyLinkFlags(extraLinkOptions, target, configName);
 
   std::vector<std::string> opts;
   target->GetLinkOptions(opts, configName,

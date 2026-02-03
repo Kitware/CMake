@@ -19,5 +19,10 @@ macro(__hpux_compiler_hp lang)
 
   string(APPEND CMAKE_${lang}_FLAGS_INIT " ")
 
-  set(CMAKE_${lang}_LINK_FLAGS "-Wl,+s,+nodefaultrpath")
+  set(CMAKE_EXECUTABLE_CREATE_${lang}_FLAGS "-Wl,+s,+nodefaultrpath")
+  cmake_policy(GET CMP0210 _CMP0210)
+  if (NOT _CMP0210 STREQUAL "NEW")
+    set(CMAKE_${lang}_LINK_FLAGS "${CMAKE_EXECUTABLE_CREATE_${lang}_FLAGS}")
+  endif()
+  unset(_CMP0210)
 endmacro()

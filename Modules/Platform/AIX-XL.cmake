@@ -16,7 +16,12 @@ macro(__aix_compiler_xl lang)
   set(CMAKE_SHARED_LIBRARY_${lang}_FLAGS " ")
   set(CMAKE_SHARED_MODULE_${lang}_FLAGS  " ")
 
-  set(CMAKE_${lang}_LINK_FLAGS "-Wl,-bnoipath")
+  set(CMAKE_EXECUTABLE_CREATE_${lang}_FLAGS "-Wl,-bnoipath")
+  cmake_policy(GET CMP0210 _CMP0210)
+  if (NOT _CMP0210 STREQUAL "NEW")
+    set(CMAKE_${lang}_LINK_FLAGS "${CMAKE_EXECUTABLE_CREATE_${lang}_FLAGS}")
+  endif()
+  unset(_CMP0210)
 
   set(_OBJECTS " <OBJECTS>")
   if(DEFINED CMAKE_XL_CreateExportList AND CMAKE_XL_CreateExportList STREQUAL "")
