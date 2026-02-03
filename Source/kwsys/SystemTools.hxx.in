@@ -6,6 +6,7 @@
 #include <@KWSYS_NAMESPACE@/Configure.hxx>
 #include <@KWSYS_NAMESPACE@/Status.hxx>
 
+#include <ctime>
 #include <iosfwd>
 #include <map>
 #include <string>
@@ -860,6 +861,12 @@ public:
    *               Time Manipulation Routines
    *  -----------------------------------------------------------------
    */
+
+  /** Get time as local time (thread-safe).  */
+  static std::tm LocalTime(std::time_t timep);
+
+  /** Get time as UTC time (thread-safe).  */
+  static std::tm GMTime(std::time_t timep);
 
   /** Get current time in seconds since Posix Epoch (Jan 1, 1970).  */
   static double GetTime();
