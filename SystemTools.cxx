@@ -4115,12 +4115,33 @@ Status SystemTools::GetShortPath(std::string const& path,
 #endif
 }
 
+std::tm SystemTools::LocalTime(std::time_t timep)
+{
+  std::tm out;
+#if defined(_WIN32) && !defined(__CYGWIN__)
+  localtime_s(&out, &timep);
+#else
+  localtime_r(&timep, &out);
+#endif
+  return out;
+}
+
+std::tm SystemTools::GMTime(std::time_t timep)
+{
+  std::tm out;
+#if defined(_WIN32) && !defined(__CYGWIN__)
+  gmtime_s(&out, &timep);
+#else
+  gmtime_r(&timep, &out);
+#endif
+  return out;
+}
+
 std::string SystemTools::GetCurrentDateTime(char const* format)
 {
   char buf[1024];
-  time_t t;
-  time(&t);
-  strftime(buf, sizeof(buf), format, localtime(&t));
+  tm const t = LocalTime(std::time(nullptr));
+  strftime(buf, sizeof(buf), format, &t);
   return std::string(buf);
 }
 
