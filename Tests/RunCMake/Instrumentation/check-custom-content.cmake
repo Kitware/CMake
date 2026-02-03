@@ -15,6 +15,9 @@ set(firstFile "")
 foreach(content_file IN LISTS content_files)
   read_json("${content_file}" contents)
 
+  # Check project name
+  json_assert_key("${content_file}" "${contents}" project "instrumentation")
+
   # Check custom content
   string(JSON custom GET "${contents}" custom)
   json_assert_key("${content_file}" "${custom}" myString "string")
