@@ -14,6 +14,8 @@ run_cmake(AppendNoArgs)
 run_cmake(Prepend)
 run_cmake(PrependNoArgs)
 
+run_cmake_script(CaseUTF-8)
+
 run_cmake(Concat)
 run_cmake(ConcatNoArgs)
 
