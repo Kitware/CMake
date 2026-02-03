@@ -1,6 +1,6 @@
 if (NOT EXISTS ${RunCMake_TEST_BINARY_DIR}/.cmake/api/v1/reply)
   set(RunCMake_TEST_FAILED "Failed to read FileAPI query from user config directory")
 endif()
-if (NOT EXISTS ${RunCMake_TEST_BINARY_DIR}/.cmake/instrumentation-ec7aa2dc-b87f-45a3-8022-fe01c5f59984/v1/data)
+if (NOT EXISTS ${RunCMake_TEST_BINARY_DIR}/.cmake/instrumentation/v1/data)
   set(RunCMake_TEST_FAILED "Failed to read Instrumentation query from user config directory")
 endif()

@@ -17,7 +17,6 @@ file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmArgumentParser.h"
 #include "cmArgumentParserTypes.h"
 #include "cmExecutionStatus.h"
-#include "cmExperimental.h"
 #include "cmInstrumentation.h"
 #include "cmInstrumentationQuery.h"
 #include "cmList.h"
@@ -68,14 +67,6 @@ std::function<bool(std::string const&, E&)> EnumParser(
 bool cmInstrumentationCommand(std::vector<std::string> const& args,
                               cmExecutionStatus& status)
 {
-  // if (status->GetMakefile().GetPropertyKeys) {
-  if (!cmExperimental::HasSupportEnabled(
-        status.GetMakefile(), cmExperimental::Feature::Instrumentation)) {
-    status.SetError(
-      "requires the experimental Instrumentation flag to be enabled");
-    return false;
-  }
-
   if (args.empty()) {
     status.SetError("must be called with arguments.");
     return false;

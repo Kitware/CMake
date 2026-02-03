@@ -25,7 +25,6 @@
 
 #include "cmCMakePath.h"
 #include "cmCryptoHash.h"
-#include "cmExperimental.h"
 #include "cmFileLock.h"
 #include "cmFileLockResult.h"
 #include "cmGeneratorTarget.h"
@@ -94,18 +93,13 @@ std::map<std::string, std::string> cmInstrumentation::cdashSnippetsMap = {
 cmInstrumentation::cmInstrumentation(std::string const& binary_dir,
                                      LoadQueriesAfter loadQueries)
 {
-  std::string const uuid =
-    cmExperimental::DataForFeature(cmExperimental::Feature::Instrumentation)
-      .Uuid;
   this->binaryDir = binary_dir;
-  this->timingDirv1 =
-    cmStrCat(this->binaryDir, "/.cmake/instrumentation-", uuid, "/v1");
+  this->timingDirv1 = cmStrCat(this->binaryDir, "/.cmake/instrumentation/v1");
   this->cdashDir = cmStrCat(this->timingDirv1, "/cdash");
   this->dataDir = cmStrCat(this->timingDirv1, "/data");
   if (cm::optional<std::string> configDir =
         cmSystemTools::GetCMakeConfigDirectory()) {
-    this->userTimingDirv1 =
-      cmStrCat(configDir.value(), "/instrumentation-", uuid, "/v1");
+    this->userTimingDirv1 = cmStrCat(configDir.value(), "/instrumentation/v1");
   }
   if (loadQueries == LoadQueriesAfter::Yes) {
     this->LoadQueries();
@@ -131,23 +125,15 @@ void cmInstrumentation::CheckCDashVariable()
   std::string envVal;
   if (cmSystemTools::GetEnv("CTEST_USE_INSTRUMENTATION", envVal) &&
       !cmIsOff(envVal)) {
-    if (cmSystemTools::GetEnv("CTEST_EXPERIMENTAL_INSTRUMENTATION", envVal)) {
-      std::string const uuid = cmExperimental::DataForFeature(
-                                 cmExperimental::Feature::Instrumentation)
-                                 .Uuid;
-      if (envVal == uuid) {
-        std::set<cmInstrumentationQuery::Option> options_ = {
-          cmInstrumentationQuery::Option::CDashSubmit
-        };
-        if (cmSystemTools::GetEnv("CTEST_USE_VERBOSE_INSTRUMENTATION",
-                                  envVal) &&
-            !cmIsOff(envVal)) {
-          options_.insert(cmInstrumentationQuery::Option::CDashVerbose);
-        }
-        std::set<cmInstrumentationQuery::Hook> hooks_;
-        this->WriteJSONQuery(options_, hooks_, {});
-      }
+    std::set<cmInstrumentationQuery::Option> options_ = {
+      cmInstrumentationQuery::Option::CDashSubmit
+    };
+    if (cmSystemTools::GetEnv("CTEST_USE_VERBOSE_INSTRUMENTATION", envVal) &&
+        !cmIsOff(envVal)) {
+      options_.insert(cmInstrumentationQuery::Option::CDashVerbose);
     }
+    std::set<cmInstrumentationQuery::Hook> hooks_;
+    this->WriteJSONQuery(options_, hooks_, {});
   }
 }
 

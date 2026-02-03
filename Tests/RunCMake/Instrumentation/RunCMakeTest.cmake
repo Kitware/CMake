@@ -12,7 +12,6 @@ function(instrument test)
     "INSTALL_PARALLEL"
     "TEST"
     "WORKFLOW"
-    "EXPERIMENTAL_WARNING"
     "COPY_QUERIES"
     "COPY_QUERIES_GENERATED"
     "STATIC_QUERY"
@@ -26,8 +25,7 @@ function(instrument test)
   )
   cmake_parse_arguments(ARGS "${OPTIONS}" "CHECK_SCRIPT;CONFIGURE_ARG" "" ${ARGN})
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/${test})
-  set(uuid "ec7aa2dc-b87f-45a3-8022-fe01c5f59984")
-  set(v1 ${RunCMake_TEST_BINARY_DIR}/.cmake/instrumentation-${uuid}/v1)
+  set(v1 ${RunCMake_TEST_BINARY_DIR}/.cmake/instrumentation/v1)
   set(v1 ${v1} PARENT_SCOPE)
   set(query_dir ${CMAKE_CURRENT_LIST_DIR}/query)
   configure_file(${RunCMake_SOURCE_DIR}/initial.cmake.in ${RunCMake_BINARY_DIR}/initial.cmake)
@@ -93,9 +91,6 @@ function(instrument test)
 
   # Configure Test Case
   set(RunCMake_TEST_NO_CLEAN 1)
-  if (NOT ARGS_EXPERIMENTAL_WARNING)
-    list(APPEND ARGS_CONFIGURE_ARG "-Wno-dev")
-  endif()
   if (ARGS_FAIL)
     list(APPEND ARGS_CONFIGURE_ARG "-DFAIL=ON")
   endif()
@@ -121,7 +116,7 @@ function(instrument test)
         COPYONLY
       )
     endforeach()
-    set(v1 ${RunCMake_TEST_BINARY_DIR}/build/.cmake/instrumentation-${uuid}/v1)
+    set(v1 ${RunCMake_TEST_BINARY_DIR}/build/.cmake/instrumentation/v1)
     run_cmake_command(${test}-workflow ${CMAKE_COMMAND} --workflow default)
     set(ARGS_NO_CONFIGURE TRUE)
   endif()
@@ -230,9 +225,6 @@ instrument(cmake-command
 instrument(cmake-command-data
   COPY_QUERIES BUILD INSTALL TEST DYNAMIC_QUERY
   CHECK_SCRIPT check-data-dir.cmake
-)
-instrument(cmake-command-experimental-warning
-  EXPERIMENTAL_WARNING
 )
 instrument(cmake-command-bad-api-version)
 instrument(cmake-command-bad-data-version)

@@ -23,7 +23,6 @@ public:
     ExportPackageInfo,
     MappedPackageInfo,
     ExportBuildDatabase,
-    Instrumentation,
     GenerateSbom,
 
     Sentinel,

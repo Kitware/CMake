@@ -72,14 +72,6 @@ cmExperimental::FeatureData const LookupTable[] = {
     "meant only for experimentation and feedback to CMake developers.",
     {},
     cmExperimental::TryCompileCondition::Never },
-  // Instrumentation
-  { "Instrumentation",
-    "ec7aa2dc-b87f-45a3-8022-fe01c5f59984",
-    "CMAKE_EXPERIMENTAL_INSTRUMENTATION",
-    "CMake's support for collecting instrumentation data is experimental. It "
-    "is meant only for experimentation and feedback to CMake developers.",
-    {},
-    cmExperimental::TryCompileCondition::Never },
   { "GenerateSbom",
     "ca494ed3-b261-4205-a01f-603c95e4cae0",
     "CMAKE_EXPERIMENTAL_GENERATE_SBOM",

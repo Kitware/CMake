@@ -1,4 +1,3 @@
-set(CMAKE_EXPERIMENTAL_INSTRUMENTATION @uuid@)
 cmake_instrumentation(
   API_VERSION 1
   DATA_VERSION 1

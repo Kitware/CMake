@@ -2,4 +2,4 @@ CMake Error at [^
 ]* \(cmake_instrumentation\):
   cmake_instrumentation given unknown argument "UNKNOWN_ARG"\.
 Call Stack \(most recent call first\):
-  CMakeLists\.txt:6 \(include\)
+  CMakeLists\.txt:5 \(include\)
