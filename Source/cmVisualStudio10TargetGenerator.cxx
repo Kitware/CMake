@@ -2746,7 +2746,10 @@ void cmVisualStudio10TargetGenerator::WriteAllSources(Elem& e0)
           customObjectName = this->GeneratorTarget->GetObjectName(si.Source);
         }
       } else {
-        customObjectName = cmStrCat(std::move(customObjectName), ".obj");
+        customObjectName =
+          cmStrCat(std::move(customObjectName),
+                   this->GlobalGenerator->GetLanguageOutputExtension(
+                     si.Source->GetLanguage()));
       }
       if (!customObjectName.empty()) {
         std::string outputName = "ObjectFileName";
