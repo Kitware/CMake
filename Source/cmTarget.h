@@ -237,6 +237,8 @@ public:
   bool IsRuntimeBinary() const;
   bool IsSymbolic() const;
   bool CanCompileSources() const;
+  void SetIsForTryCompile();
+  bool IsForTryCompile() const;
 
   bool GetMappedConfig(std::string const& desiredConfig, cmValue& loc,
                        cmValue& imp, std::string& suffix) const;

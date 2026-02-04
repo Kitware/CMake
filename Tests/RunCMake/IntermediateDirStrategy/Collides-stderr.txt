@@ -1,0 +1,10 @@
+CMake Warning in collides/CMakeLists.txt:
+  The 'CubeTestPluginLogic' and 'TeamworkServerBlobStoreUploadSessionStore'
+  targets share an intermediate directory
+
+      .*/Tests/RunCMake/IntermediateDirStrategy/Collides-build/(collides/)?.o/039c43fd
+
+  which may cause problems with the build graph.  This project is not
+  compatible with the `SHORT` target intermediate directory strategy.
+  Possible remedies include: moving the target into different directories or
+  renaming a target.
