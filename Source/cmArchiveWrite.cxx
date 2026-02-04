@@ -43,6 +43,10 @@ static void cm_archive_entry_copy_pathname(struct archive_entry* e,
 {
 #ifdef _WIN32
   // libarchive converts our UTF-8 encoding to the archive's encoding.
+  // `archive_entry_update_pathname_utf8` always populates the WCS form too.
+  // It also populates the MBS form if possible, but we ignore conversion
+  // failure because the archive formats support converting directly from
+  // the WCS form to the archive's encoding without using the MBS form.
   archive_entry_update_pathname_utf8(e, dest);
 #else
   // libarchive converts our locale's encoding to the archive's encoding.
