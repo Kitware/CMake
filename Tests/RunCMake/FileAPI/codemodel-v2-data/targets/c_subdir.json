@@ -33,12 +33,14 @@
             ]
         }
     ],
+    "interfaceSources": null,
     "sourceGroups": [
         {
             "name": "Source Files",
             "sourcePaths": [
                 "^subdir/empty\\.c$"
-            ]
+            ],
+            "interfaceSourcePaths": null
         }
     ],
     "compileGroups": [

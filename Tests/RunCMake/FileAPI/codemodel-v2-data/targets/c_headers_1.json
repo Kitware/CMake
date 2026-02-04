@@ -171,11 +171,40 @@
       ]
     }
   ],
+  "interfaceSources": [
+    {
+      "path": "^fileset/error\\.c$",
+      "isGenerated": null,
+      "fileSetName": "HEADERS",
+      "sourceGroupName": "Header Files"
+    },
+    {
+      "path": "^fileset/other\\.c$",
+      "isGenerated": null,
+      "fileSetName": "HEADERS",
+      "sourceGroupName": "Source Files"
+    },
+    {
+      "path": "^fileset/h3\\.h$",
+      "isGenerated": null,
+      "fileSetName": "c",
+      "sourceGroupName": "Header Files"
+    },
+    {
+      "path": "^fileset/dir/h2\\.h$",
+      "isGenerated": null,
+      "fileSetName": "b",
+      "sourceGroupName": "Header Files"
+    }
+  ],
   "sourceGroups": [
     {
       "name": "Source Files",
       "sourcePaths": [
         "^fileset/empty\\.c$",
+        "^fileset/other\\.c$"
+      ],
+      "interfaceSourcePaths": [
         "^fileset/other\\.c$"
       ]
     },
@@ -186,6 +215,11 @@
         "^fileset/h1\\.h$",
         "^fileset/dir/h2\\.h$",
         "^fileset/dir/h4\\.h$"
+      ],
+      "interfaceSourcePaths": [
+        "^fileset/error\\.c$",
+        "^fileset/dir/h2\\.h$",
+        "^fileset/h3\\.h$"
       ]
     }
   ],

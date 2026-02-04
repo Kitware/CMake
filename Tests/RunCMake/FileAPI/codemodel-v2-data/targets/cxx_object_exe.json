@@ -54,18 +54,21 @@
             ]
         }
     ],
+    "interfaceSources": null,
     "sourceGroups": [
         {
             "name": "Source Files",
             "sourcePaths": [
                 "^empty\\.cxx$"
-            ]
+            ],
+            "interfaceSourcePaths": null
         },
         {
             "name": "Object Libraries",
             "sourcePaths": [
                 "^.*/Tests/RunCMake/FileAPI/codemodel-v2-build/(object|build/cxx_object_lib\\.build)/.*/empty(\\.cxx)?\\.o(bj)?$"
-            ]
+            ],
+            "interfaceSourcePaths": null
         }
     ],
     "compileGroups": [

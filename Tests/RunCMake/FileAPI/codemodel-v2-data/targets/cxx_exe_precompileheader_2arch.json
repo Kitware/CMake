@@ -240,6 +240,7 @@
       ]
     }
   ],
+  "interfaceSources": null,
   "sourceGroups": [
     {
       "name": "Source Files",
@@ -247,14 +248,16 @@
         ".*cmake_pch(_[^.]+)?(\\.hxx)?\\.cxx$",
         ".*cmake_pch(_[^.]+)?(\\.hxx)?\\.cxx$",
         "^empty\\.cxx$"
-      ]
+      ],
+      "interfaceSourcePaths": null
     },
     {
       "name": "Precompile Header File",
       "sourcePaths": [
         ".*/cmake_pch(_[^.]+)?\\.hxx$",
         ".*/cmake_pch(_[^.]+)?\\.hxx$"
-      ]
+      ],
+      "interfaceSourcePaths": null
     }
   ]
 }

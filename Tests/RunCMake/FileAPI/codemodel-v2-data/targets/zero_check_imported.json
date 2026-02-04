@@ -42,18 +42,21 @@
             ]
         }
     ],
+    "interfaceSources": null,
     "sourceGroups": [
         {
             "name": "",
             "sourcePaths": [
                 "^.*/Tests/RunCMake/FileAPI/codemodel-v2-build/imported/CMakeFiles/ZERO_CHECK$"
-            ]
+            ],
+            "interfaceSourcePaths": null
         },
         {
             "name": "CMake Rules",
             "sourcePaths": [
                 "^.*/Tests/RunCMake/FileAPI/codemodel-v2-build/imported/CMakeFiles/ZERO_CHECK\\.rule$"
-            ]
+            ],
+            "interfaceSourcePaths": null
         }
     ],
     "compileGroups": null,

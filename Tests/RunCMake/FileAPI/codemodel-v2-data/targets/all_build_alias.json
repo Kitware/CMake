@@ -42,18 +42,21 @@
             ]
         }
     ],
+    "interfaceSources": null,
     "sourceGroups": [
         {
             "name": "",
             "sourcePaths": [
                 "^.*/Tests/RunCMake/FileAPI/codemodel-v2-build/alias/CMakeFiles/ALL_BUILD$"
-            ]
+            ],
+            "interfaceSourcePaths": null
         },
         {
             "name": "CMake Rules",
             "sourcePaths": [
                 "^.*/Tests/RunCMake/FileAPI/codemodel-v2-build/alias/CMakeFiles/ALL_BUILD\\.rule$"
-            ]
+            ],
+            "interfaceSourcePaths": null
         }
     ],
     "compileGroups": null,
