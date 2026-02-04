@@ -75,6 +75,8 @@ modules includes:
 ``import std`` Support
 ======================
 
+.. versionadded:: 4.3
+
 Support for ``import std`` is limited to the following toolchain and standard
 library combinations:
 
@@ -85,12 +87,6 @@ library combinations:
 
 The :variable:`CMAKE_CXX_COMPILER_IMPORT_STD` variable lists standard levels
 which have support for ``import std`` in the active C++ toolchain.
-
-.. note::
-
-   This support is provided only when experimental support for
-   ``import std`` has been enabled by the
-   ``CMAKE_EXPERIMENTAL_CXX_IMPORT_STD`` gate.
 
 Generator Support
 =================

@@ -94,31 +94,6 @@ When activated, this experimental feature provides the following:
   described using |CPS|_. Refer to the :command:`find_package` documentation
   for details.
 
-C++ ``import std`` support
-==========================
-
-In order to activate support for ``import std`` in C++23 and newer targets,
-set
-
-* variable ``CMAKE_EXPERIMENTAL_CXX_IMPORT_STD`` to
-* value ``d0edc3af-4c50-42ea-a356-e2862fe7a444``.
-
-This UUID may change in future versions of CMake.  Be sure to use the value
-documented here by the source tree of the version of CMake with which you are
-experimenting.  It must be set before the ``CXX`` toolchain is discovered by
-CMake, usually as part of a :command:`project` call.
-
-When activated, this experimental feature provides the following:
-
-* The :prop_tgt:`CXX_MODULE_STD` target property and its initializing variable
-  :variable:`CMAKE_CXX_MODULE_STD`.
-
-* Targets with the property set to a true value and at least ``cxx_std_23``
-  may use ``import std;`` in any scanned C++ source file.
-
-.. _CPS: https://cps-org.github.io/cps/
-.. |CPS| replace:: Common Package Specification
-
 Build database support
 ======================
 
