@@ -370,27 +370,6 @@ Json::Value CollationInformationExports(cmGeneratorTarget const* gt)
   return tdi_exports;
 }
 
-std::vector<cmCxxModuleMetadata::PreprocessorDefineData>
-MakePreprocessorDefines(std::vector<std::string> const& defines)
-{
-  std::vector<cmCxxModuleMetadata::PreprocessorDefineData> result;
-  result.reserve(defines.size());
-
-  for (auto const& def : defines) {
-    cmCxxModuleMetadata::PreprocessorDefineData data;
-    auto offset = def.find('=');
-    if (offset == def.npos) {
-      data.Name = def;
-    } else {
-      data.Name = def.substr(0, offset);
-      data.Value = def.substr(offset);
-    }
-    result.emplace_back(std::move(data));
-  }
-
-  return result;
-}
-
 }
 
 void cmDyndepCollation::AddCollationInformation(
@@ -826,11 +805,11 @@ bool cmDyndepCollation::WriteDyndepMetadata(
         mod.LogicalName = p.LogicalName;
         mod.IsInterface = p.IsInterface;
 
-        auto& local_args = mod.LocalArguments.emplace();
-        local_args.Definitions = MakePreprocessorDefines(file_set.Definitions);
-        local_args.IncludeDirectories = file_set.IncludeDirectories;
-        local_args.CompileOptions = file_set.CompileOptions;
-        local_args.CompileFeatures = file_set.CompileFeatures;
+        // FIXME(#27565): Local arguments may refer to include directories or
+        // other resources which live in unknown locations on the consuming
+        // machine. There's no general-purpose way to solve this with module
+        // manifests as currently specified. For now, forego serializing them
+        // and rely on CPS to fill in the blanks.
 
         exp.Manifest.Modules.emplace_back(std::move(mod));
 
