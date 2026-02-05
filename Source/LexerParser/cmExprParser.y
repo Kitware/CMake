@@ -148,6 +148,9 @@ term:
     $<Number>$ = $<Number>1 / $<Number>3;
   }
 | term exp_MOD unary {
+    if (yyvsp[0].Number == 0) {
+      throw std::overflow_error("modulo by zero");
+    }
     $<Number>$ = $<Number>1 % $<Number>3;
   }
 
