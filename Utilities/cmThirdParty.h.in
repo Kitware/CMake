@@ -16,3 +16,7 @@
 #cmakedefine CMAKE_USE_SYSTEM_LIBRHASH
 #cmakedefine CMAKE_USE_SYSTEM_LIBUV
 #cmakedefine CMAKE_USE_SYSTEM_ZSTD
+#cmakedefine CMAKE_USE_SYSTEM_NGHTTP2
+
+/* Whether CMake is using OpenSSL library.  */
+#cmakedefine CMAKE_USE_OPENSSL

@@ -11,6 +11,13 @@
 #include "cmsys/Glob.hxx"
 #include "cmsys/RegularExpression.hxx"
 
+#if !defined(CMAKE_BOOTSTRAP)
+#  include <memory>
+
+#  include <cm3p/json/value.h>
+#  include <cm3p/json/writer.h>
+#endif
+
 #include "cmDocumentationEntry.h"
 #include "cmDocumentationSection.h"
 #include "cmRST.h"
@@ -21,7 +28,9 @@
 namespace {
 cmDocumentationEntry const cmDocumentationStandardOptions[21] = {
   { "-h,-H,--help,-help,-usage,/?", "Print usage information and exit." },
-  { "--version,-version,/V [<file>]", "Print version number and exit." },
+  { "--version[=json-v1],-version[=json-v1],/V[=json-v1],/version[=json-v1] "
+    "[<file>]",
+    "Print version number and exit." },
   { "--help <keyword> [<file>]", "Print help for one keyword and exit." },
   { "--help-full [<file>]", "Print all help manuals and exit." },
   { "--help-manual <man> [<file>]", "Print one help manual and exit." },
@@ -86,6 +95,60 @@ bool cmDocumentation::PrintVersion(std::ostream& os)
   return true;
 }
 
+bool cmDocumentation::PrintVersionJson(std::ostream& os)
+{
+#if !defined(CMAKE_BOOTSTRAP)
+  Json::Value root = Json::objectValue;
+
+  // Output version information
+  root["version"] = Json::objectValue;
+  root["version"]["major"] = 1;
+  root["version"]["minor"] = 0;
+
+  // CMake tool name
+  root["program"] = Json::objectValue;
+  root["program"]["name"] = this->GetNameString();
+
+  // CMake version information
+  root["program"]["version"] = Json::objectValue;
+  root["program"]["version"]["string"] = cmVersion::GetCMakeVersion();
+  root["program"]["version"]["major"] = cmVersion::GetMajorVersion();
+  root["program"]["version"]["minor"] = cmVersion::GetMinorVersion();
+  root["program"]["version"]["patch"] = cmVersion::GetPatchVersion();
+
+  // Dependencies
+  root["dependencies"] = Json::arrayValue;
+  std::vector<cmVersion::DependencyInfo> const& deps =
+    cmVersion::CollectDependencyInfo();
+  for (cmVersion::DependencyInfo const& dep : deps) {
+    Json::Value depJson = Json::objectValue;
+    depJson["name"] = dep.name;
+    if (!dep.version.empty()) {
+      depJson["version"] = dep.version;
+    }
+    depJson["type"] =
+      dep.type == cmVersion::DependencyType::System ? "system" : "bundled";
+    if (!dep.cameFrom.empty()) {
+      depJson["via"] = dep.cameFrom;
+    }
+    root["dependencies"].append(std::move(depJson));
+  }
+
+  // Output JSON
+  Json::StreamWriterBuilder builder;
+  builder["indentation"] = "  ";
+  std::unique_ptr<Json::StreamWriter> writer(builder.newStreamWriter());
+  writer->write(root, &os);
+  os << std::endl;
+
+  return true;
+#else
+  os << "{\"error\":\"JSON version output not available in bootstrap build\"}"
+     << std::endl;
+  return false;
+#endif
+}
+
 bool cmDocumentation::PrintDocumentation(Type ht, std::ostream& os)
 {
   switch (ht) {
@@ -125,6 +188,8 @@ bool cmDocumentation::PrintDocumentation(Type ht, std::ostream& os)
       return this->PrintHelpListGenerators(os);
     case cmDocumentation::Version:
       return this->PrintVersion(os);
+    case cmDocumentation::VersionJson:
+      return this->PrintVersionJson(os);
     case cmDocumentation::OldCustomModules:
       return this->PrintOldCustomModules(os);
     default:
@@ -376,8 +441,15 @@ bool cmDocumentation::CheckOptions(int argc, char const* const* argv,
       return true;
     } else if ((strcmp(argv[i], "--version") == 0) ||
                (strcmp(argv[i], "-version") == 0) ||
-               (strcmp(argv[i], "/V") == 0)) {
+               (strcmp(argv[i], "/V") == 0) ||
+               (strcmp(argv[i], "/version") == 0)) {
       help.HelpType = cmDocumentation::Version;
+      i += int(get_opt_argument(i + 1, help.Filename));
+    } else if (strcmp(argv[i], "--version=json-v1") == 0 ||
+               strcmp(argv[i], "-version=json-v1") == 0 ||
+               strcmp(argv[i], "/V=json-v1") == 0 ||
+               strcmp(argv[i], "/version=json-v1") == 0) {
+      help.HelpType = cmDocumentation::VersionJson;
       i += int(get_opt_argument(i + 1, help.Filename));
     }
     if (help.HelpType != None) {

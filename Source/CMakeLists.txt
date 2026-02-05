@@ -522,6 +522,7 @@ add_library(
   cmUVStreambuf.h
   cmVariableWatch.cxx
   cmVariableWatch.h
+  cmVersion_Dependencies.cxx
   cmVersion.cxx
   cmVersion.h
   cmWindowsRegistry.cxx

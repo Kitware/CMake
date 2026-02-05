@@ -121,6 +121,13 @@ if(NOT CMake_TEST_EXTERNAL_CMAKE)
       string(APPEND DEPS_BUNDLED " ${util}")
     endif()
   endforeach()
+
+  # OpenSSL is not included in the UTILITIES list,
+  # but it is a system dependency, if used
+  if(CMAKE_USE_OPENSSL)
+    string(APPEND DEPS_SYSTEM " OPENSSL")
+  endif()
+
   if(DEPS_SYSTEM)
     message(STATUS "Using system-installed:${DEPS_SYSTEM}")
   endif()

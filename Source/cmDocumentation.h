@@ -24,6 +24,7 @@ public:
   {
     None,
     Version,
+    VersionJson,
     Usage,
     Help,
     Full,
@@ -116,6 +117,7 @@ private:
   bool PrintFiles(std::ostream& os, std::string const& pattern);
 
   bool PrintVersion(std::ostream& os);
+  bool PrintVersionJson(std::ostream& os);
   bool PrintUsage(std::ostream& os);
   bool PrintHelp(std::ostream& os);
   bool PrintHelpFull(std::ostream& os);
