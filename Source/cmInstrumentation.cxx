@@ -40,6 +40,7 @@
 #include "cmTimestamp.h"
 #include "cmUVProcessChain.h"
 #include "cmValue.h"
+#include "cmake.h"
 
 using LoadQueriesAfter = cmInstrumentation::LoadQueriesAfter;
 
@@ -234,6 +235,8 @@ void cmInstrumentation::WriteCMakeContent(
   Json::Value root;
   root["targets"] = this->DumpTargets(gg);
   root["custom"] = this->customContent;
+  root["project"] =
+    gg->GetCMakeInstance()->GetCacheDefinition("CMAKE_PROJECT_NAME").GetCStr();
   this->WriteInstrumentationJson(
     root, "data/content",
     cmStrCat("cmake-", this->ComputeSuffixTime(), ".json"));

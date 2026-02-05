@@ -566,6 +566,9 @@ corresponding to the CMake invocation responsible for generating its command.
 
 Each CMake content file contains the following:
 
+  ``project``
+    The value of :variable:`CMAKE_PROJECT_NAME`.
+
   ``custom``
     An object containing arbitrary JSON data specified by the user with the
     :ref:`cmake_instrumentation CUSTOM_CONTENT` functionality of the
