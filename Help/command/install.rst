@@ -792,7 +792,7 @@ Signatures
       Exclude the matched file or directory from installation.
 
     ``PERMISSIONS <permission>...``
-      Ovrerride the permissions setting for the matched file or directory.
+      Override the permissions setting for the matched file or directory.
 
     For example, the code
 
