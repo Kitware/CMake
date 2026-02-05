@@ -2734,13 +2734,22 @@ void cmVisualStudio10TargetGenerator::WriteAllSources(Elem& e0)
         customObjectName =
           this->LocalGenerator->GetCustomObjectFileName(*si.Source);
       }
+      if (customObjectName.empty()) {
+        if (this->GeneratorTarget->HasExplicitObjectName(si.Source)) {
+          customObjectName = this->GeneratorTarget->GetObjectName(si.Source);
+        }
+      } else {
+        customObjectName =
+          cmStrCat(std::move(customObjectName),
+                   this->GlobalGenerator->GetLanguageOutputExtension(
+                     si.Source->GetLanguage()));
+      }
       if (!customObjectName.empty()) {
         std::string outputName = "ObjectFileName";
         if (si.Source->GetLanguage() == "CUDA"_s) {
           outputName = "CompileOut";
         }
-        e2.Element(outputName,
-                   cmStrCat("$(IntDir)", customObjectName, ".obj"));
+        e2.Element(outputName, cmStrCat("$(IntDir)", customObjectName));
       }
 
       this->FinishWritingSource(e2, toolSettings);
@@ -2842,15 +2851,6 @@ void cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
   }
 
   bool noWinRT = this->TargetCompileAsWinRT && lang == "C"_s;
-  // for the first time we need a new line if there is something
-  // produced here.
-  if (!objectName.empty()) {
-    if (lang == "CUDA"_s) {
-      e2.Element("CompileOut", cmStrCat("$(IntDir)/", objectName));
-    } else {
-      e2.Element("ObjectFileName", cmStrCat("$(IntDir)/", objectName));
-    }
-  }
 
   if (lang == "ASM_NASM"_s) {
     if (cmValue objectDeps = sf.GetProperty("OBJECT_DEPENDS")) {
