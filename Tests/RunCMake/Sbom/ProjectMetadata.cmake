@@ -8,4 +8,5 @@ add_library(test INTERFACE)
 install(
   TARGETS test
   EXPORT test_targets
+  DESTINATION .
 )

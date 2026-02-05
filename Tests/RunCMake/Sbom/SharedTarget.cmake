@@ -11,4 +11,5 @@ target_link_libraries(shared PUBLIC foo::foo)
 install(
   TARGETS shared
   EXPORT shared_targets
+  DESTINATION .
 )

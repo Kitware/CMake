@@ -18,4 +18,5 @@ target_link_libraries(test PUBLIC baz)
 install(
   TARGETS test
   EXPORT test_targets
+  DESTINATION .
 )

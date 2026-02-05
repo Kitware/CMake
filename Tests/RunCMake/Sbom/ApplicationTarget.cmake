@@ -16,4 +16,5 @@ target_link_libraries(application PUBLIC bar::bar)
 install(
   TARGETS application
   EXPORT application_targets
+  DESTINATION .
 )

@@ -8,4 +8,3 @@ add_library(canine INTERFACE)
 target_link_libraries(canine INTERFACE mammal)
 
 install(TARGETS canine EXPORT dog DESTINATION .)
-install(SBOM dog EXPORT dog DESTINATION .)

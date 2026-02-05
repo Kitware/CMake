@@ -2584,6 +2584,7 @@ bool HandleSbomMode(std::vector<std::string> const& args,
   // specified
   helper.Makefile->GetGlobalGenerator()->AddInstallComponent(
     ica.GetComponent());
+  helper.Makefile->SetExplicitlyGeneratesSbom(true);
 
   // Create the export install generator.
   helper.Makefile->AddInstallGenerator(
