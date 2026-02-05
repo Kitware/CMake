@@ -1791,10 +1791,11 @@ bool HandleDirectoryMode(std::vector<std::string> const& args,
       exclude_from_all = true;
       doing = DoingNone;
     } else if (doing == DoingDirs) {
-      // Convert this directory to a full path.
+      // If the given directory is not a full path, convert it to one by
+      // assuming it's relative to the current source directory.
       std::string dir = args[i];
       std::string::size_type gpos = cmGeneratorExpression::Find(dir);
-      if (gpos != 0 && !cmSystemTools::FileIsFullPath(dir)) {
+      if (!dir.empty() && gpos != 0 && !cmSystemTools::FileIsFullPath(dir)) {
         dir =
           cmStrCat(helper.Makefile->GetCurrentSourceDirectory(), '/', args[i]);
       }
