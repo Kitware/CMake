@@ -13,7 +13,7 @@ def check_objects(o, g):
     assert is_list(o)
     assert len(o) == 1
     major = 2
-    minor = 9
+    minor = 10
     check_index_object(o[0], "codemodel", major, minor, check_object_codemodel(g, major, minor))
 
 def check_backtrace(t, b, backtrace):
@@ -317,6 +317,11 @@ def check_target(c, major, minor):
         if expected["symbolic"] is not None:
             expected_keys.append("symbolic")
             assert is_bool(obj["symbolic"], expected["symbolic"])
+
+        if expected["interfaceSources"] is not None:
+            expected_keys.append("interfaceSources")
+            assert is_list(obj["interfaceSources"])
+            assert len(obj["interfaceSources"]) == len(expected["interfaceSources"])
 
         assert is_dict(obj["paths"])
         assert sorted(obj["paths"].keys()) == ["build", "source"]
@@ -710,7 +715,16 @@ def check_target(c, major, minor):
 
             def check_source_group(actual, expected):
                 assert is_dict(actual)
-                assert sorted(actual.keys()) == ["name", "sourceIndexes"]
+
+                expected_group_keys = ["name", "sourceIndexes"]
+                if expected["interfaceSourcePaths"] is not None:
+                    expected_group_keys.append("interfaceSourceIndexes")
+                    check_list_match(lambda a, e: matches(obj["interfaceSources"][a]["path"], e),
+                                     actual["interfaceSourceIndexes"], expected["interfaceSourcePaths"],
+                                     missing_exception=lambda e: "Interface source path: %s" % e,
+                                     extra_exception=lambda a: "Interface source path: %s" % obj["interfaceSources"][a]["path"])
+
+                assert sorted(actual.keys()) == sorted(expected_group_keys)
 
                 check_list_match(lambda a, e: matches(obj["sources"][a]["path"], e),
                                  actual["sourceIndexes"], expected["sourcePaths"],
@@ -1167,6 +1181,7 @@ def gen_check_build_system_targets(c, g, inSource):
                             "sourcePaths": [
                                 "^.*/Tests/RunCMake/FileAPI/codemodel-v2-build/CMakeFiles/([0-9a-f]+/)?generate\\.stamp\\.rule$",
                             ],
+                            "interfaceSourcePaths": None,
                         },
                     ]
                 elif e["name"] in ("ALL_BUILD"):

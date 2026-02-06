@@ -48,18 +48,21 @@
             ]
         }
     ],
+    "interfaceSources": null,
     "sourceGroups": [
         {
             "name": "",
             "sourcePaths": [
                 "^.*/Tests/RunCMake/FileAPI/codemodel-v2-build/custom/CMakeFiles/custom_tgt(-(Debug|Release|RelWithDebInfo|MinSizeRel))?$"
-            ]
+            ],
+            "interfaceSourcePaths": null
         },
         {
             "name": "CMake Rules",
             "sourcePaths": [
                 "^.*/Tests/RunCMake/FileAPI/codemodel-v2-build/(custom/)?CMakeFiles/([0-9a-f]+/)?custom_tgt(-\\(CONFIG\\))?\\.rule$"
-            ]
+            ],
+            "interfaceSourcePaths": null
         }
     ],
     "compileGroups": null,

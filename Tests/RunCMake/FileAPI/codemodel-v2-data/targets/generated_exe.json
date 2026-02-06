@@ -54,18 +54,21 @@
             ]
         }
     ],
+    "interfaceSources": null,
     "sourceGroups": [
         {
             "name": "Source Files",
             "sourcePaths": [
                 "^.*/Tests/RunCMake/FileAPIExternalSource/empty\\.c$"
-            ]
+            ],
+            "interfaceSourcePaths": null
         },
         {
             "name": "Generated Source Files",
             "sourcePaths": [
                 "^.*/Tests/RunCMake/FileAPI/FileAPIExternalBuild/generated\\.cxx$"
-            ]
+            ],
+            "interfaceSourcePaths": null
         }
     ],
     "compileGroups": [

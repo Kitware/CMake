@@ -31,6 +31,9 @@
     },
     {
       "$ref": "#/definitions/codemodelV2_9"
+    },
+    {
+      "$ref": "#/definitions/codemodelV2_10"
     }
   ],
   "definitions": {
@@ -47,7 +50,25 @@
         },
         "minor": {
           "type": "integer",
-          "minimum": 9
+          "const": 9
+        }
+      },
+      "additionalProperties": false
+    },
+    "codemodelVersionV2_10": {
+      "type": "object",
+      "required": [
+        "major",
+        "minor"
+      ],
+      "properties": {
+        "major": {
+          "type": "integer",
+          "const": 2
+        },
+        "minor": {
+          "type": "integer",
+          "minimum": 10
         }
       },
       "additionalProperties": false
@@ -615,7 +636,31 @@
         "additionalProperties": false
       }
     },
-    "sourceGroups": {
+    "interfaceSourcesV2_10": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "path"
+        ],
+        "properties": {
+          "path": {
+            "$ref": "#/definitions/sourcesPath"
+          },
+          "sourceGroupIndex": {
+            "$ref": "#/definitions/sourcesSourceGroupIndex"
+          },
+          "isGenerated": {
+            "$ref": "#/definitions/sourcesIsGenerated"
+          },
+          "fileSetIndex": {
+            "$ref": "#/definitions/sourcesFileSetIndexV2_5"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "sourceGroupsV2_0": {
       "type": "array",
       "items": {
         "type": "object",
@@ -635,6 +680,39 @@
               "minimum": 0
             },
             "description": "Indices into sources array"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "sourceGroupsV2_10": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "sourceIndexes"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of source group"
+          },
+          "sourceIndexes": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "description": "Indices into sources array"
+          },
+          "interfaceSourceIndexes": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "description": "Indices into interfaceSources array"
           }
         },
         "additionalProperties": false
@@ -1052,7 +1130,7 @@
           "$ref": "#/definitions/sourcesV2_0"
         },
         "sourceGroups": {
-          "$ref": "#/definitions/sourceGroups"
+          "$ref": "#/definitions/sourceGroupsV2_0"
         },
         "compileGroups": {
           "$ref": "#/definitions/compileGroupsV2_0"
@@ -1116,7 +1194,7 @@
           "$ref": "#/definitions/sourcesV2_0"
         },
         "sourceGroups": {
-          "$ref": "#/definitions/sourceGroups"
+          "$ref": "#/definitions/sourceGroupsV2_0"
         },
         "compileGroups": {
           "$ref": "#/definitions/compileGroupsV2_1"
@@ -1180,7 +1258,7 @@
           "$ref": "#/definitions/sourcesV2_0"
         },
         "sourceGroups": {
-          "$ref": "#/definitions/sourceGroups"
+          "$ref": "#/definitions/sourceGroupsV2_0"
         },
         "compileGroups": {
           "$ref": "#/definitions/compileGroupsV2_2"
@@ -1247,7 +1325,7 @@
           "$ref": "#/definitions/sourcesV2_5"
         },
         "sourceGroups": {
-          "$ref": "#/definitions/sourceGroups"
+          "$ref": "#/definitions/sourceGroupsV2_0"
         },
         "compileGroups": {
           "$ref": "#/definitions/compileGroupsV2_2"
@@ -1314,7 +1392,7 @@
           "$ref": "#/definitions/sourcesV2_5"
         },
         "sourceGroups": {
-          "$ref": "#/definitions/sourceGroups"
+          "$ref": "#/definitions/sourceGroupsV2_0"
         },
         "compileGroups": {
           "$ref": "#/definitions/compileGroupsV2_6"
@@ -1384,7 +1462,7 @@
           "$ref": "#/definitions/sourcesV2_5"
         },
         "sourceGroups": {
-          "$ref": "#/definitions/sourceGroups"
+          "$ref": "#/definitions/sourceGroupsV2_0"
         },
         "compileGroups": {
           "$ref": "#/definitions/compileGroupsV2_6"
@@ -1457,7 +1535,7 @@
           "$ref": "#/definitions/sourcesV2_5"
         },
         "sourceGroups": {
-          "$ref": "#/definitions/sourceGroups"
+          "$ref": "#/definitions/sourceGroupsV2_0"
         },
         "compileGroups": {
           "$ref": "#/definitions/compileGroupsV2_6"
@@ -1564,7 +1642,117 @@
           "$ref": "#/definitions/symbolicV2_9"
         },
         "sourceGroups": {
-          "$ref": "#/definitions/sourceGroups"
+          "$ref": "#/definitions/sourceGroupsV2_0"
+        },
+        "compileGroups": {
+          "$ref": "#/definitions/compileGroupsV2_6"
+        },
+        "backtraceGraph": {
+          "$ref": "#/definitions/backtraceGraph"
+        }
+      },
+      "additionalProperties": false
+    },
+    "codemodelV2_10": {
+      "required": [
+        "codemodelVersion",
+        "name",
+        "id",
+        "type",
+        "paths",
+        "sources",
+        "backtraceGraph"
+      ],
+      "properties": {
+        "codemodelVersion": {
+          "$ref": "#/definitions/codemodelVersionV2_10"
+        },
+        "name": {
+          "$ref": "#/definitions/name"
+        },
+        "id": {
+          "$ref": "#/definitions/id"
+        },
+        "type": {
+          "$ref": "#/definitions/typeV2_9"
+        },
+        "imported": {
+          "$ref": "#/definitions/importedV2_9"
+        },
+        "local": {
+          "$ref": "#/definitions/localV2_9"
+        },
+        "abstract": {
+          "$ref": "#/definitions/abstractV2_9"
+        },
+        "backtrace": {
+          "$ref": "#/definitions/backtrace"
+        },
+        "folder": {
+          "$ref": "#/definitions/folder"
+        },
+        "paths": {
+          "$ref": "#/definitions/paths"
+        },
+        "nameOnDisk": {
+          "$ref": "#/definitions/nameOnDisk"
+        },
+        "artifacts": {
+          "$ref": "#/definitions/artifacts"
+        },
+        "isGeneratorProvided": {
+          "$ref": "#/definitions/isGeneratorProvided"
+        },
+        "install": {
+          "$ref": "#/definitions/install"
+        },
+        "launchers": {
+          "$ref": "#/definitions/launchersV2_7"
+        },
+        "link": {
+          "$ref": "#/definitions/link"
+        },
+        "archive": {
+          "$ref": "#/definitions/archive"
+        },
+        "debugger": {
+          "$ref": "#/definitions/debuggerV2_8"
+        },
+        "dependencies": {
+          "$ref": "#/definitions/dependencies"
+        },
+        "linkLibraries": {
+          "$ref": "#/definitions/linkLibrariesV2_9"
+        },
+        "interfaceLinkLibraries": {
+          "$ref": "#/definitions/interfaceLinkLibrariesV2_9"
+        },
+        "compileDependencies": {
+          "$ref": "#/definitions/compileDependenciesV2_9"
+        },
+        "interfaceCompileDependencies": {
+          "$ref": "#/definitions/interfaceCompileDependenciesV2_9"
+        },
+        "objectDependencies": {
+          "$ref": "#/definitions/onlyTargetDependenciesArrayV2_9"
+        },
+        "orderDependencies": {
+          "$ref": "#/definitions/onlyTargetDependenciesArrayV2_9"
+        },
+        "fileSets": {
+          "$ref": "#/definitions/fileSetsV2_5"
+        },
+        "sources": {
+          "$ref": "#/definitions/sourcesV2_5"
+        },
+        "interfaceSources": {
+          "$ref": "#/definitions/interfaceSourcesV2_10"
+        },
+        "symbolic": {
+          "$ref": "#/definitions/symbolicV2_9"
+        },
+        "sourceGroups": {
+          "$ref": "#/definitions/sourceGroupsV2_10"
         },
         "compileGroups": {
           "$ref": "#/definitions/compileGroupsV2_6"

@@ -57,12 +57,14 @@
             ]
         }
     ],
+    "interfaceSources": null,
     "sourceGroups": [
         {
             "name": "Source Files",
             "sourcePaths": [
                 "^empty\\.c$"
-            ]
+            ],
+            "interfaceSourcePaths": null
         }
     ],
     "compileGroups": [

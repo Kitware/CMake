@@ -11,6 +11,7 @@
     "isGeneratorProvided": null,
     "fileSets": null,
     "sources": [],
+    "interfaceSources": null,
     "sourceGroups": null,
     "compileGroups": null,
     "backtrace": [

@@ -822,7 +822,7 @@ std::string cmFileAPI::NoSupportedVersion(
 // Update the following files as well when updating this constant:
 //   Help/manual/cmake-file-api.7.rst
 //   Tests/RunCMake/FileAPI/codemodel-v2-check.py (check_objects())
-static unsigned int const CodeModelV2Minor = 9;
+static unsigned int const CodeModelV2Minor = 10;
 
 void cmFileAPI::BuildClientRequestCodeModel(
   ClientRequest& r, std::vector<RequestVersion> const& versions)

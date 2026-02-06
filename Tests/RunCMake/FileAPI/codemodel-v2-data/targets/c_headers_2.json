@@ -42,11 +42,27 @@
       ]
     }
   ],
+  "interfaceSources": [
+    {
+      "path": "^fileset/h1\\.h$",
+      "isGenerated": null,
+      "fileSetName": "HEADERS",
+      "sourceGroupName": "Header Files"
+    }
+  ],
   "sourceGroups": [
     {
       "name": "Source Files",
       "sourcePaths": [
         "^fileset/empty\\.c$"
+      ],
+      "interfaceSourcePaths": null
+    },
+    {
+      "name": "Header Files",
+      "sourcePaths": [],
+      "interfaceSourcePaths": [
+        "^fileset/h1\\.h$"
       ]
     }
   ],

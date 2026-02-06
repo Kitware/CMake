@@ -450,6 +450,7 @@ class Target
   {
     std::string Name;
     Json::Value SourceIndexes = Json::arrayValue;
+    Json::Value InterfaceSourceIndexes = Json::arrayValue;
   };
   std::unordered_map<cmSourceGroup const*, Json::ArrayIndex> SourceGroupsMap;
   std::vector<SourceGroup> SourceGroups;
@@ -463,6 +464,8 @@ class Target
   std::vector<CompileGroup> CompileGroups;
 
   using FileSetDatabase = std::map<std::string, Json::ArrayIndex>;
+
+  std::vector<cmFileSetVisibility> FileSetVisibilities;
 
   template <typename T>
   JBT<T> ToJBT(BT<T> const& bt)
@@ -484,7 +487,7 @@ class Target
   void ProcessLanguages();
   void ProcessLanguage(std::string const& lang);
 
-  Json::ArrayIndex AddSourceGroup(cmSourceGroup* sg, Json::ArrayIndex si);
+  Json::ArrayIndex AddSourceGroup(cmSourceGroup* sg);
   CompileData BuildCompileData(cmSourceFile* sf);
   CompileData MergeCompileData(CompileData const& fd);
   Json::ArrayIndex AddSourceCompileGroup(cmSourceFile* sf,
@@ -504,6 +507,9 @@ class Target
   Json::Value DumpSources(FileSetDatabase const& fsdb);
   Json::Value DumpSource(cmGeneratorTarget::SourceAndKind const& sk,
                          Json::ArrayIndex si, FileSetDatabase const& fsdb);
+  Json::Value DumpInterfaceSources(FileSetDatabase const& fsdb);
+  Json::Value DumpInterfaceSource(std::string path, Json::ArrayIndex si,
+                                  FileSetDatabase const& fsdb);
   Json::Value DumpSourceGroups();
   Json::Value DumpSourceGroup(SourceGroup& sg);
   Json::Value DumpCompileGroups();
@@ -1373,6 +1379,11 @@ Json::Value Target::Dump()
     // output a sources array to preserve backward compatibility
     target["sources"] = this->DumpSources(fileSetInfo.second);
 
+    auto interfaceSources = this->DumpInterfaceSources(fileSetInfo.second);
+    if (!interfaceSources.empty()) {
+      target["interfaceSources"] = std::move(interfaceSources);
+    }
+
     Json::Value folder = this->DumpFolder();
     if (!folder.isNull()) {
       target["folder"] = std::move(folder);
@@ -1466,7 +1477,7 @@ void Target::ProcessLanguage(std::string const& lang)
   }
 }
 
-Json::ArrayIndex Target::AddSourceGroup(cmSourceGroup* sg, Json::ArrayIndex si)
+Json::ArrayIndex Target::AddSourceGroup(cmSourceGroup* sg)
 {
   auto i = this->SourceGroupsMap.find(sg);
   if (i == this->SourceGroupsMap.end()) {
@@ -1476,7 +1487,6 @@ Json::ArrayIndex Target::AddSourceGroup(cmSourceGroup* sg, Json::ArrayIndex si)
     g.Name = sg->GetFullName();
     this->SourceGroups.push_back(std::move(g));
   }
-  this->SourceGroups[i->second].SourceIndexes.append(si);
   return i->second;
 }
 
@@ -1710,6 +1720,11 @@ std::pair<Json::Value, Target::FileSetDatabase> Target::DumpFileSets()
   Json::Value fsJson = Json::nullValue;
   FileSetDatabase fsdb;
 
+  // We record the visibility of each file set for later use when dumping
+  // interface sources, which needs to map files to file set visibility
+  // with only an index available. Those indexes match this vector.
+  this->FileSetVisibilities.clear();
+
   // Build the fileset database.
   auto const* tgt = this->GT->Target;
   auto const& fs_names = tgt->GetAllFileSetNames();
@@ -1737,6 +1752,7 @@ std::pair<Json::Value, Target::FileSetDatabase> Target::DumpFileSets()
         fs->EvaluateDirectoryEntries(directoryEntries, context, this->GT);
 
       fsJson.append(this->DumpFileSet(fs, directories));
+      this->FileSetVisibilities.push_back(fs->GetVisibility());
 
       std::map<std::string, std::vector<std::string>> files_per_dirs;
       for (auto const& entry : fileEntries) {
@@ -1814,7 +1830,9 @@ Json::Value Target::DumpSource(cmGeneratorTarget::SourceAndKind const& sk,
   }
 
   if (cmSourceGroup* sg = this->GT->LocalGenerator->FindSourceGroup(path)) {
-    source["sourceGroupIndex"] = this->AddSourceGroup(sg, si);
+    Json::ArrayIndex const groupIndex = this->AddSourceGroup(sg);
+    source["sourceGroupIndex"] = groupIndex;
+    this->SourceGroups[groupIndex].SourceIndexes.append(si);
   }
 
   switch (sk.Kind) {
@@ -1836,6 +1854,69 @@ Json::Value Target::DumpSource(cmGeneratorTarget::SourceAndKind const& sk,
     case cmGeneratorTarget::SourceKindXaml:
     case cmGeneratorTarget::SourceKindUnityBatched:
       break;
+  }
+
+  return source;
+}
+
+Json::Value Target::DumpInterfaceSources(FileSetDatabase const& fsdb)
+{
+  Json::Value interfaceSources = Json::arrayValue;
+  auto dumpFile = [this, &interfaceSources, &fsdb](std::string const& file) {
+    std::string path = file;
+    if (!cmSystemTools::FileIsFullPath(path)) {
+      path = cmStrCat(
+        this->GT->GetLocalGenerator()->GetCurrentSourceDirectory(), '/', file);
+    }
+    path = cmSystemTools::CollapseFullPath(path);
+
+    interfaceSources.append(
+      this->DumpInterfaceSource(path, interfaceSources.size(), fsdb));
+  };
+
+  cmValue prop = this->GT->GetProperty("INTERFACE_SOURCES");
+  if (prop) {
+    cmList files{ cmGeneratorExpression::Evaluate(
+      *prop, this->GT->GetLocalGenerator(), this->Config, this->GT) };
+
+    for (std::string const& file : files) {
+      dumpFile(file);
+    }
+  }
+
+  for (auto const& fsIter : fsdb) {
+    Json::ArrayIndex const index = fsIter.second;
+    // FileSetVisibilities was populated by DumpFileSets() and will always
+    // have the same size as the file sets array that index is indexing into
+    if (this->FileSetVisibilities[index] != cmFileSetVisibility::Private) {
+      dumpFile(fsIter.first);
+    }
+  }
+
+  return interfaceSources;
+}
+
+Json::Value Target::DumpInterfaceSource(std::string path, Json::ArrayIndex si,
+                                        FileSetDatabase const& fsdb)
+{
+  Json::Value source = Json::objectValue;
+
+  cmSourceFile* sf = this->GT->Makefile->GetOrCreateSource(path);
+  path = sf->ResolveFullPath();
+  source["path"] = RelativeIfUnder(this->TopSource, path);
+  if (sf->GetIsGenerated()) {
+    source["isGenerated"] = true;
+  }
+
+  auto fsit = fsdb.find(path);
+  if (fsit != fsdb.end()) {
+    source["fileSetIndex"] = fsit->second;
+  }
+
+  if (cmSourceGroup* sg = this->GT->LocalGenerator->FindSourceGroup(path)) {
+    Json::ArrayIndex const groupIndex = this->AddSourceGroup(sg);
+    source["sourceGroupIndex"] = groupIndex;
+    this->SourceGroups[groupIndex].InterfaceSourceIndexes.append(si);
   }
 
   return source;
@@ -1951,6 +2032,9 @@ Json::Value Target::DumpSourceGroup(SourceGroup& sg)
   Json::Value group = Json::objectValue;
   group["name"] = sg.Name;
   group["sourceIndexes"] = std::move(sg.SourceIndexes);
+  if (!sg.InterfaceSourceIndexes.empty()) {
+    group["interfaceSourceIndexes"] = std::move(sg.InterfaceSourceIndexes);
+  }
   return group;
 }
 
