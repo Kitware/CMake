@@ -10,7 +10,6 @@
 #include <unordered_set>
 #include <vector>
 
-#include <cm3p/json/reader.h>
 #include <cm3p/json/value.h>
 #include <cm3p/json/writer.h>
 
@@ -169,7 +168,6 @@ private:
   /** Identify the situation in which WriteReplies was called.  */
   IndexFor ReplyIndexFor = IndexFor::Success;
 
-  std::unique_ptr<Json::CharReader> JsonReader;
   std::unique_ptr<Json::StreamWriter> JsonWriter;
 
   bool ReadJsonFile(std::string const& file, Json::Value& value,
