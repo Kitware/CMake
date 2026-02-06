@@ -3,6 +3,7 @@
 
 #include "cmJSONState.h"
 
+#include <istream>
 #include <iterator>
 #include <memory>
 #include <sstream>
@@ -27,37 +28,12 @@ cmJSONState::cmJSONState(std::string jsonFile, Json::Value* root)
   // If there's a BOM, toss it.
   cmsys::FStream::ReadBOM(fin);
 
-  // Save the entire document.
-  std::streampos finBegin = fin.tellg();
-  this->doc = std::string(std::istreambuf_iterator<char>(fin),
-                          std::istreambuf_iterator<char>());
-  if (this->doc.empty()) {
-    this->AddError("A JSON document cannot be empty");
-    return;
-  }
-  fin.seekg(finBegin);
+  this->ReadJSONStream(fin, root);
+}
 
-  Json::CharReaderBuilder builder;
-  Json::CharReaderBuilder::strictMode(&builder.settings_);
-  std::string errMsg;
-
-#if JSONCPP_VERSION_HEXA >= 0x01090600
-  // Has StructuredError
-  std::unique_ptr<Json::CharReader> const reader(builder.newCharReader());
-  reader->parse(doc.data(), doc.data() + doc.size(), root, &errMsg);
-  std::vector<Json::CharReader::StructuredError> structuredErrors =
-    reader->getStructuredErrors();
-  for (auto const& structuredError : structuredErrors) {
-    this->AddErrorAtOffset(structuredError.message,
-                           structuredError.offset_start);
-  }
-#else
-  // No StructuredError Available, Use error string from jsonCpp
-  if (!Json::parseFromStream(builder, fin, root, &errMsg)) {
-    errMsg = cmStrCat("JSON Parse Error: ", this->Filename, ":\n", errMsg);
-    this->AddError(errMsg);
-  }
-#endif
+cmJSONState::cmJSONState(std::istream& jsonIStream, Json::Value* root)
+{
+  this->ReadJSONStream(jsonIStream, root);
 }
 
 void cmJSONState::AddError(std::string const& errMsg)
@@ -142,6 +118,46 @@ void cmJSONState::push_stack(std::string const& k, Json::Value const* value)
 void cmJSONState::pop_stack()
 {
   this->parseStack.pop_back();
+}
+
+void cmJSONState::ReadJSONStream(std::istream& jsonIStream, Json::Value* root)
+{
+  // Save the entire document.
+  std::streampos inBegin = jsonIStream.tellg();
+  this->doc = std::string(std::istreambuf_iterator<char>(jsonIStream),
+                          std::istreambuf_iterator<char>());
+  if (this->doc.empty()) {
+    this->AddError("A JSON document cannot be empty");
+    return;
+  }
+  jsonIStream.seekg(inBegin);
+
+  Json::CharReaderBuilder builder;
+  Json::CharReaderBuilder::strictMode(&builder.settings_);
+  std::string errMsg;
+
+#if JSONCPP_VERSION_HEXA >= 0x01090600
+  // Has StructuredError
+  std::unique_ptr<Json::CharReader> const reader(builder.newCharReader());
+  reader->parse(this->doc.data(), this->doc.data() + this->doc.size(), root,
+                &errMsg);
+  std::vector<Json::CharReader::StructuredError> structuredErrors =
+    reader->getStructuredErrors();
+  for (auto const& structuredError : structuredErrors) {
+    this->AddErrorAtOffset(structuredError.message,
+                           structuredError.offset_start);
+  }
+#else
+  // No StructuredError Available, Use error string from jsonCpp
+  if (!Json::parseFromStream(builder, jsonIStream, root, &errMsg)) {
+    if (this->Filename.empty()) {
+      errMsg = cmStrCat("JSON Parse Error:\n ", errMsg);
+    } else {
+      errMsg = cmStrCat("JSON Parse Error: ", this->Filename, ":\n", errMsg);
+    }
+    this->AddError(errMsg);
+  }
+#endif
 }
 
 std::string cmJSONState::GetJsonContext(Location loc)
