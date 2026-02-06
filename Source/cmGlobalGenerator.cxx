@@ -2129,6 +2129,35 @@ std::string cmGlobalGenerator::ComputeTargetShortName(
   return cmStrCat(tgtHash, dirHash);
 }
 
+cmGlobalGenerator::TargetDirectoryRegistration&
+cmGlobalGenerator::RegisterTargetDirectory(cmGeneratorTarget const* tgt,
+                                           std::string const& targetDir) const
+{
+  if (!tgt->IsNormal() || tgt->GetType() == cmStateEnums::GLOBAL_TARGET ||
+      tgt->Target->IsForTryCompile()) {
+    static TargetDirectoryRegistration utilityRegistration(nullptr, true);
+    return utilityRegistration;
+  }
+
+  // Get the registration instance for the target.
+#if __cplusplus >= 201703L
+  auto registration = this->TargetDirectoryRegistrations.try_emplace(tgt);
+#else
+  auto registration = this->TargetDirectoryRegistrations.insert(
+    std::make_pair(tgt, TargetDirectoryRegistration()));
+#endif
+  // If it was just inserted, search for a `CollidesWith` possibility.
+  if (registration.second) {
+    auto& otherTargets = this->TargetDirectories[targetDir];
+    if (!otherTargets.empty()) {
+      registration.first->second.CollidesWith = *otherTargets.begin();
+    }
+    otherTargets.insert(tgt);
+  }
+
+  return registration.first->second;
+}
+
 void cmGlobalGenerator::ComputeTargetObjectDirectory(
   cmGeneratorTarget* /*unused*/) const
 {

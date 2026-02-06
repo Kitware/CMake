@@ -47,5 +47,6 @@ function(run_install_test case)
 endfunction()
 
 if (RunCMake_GENERATOR MATCHES "(Ninja|Makefiles|Visual Studio)")
+  run_cmake(Collides)
   run_install_test(ShortObjectDoesntChangeInstall)
 endif ()

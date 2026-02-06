@@ -111,6 +111,7 @@ std::string cmExportTryCompileFileGenerator::FindTargets(
   cmTarget dummyHead("try_compile_dummy_exe", cmStateEnums::EXECUTABLE,
                      cmTarget::Visibility::Normal, tgt->Target->GetMakefile(),
                      cmTarget::PerConfig::Yes);
+  dummyHead.SetIsForTryCompile();
 
   cmGeneratorTarget gDummyHead(&dummyHead, tgt->GetLocalGenerator());
 

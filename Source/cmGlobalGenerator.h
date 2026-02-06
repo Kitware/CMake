@@ -646,6 +646,20 @@ public:
   virtual std::string GetShortBinaryOutputDir() const;
   std::string ComputeTargetShortName(std::string const& bindir,
                                      std::string const& targetName) const;
+  struct TargetDirectoryRegistration
+  {
+    TargetDirectoryRegistration() = default;
+    TargetDirectoryRegistration(cmGeneratorTarget const* t, bool w)
+      : CollidesWith(t)
+      , Warned(w)
+    {
+    }
+
+    cmGeneratorTarget const* CollidesWith = nullptr;
+    bool Warned = false;
+  };
+  TargetDirectoryRegistration& RegisterTargetDirectory(
+    cmGeneratorTarget const* tgt, std::string const& targetDir) const;
 
   virtual void ComputeTargetObjectDirectory(cmGeneratorTarget* gt) const;
 
@@ -821,11 +835,20 @@ private:
     std::unordered_map<std::string, cmGeneratorTarget*>;
   using MakefileMap = std::unordered_map<std::string, cmMakefile*>;
   using LocalGeneratorMap = std::unordered_map<std::string, cmLocalGenerator*>;
+  using TargetDirectoryRegistrationMap =
+    std::map<cmGeneratorTarget const*, TargetDirectoryRegistration>;
+  using TargetDirectoryMap =
+    std::unordered_map<std::string, std::set<cmGeneratorTarget const*>>;
   // Map efficiently from target name to cmTarget instance.
   // Do not use this structure for looping over all targets.
   // It contains both normal and globally visible imported targets.
   TargetMap TargetSearchIndex;
   GeneratorTargetMap GeneratorTargetSearchIndex;
+
+  // Map from target to a directory registration.
+  mutable TargetDirectoryRegistrationMap TargetDirectoryRegistrations;
+  // Map from target directories to targets using it.
+  mutable TargetDirectoryMap TargetDirectories;
 
   // Map efficiently from source directory path to cmMakefile instance.
   // Do not use this structure for looping over all directories.

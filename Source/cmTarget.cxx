@@ -612,6 +612,7 @@ public:
   bool BuildInterfaceIncludesAppended;
   bool PerConfig;
   bool IsSymbolic;
+  bool IsForTryCompile{ false };
   cmTarget::Visibility TargetVisibility;
   std::set<BT<std::pair<std::string, bool>>> Utilities;
   std::set<std::string> CodegenDependencies;
@@ -2908,6 +2909,16 @@ bool cmTarget::CanCompileSources() const
       break;
   }
   return false;
+}
+
+void cmTarget::SetIsForTryCompile()
+{
+  this->impl->IsForTryCompile = true;
+}
+
+bool cmTarget::IsForTryCompile() const
+{
+  return this->impl->IsForTryCompile;
 }
 
 char const* cmTarget::GetSuffixVariableInternal(

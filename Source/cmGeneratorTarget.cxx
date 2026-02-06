@@ -5560,8 +5560,27 @@ std::string cmGeneratorTarget::GetSupportDirectory(
   cmStateEnums::IntermediateDirKind kind) const
 {
   cmLocalGenerator* lg = this->GetLocalGenerator();
-  return cmStrCat(lg->GetObjectOutputRoot(kind), '/',
-                  lg->GetTargetDirectory(this, kind));
+  auto targetDir = cmStrCat(lg->GetObjectOutputRoot(kind), '/',
+                            lg->GetTargetDirectory(this, kind));
+
+#ifndef CMAKE_BOOTSTRAP
+  auto& tdr =
+    this->GetGlobalGenerator()->RegisterTargetDirectory(this, targetDir);
+  if (tdr.CollidesWith && !tdr.Warned) {
+    this->Makefile->IssueMessage(
+      MessageType::WARNING,
+      cmStrCat("The '", tdr.CollidesWith->GetName(), "' and '",
+               this->GetName(),
+               "' targets share an intermediate directory\n    ", targetDir,
+               "\nwhich may cause problems with the build graph. This project "
+               "is not compatible with the `SHORT` target intermediate "
+               "directory strategy. Possible remedies include: moving the "
+               "target into different directories or renaming a target."));
+    tdr.Warned = true;
+  }
+#endif
+
+  return targetDir;
 }
 
 std::string cmGeneratorTarget::GetCMFSupportDirectory(
