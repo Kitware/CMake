@@ -162,7 +162,7 @@ std::string Glob::PatternToRegex(std::string const& pattern,
         // On case-insensitive systems file names are converted to lower
         // case before matching.
         if (!preserve_case) {
-          ch = tolower(ch);
+          ch = tolower(static_cast<unsigned char>(ch));
         }
       }
 #endif
