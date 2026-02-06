@@ -534,6 +534,21 @@ static bool CheckStringOperations()
 {
   bool res = true;
 
+  // Case conversion should only affect ASCII bytes.
+  // Test using a UTF-8 Copyright Symbol because its leading byte
+  // is transformed by MSVC's tolower in a US-ASCII locale.
+  static std::string const sampleUTF8 = "y\xC2\xA9Z"; // Copyright Symbol
+  if (kwsys::SystemTools::LowerCase(sampleUTF8) != "y\xC2\xA9z") {
+    std::cerr << "Problem with LowerCase " << '"' << sampleUTF8 << '"'
+              << std::endl;
+    res = false;
+  }
+  if (kwsys::SystemTools::UpperCase(sampleUTF8) != "Y\xC2\xA9Z") {
+    std::cerr << "Problem with UpperCase " << '"' << sampleUTF8 << '"'
+              << std::endl;
+    res = false;
+  }
+
   std::string test = "mary had a little lamb.";
   if (kwsys::SystemTools::CapitalizedWords(test) !=
       "Mary Had A Little Lamb.") {
