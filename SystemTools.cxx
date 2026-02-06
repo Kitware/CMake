@@ -320,7 +320,8 @@ inline char const* Getcwd(char* buf, unsigned int len)
     if (nlen < len) {
       // make sure the drive letter is capital
       if (nlen > 1 && buf[1] == ':') {
-        buf[0] = toupper(buf[0]);
+        buf[0] =
+          static_cast<char>(toupper(static_cast<unsigned char>(buf[0])));
       }
       return buf;
     }
@@ -552,7 +553,8 @@ std::string SystemToolsStatic::GetCasePathName(std::string const& pathIn)
   casePath = path_components[idx++];
   // make sure drive letter is always upper case
   if (casePath.size() > 1 && casePath[1] == ':') {
-    casePath[0] = toupper(casePath[0]);
+    casePath[0] = static_cast<std::string::value_type>(
+      toupper(static_cast<unsigned char>(casePath[0])));
   }
   char const* sep = "";
 
@@ -1656,9 +1658,11 @@ std::string SystemTools::Capitalized(std::string const& s)
     return n;
   }
   n.resize(s.size());
-  n[0] = static_cast<std::string::value_type>(toupper(s[0]));
+  n[0] = static_cast<std::string::value_type>(
+    toupper(static_cast<unsigned char>(s[0])));
   for (size_t i = 1; i < s.size(); i++) {
-    n[i] = static_cast<std::string::value_type>(tolower(s[i]));
+    n[i] = static_cast<std::string::value_type>(
+      tolower(static_cast<unsigned char>(s[i])));
   }
   return n;
 }
@@ -1677,7 +1681,8 @@ std::string SystemTools::CapitalizedWords(std::string const& s)
     if (isalpha(s[i]) && (i == 0 || isspace(s[i - 1])))
 #endif
     {
-      n[i] = static_cast<std::string::value_type>(toupper(s[i]));
+      n[i] = static_cast<std::string::value_type>(
+        toupper(static_cast<unsigned char>(s[i])));
     }
   }
   return n;
@@ -1697,7 +1702,8 @@ std::string SystemTools::UnCapitalizedWords(std::string const& s)
     if (isalpha(s[i]) && (i == 0 || isspace(s[i - 1])))
 #endif
     {
-      n[i] = static_cast<std::string::value_type>(tolower(s[i]));
+      n[i] = static_cast<std::string::value_type>(
+        tolower(static_cast<unsigned char>(s[i])));
     }
   }
   return n;
@@ -1768,7 +1774,8 @@ std::string SystemTools::LowerCase(std::string const& s)
   std::string n;
   n.resize(s.size());
   for (size_t i = 0; i < s.size(); i++) {
-    n[i] = static_cast<std::string::value_type>(tolower(s[i]));
+    n[i] = static_cast<std::string::value_type>(
+      tolower(static_cast<unsigned char>(s[i])));
   }
   return n;
 }
@@ -1779,7 +1786,8 @@ std::string SystemTools::UpperCase(std::string const& s)
   std::string n;
   n.resize(s.size());
   for (size_t i = 0; i < s.size(); i++) {
-    n[i] = static_cast<std::string::value_type>(toupper(s[i]));
+    n[i] = static_cast<std::string::value_type>(
+      toupper(static_cast<unsigned char>(s[i])));
   }
   return n;
 }
@@ -2743,8 +2751,8 @@ int SystemTools::Strucmp(char const* l, char const* r)
   int lc;
   int rc;
   do {
-    lc = tolower(*l++);
-    rc = tolower(*r++);
+    lc = tolower(static_cast<unsigned char>(*l++));
+    rc = tolower(static_cast<unsigned char>(*r++));
   } while (lc == rc && lc);
   return lc - rc;
 }
