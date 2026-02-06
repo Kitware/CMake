@@ -27,6 +27,21 @@
           "ANSWER": 42
         }
       }
+    },
+    "Private1": {
+      "type": "dylib"
+    },
+    "Private2": {
+      "type": "dylib"
+    },
+    "Other": {
+      "type": "dylib",
+      "dyld_requires": [ ":Private1" ],
+      "configurations": {
+        "test": {
+          "dyld_requires": [ ":Private2" ]
+        }
+      }
     }
   }
 }
