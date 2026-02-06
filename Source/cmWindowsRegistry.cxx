@@ -47,8 +47,8 @@ int Strucmp(cm::string_view l, cm::string_view r)
   cm::string_view::size_type ri = 0;
 
   do {
-    lc = std::tolower(l[li++]);
-    rc = std::tolower(r[ri++]);
+    lc = std::tolower(static_cast<unsigned char>(l[li++]));
+    rc = std::tolower(static_cast<unsigned char>(r[ri++]));
   } while (lc == rc && li < l.size() && ri < r.size());
 
   return lc == rc ? static_cast<int>(l.size() - r.size()) : lc - rc;

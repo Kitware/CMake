@@ -92,7 +92,8 @@ public:
   std::string GetWorkingDirectoryOnDrive(char letter) override
   {
     std::string result;
-    auto i = this->WorkDirOnDrive.find(std::tolower(letter));
+    auto i = this->WorkDirOnDrive.find(
+      std::tolower(static_cast<unsigned char>(letter)));
     if (i != this->WorkDirOnDrive.end()) {
       result = i->second;
     }

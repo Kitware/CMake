@@ -1556,8 +1556,8 @@ std::string cmComputeLinkInformation::NoCaseExpression(std::string const& str)
       ret += c;
     } else {
       ret += '[';
-      ret += static_cast<char>(tolower(c));
-      ret += static_cast<char>(toupper(c));
+      ret += static_cast<char>(tolower(static_cast<unsigned char>(c)));
+      ret += static_cast<char>(toupper(static_cast<unsigned char>(c)));
       ret += ']';
     }
   }

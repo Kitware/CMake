@@ -66,7 +66,7 @@ CM_LOCAL char* lowercase(const char* string)
   }
   strcpy(new_string, string);  /* NOLINT */
   for (p = new_string; *p != 0; ++p) {
-    *p = CM_CAST(char, tolower(*p));
+    *p = CM_CAST(char, tolower(CM_CAST(unsigned char, *p)));
   }
   return new_string;
 }

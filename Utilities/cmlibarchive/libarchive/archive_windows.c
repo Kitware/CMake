@@ -712,9 +712,9 @@ __la_stat(const char *path, struct stat *st)
 			char exttype[4];
 
 			++ p;
-			exttype[0] = toupper(*p++);
-			exttype[1] = toupper(*p++);
-			exttype[2] = toupper(*p++);
+			exttype[0] = toupper((unsigned char)*p++);
+			exttype[1] = toupper((unsigned char)*p++);
+			exttype[2] = toupper((unsigned char)*p++);
 			exttype[3] = '\0';
 			if (!strcmp(exttype, "EXE") || !strcmp(exttype, "CMD") ||
 				!strcmp(exttype, "BAT") || !strcmp(exttype, "COM"))

@@ -41,7 +41,7 @@ int main(int argc, char** argv)
     std::this_thread::sleep_for(std::chrono::milliseconds(12000));
     std::string input = getStdin();
     for (auto& c : input) {
-      c = static_cast<char>(std::toupper(c));
+      c = static_cast<char>(std::toupper(static_cast<unsigned char>(c)));
     }
     std::cout << input << std::flush;
     std::cerr << "2" << std::flush;

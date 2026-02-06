@@ -127,10 +127,13 @@ void cmGccDepfileLexerHelper::sanitizeContent()
         // Unescape the colon following the drive letter.
         // Some versions of GNU compilers can escape this character.
         // c\:\path must be transformed to c:\path
-        if (pit->size() >= 3 && std::toupper((*pit)[0]) >= 'A' &&
-            std::toupper((*pit)[0]) <= 'Z' && (*pit)[1] == '\\' &&
-            (*pit)[2] == ':') {
-          pit->erase(1, 1);
+        if (pit->size() >= 3) {
+          auto pit0 = static_cast<char>(
+            std::toupper(static_cast<unsigned char>((*pit)[0])));
+          if (pit0 >= 'A' && pit0 <= 'Z' && (*pit)[1] == '\\' &&
+              (*pit)[2] == ':') {
+            pit->erase(1, 1);
+          }
         }
 #endif
         ++pit;

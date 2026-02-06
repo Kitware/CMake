@@ -3702,7 +3702,8 @@ bool cmCTest::ConvertInstrumentationJSONFileToXML(std::string const& fpath,
   bool generating_test_xml = root["role"] == "test";
   if (!generating_test_xml) {
     std::string element_name = root["role"].asString();
-    element_name[0] = static_cast<char>(std::toupper(element_name[0]));
+    element_name[0] = static_cast<char>(
+      std::toupper(static_cast<unsigned char>(element_name[0])));
     xml.StartElement(element_name);
     std::vector<std::string> keys = root.getMemberNames();
     for (auto const& key : keys) {
@@ -3734,7 +3735,8 @@ bool cmCTest::ConvertInstrumentationJSONFileToXML(std::string const& fpath,
   std::vector<std::string> keys = dynamic_information.getMemberNames();
   for (auto const& key : keys) {
     std::string measurement_name = key;
-    measurement_name[0] = static_cast<char>(std::toupper(measurement_name[0]));
+    measurement_name[0] = static_cast<char>(
+      std::toupper(static_cast<unsigned char>(measurement_name[0])));
 
     xml.StartElement("NamedMeasurement");
     xml.Attribute("type", "numeric/double");
