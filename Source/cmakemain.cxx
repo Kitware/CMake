@@ -500,8 +500,8 @@ int do_build(int ac, char const* const* av)
   };
   auto resolvePackagesLambda = [&](std::string const& value) -> bool {
     std::string v = value;
-    std::transform(v.begin(), v.end(), v.begin(), ::tolower);
-
+    std::transform(v.begin(), v.end(), v.begin(),
+                   [](unsigned char c) { return std::tolower(c); });
     if (v == "on") {
       resolveMode = PackageResolveMode::Force;
     } else if (v == "only") {

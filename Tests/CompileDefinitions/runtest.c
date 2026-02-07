@@ -11,7 +11,7 @@ int main(void)
   char build_config_name[] = BUILD_CONFIG_NAME;
   char* c;
   for (c = build_config_name; *c; ++c) {
-    *c = (char)tolower((int)*c);
+    *c = (char)tolower((unsigned char)*c);
   }
   fprintf(stderr, "build_config_name=\"%s\"\n", build_config_name);
 #ifdef TEST_CONFIG_DEBUG

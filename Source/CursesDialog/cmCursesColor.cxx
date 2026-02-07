@@ -42,7 +42,7 @@ short cmCursesColor::GetColor(char id, short fallback)
   if (!initialized) {
     if (auto* v = getenv("CCMAKE_COLORS")) {
       while (v[0] && v[1] && v[1] == '=') {
-        auto const n = std::toupper(*v);
+        auto const n = std::toupper(static_cast<unsigned char>(*v));
 
         char buffer[12];
         memset(buffer, 0, sizeof(buffer));

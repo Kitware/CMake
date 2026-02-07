@@ -147,7 +147,7 @@ int form_request_by_name( const char *str )
       strncpy(buf,str,sizeof(buf));
       while( (i<sizeof(buf)) && (buf[i] != '\0') )
 	{
-	  buf[i] = toupper((int)(buf[i]));
+	  buf[i] = toupper((unsigned char)(buf[i]));
 	  i++;
 	}
       

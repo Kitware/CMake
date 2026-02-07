@@ -349,7 +349,7 @@ void cmFindLibraryHelper::RegexFromLiteral(std::string& out,
       out += "\\";
     }
     if (dirCase == cmSystemTools::DirCase::Insensitive) {
-      out += static_cast<char>(tolower(ch));
+      out += static_cast<char>(tolower(static_cast<unsigned char>(ch)));
     } else {
       out += ch;
     }

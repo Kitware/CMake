@@ -99,6 +99,6 @@ std::string cmSbomArguments::GetPackageFileName() const
   std::string const pkgNameOnDisk = this->GetPackageDirName();
   std::string format = GetSbomFileExtension(this->GetFormat());
   std::transform(format.begin(), format.end(), format.begin(),
-                 [](char const c) { return std::tolower(c); });
+                 [](unsigned char c) { return std::tolower(c); });
   return cmStrCat(pkgNameOnDisk, format);
 }

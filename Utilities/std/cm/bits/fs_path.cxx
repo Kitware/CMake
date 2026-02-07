@@ -426,8 +426,9 @@ private:
 #  if defined(_WIN32)
   bool is_drive_name(pointer ptr)
   {
-    return std::toupper(ptr[0]) >= 'A' && std::toupper(ptr[0]) <= 'Z' &&
-      ptr[1] == ':';
+    auto ptr0 =
+      static_cast<char>(std::toupper(static_cast<unsigned char>(ptr[0])));
+    return ptr0 >= 'A' && ptr0 <= 'Z' && ptr[1] == ':';
   }
 #  endif
 
