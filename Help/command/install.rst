@@ -498,7 +498,7 @@ Signatures
              [CONFIGURATIONS <config>...]
              [COMPONENT <component>]
              [OPTIONAL] [EXCLUDE_FROM_ALL]
-            ] [...]
+            ]...
             )
 
   The ``IMPORTED_RUNTIME_ARTIFACTS`` form specifies rules for installing the
@@ -792,7 +792,7 @@ Signatures
       Exclude the matched file or directory from installation.
 
     ``PERMISSIONS <permission>...``
-      Ovrerride the permissions setting for the matched file or directory.
+      Override the permissions setting for the matched file or directory.
 
     For example, the code
 
@@ -819,7 +819,7 @@ Signatures
 
     install([[SCRIPT <file>] [CODE <code>]]
             [ALL_COMPONENTS | COMPONENT <component>]
-            [EXCLUDE_FROM_ALL] [...])
+            [EXCLUDE_FROM_ALL])
 
   The ``SCRIPT`` form will invoke the given CMake script files during
   installation.  If the script file name is a relative path it will be
@@ -1138,7 +1138,7 @@ Signatures
              [COMPONENT <component>]
              [NAMELINK_COMPONENT <component>]
              [OPTIONAL] [EXCLUDE_FROM_ALL]
-            ] [...]
+            ]...
             [PRE_INCLUDE_REGEXES <regex>...]
             [PRE_EXCLUDE_REGEXES <regex>...]
             [POST_INCLUDE_REGEXES <regex>...]
