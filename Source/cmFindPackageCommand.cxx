@@ -881,7 +881,7 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
       this->AddPathSuffix(args[i]);
     } else if (doing == DoingConfigs) {
       if (args[i].find_first_of(":/\\") != std::string::npos ||
-          cmSystemTools::GetFilenameLastExtension(args[i]) != ".cmake") {
+          !cmHasSuffix(args[i], ".cmake"_s)) {
         this->SetError(cmStrCat(
           "given CONFIGS option followed by invalid file name \"", args[i],
           "\".  The names given must be file names without "

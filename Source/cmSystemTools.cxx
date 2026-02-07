@@ -4396,3 +4396,29 @@ char cmSystemTools::GetSystemPathlistSeparator()
   return ':';
 #endif
 }
+
+cm::string_view cmSystemTools::GetFilenameNameView(cm::string_view filename)
+{
+// implementation mostly taken from cmsys::SystemTools
+#if defined(_WIN32) || defined(KWSYS_SYSTEMTOOLS_SUPPORT_WINDOWS_SLASHES)
+  cm::static_string_view separators = "/\\"_s;
+#else
+  char separators = '/';
+#endif
+  std::string::size_type slash_pos = filename.find_last_of(separators);
+  if (slash_pos == std::string::npos) {
+    return filename;
+  }
+  return filename.substr(slash_pos + 1);
+}
+
+cm::string_view cmSystemTools::GetFilenameLastExtensionView(
+  cm::string_view filename)
+{
+  cm::string_view name = cmSystemTools::GetFilenameNameView(filename);
+  cm::string_view::size_type dot_pos = name.rfind('.');
+  if (dot_pos == std::string::npos) {
+    return cm::string_view();
+  }
+  return name.substr(dot_pos);
+}

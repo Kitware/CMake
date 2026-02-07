@@ -2321,7 +2321,7 @@ bool cmLocalGenerator::GetRealDependency(std::string const& inName,
   if (name.empty()) {
     return false;
   }
-  if (cmSystemTools::GetFilenameLastExtension(name) == ".exe") {
+  if (cmHasSuffix(name, ".exe"_s)) {
     name = cmSystemTools::GetFilenameWithoutLastExtension(name);
   }
 
@@ -4693,8 +4693,6 @@ std::string cmLocalGenerator::GetShortObjectFileName(
   cmSourceFile const& source) const
 {
   std::string objectName = this->GetRelativeSourceFileName(source);
-  std::string objectFileName =
-    cmSystemTools::GetFilenameName(source.GetFullPath());
   cmCryptoHash objNameHasher(cmCryptoHash::AlgoSHA3_512);
   std::string terseObjectName =
     objNameHasher.HashString(objectName).substr(0, 8);
@@ -5200,7 +5198,7 @@ std::vector<std::string> ComputeISPCExtraObjects(
   std::vector<std::string> computedObjects;
   computedObjects.reserve(ispcSuffixes.size());
 
-  auto extension = cmSystemTools::GetFilenameLastExtension(objectName);
+  auto extension = cmSystemTools::GetFilenameLastExtensionView(objectName);
 
   // We can't use cmSystemTools::GetFilenameWithoutLastExtension as it
   // drops any directories in objectName

@@ -382,7 +382,7 @@ std::string cmExportInstallCMakeConfigGenerator::GetFileSetFiles(
       auto prefix = it.first.empty() ? "" : cmStrCat(it.first, '/');
       for (auto const& filename : it.second) {
         auto relFile =
-          cmStrCat(prefix, cmSystemTools::GetFilenameName(filename));
+          cmStrCat(prefix, cmSystemTools::GetFilenameNameView(filename));
         auto escapedFile =
           cmStrCat(dest,
                    cmOutputConverter::EscapeForCMake(

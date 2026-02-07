@@ -1167,7 +1167,7 @@ Json::Value DirectoryObject::DumpInstaller(cmInstallGenerator* gen)
       for (auto const& file : it.second) {
         files.append(this->DumpInstallerPath(
           this->TopSource, file,
-          cmStrCat(dir, cmSystemTools::GetFilenameName(file))));
+          cmStrCat(dir, cmSystemTools::GetFilenameNameView(file))));
       }
     }
     installer["paths"] = std::move(files);

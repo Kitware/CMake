@@ -6,7 +6,6 @@
 
 #include <map>
 #include <string>
-#include <utility>
 
 #include "cmProperty.h"
 
@@ -69,12 +68,9 @@ public:
   cmPropertyDefinition const* GetPropertyDefinition(
     std::string const& name, cmProperty::ScopeType scope) const;
 
-  using KeyType = std::pair<std::string, cmProperty::ScopeType>;
-  std::map<KeyType, cmPropertyDefinition> const& GetMap() const
-  {
-    return this->Map_;
-  }
+  using ScopeMap = std::map<cmProperty::ScopeType, cmPropertyDefinition>;
+  std::map<std::string, ScopeMap> const& GetMap() const { return this->Map_; }
 
 private:
-  std::map<KeyType, cmPropertyDefinition> Map_;
+  std::map<std::string, ScopeMap> Map_;
 };

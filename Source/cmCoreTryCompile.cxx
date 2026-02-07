@@ -575,9 +575,9 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
     for (auto const& source : sources) {
       auto const& si = source.first;
       std::string ext = cmSystemTools::GetFilenameLastExtension(si);
-      std::string lang = gg->GetLanguageFromExtension(ext.c_str());
+      cm::string_view lang = gg->GetLanguageFromExtension(ext);
       if (!lang.empty()) {
-        testLangs.insert(lang);
+        testLangs.insert(std::string(lang));
       } else {
         std::ostringstream err;
         err << "Unknown extension \"" << ext

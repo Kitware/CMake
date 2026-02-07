@@ -1110,17 +1110,22 @@ std::string cmGlobalGenerator::GetLanguageOutputExtension(
   return "";
 }
 
-std::string cmGlobalGenerator::GetLanguageFromExtension(char const* ext) const
+cm::string_view cmGlobalGenerator::GetLanguageFromExtension(
+  cm::string_view ext) const
 {
   // if there is an extension and it starts with . then move past the
   // . because the extensions are not stored with a .  in the map
-  if (!ext) {
+  if (ext.empty()) {
     return "";
   }
-  if (*ext == '.') {
-    ++ext;
+  if (ext.front() == '.') {
+    ext = ext.substr(1);
   }
+#if __cplusplus >= 201402L || defined(_MSVC_LANG) && _MSVC_LANG >= 201402L
   auto const it = this->ExtensionToLanguage.find(ext);
+#else
+  auto const it = this->ExtensionToLanguage.find(std::string(ext));
+#endif
   if (it != this->ExtensionToLanguage.end()) {
     return it->second;
   }
@@ -1249,12 +1254,12 @@ std::string cmGlobalGenerator::GetSafeGlobalSetting(
   return this->Makefiles[0]->GetDefinition(name);
 }
 
-bool cmGlobalGenerator::IgnoreFile(char const* ext) const
+bool cmGlobalGenerator::IgnoreFile(cm::string_view ext) const
 {
   if (!this->GetLanguageFromExtension(ext).empty()) {
     return false;
   }
-  return (this->IgnoreExtensions.count(ext) > 0);
+  return (this->IgnoreExtensions.count(std::string(ext)) > 0);
 }
 
 bool cmGlobalGenerator::GetLanguageEnabled(std::string const& l) const
@@ -2831,7 +2836,7 @@ cmGlobalGenerator::SplitFrameworkPath(std::string const& path,
   static cmsys::RegularExpression frameworkPath(
     "((.+)/)?([^/]+)\\.framework(/Versions/([^/]+))?(/(.+))?$");
 
-  auto ext = cmSystemTools::GetFilenameLastExtension(path);
+  auto ext = cmSystemTools::GetFilenameLastExtensionView(path);
   if ((ext.empty() || ext == ".tbd" || ext == ".framework") &&
       frameworkPath.find(path)) {
     auto name = frameworkPath.match(3);
@@ -2856,7 +2861,7 @@ cmGlobalGenerator::SplitFrameworkPath(std::string const& path,
   if (format == FrameworkFormat::Extended) {
     // path format can be more flexible: (/path/to/)?fwName(.framework)?
     auto fwDir = cmSystemTools::GetParentDirectory(path);
-    auto name = cmSystemTools::GetFilenameLastExtension(path) == ".framework"
+    auto name = ext == ".framework"
       ? cmSystemTools::GetFilenameWithoutExtension(path)
       : cmSystemTools::GetFilenameName(path);
 

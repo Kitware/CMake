@@ -1363,14 +1363,10 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateXCodeFileReferenceFromPath(
   }
   // Make a copy so that we can override it later
   std::string path = cmSystemTools::CollapseFullPath(fullpath);
-  // Compute the extension without leading '.'.
-  std::string ext = cmSystemTools::GetFilenameLastExtension(path);
-  if (!ext.empty()) {
-    ext = ext.substr(1);
-  }
   if (fileType.empty()) {
     path = this->GetLibraryOrFrameworkPath(path);
-    ext = cmSystemTools::GetFilenameLastExtension(path);
+    // Compute the extension without leading '.'.
+    std::string ext = cmSystemTools::GetFilenameLastExtension(path);
     if (!ext.empty()) {
       ext = ext.substr(1);
     }

@@ -705,6 +705,16 @@ public:
   /** Get the system path separator character */
   static char GetSystemPathlistSeparator();
 
+  /** Return subview of the full filename (i.e. file name without path) */
+  static cm::string_view GetFilenameNameView(cm::string_view filename);
+
+  /**
+   * Return subview of file extension of a full filename (dot included).
+   * Warning: this is the shortest extension (for example: .gz of .tar.gz)
+   */
+  static cm::string_view GetFilenameLastExtensionView(
+    cm::string_view filename);
+
 private:
   static bool s_ForceUnixPaths;
   static bool s_RunCommandHideConsole;

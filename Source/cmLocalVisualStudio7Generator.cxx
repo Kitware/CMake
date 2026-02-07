@@ -1486,8 +1486,8 @@ cmLocalVisualStudio7GeneratorFCInfo::cmLocalVisualStudio7GeneratorFCInfo(
     std::string configUpper = cmSystemTools::UpperCase(config);
     cmLVS7GFileConfig fc;
 
-    std::string lang =
-      lg->GlobalGenerator->GetLanguageFromExtension(sf.GetExtension().c_str());
+    std::string lang = std::string(
+      lg->GlobalGenerator->GetLanguageFromExtension(sf.GetExtension()));
     std::string const& sourceLang = lg->GetSourceFileLanguage(sf);
     bool needForceLang = false;
     // source file does not match its extension language

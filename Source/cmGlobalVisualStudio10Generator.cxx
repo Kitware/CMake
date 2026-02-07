@@ -1263,8 +1263,8 @@ std::string cmGlobalVisualStudio10Generator::GenerateRuleFile(
   std::string ruleDir = cmStrCat(
     this->GetCMakeInstance()->GetHomeOutputDirectory(), "/CMakeFiles/",
     hasher.HashString(cmSystemTools::GetFilenamePath(output)));
-  std::string ruleFile =
-    cmStrCat(ruleDir, '/', cmSystemTools::GetFilenameName(output), ".rule");
+  std::string ruleFile = cmStrCat(
+    ruleDir, '/', cmSystemTools::GetFilenameNameView(output), ".rule");
   return ruleFile;
 }
 

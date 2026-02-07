@@ -1991,8 +1991,7 @@ bool HandleExportAndroidMKMode(std::vector<std::string> const& args,
   }
 
   // Check the file extension.
-  if (!fname.empty() &&
-      cmSystemTools::GetFilenameLastExtension(fname) != ".mk") {
+  if (!fname.empty() && !cmHasSuffix(fname, ".mk"_s)) {
     status.SetError(cmStrCat(
       args[0], " given invalid export file name \"", fname,
       R"(".  The FILE argument must specify a name ending in ".mk".)"));
@@ -2250,8 +2249,7 @@ bool HandleExportMode(std::vector<std::string> const& args,
   }
 
   // Check the file extension.
-  if (!fname.empty() &&
-      cmSystemTools::GetFilenameLastExtension(fname) != ".cmake") {
+  if (!fname.empty() && !cmHasSuffix(fname, ".cmake"_s)) {
     status.SetError(
       cmStrCat(args[0], " given invalid export file name \"", fname,
                "\".  "

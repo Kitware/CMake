@@ -340,14 +340,15 @@ void cmMakefile::PrintCommandTrace(cmListFileFunction const& lff,
   std::vector<std::string> const& trace_only_this_files =
     this->GetCMakeInstance()->GetTraceSources();
   std::string const& full_path = bt.Top().FilePath;
-  std::string const& only_filename = cmSystemTools::GetFilenameName(full_path);
+  cm::string_view only_filename =
+    cmSystemTools::GetFilenameNameView(full_path);
   bool trace = trace_only_this_files.empty();
   if (!trace) {
     for (std::string const& file : trace_only_this_files) {
       std::string::size_type const pos = full_path.rfind(file);
       trace = (pos != std::string::npos) &&
         ((pos + file.size()) == full_path.size()) &&
-        (only_filename == cmSystemTools::GetFilenameName(file));
+        (only_filename == cmSystemTools::GetFilenameNameView(file));
       if (trace) {
         break;
       }
