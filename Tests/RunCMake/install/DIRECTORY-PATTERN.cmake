@@ -34,3 +34,13 @@ install(
   DIRECTORY
   DESTINATION empty
   )
+
+install(
+  DIRECTORY "" ""
+  DESTINATION empty_str
+  )
+
+install(
+  DIRECTORY
+  DESTINATION $<LOWER_CASE:EMPTY_WITH_GENEX>
+  )

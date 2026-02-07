@@ -2,6 +2,7 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmInstallDirectoryGenerator.h"
 
+#include <algorithm>
 #include <utility>
 
 #include "cmGeneratorExpression.h"
@@ -54,6 +55,13 @@ bool cmInstallDirectoryGenerator::Compute(cmLocalGenerator* lg)
 std::vector<std::string> cmInstallDirectoryGenerator::GetDirectories(
   std::string const& config) const
 {
+  // If given only empty directories, collapse into a single specification to
+  // avoid redundant calls. This supports the use case of installing an empty
+  // directory into a destination when a directory is not specified.
+  if (std::all_of(this->Directories.begin(), this->Directories.end(),
+                  [](std::string const& d) { return d.empty(); })) {
+    return std::vector<std::string>{ "" };
+  }
   cmList directories;
   if (this->ActionsPerConfig) {
     for (std::string const& f : this->Directories) {
@@ -81,11 +89,13 @@ void cmInstallDirectoryGenerator::GenerateScriptForConfig(
 {
   std::vector<std::string> dirs = this->GetDirectories(config);
 
-  // Make sure all dirs have absolute paths.
-  cmMakefile const& mf = *this->LocalGenerator->GetMakefile();
-  for (std::string& d : dirs) {
-    if (!cmSystemTools::FileIsFullPath(d)) {
-      d = cmStrCat(mf.GetCurrentSourceDirectory(), '/', d);
+  if (!(dirs.size() == 1 && dirs[0].empty())) {
+    // Make sure all dirs have absolute paths.
+    cmMakefile const& mf = *this->LocalGenerator->GetMakefile();
+    for (std::string& d : dirs) {
+      if (!cmSystemTools::FileIsFullPath(d)) {
+        d = cmStrCat(mf.GetCurrentSourceDirectory(), '/', d);
+      }
     }
   }
 
