@@ -983,9 +983,6 @@ void cmGlobalFastbuildGenerator::AddCompiler(std::string const& language,
     return;
   }
 
-  // Calculate the i18n number.
-  std::string i18nNum = "1033";
-
   // Add the language to the compiler's name
   FastbuildCompiler compilerDef;
   compilerDef.ExtraVariables["Root"] =
@@ -1026,6 +1023,10 @@ void cmGlobalFastbuildGenerator::AddCompiler(std::string const& language,
       (language == "C" || language == "CXX") &&
       compilerDef.CmakeCompilerID == "MSVC") {
     // https://cmake.org/cmake/help/latest/variable/MSVC_VERSION.html
+
+    // Calculate the i18n number.
+    std::string const i18nNum =
+      mf->GetSafeDefinition(cmStrCat("CMAKE_", language, "_MSVC_I18N_DIR"));
 
     // Visual Studio 17 (19.30 to 19.39)
     // TODO
