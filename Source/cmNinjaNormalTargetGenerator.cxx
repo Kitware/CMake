@@ -478,6 +478,11 @@ void cmNinjaNormalTargetGenerator::WriteLinkRule(
       vars.Includes = "$INCLUDES";
     }
 
+    if (this->TargetLinkLanguage(config) == "Rust") {
+      vars.RustSources = "$RUST_SOURCES";
+      vars.RustObjectDeps = "$RUST_OBJECT_DEPS";
+    }
+
     std::string responseFlag;
 
     std::string cmakeVarLang =
@@ -1276,6 +1281,40 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement(
         gt->IsExecutableWithExports()) {
       linkBuild.Outputs.push_back(vars["SWIFT_MODULE"]);
     }
+  } else if (this->TargetLinkLanguage(config) == "Rust") {
+    // Use one-step build/link for Rust.
+    // Compute specific libraries to link with.
+    std::vector<cmSourceFile const*> sources;
+    gt->GetObjectSources(sources, config);
+    cmLocalGenerator const* lg = this->GetLocalGenerator();
+    std::string entry_obj;
+
+    for (auto const& source : sources) {
+      if (source->GetLanguage() == "Rust") {
+        if (vars.count("RUST_SOURCES") == 0) {
+          std::string const sourcePath =
+            this->GetCompiledSourceNinjaPath(source);
+          vars["RUST_SOURCES"] =
+            lg->ConvertToOutputFormat(sourcePath, cmOutputConverter::SHELL);
+          entry_obj = this->GetObjectFilePath(source, config);
+        } else {
+          assert(false && "Rust crate can only have 1 entry");
+        }
+      }
+    }
+
+    linkBuild.ExplicitDeps = this->GetObjects(config);
+    std::stringstream obj_deps;
+
+    // Do not try linking to object file created from the crate entry.
+    for (auto const& obj : linkBuild.ExplicitDeps) {
+      if (obj != entry_obj) {
+        obj_deps << " "
+                 << lg->ConvertToOutputFormat(obj, cmOutputConverter::SHELL);
+      }
+    }
+
+    vars["RUST_OBJECT_DEPS"] = obj_deps.str();
   } else {
     linkBuild.ExplicitDeps = this->GetObjects(config);
   }

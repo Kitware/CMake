@@ -600,6 +600,9 @@ if(UNIX AND CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG)
     -DCMAKE_EXECUTABLE_FORMAT=${CMAKE_EXECUTABLE_FORMAT}
     )
 endif()
+if(CMake_TEST_Rust)
+  add_RunCMake_test(Rust)
+endif()
 add_RunCMake_test(ScriptMode)
 add_RunCMake_test(StandardLinkDirectories)
 add_RunCMake_test(Swift -DCMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME}

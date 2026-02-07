@@ -24,6 +24,7 @@ public:
     MappedPackageInfo,
     ExportBuildDatabase,
     GenerateSbom,
+    Rust,
 
     Sentinel,
   };

@@ -143,6 +143,16 @@ std::string cmRulePlaceholderExpander::ExpandVariable(
       return this->ReplaceValues->SwiftSources;
     }
   }
+  if (this->ReplaceValues->RustSources) {
+    if (variable == "RUST_SOURCES") {
+      return this->ReplaceValues->RustSources;
+    }
+  }
+  if (this->ReplaceValues->RustObjectDeps) {
+    if (variable == "RUST_OBJECT_DEPS") {
+      return this->ReplaceValues->RustObjectDeps;
+    }
+  }
   if (this->ReplaceValues->TargetPDB) {
     if (variable == "TARGET_PDB") {
       return this->ReplaceValues->TargetPDB;
