@@ -3,7 +3,7 @@
 ARG BASE_IMAGE=arm64v8/debian:13
 
 FROM ${BASE_IMAGE} AS cuda-keyring
-ADD https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/sbsa/cuda-keyring_1.1-1_all.deb /root/
+ADD https://developer.download.nvidia.com/compute/cuda/repos/debian13/sbsa/cuda-keyring_1.1-1_all.deb /root/
 RUN --mount=type=tmpfs,target=/var/log \
     apt-get update \
  && apt-get -y install ca-certificates \
