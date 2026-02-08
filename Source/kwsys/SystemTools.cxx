@@ -27,6 +27,7 @@
 #include KWSYS_HEADER(Encoding.hxx)
 
 #include <algorithm>
+#include <cctype>
 #include <fstream>
 #include <iostream>
 #include <set>
@@ -1768,28 +1769,18 @@ char* SystemTools::AppendStrings(char const* str1, char const* str2,
   return newstr;
 }
 
-// Return a lower case string
-std::string SystemTools::LowerCase(std::string const& s)
+std::string SystemTools::LowerCase(std::string s)
 {
-  std::string n;
-  n.resize(s.size());
-  for (size_t i = 0; i < s.size(); i++) {
-    n[i] = static_cast<std::string::value_type>(
-      tolower(static_cast<unsigned char>(s[i])));
-  }
-  return n;
+  std::transform(s.begin(), s.end(), s.begin(),
+                 [](unsigned char c) { return std::tolower(c); });
+  return s;
 }
 
-// Return a lower case string
-std::string SystemTools::UpperCase(std::string const& s)
+std::string SystemTools::UpperCase(std::string s)
 {
-  std::string n;
-  n.resize(s.size());
-  for (size_t i = 0; i < s.size(); i++) {
-    n[i] = static_cast<std::string::value_type>(
-      toupper(static_cast<unsigned char>(s[i])));
-  }
-  return n;
+  std::transform(s.begin(), s.end(), s.begin(),
+                 [](unsigned char c) { return std::toupper(c); });
+  return s;
 }
 
 // Count char in string
