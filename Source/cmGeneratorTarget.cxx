@@ -5306,18 +5306,6 @@ bool cmGeneratorTarget::ApplyCXXStdTargets()
                ">:", cxxTargetName, ">>"));
   }
 
-  // Check the experimental feature here. A toolchain may have
-  // skipped the check in the toolchain preparation logic.
-  if (!cmExperimental::HasSupportEnabled(
-        *this->Makefile, cmExperimental::Feature::CxxImportStd)) {
-    this->Makefile->IssueMessage(
-      MessageType::FATAL_ERROR,
-      "Experimental `import std` support not enabled when detecting "
-      "toolchain; it must be set before `CXX` is enabled (usually a "
-      "`project()` call).");
-    return false;
-  }
-
   return true;
 }
 

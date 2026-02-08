@@ -156,6 +156,7 @@ set(properties
   "AUTOMOC_DEPEND_FILTERS"                  "FIRST<SEMI>SECOND" "<SAME>"
   ## C++
   "CXX_SCAN_FOR_MODULES"                    "ON"                "<SAME>"
+  "CXX_MODULE_STD"                          "ON"                "<SAME>"
   ## Ninja
   "JOB_POOL_COMPILE"                        "compile_pool"      "<SAME>"
   "JOB_POOL_LINK"                           "link_pool"         "<SAME>"
@@ -229,15 +230,6 @@ macro (add_language_properties lang std)
     "${lang}_VISIBILITY_PRESET"     "hidden"  "<SAME>"
     )
 endmacro ()
-
-set(_cmake_supported_import_std_experimental "")
-cmake_language(GET_EXPERIMENTAL_FEATURE_ENABLED "CxxImportStd" _cmake_supported_import_std_experimental)
-if(_cmake_supported_import_std_experimental)
-  list(APPEND properties
-    # property                      expected  alias
-    "CXX_MODULE_STD"                "ON"      "<SAME>"
-  )
-endif()
 
 # Mock up knowing the standard flag. This doesn't actually build, so nothing
 # should care at this point.

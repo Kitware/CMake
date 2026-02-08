@@ -18,7 +18,6 @@ public:
   enum class Feature
   {
     ExportPackageDependencies,
-    CxxImportStd,
     ImportPackageInfo,
     ExportPackageInfo,
     MappedPackageInfo,

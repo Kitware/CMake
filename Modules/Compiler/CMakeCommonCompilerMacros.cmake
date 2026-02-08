@@ -220,17 +220,6 @@ function(cmake_cxx_find_modules_json)
     return ()
   endif ()
 
-  # Check the experimental flag. Check it here to avoid triggering warnings in
-  # situations that don't support the feature anyways.
-  set(_cmake_supported_import_std_experimental "")
-  cmake_language(GET_EXPERIMENTAL_FEATURE_ENABLED
-    "CxxImportStd"
-    _cmake_supported_import_std_experimental)
-  if (NOT _cmake_supported_import_std_experimental)
-    set(CMAKE_CXX_COMPILER_IMPORT_STD_ERROR_MESSAGE "Experimental `import std` support not enabled when detecting toolchain; it must be set before `CXX` is enabled (usually a `project()` call)" PARENT_SCOPE)
-    return ()
-  endif ()
-
   _cmake_cxx_find_modules_json()
   set(CMAKE_CXX_COMPILER_IMPORT_STD_ERROR_MESSAGE "${CMAKE_CXX_COMPILER_IMPORT_STD_ERROR_MESSAGE}" PARENT_SCOPE)
   set(CMAKE_CXX_STDLIB_MODULES_JSON "${CMAKE_CXX_STDLIB_MODULES_JSON}" PARENT_SCOPE)
