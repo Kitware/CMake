@@ -1,3 +1,5 @@
+glibc-locale-source
+
 # Install build requirements.
 ncurses-devel
 openssl-devel

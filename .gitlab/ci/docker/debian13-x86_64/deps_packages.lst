@@ -1,3 +1,5 @@
+locales
+
 # Install build requirements.
 libssl-dev
 
