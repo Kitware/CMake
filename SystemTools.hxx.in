@@ -133,15 +133,11 @@ public:
    */
   static std::string UnCapitalizedWords(std::string const&);
 
-  /**
-   * Return a lower case string
-   */
-  static std::string LowerCase(std::string const&);
+  /** Return a lower-case string.  */
+  static std::string LowerCase(std::string);
 
-  /**
-   * Return a lower case string
-   */
-  static std::string UpperCase(std::string const&);
+  /** Return an upper-case string.  */
+  static std::string UpperCase(std::string);
 
   /**
    * Count char in string
