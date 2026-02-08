@@ -457,30 +457,6 @@ void cmSystemTools::ExpandRegistryValues(std::string& source,
 }
 #endif
 
-// Return a lower case string
-std::string cmSystemTools::LowerCase(cm::string_view s)
-{
-  std::string n;
-  n.resize(s.size());
-  for (size_t i = 0; i < s.size(); i++) {
-    n[i] = static_cast<std::string::value_type>(
-      tolower(static_cast<unsigned char>(s[i])));
-  }
-  return n;
-}
-
-// Return an upper case string
-std::string cmSystemTools::UpperCase(cm::string_view s)
-{
-  std::string n;
-  n.resize(s.size());
-  for (size_t i = 0; i < s.size(); i++) {
-    n[i] = static_cast<std::string::value_type>(
-      toupper(static_cast<unsigned char>(s[i])));
-  }
-  return n;
-}
-
 std::string cmSystemTools::HelpFileName(cm::string_view str)
 {
   std::string name(str);

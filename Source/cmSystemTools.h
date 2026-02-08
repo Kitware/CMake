@@ -40,20 +40,22 @@ public:
   using Superclass = cmsys::SystemTools;
   using Encoding = cmProcessOutput::Encoding;
 
-  /**
-   * Return a lower case string
-   */
-  static std::string LowerCase(cm::string_view);
+  /** Return a lower-case string.  */
+  static std::string LowerCase(cm::string_view s)
+  {
+    return cmsys::SystemTools::LowerCase(std::string(s));
+  }
   static std::string LowerCase(char const* s)
   {
     return LowerCase(cm::string_view{ s });
   }
   using cmsys::SystemTools::LowerCase;
 
-  /**
-   * Return an upper case string
-   */
-  static std::string UpperCase(cm::string_view);
+  /** Return an upper-case string.  */
+  static std::string UpperCase(cm::string_view s)
+  {
+    return cmsys::SystemTools::UpperCase(std::string(s));
+  }
   static std::string UpperCase(char const* s)
   {
     return UpperCase(cm::string_view{ s });
