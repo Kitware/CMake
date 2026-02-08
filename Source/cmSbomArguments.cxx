@@ -3,9 +3,10 @@
 #include "cmSbomArguments.h"
 
 #include <algorithm>
-#include <cctype>
 
 #include <cm/string_view>
+
+#include "cmsys/String.h"
 
 #include "cmExecutionStatus.h"
 #include "cmGeneratorExpression.h"
@@ -99,6 +100,6 @@ std::string cmSbomArguments::GetPackageFileName() const
   std::string const pkgNameOnDisk = this->GetPackageDirName();
   std::string format = GetSbomFileExtension(this->GetFormat());
   std::transform(format.begin(), format.end(), format.begin(),
-                 [](unsigned char c) { return std::tolower(c); });
+                 cmsysString_tolower);
   return cmStrCat(pkgNameOnDisk, format);
 }

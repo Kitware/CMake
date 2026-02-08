@@ -9,7 +9,7 @@
 #include <utility>
 
 #ifdef _WIN32
-#  include <cctype>
+#  include <cmsys/String.h>
 #endif
 
 #include <cmsys/Status.hxx>
@@ -92,8 +92,7 @@ public:
   std::string GetWorkingDirectoryOnDrive(char letter) override
   {
     std::string result;
-    auto i = this->WorkDirOnDrive.find(
-      std::tolower(static_cast<unsigned char>(letter)));
+    auto i = this->WorkDirOnDrive.find(cmsysString_tolower(letter));
     if (i != this->WorkDirOnDrive.end()) {
       result = i->second;
     }

@@ -16,6 +16,8 @@
 #  include <cctype>
 
 #  include <windows.h>
+
+#  include <cmsys/String.h>
 #endif
 
 #define MAX_SYMBOLIC_LINKS 32
@@ -171,8 +173,7 @@ std::string ImplBase::GetWorkingDirectoryOnDrive(char letter)
   std::string d = this->OS.GetWorkingDirectoryOnDrive(letter);
   std::replace(d.begin(), d.end(), '\\', '/');
   if (d.size() >= 3 &&
-      std::toupper(static_cast<unsigned char>(d[0])) ==
-        std::toupper(static_cast<unsigned char>(letter)) &&
+      cmsysString_toupper(d[0]) == cmsysString_toupper(letter) &&
       d[1] == ':' && d[2] == '/') {
     d[0] = letter;
     d.push_back('/');
@@ -182,8 +183,7 @@ std::string ImplBase::GetWorkingDirectoryOnDrive(char letter)
   // Use the current working directory if the drive matches.
   d = this->OS.GetWorkingDirectory();
   if (d.size() >= 3 &&
-      std::toupper(static_cast<unsigned char>(d[0])) ==
-        std::toupper(static_cast<unsigned char>(letter)) &&
+      cmsysString_toupper(d[0]) == cmsysString_toupper(letter) &&
       d[1] == ':' && d[2] == '/') {
     d[0] = letter;
     d.push_back('/');
@@ -284,7 +284,7 @@ Control Impl<Policy>::ResolveRoot(Root root)
 
     if (Policy::ActualCase == Options::ActualCase::Yes) {
       // Normalize the drive letter to upper-case.
-      P[0] = static_cast<char>(std::toupper(static_cast<unsigned char>(P[0])));
+      P[0] = static_cast<char>(cmsysString_toupper(P[0]));
     }
 
     // The root is a drive letter.  The root '/' immediately follows.

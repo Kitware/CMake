@@ -3,7 +3,6 @@
 #include "cmFindLibraryCommand.h"
 
 #include <algorithm>
-#include <cctype>
 #include <cstdio>
 #include <cstring>
 #include <set>
@@ -13,6 +12,7 @@
 #include <cm/optional>
 
 #include "cmsys/RegularExpression.hxx"
+#include "cmsys/String.h"
 
 #include "cmFindCommon.h"
 #include "cmGlobalGenerator.h"
@@ -349,7 +349,7 @@ void cmFindLibraryHelper::RegexFromLiteral(std::string& out,
       out += "\\";
     }
     if (dirCase == cmSystemTools::DirCase::Insensitive) {
-      out += static_cast<char>(tolower(static_cast<unsigned char>(ch)));
+      out += static_cast<char>(cmsysString_tolower(ch));
     } else {
       out += ch;
     }

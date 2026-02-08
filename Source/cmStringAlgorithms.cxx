@@ -8,15 +8,17 @@
 #include <cstdio>
 #include <cstdlib>
 
+#include "cmsys/String.h"
+
 bool cmStrCaseEq(cm::string_view s1, cm::string_view s2)
 {
   if (s1.size() != s2.size()) {
     return false;
   }
 
-  return std::equal(
-    s1.begin(), s1.end(), s2.begin(),
-    [](unsigned char a, unsigned char b) { return tolower(a) == tolower(b); });
+  return std::equal(s1.begin(), s1.end(), s2.begin(), [](char a, char b) {
+    return cmsysString_tolower(a) == cmsysString_tolower(b);
+  });
 }
 
 std::string cmTrimWhitespace(cm::string_view str)
