@@ -58,7 +58,7 @@
 ### Debian
 
 .debian13:
-    image: "kitware/cmake:ci-debian13-x86_64-2025-11-11"
+    image: "kitware/cmake:ci-debian13-x86_64-2026-02-08"
 
     variables:
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci"
@@ -73,7 +73,7 @@
         CMAKE_CI_NO_INSTALL: 1
 
 .debian13_aarch64:
-    image: "kitware/cmake:ci-debian13-aarch64-2025-11-11"
+    image: "kitware/cmake:ci-debian13-aarch64-2026-02-08"
 
     variables:
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci"
@@ -82,7 +82,7 @@
 ### Fedora
 
 .fedora43:
-    image: "kitware/cmake:ci-fedora43-x86_64-2026-01-27"
+    image: "kitware/cmake:ci-fedora43-x86_64-2026-02-08"
 
     variables:
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci/long file name for testing purposes"

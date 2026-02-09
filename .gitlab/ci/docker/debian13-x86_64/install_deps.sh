@@ -4,6 +4,10 @@ set -e
 
 apt-get install -y $(grep '^[^#]\+$' /root/deps_packages.lst)
 
+# Add locales.
+sed -i -E '/^# en_US[ .](ISO-8859-1|UTF-8)( |$)/ s/^# //' /etc/locale.gen
+dpkg-reconfigure --frontend=noninteractive locales
+
 curl -L -O https://github.com/IronLanguages/ironpython3/releases/download/v3.4.0/ironpython_3.4.0.deb
 echo '7dcd10b7a0ec0342bd7e20eebb597a96bb15267eb797d59358a3b1cfaa3e1adc  ironpython_3.4.0.deb' > ironpython.sha256sum
 sha256sum --check ironpython.sha256sum

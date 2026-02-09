@@ -42,6 +42,8 @@ restat = "restat"
 Spectre = "Spectre"
 # Identifier used in source code (`GlobalTargetInfo`)
 gti = "gti"
+# StrCpy in NSIS input.
+Cpy = "Cpy"
 
 [files]
 ignore-hidden = false
