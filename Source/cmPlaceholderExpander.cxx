@@ -2,7 +2,7 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmPlaceholderExpander.h"
 
-#include <cctype>
+#include "cmsys/String.h"
 
 std::string& cmPlaceholderExpander::ExpandVariables(std::string& s)
 {
@@ -23,7 +23,7 @@ std::string& cmPlaceholderExpander::ExpandVariables(std::string& s)
     char c = s[start + 1];
     // if the next char after the < is not A-Za-z then
     // skip it and try to find the next < in the string
-    if (!isalpha(c)) {
+    if (!cmsysString_isalpha(c)) {
       start = s.find('<', start + 1);
     } else {
       // extract the var

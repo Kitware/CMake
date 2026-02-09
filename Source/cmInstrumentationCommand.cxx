@@ -3,7 +3,6 @@ file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmInstrumentationCommand.h"
 
 #include <algorithm>
-#include <cctype>
 #include <cstdlib>
 #include <functional>
 #include <set>
@@ -13,6 +12,8 @@ file LICENSE.rst or https://cmake.org/licensing for details.  */
 
 #include <cm3p/json/reader.h>
 #include <cm3p/json/value.h>
+
+#include "cmsys/String.h"
 
 #include "cmArgumentParser.h"
 #include "cmArgumentParserTypes.h"
@@ -27,14 +28,11 @@ file LICENSE.rst or https://cmake.org/licensing for details.  */
 
 namespace {
 
-bool isCharDigit(char ch)
-{
-  return std::isdigit(static_cast<unsigned char>(ch));
-}
 bool validateVersion(std::string const& key, std::string const& versionString,
                      int& version, cmExecutionStatus& status)
 {
-  if (!std::all_of(versionString.begin(), versionString.end(), isCharDigit)) {
+  if (!std::all_of(versionString.begin(), versionString.end(),
+                   cmsysString_isdigit)) {
     status.SetError(cmStrCat("given a non-integer ", key, '.'));
     return false;
   }

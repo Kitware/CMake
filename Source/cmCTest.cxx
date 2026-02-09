@@ -3,7 +3,6 @@
 #include "cmCTest.h"
 
 #include <algorithm>
-#include <cctype>
 #include <chrono>
 #include <cstdint>
 #include <cstdio>
@@ -300,7 +299,8 @@ std::string cmCTest::DecodeURL(std::string const& in)
 {
   std::string out;
   for (char const* c = in.c_str(); *c; ++c) {
-    if (*c == '%' && isxdigit(*(c + 1)) && isxdigit(*(c + 2))) {
+    if (*c == '%' && cmsysString_isxdigit(*(c + 1)) &&
+        cmsysString_isxdigit(*(c + 2))) {
       char buf[3] = { *(c + 1), *(c + 2), 0 };
       out.append(1, static_cast<char>(strtoul(buf, nullptr, 16)));
       c += 2;

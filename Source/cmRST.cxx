@@ -8,6 +8,7 @@
 #include <utility>
 
 #include "cmsys/FStream.hxx"
+#include "cmsys/String.h"
 
 #include "cmAlgorithms.h"
 #include "cmRange.h"
@@ -158,7 +159,7 @@ void cmRST::ProcessLine(std::string const& line)
   // A line starting in .. is an explicit markup start.
   if (line == ".." ||
       (line.size() >= 3 && line[0] == '.' && line[1] == '.' &&
-       cmIsSpace(line[2]))) {
+       cmsysString_isspace(line[2]))) {
     this->Reset();
     this->MarkupType =
       (line.find_first_not_of(" \t", 2) == std::string::npos ? Markup::Empty
@@ -218,7 +219,7 @@ void cmRST::ProcessLine(std::string const& line)
   }
   // Indented lines following an explicit markup start are explicit markup.
   else if (this->MarkupType != Markup::None &&
-           (line.empty() || cmIsSpace(line[0]))) {
+           (line.empty() || cmsysString_isspace(line[0]))) {
     this->MarkupType = Markup::Normal;
     // Record markup lines if the start line was recorded.
     if (!this->MarkupLines.empty()) {

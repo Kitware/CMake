@@ -2,10 +2,10 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
-#include <cctype>
-
 #include <cm/optional>
 #include <cm/string_view>
+
+#include "cmsys/String.h"
 
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
@@ -288,6 +288,6 @@ private:
   static bool IsFlag(cm::string_view arg)
   {
     return !arg.empty() && arg[0] == '-' &&
-      !(arg.size() >= 2 && std::isdigit(arg[1]));
+      !(arg.size() >= 2 && cmsysString_isdigit(arg[1]));
   }
 };

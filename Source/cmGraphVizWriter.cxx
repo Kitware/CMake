@@ -3,7 +3,6 @@
 #include "cmGraphVizWriter.h"
 
 #include <algorithm>
-#include <cctype>
 #include <iostream>
 #include <memory>
 #include <set>
@@ -13,6 +12,7 @@
 #include <cm/memory>
 
 #include "cmsys/RegularExpression.hxx"
+#include "cmsys/String.h"
 
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorTarget.h"
@@ -602,7 +602,7 @@ std::string cmGraphVizWriter::PathSafeString(std::string const& str)
   auto const extra_chars = std::set<char>{ '.', '-', '_' };
 
   for (char c : str) {
-    if (std::isalnum(c) || extra_chars.find(c) != extra_chars.cend()) {
+    if (cmsysString_isalnum(c) || extra_chars.find(c) != extra_chars.cend()) {
       pathSafeStr += c;
     }
   }

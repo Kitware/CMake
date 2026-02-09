@@ -5,7 +5,6 @@
 #include <algorithm>
 #include <array>
 #include <cassert>
-#include <cctype>
 #include <cstddef>
 #include <cstdio>
 #include <cstring>
@@ -19,6 +18,8 @@
 #include <cm/string_view>
 #include <cmext/algorithm>
 #include <cmext/string_view>
+
+#include "cmsys/String.h"
 
 #include "cmAlgorithms.h"
 #include "cmComputeLinkInformation.h" // IWYU pragma: keep
@@ -3953,8 +3954,7 @@ std::string cmGeneratorTarget::GetLinkerTool(std::string const& lang,
 
     if (linkerType != "DEFAULT"_s) {
       auto isCMakeLinkerType = [](std::string const& type) -> bool {
-        return std::all_of(type.cbegin(), type.cend(),
-                           [](char c) { return std::isupper(c); });
+        return std::all_of(type.cbegin(), type.cend(), cmsysString_isupper);
       };
       if (isCMakeLinkerType(linkerType)) {
         this->LocalGenerator->IssueMessage(

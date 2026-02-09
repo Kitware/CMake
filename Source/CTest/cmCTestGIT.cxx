@@ -11,6 +11,7 @@
 #include <cmext/algorithm>
 
 #include "cmsys/FStream.hxx"
+#include "cmsys/String.h"
 
 #include "cmCTest.h"
 #include "cmCTestVC.h"
@@ -412,14 +413,14 @@ protected:
 
   char const* ConsumeSpace(char const* c)
   {
-    while (*c && cmIsSpace(*c)) {
+    while (*c && cmsysString_isspace(*c)) {
       ++c;
     }
     return c;
   }
   char const* ConsumeField(char const* c)
   {
-    while (*c && !cmIsSpace(*c)) {
+    while (*c && !cmsysString_isspace(*c)) {
       ++c;
     }
     return c;
@@ -479,7 +480,7 @@ private:
   {
     // Person Name <person@domain.com> 1234567890 +0000
     char const* c = str;
-    while (*c && cmIsSpace(*c)) {
+    while (*c && cmsysString_isspace(*c)) {
       ++c;
     }
 
@@ -488,7 +489,7 @@ private:
       ++c;
     }
     char const* name_last = c;
-    while (name_last != name_first && cmIsSpace(*(name_last - 1))) {
+    while (name_last != name_first && cmsysString_isspace(*(name_last - 1))) {
       --name_last;
     }
     person.Name.assign(name_first, name_last - name_first);

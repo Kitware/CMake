@@ -3,13 +3,13 @@
 #include "cmDocumentation.h"
 
 #include <algorithm>
-#include <cctype>
 #include <cstring>
 #include <utility>
 
 #include "cmsys/FStream.hxx"
 #include "cmsys/Glob.hxx"
 #include "cmsys/RegularExpression.hxx"
+#include "cmsys/String.h"
 
 #if !defined(CMAKE_BOOTSTRAP)
 #  include <memory>
@@ -516,7 +516,7 @@ void cmDocumentation::PrintNames(std::ostream& os, std::string const& pattern)
     std::string line;
     cmsys::ifstream fin(f.c_str());
     while (fin && cmSystemTools::GetLineFromStream(fin, line)) {
-      if (!line.empty() && (isalnum(line[0]) || line[0] == '<')) {
+      if (!line.empty() && (cmsysString_isalnum(line[0]) || line[0] == '<')) {
         names.push_back(line);
         break;
       }

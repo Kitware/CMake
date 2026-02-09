@@ -13,8 +13,6 @@
 #include <cmext/string_view>
 
 #ifdef _WIN32
-#  include <cctype>
-
 #  include <windows.h>
 
 #  include <cmsys/String.h>
@@ -97,7 +95,7 @@ private:
 Root ClassifyRoot(cm::string_view p)
 {
 #ifdef _WIN32
-  if (p.size() >= 2 && std::isalpha(p[0]) && p[1] == ':') {
+  if (p.size() >= 2 && cmsysString_isalpha(p[0]) && p[1] == ':') {
     return Root::Drive;
   }
   if (p.size() >= 3 && p[0] == '/' && p[1] == '/' && p[2] != '/') {

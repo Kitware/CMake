@@ -4,7 +4,6 @@
 
 #include <algorithm>
 #include <cassert>
-#include <cctype>
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
@@ -26,6 +25,7 @@
 #include "cmsys/FStream.hxx"
 #include "cmsys/Glob.hxx"
 #include "cmsys/RegularExpression.hxx"
+#include "cmsys/String.h"
 
 #include "cm_sys_stat.h"
 
@@ -519,7 +519,8 @@ bool HandleStringsCommand(std::vector<std::string> const& args,
     }
 
     if (c >= 0 && c <= 0xFF &&
-        (isprint(c) || c == '\t' || (c == '\n' && newline_consume))) {
+        (cmsysString_isprint(static_cast<char>(c)) || c == '\t' ||
+         (c == '\n' && newline_consume))) {
       // This is an ASCII character that may be part of a string.
       // Cast added to avoid compiler warning. Cast is ok because
       // c is guaranteed to fit in char by the above if...
@@ -3767,7 +3768,7 @@ bool HandleArchiveCreateCommand(std::vector<std::string> const& args,
 
   if (!parsedArgs.CompressionLevel.empty()) {
     if (parsedArgs.CompressionLevel.size() != 1 &&
-        !std::isdigit(parsedArgs.CompressionLevel[0])) {
+        !cmsysString_isdigit(parsedArgs.CompressionLevel[0])) {
       status.SetError(
         cmStrCat("compression level ", parsedArgs.CompressionLevel, " for ",
                  parsedArgs.Compression, " should be in range ",
@@ -3800,7 +3801,7 @@ bool HandleArchiveCreateCommand(std::vector<std::string> const& args,
   constexpr int minThreads = 0;
   if (!parsedArgs.Threads.empty()) {
     if (parsedArgs.Threads.size() != 1 &&
-        !std::isdigit(parsedArgs.Threads[0])) {
+        !cmsysString_isdigit(parsedArgs.Threads[0])) {
       status.SetError(cmStrCat("number of threads ", parsedArgs.Threads,
                                " should be at least ", minThreads));
       cmSystemTools::SetFatalErrorOccurred();

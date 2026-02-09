@@ -4,7 +4,6 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include <cctype>
 #include <cstring>
 #include <initializer_list>
 #include <iterator>
@@ -49,15 +48,6 @@ private:
  * Note that this is not guaranteed to work correctly on non-ASCII strings.
  */
 bool cmStrCaseEq(cm::string_view a, cm::string_view b);
-
-/** Returns true if the character @a ch is a whitespace character.  **/
-inline bool cmIsSpace(char ch)
-{
-  // isspace takes 'int' but documents that the value must be representable
-  // by 'unsigned char', or be EOF.  Cast to 'unsigned char' to avoid sign
-  // extension while converting to 'int'.
-  return std::isspace(static_cast<unsigned char>(ch));
-}
 
 /** Returns a string that has whitespace removed from the start and the end. */
 std::string cmTrimWhitespace(cm::string_view str);

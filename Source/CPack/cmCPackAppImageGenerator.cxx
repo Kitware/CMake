@@ -4,7 +4,6 @@
 #include "cmCPackAppImageGenerator.h"
 
 #include <algorithm>
-#include <cctype>
 #include <cstddef>
 #include <utility>
 #include <vector>
@@ -14,6 +13,7 @@
 #include <sys/types.h>
 
 #include "cmsys/FStream.hxx"
+#include "cmsys/String.h"
 
 #include "cmCPackLog.h"
 #include "cmELF.h"
@@ -340,11 +340,9 @@ namespace {
 // Trim leading and trailing whitespace from a string
 std::string trim(std::string const& str)
 {
-  auto start = std::find_if_not(
-    str.begin(), str.end(), [](unsigned char c) { return std::isspace(c); });
-  auto end = std::find_if_not(str.rbegin(), str.rend(), [](unsigned char c) {
-               return std::isspace(c);
-             }).base();
+  auto start = std::find_if_not(str.begin(), str.end(), cmsysString_isspace);
+  auto end =
+    std::find_if_not(str.rbegin(), str.rend(), cmsysString_isspace).base();
   return (start < end) ? std::string(start, end) : std::string();
 }
 } // namespace

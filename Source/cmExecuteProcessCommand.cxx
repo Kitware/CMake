@@ -24,6 +24,8 @@
 #  include "cm_fileno.hxx"
 #endif
 
+#include "cmsys/String.h"
+
 #include "cmArgumentParser.h"
 #include "cmExecutionStatus.h"
 #include "cmList.h"
@@ -40,7 +42,7 @@
 namespace {
 bool cmExecuteProcessCommandIsWhitespace(char c)
 {
-  return (cmIsSpace(c) || c == '\n' || c == '\r');
+  return (cmsysString_isspace(c) || c == '\n' || c == '\r');
 }
 
 FILE* FopenCLOEXEC(std::string const& path, char const* mode)
