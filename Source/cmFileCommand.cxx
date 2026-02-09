@@ -1698,6 +1698,16 @@ std::string const TLS_VERSION_DEFAULT = "1.2";
 // Stuff for curl download/upload
 using cmFileCommandVectorOfChar = std::vector<char>;
 
+std::string CurlCompatFileURL(std::string url)
+{
+  if (cmHasLiteralPrefix(url, "file://")) {
+    // libcurl 7.77 and below accidentally allowed spaces in file:// URLs,
+    // which CMake has long accepted as a result.  Explicitly encode spaces.
+    cmSystemTools::ReplaceString(url, " ", "%20");
+  }
+  return url;
+}
+
 size_t cmWriteToFileCallback(void* ptr, size_t size, size_t nmemb, void* data)
 {
   int realsize = static_cast<int>(size * nmemb);
@@ -2139,7 +2149,7 @@ bool HandleDownloadCommand(std::vector<std::string> const& args,
     }
   }
 
-  url = cmCurlFixFileURL(url);
+  url = CurlCompatFileURL(url);
 
   ::CURL* curl;
   cm_curl_global_init(CURL_GLOBAL_DEFAULT);
@@ -2541,7 +2551,7 @@ bool HandleUploadCommand(std::vector<std::string> const& args,
 
   unsigned long file_size = cmsys::SystemTools::FileLength(filename);
 
-  url = cmCurlFixFileURL(url);
+  url = CurlCompatFileURL(url);
 
   ::CURL* curl;
   cm_curl_global_init(CURL_GLOBAL_DEFAULT);

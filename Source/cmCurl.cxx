@@ -227,20 +227,6 @@ std::string cmCurlSetNETRCOption(::CURL* curl, std::string const& netrc_level,
   return e;
 }
 
-std::string cmCurlFixFileURL(std::string url)
-{
-  if (!cmHasLiteralPrefix(url, "file://")) {
-    return url;
-  }
-
-  // libcurl 7.77 and below accidentally allowed spaces in URLs in some cases.
-  // One such case was file:// URLs, which CMake has long accepted as a result.
-  // Explicitly encode spaces for a URL.
-  cmSystemTools::ReplaceString(url, " ", "%20");
-
-  return url;
-}
-
 ::CURL* cm_curl_easy_init()
 {
   ::CURL* curl = curl_easy_init();
