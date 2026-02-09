@@ -801,6 +801,10 @@ void cmPackageInfoReader::SetTargetProperties(
                          configuration, NormalizeTargetName(dep, package));
   }
 
+  for (std::string const& lib : ReadList(data, "link_libraries")) {
+    AppendProperty(makefile, target, "LINK_LIBRARIES"_s, configuration, lib);
+  }
+
   // TODO: Handle non-configuration modules
   // once IMPORTED_CXX_MODULES supports it
   if (!configuration.empty()) {
