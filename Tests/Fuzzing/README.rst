@@ -12,7 +12,10 @@ All fuzzers are implemented using the `libFuzzer engine`_.
 Building Locally
 ----------------
 
-To build the fuzzers locally with Clang and libFuzzer::
+See `reproducing OSS-Fuzz bugs locally`_ for official instructions from
+OSS-Fuzz on reproducing using Docker.
+
+Unofficially, to build the fuzzers locally with Clang and libFuzzer:
 
   mkdir build && cd build
   cmake -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ \
@@ -20,7 +23,15 @@ To build the fuzzers locally with Clang and libFuzzer::
         -DCMAKE_C_FLAGS="-fsanitize=fuzzer-no-link,address" \
         -DCMAKE_CXX_FLAGS="-fsanitize=fuzzer-no-link,address" \
         ..
-  make -j$(nproc)
+  cmake --build .
+
+The above command runs the fuzzers using address sanitizer (ASAN). Fuzzing can
+also be performed using memory (MSAN) or undefined behavior (UBSAN) sanitizers.
+Adjust the ``CMAKE_(C|CXX)_FLAGS`` accordingly using
+``-fsanitizer=fuzzer-no-link,memory`` or
+``-fsanitizer=fuzzer-no-link,undefined``, respectively.
+
+.. _`reproducing OSS-Fuzz bugs locally`: https://google.github.io/oss-fuzz/getting-started/reproducing-bugs-locally/
 
 Seed Corpora
 ------------
