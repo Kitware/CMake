@@ -50,6 +50,8 @@ if(NOT MSVC_VERSION)
     set(_compiler_version ${CMAKE_Fortran_SIMULATE_VERSION})
   elseif(CMAKE_CUDA_SIMULATE_VERSION)
     set(_compiler_version ${CMAKE_CUDA_SIMULATE_VERSION})
+  elseif(CMAKE_HIP_SIMULATE_VERSION)
+    set(_compiler_version ${CMAKE_HIP_SIMULATE_VERSION})
   elseif(CMAKE_C_COMPILER_VERSION)
     set(_compiler_version ${CMAKE_C_COMPILER_VERSION})
   else()
@@ -483,7 +485,8 @@ macro(__windows_compiler_msvc lang)
   endif()
 
   if("x${lang}" STREQUAL "xC" OR
-      "x${lang}" STREQUAL "xCXX")
+      "x${lang}" STREQUAL "xCXX" OR
+      "x${lang}" STREQUAL "xHIP")
     if(CMAKE_MSVC_RUNTIME_LIBRARY_DEFAULT)
       set(_MDd "")
       set(_MD "")

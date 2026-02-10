@@ -1,5 +1,5 @@
 include(Platform/Windows-Clang)
-set(_COMPILE_HIP_MSVC " -TP")
+set(_COMPILE_HIP_MSVC " -x hip")
 __windows_compiler_clang(HIP)
 
 if("x${CMAKE_HIP_COMPILER_FRONTEND_VARIANT}" STREQUAL "xMSVC")
