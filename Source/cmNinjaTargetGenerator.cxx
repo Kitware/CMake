@@ -254,7 +254,7 @@ std::string cmNinjaTargetGenerator::ComputeFlagsForObject(
   }
 
   auto const* fs = this->GeneratorTarget->GetFileSetForSource(config, source);
-  if (fs && fs->GetType() == "CXX_MODULES"_s) {
+  if (fs && fs->GetType() == cmFileSet::CXX_MODULES) {
     if (source->GetLanguage() != "CXX"_s) {
       this->GetMakefile()->IssueMessage(
         MessageType::FATAL_ERROR,
@@ -1056,9 +1056,9 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements(
             this->GeneratorTarget->GetFileSetForSource(
               config, this->Makefile->GetOrCreateGeneratedSource(*it));
           bool isVisible = fileset &&
-            cmFileSetVisibilityIsForInterface(fileset->GetVisibility());
+            cmFileSet::VisibilityIsForInterface(fileset->GetVisibility());
           bool isIncludeable =
-            !fileset || cmFileSetTypeCanBeIncluded(fileset->GetType());
+            !fileset || cmFileSet::TypeCanBeIncluded(fileset->GetType());
           if (fileset && isVisible && isIncludeable) {
             ++it;
             continue;
@@ -1169,7 +1169,7 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements(
       if (!fs) {
         continue;
       }
-      if (fs->GetType() != "CXX_MODULES"_s) {
+      if (fs->GetType() != cmFileSet::CXX_MODULES) {
         continue;
       }
       if (sf->GetLanguage().empty()) {
@@ -1177,8 +1177,8 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements(
           MessageType::FATAL_ERROR,
           cmStrCat("Target \"", this->GeneratorTarget->GetName(),
                    "\" has source file\n  ", sf->GetFullPath(),
-                   "\nin a \"FILE_SET TYPE CXX_MODULES\" but it is not "
-                   "scheduled for compilation."));
+                   "\nin a \"FILE_SET TYPE ", cmFileSet::CXX_MODULES,
+                   "\" but it is not scheduled for compilation."));
       }
     }
   }

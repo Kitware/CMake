@@ -240,7 +240,7 @@ cmExportInstallPackageInfoGenerator::GetFileSetDirectory(
   }
 
   std::string const& type = fileSet->GetType();
-  if (config && (type == "CXX_MODULES"_s)) {
+  if (config && (type == cmFileSet::CXX_MODULES)) {
     // C++ modules do not support interface file sets which are dependent
     // upon the configuration.
     cmMakefile* mf = gte->LocalGenerator->GetMakefile();
@@ -284,13 +284,13 @@ bool cmExportInstallPackageInfoGenerator::GenerateFileSetProperties(
     cm::optional<std::string> const& fileSetDirectory =
       this->GetFileSetDirectory(gte, te, fileSet, config);
 
-    if (fileSet->GetType() == "HEADERS"_s) {
+    if (fileSet->GetType() == cmFileSet::HEADERS) {
       if (fileSetDirectory &&
           !cm::contains(seenIncludeDirectories, *fileSetDirectory)) {
         component["includes"].append(*fileSetDirectory);
         seenIncludeDirectories.insert(*fileSetDirectory);
       }
-    } else if (fileSet->GetType() == "CXX_MODULES"_s) {
+    } else if (fileSet->GetType() == cmFileSet::CXX_MODULES) {
       hasModules = true;
       this->RequiresConfigFiles = true;
     }

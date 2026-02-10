@@ -195,13 +195,13 @@ std::shared_ptr<cmDebuggerVariables> cmDebuggerVariablesHelper::CreateIfAny(
     return {};
   }
 
-  static auto visibilityString = [](cmFileSetVisibility visibility) {
+  static auto visibilityString = [](cmFileSet::Visibility visibility) {
     switch (visibility) {
-      case cmFileSetVisibility::Private:
+      case cmFileSet::Visibility::Private:
         return "Private";
-      case cmFileSetVisibility::Public:
+      case cmFileSet::Visibility::Public:
         return "Public";
-      case cmFileSetVisibility::Interface:
+      case cmFileSet::Visibility::Interface:
         return "Interface";
       default:
         return "Unknown";
@@ -307,13 +307,13 @@ std::shared_ptr<cmDebuggerVariables> cmDebuggerVariablesHelper::CreateIfAny(
                   target->GetCompileOptionsEntries()));
     targetVariables->AddSubVariables(
       CreateIfAny(variablesManager, "CxxModuleSets", supportsVariableType,
-                  target->GetCxxModuleSetsEntries()));
+                  target->GetFileSetsEntries(cmFileSet::CXX_MODULES)));
     targetVariables->AddSubVariables(
       CreateIfAny(variablesManager, "HeaderSets", supportsVariableType,
-                  target->GetHeaderSetsEntries()));
+                  target->GetFileSetsEntries(cmFileSet::HEADERS)));
     targetVariables->AddSubVariables(CreateIfAny(
       variablesManager, "InterfaceHeaderSets", supportsVariableType,
-      target->GetInterfaceHeaderSetsEntries()));
+      target->GetInterfaceFileSetsEntries(cmFileSet::HEADERS)));
     targetVariables->AddSubVariables(
       CreateIfAny(variablesManager, "LinkDirectories", supportsVariableType,
                   target->GetLinkDirectoriesEntries()));

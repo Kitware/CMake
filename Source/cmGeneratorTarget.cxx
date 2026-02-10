@@ -1122,8 +1122,8 @@ bool cmGeneratorTarget::IsInBuildSystem() const
       // An INTERFACE library is in the build system if it has SOURCES
       // or C++ module filesets.
       if (!this->SourceEntries.empty() ||
-          !this->Target->GetHeaderSetsEntries().empty() ||
-          !this->Target->GetCxxModuleSetsEntries().empty()) {
+          !this->Target->GetFileSetsEntries(cmFileSet::HEADERS).empty() ||
+          !this->Target->GetFileSetsEntries(cmFileSet::CXX_MODULES).empty()) {
         return true;
       }
       break;
@@ -2342,7 +2342,7 @@ cmGeneratorTarget::GetClassifiedFlagsForSource(cmSourceFile const* sf,
     std::string bmiFlags;
 
     auto const* fs = this->GetFileSetForSource(config, sf);
-    if (fs && fs->GetType() == "CXX_MODULES"_s) {
+    if (fs && fs->GetType() == cmFileSet::CXX_MODULES) {
       if (lang != "CXX"_s) {
         mf->IssueMessage(
           MessageType::FATAL_ERROR,
@@ -5782,8 +5782,8 @@ bool cmGeneratorTarget::AddHeaderSetVerification()
         allVerifyTargetName, { cmStateEnums::TargetDomain::NATIVE });
 
     auto fileSetEntries = isInterface
-      ? this->Target->GetInterfaceHeaderSetsEntries()
-      : this->Target->GetHeaderSetsEntries();
+      ? this->Target->GetInterfaceFileSetsEntries(cmFileSet::HEADERS)
+      : this->Target->GetFileSetsEntries(cmFileSet::HEADERS);
 
     std::set<cmFileSet*> fileSets;
     for (auto const& entry : fileSetEntries) {
@@ -6163,7 +6163,7 @@ bool cmGeneratorTarget::HaveCxx20ModuleSources(std::string* errorMessage) const
       }
 
       auto const& fs_type = file_set->GetType();
-      return fs_type == "CXX_MODULES"_s;
+      return fs_type == cmFileSet::CXX_MODULES;
     });
 }
 
@@ -6337,7 +6337,7 @@ bool cmGeneratorTarget::NeedDyndepForSource(std::string const& lang,
   // Any file in `CXX_MODULES` file sets need scanned (it being `CXX` is
   // enforced elsewhere).
   auto const* fs = this->GetFileSetForSource(config, sf);
-  if (fs && fs->GetType() == "CXX_MODULES"_s) {
+  if (fs && fs->GetType() == cmFileSet::CXX_MODULES) {
     return true;
   }
 

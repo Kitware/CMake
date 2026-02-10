@@ -25,30 +25,30 @@
 #include "cmSystemTools.h"
 #include "cmake.h"
 
-cm::static_string_view cmFileSetVisibilityToName(cmFileSetVisibility vis)
+cm::static_string_view cmFileSet::VisibilityToName(Visibility vis)
 {
   switch (vis) {
-    case cmFileSetVisibility::Interface:
+    case Visibility::Interface:
       return "INTERFACE"_s;
-    case cmFileSetVisibility::Public:
+    case Visibility::Public:
       return "PUBLIC"_s;
-    case cmFileSetVisibility::Private:
+    case Visibility::Private:
       return "PRIVATE"_s;
   }
   return ""_s;
 }
 
-cmFileSetVisibility cmFileSetVisibilityFromName(cm::string_view name,
-                                                cmMakefile* mf)
+cmFileSet::Visibility cmFileSet::VisibilityFromName(cm::string_view name,
+                                                    cmMakefile* mf)
 {
   if (name == "INTERFACE"_s) {
-    return cmFileSetVisibility::Interface;
+    return Visibility::Interface;
   }
   if (name == "PUBLIC"_s) {
-    return cmFileSetVisibility::Public;
+    return Visibility::Public;
   }
   if (name == "PRIVATE"_s) {
-    return cmFileSetVisibility::Private;
+    return Visibility::Private;
   }
   auto msg = cmStrCat("File set visibility \"", name, "\" is not valid.");
   if (mf) {
@@ -56,44 +56,59 @@ cmFileSetVisibility cmFileSetVisibilityFromName(cm::string_view name,
   } else {
     cmSystemTools::Error(msg);
   }
-  return cmFileSetVisibility::Private;
+  return Visibility::Private;
 }
 
-bool cmFileSetVisibilityIsForSelf(cmFileSetVisibility vis)
+bool cmFileSet::VisibilityIsForSelf(Visibility vis)
 {
   switch (vis) {
-    case cmFileSetVisibility::Interface:
+    case Visibility::Interface:
       return false;
-    case cmFileSetVisibility::Public:
-    case cmFileSetVisibility::Private:
+    case Visibility::Public:
+    case Visibility::Private:
       return true;
   }
   return false;
 }
 
-bool cmFileSetVisibilityIsForInterface(cmFileSetVisibility vis)
+bool cmFileSet::VisibilityIsForInterface(Visibility vis)
 {
   switch (vis) {
-    case cmFileSetVisibility::Interface:
-    case cmFileSetVisibility::Public:
+    case Visibility::Interface:
+    case Visibility::Public:
       return true;
-    case cmFileSetVisibility::Private:
+    case Visibility::Private:
       return false;
   }
   return false;
 }
+cm::static_string_view const cmFileSet::HEADERS = "HEADERS"_s;
+cm::static_string_view const cmFileSet::CXX_MODULES = "CXX_MODULES"_s;
 
-bool cmFileSetTypeCanBeIncluded(std::string const& type)
+bool cmFileSet::IsKnownType(std::string const& type)
 {
-  return type == "HEADERS"_s;
+  return cm::contains(GetKnownTypes(), type);
 }
+
+bool cmFileSet::TypeCanBeIncluded(std::string const& type)
+{
+  return type == HEADERS;
+}
+
+cmList const& cmFileSet::GetKnownTypes()
+{
+  return KnownTypes;
+}
+
+cmList cmFileSet::KnownTypes{ std::string{ HEADERS },
+                              std::string{ CXX_MODULES } };
 
 cmFileSet::cmFileSet(cmMakefile* makefile, std::string name, std::string type,
-                     cmFileSetVisibility visibility)
+                     Visibility visibility)
   : Makefile(makefile)
   , Name(std::move(name))
   , Type(std::move(type))
-  , Visibility(visibility)
+  , FSVisibility(visibility)
 {
 }
 

@@ -236,8 +236,8 @@ bool TargetSourcesImpl::HandleOneFileSet(
     (args.Type.empty() && args.FileSet[0] >= 'A' && args.FileSet[0] <= 'Z');
   std::string type = isDefault ? args.FileSet : args.Type;
 
-  cmFileSetVisibility visibility =
-    cmFileSetVisibilityFromName(scope, this->Makefile);
+  cmFileSet::Visibility visibility =
+    cmFileSet::VisibilityFromName(scope, this->Makefile);
 
   auto fileSet =
     this->Target->GetOrCreateFileSet(args.FileSet, type, visibility);
@@ -254,30 +254,32 @@ bool TargetSourcesImpl::HandleOneFileSet(
       this->SetError("Must specify a TYPE when creating file set");
       return false;
     }
-    if (type != "HEADERS"_s && type != "CXX_MODULES"_s) {
-      this->SetError(
-        R"(File set TYPE may only be "HEADERS" or "CXX_MODULES")");
+    if (!cmFileSet::IsKnownType(type)) {
+      this->SetError(cmStrCat("File set TYPE may only be \"",
+                              cmFileSet::GetKnownTypes().join("\", \""), '"'));
       return false;
     }
 
-    if (cmFileSetVisibilityIsForSelf(visibility) &&
+    if (cmFileSet::VisibilityIsForSelf(visibility) &&
         this->Target->GetType() == cmStateEnums::INTERFACE_LIBRARY &&
         !this->Target->IsImported()) {
-      if (type == "CXX_MODULES"_s) {
-        this->SetError(R"(File set TYPE "CXX_MODULES" may not have "PUBLIC" )"
-                       R"(or "PRIVATE" visibility on INTERFACE libraries.)");
+      if (type == cmFileSet::CXX_MODULES) {
+        this->SetError(
+          cmStrCat(R"(File set TYPE ")", cmFileSet::CXX_MODULES,
+                   R"(" may not have "PUBLIC" )"
+                   R"(or "PRIVATE" visibility on INTERFACE libraries.)"));
         return false;
       }
     }
 
     // FIXME(https://wg21.link/P3470): This condition can go
     // away when interface-only module units are a thing.
-    if (cmFileSetVisibilityIsForInterface(visibility) &&
-        !cmFileSetVisibilityIsForSelf(visibility) &&
+    if (cmFileSet::VisibilityIsForInterface(visibility) &&
+        !cmFileSet::VisibilityIsForSelf(visibility) &&
         !this->Target->IsImported()) {
-      if (type == "CXX_MODULES"_s) {
-        this->SetError(
-          R"(File set TYPE "CXX_MODULES" may not have "INTERFACE" visibility)");
+      if (type == cmFileSet::CXX_MODULES) {
+        this->SetError(cmStrCat(R"(File set TYPE ")", cmFileSet::CXX_MODULES,
+                                R"(" may not have "INTERFACE" visibility)"));
         return false;
       }
     }
@@ -298,7 +300,7 @@ bool TargetSourcesImpl::HandleOneFileSet(
       this->SetError(
         cmStrCat("Scope ", scope, " for file set \"", args.FileSet,
                  "\" does not match original scope ",
-                 cmFileSetVisibilityToName(fileSet.first->GetVisibility())));
+                 cmFileSet::VisibilityToName(fileSet.first->GetVisibility())));
       return false;
     }
   }
@@ -315,16 +317,16 @@ bool TargetSourcesImpl::HandleOneFileSet(
   if (!baseDirectories.empty()) {
     fileSet.first->AddDirectoryEntry(
       BT<std::string>(baseDirectories, this->Makefile->GetBacktrace()));
-    if (type == "HEADERS"_s) {
+    if (type == cmFileSet::HEADERS) {
       for (auto const& dir : cmList{ baseDirectories }) {
         auto interfaceDirectoriesGenex =
           cmStrCat("$<BUILD_INTERFACE:", dir, '>');
-        if (cmFileSetVisibilityIsForSelf(visibility)) {
+        if (cmFileSet::VisibilityIsForSelf(visibility)) {
           this->Target->AppendProperty("INCLUDE_DIRECTORIES",
                                        interfaceDirectoriesGenex,
                                        this->Makefile->GetBacktrace());
         }
-        if (cmFileSetVisibilityIsForInterface(visibility)) {
+        if (cmFileSet::VisibilityIsForInterface(visibility)) {
           this->Target->AppendProperty("INTERFACE_INCLUDE_DIRECTORIES",
                                        interfaceDirectoriesGenex,
                                        this->Makefile->GetBacktrace());

@@ -449,9 +449,9 @@ cmBuildDatabase cmBuildDatabase::ForTarget(cmGeneratorTarget* gt,
     bool isPrivate = true;
     if (sf->GetLanguage() == "CXX"_s) {
       auto const* fs = gt->GetFileSetForSource(config, sf);
-      if (fs && fs->GetType() == "CXX_MODULES"_s) {
+      if (fs && fs->GetType() == cmFileSet::CXX_MODULES) {
         isCXXModule = true;
-        isPrivate = !cmFileSetVisibilityIsForInterface(fs->GetVisibility());
+        isPrivate = !cmFileSet::VisibilityIsForInterface(fs->GetVisibility());
       }
     }
 

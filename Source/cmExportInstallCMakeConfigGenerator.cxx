@@ -302,7 +302,8 @@ std::string cmExportInstallCMakeConfigGenerator::GetFileSetDirectories(
     auto const& type = fileSet->GetType();
     // C++ modules do not support interface file sets which are dependent upon
     // the configuration.
-    if (cge->GetHadContextSensitiveCondition() && type == "CXX_MODULES"_s) {
+    if (cge->GetHadContextSensitiveCondition() &&
+        type == cmFileSet::CXX_MODULES) {
       auto* mf = this->IEGen->GetLocalGenerator()->GetMakefile();
       std::ostringstream e;
       e << "The \"" << gte->GetName() << "\" target's interface file set \""
@@ -367,7 +368,7 @@ std::string cmExportInstallCMakeConfigGenerator::GetFileSetFiles(
     auto const& type = fileSet->GetType();
     // C++ modules do not support interface file sets which are dependent upon
     // the configuration.
-    if (contextSensitive && type == "CXX_MODULES"_s) {
+    if (contextSensitive && type == cmFileSet::CXX_MODULES) {
       auto* mf = this->IEGen->GetLocalGenerator()->GetMakefile();
       std::ostringstream e;
       e << "The \"" << gte->GetName() << "\" target's interface file set \""

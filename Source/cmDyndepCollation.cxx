@@ -105,12 +105,12 @@ TdiSourceInfo CollationInformationSources(cmGeneratorTarget const* gt,
     }
     auto fs_type = file_set->GetType();
     // We only care about C++ module sources here.
-    if (fs_type != "CXX_MODULES"_s) {
+    if (fs_type != cmFileSet::CXX_MODULES) {
       continue;
     }
     // Synthetic (BMI-only) targets do not build private C++ modules.
     if (tgt->IsSynthetic() &&
-        file_set->GetVisibility() == cmFileSetVisibility::Private) {
+        file_set->GetVisibility() == cmFileSet::Visibility::Private) {
       continue;
     }
 
@@ -148,16 +148,16 @@ TdiSourceInfo CollationInformationSources(cmGeneratorTarget const* gt,
             // Duplicate source; raise an author warning.
             gt->Makefile->IssueMessage(
               MessageType::AUTHOR_WARNING,
-              cmStrCat(
-                "Target \"", tgt->GetName(), "\" has source file\n  ", file,
-                "\nin a \"FILE_SET TYPE CXX_MODULES\" multiple times."));
+              cmStrCat("Target \"", tgt->GetName(), "\" has source file\n  ",
+                       file, "\nin a \"FILE_SET TYPE ", cmFileSet::CXX_MODULES,
+                       "\" multiple times."));
             continue;
           }
           gt->Makefile->IssueMessage(
             MessageType::FATAL_ERROR,
             cmStrCat("Target \"", tgt->GetName(), "\" has source file\n  ",
-                     file,
-                     "\nin a \"FILE_SET TYPE CXX_MODULES\" but it is not "
+                     file, "\nin a \"FILE_SET TYPE ", cmFileSet::CXX_MODULES,
+                     "\" but it is not "
                      "scheduled for compilation."));
           continue;
         }
@@ -212,7 +212,7 @@ TdiSourceInfo CollationInformationSources(cmGeneratorTarget const* gt,
         tdi_module_info["name"] = file_set->GetName();
         tdi_module_info["type"] = file_set->GetType();
         tdi_module_info["visibility"] =
-          std::string(cmFileSetVisibilityToName(file_set->GetVisibility()));
+          std::string(cmFileSet::VisibilityToName(file_set->GetVisibility()));
         tdi_module_info["destination"] = fs_dest;
       }
     }
@@ -403,7 +403,7 @@ struct CxxModuleFileSet
   std::string RelativeDirectory;
   std::string SourcePath;
   std::string Type;
-  cmFileSetVisibility Visibility = cmFileSetVisibility::Private;
+  cmFileSet::Visibility Visibility = cmFileSet::Visibility::Private;
   cm::optional<std::string> Destination;
   std::vector<std::string> IncludeDirectories;
   std::vector<std::string> Definitions;
@@ -526,7 +526,7 @@ cmDyndepCollation::ParseExportInfo(Json::Value const& tdi)
       }
       fsi.SourcePath = tdi_cxx_module_info["source"].asString();
       fsi.Type = tdi_cxx_module_info["type"].asString();
-      fsi.Visibility = cmFileSetVisibilityFromName(
+      fsi.Visibility = cmFileSet::VisibilityFromName(
         tdi_cxx_module_info["visibility"].asString(), nullptr);
       auto const& tdi_fs_dest = tdi_cxx_module_info["destination"];
       if (tdi_fs_dest.isString()) {
@@ -676,8 +676,8 @@ bool cmDyndepCollation::WriteDyndepMetadata(
         cmSystemTools::Error(
           cmStrCat("Output ", object.PrimaryOutput, " provides the `",
                    provides.LogicalName,
-                   "` module but it is not found in a `FILE_SET` of type "
-                   "`CXX_MODULES`"));
+                   "` module but it is not found in a `FILE_SET` of type `",
+                   cmFileSet::CXX_MODULES, '`'));
         result = false;
       }
 
@@ -717,12 +717,12 @@ bool cmDyndepCollation::WriteDyndepMetadata(
     }
 
     // Verify the fileset type for the object.
-    if (file_set.Type == "CXX_MODULES"_s) {
+    if (file_set.Type == cmFileSet::CXX_MODULES) {
       if (!has_provides) {
-        cmSystemTools::Error(
-          cmStrCat("Output ", object.PrimaryOutput,
-                   " is of type `CXX_MODULES` but does not provide a module "
-                   "interface unit or partition"));
+        cmSystemTools::Error(cmStrCat("Output ", object.PrimaryOutput,
+                                      " is of type `", cmFileSet::CXX_MODULES,
+                                      "` but does not provide a module "
+                                      "interface unit or partition"));
         result = false;
         continue;
       }
@@ -734,7 +734,7 @@ bool cmDyndepCollation::WriteDyndepMetadata(
         cmSystemTools::Error(cmStrCat(
           "Source ", file_set.SourcePath, " provides the `",
           provides.LogicalName, "` C++ module but is of type `", file_set.Type,
-          "` module but must be of type `CXX_MODULES`"));
+          "` module but must be of type `", cmFileSet::CXX_MODULES, '`'));
         result = false;
       }
 
@@ -742,7 +742,7 @@ bool cmDyndepCollation::WriteDyndepMetadata(
       continue;
     }
 
-    if (!cmFileSetVisibilityIsForInterface(file_set.Visibility)) {
+    if (!cmFileSet::VisibilityIsForInterface(file_set.Visibility)) {
       // Nothing needs to be conveyed about non-`PUBLIC` modules.
       for (auto const& p : object.Provides) {
         private_modules.insert(p.LogicalName);
@@ -926,7 +926,7 @@ bool cmDyndepCollation::IsObjectPrivate(
     return false;
   }
   auto const& file_set = fileset_info_itr->second;
-  return !cmFileSetVisibilityIsForInterface(file_set.Visibility);
+  return !cmFileSet::VisibilityIsForInterface(file_set.Visibility);
 }
 
 bool cmDyndepCollation::IsBmiOnly(cmCxxModuleExportInfo const& exportInfo,

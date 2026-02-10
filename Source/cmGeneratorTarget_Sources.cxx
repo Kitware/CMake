@@ -106,7 +106,7 @@ void addFileSetEntry(cmGeneratorTarget const* headTarget,
     EvaluatedTargetPropertyEntry const& entry = entries.Entries.back();
     for (auto const& file : entry.Values) {
       auto* sf = headTarget->Makefile->GetOrCreateSource(file);
-      if (fileSet->GetType() == "HEADERS"_s) {
+      if (fileSet->GetType() == cmFileSet::HEADERS) {
         sf->SetProperty("HEADER_FILE_ONLY", "TRUE");
       }
 
@@ -131,7 +131,7 @@ void addFileSetEntry(cmGeneratorTarget const* headTarget,
         }
       }
       if (!found) {
-        if (fileSet->GetType() == "HEADERS"_s) {
+        if (fileSet->GetType() == cmFileSet::HEADERS) {
           headTarget->Makefile->GetOrCreateSourceGroup("Header Files")
             ->AddGroupFile(path);
         }
@@ -146,13 +146,15 @@ void AddFileSetEntries(cmGeneratorTarget const* headTarget,
                        cmGeneratorExpressionDAGChecker* dagChecker,
                        EvaluatedTargetPropertyEntries& entries)
 {
-  for (auto const& entry : headTarget->Target->GetHeaderSetsEntries()) {
+  for (auto const& entry :
+       headTarget->Target->GetFileSetsEntries(cmFileSet::HEADERS)) {
     for (auto const& name : cmList{ entry.Value }) {
       auto const* headerSet = headTarget->Target->GetFileSet(name);
       addFileSetEntry(headTarget, context, dagChecker, headerSet, entries);
     }
   }
-  for (auto const& entry : headTarget->Target->GetCxxModuleSetsEntries()) {
+  for (auto const& entry :
+       headTarget->Target->GetFileSetsEntries(cmFileSet::CXX_MODULES)) {
     for (auto const& name : cmList{ entry.Value }) {
       auto const* cxxModuleSet = headTarget->Target->GetFileSet(name);
       addFileSetEntry(headTarget, context, dagChecker, cxxModuleSet, entries);
@@ -400,7 +402,7 @@ void cmGeneratorTarget::ComputeKindedSources(KindedSources& files,
     if (sf->GetCustomCommand()) {
       kind = SourceKindCustomCommand;
     } else if (!this->Target->IsNormal() && !this->Target->IsImported() &&
-               fs && (fs->GetType() == "CXX_MODULES"_s)) {
+               fs && (fs->GetType() == cmFileSet::CXX_MODULES)) {
       kind = SourceKindCxxModuleSource;
     } else if (this->Target->GetType() == cmStateEnums::UTILITY ||
                this->Target->GetType() == cmStateEnums::INTERFACE_LIBRARY

@@ -639,7 +639,7 @@ void cmExportCMakeConfigGenerator::GenerateTargetFileSets(
         return;
       }
 
-      if (fileSet->GetType() == "HEADERS"_s) {
+      if (fileSet->GetType() == cmFileSet::HEADERS) {
         os << "\n      " << this->GetFileSetDirectories(gte, fileSet, te);
       }
     }

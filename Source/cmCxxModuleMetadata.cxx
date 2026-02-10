@@ -448,8 +448,9 @@ void cmCxxModuleMetadata::PopulateTarget(
   std::string metadataDir =
     cmSystemTools::GetFilenamePath(meta.MetadataFilePath);
 
-  auto fileSet = target.GetOrCreateFileSet("CXX_MODULES", "CXX_MODULES",
-                                           cmFileSetVisibility::Interface);
+  auto fileSet = target.GetOrCreateFileSet(
+    std::string{ cmFileSet::CXX_MODULES },
+    std::string{ cmFileSet::CXX_MODULES }, cmFileSet::Visibility::Interface);
 
   for (auto const& module : meta.Modules) {
     std::string sourcePath = module.SourcePath;

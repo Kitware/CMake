@@ -228,7 +228,7 @@ cm::optional<std::string> cmExportInstallSbomGenerator::GetFileSetDirectory(
   }
 
   std::string const& type = fileSet->GetType();
-  if (config && (type == "CXX_MODULES"_s)) {
+  if (config && (type == cmFileSet::CXX_MODULES)) {
     cmMakefile* mf = gte->LocalGenerator->GetMakefile();
     std::ostringstream e;
     e << "The \"" << gte->GetName() << "\" target's interface file set \""

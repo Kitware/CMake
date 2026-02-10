@@ -465,7 +465,7 @@ class Target
 
   using FileSetDatabase = std::map<std::string, Json::ArrayIndex>;
 
-  std::vector<cmFileSetVisibility> FileSetVisibilities;
+  std::vector<cmFileSet::Visibility> FileSetVisibilities;
 
   template <typename T>
   JBT<T> ToJBT(BT<T> const& bt)
@@ -1788,7 +1788,7 @@ Json::Value Target::DumpFileSet(cmFileSet const* fs,
   fileSet["name"] = fs->GetName();
   fileSet["type"] = fs->GetType();
   fileSet["visibility"] =
-    std::string(cmFileSetVisibilityToName(fs->GetVisibility()));
+    std::string(cmFileSet::VisibilityToName(fs->GetVisibility()));
 
   Json::Value baseDirs = Json::arrayValue;
   for (auto const& directory : directories) {
@@ -1888,7 +1888,7 @@ Json::Value Target::DumpInterfaceSources(FileSetDatabase const& fsdb)
     Json::ArrayIndex const index = fsIter.second;
     // FileSetVisibilities was populated by DumpFileSets() and will always
     // have the same size as the file sets array that index is indexing into
-    if (this->FileSetVisibilities[index] != cmFileSetVisibility::Private) {
+    if (this->FileSetVisibilities[index] != cmFileSet::Visibility::Private) {
       dumpFile(fsIter.first);
     }
   }

@@ -502,7 +502,7 @@ static bool testCreateFromFileSet()
   auto dummies = CreateDummies("Foo");
 
   cmFileSet fileSet(dummies.Makefile.get(), "Foo", "HEADERS",
-                    cmFileSetVisibility::Public);
+                    cmFileSet::Visibility::Public);
   BT<std::string> directory;
   directory.Value = "c:/";
   fileSet.AddDirectoryEntry(directory);
@@ -547,7 +547,7 @@ static bool testCreateFromFileSets()
   auto dummies = CreateDummies("Foo");
 
   cmFileSet fileSet(dummies.Makefile.get(), "Foo", "HEADERS",
-                    cmFileSetVisibility::Public);
+                    cmFileSet::Visibility::Public);
   BT<std::string> directory;
   directory.Value = "c:/";
   fileSet.AddDirectoryEntry(directory);

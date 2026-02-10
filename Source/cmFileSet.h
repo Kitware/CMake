@@ -11,6 +11,7 @@
 #include <cm/string_view>
 #include <cmext/string_view>
 
+#include "cmList.h"
 #include "cmListFileCache.h"
 #include "cmPropertyMap.h"
 #include "cmValue.h"
@@ -26,29 +27,36 @@ struct cmGeneratorExpressionDAGChecker;
 class cmGeneratorTarget;
 class cmMakefile;
 
-enum class cmFileSetVisibility
-{
-  Private,
-  Public,
-  Interface,
-};
-cm::static_string_view cmFileSetVisibilityToName(cmFileSetVisibility vis);
-cmFileSetVisibility cmFileSetVisibilityFromName(cm::string_view name,
-                                                cmMakefile* mf);
-bool cmFileSetVisibilityIsForSelf(cmFileSetVisibility vis);
-bool cmFileSetVisibilityIsForInterface(cmFileSetVisibility vis);
-
-bool cmFileSetTypeCanBeIncluded(std::string const& type);
-
 class cmFileSet
 {
 public:
+  enum class Visibility
+  {
+    Private,
+    Public,
+    Interface,
+  };
+  static cm::static_string_view VisibilityToName(Visibility vis);
+  static Visibility VisibilityFromName(cm::string_view name, cmMakefile* mf);
+
+  static bool VisibilityIsForSelf(Visibility vis);
+  static bool VisibilityIsForInterface(Visibility vis);
+
+  static bool IsKnownType(std::string const& type);
+  static bool TypeCanBeIncluded(std::string const& type);
+
+  // Pre-defined FileSet types
+  static cm::static_string_view const HEADERS;
+  static cm::static_string_view const CXX_MODULES;
+
+  static cmList const& GetKnownTypes();
+
   cmFileSet(cmMakefile* makefile, std::string name, std::string type,
-            cmFileSetVisibility visibility);
+            Visibility visibility);
 
   std::string const& GetName() const { return this->Name; }
   std::string const& GetType() const { return this->Type; }
-  cmFileSetVisibility GetVisibility() const { return this->Visibility; }
+  Visibility GetVisibility() const { return this->FSVisibility; }
 
   cmMakefile* GetMakefile() const { return this->Makefile; }
 
@@ -107,10 +115,12 @@ public:
   cmValue GetProperty(std::string const& prop) const;
 
 private:
+  static cmList KnownTypes;
+
   cmMakefile* Makefile;
   std::string Name;
   std::string Type;
-  cmFileSetVisibility Visibility;
+  Visibility FSVisibility;
   std::vector<BT<std::string>> DirectoryEntries;
   std::vector<BT<std::string>> FileEntries;
   cmPropertyMap Properties;

@@ -64,11 +64,11 @@ bool cmInstallFileSetGenerator::Compute(cmLocalGenerator* lg)
   }
 
   cmList interfaceFileSetEntries{ target.GetSafeProperty(
-    cmTarget::GetInterfaceFileSetsPropertyName(this->FileSet->GetType())) };
+    target.GetInterfaceFileSetsPropertyName(this->FileSet->GetType())) };
 
   if (std::find(interfaceFileSetEntries.begin(), interfaceFileSetEntries.end(),
                 this->FileSetName) != interfaceFileSetEntries.end()) {
-    if (this->FileSet->GetType() == "HEADERS"_s) {
+    if (this->FileSet->GetType() == cmFileSet::HEADERS) {
       this->Destination = this->FileSetDestinations.Headers;
     } else {
       this->Destination = this->FileSetDestinations.CXXModules;
