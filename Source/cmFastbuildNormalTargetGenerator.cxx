@@ -2082,6 +2082,8 @@ void cmFastbuildNormalTargetGenerator::AppendLinkDeps(
   for (cmComputeLinkInformation::Item const& item : items) {
     std::string const feature = item.GetFeatureName();
     LogMessage("GetFeatureName: " + feature);
+    std::string const formatted =
+      item.GetFormattedItem(item.Value.Value).Value;
     if (!feature.empty()) {
       LogMessage("GetFormattedItem: " +
                  item.GetFormattedItem(item.Value.Value).Value);
@@ -2092,13 +2094,26 @@ void cmFastbuildNormalTargetGenerator::AppendLinkDeps(
     if (item.ObjectSource &&
         linkerNode.Type != FastbuildLinkerNode::STATIC_LIBRARY) {
       // Tested in "ObjectLibrary" test.
-      auto libName = item.ObjectSource->GetObjectLibrary();
+      std::string const libName = item.ObjectSource->GetObjectLibrary();
       std::string dep = libName + FASTBUILD_OBJECTS_ALIAS_POSTFIX;
       if (linkedObjects.emplace(dep).second) {
-        FastbuildTargetDep targetDep{ std::move(libName) };
+        FastbuildTargetDep targetDep{ libName };
         targetDep.Type = FastbuildTargetDepType::ORDER_ONLY;
         preBuildDeps.emplace(std::move(targetDep));
-        linkerNode.LibrarianAdditionalInputs.emplace_back(std::move(dep));
+
+        cmTarget const* importedTarget =
+          this->LocalGenerator->GetMakefile()->FindImportedTarget(libName);
+        // Add direct path to the object for imported target
+        // since such targets are not defined in fbuild.bff file.
+        if (importedTarget) {
+          LogMessage(
+            cmStrCat("Adding ", formatted, " to LibrarianAdditionalInputs"));
+          linkerNode.LibrarianAdditionalInputs.emplace_back(formatted);
+        } else {
+          LogMessage(
+            cmStrCat("Adding ", dep, " to LibrarianAdditionalInputs"));
+          linkerNode.LibrarianAdditionalInputs.emplace_back(std::move(dep));
+        }
       }
     } else if (linkerNode.Type == FastbuildLinkerNode::STATIC_LIBRARY) {
       LogMessage(cmStrCat("Skipping linking to STATIC_LIBRARY (",
