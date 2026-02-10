@@ -1,5 +1,5 @@
 function (_cmake_cxx_find_modules_json)
-  if (DEFINED CMAKE_CXX_STDLIB_MODULES_JSON)
+  if (CMAKE_CXX_STDLIB_MODULES_JSON)
     return ()
   endif ()
 

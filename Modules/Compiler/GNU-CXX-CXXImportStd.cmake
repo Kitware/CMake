@@ -4,7 +4,7 @@ function (_cmake_cxx_find_modules_json)
     return ()
   endif ()
 
-  if (NOT DEFINED CMAKE_CXX_STDLIB_MODULES_JSON)
+  if (NOT CMAKE_CXX_STDLIB_MODULES_JSON)
     execute_process(
       COMMAND
         "${CMAKE_CXX_COMPILER}"
