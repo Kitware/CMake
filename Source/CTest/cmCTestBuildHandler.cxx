@@ -620,7 +620,6 @@ void cmCTestBuildHandler::GenerateInstrumentationXML(cmXMLWriter& xml)
       if (target_name == "." || target_name == "..") {
         continue;
       }
-      std::string target_type = "UNKNOWN";
 
       xml.StartElement("Target");
       xml.Attribute("name", target_name);
@@ -644,19 +643,23 @@ void cmCTestBuildHandler::GenerateInstrumentationXML(cmXMLWriter& xml)
           target_data = cmake_content["targets"];
         }
       }
-      // Extract targetType and targetLabels
-      if (target_data.isObject() && target_data.isMember(target_name)) {
+      bool target_has_data =
+        target_data.isObject() && target_data.isMember(target_name);
+      // Extract targetType
+      std::string target_type = "UNKNOWN";
+      if (target_has_data) {
         target_type = target_data[target_name]["type"].asString();
-        if (!target_data[target_name]["labels"].empty()) {
-          xml.StartElement("Labels");
-          for (auto const& json_label_item :
-               target_data[target_name]["labels"]) {
-            xml.Element("Label", json_label_item.asString());
-          }
-          xml.EndElement(); // Labels
-        }
       }
       xml.Attribute("type", target_type);
+      // Extract targetLabels
+      if (target_has_data && !target_data[target_name]["labels"].empty()) {
+        xml.StartElement("Labels");
+        for (auto const& json_label_item :
+             target_data[target_name]["labels"]) {
+          xml.Element("Label", json_label_item.asString());
+        }
+        xml.EndElement(); // Labels
+      }
 
       // Write instrumendation data for this target.
       std::string target_subdir = cmStrCat("build/targets/", target_name);
