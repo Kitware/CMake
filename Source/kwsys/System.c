@@ -1,15 +1,16 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing#kwsys for details.  */
 #include "kwsysPrivate.h"
+#include KWSYS_HEADER(String.h)
 #include KWSYS_HEADER(System.h)
 
 /* Work-around CMake dependency scanning limitation.  This must
    duplicate the above list of headers.  */
 #if 0
+#  include "String.h.in"
 #  include "System.h.in"
 #endif
 
-#include <ctype.h>  /* isspace */
 #include <stddef.h> /* ptrdiff_t */
 #include <stdlib.h> /* malloc, free */
 #include <string.h> /* memcpy */
@@ -148,7 +149,7 @@ static char** kwsysSystem__ParseUnixCommand(char const* command, int flags)
           in_argument = 1;
         }
       }
-    } else if (isspace((unsigned char)*c)) {
+    } else if (kwsysString_isspace(*c)) {
       if (in_argument) {
         if (in_single || in_double) {
           /* This space belongs to a quoted argument.  */

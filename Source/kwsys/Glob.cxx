@@ -8,6 +8,7 @@
 #include KWSYS_HEADER(RegularExpression.hxx)
 #include KWSYS_HEADER(SystemTools.hxx)
 #include KWSYS_HEADER(Directory.hxx)
+#include KWSYS_HEADER(String.h)
 
 // Work-around CMake dependency scanning limitation.  This must
 // duplicate the above list of headers.
@@ -16,6 +17,7 @@
 #  include "Directory.hxx.in"
 #  include "Glob.hxx.in"
 #  include "RegularExpression.hxx.in"
+#  include "String.h.in"
 #  include "SystemTools.hxx.in"
 #endif
 
@@ -23,7 +25,6 @@
 #include <string>
 #include <vector>
 
-#include <cctype>
 #include <cstdio>
 #include <cstring>
 namespace KWSYS_NAMESPACE {
@@ -162,7 +163,7 @@ std::string Glob::PatternToRegex(std::string const& pattern,
         // On case-insensitive systems file names are converted to lower
         // case before matching.
         if (!preserve_case) {
-          ch = tolower(static_cast<unsigned char>(ch));
+          ch = kwsysString_tolower(ch);
         }
       }
 #endif

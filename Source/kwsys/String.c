@@ -17,84 +17,130 @@ condition blocks the compiler from seeing the symbols defined here.
 #    include "String.h.in"
 #  endif
 
-/* Select an implementation for strcasecmp.  */
-#  if defined(_MSC_VER)
-#    define KWSYS_STRING_USE_STRICMP
-#    include <string.h>
-#  elif defined(__GNUC__)
-#    define KWSYS_STRING_USE_STRCASECMP
-#    include <strings.h>
-#  else
-/* Table to convert upper case letters to lower case and leave all
-   other characters alone.  */
-static char kwsysString_strcasecmp_tolower[] = {
-  '\000', '\001', '\002', '\003', '\004', '\005', '\006', '\007', '\010',
-  '\011', '\012', '\013', '\014', '\015', '\016', '\017', '\020', '\021',
-  '\022', '\023', '\024', '\025', '\026', '\027', '\030', '\031', '\032',
-  '\033', '\034', '\035', '\036', '\037', '\040', '\041', '\042', '\043',
-  '\044', '\045', '\046', '\047', '\050', '\051', '\052', '\053', '\054',
-  '\055', '\056', '\057', '\060', '\061', '\062', '\063', '\064', '\065',
-  '\066', '\067', '\070', '\071', '\072', '\073', '\074', '\075', '\076',
-  '\077', '\100', '\141', '\142', '\143', '\144', '\145', '\146', '\147',
-  '\150', '\151', '\152', '\153', '\154', '\155', '\156', '\157', '\160',
-  '\161', '\162', '\163', '\164', '\165', '\166', '\167', '\170', '\171',
-  '\172', '\133', '\134', '\135', '\136', '\137', '\140', '\141', '\142',
-  '\143', '\144', '\145', '\146', '\147', '\150', '\151', '\152', '\153',
-  '\154', '\155', '\156', '\157', '\160', '\161', '\162', '\163', '\164',
-  '\165', '\166', '\167', '\170', '\171', '\172', '\173', '\174', '\175',
-  '\176', '\177', '\200', '\201', '\202', '\203', '\204', '\205', '\206',
-  '\207', '\210', '\211', '\212', '\213', '\214', '\215', '\216', '\217',
-  '\220', '\221', '\222', '\223', '\224', '\225', '\226', '\227', '\230',
-  '\231', '\232', '\233', '\234', '\235', '\236', '\237', '\240', '\241',
-  '\242', '\243', '\244', '\245', '\246', '\247', '\250', '\251', '\252',
-  '\253', '\254', '\255', '\256', '\257', '\260', '\261', '\262', '\263',
-  '\264', '\265', '\266', '\267', '\270', '\271', '\272', '\273', '\274',
-  '\275', '\276', '\277', '\300', '\301', '\302', '\303', '\304', '\305',
-  '\306', '\307', '\310', '\311', '\312', '\313', '\314', '\315', '\316',
-  '\317', '\320', '\321', '\322', '\323', '\324', '\325', '\326', '\327',
-  '\330', '\331', '\332', '\333', '\334', '\335', '\336', '\337', '\340',
-  '\341', '\342', '\343', '\344', '\345', '\346', '\347', '\350', '\351',
-  '\352', '\353', '\354', '\355', '\356', '\357', '\360', '\361', '\362',
-  '\363', '\364', '\365', '\366', '\367', '\370', '\371', '\372', '\373',
-  '\374', '\375', '\376', '\377'
-};
-#  endif
+#  include <ctype.h>
 
-/*--------------------------------------------------------------------------*/
-int kwsysString_strcasecmp(char const* lhs, char const* rhs)
+int kwsysString_isalnum(char c)
 {
-#  if defined(KWSYS_STRING_USE_STRICMP)
-  return _stricmp(lhs, rhs);
-#  elif defined(KWSYS_STRING_USE_STRCASECMP)
-  return strcasecmp(lhs, rhs);
-#  else
-  char const* const lower = kwsysString_strcasecmp_tolower;
-  unsigned char const* us1 = (unsigned char const*)lhs;
-  unsigned char const* us2 = (unsigned char const*)rhs;
-  int result;
-  while ((result = lower[*us1] - lower[*us2++], result == 0) && *us1++) {
-  }
-  return result;
-#  endif
+  return (kwsysString_isalpha(c) | /* bitwise-or to avoid branching.  */
+          kwsysString_isdigit(c));
 }
 
-/*--------------------------------------------------------------------------*/
+int kwsysString_isalpha(char c)
+{
+  return (kwsysString_islower(c) | /* bitwise-or to avoid branching.  */
+          kwsysString_isupper(c));
+}
+
+int kwsysString_isascii(char c)
+{
+  unsigned char const uc = (unsigned char)c;
+  return (uc & 0x80) ^ 0x80;
+}
+
+int kwsysString_isblank(char c)
+{
+  unsigned char const uc = (unsigned char)c;
+  return uc < 0x80 && isblank(uc);
+}
+
+int kwsysString_iscntrl(char c)
+{
+  unsigned char const uc = (unsigned char)c;
+  return uc < 0x80 && iscntrl(uc);
+}
+
+int kwsysString_isdigit(char c)
+{
+  unsigned char const uc = (unsigned char)c;
+  /* Push '0-9' to 246-255 so integer division by 246 is 1 only for them.  */
+  return ((uc + 246 - '0') & 0xFF) / 246;
+}
+
+int kwsysString_isgraph(char c)
+{
+  unsigned char const uc = (unsigned char)c;
+  return uc < 0x80 && isgraph(uc);
+}
+
+int kwsysString_islower(char c)
+{
+  unsigned char const uc = (unsigned char)c;
+  /* Push 'a-z' to 230-255 so integer division by 230 is 1 only for them.  */
+  return ((uc + 230 - 'a') & 0xFF) / 230;
+}
+
+int kwsysString_isprint(char c)
+{
+  unsigned char const uc = (unsigned char)c;
+  /* Push 32-126 to 161-255 so integer division by 161 is 1 only for them.  */
+  return ((uc + 161 - ' ') & 0xFF) / 161;
+}
+
+int kwsysString_ispunct(char c)
+{
+  unsigned char const uc = (unsigned char)c;
+  return uc < 0x80 && ispunct(uc);
+}
+
+int kwsysString_isspace(char c)
+{
+  unsigned char const uc = (unsigned char)c;
+  return uc < 0x80 && isspace(uc);
+}
+
+int kwsysString_isupper(char c)
+{
+  unsigned char const uc = (unsigned char)c;
+  /* Push 'A-Z' to 230-255 so integer division by 230 is 1 only for them.  */
+  return ((uc + 230 - 'A') & 0xFF) / 230;
+}
+
+int kwsysString_isxdigit(char c)
+{
+  unsigned char const uc = (unsigned char)c;
+  return (
+    /* Push '0-9' to 246-255 so integer division by 246 is 1 only for them.  */
+    (((uc + 246 - '0') & 0xFF) / 246) | /* bitwise-or to avoid branching.    */
+    /* Push 'A-F' to 250-255 so integer division by 250 is 1 only for them.  */
+    (((uc + 250 - 'A') & 0xFF) / 250) | /* bitwise-or to avoid branching.    */
+    /* Push 'a-f' to 250-255 so integer division by 250 is 1 only for them.  */
+    (((uc + 250 - 'a') & 0xFF) / 250));
+}
+
+unsigned char kwsysString_tolower(char c)
+{
+  unsigned char const uc = (unsigned char)c;
+  /* Push 'A-Z' to 230-255 so integer division by 230 is 1 only for them.  */
+  return (unsigned char)(uc ^ ((((uc + 230 - 'A') & 0xFF) / 230) << 5));
+}
+
+unsigned char kwsysString_toupper(char c)
+{
+  unsigned char const uc = (unsigned char)c;
+  /* Push 'a-z' to 230-255 so integer division by 230 is 1 only for them.  */
+  return (unsigned char)(uc ^ ((((uc + 230 - 'a') & 0xFF) / 230) << 5));
+}
+
+int kwsysString_strcasecmp(char const* lhs, char const* rhs)
+{
+  int result;
+  while ((result = kwsysString_tolower(*lhs) - kwsysString_tolower(*rhs++)) ==
+           0 &&
+         *lhs++) {
+  }
+  return result;
+}
+
 int kwsysString_strncasecmp(char const* lhs, char const* rhs, size_t n)
 {
-#  if defined(KWSYS_STRING_USE_STRICMP)
-  return _strnicmp(lhs, rhs, n);
-#  elif defined(KWSYS_STRING_USE_STRCASECMP)
-  return strncasecmp(lhs, rhs, n);
-#  else
-  char const* const lower = kwsysString_strcasecmp_tolower;
-  unsigned char const* us1 = (unsigned char const*)lhs;
-  unsigned char const* us2 = (unsigned char const*)rhs;
   int result = 0;
-  while (n && (result = lower[*us1] - lower[*us2++], result == 0) && *us1++) {
+  while (n &&
+         (result = kwsysString_tolower(*lhs) - kwsysString_tolower(*rhs++)) ==
+           0 &&
+         *lhs++) {
     --n;
   }
   return result;
-#  endif
 }
 
 #endif /* KWSYS_STRING_C */
