@@ -321,8 +321,8 @@ public:
   cmBTStringRange GetLinkInterfaceDirectExcludeEntries() const;
 
   void CopyPolicyStatuses(cmTarget const* tgt);
-  void CopyImportedCxxModulesEntries(cmTarget const* tgt);
-  void CopyImportedCxxModulesProperties(cmTarget const* tgt);
+  void CopyCxxModulesEntries(cmTarget const* tgt);
+  void CopyCxxModulesProperties(cmTarget const* tgt);
 
   cmBTStringRange GetHeaderSetsEntries() const;
   cmBTStringRange GetCxxModuleSetsEntries() const;

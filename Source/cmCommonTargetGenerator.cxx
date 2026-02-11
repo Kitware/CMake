@@ -180,35 +180,90 @@ cmCommonTargetGenerator::GetLinkedTargetDirectories(
 
   if (cmComputeLinkInformation* cli =
         this->GeneratorTarget->GetLinkInformation(config)) {
-    auto addLinkedTarget =
-      [this, &lang, &config, &dirs, &direct_emitted, &forward_emitted,
-       gg](cmGeneratorTarget const* linkee, Forwarding forward) {
-        if (linkee &&
-            !linkee->IsImported()
-            // Skip targets that build after this one in a static lib cycle.
-            && gg->TargetOrderIndexLess(linkee, this->GeneratorTarget)
-            // We can ignore the INTERFACE_LIBRARY items because
-            // Target->GetLinkInformation already processed their
-            // link interface and they don't have any output themselves.
-            && (linkee->GetType() != cmStateEnums::INTERFACE_LIBRARY
-                // Synthesized targets may have relevant rules.
-                || linkee->IsSynthetic()) &&
-            ((lang == "CXX"_s && linkee->HaveCxx20ModuleSources()) ||
-             (lang == "Fortran"_s && linkee->HaveFortranSources(config)))) {
-          cmLocalGenerator* lg = linkee->GetLocalGenerator();
-          std::string di = linkee->GetSupportDirectory();
-          if (lg->GetGlobalGenerator()->IsMultiConfig()) {
-            di = cmStrCat(di, '/', config);
-          }
-          if (forward == Forwarding::Yes &&
-              forward_emitted.insert(linkee).second) {
-            dirs.Forward.push_back(di);
-          }
-          if (direct_emitted.insert(linkee).second) {
-            dirs.Direct.emplace_back(di);
+
+    auto findSyntheticTarget =
+      [this,
+       &config](cmGeneratorTarget const* linkee) -> cmGeneratorTarget const* {
+      if (!linkee) {
+        return nullptr;
+      }
+
+      // Check the map of direct synthetic dependencies for a substitute
+      auto const& synthDeps = this->GeneratorTarget->GetSyntheticDeps(config);
+      auto it = synthDeps.find(linkee);
+      if (it != synthDeps.end() && !it->second.empty()) {
+        return it->second.front();
+      }
+
+      // Check linked targets to finding synthetic targets for transitive deps
+      std::vector<cmGeneratorTarget const*> pending;
+      std::set<cmGeneratorTarget const*> visited;
+      for (auto const& dep : synthDeps) {
+        for (auto const* synth : dep.second) {
+          if (synth && visited.insert(synth).second) {
+            pending.push_back(synth);
           }
         }
-      };
+      }
+
+      while (!pending.empty()) {
+        auto const* current = pending.back();
+        pending.pop_back();
+        auto const& transitiveSynthDeps = current->GetSyntheticDeps(config);
+        auto itLinkeeSynth = transitiveSynthDeps.find(linkee);
+        if (itLinkeeSynth != transitiveSynthDeps.end() &&
+            !itLinkeeSynth->second.empty()) {
+          return itLinkeeSynth->second.front();
+        }
+        for (auto const& entry : transitiveSynthDeps) {
+          for (auto const* synth : entry.second) {
+            if (synth && visited.insert(synth).second) {
+              pending.push_back(synth);
+            }
+          }
+        }
+      }
+
+      return nullptr;
+    };
+
+    auto addLinkedTarget = [this, &lang, &config, &dirs, &direct_emitted,
+                            &forward_emitted, &findSyntheticTarget,
+                            gg](cmGeneratorTarget const* linkee,
+                                Forwarding forward) {
+      // Check if the linkee has a synthetic target to use for importing
+      cmGeneratorTarget const* mappedLinkee = linkee;
+      if (auto const* synth = findSyntheticTarget(linkee)) {
+        mappedLinkee = synth;
+      }
+
+      if (mappedLinkee &&
+          !mappedLinkee->IsImported()
+          // Skip targets that build after this one in a static lib cycle.
+          && gg->TargetOrderIndexLess(mappedLinkee, this->GeneratorTarget)
+          // We can ignore the INTERFACE_LIBRARY items because
+          // Target->GetLinkInformation already processed their
+          // link interface and they don't have any output themselves.
+          && (mappedLinkee->GetType() != cmStateEnums::INTERFACE_LIBRARY
+              // Synthesized targets may have relevant rules.
+              || mappedLinkee->IsSynthetic()) &&
+          ((lang == "CXX"_s && mappedLinkee->HaveCxx20ModuleSources()) ||
+           (lang == "Fortran"_s &&
+            mappedLinkee->HaveFortranSources(config)))) {
+        cmLocalGenerator* lg = mappedLinkee->GetLocalGenerator();
+        std::string di = mappedLinkee->GetSupportDirectory();
+        if (lg->GetGlobalGenerator()->IsMultiConfig()) {
+          di = cmStrCat(di, '/', config);
+        }
+        if (forward == Forwarding::Yes &&
+            forward_emitted.insert(mappedLinkee).second) {
+          dirs.Forward.push_back(di);
+        }
+        if (direct_emitted.insert(mappedLinkee).second) {
+          dirs.Direct.emplace_back(di);
+        }
+      }
+    };
     for (auto const& item : cli->GetItems()) {
       if (item.Target) {
         addLinkedTarget(item.Target, Forwarding::No);

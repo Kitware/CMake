@@ -5,6 +5,9 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <string>
+#include <vector>
+
+#include "cmListFileCache.h"
 
 class cmGeneratorTarget;
 class cmTarget;
@@ -19,4 +22,5 @@ public:
 
 private:
   std::string Hash;
+  std::vector<BT<std::string>> CompileFeatures;
 };

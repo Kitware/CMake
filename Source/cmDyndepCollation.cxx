@@ -108,6 +108,11 @@ TdiSourceInfo CollationInformationSources(cmGeneratorTarget const* gt,
     if (fs_type != "CXX_MODULES"_s) {
       continue;
     }
+    // Synthetic (BMI-only) targets do not build private C++ modules.
+    if (tgt->IsSynthetic() &&
+        file_set->GetVisibility() == cmFileSetVisibility::Private) {
+      continue;
+    }
 
     auto fileEntries = file_set->CompileFileEntries();
     auto directoryEntries = file_set->CompileDirectoryEntries();

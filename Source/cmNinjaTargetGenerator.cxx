@@ -1228,6 +1228,23 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements(
 
     this->WriteTargetDependInfo(language, config);
 
+    // Non-imported synthetic targets read module info from their native target
+    // Add as implicit dependency.
+    if (this->GeneratorTarget->IsSynthetic()) {
+      if (cmGeneratorTarget const* native_gt =
+            this->LocalGenerator->FindGeneratorTargetToUse(
+              this->GeneratorTarget->Target->GetTemplateName())) {
+        if (!native_gt->IsImported()) {
+          std::string native_dir = native_gt->GetSupportDirectory();
+          if (this->GetGlobalGenerator()->IsMultiConfig()) {
+            native_dir = cmStrCat(native_dir, '/', config);
+          }
+          build.ImplicitDeps.emplace_back(this->ConvertToNinjaPath(
+            cmStrCat(native_dir, '/', language, "Modules.json")));
+        }
+      }
+    }
+
     auto const linked_directories =
       this->GetLinkedTargetDirectories(language, config);
     for (std::string const& l : linked_directories.Direct) {
@@ -2153,6 +2170,22 @@ void cmNinjaTargetGenerator::WriteTargetDependInfo(std::string const& lang,
     tdi["forward-modules-from-target-dirs"] = Json::arrayValue;
   for (std::string const& l : linked_directories.Forward) {
     tdi_forward_modules_from_target_dirs.append(l);
+  }
+
+  // Record the native target support directory for non-imported synthetic
+  // targets
+  if (this->GeneratorTarget->IsSynthetic()) {
+    if (cmGeneratorTarget* nativeGT =
+          this->LocalGenerator->FindGeneratorTargetToUse(
+            this->GeneratorTarget->Target->GetTemplateName())) {
+      if (!nativeGT->IsImported()) {
+        std::string nativeDir = nativeGT->GetSupportDirectory();
+        if (this->GetGlobalGenerator()->IsMultiConfig()) {
+          nativeDir = cmStrCat(nativeDir, '/', config);
+        }
+        tdi["native-target-dir"] = nativeDir;
+      }
+    }
   }
 
   cmDyndepGeneratorCallbacks cb;
