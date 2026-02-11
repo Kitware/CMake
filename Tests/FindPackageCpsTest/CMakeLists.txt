@@ -29,6 +29,13 @@ function(expect PACKAGE VAR OP VALUE WHAT)
   endif()
 endfunction()
 
+function(expect_property TARGET PROPERTY DESCRIPTION EXPECTED)
+  get_target_property(actual ${TARGET} ${PROPERTY})
+  if(NOT "${actual}" STREQUAL "${EXPECTED}")
+    message(SEND_ERROR "${TARGET} has wrong ${DESCRIPTION} '${actual}' !")
+  endif()
+endfunction()
+
 function(test_version PACKAGE LITERAL COUNT MAJOR MINOR PATCH TWEAK)
   if(NOT ${PACKAGE}_FOUND)
     message(SEND_ERROR "${PACKAGE} not found !")
@@ -47,7 +54,7 @@ function(test_unparsed_version PACKAGE VERSION)
   test_version(${PACKAGE} "${VERSION}" 0 0 0 0 0)
 endfunction()
 
-function(test_global TARGET VALUE)
+function(expect_global TARGET VALUE)
   get_target_property(global "${TARGET}" IMPORTED_GLOBAL)
   if((VALUE AND NOT global) OR (NOT VALUE AND global))
     message(SEND_ERROR "${TARGET} has wrong IMPORTED_GLOBAL '${global}' !")
@@ -78,6 +85,7 @@ test_unparsed_version(CustomVersion "VII")
 
 ###############################################################################
 # Test finding a package whose CPS file is in the package prefix root.
+
 set(RootTest_DIR "${CMAKE_CURRENT_SOURCE_DIR}/RootTest")
 find_package(RootTest)
 if(NOT RootTest_FOUND)
@@ -166,21 +174,15 @@ elseif(NOT TARGET Foo::RelativeTest)
 elseif(NOT TARGET Foo::Empty)
   message(SEND_ERROR "Foo::Empty missing !")
 else()
-  get_property(pt_includes
-    TARGET Foo::PrefixTest PROPERTY INTERFACE_INCLUDE_DIRECTORIES)
-  if(NOT "${pt_includes}" STREQUAL "$<$<CONFIG:default>:${CMAKE_CURRENT_SOURCE_DIR}/include>" )
-    message(SEND_ERROR "Foo::PrefixTest has wrong includes '${pt_includes}' !")
-  endif()
-  set(pt_includes)
+  expect_property(
+    Foo::PrefixTest INTERFACE_INCLUDE_DIRECTORIES "includes"
+    "$<$<CONFIG:default>:${CMAKE_CURRENT_SOURCE_DIR}/include>")
 
-  get_property(rt_includes
-    TARGET Foo::RelativeTest PROPERTY INTERFACE_INCLUDE_DIRECTORIES)
-  if(NOT "${rt_includes}" STREQUAL "$<$<CONFIG:default>:${CMAKE_CURRENT_SOURCE_DIR}/cps/../include>")
-    message(SEND_ERROR "Foo::RelativeTest has wrong includes '${rt_includes}' !")
-  endif()
-  set(rt_includes)
+  expect_property(
+    Foo::RelativeTest INTERFACE_INCLUDE_DIRECTORIES "includes"
+    "$<$<CONFIG:default>:${CMAKE_CURRENT_SOURCE_DIR}/cps/../include>")
 
-  test_global(Foo::Empty FALSE)
+  expect_global(Foo::Empty FALSE)
 endif()
 
 ###############################################################################
@@ -192,7 +194,7 @@ if(NOT Global_FOUND)
 elseif(NOT TARGET Global::Target)
   message(SEND_ERROR "Global::Target missing !")
 else()
-  test_global(Foo::Empty FALSE)
+  expect_global(Foo::Empty FALSE)
 endif()
 
 ###############################################################################
@@ -222,6 +224,18 @@ target_link_libraries(requires-test RequiresTest::Indirect)
 
 add_executable(requires-test-compile_only requires-test.cxx)
 target_link_libraries(requires-test-compile_only RequiresTest::CompileOnly)
+
+expect_property(
+  RequiresTest::Other INTERFACE_LINK_LIBRARIES
+  "link libraries" "every-config;$<$<CONFIG:test>:test-config>")
+
+expect_property(
+  RequiresTest::Other IMPORTED_LINK_DEPENDENT_LIBRARIES
+  "dyld requirements (any config)" "RequiresTest::Private1")
+
+expect_property(
+  RequiresTest::Other IMPORTED_LINK_DEPENDENT_LIBRARIES_TEST
+  "dyld requirements ('TEST' config)" "RequiresTest::Private2")
 
 ###############################################################################
 # Test importing of (language-specific) include paths.
@@ -343,16 +357,10 @@ elseif(NOT TARGET DefaultConfigurationsTest::Target1)
 elseif(NOT TARGET DefaultConfigurationsTest::Target2)
   message(SEND_ERROR "DefaultConfigurationsTest::Target2 missing !")
 else()
-  get_property(dct1_configs
-    TARGET DefaultConfigurationsTest::Target1 PROPERTY IMPORTED_CONFIGURATIONS)
-  if(NOT "${dct1_configs}" STREQUAL "DEFAULT;TEST")
-    message(SEND_ERROR "DefaultConfigurationsTest::Target1 has wrong configurations '${dct1_configs}' !")
-  endif()
-  get_property(dct2_configs
-    TARGET DefaultConfigurationsTest::Target2 PROPERTY IMPORTED_CONFIGURATIONS)
-  if(NOT "${dct2_configs}" STREQUAL "TEST")
-    message(SEND_ERROR "DefaultConfigurationsTest::Target2 has wrong configurations '${dct2_configs}' !")
-  endif()
-  set(dct1_configs)
-  set(dct2_configs)
+  expect_property(
+    DefaultConfigurationsTest::Target1 IMPORTED_CONFIGURATIONS
+    "configurations" "DEFAULT;TEST")
+  expect_property(
+    DefaultConfigurationsTest::Target2 IMPORTED_CONFIGURATIONS
+    "configurations" "TEST")
 endif()

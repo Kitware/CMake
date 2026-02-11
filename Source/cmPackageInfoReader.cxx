@@ -250,6 +250,21 @@ void AppendProperty(cmMakefile* makefile, cmTarget* target,
   }
 }
 
+void AppendImportProperty(cmMakefile* makefile, cmTarget* target,
+                          cm::string_view property,
+                          cm::string_view configuration,
+                          std::string const& value)
+{
+  if (!configuration.empty()) {
+    std::string const fullprop = cmStrCat(
+      "IMPORTED_", property, '_', cmSystemTools::UpperCase(configuration));
+    target->AppendProperty(fullprop, value, makefile->GetBacktrace());
+  } else {
+    std::string const fullprop = cmStrCat("IMPORTED_", property);
+    target->AppendProperty(fullprop, value, makefile->GetBacktrace());
+  }
+}
+
 template <typename Transform>
 void AppendLanguageProperties(cmMakefile* makefile, cmTarget* target,
                               cm::string_view property,
@@ -778,6 +793,15 @@ void cmPackageInfoReader::SetTargetProperties(
   for (std::string const& dep : ReadList(data, "link_requires")) {
     std::string const& lib =
       cmStrCat("$<LINK_ONLY:"_s, NormalizeTargetName(dep, package), '>');
+    AppendProperty(makefile, target, "LINK_LIBRARIES"_s, configuration, lib);
+  }
+
+  for (std::string const& dep : ReadList(data, "dyld_requires")) {
+    AppendImportProperty(makefile, target, "LINK_DEPENDENT_LIBRARIES"_s,
+                         configuration, NormalizeTargetName(dep, package));
+  }
+
+  for (std::string const& lib : ReadList(data, "link_libraries")) {
     AppendProperty(makefile, target, "LINK_LIBRARIES"_s, configuration, lib);
   }
 

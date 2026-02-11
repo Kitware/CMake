@@ -94,6 +94,10 @@ private:
   bool CheckVersion() const;
   bool CheckDefaultTargets() const;
 
+  std::vector<std::string> ExtractRequirements(
+    std::vector<std::string> const& names, bool& result,
+    std::vector<std::string>& libraryPaths) const;
+
   void GenerateInterfaceLinkProperties(
     bool& result, Json::Value& component, cmGeneratorTarget const* target,
     ImportPropertyMap const& properties) const;
