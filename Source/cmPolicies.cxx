@@ -3,11 +3,12 @@
 #include "cmPolicies.h"
 
 #include <cassert>
-#include <cctype>
 #include <cstdio>
 #include <cstring>
 #include <sstream>
 #include <vector>
+
+#include "cmsys/String.h"
 
 #include "cmListFileCache.h"
 #include "cmMakefile.h"
@@ -32,7 +33,7 @@ static bool stringToId(char const* input, cmPolicies::PolicyID& pid)
     return true;
   }
   for (int i = 3; i < 7; ++i) {
-    if (!isdigit(*(input + i))) {
+    if (!cmsysString_isdigit(*(input + i))) {
       return false;
     }
   }

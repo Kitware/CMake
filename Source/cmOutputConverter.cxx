@@ -4,7 +4,6 @@
 
 #include <algorithm>
 #include <cassert>
-#include <cctype>
 #include <set>
 #include <vector>
 
@@ -12,6 +11,8 @@
 #  include <unordered_map>
 #  include <utility>
 #endif
+
+#include "cmsys/String.h"
 
 #include "cmList.h"
 #include "cmState.h"
@@ -425,7 +426,7 @@ static bool Shell_CharNeedsQuotesOnWindows(char c)
 
 static bool Shell_CharIsMakeVariableName(char c)
 {
-  return c && (c == '_' || isalpha((static_cast<int>(c))));
+  return c && (c == '_' || cmsysString_isalpha((static_cast<int>(c))));
 }
 
 bool cmOutputConverter::Shell_CharNeedsQuotes(char c, int flags)

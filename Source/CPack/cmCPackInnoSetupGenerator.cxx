@@ -4,12 +4,12 @@ file LICENSE.rst or https://cmake.org/licensing for details. */
 #include "cmCPackInnoSetupGenerator.h"
 
 #include <algorithm>
-#include <cctype>
 #include <cstdlib>
 #include <ostream>
 #include <utility>
 
 #include "cmsys/RegularExpression.hxx"
+#include "cmsys/String.h"
 
 #include "cmCPackComponentGroup.h"
 #include "cmCPackLog.h"
@@ -116,7 +116,7 @@ int cmCPackInnoSetupGenerator::PackageFiles()
     if (cmSystemTools::LowerCase(i) == "english") {
       params["MessagesFile"] = "\"compiler:Default.isl\"";
     } else {
-      i[0] = static_cast<char>(std::toupper(static_cast<unsigned char>(i[0])));
+      i[0] = static_cast<char>(cmsysString_toupper(i[0]));
       params["MessagesFile"] = cmStrCat("\"compiler:Languages\\", i, ".isl\"");
     }
 

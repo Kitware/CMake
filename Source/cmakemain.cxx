@@ -5,7 +5,6 @@
 
 #include <algorithm>
 #include <cassert>
-#include <cctype>
 #include <climits>
 #include <cstring>
 #include <functional>
@@ -19,6 +18,8 @@
 #include <cmext/algorithm>
 
 #include <cm3p/uv.h>
+
+#include "cmsys/String.h"
 
 #include "cmBuildArgs.h"
 #include "cmBuildOptions.h"
@@ -500,8 +501,7 @@ int do_build(int ac, char const* const* av)
   };
   auto resolvePackagesLambda = [&](std::string const& value) -> bool {
     std::string v = value;
-    std::transform(v.begin(), v.end(), v.begin(),
-                   [](unsigned char c) { return std::tolower(c); });
+    std::transform(v.begin(), v.end(), v.begin(), cmsysString_tolower);
     if (v == "on") {
       resolveMode = PackageResolveMode::Force;
     } else if (v == "only") {

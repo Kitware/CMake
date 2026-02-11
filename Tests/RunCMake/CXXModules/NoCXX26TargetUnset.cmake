@@ -3,7 +3,7 @@ set(CMAKE_CXX_SCANDEP_SOURCE "echo")
 
 # TODO(cxxmodules): Add instances of this test which test the policy
 # of the property's unset behavior.
-# set(CMAKE_CXX_MODULE_STD …)
+# set(CMAKE_CXX_MODULE_STD ...)
 
 add_library(nocxx26target)
 target_sources(nocxx26target

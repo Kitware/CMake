@@ -8,15 +8,17 @@
 #include <cstdio>
 #include <cstdlib>
 
+#include "cmsys/String.h"
+
 bool cmStrCaseEq(cm::string_view s1, cm::string_view s2)
 {
   if (s1.size() != s2.size()) {
     return false;
   }
 
-  return std::equal(
-    s1.begin(), s1.end(), s2.begin(),
-    [](unsigned char a, unsigned char b) { return tolower(a) == tolower(b); });
+  return std::equal(s1.begin(), s1.end(), s2.begin(), [](char a, char b) {
+    return cmsysString_tolower(a) == cmsysString_tolower(b);
+  });
 }
 
 std::string cmTrimWhitespace(cm::string_view str)
@@ -25,7 +27,7 @@ std::string cmTrimWhitespace(cm::string_view str)
   // because the qualification of `auto` is platform-dependent.
   // NOLINTNEXTLINE(readability-qualified-auto)
   auto start = str.begin();
-  while (start != str.end() && cmIsSpace(*start)) {
+  while (start != str.end() && cmsysString_isspace(*start)) {
     ++start;
   }
   if (start == str.end()) {
@@ -33,7 +35,7 @@ std::string cmTrimWhitespace(cm::string_view str)
   }
   // NOLINTNEXTLINE(readability-qualified-auto)
   auto stop = str.end() - 1;
-  while (cmIsSpace(*stop)) {
+  while (cmsysString_isspace(*stop)) {
     --stop;
   }
   return std::string(start, stop + 1);
@@ -44,14 +46,14 @@ cm::string_view cmStripWhitespace(cm::string_view str)
   std::string::size_type const l = str.size();
 
   std::string::size_type s = 0;
-  while (s < l && cmIsSpace(str[s])) {
+  while (s < l && cmsysString_isspace(str[s])) {
     ++s;
   }
   if (s == l) {
     return cm::string_view{};
   }
   std::string::size_type e = l - 1;
-  while (cmIsSpace(str[e])) {
+  while (cmsysString_isspace(str[e])) {
     --e;
   }
   return str.substr(s, e + 1 - s);
@@ -196,7 +198,7 @@ bool cmStrToULong(char const* str, unsigned long* value)
 {
   errno = 0;
   char* endp;
-  while (cmIsSpace(*str)) {
+  while (cmsysString_isspace(*str)) {
     ++str;
   }
   if (*str == '-') {
@@ -228,7 +230,7 @@ bool cmStrToULongLong(char const* str, unsigned long long* value)
 {
   errno = 0;
   char* endp;
-  while (cmIsSpace(*str)) {
+  while (cmsysString_isspace(*str)) {
     ++str;
   }
   if (*str == '-') {

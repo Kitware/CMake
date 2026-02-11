@@ -2,11 +2,12 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmCursesColor.h"
 
-#include <cctype>
 #include <cstdlib>
 #include <cstring>
 #include <unordered_map>
 #include <utility>
+
+#include "cmsys/String.h"
 
 #include "cmCursesStandardIncludes.h"
 
@@ -42,7 +43,7 @@ short cmCursesColor::GetColor(char id, short fallback)
   if (!initialized) {
     if (auto* v = getenv("CCMAKE_COLORS")) {
       while (v[0] && v[1] && v[1] == '=') {
-        auto const n = std::toupper(static_cast<unsigned char>(*v));
+        char const n = cmsysString_toupper(*v);
 
         char buffer[12];
         memset(buffer, 0, sizeof(buffer));

@@ -12,9 +12,8 @@
 #include "LexerParser/cmGccDepfileLexer.h"
 
 #ifdef _WIN32
-#  include <cctype>
-
 #  include "cmsys/Encoding.h"
+#  include "cmsys/String.h"
 #endif
 
 bool cmGccDepfileLexerHelper::readFile(char const* filePath)
@@ -128,8 +127,7 @@ void cmGccDepfileLexerHelper::sanitizeContent()
         // Some versions of GNU compilers can escape this character.
         // c\:\path must be transformed to c:\path
         if (pit->size() >= 3) {
-          auto pit0 = static_cast<char>(
-            std::toupper(static_cast<unsigned char>((*pit)[0])));
+          auto pit0 = static_cast<char>(cmsysString_toupper((*pit)[0]));
           if (pit0 >= 'A' && pit0 <= 'Z' && (*pit)[1] == '\\' &&
               (*pit)[2] == ':') {
             pit->erase(1, 1);

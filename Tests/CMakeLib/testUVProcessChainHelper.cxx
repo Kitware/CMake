@@ -1,4 +1,3 @@
-#include <cctype>
 #include <chrono>
 #include <cstdlib>
 #include <iostream>
@@ -7,6 +6,7 @@
 #include <string>
 #include <thread>
 
+#include "cmsys/String.h"
 #include "cmsys/SystemTools.hxx"
 
 #ifdef _WIN32
@@ -41,7 +41,7 @@ int main(int argc, char** argv)
     std::this_thread::sleep_for(std::chrono::milliseconds(12000));
     std::string input = getStdin();
     for (auto& c : input) {
-      c = static_cast<char>(std::toupper(static_cast<unsigned char>(c)));
+      c = static_cast<char>(cmsysString_toupper(c));
     }
     std::cout << input << std::flush;
     std::cerr << "2" << std::flush;

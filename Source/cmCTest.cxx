@@ -3,7 +3,6 @@
 #include "cmCTest.h"
 
 #include <algorithm>
-#include <cctype>
 #include <chrono>
 #include <cstdint>
 #include <cstdio>
@@ -34,6 +33,7 @@
 #include "cmsys/Directory.hxx"
 #include "cmsys/FStream.hxx"
 #include "cmsys/RegularExpression.hxx"
+#include "cmsys/String.h"
 #include "cmsys/SystemInformation.hxx"
 #ifndef _WIN32
 #  include <unistd.h> // IWYU pragma: keep
@@ -299,7 +299,8 @@ std::string cmCTest::DecodeURL(std::string const& in)
 {
   std::string out;
   for (char const* c = in.c_str(); *c; ++c) {
-    if (*c == '%' && isxdigit(*(c + 1)) && isxdigit(*(c + 2))) {
+    if (*c == '%' && cmsysString_isxdigit(*(c + 1)) &&
+        cmsysString_isxdigit(*(c + 2))) {
       char buf[3] = { *(c + 1), *(c + 2), 0 };
       out.append(1, static_cast<char>(strtoul(buf, nullptr, 16)));
       c += 2;
@@ -3702,8 +3703,7 @@ bool cmCTest::ConvertInstrumentationJSONFileToXML(std::string const& fpath,
   bool generating_test_xml = root["role"] == "test";
   if (!generating_test_xml) {
     std::string element_name = root["role"].asString();
-    element_name[0] = static_cast<char>(
-      std::toupper(static_cast<unsigned char>(element_name[0])));
+    element_name[0] = static_cast<char>(cmsysString_toupper(element_name[0]));
     xml.StartElement(element_name);
     std::vector<std::string> keys = root.getMemberNames();
     for (auto const& key : keys) {
@@ -3735,8 +3735,8 @@ bool cmCTest::ConvertInstrumentationJSONFileToXML(std::string const& fpath,
   std::vector<std::string> keys = dynamic_information.getMemberNames();
   for (auto const& key : keys) {
     std::string measurement_name = key;
-    measurement_name[0] = static_cast<char>(
-      std::toupper(static_cast<unsigned char>(measurement_name[0])));
+    measurement_name[0] =
+      static_cast<char>(cmsysString_toupper(measurement_name[0]));
 
     xml.StartElement("NamedMeasurement");
     xml.Attribute("type", "numeric/double");

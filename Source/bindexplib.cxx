@@ -72,6 +72,7 @@
 #  include <windows.h>
 
 #  include "cmsys/Encoding.hxx"
+#  include "cmsys/String.h"
 #endif
 
 #include "cmsys/FStream.hxx"
@@ -261,7 +262,7 @@ public:
           }
 
           // clear out any leading spaces
-          while (isspace(symbol[0]))
+          while (cmsysString_isspace(symbol[0]))
             symbol.erase(0, 1);
           // if it starts with _ and has an @ then it is a __cdecl
           // so remove the @ stuff for the export

@@ -3,7 +3,6 @@
 #include "cmComputeLinkInformation.h"
 
 #include <algorithm>
-#include <cctype>
 #include <sstream>
 #include <utility>
 
@@ -12,6 +11,8 @@
 #include <cm/string_view>
 #include <cmext/algorithm>
 #include <cmext/string_view>
+
+#include "cmsys/String.h"
 
 #include "cmComputeLinkDepends.h"
 #include "cmGeneratorTarget.h"
@@ -1556,8 +1557,8 @@ std::string cmComputeLinkInformation::NoCaseExpression(std::string const& str)
       ret += c;
     } else {
       ret += '[';
-      ret += static_cast<char>(tolower(static_cast<unsigned char>(c)));
-      ret += static_cast<char>(toupper(static_cast<unsigned char>(c)));
+      ret += static_cast<char>(cmsysString_tolower(c));
+      ret += static_cast<char>(cmsysString_toupper(c));
       ret += ']';
     }
   }

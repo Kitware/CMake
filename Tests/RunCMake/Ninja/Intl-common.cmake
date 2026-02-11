@@ -1,1 +1,1 @@
-set(intl "intl-ë®")
+set(intl "intl-ë®") # UTF-8

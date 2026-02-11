@@ -4,7 +4,6 @@
 #include "cmPkgConfigResolver.h"
 
 #include <algorithm>
-#include <cctype>
 #include <cstring>
 #include <iterator>
 #include <string>
@@ -15,6 +14,8 @@
 #include <cm/optional>
 #include <cm/string_view>
 
+#include "cmsys/String.h"
+
 #include "cmPkgConfigParser.h"
 #include "cmStringAlgorithms.h"
 
@@ -24,7 +25,7 @@ void TrimBack(std::string& str)
 {
   if (!str.empty()) {
     auto it = str.end() - 1;
-    for (; std::isspace(*it); --it) {
+    for (; cmsysString_isspace(*it); --it) {
       if (it == str.begin()) {
         str.clear();
         return;
@@ -45,11 +46,11 @@ std::string AppendAndTrim(std::string& str, cm::string_view sv)
   auto begin = str.begin() + size;
   auto cur = str.end() - 1;
 
-  while (cur != begin && std::isspace(*cur)) {
+  while (cur != begin && cmsysString_isspace(*cur)) {
     --cur;
   }
 
-  if (std::isspace(*cur)) {
+  if (cmsysString_isspace(*cur)) {
     return {};
   }
 
@@ -59,7 +60,8 @@ std::string AppendAndTrim(std::string& str, cm::string_view sv)
 cm::string_view TrimFlag(cm::string_view flag)
 {
   std::size_t trim_size = 2;
-  for (auto c = flag.rbegin(); c != flag.rend() && std::isspace(*c); ++c) {
+  for (auto c = flag.rbegin(); c != flag.rend() && cmsysString_isspace(*c);
+       ++c) {
     ++trim_size;
   }
   return { flag.data() + 2, flag.size() - trim_size };
@@ -406,7 +408,7 @@ std::vector<cm::string_view> cmPkgConfigResolver::TokenizeFlags(
   std::vector<cm::string_view> result;
 
   auto it = flagline.begin();
-  while (it != flagline.end() && std::isspace(*it)) {
+  while (it != flagline.end() && cmsysString_isspace(*it)) {
     ++it;
   }
 
@@ -414,11 +416,11 @@ std::vector<cm::string_view> cmPkgConfigResolver::TokenizeFlags(
     char const* start = &(*it);
     std::size_t len = 0;
 
-    for (; it != flagline.end() && !std::isspace(*it); ++it) {
+    for (; it != flagline.end() && !cmsysString_isspace(*it); ++it) {
       ++len;
     }
 
-    for (; it != flagline.end() && std::isspace(*it); ++it) {
+    for (; it != flagline.end() && cmsysString_isspace(*it); ++it) {
       ++len;
     }
 
@@ -665,12 +667,12 @@ cmPkgConfigVersionReq cmPkgConfigResolver::ParseVersion(
       return result;
     }
 
-    if (!std::isspace(*cur)) {
+    if (!cmsysString_isspace(*cur)) {
       break;
     }
   }
 
-  for (; cur != end && !std::isspace(*cur) && *cur != ','; ++cur) {
+  for (; cur != end && !cmsysString_isspace(*cur) && *cur != ','; ++cur) {
     result.Version += *cur;
   }
 
@@ -687,7 +689,7 @@ std::vector<cmPkgConfigDependency> cmPkgConfigResolver::ParseDependencies(
   auto end = deps.end();
 
   while (cur != end) {
-    while ((std::isspace(*cur) || *cur == ',')) {
+    while ((cmsysString_isspace(*cur) || *cur == ',')) {
       if (++cur == end) {
         return result;
       }
@@ -696,7 +698,7 @@ std::vector<cmPkgConfigDependency> cmPkgConfigResolver::ParseDependencies(
     result.emplace_back();
     auto& dep = result.back();
 
-    while (!std::isspace(*cur) && *cur != ',') {
+    while (!cmsysString_isspace(*cur) && *cur != ',') {
       dep.Name += *cur;
       if (++cur == end) {
         return result;
@@ -713,7 +715,7 @@ std::vector<cmPkgConfigDependency> cmPkgConfigResolver::ParseDependencies(
           return true;
         }
 
-        if (!std::isspace(*cur)) {
+        if (!cmsysString_isspace(*cur)) {
           return false;
         }
       }
@@ -769,11 +771,11 @@ bool cmPkgConfigResolver::CheckVersion(cmPkgConfigVersionReq const& desired,
   auto b_end = provided.end();
 
   while (a_cur != a_end && b_cur != b_end) {
-    while (a_cur != a_end && !std::isalnum(*a_cur) && *a_cur != '~') {
+    while (a_cur != a_end && !cmsysString_isalnum(*a_cur) && *a_cur != '~') {
       ++a_cur;
     }
 
-    while (b_cur != b_end && !std::isalnum(*b_cur) && *b_cur != '~') {
+    while (b_cur != b_end && !cmsysString_isalnum(*b_cur) && *b_cur != '~') {
       ++b_cur;
     }
 
@@ -799,23 +801,23 @@ bool cmPkgConfigResolver::CheckVersion(cmPkgConfigVersionReq const& desired,
     auto b_seg = b_cur;
     bool is_num;
 
-    if (std::isdigit(*a_cur)) {
+    if (cmsysString_isdigit(*a_cur)) {
       is_num = true;
-      while (a_cur != a_end && std::isdigit(*a_cur)) {
+      while (a_cur != a_end && cmsysString_isdigit(*a_cur)) {
         ++a_cur;
       }
 
-      while (b_cur != b_end && std::isdigit(*b_cur)) {
+      while (b_cur != b_end && cmsysString_isdigit(*b_cur)) {
         ++b_cur;
       }
 
     } else {
       is_num = false;
-      while (a_cur != a_end && std::isalpha(*a_cur)) {
+      while (a_cur != a_end && cmsysString_isalpha(*a_cur)) {
         ++a_cur;
       }
 
-      while (b_cur != b_end && std::isalpha(*b_cur)) {
+      while (b_cur != b_end && cmsysString_isalpha(*b_cur)) {
         ++b_cur;
       }
     }

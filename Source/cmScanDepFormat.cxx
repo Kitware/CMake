@@ -3,7 +3,6 @@
 
 #include "cmScanDepFormat.h"
 
-#include <cctype>
 #include <cstdio>
 #include <utility>
 
@@ -16,6 +15,7 @@
 #include <cm3p/json/writer.h>
 
 #include "cmsys/FStream.hxx"
+#include "cmsys/String.h"
 
 #include "cmGeneratedFileStream.h"
 #include "cmStringAlgorithms.h"
@@ -38,7 +38,7 @@ static Json::Value EncodeFilename(std::string const& path)
   data.reserve(path.size());
 
   for (auto const& byte : path) {
-    if (std::iscntrl(byte)) {
+    if (cmsysString_iscntrl(byte)) {
       // Control characters.
       data.append("\\u");
       char buf[5];

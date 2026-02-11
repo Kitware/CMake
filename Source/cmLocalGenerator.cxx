@@ -5,7 +5,6 @@
 #include <algorithm>
 #include <array>
 #include <cassert>
-#include <cctype>
 #include <cstdio>
 #include <cstdlib>
 #include <initializer_list>
@@ -23,6 +22,7 @@
 #include <cmext/string_view>
 
 #include "cmsys/RegularExpression.hxx"
+#include "cmsys/String.h"
 
 #include "cmAlgorithms.h"
 #include "cmCMakePath.h"
@@ -2556,7 +2556,8 @@ void cmLocalGenerator::AddConfigVariableFlags(std::string& flags,
 void cmLocalGenerator::AppendFlags(std::string& flags,
                                    std::string const& newFlags) const
 {
-  bool allSpaces = std::all_of(newFlags.begin(), newFlags.end(), cmIsSpace);
+  bool allSpaces =
+    std::all_of(newFlags.begin(), newFlags.end(), cmsysString_isspace);
 
   if (!newFlags.empty() && !allSpaces) {
     if (!flags.empty()) {
@@ -3489,8 +3490,7 @@ void cmLocalGenerator::AppendLinkerTypeFlags(std::string& flags,
     }
   } else if (linkerType != "DEFAULT"_s) {
     auto isCMakeLinkerType = [](std::string const& type) -> bool {
-      return std::all_of(type.cbegin(), type.cend(),
-                         [](char c) { return std::isupper(c); });
+      return std::all_of(type.cbegin(), type.cend(), cmsysString_isupper);
     };
     if (isCMakeLinkerType(linkerType)) {
       this->IssueMessage(

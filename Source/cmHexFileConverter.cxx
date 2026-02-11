@@ -2,9 +2,10 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmHexFileConverter.h"
 
-#include <cctype>
 #include <cstdio>
 #include <cstring>
+
+#include "cmsys/String.h"
 
 #include "cmSystemTools.h"
 
@@ -163,7 +164,7 @@ cmHexFileConverter::FileType cmHexFileConverter::DetermineFileType(
   }
 
   for (unsigned int i = 1; i < slen; i++) {
-    if (!isxdigit(buf[i])) {
+    if (!cmsysString_isxdigit(buf[i])) {
       return Binary;
     }
   }

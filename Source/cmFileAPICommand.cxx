@@ -4,12 +4,13 @@ file LICENSE.rst or https://cmake.org/licensing for details.  */
 
 #include <algorithm>
 #include <array>
-#include <cctype>
 #include <cstdlib>
 #include <utility>
 
 #include <cm/string_view>
 #include <cmext/string_view>
+
+#include "cmsys/String.h"
 
 #include "cmArgumentParser.h"
 #include "cmArgumentParserTypes.h"
@@ -22,11 +23,6 @@ file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "cmake.h"
 
 namespace {
-
-bool isCharDigit(char ch)
-{
-  return std::isdigit(static_cast<unsigned char>(ch));
-}
 
 std::string processObjectKindVersions(cmFileAPI& fileApi,
                                       cmFileAPI::ObjectKind objectKind,
@@ -103,7 +99,7 @@ bool handleQueryCommand(std::vector<std::string> const& args,
   }
 
   if (!std::all_of(arguments.ApiVersion.begin(), arguments.ApiVersion.end(),
-                   isCharDigit)) {
+                   cmsysString_isdigit)) {
     status.SetError("QUERY given non-integer API_VERSION.");
     return false;
   }

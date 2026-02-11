@@ -88,6 +88,10 @@ if (WIN32)
   file(REAL_PATH "${low}" out)
 
   if(NOT "${out}" PATH_EQUAL "${in}")
-    message(SEND_ERROR "real path is \"${out}\", should be \"${in}\"")
+    message(SEND_ERROR
+      "real path is:\n"
+      "  \"${out}\"\n"
+      "but should be:\n"
+      "  \"${in}\"")
   endif()
 endif()

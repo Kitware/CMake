@@ -58,7 +58,6 @@
 #  include <cm3p/archive_entry.h>
 
 #  include "cmArchiveWrite.h"
-#  include "cmLocale.h"
 #  ifndef __LA_INT64_T
 #    define __LA_INT64_T la_int64_t
 #  endif
@@ -77,7 +76,6 @@
 
 #include <algorithm>
 #include <cassert>
-#include <cctype>
 #include <cerrno>
 #include <cstdint>
 #include <cstdio>
@@ -104,6 +102,7 @@
 #endif
 #include "cmsys/FStream.hxx"
 #include "cmsys/RegularExpression.hxx"
+#include "cmsys/String.h"
 #include "cmsys/System.h"
 
 #if defined(_WIN32)
@@ -574,7 +573,7 @@ void cmSystemTools::ParseWindowsCommandLine(char const* command,
     } else {
       arg.append(backslashes, '\\');
       backslashes = 0;
-      if (cmIsSpace(*c)) {
+      if (cmsysString_isspace(*c)) {
         if (in_quotes) {
           arg.append(1, *c);
         } else if (in_argument) {
@@ -733,7 +732,7 @@ bool cmSystemTools::SplitProgramFromArgs(std::string const& command,
   char const* c = command.c_str();
 
   // Skip leading whitespace.
-  while (cmIsSpace(*c)) {
+  while (cmsysString_isspace(*c)) {
     ++c;
   }
 
@@ -763,7 +762,7 @@ bool cmSystemTools::SplitProgramFromArgs(std::string const& command,
       in_double = true;
     } else if (*c == '\'') {
       in_single = true;
-    } else if (cmIsSpace(*c)) {
+    } else if (cmsysString_isspace(*c)) {
       break;
     } else {
       program += *c;
@@ -1340,7 +1339,7 @@ std::string cmSystemTools::GetRealPathResolvingWindowsSubst(
   }
   // Normalize to upper-case drive letter as cm::PathResolver does.
   if (resolved_path.size() > 1 && resolved_path[1] == ':') {
-    resolved_path[0] = toupper(static_cast<unsigned char>(resolved_path[0]));
+    resolved_path[0] = cmsysString_toupper(resolved_path[0]);
   }
   return resolved_path;
 #else
@@ -1362,12 +1361,10 @@ std::string cmSystemTools::GetRealPath(std::string const& path,
   // limitation to otherwise preserve susbt drives.
   if (resolved_path.size() >= 2 && resolved_path[1] == ':' &&
       path.size() >= 2 && path[1] == ':' &&
-      toupper(static_cast<unsigned char>(resolved_path[0])) !=
-        toupper(static_cast<unsigned char>(path[0]))) {
+      cmsysString_toupper(resolved_path[0]) != cmsysString_toupper(path[0])) {
     // FIXME: Add thread_local or mutex if we use threads.
     static std::map<char, std::string> substMap;
-    char const drive =
-      static_cast<char>(toupper(static_cast<unsigned char>(path[0])));
+    char const drive = static_cast<char>(cmsysString_toupper(path[0]));
     std::string maybe_subst = cmStrCat(drive, ":/");
     auto smi = substMap.find(drive);
     if (smi == substMap.end()) {
@@ -2626,8 +2623,6 @@ bool extract_tar(std::string const& arFileName,
                  cmSystemTools::cmTarExtractTimestamps extractTimestamps,
                  bool extract)
 {
-  cmLocaleRAII localeRAII;
-  static_cast<void>(localeRAII);
   struct archive* a = archive_read_new();
   struct archive* ext = archive_write_disk_new();
   if (extract) {
@@ -3866,7 +3861,7 @@ static size_t cm_strverscmp_find_first_difference_or_end(char const* lhs,
 static size_t cm_strverscmp_find_digits_begin(char const* s, size_t i)
 {
   /* Step back until we are not preceded by a digit.  */
-  while (i > 0 && isdigit(s[i - 1])) {
+  while (i > 0 && cmsysString_isdigit(s[i - 1])) {
     --i;
   }
   return i;
@@ -3875,7 +3870,7 @@ static size_t cm_strverscmp_find_digits_begin(char const* s, size_t i)
 static size_t cm_strverscmp_find_digits_end(char const* s, size_t i)
 {
   /* Step forward over digits.  */
-  while (isdigit(s[i])) {
+  while (cmsysString_isdigit(s[i])) {
     ++i;
   }
   return i;
@@ -3885,7 +3880,7 @@ static size_t cm_strverscmp_count_leading_zeros(char const* s, size_t b)
 {
   size_t i = b;
   /* Step forward over zeros that are followed by another digit.  */
-  while (s[i] == '0' && isdigit(s[i + 1])) {
+  while (s[i] == '0' && cmsysString_isdigit(s[i + 1])) {
     ++i;
   }
   return i - b;
@@ -3897,7 +3892,8 @@ static int cm_strverscmp(char const* lhs, char const* rhs)
   if (lhs[i] != rhs[i]) {
     /* The strings differ starting at 'i'.  Check for a digit sequence.  */
     size_t const b = cm_strverscmp_find_digits_begin(lhs, i);
-    if (b != i || (isdigit(lhs[i]) && isdigit(rhs[i]))) {
+    if (b != i ||
+        (cmsysString_isdigit(lhs[i]) && cmsysString_isdigit(rhs[i]))) {
       /* A digit sequence starts at 'b', preceding or at 'i'.  */
 
       /* Look for leading zeros, implying a leading decimal point.  */

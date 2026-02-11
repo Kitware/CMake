@@ -2,6 +2,8 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #include "RegexExplorer.h"
 
+#include "cmsys/String.h"
+
 RegexExplorer::RegexExplorer(QWidget* p)
   : QDialog(p)
   , m_matched(false)
@@ -147,7 +149,7 @@ bool RegexExplorer::stripEscapes(std::string& source)
       } else if (nextc == 'n') {
         result.append(1, '\n');
         in++;
-      } else if (isalnum(nextc) || nextc == '\0') {
+      } else if (cmsysString_isalnum(nextc) || nextc == '\0') {
         return false;
       } else {
         result.append(1, nextc);

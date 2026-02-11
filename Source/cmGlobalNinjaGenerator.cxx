@@ -4,7 +4,6 @@
 
 #include <algorithm>
 #include <cassert>
-#include <cctype>
 #include <cstdio>
 #include <functional>
 #include <iterator>
@@ -23,6 +22,7 @@
 #include <cm3p/json/writer.h>
 
 #include "cmsys/FStream.hxx"
+#include "cmsys/String.h"
 
 #include "cmCustomCommand.h"
 #include "cmCxxModuleMapper.h"
@@ -172,7 +172,7 @@ std::string cmGlobalNinjaGenerator::EncodeRuleName(std::string const& name)
   // "." and all invalid characters as hexadecimal.
   std::string encoded;
   for (char i : name) {
-    if (isalnum(i) || i == '_' || i == '-') {
+    if (cmsysString_isalnum(i) || i == '_' || i == '-') {
       encoded += i;
     } else {
       char buf[16];
