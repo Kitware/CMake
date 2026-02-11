@@ -19,10 +19,16 @@ events:(
     name: "ViaConfig"
     configs:
       -
-        filename: "ViaConfigConfig.cmake"
+        filename: "ViaConfig\.cps"
+        kind: "cps"
+      -
+        filename: "viaconfig\.cps"
+        kind: "cps"
+      -
+        filename: "ViaConfigConfig\.cmake"
         kind: "cmake"
       -
-        filename: "viaconfig-config.cmake"
+        filename: "viaconfig-config\.cmake"
         kind: "cmake"
     version_request:
       exact: false
@@ -48,31 +54,63 @@ events:(
         CMAKE_FIND_ROOT_PATH_MODE: "BOTH"
     candidates:
       -
-        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog-build/CMakeFiles/pkgRedirects/ViaConfigConfig.cmake"
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog-build/CMakeFiles/pkgRedirects/ViaConfigConfig\.cmake"
         mode: "config"
         reason: "no_exist"
       -
-        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog-build/CMakeFiles/pkgRedirects/viaconfig-config.cmake"
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog-build/CMakeFiles/pkgRedirects/viaconfig-config\.cmake"
         mode: "config"
         reason: "no_exist"
       -
-        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/ViaConfigConfig.cmake"
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog-build/CMakeFiles/pkgRedirects/lib/cps/ViaConfig\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog-build/CMakeFiles/pkgRedirects/lib/cps/viaconfig\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog-build/CMakeFiles/pkgRedirects/share/cps/ViaConfig\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog-build/CMakeFiles/pkgRedirects/share/cps/viaconfig\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/ViaConfigConfig\.cmake"
         mode: "config"
         reason: "no_exist"
       -
-        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/viaconfig-config.cmake"
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/viaconfig-config\.cmake"
         mode: "config"
         reason: "no_exist"
       -
-        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/cmake/ViaConfigConfig.cmake"
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/cmake/ViaConfigConfig\.cmake"
         mode: "config"
         reason: "no_exist"
       -
-        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/cmake/viaconfig-config.cmake"
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/cmake/viaconfig-config\.cmake"
         mode: "config"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/lib/cps/ViaConfig\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/lib/cps/viaconfig\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/share/cps/ViaConfig\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/share/cps/viaconfig\.cps"
+        mode: "cps"
         reason: "no_exist"
     found:
-      path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/ViaConfig/ViaConfigConfig.cmake"
+      path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/ViaConfig/ViaConfigConfig\.cmake"
       mode: "config"
       version: "1\.0"
     search_context:(
@@ -104,9 +142,9 @@ events:(
         CMAKE_FIND_USE_SYSTEM_PACKAGE_REGISTRY: true
         CMAKE_FIND_ROOT_PATH_MODE: "BOTH"
     found:
-      path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/cmake/FindViaModule.cmake"
+      path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/cmake/FindViaModule\.cmake"
       mode: "module"
-      version: "1.0"
+      version: "1\.0"
     search_context:(
       [^
 ]*)+
@@ -117,10 +155,16 @@ events:(
     name: "Inner"
     configs:
       -
-        filename: "InnerConfig.cmake"
+        filename: "Inner\.cps"
+        kind: "cps"
+      -
+        filename: "inner\.cps"
+        kind: "cps"
+      -
+        filename: "InnerConfig\.cmake"
         kind: "cmake"
       -
-        filename: "inner-config.cmake"
+        filename: "inner-config\.cmake"
         kind: "cmake"
     version_request:
       exact: false
@@ -146,33 +190,65 @@ events:(
         CMAKE_FIND_ROOT_PATH_MODE: "BOTH"
     candidates:
       -
-        path: "[^"]*/CMakeFiles/pkgRedirects/InnerConfig.cmake"
+        path: "[^"]*/CMakeFiles/pkgRedirects/InnerConfig\.cmake"
         mode: "config"
         reason: "no_exist"
       -
-        path: "[^"]*/CMakeFiles/pkgRedirects/inner-config.cmake"
+        path: "[^"]*/CMakeFiles/pkgRedirects/inner-config\.cmake"
         mode: "config"
         reason: "no_exist"
       -
-        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/InnerConfig.cmake"
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog-build/CMakeFiles/pkgRedirects/lib/cps/Inner\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog-build/CMakeFiles/pkgRedirects/lib/cps/inner\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog-build/CMakeFiles/pkgRedirects/share/cps/Inner\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog-build/CMakeFiles/pkgRedirects/share/cps/inner\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/InnerConfig\.cmake"
         mode: "config"
         reason: "no_exist"
       -
-        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/inner-config.cmake"
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/inner-config\.cmake"
         mode: "config"
         reason: "no_exist"
       -
-        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/cmake/InnerConfig.cmake"
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/cmake/InnerConfig\.cmake"
         mode: "config"
         reason: "no_exist"
       -
-        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/cmake/inner-config.cmake"
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/cmake/inner-config\.cmake"
         mode: "config"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/lib/cps/Inner\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/lib/cps/inner\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/share/cps/Inner\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/share/cps/inner\.cps"
+        mode: "cps"
         reason: "no_exist"
     found:
-      path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/Inner/InnerConfig.cmake"
+      path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/Inner/InnerConfig\.cmake"
       mode: "config"
-      version: "1.1"
+      version: "1\.1"
     search_context:(
       [^
 ]*)+
@@ -202,9 +278,9 @@ events:(
         CMAKE_FIND_USE_SYSTEM_PACKAGE_REGISTRY: true
         CMAKE_FIND_ROOT_PATH_MODE: "BOTH"
     found:
-      path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/cmake/FindWithInner.cmake"
+      path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/cmake/FindWithInner\.cmake"
       mode: "module"
-      version: "1.1"
+      version: "1\.1"
     search_context:(
       [^
 ]*)+
@@ -215,14 +291,20 @@ events:(
     name: "VersionCheck"
     configs:
       -
-        filename: "VersionCheckConfig.cmake"
+        filename: "VersionCheck\.cps"
+        kind: "cps"
+      -
+        filename: "versioncheck\.cps"
+        kind: "cps"
+      -
+        filename: "VersionCheckConfig\.cmake"
         kind: "cmake"
       -
-        filename: "versioncheck-config.cmake"
+        filename: "versioncheck-config\.cmake"
         kind: "cmake"
     version_request:
-      version: "2.0"
-      version_complete: "2.0"
+      version: "2\.0"
+      version_complete: "2\.0"
       exact: false
     settings:
       required: "optional"
@@ -246,42 +328,74 @@ events:(
         CMAKE_FIND_ROOT_PATH_MODE: "BOTH"
     candidates:
       -
-        path: "[^"]*/CMakeFiles/pkgRedirects/VersionCheckConfig.cmake"
+        path: "[^"]*/CMakeFiles/pkgRedirects/VersionCheckConfig\.cmake"
         mode: "config"
         reason: "no_exist"
       -
-        path: "[^"]*/CMakeFiles/pkgRedirects/versioncheck-config.cmake"
+        path: "[^"]*/CMakeFiles/pkgRedirects/versioncheck-config\.cmake"
         mode: "config"
         reason: "no_exist"
       -
-        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/VersionCheckConfig.cmake"
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog-build/CMakeFiles/pkgRedirects/lib/cps/VersionCheck\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog-build/CMakeFiles/pkgRedirects/lib/cps/versioncheck\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog-build/CMakeFiles/pkgRedirects/share/cps/VersionCheck\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog-build/CMakeFiles/pkgRedirects/share/cps/versioncheck\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/VersionCheckConfig\.cmake"
         mode: "config"
         reason: "no_exist"
       -
-        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/versioncheck-config.cmake"
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/versioncheck-config\.cmake"
         mode: "config"
         reason: "no_exist"
       -
-        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/cmake/VersionCheckConfig.cmake"
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/cmake/VersionCheckConfig\.cmake"
         mode: "config"
         reason: "no_exist"
       -
-        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/cmake/versioncheck-config.cmake"
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/cmake/versioncheck-config\.cmake"
         mode: "config"
         reason: "no_exist"
       -
-        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/VersionCheck-1.5/VersionCheckConfig.cmake"
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/lib/cps/VersionCheck\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/lib/cps/versioncheck\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/share/cps/VersionCheck\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/share/cps/versioncheck\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/VersionCheck-1\.5/VersionCheckConfig\.cmake"
         mode: "config"
         reason: "insufficient_version"
-        message: "The version found is not compatible with the version requested."
+        message: "The version found is not compatible with the version requested\."
       -
-        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/VersionCheck-1.5/versioncheck-config.cmake"
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/VersionCheck-1\.5/versioncheck-config\.cmake"
         mode: "config"
         reason: "no_exist"
     found:
-      path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/VersionCheck-2.5/VersionCheckConfig.cmake"
+      path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/VersionCheck-2\.5/VersionCheckConfig\.cmake"
       mode: "config"
-      version: "2.5"
+      version: "2\.5"
     search_context:(
       [^
 ]*)+

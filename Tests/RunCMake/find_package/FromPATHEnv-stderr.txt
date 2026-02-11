@@ -78,6 +78,14 @@
     [^
 ]*/Tests/RunCMake/find_package/FromPATHEnv-build/CMakeFiles/pkgRedirects/resolved-config\.cmake
     [^
+]*/Tests/RunCMake/find_package/FromPATHEnv-build/CMakeFiles/pkgRedirects/lib/cps/Resolved\.cps
+    [^
+]*/Tests/RunCMake/find_package/FromPATHEnv-build/CMakeFiles/pkgRedirects/lib/cps/resolved\.cps
+    [^
+]*/Tests/RunCMake/find_package/FromPATHEnv-build/CMakeFiles/pkgRedirects/share/cps/Resolved\.cps
+    [^
+]*/Tests/RunCMake/find_package/FromPATHEnv-build/CMakeFiles/pkgRedirects/share/cps/resolved\.cps
+    [^
 ]*/Tests/RunCMake/find_package/PackageRoot/ResolvedConfig\.cmake
 
   The file was found at

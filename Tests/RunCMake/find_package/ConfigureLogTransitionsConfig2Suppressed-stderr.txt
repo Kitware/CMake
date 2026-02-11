@@ -7,6 +7,8 @@ CMake Warning at ConfigureLogTransitionsConfig2Suppressed\.cmake:[0-9]+ \(find_p
   Could not find a package configuration file provided by "ViaConfig" with
   any of the following names:
 
+    ViaConfig\.cps
+    viaconfig\.cps
     ViaConfigConfig\.cmake
     viaconfig-config\.cmake
 
@@ -27,6 +29,8 @@ CMake Warning at ConfigureLogTransitionsConfig2Suppressed\.cmake:[0-9]+ \(find_p
   Could not find a package configuration file provided by "ViaConfig" with
   any of the following names:
 
+    ViaConfig\.cps
+    viaconfig\.cps
     ViaConfigConfig\.cmake
     viaconfig-config\.cmake
 
@@ -49,6 +53,8 @@ CMake Warning at ConfigureLogTransitionsConfig2Suppressed\.cmake:[0-9]+ \(find_p
   Could not find a package configuration file provided by "ViaConfig" with
   any of the following names:
 
+    ViaConfig\.cps
+    viaconfig\.cps
     ViaConfigConfig\.cmake
     viaconfig-config\.cmake
 

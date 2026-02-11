@@ -6,6 +6,7 @@ CMake Warning at UnwindInclude/UnwindFunction\.cmake:4 \(find_package\):
   Could not find a package configuration file provided by "foo" with any of
   the following names:
 
+    foo\.cps
     fooConfig\.cmake
     foo-config\.cmake
 

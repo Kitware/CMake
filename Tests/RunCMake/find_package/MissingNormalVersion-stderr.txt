@@ -6,6 +6,8 @@ CMake Warning at MissingNormalVersion\.cmake:1 \(find_package\):
   Could not find a package configuration file provided by "NotHere"
   \(requested version 1\.2\) with any of the following names:
 
+    NotHere\.cps
+    nothere\.cps
     NotHereConfig\.cmake
     nothere-config\.cmake
 

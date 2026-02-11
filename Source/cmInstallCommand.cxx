@@ -2286,8 +2286,6 @@ bool HandleExportMode(std::vector<std::string> const& args,
 #ifndef CMAKE_BOOTSTRAP
   // Check if PACKAGE_INFO export has been requested for this export set.
   if (cmExperimental::HasSupportEnabled(
-        status.GetMakefile(), cmExperimental::Feature::ExportPackageInfo) &&
-      cmExperimental::HasSupportEnabled(
         status.GetMakefile(), cmExperimental::Feature::MappedPackageInfo)) {
     if (cmValue const& piExports = helper.Makefile->GetDefinition(
           "CMAKE_INSTALL_EXPORTS_AS_PACKAGE_INFO")) {
@@ -2321,12 +2319,6 @@ bool HandlePackageInfoMode(std::vector<std::string> const& args,
                            cmExecutionStatus& status)
 {
 #ifndef CMAKE_BOOTSTRAP
-  if (!cmExperimental::HasSupportEnabled(
-        status.GetMakefile(), cmExperimental::Feature::ExportPackageInfo)) {
-    status.SetError("does not recognize sub-command PACKAGE_INFO");
-    return false;
-  }
-
   Helper helper(status);
 
   // This is the PACKAGE_INFO mode.

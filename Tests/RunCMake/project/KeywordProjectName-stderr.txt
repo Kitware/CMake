@@ -15,6 +15,22 @@ Call Stack \(most recent call first\):
 This warning is for project developers\.  Use -Wno-dev to suppress it\.
 
 CMake Warning \(dev\) at KeywordProjectName\.cmake:[0-9]+ \(project\):
+  project\(\) called with 'COMPAT_VERSION' as first argument\.  The first
+  parameter should be the project name, not a keyword argument\.  See the
+  cmake-commands\(7\) manual for correct usage of the project\(\) command\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
+This warning is for project developers\.  Use -Wno-dev to suppress it\.
+
+CMake Warning \(dev\) at KeywordProjectName\.cmake:[0-9]+ \(project\):
+  project\(\) called with 'SPDX_LICENSE' as first argument\.  The first
+  parameter should be the project name, not a keyword argument\.  See the
+  cmake-commands\(7\) manual for correct usage of the project\(\) command\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
+This warning is for project developers\.  Use -Wno-dev to suppress it\.
+
+CMake Warning \(dev\) at KeywordProjectName\.cmake:[0-9]+ \(project\):
   project\(\) called with 'DESCRIPTION' as first argument\.  The first parameter
   should be the project name, not a keyword argument\.  See the
   cmake-commands\(7\) manual for correct usage of the project\(\) command\.

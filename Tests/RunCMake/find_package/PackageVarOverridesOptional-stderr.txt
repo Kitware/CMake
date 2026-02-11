@@ -6,6 +6,8 @@ CMake Error at PackageVarOverridesOptional\.cmake:[0-9]+ \(find_package\):
   Could not find a package configuration file provided by "Foo" with any of
   the following names:
 
+    Foo\.cps
+    foo\.cps
     FooConfig\.cmake
     foo-config\.cmake
 

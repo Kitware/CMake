@@ -6,6 +6,8 @@ CMake Error at do_test\.cmake:16 \(find_package\):
   Could not find a package configuration file provided by "NoPrefix" with any
   of the following names:
 
+    NoPrefix\.cps
+    noprefix\.cps
     NoPrefixConfig\.cmake
     noprefix-config\.cmake
 

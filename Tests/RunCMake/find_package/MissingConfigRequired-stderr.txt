@@ -2,6 +2,8 @@ CMake Error at MissingConfigRequired\.cmake:1 \(find_package\):
   Could not find a package configuration file provided by "NotHere" with any
   of the following names:
 
+    NotHere\.cps
+    nothere\.cps
     NotHereConfig\.cmake
     nothere-config\.cmake
 

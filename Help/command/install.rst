@@ -975,10 +975,7 @@ Signatures
 .. signature::
   install(PACKAGE_INFO <package-name> [...])
 
-  .. versionadded:: 3.31
-  .. note::
-
-    Experimental. Gated by ``CMAKE_EXPERIMENTAL_EXPORT_PACKAGE_INFO``.
+  .. versionadded:: 4.3
 
   Installs a |CPS|_ ("CPS") file exporting targets for dependent projects:
 

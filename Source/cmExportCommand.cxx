@@ -401,12 +401,6 @@ static bool HandleSpecialExportMode(std::vector<std::string> const& args,
 static bool HandlePackageInfoMode(std::vector<std::string> const& args,
                                   cmExecutionStatus& status)
 {
-  if (!cmExperimental::HasSupportEnabled(
-        status.GetMakefile(), cmExperimental::Feature::ExportPackageInfo)) {
-    status.SetError("does not recognize sub-command PACKAGE_INFO");
-    return false;
-  }
-
   using arg_t = cmPackageInfoArguments;
   using gen_t = cmExportBuildPackageInfoGenerator;
   return HandleSpecialExportMode<arg_t, gen_t>(args, status);

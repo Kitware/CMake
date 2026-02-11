@@ -116,6 +116,14 @@ CMake Debug Log at ModuleModeDebugPkg/FindFoo\.cmake:[0-9]+ \(find_package\):
 ]*/Tests/RunCMake/find_package/ModuleModeDebugPkg-build/CMakeFiles/pkgRedirects/ZotConfig\.cmake
     [^
 ]*/Tests/RunCMake/find_package/ModuleModeDebugPkg-build/CMakeFiles/pkgRedirects/zot-config\.cmake
+    [^
+]*/Tests/RunCMake/find_package/ModuleModeDebugPkg-build/CMakeFiles/pkgRedirects/lib/cps/Zot\.cps
+    [^
+]*/Tests/RunCMake/find_package/ModuleModeDebugPkg-build/CMakeFiles/pkgRedirects/lib/cps/zot\.cps
+    [^
+]*/Tests/RunCMake/find_package/ModuleModeDebugPkg-build/CMakeFiles/pkgRedirects/share/cps/Zot\.cps
+    [^
+]*/Tests/RunCMake/find_package/ModuleModeDebugPkg-build/CMakeFiles/pkgRedirects/share/cps/zot\.cps
 
   The file was not found\.
 

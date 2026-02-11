@@ -19,10 +19,16 @@ events:(
     name: "ParameterCheckConfig"
     configs:
       -
-        filename: "ParameterCheckConfigConfig.cmake"
+        filename: "ParameterCheckConfig\.cps"
+        kind: "cps"
+      -
+        filename: "parametercheckconfig\.cps"
+        kind: "cps"
+      -
+        filename: "ParameterCheckConfigConfig\.cmake"
         kind: "cmake"
       -
-        filename: "parametercheckconfig-config.cmake"
+        filename: "parametercheckconfig-config\.cmake"
         kind: "cmake"
     version_request:
       exact: false
@@ -50,33 +56,65 @@ events:(
         CMAKE_FIND_ROOT_PATH_MODE: "BOTH"
     candidates:
       -
-        path: "[^"]*/CMakeFiles/pkgRedirects/ParameterCheckConfigConfig.cmake"
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/ParameterCheckConfigConfig\.cmake"
         mode: "config"
         reason: "no_exist"
       -
-        path: "[^"]*/CMakeFiles/pkgRedirects/parametercheckconfig-config.cmake"
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/parametercheckconfig-config\.cmake"
         mode: "config"
         reason: "no_exist"
       -
-        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/ParameterCheckConfigConfig.cmake"
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/lib/cps/ParameterCheckConfig\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/lib/cps/parametercheckconfig\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/share/cps/ParameterCheckConfig\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/share/cps/parametercheckconfig\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/ParameterCheckConfigConfig\.cmake"
         mode: "config"
         reason: "no_exist"
       -
-        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/parametercheckconfig-config.cmake"
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/parametercheckconfig-config\.cmake"
         mode: "config"
         reason: "no_exist"
       -
-        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/cmake/ParameterCheckConfigConfig.cmake"
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/cmake/ParameterCheckConfigConfig\.cmake"
         mode: "config"
         reason: "no_exist"
       -
-        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/cmake/parametercheckconfig-config.cmake"
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/cmake/parametercheckconfig-config\.cmake"
         mode: "config"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/lib/cps/ParameterCheckConfig\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/lib/cps/parametercheckconfig\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/share/cps/ParameterCheckConfig\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/share/cps/parametercheckconfig\.cps"
+        mode: "cps"
         reason: "no_exist"
     found:
-      path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/ParameterCheckConfig/ParameterCheckConfigConfig.cmake"
+      path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/ParameterCheckConfig/ParameterCheckConfigConfig\.cmake"
       mode: "config"
-      version: "1.6"
+      version: "1\.6"
     search_context:(
       [^
 ]*)+
@@ -87,10 +125,16 @@ events:(
     name: "ParameterCheckConfig"
     configs:
       -
-        filename: "ParameterCheckConfigConfig.cmake"
+        filename: "ParameterCheckConfig\.cps"
+        kind: "cps"
+      -
+        filename: "parametercheckconfig\.cps"
+        kind: "cps"
+      -
+        filename: "ParameterCheckConfigConfig\.cmake"
         kind: "cmake"
       -
-        filename: "parametercheckconfig-config.cmake"
+        filename: "parametercheckconfig-config\.cmake"
         kind: "cmake"
     version_request:
       exact: false
@@ -118,81 +162,177 @@ events:(
         CMAKE_FIND_ROOT_PATH_MODE: "BOTH"
     candidates:
       -
-        path: "[^"]*/CMakeFiles/pkgRedirects/ParameterCheckConfigConfig.cmake"
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/ParameterCheckConfigConfig\.cmake"
         mode: "config"
         reason: "no_exist"
       -
-        path: "[^"]*/CMakeFiles/pkgRedirects/parametercheckconfig-config.cmake"
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/parametercheckconfig-config\.cmake"
         mode: "config"
         reason: "no_exist"
       -
-        path: "[^"]*/CMakeFiles/pkgRedirects/suffix1/ParameterCheckConfigConfig.cmake"
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/suffix1/ParameterCheckConfigConfig\.cmake"
         mode: "config"
         reason: "no_exist"
       -
-        path: "[^"]*/CMakeFiles/pkgRedirects/suffix1/parametercheckconfig-config.cmake"
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/suffix1/parametercheckconfig-config\.cmake"
         mode: "config"
         reason: "no_exist"
       -
-        path: "[^"]*/CMakeFiles/pkgRedirects/suffix2/ParameterCheckConfigConfig.cmake"
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/suffix2/ParameterCheckConfigConfig\.cmake"
         mode: "config"
         reason: "no_exist"
       -
-        path: "[^"]*/CMakeFiles/pkgRedirects/suffix2/parametercheckconfig-config.cmake"
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/suffix2/parametercheckconfig-config\.cmake"
         mode: "config"
         reason: "no_exist"
       -
-        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/ParameterCheckConfigConfig.cmake"
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/lib/cps/ParameterCheckConfig\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/lib/cps/parametercheckconfig\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/lib/cps/suffix1/ParameterCheckConfig\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/lib/cps/suffix1/parametercheckconfig\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/lib/cps/suffix2/ParameterCheckConfig\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/lib/cps/suffix2/parametercheckconfig\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/share/cps/ParameterCheckConfig\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/share/cps/parametercheckconfig\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/share/cps/suffix1/ParameterCheckConfig\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/share/cps/suffix1/parametercheckconfig\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/share/cps/suffix2/ParameterCheckConfig\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/share/cps/suffix2/parametercheckconfig\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/ParameterCheckConfigConfig\.cmake"
         mode: "config"
         reason: "no_exist"
       -
-        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/parametercheckconfig-config.cmake"
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/parametercheckconfig-config\.cmake"
         mode: "config"
         reason: "no_exist"
       -
-        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/suffix1/ParameterCheckConfigConfig.cmake"
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/suffix1/ParameterCheckConfigConfig\.cmake"
         mode: "config"
         reason: "no_exist"
       -
-        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/suffix1/parametercheckconfig-config.cmake"
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/suffix1/parametercheckconfig-config\.cmake"
         mode: "config"
         reason: "no_exist"
       -
-        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/suffix2/ParameterCheckConfigConfig.cmake"
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/suffix2/ParameterCheckConfigConfig\.cmake"
         mode: "config"
         reason: "no_exist"
       -
-        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/suffix2/parametercheckconfig-config.cmake"
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/suffix2/parametercheckconfig-config\.cmake"
         mode: "config"
         reason: "no_exist"
       -
-        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/cmake/ParameterCheckConfigConfig.cmake"
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/cmake/ParameterCheckConfigConfig\.cmake"
         mode: "config"
         reason: "no_exist"
       -
-        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/cmake/parametercheckconfig-config.cmake"
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/cmake/parametercheckconfig-config\.cmake"
         mode: "config"
         reason: "no_exist"
       -
-        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/cmake/suffix1/ParameterCheckConfigConfig.cmake"
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/cmake/suffix1/ParameterCheckConfigConfig\.cmake"
         mode: "config"
         reason: "no_exist"
       -
-        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/cmake/suffix1/parametercheckconfig-config.cmake"
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/cmake/suffix1/parametercheckconfig-config\.cmake"
         mode: "config"
         reason: "no_exist"
       -
-        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/cmake/suffix2/ParameterCheckConfigConfig.cmake"
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/cmake/suffix2/ParameterCheckConfigConfig\.cmake"
         mode: "config"
         reason: "no_exist"
       -
-        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/cmake/suffix2/parametercheckconfig-config.cmake"
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/cmake/suffix2/parametercheckconfig-config\.cmake"
         mode: "config"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/lib/cps/ParameterCheckConfig\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/lib/cps/parametercheckconfig\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/lib/cps/suffix1/ParameterCheckConfig\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/lib/cps/suffix1/parametercheckconfig\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/lib/cps/suffix2/ParameterCheckConfig\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/lib/cps/suffix2/parametercheckconfig\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/share/cps/ParameterCheckConfig\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/share/cps/parametercheckconfig\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/share/cps/suffix1/ParameterCheckConfig\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/share/cps/suffix1/parametercheckconfig\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/share/cps/suffix2/ParameterCheckConfig\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/share/cps/suffix2/parametercheckconfig\.cps"
+        mode: "cps"
         reason: "no_exist"
     found:
-      path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/ParameterCheckConfig/ParameterCheckConfigConfig.cmake"
+      path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/ParameterCheckConfig/ParameterCheckConfigConfig\.cmake"
       mode: "config"
-      version: "1.6"
+      version: "1\.6"
     search_context:(
       [^
 ]*)+
@@ -203,10 +343,16 @@ events:(
     name: "ParameterCheckConfig"
     configs:
       -
-        filename: "ParameterCheckConfigConfig.cmake"
+        filename: "ParameterCheckConfig\.cps"
+        kind: "cps"
+      -
+        filename: "parametercheckconfig\.cps"
+        kind: "cps"
+      -
+        filename: "ParameterCheckConfigConfig\.cmake"
         kind: "cmake"
       -
-        filename: "parametercheckconfig-config.cmake"
+        filename: "parametercheckconfig-config\.cmake"
         kind: "cmake"
     version_request:
       exact: false
@@ -232,12 +378,28 @@ events:(
         CMAKE_FIND_ROOT_PATH_MODE: "BOTH"
     candidates:
       -
-        path: "[^"]*/CMakeFiles/pkgRedirects/ParameterCheckConfigConfig.cmake"
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/ParameterCheckConfigConfig\.cmake"
         mode: "config"
         reason: "no_exist"
       -
-        path: "[^"]*/CMakeFiles/pkgRedirects/parametercheckconfig-config.cmake"
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/parametercheckconfig-config\.cmake"
         mode: "config"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/lib/cps/ParameterCheckConfig\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/lib/cps/parametercheckconfig\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/share/cps/ParameterCheckConfig\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/share/cps/parametercheckconfig\.cps"
+        mode: "cps"
         reason: "no_exist"
     found: null
     search_context:(
@@ -250,10 +412,16 @@ events:(
     name: "ParameterCheckConfig"
     configs:
       -
-        filename: "ParameterCheckConfigConfig.cmake"
+        filename: "ParameterCheckConfig\.cps"
+        kind: "cps"
+      -
+        filename: "parametercheckconfig\.cps"
+        kind: "cps"
+      -
+        filename: "ParameterCheckConfigConfig\.cmake"
         kind: "cmake"
       -
-        filename: "parametercheckconfig-config.cmake"
+        filename: "parametercheckconfig-config\.cmake"
         kind: "cmake"
     version_request:
       exact: false
@@ -279,33 +447,65 @@ events:(
         CMAKE_FIND_ROOT_PATH_MODE: "BOTH"
     candidates:
       -
-        path: "[^"]*/CMakeFiles/pkgRedirects/ParameterCheckConfigConfig.cmake"
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/ParameterCheckConfigConfig\.cmake"
         mode: "config"
         reason: "no_exist"
       -
-        path: "[^"]*/CMakeFiles/pkgRedirects/parametercheckconfig-config.cmake"
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/parametercheckconfig-config\.cmake"
         mode: "config"
         reason: "no_exist"
       -
-        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/ParameterCheckConfigConfig.cmake"
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/lib/cps/ParameterCheckConfig\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/lib/cps/parametercheckconfig\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/share/cps/ParameterCheckConfig\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/share/cps/parametercheckconfig\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/ParameterCheckConfigConfig\.cmake"
         mode: "config"
         reason: "no_exist"
       -
-        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/parametercheckconfig-config.cmake"
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/parametercheckconfig-config\.cmake"
         mode: "config"
         reason: "no_exist"
       -
-        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/cmake/ParameterCheckConfigConfig.cmake"
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/cmake/ParameterCheckConfigConfig\.cmake"
         mode: "config"
         reason: "no_exist"
       -
-        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/cmake/parametercheckconfig-config.cmake"
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/cmake/parametercheckconfig-config\.cmake"
         mode: "config"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/lib/cps/ParameterCheckConfig\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/lib/cps/parametercheckconfig\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/share/cps/ParameterCheckConfig\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/share/cps/parametercheckconfig\.cps"
+        mode: "cps"
         reason: "no_exist"
     found:
-      path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/ParameterCheckConfig/ParameterCheckConfigConfig.cmake"
+      path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/ParameterCheckConfig/ParameterCheckConfigConfig\.cmake"
       mode: "config"
-      version: "1.6"
+      version: "1\.6"
     search_context:(
       [^
 ]*)+
@@ -316,10 +516,16 @@ events:(
     name: "ParameterCheckConfig"
     configs:
       -
-        filename: "ParameterCheckConfigConfig.cmake"
+        filename: "ParameterCheckConfig\.cps"
+        kind: "cps"
+      -
+        filename: "parametercheckconfig\.cps"
+        kind: "cps"
+      -
+        filename: "ParameterCheckConfigConfig\.cmake"
         kind: "cmake"
       -
-        filename: "parametercheckconfig-config.cmake"
+        filename: "parametercheckconfig-config\.cmake"
         kind: "cmake"
     version_request:
       exact: false
@@ -345,33 +551,65 @@ events:(
         CMAKE_FIND_ROOT_PATH_MODE: "ONLY"
     candidates:
       -
-        path: "[^"]*/CMakeFiles/pkgRedirects/ParameterCheckConfigConfig.cmake"
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/ParameterCheckConfigConfig\.cmake"
         mode: "config"
         reason: "no_exist"
       -
-        path: "[^"]*/CMakeFiles/pkgRedirects/parametercheckconfig-config.cmake"
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/parametercheckconfig-config\.cmake"
         mode: "config"
         reason: "no_exist"
       -
-        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/ParameterCheckConfigConfig.cmake"
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/lib/cps/ParameterCheckConfig\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/lib/cps/parametercheckconfig\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/share/cps/ParameterCheckConfig\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/share/cps/parametercheckconfig\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/ParameterCheckConfigConfig\.cmake"
         mode: "config"
         reason: "no_exist"
       -
-        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/parametercheckconfig-config.cmake"
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/parametercheckconfig-config\.cmake"
         mode: "config"
         reason: "no_exist"
       -
-        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/cmake/ParameterCheckConfigConfig.cmake"
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/cmake/ParameterCheckConfigConfig\.cmake"
         mode: "config"
         reason: "no_exist"
       -
-        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/cmake/parametercheckconfig-config.cmake"
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/cmake/parametercheckconfig-config\.cmake"
         mode: "config"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/lib/cps/ParameterCheckConfig\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/lib/cps/parametercheckconfig\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/share/cps/ParameterCheckConfig\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/share/cps/parametercheckconfig\.cps"
+        mode: "cps"
         reason: "no_exist"
     found:
-      path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/ParameterCheckConfig/ParameterCheckConfigConfig.cmake"
+      path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/ParameterCheckConfig/ParameterCheckConfigConfig\.cmake"
       mode: "config"
-      version: "1.6"
+      version: "1\.6"
     search_context:(
       [^
 ]*)+
@@ -382,10 +620,16 @@ events:(
     name: "ParameterCheckConfig"
     configs:
       -
-        filename: "ParameterCheckConfigConfig.cmake"
+        filename: "ParameterCheckConfig\.cps"
+        kind: "cps"
+      -
+        filename: "parametercheckconfig\.cps"
+        kind: "cps"
+      -
+        filename: "ParameterCheckConfigConfig\.cmake"
         kind: "cmake"
       -
-        filename: "parametercheckconfig-config.cmake"
+        filename: "parametercheckconfig-config\.cmake"
         kind: "cmake"
     version_request:
       exact: false
@@ -411,33 +655,65 @@ events:(
         CMAKE_FIND_ROOT_PATH_MODE: "NEVER"
     candidates:
       -
-        path: "[^"]*/CMakeFiles/pkgRedirects/ParameterCheckConfigConfig.cmake"
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/ParameterCheckConfigConfig\.cmake"
         mode: "config"
         reason: "no_exist"
       -
-        path: "[^"]*/CMakeFiles/pkgRedirects/parametercheckconfig-config.cmake"
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/parametercheckconfig-config\.cmake"
         mode: "config"
         reason: "no_exist"
       -
-        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/ParameterCheckConfigConfig.cmake"
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/lib/cps/ParameterCheckConfig\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/lib/cps/parametercheckconfig\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/share/cps/ParameterCheckConfig\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/share/cps/parametercheckconfig\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/ParameterCheckConfigConfig\.cmake"
         mode: "config"
         reason: "no_exist"
       -
-        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/parametercheckconfig-config.cmake"
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/parametercheckconfig-config\.cmake"
         mode: "config"
         reason: "no_exist"
       -
-        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/cmake/ParameterCheckConfigConfig.cmake"
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/cmake/ParameterCheckConfigConfig\.cmake"
         mode: "config"
         reason: "no_exist"
       -
-        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/cmake/parametercheckconfig-config.cmake"
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/cmake/parametercheckconfig-config\.cmake"
         mode: "config"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/lib/cps/ParameterCheckConfig\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/lib/cps/parametercheckconfig\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/share/cps/ParameterCheckConfig\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/share/cps/parametercheckconfig\.cps"
+        mode: "cps"
         reason: "no_exist"
     found:
-      path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/ParameterCheckConfig/ParameterCheckConfigConfig.cmake"
+      path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/ParameterCheckConfig/ParameterCheckConfigConfig\.cmake"
       mode: "config"
-      version: "1.6"
+      version: "1\.6"
     search_context:(
       [^
 ]*)+
@@ -448,16 +724,28 @@ events:(
     name: "OtherParameterCheck"
     configs:
       -
-        filename: "BogusParameterCheckConfig.cmake"
+        filename: "BogusParameterCheck\.cps"
+        kind: "cps"
+      -
+        filename: "bogusparametercheck\.cps"
+        kind: "cps"
+      -
+        filename: "BogusParameterCheckConfig\.cmake"
         kind: "cmake"
       -
-        filename: "bogusparametercheck-config.cmake"
+        filename: "bogusparametercheck-config\.cmake"
         kind: "cmake"
       -
-        filename: "ParameterCheckConfigConfig.cmake"
+        filename: "ParameterCheckConfig\.cps"
+        kind: "cps"
+      -
+        filename: "parametercheckconfig\.cps"
+        kind: "cps"
+      -
+        filename: "ParameterCheckConfigConfig\.cmake"
         kind: "cmake"
       -
-        filename: "parametercheckconfig-config.cmake"
+        filename: "parametercheckconfig-config\.cmake"
         kind: "cmake"
     version_request:
       exact: false
@@ -484,65 +772,129 @@ events:(
         CMAKE_FIND_ROOT_PATH_MODE: "BOTH"
     candidates:
       -
-        path: "[^"]*/CMakeFiles/pkgRedirects/BogusParameterCheckConfig.cmake"
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/BogusParameterCheckConfig\.cmake"
         mode: "config"
         reason: "no_exist"
       -
-        path: "[^"]*/CMakeFiles/pkgRedirects/bogusparametercheck-config.cmake"
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/bogusparametercheck-config\.cmake"
         mode: "config"
         reason: "no_exist"
       -
-        path: "[^"]*/CMakeFiles/pkgRedirects/ParameterCheckConfigConfig.cmake"
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/ParameterCheckConfigConfig\.cmake"
         mode: "config"
         reason: "no_exist"
       -
-        path: "[^"]*/CMakeFiles/pkgRedirects/parametercheckconfig-config.cmake"
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/parametercheckconfig-config\.cmake"
         mode: "config"
         reason: "no_exist"
       -
-        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/BogusParameterCheckConfig.cmake"
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/lib/cps/BogusParameterCheck\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/lib/cps/bogusparametercheck\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/lib/cps/ParameterCheckConfig\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/lib/cps/parametercheckconfig\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/share/cps/BogusParameterCheck\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/share/cps/bogusparametercheck\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/share/cps/ParameterCheckConfig\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/share/cps/parametercheckconfig\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/BogusParameterCheckConfig\.cmake"
         mode: "config"
         reason: "no_exist"
       -
-        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/bogusparametercheck-config.cmake"
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/bogusparametercheck-config\.cmake"
         mode: "config"
         reason: "no_exist"
       -
-        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/ParameterCheckConfigConfig.cmake"
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/ParameterCheckConfigConfig\.cmake"
         mode: "config"
         reason: "no_exist"
       -
-        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/parametercheckconfig-config.cmake"
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/parametercheckconfig-config\.cmake"
         mode: "config"
         reason: "no_exist"
       -
-        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/cmake/BogusParameterCheckConfig.cmake"
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/cmake/BogusParameterCheckConfig\.cmake"
         mode: "config"
         reason: "no_exist"
       -
-        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/cmake/bogusparametercheck-config.cmake"
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/cmake/bogusparametercheck-config\.cmake"
         mode: "config"
         reason: "no_exist"
       -
-        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/cmake/ParameterCheckConfigConfig.cmake"
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/cmake/ParameterCheckConfigConfig\.cmake"
         mode: "config"
         reason: "no_exist"
       -
-        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/cmake/parametercheckconfig-config.cmake"
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/cmake/parametercheckconfig-config\.cmake"
         mode: "config"
         reason: "no_exist"
       -
-        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/ParameterCheckConfig/BogusParameterCheckConfig.cmake"
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/lib/cps/BogusParameterCheck\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/lib/cps/bogusparametercheck\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/lib/cps/ParameterCheckConfig\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/lib/cps/parametercheckconfig\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/share/cps/BogusParameterCheck\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/share/cps/bogusparametercheck\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/share/cps/ParameterCheckConfig\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/share/cps/parametercheckconfig\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/ParameterCheckConfig/BogusParameterCheckConfig\.cmake"
         mode: "config"
         reason: "no_exist"
       -
-        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/ParameterCheckConfig/bogusparametercheck-config.cmake"
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/ParameterCheckConfig/bogusparametercheck-config\.cmake"
         mode: "config"
         reason: "no_exist"
     found:
-      path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/ParameterCheckConfig/ParameterCheckConfigConfig.cmake"
+      path: "[^"]*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/ParameterCheckConfig/ParameterCheckConfigConfig\.cmake"
       mode: "config"
-      version: "1.6"
+      version: "1\.6"
     search_context:(
       [^
 ]*)+

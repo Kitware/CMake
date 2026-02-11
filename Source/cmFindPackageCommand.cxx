@@ -27,7 +27,6 @@
 #include "cmConfigureLog.h"
 #include "cmDependencyProvider.h"
 #include "cmExecutionStatus.h"
-#include "cmExperimental.h"
 #include "cmFindPackageStack.h"
 #include "cmList.h"
 #include "cmListFileCache.h"
@@ -926,9 +925,7 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
   // Check and eliminate search modes not allowed by the args provided
   this->UseFindModules = configArgs.empty();
   this->UseConfigFiles = moduleArgs.empty();
-  if (this->UseConfigFiles &&
-      cmExperimental::HasSupportEnabled(
-        *this->Makefile, cmExperimental::Feature::ImportPackageInfo)) {
+  if (this->UseConfigFiles) {
     this->UseCpsFiles = this->Configs.empty();
   } else {
     this->UseCpsFiles = false;

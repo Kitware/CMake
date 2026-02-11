@@ -1,4 +1,4 @@
-CMake Warning \(dev\) at ExperimentalWarning\.cmake:13 \(install\):
+CMake Warning \(dev\) at ExperimentalWarning\.cmake:[0-9]+ \(install\):
   CMake's support for generating package information in the Common Package
   Specification format from CMake script exports is experimental\.  It is
   meant only for experimentation and feedback to CMake developers\.

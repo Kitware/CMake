@@ -27,10 +27,16 @@ events:(
     name: "ViaModule"
     configs:
       -
-        filename: "ViaModuleConfig.cmake"
+        filename: "ViaModule\.cps"
+        kind: "cps"
+      -
+        filename: "viamodule\.cps"
+        kind: "cps"
+      -
+        filename: "ViaModuleConfig\.cmake"
         kind: "cmake"
       -
-        filename: "viamodule-config.cmake"
+        filename: "viamodule-config\.cmake"
         kind: "cmake"
     version_request:
       exact: false
@@ -56,16 +62,32 @@ events:(
         CMAKE_FIND_ROOT_PATH_MODE: "BOTH"
     candidates:
       -
-        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLogTransitionsModule2-build/CMakeFiles/pkgRedirects/ViaModuleConfig.cmake"
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLogTransitionsModule2-build/CMakeFiles/pkgRedirects/ViaModuleConfig\.cmake"
         mode: "config"
         reason: "no_exist"
       -
-        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLogTransitionsModule2-build/CMakeFiles/pkgRedirects/viamodule-config.cmake"
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLogTransitionsModule2-build/CMakeFiles/pkgRedirects/viamodule-config\.cmake"
         mode: "config"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLogTransitionsModule2-build/CMakeFiles/pkgRedirects/lib/cps/ViaModule\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLogTransitionsModule2-build/CMakeFiles/pkgRedirects/lib/cps/viamodule\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLogTransitionsModule2-build/CMakeFiles/pkgRedirects/share/cps/ViaModule\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLogTransitionsModule2-build/CMakeFiles/pkgRedirects/share/cps/viamodule\.cps"
+        mode: "cps"
         reason: "no_exist"(
       -
-        path: "[^"]*/(viamodule-config|ViaModuleConfig).cmake"
-        mode: "config"
+        path: "[^"]*/((viamodule|ViaModule)\.cps|(viamodule-config|ViaModuleConfig)\.cmake)"
+        mode: "(cps|config)"
         reason: "no_exist")*
     found: null
     search_context:(
@@ -107,10 +129,16 @@ events:(
     name: "ViaModule"
     configs:
       -
-        filename: "ViaModuleConfig.cmake"
+        filename: "ViaModule\.cps"
+        kind: "cps"
+      -
+        filename: "viamodule\.cps"
+        kind: "cps"
+      -
+        filename: "ViaModuleConfig\.cmake"
         kind: "cmake"
       -
-        filename: "viamodule-config.cmake"
+        filename: "viamodule-config\.cmake"
         kind: "cmake"
     version_request:
       exact: false
@@ -136,16 +164,32 @@ events:(
         CMAKE_FIND_ROOT_PATH_MODE: "BOTH"
     candidates:
       -
-        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLogTransitionsModule2-build/CMakeFiles/pkgRedirects/ViaModuleConfig.cmake"
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLogTransitionsModule2-build/CMakeFiles/pkgRedirects/ViaModuleConfig\.cmake"
         mode: "config"
         reason: "no_exist"
       -
-        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLogTransitionsModule2-build/CMakeFiles/pkgRedirects/viamodule-config.cmake"
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLogTransitionsModule2-build/CMakeFiles/pkgRedirects/viamodule-config\.cmake"
         mode: "config"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLogTransitionsModule2-build/CMakeFiles/pkgRedirects/lib/cps/ViaModule\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLogTransitionsModule2-build/CMakeFiles/pkgRedirects/lib/cps/viamodule\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLogTransitionsModule2-build/CMakeFiles/pkgRedirects/share/cps/ViaModule\.cps"
+        mode: "cps"
+        reason: "no_exist"
+      -
+        path: "[^"]*/Tests/RunCMake/find_package/ConfigureLogTransitionsModule2-build/CMakeFiles/pkgRedirects/share/cps/viamodule\.cps"
+        mode: "cps"
         reason: "no_exist"(
       -
-        path: "[^"]*/(viamodule-config|ViaModuleConfig).cmake"
-        mode: "config"
+        path: "[^"]*/((viamodule|ViaModule)\.cps|(viamodule-config|ViaModuleConfig)\.cmake)"
+        mode: "(cps|config)"
         reason: "no_exist")*
     found: null
     search_context:(

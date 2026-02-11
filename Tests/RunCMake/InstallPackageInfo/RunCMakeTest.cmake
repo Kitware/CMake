@@ -1,20 +1,5 @@
 include(RunCMake)
 
-# Test experimental gate
-run_cmake(ExperimentalGate)
-run_cmake(ExperimentalWarning)
-
-# Test version check author warning
-# TODO Move to be with other tests when experimental gate is removed.
-run_cmake(VersionCheckWarning)
-
-# Enable experimental feature and suppress warnings
-set(RunCMake_TEST_OPTIONS
-  -Wno-dev
-  "-DCMAKE_EXPERIMENTAL_EXPORT_PACKAGE_INFO:STRING=7fa7d13b-8308-4dc7-af39-9e450456d68f"
-  "-DCMAKE_EXPERIMENTAL_FIND_CPS_PACKAGES:STRING=e82e467b-f997-4464-8ace-b00808fff261"
-  )
-
 function(run_cmake_install test)
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/${test}-build)
   if (NOT RunCMake_GENERATOR_IS_MULTI_CONFIG)
@@ -64,6 +49,6 @@ run_cmake(DependencyVersionCps)
 run_cmake(TransitiveSymbolicComponent)
 run_cmake(InstallSymbolicComponent)
 run_cmake(VersionCheck)
-# run_cmake(VersionCheckWarning)
+run_cmake(VersionCheckWarning)
 run_cmake(VersionCheckError)
 run_cmake_install(Destination)

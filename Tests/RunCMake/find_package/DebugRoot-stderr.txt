@@ -41,6 +41,14 @@
     [^
 ]*/Tests/RunCMake/find_package/DebugRoot/NoExist/DebugRoot/debugroot-config\.cmake
     [^
+]*/Tests/RunCMake/find_package/DebugRoot/NoExist/DebugRoot/lib/cps/DebugRoot\.cps
+    [^
+]*/Tests/RunCMake/find_package/DebugRoot/NoExist/DebugRoot/lib/cps/debugroot\.cps
+    [^
+]*/Tests/RunCMake/find_package/DebugRoot/NoExist/DebugRoot/share/cps/DebugRoot\.cps
+    [^
+]*/Tests/RunCMake/find_package/DebugRoot/NoExist/DebugRoot/share/cps/debugroot\.cps
+    [^
 ]*/Tests/RunCMake/find_package/DebugRoot/Exist/DebugRoot/DebugRootConfig\.cmake
 
   The file was found at

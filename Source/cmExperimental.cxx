@@ -29,24 +29,6 @@ cmExperimental::FeatureData const LookupTable[] = {
     "only for experimentation and feedback to CMake developers.",
     {},
     cmExperimental::TryCompileCondition::Always },
-  // ImportPackageInfo
-  { "ImportPackageInfo",
-    "e82e467b-f997-4464-8ace-b00808fff261",
-    "CMAKE_EXPERIMENTAL_FIND_CPS_PACKAGES",
-    "CMake's support for importing package information in the Common Package "
-    "Specification format (via find_package) is experimental. It is meant "
-    "only for experimentation and feedback to CMake developers.",
-    {},
-    cmExperimental::TryCompileCondition::Always },
-  // ExportPackageInfo
-  { "ExportPackageInfo",
-    "7fa7d13b-8308-4dc7-af39-9e450456d68f",
-    "CMAKE_EXPERIMENTAL_EXPORT_PACKAGE_INFO",
-    "CMake's support for exporting package information in the Common Package "
-    "Specification format is experimental. It is meant only for "
-    "experimentation and feedback to CMake developers.",
-    {},
-    cmExperimental::TryCompileCondition::Always },
   // MappedPackageInfo
   { "MappedPackageInfo",
     "ababa1b5-7099-495f-a9cd-e22d38f274f2",

@@ -6,6 +6,8 @@ CMake Error at RequiredVarOptional\.cmake:[0-9]+ \(find_package\):
   Could not find a package configuration file provided by "DoesNotExist" with
   any of the following names:
 
+    DoesNotExist\.cps
+    doesnotexist\.cps
     DoesNotExistConfig\.cmake
     doesnotexist-config\.cmake
 

@@ -153,9 +153,6 @@ Exporting Targets to the |CPS|
          [CXX_MODULES_DIRECTORY <directory>])
 
 .. versionadded:: 4.3
-.. note::
-
-  Experimental. Gated by ``CMAKE_EXPERIMENTAL_EXPORT_PACKAGE_INFO``.
 
 Creates a file in the |CPS|_ that may be included by outside projects to import
 targets named by ``<target>...`` from the current project's build tree.  See

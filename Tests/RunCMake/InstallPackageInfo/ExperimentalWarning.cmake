@@ -1,8 +1,0 @@
-set(
-  CMAKE_EXPERIMENTAL_EXPORT_PACKAGE_INFO
-  "7fa7d13b-8308-4dc7-af39-9e450456d68f"
-  )
-
-add_library(foo INTERFACE)
-install(TARGETS foo EXPORT foo DESTINATION .)
-install(PACKAGE_INFO foo DESTINATION cps EXPORT foo)

@@ -75,23 +75,25 @@ The command has a few modes by which it searches for packages:
 .. _`Config mode`:
 
 **Config mode**
-  In this mode, CMake searches for a file called
-  ``<lowercasePackageName>-config.cmake`` or ``<PackageName>Config.cmake``.
-  It will also look for ``<lowercasePackageName>-config-version.cmake`` or
+  In this mode, CMake searches for a file matching any of:
+
+  * ``<lowercasePackageName>-config.cmake``
+  * ``<PackageName>Config.cmake``
+  * ``<PackageName>.cps``
+  * ``<lowercasePackageName>.cps``
+
+  If one of the first two is found, CMake will also look respectively, for
+  ``<lowercasePackageName>-config-version.cmake`` or
   ``<PackageName>ConfigVersion.cmake`` if version details were specified
   (see :ref:`version selection` for an explanation of how these separate
-  version files are used).
+  version files are used).  The first two options are CMake-script package
+  descriptions.  The latter two are |CPS|_ (CPS) package descriptions, which
+  are more portable and include version information in the 'base' file.  Aside
+  from any explicitly noted exceptions, any references to "config files",
+  "config mode", "package configuration files", and so forth refer equally to
+  both CPS and CMake-script files.
 
   .. note::
-    If the experimental ``CMAKE_EXPERIMENTAL_FIND_CPS_PACKAGES`` is enabled,
-    files named ``<PackageName>.cps`` and ``<lowercasePackageName>.cps`` are
-    also considered.  These files provide package information according to the
-    |CPS|_ (CPS), which is more portable than CMake script.  Aside from any
-    explicitly noted exceptions, any references to "config files", "config
-    mode", "package configuration files", and so forth refer equally to both
-    CPS and CMake-script files.  This functionality is a work in progress, and
-    some features may be missing.
-
     Search is implemented in a manner that will tend to prefer |CPS| files
     over CMake-script config files in most cases.  Specifying ``CONFIGS``
     suppresses consideration of CPS files.
@@ -312,8 +314,14 @@ the names following it are used instead of ``<PackageName>``.  The names are
 also considered when determining whether to redirect the call to a package
 provided by :module:`FetchContent`.
 
-The command searches for a file called ``<PackageName>Config.cmake`` or
-``<lowercasePackageName>-config.cmake`` for each name specified.
+The command searches for a file whose name, for each package name specified,
+matches any of:
+
+* ``<PackageName>Config.cmake``
+* ``<lowercasePackageName>-config.cmake``
+* ``<PackageName>.cps``
+* ``<lowercasePackageName>.cps``
+
 A replacement set of possible configuration file names may be given
 using the ``CONFIGS`` option.  The :ref:`search procedure` is specified below.
 Once found, any :ref:`version constraint <version selection>` is checked,
@@ -324,9 +332,8 @@ is stored in the CMake variable ``<PackageName>_CONFIG``.
 
 .. note::
 
-  If the experimental ``CMAKE_EXPERIMENTAL_FIND_CPS_PACKAGES`` is enabled,
-  files named ``<PackageName>.cps`` and ``<lowercasePackageName>.cps`` are
-  also considered, unless ``CONFIGS`` is given.
+  Because CPS files are not permitted to have names that do *not* match the
+  package name, specifying ``CONFIGS`` will suppress searcing for CPS files.
 
 All configuration files which have been considered by CMake while
 searching for the package with an appropriate version are stored in the
@@ -396,7 +403,7 @@ Each entry is meant for installation trees following Windows (``W``), UNIX
 
 .. [#p1] .. versionadded:: 3.25
 
-.. [#p2] .. versionadded:: 4.0
+.. [#p2] .. versionadded:: 4.3
 
 On systems supporting macOS :prop_tgt:`FRAMEWORK` and :prop_tgt:`BUNDLE`, the
 following directories are searched for Frameworks or Application Bundles
@@ -416,7 +423,7 @@ containing a configuration file:
  ``<prefix>/<name>.app/Contents/Resources/CMake/``                 A
 =============================================================== ==========
 
-.. [#p3] .. versionadded:: 4.0
+.. [#p3] .. versionadded:: 4.3
 
 When searching the above paths, ``find_package`` will only look for ``.cps``
 files in search paths which contain ``/cps/``, and will only look for
@@ -986,15 +993,6 @@ for the package.  The package configuration file may set
 ``<PackageName>_FOUND`` to false to tell ``find_package`` that component
 requirements are not satisfied.
 
-.. _CPS: https://cps-org.github.io/cps/
-.. |CPS| replace:: Common Package Specification
-
-.. _cps-compat_version: https://cps-org.github.io/cps/schema.html#compat-version
-.. |cps-compat_version| replace:: ``compat_version``
-
-.. _cps-version_schema: https://cps-org.github.io/cps/schema.html#version-schema
-.. |cps-version_schema| replace:: ``version_schema``
-
 CPS Transitive Requirements
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -1028,3 +1026,12 @@ internal check that the candidate package supplied the required imported
 targets.  Those targets must be named ``<PackageName>::<ComponentName>``, in
 conformance with CPS convention, or the check will consider the package not
 found.
+
+.. _CPS: https://cps-org.github.io/cps/
+.. |CPS| replace:: Common Package Specification
+
+.. _cps-compat_version: https://cps-org.github.io/cps/schema.html#compat-version
+.. |cps-compat_version| replace:: ``compat_version``
+
+.. _cps-version_schema: https://cps-org.github.io/cps/schema.html#version-schema
+.. |cps-version_schema| replace:: ``version_schema``
