@@ -16,6 +16,21 @@
 #  define kwsysEXPORT @KWSYS_NAMESPACE@_EXPORT
 #endif
 #if !@KWSYS_NAMESPACE@_NAME_IS_KWSYS
+#  define kwsysString_isalnum kwsys_ns(String_isalnum)
+#  define kwsysString_isalpha kwsys_ns(String_isalpha)
+#  define kwsysString_isascii kwsys_ns(String_isascii)
+#  define kwsysString_isblank kwsys_ns(String_isblank)
+#  define kwsysString_iscntrl kwsys_ns(String_iscntrl)
+#  define kwsysString_isdigit kwsys_ns(String_isdigit)
+#  define kwsysString_isgraph kwsys_ns(String_isgraph)
+#  define kwsysString_islower kwsys_ns(String_islower)
+#  define kwsysString_isprint kwsys_ns(String_isprint)
+#  define kwsysString_ispunct kwsys_ns(String_ispunct)
+#  define kwsysString_isspace kwsys_ns(String_isspace)
+#  define kwsysString_isupper kwsys_ns(String_isupper)
+#  define kwsysString_isxdigit kwsys_ns(String_isxdigit)
+#  define kwsysString_tolower kwsys_ns(String_tolower)
+#  define kwsysString_toupper kwsys_ns(String_toupper)
 #  define kwsysString_strcasecmp kwsys_ns(String_strcasecmp)
 #  define kwsysString_strncasecmp kwsys_ns(String_strncasecmp)
 #endif
@@ -23,6 +38,51 @@
 #if defined(__cplusplus)
 extern "C" {
 #endif
+
+/** Locale-independent ASCII isalnum.  */
+kwsysEXPORT int kwsysString_isalnum(char c);
+
+/** Locale-independent ASCII isalpha.  */
+kwsysEXPORT int kwsysString_isalpha(char c);
+
+/** Locale-independent ASCII isascii.  */
+kwsysEXPORT int kwsysString_isascii(char c);
+
+/** Locale-independent ASCII isblank.  */
+kwsysEXPORT int kwsysString_isblank(char c);
+
+/** Locale-independent ASCII iscntrl.  */
+kwsysEXPORT int kwsysString_iscntrl(char c);
+
+/** Locale-independent ASCII isdigit.  */
+kwsysEXPORT int kwsysString_isdigit(char c);
+
+/** Locale-independent ASCII isgraph.  */
+kwsysEXPORT int kwsysString_isgraph(char c);
+
+/** Locale-independent ASCII islower.  */
+kwsysEXPORT int kwsysString_islower(char c);
+
+/** Locale-independent ASCII isprint.  */
+kwsysEXPORT int kwsysString_isprint(char c);
+
+/** Locale-independent ASCII ispunct.  */
+kwsysEXPORT int kwsysString_ispunct(char c);
+
+/** Locale-independent ASCII isspace.  */
+kwsysEXPORT int kwsysString_isspace(char c);
+
+/** Locale-independent ASCII isupper.  */
+kwsysEXPORT int kwsysString_isupper(char c);
+
+/** Locale-independent ASCII isxdigit.  */
+kwsysEXPORT int kwsysString_isxdigit(char c);
+
+/** Locale-independent ASCII tolower.  */
+kwsysEXPORT unsigned char kwsysString_tolower(char c);
+
+/** Locale-independent ASCII toupper.  */
+kwsysEXPORT unsigned char kwsysString_toupper(char c);
 
 /**
  * Compare two strings ignoring the case of the characters.  The
@@ -49,6 +109,21 @@ kwsysEXPORT int kwsysString_strncasecmp(char const* lhs, char const* rhs,
 #  undef kwsys_ns
 #  undef kwsysEXPORT
 #  if !@KWSYS_NAMESPACE@_NAME_IS_KWSYS
+#    undef kwsysString_isalnum
+#    undef kwsysString_isalpha
+#    undef kwsysString_isascii
+#    undef kwsysString_isblank
+#    undef kwsysString_iscntrl
+#    undef kwsysString_isdigit
+#    undef kwsysString_isgraph
+#    undef kwsysString_islower
+#    undef kwsysString_isprint
+#    undef kwsysString_ispunct
+#    undef kwsysString_isspace
+#    undef kwsysString_isupper
+#    undef kwsysString_isxdigit
+#    undef kwsysString_tolower
+#    undef kwsysString_toupper
 #    undef kwsysString_strcasecmp
 #    undef kwsysString_strncasecmp
 #  endif

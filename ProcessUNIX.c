@@ -54,7 +54,6 @@ do.
 #endif
 
 #include <assert.h>    /* assert */
-#include <ctype.h>     /* isspace */
 #include <dirent.h>    /* DIR, dirent */
 #include <errno.h>     /* errno */
 #include <fcntl.h>     /* fcntl */

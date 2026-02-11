@@ -9,12 +9,14 @@
 #include "kwsysPrivate.h"
 #include KWSYS_HEADER(Encoding.hxx)
 #include KWSYS_HEADER(Encoding.h)
+#include KWSYS_HEADER(String.h)
 
 // Work-around CMake dependency scanning limitation.  This must
 // duplicate the above list of headers.
 #if 0
 #  include "Encoding.h.in"
 #  include "Encoding.hxx.in"
+#  include "String.h"
 #endif
 
 #include <cstdlib>
@@ -29,7 +31,6 @@
 #if defined(_WIN32)
 #  include <windows.h>
 
-#  include <ctype.h>
 #  include <shellapi.h>
 #endif
 
@@ -248,7 +249,7 @@ std::wstring Encoding::ToWindowsExtendedPath(std::wstring const& wsource)
    * previous size workaround. */
   wfull_len = static_cast<DWORD>(wcslen(&wfull[0]));
 
-  if (wfull_len >= 2 && isalpha(wfull[0]) &&
+  if (wfull_len >= 2 && kwsysString_isalpha(wfull[0]) &&
       wfull[1] == L':') { /* C:\Foo\bar\FooBar.txt */
     return L"\\\\?\\" + std::wstring(&wfull[0]);
   } else if (wfull_len >= 2 && wfull[0] == L'\\' &&
@@ -259,7 +260,7 @@ std::wstring Encoding::ToWindowsExtendedPath(std::wstring const& wsource)
           wfull[6] == L'C' &&
           wfull[7] == L'\\') { /* \\?\UNC\Foo\bar\FooBar.txt */
         return std::wstring(&wfull[0]);
-      } else if (wfull_len >= 6 && isalpha(wfull[4]) &&
+      } else if (wfull_len >= 6 && kwsysString_isalpha(wfull[4]) &&
                  wfull[5] == L':') { /* \\?\C:\Foo\bar\FooBar.txt */
         return std::wstring(&wfull[0]);
       } else if (wfull_len >= 5) { /* \\?\Foo\bar\FooBar.txt */
@@ -267,7 +268,7 @@ std::wstring Encoding::ToWindowsExtendedPath(std::wstring const& wsource)
       }
     } else if (wfull_len >= 4 && wfull[2] == L'.' &&
                wfull[3] == L'\\') { /* Starts with \\.\ a device name */
-      if (wfull_len >= 6 && isalpha(wfull[4]) &&
+      if (wfull_len >= 6 && kwsysString_isalpha(wfull[4]) &&
           wfull[5] == L':') { /* \\.\C:\Foo\bar\FooBar.txt */
         return L"\\\\?\\" + std::wstring(&wfull[4]);
       } else if (wfull_len >=
