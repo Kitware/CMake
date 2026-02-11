@@ -88,6 +88,10 @@ library combinations:
 The :variable:`CMAKE_CXX_COMPILER_IMPORT_STD` variable lists standard levels
 which have support for ``import std`` in the active C++ toolchain.
 
+Additionally, only the :ref:`Ninja Generators` currently support
+``import std`` at this time because :ref:`Visual Studio Generators` do not
+support building :term:`BMIs <BMI>` for ``IMPORTED`` targets.
+
 Generator Support
 =================
 
