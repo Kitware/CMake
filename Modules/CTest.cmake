@@ -7,7 +7,7 @@ CTest
 
 Configure a project for testing with CTest/CDash
 
-Include this module in the top CMakeLists.txt file of a project to
+Include this module in the top ``CMakeLists.txt`` file of a project to
 enable testing with CTest and dashboard submissions to CDash:
 
 .. code-block:: cmake
@@ -41,8 +41,8 @@ file at the top of the project with content such as:
   set(CTEST_NIGHTLY_START_TIME "01:00:00 UTC")
   set(CTEST_SUBMIT_URL "http://my.cdash.org/submit.php?project=MyProject")
 
-(the CDash server can provide the file to a project administrator who
-configures ``MyProject``).  Settings in the config file are shared by
+The CDash server can provide the file to a project administrator who
+configures ``MyProject``.  Settings in the config file are shared by
 both this ``CTest`` module and the :manual:`ctest(1)` command-line
 :ref:`Dashboard Client` mode (:option:`ctest -S`).
 
