@@ -15,6 +15,10 @@
 #include <cm/type_traits>
 #include <cmext/string_view>
 
+#if !defined(_WIN32)
+#  include <langinfo.h>
+#endif
+
 #include "cmsys/FStream.hxx"
 #include "cmsys/Glob.hxx"
 #include "cmsys/String.h"
@@ -73,6 +77,22 @@ cm::optional<std::string> GetValue(cmsys::SystemInformation& info,
   }
   if (key == "FQDN"_s) {
     return ValueToString(info.GetFullyQualifiedDomainName());
+  }
+  if (key == "LOCALE_CHARSET"_s) {
+#if defined(_WIN32)
+    // On Windows we always use UTF-8.
+    return ValueToString("UTF-8");
+#else
+    // On non-Windows platforms we use the locale's encoding.
+    if (char const* charset = nl_langinfo(CODESET)) {
+      if (cmsysString_strcasecmp(charset, "utf-8") == 0 ||
+          cmsysString_strcasecmp(charset, "utf8") == 0) {
+        charset = "UTF-8";
+      }
+      return ValueToString(charset);
+    }
+    return ValueToString("");
+#endif
   }
   if (key == "TOTAL_VIRTUAL_MEMORY"_s) {
     return ValueToString(info.GetTotalVirtualMemory());

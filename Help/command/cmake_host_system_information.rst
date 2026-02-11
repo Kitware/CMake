@@ -137,6 +137,17 @@ queried.  The list of queried values is stored in ``<variable>``.
 
   Human readable full processor description
 
+``LOCALE_CHARSET``
+  .. versionadded:: 4.3
+
+  The locale's character set, if known, otherwise empty.
+
+  This is the :ref:`encoding <CMake Language Encoding>` expected
+  in :manual:`cmake-language(7)` files and scripts:
+
+  * On Windows, this is always ``UTF-8``.
+  * On UNIX and macOS, this is based on the current locale.
+
 ``OS_NAME``
   .. versionadded:: 3.10
 
