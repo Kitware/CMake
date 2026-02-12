@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 4.2)
 
-set(CMAKE_EXPERIMENTAL_RUST "3cc9b32c-47d3-4056-8953-d74e69fc0d6c")
+set(CMAKE_EXPERIMENTAL_RUST "6b6e613b-f6cb-402d-8aea-59034fa8c65b")
 
 function(setup PREFIX)
     add_library(${PREFIX}_static STATIC ../static.rs)

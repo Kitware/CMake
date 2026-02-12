@@ -1,3 +1,3 @@
-set(CMAKE_EXPERIMENTAL_RUST "3cc9b32c-47d3-4056-8953-d74e69fc0d6c")
+set(CMAKE_EXPERIMENTAL_RUST "6b6e613b-f6cb-402d-8aea-59034fa8c65b")
 enable_language(Rust)
 message(STATUS "CMAKE_Rust_COMPILER='${CMAKE_Rust_COMPILER}'")
