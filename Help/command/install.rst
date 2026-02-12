@@ -1275,6 +1275,11 @@ Signatures
   In any case, any metadata values specified in the ``install`` command will
   take precedence.
 
+  Note that an SBOM file cannot be generated for targets with generator
+  expressions contained in their :prop_tgt:`LINK_LIBRARIES` or
+  :prop_tgt:`INTERFACE_LINK_LIBRARIES` properties, unless the generator
+  expressions are guarded by :genex:`LINK_ONLY`.
+
 Examples
 ^^^^^^^^
 
