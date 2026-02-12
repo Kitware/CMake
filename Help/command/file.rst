@@ -710,12 +710,12 @@ Path Conversion
   file(TO_CMAKE_PATH "<path>" <variable>)
   file(TO_NATIVE_PATH "<path>" <variable>)
 
-  The ``TO_CMAKE_PATH`` mode converts a native ``<path>`` into a cmake-style
+  The ``TO_CMAKE_PATH`` mode converts a native ``<path>`` into a CMake-style
   path with forward-slashes (``/``).  The input can be a single path or a
   system search path like ``$ENV{PATH}``.  A search path will be converted
-  to a cmake-style list separated by ``;`` characters.
+  to a :ref:`semicolon-separated list <CMake Language Lists>`.
 
-  The ``TO_NATIVE_PATH`` mode converts a cmake-style ``<path>`` into a native
+  The ``TO_NATIVE_PATH`` mode converts a CMake-style ``<path>`` into a native
   path with platform-specific slashes (``\`` on Windows hosts and ``/``
   elsewhere).
 
