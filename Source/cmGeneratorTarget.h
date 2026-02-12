@@ -626,6 +626,8 @@ public:
 
   void AddISPCTargetFlags(std::string& flags) const;
 
+  void AddRustTargetFlags(std::string& flags) const;
+
   std::string GetFeatureSpecificLinkRuleVariable(
     std::string const& var, std::string const& lang,
     std::string const& config) const;

@@ -1,0 +1,5 @@
+\[1/5\] Building Rust object CMakeFiles[\\/]Edition\.20[0-9][0-9]\.dir[\\/](Debug[\\/])?libedition_20[0-9][0-9]\.rs\.rlib
+\[2/5\] Building Rust object CMakeFiles[\\/]Edition\.20[0-9][0-9]\.dir[\\/](Debug[\\/])?libedition_20[0-9][0-9]\.rs\.rlib
+\[3/5\] Building Rust object CMakeFiles[\\/]Edition\.20[0-9][0-9]\.dir[\\/](Debug[\\/])?libedition_20[0-9][0-9]\.rs\.rlib
+\[4/5\] Building Rust object CMakeFiles[\\/]Edition\.20[0-9][0-9]\.dir[\\/](Debug[\\/])?libedition_20[0-9][0-9]\.rs\.rlib
+\[5/5\] Linking Rust executable (Debug[\\/])?Editions

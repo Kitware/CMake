@@ -2140,6 +2140,8 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
     }
   } else if (lang == "HIP") {
     target->AddHIPArchitectureFlags(compileOrLink, config, flags);
+  } else if (lang == "Rust") {
+    target->AddRustTargetFlags(flags);
   }
 
   // Add VFS Overlay for Clang compilers

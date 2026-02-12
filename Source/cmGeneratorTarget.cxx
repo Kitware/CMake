@@ -2795,6 +2795,14 @@ void cmGeneratorTarget::AddHIPArchitectureFlags(cmBuildStep compileOrLink,
   }
 }
 
+void cmGeneratorTarget::AddRustTargetFlags(std::string& flags) const
+{
+  cmValue const edition = this->GetProperty("Rust_EDITION");
+  if (edition && !edition->empty()) {
+    flags += " --edition=" + *edition;
+  }
+}
+
 void cmGeneratorTarget::AddCUDAToolkitFlags(std::string& flags) const
 {
   std::string const& compiler =
