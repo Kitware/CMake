@@ -156,14 +156,24 @@ std::string cmRulePlaceholderExpander::ExpandVariable(
       return this->ReplaceValues->SwiftSources;
     }
   }
-  if (this->ReplaceValues->RustSources) {
-    if (variable == "RUST_SOURCES") {
-      return this->ReplaceValues->RustSources;
+  if (this->ReplaceValues->RustEmit) {
+    if (variable == "RUST_EMIT") {
+      return this->ReplaceValues->RustEmit;
     }
   }
-  if (this->ReplaceValues->RustObjectDeps) {
-    if (variable == "RUST_OBJECT_DEPS") {
-      return this->ReplaceValues->RustObjectDeps;
+  if (this->ReplaceValues->RustMainCrateRoot) {
+    if (variable == "RUST_MAIN_CRATE_ROOT") {
+      return this->ReplaceValues->RustMainCrateRoot;
+    }
+  }
+  if (this->ReplaceValues->RustLinkCrates) {
+    if (variable == "RUST_LINK_CRATES") {
+      return this->ReplaceValues->RustLinkCrates;
+    }
+  }
+  if (this->ReplaceValues->RustNativeObjects) {
+    if (variable == "RUST_NATIVE_OBJECTS") {
+      return this->ReplaceValues->RustNativeObjects;
     }
   }
   if (this->ReplaceValues->TargetPDB) {

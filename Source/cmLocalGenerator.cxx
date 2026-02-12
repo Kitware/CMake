@@ -4678,6 +4678,20 @@ std::string cmLocalGenerator::GetObjectFileNameWithoutTarget(
     *hasSourceExtension = keptSourceExtension;
   }
 
+  if (source.GetLanguage() == "Rust") {
+    cmValue const rustEmit = source.GetRustEmitProperty();
+    // Rust requires any rlib to start with lib prefix on all platforms to
+    // allow linking to them as crate. So we enforce having lib prefix for rust
+    // "object" files.
+    if (rustEmit == "link") {
+      cmCMakePath objectPath(objectName);
+      std::string const objectFileName =
+        "lib" + objectPath.GetFileName().String();
+      objectPath.ReplaceFileName(objectFileName);
+      objectName = objectPath.String();
+    }
+  }
+
   // Convert to a safe name.
   return this->CreateSafeUniqueObjectFileName(objectName, dir_max);
 }

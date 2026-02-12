@@ -145,6 +145,7 @@ public:
     SourceKindCustomCommand,
     SourceKindExternalObject,
     SourceKindCxxModuleSource,
+    SourceKindRustMainCrateRoot,
     SourceKindExtra,
     SourceKindHeader,
     SourceKindIDL,
@@ -223,6 +224,9 @@ public:
                          std::string const& config) const;
   void GetManifests(std::vector<cmSourceFile const*>&,
                     std::string const& config) const;
+
+  void GetRustMainCrateRoot(std::vector<cmSourceFile const*>&,
+                            std::string const& config) const;
 
   std::set<cmLinkItem> const& GetUtilityItems() const;
 

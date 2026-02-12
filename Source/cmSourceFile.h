@@ -184,6 +184,8 @@ public:
   void SetObjectLibrary(std::string const& objlib);
   std::string GetObjectLibrary() const;
 
+  cmValue GetRustEmitProperty() const;
+
 private:
   cmSourceFileLocation Location;
   cmPropertyMap Properties;

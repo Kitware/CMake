@@ -3,11 +3,20 @@
 
 include(CMakeLanguageInformation)
 
-if(UNIX)
-  set(CMAKE_Rust_OUTPUT_EXTENSION .o)
-else()
-  set(CMAKE_Rust_OUTPUT_EXTENSION .obj)
-endif()
+set(CMAKE_Rust_OUTPUT_EXTENSION .rlib)
+
+# Other values are supported to generate various outputs (LLVM bitcode, or IR,
+# crate metadata, Rust MIR). However, CMake cannot do anything with those
+# outputs, so we list output which can be reused in later stages of the build.
+# See: https://doc.rust-lang.org/rustc/command-line-arguments.html#--emit-specifies-the-types-of-output-files-to-generate
+set(CMAKE_Rust_EMIT_VALUES link obj asm)
+
+# The output extension for each supported emit value.
+set(CMAKE_Rust_EMIT_link_OUTPUT_EXTENSION .rlib)
+set(CMAKE_Rust_EMIT_asm_OUTPUT_EXTENSION .s)
+# Might be switched to .obj on Windows when using MSVC target triple, see:
+# https://github.com/rust-lang/rust/issues/37207
+set(CMAKE_Rust_EMIT_obj_OUTPUT_EXTENSION .o)
 
 set(CMAKE_Rust_LIBRARY_PATH_FLAG "-L ")
 set(CMAKE_Rust_LINK_LIBRARY_FILE_FLAG "-C link-arg=")
@@ -61,21 +70,20 @@ endblock()
 
 cmake_initialize_per_config_variable(CMAKE_Rust_FLAGS "Flags used by the Rust compiler")
 
+if(NOT CMAKE_Rust_COMPILE_OBJECT)
+  set(CMAKE_Rust_COMPILE_OBJECT "<CMAKE_Rust_COMPILER> --crate-type=rlib <FLAGS> --emit=<RUST_EMIT>,dep-info=<DEP_FILE> -o <OBJECT> <SOURCE>")
+endif()
+
 if(NOT CMAKE_Rust_CREATE_STATIC_LIBRARY)
-  set(CMAKE_Rust_CREATE_STATIC_LIBRARY "${CMAKE_Rust_COMPILER} <LANGUAGE_COMPILE_FLAGS> --crate-type=staticlib <RUST_SOURCES> -o <TARGET> -C link-args=\"<RUST_OBJECT_DEPS>\"")
+  set(CMAKE_Rust_CREATE_STATIC_LIBRARY "${CMAKE_Rust_COMPILER} <LANGUAGE_COMPILE_FLAGS> --crate-type=staticlib --emit=link,dep-info=<DEP_FILE> <RUST_MAIN_CRATE_ROOT> -o <TARGET> <RUST_LINK_CRATES> <RUST_NATIVE_OBJECTS>")
 endif()
 
 if(NOT CMAKE_Rust_CREATE_SHARED_LIBRARY)
-  set(CMAKE_Rust_CREATE_SHARED_LIBRARY "${CMAKE_Rust_COMPILER} <LANGUAGE_COMPILE_FLAGS> --crate-type=cdylib <RUST_SOURCES> -o <TARGET> <LINK_FLAGS> <LINK_LIBRARIES> -C link-args=\"<RUST_OBJECT_DEPS>\"")
-endif()
-
-# Deadcode warnings are not useful when generating object files.
-if(NOT CMAKE_Rust_COMPILE_OBJECT)
-  set(CMAKE_Rust_COMPILE_OBJECT "${CMAKE_Rust_COMPILER} <FLAGS> -A dead_code --crate-type=lib --emit=obj=<OBJECT>,dep-info=<DEP_FILE> <SOURCE>")
+  set(CMAKE_Rust_CREATE_SHARED_LIBRARY "${CMAKE_Rust_COMPILER} <LANGUAGE_COMPILE_FLAGS> --crate-type=cdylib --emit=link,dep-info=<DEP_FILE> <RUST_MAIN_CRATE_ROOT> -o <TARGET> <RUST_LINK_CRATES> <RUST_NATIVE_OBJECTS> <LINK_FLAGS> <LINK_LIBRARIES>")
 endif()
 
 if(NOT CMAKE_Rust_LINK_EXECUTABLE)
-  set(CMAKE_Rust_LINK_EXECUTABLE "${CMAKE_Rust_COMPILER} <FLAGS> --crate-type=bin <RUST_SOURCES> -o <TARGET> <LINK_FLAGS> <LINK_LIBRARIES> -C link-args=\"<RUST_OBJECT_DEPS>\"")
+  set(CMAKE_Rust_LINK_EXECUTABLE "${CMAKE_Rust_COMPILER} <FLAGS> --crate-type=bin --emit=link,dep-info=<DEP_FILE> <RUST_MAIN_CRATE_ROOT> -o <TARGET> <RUST_LINK_CRATES> <RUST_NATIVE_OBJECTS> <LINK_FLAGS> <LINK_LIBRARIES>")
 endif()
 
 set(CMAKE_Rust_INFORMATION_LOADED 1)

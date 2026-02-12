@@ -369,6 +369,8 @@ public:
   std::string GetLanguageOutputExtension(cmSourceFile const&) const;
   //! What is the object file extension for a given language?
   std::string GetLanguageOutputExtension(std::string const& lang) const;
+  //! What is the object file extension for a given --emit option in Rust?
+  std::string GetRustEmitOutputExtension(std::string const& emitValue) const;
 
   //! What is the configurations directory variable called?
   virtual char const* GetCMakeCFGIntDir() const { return "."; }
@@ -875,6 +877,7 @@ private:
   std::set<std::string> LanguagesInProgress;
   std::map<std::string, std::string> OutputExtensions;
   std::map<std::string, std::string> LanguageToOutputExtension;
+  std::map<std::string, std::string> RustEmitToOutputExtension;
 #if __cplusplus >= 201402L || defined(_MSVC_LANG) && _MSVC_LANG >= 201402L
   std::map<std::string, std::string, std::less<void>> ExtensionToLanguage;
 #else

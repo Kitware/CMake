@@ -1086,6 +1086,13 @@ std::string cmGlobalGenerator::GetLanguageOutputExtension(
 {
   std::string const& lang = source.GetLanguage();
   if (!lang.empty()) {
+    if (lang == "Rust") {
+      // Rust source file can be compiled into different type of outputs. So
+      // we need to change the extension based on the Rust_EMIT property.
+      if (cmValue const rustEmit = source.GetRustEmitProperty()) {
+        return this->GetRustEmitOutputExtension(rustEmit);
+      }
+    }
     return this->GetLanguageOutputExtension(lang);
   }
   // if no language is found then check to see if it is already an
@@ -1105,6 +1112,16 @@ std::string cmGlobalGenerator::GetLanguageOutputExtension(
 {
   auto const it = this->LanguageToOutputExtension.find(lang);
   if (it != this->LanguageToOutputExtension.end()) {
+    return it->second;
+  }
+  return "";
+}
+
+std::string cmGlobalGenerator::GetRustEmitOutputExtension(
+  std::string const& emitValue) const
+{
+  auto const it = this->RustEmitToOutputExtension.find(emitValue);
+  if (it != this->RustEmitToOutputExtension.end()) {
     return it->second;
   }
   return "";
@@ -1207,6 +1224,19 @@ void cmGlobalGenerator::SetLanguageEnabledMaps(std::string const& l,
     if (cmHasPrefix(outputExtension, '.')) {
       outputExtension = outputExtension.substr(1);
       this->OutputExtensions[outputExtension] = outputExtension;
+    }
+  }
+
+  if (l == "Rust") {
+    std::string const emitValues =
+      mf->GetSafeDefinition("CMAKE_Rust_EMIT_VALUES");
+    cmList emitList{ emitValues };
+    for (std::string const& v : emitList) {
+      std::string emitOutputExtension =
+        cmStrCat("CMAKE_Rust_EMIT_", v, "_OUTPUT_EXTENSION");
+      if (cmValue outputExtension = mf->GetDefinition(emitOutputExtension)) {
+        this->RustEmitToOutputExtension[v] = outputExtension;
+      }
     }
   }
 
