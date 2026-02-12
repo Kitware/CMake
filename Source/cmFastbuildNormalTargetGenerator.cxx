@@ -1399,9 +1399,11 @@ void cmFastbuildNormalTargetGenerator::GenerateObjects(FastbuildTarget& target)
 
     cmSourceFile const& srcFile = *source;
     std::string const pathToFile = srcFile.GetFullPath();
+    bool fileUsesUnity = useUnity;
     if (useUnity) {
       // Check if the source should be added to "UnityInputIsolatedFiles".
       if (srcFile.GetPropertyAsBool(SKIP_UNITY_BUILD_INCLUSION)) {
+        fileUsesUnity = false;
         isolatedFromUnity.emplace(pathToFile);
       }
       std::string const perFileUnityGroup =
@@ -1441,11 +1443,17 @@ void cmFastbuildNormalTargetGenerator::GenerateObjects(FastbuildTarget& target)
 
       // If object should be placed in some subdir in the output
       // path. Tested in "SourceGroups" test.
-      auto const subdir = cmSystemTools::GetFilenamePath(
-        this->GeneratorTarget->GetObjectName(source));
-      if (!subdir.empty()) {
-        objOutDirWithPossibleSubdir += "/";
-        objOutDirWithPossibleSubdir += subdir;
+      // Not necessary for files in unity buckets because they are
+      // built into a single unity object file. Executing this logic
+      // for unity bucketed files prevents buckets from containing
+      // source files in different subdirectories.
+      if (!fileUsesUnity) {
+        auto const subdir = cmSystemTools::GetFilenamePath(
+          this->GeneratorTarget->GetObjectName(source));
+        if (!subdir.empty()) {
+          objOutDirWithPossibleSubdir += "/";
+          objOutDirWithPossibleSubdir += subdir;
+        }
       }
 
       std::string const objectListHash = hash.HashString(cmStrCat(
