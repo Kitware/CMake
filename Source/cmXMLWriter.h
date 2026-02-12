@@ -113,6 +113,11 @@ private:
     return std::chrono::system_clock::to_time_t(value);
   }
 
+  static long long SafeContent(std::chrono::milliseconds value)
+  {
+    return value.count();
+  }
+
   template <typename T>
   static T SafeContent(T value)
   {
