@@ -1550,7 +1550,7 @@ t:windows-borland5.8:
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
-t:windows-clang19.1-cl-ninja:
+t:windows-clang21.1-cl-ninja:
     extends:
         - .windows_clang_ninja
         - .cmake_test_windows_external
@@ -1560,10 +1560,10 @@ t:windows-clang19.1-cl-ninja:
     needs:
         - t:windows-vs2026-x64-ninja
     variables:
-        CMAKE_CI_BUILD_NAME: windows_clang19.1_cl_ninja
+        CMAKE_CI_BUILD_NAME: windows_clang21.1_cl_ninja
         CMAKE_CI_JOB_NIGHTLY: "true"
 
-t:windows-clang19.1-cl-nmake:
+t:windows-clang21.1-cl-nmake:
     extends:
         - .windows_clang_nmake
         - .cmake_test_windows_external
@@ -1573,10 +1573,10 @@ t:windows-clang19.1-cl-nmake:
     needs:
         - t:windows-vs2026-x64-ninja
     variables:
-        CMAKE_CI_BUILD_NAME: windows_clang19.1_cl_nmake
+        CMAKE_CI_BUILD_NAME: windows_clang21.1_cl_nmake
         CMAKE_CI_JOB_NIGHTLY: "true"
 
-t:windows-clang19.1-gnu-ninja:
+t:windows-clang21.1-gnu-ninja:
     extends:
         - .windows_clang_ninja
         - .cmake_test_windows_external
@@ -1586,10 +1586,10 @@ t:windows-clang19.1-gnu-ninja:
     needs:
         - t:windows-vs2026-x64-ninja
     variables:
-        CMAKE_CI_BUILD_NAME: windows_clang19.1_gnu_ninja
+        CMAKE_CI_BUILD_NAME: windows_clang21.1_gnu_ninja
         CMAKE_CI_JOB_NIGHTLY: "true"
 
-t:windows-clang19.1-gnu-nmake:
+t:windows-clang21.1-gnu-nmake:
     extends:
         - .windows_clang_nmake
         - .cmake_test_windows_external
@@ -1599,7 +1599,7 @@ t:windows-clang19.1-gnu-nmake:
     needs:
         - t:windows-vs2026-x64-ninja
     variables:
-        CMAKE_CI_BUILD_NAME: windows_clang19.1_gnu_nmake
+        CMAKE_CI_BUILD_NAME: windows_clang21.1_gnu_nmake
         CMAKE_CI_JOB_NIGHTLY: "true"
 
 t:windows-intel2021.9-ninja:
