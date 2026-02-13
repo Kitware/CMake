@@ -5,19 +5,19 @@ Set a named property in a given scope.
 
 .. code-block:: cmake
 
-  set_property(<GLOBAL                                     |
-                DIRECTORY [<dir>]                          |
-                TARGET    [<target1> ...]                  |
-                FILE_SET  [<file_set> ...] TARGET <target> |
-                SOURCE    [<src1> ...]
+  set_property({GLOBAL                                    |
+                DIRECTORY [<dir>]                         |
+                TARGET    <target>...                     |
+                FILE_SET  <file_set>... TARGET <target>   |
+                SOURCE    <source>...
                           [DIRECTORY <dirs> ...]
-                          [TARGET_DIRECTORY <targets> ...] |
-                INSTALL   [<file1> ...]                    |
-                TEST      [<test1> ...]
-                          [DIRECTORY <dir>]                |
-                CACHE     [<entry1> ...]>
+                          [TARGET_DIRECTORY <targets>...] |
+                INSTALL   <file>...                       |
+                TEST      <test>...
+                          [DIRECTORY <dir>]               |
+                CACHE     <entry>...}
                [APPEND] [APPEND_STRING]
-               PROPERTY <name> [<value1> ...])
+               PROPERTY <name> [<value>...])
 
 Sets one property on zero or more objects of a scope.
 

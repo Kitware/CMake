@@ -8,8 +8,8 @@ Define and document custom properties.
   define_property(<GLOBAL | DIRECTORY | TARGET | SOURCE |
                    TEST | VARIABLE | CACHED_VARIABLE>
                    PROPERTY <name> [INHERITED]
-                   [BRIEF_DOCS <brief-doc> [docs...]]
-                   [FULL_DOCS <full-doc> [docs...]]
+                   [BRIEF_DOCS <brief-doc> [<docs>...]]
+                   [FULL_DOCS <full-doc> [<docs>...]]
                    [INITIALIZE_FROM_VARIABLE <variable>])
 
 Defines one property in a scope for use with the :command:`set_property` and

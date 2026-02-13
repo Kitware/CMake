@@ -8,8 +8,8 @@ Add sources to a target.
 .. code-block:: cmake
 
   target_sources(<target>
-    <INTERFACE|PUBLIC|PRIVATE> [items1...]
-    [<INTERFACE|PUBLIC|PRIVATE> [items2...] ...])
+    {INTERFACE|PUBLIC|PRIVATE} <source>...
+    [{INTERFACE|PUBLIC|PRIVATE} <source>...]...)
 
 Specifies sources to use when building a target and/or its dependents.
 The named ``<target>`` must have been created by a command such as
@@ -70,7 +70,7 @@ File Sets
 .. code-block:: cmake
 
   target_sources(<target>
-    [<INTERFACE|PUBLIC|PRIVATE>
+    [{INTERFACE|PUBLIC|PRIVATE}
      [FILE_SET <set> [TYPE <type>] [BASE_DIRS <dirs>...] [FILES <files>...]]...
     ]...)
 

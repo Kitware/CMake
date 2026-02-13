@@ -158,8 +158,8 @@ Libraries for a Target and/or its Dependents
 .. code-block:: cmake
 
   target_link_libraries(<target>
-                        <PRIVATE|PUBLIC|INTERFACE> <item>...
-                       [<PRIVATE|PUBLIC|INTERFACE> <item>...]...)
+    {INTERFACE|PUBLIC|PRIVATE} <item>...
+    [{INTERFACE|PUBLIC|PRIVATE} <item>...]...)
 
 The ``PUBLIC``, ``PRIVATE`` and ``INTERFACE``
 :ref:`scope <Target Command Scope>` keywords can be used to

@@ -551,7 +551,7 @@ Signatures
   programs that are not targets, such as shell scripts.  Use the ``TARGETS``
   form to install targets built within the project.
 
-  The list of ``files...`` given to ``FILES`` or ``PROGRAMS`` may use
+  The list of files given to ``FILES`` or ``PROGRAMS`` may use
   "generator expressions" with the syntax ``$<...>``.  See the
   :manual:`cmake-generator-expressions(7)` manual for available expressions.
   However, if any item begins in a generator expression it must evaluate

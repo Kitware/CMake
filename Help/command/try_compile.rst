@@ -71,10 +71,10 @@ Try Compiling Source Files
 
   try_compile(<compileResultVar>
               [SOURCES_TYPE <type>]
-              <SOURCES <srcfile...>                 |
+              {SOURCES <srcfile>...                 |
                SOURCE_FROM_CONTENT <name> <content> |
                SOURCE_FROM_VAR <name> <var>         |
-               SOURCE_FROM_FILE <name> <path>       >...
+               SOURCE_FROM_FILE <name> <path>       }...
               [LOG_DESCRIPTION <text>]
               [NO_CACHE]
               [NO_LOG]
@@ -130,7 +130,7 @@ The signature above is recommended for clarity.
 
 .. code-block:: cmake
 
-  try_compile(<compileResultVar> <bindir> <srcfile|SOURCES srcfile...>
+  try_compile(<compileResultVar> <bindir> {<srcfile>|SOURCES <srcfile>...}
               [CMAKE_FLAGS <flags>...]
               [COMPILE_DEFINITIONS <defs>...]
               [LINK_OPTIONS <options>...]

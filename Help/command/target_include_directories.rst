@@ -6,8 +6,8 @@ Add include directories to a target.
 .. code-block:: cmake
 
   target_include_directories(<target> [SYSTEM] [AFTER|BEFORE]
-    <INTERFACE|PUBLIC|PRIVATE> [items1...]
-    [<INTERFACE|PUBLIC|PRIVATE> [items2...] ...])
+    {INTERFACE|PUBLIC|PRIVATE} <dir...
+    [{INTERFACE|PUBLIC|PRIVATE} <dir>...]...)
 
 Specifies include directories to use when compiling a given target.
 The named ``<target>`` must have been created by a command such

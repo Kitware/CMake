@@ -5,17 +5,17 @@ Add a target with no output so it will always be built.
 
 .. code-block:: cmake
 
-  add_custom_target(Name [ALL] [command1 [args1...]]
-                    [COMMAND command2 [args2...] ...]
-                    [DEPENDS depend depend depend ...]
-                    [BYPRODUCTS [files...]]
-                    [WORKING_DIRECTORY dir]
-                    [COMMENT comment]
-                    [JOB_POOL job_pool]
+  add_custom_target(Name [ALL] [command1 [<args1>...]]
+                    [COMMAND command2 [<args2>...]] ...
+                    [DEPENDS <depend>...]
+                    [BYPRODUCTS <file>...]
+                    [WORKING_DIRECTORY <dir>]
+                    [COMMENT <comment>]
+                    [JOB_POOL <job_pool>]
                     [JOB_SERVER_AWARE <bool>]
                     [VERBATIM] [USES_TERMINAL]
                     [COMMAND_EXPAND_LISTS]
-                    [SOURCES src1 [src2...]])
+                    [SOURCES <source>...])
 
 Adds a target with the given name that executes the given commands.
 The target has no output file and is *always considered out of date*

@@ -2,7 +2,7 @@ find_file
 ---------
 
 .. |FIND_XXX| replace:: find_file
-.. |NAMES| replace:: NAMES name1 [name2 ...]
+.. |NAMES| replace:: NAMES <name>...
 .. |SEARCH_XXX| replace:: full path to a file
 .. |SEARCH_XXX_DESC| replace:: full path to a named file
 .. |prefix_XXX_SUBDIR| replace:: ``<prefix>/include``

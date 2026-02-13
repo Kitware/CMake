@@ -7,7 +7,9 @@ Add expected compiler features to a target.
 
 .. code-block:: cmake
 
-  target_compile_features(<target> <PRIVATE|PUBLIC|INTERFACE> <feature> [...])
+  target_compile_features(<target>
+    {INTERFACE|PUBLIC|PRIVATE} <feature>...
+    [{INTERFACE|PUBLIC|PRIVATE} <feature>...]...)
 
 Specifies compiler features required when compiling a given target.  If the
 feature is not listed in the :variable:`CMAKE_C_COMPILE_FEATURES`,

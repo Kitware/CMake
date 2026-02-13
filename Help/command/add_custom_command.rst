@@ -14,18 +14,18 @@ The first signature is for adding a custom command to produce an output:
 
 .. code-block:: cmake
 
-  add_custom_command(OUTPUT output1 [output2 ...]
-                     COMMAND command1 [ARGS] [args1...]
-                     [COMMAND command2 [ARGS] [args2...] ...]
+  add_custom_command(OUTPUT <output1> [<output2> ...]
+                     COMMAND <command1> [ARGS] [<args1>...]
+                     [COMMAND <command2> [ARGS] [<args2>...]] ...
                      [MAIN_DEPENDENCY depend]
-                     [DEPENDS [depends...]]
-                     [BYPRODUCTS [files...]]
-                     [IMPLICIT_DEPENDS <lang1> depend1
-                                      [<lang2> depend2] ...]
-                     [WORKING_DIRECTORY dir]
-                     [COMMENT comment]
-                     [DEPFILE depfile]
-                     [JOB_POOL job_pool]
+                     [DEPENDS <depends>...]
+                     [BYPRODUCTS <files>...]
+                     [IMPLICIT_DEPENDS <lang1> <depend1>
+                                      [<lang2> <depend2>] ...]
+                     [WORKING_DIRECTORY <dir>]
+                     [COMMENT <comment>]
+                     [DEPFILE <depfile>]
+                     [JOB_POOL <job_pool>]
                      [JOB_SERVER_AWARE <bool>]
                      [VERBATIM] [APPEND] [USES_TERMINAL]
                      [CODEGEN]
@@ -593,11 +593,11 @@ target is already built, the command will not execute.
 
   add_custom_command(TARGET <target>
                      PRE_BUILD | PRE_LINK | POST_BUILD
-                     COMMAND command1 [ARGS] [args1...]
-                     [COMMAND command2 [ARGS] [args2...] ...]
-                     [BYPRODUCTS [files...]]
-                     [WORKING_DIRECTORY dir]
-                     [COMMENT comment]
+                     COMMAND <command1> [ARGS] [<args1>...]
+                     [COMMAND <command2> [ARGS] [<args2>...]] ...
+                     [BYPRODUCTS <files>...]
+                     [WORKING_DIRECTORY <dir>]
+                     [COMMENT <comment>]
                      [VERBATIM]
                      [COMMAND_EXPAND_LISTS]
                      [USES_TERMINAL])

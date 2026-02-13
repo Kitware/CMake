@@ -9,8 +9,8 @@ library target.
 .. code-block:: cmake
 
   target_link_options(<target> [BEFORE]
-    <INTERFACE|PUBLIC|PRIVATE> [items1...]
-    [<INTERFACE|PUBLIC|PRIVATE> [items2...] ...])
+    {INTERFACE|PUBLIC|PRIVATE} <item>...
+    [{INTERFACE|PUBLIC|PRIVATE} <item>...]...)
 
 The named ``<target>`` must have been created by a command such as
 :command:`add_executable` or :command:`add_library` and must not be an

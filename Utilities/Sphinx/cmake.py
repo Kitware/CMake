@@ -101,8 +101,12 @@ CMakeLexer.tokens["root"] = [
   (r'(?s)"(\\"|[^"])*"', String),
   (r'\.\.\.', Name.Variable),
   # <..|..> is different from <expr>
-  (r'<', Operator, '#push'),
-  (r'>', Operator, '#pop'),
+  # TODO: <..|..> should be {..|..}; remove when all instances are converted?
+  (r'<', Punctuation, '#push'),
+  (r'>', Punctuation, '#pop'),
+  # {..|..}
+  (r'\{', Punctuation, '#push'),
+  (r'\}', Punctuation, '#pop'),
   (r'\n', Whitespace),
   (r'[ \t]+', Whitespace),
   (r'#.*\n', Comment),
