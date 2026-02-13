@@ -7,6 +7,7 @@
 #include <string>
 
 #include "cmCPackGenerator.h"
+#include "cmWIXInstallScope.h"
 #include "cmWIXPatch.h"
 #include "cmWIXShortcut.h"
 
@@ -158,6 +159,8 @@ private:
   std::string RelativePathWithoutComponentPrefix(std::string const& path);
 
   void InjectXmlNamespaces(cmWIXSourceWriter& sourceWriter);
+
+  cmWIXInstallScope GetInstallScope() const;
 
   std::vector<std::string> WixSources;
   id_map_t PathToIdMap;

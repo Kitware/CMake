@@ -4,7 +4,10 @@
 
 #include <string>
 
+#include <cm/optional>
+
 #include "cmCPackGenerator.h"
+#include "cmWIXInstallScope.h"
 #include "cmWIXSourceWriter.h"
 
 /** \class cmWIXDirectoriesSourceWriter
@@ -15,13 +18,18 @@ class cmWIXDirectoriesSourceWriter : public cmWIXSourceWriter
 public:
   cmWIXDirectoriesSourceWriter(unsigned long wixVersion, cmCPackLog* logger,
                                std::string const& filename,
-                               GuidType componentGuidType);
+                               GuidType componentGuidType,
+                               cmWIXInstallScope installScope,
+                               std::string componentKeysRegistryPath);
 
   void EmitStartMenuFolder(std::string const& startMenuFolder);
 
   void EmitDesktopFolder();
 
   void EmitStartupFolder();
+
+  cm::optional<std::string> EmitRemoveFolderComponentOnUserInstall(
+    std::string const& directoryId);
 
   struct InstallationPrefixDirectory
   {
@@ -35,4 +43,8 @@ public:
 
   void EndInstallationPrefixDirectory(
     InstallationPrefixDirectory installationPrefixDirectory);
+
+private:
+  bool PerUserInstall = false;
+  std::string ComponentKeysRegistryPath;
 };

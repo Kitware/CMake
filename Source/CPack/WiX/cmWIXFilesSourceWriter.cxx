@@ -19,12 +19,26 @@
 #  include "cmsys/Encoding.hxx"
 #endif
 
-cmWIXFilesSourceWriter::cmWIXFilesSourceWriter(unsigned long wixVersion,
-                                               cmCPackLog* logger,
-                                               std::string const& filename,
-                                               GuidType componentGuidType)
+cmWIXFilesSourceWriter::cmWIXFilesSourceWriter(
+  unsigned long wixVersion, cmCPackLog* logger, std::string const& filename,
+  GuidType componentGuidType, cmWIXInstallScope installScope,
+  std::string componentKeysRegistryPath)
   : cmWIXSourceWriter(wixVersion, logger, filename, componentGuidType)
+  , ComponentKeysRegistryPath(std::move(componentKeysRegistryPath))
 {
+  switch (installScope) {
+    case cmWIXInstallScope::PER_USER:
+      this->PerUserInstall = true;
+      break;
+    case cmWIXInstallScope::PER_MACHINE:
+    case cmWIXInstallScope::NONE:
+      this->PerUserInstall = false;
+      break;
+    default:
+      cmCPackLogger(cmCPackLog::LOG_ERROR,
+                    "Unhandled install scope value, this is a CPack Bug.");
+      break;
+  }
 }
 
 void cmWIXFilesSourceWriter::EmitShortcut(std::string const& id,
@@ -127,7 +141,11 @@ std::string cmWIXFilesSourceWriter::EmitComponentFile(
   std::string componentId = std::string("CM_C") + id;
   std::string fileId = std::string("CM_F") + id;
 
-  std::string guid = CreateGuidFromComponentId(componentId);
+  // Wix doesn't support automatic GUIDs for components which have both
+  // registry entries and files.
+  std::string guid = this->PerUserInstall
+    ? CreateCmakeGeneratedGuidFromComponentId(componentId)
+    : CreateGuidFromComponentId(componentId);
 
   BeginElement("DirectoryRef");
   AddAttribute("Id", directoryId);
@@ -150,6 +168,22 @@ std::string cmWIXFilesSourceWriter::EmitComponentFile(
   }
 
   patch.ApplyFragment(componentId, *this);
+
+  if (this->PerUserInstall) {
+    // For perUser installs, MSI requires using a registry entry as the key
+    // path for components.
+    BeginElement("RegistryValue");
+
+    AddAttribute("Root", "HKCU");
+    AddAttribute("Key", this->ComponentKeysRegistryPath);
+    AddAttribute("Name", fileId);
+    AddAttribute("Type", "string");
+    AddAttribute("Value", "1");
+    AddAttribute("KeyPath", "yes");
+
+    EndElement("RegistryValue");
+  }
+
   BeginElement("File");
   AddAttribute("Id", fileId);
 
@@ -164,7 +198,9 @@ std::string cmWIXFilesSourceWriter::EmitComponentFile(
 #endif
   AddAttribute("Source", sourcePath);
 
-  AddAttribute("KeyPath", "yes");
+  if (!this->PerUserInstall) {
+    AddAttribute("KeyPath", "yes");
+  }
 
   mode_t fileMode = 0;
   cmSystemTools::GetPermissions(filePath.c_str(), fileMode);

@@ -6,9 +6,24 @@
 
 cmWIXDirectoriesSourceWriter::cmWIXDirectoriesSourceWriter(
   unsigned long wixVersion, cmCPackLog* logger, std::string const& filename,
-  GuidType componentGuidType)
+  GuidType componentGuidType, cmWIXInstallScope installScope,
+  std::string componentKeysRegistryPath)
   : cmWIXSourceWriter(wixVersion, logger, filename, componentGuidType)
+  , ComponentKeysRegistryPath(std::move(componentKeysRegistryPath))
 {
+  switch (installScope) {
+    case cmWIXInstallScope::PER_USER:
+      this->PerUserInstall = true;
+      break;
+    case cmWIXInstallScope::PER_MACHINE:
+    case cmWIXInstallScope::NONE:
+      this->PerUserInstall = false;
+      break;
+    default:
+      cmCPackLogger(cmCPackLog::LOG_ERROR,
+                    "Unhandled install scope value, this is a CPack Bug.");
+      break;
+  }
 }
 
 void cmWIXDirectoriesSourceWriter::EmitStartMenuFolder(
@@ -45,6 +60,43 @@ void cmWIXDirectoriesSourceWriter::EmitStartupFolder()
     AddAttribute("Name", "Startup");
   }
   EndElement_StandardDirectory();
+}
+
+cm::optional<std::string>
+cmWIXDirectoriesSourceWriter::EmitRemoveFolderComponentOnUserInstall(
+  std::string const& directoryId)
+{
+  if (!this->PerUserInstall) {
+    return {};
+  }
+
+  BeginElement("Component");
+
+  std::string componentId = directoryId + "_RemoveFolderComponent";
+  AddAttribute("Id", componentId);
+  AddAttribute("Guid", CreateGuidFromComponentId(componentId));
+
+  BeginElement("RemoveFolder");
+  AddAttribute("Id", directoryId + "_RemoveFolder");
+  AddAttribute("Directory", directoryId);
+  AddAttribute("On", "uninstall");
+  EndElement("RemoveFolder");
+
+  // Need a keyPath for the component
+  BeginElement("RegistryValue");
+
+  AddAttribute("Root", "HKCU");
+  AddAttribute("Key", this->ComponentKeysRegistryPath);
+  AddAttribute("Name", componentId);
+  AddAttribute("Type", "string");
+  AddAttribute("Value", "1");
+  AddAttribute("KeyPath", "yes");
+
+  EndElement("RegistryValue");
+
+  EndElement("Component");
+
+  return componentId;
 }
 
 cmWIXDirectoriesSourceWriter::InstallationPrefixDirectory

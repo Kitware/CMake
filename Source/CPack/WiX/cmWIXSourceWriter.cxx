@@ -159,13 +159,19 @@ std::string cmWIXSourceWriter::CreateGuidFromComponentId(
 {
   std::string guid = "*";
   if (this->ComponentGuidType == CMAKE_GENERATED_GUID) {
-    cmCryptoHash hasher(cmCryptoHash::AlgoMD5);
-    std::string md5 = hasher.HashString(componentId);
-    cmUuid uuid;
-    std::vector<unsigned char> ns;
-    guid = uuid.FromMd5(ns, md5);
+    guid = CreateCmakeGeneratedGuidFromComponentId(componentId);
   }
   return guid;
+}
+
+std::string cmWIXSourceWriter::CreateCmakeGeneratedGuidFromComponentId(
+  std::string const& componentId)
+{
+  cmCryptoHash hasher(cmCryptoHash::AlgoMD5);
+  std::string md5 = hasher.HashString(componentId);
+  cmUuid uuid;
+  std::vector<unsigned char> ns;
+  return uuid.FromMd5(ns, md5);
 }
 
 void cmWIXSourceWriter::WriteXMLDeclaration()
