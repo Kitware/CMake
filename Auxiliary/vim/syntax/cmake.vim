@@ -3539,7 +3539,6 @@ syn keyword cmakeKWexport contained
             \ APPENDIX
             \ AUTO
             \ CMAKE_EXPERIMENTAL_EXPORT_PACKAGE_DEPENDENCIES
-            \ CMAKE_EXPERIMENTAL_EXPORT_PACKAGE_INFO
             \ CMAKE_MAP_IMPORTED_CONFIG_
             \ COMPAT_VERSION
             \ CONFIG
@@ -3835,7 +3834,6 @@ syn keyword cmakeKWfind_package contained
             \ BYPASS_PROVIDER
             \ CATEGORY
             \ CMAKE_DISABLE_FIND_PACKAGE_
-            \ CMAKE_EXPERIMENTAL_FIND_CPS_PACKAGES
             \ CMAKE_FIND_ROOT_PATH_BOTH
             \ CMAKE_FIND_USE_
             \ CMAKE_REQUIRE_FIND_PACKAGE_
@@ -4149,7 +4147,6 @@ syn keyword cmakeKWinstall contained
             \ BUILD_TYPE
             \ BUNDLE_EXECUTABLE
             \ CMAKE_EXPERIMENTAL_EXPORT_PACKAGE_DEPENDENCIES
-            \ CMAKE_EXPERIMENTAL_EXPORT_PACKAGE_INFO
             \ CMAKE_INSTALL_BINDIR
             \ CMAKE_INSTALL_DATADIR
             \ CMAKE_INSTALL_DATAROOTDIR
@@ -4417,7 +4414,6 @@ syn keyword cmakeKWproject contained
             \ ASM_MASM
             \ ASM_NASM
             \ ATT
-            \ CMAKE_EXPERIMENTAL_EXPORT_PACKAGE_INFO
             \ CMAKE_PROJECT_
             \ COMPAT_VERSION
             \ CPS

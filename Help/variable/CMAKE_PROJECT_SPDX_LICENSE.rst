@@ -1,11 +1,7 @@
 CMAKE_PROJECT_SPDX_LICENSE
 --------------------------
 
-.. versionadded:: 4.2
-
-.. note::
-
-  Experimental. Gated by ``CMAKE_EXPERIMENTAL_EXPORT_PACKAGE_INFO``.
+.. versionadded:: 4.3
 
 The license(s) of the top level project.
 
@@ -18,7 +14,7 @@ the following top level CMakeLists.txt:
 
 .. code-block:: cmake
 
-  cmake_minimum_required(VERSION 4.2)
+  cmake_minimum_required(VERSION 4.3)
   project(First SPDX_LICENSE "BSD-3-Clause")
   project(Second SPDX_LICENSE "BSD-3-Clause AND CC-BY-SA-4.0")
   add_subdirectory(sub)

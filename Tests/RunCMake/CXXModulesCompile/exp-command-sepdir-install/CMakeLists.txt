@@ -40,7 +40,6 @@ add_test(NAME export_sepdir_build
     "-Dexpected_dir=${CMAKE_INSTALL_PREFIX}/lib/cxx/miu"
     "-Dexport_sepdir_DIR=${CMAKE_INSTALL_PREFIX}/lib/cmake/export_sepdir"
     "-Dexport_sepdir_cps_DIR=${CMAKE_INSTALL_PREFIX}/lib/cmake/export_sepdir_cps"
-    "-DCMAKE_EXPERIMENTAL_FIND_CPS_PACKAGES=e82e467b-f997-4464-8ace-b00808fff261"
     ${generator}
     -S "${CMAKE_CURRENT_SOURCE_DIR}/test"
     -B "${CMAKE_CURRENT_BINARY_DIR}/test")

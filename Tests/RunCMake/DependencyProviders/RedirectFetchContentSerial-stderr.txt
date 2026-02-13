@@ -2,6 +2,8 @@ CMake Error at set_provider\.cmake:[0-9]+ \(find_package\):
   Could not find a package configuration file provided by "SomeDep" with any
   of the following names:
 
+    SomeDep\.cps
+    somedep\.cps
     SomeDepConfig\.cmake
     somedep-config\.cmake
 

@@ -51,7 +51,6 @@ add_test(NAME export_transitive_modules1_build
     "-Dexpected_binary_dir=${CMAKE_INSTALL_PREFIX}/lib/cxx/bmi"
     "-Dexport_transitive_modules1_DIR=${CMAKE_INSTALL_PREFIX}/lib/cmake/export_transitive_modules1"
     "-Dexport_transitive_modules1_cps_DIR=${CMAKE_INSTALL_PREFIX}/lib/cmake/export_transitive_modules1_cps"
-    "-DCMAKE_EXPERIMENTAL_FIND_CPS_PACKAGES=e82e467b-f997-4464-8ace-b00808fff261"
     ${generator}
     -S "${CMAKE_CURRENT_SOURCE_DIR}/test"
     -B "${CMAKE_CURRENT_BINARY_DIR}/test")

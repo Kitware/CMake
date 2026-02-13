@@ -1,11 +1,5 @@
 include(RunCMake)
 
-set(RunCMake_TEST_OPTIONS
-  -Wno-dev
-  "-DCMAKE_EXPERIMENTAL_EXPORT_PACKAGE_INFO:STRING=7fa7d13b-8308-4dc7-af39-9e450456d68f"
-  "-DCMAKE_EXPERIMENTAL_FIND_CPS_PACKAGES:STRING=e82e467b-f997-4464-8ace-b00808fff261"
-  )
-
 function(build_project test)
   set(RunCMake_TEST_NO_CLEAN FALSE)
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/${test}-build)

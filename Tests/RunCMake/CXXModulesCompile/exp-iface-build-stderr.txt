@@ -1,5 +1,0 @@
-CMake Warning \(dev\) at CMakeLists\.txt:[0-9]+ \(project\):
-  CMake's support for exporting package information in the Common Package
-  Specification format is experimental\.  It is meant only for experimentation
-  and feedback to CMake developers\.
-This warning is for project developers\.  Use -Wno-dev to suppress it

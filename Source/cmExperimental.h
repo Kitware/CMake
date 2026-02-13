@@ -18,8 +18,6 @@ public:
   enum class Feature
   {
     ExportPackageDependencies,
-    ImportPackageInfo,
-    ExportPackageInfo,
     MappedPackageInfo,
     ExportBuildDatabase,
     GenerateSbom,

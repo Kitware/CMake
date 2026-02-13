@@ -51,7 +51,6 @@ add_test(NAME export_with_headers_build
     "${CMAKE_COMMAND}"
     "-Dexport_with_headers_DIR=${CMAKE_INSTALL_PREFIX}/lib/cmake/export_with_headers"
     "-Dexport_with_headers_cps_DIR=${CMAKE_INSTALL_PREFIX}/lib/cmake/export_with_headers_cps"
-    "-DCMAKE_EXPERIMENTAL_FIND_CPS_PACKAGES=e82e467b-f997-4464-8ace-b00808fff261"
     ${generator}
     -S "${CMAKE_CURRENT_SOURCE_DIR}/test"
     -B "${CMAKE_CURRENT_BINARY_DIR}/test")

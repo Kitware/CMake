@@ -7,6 +7,8 @@ CMake Warning at ConfigureLogTransitionsModule2Suppressed\.cmake:[0-9]+ \(find_p
   Could not find a package configuration file provided by "ViaModule" with
   any of the following names:
 
+    ViaModule\.cps
+    viamodule\.cps
     ViaModuleConfig\.cmake
     viamodule-config\.cmake
 
@@ -27,6 +29,8 @@ CMake Warning at ConfigureLogTransitionsModule2Suppressed\.cmake:[0-9]+ \(find_p
   Could not find a package configuration file provided by "ViaModule" with
   any of the following names:
 
+    ViaModule\.cps
+    viamodule\.cps
     ViaModuleConfig\.cmake
     viamodule-config\.cmake
 
@@ -49,6 +53,8 @@ CMake Warning at ConfigureLogTransitionsModule2Suppressed\.cmake:[0-9]+ \(find_p
   Could not find a package configuration file provided by "ViaModule" with
   any of the following names:
 
+    ViaModule\.cps
+    viamodule\.cps
     ViaModuleConfig\.cmake
     viamodule-config\.cmake
 

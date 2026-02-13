@@ -69,10 +69,18 @@
 
     .*/Tests/RunCMake/find_package/ConfigureLog-build/CMakeFiles/pkgRedirects/ViaConfigConfig\.cmake
     .*/Tests/RunCMake/find_package/ConfigureLog-build/CMakeFiles/pkgRedirects/viaconfig-config\.cmake
+    .*/Tests/RunCMake/find_package/ConfigureLog-build/CMakeFiles/pkgRedirects/lib/cps/ViaConfig\.cps
+    .*/Tests/RunCMake/find_package/ConfigureLog-build/CMakeFiles/pkgRedirects/lib/cps/viaconfig\.cps
+    .*/Tests/RunCMake/find_package/ConfigureLog-build/CMakeFiles/pkgRedirects/share/cps/ViaConfig\.cps
+    .*/Tests/RunCMake/find_package/ConfigureLog-build/CMakeFiles/pkgRedirects/share/cps/viaconfig\.cps
     .*/Tests/RunCMake/find_package/ConfigureLog/ViaConfigConfig\.cmake
     .*/Tests/RunCMake/find_package/ConfigureLog/viaconfig-config\.cmake
     .*/Tests/RunCMake/find_package/ConfigureLog/cmake/ViaConfigConfig\.cmake
     .*/Tests/RunCMake/find_package/ConfigureLog/cmake/viaconfig-config\.cmake
+    .*/Tests/RunCMake/find_package/ConfigureLog/lib/cps/ViaConfig\.cps
+    .*/Tests/RunCMake/find_package/ConfigureLog/lib/cps/viaconfig\.cps
+    .*/Tests/RunCMake/find_package/ConfigureLog/share/cps/ViaConfig\.cps
+    .*/Tests/RunCMake/find_package/ConfigureLog/share/cps/viaconfig\.cps
     .*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/ViaConfig/ViaConfigConfig\.cmake
 
   The file was found at
@@ -165,12 +173,20 @@ CMake Debug Log at ConfigureLog/cmake/FindWithInner\.cmake:[0-9]+ \(find_package
 
   find_package considered the following locations for Inner's Config module:
 
-    .*/CMakeFiles/pkgRedirects/InnerConfig\.cmake
-    .*/CMakeFiles/pkgRedirects/inner-config\.cmake
+    .*/Tests/RunCMake/find_package/ConfigureLog-build/CMakeFiles/pkgRedirects/InnerConfig\.cmake
+    .*/Tests/RunCMake/find_package/ConfigureLog-build/CMakeFiles/pkgRedirects/inner-config\.cmake
+    .*/Tests/RunCMake/find_package/ConfigureLog-build/CMakeFiles/pkgRedirects/lib/cps/Inner\.cps
+    .*/Tests/RunCMake/find_package/ConfigureLog-build/CMakeFiles/pkgRedirects/lib/cps/inner\.cps
+    .*/Tests/RunCMake/find_package/ConfigureLog-build/CMakeFiles/pkgRedirects/share/cps/Inner\.cps
+    .*/Tests/RunCMake/find_package/ConfigureLog-build/CMakeFiles/pkgRedirects/share/cps/inner\.cps
     .*/Tests/RunCMake/find_package/ConfigureLog/InnerConfig\.cmake
     .*/Tests/RunCMake/find_package/ConfigureLog/inner-config\.cmake
     .*/Tests/RunCMake/find_package/ConfigureLog/cmake/InnerConfig\.cmake
     .*/Tests/RunCMake/find_package/ConfigureLog/cmake/inner-config\.cmake
+    .*/Tests/RunCMake/find_package/ConfigureLog/lib/cps/Inner\.cps
+    .*/Tests/RunCMake/find_package/ConfigureLog/lib/cps/inner\.cps
+    .*/Tests/RunCMake/find_package/ConfigureLog/share/cps/Inner\.cps
+    .*/Tests/RunCMake/find_package/ConfigureLog/share/cps/inner\.cps
     .*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/Inner/InnerConfig\.cmake
 
   The file was found at
@@ -266,12 +282,20 @@ CMake Debug Log at ConfigureLog\.cmake:[0-9]+ \(find_package\):
   find_package considered the following locations for VersionCheck's Config
   module:
 
-    .*/CMakeFiles/pkgRedirects/VersionCheckConfig\.cmake
-    .*/CMakeFiles/pkgRedirects/versioncheck-config\.cmake
+    .*/Tests/RunCMake/find_package/ConfigureLog-build/CMakeFiles/pkgRedirects/VersionCheckConfig\.cmake
+    .*/Tests/RunCMake/find_package/ConfigureLog-build/CMakeFiles/pkgRedirects/versioncheck-config\.cmake
+    .*/Tests/RunCMake/find_package/ConfigureLog-build/CMakeFiles/pkgRedirects/lib/cps/VersionCheck\.cps
+    .*/Tests/RunCMake/find_package/ConfigureLog-build/CMakeFiles/pkgRedirects/lib/cps/versioncheck\.cps
+    .*/Tests/RunCMake/find_package/ConfigureLog-build/CMakeFiles/pkgRedirects/share/cps/VersionCheck\.cps
+    .*/Tests/RunCMake/find_package/ConfigureLog-build/CMakeFiles/pkgRedirects/share/cps/versioncheck\.cps
     .*/Tests/RunCMake/find_package/ConfigureLog/VersionCheckConfig\.cmake
     .*/Tests/RunCMake/find_package/ConfigureLog/versioncheck-config\.cmake
     .*/Tests/RunCMake/find_package/ConfigureLog/cmake/VersionCheckConfig\.cmake
-    .*/Tests/RunCMake/find_package/ConfigureLog/cmake/versioncheck-config\.cmake(
+    .*/Tests/RunCMake/find_package/ConfigureLog/cmake/versioncheck-config\.cmake
+    .*/Tests/RunCMake/find_package/ConfigureLog/lib/cps/VersionCheck\.cps
+    .*/Tests/RunCMake/find_package/ConfigureLog/lib/cps/versioncheck\.cps
+    .*/Tests/RunCMake/find_package/ConfigureLog/share/cps/VersionCheck\.cps
+    .*/Tests/RunCMake/find_package/ConfigureLog/share/cps/versioncheck\.cps(
     .*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/VersionCheck-1\.5/VersionCheckConfig\.cmake
     .*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/VersionCheck-1\.5/versioncheck-config\.cmake)?
     .*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/VersionCheck-2\.5/VersionCheckConfig\.cmake

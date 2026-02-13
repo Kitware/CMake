@@ -68,6 +68,14 @@
     [^
 ]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/parametercheckconfig-config\.cmake
     [^
+]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/lib/cps/ParameterCheckConfig\.cps
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/lib/cps/parametercheckconfig\.cps
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/share/cps/ParameterCheckConfig\.cps
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/share/cps/parametercheckconfig\.cps
+    [^
 ]*/Tests/RunCMake/find_package/ConfigureLog/ParameterCheckConfigConfig\.cmake
     [^
 ]*/Tests/RunCMake/find_package/ConfigureLog/parametercheckconfig-config\.cmake
@@ -75,6 +83,14 @@
 ]*/Tests/RunCMake/find_package/ConfigureLog/cmake/ParameterCheckConfigConfig\.cmake
     [^
 ]*/Tests/RunCMake/find_package/ConfigureLog/cmake/parametercheckconfig-config\.cmake
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLog/lib/cps/ParameterCheckConfig\.cps
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLog/lib/cps/parametercheckconfig\.cps
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLog/share/cps/ParameterCheckConfig\.cps
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLog/share/cps/parametercheckconfig\.cps
     [^
 ]*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/ParameterCheckConfig/ParameterCheckConfigConfig\.cmake
 
@@ -164,6 +180,30 @@ CMake Debug Log at ConfigureLogParameters2\.cmake:[0-9]+ \(find_package\):
     [^
 ]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/suffix2/parametercheckconfig-config\.cmake
     [^
+]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/lib/cps/ParameterCheckConfig.cps
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/lib/cps/parametercheckconfig.cps
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/lib/cps/suffix1/ParameterCheckConfig.cps
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/lib/cps/suffix1/parametercheckconfig.cps
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/lib/cps/suffix2/ParameterCheckConfig.cps
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/lib/cps/suffix2/parametercheckconfig.cps
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/share/cps/ParameterCheckConfig.cps
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/share/cps/parametercheckconfig.cps
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/share/cps/suffix1/ParameterCheckConfig.cps
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/share/cps/suffix1/parametercheckconfig.cps
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/share/cps/suffix2/ParameterCheckConfig.cps
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/share/cps/suffix2/parametercheckconfig.cps
+    [^
 ]*/Tests/RunCMake/find_package/ConfigureLog/ParameterCheckConfigConfig\.cmake
     [^
 ]*/Tests/RunCMake/find_package/ConfigureLog/parametercheckconfig-config\.cmake
@@ -187,6 +227,30 @@ CMake Debug Log at ConfigureLogParameters2\.cmake:[0-9]+ \(find_package\):
 ]*/Tests/RunCMake/find_package/ConfigureLog/cmake/suffix2/ParameterCheckConfigConfig\.cmake
     [^
 ]*/Tests/RunCMake/find_package/ConfigureLog/cmake/suffix2/parametercheckconfig-config\.cmake
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLog/lib/cps/ParameterCheckConfig.cps
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLog/lib/cps/parametercheckconfig.cps
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLog/lib/cps/suffix1/ParameterCheckConfig.cps
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLog/lib/cps/suffix1/parametercheckconfig.cps
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLog/lib/cps/suffix2/ParameterCheckConfig.cps
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLog/lib/cps/suffix2/parametercheckconfig.cps
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLog/share/cps/ParameterCheckConfig.cps
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLog/share/cps/parametercheckconfig.cps
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLog/share/cps/suffix1/ParameterCheckConfig.cps
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLog/share/cps/suffix1/parametercheckconfig.cps
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLog/share/cps/suffix2/ParameterCheckConfig.cps
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLog/share/cps/suffix2/parametercheckconfig.cps
     [^
 ]*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/ParameterCheckConfig/ParameterCheckConfigConfig\.cmake
 
@@ -220,6 +284,14 @@ CMake Debug Log at ConfigureLogParameters2\.cmake:[0-9]+ \(find_package\):
 ]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/ParameterCheckConfigConfig\.cmake
     [^
 ]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/parametercheckconfig-config\.cmake
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/lib/cps/ParameterCheckConfig.cps
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/lib/cps/parametercheckconfig.cps
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/share/cps/ParameterCheckConfig.cps
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/share/cps/parametercheckconfig.cps
 
   The file was not found\.
 
@@ -296,6 +368,14 @@ CMake Debug Log at ConfigureLogParameters2\.cmake:[0-9]+ \(find_package\):
     [^
 ]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/parametercheckconfig-config\.cmake
     [^
+]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/lib/cps/ParameterCheckConfig.cps
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/lib/cps/parametercheckconfig.cps
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/share/cps/ParameterCheckConfig.cps
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/share/cps/parametercheckconfig.cps
+    [^
 ]*/Tests/RunCMake/find_package/ConfigureLog/ParameterCheckConfigConfig\.cmake
     [^
 ]*/Tests/RunCMake/find_package/ConfigureLog/parametercheckconfig-config\.cmake
@@ -303,6 +383,14 @@ CMake Debug Log at ConfigureLogParameters2\.cmake:[0-9]+ \(find_package\):
 ]*/Tests/RunCMake/find_package/ConfigureLog/cmake/ParameterCheckConfigConfig\.cmake
     [^
 ]*/Tests/RunCMake/find_package/ConfigureLog/cmake/parametercheckconfig-config\.cmake
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLog/lib/cps/ParameterCheckConfig.cps
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLog/lib/cps/parametercheckconfig.cps
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLog/share/cps/ParameterCheckConfig.cps
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLog/share/cps/parametercheckconfig.cps
     [^
 ]*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/ParameterCheckConfig/ParameterCheckConfigConfig\.cmake
 
@@ -384,6 +472,14 @@ CMake Debug Log at ConfigureLogParameters2\.cmake:[0-9]+ \(find_package\):
     [^
 ]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/parametercheckconfig-config\.cmake
     [^
+]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/lib/cps/ParameterCheckConfig.cps
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/lib/cps/parametercheckconfig.cps
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/share/cps/ParameterCheckConfig.cps
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/share/cps/parametercheckconfig.cps
+    [^
 ]*/Tests/RunCMake/find_package/ConfigureLog/ParameterCheckConfigConfig\.cmake
     [^
 ]*/Tests/RunCMake/find_package/ConfigureLog/parametercheckconfig-config\.cmake
@@ -391,6 +487,14 @@ CMake Debug Log at ConfigureLogParameters2\.cmake:[0-9]+ \(find_package\):
 ]*/Tests/RunCMake/find_package/ConfigureLog/cmake/ParameterCheckConfigConfig\.cmake
     [^
 ]*/Tests/RunCMake/find_package/ConfigureLog/cmake/parametercheckconfig-config\.cmake
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLog/lib/cps/ParameterCheckConfig.cps
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLog/lib/cps/parametercheckconfig.cps
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLog/share/cps/ParameterCheckConfig.cps
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLog/share/cps/parametercheckconfig.cps
     [^
 ]*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/ParameterCheckConfig/ParameterCheckConfigConfig\.cmake
 
@@ -472,6 +576,14 @@ CMake Debug Log at ConfigureLogParameters2\.cmake:[0-9]+ \(find_package\):
     [^
 ]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/parametercheckconfig-config\.cmake
     [^
+]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/lib/cps/ParameterCheckConfig.cps
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/lib/cps/parametercheckconfig.cps
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/share/cps/ParameterCheckConfig.cps
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/share/cps/parametercheckconfig.cps
+    [^
 ]*/Tests/RunCMake/find_package/ConfigureLog/ParameterCheckConfigConfig\.cmake
     [^
 ]*/Tests/RunCMake/find_package/ConfigureLog/parametercheckconfig-config\.cmake
@@ -479,6 +591,14 @@ CMake Debug Log at ConfigureLogParameters2\.cmake:[0-9]+ \(find_package\):
 ]*/Tests/RunCMake/find_package/ConfigureLog/cmake/ParameterCheckConfigConfig\.cmake
     [^
 ]*/Tests/RunCMake/find_package/ConfigureLog/cmake/parametercheckconfig-config\.cmake
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLog/lib/cps/ParameterCheckConfig.cps
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLog/lib/cps/parametercheckconfig.cps
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLog/share/cps/ParameterCheckConfig.cps
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLog/share/cps/parametercheckconfig.cps
     [^
 ]*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/ParameterCheckConfig/ParameterCheckConfigConfig\.cmake
 
@@ -564,6 +684,22 @@ CMake Debug Log at ConfigureLogParameters2\.cmake:[0-9]+ \(find_package\):
     [^
 ]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/parametercheckconfig-config\.cmake
     [^
+]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/lib/cps/BogusParameterCheck.cps
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/lib/cps/bogusparametercheck.cps
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/lib/cps/ParameterCheckConfig.cps
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/lib/cps/parametercheckconfig.cps
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/share/cps/BogusParameterCheck.cps
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/share/cps/bogusparametercheck.cps
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/share/cps/ParameterCheckConfig.cps
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLogParameters2-build/CMakeFiles/pkgRedirects/share/cps/parametercheckconfig.cps
+    [^
 ]*/Tests/RunCMake/find_package/ConfigureLog/BogusParameterCheckConfig\.cmake
     [^
 ]*/Tests/RunCMake/find_package/ConfigureLog/bogusparametercheck-config\.cmake
@@ -579,6 +715,22 @@ CMake Debug Log at ConfigureLogParameters2\.cmake:[0-9]+ \(find_package\):
 ]*/Tests/RunCMake/find_package/ConfigureLog/cmake/ParameterCheckConfigConfig\.cmake
     [^
 ]*/Tests/RunCMake/find_package/ConfigureLog/cmake/parametercheckconfig-config\.cmake
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLog/lib/cps/BogusParameterCheck.cps
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLog/lib/cps/bogusparametercheck.cps
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLog/lib/cps/ParameterCheckConfig.cps
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLog/lib/cps/parametercheckconfig.cps
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLog/share/cps/BogusParameterCheck.cps
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLog/share/cps/bogusparametercheck.cps
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLog/share/cps/ParameterCheckConfig.cps
+    [^
+]*/Tests/RunCMake/find_package/ConfigureLog/share/cps/parametercheckconfig.cps
     [^
 ]*/Tests/RunCMake/find_package/ConfigureLog/lib/cmake/ParameterCheckConfig/BogusParameterCheckConfig\.cmake
     [^
