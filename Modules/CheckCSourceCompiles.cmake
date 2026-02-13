@@ -77,7 +77,7 @@ and linked:
 
   include(CheckCSourceCompiles)
 
-  check_c_source_compiles("
+  check_c_source_compiles([[
     #include <emmintrin.h>
     int main(void)
     {
@@ -85,7 +85,7 @@ and linked:
       (void)a;
       return 0;
     }
-  " PROJECT_HAVE_SSE2_INTRINSICS)
+  ]] PROJECT_HAVE_SSE2_INTRINSICS)
 
 See Also
 ^^^^^^^^

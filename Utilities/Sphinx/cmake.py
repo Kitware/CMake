@@ -62,6 +62,9 @@ from pygments.token import (Comment, Name, Number, Operator, Punctuation,
 #   be present.
 
 CMakeLexer.tokens["root"] = [
+  # [[string]]
+  (r'\[\[(?:\W[\w\W]*?)?\]\]', String.Multiline),
+  (r'\[(?P<level>=+)\[[\w\W]*?\](?P=level)\]', String.Multiline),
   # fctn(
   (r'\b(\w+)([ \t]*)(\()',
    bygroups(Name.Function, Text, Name.Function), '#push'),

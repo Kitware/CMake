@@ -28,6 +28,7 @@ The following individuals and institutions are among the contributors:
 * `Eran Ifrah <mailto:eran.ifrah@gmail.com>`_
 * Esben Mose Hansen, Ange Optimization ApS
 * `Geoffrey Viola <mailto:geoffrey.viola@asirobots.com>`_
+* `Georg Brandl <mailto:georg@python.org>`_
 * `Google Inc <https://www.google.com/>`_
 * Gregor Jasny
 * `Helio Chissini de Castro <mailto:helio@kde.org>`_

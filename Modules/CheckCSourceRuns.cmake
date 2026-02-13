@@ -65,12 +65,12 @@ the check is stored in the internal cache variable ``HAVE_NORETURN``.
 
   include(CheckCSourceRuns)
 
-  check_c_source_runs("
+  check_c_source_runs([[
     #include <stdlib.h>
     #include <stdnoreturn.h>
     noreturn void f(){ exit(0); }
     int main(void) { f(); return 1; }
-  " HAVE_NORETURN)
+  ]] HAVE_NORETURN)
 
 See Also
 ^^^^^^^^

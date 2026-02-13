@@ -79,13 +79,13 @@ in the internal cache variable ``HAVE_CXX11_LAMBDAS``:
 
   include(CheckCXXSourceCompiles)
 
-  check_cxx_source_compiles("
+  check_cxx_source_compiles([[
     int main()
     {
       auto lambda = []() { return 42; };
       return lambda();
     }
-  " HAVE_CXX11_LAMBDAS)
+  ]] HAVE_CXX11_LAMBDAS)
 
 See Also
 ^^^^^^^^
