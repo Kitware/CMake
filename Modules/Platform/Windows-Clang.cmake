@@ -233,6 +233,11 @@ if("x${CMAKE_C_SIMULATE_ID}" STREQUAL "xMSVC"
     macro(__windows_compiler_clang_base lang)
       set(_COMPILE_${lang} "${_COMPILE_${lang}_MSVC}")
       __windows_compiler_msvc(${lang})
+
+      # Prefer clang-cl's gcc-style depfile over cl-style /showIncludes
+      set(CMAKE_DEPFILE_FLAGS_${lang} "-clang:-MD -clang:-MT<DEP_TARGET> -clang:-MF<DEP_FILE>")
+      unset(CMAKE_${lang}_DEPFILE_FORMAT)
+
       unset(CMAKE_${lang}_COMPILE_OPTIONS_MSVC_DEBUG_INFORMATION_FORMAT_EditAndContinue) # -ZI not supported by Clang
       set(CMAKE_${lang}_COMPILE_OPTIONS_WARNING_AS_ERROR "-WX")
       set(CMAKE_INCLUDE_SYSTEM_FLAG_${lang} "-imsvc")
