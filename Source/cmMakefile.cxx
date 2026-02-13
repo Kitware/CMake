@@ -3370,8 +3370,7 @@ cmGlobalGenerator* cmMakefile::GetGlobalGenerator() const
 #ifndef CMAKE_BOOTSTRAP
 cmVariableWatch* cmMakefile::GetVariableWatch() const
 {
-  if (this->GetCMakeInstance() &&
-      this->GetCMakeInstance()->GetVariableWatch()) {
+  if (this->GetCMakeInstance()) {
     return this->GetCMakeInstance()->GetVariableWatch();
   }
   return nullptr;
