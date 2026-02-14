@@ -232,31 +232,46 @@ bool TargetSourcesImpl::HandleOneFileSet(
     return false;
   }
 
-  bool const isDefault = args.Type == args.FileSet ||
-    (args.Type.empty() && args.FileSet[0] >= 'A' && args.FileSet[0] <= 'Z');
-  std::string type = isDefault ? args.FileSet : args.Type;
+  if (!args.Type.empty() && !cmFileSet::IsKnownType(args.Type)) {
+    this->SetError(cmStrCat("File set TYPE may only be \"",
+                            cmFileSet::GetKnownTypes().join("\", \""), '"'));
+    return false;
+  }
+  if (args.Type.empty() && args.FileSet[0] >= 'A' && args.FileSet[0] <= 'Z' &&
+      !cmFileSet::IsKnownType(args.FileSet)) {
+    this->SetError(
+      cmStrCat("FILE_SET names starting with a capital letter are reserved "
+               "for built-in file sets and may only be \"",
+               cmFileSet::GetKnownTypes().join("\", \""), '"'));
+    return false;
+  }
+  if (!args.Type.empty() && args.FileSet[0] >= 'A' && args.FileSet[0] <= 'Z' &&
+      args.Type != args.FileSet) {
+    this->SetError(cmStrCat("FILE_SET name starting with a capital letter "
+                            "must match the TYPE name \"",
+                            args.Type, '"'));
+    return false;
+  }
 
+  bool const isDefault = args.Type == args.FileSet ||
+    (args.Type.empty() && cmFileSet::IsKnownType(args.FileSet));
+
+  if (!isDefault && !cmFileSet::IsValidName(args.FileSet)) {
+    this->SetError("Non-default file set name must contain only letters, "
+                   "numbers, and underscores, and must not start with a "
+                   "capital letter or underscore");
+    return false;
+  }
+
+  std::string type = isDefault ? args.FileSet : args.Type;
   cmFileSet::Visibility visibility =
     cmFileSet::VisibilityFromName(scope, this->Makefile);
 
   auto fileSet =
     this->Target->GetOrCreateFileSet(args.FileSet, type, visibility);
   if (fileSet.second) {
-    if (!isDefault) {
-      if (!cmFileSet::IsValidName(args.FileSet)) {
-        this->SetError("Non-default file set name must contain only letters, "
-                       "numbers, and underscores, and must not start with a "
-                       "capital letter or underscore");
-        return false;
-      }
-    }
     if (type.empty()) {
       this->SetError("Must specify a TYPE when creating file set");
-      return false;
-    }
-    if (!cmFileSet::IsKnownType(type)) {
-      this->SetError(cmStrCat("File set TYPE may only be \"",
-                              cmFileSet::GetKnownTypes().join("\", \""), '"'));
       return false;
     }
 
