@@ -1222,7 +1222,7 @@ Available commands are:
 
   Copy files to ``<destination>`` (either file or directory).
   If multiple files are specified, or if ``-t`` is specified, the
-  ``<destination>`` must be directory and it must exist. If ``-t`` is not
+  ``<destination>`` must be a directory and it must exist. If ``-t`` is not
   specified, the last argument is assumed to be the ``<destination>``.
   Wildcards are not supported. ``copy`` does follow symlinks. That means it
   does not copy symlinks, but the files or directories it point to.
@@ -1269,28 +1269,36 @@ Available commands are:
   This is faster than ``copy_directory_if_different`` as it only compares
   file timestamps instead of file contents.
 
-.. option:: copy_if_different <file>... <destination>
+.. option:: copy_if_different <file>... <destination>,
+            copy_if_different -t <destination> <file>...
 
   Copy files to ``<destination>`` (either file or directory) if
   they have changed.
-  If multiple files are specified, the ``<destination>`` must be
-  directory and it must exist.
+  If multiple files are specified, or if ``-t`` is specified,
+  the ``<destination>`` must be a directory and it must exist.
   ``copy_if_different`` does follow symlinks.
 
   .. versionadded:: 3.5
     Support for multiple input files.
 
-.. option:: copy_if_newer <file>... <destination>
+  .. versionadded:: 4.4
+    Support for the ``-t`` argument.
+
+.. option:: copy_if_newer <file>... <destination>,
+            copy_if_newer -t <destination> <file>...
 
   .. versionadded:: 4.2
 
   Copy files to ``<destination>`` (either file or directory) if
   source files are newer than destination files (based on file timestamps).
-  If multiple files are specified, the ``<destination>`` must be
-  directory and it must exist.
+  If multiple files are specified, or if ``-t`` is specified,
+  the ``<destination>`` must be a directory and it must exist.
   ``copy_if_newer`` does follow symlinks.
   This is faster than ``copy_if_different`` as it only compares
   file timestamps instead of file contents.
+
+  .. versionadded:: 4.4
+    Support for the ``-t`` argument.
 
 .. option:: create_symlink <old> <new>
 

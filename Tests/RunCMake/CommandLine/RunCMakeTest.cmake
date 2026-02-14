@@ -653,6 +653,12 @@ run_cmake_command(E_copy-t-argument-target-is-file
   ${CMAKE_COMMAND} -E copy ${in}/f1.txt -t ${out}/f1.txt ${in}/f3.txt)
 run_cmake_command(E_copy-t-argument-no-source-files
   ${CMAKE_COMMAND} -E copy -t ${out})
+run_cmake_command(E_copy_if_different-t-argument
+  ${CMAKE_COMMAND} -E copy_if_different ${in}/f1.txt -t ${out} ${in}/f3.txt)
+run_cmake_command(E_copy_if_different-t-argument-target-is-file
+  ${CMAKE_COMMAND} -E copy_if_different ${in}/f1.txt -t ${out}/f1.txt ${in}/f3.txt)
+run_cmake_command(E_copy_if_different-t-argument-no-source-files
+  ${CMAKE_COMMAND} -E copy_if_different -t ${out})
 run_cmake_command(E_copy_if_different-one-source-directory-target-is-directory
   ${CMAKE_COMMAND} -E copy_if_different ${in}/f1.txt ${out})
 run_cmake_command(E_copy_if_different-three-source-files-target-is-directory
@@ -661,6 +667,12 @@ run_cmake_command(E_copy_if_different-three-source-files-target-is-file
   ${CMAKE_COMMAND} -E copy_if_different ${in}/f1.txt ${in}/f2.txt ${in}/f3.txt ${out}/f1.txt)
 run_cmake_command(E_copy_if_different-nonexistent-source
   ${CMAKE_COMMAND} -E copy_if_different ${in}/nonexistent.txt ${out})
+run_cmake_command(E_copy_if_newer-t-argument
+  ${CMAKE_COMMAND} -E copy_if_newer ${in}/f1.txt -t ${out} ${in}/f3.txt)
+run_cmake_command(E_copy_if_newer-t-argument-target-is-file
+  ${CMAKE_COMMAND} -E copy_if_newer ${in}/f1.txt -t ${out}/f1.txt ${in}/f3.txt)
+run_cmake_command(E_copy_if_newer-t-argument-no-source-files
+  ${CMAKE_COMMAND} -E copy_if_newer -t ${out})
 run_cmake_command(E_copy_if_newer-one-source-directory-target-is-directory
   ${CMAKE_COMMAND} -E copy_if_newer ${in}/f1.txt ${out})
 run_cmake_command(E_copy_if_newer-three-source-files-target-is-directory
