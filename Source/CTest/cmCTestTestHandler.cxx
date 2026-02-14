@@ -652,6 +652,12 @@ bool cmCTestTestHandler::GenerateXML()
       this->LogFile = nullptr;
       return false;
     }
+
+    // We represent some times as a double-precision floating-point number
+    // of seconds since the epoch.  Print them with microsecond precision.
+    // Representable values differ by hundreds of nanoseconds anyway.
+    xmlfile << std::fixed << std::setprecision(6);
+
     cmXMLWriter xml(xmlfile);
     this->GenerateCTestXML(xml);
   }
