@@ -1531,7 +1531,9 @@ void cmCTestTestHandler::WriteTestResultHeader(cmXMLWriter& xml,
   xml.Element("Path", this->CTest->GetShortPathToFile(result.Path));
   xml.Element("FullName", this->CTest->GetShortPathToFile(testPath));
   xml.Element("FullCommandLine", result.FullCommandLine);
-  xml.Element("StartTestTime", result.StartTestTime);
+  if (result.StartTestTime) {
+    xml.Element("StartTestTime", *result.StartTestTime);
+  }
 }
 
 void cmCTestTestHandler::WriteTestResultFooter(cmXMLWriter& xml,
