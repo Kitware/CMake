@@ -2,7 +2,10 @@
    file LICENSE.rst or https://cmake.org/licensing for details.  */
 #pragma once
 
+#include <string>
+
 #include "cmCPackGenerator.h"
+#include "cmWIXInstallScope.h"
 #include "cmWIXPatch.h"
 #include "cmWIXShortcut.h"
 #include "cmWIXSourceWriter.h"
@@ -15,7 +18,9 @@ class cmWIXFilesSourceWriter : public cmWIXSourceWriter
 public:
   cmWIXFilesSourceWriter(unsigned long wixVersion, cmCPackLog* logger,
                          std::string const& filename,
-                         GuidType componentGuidType);
+                         GuidType componentGuidType,
+                         cmWIXInstallScope installScope,
+                         std::string componentKeysRegistryPath);
 
   void EmitShortcut(std::string const& id, cmWIXShortcut const& shortcut,
                     std::string const& shortcutPrefix, size_t shortcutIndex);
@@ -37,4 +42,8 @@ public:
                                 std::string const& filePath, cmWIXPatch& patch,
                                 cmInstalledFile const* installedFile,
                                 int diskId);
+
+private:
+  bool PerUserInstall = false;
+  std::string ComponentKeysRegistryPath;
 };

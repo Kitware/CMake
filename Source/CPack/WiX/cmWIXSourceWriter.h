@@ -5,6 +5,8 @@
 #include <string>
 #include <vector>
 
+#include <cm/optional>
+
 #include "cmsys/FStream.hxx"
 
 #include "cmCPackLog.h"
@@ -51,6 +53,12 @@ public:
                                std::string const& value);
 
   std::string CreateGuidFromComponentId(std::string const& componentId);
+
+  // In most cases CreateGuidFromComponentId should be used instead, since it
+  // takes ComponentGuidType into consideration. This function always generates
+  // an explicit GUID.
+  static std::string CreateCmakeGeneratedGuidFromComponentId(
+    std::string const& componentId);
 
   static std::string EscapeAttributeValue(std::string const& value);
 
