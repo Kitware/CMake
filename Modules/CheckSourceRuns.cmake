@@ -96,12 +96,12 @@ the check is stored in the internal cache variable ``HAVE_NORETURN``.
 
   include(CheckSourceRuns)
 
-  check_source_runs(C "
+  check_source_runs(C [[
     #include <stdlib.h>
     #include <stdnoreturn.h>
     noreturn void f(){ exit(0); }
     int main(void) { f(); return 1; }
-  " HAVE_NORETURN)
+  ]] HAVE_NORETURN)
 
 Example: Checking Fortran Code
 """"""""""""""""""""""""""""""
@@ -112,12 +112,12 @@ Checking if Fortran source code runs successfully:
 
   include(CheckSourceRuns)
 
-  check_source_runs(Fortran "
+  check_source_runs(Fortran [[
     program test
     real :: x[*]
     call co_sum(x)
     end program
-  " HAVE_COARRAY)
+  ]] HAVE_COARRAY)
 
 Example: Checking C++ Code With Bracket Argument
 """"""""""""""""""""""""""""""""""""""""""""""""
@@ -171,7 +171,7 @@ successfully and stores a boolean result in the internal cache variable
       set(CMAKE_REQUIRED_LIBRARIES gnu)
     endif()
 
-    check_source_runs(C "
+    check_source_runs(C [[
       #include <sched.h>
       int main(void)
       {
@@ -180,7 +180,7 @@ successfully and stores a boolean result in the internal cache variable
         }
         return 0;
       }
-    " HAVE_SCHED_GETCPU)
+    ]] HAVE_SCHED_GETCPU)
   cmake_pop_check_state()
 
 See Also
